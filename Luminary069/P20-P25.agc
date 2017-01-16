@@ -16,7 +16,7 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2016-12-13 MAS  Created from Luminary 99.
 ##              2016-12-14 MAS  Updated from comment-proofed Luminary 99 version.
-##              2016-01-xx HG   Trasncribed
+##              2016-01-16 HG   Trasncribed
 ## Page 504
 
 # RENDEZVOUS NAVIGATION PROGRAM 20
@@ -524,39 +524,39 @@ UPPSV3          CLEAR           RTB
                 COUNT*          $$/P25
 PROG25          TC              2PHSCHNG
                 OCT             4                       # MAKE GROUP 4 INACTIVE (VERB 37)
-                OCT             05022   
+                OCT             05022
                 OCT             26000                   # PRIORITY 26
-                
-                TC              BANKCALL        
+
+                TC              BANKCALL
                 CADR            R02BOTH                 # IMU STATUS CHECK
-                TC              UPFLAG  
+                TC              UPFLAG
                 ADRES           TRACKFLG                # SET TRACK FLAG
-                TC              UPFLAG  
+                TC              UPFLAG
                 ADRES           P25FLAG                 # SET P25FLAG
-P25LEM1         TC              PHASCHNG        
-                OCT             04022   
-                CAF             P25FLBIT        
+P25LEM1         TC              PHASCHNG
+                OCT             04022
+                CAF             P25FLBIT
                 MASK            STATE                   # IS P25FLAG SET
-                EXTEND          
-                BZF             ENDOFJOB        
+                EXTEND
+                BZF             ENDOFJOB
                 CAF             TRACKBIT                # IS TRACKFLAG SET?
-                MASK            STATE           +1        
-                EXTEND          
-                
-## Page 515             
+                MASK            STATE           +1
+                EXTEND
+
+## Page 515
                 BZF             P25LMWT1                # NO-SKIP PHASE CHANGE AND WAIT 1 MINUTE
                 CAF             SEVEN                   # CALL R65 - FINE PREFERRED
-                TS              R65CNTR 
+                TS              R65CNTR
                 TC              BANKCALL                # TRACKING ATTITUDE ROUTINE
-                CADR            R65LEM  
+                CADR            R65LEM
                 TC              P25LEM1                 # THEN GO CHECK FLAGS
-P25LEMWT        TC              PHASCHNG        
-                OCT             00112   
-P25LMWT1        CAF             60SCNDS 
+P25LEMWT        TC              PHASCHNG
+                OCT             00112
+P25LMWT1        CAF             60SCNDS
                 INHINT
                 TC              TWIDDLE                 # WAIT ONE MINUTE THEN CHECK AGAIN
-                ADRES           P25LEM2 
-                TC              ENDOFJOB        
+                ADRES           P25LEM2
+                TC              ENDOFJOB
 P25LEM2         CAF             PRIO14
                 TC              FINDVAC
                 EBANK=          LOSCOUNT
@@ -565,7 +565,7 @@ P25LEM2         CAF             PRIO14
 60SCNDS         DEC             6000
 P25OK           EXIT
                 TC              P25LEMWT
-        
+
 ## Page 516
 # DATA READ ROUTINE 22 (LEM)
 # PROGRAM DESCRIPTION
@@ -602,103 +602,103 @@ P25OK           EXIT
 R22LEM          TC              PHASCHNG
                 OCT             04022
                 CAF             RNDVZBIT                # IS RENDESVOUS FLAG SET?
-                MASK            STATE   
-                EXTEND          
+                MASK            STATE
+                EXTEND
                 BZF             ENDOFJOB                # NO-EXIT R22 AND P20
                 CAF             TRACKBIT                # IS TRACKFLAG SET?
-                MASK            STATE           +1        
-                EXTEND          
+                MASK            STATE           +1
+                EXTEND
                 BZF             R22WAIT                 # NO WAIT
 R22LEM12        CAF             BIT14                   # IS RR AUTO TRACK ENABLE DISCRETE STILL
                 EXTEND                                  # ON (A MONITOR REPOSITION BY R25 CLEARSIT
-                RAND            CHAN12  
-                EXTEND          
+                RAND            CHAN12
+                EXTEND
                 BZF             P20LEMA                 # NO - RETURN TO P20
                 CAF             BIT2                    # YES
                 EXTEND                                  # IS RR AUTO MODE DISCRETE PRESENT
-                RAND            CHAN33  
-                
+                RAND            CHAN33
+
 ## Page 517
-                EXTEND          
+                EXTEND
                 BZF             +2                      # YES CONTINUE
                 TC              P20LEMB5                # NO - SET IT
                 CS              RADMODES                # ARE RR CDUS BEING ZEROED
                 MASK            BIT13                   # (BIT 13 RADMODES EQUAL ONE)
-                EXTEND          
+                EXTEND
                 BZF             R22LEM42                # CDUS BEING ZEROED
                 TC              PHASCHNG                # IF A RESTART OCCURS,AN EXTRA RADAR
                 OCT             00152                   # READING IS TAKEN,SO BAD DATA ISN'T USED
                 TC              BANKCALL                # YES READ DATA + CALCULATE LOS
                 CADR            LRS22.1                 # DATA READ SUBROUTINE
-                INDEX           MPAC    
-                TC              +1      
+                INDEX           MPAC
+                TC              +1
                 TC              R22LEM2                 # NORMAL RETURN (GOOD DATA)
                 TC              P20LEMC                 # COULD NOT READ RADAR-TRY TO REDESIGNATE
                 CAF             ALRM525                 # RR LOS NOT WITHIN 3 DEGREES (ALARM)
-                TC              BANKCALL        
-                CADR            PRIOLARM        
+                TC              BANKCALL
+                CADR            PRIOLARM
                 TC              GOTOV56                 # TERMINATE EXITS P20 VIA V56 CODING
                 TC              R22LEM1                 # PROC (DISPLAY DELTA THETA)
                 TC              -5                      # ENTER (ILLEGAL OPTION)
-                TC              ENDOFJOB        
-                
-                
-R22LEM1         TC              PHASCHNG        
-                OCT             04022   
+                TC              ENDOFJOB
+
+
+R22LEM1         TC              PHASCHNG
+                OCT             04022
                 CAF             V06N05                  # DISPLAY DELTA THETA
-                TC              BANKCALL        
-                CADR            PRIODSP 
+                TC              BANKCALL
+                CADR            PRIODSP
                 TC              GOTOV56                 # TERMINATE EXITS P20 VIA V56 CODING
                 TC              R22LEM2                 # PROC (OK CONTINUE)
                 TC              P20LEMC                 # ENTER(RECYCLE)
-R22LEM2         TC              PHASCHNG        
-                OCT             04022   
+R22LEM2         TC              PHASCHNG
+                OCT             04022
                 TC              LUNSFCHK                # CHECK IF ON LUNAR SURFACE (P22FLAG SET)
                 TC              R22LEM3                 # YES-BYPASS FLAG CHECKS AND LRS22.2
                 CA              FLAGWRD1                # IS TRACK FLAG SET
-                MASK            TRACKBIT        
-                EXTEND          
+                MASK            TRACKBIT
+                EXTEND
                 BZF             R22WAIT                 # NO - WAIT
                 TC              BANKCALL                # YES
                 CADR            LRS22.2                 # CHECKS RR BORESIGHT WITHIN 30 DEG OF +Z
-                INDEX           MPAC    
-                TC              +1      
+                INDEX           MPAC
+                TC              +1
                 TC              R22LEM3                 # NORMAL RETURN(LOS WITHIN 30 OF Z-AXIS)
-                TC              BANKCALL        
-                CADR            R61LEM  
+                TC              BANKCALL
+                CADR            R61LEM
                 TC              R22WAIT                 # NOT WITHIN 30 DEG OF Z-AXIS
 R22LEM3         CS              FLAGWRD1                # SHOULD WE BYPASS STATE VECTOR UPDATE
                 MASK            NOUPFBIT                # (IS NO UPDATE FLAG SET?)
-                
-## Page 518             
-                EXTEND          
+
+## Page 518
+                EXTEND
                 BZF             R22LEM42                # BRANCH-YES
                 CA              FLAGWRD1                # IS UPDATE FLAG SET
-                MASK            UPDATBIT        
-                EXTEND          
+                MASK            UPDATBIT
+                EXTEND
                 BZF             R22LEM42                # UPDATE FLAG NOT SET
                 CAF             PRIO26                  # INSURE HIGH PRIO IN RESTART
-                TS              PHSPRDT2        
-                
-                TC              INTPRET 
-                GOTO            
-                                LSR22.3 
+                TS              PHSPRDT2
+
+                TC              INTPRET
+                GOTO
+                                LSR22.3
 R22LEM93        EXIT                                    # NORMAL EXIT FROM LSR22.3
                 TC              PHASCHNG                # PHASE CHANGE TO PROTECT AGAINST
                 OCT             04022                   # CONFLICT WITH GRP2PC ERASEABLE
-                TCF             R22LEM44        
-R22LEM96        EXIT            
+                TCF             R22LEM44
+R22LEM96        EXIT
                 CAF             ZERO                    # SET N49FLAG = ZERO TO INDICATE
                 TS              N49FLAG                 # V06 N49 DISPLAY HASNT BEEN ANSWERED
-                TC              PHASCHNG        
+                TC              PHASCHNG
                 OCT             04022                   # TO PROTECT DISPLAY
                 CAF             PRIO27                  # PROTECT DISPLAY
-                TC              NOVAC   
-                EBANK=          N49FLAG 
-                2CADR           N49DSP  
-                TC              INTPRET 
-                SLOAD           
-                                N49FLAG 
+                TC              NOVAC
+                EBANK=          N49FLAG
+                2CADR           N49DSP
+                TC              INTPRET
+                SLOAD
+                                N49FLAG
                 BZE             BMN                     # LOOP TO CHECK IF FLAG
                                 -3                      # SETTING CHANGED-BRANCH - NO
                                 R22LEM7                 # PROCEED
@@ -710,7 +710,7 @@ R22LEM96        EXIT
 R22LEM7         CALL                                    # PROCEED
                                 GRP2PC                  # PHASE CHANGE AND
                 GOTO                                    # GO TO INCORPORATE DATA.
-                                ASTOK   
+                                ASTOK
 R22LEM44        INCR            MARKCTR                 # INCREMENT COUNT OF MARKS INCORPORATED.
                 TC              LUNSFCHK                # ARE WE ON LUNAR SURFACE
                 TC              R22LEM46                # YES - WAIT 2 SECONDS
@@ -719,27 +719,27 @@ R22LEM44        INCR            MARKCTR                 # INCREMENT COUNT OF MAR
 R22LEM42        TC              LUNSFCHK                # CHECK IF ON LUNAR SURFACE (P22FLAG SET)
                 TC              R22LEM46                # YES - WAIT 2 SECONDS
                 CA              TWO                     # NO-SET R65COUNTER = 2
-R22LEM45        TS              R65CNTR 
+R22LEM45        TS              R65CNTR
 
-## Page 519             
-                TC              BANKCALL        
+## Page 519
+                TC              BANKCALL
                 CADR            R65LEM                  # FINE PREFERRED TRACKING ATTITUDE
-                TC              R22LEM  
-R22WAIT         CAF             1500DEC 
-                TC              P20LEMWT        +1     
-                
-                
-R22LEM46        CAF             2SECS   
+                TC              R22LEM
+R22WAIT         CAF             1500DEC
+                TC              P20LEMWT        +1
+
+
+R22LEM46        CAF             2SECS
                 TC              P20LEMWT        +1      # WAIT 2 SECONDS AND TAKE ANOTHER MARK
 
-                
-N49DSP          CAF             V06N49NB        
+
+N49DSP          CAF             V06N49NB
                 TC              BANKCALL                # EXCESSIVE STATE VECTOR UPDATE - FLASH
                 CADR            PRIODSP                 # VERB 06 NOUN 49 R1=DELTA R, R2=DELTA V
                 TC              GOTOV56                 # TERMINATE - EXIT R22 AND P20
                 CS              ONE                     # PROCEED - N49FLAG = -1
                 TS              N49FLAG                 # RECYCLE - N49FLAG = + VALUE
-                TC              ENDOFJOB        
+                TC              ENDOFJOB
 R22RSTRT        TC              PHASCHNG                # IF A RESTART OCCURS WHILE READING RADAR
                 OCT             00152                   # COME HERE TO TAKE A RANGE-RATE READING
                 TC              BANKCALL                # WHICH ISNT USED TO PREVENT TAKING A BAD
@@ -749,8 +749,8 @@ R22RSTRT        TC              PHASCHNG                # IF A RESTART OCCURS WH
                 TC              P20LEMC                 # COULD NOT READ RADAR - TRY TO REDESIGNATE
                 TC              R22LEM                  # READ SUCCESSFUL - CONTINUE AT R22
 
-                
-ALRM525         OCT             00525   
+
+ALRM525         OCT             00525
 V06N05          VN              00605
 V06N49NB        VN              00649
 1500DEC         DEC             1500
@@ -803,46 +803,46 @@ LUNSFCHK        CS              FLAGWRD8                # CHECK IF ON LUNAR SURF
                 COUNT*          $$/R21
 R21LEM          CAF             MAXTRIES                # ALLOW 60 PASSES (APPROX 45 SECS.) TO
                 TS              DESCOUNT                # DESIGNATE AND LOCKON
-                TC              LUNSFCHK                
-                TC              R21LEM5         
+                TC              LUNSFCHK
+                TC              R21LEM5
                 CAF             ZERO                    #      COMMAND ANTENNA TO MODE CENTER
                 TS              TANG                    # IF NOT ON SURFACE-MODE 1-(T=0,S=0)
-                TS              TANG            +1         
-                TC              R21LEM6         
+                TS              TANG            +1
+                TC              R21LEM6
 R21LEM5         CAF             BIT15                   # IF ON LUNAR SURFACE-MODE 2-(T=180,S=-90)
-                TS              TANG            
-                CS              HALF            
-                TS              TANG            +1         
-R21LEM6         TC              DOWNFLAG                
-                ADRES           LOKONSW         
-                TC              BANKCALL                
-                CADR            RRDESNB         
-                TC              +1              
-                
-## Page 521                
-                TC              BANKCALL                
-                CADR            RADSTALL                
+                TS              TANG
+                CS              HALF
+                TS              TANG            +1
+R21LEM6         TC              DOWNFLAG
+                ADRES           LOKONSW
+                TC              BANKCALL
+                CADR            RRDESNB
+                TC              +1
+
+## Page 521
+                TC              BANKCALL
+                CADR            RADSTALL
                 TC              R21-503                 # BAD RETURN FROM DESIGNATE -ISSUE ALARM
 R21LEM10        TC              UPFLAG                  # INDICATES LOS TO BE COMPUTED
                 ADRES           LOSCMFLG                # EVERY FOURTH PASS THRU DODES
                 CS              BIT14                   # REMOVE RR SELF TRACK ENABLE
-                EXTEND          
+                EXTEND
                 WAND            CHAN12
-R21LEM2         CAF             THREE           
-                TS              LOSCOUNT                
-R21LEM1         TC              INTPRET         
-                RTB             DAD             
-                                LOADTIME                
+R21LEM2         CAF             THREE
+                TS              LOSCOUNT
+R21LEM1         TC              INTPRET
+                RTB             DAD
+                                LOADTIME
                                 HALFSEC                 # EXTRAPOLATE TO PRESENT TIME + .5 SEC.
                 STCALL          TDEC1                   # LOS DETERMINATION ROUTINE
-                                LPS20.1         
-                EXIT                    
+                                LPS20.1
+                EXIT
 R21LEM3         TC              UPFLAG                  # SET LOKONSW TO RADAR-ON DESIRED
-                ADRES           LOKONSW         
-                TC              INTPRET         
+                ADRES           LOKONSW
+                TC              INTPRET
                 CALL                                    # INPUT (RRTARGET UPDATED BY LPS20.1)
                                 RRDESSM                 # DESIGNATE ROUTINE
-                EXIT                    
+                EXIT
                 TC              R21LEM4                 # LOS NOT IN MODE 2 COVERAGE
                                                         # ON LUNAR SURFACE
                 TC              P20LEMA                 # VEHICLE MANEUVER REQUIRED.
@@ -851,32 +851,33 @@ R21LEM3         TC              UPFLAG                  # SET LOKONSW TO RADAR-O
                 TC              +2                      # BADEND-LOCKON NOT ACHIEVED IN 60 TRIES
                 TC              R21END                  # EXIT ROUTINE RETURN TO P20 (LOCK-ON)
 R21-503         CAF             ALRM503                 # ISSUE ALARM 503
-                TC              BANKCALL                
-                CADR            PRIOLARM                
+                TC              BANKCALL
+                CADR            PRIOLARM
                 TC              GOTOV56                 # TERMINATE EXITS P20 VIA V56 CODING
                 TC              R21SRCH                 # PROC
-                TC              P20LEMC3                
-                TC              ENDOFJOB                
-R21END          TC              DOWNFLAG                
+                TC              P20LEMC3
+                TC              ENDOFJOB
+R21END          TC              DOWNFLAG
                 ADRES           LOSCMFLG                # RESET LOSCMFLG
                 TC              P20LEMWT                # EXIT R21 TO PERFORM DATA READ
-R21SRCH         TC              PHASCHNG                
-                OCT             04022           
+R21SRCH         TC              PHASCHNG
+                OCT             04022
                 TC              R24LEM                  # SEARCH ROUTINE
-ALRM503         OCT             00503           
-ALRM527         OCT             527             
+ALRM503         OCT             00503
+ALRM527         OCT             527
 
-                        
+
 R21LEM4         CAF             ALRM527                 # ALARM 527-LOS NOT IN MODE 2 COVERAGE
                 TC              BANKCALL                # ON LUNAR SURFACE
                 CADR            PRIOLARM
-                
+
 ## Page 522
-                TC              GOTOV56                 # TERMINATE EXITS P20 VIA V56 CODING   
+                TC              GOTOV56                 # TERMINATE EXITS P20 VIA V56 CODING
                 TC              P20LEMC3
                 TC              -5                      # ENTER
-HALFSEC         2DEC            50              
-                        
+                TC              ENDOFJOB
+HALFSEC         2DEC            50
+
 ## Page 523
 # MANUAL ACQUISITION ROUTINE R23LEM
 # PROGRAM DESCRIPTION
@@ -903,50 +904,50 @@ HALFSEC         2DEC            50
                 EBANK=          GENRET
                 COUNT*          $$/R23
 R23LEM          TC              UPFLAG                  # SET NO ANGLE MONITOR FLAG
-                ADRES           NORRMON 
-                INHINT          
+                ADRES           NORRMON
+                INHINT
                 TC              IBNKCALL                # SELECT MINIMUM DEADBAND
-                CADR            SETMINDB        
-                RELINT          
+                CADR            SETMINDB
+                RELINT
 R23LEM1         CAF             BIT14                   # ENABLE TRACKER
-                EXTEND          
-                WOR             CHAN12  
-                CAF             OCT205  
-                TC              BANKCALL        
-                CADR            GOPERF1 
+                EXTEND
+                WOR             CHAN12
+                CAF             OCT205
+                TC              BANKCALL
+                CADR            GOPERF1
                 TC              R23LEM2                 # TERMINATE
                 TC              R23LEM11                # PROCEDE
                 TC              R23LEM3                 # ENTER- DO ANOTHER MANUVER
-R23LEM11        INHINT          
+R23LEM11        INHINT
                 TC              RRLIMCHK                # YES - CHECK IF ANTENNA IS WITHIN LIMITS
-                ADRES           CDUT    
+                ADRES           CDUT
                 TC              OUTOFLIM                # NOT WITHIN LIMITS
                 TC              IBNKCALL                # RESTORE DEADBAND TO
                 CADR            RESTORDB                # ASTRONAUT SELECTED VALUE
-                RELINT          
+                RELINT
                 TC              DOWNFLAG                # CLEAR NO ANGLE MONITOR FLAG
-                ADRES           NORRMON 
+                ADRES           NORRMON
                 TC              P20LEMB1                # RADAR IS LOCKED ON CONTINUE IN P20
-OUTOFLIM        RELINT     
-     
-## Page 524             
-                CAF             OCT501PV        
+OUTOFLIM        RELINT
+
+## Page 524
+                CAF             OCT501PV
                 TC              BANKCALL                # ISSUE ALARM - RR ANTENNA NOT WITHIN
                 CADR            PRIOLARM                # LIMITS
                 TC              R23LEM2                 # TERMINATE - EXIT R23 TO R00 (GO TO POOH)
                 TC              OUTOFLIM        +1      # PROCEED ILLEGAL
                 TC              R23LEM3                 # RECYCLE- DO ANOTHER MANUVER
-                TC              ENDOFJOB        
+                TC              ENDOFJOB
 R23LEM2         TC              DOWNFLAG                # CLEAR NO ANGLE MONITOR FLAG
-                ADRES           NORRMON 
+                ADRES           NORRMON
                 TC              GOTOV56                 # AND EXIT VIA V56
-R23LEM3         TC              BANKCALL        
-                CADR            R61LEM  
-                TC              R23LEM1 
-        
+R23LEM3         TC              BANKCALL
+                CADR            R61LEM
+                TC              R23LEM1
+
 OCT501PV        OCT             501
 OCT205          OCT             205
-        
+
 ## Page 525
 # SEARCH ROUTINE R24LEM
 # PROGRAM DESCRIPTION
@@ -984,61 +985,61 @@ R24LEM          TC              UPFLAG
                 ADRES           SRCHOPTN                # SET SRCHOPT FLAG
                 TC              DOWNFLAG                # RESET LOS BEING COMPUTED FLAG TO MAKE
                 ADRES           LOSCMFLG                # SURE DODES DOESN'T GO TO R21
-R24LEM1         CAF             ZERO    
+R24LEM1         CAF             ZERO
                 TS              DATAGOOD                # ZERO OUT DATA INDICATOR
                 TS              OMEGAD                  # ZERO OMEGA DISPLAY REGS
                 TS              OMEGAD          +1      # ZERO OMEGA DISPLAY REGS
-R24LEM2         TC              PHASCHNG        
-                OCT             04022   
-                CAF             V16N80  
-                TC              BANKCALL        
-                CADR            PRIODSPR        
-                TC              GOTOV56 
+R24LEM2         TC              PHASCHNG
+                OCT             04022
+                CAF             V16N80
+                TC              BANKCALL
+                CADR            PRIODSPR
+                TC              GOTOV56
                 TC              R24END                  # PROCEED EXIT R24 TO P20LEM1
-                
-                
+
+
                 TC              R24LEM3                 # RECYCLE - CALL R61 TO MANEUVER S/C
-                
-## Page 526             
-                TC              BANKCALL        
-                CADR            LRS24.1 
+
+## Page 526
+                TC              BANKCALL
+                CADR            LRS24.1
 R24END          INHINT
-                TC              KILLTASK        
-                CADR            CALLDGCH        
+                TC              KILLTASK
+                CADR            CALLDGCH
                 TC              CLRADMOD                # CLEAR BITS 10 & 15 OF RADMODES.
                 TCF             P20LEM1                 # AND GO TO 400 MI. RANGE CHECK IN P20.
-                
-                BLOCK           3       
-                SETLOC          FFTAG6  
-                BANK            
-                COUNT*          $$/R24  
-                
-CLRADMOD        CS              BIT10+15        
-                INHINT          
-                MASK            RADMODES        
-                TS              RADMODES        
-                CS              BIT2                    # DISABLE RR ERROR COUNTERS
-                EXTEND          
-                WAND            CHAN12                  # USER WILL RELINT
-                
-                TC              Q       
-                
-BIT10+15        OCT             41000   
-                BANK            24      
-                SETLOC          P20S    
-                BANK            
-                COUNT*          $$/R24  
-                
-R24LEM3         TC              PHASCHNG        
-                OCT             04022   
+
+                BLOCK           3
+                SETLOC          FFTAG6
+                BANK
+                COUNT*          $$/R24
+
+CLRADMOD        CS              BIT10+15
                 INHINT
-                TC              KILLTASK        
+                MASK            RADMODES
+                TS              RADMODES
+                CS              BIT2                    # DISABLE RR ERROR COUNTERS
+                EXTEND
+                WAND            CHAN12                  # USER WILL RELINT
+
+                TC              Q
+
+BIT10+15        OCT             41000
+                BANK            24
+                SETLOC          P20S
+                BANK
+                COUNT*          $$/R24
+
+R24LEM3         TC              PHASCHNG
+                OCT             04022
+                INHINT
+                TC              KILLTASK
                 CADR            CALLDGCH                # KILL WAITLIST FOR NEXT POINT IN PATTERN
                 TC              CLRADMOD                # CLEAR BITS 10 + 15 OF RADMODES TO KILL
                 RELINT                                  # HALF SECOND DESIGNATE LOOP
-                CAF             .5SEC   
+                CAF             .5SEC
                 TC              BANKCALL                # WAIT FOR DESIGNATE LOOP TO DIE
-                CADR            DELAYJOB        
+                CADR            DELAYJOB
                 TC              LUNSFCHK                # CHECK IF ON LUNAR SURFACE
                 TC              R24LEM2                 # YES-DONT DO ATTITUDE MANEUVER
                 TC              BANKCALL                # CALL R61 TO DO PREFERRED TRACKING
@@ -1048,8 +1049,8 @@ R24LEM3         TC              PHASCHNG
                                                         # RRDESSM WILL RETURN TO CALLER
                 TC              R24LEM2                 # AND GO BACK TO PUT UP V16 N80 DISPLAY
 
-## Page 527                
-V16N80          VN              01680   
+## Page 527
+V16N80          VN              01680
 
 ## Page 528
 # PREFERRED TRACKING ATTITUDE ROUTINE R61LEM
@@ -1084,46 +1085,46 @@ V16N80          VN              01680
 # DEBRIS
 #   SEE SUBROUTINES
                 SETLOC          R61
-                BANK    
+                BANK
                 EBANK=          LOSCOUNT
                 COUNT*          $$/R61
 R61LEM          TC              MAKECADR
                 TS              GENRET
                 TC              UPFLAG                  # SET R61 FLAG
-                ADRES           R61FLAG 
-                TC              R61C+L01        
-R65LEM          TC              MAKECADR        
-                TS              GENRET  
+                ADRES           R61FLAG
+                TC              R61C+L01
+R65LEM          TC              MAKECADR
+                TS              GENRET
                 TC              DOWNFLAG                # RESET R61 FLAG
-                ADRES           R61FLAG 
+                ADRES           R61FLAG
 R61C+L01        CAF             TRACKBIT                # TRACKFLAG
-                MASK            STATE           +1        
-                EXTEND          
+                MASK            STATE           +1
+                EXTEND
                 BZF             R61C+L1                 # NOT SET
 R61C+L03        TC              INTPRET                 # SET
-                VLOAD           
-                
-## Page 529             
-                                HIUNITZ 
+                VLOAD
+
+## Page 529
+                                HIUNITZ
                 STORE           SCAXIS                  # TRACK AXIS UNIT VECTOR
-                RTB             
+                RTB
                                 LOADTIME                # PRESENT TIME
                 DAD                                     # EXTARPULATE FORWARD FORWARD TO CENTER OF
                                 3SECONDS                # SIX SECOND PERIOD.
-                STCALL          TDEC1   
+                STCALL          TDEC1
                                 LPS20.1                 # LOS DETERMINATION + VEH ATTITUDE
-                VLOAD           
-                                RRTARGET        
+                VLOAD
+                                RRTARGET
                 STORE           POINTVSM                # DIRECTION IN WHICH TRACK AXIS IS TO BE
                 CALL
                                 VECPOINT                # TO COMPUTE FINAL ANGLES
                 STORE           CPHI                    # STORE FINAL ANGLES - CPHI,CTHETA,CPSI
-                EXIT            
-                TC              PHASCHNG        
-                OCT             04022   
+                EXIT
+                TC              PHASCHNG
+                OCT             04022
                 CAF             TRACKBIT                #  IS TRACK FLAG SET
-                MASK            FLAGWRD1        
-                EXTEND          
+                MASK            FLAGWRD1
+                EXTEND
                 BZF             R61C+L1                 # BRANCH - NO SKIP THIS CYCLE OF R61/65
                 EXTEND
                 READ            CHAN30                  # CHECK AUTO MODE
@@ -1135,89 +1136,89 @@ R61C+L03        TC              INTPRET                 # SET
                 MASK            BIT14                   # (+) = NOT IN AUTO, (+0) =AOK
                 CCS             A
                 TC              R61C+L04                # NOT IN AUTO MODE
-                TC              INTPRET 
-                VLOAD           CALL    
-                                RRTARGET        
-                                CDU*SMNB        
+                TC              INTPRET
+                VLOAD           CALL
+                                RRTARGET
+                                CDU*SMNB
                 DLOAD           ACOS
-                                MPAC            +5 
+                                MPAC            +5
                 STODL           PHI
                                 TENDEG
                 BDSU            BPL
                                 PHI
                                 R61C+L05                # PHI GRE 10DEG
-                EBANK=          CDUXD   
+                EBANK=          CDUXD
                 EXIT
                 CAF             CDUBANK
-                TS              BBANK   
-                INHINT          
-                EXTEND          
-                DCA             CPHI    
-                DXCH            CDUXD   
-                
+                TS              BBANK
+                INHINT
+                EXTEND
+                DCA             CPHI
+                DXCH            CDUXD
+
 ## Page 530
-                CA              CPSI    
-                TS              CDUZD   
-                RELINT          
-                EBANK=          LOSCOUNT        
+                CA              CPSI
+                TS              CDUZD
+                RELINT
+                EBANK=          LOSCOUNT
                 CAF             R61BANK
-                TS              BBANK   
-                TC              R61C+L06        
-R61C+L05        EXIT            
-                INHINT          
-                TC              IBNKCALL        
-                FCADR           ZATTEROR        
-                TC              IBNKCALL        
+                TS              BBANK
+                TC              R61C+L06
+R61C+L05        EXIT
+                INHINT
+                TC              IBNKCALL
+                FCADR           ZATTEROR
+                TC              IBNKCALL
                 FCADR           SETMINDB                # REDUCE ATTITUDE ERROR
-                TC              DOWNFLAG        
-                ADRES           3AXISFLG        
-                TC              UPFLAG  
+                TC              DOWNFLAG
+                ADRES           3AXISFLG
+                TC              UPFLAG
                 ADRES           PDSPFLAG                # SET PRIORITY DISPLAY FLAG
-                TC              BANKCALL        
-                CADR            R60LEM  
-                INHINT          
-                TC              IBNKCALL        
-                FCADR           RESTORDB        
-                TC              PHASCHNG        
-                OCT             04022   
-                TC              DOWNFLAG        
+                TC              BANKCALL
+                CADR            R60LEM
+                INHINT
+                TC              IBNKCALL
+                FCADR           RESTORDB
+                TC              PHASCHNG
+                OCT             04022
+                TC              DOWNFLAG
                 ADRES           PDSPFLAG                # RESET PRIORITY DISPLAY FLAG
 R61C+L06        CAF             R61FLBIT
                 MASK            STATE           +1
                 EXTEND
                 BZF             +2
-                TC              R61C+L4 
-                CCS             R65CNTR 
+                TC              R61C+L4
+                CCS             R65CNTR
                 CCS             A
-                TC              +2      
+                TC              +2
                 TC              R61C+L4                 # R65CNTR = 0 - EXIT ROUTINE
-                TS              R65CNTR 
-                CAF             06SEC   
+                TS              R65CNTR
+                CAF             06SEC
                 INHINT
-                TC              TWIDDLE 
-                ADRES           R61C+L2 
-                TC              ENDOFJOB        
-R61C+L2         CAF             PRIO26  
-                TC              FINDVAC 
-                EBANK=          LOSCOUNT        
-                2CADR           R61C+L01        
-                TC              TASKOVER        
+                TC              TWIDDLE
+                ADRES           R61C+L2
+                TC              ENDOFJOB
+R61C+L2         CAF             PRIO26
+                TC              FINDVAC
+                EBANK=          LOSCOUNT
+                2CADR           R61C+L01
+                TC              TASKOVER
 R61C+L04        TC              BANKCALL                # TO CONVERT ANGLES TO FDAI
-                CADR            BALLANGS        
-                TC              R61C+L06        
-                
+                CADR            BALLANGS
+                TC              R61C+L06
+
 ## Page 531
-R61C+L4         CAE             GENRET  
+R61C+L4         CAE             GENRET
                 TCF             BANKJUMP                # EXIT R61
 R61C+L1         CAF             BIT7+9PV                # IS RENDEZVOUS OR P25FLAG SET
-                MASK            STATE   
-                EXTEND          
+                MASK            STATE
+                EXTEND
                 BZF             ENDOFJOB                # NO-EXIT ROUTINE AND PROGRAM.
                 TC              R61C+L06                # YES EXIT ROUTINE
-BIT7+9PV        OCT             00500   
+BIT7+9PV        OCT             00500
 TENDEG          2DEC            0.2777777               # SCALED UNTS OF REVOLUTION B0
-06SEC           DEC             600     
-PHI             EQUALS          20D     
+06SEC           DEC             600
+PHI             EQUALS          20D
                 EBANK=          CDUXD
 CDUBANK         BBCON           R61C+L05
                 EBANK=          LOSCOUNT
@@ -1225,10 +1226,10 @@ R61BANK         BBCON           R61C+L05
                 BLOCK           02
                 SETLOC          RADARFF
                 BANK
-                
+
                 EBANK=          LOSCOUNT
                 COUNT*          $$/RRSUB
-        
+
 ## Page 532
 # THE FOLLOWING SUBROUTINE RETURNS TO CALLER + 2 IF THE ABSOLUTE VALUE OF VALUE OF C(A) IS GREATER THAN THE
 # NEGATIVE OF THE NUMBER AT CALLER +1. OTHERWISE IT RETURNS TO CALLER +3. MAY BE CALLED IN RUPT OR UNDER EXEC.
@@ -1236,11 +1237,11 @@ R61BANK         BBCON           R61C+L05
 MAGSUB          EXTEND
                 BZMF            +2
                 TCF             +2
-                COM     
-        
+                COM
+
                 INDEX           Q
                 AD              0
-                EXTEND  
+                EXTEND
                 BZMF            Q+2                     # ABS(A) <= CONST GO TO L+3
                 TCF             Q+1                     # ABS(A) >  CONST GO TO L+2
 
@@ -1288,41 +1289,41 @@ RRLIMCHK        EXTEND
                 INCR            Q
                 DXCH            ITEMP1
                 LXCH            Q                       # L(CALLER +2) TO L.
-                        
+
                 CAF             BIT12                   # SEE WHICH MODE RR IS IN.
-                MASK            RADMODES        
-                CCS             A       
-                TCF             MODE2CHK        
-                        
+                MASK            RADMODES
+                CCS             A
+                TCF             MODE2CHK
+
                 CA              ITEMP1                  # MODE 1 IS DEFINED AS
-                
-## Page 534                     
+
+## Page 534
                 TC              MAGSUB                  #     1. ABS(T) L 55 DEGS.
                 DEC             -.30555                 #     2. ABS(S + 5.5 DEGS) L 64.5 DEGS
                 TC              L                       #         (SHAFT LIMITS AT +59, -70 DEGS)
-                        
-                CAF             5.5DEGS 
+
+                CAF             5.5DEGS
                 AD              ITEMP2                  # S
-                TC              MAGSUB  
+                TC              MAGSUB
                 DEC             -.35833                 # 64.5 DEGS
-                TC              L       
+                TC              L
                 TC              RRLIMOK                 # IN LIMITS.
-                        
+
 MODE2CHK        CAF             82DEGS                  # MODE 2 IS DEFINED AS
                 AD              ITEMP2                  #     1. ABS(T) G 125 DEGS.
                 TC              MAGSUB                  #     2. ABS(S + 82 DEGS) L 57 DEGS
                 DEC             -.31667                 #         (SHAFT LIMITS AT -25, -139 DEGS)
-                TC              L       
-                        
-                CA              ITEMP1  
-                TC              MAGSUB  
+                TC              L
+
+                CA              ITEMP1
+                TC              MAGSUB
                 DEC             -.69444                 # 125 DEGS
-                        
-RRLIMOK         INDEX           L       
+
+RRLIMOK         INDEX           L
                 TC              L                       # ( = TC 1 )
-                        
-5.5DEGS         DEC             .03056  
-82DEGS          DEC             .45556  
+
+5.5DEGS         DEC             .03056
+82DEGS          DEC             .45556
 
 ## Page 535
 # PROGRAM NAME_  SETTRKF                                                  . IF EITHER:
@@ -1358,40 +1359,40 @@ RRLIMOK         INDEX           L
 
 # ALARMS_  TRACKER FAIL LAMP
 
-# EXIT_  L +1 (ALWAYS)                                                    ED.     
-                                                  
+# EXIT_  L +1 (ALWAYS)                                                    ED.
+
 SETTRKF         CAF             BIT1                    # NO ACTION IF DURING LAMP TEST.
-                MASK            IMODES33        
-                CCS             A       
-                TC              Q       
-                
-RRTRKF          CA              BIT8    
-                TS              L       
-                
+                MASK            IMODES33
+                CCS             A
+                TC              Q
+
+RRTRKF          CA              BIT8
+                TS              L
+
                 CAF             13,7,2                  # SEE IF CDU FAILED.
-                MASK            RADMODES        
-                EXTEND          
+                MASK            RADMODES
+                EXTEND
                 BZF             TRKFLON                 # CONDITION 3 ABOVE.
-                
+
 RRCHECK         CAF             BIT4                    # SEE IF RR DATA FAILED.
-                MASK            RADMODES 
-                
-## Page 536             
-                CCS             A       
-TRKFLON         CA              L       
+                MASK            RADMODES
+
+## Page 536
+                CCS             A
+TRKFLON         CA              L
                 AD              DSPTAB          +11D    # HALF ADD DESIRED AND PRESENT STATES.
-                MASK            L       
-                EXTEND          
+                MASK            L
+                EXTEND
                 BZF             TCQ                     # NO CHANGE.
-                
+
 FLIP            CA              DSPTAB          +11D    # CANT USE LXCH DSPTAB +11D (RESTART PROB)
-                EXTEND          
+                EXTEND
                 RXOR            LCHAN
                 MASK            POSMAX
                 AD              BIT15
                 TS              DSPTAB          +11D
                 TC              Q
-        
+
 13,7,2          OCT             10102
 ENDRMODF        EQUALS
 
@@ -1414,7 +1415,7 @@ ENDRMODF        EQUALS
 # TO TASKOVER.
 
 # CALLING SEQUENCE: WAITLIST TASK FROM RRAUTCHK IF THE RR POWER ON AUTO
-# BIT (CHAN 33 BIT 2) CHANGES TO 0 AND NO PROGRAM WAS USING 
+# BIT (CHAN 33 BIT 2) CHANGES TO 0 AND NO PROGRAM WAS USING
 # THE RR (STATE BIT 7).
 
 # ERASABLE INITIALIZATION REQUIRED:
@@ -1431,8 +1432,8 @@ ENDRMODF        EQUALS
 
                 BANK            24
                 SETLOC          P20S1
-                BANK    
-        
+                BANK
+
                 EBANK=          LOSCOUNT
                 COUNT*          $$/RSUB
 RRTURNON        TC              RRZEROSB
@@ -1442,7 +1443,7 @@ RRTURNON        TC              RRZEROSB
                 MASK            RADMODES
                 TS              RADMODES
                 TCF             TASKOVER
-                
+
 ## Page 538
 # PROGRAM NAME_  RRZEROSB
 
@@ -1451,7 +1452,7 @@ RRTURNON        TC              RRZEROSB
 # DETERMINE THE RR MODE, AND TURNS ON THE TRACKER FAIL
 # LAMP IF REQUIRED. INITIALLY THE RR CDU ZERO BIT (CHAN 12
 # BIT 1) IS SET. FOLLOWING A 20 MILLISECOND WAIT, THE LGC
-# RR CDU COUNTERS (OPTY, OPTX) ARE SET = 0 AFTER 
+# RR CDU COUNTERS (OPTY, OPTX) ARE SET = 0 AFTER
 # WHICH THE RR CDU ZERO DISCRETE (CHAN 12 BIT 1) IS
 # REMOVED. A 4 SECOND WAIT IS SET TO ALL THE RR CDU:S
 # TO REPEAT THE ACTUAL TRUNNION AND SHAFT ANGLES. THE
@@ -1481,42 +1482,42 @@ RRZEROSB        EXTEND
                 CAF             BIT1                    # BIT 13 OF RADMODES MUST BE SET BEFORE
                 EXTEND                                  # COMING HERE.
                 WOR             CHAN12                  # TURN ON ZERO RR CDU
-                TC              FIXDELAY        
-                DEC             2       
-                
-                CAF             ZERO    
-                TS              CDUT    
-                TS              CDUS    
+                TC              FIXDELAY
+                DEC             2
+
+                CAF             ZERO
+                TS              CDUT
+                TS              CDUS
                 CS              ONE                     # REMOVE ZEROING BIT.
-                EXTEND          
-                WAND            CHAN12  
-                TC              FIXDELAY        
+                EXTEND
+                WAND            CHAN12
+                TC              FIXDELAY
                 DEC             1000                    # RESET FAIL INHIBIT IN 10 SECS - D.281
-                
+
                 CS              BIT13                   # REMOVE ZEROING IN PROCESS BIT.
-                
-## Page 539             
-                MASK            RADMODES        
-                TS              RADMODES        
-                
-                CA              CDUT    
-                TC              MAGSUB  
-                DEC             -.5     
+
+## Page 539
+                MASK            RADMODES
+                TS              RADMODES
+
+                CA              CDUT
+                TC              MAGSUB
+                DEC             -.5
                 TCF             +3                      # IF MODE 2.
-                
-                CAF             ZERO    
-                TCF             +2      
-                CAF             ANTENBIT        
-                XCH             RADMODES        
-                MASK            -BIT12  
-                ADS             RADMODES        
-                
+
+                CAF             ZERO
+                TCF             +2
+                CAF             ANTENBIT
+                XCH             RADMODES
+                MASK            -BIT12
+                ADS             RADMODES
+
                 TC              SETTRKF                 # TRACKER LAMP MIGHT GO ON NOW.
-                
+
                 TC              RRRET                   # DONE.
-                
+
 -BIT12          EQUALS          -1/8                    # IN SPROOT
-        
+
 ## Page 540
 # PROGRAM NAME_  DORREPOS
 # FUNCTIONAL DESCRIPTION_
@@ -1536,7 +1537,7 @@ RRZEROSB        EXTEND
 # -90 DEGREES IF IN MODE 2. IF DURING RRTONLY OR RRSONLY A
 # REMODE HAS BEEN REQUESTED (RADMODES BIT 14), AND ALWAYS
 # FOLLOWING COMPLETION OF RRSONLY, CONTROL IS TRANSFERRED TO
-# REPOSRPT. HERE THE REPOSITION FLAG (RADMODES BIT 11) IS 
+# REPOSRPT. HERE THE REPOSITION FLAG (RADMODES BIT 11) IS
 # REMOVED. A CHECK IS THEN MADE ON THE DESIGNATE FLAG (RADMODES
 # BIT 10). IF PRESENT, CONTROL IS TRANSFERRED TO BEGDES. IF NOT PRESENT
 # INDICATING NO FURTHER ANTENNA CONTROL REQUIRED, THE RR ERROR
@@ -1568,45 +1569,45 @@ DORREPOS        TC              SETRRECR                # SET UP RR CDU ERROR CO
                 DEC             2
 
                 CAF             BIT12                   # MANEUVER TRUNNION ANGLE TO NOMINAL POS.
-                
+
 ## Page 541
                 MASK            RADMODES
                 CCS             A
                 CAF             BIT15                   # 0 FOR MODE 1 AND 180 FOR MODE 2.
-                TC              RRTONLY 
-                
+                TC              RRTONLY
+
                 CAF             BIT12                   # NOW PUT SHAFT IN RIGHT POSITION.
-                MASK            RADMODES        
-                CCS             A       
+                MASK            RADMODES
+                CCS             A
                 CS              HALF                    # -90 FOR MODE 2.
-                TC              RRSONLY 
-                
+                TC              RRSONLY
+
 REPOSRPT        CS              REPOSBIT                # RETURNS HERE FROM RR1AXIS IF REMODE
                                                         # REQUESTED DURING REPOSITION.
                 MASK            RADMODES                # REMOVE REPOSITION BIT.
-                TS              RADMODES        
+                TS              RADMODES
                 MASK            BIT10                   # SEE IF SOMEONE IS WAITING TO DESIGNATE.
-                CCS             A       
-                TCF             BEGDES  
+                CCS             A
+                TCF             BEGDES
                 CS              BIT2                    # IF NO FURTHER ANTENNA CONTROL REQUIRED,
                 EXTEND                                  # REMOVE ERROR COUNTER ENABLE.
-                WAND            CHAN12  
-                TCF             TASKOVER        
-                
+                WAND            CHAN12
+                TCF             TASKOVER
+
 SETRRECR        CAF             BIT2                    # SET UP RR ERROR COUNTERS.
-                EXTEND          
-                RAND            CHAN12  
+                EXTEND
+                RAND            CHAN12
                 CCS             A                       # DO NOT CLEAR LAST COMMAND IF
                 TC              Q                       # ERROR COUNTERS ARE ENABLED.
-                
-                TS              LASTYCMD        
-                TS              LASTXCMD        
-                CAF             BIT2    
-                EXTEND          
+
+                TS              LASTYCMD
+                TS              LASTXCMD
+                CAF             BIT2
+                EXTEND
                 WOR             CHAN12                  # ENABLE RR CDU ERROR COUNTERS.
-                TC              Q       
-                
-## Page 542     
+                TC              Q
+
+## Page 542
 # PROGRAM NAME_  REMODE                                                   IVES SHAFT TO -45, AND FINALLY DRIVES
 #
 # FUNCTIONAL DESCRIPTION_                                                 S DONE WITH SINGLE AXIS ROTATIONS (SEE
@@ -1651,55 +1652,55 @@ SETRRECR        CAF             BIT2                    # SET UP RR ERROR COUNTE
 
 REMODE          CAF             BIT12                   # DRIVE TRUNNION TO 0 (180).
                 MASK            RADMODES                # (ERROR COUNTER ALREADY ENABLED)
-                CCS             A       
-                CAF             BIT15   
-                TC              RRTONLY 
-                
-                CAF             -45DEGSR        
-                TC              RRSONLY 
-                
-## Page 543             
-                CS              RADMODES        
-                MASK            BIT12        
-                CCS             A       
+                CCS             A
+                CAF             BIT15
+                TC              RRTONLY
+
+                CAF             -45DEGSR
+                TC              RRSONLY
+
+## Page 543
+                CS              RADMODES
+                MASK            BIT12
+                CCS             A
                 CAF             -80DEGSR                # GO TO T = -130 (-50).
-                AD              -50DEGSR        
-                TC              RRTONLY 
-                
-                CS              RADMODES        
-                MASK            BIT12        
-                CCS             A       
+                AD              -50DEGSR
+                TC              RRTONLY
+
+                CS              RADMODES
+                MASK            BIT12
+                CCS             A
                 CAF             BIT15                   # GO TO T = -180 (+0).
-                TC              RRTONLY 
-                
+                TC              RRTONLY
+
                 CS              RADMODES                # GO TO S = -90 (+0).
-                MASK            BIT12        
-                CCS             A       
-                CS              HALF    
-                TC              RRSONLY 
-                
-                TC              RMODINV 
-                
+                MASK            BIT12
+                CCS             A
+                CS              HALF
+                TC              RRSONLY
+
+                TC              RMODINV
+
                 CS              BIT14                   # END OF REMODE.
-                MASK            RADMODES        
-                TS              RADMODES        
-                
+                MASK            RADMODES
+                TS              RADMODES
+
                 CAF             BIT10                   # WAS REMODE CALLED DURING DESIGNATE
                 MASK            RADMODES                # (BIT10 RADMODES = 1)
-                EXTEND          
+                EXTEND
                 BZF             RGOODEND                # NO-RETURN TO CALLER WAITING IN RADSTALL
                 TC              STDESIG                 # YES - RETURN TO DESIGNATE
--45DEGSR        =               13,14,15        
--50DEGSR        DEC             -.27778 
--80DEGSR        DEC             -.44444 
-                
+-45DEGSR        =               13,14,15
+-50DEGSR        DEC             -.27778
+-80DEGSR        DEC             -.44444
+
 RMODINV         LXCH            RADMODES                # INVERT THE MODE STATUS.
-                CAF             BIT12        
-                EXTEND  
+                CAF             BIT12
+                EXTEND
                 RXOR            LCHAN
                 TS              RADMODES
                 TC              Q
-        
+
 ## Page 544
 # PROGRAM NAMES_  RRTONLY, RRSONLY
 
@@ -1741,54 +1742,54 @@ RMODINV         LXCH            RADMODES                # INVERT THE MODE STATUS
 # L+1  (ANGLE WITHIN ONE DEGREE OR RR OUT OF AUTO MODE)
 
 RRTONLY         TS              RDES                    # DESIRED TRUNION ANGLE.
-                CAF             ZERO    
-                TCF             RR1AXIS 
-                
+                CAF             ZERO
+                TCF             RR1AXIS
+
 RRSONLY         TS              RDES                    # SHAFT COMMANDS ARE UNRESOLVED SINCE THIS
                 CAF             ONE                     # ROUTINE ENTERED ONLY WHEN T = 0 OR 180.
-                
-RR1AXIS         TS              RRINDEX 
-                EXTEND          
-                QXCH            RRRET   
-                TCF             RR1AX2  
-                
-## Page 545             
-NXTRR1AX        TC              FIXDELAY        
+
+RR1AXIS         TS              RRINDEX
+                EXTEND
+                QXCH            RRRET
+                TCF             RR1AX2
+
+## Page 545
+NXTRR1AX        TC              FIXDELAY
                 DEC             50                      # 2 SAMPLES PER SECOND.
-                
+
 RR1AX2          CS              RADMODES                # IF SOMEONE REQUESTES AS DESIGNATE WHICH
                 MASK            PRIO22                  # REQUIRES A REMODE AND A REPOSITION IS IN
                 EXTEND                                  # PROGRESS, INTERRUPT IT AND START THE
                 BZF             REPOSRPT                # REMODE IMMEDIATELY.
-                
-                CA              RDES    
-                EXTEND          
-                INDEX           RRINDEX 
-                MSU             CDUT    
+
+                CA              RDES
+                EXTEND
+                INDEX           RRINDEX
+                MSU             CDUT
                 TS              ITEMP1                  # SAVE ERROR SIGNAL.
-                EXTEND          
+                EXTEND
                 MP              RRSPGAIN                # TRIES TO NULL .7 OF ERROR OVER NEXT .5
-                TS              L       
-                CA              RADMODES        
-                MASK            AUTOMBIT        
+                TS              L
+                CA              RADMODES
+                MASK            AUTOMBIT
                 XCH             ITEMP1                  # STORE RR-OUT-OF-AUTO-MODE BIT.
                 TC              MAGSUB                  # SEE IF WITHIN ONE DEGREE.
                 DEC             -.00555                 # SCALED IN HALF-REVS.
-                
+
                 CCS             ITEMP1                  # NO.  IF RR OUT OF AUTO MODE, EXIT.
                 TC              RRRET                   # RETURN TO CALLER.
-                
+
                 CCS             RRINDEX                 # COMMAND FOR OTHER AXIS IS ZERO.
                 TCF             +2                      # SETTING A TO 0.
-                XCH             L       
-                DXCH            TANG    
-                
-                TC              RROUT   
-                
+                XCH             L
+                DXCH            TANG
+
+                TC              RROUT
+
                 TCF             NXTRR1AX                # COME BACK IN .5 SECONDS.
-                
+
 RRSPGAIN        DEC             .59062                  # NULL .7 ERROR IN .5 SEC.
-                
+
 ## Page 546
 # PROGRAM NAME_  RROUT                                                    RROR COUNTER SCALING. RROUT LIMITS THEM
 
@@ -1827,74 +1828,74 @@ RRSPGAIN        DEC             .59062                  # NULL .7 ERROR IN .5 SE
 
 RROUT           LXCH            Q                       # SAVE RETURN.
                 CAF             ONE                     # LOOP TWICE.
-RROUT2          TS              ITEMP2  
-                INDEX           A       
-                CA              TANG    
+RROUT2          TS              ITEMP2
+                INDEX           A
+                CA              TANG
                 TS              ITEMP1                  # SAVE SIGN OF COMMAND FOR LIMITING.
-                        
+
                 TC              MAGSUB                  # SEE IF WITHIN LMITS.
--RRLIMIT        DEC             -384    
+-RRLIMIT        DEC             -384
                 TCF             RROUTLIM                # LIMIT COMMAND TO MAG OF 384.
-                        
+
 SETRRCTR        CA              ITEMP1                  # COUNT OUT DIFFERENCE BETWEEN DESIRED
                 INDEX           ITEMP2                  # STATE AND PRESENT STATE AS RECORDED IN
                 XCH             LASTYCMD                # LASTYCMD AND LASTXCMD
-                COM                     
-                
-## Page 547                     
-                AD              ITEMP1  
+                COM
+
+## Page 547
+                AD              ITEMP1
                 AD              NEG0                    # PREVENT +0 IN OUTCOUNTER
-                INDEX           ITEMP2  
-                TS              CDUTCMD 
-                        
+                INDEX           ITEMP2
+                TS              CDUTCMD
+
                 CCS             ITEMP2                  # PROCESS BOTH INPUTS.
-                TCF             RROUT2  
-                        
+                TCF             RROUT2
+
                 CAF             PRIO6                   # ENABLE COUNTERS.
-                EXTEND                  
+                EXTEND
                 WOR             CHAN14                  # PUT ON CDU DRIVES S AND T
                 TC              L                       # RETURN.
-                        
+
 RROUTLIM        CCS             ITEMP1                  # LIMIT COMMAND TO ABS VAL OF 384.
-                CS              -RRLIMIT        
-                TCF             +2      
-                CA              -RRLIMIT        
-                TS              ITEMP1  
-                TCF             SETRRCTR        +1     
-                
-## Page 548             
+                CS              -RRLIMIT
+                TCF             +2
+                CA              -RRLIMIT
+                TS              ITEMP1
+                TCF             SETRRCTR        +1
+
+## Page 548
 #          ROUTINE TO ZERO THE RR CDUS AND DETERMINE THE ANTENNA MODE.
 
 RRZERO          CAF             BIT11+1                 # SEE IF MONITOR REPOSITION OR NOT IN AUTO
                 MASK            RADMODES                # IF SO, DONT RE-ZERO CDUS.
-                CCS             A       
+                CCS             A
                 TCF             RADNOOP                 # (IMMEDIATE TASK TO RGOODEND).
-                
-                INHINT          
+
+                INHINT
                 CS              BIT13                   # SET FLAG TO SHOW ZEROING IN PROGRESS.
-                MASK            RADMODES        
-                AD              BIT13        
-                TS              RADMODES        
-                
-                CAF             ONE     
-                TC              WAITLIST        
-                EBANK=          LOSCOUNT        
-                2CADR           RRZ2    
-                
+                MASK            RADMODES
+                AD              BIT13
+                TS              RADMODES
+
+                CAF             ONE
+                TC              WAITLIST
+                EBANK=          LOSCOUNT
+                2CADR           RRZ2
+
                 CS              RADMODES                # SEE IF IN AUTO MODE.
-                MASK            BIT2        
-                CCS             A       
-                TCF             ROADBACK        
+                MASK            BIT2
+                CCS             A
+                TCF             ROADBACK
                 TC              ALARM                   # AUTO DISCRETE NOT PRESENT - TRYING
-                OCT             510     
-ROADBACK        RELINT          
-                TCF             SWRETURN        
-                
+                OCT             510
+ROADBACK        RELINT
+                TCF             SWRETURN
+
 RRZ2            TC              RRZEROSB                # COMMON TO TURNON AND RRZERO.
-                TCF             ENDRADAR        
-        
+                TCF             ENDRADAR
+
 BIT11+1         OCT             02001
-        
+
 ## Page 549
 # PROGRAM NAME_  RRDESSM                                                  R (HALF-UNIT) IN RRTARGET. REMODES IF
 
@@ -1946,41 +1947,41 @@ BIT11+1         OCT             02001
 
 RRDESSM         STQ             CLEAR
                                 DESRET
-## Page 550     
+## Page 550
                                 RRNBSW
                 CALL                                    # COMPUTES SINES AND COSINES, ORDER Y Z X
-                                CDUTRIG 
+                                CDUTRIG
                 VLOAD           CALL                    # LOAD VECTOR AND CALL TRANSFORMATION
-                                RRTARGET        
-                                *SMNB*  
-                
+                                RRTARGET
+                                *SMNB*
+
                 CALL                                    # GET RR GIMBAL ANGLES IN PRESENT AND
                                 RRANGLES                # ALTERNATE MODE.
-                EXIT            
-                
-                INHINT          
-                TC              RRLIMCHK        
+                EXIT
+
+                INHINT
+                TC              RRLIMCHK
                 ADRES           MODEA                   # CONFIGURATION FOR CURRENT MODE.
                 TC              +3                      # NOT IN CURRENT MODE
 OKDESSM         INCR            DESRET                  # INCREMENT SAYS NO VEHICLE MANEUVER REQ.
                 TC              STARTDES                # SHOW DESIGNATE REQUIRED
-                CS              FLAGWRD8        
+                CS              FLAGWRD8
                 MASK            SURFFBIT                # CHECK IF ON LUNAR SURFACE (SURFFLAG=P22F
-                EXTEND          
+                EXTEND
                 BZF             NORDSTAL                # BRANCH-YES-CANNOT DESIGNATE IN MODE 2
-                TC              TRYSWS  
-                
-                
+                TC              TRYSWS
+
+
 LUNDESCH        CS              FLAGWRD8                # OVERFLOW RETURN FROM RRANGLES
                 MASK            SURFFBIT                # CHECK IF ON LUNAR SURFACE
-                EXTEND          
+                EXTEND
                 BZF             NORDSTAL                # BRANCH-YES-RETURN TO CALLER - ALARM 527
-                CA              STATE   
-                MASK            RNDVZBIT        
+                CA              STATE
+                MASK            RNDVZBIT
                 CCS             A                       # TEST RNDVZFLG.
                 TC              NODESSM                 # NOT ON MOON-CALL FOR ATTITUDE MANEUVER
                 TCF             ENDOFJOB                # ...BUT NOT IN R29.
-                
+
 ## Page 551
 # PROGRAM NAME_  STARTDES                                                 STORED AS A HALF-UNIT VECTOR IN RRTARGET
 
@@ -2028,47 +2029,47 @@ STARTDES        INCR            DESRET
                 MASK            BIT10
                 ADS             RADMODES
                 MASK            BIT11                   # SEE IF REPOSITIONING IN PROGRESS.
-                CCS             A       
+                CCS             A
                 TCF             DESRETRN                # ECTR ALREADY SET UP.
-                
+
                 TC              SETRRECR                # SET UP ERROR COUNTERS.
-## Page 552             
-                CAF             TWO     
-                TC              WAITLIST        
-                EBANK=          LOSCOUNT        
-                2CADR           BEGDES  
-                
+## Page 552
+                CAF             TWO
+                TC              WAITLIST
+                EBANK=          LOSCOUNT
+                2CADR           BEGDES
+
 DESRETRN        CA              RADCADR                 # FIRST PASS THRU DESIGNATE
-                EXTEND          
+                EXTEND
                 BZF             DESRTRN                 # YES   SET EXIT
                 TC              ENDOFJOB                # NO
-DESRTRN         RELINT          
-                INCR            DESRET  
-                CA              DESRET  
-                TCF             BANKJUMP        
-                
+DESRTRN         RELINT
+                INCR            DESRET
+                CA              DESRET
+                TCF             BANKJUMP
+
 NORDSTAL        CAF             ZERO                    # ZERO RADCADR TO WIPE  OUT ANYONE
                 TS              RADCADR                 # WAITING IN RADSTALL SINCE WE ARE NOW
                 TCF             DESRTRN                 # RETURNING TO P20 AND MAY DO NEW RADSTALL
-        
+
 ## Page 553
 #          SEE IF RRDESSM CAN BE ACCOMPLISHED AFTER A REMODE.
 
 TRYSWS          TC              RMODINV                 # (NOTE RUPT INHIBIT)
                 TC              RRLIMCHK                # TRY DIFFERENT MODE.
-                ADRES           MODEB   
+                ADRES           MODEB
                 TCF             NODESSM                 # VEHICLE MANEUVER REQUIRED.
-                
+
                 TC              RMODINV                 # RESET BIT12
                 CAF             BIT14                   # SET FLAG FOR REMODE.
-                ADS             RADMODES        
-                
-                TCF             OKDESSM 
-                
+                ADS             RADMODES
+
+                TCF             OKDESSM
+
 NODESSM         TC              RMODINV                 # RE-INVERT MODE AND RETURN
                 INCR            DESRET                  # TO CALLER +2
                 TCF             NORDSTAL
-        
+
 MAXTRYS         DEC             60
 
 ## Page 554
@@ -2077,82 +2078,82 @@ MAXTRYS         DEC             60
 
 RRDESNB         TC              MAKECADR
                 TS              DESRET
-                
+
                 TC              DOWNFLAG                # RESET FLAG TO PREVENT DODES FROM GOING
                 ADRES           LOSCMFLG                # BACK TO R21
                 CA              MAXTRYS                 # SET TIME LIMIT COUNTER
                 TS              DESCOUNT                # FOR DESIGNATE
                 INHINT                                  # SEE IF CURRENT MODE OK.
                 TC              RRLIMNB                 # DO SPECIAL V41 LIMIT CHECK
-                ADRES           TANG    
+                ADRES           TANG
                 TCF             TRYSWN                  # SEE IF IN OTHER MODE.
-                        
-OKDESNB         RELINT                  
-                EXTEND                  
-                DCA             TANG    
-                DXCH            TANGNB  
-                TC              INTPRET 
-                        
+
+OKDESNB         RELINT
+                EXTEND
+                DCA             TANG
+                DXCH            TANGNB
+                TC              INTPRET
+
                 CALL                                    # GET LOS IN NB COORDS.
-                                RRNB    
-                STORE           RRTARGET        
-                        
-                SET             EXIT    
-                                RRNBSW  
-                        
-                INHINT                  
-                TCF             STARTDES        +1     
+                                RRNB
+                STORE           RRTARGET
+
+                SET             EXIT
+                                RRNBSW
+
+                INHINT
+                TCF             STARTDES        +1
 TRYSWN          TC              RMODINV                 # SEE IF OTHER MODE WILL DO.
                 TC              RRLIMNB                 # DO SPECIAL V41 LIMIT CHECK
-                ADRES           TANG    
+                ADRES           TANG
                 TCF             NODESNB                 # NOT POSSIBLE.
-                        
-                TC              RMODINV 
-                CAF             BI14                    # CALL FOR REMODE.
-                ADS             RADMODES        
-                TCF             OKDESNB 
-                        
+
+                TC              RMODINV
+                CAF             BIT14                   # CALL FOR REMODE.
+                ADS             RADMODES
+                TCF             OKDESNB
+
 NODESNB         TC              RMODINV                 # REINVERT MODE BIT.
                 TC              ALARM                   # BAD INPUT ANGLES.
-                OCT             502     
-                TC              CLRADMOD        
+                OCT             502
+                TC              CLRADMOD
                 TC              ENDOFJOB                # AVOID 503 ALARM.
-                        
+
 RRLIMNB         INDEX           Q                       # THIS ROUTINE IS IDENTICAL TO RRLIMCHK
                 CAF             0                       # EXCEPT THAT THE MODE 1 SHAFT LOWER
                 INCR            Q                       # LIMIT IS -85 INSTEAD OF -70 DEGREES
-                EXTEND                  
-                
-## Page 555                     
+                EXTEND
+
+## Page 555
                 INDEX           A                       # READ GIMBAL ANGLES INTO ITEMP STORAGE
-                DCA             0       
-                DXCH            ITEMP1  
+                DCA             0
+                DXCH            ITEMP1
                 LXCH            Q                       # L(CALLER +2) TO L
-                        
+
                 CAF             BIT12                   # SEE WHICH MODE RR IS IN.
-                MASK            RADMODES        
-                CCS             A       
+                MASK            RADMODES
+                CCS             A
                 TCF             MODE2CHK                # MODE 2 CAN USE RRLIMCHK CODING
-                CA              ITEMP1  
+                CA              ITEMP1
                 TC              MAGSUB                  # MODE 1 IS DEFINED AS
                 DEC             -.30555                 #   1. ABS(T) L 55 DEGS
                 TC              L                       #   2  SHAFT LIMITS AT +59, -85 DEGS
-                        
+
                 CA              ITEMP2                  # LOAD SHAFT ANGLE
-                EXTEND                  
+                EXTEND
                 BZMF            NEGSHAFT                # IF NEGATIVE SHAFT ANGLE, ADD 20.5 DEGS
-                AD              5.5DEGS 
-SHAFTLIM        TC              MAGSUB  
+                AD              5.5DEGS
+SHAFTLIM        TC              MAGSUB
                 DEC             -.35833                 # 64.5 DEGREES
                 TC              L                       # NOT IN LIMITS
                 TC              RRLIMOK                 # IN LIMITS
 NEGSHAFT        AD              20.5DEGS                # MAKE NEGATIVE SHAFT LIMIT -85 DEGREES
-                TCF             SHAFTLIM        
-                        
-                        
-20.5DEGS        DEC             .11389  
-                
-## Page 556 
+                TCF             SHAFTLIM
+
+
+20.5DEGS        DEC             .11389
+
+## Page 556
 # PROGRAM NAME_  BEGDES
 
 # FUNCTIONAL DESCRIPTION_
@@ -2210,44 +2211,44 @@ BEGDES          CS              RADMODES
                 TC              STDESIG
                 TC              REMODE
 DESLOOP         TC              FIXDELAY                # 2 SAMPLES PER SECOND.
-                DEC             50              
-                        
-STDESIG         CAF             BIT11                
+                DEC             50
+
+STDESIG         CAF             BIT11
                 MASK            RADMODES                # SEE IF GIMBAL LIMIT MONITOR HAS FOUND US
                 CCS             A                       # OUT OF BOUNDS. IF SO, THIS BIT SHOWS A
                 TCF             BADDES                  # REPOSITION TO BE IN PROGRESS.
-                        
+
                 CCS             RADMODES                # SEE IF CONTINUOUS DESIGNATE WANTED.
                 TCF             +3                      # IF SO, DONT CHECK BIT 10 TO SEE IF IN
                 TCF             +2                      # LIMITS BUT GO RIGHT TO FINDVAC ENTRY.
-                TCF             MOREDES         +1              
-                        
+                TCF             MOREDES         +1
+
                 CS              RADMODES                # IF NON-CONTINUOUS, SEE IF END OF
                 MASK            BIT10                   # PROBLEM (DATA GOOD IF LOCK-ON WANTED OR
                 CCS             A                       # WITHIN LIMITS IF NOT). IF SO, EXIT AFTER
                 TCF             ENDRADAR                # CHECKING RR CDU FAIL.
-                        
+
 STDESIG1        CCS             DESCOUNT                # SEE IF THE TIME LIMIT HAS EXPIRED
-                TCF             MOREDES         
-                        
+                TCF             MOREDES
+
                 CS              B14+B2                  # IF OUT OF TIME, REMOVE ECR ENABLE + TRKR
-                EXTEND                  
-                WAND            CHAN12          
+                EXTEND
+                WAND            CHAN12
 BADDES          CS              BIT10                   # REMOVE DESIGNATE FLAG.
-                MASK            RADMODES                
-                TS              RADMODES                
-                TCF             RDBADEND                
-                        
-MOREDES         TS              DESCOUNT                
+                MASK            RADMODES
+                TS              RADMODES
+                TCF             RDBADEND
+
+MOREDES         TS              DESCOUNT
                 CAF             PRIO26                  # UPDATE GYRO TORQUE COMMANDS.
-                TC              FINDVAC         
-                EBANK=          LOSCOUNT                
+                TC              FINDVAC
+                EBANK=          LOSCOUNT
                 2CADR           DODES
-        
+
                 TCF             DESLOOP
-        
+
 B14+B2          OCT             20002
-        
+
 ## Page 558
 # PROGRAM NAME_  DODES
 
@@ -2260,10 +2261,10 @@ B14+B2          OCT             20002
 # + SHAFT = LOS  . (COS(S), 0, -SIN (S)) (DOT PRODUCT)
 # -TRUNNION = LOS  . (SIN (T) SIN (S), COS (T), SIN (T) COS (S) )
 # THE SIGN OF THE SHAFT COMMAND IS THEN REVERSED IF IN MODE 2
-# (RADMODES BIT 12) BECAUSE A RELAY IN THE RR REVERSES THE 
+# (RADMODES BIT 12) BECAUSE A RELAY IN THE RR REVERSES THE
 # POLARITY OF THE COMMAND. AT RRSCALUP EACH COMMAND IS
 # SCALED AND IF EITHER, OR BOTH, OF THE COMMANDS IS GREATER THAN
-# .5 DEGREES, MPAC +1 IS SET POSITIVE. IF A CONTINUOUS DESIGNATE 
+# .5 DEGREES, MPAC +1 IS SET POSITIVE. IF A CONTINUOUS DESIGNATE
 # (RADMODES BIT 15) IS DESIRED AND THE SEARCH ROUTINE IS NOT OPERATING,
 # THE RR AUTO TRACKER ENABLE BIT (CHAN 12 BIT 14) IS CLEARED AND RROUT
 # CALLED TO PUT OUT THE COMMANDS PROVIDED NO REPOSITION (RADMODES BIT 11)
@@ -2311,9 +2312,9 @@ B14+B2          OCT             20002
 DODES           EXTEND
                 DCA             CDUT
                 DXCH            TANG
-        
+
                 TC              INTPRET
-        
+
                 SETPD           VLOAD
                                 0
                                 RRTARGET
@@ -2321,53 +2322,53 @@ DODES           EXTEND
                                 RRNBSW
                                 DONBRD                  # TARGET IN NAV-BASE COORDINATES
                                 MLOSV                   # MULTIPLY UNIT LOS BY MAGNITUDE
-                VSL1            PDVL    
-                                LOSVEL  
+                VSL1            PDVL
+                                LOSVEL
                 VXSC            VAD                     # ADD ONE SECOND RELATIVE VELOCITY TO LOS
-                                MCTOMS  
-                UNIT            CALL    
-                                CDUTRIG 
-                CALL            
-                                *SMNB*  
-                
-DONBRD          STODL           32D     
-                                TANG            +1 
+                                MCTOMS
+                UNIT            CALL
+                                CDUTRIG
+                CALL
+                                *SMNB*
+
+DONBRD          STODL           32D
+                                TANG            +1
                 RTB             PUSH                    # SHAFT COMMAND = V(32D).(COS(S), 0,
                                 CDULOGIC                #      (-SIN(S)).
                 SIN             PDDL                    # SIN(S) TO 0 AND COS(S) TO 2.
-                COS             PUSH    
-                DMP             PDDL    
-                                32D     
-                                36D     
-                DMP             BDSU    
-                                0       
-                STADR           
+                COS             PUSH
+                DMP             PDDL
+                                32D
+                                36D
+                DMP             BDSU
+                                0
+                STADR
                 STORE           TANG            +1      # SHAFT COMMAND
-                
-                SLOAD           RTB     
-                                TANG    
-                                CDULOGIC        
+
+                SLOAD           RTB
+                                TANG
+                                CDULOGIC
                 PUSH            COS                     # COS(T) TO 4.
-                PDDL            SIN     
+                PDDL            SIN
                 PUSH            DMP                     # SIN(T) TO 6.
-                                2       
-                                
-## Page 560             
+                                2
+
+## Page 560
                 SL1             PDDL                    # DEFINE VECTOR U = (SIN(T)SIN(S))
                                 4                       #                   (COS(T)      )
                 PDDL            DMP                     #                   (SIN(T)COS(S))
-                                6       
-                                0       
-                SL1             VDEF    
+                                6
+                                0
+                SL1             VDEF
                 DOT             EXIT                    # DOT U WITH LOS TO GET TRUNNION COMMAND.
-                                32D     
-        
+                                32D
+
 ## Page 561
 #          AT THIS POINT WE HAVE A ROTATION VECTOR IN DISH AXES LYING IN THE TS PLANE. CONVERT THIS TO A
 # COMMANDED RATE AND ENABLE THE TRACKER IF WE ARE WITHIN .5 DEGREES OF THE TARGET.
 
                 CS              MPAC                    # DOT WAS NEGATIVE OF DESIRED ANGLE.
-                EXTEND          
+                EXTEND
                 MP              RDESGAIN                # SCALING ON INPUT ANGLE WAS 4 RADIANS.
                 TS              TANG                    # TRUNNION COMMAND.
                 CS              RADMODES                # A RELAY IN THE RR REVERSES POLARITY OF
@@ -2376,143 +2377,143 @@ DONBRD          STODL           32D
                 BZF             +3                      # GYRO CAUSES A POSITIVE CHANGE IN THE
                 CA              TANG            +1      # SHAFT ANGLE. COMPENSATE FOR THIS SWITCH
                 TCF             +2                      # BY CHANGING THE POLARITY OF OUR COMMAND.
-        +3      CS              TANG            +1 
-                EXTEND          
+        +3      CS              TANG            +1
+                EXTEND
                 MP              RDESGAIN                # SCALING ON INPUT ANGLE WAS 4 RADIANS.
                 TS              TANG            +1      # SHAFT COMMAND.
-                TC              INTPRET 
-                
-                DLOAD           DMP     
+                TC              INTPRET
+
+                DLOAD           DMP
                                 2                       # COS(S).
                                 4                       # COS(T).
                 SL1             PDDL                    # Z COMPONENT OF URR.
                 DCOMP           PDDL                    # Y COMPONENT = -SIN(T).
                                 0                       # SIN(S).
-                DMP             SL1     
+                DMP             SL1
                                 4                       # COS(T).
                 VDEF            BON                     # FORM URR IN NB AXES.
                                 RRNBSW                  # BYPASS NBSM CONVERSION IN VERB 41.
-                                +3      
-                CALL            
+                                +3
+                CALL
                                 *NBSM*                  # GET URR IN SM AXES.
-                DOT             EXIT    
+                DOT             EXIT
                                 RRTARGET                # GET COSINE OF ANGLE BETWEEN RR AND LOS.
-                
-                EXTEND          
-                DCS             COS1/2DG        
+
+                EXTEND
+                DCS             COS1/2DG
                 DAS             MPAC                    # DIFFERENCE OF COSINES, SCALED B-2.
-                CCS             MPAC    
+                CCS             MPAC
                 CA              ZERO                    # IF COS ERROR BIGGER, ERROR IS SMALLER.
-                TCF             +2      
-                CA              ONE     
+                TCF             +2
+                CA              ONE
                 TS              MPAC            +1      # ZERO IF RR IS POINTED OK, ONE IF NOT.
-                
-## Page 562             
+
+## Page 562
 #          SEE IF TRACKER SHOULD BE ENABLED OR DISABLED.
 
                 CCS             RADMODES                # IF CONTINUOUS DESIGNATE WANTED, PUT OUT
                 TCF             SIGNLCHK                # COMMANDS WITHOUT CHECKING MAGNITUDE OF
                 TCF             SIGNLCHK                # ERROR SIGNALS
-                TCF             DORROUT 
+                TCF             DORROUT
 SIGNLCHK        CCS             MPAC            +1      # SEE IF BOTH AXES WERE WITHIN .5 DEGS.
-                TCF             DGOODCHK        
+                TCF             DGOODCHK
                 CS              STATE                   # IF WITHIN LIMITS AND NO LOCK-ON WANTED,
                 MASK            LOKONBIT                # PROBLEM IS FINISHED.
-                CCS             A       
-                TCF             RRDESDUN        
-                
+                CCS             A
+                TCF             RRDESDUN
+
                 CAF             BIT14                   # ENABLE THE TRACKER.
-                EXTEND          
-                WOR             CHAN12  
-                
+                EXTEND
+                WOR             CHAN12
+
 DGOODCHK        CAF             BIT4                    # SEE IF DATA GOOD RECEIVED YET
-                EXTEND          
-                RAND            CHAN33  
-                CCS             A       
-                TCF             DORROUT 
-                
+                EXTEND
+                RAND            CHAN33
+                CCS             A
+                TCF             DORROUT
+
 RRDESDUN        CS              BIT10                   # WHEN PROBLEM DONE, REMOVE BIT 10 SO NEXT
                 MASK            RADMODES                # WAITLIST TASK WE WILL GO TO RGOODEND.
-                INHINT          
-                TS              RADMODES        
-                
+                INHINT
+                TS              RADMODES
+
                 TC              DOWNFLAG                # RESET LOSCMFLG TO PREVENT A
                 ADRES           LOSCMFLG                # RECOMPUTATION OF LOS AFTER DATA GOOD
                 CS              BIT2                    # TURN OFF ENABLE RR ERROR COUNTER
-                EXTEND          
-                WAND            CHAN12  
+                EXTEND
+                WAND            CHAN12
                 TCF             ENDOFJOB                # WITH ECTR DISABLED.
-                
+
 DORROUT         CA              FLAGWRD2                # IF NOT IN P20/P22 BUT V41,DON'T DO
                 MASK            RNDVZBIT                # VELOCITY CORRECTION
-                EXTEND          
-                BZF             NOTP20  
-                TC              INTPRET 
+                EXTEND
+                BZF             NOTP20
+                TC              INTPRET
                 VLOAD           VXSC                    # MULTIPLY UNIT LOS BY MAGNITUDE
-                                RRTARGET        
-                                MLOSV   
-                VSL1            PUSH    
+                                RRTARGET
+                                MLOSV
+                VSL1            PUSH
                 VLOAD           VXSC                    # ADD .5 SEC. OF VELOCITY
                                 LOSVEL                  # TO LOS VECTOR
-                                MCTOMS  
-                VSR1            VAD     
-                UNIT            
+                                MCTOMS
+                VSR1            VAD
+                UNIT
                 STODL           RRTARGET                # STORE VELOCITY-CORRECTED LOS (UNIT)
-                
+
 ## Page 563
-                                36D     
+                                36D
                 STORE           MLOSV                   # AND STORE MAGNITUDE
-                EXIT            
-NOTP20          INHINT          
+                EXIT
+NOTP20          INHINT
                 CS              RADMODES                # PUT OUT COMMAND UNLESS MONITOR
                 MASK            BIT11                   # REPOSITION HAS TAKEN OVER.
-                CCS             A       
-                TC              RROUT   
-                
-                CA              FLAGWRD2        
+                CCS             A
+                TC              RROUT
+
+                CA              FLAGWRD2
                 MASK            LOSCMBIT                # IF LOSCMFLG NOT SET, DON'T TEST
                 EXTEND                                  # LOS COUNTER
-                BZF             ENDOFJOB        
+                BZF             ENDOFJOB
                 CCS             LOSCOUNT                # TEST LOS COUNTER TO SEE IF TIME TO GET
                 TC              DODESEND                # A NEW LOS
-                INHINT          
+                INHINT
                 TC              KILLTASK                # YES - KILL TASK WHICH SCHEDULES DODES
-                CADR            DESLOOP         +2      
-                RELINT          
-                CCS             NEWJOB  
-                TC              CHANG1  
-                TC              BANKCALL        
-                CADR            R21LEM2 
-                
-                
-DODESEND        TS              LOSCOUNT        
-                TC              ENDOFJOB        
-                
-                
+                CADR            DESLOOP         +2
+                RELINT
+                CCS             NEWJOB
+                TC              CHANG1
+                TC              BANKCALL
+                CADR            R21LEM2
+
+
+DODESEND        TS              LOSCOUNT
+                TC              ENDOFJOB
+
+
 RDESGAIN        DEC             .53624                  # TRIES TO NULL .5 ERROR IN .5 SEC.
 COS1/2DG        2DEC            .999961923      B-2     # COSINE OF 0.5 DEGREES.
-MCTOMS          2DEC            100             B-13        
-                
+MCTOMS          2DEC            100             B-13
+
 ## Page 564
 # RADAR READ INITIALIZATION
- 
+
 # RADAR DATA ARE READ BY A BANKCALL FOR THE APPROPRIATE LEAD-IN BELOW.
 
 LRALT           TC              INITREAD         -1     # ONE SAMPLE PER READING.
 ALLREAD         OCT             17
-        
+
 LRVELZ          TC              INITREAD
                 OCT             16
-        
+
 LRVELY          TC              INITREAD
                 OCT             15
-        
+
 LRVELX          TC              INITREAD
                 OCT             14
-        
+
 RRRDOT          TC              INITREAD        -1
                 OCT             12
-        
+
 RRRANGE         TC              INITREAD        -1
                 OCT             11
 
@@ -2521,229 +2522,229 @@ RRRANGE         TC              INITREAD        -1
 
 LRVEL           TS              TIMEHOLD                # STORE VBEAM INDEX HERE MOMEMTARILY
                 CAF             FIVE                    # SPECIFY FIVE SAMPLES
-                INDEX           TIMEHOLD        
-                TCF             LRVELZ  
-                
-## Page 565             
+                INDEX           TIMEHOLD
+                TCF             LRVELZ
+
+## Page 565
  -1             CAF             ONE                     # ENTRY TO TAKE ONLY 1 SAMPLE.
-INITREAD        INHINT          
-                
+INITREAD        INHINT
+
                 TS              TIMEHOLD                # GET DT OF MIDPOINT OF NOMINAL SAMPLING
                 EXTEND                                  # INTERVAL (ASSUMES NO BAD SAMPLES WILL BE
                 MP              BIT3                    # ENCOUNTERED).
                 DXCH            TIMEHOLD
-        
+
                 CCS             A
                 TS              NSAMP
                 AD              ONE
 #          INSERT FOLLOWING INSTRUCTION TO GET 2N TRIES FOR N SAMPLES.
 #                                                  DOUBLE
                 TS              SAMPLIM
-        
+
                 CAF             DGBITS                  # READ CURRENT VALUE OF DATA GOOD BITS.
-                EXTEND                  
-                RAND            CHAN33          
-                TS              OLDATAGD                
-                        
-                CS              ALLREAD         
-                EXTEND                  
+                EXTEND
+                RAND            CHAN33
+                TS              OLDATAGD
+
+                CS              ALLREAD
+                EXTEND
                 WAND            CHAN13                  # REMOVE ALL RADAR BITS
-                        
-                INDEX           Q               
-                CAF             0               
-                EXTEND                  
+
+                INDEX           Q
+                CAF             0
+                EXTEND
                 WOR             CHAN13                  # SET NEW RADAR BITS
-                        
-                EXTEND                  
-                DCA             TIME2           
+
+                EXTEND
+                DCA             TIME2
                 DAS             TIMEHOLD                # TIME OF NOMINAL MIDPOINT.
-                        
+
                 CAF             ZERO
                 TS              L
                 DXCH            SAMPLSUM
                 TCF             ROADBACK
-        
+
 DGBITS          OCT             230
-        
+
 ## Page 566
 # RADAR RUPT READER
- 
+
 # THIS ROUTINE STARTS FROM A RADARUPT. IT READS THE DATA $ LOTS MORE.
 
                 SETLOC          RADARUPT
-                BANK    
-        
+                BANK
+
                 COUNT*          $$/RRUPT
 RADAREAD        EXTEND                                  # MUST SAVE SBANK BECAUSE OF RUPT EXITS
                 ROR             SUPERBNK                # VIA TASKOVER (BADEND OR GOODEND.
-                TS              BANKRUPT        
-                EXTEND          
-                QXCH            QRUPT   
-                
-                CAF             SEVEN   
-                EXTEND          
-                RAND            CHAN13  
-                TS              DNINDEX 
+                TS              BANKRUPT
+                EXTEND
+                QXCH            QRUPT
+
+                CAF             SEVEN
+                EXTEND
+                RAND            CHAN13
+                TS              DNINDEX
                 EXTEND                                  # IF RADAR SELECT BITS ZERO,DO NOT STORE
                 BZF             TRYCOUNT                # DATA FOR DOWNLIST (ERASABLE PROBLEMS)
-                CA              RNRAD   
-                INDEX           DNINDEX 
-                TS              DNRRANGE        -1     
-TRYCOUNT        CCS             SAMPLIM 
-                TCF             PLENTY  
-                TCF             NOMORE  
-                TC              ALARM   
-                OCT             520     
-                TC              RESUME  
-                
+                CA              RNRAD
+                INDEX           DNINDEX
+                TS              DNRRANGE        -1
+TRYCOUNT        CCS             SAMPLIM
+                TCF             PLENTY
+                TCF             NOMORE
+                TC              ALARM
+                OCT             520
+                TC              RESUME
+
 NOMORE          CA              FLGWRD11                # IS LRBYPASS SET?
-                MASK            LRBYBIT 
-                EXTEND          
+                MASK            LRBYBIT
+                EXTEND
                 BZF             BADRAD                  # NO.  R12 IS ON -- BYPASS 521 ALARM.
-                
+
                 CS              FLAGWRD3                # CHECK R04FLAG.
                 MASK            R04FLBIT                # IF 1,R04 IS RUNNING. DO NOT ALARM-
-                EXTEND          
-                BZF             BADRAD  
-                
+                EXTEND
+                BZF             BADRAD
+
                 TC              ALARM                   # P20 WANTS THE ALARM.
-                OCT             521     
-BADRAD          CS              ONE     
-                TS              SAMPLIM 
-                TC              RDBADEND        -2     
-PLENTY          TS              SAMPLIM 
-                CAF             BIT3    
-                EXTEND          
+                OCT             521
+BADRAD          CS              ONE
+                TS              SAMPLIM
+                TC              RDBADEND        -2
+PLENTY          TS              SAMPLIM
+                CAF             BIT3
+                EXTEND
                 RAND            CHAN13                  # TO FIND OUT WHICH RADAR
-                EXTEND          
-                
-## Page 567             
-                BZF             RENDRAD 
-                
+                EXTEND
+
+## Page 567
+                BZF             RENDRAD
+
                 TC              R77CHECK                # R77 QUITS HERE.
 LRPOSCHK        CA              RADMODES                # SEE IF LR IN DESIRED POSITION.
-                EXTEND          
-                RXOR            CHAN33  
-                MASK            BIT6    
-                EXTEND          
-                BZF             VELCHK  
-                
-                TC              ALARM   
-                OCT             522     
-                TC              BADRAD  
-                
+                EXTEND
+                RXOR            CHAN33
+                MASK            BIT6
+                EXTEND
+                BZF             VELCHK
+
+                TC              ALARM
+                OCT             522
+                TC              BADRAD
+
 VELCHK          CAF             BIN3                    # = 00003 OCT
-                EXTEND          
+                EXTEND
                 RXOR            CHAN13                  # RESET ACTIVITY BIT
-                MASK            BIN3    
-                EXTEND          
+                MASK            BIN3
+                EXTEND
                 BZF             LRHEIGHT                # TAKE A LR RANGE READING
-                
-                CAF             POSMAX  
-                MASK            RNRAD   
-                AD              LVELBIAS        
-                TS              L       
-                CAE             RNRAD   
-                DOUBLE          
-                MASK            BIT1    
-                DXCH            ITEMP3  
-                
+
+                CAF             POSMAX
+                MASK            RNRAD
+                AD              LVELBIAS
+                TS              L
+                CAE             RNRAD
+                DOUBLE
+                MASK            BIT1
+                DXCH            ITEMP3
+
                 CAF             BIT8                    # DATA GOOD ISNT CHECKED UNTIL AFTER READ-
                 TC              DGCHECK                 # ING DATA SO SOME RADAR TESTS WILL WORK
                                                         # INDEPENDENT OF DATA GOOD.
-                
-                CCS             NSAMP   
-                TC              NOEND   
-GOODRAD         CS              ONE     
-                TS              SAMPLIM 
+
+                CCS             NSAMP
+                TC              NOEND
+GOODRAD         CS              ONE
+                TS              SAMPLIM
                 CS              ITEMP1                  # WHEN ENOUGH GOOD DATA HAS BEEN GATHERED,
                 MASK            RADMODES                # RESET DATA FAIL FLAGS FOR SETTRKF.
-                TS              RADMODES        
+                TS              RADMODES
                 TC              RADLITES                # LAMPS MAY GO OFF IF DATA JUST GOOD.
-                TC              RGOODEND        -2     
-                
-NOEND           TS              NSAMP   
+                TC              RGOODEND        -2
+
+NOEND           TS              NSAMP
 RESAMPLE        CCS             SAMPLIM                 # SEE IF ANY MORE TRIES SHOULD BE MADE.
-                TCF             +2      
+                TCF             +2
                 TCF             DATAFAIL                # N SAMPLES NOT AVAILABLE.
                 CAF             BIT4                    # RESET ACTIVITY BIT.
-                EXTEND          
-                
-## Page 568             
+                EXTEND
+
+## Page 568
                 WOR             CHAN13                  # RESET ACTIVITY BIT
-                TC              RESUME  
-                
-                
-LRHEIGHT        CAF             BIT5    
+                TC              RESUME
+
+
+LRHEIGHT        CAF             BIT5
                 TS              ITEMP1                  # (POSITION OF DATA GOOD BIT IN CHAN 33)
-                
-                CAF             BIT9    
-                TC              SCALECHK        -1     
-                
+
+                CAF             BIT9
+                TC              SCALECHK        -1
+
 RENDRAD         CAF             BIT11                   # MAKE SURE ANTENNA HAS NOT GONE OUT OF
                 MASK            RADMODES                # LIMITS.
-                CCS             A       
-                TCF             BADRAD  
-                
+                CCS             A
+                TCF             BADRAD
+
                 CS              RADMODES                # BE SURE RR CDU HASNT FAILED.
-                MASK            BIT7        
-                CCS             A       
-                TCF             BADRAD  
-                
+                MASK            BIT7
+                CCS             A
+                TCF             BADRAD
+
                 CAF             BIT4                    # SEE IF DATA HAS BEEN GOOD.
                 TS              ITEMP1                  # (POSITION OF DATA GOOD BIT IN CHAN 33)
-                
+
                 CAF             BIT1                    # SEE IF RR RDOT.
-                EXTEND          
-                RAND            CHAN13  
+                EXTEND
+                RAND            CHAN13
                 TS              Q                       # FOR LATER TESTING.
-                CCS             A       
-                TCF             +2      
+                CCS             A
+                TCF             +2
                 TCF             RADIN                   # NO SCALE CHECK FOR RR RDOT.
-                CAF             BIT3    
-                TS              L       
-                
-SCALECHK        EXTEND          
+                CAF             BIT3
+                TS              L
+
+SCALECHK        EXTEND
                 RAND            CHAN33                  # SCALE STATUS NOW
-                XCH             L       
+                XCH             L
                 MASK            RADMODES                # SCALE STATUS BEFORE
-                EXTEND          
+                EXTEND
                 RXOR            LCHAN                   # SEE IF THEY DIFFER
-                CCS             A       
+                CCS             A
                 TC              SCALCHNG                # THEY DIFFER
-                
-RADIN           CAF             POSMAX  
-                MASK            RNRAD   
-                TS              ITEMP4  
-                
-                CAE             RNRAD   
-                DOUBLE          
-                MASK            BIT1    
-                TS              ITEMP3  
-                
-## Page 569             
+
+RADIN           CAF             POSMAX
+                MASK            RNRAD
+                TS              ITEMP4
+
+                CAE             RNRAD
+                DOUBLE
+                MASK            BIT1
+                TS              ITEMP3
+
+## Page 569
                 CCS             Q                       # SEE IF RR RDOT.
                 TCF             SCALADJ                 # NO, BUT SCALE CHANGING MAY BE NEEDED.
-                
+
                 EXTEND                                  # IF RR RANGE RATE, THROW OUT BIAS.
-                DCS             RDOTBIAS        
-DASAMPL         DAS             ITEMP3  
+                DCS             RDOTBIAS
+DASAMPL         DAS             ITEMP3
 DGCHECK2        CA              ITEMP1                  # SEE THAT DATA HAS BEEN GOOD BEFORE AND
                 TC              DGCHECK         +1      # AFTER TAKING SAMPLE.
-                TC              GOODRAD 
-                
-SCALCHNG        LXCH            RADMODES        
-                AD              BIT1    
-                EXTEND          
-                RXOR            LCHAN   
-                TS              RADMODES        
+                TC              GOODRAD
+
+SCALCHNG        LXCH            RADMODES
+                AD              BIT1
+                EXTEND
+                RXOR            LCHAN
+                TS              RADMODES
                 CAF             DGBITS                  # UPDATE LAST VALUE OF DATA GOOD BITS.
-                EXTEND          
-                RAND            CHAN33  
-                TS              OLDATAGD        
+                EXTEND
+                RAND            CHAN33
+                TS              OLDATAGD
                 TC              UPFLAG                  # SET RNGSCFLG
                 ADRES           RNGSCFLG                # FOR LRS24.1
-                TCF             BADRAD  
+                TCF             BADRAD
 
 # R77 MUST IGNORE DATA FAILS SO AS NOT TO DISTURB THE ASTRONAUT.
 
@@ -2755,7 +2756,7 @@ R77CHECK        CS              FLAGWRD5
                 MASK            RADMODES
                 TS              L
                 CA              BITS5,8
-                EXTEND  
+                EXTEND
                 RAND            CHAN33
                 AD              L
                 TS              RADMODES
@@ -2767,46 +2768,46 @@ BITS5,8         OCT             220
 
 SCALADJ         CCS             L                       # L HAS SCALE INBIT FOR THIS RADAR.
                 TCF             +2                      # ON HIGH SCALE.
-                TCF             DGCHECK2        
-                        
-                CA              DNINDEX 
-                MASK            BIT3    
-                CCS             A       
-                TCF             LRSCK   
-                        
-                DXCH            ITEMP3  
-                DDOUBL                  
-                DDOUBL                  
-                DDOUBL                  
-                DXCH            ITEMP3  
-                        
-                TCF             DGCHECK2        
-                        
-LRSCK           CCS             ITEMP3  
-                TCF             +11     
-                CS              ITEMP4  
-                AD              HISCALIM        
-                EXTEND                  
-                BZMF            +5      
-                        
-                CS              FLGWRD11        
-                MASK            SCABBIT 
-                ADS             FLGWRD11        
-                TCF             +4      
-                        
-                CS              SCABBIT 
-                MASK            FLGWRD11        
-                TS              FLGWRD11        
-                        
-                EXTEND                  
-                DCA             ITEMP3  
-                DDOUBL                  
-                DDOUBL                  
-                TCF             DASAMPL 
-                        
+                TCF             DGCHECK2
+
+                CA              DNINDEX
+                MASK            BIT3
+                CCS             A
+                TCF             LRSCK
+
+                DXCH            ITEMP3
+                DDOUBL
+                DDOUBL
+                DDOUBL
+                DXCH            ITEMP3
+
+                TCF             DGCHECK2
+
+LRSCK           CCS             ITEMP3
+                TCF             +11
+                CS              ITEMP4
+                AD              HISCALIM
+                EXTEND
+                BZMF            +5
+
+                CS              FLGWRD11
+                MASK            SCABBIT
+                ADS             FLGWRD11
+                TCF             +4
+
+                CS              SCABBIT
+                MASK            FLGWRD11
+                TS              FLGWRD11
+
+                EXTEND
+                DCA             ITEMP3
+                DDOUBL
+                DDOUBL
+                TCF             DASAMPL
+
 HISCALIM        DEC             460                     # 2481.7 FT  *****************************
 
-## Page 571                     
+## Page 571
 DGCHECK         TS              ITEMP1                  # UPDATE DATA GOOD BIT IN OLDATAGD AND
                 EXTEND                                  # MAKE SURE IT WAS ON BEFORE AND AFTER THE
                 RAND            CHAN33                  # SAMPLE WAS TAKEN BEFORE RETURNING. IF
@@ -2816,114 +2817,114 @@ DGCHECK         TS              ITEMP1                  # UPDATE DATA GOOD BIT I
                 AD              L                       # WHICH FAILED TO APPEAR IS IN ITEMP1 AND
                 XCH             OLDATAGD                # CAN BE USED TO SET RADMODES WHICH VIA
                 MASK            ITEMP1                  # SETTRKF SETS THE TRACKER FAIL LAMP.
-                AD              L       
+                AD              L
                 CCS             A                       # SHOULD BOTH BE ZERO.
-                TC              RESAMPLE        
+                TC              RESAMPLE
                 DXCH            ITEMP3                  # IF DATA GOOD BEFORE AND AFTER, ADD TO
                 DAS             SAMPLSUM                # ACCUMULATION.
-                TC              Q       
-                        
+                TC              Q
+
 DATAFAIL        CS              ITEMP1                  # IN THE ABOVE CASE, SET RADMODES BIT
                 MASK            RADMODES                # SHOWING SOME RADAR DATA FAILED.
-                AD              ITEMP1  
-                TS              RADMODES        
-                        
+                AD              ITEMP1
+                TS              RADMODES
+
                 DXCH            ITEMP3                  # IF WE HAVE BEEN UNABLE TO GATHER N
                 DXCH            SAMPLSUM                # SAMPLES, USE LAST ONE ONLY.
                 TC              RADLITES
                 TCF             NOMORE
-                
-## Page 572             
+
+## Page 572
 # THIS ROUTINE CHANGES THE LR POSITION, AND CHECKS THAT IT GOT THERE.
 
                 SETLOC          P20S1
-                BANK    
-        
+                BANK
+
                 COUNT*          $$/RSUB
-LRPOS2          INHINT  
-        
+LRPOS2          INHINT
+
                 CS              RADMODES
                 MASK            BIT6                    # SHOW DESIRED LR POSITION IS 2
-                ADS             RADMODES        
-                
-                CAF             BIT7    
-                EXTEND          
+                ADS             RADMODES
+
+                CAF             BIT7
+                EXTEND
                 RAND            CHAN33                  # SEE IF ALREADY THERE.
-                EXTEND          
-                BZF             RADNOOP 
-                
-                CAF             BIT13   
-                EXTEND          
+                EXTEND
+                BZF             RADNOOP
+
+                CAF             BIT13
+                EXTEND
                 WOR             CHAN12                  # COMMAND TO POSITION 2
                 CAF             6SECS                   # START SCANNING FOR INBIT AFTER 7 SECS.
-                TC              WAITLIST        
-                EBANK=          LOSCOUNT        
-                2CADR           LRPOSCAN        
-                
-                TC              ROADBACK        
-                
-LRPOSNXT        TS              SAMPLIM 
+                TC              WAITLIST
+                EBANK=          LOSCOUNT
+                2CADR           LRPOSCAN
+
+                TC              ROADBACK
+
+LRPOSNXT        TS              SAMPLIM
                 TC              FIXDELAY                # SCAN ONCE PER SECOND 15 TIMES MAX AFTER
                 DEC             100                     # INITIAL DELAY OF 7 SECONDS.
-                
+
                 CAF             BIT7                    # SEE IF LR POS2 IS ON
-                EXTEND          
-                RAND            CHAN33  
-                EXTEND          
+                EXTEND
+                RAND            CHAN33
+                EXTEND
                 BZF             LASTLRDT                # IF THERE, WAIT FINAL SECOND FOR BOUNCE.
-                
+
                 CCS             SAMPLIM                 # SEE IF MAX TIME UP.
-                TCF             LRPOSNXT        
-                
+                TCF             LRPOSNXT
+
                 CS              BIT13                   # IF TIME UP, DISABLE COMMAND AND ALARM.
-                EXTEND          
-                WAND            CHAN12  
-                TCF             RDBADEND        
-                
+                EXTEND
+                WAND            CHAN12
+                TCF             RDBADEND
+
 RADNOOP         CAF             ONE                     # NO FURTHER ACTION REQUESTED.
-                TC              WAITLIST        
-                EBANK=          LOSCOUNT        
-                2CADR           RGOODEND   
-                
-## Page 573             
-                TC              ROADBACK        
-                
+                TC              WAITLIST
+                EBANK=          LOSCOUNT
+                2CADR           RGOODEND
+
+## Page 573
+                TC              ROADBACK
+
 LASTLRDT        CA              2SECS                   # WAIT TWO SECONDS AFTER RECEIPT OF INBIT
                 TC              VARDELAY                # TO WAIT FOR ANTENNA BOUNCE TO DIE OUT.
-                
-                CS              BIT13                   # REMOVE COMMAND
-                EXTEND          
-                WAND            CHAN12  
-                TCF             RGOODEND        
-                
-LRPOSCAN        CAF             FOURTEEN                # SET UP FOR 15 SAMPLES.
-                TCF             LRPOSNXT     
-                
-6SECS           DEC             600     
 
-## Page 574     
+                CS              BIT13                   # REMOVE COMMAND
+                EXTEND
+                WAND            CHAN12
+                TCF             RGOODEND
+
+LRPOSCAN        CAF             FOURTEEN                # SET UP FOR 15 SAMPLES.
+                TCF             LRPOSNXT
+
+6SECS           DEC             600
+
+## Page 574
 #          SEQUENCES TO TERMINATE RR OPERATIONS.
 
 ENDRADAR        CAF             BIT7                    # PROLOG TO CHECK RR CDU FAIL BEFORE END.
-                MASK            RADMODES        
-                CCS             A       
-                TCF             RGOODEND        
-                TCF             RDBADEND        
+                MASK            RADMODES
+                CCS             A
+                TCF             RGOODEND
+                TCF             RDBADEND
  -2             CS              ZERO                    # RGOODEND WHEN NOT UNDER WAITLIST CONTROL
-                TS              RUPTAGN 
-                
-RGOODEND        CAF             TWO     
-                TC              POSTJUMP        
-                CADR            GOODEND 
-                
+                TS              RUPTAGN
+
+RGOODEND        CAF             TWO
+                TC              POSTJUMP
+                CADR            GOODEND
+
  -2             CS              ZERO                    # RDBADEND WHEN NOT UNDER WAITLIST.
-                TS              RUPTAGN 
+                TS              RUPTAGN
 RDBADEND        CAF             TWO
                 TC              POSTJUMP
                 CADR            BADEND
-        
+
 BIN3            EQUALS          THREE
-        
+
 ## Page 575
 # PROGRAM NAME_ LPS20.1 VECTOR EXTRAPOLATION AND LOS COMPUTATION
 # MOD. NO.  2      BY  J.D. COYNE    SDC    DATE   12-7-66
@@ -2972,58 +2973,58 @@ BIN3            EQUALS          THREE
 
                 BANK            23
                 SETLOC          P20S
-                BANK    
-                
-## Page 576     
+                BANK
+
+## Page 576
                 COUNT*          $$/LPS20
-        
+
 LPS20.1         STQ             BOFF
                                 LS21X
                                 LOSCMFLG                # LOSCMFLG = 0 MEANS NOT CALLED BY R21
                                 LMINT                   # SO CALL LEMCONIC TO GET LM STATE
                 BON                                     # IF IN R21 AND ON LUNAR SURFACE
                                 SURFFLAG                # DON'T CALL LEMCONIC
-                                CSMINT  
-LMINT           CALL            
+                                CSMINT
+LMINT           CALL
                                 LEMCONIC                # EXTRAPOLATE LEM
-                VLOAD           
-                                RATT    
+                VLOAD
+                                RATT
                 STOVL           LMPOS                   # SAVE LM POSITION B-29
-                                VATT    
+                                VATT
                 STODL           LMVEL                   # SAVE LM VELOCITY B-7
-                                TAT     
-CSMINT          STCALL          TDEC1   
+                                TAT
+CSMINT          STCALL          TDEC1
                                 CSMCONIC                #  EXTRAPOLATE CSM
                 VLOAD           VSU                     # COMPUTE RELATIVE VELOCITY V(CSM) - V(LM)
-                                VATT    
-                                LMVEL   
-                MXV             VSL1    
-                                REFSMMAT        
-                EXIT            
+                                VATT
+                                LMVEL
+                MXV             VSL1
+                                REFSMMAT
+                EXIT
                 TC              KILLTASK                # KILL THE TASK WHICH CALLS DODES SINCE
                 CADR            DESLOOP         +2      # STORING INTO ERASEABLES DODES USES
-                TC              INTPRET 
-                STOVL           LOSVEL  
-                                RATT    
-                VSU             BOFF    
-                                LMPOS   
-                                RNDVZFLG        
-                                NOTSHIFT        
-                BOVB            
-                                TCDANZIG        
+                TC              INTPRET
+                STOVL           LOSVEL
+                                RATT
+                VSU             BOFF
+                                LMPOS
+                                RNDVZFLG
+                                NOTSHIFT
+                BOVB
+                                TCDANZIG
                 VSL             BOVB
-                                9D      
+                                9D
                                 526ALARM
-NOTSHIFT        UNIT                                   
-                MXV             VSL1    
+NOTSHIFT        UNIT
+                MXV             VSL1
                                 REFSMMAT                # CONVERT TO STABLE MEMBER
-                STODL           RRTARGET        
+                STODL           RRTARGET
                                 36D                     # SAVE MAGNITUDE OF LOS VECTOR FOR
                 STORE           MLOSV                   # VELOCITY CORRECTION IN DESIGNATE
-                CLRGO           
-                                RRNBSW  
+                CLRGO
+                                RRNBSW
                                 LS21X
-        
+
 ## Page 577
 # PROGRAM NAME_ : LPS20.2 400 NM RANGE CHECK
 # MOD. NO. 2   BY J.D. COYNE    SDC    DATE  12-7-66
@@ -3061,13 +3062,13 @@ NOTSHIFT        UNIT
 # MPAC DESTROYED BY THIS ROUTINE
 
                 SETLOC          P20S1
-                BANK    
+                BANK
                 COUNT*          $$/LPS20
-        
+
 LPS20.2         DLOAD           DSU
                                 MLOSV                   # MAGNITUDE OF LOS
                                 FHNM                    # OVER 400NM  _
-                BPL     
+                BPL
                                 TOFAR
                 SLOAD           RVQ
                                 ZERO/SP
@@ -3075,7 +3076,7 @@ TOFAR           SLOAD           RVQ
                                 ONE/SP
 ONE/SP          DEC             1
 
-## Page 578     
+## Page 578
 FHNM            2DEC            740800          B-20    # 400 NAUTICAL MILES IN METERS B-20
 
 ## Page 579
@@ -3141,54 +3142,54 @@ FHNM            2DEC            740800          B-20    # 400 NAUTICAL MILES IN 
 
                 BANK            32
                 SETLOC          LRS22
-                BANK    
+                BANK
                 COUNT*          $$/LRS22
-        
+
 LRS22.1         TC              MAKECADR
                 TS              LRS22.1X
                 TC              DOWNFLAG
                 ADRES           RNGSCFLG
-                INHINT  
+                INHINT
                 CAF             BIT3
                 EXTEND                                  # GET RR RANGE SCALE
                 RAND            CHAN33                  # FROM CHANNEL 33 BIT 3
-                TS              L               
-                CS              BIT3         
-                MASK            RADMODES                
-                AD              L               
-                TS              RADMODES                
-                RELINT                  
-READRDOT        TC              BANKCALL                
+                TS              L
+                CS              BIT3
+                MASK            RADMODES
+                AD              L
+                TS              RADMODES
+                RELINT
+READRDOT        TC              BANKCALL
                 CADR            RRRDOT                  # READ RANGE-RATE (ONE SAMPLE)
-                TC              BANKCALL                
+                TC              BANKCALL
                 CADR            RADSTALL                # WAIT FOR DATA READ COMPLETION
                 TCF             EREXIT1                 # COULD NOT READ RADAR-ERROR EXIT 1
-                        
+
                 INHINT                                  # NO INTERRUPTS WHILE READING TIME AND CDU
                 DXCH            TIMEHOLD                # SET MARK TIME EQUAL TO THE MID-POINT
                 DXCH            MKTIME                  # TEMP BUFFER FOR DOWNLINK
                 DXCH            SAMPLSUM                # SAVE RANGE-RATE READING
-                DXCH            RDOTMSAV                
-                EXTEND                  
+                DXCH            RDOTMSAV
+                EXTEND
                 DCA             CDUY                    # SAVE ICDU ANGLES
-                DXCH            AIG                     
-                CA              CDUX            
-                TS              AOG                     
-                EXTEND                  
+                DXCH            AIG
+                CA              CDUX
+                TS              AOG
+                EXTEND
                 DCA             TIME2                   #  SAVE TIME
                 DXCH            MPAC                    # SAVE TIME OF CDY READINGS IN MPAC
-                EXTEND                  
+                EXTEND
                 DCA             CDUT                    # SAVE TRUNION AND SHAFT ANGLES FOR RRNB
-                DXCH            TANG        
-                
-## Page 581                     
-                RELINT                  
-                TC              BANKCALL                
+                DXCH            TANG
+
+## Page 581
+                RELINT
+                TC              BANKCALL
                 CADR            RRRANGE                 # READ RR RANGE (ONE SAMPLE)
-                TC              BANKCALL                
+                TC              BANKCALL
                 CADR            RADSTALL                # WAIT FOR READ COMPLETE
                 TC              CHEXERR                 # CHECK FOR ERRORS DURING READ
-                TC              INTPRET         
+                TC              INTPRET
                 STODL           20D                     # SAVE TIME OF CDU READINGS IN 20D
                                 RDOTMSAV                # CONVERT RDOT UNITS AND SCALING
                 SL              DMPR                    # START WITH READING SCALED B-28, -.6278
@@ -3197,65 +3198,65 @@ READRDOT        TC              BANKCALL
                 STODL           RDOTM                   # STORE FOR USE BY LSR22.3
                                 TANG
                 STORE           TANGNB
-                SLOAD           RTB             
+                SLOAD           RTB
                                 TANG                    # GET TRUNION ANGLE
                                 CDULOGIC                # CONVERT TO DP ONES COMP. IN REVOLUTIONS
                 STORE           RRTRUN                  # AND SAVE FOR TMI ROUTINE (LSR22.3)
-                SLOAD           RTB             
+                SLOAD           RTB
                                 TANG            +1      # DITTO FOR SHAFT ANGLE
-                                CDULOGIC                
-                STODL           RRSHAFT         
-                                SAMPLSUM                
+                                CDULOGIC
+                STODL           RRSHAFT
+                                SAMPLSUM
                 DMP             SL2R                    # CONVERT UNITS AND SCALING OF RANGE
                                 RANGCONV                # PER BIT, END WITH METERS,SCALED -29
-                STCALL          RM              
+                STCALL          RM
                                 RRNB                    # COMPUTE RADAR LOS USING RRNB
                 STODL           RRBORSIT                # AND SAVE
-                                20D             
+                                20D
                 STCALL          TDEC1                   # GET STATE VECTOR LOS AT TIME OF CDU READ
-                                LPS20.1         
-                EXIT                    
+                                LPS20.1
+                EXIT
                 CA              AIG                     # STORE IMU CDU ANGLES AT MARKTIME
                 TS              CDUSPOT                 # IN CDUSPOT FOR TRG*SMNB
-                CA              AMG             
-                TS              CDUSPOT         +2              
-                CA              AOG             
-                TS              CDUSPOT         +4              
-                TC              INTPRET         
+                CA              AMG
+                TS              CDUSPOT         +2
+                CA              AOG
+                TS              CDUSPOT         +4
+                TC              INTPRET
                 VLOAD           CALL                    # LOAD VECTOR AND CALL TRANSFORMATION
-                                RRTARGET                
+                                RRTARGET
                                 TRG*SMNB                # ROTATE LOS AT MARKTIME FROM SM TO NB.
                 DOT                                     # DOT WITH RADAR LOS TO GET ANGLE
-                                RRBORSIT                
+                                RRBORSIT
                 SL1             ACOS                    # BETWEEN THEM
                 STORE           DSPTEM1                 # STORE FOR POSSIBLE DISPLAY
                 DSU             BMN                     # IS IT LESS THAN 3 DEGREES
-                                THREEDEG                
+                                THREEDEG
                                 NORMEXIT                # YES-NORMAL EXIT
-                                
+
 ## Page 582
-                        
+
                 EXIT                                    # ERROR EXIT 2
                 CAF             BIT2                    # SET ERROR CODE
-                TS              MPAC            
-                TCF             OUT22.1         
-                        
+                TS              MPAC
+                TCF             OUT22.1
+
 NORMEXIT        EXIT                                    # NORMAL EXIT-SET MPAC EQUAL ZERO
-                CAF             ZERO            
-                TS              MPAC            
+                CAF             ZERO
+                TS              MPAC
 OUT22.1         CAE             LRS22.1X                # EXIT FROM LRS22.1
-                TC              BANKJUMP                
-CHEXERR         CAE             FLAGWRD5                
-                MASK            RNGSCBIT                
+                TC              BANKJUMP
+CHEXERR         CAE             FLAGWRD5
+                MASK            RNGSCBIT
                 CCS             A                       # CHECK IF RANGE SCALE CHANGED
                 TCF             READRDOT                # YES-TAKE ANOTHER READING
-                        
+
 EREXIT1         CA              BIT1                    # SET ERROR CODE
-                TS              MPAC            
-                TC              OUT22.1         
+                TS              MPAC
+                TC              OUT22.1
 THREEDEG        2DEC            .008333333              # THREE DEGREES,SCALED  REVS,B0
-RRLOSVEC        EQUALS          RRTARGET                
-        
+RRLOSVEC        EQUALS          RRTARGET
+
 ## Page 583
 # PROGRAM NAME - LRS22.2 (DATA READ SUBROUTINE 2)
 
@@ -3290,7 +3291,7 @@ RRLOSVEC        EQUALS          RRTARGET
 # DEBRIS -  A,L,Q MPAC -PUSHLIST AND PUSHLOC ARE NOT CHANGED BY THIS ROUTINE
 
                 SETLOC          P20S
-                BANK    
+                BANK
 LRS22.2         TC              MAKECADR
                 TS              LRS22.1X
                 TC              INTPRET
@@ -3299,1704 +3300,1751 @@ LRS22.2         TC              MAKECADR
                                 RRBORSIT        +4      # BY TAKING ARCCOS OF Z-COMP. OF THE RR
                                                         # LOS VECTOR,A HALF UNIT VECTOR
                                                         # IN NAV BASE AXES)
-                DSU             BMN             
-                                30DEG           
+                DSU             BMN
+                                30DEG
                                 OKEXIT                  # NORMAL EXIT-WITHIN 30 DEG.
                 EXIT                                    # ERROR EXIT-NOT WITHIN 30 DEG.
                 CAF             BIT1                    # SET ERROR CODE IN MPAC
-                TS              MPAC            
-                TCF             OUT22.2         
+                TS              MPAC
+                TCF             OUT22.2
 OKEXIT          EXIT                                    # NORMAL EXIT-SET MPAC = ZERO
-                        
-## Page 584    
+
+## Page 584
                 CAF             ZERO
                 TS              MPAC
 OUT22.2         CAE             LRS22.1X
                 TC              BANKJUMP
-        
+
 30DEG           2DEC            .083333333              # THIRTY DEGREES,SCALED REVS,B0
 
-## Page 574 XXXXXXX
-# PROGRAM NAME - LSR22.3                                DATE - 29 MAY 1967
-# MOD. NO 3                                             LOG SECTION - P20-25
-# MOD. BY - DANFORTH                                    ASSEMBLY LEMP20S REV 10
-#
+## Page 585
+# PROGRAM NAME - LSR22.3                                                  DATE - 29 MAY 1967
+# MOD. NO 3                                                               LOG SECTION - P20-25
+# MOD. BY - DANFORTH                                                      ASSEMBLY LEMP20S REV 10
+
 # FUNCTIONAL DESCRIPTION
-#       THIS ROUTINE COMPUTES THE B-VECTORS AND DELTA Q FOR EACH OF THE QUANTITIES MEASURED BY THE RENDEZVOUS
-#       RADAR.  (RANGE, RANGE RATE, SHAFT AND TRUNNION ANGLES).  THE ROUTINE CALLS THE INCORP1 AND INCORP2 ROUTINES
-#       WHICH COMPUTE THE DEVIATIONS AND CORRECT THE STATE VECTOR.
-#
+
+# THIS ROUTINE COMPUTES THE B-VECTORS AND DELTA Q FOR EACH OF THE QUANTITIES MEASURED BY THE RENDEZVOUS
+# RADAR.(RANGE,RANGE RATE,SHAFT AND TRUNNION ANGLES). THE ROUTINE CALLS THE INCORP1 AND INCORP2 ROUTINES
+# WHICH COMPUTE THE DEVIATIONS AND CORRECT THE STATE VECTOR.
+
 # CALLING SEQUENCE
-#       THIS ROUTINE IS PART OF P20 RENDEZVOUS NAVIGATION FOR THE LM COMPUTER ONLY.  THE ROUTINE IS ENTERED FROM
-#       R22 LEM ONLY AND RETURNS DIRECTLY TO R22LEM FOLLOWING SUCCESSFUL INCORPORATION OF MEASURED DATA.  IF THE
-#       COMPUTED STATE VECTOR DEVIATIONS EXCEED THE MAXIMUM PERMITTED.  THE ROUTINE RETURNS TO R22LEM TO DISPLAY
-#       THE DEVIATIONS.  IF THE ASTRONAUT ACCEPTS THE DATA R22LEM RETURNS TO LSR22.3 TO INCORPORATE THE
-#       DEVIATIONS INTO THE STATE VECTOR.  IF THE ASTRONAUT REJECTS THE DEVIATIONS, NO MORE MEASUREMENTS ARE
-#       PROCESSED FOR THIS MARK, I.E.,  R22LEM GETS THE NEXT MARK.
+# THIS ROUTINE IS PART OF P20 RENDEZVOUS NAVIGATION FOR THE LM COMPUTER O NLY. THE ROUTINE IS ENTERED FROM
+# R22LEM  ONLY AND RETURNS DIRECTLY TO R22LEM  FOLLOWING SUCCESSFUL INCORPORATION OF MEASURED DATA. IF THE
+# COMPUTED STATE VECTOR DEVIATIONS EXCEED THE MAXIMUM PERMITTED. THE ROUTINE RETURNS TO R22LEM  TO DISPLAY
+# THE DEVIATIONS. IF THE ASTRONAUT ACCEPTS THE DATA R22LEM  RETURNS TO    LSR22.3 TO INCORPORATE THE
+# DEVIATIONS INTO THE STATE VECTOR. IF THE ASTRONAUT REJECTS THE DEVIATIONS, NO MORE MEASUREMENTS ARE
+# PROCESSED FOR THIS MARK,I.E.,R22LEM  GETS THE NEXT MARK.
+
 #
 # SUBROUTINES CALLED
-#       WLINIT          LGCUPDTE        INTEGRV         INCORP1         ARCTAN
-#       GETULC          RARARANG        INCORP2         NBSM            INTSTALL
+#  WLINIT     LGCUPDTE     INTEGRV     INCORP1     ARCTAN
+#  GETULC     RARARANG     INCORP2     NBSM        INTSTALL
 #
 # OUTPUT
-#       CORRECTED LM OR CSM STATE VECTOR (PERMANENT)
-#       NUMBER OF MARKS INCORPORATED IN MARKCTR
-#       MAGNITUDE OF POSITION DEVIATION (FOR DISPLAY) IN R22DISP METERS B-29
-#       MAGNITUDE OF VELOCITY DEVIATION (FOR DISPLAY) IN R22DISP +2 M/CSEC B-7
-#       UPDATED W-MATRIX
+#  CORRECTED LM OR CSM STATE VECTOR (PERMANENT)
+#  NUMBER OF MARKS INCORPORATED IN MARKCTR
+#  MAGNITUDE OF POSITION DEVIATION (FOR DISPLAY) IN R22DISP METERS B-29
+#  MAGNITUDE OF VELOCITY DEVIATION (FOR DISPLAY) IN R22DISP +2 M/CSEC B-7
+#  UPDATED W-MATRIX
 #
-# ERASABLE INITIALIZATION REQUIRED
-#       LM AND CSM STATE VECTORS
-#       W-MATRIX
-#       MARK TIME IN MKTIME
-#       RADAR RANGE IN RM METERS B-29
-#               RANGE RATE IN RDOTM METERS/CSES B-7
-#               SHAFT ANGLE IN RRSHAFT REVS. B0
-#               TRUNNION ANGLE IN RRTRUN REVS. B0
-#       GIMBAL ANGLES   INNER IN AIG
-#                       MIDDLE IN AMG
-#                       OUTER IN ACG
-#       REFSMMAT
-#       RENDWFLG
-#       NOANGFLG
-#       VEHUPFLG
-#
-# DEBRIS
-#       PUSHLIST -- ALL
-#       MX, MY, MZ (VECTORS)
-## Page 575
-#       ULC, RXZ, SINTHETA, LGRET, RDRET, BVECTOR, W.IND, X78T
 
-                BANK    13
-                SETLOC  P20S3
+# ERASABLE INITIALIZATION REQUIRED
+#  LM AND CSM STATE VECTORS
+#  W-MATRIX
+#  MARK TIME IN MKTIME
+#  RADAR RANGE IN RM METERS B-29
+#        RANGE RATE IN RDOTM METERS/CSES B-7
+#        SHAFT ANGLE IN RRSHAFT REVS.B0
+#        TRUNNION ANGLE IN RRTRUN REVS. B0
+#  GIMBAL ANGLES  INNER IN AIG
+#                 MIDDLE IN AMG
+#                 OUTER IN AOG
+#  REFSMMAT
+#  RENDWFLG
+#  NOANGFLG
+#  VEHUPFLG
+
+# DEBRIS
+#  PUSHLIST--ALL
+#  MX, MY, MZ  (VECTORS)
+
+## Page 586
+#  ULC,RXZ,SINTHETA,LGRET,RDRET,BVECTOR,W.IND,X78T
+
+                BANK            13
+                SETLOC          P20S3
                 BANK
 
-                EBANK=  LOSCOUNT
-                COUNT*  $$/LSR22
+                EBANK=          LOSCOUNT
+                COUNT*          $$/LSR22
 LSR22.3         CALL
-                        GRP2PC
-                BON     SET
-                        SURFFLAG        # ARE WE ON LUNAR SURFACE
-                        LSR22.4         # YES
-                        DMENFLG
-                BOFF    CALL
-                        VEHUPFLG
-                        DOLEM
-                        INTSTALL
-                CLEAR   CALL            # LM PRECISION INTEGRATION
-                        VINTFLAG
-                        SETIFLGS
+                                GRP2PC
+                BON             SET
+                                SURFFLAG                # ARE WE ON LUNAR SURFACE
+                                LSR22.4                 # YES
+                                DMENFLG
+                BOFF            CALL
+                                VEHUPFLG
+                                DOLEM
+                                INTSTALL
+                CLEAR           CALL                    # LM PRECISION INTEGRATION
+                                VINTFLAG
+                                SETIFLGS
                 CALL
-                        INTGRCAL
+                                INTGRCAL
                 CALL
-                        GRP2PC
+                                GRP2PC
                 CALL
-                        INTSTALL
-                CLEAR   BOFF
-                        DIM0FLAG
-                        RENDWFLG
-                        NOTWCSM
-                SET     SET             # CSM WITH W-MATRIX INTEGRATION
-                        DIM0FLAG
-                        D6OR9FLG
-NOTWCSM         SET     CLEAR
-                        VINTFLAG
-                        INTYPFLG
-                SET     CALL
-                        STATEFLG
-                        INTGRCAL
+                                INTSTALL
+                CLEAR           BOFF
+                                DIM0FLAG
+                                RENDWFLG
+                                NOTWCSM
+                SET             SET                     # CSM WITH W-MATRIX INTEGRATION
+                                DIM0FLAG
+                                D6OR9FLG
+NOTWCSM         SET             CLEAR
+                                VINTFLAG
+                                INTYPFLG
+                SET             CALL
+                                STATEFLG
+                                INTGRCAL
                 GOTO
-                        MARKTEST
+                                MARKTEST
 DOLEM           CALL
-                        INTSTALL
-                SET     CALL
-                        VINTFLAG
-                        SETIFLGS
+                                INTSTALL
+                SET             CALL
+                                VINTFLAG
+                                SETIFLGS
                 CALL
-                        INTGRCAL
-## Page 576
-                CALL
-                        GRP2PC
-                CALL
-                        INTSTALL
-                CLEAR   BOFF
-                        DIM0FLAG
-                        RENDWFLG
-                        NOTWLEM
-                SET     SET             # LM WITH W-MATRIX INTEGRATION
-                        DIM0FLAG
-                        D6OR9FLG
-NOTWLEM         CLEAR   CLEAR
-                        INTYPFLG
-                        VINTFLAG
-                SET     CALL
-                        STATEFLG
-                        INTGRCAL
-MARKTEST        BON     CALL            # HAS W-MATRIX BEEN INVALIDATED
-                        RENDWFLG        # HAS W-MATRIX BEEN INVALIDATED
-                        RANGEBQ
-                        WLINIT          # YES - REINITIALIZE
-RANGEBQ         BON     EXIT            # DON'T CALL R65 IF ON SURFACE
-                        SURFFLAG
-                        RANGEBQ1
-                CA      ZERO
-                TS      R65CNTR
-                TC      BANKCALL
-                CADR    R65LEM
-                TC      INTPRET
-RANGEBQ1        AXT,2   BON             # CLEAR X2
-                        0
-                        LMOONFLG        # IS MOON SPHERE OF INFLUENCE
-                        SETX2           # YES.  STORE ZERO IN SCALSHFT REGISTER
-                INCR,2
-                        2
-SETX2           SXA,2   CALL
-                        SCALSHFT        # 0 - MOON.  2 - EARTH
-                        GRP2PC
-                AXT,1   SXA,1           # STORE RANGE CODE (1) FOR R3 IN NOUN 49
-                        1
-                        WHCHREAD
-                SLOAD   SR              # GET SINGLE PRECISION RVARMIN (B-12)
-                        RVARMIN         # SHIFT TO TRIPLE PRECISION (B-40)
-                        28D
-                RTB
-                        TPMODE          # AND SAVE IN 20D
-                STORE   20D
-                CALL                    # BEGIN COMPUTING THE B-VECTORS, DELTAQ
-                        GETULC          # B-VECTORS FOR RANGE
-                BON     VCOMP           # B0, COMP. IF LM BEING CORRECTED
-## Page 577
-                        VEHUPFLG
-                        +1
-                STOVL   BVECTOR
-                        ZEROVECS
-                STORE   BVECTOR +6      # B1
-                STODL   BVECTOR +12D    # B2
-                        36D
-                SRR*    BDSU
-                        2,2             # SHIFT FROM EARTH/MOON SPHERE TO B-29
-                        RM              # RM - (MAGNITUDE RCSM-RLM)
-                SLR*
-                        2,2             # SHIFT TO EARTH/MOON SPHERE
-                STODL   DELTAQ          # EARTH B-29.  MOON B-27
-                        36D             # RLC B-29/B-27
-                NORM    DSQ             # NORMALIZE AND SQUARE
-                        X1
-                DMP     SR*
-                        RANGEVAR        # MULTIPLY BY RANGEVAR (B12) THEN
-                        0 -2,1          # UNNORMALIZE
-                SR*     SR*
-                        0,1
-                        0,2
-                SR*     RTB
-                        0,2
-                        TPMODE
-                STORE   VARIANCE        # B-40
-                DCOMP   TAD
-                        20D             # B-40
-                BMN     TLOAD
-                        QOK
-                        20D             # B-40
-                STORE   VARIANCE
-QOK             CALL
-                        LGCUPDTE
+                                INTGRCAL
 
-                SSP     CALL
-                        WHCHREAD
-                DEC     2               # STORE R-RATE CODE (2) FOR R3 IN NOUN 49
-                        GRP2PC
-                CALL                    # B-VECTOR, DELTAQ FOR RANGE RATE
-                        GETULC
-                PDDL    SR*             # GET RLC SCALED B-29/B-27
-                        36D             # AND SHIFT TO B-23
-                        0 -4,2
-                STOVL   36D             # THEN STORE BACK IN 36D
-                BON     VCOMP           # B1, COMP. IF LM BEING CORRECTED
-                        VEHUPFLG
-                        +1
+## Page 587
+                CALL
+                                GRP2PC
+                CALL
+                                INTSTALL
+                CLEAR           BOFF
+                                DIM0FLAG
+                                RENDWFLG
+                                NOTWLEM
+                SET             SET                     # LM WITH W-MATRIX INTEGRATION
+                                DIM0FLAG
+                                D6OR9FLG
+NOTWLEM         CLEAR           CLEAR
+                                INTYPFLG
+                                VINTFLAG
+                SET             CALL
+                                STATEFLG
+                                INTGRCAL
+MARKTEST        BON             CALL                    # HAS W-MATRIX BEEN INVALIDATED
+                                RENDWFLG                # HAS W-MATRIX BEEN INVALIDATED
+                                RANGEBQ
+                                WLINIT                  # YES - REINITIALIZE
+                EXIT
+                CA              ZERO
+                TS              R65CNTR
+                TC              BANKCALL
+                CADR            R65LEM
+                TC              INTPRET
+RANGEBQ         AXT,2           BON                     # CLEAR X2.
+                                0
+                                LMOONFLG                # IS MOON SPHERE OF INFLUENCE
+                                SETX2                   # YES. STORE ZERO IN SCALSHFT REGISTER
+                INCR,2
+                                2
+SETX2           SXA,2           CALL
+                                SCALSHFT                # 0-MOON. 2-EARTH
+                                GRP2PC
+                SLOAD           SR                      # GET SINGLE PRECISION RVARMIN (B-12)
+                                RVARMIN                 # SHIFT TO TRIPLE PRECISION    (B-40)
+                                28D
+                RTB
+                                TPMODE                  # AND SAVE IN 20D
+                STORE           20D
+                CALL                                    # BEGIN COMPUTING THE B-VECTORS, DELTAQ
+                                GETULC                  # B-VECTORS FOR RANGE
+                BON             VCOMP                   # B0, COMP. IF LM BEING CORRECTED
+                                VEHUPFLG
+                                +1
+                STOVL           BVECTOR
+                                ZEROVECS
+                STORE           BVECTOR         +6      # B1
+
+## Page 588
+                STODL           BVECTOR         +12D    # B2
+                                36D
+                SRR*            BDSU
+                                2,2                     # SHIFT FROM EARTH/MOON SPHERE TO B-29
+                                RM                      # RM - (MAGNITUDE RCSM-RLM)
+                SLR*
+                                2,2                     # SHIFT TO EARTH/MOON SPHERE
+                STODL           DELTAQ                  # EARTH B-29. MOON B-27
+                                36D                     # RLC B-29/B-27
+                NORM            DSQ                     # NORMALIZE AND SQUARE
+                                X1
+                DMP             SR*
+                                RANGEVAR                # MULTIPLY BY RANGEVAR(B12) THEN
+                                0 -2,1                  # UNNORMALIZE
+                SR*             SR*
+                                0,1
+                                0,2
+                SR*             RTB
+                                0,2
+                                TPMODE
+                STORE           VARIANCE                # B-40
+                DCOMP           TAD
+                                20D                     #   B-40
+                BMN             TLOAD
+                                QOK
+                                20D                     #   B-40
+                STORE           VARIANCE
+QOK             CALL
+                                LGCUPDTE
+
+                CALL
+                                GRP2PC
+                CALL                                    # B-VECTOR,DELTAQ FOR RANGE RATE
+                                GETULC
+                PDDL            SR*                     # GET RLC SCALED B-29/B-27
+                                36D                     # AND SHIFT TO B-23
+                                0 -4,2
+                STOVL           36D                     # THEN STORE BACK IN 36D
+                BON             VCOMP                   # B1, COMP. IF LM BEING CORRECTED
+                                VEHUPFLG
+                                +1
                 VXSC
-                        36D             # B1 = RLC (B-24/B-22)
-## Page 578
-                STOVL   BVECTOR +6
-                        NUVLEM
-                VSR*    VAD
-                        6,2             # SHIFT FOR EARTH/MOON SPHERE
-                        VCVLEM          # EARTH B-7. MOON B-5
-                PDVL    VSR*            # VL TO PD6
-                        NUVCSM
-                        6,2             # SHIFT FOR EARTH/MOON SPHERE
-                VAD     VSU
-                        VCVCSM
-                PDVL    DOT             # VC - VL = VLC TO PD6
-                        0
-                        6
-                PUSH    SRR*            # RDOT B-8/B-6 TO PD12
-                        2,2             # SHIFT FROM EARTH/MOON SPHERE TO B-8
-                DSQ     DMPR            # RDOT**2 B-16 X RATEVAR B12
-                        RATEVAR
-                STORE   VARIANCE
-                SLOAD   SR
-                        VVARMIN         # GET SINGLE PRECISION VVARMIN (B+12)
-                        16D             # SHIFT TO DP (B-4)
-                STORE   24D             # AND SAVE IN 24D
-                DSU     BMN             # IS MIN. VARIANCE > COMPUTED VARIANCE
-                        VARIANCE
-                        VOK             # BRANCH - NO
-                DLOAD                   # YES - USE MINIMUM VARIANCE
-                        24D
-                STORE   VARIANCE
-VOK             DLOAD   SR2             # RDOT (PD12) FROM B-8/B-6
-                PDDL    SLR*            # TO B-10/B-8
-                        RDOTM           # SHIFT TO EARTH/MOON SPHERE
-                        0 -1,2          # B-7 TO B-10/B-8
+                                36D                     # B1 = RLC (B-24/B-22)
+                STOVL           BVECTOR         +6
+                                NUVLEM
+                VSR*            VAD
+                                6,2                     # SHIFT FOR EARTH/MOON SPHERE
+                                VCVLEM                  # EARTH B-7. MOON B-5
+                PDVL            VSR*                    # VL TO PD6
+                                NUVCSM
+
+## Page 589
+                                6,2                     # SHIFT FOR EARTH/MOON SPHERE
+                VAD             VSU
+                                VCVCSM
+                PDVL            DOT                     # VC - VL = VLC TO PD6
+                                0
+                                6
+                PUSH            SRR*                    # RDOT B-8/B-6 TO PD12
+                                2,2                     # SHIFT FROM EARTH/MOON SPHERE TO B-8
+                DSQ             DMPR                    # RDOT**2 B-16 X RATEVAR B12
+                                RATEVAR
+                STORE           VARIANCE
+                SLOAD           SR
+                                VVARMIN                 # GET SINGLE PRECISION VVARMIN (B+12)
+                                16D                     # SHIFT TO DP (B -4)
+                STORE           24D                     # AND SAVE IN 24D
+                DSU             BMN                     # IS MIN. VARIANCE > COMPUTED VARIANCE
+                                VARIANCE
+                                VOK                     # BRANCH - NO
+                DLOAD                                   # YES - USE MINIMUM VARIANCE
+                                24D
+                STORE           VARIANCE
+VOK             DLOAD           SR2                     # RDOT(PD12) FROM B-8/B-6
+                PDDL            SLR*                    # TO B-10/B-8
+                                RDOTM                   # SHIFT TO EARTH/MOON SPHERE
+                                0 -1,2                  # B-7 TO B-10/B-8
                 DSU
                 DMPR
-                        36D
-                STOVL   DELTAQ          # B-33
-                        0               # NOW GET B0
-                VXV     VXV             # (ULC X VLC) X ULC
-                BON     VCOMP           # B0, COMP. IF LM BEING CORRECTED
-                        VEHUPFLG
-                        +1
+                                36D
+                STOVL           DELTAQ                  #   B-33
+                                0                       # NOW GET B0
+                VXV             VXV                     # (ULC X VLC) X ULC
+                BON             VCOMP                   # B0, COMP. IF LM BEING CORRECTED
+                                VEHUPFLG
+                                +1
                 VSR*
-                        0 -2,2          # SCALED B-5
-                STOVL   BVECTOR
-                        ZEROVECS
-                STORE   20D             # ZERO OUT 20 TO 25 IN PUSHLIST
-                STOVL   BVECTOR +12D
-                        BVECTOR
-                ABVAL   NORM            # LOAD B0, GET MAGNITUDE AND NORMALIZE
-                        20D             # SHIFT COUNT IN 20D
-## Page 579
-                VLOAD   ABVAL
-                        BVECTOR +6D     # LOAD B1, GET MAGNITUDE AND NORMALIZE
-                NORM    DLOAD
-                        22D             # SHIFT COUNT IN 22D
-                        22D             # FIND WHICH SHIFT IS SMALLER
-                DSU     BMN             # BRANCH - B0 HAS SMALLER SHIFT COUNT
-                        20D
-                        VOK1
-                LXA,1   GOTO
-                        22D             # LOAD X2 WITH THE SMALLER SHIFT COUNT
-                        VOK2
+                                0 -2,2                  # SCALED B-5
+                STOVL           BVECTOR
+                                ZEROVECS
+                STORE           20D                     # ZERO OUT 20 TO 25 IN PUSHLIST
+                STOVL           BVECTOR         +12D
+                                BVECTOR
+                ABVAL           NORM                    # LOAD B0, GET MAGNITUDE AND NORMALIZE
+                                20D                     # SHIFT COUNT IN 20D
+                VLOAD           ABVAL
+                                BVECTOR         +6D     # LOAD B1, GET MAGNITUDE AND NORMALIZE
+                NORM            DLOAD
+                                22D                     # SHIFT COUNT IN 22D
+                                22D                     # FIND WHICH SHIFT IS SMALLER
+                DSU             BMN                     # BRANCH- B0 HAS SMALLER SHIFT COUNT
+                                20D
+
+## Page 590
+                                VOK1
+                LXA,1           GOTO
+                                22D                     # LOAD X2 WITH THE SMALLER SHIFT COUNT
+                                VOK2
 VOK1            LXA,1
-                        20D
-VOK2            VLOAD   VSL*            # THEN ADJUST B0, B1, DELTAQ AND VARIANCE
-                        BVECTOR         # WITH THI SSHIFT COUNT
-                        0,1
-                STOVL   BVECTOR
-                        BVECTOR +6
+                                20D
+VOK2            VLOAD           VSL*                    # THEN ADJUST B0,B1,DELTAQ AND VARIANCE
+                                BVECTOR                 # WITH THI SSHIFT COUNT
+                                0,1
+                STOVL           BVECTOR
+                                BVECTOR         +6
                 VSL*
-                        0,1
-                STODL   BVECTOR +6
-                        DELTAQ
+                                0,1
+                STODL           BVECTOR         +6
+                                DELTAQ
                 SL*
-                        0,1
-                STORE   DELTAQ
-                DLOAD   SL*             # GET RLC AND ADJUST FOR SCALE SHIFT
-                        36D
-                        0 -1,1
-                DSQ     DMP             # MULTIPLY RLC**2 BY VARIANCE
-                        VARIANCE
-                SL4     RTB             # SHIFT TO CONFORM TO BVECTORS AND DELTAQ
-                        TPMODE
-                STCALL  VARIANCE        # AND STORE TP VARIANCE
-                        LGCUPDTE
+                                0,1
+                STORE           DELTAQ
+                DLOAD           SL*                     # GET RLC AND ADJUST FOR SCALE SHIFT
+                                36D
+                                0 -1,1
+                DSQ             DMP                     # MULTIPLY RLC**2 BY VARIANCE
+                                VARIANCE
+                SL4             RTB                     # SHIFT TO CONFORM TO BVECTORS AND DELTAQ
+                                TPMODE
+                STCALL          VARIANCE                # AND STORE TP VARIANCE
+                                LGCUPDTE
 
                 CALL
-                        GRP2PC
-                BON     EXIT            # ARE ANGLES TO BE DONE
-                        SURFFLAG
-                        RENDEND         # NO
-                EBANK=  AIG
-MXMYMZ          CAF     AIGBANK
-                TS      BBANK
-                CA      AIG             # YES, COMPUTE  MX, MY, MZ
-                TS      CDUSPOT
-                CA      AMG
-                TS      CDUSPOT +2
-                CA      AOG
-                TS      CDUSPOT +4      # GIMBL ANGLES NOW IN CDUSPOT FOR TRG*NBSM
-                TC      INTPRET
-## Page 580
-                VLOAD   CALL
-                        UNITX
-                        TRG*NBSM
-                VXM     VSL1
-                        REFSMMAT
-                STOVL   MX
-                        UNITY
+                                GRP2PC
+                BON             EXIT                    # ARE ANGLES TO BE DONE
+                                SURFFLAG
+                                RENDEND                 # NO
+                EBANK=          AIG
+MXMYMZ          CAF             AIGBANK
+                TS              BBANK
+                CA              AIG                     # YES, COMPUTE  MX, MY, MZ
+                TS              CDUSPOT
+                CA              AMG
+                TS              CDUSPOT         +2
+                CA              AOG
+                TS              CDUSPOT         +4      # GIMBL ANGLES NOW IN CDUSPOT FOR TRG*NBSM
+                TC              INTPRET
+                VLOAD           CALL
+                                UNITX
+                                TRG*NBSM
+                VXM             VSL1
+                                REFSMMAT
+                STOVL           MX
+                                UNITY
+
+## Page 591
                 CALL
-                        *NBSM*
-                VXM     VSL1
-                        REFSMMAT
-                STOVL   MY
-                        UNITZ
+                                *NBSM*
+                VXM             VSL1
+                                REFSMMAT
+                STOVL           MY
+                                UNITZ
                 CALL
-                        *NBSM*
-                VXM     VSL1
-                        REFSMMAT
-SHAFTBQ         STCALL  MZ
-                        RADARANG
-                SSP     CALL            # STORE SHAFT CODE (3) FOR R3 IN NOUN 49
-                        WHCHREAD
-                DEC     3
-                        GRP2PC
-                VLOAD   DOT             # COMPUTE DELTAQ,B VECTORS FOR SHAFT ANG.
-                        ULC
-                        MX
+                                *NBSM*
+                VXM             VSL1
+                                REFSMMAT
+SHAFTBQ         STCALL          MZ
+                                RADARANG
+                CALL
+                                GRP2PC
+                VLOAD           DOT                     # COMPUTE DELTAQ,B VECTORS FOR SHAFT ANG.
+                                ULC
+                                MX
                 SL1
-                STOVL   SINTH           # 18D
-                        ULC
-                DOT     SL1
-                        MZ
-                STCALL  COSTH           # 16D
-                        ARCTAN
-                BDSU    DMP
-                        RRSHAFT
-                        2PI/8
-                SL3R    PUSH
-                DLOAD   SL3
-                        X789
-                SRR*    BDSU            # SHIFT FROM -5/-3 TO B0
-                        0,2
-                DMP     SRR*
-                        RXZ
-                        0,1             # SHIFT TO EARTH/MOON SPHERE
-                STOVL   DELTAQ          # EARTH B-29.  MOON B-27
-                        ULC
-                VXV     VSL1
-                        MY
+                STOVL           SINTH                   # 18D
+                                ULC
+                DOT             SL1
+                                MZ
+                STCALL          COSTH                   # 16D
+                                ARCTAN
+                BDSU            DMP
+                                RRSHAFT
+                                2PI/8
+                SL3R            PUSH
+                DLOAD           SL3
+                                X789
+                SRR*            BDSU                    # SHIFT FROM -5/-3 TO B0
+                                0,2
+                DMP             SRR*
+                                RXZ
+                                0,1                     # SHIFT TO EARTH/MOON SPHERE
+                STOVL           DELTAQ                  # EARTH B-29. MOON B-27
+                                ULC
+                VXV             VSL1
+                                MY
                 UNIT
-                BOFF    VCOMP           # B0, COMP. IF CSM BEING CORRECTED
-## Page 581
-                        VEHUPFLG
-                        +1
-                STOVL   BVECTOR
-                        ZEROVECS
-                STORE   BVECTOR +6
-                STODL   BVECTOR +12D
-                        RXZ
-                SR*     SRR*            # SHIFT FROM EARTH/MOON SPHERE TO B-25
-                        0 -2,1
-                        0,2
-                STORE   BVECTOR +12D
+                BOFF            VCOMP                   # B0, COMP. IF CSM BEING CORRECTED
+                                VEHUPFLG
+                                +1
+                STOVL           BVECTOR
+                                ZEROVECS
+                STORE           BVECTOR         +6
+                STODL           BVECTOR         +12D
+                                RXZ
+                SR*             SRR*                    # SHIFT FROM EARTH/MOON SPHERE TO B-25
+                                0 -2,1
+
+## Page 592
+                                0,2
+                STORE           BVECTOR +12D
                 SLOAD
-                        SHAFTVAR
-                DAD     DMP
-                        IMUVAR          # RAD**2 B12
-                        RXZ
-                SRR*    DMP
-                        0,1             # SHIFT TO EARTH/MOON SPHERE
-                        RXZ
-                SR*     SR*
-                        0 -2,1
-                        0,2
-                SR*     RTB
-                        0,2
-                        TPMODE          # STORE VARIANCE TRIPLE PRECISION
-                STCALL  VARIANCE        # B-40
-                        LGCUPDTE
+                                SHAFTVAR
+                DAD             DMP
+                                IMUVAR                  # RAD**2 B12
+                                RXZ
+                SRR*            DMP
+                                0,1                     # SHIFT TO EARTH/MOON SPHERE
+                                RXZ
+                SR*             SR*
+                                0 -2,1
+                                0,2
+                SR*             RTB
+                                0,2
+                                TPMODE                  # STORE VARIANCE TRIPLE PRECISION
+                STCALL          VARIANCE                # B-40
+                                LGCUPDTE
 
                 CALL
-                        GRP2PC
+                                GRP2PC
 TRUNBQ          CALL
-                        RADARANG
-                SSP     CALL            # STORE TRUNNION CODE (4) FOR R3 IN N49
-                        WHCHREAD
-                DEC     4
-                        GRP2PC
-                VLOAD   VXV
-                        ULC
-                        MY
-                VSL1    VXV
-                        ULC
-                VSL1                    # (ULC X MY) X ULC
-                BOFF    VCOMP           # B0, COMP. IF CSM BEING CORRECTED
-                        VEHUPFLG
-                        +1
-                STOVL   BVECTOR
-                        ZEROVECS
-                STORE   BVECTOR +6
-                STODL   BVECTOR +12D
-                        RXZ
-## Page 582
-                SR*     SRR*            # SHIFT FROM EARTH/MOON SPHERE TO B-25
-                        0 -2,1
-                        0,2
-                STORE   BVECTOR +14D
-                SLOAD
-                        TRUNVAR
-                DAD     DMP
-                        IMUVAR
-                        RXZ
-                SRR*    DMP
-                        0,1             # SHIFT TO EARTH/MOON SPHERE
-                        RXZ
-                SR*     SR*
-                        0 -2,1
-                        0,2
-                SR*     RTB
-                        0,2
-                        TPMODE          # STORE VARIANCE TRIPLE PRECISION
-                STODL   VARIANCE
-                        SINTHETA
-                ASIN    BDSU            # SIN THETA IN PD6
-                        RRTRUN
-                DMP     SL3R
-                        2PI/8
-                PDDL    SL3
-                        X789 +2
-                SRR*    BDSU            # SHIFT FROM -5/-3 TO B0
-                        0,2
-                DMP     SRR*
-                        RXZ
-                        0,1
-                STCALL  DELTAQ          # EARTH B-29.  MOON B-27
-                        LGCUPDTE
+                                RADARANG
                 CALL
-                        GRP2PC
-RENDEND         GOTO
-                        R22LEM93
+                                GRP2PC
+                VLOAD           VXV
+                                ULC
+                                MY
+                VSL1            VXV
+                                ULC
+                VSL1                                    # (ULC X MY) X ULC
+                BOFF            VCOMP                   # B0, COMP. IF CSM BEING CORRECTED
+                                VEHUPFLG
+                                +1
+                STOVL           BVECTOR
+                                ZEROVECS
+                STORE           BVECTOR         +6
+                STODL           BVECTOR         +12D
+                                RXZ
+                SR*             SRR*                    # SHIFT FROM EARTH/MOON SPHERE TO B-25
+                                0 -2,1
+                                0,2
+                STORE           BVECTOR         +14D
+                SLOAD
+                                TRUNVAR
+                DAD             DMP
+                                IMUVAR
+                                RXZ
+                SRR*            DMP
+                                0,1                     # SHIFT TO EARTH/MOON SPHERE
 
+## Page 593
+                                RXZ
+                SR*             SR*
+                                0 -2,1
+                                0,2
+                SR*             RTB
+                                0,2
+                                TPMODE                  # STORE VARIANCE TRIPLE PRECISION
+                STODL           VARIANCE
+                                SINTHETA
+                ASIN            BDSU                    # SIN THETA IN PD6
+                                RRTRUN
+                DMP             SL3R
+                                2PI/8
+                PDDL            SL3
+                                X789            +2
+                SRR*            BDSU                    # SHIFT FROM -5/-3 TO B0
+                                0,2
+                DMP             SRR*
+                                RXZ
+                                0,1
+                STCALL          DELTAQ                  # EARTH B-29. MOON B-27
+                                LGCUPDTE
+                CALL
+                                GRP2PC
+RENDEND         GOTO
+                                R22LEM93
 # FUNCTIONAL DESCRIPTION
-#       LSR22.4 IS THE ENTRY TO PERFORM LUNAR SURFACE NAVIGATION FOR THE LM
-#       COMPUTER ONLY.  THIS ROUTINE COMPUTES THE B-VECTORS AND DELTA Q FOR RANGE
-#       AND RANGE RATE MEASURED BY THE RENDEZVOUS RADAR
-#
+
+# LSR22.4 IS THE ENTRY TO PERFORM LUNAR SURFACE NAVIGATION FOR THE LM
+# COMPUTER ONLY. THIS ROUTINE COMPUTES THE B-VECTORS AND DELTA Q FOR RANGE
+# AND RANGE RATE MEASURED BY THE RENDEZVOUS RADAR
+
 # SUBROUTINES CALLED
-#       INSTALL         LGCUPDTE        INCORP1         RP-TO-R
-#       INTEGRV         GETULC          INCORP2
-#
+#  INSTALL   LGCUPDTE  INCORP1   RP-TO-R
+#  INTEGRV   GETULC    INCORP2
+
 # OUTPUT
-#       CORRECTED CSM STATE VECTOR (PERMANENT)
-#       NUMBER OF MARKS INCORPORATED IN MARKCTR
-## Page 583
-#       MAGNITUDE OF POSITION DEVIATION (FOR DISPLAY) IN R22 DISP METERS B-29
-#       MAGNITUDE OF VELOCITY DEVIATION (FOR DISPLAY) IN R22DISP +2 M/CSEC B-7
-#       UPDATED W-MATRIX
+#  CORRECTED CSM STATE VECTOR (PERMANENT)
+#  NUMBER OF MARKS INCORPORATED IN MARKCTR
+#  MAGNITUDE OF POSITION DEVIATION (FOR DISPLAY) IN R22DISP METERS B-29
+#  MAGNITUDE OF VELOCITY DEVIATION (FOR DISPLAY) IN R22DISP +2 M/CSEC B-7
+#  UPDATED W-MATRIX
 
 # ERASABLE INITIALIZATION REQUIRED
-#       LM AND CSM STATE VECTORS
-#       W-MATRIX
-#       MARK TIME IN MKTIME
-#       RADAR RANGE IN RM METERS B-29
-#       RANGE RATE IN RDOTM METERS/CSEC B-7
-#       VEHUPFLG
+#  LM AND CSM STATE VECTORS
+#  W-MATRIX
+#  MARK TIME IN MKTIME
+#  RADAR RANGE IN RM METERS B-29
+#        RANGE RATE IN RDOTM METERS/CSEC B-7
+#  VEHUPFLG
 
+## Page 594
 LSR22.4         CALL
-                        INTSTALL
-                SET     CLEAR
-                        STATEFLG
-                        VINTFLAG        # CALL TO GET LM POS + VEL IN REF COORD.
+                                INTSTALL
+                SET             CLEAR
+                                STATEFLG
+                                VINTFLAG                # CALL TO GET LM POS + VEL IN REF COORD.
                 CALL
-                        INTGRCAL
+                                INTGRCAL
                 CALL
-                        GRP2PC
-                CLEAR   CALL
-                        DMENFLG         # SET MATRIX SIZE TO 6X6 FOR INCORP
-                        INTSTALL
-                DLOAD   BHIZ            # IS THIS FIRST TIME THROUGH
-                        MARKCTR
-                        INITWMX6        # YES, INITIALIZE 6X6 W-MATRIX
-                CLEAR   SET
-                        D6OR9FLG
-                        DIM0FLAG
-                SET     CLEAR
-                        VINTFLAG
-                        INTYPFLG
+                                GRP2PC
+                CLEAR           CALL
+                                DMENFLG                 # SET MATRIX SIZE TO 6X6 FOR INCORP
+                                INTSTALL
+                DLOAD           BHIZ                    # IS THIS FIRST TIME THROUGH
+                                MARKCTR
+                                INITWMX6                # YES, INITIALIZE 6X6 W-MATRIX
+                CLEAR           SET
+                                D6OR9FLG
+                                DIM0FLAG
+                SET             CLEAR
+                                VINTFLAG
+                                INTYPFLG
                 CALL
-                        INTGRCAL
+                                INTGRCAL
                 GOTO
-                        RANGEBQ
+                                RANGEBQ
 
 INITWMX6        CALL
-                        WLINIT          # INITIALIZE W-MATRIX
-                SET     CALL
-                        VINTFLAG
-                        SETIFLGS
+                                WLINIT                  # INITIALIZE W-MATRIX
+                SET             CALL
+                                VINTFLAG
+                                SETIFLGS
                 CALL
-                        INTGRCAL
+                                INTGRCAL
                 GOTO
-                        RANGEBQ
+                                RANGEBQ
 
 # THIS ROUTINE CLEARS RFINAL (DP) AND CALLS INTEGRV
-## Page 584
-INTGRCAL        STQ     DLOAD
-                        IGRET
-                        MKTIME
-                STCALL  TDEC1
-                        INTEGRV
+
+INTGRCAL        STQ             DLOAD
+                                IGRET
+                                MKTIME
+                STCALL          TDEC1
+                                INTEGRV
                 GOTO
-                        IGRET
+                                IGRET
 
 # THIS ROUTINE INITIALIZES THE W-MATRIX BY ZEROING ALL W THEN SETTING
 # DIAGONAL ELEMENTS TO INITIAL STORED VALUES.
 
-                EBANK=  W
+                EBANK=          W
+
+## Page 595
 WLINIT          EXIT
-                CAF     WBANK
-                TS      BBANK
-                CAF     WSIZE
-                TS      W.IND
-                CAF     ZERO
-                INDEX   W.IND
-                TS      W
-                CCS     W.IND
-                TC      -5
-                CAF     AIGBANK         # RESTORE EBANK 7
-                TS      BBANK
-                TC      INTPRET
-                BON     SLOAD           # IF ON LUNAR SURFACE, INITIALIZE WITH
-                        SURFFLAG        # WSURFPOS AND WSURFVEL INSTEAD OF
-                        WLSRFPOS        # WRENDPOS AND WRENDVEL
-                        WRENDPOS
+                CAF             WBANK
+                TS              BBANK
+                CAF             WSIZE
+                TS              W.IND
+                CAF             ZERO
+                INDEX           W.IND
+                TS              W
+                CCS             W.IND
+                TC              -5
+                CAF             AIGBANK                 # RESTORE EBANK 7
+                TS              BBANK
+                TC              INTPRET
+                BON             SLOAD                   # IF ON LUNAR SURFACE,INITIALIZE WITH
+                                SURFFLAG                # WSURFPOS AND WSURFVEL INSTEAD OF
+                                WLSRFPOS                # WRENDPOS AND WRENDVEL
+                                WRENDPOS
                 GOTO
-                        WPOSTORE
+                                WPOSTORE
 WLSRFPOS        SLOAD
-                        WSURFPOS
-WPOSTORE        SR                      # SHIFT TO B-19 SCALE
-                        5
-                STORE   W
-                STORE   W +8D
-                STORE   W +16D
-                BON     SLOAD
-                        SURFFLAG
-                        WLSRFVEL
-                        WRENDVEL
+                                WSURFPOS
+WPOSTORE        SR                                      # SHIFT TO B-19 SCALE
+                                5
+                STORE           W
+                STORE           W               +8D
+                STORE           W               +16D
+                BON             SLOAD
+                                SURFFLAG
+                                WLSRFVEL
+                                WRENDVEL
                 GOTO
-                        WVELSTOR
+                                WVELSTOR
 WLSRFVEL        SLOAD
-                        WSURFVEL
-WVELSTOR        STORE   W +72D
-                STORE   W +80D
-                STORE   W +88D
+                                WSURFVEL
+WVELSTOR        STORE           W               +72D
+                STORE           W               +80D
+                STORE           W               +88D
                 SLOAD
-## Page 585
-                        WSHAFT
-                STORE   W +144D
+                                WSHAFT
+                STORE           W               +144D
                 SLOAD
-                        WTRUN
-                STORE   W +152D
-                SET     SSP             # SET RENDWFLG - W-MATRIX VALID
-                        RENDWFLG
-                        MARKCTR         # SET MARK COUNTER EQUAL ZERO
-                        0
+                                WTRUN
+                STORE           W               +152D
+                SET             SSP                     # SET RENDWFLG - W-MATRIX VALID
+                                RENDWFLG
+                                MARKCTR                 # SET MARK COUNTER EQUAL ZERO
+                                0
                 RVQ
 
-                EBANK=  W
-WBANK           BBCON   WLINIT
-                EBANK=  AIG
-AIGBANK         BBCON   LSR22.3
+                EBANK=          W
+
+## Page 596
+WBANK           BBCON           WLINIT
+                EBANK=          AIG
+AIGBANK         BBCON           LSR22.3
 
 # GETULC
-#
+
 # THIS SUBROUTINE COMPUTES THE RELATIVE POSITION VECTOR BETWEEN THE CSM
 # AND THE LM, LEAVING THE UNIT VECTOR IN THE PUSHLIST AND MPAC AND THE
 # MAGNITUDE IN 36D.
 
-GETULC          SETPD   VLOAD
-                        0
-                        DELTALEM
+GETULC          SETPD           VLOAD
+                                0
+                                DELTALEM
                 LXA,2
-                        SCALSHFT        # LOAD X2 WITH SCALE SHIFT
-                VSR*    VAD
-                        9D,2            # SHIFT FOR EARTH/MOON SPHERE
-                        RCVLEM
-                PDVL    VSR*
-                        DELTACSM
-                        9D,2            # SHIFT FOR EARTH/MOON SPHERE
-                VAD     VSU
-                        RCVCSM
-                RTB     PUSH            # USE NORMUNIT TO PRESERVE ACCURACY
-                        NORMUNX1
-                STODL   ULC
-                        36D
-                SL*                     # ADJUST MAGNITUDE FROM NORMUNIT
-                        0,1
-                STOVL   36D             # ULC IN PD0 AND MPAC,RLC IN 36D
-                        ULC
+                                SCALSHFT                # LOAD X2 WITH SCALE SHIFT
+                VSR*            VAD
+                                9D,2                    # SHIFT FOR EARTH/MOON SPHERE
+                                RCVLEM
+                PDVL            VSR*
+                                DELTACSM
+                                9D,2                    # SHIFT FOR EARTH/MOON SPHERE
+                VAD             VSU
+                                RCVCSM
+                RTB             PUSH                    # USE NORMUNIT TO PRESERVE ACCURACY
+                                NORMUNX1
+                STODL           ULC
+                                36D
+                SL*                                     # ADJUST MAGNITUDE FROM NORMUNIT
+                                0,1
+                STOVL           36D                     # ULC IN PD0 AND MPAC,RLC IN 36D
+                                ULC
                 RVQ
 
 # RADARANG
-#
+
 # THIS SUBROUTINE COMPUTES SINTHETA = -ULC DOT MY
 # RXZ = (SQRT (1-SINTHETA**2))RLC
 # OUTPUT
-#       ULC IN ULC, PD0
-## Page 586
-#       RLC IN PD36D
-#       SIN THETA IN SINTHETA AND PD6
-#       RXZ NORM IN RXZ (N IN X1)
+#  ULC IN ULC, PD0
+#  RLC IN PD36D
+#  SIN THETA IN SINTHETA AND PD6
+#  RXZ NORM IN RXZ (N IN X1)
+RADARANG        STQ             CALL
+                                RDRET
+                                GETULC
+                VCOMP           DOT
+                                MY
+                SL1R            PUSH                    # SIN THETA TO PD6
+                STORE           SINTHETA
+                DSQ             BDSU
+                                DP1/4TH                 # 1 - (SIN THETA)**2
 
-RADARANG        STQ     CALL
-                        RDRET
-                        GETULC
-                VCOMP   DOT
-                        MY
-                SL1R    PUSH            # SIN THETA TO PD6
-                STORE   SINTHETA
-                DSQ     BDSU
-                        DP1/4TH         # 1-(SIN THETA)**2
-                SQRT    DMP
-                        36D
-                SL1     NORM
-                        X1              # SET SHIFT COUNTER IN X1
-                STORE   RXZ
-                GOTO                    # EXIT
-                        RDRET
-LGCUPDTE        STQ     CALL
-                        LGRET
-                        INCORP1
-                VLOAD   ABVAL
-                        DELTAX +6
-                LXA,2   SRR*
-                        SCALSHFT        # 0 - MOON.  2 - EARTH
-                        2,2             # SET VEL DISPLAY TO B-7
-                STOVL   R22DISP +2
-                        DELTAX
-                ABVAL   SRR*
-                        2,2             # SET POS DISPLAY TO B-29
-                STORE   R22DISP
-                SLOAD   SR
-                        RMAX
-                        10D
-                DSU     BMN
-                        R22DISP
-                        R22LEM96        # GO DISPLAY
-                SLOAD   DSU
-                        VMAX
-                        R22DISP +2      # VMAX MINUS VEL. DEVIATION
+## Page 597
+                SQRT            DMP
+                                36D
+                SL1             NORM
+                                X1                      # SET SHIFT COUNTER IN X1
+                STORE           RXZ
+                GOTO                                    # EXIT
+                                RDRET
+LGCUPDTE        STQ             CALL
+                                LGRET
+                                INCORP1
+                VLOAD           ABVAL
+                                DELTAX          +6
+                LXA,2           SRR*
+                                SCALSHFT                # 0 - MOON.  2 - EARTH
+                                2,2                     # SET VEL DISPLAY TO B-7
+                STOVL           R22DISP         +2
+                                DELTAX
+                ABVAL           SRR*
+                                2,2                     # SET POS DISPLAY TO B-29
+                STORE           R22DISP
+                SLOAD           SR
+                                RMAX
+                                10D
+                DSU             BMN
+                                R22DISP
+                                R22LEM96                # GO DISPLAY
+                SLOAD           DSU
+                                VMAX
+                                R22DISP         +2      # VMAX MINUS VEL. DEVIATION
                 BMN
-                        R22LEM96        # GO DISPLAY
+                                R22LEM96                # GO DISPLAY
 ASTOK           CALL
-                        INCORP2
+                                INCORP2
                 GOTO
-                        LGRET
-IMUVAR          2DEC    E-6 B12         # RAD**2
+                                LGRET
+IMUVAR          2DEC            E-6     B12             # RAD**2
 
-WSIZE           DEC     161
-## Page 587
-2PI/8           2DEC    3.141592653 B-2
+WSIZE           DEC             161
+2PI/8           2DEC            3.141592653     B-2
+                EBANK=          LOSCOUNT
 
-                EBANK=  LOSCOUNT
-## Page 588
+## Page 598
+# PROGRAM NAME LRS24.1   RR SEARCH ROUTINE
+# MOD NO  0        BY  P VOLANTE  SDC          DATE 1-15-67
 
-# PROGRAM NAME LRS24.1          RR SEARCH ROUTINE
-# MOD NO 0                      BY P VOLANTE   SDC              DATE 1-15-67
-#
+
 # FUNCTIONAL DESCRIPTION
-#
+
 # DRIVES THE RENDEZVOUS RADAR IN A HEXAGONAL SEARCH PATTERN ABOUT THE LOS TO THE CSM (COMPUTED FROM THE CSM AND LM
 # STATE VECTORS) CHECKING FOR THE DATA GOOD DISCRETE AND MONITORING THE ANGLE BETWEEN THE RADAR BORESIGHT AND THE
-# LM +Z AXIS.  IF THIS ANGLE EXCEEDS 30 DEGREES THE PREFERRED TRACKING ATTITUDE ROUTINE IS CALLED TO PERFORM AN
+# LM +Z AXIS. IF THIS ANGLE EXCEEDS 30 DEGREES THE PREFERRED TRACKING ATTITUDE ROUTINE IS CALLED TO PERFORM AN
 # ATTITUDE MANEUVER.
-#
+
+
 # CALLING SEQUENCE - BANKCALL FOR LRS24.1
-#
+
+
 # SUBROUTINES CALLED
-#
-#       LEMCONIC        R61LEM
-#       CSMCONIC        RRDESSM
-#       JOBDELAY        FLAGDOWN
-#       WAITLIST        FLAGUP
-#       RRNB            BANKCALL
-#
-# EXIT - TO ENDOFJOB WHEN THE SEARCH FLAG (SRCHOPT) IS NOT SET
-#
+
+#       LEMCONIC      R61LEM
+#       CSMCONIC      RRDESSM
+#       JOBDELAY      FLAGDOWN
+#       WAITLIST      FLAGUP
+#       RRNB          BANKCALL
+
+
+# EXIT -  TO ENDOFJOB WHEN THE SEARCH FLAG (SRCHOPT) IS NOT SET
+
+
 # OUTPUT
-#
-#       DATAGOOD (SP) - FOR DISPLAY IN R1 -     00000 INDICATES NO LOCKON
-#                                               11111 INDICATES LOCKON ACHIEVED
-#       OMEGAD (SP)   - FOR DISPLAY IN R2 -     ANGLE BETWEEN RR BORESIGHT VECTOR AND THE SPACECRAFT +Z AXIS
-#
+
+#     DATAGOOD (SP)-FOR DISPLAY IN R1- 00000 INDICATES NO LOCKON
+#                                      11111 INDICATES LOCKON ACHIEVED
+#     OMEGAD   (SP)-FOR DISPLAY IN R2- ANGLE BETWEEN RR BORESIGHT VECTOR AND THE SPACECRAFT +Z AXIS
+
 # ERASABLE INITIALIZATION REQUIRED
-#
-#       SEARCH FLAG MUST BE SET
-#       LM AND CSM STATE VECTORS AND REFSMMAT MATRIX
-#
+#    SEARCH FLAG MUST BE SET
+#    LM AND CSM STATE VECTORS AND REFSMMAT MATRIX
 # DEBRIS
-#
-#       RLMSRCH         UXVECT
-#       VXRLM           UYVECT
-#       LOSDESRD        NSRCHPNT
-#       DATAGOOD        OMEGAD
-#       MPAC            PUSHLIST
 
-                COUNT*  $$/LRS24
-LRS24.1         CAF     ZERO
-                TS      NSRCHPNT        # SET SEARCH PATTERN POINT COUNTER TO ZERO
-CHKSRCH         CAF     BIT14           # ISSUE AUTO TRACK ENABLE TO RADAR
-                EXTEND
-## Page 589
-                WOR     CHAN12
-                CAF     SRCHOBIT        # CHECK IF SEARCH STILL REQUESTED
-                MASK    FLAGWRD2        # (SRCHOPT FLAG SET)
-                EXTEND
-                BZF     ENDOFJOB        # NO-TERMINATE JOB
+#    RLMSRCH      UXVECT
+#    VXRLM        UYVECT
+#    LOSDESRD     NSRCHPNT
+#    DATAGOOD     OMEGAD
+#    MPAC         PUSHLIST
 
-                CAF     6SECONDS        # SCHEDULE TASK TO DRIVE RADAR TO NEXT PT.
+                COUNT*          $$/LRS24
+LRS24.1         CAF             ZERO
+                TS              NSRCHPNT                # SET SEARCH PATTERN POINT COUNTER TO ZERO
+CHKSRCH         CAF             BIT14                   # ISSUE AUTO TRACK ENABLE TO RADAR
+                EXTEND
+
+## Page 599
+                WOR             CHAN12
+                CAF             SRCHOBIT                # CHECK IF SEARCH STILL REQUESTED
+                MASK            FLAGWRD2                # (SRCHOPT FLAG SET)
+                EXTEND
+                BZF             ENDOFJOB                # NO-TERMINATE JOB
+
+
+                CAF             6SECONDS                # SCHEDULE TASK TO DRIVE RADAR TO NEXT PT.
                 INHINT
-                TC      WAITLIST        # IN 6 SECONDS
-                EBANK=  LOSCOUNT
-                2CADR   CALLDGCH
-
+                TC              WAITLIST                # IN 6 SECONDS
+                EBANK=          LOSCOUNT
+                2CADR           CALLDGCH
                 RELINT
-                CS      RADMODES        # IS REMODE IN PROGRESS
-                MASK    REMODBIT
+                CS              RADMODES                # IS REMODE IN PROGRESS
+                MASK            BIT14                   # (BIT 14 RADMODES = 1)
                 EXTEND
-                BZF     ENDOFJOB        # YES - WAIT SIX SECONDS
-                TC      INTPRET
+                BZF             ENDOFJOB                # YES- WAIT SIX SECONDS
+                TC              INTPRET
 
-                RTB     DAD             # COMPUTE LOS AT PRESENT TIME + 1.5 SEC.
-                        LOADTIME
-                        1.5SECS
-LRS24.11        STCALL  TDEC1
-                        LEMCONIC        # EXTRAPOLATE LM STATE VECTOR
+                RTB
+                                LOADTIME
+LRS24.11        STCALL          TDEC1
+                                LEMCONIC                # EXTRAPOLATE LM STATE VECTOR
                 VLOAD
-                        RATT
-                STOVL   RLMSRCH         # SAVE LEM POSITION
-                        VATT
-                STODL   SAVLEMV         # SAVE LEM VELOCITY
-                        TAT
-                STCALL  TDEC1           # EXTRAPOLATE CSM STATE VECTOR
-                        CSMCONIC        # EXTRAPOLATE CSM STATE VECTOR
-                VLOAD   VSU             # LOS VECTOR = R(CSM) - R(LM)
-                        RATT
-                        RLMSRCH
+                                RATT
+                STOVL           RLMSRCH                 # SAVE LEM POSITION
+                                VATT
+                STODL           SAVLEMV                 # SAVE LEM VELOCITY
+                                TAT
+                STCALL          TDEC1                   # EXTRAPOLATE CSM STATE VECTOR
+                                CSMCONIC                # EXTRAPOLATE CSM STATE VECTOR
+                VLOAD           VSU                     # LOS VECTOR = R(CSM)-R(LM)
+                                RATT
+                                RLMSRCH
                 UNIT
-                STOVL   LOSDESRD        # STORE DESIRED LOS
-                        VATT            # COMPUTE UNIT(V(CM) CROSS R(CM))
-                UNIT    VXV
-                        RATT
+                STOVL           LOSDESRD                # STORE DESIRED LOS
+                                VATT                    # COMPUTE UNIT(V(CM) CROSS R(CM))
+                UNIT            VXV
+                                RATT
                 UNIT
-                STORE   VXRCM
-                VLOAD   VSU
-                        VATT
-                        SAVLEMV
-                MXV     VSL1            # CONVERT FROM REFERENCE TO STABLE MEMBER
-                        REFSMMAT
-                STORE   SAVLEMV         # VLC = V(CSM) - V(LM)
-                SLOAD   BZE             # CHECK IF N=0
-## Page 590
-                        NSRCHPNT
-                        DESGLOS         # YES - DESIGNATE ALONG LOS
-                DSU     BZE             # IS N=1
-                        ONEOCT          # YES - CALCULATE X AND Y AXES OF
-                        CALCXY          # SEARCH PATTERN COORDINATE SYSTEM
-                VLOAD                   # NO - ROTATE X-Y AXES TO NEXT SEARCH POINT
-                        UXVECT
-                STOVL   UXVECTPR        # SAVE ORIGINAL X AND Y VECTORS
-                        UYVECT          # UXPRIME = ORIGINAL UX
-                STORE   UYVECTPR        # UYPRIME = ORIGINAL UY
+                STORE           VXRCM
+                VLOAD           VSU
+                                VATT
+                                SAVLEMV
+                MXV             VSL1                    # CONVERT FROM REFERENCE TO STABLE MEMBER
+                                REFSMMAT
+                STORE           SAVLEMV                 # VLC = V(CSM) - V(LM)
+                SLOAD           BZE                     # CHECK IF N=0
+                                NSRCHPNT
+
+## Page 600
+                                DESGLOS                 # YES-DESIGNATE ALONG LOS
+                DSU             BZE                     # IS N=1
+                                ONEOCT                  # YES-CALCULATE X AND Y AXES OF
+                                CALCXY                  # SEARCH PATTERN COORDINATE SYSTEM
+                VLOAD                                   # NO-ROTATE X-Y AXES TO NEXT SEARCH POINT
+                                UXVECT
+                STOVL           UXVECTPR                # SAVE ORIGINAL X AND Y VECTORS
+                                UYVECT                  # UXPRIME = ORIGINAL UX
+                STORE           UYVECTPR                # UYPRIME = ORIGINAL UY
                 VXSC
-                        SIN60DEG        # UX = (COS 60)UXPR + (SIN 60)UYPR
-                STOVL   UXVECT
-                        UXVECTPR
-                VXSC    VAD
-                        COS60DEG
-                        UXVECT
+                                SIN60DEG                # UX =(COS 60)UXPR +(SIN 60)UYPR
+                STOVL           UXVECT
+                                UXVECTPR
+                VXSC            VAD
+                                COS60DEG
+                                UXVECT
                 UNIT
-                STOVL   UXVECT
-                        UXVECTPR        # UY = (-SIN 60)UXPR + (COS 60)UYPR
+                STOVL           UXVECT
+                                UXVECTPR                # UY=(-SIN 60)UXPR +(COS 60)UYPR
                 VXSC
-                        SIN60DEG
-                STOVL   UYVECT
-                        UYVECTPR
-                VXSC    VSU
-                        COS60DEG
-                        UYVECT
+                                SIN60DEG
+                STOVL           UYVECT
+                                UYVECTPR
+                VXSC            VSU
+                                COS60DEG
+                                UYVECT
                 UNIT
-                STORE   UYVECT
-OFFCALC         VXSC    VAD             # OFFSET VECTOR = K(UY)
-                        OFFSTFAC        # LOS VECTOR + OFFSET VECTOR DEFINES
-                        LOSDESRD        # DESIRED POINT IN SEARCH PATTERN
-                UNIT    MXV
-                        REFSMMAT        # CONVERT TO STABLE MEMBER COORDINATES
+                STORE           UYVECT
+OFFCALC         VXSC            VAD                     # OFFSET VECTOR = K(UY)
+                                OFFSTFAC                # LOS VECTOR + OFFSET VECTOR DEFINES
+                                LOSDESRD                # DESIRED POINT IN SEARCH PATTERN
+                UNIT            MXV
+                                REFSMMAT                # CONVERT TO STABLE MEMBER COORDINATES
                 VSL1
-CONTDESG        STOVL   RRTARGET
-                        SAVLEMV
-                STORE   LOSVEL
+CONTDESG        STOVL           RRTARGET
+                                SAVLEMV
+                STORE           LOSVEL
                 EXIT
                 INHINT
-                TC      KILLTASK        # KILL ANY PRESENTLY WAITLISTED TASK
-                CADR    DESLOOP +2      # WHICH WOULD DESIGNATE TO THE LAST
-                                        # POINT IN THE PATTERN
-CONTDES2        CS      CDESBIT
-                MASK    RADMODES        # SET BIT 15 OF RADMODES TO INDICATE
-                AD      CDESBIT         # A CONTINUOUS DESIGNATE WANTED.
-                TS      RADMODES
-                TC      INTPRET
+                TC              KILLTASK                # KILL ANY PRESENTLY WAITLISTED TASK
+                CADR            DESLOOP         +2      # WHICH WOULD DESIGNATE TO THE LAST
+                                                        # POINT IN THE PATTERN
+CONTDES2        CS              BIT15
+                MASK            RADMODES                # SET BIT 15 OF RADMODES TO INDICATE
+                AD              BIT15                   # A CONTINUOUS DESIGNATE WANTED
+                TS              RADMODES
+                TC              INTPRET
 
                 CALL
-## Page 591
-                        RRDESSM         # DESIGNATE RADAR TO RRTARGET VECTOR
+                                RRDESSM                 # DESIGNATE RADAR TO RRTARGET VECTOR
+
+## Page 601
 
                 EXIT
-                TC      LIMALARM        # LOS NOT IN MODE 2 COVERAGE (P22)
-                TC      LIMALARM        # VEHICLE MANEUVER REQUIRED (P20)
+                TC              LIMALARM                # LOS NOT IN MODE 2 COVERAGE (P22)
+                TC              LIMALARM                # VEHICLE MANEUVER REQUIRED (P20)
 
-                                        # COMPUTE OMEGA,ANGLE BETWEEN RR LOS AND
-                                        # SPACECRAFT +Z AXIS
+
+                                                        # COMPUTE OMEGA,ANGLE BETWEEN RR LOS AND
+                                                        # SPACECRAFT +Z AXIS
 OMEGCALC        EXTEND
-                DCA     CDUT
-                DXCH    TANGNB
-                TC      INTPRET
+                DCA             CDUT
+                DXCH            TANGNB
+                TC              INTPRET
                 CALL
-                        RRNB
-                DLOAD   ACOS            # OMEGA IS ARCCOSINE OF Z-COMPONENT OF
-                        36D             # VECTOR COMPUTED BY RRNB (LEFT AT 32D)
-                STORE   OMEGDISP        # STORE FOR DISPLAY IN R2
+                                RRNB
+                DLOAD           ACOS                    # OMEGA IS ARCCOSINE OF Z-COMPONENT OF
+                                36D                     # VECTOR COMPUTED BY RRNB (LEFT AT 32D)
+                STORE           OMEGDISP                # STORE FOR DISPLAY IN R2
                 EXIT
-                TC      ENDOFJOB
-## Page 592
+                TC              ENDOFJOB
+
+## Page 602
 # CALCULATE X AND Y VECTORS FOR SEARCH PATTERN COORDINATE SYSTEM
 
-CALCXY          VLOAD   VXV
-                        VXRCM
-                        LOSDESRD
+
+CALCXY          VLOAD           VXV
+                                VXRCM
+                                LOSDESRD
                 UNIT
-                STOVL   UXVECT          # UX = (VLM X RLM) X LOS
-                        LOSDESRD
-                VXV     UNIT
-                        UXVECT
-                STORE   UYVECT          # UY = LOS X UX
+                STOVL           UXVECT                  # UX = (VLM X RLM) X LOS
+                                LOSDESRD
+                VXV             UNIT
+                                UXVECT
+                STORE           UYVECT                  # UY = LOS X UX
                 GOTO
-                        OFFCALC
+                                OFFCALC
 
-DESGLOS         VLOAD   MXV             # WHEN N= 0,DESIGNATE ALONG LOS
-                        LOSDESRD
-                        REFSMMAT        # CONVERT LOS FROM REFERENCE TO SM COORDS
-                VSL1    GOTO
-                        CONTDESG
 
-CALLDGCH        CAE     FLAGWRD0        # IS RENDEZVOUS FLAG SET
-                MASK    RNDVZBIT
+DESGLOS         VLOAD           MXV                     # WHEN N= 0,DESIGNATE ALONG LOS
+                                LOSDESRD
+                                REFSMMAT                # CONVERT LOS FROM REFERENCE TO SM COORDS
+                VSL1            GOTO
+                                CONTDESG
+
+
+CALLDGCH        CAE             FLAGWRD0                # IS RENDEZVOUS FLAG SET
+                MASK            RNDVZBIT
                 EXTEND
-                BZF     TASKOVER        # NO - EXIT R24
-                CAF     PRIO25          # YES - SCHEDULE JOB TO DRIVE RADAR TO NEXT
-                TC      FINDVAC         # POINT IN SEARCH PATTERN
-                EBANK=  RLMSRCH
-                2CADR   DATGDCHK
+                BZF             TASKOVER                # NO-EXIT R24
+                CAF             PRIO25                  # YES-SCHEDULE JOB TO DRIVE RADAR TO NEXT
+                TC              FINDVAC                 # POINT IN SEARCH PATTERN
+                EBANK=          RLMSRCH
+                2CADR           DATGDCHK
+                TC              TASKOVER
 
-                TC      TASKOVER
 
-DATGDCHK        CAF     BIT4
-                EXTEND                  # CHECK IF DATA GOOD DISCRETE PRESENT
-                RAND    CHAN33
+DATGDCHK        CAF             BIT4
+                EXTEND                                  # CHECK IF DATA GOOD DISCRETE PRESENT
+                RAND            CHAN33
                 EXTEND
-                BZF     STORE1S         # YES - GO TO STORE 11111 FOR DISPLAY IN R1
-                CS      SIX
-                AD      NSRCHPNT        # IS N GREATER THAN 6
+                BZF             STORE1S                 # YES- GO TO STORE 11111 FOR DISPLAY IN R1
+                CS              SIX
+                AD              NSRCHPNT                # IS N GREATER THAN 6
                 EXTEND
-                BZF     LRS24.1         # YES - RESET N = 0 AND START AROUND AGAIN
-                INCR    NSRCHPNT        # NO-SET N = N+1 AN GO TO
-                TCF     CHKSRCH         # NEXT POINT IN PATTERN
+                BZF             LRS24.1                 # YES - RESET N = 0 AND START AROUND AGAIN
+                INCR            NSRCHPNT                # NO-SET N = N+1 AN GO TO
+                TCF             CHKSRCH                 # NEXT POINT IN PATTERN
 
-STORE1S         CAF     ALL1S           # STORE 11111 FOR DISPLAY IN R1
-                TS      DATAGOOD
-## Page 593
+
+STORE1S         CAF             ALL1S                   # STORE 11111 FOR DISPLAY IN R1
+                TS              DATAGOOD
+
+## Page 603
                 INHINT
-                TC      KILLTASK        # DELETE DESIGNATE TASK FROM
-                CADR    DESLOOP +2      # WAITLIST USING KILLTASK
-                TC      ENDOFJOB
+                TC              KILLTASK                # DELETE DESIGNATE TASK FROM
+                CADR            DESLOOP         +2      # WAITLIST USING KILLTASK
+                TC              ENDOFJOB
 
-LIMALARM        TC      ALARM           # ISSUE ALARM 527 - LOS NOT IN MODE2
-                OCT     527             # COVERAGE IN P22 OR VEHICLE MANEUVER
-                INHINT                  # REQUIRED IN P20
-                TC      KILLTASK        # KILL WAITLIST CALL FOR NEXT
-                CADR    CALLDGCH        # POINT IN SEARCH PATTERN
-                TC      ENDOFJOB
+LIMALARM        TC              ALARM                   # ISSUE ALARM 527- LOS NOT IN MODE2
+                OCT             527                     # COVERAGE IN P22 OR VEHICLE MANEUVER
+                INHINT                                  # REQUIRED IN P20
+                TC              KILLTASK                # KILL WAITLIST CALL FOR NEXT
+                CADR            CALLDGCH                # POINT IN SEARCH PATTERN
+                TC              ENDOFJOB
 
-ALL1S           DEC     11111
-SIN60DEG        2DEC    .86603
-COS60DEG        =       DPHALF          # (2DEC .50)
-UXVECTPR        EQUALS  12D             # PREVIOUS
-UYVECTPR        EQUALS  18D
-RLMUNIT         EQUALS  12D
-OFFSTFAC        2DEC    0.05678         # TANGENT OF 3.25 DEGREES
 
-ONEOCT          OCT     00001           # **** NOTE - THESE TWO CONSTANTS MUST ****
-3SECONDS        2DEC    300             # **** BE IN THIS ORDER BECAUSE         ****
+ALL1S           DEC             11111
+SIN60DEG        2DEC            .86603
+COS60DEG        =               DPHALF                  # (2DEC   .50)
+UXVECTPR        EQUALS          12D                     # PREVIOUS
+UYVECTPR        EQUALS          18D
+RLMUNIT         EQUALS          12D
+OFFSTFAC        2DEC            0.05678                 # TANGENT OF 3.25 DEGREES
+ONEOCT          OCT             00001                   # ****  NOTE-THESE TWO CONSTANTS MUST ****
+3SECONDS        2DEC            300                     # ****  BE IN THIS ORDER BECAUSE      ****
+                                                        # ****  ONEOCT NEEDS A LOWER ORDER    ****
+                                                        # ****  WORD OF ZEROES                ****
+6SECONDS        DEC             600
+DEC50           DEC             50
+# ********************************
+#
+# TEST PROGRAM FOR LSR22.3 --- TO BE REMOVED
+# ********************************
 
-                                        # **** ONEOCT NEEDS A LOWER ORDER       ****
-                                        # **** WORD OF ZEROES                   ****
-6SECONDS        DEC     600
-1.5SECS         2DEC    150
+                BANK            27
 
-ZERO/SP         EQUALS  HI6ZEROS
+                EBANK=          AIG
+                COUNT*          $$/RTEST
+TEST22.3        CAF             ZERO
+                TS              LONG
+LOOP22.3        TC              INTPRET
+                LXC,2           DLOAD*
+                                LONG
+                                JOBOVER         +1,2
+                STORE           AIG
+                DLOAD*
+                                JOBOVER         +2,2
+                STORE           AMG
+                DLOAD*
 
-                BLOCK   02
-                SETLOC  FFTAG5
+## Page 604
+                                JOBOVER         +4,2
+                STORE           MKTIME
+                DLOAD*
+                                JOBOVER         +6,2
+                STORE           RM
+                DLOAD*
+                                JOBOVER         +8D,2
+                STORE           RDOTM
+                DLOAD*
+                                JOBOVER         +10D,2
+                STORE           RRSHAFT
+                DLOAD*
+                                JOBOVER         +12D,2
+                STORE           RRTRUN
+                CALL
+                                LSR22.3
+22.3ENT         EXIT
+                CA              LONG
+                AD              DEC13T
+                TS              LONG
+                CCS             LONG            +1
+                TC              +2
+STOP22.3        CA              A
+                TS              LONG            +1
+                TC              LOOP22.3
+DEC13T          DEC             13
+
+JOBOVER         EQUALS          LRS24.1                 # ****  TEMPORARY DEFINITION ******
+
+# END OF TEST PROGRAM
+# ***********************************************
+ZERO/SP         EQUALS          HI6ZEROS
+                BLOCK           02
+                SETLOC          FFTAG5
                 BANK
-                COUNT*  $$/P20
-GOTOV56         EXTEND                  # P20 TERMINATES BY GOTOV56 INSTEAD OF
-                DCA     VB56CADR        # GOTOPOOH
-                TCF     SUPDXCHZ
-                EBANK=  WHOCARES
-VB56CADR        2CADR   TRMTRACK
+                COUNT*          $$/P20
+GOTOV56         EXTEND                                  # P20 TERMINATES BY GOTOV56 INSTEAD OF
+                DCA             VB56CADR                # GOTOPOOH
+                TCF             SUPDXCHZ
+                EBANK=          WHOCARES
+VB56CADR        2CADR           TRMTRACK
+
+## Page 605
 
 ## Page 594
-# PROGRAM NAME: R29     (RENDEZVOUS RADAR DESIGNATE DURING POWERED FLIGHT)
-# MOD NO. 2     BY H. BLAIR-SMITH       JULY 2, 1968.
-#
+# PROGRAM NAME: R29  (RENDEZVOUS RADAR DESIGNATE DURING POWERED FLIGHT)
+# MOD NO. 2       BY H. BLAIR-SMITH       JULY 2, 1968.
+
+
 # FUNCTIONAL DESCRIPTION:
-#
-#       DESIGNATES THE RENDEZVOUS RADAR TOWARD THE COMPUTED LOS TO THE CSM, WITH THE CHIEF OBJECTIVE OF OBTAINING RANGE
-#       AND RANGE RATE DATA AT 2-SECOND INTERVALS FOR TRANSMISSION TO THE GROUND.  WHEN THE RR IS WITHIN .5 DEGREE OF
-#       THE COMPUTED LOS, TRACKING IS ENABLED, AND DESIGNATION CONTINUES UNTIL THE DATA-GOOD DISCRETE IS RECEIVED.  AT
-#       THAT POINT, DESIGNATION CEASES AND A RADAR-READING ROUTINE TAKES OVER, PREPARING A CONSISTENT SET OF DATA FOR
-#       DOWN TELEMETRY.  THE SET INCLUDES RANGE, RANGE RATE, MARK TIME, TWO RR CDU ANGLES, THREE IMUCDU ANGLES, AND AN
-#       INDICATOR WHICH IS 1 WHEN THE SET IS CONSISTENT AND 0 OTHERWISE.  THE INDICATOR IS IN TRKMKCNT.
-#
+
+# DESIGNATES THE RENDEZVOUS RADAR TOWARD THE COMPUTED LOS TO THE CSM, WITH THE CHIEF OBJECTIVE OF OBTAINING RANGE
+# AND RANGE RATE DATA AT 2-SECOND INTERVALS FOR TRANSMISSION TO THE GROUND.  WHEN THE RR IS WITHIN .5 DEGREE OF
+# THE COMPUTED LOS, TRACKING IS ENABLED, AND DESIGNATION CONTINUES UNTIL THE DATA-GOOD DISCRETE IS RECEIVED.  AT
+# THAT POINT, DESIGNATION CEASES AND A RADAR-READING ROUTINE TAKES OVER, PREPARING A CONSISTENT SET OF DATA FOR
+# DOWN TELEMETRY.  THE SET INCLUDES RANGE, RANGE RATE, MARK TIME, TWO RR CDU ANGLES, THREE IMUCDU ANGLES, AND AN
+# INDICATOR WHICH IS 1 WHEN THE SET IS CONSISTENT AND 0 OTHERWISE.  THE INDICATOR IS IN TRKMKCNT.
+
 # CALLING SEQUENCE:  BEGUN EVERY 2 SECONDS AS AN INTEGRAL PART OF SERVICER
-#
+
+
 # SUBROUTINES CALLED:
 #
-#       REMODE          RRTONLY
-#       UNIT            MPACVBUF
-#       QUICTRIG        AX*SR*T
-#       SPSIN           SPCOS
-#       SETRRECR        RROUT
-#       RRRDOT          RRRANGE
-#
+# REMODE   RRTONLY
+# UNIT     MPACVBUF
+# QUICTRIG AX*SR*T
+# SPSIN    SPCOS
+# SETRRECR RROUT
+# RRRDOT   RRRANGE
+
+
 # EXIT:  TO NOR29NOW, IN SERVICER.
-#
+
+
 # OUTPUT:  (ALL FOR DOWNLINK)
-#
-#       RM              RDOTM           (RAW)
-#       AIG             AMG
-#       AOG             TRKMKCNT        TRKMKCNT = 00001 IF SET IS CONSISTENT,
-#       TANGNB          TANGNB +1       OTHERWISE TRKMKCNT = 00000.
-#       MKTIME
-## Page 595
+
+# RM       RDOTM                  (RAW)
+# AIG      AMG
+# AOG      TRKMKCNT               TRKMKCNT = 00001 IF SET IS CONSISTENT,
+# TANGNB   TANGNB +1              OTHERWISE TRKMKCNT = 00000.
+# MKTIME
+
+## Page 606
 #
 # ERASABLE INITIALIZATION REQUIRED:
-#
-#       NOR29FLG        READRFLG                (TO 1 AND 0 BY FRESH START) (RESET NOR29FLG TO LET SERVICER RUN R29)
-#       PIPTIME         RADMODES (BIT 10)       (BIT SET TO 0 BY FRESH START)
-#       R(CSM)          V(CSM)
-#       R               V                       (PIPTIME THRU V BY AVE G IN SERVICER)
-#
-# DEBRIS:
-#
-#       RADMODES (BIT 10)
-#       LOSSM           LOSVDT/4                (= RRTARGET & LOSVEL)
-#       SAVECDUT        OLDESFLG                (SAVECDUT = MLOSV)
-#       LOSCMFLG        READRFLG
-#
-# ALARMS:  NONE.
-#
-# COMPONENT JOBS AND TASKS:
-#
-#       INITIALIZING, IF RR IS FOUND TO BE IN MODE 1:  JOB R29REMOJ AND TASK REMODE:  ALWAYS: TASK PREPOS29.
-#       DESIGNATING:  TASK BEGDES29 & JOB R29DODES.
-#       RADAR READING:  TASK R29READ AND JOB R29RDJOB.  ALL JOBS ARE NOVAC TYPE.
 
-                BANK    33
-                SETLOC  R29/SERV
+# NOR29FLG READRFLG               (TO 1 AND 0 BY FRESH START)  (RESET NOR29FLG TO LET SERVICER RUN R29)
+# PIPTIME  RADMODES (BIT 10)      (BIT SET TO 0 BY FRESH START)
+# R(CSM)   V(CSM)
+# R        V                      (PIPTIME THRU V BY AVE G IN SERVICER)
+
+
+# DEBRIS:
+
+# RADMODES (BIT 10)
+# LOSSM    LOSVDT/4       (= RRTARGET & LOSVEL)
+# SAVECDUT OLDESFLG       (SAVECDUT = MLOSV)
+# LOSCMFLG READRFLG
+
+
+# ALARMS:  NONE.
+
+
+# COMPONENT JOBS AND TASKS:
+
+# INITIALIZING, IF RR IS FOUND TO BE IN MODE 1:  JOB R29REMOJ AND TASK REMODE;  ALWAYS: TASK PREPOS29.
+# DESIGNATING:  TASK BEGDES29 & JOB R29DODES.
+# RADAR READING:  TASK R29READ AND JOB R29RDJOB.  ALL JOBS ARE NOVAC TYPE.
+
+
+                BANK            33
+                SETLOC          R29/SERV
                 BANK
 
-                COUNT*  $$/r29
+                COUNT*          $$/R29
 
-NR29&RDR        EQUALS  EBANK5
+NR29&RDR        EQUALS          EBANK5
 
-## Page 596
+## Page 607
 # SERVICER COMES TO R29 FROM "R29?" IF NOR29FLG, READRFLG, RRREMODE, RRCDUZRO, RRREPOS, AND DISPLAY-INERTIAL-DATA
 # ARE ALL RESET, AND THE RR IS IN LGC MODE (OFTEN CONFUSINGLY CALLED AUTO MODE).
 
-R29             CS      RADMODES
-                MASK    DESIGBIT
+R29             CS              RADMODES
+                MASK            BIT10
                 EXTEND
-                BZF     R29.LOS         # BRANCH IF DESIGNATION IS ALREADY ON.
+                BZF             R29.LOS                 # BRANCH IF DESIGNATION IS ALREADY ON.
 
                 INHINT
-                ADS     RADMODES        # SHOW THAT DESIGNATION IS NOW ON.
-                CS      BIT14
+                ADS             RADMODES                # SHOW THAT DESIGNATION IS NOW ON.
+                CS              BIT14
                 EXTEND
-                WAND    CHAN12          # REMOVE RR TRACK ENABLE DISCRETE.
-                CS      LOSCMBIT
-                MASK    FLAGWRD2
-                TS      FLAGWRD2        # CLEAR LOSCMFLG TO SHOW DES. LOOP IS OFF.
-                CS      OLDESBIT
-                MASK    STATE
-                TS      STATE           # SHOW THAT DES. LOOP IS NOT REQUESTED.
-                TC      BANKCALL
-                CADR    SETRRECR        # ENABLE RR ERROR COUNTERS.
-                CA      ANTENBIT
-                MASK    RADMODES
-                CCS     A               # TEST RR MODE BIT.
-                TCF     SETPRPOS        # MODE 2.
+                WAND            CHAN12                  # REMOVE RR TRACK ENABLE DISCRETE.
+                CS              LOSCMBIT
+                MASK            FLAGWRD2
+                TS              FLAGWRD2                # CLEAR LOSCMFLG TO SHOW DES. LOOP IS OFF.
+                CS              OLDESBIT
+                MASK            STATE
+                TS              STATE                   # SHOW THAT DES. LOOP IS NOT REQUESTED.
+                TC              BANKCALL
+                CADR            SETRRECR                # ENABLE RR ERROR COUNTERS.
+                CA              BIT12
+                MASK            RADMODES
+                CCS             A                       # TEST RR MODE BIT.
+                TCF             SETPRPOS                # MODE 2.
 
-                CA      PRIO21          # MODE 1:  MUST REMODE.
-                TC      NOVAC
-                EBANK=  LOSCOUNT
-                2CADR   R29REM0J        # NEEDS OWN JOB TO RADSTALL IN.
+                CA              PRIO21                  # MODE 1; MUST REMODE.
+                TC              NOVAC
+                EBANK=          LOSCOUNT
+                2CADR           R29REM0J                # NEEDS OWN JOB TO RADSTALL IN.
 
-                CS      DESIGBIT
-                MASK    RADMODES        # CLEAR DESIGNATE FLAG IN RADMODES
-                TS      RADMODES        # BEFORE CALLING REMODE
-                CA      REMODBIT
-                ADS     RADMODES        # SHOW THAT REMODING IS ON.
-                TCF     NOR29NOW        # CONTINUE SERVICER FUNCTIONS.
+                CS              BIT10
+                MASK            RADMODES                # CLEAR DESIGNATE FLAG IN RADMODES
+                TS              RADMODES                # BEFORE CALLING REMODE
+                CA              BIT14
+                ADS             RADMODES                #  SHOW THAT REMODING IS ON.
+                TCF             NOR29NOW                # CONTINUE SERVICER FUNCTIONS.
 
-SETPRPOS        CA      ONE
-                TC      WAITLIST
-                EBANK=  LOSCOUNT
-                2CADR   PREPOS29        # TASK TO SET TRUNNION ANGLE TO -180 DEG.
+SETPRPOS        CA              ONE
+                TC              WAITLIST
+                EBANK=          LOSCOUNT
+                2CADR           PREPOS29                # TASK TO SET TRUNNION ANGLE TO -180 DEG.
 
-                CA      REPOSBIT
-                ADS     RADMODES        # SHOW THAT REPOSITIONING IS ON.
-                TCF     NOR29NOW
+                CA              BIT11
+                ADS             RADMODES                # SHOW THAT REPOSITIONING IS ON.
+                TCF             NOR29NOW
 
-## Page 597
+## Page 608
 # FORCE RENDEZVOUS RADAR INTO MODE 2.
 
-R29REM0J        CA      ONE
-                TC      WAITLIST
-                EBANK=  LOSCOUNT
-                2CADR   REMODE          # REMODE MUST RUN AS A TASK.
+R29REM0J        CA              ONE
+                TC              WAITLIST
+                EBANK=          LOSCOUNT
+                2CADR           REMODE                  # REMODE MUST RUN AS A TASK.
+                TC              BANKCALL                # WAIT FOR END OF REMODING.
+                CADR            RADSTALL
 
-                TC      BANKCALL        # WAIT FOR END OF REMODING.
-                CADR    RADSTALL
-
-                TCF     ENDOFJOB        # BAD EXIT CAN'T HAPPEN.
-                TCF     ENDOFJOB
+                TCF             ENDOFJOB                # BAD EXIT CAN'T HAPPEN.
+                TCF             ENDOFJOB
 
 # TASK TO PREPOSITION THE RR TRUNNION ANGLE TO -180 DEG.
 
-                SETLOC  R29S1
+                SETLOC          R29S1
                 BANK
 
-PREPOS29        CA      NEGMAX          # -180 DEG.
-                TC      RRTONLY         # DRIVE TRUNNION CDU.
-                CS      REPOSBIT        # SHOW THAT REPOSITIONING IS OFF.
-                MASK    RADMODES
-                TS      RADMODES
-                TCF     TASKOVER
+PREPOS29        CA              NEGMAX                  # -180 DEG.
+                TC              RRTONLY                 # DRIVE TRUNNION CDU.
+                CS              REPOSBIT                # SHOW THAT REPOSITIONING IS OFF.
+                MASK            RADMODES
+                TS              RADMODES
+                TCF             TASKOVER
+
 
 # COMPUTE LINE-OF-SIGHT AND LOS VELOCITY, AND PASS THEM TO THE R29DODES LOOP.
 
-                SETLOC  R29
+
+                SETLOC          R29
                 BANK
 
 R29.LOS         EXTEND
-                DCS     PIPTIME
-                DXCH    MPAC
+                DCS             PIPTIME
+                DXCH            MPAC
                 EXTEND
-                DCA     TIME2
-                DAS     MPAC            # (MPAC) = T-PIPTIME, SCALED B-28.
-                TS      MODE            # SET MODE TO DOUBLE PRECISION.
-                CA      MPAC +1
+                DCA             TIME2
+                DAS             MPAC                    # (MPAC) = T-PIPTIME, SCALED B-28.
+                TS              MODE                    # SET MODE TO DOUBLE PRECISION.
+                CA              MPAC            +1
                 EXTEND
-                MP      BIT12
-                DXCH    MPAC            # T-PIPTIME NOW SCALED B-17.
-                TC      INTPRET
-## Page 598
-# LOSCMFLG = 0 MEANS THAT THE DESIGNATION IS READY FOR NEW DATA.  SETTING LOSCMFLG MAKES IT GO AWAY SO SETUP29D CAN
+                MP              BIT12
+                DXCH            MPAC                    # T-PIPTIME NOW SCALED B-17.
+                TC              INTPRET
+
+## Page 609
+# LOSCMFLG=0 MEANS THAT THE DESIGNATION IS READY FOR NEW DATA.  SETTING LOSCMFLG MAKES IT GO AWAY SO SETUP29D CAN
 # START IT UP WHEN THE DATA IS IN PLACE.
 
-                PDVL    VSU             # PUSH DOWN T-PIPTIME.
-                        V(CSM)
-                        V               # LOSVEL = V(CSM) - V.
-                PDDL    VXSC            # SWAP LOSVEL FOR T-PIPTIME, MULTIPLY THEM
-                VAD     VSU             #       AND ADD THE RESULT TO R(CSM) - R TO GET
-                        R(CSM)          #       AN UP-TO-DATE LOS VECTOR IN SM AXES.
-                        R
-                BOFSET  EXIT            # (BOFSET DOES ITS THING INHINTED.)
-                        LOSCMFLG        # IF DESIGNATE LOOP IS OFF, CHANGE LOSCM-
-                        SETUP29D        # FLG TO ON AND GO TO SET UP NEW DATA.
-                TCF     NOR29NOW        # IF DES. LOOP IS ON, LET IT USE OLD DATA.
 
-SETUP29D        STOVL   LOSSM           # LINE-OF-SIGHT VECTOR, STABLE MEMBER AXES
-                        0
+                PDVL            VSU                     # PUSH DOWN T-PIPTIME.
+                                V(CSM)
+                                V                       # LOSVEL = V(CSM) - V.
+                PDDL            VXSC                    # SWAP LOSVEL FOR T-PIPTIME, MULTIPLY THEM
+                VAD             VSU                     #  AND ADD THE RESULT TO R(CSM) - R TO GET
+                                R(CSM)                  #  AN UP-TO-DATE LOS VECTOR IN SM AXES.
+                                R
+                BOFSET          EXIT                    # (BOFSET DOES ITS THING INHINTED.)
+                                LOSCMFLG                # IF DESIGNATE LOOP IS OFF, CHANGE LOSCM-
+                                SETUP29D                #  FLG TO ON AND GO TO SET UP NEW DATA.
+                TCF             NOR29NOW                # IF DES. LOOP IS ON, LET IT USE OLD DATA.
+
+SETUP29D        STOVL           LOSSM                   # LINE-OF-SIGHT VECTOR, STABLE MEMBER AXES
+                                0
                 VXSC
-                        .5SECB17
-                STORE   LOSVDT/4        # 1/2 SECOND'S WORTH OF LOS VELOCITY.
-                CLEAR   EXIT
-                        LOSCMFLG        # LET R29DLOOP USE NEW DATA.
+                                .5SECB17
+                STORE           LOSVDT/4                # 1/2 SECOND'S WORTH OF LOS VELOCITY.
+                CLEAR           EXIT
+                                LOSCMFLG                # LET R29DLOOP USE NEW DATA.
 
-                CS      STATE
-                MASK    OLDESBIT
+                CS              STATE
+                MASK            OLDESBIT
                 EXTEND
-                BZF     NOR29NOW        # BRANCH IF R29 DES. LOOP IS REQUESTED.
+                BZF             NOR29NOW                # BRANCH IF R29 DES. LOOP IS REQUESTED.
                 INHINT
-                ADS     STATE           # OTHERWISE REQUEST IT NOW.
+                ADS             STATE                   # OTHERWISE REQUEST IT NOW.
 
-                CCS     PIPCTR          # SEE IF TASK SHOULD BE OFFSET ONE SECOND.
-                CS      SUPER110        # -96D +100D = 4.
-                AD      1SEC            # 0 +100D = 100D.
-                TC      WAITLIST
-                EBANK=  LOSCOUNT
-                2CADR   BEGDES29        # START BEGDES29 TASK ASAP.
+                CCS             PIPCTR                  # SEE IF TASK SHOULD BE OFFSET ONE SECOND.
+                CS              SUPER110                # -96D +100D = 4.
+                AD              1SEC                    # 0 +100D = 100D.
+                TC              WAITLIST
+                EBANK=          LOSCOUNT
+                2CADR           BEGDES29                # START BEGDES29 TASK ASAP.
+                TCF             NOR29NOW                # RELINT AND CONTINUE SERVICER FUNCTIONS.
 
-                TCF     NOR29NOW        # RELINT AND CONTINUE SERVICER FUNCTIONS.
+.5SECB17        2DEC            50              B-17
 
-.5SECB17        2DEC    50 B-17
-
-## Page 599
+## Page 610
 # R29 DESIGNATE JOB AND TASK MACHINERY.  TASK RECURS EVERY .5 SEC UNTIL DESIGNATE IS CALLED OFF; IT MAY WAIT FOR A
 # CENTISECOND OR TWO IF IT COMES UP WHILE SETUP29D IS SUPPLYING NEW DATA.
 
-                BANK    24
-                SETLOC  P20S
+                BANK            24
+                SETLOC          P20S
                 BANK
 
-                COUNT*  $$/R29
+                COUNT*          $$/R29
 
-BEGDES29        CAF     PRIO21
-                TC      NOVAC
-                EBANK=  LOSVDT/4
-                2CADR   R29DODES        # START R29DODES JOB TWICE A SECOND.
+BEGDES29        CAF             PRIO21
+                TC              NOVAC
+                EBANK=          LOSVDT/4
+                2CADR           R29DODES                # START R29DODES JOB TWICE A SECOND.
 
-R29DLOOP        CAF     .5SEC
-                TC      VARDELAY
+R29DLOOP        CAF             .5SEC
+                TC              VARDELAY
 
-                CS      RADMODES
-                MASK    DESIGBIT
-                CCS     A
-                TCF     TASKOVER        # QUIT IF DESIGNATION IS CALLED OFF.
+                CS              RADMODES
+                MASK            BIT10
+                CCS             A
+                TCF             TASKOVER                # QUIT IF DESIGNATION IS CALLED OFF.
 
-                CS      FLAGWRD2
-                MASK    LOSCMBIT
+                CS              FLAGWRD2
+                MASK            LOSCMBIT
                 EXTEND
-                BZF     +3              # BRANCH IF SETUP29D'S SUPPLYING NEW DATA.
-                ADS     FLAGWRD2        # SET LOSCMFLG:  SHOW THAT DES. LOOP IS ON.
-                TCF     BEGDES29
+                BZF             +3                      # BRANCH IF SETUP29D'S SUPPLYING NEW DATA.
+                ADS             FLAGWRD2                # SET LOSCMFLG:  SHOW THAT DES. LOOP IS ON.
+                TCF             BEGDES29
 
-                CA      ONE
-                TCF     R29DLOOP +1     # WAIT A CENTISECOND FOR NEW DATA.
-## Page 600
+                CA              ONE
+                TCF             R29DLOOP        +1      # WAIT A CENTISECOND FOR NEW DATA.
+
+## Page 611
 # R29DODES:  RR DESIGNATION LOOP FOR R29
-#
+
 # THIS ROUTINE DOES MUCH THE SAME THING AS DODES, BUT A GREAT DEAL FASTER.  IT TAKES THE NON-UNITIZED LOS VECTOR
 # IN STABLE MEMBER COORDINATES (LOSSM) AND A DELTA-LOS IN SM AXES (LOSVDT/4) WHICH IS 1/2 SEC TIMES LOS VELOCITY,
 # AND DEVELOPS THE SHAFT AND TRUNNION COMMANDS USING SINGLE PRECISION AS MUCH AS POSSIBLE, AND INTERPRETIVE NOT AT
 # ALL.  THE UNIT(LOSSM + LOSVEL * 1 SEC) IS COMPUTED IN DP AND TRANSFORMED TO NAV BASE COORDINATES IN DOUBLE PRE-
 # CISION (USING SP SINES AND COSINES OF CDU ANGLES), AND THE REST IS DONE IN SP.
-#
+
 # THE FUNCTIONAL DIFFERENCE IS THAT R29DODES ALWAYS CLEARS LOSCMFLG WHEN IT ENDS, AND IT STARTS UP THE R29READ
 # TASK WHEN LOCK-ON IS ACHIEVED.
 
-                BANK    32
-                SETLOC  F2DPS*32
+                BANK            32
+                SETLOC          F2DPS*32
                 BANK
 
-                COUNT*  $$/R29
-                EBANK=  LOSVDT/4
+                COUNT*          $$/R29
+                EBANK=          LOSVDT/4
 
-R29DODES        CA      ONE
-                TS      TANG            # INDICATE 1ST PASS THRU VECTOR LOOP.
-                CA      FIVE
+R29DODES        CA              ONE
+                TS              TANG                    # INDICATE 1ST PASS THRU VECTOR LOOP.
+                CA              FIVE
 
-R29DVBEG        CCS     A               # COUNT DOWN BY TWOS IN VECTOR LOOP.
-                TS      Q
-                CCS     TANG
-                TCF     R29DPAS1        # DO THIS ON 1ST PASS THRU LOOP.
+R29DVBEG        CCS             A                       # COUNT DOWN BY TWOS IN VECTOR LOOP.
+                TS              Q
+                CCS             TANG
+                TCF             R29DPAS1                # DO THIS ON 1ST PASS THRU LOOP.
 
-                EXTEND                  # (A "PASS" HERE MEANS 3 TIMES AROUND).
-                INDEX   Q
-                DCA     LOSVDT/4
-                INDEX   Q
-                DAS     LOSSM           # ADVANCE LOS VECTOR 1/2 SECOND.
+                EXTEND                                  # (A "PASS" HERE MEANS 3 TIMES AROUND).
+                INDEX           Q
+                DCA             LOSVDT/4
+                INDEX           Q
+                DAS             LOSSM                   # ADVANCE LOS VECTOR 1/2 SECOND.
 
 R29DPAS1        EXTEND
-                INDEX   Q
-                DCA     LOSSM
-                INDEX   Q               # MOVE CURRENT LOS (1ST PASS) OR LOS PRO-
-                DXCH    MPAC +1         # JECTED 1/2 SEC AHEAD (2ND PASS).
-                CCS     TANG
-                TCF     R29DVEND        # BUG OUT HERE IN 1ST PASS.
+                INDEX           Q
+                DCA             LOSSM
+                INDEX           Q                       # MOVE CURRENT LOS (1ST PASS) OR LOS PRO-
+                DXCH            MPAC            +1      # JECTED 1/2 SEC AHEAD (2ND PASS).
+                CCS             TANG
+                TCF             R29DVEND                # BUG OUT HERE IN 1ST PASS.
 
                 EXTEND
-                INDEX   Q
-                DCA     LOSVDT/4
-                INDEX   Q
-                DAS     MPAC +1         # PROJECT LOS 1 SECOND AHEAD (2ND PASS).
+                INDEX           Q
+                DCA             LOSVDT/4
+                INDEX           Q
+                DAS             MPAC            +1      # PROJECT LOS 1 SECOND AHEAD (2ND PASS).
 
-R29DVEND        CCS     Q
-                TCF     R29DVBEG        # BRANCH TO CONTINUE VECTOR LOOP.
+R29DVEND        CCS             Q
+                TCF             R29DVBEG                # BRANCH TO CONTINUE VECTOR LOOP.
 
-## Page 601
+## Page 612
 # UNITIZE AND TRANSFORM TO NAV BASE AXES THE PRESENT LOS (1ST PASS) OR THE 1-SEC PROJECTED LOS (2ND PASS).
 
-                DXCH    MPAC +1
-                DXCH    MPAC
-                CA      R29FXLOC        # = ADRES INTB15 + -34D
-                TS      FIXLOC
-                TC      USPRCADR        # WITH FIXLOC ARMED FOR LENGTH AND LENGTH
-                CADR    UNIT            # SQUARED, BORROW UNITIZING ROUTINE.
-                TC      MPACVBUF        # MOVE UNIT(LOS) TO AX*SR*T ARG AREA.
+                DXCH            MPAC            +1
+                DXCH            MPAC
+                CA              R29FXLOC                # = ADRES INTB15+ -34D
+                TS              FIXLOC
+                TC              USPRCADR                # WITH FIXLOC ARMED FOR LENGTH AND LENGTH
+                CADR            UNIT                    # SQUARED, BORROW UNITIZING ROUTINE.
+                TC              MPACVBUF                # MOVE UNIT(LOS) TO AX*SR*T ARG AREA.
 
-                CCS     TANG
-                TCF     +2
-                TCF     GOTANGLS        # GET CDU ANGLES ONLY AFTER 1ST PASS.
-                INHINT                  # ENSURE CONSISTENT CDU READINGS.
+                CCS             TANG
+                TCF             +2
+                TCF             GOTANGLS                # GET CDU ANGLES ONLY AFTER 1ST PASS.
+                INHINT                                  # ENSURE CONSISTENT CDU READINGS.
                 EXTEND
-                DCA     CDUT
-                DXCH    SAVECDUT        # TRUNNION AND SHAFT ANGLES.
-                CA      CDUY
-                TS      CDUSPOT
-                CA      CDUZ
-                TS      CDUSPOT +2
-                CA      CDUX
-                TS      CDUSPOT +4      # CDU ANGLES IN FUNNY ORDER FOR AX*SR*T.
-                TC      BANKCALL
-                CADR    QUICTRIG        # GET SINES AND COSINES OF CDU ANGLES.
+                DCA             CDUT
+                DXCH            SAVECDUT                # TRUNNION AND SHAFT ANGLES.
+                CA              CDUY
+                TS              CDUSPOT
+                CA              CDUZ
+                TS              CDUSPOT         +2
+                CA              CDUX
+                TS              CDUSPOT         +4      # CDU ANGLES IN FUNNY ORDER FOR AX*SR*T.
+                TC              BANKCALL
+                CADR            QUICTRIG                # GET SINES AND COSINES OF CDU ANGLES.
 
-GOTANGLS        CS      THREE
-                TC      BANKCALL
-                CADR    AX*SR*T         # TRANSFORM UNIT LOS TO NB AXES (ULOSNB).
+GOTANGLS        CS              THREE
+                TC              BANKCALL
+                CADR            AX*SR*T                 # TRANSFORM UNIT LOS TO NB AXES (ULOSNB).
 
-                CCS     TANG
-                TCF     +2
-                TCF     R29DPAS2        # GO TO RR COMMAND COMP. AFTER 2ND PASS.
+                CCS             TANG
+                TCF             +2
+                TCF             R29DPAS2                # GO TO RR COMMAND COMP. AFTER 2ND PASS.
 
-## Page 602
+## Page 613
 # COMPUTE COSINE OF THE ANGLE BETWEEN THE PRESENT LOS AND THE RR BORESIGHT VECTOR, AND SET THE SELFTRACK ENABLE IF
 # THE COSINE IS APPROXIMATELY COS(.5 DEG) OR GREATER (I.E. SMALLER ANGLE).
 
-                INHINT
-                TS      TANG            # INDICATE 2ND PASS THRU VECTOR LOOP.
-                CA      SAVECDUT
-                TC      SPCOS
-                TS      PUSHLOC         # PUSHLOC = COS T.
-                CS      SAVECDUT
-                TC      SPSIN
-                TS      MODE            # MODE = -SIN T.
+                TS              TANG                    # INDICATE 2ND PASS THRU VECTOR LOOP.
+                CA              SAVECDUT
+                TC              SPCOS
+                TS              PUSHLOC                 # PUSHLOC = COS T.
+                CS              SAVECDUT
+                TC              SPSIN
+                TS              MODE                    # MODE = -SIN T.
                 EXTEND
-                MP      VBUF +2         # FORM - SIN T ULOSNBY.
-                DXCH    MPAC
-                CA      SAVECDUT +1
-                TC      SPSIN
-                TS      SAVECDUT        # SAVECDUT NOW = SIN S.
+                MP              VBUF            +2      # FORM - SIN T ULOSNBY.
+                DXCH            MPAC
+                CA              SAVECDUT        +1
+                TC              SPSIN
+                TS              SAVECDUT                # SAVECDUT NOW = SIN S.
                 EXTEND
-                MP      PUSHLOC
+                MP              PUSHLOC
                 EXTEND
-                MP      VBUF            # FORM SIN S COS T ULOSNBX.
-                DAS     MPAC
-                CA      SAVECDUT +1
-                TC      SPCOS
-                TS      SAVECDUT +1     # SAVECDUT +1 NOW = COS S.
+                MP              VBUF                    # FORM SIN S COS T ULOSNBX.
+                DAS             MPAC
+                CA              SAVECDUT        +1
+                TC              SPCOS
+                TS              SAVECDUT        +1      # SAVECDUT +1 NOW = COS S.
                 EXTEND
-                MP      PUSHLOC
+                MP              PUSHLOC
                 EXTEND
-                MP      VBUF +4         # FORM COS S COS T ULOSNBZ.
-                DAS     MPAC            # COS(ERROR) = ULOSNB . (SIN S COS T,
-                EXTEND                  # -SIN T, COS S COS T).
-                DCA     MPAC
-TESTCOS         DAS     MPAC            # (ULOSNB IN VBUF WAS A HALF-UNIT VECTOR).
-                CCS     A               # TEST FOR + OVERFLOW, NONE, OR MINUS.
-                CA      BIT14
+                MP              VBUF            +4      # FORM COS S COS T ULOSNBZ.
+                DAS             MPAC                    # COS(ERROR) = ULOSNB . (SIN S COS T,
+                EXTEND                                  # -SIN T, COS S COS T).
+                DCA             MPAC
+TESTCOS         DAS             MPAC                    # (ULOSNB IN VBUF WAS A HALF-UNIT VECTOR).
+                CCS             A                       # TEST FOR + OVERFLOW, NONE, OR MINUS.
+                CA              BIT14
                 NOOP
                 EXTEND
-                WOR     CHAN12          # IF PLUS OVERFLOW, SET SELFTRACK ENABLE.
-                RELINT
-                TCF     R29DVBEG -1     # MAKE 2ND PASS THRU VECTOR LOOP.
+                WOR             CHAN12                  # IF PLUS OVERFLOW, SET SELFTRACK ENABLE.
+                TCF             R29DVBEG        -1      # MAKE 2ND PASS THRU VECTOR LOOP.
 
-## Page 603
+## Page 614
 # COMPUTE SHAFT AND TRUNNION COMMANDS TO NULL HALF THE ERROR IN HALF A SECOND.
 
-R29DPAS2        CA      SAVECDUT +1
-                EXTEND
-                MP      VBUF            # FORM COS S ULOSNB'X.
-                DXCH    TANG
-                CS      SAVECDUT
-                EXTEND
-                MP      VBUF +4         # FORM - SIN S ULOSNB'Z.
-                DAS     TANG            # RAW SHAFT CMD = ULOSNB' . (COS S, 0,
-                CS      MODE            # - SIN S)
-                EXTEND
-                MP      SAVECDUT
-                EXTEND
-                MP      VBUF            # FORM SIN T SIN S ULOSNB'X.
-                DXCH    MPAC
-                CA      PUSHLOC
-                EXTEND
-                MP      VBUF +2         # FORM COS T ULOSNB'Y.
-                DAS     MPAC
-                CS      MODE
-                EXTEND
-                MP      SAVECDUT +1
-                EXTEND
-                MP      VBUF +4         # FORM SIN T COS S ULOSNB'Z.
-                DAS     MPAC            # RAW TRUNNION CMD = ULOSNB'.
-                CA      MPAC            # (SIN S SIN T, COS T, SIN S COS T).
-                EXTEND
-                MP      RR29GAIN
-                XCH     TANG            # STORE REFINED T CMD, GET RAW S CMD.
-                EXTEND
-                MP      RR29GAIN
-                TS      TANG +1         # STORE REFINED S CMD.
 
-## Page 604
+R29DPAS2        CA              SAVECDUT        +1
+                EXTEND
+                MP              VBUF                    # FORM COS S ULOSNB'X.
+                DXCH            TANG
+                CS              SAVECDUT
+                EXTEND
+                MP              VBUF            +4      # FORM - SIN S ULOSNB'Z.
+                DAS             TANG                    # RAW SHAFT CMD = ULOSNB' . (COS S, 0,
+                CS              MODE                    # - SIN S)
+                EXTEND
+                MP              SAVECDUT
+                EXTEND
+                MP              VBUF                    # FORM SIN T SIN S ULOSNB'X.
+                DXCH            MPAC
+                CA              PUSHLOC
+                EXTEND
+                MP              VBUF            +2      # FORM COS T ULOSNB'Y.
+                DAS             MPAC
+                CS              MODE
+                EXTEND
+                MP              SAVECDUT        +1
+                EXTEND
+                MP              VBUF            +4      # FORM SIN T COS S ULOSNB'Z.
+                DAS             MPAC                    # RAW TRUNNION CMD = ULOSNB'.
+                CA              MPAC                    # (SIN S SIN T, COS T, SIN S COS T).
+                EXTEND
+                MP              RR29GAIN
+                XCH             TANG                    # STORE REFINED T CMD, GET RAW S CMD.
+                EXTEND
+                MP              RR29GAIN
+                TS              TANG            +1      # STORE REFINED S CMD.
+
+## Page 615
 # WHETHER OR NOT TRACKING WAS ENABLED THIS TIME, CHECK ON RR DATA-GOOD.  IF PRESENT, STOP DESIGNATING AND START
 # READING DATA FROM THE RENDEZVOUS RADAR.
 
-DGOOD?          CAF     BIT4
+DGOOD?          CAF             BIT4
                 EXTEND
-                RAND    CHAN33          # GET RR DATA-GOOD BIT.
-                INHINT                  # (MAINLY FOR RROUT).
+                RAND            CHAN33                  # GET RR DATA-GOOD BIT.
+                INHINT                                  # (MAINLY FOR RROUT).
                 EXTEND
-                BZF     R29LOKON        # BRANCH IF DATA-GOOD IS PRESENT.
+                BZF             R29LOKON                # BRANCH IF DATA-GOOD IS PRESENT.
 
-                TC      BANKCALL
-                CADR    RROUT           # DATA-GOOD IS ABSENT, SO SEND COMMANDS.
-                TCF     END29DOD
+                TC              BANKCALL
+                CADR            RROUT                   # DATA-GOOD IS ABSENT, SO SEND COMMANDS.
+                TCF             END29DOD
 
-R29LOKON        CS      DESIGBIT
-                MASK    RADMODES
-                TS      RADMODES        # SHOW THAT DESIGNATION IS OVER.
-                CS      BIT2
+R29LOKON        CS              BIT10
+                MASK            RADMODES
+                TS              RADMODES                # SHOW THAT DESIGNATION IS OVER.
+                CS              BIT2
                 EXTEND
-                WAND    CHAN12          # DISABLE RR ERROR COUNTERS.
-                CA      READRBIT
-                ADS     FLAGWRD3        # SHOW THAT READING HAS BEEN REQUESTED.
-                CCS     PIPCTR          # SEE IF TASK SHOULD BE OFFSET 1 SEC.
-                CS      SUPER110        # -96D + 100D = 4.
-                AD      1SEC            # 0 + 100D = 100D.
-                TC      WAITLIST
-                EBANK=  LOSCOUNT
-                2CADR   R29READ         # START READING TASK AND JOB.
+                WAND            CHAN12                  # DISABLE RR ERROR COUNTERS.
+                CA              READRBIT
+                ADS             FLAGWRD3                # SHOW THAT READING HAS BEEN REQUESTED.
+                CCS             PIPCTR                  # SEE IF TASK SHOULD BE OFFSET 1 SEC.
+                CS              SUPER110                # -96D + 100D = 4.
+                AD              1SEC                    # 0 + 100D = 100D.
+                TC              WAITLIST
+                EBANK=          LOSCOUNT
+                2CADR           R29READ                 # START READING TASK AND JOB.
 
-END29DOD        CS      LOSCMBIT
-                MASK    FLAGWRD2
-                TS      FLAGWRD2        # ALWAYS CLEAR LOSCMFLG.
-                TCF     ENDOFJOB
+END29DOD        CS              LOSCMBIT
+                MASK            FLAGWRD2
+                TS              FLAGWRD2                # ALWAYS CLEAR LOSCMFLG.
+                TCF             ENDOFJOB
 
-R29FXLOC        ADRES   INTB15+ -34D
-RR29GAIN        DEC     -.53624
-LOSVDT/4        EQUALS  LOSVEL
-LOSSM           EQUALS  RRTARGET
-SAVECDUT        EQUALS  MLOSV
+R29FXLOC        ADRES           INTB15+         -34D
+RR29GAIN        DEC             -.53624
+LOSVDT/4        EQUALS          LOSVEL
+LOSSM           EQUALS          RRTARGET
+SAVECDUT        EQUALS          MLOSV
 
-## Page 605
+## Page 616
 # RR READING IS SET UP BY R29DODES WHEN IT DETECTS RR LOCK-ON.
 
-                BANK    24
-                SETLOC  P20S
+                BANK            24
+                SETLOC          P20S
                 BANK
 
-                COUNT*  $$/R29
+                COUNT*          $$/R29
 
-                EBANK=  LOSCOUNT
+                EBANK=          LOSCOUNT
 
-R29READ         CAF     PRIO26          # CALLED BY WAITLIST.
-                TC      NOVAC
-                EBANK=  LOSCOUNT
-                2CADR   R29RDJOB        # START JOB TO READ AND DOWNLINK FOR R29.
+R29READ         CAF             PRIO26                  # CALLED BY WAITLIST.
+                TC              NOVAC
+                EBANK=          LOSCOUNT
+                2CADR           R29RDJOB                # START JOB TO READ AND DOWNLINK FOR R29.
 
-                CA      2SECS
-                TC      VARDELAY
+                CA              2SECS
+                TC              VARDELAY
 
-                CA      FLAGWRD3        # 2 SECONDS LATER, SEE IF READING IS STILL
-                MASK    READRBIT        # ALLOWED (NO TRACKER FAIL ETC.)
-                CCS     A
-                TCF     R29READ         # IT'S OK:  CALL IT AGAIN.
-                TCF     TASKOVER        # IT AIN'T:  WAIT FOR REDESIGNATE.
+                CA              FLAGWRD3                # 2 SECONDS LATER, SEE IF READING IS STILL
+                MASK            READRBIT                # ALLOWED (NO TRACKER FAIL ETC.)
+                CCS             A
+                TCF             R29READ                 # IT'S OK; CALL IT AGAIN.
+                TCF             TASKOVER                # IT AIN'T; WAIT FOR REDESIGNATE.
 
-R29RDJOB        CA      FLAGWRD3        # CALLED VIA NOVAC.
-                MASK    NR29FBIT
-                CCS     A               # TEST "NOR29FLG".
-                TCF     ENDRRD29        # R29 IS NOW OVER, STOP AT ONCE.
+R29RDJOB        CA              FLAGWRD3                # CALLED VIA NOVAC.
+                MASK            NR29FBIT
+                CCS             A                       # TEST "NOR29FLG".
+                TCF             ENDRRD29                # R29 IS NOW OVER, STOP AT ONCE.
 
-                CA      RADMODES
-                MASK    AUTOMBIT
-                CCS     A               # TEST RR-NOT-IN-AUTO-MODE BIT.
-                TCF     ENDRRD29        # ASTRO TOOK RR OUT OF AUTO MODE.
+                CA              RADMODES
+                MASK            AUTOMBIT
+                CCS             A                       # TEST RR-NOT-IN-AUTO-MODE BIT.
+                TCF             ENDRRD29                # ASTRO TOOK RR OUT OF AUTO MODE.
 
-                TC      BANKCALL
-                CADR    RRRDOT          # INITIATE READING OF RANGE RATE.
-                TC      BANKCALL
-                CADR    RADSTALL        # GO TO SLEEP UNTIL IT'S READY.
-                TCF     ENDRRD29        # BAD READ; REDESIGNATE.
+                TC              BANKCALL
+                CADR            RRRDOT                  # INITIATE READING OF RANGE RATE.
+                TC              BANKCALL
+                CADR            RADSTALL                # GO TO SLEEP UNTIL IT'S READY.
+                TCF             ENDRRD29                # BAD READ; REDESIGNATE.
 
-## Page 606
+## Page 617
 # R29 RADAR READING CONTINUED.
 
-                DXCH    TIMEHOLD
-                DXCH    MPAC            # TIME OF RR READING, FOR DOWNLINK.
-                INHINT                  # BE SURE OF 5 CONSISTENT CDU ANGLES.
-                EXTEND
-                DCA     CDUT
-                DXCH    MPAC +2         # RRCDU ANGLES AT RR READ, FOR DOWNLINK.
-                EXTEND
-                DCA     CDUY
-                DXCH    MPAC +4         # MPAC'S 7 WORDS ARE BUFFER FOR COPYCYCLE.
-                CA      CDUX
-                TS      MPAC +6         # IMUCDU ANGLES AT RR READ, FOR DOWNLINK.
 
-R29RANGE        TC      BANKCALL
-                CADR    RRRANGE         # INITIATE READING OF RR RANGE.
-                TC      BANKCALL
-                CADR    RADSTALL        # GO TO SLEEP UNTIL IT'S READY.
-                TCF     R29RRR?         # BAD READ OR SCALE CHANGE ... WHICH?
+                DXCH            TIMEHOLD
+                DXCH            MPAC                    # TIME OF RR READING, FOR DOWNLINK.
+                INHINT                                  # BE SURE OF 5 CONSISTENT CDU ANGLES.
+                EXTEND
+                DCA             CDUT
+                DXCH            MPAC            +2      # RRCDU ANGLES AT RR READ, FOR DOWNLINK.
+                EXTEND
+                DCA             CDUY
+                DXCH            MPAC            +4      # MPAC'S 7 WORDS ARE BUFFER FOR COPYCYCLE.
+                CA              CDUX
+                TS              MPAC            +6      # IMUCDU ANGLES AT RR READ, FOR DOWNLINK.
+
+R29RANGE        TC              BANKCALL
+                CADR            RRRANGE                 # INITIATE READING OF RR RANGE.
+                TC              BANKCALL
+                CADR            RADSTALL                # GO TO SLEEP UNTIL IT'S READY.
+                TCF             R29RRR?                 # BAD READ OR SCALE CHANGE ... WHICH?
 
                 INHINT
-                DXCH    DNRRANGE        # COPYCYCLE TO LAY OUT NEW R29 DOWNLINK.
-                DXCH    RM
-                DXCH    MPAC
-                DXCH    MKTIME
-                DXCH    MPAC +2
-                DXCH    TANGNB
-                DXCH    MPAC +4
-                DXCH    AIG
-                CA      MPAC +6
-                TS      AOG
-                CA      ONE
-                TS      TRKMKCNT        # SHOW THAT DOWNLINK DATA IS CONSISTENT.
-                TCF     ENDOFJOB
+                DXCH            DNRRANGE                # COPYCYCLE TO LAY OUT NEW R29 DOWNLINK.
+                DXCH            RM
+                DXCH            MPAC
+                DXCH            MKTIME
+                DXCH            MPAC            +2
+                DXCH            TANGNB
+                DXCH            MPAC            +4
+                DXCH            AIG
+                CA              MPAC            +6
+                TS              AOG
+                CA              ONE
+                TS              TRKMKCNT                # SHOW THAT DOWNLINK DATA IS CONSISTENT.
+                TCF             ENDOFJOB
 
-R29RRR?         CS      FLAGWRD5
-                MASK    BIT10
-                CCS     A               # WAS IT A SCALE CHANGE (REAL OR PHONY)?
-                TCF     ENDRRD29        # NO, A BAD READ; REDESIGNATE.
-                TC      DOWNFLAG
-                ADRES   RNGSCFLG
-                TCF     R29RANGE        # YES; CLEAR FLAG AND READ AGAIN.
+R29RRR?         CS              FLAGWRD5
+                MASK            BIT10
+                CCS             A                       # WAS IT A SCALE CHANGE (REAL OR PHONY)?
+                TCF             ENDRRD29                # NO, A BAD READ; REDESIGNATE.
+                TC              DOWNFLAG
+                ADRES           RNGSCFLG
+                TCF             R29RANGE                # YES; CLEAR FLAG AND READ AGAIN.
 
-ENDRRD29        CA      ZERO            # TROUBLE MADE US COME HERE TO LEAVE THE
-                TS      TRKMKCNT        # RR-READING MODE.  DISCREDIT DOWNTEL.
-                TC      DOWNFLAG
-                ADRES   READRFLG
-                CS      BIT14
+ENDRRD29        CA              ZERO                    # TROUBLE MADE US COME HERE TO LEAVE THE
+                TS              TRKMKCNT                # RR-READING MODE.  DISCREDIT DOWNTEL.
+                TC              DOWNFLAG
+                ADRES           READRFLG
+                CS              BIT14
                 EXTEND
-## Page 607
-                WAND    CHAN12          # REMOVE TRACK-ENABLE DISCRETE.
-                TCF     ENDOFJOB
 
-## Page 608
+## Page 618
+                WAND            CHAN12                  # REMOVE TRACK-ENABLE DISCRETE.
+                TCF             ENDOFJOB
+
+## Page 619
 # W-MATRIX MONITOR
 
-                BANK    31
-                SETLOC  VB67
+                BANK            31
+                SETLOC          VB67
                 BANK
-                COUNT*  $$/EXTVB
+                COUNT*          $$/EXTVB
 
-                EBANK=  WWPOS
+                EBANK=          WWPOS
 
-V67CALL         TC      INTPRET
+V67CALL         TC              INTPRET
                 CALL
-                        V67WW
+                                V67WW
                 EXIT
-                EXTEND                  # SAVE THE PRESENT N99 VALUES FOR
-                DCA     WWPOS           # COMPARISON AFTER THE DISPLAY
-                DXCH    WWBIAS +2
+                EXTEND                                  # SAVE THE PRESENT N99 VALUES FOR
+                DCA             WWPOS                   # COMPARISON AFTER THE DISPLAY
+                DXCH            WWVEL           +2
                 EXTEND
-                DCA     WWVEL
-                DXCH    WWBIAS +4
+                DCA             WWVEL
+                DXCH            WWVEL           +4
+V06N99DS        CAF             V06N99
+                TC              BANKCALL
+                CADR            GOXDSPF
+                TCF             ENDEXT
+                TCF             +5
+                TCF             V06N99DS
+                CAF             BIT13
+                TC              BLANKET
+                TC              ENDOFJOB
+ +5             ZL
+                CA              THREE
+N99LOOP         TS              Q
+                INDEX           Q
+                CS              WWPOS
+                INDEX           Q
+                AD              WWPOS           +6
+                ADS             L
+                CCS             Q                       # THE SUM OF ALL DIFFERENCES MUST BE ZERO.
+                TCF             N99LOOP
+                LXCH            A
                 EXTEND
-                DCA     WWBIAS
-                DXCH    WWBIAS +6
-V06N99DS        CAF     V06N99
-                TC      BANKCALL
-                CADR    GOXDSPF
-                TCF     ENDEXT
-                TCF     V6N99PRO
-                TCF     V06N99DS
-V6N99PRO        ZL
-                CA      FIVE
-N99LOOP         TS      Q
-                INDEX   Q
-                CS      WWPOS
-                INDEX   Q
-                AD      WWPOS +6
-                ADS     L
-                CCS     Q               # THE SUM OF ALL DIFFERENCES MUST BE ZERO.
-                TCF     N99LOOP
-                LXCH    A
-                EXTEND
-                BZF     V06N9933
-                TC      UPFLAG
-                ADRES   V67FLAG
+                BZF             V06N9933
+                TC              UPFLAG
+                ADRES           V67FLAG
 
-V06N9933        TC      INTPRET
-                BON     EXIT
-                        V67FLAG
-                        +2
-                TCF     ENDEXT
-                DLOAD
-## Page 609
-                        WWPOS
-                SL4     SL1
-                STODL   0D
-                        WWVEL
-                STODL   2D
-                        WWBIAS
-                SL                      # SHIFT FROM NOUN SCALING (B-5) TO
-                        10D             # INTERNAL SCALING (B+5)
-                STORE   4D
-                BON     LXA,1
-                        SURFFLAG
-                        V67SURF
-                        0D
-                SXA,1   LXA,1
-                        WRENDPOS
-                        2D
-                SXA,1   GOTO
-                        WRENDVEL
-                        V67CLRF
-V67SURF         LXA,1   SXA,1
-                        0D
-                        WSURFPOS
-                LXA,1   SXA,1
-                        2D
-                        WSURFVEL
-V67CLRF         LXA,1   SXA,1
-                        4D
-                        WTRUN
-                SXA,1
-                        WSHAFT
-                CLEAR   EXIT
-                        RENDWFLG
-                TCF     ENDEXT
-V67WW           STQ     BOV
-                        S2
-                        +1
-                CLEAR   CALL
-                        V67FLAG
-                        INTSTALL
-                SSP     DLOAD
-                        S1
-                DEC     6
-                        ZEROVECS
-                STORE   WWPOS
-                STORE   WWVEL
-                STORE   WWBIAS
+V06N9933        TC              INTPRET
+                BON             EXIT
+                                V67FLAG
+                                +2
+                TCF             ENDEXT
+                DLOAD           DMP
+
+## Page 620
+                                WWPOS
+                                1/SQRT3
+                SL4             SL1
+                STODL           0D
+                                WWVEL
+                DMP
+                                1/SQRT3
+                STORE           2D
+                BON             LXA,1
+                                SURFFLAG
+                                V67SURF
+                                0D
+                SXA,1           LXA,1
+                                WRENDPOS
+                                2D
+                SXA,1           GOTO
+                                WRENDVEL
+                                V67CLRF
+V67SURF         LXA,1           SXA,1
+                                0D
+                                WSURFPOS
+                LXA,1           SXA,1
+                                2D
+                                WSURFVEL
+V67CLRF         CLEAR           EXIT
+                                RENDWFLG
+                TCF             ENDEXT
+V67WW           STQ             BOV
+                                S2
+                                +1
+                CLEAR           CALL
+                                V67FLAG
+                                INTSTALL
+                SSP             DLOAD
+                                S1
+                DEC             6
+                                ZEROVECS
+                STORE           WWPOS
+                STORE           WWVEL
                 AXT,1
-                DEC     54
-NXPOSVEL        VLOAD*  VSQ
-                        W +54D,1
-## Page 610
-                GOTO
-                        ADDPOS
-V06N99          VN      0699
-
-                SETLOC  VB67A
-                BANK
-                COUNT*  $$/EXTVB
-
-ADDPOS          DAD
-                        WWPOS
-                STORE   WWPOS
-                VLOAD*  VSQ
-                        W +108D,1
+                DEC             54
+NXPOSVEL        VLOAD*          VSQ
+                                W               +54D,1
                 DAD
-                        WWVEL
-                STORE   WWVEL
-                VLOAD*  VSQ
-                        W +162D,1
+                                WWPOS
+                STORE           WWPOS
+                VLOAD*          VSQ
+                                W               +108D,1
                 DAD
-                        WWBIAS
-                STORE   WWBIAS
-                TIX,1   SQRT
-                        NXPOSVEL
-                SR                      # SHIFT FROM INTERNAL SCALING (B+5) TO
-                        10D             # NOUN SCALING (B-5)
-                STODL   WWBIAS
-                        WWVEL
+                                WWVEL
+
+## Page 621
+                STORE           WWVEL
+                TIX,1           SQRT
+                                NXPOSVEL
+                STODL           WWVEL
+                                WWPOS
                 SQRT
-                STODL   WWVEL
-                        WWPOS
-                SQRT
-                STORE   WWPOS
-                BOV     GOTO
-                        +2
-                        V67XXX
+                STORE           WWPOS
+                BOV             GOTO
+                                +2
+                                V67XXX
                 DLOAD
-                        DPPOSMAX
-                STORE   WWPOS
-                STORE   WWVEL
-                STORE   WWBIAS
-V67XXX          DLOAD   DSU
-                        WWPOS
-                        FT99999
-                BMN     DLOAD
-                        +3
-                        FT99999
-                STORE   WWPOS
-                LXA,1   SXA,1
-                        S2
-                        QPRET
-## Page 611
+                                DPPOSMAX
+                STORE           WWPOS
+                STORE           WWVEL
+V67XXX          LXA,1           SXA,1
+                                S2
+                                QPRET
                 EXIT
-                TC      POSTJUMP
-                CADR    INTWAKE
+                TC              POSTJUMP
+                CADR            INTWAKE
 
-FT99999         2DEC    30479 B-19
+1/SQRT3         2DEC            0.5773502
+V06N99          VN              0699
 
-## Page 612
-                BANK    25
-                SETLOC  RADARUPT
+## Page 622
+                BANK            25
+                SETLOC          RADARUPT
                 BANK
-                COUNT*  $$/RRUPT
+                COUNT*          $$/RRUPT
 
-                EBANK=  LOSCOUNT
+                EBANK=          LOSCOUNT
 
-R12LITES        CA      ONE
-                MASK    IMODES33
-                CCS     A
-                TCF     ISWRETRN
+R12LITES        CA              ONE
+                MASK            IMODES33
+                CCS             A
+                TCF             ISWRETRN
 
-                TC      HLIGHT
-                TC      HLIGHT -3
-                TCF     ISWRETRN
+                TC              HLIGHT
+                TC              HLIGHT          -3
+                TCF             ISWRETRN
 
-RADLITES        CA      BIT1
-                MASK    IMODES33
-                CCS     A
-                TC      Q
+RADLITES        CA              BIT1
+                MASK            IMODES33
+                CCS             A
+                TC              Q
 
-                CS      BIT5
-                AD      ITEMP1
-                CCS     A
-                CS      ONE
-                TCF     VLIGHT
+                CS              BIT5
+                AD              ITEMP1
+                CCS             A
+                CS              ONE
+                TCF             VLIGHT
 
-                TCF     RRTRKF
+                TCF             RRTRKF
 
-HLIGHT          TS      ITEMP5          # ZERO ITEMP5 FOR H INDEX
+HLIGHT          TS              ITEMP5                  # ZERO ITEMP5 FOR H INDEX
 
-                CA      HLITE
-                TS      L
+                CA              HLITE
+                TS              L
 
-                CA      FLGWRD11
-                MASK    SCABBIT
-                CCS     A
-                TCF     ONLITES
-                CA      LRALTBIT
-BOTHLITS        MASK    RADMODES
-                CCS     A
-                TCF     ONLITES
+                CA              FLGWRD11
+                MASK            SCABBIT
+                CCS             A
+                TCF             ONLITES
+                CA              BIT5
+BOTHLITS        MASK            RADMODES
+                CCS             A
+                TCF             ONLITES
 
-                CA      FLGWRD11
-                INDEX   ITEMP5
-                MASK    HFLSHBIT
-                CCS     A
-                TCF     RRTRKF
-## Page 613
+                CA              FLGWRD11
+                INDEX           ITEMP5
+                MASK            HFLSHBIT
+                CCS             A
+                TCF             RRTRKF
+
+## Page 623
 LITIT           EXTEND
-                QXCH    ITEMP6
-                TC      TRKFLON +1
+                QXCH            ITEMP6
+                TC              TRKFLON         +1
 
                 EXTEND
-                QXCH    ITEMP6
-                TCF     RRTRKF
+                QXCH            ITEMP6
+                TCF             RRTRKF
 
 
-ONLITES         INDEX   ITEMP5
-                CS      HFLSHBIT
-                MASK    FLGWRD11
-                TS      FLGWRD11
+ONLITES         INDEX           ITEMP5
+                CS              HFLSHBIT
+                MASK            FLGWRD11
+                TS              FLGWRD11
 
-                CA      L
-                TCF     LITIT
-VLIGHT          TS      ITEMP5
-                CA      VLITE
-                TS      L
-                CA      BIT8
-                TCF     BOTHLITS
+                CA              L
+                TCF             LITIT
+VLIGHT          TS              ITEMP5
+                CA              VLITE
+                TS              L
+                CA              BIT8
+                TCF             BOTHLITS
 
-HLITE           EQUALS  BIT5
-VLITE           EQUALS  BIT3
-
+HLITE           EQUALS          BIT5
+VLITE           EQUALS          BIT3
