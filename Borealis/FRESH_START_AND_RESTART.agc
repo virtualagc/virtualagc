@@ -33,6 +33,7 @@ DOFSTART        CAF             ZERO                    # DO A FRESH START,
                 TS              MODREG
                 TS              AGSWORD                 # ALLOW AGS INITIALIZATION
                 TS              UPLOCK                  # FREE UPLINK INTERLOCK
+                TS              T4TEMP
 
                 TS              CDUX                    # ZERO CDUS SO MATRIX COMPUTATION IN T4
                 TS              CDUY                    # WONT OVERFLOW.

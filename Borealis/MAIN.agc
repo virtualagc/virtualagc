@@ -10,7 +10,8 @@
 ## Contact:     Mike Stewart <mastewar1@gmail.com>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2016-12-20 MAS  Created from Aurora 12 (with much DAP stuff removed).
-## Mod history: 2016-12-21 MAS  Added Retread instruction checks.
+##              2016-12-21 MAS  Added Retread instruction checks.
+##              2017-01-15 MAS  Added a file for extended self-tests.
 
 # Source file name
 # ----------------
@@ -39,6 +40,7 @@ $ALARM_AND_ABORT.agc
 $DOWN-TELEMETRY_PROGRAM.agc
 $AGC_BLOCK_TWO_SELF-CHECK.agc
 $AGC_BLK2_INSTRUCTION_CHECK.agc
+$AGC_BLOCK_TWO_EXTENDED_TESTS.agc
 $INFLIGHT_ALIGNMENT_ROUTINES.agc
 $RTB_OP_CODES.agc
 $LEM_FLIGHT_CONTROL_SYSTEM_TEST.agc

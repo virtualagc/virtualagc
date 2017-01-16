@@ -11,6 +11,8 @@
 ## Contact:     Mike Stewart <mastewar1@gmail.com>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2016-12-20 MAS  Created from Aurora 12 (with much DAP stuff removed).
+##              2017-01-15 MAS  Added TIME5 and TIME6 interrupts, and tweaked TIME4's
+##                              leadin a bit.
 
                 SETLOC          4000
                 
@@ -22,12 +24,12 @@
                 DXCH            ARUPT                   # T6RUPT
                 CAF             T6RPTBB
                 XCH             BBANK
-                TCF             RESUME      +3          # ***FIX LATER***
+                TCF             T6RUPT
                 
                 DXCH            ARUPT                   # T5RUPT
                 CAF             T5RPTBB
                 XCH             BBANK
-                TCF             RESUME      +3          # ***FIX LATER***
+                TCF             T5RUPT
                 
                 DXCH            ARUPT                   # T3RUPT
                 CAF             T3RPTBB
@@ -35,7 +37,7 @@
                 TCF             T3RUPT
                 
                 DXCH            ARUPT                   # T4RUPT
-                CAF             ZERO
+                CAF             FOUR
                 TCF             T4RUPT
 T4RPTBB         BBCON           T4RUPTA
 
@@ -77,10 +79,10 @@ T4RPTBB         BBCON           T4RUPTA
 GOBB            BBCON           GOPROG
 
                 EBANK=          TIME1
-T5RPTBB         BBCON           RESUME                  # ***FIX LATER***
+T5RPTBB         BBCON           T5RUPT
 
                 EBANK=          TIME1
-T6RPTBB         BBCON           RESUME                  # ***FIX LATER***
+T6RPTBB         BBCON           T6RUPT
 
                 EBANK=          LST1
 T3RPTBB         BBCON           T3RUPT
