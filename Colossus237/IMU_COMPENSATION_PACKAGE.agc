@@ -11,6 +11,8 @@
 ## Mod history: 2011-01-23 JL   Adapted from corresponding Colossus 249 file.
 ##		2016-12-30 RSB	Proofed comment text using octopus/ProoferComments,
 ##				and corrected errors found.
+##		2017-01-14 RSB	Fixed comment-text errors located while 
+##				diff'ing against Colossus 249.
 
 ## Page 290
 
@@ -92,7 +94,7 @@ IRIGX		EXTEND
 #		DCS	DELVZ	  ***	(PIPA PULSES) X 2(+14)
 #		DXCH	MPAC	  ***
 #		CA	ADOAX	  ***	(GYRO PULSES)/(PIPA PULSE) X 2(-3)       *
-#		TC	GCOMPSUB  ***	-(ADDAX)(PIPAZ)   (GYRO PULSES) X 2(+14)
+#		TC	GCOMPSUB  ***	-(ADOAX)(PIPAZ)   (GYRO PULSES) X 2(+14)
 
 		CS	NBDX		# (GYRO PULSES)/(CS) X 2(-5)
 		TC	DRIFTSUB	# -(NBDX)(DELTAT)   (GYRO PULSES) X 2(+14)
@@ -115,7 +117,7 @@ IRIGY		EXTEND
 #		CA	ADOAY	  ***	(GYRO PULSES)/(PIPA PULSE) X 2(-3)      *
 #		TC	GCOMPSUB  ***	-(ADOAY)(PIPAX)     (GYRO PULSES) X 2(+14)
 
-		CS	NBDY		# (GYRO PULSES)/(CS) X 2(-9)
+		CS	NBDY		# (GYRO PULSES)/(CS) X 2(-5)
 		TC	DRIFTSUB	# -(NBDY)(DELTAT)   (GYRO PULSES) X 2(+14)
 
 IRIGZ		EXTEND

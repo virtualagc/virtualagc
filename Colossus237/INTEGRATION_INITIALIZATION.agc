@@ -11,6 +11,8 @@
 ## Mod history: 2011-04-17 JL	Adapted from corresponding Colossus 249 file.
 ##		2017-01-01 RSB	Proofed comment text using octopus/ProoferComments,
 ##				and fixed errors found.
+##		2017-01-14 RSB	Fixed comment-text errors located by diff'ing 
+##				against Colossus 249.
 
 ## Page 1275
 # 1.0 INTRODUCTION
@@ -162,7 +164,7 @@
 #    X1           MUTABLE ENTRY                              -2     -10D
 #
 #    X2           COORDINT
-#    X2           COORDINATE SYSTEM ORIGIN                   0      2
+#    X2           COORDINATE SYSTEM ORIGEN                   0      2
 #                 (THIS, NOT MOONFLAG, SHOULD BE
 ## Page 1278
 #                 USED TO DETERMINE ORIGIN.)

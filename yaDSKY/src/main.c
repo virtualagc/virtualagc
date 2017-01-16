@@ -57,6 +57,8 @@
 				updating KeyRel and OprErr at the flash rate
 				even if the graphic being updated hadn't
 				actually changed.
+		01/15/17 MAS	Removed flashing code now that light flashing
+				is driven by the AGC itself.
 */
 
 /*
@@ -204,7 +206,7 @@ main (int argc, char *argv[])
 	  printf ("--cfg=ConfigFilename\n");
 	  printf ("\tSelects a configuration file to be used, to allow different yaDSKY\n");
 	  printf ("\tsettings for LM vs. CM, or for different Apollo missions.  The \n");
-	  printf ("\tconfiguration files presently known are LM.ini, CM.ini, and CM0.ini. \n");
+	  printf ("\tconfiguration files presently known are LM0.ini, LM.ini, LM1.ini, and CM.ini. \n");
 	  printf ("\tBy default (no --cfg switch) LM settings are used, but not the LM.ini\n");
 	  printf ("\tfile itself.\n");
 	  printf ("--half-size\n");
@@ -306,75 +308,15 @@ Pulse (gpointer data)
 #endif
 #define gtk_image_set_from_file my_gtk_image_set_from_file
   extern void my_gtk_image_set_from_file (GtkImage *Image, const char *Filename);
-  extern int VerbNounFlashing;
   static unsigned char Packet[4];
   static int PacketSize = 0;
-  static int FlashCounter = 1, FlashStatus = 0;
   int i;
   unsigned char c;
-  static const char *LastKeyRel = NULL, *LastOprErr = NULL;
   
   if (StartupDelay > 0)
     {
       StartupDelay -= PULSE_INTERVAL;
       return (TRUE);
-    }
-  // If the noun/verb-flash flag is set, then flash them.
-  if (!--FlashCounter)
-    {
-      extern GtkImage *VD1Digit, *VD2Digit, *ND1Digit, *ND2Digit,
-		      *OprErrAnnunciator, *KeyRelAnnunciator;
-      extern const char *CurrentVD1, *CurrentVD2, *CurrentND1, 
-			*CurrentND2, *CurrentBlank,
-			*CurrentOprErr, *CurrentKeyRel,
-			*BlankOprErr, *BlankKeyRel;
-      if (CurrentVD1 == CurrentBlank && CurrentVD2 == CurrentBlank &&
-          CurrentND1 == CurrentBlank && CurrentND2 == CurrentBlank &&
-	  CurrentKeyRel == BlankKeyRel && CurrentOprErr == BlankOprErr)
-        FlashCounter = 1;
-      else
-        FlashCounter = 10;
-      if (FlashStatus)
-	{
-	  if (VerbNounFlashing)
-	    {
-	      gtk_image_set_from_file (VD1Digit, CurrentVD1);
-	      gtk_image_set_from_file (VD2Digit, CurrentVD2);
-	      gtk_image_set_from_file (ND1Digit, CurrentND1);
-	      gtk_image_set_from_file (ND2Digit, CurrentND2);
-	    }
-	  if (LastKeyRel != CurrentKeyRel)
-	    {
-	      gtk_image_set_from_file (KeyRelAnnunciator, CurrentKeyRel);
-	      LastKeyRel = CurrentKeyRel;
-	    }
-	  if (LastOprErr != CurrentOprErr)
-	    {
-	      gtk_image_set_from_file (OprErrAnnunciator, CurrentOprErr);
-	      LastOprErr = CurrentOprErr;
-	    }
-	}
-      else
-	{
-	  if (VerbNounFlashing)
-	    {
-	      gtk_image_set_from_file (VD1Digit, CurrentBlank);
-	      gtk_image_set_from_file (VD2Digit, CurrentBlank);
-	      gtk_image_set_from_file (ND1Digit, CurrentBlank);
-	      gtk_image_set_from_file (ND2Digit, CurrentBlank);
-	    }
-	  if (LastKeyRel != BlankKeyRel)
-	    {
-	      gtk_image_set_from_file (KeyRelAnnunciator, BlankKeyRel);
-	      LastKeyRel = BlankKeyRel;
-	    }
-	  if (LastOprErr != BlankOprErr)
-	    {
-	      gtk_image_set_from_file (OprErrAnnunciator, BlankOprErr);
-	      LastOprErr = BlankOprErr;
-	    }
-	}
-      FlashStatus = !FlashStatus;
     }
   // Try to connect to the server (yaAGC) if not already connected.
   if (ServerSocket == -1)
