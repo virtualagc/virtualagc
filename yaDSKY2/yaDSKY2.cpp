@@ -70,6 +70,8 @@
  *                              hotkeys aren't recognized until at least
  *                              one click of the virtual buttons, but it's
  *                              a lot better than not working at all.
+ *              2017-01-15 MAS  Set sane defaults for the indicators when
+ *                              no config is present.
  *
  * The yaDSKY2 program is intended to be a completely identical drop-in
  * replacement for the yaDSKY program as it exists at 2009-03-06.
@@ -160,72 +162,72 @@ static Ind_t Inds[14] = {
   {				// 11
     UplinkActyOnJpeg,
     UplinkActyOffJpeg,
-    011, 4, 0, 0
+    011, 04, 0, 0, 0, 0, 0, 0
   },
   {				// 12
     NoAttOnJpeg,
     NoAttOffJpeg,
-    010, 9, 0, 0
+    010, 010, 0, 0, 0, 1, 074000, 060000
   },
   {				// 13
     StbyOnJpeg,
     StbyOffJpeg,
-    013, 11, 0, 0
+    0163, 0400, 0, 0, 0, 0, 0, 0 
   },
   {				// 14
     KeyRelOnJpeg,
     KeyRelOffJpeg,
-    011, 16, 0, 0
+    0163, 020, 0, 0, 0, 0, 0, 0
   },
   {				// 15
     OprErrOnJpeg,
     OprErrOffJpeg,
-    011, 64, 0, 0
+    0163, 0100, 0, 0, 0, 0, 0, 0
   },
   {				// 16
     PrioDispOnJpeg,
     PrioDispOffJpeg,
-    99, 0, 0, 0
+    010, 01, 0, 0, 0, 1, 074000, 060000
   },
   {				// 17
     NoDapOnJpeg,
     NoDapOffJpeg,
-    99, 0, 0, 0
+    010, 02, 0, 0, 0, 1, 074000, 060000
   },
   {				// 21
     TempOnJpeg,
     TempOffJpeg,
-    011, 8, 0, 0
+    011, 010, 0, 0, 0, 0, 0, 0
   },
   {				// 22
     GimbalLockOnJpeg,
     GimbalLockOffJpeg,
-    010, 6, 0, 0
+    010, 040, 0, 0, 0, 1, 074000, 060000
   },
   {				// 23
     ProgOnJpeg,
     ProgOffJpeg,
-    010, 9, 0, 0
+    010, 0400, 0, 0, 0, 1, 074000, 060000
   },
   {				// 24
     RestartOnJpeg,
     RestartOffJpeg,
-    99, 0, 0, 0
+    0163, 0200, 0, 0, 0, 0, 0, 0
   },
   {				// 25
     TrackerOnJpeg,
     TrackerOffJpeg,
-    010, 8, 0, 0
+    010, 0200, 0, 0, 0, 1, 074000, 060000
   },
   {				// 26
     AltOnJpeg,
     AltOffJpeg,
-    99, 0, 0, 0
+    010, 020, 0, 0, 0, 1, 074000, 060000
   },
   {				// 27
     VelOnJpeg,
     VelOffJpeg,
-    99, 0, 0, 0
+    010, 04, 0, 0, 0, 1, 074000, 060000
   }
 };
 
@@ -1078,7 +1080,7 @@ bool yaDskyApp::OnInit()
 	  printf ("--cfg=ConfigFilename\n");
 	  printf ("\tSelects a configuration file to be used, to allow different yaDSKY\n");
 	  printf ("\tsettings for LM vs. CM, or for different Apollo missions.  The \n");
-	  printf ("\tconfiguration files presently known are LM.ini, CM.ini, and CM0.ini. \n");
+	  printf ("\tconfiguration files presently known are LM0.ini, LM.ini, LM1.ini, and CM.ini. \n");
 	  printf ("\tBy default (no --cfg switch) LM settings are used, but not the LM.ini\n");
 	  printf ("\tfile itself.\n");
 	  printf ("--half-size\n");
@@ -1181,7 +1183,6 @@ TimerClass::Notify ()
 {
   static unsigned char Packet[4];
   static int PacketSize = 0;
-  static int FlashCounter = 1, FlashStatus = 0;
   int i;
   unsigned char c;
   

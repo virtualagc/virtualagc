@@ -21,6 +21,7 @@
 ##                                          TITOT2 -> T1TOT2
 ##                                          TABLTFF-> TABLTTF
 ##              2017-01-08 HG   fix operand modifier JBRFG* +1 -> JBRFG* +2
+##              2017-01-16 HG   uncomment LMPOS and LMVEL
 ## Page 106
 # CONVENTIONS AND NOTATIONS UTILIZED FOR ERASABLE ASSIGNMENTS.
 
@@ -1322,8 +1323,8 @@ RFAILCNT        ERASE                                   # (1)
 #*(12D)
 
 
-#*LMPOS           EQUALS          RTSTDEX                 # I(6)TEMP.  STORAGE FOR LM POS. VECTOR.
-#*LMVEL           EQUALS          LMPOS           +6      # I(6)TEMP.  STORAGE FOR LM VEL. VECTOR.
+LMPOS           EQUALS          RTSTDEX                 # I(6)TEMP.  STORAGE FOR LM POS. VECTOR.
+LMVEL           EQUALS          LMPOS           +6      # I(6)TEMP.  STORAGE FOR LM VEL. VECTOR.
 #*
 
 END-E4          EQUALS                                  # FIRST UNUSED LOCATION IN E4

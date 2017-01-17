@@ -15,6 +15,8 @@
 ##		2010-08-27 JL	Fixed some indentation, whitespace.
 ##		2016-12-22 RSB	Proofed comment text using octopus/ProoferComments
 ##				and corrected the errors found.
+##		2017-01-15 RSB	Fixed comment-text errors noted while diff'ing vs
+##				Colossus 249.
 ##
 ## This source code has been transcribed or otherwise adapted from digitized
 ## images of a hardcopy from the MIT Museum.  The digitization was performed
@@ -560,9 +562,9 @@ CHKSWTCH	STQ	BOF
 
 RPQOK		LXA,2	VLOAD		# RESTORE X2 AFTER USING LUNPOS
 			PBODY
-			TDELTAV		#  _
+			TDELTAV		#  -
 		VSL*	VAD		# |RQC|-RSPHERE WHEN OUTSIDE THE SPHERE.
-			0	-7,2	# _   _            _
+			0	-7,2	# -   -            -
 			RCV		# R = RDEVIATION + RCONIC
 		BOF	ABVAL
 			MOONFLAG
@@ -642,7 +644,7 @@ MINIRECT	STORE	VRECT
 		RVQ
 
 ## Page 1348
-# THE THREE DIFEQ ROUTINES - DIFEQ+0, DIFEQ+12, AND DIFEQ+24 - ARE ENTERED TO PROCESS THE CONTRIBUTIONS AT THE
+# THE THREE DIFEQ ROUTINES - DIFEQ+0, DIFEQ+12, AND DIFEQ+24 - ARE ENTEREDTO PROCESS THE CONTRIBUTIONS AT THE
 # BEGINNING, MIDDLE, AND END OF THE TIMESTEP, RESPECTIVELY.  THE UPDATING IS DONE BY THE NYSTROM METHOD.
 
 DIFEQ+0		VLOAD	VSR3
