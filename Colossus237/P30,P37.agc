@@ -12,6 +12,8 @@
 ##		2011-04-29 JL	Added missing line at the bottom of page 632.
 ##		2016-12-31 RSB	Proofed comment text using octopus/ProoferComments,
 ##				and corrected errors found.
+##		2017-01-17 RSB	Fixed comment-text errors noted while diff'ing
+##				vs Colossus 249.
 
 ## Page 624
 		BANK	32
@@ -281,7 +283,7 @@ S30.1		STQ	DLOAD
 			QTEMP
 
 ## Page 630
-# S31.1  PROGRAM DESCRIPTION                   26DEC67
+# S31.1  PROGRAM DESCRIPTION                   28DEC67
 # MOD.1 BY S.ZELDIN
 
 # S31.1 COMPUTES DELV IN REF AND LV COORDS,MAG OF DELV,INTERCEPT TIME,
@@ -346,7 +348,7 @@ S31.1		STQ	DLOAD
 			QTEMP
 
 ## Page 632
-# SUBROUTINE NAME:      DELRSPL                                           (CONTINUATION OF V 62 IN CSM IF P11 ACTI
+# SUBROUTINE NAME:      DELRSPL                                           (CONTINUATION OF V 82 IN CSM IF P11 ACTI
 # TRANSFERRED COMPLETELY FROM SUNDISK, P30S REV 33. 9 SEPT 67.
 # MOD NO:  0           MOD BY:  ZELDIN               DATE:
 # MOD NO:  1           MOD BY:  RR BAIRNSFATHER      DATE:  11 APR 67
