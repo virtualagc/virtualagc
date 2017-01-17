@@ -16,10 +16,9 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2016-12-13 MAS  Created from Luminary 99.
 ##              2016-12-14 MAS  Updated from comment-proofed Luminary 99 version.
+##		2017-01-17 RRB	Updated for Luminary 69
 
-## NOTE: Page numbers below have not yet been updated to reflect Luminary 69.
-
-## Page 338
+## Page 351
 # SUBROUTINE NAME:	V89CALL
 # MOD NO:	0			DATE:		9 JAN 1968
 # MOD BY:	DIGITAL DEVEL GROUP	LOG SECTION:	R63
@@ -69,7 +68,7 @@
 # ERASABLE INITIALIZATION REQUIRED:  NONE
 #
 # DEBRIS:	OPTION1, +1, TDEC1, PCINTVSM, SCAXIS, CPHI, CTHETA, CPSI,
-## Page 339
+## Page 352
 #		3AXISFLG.
 
 		EBANK=	RONE
@@ -118,7 +117,7 @@ V89RECL		TC	INTPRET		#		    = 2 FOR X AXIS
 ALINEX		TC	INTPRET		# X AXIS ALIGNMENT
 		VLOAD
 			UNITX		# READ (.5, 0, 0)
-## Page 340
+## Page 353
 V89CALL1	STCALL	SCAXIS		# STORE SELECTED ALIGNMENT AXIS
 			VECPOINT	# PUTS DESIRED GIM ANG (OG,IG,MG) IN TMPAC
 		STORE	CPHI		# STORE GIMBAL ANGLES FOR BALLANGS CALL.
@@ -144,6 +143,6 @@ ALINEZ		TC	INTPRET		# Z AXIS ALIGNMENT
 			
 VB04N12		VN	412
 VB06N18		VN	0618
-## Page 341
+## Page 354
 DP1MIN		2DEC	6000
 
