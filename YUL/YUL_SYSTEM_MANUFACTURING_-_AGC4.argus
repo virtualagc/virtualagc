@@ -8,6 +8,7 @@
 # Pages:        576-615
 # Mod history:  2016-10-06 JL   Created.
 #               2017-01-14 JL   Transcribed pages 576-592.
+#               2017-01-17 JL   Transcribed pages 593-598.
 
 # Annotations:
 #
@@ -694,26 +695,254 @@ R0558   SUBDIRECTOR *TESTING* IS OPTIONAL. SEE PAGE 34.
 # Page 593
 #      @YUL SYSTEM MANUFACTURING - AGC4                                          USER'S OWN PAGE NO.  18        PAGE  18
 
+ 0638              TS,LOADG     LOADG         FRAME         CHK PARIT      C    IN 3 FRAMES
+ 0640              SWE,B43T47   N,R1          5             FRAME
+ 0641              TS,LOADG     LOADG         FRAME         CHK PARIT      C
+ 0642              EX           N,R1          CAC3          KCOMMON +2
+ 0643              NA           KCOMMON +2    ZERO          C,+2
+ 0644              SS           ONE           ONE           N,R1                INSERT ODD PARITY FOR *UNUSED* WORDS
+ 0646              SWE,B41      N,R1          7,L           FRAME
+ 0647              SWS,B43T47   N,R1,1        10            FRAME
+ 0648              TS,LOADG     LOADG         FRAME         CHK PARIT      C
+ 0649              WA           KCOMMON       ONE           KCOMMON
+ 0650              TS           -             -             SND WORD
+ 0651   DNE BANKS  TS           STOP36K       FRAME         CHK PARIT      C    SEND STOP CODE
+ 0653              TS           WB3 36K       FRAME         GO TITLE T          SEND TAPE PARAGRAPH TAILING MESSAGE
+ 0655              SS           ONES          B34           SWITCH
+ 0656   END P TAPE NA,FOUR      TEST INST     ZERO          CHECK DNE
+ 0657              TS           -             -             MON TAPE
+ 0658              RW,1         -             -             -                   REWIND YULPROGS.
+ 0660              S,MON TYPER  WPAPER TA     SPRAMR +24    MANUF RTN           ANNOUNCE READY TAPE, EXIT.
+ 0662   CHK PARIT  SWS,ONES     FRAME         4,L           KCOMMON +2     C    FOR RIGHT EIGHT BITS IN FRAME, COMPUTE
+ 0664              HA           FRAME         KCOMMON +2    KCOMMON +2     C    ODD PARITY (BIT 42 IS ALWAYS INITIALLY 
+ 0666              SWS,ONES     KCOMMON +2    2,L           KCOMMON +3     C    = 1) AND PLACE IN BIT 42
+ 0668              HA           KCOMMON +2    KCOMMON +3    KCOMMON +2     C
+ 0669              SWS,ONES     KCOMMON +2    1             KCOMMON +3     C
+ 0670              HA,B42       KCOMMON +3    KCOMMON +2    FRAME          C
+ 0671              TS           -             -             PCH FRAME      C    NOW GO PUNCH THIS FRAME
 
 # Page 594
 #      @YUL SYSTEM MANUFACTURING - AGC4                                          USER'S OWN PAGE NO.  19        PAGE  19
 
+P0673   PROCEDURE TO PUNCH AN AGC4 MASTER DECK
+R0674   SUBDIRECTOR *TESTING* IS OPTIONAL.  SEE PAGE 34.
+
+ 0675   TRY MASTR  NA           KCOMMON       W MASTER      TRY SYMBL           "MASTER" IS REQUIRED.
+ 0677              NA           N,X5,3        W DECK        BAD SD              "DECK" IS REQUIRED.
+ 0679              NA           N,X5,3        ONES          BAD SD              SUPERFLUOUS WORDS ARE FORBIDDEN.
+ 0681              TS           -             -             CHK TEST
+ 0682              TS           L DIRECTY     Z,X5          E SYLT OK
+ 0683              S,MON TYPER  PMSTR MSG     SPRA +24      C,+1                TYPE "PUNCH MASTER DECK".
+ 0685   DO MASTER  NA,CHAR8     5,0           ZERO          C,+2                BRANCH IF SOME BACKUP ALREADY WANTED.
+ 0687              SS           TWO           CHAR8         N,X5                CALL FOR BACKUP TAPE LABEL AMENDMENT.
+ 0689              SWE, D4T7    5,5           D,5,L         MON DAW             FETCH CURRENT MASTER DECK SERIAL NUMBER.
+ 0691              DA, CAC3     5,5           ONE           5,5                 INCREMENT PERMANENTLY STORED SERIAL.
+ 0693              TS           Z,SC          Z,AU1         YUL D2A ZS
+ 0694   MON DAW    RESERVE      1
+ 0695              SS           N,SH          C2T7          CARD                PLACE ALPHA SERIAL AS CARD NUMBER.
+ 0697              SWS, C4578   5,4           A,3           CARD +8
+ 0698              SWS, C2T3    5,4           A,3           CARD +9             PLACE ALPHA DATE IN LOG CARD.
+
+R0700   LOOP FOR EACH PARAGRAPH (FORMERLY SUBSTRAND) READ FROM YULPROGS.
+
+ 0701   MASDEK PH  TS           L OBJC MSG    Z,R1          FETCH SS            FETCH A PARAGRAPH IF ANY ARE LEFT.
+
+ 0703              TS           -             -             END MASTR           CUT OUT HERE IF NO MORE.
+ 0705              SWS, ACO1    1,2           36,L          PH NUMBER
+ 0706              SWS, ACO2    1,2           33,L          PH NUMBER
+ 0707              SWS, ACO3    1,2           30,L          PH NUMBER           FORM ALPHA PARAGRAPH NUMBER.
+ 0709              SS           PH NUMBER     C1T3          CARD +7             PUT IT IN LOG OR PRECEDING TRAILER.
+ 0711              S, PUNCH CD  CARD -1       ALPHA         C,+1                PUNCH LOG CARD ON PRECEDING TRAILER.
+ 0713              SS           RC1&2C8       C1C8          CARD                SET COLUMNS 1 AND 8 FOR HEADER CARD.
+ 0715              TX           PH NUMBER     -             CARD +9             PARAGRAPH NUMBER FOR HEADER CARD.
+ 0717              SWE, D12     1,2           2             Z,AU1
+ 0718              WA           Z,AU1         L STICKNS     Z,AU1
+ 0719              SS           N,AU1         C5T7          CARD +9             SET UP STICK NAME AND HALF-STICK LETTER.
+ 0721              SWS, SEVEN   1,2           4             CARD +9
+ 0722              SS           1,2           THREE         CARD +9             SET UP NUMBER OF SENSE LINE SET.
+ 0724              TN           N,R1          7             CARD +1             PLACE OBJECT MESSAGE IN HEADER CARD.
+ 0726              SS           W PARAGRA     C5T8          CARD +7
+ 0727              TX           W PARAGRA +1  -             CARD +8             PUT "PARAGRAPH" IN HEADER.
+ 0729              S, PUNCH CD  CARD -1       ALPHA         C,+1                PUNCH PARAGRAPH HEADER CARD.
+ 0731              WA           Z,X1          THREE         Z,X5                1800 ADDRESS OF FIRST WORD IN PARAGRAPH.
+ 0733              SS           ALF 370       C1T4          CARD +9             INITIALIZE SUBADDRESS IN DETAIL CARD.
+
+R0735   LOOP FOR EACH FOUR CARDS (32 WORDS)
+ 0736   4 CARDS    SS           BLANKS        C1C8          CARD                SET COLUMNS 1 AND 8 FOR DETAIL CARD.
+ 0738              TS           FOUR          Z,R7          EACH CARD +1        SET UP TO COUNT 4 CARDS.
 
 # Page 595
 #      @YUL SYSTEM MANUFACTURING - AGC4                                          USER'S OWN PAGE NO.  20        PAGE  20
 
+P0740   LOOP FOR EACH CARD.
+ 0741   EACH CARD  S, PUNCH CD  CARD -1       ALPHA         C,+1                PUNCH A DETAIL CARD WITH 8 WORDS.
+
+ 0743              TX           CARD WD2      -             Z,X4
+
+R0744   LOOP FOR EACH WORD.
+
+ 0745   WD IN CARD TX           EMPTY WD      -             N,X4
+ 0746              SSL,THREE    N,X5          27            C,+1                SET UP LEAD CHAR CODE FOR THIS AGC WORD
+ 0748              TS           ZERO          KCOMMON       C,+4                BASIC INSTRUCTION
+ 0750              TS           NINE          KCOMMON       C,+6                INTERPRETIVE INSTRUCTION WORD
+ 0752              TS           EIGHT         KCOMMON       C,+5                CONSTANT WORD
+ 0754              TX           FOUR          -             KCOMMON             AGC WORD ADDRESSES UNUSED FIXED MEMORY
+ 0756              SWS,ONES     N,X5          31            KCOMMON +1
+ 0757              LA,B44T48    KCOMMON +1    TWO           C,+2
+ 0758              SS           ONES          TWO           KCOMMON             OPERAND LOCATED IN A FIXED BANK.
+ 0760              SWS,ACD2     KCOMMON       12            N,X4                STORE LEAD CHAR IN CHAR POSIT 2
+ 0762              SWS, ACO3    N,X5          17,L          N,X4
+ 0763              SWS, ACO4    N,X5          14,L          N,X4
+ 0764              SWS, ACO5    N,X5          11,L          N,X4
+ 0765              SWS, ACO6    N,X5          8,L           N,X4
+ 0766              SWS, ACO7    N,X5          5,L           N,X4
+ 0767              SS           N,X5,1        ONE           N,X4,1              SPREAD AGC4 WORD OUT TO 1800 ALPHA WORD.
+ 0769              NA           Z,X4          CARD WD10     WD IN CARD          BRANCH IF MORE WORDS FOR THIS CARD.
+
+ 0771              WA           CARD +9       OCT INC       CARD +9
+ 0772              SS           ZERO          OCT 00047     CARD +9             INCREMENT ALFOCTAL SUBADDRESS BY 8.
+ 0774              NA           Z,R7,1        ONE           EACH CARD           BRANCH IF NOT END OF 4-CARD GROUP.
+
+ 0776              SS           RC1&2C8       CHAR 8        CARD                DOUBLE-SPACE AFTER EACH 4 CARDS.
+ 0778              S, PUNCH CD  CARD -1       ALPHA         C,+1                PUNCH EVERY FOURTH DETAIL CARD.
+ 0780              NA           5,2           EOR           4 CARDS             BRANCH IF NOT LAST GROUP IN PARAGRAPH.
+
+ 0782              SS           RC1&8C8       C1C8          CARD                SET COLUMNS 1 AND 8 FOR TRAILER CARD.
+ 0784              TN           END PARAG     6             CARD +1             SET UP ALPHA TEXT OF TRAILER CARD.
+ 0786              MT           BLANKS        3             N,AU2,1
+ 0787              TS, C1T3     PH NUMBER     CARD +4       MASDEK PH           GIVE UNFINISHED TRAILER TO NEXT PARAGR.
+
+R0789   FINAL ACTIONS FOR AGC4 MASTER DECK.
+
+ 0790   END MASTR  TN           W END DECK    3             CARD +5
+ 0791              S, PUNCH CD  CARD -1       ALPHA         CLOSE PCH           PUNCH FINAL TRAILER CARD.
+
+
+
+ 0793   CLOSE PCH  S, PUNCH CD  EOR           BINARY        C,+1                CLOSE OUT PUNCHING.
+ 0795              TS           -             -             MON TAPE
+ 0796              RW,1         -             -             -                   REWIND YULPROGS.
+ 0798              S, MON TYPER W CARD OUT    SPRAMR +16    MANUF RTN
 
 # Page 596
 #      @YUL SYSTEM MANUFACTURING - AGC4                                          USER'S OWN PAGE NO.  21        PAGE  21
 
+P0799   * PUNCH SYMBOL TABLE * AND * PUNCH SYMBOL TABLE AND MASTER DECK * SUBDIRECTOR ROUTINES HERE.
+R0801   SUBDIRECTOR *TESTING* IS OPTIONAL.  SEE PAGE 34.
+
+ 0802   TRY SYMBL  NA           KCOMMON       W SYMBOL      BAD SD              WORD SYMBOL IS REQUIRED
+ 0804              NA           N,X5,3        W TABLE       BAD SD              WORD TABLE IS REQUIRED
+ 0806              NA           ONES          N,X5          TRY AND             NO MORE WORDS ALLOWED
+ 0808              S,MON TYPER  SYMBL MSG     SPRA +24      C,+1
+ 0809   GO SYMBOL  TS           -             -             CHK TEST            LOOK FOR * TESTING * SUBDIRECTOR
+ 0811              TS           ONES          SYMS OR NO    E SYLT OK           START SEARCH FOR FIRST BINARY RECORD
+ 0813              TS           L OBJC MSG    Z,R1          FETCH SS            GET FIRST BINARY RECORD
+ 0815              TS           1,71          Z,R2          C,+2                72ND LOC HOLDS 2(NUMBER OF SYMBOLS)
+ 0817              TS           -             -             DISASTER            SHOULD NEVER COME HERE
+ 0819              SS           ZERO          CORE OOO      Z,R2                ASSURE NEGATIVE SIGN
+ 0821              TN           W END SYMT +1 2             CARDS               SET UP SYMBOL TABLE OPENING CARD
+ 0823              TN           N,R1          7             CARDS +2
+ 0824              TX           Z,R2          -             Z,R1
+ 0825              TX           ZERO          -             KCOMMON
+ 0826              NA           Z,R1          ZERO          C,+2                JUMP IF SYMBOLS EXIST IN SYMBOL TABLE
+ 0828              S,MON TYPER  NO SYM MSG    SPRAMR +24    TYP ABORT
+ 0829              DS           KCOMMON       ONE           KCOMMON             COMPUTE NUMBER OF CARDS NEEDED
+ 0831              LA           ELEVEN        Z,R1,10       C,-1
+ 0832              TX           BLK4AGC4      -             CARDS +9
+ 0833              SWE,ONES     KCOMMON       16,L          C,+2
+ 0834              TS           Z,SC          Z,AU1         YUL D2A ZS          CONVERT NUMBER TO HOLLERITH CODE
+ 0836              RESERVE      1
+ 0837              SWS,C7T8     N,SH          12            CARDS +8            INSERT IN OPENING CARD
+ 0839              SWS,C1T2     N,SH          12            CARDS +9
+ 0840              S,PUNCH CD   CARDS -1      ALPHA         C,+1                PUNCH OPENING CARD
+ 0842              TX           L CARDS       -             Z,R4                R4 SET TO CARD PUNCH BUFFER
+ 0844   GO ROUND   TS           C256          Z,R1          FETCH SS            GO GET NEXT BLOCK OF 128 SYMBOLS
+ 0846              TS           Z,X1          Z,X5          C,+2
+ 0847              TS           -             -             DISASTER            SHOULD NEVER GET HERE
+ 0849              TX           Z,X5,3        -             -                   X5 SET TO FIRST SYMBOL WORD PAIR
+ 0851   NEXT SYMB  TX           BLKC1C8       -             N,R4
+ 0852              SWS,ACO3     5,1           2,L           N,R4                PLACE 6 DIGIT DEF INTO FIRST WORD OF PAI
+ 0854              SWS,ACO4     5,1           1             N,R4
+ 0855              SWS,ACO5     5,1           4             N,R4
+ 0856              SWS,ACO6     5,1           7             N,R4
+ 0857              SWS,ACO7     5,1           10            N,R4,1
+ 0858              TX           N,X5,2        -             N,R4.1              8 CHAR ALPHA SYMBOL INTO 2ND WORD OF PAI
+ 0860              NA           Z,R4          CARDS P10     C,+3                JUMP IF CARD NOT FULL
+ 0862              S,PUNCH CD   CARDS -1      ALPHA         C,+1                PUNCH CURRENT CARD
+ 0864              TX           LCARDS        -             Z,R4
+ 0865              LA           Z,R2,2        TWO           SYM DONE            JUMP IF ALL SYMBOLS PROCESSED
+ 0867              NA           Z,R1,2        TWO           NEXT SYMB           JUMP IF MORE SYMBOLS IN CURRENT BLOCK
+ 0869              TS           -             -             GO ROUND
+ 0870              MT           BLANKS        2             N,R4,1              FILL IN REMINDER OF CARD WITH BLANKS
+ 0872              NA           Z,R4          CARDS P10     C,-1
+ 0873              S,PUNCH CD   CARDS -1      ALPHA         C,+2                PUNCH LAST CARD CONTAINING SYMBOLS
+ 0875   SYM DONE   NA           Z,R4          L CARDS       C,-3                JUMP IF CARD PARTIALLY LOADED
+ 0877              TN           W END SYMT    3             CARDS               COMPOSE CLOSING SYMBOL TABLE CARD
+ 0879              TX           L OBJC MSG    -             Z,R1
+ 0880              TN           N,R1          7             CARDS  +3
+ 0881              S,PUNCH CD   CARDS -1      ALPHA         C,+1                PUNCH IT
+ 0883              LA           MASTR TOO     ZERO          CLOSE PCH           JUMP IF ONLY SYMBOL TABLE TO BE PUNCHED
 
 # Page 597
 #      @YUL SYSTEM MANUFACTURING - AGC4                                          USER'S OWN PAGE NO.  22        PAGE  22
 
+ 0885              TS           L DIRECTY     Z,X5          DO MASTER           GO PUNCH MASTER DECK NOW
+ 0887   TRY AND    NA           N,X5,3        W AND         BAD SD              WORDS * AND MASTER DECK* REQUIRED
+ 0889              NA           N,X5,3        W MASTER      BAD SD
+ 0890              NA           N,X5,3        W DECK        BAD SD
+ 0891              NA           N,X5,3        ONES          BAD SD              NO MORE WORDS ALLOWED
+ 0893              S,MON TYPER  SYMAS MSG     SPRA +40      C,+1
+ 0894              TS           ONE           MASTR TOO     GO SYMBOL           SET MASTER DECK ALSO FLAG
 
 # Page 598
 #      @YUL SYSTEM MANUFACTURING - AGC4                                          USER'S OWN PAGE NO.  23        PAGE  23
 
+P0896   SUBROUTINES COMMON TO PUNCHING RAYTHEOM WIRING TAPE AND RAYTHEOM CORE ROPE TESTER TAPE
+ 0898   RY COMMON  NA           N,X5,3        W TAPE        BAD SD              "TAPE" IS REQUIRED.
+ 0900   RYCOMMOP   NA           N,X5,3        ONES          BAD SD              SUPERFLUOUS WORDS ARE FORBIDDEN.
+ 0902              TX           L REQ LIST    -             Z,AU1
+ 0903              MT           ZERO          63            N,AU1,1
+ 0904              MT           ZERO          54            N,AU1,1             ZERO REQ LIST OF 116 WDS + SENTINEL.
+ 0906              TX           HOLD LOC                    Z,SC                GO TO READ & ABSORB PARAGRAPH REQUESTS.
+ 0908   GET RWT SS TN           CRWT MSG      9             TITLE MSG +1
+ 0909              TX           L AUTH NAM    -             Z,X5
+ 0910              NA,C1T4      5,0           W NASA        NO NASA
+ 0911   NEX RWT SS TS           Z,SC          Z,X5          GET REQ PN          GO TO FETCH NEXT REQUESTED PARAGRAPH.
+
+ 0913              TS           -             -             END PTAPE           NORMAL END-OF-TASK PROCEDURE.
+
+ 0915   SET WORD   TX           W CRW         -             FRAME               BEGIN (OR RESTART) PUNCHING SUBSTRAND.
+ 0917              SWE,CAC3     STIKWIRE      16            Z,X4
+ 0918              SWS,C3T5     4,0           A,2,L         TITLE MSG  +7       INSTALL NAME OF QUARTER-ROPE.
+ 0920              TX           Z,SC,6        -             Z,X5
+ 0921   ARTS OK NO RESERVE      6
+ 0922              NA,C5T6      5,0           4,0           C,+2                MATCH MODULE NUMBER
+ 0924              TS           STIK WIRE     Z,AU1         C,+2
+ 0925              NA           N,X5,1        C,-3          C,-2
+ 0926              SWS,C4T7     5,0           A,3           TITLE MSG +5
+ 0927              TS           N,AU1         TITLE MSG +9  GO TITLE H          INSTALL WIRE NUMBER RANGE.
+ 0929              TX           HOLD LOC      -             Z,SC
+ 0930   NO NASA    S,MON TYPER  NASA MSG      SPRAMR +48    TYP ABORT
+R0931   SUBROUTINE TO SEND OUT LEADING AND TAILING MESSAGES FOR EACH PAPER TAPE PARAGRAPH
+ 0933   GO TITLE H TX           Z,SH          -             Z,R3
+ 0934              NA,FOUR      TEST INST     ZERO          CHECK NOW
+ 0935   GO TITLE J TS           W HEAD        GO LAST       GO TITLE M
+ 0936              TX           Z,SC,1        -             -
+ 0937   GO TITLE T TX           Z,SH          -             Z,R3
+ 0938              NA,FOUR      TEST INST     ZERO          CHECK END
+ 0939   GO TITLE K TX           W TAIL        -             GO LAST             END THIS MESSAGE WITH *TAIL*
+ 0941   GO TITLE M NA,TWO       TEST INST     TWO           C,+2                JUMP IF LISTING NOT REQUESTED
+ 0943              TS           Z,SC          KCOMMON +5    PRINT DAT           IF SO, PRINT LEADER AND TITLE MESSAGE
+ 0945              NA,ONE       TEST INST     ZERO          GO SET CSC          JUMP IF TAPE PUNCHING INHIBITED
+ 0947              TS           -             -             PCH LEDER           GO PUNCH LEADER VIA YULPASS0
+ 0949              WA           Z,SC          THREE         Z,S1
+ 0950              NA           N,S1          BLANKS        C,+2                CAUSE SKIP OF TITLE MESSAGE LEADING BLAN
+ 0952              TS           Z,S1,1        -             C,-1
+ 0953              TS           Z,SC,10       -             PCH TITLE           GO PUNCH TITLE MESSAGE
+ 0955   TITLE MSG  ALF,5
+ 0956              ALF,5
+ 0957   GO LAST    ALF
+ 0958   GO SET CSC TS           Z,R3          KCOMMON +5    RET GO OK           GO SET CO-SEQUENCE COUNTER CORRECTLY
 
 # Page 599
 #      @YUL SYSTEM MANUFACTURING - AGC4                                          USER'S OWN PAGE NO.  24        PAGE  24
