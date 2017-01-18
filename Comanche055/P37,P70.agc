@@ -19,6 +19,8 @@
 ##				GOTOPOOH, and I've changed them back.
 ##		2016-12-21 RSB	Proofed comment text using octopus/ProoferComments
 ##				and corrected the errors found.
+##		2017-01-18 RSB	Fixed comment-text errors noted while diff'ing
+##				vs Colossus 249.
 ##
 ## This source code has been transcribed or otherwise adapted from digitized
 ## images of a hardcopy from the MIT Museum.  The digitization was performed
@@ -130,7 +132,7 @@ P37		TC	PHASCHNG	# P37 IS NOT RESTARTABLE.
 		EXIT
 		CAF	V6N33RTE	# INPUT TIG	STORED IN SPRTETIG
 		TCR	P370GOF		#		OVERLAYED WITH TIG
-		TCF	-2		# DISPLAY NEW DATA
+		TCF	-2		# DESPLAY NEW DATA
 		CAF	V6N60RTE	# INPUT REENTRY ANGLE IN GAMMAEI
 		TCR	P37GFRB1	#	AND DESIRED DELTA V IN RTEDVD
 		TCF	-2		# DISPLAY NEW DATA
@@ -801,7 +803,7 @@ INVC125		VLOAD
 #	AT L+2 OF CALLING SEQUENCE WITH MPAC = 0
 #
 # ALARM EXIT MODE
-#	AT L+2 OF CALLING SEQUENCE WITH MPAC -
+#	AT L+2 OF CALLING SEQUENCE WITH MPAC =
 #		OCTAL 605	FOR EXCESS ITERATIONS
 #		OCTAL 613	FOR REENTRY ANGLE OUT OF LIMITS
 #
@@ -1032,11 +1034,11 @@ PREC175		DLOAD	DSU
 			PREC207
 PREC205		DLOAD	DSU		# NOT FIRST PASS OF ITERATION
 			RPRE'
-			RPRE		# RPRE'-RPRE			B29/B27
+			RPRE		# RPRE,-RPRE			B29/B27
 		NORM	BDDV
 			X2
 			DRCON
-		SL*	PUSH		# DRCON/(RPRE'-RPRE)=S		B2
+		SL*	PUSH		# DRCON/(RPRE,-RPRE)=S		B2
 			0 -2,2
 		DAD	BOV		# S GR +4 OR LS -4
 			1RTEB1

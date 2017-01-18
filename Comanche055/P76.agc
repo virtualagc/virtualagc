@@ -1,20 +1,22 @@
 ### FILE="Main.annotation"
-## Copyright:    Public domain.
-## Filename:     P76.agc
-## Purpose:      Part of the source code for Colossus 2A, AKA Comanche 055.
-##               It is part of the source code for the Command Module's (CM)
-##               Apollo Guidance Computer (AGC), for Apollo 11.
-## Assembler:    yaYUL
-## Contact:      Hartmuth Gutsche <hgutsche@xplornet.com>.
-## Website:      www.ibiblio.org/apollo.
-## Pages:	 pp  511-513
-## Mod history:  2009-05-08 HG    Adapting from the Luminary131/ file 
-##                 		  of the same name, using Comanche055 page 
-##               		  images 0511.jpg - 0513.jpg. 
-##		 2016-12-10 RSB	  Proofed comments with octopus/ProoferComments
-##				  and fixed the errors found.
-##		 2016-12-10 RSB	  All of the GOTOP00H's should have been
-##				  GOTOPOOH, and I've changed them back.
+## Copyright:   Public domain.
+## Filename:    P76.agc
+## Purpose:     Part of the source code for Colossus 2A, AKA Comanche 055.
+##              It is part of the source code for the Command Module's (CM)
+##              Apollo Guidance Computer (AGC), for Apollo 11.
+## Assembler:   yaYUL
+## Contact:     Hartmuth Gutsche <hgutsche@xplornet.com>.
+## Website:     www.ibiblio.org/apollo.
+## Pages:	pp  511-513
+## Mod history: 2009-05-08 HG   Adapting from the Luminary131/ file 
+##                 		of the same name, using Comanche055 page 
+##               		images 0511.jpg - 0513.jpg. 
+##		2016-12-10 RSB	Proofed comments with octopus/ProoferComments
+##				and fixed the errors found.
+##		2016-12-10 RSB	All of the GOTOP00H's should have been
+##				GOTOPOOH, and I've changed them back.
+##		2017-01-18 RSB	Fixed comment-text errors noted while diff'ing
+##				vs Colossus 249.
 ##
 ## This source code has been transcribed or otherwise adapted from digitized
 ## images of a hardcopy from the MIT Museum.  The digitization was performed
@@ -64,7 +66,7 @@
 P76		TC	UPFLAG
 		ADRES	TRACKFLG
 
-		CAF	V06N84          # FLASH LAST DELTA V.
+		CAF	V06N84          # FLASH LAST DELTA V,
 		TC      BANKCALL        # AND WAIT FOR KEYBOARD ACTION.
 	        CADR    GOFLASH
 		TCF     ENDP76	

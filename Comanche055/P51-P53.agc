@@ -23,6 +23,8 @@
 ##				GOTOPOOH, and I've changed them back.
 ##		2016-12-11 RSB	Proofed comments with octopus/ProoferComments
 ##				and fixed the errors found.
+##		2017-01-18 RSB	Fixed comment-text errors noted while diff'ing
+##				vs Colossus 249.
 ##
 ## The contents of the "Comanche055" files, in general, are transcribed 
 ## from scanned documents. 
@@ -334,7 +336,7 @@ V06N89*		VN	0689
 #	YSMD = UNIT(ZSMD*XSMD)
 #	ZSMD = UNIT((R*V)*RLS)
 #
-# CALL 		CALL
+# CALL -	CALL
 #			P52LS
 #
 # INPUTS-	DSPTEM1 = TIME OF ALIGNMENT
@@ -569,7 +571,7 @@ TERM52		TC	CLEARMRK
 		TC	BANKCALL	# CLEAR OUT EXTENDED VERBS
 		CADR	KLEENEX
 		
-		TC	GOTOPOOH	# NOW GO TO P00
+		TC	GOTOPOOH	# NOW GO TO POO
 		
 ADVORB		STQ	SET		# SETS UP ADVANCED ORBIT TRACKING
 			SAVQR52
@@ -607,11 +609,11 @@ ADVORB		STQ	SET		# SETS UP ADVANCED ORBIT TRACKING
 #	C = VELOCITY OF LIGHT
 #
 #		EARTH IS PRIMARY			MOON IS PRIMARY
-#		        _                                       _
+#		        -                                       -
 #		VEARTH=-1(RATT)				VEARTH=-1(REM+RATT)
-#		        _				        _
+#		        -				        -
 #		VMOON = 1(REM-RATT)			VMOON =-1(RATT)
-#		        _				        _
+#		        -				        -
 #		VSUN  = 1(RES)				VSUN  = 1(RES-REM)
 #		              -1
 #		CEARTH=COS(SIN  (RE/RATT)+5)		CEARTH=COS 5
@@ -622,7 +624,7 @@ ADVORB		STQ	SET		# SETS UP ADVANCED ORBIT TRACKING
 #
 #			    VEL/C = VSUN X ECLIPOL + VATT/C
 #
-# CALL 		DLOAD	CALL
+# CALL 	-	DLOAD	CALL
 #			DESIRED TIME
 #			LOCSAM
 #
@@ -1089,7 +1091,7 @@ R54		=	CHKSDATA
 #
 # FUNCTIONAL DESCRIPTION - CHECKS THE VALIDITY OF A PAIR OF STAR SIGHTINGS.  WHEN A PAIR OF STAR SIGHTINGS ARE MADE
 # BY THE ASTRONAUT THIS ROUTINE OPERATES AND CHECKS THE OBSERVED SIGHTINGS AGAINST STORED STAR VECTORS IN THE
-# COMPUTER TO INSURE A PROPER SIGHTING WAS MADE.  THE FOLLOWING COMPUTATIONS ARE PERFORMED -
+# COMPUTER TO INSURE A PROPER SIGHTING WAS MADE.  THE FOLLOWING COMPUTATIONS ARE PERFORMED_
 #	OS1	=	OBSERVED STAR 1 VECTOR
 #	OS2	=	OBSERVED STAR 2 VECTOR
 #	SS1	=	STORED STAR 1 VECTOR
@@ -1324,7 +1326,7 @@ CALCSMSC	DLOAD	DMP
 #
 #	1.  SEXTANT ANGLES ARE COMPUTED IN TERMS OF NAVIGATIONAL BASE COORDINATES.  LET SA AND TA BE THE SHAFT AND
 #	TRUNNION ANGLES, RESPECTIVELY.  THEN,
-#	_
+#	-
 #	V  = (SIN(TA)*COS(SA), SIN(TA)*SIN(SA), COS(TA))	(A COLUMN VECTOR)
 #        NB
 #	THE OUTPUT IS A HALF-UNIT VECTOR STORED IN STARM.
@@ -1361,52 +1363,51 @@ CALCSMSC	DLOAD	DMP
 #		LET S  AND S  BE TWO STAR VECTORS EXPRESSED IN TWO COORDINATE SYSTEMS, A AND B (BASIC AND STABLE MEMBER).
 #		     1      2
 ## Page 765
-#		DEFINE,
-#		-    -
-#		U  = S
-#		 A    A1
-#		-         -    -
-#		V  = UNIT(S  X S  )
-#		 A         A1   A2
-#		-    -   -
-#		W  = U X V
-#		 A    A   A
+#		DEFINE,	-    -
+#			U  = S
+#			 A    A1
+#			-         -    -
+#			V  = UNIT(S  X S  )
+#			 A         A1   A2
+#			-    -   -
+#			W  = U X V
+#			 A    A   A
 #
 #		AND
-#		-    -
-#		U  = S
-#		 B    B1
-#		-         -    -
-#		V  = UNIT(S  X S  )
-#		 B         B1   B2
-#		-    -   -
-#		W  = U X V
-#		 B    B   B
+#			-    -
+#			U  = S
+#			 B    B1
+#			-         -    -
+#			V  = UNIT(S  X S  )
+#			 B         B1   B2
+#			-    -   -
+#			W  = U X V
+#			 B    B   B
 #
-#		THEN
-#		-        -       -       -
-#		X  = U  *U + V  *V + W  *W
-#		      B1  A   B1  A   B1  A
-#		-        -       -       -		(REFSMMAT)
-#		Y  = U  *U + V  *V + W  *W
-#		      B2  A   B2  A   B2  A
-#		-        -       -       -
-#		Z  = U  *U + V  *V + W  *W
-#		      B3  A   B3  A   B3  A
+#		THEN	-        -       -       -
+#			X  = U  *U + V  *V + W  *W
+#			      B1  A   B1  A   B1  A
+#			-        -       -       -		(REFSMMAT)
+#			Y  = U  *U + V  *V + W  *W
+#			      B2  A   B2  A   B2  A
+#			-        -       -       -
+#			Z  = U  *U + V  *V + W  *W
+#			      B3  A   B3  A   B3  A
 #
 # THE INPUTS CONSIST OF THE FOUR HALF-UNIT VECTORS STORED AS FOLLOWS
-#		-
-#		S   IN 6-11 OF THE VAC AREA
-#		 A1
-#		-
-#		S   IN 12-17 OF THE VAC AREA
-#		 A2
-#		-
-#		S   IN STARAD
-#		 B1
-## Page 766	-
-#		S   IN STARAD +6
-#		 B2
+#			-
+#			S   IN 6-11 OF THE VAC AREA
+#			 A1
+#			-
+#			S   IN 12-17 OF THE VAC AREA
+#			 A2
+#			-
+#			S   IN STARAD
+#			 B1
+## Page 766
+#			-
+#			S   IN STARAD +6
+#			 B2
 #
 # CALLING SEQUENCE
 #
