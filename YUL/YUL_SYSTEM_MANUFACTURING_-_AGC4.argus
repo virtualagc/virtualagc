@@ -9,6 +9,7 @@
 # Mod history:  2016-10-06 JL   Created.
 #               2017-01-14 JL   Transcribed pages 576-592.
 #               2017-01-17 JL   Transcribed pages 593-598.
+#               2017-01-18 JL   Transcribed pages 599-603.
 
 # Annotations:
 #
@@ -947,22 +948,210 @@ R0931   SUBROUTINE TO SEND OUT LEADING AND TAILING MESSAGES FOR EACH PAPER TAPE 
 # Page 599
 #      @YUL SYSTEM MANUFACTURING - AGC4                                          USER'S OWN PAGE NO.  24        PAGE  24
 
+P0960   SUBROUTINE TO READ AND ABSORB SUBDIRECTORS
+R0961   S     PARAGRAPH ALL
+R0962   S     PARAGRAPH NNN
+R0963   S     PARAGRAPH NNN THRU (THROUGH) NNN
+R0964   THE APPEARANCE OF *PARAGRAPH ALL* FORBIDS ANY SUBSEQUENT PARAGRAPH SUBDIRECTORS.
+R0966   THE APPEARANCE OF ANY PARAGRAPH SUBDIRECTOR FORBIDS ANY SUBSEQUENT *PARAGRAPH ALL* SUBDIRECTOR.
+R0968   NNN IS FROM 1 TO 3 OCTAL DIGITS
+R0969   AND IS THE NAME OF AN AGC4 PARAGRAPH.  A CARD SPECIFYING PARAGRAPH N WILL LEAVE IN REQ LIST +N A CAC WHOSE CAC2
+R0971   POINTS TO ALF "     RHS" (ROPE, HALF, SIDE = QUARTER-ROPE NAME), AND WHOSE CAC3 POINTS TO ALF "WWW-WWW", THE
+R0973   RANGE OF WIRE NUMBERS THAT SPECIFY THE SENSE-WINDING SET.  ENTER AT READ A REQ WITH RETURN IN S1.
+
+R0975   ASSORTED COMPLAINTS ABOUT ILL-FORMED PARAGRAPH REQUEST CARDS.
+
+ 0976   2 LONG PHN S,MON TYPER  2 LONP MSG    SPRAMR +24    C,+4                PARAGRAPH NUMBER TOO LONG.
+ 0978   UNOCT PHN  S,MON TYPER  UNOPN MSG     SPRAMR +24    C,+3                PARAGRAPH NUMBER BLANK OR NON-OCTAL.
+ 0980   ILLEG PHN  S,MON TYPER  ILLPN MSG     SPRAMR +24    C,+2                PARAGRAPH NUMBER HAS ILLEGAL VALUE.
+ 0982   DUPLI PHN  S,MON TYPER  DUPPN MSG     SPRAMR +24    C,+1                PARAGRAPH NUMBER DUPLICATED.
+ 0984              TS           -             -             IGN SUBDR           ALWAYS IGNORE ILL-FORMED REQUEST.
+ 0986   READ A REQ TS           -             -             RD SBDIRC           FETCH SS REQUEST IF ANY SUCH ARE LEFT.
+ 0988              TS           -             -             ANY GOODS           COME HERE WHEN SUBDIRECTORS RUN OUT.
+ 0990              WA           Z,X6          OCTAL 20      Z,X5
+ 0991              TN           N,X5,3        2             K COMMON
+ 0992              NA           KCOMMON       W PARAGRF     TRY TEST
+ 0993              NA           KCOMMON +1    W PARAGRF +1  BAD SD              "PARAGRAPH" IS REQUIRED.
+ 0995              NA           5,0           W ALL         LIST PARA           JUMP IF NOT *ALL*
+ 0997              NA           5,3           ONES          BAD SD6             NO MORE WORDS ALLOWED
+ 0999              TX           ONE ONLY      -             C,-2                NO FIRTHER *PARAGRAPH* SD ALLOWED
+ 1001              TS           C,+1          READ A REQ +1 READ A REQ
+ 1002              TS           -             -             ALL PARAS
+ 1003   ALL PARAS  NA           REQ LIST +116 ONES          C,+2                *PARAGRAPH ALL* SD MUST BE ONLY
+ 1005              S,MON TYPER  PALL MSG      SPRAMR +56    TYP ABORT           *PARAGRAPH* SD FOR THIS TASK
+ 1007              TS           ONES          SYMS OR NO    E SYLT OK           START SEARCH FOR PROGRAM FIRST BINARY RE
+ 1009              TS           ONE           PARA DEEP     FETCH SS            GO GET THE FIRST BINARY RECORD
+ 1011              TS           FOUR          Z,R3          C,+2                WORDS 6 - 9 HOLD PARAGRAPH USE MARKERS
+ 1013              TS           -             -             DISASTER            SHOULD NEVER COME HERE
+ 1015              WA           Z,X1          FIVE          Z,R4
+ 1016              TX           C 32          -             KCOMMON +1          32 PARAGRAPH MARKERS PER WORD
+ 1018              NA           ALLOWE        ZERO          ALL RAT             JUMP IF ERASABLE PARAGRAPHS ALLOWED
+ 1020              TX           C 32          -             Z,R0
+ 1021              SWE,ONES     N,R4,1        5,L           KCOMMON             BRING FORTH BIT FOR FIRST FIXED PARA
+ 1023              TS           Z,R0,4        -             ALL DOG
+ 1024   ALL RAT    TX           C 32          -             Z,R0
+ 1025              TX           N,R4,1        -             KCOMMON
+ 1026   ALL CAT    SWE,ONES     KCOMMON       1,L           KCOMMON             PUT PARAGRAPH USE BIT INTO BIT 48
+ 1028   ALL DOG    NA,ONE       KCOMMON       ONE           ALL MICE            JUMP IF PARAGRAPH NOT USED BY THIS PROG
+ 1030              WD           KCOMMON +1    Z,R0          PARAG NO            DETERMINE PARAGRAPH NUMBER
+ 1032              TS           Z,SC          Z,R1          ST PARA DT          GO SET UP ITS DATA
+ 1034   ALL MICE   NA           Z,R0,1        ONE           ALL CAT             JUMP IF WORD OF 32 MARKERS NOT FINISHED
+ 1036              WA           C 32          KCOMMON +1    KCOMMON +1
+ 1037              NA           Z,R3,1        ONE           ALL RAT             JUMP IF MORE PARA MARKER WORDS YET
+ 1039              TS           C,+1          READY NOW     ANY MDN
+ 1040              TX           L REQ LIST    -             REQ PLACE
+ 1041   LIST PARA  TS           Z,SC          Z,R1          CHK PARA N          CHECK ALPHA VALIDITY OF PARA NUMBER
+ 1043              TX           N,X5,3        -             KCOMMON
+ 1044              NA           KCOMMON       W THRU        C,+2
 
 # Page 600
 #      @YUL SYSTEM MANUFACTURING - AGC4                                          USER'S OWN PAGE NO.  25        PAGE  25
 
+ 1045              TS           -             -             C,+2
+ 1046              NA           KCOMMON       W THROUGH     CHK REG PA
+ 1047              TX           PARAG NO      -             KCOMMON +3          SAVE LOW PARAGRAPH NUMBER
+ 1049              TS           Z,SC          Z,R1          CHK PARA N          CHECK ALPHA VALIDITY OF PARA NUMBER
+ 1051              NA           ONES          N,X5          BAD SDN             NO MORE WORDS ALLOWED IN SD
+ 1053              LA           PARAG NO      KCOMMON +3    BAD SD              JUMP IF 1ST PARA NOT LOWER THAN 2ND
+ 1055              TS           Z,SC          Z,R1          ST PARA DT          SET UP PARAGRAPH DATA
+ 1057              LA           PARAG NO      KCOMMON +3    READ A REQ          JUMP IF ALL INCLUSIVE PARAS SET UP
+ 1059              WD           PARAG NO      ONE           PARAG NO
+ 1060              TS           -             -             C,-3
+ 1061   CHK REG PA NA           ONES          KCOMMON       BAD SD              NO MORE WORDS ALLOWED
+ 1063              TS           Z,SC          Z,R1          ST PARA DT          SET  UP PARAGRAPH DATA
+ 1065              TS           -             -             READ A REQ
+ 1066   CHK PARA N LA,CHAR6     5,2           ZERO          UNOCT PHN           BLANK PARAGRAPH NUMBER.
+ 1068              LA, CHAR6    4 C6          5,2           2LONG PHN           PARAGRAPH NUMBER OVER THREE DIGITS.
+ 1070              LA,CHAR8     EIGHT         5,2           UNOCT PHN           PARAGRAPH NUMBER NOT OCTAL.
+ 1072              TS           ZERO          PARAG NO      C,+2
+
+ 1073              SWS, ONES    PARAG NO      3,L           PARAG NO
+ 1074              SWS, SEVEN   N,X5          A,7           PARAG NO            CONVERT ALPHA-OCTAL TO BINARY.
+ 1076              SWS, C1T3    N,X5          A,1,L         N,X5
+ 1077              NA           N,X5          BLANKS        C,-3
+
+ 1078              TS           Z,X5,3        -             N,R1
+ 1079   ST PARA DT NA           ALLOW E       ZERO          C,+2
+ 1080              LA, CHAR8    PARAG NO      THREE         ILLEG PHN           NUMBERS X00 THRU X03 ARE ILLEGAL.
+ 1082              LA, CHAR8    OCT 164       PARAG NO      ILLEG PHN           NUMBERS X64 THRU X77 ARE ILLEGAL.
+ 1084              LA           OCT 164       PARAG NO      ILLEG PHN           NUMBERS 164 THRU 777 ARE ILLEGAL.
+ 1086              WA           PARAG NO      L REQ LIST    Z,R2
+ 1087              NA           N,R2          ZERO          DUPLI PHN           REQUESTED PARAGRAPH NUMBER IS DUPLICATE.
+ 1089              SWS,D8       PARAG NO      14,L          N,R2                4 BITS DETERMINE WHICH QUARTER-ROPE.
+ 1091              SWS,SEVEN    PARAG NO      4             N,R2                HIGH 1 AND LOW 2 BITS DETERMINE WHICH
+ 1093              SS           PARAG NO      THREE         N,R2                SENSE-WINDING SET (1 OF 8).
+ 1095              WA           N,R2          ST WIR CAC    N,R2                ADD BASE ADDRESSES TO BIT GROUPS.
+ 1097              TS           ONES          REQ LIST +116 N,R1                SHOW THAT AT LEAST ONE REQUEST GOT IN.
+ 1099   ANY GOODS  NA           REQ LIST +116 ZERO          C,+2                RETURN IF ANY REQUESTS WERE ABSORBED.
+ 1101              S,MON TYPER  NO GUD MSG    SPRAMR +16    TYP ABORT           TYPE "NO GOOD REQUESTS", ABORT.
+ 1103   ANY MDN    NA           MDN MARK      ZERO          CHECK MDN           JUMP TO CHECK MODULE DECK NUMBERS
+ 1105              S,MON TYPER  NO MDN MSG    SPRAMR +48    TYP ABORT
+ 1106   READY NOW  TS           L REQ LIST    REQ PLACE     E SYLT OK           MAKE GROUP 5 LOOK FOR DESIRED PROGRAM
+ 1108              TX           HOLD LOC      -             Z,SC
 
 # Page 601
 #      @YUL SYSTEM MANUFACTURING - AGC4                                          USER'S OWN PAGE NO.  26        PAGE  26
 
+P1109   ALONG WITH THE PARAGRAPH SUBDIRECTOR CARDS, THE JOB MAY OPTIONALLY HAVE A "USE" SUBDIRECTOR TO SPECIFY A TYPE OF
+R1111   OUTPUT TAPE.  THE FIVE OPTIONS ARE:
+R1112              0    PINK OILED PAPER TAPE ( PROGRAM USES THIS IF NO TAPE SP ECIFIED)
+R1114              1    BLACK OILED PAPER TAPE
+R1115              2    BLUE MYLAR TAPE
+R1116              3    GRAY FIBER TAPE
+R1117              4    ALUMINUM TAPE
+
+ 1118   TRY USE    NA           KCOMMON       W USE         TRY MODUL
+ 1119              TS           ONE ONLY      C,+0          AGC4 PNCH      C    ONLY ONE SUCH SUBDIRECTOR ALLOWED
+ 1121              NA           KCOMMON       W PINK        TRY BLACK
+ 1122   TRY OILED  NA           N,X5,3        W OILED       BAD SD
+ 1123              NA           N,X5,3        W PAPER       BAD SD
+ 1124   TRY TAPE   NA           N,X5,3        W TAPE        BAD SD
+ 1125              LA           ONES          N,X5,3        READ A REQ
+ 1126   GO BAD SD  TS           -             -             BAD SD
+ 1127   TRY BLACK  NA           KCOMMON       W BLACK       TRY BLUE
+ 1128              TS,B21T24    B24K          SWITCH        TRY OILED
+ 1129   TRY BLUE   NA           KCOMMON       W BLUE        TRY GRAY
+ 1130              NA           N,X5,3        W MYLAR       BAD SD
+ 1131              TS,B21T24    B23K          SWITCH        TRY TAPE
+ 1132   TRY GRAY   NA           KCOMMON       W GRAY        C,+2
+ 1133              TS           -             -             C,+2
+ 1134              NA           KCOMMON       W GREY        TRY ALUMN
+ 1135              NA           N,X5,3        W FIBER       BAD SD
+ 1136              TS,B21T24    B23T24K       SWITCH        TRY TAPE
+ 1137   TRY ALUMN  NA           KCOMMON       W ALUMINM     BAD SD
+ 1138              NA           KCOMMON +1    BLANKS        BAD SD
+ 1139              TS,B21T24    B22K          SWITCH        TRY TAPE
 
 # Page 602
 #      @YUL SYSTEM MANUFACTURING - AGC4                                          USER'S OWN PAGE NO.  27        PAGE  27
 
+P1140   ALONG WITH THE PARAGRAPH SUBDIRECTOR CARDS, THE JOB WILL MANDATORILY HAVE A "MODULE DECK NUMBERS" SUBDIRECTOR.
+R1142   THE THREE INTRODUCTORY WORDS ARE FOLLOWED BY SIX "WORDS" EACH CONSISTING OF SIX CHARACTERS ( FOUR FOR THE MODULE
+R1144   DECK NUMBER AND TWO FOR MODULE NUMBER IN THAT ORDER).  ALL SIX CHARACTERS MUST APPEAR IN EACH WORD. ROUTIN
+R1146   ES BELOW READ THIS SUBDIRECTOR AND LATER CHECK THAT A MODULE DECK NUMBER EXISTS FOR EACH MODULE SPECIFIED (IMPLI
+R1148   CITLY) BY THE PARAGRAPH CARDS. IF THIS CARD IS MISSING OR A MODULE DOES NOT HAVE AN ASSIGNED MODULE DECK NUMBER,
+R1150   ABORT
+
+ 1151   TRY MODUL  NA           KCOMMON       W MODULE      BAD SD              WORDS *MODULE DECK NUMBERS* REQUIRED
+ 1153              NA           N,X5,3        W DECK        BAD SD
+ 1154              NA           N,X5,3        W NUMBERS     BAD SD
+ 1155              TS           ONE ONLY      C,+0          LOAD ART       C    ONLY ONE SUCH SUBDIRECTOR ALLOWED
+ 1157              MT           N,X5,3        6             N,X3,1              SAVE 6 WORDS OF 6 CHARS EACH
+ 1159              TS           ONE           MDN MARK      READ A REQ          SET MODULE DECK NUMBERS MARKERS
+ 1161   CHECK MDN  TX           L REQ LIST    -             Z,X5
+ 1162   NEXT MDN   LA           N,X5,1        ZERO          C,+0                FIND ACTIVE PARAGRAPH
+ 1164              WD           Z,X5          ONE           Z,X5
+ 1165              LA           ONES          N,X5          MDN NUM             JUMP IF NO MORE
+ 1167              SWE,CAC3     5,0           16            Z,X6
+ 1168   LOAD ART   TX           L ARTSDK N    -             Z,X3
+ 1169              NA,C5T6      3,0           6,0           C,+3                COMPARE PARA MODULE NUMBER WITH MODULE
+ 1171              TX,CHAR8     ONES          -             3,0                 NUMBERS FROM *MODULE DECK NUMBERS* SD
+ 1173              TS           Z,X5,1        -             NEXT MDN            WHEN MATCHED, SHOW MODULE CALLED BY TASK
+ 1175              NA           N,X3,1        ARTS DK NO +5 C,-3
+ 1176              SWS,C7T8     6,0           A,2           CHK M MSG +4        ERROR IF TASK CALLS A PARA WITHIN A
+ 1178              S,MON TYPER  CHK M MSG     SPRAMR +40    TYP ABORT           MODULE WITHOUT AN ASSIGNED DECK NUMBER
+ 1180   ONE ONLY   S,MON TYPER  EXCES MSG     SPRAMR +32    REJEC DIR
+ 1181   MDN NUM    TS           K6M           Z,X5          LOAD ART       C
+ 1182   NXT MDN CK LA           ONES          N,X3          READY NOW           JUMP IF ALL MODULES FROM *MODULE DECK
+ 1184              LA,CHAR8     ONES          3,0           MDN OK              NUMBERS* CALLED BY TASK
+ 1186              SWS,C1T2     3,0           A,4,L         X MDN MSG +3
+ 1187              S,MON TYPER  X MDN MSG     SPRAMR +48    TYP ABORT           ERROR IF ONE NOT SO
+ 1189   MDN OK     LA           Z,X5,1        ONE           READY NOW
+ 1190              TS           Z,X3,1        -             NXT MDN OK
 
 # Page 603
 #      @YUL SYSTEM MANUFACTURING - AGC4                                          USER'S OWN PAGE NO.  28        PAGE  28
 
+P1191   SUBROUTINE TO DELIVER THE NEXT REQUESTED PARAGRAPH (AS DETERMINED BY READ A REQ).  FOR EACH REQUESTED BUT ABSENT
+R1193   PARAGRAPH, A COMPLAINT IS TYPED.  IF ALL REQUESTED PARAGRAPHS ARE ABSENT, "NO GOOD REQUESTS" IS TYPED AND THE
+R1195   TASK ABORTS.  NORMAL RETURN IS TO L+2 WITH PARAGRAPH AVAILABLE AT X1, AND IN STIK WIRE THE CAC SET UP BY READ A
+R1197   REQ.  END-OF-FILE RETURN IS TO L+1.  ENTER WITH RETURN (L+1) IN X5.
+
+
+
+ 1198   GET PAR CM LA           N,AU1,1       ZERO          C,+0           C    FIND NEXT ACTIVE PARAGRAPH
+ 1200              TX           Z,AU1         -             REQ PLACE      C
+ 1201              WD           Z,AU1         ONE           Z,AU1          C
+ 1202              LA           ONES          N,AU1         C,+3           C
+ 1203              WD           Z,AU1         L REQ LIST    PARAG NO       C    DETERMINE ITS PARAGRAPH NUMBER
+ 1205              TX           N,AU1         -             STIK WIRE
+ 1206   LAS PN DUN TS           -             -             ANY GOODS +1        EXIT IF NONE
+ 1208   GET REQ PN TS           REQ PLACE     Z,AU1         GET PAR CM     C
+ 1209   FETCH REQ  TS           -             -             FETCH SS            GET PARAGRAPH IF IT EXISTS.
+ 1211              TS           -             -             FETCH PAR           STOP TRYING IF PARAGRAPHS RUN OUT.
+ 1213              TX           ZERO          -             PARA DEEP
+ 1214   NOW CHECK  LA           1,2           PARAG NO      PHN MATCH           BRANCH IF COULD BE DESIRED PH.
+ 1216   PH NOT HER SWS,ACO3     PARAG NO      24,L          PNHER MSG +1
+ 1217              SWS, ACO4    PARAG NO      21,L          PNHER MSG +1
+ 1218              SWS, ACO5    PARAG NO      18,L          PNHER MSG +1
+ 1219              S,MON TYPER  PNHER MSG     SPRA +24      C,+1                TYPE "PARAGRAPH NNN NOT HERE", TRY NEXT.
+ 1221              TS           REQ PLACE     Z,AU1         GET PAR CM     C
+ 1222   NOTHERS    TS           -             -             NOW CHECK
+ 1223   PHN MATCH  NA           1,2           PARAG NO      FETCH REQ           BRANCH TO BYPASS UNWANTED PARAGRAPH.
+ 1225              TS           C,+1          LAS PN DUN    5,1                 SET UP END-OF-FILE EXIT, DO NORMAL EXIT.
+ 1227              TS           -             -             N,X5
+ 1228   FETCH PAR  NA           PARA DEEP     ZERO          FETCH REQ           JUMP IF 1ST BINARY RECORD NOT YET FOUND
+ 1230              TS           C,+0          NOTHERS       PHNOTHER
 
 # Page 604
 #      @YUL SYSTEM MANUFACTURING - AGC4                                          USER'S OWN PAGE NO.  29        PAGE  29
