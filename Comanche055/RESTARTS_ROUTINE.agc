@@ -16,6 +16,8 @@
 ##		2010-08-28 JL	Added missing comment character.
 ##		2016-12-22 RSB	Proofed comment text using octopus/ProoferComments
 ##				and corrected the errors found.
+##		2017-01-18 RSB	Fixed comment-text errors noted while diff'ing
+##				vs Colossus 249.
 ##
 ## The contents of the "Comanche055" files, in general, are transcribed 
 ## from scanned documents. 
@@ -171,7 +173,7 @@ CHKNOVAC	TS	GOLOC -1	# SAVE PRIO UNTIL WE SEE IF ITS
 		BZMF	ITSNOVAC
 
 		CAF	FVACCADR	# POSITIVE, SET UP FINDVAC CALL.
-		XCH	GOLOC -1	# PICK UP PRIO.
+		XCH	GOLOC -1	# PICK UP PRIO,
 		TC	GOLOC -1	# AND GO
 
 ITSNOVAC	CAF	NOVACADR	# NEGATIVE,

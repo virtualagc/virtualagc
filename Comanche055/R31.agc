@@ -12,6 +12,8 @@
 ##		2009-05-20 RSB	Corrected INSTALL -> INTSTALL
 ##		2016-12-10 RSB	Proofed comments with octopus/ProoferComments
 ##				and fixed the errors found.
+##		2017-01-18 RSB	Fixed comment-text errors noted while diff'ing
+##				vs Colossus 249.
 ##
 ## The contents of the "Comanche055" files, in general, are transcribed 
 ## from scanned documents. 
@@ -53,7 +55,7 @@ DSPDELAY	CAF	1SEC
 		BZF	DSPDELAY
 
 DISPN5X		CA	FLAGWRD9	# TEST R31FLAG (IN SUNDANCE R31FLAG WILL
-		MASK	BIT4		# 	ALWAYS BE SET AS R34 DOES NOT EXIST.
+		MASK	BIT4		# 	ALWAYS BE SET AS R34 DOES NOT EXIST)
 		EXTEND
 		BZF	+3
 		CAF	V16N54		# R31	USE NOUN 54

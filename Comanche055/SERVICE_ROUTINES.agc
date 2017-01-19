@@ -1,20 +1,22 @@
 ### FILE="Main.annotation"
-## Copyright:    Public domain.
-## Filename:     SERVICE_ROUTINES.agc
-## Purpose:      Part of the source code for Comanche, build 055. It
-##               is part of the source code for the Command Module's
-##               (CM) Apollo Guidance Computer (AGC), Apollo 11.
-## Assembler:    yaYUL
-## Reference:    pp. 1485-1492
-## Contact:      Ron Burkey <info@sandroid.org>
-## Website:      http://www.ibiblio.org/apollo.
-## Mod history:  2009-05-07 RSB	Adapted from Colossus249 file of the same
+## Copyright:   Public domain.
+## Filename:    SERVICE_ROUTINES.agc
+## Purpose:     Part of the source code for Comanche, build 055. It
+##              is part of the source code for the Command Module's
+##              (CM) Apollo Guidance Computer (AGC), Apollo 11.
+## Assembler:   yaYUL
+## Reference:   pp. 1485-1492
+## Contact:     Ron Burkey <info@sandroid.org>
+## Website:     http://www.ibiblio.org/apollo.
+## Mod history: 2009-05-07 RSB	Adapted from Colossus249 file of the same
 ##				name, and page images. Corrected various 
 ##				typos in the transcription of program 
 ##				comments, and these should be back-ported  
 ##				to Colossus249.
 ##		2016-12-22 RSB	Proofed comment text using octopus/ProoferComments
 ##				and corrected the errors found.
+##		2017-01-18 RSB	Fixed comment-text errors noted while diff'ing
+##				vs Colossus 249.
 ##
 ## The contents of the "Comanche055" files, in general, are transcribed 
 ## from scanned documents. 
@@ -115,7 +117,7 @@ DOWNFLAG	CA	Q
 		MASK	L		# RESET BIT
 		TCF	COMFLAG
 
-DEBIT		AD	ONE		# CET DE BITS
+DEBIT		AD	ONE		# GET DE BITS
 		INHINT
 		TS	ITEMP3
 		CA	LOW4		# DEC15
