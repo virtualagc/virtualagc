@@ -10,6 +10,7 @@
 #               2017-01-14 JL   Transcribed pages 576-592.
 #               2017-01-17 JL   Transcribed pages 593-598.
 #               2017-01-18 JL   Transcribed pages 599-603.
+#               2017-01-19 JL   Transcribed page 604.
 
 # Annotations:
 #
@@ -1156,6 +1157,61 @@ R1197   REQ.  END-OF-FILE RETURN IS TO L+1.  ENTER WITH RETURN (L+1) IN X5.
 # Page 604
 #      @YUL SYSTEM MANUFACTURING - AGC4                                          USER'S OWN PAGE NO.  29        PAGE  29
 
+P1231   *PUNCH RAYTHEON WIRING TAPE* SUBDIRECTOR SUBROUTINE HERE.
+R1232   EACH SUBSTRAND IS A SEPARATE PIECE OF PAPER
+R1233   AT LEAST ONE OF THE SUBDIRECTORS *PARAGRAPH* IS REQUIRED. SEE PAGE 24.
+R1234   SUBDIRECTOR *MODULE DECK NUMBERS* IS REQUIRED.  SEE PAGE 27.
+R1235   SUBDIRECTOR *USE* IS OPTIONAL. SEE PAGE 26.
+R1236   SUBDIRECTOR *TESTING* IS OPTIONAL.  SEE PAGE 34.
+
+ 1237   RAYTH PQ   NA           KCOMMON       W RATHEON     TRY MASTR           BR IF WD 2 NOTE "CORE" OR "RAYTHEON".
+ 1239              NA           KCOMMON +1    BLANKS        BAD SD              "RAYTHEON" IS REQUIRED HERE.
+ 1241              NA           N,X5          W WIRING      RAYTH TT            "WIRING" IS REQUIRED.
+ 1243              TX           Z,X5,3        -             -
+ 1244              TS           Z,SC          HOLD LOC      RY COMMON           GO QUIZ REST OF SUBDIRECTOR
+ 1246              S,MON TYPER  PRWTP MSG     SPRA +32      C,+1
+ 1247              TS           Z,SC          HOLD LOC      READ A REQ          READ OTHER TASK SUBDIRECTORS
+ 1249              TS           Z,SC          HOLD LOC      GET RWT SS
+ 1250              TX           THIRTY        -             Z,R3
+ 1251              TX           FEED 1T7      -             FRAME          C
+ 1252              NA           Z,R3,1        ONE           C,-1
+ 1253              WA           Z,X1          THREE         Z,R2                INITIAL ADDRESS OF PARAGRAPH.
+ 1255              WD           L RSPEX P8    EIGHT         Z,R3                INIT. ADDR. FOR LIST OF SUBSTRAND SPECS.
+ 1257   REARANGE   TS           Z,R2,1        Z,AU1         C,+1           C    THE BISEQUENCE BIT DOES SOME SWINGING
+ 1259              TS           N,R3,1        Z,AU2         PARA TO SS     C    THINGS IN HERE.  HINT: WHAT GETS DONE
+ 1261              NA           Z,R3          L RSPEX P8    C,-2                TWICE IN AN OBSCURE WAY....
+ 1263              TS           R SPECS +1    Z,X4          C,+2                INITIAL ADDRESS OF SUBSTRAND.
+ 1265   PARA TO SS MT           N,AU1,4       32            N,AU2,1             CONVERT PARAGRAPH TO SUBSTRAND.
+
+R1267   PROCEDURE TO ESTABLISH X AND Z COORDINATES OF EACH CORE.
+ 1268              TS           7 D2          FRAME         C,+2
+ 1269   Z COORD    WD           FRAME         1 D2          FRAME               MOVE UP ONE ROW.
+ 1271              TX           C32           -             Z,R3
+ 1272              SS           FRAME         D2            N,X4,1              LABEL CORES WITH Z-COORDINATES.
+ 1274              NA           Z,R3,1        ONE           C,-1
+ 1275              SM           FRAME         CAC3          N,X4,1              SHOW BYPASS HOLE AND DO SAME FOR IT.
+ 1277              NA           FRAME         ZERO          Z COORD
+ 1278              DS           DEC 0033      1 D4          FRAME
+ 1279              TS           R SPECS +1    Z,X4          C,+2
+ 1280   X COORD    DS           FRAME         1 D4          FRAME               MOVE RIGHT 1 COLUMN.
+ 1282              DS, D3D4     DEC 0033      FRAME         4,231
+ 1283              SS           FRAME         D3D4          4,198
+ 1284              SS           4,231         D3D4          4,165
+ 1285              SS           FRAME         D3D4          4,132
+ 1286              SS           4,165         D3D4          4,99
+ 1287              SS           FRAME         D3D4          4,66
+ 1288              SS           4,99          D3D4          4,33
+ 1289              SS           FRAME         D3D4          N,X4,1              LABEL CORES & BYPASSES W/ X-COORDINATES.
+ 1291              NN           FRAME         ZERO          X COORD
+
+R1292   INITIALIZE CODED PUNCHING FOR SUBSTRAND.
+ 1293              SWS,SEVEN    TITLE MSG +7  A,3           SPEC FRAM           SET A/B BIT, ZERO NEEDLE-HOLDER BIT.
+ 1295              SM           SPEC FRAM     NINE          SPEC FRAM           SET BEGIN SS AND BEGIN WIRE BITS.
+ 1297              SWE,ONES     TITLE MSG +9  A,1,L         WIRENO
+ 1298              TS           L WIRE NO     Z,X4          MON A2D             CONVERT FIRST WIRE NUMBER TO DECIMAL.
+ 1300   MON DECNO  RESERVE      1
+ 1301              TX           MON DECNO     -             WIRE NO
+ 1302              TX           ONE           -             BIT MASK            WORK FROM PARITY BIT TOWARD SIGN BIT.
 
 # Page 605
 #      @YUL SYSTEM MANUFACTURING - AGC4                                          USER'S OWN PAGE NO.  30        PAGE  30
