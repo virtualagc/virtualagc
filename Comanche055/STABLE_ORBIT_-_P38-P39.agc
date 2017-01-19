@@ -1,51 +1,51 @@
 ### FILE="Main.annotation"
-## Copyright:	Public domain.
-## Filename:	STABLE_ORBIT.agc
-## Purpose:	Part of the source code for Colossus, build 249.
-##		It is part of the source code for the Command Module's (CM)
-##		Apollo Guidance Computer (AGC), for Apollo 9.
-## Assembler:	yaYUL
-## Reference:	pp. 516-523.
-## Contact:	Ron Burkey <info@sandroid.org>.
-## Website:	www.ibiblio.org/apollo.
-## Mod history:	08/12/04 RSB.	Began transcribing.
-##		2017-01-06 RSB	Page numbers now agree with those on the
-##				original harcopy, as opposed to the PDF page
-##				numbers in 1701.pdf.
+## Copyright:   Public domain.
+## Filename:    STABLE_ORBIT_-_P38-P39.agc
+## Purpose:     Part of the source code for Colossus 2A, AKA Comanche 055.
+##              It is part of the source code for the Command Module's (CM)
+##              Apollo Guidance Computer (AGC), for Apollo 11.
+## Assembler:   yaYUL
+## Contact:     Hartmuth Gutsche <hgutsche@xplornet.com>.
+## Website:     www.ibiblio.org/apollo.
+## Pages:	525-532
+## Mod history: 2009-05-10 HG   Started adapting from the Colossus249/ file
+##                		of the same name, using Comanche055 page
+##                		images 0525.jpg - 0532.jpg.
+##		2010-08-20 JL	Fixed page number comment (p531).
+##		2016-12-10 RSB	Proofed comments with octopus/ProoferComments
+##				and fixed the errors found.
+##		2016-12-10 RSB	All of the GOTOP00H's should have been
+##				GOTOPOOH, and I've changed them back.
+##		2017-01-19 RSB	Renamed from STABLE_ORBIT.agc to agree with 
+##				the actual name from the log section, and with
+##				the naming in Colossus 237.
 ##
-## The contents of the "Colossus249" files, in general, are transcribed 
-## from a scanned copy of the program listing.  Notations on this
-## document read, in part:
+## This source code has been transcribed or otherwise adapted from digitized
+## images of a hardcopy from the MIT Museum.  The digitization was performed
+## by Paul Fjeld, and arranged for by Deborah Douglas of the Museum.  Many
+## thanks to both.  The images (with suitable reduction in storage size and
+## consequent reduction in image quality as well) are available online at
+## www.ibiblio.org/apollo.  If for some reason you find that the images are
+## illegible, contact me at info@sandroid.org about getting access to the 
+## (much) higher-quality images which Paul actually created.
 ##
-##	Assemble revision 249 of AGC program Colossus by NASA
-##	2021111-041.  October 28, 1968.  
+## Notations on the hardcopy document read, in part:
 ##
-##	This AGC program shall also be referred to as
-##				Colossus 1A
+##    Assemble revision 055 of AGC program Comanche by NASA
+##    2021113-051.  10:28 APR. 1, 1969  
 ##
-##	Prepared by
-##			Massachusetts Institute of Technology
-##			75 Cambridge Parkway
-##			Cambridge, Massachusetts
-##	under NASA contract NAS 9-4065.
-##
-## Refer directly to the online document mentioned above for further information.
-## Please report any errors (relative to the scanned pages) to info@sandroid.org.
-##
-## In some cases, where the source code for Luminary 131 overlaps that of 
-## Colossus 249, this code is instead copied from the corresponding Luminary 131
-## source file, and then is proofed to incorporate any changes.
-
-## Page 516
+##    This AGC program shall also be referred to as
+##            Colossus 2A
+## Page 525
 # STABLE ORBIT RENDEZVOUS PROGRAMS (P38 AND P78)
 #
-# MOD NO -1		LOG SECTION -- STABLE ORBIT -- P38-P39
-# MOD BY RUDNICKI.S	DATE 26JAN68
+# MOD NO -1		LOG SECTION - STABLE ORBIT - P38-P39
+# MOD BY RUDNICKI.S	DATE 25JAN68
 #
 # FUNCTIONAL DESCRIPTION
 #
 #	P38 AND P78 CALCULATE THE REQUIRED DELTA V AND OTHER INITIAL
-#	CONDITIONS REQUIRED BY TEH AGC TO (1) PUT THE ACTIVE VEHICLE
+#	CONDITIONS REQUIRED BY THE AGC TO (1) PUT THE ACTIVE VEHICLE
 #	ON A TRANSFER TRAJECTORY THAT INTERCEPTS THE PASSIVE VEHICLE
 #	ORBIT A GIVEN DISTANCE, DELTA R, EITHER AHEAD OF OR BEHIND THE
 #	PASSIVE VEHICLE AND (2) ACTUALLY PLACE THE ACTIVE VEHICLE IN THE
@@ -65,7 +65,7 @@
 #
 #		(A)  TIG	TIME OF SOI MANEUVER
 #		(B)  CENTANG	ORBITAL CENTRAL ANGLE OF THE PASSIVE VEHICLE
-#				DURING THE TRANSFER FROM TIG TO TIME OF INTERCEPT
+#				DURING TRANSFER FROM TIG TO TIME OF INTERCEPT
 #		(C)  DELTAR	THE DESIRED SEPARATION OF THE TWO VEHICLES
 #				SPECIFIED AS A DISTANCE ALONG THE PASSIVE VEHICLE
 #				ORBIT
@@ -75,36 +75,36 @@
 #
 #		(A)  TIG	TIME OF SOR MANEUVER
 #		(B)  CENTANG	AN OPTIONAL RESPECIFICATION OF 1 (B) ABOVE
-#		(C)  OPTION	EQUALS -2 FOR SOR
+#		(C)  OPTION	EQUALS 2 FOR SOR
 #		(D)  DELTTIME	THE TIME REQUIRED TO TRAVERSE DELTA R WHEN
 #				TRAVELING AT A VELOCITY EQUAL TO THE HORIZONTAL
-#				VELOCITY OF THE PASSIVE VEHICLE -- SAVED FROM
+#				VELOCITY OF THE PASSIVE VEHICLE - SAVED FROM
 #				SOI PHASE
-#		(E)  TINT	TIME OF INTERCEPT (SOI) -- SAVED FROM SOI PHASE
+#		(E)  TINT	TIME OF INTERCEPT (SOI) - SAVED FROM SOI PHASE
 #
 # OUTPUT
 #
 #	(1)  TRKMKCNT	NUMBER OF MARKS
 #	(2)  TTOGO	TIME TO GO
 #	(3)  +MGA	MIDDLE GIMBAL ANGLE
-## Page 517
+## Page 526
 #	(4)  DSPTEM1	TIME OF INTERCEPT OF PASSIVE VEHICLE ORBIT
 #			(FOR SOI ONLY)
 #	(5)  POSTTPI	PERIGEE ALTITUDE OF ACTIVE VEHICLE ORBIT AFTER
 #			THE SOI (SOR) MANEUVER
 #	(6)  DELVTPI	MAGNITUDE OF DELTA V AT SOI (SOR) TIME
 #	(7)  DELVTPF	MAGNITUDE OF DELTA V AT INTERCEPT TIME
-#	(8)  DELTA 	VELOCITY AT SOI (AND SOR) -- LOCAL VERTICAL
-#			CORDINATES
+#	(8)  DELVLVC 	DELTA VELOCITY AT SOI (AND SOR) - LOCAL VERTICAL
+#			COORDINATES
 #
-# SUBROUTINE USED
+# SUBROUTINES USED
 #
 #	AVFLAGA
 #	AVFLAGP
 #	VNDSPLY
 #	BANKCALL
 #	GOFLASHR
-#	GOTOP00H
+#	GOTOPOOH
 #	BLANKET
 #	ENDOFJOB
 #	PREC/TT
@@ -119,48 +119,47 @@
 		EBANK=	SUBEXIT
 		COUNT*	$$/P3879
 		
-P38		TC	BANKCALL
-		CADR	AVFLAGA		# THIS VEHICLE ACTIVE
-		TC	+3
-P78		TC	BANKCALL
-		CADR	AVFLAGP		# OTHER VEHICLE ACTIVE
-		TC	BANKCALL
-		CADR	P20FLGON	# SET UPDATFLG, TRACKFLG
+P38		TC	AVFLAGA         # THIS VEHICLE ACTIVE
+		TC      +2
+P78		TC	AVFLAGP         # OTHER VEHICLE ACTIVE
+		TC      P20FLGON        # SET UPDATFLG, TRACKFLG
 		CAF	V06N33SR	# DISPLAY TIG
 		TC	VNDSPLY
 		CAF	V06N55SR	# DISPLAY CENTANG
 		TCR	BANKCALL
 		CADR	GOFLASHR
-		TCF	GOTOP00H	# TERMINATE
+		TCF	GOTOPOOH	# TERMINATE
 		TCF	+5		# PROCEED
 		TCF	-5		# RECYCLE
-		CAF	THREE		# IMMEDIATE RETURN -- BLANK R1, R2
+		CAF	THREE		# IMMEDIATE RETURN - BLANK R1, R2
 		TCR	BLANKET
 		TCF	ENDOFJOB
 		CAF	FIVE
-## Page 518
 		TS	OPTION1
 		CAF	ONE
 		TS	OPTION2		# OPTION CODE IS SET TO 1
+## Page 527
 		CAF	V04N06SR	# DISPLAY OPTION CODE -1 = SOI, 2 = SOR
 		TCR	BANKCALL
 		CADR	GOFLASHR
-		TCF	GOTOP00H	# TERMINATE
+		TCF	GOTOPOOH	# TERMINATE
 		TCF	+5		# PROCEED
 		TCF	-5		# RECYCLE
-		CAF	BIT3		# IMMEDIATE RETURN -- BLANK R3
+		CAF	BIT3		# IMMEDIATE RETURN - BLANK R3
 		TCR	BLANKET
 		TCF	ENDOFJOB
 		TC	INTPRET
-		SLOAD	SR1
+		SSP
+		        NN
+		        2
+		SLOAD   SR1
 			OPTION2
 		BHIZ	DLOAD
 			OPTN1
 			TINT
 		STORE	TINTSOI		# STORE FOR SOR PHASE
 		CLRGO
-			OPTNSW		# OPTNSW
-
+			OPTNSW		# OPTNSW: ON = SOI. OFF = SOR
 			JUNCTN1
 OPTN1		SET	CLEAR		# SOI
 			OPTNSW
@@ -176,10 +175,10 @@ OPTN1		SET	CLEAR		# SOI
 		CAF	V06N57SR	# DISPLAY DELTA R
 		TCR	BANKCALL
 		CADR	GOFLASHR
-		TCF	GOTOP00H	# TERMINATE
+		TCF	GOTOPOOH	# TERMINATE
 		TCF	+5		# PROCEED
 		TCF	-5		# RECYCLE
-		CAF	SIX		# IMMEDIATE RETURN -- BLANK R2, R3
+		CAF	SIX		# IMMEDIATE RETURN - BLANK R2, R3
 		TCR	BLANKET
 		TCF	ENDOFJOB
 		CAF	V06N34SR	# DISPLAY TIME OF INTERCEPT
@@ -190,7 +189,7 @@ JUNCTN1		CLEAR	CALL
 			SELECTMU	# SELECT MU, CLEAR FINALFLG, GO TO VN1645
 RECYCLE		CALL
 			PREC/TT
-## Page 519
+## Page 528
 		BOFF	DLOAD
 			OPTNSW
 			OPTN2
@@ -220,7 +219,7 @@ JUNCTN2		DLOAD	DSU
 		
 # .... MAINRTNE ....
 #
-# SUBROUTINES USED:
+# SUBROUTINES USED
 #
 #	S3435.25
 #	PERIAPO1
@@ -228,7 +227,7 @@ JUNCTN2		DLOAD	DSU
 #	VNDSPLY
 #	BANKCALL
 #	GOFLASH
-#	GOTOP00H
+#	GOTOPOOH
 #	VN1645
 
 MAINRTNE	STCALL	TDEC1		# PRECISION UPDATE PASSIVE VEHICLE TO
@@ -243,8 +242,7 @@ MAINRTNE	STCALL	TDEC1		# PRECISION UPDATE PASSIVE VEHICLE TO
 		CALL
 			S3435.25
 TEST3979	BOFF	BON
-
-## Page 520
+## Page 529
 			P39/79SW
 			MAINRTN1
 			FINALFLG
@@ -289,16 +287,16 @@ DSPLY81		CAF	V06N81SR	# DISPLAY DELTA V (LV)
 			
 # STABLE ORBIT MIDCOURSE PROGRAM (P39 AND P79)
 #
-# MOD NO -1		LOG SECTION -- STABLE ORBIT -- P38-P39
+# MOD NO -1		LOG SECTION - STABLE ORBIT - P38-P39
 # MOD BY RUDNICKI, S	DATE 25JAN68
 #
 # FUNCTIONAL DESCRIPTION
 #
 #	P39 AND P79 CALCULATE THE REQUIRED DELTA V AND OTHER INITIAL
-#	CONDITIONS REQUIRED BY TEH AGC TO MAKE A MIDCOURSE CORRECTION
-## Page 521
+#	CONDITIONS REQUIRED BY THE AGC TO MAKE A MIDCOURSE CORRECTION
+## Page 530
 #	MANEUVER AFTER COMPLETING THE SOI MANEUVER BUT BEFORE MAKING
-#	THE SOR MANEUVER.
+#	THE SOR MANEUVER
 #
 # CALLING SEQUENCE
 #
@@ -309,16 +307,16 @@ DSPLY81		CAF	V06N81SR	# DISPLAY DELTA V (LV)
 #
 # INPUT
 #
-#	(1)  TPASS4	TIME OF INTERCEPT -- SAVED FROM P38/P78
-#	(2)  TARGTIME	TIME THAT PASSIVE VEHICLE IS AT INTERCEPT POINT --
-#			SAED FROM P38/P78
+#	(1)  TPASS4	TIME OF INTERCEPT - SAVED FROM P38/P78
+#	(2)  TARGTIME	TIME THAT PASSIVE VEHICLE IS AT INTERCEPT POINT -
+#			SAVED FROM P38/P78
 #
 # OUTPUT
 #
-#	(1)  TRKMKCNT	NUMBER OF MARKS.
+#	(1)  TRKMKCNT	NUMBER OF MARKS
 #	(2)  TTOGO	TIME TO GO
 #	(3)  +MGA	MIDDLE GIMBAL ANGLE
-#	(4)  DELVLVC	DELTA VELOCITY AT MID -- LOCAL VERTICAL COORDINATES
+#	(4)  DELVLVC	DELTA VELOCITY AT MID - LOCAL VERTICAL COORDINATES
 #
 # SUBROUTINES USED
 #
@@ -330,27 +328,24 @@ DSPLY81		CAF	V06N81SR	# DISPLAY DELTA V (LV)
 #	S34/35.1
 #	MAINRTNE
 
-P39		TC	BANKCALL
-		CADR	AVFLAGA		# THIS VEHICLE ACTIVE
+P39		TC	AVFLAGA		# THIS VEHICLE ACTIVE
 		EXTEND
 		DCA	ATIGINC
 		TC	P39/P79A
-P79		TC	BANKCALL
-		CADR	AVFLAGP		# OTHER VEHICLE ACTIVE
+P79		TC	AVFLAGP		# OTHER VEHICLE ACTIVE
 		EXTEND
 		DCA	PTIGINC
 P39/P79A	DXCH	KT		# TIME TO PREPARE FOR BURN
-		TC	BANKCALL
-		CADR	P20FLGON	# SET UPDATFLG, TRACKFLG
+		TC	P20FLGON	# SET UPDATFLG, TRACKFLG
 		TC	INTPRET
 		SET	CALL
 			P39/79SW
 			SELECTMU	# SELECT MU, CLEAR FINALFLG, GO TO VN1645
 P39/P79B	RTB	DAD
-## Page 522
 			LOADTIME
 			KT
 		STORE	TIG		# TIG = T (PRESENT) + PREPARATION TIME
+## Page 531
 		STCALL	TDEC1		# PRECISION UPDATE ACTIVE AND PASSIVE
 			PRECSET		# 	VEHICLES TO TIG
 		CALL
@@ -382,7 +377,6 @@ PREC/TT		STQ	DLOAD
 		SIN	SET
 			RVSW
 		STOVL	SNTH
-		
 			VPASS3
 		VSR*
 			0,2
@@ -403,10 +397,10 @@ PREC/TT		STQ	DLOAD
 
 INTRPVP		STQ	BOFF		# PRECISION UPDATE PASSIVE VEHICLE TO
 			RTRN		#	TDEC1
-## Page 523
 			AVFLAG
 			OTHERV
 		CALL
+## Page 532
 			CSMPREC
 		GOTO
 			RTRN
@@ -421,7 +415,7 @@ OTHERV		CALL
 #
 #	BANKCALL
 #	GOFLASH
-#	GOTOP00H
+#	GOTOPOOH
 
 VNDSPLY		EXTEND			# FLASH DISPLAY
 		QXCH	RTRN
@@ -429,7 +423,7 @@ VNDSPLY		EXTEND			# FLASH DISPLAY
 		CA	VERBNOUN
 		TCR	BANKCALL
 		CADR	GOFLASH
-		TCF	GOTOP00H	# TERMINATE
+		TCF	GOTOPOOH	# TERMINATE
 		TC	RTRN		# PROCEED
 		TCF	-5		# RECYCLE
 V06N33SR	VN	0633
@@ -439,5 +433,4 @@ V06N57SR	VN	0657
 V06N34SR	VN	0634
 V06N58SR	VN	0658
 V06N81SR	VN	0681
-
 

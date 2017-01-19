@@ -96,7 +96,7 @@ $P34-P35,_P74-P75.agc				        # pp. 460-504
 $R31.agc					        # pp. 505-510
 $P76.agc					        # pp. 511-513
 $R30.agc					        # pp. 514-524
-$STABLE_ORBIT.agc				        # pp. 525-532
+$STABLE_ORBIT_-_P38-P39.agc			        # pp. 525-532
 
 # TROUBLE
 $P11.agc					        # pp. 533-550

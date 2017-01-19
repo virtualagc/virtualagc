@@ -14,6 +14,8 @@
 ##		2016-11-02 RSB	Typo (offset-reference +2 was not indented).
 ##		2017-01-01 RSB	Proofed comment text using octopus/ProoferComments,
 ##				and fixed errors found.
+##		2017-01-18 RSB	Fixed comment-text errors noted while diff'ing
+##				vs Colossus 249.
 
 ## Page 795
 # ENTRY INITIALIZATION ROUTINE
@@ -495,7 +497,7 @@ A0CALC		DDV	DAD		# V1 = V + RDOT/TEM1B
 		STODL	V1		# V1/2 VS
 
 			RDOT
-		DSQ	DDV		# A0=(V1/V)SQ(D+RDOT SQ/(TEM1D 2 C1 HS)
+		DSQ	DDV		# A0=(V1/V)SQ(D+RDOT SQ/(TEM1B 2 C1 HS)
 			TEM1B
 		DDV	DAD
 			2C1HS
@@ -862,7 +864,7 @@ GOTOUPSY	RTB			# END OF HUNTEST
 			P65		# HUNTEST USE OF GRP4 IS DISABLED BY P65
 #					  USE FOR DISPLAY.
 #					  SET MODE = UPCONTRL.
-#					  RETURN FROM P65 DIRECTLY TO UPDONTRL
+#					  RETURN FROM P65 DIRECTLY TO UPCONTRL
 #					  VIA THE GOTOADDR AT REFAZE10.
 
 UPCONTRL	DLOAD	DSU		# IF D-140 POS, NOSWITCH =1
@@ -1122,7 +1124,7 @@ PREFINAL	SSP	RTB
 			PREFINAL	# FROM HUNTEST.
 			P67		# DISABLES GRP4. FINE IF FROM HUNTEST.BUT 
 #					  MAY ALSO REMOVE RESTART PROTECTION OF
-#					  M69 (P65).
+#					  N69 (P65).
 #					  ROLLC        XRNGERR       DNRNGERR
 #					  XXX.XX DEG   XXXX.X NM     XXXX.X NM
 

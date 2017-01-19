@@ -1,17 +1,19 @@
 ### FILE="Main.annotation"
-## Copyright:    Public domain.
-## Filename:     SERVICER207.agc
-## Purpose:      Part of the source code for Comanche, build 055. It
-##               is part of the source code for the Command Module's
-##               (CM) Apollo Guidance Computer (AGC), Apollo 11.
-## Assembler:    yaYUL
-## Reference:    pp. 819-836
-## Contact:      Ron Burkey <info@sandroid.org>
-## Website:      http://www.ibiblio.org/apollo.
-## Mod history:  2009-05-12 RSB	Adapted from Colossus249 file of the same
+## Copyright:   Public domain.
+## Filename:    SERVICER207.agc
+## Purpose:     Part of the source code for Comanche, build 055. It
+##              is part of the source code for the Command Module's
+##              (CM) Apollo Guidance Computer (AGC), Apollo 11.
+## Assembler:   yaYUL
+## Reference:   pp. 819-836
+## Contact:     Ron Burkey <info@sandroid.org>
+## Website:     http://www.ibiblio.org/apollo.
+## Mod history: 2009-05-12 RSB	Adapted from Colossus249 file of the same
 ##				name and Comanche 055 page images.
 ##		2016-12-11 RSB	Proofed comments with octopus/ProoferComments
 ##				and fixed the errors found.
+##		2017-01-18 RSB	Fixed comment-text errors noted while diff'ing
+##				vs Colossus 249.
 ##
 ## The contents of the "Comanche055" files, in general, are transcribed 
 ## from scanned documents. 
@@ -102,7 +104,7 @@
 #		PIPS COMPENSATED VIA 1/PIPA SUBROUTINE.
 #		DVTOTAL INCREMENTED BY ABSOLUTE VALUE OF DELV.
 #		THRUST MONITOR (DVMON) PERFORMED UNLESS IDLE FLAG IS ON.
-#		CONTROL TRANSFERRED TO AVERAGE Q.
+#		CONTROL TRANSFERRED TO AVERAGE G.
 #
 #	DVMON
 #
@@ -159,7 +161,7 @@
 #			ALL SUCH ROUTINES SHOULD RETURN TO SERVEXIT, WHICH IS THE NORMAL EXIT FROM AVERAGE G.
 #
 #	SERVEXIT -	DOES A PHASE CHANGE FOR RESTART PROTECTION AND GOES TO ENDOFJOB.
-#			THE 2CADR OF SERVEXIT IS SET INTO AVGEXIT BY THE USERI F NO OTHER ROUTINE (SEE ABOVE).
+#			THE 2CADR OF SERVEXIT IS SET INTO AVGEXIT BY THE USER IF NO OTHER ROUTINE (SEE ABOVE).
 #
 #	AVGEND -	LAST PASS OF AVERAGE G EXITS HERE, BYPASSING SPECIAL ROUTINE (SEE ABOVE UNDER READACCS).
 #			FINAL EXIT IS TO CANV37.				F AVERAGE G).

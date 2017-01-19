@@ -122,7 +122,7 @@ $P34-P35,_P74-P75.agc				        # pp. 452-495
 $R31.agc					        # pp. 496-501
 $P76.agc					        # pp. 502-504
 $R30.agc					        # pp. 505-515
-$STABLE_ORBIT.agc				        # pp. 516-523
+$STABLE_ORBIT_-_P38-P39.agc			        # pp. 516-523
 
 # PANDORA
 $P11.agc					        # pp. 524-540

@@ -11,6 +11,8 @@
 ## Mod history:	2011-01-12 JL	Adapted from corresponding Colossus 249 file.
 ##		2016-12-30 RSB	Proofed comment text using octopus/ProoferComments,
 ##				and corrected errors found.
+##		2017-01-18 RSB	Fixed comment-text errors noted while diff'ing
+##				vs Colossus 249.
 
 ## Page 204
 
@@ -58,7 +60,7 @@
 # TASK.  EXAMPLES,
 #
 #						   OCT    77777		  THIS WILL CAUSE AN IMMEDIATE RESTART
-#						  -2CADR  ATASK		  OF THE TASK 'ATASK'
+#						  -2CADR  ATASK		  OF THE TASK :ATASK:
 #
 #						   DEC    200		  IF THE TIME OF THE 2 SECONDS SINCE DUMMY
 #						  -2CADR  DUMMY		  WAS PUT ON WAITLIST IS UP, IT WILL BEGIN
