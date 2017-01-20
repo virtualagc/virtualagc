@@ -13,6 +13,8 @@
 ##		2011-05-08 JL	Removed workarounds.
 ##		2016-12-21 RSB	Proofed comment text using octopus/ProoferComments
 ##				and corrected the errors found.
+##		2017-01-20 RSB	Fixed comment-text errors noted while diff'ing
+##				vs Colossus 249.
 
 ## This source code has been transcribed or otherwise adapted from digitized
 ## images of a hardcopy from the MIT Museum.  The digitization was performed
@@ -159,7 +161,7 @@
 #	IGNORED IN COMPUTING THE FIRING TIME, SO THAT THE EXTENSION (INTO
 #	THE COAST REGION) OF THE STRAIGHT LINE SWITCH IS WHAT IS FIRED TO.
 #	IF THE ROLL DAP FINDS ITSELF IN THE COAST REGION BEFORE REACHING
-#	THE DESIRED INTERSECTION (IE. IN THE REGION BETWEEN THE MINLIM
+#	THE DESIRED INTERSECTION (IE, IN THE REGION BETWEEN THE MINLIM
 #	AND THE STRAIGHT LINE SWITCH) IT WILL EXIBIT NORMAL COAST-REGION
 #	BEHAVIOR AND TURN OFF THE JETS.  THE PURPOSE OF THIS FIRING POLICY
 #	IS TO MAINTAIN STATIC ROLL STABILITY IN THE EVENT OF A JET

@@ -14,6 +14,10 @@
 ##		2017-01-05 RSB	Page numbers now agree with those on the
 ##				original harcopy, as opposed to the PDF page
 ##				numbers in 1701.pdf.
+##		2017-01-20 RSB	Cross-diff'd comment text (not whitespace)
+##				vs the already-proofed corresponding Colossus
+##				237 and Comanche 55 source-code files
+##				and corrected errors found.
 ##
 ## The contents of the "Colossus249" files, in general, are transcribed 
 ## from a scanned copy of the program listing.  Notations on this
@@ -39,8 +43,6 @@
 ## source file, and then is proofed to incorporate any changes.
 
 ## Page 25
-# TAGS FOR RELATIVE SETLOC AND BLANK BANK CARDS
-
 FIXED		MEMORY	120000 - 167777
 		COUNT	BANKSUM
 
@@ -136,6 +138,7 @@ INTINIT		EQUALS
 SR52/1		EQUALS
 ORBITAL2	EQUALS
 		BNKSUM	13
+# SPACER
 		
 # MODULE 3 CONTAINS BANKS 14 THROUGH 21
 
@@ -220,7 +223,7 @@ P60S		EQUALS
 P60S1		EQUALS
 P60S2		EQUALS
 P60S3		EQUALS
-PLANTIN		EQUALS
+PLANTIN		EQUALS			# LUNAR ROT
 EPHEM		EQUALS
 P05P06		EQUALS
 26P50S		EQUALS
@@ -244,7 +247,7 @@ RTE2		EQUALS
 		BANK	30
 IMUSUPER	EQUALS
 LOWSUPER	EQUALS
-FCSTART		EQUALS			# STANDARD LOCATION FOR THIS
+FCSTART		EQUALS			# STANDARD LOCATION FOR THIS.  (FOR EXTVB)
 LOPC		EQUALS
 P20S1		EQUALS
 P20S6		EQUALS
@@ -344,7 +347,7 @@ LOUNITZ		EQUALS	ZUNIT			# 2DEC 0
 
 		SBANK=	LOWSUPER
 
-# ROPE-SPECIFIC ASSIGNS OBVIATING NEED TO CHECK COMPUTER FLAG IN DETERMINING(?) INTEGRATION AREA ENTRIES.
+# ROPE SPECIFIC ASSIGNS OBVIATING NEED TO CHECK COMPUTER FLAG IN DETVRUZVING INTEGRATION AREA ENTRIES
 
 OTHPREC		EQUALS	LEMPREC
 ATOPOTH		EQUALS	ATOPLEM
@@ -358,11 +361,11 @@ THISAXIS	=	UNITX
 ERASID		EQUALS	LOW10			# DOWNLINK ERASABLE DUMP ID
 DELAYNUM	EQUALS	THREE
 
-#********************************************************************************************************
+#****************************************************************************************************************
 
 # THE FOLLOWING ECADRS ARE DEFINED TO FACILITATE EBANK SWITCHING.  THEY ALSO MAKE IT EASIER FOR
 # ERASABLE CONTROL TO REARRANGE ERASABLE MEMORY WITHOUT DISRUPTING THE PROGRAMS WHICH SET EBANKS.
-# PRIOR TO ROP RELEASE FIXED MEMORY CAN BE SAVED BY SETTING EACH EBXXXX =EBANKX (X=4,5,6,7).  EBANKX OF COURSE
+# PRIOR TO ROPE RELEASE FIXED MEMORY CAN BE SAVED BY SETTING EACH EBXXXX =EBANKX (X=4,5,6,7).  EBANKX OF COURSE
 # WILL BE THE BANK WHERE THE ERASABLES REFERENCED IN EBXXXX WILL BE STORED.
 
 		BANK	7
@@ -388,5 +391,5 @@ EBQPLACE	ECADR	QPLACES
 ## Page 33
 EBRN1		ECADR	RN1
 
-#******************************************************************************************************
+#****************************************************************************************************************
 

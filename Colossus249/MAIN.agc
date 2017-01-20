@@ -46,6 +46,7 @@
 #	lower-case Greek pi		      	?
 #	upper-case Greek Sigma			%
 #	strange lower-case d		      	&
+#	integral symbol				#
 #	'			      	      	:
 #	:				      	@ 
 #	(discarded)				_

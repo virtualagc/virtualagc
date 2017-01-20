@@ -12,6 +12,8 @@
 ##				same name, using Comanche055 page images.
 ##		2016-12-21 RSB	Proofed comment text using octopus/ProoferComments
 ##				and corrected the errors found.
+##		2017-01-20 RSB	Fixed comment-text errors noted while diff'ing
+##				vs Colossus 249.
 ##
 ## This source code has been transcribed or otherwise adapted from digitized
 ## images of a hardcopy from the MIT Museum.  The digitization was performed
@@ -102,8 +104,8 @@
 #
 #		VARST0 = NOLEMVAL0	WHERE THE MEANING AND SCALING OF VARST0
 #		   .	      .		TO VARST9 ARE THE SAME AS GIVEN ABOVE
-#		
-#					NOTE... FOR THIS CASE, VARST8,9 HAVE NO
+#		   .          .
+#		   .          .		NOTE... FOR THIS CASE, VARST8,9 HAVE NO
 #		VARST9 = NOLEMVAL9	MEANING (THEY ARE COMPUTED BUT NOT USED)
 #
 # 	(3)	THE FINAL OUTPUT CALCULATIONS ARE THEN DONE
@@ -114,7 +116,7 @@
 #
 #		IXX2 = VARST2 + (CSMMASS + NEGBPW)VARST(3 OR 7)		IAVG/TLX
 #
-# 	THE DATA USED CAME FROM CSM/LM SPACECRAFT OPERATIONAL DATA BOOK,
+# 	THE DATA USED CAME FROM CSM/LM SPACECRAFT OPERATIONAL DATA BOOK.
 #		VOL. 3, NASA DOCUMENT SNA-8-D-027 (MARCH 1968)
 #
 # 	PERTINENT MASS DATA:		CSM WEIGHT	(FULL)	64100 LBS
