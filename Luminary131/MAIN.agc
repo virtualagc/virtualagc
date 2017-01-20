@@ -18,6 +18,9 @@
 #				of the printout (rather than PDF "pages" in
 #				the file 1729.pdf, which is no longer the
 #				associated reference material).
+#		2017-01-20 RSB	Changed GOTOP00H to GOTOPOOH in all *.agc
+#				files.  There are probably more POO problems
+#				but those are the only ones I fixed.
 #
 # The contents of the "Luminary131" files, in general, are
 # transcribed from a scanned document originally obtained from MIT's

@@ -21,6 +21,9 @@
 #				log sections have now had their internal page-numbering
 #				adjusted to conform to the numbering of the printed 
 #				pages.
+#		2017-01-20 RSB	Changed GOTOP00H to GOTOPOOH in all *.agc
+#				files.  There are probably more POO problems
+#				but those are the only ones I fixed.
 #
 # The contents of the "Colossus249" files, in general, are transcribed 
 # from a scanned document originally obtained from MIT's website,

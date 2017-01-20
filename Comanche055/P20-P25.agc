@@ -12,13 +12,13 @@
 ##				of the same name, using Comanche055 page 
 ##				images. 
 ##		2009-05-20 RSB	Corrections:  P2OS -> P20S, STO -> STQ,
-##				GOTOPOOH -> GOTOP00H, a duplicated EXTEND
+##				GOTOPOOH -> GOTOPOOH, a duplicated EXTEND
 ##				was fixed, P23.10 -> R23.10, 
 ##				S22B0X44 -> S22BOX44, S22SUBSCL -> 22SUBSCL,
 ##				S22DPP -> S22DSPP, changed some instructions in
 ##				P23.152.
 ##		2010-08-24 JL	Fixed page 627 number. Fixed some whitespace.
-##		2016-12-10 RSB	All of the GOTOP00H's should have been
+##		2016-12-10 RSB	All of the GOTOPOOH's should have been
 ##				GOTOPOOH, and I've changed them back.
 ##		2016-12-10 RSB	Proofed comments with octopus/ProoferComments
 ##				and fixed the errors found.

@@ -13,7 +13,7 @@
 ##				images.
 ##		2009-05-20 RSB	Corrected BDV -> BOV.
 ##		2010-08-24 JL	Fixed page numbers, some whitespace.
-##		2016-12-10 RSB	All of the GOTOP00H's should have been
+##		2016-12-10 RSB	All of the GOTOPOOH's should have been
 ##				GOTOPOOH, and I've changed them back.
 ##		2016-12-11 RSB	Proofed comments with octopus/ProoferComments
 ##				and fixed the errors found.

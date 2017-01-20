@@ -11,7 +11,7 @@
 ## Mod history: 2009-05-12 RSB	Adapted from Colossus249 file of the same
 ##				name, and Comanche 055 page images.
 ##		2009-05-20 RSB	Corrections: SETI/PDT -> SET1/PDT, 
-##				GOTOPOOH -> GOTOP00H, R33EXIT -> R53EXIT,
+##				GOTOPOOH -> GOTOPOOH, R33EXIT -> R53EXIT,
 ##				V853 -> VB53, R56A -> R56A1 (some places
 ##				only), added missing R56A1 label, added a
 ##				missing CAF in COARSTYP, corrected a SETLOC
@@ -19,7 +19,7 @@
 ## 		2009-05-21 RSB	In COARFINE, a TC BANKCALL was corrected to
 ##				TC PHASCHNG.  In R53C, a CADR GOFLASHR was
 ##				corrected to CADR GOFLASH.
-##		2016-12-10 RSB	All of the GOTOP00H's should have been
+##		2016-12-10 RSB	All of the GOTOPOOH's should have been
 ##				GOTOPOOH, and I've changed them back.
 ##		2016-12-11 RSB	Proofed comments with octopus/ProoferComments
 ##				and fixed the errors found.

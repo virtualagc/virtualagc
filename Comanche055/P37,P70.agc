@@ -15,7 +15,7 @@
 ##		2009-05-23 RSB	In RTD18, corrected a STOVL DELVLVC to 
 ##				STODL DELVLVC and a STODL 02D to STORE 02D.
 ##		2010-08-28 JL	Added missing comment characters.
-##		2016-12-10 RSB	All of the GOTOP00H's should have been
+##		2016-12-10 RSB	All of the GOTOPOOH's should have been
 ##				GOTOPOOH, and I've changed them back.
 ##		2016-12-21 RSB	Proofed comment text using octopus/ProoferComments
 ##				and corrected the errors found.
