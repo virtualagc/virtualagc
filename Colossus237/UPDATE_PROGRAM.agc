@@ -11,6 +11,8 @@
 ## Mod history: 2011-04-17 JL	Adapted from corresponding Colossus 249 file.
 ##		2017-01-01 RSB	Proofed comment text using octopus/ProoferComments,
 ##				and fixed errors found.
+##		2017-01-20 RSB	Fixed comment-text errors noted while diff'ing
+##				vs Colossus 249.
 
 ## Page 1461
 # PROGRAM NAME:   P27
@@ -65,7 +67,7 @@
 ## Page 1462
 #  V71EIIEAAAAE     (CONTIGUOUS BLOCK UPDATE) II-2 OCTAL COMPONENTS,XXXXX,
 #  XXXXXE           ARE LOADED INTO ERASABLE STARTING AT ECADR, AAAA.
-# XXXXXE            IT IS .GE. 3 .AND. .LE. 200.,
+# XXXXXE            IT IS .GE. 3 .AND. .LE. 20D.,
 #                   AND (AAAA + II - 3) DOES NOT PRODUCE AN ADDRESS IN THE
 # 9 NEXT BANK
 #   .               SCALING IS SAME AS INTERNAL REGISTERS.

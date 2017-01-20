@@ -16,6 +16,8 @@
 ##		2010-08-29 JL	Fixed indentation, whitespace.
 ##		2016-12-22 RSB	Proofed comment text using octopus/ProoferComments
 ##				and corrected the errors found.
+##		2017-01-20 RSB	Fixed comment-text errors noted while diff'ing
+##				vs Colossus 249.
 ##
 ## The contents of the "Comanche055" files, in general, are transcribed 
 ## from scanned documents. 
@@ -186,7 +188,7 @@ V73UPDAT	CAF	UP73		# COMES HERE ON V73E
 CKMDMORE	CS	FLAGWRD5
 		MASK	BIT8		# CHECK IF COMPUTER IS LGC
 		CCS	A		# IS COMPUTER LGC OR AGC
-UPERLEM		TCF	UPERROR		# ERROR- IT'S THE LEM + MODE IS NOT P00.
+UPERLEM		TCF	UPERROR		# ERROR- IT'S THE LEM + MODE IS NOT POO.
 		CS	TWO
 		MASK	MODREG
 		CCS	A
@@ -292,7 +294,7 @@ UPVERIFY	CAF	ADUPTEMP	# PLACE ECADR WHERE COMPONENT NO. INDEX
 		AD	UPTEMP		# CALCULATE THE ECADR OF LOCATION IN
 		TCF	OHWELL2 +2	# UPBUFF WHICH USER WANTS TO CHANGE.
 
-UPOUT4		EQUALS	UPOUT +1	# COMES HERE ON V34 TC TERMINATE UPDATE
+UPOUT4		EQUALS	UPOUT +1	# COMES HERE ON V34 TO TERMINATE UPDATE
 
 # CHECK FOR VERB 32 SEQUENCE
 

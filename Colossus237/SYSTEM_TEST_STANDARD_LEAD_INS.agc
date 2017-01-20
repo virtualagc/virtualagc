@@ -11,6 +11,8 @@
 ## Mod history: 2011-01-27 JL   Adapted from corresponding Colossus 249 file.
 ##		2016-12-30 RSB	Proofed comment text using octopus/ProoferComments,
 ##				and corrected errors found.
+##		2017-01-20 RSB	Fixed comment-text errors noted while diff'ing
+##				vs Colossus 249.
 
 ## Page 411
 		EBANK=	XSM
@@ -32,7 +34,7 @@
 
 #						   TC     BANKCALL
 #						   CADR   E/BKCALL
-#						   CADR   ROUTINE         WHERE YOO WANT TO GO IN FIXED.
+#						   CADR   ROUTINE         WHERE YOU WANT TO GO IN FIXED.
 #						   RETURN HERE FROM DISPLAY TERMINATE, BAD STALL OR TC Q.
 #						   RETURN HERE FROM DISPLAY PROCEED OR GOOD RETURN FROM STALL.
 #						   RETURN HERE FROM DISPLAY ENTER OR RECYCLE.

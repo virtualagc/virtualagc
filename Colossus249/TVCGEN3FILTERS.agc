@@ -14,6 +14,9 @@
 ##		2017-01-06 RSB	Page numbers now agree with those on the
 ##				original harcopy, as opposed to the PDF page
 ##				numbers in 1701.pdf.
+##		2017-01-20 RSB	Cross-diff'd comment text (not whitespace)
+##				vs the already-proofed corresponding Colossus
+##				237 source-code files, and corrected errors found.
 ##
 ## The contents of the "Colossus249" files, in general, are transcribed 
 ## from a scanned copy of the program listing.  Notations on this
@@ -51,32 +54,32 @@
 #
 #	1. FILTER COEFFICIENTS AND GAINS IN ERASABLE MEMORY
 #	2. UP TO THIRD-ORDER NUMERATOR OR DENOMINATOR
-#	3. OPERATIONAL FIT WITHIN THE STRUCTURE OF TEH REGULAR LEM-ON DAP CODING
+#	3. OPERATIONAL FIT WITHIN THE STRUCTURE OF THE REGULAR LEM-ON DAP CODING
 #	4. DENOMINATOR POLES INSIDE THE Z-PLANE UNIT CIRCLE
-#	5. NUMERATOR ZEROES INSIDE THE Z-PLANE DOUBLE-UNIT CIRCLE
+#	5. NUMERATOR ZEROS INSIDE THE Z-PLANE DOUBLE-UNIT CIRCLE
 #	6. HIGH FREQUENCY (BODE) GAIN LESS THAN 8ASCREVS, OR 8.6380088 DEG/DEG
 #
 # THE FILTERS ARE SHOWN IN THE FOLLOWING DIAGRAMS.....
-# PITCH GEN3DAP FILTER:
+# PITCH GEN3DAP FILTER..
 #                                                             KPGEN3
 #                                                            ********
 #               *****************************************           *
 #               *                                       *           *
 #               *               -1        -2        -3  *           *
-#  EP = ERRBTMP *    APO + AP1 Z   + AP2 Z   + AP3 Z    *    NPO          NP0 = CMDTMP  **
+#  EP = ERRBTMP *    APO + AP1 Z   + AP2 Z   + AP3 Z    *    NPO          NPD = CMDTMP  **
 # ***************  -----------------------------------  **********( X )*********************
 #               *               -1        -2        -3  *				**
 #		*      1 + BP1 Z   + BP2 Z   + BP3 Z    *
 #               *                                       *
 #   		*****************************************
 #
-# YAW GEN3DAP FILTER:
+# YAW GEN3DAP FILTER..
 #                                                             KYGEN3
 #                                                            ********
 #               *****************************************           *
 #               *                                       *           *
 #               *               -1        -2        -3  *           *
-#  EY = ERRBTMP *    AYO + AY1 Z   + AY2 Z   + AY3 Z    *    NYO          NY0 = CMDTMP  **
+#  EY = ERRBTMP *    AYO + AY1 Z   + AY2 Z   + AY3 Z    *    NY0          NYP = CMDTMP  **
 # ***************  -----------------------------------  **********( X )*********************
 #               *               -1        -2        -3  *				**
 #		*      1 + BY1 Z   + BY2 Z   + BY3 Z    *
@@ -86,22 +89,22 @@
 ## Page 962
 # THE IMPLEMENTING EQUATIONS FOR THESE FILTERS ARE AS FOLLOWS.....
 #
-#	PITCH GEN3DAP.....				YAW GEN3DAP....
+#	PITCH GEN3DAP....				YAW GEN3DAP....
 #		NPD = (B+4) KPGEN3 NP0				NYD = (B+4) KYGEN3 NY0
 #		NP0 = AP0 EP	       + 4(Z-1) NP1		NY0 = AY0 EY	       + 4(Z-1) NY1
-#		NP1 = AP1 EP - BP1 NP0 +  (Z-1) NP2		NY1 = AY1 EY - BY1 NY0 +  (Z-1) NY2
-#		NP2 = AP3 EP - BP2 NP0 +  (Z-1) NP3		NY2 = AY2 EY - BY2 NY0 +  (Z-1) NY3
+#		NY1 = AP1 EP - BP1 NP0 +  (Z-1) NP2		NY1 = AY1 EY - BY1 NY0 +  (Z-1) NY2
+#		NP2 = AP2 EP - BP2 NP0 +  (Z-1) NP3		NY2 = AY2 EY - BY2 NY0 +  (Z-1) NY3
 #		NP3 = AP3 EP - BP3 NP0				NY3 = AY3 EY - BY3 NY0
 #
 # FILTER INPUTS EP AND EY ARE PICKED UP FROM REGULAR LEM-ON CODING AT ERRBTMP (UPPER WORD ONLY), THUS ARE
 # SINGLE PRECISION QUANTITIES SCALED AT B-1 REVS.  FILTER OUTPUTS NPD AND NYD ARE LEFT IN DOUBLE PRECISION AT
-# CMDTMP, SCALED AT 1 ASCREV, READY FOR OUTPUT PROCESSING VIA REGULAR LEM-ON CODING AT "P,YOFFSET"
+# CMDTMP, SCALED AT 1 ASCREV, READY FOR OUTPUT PROCESSING VIA REGULAR LEM-ON CODING AT ..P,YOFFSET..
 # FOLLOWING OUTPUT PROCESSING, RETURN TO THE GEN3DAP FILTERS IS MADE FOR CALCULATION OF THE REMAINING NODES
-# NP1 TO NP3, OR NY1 TO NY3.  GEN3DAP FILTERS THEN RETURN TOTHE LEM-ON CODING AT "DELBARP,Y"  FOR RESPECTIVE
+# NP1 TO NP3, OR NY1 TO NY3.  GEN3DAP FILTERS THEN RETURN TOTHE LEM-ON CODING AT ..DELBARP,Y..  FOR RESPECTIVE
 # OFFSET-TRACKER-FILTER COMPUTATIONS AND COPYCYCLES.  NOTE THE EQUIVALENCES...NP1TMP=J5TMP, NP1=J5,
-# NP2TMP=NSUMTMP, NPT2=PNSUM, NP3TMP=DSUMTMP, NP3=PDSUM, WITH CORRESPONDING RELATIONS FOR YAW.  THUS THE COPY-
+# NP2TMP=NSUMTMP, NP2=PNSUM, NP3TMP=DSUMTMP, NP3=PDSUM, WITH CORRESPONDING RELATIONS FOR YAW.  THUS THE COPY-
 # CYCLE PCOPY, FROM THE GEN3DAP STANDPOINT, IS EFFECTIVE FROM PMISC-3 TO ITS END AT TC Q.  YCOPY FROM YMISC-3.
-# SCALING OF THE FILTER NODES, COEFFICIENTS, AND GAINS WITHIN THE AGS IS AS FOLLOWS.....
+# SCALING OF THE FILTER NODES, COEFFICIENTS, AND GAINS WITHIN THE AGC IS AS FOLLOWS.....
 #
 #	QUANTITY	QUANTITY	PHYS. UNITS	MAX. VALUE	SCALE AT (FOR)
 #
@@ -119,7 +122,7 @@
 #	AP0		AY0		DIMLESS.	1		B+2
 #	AP1		AY1		DIMLESS.	6		B+4
 #	AP2		AY2		DIMLESS.	12		B+4
-#	AP3		AY3		DIMLESS		8		B+4
+#	AP3		AY3		DIMLESS.	8		B+4
 #
 #	BP1		BY1		DIMLESS.	3		B+2
 # 	BP2		BY2		DIMLESS.	3		B+2
@@ -139,8 +142,8 @@
 # NORMAL EXIT MODE....
 #
 #      *TC POSTJUMP....
-#	CADR (POFFSET, DELBARP), (YOFFSET, DELBARY).  I.E., RETURNS TO
-#	PITCHDAP OR YAWDAP AT APPROPRIATE ENTRY POINT.
+#	CADR (POFFSET, DELBARP), (YOFFSET, DELBARY).  IE, RETURNS TO
+#	PITCHDAP OR YAWDAP AT APPROPRIATE ENTRY POINT
 #
 # ALARM OR ABORT EXIT MODES....NONE
 #
@@ -274,7 +277,7 @@ AP2(EP)		CAE	EP		# DPXSP MULTIPLY FOR NUMERATOR COMPONENT
 		ADS	NP2TMP		# COMPLETED NODE NP2
 		
 NP3NODE		CS	NP0		# FORM NODE NP3....NO PAST NODES, DIRECT
-		EXTEND			# 	DPXDP MULTIPLY FOR DENOMINATOR
+		EXTEND			# 	TO DPXDP MULTIPLY FOR DENOMINATOR
 		MP	BP3		#	COMPONENT
 		DXCH	NP3TMP
 		CS	NP0 +1
@@ -309,7 +312,7 @@ AP3(EP)		CAE	EP		# DPXSP MULTIPLY FOR NUMERATOR COMPONENT
 					# 	AND PITCH DAP COPYCYCLE.
 					
 ## Page 967
-# YAW GEN3DAP FILTER
+# YAW GEN3DAP FILTER....
 
 NY0NODE		EXTEND			# FORM NODE NY0....COLLECT (PAST NY1)
 		DCA	NY1		# 	(COMES HERE FROM REG. DAP CODING)

@@ -13,6 +13,8 @@
 ##		2010-08-24 JL	Fixed page 983 number. Fixed some indentation.
 ##		2016-12-21 RSB	Proofed comment text using octopus/ProoferComments
 ##				and corrected the errors found.
+##		2017-01-20 RSB	Fixed comment-text errors noted while diff'ing
+##				vs Colossus 249.
 ##
 ## This source code has been transcribed or otherwise adapted from digitized
 ## images of a hardcopy from the MIT Museum.  The digitization was performed
@@ -102,7 +104,7 @@
 #     *      *        *      *        *  *    *  *    *  *    *  *    *  *    **  **  **  **  **
 #     *      *        *      *        *  *    *  *    *  *    *  *    *  *    **  **  **  **  **
 #     *      *        *      *        *  *    *  *    *  *    *  *    *  *    **  **  **  **  **
-# ----------------------------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------------------------------
 #             *      *        *      *    *  *    *  *    *  *    *  *    *  *  **  **  **  **  **
 #             *      *        *      *    *  *    *  *    *  *    *  *    *  *  **  **  **  **  **
 #             *      *        *      *    *  *    *  *    *  *    *  *    *  *  **  **  **  **  **
