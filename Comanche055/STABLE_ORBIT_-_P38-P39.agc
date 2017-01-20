@@ -14,11 +14,13 @@
 ##		2010-08-20 JL	Fixed page number comment (p531).
 ##		2016-12-10 RSB	Proofed comments with octopus/ProoferComments
 ##				and fixed the errors found.
-##		2016-12-10 RSB	All of the GOTOP00H's should have been
+##		2016-12-10 RSB	All of the GOTOPOOH's should have been
 ##				GOTOPOOH, and I've changed them back.
 ##		2017-01-19 RSB	Renamed from STABLE_ORBIT.agc to agree with 
 ##				the actual name from the log section, and with
 ##				the naming in Colossus 237.
+##		2017-01-18 RSB	Fixed comment-text errors noted while diff'ing
+##				vs Colossus 249.
 ##
 ## This source code has been transcribed or otherwise adapted from digitized
 ## images of a hardcopy from the MIT Museum.  The digitization was performed
@@ -159,7 +161,7 @@ P78		TC	AVFLAGP         # OTHER VEHICLE ACTIVE
 			TINT
 		STORE	TINTSOI		# STORE FOR SOR PHASE
 		CLRGO
-			OPTNSW		# OPTNSW: ON = SOI. OFF = SOR
+			OPTNSW		# OPTNSW; ON = SOI. OFF = SOR
 			JUNCTN1
 OPTN1		SET	CLEAR		# SOI
 			OPTNSW
@@ -257,7 +259,7 @@ MAINRTN1	VLOAD	ABVAL
 			VPASS4
 		VSU	ABVAL
 			VTPRIME
-		STOVL	DELVTPF		# DELTA V (FINAL) = V-T - VT
+		STOVL	DELVTPF		# DELTA V (FINAL) = V'T - VT
 			RACT3
 		PDVL	CALL
 			VIPRIME
@@ -288,7 +290,7 @@ DSPLY81		CAF	V06N81SR	# DISPLAY DELTA V (LV)
 # STABLE ORBIT MIDCOURSE PROGRAM (P39 AND P79)
 #
 # MOD NO -1		LOG SECTION - STABLE ORBIT - P38-P39
-# MOD BY RUDNICKI, S	DATE 25JAN68
+# MOD BY RUDNICKI.S	DATE 25JAN68
 #
 # FUNCTIONAL DESCRIPTION
 #

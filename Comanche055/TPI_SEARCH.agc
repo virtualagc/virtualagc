@@ -11,7 +11,7 @@
 ## Mod history:	2009-05-15 RSB	Adapted from the Colossus249/ file of the
 ##				same name, using Comanche055 page images.
 ##		2009-05-20 RSB	Corrections:  On p. 551, "SETLOC P17S" -> P17S1.
-##		2016-12-10 RSB	All of the GOTOP00H's should have been
+##		2016-12-10 RSB	All of the GOTOPOOH's should have been
 ##				GOTOPOOH, and I've changed them back.
 ##		2016-12-10 RSB	Proofed comments with octopus/ProoferComments
 ##				and fixed the errors found.

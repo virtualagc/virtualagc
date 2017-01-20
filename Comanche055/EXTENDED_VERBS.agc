@@ -11,7 +11,7 @@
 ## Website:	http://www.ibiblio.org/apollo.
 ## Mod history:	2009-05-18 FB	Transcription Batch 3 Assignment.
 ##		2009-05-20 RSB	Corrections:  POODOO -> P00DOO,
-##				GOTOPOOH -> GOTOP00H, added a couple of 
+##				GOTOPOOH -> GOTOPOOH, added a couple of 
 ##				missing instructions in Verb 96.
 ##		2009-05-23 RSB	In SYSTEST, corrected TC FLAGWRD1 to 
 ##				CA FLAGWRD1.  Added a variety of SBANK=
@@ -23,7 +23,7 @@
 ##		2011-05-17 JL	Removed all SBANK= workarounds.
 ##		2016-12-10 RSB	Proofed comments with octopus/ProoferComments
 ##				and fixed the errors found.
-##		2016-12-10 RSB	All of the GOTOP00H's should have been
+##		2016-12-10 RSB	All of the GOTOPOOH's should have been
 ##				GOTOPOOH, and I've changed them back.
 ##		2017-01-13 RSB	Fixed comment errors detected in cross-diff vs
 ##				Colossus 249.

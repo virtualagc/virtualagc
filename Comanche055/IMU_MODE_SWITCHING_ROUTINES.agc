@@ -13,7 +13,7 @@
 ##				using Comanche055 page images.
 ##		2010-08-20 JL	Fixed page number comment (p1447).
 ##				Fixed some pseudo-label indents.
-##		2016-12-10 RSB	All of the GOTOP00H's should have been
+##		2016-12-10 RSB	All of the GOTOPOOH's should have been
 ##				GOTOPOOH, and I've changed them back.
 ##		2016-12-22 RSB	Proofed comment text using octopus/ProoferComments
 ##				and corrected the errors found.

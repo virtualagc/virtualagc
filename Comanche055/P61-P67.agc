@@ -15,7 +15,7 @@
 ##				interpreter operands fixed stuff like
 ##				N-M,1 to N -M,1
 ##		2010-08-28 JL	Fixed some indentation.
-##		2016-12-10 RSB	All of the GOTOP00H's should have been
+##		2016-12-10 RSB	All of the GOTOPOOH's should have been
 ##				GOTOPOOH, and I've changed them back.
 ##		2016-12-11 RSB	Proofed comments with octopus/ProoferComments
 ##				and fixed the errors found.

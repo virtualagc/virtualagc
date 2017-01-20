@@ -18,7 +18,7 @@
 ##		2009-05-21 RSB	Changed a P32/P72D to P32/P72E in 
 ##				P32/P72D.  DP1/4TH changed to DP1/4 in 
 ##				CDHMVR.
-##		2016-12-10 RSB	All of the GOTOP00H's should have been
+##		2016-12-10 RSB	All of the GOTOPOOH's should have been
 ##				GOTOPOOH, and I've changed them back.
 ##		2016-12-11 RSB	Proofed comments with octopus/ProoferComments
 ##				and fixed the errors found.
