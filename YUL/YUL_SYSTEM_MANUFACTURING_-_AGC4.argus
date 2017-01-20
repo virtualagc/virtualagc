@@ -11,6 +11,7 @@
 #               2017-01-17 JL   Transcribed pages 593-598.
 #               2017-01-18 JL   Transcribed pages 599-603.
 #               2017-01-19 JL   Transcribed page 604.
+#               2017-01-20 JL   Transcribed pages 605-615.
 
 # Annotations:
 #
@@ -1216,43 +1217,537 @@ R1292   INITIALIZE CODED PUNCHING FOR SUBSTRAND.
 # Page 605
 #      @YUL SYSTEM MANUFACTURING - AGC4                                          USER'S OWN PAGE NO.  30        PAGE  30
 
+P1304   INITIALIZATION FOR EACH WIRE.
+
+ 1305   RAYT WIRE  TS           SPEC FRAM     FRAME         PCH FRAME      C    SPECIAL CHARACTER FOR BEGIN-WIRE BLOCK.
+ 1307              SS           ZERO          NINE          SPEC FRAM           RESET BEGIN-SS AND BEGIN-WIRE BITS.
+ 1309              HA           SPEC FRAM     FOUR          SPEC FRAM           PHONY NEEDLE-HOLDER COMPLEMENT.
+ 1311              SWE, D12     WIRE NO       D,2           FRAME
+ 1312              BT           FRAME         10            COMMON
+ 1313              SM           FRAME         WIR HUNDS     FRAME          C    HUNDREDS DIGIT OF WIRE NUMBER.
+ 1315              SWE, D12     WIRE NO       D,1           FRAME
+ 1316              WA           COMMON        FRAME         COMMON
+ 1317              BT           COMMON        10            COMMON
+ 1318              SM           FRAME         WIR TENS      FRAME          C    TENS DIGIT OF WIRE NUMBER.
+ 1320              EX           WIRE NO       D12           FRAME
+ 1321              WA           COMMON        FRAME         COMMON
+ 1322              SM           FRAME         WIR UNITS     FRAME          C    UNITS DIGIT OF WIRE NUMBER.
+ 1324              TX           X TENS        -             FRAME          C
+ 1325              TX           X UNITS       -             FRAME          C
+ 1326              TX           Z UNITS       -             FRAME          C    DUMMY POSITION TO 00,0.
+ 1328              WD           COMMON        ONE           COMMON
+ 1329              SWE, SEVEN   COMMON        1             COMMON              FIND WHICH SLOT WIRE COMES FROM.
+ 1331              BT           COMMON        4             COMMON
+ 1332              WA           COMMON        TWO           COMMON              FIND CORE NEAREST THAT SLOT.
+ 1334              WA           R SPECS +1    COMMON        Z,X5                ...AND START THERE.
+ 1336              TX           Z,X5          -             COMMON
+
+R1337   PROCEDURE FOR EACH CORE.
+
+ 1338   TEST BIT   NA, BIT MASK 5,0           ZERO          C,+2                BRANCH TO THREAD THIS CORE NOW.
+ 1340              TS           Z,X5,1        -             END WIR CH
+
+ 1341              HA           SPEC FRAM     FOUR          SPEC FRAM           COMPLEMENT NEEDLE-HOLDER BIT.
+ 1343              TX           SPEC FRAM     -             FRAME          C    SPECI CHARACTER FOR CORE THREADING.
+ 1345              SWE, D12     N,X5          D,9           FRAME
+ 1346              SM           FRAME         X TENS        FRAME          C    TENS DIGIT OF X COORDINATE.
+ 1348              SWE, D12     N,X5          D,8           FRAME
+ 1349              SM           FRAME         X UNITS       FRAME          C    UNITS DIGIT OF X COORDINATE.
+ 1351              SWE, D12     N,X5          D,10          FRAME
+ 1352              SM           FRAME         Z UNITS       FRAME          C    Z COORDINATE.
+ 1354              NA           Z,X5,1        L END RASS    END WIR CH          BRANCH IF NOT AT UPPER LEFT BYPASS HOLE.
+
+ 1356              TS           R SPECS +1    Z,X5          TEST BIT            GO BACK AND PICK UP REST OF BOTTOM ROW.
+
+ 1358   END WIR CH NA           Z,X5          COMMON        TEST BIT            BRANCH IF MORE CORES ALONG WIRE.
 
 # Page 606
 #      @YUL SYSTEM MANUFACTURING - AGC4                                          USER'S OWN PAGE NO.  31        PAGE  31
 
+P1360   PROCEDURE TO FINISH OFF A WIRE.
+
+ 1361              WA           BIT MASK      BIT MASK      BIT MASK            MOVE TO NEXT WIRE.
+ 1363              SWS, ONE     BIT MASK      16            SPEC FRAM           SET OR RESET END-OF-SUBSTRAND BIT.
+ 1365              SM           SPEC FRAM     EIGHT         SPEC FRAM           SET END-WIRE BIT.
+ 1367              TX           SPEC FRAM     -             FRAME          C    SPECIAL CHARACTER FOR END-WIRE BLOCK.
+ 1369              SWE, D12     WIRE NO       D,2           FRAME
+ 1370              SM           FRAME         WIR HUNDS     FRAME          C
+ 1371              SWE, D12     WIRE NO       D,1           FRAME
+ 1372              SM           FRAME         WIR TENS      FRAME          C
+ 1373              EX           WIRE NO       D12           FRAME
+ 1374              SM           FRAME         WIR UNITS     FRAME          C    REPEAT WIRE NUMBER.
+ 1376              DA           WIRE NO       ONE           WIRE NO             ...THEN INCREMENT SAME.
+ 1378              TX           X TENS        -             FRAME          C
+ 1379              TX           X UNITS       -             FRAME          C
+ 1380              TX           Z UNITS       -             FRAME          C    DUMMY POSITION TO 00,0.
+ 1382              LA           BIT MASK      CAC 3         RAYT WIRE           BRANCH IF MORE WIRES IN SUBSTRAND.
+
+R1384   PROCEDURE TO FINISH OFF A SUBSTRAND.
+
+ 1385              TX           THIRTY        -             Z,R3
+ 1386              TX           FEED 1T7      -             FRAME          C
+ 1387              NA           Z,R3,1        ONE           C,-1
+ 1388   FINISH U   TS           W CRW         FRAME         GO TITLE T          PUNCH PROGRAM I.D. AGAIN.
+ 1390              SS           ONES          B34           SWITCH
+ 1391              TS           -             -             NEX RWT SS          GO SEE IF ANOTHER SUBSTRAND IS WANTED.
 
 # Page 607
 #      @YUL SYSTEM MANUFACTURING - AGC4                                          USER'S OWN PAGE NO.  32        PAGE  32
 
+P1393   *PUNCH RAYTHEON TESTER TAPE* SUBDIRECTOR ROUTINE HERE.
+R1394   EACH SUBSTRAND IS A SEPARATE PIECE OF PAPER.
+R1395   AT LEAST ONE OF THE SUBDIRECTORS *PARAGRAPH* IS REQUIRED. SEE PAGE 24.
+R1396   SUBDIRECTOR *MODULE DECK NUMBERS* IS REQUIRED.  SEE PAGE 27.
+R1397   SUBDIRECTOR *USE* IS OPTIONAL. SEE PAGE 26.
+R1398   SUBDIRECTOR *TESTING* IS OPTIONAL.  SEE PAGE 34.
+
+ 1399   RAYTH TT   NA           N,X5,3        W TESTER      BAD SD
+ 1400              SWS,B14T24   L ARTSDK N    8,L           SET WORD
+ 1401              TS           Z,SC          HOLD LOC      RY COMMON           GO CHECK REMAINDER OF SUBDIRECTOR
+ 1403              S,MON TYPER  PRTTP MSG     SPRA +32      C,+1
+ 1404              TS           Z,SC          HOLD LOC      READ A REQ          READ TASK SUBSEQUENT SUBDIRECTORS
+ 1406              TS           Z,SC          HOLD LOC      GET RWT SS
+ 1407              TX           STIK WIRE     -             Z,X5                X5 HOLDS LOC OF WIRE NUMBER
+ 1409              SSL,THREE    PARAG NO      2             C,+1                SET UP BASE ADDR OF PARA WITHIN BANK
+ 1411              TS           CORE  000     Z,R2          C,+4
+ 1412              TS           CORE  400     Z,R2          C,+3
+ 1413              TS           CORE 1000     Z,R2          C,+2
+ 1414              TX           CORE 1400     -             Z,R2
+ 1415              TX           ONE           -             BIT MASK
+ 1416              WA           Z,X1          THREE         FIRST WD
+ 1417              WA           FIRST WD      C 255         E 256 LOC
+ 1418              TX           5,8           -             Z,R3
+ 1419   NEW WIRE   TX           FIRST WD      -             Z,R1
+ 1420              TS           STOP          FRAME         PCH FRAME      C    SEND STOP CODE
+ 1422              TX           RESET         -             FRAME          C
+ 1423              EX           Z,R3          CHAR8         FRAME
+ 1424              SM           FRAME         SENSE A       FRAME          C    SEND WIRE NUMNER IN TWO FRAMES
+ 1426              SWE,ONE      Z,R3,1        A,1           FRAME
+ 1427              SM           FRAME         SENSE B       FRAME          C
+ 1428   NEW CORE   EX           Z,R2          B44T48        FRAME               SEND CORE NUMNER WITHIN BANK IN 2 FRAMES
+ 1430              SM           FRAME         CORE NO A     FRAME          C
+ 1431              SWE,B44T48   Z,R2,1        5             FRAME
+ 1432              SM           FRAME         CORE NO B     FRAME          C
+ 1433              TX           N,R1,1        -             IN OR NOT
+ 1434              NA,BITMASK   IN OR NOT     ZERO          THRU                JUMP IF WIRE SHOULD THREAD CORE
+ 1436              TX           ZERO          -             FRAME          C    SEND ZERO FRAME IF NOT
+ 1438   MORE       LA           Z,R1          E 256 LOC     NEW CORE            JUMP IF PARA NOT DONE WITH THIS WIRE
+ 1440              WA           BIT MASK      BIT MASK      BIT MASK
+ 1441              WD           Z,R2          C 256         Z,R2
+ 1442              LA           BIT MASK      CAC 3         NEW WIRE            JUMP IF 16 WIRES NOT DONE
+ 1444              TX           STOP          -             FRAME          C    SEND STOP CODE
+ 1446              TS,B14T24    SET WORD      FINISH U      FINISH U
+ 1447   THRU       TX           ONE           -             FRAME          C    SEND FRAME = 1 IF CORE THREADED
+ 1449              TS           -             -             MORE
 
 # Page 608
 #      @YUL SYSTEM MANUFACTURING - AGC4                                          USER'S OWN PAGE NO.  33        PAGE  33
 
+P1450   PROCEDURE TO  PUNCH CARDS/TAPE IN CORRELATION WITH *TESTING* SUBDIRECTOR, IF ANY
+
+ 1452   PRINT DAT  S,PHI PRINT  PRINT BUF                                       PRINT PREVIOUS LINE, IF ANY
+ 1454              TS           HOT DOG       Z,R6          BLANK OUT      C    BLANK OUT PRINT BUFFER
+ 1456              TX           FRAME         -             PRINT BUF +1        TASK CODE WORD ONTO LINE
+ 1458              TN           TITLE MSG     11            PRINT BUF +4        SAME FOR TITLE MESSAGE
+ 1460              TS           -             -             GO BOY
+ 1461   JUST PUNC  NA, ONE      TEST INST     ZERO          RET GO              JUMP IF PUNCHING INHIBITED
+ 1463   FRAME PUN  TS           -             -             0,75           C    GO PUNCH ONE FRAME
+ 1465              TX           KCOMMON +5    -             Z,SC                CO-SEQUENCE LEFT SET TO 0,75
+ 1467   RET GO     NA,FOUR      TEST INST     ZERO          CHECK IT
+ 1468   RET GO OK  TX           Z,SC          -             Z,CSC          C
+ 1469              TX           KCOMMON +5    -             Z,SC                CO-SEQUENCE LEFT SET TO PCH FRAME
+ 1471   PCH FRAME  TS           Z,SC          KCOMMON +5    C,+1
+ 1472              NA,TWO       TEST INST     TWO           JUST PUNC           JUMP IF LISTING NOT REQUESTED
+ 1474              TX           KCOMMON +9    -             Z,R6
+ 1475              TX           N,SC,1        -             N,R6
+ 1476              OCT          1515151515000000
+ 1477              SWS,ACO6     FRAME         6,L           N,R6                PUT CURRENT FRAME INTO PRINT LINE
+ 1479              SWS,ACO7     FRAME         3,L           N,R6
+ 1480              SS           FRAME         SEVEN         N,R6,1
+ 1481              NA,ONE       TEST INST     ZERO          C,+2                JUMP IF PUNCHING INHIBITED
+ 1483              TS           -             -             FRAME PUN      C
+ 1484              LA           Z,R6          N,SC,1        WOW WEE             JUMP IF PRINT LINE NOT FULL
+ 1486              SPEC                                     PRINT BUF +14
+ 1487   GO BOY     NA,ONE       TEST INST     ZERO          C,+2
+ 1488              TX           W PUNCHED     -             PRINT BUF +15
+ 1489              S,PHI PRINT  PRINT BUF
+ 1490              TX           N,SC,1        -             Z,R6
+ 1491   HOT DOG    SPEC                                     PRINT BUF +1
+ 1492   BLANK OUT  MT           BLANKS        15            N,R6,1
+ 1493              TS           C,-2          KCOMMON +9    RET GO              SAVE LINE POINTER
+ 1495   WOW WEE    TS           Z,R6          KCOMMON +9    RET GO
+ 1496   PRINT BUF  OCT          0102
+ 1497              ALF,5
+ 1498              ALF,5
+ 1499              ALF,5
+ 1500   PUNCH CD   SIMULATE
+ 1501              TS           -             -             C,+1
+ 1502              EBA          Z,AU1         ZERO          KCOMMON +8
+ 1503              NA,TWO       TEST INST     TWO           NO CD LIST          JUMP IF LISTING NOT REQUESTED
+ 1505              EBA          KCOMMON +8    ZERO          Z,X4
+ 1506              TX           Z,AU2         -             KCOMMON +9
+ 1507              TN           4,1           10            PRINT BUF +1
+ 1508              TX           BLANKS        -             PRINT BUF +15
+ 1509              NA,ONE       TEST INST     ZERO          C,+2
+ 1510              TX           W PUNCHED     -             PRINT BUF +15
+ 1511              S,PHI PRINT  PRINT BUF                                       PRINT LINE = ONE CARD
+ 1513              TX           KCOMMON +9    -             Z,AU2
+ 1514   NO CD LIST TX           PUNCH CD      -             0,87
+ 1515              EBA          KCOMMON +8    ZERO          Z,AU1
+ 1516              NA,ONE       TEST INST     ZERO          C,+2                JUMP IF PUNCHING INHIBITED
+ 1518              TS           -             -             0,88           C    GO PUNCH CARD VIA YULPASS0
+ 1520              TS           -             -             N,AU2
 
 # Page 609
 #      @YUL SYSTEM MANUFACTURING - AGC4                                          USER'S OWN PAGE NO.  34        PAGE  34
 
+P1521   PROCEDURE TO SET UP REQUEST FOR EITHER NO PUNCHING AND/OR LISTING OF  CURRENT TASK VIA *TESTING* SUBDIRECTOR.
+
+ 1523   TRY TEST   NA           KCOMMON       W TESTING     TRY USE
+ 1524              TS           Z,SC          Z,R1          UP WORD
+ 1525              TS           -             -             READ A REQ
+ 1526   CHK TEST   TS           Z,SH          Z,R1          RD SBDIRC           IS NEXT CARD A SUBDIRECTOR
+ 1528              TS           -             -             N,R1                NO
+ 1530              WA           Z,X6          OCTAL 20      Z,X5                YES
+ 1532              NA           N,X5,3        W TESTING     BAD SD              WORD TESTING IS REQUIRED
+ 1534   UP WORD    TX           N,X5,3        -             KCOMMON
+ 1535              NA           KCOMMON       W NOPUNCH     C,+2
+ 1536              TS,ONE       ONE           TEST INST     UP WORD        C    SET INHIBIT PUNCH SWITCH
+ 1538              NA           KCOMMON       W LIST        C,+2
+ 1539              TS,TWO       TWO           TEST INST     UP WORD        C    SET LISTING REQUESTED SWITCH
+ 1541              NA           KCOMMON       W CHECK       C,+2
+ 1542              TS,FOUR      ONES          TEST INST     UPWORD         C
+ 1543              NA           ONES          KCOMMON       BAD SD
+ 1544              TS           -             -             N,R1
+ 1545   PAP ABORT  DUMP
+ 1546              COREDUMP,0   2048          6143
+ 1547              TS           -             -             END P TAPE
+
+ 1548   CHECK NOW  NA           CHECK ON      ZERO          CHECK DOG
+ 1549   GET READR  S,MON TYPER  CHECK DOT     SPRA +40      C,+1
+ 1550              STOP                                     -
+ 1551              TS           ONE           Z,AU1         7,111          C
+ 1552              TS           ZERO          FRAME POW     GET READS
+ 1553              WA           FRAME NUM     ONE           FRAME NUM
+ 1554              LA           FRAME NUM     THREE         GET READR
+ 1555              TS           -             -             PAP ABORT
+ 1556   GET READS  SWS,BIT6     7,174         18,L          CHECK RDA
+ 1557              TX,BIT6      CHECK RDA     -             CHECK RDB
+ 1558              TX,BIT6      CHECK RDA     -             CHECK RDB
+ 1559              TX,BIT6      CHECK RDA     -             CHECK RDC
+ 1560              TX           ONES          -             CHECK ON
+ 1561   CHECK DOG  TS           ZERO          FRAME POW     CHECK RDS      C
+ 1562              SWS,ONES     CHK H BUF     8,L           CHK H BUF
+ 1563              SWS,ONES     CHK H BUF +1  8,L           CHK H BUF +1
+ 1564              SWS,ONES     CHK H BUF +2  8,L           CHK H BUF +2
+ 1565              SWS,ONES     CHK H BUF +3  8,L           CHK H BUF +3
+ 1566              SWS,ONES     CHK H BUF +4  8,L           CHK H BUF +4
+ 1567              SWS,ONES     CHK H BUF +5  8,L           CHK H BUF +5
+ 1568              TX,B41T48    CHK H BUF +1  -             CHK H BUF
+ 1569              TX,B41T48    CHK H BUF +2  -             CHK H BUF +1
+ 1570              TX,B41T48    CHK H BUF +3  -             CHK H BUF +2
+ 1571              TX,B41T48    CHK H BUF +4  -             CHK H BUF +3
+ 1572              TX,B41T48    CHK H BUF +5  -             CHK H BUF +4
+ 1573              TX,B41T48    CHK H BUF +20 -             CHK H BUF +5
+ 1574              NA           CHK H BUF     CHK HEAD      CHECK DOG
+ 1575              NA           CHK H BUF +1  CHK HEAD +1   CHECK DOG
+ 1576              NA           CHK H BUF +2  CHK HEAD +2   CHECK DOG
+ 1577              NA           CHK H BUF +3  CHK HEAD +3   CHECK DOG
+ 1578              NA           CHK H BUF +4  CHK HEAD +4   CHECK DOG
+ 1579              NA           CHK H BUF +5  CHK HEAD +5   CHECK DOG
+ 1580              TS           -             -             CHECK RDS      C
 
 # Page 610
 #      @YUL SYSTEM MANUFACTURING - AGC4                                          USER'S OWN PAGE NO.  35        PAGE  35
 
+ 1581              LA           CHECK FRM +15 ZERO          C,-1
+ 1582              TS           -             -              CHECK RDS     C
+ 1583              LA           CHECK FRM +11 ZERO          C,-1
+ 1584              TS           W HEAD        CHECK BUF +11 CHECK COM
+ 1585              TS           PONE          FRAME NUM      GO TITLE J
+ 1586   CHECK END  TS           ZERO          FRAME NUM     CHECK RDS      C
+ 1587              TS           W TAIL        CHECK BUF +11 CHECK COM
+ 1588              TS           -             -             GO TITLE K
+ 1589   CHECK IT   TS           -             -             CHECK RDS      C
+ 1590              LA           FRAME NUM     ZERO          RET GO OK
+ 1591              LA           SEVEN         FRAME POW     CHECK EOK
+ 1592              NA,B41T48    CHECK FRM +10 FRAME         CHECK HOT
+ 1593              TX           ZERO          -             FRAME POW
+ 1594   CHECK EOK  DA           FRAME NUM     PONE          FRAME NUM
+ 1595              TS           -             -             RET GO OK
+ 1596   CHECK HOT  TN           FRAME YUL +1  4             FRAME YUL
+ 1597              TX           FRAME         -             FRAME YUL +4
+ 1598              WA           FRAME POW     ONE           FRAME POW
+ 1599              NA           FRAME POW     SEVEN         CHECK ERR
+ 1600              NA,B41T48    FRAME YUL     CHECK FRM +7  CHECK SOP
+ 1601              NA,B41T48    FRAME YUL +1  CHECK FRM +8  CHECK SOP
+ 1602              NA,B41T48    FRAME YUL +2  CHECK FRM +9  CHECK SOP
+ 1603              NA,B41T48    FRAME YUL +3  CHECK FRM +10 CHECK SOP
+ 1604              NA,B41T48    FRAME YUL +4  CHECK FRM +11 CHECK SOP
+ 1605              TS           -             -             CHECK RDS      C
+ 1606              S,PHI PRINT  SKIP MSG
+ 1607              TS           ZERO          FRAME POW     CHECK EOK
+ 1608   CHECK SOP  NA,B41T48    FRAME YUL +1  CHECK FRM +6  CHECK EPA
+ 1609              NA,B41T48    FRAME YUL +2  CHECK FRM +7  CHECK EPA
+ 1610              NA,B41T48    FRAME YUL +3  CHECK FRM +8  CHECK EPA
+ 1611              NA,B41T48    FRAME YUL +4  CHECK FRM +9  CHECK EPA
+ 1612              S,PHI PRINT  SKIP MSG
+ 1613              TX           N,SC,1        -             CHECK IT
+ 1614              TX           C,+2          -             CHECK IT
+ 1615              TS           ZERO          FRAME POW     CHECK EOK
+ 1616              TS           -             -             CHECK RDS      C
+ 1617   CHECK EPA  S,PHI PRINT  CANCL MSG
+ 1618              TS           -             -             CHECK EOK
+ 1619   CHECK ERR  TN           TITLE MSG +1  9             CHECK BUF +1
+ 1620              TN           CHECK MUM     6             CHECK BUF +10
+ 1621              SWS,D12      FRAME NUM     16            CHECK BUF +10
+ 1622              SWS,ACD1     FRAME NUM     18            CHECK BUF +11
+ 1623              SWS,ACD2     FRAME NUM     20            CHECK BUF +11
+ 1624              SWS,ACD3     FRAME NUM     22            CHECK BUF +11
+ 1625              SWS,ACD4     FRAME NUM     24            CHECK BUF +11
+ 1626              SWS,SEVEN    CHECK FRM +10 6             CHECK BUF +11
+ 1627              SWS,ACO1     CHECK FRM +10 9             CHECK BUF +12
+ 1628              SWS,ACO2     CHECK FRM +10 12            CHECK BUF +12
+ 1629              SWS, ACO7    FRAME         0             CHECK BUF +13
+ 1630              SWS, SEVEN   FRAME         3             CHECK BUF +13
+ 1631              SWS, ACO1    FRAME         6             CHECK BUF +14
+ 1632              SWS,CAC3     L CHK BUFS    16            Z,R6
+ 1633              S,PHIPRINT   CHECK BUF
+ 1634              TN           CHECK SPA     4             CHECK BUF +1
+ 1635              TS           L CHK BUFS    Z,AU1         CHECK SUT      C
 
 # Page 611
 #      @YUL SYSTEM MANUFACTURING - AGC4                                          USER'S OWN PAGE NO.  36        PAGE  36
 
+ 1636              S,PHI PRINT  CHECK BUF
+ 1637              TN           CHECK BRA     4             CHECK BUF +1
+ 1638              TX           Z,R6,1        -             -
+ 1639              TS           L CHK BUFS    Z,AU1         CHECK SUT      C
+ 1640              S,PHI PRINT  CHECK BUF
+ 1641              DA           CHECK CNT     PONE          CHECK CNT
+ 1642              TS           -             -             CHECK EOK
+ 1643   CHECK SUT  TX           TEN           -             Z,AU2          C
+ 1644   CHECK MUT  TX           BLNK 3ZS      -             N,AU1          C
+ 1645              SWS,ACO6     N,R6          6,L           N,AU1          C
+ 1646              SWS,ACO7     N,R6          3,L           N,AU1          C
+ 1647              SWS,SEVEN    N,R6,1        0             N,AU1,1        C
+ 1648              NA           Z,AU2,1       ONE           CHECK MUT      C
+ 1649              TX           BLANKS        -             CHECK BUF +15
+ 1650   CHECK BUF  OCT          0102
+ 1651              ALF,5
+ 1652              ALF,5
+ 1653              ALF,5
+ 1654   CHECK RDS  WA,ONE       SWITCH PA     ONE           SWITCH PA      C
+ 1655              NA,ONE       SWITCH PA     ZERO          CHECK RDB      C
+ 1656   CHECK RDA  RF,00        CHECK FRM +21 -             C,+3
+ 1657   CHECK RDC  RF,00        CHECK FRM +22 -             C,-1
+ 1658              TS           -             -             PAP ABORT
+ 1659              TN           CHECK FRM +1  20            CHECK FRM      C
+ 1660              TX           CHECK FRM +22 -             CHECK FRM +20
+ 1661   CHECK RDB  RF,00        CHECK FRM +22 -             C,+3
+ 1662   CHECK RDD  RF,00        CHECK FRM +21 -             C,-1
+ 1663              TS           -             -             PAP ABORT
+ 1664              TN           CHECK FRM +1  21            CHECK FRM
+ 1665   CHECK DNE  SWS,D12      CHECK CNT     16            CHECK LOS +2
+ 1666              SWS,ACD1     CHECK CNT     18            CHECK LOS +3
+ 1667              SWS,ACD2     CHECK CNT     20            CHECK LOS +3
+ 1668              SWS,ACD3     CHECK CNT     22            CHECK LOS +3
+ 1669              SWS,ACD4     CHECK CNT     24            CHECK LOS +3
+ 1670              TS           CHECK WDD     Z,AU1         7,111          C
+ 1671              S,MON TYPER  CHECK LOS     SPRA +40      CHK EXIT
+ 1672              TS           -             -             PAP ABORT
+ 1673   CHK HEAD   DEC          -0
+ 1674              DEC          00 7F 08 08 08 7F
+ 1675              DEC          00 7F 4B 4B 4B 42
+ 1676              DEC          00 3F 48 48 48 3F
+ 1677              DEC          00 7F 42 42 42 3D
+ 1678              DEC          -0
+ 1679   CHECK COM  TN           TITLE MSG     10            CHECK BUF +1
+ 1680              TX           BLANKS        -             CHECK BUF +12
+ 1681              TX           BLANKS        -             CHECK BUF +13
+ 1682              TX           BLANKS        -             CHECK BUF +14
+ 1683              TX           BLANKS        -             CHECK BUF +15
+ 1684              S,PHI PRINT  CHECK BUF
+ 1685              TX           Z,SH          -             Z,SC
+ 1686   CHK EXIT   TN           CHECK LOS     5             PRINT BUF +6
+ 1687              TS           B1            PRINT BUF     LAS MF LIN          FINISH OFF PRINTING OF CHECKING TASK.
 
 # Page 612
 #      @YUL SYSTEM MANUFACTURING - AGC4                                          USER'S OWN PAGE NO.  37        PAGE  37
 
+P1689              PROCEDURE TO COPY THE BINARY RECORD OF A PRORGRAM ONTO WORK TAPE 2 FOR COMPARISON WITH ANOTHER BY THE
+R1691   FOLLOWING TASK.  SUBDIRECTOR IS:
+R1692   S       COPY ONTO WORKER
+
+ 1693   AGC4 COPY  NA           N,X5,3        W ONTO        BAD SD              WORD ONTO IS REQUIRED
+ 1695              NA           N,X5,3        W WORKER      BAD SD              WORD WORKER IS REQUIRED
+ 1697              TX           BY PAS MDN    -             ANY MDN             * MODULE DECK NUMBERS* SD NOT ALLOWED
+ 1699              TS           Z,SC          HOLD LOC      RY COMMOP           ZERO PARAGRAPH REEQUESTS
+ 1701              S,MON TYPER  COPY MSG      SPRA+16       C,+1                PRINT OUT COPY MESSAGE
+ 1703              TS           Z,SC          HOLD LOC      READ A REQ          GO READ TASK SUBDIRECTORS
+ 1705              TS           Z,SC          HOLD LOC      GET WORKR           GO RESERVE YUL WORKER 2
+ 1707   COPY XA    TS           Z,SC          Z,X5          GET REQ PN          GO GET NEXT PARAGRAPH
+ 1709              TS           -             -             COPY XB             NO MORE PARAGRAPHS
+ 1711   COPY XD    TX           1,1           -             C FIRST RC +1       PROGRAM NAME INTO STATEMENT WHICH
+ 1713              CC           C FIRST RC    -             C FIRST RC +6       IDENTIFIES THIS PARTICULAR COPY JOB TO
+ 1715              TS           -             -             MON TAPE            IT'S PARTICULAR COMPARE JOB.  NOW WRITE
+ 1717              WF,2         C FIRST RC    -             -                   IT ONTO THE WORKER
+ 1719              TN           COPY LINE     3             PRINT BUF +1
+ 1720              TX           L OBJC MSG    -             Z,AU1
+ 1721   OBJ MANUF  MT           N,AU1,1       7             N,AU2,1
+ 1722              TS           Z,SC          K COMMON +5   GO BOY              PREPARE AND PRINT PAGE HEAD FOR COPY.
+ 1724              TS           -             -             MON TAPE
+ 1725              WF,2         -             -             -
+ 1726              TX           N,SC,1        -             COPY XD
+ 1727              TS           -             -             C,+1
+ 1728              TS           -             -             MON TAPE
+ 1729              WF,2         1,0           -             -
+ 1730              TS           -             -             MON TAPE            WAIT UNTIL WRITE DONE
+ 1732              WF,2         -             -             -
+ 1733              TS           -             -             COPY XA
+ 1734   COPY XB    S,MON EOFRI  TAPE ORDR     -             ZERO                WRITE END OF FILE RECORDS
+ 1736              S,MON TYPER  E COPY MSG    SPRAMR +56    C,+1                TYPE OUT COPYING DONE MESSAGE.
+ 1738              TX           ZERO          -             LAS MF LIN
+ 1739              TX           AGC4 CMPR -1  -             AGC4 CMPR -4        PREVENT FINAL PRINTING IF COPYING.
+ 1741   COPY XC    TS           B1            PRINT BUF     MON TAPE            REWIND WORKER
+ 1743              RW,2         -             -             -
+ 1744              TN           E CMPR MSG    2             PRINT BUF +1
+ 1745   LAS MF LIN TS           Z,SC          K COMMON +5   GO BOY
+ 1746              TS           OCT 00047     PRINT BUF     MON TAPE            REWIND YULPROGS
+ 1748              RW,1         -             -             -
+ 1749              S, PHI PRINT PRINT BUF
+ 1750              S, PHI PRINT PRINT BUF
+ 1751              S, PHI PRINT PRINT BUF
+ 1752              TS           -             -             MANUF RTN
 
 # Page 613
 #      @YUL SYSTEM MANUFACTURING - AGC4                                          USER'S OWN PAGE NO.  38        PAGE  38
 
+P1753              PROCEDURE TO COMPARE THE BINARY RECORD OF A PROGRAM WITH ANOTHER STORED ON WORK TAPE 2 BY THE PRECED-
+R1755   ING TASK.  SUBDIRECTOR IS:
+R1756   S       COMPARE PROGRAM PROGNAME FROM WORKER
+
+ 1757   AGC4 CMPR  NA           N,X5,3        W PROGNAM     BAD SD              WORD PROGRAM IS REQUIRED
+ 1759              TX           N,X5,3        -             C FIRST RC +1       EXTRACT COPY PROGRAM NAME
+ 1761              NA           N,X5,3        W FROM        BAD SD              WORD FROM IS REQUIRED
+ 1763              NA           N,X5,3        W WORKER      BAD SD              WORD WORKER IS REQUIRED
+ 1765              TX           BY PAS MDN    -             ANY MDN             * MODULE DECK NUMBER* SD IS NOT ALLOWED.
+ 1767              TS           Z,SC          HOLD LOC      RY COMMOP           ZERO PARAGRAPH REQUESTS
+ 1769              S,MON TYPER  CMPAR MSG     SPRA+24       C,+1                PRINT OUT COMPARE MESSAGE
+ 1771              TS           Z,SC          HOLD LOC      READ A REQ          GO READ TASK SUBDIRECTORS
+ 1773              S,MONTADDR   TAPE ORDR                                       MUST OWN WORKER 2 CUZ MUST FOLLOW COPY
+ 1775              TS           C,+2          HOLD LOC      TAPE ORDE
+ 1776              S, MON TYPER NO WT2 MSG    SPRAMR +40    TYP ABORT
+ 1777              SPEC                                     C,+1
+ 1778              TX           THREE         -             TEST INST           ENABLE PRINTING/NO PUNCH OF PCH FRAME
+ 1780   CMPR XA    TS           Z,SC          Z,X5          GET REQ PN          GET NEXT PARAGRAPH.
+ 1782              TS           -             -             CMPR XB             NO MORE PARAGRAPHS
+ 1784              TX           ZERO          -             KCOMMON +7          SHOW ZERO ERRORS SO FAR IN NEW PARA
+ 1786   CMPR XR    TX           L CPY AREA    -             Z,X4                COPY AREA BASE ADDRESS
+ 1788              TS           -             -             MON TAPE            READ A RECORD FROM THE WORKER
+ 1790              RF,2         4,0           -             -                   WAIT UNTIL READ IN
+ 1792              TS           -             -             MON TAPE
+ 1793              RF,2         -             -             -
+ 1794   CMPR XU    NA,BANBITS   4,0           BAN EOFRI     CMPR XH
+ 1795              TS           -             -             CMPR XS
+ 1796   CMPR XH    NA           C FIRST RC    4,0           CMPR XK             DEMAND MATCH OF FIRST SIX WORDS OF
+ 1798              NA           C FIRST RC +1 4,1           CMPR XK             FIRST WORKER RECORD
+ 1800              NA           C FIRST RC +2 4,2           CMPR XK
+ 1801              NA           C FIRST RC +3 4,3           CMPR XK
+ 1802              NA           C FIRST RC +4 4,4           CMPR XK
+ 1803              NA           C FIRST RC +5 4,5           CMPR XK
+ 1804              TN           CMPR LINE     3             PRINT BUF +1
+ 1805              TS           L OBJC MSG    Z,AU1         OBJ MANUF      C
+ 1806              TS           Z,SC          K COMMON +5   GO BOY              PREPARE AND PRINT PAGE HEAD FOR COMPARE.
+ 1808              TS           N,SC          CMPR XH       CMPR XR
+ 1809              TS           -             -             C,+1
+ 1810   CMPR XN    NA           4,2           1,2           CMPR XC             JUMP IF PARAGRAPH NUMBERS DISAGREE
+ 1812              WA           Z,X1          THREE         Z,X5
+ 1813              TX           Z,X4,3        -             -                   POINT TO FIRST AGC WORDS IN EACH PARA
+ 1815              TX           Z,X5          -             KCOMMON + 3
+ 1816   CMPR XG    NA,CAC3      4,0           5,0           CMPR XD             JUMP IF AGC WORDS DISAGREE FOR THIS LOC
+ 1818   CMPR XQ    WA           Z,X4,1        Z,X5,1        -
+ 1819              TS           -             -             CMPR XG
+ 1820   CMPR XD    WD           Z,X5          C255          Z,R1                LOOK TO SEE IF PARA BOUNDARAY EXCEEDED
+ 1822              LA           Z,R1          KCOMMON +3    CMPR XE             JUMP IF PARAGRAPH NOT DONE
+ 1824              LA           KCOMMON + 9   HOT DOG       CMPR XA             JUMP IF NO PARTIAL LINE WAITING
+ 1826              TS           Z,SC          KCOMMON +5    GO BOY              PRINT REMAINING PARTIAL LINE
+ 1828              TS           -             -             CMPR XA
+ 1829   CMPR XE    WA           KCOMMON + 7   ONE           KCOMMON +7          NUMBER OF LOCS WITH DIFFERENT VALUES
+ 1831              LA           TWO           KCOMMON +7    CMPR XF             JUMP IF ONE ALREADY FOUND FOR THIS PARA
+ 1833              TN           CMPFL MSG     10            PRINT BUF +1
+ 1834              SWS,ACO6     1,2           6,L           PRINT BUF +2        SET PARAGRAPH NUMBER INTO COMPARE FAIL
+ 1836              SWS,ACO7     1,2           3,L           PRINT BUF +3        MESSAGE
 
 # Page 614
 #      @YUL SYSTEM MANUFACTURING - AGC4                                          USER'S OWN PAGE NO.  39        PAGE  39
 
+ 1838              SS           1,2           SEVEN         PRINT BUF + 2
+ 1839              TS           Z,SC          KCOMMON +5    GO BOY              PRINT COMPARE FAIL MESSAGE
+ 1841   CMPR XF    WD           Z,X5          KCOMMON+3     FRAME               DETERMINE WORD'S RELATIVE PARAGRAPH LOC
+ 1843              TS           -             -             PCH FRAE       C    SET WORD RELATIVE LOC ONTO PRINT LINE
+ 1845              TS           -             -             CMPR XQ
+ 1846   CMPR XC    LA           4,2           1,2           CMPR XL             JUMP IF PARAGRAPH NOT ON YULPROGS
+ 1848              SWS,ACO6     1,2           6,L           CMPR XM +1          COMPLAIN ABOUT PARAGRAPH BEING MISSING
+ 1850              SWS,ACO7     1,2           3,L           CMPR XM +1          IN THE COPY PROGRAM
+ 1852              SS           1,2           SEVEN         CMPR XM +1
+ 1853              TN           CMPR XM       5             PRINT BUF +1
+ 1854              TS           Z,SC          KCOMMON +5    GO BOY
+ 1855              S,MON TYPER  CMPR XM       SPRA+40       C,+1
+ 1856              TX           Z,X4          -             KCOMMON+8
+ 1857              TS           Z,SC          Z,X5          GET REQ PN          GET NEXT PARAGRAPH
+ 1859              TS           KCOMMON +8    Z,X4          CMPRXB
+ 1860              TS           KCOMMON +8    Z,X4          CMPR XN
+ 1861   CMPR XM    ALF,5        PARAGRAPH    000 MISSING IN COPY PROGRAM
+ 1862   CMPR XL    SWS,ACO6     4,2           6,L           CMPR XP +1          COMPLAIN ABOUT PARAGRAPH BEING MISSING
+ 1864              SWS,ACO7     4,2           3,L           CMPR XP +1          IN COMPARE PROGRAM
+ 1866              SS           4,2           SEVEN         CMPR XP +1
+ 1867              TN           CMPR XP       6             PRINT BUF + 1
+ 1868              TS           Z,SC          KCOMMON +5    GO BOY
+ 1869              S,MON TYPER  CMPR XP       SPRA +48      CMPR XR
+ 1870   CMPR XP    ALF,5        PARAGRAPH    000 MISSING IN COMPARE PROG
+ 1871              ALF,1        RAM
+ 1872   CMPR XB    TS           N,SC          CMPR XU       CMPR XR             READ WORKER RECORD
+ 1874              TS           -             -             C,+1
+ 1875              NA,BANBITS   4,0           BANEOFRI      CMPR XW             JUMP IF NOT END OF WORKER
+ 1877              S,MON TYPER  E CMPR MSG    SPRAMR+16     COPY XC             PRINT COMPARE DONE MESSAGE
+ 1879   CMPR XW    SWS,ACO6     4,2           6,L           CMPR XX +1          COMPLAIN ABOUT POSSIBLE MISSING 
+ 1881              SWS,ACO7     4,2           3,L           CMPR XX +1          PARAGRAPHS IN THE COMPARE PROGRAM
+ 1883              SS           4,2           SEVEN         CMPR XX +1
+ 1884              TN           CMPR XX       7             PRINT BUF +1
+ 1885              TS           Z,SC          KCOMMON +5    GO BOY
+ 1886              S,MON TYPER  CMPR XX       SPRAMR+56     COPY XC
+ 1887   CMPR XX    ALF,5        PARAGRAPHS   000 AND ABOVE MISSING FROM
+ 1888              ALF,2        COMPARE PROGRAM
+ 1889   CMPR XS    SWS,ACO6     1,2           6,L           CMPR XT +1          COMPLAIN ABOUT MISSIGN PARAGRAPHS IN
+ 1891              SWS,ACO7     1,2           3,L           CMPR XT +1          THE COPY PROGRAM
+ 1893              SS           1,2           SEVEN         CMPR XT +1
+ 1894              TN           CMPR XT       7             PRINT BUF +1
+ 1895              TS           Z,SC          KCOMMON +5    GO BOY
+ 1896              S,MON TYPER  CMPR XT       SPRAMR+56     COPY XC
+ 1897   CMPR XT    ALF,5        PARAGRAPHS   000 AND ABOVE MISSING FROM
+ 1898              ALF,2        COPY PROGRAM
+ 1899   CMPR XK    S,MONTYPER   C,+1          SPRAMR +56    CMPR XJ
+ 1900              ALF,5        COPY JOB EITHER MISSING, UNSUCCESSFUL,
+ 1901              ALF,2        NOT MATCHING OR
+ 1902   CMPR XJ    S,MONTYPER   C,+1          SPRAMR +56    COPY XC
+ 1903              ALF,5        WAS NOT IMMEDIATELY FOLLOWED BY THIS COM
+ 1904              ALF,2        PARE JOB
+ 1905   GET WORKER S,MON TADDR  TAPE ORDR                                       ASK IF YUL SYSTEM HAS RESERVED A WORKER
+ 1907              TS           -             -             TAPE ORDE           IT CALLS 2.  YES IT HAS.
+ 1909              TS           ONES          C,+3          PHI SNACH           NO IT HAS NOT, GO GET IT.
+ 1911              ALF,3        W00Y0102YULWRK2
 
 # Page 615
 #      @YUL SYSTEM MANUFACTURING - AGC4                                          USER'S OWN PAGE NO.  40        PAGE  40
+
+ 1912   TAPE ORDE  TS           -             -             MON TAPE            REWIND WORKER
+ 1914   TAPE ORDR  RW,2         -             -             -
+ 1915              TS           CAC3          Z,X4          MON TAPE            SKIP OVER LABEL RECORD
+ 1917              RF,2         4,0           -             -
+ 1918              TS           -             -             MON TAPE            WAIT UNTIL SKIP DONE
+ 1920              RF,2         -             -             -
+ 1921              TX           HOLD LOC      -             Z,SC                RETURN TO CALLER
+ 1923   COPY AREA  RESERVE      262                                             WORK AREA FOR COPY AND COMPARE ROUTINES
+ SEQBRK            END          YUL MANUF     AGC4
 
