@@ -17,6 +17,8 @@
 ## Mod history: 2016-12-13 MAS  Created from Luminary 99.
 ##              2016-12-18 MAS  Updated from comment-proofed Luminary 99 version.
 ##		2017-01-04 RRB	Updated for Luminary 69.
+##              2017-01-21 HG   Fix opcode RELINS -> RELINT
+##                                         DXVH   -> DXCH
 
 ## Page 1390
 		BANK	22
@@ -57,7 +59,7 @@ READPIPS	INHINT
 		CA	PIPAY
 		TS	MPAC +3
 		CA	PIPAZ
-		RELINS
+		RELINT
 		TS	MPAC +5
 
 		CAF	ZERO
@@ -206,7 +208,7 @@ TRANSP1		CAF	XNBEB
 		
 		DXCH	XNB +10D
 		DXCH	XNB +14D
-		DXVH	XNB +10D
+		DXCH	XNB +10D
 		TCF	DANZIG
 		
 		EBANK=	XNB1

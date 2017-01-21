@@ -18,6 +18,7 @@
 ##              2016-12-18 MAS  Updated from comment-proofed Luminary 99 version.
 ##		2017-01-09 RRB	Updated for Luminary 69.
 ##              2017-01-20 HG   Fix pseudo code 2CARD -> 2CADR
+##              2017-01-21 HG   Fix operand XDEVLFLG -> XDELVFLG
 
 ## Page 829
 		BANK	21
@@ -357,7 +358,7 @@ PREBRET1	EXIT
 			PIPTIME1
 		STORE	TIG
 		SET	CLEAR
-			XDEVLFLG
+			XDELVFLG
 			LETABORT
 		EXIT
 
