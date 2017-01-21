@@ -18,6 +18,10 @@
 ##              2016-12-14 MAS  Updated from comment-proofed Luminary 99 version.
 ##		2016-12-18 RRB	Updated for Luminary 69.
 ##              2016-12-28 HG   Fix operand MXV\ -> MXV
+##              2017-01-20 HG   Add missing DECTWO
+##                              Remove ABVAL
+##                                     STORE RTMAG
+ 
 
 ## Page 667
 # TRANSFER PHASE INITIATION (TPI) PROGRAMS (P34 AND P74)
@@ -1028,7 +1032,7 @@ MAX250		2DEC	25 E3
 THIRD		2DEC	.333333333
 
 ELEPS		2DEC	.27777777 E-3
-
+DECTWO          OCT     2
 DP-.01		OCT	77777		# CONSTANTS
 		OCT	61337		# ADJACENT	-.01 FOR MGA DSP
 EPSFOUR		2DEC	.0416666666
@@ -1122,9 +1126,6 @@ HAVEGUES	VLOAD	STQ
 			RTARG1
 		VSL2
 		STORE	RTARG1
-		ABVAL
-		STORE	RTMAG
-
 # INITIALIZATION
 
 INITVEL1	SSP	DLOAD		# SET ITCTR TO -1,LOAD MPAC WITH E4 (PL 2D)
