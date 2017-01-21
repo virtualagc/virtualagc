@@ -13,6 +13,8 @@
 ## 		2009-09-14 JL	Fix typos. Fix page numbers. Remove change comments. 
 ##				Remove RELINT. Restore hard tabs.
 ##		2010-02-20 RSB	Un-##'d this header.
+##		2017-01-21 RSB	Proofed comment text by diff'ing vs Comanche 55
+##				and corrected errors found.
 
 ## Page 890
 		SETLOC BODYATT
@@ -157,7 +159,7 @@ CM/TRIO		STODL	24D
 		STOVL	SINTH		# -SIN(ALFA)/4
 		DOT			# UL/2 FROM PDL 0
 			UBZ/2
-		STCALL	COSTH		# COS(ALFA)/2
+		STCALL	COSTH		# COS(ALFA)/4
 			ARCTRIG
 		STOVL	8D		# -(ALFA/180) /2
 			UNITR		# UR/2				REF COORDS
@@ -169,7 +171,7 @@ CM/TRIO		STODL	24D
 		TLOAD	EXIT		# ANGLES IN MPAC IN THE ORDER
 					# -( (ROLL, BETA, ALFA) /180)/2
 			6D		# THESE VALUES CORRECT AT PIPUP TIME.
-
+# SPACER
 ## Page 894
 
 # BASIC SUBROUTINE TO UPDATE ATTITUDE ANGLES
@@ -212,7 +214,7 @@ DOGAMDOT	CS	L
 NOGAMDOT	CA	ZERO		# COME HERE INHINTED.
 		TS	GAMDOT
 					# FOR NOW LEAVE IN 2S,C
-					# UPDATE ANGLES BY CORRECTING EULER ANG
+					# UPDATE ANGLES BY CORRECTING EUILER ANG
 					# FOR ACCRUED INCREMENT SINCE PIPUP
 					# R = R EUIL + R(NOW) -R(PIPUP)
 		CS	MPAC		# GET (R EUL/180) /2
