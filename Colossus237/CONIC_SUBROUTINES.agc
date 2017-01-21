@@ -14,6 +14,8 @@
 ##				and fixed errors found.
 ##		2017-01-07 RSB	Fixed comment errors detected in cross-diff vs
 ##				Colossus 249.
+##		2017-01-21 RSB	Back-ported comment error fixes detected in diff'ing
+##				Artemis 72 vs Comanche 55.
 
 ## Page 1228
 # PROGRAM DESCRIPTION - ENTIRE CONIC SUBROUTINE LOG SECTION                       DATE - 1 SEPTEMBER 1967
@@ -2002,7 +2004,7 @@ DCOGA		EQUALS	12D
 # R2       EQUALS MAGVEC2
 COSF		EQUALS	24D
 # RTNPRM   ERASE  +0
-# SCNRDOT  ERASE  +0
+# SGNRDOT  ERASE  +0
 # RDESIRED ERASE  +1
 
 

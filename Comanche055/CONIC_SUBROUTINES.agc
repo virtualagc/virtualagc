@@ -16,6 +16,8 @@
 ##				and corrected the errors found.
 ##		2017-01-07 RSB	Fixed comment errors detected in cross-diff vs
 ##				Colossus 249.
+##		2017-01-21 RSB	Comment-text error fixes detected in diff'ing
+##				vs Artemis 72.
 ##
 ## This source code has been transcribed or otherwise adapted from digitized
 ## images of a hardcopy from the MIT Museum.  The digitization was performed
@@ -1890,7 +1892,7 @@ DCOGA		EQUALS	12D
 COSF		EQUALS	24D
 
 # RTNPRM	ERASE	+0
-# SCNRDOT	ERASE	+0
+# SGNRDOT	ERASE	+0
 # RDESIRED	ERASE	+1
 
 

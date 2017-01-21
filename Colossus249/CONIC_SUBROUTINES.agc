@@ -16,6 +16,8 @@
 ##				vs the already-proofed corresponding Colossus
 ##				237 and Comanche 55 source-code files
 ##				and corrected errors found.
+##		2017-01-21 RSB	Back-ported comment error fixes detected in diff'ing
+##				Artemis 72 vs Comanche 55.
 ##
 ## The contents of the "Colossus249" files, in general, are transcribed 
 ## from a scanned copy of the program listing.  Notations on this
@@ -1886,7 +1888,7 @@ DCOGA		EQUALS	12D
 COSF		EQUALS	24D
 
 # RTNPRM	ERASE	+0
-# SCNRDOT	ERASE	+0
+# SGNRDOT	ERASE	+0
 # RDESIRED	ERASE	+1
 
 
