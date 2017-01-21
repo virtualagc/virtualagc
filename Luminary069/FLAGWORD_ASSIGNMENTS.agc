@@ -16,6 +16,7 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2016-12-13 MAS  Created from Luminary 99.
 ##              2016-01-03 HG   Transcribed
+##              2017-01-21 HG   Fix label CHIPFLAG -> CPHIFLAG
 
 ## Page 77
 #          FLAGWORDS 0-11  ARE DOWNLINKED AND CAN BE SET AND CLEARED BY UP-FLAG AND DOWN-FLAG INSTRUCTIONS IN THE
@@ -244,7 +245,7 @@ FLAGWRD0        =               STATE           +0      # (000-014)
                                                         # (SET)              (RESET)
 
 # BIT 15 FLAG 0 (S)
-CHIPFLAG        =               000D                    # OUTPUT OF CALCGA IS OUTPUT OF CALCGA IS
+CPHIFLAG        =               000D                    # OUTPUT OF CALCGA IS OUTPUT OF CALCGA IS
 CPHIBIT         =               BIT15                   # CPHIX               THETAD
 #
 

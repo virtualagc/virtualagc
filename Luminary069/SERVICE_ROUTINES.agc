@@ -17,6 +17,7 @@
 ## Mod history: 2016-12-13 MAS  Created from Luminary 99.
 ##              2016-12-18 MAS  Updated from comment-proofed Luminary 99 version.
 ##		2017-01-10 RRB	Updated for Luminary 69.
+##              2017-01-21 HG   fix operand OCT 7 -> OCT7
 
 ## Page 1368
 		BANK	10
@@ -43,7 +44,7 @@ UPENT2		TS	L		# WHICH FLAGWORD IS IT?
 		TC	Q		# RETURN
 
 DOWNENT2	TS	L		# WHICH FLAGWORD IS IT
-		MASK	OCT 7
+		MASK	OCT7
 		XCH	L		# SAVE IN L FOR INDEXING
 
 		MASK	OCT77770	# OBTAIN THE BIT INFORMATION

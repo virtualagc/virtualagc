@@ -17,6 +17,8 @@
 ## Mod history: 2016-12-13 MAS  Created from Luminary 99.
 ##              2016-12-18 MAS  Updated from comment-proofed Luminary 99 version.
 ##		2016-12-29 RRB	Updated for Luminary 69.
+##              2017-01-21 HG   Fix operand BIT 12 -> BIT12
+##                                          NEGSUM -> NEGUSUM
 
 ## Page 1467
 		BANK	21
@@ -99,7 +101,7 @@ ALGORTHM	EXTEND			# Q(R)DIFF IS THETA (ERROR) SCALED AT PI.
 		MP	BIT12
 		DXCH	OMEGA.K
 		EXTEND
-		MP	BIT 12
+		MP	BIT12
 		ADS	OMEGA.K +1
 		
 		CAE	ACENTRAL	# FORM ALPHA(2)/(2) IN D.P.,
@@ -384,7 +386,7 @@ RSTOFGTS	CCS	FUNCTION
 
 ZEROOT		EXTEND
 		DCA	ZERO
-		TCF	NEGSUM
+		TCF	NEGUSUM
 
 ZEROHIGH	CA	FOURTEEN	# ARG LESS THAN 2(-14) MEANS 3/2 POWER
 					# WILL BE LESS THAN 2(-21).
