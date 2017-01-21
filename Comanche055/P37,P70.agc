@@ -11,7 +11,7 @@
 ## Mod history:	2009-05-11 JVL	Adapted from the Colossus249/ file
 ##				of the same name, using Comanche055 page
 ##				images.
-##		2009-05-20 RSB	Added missing label V2T179.  Fixed POODOO -> P00DOO.
+##		2009-05-20 RSB	Added missing label V2T179.  Fixed POODOO -> POODOO.
 ##		2009-05-23 RSB	In RTD18, corrected a STOVL DELVLVC to 
 ##				STODL DELVLVC and a STODL 02D to STORE 02D.
 ##		2010-08-28 JL	Added missing comment characters.
@@ -1310,7 +1310,7 @@ V2T100		STQ	DLOAD
 		BMN
 			V2T101
 V2TERROR	EXIT			#	OR IF LAMBDA LESS THAN ONE
-		TC	P00DOO		# NO SOLUTION IF LAMBDA LESS THAN 1
+		TC	POODOO		# NO SOLUTION IF LAMBDA LESS THAN 1
 		OCT	00610
 V2T101		SETPD	CLEAR
 			0		#					PL00D

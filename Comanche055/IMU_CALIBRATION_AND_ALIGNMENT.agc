@@ -9,7 +9,7 @@
 ## Contact:     Onno Hommes <ohommes@cmu.edu>
 ## Website:     http://www.ibiblio.org/apollo.
 ## Mod history: 2009-05-10 OH	Batch 1 Assignment Comanche Transcription
-##		2009-05-20 RSB	Corrections: P00D00H -> P00DOOH, definition
+##		2009-05-20 RSB	Corrections: P00D00H -> POODOOH, definition
 ##				of 25DECML fixed.
 ##		2009-05-23 RSB	At SPECSTS, corrected to PRIO22.
 ##		2010-08-28 JL	Fixed indentation.
@@ -871,7 +871,7 @@ GTSCPSS		CA	FLAGWRD1	# CALLED BY V37
 ## Page 443
 		EXTEND
 		BZF	GTSCPSSA
-		TC	P00DOO
+		TC	POODOO
 		OCT	1521		# NODO ALARM FOR P01 - P11 ALREADY DONE
 		
 GTSCPSSA	CAF	ONE

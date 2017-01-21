@@ -10,7 +10,7 @@
 ##  		Fabrizio Bernardini <fabrizio@spacecraft.it>
 ## Website:	http://www.ibiblio.org/apollo.
 ## Mod history:	2009-05-18 FB	Transcription Batch 3 Assignment.
-##		2009-05-20 RSB	Corrections:  POODOO -> P00DOO,
+##		2009-05-20 RSB	Corrections:  POODOO -> POODOO,
 ##				GOTOPOOH -> GOTOPOOH, added a couple of 
 ##				missing instructions in Verb 96.
 ##		2009-05-23 RSB	In SYSTEST, corrected TC FLAGWRD1 to 
@@ -489,7 +489,7 @@ SYSTEST		TC	CHKP00H
 		MASK	NOP01BIT
 		EXTEND
 		BZF	V92CONT		# IF IT'S NOT YET SET, CONTINUE
-		TC	P00DOO		# IT'S ON. SEND NODO ALARM FOR P07
+		TC	POODOO		# IT'S ON. SEND NODO ALARM FOR P07
 		OCT	1521
 V92CONT		TC	EXDAPOFF	# TURN DAP OFF IT IT'S ON
 		CAF	PRIO20

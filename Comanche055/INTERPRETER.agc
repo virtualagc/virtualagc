@@ -10,7 +10,7 @@
 ## Pages:	1107-1199
 ## Mod history:	2009-05-08 RSB	Adapted from the Luminary131/ file of the
 ##				same name, using Comanche055 page images. 
-##		2009-05-20 RSB	Corrections:  P00D00 -> P00DOO, fixed a 
+##		2009-05-20 RSB	Corrections:  P00D00 -> POODOO, fixed a 
 ##				"Page N" reference.
 ##		2009-05-21 RSB	Corrected definition of 5B10, which overflowed
 ##				integer arithmetic.
@@ -2540,7 +2540,7 @@ ZEROANS		CAF	ZERO		# FORCE ANSWER TO ZERO HERE.
 		TCF	SQRTABRT
 		TCF	FIXROOT
 
-SQRTABRT	TC	P00DOO
+SQRTABRT	TC	POODOO
 		OCT	1302
 
 ## Page 1185
