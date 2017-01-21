@@ -17,6 +17,13 @@
 ## Mod history: 2016-12-13 MAS  Created from Luminary 99.
 ##              2016-12-14 MAS  Updated from comment-proofed Luminary 99 version.
 ##              2016-12-15 RRB  Updated for Luminary 69.
+##              2017-01-20 HG   add label V16N54
+##                              fix label REDOEXPT -> REDOEXTP
+##                                        GETRVN   -> GETRVN2
+##                              fix operand RRONE   -> RONE 
+##                                          REFSMAT -> REFSMMAT
+##                                          RHTETA  -> RTHETA
+##                                          EDNEXT  -> ENDEXT
 
 ## Page 712
 		BANK	34
@@ -75,13 +82,13 @@ COMPDISP	VLOAD	VSU
 		DOT			# (VATT-VONE).UNIT(LOS)		PD = 0
 		SL1
 		STOVL	RRATE		# RANGE RATE M/CS B-7
-			RRONE
+			RONE
 		UNIT	PDVL		# UR TO 0D			PD = 6
 			THISAXIS	# UNITX FOR CM, UNTIZ FOR LM
 		CALL
 			CDU*NBSM
 		VXM	PUSH		# UXORZ TO 6D		PD=12D
-			REFSMAT
+			REFSMMAT
 		VPROJ	VSL2
 			0D
 		BVSU	UNIT
@@ -97,19 +104,19 @@ COMPDISP	VLOAD	VSU
 		DLOAD	BDSU		# IF UXORZ.R, RTHETA = 1 - RTHETA
 			RTHETA
 			DPPOSMAX
-		STORE	RHTETA		# RTHETA BETWEEN 0 AND 1 REV.
+		STORE	RTHETA		# RTHETA BETWEEN 0 AND 1 REV.
 		EXIT
 		CAF	BIT5		# HAVE WE BEEN ANSWERED
 		MASK	EXTVBACT
 		EXTEND
-		BZF	EDNEXT		# YES, DIE
+		BZF	ENDEXT		# YES, DIE
 		
 		CS	EXTVBACT
 		MASK	BIT12
 		ADS	EXTVBACT
 		
 		TCF	V83
-		VN	1654
+V16N54		VN	1654
 		
 ## Page 714
 # THE STATEXTP SUBROUTINE DOES A PRECISION EXTRAPOLATION OF BOTH VEHICLES
@@ -203,7 +210,7 @@ GETRVN		VLOAD	GOTO
 			+1
 		STODL	VONE
 			PIPTIME
-GETRVN		CALL
+GETRVN2		CALL
 			INTSTALL
 		CLEAR	GOTO
 			INTYPFLG	# PREC EXTRAP FOR OTHER
@@ -213,7 +220,7 @@ R31SURF		STCALL	TDEC1		# LM ON SURFACE
 		GOTO			# DO CSM CONIC
 			OTHCONIC
 ## Page 716
-REDOEXPT	STQ	GOTO
+REDOEXTP	STQ	GOTO
 			STATEXIT
 			HAVEBASE
 
