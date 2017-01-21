@@ -17,6 +17,7 @@
 ## Mod history: 2016-12-13 MAS  Created from Luminary 99.
 ##              2016-12-15 MAS  Updated from comment-proofed Luminary 99 version.
 ##		2017-01-11 RRB	Updated for Luminary 69.
+##              2017-01-20 HG   Remove DECTWO
 
 ## Page 731
 # STABLE ORBIT RENDEZVOUS PROGRAMS (P38 AND P78)
@@ -416,7 +417,6 @@ V06N57SR	VN	0657
 V06N34SR	VN	0634
 V06N58SR	VN	0658
 V06N81SR	VN	0681
-DECTWO		OCT	2
 
 # *** END OF KISSING .040 ***
 

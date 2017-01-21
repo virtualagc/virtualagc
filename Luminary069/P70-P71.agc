@@ -17,6 +17,7 @@
 ## Mod history: 2016-12-13 MAS  Created from Luminary 99.
 ##              2016-12-18 MAS  Updated from comment-proofed Luminary 99 version.
 ##		2017-01-09 RRB	Updated for Luminary 69.
+##              2017-01-20 HG   Fix pseudo code 2CARD -> 2CADR
 
 ## Page 829
 		BANK	21
@@ -270,7 +271,7 @@ INJTARG		GOTO			# *** BYPASS ZONE 0 ***
 		OCT	47014
 		-GENADR	ENGOFFDT
 		EBANK=	DVCNTR
-		2CARD	ZONEZERO
+		2CADR	ZONEZERO
 ## Page 834
 		TCF	ENDOFJOB
 

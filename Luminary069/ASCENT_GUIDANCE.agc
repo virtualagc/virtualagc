@@ -270,7 +270,7 @@ PROK            DLOAD
                 DDV             DDV
                                 TGO                     # (D21 DYDOT - DY/ E TGO*2(6)            (6)
                 SL2             SETPD                   # MPAC = D*2(8)
-                                04                                                               (4)
+                                04D                     #                                        (4)
                 STORE           YRATE
 CONST           DLOAD           DMP                     # LOAD B*2(8)
                                 PRATE                   # B D12*2(-9)
