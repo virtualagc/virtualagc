@@ -17,6 +17,7 @@
 ## Mod history: 2016-12-13 MAS  Created from Luminary 99.
 ##              2016-12-18 MAS  Updated from comment-proofed Luminary 99 version.
 ##		2017-01-04 RRB	Updated for Luminary 69.
+##              2017-01-21 HG   fix statement TCF WOTEST --> CA BIT7
 
 ## Page 983
 # PROGRAM NAME - DOWN TELEMETRY PROGRAM
@@ -152,7 +153,7 @@
 DODOWNTM	TS	BANKRUPT
 		EXTEND
 		QXCH	QRUPT		# SAVE Q
-		TCF	WOTEST
+		CA      BIT7
 WO1		EXTEND			# SET WORD ORDER BIT TO 1 ONLY IF IT
 		WOR	CHAN13		# ALREADY ISN'T.
 		TC	DNTMGOTO	# GOTO APPROPRIATE PHASE OF PROGRAM

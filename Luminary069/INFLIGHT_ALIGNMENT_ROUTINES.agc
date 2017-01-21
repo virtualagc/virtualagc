@@ -17,6 +17,7 @@
 ## Mod history: 2016-12-13 MAS  Created from Luminary 99.
 ##              2016-12-18 MAS  Updated from comment-proofed Luminary 99 version.
 ##		2017-01-16 RRB	Updated for Luminary 69.
+##              2017-01-21 HG   Add missing interpretive operation BONCLR
 
 ## Page 1244
 		BANK	22
@@ -184,7 +185,7 @@ CALCGA1		VLOAD	DOT
 
 		STOVL	IGC
 			OGC
-		RTB
+		RTB     BONCLR
 			V1STO2S
 			CPHIFLAG
 			S2

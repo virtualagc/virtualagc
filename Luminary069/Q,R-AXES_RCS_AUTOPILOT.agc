@@ -17,6 +17,9 @@
 ## Mod history: 2016-12-13 MAS  Created from Luminary 99.
 ##              2016-12-18 MAS  Updated from comment-proofed Luminary 99 version.
 ##		2017-01-03 RRB	Updated for Luminary 69.
+##              2017-01-21 HG   Fix operand ROT-TOUV -> ROT45DEG
+##                                          +X0RULGE -> +XORULGE
+##                              Add missing declaration .707 DEC .70711
 
 ## Page 1436
 		BANK	17
@@ -45,7 +48,7 @@ RCS		CAF	ZERO		#   RCS (TRYGTS MAY BRANCH TO HERE)
 		TS	COTROLER
 
 		DXCH	EDOTQ
-		TC	ROT-TOUV
+		TC	ROT45DEG
 		DXCH	OMEGAU
 
 # X - TRANSLATION:
@@ -65,7 +68,7 @@ SENSEGET	CA	BIT7		# INPUT BITS OVERRIDE THE INTERNAL BITS
 		EXTEND			# SENSETYP WILL NOT OPPOSE ANYTRANS
 		RAND	CHAN31
 		EXTEND
-		BZF	+X0RULGE
+		BZF	+XORULGE
 ## Page 1437
 		CA	BIT8
 		EXTEND
@@ -76,7 +79,7 @@ SENSEGET	CA	BIT7		# INPUT BITS OVERRIDE THE INTERNAL BITS
 		CA	ULLAGER
 		MASK	DAPBOOLS
 		CCS	A
-		TCF	+X0RULGE
+		TCF	+XORULGE
 
 		TS	NEXTU		# STORE NULL TRANSLATION POLICIES
 		TS	NEXTV
@@ -760,6 +763,8 @@ ROT45DEG	TS	ROTEMP1
 		MP	.707
 		LXCH	ROTEMP2
 		TC	Q
+                
+.707            DEC     .70711                
 
 SELCTSUB	INDEX	ROTINDEX
 		CA	ALLJETS
