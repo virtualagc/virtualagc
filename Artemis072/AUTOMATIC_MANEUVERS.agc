@@ -12,6 +12,8 @@
 ## Mod history:	2009-08-27 SN	Adapted from corresponding Comanche 055 file.
 ## 		2009-09-06 JL	Fixed typos.
 ##		2010-02-20 RSB	Un-##'d this header.
+##		2017-01-21 RSB	Proofed comment text by diff'ing vs Comanche 55
+##				and corrected errors found.
 
 ## Page 1024
 		SETLOC	DAPS3
@@ -175,7 +177,7 @@ ENDDAMP		TS	HOLDFLAG	# SET HOLDFLAG +0
 #
 # DETERMINE THE LOCATION OF THE RATE ERROR AND THE ATTITUDE ERROR RELATIVE TO THE SWITCHING LOGIC IN THE PHASE
 # PLANE.
-# COMPUTE THE CHANGE IN RATE CORRESPONDING TO THE ATTITUDE ERROR NECESSARY TO DRIVE THE S/C INTO THE
+# COMPUTE THE CHANGE IN RATE CORRESPONDING TO THE ATTITUDE ERROR NECESSARY TO DRIVE THE THE S/C INTO THE
 # APPROPRIATE DEADZONE.
 #
 #
@@ -191,10 +193,10 @@ ENDDAMP		TS	HOLDFLAG	# SET HOLDFLAG +0
 #                    *                . *
 #                     *-              .  *
 #   R22             R24*-     R23     .   *
-#                       *             .    *
+#                       *-            .    *
 #                        *            .     *
 #                         + -ADB      .      * AF              ATTITUDE
-#  ........................+--+---------------+--+........................
+# .........................+--+---------------+--+........................
 #                           AF *      .     +ADB  +             ERROR
 #                               *     .            *
 #                                *    .            -*
@@ -437,10 +439,10 @@ J24		CS	AERR
 #	DELTA W = DESIRED CHANGE IN S/C ANGULAR RATE AS DETERMINED BY THE
 #		  SWITCHING LOGIC,  AT THIS POINT STORED IN KMPAC.
 #
-#	   J/M  = S/C INERTIA TO TORQUE RATIO SCALED BY
+#	   J/M  = S/C INERTIA TO TORQUE 9ATIO SCALED BY
 #		    (57.3/450)(B24/1600)(1/.8)
 #		  FOR 1 JET OPERATION  (M = 700 FT-LB).
-#		  IE J/M = J(SLUG-FTFT) x 0.00000085601606
+#		  IE J/M = J(SLUG-FTFT) X 0.00000085601606
 #
 #	          THE CORRESPONDING COMPUTER VARIABLES ESTABLISHED BY
 #		  KEYBOARD ENTRY ARE

@@ -17,6 +17,8 @@
 ##		2011-05-07 JL	Removed comment.
 ##		2017-01-04 RSB	Proofed comment text using octopus/ProoferComments
 ##				and fixed errors found.
+##		2017-01-21 RSB	Double-checked comment text by direct visual comparison
+##				to scanned page.
 
 ## Page 36
 # ECADR			MNEMONIC
