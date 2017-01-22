@@ -14,6 +14,7 @@
 ##		2011-01-06 JL	Fixed pseudo-label indentation.
 ##		2016-12-17 RSB	Proofed text comments with octopus/ProoferComments
 ##				and corrected the errors found.
+##		2017-01-22 MAS	Fixed some lingering comment errors.
 ##
 ## This source code has been transcribed or otherwise adapted from
 ## digitized images of a hardcopy from the MIT Museum.  The digitization
@@ -53,7 +54,7 @@
 #
 # USERS OF INTEGRVS DESIRING INTEGRATION (INTYPFLG = 0) SHOULD NOTE THAT THE OBLATENESS PERTURBATION COMPUTATION
 # IN LUNAR ORBIT IS TIME DEPENDENT.  THEREFORE, THE USER SHOULD SUPPLY AN INITIAL STATE VECTOR VALID AT SOME REAL
-# TIME AND THE DESIRED TIME (TDEC1) ALSO AT SOME REAL TIME.  FOR CONIC ..INTEGRATION.. THE USER MAY STILL USE ZERO
+# TIME AND THE DESIRED TIME (TDEC1) ALSO AT SOME REAL TIME.  FOR CONIC ,,INTEGRATION,, THE USER MAY STILL USE ZERO
 # AS THE INITIAL TIME AND DELTA TIME AS THE DESIRED TIME.
 #
 # 2.0 GENERAL DESCRIPTION
