@@ -767,7 +767,7 @@ DT/2MAX         2DEC    4000 E2 B-20
 
 INTSTALL        EXIT
                 CAF     ZERO
-                TS      L
+ALLSTALL        TS      L
                 CA      RASFLAG
                 INDEX   L
 ## Page 1215
