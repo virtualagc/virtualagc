@@ -17,6 +17,7 @@
 ## Mod history: 2016-12-13 MAS  Created from Luminary 99.
 ##              2016-12-18 MAS  Updated from comment-proofed Luminary 99 version.
 ##		2017-01-21 RRB	Updated for Luminary 69.
+##              2017-01-22 HG   Remove non existent code arround label GOBAQUE 
 
 ## Page 1223
 # DELETE
@@ -290,11 +291,7 @@ GAMCOMP		VLOAD	VSR1
 		STORE	FV
 		BOV	RVQ		# RETURN IF NO OVERFLOW
 			+1
-GOBAQUE		VLOAD	ABVAL
-			TDELTAV
-		BZE
-			INT-ABRT
-		DLOAD	SR
+GOBAQUE         DLOAD	SR
 			H
 			9D
 		PUSH	BDSU
