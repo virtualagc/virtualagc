@@ -13,6 +13,8 @@
 ##				and fixed errors found.
 ##		2017-01-08 RSB	Fixed comment errors detected in cross-diff vs
 ##				Colossus 249.
+##		2017-01-22 RSB	Back-ported comment error fixes detected in diff'ing
+##				Artemis 72 vs Comanche 55.
 
 ## Page 788
 #          VARIABLE    DESCRIPTION                        MAXIMUM VALUE *          COMPUTER NAME
@@ -121,7 +123,7 @@
 
 ## Page 791
 #          EXTRA COMPUTER ERASABLE LOCATIONS NOT SHOWN ON FLOW CHARTS
-#          ----------------------------------------------------------
+#          -----------------------------------------------------------
 
 #          VARIABLE    DESCRIPTION                        MAXIMUM VALUE
 #          --------    -----------                        ------- -----

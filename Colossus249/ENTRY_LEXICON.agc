@@ -16,6 +16,8 @@
 ##				vs the already-proofed corresponding Colossus
 ##				237 and Comanche 55 source-code files
 ##				and corrected errors found.
+##		2017-01-22 RSB	Back-ported comment error fixes detected in diff'ing
+##				Artemis 72 vs Comanche 55.
 ##
 ## The contents of the "Colossus249" files, in general, are transcribed 
 ## from a scanned copy of the program listing.  Notations on this
@@ -206,7 +208,7 @@
 
 ## Page 794
 # EXTRA COMPUTER ERASABLE LOCATIONS NOT SHOWN ON FLOW CHARTS
-# ----------------------------------------------------------
+# -----------------------------------------------------------
 #
 # VARIABLE	DESCRIPTION				MAXIMUM VALUE
 # --------	-----------				------- -----

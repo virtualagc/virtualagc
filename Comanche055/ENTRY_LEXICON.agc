@@ -14,6 +14,8 @@
 ##				and fixed the errors found.
 ##		2017-01-08 RSB	Fixed comment errors detected in cross-diff vs
 ##				Colossus 249.
+##		2017-01-22 RSB	Fixed comment errors detected in cross-diff vs
+##				Artemis 72.
 ##
 ## The contents of the "Comanche055" files, in general, are transcribed 
 ## from scanned documents. 
@@ -200,7 +202,7 @@
 
 ## Page 840
 # EXTRA COMPUTER ERASABLE LOCATIONS NOT SHOWN ON FLOW CHARTS
-# ----------------------------------------------------------
+# -----------------------------------------------------------
 #
 # VARIABLE	DESCRIPTION				MAXIMUM VALUE
 # --------	-----------				------- -----
