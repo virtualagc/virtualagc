@@ -17,6 +17,8 @@
 ##				numbers in 1701.pdf.
 ##		2017-01-13 RSB	Fixed comment errors detected in cross-diff vs
 ##				Colossus 237 and Comanche 55.
+##		2017-01-22 RSB	Back-ported comment error fixes detected in diff'ing
+##				Artemis 72 vs Comanche 55.
 ##
 ## The contents of the "Colossus249" files, in general, are transcribed 
 ## from a scanned copy of the program listing.  Notations on this
@@ -784,11 +786,11 @@ V04N46		VN	0446
 #	1.	IF AVERAGE G IS OFF:
 #			FLASH DISPLAY V04N06.  R2 INDICATES WHICH SHIP'S STATE VECTOR IS
 #			TO BE UPDATED.  INITIAL CHOICE IS THIS SHIP (R2=1).  ASTRONAUT
-#			CAN CHANGE TO OTHER SHIP BY V22EXE, WHERE X NOT EQ I.
+#			CAN CHANGE TO OTHER SHIP BY V22EXE, WHERE X NOT EQ 1.
 #			SELECTED STATE VECTOR UPDATED BY THISPREC (OTHPREC).
 #			CALLS SR30.1 (WHICH CALLS TFFCONMU + TFFRP/RA) TO CALCULATE
 ## Page 249
-#			RPER (PERIGEE RADIUS), RAP0 (APOGEE RADIUS), HPER (PERIGEE
+#			RPER (PERIGEE RADIUS), RAPO (APOGEE RADIUS), HPER (PERIGEE
 #			HEIGHT ABOVE LAUNCH PAD OR LUNAR LANDING SITE), HAPO (APOGEE
 #			HEIGHT AS ABOVE), TPER (TIME TO PERIGEE), TFF (TIME TO 
 #			INTERSECT 300 KFT ABOVE PAD OR 35KFT ABOVE LANDING SITE).
