@@ -14,6 +14,8 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2016-11-17 JL   Created from Luminary131 version.
 ##              2016-11-27 HG   Transcribed
+##              2016-12-07 HG   Fix P00 -> POO
+##                              Change POO -> P00 in some comments
 
 ## Page 487
 # MOD NO: 0                             DATE: 1 MAY 1968
@@ -214,7 +216,7 @@ R61TEST         CA              MODREG                  # IF WE ARE IN P00 IT MU
                 CA              FLAGWRD5
                 MASK            PDSPFBIT
                 EXTEND
-                BZF             GOTOP00H                # NO
+                BZF             GOTOPOOH                # NO
                 TC              GOTOV56                 # YES
 
 BIT14+7         OCT             20100

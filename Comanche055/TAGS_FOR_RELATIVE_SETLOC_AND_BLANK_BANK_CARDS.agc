@@ -10,6 +10,8 @@
 ## Mod history:	2009-05-05 RSB	Adapted from the Colossus249/ file of the 
 ##				same name, using Comanche055 page images.
 ##		2009-05-20 RSB	Corrected R32 -> R31.
+##		2016-12-09 RSB	Proofed comments with octopus/ProoferComments
+##				and fixed the errors found.
 ##
 ## This source code has been transcribed or otherwise adapted from digitized
 ## images of a hardcopy from the MIT Museum.  The digitization was performed
@@ -29,8 +31,6 @@
 ##			Colossus 2A
 
 ## Page 27
-# TAGS FOR RELATIVE SETLOC AND BLANK BANK CARDS
-
 FIXED		MEMORY	120000 - 167777
 		COUNT	BANKSUM
 
@@ -146,8 +146,10 @@ CDHTAGS		EQUALS
 E/PROG1		EQUALS
 MODCHG3		EQUALS
 		BNKSUM	13
-		
-# MODULE 3 CONTAINS BANKS 14 THROUGH 21
+
+# SPACER
+	
+#          MODULE 3 CONTAINS BANKS 14 THROUGH 21
 
 		BANK 	14
 STARTAB		EQUALS
@@ -269,7 +271,7 @@ P40S2		EQUALS
 		BANK	30
 IMUSUPER	EQUALS
 LOWSUPER	EQUALS
-FCSTART		EQUALS			# STANDARD LOCATION FOR THIS. (FOR EXTV8)
+FCSTART		EQUALS			# STANDARD LOCATION FOR THIS. (FOR EXTVB)
 LOPC		EQUALS
 P20S1		EQUALS
 P20S6		EQUALS
@@ -383,7 +385,7 @@ LOUNITZ		EQUALS	ZUNIT			# 2DEC 0
 
 		SBANK=	LOWSUPER
 
-# ROPE-SPECIFIC ASSIGNS OBVIATING NEED TO CHECK COMPUTER FLAG IN DETERMINING(?) INTEGRATION AREA ENTRIES.
+# ROPE SPECIFIC ASSIGNS OBVIATING NEED TO CHECK COMPUTER FLAG IN DETVRUZVING INTEGRATION AREA ENTRIES
 
 OTHPREC		EQUALS	LEMPREC
 ATOPOTH		EQUALS	ATOPLEM
@@ -400,7 +402,7 @@ THISAXIS	=	UNITX
 ERASID		EQUALS	LOW10			# DOWNLINK ERASABLE DUMP ID
 DELAYNUM	EQUALS	THREE
 
-#********************************************************************************************************
+#****************************************************************************************************************
 
 # THE FOLLOWING ECADRS ARE DEFINED TO FACILITATE EBANK SWITCHING.  THEY ALSO MAKE IT EASIER FOR
 # ERASABLE CONTROL TO REARRANGE ERASABLE MEMORY WITHOUT DISRUPTING THE PROGRAMS WHICH SET EBANKS.
@@ -429,9 +431,7 @@ EBQPLACE	ECADR	QPLACES
 		EBANK=	RN1
 EBRN1		ECADR	RN1
 
-#******************************************************************************************************
+#****************************************************************************************************************
 
 ## Page 36
-		
-# *** END OF MAIN PROGRAM ***
-
+## This page contains only assembler-generated messages, and no source code.

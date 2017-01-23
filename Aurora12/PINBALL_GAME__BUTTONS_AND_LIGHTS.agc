@@ -8,6 +8,8 @@
 ## Pages:        289-355
 ## Mod history:  2016-09-20 JL   Created.
 ##               2016-10-19 HG   Transcribed
+##		 2016-12-08 RSB	 Proofed comments with octopus/ProoferComments
+##				 and fixed the errors found.
 
 ## This source code has been transcribed or otherwise adapted from
 ## digitized images of a hardcopy from the private collection of
@@ -50,36 +52,36 @@
 
 # RESERVED FOR PINBALL EXECUTIVE ACTION
 #
-# DSPCOUNT      ERASE                   # DISPLAY POSITION INDICATOR
-# DECBRNCH      ERASE                   # +DEC, -DEC, OCT INDICATOR
-# VERBREG       ERASE                   # VERB CODE
-# NOUNREG       ERASE                   # NOUN CODE
-# XREG          ERASE                   # R1 INPUT BUFFER
-# YREG          ERASE                   # R2 INPUT BUFFER
-# ZREG          ERASE                   # R3 INPUT BUFFER
-# XREGLP        ERASE                   # LO PART OF XREG (FOR DEC CONV ONLY)
-# YREGLP        ERASE                   # LO PART OF YREG (FOR DEC CONV ONLY)
-# ZREGLP        ERASE                   # LO PART OF ZREG (FOR DEC CONV ONLY)
-# MODREG        ERASE                   # MODE CODE
-# DSPLOCK       ERASE                   # KEYBOARD/SUBROUTINE CALL INTERLOCK
-# REQRET        ERASE                   # RETURN REGISTER FOR LOAD
-# LOADSTAT      ERASE                   # STATUS INDICATOR FOR LOADTST
-# CLPASS        ERASE                   # PASS INDICATOR CLEAR
-# NOUT          ERASE                   # ACTIVITY COUNTER FOR DSPTAB
-# NOUNCADR      ERASE                   # MACHINE CADR FOR NOUN
-# MONSAVE       ERASE                   # N/V CODE FOR MONITOR. (= MONSAVE1-1)
-# MONSAVE1      ERASE                   # NOUNCADR FOR MONITOR(MATBS) =MONSAVE +1
-# DSPTAB        ERASE           +13D    # 0-10,DISPLAY PANEL BUFFER.11-13,C RELAYS
-# CADRSTOR      ERASE                   # ENDIDLE STORAGE
-# GRABLOCK      ERASE                   # INTERNAL INTERLOCK FOR DISPLAY SYSTEM
-# NVQTEM        ERASE                   # NVSUB STORAGE FOR CALLING ADDRESS
-#                                       # MUST = NVBNKTEM-1
-# NVBNKTEM      ERASE                   # NVSUB STORAGE FOR CALLING BANK
-#                                       # MUST = NVQTEM+1
-# DSPLIST       ERASE           +2      # WAITING LIST FOR DSP SYST INTERNAL USE
-# EXTVBACT      ERASE                   # EXTENDED VERB ACTIVITY INTERLOCK
-# DSPTEM1       ERASE           +2      # BUFFER STORAGE AREA 1 (MOSTLY FOR TIME)
-# DSPTEM2       ERASE           +2      # BUFFER STORAGE AREA 2 (MOSTLY FOR DEG)
+# DSPCOUNT      ERASE                   DISPLAY POSITION INDICATOR
+# DECBRNCH      ERASE                   +DEC, -DEC, OCT INDICATOR
+# VERBREG       ERASE                   VERB CODE
+# NOUNREG       ERASE                   NOUN CODE
+# XREG          ERASE                   R1 INPUT BUFFER
+# YREG          ERASE                   R2 INPUT BUFFER
+# ZREG          ERASE                   R3 INPUT BUFFER
+# XREGLP        ERASE                   LO PART OF XREG (FOR DEC CONV ONLY)
+# YREGLP        ERASE                   LO PART OF YREG (FOR DEC CONV ONLY)
+# ZREGLP        ERASE                   LO PART OF ZREG (FOR DEC CONV ONLY)
+# MODREG        ERASE                   MODE CODE
+# DSPLOCK       ERASE                   KEYBOARD/SUBROUTINE CALL INTERLOCK
+# REQRET        ERASE                   RETURN REGISTER FOR LOAD
+# LOADSTAT      ERASE                   STATUS INDICATOR FOR LOADTST
+# CLPASS        ERASE                   PASS INDICATOR CLEAR
+# NOUT          ERASE                   ACTIVITY COUNTER FOR DSPTAB
+# NOUNCADR      ERASE                   MACHINE CADR FOR NOUN
+# MONSAVE       ERASE                   N/V CODE FOR MONITOR. (= MONSAVE1-1)
+# MONSAVE1      ERASE                   NOUNCADR FOR MONITOR(MATBS) =MONSAVE +1
+# DSPTAB        ERASE           +13D    0-10,DISPLAY PANEL BUFFER.11-13,C RELAYS
+# CADRSTOR      ERASE                   ENDIDLE STORAGE
+# GRABLOCK      ERASE                   INTERNAL INTERLOCK FOR DISPLAY SYSTEM
+# NVQTEM        ERASE                   NVSUB STORAGE FOR CALLING ADDRESS
+#                                       MUST = NVBNKTEM-1
+# NVBNKTEM      ERASE                   NVSUB STORAGE FOR CALLING BANK
+#                                       MUST = NVQTEM+1
+# DSPLIST       ERASE           +2      WAITING LIST FOR DSP SYST INTERNAL USE
+# EXTVBACT      REASE                   EXTENDED VERB ACTIVITY INTERLOCK
+# DSPTEM1       ERASE           +2      BUFFER STORAGE AREA 1 (MOSTLY FOR TIME)
+# DSPTEM2       ERASE           +2      BUFFER STORAGE AREA 2 (MOSTLY FOR DEG)
 
 
 ## Page 290
@@ -223,7 +225,7 @@
 
 
 
-# THERE IS AN 11-REGISTER TABLE (DSPTAB) FOR THE DISPLAY PANEL.
+# THERE IS AN 11 REGISTER TABLE (DSPTAB) FOR THE DISPLAY PANEL.
 
 # DSPTAB RELAYWD       BIT11     BITS 10-6     BITS 5-1
 # RELADD
@@ -244,7 +246,7 @@
 
 
 
-# THE 5-BIT RELAY CODES ARE,
+# THE 5 BIT RELAY CODES ARE,
 # BLANK      00000
 # 0          10101
 # 1          00011
@@ -388,7 +390,7 @@ ENDNUM          CAF             THREE
                 TC              DECEND
 ENDALL          CS              DSPCOUNT                # BLOCK NUMIN BY PLACING DSPCOUNT
                 TC              MORNUM          +1      # NEGATIVELY
-DECEND          TC              DMP                     # MULT SUM X 2EXP-28 IN MPAC, MAPC+1 BY
+DECEND          TC              DMP                     # MULT SUM X 2EXP-28 IN MPAC, MPAC+1 BY
                 ADRES           DECON                   # 2EXP14/10EXP5. GIVES(SUM/10EXP5)X2EXP-14
                 CAF             THREE                   # IN MPAC, +1, +2.
                 MASK            DECBRNCH
@@ -537,10 +539,10 @@ SGNTST1         AD              DSPCOUNT
 
 
 # ERROR LIGHT RESET (RSET) TURNS OFF,
-# UPLINK ACTIVITY, AUTO, HOLD, FREE, OPERATOR ERROR,
+# UPLINK ACTIVITY, AUTO, HOLD, FREE, NO ATT, OPERATOR ERROR,
 # PROG ALM, TRACKER FAIL.
 # LEAVES GIMBAL LOCK ALONE.
-# IT ALSO ZEROS THE :TEST ALARM: OUT BIT, WHICH TURNS OFF STBY,RESTART.
+# IT ALSO ZEROES THE :TEST ALARM: OUT BIT, WHICH TURNS OFF STBY,RESTART.
 # IT ALSO SETS :CAUTION RESET: TO 1.
 # IT ALSO FORCES BIT 12 OF ALL DSPTAB ENTRIES TO 1.
 
@@ -669,7 +671,7 @@ LEGALTST        AD              NEG2
                 TC              GETINREL
                 CAF             ZERO
                 INDEX           INREL
-                TS              VERBREG                 # ZERO X, Y, Z, REG.
+                TS              VERBREG                 # ZERO X, Y, Z REG.
                 INDEX           INREL
 
 
@@ -769,11 +771,11 @@ ACCEPTWD        CS              REQRET                  # 5 CHAR IN (DSPCOUNT IS
 
 ENTEXIT         =               ENTRET
 
-LOWVERB         OCT             30                      # LOWER VERB THAT AVOIDS NOUN TEST.
+LOWVERB         OCT             30                      # LOWER VERB THAT AVOIDS NOUN TEST
 
 ENTPAS0         CAF             ZERO                    #  NOUN VERB SUB ENTERS HERE
                 TS              DECBRNCH
-TESTVB          CS              VERBREG                 # IF VERB IS 30-77, SKIP NOUN TEST.
+TESTVB          CS              VERBREG                 # IF VERB IS 30-77, SKIP NOUN TEST
 
 
 ## Page 304
@@ -820,7 +822,7 @@ INTMCTBS        CA              MPAC            +2      # INTERNAL MACH CADR TO 
                 TC              SETNCADR                # ECADR INTO NOUNCADR. SET EB, NOUNADD.
                 CS              BIT4                    # NVSUB CALL LEFT CADR IN MPAC+2 FOR MACH
                 MASK            VERBREG                 # CADR TO BE SPECIFIED.
-                AD              NEG5                    # MASKING MAKES VB15 LOOK LIKE VB05
+                AD              NEG5                    # MASKING MAKES VB15 LOOK LIKE VB05.
                 EXTEND
                 BZF             VERBFAN                 # VB = 05 OR 15, DO NOT DISPLAY CADR.
                 CAF             R3D1                    # VB NOT = 05 OR 15, DISPLAY CADR.
@@ -977,9 +979,11 @@ REQCOM          TS              DSPCOUNT
                 EXTEND
                 BZF             ENDRQDAT                # ENTEXIT = ENDOFJOB. EXTERNALLY INITIATED
                 CS              ZERO                    # ENTEXIT NOT ENDOFJOB. NVSUB INITIATED
-                TS              CADRSTOR                # NVSUB INITIATED LOAD. SET CARDSTOR TO -0
+                TS              CADRSTOR                # NVSUB INITIATED LOAD. SET CADRSTOR TO -0
 ENDRQDAT        TC              ENTEXIT
 
+# IF NVSUB INITIATED LOAD, SET CADRSTOR TO -0 TO TELL RECALTST TO RELEASE
+# DISPLAY IF ENDIDLE WAS NOT USED. (NECESSARY FOR DATAWAIT)
 
 
                 TS              NOUNREG
@@ -1034,7 +1038,7 @@ GODSPALM        TC              POSTJUMP
 #                      N-S ARE THE SF ROUTINE CODE NUMBER.
 #                      P-S ARE THE SF CONSTANT CODE NUMBER.
 
-# MIXED-CASE,M-S ARE THE SF CONSTANT3 CODE NUMBER     3 COMPONENT CASE
+# MIXED CASE,M-S ARE THE SF CONSTANT3 CODE NUMBER     3 COMPONENT CASE
 #            N-S ARE THE SF CONSTANT2 CODE NUMBER
 #            P-S ARE THE SF CONSTANT1 CODE NUMBER
 #            N-S ARE THE SF CONSTANT2 CODE NUMBER     2 COMPONENT CASE
@@ -1202,7 +1206,7 @@ DSPDCPUT        CAF             ZERO                    # DISPLAYS DATA
                 TS              SFTEMP1
                 EXTEND                                  # SWITCH BANKS TO SF CONSTANT TABLE
                 DCA             GTSFOUTL                #    READING ROUTINE.
-                DXCH            Z                       # LOADS SFTEMP1, SFTEMP2
+                DXCH            Z                       # LOADS SFTEMP1, SFTEMP2.
                 INDEX           MIXBR
                 TC              +0
                 TC              DSPSFNOR
@@ -1252,7 +1256,7 @@ ENDRTOUT        EQUALS
 # NUMBERS IN THE NEGATIVE (AGC) RANGE.
 
 DEGOUTSF        CAF             ZERO
-                TS              MPAC            +2      # SET INDEX FOR FULL SCALE.
+                TS              MPAC            +2      # SET INDEX FOR FULL SCALE
                 TC              FIXRANGE
                 TC              +2                      # NO AUGMENT NEEDED (SFTEMP1 AND 2 ARE 0)
                 TC              SETAUG                  # SET AUGMENTER ACCORDING TO C(MPAC +2)
@@ -1267,8 +1271,8 @@ OPDEGOUT        CCS             MPAC                    # RANGE IS 90 DEG
                 AD              NEG1                    # IF NEG ZERO SUBTRACT 1
                 AD              20BIAS
 BIASCOM         TS              MPAC                    # TEST FOR OVERFLOW
-                TC              +3                      # NO OVERFLOW
-                CAF             BIT15                   # IF OVERFLOW
+                TC              +3                      # NO OVFLOW
+                CAF             BIT15                   # IF OVFLOW
                 ADS             MPAC
                 CAF             TWO                     # SET MULTIPLIER TO .45
                 TC              DEGOUTSF        +1
@@ -1351,7 +1355,7 @@ DPOUT           XCH             Q
                 TC              +0
                 TC              DPOUTNOR
                 INDEX           DECOUNT                 # GET IDADDTAB ENTRY FOR COMPONENT K
-                CA              IDAD1TEM                #     OF NOUN
+                CA              IDAD1TEM                #     OF NOUN.
                 MASK            LOW11                   # E SUBK
                 TC              SETEBANK                # SET EB, LEAVE EADRES IN A.
 DPOUTCOM        EXTEND
@@ -1368,7 +1372,7 @@ DPOUTNOR        CA              NOUNADD                 # E
 
 
 
-# THIS IS A SPECIAL PURPOS VERB FOR DISPLAYING A DOUBLE PRECISION AGC
+# THIS IS A SPECIAL PURPOSE VERB FOR DISPLAYING A DOUBLE PRECISION AGC
 # WORD AS 10 DECIMAL DIGITS ON THE AGC DISPLAY PANEL.  IT CAN BE USED WITH
 # ANY NOUN, EXCEPT MIXED NOUNS. IT DISPLAYS THE CONTENTS
 # OF THE REGISTER NOUNADD IS POINTING TO .  IF USED WITH NOUNS WHICH ARE
@@ -1525,7 +1529,7 @@ ALLDC/OC        TS              DECOUNT                 # TESTS THAT DATA WORDS 
                 AD              DECOUNT                 # DEC COMP = 7 FOR 3COMP, =6 FOR 2COMP
                 EXTEND                                  # (BUT IT HAS BEEN DECREMENTED BY CCS)
                 BZF             +2                      # MUST MATCH 6 FOR 3COMP, 5 FOR 2COMP.
-                TC              GODSPALM                # ALARM AND RECYCLE.
+                TC              GODSPALM
 GOQ             TC              Q                       # ALL REQUIRED ARE DEC. OK
 
 
@@ -1665,8 +1669,8 @@ PUTSFNOR        TC              SFRUTNOR
 
 PUTDCSF2        INDEX           A
                 CAF             SFINTABR
-                TC              BANKJUMP                # SWITCH BANKS FOR EXPANSION ROOM
-SFINTABR        CADR            DSPALARM                # ALARM IF DEC LOAD WITH OCTAL ONY NOUN
+                TC              BANKJUMP                # SWITCH BANKS FOR EXPANSHION ROOM
+SFINTABR        CADR            DSPALARM                # ALARM IF DEC LOAD WITH OCTAL ONLY NOUN
 
                 CADR            BINROUND
                 CADR            DEGINSF
@@ -1680,7 +1684,7 @@ ENDRUTIN        EQUALS
 
 
 # SCALE FACTORS FOR THOSE ROUTINES NEEDING THEM ARE AVAILABLE IN SFTEMP1.
-# ALL SFIN ROUTINES USE MPAC MPAC+1. LEAVE RESULT IN A. END WITH TC DECRET.
+# ALL SFIN ROUTINES USE MPAC MPAC+1. LEAVE RESULT IN A. END WITH TC DECRET
 
 
 
@@ -1753,8 +1757,8 @@ OPTDEGIN        CCS             MPAC                    # OPTICS SCALING ROUTINE
                 TC              +3
                 TC              DSPALARM                # REJECT NEGATIVE INPUT
                 TC              DSPALARM                #         DITTO
-OPDEGIN2        CAF             NEG.2                   # RNAGE IS 90 DEG
-                ADS             MPAC                    # SUBTARCT BIAS
+OPDEGIN2        CAF             NEG.2                   # RANGE IS 90 DEG
+                ADS             MPAC                    # SUBTRACT BIAS
                 TC              DMP                     # MULT BY 100 / 45  B-2
 
 ## Page 326
@@ -1842,7 +1846,7 @@ TESTOFUF        CCS             OVFIND                  # RETURNS IF NO OF/UF
 # IF KILLER BIT IS ON, MONREQ ENTERS NO FURTHER REQUESTS, ZEROS MONSAVE
 # AND MONSAVE1 (TURNING OFF KILLER BIT).
 
-# MONITOR DOESNT TEST FOR MATBS SINCE NVSUB CAN HANDLE INTERNAL MATBS NOW
+# MONITOR DOSENT TEST FOR MATBS SINCE NVSUB CAN HANDLE INTERNAL MATBS NOW
                 SETLOC          ENDRUTIN
 
 MONITOR         CS              BIT15
@@ -1858,7 +1862,7 @@ MONIT1          TS              MPAC            +1      # TEMP STORAGE
                 CS              GRABLOCK                # NEITHER CASE SEARCHES LIST.
                 AD              TWO
                 CCS             A
-                TC              RELDSP1                 # GRABLOCK=0,1 +0 INTO DSPLOCK AND
+                TC              RELDSP1                 # GRABLOCK=0,1, +0 INTO DSPLOCK AND
                 TC              +4                      # TURN OFF KEY RLSE LIGHT.
                 TC              CCSHOLE
                 CAF             ZERO                    # GRABLOCK=2, +0 INTO DSPLOCK AND
@@ -1881,11 +1885,11 @@ MONIT1          TS              MPAC            +1      # TEMP STORAGE
 
 
 MONREQ          TC              LODSAMPT                # CALLED BY WAITLIST
-                CCS             MONSAVE1                # TIME IS SNATCHED N RUPT FOR NOUN 65
+                CCS             MONSAVE1                # TIME IS SNATCHED IN RUPT FOR NOUN 65
                 TC              +4                      # IF KILLER BIT = 0, ENTER REQUESTS
                 TC              +3                      # IF KILLER BIT = 0, ENTER REQUESTS
-                TC              KILLMON                 # IF KILLER BIT = 1, NO REQUESTS.
-                TC              KILLMON                 # IF KILLER BIT = 1, NO REQUESTS.
+                TC              KILLMON                 # IF KILLER BIT = 1, NO REQUESTS
+                TC              KILLMON                 # IF KILLER BIT = 1, NO REQUESTS
                 CAF             MONDEL
                 TC              WAITLIST                # ENTER WAITLIST REQUEST FOR MONREQ
                 EBANK=          DSPCOUNT
@@ -1918,7 +1922,7 @@ MONDO           CCS             MONSAVE1                # CALLED BY EXEC
                 CAF             LOW6                    # NVSUB IS AVAILABLE
                 MASK            MONSAVE
                 TS              NVTEMP
-                TC              NVSUBMON                # PLACE NOUN INTO NOUNREG ANS DISPLAY IT
+                TC              NVSUBMON                # PLACE NOUN INTO NOUNREG AND DISPLAY IT
                 TC              ENDOFJOB                # IN CASE OF ALARM DURING DISPLAY
                 CAF             MONMASK
                 MASK            MONSAVE                 # CHANGE MONITOR VERB TO DISPLAY VERB
@@ -2166,7 +2170,7 @@ DSMSK           OCT             37
 
 
 
-# FOR 11DSPIN, PUT REL ADDRESS OF DSPTAB ENTRY INTO A, 1 IN BIT11 OR 0 IN
+# FOR 11DSPIN, PUT REL ADDRESSS OF DSPTAB ENTRY INTO A, 1 IN BIT11 OR 0 IN
 # BIT11 OF CODE.
 
 11DSPIN         TS              DSREL
@@ -2226,7 +2230,7 @@ MMCHANG         TC              REQMM
                 CADR            MODROUTB                # GO THRU STANDARD LOC.
 
 ## Page 336
-MODROUTB        =               DSPALARM
+MODROUTB        =               DSPALARM		# **FIX LATER**
 REQMM           CS              Q
                 TS              REQRET
                 CAF             ND1
@@ -2303,22 +2307,22 @@ VBTERM          TC              KILMONON                # TURN ON KILL MONITOR B
 
 
 
-# FLASH IS TURNED OFF BY PROCEED WITHOUT DATA, TERMINATE, END OF LOAD
+# FLASH IS TURNED OFF ONLY BY PROCEED WITHOUT DATA, TERMINATE, END OF LOAD
 
 
 
-# VBRELDSP TURNS OFF RELEASE DISPALY SYSTEM LIGHT(AND SEARCHES LIST ONLY
+# VBRELDSP TURNS OFF RELEASE DISPLAY SYSTEM LIGHT(AND SEARCHES LIST ONLY
 # IF THIS LIGHT WAS TURNED ON BY NVSUBUSY), AND TURNS OFF UPACT LIGHT.
 
 VBRELDSP        CS              BIT3
                 EXTEND
-                WAND            DSALMOUT                # TURN OFF UPACT LITE
+                WAND            DSALMOUT                # TURN OFF UPACT LIGHT
                 TC              RELDSP                  # SEARCHES LIST
                 TC              ENDOFJOB
 
 
 
-# BUMP SHIFTS WORD DISLAYED IN R2 TO R3, R1 TO R2. IT BLANKS R1.
+# BUMP SHIFTS WORD DISPLAYED IN R2 TO R3, R1 TO R2. IT BLANKS R1.
 
 BUMP            CAF             FIVE                    # R2D5
                 TS              DSPCOUNT
@@ -2368,7 +2372,7 @@ SWSGN           CAF             ZERO                    # -0, DSPCOUNT= OCT 16. 
                 MASK            BIT11
                 TS              CODE
                 INDEX           DSPCOUNT
-                CAF             SWTAB                   # PUT AWAY ORDER, DSREL= 0,1,3,4
+                CAF             SWTAB                   # PUT AWAY ORDER, DSREL= 0,1,3,4.
                 TC              11DSPIN                 #                  (-R3,+R3,-R2,+R2.)
                 CS              DSPCOUNT
                 AD              SWTAB           +2      # OCT 3
@@ -2391,13 +2395,13 @@ SWTAB           OCT             0                       # -R3
 ## Page 340
 # NVSUB IS USED FOR SUBROUTINE CALLS FROM WITHIN COMPUTER. IT CAN BE
 # USED TO DO ANY THING THE KEYBOARD CAN CALL. PLACE ...VVVVVVNNNNNN
-# INTO A.      V-S ARE 6BIT VERB CODE. N-S , 6 BIT NOUN CODE
+# INTO A.      V-S ARE 6BIT VERB CODE. N-S , 6 BIT NOUN CODE.
 
 # NVSUB CAN BE USED WTIH MACH CADR TO BE SPEC BY PLACING THE CADR INTO
 # MPAC+2 BEFORE THE STANDARD NVSUB CALL.
 
 #  NVSUB RETURNS TO 2+ CALLING LOC AFTER PERFORMING TASK, IF DISPLAY
-# SYSTEM IS AVAIALBLE. THE NEW NOUN AND VERB CODES ARE DISPLAYED.
+# SYSTEM IS AVAILABLE. THE NEW NOUN AND VERB CODES ARE DISPLAYED.
 # IF V:S =0, THE NEW NOUN CODE IS DISPLAYED ONLY(RETURN WITH NO FURTHER
 # ACTION). IF N-S =0, THE NEW VERB CODE IS DISPLAYED ONLY(RETURN WITH NO
 # FURTHER ACTION).
@@ -2409,9 +2413,10 @@ SWTAB           OCT             0                       # -R3
 
 # THE DISPLAY SYSTEM IS BLOCKED BY THE DEPRESSION OF ANY
 # KEY, EXCEPT ERROR LIGHT RESET. ALSO BY ENDIDLE.
-#      IT IS RELEASED BY SPECIAL VERB = RELEASE DISPLAY, ALL GOT TO VERBS.
+#      IT IS RELEASED BY SPECIAL VERB = RELEASE DISPLAY, ALL GO TO VERBS.
 # PROCEED WITHOUT DATA, TERMINATE, INITIALIZE EXECUTIVE,
 # RECALL PART OF RECALTST IF ENDIDLE WAS USED,
+# IN RECALTST IF NVSUB INITIATED LOAD AND ENDIDLE WAS NOT USED,
 # VB = REQUEST EXECUTIVE, VB = REQUEST WAITLIST,
 # MONITOR SET UP.
 
@@ -2427,7 +2432,7 @@ SWTAB           OCT             0                       # -R3
 NVSUB           TS              NVTEMP                  # IN FIXED FIXED
                 CCS             DSPLOCK
                 TC              Q                       # DSP SYST BLOCKED, RET TO 1+ CALLING LOC
-                CA              Q                       # DSP SYST AVAILABLE.
+                CA              Q                       # DSP SYST AVAILABLE
                 AD              ONE
                 TS              NVQTEM                  # 2+ CALLING LOC INTO NVQTEM
                 TC              KILMONON                # TURN ON KILL MONITOR BIT
@@ -2442,7 +2447,7 @@ NVSBBBNK        BBCON           NVSUB1
 ## Page 341
 NVSUBMON        CA              Q                       # MONDO COMES HERE
                 AD              ONE
-                TS              NVQTEM                  #
+                TS              NVQTEM                  # 2 + CALLING LOC INTO NVQTEM
                 TC              NVSUBCOM
 
 NVSUBEND        DXCH            NVQTEM                  # NVBNKTEM MUST = NVQTEM+1
@@ -2502,7 +2507,7 @@ KILMONON        CS              BIT15                   # FORCE BIT 15 OF MONSAV
 
 # LOADSTAT  +0 INACTIVE (WAITING FOR DATA). SET BY NVSUB
 #           +1  PROCEED NO DATA. SET BY SPECIAL VERB
-#          -1 TERMINATE   SET BY SPECIAL VERB.
+#          -1 TERMINATE   SET BY SPECIAL VERB
 #          -0 DATA IN   SET BY END OF LOAD ROUTINE
 
 
@@ -2546,7 +2551,7 @@ DATAWAIT        CCS             LOADSTAT
                 TC              Q                       # TERMINATE. RETURN TO L+1.
                 INDEX           Q                       # DATA IN. RETURN TO L+3.
                 TC              2
-DATWAIT1        INDEX           Q                       # RETURN TO L+2
+DATWAIT1        INDEX           Q                       # RETURN TO L+2.
                 TC              1
 
 # DATAWAIT DOES NOT RELEASE DISPLAY SYST. IT IS RELEASED AT END OF NVSUB
@@ -2557,7 +2562,7 @@ DATWAIT1        INDEX           Q                       # RETURN TO L+2
                 SETLOC          MID6            +1
 # DSPMM PLACE MAJOR MODE CODE INTO MODREG
 
-DSPMM1          CAF             MD1                     # GETS HERE THRU DSPMM (STANADARD LEAD IN)
+DSPMM1          CAF             MD1                     # GETS HERE THRU DSPMM (STANDARD LEAD IN)
                 XCH             DSPCOUNT
                 TS              DSPMMTEM                # SAVE DSPCOUNT
                 CA              MODREG
@@ -2583,7 +2588,7 @@ RECALTST        CCS             CADRSTOR
                 TC              ENDOFJOB                # NORMAL EXIT IF KEYBOARD INITIATED
                 TC              RECAL1
                 TS              CADRSTOR                # -0. CONCLUSION OF NVSUB INITIATED LOAD.
-                TC              RECAL3                  # +0 INTO CARDSTOR. RELEASE DISPLAY,
+                TC              RECAL3                  # +0 INTO CADRSTOR. RELEASE DISPLAY,
                                                         #    AND ENDOFJOB. NEEDED FOR DATAWAIT.
 RECAL1          CAF             ZERO
                 XCH             CADRSTOR
@@ -2646,11 +2651,11 @@ DOPROC          CAF             ONE
 # 00100                           GYRO BIAS DRIFT .BBXXXXX MILLIRAD/SEC
 # 00101                           GYRO AXIS ACCEL. DRIFT
 #                                 .BBXXXXX (MILLIRAD/SEC) / (CM/SEC SEC)
-# 00110                           PIPA BIAS X.XXXX XM/SEC SEC
+# 00110                           PIPA BIAS X.XXXX CM/SEC SEC
 # 00111                           PIPA SCALE FACTOR ERROR
 #                                     XXXXX. PARTS/MILLION
 # 01000                           POSITION(XXXX.X KILOMETERS) USE ARITHDP3
-# 01001                           VELOCITY(XXXX.X METERS/SEC) USE ARITHDP24
+# 01001                           VELOCITY(XXXX.X METERS/SEC) USE ARITHDP2
 # 01010                           TIME HOURS(XXX.XX)WEEKS INSIDE(ARITHDP2)
 # 01011                           ELEVATION DEGREES(89.999MAX) USE ARITH
 # 01100                           RENDEZVOUS RADAR RANGE(XXXXXB.FEET)
@@ -2750,7 +2755,7 @@ SFCOM           DXCH            SFTEMP1
 
 # GTSFIN LOADS SFTEMP1, SFTEMP2 WITH THE DP SFINTAB INTRIES.
 
-GTSFIN          DXCH            SFTEMP1                 # 2X(SFCONUM) ARIVES IN SFTEMP1.
+GTSFIN          DXCH            SFTEMP1                 # 2X(SFCONUM) ARRIVES IN SFTEMP1.
                 EXTEND
                 INDEX           A
                 DCA             SFINTAB
@@ -2838,7 +2843,7 @@ NNTYPTAB        OCT             00000                   # 00 NOT IN USE
                 OCT             00102                   # 03 1COMP DEGREES
                 OCT             00241                   # 04 1COMP HOURS
                 OCT             00200                   # 05 1COMP SECONDS
-                OCT             00343                   # 06 1COMP GYRO DEGRESS
+                OCT             00343                   # 06 1COMP GYRO DEGREES
                 OCT             00000                   # 07       SPARE
                 OCT             00000                   # 10 1COMP OCTAL ONLY
 
@@ -2901,11 +2906,11 @@ NNTYPTAB        OCT             00000                   # 00 NOT IN USE
                 OCT             00412                   # 74 3COMP  TIME WEEKS, POSITION, WHOLE
                 OCT             20450                   # 75 3COMP  POSITION, VELOCITY, POSITION
                 OCT             20410                   # 76 3COMP  POSITION FOR EACH
-                OCT             22451                   # 77 3COMP  VELOCITY FRO EACH
+                OCT             22451                   # 77 3COMP  VELOCITY FOR EACH
 
 
 
-SFINTAB         OCT             00006                   # WHOLE,TIME
+SFINTAB         OCT             00006                   # WHOLE,TIME(SEC)
                 OCT             03240
                 OCT             00253                   # TIME HOURS ( = 1.3..... )
                 OCT             25124                   #   (POINT BETWEEN BITS 7-8 )
@@ -2931,7 +2936,7 @@ SFINTAB         OCT             00006                   # WHOLE,TIME
                 OCT             03434
                 OCT             00006                   # RENDEZVOUS RADAR RANGE
                 OCT             20162
-                OCT             00011                   # RENDESVOUS RADAR RANGE RATE
+                OCT             00011                   # RENDEZVOUS RADAR RANGE RATE
                 OCT             27066
                 OCT             00016                   # LANDING RADAR ALTITUDE
                 OCT             04245
@@ -2995,7 +3000,7 @@ SFOUTAB         OCT             05174                   # WHOLE, TIME(SEC)
                 OCT             16415
                 OCT             00007                   # ROT HAND CONT ANGLE RATE
                 OCT             13734
-                OCT             74502                   # LANDING RADAR VELX (NEG TO WITCH SIGNS)
+                OCT             74502                   # LANDING RADAR VELX (NEG TO SWITCH SIGNS)
                 OCT             76401
 
 ## Page 353
@@ -3027,7 +3032,7 @@ IDADDTAB        ECADR           RSTACK          +18D    # 01        LANDING RADA
                 ECADR           RSTACK          +9D     # 07        DEGREES
                 ECADR           ALT                     # 10        INITIAL/FINAL ALTITUDE
                 ECADR           FINALT                  # 10        INITIAL/FINAL ALTITUDE
-                ECADR           ALTRATE                 # 10        ALTRATE
+                ECADR           ALTRATE                 # 10        ALTITUDE RATE
                 ECADR           SAMPTIME                # 11        HOURS
                 ECADR           SAMPTIME                # 11        SECONDS
                 ECADR           DSPTEM2                 # 11        WHOLE
@@ -3080,7 +3085,7 @@ RUTMXTAB        OCT             00204                   # 01  LANDING RADAR ALTI
                 OCT             04104                   # 07  REND. RADAR RANGE RATE, DEG, DEG
                 OCT             06204                   # 10  INIT/FIN ALT, INIT/FIN ALT, ALT RATE
                 OCT             00205                   # 11  HOURS, SECONDS
-                OCT             06043                   # 12  WHOLE, FRACTIONA, WHOLE
+                OCT             06043                   # 12  WHOLE, FRACTIONAL, WHOLE
                 OCT             16347                   # 13  GYRO DEGREES (FOR EACH)
                 OCT             00104                   # 14  OPT TRACK AZIMUTH ANGLE, DEGREES
                 OCT             00104                   # 15  OPT TRACK AZIMUTH ANGLE, DEGREES
@@ -3193,7 +3198,7 @@ MD1             OCT             25
 
 BINCON          DEC             10
 
-FALTON          CA              BIT7                    # TURN ON OPERATOR ERROR LIGHT.
+FALTON          CA              BIT7                    # TURN ON OPERATOR ERROR LIGHT
                 EXTEND
                 WOR             DSALMOUT                # BIT 7 OF CHANNEL 11
                 TC              Q
@@ -3244,7 +3249,7 @@ FLASHOFF        CS              BIT6                    # TURN OFF V/N FLASH
 ## Page 358
 # INTERNAL ROUTINES THAT USE THE KEYBOARD AND DISPLAY SYSTEM(THRU
 # NVSUB) MUST  TC GRABDSP  BEFOREHAND , TO GRAB THE DISPLAY SYSTEM AND
-# MAKE IT BUSY TO OTHER INERNAL USERS.
+# MAKE IT BUSY TO OTHER INTERNAL USERS.
 
 #       WHEN FINISHED , THERE MUST BE A TC FREEDSP , TO RELEASE THE
 # SYSTEM FOR OTHER INTERNAL USERS.
@@ -3270,12 +3275,12 @@ FLASHOFF        CS              BIT6                    # TURN OFF V/N FLASH
 #          CAF    WAKEFCADR
 #          TC     GRABUSY
 
-#       A ROUTINE CALLED NVSUBUSY US PROVIDED (USE IS OPTINAL)  TO PUT
+#       A ROUTINE CALLED NVSUBUSY IS PROVIDED (USE IS OPTIONAL)  TO PUT
 # YOUR JOB TO SLEEP UNTIL THE OPERATOR RELEASES IT.
 # NVSUBUSY CANNOT BE CALLED FROM E MEMORY, SINCE JOBSLEEP AND JOBWAKE
 # HANDLE ONLY FIXED MEMORY.
 #                                             YOUR CADR IS PUT
-# ON TOP OF A WAITING LIST (fif)). IT ALSO TURNS ON KEY RELEASE LIGHT.
+# ON TOP OF A WAITING LIST (FIFO). IT ALSO TURNS ON KEY RELEASE LIGHT.
 
 #        THE CALLING SEQUENCE IS
 #          CAF    WAKEFCADR
@@ -3320,7 +3325,7 @@ GRABUSY1        TS              L
                 TC              BANKJUMP
                 CAF             TWO
                 TS              LSTPTR
-                INDEX           LSTPTR                  # SEARCH LIST FRO FIRST AVAILABLE SPACE
+                INDEX           LSTPTR                  # SEARCH LIST FOR FIRST AVAILABLE SPACE
                 CCS             DSPLIST                 # FROM BOTTOM.
                 TC              +2
                 TC              PUTINLST                # SPACE FOUND
@@ -3333,7 +3338,7 @@ PUTINLST        CA              L
                 TC              JOBSLEEP
 
 
-# GRABWAIT IS A SPECIAL ENTRANCE FRO ROUTINES IN FIXED BANKS ONLY. IF
+# GRABWAIT IS A SPECIAL ENTRANCE FOR ROUTINES IN FIXED BANKS ONLY. IF
 # SYSTEM IS NOT GRABBED, IT GRABS IT AND RETURNS TO L+1 ( L = LOC FROM
 # WHICH THE TC GRABWAIT WAS DONE). IF SYSTEM IS GRABBED, IT PUTS CALLING
 # JOB TO SLEEP WITH L+1 GOING INTO LIST FOR EVENTUAL WAKING UP WHEN
@@ -3341,10 +3346,10 @@ PUTINLST        CA              L
 #
                 SETLOC          GRABUSY         +2
 GRABWAIT        CCS             GRABLOCK
-                TCF             PREGBSY                 # GRABBED. PUT L+1 INTO LIST. GO TO SLEEP
+                TCF             PREGBSY                 # GRABBED. PUT L+1 INTO LIST. GO TO SLEEP.
 
 ## Page 360
-                CAF             ONE                     # NOT GRABBED. GRAB AND RETURN TO L+1
+                CAF             ONE                     # NOT GRABBED. GRAB AND RETURN TO L+1.
                 TS              GRABLOCK
                 TC              Q
 
@@ -3363,7 +3368,7 @@ NVSUBSY1        TS              L
                 TC              +3                      # STILL BUSY
                 CA              L                       # DSPLOCK = +0 SO RETURN DIRECTLY
                 TC              BANKJUMP
-                CAF             TWO                     # SET FRO GRABBED STATE AND NVSUBUSY USE
+                CAF             TWO                     # SET FOR GRABBED STATE AND NVSUBUSY USE
                 TS              GRABLOCK
                 CA              L
                 XCH             DSPLIST         +2      # ENTER CADR INTO FIRST POSITION OF LIST
@@ -3389,7 +3394,7 @@ ENDNVBSY        TC              JOBSLEEP
 NVSBWAIT        TS              NVTEMP
                 CCS             DSPLOCK
                 TCF             NVSBWT1                 # BUSY
-                CA              Q                       # FREE. NVSUB WILL SAVE L+1 FRO RETURN
+                CA              Q                       # FREE. NVSUB WILL SAVE L+1 FOR RETURN
                 TCF             NVSUB           +5      # AFTER EXECUTION.
 NVSBWT1         INCR            Q                       # L+2. PRENVBSY WILL PUT L-1 INTO LIST AND
                 TCF             PRENVBSY                # GO TO SLEEP.
@@ -3414,7 +3419,7 @@ RELDSP2         INHINT
                 TS              DSPLOCK
                 RELINT
                 TC              RELRET
-RELDSP1         XCH             Q                       # SET DSPLOCK TO +0. RELDSP LIGHT OFF
+RELDSP1         XCH             Q                       # SET DSPLOCK TO +0. RELDSP LIGHT OFF.
                 TS              RELRET                  # NO LIST SEARCH
                 TC              RELDSP2
 
@@ -3531,7 +3536,7 @@ TSTCON1         OCT             00175
 TSTCON2         OCT             40650                   # DSPTAB+11D BITS 4,6,8,9.
                                                         # NO ATT, GIMBAL LOCK, TRACKER, PROG ALM.
 TSTCON3         OCT             00115                   # CHAN 11 BITS 1, 3, 4, 7.
-                                                        # UPLINK ACITIVY, TEMP, OPERATOR ERROR.
+                                                        # UPLINK ACTIVITY, TEMP, OPERATOR ERROR.
 SHOLTS          OCT             764                     # 5 SEC
 
 
@@ -3572,10 +3577,10 @@ TSTLTS3         CS              TSTCON3                 # CALLED BY EXECUTIVE
                 RELINT
 
                 TC              DSPMM                   # REDISPLAY C(MODREG)
-                TC              POSTJUMP                # TURN OFF KEY RLSE LISGHT ( AND SEARCH LIST
+                TC              POSTJUMP                # TURN OFF KEY RLSE LIGHT ( AND SEARCH LIST
                 CADR            VBTERM                  # IF APPROPRIATE).
-                                                        # TURN OF V/N FLASH, SET LOADSTAT FOR
-                                                        # TERMINATE CONDITION, AND GO TO
+                                                        # TURN OFF V/N FLASH, SET LOADSTAT FOR
+                                                        # FOR TERMINATE CONDITION, AND GO TO
                                                         # RECALTST. FINALLY DO TC ENDOFJOB.
 
 ## Page 365

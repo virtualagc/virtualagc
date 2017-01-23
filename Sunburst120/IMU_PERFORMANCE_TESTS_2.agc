@@ -19,23 +19,25 @@
 ##				scanned program listing.
 ##		2016-10-31 RSB	Typos.
 ##		2016-11-02 RSB	More typos.
+##		2016-12-05 RSB	Comment-proofing with octopus/ProoferComments
+##				completed, changes made.
 
 ## Page 411
                 BANK            24
                 EBANK=          XSM
 
 
-IMUTEST         CA              ZERO
+IMUTEST         CA              ZERO			# DRIFT AND SCALE FACTOR TEST
                 TS              DRIFTT
                 TS              GEOCOMPS
                 CAF             1SECX
                 TS              1SECXT
                 
-	        TC              INTPRET                 # OPTIMUM COMPASS COMES IN HERE
+	        TC              INTPRET    
                 CALL
                                 LATAZCHK
                 EXIT
-                CA              ONE
+                CA              ONE			
                 TS              POSITON
 
                 TS              DSPTEM2         +2
@@ -57,7 +59,7 @@ IMUBACK         CA              ZERO
                 TS              DSPTEM2
                 TC              BANKCALL                # ISS RETURNS IN COARSE ALIGN MODE TO
                 CADR            IMUCOARS                # ENABLE OPERATOR TO DECIDE WHAT TO DO
-
+							# ABOUT GIMBAL LOCK
 		CCS		GEOCOMPS
 		TC		+3
                 TC              SHOWLD
@@ -99,7 +101,7 @@ JUMPLOAD        TC		FREEDSP			# FREE DISPLAY IF IN GYROCOMPASS
 		TC              LOADGTSM
                 TC              BANKCALL
                 CADR            ESTIMS
-TORQUE          TC              PHASCHNG                # FILTER TORQUES PLTFM AND SETS UP ERATE
+TORQUE          TC              PHASCHNG                # FILTER RETURNS AFTER TORQUE AND ER SET
                 OCT             00005
                 CA              ZERO
                 TS              DSPTEM2
@@ -373,7 +375,7 @@ SIZLOOK         MASK            NEG3                    # T ENTER TEST NO THAT I
                 BZF             GUDENTRY                #   THIS IS CONSIDERED NECESSARY BECAUSE
                 TC              TESTCALL                # OF FOLLOWING INDEXED TC WHICH COULD
 
-NEGSIZ          COM                                     # SEND THE COMPUTER OFF INTO BOONDOCKS
+NEGSIZ          COM                                     # SEND THE COMPUTER OFF INTO THE BOONDOCKS
                 TC              SIZLOOK                 # TO PLAY WITH ITSELF IF THE OPERATOR
 GUDENTRY        CA              CALCDIR                 # MAKES ABAD ENTRY******
                 AD              FOUR
@@ -400,14 +402,14 @@ GUDENTRY        CA              CALCDIR                 # MAKES ABAD ENTRY******
                 TS              SAVE            +1
                 TC              FREEDSP
                 CAF             ZERO
-                TS              NBPOS                   # SET UP NB COORD TO NORTH, X UP
-                TS              SAVE            +2      # INTIALIZE FOR EARTHR DESIGNATE USAGE
+                TS              NBPOS                   # SET UP NB COORD TO Z NORTH, X UP
+                TS              SAVE            +2      # INITIALIZE FOR EARTHR DESIGNATE USAGE
                 TS              TESTNO                  # INITIALIZE FOR TEST ABORT ROUTINE
                 TS              CDUFLAG                 # ZEROS FOR STRTWACH USE
                 CAF             SFCONST
 
 ## Page 419
-                TS              SFCONST1                # FOR DIVISION DURING CALCFSE
+                TS              SFCONST1                # FOR DIVISION DURING CALCSFE
 
                 TC              BANKCALL
                 CADR            IMUZERO
@@ -428,7 +430,7 @@ ENABLE          CAF             BIT6
                 WOR             14C                     # ON CAL MODULE RELAY
 
                 INHINT
-                CS              TWO                     # SETS UP EXEC SWITCH SO IMPULSE WILL
+                CS              TWO                     # SETS UP EXEC SWITCH SO IMUPULSE WILL
                 MASK            IMODES33                # NOT TURN OFF GYRO TORQ ENABLE RELAY
                 AD              TWO
                 TS              IMODES33
@@ -450,7 +452,7 @@ STRTWACH        CCS             CDUFLAG                 #  RETURNS HERE VIA QPLA
                 TC              LOOKCDUP        -4
                 TC              LOOKCDUP
 CORRECT         CAF             ZERO
-                TS              LGYRO                   #  RELEASES GYROS FOR IMPULSE USAGE
+                TS              LGYRO                   #  RELEASES GYROS FOR IMUPULSE USAGE
                 TC              BANKCALL                # EARTHRATE CORRECTION TO GYROS NOT EAST
                 CADR            EARTHR                  # OR WEST
                 CAF             ONE
@@ -465,7 +467,7 @@ CORRECT         CAF             ZERO
                 BZF             STOPTEST                # OR THE CDU,S ARE NOT WORKING.
                 TC              DIRECTN
 
-                CAF             ZERO                    # ZERO CDU REG WHICH WILL BE USED TO
+                CAF             ZERO                    # ZEROS CDU REG WHICH WILL BE USED TO
                 TS              SAVE            +1
                 INDEX           CDUNDX                  # MEASURE ANGLE.
                 TS              CDUX
@@ -476,7 +478,7 @@ STILLOOK        TS              TIMER
                 CCS             CDUX                    # STARTS
                 TC              OUTPLUS                 # HERE IS PLUS PULSE
                 TC              TIMEWACH
-                TC              ALARMS                  # TTELL OPERATOR FISRT CDU PULSE WAS MISSD
+                TC              ALARMS                  # TTELL OPERATOR FIRST CDU PULSE WAS MISSD
                 TC              OUTNEG                  # HERE IS MINUS PULSE
 TIMEWACH        CCS             TIMER                   # WATCHES TIME IN INHINT SO COPS WILL NOT
                 TC              STILLOOK                # CATCH US
@@ -551,7 +553,7 @@ CALCSFE         CA              SAVE                    # GYROCTR AT TEST START
 NEGSFE          CAE             SAVE            +2      # IDEAL NO OF PULSES, THE SFE EXCEEDS
                 TC              ARITH                   # 15600 PPM, THE TEST IS NOT VALID AND
 
-# THERFORE ABORTS AND TURNS ON PROGRAM ALARM
+# THEREFORE ABORTS AND TURNS ON PROGRAM ALARM
 POSSFE          CAF             POSMAX                  # POS SFE DEFINITION = IRIG SF IN SEC OF
                 EXTEND                                  # ARC PER PULSE IS GREATER THAN
                 SU              SAVE            +2      # .61798095703125  SEC OF ARC/ PULSE
@@ -594,7 +596,7 @@ STOPTEST        TC              BANKCALL
 
 ## Page 423
 CHECKG          EXTEND                                  # PIP PULSE CATCHING ROUTINE
-                QXCH            QPLACE                  # RECORDS TIME AT OCCURENCE OF A DELTA V
+                QXCH            QPLACE                  # RECORDS TIME AT OCCURRENCE OF A DELTA V
 CHECKG1         RELINT                                  # KEEPS CONTENT OF PIPA REG INTACT
                 CCS             NEWJOB
                 TC              CHANG1
@@ -749,7 +751,7 @@ FALNE1          CA              CDUX
                 TC              QPLACE
 
 ## Page 427
-WAITLOOP        EXTEND                                  # LOOPS IN X SEC INCREMETNS FOR NUMBER OF
+WAITLOOP        EXTEND                                  # LOOPS IN X SEC INCREMENTS FOR NUMBER OF
                 QXCH            QPLAC
                 TS              COUNTPL                 # NUMBER PUT INTO LENGTHOT
 WAITLP1         CCS             COUNTPL
@@ -860,7 +862,7 @@ NBPOSPL         EXTEND                                  # SETS UP AZIMUTH AND VE
                                 0,1
                 STORE           STARAD
 
-                AXC,1           XSU,1                   # VERITCAL IN NB COORDS
+                AXC,1           XSU,1                   # VERTICAL IN NB COORDS
                                 SCNBVER
                                 NBPOS
                 VLOAD*
@@ -948,7 +950,7 @@ POSN4           CA              HALF                    #  Z DOWN, Y SOUTH ,X EA
 POSN5           CA              HALF                    # Y UP, Z NORTH, X WEST
 ## Page 431
                 TS              YSM
-                COM                                     #  NBDZ-ADSRAZ =DH
+                COM                                     #  NBDZ-SRAZ=DH
                 TS              XSM             +4
                 TS              ZSM             +2
                 CA              ONE
@@ -958,7 +960,7 @@ POSN5           CA              HALF                    # Y UP, Z NORTH, X WEST
 
 
 # TO RUN POSITION 6 VERTICAL AFTER PIP TEST POS 6 IS DISPLAYED THE OPERATR
-# MUST CALCULATE FROM 2.5 -NBDZ-ADSRAZ  (XXX.XX)MERU.    WHEN P
+# MUST CALCULATE FROM POSN 2,5 -NBDZ-ADSRAZ (XXX.XX)MERU. WHEN P
 # IP DATA FLASHES DO VERB 33 ENTER. THIS STARTS VERTICAL TEST. THEN THE
 # DATA XXX.XX MERU AS CALCULATED MUST BE ENTERED INTO DRIFTT. IE VERB 21
 # ENTER NOUN 01 ENTER LOCATION OF DRIFTT ENTER + (OR -) XXXXX ENTER
@@ -972,10 +974,10 @@ POSN6           CA              HALF                    # Y DOWN, Z EAST, X SOUT
                 TC              QPLACE
 
 
-POSN7           CS              HALF                    # Z UP-EAST,Y UP-WEST,X NORTH.THIS POSITION
+POSN7           CS              HALF                    # Z UP-EAST,Y UP-WEST,X NORTH.THIS POSITON
                 TS              XSM             +2
                 CA              ROOT1/2
-                TS              YSM			#  NBDX - .707 ADSRAX = -DN
+                TS              YSM			#  NBDX - .707 ADSRAX = -DH
                 TS              ZSM
                 TS              ZSM             +4
                 COM
@@ -1011,7 +1013,7 @@ OPCHKPOS        CA              ROOT1SQ                 # OG=+45DEG,IG=-45DEG,MG
                 TS              ZSM             +2
                 TC              QPLACE
 
-POSN9           CA              HALF                    # X UP EAST,Y UP WEST,Z SOUTH.THIS POSITION
+POSN9           CA              HALF                    # X UP EAST,Y UP WEST,Z SOUTH.THIS POSITON
                 TS              ZSM             +2
                 CA              ROOT1/2                 #  -NBDZ +.707 SRAZ =DH
                 TS              XSM

@@ -8,6 +8,8 @@
 ## Pages:        26
 ## Mod history:  2016-09-20 JL   Created.
 ##               2016-10-16 JL   Transcribed.
+##		 2016-12-07 RSB	 Proofed comments with octopus/ProoferComments
+##				 and made a few changes.
 
 ## This source code has been transcribed or otherwise adapted from
 ## digitized images of a hardcopy from the private collection of
@@ -41,3 +43,4 @@ NAVKEYIN        EQUALS          16
 CHAN33          EQUALS          33                              
 DNTM1           EQUALS          34                              
 DNTM2           EQUALS          35                              
+# END OF CHANNEL ASSIGNMENTS

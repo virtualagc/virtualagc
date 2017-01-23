@@ -7,7 +7,9 @@
 ## Website:      https://www.ibiblio.org/apollo.
 ## Pages:        368-369
 ## Mod history:  2016-09-20 JL   Created.
-##               2016-10-16 HG  Fix label ENDCM5 -> ENDCMS
+##               2016-10-16 HG   Fix label ENDCM5 -> ENDCMS
+##		 2016-12-08 RSB	 Proofed comments with octopus/ProoferComments
+##				 but no errors found.
 
 ## This source code has been transcribed or otherwise adapted from
 ## digitized images of a hardcopy from the private collection of 

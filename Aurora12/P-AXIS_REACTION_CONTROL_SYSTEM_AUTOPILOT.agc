@@ -13,6 +13,8 @@
 ##                               comment code look alike
 ##                               JSATCHG -> JTSATCHG
 ##               2016-10-15 HG   Fix operand BITS13-14 -> BIT13-14
+##		 2016-12-08 RSB	 Proofed comments with octopus/ProoferComments
+##				 and fixed the errors found.
 
 ## This source code has been transcribed or otherwise adapted from
 ## digitized images of a hardcopy from the private collection of 
@@ -119,7 +121,7 @@ PAXIS           CAF             MS30P                           # RESET TIMER IM
                 EXTEND                                          # AUTOMATIC MODE BITS.
                 BZF             GOIDLE
 
-# WHILE DAP ON, SET UP EITHER A KALMAN FILTER RUPT OR A DUMMY FILTER RUPT BY SETTING UP T5ADR FROM ERASABLE.
+# WHILE DAP IS ON, SET UP EITHER A KALMAN FILTER RUPT OR A DUMMY FILTER RUPT BY SETTING UP T5ADR FROM ERASABLE.
 
                 EXTEND                                          # T5ADR IS SET TO EITHER FILTER OR
                 DCA             PFILTADR                        # DUMMYFIL IN A BLIND MANNER SINCE
@@ -338,7 +340,7 @@ RATEDONE        CS              BIT1
 
                 TCF             JETSOFF
 
-RHCMOVED        CAF             BIT1                            # CHECKING THE RATE COMMANED BIT
+RHCMOVED        CAF             BIT1                            # CHECKING THE RATE COMMAND BIT
                 MASK            DAPBOOLS                        
                 EXTEND                                          
                 BZF             JUSTOUT
@@ -359,7 +361,7 @@ RHCMOVED        CAF             BIT1                            # CHECKING THE R
                 TS              P-RHCCTR
                 TS              Q-RHCCTR
                 TS              R-RHCCTR
-                CA              BITS8,9                         # ENABLE COUNTERS, START READING
+                CA              BITS8,9                         # ENABALE COUNTERS, START READING
                 EXTEND
                 WOR             13
                 TCF             OBEYRATE

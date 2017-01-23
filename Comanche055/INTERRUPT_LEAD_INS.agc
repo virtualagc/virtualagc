@@ -10,6 +10,8 @@
 ##  		Fabrizio Bernardini <fabrizio@spacecraft.it>
 ## Website:	http://www.ibiblio.org/apollo.
 ## Mod history:	09/05/09 FB	Transcription of Batch FB-1 Assignment.
+##		2016-12-10 RSB	Proofed comments with octopus/ProoferComments
+##				and fixed the errors found.
 ##
 ## The contents of the "Comanche055" files, in general, are transcribed 
 ## from scanned documents. 

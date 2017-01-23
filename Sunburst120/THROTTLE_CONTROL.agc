@@ -10,13 +10,15 @@
 ## Mod history:  2016-09-30 RSB  Created draft version.
 ##               2016-10-30 MAS  Transcribed.
 ##		 2016-11-02 RSB	 Typo.
+##		 2016-12-06 RSB	 Comment-proofing via octopus/ProoferComments;
+##				 changes were made.
 
 ## Page 849
 #       THROTTLE CONTROL CAN BE USED IN EITHER OF TWO MODES: IN "PERCENTAGE MODE" (WHEN A CERTAIN FRACTION OF
 # MAXIMUM THRUST IS DESIRED) AND IN "ACCELERATION MODE"  (WHEN THE THRUST DESIRED IS THAT CORRESPONDING TO A
 # SPECIFIED ACCELERATION).
 
-#                  PERCENTAGE MODE                                               ACCLERATION MODE
+#                  PERCENTAGE MODE                                               ACCELERATION MODE
 
 #       THE FRACTION OF MAXIMUM THRUST (NOMINALLY                     DESIRED ACCELERATION, IN DOUBLE PRECISION,
 # 10500 POUNDS) DESIRED, IN SINGLE PRECISION, IS                IN UNITS OF 2(-5) M/CS/CS, IS PLACED IN /ACF/.
@@ -26,7 +28,7 @@
 # TO THE USER (AT THE INSTRUCTION IMMEDIATELY                   INSTRUCTION FOLLOWING THE DTCB).
 # FOLLOWING THE DTCB).
 #                                                                    ACCLJOB, AFTER A RESTART PROTECT,
-#       PCNTJOB, AFTER A RESTART PROTECT,                       COMPUTES DESIRED ACCELERATION, FC = /AFC/ MASS,
+#       PCNTJOB, AFTER A RESTART PROTECT,                       COMPUTES DESIRED ACCELERATION, FC = /ACF/ MASS,
 # TURNS OFF THE TRIM GIMBAL, SETS UP A WAITLIST                SCALED AT ABOUT 2.7 POUNDS PER BIT.
 # TASK (DESCRIBED LOCALLY), COMPUTES THRUST DESIRED,
 # FC = PCNTF FMAX, SCALED AT ABOUT 2.7 POUNDS PER BIT,                (NOTE THAT IN THE ACCELERATION MODE THE TRIM
@@ -82,7 +84,7 @@ MASSMULT        EXTEND
                 DXCH            MPAC
                 TC              DMP                             # LEAVES ODDLY SCALED FORCE IN MPAC
                 ADRES           MASS
-                TC              DMP                             # LEAVES PROPERLY SCLAED FORCE IN MPAC
+                TC              DMP                             # LEAVES PROPERLY SCALED FORCE IN MPAC
                 ADRES           SCALEFAC
                 DXCH            MPAC            +1              # LOADING FORCE INTO A AND L
                 TC              BUF                             # IN WHICH Q WAS STORED
@@ -103,10 +105,10 @@ PCNTOVER        CS              ZERO
 
 ## The character used for separation below, and throughout the rest of this section, was actually a small
 ## box, similar to the unicode white square (U+25A1). All occurrences have been replaced with the ASCII =.
-# =======================================================================================================
+# ========================================================================
 THROTDT         DEC             +195
 PGUID           DEC             +200
-# =======================================================================================================
+# ========================================================================
 
 ## Page 851
                                                                 # ***********
@@ -182,14 +184,14 @@ PCNTJOB         INHINT                                          # SINCE THROTTLI
 
 
 
-# =======================================================================================================
+# ========================================================================
 SCALEFAC        2DEC            +51.946987      B-14            # QUASI-NEWTONS TO PULSE UNITS
 
 2.PG.FRT        DEC             12800                           # TWICE PGUID TIME PULSE RATE
 -LOCRIT         DEC             -2019                           # THE LOWER MID-SCALE CRITERION
 FEXTRA          =               -LOCRIT
 +FLOW           DEC             +438                            # MINIMUM ATTAINABLE THRUST
-# =======================================================================================================
+# ========================================================================
 
 ACCLJOB         TC              PHASCHNG
                 OCT             05024
@@ -198,7 +200,7 @@ ACCLJOB         TC              PHASCHNG
                 EXTEND
                 DCA             /ACF/
                 TC              MASSMULT
-                DXCH            FC                              # FC = MASS /AFC/, SCALED
+                DXCH            FC                              # FC = MASS /ACF/, SCALED
 
 ## Page 853
 FOLDCALC        EXTEND
@@ -310,7 +312,8 @@ DOIT            TS              THRUST
                 CAF             BIT4
                 EXTEND
                 WOR             14                              # AND THE ENGINE DOES THE REST...
-
+## What we show as a percent-sign below ("WOULD THAT IT WERE%") was really a 1/2 symbol (&frac12;) 
+## in the original hardcopy.
                                                                 # SINCE /AF/ IS NOT AN INSTANTANEOUS
                                                                 # ACCELERATION (WOULD THAT IT WERE%) BUT
                                                                 # RATHER AN "AVERAGE" OF THE ACCELERATION

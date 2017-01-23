@@ -9,6 +9,10 @@
 ## Mod history:  2016-09-20 JL   Created.
 ##               2016-09-21 MAS  Filled out.
 ##               2016-10-15 HG   Fix label ISWCALLL -> ISWCALL
+##		 2016-12-07 RSB	 Proofed the comments, mostly with 
+##				 octopus/ProoferComments, but some pages
+##				 needed to be done manually.  Only some
+##				 column alignments were changed.
 
 ## This source code has been transcribed or otherwise adapted from
 ## digitized images of a hardcopy from the private collection of 
@@ -29,8 +33,8 @@
 ##       https://archive.org/details/aurora00dapg
 
 ## Page 29
-# THE FOLLOWING ROUTINE CAN BE USED TO CALL A SUBROUTINE IN ANOTHER BANK. IN THE BANKCALL VERSION, THE
-# CADR OF THE SUBROUTINE IMMEDIATELY FOLLOWS THE TC BANKCALL INSTRUCTION, WITH C(A) AND C(L) PRESERVED.
+#          THE FOLLOWING ROUTINE CAN BE USED TO CALL A SUBROUTINE IN ANOTHER BANK. IN THE BANKCALL VERSION, THE
+# CADR OF THE SUBROUTINE IMMEDIATELY FOLLOWS THE  TC BANKCALL  INSTRUCTION, WITH C(A) AND C(L) PRESERVED.
 
                 SETLOC          ENDINTFF                        
 BANKCALL        DXCH            BUF2                            # SAVE INCOMING A,L.
@@ -38,7 +42,7 @@ BANKCALL        DXCH            BUF2                            # SAVE INCOMING 
                 CA              0                               
                 INCR            Q                               # SO WE RETURN TO THE LOC. AFTER THE CADR.
 
-# SWCALL IS IDENTICAL TO BANKCALL, EXCEPT THAT THE CADR ARRIVES IN A.
+#          SWCALL IS IDENTICAL TO BANKCALL, EXCEPT THAT THE CADR ARRIVES IN A.
 
 SWCALL          TS              L                               
                 LXCH            FBANK                           # SWITCH BANKS, SAVING RETURN.
@@ -53,14 +57,14 @@ SWRETURN        XCH             BUF2            +1              # COMES HERE TO 
                 XCH             BUF2            +1              
                 TC              BUF2                            
 
-# THE FOLLOWING ROUTINE CAN BE USED AS A UNILATERAL JUMP WITH C(A,L) PRESERVED AND THE CADR IMMEDIATELY
+#          THE FOLLOWING ROUTINE CAN BE USED AS A UNILATERAL JUMP WITH C(A,L) PRESERVED AND THE CADR IMMEDIATELY
 # FOLLOWING THE TC POSTJUMP INSTRUCTION.
 
 POSTJUMP        XCH             Q                               # SAVE INCOMING C(A).
                 INDEX           A                               # GET CADR.
                 CA              0                               
 
-# BANKJUMP IS THE SAME AS POSTJUMP, EXCEPT THAT THE CADR ARRIVES IN A.
+#          BANKJUMP IS THE SAME AS POSTJUMP, EXCEPT THAT THE CADR ARRIVES IN A.
 
 BANKJUMP        TS              FBANK                           
                 MASK            LOW10                           

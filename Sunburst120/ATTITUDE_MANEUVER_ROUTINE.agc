@@ -1,18 +1,20 @@
 ### FILE="Main.annotation"
-## Copyright:    Public domain.
-## Filename:     ATTITUDE_MANEUVER_ROUTINE.agc
-## Purpose:      A module for revision 0 of BURST120 (Sunburst). It 
-##               is part of the source code for the Lunar Module's
-##               (LM) Apollo Guidance Computer (AGC) for Apollo 5.
-## Assembler:    yaYUL
-## Contact:      Ron Burkey <info@sandroid.org>.
-## Website:      www.ibiblio.org/apollo/index.html
-## Mod history:  2016-09-30 RSB  Created draft version.
-##               2016-10-20 MAS  Began adapting from Luminary 099.
-##               2016-10-21 MAS  Completed adapting/transcribing.
-##		 2016-10-31 RSB	 Typos.
-##		 2016-11-01 RSB	 More typos.
-##		 2016-11-02 RSB	 More typos.
+## Copyright:   Public domain.
+## Filename:    ATTITUDE_MANEUVER_ROUTINE.agc
+## Purpose:     A module for revision 0 of BURST120 (Sunburst). It 
+##              is part of the source code for the Lunar Module's
+##              (LM) Apollo Guidance Computer (AGC) for Apollo 5.
+## Assembler:   yaYUL
+## Contact:     Ron Burkey <info@sandroid.org>.
+## Website:     www.ibiblio.org/apollo/index.html
+## Mod history: 2016-09-30 RSB  Created draft version.
+##              2016-10-20 MAS  Began adapting from Luminary 099.
+##              2016-10-21 MAS  Completed adapting/transcribing.
+##		2016-10-31 RSB	Typos.
+##		2016-11-01 RSB	More typos.
+##		2016-11-02 RSB	More typos.
+##		2016-12-06 RSB	Comment-proofing with octopus/ProoferComments,
+##				changes made.
 
 ## Page 636
 # BLOCK 2 LGC ATTITUDE MANEUVER ROUTINE-KALCMANU
@@ -91,7 +93,7 @@
 #      A)  AM LESS THAN .25 DEGREES (MINANG)
 #      B)  AM GREATER THAN 170 DEGREES (MAXANG)
 
-#      IF AM LESS THAN .25 DEGREES, NO COMPLICATED AUTOMATIC MANEUVERING IS NECESSARY.  THREFORE, WE CAN SIMPLY
+#      IF AM LESS THAN .25 DEGREES, NO COMPLICATED AUTOMATIC MANEUVERING IS NECESSARY.  THEREFORE WE CAN SIMPLY
 # SET CDU DESIRED EQUAL TO THE FINAL CDU DESIRED ANGLES AND TERMINATE THE JOB.
 
 #      IF AM IS GREATER THAN .25 DEGREES BUT LESS THAN 170 DEGREES, THE AXES OF THE SINGLE EQUIVALENT ROTATION
@@ -124,7 +126,7 @@
 #      AT THE BEGINNING OF THE MANEUVER THE AUTOPILOT DESIRED RATES (OMEGAPD, OMEGAQD, OMEGARD) AND THE 
 # MANEUVER TIMINGS ARE ESTABLISHED.  ON THE FIRST PASS AND ON ALL SUBSEQUENT UPDATES THE CDU DESIRED
 # ANGLES ARE LOADED WITH THE APPROPRIATE VALUES AND THE INCREMENTAL CDU ANGLES ARE COMPUTED.  THE AGC CLOCKS
-# (TIME1 AND TIME2) ARE THEN CHECKED TO SEE IF THE MANEUVER WILL TERMINATE BEFORE THE NEXT UPDATE.  IF
+# (TIME1 AND TIME2) ARE THAN CHECKED TO SEE IF THE MANEUVER WILL TERMINATE BEFORE THE NEXT UPDATE.  IF
 # NOT, KALCMANU CALLS FOR ANOTHER UPDATE (RUN AS A JOB WITH PRIORITY TBD) IN ONE SECOND.  ANY DELAYS IN THIS
 # CALLING SEQUENCE ARE AUTOMATICALLY COMPENSATED IN CALLING FOR THE NEXT UPDATE.
 
@@ -274,9 +276,10 @@
 
 #            (B )                (A )
 #            ( X)                ( X)
-#            (  )                (  )
-#            (B )           *    (A )
-#            ( Y)      =    M    ( Y)
+#	     (  )                (  )
+#            (  )           *    (  )
+#            (B )      =    M    (A )
+#            ( Y)                ( Y)
 #            (  )                (  )
 #            (B )                (A )
 #            ( Z)                ( Z)
@@ -311,7 +314,7 @@
 #       X    =    ARCSIN (-M /COSZ)
 #                           5
 
-# IF M  IS NEGATIVE, X IS REPLACED BY PI SGN X - X
+# IF M  IS NEGATIVE X IS REPLACED BY PI SGN X - X
 #     4
 
 #      THIS ROUTINE DOES NOT SET THE PUSH DOWN POINTER, BUT USES THE NEXT 8 LOCATIONS OF THE PUSH DOWN LIST AND
@@ -372,9 +375,9 @@
 ## Page 643
 #            (B )                     (A )
 #            ( X)                     ( X)
-#            (  )                     (  )
-#            (B )            *        (A )
-#            ( Y)      =    DEL       ( Y)
+#            (  )              *      (  )
+#            (B )      =    DEL       (A )
+#            ( Y)                     ( Y)
 #            (  )                     (  )
 #            (B )                     (A )
 #            ( Z)                     ( Z)
@@ -437,7 +440,7 @@
 #                                       1       IGNORE ANY FINAL P-AXIS YAW
 
 # 34                      11            0       SIGNAL END OF KALCMANU
-#                                       1       KALCMANU IN PROCESS.      USER MUST SET SWITCH BEFORE INITIATING
+#                                       1       KALCMANU IN PROCESS       USER MUST SET SWITCH BEFORE INITIATING
 
 
 #         *  INTERNAL TO KALCMANU
@@ -481,7 +484,7 @@ VECPOINT        TC              INTPRET
                                 POINTVSM                        # RESOLVE THE POINTING DIRECTION VS INTO
                                 MIS                             # INITIAL S/C AXES
                 UNIT            PUSH
-                VXV             UNIT                            # TAKE THE CROSS PRODUCT OF VF X VI
+                VXV             UNIT                            # TAKE THE CROSS PRODUCT VF X VI
                                 SCAXIS                          # WHERE VI = SCAXIS
                 BOV             VCOMP
                                 PICKAXIS
@@ -773,7 +776,7 @@ MXM3            SETPD                                           # MXM3 MULTIPLIE
                 PDDL*           VDEF                            # DEFINE VECTOR M2(COL 1)
                                 0,2
                 MXV*            PDDL*                           # M1XM2(COL 1) IN PD
-                                0,1                             # AND MPAC
+                                0,1           
                                 14D,2
                 PDDL*           PDDL*
                                 8D,2

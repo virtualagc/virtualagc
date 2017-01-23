@@ -14,6 +14,8 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2016-11-17 JL   Created from Luminary131 version.
 ##              2016-11-24 HG   Transcribed
+##              2016-12-07 HG   Fix P00 -> POO (appears only in comments)
+##                              revert above changes
 
 ## Page 350
 # SUBROUTINE NAME:    V89CALL
@@ -52,7 +54,7 @@
 
 # CALLING SEQUENCE:  V 89 E.
 #
-# SUBROUTINES CALLED:  CHECKP00H, R02BOTH, GOXDSPF, CSMCONIC, LEMCONIC,
+# SUBROUTINES CALLED:  CHECKPOOH, R02BOTH, GOXDSPF, CSMCONIC, LEMCONIC,
 #                      VECPOINT, BALLANGS, R60LEM.
 
 # NORMAL EXIT MODES:  TC ENDEXT

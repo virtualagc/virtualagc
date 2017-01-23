@@ -1,15 +1,17 @@
 ### FILE="Main.annotation"
-## Copyright:    Public domain.
-## Filename:     MISSION_PHASE_2_GUIDANCE_REFERENCE_RELEASE_PLUS_BOOST_MONITOR.agc
-## Purpose:      A module for revision 0 of BURST120 (Sunburst). It 
-##               is part of the source code for the Lunar Module's
-##               (LM) Apollo Guidance Computer (AGC) for Apollo 5.
-## Assembler:    yaYUL
-## Contact:      Ron Burkey <info@sandroid.org>.
-## Website:      www.ibiblio.org/apollo/index.html
-## Mod history:  2016-09-30 RSB  Created draft version.
-##               2016-10-23 MAS  Transcribed.
-##		 2016-10-32 RSB	 Typos.
+## Copyright:   Public domain.
+## Filename:    MISSION_PHASE_2_GUIDANCE_REFERENCE_RELEASE_PLUS_BOOST_MONITOR.agc
+## Purpose:     A module for revision 0 of BURST120 (Sunburst). It 
+##              is part of the source code for the Lunar Module's
+##              (LM) Apollo Guidance Computer (AGC) for Apollo 5.
+## Assembler:   yaYUL
+## Contact:     Ron Burkey <info@sandroid.org>.
+## Website:     www.ibiblio.org/apollo/index.html
+## Mod history: 2016-09-30 RSB  Created draft version.
+##              2016-10-23 MAS  Transcribed.
+##		2016-10-32 RSB	Typos.
+##		2016-12-06 RSB	Comments proofed using octopus/ProoferComments,
+##				changes made.
 
 ## Page 673
 # PROGRAM NAME - MISSION PHASE 2 GUIDANCE REFERENCE RELEASE + BOOST MONITOR.
@@ -469,7 +471,7 @@ SVEXADRS        EQUALS          SVEXITAD
 12SEC           DEC             1200
 WEARTH          2DEC            31.1539787      B-5             # REVOLUTIONS PER 2(28) CENTISECONDS.
 
-+XJETSON        OCT             00252                           # BITS FOR +X TRANLSATION JETS
++XJETSON        OCT             00252                           # BITS FOR +X TRANSLATION JETS
 
 
 

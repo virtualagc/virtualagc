@@ -18,6 +18,8 @@
 ##                                  opernand NOVAK   -> NOVAC
 ##                                           GOMARKER-> GOMARKFR
 ##                                           CMKCNTR -> XMKCNTR 
+##              2016-12-07 HG   fix P00 -> POO
+##              2016-12-11 HG   Fix operation CS NOMKCNT -> CA NOMKCNT
 
 ## Page 255
                 SETLOC          AOTMARK1
@@ -81,7 +83,7 @@ MKRELEAS        CAF             ZERO
 
 KILLAOT         CAF             ZERO
                 TS              EXTVBACT                # TERMINATE AOTMARK-ALLOW EXT VERB
-                TC              GOTOP00H
+                TC              GOTOPOOH
 
 ## Page 257
 GETDAT          CS              MARKSTAT                # SET BIT12 TO DISCOURAGE MARKRUPT
@@ -92,7 +94,7 @@ N71DISP         CAF             V01N71                  # DISPLAY DETENT AND STA
                 TC              BANKCALL
                 CADR            GOMARKF
 
-                TCF             KILLAOT                 # V34-DOES GOTOP00H
+                TCF             KILLAOT                 # V34-DOES GOTOPOOH
                 TCF             DODAT                   # V33-PROCEED-USE THIS STAR FOR MARKS
 ENTERDAT        TCF             GETDAT                  # ENTER-REDISPLAY STAR CODE
 
@@ -115,7 +117,7 @@ CODE7           CAF             V06N87*                 # CODE 7, COAS SIGHTING,
                 TC              BANKCALL                # AZ AND EL OF SIGHTING DEVICE FROM ASTRO
                 CADR            GOMARKF
 
-                TCF             KILLAOT                 # V34-DOES GOTOP00H
+                TCF             KILLAOT                 # V34-DOES GOTOPOOH
                 TCF             +2                      # PROCEED
                 TCF             CODE7                   # ON ENTER, RECYCLE
                 EXTEND
@@ -443,7 +445,7 @@ PASTIT          CAF             LOW9                    # FREE UP MARKRUPT RETAI
                 TC              BANKCALL
                 CADR            GOMARK2
 
-                TCF             KILLAOT                 # V34-DOES GOTOP00H
+                TCF             KILLAOT                 # V34-DOES GOTOPOOH
                 TCF             MARKCHEX                # VB33-PROCEED, GOT MARKS, COMPUTE LOS
                 CS              BIT6
                 MASK            MPAC
@@ -556,7 +558,7 @@ MKALARM         TC              ALARM                   # NOT A PAIR TO PROCESS-
 
 ASKASTR         CAF             OCT16
                 TS              DSPTEM1
-                CS              NOMKCNT
+                CA              NOMKCNT
                 TS              DSPTEM1         +1
                 CAF             V50N25
                 TC              BANKCALL

@@ -5,6 +5,7 @@
 # Mod history:	2011-05-03 JL	Created.
 #               2012-09-16 JL   Added binsource2bin.
 #               2012-09-17 JL   Renamed binsource2bin to listing2binsource.
+#		2016-12-12 RSB	Added boxAGC
 
 ifndef PREFIX
 PREFIX=/usr/local
@@ -13,6 +14,7 @@ endif
 TARGETS=listing2binsource oct2bin bdiffhead checkdec webb2burkey-rope split-interp
 
 default: ${TARGETS}
+	$(MAKE) -C boxAGC
 
 listing2binsource: listing2binsource.c utils.c
 	${cc} ${CFLAGS} -DNVER=${NVER} -DINSTALLDIR=${PREFIX}/bin -DMAIN_PROGRAM -o $@ $^ -lm
@@ -34,4 +36,5 @@ split-interp: split-interp.c
 
 clean:
 	-rm -f ${TARGETS} *.o *.exe *-macosx 
+	$(MAKE) -C boxAGC clean
 

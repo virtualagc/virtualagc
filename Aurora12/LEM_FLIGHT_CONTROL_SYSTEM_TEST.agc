@@ -8,6 +8,8 @@
 ## Pages:        431-443
 ## Mod history:  2016-09-20 JL   Created.
 ##               2016-09-27 MAS  Filled out.
+##		 2016-12-08 RSB	 Proofed comments with octopus/ProoferComments
+##				 and fixed the errors found.
 
 ## This source code has been transcribed or otherwise adapted from
 ## digitized images of a hardcopy from the private collection of 
@@ -39,7 +41,7 @@
 #            (2) ENGINE ON - OFF TASK
 #            (3) DESCENT ENGINE GIMBAL TRIM TASK
 #            (4) DESCENT ENGINE THROTTLE TASK
-#            (5) INTERFACE CONTROL CHANNEL LOOK TASK
+#            (5) INTERFACE CHANNEL LOOK TASK
 
 
 FCSSTART        TC              GRABWAIT                        # SO NOTHING DISRUPTS THE LOAD.
@@ -224,7 +226,7 @@ XJETMASK        OCT             00040                           # JET 10
 # THIS TASK TURNS THE LEM ASCENT OR DESCENT ENGINE ON AND OFF ACCORDING TOTHE CONSTANTS STORED IN THE FIVE SETS OF
 # REGISTERS, (1) CYLTIMES, WHICH CONTAINS THE NUMBER OF TIMES A PARTICULARSTEP WILL BE REPEATED, (2) NEXTCYLT,
 #  WHICH CONTAINS THE TIME BETWEEN STEPS SCALED FOR T3, (3) ONTIME, WHICH CONTAINS THE TIME TO TURN THE ENGINE ON
-# WHICH ALSO DETERMINES THE LENGTH OF TIME THE ENGINE WILL BE OFF WITHIN A SERIES OF ON:OFF CYCLES, (4) OFFTIME,
+# WHICH ALSO DETERMINES THE LENGTH OF TIME THE ENGIME WILL BE OFF WITHIN A SERIES OF ON:OFF CYCLES, (4) OFFTIME,
 #  WHICH CONTAINS THE NUMBER OF 2 MINUTES BEFORE THE ENGINE WILL BE TURNED OFF, AND (5) OFFTIMER, WHICH
 # CONTAINS THE RESIDUAL TIME BEFORE THE ENGINE WILL BE TURNED OFF.  OFFTIME AND OFFTIMER DETERMINE THE LENGTH
 # OF TIME THE ENGINE WILL BE ON IN ANY ONE CYCLE. THERE ARE THREE SETS OF THESE REGISTERS.
@@ -456,7 +458,7 @@ THRSTART        NDX             THRTSTEP                        # ENTER HERE.
                 TC              TASKOVER
 
 THR2COMM        NDX             THRTSTEP
-                CAE             THCOMM2                         # SAME REMARKS AS FOR THCOMM1
+                CAE             THCOMM2                         # SAME REMARKS AS FOR THCOMM1.
                 TC              THROTON
                 AD              BIT1                            # 10MS IN CASE OF NO THCOMM2.
                 TC              WAITLIST

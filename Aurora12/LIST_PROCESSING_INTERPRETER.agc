@@ -13,6 +13,8 @@
 ##               2016-10-15 HG   fix label EIHGT -> EIGHT 
 ##                               fix operand BIT14 -> BIT4   
 ##               2016-10-16      fix label NEGO -> NEG0  
+##		 2016-12-07 RSB	 Proofed comments with octopus/ProoferComments
+##				 and made changes.
 
 ## This source code has been transcribed or otherwise adapted from
 ## digitized images of a hardcopy from the private collection of
@@ -34,7 +36,7 @@
 
 
 ## Page 34
-# SECTION 1:  DISPATCHER
+# SECTION 1  DISPATCHER
 #
 #          ENTRY TO THE INTERPRETER. INTPRET SETS LOC TO THE FIRST INSTRUCTION, BANKSET TO THE FBANK OF THE
 # OBJECT INTERPRETIVE PROGRAM, AND INTBIT15 TO THE BIT15 CONTENTS OF FBANK. INTERPRETIVE PROGRAMS MAY BE IN
@@ -68,7 +70,7 @@ DANZIG          CA              BANKSET                 # SET BBANK BEFORE TESTI
 
 NOIBNKSW        CCS             EDOP                    # SEE IF AN ORDER CODE IS LEFT OVER FROM
                 TCF             OPJUMP                  # THE LAST PAIR RETRIEVED. IF SO, EXECUTE.
-                                                        # EDOP IS SET TO ZERO ON ITS RE-EDITIING.
+                                                        # EDOP IS SET TO ZERO ON ITS RE-EDITING.
 
                 CCS             NEWJOB                  # SEE IF A JOB OF HIGHER PRIORITY IS
                 TCF             CHANG2                  # PRESENT, AND IF SO, CHANGE JOBS.
@@ -109,7 +111,7 @@ NEG4            DEC             -4
 
 ## Page 37
 #          FINAL DIGESTION OF DIRECT ADDRESSES OF OP CODES WITH 01 PREFIX IS DONE HERE. IN EACH CASE, THE
-# REQUIRED 12-BIT SUB-ADDRESS IS LEFT IN ADDRWD, WITH ANY REQUIRED BANK SWITCHING DONE (F ONLY). ADDRESSES LESS
+# REQUIRED 12 BIT SUB-ADDRESS IS LEFT IN ADDRWD, WITH ANY REQUIRED BANK SWITCHING DONE (F ONLY). ADDRESSES LESS
 # THAN 45D ARE TAKEN TO BE RELATIVE TO THE WORK AREA. THE OP CODE IS NOW IN BITS 1-5 OF CYR WITH BIT 14 = 1.
 
 
@@ -125,7 +127,7 @@ NETZERO         CA              FIXLOC                  # IF SO, LEAVE THE MODIF
                 7               INDJUMP         -1      # TCF INDJUMP + OP, EDITING CYR.
 
 IERASTST        EXTEND
-                BZMF            NETZERO         +2      # GENERAL ERASABLE - DISPATCH IMMEDIATELY
+                BZMF            NETZERO         +2      # GENERAL ERASABLE - DISPATCH IMMEDIATELY.
 
 FIXEDADR        AD              INTB15+                 # FIXED BANK ADDRESS. RESTORE AND ADD B15.
  +1             TS              FBANK                   # SWITCH BANKS AND LEAVE SUB-ADDRESS IN
@@ -203,7 +205,7 @@ PUSHUP          CAF             OCT23                   # IF THE LOW 5 BITS OF C
                 MASK            CYR                     # 20, THIS OP REQUIRES SPECIAL ATTENTION.
                 AD              -OCT10                  # (NO -0).
                 CCS             A
-                TCF             REGUP                   # FOR ALL CODES GREATEER THAN OCT 7.
+                TCF             REGUP                   # FOR ALL CODES GREATER THAN OCT 7.
 
 -OCT10          OCT             -10
 
@@ -235,7 +237,7 @@ NO.WDS          OCT             2                       # CONVENTIONAL DECREMENT
 #          TEST THE SECOND PREFIX BIT TO SEE IF THIS IS A MISCELLANEOUS OR A UNARY/SHORT SHIFT OPERATION.
 
 OPJUMP2         CCS             CYR                     # TEST SECOND PREFIX BIT.
-                TCF             OPJUMP3                 # TEST THIRD BIT TO SEE IF UNARY OR SHIFT
+                TCF             OPJUMP3                 # TEST THIRD BIT TO SEE IF UNARY OR SHIFT.
 
 -ENDVAC         DEC             -45
 
@@ -247,12 +249,12 @@ OPJUMP2         CCS             CYR                     # TEST SECOND PREFIX BIT
                 INDEX           LOC                     # PICK UP ADDRESS WORD.
                 CA              0
                 TS              POLISH                  # THE ABSOLUTE ADDRESS WILL BE LEFT IN
-                TS              ADDRWD                  # POLISH WITH AN EERASABLE SUBADDRESS IN
-                                                        # ADDRWD
-                MASK            HIGH9                   # SEE IF RELATIVE TO WORK AREA
+                TS              ADDRWD                  # POLISH WITH AN ERASABLE SUBADDRESS IN
+                                                        # ADDRWD.
+                MASK            HIGH9                   # SEE IF RELATIVE TO THE WORK AREA.
                 CCS             A
                 TCF             +2
-                TCF             RELWORK                 # ONLY IF ZERO
+                TCF             RELWORK                 # ONLY IF ZERO.
 
                 CAF             LOW7+2K                 # THESE INSTRUCTIONS ARE IN BANK 1.
                 TS              FBANK
@@ -300,7 +302,7 @@ INDJUMP         TCF             VLOAD                   # 00 - LOAD MPAC WITH A 
                 TCF             CGOTO                   # 04 - COMPUTED GO TO.
                 TCF             TLOAD                   # 05 - LOAD MPAC WITH TRIPLE PRECISION.
                 TCF             DLOAD                   # 06 - LOAD MPAC WITH A DP SCALAR.
-                TCF             V/SC                    # 07 - VECTOR DIVIDED BY A SCALAR.
+                TCF             V/SC                    # 07 - VECTOR DIVIDED BY SCALAR.
 
                 TCF             SLOAD                   # 10 - LOAD MPAC IN SINGLE PRECISION.
                 TCF             SSP                     # 11 - SET SINGLE PRECISION INTO X.
@@ -314,7 +316,7 @@ INDJUMP         TCF             VLOAD                   # 00 - LOAD MPAC WITH A 
                 TCF             DMPR                    # 20 - DP MULTIPLY AND ROUND.
                 TCF             DDV                     # 21 - DP DIVIDE BY.
                 TCF             BDDV                    # 22 - DP DIVIDE INTO.
-                TCF             GSHIFT                  # 23 - GENERAL SHIFT INSTRUCTION
+                TCF             GSHIFT                  # 23 - GENERAL SHIFT INSTRUCTION.
                 TCF             VAD                     # 24 - VECTOR ADD.
                 TCF             VSU                     # 25 - VECTOR SUBTRACT.
                 TCF             BVSU                    # 26 - VECTOR SUBTRACT FROM.
@@ -345,7 +347,7 @@ MISCJUMP        TCF             AXT                     # 00 - ADDRESS TO INDEX 
 
                 TCF             XAD                     # 10 - INDEX REGISTER ADD FROM ERASABLE.
                 TCF             XSU                     # 11 - INDEX SUBTRACT FROM ERASABLE.
-                TCF             BZE/GOTO                # 12 - BRANCH ZERO AND GOTO
+                TCF             BZE/GOTO                # 12 - BRANCH ZERO AND GOTO.
                 TCF             BPL/BMN                 # 13 - BRANCH PLUS AND BRANCH MINUS.
                 TCF             CALL/ITA                # 14 - CALL AND STORE QPRET.
                 TCF             RTB/BHIZ                # 15 - RETURN TO BASIC AND BRANCH HI ZERO.
@@ -353,9 +355,9 @@ MISCJUMP        TCF             AXT                     # 00 - ADDRESS TO INDEX 
                 TCF             BOV(B)                  # 17 - BRANCH ON OVERFLOW TO BASIC OR INT.
 
 ## Page 44
-#          THE FOLLOWING JUMP TABLE APPLIES TO UNARY INSTRUCTIONS.
+#          THE FOLLOWING JUMP TABLE APPIES TO UNARY INSTRUCTIONS.
 
-                                                        # 00 - EXIT -- DETECTED EARLIER.
+                                                        # 00 - EXIT - DETECTED EARLIER.
 UNAJUMP         TCF             SQRT                    # 01 - SQUARE ROOT.
                 TCF             SINE                    # 02 - SIN.
                 TCF             COSINE                  # 03 - COS.
@@ -364,7 +366,7 @@ UNAJUMP         TCF             SQRT                    # 01 - SQUARE ROOT.
                 TCF             DSQ                     # 06 - DP SQUARE.
                 TCF             ROUND                   # 07 - ROUND TO DP.
 
-                TCF             COMP                    # 10 - COMPLEMENT VECTOR OR SCALAR
+                TCF             COMP                    # 10 - COMPLEMENT VECTOR OR SCALAR.
                 TCF             VDEF                    # 11 - VECTOR DEFINE.
                 TCF             UNIT                    # 12 - UNIT VECTOR.
                 TCF             ABVALABS                # 13 - LENGTH OF VECTOR OR MAG OF SCALAR.
@@ -382,7 +384,7 @@ UNAJUMP         TCF             SQRT                    # 01 - SQUARE ROOT.
 # FOLLOWING THE STORE CODE IS TO BE USED AS AN ADDRESS FROM WHICH TO RE-LOAD MPAC. FOUR OPTIONS ARE AVAILABLE:
 
 #          1. STORE               STORE MPAC. THE E ADDRESS MAY BE INDEXED.
-#          2. STODL               STORE MPAC AND RE-LOAD IT IN DP WITH THE NEXT ADDRESS (THE LOAD MAY BE INDEXED).
+#          2. STODL               STORE MPAC AND RE-LOAD IT IN DP WITH THE NEXT ADDRESS (EITHER MAY BE INDEXED).
 #          3. STOVL               STORE MPAC AND RE-LOAD A VECTOR (AS ABOVE).
 #          4. STCALL              STORE AND DO A CALL (BOTH ADDRESSES MUST BE DIRECT HERE).
 
@@ -461,7 +463,7 @@ STORE,2         INDEX           FIXLOC
                 CS              X2
 PRESTORE        ADS             ADDRWD                  # RESULTANT ADDRESS IS IN ERASABLE.
 
-STORE           CA              ADDRWD                  # SEE IF ADDRESS REALTIVE TO WORK AREA.
+STORE           CA              ADDRWD                  # SEE IF ADDRESS RELATIVE TO WORK AREA.
                 AD              -ENDVAC
                 CCS             A
                 TCF             STARTSTO                # ADDRESS OK AS IS.
@@ -500,7 +502,7 @@ TSTORE          CA              MPAC            +2
                 TC              Q
 
 ## Page 49
-#          ROUTINES TO BEGIN PROCESSING OF THE SECOND ADDRES ASSOCIATED WITH ALL STORE-TYPE CODES EXCEPT STORE
+#          ROUTINES TO BEGIN PROCESSING OF THE SECOND ADDRESS ASSOCIATED WITH ALL STORE-TYPE CODES EXCEPT STORE
 # ITSELF.
 
 DODLOAD         CAF             DLOADCOD
@@ -522,7 +524,7 @@ DLOAD           EXTEND
                 DCA             0                       # PICK UP DP ARGUMENT AND LEAVE IT IN
 SLOAD2          DXCH            MPAC                    # MPAC,+1, SETTING MPAC +2 TO ZERO. THE
                 CAF             ZERO                    # CONTENTS OF THE OTHER FOUR REGISTERS OF
-                TS              MPAC            +2      # MPAC ARE IRRELEVANT
+                TS              MPAC            +2      # MPAC ARE IRRELEVANT.
                 TCF             NEWMODE                 # DECLARE DOUBLE PRECISION MODE.
 
 TLOAD           INDEX           ADDRWD
@@ -669,7 +671,7 @@ STORE1          INDEX           ADDRWD                  # SOME INDEX AND MISCELL
 #          8. BZE                 BRANCH IF MPAC ZERO.
 #          9. BMN                 BRANCH IF MPAC NEGATIVE NON-ZERO.
 
-CCALL           INCR            LOC                     # MAINTAIN LOC FOR QPRET COMPUTATION
+CCALL           INCR            LOC                     # MAINTAIN LOC FOR QPRET COMPUTATION.
                 INDEX           LOC
                 CAF             0                       # GET BASE ADDRESS OF CADR LIST.
                 INDEX           ADDRWD
@@ -705,7 +707,7 @@ GOTO            CA              POLISH                  # BASIC BRANCHING SEQUEN
 
                 INDEX           LOC
                 CA              0               -2000   # (ADDRESS HAD BEEN AUGMENTED BY 2000.)
-                TCF             GOTO            +1      # ALLOWS ARBITRARY INDICRECTNESS.
+                TCF             GOTO            +1      # ALLOWS ARBITRARY INDIRECTNESS.
 
 CGOTO           INDEX           LOC                     # COMPUTED GO TO. PICK UP ADDRESS OF CADR
                 CA              1                       # LIST.
@@ -748,7 +750,7 @@ BRANCH          CCS             MPAC
                 TCF             +2
                 TCF             NEG
 
-                INDEX           Q                       # IF ALL THREE REGISTERS WHERE +-0.
+                INDEX           Q                       # IF ALL THREE REGISTERS WERE +-0.
                 TC              1
 
 NEG             INDEX           Q                       # IF FIRST NON-ZERO REGISTER WAS NEGATIVE.
@@ -1061,7 +1063,7 @@ POLY2           TC              DMPSUB                  # MULTIPLY BY X
                 EXTEND
                 INDEX           POLISH
                 DCA             1                       # ADD IN NEXT COEFFICIENT
-                DAS             MPAC                    # USER'S RESPONSIBILITY TO ASSURE NO OVFLOW
+                DAS             MPAC                    # USERS RESPONSIBILITY TO ASSURE NO OVFLOW
 
                 CCS             POLYCNT
                 TCF             POLYLOOP
@@ -1072,7 +1074,7 @@ POLY2           TC              DMPSUB                  # MULTIPLY BY X
 
 TPAGREE         EXTEND                                  # FORCE SIGN AGREEMENT AMONG THE TRIPLE-
                 QXCH            BUF                     # PRECISION CONTENTS OF MPAC, RETURNING
-                TC              BRANCH                  # WITH SIGNUM OF THE INPUT IN A.
+                TC              BRANCH                  # WITH THE SIGNUM OF THE INPUT IN A.
                 TCF             ARG+
                 TCF             ARGZERO
 
@@ -1110,7 +1112,7 @@ SHORTMP         TS              MPTEMP
                 EXTEND
                 MP              MPTEMP
                 DAS             MPAC            +1
-                XCH             MPAC                    # SETTING MAPC TO 0.
+                XCH             MPAC                    # SETTING MPAC TO 0.
                 EXTEND
                 MP              MPTEMP
                 DAS             MPAC
@@ -1248,8 +1250,8 @@ DVXSC           EXTEND                                  # SAVE SCALAR IN MPAC +3
                 TCF             NEWMODE
 
 ## Page 71
-#          VECTOR CROSS PRODUCT ROUTINE CALCULATES (X M -X M ,X M -X M ,X M -X M ) WHERE M IS THE VECTOR IN
-#                                                    3 2  2 3  1 3  3 1  2 1  1 2
+#          THE VECTOR CROSS PRODUCT ROUTINE CALCULATES (X M -X M ,X M -X M ,X M -X M ) WHERE M IS THE VECTOR IN
+#                                                        3 2  2 3  1 3  3 1  2 1  1 2
 # MPAC AND X THE VECTOR AT THE GIVEN ADDRESS.
 
 
@@ -1322,7 +1324,7 @@ MPACVBUF        EXTEND                                  # CALLED BY MXV, VXM, AN
 ## Page 73
 #          INTERPRETIVE INSTRUCTIONS WHOSE EXECUTION CONSISTS OF PRINCIPALLY CALLING SUBROUTINES.
 
-DMP1            TC              DMPSUB                  # DMP INSTRUCTIONS
+DMP1            TC              DMPSUB                  # DMP INSTRUCTION.
                 TCF             DANZIG
 
 DMPR            TC              DMPSUB
@@ -1395,13 +1397,13 @@ DV/SC           EXTEND
 
 SIGN            INDEX           ADDRWD                  # CALL COMP INSTRUCTION IF WORD AT X IS
                 CCS             0                       # NEGATIVE NON-ZERO.
-                TCF             NOIBNKSW
+                TCF             NOIBNKSW		# NO FBANK SWITCH REQUIRED.
                 TCF             +2
                 TCF             COMP                    # DO THE COMPLEMENT.
 
                 INDEX           ADDRWD
                 CCS             1
-                TCF             NOIBNKSW                # NO FBANK SWITCH REQIURED.
+                TCF             NOIBNKSW                # NO FBANK SWITCH REQUIRED.
                 TCF             NOIBNKSW                # NO FBANK SWITCH REQUIRED.
                 TCF             COMP
                 TCF             NOIBNKSW                # NO FBANK SWITCH REQUIRED.
@@ -1429,7 +1431,7 @@ DCOMP           CS              MPAC            +2
                 TCF             DANZIG
 
 ## Page 76
-#          CONSTANTS REQUIRED IN FIXED-FIXED
+#          CONSTANTS REQUIRED IN FIXED-FIXED.
 
 DPOSMAX         OCT             37777
 POSMAX          OCT             37777
@@ -1506,7 +1508,7 @@ ENDINTF         EQUALS
 #          5.  VSR1 TO VSR8       VECTOR SHIFT RIGHT (ALWAYS ROUNDS).
 #          6.  VSL1 TO VSL8       VECTOR SHIFT LEFT (NEVER ROUNDS).
 
-#          THE FOLLOWING CODES REQUIRE AND ADDRESS WHICH MAY BE INDEXED:*
+#          THE FOLLOWING CODES REQUIRE AN ADDRESS WHICH MAY BE INDEXED:*
 
 #          1.  SR                 SCALAR SHIFT RIGHT.
 #          2.  SRR                SCALAR SHIFT RIGHT AND ROUND.
@@ -1554,7 +1556,7 @@ MPACSHR         CA              MPTEMP                  # DO A TRIPLE PRECISION 
                 DAS             MPAC            +1      # GUARANTEED NO OVERFLOW.
                 TCF             DANZIG
 
-#          MPAC SHIFT RIGHT AND ROUND SUBROUTINES
+#          MPAC SHIFT RIGHT AND ROUND SUBROUTINES.
 
 MPACSRND        CA              MPAC            +2      # WE HAVE TO DO ALL THREE MULTIPLIES SINCE
                 EXTEND                                  # MPAC +1 AND MPAC +2 MIGHT HAVE SIGN
@@ -1606,7 +1608,7 @@ TSSL            CA              SR                      # GET SHIFT COUNT FOR SR
                 CCS             CYR                     # SEE IF ROUND WANTED.
 ROUND           TC              ROUNDSUB                # YES - ROUND AND EXIT.
                 TCF             DANZIG                  # SL LEAVES A ZERO IN CYR FOR NO ROUND.
-                TCF             DANZIG                  # NO - EXIT IMMEDIATELY
+                TCF             DANZIG                  # NO - EXIT IMMEDIATL
 
 ## Page 81
 # VECTOR SHIFTING ROUTINES.
@@ -1683,7 +1685,7 @@ TSLCLOOP        INCR            MPTEMP                  # INCREMENT SHIFT COUNTE
                 DAS             MPAC            +1
                 AD              MPAC
                 ADS             MPAC
-TSLCTEST        DOUBLE                                  # SEE IF (ANOTHER) SHIFT IS REQUIRED
+TSLCTEST        DOUBLE                                  # SEE IF (ANOTHER) SHIFT IS REQUIRED.
                 OVSK
                 TCF             TSLCLOOP                # YES - INCREMENT COUNT AND SHIFT AGAIN.
 
@@ -1697,7 +1699,7 @@ ENDTSLC         CS              MPTEMP
 #          BITS 1-7        SHIFT COUNT (SUBADDRESS) LESS THAN 125 DECIMAL.
 #          BIT 8           PSEUDO SIGN BIT (DETECTS CHANGE IN SIGN IN INDEXED SHIFTS).
 #          BIT 9           0 FOR LEFT SHIFT, AND 1 FOR RIGHT SHIFT.
-#          BIT 10          1 FOR TERMINAL ROUND ON SCALAR SHIFTS, 0 OTHERWISE
+#          BIT 10          1 FOR TERMINAL ROUND ON SCALAR SHIFTS, 0 OTHERWISE.
 #          BITS 11-15      0.
 
 # THE ABOVE ENCODING IS DONE BY THE YUL SYSTEM.
@@ -1720,19 +1722,19 @@ GENSHFT2        TS              MPTEMP                  # DECREMENTED SHIFT COUN
                 MP              ADDRWD
                 MASK            LOW2                    # JUMPS ON SHIFT DIRECTION (BIT8) AND
                 INDEX           A
-                TCF             +1                      # ORIGINAL SHIFT DIRECTION (BIT 9)
+                TCF             +1                      # ORIGINAL SHIFT DIRECTION (BIT 9).
                 TCF             RIGHT-                  # NEGATIVE SHIFT COUNT FOR SL OR SLR.
                 TCF             LEFT                    # SL OR SLR.
                 TCF             LEFT-                   # NEGATIVE SHIFT COUNT WITH SR OR SRR.
 
 ## Page 85
-#          GENERAL SHIFT RIGHT
+#          GENERAL SHIFT RIGHT.
 
 RIGHT           CCS             MODE                    # SET IF VECTOR OR SCALAR.
                 TCF             GENSCR
                 TCF             GENSCR
 
-                CA              MPTEMP                  # SEE IF SHIFT COUNT LESS THAN 13D.
+                CA              MPTEMP                  # SEE IF SHIFT COUNT GREATER THAN 13D.
 VRIGHT2         AD              NEG12
                 EXTEND
                 BZMF            VSSR                    # IF SO, BRANCH AND SHIFT IMMEDIATELY.
@@ -1829,9 +1831,9 @@ GENSCL          CAF             BIT6                    # PUT ROUNDING BIT (BIT1
 
 ## Page 88
 #          SCALAR DIVISION INSTRUCTIONS, DDV AND BDDV, ARE EXECUTED HERE. AT THIS POINT, THE DIVIDEND IS IN MPAC
-# AND THE DIVISOR IS IN BUF.
+# AND THE DIVISOR IN BUF.
 
-DDV/BDDV        CS              ONE                     # INITIALIZATION
+DDV/BDDV        CS              ONE                     # INITIALIZATION.
                 TS              DVSIGN                  # +-1 FOR POSITIVE QUOTIENT - -0 FOR NEG.
                 TS              DVNORMCT                # DIVIDEND NORMALIZATION COUNT.
                 TS              MAXDVSW                 # NEAR-ONE DIVIDE FLAG.
@@ -1841,11 +1843,11 @@ DDV/BDDV        CS              ONE                     # INITIALIZATION
                 TCF             +2
                 TCF             BUF-
 
-                XCH             BUF             +1      # SHIFT DIVIDEND AND DIVISOR LEFT 14
+                XCH             BUF             +1      # SHIFT DIVIDEND AND DIVISOR LEFT 14.
                 XCH             BUF
                 XCH             MPAC            +1
                 XCH             MPAC
-                EXTEND                                  # CHECK FOR OVERFLOW
+                EXTEND                                  # CHECK FOR OVERFLOW.
                 BZF             +2
                 TCF             DVOVF
 
@@ -1953,7 +1955,7 @@ DVNORM          CA              BUF                     # SEE IF DIVISOR NORMALI
 
                 DDOUBL                                  # PROLOGUE WHICH NORMALIZES THE DIVIDEND
                 DDOUBL                                  # WHEN IT IS KNOWN THAT NO DIVISION
-                DDOUBL                                  # OVEFLOW WILL OCCUR.
+                DDOUBL                                  # OVERFLOW WILL OCCUR.
                 DDOUBL
                 DDOUBL
                 DDOUBL
@@ -1967,9 +1969,9 @@ DVNORM          CA              BUF                     # SEE IF DIVISOR NORMALI
                 DXCH            MPAC
 
 MAXTEST         CCS             MAXDVSW                 # 0 IF MAJORS MIGHT BE =, -1 OTHERWISE.
-BIASHI          DEC             .4192           B-1     # SQRT CONSTANTS.
+BIASHI          DEC             .4192           B-1     # SQRT CONSTANTS
 
-                TCF             MAXDV                   # CHECK TO SEE IF THAY ARE NOW EQUAL.
+                TCF             MAXDV                   # CHECK TO SEE IF THEY ARE NOW EQUAL.
 
 ## Page 93
 #          THE FOLLOWING IS A GENERAL PURPOSE DOUBLE PRECISION DIVISION ROUTINE. IT DIVIDES MPAC BY BUF AND LEAVES
@@ -2061,7 +2063,7 @@ MAXDV           CS              MPAC                    # SEE IF MAXDV CASE STIL
                 AD              BUF                     # NORMALIZATION.
                 EXTEND
                 BZF             +2
-                TCF             GENDDV                  # MPAC NOW LESS THAN BUFF - DIVIDE AS USUAL.
+                TCF             GENDDV                  # MPAC NOW LESS THAN BUF - DIVIDE AS USUAL
 
  +2             CAF             POSMAX                  # SET MAJOR PART OF RESULT.
                 TS              MPAC
@@ -2212,7 +2214,7 @@ SLOPELO         DEC             .8324
 ## Page 101
 #          THE FOLLOWING ROUTINE EXECUTES THE UNIT INSTRUCTION, WHICH TAKES THE UNIT OF THE VECTOR IN MPAC.
 
-UNIT            TC              MPACVBUF                # SAVE ARGUMENT IN VBUF
+UNIT            TC              MPACVBUF                # SAVE THE ARGUMENT IN VBUF.
                 CAF             ZERO                    # MUST SENSE OVERFLOW IN FOLLOWING DOT.
                 XCH             OVFIND
                 TS              TEM1
@@ -2440,7 +2442,7 @@ RVQ             INDEX           FIXLOC                  # RVQ - RETURN IVA QPRET
                 TCF             GOTO            +1
 
 ## Page 107
-#          THE FOLLOWING SUBROUTINES ARE USED IN SQUARING MPAC, IN BOTH THE SCALAR AND VECTOR SENSE.  THEY ARE
+#          THE FOLLOWING SUBROUTINES ARE USED IN SQUARING MPAC, IN BOTH THE SCALAR AND VECTOR SENSE. THEY ARE
 # SPECIAL CASES OF DMPSUB AND DOTSUB, PUT IN TO SAVE SOME TIME.
 
 DSQSUB          CA              MPAC            +1      # SQUARES THE SCALAR CONTENTS OF MPAC.
@@ -2558,7 +2560,7 @@ ARGHI           CAF             SLOPEHI                 # ARGUMENT BETWEEN .25 A
                 DV              BUF                     # (MPAC/2)/(X0/2)
                 EXTEND
                 MP              HALF
-                ADS             BUF                     # X1 = X0/2 + .5(MPAX/2)/(X0/2).
+                ADS             BUF                     # X1 = X0/2 + .5(MPAC/2)/(X0/2).
 
                 EXTEND
                 MP              HALF                    # FORM UP X1/2.
@@ -2624,7 +2626,7 @@ NORMTEST        CCS             CYL                     # SEE IF ARGUMENT NOW NO
 ## Page 111
 # TRIGONOMETRIC FUNCTION PACKAGE.
 
-#          THE FOLLOWING TRIGONOMETRIC FUNCTIONS ARE AVAIALABLE AS INTERPRETIVE OPERATIONS:
+#          THE FOLLOWING TRIGONOMETRIC FUNCTIONS ARE AVAILABLE AS INTERPRETIVE OPERATIONS:
 
 #          1.      SIN            COMPUTES (1/2)SINE(2 PI MPAC).
 #          2.      COS            COMPUTES (1/2)COSINE(2 PI MPAC).
@@ -2632,7 +2634,7 @@ NORMTEST        CCS             CYL                     # SEE IF ARGUMENT NOW NO
 #          3.      ASIN           COMPUTES (1/2PI)ARCSINE(2 MPAC).
 #          4.      ACOS           COMPUTES (1/2PI)ARCCOSINE(2 MPAC).
 
-# SIN-ASIN AND COS-ACOS ARE MUTUALLY INVERSE, I.E., SIN(ASIN(X)) = X.
+# SIN-ASIN AND COS-ACOS ARE MUTUALLY INVERSE, IE SIN(ASIN(X)) = X.
 
 COSINE          TC              BRANCH                  # FINDS COSINE USING THE IDENTITY
                 TCF             +3                      # COS(X) = SIN(PI/2 - ABS(X)).
@@ -2818,7 +2820,7 @@ ENDINTS0        EQUALS
 #          3.  LXA                LOAD INDEX FROM ERASABLE.
 #          4.  LXC                LOAD INDEX COMPLEMENTED FROM ERASABLE.
 #          5.  SXA                STORE INDEX IN ERASABLE.
-#          6.  XCHX               EXCHANGE INDEX REGISTER WITH ERASABLE.
+#          6.  XCHX               EXCHANGE INDEX REIGSTER WITH ERASABLE.
 
 #          7.  INCR               INCREMENT INDEX REGISTER.
 #          8.  XAD                ERASABLE ADD TO INDEX REGISTER.
@@ -2840,7 +2842,7 @@ AXC             TC              TAGSUB
                 CS              POLISH
                 TC              XSTORE
 
-LXA             TC              TAGSUB                  # LOAD INDEX REGISTER FROM ERASABLE.
+LXA             TC              TAGSUB                  # LOAD INDEX FROM ERASABLE.
                 INDEX           ADDRWD
                 CA              0
                 TCF             XSTORE
@@ -2924,7 +2926,7 @@ RTB             CA              POLISH
 ##              TC      SWCALL  -1      # SO A "TC Q" FROM ROUTINE LEADS TO DANZIG
 
 BHIZ            CCS             MPAC
-## Note: In the scan the above line has a box marked arround the BHIZ label.
+## Note: In the scan the above line has a box marked around the BHIZ label.
                 TCF             DANZIG
 ## Note: in the scan the above line has an arrow mark appended to the instruction pointing to the operator DANZIG
 ##       i.e. looks like  TCF   DANZIG <--
@@ -2952,7 +2954,7 @@ BPL/BMN         CCS             CYR
                 TCF             BPL
 5B10            DEC             5               B+10    # SHIFTS OP CODE IN SWITCH INSTRUCTION ADR
 
-                TC              BRANCH                  # DO BMN
+                TC              BRANCH                  # DO BMN.
                 TCF             DANZIG
                 TCF             DANZIG
                 TCF             GOTO                    # ONLY IF NNZ.
@@ -3047,11 +3049,11 @@ SWSTORE         INDEX           SWWORD
 ## Page 122
  +13D           RELINT                                  # 11 - NOOP.
                 CAF             BIT13
-                EXTEND                                  # DISPATCH SEQUENCE CHANGING OR BRANCHING
+                EXTEND                                  # DISPATCH SEQUCE CHANGING OR BRANCHING
                 MP              POLISH                  # CODE.
                 MASK            B3TOB4
                 INDEX           A
-                TCF             +1                      # ORIGINALLY STORED IN BITS 5-6
+                TCF             +1                      # ORIGINALLY STORED IN BITS 5-6.
 
  +1             CS              Q                       # 00 - BRANCH IF ON.
 TEST            MASK            SWBIT

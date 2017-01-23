@@ -9,6 +9,8 @@
 ## Website:      www.ibiblio.org/apollo/index.html
 ## Mod history:  2016-09-30 RSB  Created draft version.
 ##               2016-10-30 MAS  Transcribed.
+##		 2016-12-06 RSB	 Comment-proofing via octopus/ProoferComments;
+##				 changes were made.
 
 ## Page 844
                 BANK            30
@@ -66,7 +68,7 @@ MASSMON         DLOAD           BOFF
                 EXIT
 
                 CA              ETHROTL
-                TS              EBANK                           # JUST TO INSURE HAVING THE PROPER BANK
+                TS              EBANK                           # JUST TO INSURE HAVING THE PROPER EBANK
                 EBANK=          ETHROT
 
                 EXTEND
@@ -255,6 +257,6 @@ VXSTEP4         2DEC            +.4694933687                    # ABOUT 3004.75 
 HIFSTEP         DEC             +.9999999999                    # JUST IN CASE, ANOMALOUSLY,
 HISLOPE         DEC             +.0000000000                    #   PREFORCE APPEARS TO
 HIVXSTEP        2DEC            +.4694933687                    #   EXCEED 100%.
-                                                                # * * * * * * * * * * * * * * * * * * * *
+                                                                # * * * * * * * * * * * * * * * * * * * * *
 
 ETHROTL         ECADR           ETHROT

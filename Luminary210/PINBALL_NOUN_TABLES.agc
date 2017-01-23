@@ -16,6 +16,8 @@
 ##              2016-11-21 MAS  Began corrections.
 ##              2016-11-22 MAS  Completed corrections. There's some new nouns, as well
 ##                              as some changes to old ones.
+##              2016-12-11 HG   fix operand DSPTEM1 -> N26/PRI
+##              2016-12-12 HG   fix value for forward/lateral velocity
 
 ## Page 313
 # THE FOLLOWING REFERS TO THE NOUN TABLES
@@ -225,7 +227,7 @@ NNADTAB		OCT	00000			# 00 NOT IN USE
 		ECADR	DSPTEM2 +1		# 24 DELTA TIME FOR AGC CLOCK(HRS,MIN,SEC)
 		ECADR	DSPTEM1			# 25 CHECKLIST
 						#       (USED WTIH PLEASE PERFORM ONLY)
-		ECADR	DSPTEM1			# 26 PRIO/DELAY, ADRES, BBCON
+		ECADR	N26/PRI			# 26 PRIO/DELAY, ADRES, BBCON
 		ECADR	SMODE			# 27 SELF TEST ON/OFF SWITCH
 ## Page 318
 		OCT	00000			# 28 SPARE
@@ -628,7 +630,7 @@ SFOUTAB		OCT	05174			# WHOLE, DP TIME (SEC)
 		OCT	31757
 		OCT	02476			# ALTITUDE RATE
 		OCT	05531
-		2DEC	5.517 E-5 B14		# FORWARD/LATERAL VELOCITY
+		2DEC	5.571 E-5 B14		# FORWARD/LATERAL VELOCITY
 		
 		OCT	00007			# ROT HAND CONT ANGLE RATE
 		OCT	13734

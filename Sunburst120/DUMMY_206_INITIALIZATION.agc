@@ -8,7 +8,9 @@
 ## Contact:	Ron Burkey <info@sandroid.org>.
 ## Website:	www.ibiblio.org/apollo/index.html
 ## Mod history:	2016-09-30 RSB	Created draft version.
-##		2017-10-30 RSB	Finished transcription.
+##		2016-10-30 RSB	Finished transcription.
+##		2016-12-06 RSB	Proofed comments with octopus/ProoferComments,
+##				changes were made.
 
 ## Page 869
 # PROGRAM NAME - BEGIN206
@@ -39,7 +41,7 @@
 # DEBRIS - ITEMP1, CENTRALS, ERASABLES IN SUBROUTINES CALLED
 
 # NOTES - SINCE ONLY THE LOW ORDER PART OF STARTDT1 AND STARTDT2 ARE USED OT COMPUTE THE DELTAT FOR WAITLIST, THE
-#   REQUIRED TASKS AND JOBS WILL BE CALLED WITHINT 163.84 SECONDS
+#   REQUIRED TASKS AND JOBS WILL BE CALLED WITHIN 163.84 SECONDS
 
 
 		BANK	35

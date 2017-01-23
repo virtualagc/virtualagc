@@ -12,6 +12,8 @@
 ##                               Remove added decimal markes D  
 ##               2016-10-11 HG   fix label DNPAHSE1 -> DNPHASE1   
 ##                                         DNPAHSE2 -> DNPHASE3 
+##		 2016-12-08 RSB	 Proofed comments with octopus/ProoferComments
+##				 and fixed the errors found.
 
 ## This source code has been transcribed or otherwise adapted from
 ## digitized images of a hardcopy from the private collection of 
@@ -75,7 +77,7 @@ AGSLIST         ECADR   UPLOCK
                 ADRES   AGSBUFF +1
                 ADRES   AGSBUFF 
 ## Page 371
-#       THIS ROUTINE IS INITIATED EVERY 20MS BY AN INTERRUPT TRIGGERED
+#       THIS ROUTINE IS INITITATED EVERY 20MS BY AN INTERRUPT TRIGGERED
 # BY THE RECEIPT OF AN ENDPULSE FROM THE SPACECRAFT TELEMETRY PROGRAMMER.
 
 DODOWNTM        TS      BANKRUPT        # DO APPROPRIATE TM PHASE.
@@ -87,7 +89,7 @@ DNPHASE1        CA      DNLSTADR        # ONCE PER CYCLE (1 SECOND), AN ID IS SE
                 MASK    LOW10           # SELECTED BY A MISSION OR TEST PROGRAM.
                 EXTEND
                 WRITE   DNTM1
-                CS      BIT7            # WORD ORDER BIT IS 0 FOR ID WORD ONLY.
+                CS      BIT7            # WORD ORDER BIT IS 0 FOR ID OWRD ONLY.
                 EXTEND
                 WAND    13
                 
@@ -101,7 +103,7 @@ DNPHASE2        CAF     BIT7            # SET WORD ORDER BACK TO 1 FOR REMAINDER
                 WOR     13              # FROM ANYWHERE IN COMMON ERASABLE OR E7.
                 
                 CAF     ZERO    
-                TS      ITEMP1          # TAKE SNAPSHOT OF 12 DP WORDS
+                TS      ITEMP1          # TAKE SNAPSHOT OF 12 DP WORDS.
                 CAF     TEN
                 
 LOOP            TS      ITEMP2          # THESE 12 DP WORDS ARE READ INTO AN
@@ -238,7 +240,7 @@ FIXLSTCL        OCT     33
                 OCT     12
 ## Page 375                
 #       SPECIAL DATA LIST FOR HIGH SPEED RADAR SAMPLING. TELEMETERS TABLE OF 12 MEASUREMENTS OF 5 WORDS EACH -
-# DATA IN WORDS 1 & 2, RR CDU ANGLES IN 3 & 4, AND TIME 1 IN 5
+# DATA IN WORDS 1 & 2, RR CDU ANGLES IN 3 & 4, AND TIME 1 IN 5.
 FSTRADTM        ECADR   UPLOCK
                 ECADR   RFAILCNT        # COUNTS BAD SAMPLES.
                 ECADR   RSTACK +70D

@@ -8,7 +8,7 @@
 # Contact:	Ron Burkey <info@sandroid.org>.
 # Website:	www.ibiblio.org/apollo/index.html
 # Mod history:	2016-09-29 RSB	Created draft version.
-#		2016-09-30 RSB	Shoudl be complete now.
+#		2016-09-30 RSB	Should be complete now.
 #
 # From the library of Don Eyles, scanned at archive.org, sponsored financially
 # by Mike Stewart, and transcribed by a team of volunteers.
@@ -40,7 +40,7 @@
 # it a little easier to work with.  The code chunks correspond to natural divisions
 # into sub-programs.  In fact, these divisions are more-or-less specified by
 # the source code itself.  Refer to the ASSEMBLY_AND_OPERATION_INFORMATION.agc
-# file's TABLE OF LOG CARDS..
+# file's TABLE OF LOG CARDS.
 
 $ASSEMBLY_AND_OPERATION_INFORMATION.agc			# p. 1
 $ERASABLE_ASSIGNMENTS.agc				# p. 12

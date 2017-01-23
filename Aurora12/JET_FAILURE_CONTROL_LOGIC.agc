@@ -13,6 +13,8 @@
 ##                                           ASNTPOOL-> ASCNTPOL
 ##                               fix label   POLFIND -> POLFND  
 ##               2016-10-16 HG   fix operand BIT17 -> bit7
+##		 2016-12-08 RSB	 Proofed comments with octopus/ProoferComments
+##				 and fixed the errors found.
 
 ## This source code has been transcribed or otherwise adapted from
 ## digitized images of a hardcopy from the private collection of
@@ -103,7 +105,7 @@ POLFND          INDEX           POLRELOC
                 CA              POLTAB1
                 MASK            LOW8                    # GET CHANNEL 5 BIT CONFIGURATION FOR
                 AD              BIT15                   # SET SIGN FOR Q,R AXIS FLAG
-                TS              JTSONNOW                # JET TO BE TURNED ON IMMEDIATELY
+                TS              JTSONNOW                # JETS TO BE TURNED ON IMMEDIATELY
                 INDEX           POLRELOC
                 CA              POLTAB1
                 EXTEND
@@ -138,7 +140,7 @@ TORKSETP        INDEX           POLRELOC
 
 ## Page 596
                 EXTEND
-                MP              BIT9                    # GET CHANNEL 5 BIT CONFIGURATIN FOR
+                MP              BIT9                    # GET CHANNEL 5 BIT CONFIGURATION FOR
                 AD              BIT15                   # SET SIGN FOR Q,R AXIS FLAG
                 TS              JTSATCHG                # JETS TO BE TURNED ON AFTER TORQUING
 
@@ -162,7 +164,7 @@ TORKTABL        DEC             -4
                 DEC             +2
                 DEC             +4
 
-# POLTAB1 LISTS Q,R-AXIS ROTAIONAL JET POLICIES
+# POLTAB1 LISTS Q,R-AXIS ROTATIONAL JET POLICIES
 
 POLTAB1         OCTAL             220                   # JETS  9 14  0  0 NO 2  CTR 0
                 OCTAL               6                   # JETS  2  5  0  0 NO 2  CTR 0
@@ -299,7 +301,7 @@ POLTAB1         OCTAL             220                   # JETS  9 14  0  0 NO 2 
                 OCTAL            1030                   # JETS  6  9  0  0 NO 2  CTR 2
                 OCTAL           11532                   # JETS  2  6  9 13 NO 4  CTR 3
 
-# POLTAB2 LISTS Q,R-AXIS TRANSLATION POLICIES
+# POLTAB2 LISTS Q,R-AXIS TRANSLATIONAL POLICIES
 
 POLTAB2         OCTAL           25610                   # JETS  6 14  QNO  2  RNO  0
                 OCTAL           25442                   # JETS  2 10  QNO  2  RNO  0
@@ -475,7 +477,7 @@ ASCNTPOL        DEC             85
                 DEC             112
                 DEC             95
 
-# +XPLOADR LISTS THE ENTRY POINTS UNDER +X TRANSLATION CONDITIONS
+# +XPOLADR LISTS THE ENTRY POINTS UNDER +X TRANSLATION CONDITIONS
 
                 DEC             19
                 DEC             17

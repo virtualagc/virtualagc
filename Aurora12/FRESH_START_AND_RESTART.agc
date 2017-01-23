@@ -10,6 +10,8 @@
 ##               2016-10-04 HG   Added missed IDLEADR
 ##               2016-10-16 HG   Fix operand T4L``INIT -> T4LINIT
 ##                                           ENDRSTART -> ENDRSTRT
+##		 2016-12-08 RSB	 Proofed comments with octopus/ProoferComments
+##				 and fixed the errors found.
 
 ## This source code has been transcribed or otherwise adapted from
 ## digitized images of a hardcopy from the private collection of 
@@ -104,7 +106,10 @@ STARTSIM        CAF             BIT14
                 OCT             77777
                 
                 TCF             DUMMYJOB        +2      # DONT ZERO NEWJOB
+
 ## Page 153
+#          COMES HERE FROM LOCATION 4000, GOJAM. RESTART ANY PROGRAMS WHICH MAY HAVE BEEN RUNNING AT THE TIME.
+
 GOPROG          INCR            REDOCTR                 # ADVANCE RESTART COUNTER.
 
                 TC              STARTSUB                # COMMON INITIALIZATION ROUTINE.
@@ -165,11 +170,11 @@ NXTRST          TS              MPAC            +5
                 TCF             PINACT                  # +0 - GROUP NOT RUNNING.
                 
 PTERM           TS              MPAC                    # NNZ - TERMINATE REQUEST.
-                INDEX           MPAC            +5      # PICK UP TERMINATE RESTART CADR.
+                INDEX           MPAC            +5      # PICK UP RESTART TERMINATE CADR.
                 CAF             RTERMCAD
                 
 PACT2           TS              L
-                INCR            MPAC                    # ABS OF PHASE
+                INCR            MPAC                    # ABS OF PHASE.
                 CS              LOW7                    # SEE THAT MAG IS LESS THAN 128.
                 MASK            MPAC
                 CCS             A
@@ -198,7 +203,7 @@ PTBAD           CAF             OCT1107                 # SET ADDITIONAL FAILURE
 OCT1107         OCT             1107                    # ADDITIONAL ALARM CODE.
 
 DORSTART        CAF             IFAILINH                # LEAVE IMUFAILURE INHIBITS INTACT ON
-                MASK            IMODES30                # RESTART, RESTTING ALL FAILURE CODES.
+                MASK            IMODES30                # RESTART, RESETTING ALL FAILURE CODES.
                 AD              IM30INIR
                 TS              IMODES30
 ## Page 155
@@ -216,7 +221,7 @@ STARTSUB        XCH             Q
                 WRITE           14
                 EXTEND
                 WRITE           11
-                CAF             PRIO34                  # ENABLE INTERRUPTS
+                CAF             PRIO34                  # ENABLE INTERRUPTS.
                 EXTEND
                 WRITE           13
                 

@@ -9,6 +9,7 @@
 ## Website:	www.ibiblio.org/apollo/index.html
 ## Mod history:	2016-09-30 RSB	Created draft version.
 ##		2016-10-04 RSB	Transcribed.
+##		2016-12-03 RSB	Fixed missing line, with octopus/ProoferComments.
 
 ## Page 59
 HISCALAR	EQUALS	3
@@ -24,4 +25,4 @@ NAVKEYIN	EQUALS	16
 CHAN33		EQUALS	33
 DNTM1		EQUALS	34
 DNTM2		EQUALS	35
-
+# END OF CHANNEL ASSIGNMENTS

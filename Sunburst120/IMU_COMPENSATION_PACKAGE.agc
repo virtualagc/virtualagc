@@ -12,6 +12,8 @@
 ##				the Aurora 12 version of the file.
 ##		2016-11-01 RSB	Typos.
 ##		2016-11-02 RSB	More typos.
+##		2016-12-06 RSB	Comment-proofing via octopus/ProoferComments;
+##				changes were made.
 
 ## Page 859
                 BANK    12
@@ -73,10 +75,10 @@
 #       1 G = 979.24 (CM)/(SEC)(SEC)  (AMR)          1 (MERU)/(G) = .000024787174 (GYRO PULSES)/(PIPA PULSE)
 
 # REFERENCES
-#       AGC PROGRAMMING MEMO NO. 12, I.S.S. MEMO NO. 247, I.S.S. MEMO NO 328, I.S.S. MEMO NO. 339
+#       AGC PROGRAMMING MEMO NO. 12, I.S.S. MEMO NO. 247, I.S.S. MEMO NO. 328, I.S.S. MEMO NO. 339
 
 # CALLING SEQUENCE 
-#       L      TC     BANKALL
+#       L      TC     BANKCALL
 #       L+1    CADR   1/PIPA
 #       L+2                       RETURNS HERE
 
@@ -294,7 +296,7 @@ DRFTSUB2        CAF     TWO             # PIPAX, PIPAY, PIPAZ
 1/GYRO          CAF     FOUR            # PIPAZ, PIPAY, PIPAX
                 TS      BUF     
                 
-                INDEX   BUF             # SCALE GYRO COMMANDS FOR IMPULSE
+                INDEX   BUF             # SCALE GYRO COMMANDS FOR IMUPULSE
                 CA      GCOMP   +1      # FRACTIONAL PULSES
                 EXTEND
                 MP      BIT8            # SHIFT RIGHT 7
@@ -360,7 +362,7 @@ NBD2            CCS     A               # CALCULATE ELAPSED TIME
                 TCF     +2              # TIME1 OVERFLOW
                 TCF     ENDOFJOB        # IF ELAPSED TIME = 0  (DIFFERENCE = -0)
                 
-                COM                     # CALCULATE ABSOLUE DIFFERENCE
+                COM                     # CALCULATE ABSOLUTE DIFFERENCE
                 AD      POSMAX  
                 
 NBD3            EXTEND                  # C(A) = DELTAT    (CS) X 2(+14)
@@ -398,7 +400,7 @@ NBD3            EXTEND                  # C(A) = DELTAT    (CS) X 2(+14)
 FBIASSUB        XCH     Q
                 TS      BUF     +1
                 
-                CA      Q               # NBD SCALED (GRO PULSES)/(CS) X 2(-5)
+                CA      Q               # NBD SCALED (GYRO PULSES)/(CS) X 2(-5)
                 EXTEND
                 MP      MPAC            # DELTAT SCALED (CS) X 2(+19)
                 INDEX   BUF

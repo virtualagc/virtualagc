@@ -11,6 +11,8 @@
 ##		2016-10-19 RSB	Transcribed, largely from Aurora 12 version of the file.
 ##		2016-10-31 RSB	Typos.
 ##		2016-11-01 RSB	More typos.
+##		2016-12-06 RSB	Comments proofed using octopus/ProoferComments,
+##				changes made.
 
 ## Page 948
 #          THE FOLLOWING ROUTINE CAN BE USED TO CALL A SUBROUTINE IN ANOTHER BANK. IN THE BANKCALL VERSION, THE
@@ -61,7 +63,7 @@ MAKECADR        CAF             LOW10
                 TC              Q                               
 
 
-#          THE FOLLOWING ROUTINE OBTAINS THE RETURN CADR SAVED BY SWCALL OR BANKCALL AND LEAVES IT IN A.  ENTER
+#          THE FOLLOWING ROUTINE OBTAINS THE ONE WORD AT THE ADDRESS ARRIVING IN A, AND LEAVES IT IN A.  ENTER
 # WITH THE CADR IN A, AT DATACALL WITH JUNK IN L IF NOT SWITCHING SUPERBANKS, OTHERWISE AT SUPDACAL WITH SUPERBANK
 # BITS IN BITS 7-5 IN L (BITS 15-8 AND 4-1 MAY BE JUNK).  DEBRIS = MTEMP.  INHINTS FOR ABOUT 165 MUSEC.
 
@@ -76,7 +78,7 @@ SUPDACAL        TS              MPTEMP
                 ROR             SUPERBNK                        # SAVE FBANK IN BITS 15-11, AND
                 XCH             MPTEMP                          #  SUPERBANK IN BITS  7-5.
                 MASK            LOW10                           
-                XCH             L                               # SAVE REL. ADR. IN BANK, FETCH SUPERBITS
+                XCH             L                               # SAVE REL. ADR. IN BANK, FETCH SUPERBITS.
                 INHINT                                          # BECAUSE RUPT DOES NOT SAVE SUPERBANK.
                 EXTEND                                          
                 WRITE           SUPERBNK                        # SET SUPERBANK FOR DATA.
@@ -139,7 +141,7 @@ ISWRETRN        XCH             RUPTREG4
 USEPRET         XCH             Q                               # FETCH Q, SAVING A
                 TS              LOC                             # L+1 TO LOC
                 CA              BBANK                           
-                TS              BANKSET                         # USERS BANK TO BANKSET
+                TS              BANKSET                         # USER'S BBANK TO BANKSET
                 CA              BIT8                            
                 TS              EDOP                            # EXIT INSTRUCTION TO EDOP
                 CA              Q                               # RETRIEVE ORIGINAL A

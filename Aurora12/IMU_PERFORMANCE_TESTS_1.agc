@@ -13,6 +13,8 @@
 ##                                   DSTEMP1 -> DSPTEM1
 ##                                   DSTEM1  -> DSPTEM1
 ##               2016-10-18 HG   Fix operand TAZEL -> TAZEL1
+##		 2016-12-08 RSB	 Proofed comments with octopus/ProoferComments
+##				 and fixed the errors found.
 
 ## This source code has been transcribed or otherwise adapted from
 ## digitized images of a hardcopy from the private collection of
@@ -53,8 +55,8 @@ AOTNBIMU        CAF             ONE                     # AOT-NB-IMU FINE ALIGNM
                                 ERTHRVSE                # TO CALCULATE EARTH RATE VECTOR
                 EXIT
 
-POSLOAD         CAF             V24N30E                 # R1  000X ENTER     POSITION 1,2, OR 3
-                TC              NVSBWAIT                # R2  0000 ENTER     00001 FOR LAB OPTION
+POSLOAD         CAF             V24N30E                 # R1  0000X ENTER     POSITION 1,2, OR 3
+                TC              NVSBWAIT                # R2  00000 ENTER     00001 FOR LAB OPTION
                 TC              ENDIDLE
                 TCF             ENDTEST
                 TCF             -4
@@ -76,7 +78,7 @@ POSLOAD         CAF             V24N30E                 # R1  000X ENTER     POS
 
                 TC              PUTPOSX                 # TO COARSE ALIGN STABLE MEMBER
 
-                TC              GMLCKCHK                # CHECK FOR GIMABL LOCK BEFORE FINE ALIGN
+                TC              GMLCKCHK                # CHECK FOR GIMBAL LOCK BEFORE FINE ALIGN
                 TC              OGCZERO                 # FOR EARTH RATE COMPENSATION
 
                 TC              BANKCALL
@@ -137,12 +139,12 @@ PIP2            CAE             PIPNDX
                 RELINT
 
 ## Page 446
-                TC              STORRSLT                # STORE TIME ANP PIPAI
+                TC              STORRSLT                # STORE TIME AND PIPAI
 
                 CAE             PIPNDX          +1
                 TS              PIPINDEX                # POS1 PIPAZ    POS2 PIPAY    POS3 PIPAZ
                 TC              BANKCALL
-                CADR            CHECKG                  # SYNC PIPA PULSE
+                CADR            CHECKG                  # SYNC ON PIPA PULSE
 
                 RELINT
                 TC              STORRSLT                # STORE TIME AND PIPAI
@@ -156,14 +158,14 @@ PIP2            CAE             PIPNDX
 PIP2ADR         CADR            PIP2
 
 ## Page 447
-FINDNAVB        EXTEND                                  # MARKS * CLAC NB OR SM WRT EARTH REF
+FINDNAVB        EXTEND                                  # MARKS * CALC NB OR SM WRT EARTH REF
                 QXCH            QPLACE
 
                 TC              BANKCALL
                 CADR            MKRELEAS                # RELEASE MARK SYSTEM
                 CAF             ONE
                 TS              DSPTEM1
-                CAF             V01N30E                 # DISPLY 00001 IN R1
+                CAF             V01N30E                 # DISPLAY 00001 IN R1
                 TC              NVSBWAIT
                 CAF             ZERO                    # TO INDICATE GROUND MARKS
                 TC              BANKCALL
@@ -207,14 +209,14 @@ FINDNAVB        EXTEND                                  # MARKS * CLAC NB OR SM 
                 TCF             EARRTCOM        +5      # IF COARSE ALIGN MARKS
 
 ## Page 448
-EARRTCOM        TC              BANKCALL                # EARTH RATE COMPENSATION BEWTEEN MARKS
+EARRTCOM        TC              BANKCALL                # EARTH RATE COMPENSATION BETWEEN MARKS
                 CADR            EARTHR
                 CCS             OPTCADR                 # +0 IF MARK BUTTON NOT DEPRESSED
                 TCF             +3
                 TCF             EARRTCOM                # CONTINUE TO COMPENSATE FOR EARTH RATE
                 TCF             +1
                 TC              BANKCALL
-                CADR            OPTSTALL                # INSURE SUCCESFUL MARK
+                CADR            OPTSTALL                # INSURE SUCCESSFUL MARK
                 TCF             ENDTEST
 
                 TC              GIMANGS1
@@ -264,7 +266,7 @@ PUTPOSX         EXTEND                                  # COARSE ALIGNS STABLE M
 
 
 
-SMDCALC         EXTEND                                  # FINE ALIGNS STABLE MEBER
+SMDCALC         EXTEND                                  # FINE ALIGNS STABLE MEMBER
                 QXCH            QPLACE
 
                 TC              INTPRET
@@ -371,7 +373,7 @@ ERTHRVSE        DLOAD           PDDL
                                 LATITUDE
                 COS             DCOMP
                 PDDL            SIN
-                                LATITUDE                # EART RATE = .1504 ARCSEC / 10 MSEC
+                                LATITUDE                # EARTH RATE = .1504 ARCSEC / 10 MSEC
                 VDEF            VXSC                    # 1.618 GYRO PULSES = 1 ARCSEC
                                 OMEG/MS                 # OMEG/MS = .243... GYRO PULSES / 10 MSEC
                 STORE           ERVECTOR
@@ -589,7 +591,7 @@ POS4            CAF             BIT5                    # OPTION TO ALIGN SM TO 
                 TC              ENDIDLE                 # R3  +- XXX.XX   MIDDLE GIMBAL ANGLE
                 TCF             ENDTEST
                 TCF             -4
-                CA              THETAD                  # SET UP ANLES FOR SMNB
+                CA              THETAD                  # SET UP ANGLES FOR SMNB
                 INDEX           FIXLOC
                 TS              24
                 CA              THETAD          +1
@@ -601,7 +603,7 @@ POS4            CAF             BIT5                    # OPTION TO ALIGN SM TO 
 
                 TC              INTPRET
                 RTB             CALL
-                                TRANSPSE                # EARH REF WRT NAV BASE
+                                TRANSPSE                # EARTH REF WRT NAV BASE
                                 SMD/EREF                # STABLE MEMBER DESIRED WRT EARTH REF
                 RTB
                                 TRANSPSE                # BACK TO NAV BASE WRT TO EARTH REF
@@ -971,7 +973,7 @@ EEEE            TC              INTPRET
 # :ENTER: NOW CAUSES THE CONTENTS OF 55 TO BE MADE NEGATIVE
 # DECREASE THROTTLE RATE DESCENT ENGINE
 # THE NEXT :ENTER: ZEROS THE REGISTER AND SENDS A PULSE TRAIN (HERE ALTERN
-# ZEROS FOR CALRITY) TO THE ALTITUDE METER.
+# ZEROS FOR CLARITY) TO THE ALTITUDE METER.
 # THE NEXT :ENTER: WILL ADVANCE THE TEST TO THE ALTITUDE RATE METER TEST.
 # THE NEXT :ENTER : WILL TERMINATE THE TEST.
 
@@ -1169,7 +1171,7 @@ AOTANGCK        TC              INTPRET
                 STCALL          COSTH                   # COSTH = V.V
                                 ARCTRIG
                 RTB
-                                1STO2S                  # DP 1S COMP SP 2S COMP.
+                                1STO2S                  # DP 1S COMP TO SP 2S COMP.
                 STORE           THETA
                 EXIT
                 CAF             THETAADR
@@ -1199,7 +1201,7 @@ ZEROLP          ZL
                 TC              POSTJUMP
                 CADR            SLAP1
 ZEROLP1         RELINT
-                CAF             ZERO                    # KEEP T4RUPT GOING, BUT NOT CYCLING
+                CAF             ZERO                    # KEEP T4RUPT GOING, BUT NOT CYCLING.
                 TS              DSRUPTSW
                 INHINT
                 CS              ONE
@@ -1252,7 +1254,7 @@ SCALFTR         2DEC            .64                     # FOR STORRSLT
 OMEG/MS         2DEC            .24339048               # GYRO PULSES / 10 MSEC
 
 ## Page 473
-#          THE FOLOWING ROUTINE READS THE CLOCK AND SCALAR (CHANNEL 3 AND 4) INTO A AND L, INSURING THAT THE
+#          THE FOLLOWING ROUTINE READS THE CLOCK AND SCALAR (CHANNELS 3 AND 4) INTO A AND L, INSURING THAT THE
 # DATA WAS NOT IN TRANSITION WHEN IT WAS READ.
                 SETLOC          ENDFAILF
 FINETIME        INHINT                                  # RETURNS WITH INTERRUPT INHIBITED.
@@ -1272,7 +1274,7 @@ FINETIME        INHINT                                  # RETURNS WITH INTERRUPT
  +4             CS              POSMAX                  # IF LOW PART CONTAINS SOMETHING LESS THAN
                 AD              L                       # POSMAX, THE HIGH PART CAN BE READ SAFELY
                 EXTEND
-                BZF             FINETIME        +1      # TRY AGAIN - CONDITION WILL DISAPPEAR
+                BZF             FINETIME        +1      # TRY AGAIN - CONDITION WILL DISAPPEAR.
 
                 EXTEND
                 READ            HISCALAR
@@ -1294,7 +1296,7 @@ REDYTORK        TC              BANKCALL
                 EXIT
                 CA              OPTNREG                 # INITIALIZE CDUNDX FOR PULSE CATCHING
                 AD              NEG2                    # C(K) WAS 4 2 1 NOW C(A) IS 2 0 -1
-                TS              GYTOBETQ                # C(K) = 2,0,-1 FOR  X,Y,Z
+                TS              GYTOBETQ                # C(K) = 2,0,-1 FOR  X,Y,Z.
                 EXTEND
                 BZF             +3
                 CAF             TWO

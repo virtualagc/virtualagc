@@ -7,6 +7,8 @@
 ## Website:      https://www.ibiblio.org/apollo.
 ## Pages:        285-288
 ## Mod history:  2016-09-20 JL   Created.
+##		 2016-12-08 RSB	 Proofed comments with octopus/ProoferComments
+##				 and fixed the errors found.
 
 ## This source code has been transcribed or otherwise adapted from
 ## digitized images of a hardcopy from the private collection of 
@@ -44,7 +46,10 @@ KEYCOM          TS              RUPTREG4
                 INDEX           LOCCTR
                 TS              MPAC                    # LEAVE 5 BIT KEY CDE IN MPAC FOR CHARIN
                 TC              RESUME
+
 ## Page 286
+# UPRUPT PROGRAM
+
 UPRUPT          TS              BANKRUPT
                 XCH             Q
                 TS              QRUPT

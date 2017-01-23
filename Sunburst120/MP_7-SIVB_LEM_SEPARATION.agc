@@ -11,6 +11,8 @@
 ##               2016-10-25 MAS  Transcribed.
 ##		 2016-10-31 RSB	 Typos.
 ##		 2016-11-01 RSB	 More typos.
+##		 2016-12-06 RSB	 Comments proofed using octopus/ProoferComments,
+##				 no changes made.
 
 ## Page 712
                 BANK            25

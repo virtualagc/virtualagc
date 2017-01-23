@@ -8,6 +8,8 @@
 ## Contact:	Ron Burkey <info@sandroid.org>.
 ## Website:	www.ibiblio.org/apollo.
 ## Mod history:	2009-05-06 RSB	Transcribed from page images.
+##		2016-12-09 RSB	Proofed comments with octopus/ProoferComments
+##				and fixed the errors found.
 ##
 ## This source code has been transcribed or otherwise adapted from digitized
 ## images of a hardcopy from the MIT Museum.  The digitization was performed
@@ -25,23 +27,23 @@
 
 ## Page 1
 
-#************************************************************************
-#									*
-#		THIS AGC PROGRAM SHALL ALSO BE REFERRED TO AS:		*
-#									*
-#									*
-#				COLOSSUS 2A				*
-#									*
-#									*
-#	THIS PROGRAM IS INTENDED FOR USE IN THE CM AS SPECIFIED		*
-#	IN REPORT R-577.  THIS PROGRAM WAS PREPARED UNDER DSR		*
-#	PROJECT 55-23870, SPONSORED BY THE MANNED SPACECRAFT		*
-#	CENTER OF THE NATIONAL AERONAUTICS AND SPACE			*
-#	ADMINISTRATION THROUGH CONTRACT NAS 9-4065 WITH THE		*
-#	INSTRUMENTATION LABORATORY, MASSACHUSETTS INSTITUTE OF		*
-#	TECHNOLOGY, CAMBRIDGE, MASS.					*
-#									*
-#************************************************************************
+# ************************************************************************
+# *									 *
+# *		THIS AGC PROGRAM SHALL ALSO BE REFERRED TO AS:		 *
+# *									 *
+# *									 *
+# *				COLOSSUS 2A				 *
+# *									 *
+# *									 *
+# *	 THIS PROGRAM IS INTENDED FOR USE IN THE CM AS SPECIFIED	 *
+# *	 IN REPORT R-577.  THIS PROGRAM WAS PREPARED UNDER DSR		 *
+# *	 PROJECT 55-23870, SPONSORED BY THE MANNED SPACECRAFT		 *
+# *	 CENTER OF THE NATIONAL AERONAUTICS AND SPACE			 *
+# *	 ADMINISTRATION THROUGH CONTRACT NAS 9-4065 WITH THE		 *
+# *	 INSTRUMENTATION LABORATORY, MASSACHUSETTS INSTITUTE OF		 *
+# *	 TECHNOLOGY, CAMBRIDGE, MASS.					 *
+# *									 *
+# ************************************************************************
 
 
 #	SUBMITTED:	MARGARET H. HAMILTON		DATE:	28 MAR 69
@@ -53,7 +55,7 @@
 #		APOLLO GUIDANCE AND NAVIGATION PROGRAM
 
 #	APPROVED:	FRED H. MARTIN			DATE:	28 MAR 69
-#		FRED H. MARTIN, COLOSSUS PROJECT MANAGER
+#		FRED H. MARTIN, COLOSSUS PROJECT MANGER
 #		APOLLO GUIDANCE AND NAVIGATION PROGRAM
 
 #	APPROVED:	NORMAN E. SEARS			DATE:	28 MAR 69

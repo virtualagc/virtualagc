@@ -14,6 +14,11 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2016-11-17 JL   Created from Luminary131 version.
 ##              2016-11-17 HG   Transcribed
+##              2016-12-08 HG   Fix label  HBEAMANB  -> HBEAMNB
+##              2016-12-11 HG   fix value for STAR 22 Z
+##                                            BSUBO
+##              2016-12-12 HG   fix value for HBEAMNB
+##              2016-12-12 MAS  Split up some Exx Bxx scalers.
 
 
 ## Page 39
@@ -86,15 +91,15 @@ AT/RCS          2DEC            .0000785        B+10    # 4 JETS IN A DRY LEM
 
 # *** THE ORDER OF THE FOLLOWING TWO CONSTANTS MUST NOT BE CHANGED *******
 
-APSVEX          DEC             -3030           E-2 B-5 # 9942 FT/SEC IN M/CS.
-DPSVEX          DEC*            -2.95588868     E+1B-05*#         VE (DPS) +2.95588868E+ 3
+APSVEX          DEC             -3030           E-2 B-5   # 9942 FT/SEC IN M/CS.
+DPSVEX          DEC*            -2.95588868     E+1 B-05* #         VE (DPS) +2.95588868E+ 3
 # ************************************************************************
 
                 SETLOC          F2DPS*31
                 BANK
                 COUNT*          $$/F2DPS
 
-TRIMACCL        2DEC*           +3.50132708     E-5B+08*#         A (T)    +3.50132708E- 1
+TRIMACCL        2DEC*           +3.50132708     E-5 B+08* #         A (T)    +3.50132708E- 1
 
 ## Page 41
 # THROTTLING AND THRUST DETECTION PARAMETERS
@@ -119,16 +124,16 @@ THRESH2         DEC             308
                 BANK
                 COUNT*          $$/THROT
 
-FMAXODD         DEC             +3841                   # FSAT          +4.81454413 E+ 4
-FMAXPOS         DEC             +3467                   # FMAX          +4.34546769 E+ 4
-THROTLAG        DEC             +8                      # TAU (TH)       +0.08 SECONDS
-SCALEFAC        2DEC*           +7.97959872     E+2B-16*# BITPERF       +7.97959872 E- 2
+FMAXODD         DEC             +3841                     # FSAT          +4.81454413 E+ 4
+FMAXPOS         DEC             +3467                     # FMAX          +4.34546769 E+ 4
+THROTLAG        DEC             +8                        # TAU (TH)       +0.08 SECONDS
+SCALEFAC        2DEC*           +7.97959872     E+2 B-16* # BITPERF       +7.97959872 E- 2
 
                 SETLOC          F2DPS*32
                 BANK
                 COUNT*          $$/F2DPS
 
-DPSTHRSH        DEC             36                      # (THRESH1 + THRESH3 FOR P63)
+DPSTHRSH        DEC             36                        # (THRESH1 + THRESH3 FOR P63)
 
 ## Page 42
 # LM HARDWARE-RELATED PARAMETERS
@@ -149,9 +154,9 @@ RANGCONV        2DEC            2.859024        B-3     # CONVERTS RR RANGE READ
                 BANK
                 COUNT*          $$/SERV
 
-HBEAMANB        2DEC            -0.7147168647           # POS 1 ALT BEAM IN NAV BASE COORDINATES
+HBEAMNB         2DEC            -0.7147168647           # POS 1 ALT BEAM IN NAV BASE COORDINATES
                 2DEC            -0.0731086602
-                2DEC            -0.6955824327
+                2DEC            -0.6955824372
 
 VZBEAMNB        2DEC            -0.4067366430           # POS 1 VZ  BEAM
                 2DEC            +0.0954915028
@@ -431,7 +436,7 @@ REMDIST         2DEC            384402000       B-29    # MEAN DISTANCE BETWEEN 
 
                 2DEC            -.9168160791    B-1     # STAR 22       X
                 2DEC            -.3506241694    B-1     # STAR 22       Y
-                2DEC            -.1907834362    B-1     # STAR 22       Z
+                2DEC            -.1910784362    B-1     # STAR 22       Z
 
 ## Page 51
                 2DEC            -.4521486548    B-1     # STAR 21       X
@@ -580,7 +585,7 @@ FDOT            2DEC*           4.253263471     E-9 B27*        #    REV/CSEC
 BDOT            2DEC*           -1.145529390    E-16 B28*       # REV/CSEC
 NODIO           2DEC*           8.788308600     E-1  B 0*       #  REV
 FSUBO           2DEC*           6.552737750     E-1  B 0*       #  REV
-BSUBO           2DEC*           1.160576171     E-2  B 0*       #  REV
+BSUBO           2DEC*           6.511941688     E-2  B 0*       #  REV
 WEARTH          2DEC*           1.160576171     E-7  B23*       #    REV/CSEC
 AZO             2DEC*           7.733314844     E-1  B 0*       # REVS
 

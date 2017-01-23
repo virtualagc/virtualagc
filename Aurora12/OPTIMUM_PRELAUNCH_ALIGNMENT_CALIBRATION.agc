@@ -11,6 +11,8 @@
 ##               2016-10-15 HG   Fix operand INPRET -> INTPRET
 ##                                           PHASECHNG -> PHASCHNG 
 ##                               Fix operator TC -> CA
+##		 2016-12-08 RSB	 Proofed comments with octopus/ProoferComments
+##				 and fixed errors found.
 
 ## This source code has been transcribed or otherwise adapted from
 ## digitized images of a hardcopy from the private collection of 
@@ -453,7 +455,7 @@ RESTEST3        CA              ZERO                            # RESET CHANGE I
                 TS              PREMTRXC
                 RELINT
 ## Page 523
-                TC              INTPRET                         # HERE TO CHANGE ORIENTATION
+                TC              INTPRET                         # HERE TO CHANGE ORIENTATOON
                 AXT,1                                           # DESIRED IN XSM,PRESENT IN GEOMTRX
                                 18D
                 SSP
@@ -514,6 +516,8 @@ GEOBAVR         TC              BANKCALL
 
 
 ## Page 525
+# SET UP WAITLIST SECTION
+
 SLEEPIE         TS              LENGTHOT                        # TEST NOT OVER-DECREMENT LENGTHOT
                 TC              PHASCHNG                        #  CHANGE PHASE
                 OCT             00301

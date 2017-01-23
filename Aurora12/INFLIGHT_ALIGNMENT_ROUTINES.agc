@@ -13,10 +13,12 @@
 ##               2016-10-18 HG   Add missing interpretive operand ZPRIME
 ##                                                                8D,1
 ##                               Fix opcode STODL -> STCALL
-##		2016-10-23 RSB	All of the interpretive operands were 
-##				mis-aligned.  (Possibly the file had once been
-##				processed "yaYUL --format" was buggy with
-##				respect to interpretive-operand alignment.)
+##		 2016-10-23 RSB	 All of the interpretive operands were 
+##				 mis-aligned.  (Possibly the file had once been
+##				 processed "yaYUL --format" was buggy with
+##				 respect to interpretive-operand alignment.)
+##		 2016-12-08 RSB	 Proofed comments with octopus/ProoferComments
+##				 and fixed the errors found.
 
 ## This source code has been transcribed or otherwise adapted from
 ## digitized images of a hardcopy from the private collection of 
@@ -191,10 +193,10 @@ SMNB1           AXT,1           AXT,2                           # ROTATE X,Z, AB
 
 # NBSM TRANSFORMS A STAR DIRECTION FROM NAVIGATION BASE TO STABLE MEMBER COORDINATES.
 
-# THE INPUTS ARE 1) THE SGAR VECTOR REFERRED TO NAVIGATION BASE COORDINATES STORED AT LOCATION 32D OF THE VAC
-# AREA. 2) THE GIMBAL ANGLES (CDUY,CDUZ,CDUX) STORED AT ALTERNATING LOCATIONS RESPECTIVELY. THE ANGLES ARE 
+# THE INPUTS ARE  1) THE STAR VECTOR REFERRED TO NAVIGATION BASE COORDINATES STORED AT LOCATION 32D OF THE VAC
+# AREA.  2) THE GIMBAL ANGLES (CDUY,CDUZ,CDUX) STORED AT ALTERNATING LOCATIONS RESPECTIVELY. THE ANGLES ARE 
 # USUALLY STORED AT LOCATIONS 2,4, AND 6 OF THE MARK VAC AREA. THEY CAN BE STORED AT LOCATIONS 20,22, AND 24 OF
-# YOUR JOB VAC AREA. 3) THE BASE ADDRESS OF THE GIMBAL ANGLES STORED SP AT LOCATION S1 OF YOUR JOB VAC AREA.
+# YOUR JOB VAC AREA.  3) THE BASE ADDRESS OF THE GIMBAL ANGLES STORED SP AT LOCATION S1 OF YOUR JOB VAC AREA.
 
 # THE OUTPUT IS THE STAR VECTOR REFERRED TO PRESENT STABLE MEMBER COORDINATES STORED AT LOCATION 32D OF THE VAC
 # AREA. THE OUTPUT IS ALSO AVAILABLE AT MPAC.
@@ -294,7 +296,7 @@ AXISROT1        DAD             STADR                           #   MPAC + PD2  
 
 # THE OUTPUTS ARE THE THREE CDU DRIVING ANGLES AND ARE STORED SP AT THETAD, THETAD +1, AND THETAD +2.
 
-CALCGA          VLOAD           VXV                             # PUSHDONW 00-04,16D,18D
+CALCGA          VLOAD           VXV                             # PUSHDOWN 00-04,16D,18D
                                 XNB                             # XNB = OGA (OUTER GIMBAL AXIS)
                                 YSM                             # YSM = IGA (INNER GIMBAL AXIS)
                 UNIT            PUSH                            # PD0 = UNIT(OGA X IGA) = MGA
@@ -363,7 +365,7 @@ GIMLOCK1        EXIT
 # THE OUTPUT DEFINES COORDINATE SYSTEM A REFERRED TO COORDINATE SYSTEM B.  THE THREE HALF-UNIT VECTORS ARE STORED
 # AT LOCATIONS XDC, XDC +6, XDC +12D, AND STARAD, STARAD +6, STARAD +12D.
 
-AXISGEN         AXT,1           SSP                             # PUSHDOWN 00-22D,24-28D,30D
+AXISGEN         AXT,1           SSP                             # PUSHDOWN 00-22D,24D-28D,30D
                                 STARAD          +6              
                                 S1                              
                                 STARAD          -6              
@@ -434,7 +436,7 @@ AXISGEN3        TIX,2
 
 ## Page 415
 
-# TRANSPSE COMPUTES THE TRANSPOSE OF A MATRIX (TRANSPOSE = INVERSE OF ORTHOGONAL TRANSOFRMATION).
+# TRANSPSE COMPUTES THE TRANSPOSE OF A MATRIX (TRANSPOSE = INVERSE OF ORTHOGONAL TRANSFORMATION).
 
 # THE INPUT IS A MATRIX DEFINING COORDINATE SYSTEM A WITH RESPECT TO COORDINATE SYSTEM B STORED IN STARAD THRU
 # STARAD +17D.
@@ -461,7 +463,7 @@ TRANSPSE        DXCH            STARAD          +2              # PUSHDOWN NONE
 # EARTH REFERENCE COORDINATES TO ALIGN THE STABLE MEMBER TO SPECIFIED GIMBAL ANGLES.
 
 # THE INPUTS ARE 1) THE MATRIX DEFINING THE EARTH REFERENCE COORDINATE FRAME WITH RESPECT TO THE NAVIGATION BASE
-# COORDINATE FRAME. 2) SAME AS 3) AND 3) of SMNB.
+# COORDINATE FRAME. 2) SAME AS 2) AND 3) OF SMNB.
 
 # THE OUTPUT IS THE DESIRED STABLE MEMBER COORDINATES WITH RESPECT TO THE EARTH REFERENCE COORDINATE FRAME. THE
 # THREE UNIT VECTORS ARE STORED AT XSM, YSM, AND ZSM.
@@ -631,7 +633,7 @@ NEARONE         2DEC            .999999999
 # THE BASE ADDRESS OF THE CDUS IS STORED AT LOCATION S1
 
 # THE OUTPUT IS A STAR VECTOR REFERRED TO STABLE MEMBER AT LOC 32D
-# AND AVAILABLE IN MPAC
+# AND AVAILBLE IN MPAC
 
 
 AOTSM           ITA                                             
@@ -678,7 +680,7 @@ AOTSM           ITA
 
 ## Page 422
 
-#          GIVEN RR TRUNION AND SHAFT (T,S) IN TANG,+1, FINAD THE ASSOCIATED LINE OF SIGNT IN NAV BASE AXES.
+#          GIVEN RR TRUNION AND SHAFT (T,S) IN TANG,+1, FIND THE ASSOCIATED LINE OF SIGNT IN NAV BASE AXES.
 # THE HALF UNIT VECTOR, .5( SIN(S)COS(T),-SIN(T),COS(S)COS(T) ) IS LEFT IN MPAC AND 32D.
 
 RRNB            SLOAD           RTB                             
@@ -707,7 +709,7 @@ RRNB            SLOAD           RTB
 ## Page 423
 
 #           THE FOLLOWING ROUTINE TAKES A HALF UNIT TARGET VECTOR REFERRED TO NAV BASE COORDINATES AND FINDS BOTH
-# GIMBAL ORIENTATION AT WHICH THE RR MIGHT SIGHT THE TARGET. THE GIMBAL ANGLES CORRESPONDING TO THE PRESENT MODE
+# GIMBAL ORIENTATIONS AT WHICH THE RR MIGHT SIGHT THE TARGET. THE GIMBAL ANGLES CORRESPONDING TO THE PRESENT MODE
 # ARE LEFT IN MODEA AND THOSE WHICH WOULD BE USED AFTER A REMODE IN MODEB. THIS ROUTINE ASSUMES MODE 1 IS TRUNNION
 # ANGLE LESS THAN 90 DEGS IN ABS VALUE WITH ARBITRARY SHAFT, WITH A CORRESPONDING DEFINITION FOR MODE 2. MODE
 # SELECTION AND LIMIT CHECKING ARE DONE ELSEWHERE.
@@ -721,7 +723,7 @@ RRANGLES        DLOAD           DCOMP                           # SINCE WE WILL 
                                 34D                             # ANGLE LATER, WE CAN FIND THE MODE 1
                 SETPD           ASIN                            # TRUNNION BY SIMPLY TAKING THE ARCSIN OF
                                 0                               # THE Y COMPONENT, THE ASIN GIVING AN
-                PUSH            BDSU                            # ANSWER WHOSE ABS VAL IS LES THAN 90 DEG
+                PUSH            BDSU                            # ANSWER WHOSE ABS VAL IS LESS THAN 90 DEG
                                 HALFDP                          
                 STODL           4                               # MODE 2 TRUNNION TO 4.
 
