@@ -1,10 +1,10 @@
 ## Copyright:   Public domain.
 ## Filename:    ORBITAL_INTEGRATION.agc
 ## Purpose:     The main source file for Luminary revision 069.
-##              It is part of the source code for the original release 
-##              of the source code for the Lunar Module's (LM) Apollo 
-##              Guidance Computer (AGC) for Apollo 10. The actual flown 
-##              version was Luminary 69 revision 2, which included a 
+##              It is part of the source code for the original release
+##              of the source code for the Lunar Module's (LM) Apollo
+##              Guidance Computer (AGC) for Apollo 10. The actual flown
+##              version was Luminary 69 revision 2, which included a
 ##              newer lunar gravity model and only affected module 2.
 ##              This file is intended to be a faithful transcription, except
 ##              that the code format has been changed to conform to the
@@ -17,7 +17,9 @@
 ## Mod history: 2016-12-13 MAS  Created from Luminary 99.
 ##              2016-12-18 MAS  Updated from comment-proofed Luminary 99 version.
 ##		2017-01-21 RRB	Updated for Luminary 69.
-##              2017-01-22 HG   Remove non existent code arround label GOBAQUE 
+##              2017-01-22 HG   Remove non existent code arround label GOBAQUE
+##                              Remove incorrect "," in interpretative operand
+#3                              Fic interpretive operators VXSC BOV -> VXSC
 
 ## Page 1223
 # DELETE
@@ -212,7 +214,7 @@ GAMCOMP		VLOAD	VSR1
 		NORM	ROUND
 			31D
 		PDDL	NORM		# NORMED B SQUARED TO PD LIST
-## Page 1228		
+## Page 1228
 			ALPHAM		# NORMALIZE (LESS ONE) LENGTH OF ALPHA
 			32D		# SAVING NORM SCALE FACTOR IN X1
 		SR1	PDVL
@@ -392,7 +394,7 @@ COMTERM		STORE	UZ
 			S1		#	  4
 		PUSH	BDDV*		# NORMED R  TO 0D
 			J2REQSQ,2
-		VXSC	BOV
+		VXSC
 			TVEC
 		STORE	TVEC
 		XAD,1	XAD,1
@@ -408,7 +410,7 @@ COMTERM		STORE	UZ
 			URPV +2		#  2  2
 		DAD	PDDL		# Y +X  B2 TO 2D
 			2D
-		SL1	DSU	
+		SL1	DSU
 
 ## Page 1232
 			2D
@@ -445,7 +447,7 @@ COMTERM		STORE	UZ
 NBRANCH1	BOV
 			+1
 		VSL*	VAD
-			0, -22D,1
+			0 -22D,1
 			FV
 		STORE	FV
 		BOV
@@ -551,7 +553,7 @@ LUNSPH		DLOAD	SR2
 		CALL
 			LUNPOS
 		VCOMP
-		STORE	RPQV		
+		STORE	RPQV
 DOSWITCH	CALL
 			ORIGCHNG
 		GOTO

@@ -17,6 +17,7 @@
 ## Mod history: 2016-12-13 MAS  Created from Luminary 99.
 ##              2016-12-15 MAS  Updated from comment-proofed Luminary 99 version.
 ##              2017-01-20 HG   Transcribed
+##              2017-01-22 HG   Shift pseudo label +3 to column 2
 
 ## Page 739
 ## <br><br>
@@ -572,7 +573,7 @@ COMFAIL         TC              UPFLAG                  # (15)
                 TCF             +3                      # YES
                 TC              BANKCALL                # OTHERWISE, START IT UP
                 CADR            STCLOK1
-        +3      CS              VB97DEX
+ +3             CS              VB97DEX
                 TS              DISPDEX
                 TC              PHASCHNG                # TURN OFF GROUP 4.
                 OCT             00004

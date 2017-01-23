@@ -19,6 +19,7 @@
 ##		2017-01-04 RRB	Updated for Luminary 69.
 ##              2017-01-21 HG   Fix opcode RELINS -> RELINT
 ##                                         DXVH   -> DXCH
+##              2017-01-22 HG   Fix operand modifier 10d -> 10D
 
 ## Page 1390
 		BANK	22
@@ -225,7 +226,7 @@ TRANSP2		CAF	XNB1EB
 
 		DXCH	XNB1 +10D
 		DXCH	XNB1 +14D
-		DXCH	XNB1 +10d
+		DXCH	XNB1 +10D
 		TCF	DANZIG
 
 ## Page 1396

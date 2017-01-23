@@ -17,6 +17,7 @@
 ## Mod history: 2016-12-13 MAS  Created from Luminary 99.
 ##              2016-12-18 MAS  Updated from comment-proofed Luminary 99 version.
 ##		2016-12-24 RRB	Updated for Luminary 69.
+##              2016-01-22 HG   Fix operand PLANTIN1 -> PLANTIN
 
 ## Page 1135
 # ..... RP-TO-R SUBROUTINE .....
@@ -46,7 +47,7 @@
 # OUTPUT
 #	MPAC = R VECTOR METERS B-29 FOR EARTH, B-27 FOR MOON
 
-		SETLOC	PLANTIN1
+		SETLOC	PLANTIN
 		BANK
 
 		COUNT*	$$/LUROT

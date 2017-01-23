@@ -16,6 +16,7 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2016-12-13 MAS  Created from Luminary 99.
 ##              2017-01-05 HG   Transcribed
+##              2017-01-22 HG   Fix operand BIT1 -> BIT11
 
 ## Page 170
                 BANK            12
@@ -1273,7 +1274,7 @@ RRGIMON         CAE             FLAGWRD5                # IS NO ANGLE MONITOR FL
 
                 TCF             NORRGMON                # (ADDITIONAL CODING MAY GO HERE).
 
-MONREPOS        CAF             BIT1                    # SET FLAG TO SHOW REPOSITION IN PROGRESS.
+MONREPOS        CAF             BIT11                   # SET FLAG TO SHOW REPOSITION IN PROGRESS.
                 ADS             RADMODES
 
                 CS              OCT20002                # DISABLE TRACKER AND ERROR COUNTER.

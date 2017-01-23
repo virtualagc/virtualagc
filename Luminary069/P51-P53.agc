@@ -17,6 +17,13 @@
 ## Mod history: 2016-12-13 MAS  Created from Luminary 99.
 ##              2016-12-18 MAS  Updated from comment-proofed Luminary 99 version.
 ##              2017-01-22 HG   Transcribed
+##              2017-01-22 HG   Fix operand V06N22  -> V6N22
+##                                          V06N22  -> V06N22* 
+##                                          DSPTEM1 -> DSPTEM2  
+##                              Fix interpretive operator SET EXIT -> SET
+##                                                        STOVL -> STORE
+##                              Fix operator XCH -> TS
+##                                           +2  -> +5
 
 ## Page 925
 # PROGRAM NAME- PROG52                                                                   DATE- JAN 9, 1967
@@ -182,7 +189,7 @@ P52W            TC              INTPRET
 P52D            CALL                                    # READ VEHICLE ATTITUDE AND
                                 S52.2                   #  COMPUTE GIMBAL ANGLES
                 EXIT
-                CAF             V06N22
+                CAF             V06N22*
                 TC              BANKCALL                # DISPLAY GIMBAL ANGLES
                 CADR            GOFLASH
                 TC              GOTOPOOH
@@ -1045,7 +1052,7 @@ P51             TC              BANKCALL                # IS ISS ON - IF NOT, IM
                 TS              THETAD                  # ZERO THE GIMBALS
                 TS              THETAD          +1
                 TS              THETAD          +2
-                CAF             V06N22
+                CAF             V6N22
                 TC              BANKCALL
                 CADR            GODSPRET
                 CAF             V41K                    # NOW DISPLAY COARSE ALIGN VERB 41
@@ -1130,7 +1137,7 @@ P51G            CALL
                                 REFSMMAT
                 CALL
                                 MATMOVE
-                SET             EXIT
+                SET
                                 REFSMFLG
 
 ## Page 950
@@ -1384,7 +1391,7 @@ STORPOS         TS              A                       # DETECT OVF AZ = -120
                 CAF             BIT15                   # OVF SKIP-ADD NEGMAX TO OVF CORRECT QMIN
                 ADS             QMIN
                 CAF             BIT13                   # ELV=45 DEG
-                XCH             L
+                TS              L
                 CA              QMIN
                 INDEX           FIXLOC
                 DXCH            8D                      # JAM AZ IN 8D, 45 DEG IN 9D FOR OANB
@@ -1513,7 +1520,7 @@ DEG.5           2DEC            .00138888               # .5 DEGRESS SCALED IN R
 DEG60           OCT             12525                   # 60 DEG CDU SCALING
 CURSOR          EQUALS          DSPTEM1
 SPIRAL          EQUALS          DSPTEM1         +1
-POSCODE         EQUALS          DSPTEM1         +2
+POSCODE         EQUALS          DSPTEM2         +2
 
 ## Page 959
 # NAME -    PLANET
@@ -1532,7 +1539,7 @@ POSCODE         EQUALS          DSPTEM1         +2
                 BANK
                 COUNT*          $$/P51
 
-PLANET          STOVL           TSIGHT
+PLANET          STORE           TSIGHT
                 STQ             EXIT
                                 GCTR
                 CS              HIGH9
@@ -2033,7 +2040,7 @@ P57AA           CAF             V06N34*                 # DISPLAY TALIGN, TALIGN
                 TC              BANKCALL
                 CADR            GOFLASHR
                 TCF             GOTOPOOH                # V34-TERMINATE
-                TCF             +2
+                TCF             +5
                 TCF             P57AA                   # VB32-RECYCLE
 
                 TC              PHASCHNG

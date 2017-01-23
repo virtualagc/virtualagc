@@ -21,6 +21,7 @@
 ##              2017-01-20 HG   Add missing DECTWO
 ##                              Remove ABVAL
 ##                                     STORE RTMAG
+##              2017-01-22 HG   Remove CAF P30ZERO 
  
 
 ## Page 667
@@ -206,7 +207,6 @@ P34/P74A	TC	P20FLGON	# SET UPDATFLG, TRACKFLG
 		EXTEND
 		DCA	130DEG
 		DXCH	CENTANG
-		CAF	P30ZERO
 		TC	DISPLAYE	# ELEV AND CENTANG
 		TC	INTPRET
 		CLEAR	DLOAD

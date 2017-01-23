@@ -16,7 +16,10 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2016-12-13 MAS  Created from Luminary 99.
 ##              2016-12-14 MAS  Updated from comment-proofed Luminary 99 version.
-##              2016-01-16 HG   Trasncribed
+##              2016-01-16 HG   Transcribed
+##              2017-01-22 HG   Shift pseudo label +3 to column 2.
+##                              Add missing operator INHINT
+##                              
 ## Page 504
 
 # RENDEZVOUS NAVIGATION PROGRAM 20
@@ -2377,7 +2380,7 @@ DONBRD          STODL           32D
                 BZF             +3                      # GYRO CAUSES A POSITIVE CHANGE IN THE
                 CA              TANG            +1      # SHAFT ANGLE. COMPENSATE FOR THIS SWITCH
                 TCF             +2                      # BY CHANGING THE POLARITY OF OUR COMMAND.
-        +3      CS              TANG            +1
+ +3             CS              TANG            +1
                 EXTEND
                 MP              RDESGAIN                # SCALING ON INPUT ANGLE WAS 4 RADIANS.
                 TS              TANG            +1      # SHAFT COMMAND.
@@ -3001,6 +3004,7 @@ CSMINT          STCALL          TDEC1
                 MXV             VSL1
                                 REFSMMAT
                 EXIT
+                INHINT
                 TC              KILLTASK                # KILL THE TASK WHICH CALLS DODES SINCE
                 CADR            DESLOOP         +2      # STORING INTO ERASEABLES DODES USES
                 TC              INTPRET

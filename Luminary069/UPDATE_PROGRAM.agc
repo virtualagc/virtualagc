@@ -21,6 +21,7 @@
 ##				whitespace was the only actual change.
 ##		2017-01-16 MAS	Fixed a page number and changed to spaces-only in
 ##				the line comments.
+##              2017-01-22 HG   Add workaround for SBANK
 
 ## Page 1379
 # PROGRAM NAME:   P27
@@ -192,6 +193,9 @@ UPPART2		EQUALS			# UPDATE PROGRAM - PART 2
 		TC	PHASCHNG	# SET RESTART GROUP 6 TO RESTORE OLD MODE
 		OCT	07026		# AND DOWNLIST AND EXIT IF RESTART OCCURS.
 		OCT	30000		# PRIORITY SAME AS CHRPRIO
+## [WORKAROUND] HG                
+                SBANK=  PINSUPER
+## [WORKAROUND] HG                
 		EBANK=	UPBUFF
 		2CADR	UPOUT +1
 
