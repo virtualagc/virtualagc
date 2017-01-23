@@ -8,14 +8,17 @@
 ##		that the code format has been changed to conform to the
 ##		requirements of the yaYUL assembler rather than the
 ##		original YUL assembler.
-## Reference:	pp. 1132-1138 of 1729.pdf.
+## Reference:	pp. 1127-1133
 ## Contact:	Ron Burkey <info@sandroid.org>.
 ## Website:	www.ibiblio.org/apollo/index.html
 ## Mod history:	05/31/03 RSB.	Began transcribing.
 ##		05/14/05 RSB	Corrected website reference above.
 ##		2011-01-05 JL	Fixed indentation of RVQ instruction.
+##		2017-01-06 RSB	Page numbers now agree with those on the
+##				original harcopy, as opposed to the PDF page
+##				numbers in 1701.pdf.
 
-## Page 1132
+## Page 1127
 # SUBROUTINE TO CONVERT RAD VECTOR AT GIVEN TIME TO LAT,LONG AND ALT
 #
 # CALLING SEQUENCE
@@ -66,7 +69,7 @@ CALLRTRP	CALL
 		PDDL	DSQ
 			ALPHAV +2
 		DAD	SQRT
-## Page 1133
+## Page 1128
 		DMP	SL1R
 			GAMRP
 		STODL	COSTH		# COS(LAT) B-1
@@ -85,7 +88,7 @@ CALLRTRP	CALL
 			ERADM
 		STCALL	ALT		# EXIT WITH ALT METERS B-29
 			INCORPEX
-## Page 1134
+## Page 1129
 # SUBROUTINE TO CONVERT LAT,LONG.ALT AT GIVEN TIME TO RADIUS VECTOR
 #
 # CALLING SEQUENCE
@@ -137,7 +140,7 @@ CALLRPRT	CALL
 			RP-TO-R		# EXIT WITH UNIT R VECTOR IN MPAC
 		STODL	ALPHAV
 			ERADM
-## Page 1135
+## Page 1130
 		DAD	VXSC		# (RE + ALT)(UNIT R) METERS B-30
 			ALT
 			ALPHAV
@@ -176,7 +179,7 @@ DP1/2		=	XUNIT
 B2/A2		2DEC	.9933064884 B-1	# GAMMA= B**2/A**2 B-1
 EE		2DEC	6.6935116 E-3	# (1-B**2/A**2) B-0
 
-## Page 1136
+## Page 1131
 # ARCTAN SUBROUTINE
 #
 # CALLING SEQUENCE
@@ -223,7 +226,7 @@ ATAN=90		DLOAD	SIGN
 
 2DZERO		=	DPZERO
 
-## Page 1137
+## Page 1132
 # ***** SETGAMMA SUBROUTINE *****
 # SUBROUTINE TO SET GAMMA FOR THE LAT-LONG AND LALOTORV SUBROUTINES
 #
@@ -250,7 +253,7 @@ SETGMEX		STORE	GAMRP
 		RVQ
 GAMRP		=	8D
 
-## Page 1138
+## Page 1133
 # ***** SETRE SUBROUTINE *****
 # SUBROUTINE TO SET RE (EARTH OR MOON RADIUS)
 #

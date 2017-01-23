@@ -1,16 +1,18 @@
 ### FILE="Main.annotation"
-## Copyright:    Public domain.
-## Filename:	 RCS-CSM_DAP_EXECUTIVE_PROGRAMS.agc
-## Purpose:      Part of the source code for Colossus build 237.
-##               This is for the Command Module's (CM) Apollo Guidance
-##               Computer (AGC), for Apollo 8.
-## Assembler:    yaYUL
-## Contact:      Jim Lawton <jim DOT lawton AT gmail DOT com>
-## Website:      www.ibiblio.org/apollo/index.html
-## Page Scans:   www.ibiblio.org/apollo/ScansForConversion/Colossus237/
-## Mod history:  2011-03-15 JL	Adapted from corresponding Colossus 249 file.
+## Copyright:   Public domain.
+## Filename:	RCS-CSM_DAP_EXECUTIVE_PROGRAMS.agc
+## Purpose:     Part of the source code for Colossus build 237.
+##              This is for the Command Module's (CM) Apollo Guidance
+##              Computer (AGC), for Apollo 8.
+## Assembler:   yaYUL
+## Contact:     Jim Lawton <jim DOT lawton AT gmail DOT com>
+## Website:     www.ibiblio.org/apollo/index.html
+## Page Scans:  www.ibiblio.org/apollo/ScansForConversion/Colossus237/
+## Mod history: 2011-03-15 JL	Adapted from corresponding Colossus 249 file.
+##		2017-01-01 RSB	Proofed comment text using octopus/ProoferComments,
+##				and fixed errors found.
 
-## Page 1012
+## Page 1005
 # CALCULATION OF  AMGB, AMBG     ONCE EVERY SECOND
 
 #  AMGB =  1   SIN(PSI)           0
@@ -61,7 +63,7 @@ AMBGUPDT	CA	FLAGWRD6	# CHECK FOR RCS AUTOPILOT
 		EXTEND
 		MP	CAPSI
 		COM
-## Page 1013
+## Page 1006
 		TS	AMGB7
 		TCF	ENDOFJOB
 QUADANGL	DEC	660		# = 7.25 DEGREES

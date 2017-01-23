@@ -16,6 +16,8 @@
 ##              2016-11-27 HG   Transcribed
 ##              2016-12-07 HG   Fix P00 -> POO
 ##                              Change POO -> P00 in some comments
+##		2016-12-23 RSB	Proofed comment text with octopus/ProoferComments
+##				and fixed all errors found.
 
 ## Page 487
 # MOD NO: 0                             DATE: 1 MAY 1968
@@ -33,7 +35,7 @@
 
 # 3. REQUEST FLASHING DISPLAY V50 N18 PLEASE PERFORM AUTO MANEUVER.
 
-# 4. IF PRIORITY DISPLAY FLAG IS SET TO A PHASECHANGE. THEN AWAIT
+# 4. IF PRIORITY DISPLAY FLAG IS SET DO A PHASECHANGE. THEN AWAIT
 # ASTRONAUT RESPONSE.
 
 # 5. DISPLAY RESPONSE RETURNS:
@@ -42,7 +44,7 @@
 #
 #     B. TERMINATE - IF IN P00 GO TO STEP 5A. OTHERWISE CHECK IF R61 IS
 #        THE CALLING PROGRAM. IF IN R61 AN EXIT IS MADE TO GOTOV56. IF
-#        NOT IN R61 AND EXIT IS DONE VIA GOTOP00H.
+#        NOT IN R61 AN EXIT IS DONE VIA GOTOPOOH.
 #
 #     C. PROCEED - CONTINUE WITH PROGRAM AT STEP 6.
 
@@ -62,7 +64,7 @@
 # 12. DO A MANEUVER CALCULATION AND ICDU DRIVE ROUTINE TO ACHIEVE FINAL
 
 #     GIMBAL ANGLES (GOMANUR).
-# 13. AT END OF MANEUVER TO TO STEP 3.
+# 13. AT END OF MANEUVER GO TO STEP 3.
 
 #          IF SATISFACTORY MANEUVER STEP 5A EXITS R60.
 #          FOR FURTHER ADJUSTMENT OF THE VEHICLE ATTITUDE ABOUT THE
@@ -150,7 +152,7 @@ TOBALLC         TC              BANKCALL
 
 AUTOMANV        TC              CHKLINUS
                 TCF             STARTMNV
-                CAF             STARTMNAD               # RESTART AT STARTMNV IF PRIORIT
+                CAF             STARTMNAD               # RESTART AT STARTMNV IF PRIORITY
                 TS              TBASE2                  #    DISPLAY FLAG SET
 
 STARTMNV        TC              BANKCALL                # PERFORM MANEUVER VIA KALCMANU
@@ -179,7 +181,7 @@ CHKLINS1        TS              TBASE2
                 OCT             00132
 
                 CAF             BIT7
-                TC              LINUS                   # GO SET BITS FOR PRIORITY DISPLAY
+                TC              LINUS                   # GO SET BITS FOR PRIORITY DISPLAY    -
                 TC              MPAC +2
 
 RELINUS         CAF             PRIO26                  # RESTORE ORIGINAL PRIORITY
@@ -219,7 +221,7 @@ R61TEST         CA              MODREG                  # IF WE ARE IN P00 IT MU
                 BZF             GOTOPOOH                # NO
                 TC              GOTOV56                 # YES
 
-BIT14+7         OCT             20100
+BIT14+7         OCT             20100			#					-
 OCT203          OCT             203
 
 ## Page 491
@@ -252,7 +254,7 @@ ISITAUTO        EXTEND                                  # CHECK FOR AUTO MODE
 #          TC      BALLANGS
 # NORMAL EXIT MODE
 
-#          TC      BALLEXIT        # (SAVED Q)
+#          TC      BALLEXIT        (SAVED Q)
 
 # ALARM OR EXIT MODE   NIL
 # SUBROUTINES CALLED
@@ -326,12 +328,12 @@ BALLANGS        TC              MAKECADR
                                 COSCDUX
                 DMP             SL1                     # CXCY
                                 COSCDUY
-                DSU             STADR                   # PULL UP FORM 6 PD
+                DSU             STADR                   # PULL UP FROM 6 PD
                 STODL           COSTH                   # COSTH = CXCY - SXSZSY
                                 SINCDUY
                 DMP             SL1
                                 COSCDUX                 # CXSY
-                DAD             STADR                   # PULL UP FORM 4 PD
+                DAD             STADR                   # PULL UP FROM 4 PD
                 STCALL          SINTH                   # SINTH = CXSY + SXSZCY
                                 ARCTAN                  # RETURNS WITH D(MPAC) = PITCH
                 PDDL            VDEF                    # PITCH INTO 2 PD, ROLL INTO MPAC FROM 2PD
@@ -354,7 +356,7 @@ ENDBALL         CA              BALLEXIT
 # BEGINNING WITH THE LOCATION CALLED SCAXIS.  THE COMPONENTS OF THIS VECTOR ARE GIVEN IN SPACECRAFT COORDINATES.
 # THE DIRECTION IN WHICH THIS AXIS IS TO BE POINTED MUST APPEAR AS A HALF UNIT DOUBLE PRECISION VECTOR IN
 # SUCCESSIVE LOCATIONS OF ERASABLE MEMORY BEGINNING WITH THE ADDRESS CALLED POINTVSM.  THE COMPONENTS OF THIS
-# VECTOR ARE GIVEN IN STABLE MEMBER COORDINATES.  WITH THIS INFORMTAION VECPOINT COMPUTES A SET OF THREE GIMBAL
+# VECTOR ARE GIVEN IN STABLE MEMBER COORDINATES.  WITH THIS INFORMATION VECPOINT COMPUTES A SET OF THREE GIMBAL
 # ANGLES (2S COMPLEMENT) CORESPONDING TO THE CROSS-PRODUCT ROTATION BETWE EN SCAXIS AND POINTVSM AND STORES THEM
 # IN T(MPAC) BEFORE RETURNING TO THE CALLER.
 #          THIS ROTATION, HOWEVER, MAY BRING THE S/C INTO GIMBAL LOCK.  WHEN POINTING A VECTOR IN THE Y-Z PLANE,
@@ -369,7 +371,7 @@ ENDBALL         CA              BALLEXIT
 # REQUIRED TO POINT THE VECTOR IN THE DESIRED DIRECTION.  AT PRESENT NO INDICATION IS GIVEN FOR THIS SITUATION
 # EXCEPT THAT THE FINAL MIDDLE GIMBAL ANGLE IN MPAC +2 IS GREATER THAN 59 DEGREES.
 
-#          CALLING SEQUENCE
+#          CALLING SEQUENCE -
 #              1) LOAD SCAXIS, POINTVSM
 #              2) CALL
 #                       VECPOINT
@@ -381,7 +383,7 @@ ENDBALL         CA              BALLEXIT
 #              3) DESIRED MIDDLE GIMBAL ANGLE IN MPAC +2
 
 
-#          ERASABLES USED --
+#          ERASABLES USED -
 
 #              1) SCAXIS           6
 #              2) POINTVSM         6
@@ -434,7 +436,7 @@ STORANG         STCALL          25D
                                 SCAXIS
                                 28D
                 SL1             ARCCOS
-COMPMATX        CALL                                    # NO COMPUTE THE TRANSFORMATION FROM
+COMPMATX        CALL                                    # NOW COMPUTE THE TRANSFORMATION FROM
                                 DELCOMP                 # FINAL S/C AXES TO INITIAL S/C AXES MFI
                 AXC,1           AXC,2
                                 MIS                     # COMPUTE THE TRANSFORMATION FROM FINAL
@@ -518,12 +520,12 @@ PICKAXIS        VLOAD           DOT                     # IF VF X VI = 0, FIND V
                                 ROT180
                                 25D
                 GOTO                                    # IF VF = VI, CDU DESIRED = PRESENT CDU
-                                VECQTEMP                # PRESETN CDU ANGLES
+                                VECQTEMP                # PRESENT CDU ANGLES
 
                 BANK            35
                 SETLOC          MANUVER1
                 BANK
-ROT180          VLOAD           VXV                     # IF VF, VI ANTI-PARALLEL, 108 DEG ROTATION
+ROT180          VLOAD           VXV                     # IF VF, VI ANTIPARALLEL, 108 DEG ROTATION
                                 MIS             +6      # IS REQUIRED. Y STABLE MEMBER AXIS IN
                                 HIDPHALF                # INITIAL S/C AXES.
                 UNIT            VXV                     # FIND Y(SM) X X(I)
@@ -576,7 +578,7 @@ R62FLASH        CAF             V06N22                  # FLASH V06N22 AND
                 TCF             R62FLASH                # ENTER
 
                                                         # ASTRONAUT MAY LOAD NEW ICDUS AT THIS
-                                                        # POINT.
+                                                        # POINT
 GOMOVE          TC              UPFLAG                  # SET FOR 3-AXIS MANEUVER
                 ADRES           3AXISFLG
 

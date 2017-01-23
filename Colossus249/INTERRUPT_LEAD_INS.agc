@@ -5,14 +5,21 @@
 ##		It is part of the source code for the Command Module's (CM)
 ##		Apollo Guidance Computer (AGC), for Apollo 9.
 ## Assembler:	yaYUL
-## Reference:	pp. 129-130 of 1701.pdf.
+## Reference:	pp. 127-128
 ## Contact:	Ron Burkey <info@sandroid.org>.
 ## Website:	www.ibiblio.org/apollo.
 ## Mod history:	08/06/04 RSB.	Adapted from similar Luminary 131 file.
+##		2017-01-05 RSB	Page numbers now agree with those on the
+##				original harcopy, as opposed to the PDF page
+##				numbers in 1701.pdf.
+##		2017-01-14 RSB	Cross-diff'd comment text (not whitespace)
+##				vs the already-proofed corresponding Colossus
+##				237 and Comanche 55 source-code files
+##				and corrected errors found.  No differences
+##				remain.
 ##
 ## The contents of the "Colossus249" files, in general, are transcribed 
-## from a scanned document obtained from MIT's website,
-## http://hrst.mit.edu/hrs/apollo/public/archive/1701.pdf.  Notations on this
+## from a scanned copy of the program listing.  Notations on this
 ## document read, in part:
 ##
 ##	Assemble revision 249 of AGC program Colossus by NASA
@@ -28,13 +35,13 @@
 ##	under NASA contract NAS 9-4065.
 ##
 ## Refer directly to the online document mentioned above for further information.
-## Please report any errors (relative to 1701.pdf) to info@sandroid.org.
+## Please report any errors (relative to the scanned pages) to info@sandroid.org.
 ##
 ## In some cases, where the source code for Luminary 131 overlaps that of 
 ## Colossus 249, this code is instead copied from the corresponding Luminary 131
 ## source file, and then is proofed to incorporate any changes.
 
-## Page 129
+## Page 127
 		SETLOC	4000 
 		
 		COUNT	02/RUPTS
@@ -85,7 +92,7 @@
 		TCF	DODOWNTM
 		
 		DXCH	ARUPT		# RADAR RUPT
-## Page 130
+## Page 128
 		CAF	RDRPTBB
 		XCH	BBANK
 		TCF	VHFREAD
@@ -116,7 +123,7 @@ DWNRPTBB	BBCON	DODOWNTM
 RDRPTBB		BBCON	VHFREAD
 
 		EBANK=	TIME1
-HCRUPTBB	BBCON	RESUME		# NOT USA
+HCRUPTBB	BBCON	RESUME		# NOT USED
 
 		EBANK=	DSRUPTSW
 T4RPTBB		BBCON	T4RUPT

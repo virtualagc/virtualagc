@@ -5,14 +5,20 @@
 ##		It is part of the source code for the Command Module's (CM)
 ##		Apollo Guidance Computer (AGC), for Apollo 9.
 ## Assembler:	yaYUL
-## Reference:	pp. 891-892 of 1701.pdf.
+## Reference:	pp. 887-888.
 ## Contact:	Ron Burkey <info@sandroid.org>.
 ## Website:	www.ibiblio.org/apollo.
 ## Mod history:	08/22/04 RSB.	Began transcribing.
+##		2017-01-06 RSB	Page numbers now agree with those on the
+##				original harcopy, as opposed to the PDF page
+##				numbers in 1701.pdf.
+##		2017-01-18 RSB	Cross-diff'd comment text (not whitespace)
+##				vs the already-proofed corresponding Colossus
+##				237 and Comanche 55 source-code files
+##				and corrected errors found.
 ##
 ## The contents of the "Colossus249" files, in general, are transcribed 
-## from a scanned document obtained from MIT's website,
-## http://hrst.mit.edu/hrs/apollo/public/archive/1701.pdf.  Notations on this
+## from a scanned copy of the program listing.  Notations on this
 ## document read, in part:
 ##
 ##	Assemble revision 249 of AGC program Colossus by NASA
@@ -28,15 +34,13 @@
 ##	under NASA contract NAS 9-4065.
 ##
 ## Refer directly to the online document mentioned above for further information.
-## Please report any errors (relative to 1701.pdf) to info@sandroid.org.
+## Please report any errors (relative to the scanned pages) to info@sandroid.org.
 ##
 ## In some cases, where the source code for Luminary 131 overlaps that of 
 ## Colossus 249, this code is instead copied from the corresponding Luminary 131
 ## source file, and then is proofed to incorporate any changes.
 
-## Page 891
-# S-BAND ANTENNA FOR CM
-
+## Page 887
 		BANK	23
 		SETLOC	SBAND
 		BANK
@@ -67,7 +71,7 @@ SBANDANT	TC	BANKCALL	# V 64 E GETS US HERE
 			EISOI +2
 EISOI		VLOAD	VCOMP		# EARTH, R= -RCM
 			RATT
-		SETPD	MXV		# RCS TO STABLE MEMBER: B-1X B-29X B+1
+		SETPD	MXV		# RCS TO STABLE MEMBER- B-1X B-29X B+1
 			2D		# 2D
 			REFSMMAT	# STABLE MEMBER.  B-1X B-29X B+1= B-29
 		VSL1	PDDL		# 8D
@@ -87,12 +91,12 @@ EISOI		VLOAD	VCOMP		# EARTH, R= -RCM
 COVCNV		UNIT	BOV		# TEST OVERFLOW FOR INDICATION OF NULL
 			NOADJUST	# VECTOR
 		PUSH	DOT		# 20D
-## Page 892
+## Page 888
 			HIUNITX		# COMPUTE YAW ANGLE = ACOS (URP.UX)
 		SL1	ACOS		# REVOLUTIONS SCALED B0
 		PDVL	DOT		# 22D YAWANG
 			URP
-			HIUNITY		# COMPUTE FOLLOWING: URP.UY
+			HIUNITY		# COMPUTE FOLLOWING- URP.UY
 		SL1	BPL		# POSITIVE
 			NOADJUST	# YES, 0-180 DEGREES
 		DLOAD	DSU		# NO, 181-360 DEGREES 20D
@@ -120,7 +124,7 @@ NOADJUST	VLOAD	DOT		# COMPUTE PITCH ANGLE
 		TC	ENDOFJOB	# RECYCLE
 		CAF	BIT3		# IMMEDIATE RETURN
 		TC	BLANKET		# BLANK R3
-		CAF	BIT1		# DELAY MINIMUM TIME TO ALLOW DISPLAY N
+		CAF	BIT1		# DELAY MINIMUM TIME TO ALLOW DISPLAY IN
 		TC	BANKCALL
 		CADR	DELAYJOB
 		TCF	SBANDANT +2

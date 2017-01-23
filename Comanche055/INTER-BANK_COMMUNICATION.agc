@@ -1,19 +1,23 @@
 ### FILE="Main.annotation"
-## Copyright:    Public domain.
-## Filename:     INTER-BANK_COMMUNICATION.agc
-## Purpose:      Part of the source code for Comanche, build 055. It
-##               is part of the source code for the Command Module's
-##               (CM) Apollo Guidance Computer (AGC), Apollo 11.
-## Assembler:    yaYUL
-## Reference:    pp. 1103-1106
-## Contact:      Ron Burkey <info@sandroid.org>
-## Website:      http://www.ibiblio.org/apollo.
-## Mod history:  2009-05-08 RSB	Adapted from Colossus249/ file of same name
+## Copyright:   Public domain.
+## Filename:    INTER-BANK_COMMUNICATION.agc
+## Purpose:     Part of the source code for Comanche, build 055. It
+##              is part of the source code for the Command Module's
+##              (CM) Apollo Guidance Computer (AGC), Apollo 11.
+## Assembler:   yaYUL
+## Reference:   pp. 1103-1106
+## Contact:     Ron Burkey <info@sandroid.org>
+## Website:     http://www.ibiblio.org/apollo.
+## Mod history: 2009-05-08 RSB	Adapted from Colossus249/ file of same name
 ##				and page images. Corrected various typos
 ##				in the transcription of program comments,
 ##				and these should be back-ported to 
 ##				Colossus249.
 ##		2011-05-08 JL	Removed workaround.
+##		2016-12-21 RSB	Proofed comment text using octopus/ProoferComments
+##				and corrected the errors found.
+##		2017-01-14 RSB	Corrected comment-text errors located while diff'ing
+##				against Colossus 249.
 
 ## The contents of the "Comanche055" files, in general, are transcribed 
 ## from scanned documents. 
@@ -53,7 +57,7 @@ SWCALL		TS	L
 		XCH	Q		# A,L NOW CONTAINS DP RETURN.
 		DXCH	BUF2		# RESTORING INPUTS IF THIS IS A BANKCALL.
 		INDEX	Q
-		TC	10000		# SETTING Q TO SWRETURN
+		TC	10000		# SETTING Q TO SWRETURN.
 
 SWRETURN	XCH	BUF2 +1		# COMES HERE TO RETURN TO CALLER. C(A,L)
 		XCH	FBANK		# ARE PRESERVED FOR RETURN.
@@ -89,7 +93,7 @@ SUPDACAL	TS	MPTEMP
 		ROR	SUPERBNK	# SAVE FBANK IN BITS 15-11, AND
 		XCH	MPTEMP		# SUPERBANK IN BITS 7-5.
 		MASK	LOW10
-		XCH	L		# SAVE REL. ADR. IN BANK, FETCH SUPERBITS
+		XCH	L		# SAVE REL. ADR. IN BANK, FETCH SUPERBITS.
 		INHINT			# BECAUSE RUPT DOES NOT SAVE SUPERBANK.
 		EXTEND
 		WRITE	SUPERBNK	# SET SUPERBANK FOR DATA.
@@ -126,8 +130,8 @@ ISWRETRN	XCH	RUPTREG4
 
 # 2. USPRCADR ACCESSES INTERPRETIVE CODING IN OTHER THAN THE USER'S FBANK.  THE CALLING SEQUENCE IS AS FOLLOWS:
 #	L	TC	USPRCADR
-#	L+1	CADR	INTPRETX	# INTPRETX IS THE INTERPRETIVE CODING
-#					# RETURN IS TO L+2
+#	L+1	CADR	INTPRETX	INTPRETX IS THE INTERPRETIVE CODING
+#					RETURN IS TO L+2
 
 USPRCADR	TS	LOC		# SAVE A
 		CA	BIT8
@@ -143,12 +147,12 @@ USPRCADR	TS	LOC		# SAVE A
 		TCF	Q+10000
 
 ## Page 1106
-# THERE ARE FOUR POSSIBLE SETTINGS FOR CHANNEL 07.  (CHANNEL 07 CONTAINS SUPERBANK SETTING.)
+# THERE ARE FOUR POSSIBLE SETTINGS FOR CHANNEL 07.  (CHANNEL 07 CONTAINS THE SUPERBANK SETTING.)
 #
 #					PSEUDO-FIXED	 OCTAL PSEUDO
-# SUPERBANK	SETTING	S-REG. VALUE	BANK NUMBERS	   ADDRESSES
-# ---------	-------	------------	------------ 	   ---------
-# SUPERBANK 3	  OXX	 2000 - 3777	   30 - 37	 70000 - 107777		(WHERE XX CAN BE ANYTHING AND
+# SUPERBANK	SETTING	S-REG. VALUE	BANK NUMBERS	 ADDRESSES
+# ----------	-------	------------	 ------------ 	  ------------
+# SUPERBANK 3	  0XX	 2000 - 3777	   30 - 37	 70000 - 107777		(WHERE XX CAN BE ANYTHING AND
 #										WILL USUALLY BE SEEN AS 11)
 # SUPERBANK 4	  100	 2000 - 3777	   40 - 47	110000 - 127777		(AS FAR AS IT CAN BE SEEN,
 #										ONLY BANKS 40-43 WILL EVER BE
@@ -161,7 +165,7 @@ USPRCADR	TS	LOC		# SAVE A
 # SUPERBANK SHOULD USE SUPERSW. ***
 #
 # SUPERSW MAY BE CALLED IN THIS FASHION:
-#	CAF	ABBCON		WHERE -- ABBCON  BBCON  SOMETHING --
+#	CAF	ABBCON		WHERE -- ABBCON  BBCON  SOMETHIN --
 #	TCR	SUPERSW		(THE SUPERBNK BITS ARE IN THE BBCON)
 #	...	  ...
 #	 .	   .

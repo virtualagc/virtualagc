@@ -8,12 +8,15 @@
 ##		that the code format has been changed to conform to the
 ##		requirements of the yaYUL assembler rather than the 
 ##		original YUL assembler.
-## Reference:	pp. 624-627 of 1729.pdf.
+## Reference:	pp. 619-622
 ## Contact:	Ron Burkey <info@sandroid.org>.
 ## Website:	www.ibiblio.org/apollo
 ## Mod history:	05/19/03 RSB.	Began transcribing.
+##		2017-01-06 RSB	Page numbers now agree with those on the
+##				original harcopy, as opposed to the PDF page
+##				numbers in 1701.pdf.
 
-## Page 624
+## Page 619
 # PROGRAM DESCRIPTION P30	DATE 3-6-67
 # MOD.1 BY RAMA AIYAWAR
 #
@@ -25,10 +28,10 @@
 #
 # CALLING SEQUENCE VIA JOB FROM V37
 #
-# EXIT VIA V37 CALL CR TO GOTOP00H (V34E)
+# EXIT VIA V37 CALL CR TO GOTOPOOH (V34E)
 #
 # SUBROUTINE CALLS --	FLAGUP, PHASCHNG, BANKCALL, ENDOFJOB, GOFLASH, GOFLASHR
-#			GOPERF3R, INTPRET, BLANKET, GOTOP00H, R02BOTH, S30.1,
+#			GOPERF3R, INTPRET, BLANKET, GOTOPOOH, R02BOTH, S30.1,
 #			TIG/N35, MIDGIM, DISPMGA
 #
 # ERASABLE INITIALIZATION -- STATE VECTOR
@@ -64,7 +67,7 @@ P30N33		CAF	V06N33		# T OF IGN
 			XDELVFLG
 		EXIT
 PARAM30		CAF	V06N42		# DISPLAY APOGEE,PERIGEE,DELTA V
-## Page 625
+## Page 620
 		TC	VNP00H
 		
 		TC	INTPRET
@@ -78,7 +81,7 @@ REVN1645	CALL
 V06N33		VN	0633
 V06N42		VN	0642
 
-## Page 626
+## Page 621
 # PROGRAM DESCRPTION S30.1	DATE 9NOV66
 # MOD NO 1			LOG SECTION P30,P37
 # MOD BY RAMA AIYAWAR **
@@ -136,7 +139,7 @@ S30.1		STQ	DLOAD
 			LEMPREC		# ENCKE ROUTINE FOR LEM
 			
 		VLOAD	SXA,2
-## Page 627
+## Page 622
 			RATT
 			RTX2
 		STORE	RTIG		# RADIUS VECTOR AT IGNITION TIME

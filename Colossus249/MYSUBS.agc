@@ -5,14 +5,19 @@
 ##		It is part of the source code for the Command Module's (CM)
 ##		Apollo Guidance Computer (AGC), for Apollo 9.
 ## Assembler:	yaYUL
-## Reference:	Begins on p. 974 of 1701.pdf.
+## Reference:	Begins on p. 970.
 ## Contact:	Ron Burkey <info@sandroid.org>.
 ## Website:	www.ibiblio.org/apollo.
 ## Mod history:	08/25/04 RSB.	Began transcribing.
+##		2017-01-06 RSB	Page numbers now agree with those on the
+##				original harcopy, as opposed to the PDF page
+##				numbers in 1701.pdf.
+##		2017-01-15 RSB	Comment-text proofed by 3-way diff'ing vs
+##				Colossus 237 and Comanche 55.  No differences
+##				were found, so no corrections were made.
 ##
 ## The contents of the "Colossus249" files, in general, are transcribed 
-## from a scanned document obtained from MIT's website,
-## http://hrst.mit.edu/hrs/apollo/public/archive/1701.pdf.  Notations on this
+## from a scanned copy of the program listing.  Notations on this
 ## document read, in part:
 ##
 ##	Assemble revision 249 of AGC program Colossus by NASA
@@ -28,13 +33,13 @@
 ##	under NASA contract NAS 9-4065.
 ##
 ## Refer directly to the online document mentioned above for further information.
-## Please report any errors (relative to 1701.pdf) to info@sandroid.org.
+## Please report any errors (relative to the scanned pages) to info@sandroid.org.
 ##
 ## In some cases, where the source code for Luminary 131 overlaps that of 
 ## Colossus 249, this code is instead copied from the corresponding Luminary 131
 ## source file, and then is proofed to incorporate any changes.
 
-## Page 974
+## Page 970
 		BANK	20
 		SETLOC	MYSUBS
 		BANK
@@ -83,7 +88,7 @@ TSK		TS	KMPAC
 DPADD+		AD	NEGMAX		# KMPAC GREATER THAN 0
 		TCF	TSK
 
-## Page 975
+## Page 971
 DPADD-		COM
 		AD	POSMAX		# KMPAC LESS THAN 0
 		TCF	TSK
@@ -93,6 +98,6 @@ DPADD2+		AD	NEGMAX		# CAN NOT OVERFLOW
 		CA	NEGMAX		# UPPER WAS = 0
 		TCF	TSK
 
-## Page 976
-# This page is empty ... woo-hoo!! -- RSB 2004
+## Page 972
+## This page is empty.
 

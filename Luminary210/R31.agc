@@ -18,6 +18,8 @@
 ##				of the constant V16N54, there were no changes.
 ##              2016-12-01 HG   fix operand V15N54  -> V16N54
 ##                              remove V16N54 from its old location 
+##		2016-12-25 RSB	Comment-text proofed using ProoferComments
+##				and corrected errors found.
 
 ## Page 706
 		BANK	40
@@ -205,12 +207,12 @@ GETRVN		CA	PRIO22		# INHIBIT SERVICER
 		TC	PRIOCHNG
 		TC	INTPRET
 		VLOAD	SETPD
-			RN		# LM STATE VECTOR IN RN,VN.
+			RN		# LM STATE VECTOR IN RN,VN
 			0
 		STOVL	RONE
 			VN
 		STOVL	VONE		# LOAD R(CSM),V(CSM) IN CASE MUNFLAG SET
-			V(CSM)		# (TO INSURE TIME COMPATIBILITY)
+			V(CSM)		# (TO INSURE TIME COMPATABILITY)
 		PDVL	PDDL
 			R(CSM)
 			PIPTIME
@@ -239,7 +241,7 @@ GETRVN2		CALL
 			OTHINT
 R31SURF		TC	INTPRET
 		RTB			# LM IS ON SURFACE, SO PRECISION
-			LOADTIME	# INTEGRATION USED PLANETARY INERTIAL
+			LOADTIME	# INTEGRATION USES PLANETARY INERTIAL
 		STCALL	TDEC1		# ORIENTATION SUBROUTINE
 			LEMPREC
 		GOTO			# DO CSM CONIC

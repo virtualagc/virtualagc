@@ -1,14 +1,16 @@
 ### FILE="Main.annotation"
-## Copyright:    Public domain.
-## Filename:	 TVCSTROKETEST.agc
-## Purpose:      Part of the source code for Colossus build 237.
-##               This is for the Command Module's (CM) Apollo Guidance
-##               Computer (AGC), for Apollo 8.
-## Assembler:    yaYUL
-## Contact:      Jim Lawton <jim DOT lawton AT gmail DOT com>
-## Website:      www.ibiblio.org/apollo/index.html
-## Page Scans:   www.ibiblio.org/apollo/ScansForConversion/Colossus237/
-## Mod history:  2011-03-12 JL	Adapted from corresponding Colossus 249 file.
+## Copyright:   Public domain.
+## Filename:	TVCSTROKETEST.agc
+## Purpose:     Part of the source code for Colossus build 237.
+##              This is for the Command Module's (CM) Apollo Guidance
+##              Computer (AGC), for Apollo 8.
+## Assembler:   yaYUL
+## Contact:     Jim Lawton <jim DOT lawton AT gmail DOT com>
+## Website:     www.ibiblio.org/apollo/index.html
+## Page Scans:  www.ibiblio.org/apollo/ScansForConversion/Colossus237/
+## Mod history: 2011-03-12 JL	Adapted from corresponding Colossus 249 file.
+##		2017-01-01 RSB	Proofed comment text using octopus/ProoferComments,
+##				and fixed errors found.
 
 ## Page 940
 # NAME     STROKE TEST PACKAGE   (INCLUDING INITIALIZATION PACKAGE)
@@ -20,7 +22,7 @@
 #      STRKTSTI (STROKE TEST INITIALIZATION) IS CALLED AS A JOB BY VB68.
 #               IT INITIALIZES ALL ERASABLES REQD FOR A STROKE TEST, AND
 #      	        THEN TESTS FOR AN 80MS DAP. IF 80MS IT SETS STROKER = ESTROKER
-#      	        FOR AN IMMEDIATE STROKE TEST, OTEHRWISE IT MERELY ENABLES
+#      	        FOR AN IMMEDIATE STROKE TEST, OTHERWISE IT MERELY ENABLES
 #      	        A STROKE TEST BY SETTING STROKER TO -0. THE STROKE TEST
 #      	        THEN AWAITS SWITCHOVER TO THE 80MS DAP WHEREUPON IT IS
 #      	        ENABLED AFTER AN ADDITIONAL 4 SECOND DELAY TO AVOID
@@ -29,7 +31,7 @@
 #      HACK (STROKE TEST) GENERATES THE WAVEFORM BY DUMPING PULSE BURSTS
 #      	        OF PROPER SIGN AND IN PROPER SEQUENCE DIRECTLY INTO
 #      	        TVCPITCH, WORKING IN CONJUNCITON WITH BOTH PITCH AND YAW
-#      	        TVC DAPS, WITH INTERMEDIAT WAITLIST CALLS. NOTE, HOWEVER
+#      	        TVC DAPS, WITH INTERMEDIATE WAITLIST CALLS. NOTE, HOWEVER
 #      	        THAT THE STROKE TEST IS PERFORMED ONLY IN THE PITCH AXIS.
 #      	        AN EXAMPLE WAVEFORM IS GIVEN BELOW, TO DEMONSTRATE STROKE-
 #      	        TEST PARAMETER SELECTION
@@ -110,8 +112,8 @@
 #      	   FCARD2 = +9  (NUMBER REVERSALS MINUS 1)
 #      	   FCARD5 = +1  (NUMBER OF PULSE BURSTS IN 1/2 AMPLITUDE)
 #      SET4..
-#      	   FCARD3 = +0  (NUMBER OF REVERSALS MINUS 1)
-#      	   FCARD6 = +0  (NUMBER OF PULSE BURSTS IN 1/2 AMPLUTUDE)
+#      	   FCARD3 = +0  (NUMBER REVERSALS MINUS 1)
+#      	   FCARD6 = +0  (NUMBER OF PULSE BURSTS IN 1/2 AMPLITUDE)
 
 ## Page 942
 # STROKE TEST INITIALIZATION PACKAGE  (AS A JOB, FROM VERB 68)
@@ -191,7 +193,7 @@ FCARD6		DEC	4		#                              SET4..(+ 4)
 HACK		EXTEND			# ENTRY (IN T5 RUPT) FROM TVCDAPS
 		QXCH	BUNKER		# SAVE Q FOR DAP RETURN
 
-		CAF	20MS		# 2DAPSx2(PASSES/DAP)x2(CS/PASS)=8CS=TVCDT
+		CAF	20MS		# 2DAPSX2(PASSES/DAP)X2(CS/PASS)=8CS=TVCDT
 		TC	WAITLIST
 		EBANK=	BUNKER
 		2CADR	HACKWLST
@@ -216,7 +218,7 @@ HACKWLST	CAF	TCTSKOVR	# ENTRY FROM WAITLIST
 
 		CCS	REVS
 		TCF	REVUP		# POSITIVE REVS
-		TCF	REVUP +4	# FINAL REVERSAL, THE SET
+		TCF	REVUP +4	# FINAL REVERSAL, THIS SET
 
 		INCR	CARD		# NEGATIVE REVS SET LAST PASS, READY FOR
 		CS	CARD		#      THE NEXT SET. CHECK IF NO MORE SETS
@@ -239,7 +241,7 @@ STROKILL	TS	STROKER		# RESET (TO +0) TO END TEST
 
 REVUP		TS	REVS		# ALL REVERSALS EXCEPT LAST OF SET
 		CA	N
-		DOUBLE			# 2 x 1/2AMP
+		DOUBLE			# 2 X 1/2AMP
 		TCF	+4
 
   +4		CS	ONE		# FINAL REVERSAL, THIS SET

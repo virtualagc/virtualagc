@@ -1,15 +1,19 @@
 ### FILE="Main.annotation"
-## Copyright:    Public domain.
-## Filename:	 EXECUTIVE.agc
-## Purpose:      Part of the source code for Colossus build 237.
-##               This is for the Command Module's (CM) Apollo Guidance
-##               Computer (AGC), for Apollo 8.
-## Assembler:    yaYUL
-## Contact:      Jim Lawton <jim DOT lawton AT gmail DOT com>
-## Website:      www.ibiblio.org/apollo/index.html
-## Page Scans:   www.ibiblio.org/apollo/ScansForConversion/Colossus237/
-## Mod history:  2011-04-13 JL	Adapted from corresponding Colossus 249 file.
-##		 2016-11-02 RSB	Typo (offset-reference +1 was not indented).
+## Copyright:   Public domain.
+## Filename:	EXECUTIVE.agc
+## Purpose:     Part of the source code for Colossus build 237.
+##              This is for the Command Module's (CM) Apollo Guidance
+##              Computer (AGC), for Apollo 8.
+## Assembler:   yaYUL
+## Contact:     Jim Lawton <jim DOT lawton AT gmail DOT com>
+## Website:     www.ibiblio.org/apollo/index.html
+## Page Scans:  www.ibiblio.org/apollo/ScansForConversion/Colossus237/
+## Mod history: 2011-04-13 JL	Adapted from corresponding Colossus 249 file.
+##		2016-11-02 RSB	Typo (offset-reference +1 was not indented).
+##		2017-01-01 RSB	Proofed comment text using octopus/ProoferComments,
+##				and fixed errors found.
+##		2017-01-22 RSB	Back-ported comment error fixes detected in diff'ing
+##				Artemis 72 vs Comanche 55.
 
 ## Page 1175
 		BLOCK	02
@@ -61,7 +65,7 @@ CHANG1		LXCH	Q
 #          TO SUSPEND AN INTERPRETIVE JOB:
 
 CHANG2		CS	LOC		# NEGATIVE LOC SHOWS JOB = INTERPRETIVE.
-#          ITRACE (4) REFERS TO "CHANG2"
+#          ITRACE (4) REFERS TO "CHANG2".
 ## Page 1176
 		TS	L
  +2		CAF	EXECBANK
@@ -141,7 +145,7 @@ NOVAC2		CAF	ZERO		# NOVAC ENTERS HERE. FIND A CORE SET.
 NOVAC3		TS	EXECTEM2
 		INDEX	LOCCTR
 		CCS	PRIORITY	# EACH PRIORITY REGISTER CONTAINS -0 IF
-		TCF	NEXTCORE	# THE CORESPONDING CORE SET IS AVAILABLE.
+		TCF	NEXTCORE	# THE CORRESPONDING CORE SET IS AVAILABLE.
 NO.CORES	DEC	6
 		TCF	NEXTCORE	# AN ACTIVE JOB HAS A POSITIVE PRIORITY
 #					  BUT A DORMANT JOB'S PRIORITY IS NEGATIVE
@@ -161,7 +165,7 @@ CORFOUND	CA	NEWPRIO		# SET THE PRIORITY OF THIS JOB IN THE CORE
 		TS	FIXLOC
 
 SPECTEST	CCS	NEWJOB		# SEE IF ANY ACTIVE JOBS WAITING (RARE).
-		TCF	SETLOC		# MUST BE AWAKENED OUT UNCHANGED JOB.
+		TCF	SETLOC		# MUST BE AWAKENED BUT UNCHANGED JOB.
 		TC	CCSHOLE
 		TC	CCSHOLE
 		TS	NEWJOB		# +0 SHOWS ACTIVE JOB ALREADY SET.
@@ -304,7 +308,7 @@ JOBWAKE3	CAF	COREINC
 		ADS	LOCCTR
 		CCS	EXECTEM2
 		TCF	JOBWAKE4
-		CS	ONE		# EXIT IF SLEEPIN JOB NOT FOUND.
+		CS	ONE		# EXIT IF SLEEPING JOB NOT FOUND.
 		TS	LOCCTR
 		TCF	ENDFIND
 
@@ -321,7 +325,7 @@ WAKETEST	CS	NEWLOC
 		INDEX	LOCCTR
 		TS	PRIORITY
 
-		CS	FBANKMSK	# MASK UP THE 2CADR OF THE WAKE ADDRESS
+		CS	FBANKMSK	# MAKE UP THE 2CADR OF THE WAKE ADDRESS
 		MASK	NEWLOC		# USING THE CADR IN NEWLOC AND THE EBANK
 		AD	2K		# HALF OF BBANK SAVED IN BANKSET.
 		XCH	NEWLOC
@@ -406,7 +410,7 @@ EJSCAN		CCS	PRIORITY +12D
 
 		TCF	+2
 		TCF	DUMMYJOB
-		CCS	BUF		# BUF IS ZERO IS THIS IS A PRIOCHNG AND
+		CCS	BUF		# BUF IS ZERO IF THIS IS A PRIOCHNG AND
 		TCF	+2		# CHANGED PRIORITY IS STILL HIGHEST.
 		TCF	ENDPRCHG -1
 
@@ -443,10 +447,10 @@ DUMMYJOB	CS	ZERO		# SET NEWJOB TO -0 FOR IDLING.
 		CS	TWO		# TURN OFF THE ACTIVITY LIGHT.
 		EXTEND
 		WAND	DSALMOUT
-ADVAN		CCS	NEWJOB		# IS THE NEWJOB ACTIVE ?
+ADVAN		CCS	NEWJOB		# IS A NEWJOB ACTIVE ?
 		TCF	NUCHANG2	# YES... ONE REQUIRING A CHANGE JOB.
 		CAF	TWO		# NEW JOB ALREADY IN POSITION FOR
-		TCF	NUDIRECT	# EXECUTION
+		TCF	NUDIRECT	# EXECUTION.
 
 		CA	SELFRET
 		TS	L		# PUT RETURN ADDRESS IN L.
@@ -465,9 +469,9 @@ NUDIRECT	EXTEND			# TURN THE GREEN LIGHT BACK ON.
 
 		COUNT	02/EXEC
 
-# SUPDXCHZ - ROUTINE TO TRANSFER TO SUPEBANK.
+# SUPDXCHZ - ROUTINE TO TRANSFER TO SUPERBANK.
 # CALLING SEQUENCE
-#		TCF	SUPDXCHZ	# WITH 2CADR OF DESIRED LOCATION IN A + L.
+#		TCF	SUPDXCHZ	WITH 2CADR OF DESIRED LOCATION IN A + L.
 
 SUPDXCHZ	XCH	L		# BASIC.
  +1		EXTEND

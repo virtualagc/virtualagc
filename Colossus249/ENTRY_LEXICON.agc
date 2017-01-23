@@ -5,14 +5,22 @@
 ##		It is part of the source code for the Command Module's (CM)
 ##		Apollo Guidance Computer (AGC), for Apollo 9.
 ## Assembler:	yaYUL
-## Reference:	pp. 795-801 of 1701.pdf.
+## Reference:	pp. 791-797.
 ## Contact:	Ron Burkey <info@sandroid.org>.
 ## Website:	www.ibiblio.org/apollo.
 ## Mod history:	08/19/04 RSB.	Transcribed	.
+##		2017-01-06 RSB	Page numbers now agree with those on the
+##				original harcopy, as opposed to the PDF page
+##				numbers in 1701.pdf.
+##		2017-01-07 RSB	Cross-diff'd comment text (not whitespace)
+##				vs the already-proofed corresponding Colossus
+##				237 and Comanche 55 source-code files
+##				and corrected errors found.
+##		2017-01-22 RSB	Back-ported comment error fixes detected in diff'ing
+##				Artemis 72 vs Comanche 55.
 ##
 ## The contents of the "Colossus249" files, in general, are transcribed 
-## from a scanned document obtained from MIT's website,
-## http://hrst.mit.edu/hrs/apollo/public/archive/1701.pdf.  Notations on this
+## from a scanned copy of the program listing.  Notations on this
 ## document read, in part:
 ##
 ##	Assemble revision 249 of AGC program Colossus by NASA
@@ -28,36 +36,36 @@
 ##	under NASA contract NAS 9-4065.
 ##
 ## Refer directly to the online document mentioned above for further information.
-## Please report any errors (relative to 1701.pdf) to info@sandroid.org.
+## Please report any errors (relative to the scanned pages) to info@sandroid.org.
 ##
 ## In some cases, where the source code for Luminary 131 overlaps that of 
 ## Colossus 249, this code is instead copied from the corresponding Luminary 131
 ## source file, and then is proofed to incorporate any changes.
 
-## Page 795
+## Page 791
 # VARIABLE	DESCRIPTION				MAXIMUM VALUE *		COMPUTER NAME
-# --------	-----------				---------------		-------------
-# _
+# --------	-----------				------- -----		-------- ----
+# -
 # URT0		INITIAL TARGET VECTOR			2 (UNIT VECTOR)		= RTINIT
-# _
+# -
 # UZ		UNIT VECTOR NORTH			1			= UNITW
-# _
+# -
 # V		VELOCITY VECTOR				2 VSAT			= VEL
-# _
+# -
 # R		POSITION VECTOR				2 EXP 29 METERS		= RN
-# _
+# -
 # VI 		INERTIAL VELOCITY			128 M/CENTISEC		= VN
-# _
+# -
 # RTE		VECTOR EAST AT INITIAL TARGET		2			= RTEAST
-# _
+# -
 # UTR		NORMAL TO RTE AND UZ			2			= RTNORM
-# _
+# -
 # URT		TARGET VECTOR				2			= RT
-# _
+# -
 # UNI		UNIT NORMAL TO TRAJECTORY PLANE		2	
-# _
+# -
 # DELV		INTEGRATED ACCEL. FROM PIPAS		5.85 16384 CM/S
-# _
+# -
 # G		GRAVITY VECTOR				128 M/CENTISEC		= GDT/2
 #
 # A0		INITIAL DRAG FOR UPCONTRL		805 FPSS		FPSS=FT/SEC/SEC
@@ -107,7 +115,7 @@
 # F1		DRANGE/D DRAG	(FINAL PHASE)		2700/805		= FX +5
 #
 # F2		DRANGE/D RDOT	(FINAL PHASE)		2700/2VS NM/FPS		= FX +4
-## Page 796
+## Page 792
 #
 # F3		DRANGE/D (L/D)				2700 NM			= FX
 #
@@ -116,11 +124,13 @@
 # FACT2		CONST FOR UPCONTRL			1/805 FPSS
 #
 # FACTOR	USED IN UPCONTRL			1			* MAXIMUM VALUE DENOTES UNSCALED
-#										  VARIABLE VALUE WHEN SCALED
-# GAMMAL	FLIGHT PATH ANGLE AT VL			1 RADIAN		  VARIABLE HAS MAXIMUM VALUE OF ONE.
+#								
+# GAMMAL	FLIGHT PATH ANGLE AT VL			1 RADIAN		  VARIABLE VALUE WHEN SCALED
 #
-# GAMMAL1	SIMPLE FORM OF GAMMAL			1 RADIAN
-## Page 797
+# GAMMAL1	SIMPLE FORM OF GAMMAL			1 RADIAN		  VARIABLE HAS MAXIMUM VALUE OF ONE.
+## Page 793
+# VARIABLE	DESCRIPTION				MAXIMUM VALUE		COMPUTER NAME
+# --------	-----------				-------	-----		-------- ----
 #
 # HEADSUP	INDICATOR FOR INITIAL ROLL		1
 #
@@ -151,7 +161,7 @@
 #
 # L/DCMINR	LAD COS(15DEG)				1			(NOM = 0.2895)
 #
-# PREDANGLE	PREDICTED RANGE	(FINAL PHASE)		2700 NM			= PREDANG
+# PREDANGL	PREDICTED RANGE	(FINAL PHASE)		2700 NM			= PREDANG
 #
 # Q2		FINAL PHASE RANGE -23500 Q3		21600 NM
 #		Q2 = FCN(LAD)
@@ -188,20 +198,20 @@
 #		  2     2
 # VBARS		VL /VSAT				4
 #					   2     2
-# VSQ		NORMALIZED VEL. SQUARED = V /VSAT	4			= VSQUARE
+# VSQ		NORMALISED VEL. SQUARED = V /VSAT	4			= VSQUARE
 #
 # WT		EARTH RATE TIMES TIME			1 REVOLUTION		NOT SAVED
-#
+#										= WIE (DTEAROT)
 # X		INTERMEDIATE VARIABLE IN G-LIMITER	2 VSAT	 		NOT SAVED
 #
 # Y		LATERAL MISS LIMIT			4 RADIANS		NOT SAVED
 
-## Page 798
+## Page 794
 # EXTRA COMPUTER ERASABLE LOCATIONS NOT SHOWN ON FLOW CHARTS
-# ----------------------------------------------------------
+# -----------------------------------------------------------
 #
 # VARIABLE	DESCRIPTION				MAXIMUM VALUE
-# --------	-----------				-------------
+# --------	-----------				------- -----
 #
 # GOTOADDR	ADDRESS SELECTED BY SEQUENCER
 #
@@ -215,7 +225,7 @@
 #
 # JJ		INDEX IN FINAL PHASE TABLE LOOK-UP
 #
-# MM		INDEX IN FINAL PHASE TABLE LOOK-U
+# MM		INDEX IN FINAL PHASE TABLE LOOK-UP
 #
 # GRAD		INTERPOLATION FACTOR IN FINAL PHASE
 #
@@ -236,15 +246,15 @@
 # TIME/RTO	TIME OF INITIAL TARGET RTINIT		B 28 CENTISEC
 #
 # DTEAROT	EST TIME BETWEEN RTINIT AND RT		B 28 CENTISEC
-# _
+# -
 # UNITV		UNIT V VECTOR				2
-# _
+# -
 # UNITR		UNIT R VECTOR				2
-#  _
+#  -
 # -VREL		NEGATIVE VELOCITY REL TO ATMOSP		2 VSAT
 
 # COMPUTER SWITCHES					INITIAL STATE		CM/FLAGS = STATE +6
-# -----------------					-------------		-------------------
+# -------- --------					-------------		-------------------
 #
 # ENTRYDSP	DO ENTRY DISPLAY, IF SET		NON-BRANCH (1)		92D, BIT 13
 # GONEPAST	INDICATES OVERSHOOT OF TARGET		NON-BRANCH (0)		95D, BIT 10
@@ -256,9 +266,9 @@
 # LATSW		INHIBIT DOWNLIFT SWITCH IF NOT SET	    BRANCH (1)		101D, BIT 4
 # .05GSW	INDICATES DRAG EXCEEDS .05 GS		    BRANCH (0)		102D, BIT 3
 #
-# GONEBY	INDICATES GONE PAST TARGET (SET)	SELF-INITIALIZING	112D, BIT 6
+# GONEBY	INDICATES GONE PAST TARGET (SET)	SELF-INITIALZNG		112D, BIT 8
 
-## Page 799
+## Page 795
 # CONSTANTS AND GAINS							VALUE
 # -------------------							-----
 #
@@ -273,7 +283,7 @@
 # DLEWD0	INITIAL VARIATION IN LEWD				-.05
 # D2		DRAG TO CHANGE LEWD					175	FPSS
 # DT		COMPUTATION CYCLE TIME INTERVAL				2	SEC.
-# GMAX		MAXIMUM ACCELERATION					257.6	FPSS	(6 G-S)
+# GMAX		MAXIMUM ACCELERATION					257.6	FPSS	(8 G-S)
 # KA1		FACTOR IN KA CALC					1.3	GS
 # KA2		FACTOR IN KA CALC					.2 	GS
 # KA3		FACTOR IN D0 CALC					90 FPSS
@@ -292,10 +302,10 @@
 # Q5		FINAL PHASE DRANGE/D GAMMA				7050	NM/RAD
 # Q6		FINAL PHASE INITIAL FLIGHT PATH ANGLE			.0349	RAD
 # Q7F		MIN DRAG FOR UPCONTROL					6	FPSS
-# Q7MIN		IN VALUE FOR Q7 IN FACTOR CALCULATION			40	FPSS
+# Q7MIN		MIN VALUE FOR Q7 IN FACTOR CALCULATION			40	FPSS
 # Q19		FACTOR IN GAMMAL1 CALCULATION				.5
-# Q21		FACTOR IN Q2 CALCULATION				1000	NM
-# Q22		FACTOR IN Q2 CALCULATION				-1302	NM
+# Q21		FACTOR IN Q2 CALCULATION.				1000	NM
+# Q22		FACTOR IN Q2 CALCULATION.				-1302	NM
 # VFINAL1	VELOCITY TO START FINAL PHASE ON INITIAL ENTRY		27000	FPS
 # VFINAL	FACTOR IN INITIAL UP-DOWN CALC				26600	FPS
 # VLMIN		MINIMUM VL						18000	FPS
@@ -305,22 +315,22 @@
 # 25NM		TOLERANCE TO STOP RANGE ITERATION			25	NM
 # VQUIT		VELOCITY TO STOP STEERING				1000	FPS
 
-## Page 800
+## Page 796
 # CONVERSION FACTORS AND SCALING CONSTANTS
-# ----------------------------------------
+# ---------- ------- --- ------- ---------
 #
-# ATK	ANGLE IN RAD TO NM						3437.7466	NM/RAD
-# G5	NOMINAL G VALUE FOR SCALING					(?)		FPSS
-# H5	ATMOSPHERE SCALE HEIGHT						28500		FT
+# ATK	ANGLE IN RAD TO NM						3437.7468	NM/RAD
+# GS	NOMINAL G VALUE FOR SCALING					32.2		FPSS
+# HS	ATMOSPHERE SCALE HEIGHT						28500		FT
 # J	GRAVITY HARMONIC COEFFICIENT					.00162346	
-# (?)	EQUATORIAL EARTH RATE						1546.10168	FPS
+# KWE	EQUATORIAL EARTH RATE						1546.70168	FPS
 # MUE	EARTH GRAVITATIONAL CONSTANT					3.986032233 E14	CUBIC M/ SEC SEC
 # RE	EARTH RADIUS							21202900	FT
 # REQ	EARTH EQUATORIAL RADIUS						20925738.2	FT
 # VSAT	SATELLITE VELOCITY AT RE					25766.1973	FPS
 # WIE	EARTH RATE							.0000729211505	RAD/SEC
  
-#		(END GSOP AS-276, VOL 1, FIG. 5.6-3 CONSTANTS, GAINS, ETC.)
+#		(END GSOP AS-278, VOL 1, FIG. 5.6-3 CONSTANTS, GAINS, ETC.)
 
 # DISPLAY QUANTITIES
 # ------------------
@@ -328,52 +338,52 @@
 # (SEE SECTION 4 OF THE GSOP FOR SIGN CONVENTIONS.)
 #
 # VARIABLE	DESCRIPTION				MAXIMUM VALUE
-# --------	-----------				-------------
+# --------	-----------				------- -----
 #
 # QMAX		PREDICTED MAXIMUM ENTRY ACCEL		163.84 GS	N 60
 # VPRED		PREDICTED VELOCITY AT ALTITUDE		128 M/CENTISEC	N 60
 # 		400K FT ABOVE FISCHER RADIUS.
 # GAMMAEI	PREDICTED GAMMA AT ALTITUDE		1 REVOLUTION	N 60
-#		400K FT ABOVE FISCHER RADIUS
+#		400K FT ABOVE FISCHER RADIUS.
 # D		DRAG ACCELERATION			805 FPSS	N 64
 # VMAGI		INERTIAL VELOCITY MAGNITUDE		128 M/CENTISEC	N 64, N 68
 # THETAH	DESIRED RANGE ANGLE NM			1 REVOLUTION	N 64, N 67
 # LAT		PRESENT LATITUDE			1 REVOLUTION	N 67
 # LONG		PRESENT LONGITUDE			1 REVOLUTION	N 67
-# RTOGO		RANGE ANGLE TO SPLASH FROM		1 REVOLUTION	N 67
-# 		EMSALT FT ABOVE FISCHER RADIUS (IN NM)	
+# RTOGO		RANGE ANGLE TO SPLASH FROM		1 REVOLUTION	N 63
+# 		EMSALT FT ABOVE FISCHER RADIUS. (IN NM)	
 # VIO		PREDICTED VELOCITY AT ALTITUDE		128 M/CENTISEC	N 63
 #		EMSALT FT ABOVE FISCHER RADIUS.
 # TTE		TIME OF FREE FALL TO ALT		B 28 CENTISEC	N 63
-# 		EMSALT FT ABOVE FISCHER RADIUS
-# ROLLC		ROLL COMMAND				1 REVOLUTION	N 68, N 68, N 69
+# 		EMSALT FT ABOVE FISCHER RADIUS.
+# ROLLC		ROLL COMMAND				1 REVOLUTION	N 66, N 68, N 69
 # LATANG	CROSS-RANGE ERROR (XRNGERR)		4 RADIANS	N 66
 # DNRNGERR	DOWN RANGE ERROR			1 REVOLUTION	N 66
 #		(PREDANG - THETAH IN NM)
 # HDOT		ALTITUDE RATE				128 M/CENTISEC	N 68
-# QT		MINIMUM DRAG FOR UPCONTROL		805 FPSS	N 69
+# Q7		MINIMUM DRAG FOR UPCONTROL		805 FPSS	N 69
 # VL		EXIT VELOCITY FOR UP-CONTROL		2 VSAT		N 69
 
-## Page 801
-# BODY ATTITUDE QUANTITIES (CM/POSE)
-# ----------------------------------
+## Page 797
+# BODY ATTITUDE QUANTITIES  (CM/POSE)
+# -----------------------------------
 #
-# VARIABLE	DECRIPTION				MAXIMUM VALUE
-# --------	----------				-------------
-#  _
+# VARIABLE	DESCRIPTION				MAXIMUM VALUE
+# --------	-----------				------- -----
+#  -
 # -VREL		NEGATIVE VELOCITY REL TO ATMOS.		2 VSAT
-# _
+# -
 # OLDUYA	USED FOR UYA BELOW 1000 FPS		2
-# _
+# -
 # UXA/2		UNIT VECTOR TRIAD			2
-# _
+# -
 # UYA/2			BASED ON			2
-# _
-# UZA/2				THE TRAJECTORY		2
-# _
+# -
+# UZA/2				THE TRAJECTORY.		2
+# -
 # UBX/2		UNIT VECTOR				2
-# _
+# -
 # UBY/2			BODY TRIAD			2
-# _
+# -
 # UBZ/2				FOR CM.			2
 

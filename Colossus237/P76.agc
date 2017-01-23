@@ -1,14 +1,16 @@
 ### FILE="Main.annotation"
-## Copyright:    Public domain.
-## Filename:	 P76.agc
-## Purpose:      Part of the source code for Colossus build 237.
-##               This is for the Command Module's (CM) Apollo Guidance
-##               Computer (AGC), for Apollo 8.
-## Assembler:    yaYUL
-## Contact:      Jim Lawton <jim DOT lawton AT gmail DOT com>
-## Website:      www.ibiblio.org/apollo/index.html
-## Page Scans:   www.ibiblio.org/apollo/ScansForConversion/Colossus237/
-## Mod history:  2011-02-05 JL   Adapted from corresponding Colossus 249 file.
+## Copyright:   Public domain.
+## Filename:	P76.agc
+## Purpose:     Part of the source code for Colossus build 237.
+##              This is for the Command Module's (CM) Apollo Guidance
+##              Computer (AGC), for Apollo 8.
+## Assembler:   yaYUL
+## Contact:     Jim Lawton <jim DOT lawton AT gmail DOT com>
+## Website:     www.ibiblio.org/apollo/index.html
+## Page Scans:  www.ibiblio.org/apollo/ScansForConversion/Colossus237/
+## Mod history: 2011-02-05 JL   Adapted from corresponding Colossus 249 file.
+##		2016-12-31 RSB	Proofed comment text using octopus/ProoferComments,
+##				and corrected errors found.
 
 ## Page 500
 # 1) PROGRAM NAME - TARGET DELTA V PROGRAM (P76).
@@ -19,7 +21,7 @@
 #    	   BEEN TRANSFORMED FROM LV TO REF COSYS). USING INTEGRVS, THE    PROGRAM THEN INTEGRATES THE OTHER
 # VEHICLE STATE VECTOR TO THE STATE VECTOR OF THIS VEHICLE, THUS INSURING THAT THE W-MATRIX AND BOTH VEHICLE
 # STATES CORRESPOND TO THE SAME TIME.
-# 3) ERASABLE INIITIALIZATION REQUIRED - NONE.
+# 3) ERASABLE INITIALIZATION REQUIRED - NONE.
 # 4) CALLING SEQUENCES AND EXIT MODES - CALLED BY ASTRONAUT REQUEST THRU DSKY V 37 E 76 E.
 #    	   EXITS BY TCF ENDOFJOB.
 # 5) OUTPUT - OTHER VEHICLE STATE VECTOR INTEGRATED TO TIG AND INCREMENTED BY DELTA V IN REF COSYS.
@@ -29,7 +31,7 @@
 # 7) SUBROUTINES CALLED - BANKCALL,GOXDSPF,CSMPREC (OR LEMPREC),ATOPCSM (OR ATOPLEM),INTSTALL,INTWAKE, PHASCHNG
 #    	   INTPRET, INTEGRVS, AND MINIRECT.
 
-# 8) FLAG USE - MOONFLAG,CMOONFLG,INTYPFLG,RASFLAG, AND MARKCTR.
+# 8) FLAG USE - MOONFLAG,CMOONFLAG,INTYPFLG,RASFLAG, AND MARKCTR.
 
 		BANK	30
 		SETLOC	P76LOC

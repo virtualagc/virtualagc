@@ -14,6 +14,8 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2016-11-17 JL   Created from Luminary131 version.
 ##              2016-11-29 TB   Transcribed
+##		2016-12-26 RSB	Comment-text proofed using ProoferComments
+##				and corrected errors found.
 
 ## Page 1371
                 BANK            10                              
@@ -102,7 +104,7 @@ DEBIT           AD              ONE                             # GET DE BITS
 # DELAYJOB- A GENERAL ROUTINE TO DELAY A JOB A SPECIFIC AMOUNT OF TIME BEFORE PICKING UP AGAIN.
 
 # ENTRANCE REQUIREMENTS...
-#               CAF     DT              # DELAY JOB FOR DT CENTISECS
+#               CAF     DT              DELAY JOB FOR DT CENTISECS
 #               TC      BANKCALL
 #               CADR    DELAYJOB
 
@@ -110,7 +112,7 @@ DEBIT           AD              ONE                             # GET DE BITS
                 SETLOC          DLAYJOB                         
                 BANK                                            
 
-# THIS MUST REMAIN IN BANK 0 ****************************************
+# THIS MUST REMAIN IN BANK 0 *****************************************
 
                 COUNT*          $$/DELAY                        
 2SECDELY        CAF             2SECS                           
@@ -141,7 +143,7 @@ OK2DELAY        CA              TCSLEEP                         # SET WAITLIST I
                 CAF             WAKECAD                         # STORE CADR FOR TASK CALL
                 TCF             DLY2            -1              # DLY IS IN WAITLIST ROUTINE
 
-TCGETCAD        TC              MAKECADR                        # GET CALLER'S FCADR
+TCGETCAD        TC              MAKECADR                        # GET CALLERS FCADR
 
                 INDEX           RUPTREG1                        
                 TS              DELAYLOC                        # SAVE DELAY CADRS
@@ -170,14 +172,14 @@ WAKECAD         GENADR          WAKER
 # CONSECUTIVE ERASABLE LOCATIONS.  IF BOTH BLOCKS OF DATA ARE IN SWITCHABLE EBANKS, THEY MUST BE IN THE SAME ONE.
 
 # GENTRAN IS CALLABLE IN A JOB AS WELL AS A RUPT.  THE CALLING SEQUENCE IS:
-#       I       CA      N-1             # # OF QUANTITIES MINUS ONE.
-#       I +1    TC      GENTRAN         # IN FIXED-FIXED.
-#       I +2    ADRES   L               # STARTING ADRES OF DATA TO BE MOVED.
-#       I +3    ADRES   M               # STARTING ADRES OF DUPLICATION BLOCK.
-#       I +4                            # RETURNS HERE.
+#       I       CA      N-1             # OF QUANTITIES MINUS ONE.
+#       I +1    TC      GENTRAN         IN FIXED-FIXED.
+#       I +2    ADRES   L               STARTING ADRES OF DATA TO BE MOVED.
+#       I +3    ADRES   M               STARTING ADRES OF DUPLICATION BLOCK.
+#       I +4                            RETURNS HERE.
 
 # GENTRAN TAKES 25 MCT'S (300 MICROSECONDS) PER ITEM + 5 MCT'S (60 MICS) FOR ENTERING AND EXITING.
-# A, L, AND ITEMP1 ARE NOT PRESERVED.
+# A, L AND ITEMP1 ARE NOT PRESERVED.
 
                 BLOCK           02                              
                 SETLOC          FFTAG4                          
@@ -188,7 +190,7 @@ WAKECAD         GENADR          WAKER
                 COUNT*          $$/TRAN                         
 
 GENTRAN         INHINT                                          
-                TS              ITEMP1                          # SAVE N-1
+                TS              ITEMP1                          # SAVE N-1.
                 INDEX           Q                               # C(Q) = ADRES L.
                 AD              0                               # ADRES (L + N - 1).
                 INDEX           A                               
@@ -204,7 +206,7 @@ GENTRAN         INHINT
                 TCF             Q+2                             # RETURN TO CALLER.
 
 ## Page 1377
-# B5OFF         ZERO BIT 5 OF EXTVBACK, WHICH IS SET BY TESTXACT.
+# B5OFF         ZERO BIT 5 OF EXTVBACT, WHICH IS SET BY TESTXACT.
 # MAY BE USED AS NEEDED BY ANY EXTENDED VERB WHICH HAS DONE TESTXACT
 
                 COUNT*          $$/EXTVB                        

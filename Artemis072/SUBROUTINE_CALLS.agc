@@ -12,9 +12,10 @@
 ## Mod history:	2009-07-29 OH	New file created.
 ## 		2009-09-04 JL	Fix typo.
 ##		2010-02-20 RSB	Un-##'d this header.
+##		2017-01-04 RSB	Proofed comment text using octopus/ProoferComments
+##				and fixed errors found.
 
 ## Page 37
-# SUBROUTINE_CALLS
 
 		SUBRO	ERASTOTL	041
 		SUBRO	DIOGENES	064
@@ -23,4 +24,3 @@
 		SUBRO	ULYSSES		029
 		SUBRO	ZEUS		046
 
-# *** END OF MAIN PROGRAM ***

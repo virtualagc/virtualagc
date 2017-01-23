@@ -5,14 +5,22 @@
 ##		It is part of the source code for the Command Module's (CM)
 ##		Apollo Guidance Computer (AGC), for Apollo 9.
 ## Assembler:	yaYUL
-## Reference:	p. 1314 of 1701.pdf.
+## Reference:	p. 1302
 ## Contact:	Ron Burkey <info@sandroid.org>.
 ## Website:	www.ibiblio.org/apollo.
 ## Mod history:	08/29/04 RSB.	Began adapting from correspoinding Luminary131 file.
+##		2017-01-06 RSB	Page numbers now agree with those on the
+##				original harcopy, as opposed to the PDF page
+##				numbers in 1701.pdf.
+##		2017-01-15 RSB	Cross-diff'd comment text (not whitespace)
+##				vs the already-proofed corresponding Colossus
+##				237 and Comanche 55 source-code files
+##				and corrected errors found.  The comment-text
+##				ended up being identical to Colossus 237, but 
+##				differing from Comanche 55.
 ##
 ## The contents of the "Colossus249" files, in general, are transcribed 
-## from a scanned document obtained from MIT's website,
-## http://hrst.mit.edu/hrs/apollo/public/archive/1701.pdf.  Notations on this
+## from a scanned copy of the program listing.  Notations on this
 ## document read, in part:
 ##
 ##	Assemble revision 249 of AGC program Colossus by NASA
@@ -28,15 +36,13 @@
 ##	under NASA contract NAS 9-4065.
 ##
 ## Refer directly to the online document mentioned above for further information.
-## Please report any errors (relative to 1701.pdf) to info@sandroid.org.
+## Please report any errors (relative to the scanned pages) to info@sandroid.org.
 ##
 ## In some cases, where the source code for Luminary 131 overlaps that of 
 ## Colossus 249, this code is instead copied from the corresponding Luminary 131
 ## source file, and then is proofed to incorporate any changes.
 
-## Page 1314
-# ORBITAL INTEGRATION
-
+## Page 1302
 # DELETE
 		BANK	13
 		SETLOC	ORBITAL
@@ -68,7 +74,7 @@ KEPPREP		LXA,2	SETPD
 			4D
 		DSQ	PDDL		# (FS)SQ (+12 +2(N1-N2))	8D	PL 10D
 			4D
-		DSQ	PDDL*		# SSQ/MU (-20R +2(N1-N2))	10D	PL 12D
+		DSQ	PDDL*		# SSQ/MU (-2OR +2(N1-N2))	10D	PL 12D
 			MUEARTH,2
 		SR3	SR4
 		PDVL	VSQ		# PREALIGN MU (+43 OR +37) 	12D	PL 14D
@@ -80,7 +86,7 @@ KEPPREP		LXA,2	SETPD
 		DMP	SL*
 			DP2/3
 			0 -3,1		# 10L(1/R-ALPHA) (+13 +2(N1-N2))
-		XSU,1	DAD		# 2(FS)SQ - ETCETERA			PL 8D
+		XSU,1	DAD		# 2(FS)SQ - ETCETRA			PL 8D
 			S1		# X1 = N2-N1
 		SL*	DSU		# -FS+2(FS)SQ ETC (+6 +N1-N2)		PL 6D
 			8D,1
@@ -88,7 +94,7 @@ KEPPREP		LXA,2	SETPD
 			0D
 			4D
 		SL*	SL*
-## Page 1315
+## Page 1303
 			8D,1
 			0,1		# S(-FS(1-2FS)-1/6...) (+17 OR +16)
 		DAD	PDDL		#					PL 6D
@@ -110,7 +116,7 @@ KEPPREP		LXA,2	SETPD
 		GOTO
 			KEPLERN
 
-## Page 1316
+## Page 1304
 FBR3		LXA,1	SSP
 			DIFEQCNT
 			S1
@@ -128,7 +134,7 @@ FBR3		LXA,1	SSP
 		STCALL	TET
 			KEPPREP
 
-## Page 1317
+## Page 1305
 # AGC ROUTINE TO COMPUTE ACCELERATION COMPONENTS.
 
 ACCOMP		LXA,1	LXA,2
@@ -178,7 +184,7 @@ ACCOMP		LXA,1	LXA,2
 			0
 		STORE	BETAV
 		STOVL	RPQV
-## Page 1318
+## Page 1306
 			2D
 		STORE	RPSV
 		SLOAD	DSU
@@ -229,7 +235,7 @@ GAMCOMP		VLOAD	VSR1
 		NORM	ROUND
 			31D
 		PDDL	NORM		# NORMED B SQUARED TO PD LIST
-## Page 1319
+## Page 1307
 			ALPHAM		# NORMALIZE (LESS ONE) LENGTH OF ALPHA
 			32D		# SAVING NORM SCALE FACTOR IN X1
 		SR1	PDVL
@@ -238,9 +244,9 @@ GAMCOMP		VLOAD	VSR1
 		STODL	BETAV
 			36D
 		STORE	BETAM
-		NORM	BDDV		# FORM NORMALIZE QUOTIEN ALPHAM/BETAM
+		NORM	BDDV		# FORM NORMALIZED QUOTIENT ALPHAM/BETAM
 			33D
-		SR1R	PUSH		# C(PDL+2) = ALMOST NORMALIZE RHO.
+		SR1R	PUSH		# C(PDL+2) = ALMOST NORMALIZED RHO.
 		DLOAD*
 			ASCALE,1
 		STORE	S1
@@ -278,14 +284,14 @@ GAMCOMP		VLOAD	VSR1
 			14D
 		DMPR	VXSC
 			6
-			BETAV
+			BETAV		#               -
 		PDVL	VSR3		# (G/2)(C(PD+4))B/2 TO PD+16D
-## Page 1320
+## Page 1308
 			ALPHAV
 		VAD	PUSH		# A12 + C(PD+16D) TO PD+16D
 		DLOAD	DMP
 			0
-			12D
+			12D		# -
 		NORM	ROUND
 			30D
 		BDDV	DMP*
@@ -324,7 +330,7 @@ GOBAQUE		DLOAD	SR
 			RPQFLAG
 			TESTLOOP
 
-## Page 1321
+## Page 1309
 # THE OBLATE ROUTINE COMPUTES THE ACCELERATION DUE TO OBLATENESS.  IT USES THE UNIT OF THE VEHICLE
 # POSITION VECTOR FOUND IN ALPHAV AND THE DISTANCE TO THE CENTER IN ALPHAM.  THIS IS ADDED TO THE SUM OF THE
 # DISTURBING ACCELERATIONS IN FV AND THE PROPER DIFEQ STAGE IS CALLED VIA X1.
@@ -352,7 +358,7 @@ OBLATE		LXA,2	DLOAD
 		VAD	VXM
 			ZUNIT
 			MMATRIX
-		UNIT			# PROBABLY UNNECESSARY.
+		UNIT			# POSSIBLY UNNECESSARY
 COMTERM		STORE	UZ
 		DLOAD	DMPR
 			COSPHI/2
@@ -376,7 +382,7 @@ COMTERM		STORE	UZ
 		PDDL	DMPR
 			2
 			5/128
-## Page 1322
+## Page 1310
 		BDSU
 		DMP*
 			J4REQ/J3,2
@@ -393,9 +399,9 @@ COMTERM		STORE	UZ
 		DMP*	SR1
 			J4REQ/J3,2
 		DDV	DAD
-			ALPHAM
+			ALPHAM		#                -3
 		DMPR*	SR3	           
-			2J3RE/J2,2
+			2J3RE/J2,2	#    3         4
 		DDV	DAD	
 			ALPHAM
 		VXSC	VSL1	      
@@ -407,8 +413,8 @@ COMTERM		STORE	UZ
 		NORM	DSQ	
 			X1	
 		DSQ	NORM
-			S1	
-		PUSH	BDDV*	
+			S1		#         4
+		PUSH	BDDV*		# NORMED R  TO 0D
 			J2REQSQ,2
 		VXSC
 			TVEC
@@ -427,7 +433,7 @@ COMTERM		STORE	UZ
 		DAD	PDDL		# Y  +X  B-2 TO 2D
 			2D
 		SL1	DSU
-## Page 1323
+## Page 1311
 			2D
 		PDDL	PUSH		# X -Y B-2 TO 4D  COSPHI 2 TO 6D
 			COSPHI/2
@@ -435,7 +441,7 @@ COMTERM		STORE	UZ
 			UZ
 		DSQ	DSU
 			3/5		#   2  2       2
-		DMP	SL3		# (X -Y )((5COS (PHI)-3)UR 2COS(PHI)UZ
+		DMP	SL3		# (X -Y)((5COS (PHI)-3)UR 2COS(PHI)UZ)
 			5/8
 		VXSC	VSU		# 	B-3 TO 4D
 			ALPHAV
@@ -480,7 +486,7 @@ COSPHIE		DLOAD
 			ALPHAV +4
 		STOVL	COSPHI/2
 			ZUNIT
-## Page 1324
+## Page 1312
 		GOTO
 			COMTERM
 DIFEQTAB	CADR	DIFEQ+0
@@ -531,7 +537,7 @@ RECTEST		VLOAD	ABVAL		# RECTIFY IF
 			3/4
 		BOV
 			CALLRECT
-## Page 1325
+## Page 1313
 		BMN
 			INTGRATE
 CALLRECT	CALL
@@ -582,7 +588,7 @@ ORIGCHNG	STQ	CALL
 			0,2
 		VSU	VSL*
 			RPQV
-## Page 1326
+## Page 1314
 			2,2
 		STORE	RRECT
 		STODL	RCV
@@ -607,8 +613,8 @@ ORIGCHNG	STQ	CALL
 			MOONFLAG
 			CLRMOON
 			SETMOON
-## Page 1327
-# THE RECTIFY SUBROUTINE IS CALLED BY THE INTEGRATION PROGRAM AND OCCIASIONALLY BY THE MEASUREMENT INCORPORATION
+## Page 1315
+# THE RECTIFY SUBROUTINE IS CALLED BY THE INTEGRATION PROGRAM AND OCCASIONALLY BY THE MEASUREMENT INCORPORATION
 # ROUTINES TO ESTABLISH A NEW CONIC.
 
 RECTIFY		LXA,2	VLOAD
@@ -633,8 +639,8 @@ MINIRECT	STORE	VRECT
 		STORE	XKEP
 		RVQ
 
-## Page 1328
-# THE THREE DIFEQ ROUTINES -- DIFEQ+0, DIFEQ+12, DIFEQ+24 -- ARE ENTERED TO PROCESS THE CONTRIBUTIONS AT THE
+## Page 1316
+# THE THREE DIFEQ ROUTINES - DIFEQ+0, DIFEQ+12, AND DIFEQ+24 - ARE ENTEREDTO PROCESS THE CONTRIBUTIONS AT THE
 # BEGINNING, MIDDLE, AND END OF THE TIMESTEP, RESPECTIVELY.  THE UPDATING IS DONE BY THE NYSTROM METHOD.
 
 DIFEQ+0		VLOAD	VSR3
@@ -685,7 +691,7 @@ DIFEQ+2		DLOAD	DMPR
 
 		CALL
 			GRP2PC
-## Page 1329
+## Page 1317
 		LXA,2	SSP
 			COLREG
 			S2
@@ -736,7 +742,7 @@ ENDSTATE	BOV	VLOAD
 			AMOVED
 		BON	GOTO
 			VINTFLAG
-## Page 1330
+## Page 1318
 			ATOPCSM
 			ATOPLEM
 AMOVED		SET	SSP
@@ -776,7 +782,7 @@ DIFEQCOM	DLOAD	DAD		# INCREMENT H AND DIFEQCNT.
 			FBR3
 
 WMATEND		CLEAR	CLEAR
-			DIM0FLAG	# DON'T INTEGRATE W THIS TIME
+			DIM0FLAG	# DONT INTEGRATE W THIS TIME
 			ORBWFLAG	# INVALIDATE W
 		CLEAR
 			RENDWFLG
@@ -785,14 +791,14 @@ WMATEND		CLEAR	CLEAR
 		TC	ALARM
 		OCT	421
 		TC	INTPRET
-## Page 1331
+## Page 1319
 		GOTO
 			TESTLOOP	# FINISH INTEGRATING STATE VECTOR
 
-## Page 1332
+## Page 1320
 # ORBITAL ROUTINE FOR EXTRAPOLATION OF THE W MATRIX.  IT COMPUTES THE SECOND DERIVATIVE OF EACH COLUMN POSITION
 # VECTOR OF THE MATRIX AND CALLS THE NYSTROM INTEGRATION ROUTINES TO SOLVE THE DIFFERENTIAL EQUATIONS.  THE PROGRAM
-# USES A TABLE OF VEHICL POSITION VECTORS COMPUTED DURING THE INTEGRATION OF THE VEHICLE'S POSITION AND VELOCITY.
+# USES A TABLE OF VEHICLE POSITION VECTORS COMPUTED DURING THE INTEGRATION OF THE VEHICLES POSITION AND VELOCITY.
 
 DOW..		LXA,2	DLOAD*
 			PBODY
@@ -841,7 +847,7 @@ DOW..1		VLOAD	VSR4
 			S2
 			34D
 		VSL*	RVQ
-## Page 1333
+## Page 1321
 			0 -8D,2	
 
 		SETLOC	ORBITAL1
@@ -865,6 +871,8 @@ DP2/3		2DEC	.6666666667
 2/3		EQUALS	DP2/3
 OCT27		OCT	27
 
+# LM504 IS TEMPORARY
+
 		BANK	13
 		SETLOC	ORBITAL2
 		BANK
@@ -881,7 +889,7 @@ OCT27		OCT	27
 		DEC	-4
 ASCALE		DEC	-7
 		DEC	-6
-## Page 1334
+## Page 1322
 		2DEC*	1.32715445 E16 B-54*	# S
 		2DEC*	4.9027780 E8 B-30*	# M
 MUEARTH		2DEC*	3.986032 E10 B-36*

@@ -8,13 +8,16 @@
 ##		that the code format has been changed to conform to the
 ##		requirements of the yaYUL assembler rather than the 
 ##		original YUL assembler.
-## Reference:	pp. 377-379 of 1729.pdf.
+## Reference:	pp. 372-374
 ## Contact:	Ron Burkey <info@sandroid.org>.
 ## Website:	www.ibiblio.org/apollo/index.html
 ## Mod history:	05/11/03 RSB.	Began transcribing.
 ##		05/14/05 RSB	Corrected website reference above.
+##		2017-01-06 RSB	Page numbers now agree with those on the
+##				original harcopy, as opposed to the PDF page
+##				numbers in 1701.pdf.
 
-## Page 377
+## Page 372
 		EBANK=	XSM
 		
 		BANK	33
@@ -61,7 +64,7 @@ E/BKCALL	DXCH	BUF2		# SAVE A,L AND GET DP RETURN
 E/SWITCH	DXCH	EBUF2
 		DTCB
 		
-## Page 378
+## Page 373
 # E/CALL	FOR CALLING A FIXED MEMORY INTERPRETIVE SUBROUTINE FROM ERASABLE AND RETURNING TO ERASABLE.
 #
 # THE CALLING SEQUENCE IS...
@@ -84,7 +87,7 @@ E/CALL		LXCH	LOC		# ADRES -1 OF CADR.
 		LXCH	EBUF2 +1	# PICK UP RETURN.
 		TCF	INTPRET +2	# SET LOC AND RETURN TO CALLER.
 		
-## Page 379
+## Page 374
 # E/JOBWAK	FOR WAKING UP ERASABLE MEMORY JOBS.
 #
 # THIS ROUTINE MUST BE CALLED IN INTERRUPT OR WITH INTERRUPTS INHIBITED.

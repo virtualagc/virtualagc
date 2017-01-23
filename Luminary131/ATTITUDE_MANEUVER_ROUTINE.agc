@@ -8,14 +8,17 @@
 ##		that the code format has been changed to conform to the
 ##		requirements of the yaYUL assembler rather than the 
 ##		original YUL assembler.
-## Reference:	pp. 349-370 of 1729.pdf.
+## Reference:	pp. 344-365
 ## Contact:	Ron Burkey <info@sandroid.org>.
 ## Website:	www.ibiblio.org/apollo/index.html
 ## Mod history:	05/10/03 RSB.	Began transcribing.
 ##		05/14/05 RSB	Corrected website reference above.
 ##		2010-08-24 JL	Added missing page number comments.
+##		2017-01-06 RSB	Page numbers now agree with those on the
+##				original harcopy, as opposed to the PDF page
+##				numbers in 1701.pdf.
 
-## Page 349
+## Page 344
 # BLOCK 2 LGC ATTITUDE MANEUVER ROUTINE -- KALCMANU
 #
 # MOD 2		DATE 5/1/67	BY DONE KEENE
@@ -64,7 +67,7 @@
 #
 # KALCMANU IS CALLED AS A HIGH PRIORITY JOB WITH ENTRY POINTS AT KALCMAN3 AND VECPOINT.  IT FIRST PICKS
 # UP THE CURREN CDU ANGLES TO BE USED AS THE BASIS FOR ALL COMPUTATIONS INVOLVING THE INITIAL S/C ORIENTATION.
-## Page 350
+## Page 345
 # IT THEN DETERMINES THE DIRECTION COSINE MATRICES RELATING BOTH THE INITIAL AND FINAL S/C ORIENTATION TO STABLE
 #               *   *                                                                               *
 # MEMBER AXES (MIS,MFS).  IT ALSO COMPUTES THE MATRIX RELATING FINAL S/C AXES TO INITIAL S/C AXES (MFI).  THE
@@ -112,7 +115,7 @@
 # IF IT IS FOUND THAT THE MANEUVER IS TO TERMINATE BEFORE THE NEXT UPDATE A ROUTINE IS CALLED (AS A WAIT-
 # LIST TASK) TO STOP THE MANEUVER AT THE APPROPRIATE TIME AS EXPLAINED ABOVE.
 
-## Page 351
+## Page 346
 # CALLING SEQUENCE
 #
 # IN ORDER TO PERFORM A KALCMANU SUPERVISED MANEUVER, THE COMMANDED GIMBAL ANGLES MUST BE PRECOMPUTED AND
@@ -162,7 +165,7 @@
 #			[                ]
 #			[ M     M     M  ]
 #			[  6     7     8 ]
-## Page 352
+## Page 347
 #                                                                                  *
 # INDEX REGISTER X1 MUST BE LOADED WITH THE COMPLEMENT OF THE STARTING ADDRESS FOR M1, AND X2 MUST BE
 #                                                        *
@@ -210,7 +213,7 @@
 #	
 #	M	=	SINY SINZ COSX + COSY SINX
 #	 7
-## Page 353
+## Page 348
 #	M	=	-SINY SINZ SINX + COSY COSX
 #	 8
 #
@@ -258,7 +261,7 @@
 #
 # IF M  IS NEGATIVE, Y IS REPLACED BY PI SGN Y - Y.
 #     0
-## Page 354
+## Page 349
 #	X	=	ARCSIN (-M /COSZ)
 #			          5
 #
@@ -306,7 +309,7 @@
 #				[ -U		 U		 0  ]
 #				[   Y 		  X		    ]
 #
-## Page 355
+## Page 350
 #	_
 #	U	=	UNIT ROTATION VECTOR RESOLVED INTO S/C AXES.
 #	A	=	ROTATION ANGLE
@@ -351,7 +354,7 @@
 #	1)	FIXED MEMORY		1059 WORDS
 #	2)	ERASABLE MEMORY		  98
 #	3)	STATE SWITCHES		   3
-## Page 356
+## Page 351
 #	4)	FLAGS			   1
 #
 # JOB PRIORITIES
@@ -396,13 +399,13 @@
 # THE FOLLOWING SUBROUTINES MAY BE PUT IN A DIFFERENT BANK
 #
 #	MXM3
-## Page 357
+## Page 352
 #	TRANSPGS
 #	SIGNMPAC
 #	READCDUK
 #	CDUTODCM
 
-## Page 358
+## Page 353
 		BANK	15
 		SETLOC	KALCMON1
 		BANK
@@ -453,7 +456,7 @@ SECAD		AXC,1	CALL		# MIS AND MFS ARRAYS CALCULATED
 		STADR
 		STORE	MFI		# MFI = TMIS MFS (SCALED BY 4)
 		SETPD	CALL		# TRANSPOSE MFI IN PD LIST
-## Page 359
+## Page 354
 			18D
 			TRNSPSPD
 		VLOAD	STADR
@@ -504,7 +507,7 @@ CHECKMAX	DLOAD	DSU
 			COFSKEW		# COFSKEW
 		UNIT
 		STORE	COF		# COF IS THE MANEUVER AXIS
-## Page 360
+## Page 355
 		GOTO			# SEE IF MANEUVER GOES THRU GIMBAL LOCK
 			LOCSKIRT
 ALTCALC		VLOAD	VAD		# IF AM GREATER THAN 170 DEGREES
@@ -554,7 +557,7 @@ COFMAXGO	DLOAD	DSU
 			COF
 			COF +2
 		BMN	DLOAD		# COFY G COFX
-## Page 361
+## Page 356
 			COMP12
 			COF
 		DSU	BMN
@@ -605,7 +608,7 @@ OKU12		DLOAD	BPL
 			LOCSKIRT
 		DLOAD	DCOMP		# SIGN OF UZ OPPOSITE TO UY
 			COF +4
-## Page 362
+## Page 357
 		STORE	COF +4
 		GOTO
 			LOCSKIRT
@@ -629,7 +632,7 @@ OKU31		DLOAD	BPL
 		STORE	COF +2
 		GOTO
 			LOCSKIRT
-## Page 363
+## Page 358
 # MATRIX OPERATIONS
 
 		BANK	13
@@ -679,7 +682,7 @@ TRNSPSPD	EXIT			# ENTER WITH MATRIX AT 0 IN PD LIST
 		DXCH	6
 		INDEX	FIXLOC
 		DXCH	2
-## Page 364
+## Page 359
 		TC	INTPRET
 		RVQ
 		
@@ -723,7 +726,7 @@ CDUTODCM	AXT,1	SSP
 LOOPSIN		SLOAD*	RTB
 			10D,1
 			CDULOGIC
-## Page 365
+## Page 360
 		STORE	10D		# LOAD PD WITH 	0 SIN(PHI)
 		SIN	PDDL		#		2 COS(PHI)
 			10D		#		4 SIN(THETA)
@@ -774,7 +777,7 @@ LOOPSIN		SLOAD*	RTB
 			10D
 		DCOMP	SL1
 		STORE	12D,2		# C6=-SIN(THETA)COS(PSI)
-## Page 366
+## Page 361
 		DLOAD
 		DMP	SL1		# (PUSH UP 7)
 			8D
@@ -824,7 +827,7 @@ DELCOMP		SETPD	PUSH		# MPAC CONTAINS THE ANGLE A
 			2
 		BOVB
 			SIGNMPAC
-## Page 367
+## Page 362
 		STODL	KEL		# UX UX(1-COS(A)) +COS(A)
 			COF +2
 		DSQ	DMP
@@ -875,7 +878,7 @@ DELCOMP		SETPD	PUSH		# MPAC CONTAINS THE ANGLE A
 		BOVB
 			SIGNMPAC
 		STODL	KEL +4		# UX UZ (1-COS(A))+UY SIN(A)
-## Page 368
+## Page 363
 		BDSU	SL2
 		BOVB
 			SIGNMPAC
@@ -932,7 +935,7 @@ DELCOMP		SETPD	PUSH		# MPAC CONTAINS THE ANGLE A
 #
 #	C  = -SIN(THETA) SIN(PSI) SIN(PHI) + COS(THETA)COS(PHI)
 #	 8
-## Page 369
+## Page 364
 #
 # WHERE	PHI = OGA
 #	THETA = IGA
@@ -978,7 +981,7 @@ SUHALFAP	DSU	GOTO
 			VECOFANG
 OKPHI		DLOAD			# PUSH UP PHI
 VECOFANG	VDEF	RVQ
-## Page 370
+## Page 365
 # ROUTINES FOR TERMINATING THE AUTOMATIC MANEUVER AND RETURNING TO USER.
 
 TOOBADF		EXIT

@@ -11,6 +11,10 @@
 ## Mod history:	2009-05-13 RSB	Adapted from the Colossus249/ file of the
 ##				same name, using Comanche055 page images.
 ##		2010-08-24 JL	Fixed page 983 number. Fixed some indentation.
+##		2016-12-21 RSB	Proofed comment text using octopus/ProoferComments
+##				and corrected the errors found.
+##		2017-01-20 RSB	Fixed comment-text errors noted while diff'ing
+##				vs Colossus 249.
 ##
 ## This source code has been transcribed or otherwise adapted from digitized
 ## images of a hardcopy from the MIT Museum.  The digitization was performed
@@ -44,10 +48,10 @@
 #	HACK (STROKE TEST) GENERATES THE WAVEFORM BY DUMPING PULSE BURSTS
 #		OF PROPER SIGN AND IN PROPER SEQUENCE DIRECTLY INTO
 #		TVCPITCH, WORKING IN CONJUNCITON WITH BOTH PITCH AND YAW
-#		TVC DAPS, WITH INTERMEDIAT WAITLIST CALLS.  NOTE, HOWEVER
+#		TVC DAPS, WITH INTERMEDIATE WAITLIST CALLS.  NOTE, HOWEVER
 #		THAT THE STROKE TEST IS PERFORMED ONLY IN THE PITCH AXIS.
 #		AN EXAMPLE WAVEFORM IS GIVEN BELOW, TO DEMONSTRATE STROKE-
-#		TEST PARAMETER SELECTION.
+#		TEST PARAMETER SELECTION
 #	RESTARTS CAUSE TEST TO BE TERMINATED.  ANOTHER V68 REQD IF TEST
 #		IS TO BE RE-RUN.
 #	PULSE BURST SIZE IS PAD-LOADED (ESTROKER) SO THAT AMPLITUDE OF
@@ -58,11 +62,11 @@
 #
 # CALLING SEQUENCE....
 #	EXTENDED VERB 68 SETS UP STRKTSTI JOB
-#	PITCH AND YAW TVCDAPS, FINDING STROKER NON-ZERO, DO A "TC HACK"
-#	AN INTERNALLY-GENERATED WAITLIST CALL ENTERS AT "HACKWLST"
+#	PITCH AND YAW TVCDAPS, FINDING STROKER NON-ZERO, DO A ..TC HACK..
+#	AN INTERNALLY-GENERATED WAITLIST CALL ENTERS AT ..HACKWLST..
 #
 # NORMAL EXIT MODES....
-#	TC BUNKER ("Q" IF ENTRY FROM DAP, "TCTSKOVR" IF FROM WAITLIST) LIST
+#	TC BUNKER (..Q.. IF ENTRY FROM DAP, ..TCTSKOVR.. IF FROM WAITLIST) LIST
 #
 # SUBROUTINES CALLED....
 #	WAITLIST
@@ -76,7 +80,7 @@
 #
 # OUTPUT....
 #	STRKTSTI...INITIALIZATION FOR STROKE TEST
-#	HACK, HACKWLST...PULSE BURSTS INTO TVCPITCH VIA "ADS"
+#	HACK, HACKWLST...PULSE BURSTS INTO TVCPITCH VIA ..ADS..
 #			  RESETS STROKER = +0 WHEN TEST COMPLETED
 #
 # DEBRIS....
@@ -91,7 +95,7 @@
 #        **              **
 #        **              **
 #        **              **		EXAMPLE WAVEFORM (EACH * REPRESENTS
-#       *  *            *  *		  (85.41 ARCSEC OF ACTUATOR CMD)
+#       *  *            *  *		     85.41 ARCSEC OF ACTUATOR CMND)
 #       *  *            *  *
 #       *  *            *  *
 #      *    *          *    *          **      **      **      **      **
@@ -100,7 +104,7 @@
 #     *      *        *      *        *  *    *  *    *  *    *  *    *  *    **  **  **  **  **
 #     *      *        *      *        *  *    *  *    *  *    *  *    *  *    **  **  **  **  **
 #     *      *        *      *        *  *    *  *    *  *    *  *    *  *    **  **  **  **  **
-# ----------------------------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------------------------------
 #             *      *        *      *    *  *    *  *    *  *    *  *    *  *  **  **  **  **  **
 #             *      *        *      *    *  *    *  *    *  *    *  *    *  *  **  **  **  **  **
 #             *      *        *      *    *  *    *  *    *  *    *  *    *  *  **  **  **  **  **
@@ -119,18 +123,18 @@
 #	FCARD	 = +3		(NUMBER OF SETS)
 #	ESTROKER = +3		(PULSE BURST SIZE, SC.AT 85.41 ARCSEC/BIT)
 #
-#	SET1:
+#	SET1..
 #		FREVS	= +3	(NUMBER REVERSALS MINUS 1)
 #		FCADDY	= +4	(NUMBER OF PULSE BURSTS IN 1/2 AMPLITUDE)
-#	SET2:
+#	SET2..
 #		FCARD1	= +9	(NUMBER REVERSALS MINUS 1)
 #		FCARD4	= +2	(NUMBER OF PULSE BURSTS IN 1/2 AMPLITUDE)
-#	SET3:
+#	SET3..
 #		FCARD2	= +9	(NUMBER REVERSALS MINUS 1)
 #		FCARD5	= +1	(NUMBER OF PULSE BURSTS IN 1/2 AMPLITUDE)
-#	SET4:
-#		FCARD3	= +0	(NUMBER OF REVERSALS MINUS 1)
-#		FCARD6	= +0	(NUMBER OF PULSE BURSTS IN 1/2 AMPLUTUDE)
+#	SET4..
+#		FCARD3	= +0	(NUMBER REVERSALS MINUS 1)
+#		FCARD6	= +0	(NUMBER OF PULSE BURSTS IN 1/2 AMPLITUDE)
 
 ## Page 981
 # STROKE TEST INITIALIZATION PACKAGE (AS A JOB, FROM VERB 68)
@@ -191,8 +195,8 @@ FCARD2		DEC	9		# 			    3........(  9)
 FCARD3		DEC	13		#                           4........( 13)
 
 FCARD4		DEC	6		# NO. PULSE BURSTS IN 1/2 AMP, SET2..(+ 6)
-FCARD5		DEC	5		#                                 3..(+ 5)
-FCARD6		DEC	4		#                                 4..(+ 4)
+FCARD5		DEC	5		#                              SET3..(+ 5)
+FCARD6		DEC	4		#                              SET4..(+ 4)
 
 20MS		=	BIT2
 
@@ -203,7 +207,7 @@ FCARD6		DEC	4		#                                 4..(+ 4)
 HACK		EXTEND			# ENTRY (IN T5 RUPT) FROM TVCDAPS
 		QXCH	BUNKER		# SAVE Q FOR DAP RETURN
 		
-		CAF	20MS		# 2DAPSx2(PASSES/DAP)x2(CS/PASS)=8CS=TVCDT
+		CAF	20MS		# 2DAPSX2(PASSES/DAP)X2(CS/PASS)=8CS=TVCDT
 		TC	WAITLIST
 		EBANK=	BUNKER
 		2CADR	HACKWLST
@@ -228,7 +232,7 @@ HACKWLST	CAF	TCTSKOVR	# ENTRY FROM WAITLIST
 		
 		CCS	REVS
 		TCF	REVUP		# POSITIVE REVS
-		TCF	REVUP +4	# FINAL REVERSAL, THE SET
+		TCF	REVUP +4	# FINAL REVERSAL, THIS SET
 		
 		INCR	CARD		# NEGATIVE REVS SET LAST PASS, READY FOR
 		CS	CARD		#	THE NEXT SET.  CHECK IF NO MORE SETS
@@ -249,7 +253,7 @@ STROKILL	TS	STROKER		# RESET (TO +0) TO END TEST
 		
 REVUP		TS	REVS		# ALL REVERSALS EXCEPT LAST OF SET
 		CA	N
-		DOUBLE			# 2 x 1/2AMP
+		DOUBLE			# 2 X 1/2AMP
 		TCF	+4
 
  +4		CS	ONE		# FINAL REVERSAL, THIS SET

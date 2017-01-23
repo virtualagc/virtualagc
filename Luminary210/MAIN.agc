@@ -8,7 +8,7 @@
 # Contact:	Ron Burkey <info@sandroid.org>.
 # Website:	www.ibiblio.org/apollo/index.html
 # Mod history:	2016-11-16 JL   Created.
-#              2016-11-16 JL   Corrected page numbers and file names for Luminary210.
+#               2016-11-16 JL   Corrected page numbers and file names for Luminary210.
 #
 # Reference TBD.
 

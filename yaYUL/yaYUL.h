@@ -1,5 +1,5 @@
 /*
- *  Copyright 2003-2005,2009-2010,2016 Ronald S. Burkey <info@sandroid.org>
+ *  Copyright 2003-2005,2009-2010,2016-2017 Ronald S. Burkey <info@sandroid.org>
  *
  *  This file is part of yaAGC.
  *
@@ -65,6 +65,7 @@
  *                               a "superbit" setting has been established in the
  *                               program or not.
  *                11/14/16 RSB   Added --to-yul.
+ *                2017-01-05 RSB Added BBCON* as distinct from BBCON.
  */
 
 #ifndef INCLUDED_YAYUL_H
@@ -347,7 +348,7 @@ typedef struct
   char *Label, *FalseLabel, *Operator, *Operand, *Mod1, *Mod2, *Comment, *Extra,
       *Alias;
   int Index;
-  unsigned Extend :1;
+  unsigned Extend :2;
   unsigned IndexValid :1;
   Bank_t EBank;
   Bank_t SBank;
@@ -374,7 +375,7 @@ typedef struct
   unsigned Warning :1;                   // Non-zero for warning.
   unsigned Fatal :1;                     // Non-zero for fatal error.
   unsigned LabelValueValid :1;           // Non-zero if LabelValue valid.
-  unsigned Extend :1;
+  unsigned Extend :2;
   unsigned IndexValid :1;
   Bank_t EBank;                         // For EBANK= manipulations.
   Bank_t SBank;                         // For SBANK= manipulations.
@@ -542,8 +543,8 @@ Parser_t ParseBLOCK, ParseEQUALS, ParseEqualsECADR, ParseCHECKequals, ParseBANK,
     ParseINDEX, ParseDXCH, ParseTS, ParseXCH, ParseDV, ParseBZF, ParseMSU,
     ParseQXCH, ParseAUG, ParseDIM, ParseBZMF, ParseSU, ParseRAND, ParseREAD,
     ParseROR, ParseRXOR, ParseWAND, ParseWOR, ParseWRITE, ParseERASE,
-    ParseGENADR, ParseINDEX, ParseCADR, ParseFCADR, ParseECADR,
-    ParseEBANKEquals, Parse2FCADR, ParseCAE, ParseCAF, ParseBBCON, Parse2CADR,
+    ParseGENADR, ParseINDEX, ParseCADR, ParseFCADR, ParseECADR, ParseEBANKEquals,
+    Parse2FCADR, ParseCAE, ParseCAF, ParseBBCON, ParseBBCONstar, Parse2CADR,
     ParseDNCHAN, ParseSTCALL, ParseSTODL, ParseSTORE, ParseSTOVL, ParseVN,
     Parse2OCT, ParseSBANKEquals, ParseEDRUPT, ParseInterpretiveOperand,
     ParseEqMinus, ParseXCADR, ParseSECSIZ;

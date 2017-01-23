@@ -729,7 +729,7 @@ SAVERATE        EXTEND                                  # COME HERE FIRST TIME I
                 ADS             DAPBOOLS                # AGAIN IN RATE HOLD PASSES
                 TCF             RESUME                  # RETURN TO IDLE AFTER SAVING RATE
 
-100MSCAL        DEC             .025                    # 100 MS. SACLED AT 4 SEC.  RATE HOLD DELT
+100MSCAL        DEC             .025                    # 100 MS. SCALED AT 4 SEC.  RATE HOLD DELT
 
 # TO COMPUTE TEH DELCDUS, Y AND Z, WE SET UP A LOOP AND SOLVE THE EQUATION
 

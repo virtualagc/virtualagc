@@ -15,6 +15,8 @@
 ## Mod history: 2016-11-17 JL   Created from Luminary131 version.
 ##              2016-12-10 MAS  Began transcription.
 ##              2016-12-10 MAS  Completed transcription.
+##		2016-12-26 RSB	Comment-text proofed using ProoferComments
+##				and corrected errors found.
 
 ## Page 1265
 #          THE TFF SUBROUTINES MAY BE USED IN EITHER EARTH OR MOON CENTERED COORDINATES. THE TFF ROUTINES NEVER
@@ -121,7 +123,7 @@ TFFTEM		=	36D	#            TEMPORARY
 #          TFFNP  E: (-38+2NR)    M  LCP, SEMI LATUS RECTUM, WEIGHTED BY NR.       FOR VGAMCALC
 #                 M: (-36+2NR)
 #          TFF/RTMU  E:(17)  M:(14)       1/SQRT(MU)
-#          TFFVSQ E:(20)  M:(18)  1/M   -(V SQ/MU): PRESENT VELOCITY,NORMALIZED.   FOR VGAMCALC
+#          TFFVSQ E:(20)  M:(18)  1/M   -(V SQ/MU): PRESENT VELOCITY,NORMLIZED.    FOR VGAMCALC
 #          TFFALFA  E: (26-NR)    1/M   ALFA, WEIGHTED BY NR
 #                   M: (24-NR)
 #          TFFRTALF  E: (10+NA)   SQRT(ALFA), NORMALIZED
@@ -214,7 +216,7 @@ DUMPCNIC	RVQ
 #                 1. APOGEE RADIUS IS NOT MEANINGFUL FOR HYPERBOLA
 #                 2. APOGEE RADIUS IS NOT DEFINED FOR PARABOLA
 #                 3. APOGEE RADIUS EXCEEDS THE SCALING FOR ELLIPSE.
-#          THIS SUBROUTINE REQUIRED THE SIGNED  RECIPROCAL SEMI MAJ AXIS,  ALFA,  AND SEMI LATUS RECTUM AS DATA.
+#          THIS SUBROUTINE REQUIRES THE SIGNED  RECIPROCAL SEMI MAJ AXIS,  ALFA,  AND SEMI LATUS RECTUM AS DATA.
 # CALLING SEQUENCE:  CALL
 #                           TFFRP/RA
 #          PUSHLOC = PDL+0, ARBITRARY IF LEQ 10D
@@ -283,9 +285,9 @@ DUMPRPRA	RVQ
 # MOD BY:  RR BAIRNSFATHER
 # MOD NO:  1           MOD BY:  RR BAIRNSFATHER      DATE:  21 MAR 67
 # MOD NO:  2           MOD BY:  RR BAIRNSFATHER      DATE:  14 APR 67
-# MOD BY:  3           MOD BY:  RR BAIRNSFATHER      DATE:  8JUL 67       NEAR EARTH MUE AND NEG TFF (GONEPAST)
-# MOD BY:  4           MOD BY:  RR BAIRNSFATHER      DATE:  21 NOV 67     ADD VARIABLE MU.
-# MOD BY:  5           MOD BY:  RR BAIRNSFATHER      DATE:  21 MAR 68     ACCEPT DIFFERENT EARTH/MOON SCALES
+# MOD NO:  3           MOD BY:  RR BAIRNSFATHER      DATE:  8JUL 67       NEAR EARTH MUE AND NEG TFF (GONEPAST)
+# MOD NO:  4           MOD BY:  RR BAIRNSFATHER      DATE:  21 NOV 67     ADD VARIABLE MU.
+# MOD NO:  5           MOD BY:  RR BAIRNSFATHER      DATE:  21 MAR 68     ACCEPT DIFFERENT EARTH/MOON SCALES
 # FUNCTIONAL DESCRIPTION:      PROGRAM CALCULATES THE FREE-FALL TIME OF FLIGHT FROM PRESENT POSITION  RN  AND
 #          VELOCITY  VN  TO A RADIUS LENGTH SPECIFIED BY  RTERM  , SUPPLIED BY THE USER. THE POSITION VECTOR
 #          RN  MAY BE ON EITHER SIDE OF THE CONIC, BUT  RTERM  IS CONSIDERED ON THE INBOUND SIDE.
@@ -320,7 +322,7 @@ DUMPRPRA	RVQ
 
 #          WHERE  T(X) IS A POLYNOMIAL APPROXIMATION TO THE SERIES
 #                            2     3                        2
-#                 1/3 -X/5 +X /7 -X /8 ...                (X   <  1.0)
+#                 1/3 -X/5 +X /7 -X /9 ...                (X   <  1.0)
 
 # CALLING SEQUENCE:  TIME TO RTERM                           TIME TO PERIGEE
 #                    CALL                                    CALL
@@ -350,7 +352,7 @@ DUMPRPRA	RVQ
 #          PUSHLOC AT PDL+0
 # ERASABLE INITIALIZATION REQUIRED:
 #          RONE   E:(-29)  M:(-27)  M   STATE VECTOR                      LEFT BY USER
-#          VONE'  E:(+10)  M:(+9)   VN/SQRT(NU)                           LEFT BY TFF/CONIC
+#          VONE'  E:(+10)  M:(+9)   VN/SQRT(MU)                           LEFT BY TFF/CONIC
 #          RMAG1  E:(-29)  M:(-27)  PRESENT RADIUS,  M                    LEFT BY TFFCONIC
 #          C(MPAC)E:(-29)  M:(-27)  RTERM, TERMINAL RADIUS LENGTH, M      LEFT BY USER
 
@@ -369,9 +371,9 @@ DUMPRPRA	RVQ
 #          TFF1/ALF  E: (-22-2NA)  SIGNED SEMIMAJ AXIS, WEIGHTED BY NA    LEFT BY TFFCONIC
 #                    M: (-20-2NA)
 # DEBRIS:  QPRET,   PDL+0 ... PDL+3
-#          RTERM  E:(-29)  M(-27)   RTERM, TERMINAL RADIUS LENGTH
-#          RAPO   E:(-29)  M(-27)   PDL 16D  (=NRTERM)
-#          RPER   E:(-29)  M(-27)   PDL 14D   (=TFFQ1)
+#          RTERM  E:(-29)  M:(-27)   RTERM, TERMINAL RADIUS LENGTH
+#          RAPO   E:(-29)  M:(-27)   PDL 16D  (=NRTERM)
+#          RPER   E:(-29)  M:(-27)   PDL 14D   (=TFFQ1)
 
 ## Page 1274
 CALCTPER	SETGO			# ENTER WITH RPER  IN MPAC
@@ -478,7 +480,7 @@ TFFXTEST	DAD	PDDL		#  (ABS(DEN) TO PDL+2))  E: (-3) OR (-16)
 					# E: (-13)  M: (-12)
 		PUSH	DSQ		# Z TO PDL+0
 		PUSH	DMP		# Z SQ TO PDL+2  E: (-26)  M: (-24)
-			TFFNP		# LC P  E: (-38+2NR)  M: (-36+NR)
+			TFFNP		# LC P  E: (-38+2NR)  M: (-36+2NR)
 		SL	SIGN
 			5
 			TFFTEM		# AFFIX SIGN FOR SDELF (ENTRY DISPLAY)
@@ -522,7 +524,7 @@ TFFXTEST	DAD	PDDL		#  (ABS(DEN) TO PDL+2))  E: (-3) OR (-16)
 					# TFF SQRT(MU) FROM PDL+0  E:(-45) M:(-42)
 ENDTFF		DMP	BOV		# TFF SQRT(MU) IN MPAC     E:(-45) M:(-42)
 			TFF/RTMU	# E: (17)  M: (14)
-			MAXTFF		# SET POSMAX IN OVFL.
+			MAXTFF		# SET POSMAX IF OVFL.
 
 DUMPTFF2	RVQ			# RETURN  TFF   (-28) CS IN MPAC.
 

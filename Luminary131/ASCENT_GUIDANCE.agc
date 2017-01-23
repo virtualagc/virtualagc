@@ -8,14 +8,17 @@
 ##		that the code format has been changed to conform to the
 ##		requirements of the yaYUL assembler rather than the
 ##		original YUL assembler.
-## Reference:	pp. 841-856 of 1729.pdf.
+## Reference:	pp. 836-851
 ## Contact:	Ron Burkey <info@sandroid.org>.
 ## Website:	www.ibiblio.org/apollo/index.html
 ## Mod history:	05/26/03 RSB.	Began transcribing.
 ##		05/14/05 RSB	Corrected website reference above.
 ##		2010-10-25 JL	Added missing # in comments.
+##		2017-01-06 RSB	Page numbers now agree with those on the
+##				original harcopy, as opposed to the PDF page
+##				numbers in 1701.pdf.
 
-## Page 841
+## Page 836
 		BANK	34
 		SETLOC	ASCFILT
 		BANK
@@ -66,11 +69,11 @@ ATMAG		TC	PHASCHNG
 		SR1	DDV
 			TBUP
 		STCALL	AT
-## Page 842
+## Page 837
 			ASCENT
 BIT3H		OCT	4
 
-## Page 843
+## Page 838
 		BANK	30
 		SETLOC	ASENT
 		BANK
@@ -117,7 +120,7 @@ ASCENT		VLOAD	ABVAL
 			YDOTD
 		DSU
 			YDOT
-## Page 844
+## Page 839
 		STORE	DYDOT		# DYDOT = (YDOTD - YDOT) *2(7) M/CS.
 		VXSC	PDDL
 			LAXIS
@@ -169,7 +172,7 @@ MAINENG		DDV	PUSH		# VG/VE IN PDL(0)		(2)
 			T2TEST
 			4SEC(17)	# ( TGO - 4 )*2(-17) CS.
 
-## Page 845
+## Page 840
 		BMN
 			ENGOFF
 T2TEST		DLOAD
@@ -220,7 +223,7 @@ RATES		DLOAD	DSU
 		DAD	SL2		# (D21 DRDOT-DR)*2(-22)		(8)
 		DDV	DDV
 			06D		# (D21 DRDOT-DR)/E*2(-9)
-## Page 846
+## Page 841
 			TGO
 		STORE	PRATE		# B * 2(8)
 		BMN	DLOAD		# B>0 NOT PERMITTED
@@ -271,7 +274,7 @@ CONST		DLOAD	DMP		# LOAD B*2(8)
 		STORE	YCONS
 CMPONENT	SETPD	BOFF
 			00D
-## Page 847
+## Page 842
 			P7071FLG
 			+3		# IF P7071FLG = 1 (I.E., P70 OR P71)
 		CALL			#	COMPUTE NEW RP FOR NEXT CYCLE.
@@ -322,7 +325,7 @@ AIMER		SIGN
 		STORE	ATP
 		VXSC
 			ZAXIS1		# ATP ZAXIS *2(8)
-## Page 848
+## Page 843
 		VSL1	VAD		# AT*2(0)
 			00D
 		STORE	UNFC/2		# WILL BE OVERWRITTEN IF IN VERT. RISE.
@@ -373,7 +376,7 @@ ASCTERM2	EXIT
 ASCTERM3	TCF	ENDOFJOB
 ASCTERM4	EXIT
 		INHINT
-## Page 849
+## Page 844
 		TC	IBNKCALL	# NO GUIDANCE THIS CYCLE -- HENCE ZERO
 		CADR	STOPRATE	# THE DAP COMMANDED RATES.
 		TCF	ASCTERM1 +1
@@ -425,7 +428,7 @@ OFFROT		CLRGO
 
 SETXFLAG	=	CHECKYAW
 
-## Page 850
+## Page 845
 CHECKYAW	SET
 			XOVINFLG	# PROHIBIT X-AXIS OVERRRIDE
 		DLOAD	VXSC
@@ -475,7 +478,7 @@ ENGOFF		RTB
 		TC	TPAGREE		# FORCH SIGN AGREEMENT ON MPAC, MPAC +1.
 		CAF	EBANK7
 		TS	EBANK
-## Page 851
+## Page 846
 		EBANK=	TGO
 		INHINT
 		CCS	MPAC +1
@@ -525,7 +528,7 @@ CUTOFF		TC	UPFLAG		# SET FLRCS FLAG.
 
  +3		TC	POSTJUMP
  		CADR	TERMASC
-## Page 852
+## Page 847
 
 CUTOFF1		INHINT
 		TC	IBNKCALL	# ZERO ATTITUDE ERRORS BEFORE REDUCINT DB.
@@ -559,7 +562,7 @@ TERMASC		TC	PHASCHNG
 		CADR	RESTORDB
 		TC	DOWNFLAG	# DISALLOW ABORTS AT THIS TIME.
 		ADRES	LETABORT
-		TCF	GOTOP00H
+		TCF	GOTOPOOH
 
 V16N85C		VN	1685
 
@@ -577,7 +580,7 @@ RPCOMP2		DLOAD	DMP		# FLRCS = 0 (GUIDANCE MODE)
 			TGO
 			TGO
 		DDV	SL1
-## Page 853
+## Page 848
 			TBUP
 		DAD	PDDL
 			/R/MAG
@@ -629,7 +632,7 @@ THETCOMP	VLOAD	UNIT
 
 ASCSAVE		=	CG
 
-## Page 854
+## Page 849
 		BANK	27
 		SETLOC	ASENT1
 		BANK
@@ -647,7 +650,7 @@ YCOMP		VLOAD	DOT
 		SETLOC	ASENT
 		BANK
 
-## Page 855
+## Page 850
 100CS		EQUALS	2SEC(18)
 T2A		EQUALS	2SEC(17)
 4SEC(17)	2DEC	400 B-17
@@ -670,7 +673,7 @@ MINABDV		2DEC	.0356 B-5	# 10 PERCENT BIGGER THAN GRAVITY
 25KFT		2DEC	7620 B-24
 1/DV0		=	MASS1
 
-## Page 856
+## Page 851
 # THE LOGARITHM SUBROUTINE
 
 		BANK	24

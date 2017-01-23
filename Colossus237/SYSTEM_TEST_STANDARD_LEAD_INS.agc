@@ -1,14 +1,18 @@
 ### FILE="Main.annotation"
-## Copyright:    Public domain.
-## Filename:	 SYSTEM_TEST_STANDARD_LEAD_INS.agc
-## Purpose:      Part of the source code for Colossus build 237.
-##               This is for the Command Module's (CM) Apollo Guidance
-##               Computer (AGC), for Apollo 8.
-## Assembler:    yaYUL
-## Contact:      Jim Lawton <jim DOT lawton AT gmail DOT com>
-## Website:      www.ibiblio.org/apollo/index.html
-## Page Scans:   www.ibiblio.org/apollo/ScansForConversion/Colossus237/
-## Mod history:  2011-01-27 JL   Adapted from corresponding Colossus 249 file.
+## Copyright:   Public domain.
+## Filename:	SYSTEM_TEST_STANDARD_LEAD_INS.agc
+## Purpose:     Part of the source code for Colossus build 237.
+##              This is for the Command Module's (CM) Apollo Guidance
+##              Computer (AGC), for Apollo 8.
+## Assembler:   yaYUL
+## Contact:     Jim Lawton <jim DOT lawton AT gmail DOT com>
+## Website:     www.ibiblio.org/apollo/index.html
+## Page Scans:  www.ibiblio.org/apollo/ScansForConversion/Colossus237/
+## Mod history: 2011-01-27 JL   Adapted from corresponding Colossus 249 file.
+##		2016-12-30 RSB	Proofed comment text using octopus/ProoferComments,
+##				and corrected errors found.
+##		2017-01-20 RSB	Fixed comment-text errors noted while diff'ing
+##				vs Colossus 249.
 
 ## Page 411
 		EBANK=	XSM
@@ -30,7 +34,7 @@
 
 #						   TC     BANKCALL
 #						   CADR   E/BKCALL
-#						   CADR   ROUTINE         WHERE YOO WANT TO GO IN FIXED.
+#						   CADR   ROUTINE         WHERE YOU WANT TO GO IN FIXED.
 #						   RETURN HERE FROM DISPLAY TERMINATE, BAD STALL OR TC Q.
 #						   RETURN HERE FROM DISPLAY PROCEED OR GOOD RETURN FROM STALL.
 #						   RETURN HERE FROM DISPLAY ENTER OR RECYCLE.
@@ -40,7 +44,7 @@
 
 # 	   A + L ARE PRESERVED THROUGH BANKCALL AND E/BKCALL.
 
-E/BKCALL	DXCH	BUF2		# SAVE A,L AND GET DP RETURN
+E/BKCALL	DXCH	BUF2		# SAVE A,L AND GET DP RETURN.
 		DXCH	EBUF2		# SAVE DP RETURN.
 		INCR	EBUF2		# RETURN +1 BECAUSE DOUBLE CADR.
 		CA	BBANK
@@ -77,7 +81,7 @@ E/CALL		LXCH	LOC		# ADRES -1 OF CADR.
 			EBUF2		# INDIRECTLY EXECUTE ROUTINE.  IT MUST
 		EXIT			# LEAVE VIA RVQ OR EQUIVALENT.
 		LXCH	EBUF2 +1	# PICK UP RETURN.
-		TCF	INTPRET +2	# SET LOC AND RETURN TO CALLER.
+		TCF	INTPRET +2	# SET LOC AND RETURB TO CALLER
 
 ## Page 413
 # E/JOBWAK	  FOR WAKING UP ERASABLE MEMORY JOBS.
@@ -95,7 +99,7 @@ E/CALL		LXCH	LOC		# ADRES -1 OF CADR.
 #						     .			  RETURNS HERE
 #						     .
 #						     .
-#						   RELINT		  IF YOU DID AND INHINT.
+#						   RELINT		  IF YOU DID AN INHINT.
 
 		BANK	33
 		SETLOC	E/PROG
@@ -103,7 +107,7 @@ E/CALL		LXCH	LOC		# ADRES -1 OF CADR.
 
 		COUNT*	 $$/P07
 
-E/JOBWAK	TC	JOBWAKE		# ARRIVE WITH ADRES IN A.
+E/JOBWAK	TC	JOBWAKE		# ARRIVE IWTH ADRES IN A.
 		CS	BIT11
 		NDX	LOCCTR
 		ADS	LOC		# KNOCK FIXED MEMORY BIT OUT OF ADRES.

@@ -8,13 +8,16 @@
 ##		that the code format has been changed to conform to the
 ##		requirements of the yaYUL assembler rather than the 
 ##		original YUL assembler.
-## Reference:	pp. 389-396 of 1729.pdf.
+## Reference:	pp. 384-391
 ## Contact:	Ron Burkey <info@sandroid.org>.
 ## Website:	www.ibiblio.org/apollo/index.html
 ## Mod history:	05/11/03 RSB.	Began transcribing.
 ##		05/14/05 RSB.	Corrected website reference above.
+##		2017-01-06 RSB	Page numbers now agree with those on the
+##				original harcopy, as opposed to the PDF page
+##				numbers in 1701.pdf.
 
-## Page 389
+## Page 384
 # PROGRAM --	IMU PERFORMANCE TESTS 4
 # DATA --	NOV 15, 1966
 # BY --		GEORGE SCHMIDT IL7-146 EXT 1126
@@ -44,7 +47,7 @@
 #
 # ALL CENTRALS -- ALL OF EBANK XSM
 
-## Page 390
+## Page 385
 		BANK	33
 		SETLOC	IMU4
 		BANK
@@ -84,7 +87,7 @@ ESTIMS		INHINT
 VERTSKIP	EXIT
 		TC	SLEEPIE +1
 		
-## Page 391
+## Page 386
 ALLOOP		CA	OVFLOWCK
 		EXTEND
 		BZF	+2
@@ -121,7 +124,7 @@ SPECSTS		CAF	PRIO20
 		
 		TC	TASKOVER
 		
-## Page 392
+## Page 387
 ALFLT		CCS	GEOCOMPS
 		TC	+2
 		TC	NORMLOP
@@ -172,7 +175,7 @@ DELMLP		DLOAD*	DMP
 		STORE	INTY +8D,1
 		PDDL	DMP*
 			VELSC
-## Page 393
+## Page 388
 			VLAUN +8D,1
 		SL2R
 		DSU	STADR
@@ -222,7 +225,7 @@ LOOSE		DLOAD*	PDDL*
 			POSNV +8D,1
 		MXV	VSL1
 			TRANSM1
-## Page 394
+## Page 389
 		DLOAD
 			MPAC
 		STORE	POSNV +8D,1
@@ -272,7 +275,7 @@ PERFERAS	EXIT
 		CA	CDUX
 		TS	LOSVEC +1	# FOR TROUBLESHOOTING VD POSNS 2.
 		
-## Page 395
+## Page 390
 SETUPER1	TC	INTPRET
 		DLOAD	PDDL		# ANGLES FROM DRIFT TEST ONLY
 			ANGZ
@@ -319,7 +322,7 @@ SOMERR2		CAF	OCT1601
 OCT1601		OCT	01601
 DEC585		OCT	06200		# 3200 B+14 ORDER IS IMPORTANT
 SCHZEROS	2DEC	.00000000
-## Page 396
+## Page 391
 		2DEC	.00000000
 		OCT	00000
 ONEDPP		OCT	00000		# ORDER IS IMPORTANT

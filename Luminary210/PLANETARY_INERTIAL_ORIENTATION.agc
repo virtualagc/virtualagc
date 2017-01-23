@@ -14,13 +14,13 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2016-11-17 JL   Created from Luminary131 version.
 ##		2016-12-09 JS   Compared to Luminary210 images. Updated where needed.
+##		2016-12-26 RSB	Comment-text proofed using ProoferComments
+##				and corrected errors found.
 
 ## Page 1138
-# PLANETARY INERTIAL ORIENTATION
-#
 # ..... RP-TO-R SUBROUTINE .....
 # SUBROUTINE TO CONVERT RP (VECTOR IN PLANETARY COORDINATE SYSTEM,EITHER
-#  EARTH-FIXED OR MOON-FIXED) TO R (SAME VECTOR IN BASIC REF. SYSTEM)
+#  EARTH-FIXED OR MOON-FIXED) TO R (SAME VECTOR IN THE BASIC REF. SYSTEM)
 #  R=MT(T)*(RP+LPXRP)    MT = M MATRIX TRANSPOSE
 #
 # CALLING SEQUENCE
@@ -167,7 +167,7 @@ MOONMX		STQ	SETPD
 			FSUBO		#                     8-9D=FSUBO
 		PDDL	PUSH		# PD 10D THEN 12D   10-11D=FDOT
 			FDOT
-		AXT,1	CALL		# F REQUIRES SL 1, SL 6 IN NEWANGLE.
+		AXT,1	CALL		# F REQUIRES SL 1, SL 6 IN NEWANGLE
 			4
 			NEWANGLE	# EXIT WITH PD 8D AND MPAC= F REVS B0
 		STODL	AVECTR +2	# SAVE F TEMP
@@ -188,7 +188,7 @@ MOONMX		STQ	SETPD
 		DMP	SL1R		#                         SOB*SIN(NODI)
 			SOB
 		STODL	BVECTR +4	# PD 8D
-		SIN	PUSH		#                        -SIN(NODI)   B-1
+		SIN	PUSH		# PD 10D                  -SIN(NODI)   B-1
 		DCOMP	GOTO		#         26-31D=BVECTR= COV*COS(NODI)
 			MOONMXA
 		BANK	25
@@ -287,7 +287,7 @@ NEWANGLE	DLOAD	SR		# ENTER PD 12D
 #  L       CALL
 #  L+1            EARTHMX
 #
-# SUBROUTINE USED
+# SUBROUTINES USED
 #  NEWANGLE
 #
 # INPUT
@@ -331,7 +331,7 @@ EARTHMX		STQ	SETPD		# SET   8-9D=AZO
 			EARTHMXX
 
 ## Page 1145
-# ..... EARTH SUBROUTINE .....
+# ..... EARTHL SUBROUTINE .....
 # SUBROUTINE TO COMPUTE L VECTOR FOR EARTH
 #
 # CALLING SEQUENCE
@@ -372,7 +372,7 @@ SINNODI		=	8D		# 2       SIN(NODI)
 DVECTR		=	8D		# 6       D VECTOR MOON
 CVECTR		=	8D		# 6       C VECTR MOON
 504AZ		=	18D		# 2      AZ
-TIMSUBM		=	14D		# 3       TIME SUB M (MOON) T+10 IN GETAZ
+TIMSUBM		=	14D		# 3       TIME SUB M (MOON) T+T0 IN GETAZ
 504LPL		=	14D		# 6       L OR LP VECTOR
 AVECTR		=	20D		# 6       A VECTOR (MOON)
 BVECTR		=	26D		# 6       B VECTOR (MOON)

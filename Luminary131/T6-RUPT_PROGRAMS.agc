@@ -8,13 +8,16 @@
 ##		that the code format has been changed to conform to the
 ##		requirements of the yaYUL assembler rather than the
 ##		original YUL assembler.
-## Reference:	pp. 1400-1402 of 1729.pdf.
+## Reference:	pp. 1395-1397
 ## Contact:	Ron Burkey <info@sandroid.org>.
 ## Website:	www.ibiblio.org/apollo/index.html
 ## Mod history:	06/07/03 RSB.	Began transcribing.
 ##		05/14/05 RSB	Corrected website reference above.
+##		2017-01-06 RSB	Page numbers now agree with those on the
+##				original harcopy, as opposed to the PDF page
+##				numbers in 1701.pdf.
 
-## Page 1400
+## Page 1395
 # PROGRAM NAMES:	(1) T6JOBCHK	MOD. NO. 5	OCTOBER 2, 1967
 #			(2) DOT6RUPT
 # MODIFICATION BY:	LOWELL G. HULL (A.C.ELECTRONICS)
@@ -63,7 +66,7 @@
 # DEBRIS:	T6JOBCHK CLOBBERS A.  DOT6RUPT CLOBBERS NOTHING.
 
 		BLOCK	02
-## Page 1401
+## Page 1396
 		BANK	17
 		SETLOC	DAPS2
 		BANK
@@ -114,7 +117,7 @@ GOCH56		INDEX	L
 		BANK
 		EBANK=	CDUXD
 		COUNT*	$$/DAPT6
-## Page 1402
+## Page 1397
 		CA	NEXTP
 WRITEP		EXTEND
 		WRITE	CHAN6

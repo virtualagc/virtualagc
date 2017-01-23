@@ -1,17 +1,21 @@
 ### FILE="Main.annotation"
-## Copyright:    Public domain.
-## Filename:	 REENTRY_CONTROL.agc
-## Purpose:      Part of the source code for Colossus build 237.
-##               This is for the Command Module's (CM) Apollo Guidance
-##               Computer (AGC), for Apollo 8.
-## Assembler:    yaYUL
-## Contact:      Jim Lawton <jim DOT lawton AT gmail DOT com>
-## Website:      www.ibiblio.org/apollo/index.html
-## Page Scans:   www.ibiblio.org/apollo/ScansForConversion/Colossus237/
-## Mod history:  2011-03-03 JL	Adapted from corresponding Colossus 249 file.
-##		 2011-04-27 JL	Fixed symbol name.
-##		 2012-10-08 JL	Fixed incorrect value on p808.
-##		 2016-11-02 RSB	Typo (offset-reference +2 was not indented).
+## Copyright:   Public domain.
+## Filename:	REENTRY_CONTROL.agc
+## Purpose:     Part of the source code for Colossus build 237.
+##              This is for the Command Module's (CM) Apollo Guidance
+##              Computer (AGC), for Apollo 8.
+## Assembler:   yaYUL
+## Contact:     Jim Lawton <jim DOT lawton AT gmail DOT com>
+## Website:     www.ibiblio.org/apollo/index.html
+## Page Scans:  www.ibiblio.org/apollo/ScansForConversion/Colossus237/
+## Mod history: 2011-03-03 JL	Adapted from corresponding Colossus 249 file.
+##		2011-04-27 JL	Fixed symbol name.
+##		2012-10-08 JL	Fixed incorrect value on p808.
+##		2016-11-02 RSB	Typo (offset-reference +2 was not indented).
+##		2017-01-01 RSB	Proofed comment text using octopus/ProoferComments,
+##				and fixed errors found.
+##		2017-01-18 RSB	Fixed comment-text errors noted while diff'ing
+##				vs Colossus 249.
 
 ## Page 795
 # ENTRY INITIALIZATION ROUTINE
@@ -34,7 +38,7 @@ STARTENT	EXIT			# MM = 63
 
 		CS	ENTMASK		# INITIALIZE ALL SWITCHES TO ZERO
 #					  EXCEPT LATSW, ENTRYDSP AND GONEPAST.
-#					  GONEBY 112D BIT8 FLAG7,SELF INITIALIZING.
+#					  GONEBY 112D BIT8 FLAG7,SELF INITIALIZING
 		INHINT
 		MASK	CM/FLAGS
 #					  ENTRYDSP = 92D  B13
@@ -124,7 +128,7 @@ STARTEN1	STQ	VLOAD
 			500SEC		# NOMINAL ENTRY TIME FOR P63
 #					  TIME/RTO = PIPTIME, STILL.
 		STCALL	DTEAROT		# INITIALIZE EARROT
-			EARROT1		# GET R5
+			EARROT1		# GET RT
 		DOT	SL1
 			UNITR		# RT/2 IN MPAC
 		ACOS
@@ -308,7 +312,7 @@ NOLDCALC	GOTO
 
 NO.05G		CLEAR	GOTO		# THIS WAY FOR DAP.(MAY INTERRUPT)
 			.05GSW		# .05GSW = 102D  B3
-			NOLDCALC	# KEEP SINGLE EXIT FOR TARGETING
+			NOLDCALC	# KEEP SINGLE EXIT FOR TARGETNG
 
 ## Page 802
 #    SUBROUTINES CALLED BY SCALEPOP (TARGETING):
@@ -339,7 +343,7 @@ GETETA		DLOAD	DDV		# D = D +D(-RDOT/HS -2D/V)  DT/2
 			SUBETA
 			THETAH
 		DMP	GOTO
-			KTETA		# = 1000x2PI/(2)E14 163.84
+			KTETA		# = 1000X2PI/(2)E14 163.84
 			UPDATERT
 
 SUBETA		DLOAD	DSU		# SWITCH FROM  INERTIAL TO RELATIVE VEL.
@@ -379,7 +383,7 @@ TINYTHET	DSU	ABS		# ENTER WITH X-.249
 
 		COUNT*	$$/ENTRY
 
-#					  MM = 63 , 64 ...
+#					  MM = 63 , 64 ..
 INITROLL	BON	BOFF		# IF D- .05G NEG, GO TO LIMITL/D
 			INRLSW
 			INITRL1
@@ -493,7 +497,7 @@ A0CALC		DDV	DAD		# V1 = V + RDOT/TEM1B
 		STODL	V1		# V1/2 VS
 
 			RDOT
-		DSQ	DDV		# A0=(V1/V)SQ(D+RDOT SQ/(TEM1D 2 C1 HS)
+		DSQ	DDV		# A0=(V1/V)SQ(D+RDOT SQ/(TEM1B 2 C1 HS)
 			TEM1B
 		DDV	DAD
 			2C1HS
@@ -599,7 +603,7 @@ GETDHOOK	DLOAD	CALL		# DHOOK=((1-VS1/FACT1) SQ -ALP)/FACT2
 			5		# CHOOK
 			Q7
 		DSU	
-			CHOOK		# 1  (-5)  = .25 /8
+			CHOOK		# = 1  (-5)  = .25 /8
 		STORE	AHOOKDV
 
 		DAD	DMP		# GAMMAL= GAMMAL1-CH1 DVL SQ(1+AHOOK DVL)
@@ -746,7 +750,7 @@ SIDETRAK	EXIT
 		TS	PHSPRDT5	# GRP 4.
 
 		TC	PHASCHNG
-		OCT	00474		# RESTART GRP 4 AT PRE-HUN.
+		OCT	00474		# RESTART GRP 4 AT PRE-HUNT.
 #					  FORCE RESTART TO PICK UP IN GRP 4:
 #					  USE PRIO 17 FOR GRP 4( < SERVICER PRIO)
 		CA	PRIO16		# CONTINUE GRP 5 AT LOWER PRIO THAN EITHER
@@ -860,7 +864,7 @@ GOTOUPSY	RTB			# END OF HUNTEST
 			P65		# HUNTEST USE OF GRP4 IS DISABLED BY P65
 #					  USE FOR DISPLAY.
 #					  SET MODE = UPCONTRL.
-#					  RETURN FROM P65 DIRECTLY TO UPDONTRL
+#					  RETURN FROM P65 DIRECTLY TO UPCONTRL
 #					  VIA THE GOTOADDR AT REFAZE10.
 
 UPCONTRL	DLOAD	DSU		# IF D-140 POS, NOSWITCH =1
@@ -1103,7 +1107,7 @@ KEP2		DLOAD	DSU		# IF Q7F+KDMIN -D NEG,GO TO FINAL PHASE.
 		STORE	MPAC +2
 
 		BON	TLOAD		# IF D > .05G, KEEP PRESENT ROLL COMMAND.
-			.05GSW		# IF D < .06G, SET ROLL COMMAND = 0.
+			.05GSW		# IF D < .05G, SET ROLL COMMAND = 0.
 			+2
 			3ZEROS		# SET ROLLC & ROLLHOLD =0.
  +2		STCALL	ROLLC		# (SP ROLLHOLD FOLLOWS DP ROLLC)
@@ -1112,7 +1116,7 @@ KEP2		DLOAD	DSU		# IF Q7F+KDMIN -D NEG,GO TO FINAL PHASE.
 #					 AVAILABLE IN CPHI'S FOR N22.
 
 ## Page 821
-# START  FINAL  PHASE  ...
+# START  FINAL  PHASE  ..
 
 #					  MM = 67
 PREFINAL	SSP	RTB
@@ -1120,9 +1124,9 @@ PREFINAL	SSP	RTB
 			PREFINAL	# FROM HUNTEST.
 			P67		# DISABLES GRP4. FINE IF FROM HUNTEST.BUT 
 #					  MAY ALSO REMOVE RESTART PROTECTION OF
-#					  M69 (P65).
+#					  N69 (P65).
 #					  ROLLC        XRNGERR       DNRNGERR
-#					  XXX.XX DEG   XXXX.X NM     XXXX.XX NM
+#					  XXX.XX DEG   XXXX.X NM     XXXX.X NM
 
 		SET	SSP
 			EGSW
@@ -1159,7 +1163,7 @@ BACK		TS	JJ
 		ZL
 		EXTEND
 		DV	TEM1B
-		TS	GRAD		# GRAD = (V-VREF)/(VK+1 - VK)   (POS NUM)
+		TS	GRAD		# GRAD = (V-VREF)/(VK+1 - VK)   (POS NUM
 
 		CAF	FIVE
 
@@ -1323,7 +1327,7 @@ NODISKY		INHINT
 		CCS	NEWJOB		# PROTECT READACCS GRP 5, IF SIDETRACKED.
 		TC	CHANG1
 SERVNOUT	TC	POSTJUMP	# ( COME HERE FROM P67.3)
-		CADR	SERVEXIT	# AND END AVERAGEG JOB VIA  ENDOJOB.
+		CADR	SERVEXIT	# AND END AVERAGEG JOB VIA  ENDOFJOB.
 
 ## Page 826
 #          DISPLAY WHEN V IS LESS THAN VQUIT.
@@ -1516,7 +1520,7 @@ VLMIN		2DEC	.34929485	# 18000/2 VS
 VMIN		=	FOURTH		# (VS/2) / 2VS
 C12		2DEC	.00684572901	# 32 28500/(21202900 2 PI)
 1/KB1		2DEC	.29411765	# 1 / 3.4
--1/KB2		2DEC	-.0057074322 B4	# - 1/(  .0034  2  VS)   EXP +4
+-1/KB2		2DEC	-.0057074322 B4	# = - 1/(  .0034  2  VS)   EXP +4
 VQUIT		2DEC	.019405269	# 1000 /2VS
 C20		2DEC	.21739130	#  (175 FPSS) LIFT UP IF ABOVE C20
 C21		2DEC	.17391304	# 140/805

@@ -20,6 +20,8 @@
 ##              2016-11-29 HG   fix opcode  BDSL  -> BDSU
 ##              2016-12-07 HG   fix P00 -> POO (appears only in comments)
 ##              2016-12-12 hg   Fix operator BZMF -> BZF
+##		2016-12-25 RSB	Comment-text proofed using ProoferComments
+##				and corrected errors found.
 
 ## Page 860
 		BANK	37
@@ -27,7 +29,7 @@
 		BANK
 
 		EBANK=	DVCNTR
-# ***************************************   PREREAD   **************************************************************
+# *************************************   PREREAD   **************************************************************
 
 
 		COUNT*	$$/SERV
@@ -39,7 +41,7 @@ PREREAD		CAF	SEVEN		# 5.7 SPOT TO SKIP LASTBIAS AFTER
 		EBANK=	NBDX
 		2CADR	LASTBIAS	# DO LAST GYRO COMPENSATION IN FREE FALL
 
-BIBIBIAS	TC	PIPASR +3	# CLEAR + READ PIPS LAST TIME IN FRE5+F133
+BIBIBIAS	TC	PIPASR +3	# CLEAR + READ PIPS LAST TIME IN FREE FALL
 					# DO NOT DESTROY VALUE OF PIPTIME1
 
 		CS	FLAGWRD7
@@ -65,7 +67,7 @@ GOREADAX	TC	GNUTFAZ5
 		TC	VARDELAY
 
 ## Page 861
-# ***************************************   READACCS   *************************************************************
+# *************************************   READACCS   *************************************************************
 READACCS	CS	OCT37771	# THIS PIECE OF CODING ATTEMPTS TO
 		AD	TIME5		# SYNCHRONIZE READACCS WITH THE DIGITAL
 		CCS	A		# AUTOPILOT SO THAT A PAXIS RUPT WILL
@@ -87,7 +89,7 @@ REDO5.5		CAF	ONE             # SHOWS THAT PIPAREAD HAD NOT STARTED
 		CA	PRIO20
 		TC	FINDVAC
 		EBANK=	DVCNTR
-		2CADR	SERVICER	# SET UP SERVISER JOB
+		2CADR	SERVICER	# SET UP SERVICER JOB
 
 		CA	BIT9
 		EXTEND
@@ -103,7 +105,7 @@ REDO5.5		CAF	ONE             # SHOWS THAT PIPAREAD HAD NOT STARTED
 		EXTEND
 		BZF	MAKEACCS	# NO: BYPASS LR READ AND DISPLAYS
 
-		CS	FLGWRD11	# YES: DOES SOMEWONE WANT TO BYPASS LR UPDT
+		CS	FLGWRD11	# YES: DOES SOMEONE WANT TO BYPASS LR UPDT
 		MASK	LRBYBIT
 		EXTEND
 		BZF	R10CALL		# YES: BYPASS LR READINGS
@@ -156,7 +158,7 @@ GNUTFAZ5	TS	L		# SAVE INPUT IN L
 		TCF	+2
 
 GNUFAZE5	TS	L		# SAVE INPUT IN L
-		CS	L		# -PHASE IN A, PHASE IN L.
+		CS	L		# -PHASE IN A, PHASE IN L
 		DXCH	-PHASE5		# SET -PHASE5,PHASE5
 		TC	Q
 
@@ -175,7 +177,7 @@ OCT37771	OCT	37771
 		COUNT*	$$/SERV
 
 ## Page 864
-# ***************************************   SERVICER   *************************************************************
+# *************************************   SERVICER   *************************************************************
 #
 
 SERVICER	TC	PHASCHNG	# RESTART REREADAC + SERVICER
@@ -257,7 +259,7 @@ GOSERV		TC	QUIKFAZ5
 
 COPYCYCL	TC	COPYCYC		# RN1,VN1,MASS1 => RN,VN,MASS.
 
-#		CA	ZERO		# A IS ZERO ON RETURN FROM COPYCYC
+#		CA	ZERO		A IS ZERO ON RETURN FROM COPYCYC
 		TS	PIPATMPX	# STILL UNDER INHINT
 		TS	PIPATMPY
 		TS	PIPATMPZ
@@ -319,7 +321,7 @@ LOTHRUST	TC	QUIKFAZ5
 		TCF	DECCNTR		# NO: DECREMENT DVCNTR.
 
 		CCS	PHASE4		# COMFAIL JOB ACTIVE?
-		TCF	SERVOUT		# YES:  WON'T NEED ANOTHER.
+		TCF	SERVOUT		# YES   WON'T NEED ANOTHER.
 
 		TC	PHASCHNG	# 4.37SPOT FOR COMFAIL.
 		OCT	00374
@@ -371,7 +373,7 @@ XNBPIPAD	ECADR	XNBPIP
 		COUNT*	$$/SERV
 
 AVGEND		CA	PIPTIME +1	# FINAL AVERAGE G EXIT,AVEGFLAG SET.
-		TS	1/PIPADT	# SET UP COASTING FLIGHT GYRO COMPENSATION.
+		TS	1/PIPADT	# SET UP COASTING FLIGHT GYRO COMPENSATION
 
 		TC	UPFLAG		# SET DRIFT FLAG, TERMINATE POWERED FLITE
 		ADRES	DRIFTFLG	# GYRO COMPENSATION.
@@ -420,7 +422,7 @@ SERVIDLE	EXTEND			# DISCONNECT SERVICER FROM ALL GUIDANCE
 		MASK	IDLEFBIT
 		ADS	FLAGWRD7
 
-		CAF	LRBYBIT		# TERMINATE R12 IS RUNNING.
+		CAF	LRBYBIT		# TERMINATE R12 IF RUNNING.
 		TS	FLGWRD11
 
 		EXTEND
@@ -472,6 +474,8 @@ SERVEXIT	TC	PHASCHNG
 		TCF	ENDOFJOB
 
 ## Page 871
+# NORMLIZE AND COPYCYCL
+
 NORMLIZE	TC	INTPRET
 		VLOAD	BOFF
 			RN1
@@ -516,7 +520,7 @@ NORMLIZ2	CA	EIGHTEEN
 		TC	COPYCYC +1	# DO NOT COPY MASS IN NORMLIZE
 		TC	ENDOFJOB
 
-# COPYCY PLACES NEWLY NAVIGATED STATE VECTORS AND MASS INTO DOWNLIST REG
+# COPYCYC PLACES NEWLY NAVIGATED STATE VECTORS AND MASS INTO DOWNLIST REG
 
 COPYCYC		CA	OCT24		# DEC 20
 ## Page 872
@@ -549,10 +553,10 @@ EIGHTEEN	DEC	18
 
 #    AT THE END OF THE PIPA READER THE CDUS ARE READ AND STORED AS A
 # VECTOR IN CDUTEMP.  THE HIGH ORDER PART OF EACH COMPONENT CONTAINS
-# THE CDU READING IN 25 COMP IN THE ORDER CDUX,Y,Z.  THE THRUST
+# THE CDU READING IN 2S COMP IN THE ORDER CDUX,Y,Z.  THE THRUST
 # VECTOR ESTIMATOR IN FINDCDUD REQUIRES THE CDUS BE READ AT PIPTIME.
 
-# CALLINE SEQUENCE AND EXIT
+# CALLING SEQUENCE AND EXIT
 
 #    CALL VIA TC, ISWCALL, ETC.
 
@@ -901,9 +905,9 @@ COPYCYC1	TC	QUIKFAZ5
 		DCA	V1S +4
 		DXCH	V +4
 
-		TCF	COPYCYCL	# COMPLETE THE COPYCYCL.
+		TCF	COPYCYCL	# COMPLETE THE COYPCYCL.
 
-# COPYCYCL CONSTANTS:
+# COPYCYC1 CONSTANTS:
 
 GSCALE1		2DEC	100 B-16
 
@@ -911,7 +915,7 @@ GSCALE1		2DEC	100 B-16
 BIASFACT	2DEC	.01 B-10
 
 ## Page 882
-# ****************************************************************************************************************
+# *********************************************************************************************************
 
 CALCGRAV	UNIT	PUSH		# SAVE UNIT/R/ IN PUSHLIST            (18)
 		STORE 	UNIT/R/
@@ -959,10 +963,10 @@ CALCRVG		VLOAD	VXM
 			KPIP1
 		STORE	DELVREF
 		VSR1	PUSH
-		VAD	PUSH		# (DV-OLDGDT)/2 TO PD SCALED AT 2(+7)M/CS.
+		VAD	PUSH		# (DV-OLDGDT)/2 TO PD SCALED AT 2(+7)M/CS
 ## Page 883
 			GDT/2
-		VAD	PDDL
+		VAD	PDDL		#					(18)
 			VN
 			PGUIDE
 		SL	VXSC
@@ -984,7 +988,7 @@ DP1/20		2DEC	0.05
 SHIFT11		2DEC	1 B-11
 
 ## Page 884
-# ***************************************************************************************************************
+# ****************************************************************************************************************
 
 # MUNRVG IS A SPECIAL AVERAGE G INTEGRATION ROUTINE USED BY THRUSTING
 # PROGRAMS WHICH FUNCTION IN THE VICINITY OF AN ASSUMED SPHERICAL MOON.
@@ -1101,9 +1105,12 @@ POSUPDAT	TC	QUIKFAZ5
 		STORE	TEMDELH		# STORE PARTIAL(TRUE) DELTA H, AND
 		PDDL			# LOAD NEG OF BEAM Z
 
-# ==========================================================================
+## At the end of the 2nd divider below, the suffixed ':' was an '=' in the
+## original printout.  The replacement is a workaround for our proof-reading
+## system.
+# ========================================================================
 # TERRAIN MODEL
-# ==========================================================================
+# =======================================================================:
 
 		SR1	DAD
 			LAND +4
@@ -1256,7 +1263,7 @@ VELDATA?	CS	FLGWRD11
 		TCF	VALTCHK		# NO   SEE IF V READING TO BE TAKEN
 
 VELUPDAT	TC	POSINDEX	# SET X1 AND X2 AND ZERO PUSHLIST
-		CS	VSELECT		# PROCESS VELOCITY DATA
+		CS	VSELECT
 		TS	L
 		ADS	L		# -2 VSELECT IN L
 		AD	L
@@ -1490,7 +1497,7 @@ NOLITE		CA	LRMCTR		# SET S = M
 		TCF	ENDVDAT		# LOBE LOCK UP NOT DETECTED ON X AXIS.
 
 ## Page 894
-# ******************************************************************************************************
+# ********************************************************************************************************
 		BANK	33
 		SETLOC	SERVICES
 		BANK

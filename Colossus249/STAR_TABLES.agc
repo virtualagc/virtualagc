@@ -5,14 +5,20 @@
 ##		It is part of the source code for the Command Module's (CM)
 ##		Apollo Guidance Computer (AGC), for Apollo 9.
 ## Assembler:	yaYUL
-## Reference:	Starts on p. 1379 of 1701.pdf.
+## Reference:	Starts on p. 1357
 ## Contact:	Ron Burkey <info@sandroid.org>.
 ## Website:	www.ibiblio.org/apollo.
 ## Mod history:	08/30/04 RSB.	Adapted from corresponding Luminary131 file.
+##		2017-01-06 RSB	Page numbers now agree with those on the
+##				original harcopy, as opposed to the PDF page
+##				numbers in 1701.pdf.
+##		2017-01-20 RSB	Cross-diff'd comment text (not whitespace)
+##				vs the already-proofed corresponding Colossus
+##				237 and Comanche 55 source-code files
+##				but no errors found.
 ##
 ## The contents of the "Colossus249" files, in general, are transcribed 
-## from a scanned document obtained from MIT's website,
-## http://hrst.mit.edu/hrs/apollo/public/archive/1701.pdf.  Notations on this
+## from a scanned copy of the program listing.  Notations on this
 ## document read, in part:
 ##
 ##	Assemble revision 249 of AGC program Colossus by NASA
@@ -28,13 +34,13 @@
 ##	under NASA contract NAS 9-4065.
 ##
 ## Refer directly to the online document mentioned above for further information.
-## Please report any errors (relative to 1701.pdf) to info@sandroid.org.
+## Please report any errors (relative to the scanned pages) to info@sandroid.org.
 ##
 ## In some cases, where the source code for Luminary 131 overlaps that of 
 ## Colossus 249, this code is instead copied from the corresponding Luminary 131
 ## source file, and then is proofed to incorporate any changes.
 
-## Page 1379
+## Page 1357
 		BANK	32
 		SETLOC	STARTAB
 		BANK
@@ -70,7 +76,7 @@
 		2DEC	-.4436486945 B-1	# STAR 31	Z
 		
 		2DEC	+.1216171923 B-1	# STAR 30	X
-## Page 1380
+## Page 1358
 		2DEC	-.7703014754 B-1	# STAR 30 	Y
 		2DEC	+.6259751556 B-1	# STAR 30	Z
 		
@@ -104,7 +110,7 @@
 		
 		2DEC	-.9171065276 B-1	# STAR 22	X
 		2DEC	-.3500098785 B-1	# STAR 22	Y
-## Page 1381
+## Page 1359
 		2DEC	-.1908106439 B-1	# STAR 22	Z
 		
 		2DEC	-.4524416631 B-1	# STAR 21	X
@@ -139,7 +145,7 @@
 		2DEC	+.9066387314 B-1	# STAR 14	Y
 		2DEC	+.0924676785 B-1	# STAR 14	Z
 		
-## Page 1382
+## Page 1360
 		2DEC	-.1818957154 B-1	# STAR 13	X
 		2DEC	+.9405318128 B-1	# STAR 13	Y
 		2DEC	-.2869039173 B-1	# STAR 13	Z
@@ -173,7 +179,7 @@
 		2DEC	-.6484940879 B-1	# STAR 6	Z
 		
 		2DEC	+.0131955837 B-1	# STAR 5	X
-## Page 1383
+## Page 1361
 		2DEC	+.0078043793 B-1	# STAR 5	Y
 		2DEC	+.9998824772 B-1	# STAR 5	Z
 		

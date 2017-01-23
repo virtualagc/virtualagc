@@ -20,6 +20,9 @@
 ##		2011-05-17 JL	Removed all SBANK= workarounds.
 ##		2016-12-10 RSB	Proofed comments with octopus/ProoferComments
 ##				and fixed the errors found.
+##		2017-01-15 RSB	Corrected comment-text errors observed while
+##				diff'ing vs Colossus 249.
+
 ## This source code has been transcribed or otherwise adapted from digitized
 ## images of a hardcopy from the MIT Museum.  The digitization was performed
 ## by Paul Fjeld, and arranged for by Deborah Douglas of the Museum.  Many
@@ -67,7 +70,7 @@
 #			-        -                                 X  Y  Z
 #			U =UNIT(-R) 	LOCAL VERTICAL AT TIME OF LIFTOFF
 #			 Z     
-#			-       -
+#			-       -	-
 #			U =UNIT(A),	A=HOR VECTOR AT LAUNCH AZIMUTH
 #			 X
 #			-  -   -
@@ -98,7 +101,7 @@
 #	DELAYJOB	EARTHR		ENDOFJOB	FINDVAC		IBNKCALL
 #	INTPRET		LALOTORV	NEEDLER		NEWMODEX	PHASCHNG
 #	POSTJUMP	POWRSERS	PREREAD1	REGODSPR	S11.1
-#	SERVEXIT	TASKOVER	TCDANZIG	V1STO2S		WAITLIST
+#	SERVEXIT	TASKOVER	TCDANZIG	V1ST02S		WAITLIST
 #
 # ASTRONAUT REQUESTS (IF ALTITUDE ABOVE 300,000 FT)
 #
@@ -267,7 +270,7 @@ MATRXJOB	ZL	                # STORE DP GIMBAL ANGLES FOR ATTITUDE
 		ZL
 		CA      CDUZ
 		DXCH    MGC
-		TC      INTPRET         #       _
+		TC      INTPRET         #       -
 		VLOAD   VSR1            # SCALE OGC B-1
 			OGC
 		STORE   OGC
@@ -285,7 +288,7 @@ MATRXJOB	ZL	                # STORE DP GIMBAL ANGLES FOR ATTITUDE
 			ERADFLAG
 			LALOTORV	# CONVERT TO POSITION VECTOR IN REF.COORDS
 			
-		STCALL	RN1             #              _   
+		STCALL	RN1             #              -   
 			GETDOWN 	# RETURN WITH VECTOR FOR DOWN DIRECTION
 		VCOMP   UNIT
 		STOVL	REFSMMAT +12D	# UNITZ = UNIT(GRAV)
@@ -493,7 +496,7 @@ GETDOWN         STQ     SETPD
 ## Page 542
 #	TGSC = (0	COS(CDUX)*COS(CDUZ)	SIN(CDUX)) = TO SPACECRAFT AXES
 #	       (0      -SIN(CDUX)*COS(CDUZ)	COS(CDUX))   CONVERSION MATRIX
-#			     _
+#			     -
 #	THE ATTITUDE ERRORS, A, ARE STORED ONE HALF SINGLE PRECISION IN
 #	THE REGISTERS AK, AK1, AK2 AS INPUT TO NEEDLER, THE FDAI ATTITUDE
 #	ERROR DISPLAY ROUTINE.

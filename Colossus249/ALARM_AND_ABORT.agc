@@ -5,16 +5,22 @@
 ##		It is part of the source code for the Command Module's (CM)
 ##		Apollo Guidance Computer (AGC), for Apollo 9.
 ## Assembler:	yaYUL
-## Reference:	Starts on p. 1483 of 1701.pdf.
+## Reference:	Starts on p. 1461
 ## Contact:	Ron Burkey <info@sandroid.org>.
 ## Website:	www.ibiblio.org/apollo.
 ## Mod history:	08/30/04   RSB	Adapted from corresponding Luminary131 file.
 ##		2010-10-24 JL	Indentation fixes.
 ##              2011-05-07 JL   Removed workarounds.
+##		2017-01-06 RSB	Page numbers now agree with those on the
+##				original harcopy, as opposed to the PDF page
+##				numbers in 1701.pdf.
+##		2017-01-07 RSB	Cross-diff'd comment text (not whitespace)
+##				vs the already-proofed corresponding Colossus
+##				237 and Comanche 55 source-code files
+##				and corrected errors found.
 ##
 ## The contents of the "Colossus249" files, in general, are transcribed 
-## from a scanned document obtained from MIT's website,
-## http://hrst.mit.edu/hrs/apollo/public/archive/1701.pdf.  Notations on this
+## from a scanned copy of the program listing.  Notations on this
 ## document read, in part:
 ##
 ##	Assemble revision 249 of AGC program Colossus by NASA
@@ -30,20 +36,20 @@
 ##	under NASA contract NAS 9-4065.
 ##
 ## Refer directly to the online document mentioned above for further information.
-## Please report any errors (relative to 1701.pdf) to info@sandroid.org.
+## Please report any errors (relative to the scanned pages) to info@sandroid.org.
 ##
 ## In some cases, where the source code for Luminary 131 overlaps that of 
 ## Colossus 249, this code is instead copied from the corresponding Luminary 131
 ## source file, and then is proofed to incorporate any changes.
 
-## Page 1483
+## Page 1461
 # THE FOLLOWING SUBROUTINE MAY BE CALLED TO DISPLAY A NON-ABORTIVE ALARM CONDITION.  IT MAY BE CALLED
 # EITHER IN INTERRUPT OR UNDER EXECUTIVE CONTROL.
 #
-# THE CALLING SEQUENCE IS AS FOLLOWS:
+# CALLING SEQUENCE IS AS FOLLOWS:
 #		TC	ALARM
-#		OCT	AAANN		# ALARM NO. NN IN GENERAL AREA AAA.
-#					# (RETURNS HERE)
+#		OCT	AAANN		ALARM NO. NN IN GENERAL AREA AAA.
+#					(RETURNS HERE)
 
 		BLOCK	02
 		SETLOC	FFTAG7
@@ -86,10 +92,10 @@ FAIL3		CA	FAILREG +2
 		CCS	A
 		TCF	MULTFAIL
 		LXCH	FAILREG +2
-## Page 1484
+## Page 1462
 		TCF	MULTEXIT
 		
-PROGLARM	CS	DSPTAB +11D	# TURN ON PROGRAM ALARM IF OFF
+PROGLARM	CS	DSPTAB +11D
 		MASK	OCT40400
 		ADS	DSPTAB +11D
 
@@ -106,28 +112,28 @@ MULTFAIL	CA	L
 
 # PRIOLARM DISPLAYS V05N09 VIA PRIODSPR WITH 3 RETURNS TO THE USER FROM THE ASTRONAUT AT CALL LOC +1,+2,+3 AND
 # AN IMMEDIATE RETURN TO THE USER AT CALL LOC +4.  EXAMPLE FOLLOWS,
-#		CAF	OCTXX		# ALARM CODE
+#		CAF	OCTXX		ALARM CODE
 #		TC	BANKCALL
 #		CADR	PRIOLARM
 #		...	...
 #		...	...
-#		...	...		# ASTRONAUT RETURN
-#		TC	PHASCHNG	# IMMEDIATE RETURN TO USER.  RESTART
-#		OCT	X.1		# PHASE CHANGE FOR PRIO DISPLAY
+#		...	...		ASTRONAUT RETURN
+#		TC	PHASCHNG	IMMEDIATE RETURN TO USER.  RESTART
+#		OCT	X.1		PHASE CHANGE FOR PRIO DISPLAY
 
 		BANK	10
 		SETLOC	DISPLAYS
 		BANK
 
 		COUNT	10/DSPLA
-PRIOLARM	INHINT			# * * * KEEP IN DISPLAY ROUTINE'S BANK
+PRIOLARM	INHINT			# * * * KEEP IN DISPLAY ROUTINES BANK
 		TS	L		# SAVE ALARM CODE
 
 		CA	BUF2		# 2 CADR OF PRIOLARM USER
 		TS	ALMCADR
 		CA	BUF2 +1
 		TC	PRIOENT +1	# * LEAVE L ALONE
--2SEC		DEC	-200		# *** DON'T MOVE
+-2SEC		DEC	-200		# *** DONT MOVE
 		CAF	V05N09
 		TCF	PRIODSPR
 
@@ -135,7 +141,7 @@ PRIOLARM	INHINT			# * * * KEEP IN DISPLAY ROUTINE'S BANK
 		SETLOC	FFTAG7
 		BANK
 
-## Page 1485
+## Page 1463
 		COUNT	02/ALARM
 		
 BAILOUT		INHINT
@@ -154,17 +160,17 @@ WHIMPER		CA	TWO
 		RESUME
 		TC	POSTJUMP	# RESUME SENDS CONTROL HERE
 		CADR	ENEMA
-P00DOO		INHINT
+POODOO		INHINT
 		CA	Q
 ABORT2		TS	ALMCADR
 		INDEX	Q
 		CAF	0
 		TC	BORTENT
-OCT77770	OCT	77770		# DON'T MOVE
+OCT77770	OCT	77770		# DONT MOVE
 		CA	V37FLBIT	# IS AVERAGE G ON
 		MASK	FLAGWRD7
 		CCS	A
-		TC	WHIMPER -1	# YES.  DON'T DO P00DOO.  DO BAILOUT.
+		TC	WHIMPER -1	# YES.  DONT DO POODOO.  DO BAILOUT.
 
 		TC	BANKCALL
 		CADR	MR.KLEAN
@@ -185,19 +191,19 @@ DOALARM		EQUALS	ENDOFJOB
 # CALLING SEQUENCE FOR VARALARM
 #		CAF	(ALARM)
 #		TC	VARALARM
-## Page 1486
+## Page 1464
 
 # VARALARM TURNS ON PROGRAM ALARM LIGHT BUT DOES NOT DISPLAY
 
 VARALARM	INHINT
 
-		TS	L		# SAVE USER'S ALARM CODE
+		TS	L		# SAVE USERS ALARM CODE
 
-		CA	Q		# SAVE USER'S Q
+		CA	Q		# SAVE USERS Q
 		TS	ALMCADR
 
 		TC	PRIOENT
-OCT14		OCT	14		# DON'T MOVE
+OCT14		OCT	14		# DONT MOVE
 
 		TC	ALMCADR		# RETURN TO USER
 

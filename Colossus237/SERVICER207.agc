@@ -1,14 +1,18 @@
 ### FILE="Main.annotation"
-## Copyright:    Public domain.
-## Filename:	 SERVICER207.agc
-## Purpose:      Part of the source code for Colossus build 237.
-##               This is for the Command Module's (CM) Apollo Guidance
-##               Computer (AGC), for Apollo 8.
-## Assembler:    yaYUL
-## Contact:      Jim Lawton <jim DOT lawton AT gmail DOT com>
-## Website:      www.ibiblio.org/apollo/index.html
-## Page Scans:   www.ibiblio.org/apollo/ScansForConversion/Colossus237/
-## Mod history:  2011-02-28 JL	Adapted from corresponding Colossus 249 file.
+## Copyright:   Public domain.
+## Filename:	SERVICER207.agc
+## Purpose:     Part of the source code for Colossus build 237.
+##              This is for the Command Module's (CM) Apollo Guidance
+##              Computer (AGC), for Apollo 8.
+## Assembler:   yaYUL
+## Contact:     Jim Lawton <jim DOT lawton AT gmail DOT com>
+## Website:     www.ibiblio.org/apollo/index.html
+## Page Scans:  www.ibiblio.org/apollo/ScansForConversion/Colossus237/
+## Mod history: 2011-02-28 JL	Adapted from corresponding Colossus 249 file.
+##		2017-01-01 RSB	Proofed comment text using octopus/ProoferComments,
+##				and fixed errors found.
+##		2017-01-18 RSB	Fixed comment-text errors noted while diff'ing
+##				vs Colossus 249.
 
 ## Page 770
 # PROGRAM NAME - PREREAD, READACCS, SERVICER, AVERAGE G.
@@ -47,7 +51,7 @@
 #                              2) TOTAL ACCUMULATED DELV VALUE (DVTOTAL) - SET TO ZERO.
 #                              3) AXIS VECTOR (AXIS) - SET TO (.5,0,0).
 #          NORMLIZE JOB SCHEDULED.
-#          READACCS TASH CALLED IN 2 SECONDS.
+#          READACCS TASK CALLED IN 2 SECONDS.
 
 
 #    NORMLIZE
@@ -73,7 +77,7 @@
 # ONMNITOR
 
 #          A SEQUENCE OF THREE PASSES THROUGH QUICKREAD FOLLOWING A CALL TO READACCS WITH ONMONFLG SET AT 1/2 
-#          SEC INTERVALS. INTERVALS ARE COUNTED OUT BY PIPCTR, INITIALIZED AT 3 BY READACCS
+#          SEC INTERVALS. INTERVALS ARE COUNTED OUT BY PIPCTR, INITIALISED AT 3 BY READACCS
 
 #    QUIKREAD
 
@@ -87,7 +91,7 @@
 #          PIPS COMPENSATED VIA 1/PIPA SUBROUTINE.
 #          DVTOTAL INCREMENTED BY ABSOLUTE VALUE OF DELV.
 #          THRUST MONITOR (DVMON) PERFORMED UNLESS IDLE FLAG IS ON.
-#          CONTROL TRANSFERRED TO AVERAGE Q.
+#          CONTROL TRANSFERRED TO AVERAGE G.
 
 
 #          DVMON
@@ -114,9 +118,9 @@
 
 ## Page 772
 #          RN1, VN1, GDT1/2 CALCULATED VIA CALCRVG ROUTINE BY UPDATING RN, VN WITH DELV AND AN AVERAGED VALUE
-#          OF GDT/2
+#          OF GDT/2.
 #          RN1, VN1, GDT1/2, PIPTIME1 COPIED INTO RN, VN, GDT/2, PIPTIME FOR RESTART PROTECTION.
-#          CONTROL TRANSFERRED TO ADDRESS SPECIFIED BY USER (OR BY READACCS FOR LAST PASS) IN AVEGEXIT.
+#          CONTROL TRANSFERRED TO ADDRESS SPECIFIED BY USER (OR BY READACCS FOR LAST PASS) IN AVGEXIT.
 #          LAST PASS (AVGEND)  1) FREE FALL GYRO COMPENSATION SET UP.
 #                              2) DRIFT FLAG TURNED ON.
 #                              3) STATE VECTOR TRANSFERRED VIA AVETOMID ROUTINE.
@@ -129,7 +133,7 @@
 # CALLING SEQUENCE
 
 #          PREREAD ENTERED DIRECTLY FROM TIG-30 VIA POSTJUMP.
-#          READACCS CALLED AS WAITLIST TASK.
+#          READACCS CALLED AS WAITLIST TASK.				.
 
 
 # SUBROUTINES CALLED
@@ -145,7 +149,7 @@
 
 #          AVGEXIT - THIS IS A DOUBLE PRECISION ERASABLE LOCATION BY WHICH CONTROL IS TRANSFERRED AT THE END
 #                    OF EACH CYCLE OF AVERAGE G.
-#                    THE 2CADR OF A ROUTINE TO BE PERFORMED AT THAT TIME (E.G., STEERING EQUATIONS TO BE REPORTED
+#                    THE 2CADR OF A ROUTINE TO BE PERFORMED AT THAT TIME (E.G., STEERING EQUATIONS TO BE PERFORMED
 #                    AT 2 SECOND INTERVALS) MAY BE SET BY THE USER INTO AVGEXIT.
 #                    ALL SUCH ROUTINES SHOULD RETURN TO SERVEXIT, WHICH IS THE NORMAL EXIT FROM AVERAGE G.
 
@@ -258,7 +262,7 @@ PREREAD1	EXTEND
 		TC	RUPTREG1
 
 ## Page 775
-# *************************************   READACCS   **************************************************************
+# *************************************   READACCS   *************************************************************
 		EBANK=	AOG
 READACCS	TC	PIPASR
 
@@ -381,7 +385,7 @@ AVOUTCAD	2CADR	AVGEND
 
 #          CALL AS WAITLIST TASK. TERMINATES ITSELF IN TASKOVER
 
-# INITIALIZATION
+# INITIALISATION
 
 #          PIPCTR = 2 (FOR DT = 0.5 SEC)
 #          X,Y,ZPIPBUF SET TO PREVIOUS PIPAX,Y,Z
@@ -416,7 +420,7 @@ CHKCTR		CCS	RUPTREG1
 		TC	TASKOVER
 
 ## Page 779
-# *************************************   SERVICER   **************************************************************
+# *************************************   SERVICER   *************************************************************
 #
 
 		EBANK=	DVCNTR
@@ -617,7 +621,7 @@ NORMLIZE	CAF	THIRTEEN	# SET UP TO COPY 14 REGS- RN1,VN1,PIPTIME1
 PIPASR		EXTEND
 		DCA	TIME2
 		DXCH	PIPTIME1	# CURRENT TIME	POSITIVE VALUE
-		CS	ZERO		# INITIALIZAE THESE AT NEG ZERO.
+		CS	ZERO		# INITIALIZE THESE AT NEG ZERO.
 		TS	TEMX
 		TS	TEMY
 		TS	TEMZ
@@ -626,7 +630,7 @@ PIPASR		EXTEND
 		TS	DELVZ		# OTHER DELVS OK INCLUDING LOW ORDER
 		TS	DELVY
 
-		TS	DELVX +1	# LOW ORDER DELV'S ARE ZEROED FOR TM: THIS
+		TS	DELVX +1	# LOW ORDER DELV'S ARE ZEROED FOR TM: THUS
 		TS	DELVY +1	# IF DNLNK'D LOW ORDER DELVS ARE NZ, THEY
 		TS	DELVZ +1	# CONTAIN PROPER COMPENSATION. IF=0, THEN
 #					  THE TM VALUES ARE BEFORE COMPENSATION.

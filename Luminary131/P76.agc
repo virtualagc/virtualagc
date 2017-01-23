@@ -8,12 +8,15 @@
 ##		that the code format has been changed to conform to the
 ##		requirements of the yaYUL assembler rather than the
 ##		original YUL assembler.
-## Reference:	pp. 716-718 of 1729.pdf.
+## Reference:	pp. 711-713
 ## Contact:	Ron Burkey <info@sandroid.org>.
 ## Website:	www.ibiblio.org/apollo
 ## Mod history:	05/24/03 RSB.	Began transcribing.
+##		2017-01-06 RSB	Page numbers now agree with those on the
+##				original harcopy, as opposed to the PDF page
+##				numbers in 1701.pdf.
 
-## Page 716
+## Page 711
 # 1)	PROGRAM NAME -- TARGET DELTA V PROGRAM (P76).
 # 2)	FUNCTIONAL DESCRIPTION -- UPON ENTRY BY ASTRONAUT ACTION, P76 FLASHES DSKY REQUESTS TO THE ASTRONAUT
 #	TO PROVIDE VIA DSKY (1) THE DELTA V TO BE APPLIED TO THE OTHER VEHICLE STATE VECTOR AND (2) THE
@@ -63,7 +66,7 @@ P76		TC	UPFLAG
 		TC	+2
 		TC	-5
 		TC	INTPRET		# RETURN TO INTERPRETIVE CODE
-## Page 717
+## Page 712
 		DLOAD	SET
 			TIG
 			NODOFLAG
@@ -114,7 +117,7 @@ INTOTHIS	STCALL	TDEC1
 		STOVL	TET
 			VATT1
 		CALL
-## Page 718
+## Page 713
 			MINIRECT
 		EXIT
 		TC	PHASCHNG
@@ -131,7 +134,7 @@ OUT		CLEAR	EXIT		# ALLOW V37.  NO NEED TO CLEAR NODOFLAG AT
 					# RESPONSES TRANSFER THERE FROM P76+.
 ENDP76		CAF	ZERO
 		TS	MARKCTR		# CLEAR RR TRACKING MARK COUNTER
-		TCF	GOTOP00H
+		TCF	GOTOPOOH
 
 V06N84		NV	0684
 		NV	0633

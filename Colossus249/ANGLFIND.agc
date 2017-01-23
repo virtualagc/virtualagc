@@ -5,14 +5,23 @@
 ##		It is part of the source code for the Command Module's (CM)
 ##		Apollo Guidance Computer (AGC), for Apollo 9.
 ## Assembler:	yaYUL
-## Reference:	pp. 394-406 of 1701.pdf.
+## Reference:	pp. 392-404.
 ## Contact:	Ron Burkey <info@sandroid.org>.
 ## Website:	www.ibiblio.org/apollo.
 ## Mod history:	08/10/04 RSB.	Began transcribing.
+##		2017-01-02 RSB	Fixed a couple of comment errors, detected by
+##				comparison to Colossus 237 and Comanche 55.
+##				Lots more to come.
+##		2017-01-06 RSB	Page numbers now agree with those on the
+##				original harcopy, as opposed to the PDF page
+##				numbers in 1701.pdf.
+##		2017-01-07 RSB	Cross-diff'd comment text (not whitespace)
+##				vs the already-proofed corresponding Colossus
+##				237 and Comanche 55 source-code files
+##				and corrected all remaining errors found.
 ##
 ## The contents of the "Colossus249" files, in general, are transcribed 
-## from a scanned document obtained from MIT's website,
-## http://hrst.mit.edu/hrs/apollo/public/archive/1701.pdf.  Notations on this
+## from a scanned copy of the program listing.  Notations on this
 ## document read, in part:
 ##
 ##	Assemble revision 249 of AGC program Colossus by NASA
@@ -28,13 +37,13 @@
 ##	under NASA contract NAS 9-4065.
 ##
 ## Refer directly to the online document mentioned above for further information.
-## Please report any errors (relative to 1701.pdf) to info@sandroid.org.
+## Please report any errors (relative to the scanned pages) to info@sandroid.org.
 ##
 ## In some cases, where the source code for Luminary 131 overlaps that of 
 ## Colossus 249, this code is instead copied from the corresponding Luminary 131
 ## source file, and then is proofed to incorporate any changes.
 
-## Page 394
+## Page 392
 		BANK	15
 		SETLOC	KALCMON1
 		BANK
@@ -57,7 +66,7 @@ KALCMAN3	TC	INTPRET
 			CPHI		# (MFS)
 		CALL
 			CDUTODCM
-SECAD		AXC,1	CALL		# MIS AND MFS ARRAYS CALCULATED
+SECAD		AXC,1	CALL		# MIS AND MFS ARRAYS CALCULATED		$2
 			MIS
 			TRANSPOS
 		VLOAD
@@ -85,7 +94,7 @@ SECAD		AXC,1	CALL		# MIS AND MFS ARRAYS CALCULATED
 		STOVL	TMFI	+12D
 		STADR
 		STOVL	TMFI	+6
-## Page 395
+## Page 393
 		STADR
 		STORE	TMFI		# TMFI = TRANSPOSE (MFI) SCALED BY 4
 		
@@ -111,7 +120,7 @@ SECAD		AXC,1	CALL		# MIS AND MFS ARRAYS CALCULATED
 		DSU	DAD
 			DP1/4TH
 			MFI	+8D
-		STORE	CAM		# CAM = (MFI0+MFI4+MFI8-1)/2 HALF-SCALE
+		STORE	CAM		# CAM = (MFI0+MFI4+MFI8-1)/2 HALF SCALE
 		ARCCOS
 		STORE	AM		# AM=ARCCOS(CAM)  (AM SCALED BY 2)
 		DSU	BPL
@@ -136,7 +145,7 @@ CHECKMAX	DLOAD	DSU
 			LOCSKIRT
 ALTCALC		VLOAD	VAD		# IF AM GREATER THAN 170 DEGREES
 			MFI
-## Page 396
+## Page 394
 			TMFI
 		VSR1
 		STOVL	MFISYM
@@ -153,26 +162,26 @@ ALTCALC		VLOAD	VAD		# IF AM GREATER THAN 170 DEGREES
 
 		DLOAD	SR1
 			CAM
-		PDDL	DSU		# PD0 CAM
+		PDDL	DSU		# PD0 CAM			$4
 			DPHALF
 			CAM
-		BOVB	PDDL		# PDL 1 - CAM
+		BOVB	PDDL		# PD2 1 - CAM			$2
 			SIGNMPAC
 			MFISYM	+16D
 		DSU	DDV
 			0
 			2
-		SQRT	PDDL		# COFZ = SQRT(MFISYM8-CAM)/(1-CAM)
-			MFISYM	+8D
+		SQRT	PDDL		# COFZ = SQRT(MFISYM8-CAM)/1-CAM)
+			MFISYM	+8D	#			   	$ ROOT 2
 		DSU	DDV
 			0
 			2
-		SQRT	PDDL		# COFY = SQRT(MFISYM4-CAM)/(1-CAM)
+		SQRT	PDDL		# COFY = SQRT(MFISYM4-CAM)/(1-CAM) $ROOT2
 			MFISYM
 		DSU	DDV
 			0
 			2
-		SQRT	VDEF		# COFX = SQRT(MFISYM-CAM)/(1-CAM)
+		SQRT	VDEF		# COFX = SQRT(MFISYM-CAM)/(1-CAM) $ROOT 2
 		UNIT
 		STORE	COF
 		
@@ -186,7 +195,7 @@ COFMAXGO	DLOAD	DSU
 			COF
 		DSU	BMN
 			COF	+4
-## Page 397
+## Page 395
 			METHOD3		# COFZ G COFX OR COFY
 		GOTO
 			METHOD1		# COFX G COFY OR COFZ
@@ -237,7 +246,7 @@ CKU12		DLOAD	BPL
 		GOTO
 			LOCSKIRT
 METHOD3		DLOAD	BPL		# COFZ MAX
-## Page 398
+## Page 396
 			COFSKEW	+4	# UZ
 			U3POS
 		VLOAD	VCOMP
@@ -258,7 +267,7 @@ CKU31		DLOAD	BPL
 		GOTO
 			LOCSKIRT
 
-## Page 399
+## Page 397
 # MATRIX OPERATIONS
 
 MXM3		SETPD			# MXM3 MULTIPLIES 2 3X3 MATRICES
@@ -307,7 +316,7 @@ TRNSPSPD	DLOAD	PDDL		# ENTER WITH MATRIX IN PD LIST
 		STODL	12D
 			10D
 		PDDL
-## Page 400
+## Page 398
 			14D
 		STODL	10D
 		STADR
@@ -321,12 +330,12 @@ MAXANG		DEC	.472222
 # D = MGA CORRESPONDING TO GIMBAL LOCK = 60 DEGREES
 # NGL = BUFFER ANGLE (TO AVOID DIVISIONS BY ZERO) = 2 DEGREES
 
-SD		DEC	.433015		# = SIN(D)
-K3S1		DEC	.86603		# = SIN(D)
-K4		DEC	-.25		# = -COS(D)
-K4SQ		DEC	.125		# = COS(D)COS(D)
-SNGLCD		DEC	.008725		# = SIN(NGL)COS(D)
-CNGL		DEC	.499695		# = COS(NGL)
+SD		DEC	.433015		# = SIN(D)				$2
+K3S1		DEC	.86603		# = SIN(D)				$1
+K4		DEC	-.25		# = -COS(D)				$2
+K4SQ		DEC	.125		# = COS(D)COS(D)			$2
+SNGLCD		DEC	.008725		# = SIN(NGL)COS(D)			$2
+CNGL		DEC	.499695		# = COS(NGL)				$2
 READCDUK	INHINT			# LOAD T(MPAC) WITH THE CURRENT CDU ANGLES
 		CA	CDUZ
 		TS	MPAC	+2
@@ -341,9 +350,9 @@ READCDUK	INHINT			# LOAD T(MPAC) WITH THE CURRENT CDU ANGLES
 		COUNT*	$$/KALC
 		
 CDUTODCM	AXT,1	SSP		# SUBROUTINE TO COMPUTE DIRECTION COSINE
-		OCT	3		# MATRIX RELATING S/C AXES TO STARLE
+		OCT	3		# MATRIX RELATING S/C AXES TO STABLE
 			S1		# MEMBER AXES FROM 3 CDU ANGLES IN T(MPAC)
-		OCT	1		# SET XR1, S1, AND PD FOR LOOP
+		OCT	1		# SET XR1, S1 AND PD FOR LOOP
 		STORE	7
 		SETPD
 			0
@@ -359,7 +368,7 @@ LOOPSIN		SLOAD*	RTB
 			6
 		DMP	SL1
 			10D
-## Page 401
+## Page 399
 		STORE	0,2
 		DLOAD
 			4
@@ -410,7 +419,7 @@ LOOPSIN		SLOAD*	RTB
 			8D
 		PDDL	DMP		# (PD7 COS(PHI)SIN(THETA)SIN(PSI)) SCALE 4
 			6
-## Page 402
+## Page 400
 			0
 		DAD	SL1		# (PUSH UP 7)
 		STADR			# C7=COS(PHI)SIN(THETA)SIN(PSI)
@@ -430,16 +439,16 @@ ENDOCM		EQUALS
 		SETLOC	KALCMON1
 		BANK
 		
-# CALCULATION OF THE MATRIX DEL.......
+# CALCULATION OF THE MATRIX DEL......
 #
-#	*      *               __T           *
+#	*      *               --T           *
 #	DEL = (IDMATRIX)COS(A)+UU (1-COS(A))+UX SIN(A)		SCALED 1
 #
-#             _
+#             -
 #	WHERE U IS A UNIT VECTOR (DP SCALED 2) ALONG THE AXIS OF ROTATION.
-#	A IS THE ANGLE OF ROTATION (DP SCALED 2).
-#					   _
-#	UPON ENTRY THE STARTING ADDRESS OF U IS COF, AND A IS IN MPAC.
+#	A IS THE ANGLE OF ROTATION (DP SCALED 2)
+#					   -
+#	UPON ENTRY THE STARTING ADDRESS OF U IS COF, AND A IS IN MPAC
 
 		COUNT	22/KALC
 		
@@ -447,8 +456,8 @@ DELCOMP		SETPD	PUSH		# MPAC CONTAINS THE ANGLE A
 			0
 		SIN	PDDL		# PD0 = SIN(A)
 		COS	PUSH		# PD2 = COS(A)
-		SR2	PDDL		# PD2 = COS(A)
-		BDSU	BOVB		# PD4 = 1-COS(A)
+		SR2	PDDL		# PD2 = COS(A)				$8
+		BDSU	BOVB		# PD4 = 1-COS(A)			$2
 			DPHALF
 			SIGNMPAC
 			
@@ -459,11 +468,11 @@ DELCOMP		SETPD	PUSH		# MPAC CONTAINS THE ANGLE A
 		DSQ	DMP
 			4
 		DAD	SL3
-## Page 403
+## Page 401
 			2
 		BOVB
 			SIGNMPAC
-		STODL	DEL		# UX UX(U-COS(A)) +COS(A)
+		STODL	DEL		# UX UX(U-COS(A)) +COS(A)		$1
 			COF	+2
 		DSQ	DMP
 			4
@@ -471,7 +480,7 @@ DELCOMP		SETPD	PUSH		# MPAC CONTAINS THE ANGLE A
 			2
 		BOVB	
 			SIGNMPAC
-		STODL	DEL	+8D	# UY UY(1-COS(A)) +COS(A)
+		STODL	DEL	+8D	# UY UY(1-COS(A)) +COS(A)		$1
 			COF	+4
 		DSQ	DMP
 			4
@@ -479,19 +488,19 @@ DELCOMP		SETPD	PUSH		# MPAC CONTAINS THE ANGLE A
 			2
 		BOVB
 			SIGNMPAC
-		STORE	DEL	+16D	# UZ UZ(1-COS(A)) +COS(A)
+		STORE	DEL	+16D	# UZ UZ(1-COS(A)) +COS(A)		$1
 		
-# COMPUTE THE OFF-DIAGONAL TERMS OF DEL
+# COMPUTE THE OFF DIAGONAL TERMS OF DEL
 
 		DLOAD	DMP
 			COF
 			COF	+2
 		DMP	SL1
 			4
-		PDDL	DMP		# D6	UX UY (1-COS A)
+		PDDL	DMP		# D6	UX UY (1-COS A)			$ 4
 			COF	+4
 			0
-		PUSH	DAD		# D8	UZ SIN A
+		PUSH	DAD		# D8	UZ SIN A			$ 4
 			6
 		SL2	BOVB
 			SIGNMPAC
@@ -504,27 +513,27 @@ DELCOMP		SETPD	PUSH		# MPAC CONTAINS THE ANGLE A
 		DMP	DMP
 			COF	+4
 			4
-		SL1	PDDL		# D6	UX UZ (1-COS A)
+		SL1	PDDL		# D6	UX UZ (1-COS A )		$ 4
 			COF	+2
 		DMP	PUSH		# D8	UY SIN(A)
 			0
 		DAD	SL2
 			6
-## Page 404
+## Page 402
 		BOVB
 			SIGNMPAC
 		STODL	DEL	+4	# UX UZ (1-COS(A))+UY SIN(A)
 		BDSU	SL2
 		BOVB
 			SIGNMPAC
-		STODL	DEL	+12D	# UX UZ (U-COS(A))-UY SIGN(A)
+		STODL	DEL	+12D	# UX UZ (U-COS(A))-UY SIN(A)
 			COF	+2
 		DMP	DMP
 			COF	+4
 			4
-		SL1	PDDL		# D6	UY UZ (1-COS(A))
+		SL1	PDDL		# D6	UY UZ (1-COS(A))		$ 4
 			COF
-		DMP	PUSH		# D6	UX SIN(A)
+		DMP	PUSH		# D8	UX SIN(A)
 			0
 		DAD	SL2
 			6
@@ -547,10 +556,10 @@ DELCOMP		SETPD	PUSH		# MPAC CONTAINS THE ANGLE A
 #	C =COS(THETA)COS(PSI)
 #	 0
 #
-#	C =-COS(THETA)SIN(PSI)COS(PHI)+SIN(THETA)SIN(PHI)
+#	C =-COS(THETA)SIN(PSI)COS(PHI)+SI (THETA)SIN(PHI)
 #	 1
 #
-#	C =COS(THETA)SIN(PSI)SIN(PHI)+SIN(THETA)COS(PHI)
+#	C =COS(THETA)SIN(PSI)SIN(PHI)+S N(THETA)COS(PHI)
 #	 2
 #
 #	C =SIN(PSI)
@@ -565,10 +574,10 @@ DELCOMP		SETPD	PUSH		# MPAC CONTAINS THE ANGLE A
 #	C =-SIN(THETA)COS(PSI)
 #	 6
 #
-#	C =SIN(THETA)SIN(PSI)COS(PHI)+COS(THETA)SIN(PHI)
+#	C =SIN(THETA)SIN(PSI)COS(PHI)+COS THETA)SIN(PHI)
 #	 7
-## Page 405
-#	C =-SIN(THETA)SIN(PSI)SIN(PHI)+COS(THETA)COS(PHI)
+## Page 403
+#	C =-SIN(THETA)SIN(PSI)SIN(PHI)+CO (THETA)COS(PHI)
 #	 8
 #
 #	WHERE	PHI = OGA
@@ -616,7 +625,7 @@ SUHALFAP	DSU	GOTO
 CKPHI		DLOAD			# PUSH UP PHI
 VECOFANG	VDEF	RVQ
 
-## Page 406
+## Page 404
 # ROUTINE FOR TERMINATING AUTOMATIC MANEUVERS
 
 NOGOM2		INHINT			# THIS LOCATION ACCESSED BY A BZMF NOGO -2
@@ -626,7 +635,7 @@ NOGO		INHINT
 		TC	STOPRATE
 				
 					# TERMINATE MANEUVER
-		CAF	TWO		# NOTE: ALL RETURNS ARE NOW MADE VIA
+		CAF	TWO		# NOTE - ALL RETURNS ARE NOW MADE VIA
 		TC	WAITLIST	# GOODEND
 		SBANK=	PINSUPER
 		EBANK=	BCDU

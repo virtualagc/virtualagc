@@ -18,6 +18,8 @@
 ##              2016-12-10 HG   add missing CCS MPAC
 ##                                          EXTEND
 ##                              fix opcode CAF -> TC
+##		2016-12-25 RSB	Comment-text proofed using ProoferComments
+##				and corrected errors found.
 
 ## Page 794
                 EBANK=          E2DPS
@@ -28,7 +30,7 @@
 # LUNAR LANDING FLIGHT SEQUENCE TABLES
 # ===================================================================================================================
 
-# FLIGHT SEQUENCE TABLES ARE ARRANGED IN BY FUNCTION.   THEY ARE REFERENCED USING AS AN INDEX THE REGISTER WCHPHASE:
+# FLIGHT SEQUENCE TABLES ARE ARRANGED BY FUNCTION.   THEY ARE REFERENCED USING AS AN INDEX THE REGISTER WCHPHASE:
 
 #                                                     WCHPHASE  =  -1  --->  IGNALG
 #                                                     WCHPHASE  =   0  --->  BRAKQUAD
@@ -87,17 +89,19 @@ WHATALM         TCF             1406ALM                 # BRAKQUAD
                 TCF             1406ALM                 # APPRQUAD
 #
 
-# INDICES FOR REFERENCING TARGET PARAMETERS
+# INDICES FOR REFERENCING TARGET PARAMETERS:
 
                 OCT             0                       # IGNALG
 TARGTDEX        OCT             0                       # BRAKQUAD
                 OCT             2                       # APPRQUAD
 
-# Page 796
+## Page 796
 
-# ==================================================================================================
+## The suffixed ':' at the end of the third line below is '=' in the original
+## printout.  It is a workaround for our proof-reading system.
+# ================================================================================================================
 # ENTRY POINTS:  ?GUIDSUB FOR THE IGNITION ALGORITHM, LUNLAND FOR SERVOUT
-#===================================================================================================
+# ===============================================================================================================:
 
 # IGNITION ALGORITHM ENTRY:  DELIVERS N PASSES OF QUADRATIC GUIDANCE
 
@@ -106,7 +110,7 @@ TARGTDEX        OCT             0                       # BRAKQUAD
                 TS              NGUIDSUB
                 TCF             GUILDRET
 
-GUIDSUB         TS              NGUIDSUB                # ON SUCCEEDING PASSES SKIP TTFINCR
+GUIDSUB         TS              NGUIDSUB                # ON SUCEEDING PASSES SKIP TTFINCR
                 TCF             CALCRGVG
 
 # NORMAL ENTRY:  CONTROL COMES HERE FROM SERVOUT
@@ -123,10 +127,10 @@ LUNLAND         TC              PHASCHNG
                 OCT             20000
 
 ## Page 797
-# =================================================================================================================
+# ================================================================================================================
 # GUILDENSTERN (AUTO-MODES MONITOR - R13)
-# SELECT p66 WHEN ROD SWITCH HAS BEEN MANIPULATED IN THE ATTITUDE HOLD MODE
-# =================================================================================================================
+# SELECT P66 WHEN THE ROD SWITCH HAS BEEN MANIPULATED IN THE ATTITUDE HOLD MODE
+# ================================================================================================================
 
                 COUNT*          $$/R13
 
@@ -191,7 +195,7 @@ RE-IN66         TC              INTPRET
                 TS              FWEIGHT
                 TS              FWEIGHT         +1
 
-                CAF             TWO                     # WCHPHASE=2 --> VERTICAL  PHASE
+                CAF             TWO                     # WCHPHOLD=2 --> VERTICAL  PHASE
                 TS              WCHPHOLD
 
                 TS              WCHPHASE                # ***DOES ANYONE SEE ANY NEED FOR THIS?***
@@ -244,9 +248,9 @@ GUILDRET        CAF             ZERO
 BRSPOT1         INDEX           WCHPHASE
                 TCF             NEWPHASE
 
-# ==============================================================================================================
+# ****************************************************************************************************************
 # ROUTINES TO START NEW PHASES
-# ==============================================================================================================
+# ****************************************************************************************************************
 
 STARTP64        TC              NEWMODEX
                 DEC             64
@@ -261,9 +265,9 @@ STARTP64        TC              NEWMODEX
                 TS              LRWH                    # LRWH SO LR UPDATES ARE DONE PROPERLY
 #               (CONTINUE TO TTFINCR)
 
-# **************************************************************************************************************
+# ****************************************************************************************************************
 # INCREMENT TTF/8, UPDATE LAND FOR LUNAR ROTATION, DO OTHER USEFUL THINGS
-# **************************************************************************************************************
+# ****************************************************************************************************************
 
 ## Page 800
 #
@@ -347,9 +351,9 @@ TTFINCR         TC              INTPRET
 BRSPOT2         INDEX           WCHPHASE
                 TCF             PREGUIDE
 
-# *********************************************************************
+# ****************************************************************************************************************
 # LANDING SITE PERTURBATION EQUATIONS
-# *********************************************************************
+# ****************************************************************************************************************
 
 REDESIG         CA              FLAGWRD6                # IS REDFLAG SET?
                 MASK            REDFLBIT
@@ -428,9 +432,9 @@ REDES1          DLOAD           DSU
 
                 TCF             RGVGCALC
 
-# *********************************************************************
+# ****************************************************************************************************************
 # COMPUTE STATE IN GUIDANCE COORDINATES
-# *********************************************************************
+# ****************************************************************************************************************
 
 #            RGVGCALC COMPUTATIONS ARE AS FOLLOWS:-
 
@@ -439,7 +443,7 @@ REDES1          DLOAD           DSU
 #                                 -         -   -   -
 #                                 ANGTERM = V + R * WM
 
-#                     STATE IN GUIDANCE COORDINTES:
+#                     STATE IN GUIDANCE COORDINATES:
 
 #                                 -     *   -   -
 #                                 RGU = CG (R - LAND)
@@ -489,7 +493,7 @@ RGVGCALC        TC              INTPRET                 # ENTER HERE TO RECOMPUT
                 CA              FIXLOC                  # RESET PUSH DOWN POINTER
                 TS              PUSHLOC
 
-                CA              MPAC                    # COMPUTE LOOKANGLE ITSELF
+                CA              MPAC                    # COMPUTE LOOKANGL ITSELF
                 DOUBLE
                 TC              BANKCALL
                 CADR            SPARCSIN        -1
@@ -502,9 +506,9 @@ RGVGCALC        TC              INTPRET                 # ENTER HERE TO RECOMPUT
 BRSPOT3         INDEX           WCHPHASE
                 TCF             WHATGUID
 
-# **************************************************************************
+# ****************************************************************************************************************
 # TTF/8 COMPUTATION
-# **************************************************************************
+# ****************************************************************************************************************
 
 TTF/8CL         CA              WCHPHASE
                 TC              INTPRETX
@@ -548,9 +552,9 @@ TTF/8CL         CA              WCHPHASE
 
 #               (CONTINUE TO QUADGUID)
 
-# *********************************************************************************
+# ****************************************************************************************************************
 # MAIN GUIDANCE EQUATION
-# *********************************************************************************
+# ****************************************************************************************************************
 
 #                      AS PUBLISHED:-
 
@@ -630,7 +634,7 @@ QUADGUID        CS              TTF/8
                                 ZEROMID
 
 ## Page 807
-AFCCALC1        VXM             VSL1                    # VERGUID COMES HERE
+AFCCALC1        VXM             VSL1                    # VERTGUID COMES HERE
                                 CG
                 PDVL            V/SC
                                 GDT/2
@@ -666,9 +670,9 @@ AFCCLEND        EXIT
 BRSPOT4         INDEX           WCHPHASE
                 TCF             AFTRGUID
 
-# *****************************************************************************
+# ****************************************************************************************************************
 # NEW PHASE NOW?
-# *****************************************************************************
+# ****************************************************************************************************************
 
 EXTLOGIC        INDEX           WCHPHASE                # IS TTF NEARER ZERO THAN CRITERION?
                 CA              TENDBRAK
@@ -688,9 +692,9 @@ EXTLOGIC        INDEX           WCHPHASE                # IS TTF NEARER ZERO THA
 
 #               (CONTINUE TO CGCALC)
 
-# ***********************************************************************
+# ***************************************************************************************************************
 # ERECT GUIDANCE-STABLE MEMBER TRANSFORMATION MATRIX
-# ***********************************************************************
+# ***************************************************************************************************************
 
 CGCALC          CA              WCHPHOLD
                 TC              INTPRETX
@@ -731,11 +735,11 @@ CGCALC          CA              WCHPHOLD
 EXITSPOT        INDEX           WCHPHOLD
                 TCF             WHATEXIT
 
-# ***********************************************************************
+# ****************************************************************************************************************
 
 ## Page 809
 # ROUTINES FOR EXITING FROM LANDING GUIDANCE
-# ***********************************************************************
+# ****************************************************************************************************************
 
 # 1.        EXGSUB IS THE RETURN WHEN GUIDSUB IS CALLED BY THE IGNITION ALGORITHM.
 
@@ -745,7 +749,7 @@ EXITSPOT        INDEX           WCHPHOLD
 
 #          (EXOVFLOW IS A SUBROUTINE OF EXBRAK AND EXNORM CALLED WHEN OVERFLOW OCCURRED ANYWHERE IN GUIDANCE.)
 
-EXGSUB          TC              INTPRET                 # COMPUTE TRIM VELOCITY CORRECTION TERM.
+EXGSUB          TC              INTPRET                 # COMPUTE TRIM VELOCITY CORRECTION TERM
                 VLOAD           RTB
                                 UNFC/2
                                 NORMUNIT
@@ -857,9 +861,9 @@ THRTCALL        TC              THROTTLE
 
 #               (CONTINUE TO DISPEXIT)
 
-# ***********************************************************************
+# ****************************************************************************************************************
 # GUIDANCE LOOP DISPLAYS
-# ***********************************************************************
+# ****************************************************************************************************************
 
 DISPEXIT        EXTEND                                  # KILL GROUP 3:   DISPLAYS WILL BE
                 DCA             NEG0                    #   RESTORED BY NEXT GUIDANCE CYCLE
@@ -945,7 +949,7 @@ VERTDISP        TC              VACRLEAS
                 TCF             STOPFIRE                # V32E
 
 STOPFIRE        TC              DOWNFLAG
-                ADRES           P66PROFL
+                ADRES           P66PROFL		# FLAG TO STOP P66 HORIZONTAL
                 TCF             ENDOFJOB
 
 THROT66         TC              THROTTLE        +3
@@ -954,9 +958,11 @@ THROT66         TC              THROTTLE        +3
                 TCF             DISPEX66
 
 ## Page 814
-# =================================================================================================
+## The ':' suffixed in the 2nd dividing line below is an '=' in the original printout.  
+## The change is a workaround for our proof-reading system.
+# ================================================================================================================
 # GUIDANCE FOR P66
-# =================================================================================================
+# ===============================================================================================================:
 
 #          THE P66 HORIZONTAL (HZ) EQUATION IS:
 
@@ -974,7 +980,7 @@ THROT66         TC              THROTTLE        +3
 #                    VELOCITY, PLATFORM COORDINATES. THESE ARE INITIALIZED
 #                    TO MOONRATE
 #                 (LIMIT AHZLIM) INDICATES THE CONTENT OF THE SUBSEQUENT
-#                    PARENTHESIS IS MAGNITUDE LIMITED TO AHZLIM
+#                    PARENTHESES IS MAGNITUDE LIMITED TO AHZLIM
 
 P66             TC              PHASCHNG                # TERMINATE GROUP 3
                 OCT             00003
@@ -1009,9 +1015,6 @@ OMITWALM        INHINT
 # P66 HORIZONTAL CHANNELS
 # ======================================================================================================
 
-# **********************************************************
-# GUIDANCE FOR P66
-# **********************************************************
                 SETLOC          P66LOC
                 BANK
                 COUNT*          $$/F2DPS
@@ -1023,7 +1026,7 @@ P66HZ           VLOAD           VXSC
                                 VHZC                    # IN 2(7)M/CS
                                 V                       # IN 2(7)M/CS
                 V/SC            VSU                     # YIELDS UNLIM HZ ACCEL CMD, 2(-4)M/CS/CS
-                                TAUHZ                   # IN 2(1)CS
+                                TAUHZ                   # IN 2(1))CS
                 EXIT
 
                 CA              PRIO21                  # ASSURE THIS SERVICER JOB ENDS
@@ -1066,12 +1069,12 @@ ENGARM?         CA              BIT3                    # IS ENGINE ARM SWITCH S
                 EXTEND
                 BZF             CDUWHZ                  # Y: ISSUE HZ CMDS
 
-                CA              FLAGWRD0                # N: HAVE WE PROCEEDED AFTER TOUCHDOWN
+                CA              FLAGWRD0                # N: HAVE WE PROCEEDED AFTER TOUCHDOWN?
                 MASK            P66PROBT
                 EXTEND
-                BZF             ASTROPRO                # Y: PREVENT RCS FIRING
+                BZF             ASTROPRO                # Y: PREVENT RCS FIRINGS
 CDUWHZ          TC              INTPRET                 # N: ISSUE HZ CMDS
-                STORE           UNFC/2                  # MUST STORE FOR SUCCEDING PASS
+                STORE           UNFC/2                  # MUST STORE FOR SUCCEEDING PASS
                 CALL
                                 FINDCDUW
                 EXIT
@@ -1082,9 +1085,9 @@ ASTROPRO        CA              IDLADR                  # Y: PREVENT RCS JET FIR
                 TS              T5ADR                   #    AND
                 TCF             P66VERT                 #    SKIP HZ CMDS, BUT CONTINUE DISPLAYS
 
-# =====================================================================================
+# ================================================================================================================
 # P66 VERTICAL CHANNEL
-# =====================================================================================
+# ================================================================================================================
 
 RODTASK         CA              PRIO22                  # BUMPS ALL OF SERVICER JOB EXCEPT RODCOMP
                 TC              FINDVAC
@@ -1193,9 +1196,9 @@ ITRPNT1         VXSC            PDDL                    # PUSH DELV SINCE LAST P
                                 4SEC(28)
                                 GDT/2                   # GDT/2 = VEL IN 100 CS IN 2(7)M/CS
                 VSU             VXSC                    # (TTPIP/1SEC)(GDT/2-VBIAS),2(9)M/CS   (6)
-                                VBIAS                   # IN 2(7)M/CS
-                VSL2            VAD
-                                V
+                                VBIAS			# IN 2(7)M/CS
+                VSL2            VAD			# SHIFT YIELDS 2(7)M/CS
+                                V                   	# IN 2(7)M/CS
                 VAD             STADR                   #                                      (0)
                 STOVL           24D                     # STORE P66 VELOCITY IN 2(7)M/CS
                                 R
@@ -1211,7 +1214,7 @@ ITRPNT1         VXSC            PDDL                    # PUSH DELV SINCE LAST P
                 DAD             DSU                     # DELTAH + |R| - |LAND|
                                 36D                     # |R| FROM PRECEDING UNIT OPERATION
                                 /LAND/
-                STODL           HCALC1                  # ALTITUDE FOR NOUN 60 IN 2(24)M
+                STODL           HCALC1                  # ALTITUDE FOR N 60 IN 2(24)M
 
 ## Page 819
 # COMPUTE UNCORRECTED COMMANDED THRUST ACCELERATION
@@ -1244,7 +1247,7 @@ ITRPNT1         VXSC            PDDL                    # PUSH DELV SINCE LAST P
                                 VBIAS                   # IN 2(7)M/CS
                 ABVAL           PDDL                    # PUSH DE-BIASED |DELV| IN 2(7)M/CS    (2)
                                 THISTPIP
-                DSU             PDDL                    # PUSH PERP66                          (4)
+                DSU             PDDL                    # PUSH PERP66 IN 2(28)CS               (4)
                                 LASTTPIP
                                 THISTPIP
                 STODL           LASTTPIP                # REPLACE LASTTPIP LOADING PERP66       (2)
@@ -1256,7 +1259,7 @@ ITRPNT1         VXSC            PDDL                    # PUSH DELV SINCE LAST P
 
                                 FWEIGHT                 # FW IN 2(14)BITS
                                 BIT1H                   # SCALES FW TO 2(28)BITS
-                DDV             DDV                     # THINK OF DIVIDES BEING REERSED IN ORDER
+                DDV             DDV                     # THINK OF DIVIDES BEING REVERSED IN ORDER
                                 MASS                    # IN 2(16)KG
                                 SCALEFAC                # SF RESCALES FW TO 10,000 2(12)NEWTON
                 DAD             PDDL                    # PUSH FW/SF/MASS+|AF| IN 2(-4)M/CS/CS  (4)
@@ -1292,7 +1295,7 @@ AFCSPOT         DLOAD                                   #                       
                                 2D
                 STODL           /AFC/                   # CORRECTED AND LIMITED |AFC|           (0)
 ITRPNT2         EXIT
-                DXCH            MPAC                    # FETCH MEASURED THRUST ACCEL FRO THROTTLE
+                DXCH            MPAC                    # FETCH MEASURED THRUST ACCEL FOR THROTTLE
                 TC              POSTJUMP
                 FCADR           THROT66
 
@@ -1314,22 +1317,27 @@ DEIMUBOB        CA              EBANK6
                 EBANK=          END-E7
                 EXTEND
                 MP              RIMUZ                   # IMU Z IN UNITS (180/PI 45) 2(14) CM
-                ADS             OLDPIPAX                # CURRENT PIPA X IN UNITS 2(14) CM/SEC
+                ADS             OLDPIPAX                # CURRENT P66 PIPA X IN UNITS 2(14) CM/SEC
                 TC              Q
 
 ## Page 821
+# CONSTANTS FOR P66
+
 IDLADR          GENADR          DAPIDLER
 GHZ             DEC             1.62292         E-4 B+4 # GRAVITY IN 2(-4)M/CS/CS
 
-BIT1H           OCT             00001                   # MUST PRECED A ZERO
-SHFTFACT        2DEC            1               B-17    # SCALES P66 PERIOD TO 2(1)CS
+BIT1H           OCT             00001                   # MUST PRECEDE A ZERO
+SHFTFACT        2DEC            1               B-17    # SCALES P66 PERIOD TO 2(1))CS
 RIMUZ           DEC             99.486          B-14    # 1.2667 M IN UNITS (180/PI 45) 2(14) CM
 
 ## Page 822
-# =======================================================================================
+## The suffixed ':' in the second divider below was '=' in the original printout.
+## The change is a workaround for our proof-reading system.
+# ================================================================================================================
 # REDESIGNATOR TRAP
-# =======================================================================================
+# ===============================================================================================================:
 
+# END INSERT
                 BANK            11
                 SETLOC          F2DPS*11
                 BANK
@@ -1357,7 +1365,7 @@ PITFALL         XCH             BANKRUPT
                 TCF             RESUME
 
 
-# REDESIGNATOR MONITOR (INITIATED BY PITFALL)
+# REDESIGNATION MONITOR (INITIATED BY PITFALL)
 
 
 PREMON1         TS              ZERLINA
@@ -1412,7 +1420,7 @@ COUNT'EM        CAF             BIT13                   # ARE WE IN ATTITUDE-HOL
                 ADS             ELINCR1
                 TCF             RESETRPT
 
-# THESE EQUIVALENCES ARE BASED ON GSOP CHAPTER 4, REVISION 16 OF P64LM
+# THESE EQUIVALENCIES ARE BASED ON GSOP CHAPTER 4, REVISION 16 OF P64LM
 
 +ELBIT          =               BIT2                    # -PITCH
 
@@ -1442,9 +1450,9 @@ ELEACH          =               AZEACH                  # ONE DEGREE
 
                 COUNT*  $$/F2DPS
 
-# ***********************************************************************************
+# ****************************************************************************************************************
 # DOUBLE PRECISION ROOT FINDER SUBROUTINE (BY ALLAN KLUMPP)
-# ***********************************************************************************
+# ****************************************************************************************************************
 
 #                                                         N        N-1
 #          ROOTPSRS FINDS ONE ROOT OF THE POWER SERIES A X  + A   X    + ... + A X + A
@@ -1467,13 +1475,13 @@ ELEACH          =               AZEACH                  # ONE DEGREE
 
 #          PRECAUTION: ROOTPSRS MAKES NO CHECKS FOR OVERFLOW OR FOR IMPROPER USAGE. IMPROPER USAGE COULD
 # PRECLUDE CONVERGENCE OR REQUIRE EXCESSIVE ITERATIONS. AS A SPECIFIC EXAMPLE, ROOTPSRS FORMS A DERIVATIVE
-# COEFFICIENT TABLE BY MULTIPLYINE EACH A(I) BY I, WHERE I RANGES FROM 1 TO N. IF AN ELEMENT OF THE DERIVATIVE
-# COEFFICIENT TABLE = 1 OR > 1 IN MAGNITUDE, ONLY THE EXCESS IS RETAINED. ROOTPSRS MAY CONVERGE ON THE COREECT
+# COEFFICIENT TABLE BY MULTIPLYING EACH A(I) BY I, WHERE I RANGES FROM 1 TO N. IF AN ELEMENT OF THE DERIVATIVE
+# COEFFICIENT TABLE = 1 OR > 1 IN MAGNITUDE, ONLY THE EXCESS IS RETAINED. ROOTPSRS MAY CONVERGE ON THE CORRECT
 # ROOT NONETHELESS, BUT IT MAY TAKE AN EXCESSIVE NUMBER OF ITERATIONS. THEREFORE THE USER SHOULD RECOGNIZE:
 
 # 1. USER'S RESPONSIBILITY TO ASSURE THAT I X A(I) < 1 IN MAGNITUDE FOR ALL I.
 
-# 2. USER'S RESPONSIBILITY TO ASSURE OVERFLOW WILL NOT OCCUR IN EVALUTATING EITHER THE RESIDUAL OR THE DERIVATIVE
+# 2. USER'S RESPONSIBILITY TO ASSURE OVERFLOW WILL NOT OCCUR IN EVALUATING EITHER THE RESIDUAL OR THE DERIVATIVE
 #    POWER SERIES.   THIS OVERFLOW WOULD BE PRODUCED BY SUBROUTINE POWRSERS, CALLED BY ROOTPSRS, AND MIGHT NOT
 #    PRECLUDE EVENTUAL CONVERGENCE.
 
@@ -1483,16 +1491,16 @@ ELEACH          =               AZEACH                  # ONE DEGREE
 
 # 4. THE ITERATION COUNT RETURNED IN MPAC+2 MAY BE USED TO DETECT ABNORMAL PERFORMANCE.
 
-                                                        # STORE ENTERING DATA, INITIALIZE ERASABLES
+                                                        # STORE ENTERING DATA, INITLIZE ERASABLES
 
 ROOTPSRS        EXTEND
                 QXCH            RETROOT                 # RETURN ADRES
-                TS              PWRPTR                  # PWR TABLE POINTER
-                DXCH            MPAC            +3      # PWR TABLE ADRES, N-1
+                TS              PWRPTR                  # PWR TABL POINTER
+                DXCH            MPAC            +3      # PWR TABL ADRES, N-1
                 CA              DERTABLL
                 TS              DERPTR                  # DER TABL POINTER
                 TS              MPAC            +5      # DER TABL ADRES
-                CCS             MPAC            +4      # NO POWER SERIES DEGREE 1 OR LESS
+                CCS             MPAC            +4      # NO POWER SERIES OF DEGREE 1 OR LESS
                 TS              MPAC            +6      # N-2
                 CA              ZERO                    # MODE USED AS ITERATION COUNTER. MODE
                 TS              MODE                    # MUST BE POS SO ABS WON'T COMP MPAC+3 ETC
@@ -1502,7 +1510,7 @@ ROOTPSRS        EXTEND
                 EXTEND
                 DCA             MPAC                    # FETCH ROOT GUESS, KEEPING IT IN MPAC
                 DXCH            ROOTPS                  # AND IN ROOTPS
-                INDEX           MPAC            +3      # PWR TABLE ADRES
+                INDEX           MPAC            +3      # PWR TABL ADRES
                 CA              5                       # PRECROOT TO A
                 TC              SHORTMP                 # YIELDS DP PRODUCT IN MPAC
                 TC              USPRCADR
@@ -1527,7 +1535,7 @@ DERCLOOP        TS              PWRCNT                  # LOOP COUNTER
                 DCA             1
                 DXCH            MPAC                    # A(I-1) TO MPAC, FETCHING DERCOF
                 INDEX           DERPTR
-                DXCH            3                       # DERCOF TO DER TABLE
+                DXCH            3                       # DERCOF TO DER TABL
 
 ## Page 826
                 CS              TWO
@@ -1548,7 +1556,7 @@ ROOTLOOP        EXTEND
 
                 EXTEND
                 DCA             ROOTPS
-                DXCH            MPAC                    # CURRENT ROOT TO MPAC, FETCHING DERIVATIVE
+                DXCH            MPAC                    # CURRENT ROOT TO MPAC, FETCHING DERIVTIVE
                 DXCH            BUF                     # LEAVE DERIVATIVE IN BUF AS DIVISOR
                 EXTEND
                 DCA             MPAC            +3      # LOAD A, L WITH PWR TABL ADRES, N-1
@@ -1593,9 +1601,9 @@ ROOTSTOR        DXCH            ROOTPS
 DERTABLL        ADRES           DERCOFN         -3
 
 
-# ****************************************************************************
+# ****************************************************************************************************************
 # TRASHY LITTLE SUBROUTINES
-# ****************************************************************************
+# ****************************************************************************************************************
 
 ZEROMID         CAF             ZERO                    # ROUTINE TO ZERO THE MIDDLE COMPONENT
                 TS              MPAC            +3      #   OF A VECTOR IN MPAC.   "TCF DANZIG"
@@ -1645,15 +1653,16 @@ TDISPSET        CA              TTF/8
                 OCT             01406
                 TCF             RATESTOP
 
+# DESCENT OVERFLOW SUBROUTINE
 OVFDESC         EXTEND
                 QXCH            OVFRET
 
                 TC              ALARM
                 OCT             01410
 
-                INHINT                                  # MUST USE INHINT, INBKCALL, RELINT
+                INHINT                                  # MUST USE INHINT, IBNKCALL, RELINT
                 TC              IBNKCALL                # BECAUSE DAP COULD INTERRUPT STOPRATE AND
-                FCADR           STOPRATE                # BECASUE WE COME FROM P66HZ VIA BANKCALL
+                FCADR           STOPRATE                # BECAUSE WE COME FROM P66HZ VIA BANKCALL
                 RELINT
 
                 CA              ZERO
@@ -1663,12 +1672,12 @@ OVFDESC         EXTEND
 
 ## Page 829
 
-# *********************************************************************
+# ****************************************************************************************************************
 # SPECIALIZED "PHASCHNG" SUBROUTINE
-# *********************************************************************
+# ****************************************************************************************************************
 
                 EBANK=          PHSNAME2
-FASTCHNG        CA              EBANK3                  # SPECIALIZED `PHASCHNG' ROUTINE
+FASTCHNG        CA              EBANK3                  # SPECIALIZED 'PHASCHNG' ROUTINE
                 XCH             EBANK
                 DXCH            L
                 TS              PHSNAME3
@@ -1676,9 +1685,9 @@ FASTCHNG        CA              EBANK3                  # SPECIALIZED `PHASCHNG'
                 EBANK=          E2DPS
                 TC              A
 
-# *************************************************************************************
+# ****************************************************************************************************************
 # PARAMETER TABLE INDIRECT ADDRESSES
-# *************************************************************************************
+# ****************************************************************************************************************
 
 RDG             =               RBRFGX
 VDG             =               VBRFGX
@@ -1687,9 +1696,9 @@ VDG2TTF         =               VBRFG*
 ADG2TTF         =               ABRFG*
 JDG2TTF         =               JBRFG*
 
-# *************************************************************************************
+# ****************************************************************************************************************
 # LUNAR LANDING CONSTANTS
-# *************************************************************************************
+# ***************************************************************************************************************
 
 TABLTTFL        ADRES           TABLTTF         +3      # ADDRESS FOR REFERENCING TTF TABLE
 
@@ -1741,5 +1750,5 @@ GSCALE          2DEC            100             B-11
 3/8DP           2DEC            .375
 3/4DP           2DEC            .750
 DEPRCRIT        2DEC            -.02 B-1
-# **************************************************************************
-# **************************************************************************
+# ****************************************************************************************************************
+# ****************************************************************************************************************

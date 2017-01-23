@@ -15,6 +15,8 @@
 ## Mod history: 2016-11-17 JL   Created from Luminary131 version.
 ##              2016-11-29 MAS  Began transcription.
 ##              2016-12-03 MAS  Finished transcribing.
+##		2016-12-15 RSB	Proofed comment text with octopus/ProoferComments,
+##				and corrected the errors found.
 
 ## Page 2
 
@@ -27,12 +29,12 @@
 #                                 USING PROGRAM LUMINARY
 
 
-# THIS PROGRAM AND R-567 HAVE BEEN PREPARED BY THE CHARLES STARK DRAPER LABORATORY, MASSACHUSETTS INSTITUTE
-# OF TECHNOLOGY  75 CAMBRIDGE PARKWAY, CAMBRIDGE, MASSACHUSETTS UNDER PROJECT 55-238-70, SPONSORED BY THE
-# MANNED SPACECRAFT CENTER OF THE NATIONAL AERONAUTICS AND SPACE ADMINISTRATION, CONTRACT NAS 9-4065.
+# *THIS PROGRAM AND R-567 HAVE BEEN PREPARED BY THE CHARLES STARK DRAPER LABORATORY, MASSACHUSETTS INSTITUTE
+# *OF TECHNOLOGY  75 CAMBRIDGE PARKWAY, CAMBRIDGE, MASSACHUSETTS UNDER PROJECT 55-238-90, SPONSORED BY THE
+# *MANNED SPACECRAFT CENTER OF THE NATIONAL AERONAUTICS AND SPACE ADMINISTRATION, CONTRACT NAS 9-4065.
 
 
-#                 THIS PROGRAM IS REFERRED TO AS LUMINARY 1E
+# *                 THIS PROGRAM IS REFERRED TO AS LUMINARY 1E
 # TABLE OF LOG CARDS
 
 # ABSOLUTE ADDRESSES FOR UPDATE PROGRAM
@@ -84,7 +86,7 @@
 #                 P32-P35, P72-P75
 #          KISSING
 #                 GROUND TRACKING DETERMINATION PROGRAM - P21
-#                 P34-P35, P72-P75
+#                 P34-P35, P74-P75
 #                 R31
 #                 P76
 #                 R30
@@ -252,7 +254,7 @@
 # 78 LR SPURIOUS RETURN TEST START (R77)
 # 79 LR SPURIOUS RETURN TEST STOP
 # 80 UPDATE LEM STATE VECTOR
-# 81 UPDATE CSM STATE FECTOR
+# 81 UPDATE CSM STATE VECTOR
 # 82 REQUEST ORBIT PARAM DISPLAY (R30)
 # 83 REQUEST REND  PARAM DISPLAY (R31)
 # 84
@@ -362,7 +364,7 @@
 # 40  TIME FROM IGNITION/CUTOFF              3COMP   XXBXX  MIN/SEC                      NO LOAD, DEC ONLY
 #     VG,                                            XXXX.X FT/SEC
 #     DELTA V (ACCUMULATED)                          XXXX.X FT/SEC
-# 41  TARGET  AXIMUTH,                       2COMP   XXX.XX DEG                          (FOR SYSTEM TEST)
+# 41  TARGET  AZIMUTH,                       2COMP   XXX.XX DEG                          (FOR SYSTEM TEST)
 #             ELEVATION                              XX.XXX DEG
 # 42  APOGEE,                                3COMP   XXXX.X NAUT MI                      DEC ONLY
 #     PERIGEE,                                       XXXX.X NAUT MI
@@ -486,7 +488,7 @@
 # 93  DELTA GYRO ANGLES                      3COMP   XX.XXX DEG FOR EACH
 # 94  VGX (BODY)                             3COMP   XXXX.X FT/SEC                       NO LOAD, DEC ONLY
 #     ALTITUDE RATE                                  XXXX.X FT/SEC
-#     COMPARED ALTITUDE                              XXXXX. FEET
+#     COMPUTED ALTITUDE                              XXXXX. FEET
 # 95  SPARE
 # 96  SPARE
 # 97  SYSTEM TEST INPUTS                     3COMP   XXXXX. FOR EACH
@@ -685,7 +687,7 @@
 # 90       1      RANGE           JJ
 #          2      RRATE           S
 #          3      RTHETA          H
-# 91       1      P21ALT          Q (MEMORY/100 TO DISPLAY TENS N.M.)
+# 91       1      P21ALT          Q (MEMORY/100 TO DIPLAY TENS N.M.)
 #          2      P21VEL          P
 #          3      P21GAM          H
 # 92       1      THRDISP         C
@@ -905,8 +907,8 @@
 #                      ONLY. CANNOT BE       X = 2 FOR LR POSITION 2
 #                      LOADED.)
 
-# -WW-
-## Page 23                                                          15
+# -WW-								    15
+## Page 23 
 # 360-CDU DEGREES      XXX.XX DEGREES        SP BIT 1 = 360 - (360/2  )
 #                      (MAX 359.99)             DEGREES
 #                                               (USES 15 BITS FOR MAGNI-
@@ -927,7 +929,7 @@
 #                                               2   METERS/CENTI-SEC
 
 # -AAA-
-# RADIANS              XX.XXX RADIANS        DP BIT 1 OF HIGH REGISTER -
+# RADIANS              XX.XXX RADIANS        DP BIT 1 OF HIGH REGISTER =
 #                      (MAX 31.999)              -9
 #                                               2   RADIANS
 
@@ -1050,7 +1052,6 @@
 # 32000    DAP STILL IN PROGRESS AT NEXT TIME5 RUPT  DAP
 
 ## Page 27
-# ASSEMBLY AND OPERATION INFORMATION
 #          CHECKLIST CODES FOR LUMINARY
 
 # *9      *17      *26                                                    *9   COLUMN
@@ -1061,7 +1062,7 @@
 # 00014   PROCEED  DO IMU FINE ALIGN ROUTINE                              P51,P63,P57
 # 00014   ENTER    DO LANDING SITE  DETERMINATION(N89DISP)                P57OPTION2
 # 00015   PERFORM  CELESTIAL BODY ACQUISITION
-# 00016   PROCEED  DO IMU ALIGN WITH NON-RJECTED DATA         R53         R51,P51
+# 00016   PROCEED  DO IMU ALIGN WITH NON-REJECTED DATA        R53         R51,P51
 # 00062   SWITCH   AGC POWER DOWN                                         P06
 # 00201   SWITCH   RR MODE TO AUTOMATIC                                   P20,P22,R04
 # 00203    SWITCH  GUID CONTROL TO GNC, MODE TO AUTO...                   P12,P42,P71

@@ -13,10 +13,12 @@
 ##				images.
 ##		2009-05-20 RSB	Corrected BDV -> BOV.
 ##		2010-08-24 JL	Fixed page numbers, some whitespace.
-##		2016-12-10 RSB	All of the GOTOP00H's should have been
+##		2016-12-10 RSB	All of the GOTOPOOH's should have been
 ##				GOTOPOOH, and I've changed them back.
 ##		2016-12-11 RSB	Proofed comments with octopus/ProoferComments
 ##				and fixed the errors found.
+##		2017-01-17 RSB	Fixed comment-text errors noted while diff'ing
+##				vs Colossus 249.
 ##
 ## This source code has been transcribed or otherwise adapted from digitized
 ## images of a hardcopy from the MIT Museum.  The digitization was performed
@@ -65,7 +67,7 @@ END45		TC	INTPRET
 			RGEXIT
 			
 COMPTGO		EXTEND			# USED TO COMPUTE TTOGO
-		QXCH	PHSPRDT6	# ** GROUP 6 TEMPORARY USED ,. BEWARE **
+		QXCH	PHSPRDT6	# ** GROUP 6 TEMPORARY USED ,, BEWARE **
 		
 		TC	UPFLAG		# SET TIMRFLAG
 		ADRES	TIMRFLAG	# BIT 11 FLAG 7
@@ -377,7 +379,7 @@ S31.1		STQ	DLOAD
 			QTEMP
 
 ## Page 643
-# SUBROUTINE NAME:	DELRSPL		(CONTINUATION OF V 82 IN CSM IF P11 ACTIVE)
+# SUBROUTINE NAME:	DELRSPL		(CONTINUATION OF V 82 IN CSM IF P11 ACTI
 # TRANSFERRED COMPLETELY FROM SUNDISK, P30S REV 33.  9 SEPT 67.
 # MOD NO: 0	MOD BY: ZELDIN		DATE:
 # MOD NO: 1	MOD BY: RR BAIRNSFATHER	DATE: 11 APR 67

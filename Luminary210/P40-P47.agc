@@ -31,6 +31,8 @@
 ##              2016-12-12 hg   Fix interpretive operand FRCS2 -> FRCS4
 ##                                               operator GOTO -> SET  
 ##                                  operand PHASCHNG -> 2PHSCHNG                    
+##		2016-12-25 RSB	Comment-text proofed using ProoferComments
+##				and corrected errors found.
 
 ## Page 747
 # PROGRAM DESCRIPTION  P40BOTH    DECEMBER 22, 1966
@@ -1138,6 +1140,8 @@ APSTGO		DDV	SL2
 6.5SECS		2DEC	650. B-17       # ASSUME 6.5 SECONDS OF ULLAGE
 
 ## Page 771
+# S40.9 AND RASTEER1
+
 # S40.9
 
 # FUNCTION        TO UPDATE "A" (THE SEMI-MAJOR AXIS OF THE ELLIPTICAL TRAJECTORY) BY CALLING "HAVEGUES" (INITVEL)
@@ -1235,7 +1239,7 @@ RASTEER1	VLOAD	ABVAL
 			X1
 		SXA,2
 			MUSCALE
-		STODL	R1C
+		STODL	R1C		#			2(+58 -X)
 ## Page 773
 			30D
 		SR1	PDDL

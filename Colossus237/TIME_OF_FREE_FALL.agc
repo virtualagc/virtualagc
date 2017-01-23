@@ -1,16 +1,20 @@
 ### FILE="Main.annotation"
-## Copyright:    Public domain.
-## Filename:	 TIME_OF_FREE_FALL.agc
-## Purpose:      Part of the source code for Colossus build 237.
-##               This is for the Command Module's (CM) Apollo Guidance
-##               Computer (AGC), for Apollo 8.
-## Assembler:    yaYUL
-## Contact:      Jim Lawton <jim DOT lawton AT gmail DOT com>
-## Website:      www.ibiblio.org/apollo/index.html
-## Page Scans:   www.ibiblio.org/apollo/ScansForConversion/Colossus237/
-## Mod history:  2011-04-17 JL	Adapted from corresponding Colossus 249 file.
-##		 2011-04-17 JL	Removed temporary line.
-##		 2016-11-02 RSB	Typo (various offset-references +2 and +3 not indented).
+## Copyright:   Public domain.
+## Filename:	TIME_OF_FREE_FALL.agc
+## Purpose:     Part of the source code for Colossus build 237.
+##              This is for the Command Module's (CM) Apollo Guidance
+##              Computer (AGC), for Apollo 8.
+## Assembler:   yaYUL
+## Contact:     Jim Lawton <jim DOT lawton AT gmail DOT com>
+## Website:     www.ibiblio.org/apollo/index.html
+## Page Scans:  www.ibiblio.org/apollo/ScansForConversion/Colossus237/
+## Mod history: 2011-04-17 JL	Adapted from corresponding Colossus 249 file.
+##		2011-04-17 JL	Removed temporary line.
+##		2016-11-02 RSB	Typo (various offset-references +2 and +3 not indented).
+##		2017-01-01 RSB	Proofed comment text using octopus/ProoferComments,
+##				and fixed errors found.
+##		2017-01-20 RSB	Fixed comment-text errors noted while diff'ing
+##				vs Colossus 249.
 
 ## Page 1337
 #          THE TFF SUBROUTINES MAY BE USED IN EITHER EARTH OR MOON CENTERED COORDINATES. THE TFF ROUTINES NEVER
@@ -40,14 +44,14 @@
 #                                                              BELOW      E:   IS USED FOR EARTH ORIGIN SCALE
 #                                                                         M:   IS USED FOR MOON  ORIGIN SCALE
 
-# TFFSW		=	119D  BIT1	# 0 = CALCTFF        1 = CALCTPER
+# TFFSW		=	119D  BIT1	0 = CALCTFF        1 = CALCTPER
 TFFDELQ		=	10D		# Q2-Q1              E: (-16)  M: (-15)
 RMAG1		=	12D		# ABVAL(RN)  M       E: (-29)  M: (-27)
-# RPER		=	14D		# PERIGEE RADIUS M   E: (-29)  M: (-27)
+# RPER		=	14D		PERIGEE RADIUS M   E: (-29)  M: (-27)
 TFFQ1		=	14D		# R.V / SQRT(MUE)    E: (-16)  M: (-15)
-# SDELF/2				# SIN(THETA) /2
+# SDELF/2				SIN(THETA) /2
 CDELF/2		=	14D		# COS(THETA) /2
-# RAPO		=	16D		# APOGEE RADIUS  M   E: (-29)  M: (-27)
+# RAPO		=	16D		APOGEE RADIUS  M   E: (-29)  M: (-27)
 NRTERM		=	16D		# TERMINAL RADIUS M  E: (-29+NR)
 					#                    M: (-27+NR)
 RTERM		=	18D		# TERMINAL RADIUS M  E: (-29)  M: (-27)
@@ -64,7 +68,7 @@ NRMAG		=	32D		# PRESENT RADIUS  M  E: (-29+NR)
 TFFX		=	34D     	#
 TFFTEM		=	36D		# TEMPORARY
 ## Page 1338
-#                                         REGISTERS S1, S2 ARE UNTOUCED BY ANY TFF SUBROUTINE
+#                                         REGISTERS S1, S2 ARE UNTOUCHED BY ANY TFF SUBROUTINE
 #                                         INDEX REGISTERS X1, X2 ARE USED BY ALL TFF SUBROUTINES. THEY ARE ESTAB-
 #                                         LISHED IN TFF/CONIC AND MUST BE PRESERVED BETWEEN CALLS TO SUBSEQUENT
 #                                         SUBROUTINES.
@@ -260,7 +264,7 @@ TFFRP/RA	DLOAD	DMP
 			TFF1/ALF	# E:(-22-2NA)  M:(-20-2NA)
 			TCDANZIG	# CLEAR OVFIND, IF ON.
 		BZE	SL*
-			MAXRA		# SET POSMAX IF ALFA=0
+			MAXRA		# SET POSMAX, IF ALFA=0
 			0 -5,2		# -5+NA
 		SL*	BOV
 			0,2
@@ -280,9 +284,9 @@ DUMPRPRA	RVQ
 # MOD BY:  RR BAIRNSFATHER
 # MOD NO:  1           MOD BY:  RR BAIRNSFATHER	     DATE:  21 MAR 67
 # MOD NO:  2           MOD BY:  RR BAIRNSFATHER	     DATE:  14 APR 67
-# MOD BY:  3           MOD BY:  RR BAIRNSFATHER	     DATE:  8JUL 67       NEAR EARTH MUE AND NEG TFF (GONEPAST)
-# MOD BY:  4           MOD BY:  RR BAIRNSFATHER	     DATE:  21 NOV 67     ADD VARIABLE MU.
-# MOD BY:  5           MOD BY:  RR BAIRNSFATHER	     DATE:  21 MAR 68     ACCEPT DIFFERENT EARTH/MOON SCALES
+# MOD NO:  3           MOD BY:  RR BAIRNSFATHER	     DATE:  8JUL 67       NEAR EARTH MUE AND NEG TFF (GONEPAST)
+# MOD NO:  4           MOD BY:  RR BAIRNSFATHER	     DATE:  21 NOV 67     ADD VARIABLE MU.
+# MOD NO:  5           MOD BY:  RR BAIRNSFATHER	     DATE:  21 MAR 68     ACCEPT DIFFERENT EARTH/MOON SCALES
 # FUNCTIONAL DESCRIPTION:      PROGRAM CALCULATES THE FREE-FALL TIME OF FLIGHT FROM PRESENT POSITION  RN  AND
 #          VELOCITY  VN  TO A RADIUS LENGTH SPECIFIED BY  RTERM  , SUPPLIED BY THE USER. THE POSITION VECTOR
 #          RN  MAY BE ON EITHER SIDE OF THE CONIC, BUT  RTERM  IS CONSIDERED ON THE INBOUND SIDE.
@@ -356,7 +360,7 @@ DUMPRPRA	RVQ
 #                 M: (-27+NR)
 #          X1                     -NR, NORM COUNT                         LEFT BY TFFCONIC
 #          TFFNP  E: (-38+2NR)	M   LCP, SEMI LATUS RECTUM, WEIGHT  NR    LEFT BY TFFCONIC
-#                 M: (-36+2N4)
+#                 M: (-36+2NR)
 #          TFFALFA  E: (26-NR)    1/M  ALFA, WEIGHT  NR                   LEFT BY TFFCONIC
 #                   M: (24-NR)
 #          TFFRTALF  E:(10+NA)    SQRT(ALFA), NORMALIZED                  LEFT BY TFFCONIC
@@ -365,9 +369,9 @@ DUMPRPRA	RVQ
 #          TFF1/ALF  E: (-22-2NA)  SIGNED SEMIMAJ AXIS, WEIGHTED BY NA    LEFT BY TFFCONIC
 #                    M: (-20-2NA)
 # DEBRIS:  QPRET,   PDL+0 ... PDL+3
-#          RTERM  E:(-29)  M(-27)  RTERM, TERMINAL RADIUS LENGTH
-#          RAPO   E:(-29)  M(-27)  PDL 16D  (=NRTERM)
-#          RPER   E:(-29)  M(-27)  PDL 14D   (=TFFQ1)
+#          RTERM  E:(-29)  M:(-27)  RTERM, TERMINAL RADIUS LENGTH
+#          RAPO   E:(-29)  M:(-27)  PDL 16D  (=NRTERM)
+#          RPER   E:(-29)  M:(-27)  PDL 14D   (=TFFQ1)
 
 ## Page 1346
 CALCTPER	SETGO			# ENTER WITH RPER  IN MPAC
@@ -474,7 +478,7 @@ TFFXTEST	DAD	PDDL		#  (ABS(DEN) TO PDL+2))  E: (-3) OR (-16)
 #					  E: (-13)  M: (-12)
 		PUSH	DSQ		# Z TO PDL+0
 		PUSH	DMP		# Z SQ TO PDL+2  E: (-26)  M: (-24)
-			TFFNP		# LC P  E: (-38+2NR)  M: (-36+NR)
+			TFFNP		# LC P  E: (-38+2NR)  M: (-36+2NR)
 		SL	SIGN
 			5
 			TFFTEM		# AFFIX SIGN FOR SDELF (ENTRY DISPLAY)
@@ -550,7 +554,7 @@ TFFEL1		DLOAD	DSU		# (ENTER WITH D/N=0 IN PDL+0)
 			TFF1/ALF	# 1/ALFA E: (-22-2NA)  M: (-20-2NA)
 			0,2		# 1/ALFA Z  E: (-11-NA)  M: (-10-NA)
 		PUSH	DMP		# TO PDL+0
-			TFFTEM		# 1/Z  E: (11)  M: (10
+			TFFTEM		# 1/Z  E: (11)  M: (10)
 		SL*	BOVB
 			0,2		# X2= -NA
 			SIGNMPAC	# IN CASE X= 1.0, CONTINUE
@@ -594,7 +598,7 @@ TFFEL1		DLOAD	DSU		# (ENTER WITH D/N=0 IN PDL+0)
 			0 -3,2
 		SL*	GOTO
 			0 -4,2
-			ENDTFF		# TFF SQRT(MU) IN MPAC E:(-145) M:(-42)
+			ENDTFF		# TFF SQRT(MU) IN MPAC E:(-45) M:(-42)
 
 ## Page 1351
 # PROGRAM NAME:      T(X)                                                 DATE:    01.17.67

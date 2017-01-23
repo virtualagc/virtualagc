@@ -5,15 +5,22 @@
 ##		It is part of the source code for the Command Module's (CM)
 ##		Apollo Guidance Computer (AGC), for Apollo 9.
 ## Assembler:	yaYUL
-## Reference:	pp. 409-414 of 1701.pdf.
+## Reference:	pp. 407-412.
 ## Contact:	Ron Burkey <info@sandroid.org>.
 ## Website:	www.ibiblio.org/apollo.
 ## Mod history:	08/10/04 RSB.	Began adapting from corresponding Luminary131
 ##				source file.
+##		2017-01-06 RSB	Page numbers now agree with those on the
+##				original harcopy, as opposed to the PDF page
+##				numbers in 1701.pdf.
+##		2017-01-15 RSB	Cross-diff'd comment text (not whitespace)
+##				vs the already-proofed corresponding Colossus
+##				237 and Comanche 55 source-code files
+##				and corrected errors found.  No differences
+##				remained afterward.
 ##
 ## The contents of the "Colossus249" files, in general, are transcribed 
-## from a scanned document obtained from MIT's website,
-## http://hrst.mit.edu/hrs/apollo/public/archive/1701.pdf.  Notations on this
+## from a scanned copy of the program listing.  Notations on this
 ## document read, in part:
 ##
 ##	Assemble revision 249 of AGC program Colossus by NASA
@@ -29,13 +36,13 @@
 ##	under NASA contract NAS 9-4065.
 ##
 ## Refer directly to the online document mentioned above for further information.
-## Please report any errors (relative to 1701.pdf) to info@sandroid.org.
+## Please report any errors (relative to the scanned pages) to info@sandroid.org.
 ##
 ## In some cases, where the source code for Luminary 131 overlaps that of 
 ## Colossus 249, this code is instead copied from the corresponding Luminary 131
 ## source file, and then is proofed to incorporate any changes.
 
-## Page 409
+## Page 407
 # GENERATION OF STEERING COMMANDS FOR DIGITAL AUTOPILOT FREE FALL MANEUVERS
 #
 # NEW COMMANDS WILL BE GENERATED EVERY ONE SECOND DURING THE MANEUVER
@@ -49,7 +56,7 @@
 		COUNT	22/KALC
 		
 NEWDELHI	CS	HOLDFLAG	# SEE IF MANEUVER HAS BEEN INTERRUPTED
-		EXTEND			# BY ASTRONAUT.
+		EXTEND			# BY ASTRONAUT
 		BZMF	NOGO	-2	# IF SO, TERMINATE KALCMANU
 NEWANGL		TC	INTPRET
 		AXC,1	AXC,2
@@ -80,12 +87,12 @@ INCRDCDU	TS	KSPNDX
 		CA	NCDU		# NEW DESIRED CDU ANGLES
 		EXTEND
 		INDEX	KSPNDX
-		MSU	BCDU		# INITIAL S/C ANGLE OR PRVIOUS DESIRED
+		MSU	BCDU		# INITIAL S/C ANGLE OR PREVIOUS DESIRED
 		EXTEND			# CDU ANGLES
 		MP	DT/TAU
 		INDEX	KDPNDX
-		DXCH	DELCDUX		# ANGEL INCREMENTS TO BE ADDED TO
-## Page 410
+		DXCH	DELCDUX		# ANGLE INCREMENTS TO BE ADDED TO
+## Page 408
 		INDEX	KSPNDX		# DCDU EVERY TENTH SEC
 		CA	NCDU		# BY LEM DAP
 		INDEX	KSPNDX
@@ -135,11 +142,11 @@ DT/TAU		DEC	.1
 MANUSTAT	EXIT			# INITIALIZATION ROUTINE
 		EXTEND			# FOR AUTOMATIC MANEUVERS
 		DCA	TIME2
-		DAS	TM		# TM+TO		MANEUVER COMPLETION TIME
+		DAS	TM		# TM+T0		MANEUVER COMPLETION TIME
 		EXTEND
-## Page 411
+## Page 409
 		DCS	ONESEC
-		DAS	TM		# (TM+TO)-1
+		DAS	TM		# (TM+T0)-1
 		INHINT
 		CS	ONE		# ENABLE AUTOPILOT TO PERFORM
 		TS	HOLDFLAG	# AUTOMATIC MANEUVERS
@@ -186,7 +193,7 @@ MANUCALL	TC	WAITLIST
 		CAF	ONESEC +1	# INCREMENT TIME FOR NEXT UPDATE
 		ADS	NEXTIME
 		TCF	ENDOFJOB
-## Page 412
+## Page 410
 		
 UPDTCALL	CAF	PRIO26		# CALL FOR UPDATE
 		TC	FINDVAC		# OF STEERING COMMANDS
@@ -195,7 +202,7 @@ UPDTCALL	CAF	PRIO26		# CALL FOR UPDATE
 
 		TC	TASKOVER
 		
-## Page 413
+## Page 411
 # ROUTINE FOR TERMINATING AUTOMATIC MANEUVERS
 
 MANUSTOP	TC	STOPYZ
@@ -204,13 +211,13 @@ MANUSTOP	TC	STOPYZ
 ENDROLL		CA	CPHI	
 		TS	CDUXD		# SET CDUXD TO THE COMMANDED OUTER GIMBAL
 		TC	STOPRATE
-ENDMANU		CA	ATTPRIO		# RESTORE USERS PRIO
+ENDMANU		CA	ATTPRIO		# RESTORE USERS PRIORITY
 		TS	NEWPRIO
 		
 		CA	ZERO		# ZERO ATTCADR
 		DXCH	ATTCADR
 		
-		TC	SPVAC		# RETURN TO USER
+		TC	SPVAC		# RETURN TO USER OF GOMANUR
 		
 		TC	TASKOVER
 		
@@ -246,7 +253,7 @@ ZEROERROR	CA	CDUX		# PICK UP CDU ANGLES AND STORE IN
 		TS	CDUZD
 		TC	Q
 
-## Page 414
+## Page 412
 LOADCDUD	CA	CPHI		# STORE TERMINAL ANGLES INTO
 		TS	CDUXD		# COMMAND ANGLES
 LOADYZ		CA	CTHETA

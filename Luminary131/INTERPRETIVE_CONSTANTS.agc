@@ -8,13 +8,16 @@
 ##		that the code format has been changed to conform to the
 ##		requirements of the yaYUL assembler rather than the
 ##		original YUL assembler.
-## Reference:	pp. 1099-1100 of 1729.pdf.
+## Reference:	pp. 1094-1095
 ## Contact:	Ron Burkey <info@sandroid.org>.
 ## Website:	www.ibiblio.org/apollo/index.html
 ## Mod history:	05/31/03 RSB.	Began transcribing.
 ##		05/14/05 RSB	Corrected website reference above
+##		2017-01-06 RSB	Page numbers now agree with those on the
+##				original harcopy, as opposed to the PDF page
+##				numbers in 1701.pdf.
 
-## Page 1099
+## Page 1094
 		SETLOC	INTPRET1
 		BANK
 
@@ -31,7 +34,7 @@ DPHALF		=	UNITX
 DPPOSMAX	OCT	37777
 		OCT	37777
 
-## Page 1100
+## Page 1095
 # INTERPRETIVE CONSTANTS IN THE OTHER HALF-MEMORY
 
 		SETLOC	INTPRET2

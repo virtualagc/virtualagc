@@ -15,10 +15,12 @@
 ##		2010-01-16 RSB	Commented them out again, to eliminate compile-time warnings.
 ##		2010-02-20 RSB	Un-##'d this header.
 ##		2011-05-07 JL	Removed comment.
+##		2017-01-04 RSB	Proofed comment text using octopus/ProoferComments
+##				and fixed errors found.
+##		2017-01-21 RSB	Double-checked comment text by direct visual comparison
+##				to scanned page.
 
 ## Page 36
-# ABSOLUTE LOCATIONS FOR UPDATES
-
 # ECADR			MNEMONIC
 # -----			--------
 		=ECADR	UPSVFLAG	# CSM/LM STATE VECTOR UPDATE

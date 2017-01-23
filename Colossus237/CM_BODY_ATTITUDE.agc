@@ -11,6 +11,8 @@
 ## Mod history:	2010-05-30 OH	Adapted from corresponding Colossus 249 file.
 ##		2010-12-04 JL	Remove Colossus 249 header comments. Change to double-has page numbers.
 ##		2011-02-07 JL	Minor fixes.
+##		2017-01-01 RSB	Proofed comment text using octopus/ProoferComments,
+##				and fixed errors found.
 
 ## Page 833
 		BANK	35
@@ -50,7 +52,7 @@ CM/POSE		TC	INTPRET		# COME HERE VIA AVEGEXIT.
 			S1		# UN FOR THE END OF THE TERMINAL PHASE.
 SPVQUIT		DEC	.019405		# 1000/ 2 VS
 		TIX,1	VLOAD		# IF V-VQUIT POS, BRANCH.
-			CM/POSE2	# SAME UYA IN OLDUYA
+			CM/POSE2	# SAVE UYA IN OLDUYA
 			OLDUYA		# OTHERWISE CONTINUE TO USE OLDUYA.
 CM/POSE2	STORE	UYA/2		#                          REF COORDS
 
@@ -156,7 +158,7 @@ CM/TRIO		STODL	24D
 		STOVL	SINTH		# -SIN(ALFA)/4
 		DOT			# UL/2 FROM PDL 0
 			UBZ/2
-		STCALL	COSTH		# COS(ALFA)/2
+		STCALL	COSTH		# COS(ALFA)/4
 			ARCTRIG
 		STOVL	8D		# -(ALFA/180) /2
 			UNITR		# UR/2                     REF COORDS
@@ -169,7 +171,7 @@ CM/TRIO		STODL	24D
 		TLOAD	EXIT		# ANGLES IN MPAC IN THE ORDER
 #					  -( (ROLL, BETA, ALFA) /180)/2
 			6D		# THESE VALUES CORRECT AT PIPUP TIME.
-
+# SPACER
 ## Page 837
 # BASIC SUBROUTINE TO UPDATE ATTITUDE ANGLES
 

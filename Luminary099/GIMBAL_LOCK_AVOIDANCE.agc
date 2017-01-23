@@ -12,6 +12,8 @@
 ##				Luminary131 file, using page 
 ##				images from Luminary 1A.
 ##		2010-12-31 JL	Fixed page number comment.
+##		2016-12-14 RSB	Proofed text comments with octopus/ProoferComments
+##				but no errors found.
 ##
 ## This source code has been transcribed or otherwise adapted from
 ## digitized images of a hardcopy from the MIT Museum.  The digitization

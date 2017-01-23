@@ -10,6 +10,10 @@
 ## Pages:	1025-1036
 ## Mod history:	2009-05-13 RSB	Adapted from the Colossus249/ file of the
 ##				same name, using Comanche055 page images.
+##		2016-12-21 RSB	Proofed comment text using octopus/ProoferComments
+##				and corrected the errors found.
+##		2017-01-07 RSB	Fixed comment errors detected in cross-diff vs
+##				Colossus 237 and Colossus 249.
 ##
 ## This source code has been transcribed or otherwise adapted from digitized
 ## images of a hardcopy from the MIT Museum.  The digitization was performed
@@ -88,11 +92,11 @@ MINTAU		DEC	0
 		DEC	0
 		
 ## Page 1027
-# CALCULATION OF ATTITUDE ERRORS:
-#	_    *     _      _          _
+# CALCULATION OF ATTITUDE ERRORS-
+#	-    *     -      -          -
 #	AK = AMGB (CDUX - THETADX) + BIAS
 #
-# I.E.,	*AK *   * 1        SIN(PSI)        0	** CDUX - THETADX *    *BIAS *
+# IE	*AK *   * 1        SIN(PSI)        0	** CDUX - THETADX *    *BIAS *
 #	*   *   *                               **                *    *     *
 #	*AK1* = * 0   COS(PSI)COS(PHI)  SIN(PHI)** CDUY - THETADY *  + *BIAS1*
 #	*   *   *                               **                *    *     *
@@ -184,7 +188,7 @@ ENDDAMP		TS	HOLDFLAG	# SET HOLDFLAG +0
 # DETERMINE THE LOCATION OF THE RATE ERROR AND THE ATTITUDE ERROR RELATIVE TO THE SWITCHING LOGIC IN THE PHASE
 # PLANE.
 #
-# COMPUTE THE CHANGE IN RATE CORRESPONDING TO THE ATTITUDE ERROR NECESSARY TO DRIVE THE S/C INTO THE
+# COMPUTE THE CHANGE IN RATE CORRESPONDING TO THE ATTITUDE ERROR NECESSARY TO DRIVE THE THE S/C INTO THE
 # APPROPRIATE DEADZONE.
 #
 #                                     .
@@ -192,17 +196,17 @@ ENDDAMP		TS	HOLDFLAG	# SET HOLDFLAG +0
 #        WL+H                         .
 # *********************************   .					***** SWITCH LINES ENCLOSING DEADZONES
 #   R23  WL                        *  .
-# ----------------------------------* .					----- DESIRED RATE LINES
+# --------------------------------- * .					----- DESIRED RATE LINES
 #   R23  WL-H       -                *.
 # ****************** -                .					R20, R21, R22, ETC REGIONS IN PHASE
 #                   * -               .* R18      R20       R21		PLANE FOF COMPUTING DESIRED RESPONSE
 #                    *                . *
 #                     *-              .  *
 #   R22             R24*-    R23      .   *
-#                       *             .    *
+#                       *-            .    *
 #                        *            .     *
 #                         + -ADB      .      * AF              ATTITUDE
-#  ........................+--+---------------+--+........................
+# .........................+--+---------------+--+........................
 #                           AF *      .     +ADB  +             ERROR
 #                               *     .            *
 #                                *    .            -*
@@ -211,10 +215,11 @@ ENDDAMP		TS	HOLDFLAG	# SET HOLDFLAG +0
 #                                   * .                *
 #                                    *.               - *
 #                                     .                - *****************
-#                                     .*-
+#                                     .*                -
 #                                     . * --------------------------------
-#                                     .
-#                                     .
+#                                     .  *
+#                                     .   ********************************
+#				      .
 #			FIG. 1	PHASE PLANE SWITCHING LOGIC
 #
 # CONSTANTS FOR JET SWITCHING LOGIC
@@ -436,7 +441,7 @@ J24		CS	AERR
 		DAS	KMPAC
 		
 ## Page 1035
-# COMPUTE THE JET ON TIME NECESSARY TO ACCOMPLISH THE DESIRED CHANGE IN RATE, I.E.,
+# COMPUTE THE JET ON TIME NECESSARY TO ACCOMPLISH THE DESIRED CHANGE IN RATE, IE
 #
 #	     T  = J/M(DELTA W)
 #	      J
@@ -444,10 +449,10 @@ J24		CS	AERR
 #	DELTA W = DESIRED CHANGE IN S/C ANGULAR RATE AS DETERMINED BY THE
 #		  SWITCHING LOGIC, AT THIS POINT STORED IN KMPAC.
 #
-#	    J/M = S/C INERTIA TO TORQUE RATIO SCALED BY
+#	    J/M = S/C INERTIA TO TORQUE 9ATIO SCALED BY
 #		  	(57.3/450)(B24/1600)(1/.8)
 #		  FOR 1 JET OPERATION  (M = 700 FT-LB).
-#		  I.E., J/M = J(SLUG-FTFT) x 0.00000085601606
+#		  IE J/M = J(SLUG-FTFT) X 0.00000085601606
 #
 #	          THE CORRESPONDING COMPUTER VARIABLES ESTABLISHED BY
 #		  KEYBOARD ENTRY ARE
@@ -455,7 +460,7 @@ J24		CS	AERR
 #			J/M1 (PITCH)
 #			J/M2 (YAW)
 #
-#	     T  = JET-ON TIME    SCALED 16384/1600 SEC
+#	     T  = JET ON-TIME    SCALED 16384/1600 SEC
 #	      J
 #
 #	          THE COMPUTER VARIABLES ARE
@@ -491,7 +496,7 @@ ZEROCMDS	CAF	ZERO
 		TS	TAU1
 		TS	TAU2
 T6PROG		EXTEND			# WHEN THE ROTATION COMMANDS (TAUS)
-		DCA	JETADDR		# HAVE BEEN DETERINED
+		DCA	JETADDR		# HAVE BEEN DETERMINED
 		DXCH	T5LOC		# RESET T5LOC FOR PHASE3
 		TCF	RESUME
 		

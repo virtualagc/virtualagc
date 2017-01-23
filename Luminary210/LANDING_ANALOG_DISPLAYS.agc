@@ -14,7 +14,9 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2016-11-17 JL   Created from Luminary131 version.
 ##              2016-11-27 HG   Transcribed
-##              2016-12-12 HG   Fix opernand modifier none -> +4
+##              2016-12-12 HG   Fix operannd modifier none -> +4
+##		2016-12-25 RSB	Comment-text proofed using ProoferComments
+##				and corrected errors found.
 
 ## Page 895
                 BANK            21
@@ -24,9 +26,9 @@
                 EBANK=          END-E7
                 COUNT*          $$/R10
 
-# ***************************************************************************************************************
-# LANADISP:  DISPLAY INERTIAL DATA ROUTINE FOR DESCENT AND ABORTS                           THIS VERSION BY EYLES
-# ***************************************************************************************************************
+# ****************************************************************************************************************
+# LANADISP:  DISPLAY INERTIAL DATA ROUTINE FOR DESCENT AND ABORTS                            THIS VERSION BY EYLES
+# ****************************************************************************************************************
 
 LANADISP        LXCH            PIPCTR1                 # UPDATE TBASE2 AND PIPCTR SIMULTANEOUSLY
                 CS              TIME1
@@ -37,9 +39,9 @@ LANADISP        LXCH            PIPCTR1                 # UPDATE TBASE2 AND PIPC
                 CCS             A
                 TCF             DISPRSET        +1      # NO:   GO RESET
 
-# ***************************************************************
+# ************************************************************************
 # COMPUTE VELOCITY VECTOR
-# ***************************************************************
+# ************************************************************************
 
 # DO EVERYTHING POSSIBLE BEFORE READING PIPAS.
 
@@ -100,7 +102,7 @@ LANADISP        LXCH            PIPCTR1                 # UPDATE TBASE2 AND PIPC
                 MP              LANAKPIP
 QUARDUMP        DAS             VVECTZ                  # TAG IS FOR EDITS
 
-# FINALLY, ADD IN CONTRIBUTIONS OF GRAVITY AND PIPA BIAS
+# FINALLY, ADD IN CONTRIBUTIONS OF GRAVITY AND PIPA BIAS.
 
                 CA              G-VBIASX                # G-VBIASX IS IN UNITS OF 2(-9) M/CS/CS
                 EXTEND
@@ -117,11 +119,11 @@ QUARDUMP        DAS             VVECTZ                  # TAG IS FOR EDITS
                 MP              DT
                 DAS             VVECTZ                  # VVECTZ IN UNITS OF 2(5) M/CS
 
-# **************************************************************************
-# COMPUTE ALTITUDE AND ALTITUDE RATE
+# ************************************************************************
+# COMPUTE ALTITUDE AND ALTITUDE-RATE
 
 ## Page 897
-# **************************************************************************
+# ************************************************************************
 ALTSTUFF        CA              RUNITX                  # COMPUTE RADIAL VELOCITY
                 EXTEND
                 MP              VVECTX
@@ -251,9 +253,9 @@ ALTROUT         CS              BIT2                    # SIGNIFY ALTITUDE
                 EXTEND
                 WOR             CHAN14
 
-# *********************************************************************
+# ************************************************************************
 # SEND OUT FORWARD AND LATERAL VELOCITIES
-# *********************************************************************
+# ************************************************************************
 
                 TC              CROSCOMP                # FIRST CALL SUBROUTINE TO COMPUTE THEM
 
@@ -310,9 +312,9 @@ LATVOUT         CS              LATVMETR                # SUBTRACT METER INDICAT
 
 LANADEND        TC              TASKOVER
 
-# *****************************************************************************
+# ************************************************************************
 # SUBROUTINE TO COMPUTE FORWARD AND LATERAL VELOCITIES
-# *****************************************************************************
+# ************************************************************************
 
 #     THE SCALARS VHY AND VHZ, COMPUTED NEXT, ARE THE VELOCITIES ALONG UNIT VECTORS UHYP AND UHZP. UHYP NORMAL
 # TO THE PRE-PDI ORBITAL PLANE, UHZP IN TURN NORMAL TO UHYP AND THE POSITION VECTOR.  NOW SINCE FOR THE "LANDING
@@ -413,13 +415,13 @@ APSLAD          TS              FORVTEMP                # DURING ASCENT AND ABOR
                 DXCH            LATVEL
                 EXTEND                                  # ADD SURFACE VELOCITY BACK IN SO APS
                 DCA             VSURFACE        +2      #   LATVEL DISPLAY WILL BE IN TRUE
-                DAS             LATVEL                  #   STABLE MEMBER COORDINATES
+                DAS             LATVEL                  #   STABLE-MEMBER COORDINATES
 
                 TCF             CROSSOUT                # REJOIN THE MAINSTREAM
 
-# ***************************************************************************************
+# ************************************************************************
 # LANDING ANALOG DISPLAYS INITIALIZATION
-# ***************************************************************************************
+# ************************************************************************
 
 DISPINIT        TC              CROSCOMP               # FIRST COMPUTE BUT NOT OUTPUT VELOCITIES
 
@@ -451,9 +453,9 @@ INTLZE          CAF             BIT2                    # ENABLE RR ERROR COUNTE
                 ADS             IMODES33
                 TC              TASKOVER
 
-# *****************************************************************************
+# ************************************************************************
 # LANDING ANALOG DISPLAYS RESET ROUTINE
-# *****************************************************************************
+# ************************************************************************
 
 DISPRSET        TC              CROSCOMP                # FIRST COMPUTE BUT NOT OUTPUT VELOCITIES
 
@@ -475,30 +477,30 @@ DISPRSET        TC              CROSCOMP                # FIRST COMPUTE BUT NOT 
                 TS              IMODES33
                 TCF             LANADEND
 
-# *******************************************************************************
-# CONSTANTS FOR LANDING ANALOG DISPLAY
-# *******************************************************************************
+# ************************************************************************
+# CONSTANTS FOR LANDING ANALOG DISPLAYS
+# ************************************************************************
 
 # CONSTANTS ON A-CARDS ARE FOUND IN THE CONTROLLED CONSTANTS SECTION
 
 ## Page 904
-# LANAKPIP        DEC             .0512                   # SCALES PIPAS TO UNITS OF 2(5) M/CS
+# LANAKPIP        DEC             .0512                 SCALES PIPAS TO UNITS OF 2(5) M/CS
 
-# MAXVEL          OCT             00466                   # A98.645 F/S IN UNITS OF 2(5) M/CS
+# MAXVEL          OCT             00466                 A98.645 F/S IN UNITS OF 2(5) M/CS
 
-# MAXDBITS        OCT             01034                   # ABOUT 300 F/S
+# MAXDBITS        OCT             01034                 ABOUT 300 F/S
 
-# VELCONV         DEC             .03594                  # SCALES VEL AT ONE M/CS TO .5571 F/S/BIT
+# VELCONV         DEC             .03594                SCALES VEL AT ONE M/CS TO .5571 F/S/BIT
 
-# ALTRCONV        DEC             .16020                  # SCALES ALTR AT 2(2) M/CS TO .5 F/S/BIT
+# ALTRCONV        DEC             .16020                SCALES ALTR AT 2(2) M/CS TO .5 F/S/BIT
 
-# ALTCONV         DEC             .69954                  # SCALES ALTITUDE AT 2(15) M TO 9.38 F/BIT
+# ALTCONV         DEC             .69954                SCALES ALTITUDE AT 2(15) M TO 9.38 F/BIT
 
-BITSET          =               PRIO6                   # CROSS-POINTER DRIVE BITS
+BITSET          =               PRIO6                	# CROSS-POINTER DRIVE BITS
 
-# **************************************************************************
+# ************************************************************************
 # SUBROUTINES
-# **************************************************************************
+# ************************************************************************
 LADLIMIT        TS              ITEMP1
                 CAF             ZERO
                 EXTEND
@@ -512,6 +514,6 @@ LADLIMIT        TS              ITEMP1
                 CS              ITEMP1
                 TC              Q
 
-# ****************************************************************************
+# ************************************************************************
 # THE END OF THE LANDING ANALOG DISPLAYS
-# ****************************************************************************
+# ************************************************************************

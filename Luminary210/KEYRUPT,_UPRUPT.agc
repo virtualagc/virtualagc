@@ -16,6 +16,8 @@
 ##              2016-11-23 AS   Transcribed
 ##              2016-11-27 HG   fix opcode  CSS   ->  CCS
 ##                                  operand lOW5  ->  LOW5 
+##		2016-12-26 RSB	Comment-text proofed using ProoferComments
+##				and corrected errors found.
 
 
 ## Page 1335
@@ -44,7 +46,7 @@ ACCEPTUP        CAF                     CHRPRIO         # (NOTE: RUPTREG4 = KEYT
 
                 CA                      RUPTREG4
                 INDEX                   LOCCTR
-                TS                      MPAC            # LEAVE 5 BIT KEY CODE IN MPAC FOR CHARIN
+                TS                      MPAC            # LEAVE 5 BIT KEY CDE IN MPAC FOR CHARIN
                 TC                      RESUME
 
 ## Page 1336
@@ -123,7 +125,7 @@ ELRCODE         OCT                     22
 # THIS INDICATION WILL BE TRANSFERRED TO THE GROUND BY THE DOWNLINK WHICH DOWNLINKS ALL FLAGWORDS.
 # WHEN UPLINK ACTIVITY IS LOCKED OUT ,IT CAN BE ALLOWED WHEN THE GROUND UPLINKS AND 'ERROR RESET' CODE.
 # (IT IS RECOMMENDED THAT THE 'ERROR LIGHT RESET' CODE IS PRECEEDED BY 16 BITS THE FIRST OF WHICH IS 1 FOLLOWED
-# BY 15 ZEROS.  THIS WILL ELIMINATE EXTRANEOUS BITS FROM INLINK WHICH MAY HAVE BEEN LEFT OVER FROM THE ORIGINAL
-# FAILURE).
+# BY 15 ZEROES. THIS WILL ELIMINATE EXTRANEOUS BITS FROM INLINK WHICH MAY HAVE BEEN LEFT OVER FROM THE ORIGINAL
+# FAILURE)
 #
 # UPLINK ACTIVITY IS ALSO ALLOWED(UNLOCKED) DURING FRESH START WHEN FRESH START SETS BIT4 OF FLAGWRD7 = 0.

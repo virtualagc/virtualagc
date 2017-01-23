@@ -5,27 +5,17 @@
 ##		It is part of the source code for the Lunar Module's (LM)
 ##		Apollo Guidance Computer (AGC) for Apollo 13.
 ## Assembler:	yaYUL
-## Reference:	pp. 1094-1098 of 1729.pdf.
+## Reference:	pp. 1089-1093
 ## Contact:	Ron Burkey <info@sandroid.org>.
 ## Website:	www.ibiblio.org/apollo/index.html
 ## Mod history:	04/23/03 RSB.	Began.
 ##		05/14/05 RSB	Corrected website reference above.
 ##		2010-10-25 JL	Indentation fixes.
-##
-## The contents of the "Luminary131" files, in general, are
-## transcribed from a scanned document obtained from MIT's website,
-## http://hrst.mit.edu/hrs/apollo/public/archive/1729.pdf.  Notations on this
-## document read, in part:
-##
-##	NASA Apollo LUMINARY 131 (1C) Program Source Code Listing.
-##	MIT Instrumentation/Draper Laboratory -- 19 December 1969, 1742 pages.
-##	This listing contains the flight program for the Lunar Module 
-##	as created by MIT's Draper Lab for the Apollo 13/14 moon missions.
-##
-## Refer directly to the online document mentioned above for further information.
-## Please report any errors (relative to 1729.pdf) to info@sandroid.org.
+##		2017-01-06 RSB	Page numbers now agree with those on the
+##				original harcopy, as opposed to the PDF page
+##				numbers in 1701.pdf.
 
-## Page 1094
+## Page 1089
 		BLOCK	02
 		COUNT*	$$/FCONS
 
@@ -76,7 +66,7 @@ ELEVEN		DEC	11
 OCT15		OCT	15
 # R1D1		OCT	16		# PINBALL
 LOW4		OCT	17
-## Page 1095
+## Page 1090
 # BIT5		OCT	00020
 # NC1		OCT	21		# PINBALL
 # VD1		OCT	23		# PINBALL
@@ -127,7 +117,7 @@ C5/2		DEC	.0363551	#		   	(OCTAL 01124)
 V05N09		VN	0509		# (SAME AS OCTAL 1211)
 OCT1400		OCT	01400
 V06N22		VN	0622
-## Page 1096
+## Page 1091
 # MID5		OCT	1740		# PINBALL
 BITS2-10	OCT	1776
 LOW10		OCT	1777
@@ -180,7 +170,7 @@ PRIO32		OCT	32000
 PRIO33		OCT	33000
 PRIO34		OCT	34000
 #		OCT	34034		# T4RUPT	RELTAB +6D		
-## Page 1097
+## Page 1092
 PRIO35		OCT	35000
 PRIO36		OCT	36000
 PRIO37		OCT	37000
@@ -216,7 +206,7 @@ NEG3		DEC	-3
 NEG2		OCT	77775
 NEGONE		DEC	-1
 
-## Page 1098
+## Page 1093
 
 # DEFINED BY EQUALS
 

@@ -5,16 +5,22 @@
 ##		It is part of the source code for the Command Module's (CM)
 ##		Apollo Guidance Computer (AGC), for Apollo 9.
 ## Assembler:	yaYUL
-## Reference:	Starts on p. 947 of 1701.pdf.
+## Reference:	Starts on p. 943.
 ## Contact:	Ron Burkey <info@sandroid.org>.
 ## Website:	www.ibiblio.org/apollo/index.html
 ## Mod history:	08/23/04 RSB.	Began transcribing.
 ##		05/14/05 RSB	Corrected website reference above.
 ##		2010-10-24 JL	Indentation fixes.
+##		2017-01-06 RSB	Page numbers now agree with those on the
+##				original harcopy, as opposed to the PDF page
+##				numbers in 1701.pdf.
+##		2017-01-20 RSB	Cross-diff'd comment text (not whitespace)
+##				vs the already-proofed corresponding Colossus
+##				237 and Comanche 55 source-code files
+##				and corrected errors found.
 ##
 ## The contents of the "Colossus249" files, in general, are transcribed 
-## from a scanned document obtained from MIT's website,
-## http://hrst.mit.edu/hrs/apollo/public/archive/1701.pdf.  Notations on this
+## from a scanned copy of the program listing.  Notations on this
 ## document read, in part:
 ##
 ##	Assemble revision 249 of AGC program Colossus by NASA
@@ -30,13 +36,13 @@
 ##	under NASA contract NAS 9-4065.
 ##
 ## Refer directly to the online document mentioned above for further information.
-## Please report any errors (relative to 1701.pdf) to info@sandroid.org.
+## Please report any errors (relative to the scanned pages) to info@sandroid.org.
 ##
 ## In some cases, where the source code for Luminary 131 overlaps that of 
 ## Colossus 249, this code is instead copied from the corresponding Luminary 131
 ## source file, and then is proofed to incorporate any changes.
 
-## Page 947
+## Page 943
 # NAME		STROKE TEST PACKAGE		(INCLUDING INITIALIZATION PACKAGE)
 # ORIGINAL CODING BY OLSSON			LOG SECTION....STROKE TEST PACKAGE
 # MOD BY ENGEL					DATE....21 MARCH, 1967
@@ -46,7 +52,7 @@
 #	STRKTSTI (STROKE TEST INITIALIZATION) IS CALLED AS A JOB BY VB68.
 #		IT INITIALIZES ALL ERASABLES REQD FOR A STROKE TEST, AND
 #		THEN TESTS FOR AN 80MS DAP.  IF 80MS IT SETS STROKER = ESTROKER
-#		FOR AN IMMEDIATE STROKE TEST, OTEHRWISE IT MERELY ENABLES
+#		FOR AN IMMEDIATE STROKE TEST, OTHERWISE IT MERELY ENABLES
 #		A STROKE TEST BY SETTING STROKER TO -0.  THE STROKE TEST
 #		THEN AWAITS SWITCHOVER TO THE 80MS DAP WHEREUPON IT IS
 #		ENABLED AFTER AN ADDITIONAL 4 SECOND DELAY TO AVOID
@@ -55,10 +61,10 @@
 #	HACK (STROKE TEST) GENERATES THE WAVEFORM BY DUMPING PULSE BURSTS
 #		OF PROPER SIGN AND IN PROPER SEQUENCE DIRECTLY INTO
 #		TVCPITCH, WORKING IN CONJUNCITON WITH BOTH PITCH AND YAW
-#		TVC DAPS, WITH INTERMEDIAT WAITLIST CALLS.  NOTE, HOWEVER
+#		TVC DAPS, WITH INTERMEDIATE WAITLIST CALLS.  NOTE, HOWEVER
 #		THAT THE STROKE TEST IS PERFORMED ONLY IN THE PITCH AXIS.
 #		AN EXAMPLE WAVEFORM IS GIVEN BELOW, TO DEMONSTRATE STROKE-
-#		TEST PARAMETER SELECTION.
+#		TEST PARAMETER SELECTION
 #	RESTARTS CAUSE TEST TO BE TERMINATED.  ANOTHER V68 REQD IF TEST
 #		IS TO BE RE-RUN.
 #	PULSE BURST SIZE IS PAD-LOADED (ESTROKER) SO THAT AMPLITUDE OF
@@ -69,11 +75,11 @@
 #
 # CALLING SEQUENCE....
 #	EXTENDED VERB 68 SETS UP STRKTSTI JOB
-#	PITCH AND YAW TVCDAPS, FINDING STROKER NON-ZERO, DO A "TC HACK"
-#	AN INTERNALLY-GENERATED WAITLIST CALL ENTERS AT "HACKWLST"
+#	PITCH AND YAW TVCDAPS, FINDING STROKER NON-ZERO, DO A ..TC HACK..
+#	AN INTERNALLY-GENERATED WAITLIST CALL ENTERS AT ..HACKWLST..
 #
 # NORMAL EXIT MODES....
-#	TC BUNKER ("Q" IF ENTRY FROM DAP, "TCTSKOVR" IF FROM WAITLIST) LIST
+#	TC BUNKER (..Q.. IF ENTRY FROM DAP, ..TCTSKOVR.. IF FROM WAITLIST) LIST
 #
 # SUBROUTINES CALLED....
 #	WAITLIST
@@ -86,14 +92,14 @@
 #	STROKER, CADDY, REVS, CARD, N
 #
 # OUTPUT....
-#	STRKTSTI....INITIALIZATION FOR STROKE TEST
-#	HACK, HACKWLST....PULSE BURSTS INTO TVCPITCH VIA "ADS"
+#	STRKTSTI...INITIALIZATION FOR STROKE TEST
+#	HACK, HACKWLST...PULSE BURSTS INTO TVCPITCH VIA..ADS..
 #			  RESETS STROKER = +0 WHEN TEST COMPLETED
 #
 # DEBRIS....
 #	N = CADDY = +0, CARD = -0, REVS = -1
 #	BUNKER
-## Page 948
+## Page 944
 #
 # EXAMPLE STROKE TEST WAVE FORM, DEMONSTRATING PARAMETER SELECTION
 # NOTE....THIS IS NOT THE OFFICIAL WAVEFORM....
@@ -101,7 +107,7 @@
 #        **              **
 #        **              **
 #        **              **		EXAMPLE WAVEFORM (EACH * REPRESENTS
-#       *  *            *  *		  (85.41 ARCSEC OF ACTUATOR CMD)
+#       *  *            *  *		  85.41 ARCSEC OF ACTUATOR CMND)
 #       *  *            *  *
 #       *  *            *  *
 #      *    *          *    *          **      **      **      **      **
@@ -110,7 +116,7 @@
 #     *      *        *      *        *  *    *  *    *  *    *  *    *  *    **  **  **  **  **
 #     *      *        *      *        *  *    *  *    *  *    *  *    *  *    **  **  **  **  **
 #     *      *        *      *        *  *    *  *    *  *    *  *    *  *    **  **  **  **  **
-# ----------------------------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------------------------------
 #             *      *        *      *    *  *    *  *    *  *    *  *    *  *  **  **  **  **  **
 #             *      *        *      *    *  *    *  *    *  *    *  *    *  *  **  **  **  **  **
 #             *      *        *      *    *  *    *  *    *  *    *  *    *  *  **  **  **  **  **
@@ -129,20 +135,20 @@
 #	FCARD	 = +3		(NUMBER OF SETS)
 #	ESTROKER = +3		(PULSE BURST SIZE, SC.AT 85.41 ARCSEC/BIT)
 #
-#	SET1:
+#	SET1..
 #		FREVS	= +3	(NUMBER REVERSALS MINUS 1)
 #		FCADDY	= +4	(NUMBER OF PULSE BURSTS IN 1/2 AMPLITUDE)
-#	SET2:
+#	SET2..
 #		FCARD1	= +9	(NUMBER REVERSALS MINUS 1)
 #		FCARD4	= +2	(NUMBER OF PULSE BURSTS IN 1/2 AMPLITUDE)
-#	SET3:
+#	SET3..
 #		FCARD2	= +9	(NUMBER REVERSALS MINUS 1)
 #		FCARD5	= +1	(NUMBER OF PULSE BURSTS IN 1/2 AMPLITUDE)
-#	SET4:
-#		FCARD3	= +0	(NUMBER OF REVERSALS MINUS 1)
-#		FCARD6	= +0	(NUMBER OF PULSE BURSTS IN 1/2 AMPLUTUDE)
+#	SET4..
+#		FCARD3	= +0	(NUMBER REVERSALS MINUS 1)
+#		FCARD6	= +0	(NUMBER OF PULSE BURSTS IN 1/2 AMPLITUDE)
 
-## Page 949
+## Page 945
 # STROKE TEST INITIALIZATION PACKAGE (AS A JOB, FROM VERB 68)
 
 		BANK	17
@@ -184,7 +190,7 @@ TSTINIT		CS	FCADDY		# NORMAL ENTRY FROM STRKTSTI
 		
 		TC	Q		# RETURN TO STRKTSTI+1 (OR CHKSTRK+2 OR +4)
 
-## Page 950
+## Page 946
 # THE OFFICIAL STROKE TEST WAVEFORM (3 JAN, 1967) CONSISTS OF FOUR STROKE SETS, AS FOLLOWS....
 #
 #	SET 1...10 BURSTS IN 1/2 AMP,   4 REVERSALS
@@ -202,8 +208,8 @@ FCARD1		DEC	5		# NO. REVERSALS MINUS 1, SET2........(  5)
 FCARD2		DEC	9		# 			    3........(  9)
 FCARD3		DEC	13		#                           4........( 13)
 FCARD4		DEC	6		# NO. PULSE BURSTS IN 1/2 AMP, SET2..(+ 6)
-FCARD5		DEC	5		#                                 3..(+ 5)
-FCARD6		DEC	4		#                                 4..(+ 4)
+FCARD5		DEC	5		#                              SET3..(+ 5)
+FCARD6		DEC	4		#                              SET4..(+ 4)
 
 20MS		=	BIT2
 
@@ -214,7 +220,7 @@ FCARD6		DEC	4		#                                 4..(+ 4)
 HACK		EXTEND			# ENTRY (IN T5 RUPT) FROM TVCDAPS
 		QXCH	BUNKER		# SAVE Q FOR DAP RETURN
 		
-		CAF	20MS		# 2DAPSx2(PASSES/DAP)x2(CS/PASS)=8CS=TVCDT
+		CAF	20MS		# 2DAPSX2(PASSES/DAP)X2(CS/PASS)=8CS=TVCDT
 		TC	WAITLIST
 		EBANK=	BUNKER
 		2CADR	HACKWLST
@@ -231,14 +237,14 @@ HACKWLST	CAF	TCTSKOVR	# ENTRY FROM WAITLIST
 		EXTEND
 		WOR	CHAN14
 		INCR	CADDY		# COUNT DOWN THE NO. BURSTS, THIS SLOPE
-## Page 951
+## Page 947
 		CS	CADDY
 		EXTEND
 		BZMF	+2
 		TC	BUNKER		# EXIT, WHILE ON A SLOPE
 		CCS	REVS
 		TCF	REVUP		# POSITIVE REVS
-		TCF	REVUP +4	# FINAL REVERSAL, THE SET
+		TCF	REVUP +4	# FINAL REVERSAL, THIS SET
 		
 		INCR	CARD		# NEGATIVE REVS SET LAST PASS, READY FOR
 		CS	CARD		#	THE NEXT SET.  CHECK IF NO MORE SETS
@@ -257,7 +263,7 @@ STROKILL	TS	STROKER		# RESET (TO +0) TO END TEST
 		TC	BUNKER		# EXIT, STROKE TEST FINIS
 REVUP		TS	REVS		# ALL REVERSALS EXCEPT LAST OF SET
 		CA	N
-		DOUBLE			# 2 x 1/2AMP
+		DOUBLE			# 2 X 1/2AMP
 		TCF	+4
 		
  +4		CS	ONE		# FINAL REVERSAL, THIS SET

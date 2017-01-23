@@ -1,15 +1,19 @@
 ### FILE="Main.annotation"
-## Copyright:    Public domain.
-## Filename:	 DISPLAY_INTERFACE_ROUTINES.agc
-## Purpose:      Part of the source code for Colossus build 237.
-##               This is for the Command Module's (CM) Apollo Guidance
-##               Computer (AGC), for Apollo 8.
-## Assembler:    yaYUL
-## Contact:      Jim Lawton <jim DOT lawton AT gmail DOT com>
-## Website:      www.ibiblio.org/apollo/index.html
-## Page Scans:   www.ibiblio.org/apollo/ScansForConversion/Colossus237/
-## Mod history:  2011-04-17 JL	Adapted from corresponding Colossus 249 file.
-##		 2016-11-02 RSB	Typo (offset-reference -1 was not indented).
+## Copyright:   Public domain.
+## Filename:	DISPLAY_INTERFACE_ROUTINES.agc
+## Purpose:     Part of the source code for Colossus build 237.
+##              This is for the Command Module's (CM) Apollo Guidance
+##              Computer (AGC), for Apollo 8.
+## Assembler:   yaYUL
+## Contact:     Jim Lawton <jim DOT lawton AT gmail DOT com>
+## Website:     www.ibiblio.org/apollo/index.html
+## Page Scans:  www.ibiblio.org/apollo/ScansForConversion/Colossus237/
+## Mod history: 2011-04-17 JL	Adapted from corresponding Colossus 249 file.
+##		2016-11-02 RSB	Typo (offset-reference -1 was not indented).
+##		2017-01-01 RSB	Proofed comment text using octopus/ProoferComments,
+##				and fixed errors found.
+##		2017-01-08 RSB	Fixed comment errors detected in cross-diff vs
+##				Colossus 249.
 
 ## Page 1416
 # DISPLAYS CAN BE CLASSIFIED INTO THE FOLLOWING CATEGORIES-
@@ -31,7 +35,7 @@
 #        BUT NOT WAITING FOR A RESPONSE.
 #     2. INACTIVE -A DISPLAY WHICH HAS (1) BEEN ACTIVE BUT WAS INTERRUPTEDBY A DISPLAY OF HIGHER PRIORITY,
 #        (2) BEEN PUT INTO THE WAITING LIST AT TIME IT WAS REQUESTED DUE TO THE FACT A HIGHER PRIORITY DISPLAY
-#        WAS ALREADY DOING, (3) BEEN INTERRUPTED BY THE ASTRONAUT (CALLED A PINBRANCH CONDITION, SINCE THIS TYPE
+#        WAS ALREADY GOING, (3) BEEN INTERRUPTED BY THE ASTRONAUT (CALLED A PINBRANCH CONDITION, SINCE THIS TYPE
 #        OF INACTIVE DISPLAY IS USUALLY REACTIVATED ONLY BY PINBALL) OR (4) A DISPLAY WHICH HAS FINISHED BUT STILL
 #        HAS INFO SAVED FOR RESTART PURPOSES.
 
@@ -47,7 +51,7 @@
 #     5. A MARK THAT INTERRUPTS A MARK COMPLETELY REPLACES IT.
 
 #   ORDER OF WAITING DISPLAYS-
-#     1. ASTRONAUT
+#     1. ASTRONAUT EXTERNAL USE
 #     2. PRIORITY
 #     3. INTERRUPTED MARK
 #     4. INTERRUPTED NORMAL
@@ -66,7 +70,7 @@
 #          IS TO THE USERS CALLING LOC +1.
 #      2.  ALL ROUTINES NOT ENDING IN R DO NOT DO AN IMMEDIATE RETURN TO THE USER.
 #      3.  ALL ROUTINES THAT END IN R START A SEPARATE JOB (MAKEPLAY) WITH USERS JOB PRIORITY.
-#      4.  ALL ROUTIENS NOT ENDING IN R BRANCH DIRECTLY TO MAKEPLAY WHICH MAKES THESE DISPLAYS A PART OF THE
+#      4.  ALL ROUTINES NOT ENDING IN R BRANCH DIRECTLY TO MAKEPLAY WHICH MAKES THESE DISPLAYS A PART OF THE
 #          USERS JOB.
 #      5.  ALL DISPLAY ROUTINES ARE CALLED VIA BANKCALL.
 #      6.  TO RESTART A DISPLAY THE USER WILL GENERALLY USE A PHASE OF ONE WITH DESIRED RESTART GROUP (SEE
@@ -74,7 +78,7 @@
 #      7.  ALL FLASHING DISPLAYS HAVE 3 RETURNS TO THE USER FROM ASTRONAUT RESPONSES.  A TERMINATE (V34) BRANCHES
 #          TO THE USERS CALL CADR +1.  A PROCEED (V33) BRANCHES TO THE USERS CALL CADR +2.  AN ENTER OR RECYCLE
 #          (V32) BRANCHES TO THE USERS CALL CADR +3.
-#      8.  ALL ROUTINES MUST BE USED UNDER EXECUTIVE CONTROL
+#      8.  ALL ROUTINES MUST BE USED UNDER EXECUTIVE CONTROL.
 
 # A DESCRIPTION OF EACH ROUTINE WITH AN EXAMPLE FOLLOWS:
 
@@ -88,7 +92,7 @@
 
 #                                        VXXNYY    OCT    OXXYY
 
-# ODSPR IS THE SAME AS GODSP ONLY RETURN IS TO THE USER.
+# GODSPR IS THE SAME AS GODSP ONLY RETURN IS TO THE USER.
 
 #                                                  CAF    VXXNYY
 #                                                  TC     BANKCALL
@@ -126,7 +130,7 @@
 
 # GOPERF2 DOES NOT BLANK ANY REGISTERS
 
-#                                                  CAF    VXXNYY          VARIABLE NOUN YY. XX=0 OR 01.
+#                                                  CAF    VXXNYY          VARIABLE NOUN YY. XX=00 OR 01.
 #                                                  TC     BANKCALL
 #                                                  CADR   GOPERF2
 #                                                  ...    ...             TERMINATE RETURN
@@ -344,7 +348,7 @@
 
 #                                                  CAF    V5XNYY          X=0,1,2,3,4   YY=NOUN
 #                                                  TC     BANKCALL
-#                                                  CADR   GOMARK24
+#                                                  CADR   GOMARK2R
 #                                                  ...    ...             TERMINATE RETURN
 #                                                  ...    ...             PROCEED RETURN
 #                                                  ...    ...             ENTER RETURN
@@ -375,7 +379,7 @@
 # EXDSPRET IS USED TO DISPLAY A VERB NOUN ARRIVING IN A WITH A RETURN MADE TO THE USER AFTER THE DISPLAY HAS BEEN
 # SENT OUT.
 
-#                                                  CAF    VXNYY
+#                                                  CAF    VXXNYY
 #                                                  TC     BANKCALL
 #                                                  CADR   EXDSPRET
 
@@ -427,7 +431,7 @@
 #                                                  CAF    VXXNYY          VXXNYY WILL BE A FLASHING VERB NOUN
 #                                                  TC     BANKCALL
 #                                                  CADR   PRIODSPR
-#                                                  ...    ...             TERMINATE ACTION
+#                                                  ...    ...             TERMINATE RETURN
 #                                                  ...    ...             PROCEED RETURN
 #                                                  ...    ...             ENTER OR RECYCLE RETURN
 
@@ -490,18 +494,18 @@
 
 #      TEMPORARY TEMPORARIES- A, Q, L, MPAC +2, MPAC +3, MPAC +4, MPAC +5, MPAC +6, RUPTREG2, RUPTREG3, CYL,
 # EBANK, RUPTREG4, LOC, BANKSET, MODE, MPAC, MPAC +1                      4, FACEREG
-#      ERASABLES(SHARED AND USED WITH OTHER PROGRAMS) CADRSTOR, DSPLIST, LOC, DSPTEM1, OPTION1
-#      ERASABLES(USED ONLY BY DISPLAY ROUTINES)- NVWORD,+1,+2, DSPFLAG,+1,+2, CADRFLSH,+1,+2, PRIOTIME, FLAGWRD4,
+#      ERASABES(SHARED AND USED WITH OTHER PROGRAMS) CADRSTOR, DSPLIST, LOC, DSPTEM1, OPTION1
+#      ERASABLES(USED ONLY BY DISPLAY ROUTINES)- NVWORD,+1,+2, DSPFLG,+1,+2, CADRFLSH,+1,+2, PRIOTIME, FLAGWRD4,
 ## Page 1427
-#      R1SAVE, MARK2PAC
+#      R1SAVE, MARK2PAC,
 
 
 # DEBRIS-- (USED BUT NOT STORED INTO)- NOUNREG, VERBREG, LOCCTR, MONSAVE1
 # FLAGWORD DESCRIPTIONS--
 #     FLAGWRD4- SEE DESCRIPTION UNDER LOG SECTION ERASABLE ASSIGNMENTS
 
-#     DSPFLG, DSPFLG+1, DSPFLG+2-
-#     ---------------------------
+#     DSPFLG, DSPFLG+1, DSPFLG +2-
+#     ----------------------------
 # BITS 1 BLANK R1
 #      2 BLANK R2
 #      3 BLANK R3
@@ -515,7 +519,7 @@
 #     11 EBANK
 #     12 -----           -----       V99PASTE
 #     13 2ND PART OF PERFORM
-#     14 REFLASH OR REDO  -----           REFLASH OR REDO
+#     15 REFLASH OR REDO  -----           REFLASH OR REDO
 #     15 -----          MARK REQUEST          -----
 # RESTARTING DISPLAYS--
 
@@ -528,7 +532,7 @@
 #      2. THE ASTRONAUT MUST RESPOND TO A PRIORITY DISPLAY NO SOONER THAN 5 SECS FROM THE TIME THE MISSION
 #         PROGRAM SENT OUT THE REQUEST FOR OPERATOR RESPONSE (THE ASTRONAUT WOULD SEE THIS DISPLAY FOR LESS TIME
 #         DUE TO TIME IT TAKES TO GET DISPLAY SENT OUT.) IF THE ASTRONAUT RESPONDS TOO SOON, THE PRIORITY DISPLAY
-#         IS SENT OUT AGAIN---AND AGAIN UNTIL AN ACCUMULATED 2 SECS FROM TIME THE FIRST PRIORITY DISPLAY WAS SENT
+#         IS SENT OUT AGAIN---AND AGAIN UNTIL AN ACCUMULATED 5 SECS FROM TIME THE FIRST PRIORITY DISPLAY WAS SENT
 #         OUT. THE SAME 5 SEC. DELAY WILL OCCUR AT 163.84 SECS OR IN ANY MULTIPLE OF THAT TIME DUE TO PROGRAM
 #         CONSIDERATION.
 #      3. KEY RELEASE BUTTON-
@@ -542,7 +546,7 @@
 #         OVER AGAIN.
 
 
-# SPECIAL CONSIDERATONS--
+# SPECIAL CONSIDERATIONS--
 ## Page 1428
 #      1. MPAC +2  SAVED ONLY IN MARK DISPLAYS
 #      2. GODSP(R),REGODSP(R),GOMARK(R) ALWAYS TURN ON THE FLASH IF ENTERED WITH A PASTE VERB REQUEST.
@@ -988,7 +992,7 @@ PURRS4		TS	OPTION1		# DESIRED OPTION CODE
 		CAF	V04N06
 		TS	PLAYTEM1
 
-		CAF	PERF4MSK	# FLASH,PERFORM AND EBANK R3
+		CAF	PERF4MSK	# FLASH,PERFORM AND BLANK R3
 		TC	Q
 
 SAVELOCS	INHINT
@@ -1202,7 +1206,7 @@ ISITN00		INDEX	COPINDEX	# IS THIS A PASTE
 		EXTEND
 		BZF	FLASHSUB	# YES, ASSUME PASTE ALWAYS ON FLASH
 
-		TCF	ENDOFJOB	# NOT FLASH, NOT GOPERF, THEREFORE EXIT
+		TCF	ENDOFJOB	# NOT FLASH, NOT GOPERF, THERFORE EXIT
 
 1STOR2ND	CA	TEMPOR2
 		MASK	BIT13
@@ -1515,7 +1519,7 @@ BUSYMASK	OCT	77730
 CADRMASK	OCT	50
 PINMASK		EQUALS	13,14,15
 GOPLAY		EQUALS	NVDSP
-PRIOSAVE	EQUALS	R1SAVE
+# PRIOSAVE	EQUALS	R1SAVE
 COPMPAC		EQUALS	MPAC +3
 TEMPOR2		EQUALS	MPAC +4
 OUTHERE		EQUALS	MPAC +5

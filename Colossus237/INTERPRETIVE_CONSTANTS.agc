@@ -1,16 +1,18 @@
 ### FILE="Main.annotation"
-## Copyright:    Public domain.
-## Filename:	 INTERPRETIVE_CONSTANTS.agc
-## Purpose:      Part of the source code for Colossus build 237.
-##               This is for the Command Module's (CM) Apollo Guidance
-##               Computer (AGC), for Apollo 8.
-## Assembler:    yaYUL
-## Contact:      Jim Lawton <jim DOT lawton AT gmail DOT com>
-## Website:      www.ibiblio.org/apollo/index.html
-## Page Scans:   www.ibiblio.org/apollo/ScansForConversion/Colossus237/
-## Mod history:  2011-03-12 JL	Adapted from corresponding Colossus 249 file.
+## Copyright:   Public domain.
+## Filename:	INTERPRETIVE_CONSTANTS.agc
+## Purpose:     Part of the source code for Colossus build 237.
+##              This is for the Command Module's (CM) Apollo Guidance
+##              Computer (AGC), for Apollo 8.
+## Assembler:   yaYUL
+## Contact:     Jim Lawton <jim DOT lawton AT gmail DOT com>
+## Website:     www.ibiblio.org/apollo/index.html
+## Page Scans:  www.ibiblio.org/apollo/ScansForConversion/Colossus237/
+## Mod history: 2011-03-12 JL	Adapted from corresponding Colossus 249 file.
+##		2017-01-01 RSB	Proofed comment text using octopus/ProoferComments,
+##				and fixed errors found.
 
-## Page 1187
+## Page 1172
 		SETLOC	INTPRET1
 		BANK
 
@@ -28,7 +30,7 @@ DPHALF		=	UNITX
 DPPOSMAX	OCT	37777
 		OCT	37777
 
-## Page 1188
+## Page 1173
 # INTERPRETIVE CONSTANTS IN THE OTHER HALF-MEMORY
 
 		SETLOC	INTPRET2

@@ -15,6 +15,8 @@
 ## Mod history: 2016-11-17 JL   Created from Luminary131 version.
 ##              2016-11-18 HG   Transcribed
 ##              2016-12-07 HG   Fix P00 -> POO 
+##		2016-12-15 RSB	Proofed comment text with octopus/ProoferComments,
+##				and corrected the errors found.
 
 ## Page 63
 #         FLAGWORDS 0-11 ARE DOWNLINKED AND CAN BE SET AND CLEARED BY UP-FLAG AND DOWN-FLAG INSTRUCTIONS IN THE
@@ -44,9 +46,9 @@
 # ATTFLAG       104             BIT 1  FLAG 6           ATTFLBIT
 # AUTOMODE      193             BIT 2  FLAG 12          AUTOMBIT
 # AUTR1FLG      209             BIT 1  FLAG 13          AUTRATE1
-# AUTRFLG2      208             BIT 2  FLAG 13          AUTRATE2
-# AUXFLG        103             BIT 2  FLAG 6           AUXFLBIT
-# AVEGFLG       115             BIT 5  FLAG 7           AVEGFBIT
+# AUTR2FLG      208             BIT 2  FLAG 13          AUTRATE2
+# AUXFLAG       103             BIT 2  FLAG 6           AUXFLBIT
+# AVEGFLAG      115             BIT 5  FLAG 7           AVEGFBIT
 # AVEMIDSW      149             BIT 1  FLAG 9           AVEMDBIT
 # AVFLAG        040             BIT 5  FLAG 2           AVFLBIT
 # CALCMAN2      043             BIT 2  FLAG 2           CALC2BIT
@@ -158,7 +160,7 @@
 # ORBWFLAG      054             BIT 6  FLAG 3           ORBWFBIT
 # ORDERSW       129             BIT 6  FLAG 8           ORDERBIT
 # OURRCFLG      198             BIT 12 FLAG 13          OURRCBIT
-# PDSPFLAG      076             BIT 12 FLAG 5           PDSPFBIT
+# PDSPFLAG      076             BIT 14 FLAG 5           PDSPFBIT
 # PFRATFLG      041             BIT 4  FLAG 2           PFRATBIT
 # PINBRFLG      069             BIT 6  FLAG 4           PINBRBIT
 # POOHFLAG      045             BIT 15 FLAG 3           POOHBIT
@@ -364,13 +366,13 @@ R61FLAG         =               020D                    #       RUN R61 LEM     
 R61FLBIT        =               BIT10
 
 # BIT 9 FLAG 1
-                =               021D
-                =               BIT9
+#               =               021D
+#               =               BIT9
 
 # BIT 8 FLAG 1  (S)
 
 ## Page 70
-VEHUPFLG        =               022D                    #       CSM STATE-VECTOR        LEM STATE VECTOR
+VEHUPFLG        =               022D                    #       CSM STATE VECTOR        LEM STATE VECTOR
 VEHUPBIT        =               BIT8                    #       BEING UPDATED           BEING UPDATED
 #
 
@@ -407,7 +409,7 @@ GUESSBIT        =               BIT2                    #       FOR ITERATION   
 #
 
 # BIT 1 FLAG 1
-                =               029D
+#               =               029D
 
 
 FLAGWRD2        =               STATE           +2      #       (030-044)
@@ -429,7 +431,7 @@ SRCHOBIT        =               BIT14                   #       SEARCH OPTION (R
 
 # BIT 13 FLAG 2 (S)
 ACMODFLG        =               032D                    #       MANUAL ACQUISITION      AUTO ACQUISITION
-ACMODBIT        =               BIT13                   #       BY RENDEZVOUS RADAR     BY RENDEZVOUS RADAR
+ACMODBIT        =               BIT13                   #       BY RENDESVOUS RADAR     BY RENDESVOUS RADAR
 #
 
 # BIT 12 FLAG 2 (S)
@@ -458,7 +460,7 @@ XDELVBIT        =               BIT8                    #       COMPUTATION     
 
 # BIT 7 FLAG 2 (S)
 ETPIFLAG        =               038D                    #       ELEVATION ANGLE         TPI TIME SUPPLIED
-                                                        #       SUPPLIED FOR            FOR P34,74 TO COMPUTE
+                                                        #       SUPPLIED FOR            FOR P34,74 TO COMPUT
 ETPIBIT         =               BIT7                    #       P34,74                  ELEVATION
 #
 
@@ -529,7 +531,7 @@ VFLAGBIT        =               BIT10                   #       IN FIELD OF VIEW
 #
 
 # BIT 9 FLAG 3  (S)
-R04FLAG         =               051D                    #       R04 IS RUNNING          R04 NOT RUNNING
+R04FLAG         =               051D                    #       R04 RUNNING             R04 NOT RUNNING
 R04FLBIT        =               BIT9
 #
 
@@ -571,7 +573,7 @@ D6OR9BIT        =               BIT2                    #       FOR INTEGRATION 
 
 # BIT 1 FLAG 3  (S)
 DIM0FLAG        =               059D                    #       W MATRIX IS TO BE       W MATRIX IS NOT TO
-DIM0BIT         =               BIT1                    #       USED                    USED
+DIM0BIT         =               BIT1                    #       USED                    BE USED
 #
 
 ## Page 74
@@ -596,13 +598,13 @@ NRMIDBIT        =               BIT13                   #       ENDIDLE         
 
 # BIT 12 FLAG 4 (S)
 # CODE IN        =               063D
-# DISPLAY AREA   REFERS TO THIS BIT; CHANGES NEEDED IF USED IN FUTURE
+# DISPLAY AREA   REFERS TO THIS BIT; CHANGES NEEDED IF USED IN FUTURE.
 
 # BIT 11 FLAG 4 (S)
 MWAITFLG        =               064D                    #       HIGHER PRIORITY         NO HIGHER PRIORITY
                                                         #       DISPLAY OPERATING       DISPLAY OPERATING
-MWAITBIT        =               BIT11                   #       WHEN MARK               WHEN MARK DISPLAY
-                                                        #       DISPLAY INITIATED       INITIATED
+MWAITBIT        =               BIT11                   #       WHEN MARK DISPLAY       WHEN MARK DISPLAY
+                                                        #       INITIATED       	INITIATED
 
 # BIT 10 FLAG 4 (S)
 NWAITFLG        =               065D                    #       HIGHER PRIORITY         NO HIGHER PRIORITY
@@ -653,7 +655,7 @@ MKOVFLAG        =               072D                    #       MARK DISPLAY OVE
 MKOVBIT         =               BIT3                    #       NORMAL                  NORMAL
 
 # BIT 2 FLAG 4
-                =               073D
+#               =               073D
 
 
 # BIT 1 FLAG 4  (S)
@@ -705,7 +707,7 @@ DMENFBIT        =               BIT9                    #       FOR INCORPORATIO
 
 # BIT 8 FLAG 5  (S)
 ZOOMFLAG        =               082D                    #       THROTTLE-UP HAS         THROTTLE-UP HAS NOT
-ZOOMBIT         =               BIT8                    #       OCCURRED IN P63.        YET OCCURRED IN P63
+ZOOMBIT         =               BIT8                    #       OCCURRED IN P63.        YET OCCURRED IN P63.
 #
 
 # BIT 7 FLAG 5  (S)
@@ -721,7 +723,7 @@ ENGONBIT        =               BIT7                    #
 
 # BIT 5 FLAG 5
 AORBSFLG        =               085D                    #       PREFER PAXIS JET        PREFER PAXIS JET
-AORBSYST        =               BIT5                    #       PAIRS 7,15 AND 8,6       PAIRS 4,12 AND 3,11
+AORBSYST        =               BIT5                    #       PAIRS 7,15 AND 8,16     PAIRS 4,12 AND 3,11
 #
 
 ## Page 77
@@ -732,7 +734,7 @@ NORRMBIT        =               BIT4                    #       MONITOR         
 
 # BIT 3 FLAG 5  (S)
 SOLNSW          =               087D                    #       LAMBERT DOES NOT        LAMBERT CONVERGES OR
-                                                        #       CONVERGE, OR TIME-RAD   TIME-RADIUS NON-
+                                                        #       CONVERGE, OR TIME-RAD   TIME-RADIUS NON
 SOLNSBIT        =               BIT3                    #       NEARLY CIRCULAR         CIRCULAR
 #
 
@@ -753,8 +755,8 @@ FLAGWRD6        =               STATE           +6      #       (090-104)
                                                         #       (SET)                   (RESET)
 
 # BIT 15 FLAG 6 (S)
-S32.1F1         =               090D                    #       DELTA V AT CSI TIME     DVT1 LESS THAN MAX
-S32BIT1         =               BIT15                   #       ONE EXEEDS MAX
+S32.1F1         =               090D                    #       DELTA V AT CSI TIME     DVT1 LESS THEN MAX
+S32BIT1         =               BIT15                   #       ONE EXCEEDS MAX
 #
 
 # BIT 14 FLAG 6 (S)
@@ -765,9 +767,9 @@ S32BIT2         =               BIT14                   #       NEWTON ITERATION
 # BIT 13 FLAG 6 (S)
 S32.1F3A        =               092D                    #       BIT 13 AND BIT 12 FUNCTION AS AN ORDERED
 S32BIT3A        =               BIT13                   #       PAIR (13,12) INDICATING THE POSSIBLE OC-
-                                                        #       CURRENCE OF 2 NEWTON ITERATIONS FOR S32.1
+                                                        #       CURRANCE OF 2 NEWTON ITERATIONS FOR S32.1
                                                         #       IN THE PROGRAM IN THE FOLLOWING ORDER:
-# BIT 12 FLAG 6                                         #       (0,1) (I.E. BIT 13 RESET,BIT 12 SET)
+# BIT 12 FLAG 6                                                 (0,1) (I.E. BIT 13 RESET,BIT 12 SET)
 S32.1F3B        =               093D                    #            = FIRST NEWTON ITERATION BEING DONE
 S32BIT3B        =               BIT12                   #       (0,0)= FIRST PASS OF SECOND NEWT.ITERAT.
                                                         #       (1,1)= 50 FT/SEC STAGE OF SEC. NEWT.ITER
@@ -785,8 +787,8 @@ GMBDRBIT        =               BIT10                   #
 #
 
 # BIT 9 FLAG 6
-                =               096D                    #
-                =               BIT9                    #
+#               =               096D  
+#               =               BIT9 
 #
 
 # BIT 8 FLAG 6  (S)
@@ -795,8 +797,8 @@ MUNFLBIT        =               BIT8                    #       MUNRVG          
 #
 
 # BIT 7 FLAG 6  (L)
-                =               098D                    #
-                =               BIT7                    #
+                =               098D 
+                =               BIT7 
 #
 
 # BIT 6 FLAG 6  (L)
@@ -806,11 +808,11 @@ REDFLBIT        =               BIT6                    #       PERMITTED       
 #
 
 # BIT 5 FLAG 6
-                =               100D                    #
+#               =               100D 
 #
 
 # BIT 4 FLAG 6
-                =               101D                    #
+#               =               101D 
 #
 
 # BIT 3 FLAG 6  (S)
@@ -873,7 +875,7 @@ NORMSBIT        =               BIT10                   #       TO LAMBERT      
 # BIT 9 FLAG 7  (S)
 RVSW            =               111D                    #       DO NOT COMPUTE          COMPUTE FINAL STATE
                                                         #       FINAL STATE VECTOR      VECTOR IN TIME-THETA
-RVSWBIT         =               BIT9                    #       IN TIME-DELTA
+RVSWBIT         =               BIT9                    #       IN TIME-THETA
 #
 
 # BIT 8 FLAG 7  (S)
@@ -927,13 +929,13 @@ FLAGWRD8        =               STATE +8D               #       (120-134)
 RPQFLAG         =               120D                    #       RPQ NOT COMPUTED        RPQ COMPUTED
                                                         #       (RPQ = VECTOR BE-
 RPQFLBIT        =               BIT15                   #       TWEEN SECONDARY BODY
-                                                        #       AND PRIMARY BODY)
+                                                        #       AND PRIMARY BODY
 
 # BIT 14 FLAG 8
-                =               121D                    #
+#               =               121D
 
 ## Page 81
-                =               BIT14                   #
+#               =               BIT14                 
 
 # BIT 13 FLAG 8 (S)
 NEWIFLG         =               122D                    #       FIRST PASS THROUGH      SUCCEEDING ITERATION
@@ -956,8 +958,8 @@ FLUNDBIT        =               BIT10                   #       DISPLAYS INHIBIT
 #
 
 # BIT 9 FLAG 8  (L)
-                =               126D                    #
-                =               BIT9                    #
+#               =               126D 
+#               =               BIT9
 #
 
 # BIT 8 FLAG 8  *** PROTECTED FROM FRESH START ***
@@ -984,13 +986,13 @@ APSESBIT        =               BIT5                    #       RANGE IN TIME-RA
 
 ## Page 82
 # BIT 4 FLAG 8  (S)
-COGAFLAG        =               131D                    #       NO CONIC SOLUTION --    CONIC SOLUTION
+COGAFLAG        =               131D                    #       NO CONIC SOLUTION -     CONIC SOLUTION
                                                         #       TOO CLOSE TO RECTI-     EXISTS (COGA DOES NOT
-COGAFBIT        =               BIT4                    #       LINEAR (COGA OVERFLWS)  OVERFLOW)
+COGAFBIT        =               BIT4                    #       LINEAR (COGA OVRFLWS)   OVERFLOW)
 #
 
-# BIT 3 FLAG 8  (S)
-                =               132D                    #
+# BIT 3 FLAG 8
+#               =               132D                   
 
 # BIT 2 FLAG 8  (L)
 INITALGN        =               133D                    #       INITIAL PASS THRU       SECOND PASS THRU P57
@@ -1007,8 +1009,8 @@ FLAGWRD9        =               STATE           +9D     #       (135-149)
                                                         #       (SET)                   (RESET)
 
 # BIT 15 FLAG 9
-                =               135D                    #
-                =               BIT15                   #
+#               =               135D                    
+#               =               BIT15                   
 
 # BIT 14 FLAG 9 (L)
 FLVR            =               136D                    #       VERTICAL RISE           NON-VERTICAL RISE
@@ -1067,9 +1069,9 @@ QUITBIT         =               BIT5                    #
 # BIT 4 FLAG 9
 FLT59FLG        =               146D                    #       LUNAR SURFACE MARK      NORMAL MARKING TO BE
 FLT59BIT        =               BIT4                    #       PROCEDURE USED          USED DURING INFLITE
-                                                        #       DURING INFLIE ALGN      ALIGNMENT
+                                                        #       DURING INFLITE ALGN     ALIGNMENT
 # BIT 3 FLAG 9  (L)
-MID1FLAG        =               147D                    #       INTEGRAT TO TDEC        INTEGRATE TO THE
+MID1FLAG        =               147D                    #       INTEGRATE TO TDEC       INTEGRATE TO THE
 MID1FBIT        =               BIT3                    #                               THEN-PRESENT TIME
 #
 
@@ -1080,8 +1082,8 @@ MIDAVBIT        =               BIT2                    #       PORTALS         
 
 # BIT 1 FLAG 9  (S)
 AVEMIDSW        =               149D                    #       AVETOMID CALLING        NO AVETOMID W INTEGR
-                                                        #       FOR W.MATRIX INTEGR     ALLOW SET UP RM, VN
-AVEMDBIT        =               BIT1                    #       DON'T WRITE OVER RN,    PIPTIME
+                                                        #       FOR W.MATRIX INTEGR     ALLOW SET UP RM, VN,
+AVEMDBIT        =               BIT1                    #       DONT WRITE OVER RN,     PIPTIME
                                                         #       VN,PIPTIME
 
 ## Page 84
@@ -1095,8 +1097,7 @@ FLGWRD10        =               STATE           +10D    #       (150-164)
                                                         #       (SET)                   (RESET)
 
 # BIT 15 FLAG 10
-                =               150D                    #
-                =               BIT15                   #
+#               =               150D                   
 
 # BIT 14 FLAG 10 (L,C)
 INTFLAG         =               151D                    #       INTEGRATION IN          INTEGRATION NOT IN
@@ -1108,40 +1109,40 @@ APSFLAG         =               152D                    #       ASCENT STAGE    
 APSFLBIT        =               BIT13                   #       *** PROTECTED FROM FRESH START ***
 
 # BIT 12 FLAG 10
-                =               153D                    #
+#               =               153D                    
 
 # BIT 11 FLAG 10
-                =               154D                    #
+#               =               154D                    
 
 # BIT 10 FLAG 10
-                =               155D                    #
+#               =               155D                    
 
 # BIT 9 FLAG 10
-                =               156D                    #
+#               =               156D                    
 
 # BIT 8 FLAG 10
-                =               157D                    #
+#               =               157D                    
 
 # BIT 7 FLAG 10 (L,C)
 REINTFLG        =               158D                    #       INTEGRATION ROUTINE     INTEGRATION ROUTINE
 REINTBIT        =               BIT7                    #       TO BE RESTARTED         NOT TO BE RESTARTED
 
 # BIT 6 FLAG 10
-                =               159D                    #
+#               =               159D                   
 
 ## Page 85
 
 # BIT 5 FLAG 10
-                =               160D                    #
+#               =               160D                    
 
 # BIT 4 FLAG 10
-                =               161D                    #
+#               =               161D                    
 
 # BIT 3 FLAG 10
-                =               162D                    #
+#               =               162D                    
 
 # BIT 2 FLAG 10
-CONTRLFL        =               163D                    #       DAP CONTROLLING         DAP NOT CONTROLLIN
+CONTRLFL        =               163D                    #       DAP CONTROLLING         DAP NOT CONTROLLING
 CONTRLBT        =               BIT2                    #       VEHICLE ATTITUDE        VEHICLE ATTITUDE
 #
 
@@ -1206,13 +1207,13 @@ VELDABIT        =               BIT7                    #       MEASUREMENT MADE
 #
 
 # BIT 6 FLAG 11
-                =               174D
-                =               BIT6
+#               =               174D
+#               =               BIT6
 #
 
 # BIT 5 FLAG 11 (L)(R12)
-                =               175D
-                =               BIT5
+#               =               175D
+#               =               BIT5
 #
 
 # BIT 4 FLAG 11 (L)(R12)
@@ -1221,7 +1222,7 @@ RNGEDBIT        =               BIT4                    #       MEASUREMENT MADE
 #
 
 # BIT 3 FLAG 11
-R12RDFLG        =               177D                    #       WIAT UNTIL ALL VEL      ALLOW R12 PROCESS-
+R12RDFLG        =               177D                    #       WAIT UNTIL ALL VEL      ALLOW R12 PROCESS-
 R12RDBIT        =               BIT3                    #       READS DONE BEFORE       ING OF VELDATA;
                                                         #       R12 PROCESSING          LR VEL READ DONE
 #
@@ -1332,12 +1333,12 @@ TURNONBT        =               BIT1                    #       IN PROGRESS. (ZE
 
 DAPBOOLS        EQUALS          FLGWRD13                #       DIGITAL AUTOPILOT FLAGWORD
 
-FLGWRD13        =               STATE           +13D    #       (195 - 209)
+FLGWRD13        =               STATE           +13D    #       (195 - 209)	    WAS DAPBOOLS
 
                                                         #       (SET)                   (RESET)
 
 # BIT 15 FLAG 13
-PULSEFLG        =               195D                    #       MINIMUM IMPUSE          NOT IN MINIMUM
+PULSEFLG        =               195D                    #       MINIMUM IMPULSE         NOT IN MINIMUM
 PULSES          =               BIT15                   #       COMMAND MODE IN         IMPULSE COMMAND MODE
                                                         #       "ATT HOLD" (V76)        (V77)
 #

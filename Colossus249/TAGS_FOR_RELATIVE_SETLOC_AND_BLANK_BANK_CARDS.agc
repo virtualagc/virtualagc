@@ -5,16 +5,22 @@
 ##		It is part of the source code for the Command Module's (CM)
 ##		Apollo Guidance Computer (AGC), for Apollo 9.
 ## Assembler:	yaYUL
-## Reference:	pp. 27-36 of 1701.pdf.
+## Reference:	pp. 25-33 of 1701.pdf.
 ## Contact:	Ron Burkey <info@sandroid.org>.
 ## Website:	www.ibiblio.org/apollo.
 ## Mod history:	08/02/04 RSB	Adapted from similar Luminary 131 file.
 ##		05/06/09 RSB	Made a few comment corrections I noticed
 ##				were needed when adapting for Comanche 055.
+##		2017-01-05 RSB	Page numbers now agree with those on the
+##				original harcopy, as opposed to the PDF page
+##				numbers in 1701.pdf.
+##		2017-01-20 RSB	Cross-diff'd comment text (not whitespace)
+##				vs the already-proofed corresponding Colossus
+##				237 and Comanche 55 source-code files
+##				and corrected errors found.
 ##
 ## The contents of the "Colossus249" files, in general, are transcribed 
-## from a scanned document obtained from MIT's website,
-## http://hrst.mit.edu/hrs/apollo/public/archive/1701.pdf.  Notations on this
+## from a scanned copy of the program listing.  Notations on this
 ## document read, in part:
 ##
 ##	Assemble revision 249 of AGC program Colossus by NASA
@@ -30,15 +36,13 @@
 ##	under NASA contract NAS 9-4065.
 ##
 ## Refer directly to the online document mentioned above for further information.
-## Please report any errors (relative to 1701.pdf) to info@sandroid.org.
+## Please report any errors (relative to the scanned pages) to info@sandroid.org.
 ##
 ## In some cases, where the source code for Luminary 131 overlaps that of 
 ## Colossus 249, this code is instead copied from the corresponding Luminary 131
 ## source file, and then is proofed to incorporate any changes.
 
-## Page 27
-# TAGS FOR RELATIVE SETLOC AND BLANK BANK CARDS
-
+## Page 25
 FIXED		MEMORY	120000 - 167777
 		COUNT	BANKSUM
 
@@ -82,7 +86,7 @@ MIDDGIM		EQUALS
 
 		BNKSUM	04
 		
-## Page 28
+## Page 26
 		
 		BANK	05
 FRANDRES	EQUALS
@@ -124,7 +128,7 @@ S52/2		EQUALS
 		
 		BANK	12
 CONICS		EQUALS
-## Page 29
+## Page 27
 		BNKSUM	12
 		
 		BANK	13
@@ -134,6 +138,7 @@ INTINIT		EQUALS
 SR52/1		EQUALS
 ORBITAL2	EQUALS
 		BNKSUM	13
+# SPACER
 		
 # MODULE 3 CONTAINS BANKS 14 THROUGH 21
 
@@ -162,7 +167,7 @@ DAPS7		EQUALS
 		BNKSUM	17
 		
 		BANK	20
-## Page 30
+## Page 28
 DAPS6		EQUALS
 DAPS1		EQUALS
 DAPS2		EQUALS
@@ -207,7 +212,7 @@ P40S		EQUALS
 		BNKSUM	24
 		
 		BANK	25
-## Page 31
+## Page 29
 REENTRY		EQUALS
 		BNKSUM	25
 		
@@ -218,7 +223,7 @@ P60S		EQUALS
 P60S1		EQUALS
 P60S2		EQUALS
 P60S3		EQUALS
-PLANTIN		EQUALS
+PLANTIN		EQUALS			# LUNAR ROT
 EPHEM		EQUALS
 P05P06		EQUALS
 26P50S		EQUALS
@@ -242,7 +247,7 @@ RTE2		EQUALS
 		BANK	30
 IMUSUPER	EQUALS
 LOWSUPER	EQUALS
-FCSTART		EQUALS			# STANDARD LOCATION FOR THIS
+FCSTART		EQUALS			# STANDARD LOCATION FOR THIS.  (FOR EXTVB)
 LOPC		EQUALS
 P20S1		EQUALS
 P20S6		EQUALS
@@ -250,7 +255,7 @@ P40S3		EQUALS
 R35A		EQUALS
 		BNKSUM	30
 		
-## Page 32
+## Page 30
 		BANK	31
 R35		EQUALS
 RT23		EQUALS
@@ -291,7 +296,7 @@ P17S1		EQUALS
 		BANK	36
 MEASINC		EQUALS
 MEASINC1	EQUALS
-## Page 33
+## Page 31
 P17S		EQUALS
 RTE1		EQUALS
 		BNKSUM	36
@@ -330,7 +335,7 @@ LO6ZEROS	EQUALS	ZEROVEC			# ZERO VECTOR ALWAYS IN LOW MEMORY
 HIDPHALF	EQUALS	UNITX
 LODPHALF	EQUALS	XUNIT
 HIDP1/4		EQUALS	DP1/4TH	
-## Page 34
+## Page 32
 LODP1/4		EQUALS	D1/4			# 2DEC .25
 HIUNITX		EQUALS	UNITX
 HIUNITY		EQUALS	UNITY
@@ -342,7 +347,7 @@ LOUNITZ		EQUALS	ZUNIT			# 2DEC 0
 
 		SBANK=	LOWSUPER
 
-# ROPE-SPECIFIC ASSIGNS OBVIATING NEED TO CHECK COMPUTER FLAG IN DETERMINING(?) INTEGRATION AREA ENTRIES.
+# ROPE SPECIFIC ASSIGNS OBVIATING NEED TO CHECK COMPUTER FLAG IN DETVRUZVING INTEGRATION AREA ENTRIES
 
 OTHPREC		EQUALS	LEMPREC
 ATOPOTH		EQUALS	ATOPLEM
@@ -356,11 +361,11 @@ THISAXIS	=	UNITX
 ERASID		EQUALS	LOW10			# DOWNLINK ERASABLE DUMP ID
 DELAYNUM	EQUALS	THREE
 
-#********************************************************************************************************
+#****************************************************************************************************************
 
 # THE FOLLOWING ECADRS ARE DEFINED TO FACILITATE EBANK SWITCHING.  THEY ALSO MAKE IT EASIER FOR
 # ERASABLE CONTROL TO REARRANGE ERASABLE MEMORY WITHOUT DISRUPTING THE PROGRAMS WHICH SET EBANKS.
-# PRIOR TO ROP RELEASE FIXED MEMORY CAN BE SAVED BY SETTING EACH EBXXXX =EBANKX (X=4,5,6,7).  EBANKX OF COURSE
+# PRIOR TO ROPE RELEASE FIXED MEMORY CAN BE SAVED BY SETTING EACH EBXXXX =EBANKX (X=4,5,6,7).  EBANKX OF COURSE
 # WILL BE THE BANK WHERE THE ERASABLES REFERENCED IN EBXXXX WILL BE STORED.
 
 		BANK	7
@@ -383,12 +388,8 @@ EBQPLACE	ECADR	QPLACES
 
 		BANK	37
 		EBANK=	RN1
-## Page 35
+## Page 33
 EBRN1		ECADR	RN1
 
-#******************************************************************************************************
-
-## Page 36
-		
-# *** END OF MAIN PROGRAM ***
+#****************************************************************************************************************
 

@@ -1,14 +1,20 @@
 ### FILE="Main.annotation"
-## Copyright:    Public domain.
-## Filename:	 ENTRY_LEXICON.agc
-## Purpose:      Part of the source code for Colossus build 237.
-##               This is for the Command Module's (CM) Apollo Guidance
-##               Computer (AGC), for Apollo 8.
-## Assembler:    yaYUL
-## Contact:      Jim Lawton <jim DOT lawton AT gmail DOT com>
-## Website:      www.ibiblio.org/apollo/index.html
-## Page Scans:   www.ibiblio.org/apollo/ScansForConversion/Colossus237/
-## Mod history:  2011-03-02 JL	Adapted from corresponding Colossus 249 file.
+## Copyright:   Public domain.
+## Filename:	ENTRY_LEXICON.agc
+## Purpose:     Part of the source code for Colossus build 237.
+##              This is for the Command Module's (CM) Apollo Guidance
+##              Computer (AGC), for Apollo 8.
+## Assembler:   yaYUL
+## Contact:     Jim Lawton <jim DOT lawton AT gmail DOT com>
+## Website:     www.ibiblio.org/apollo/index.html
+## Page Scans:  www.ibiblio.org/apollo/ScansForConversion/Colossus237/
+## Mod history: 2011-03-02 JL	Adapted from corresponding Colossus 249 file.
+##		2017-01-01 RSB	Proofed comment text using octopus/ProoferComments,
+##				and fixed errors found.
+##		2017-01-08 RSB	Fixed comment errors detected in cross-diff vs
+##				Colossus 249.
+##		2017-01-22 RSB	Back-ported comment error fixes detected in diff'ing
+##				Artemis 72 vs Comanche 55.
 
 ## Page 788
 #          VARIABLE    DESCRIPTION                        MAXIMUM VALUE *          COMPUTER NAME
@@ -70,7 +76,7 @@
 #          GAMMAL1     SIMPLE FORM OF GAMMAL              1 RADIAN             VARIABLE HAS MAXIMUM VALUE OF ONE.
 
 ## Page 790
-#          VARIABLE    DESCRIPTION                        MAXIMUM VALUE *          COMPUTER NAME
+#          VARIABLE    DESCRIPTION                        MAXIMUM VALUE            COMPUTER NAME
 #          --------    -----------                        ------- -----            -------- ----
 
 #          HEADSUP     INDICATOR FOR INITIAL ROLL         1
@@ -109,7 +115,7 @@
 #                        2     2
 #          VBARS       VL /VSAT                           4
 #                                                 2     2
-#          VSQ         NORMALIZED VEL. SQUARED = V /VSAT  4                        = VSQUARE
+#          VSQ         NORMALISED VEL. SQUARED = V /VSAT  4                        = VSQUARE
 #          WT          EARTH RATE TIMES TIME              1 REVOLUTION               NOT SAVED
 #                                                                                  = WIE (DTEAROT)
 #          X           INTERMEDIATE VARIABLE IN G-LIMITER 2 VSAT                     NOT SAVED
@@ -117,7 +123,7 @@
 
 ## Page 791
 #          EXTRA COMPUTER ERASABLE LOCATIONS NOT SHOWN ON FLOW CHARTS
-#          ----------------------------------------------------------
+#          -----------------------------------------------------------
 
 #          VARIABLE    DESCRIPTION                        MAXIMUM VALUE
 #          --------    -----------                        ------- -----
@@ -196,7 +202,7 @@
 #          Q5          FINAL PHASE DRANGE/ D GAMMA                         7050    NM/RAD
 #          Q6          FINAL PHASE INITIAL FLIGHT PATH ANGLE               .0349   RAD
 #          Q7F         MIN DRAG FOR UPCONTROL                              6       FPSS
-#          Q7MIN       IN VALUE FOR Q7 IN FACTOR CALCULATION               40      FPSS
+#          Q7MIN       MIN VALUE FOR Q7 IN FACTOR CALCULATION              40      FPSS
 #          Q19         FACTOR IN GAMMAL1 CALCULATION                       .5
 #          Q21         FACTOR IN Q2 CALCULATION.                           1000    NM
 #          Q22         FACTOR IN Q2 CALCULATION.                           -1302   NM
@@ -214,8 +220,8 @@
 #          ---------- ------- --- ------- ---------
 
 #          ATK         ANGLE IN RAD TO NM                                  3437.7468   NM/RAD
-#          G5          NOMINAL G VALUE FOR SCALING                         32.2        FPSS
-#          H5          ATMOSPHERE SCALE HEIGHT                             28500       FT
+#          GS          NOMINAL G VALUE FOR SCALING                         32.2        FPSS
+#          HS          ATMOSPHERE SCALE HEIGHT                             28500       FT
 #          J           GRAVITY HARMONIC COEFFICIENT                        .00162346	
 #          KWE         EQUATORIAL EARTH RATE                               1546.70168  FPS
 #          MUE         EARTH GRAVITATIONAL CONSTANT                        3.986032233 E 14 CUBIC M/ SEC SEC
@@ -224,7 +230,7 @@
 #          VSAT        SATELLITE VELOCITY AT RE                            25766.1973  FPS
 #          WIE         EARTH RATE                                          .0000729211505 RAD/SEC
  
-#                                                  (END GSOP AS-276, VOL 1, FIG. 5.6-3   CONSTANTS,GAINS, ETC.)
+#                                                  (END GSOP AS-278, VOL 1, FIG. 5.6-3   CONSTANTS,GAINS, ETC.)
 
 
 #          DISPLAY QUANTITIES
@@ -251,7 +257,7 @@
 #                      EMSALT FT ABOVE FISCHER RADIUS.
 #          TTE         TIME OF FREE FALL TO ALT           B 28 CENTISEC   N 63
 #                      EMSALT FT ABOVE FISCHER RADIUS.
-#          ROLLC       ROLL COMMAND                       1 REVOLUTION    N 68, N 68, N 69
+#          ROLLC       ROLL COMMAND                       1 REVOLUTION    N 66, N 68, N 69
 #          LATANG      CROSS-RANGE ERROR (XRNGERR)        4 RADIANS       N 66
 #          DNRNGERR    DOWN RANGE ERROR                   1 REVOLUTION    N 66
 #                      (PREDANG - THETAH   IN NM)

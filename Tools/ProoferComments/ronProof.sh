@@ -5,8 +5,46 @@
 
 AGC=$1
 SCALE=$2
-page=$3
-PSM=$4
+PSM=$3
 
-num=`printf "%04d" $page`
-./ProoferComments.py ~/Desktop/ocr/prepared$AGC/$num.png proofing$AGC/$num.png $page ../../$AGC/MAIN.agc $SCALE 1 $PSM
+if [[ "$EXT" == "" ]]
+then
+	EXT=png
+fi
+
+# Where ProoferComments is, along with all its little friends.
+bin=$HOME/git/virtualagc/Tools/ProoferComments
+# Where the image files are.
+images=$HOME/Desktop/Proofing/ProoferComments
+# Where the AGC source files are.
+source=$HOME/git/virtualagc/$AGC
+
+# Switch into a temporary working directory
+mkdir /tmp/ProoferComments$$
+cd /tmp/ProoferComments$$
+ln --symbolic $bin/* .
+rm *.box &>/dev/null
+
+while [[ "$4" != "" ]]
+do
+	page=$4
+	num=`printf "%04d" $page`
+	echo Page $num
+	./ProoferComments.py $images/prepared$AGC/$num.$EXT $images/proofing$AGC/$num.jpg $page $source/MAIN.agc $SCALE 1 $PSM
+	shift
+done
+
+if [[ "$BOX" == "yes" ]]
+then
+	cp $images/prepared$AGC/$num.png eng.agc.exp0.png
+	echo `pwd`
+	~/Desktop/jTessBoxEditor-1.6.1.jar
+	#less eng.agc.exp0.box
+fi
+if [[ "$LESS" == "yes" ]]
+then
+	less eng.agc.exp0.box
+fi
+
+cd -
+rm /tmp/ProoferComments$$ -rf

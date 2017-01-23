@@ -9,10 +9,12 @@
 ## Website:	www.ibiblio.org/apollo/index.html
 ## Page Scans:	www.ibiblio.org/apollo/ScansForConversion/Solarium055/
 ## Mod history:	2009-09-14 JL	Created.
+## 		2016-12-28 RSB	Proofed comment text using octopus/ProoferComments,
+##				and fixed errors found.
 
 ## Page 697
 		BANK	33
-BEGINNER	TC	BANKCALL
+BEGINNER	TC	BANKCALL	# CHANGE IMUMODE AS REQUIRED.
 CADRMODE	CADR	IMUREENT
 
 BEGIN501	TC	INTPRET
@@ -38,13 +40,14 @@ EXITLOC2	OCT	00105		# 5.1 MODE GOES WITH READACCS.
 
 		TC	ENDOFJOB
 
+## (JL) seems to be an arg missing. Is YUL assuming 0? Generates 07435.
 BEGINSW		TC	BANKCALL	# WAIT FOR MODE SWITCH IF NECESSARY.
 		CADR	IMUSTALL
-		TC			## (JL) seems to be an arg missing. Is YUL assuming 0? Generates 07435.
+		TC
 
 		TC	ENDOFJOB
 
-		DEC	0
+		DEC	0		# HOLE FOR 2DEC PATCHING STARTDT1 -1
 STARTDT1	DEC	200
 STARTDT2	DEC	830
 

@@ -5,14 +5,22 @@
 ##		It is part of the source code for the Command Module's (CM)
 ##		Apollo Guidance Computer (AGC), for Apollo 9.
 ## Assembler:	yaYUL
-## Reference:	Starts on p. 1439 of 1701.pdf.
+## Reference:	Starts on p. 1417
 ## Contact:	Ron Burkey <info@sandroid.org>.
 ## Website:	www.ibiblio.org/apollo.
 ## Mod history:	08/30/04 RSB.	Adapted from corresponding Luminary131 file.
+##		2017-01-06 RSB	Page numbers now agree with those on the
+##				original harcopy, as opposed to the PDF page
+##				numbers in 1701.pdf.
+##		2017-01-15 RSB	Cross-diff'd comment text (not whitespace)
+##				vs the already-proofed corresponding Colossus
+##				237 and Comanche 55 source-code files
+##				and corrected errors found. There were no
+##				differences between the comment text in the 
+##				different versions after these corrections.
 ##
 ## The contents of the "Colossus249" files, in general, are transcribed 
-## from a scanned document obtained from MIT's website,
-## http://hrst.mit.edu/hrs/apollo/public/archive/1701.pdf.  Notations on this
+## from a scanned copy of the program listing.  Notations on this
 ## document read, in part:
 ##
 ##	Assemble revision 249 of AGC program Colossus by NASA
@@ -28,13 +36,13 @@
 ##	under NASA contract NAS 9-4065.
 ##
 ## Refer directly to the online document mentioned above for further information.
-## Please report any errors (relative to 1701.pdf) to info@sandroid.org.
+## Please report any errors (relative to the scanned pages) to info@sandroid.org.
 ##
 ## In some cases, where the source code for Luminary 131 overlaps that of 
 ## Colossus 249, this code is instead copied from the corresponding Luminary 131
 ## source file, and then is proofed to incorporate any changes.
 
-## Page 1439
+## Page 1417
 		BANK	14
 		SETLOC	KEYRUPT
 		BANK
@@ -59,10 +67,10 @@ ACCEPTUP	CAF	CHRPRIO		# (NOTE: RUPTREG4 = KEYTEMP1)
 
 		CA	RUPTREG4
 		INDEX	LOCCTR
-		TS	MPAC		# LEAVE 5 BIT KEY CODE IN MPAC FOR CHARIN
+		TS	MPAC		# LEAVE 5 BIT KEY CDE IN MPAC FOR CHARIN
 		TC	RESUME
 
-## Page 1440
+## Page 1418
 # UPRUPT PROGRAM
 
 UPRUPT		TS	BANKRUPT
@@ -91,12 +99,12 @@ UPRPT1		CAF	LOW5		# TEST FOR TRIPLE CHAR REDUNDANCY
 		COM
 		TC	UPTEST
 
-UPCK		CS	ELRCODE		# CODE IS GOOD.  IF CODE = `ERROR RESET',
+UPCK		CS	ELRCODE		# CODE IS GOOD.  IF CODE = 'ERROR RESET',
 		AD	KEYTEMP1	# CLEAR UPLOCKFL (SET BIT4 OF FLAGWRD7 = 0)
-		EXTEND			# IF CODE DOES NOT = `ERROR RESET', ACCEPT
+		EXTEND			# IF CODE DOES NOT = 'ERROR RESET', ACCEPT
 		BZF	CLUPLOCK	# CODE ONLY IF UPLOCKFL IS CLEAR (=0).
 
-		CAF	BIT4		# TEST UPLOCKFL FOR 0 OR 1
+		CAF	BIT4		# TEST UPLOCKFL FOR 0 OR 1.
 		MASK	FLAGWRD7
 		CCS	A
 		TC	RESUME		# UPLOCKFL = 1
@@ -110,10 +118,10 @@ CLUPLOCK	CS	BIT4		# CLEAR UPLOCKFL (I.E., SET BIT 4 OF
 					# CODE IS BAD
 TMFAIL2		CS	FLAGWRD7	# LOCK OUT FURTHER UPLINK ACTIVITY
 		MASK	BIT4		# (BY SETTING UPLOCKFL = 1) UNTIL
-		ADS	FLAGWRD7	# `ERROR RESET' IS SENT VIA UPLINK.
+		ADS	FLAGWRD7	# 'ERROR RESET' IS SENT VIA UPLINK.
 		TC	RESUME
 UPTEST		AD	KEYTEMP1
-## Page 1441
+## Page 1419
 		CCS	A
 		TC	TMFAIL2
 HI10		OCT	77740
@@ -122,18 +130,18 @@ HI10		OCT	77740
 
 ELRCODE		OCT	22
 
-# `UPLINK ACTIVITY LIGHT' IS TURNED OFF BY .....
+# 'UPLINK ACTIVITY LIGHT' IS TURNED OFF BY .....
 #	1.	VBRELDSP
 #	2.	ERROR RESET
 #	3.	UPDATE PROGRAM (P27) ENTERED BY V70,V71,V72, AND V73.
 #
-# THE RECEPTION OF A BAD CODE (I.E., CCC FAILURE) LOCKS OUT FURTHER UPLINK ACTIVITY BY SETTING BIT4 OF FLAGWRD7 = 1.
+# THE RECEPTION OF A BAD CODE (I.E CCC FAILURE) LOCKS OUT FURTHER UPLINK ACTIVITY BY SETTING BIT4 OF FLAGWRD7 = 1.
 # THIS INDICATION WILL BE TRANSFERRED TO THE GROUND BY THE DOWNLINK WHICH DOWNLINKS ALL FLAGWORDS.
-# WHEN UPLINK ACTIVITY IS LOCKED OUT, IT CAN BE ALLOWED WHEN THE GROUND UPLINS AND `ERROR RESET' CODE.
-# (IT IS RECOMMENDED THAT THE `ERROR LIGHT RESET' CODE IS PRECEEDED BY 16 BITS THE FIRST OF WHICH IS 1 FOLLOWED
-# BY 15 ZEROS.  THIS WILL ELIMINATE EXTRANEOUS BITS FROM INLINK WHICH MAY HAVE BEEN LEFT OVER FROM THE ORIGINAL
-# FAILURE).
+# WHEN UPLINK ACTIVITY IS LOCKED OUT, IT CAN BE ALLOWED WHEN THE GROUND UPLINKS AND 'ERROR RESET' CODE.
+# (IT IS RECOMMENDED THAT THE 'ERROR LIGHT RESET' CODE IS PRECEEDED BY 16 BITS THE FIRST OF WHICH IS 1 FOLLOWED
+# BY 15 ZEROES.  THIS WILL ELIMINATE EXTRANEOUS BITS FROM INLINK WHICH MAY HAVE BEEN LEFT OVER FROM THE ORIGINAL
+# FAILURE)
 #
-# UPLINK ACTIVITY IS ALSO ALLOWED (UNLOCKED) DURING FRECH START WHEN FRESH START SETS BIT4 OF FLAGWRD7 = 0.
+# UPLINK ACTIVITY IS ALSO ALLOWED (UNLOCKED) DURING FRESH START WHEN FRESH START SETS BIT4 OF FLAGWRD7 = 0.
 
 

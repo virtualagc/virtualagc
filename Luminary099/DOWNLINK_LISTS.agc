@@ -9,6 +9,8 @@
 ## Website:	www.ibiblio.org/apollo.
 ## Pages:	193-205
 ## Mod history:	2009-05-19 HG	Transcribed from page images.
+##		2016-12-13 RSB	Proofed text comments with octopus/ProoferComments
+##				and corrected the errors found.
 ##
 ## This source code has been transcribed or otherwise adapted from
 ## digitized images of a hardcopy from the MIT Museum.  The digitization
@@ -33,8 +35,10 @@
 		EBANK=	DNTMBUFF
 
 # SPECIAL DOWNLINK OP CODES
-#	OP CODE		ADDRESS (EXAMPLE)	SENDS...		BIT 15		BITS 14-12	BITS 11-0
-#	-------		-----------------	--------		------		----------	---------
+#	OP CODE		ADDRESS (EXAMPLE)	SENDS..			BIT 15		BITS 14-12	BITS 11
+#													     -0
+#	------		-----------		----------		------		----------	-------
+#													     --
 #	1DNADR		TIME2			(2 AGC WDS)		0		0		ECADR
 #	2DNADR		TEPHEM			(4 AGC WDS)		0		1		ECADR
 #	3DNADR		VGBODY			(6 AGC WDS)		0		2		ECADR
@@ -44,9 +48,9 @@
 #	DNCHAN		30			CHANNELS		0		7		CHANNEL
 #													ADDRESS
 #	DNPTR		NEXTLIST		POINTS TO NEXT		0		6		ADRES
-#						LIST
+#						LIST.
 #
-# DOWNLIST FORMAT DEFINITIONS AND RULES --
+# DOWNLIST FORMAT DEFINITIONS AND RULES-
 # 1. END OF A LIST = -XDNADR (X = 1 TO 6), -DNPTR, OR -DNCHAN.
 # 2. SNAPSHOT SUBLIST = LIST WHICH STARTS WITH A -1DNADR.
 # 3. SNAPSHOT SUBLIST CAN ONLY CONTAIN 1DNADRS.
@@ -69,7 +73,7 @@ UPDNLIST	EQUALS	LMAGSIDL			# UPDATE PROGRAM (P27) DOWNLIST
 ## Page 194
 # LM ORBITAL MANEUVERS LIST
 #
-# --------------------- CONTROL LIST -------------------------
+# ----------------- CONTROL LIST --------------------------
 
 LMORBMDL	EQUALS					# SEND ID BY SPECIAL CODING
 		DNPTR	LMORBM01			# COLLECT SNAPSHOT
@@ -106,7 +110,7 @@ LMORBMDL	EQUALS					# SEND ID BY SPECIAL CODING
 		1DNADR	SPARE				# FORMERLY PIF
 		-1DNADR	TGO				# TGO,+1
 
-# --------------------- SUB-LISTS ---------------------------
+# ----------------- SUB-LISTS ----------------------------
 
 LMORBM01	-1DNADR	R-OTHER +2			# R-OTHER +2,+3		SNAPSHOT
 		1DNADR	R-OTHER +4			# R-OTHER +4,+5
@@ -150,12 +154,12 @@ LMORBM05	2DNADR	OMEGAP				# OMEGAP,OMEGAQ,OMEGAR,GARBAGE
 LMORBM06	1DNADR	PIPTIME1			# PIPTIME,+1		COMMON DATA
 		-3DNADR	DELV				# DELV +0...+5
 
-# --------------------------------------------------------------------
+# -----------------------------------------------------------
 
 ## Page 196
 # LM COAST AND ALIGNMENT DOWNLIST
 #
-# ---------------------- CONTROL LIST --------------------------------
+# -----------------  CONTROL LIST  --------------------------
 
 LMCSTADL	EQUALS					# SEND ID BY SPECIAL CODING
 		DNPTR	LMCSTA01			# COLLECT SNAPSHOT
@@ -185,7 +189,7 @@ LMCSTADL	EQUALS					# SEND ID BY SPECIAL CODING
 		DNPTR	LMCSTA05			# COMMON DATA
 		-6DNADR	DSPTAB				# DSPTAB +0...+11D TABLE
 
-# ---------------------- SUB-LISTS --------------------------
+# -----------------  SUB-LISTS   --------------------------
 
 LMCSTA01	EQUALS	LMORBM01			# COMMON DOWNLIST DATA
 LMCSTA02	EQUALS	LMORBM02			# COMMON DOWNLIST DATA
@@ -205,7 +209,7 @@ LMCSTA07	3DNADR	OGC				# OGC,+1,IGC,+1,MGC,+1	COMMON DATA
 ## Page 198
 # LM RENDEZVOUS AND PRE-THRUST DOWNLIST
 #
-# --------------------- CONTROL LIST ------------------------
+# -----------------  CONTROL LIST   --------------------------
 
 LMRENDDL	EQUALS					# SEND ID BY SPECIAL CODING
 		DNPTR	LMREND01			# COLLECT SNAPSHOT
@@ -245,7 +249,7 @@ LMRENDDL	EQUALS					# SEND ID BY SPECIAL CODING
 		1DNADR	DELVTPF				# DELVTPF,+1
 		-1DNADR	SPARE
 
-# --------------------- SUB-LISTS --------------------------
+# -----------------  SUB-LISTS   ----------------------------
 
 LMREND01	EQUALS	LMORBM01			# COMMON DOWNLIST DATA
 LMREND02	EQUALS	LMORBM02			# COMMON DOWNLIST DATA
@@ -261,12 +265,12 @@ LMREND07	-1DNADR	AIG				# AIG,AMG		SNAPSHOT
 		1DNADR	MKTIME				# MKTIME,+1
 		-1DNADR	RANGRDOT			# DNRRANGE,DNRRDOT
 
-# -----------------------------------------------------------
+# ------------------------------------------------------------
 
 ## Page 200
 # LM DESCENT AND ASCENT DOWNLIST
 
-# ---------------------- CONTROL LIST ------------------------
+# -----------------  CONTROL LIST    -------------------------
 
 LMDSASDL	EQUALS					# SEND ID BY SPECIAL CODING
 		DNPTR	LMDSAS07			# COLLECT SNAPSHOT
@@ -300,7 +304,7 @@ LMDSASDL	EQUALS					# SEND ID BY SPECIAL CODING
 		1DNADR	PSEUDO55			# PSEUDO55,GARBAGE
 		-1DNADR	TTOGO				# TTOGO,+1
 
-# ---------------------- SUB-LISTS ------------------------
+# -----------------  SUB-LISTS   ----------------------------
 
 LMDSAS02	EQUALS	LMORBM02			# COMMON DOWNLIST DATA
 LMDSAS03	EQUALS	LMORBM03			# COMMON DOWNLIST DATA
@@ -327,12 +331,12 @@ LMDSAS08	6DNADR	DNTMBUFF			# SEND SNAPSHOT
 
 LMDSAS09	EQUALS	LMCSTA06			# COMMON DOWNLIST DATA
 
-# ---------------------------------------------------------
+# -----------------------------------------------------------
 
 ## Page 202
 # LM LUNAR SURFACE ALIGN DOWNLIST
 
-# ---------------------- CONTROL LIST ---------------------
+# -----------------  CONTROL LIST  --------------------------
 
 LMLSALDL	EQUALS					# SEND ID BY SPECIAL CODING
 		DNPTR	LMLSAL01			# COLLECT SNAPSHOT
@@ -341,10 +345,10 @@ LMLSALDL	EQUALS					# SEND ID BY SPECIAL CODING
 		4DNADR	DNTMBUFF			# SEND SHAPSHOT
 		1DNADR	TALIGN				# TALIGN,+1
 		6DNADR	REFSMMAT			# REFSMMAT +0...+11D
-		6DNADR	YNBSAV				# YNBSAV +0...+5,SNBSAV +0...+5
+		6DNADR	YNBSAV				# YNBSAV +0...+5,ZNBSAV +0...+5
 		DNPTR	LMLSAL08			# COMMON DATA
 		DNPTR	LMLSAL02			# COMMON DATA
-		1DNADR	TIME2				# TIME2/1
+		1DNADR	TIME2				# TIME/1
 		DNPTR	LMLSAL03			# COLLECT SNAPSHOT
 		6DNADR	DNTMBUFF			# SEND SHAPSHOT
 		DNPTR	LMLSAL04			# COMMON DATA
@@ -360,7 +364,7 @@ LMLSALDL	EQUALS					# SEND ID BY SPECIAL CODING
 		1DNADR	SPARE
 		-1DNADR	SPARE
 
-# ---------------------- SUB-LISTS ----------------------
+# -----------------  SUB-LISTS   ----------------------------
 
 LMLSAL01	EQUALS	LMORBM01			# COMMON DOWNLIST DATA
 LMLSAL02	EQUALS	LMORBM02			# COMMON DOWNLIST DATA
@@ -373,12 +377,12 @@ LMLSAL08	EQUALS	LMCSTA06			# COMMON DOWNLIST DATA
 LMLSAL09	EQUALS	LMCSTA07			# COMMON DOWNLIST DATA
 
 ## Page 203
-# --------------------------------------------------------
+# -----------------------------------------------------------
 
 ## Page 204
 # LM AGS INITIALIZATION AND UPDATE DOWNLIST
 
-# ---------------------- CONTROL LIST --------------------
+# -----------------  CONTROL LIST  --------------------------
 
 LMAGSIDL	EQUALS					# SEND IO BY SPECIAL CODING
 		3DNADR	AGSBUFF +0			# AGSBUFF +0...+5
@@ -386,7 +390,7 @@ LMAGSIDL	EQUALS					# SEND IO BY SPECIAL CODING
 		3DNADR	AGSBUFF +1			# AGSBUFF +1...+6
 		1DNADR	AGSBUFF +13D			# AGSBUFF +13D, GARBAGE
 		3DNADR	AGSBUFF +6			# AGSBUFF +6...+11
-		1DNADR	AGSBUFF +12D			# AGSBUFF +12D,GARBAGE
+		1DNADR	AGSBUFF +12D			# AGSBUFF +12,GARBAGE
 		3DNADR	AGSBUFF +7			# AGSBUFF +7...+12D
 		1DNADR	AGSBUFF +13D			# AGSBUFF +13D,GARBAGE
 		6DNADR	COMPNUMB			# COMPNUMB,UPOLDMOD,UPVERB,UPCOUNT,
@@ -409,14 +413,14 @@ LMAGSIDL	EQUALS					# SEND IO BY SPECIAL CODING
 		DNPTR	LMAGSI05			# COMMON DATA
 		-6DNADR	DSPTAB				# DSPTAB +0...+11D
 
-# ---------------------- SUB-LISTS ---------------------
+# -----------------  SUB-LISTS   ----------------------------
 
 LMAGSI02	EQUALS	LMORBM02			# COMMON DOWNLIST DATA
 LMAGSI03	EQUALS	LMORBM03			# COMMON DOWNLIST DATA
 LMAGSI04	EQUALS	LMORBM04			# COMMON DOWNLIST DATA
 LMAGSI05	EQUALS	LMORBM05			# COMMON DOWNLIST DATA
 
-# ------------------------------------------------------
+# -----------------------------------------------------------
 
 DNTABLE		GENADR	LMCSTADL			# LM COAST AND ALIGN DOWNLIST
 		GENADR	LMAGSIDL			# LM AGS INITIALIZATION/UPDATE DOWNLIST

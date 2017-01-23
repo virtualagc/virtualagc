@@ -1,15 +1,19 @@
 ### FILE="Main.annotation"
-## Copyright:    Public domain.
-## Filename:	 P11.agc
-## Purpose:      Part of the source code for Colossus build 237.
-##               This is for the Command Module's (CM) Apollo Guidance
-##               Computer (AGC), for Apollo 8.
-## Assembler:    yaYUL
-## Contact:      Jim Lawton <jim DOT lawton AT gmail DOT com>
-## Website:      www.ibiblio.org/apollo/index.html
-## Page Scans:   www.ibiblio.org/apollo/ScansForConversion/Colossus237/
-## Mod history:  2011-02-06 JL   Adapted from corresponding Colossus 249 file.
-##		 2016-08-14 RSB	Added SBANKs for addressing discrepancies.
+## Copyright:   Public domain.
+## Filename:	P11.agc
+## Purpose:     Part of the source code for Colossus build 237.
+##              This is for the Command Module's (CM) Apollo Guidance
+##              Computer (AGC), for Apollo 8.
+## Assembler:   yaYUL
+## Contact:     Jim Lawton <jim DOT lawton AT gmail DOT com>
+## Website:     www.ibiblio.org/apollo/index.html
+## Page Scans:  www.ibiblio.org/apollo/ScansForConversion/Colossus237/
+## Mod history: 2011-02-06 JL   Adapted from corresponding Colossus 249 file.
+##		2016-08-14 RSB	Added SBANKs for addressing discrepancies.
+##		2016-12-31 RSB	Proofed comment text using octopus/ProoferComments,
+##				and corrected errors found.
+##		2017-01-15 RSB	Corrected comment-text errors observed while
+##				diff'ing vs Colossus 249.
 
 ## Page 522
 # EARTH ORBIT INSERTION MONITOR PROGRAM
@@ -51,7 +55,7 @@
 #	   11. SET AVGEXIT IN SERVICER TO VHHDOT TO
 #	       COMPUTE AND DISPLAY NOUN 62 EVERY 2 SECONDS
 
-#	       R1  V1  - INERTIAL VELOCITY MAGNITUDE IN FPS
+#	       R1  V1  - INTERTIAL VELOCITY MAGNITUDE IN FPS
 #	       R2  HDOT - RATE OF CHANGE OF VEHICLE VEL IN FPS
 #	       R3  H    - VEHICLE ALTITUDE ABOVE PAD IN NM
 
@@ -73,7 +77,7 @@
 #	   DELAYJOB  EARTHR    ENDOFJOB  FINDVAC   IBNKCALL
 #	   INTPRET   LALOTORV  NEEDLER   NEWMODEX  PHASCHNG
 #	   POSTJUMP  POWRSERS  PREREAD1  REGODSPR  S11.1
-#	   SERVEXIT  TASKOVER  TCDANZIG  V1STO25   WAITLIST
+#	   SERVEXIT  TASKOVER  TCDANZIG  V1ST02S   WAITLIST
 
 # ASTRONAUT REQUESTS (IF ALTITUDE ABOVE 300,000 FT)
 
@@ -87,7 +91,7 @@
 #	                      R3 TFF IN MINUTES/SECS
 
 #     IF ASTRONAUT HAS REQUESTED ANY OF THESE DISPLAYS HE MUST
-#     HIT KEY RELEASE BUTTON TO RETURN TO NORMAL NOUN 62 DISPLAY.
+#     HIT KEY RELEASE BUTTON TO RETURN TO NORMAL NOUN 62 DISPLAY
 
 # NORMAL EXIT MODE
 
@@ -131,7 +135,7 @@
 #     SPOLYARG
 #     BODY1, BODY2, BODY3
 #     VMAG2, ALTI, HDOT
-#     CENTRALS, CORE SET, AND VAC AREAS
+#     CENTRALS, CORE SET AND VAC AREAS
 
 		COUNT	34/P11
 
@@ -408,7 +412,7 @@ ATERTASK	CAF	PRIO1		# ESTABLISH JOB TO DISPLAY ATT ERRORS
 #					  WHERE   TL GE  10 SEC
 #					          TL LE 133 SEC .
 
-#					  COMPUTE DESIRED ROLL WEHRE ROLL EQUALS COUNTER-CLOCKWISE ANGLE FROM
+#					  COMPUTE DESIRED ROLL WHERE ROLL EQUALS COUNTER-CLOCKWISE ANGLE FROM
 #					  LAUNCHAZ TO -Z(S/C) AS SEEN FROM X(S/C).
 #					  ROLL = LAUNCHAZ-AZIMUTH-.5 +SATRLRT*T      IN REV
 #					  SATRLRT = RATE OF ROLL IN REV/CENTI-SEC
@@ -450,7 +454,7 @@ ATERTASK	CAF	PRIO1		# ESTABLISH JOB TO DISPLAY ATT ERRORS
 
 #					                       -
 #					  THE ATTITUDE ERRORS, A, ARE STORED ONE HALF SINGLE PRECISION IN
-#					  THE REGISTERS AK, AK1, AK2 AS INPUT TO NEEDLER, THE FDA1 ATTITUDE
+#					  THE REGISTERS AK, AK1, AK2 AS INPUT TO NEEDLER, THE FDAI ATTITUDE
 #					  ERROR DISPLAY ROUTINE.
 
 ATERJOB		CAE	TIME2		# CHECK IF MORE THAN
@@ -493,7 +497,7 @@ ATTDISP		CS	RPSTART		# PITCH/ROLL START TIME
 # 				  	  POLYLOC         =       POLYNUM +10D
 
 		CA	ZERO		# RETURN WITH PITCH(32REV)
-		TS	MODE		# STORED MPAC, MPAC +1
+		TS	MODE		# STORED IN MPAC, MPAC +1
 		TC	INTPRET
 		SETPD	SL		# 32(PITCH(32REV)) = PITCH(REV)
 			0
@@ -520,7 +524,7 @@ ATTDISP1	COS	DCOMP
 
 #					  EVALUATE ROLL = LAUNCHAZ-AZIMUTH-.5+SATRLRT*T
 		SLOAD	DMP
-			SPOLYARG	# TIME1 - RSPSTART ,CSECS B-14.
+			SPOLYARG	# TIME1 - RPSTART ,CSECS B-14.
 			SATRLRT
 		SL	DSU
 			14D

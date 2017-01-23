@@ -99,6 +99,7 @@
  *              		error message were 100% dependent on the comments.
  *              		Now they also include an estimate from the number
  *              		of lines of octals already read.
+ *              2016-12-16 RSB	Added --no-checksums (for Retread 44).
  *
  *  The format of the file is simple.  Each line just consists of 8 fields,
  *  delimited by whitespace.  Each field consists of 5 octal digits.  Blank
@@ -222,7 +223,7 @@ main(int argc, char *argv[])
   uint16_t dummy16, banknum = 0;
   int count, checkWords = 0;
   char s[129], *ss;
-  int i, j, invert = 0, page = 0, verbose = 0, useParity = 0;
+  int i, j, invert = 0, page = 0, verbose = 0, useParity = 0, noChecksums = 0;
   int currentPage = 0;
 
   // Parse the command-line switches.
@@ -237,6 +238,8 @@ main(int argc, char *argv[])
         page = j;
       else if (!strcmp(argv[i], "--block1"))
         Block1 = 1;
+      else if (!strcmp(argv[i], "--no-checksums"))
+        noChecksums = 1;
       else
         {
           fprintf(stderr, "Error: Unknown command-line switch \"%s\"\n",
@@ -287,7 +290,8 @@ main(int argc, char *argv[])
 
       if (sscanf(s, "BANK=%o", &dummy) == 1)
         {
-          check(verbose, line, checked, banknum, checksum);
+	  if (!noChecksums)
+	    check(verbose, line, checked, banknum, checksum);
           banknum = dummy;
           checksum = 0;
           if ((ftell(outfile) & 03777) != 0)
@@ -316,7 +320,8 @@ main(int argc, char *argv[])
           putc(dummy16 >> 8, outfile);
           putc(dummy16 & 255, outfile);
           checksum = addAgc(checksum, dummy16);
-          check(verbose, line, checked, banknum, checksum);
+          if (!noChecksums)
+            check(verbose, line, checked, banknum, checksum);
           checked = 1;
           goto proofIt;
         }
@@ -453,7 +458,8 @@ main(int argc, char *argv[])
         }
     }
 
-  check(verbose, line, checked, banknum, checksum);
+  if (!noChecksums)
+    check(verbose, line, checked, banknum, checksum);
   // Pad file to proper length (or else diffs will eventually fail).
   i = (Block1 ? 034 : 044) * 02000 * 2;
   while (ftell(outfile) < i)

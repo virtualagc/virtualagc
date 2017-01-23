@@ -1,14 +1,18 @@
 ### FILE="Main.annotation"
-## Copyright:    Public domain.
-## Filename:	 KEYRUPT_UPRUPT.agc
-## Purpose:      Part of the source code for Colossus build 237.
-##               This is for the Command Module's (CM) Apollo Guidance
-##               Computer (AGC), for Apollo 8.
-## Assembler:    yaYUL
-## Contact:      Jim Lawton <jim DOT lawton AT gmail DOT com>
-## Website:      www.ibiblio.org/apollo/index.html
-## Page Scans:   www.ibiblio.org/apollo/ScansForConversion/Colossus237/
-## Mod history:  2011-04-17 JL	Adapted from corresponding Colossus 249 file.
+## Copyright:   Public domain.
+## Filename:	KEYRUPT_UPRUPT.agc
+## Purpose:     Part of the source code for Colossus build 237.
+##              This is for the Command Module's (CM) Apollo Guidance
+##              Computer (AGC), for Apollo 8.
+## Assembler:   yaYUL
+## Contact:     Jim Lawton <jim DOT lawton AT gmail DOT com>
+## Website:     www.ibiblio.org/apollo/index.html
+## Page Scans:  www.ibiblio.org/apollo/ScansForConversion/Colossus237/
+## Mod history: 2011-04-17 JL	Adapted from corresponding Colossus 249 file.
+##		2017-01-01 RSB	Proofed comment text using octopus/ProoferComments,
+##				and fixed errors found.
+##		2017-01-15 RSB	Fixed comment-text errors identified by diff'ing
+##				against Colossus 249.
 
 ## Page 1413
 		BANK	14
@@ -22,7 +26,7 @@ KEYRUPT1	TS	BANKRUPT
 		TC	LODSAMPT	# TIME IS SNATCHED IN RUPT FOR NOUN 65.
 		CAF	LOW5
 		EXTEND
-		RAND	MNKEYIN		# CHECK IF KEYS 5M-IM ON
+		RAND	MNKEYIN		# CHECK IF KEYS 5M-1M ON
 KEYCOM		TS	RUPTREG4
 		CS	FLAGWRD5
 		MASK	BIT15
@@ -34,7 +38,7 @@ ACCEPTUP	CAF	CHRPRIO		# (NOTE: RUPTREG4 = KEYTEMP1)
 		2CADR	CHARIN
 		CA	RUPTREG4
 		INDEX	LOCCTR
-		TS	MPAC		# LEAVE 5 BIT KEY CODE IN MPAC FOR CHARIN
+		TS	MPAC		# LEAVE 5 BIT KEY CDE IN MPAC FOR CHARIN
 		TC	RESUME
 
 ## Page 1414
@@ -71,7 +75,7 @@ UPCK		CS	ELRCODE		# CODE IS GOOD. IF CODE = 'ERROR RESET',
 		EXTEND			# IF CODE DOES NOT = 'ERROR RESET', ACCEPT
 		BZF	CLUPLOCK	# CODE ONLY IF UPLOCKFL IS CLEAR (=0).
 
-		CAF	BIT4		# TEST UPLOCKFL FOR 0 OR 1
+		CAF	BIT4		# TEST UPLOCKFL FOR 0 OR 1.
 		MASK	FLAGWRD7
 		CCS	A
 		TC	RESUME		# UPLOCKFL = 1

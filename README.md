@@ -1,7 +1,9 @@
-----
-# We are currently in the process of transcribing Luminary 210 (the Apollo 15-17 LM flight software), and are looking for volunteers to help out. If you're interested, **[click here!](https://github.com/virtualagc/virtualagc/wiki/Luminary-210-Transcription)**
-----
- 
+---
+We are currently in the process of transcribing Luminary 116 (the Apollo 12 LM flight software), and are looking for volunteers to help out. If you're interested, **[click here!](https://github.com/virtualagc/virtualagc/wiki/Luminary-116-Transcription)**
+---
+We are also looking for scanning sponsors for Don Eyles's copies of Luminary 99 and Luminary 131. If you might like to help us out that way, **[click here!](https://virtualagc.github.io/virtualagc/volunteer.html)**
+---
+
 Virtual Apollo Guidance Computer
 ================================
 

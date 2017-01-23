@@ -19,7 +19,13 @@
 ##              2016-12-07 HG   Fix P00 -> POO
 ##                              Change POO -> P00 in some comments
 ##              2016-12-11 HG   Fix operator CS FLAGWRD5 -> CA FLAGWRD5
-##                                  operand  AGSBUFF -> AGSK   
+##                                  operand  AGSBUFF -> AGSK  
+##              2016-12-12 HG   comment out previous [WORKAROUND] with SBANK= 
+##		2016-12-23 RSB	Proofed comment text with octopus/ProoferComments
+##				and fixed all errors found.  Restored an SBANK=
+##				that we had apparently mistakenly commented out,
+##				but wasn't noticed because it had no effect on
+##				the generated octals.
 
 ## Page 275
                 BANK    7
@@ -359,7 +365,7 @@ RRDESK2         TC      BANKCALL
                 TC      ENDOFJOB
 
 
-RRDESEND        CCS     RADMODES                # TERMINATE CONTINOUUS DESIGNATE ONLY
+RRDESEND        CCS     RADMODES                # TERMINATE CONTINUOUS DESIGNATE ONLY
                 TCF     GOPIN
                 TCF     GOPIN
                 TCF     +1
@@ -416,7 +422,7 @@ AURLOKON        TC      MAKECADR
                 ADRES   LOKONSW
                 TCF     AURLKON1
 
-NOLOKON         TC      DOWNFLAG                # IF NO LOCK-ON, SET BIT15 OF RADMADES TO
+NOLOKON         TC      DOWNFLAG                # IF NO LOCK-ON, SET BIT15 OF RADMODES TO
                 ADRES   LOKONSW                 # INDICATE THAT CONTINUOUS DESIGNATION IS
                 TC      UPFLAG                  # WANTED (TO BE TERMINATED BY V44.)
                 ADRES   CDESFLAG
@@ -487,7 +493,7 @@ IMUFINEK        TC      CKMODCAD
                 CADR    IMUSTALL
                 TC      ENDEXTVB
 
-FINEK2          CAF     LGYROBIN                # PINBALL LEFT COMMANDS IN OGC REGISTERS
+FINEK2          CAF     LGYROBIN                # PINBALL LEFT COMMANDS IN OGC REGIST5RS
                 TC      BANKCALL
                 CADR    IMUPULSE
 
@@ -508,9 +514,7 @@ IMUFINEV        VN      4200
 #                 SAME RECALL AS A COMPLETED LOAD.
 #              2. THE EXECUTION OF A VERB 33 (PROCEED WITHOUT DATA) INDICATES THE REQUESTED ACTION IS NOT DESIRED.
 
-## [WORKAROUND] Moved to below the 2CADR a few lines below here --- RSB 2004.
-##              SBANK=  PINSUPER        # FOR LOADLV1 AND SHOWSUM CADR'S.
-## [WORKAROUND]
+                SBANK=  PINSUPER        # FOR LOADLV1 AND SHOWSUM CADR'S.
 
 GOLOADLV        TC      FLASHOFF
 
@@ -544,10 +548,6 @@ CKMODCAD        CA      MODECADR
 #              3. REQUIRE EXECUTION OF VERB 23.
 #              4. ADD DELTA TIME, RECEIVED FROM INPUT REGISTER, TO THE COMPUTER TIME.
 #              5. RELEASE EXT VERB DISPLAY SYSTEM
-
-## [WORKAROUND] Moved from the top of VERB 50 a few lines above here --- RSB 2004.
-                SBANK=  PINSUPER        # FOR LOADLV1 AND SHOWSUM CADR'S
-## [WORKAROUND]
 
 ALINTIME        TC      TESTXACT
                 TC      POSTJUMP        # NO ROOM IN 43
@@ -716,7 +716,7 @@ R04RR           CAF     V16N72          # DISPLAY RR CDU ANGLES (1/SEC)
                 TCF     R04Y            # V33
                 TCF     R04RR           # V32
 
-R04LR           CAF     V16N66          # DISPLAY LR RANGE AND POSITON (1/SEC)
+R04LR           CAF     V16N66          # DISPLAY LR RANGE AND POSITION (1/SEC)
                 TC      BANKCALL        #          R1  +- XXXXX. FT   LR RANGE
                 CADR    GOMARKF         #          R2  +  0000X.      POS. NO.
                 TCF     R04END          # V34      R3     BLANK
@@ -1330,7 +1330,7 @@ CHKDATA1        CAE     DAPDATR1        # IF BITS 13 AND 14 ARE BOTH ZERO, FORCE
                 CAE     DAPDATR1        # ENSURE THAT NO ILLEGAL BITS SET BY CREW.
 MSKDATR1        MASK    DSPLYMSK
                 TS      DAPDATR1
-                CAF     V04N46          # DISPLAY DAP CONIFG. / CHANBKUP
+                CAF     V04N46          # DISPLAY DAP CONFIG. / CHANBKUP
                 TC      BANKCALL
                 CADR    GOXDSPFR
                 TCF     ENDEXT          # V34E  TERMINATE
@@ -1367,7 +1367,7 @@ DPDAT1          INHINT                  # INHINT FOR SETTING OF FLAG BITS AND MA
                 MASK    CSMDOCKD        # LOAD MASS IN ACCORDANCE WITH CSMDOCKD.
                 CCS     A               #   MASS IS USUALLY ALREADY OKAY, SO DO
                 CAE     CSMMASS         #   NOT TOUCH ITS LOW-ORDER PART.
-## Page 301
+## Page 306
                 AD      LEMMASS
                 TS      MASS
                 CAE     DAPBOOLS
@@ -1566,7 +1566,7 @@ TCPIN           RTB
 OCT51           OCT     51
 TCPINAD         CADR    TCPIN
 
-# VERB 96  SET QUITFLAT TO STOP INTEGRATION.
+# VERB 96  SET QUITFLAG TO STOP INTEGRATION.
 
 #          GO TO V37 WITH ZERO TO CAUSE POO.
 #          STATEINT WILL CHECK QUITFLAG AND SKIP 1ST PASS,

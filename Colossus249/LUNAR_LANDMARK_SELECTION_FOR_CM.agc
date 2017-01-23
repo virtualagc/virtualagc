@@ -5,14 +5,23 @@
 ##		It is part of the source code for the Command Module's (CM)
 ##		Apollo Guidance Computer (AGC), for Apollo 9.
 ## Assembler:	yaYUL
-## Reference:	pp. 893-902 of 1701.pdf.
+## Reference:	pp. 889-898.
 ## Contact:	Ron Burkey <info@sandroid.org>.
 ## Website:	www.ibiblio.org/apollo.
 ## Mod history:	08/22/04 RSB.	Transcribed.
+##		2017-01-06 RSB	Page numbers now agree with those on the
+##				original harcopy, as opposed to the PDF page
+##				numbers in 1701.pdf.
+##		2017-01-15 RSB	Cross-diff'd comment text (not whitespace)
+##				vs the already-proofed corresponding Colossus
+##				237, and corrected errors found.  (Comanche 55,
+##				normally used in this process, was not similar,
+##				and therefore was not used.) There were no
+##				differences between the comment text in the 
+##				different versions after these corrections.
 ##
 ## The contents of the "Colossus249" files, in general, are transcribed 
-## from a scanned document obtained from MIT's website,
-## http://hrst.mit.edu/hrs/apollo/public/archive/1701.pdf.  Notations on this
+## from a scanned copy of the program listing.  Notations on this
 ## document read, in part:
 ##
 ##	Assemble revision 249 of AGC program Colossus by NASA
@@ -28,13 +37,13 @@
 ##	under NASA contract NAS 9-4065.
 ##
 ## Refer directly to the online document mentioned above for further information.
-## Please report any errors (relative to 1701.pdf) to info@sandroid.org.
+## Please report any errors (relative to the scanned pages) to info@sandroid.org.
 ##
 ## In some cases, where the source code for Luminary 131 overlaps that of 
 ## Colossus 249, this code is instead copied from the corresponding Luminary 131
 ## source file, and then is proofed to incorporate any changes.
 
-## Page 893
+## Page 889
 		BANK	31
 		SETLOC	R35
 		BANK
@@ -82,10 +91,10 @@ CALCTLS		TC	INTPRET
 			LAT-LONG	# COMPUTE LAT, LONG, ALT OF S/C   PD>00
 		DLOAD	AXT,1		# SAVE S/C LONGITUDE
 			LONG
-			LSLONG		# XR1 = LANDING SITE LONG--SINUS MEDII, OCEANUS
-		STCALL	LONGSAVE	# PROCELLARUM, MARE TRANQUILLITEATIS
+			LSLONG		# XR1 = LANDING SITE LONG--SINUS MEDII, OCE
+		STCALL	LONGSAVE	# ANUS PROCELLARUM, MARE TRANQUILLITEATIS
 			ELAPTIME	# COMPUTE TL (TIME TO LANDING SITE)
-## Page 894
+## Page 890
 		STORE	DSPTEM1		# SAVE TL FOR OUTPUT TO DSKY
 		EXIT		
 DISTLS		CAF	V06N31**	# DISPLAY TIME TO LANDING SITE
@@ -122,7 +131,7 @@ JLOOPP		AXT,1	XSU,1		# SET XR1 FOR LONGITUDE OF LANDMARK
 			LATTAB -2,2
 			LAT
 		ABS	PUSH		# DELTA LAT = ABS(LAT - LATJ)	PD=02
-		DSU	BPL		# DELTAL OPERATOR THAN DELTA LAT
+		DSU	BPL		# DELTAL GREATER THAN DELTA LAT
 			DELTAL
 			LMKLOOP		# NO
 		DLOAD	STADR		#				PD=00
@@ -136,7 +145,7 @@ LMKLOOP		INCR,2	SXA,2		# J = J + 2
 			JLOOPCNT
 		SLOAD	DSU
 			X2
-## Page 895
+## Page 891
 			NKVAL
 		BHIZ	GOTO		# J = NKVAL
 			DISLID		# YES, GO DISPLAY LANDMARK ID, MAYBE TL
@@ -171,7 +180,7 @@ NEXTBAND	TC	INTPRET		# MUST WE GO ON
 		TIX,1	EXIT
 			KLOOP		# YES, K = K - 1
 		TC	ENDEXT		# K = 0, EXIT R35
-## Page 896
+## Page 892
 ELAPTIME	STQ	SXA,1		# SAVE RETURN AND INDEX 1
 			RETLOCN
 			XR1HOLD
@@ -194,7 +203,7 @@ ELAPTIME	STQ	SXA,1		# SAVE RETURN AND INDEX 1
 		PDVL	VXV		# COMPUTE AND STORE UN=UNIT(UW X UZ) PD=24
 			POSVECT		# POSITION VECTOR OF CM SCALED B-27
 			VELVECT		# VELOCITY VECTOR OF CM SCALED B-5
-		VSL1	UNIT		# COMPUTE AND STORE U=UNIT(RxV)	PD=30
+		VSL1	UNIT		# COMPUTE AND STORE U=UNIT(R X V)	PD=30
 		PDDL	LXC,1		# RESTORE INDEX 1 COMPLEMENTED
 			LONGSAVE
 			XR1HOLD
@@ -203,12 +212,12 @@ ELAPTIME	STQ	SXA,1		# SAVE RETURN AND INDEX 1
 			RRCSML
 		PUSH	SIN		# DLONG = .997(LONG - LONGJ)	PD=32
 		VXSC	VSL1
-			UNN		# U'W = UW COS(DLONG) + UN SIN(DLONG)
+			UNN		# U:W = UW COS(DLONG) + UN SIN(DLONG)
 		PDDL	COS		#				PD=36
 		VXSC	VSL1
 			UW
 		VAD	VXV		#				PD=30,PD=24
-		VSL1	UNIT		# UD = UNIT (U'W X U)
+		VSL1	UNIT		# UD = UNIT (U:W X U)
 		STORE	ALPHAV		# SET UD FOR LAT-LONG--POINT OF CLOSEST
 		DOT	SL1		#	APPROACH
 			URR		# COS(THETA) = (UD . UR)
@@ -221,8 +230,8 @@ ELAPTIME	STQ	SXA,1		# SAVE RETURN AND INDEX 1
 			24D
 		BPL	DLOAD		# CHK (UR X UD).U
 			+4D
-			SNTH		# NET, THETA = 2 PI - THETA
-## Page 897
+			SNTH		# NEG, THETA = 2 PI - THETA
+## Page 893
 		DCOMP			# ERGO SIN (THETA) = -SIN (THETA)
 		STORE	SNTH
 		VLOAD	SET
@@ -248,7 +257,7 @@ ETERROR		DLOAD	GOTO		# RETURN WITH ZERO
 			HI6ZEROS
 			RETLOCN
 
-## Page 898
+## Page 894
 # SUBROUTINE TO CONVERT RP (VECTOR IN PLAN. COORD. SYSTEM, EITHER
 # EARTH-FIXED OR MOON-FIXED) TO LAT, LONG, ALT.
 #
@@ -263,7 +272,7 @@ ETERROR		DLOAD	GOTO		# RETURN WITH ZERO
 #	PD0-5D = RP VECTOR
 #	PD6-7D = TIME
 #	MPAC = 0 FOR EARTH, NON-ZERO FOR MOON.
-#	ERADFLAG, LUNAFLAG
+#	ERADFLAG, LUNAFLAG.
 #
 # OUTPUT
 #	LATITUDE IN LAT		(REVS. B-0)
@@ -295,7 +304,7 @@ BANDTABL	DEC	-12		# +60 DEGREE BAND
 		DEC	-52		# -60 DEGREE BAND
 RRCSML		2DEC	.997
 
-V06N34**	VN	00634		#**********************************
+V06N34**	VN	00634		# ****************************************
 V06N31**	VN	00631
 V05N70**	VN	00570
 KCOUNT		EQUALS	5D
@@ -305,7 +314,7 @@ UW		EQUALS	12D
 URR		EQUALS	6D
 UZZ		EQUALS	0D
 
-## Page 899
+## Page 895
 # **** TEMPORARY VALUES FOR LANDMARK TABLES-LEVINE/SAPONARO ****
 #
 #	LATTAB HAS LATITUDES THAT GO FROM +8 TO -8 DEGREES
@@ -336,7 +345,7 @@ LATTAB		2DEC	-.015231481	#	2	5	29	S
 		2DEC	.003981481	#	24	1	26	N
 		2DEC	-.008009259	#	25	2	53	S
 		2DEC	.003240741	#	26	1	10	N
-## Page 900
+## Page 896
 		2DEC	-.005694444	#	27	2	03	S
 		2DEC	.002268518	#	30	0	49	N
 		2DEC	-.007824074	#	31	2	49	S
@@ -363,7 +372,7 @@ LONGTAB		2DEC	.161157407	#	2	58	01	E
 		2DEC	-.023703704	# 	24	8	32	W
 		2DEC	-.051435185	#	25	18	31	W
 		2DEC	-.068055556	#	26	24	30	W
-## Page 901
+## Page 897
 		2DEC	-.085092593	#	27	30	38	W
 		2DEC	-.100833333	#	30	36	18	W
 		2DEC	-.101944444	#	31	36	42	W
@@ -390,11 +399,10 @@ ALTTAB		2DEC	-2090 B-29	#	2
 		2DEC	2510 B-29	#	24
 		2DEC	210 B-29	#	25
 		2DEC	960 B-29	# 	26
-## Page 902
+## Page 898
 		2DEC	1310 B-29	#	27
 		2DEC	1410 B-29	#	30
 		2DEC	-2624 B-29	#	31
 		2DEC	-2445 B-29	#	32
 		
-# *** END OF PANDORA .080 ***
 

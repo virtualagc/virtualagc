@@ -11,6 +11,10 @@
 ## Mod history:	2010-05-30 OH	Adapted from corresponding Colossus 249 file.
 ##		2010-12-04 JL	Remove Colossus 249 header comments. Change to double-has page numbers.
 ##		2011-02-07 JL	Minor fixes.
+##		2017-01-01 RSB	Proofed comment text using octopus/ProoferComments,
+##				but no errors found.
+##		2017-01-07 RSB	Fixed comment errors detected in cross-diff vs
+##				Colossus 249.
 
 ## Page 1457
 # 	   THE FOLLOWING SUBROUTINE MAY BE CALLED TO DISPLAY A NON-ABORTIVE ALARM CONDITION. IT MAY BE CALLED

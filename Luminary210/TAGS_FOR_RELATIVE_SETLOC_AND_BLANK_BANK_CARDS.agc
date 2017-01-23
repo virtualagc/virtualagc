@@ -15,11 +15,11 @@
 ## Mod history: 2016-11-17 JL   Created from Luminary131 version.
 ##              2016-11-17 HG   Transcribed
 ##              2016-11-28 HG   fix label  ABTFLAGS  --> ABTFLGS
+##		2016-12-15 RSB	Proofed comment text with octopus/ProoferComments,
+##				and corrected the errors found.
 
 
 ## Page 29
-# TAGS FOR RELATIVE SETLOC AND BLANK BANK CARDS
-
                 COUNT           BANKSUM
 
 # MODULE 1 CONTAINS BANKS 0 THROUGH 5
@@ -341,7 +341,7 @@ LOUNITZ         EQUALS  ZUNIT                   # 2DEC 0
 
 
 
-DELRSPL         EQUALS  SPLRET                  # COL PGM, ALSO CALLED BY R30 IN LUMINARY.
+DELRSPL         EQUALS  SPLRET                  # COL PGM, ALSO CALLED BY R30 IN LUMINARY
 
 # ROPE-SPECIFIC ASSIGNS OBVIATING NEED TO CHECK COMPUTER FLAG IN         DETERMINING INTEGRATION AREA ENTRIES.
 

@@ -5,16 +5,25 @@
 ##		It is part of the source code for the Command Module's (CM)
 ##		Apollo Guidance Computer (AGC), for Apollo 9.
 ## Assembler:	yaYUL
-## Reference:	pp. 294-303 of 1701.pdf.
+## Reference:	pp. 292-301.
 ## Contact:	Ron Burkey <info@sandroid.org>.
 ## Website:	www.ibiblio.org/apollo.
 ## Mod history:	08/09/04 RSB.	Began adapting from corresponding Luminary131
 ##				source file.
 ##		2010-10-24 JL	Fixed page numbers.
+##		2016-12-30 RSB	Backported BYRO->GYRO from Colossus 237.
+##				(There's lots more that needs to be backported,
+##				but I found this one particularly annoying.)
+##		2017-01-05 RSB	Page numbers now agree with those on the
+##				original harcopy, as opposed to the PDF page
+##				numbers in 1701.pdf.
+##		2017-01-14 RSB	Cross-diff'd comment text (not whitespace)
+##				vs the already-proofed corresponding Colossus
+##				237 and Comanche 55 source-code files
+##				and corrected errors found.
 ##
 ## The contents of the "Colossus249" files, in general, are transcribed 
-## from a scanned document obtained from MIT's website,
-## http://hrst.mit.edu/hrs/apollo/public/archive/1701.pdf.  Notations on this
+## from a scanned copy of the program listing.  Notations on this
 ## document read, in part:
 ##
 ##	Assemble revision 249 of AGC program Colossus by NASA
@@ -30,13 +39,13 @@
 ##	under NASA contract NAS 9-4065.
 ##
 ## Refer directly to the online document mentioned above for further information.
-## Please report any errors (relative to 1701.pdf) to info@sandroid.org.
+## Please report any errors (relative to the scanned pages) to info@sandroid.org.
 ##
 ## In some cases, where the source code for Luminary 131 overlaps that of 
 ## Colossus 249, this code is instead copied from the corresponding Luminary 131
 ## source file, and then is proofed to incorporate any changes.
 
-## Page 295
+## Page 292
 		BANK	7
 		SETLOC	IMUCOMP
 		BANK	
@@ -76,45 +85,45 @@
 		EXTEND
 		MP	BIT6		# SCALE 2(+9)	SHIFT RIGHT 9
 		INDEX	BUF +2	
-		DAS	DELVX		# (PIPAI) + (PIPAI)(SF)
+		DAS	DELVX		# (PIPAI) + (PIPAI)(SFE)
 		
 		INDEX	BUF +2
-		CS	PIPABIAS	# (PIPA PULSES)/(CS) X 2(-3)			*
+		CS	PIPABIAS	# (PIPA PULSES)/(CS) X 2(-8)			*
 		EXTEND
-		MP	1/PIPADT	# (CS) X 2(+8) NOW (PIPA PULSES) X 2(+5)	*
+		MP	1/PIPADT	# (CS) X 2(+8) NOW (PIPA PULSES) X 2(+0)	*
 		EXTEND
-		MP	BIT1		# SCALE 2(+9) SHIFT RIGHT 9			*
+		MP	BIT1		# SCALE 2(+14) SHIFT RIGHT 14			*
 		INDEX	BUF +2
 		DAS	DELVX		# (PIPAI) + (PIPAI)(SFE) - (BIAS)(DELTAT)
 		
 		CCS	BUF +2		# PIPAZ, PIPAY, PIPAX
-## Page 296
+## Page 293
 		AD	NEG1
 		TCF	1/PIPA1 +1
-		NOOP			# LESS THAN ZERO IMPOSSIBLE
+		NOOP			# LESS THAN ZERO IMPOSSIBLE.
 		RELINT
-## Page 297
+## Page 294
 
-IRIGCOMP	TS	GCOMPSW		# INDICATE COMMANDS 2 PULSES OR LESS.
-		TS	BUF		# INDEX COUNTER.  IRIGX, IRIGY, IRIGZ.
+IRIGCOMP	TS	GCOMPSW		# INDICATE COMMANDS 2 PULSES OR LESS
+		TS	BUF		# INDEX COUNTER - IRIGX, IRIGY, IRIGZ
 		
 IRIGX		EXTEND	
 		DCS	DELVX		# (PIPA PULSES) X 2(+14)
 		DXCH	MPAC
-		CA	ADIAX		# (GYRO PULSES)/(PIPA PULSE) X 2(-6)		*
+		CA	ADIAX		# (GYRO PULSES)/(PIPA PULSE) X 2(-3)		*
 		TC	GCOMPSUB	# -(ADIAX)(PIPAX)	(GYRO PULSES) X 2(+14)
 		
 		EXTEND			# 
 		DCS	DELVY		# 	(PIPA PULSES) X 2(+14)
 		DXCH	MPAC		# 
-		CS	ADSRAX		# 	(GYRO PULSES)/(PIPA PULSE) X 2(-6)	*
-		TC	GCOMPSUB	# 	-(ADSRAX)(PIPAY)	(GYRO PULSES) X 2(+14)
+		CS	ADSRAX		# 	(GYRO PULSES)/(PIPA PULSE) X 2(-3)	*
+		TC	GCOMPSUB	# 	+(ADSRAX)(PIPAY)	(GYRO PULSES) X 2(+14)
 
-#		EXTEND			# ***
-#		DCS	DELVY		# ***	(PIPA PULSES) X 2(+14)
-#		DXCH	MPAC		# ***
-#		CA	ADOAX		# ***	(GYRO PULSES)/(PIPA PULSE) X 2(-6)	*
-#		TC	GCOMPSUB	# ***	-(ADOAX)(PIPAZ)		(GYRO PULSES) X 2(+14)
+#		EXTEND			***
+#		DCS	DELVZ		***	(PIPA PULSES) X 2(+14)
+#		DXCH	MPAC		***
+#		CA	ADOAX		***	(GYRO PULSES)/(PIPA PULSE) X 2(-3)	*
+#		TC	GCOMPSUB	***	-(ADOAX)(PIPAZ)		(GYRO PULSES) X 2(+14)
 
 		CS	NBDX		# 	(GYRO PULSES)/(CS) X 2(-5)
 		TC	DRIFTSUB	#	-(NBDX)(DELTAT)	(GYRO PULSES) X 2(+14)
@@ -122,47 +131,47 @@ IRIGX		EXTEND
 IRIGY		EXTEND
 		DCS	DELVY		# (PIPA PULSES) X 2(+14)
 		DXCH	MPAC
-		CA	ADIAY		# (GYRO PULSES)/(PIPA PULSE) X 2(+14)		*
+		CA	ADIAY		# (GYRO PULSES)/(PIPA PULSE) X 2(-3)		*
 		TC	GCOMPSUB	# -(ADIAY)(PIPAY)	(GYRO PULSES) X 2(+14)
 
 		EXTEND
 		DCS	DELVZ		# (PIPA PULSES) X 2(+14)
 		DXCH	MPAC
-		CS	ADSRAY		# (GYRO PULSES)/(PIPA PULSE) X 2(-6)		*
+		CS	ADSRAY		# (GYRO PULSES)/(PIPA PULSE) X 2(-3)		*
 		TC	GCOMPSUB	# +(ADSRAY)(PIPAZ)	(GYRO PULSES) X 2(+14)
 
-#		EXTEND			# ***
-#		DCS	DELVX		# ***	(PIPA PULSES) X 2(+14)
-#		DXCH	MPAC		# ***
-#		CA	ADOAY		# ***	(GYRO PULSES)/(PIPA PULS) X 2(-6)	*
-#		TC	GCOMPSUB	# ***	-(ADOAY)(/PIPAX)	(GYRO PULSES) X 2(+14)
+#		EXTEND			***
+#		DCS	DELVX		***	(PIPA PULSES) X 2(+14)
+#		DXCH	MPAC		***
+#		CA	ADOAY		***	(GYRO PULSES)/(PIPA PULSE) X 2(-3)	*
+#		TC	GCOMPSUB	***	-(ADOAY)(PIPAX)	(GYRO PULSES) X 2(+14)
 
 		CS	NBDY		# 	(GYRO PULSES)/(CS) X 2(-5)
 		TC	DRIFTSUB	#	-(NBDY)(DELTAT)	(GYRO PULSES) X 2(+14)
 
 IRIGZ		EXTEND
-		DCS	DELVY		# (PIPA PULSES) X 2(-14)
+		DCS	DELVY		# (PIPA PULSES) X 2(+14)
 		DXCH	MPAC
-		CA	ADSRAZ		# (GYRO PULSES)/(PIPA PULSE) X 2(-6)		*
-## Page 298
+		CA	ADSRAZ		# (GYRO PULSES)/(PIPA PULSE) X 2(-3)		*
+## Page 295
 		TC	GCOMPSUB	# -(ADSRAZ)(PIPAY)	(GYRO PULSES) X 2(+14)
 		
 		EXTEND
 		DCS	DELVZ		# (PIPA PULSES) X 2(+14)
 		DXCH	MPAC
-		CA	ADIAZ		# (GYRO PULSES)/(PIPA PULSE) X 2(-6)		*
+		CA	ADIAZ		# (GYRO PULSES)/(PIPA PULSE) X 2(-3)		*
 		TC	GCOMPSUB	# -(ADIAZ)(PIPAZ)	(GYRO PULSES) X 2(+14)
 		
-#		EXTEND			# ***
-#		DCS	DELVX		# ***	(PIPA PULSE) X 2(+14)
-#		DXCH	MPAC		# ***
-#		CS	ADOAZ		# ***	(GYRO PULSES)/(PIPA PULSE) X 2(-6)	*
-#		TC	GCOMPSUB	# ***	+(ADOAZ)(PIPAX)	(GYRO PULSES) X 2(+14)
+#		EXTEND			***
+#		DCS	DELVX		***	(PIPA PULSE) X 2(+14)
+#		DXCH	MPAC		***
+#		CS	ADOAZ		***	(GYRO PULSES)/(PIPA PULSE) X 2(-3)	*
+#		TC	GCOMPSUB	***	+(ADOAZ)(PIPAX)	(GYRO PULSES) X 2(+14)
 
 		CA	NBDZ		#	(GYRO PULSES)/(CS) X 2(-5)
 		TC	DRIFTSUB	#	+(NBDZ)(DELTAT)	(GYRO PULSES) X 2(+14)
 
-## Page 299
+## Page 296
 		CCS	GCOMPSW		# ARE GYRO COMMANDS GREATER THAN 2 PULSES
 		TCF	+2		# YES	
 		TCF	IRIG1		# NO	
@@ -179,45 +188,45 @@ IRIG1		CA	MODE		# SET EBANK FOR RETURN
 
 GCOMPSUB	XCH	MPAC		# ADIA OR ADSRA COEFFICIENT ARRIVES IN A
 		EXTEND			# C(MPAC) = (PIPA PULSES) X 2(+14)
-		MP	MPAC		# (GYRO PULSES)/(PIPA PULSE) X 2(-6)		*
-		DXCH	VBUF		# NOW = (GYRO PULSES) X 2(+8)			*
+		MP	MPAC		# (GYRO PULSES)/(PIPA PULSE) X 2(-3)		*
+		DXCH	VBUF		# NOW = (GYRO PULSES) X 2(+11)			*
 
-		CA	MPAC +1		# MINOR PART OF PIPA PULSES
+		CA	MPAC +1		# MINOR PART PIPA PULSES
 		EXTEND
 		MP	MPAC		# ADIA OR ADSRA
 		TS	L
 		CAF	ZERO
-		DAS	VBUF		# NOW = (BYRO PULSES) X 2(+8)			*
+		DAS	VBUF		# NOW = (GYRO PULSES) X 2(+11)			*
 
-		CA	VBUF		# PARTIAL RESULT -- MAJOR
+		CA	VBUF		# PARTIAL RESULT - MAJOR
 		EXTEND
 		MP	BIT12		# SCALE 2(+3)	SHIFT RIGHT 3			*
-		INDEX	BUF		# RESULT = (BYRO PULSES) X 2(+14)
+		INDEX	BUF		# RESULT = (GYRO PULSES) X 2(+14)
 		DAS	GCOMP		# HI(ADIA)(PIPAI) OR HI(ADSRA)(PIPAI)
 
-		CA	VBUF +1		# PARTIAL RESULT -- MINOR
+		CA	VBUF +1		# PARTIAL RESULT - MINOR
 		EXTEND
 		MP	BIT12		# SCALE 2(+3)	SHIFT RIGHT 3			*
 		TS	L
 		CAF	ZERO
-		INDEX	BUF		# RESULT = (TYRO PULSES) X 2(+14)
+		INDEX	BUF		# RESULT = (GYRO PULSES) X 2(+14)
 		DAS	GCOMP		# (ADIA)(PIPAI) OR (ADSRA)(PIPAI)
 
 		TC	Q
 
-## Page 300
+## Page 297
 DRIFTSUB	EXTEND
 		QXCH	BUF +1
 
 		EXTEND			# C(A) = NBD	(GYRO PULSES)/(CS) X 2(-5)
-		MP	1/PIPADT	# (CS) X 2(+8)	NO (GYRO PULSES) X 2(+3)
+		MP	1/PIPADT	# (CS) X 2(+8)	NOW (GYRO PULSES) X 2(+3)
 		LXCH	MPAC +1		# SAVE FOR FRACTIONAL COMPENSATION
 		EXTEND
 		MP	BIT4		# SCALE 2(+11)	SHIFT RIGHT 11
 		INDEX	BUF
 		DAS	GCOMP		# HI(NBD)(DELTAT)	(GYRO PULSES) X 2(+14)
 		
-		CA	MPAC +1		# NO MINOR PART
+		CA	MPAC +1		# NOW MINOR PART
 		EXTEND
 		MP	BIT4		# SCALE 2(+11)		SHIFT RIGHT 11
 		TS	L
@@ -235,10 +244,10 @@ DRFTSUB2	CAF	TWO		# PIPAX, PIPAY, PIPAZ
 		
 		MASK	NEGONE
 		CCS	A		# ARE GYRO COMMANDS GREATER THAN 2 PULSES
-		TS	GCOMPSW		# YES -- SET GCOMPSW POSITIVE
+		TS	GCOMPSW		# YES - SET GCOMPSW POSITIVE
 		TC	BUF +1		# NO
 		
-## Page 301
+## Page 298
 1/GYRO		CAF	FOUR		# PIPAZ, PIPAY, PIPAX
 		TS	BUF
 		
@@ -275,7 +284,7 @@ GCOMP1		CAF	FOUR		# PIPAZ, PIPAY, PIPAX
 		INDEX	BUF		# RESCALE
 		CA	GCOMP +1
 		EXTEND
-		MP	BIT8		# SHIFT MINOR PART LEFT 7 -- MAJOR PART = 0
+		MP	BIT8		# SHIFT MINOR PART LEFT 7 - MAJOR PART = 0
 		INDEX	BUF
 		LXCH	GCOMP +1	# BITS 8-14 OF MINOR PART WERE = 0
 		
@@ -286,7 +295,7 @@ GCOMP1		CAF	FOUR		# PIPAZ, PIPAY, PIPAX
 V06N30S		VN	0630
 		TCF	ENDOFJOB
 
-## Page 302		
+## Page 299		
 NBDONLY		CCS	GCOMPSW		# BYPASS IF GCOMPSW NEGATIVE
 		TCF	+3
 		TCF	+2
@@ -303,7 +312,7 @@ NBDONLY		CCS	GCOMPSW		# BYPASS IF GCOMPSW NEGATIVE
 		RELINT
 		COM
 		AD	1/PIPADT
-NBD2		CCS	A		# CALCULATE ELAPSED TIME.
+NBD2		CCS	A		# CALCULATE ELAPSED TIME
 		AD	ONE		# NO TIME1 OVERFLOW
 		TCF	NBD3		# RESTORE TIME DIFFERENCE AND JUMP
 		TCF	+2		# TIME1 OVERFLOW
@@ -320,16 +329,16 @@ NBD3		EXTEND			# C(A) = DELTAT		(CS) X 2(+14)
 		DXCH	MPAC		# DELTAT NOW SCALED (CS) X 2(+19)
 		
 		CAF	ZERO
-		TS	GCOMPSW		# INDICATE COMMANDS 2 PULSES OR LESS.
-		TS	BUF		# INDEX X, Y, Z.
+		TS	GCOMPSW		# INDICATE COMMANDS 2 PULSES OR LESS
+		TS	BUF		# PIPAX, PIPAY, PIPAZ.
 		
 		CS	NBDX		# (GYRO PULSES)/(CS) X 2(-5)
-		TC	FBIASSUB	# -(NBOX)(DELTAT) 	(GYRO PULSES) X 2(+14)
+		TC	FBIASSUB	# -(NBDX)(DELTAT) 	(GYRO PULSES) X 2(+14)
 		
 		EXTEND
 		DCS	VBUF 
 		DXCH	MPAC		# DELTAT SCALED (CS) X 2(+19)
-		CA	NBDY		# (BYRO PULSES)/(CS) X 2(-5)
+		CA	NBDY		# (GYRO PULSES)/(CS) X 2(-5)
 		TC	FBIASSUB	# -(NBDY)(DELTAT)	(GYRO PULSES) X 2(+14)
 		
 		EXTEND
@@ -337,12 +346,12 @@ NBD3		EXTEND			# C(A) = DELTAT		(CS) X 2(+14)
 		DXCH	MPAC		# DELTAT SCALED (CS) X 2(+19)
 		CS	NBDZ		# (GYRO PULSES)/(CS) X 2(-5)
 		TC	FBIASSUB	# +(NBDZ)(DELTAT)	(GYRO PULSES) X 2(+14)
-## Page 303		
+## Page 300		
 		CCS	GCOMPSW		# ARE GYRO COMMANDS GREATER THAN 2 PULSES
 		TCF	1/GYRO		# YES
 		TCF	ENDOFJOB	# NO
 
-## Page 304
+## Page 301
 FBIASSUB	XCH	Q
 		TS	BUF +1
 		
@@ -352,7 +361,7 @@ FBIASSUB	XCH	Q
 		INDEX	BUF
 		DAS	GCOMP		# HI(NBD)(DELTAT)	(GYRO PULSES) X 2(+14)
 		
-		CA	Q		# NO FRACTIONAL PART
+		CA	Q		# NOW FRACTIONAL PART
 		EXTEND
 		MP	MPAC +1
 		TS	L
@@ -365,7 +374,7 @@ FBIASSUB	XCH	Q
 LASTBIAS	TC	BANKCALL
 		CADR	PIPUSE
 		
-		CCS	GCOMPSW
+		CCS	GCOMPSW		# BYPASS IF GCOMPSW NEGATIVE
 		TCF	+3
 		TCF	+2
 		TCF	ENDOFJOB

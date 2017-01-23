@@ -8,13 +8,16 @@
 ##		that the code format has been changed to conform to the
 ##		requirements of the yaYUL assembler rather than the
 ##		original YUL assembler.
-## Reference:	pp. 836-840 of 1729.pdf.
+## Reference:	pp. 831-835
 ## Contact:	Ron Burkey <info@sandroid.org>.
 ## Website:	www.ibiblio.org/apollo/index.html
 ## Mod history:	05/26/03 RSB.	Began transcribing.
 ##		05/14/05 RSB	Corrected website reference above.
+##		2017-01-06 RSB	Page numbers now agree with those on the
+##				original harcopy, as opposed to the PDF page
+##				numbers in 1701.pdf.
 
-## Page 836
+## Page 831
 		BANK	24
 		SETLOC	P12
 		BANK
@@ -39,7 +42,7 @@ P12LM		TC	PHASCHNG
 		CAF	V06N33A
 		TC	BANKCALL	# FLASH TIG
 		CADR	GOFLASH
-		TCF	GOTOP00H
+		TCF	GOTOPOOH
 		TCF	+2		# PROCEED
 		TCF	-5		# ENTER
 
@@ -63,7 +66,7 @@ P12LM		TC	PHASCHNG
 P12LMB		DLOAD
 			(TGO)A		# SET TGO TO AN INITIAL NOMINAL VALUE.
 		STODL	TGO
-## Page 837
+## Page 832
 			TIG
 		STCALL	TDEC1
 			LEMPREC		# ROTATE THE STATE VECTORS TO THE
@@ -96,7 +99,7 @@ P12LMB		DLOAD
 NEWLOAD		CAF	V06N76		# FLASH CROSS-RANGE, AND APOLUNE VALUES.
 		TC	BANKCALL
 		CADR	GOFLASH
-		TCF	GOTOP00H
+		TCF	GOTOPOOH
 		TCF	+2		# PROCEED
 		TCF	NEWLOAD		# ENTER NEW DATA.
 
@@ -114,7 +117,7 @@ NEWLOAD		CAF	V06N76		# FLASH CROSS-RANGE, AND APOLUNE VALUES.
 			Y
 		STOVL	YCO
 			UNIT/R/
-## Page 838
+## Page 833
 		VXSC	VAD
 			49FPS
 			V1S
@@ -165,7 +168,7 @@ P12INIT		DLOAD			# INITIALIZE ENGINE DATA.  USED FOR P12 AND
 			(AT)A
 		STODL	AT
 			(TBUP)A
-## Page 839
+## Page 834
 		STODL	TBUP
 			ATDECAY
 		DCOMP	SL
@@ -216,7 +219,7 @@ GUIDINIT	STQ	SETPD
 			RLS
 		ABVAL	SL3
 		STCALL	/LAND/
-## Page 840
+## Page 835
 			TEMPR60
 
 49FPS		2DEC	.149352 B-6	# EXPECTED RDOT AT TIPOVER

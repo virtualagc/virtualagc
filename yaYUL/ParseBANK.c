@@ -38,7 +38,20 @@
 // each bank.   
 
 #define NUM_FIXED_BANKS 044
+static int PriorPassUsedInBank[NUM_FIXED_BANKS] = { 0 };
 static int UsedInBank[NUM_FIXED_BANKS] = { 0 };
+
+void SaveUsedCounts(void)
+{
+  memcpy (PriorPassUsedInBank, UsedInBank, sizeof(PriorPassUsedInBank));
+}
+int GetPriorBankCount(int bank)
+{
+    if (bank < 0 || bank >= NUM_FIXED_BANKS)
+        return (0);
+
+    return (PriorPassUsedInBank[bank]);
+}
 
 //------------------------------------------------------------------------
 // A function for clearing the UsedInBank array at the start of a pass.

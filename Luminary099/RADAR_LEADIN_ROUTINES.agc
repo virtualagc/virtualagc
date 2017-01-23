@@ -11,6 +11,8 @@
 ## Mod history:	2009-05-17 RSB	Adapted from the corresponding 
 ##				Luminary131 file, using page 
 ##				images from Luminary 1A.
+##		2016-12-14 RSB	Proofed text comments with octopus/ProoferComments
+##				and corrected the errors found.
 ##
 ## This source code has been transcribed or otherwise adapted from
 ## digitized images of a hardcopy from the MIT Museum.  The digitization
@@ -37,7 +39,7 @@
 # RADAR SAMPLING LOOP.
 
 		COUNT*	$$/RLEAD
-RADSAMP		CCS	RSAMPDT		# TIMES NORMAL ONCE PER SECOND SAMLING
+RADSAMP		CCS	RSAMPDT		# TIMES NORMAL ONCE-PER-SECOND SAMPLING.
 		TCF	+2
 		TCF	TASKOVER	# +0 INSERTED MANUALLY TERMINATES TEST.
 		
@@ -84,12 +86,12 @@ DORSAMP2	INHINT
 		CA	RTSTLOC
 		AD	TWO		# STORAGE IS DP
 		TS	RTSTLOC
-		TCF	ENDOFJOB	# CONTINUOUS SAMPLING AND 2N TRIES -- GONE.
+		TCF	ENDOFJOB	# CONTINUOUS SAMPLING AND 2N TRIES - GONE.
 		
 # VARIABLE RADAR DATA CALLER FOR ONE MEASUREMENT ONLY.
 
 VARADAR		CAF	ONE		# WILL BE SENT TO RADAR ROUTINE IN A BY
-		TS	BUF2		# SWCALL
+		TS	BUF2		# SWCALL.
 		INDEX	RTSTDEX
 		CAF	RDRLOCS
 		TCF	SWCALL		# NOT TOUCHING Q.

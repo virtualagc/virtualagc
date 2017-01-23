@@ -8,13 +8,16 @@
 ##		that the code format has been changed to conform to the
 ##		requirements of the yaYUL assembler rather than the 
 ##		original YUL assembler.
-## Reference:	pp. 661-664 of 1729.pdf.
+## Reference:	pp. 656-659
 ## Contact:	Ron Burkey <info@sandroid.org>.
 ## Website:	www.ibiblio.org/apollo/index.html
 ## Mod history:	05/21/03 RSB.	Began transcribing. 
 ##		05/14/05 RSB	Corrected website reference above.
+##		2017-01-06 RSB	Page numbers now agree with those on the
+##				original harcopy, as opposed to the PDF page
+##				numbers in 1701.pdf.
 
-## Page 661
+## Page 656
 # GROUND TRACKING DETERMINATION PROGRAM -- P21
 #
 # PROGRAM DESCRIPTION
@@ -60,7 +63,7 @@
 #	504LM+4	2DEC	-2.553198641 E-4 RADIANS
 #
 # DEBRIS
-## Page 662
+## Page 657
 #	CENTRALS -- A,C,L
 #	OTHER -- THOSE USED BY THE ABOVE LISTED SUBROUTINES
 #	SEE LEMPREC, LAT-LONG
@@ -78,7 +81,7 @@ PROG21		CAF	ONE
 		CAF	BIT2		# OPTION 2
 		TC	BANKCALL
 		CADR	GOPERF4
-		TC	GOTOP00H	# TERMINATE
+		TC	GOTOPOOH	# TERMINATE
 		TC	+2		# PROCEED VALUE OF ASSUMED VEHICLE OK
 		TC	-5		# R2 LOADED THROUGH DSKY
 		CAF	ZERO		# INITIAL TIME = PRESENT TIME
@@ -87,7 +90,7 @@ PROG21		CAF	ONE
 P21PROG1	CAF	V6N34		# LOAD DESIRED TIME OF LAT-LONG.
 		TC	BANKCALL
 		CADR	GOFLASH
-		TC	GOTOP00H	# TERM
+		TC	GOTOPOOH	# TERM
 		TC	+2		# PROCEED VALUES OK
 		TC	-5		# TIME LOADED THROUGH DSKY
 		TC	INTPRET
@@ -111,7 +114,7 @@ P21PROG2	STCALL	TDEC1		# INTEG TO TIME SPECIFIED IN TDEC1
 		CALL
 			INTEGRV		#     CALCULATE
 		GOTO			#       AND
-## Page 663
+## Page 658
 			P21VSAVE	# SAVE BASE VECTOR
 P21CONT		VLOAD
 			P21BASER	# RECYCLE -- INTEG FROM BASE VECTOR
@@ -162,7 +165,7 @@ P21DSP		CLEAR	SLOAD		# GENERATE DISPLAY DATA
 			LUNAFLAG
 			X2
 		BZE	SET
-## Page 664
+## Page 659
 			+2		# 0 = EARTH
 			LUNAFLAG
 		VLOAD
@@ -179,8 +182,8 @@ P21DSP		CLEAR	SLOAD		# GENERATE DISPLAY DATA
 		CAF	V06N43		# DISPLAY LAT, LONG, ALT
 		TC	BANKCALL	# LAT, LONG = 1/2 REVS B0
 		CADR	GOFLASH		# ALT = KM B14
-		TC	GOTOP00H	# TERM
-		TC	GOTOP00H
+		TC	GOTOPOOH	# TERM
+		TC	GOTOPOOH
 		TC	INTPRET		# V32E RECYCLE
 		DLOAD	DAD
 			P21TIME

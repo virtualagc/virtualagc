@@ -8,13 +8,16 @@
 ##		that the code format has been changed to conform to the
 ##		requirements of the yaYUL assembler rather than the
 ##		original YUL assembler.
-## Reference:	pp. 1246-1255 of 1729.pdf.
+## Reference:	pp. 1241-1250
 ## Contact:	Ron Burkey <info@sandroid.org>.
 ## Website:	www.ibiblio.org/apollo/index.html
 ## Mod history:	06/03/03 RSB.	Began transcribing.
 ##		05/14/05 RSB.	Corrected website reference above.
+##		2017-01-06 RSB	Page numbers now agree with those on the
+##				original harcopy, as opposed to the PDF page
+##				numbers in 1701.pdf.
 
-## Page 1246
+## Page 1241
 		BANK	22
 		SETLOC	INFLIGHT
 		BANK
@@ -63,7 +66,7 @@ CALCGTA		ITA	DLOAD		# PUSHDOWN 00-03, 16D-27D, 34D-37D
 		STADR
 		STCALL	COSTH		# COS(MGC) = MPAC - PD00
 			ARCTRIG
-## Page 1247
+## Page 1242
 		STOVL	MGC		# Z GYRO TORQUING ANGLE   FRACTION OF REV.
 			ZPRIME
 		DOT
@@ -78,7 +81,7 @@ CALCGTA		ITA	DLOAD		# PUSHDOWN 00-03, 16D-27D, 34D-37D
 		STCALL	OGC		# X GYRO TORQUING ANGLE   FRACTION OF REV.
 			S2
 
-## Page 1248
+## Page 1243
 # ARCTRIG COMPUTES AN ANGLE GIVEN THE SINE AND COSINE OF THIS ANGLE.
 #
 # THE INPUTS ARE SIN/4 AND COS/4 STORED UP AT SINTH AND COSTH.
@@ -118,12 +121,12 @@ TRIG2		DLOAD	SIGN		# (135,-135)
 		STORE	THETA		# X = .5 WITH SIGN(SIN) - ARCSIN(SIN)
 		RVQ			#	(+) - (+) OR (-) - (-)
 
-## Page 1249
+## Page 1244
 # SMNB, NBSM, AND AXISROT, WHICH USED TO APPEAR HERE, HAVE BEEN
 # COMBINED IN A ROUTINE CALLED AX*SR*T, WHICH APPEARS AMONG THE POWERED
 # FLIGHT SUBROUTINES.
 
-## Page 1250
+## Page 1245
 # CALCGA COMPUTES THE CDU DRIVING ANGLES REQUIRED TO BRING THE STABLE MEMBER INTO THE DESIRED ORIENTATION.
 #
 # THE INPUTS ARE  1) THE NAVIGATION BASE COORDINATES REFERRED TO ANY COORDINATE SYSTEM.  THE THREE HALF-UNIT
@@ -173,7 +176,7 @@ CALCGA1		VLOAD	DOT
 			0
 		STOVL	COSTH		# COS(IG) = ZSM . MGA
 			XSM
-## Page 1251
+## Page 1246
 		DOT	STADR
 		STCALL	SINTH		# SIN(IG) = XSM . MGA
 			ARCTRIG
@@ -195,7 +198,7 @@ GIMLOCK1	EXIT
 		GOTO
 			CALCGA1
 
-## Page 1252
+## Page 1247
 # AXISGEN COMPUTES THE COORDINATES OF ONE COORDINATE SYSTEM REFERRED TO ANOTHER COORDINATE SYSTEM.
 #
 # THE INPUTS ARE  1) THE STAR1 VECTOR REFERRED TO COORDINATE SYSTEM A STORED AT STARAD.  2) THE STAR2 VECTOR
@@ -246,7 +249,7 @@ AXISGEN2	XCHX,1	VLOAD*
 			30D		# X1=-6 X2=+6	X1=-6 X2=+4	X1=-6 X2=+2
 			0,1
 
-## Page 1253
+## Page 1248
 		VXSC*	PDVL*		# J=(UA)(UB1)	J=(UA)(UB2)	J=(UA)(UB3)
 			STARAD +6,2
 			6,1
@@ -279,9 +282,9 @@ AXISGEN3	TIX,2
 
 		RVQ
 
-## Page 1254
+## Page 1249
 QTSN45		2DEC	.1768
 .166...		2DEC	.1666666667
 
-## Page 1255
-# (There is no source code on this page of the original assembly listing.)
+## Page 1250
+## There is no source code on this page of the original assembly listing.

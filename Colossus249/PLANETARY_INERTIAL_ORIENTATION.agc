@@ -5,14 +5,20 @@
 ##		It is part of the source code for the Command Module's (CM)
 ##		Apollo Guidance Computer (AGC), for Apollo 9.
 ## Assembler:	yaYUL
-## Reference:	Starts on p. 1225 of 1701.pdf.
+## Reference:	Starts on p. 1213
 ## Contact:	Ron Burkey <info@sandroid.org>.
 ## Website:	www.ibiblio.org/apollo.
 ## Mod history:	08/28/04 RSB.	Adapted from corresponding Luminary131 file.
+##		2017-01-06 RSB	Page numbers now agree with those on the
+##				original harcopy, as opposed to the PDF page
+##				numbers in 1701.pdf.
+##		2017-01-18 RSB	Cross-diff'd comment text (not whitespace)
+##				vs the already-proofed corresponding Colossus
+##				237 and Comanche 55 source-code files
+##				and corrected errors found.
 ##
 ## The contents of the "Colossus249" files, in general, are transcribed 
-## from a scanned document obtained from MIT's website,
-## http://hrst.mit.edu/hrs/apollo/public/archive/1701.pdf.  Notations on this
+## from a scanned copy of the program listing.  Notations on this
 ## document read, in part:
 ##
 ##	Assemble revision 249 of AGC program Colossus by NASA
@@ -28,18 +34,16 @@
 ##	under NASA contract NAS 9-4065.
 ##
 ## Refer directly to the online document mentioned above for further information.
-## Please report any errors (relative to 1701.pdf) to info@sandroid.org.
+## Please report any errors (relative to the scanned pages) to info@sandroid.org.
 ##
 ## In some cases, where the source code for Luminary 131 overlaps that of 
 ## Colossus 249, this code is instead copied from the corresponding Luminary 131
 ## source file, and then is proofed to incorporate any changes.
 
-## Page 1225
-# PLANETARY INERTIAL ORIENTATION
-#
-# ***** RP-TO-R SUBROUTINE *****
+## Page 1213
+# ..... RP-TO-R SUBROUTINE .....
 # SUBROUTINE TO CONVERT RP (VECTOR IN PLANETARY COORDINATE SYSTEM, EITHER
-# EARTH-FIXED OR MOON-FIXED) TO R (SAME VECTOR IN BASIC REF. SYSTEM)
+# EARTH-FIXED OR MOON-FIXED) TO R (SAME VECTOR IN THE BASIC REF. SYSTEM)
 #	R = MT(T) * (RP + LP X RP)	MT = M MATRIX TRANSPOSE
 #
 # CALLING SEQUENCE
@@ -50,7 +54,7 @@
 #	EARTHMX, MOONMX, EARTHL
 #
 # 	ITEMS AVAILABLE FROM LAUNCH DATA
-#		504M = THE LIBRATION VECTOR L OF THE MOON AT TIME TIMSUBL, EXPRESSED
+#		504LM = THE LIBRATION VECTOR L OF THE MOON AT TIME TIMSUBL, EXPRESSED
 #		IN THE MOON-FIXED COORD. SYSTEM		RADIANS B0
 #
 #	ITEMS NECESSARY FOR SUBR. USED (SEE DESCRIPTION OF SUBR.)
@@ -87,12 +91,12 @@ RPTORA		CALL			# EARTH COMPUTATIONS
 			EARTHL		# L VECTOR RADIANS B0
 		MXV	VSL1		# LP=M(T)*L 	RAD B-0
 			MMATRIX
-## Page 1226
+## Page 1214
 		GOTO
 			RPTORB
 
-## Page 1227
-# ***** R-TO-RP SUBROUTINE *****
+## Page 1215
+# ..... R-TO-RP SUBROUTINE .....
 # SUBROUTINE TO CONVERT R (VECTOR IN REFERENCE COORD. SYSTEM) TO RP
 # (VECTOR IN PLANETARY COORD SYSTEM) EITHER EARTH-FIXED OR MOON-FIXED
 #	RP = M(T) * (R - L X R)
@@ -143,8 +147,8 @@ RTORPA		CALL			# EARTH COMPUTATIONS
 		GOTO			# MPAC=L=(-AX,-AY,0) 	RAD B-0
 			RTORPB
 
-## Page 1228
-# ***** MOONMX SUBROUTINE *****
+## Page 1216
+# ..... MOONMX SUBROUTINE .....
 # SUBROUTINE TO COMPUTE THE TRANSFORMATION MATRIX M FOR THE MOON
 #
 # CALLING SEQUENCE
@@ -185,17 +189,17 @@ MOONMX		STQ	SETPD
 			FSUBO		# 			8-9D=FSUBO
 		PDDL	PUSH		# PD 10D THEN 12D	10-11D=FDOT
 			FDOT
-		AXT,1	CALL		# F REQUIRES SL 1, SL 6 IN NEWANGLE.
+		AXT,1	CALL		# F REQUIRES SL 1, SL 6 IN NEWANGLE
 			4
 			NEWANGLE	# EXIT WITH PD 8D AND MPAC= F REVS B0
 		STODL	AVECTR +2	# SAVE F TEMP
 			NODIO		#			8-9D=NODIO
 		PDDL	PUSH		# PD 10D THEN 12D	10-11D=NODDOT
-			NODDOT		#			MPAC=5
+			NODDOT		#			MPAC=T
 		AXT,1	CALL		# NODE REQUIRES SL 0, SL 5 IN NEWANGLE
 			5
 			NEWANGLE	# EXIT WITH PD 8D AND MPAC= NODI REVS B0
-## Page 1229
+## Page 1217
 		PUSH	COS		# PD 10D	8-9D= NODI REVS B0
 		PUSH			# PD 12D	10-11D= COS(NODI) B-1
 		STORE	AVECTR
@@ -205,10 +209,10 @@ MOONMX		STQ	SETPD
 		DMP	SL1R		#			SOB*SIN(NODI)
 			SOB
 		STODL	BVECTR +4	# PD 8D
-		SIN	PUSH		#			-SIN(NODI) B-1
+		SIN	PUSH		# PD 10D		-SIN(NODI) B-1
 		DCOMP			#         26-31D=BVECTR=COB*COS(NODI)
 		STODL	BVECTR		# PD 8D			SOB*COS(NODI)
-			AVECTR +2
+			AVECTR +2	# MOVE F FROM TEMP LOC. TO 504F
 		STODL	504F
 		DMP	SL1R
 			COB
@@ -246,7 +250,7 @@ MOONMX		STQ	SETPD
 		VSL1
 		STODL	MMATRIX +6	# M1= AVECTR*SINF-DVECTR*COSF B-1
 			504F
-## Page 1230
+## Page 1218
 		SIN	VXSC		# PD 8D
 		PDDL	COS		# PD 14D  8-13D=DVECTR*SINF B-2
 			504F
@@ -260,7 +264,7 @@ MOONMX		STQ	SETPD
 # 8-9D= X0 (REVS B-0), PUSHLOC SET AT 12D
 # 10-11D=XDOT (REVS/CSEC) SCALED B+23 FOR WEARTH,B+28 FOR NODDOT AND BDOT
 #			AND B+27 FOR FDOT
-# X1=DIFFERENCE IN 23 AND SCALING OF XDOT, =0 FOR WEARTH, 5 FOR NDDOT AND
+# X1=DIFFERENCE IN 23 AND SCALING OF XDOT, =0 FOR WEARTH, 5 FOR NODDOT AND
 #					BDOT AND 4 FOR FDOT
 # 6-7D=T (CSEC B-28), TIMSUBO= (CSEC B-42 TRIPLE PREC.)
 
@@ -283,22 +287,22 @@ NEWANGLE	DLOAD	SR		# ENTER PD 12D
 		SL*	DAD		# PD 8D		SHIFT SUCH THAT THIS PART OF X
 			10D,1		#		IS SCALED REVS/CSEC B-0
 		BOV			# TURN OFF OVERFLOW IF SET BY SHIFT
-			+1		# INSTRUCTION BEFORE EXITING.
+			+1		# INSTRUCTION BEFORE EXITING
 		RVQ			# MPAC=X= X0+(XDOT)(T+T0)	REVS B0
 
-## Page 1231
-# ***** EARTHMX SUBROUTINE *****
+## Page 1219
+# ..... EARTHMX SUBROUTINE .....
 # SUBROUTINE TO COMPUTE THE TRANSFORMATION MATRIX M FOR THE EARTH
 #
 # CALLING SEQUENCE
 #	L	CALL
 #	L+1		EARTHMX
 #
-# SUBROUTINE USED
+# SUBROUTINES USED
 #	NEWANGLE
 #
 # INPUT
-#	INPUT AVAILABLE FROM LAUNCH DATA	AZC REVS B-0
+#	INPUT AVAILABLE FROM LAUNCH DATA	AZO REVS B-0
 #						TEPHEM CSEC B-42
 #	6-7D= TIME CSEC B-28
 #
@@ -332,8 +336,8 @@ EARTHMX		STQ	SETPD		# SET 8-9D=AZO
 		GOTO
 			EARTHMXX
 
-## Page 1232
-# ***** EARTH SUBROUTINE *****
+## Page 1220
+# ..... EARTHL SUBROUTINE .....
 # SUBROUTINE TO COMPUTE L VECTOR FOR EARTH
 #
 # CALLING SEQUENCE
@@ -358,7 +362,7 @@ EARTHL		DLOAD	DCOMP
 			504LPL
 		RVQ
 
-## Page 1233
+## Page 1221
 # CONSTANTS AND ERASABLE ASSIGNMENTS
 
 1B1		=	DP1/2		# 1 SCALED B-1
@@ -371,7 +375,7 @@ SINNODI		=	8D		# 2		SIN(NODI)
 DVECTR		=	8D		# 6		D VECTOR MOON
 CVECTR		=	8D		# 6		C VECTR MOON
 504AZ		=	18D		# 2		AZ
-TIMSUBM		=	14D		# 3		TIME SUB M (MOON) T+10 IN GETAZ
+TIMSUBM		=	14D		# 3		TIME SUB M (MOON) T+T0 IN GETAZ
 504LPL		=	14D		# 6		L OR LP VECTOR
 AVECTR		=	20D		# 6		A VECTOR (MOON)
 BVECTR		=	26D		# 6		B VECTOR (MOON)

@@ -1,15 +1,19 @@
 ### FILE="Main.annotation"
-## Copyright:    Public domain.
-## Filename:	 P30,P37.agc
-## Purpose:      Part of the source code for Colossus build 237.
-##               This is for the Command Module's (CM) Apollo Guidance
-##               Computer (AGC), for Apollo 8.
-## Assembler:    yaYUL
-## Contact:      Jim Lawton <jim DOT lawton AT gmail DOT com>
-## Website:      www.ibiblio.org/apollo/index.html
-## Page Scans:   www.ibiblio.org/apollo/ScansForConversion/Colossus237/
-## Mod history:  2011-02-19 JL	Adapted from corresponding Colossus 249 file.
-##		 2011-04-29 JL	Added missing line at the bottom of page 632.
+## Copyright:   Public domain.
+## Filename:	P30,P37.agc
+## Purpose:     Part of the source code for Colossus build 237.
+##              This is for the Command Module's (CM) Apollo Guidance
+##              Computer (AGC), for Apollo 8.
+## Assembler:   yaYUL
+## Contact:     Jim Lawton <jim DOT lawton AT gmail DOT com>
+## Website:     www.ibiblio.org/apollo/index.html
+## Page Scans:  www.ibiblio.org/apollo/ScansForConversion/Colossus237/
+## Mod history: 2011-02-19 JL	Adapted from corresponding Colossus 249 file.
+##		2011-04-29 JL	Added missing line at the bottom of page 632.
+##		2016-12-31 RSB	Proofed comment text using octopus/ProoferComments,
+##				and corrected errors found.
+##		2017-01-17 RSB	Fixed comment-text errors noted while diff'ing
+##				vs Colossus 249.
 
 ## Page 624
 		BANK	32
@@ -56,7 +60,7 @@ COMPTGO		EXTEND			# USED TO COMPUTE TTOGO
 
 		TC	2PHSCHNG
 		OCT	40036		# 6.3SPOT FOR CLOKTASK
-		OCT	05024
+		OCT	05024		# GROUP 4 CONTINUES HERE
 		OCT	13000
 
 		TC	PHSPRDT6
@@ -66,7 +70,7 @@ COMPTGO		EXTEND			# USED TO COMPUTE TTOGO
 
 # MOD.I BY S. ZELDIN- TO ADD P31 AND AD APT P30 FOR P31 USE.    22DEC67
 # FUNCTIONAL DESCRIPTION
-# +30(EXTERNAL DELTA-V TARGETING PROGRAM)
+# +30(EXTERNAL DELTA-V TARGETTING PROGRAM)
 #     ACCEPTS ASTRONAUT INPUTS OF TIG,DELV(LV) AND COMPUTES,FOR DISPLAY,
 #     APOGEE,PERIGEE,DELV(MAG),MGA ASSOCIATED WITH DESIRED MANEUVER
 
@@ -88,7 +92,7 @@ COMPTGO		EXTEND			# USED TO COMPUTE TTOGO
 
 # CALLING SEQUENCE VIA JOB FROM V37
 
-# EXIT VIA V37 OR GOTOPOOH
+# EXIT VIA V37 CALL OR GOTOPOOH
 
 # OUTPUT FOR POWERED FLIGHT
 #          VTIG   X
@@ -193,14 +197,14 @@ V16N35		VN	1635
 V06N45		VN	0645
 
 ## Page 628
-# PROGRAM DESCRPTION S30.1       DATE 9NOV66
+# PROGRAM DESCRIPTION S30.1       DATE 9NOV66
 
 # MOD NO 1        LOG SECTION  P30,P37
 # MOD  BY  RAMA AIYAWAR **
 # MOD.2 BY S.ZELDIN - TO CORRECT MOD.1 FOR COLOSSUS         29DEC67
 # FUNCTIONAL DESCRIPTION
 #          BASED ON STORED TARGET PARAMETERS(R OF IGNITION(RTIG),V OF
-# IGNITION(VTIG),TIME OF IGNITION(TIG)),DELV(LV),COMPUTE PERIGEE ALTITUDE
+# IGNITION(VTIG),TIME OF IGNITION(TIG),DELV(LV),COMPUTE PERIGEE ALTITUDE
 # A+OGEE ALTITUDE AND DELTA-V REQUIRED IN REF. COORDS.(DELVSIN)
 # CALLING SEQUENCE
 #    L     CALL
@@ -279,7 +283,7 @@ S30.1		STQ	DLOAD
 			QTEMP
 
 ## Page 630
-# S31.1  PROGRAM DESCRIPTION                   26DEC67
+# S31.1  PROGRAM DESCRIPTION                   28DEC67
 # MOD.1 BY S.ZELDIN
 
 # S31.1 COMPUTES DELV IN REF AND LV COORDS,MAG OF DELV,INTERCEPT TIME,
@@ -344,25 +348,25 @@ S31.1		STQ	DLOAD
 			QTEMP
 
 ## Page 632
-# SUBROUTINE NAME:      DELRSPL                                           (CONTINUATION OF V 62 IN CSM IF P11 ACTI
+# SUBROUTINE NAME:      DELRSPL                                           (CONTINUATION OF V 82 IN CSM IF P11 ACTI
 # TRANSFERRED COMPLETELY FROM SUNDISK, P30S REV 33. 9 SEPT 67.
 # MOD NO:  0           MOD BY:  ZELDIN               DATE:
 # MOD NO:  1           MOD BY:  RR BAIRNSFATHER      DATE:  11 APR 67
 # MOD NO:  2           MOD BY:  RR BAIRNSFATHER      DATE:  12 MAY 67     ADD UR.RT CALC WHEN BELOW 300K FT
-# MOD NO:  2.1         MOD BY:  RR BAIRNSFATHER      DATE: 5 JULY 67      FIX ERROR ON MOD. 2.
+# MOD NO:  2.1         MOD BY:  RR BAIRNSFATHER      DATE: 5 JULY 67      FIX ERROR IN MOD. 2.
 # MOD NO:  3           MOD BY:  RR BAIRNSFATHER      DATE:  12 JUL 67     CHANGE SIGN OF DISPLAYED ERROR.
 # MOD 4                MOD BY   S.ZELDIN             DATE  3 APRIL 68	  CHANGE EQUATIONS FOR L/D=.18 WHICH REPLA
 # FUNCTION:            CALCULATE (FOR DISPLAY ON CALL) AN APPROXIMATE     MEASURE OF IN-PLANE SPLASH DOWN
 #                      ERROR. IF THE FREE-FALL TRANSFER ANGLE TO 300K FT  ABOVE PAD RADIUS IS POSITIVE:
-#                      SPLASH ERROR= -RANGE TO TARGET + FREE-FALL TRANSFER ANGEL + ESTIMATED ENTRY ANGLE.
+#                      SPLASH ERROR= -RANGE TO TARGET + FREE-FALL TRANSFER ANGLE + ESTIMATED ENTRY ANGLE.
 #                      THE TARGET LOCATION AT ESTIMATED TIME OF IMPACT IS USED.  IF THE FREE-FALL TRANSFER
-#                      ANGLE IS NEGATIVE:  SPASH ERROR= -RANGE TO TARGET
+#                      ANGLE IS NEGATIVE:  SPLASH ERROR= -RANGE TO TARGET
 #                      THE PRESENT TARGET LOCATION IS USED.
-# CALLING SEQUENCE:    CALLED AFTER SR30.1 IF IN CSM AND IF P11 OPERATING (UNDER CONTROL OF V82)
-# SUBROUTINES CALLED: VGAMCALC, TFF/TRIG, LALOTORV.
-# EXIT:                RETURN DIRECTLY TO V 82 PROG. AT SPLRET
+# CALLING SEQUENCE     CALLED AFTER SR30.1 IF IN CSM AND IF P11 OPERATING (UNDER CONTROL OF V82)
+# SUBROUTINES CALLED:  VGAMCALC, TFF/TRIG, LALOTORV.
+# EXIT                 RETURN DIRECTLY TO V 82 PROG. AT SPLRET
 # ERASABLE INITIALIZATION   LEFT BY SR30.1 AND V82GON1
-# OUTPUT:  RSP-RREC  RANGE IN REVOLUTIONS.                                DSKY DISPLAY IN N. MI.
+# OUTPUT:  RSP-RREC  RANGE IN REVOLUTIONS                                 DSKY DISPLAY IN N. MI.
 # DEBRIS:  QPRET, PDL0 ...PDL7 ,PDL10
 
 # THETA(1)
@@ -488,8 +492,8 @@ MAXPHI		DLOAD	GOTO
 MAXPHIC		2DEC	.09259298	# 2000 NM FOR MAXIMUM PHI ENTRY
 		COUNT*	$$/P30
 		
-#					#                    BELOW
-#					# <<<< TABLE IS INDEXED. KEEP IN ORDER >>>
+#					                   BELOW
+#					<<<< TABLE IS INDEXED. KEEP IN ORDER >>>
 
 		2DEC	7.07304526 E-4	# 5500
 		2DEC	3.08641975 E-4	# 2400
@@ -518,11 +522,11 @@ V(26K)		2DEC	79.248 B-7	# 26000
 X1CON		DEC	10
 		DEC	8
 		DEC	6
-#					  <<<<* TABLE IS INDEXED. KEEP IN ORDER >>>
-#					                      ABOVE
+#					  <<<< TABLE IS INDEXED. KEEP IN ORDER >>>
+#					                     ABOVE
 
 ## Page 636
-# ..... AVFLAG/P .....
+# ..... AVFLAGA/P .....
 
 # SUBROUTINES USED
 

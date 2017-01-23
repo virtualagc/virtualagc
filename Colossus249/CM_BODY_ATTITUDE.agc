@@ -5,14 +5,20 @@
 ##		It is part of the source code for the Command Module's (CM)
 ##		Apollo Guidance Computer (AGC), for Apollo 9.
 ## Assembler:	yaYUL
-## Reference:	pp. 840-846 of 1701.pdf.
+## Reference:	pp. 836-842.
 ## Contact:	Ron Burkey <info@sandroid.org>.
 ## Website:	www.ibiblio.org/apollo.
 ## Mod history:	08/21/04 RSB.	Began transcribing.
+##		2017-01-06 RSB	Page numbers now agree with those on the
+##				original harcopy, as opposed to the PDF page
+##				numbers in 1701.pdf.
+##		2017-01-07 RSB	Cross-diff'd comment text (not whitespace)
+##				vs the already-proofed corresponding Colossus
+##				237 and Comanche 55 source-code files
+##				and corrected errors found.
 ##
 ## The contents of the "Colossus249" files, in general, are transcribed 
-## from a scanned document obtained from MIT's website,
-## http://hrst.mit.edu/hrs/apollo/public/archive/1701.pdf.  Notations on this
+## from a scanned copy of the program listing.  Notations on this
 ## document read, in part:
 ##
 ##	Assemble revision 249 of AGC program Colossus by NASA
@@ -28,13 +34,13 @@
 ##	under NASA contract NAS 9-4065.
 ##
 ## Refer directly to the online document mentioned above for further information.
-## Please report any errors (relative to 1701.pdf) to info@sandroid.org.
+## Please report any errors (relative to the scanned pages) to info@sandroid.org.
 ##
 ## In some cases, where the source code for Luminary 131 overlaps that of 
 ## Colossus 249, this code is instead copied from the corresponding Luminary 131
 ## source file, and then is proofed to incorporate any changes.
 
-## Page 840
+## Page 836
 		BANK	35
 		
 		SETLOC	BODYATT
@@ -44,7 +50,7 @@
 		
 # PDL 12D - 15D SAFE.
 
-# VALUE OF GIMBAL AND BODY ANGLES VALID AT PIP TIME ARE SAVED DURING READACCS.
+# VALUES OF GIMBAL AND BODY ANGLES VALID AT PIP TIME ARE SAVED DURING READACCS.
 
 		EBANK=	RTINIT		# LET INTERPRETER SET EB
 		
@@ -72,8 +78,8 @@ CM/POSE		TC	INTPRET		# COME HERE VIA AVEGEXIT.
 			S1		# UN FOR THE END OF THE TERMINAL PHASE.
 SPVQUIT		DEC	.019405		# 1000/ 2 VS
 		TIX,1	VLOAD		# IF V-VQUIT POS, BRANCH.
-			CM/POSE2	# SAME UYA IN OLDUYA
-			OLDUYA		# OTHERWISE CONTINUE TO USE OLDUYA
+			CM/POSE2	# SAVE UYA IN OLDUYA
+			OLDUYA		# OTHERWISE CONTINUE TO USE OLDUYA.
 CM/POSE2	STORE	UYA/2		#				REF COORDS
 
 		STORE	OLDUYA		# RESTORE, OR SAVE AS CASE MAY BE.
@@ -82,9 +88,9 @@ CM/POSE2	STORE	UYA/2		#				REF COORDS
 			UXA/2		# FINISH OBTAINING TRAJECTORY TRIAD.
 		VSL1
 		STORE	UZA/2		#				REF COORDS
-## Page 841
+## Page 837
 		TLOAD			# PICK UP CDUX, CDUY, CDUZ CORRESPONDING
-			AOG/PIP		# TO PIPUP TIME IN 2'S C AND SAVE.
+			AOG/PIP		# TO PIPUP TIME IN 2S,C AND SAVE.
 CM/TRIO		STODL	24D
 			25D		# AIG/PIP
 			
@@ -103,7 +109,7 @@ CM/TRIO		STODL	24D
 			0		# SM /2
 		DCOMP	VXSC
 			UBX/2
-		VSL1			# NOISE WON'T OVFL
+		VSL1			# NOISE WONT OVFL.
 		STODL	UBY/2		# =(-SMCI, NOISE, SMSI)/2
 			2		# CM /2 REPLACES NOISE
 		STODL	UBY/2 +2	# UBY/2=(-SMCI, CM, SMSI)/2
@@ -132,11 +138,11 @@ CM/TRIO		STODL	24D
 		VXM	VSL2
 			REFSMMAT	# .5 UNIT
 		STODL	UBY/2		# YB/2 DONE			REF COORDS
-## Page 842
+## Page 838
 					# CM /2 FROM PDL 2
 		VXSC	VSL1
 			UBX/2
-		STODL	UBX/2		# -( CMCI, NOISE, -CMSI)/2
+		STODL	UBX/2		# =( CMCI, NOISE, -CMSI)/2
 		STADR			# SM /2 FROM PDL 0
 		STOVL	UBX/2 +2	# SM /2 REPLACES NOISE
 			UBX/2		# XB/2				PLATFORM COORDS
@@ -178,12 +184,12 @@ CM/TRIO		STODL	24D
 		STOVL	SINTH		# -SIN(ALFA)/4
 		DOT			# UL/2 FROM PDL 0
 			UBZ/2
-		STCALL	COSTH		# COS(ALFA)/2
+		STCALL	COSTH		# COS(ALFA)/4
 			ARCTRIG
 		STOVL	8D		# -(ALFA/180) /2
 			UNITR		# UR/2				REF COORDS
 		DOT	SL1
-## Page 843
+## Page 839
 			UZA/2		# MORE ACCURATE AT LARGE ARG.
 		ARCCOS
 		STORE	10D		# (-GAMA/180)/2
@@ -192,7 +198,8 @@ CM/TRIO		STODL	24D
 					# -( (ROLL, BETA, ALFA) /180)/2
 			6D		# THESE VALUES CORRECT AT PIPUP TIME.
 
-## Page 844
+# SPACER
+## Page 840
 # BASIC SUBROUTINE TO UPDATE ATTITUDE ANGLES
 
 		EBANK=	AOG
@@ -211,7 +218,7 @@ CMTR1		INDEX	FIXLOC
 					
 		CS	CM/FLAGS
 		MASK	BIT11		# GAMDIFSW=94D BIT11	INITLY=0
-		EXTEND			# DON'T CALC GAMA DOT UNTIL HAVE FORMD
+		EXTEND			# DONT CALC GAMA DOT UNTIL HAVE FORMD
 					# ONE DIFFERENCE.
 		BZF	DOGAMDOT	# IS OK, GO ON.
 		ADS	CM/FLAGS	# KNOW BIT IS 0
@@ -230,10 +237,10 @@ DOGAMDOT	CS	L
 		EXTEND
 		BZMF	+3		# SET GAMDOT=+0 AS TAG IF TOO SMALL.
 		
-NOGAMDOT	CA	ZERO		# COME HERE INHINTED
+NOGAMDOT	CA	ZERO		# COME HERE INHINTED.
 		TS	GAMDOT
-					# FOR NOW LEAVE IN 2'S C
-					# UPDATE ANGLES BY CORRECTING EULER ANG
+					# FOR NOW LEAVE IN 2S,C
+					# UPDATE ANGLES BY CORRECTING EUILER ANG
 					# FOR ACCRUED INCREMENT SINCE PIPUP
 					# R = R EUIL + R(NOW) - R(PIPUP)
 		CS	MPAC		# GET (R EUL/180) /2
@@ -243,7 +250,7 @@ NOGAMDOT	CA	ZERO		# COME HERE INHINTED
 		SU	ROLL/PIP	# GET INCR SINCE PIPUP
 		AD	ROLL/180	# ONLY SINGLE OVFL POSSIBLE.
 		TC	CORANGOV	# CORRECT FOR OVFL IF ANY
-## Page 845
+## Page 841
 		TS	TEMPROLL
 		
 		CS	MPAC +2		# GET (ALFA EUL/180) /2
@@ -283,7 +290,7 @@ REDOPOSE	EXTEND			# RE-STARTS COME HERE
 		
 		RELINT
 		
-		TC	INTPRET		# CAN'T TC DANZIG AFTER PHASCHNG.
+		TC	INTPRET		# CANT TC DANZIG AFTER PHASCHNG.
 CM/POSE3	VLOAD	ABVAL		# RETURN FROM CM/ATUP.	(RESTART)
 			VN		# 2(-7) M/CS
 		STORE	VMAGI		# FOR DISPLAY ON CALL.
@@ -294,7 +301,7 @@ CM/POSE3	VLOAD	ABVAL		# RETURN FROM CM/ATUP.	(RESTART)
 CORANGOV	TS	L
 		TC	Q
 		INDEX	A
-## Page 846
+## Page 842
 		CA	LIMITS
 		ADS	L
 		TC	Q		# COSTS 2 MCT TO USE.  SEE ANGOVCOR.

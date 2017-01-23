@@ -9,6 +9,8 @@
 ## Contact:	Jim Lawton <jim DOT lawton AT gmail DOT com>
 ## Website:	www.ibiblio.org/apollo.
 ## Mod history:	2010-12-04 JL	Adapted from similar Colossus 249 file.
+##		2016-12-29 RSB	Proofed comment text using octopus/ProoferComments,
+##				but no errors found.
 
 ## Page 126
 		SETLOC	4000 

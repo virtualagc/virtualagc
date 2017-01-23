@@ -16,6 +16,8 @@
 ##              2016-11-24 HG   Transcribed
 ##              2016-12-07 HG   Fix P00 -> POO (appears only in comments)
 ##                              revert above changes
+##		2016-12-23 RSB	Proofed comment text with octopus/ProoferComments
+##				and fixed all errors found.
 
 ## Page 350
 # SUBROUTINE NAME:    V89CALL
@@ -48,13 +50,13 @@
 # BALLANGS. FLASH DISPLAY V 06 N 18 AND AWAIT RESPONSE.
 
 # 7. RECYCLE - RETURN TO STEP 4.
-#    TERMINATE - EXIT R63
-#    PROCEED - RESET 3AXISFLAG AND CALL R60LEM FOR ATTITUDE MANEUVER.
+#    TERMINATE - EXIT R63.
+#    PROCEED - RESET 3AXISFLG AND CALL R60LEM FOR ATTITUDE MANEUVER.
 
 
 # CALLING SEQUENCE:  V 89 E.
 #
-# SUBROUTINES CALLED:  CHECKPOOH, R02BOTH, GOXDSPF, CSMCONIC, LEMCONIC,
+# SUBROUTINES CALLED:  CHKPOOH, R02BOTH, GOXDSPF, CSMCONIC, LEMCONIC,
 #                      VECPOINT, BALLANGS, R60LEM.
 
 # NORMAL EXIT MODES:  TC ENDEXT
@@ -70,7 +72,7 @@
 # DEBRIS:  OPTION1, +1, TDEC1, POINTVSM, SCAXIS, CPHI, CTHETA, CPSI,
 
 ## Page 351
-#          3AXISFLAG.
+#          3AXISFLG.
 
                 EBANK=          RONE
                 BANK            32
@@ -85,7 +87,7 @@ V89CALL         TC              BANKCALL                # IMU STATUS CHECK. RETU
                 TS              OPTIONX                 # TRACKING ATTITUDE AXIS.
                 CAF             ONE
                 TS              OPTIONX         +1
-                CAF             VB04N12                 # V 04 N 12.
+                CAF             VB04N12                 # V 04 N 12
                 TC              BANKCALL
                 CADR            GOFLASH
                 TC              ENDEXT                  # TERMINATE
@@ -110,7 +112,7 @@ V89RECL         TC              INTPRET                 #                   = 2 
                 MXV             RTB                     # (REFSMMAT X LOS). TRANSFORMS LOS FROM
                                 REFSMMAT                # REFERENCE COORD TO STAB MEMB COORD.
                                 NORMUNIT
-                STORE           POINTVSM                # STORE LOS FOR VECPOINT CALCULATION
+                STORE           POINTVSM                # STORE LOS FOR VECPOINT CALL
                 EXIT
                 CS              OPTIONX         +1      # 1 FOR Z AXIS. 2 FOR X AXIS.
                 AD              ONE
@@ -123,10 +125,10 @@ ALINEX          TC              INTPRET                 # X AXIS ALIGNMENT
 ## Page 352
 V89CALL1        STCALL          SCAXIS                  # STORE SELECTED ALIGNMENT AXIS
                                 VECPOINT                # PUTS DESIRED GIM ANG (OG,IG,MG) IN TMPAC
-                STORE           CPHI                    # STOR GIMBAL ANGLES FOR BALLANGS CALL
+                STORE           CPHI                    # STORE GIMBAL ANGLES FOR BALLANGS CALL.
                 EXIT
                 TC              BANKCALL
-                CADR            BALLANGS                # PUTS DESIRED BALL ANGLE IN FDAIX,Y,Z
+                CADR            BALLANGS                # PUTS DESIRED BALL ANGLES IN FDAIX,Y,Z
                 CAF             VB06N18                 # V 06 N 18
                 TC              BANKCALL                # NOUN 18 REFERS TO FDAIX,Y,Z
                 CADR            GOFLASH

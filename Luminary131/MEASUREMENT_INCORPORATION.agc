@@ -8,14 +8,17 @@
 ##		that the code format has been changed to conform to the
 ##		requirements of the yaYUL assembler rather than the
 ##		original YUL assembler.
-## Reference:	pp. 1148-1157 of 1729.pdf.
+## Reference:	pp. 1143-1152
 ## Contact:	Ron Burkey <info@sandroid.org>.
 ## Website:	www.ibiblio.org/apollo/index.html
 ## Mod history:	06/01/03 RSB.	Began transcribing.
 ##		05/14/05 RSB	Corrected website reference above.
 ##		2010-10-25 JL	Indentation fixes.
+##		2017-01-06 RSB	Page numbers now agree with those on the
+##				original harcopy, as opposed to the PDF page
+##				numbers in 1701.pdf.
 
-## Page 1148
+## Page 1143
 # INCORP1 -- PERFORMS THE SIX DIMENSIONAL STATE VECTOR DEVIATION FOR POSITION
 # AND VELOCITY OR THE NINE-DIMENSIONAL DEVIATION OF POSITION, VELOCITY, AND
 # RADAR OR LANDMARK BIAS.  THE OUTPUT OF THE BVECTOR ROUTINE ALONG WITH THE
@@ -67,7 +70,7 @@ Z123		VLOAD	MXV*
 		STORE	ZI +18D,2
 		VLOAD
 			BVECTOR +6	# BVECTOR (1)
-## Page 1149
+## Page 1144
 		MXV*	VAD*
 			W +108D,1
 			ZI +18D,2
@@ -118,7 +121,7 @@ INCOR1B		SL2	BOV
 			INCOR1B
 INCOR1C		TLOAD	ROUND
 			TRIPA
-## Page 1150
+## Page 1145
 		DMP	SQRT
 			TEMPVAR
 		SL*	TAD
@@ -169,7 +172,7 @@ INCOR2		VLOAD	VXM*		# COMPUT OMEGA1,2,3
 		STORE	OMEGA +6
 		VLOAD	STADR
 		STORE	OMEGA
-## Page 1151
+## Page 1146
 		BON	VLOAD
 			DMENFLG
 			INCOR2AB
@@ -193,7 +196,7 @@ INCOR3		VLOAD*
 		GOTO
 			EGRESS
 
-## Page 1152
+## Page 1147
 # INCORP2 -- INCORPORATES THE COMPUTED STATE VECTOR DEVIATIONS INTO THE
 # ESTIMATED STATE VECTOR.  THE STATE VECTOR UPDATED MAY BE FOR EITHER THE
 # LEM OR THE CSM.  DETERMINED BY FLAG VEHUPFLG.  (ZERO = LEM) (1 = CSM)
@@ -246,7 +249,7 @@ INCORP2		STQ	CALL
 		TS	ZIXA		# INITIAL IX 2 SETTING FOR Z COMPONENT
 		TS	ZIXB
 FAZA		TC	PHASCHNG
-## Page 1153
+## Page 1148
 		OCT	04022
 		TC	UPFLAG
 		ADRES	REINTFLG
@@ -297,7 +300,7 @@ FAZA1		CA	WIXB		# START FIRST PHASE OF INCORP2
 		DLOAD*	DCOMP		# CALC LOWER 3X9 PARTITION OF W MATRIX
 			ZI,2
 		NORM	VXSC
-## Page 1154
+## Page 1149
 			S2
 			OMEGAM3
 		XCHX,2	LXC,2
@@ -348,7 +351,7 @@ FAZB5		SLOAD	DAD
 			FAZB2
 FAZC		CALL
 			GRP2PC
-## Page 1155
+## Page 1150
 		VLOAD	VAD		# START 3RD PHASE OF INCORP2
 			X789		# 7TH, 8TH, 9TH COMPONENTN OF STATE VECTOR
 			DELTAX +12D	# INCORPORATION FOR X789
@@ -399,7 +402,7 @@ FAZAB3		CALL
 		CALL
 			SVDWN2		# STORE DOWNLINK STATE VECTOR
 FAZAB4		CALL
-## Page 1156
+## Page 1151
 			GRP2PC		# PHASE CHANGE
 		BOFF	VLOAD
 			DMENFLG
@@ -451,7 +454,7 @@ NEWZCOMP	VLOAD	ABVAL
 			NORMZI
 			NORMZI		# SAVE X1
 		NORM	INCR,1
-## Page 1157
+## Page 1152
 			X1
 		DEC	2
 		VLOAD	VSL*

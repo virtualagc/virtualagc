@@ -10,6 +10,8 @@
 ## Page Scans:	www.ibiblio.org/apollo/ScansForConversion/Solarium055/
 ## Mod history:	2009-09-15 JL	Created.
 ##		2016-08-19 RSB	Typos.
+## 		2016-12-28 RSB	Proofed comment text using octopus/ProoferComments,
+##				but no errors found.
 
 ## Page 290
 

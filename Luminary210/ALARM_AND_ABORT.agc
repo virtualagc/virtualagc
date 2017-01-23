@@ -15,7 +15,10 @@
 ## Mod history: 2016-11-17 JL   Created from Luminary131 version.
 ##              2016-11-29 TB   Transcribed
 ##              2016-12-07 HG   Fix P00 -> POO
-##              2016-12-11 HG   add missing opertaion MASK FLGWRD10
+##              2016-12-11 HG   add missing operation MASK FLGWRD10
+##              2016-12-12 HG   add [WORKAROUND] using SBANK=
+##		2016-12-26 RSB	Comment-text proofed using ProoferComments
+##				and corrected errors found.
 
 ## Page 1378
 # THE FOLLOWING SUBROUTINE MAY BE CALLED TO DISPLAY A NON-ABORTIVE ALARM CONDITION.  IT MAY BE CALLED
@@ -23,8 +26,8 @@
 
 # CALLING SEQUENCE IS AS FOLLOWS:
 #               TC      ALARM
-#               OCT     AAANN           # ALARM NO. NN IN GENERAL AREA AAA.
-#                                       # (RETURNS HERE)
+#               OCT     AAANN           ALARM NO. NN IN GENERAL AREA AAA.
+#                                       (RETURNS HERE)
 
                 BLOCK           02                              
                 SETLOC          FFTAG7                          
@@ -76,14 +79,14 @@ MULTEXIT        XCH             ITEMP1                          # OBTAIN RETURN 
 
 # PRIOLARM DISPLAYS V05N09 VIA PRIODSPR WITH 3 RETURNS TO THE USER FROM THE ASTRONAUT AT CALL LOC +1,+2,+3 AND
 # AN IMMEDIATE RETURN TO THE USER AT CALL LOC +4.  EXAMPLE FOLLOWS,
-#               CAF     OCTXX           # ALARM CODE
+#               CAF     OCTXX           ALARM CODE
 #               TC      BANKCALL
 #               CADR    PRIOLARM
 #               ...     ...
 #               ...     ...
-#               ...     ...             # ASTRONAUT RETURN
-#               TC      PHASCHNG        # IMMEDIATE RETURN TO USER. RESTART
-#               OCT     X.1             # PHASE CHANGE FOR PRIO DISPLAY
+#               ...     ...             ASTRONAUT RETURN
+#               TC      PHASCHNG        IMMEDIATE RETURN TO USER. RESTART
+#               OCT     X.1             PHASE CHANGE FOR PRIO DISPLAY
 
                 BANK            10                              
                 SETLOC          DISPLAYS                        
@@ -97,7 +100,7 @@ PRIOLARM        INHINT                                          # * * * KEEP IN 
                 TS              ALMCADR                         
                 CA              BUF2            +1              
                 TC              PRIOENT         +1              # * LEAVE L ALONE
--2SEC           DEC             -200                            # *** DON'T MOVE
+-2SEC           DEC             -200                            # *** DONT MOVE
                 CAF             V05N09                          
                 TCF             PRIODSPR                        
 
@@ -154,7 +157,7 @@ GOPOODOO        INHINT
 STRTIDLE        CAF             BBSERVDL                        
                 TC              SUPERSW                         
                 TC              BANKCALL                        # PUT SERVICER INTO ITS "GROUND" STATE
-                CADR            SERVIDLE                        # AND PROCED TO GOTOPOOH.
+                CADR            SERVIDLE                        # AND PROCEED TO GOTOPOOH.
 CCSHOLE         INHINT                                          
                 CA              Q                               
                 TC              ABORT2                          
@@ -190,7 +193,9 @@ ALMNCADR        INHINT
                 TCF             LARMENT                         
 
 ADR77770        TCF             OCT77770                        
-ADR40400        TCF             OCT40400                        
+ADR40400        TCF             OCT40400
+## [WORKAROUND] SBANK= not in original; for adjusting subsequent BBCON &mdash; HG
+                SBANK=          LOWSUPER 
 DOALARM         EQUALS          ENDOFJOB                        
                 EBANK=          DVCNTR                          
 BBSERVDL        BBCON           SERVIDLE                        

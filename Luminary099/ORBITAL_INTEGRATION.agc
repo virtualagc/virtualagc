@@ -14,6 +14,8 @@
 ##		2009-06-05 RSB	Fixed 3 typos.
 ##		2009-06-06 RSB	Page 1248 was missing entirely for some reason.
 ##		2009-06-07 RSB	Corrected a typo.
+##		2016-12-17 RSB	Proofed text comments with octopus/ProoferComments
+##				and corrected the errors found.
 ##
 ## This source code has been transcribed or otherwise adapted from
 ## digitized images of a hardcopy from the MIT Museum.  The digitization
@@ -31,8 +33,6 @@
 ##	16:27 JULY 14, 1969 
 
 ## Page 1227
-# ORBITAL INTEGRATION
-
 # DELETE
 		BANK	13
 		SETLOC	ORBITAL
@@ -76,7 +76,7 @@ KEPPREP		LXA,2	SETPD
 		DMP	SL*
 			DP2/3
 			0 	-3,1	# 10L(1/R-ALPHA) (+13 +2(N1-N2))
-		XSU,1	DAD		# 2(FS)SQ - ETCETERA			PL 8D
+		XSU,1	DAD		# 2(FS)SQ - ETCETRA			PL 8D
 			S1		# X1 = N2-N1
 		SL*	DSU		# -FS+2(FS)SQ ETC (+6 +N1-N2)		PL 6D
 			8D,1
@@ -234,9 +234,9 @@ GAMCOMP		VLOAD	VSR1
 		STODL	BETAV
 			36D
 		STORE	BETAM
-		NORM	BDDV		# FORM NORMALIZE QUOTIEN ALPHAM/BETAM
+		NORM	BDDV		# FORM NORMALIZED QUOTIENT ALPHAM/BETAM
 			33D
-		SR1R	PUSH		# C(PDL+2) = ALMOST NORMALIZE RHO.
+		SR1R	PUSH		# C(PDL+2) = ALMOST NORMALIZED RHO.
 		DLOAD*
 			ASCALE,1
 		STORE	S1
@@ -274,7 +274,7 @@ GAMCOMP		VLOAD	VSR1
 			14D
 		DMPR	VXSC
 			6
-			BETAV		#		_
+			BETAV		#		-
 		PDVL	VSR3		# (G/2)(C(PD+4))B/2 TO PD+16D
 ## Page 1233
 			ALPHAV
@@ -325,7 +325,7 @@ GOBAQUE		VLOAD	ABVAL
 			TESTLOOP
 
 INT-ABRT	EXIT
-		TC	P00DOO
+		TC	POODOO
 		OCT	00430
 
 ## Page 1234
@@ -397,9 +397,9 @@ COMTERM		STORE	UZ
 		DMP*	SR1
 			J4REQ/J3,2
 		DDV	DAD
-			ALPHAM
+			ALPHAM		#               -3
 		DMPR*	SR3
-			2J3RE/J2,2
+			2J3RE/J2,2	#    3        4
 		DDV	DAD
 			ALPHAM
 		VXSC	VSL1
@@ -458,7 +458,7 @@ QUALITY3	DSQ			# J22 TERM X R**4 IN 2D, SCALED B61
 			5/8		# 5 B3 ANSWER B5
 		SL1	DAD		# FROM 12D FOR Z COMPONENT (SL1 GIVES 10
 					# INSTEAD OF 5 FOR COEFFICIENT)
-		PDDL	NORM		# BACK INTO 12D FOR Z COMPNENT.
+		PDDL	NORM		# BACK INTO 12D FOR Z COMPONENT.
 			ALPHAM		# SCALED B27 FOR MOON
 			X2
 		PUSH	SLOAD		# STORE IN 14D, DESTROYING URPV
@@ -648,7 +648,7 @@ MINIRECT	STORE	VRECT
 		RVQ
 
 ## Page 1241
-# THE THREE DIFEQ ROUTINES -- DIFEQ+0, DIFEQ+12, DIFEQ+24 -- ARE ENTERED TO PROCESS THE CONTRIBUTIONS AT THE
+# THE THREE DIFEQ ROUTINES - DIFEQ+0, DIFEQ+12, AND DIFEQ+24 - ARE ENTERED TO PROCESS THE CONTRIBUTIONS AT THE
 # BEGINNING, MIDDLE, AND END OF THE TIMESTEP, RESPECTIVELY.  THE UPDATING IS DONE BY THE NYSTROM METHOD.
 
 DIFEQ+0		VLOAD	VSR3
@@ -743,7 +743,7 @@ ENDSTATE	BOV	VLOAD
 		TC	PHASCHNG
 		OCT	04022		# PHASE 1
 		TC	UPFLAG		# PHASE CHANGE HAS OCCURRED BETWEEN
-		ADRES	REINTFLG	# INSTALL AND INTWAKE
+		ADRES	REINTFLG	# INTSTALL AND INTWAKE
 		TC	INTPRET
 		SSP
 			QPRET
@@ -790,7 +790,7 @@ DIFEQCOM	DLOAD	DAD		# INCREMENT H AND DIFEQCNT.
 			FBR3
 
 WMATEND		CLEAR	CLEAR
-			DIM0FLAG	# DON'T INTEGRATE W THIS TIME
+			DIM0FLAG	# DONT INTEGRATE W THIS TIME
 			ORBWFLAG	# INVALIDATE W
 		CLEAR
 			RENDWFLG
@@ -806,7 +806,7 @@ WMATEND		CLEAR	CLEAR
 ## Page 1245
 # ORBITAL ROUTINE FOR EXTRAPOLATION OF THE W MATRIX.  IT COMPUTES THE SECOND DERIVATIVE OF EACH COLUMN POSITION
 # VECTOR OF THE MATRIX AND CALLS THE NYSTROM INTEGRATION ROUTINES TO SOLVE THE DIFFERENTIAL EQUATIONS.  THE PROGRAM
-# USES A TABLE OF VEHICLE POSITION VECTORS COMPUTED DURING THE INTEGRATION OF THE VEHICLE'S POSITION AND VELOCITY.
+# USES A TABLE OF VEHICLE POSITION VECTORS COMPUTED DURING THE INTEGRATION OF THE VEHICLES POSITION AND VELOCITY.
 
 DOW..		LXA,2	DLOAD*
 			PBODY
@@ -858,8 +858,8 @@ DOW..1		VLOAD	VSR4
 ## Page 1246
 			0 	-8D,2	
 
-# ********************************************************************************
-# ********************************************************************************
+# *****************************************************************************************************************
+# *****************************************************************************************************************
 SETITCTR	SSP	BOFF		# SET ITERCTR FOR LAMBERT CALLS.  THIS
 			ITERCTR		# CODING BELONGS IN INITVEL AND IS HERE
 			20D		# FOR PURPOSES OF A ONE-MODULE
@@ -869,8 +869,8 @@ SETITCTR	SSP	BOFF		# SET ITERCTR FOR LAMBERT CALLS.  THIS
 			ITERCTR
 			5
 			LAMBERT
-# ********************************************************************************
-# ********************************************************************************
+# *****************************************************************************************************************
+# *****************************************************************************************************************
 
 		SETLOC	ORBITAL1
 		BANK
@@ -971,7 +971,7 @@ QUALITY2	PDDL	DSQ		# SQUARE INTO 2D, B2
 					# ANSWER, SAME AS MULTIPLYING BY UNITY.
 					# MAX IS 7.
 		STORE	4D		# 2D HAS VECTOR, B3.
-		SLOAD	VXSC		# MULTIPLY COEFFICIENT TIMES VECTOR IN 2D
+		SLOAD	VXSC		# MULTIPLY COEFFIECIENT TIMES VECTOR IN 2D
 			E3J22R2M
 		PDDL	RVQ		# J22 TERM X R**4 IN 2D, SCALED B61
 			COSPHI/2	# SAME AS URPV +4  Z COMPONENT

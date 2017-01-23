@@ -5,14 +5,22 @@
 ##		It is part of the source code for the Command Module's (CM)
 ##		Apollo Guidance Computer (AGC), for Apollo 9.
 ## Assembler:	yaYUL
-## Reference:	Starts on p. 1335 of 1701.pdf.
+## Reference:	Starts on p. 1323
 ## Contact:	Ron Burkey <info@sandroid.org>.
 ## Website:	www.ibiblio.org/apollo.
 ## Mod history:	08/29/04 RSB.	Adapted from corresponding Luminary131 file.
+##		2017-01-06 RSB	Page numbers now agree with those on the
+##				original harcopy, as opposed to the PDF page
+##				numbers in 1701.pdf.
+##		2017-01-14 RSB	Cross-diff'd comment text (not whitespace)
+##				vs the already-proofed corresponding Colossus
+##				237 and Comanche 55 source-code files
+##				and corrected errors found.  After corrections,
+##				there were no text-comment differences between
+##				the different versions.
 ##
 ## The contents of the "Colossus249" files, in general, are transcribed 
-## from a scanned document obtained from MIT's website,
-## http://hrst.mit.edu/hrs/apollo/public/archive/1701.pdf.  Notations on this
+## from a scanned copy of the program listing.  Notations on this
 ## document read, in part:
 ##
 ##	Assemble revision 249 of AGC program Colossus by NASA
@@ -28,13 +36,13 @@
 ##	under NASA contract NAS 9-4065.
 ##
 ## Refer directly to the online document mentioned above for further information.
-## Please report any errors (relative to 1701.pdf) to info@sandroid.org.
+## Please report any errors (relative to the scanned pages) to info@sandroid.org.
 ##
 ## In some cases, where the source code for Luminary 131 overlaps that of 
 ## Colossus 249, this code is instead copied from the corresponding Luminary 131
 ## source file, and then is proofed to incorporate any changes.
 
-## Page 1335
+## Page 1323
 		BANK	22
 		SETLOC	INFLIGHT
 		BANK
@@ -46,7 +54,7 @@
 # THE INPUT IS THE DESIRED STABLE MEMBER COORDINATES REFERRED TO PRESENT STABLE MEMBER COORDINATES.  THE THREE
 # HALF-UNIT VECTORS ARE STORED AT XDC, YDC, AND ZDC.
 #
-# THE OUTPUTS ARE THE THREE GYRO TORQUE ANGLES TO BE APPLIED TO THE Y, Z, AND X GYROS AND ARE STORED DP AT IGC,
+# THE OUTPUTS ARE THE THREE GYRO TORQUING ANGLES TO BE APPLIED TO THE Y, Z, AND X GYROS AND ARE STORED DP AT IGC,
 # MGC, AND OGC RESPECTIVELY.
 
 		COUNT	23/INFLT
@@ -84,7 +92,7 @@ CALCGTA		ITA	DLOAD		# PUSHDOWN 00-03, 16D-27D, 34D-37D
 		STADR
 		STCALL	COSTH		# COS(MGC) = MPAC - PD00
 			ARCTRIG
-## Page 1336
+## Page 1324
 		STOVL	MGC		# Z GYRO TORQUING ANGLE   FRACTION OF REV.
 			ZPRIME
 		DOT
@@ -99,10 +107,10 @@ CALCGTA		ITA	DLOAD		# PUSHDOWN 00-03, 16D-27D, 34D-37D
 		STCALL	OGC		# X GYRO TORQUING ANGLE   FRACTION OF REV.
 			S2
 
-## Page 1337
+## Page 1325
 # ARCTRIG COMPUTES AN ANGLE GIVEN THE SINE AND COSINE OF THIS ANGLE.
 #
-# THE INPUTS ARE SIN/4 AND COS/4 STORED UP AT SINTH AND COSTH.
+# THE INPUTS ARE SIN/4 AND COS/4 STORED DP AT SINTH AND COSTH.
 #
 # THE OUTPUT IS THE CALCULATED ANGLE BETWEEN +.5 AND -.5 REVOLUTIONS AND STORED AT THETA.  THE OUTPUT IS ALSO
 # AVAILABLE AT MPAC.
@@ -139,12 +147,12 @@ TRIG2		DLOAD	SIGN		# (135,-135)
 		STORE	THETA		# X = .5 WITH SIGN(SIN) - ARCSIN(SIN)
 		RVQ			#	(+) - (+) OR (-) - (-)
 
-## Page 1338
+## Page 1326
 # SMNB, NBSM, AND AXISROT, WHICH USED TO APPEAR HERE, HAVE BEEN
 # COMBINED IN A ROUTINE CALLED AX*SR*T, WHICH APPEARS AMONG THE POWERED
 # FLIGHT SUBROUTINES.
 
-## Page 1339
+## Page 1327
 # CALCGA COMPUTES THE CDU DRIVING ANGLES REQUIRED TO BRING THE STABLE MEMBER INTO THE DESIRED ORIENTATION.
 #
 # THE INPUTS ARE  1) THE NAVIGATION BASE COORDINATES REFERRED TO ANY COORDINATE SYSTEM.  THE THREE HALF-UNIT
@@ -194,7 +202,7 @@ CALCGA1		VLOAD	DOT
 			0
 		STOVL	COSTH		# COS(IG) = ZSM . MGA
 			XSM
-## Page 1340
+## Page 1328
 		DOT	STADR
 		STCALL	SINTH		# SIN(IG) = XSM . MGA
 			ARCTRIG
@@ -211,14 +219,14 @@ CALCGA1		VLOAD	DOT
 GIMLOCK1	EXIT
 		TC	ALARM
 		OCT	00401
-		TC	UPFLAG		# GIMBAL LOCK HAS OCCURRED
+		TC	UPFLAG		# GIMBAL LOCK HAS OCCURED
 		ADRES	GLOKFAIL
 
 		TC	INTPRET
 		GOTO
 			CALCGA1
 
-## Page 1341
+## Page 1329
 # AXISGEN COMPUTES THE COORDINATES OF ONE COORDINATE SYSTEM REFERRED TO ANOTHER COORDINATE SYSTEM.
 #
 # THE INPUTS ARE  1) THE STAR1 VECTOR REFERRED TO COORDINATE SYSTEM A STORED AT STARAD.  2) THE STAR2 VECTOR
@@ -269,7 +277,7 @@ AXISGEN2	XCHX,1	VLOAD*
 			30D		# X1=-6 X2=+6	X1=-6 X2=+4	X1=-6 X2=+2
 			0,1
 
-## Page 1342
+## Page 1330
 		VXSC*	PDVL*		# J=(UA)(UB1)	J=(UA)(UB2)	J=(UA)(UB3)
 			STARAD +6,2
 			6,1
@@ -302,11 +310,11 @@ AXISGEN3	TIX,2
 
 		RVQ
 
-## Page 1343
+## Page 1331
 QTSN45		2DEC	.1768
 .166...		2DEC	.1666666667
 
-## Page 1344
-# (There is no source code on this page of the original assembly listing.---RSB 2004)
+## Page 1332
+## There is no source code on this page of the original assembly listing. &mdash;RSB 2004
 
 

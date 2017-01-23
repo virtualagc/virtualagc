@@ -14,6 +14,8 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2016-11-17 JL   Created from Artemis072 version.
 ##              2016-11-20 HG   Transcribed
+##		2016-12-23 RSB	Proofed comment text with octopus/ProoferComments
+##				and fixed all errors found.
 
 ## Page 161
 # THIS LIST IS MAINTAINED TO ENSURE THAT CERTAIN ERASABLE LOCATIONS
@@ -33,7 +35,7 @@
 
 # THIS LIST SHOULD BE UPDATED FOR ANY CHANGES TO THE DOWNLINK LISTS.
 
-# THIS LIST IS MAINTAINED BY  SUMNER ORSENBERG
+# THIS LIST IS MAINTAINED BY  SUMNER ROSENBERG
 #
 
 TIME1           CHECK=          TIME2           +1

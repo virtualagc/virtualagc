@@ -13,11 +13,11 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2016-11-17 JL   Created from Artemis072 version.
-##		2016-11-18 RRB	Transcribed
+##		2016-11-18 RSB	Transcribed
+##		2016-12-15 RSB	Proofed comment text with octopus/ProoferComments,
+##				and corrected the errors found.
 
 ## Page 1
-# ABSOLUTE LOCATIONS FOR UPDATES
-
 # ECADR			MNEMONIC
 # -----			--------
 		=ECADR	UPSVFLAG

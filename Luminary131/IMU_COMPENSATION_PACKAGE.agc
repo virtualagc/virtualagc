@@ -8,13 +8,19 @@
 ##		that the code format has been changed to conform to the
 ##		requirements of the yaYUL assembler rather than the 
 ##		original YUL assembler.
-## Reference:	pp. 333-344 of 1729.pdf.
+## Reference:	pp. 328-339
 ## Contact:	Ron Burkey <info@sandroid.org>.
 ## Website:	www.ibiblio.org/apollo/index.html
 ## Mod history:	05/10/03 RSB.	Began transcribing.
 ##		05/14/05 RSB	Corrected website reference above.
+##		2016-12-30 RSB	Backported BYRO->GYRO from Colossus 237.
+##				(There's lots more that needs to be backported,
+##				but I found this one particularly annoying.)
+##		2017-01-06 RSB	Page numbers now agree with those on the
+##				original harcopy, as opposed to the PDF page
+##				numbers in 1701.pdf.
 
-## Page 333
+## Page 328
 		BANK	7
 		SETLOC	IMUCOMP
 		BANK
@@ -66,10 +72,10 @@
 		CCS	BUF +2		# PIPAZ, PIPAY, PIPAX
 		AD	NEG1
 		TCF	1/PIPA1 +1
-## Page 334
+## Page 329
 		NOOP			# LESS THAN ZERO IMPOSSIBLE
 
-## Page 335
+## Page 330
 IRIGCOMP	TS	GCOMPSW		# INDICATE COMMANDS 2 PULSES OR LESS.
 		TS	BUF		# INDEX COUNTER.  IRIGX, IRIGY, IRIGZ.
 		
@@ -102,7 +108,7 @@ IRIG1		CA	MODE		# RESTORE CALLER'S EBANK
 		TS	EBANK
 		TCF	SWRETURN
 		
-## Page 336
+## Page 331
 IRIGX		EXTEND	
 		QXCH	MPAC	+2	# SAVE Q
 		EXTEND
@@ -153,7 +159,7 @@ IRIGZ		EXTEND
 		DCS	DELVY		# (PIPA PULSES) X 2(-14)
 		DXCH	MPAC
 		CA	ADSRAZ		# (GYRO PULSES)/(PIPA PULSE) X 2(-6)		*
-## Page 337
+## Page 332
 		TC	GCOMPSUB	# -(ADSRAZ)(PIPAY)	(GYRO PULSES) X 2(+14)
 		
 		EXTEND
@@ -170,7 +176,7 @@ IRIGZ		EXTEND
 
 		TC	MPAC +2
 
-## Page 338
+## Page 333
 GCOMPSUB	XCH	MPAC		# ADIA OR ADSRA COEFFICIENT ARRIVES IN A
 		EXTEND			# C(MPAC) = (PIPA PULSES) X 2(+14)
 		MP	MPAC		# (GYRO PULSES)/(PIPA PULSE) X 2(-6)		*
@@ -181,12 +187,12 @@ GCOMPSUB	XCH	MPAC		# ADIA OR ADSRA COEFFICIENT ARRIVES IN A
 		MP	MPAC		# ADIA OR ADSRA
 		TS	L
 		CAF	ZERO
-		DAS	VBUF		# NO = (BYRO PULSES) X 2(+8)			*
+		DAS	VBUF		# NO = (GYRO PULSES) X 2(+8)			*
 
 		CA	VBUF		# PARTIAL RESULT -- MAJOR
 		EXTEND
 		MP	BIT9		# SCALE 2(+6)	SHIFT RIGHT 6			*
-		INDEX	BUF		# RESULT = (BYRO PULSES) X 2(+14)
+		INDEX	BUF		# RESULT = (GYRO PULSES) X 2(+14)
 		DAS	GCOMP		# HI(ADIA)(PIPAI) OR HI(ADSRA)(PIPAI)
 
 		CA	VBUF +1		# PARTIAL RESULT -- MINOR
@@ -199,7 +205,7 @@ GCOMPSUB	XCH	MPAC		# ADIA OR ADSRA COEFFICIENT ARRIVES IN A
 
 		TC	Q
 
-## Page 339
+## Page 334
 DRIFTSUB	EXTEND
 		QXCH	BUF +1
 
@@ -232,7 +238,7 @@ DRFTSUB2	CAF	TWO		# PIPAX, PIPAY, PIPAZ
 		TS	GCOMPSW		# YES -- SET GCOMPSW POSITIVE
 		TC	BUF +1		# NO
 		
-## Page 340
+## Page 335
 1/GYRO		CAF	FOUR		# PIPAZ, PIPAY, PIPAX
 		TS	BUF
 		
@@ -279,7 +285,7 @@ GCOMP1		CAF	FOUR		# PIPAZ, PIPAY, PIPAX
 COMPCHK		DEC	-1		# LESS THAN ZERO IMPOSSIBLE
 		TCF	ENDOFJOB
 		
-## Page 341
+## Page 336
 NBDONLY		CCS	GCOMPSW		# BYPASS IF GCOMPSW NEGATIVE
 		TCF	+3
 		TCF	+2
@@ -330,11 +336,11 @@ NBD3		EXTEND			# C(A) = DELTAT		(CS) X 2(+14)
 		
 		CCS	TEM1		# IF SURFACE FLAG IS SET,
 		TC	IRIGY		# COMPENSAGE ACCELERATION TERMS.
-## Page 342
+## Page 337
 		EXTEND
 		DCS	VBUF +2
 		DXCH	MPAC		# DELTAT SCALED (CS) X 2(+19)
-		CA	NBDY		# (BYRO PULSES)/(CS) X 2(-5)
+		CA	NBDY		# (GYRO PULSES)/(CS) X 2(-5)
 		TC	FBIASSUB	# -(NBDY)(DELTAT)	(GYRO PULSES) X 2(+14)
 		
 		CCS	TEM1		# IF SURFACE FLAG IS SET,
@@ -350,7 +356,7 @@ NBD3		EXTEND			# C(A) = DELTAT		(CS) X 2(+14)
 		TCF	1/GYRO		# YES
 		TCF	ENDOFJOB	# NO
 
-## Page 343
+## Page 338
 FBIASSUB	XCH	Q
 		TS	BUF +1
 		
@@ -399,7 +405,7 @@ GCOMPZER	CAF	LGCOMP		# ROUTINE TO ZERO GCOMP BEFORE FIRST
 		TS	GCOMP +2
 		TS	GCOMP +3
 		TS	GCOMP +4
-## Page 344
+## Page 339
 		TS	GCOMP +5
 		
 		TCF	IRIG1		# RESTORE EBANK AND RETURN

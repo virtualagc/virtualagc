@@ -50,7 +50,7 @@ SILVER          EXTEND
 TORK            CAF     POSMAX
                 TS      GYROCTR         # 16383 PULSES =2.8125 DEG LESS ONE PULSE
                 
-                CCS     GYTOBETQ        # C(K)= 1 FOR X, -0 FOR y, -1FOR Z.
+                CCS     GYTOBETQ        # C(K)= 1 FOR X, -0 FOR Y, -1FOR Z.
                 TC      SELECTX
                 TC      CCSHOLE
                 TC      SELECTZ
@@ -523,7 +523,7 @@ FINEZERO        EXTEND
                 TS      STATE
                 RELINT
                 
- # Page 0511
+ ## Page 0511
  
                 TC      BANKCALL
                 CADR    LEMLAB

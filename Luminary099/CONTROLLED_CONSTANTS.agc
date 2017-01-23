@@ -10,6 +10,8 @@
 ## Website:	www.ibiblio.org/apollo.
 ## Pages:	038-053
 ## Mod history:	2009-05-16	JVL	Transcribed from page images.
+##		2016-12-13 RSB	Proofed text comments with octopus/ProoferComments
+##				and corrected the errors found.
 ##
 ## This source code has been transcribed or otherwise adapted from digitized
 ## images of a hardcopy from the MIT Museum.  The digitization was performed
@@ -35,13 +37,13 @@
 # *** THE ORDER OF THE FOLLOWING SIX CONSTANTS MUST NOT BE CHANGED ***
 
 FDPS		2DEC	4.3670 B-7		# 9817.5 LBS FORCE IN NEWTONS
-MDOTDPS		2DEC	0.1480 B-3		# 32.62 LBS/SEC IN KGS/CS
+MDOTDPS		2DEC	0.1480 B-3		# 32.62 LBS/SEC IN KGS/CS.
 DTDECAY		2DEC	-38
 FAPS		2DEC	1.5569 B-7		# 3500 LBS FORCE IN NEWTONS
 MDOTAPS		2DEC	0.05135 B-3		# 11.32 LBS/SEC IN KGS/CS
 ATDECAY		2DEC	-10
 
-# ********************************************************************
+# ************************************************************************
 
 FRCS4		2DEC	0.17792 B-7		# 400 LBS FORCE IN NEWTONS
 FRCS2		2DEC	0.08896 B-7		# 200 LBS FORCE IN NEWTONS
@@ -50,13 +52,13 @@ FRCS2		2DEC	0.08896 B-7		# 200 LBS FORCE IN NEWTONS
 		BANK
 		COUNT*	$$/P40
 		
-# *** APS IMPULSE DATA FOR P42 ***************************************
+# *** APS IMPULSE DATA FOR P42 *******************************************
 
 K1VAL		2DEC	124.55 B-23		# 2800 LB-SEC
 K2VAL		2DEC	31.138 B-24		# 700 LB-SEC
 K3VAL		2DEC	1.5569 B-10		# FAPS (3500 LBS THRUST)
 
-# ********************************************************************
+# ************************************************************************
 
 S40.136		2DEC	.4671 B-9		# .4671 M NEWTONS (DPS)
 S40.136_	2DEC	.4671 B+1		# S40.136 SHIFTED LEFT 10.
@@ -78,7 +80,7 @@ K(1/DV)		2DEC	436.70 B-9		# DPS ENGINE THRUST IN NEWTONS / 100 CS.
 
 (AT)A		2DEC	3.2883 E-4 B9		# INITIAL ASC. STG. ACCELERATION ** M/CS.					
 						# ASSUMPTIONS SAME AS FOR (1/DV)A.
-(TBUP)A		2DEC	91902 B-17		# ESTIMATED BURN-UP TIME OF THE ASCENT STG.
+(TBUP)A		2DEC	91902 B-17		# ESTIMATED BURN-UP TIME OF THE ASCENT STG
 						# ASSUMPTIONS SAME AS FOR (1/DV)A WITH THE
 						# ADDITIONAL ASSUMPTION THAT NET MASS-FLOW
 						# RATE = 5.299 KG/SEC = 5.135 (APS) +
@@ -164,13 +166,13 @@ HBEAMANT	2DEC	-.4687018041		# RANGE BEAM IN LR ANTENNA COORDINATES.
 		
 HSCAL		2DEC	-.3288792		# SCALES 1.079 FT/BIT TO 2(22)M.
 
-# ***** THE SEQUENCE OF THE FOLLOWING CONSTANTS MUST BE PRESERVED *********
+# ***** THE SEQUENCE OF THE FOLLOWING CONSTANTS MUST BE PRESERVED ********
 
 VZSCAL		2DEC	+.5410829105		# SCALES .8668 FT/SEC/BIT TO 2(18) M/CS.
 VYSCAL		2DEC	+.7565672446		# SCALES 1.212 FT/SEC/BIT TO 2(18) M/CS.
 VXSCAL		2DEC	-.4020043770		# SCALES -.644 FT/SEC/BIT TO 2(18) M/CS.
 
-# *************************************************************************
+# ************************************************************************
 
 KPIP		DEC	.0512			# SCALES DELV TO UNITS OF 2(5) M/CS.
 KPIP1		2DEC	.0128			# SCALES DELV TO UNITS OF 2(7) M/CS.
@@ -198,7 +200,7 @@ MAXVBITS	OCT	00547			# MAX. DISPLAYED VELOCITY 199.9989 FT/SEC.
 TORKJET1	DEC	.03757			# 550 / .2 SCALED AT (+16) 64 / 180
 
 ## Page 43
-# PARAMETERS RELATING TO MASS, INERTIA, AND VEHICLE DIMENSIONS
+# PARAMETERS RELATING TO MASS, INERTIA, AND VEHICLE DIMENSTIONS
 
 		SETLOC	FRANDRES
 		BANK
@@ -212,7 +214,7 @@ FULLAPS		DEC	5050 B-16		# NOMINAL FULL ASCENT MASS -- 2(16) KG.
 		
 MINLMD		DEC	-2850 B-16		# MIN. DESCENT STAGE MASS -- 2(16) KG.
 MINMINLM	DEC	-2200 B-16		# MIN ASCENT STAGE MASS -- 2(16) KG.
-MINCSM		=	BIT11			# MIN CSM MASS (OK FOR 1/ACCS) = 9050 LB
+MINCSM		=	BIT11			# MIN CSM MASS (OK FOR 1/ACCS) = 9050 LBS
 
 		SETLOC	DAPS3
 		BANK
@@ -235,12 +237,12 @@ OMEG/MS		2DEC	.24339048
 		BANK
 		COUNT*	$$/R30
 
-# *** THE ORDER OF THE FOLLOWING TWO CONSTANTS MUST BE PRESERVED ***********
+# *** THE ORDER OF THE FOLLOWING TWO CONSTANTS MUST BE PRESERVED *********
 
 1/RTMUM		2DEC*	.45162595 E-4 B14*
 1/RTMUE		2DEC*	.50087529 E-5 B17*
 
-# **************************************************************************
+# ************************************************************************
 
 		SETLOC	P40S1
 		BANK
@@ -259,12 +261,12 @@ MOONRATE	2DEC*	.26616994890062991 E-7 B+19*	# RAD/CS.
 		BANK
 		COUNT*	$$/SERV
 		
-# *** THE ORDER OF THE FOLLOWING TWO CONSTANTS MUST BE PRESERVED ***********
+# *** THE ORDER OF THE FOLLOWING TWO CONSTANTS MUST BE PRESERVED *********
 
 -MUDT		2DEC*	-7.9720645 E+12 B-44*
 -MUDT1		2DEC*	-9.8055560 E+10 B-44*
 
-# **************************************************************************
+# ************************************************************************
 
 -MUDTMUN	2DEC*	-9.8055560 E+10 B-38*
 RESQ		2DEC*	40.6809913 E12 B-58*
@@ -293,7 +295,7 @@ ERAD		2DEC	6373338 B-29		# PAD RADIUS
 		BANK
 		COUNT*	$$/CONIC
 		
-# *** THE ORDER OF THE FOLLOWING CONSTANTS MUST BE PRESERVED **************
+# *** THE ORDER OF THE FOLLOWING CONSTANTS MUST BE PRESERVED *************
 
 MUTABLE		2DEC*	3.986032 E10 B-36*	# MUE
 		2DEC*	.25087606 E-10 B+34*	# 1/MUE
@@ -304,7 +306,7 @@ MUTABLE		2DEC*	3.986032 E10 B-36*	# MUE
 		2DEC*	2.21422176 E4 B-15*	# SQRT(MUM)
 		2DEC*	.45162595 E-4 B+14*	# 1/SQRT(MUM)
 		
-# *************************************************************************
+# ************************************************************************
 
 ## Page 46
 		SETLOC	INTINIT
@@ -317,10 +319,10 @@ OMEGMOON	2DEC*	2.66169947 E-8 B+23*
 		BANK
 		COUNT*	$$/ORBIT
 		
-# *** THE ORDER OF THE FOLLOWING CONSTANTS MUST NOT BE CHANGED ************
+# *** THE ORDER OF THE FOLLOWING CONSTANTS MUST NOT BE CHANGED ***********
 
-		2DEC*	1.32715445 E16 B-54*
-MUM		2DEC*	4.9027780 E8 B-30*
+		2DEC*	1.32715445 E16 B-54*	# S
+MUM		2DEC*	4.9027780 E8 B-30*	# M
 MUEARTH		2DEC*	3.986032 E10 B-36*
 		2DEC 	0
 J4REQ/J3	2DEC*	.4991607391 E7 B-26*
@@ -330,7 +332,7 @@ J4REQ/J3	2DEC*	.4991607391 E7 B-26*
 J2REQSQ		2DEC*	1.75501139 E21 B-72*
 3J22R2MU	2DEC*	9.20479048 E16 B-58*
 
-# *************************************************************************
+# ************************************************************************
 
 		SETLOC	TOF-FF1
 		BANK
@@ -505,26 +507,26 @@ REMDIST		2DEC	384402000 B-29		# MEAN DISTANCE BETWEEN EARTH AND MOON.
 		
 CATLOG		DEC	6970
 		
-# *******************************************************************************
+# ************************************************************************
 
 		SETLOC	EPHEM1
 		BANK
 		COUNT*	$$/EPHEM
 		
-KONMAT		2DEC	1.0 B-1			# ********************
-		2DEC	0			#		     *
-		2DEC	0			#		     *
-		2DEC	0			#		     *
-		2DEC	.91745 B-1		# K1 COS(OBL)	     *
-		2DEC	-.03571 B-1		# K2 SIN(OBL)SIN(IM) *
-		2DEC	0			#		     *
-		2DEC	.39784 B-1		# K3 SIN(OBL)	     *
+KONMAT		2DEC	1.0 B-1			#         *************
+		2DEC	0			#		      *
+		2DEC	0			#		      *
+		2DEC	0			#		      *
+		2DEC	.91745 B-1		# K1 COS(OBL)	      *
+		2DEC	-.03571 B-1		# K2 SIN(OBL)SIN(IM)  *
+		2DEC	0			#		      *
+		2DEC	.39784 B-1		# K3 SIN(OBL)	      *
 ## Page 52
-		2DEC	.082354 B-1		# K4 COS(OBL)SIN(IM) *
-CSTODAY		2DEC	8640000 B-33		# 		     * NOTE:          *
-RCB-13		OCT	00002			#		     * TABLES CONTAIN *
-		OCT	00000			#		     * CONSTANTS FOR  *
-RATESP		2DEC	.03660098 B+4		# LOMR		     * 1969 - 1970    *
+		2DEC	.082354 B-1		# K4 COS(OBL)SIN(IM)  *
+CSTODAY		2DEC	8640000 B-33		# 		      * NOTE           *
+RCB-13		OCT	00002			#		      * TABLES CONTAIN *
+		OCT	00000			#		      * CONSTANTS FOR  *
+RATESP		2DEC	.03660098 B+4		# LOMR		      * 1969 - 1970    *
 		2DEC	.00273779 B+4		# LOSR
 		2DEC	-.00014719 B+4		# LONR
 		2DEC	.815282336		# LOMO
@@ -540,20 +542,20 @@ VAL67		2DEC*	.01726666666 B+1*	# AMOD
 		2DEC	-.01106341036		# CARG
 		2DEC	.002737925 B+1		# 1/365
 		
-# ********************************************************************************
+# ************************************************************************
 
 		SETLOC	PLANTIN2
 		BANK
 		COUNT*	$$/LUROT
 		
-COSI		2DEC	.99964173 B-1		# COS (5521.5 SEC.) B-1
-SINI		2DEC	.02676579 B-1		# SIN (5521.5 SEC.) B-1
-NODDOT		2DEC	-.457335121 E-2		# REV/CSEC B+28 = -1.07047011 E-8 RAD/SEC
-FDOT		2DEC	.570863327		# REV/CSEC B+27 =  2.67240410 E-6 RAD/SEC
+COSI		2DEC	.99964173 B-1		# COS (5521.5 SEC) B-1
+SINI		2DEC	.02676579 B-1		# SIN (5521.5 SEC) B-1
+NODDOT		2DEC	-.457335121 E-2		# REVS/CSEC B+28 = -1.07047011 E-8 RAD/SEC
+FDOT		2DEC	.570863327		# REVS/CSEC B+27 =  2.67240410 E-6 RAD/SEC
 ## Page 53
-BDOT		2DEC	-3.07500686 E-8		# REV/CSEC B+28 = -7.19757301 E-14 RAD/SEC
-NODIO		2DEC	.986209434		# REVS B-D	= 6.19653663041 RAD
-FSUBO		2DEC	.829090536		# REVS B-D	= 5.20932947829 RAD
-BSUBO		2DEC	.0651201393		# REVS B-D	= 0.40916190299 RAD
-WEARTH		2DEC	.973561595		# REV/CSEC B+23	= 7.29211494 E-5 RAD/SEC
+BDOT		2DEC	-3.07500686 E-8		# REVS/CSEC B+28=-7.19757301 E-14 RAD/SEC
+NODIO		2DEC	.986209434		# REVS B-D    = 6.19653663041 RAD
+FSUBO		2DEC	.829090536		# REVS B-D    = 5.20932947829 RAD
+BSUBO		2DEC	.0651201393		# REVS B-D    = 0.40916190299 RAD
+WEARTH		2DEC	.973561595		# REVS/CSEC B+23= 7.29211494 E-5 RAD/SEC
 

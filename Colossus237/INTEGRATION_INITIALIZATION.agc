@@ -1,14 +1,18 @@
 ### FILE="Main.annotation"
-## Copyright:    Public domain.
-## Filename:	 INTEGRATION_INITIALIZATION.agc
-## Purpose:      Part of the source code for Colossus build 237.
-##               This is for the Command Module's (CM) Apollo Guidance
-##               Computer (AGC), for Apollo 8.
-## Assembler:    yaYUL
-## Contact:      Jim Lawton <jim DOT lawton AT gmail DOT com>
-## Website:      www.ibiblio.org/apollo/index.html
-## Page Scans:   www.ibiblio.org/apollo/ScansForConversion/Colossus237/
-## Mod history:  2011-04-17 JL	Adapted from corresponding Colossus 249 file.
+## Copyright:   Public domain.
+## Filename:	INTEGRATION_INITIALIZATION.agc
+## Purpose:     Part of the source code for Colossus build 237.
+##              This is for the Command Module's (CM) Apollo Guidance
+##              Computer (AGC), for Apollo 8.
+## Assembler:   yaYUL
+## Contact:     Jim Lawton <jim DOT lawton AT gmail DOT com>
+## Website:     www.ibiblio.org/apollo/index.html
+## Page Scans:  www.ibiblio.org/apollo/ScansForConversion/Colossus237/
+## Mod history: 2011-04-17 JL	Adapted from corresponding Colossus 249 file.
+##		2017-01-01 RSB	Proofed comment text using octopus/ProoferComments,
+##				and fixed errors found.
+##		2017-01-14 RSB	Fixed comment-text errors located by diff'ing 
+##				against Colossus 249.
 
 ## Page 1275
 # 1.0 INTRODUCTION
@@ -36,7 +40,7 @@
 # TIME AND THE DESIRED TIME (TDEC1) ALSO AT SOME REAL TIME. FOR CONIC ,,INTEGRATION,, THE USER MAY STILL USE ZERO
 # AS THE INITIAL TIME AND DELTA TIME AS THE DESIRED TIME.
 #
-# 2.0 CENTRAL DESCRIPTION
+# 2.0 GENERAL DESCRIPTION
 # -----------------------
 #
 # THE INTEGRATION PROGRAM OPERATES AS A CLOSED INTERPRETIVE SUBROUTINE AND PERFORMS THESE FUNCTIONS---
@@ -68,7 +72,7 @@
 #
 # PHASE CHANGES WILL BE MADE IN THE INTEGRATION PROGRAM ONLY FOR THE INTEGRV ENTRANCE (I.E., WHEN THE W-MATRIX IS
 # INTEGRATED OR PERMANENT STATE VECTOR IS UPDATED.) THE GROUP NUMBER USED WILL BE THAT FOR THE P20-25 PROGRAMS
-# (I.E., GROUP2) WINCE THE INTEGRV ENTRANCE WILL ONLY BE USED BY THESE PROGRAMS. IF A RESTART OCCURS DURING AN
+# (I.E., GROUP2) SINCE THE INTEGRV ENTRANCE WILL ONLY BE USED BY THESE PROGRAMS. IF A RESTART OCCURS DURING AN
 # INTEGRATION OF THE STATE VECTOR ONLY, THE RECOVERY WILL BE TO THE LAST PHASE IN THE CALLING PROGRAM. CALLING
 # PROGRAMS WHICH USE THE INTEGRV OR INTEGRVS ENTRANCE OF INTEGRATION SHOULD ENSURE THAT IF PHASE CHANGING IS DONE
 # THAT IT IS PRIOR TO SETTING THE INTEGRATION INPUTS IN THE PUSHLIST.
@@ -101,7 +105,7 @@
 #
 #                                                             28     28
 #    TETCSM(LEM)    - TIME STATE VECTOR IS VALID     CSEC    2      2
-#                     CUSTOMARILY 0, BUT NOT LUNAR
+#                     CUSTOMARILY 0, BUT NOTE LUNAR
 #                     ORBIT DEPENDENCE ON REAL TIME.
 #
 #                                                             22     18
@@ -113,7 +117,7 @@
 #                     0 IF TCCSM(LEM) = 0
 ## Page 1277
 #                                                             29     27
-#    RCVSM(LEM)     - CONIC POSITION                 METERS  2      2
+#    RCVCSM(LEM)    - CONIC POSITION                 METERS  2      2
 #                     EQUALS RRECTCSM(LEM) IF
 #                     TCCSM(LEM) = 0
 #
@@ -160,7 +164,7 @@
 #    X1           MUTABLE ENTRY                              -2     -10D
 #
 #    X2           COORDINT
-#    X2           COORDINATE SYSTEM ORIGIN                   0      2
+#    X2           COORDINATE SYSTEM ORIGEN                   0      2
 #                 (THIS, NOT MOONFLAG, SHOULD BE
 ## Page 1278
 #                 USED TO DETERMINE ORIGIN.)
@@ -454,7 +458,7 @@ INTBANK		BBCON	INTEGRV
 # THE PERMANENT STATE VECTOR IS NOT UPDATED.
 # CSMCONIC AND LEMCONIC PERFORM ORBIT INTEG. BY KEPLERS METHOD TO THE TIME INDICATED IN TDEC1
 # NO DISTURBING ACCELERATIONS ARE INCLUDED. IN THE PROGRAM FLOW THE GIVEN
-# STATE VECTOR IS RECTIFIED BEFORE SOLUTION OF KEPLERS EQUATION.
+# STATE VECTOR IS RECTIFIED BEFORE SOLUTION OF KEPLERS EQUATION
 
 # THE ROUTINES ASSUME THAT THE CSM (LEM) STATE VECTOR IN P-MEM IS VALID.
 # SWITCHES SET PRIOR TO ENTRY TO THE MAIN INTEG. PROG ARE AS FOLLOWS
@@ -919,13 +923,13 @@ INT/W		DLOAD	CALL
 
 # THIS ROUTINE INTEGRATES (PRECISION) TO THE TIME SPECIFIED IN TDEC1.
 # IF, AT THE END OF AN INTEGRATION TIME STEP, CURRENT TIME PLUS A DELTA
-# TIME (SEE TIMEDELT.....BASED ON THE COMPUTATION TIME FOR ONE TIME STEP)
+# TIME (SEE TIMEDELT.....BASED ON THE COMPUTATUON TIME FOR ONE TIME STEP)
 # IS GREATER THAN THE DESIRED TIME, ALARM 1703 IS SET AND THE INTEGRATION
 # IS DONE TO THE CURRENT TIME.
 # RETURN IS IN BASIC TO THE RETURN ADDRESS PLUS ONE.
 
 # IF THE INTEGRATION IS FINISHED TO THE DESIRED TIME, RETURN IS IN BASIC
-# TO THE RETURN ADDRESS.
+# TO THE RETURN ADDRESS
 
 # IN EITHER CASE , BEFORE RETURNING, THE EXTRAPOLATED STATE VECTOR IS TRAN
 # FERRED FROM R,VATT TO R,VN1-PIPTIME1 IS SET TO THE FINISHING INTEGRA-
@@ -1090,7 +1094,7 @@ INTWAKEX	CLEAR
 INTWAKUP	SSP	CALL		# REMOVE :UPDATE STATE VECTOR INDICATOR:
 			UPSVFLAG
 			0
-			INTWAKE0	# RELEASE :GRAB: OF ORBIT INTEG.
+			INTWAKE0	# RELEASE :GRAB: OF ORBIT INTEG
 		EXIT
 
 		TC	PHASCHNG

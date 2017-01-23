@@ -5,26 +5,16 @@
 ##		It is part of the source code for the Lunar Module's (LM)
 ##		Apollo Guidance Computer (AGC) for Apollo 13.
 ## Assembler:	yaYUL
-## Reference:	pp. 59-65 of 1729.pdf.
+## Reference:	pp. 54-60
 ## Contact:	Ron Burkey <info@sandroid.org>.
 ## Website:	www.ibiblio.org/apollo/index.html
 ## Mod history:	04/23/03 RSB.	Began.
 ##		05/14/05 RSB	Corrected website reference above.
-##
-## The contents of the "Luminary131" files, in general, are
-## transcribed from a scanned document obtained from MIT's website,
-## http://hrst.mit.edu/hrs/apollo/public/archive/1729.pdf.  Notations on this
-## document read, in part:
-##
-##	NASA Apollo LUMINARY 131 (1C) Program Source Code Listing.
-##	MIT Instrumentation/Draper Laboratory -- 19 December 1969, 1742 pages.
-##	This listing contains the flight program for the Lunar Module 
-##	as created by MIT's Draper Lab for the Apollo 13/14 moon missions.
-##
-## Refer directly to the online document mentioned above for further information.
-## Please report any errors (relative to 1729.pdf) to info@sandroid.org.
+##		2017-01-06 RSB	Page numbers now agree with those on the
+##				original harcopy, as opposed to the PDF page
+##				numbers in 1701.pdf.
 
-## Page 59
+## Page 54
 
 # *** CHANNEL DESCRIPTION WORDS ARE ALLOCATED IN ERASABLE ASSIGNMENTS ***
 
@@ -60,7 +50,7 @@
 #		BIT 5		LIGHT KEYBOARD RELEASE LAMP.
 #		BIT 6		FLASH VERB AND NOUN LAMPS.
 #		BIT 7		LIGHT OPERATOR ERROR LAMP.
-## Page 60
+## Page 55
 #		BIT 8		SPARE
 #		BIT 9		TEST CONNECTOR OUTBIT
 #		BIT 10		CAUTION RESET
@@ -88,7 +78,7 @@
 #		BIT 14		ENABLE RENDEZVOUS RADAR LOCK-ON; AUTO ANGLE TRACK'G
 #		BIT 15		ISS TURN ON DELAY COMPLETE
 
-## Page 61
+## Page 56
 # CHANNEL 13	CHAN13: OUTPUT CHANNEL.
 #
 #		BIT 1		RADAR C		PROPER SETTING OF THE A,B,C MATRIX
@@ -118,7 +108,7 @@
 #		BIT 7		GYRO SELECT B		PAIR OF BITS IDENTIFIES AXIS OF
 #		BIT 8		GYRO SELECT A		GYRO SYSTEM TO BE TORQUED.
 #		BIT 9		GYRO TORQUING COMMAND IN NEGATIVE DIRECTION.
-## Page 62
+## Page 57
 #		BIT 10		GYRO ACTIVITY
 #		BIT 11		DRIVE CDU S
 #		BIT 12		DRIVE CDU T
@@ -150,7 +140,7 @@
 #		BIT 3		ENGINE ARMED SIGNAL
 #		BIT 4		ABORT WITH ASCENT ENGINE STAGE
 #		BIT 5		AUTO THROTTLE; COMPUTER CONTROL OF DESCENT ENGINE
-## Page 63
+## Page 58
 #		BIT 6		DISPLAY INERTIAL DATA
 #		BIT 7		RR CDU FAIL
 #		BIT 8		SPARE
@@ -179,7 +169,7 @@
 #		BIT 10		TRANSLATION IN -Y DIRECTION COMMANDED BY THC
 #		BIT 11		TRANSLATION IN +Z DIRECTION COMMANDED BY THC
 #		BIT 12		TRANSLATION IN -Z DIRECTION COMMANDED BY THC
-## Page 64
+## Page 59
 #		BIT 13		ATTITUDE HOLD MODE ON SCS MODE CONTROL SWITCH
 #		BIT 14		AUTO STABILIZATION OF ATTITUDE ON SCS MODE SWITCH
 #		BIT 15		ATTITUDE CONTROL OUT OF DETENT (RHC NOT IN NEUTRAL)
@@ -208,7 +198,7 @@
 #		BIT 5		LR RANGE DATA GOOD
 #		BIT 6		LR POS1
 #		BIT 7		LR POS2
-## Page 65
+## Page 60
 #		BIT 8		LR VEL DATA GOOD
 #		BIT 9		LR RANGE LOW SCALE
 #		BIT 10		BLOCK UPLINK INPUT

@@ -1,14 +1,18 @@
 ### FILE="Main.annotation"
-## Copyright:    Public domain.
-## Filename:	 POWERED_FLIGHT_SUBROUTINES.agc
-## Purpose:      Part of the source code for Colossus build 237.
-##               This is for the Command Module's (CM) Apollo Guidance
-##               Computer (AGC), for Apollo 8.
-## Assembler:    yaYUL
-## Contact:      Jim Lawton <jim DOT lawton AT gmail DOT com>
-## Website:      www.ibiblio.org/apollo/index.html
-## Page Scans:   www.ibiblio.org/apollo/ScansForConversion/Colossus237/
-## Mod history:  2011-04-17 JL	Adapted from corresponding Colossus 249 file.
+## Copyright:   Public domain.
+## Filename:	POWERED_FLIGHT_SUBROUTINES.agc
+## Purpose:     Part of the source code for Colossus build 237.
+##              This is for the Command Module's (CM) Apollo Guidance
+##              Computer (AGC), for Apollo 8.
+## Assembler:   yaYUL
+## Contact:     Jim Lawton <jim DOT lawton AT gmail DOT com>
+## Website:     www.ibiblio.org/apollo/index.html
+## Page Scans:  www.ibiblio.org/apollo/ScansForConversion/Colossus237/
+## Mod history: 2011-04-17 JL	Adapted from corresponding Colossus 249 file.
+##		2017-01-01 RSB	Proofed comment text using octopus/ProoferComments,
+##				and fixed errors found.
+##		2017-01-01 RSB	Proofed comment text using octopus/ProoferComments,
+##				and fixed errors found.
 
 ## Page 1329
 		BANK	14		# SAME FBANK AS THE FINDCDUD SUB-PROGRAM
@@ -101,7 +105,7 @@ TR*GL**P	MASK	SIX		# MAKE IT EVEN AND SMALLER
 ## Page 1331
 # ****************************************************************************************************************
 
-#     QUICTRIG, INTENDED FOR QUIDANCE CYCLE USE WHERE TIME IS CRITICAL, IS A MUCH FASTER VERSION OF CD*TR*GS.
+#     QUICTRIG, INTENDED FOR GUIDANCE CYCLE USE WHERE TIME IS CRITICAL, IS A MUCH FASTER VERSION OF CD*TR*GS.
 # QUICTRIG COMPUTES AND STORES THE SINES AND COSINES OF THE 2'S COMPLEMENT ANGLES AT CDUSPOT, CDUSPOT +2,
 # AND CDUSPOT +4.   UNLIKE CD*TR*GS, QUICTRIG DOES NOT LEAVE THE 1'S COMPLEMENT VERSIONS OF THE ANGLES IN
 # CDUSPOT.   QUICTRIG'S EXECUTION TIME IS 4.1 MS;   THIS IS 10 TIMES AS FAST AS CD*TR*GS.   QUICTRIG MAY BE
@@ -255,7 +259,7 @@ LOOP1		DXCH	MPAC
 		AD	DEX1
 		TS	ADDRWD
 
-		TC	DMPSUB		# MULTIPLY AT SIN(CDUANGLE)
+		TC	DMPSUB		# MULTIPLY BY SIN(CDUANGLE)
 		CCS	DEXDEX
 		DXCH	MPAC		# NBSM CASE
 		TCF	+3

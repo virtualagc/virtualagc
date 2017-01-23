@@ -1,15 +1,17 @@
 ### FILE="Main.annotation"
-## Copyright:    Public domain.
-## Filename:     CM_BODY_ATTITUDE.agc
-## Purpose:      Part of the source code for Comanche, build 055. It
-##               is part of the source code for the Command Module's
-##               (CM) Apollo Guidance Computer (AGC), Apollo 11.
-## Assembler:    yaYUL
-## Reference:    pp. 883-889
-## Contact:      Ron Burkey <info@sandroid.org>
-## Website:      http://www.ibiblio.org/apollo.
-## Mod history:  2009-05-12 RSB	Adapted from Colossus249 file of the same
+## Copyright:   Public domain.
+## Filename:    CM_BODY_ATTITUDE.agc
+## Purpose:     Part of the source code for Comanche, build 055. It
+##              is part of the source code for the Command Module's
+##              (CM) Apollo Guidance Computer (AGC), Apollo 11.
+## Assembler:   yaYUL
+## Reference:   pp. 883-889
+## Contact:     Ron Burkey <info@sandroid.org>
+## Website:     http://www.ibiblio.org/apollo.
+## Mod history: 2009-05-12 RSB	Adapted from Colossus249 file of the same
 ##				name and Comanche 055 page images.
+##		2016-12-21 RSB	Proofed comment text using octopus/ProoferComments
+##				and corrected the errors found.
 ##
 ## The contents of the "Comanche055" files, in general, are transcribed 
 ## from scanned documents. 
@@ -39,7 +41,7 @@
 		
 # PDL 12D - 15D SAFE.
 
-# VALUE OF GIMBAL AND BODY ANGLES VALID AT PIP TIME ARE SAVED DURING  READACCS.
+# VALUES OF GIMBAL AND BODY ANGLES VALID AT PIP TIME ARE SAVED DURING  READACCS.
 
 		EBANK=	RTINIT		# LET INTERPRETER SET EB
 		
@@ -67,8 +69,8 @@ CM/POSE		TC	INTPRET		# COME HERE VIA AVEGEXIT.
 			S1		# UN FOR THE END OF THE TERMINAL PHASE.
 SPVQUIT		DEC	.019405		# 1000/ 2 VS
 		TIX,1	VLOAD		# IF V-VQUIT POS, BRANCH.
-			CM/POSE2	# SAME UYA IN OLDUYA
-			OLDUYA		# OTHERWISE CONTINUE TO USE OLDUYA
+			CM/POSE2	# SAVE UYA IN OLDUYA
+			OLDUYA		# OTHERWISE CONTINUE TO USE OLDUYA.
 CM/POSE2	STORE	UYA/2		#				REF COORDS
 
 		STORE	OLDUYA		# RESTORE, OR SAVE AS CASE MAY BE.
@@ -79,7 +81,7 @@ CM/POSE2	STORE	UYA/2		#				REF COORDS
 		STORE	UZA/2		#				REF COORDS
 ## Page 884
 		TLOAD			# PICK UP CDUX, CDUY, CDUZ CORRESPONDING
-			AOG/PIP		# TO PIPUP TIME IN 2'S C AND SAVE.
+			AOG/PIP		# TO PIPUP TIME IN 2S,C AND SAVE.
 CM/TRIO		STODL	24D
 			25D		# AIG/PIP
 			
@@ -98,7 +100,7 @@ CM/TRIO		STODL	24D
 			0		# SM /2
 		DCOMP	VXSC
 			UBX/2
-		VSL1			# NOISE WON'T OVFL
+		VSL1			# NOISE WONT OVFL.
 		STODL	UBY/2		# =(-SMCI, NOISE, SMSI)/2
 			2		# CM /2 REPLACES NOISE
 		STODL	UBY/2 +2	# UBY/2=(-SMCI, CM, SMSI)/2
@@ -173,7 +175,7 @@ CM/TRIO		STODL	24D
 		STOVL	SINTH		# -SIN(ALFA)/4
 		DOT			# UL/2 FROM PDL 0
 			UBZ/2
-		STCALL	COSTH		# COS(ALFA)/2
+		STCALL	COSTH		# COS(ALFA)/4
 			ARCTRIG
 		STOVL	8D		# -(ALFA/180) /2
 			UNITR		# UR/2				REF COORDS
@@ -187,6 +189,7 @@ CM/TRIO		STODL	24D
 					# -( (ROLL, BETA, ALFA) /180)/2
 			6D		# THESE VALUES CORRECT AT PIPUP TIME.
 
+# SPACER
 ## Page 887
 # BASIC SUBROUTINE TO UPDATE ATTITUDE ANGLES
 
@@ -206,7 +209,7 @@ CMTR1		INDEX	FIXLOC
 					
 		CS	CM/FLAGS
 		MASK	BIT11		# GAMDIFSW=94D BIT11	INITLY=0
-		EXTEND			# DON'T CALC GAMA DOT UNTIL HAVE FORMD
+		EXTEND			# DONT CALC GAMA DOT UNTIL HAVE FORMD
 					# ONE DIFFERENCE.
 		BZF	DOGAMDOT	# IS OK, GO ON.
 		ADS	CM/FLAGS	# KNOW BIT IS 0
@@ -225,10 +228,10 @@ DOGAMDOT	CS	L
 		EXTEND
 		BZMF	+3		# SET GAMDOT=+0 AS TAG IF TOO SMALL.
 		
-NOGAMDOT	CA	ZERO		# COME HERE INHINTED
+NOGAMDOT	CA	ZERO		# COME HERE INHINTED.
 		TS	GAMDOT
-					# FOR NOW LEAVE IN 2'S C
-					# UPDATE ANGLES BY CORRECTING EULER ANG
+					# FOR NOW LEAVE IN 2S,C
+					# UPDATE ANGLES BY CORRECTING EUILER ANG
 					# FOR ACCRUED INCREMENT SINCE PIPUP
 					# R = R EUIL + R(NOW) - R(PIPUP)
 		CS	MPAC		# GET (R EUL/180) /2
@@ -278,7 +281,7 @@ REDOPOSE	EXTEND			# RE-STARTS COME HERE
 		
 		RELINT
 		
-		TC	INTPRET		# CAN'T TC DANZIG AFTER PHASCHNG.
+		TC	INTPRET		# CANT TC DANZIG AFTER PHASCHNG.
 CM/POSE3	VLOAD	ABVAL		# RETURN FROM CM/ATUP.	(RESTART)
 			VN		# 2(-7) M/CS
 		STORE	VMAGI		# FOR DISPLAY ON CALL.

@@ -10,6 +10,8 @@
 ## Page Scans:	www.ibiblio.org/apollo/ScansForConversion/Solarium055/
 ## Mod history:	2009-09-21 JL	Created.
 ##		2016-08-18 RSB	Some fixes.
+## 		2016-12-28 RSB	Proofed comment text using octopus/ProoferComments,
+##				and fixed errors found.
 
 ## Page 111
 
@@ -171,13 +173,14 @@ LTSKOV		TC	TASKOVER	# USED BY LONGCALL.
 # C(LST2+1) = TC  TASK2
 # C(LST2+2) = TC  TASK3
 # C(LST2+3) = TC  TASK4
-# C(LST2+4) = TC  TASK5						11W
+# C(LST2+4) = TC  TASK5
+# C(LST2+5) = TC  TASK6						11W
 
 ## Page 115
 
 # THE ENTRY TO WTLST2 JUST PRECEDING OCT  N  IS FOR T  LE TD LE T   -1.
 #                                                    N           N+1
-# (LE MEANS LESS THAT OR EQUAL TO).  AT ENTRY, C(A) = -(TD - T   + 1)
+# (LE MEANS LESS THAN OR EQUAL TO).  AT ENTRY, C(A) = -(TD - T   + 1)
 #                                                             N+1
 #
 # THE LST1 ENTRY -(T   - T +1) IS TO BE REPLACED BY -(TD - T + 1), AND
@@ -287,7 +290,7 @@ T3RUPT2		CS	ZERO		# SET RUPTAGN TO -0 INITIALLY, AND SET
 		XCH	LST1 +4		# 3.  MOVE UP LST1 CONTENTS, ENTERING
 		XCH	LST1 +3		#     A VALUE OF 1/2 +1 AT THE BOTTOM
 		XCH	LST1 +2		#     FOR T6-T5, CORRESPONDING TO THE
-		XCH	LST1 +1		#     INTERNAL 81.93 SEC FOR ENDTASK.
+		XCH	LST1 +1		#     INTERVAL 81.93 SEC FOR ENDTASK.
 		XCH	LST1
 		AD	POSMAX		# 4. SET T3 = 1.0 - T2 -T USING LIST 1.
 		AD	Q		# SAMPLED T3.

@@ -1,14 +1,18 @@
 ### FILE="Main.annotation"
-## Copyright:    Public domain.
-## Filename:	 IMU_COMPENSATION_PACKAGE.agc
-## Purpose:      Part of the source code for Colossus build 237.
-##               This is for the Command Module's (CM) Apollo Guidance
-##               Computer (AGC), for Apollo 8.
-## Assembler:    yaYUL
-## Contact:      Jim Lawton <jim DOT lawton AT gmail DOT com>
-## Website:      www.ibiblio.org/apollo/index.html
-## Page Scans:   www.ibiblio.org/apollo/ScansForConversion/Colossus237/
-## Mod history:  2011-01-23 JL   Adapted from corresponding Colossus 249 file.
+## Copyright:   Public domain.
+## Filename:	IMU_COMPENSATION_PACKAGE.agc
+## Purpose:     Part of the source code for Colossus build 237.
+##              This is for the Command Module's (CM) Apollo Guidance
+##              Computer (AGC), for Apollo 8.
+## Assembler:   yaYUL
+## Contact:     Jim Lawton <jim DOT lawton AT gmail DOT com>
+## Website:     www.ibiblio.org/apollo/index.html
+## Page Scans:  www.ibiblio.org/apollo/ScansForConversion/Colossus237/
+## Mod history: 2011-01-23 JL   Adapted from corresponding Colossus 249 file.
+##		2016-12-30 RSB	Proofed comment text using octopus/ProoferComments,
+##				and corrected errors found.
+##		2017-01-14 RSB	Fixed comment-text errors located while 
+##				diff'ing against Colossus 249.
 
 ## Page 290
 
@@ -50,7 +54,7 @@
 		EXTEND
 		MP	BIT6		# SCALE 2(+9)   SHIFT RIGHT 9
 		INDEX	BUF +2	
-		DAS	DELVX		# (PIPAI) + (PIPAI)(SPE)
+		DAS	DELVX		# (PIPAI) + (PIPAI)(SFE)
 		
 		INDEX	BUF +2
 		CS	PIPABIAS	# (PIPA PULSES)/(CS) X 2(-8)             *
@@ -72,7 +76,7 @@
 
 #
 IRIGCOMP	TS	GCOMPSW		# INDICATE COMMANDS 2 PULSES OR LESS
-		TS	BUF		# INDEX COUNTER - IRIGX, IRIGY, IRIGZ.
+		TS	BUF		# INDEX COUNTER - IRIGX, IRIGY, IRIGZ
 		
 IRIGX		EXTEND	
 		DCS	DELVX		# (PIPA PULSES) X 2(+14)
@@ -87,10 +91,10 @@ IRIGX		EXTEND
 		TC	GCOMPSUB	# +(ADSRAX)(PIPAY)  (GYRO PULSES) X 2(+14)
 
 #		EXTEND		  ***
-#		DCS	DELVY	  ***	# (PIPA PULSES) X 2(+14)
+#		DCS	DELVZ	  ***	(PIPA PULSES) X 2(+14)
 #		DXCH	MPAC	  ***
-#		CA	ADOAX	  ***	# (GYRO PULSES)/(PIPA PULSE) X 2(-3)     *
-#		TC	GCOMPSUB  ***	# -(ADDAX)(PIPAZ)   (GYRO PULSES) X 2(+14)
+#		CA	ADOAX	  ***	(GYRO PULSES)/(PIPA PULSE) X 2(-3)       *
+#		TC	GCOMPSUB  ***	-(ADOAX)(PIPAZ)   (GYRO PULSES) X 2(+14)
 
 		CS	NBDX		# (GYRO PULSES)/(CS) X 2(-5)
 		TC	DRIFTSUB	# -(NBDX)(DELTAT)   (GYRO PULSES) X 2(+14)
@@ -108,12 +112,12 @@ IRIGY		EXTEND
 		TC	GCOMPSUB	# +(ADSRAY)(PIPAZ)  (GYRO PULSES) X 2(+14)
 
 #		EXTEND		  ***
-#		DCS	DELVX	  ***	# (PIPA PULSES) X 2(+14)
+#		DCS	DELVX	  ***	(PIPA PULSES) X 2(+14)
 #		DXCH	MPAC	  ***
-#		CA	ADOAY	  ***	# (GYRO PULSES)/(PIPA PULSE) X 2(-3)     *
-#		TC	GCOMPSUB  ***	# -(ADOAY)(/PIPAX)  (GYRO PULSES) X 2(+14)
+#		CA	ADOAY	  ***	(GYRO PULSES)/(PIPA PULSE) X 2(-3)      *
+#		TC	GCOMPSUB  ***	-(ADOAY)(PIPAX)     (GYRO PULSES) X 2(+14)
 
-		CS	NBDY		# (GYRO PULSES)/(CS) X 2(-9)
+		CS	NBDY		# (GYRO PULSES)/(CS) X 2(-5)
 		TC	DRIFTSUB	# -(NBDY)(DELTAT)   (GYRO PULSES) X 2(+14)
 
 IRIGZ		EXTEND
@@ -130,13 +134,13 @@ IRIGZ		EXTEND
 		TC	GCOMPSUB	# -(ADIAZ)(PIPAZ)   (GYRO PULSES) X 2(+14)
 		
 #		EXTEND		  ***
-#		DCS	DELVX	  ***	# (PIPA PULSE) X 2(+14)
+#		DCS	DELVX	  ***	(PIPA PULSE) X 2(+14)
 #		DXCH	MPAC	  ***
-#		CS	ADOAZ	  ***	# (GYRO PULSES)/(PIPA PULSE) X 2(-3)     *
-#		TC	GCOMPSUB  ***	# +(ADOAZ)(PIPAX)   (GYRO PULSES) X 2(+14)
+#		CS	ADOAZ	  ***	(GYRO PULSES)/(PIPA PULSE) X 2(-3)       *
+#		TC	GCOMPSUB  ***	+(ADOAZ)(PIPAX)     (GYRO PULSES) X 2(+14)
 
 		CA	NBDZ		# (GYRO PULSES)/(CS) X 2(-5)
-		TC	DRIFTSUB	# +(NBDZ)(DELTAT)   (GYRO PULSES) X 2(+14)
+		TC	DRIFTSUB	# +(NBDZ)(DELTAT)    (GYRO PULSES) X 2(+14)
 
 ## Page 294
 		CCS	GCOMPSW		# ARE GYRO COMMANDS GREATER THAN 2 PULSES
@@ -155,7 +159,7 @@ IRIG1		CA	MODE		# SET EBANK FOR RETURN
 
 GCOMPSUB	XCH	MPAC		# ADIA OR ADSRA COEFFICIENT ARRIVES IN A
 		EXTEND			# C(MPAC) = (PIPA PULSES) X 2(+14)
-		MP	MPAC		# (GYRO PULSES)/(PIPA PULSE) X 2(-6)     *
+		MP	MPAC		# (GYRO PULSES)/(PIPA PULSE) X 2(-3)     *
 		DXCH	VBUF		# NOW = (GYRO PULSES) X 2(+11)           *
 
 		CA	MPAC +1		# MINOR PART PIPA PULSES
@@ -163,12 +167,12 @@ GCOMPSUB	XCH	MPAC		# ADIA OR ADSRA COEFFICIENT ARRIVES IN A
 		MP	MPAC		# ADIA OR ADSRA
 		TS	L
 		CAF	ZERO
-		DAS	VBUF		# NOW = (BYRO PULSES) X 2(+11)           *
+		DAS	VBUF		# NOW = (GYRO PULSES) X 2(+11)           *
 
 		CA	VBUF		# PARTIAL RESULT - MAJOR
 		EXTEND
 		MP	BIT12		# SCALE 2(+3)      SHIFT RIGHT 3         *
-		INDEX	BUF		# RESULT = (BYRO PULSES) X 2(+14)
+		INDEX	BUF		# RESULT = (GYRO PULSES) X 2(+14)
 		DAS	GCOMP		# HI(ADIA)(PIPAI) OR HI(ADSRA)(PIPAI)
 
 		CA	VBUF +1		# PARTIAL RESULT - MINOR
@@ -193,7 +197,7 @@ DRIFTSUB	EXTEND
 		INDEX	BUF
 		DAS	GCOMP		# HI(NBD)(DELTAT)   (GYRO PULSES) X 2(+14)
 		
-		CA	MPAC +1		# NO MINOR PART
+		CA	MPAC +1		# NOW MINOR PART
 		EXTEND
 		MP	BIT4		# SCALE 2(+11)		SHIFT RIGHT 11
 		TS	L
@@ -295,7 +299,7 @@ NBD3		EXTEND			# C(A) = DELTAT    (CS) X 2(+14)
 		DXCH	MPAC		# DELTAT NOW SCALED (CS) X 2(+19)
 		
 		CAF	ZERO
-		TS	GCOMPSW		# INDICATE COMMANDS 2 PULSES OR LESS.
+		TS	GCOMPSW		# INDICATE COMMANDS 2 PULSES OR LESS
 		TS	BUF		# PIPAX, PIPAY, PIPAZ
 		
 		CS	NBDX		# (GYRO PULSES)/(CS) X 2(-5)
@@ -304,7 +308,7 @@ NBD3		EXTEND			# C(A) = DELTAT    (CS) X 2(+14)
 		EXTEND
 		DCS	VBUF 
 		DXCH	MPAC		# DELTAT SCALED (CS) X 2(+19)
-		CA	NBDY		# (BYRO PULSES)/(CS) X 2(-5)
+		CA	NBDY		# (GYRO PULSES)/(CS) X 2(-5)
 		TC	FBIASSUB	# -(NBDY)(DELTAT)   (GYRO PULSES) X 2(+14)
 		
 		EXTEND

@@ -13,6 +13,8 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2016-11-17 JL   Created from Luminary131 version.
+##		2016-12-26 RSB	Comment-text proofed using ProoferComments
+##				and corrected errors found.
 
 ## Page 1470
                 BANK            21
@@ -75,7 +77,7 @@ GOQTRIMG        CAF             ZERO                    # SET INDEXER FOR Q-AXIS
                 XCH             L                       # LIMITS -1 CONTAINS POSMAX.
 
                 CCS             QRCNTR                  # PICK UP RATE FOR THIS AXIS.  RATE CELLS
-                INDEX           A                       # USE ADJACENT, NOT SEPARATED.  AT PI/4
+                INDEX           A                       # ARE ADJACENT, NOT SEPARATED.  AT PI/4
                 CA              EDOTQ
 GTSQAXIS        DXCH            WCENTRAL
 
@@ -103,7 +105,7 @@ ALGORTHM        EXTEND                                  # Q(R)DIFF IS THETA (ERR
                 EXTEND                                  # LIMITING QUOTIENT TO AVOID OVERFLOW.
                 MP              BIT14                   # -ALPHA/2 IN A, SCALED AT PI/4
                 EXTEND
-                MP              ACENTRAL                # -ALPHA(2)/2 IN A,L, SCALED AT PI(2)/16)
+                MP              ACENTRAL                # -ALPHA(2)/2 IN A,L, SCALED AT PI(2)/16
                 AD              KCENTRAL
                 EXTEND
                 BZMF            HUGEQUOT                # K-ALPHA(2)/2 SHOULD BE PNZ FO DIVISION
@@ -147,7 +149,7 @@ HAVEQUOT        CA              WCENTRAL
                 EXTEND
                 DCS             A2CNTRAL
 
-                DAS             FUNCTION                # OMEGA + ALPHA*ABS(ALPHA)/(2*K) AT 16*PI
+                DAS             FUNCTION                # OMEGA + ALPHA*ABS(ALPHA)/2*K) AT 16*PI
 
                 CCS             FUNCTION                # DEL = +1 FOR FUNCT1 GREATER THAN ZERO.
                 TCF             POSFNCT1                # OTHERWISE DEL = -1
@@ -237,9 +239,9 @@ NEGATE          EXTEND
                 BANK
 
 # THE WRCHN12 SUBROUTINE SETS BITS 9,10,11,12 OF CHANNEL 12 ON THE BASIS OF THE CONTENTS OF NEGUQ,NEGUR WHICH ARE
-# THE NEGATIVES OF THE DESIRED ACCELERATION CHANGES.  ACDT+C12 SETS Q(R)ACCDOT TO REFLECT TEH NEW DRIVES.
+# THE NEGATIVES OF THE DESIRED ACCELERATION CHANGES.  ACDT+C12 SETS Q(R)ACCDOT TO REFLECT THE NEW DRIVES.
 #
-# WARNING:  ACDT+C12 AND WHCHN12 MUST BE CALLED WITH INTERRUPT INHIBITED.
+# WARNING:  ACDT+C12 AND WRCHN12 MUST BE CALLED WITH INTERRUPT INHIBITED.
 
 BGIM            OCTAL           07400
 CHNL12          EQUALS          ITEMP6
@@ -287,7 +289,7 @@ ACDT+C12        CS              NEGUQ
 # SUBROUTINE TIMEGMBL:  MOD 0,  OCTOBER 1967, CRAIG WORK
 
 # TIMEGMBL COMPUTES THE DRIVE TIME NEEDED FOR THE TRIM GIMBAL TO POSITION THE DESCENT ENGINE NOZZLE SO AS TO NULL
-# THE OFFSET ANGULAR ACCELERATION ABOUT THE Q (OR R) AXIS.  INSTEAD OF USING AOSQ(R), TIMEBMBL USES .4*AOSQ(R),
+# THE OFFSET ANGULAR ACCELERATION ABOUT THE Q (OR R) AXIS.  INSTEAD OF USING AOSQ(R), TIMEGMBL USES .4*AOSQ(R),
 # SCALED AT PI/8.                         FOR EACH AXIS, THE DRIVE TIME IS COMPUTED AS ABS(ALPHA/ACCDOT).  A ZERO
 # ALPHA OR ACCDOT OR A ZERO QUOTIENT TURNS OFF THE GIMBAL DRIVE IMMEDIATELY.  OTHERWISE, THE GIMBAL IS TURNED ON
 # DRIVING IN THE CORRECT DIRECTION. THE Q(R)GIMTIMR IS SET TO TERMINATE THE DRIVE AND Q(R)ACCDOT
@@ -303,7 +305,7 @@ ACDT+C12        CS              NEGUQ
 
 # EXITS:  VIA TC Q.
 
-# ALARMS, ABORTS, :  NONE.
+# ALARMS, ABORTS, :  NONE
 
 # SUBROUTINES:  ACDT+C12, IBNKCALL
 
@@ -327,7 +329,7 @@ QRNDXER         EQUALS          ITEMP6
 OCT23146        OCTAL           23146                   # DECIMAL .6
 NZACCDOT        EQUALS          ITEMP3
 
-TIMEGMBL        CAF             ONE                     # INITIALZE ALLOWGTS.
+TIMEGMBL        CAF             ONE                     # INITIALIZE ALLOWGTS.
                 TS              ALLOWGTS
 
                 CAF             TWO                     # SET UP LOOP FOR R AXIS.
@@ -352,7 +354,7 @@ ALPHATRY        INDEX           QRNDXER
                 TS              Q                       # SAVE A COPY OF -AOS.
                 EXTEND                                  # NO.  RESCALE FOR TIMEGMBL USE.
                 MP              OCT23146                # OCTAL 23146 IS DECIMAL .6
-                AD              Q                       # -1.6*AOS AT PI/2 = -.4*AOS AT PI/8
+                AD              Q                       # -1.6*AOS AT PI/2 = -.4*AOS AT PI/8.
                 TS              L                       # WAS THERE OVERFLOW?
                 TCF             SETNEGU                 # NO.  COMPUTE DRIVE TIME.
 
@@ -371,7 +373,7 @@ SETNEGU         EXTEND
 POSALPH         TS              ITEMP2                  # STORE  -ABS(.4*AOS) SCALED AT PI/8.
                 CA              BIT1
  +2             INDEX           QRNDXER                 # SGN(AOS) INTO NEGU
-                TS              NEGUQ                   # STORE SGN(ALPHA) AS NEGU
+                TS              NEGUQ                   # STORE SGN(APLHA) AS NEGU
 
                 CA              NZACCDOT
                 EXTEND
@@ -414,7 +416,7 @@ DONEYET         CCS             QRNDXER
                 DXCH            RUPTREG3                # PROTECT IBNKCALL ERASABLES.  ACDT+C12
                 DXCH            ITEMP2                  # LEAVES ITEMPS2,3 ALONE.
 
-                TC              IBNKCALL                # TURN OFF CHANNEL BITS, SET Q(R)ACCDOTS.
+                TC              IBNKCALL                # TURN OF CHANNEL BITS, SET Q(R)ACCDOTS.
                 CADR            ACDT+C12
 
                 DXCH            ITEMP2                  # RESTORE ERASABLES FOR IBNKCALL.
@@ -503,7 +505,7 @@ SCALDONE        EXTEND
 
                 TC              FUNCTION        +1
 
-# ***************************************************************************************************************
+# ****************************************************************************************************************
 
 
 RSTOFGTS        TC              GTSQRT
@@ -596,9 +598,9 @@ CLOSEADR        2CADR           CLOSEOUT                # TERMINATE THE JASK.
 
 TWELVE          EQUALS          OCT14
 ROOTHALF        OCTAL           26501                   # SQUARE ROOT OF 1/2
-GMBLBITA        OCTAL           01400                   # INDEXED WRT GMBLBITB   DO NOT MOVE*******
+GMBLBITA        OCTAL           01400                   # INDEXED WRT GMBLBITB   DO NOT MOVE******
 OCT11276        OCTAL           11276                   # POSMAX - ROOTHALF
-GMBLBITB        OCTAL           06000                   # INDEXED WRT GMBLBITA   DO NOT MOVE*******
+GMBLBITB        OCTAL           06000                   # INDEXED WRT GMBLBITA   DO NOT MOVE******
 
 # SUBROUTINE ROOTCYCL:  BY CRAIG WORK,3 APRIL 68
 # ROOTCYCL IS A SUBROUTINE WHICH EXECUTES ONE NEWTON SQUARE ROOT ALGORITHM ITERATION.  THE INITIAL GUESS AT THE

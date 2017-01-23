@@ -1,18 +1,22 @@
 ### FILE="Main.annotation"
-## Copyright:    Public domain.
-## Filename:	 CM_ENTRY_DIGITAL_AUTOPILOT.agc
-## Purpose:      Part of the source code for Colossus build 237.
-##               This is for the Command Module's (CM) Apollo Guidance
-##               Computer (AGC), for Apollo 8.
-## Assembler:    yaYUL
-## Contact:      Jim Lawton <jim DOT lawton AT gmail DOT com>
-## Website:      www.ibiblio.org/apollo/index.html
-## Page Scans:   www.ibiblio.org/apollo/ScansForConversion/Colossus237/
-## Mod history:  2011-04-09 JL	Adapted from corresponding Colossus 249 file.
-##		 2011-04-17 JL	Removed temporary line.
-##		 2011-04-27 JL	Fixed symbol name.
-##		 2011-04-29 JL	Had = instead of DEC.
-##		 2016-11-02 RSB	Typo (offset-target +4 was not indented).
+## Copyright:   Public domain.
+## Filename:	CM_ENTRY_DIGITAL_AUTOPILOT.agc
+## Purpose:     Part of the source code for Colossus build 237.
+##              This is for the Command Module's (CM) Apollo Guidance
+##              Computer (AGC), for Apollo 8.
+## Assembler:   yaYUL
+## Contact:     Jim Lawton <jim DOT lawton AT gmail DOT com>
+## Website:     www.ibiblio.org/apollo/index.html
+## Page Scans:  www.ibiblio.org/apollo/ScansForConversion/Colossus237/
+## Mod history: 2011-04-09 JL	Adapted from corresponding Colossus 249 file.
+##		2011-04-17 JL	Removed temporary line.
+##		2011-04-27 JL	Fixed symbol name.
+##		2011-04-29 JL	Had = instead of DEC.
+##		2016-11-02 RSB	Typo (offset-target +4 was not indented).
+##		2017-01-01 RSB	Proofed comment text using octopus/ProoferComments,
+##				and fixed errors found.
+##		2017-01-07 RSB	Fixed comment errors detected in cross-diff vs
+##				Colossus 249.
 
 ## Page 1031
 # SUBROUTINE TO READ GYMBAL ANGLES AND FORM DIFFERENCES.   GIMBAL ANGLES ARE SAVED IN 2S COMPLEMENT, BUT THE
@@ -280,7 +284,7 @@ T5IDLER1	2CADR	T5IDLOC
 # THE 0.1 SEC DAPS WILL MISS A CYCLE, AND WILL PICK UP AT THE NEXT 0.1 SEC UPDATE. MOST OF THE TIME THE 2 SEC
 # ROLL SYSTEM WILL MISS ONLY 0.1 SEC OF CONTROL. HOWEVER IF THE RESTART OCCURS AFTER THE  SECTION TIMETST HAS
 # STARTED, THEN THE ROLL SYSTEM WILL MISS ONE CYCLE.
-# THIS IS NECESSARY UNDER THE GROUND-RULE THAT NO JET COMMANDS SHALL BE LESS THAN 14 MS.
+# THIS IS NECESSARY UNDER THE GROUNDRULE THAT NO JET COMMANDS SHALL BE LESS THAN 14 MS.
 
 		EBANK=	AOG
 		BANK	15
@@ -340,7 +344,7 @@ BODYRATE	CA	AMG		# THESE ARE 2S COMPL NOS, BUT USE ANYWAY.
 		TC	RATEAVG
 		TS	RREL		# YAWDOT = R TCDU/180
 
-# ROLLDOT:   P TCDU/180 = CDOT TCDU/180 + IDOT/180 SINM
+# ROLLDOT:   P TCDU/180 = CDOT TCDU/180 + IDOT TCDU/180 SINM
 
 		CA	AMG
 		TC	SPSIN
@@ -521,7 +525,7 @@ BIASEDZ		TS	JETEM2		# SAVE RATE/180. ERROR/180 IS IN L.
 		TCF	+2
 		CA	CM/BIAS
 		AD	L		# BIAS THE ERROR.
-		LXCH	Q		# SAVE CALLERS RETURN ADDRES.
+		LXCH	Q		# SAVE CALLERS RETURN ADDRESS.
 		TC	3DDZ		# GO GENERATE THE ERROR BIT.
 		DXCH	L		# BIT TO L, RESTORE CALLERS Q.
 4D/SDZ		CCS	JETEM2		# CAME HERE IN EXT ATM. C(L) = ERROR BIT
@@ -573,7 +577,7 @@ DZNOCOM		TS	JETEM +1	# GENERATE TAG, SET C(A)= -+1 OUTSIDE DZ
 EXDAP		TS	CMDAPMOD	# +0 FOR NOW
 		CS	BETA/180
 		AD	BETACOM
-		TS	JETEM +1	# PRESERV THIS FOR A WHILE.
+		TS	JETEM +1	# PRESERVE THIS FOR A WHILE.
 
 		CCS	CALFA
 		AD	C45LIM		# =1.0-COS(45)
@@ -632,7 +636,7 @@ EXDAP1		TS	RAXERR		# FOR YAW FDAI
 
 		CA	QAXERR		# ALFA ERROR.
 		TS	L
-		CA	QREL		# FOR ALPHADOT USE QREL
+		CA	QREL		# FOR ALFADOT USE QREL
 		TC	BIASEDZ
 		EXTEND
 		ROR	LCHAN
@@ -809,7 +813,7 @@ COMPAT		CA	LCX/360		# CORRECT FOR ASSUMED COORD TURN.
 		TS	-VT/180E	#                        DIAGNOSTIC  ****
 		XCH	-VT/180		# NOW CONTENTS OF -VT/180 AS LABELED
 		EXTEND
-		MP	-VT/180		# B(A) = -ZVT/180
+		MP	-VT/180		# B(A) = -2VT/180
 		EXTEND
 		MP	180/8ATT
 		TS	VSQ/4API
@@ -850,7 +854,7 @@ WHICHALF	DOUBLE			# FOR SECOND BURN,  A1
 		TS	JNDX1
 		TC	OVRLINE1
 
-REFLECT		CS	-VT/180		# RELFECT LHP INTO RHP REL TO TERM CONTR
+REFLECT		CS	-VT/180		# REFLECT LHP INTO RHP REL TO TERM CONTR
 		TS	-VT/180
 		TS	SR		# -VT/360  SAVED FOR DZ.
 ## Page 1051
@@ -977,7 +981,7 @@ TIMSCAL		TS	TOFF		# IN CS
 		TS	JETAG		# SET +0 TO SHOW ROLL DAP CALLED.
 
 #			       CAUSE THE TM OF BODY RATES VIA UPBUFF TO BE
-#			       INITIALIZED. ALSO CAUSE NEEDLES TO BE DONE ON EXIT
+#			       INITIALIZED. ALSO CAUSE NEEDLES TO BE DONE ON NEXT
 #			       AND ON ALTERNATE PASSES THROUGH CM/DUMPR.
 
 		CA	ONE
@@ -1119,14 +1123,14 @@ DZCALL1		TS	JETAG		# COME HERE WITH C(A)=0.
 # CALCULATE BY INTEGRATION THE ROLL ERROR BETWEEN THE 2 SEC CM/RCS UPDATES . DISPLAY ATTITUDE ERRORS AS FOLLOWS:
 #          ATM DAP:    DISPLAY ONLY ROLL ATTITUDE ERROR.
 #          EXT ATM DAP:    PRESENT 3 ATTITUDE ERRORS RELATIVE TO THE APPROPRIATE BODY AXES EACH .1 SEC.
-#                                        ROLL    ROLL-ROLL
+#                                        ROLL    ROLLC-ROLL
 #                                        PITCH   ALFAC-ALFA
 #                                        YAW     BETAC-BETA
 
 # DURING ENTRY, THE FDAI NEEDLES HAVE FULL SCALE OF 67.5 DEG IN ROLL AND  16.875 DEG IN PITCH AND YAW.
 # THE SUBROUTINE  NEEDLER  EXPECTS (ANGLE/180) AND SCALES TO 16.875 DEG   FULL SCALE.
 
-CM/FDAI		CCS	CMDAPMOD	# COME HERE EACH .1 SEC.
+CM/FDAI		CCS	CMDAPMOD	# COME HERE EACH 0.1 SEC.
 		TCF	CM/FDAIR -1	#  C(A) =0, FOR DUMP.
 		TCF	+2
 		TCF	+1		# (IN ATM, COME HERE TO   )

@@ -1,15 +1,19 @@
 ### FILE="Main.annotation"
-## Copyright:    Public domain.
-## Filename:	 PHASE_TABLE_MAINTENANCE.agc
-## Purpose:      Part of the source code for Colossus build 237.
-##               This is for the Command Module's (CM) Apollo Guidance
-##               Computer (AGC), for Apollo 8.
-## Assembler:    yaYUL
-## Contact:      Jim Lawton <jim DOT lawton AT gmail DOT com>
-## Website:      www.ibiblio.org/apollo/index.html
-## Page Scans:   www.ibiblio.org/apollo/ScansForConversion/Colossus237/
-## Mod history:  2011-04-17 JL	Adapted from corresponding Colossus 249 file.
-##		 2016-08-14 RSB	Added SBANK to handle addressing discrepancies.
+## Copyright:   Public domain.
+## Filename:	PHASE_TABLE_MAINTENANCE.agc
+## Purpose:     Part of the source code for Colossus build 237.
+##              This is for the Command Module's (CM) Apollo Guidance
+##              Computer (AGC), for Apollo 8.
+## Assembler:   yaYUL
+## Contact:     Jim Lawton <jim DOT lawton AT gmail DOT com>
+## Website:     www.ibiblio.org/apollo/index.html
+## Page Scans:  www.ibiblio.org/apollo/ScansForConversion/Colossus237/
+## Mod history: 2011-04-17 JL	Adapted from corresponding Colossus 249 file.
+##		2016-08-14 RSB	Added SBANK to handle addressing discrepancies.
+##		2017-01-01 RSB	Proofed comment text using octopus/ProoferComments,
+##				and fixed errors found.
+##		2017-01-18 RSB	Fixed comment-text errors noted while diff'ing
+##				vs Colossus 249.
 
 ## Page 1368
 #          SUBROUTINE TO UPDATE THE PROGRAM NUMBER DISPLAY ON THE DSKY.
@@ -83,12 +87,12 @@ DSPMMJOB	EQUALS	DSPMMJB
 
 # THIS INFORMATION IS PUT INTO THE OCTAL WORD AFTER TC PHASCHNG AS FOLLOWS
 
-#                 TL0 00P PPP PPP GGG
+#                 TL0 00P PPP PPP GGG					  ,
 
-# WHERE EACH LETTER OR NUMBER STANTS FOR A BIT.  THE G:S STAND FOR THE GROUP, OCTAL 1 - 7, THE P:S FOR THE PHASE,
+# WHERE EACH LETTER OR NUMBER STANDS FOR A BIT.  THE G:S STAND FOR THE GROUP, OCTAL 1 - 7, THE P:S FOR THE PHASE,
 # OCTAL 0 - 127.  0:S MUST BE 0.              IF ONE WISHES TO HAVE THE TBASE OF GROUP G TO BE SET AT THIS TIME,
 # T IS SET TO 1, OTHERWISE IT IS SET TO 0.  SIMIARLY IF ONE WISHES TO SET LONGBASE, THEN L IS SET TO 1, OTHERWISE
-# IT IS SET TO 0.  SOME EXAMLES,
+# IT IS SET TO 0.  SOME EXAMPLES,
 
 #                                                  TC     PHASCHNG        THIS WILL CAUSE GROUP 3 TOBE SET TO 0,
 #                                                  OCT    00003           MAKING GROUP 3 INACTIVE
@@ -119,7 +123,7 @@ DSPMMJOB	EQUALS	DSPMMJB
 ## Page 1371
 # AND L FOR LONGBASE.  THE BITS A AND D ARE CONCERNED WITH THE VARIABLE INFORMATION. IF D IS SET TO 1, A PRIORITY
 # OR DELTA TIME WILL BE READ FROM THE NEXT LOCATION AFTER THE OCTAL INFORMATION, IF THIS IS TO BE INDIRECT, THAT
-# IS, THE NAME OF A LOCATION CONT+INING THE INFORMATION (DELTA TIME ONLY), THEN THIS IS GIVEN AS THE -GENADR OF
+# IS, THE NAME OF A LOCATION COMT+INING THE INFORMATION (DELTA TIME ONLY), THEN THIS IS GIVEN AS THE -GENADR OF
 # THAT LOCATION WHICH CONTAINS THE DELTA TIME.  IF THE OLD PRIORITY OR DELTA TIME IS TO BE USED, THAT WHICH IS
 # ALREADY IN THE VARIABLE STORAGE, THEN D IS SET TO 0. NEXT THE A BIT IS USED.  IF IT IS SET TO 0, THE ADDRESS
 # THAT WOULD BE RESTARTED DURING A RESTART IS THE NEXT LOCATION AFTER THE  PHASE INFORMATION, THAT IS, EITHER
@@ -191,11 +195,11 @@ DSPMMJOB	EQUALS	DSPMMJB
 # DIFFERENCE --- NOTE- IF LONGBASE IS TO BE SET THIS INFORMATION IS GIVEN IN THE OCT YYYYY INFORMATION, IT WILL
 # BE DISREGARDED IF GIVEN WITH THE OCT XXXXX INFORMATION. A COUPLE OF EXAMPLES MAY HELP,
 
-#                                         AD       TC     2PHACHNG        SET TBASE3 AND IF A RESTART OCCURS START
+#                                         AD       TC     2PHSCHNG        SET TBASE3 AND IF A RESTART OCCURS START
 #                                         AD+1     OCT    40083           THE TWO ENTRIES IN 3.8 TABLE LOCATION
 #                                         AD+2     OCT    05025           THIS IS OF TYPE C, SET THE JOB TO BE
 #                                         AD+3     OCT    18000           TO BE LOCATION AD+4, WITH A PRIORITY 18,
-#                                         AD+4                            FOR GROUP 5 PHASE INFORMATION.
+#                                         AD+4                            FOR GROUP 5 PHASE INFORMATION
 
 		COUNT	02/PHASE
 
@@ -404,7 +408,7 @@ CON2		LXCH	TEMPBBCN
 
 		COUNT	02/PHASE
 
-CHECKB		MASK	BIT12		# SINCE THIS IS OF TYPE 8, THIS BIT SHOULD
+CHECKB		MASK	BIT12		# SINCE THIS IS OF TYPE B, THIS BIT SHOULD
 		CCS	A		#  BE HERE IF WE ARE TO GET A NEW PRIORITY
 		TCF	GETPRIO		# IT IS, SO GET NEW PRIORITY
 

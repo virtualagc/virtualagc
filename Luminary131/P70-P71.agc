@@ -8,12 +8,15 @@
 ##		that the code format has been changed to conform to the
 ##		requirements of the yaYUL assembler rather than the
 ##		original YUL assembler.
-## Reference:	pp. 828-835 of 1729.pdf.
+## Reference:	pp. 823-830
 ## Contact:	Ron Burkey <info@sandroid.org>.
 ## Website:	www.ibiblio.org/apollo
 ## Mod history:	05/26/03 RSB.	Began transcribing.
+##		2017-01-06 RSB	Page numbers now agree with those on the
+##				original harcopy, as opposed to the PDF page
+##				numbers in 1701.pdf.
 
-## Page 828
+## Page 823
 		BANK	21
 		SETLOC	R11
 		BANK
@@ -62,7 +65,7 @@ P71NOW?		CS	MODREG		# YES.  ARE WE IN P71 NOW?
 		AD	1DEC71
 		EXTEND
 		BZF	LANDISP		# YES.  PROCEED TO R10.
-## Page 829
+## Page 824
 		EXTEND			# NO. IS AN ABORT STAGE COMMANDED?
 		READ	CHAN30
 		COM
@@ -113,7 +116,7 @@ CONTABRT	CAF	ABRTJADR
 ABRTJADR	TCF	ABRTJASK
 ABRTJASK	CAF	OCTAL27
 
-## Page 830
+## Page 825
 		AD	Q
 		TS	L
 		COM
@@ -163,7 +166,7 @@ ABRTJASK	CAF	OCTAL27
 		DXCH	AVGEXIT
 
 		TC	ABTKLEAN	# KILL GROUPS 1,3, AND 6.
-## Page 831
+## Page 826
 		CAF	THREE		# SET UP 4.3SPOT FOR GOABORT
 		TS	L
 		COM
@@ -214,7 +217,7 @@ P70INIT		TC	INTPRET
 		CALL
 			TGOCOMP
 		DLOAD	SL
-## Page 832
+## Page 827
 			MDOTDPS
 			4D
 		BDDV
@@ -265,7 +268,7 @@ YOK		DLOAD	DSU
  			J2PARM		# ABORT TARGETING FLAG
 			ABTTGFLG
 STORPARM	STODL	JPARM
-## Page 833
+## Page 828
 			RCO
 		STORE	RP
 		SET	EXIT
@@ -316,7 +319,7 @@ OLDTIME		DLOAD	SL1		# IF FLAP=1,GTO=2 TGO
 		STORE	TGO1
 		EXIT
 
-## Page 834
+## Page 829
 		TC	PHASCHNG
 		OCT	04024
 
@@ -367,7 +370,7 @@ TGOCOMP		RTB	DSU
 		SL
 			11D
 		STORE	TGO
-## Page 835
+## Page 830
 		RVQ
 
 # ************************************************************************

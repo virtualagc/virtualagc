@@ -14,6 +14,8 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2016-11-17 JL   Created from Luminary131 version.
 ##              2016-11-24 HG   Transcribed
+##		2016-12-23 RSB	Proofed comment text with octopus/ProoferComments
+##				but no errors found.
 
 ## Page 376
                 BANK            15

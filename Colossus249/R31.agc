@@ -5,16 +5,22 @@
 ##		It is part of the source code for the Command Module's (CM)
 ##		Apollo Guidance Computer (AGC), for Apollo 9.
 ## Assembler:	yaYUL
-## Reference:	pp. 498-503 of 1701.pdf.
+## Reference:	pp. 496-501.
 ## Contact:	Ron Burkey <info@sandroid.org>.
 ## Website:	www.ibiblio.org/apollo.
 ## Mod history:	08/11/04 RSB.	Began adapting from corresponding Luminary131
 ##				source file.
 ##		2010-10-24 JL	Fixed indentation of last line (interpretive operand).
+##		2017-01-06 RSB	Page numbers now agree with those on the
+##				original harcopy, as opposed to the PDF page
+##				numbers in 1701.pdf.
+##		2017-01-18 RSB	Cross-diff'd comment text (not whitespace)
+##				vs the already-proofed corresponding Colossus
+##				237 and Comanche 55 source-code files
+##				and corrected errors found.
 ##
 ## The contents of the "Colossus249" files, in general, are transcribed 
-## from a scanned document obtained from MIT's website,
-## http://hrst.mit.edu/hrs/apollo/public/archive/1701.pdf.  Notations on this
+## from a scanned copy of the program listing.  Notations on this
 ## document read, in part:
 ##
 ##	Assemble revision 249 of AGC program Colossus by NASA
@@ -30,13 +36,13 @@
 ##	under NASA contract NAS 9-4065.
 ##
 ## Refer directly to the online document mentioned above for further information.
-## Please report any errors (relative to 1701.pdf) to info@sandroid.org.
+## Please report any errors (relative to the scanned pages) to info@sandroid.org.
 ##
 ## In some cases, where the source code for Luminary 131 overlaps that of 
 ## Colossus 249, this code is instead copied from the corresponding Luminary 131
 ## source file, and then is proofed to incorporate any changes.
 
-## Page 498
+## Page 496
 		BANK	34
 		SETLOC	R31
 		BANK
@@ -57,7 +63,7 @@ DSPDELAY	CAF	1SEC
 		BZF	DSPDELAY
 
 DISPN5X		CA	FLAGWRD9	# TEST R31FLAG (IN SUNDANCE R31FLAG WILL
-		MASK	BIT4		# 	ALWAYS BE SET AS R34 DOES NOT EXIST.
+		MASK	BIT4		# 	ALWAYS BE SET AS R34 DOES NOT EXIST)
 		EXTEND
 		BZF	+3
 		CAF	V16N54		# R31	USE NOUN 54
@@ -86,7 +92,7 @@ COMPDISP	VLOAD	VSU
 			X1		# RATT-RONE		PD= 0
 		VSR1
 		VSL*	UNIT
-## Page 499
+## Page 497
 			0,1
 		PDVL	VSU		# UNIT(LOS) TO 0D	PD= 6
 			VATT
@@ -135,9 +141,9 @@ R34ANG		VLOAD	UNIT
 			DPPOSMAX
 		STORE	RTHETA		# RTHETA BETWEEN 0 AND 1 REV.
 		EXIT
-		CAF	BIT5
+		CAF	BIT5		# HAVE WE BEEN ANSWERED
 		MASK	EXTVBACT
-## Page 500
+## Page 498
 		EXTEND
 		BZF	ENDEXT		# YES, DIE
 		
@@ -149,14 +155,14 @@ R34ANG		VLOAD	UNIT
 V16N54		VN	1654
 V16N53		VN	1653
 
-## Page 501
+## Page 499
 # THE STATEXTP SUBROUTINE DOES A PRECISION EXTRAPOLATION OF BOTH VEHICLES
 # STATE VECTORS TO PRESENT TIME AND SAVES THEM AS BASE VECTORS.
 # IF SERVICER IS OFF ---
 #		THIS VEHICLES BASE VECTOR IS CONIC EXTRAPOLATED TO
 #		PRESENT TIME AND SAVED AS RONE, VONE.
 #		THE OTHER VEHICLES BASE VECTOR IS CONIC EXTRAPOLATED
-#		TO TEH SAME TIME, THE OUTPUT BEING LEFT IN RATT, VATT.
+#		TO THE SAME TIME, THE OUTPUT BEING LEFT IN RATT, VATT.
 # IF SERVICER IS ON ---
 #		RONE, VONE ARE SET EQUAL TO RN, VN AND THE OTHER
 #		VEHICLES STATE VECTOR IS PREC. EXTRAPOLATED TO PIPTIME.
@@ -182,9 +188,9 @@ STATEXTP	STQ	RTB
 		STORE	BASETHV		# THIS VEL
 HAVEBASE	BON	RTB
 			V37FLAG
-			GETRVN		# IF AVG ON, GET RN ETC.
+			GETRVN		# IF AVG ON ,GET RN ETC.
 			LOADTIME
-		STCALL	TDEC1		# BEGIN SET UP FOR CONIT EXTRAP.  FOR THIS.
+		STCALL	TDEC1		# BEGIN SET UP FOR CONIC EXTRAP. FOR THIS.
 			INTSTALL
 		VLOAD	CLEAR
 			BASETHP
@@ -200,8 +206,8 @@ HAVEBASE	BON	RTB
 		SET
 			INTYPFLG	# CONIC EXTRAP.
 		STCALL	TET
-			INTEGRVS	# INTEGRATION --- AT LAST ---
-## Page 502
+			INTEGRVS	# INTEGRATION --- AT LAST---
+## Page 500
 		VLOAD
 			RATT
 		STOVL	RONE
@@ -226,7 +232,7 @@ OTHINT		STORE	TDEC1
 		STCALL	TET
 			INTEGRVS
 		GOTO
-			STATEXIT	# THIS VEHICLES POS.,VEL. IN PUSHLIST
+			STATEXIT	# THIS VEHICLES POS.,VEL. IN PUSHLIST.
 			
 GETRVN		VLOAD
 			RN
@@ -252,7 +258,7 @@ R34LOS		EXIT
 		CA	CDUT
 		INDEX	FIXLOC
 		TS	11D
-## Page 503
+## Page 501
 		CA	FIXLOC
 		AD	SIX
 		COM

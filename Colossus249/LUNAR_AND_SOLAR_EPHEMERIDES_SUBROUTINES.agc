@@ -5,14 +5,22 @@
 ##		It is part of the source code for the Command Module's (CM)
 ##		Apollo Guidance Computer (AGC), for Apollo 9.
 ## Assembler:	yaYUL
-## Reference:	pp. 743-746 of 1701.pdf.
+## Reference:	pp. 739-742.
 ## Contact:	Ron Burkey <info@sandroid.org>.
 ## Website:	www.ibiblio.org/apollo.
 ## Mod history:	08/22/04 RSB.	Split off from P51-P53.agc.
+##		2017-01-06 RSB	Page numbers now agree with those on the
+##				original harcopy, as opposed to the PDF page
+##				numbers in 1701.pdf.
+##		2017-01-15 RSB	Cross-diff'd comment text (not whitespace)
+##				vs the already-proofed corresponding Colossus
+##				237 and Comanche 55 source-code files
+##				and corrected errors found. There were no
+##				differences between the comment text in the 
+##				different versions after these corrections.
 ##
 ## The contents of the "Colossus249" files, in general, are transcribed 
-## from a scanned document obtained from MIT's website,
-## http://hrst.mit.edu/hrs/apollo/public/archive/1701.pdf.  Notations on this
+## from a scanned copy of the program listing.  Notations on this
 ## document read, in part:
 ##
 ##	Assemble revision 249 of AGC program Colossus by NASA
@@ -28,13 +36,13 @@
 ##	under NASA contract NAS 9-4065.
 ##
 ## Refer directly to the online document mentioned above for further information.
-## Please report any errors (relative to 1701.pdf) to info@sandroid.org.
+## Please report any errors (relative to the scanned pages) to info@sandroid.org.
 ##
 ## In some cases, where the source code for Luminary 131 overlaps that of 
 ## Colossus 249, this code is instead copied from the corresponding Luminary 131
 ## source file, and then is proofed to incorporate any changes.
 
-## Page 743
+## Page 739
 # LUNAR AND SOLAR EPHEMERIDES SUBROUTINES
 #
 # FUNCTIONAL DESCRIPTION
@@ -64,49 +72,49 @@
 #
 # INPUT
 #
-#	1) SPECIFIED GROUND ELAPSED TIME IN CS x B-28 LOADED IN MPAC.
+#	1) SPECIFIED GROUND ELAPSED TIME IN CS X B-28 LOADED IN MPAC.
 #
-#	2) TIMEMO -- TIME AT THE CENTER OF THE RANGE OVER WHICH THE LUNAR
-#	POSITION POLYNOMIAL IS VALID IN CS x B-42.
+#	2) TIMEMO - TIME AT THE CENTER OF THE RANGE OVER WHICH THE LUNAR
+#	POSITION POLYNOMIAL IS VALID IN CS X B-42.
 #
-#	3) VECOEM -- VECTOR COEFFICIENTS OF THE LUNAR POSITION POLYNOMIAL
-#	LOADED IN DESCENDING SEQUENCE IN METERS/CS**N x B-2
+#	3) VECOEM - VECTOR COEFFICIENTS OF THE LUNAR POSITION POLYNOMIAL
+#	LOADED IN DESCENDING SEQUENCE IN METERS/CS**N X B-2
 #
-#	4) RESO -- POSITION VECTOR OF THE SUN RELATIVE TO THE EARTH AT
-#	TIMEMO IN METERS x B-38
+#	4) RESO - POSITION VECTOR OF THE SUN RELATIVE TO THE EARTH AT
+#	TIMEMO IN METERS X B-38.
 #
-#	5) VESO -- VELOCITY VECTOR OF THE SUN RELATIVE TO THE EARTH AT
-#	TIMEMO IN METERS/CS x B-9
+#	5) VESO - VELOCITY VECTOR OF THE SUN RELATIVE TO THE EARTH AT
+#	TIMEMO IN METERS/CS X B-9.
 # 
-#	6) OMEGAES -- ANGULAR VELOCITY OF THE VECTOR RESO AT TIMEMO IN
-#	REV/CS x B+26
+#	6) OMEGAES - ANGULAR VELOCITY OF THE VECTOR RESO AT TIMEMO IN
+#	REV/CS X B+26.
 #
 #	ALL EXCEPT THE FIRST INPUT ARE INCLUDED IN THE PRE-LAUNCH
 #	ERASABLE DATA LOAD.
 #
-# OUTPUT -- LSPOS
-## Page 744
+# OUTPUT - LSPOS
+## Page 740
 #
-#	1) 2D(?) OF VAC AREA CONTAINS THE POSITION VECTOR OF THE SUN RELATIVE
-#	TO THE EARTH AT TIME INPUT BY THE USER IN METERS x B-38.
+#	1) 2D OF VAC AREA CONTAINS THE POSITION VECTOR OF THE SUN RELATIVE
+#	TO THE EARTH AT TIME INPUT BY THE USER IN METERS X B-38.
 #
 #	2) MPAC CONTAINS THE POSITION VECTOR OF THE MOON RELATIVE TO THE
-#	EARTH AT TIME INPUT BY THE USER IN METERS x B-29
+#	EARTH AT TIME INPUT BY THE USER IN METERS X B-29.
 #
-# OUTPUT -- LUNPOS
+# OUTPUT - LUNPOS
 #
 #	MPAC CONTAINS THE POSITION VECTOR OF THE MOON RELATIVE TO THE
-#	EARTH AT THE TIME INPUT BY USER IN METERS x B-32(?)
+#	EARTH AT THE TIME INPUT BY USER IN METERS X B-29.
 #
-# OUTPUT -- LUNVEL
+# OUTPUT - LUNVEL
 #
 #	MPAC CONTAINS THE VELOCITY VECTOR OF THE MOON RELATIVE TO THE
-#	EARTH AT THE TIME INPUT BY THE USER IN METERS/CS x B-7
+#	EARTH AT TIME INPUT BY THE USER IN METERS/CS X B-7.
 #
-# OUTPUT -- SOLPOS
+# OUTPUT - SOLPOS
 #
 #	MPAC CONTAINS THE POSITION VECTOR OF THE SUN RELATIVE TO THE EARTH
-#	AT TIME INPUT BY THE USER IN METERS x B-38.
+#	AT TIME INPUT BY THE USER IN METERS X B-38.
 #
 # SUBROUTINES USED
 #
@@ -117,7 +125,7 @@
 #	THE VAC AREA IS USED FOR STORAGE OF INTERMEDIATE AND FINAL RESULTS
 #	OF COMPUTATIONS.
 #
-#	S1, X1, AND X2 ARE USED BY THESE SUBROUTINES.
+#	S1, X1 AND X2 ARE USED BY THESE SUBROUTINES.
 #
 #	PRELAUNCH ERASABLE DATA LOAD ARE ONLY ERASABLE STORAGE USED BY
 #	THESE SUBROUTINES.
@@ -140,7 +148,7 @@ LSPOS		AXT,2			# COMPUTES POSITION VECTORS OF BOTH THE
 LUNPOS		AXT,1	GOTO		# COMPUTES THE POSITION VECTOR OF THE MOON
 			REM		# AND STORES IT IN MPAC.
 			LSTIME
-## Page 745
+## Page 741
 LUNVEL		AXT,1	GOTO		# COMPUTES THE VELOCITY VECTOR OF THE MOON
 			VEM		# AND STORES IT IN MPAC.
 			LSTIME
@@ -172,16 +180,16 @@ RES		PUSH	DMP		#					PD -2
 			VESO
 		VXV	VSL1		#					PD-10
 		VXSC	VAD		#					PD-02
-		VSL1	GOTO		# RES IN METERS x B-38 IN MPAC.
+		VSL1	GOTO		# RES IN METERS X B-38 IN MPAC.
 			X2
-RESA		STODL	2D		# RES IN METERS x B-38 IN 2D OF VAC.	PD -0
+RESA		STODL	2D		# RES IN METERS X B-38 IN 2D OF VAC.	PD -0
 REM		AXT,1	PDVL		#					PD -2
 			54D
 			VECOEM
 REMA		VXSC	VAD*
 			0D
 			VECOEM +60D,1
-		TIX,1	VSL2		# REM IN METERS x B-29 IN MPAC.
+		TIX,1	VSL2		# REM IN METERS X B-29 IN MPAC.
 			REMA
 		RVQ
 VEM		AXT,1	PDDL		#					PD -2
@@ -191,14 +199,14 @@ VEM		AXT,1	PDDL		#					PD -2
 			VECOEM
 VEMA		VXSC
 			0D
-## Page 746
+## Page 742
 		STODL	4D		#					PD -2
 		DSU	PUSH		#					PD -4
 			ONEB4
 		VXSC*	VAD
 			VECOEM +54D,1
 			4D
-		TIX,1	VSL2		# VEM IN METERS/CS x B-7 IN MPAC.
+		TIX,1	VSL2		# VEM IN METERS/CS X B-7 IN MPAC.
 			VEMA
 		RVQ
 NINEB4		2DEC	9.0 B-4

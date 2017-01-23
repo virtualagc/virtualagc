@@ -1,4 +1,11 @@
 #!/usr/bin/python
+# coding=utf-8
+# NOTE: The reason the encoding of this file is specified as UTF-8 is that Tesseract
+# sometimes returns UTF-8 characters as its guesses, and in those rare cases that 
+# we're actually interested in what Tesseract thinks, we may have string literals 
+# whose values are UTF-8.  The only example of this as I'm writing this is the
+# hyphen filter.
+
 # This file was written by Ron Burkey, who declares it to be in the public domain.
 
 # This program is similar to ProoferBox.py, which is used for checking octals
@@ -11,10 +18,24 @@
 import sys
 import re
 import os.path
+from os import environ
 from subprocess import call
 from wand.image import Image, COMPOSITE_OPERATORS
 from wand.drawing import Drawing
 from wand.color import Color
+
+tesseract = 'tesseract'
+if 'BIN' in environ:
+	tesseract = environ['BIN'] + '/tesseract'
+Solarium55 = 0
+if 'SOLARIUM55' in environ:
+	Solarium55 = 1
+Colossus237 = 0
+if 'COLOSSUS237' in environ:
+	Colossus237 =1
+Retread44 = 0
+if 'RETREAD44' in environ:
+	Retread44 =1
 
 # Parse command-line arguments
 if len(sys.argv) < 5:
@@ -27,9 +48,9 @@ if len(sys.argv) < 5:
 	print '      The AGC-file inclusion directive $ is supported, so the top-level file'
 	print '      MAIN.agc can be used in order to make scripting easier.' 
 	print 'SCALE (optional, default 1.0) represents the resolution of the imagery, relative'
-	print '      to archive.org\'s scan of Sunburst 120, which is nominally 3025 pixels high.'
-	print '      The process is not *very* sensitive to this, but you will want to adjust it'
-	print '      anyway.  For example, for Aurora 12 scans I settled on SCALE=1.15.  (Sadly,'
+	print '      to archive.org\'s scan of Sunburst 120.  The process is not *very* sensitive'
+	print '      to this, but you will want to adjust it if it is too far from 1.0.'
+	print '      For Aurora 12 scans I settled on SCALE=0.711111.  (Sadly,'
 	print '      not all of the archive.org pages have precisely identical dimensions, even'
 	print '      when those pages are all from the sames set of scans for the same harcopy.)'
 	print '      Non-archive.org imagery has a very different scale. Think of SCALE as being'
@@ -49,6 +70,12 @@ if len(sys.argv) < 5:
 	print '      bounding boxes at different locations on different pages.  I don\'t provide'
 	print '      any specific option for that, however.  I don\'t know if training affects the'
 	print '      selection of bounding boxes or not.'
+	print 'There are also several environment variables that activate filters or font-changes'
+	print 'specific to particular AGC printouts:'
+	print '      RETREAD44'
+	print '      SOLARIUM55'
+	print '      COLOSSUS237'
+	print 'To use, you should do something like "export COLOSSUS237=yes".'
 	sys.exit()
 
 backgroundImage = sys.argv[1]
@@ -79,9 +106,11 @@ else:
 img = Image(filename=backgroundImage)
 backgroundWidth = img.width
 backgroundHeight = img.height
+middleFloor = 2 * img.height / 5
+middleCeiling = 3 * img.height / 5
 # Make certain conversions on the background image.
 img.type = 'truecolor'
-img.alpha_channel = 'activate'
+#img.alpha_channel = 'activate'
 
 # Shell out to have tesseract generate the box file, and read it in.
 # While reading it in, we will reject all boxes that appear to us to be
@@ -93,7 +122,7 @@ img.alpha_channel = 'activate'
 # Mike advises to *always* use -psm=6, but -psm=4 works better for me (less
 # bad bounding boxes and text having no bounding boxes at all), and I don't
 # see the extra processing time he warns about. 
-call([ 'tesseract', backgroundImage, 'eng.agc.exp0', '-psm', psm, 'batch.nochop', 'makebox', 'agcChars.txt' ])
+call([ tesseract, backgroundImage, 'eng.agc.exp0', '-psm', psm, 'batch.nochop', 'makebox', 'agcChars.txt' ])
 file =open ('eng.agc.exp0.box', 'r')
 boxes = []
 rejectedBoxes = []
@@ -102,8 +131,10 @@ sumBoxWidthsByLine = [0]
 numBoxesByLine = [0]
 charForWidthsPattern = re.compile(r"[A-HK-Z02-9]")
 rowFloor = 15 * scale
-sumBottomsInRow = 0
+#sumBottomsInRow = 0
 numCharsInRow = 0
+avgBottom = 0
+decayBottom = 0.8
 numBoxWidths = 10
 sumBoxWidths = 16 * numBoxWidths * scale
 nominalColSpacing = 4 * scale
@@ -113,7 +144,11 @@ nominalTwoRowHeight = nominalRowHeight + nominalRowSpacing + nominalRowHeight
 row = 0
 alnumPattern = re.compile(r"[0-9A-Z]")
 lastBoxChar = '?'
+lastHyphenMidPoint = 0
+lastX = 0
+lastY = 0
 for box in file:
+	newline = 0
 	boxFields = box.split()
 	boxChar = boxFields[0]
 	boxLeft = int(boxFields[1])
@@ -122,6 +157,10 @@ for box in file:
 	boxTop = backgroundHeight - 1 - int(boxFields[4])
 	boxWidth = boxRight + 1 - boxLeft
 	boxHeight = boxBottom + 1 - boxTop
+	if boxLeft < lastX or boxBottom > lastY + rowFloor:
+		newline = 1;
+	lastX = boxLeft
+	lastY = boxBottom
 	# Take care of a box in the pendingBoxes[] array, if there is one.
 	# This algorithm is going to discard the box if it happens to be at
 	# the very end of the row, but I don't really care about that.
@@ -137,7 +176,9 @@ for box in file:
 		     	startOfRow = 0
 		     	if pendingBoxes[0]['boxLeft'] < lastBox['boxLeft']:
 		     		startOfRow = 1
-		     	if numCharsInRow > 0 and pendingBoxes[0]['boxBottom'] > sumBottomsInRow/numCharsInRow + rowFloor:
+		     	#if numCharsInRow > 0 and pendingBoxes[0]['boxBottom'] > sumBottomsInRow/numCharsInRow + rowFloor:
+		     	#	startOfRow = 1
+		     	if numCharsInRow > 0 and pendingBoxes[0]['boxBottom'] > avgBottom + rowFloor:
 		     		startOfRow = 1
 		     	if startOfRow == 0 or pendingBoxes[0]['boxLeft'] >= lastBox['boxRight']:
 			     	# Add the pending box to the list of actual boxes.  Normally these
@@ -156,15 +197,15 @@ for box in file:
 					width = int(width/n) - 1
 					height = pendingBoxes[0]['boxHeight']
 					left = pendingBoxes[0]['boxLeft']
-					right = left + width - 1 + nominalColSpacing
+					right = int(round(left + width - 1 + nominalColSpacing))
 					top = pendingBoxes[0]['boxTop']
 					bottom = pendingBoxes[0]['boxBottom']
 					for i in range(0,n):
 						boxes.append({'boxChar':boxChar, 'boxLeft':left, 'boxBottom':bottom,
 							      'boxRight':right, 'boxTop':top, 'boxWidth':width, 
 							      'boxHeight':height})
-						left += width + nominalColSpacing - 1
-						right += width + nominalColSpacing - 1
+						left += int(round(width + nominalColSpacing - 1))
+						right += int(round(width + nominalColSpacing - 1))
 			else:
 				if 0:
 					print "B"
@@ -204,8 +245,8 @@ for box in file:
 				lastLeft = lastBox['boxLeft']
 				lastRight = lastBox['boxRight']
 				combinedWidth = boxRight - lastLeft 
-				#print combinedWidth
-				if combinedWidth >= 15 * scale and combinedWidth <= 19 * scale:
+				#print combinedWidth, boxRight, lastLeft
+				if combinedWidth >= 13.5 * scale and combinedWidth <= 20.5 * scale:
 				   	# Convert all of the lastXXXX variables to describe the
 				   	# combined box.  We already know that the width is within
 				   	# the range we want, but let's check the height.
@@ -216,8 +257,9 @@ for box in file:
 				   	if boxTop < lastTop:
 				   		lastTop = boxTop
 				   	lastHeight = lastBottom - lastTop + 1
-				   	if lastHeight >= 20 * scale and lastHeight <= 28 * scale:
+				   	if lastHeight >= 20 * scale and lastHeight <= 30 * scale:
 				   		# Accept it!
+						#print combinedWidth, boxRight, lastLeft
 				   		if whichBoxes == 0:
 					   		boxes[len(boxes)-1]['boxRight'] = lastRight
 					   		boxes[len(boxes)-1]['boxLeft'] = lastLeft
@@ -251,21 +293,44 @@ for box in file:
 	   boxBottom <= boxes[len(boxes)-1]['boxBottom'] and boxTop >= boxes[len(boxes)-1]['boxTop']:
 		distance = boxRight - boxes[len(boxes)-1]['boxRight']
 	if distance < 8 * scale:
-		rejectIt = 1;
-	# Here's something to help apostrophes to be recognized:
+		rejectIt = 1
+	# In Colossus237, there's an artifact that appears very often, that I've simply gotten tired
+	# of editing out: two adjacent short strokes, very near the center of the page, presumably
+	# a remnant of a horizontal line.  Fortunately, that lets us make the filter pretty specific.
+	if Colossus237 and (boxChar == '_' or boxChar == '-') and boxWidth >= 11 and boxWidth <= 17 and \
+		boxHeight >= 4 and boxHeight <= 5 and boxTop > middleFloor and boxTop < middleCeiling:
+		rejectIt = 1
+	# Here's something to help apostrophes to be recognized.
+	#if boxWidth >= 6 * scale and boxWidth <= 8 * scale and boxHeight >= 12 * scale and \
+	#   boxHeight <= 17 * scale and numCharsInRow > 0 and \
+	#   boxBottom <= (sumBottomsInRow + 0.0)/numCharsInRow - 7 * scale:
 	if boxWidth >= 6 * scale and boxWidth <= 8 * scale and boxHeight >= 12 * scale and \
-	   boxHeight <= 16 * scale and numCharsInRow > 0 and \
-	   boxBottom <= (sumBottomsInRow + 0.0)/numCharsInRow - 7 * scale:
+	   boxHeight <= 18 * scale and numCharsInRow > 0 and \
+	   boxBottom <= avgBottom - 7 * scale:
 	   	addIt = 1 		
 	# Here's something to help hyphens to be recognized:
-	if boxChar == '-' and numCharsInRow > 0:
-		#print boxWidth/scale, boxHeight/scale, numCharsInRow, sumBottomsInRow, lastBoxChar
-		if boxWidth > 14 * scale and boxWidth < 19 * scale and boxHeight > 6 * scale and boxHeight < 9 * scale:
+	if boxChar == '-' or boxChar == '_' or boxChar == '—' or boxChar == '—' or boxChar == '=' or boxChar == '~':
+		if boxWidth > 14 * scale and boxWidth < 25 * scale and boxHeight > 4 * scale and boxHeight < 10 * scale:
 			midPoint = (boxTop + boxBottom) / 2.0
-			#print midPoint - sumBottomsInRow/numCharsInRow
-			if abs(midPoint - sumBottomsInRow/numCharsInRow + 12.5 * scale) <= 2 * scale:
+			if newline or numCharsInRow == 0 or \
+			   abs(midPoint - avgBottom + 12.5 * scale) <= 3 * scale or \
+			   abs(midPoint - lastHyphenMidPoint) <= 2 * scale:
 				#print "Adding"
 		 		addIt = 1
+		 		lastHyphenMidPoint = midPoint
+	# And underscores, '_':
+	#if (boxChar == '-' or boxChar == '_' or boxChar == '—' or boxChar == '=' or boxChar == '~') and numCharsInRow > 0:
+	if numCharsInRow > 0:
+		if boxWidth >= 20 * scale and boxWidth <= 26 * scale and boxHeight > 4 * scale and boxHeight < 10 * scale:
+			midPoint = (boxTop + boxBottom) / 2.0
+			if abs(midPoint - (avgBottom+3*scale)) <= 3 * scale:
+		 		addIt = 1
+	# And vertical lines, '|', though I guess it may serve for parentheses as well:
+	if boxChar == '|' or boxChar == 'I' or boxChar == 'l' or boxChar == '!' or boxChar == '1' or boxChar == '(' or boxChar == ')':
+		#print boxChar, boxWidth, boxHeight, scale
+		if boxWidth >= 5 * scale and boxWidth <= 8 * scale and boxHeight >= 28 * scale and boxHeight <= 35 * scale:
+			#print Added
+			addIt = 1
 	lastBoxChar = boxChar
 	# The following one is a very tough compromise.  Make it too small, and you miss some poorly-printed
 	# parentheses and L's that are printed too low.  Make it too big, and you add in some extra gunk
@@ -301,11 +366,13 @@ for box in file:
 		# New line?
 		boxIndex = len(boxes)
 		if numCharsInRow > 0:
-		   	if boxLeft < boxes[boxIndex-1]['boxLeft'] or boxBottom > sumBottomsInRow/numCharsInRow + rowFloor:
+		   	#if boxLeft < boxes[boxIndex-1]['boxLeft'] or boxBottom > sumBottomsInRow/numCharsInRow + rowFloor:
+		   	if boxLeft < boxes[boxIndex-1]['boxLeft'] or boxBottom > avgBottom + rowFloor:
 		   		sumBoxWidthsByLine.append(0)
 		   		numBoxesByLine.append(0)
 		   		row += 1
-		   		sumBottomsInRow = 0
+		   		#sumBottomsInRow = 0
+		   		avgBottom = 0
 		   		numCharsInRow = 0
 		# Is it a box we want to use for figuring out the width of space characters?
 		if re.match(charForWidthsPattern,boxChar) and boxWidth > 16 and boxWidth < 24:
@@ -313,21 +380,27 @@ for box in file:
 			sumBoxWidthsByLine[row] += boxWidth
 			numBoxesByLine[row] += 1
 		boxWidth = int(boxWidth/addAs) - 1
-		boxRight = boxLeft + boxWidth - 1 + nominalColSpacing
+		boxRight = int(round(boxLeft + boxWidth - 1 + nominalColSpacing))
 		for i in range(0,addAs):
 			if alnumPattern.match(boxChar):
-				sumBottomsInRow += boxBottom
+				#sumBottomsInRow += boxBottom
+				if numCharsInRow == 0:
+					avgBottom = boxBottom
+				else:
+					avgBottom = (1.0 - decayBottom) * boxBottom + decayBottom * avgBottom
 				numCharsInRow += 1
 			boxes.append({'boxChar':boxChar, 'boxLeft':boxLeft, 'boxBottom':boxBottom,
 				      'boxRight':boxRight, 'boxTop':boxTop, 'boxWidth':boxWidth, 
 				      'boxHeight':boxHeight})
-			boxLeft += boxWidth + nominalColSpacing - 1
-			boxRight += boxWidth + nominalColSpacing - 1	
+			boxLeft += int(round(boxWidth + nominalColSpacing - 1))
+			boxRight += int(round(boxWidth + nominalColSpacing - 1))	
 	else:
 		rejectedBoxes.append({'boxChar':boxChar, 'boxLeft':boxLeft, 'boxBottom':boxBottom,
 				      'boxRight':boxRight, 'boxTop':boxTop, 'boxWidth':boxWidth, 
 				      'boxHeight':boxHeight})
 file.close()
+
+
 
 # At this point, one thing we have, for each row of characters, is the sum of all the box widths
 # for "wide" characters (e.g., not I or 1), and the number of boxes used to compute the sum.
@@ -374,7 +447,9 @@ currentPage = -1
 blankLinePattern = re.compile(r"\A\s*\Z")
 allDashesPattern = re.compile(r"\A\s*[-][-\s]*\Z")
 allUnderlinesPattern = re.compile(r"\A\s*[_][_\s]*\Z")
-def readFile( filename ):
+allDotsPattern = re.compile(r"^\s*[.][.\s]*$")
+allEqualsPattern = re.compile(r"\A\s*=[=\s]*\Z")
+def readFile( filename, depth ):
 	"Reads an AGC source file, recursively if containing $ operators."
 	global lines, currentPage, pageNumber, blankLinePattern, allDashesPattern, allUnderlinesPattern, nodashes
 	#print "Reading file", filename
@@ -384,7 +459,7 @@ def readFile( filename ):
 		if line.startswith("$"):
 			includedFile = re.sub(r'^[$](.*[.]agc).*', r'\1', line)
 			#print "Here '", includedFile, "'"
-			readFile(agcSourceDirectory + "/" + includedFile)
+			readFile(agcSourceDirectory + "/" + includedFile, depth + 1)
 			continue
 		#if line.lower().startswith("## page "):
 		if re.match(r"## page [0-9].*", line.lower()):
@@ -405,13 +480,18 @@ def readFile( filename ):
 			continue
 		if nodashes >= 1 and re.match(allUnderlinesPattern, comment):
 			continue
+		#if nodashes >= 1 and re.match(allDotsPattern, comment):
+		#	continue
+		if nodashes >= 1 and re.match(allEqualsPattern, comment):
+			continue
 		if nodashes >= 2:
 			comment = comment.replace("-", "")
 		if nodashes >= 3:
 			comment = comment.replace("_", "")
-		lines.append(comment)
+		if depth > 0:
+			lines.append(comment)
 	file.close()
-readFile(agcSourceFilename)
+readFile(agcSourceFilename, 0)
 #print lines
 
 # At this point, we've populated lines[] with just the non-blank comments from,
@@ -432,6 +512,14 @@ for ascii in range(128):
 		imagesNomatch.append(Image(filename=filename))
 	else:
 		imagesNomatch.append(Image(filename="asciiFont/nomatch127.png"))
+# Some of the printers in specific printouts had S or * characters that were different
+# enough that I feel as though I should tweak them.
+if Solarium55 or Colossus237:
+	imagesMatch[83] = Image(filename="asciiFont/match83S.png")
+	imagesNomatch[83] = Image(filename="asciiFont/nomatch83S.png")
+if Solarium55 or Retread44:
+	imagesMatch[42] = Image(filename="asciiFont/match42S.png")
+	imagesNomatch[42] = Image(filename="asciiFont/nomatch42S.png")
 
 # Prepare a drawing-context.
 draw = Drawing()
@@ -468,7 +556,8 @@ for row in range(0, len(lines)):
 		draw.line((middle,top), (middle,bottom))
 		break
 	# Loop on non-blank characters in the row.
-	sumBottomsInRow = 0
+	#sumBottomsInRow = 0
+	avgBottom = 0
 	numCharsInRow = 0
 	charList = list(re.sub(r"\s+" ,"", lines[row]))
 	for index in range(0,len(charList)):
@@ -483,8 +572,10 @@ for row in range(0, len(lines)):
 			draw.line((middle,top), (middle,bottom))
 			break
 		if numCharsInRow > 0:
+			#if boxes[boxIndex]['boxLeft'] < boxes[boxIndex-1]['boxLeft'] or \
+			#   boxes[boxIndex]['boxBottom'] > sumBottomsInRow/numCharsInRow + rowFloor:
 			if boxes[boxIndex]['boxLeft'] < boxes[boxIndex-1]['boxLeft'] or \
-			   boxes[boxIndex]['boxBottom'] > sumBottomsInRow/numCharsInRow + rowFloor:
+			   boxes[boxIndex]['boxBottom'] > avgBottom + rowFloor:
 				#print 'Out of boxes in row', row, "character", character
 				left = boxes[boxIndex-1]['boxRight']
 				right = backgroundWidth
@@ -492,23 +583,36 @@ for row in range(0, len(lines)):
 				draw.line((left,middle), (right,middle))
 				break
 		
-		# Here is a thing to overcome a problem what octopus has to do to eliminate
-		# horizontal lines on the input pages.  One side effect is that '=' is often
-		# eliminated, which is very troublesome.  However, there are patterns we can
-		# try to use to reinsert an = where one is missing.
-		if numCharsInRow > 0 and index < len(charList)-1 and \
-		   character == '=' and boxes[boxIndex]['boxChar'] != '=' and \
-		   boxes[boxIndex]['boxChar'] == charList[index+1] and \
-		   boxes[boxIndex]['boxLeft'] > boxes[boxIndex-1]['boxRight'] + 80*scale: 
-			boxLeft = boxes[boxIndex]['boxLeft'] - 40 * scale
-			fontChar = imagesNomatch[ord('=')].clone()
-			draw.composite(operator='darken', left=boxLeft, 
-				       top=boxes[boxIndex]['boxTop'], width=fontChar.width * scale, 
-				       height=fontChar.height * scale, image=fontChar)
-			# Note that this will advance index (the pointer to characters in the line)
-			# but not boxIndex.
-			continue
-		sumBottomsInRow += boxes[boxIndex]['boxBottom']
+		# "octopus --comments" often removes '=' from its output images, which is very troublesome.
+		# However, there are patterns we can try to use to reinsert an = where one is missing.
+		# ... The same also turns out to be true for various other characters.
+		goneMissing = [ '=', '-', '_', ':' ]
+		lastRight = 0
+		if (numCharsInRow > 0):
+			lastRight = boxes[boxIndex-1]['boxRight']
+		if index < len(charList)-1:
+			bail = 0
+			for testChar in goneMissing:
+			   	if character == testChar and boxes[boxIndex]['boxChar'] != testChar and \
+					boxes[boxIndex]['boxChar'] == charList[index+1] and \
+					boxes[boxIndex]['boxLeft'] > lastRight + 80*scale: 
+						boxLeft = int(round(boxes[boxIndex]['boxLeft'] - 40 * scale))
+						fontChar = imagesNomatch[ord(testChar)].clone()
+						draw.composite(operator='darken', left=boxLeft, 
+							       top=boxes[boxIndex]['boxTop']+12-fontChar.height/2, 
+							       width=int(round(fontChar.width * scale)), 
+							       height=int(round(fontChar.height * scale)), image=fontChar)
+						# Note that this will advance index (the pointer to characters in the line)
+						# but not boxIndex.
+						bail = 1
+						break
+			if bail:
+				continue
+		#sumBottomsInRow += boxes[boxIndex]['boxBottom']
+		if numCharsInRow == 0:
+			avgBottom = boxes[boxIndex]['boxBottom']
+		else:
+			avgBottom = (1.0 - decayBottom) * boxes[boxIndex]['boxBottom'] + decayBottom * avgBottom
 		numCharsInRow += 1
 		asciiCode = ord(character)
 		if boxes[boxIndex]['boxChar'] == character:
@@ -522,6 +626,7 @@ for row in range(0, len(lines)):
 		minFontWidth = 0.7*fontWidth
 		maxFontWidth = 1.3*fontWidth
 		operator = 'darken' 
+		#print boxes[boxIndex]
 		if boxes[boxIndex]['boxHeight'] > minFontHeight and boxes[boxIndex]['boxHeight'] < maxFontHeight and \
 		   boxes[boxIndex]['boxWidth'] > minFontWidth and boxes[boxIndex]['boxWidth'] < maxFontWidth:
 			fontChar.resize(boxes[boxIndex]['boxWidth'], boxes[boxIndex]['boxHeight'], 'cubic')
@@ -529,27 +634,24 @@ for row in range(0, len(lines)):
 				       top=boxes[boxIndex]['boxTop'], width=boxes[boxIndex]['boxWidth'], 
 				       height=boxes[boxIndex]['boxHeight'], image=fontChar)
 		else:
-			if fontWidth <= minFontWidth:
-				fontWidth = minFontWidth
-			elif fontWidth >= maxFontWidth:
-				fontWidth = maxFontWidth
-			if fontHeight <= minFontHeight:
-				fontHeight = minFontHeight
-			elif fontHeight >= maxFontHeight:
-				fontHeight = maxFontHeight
 			fontChar.resize(int(round(fontWidth)), int(round(fontHeight)), 'cubic')
-			draw.composite(operator=operator, left=round((boxes[boxIndex]['boxLeft']+boxes[boxIndex]['boxRight']-fontWidth)/2.0), 
-				       top=round((boxes[boxIndex]['boxTop']+boxes[boxIndex]['boxBottom']-fontHeight)/2.0), width=fontWidth, 
-				       height=fontHeight, image=fontChar)
+			draw.composite(operator=operator, left=int(round((boxes[boxIndex]['boxLeft']+boxes[boxIndex]['boxRight']-fontWidth)/2.0)), 
+				       top=int(round((boxes[boxIndex]['boxTop']+boxes[boxIndex]['boxBottom']-fontHeight)/2.0)), width=int(round(fontWidth)), 
+				       height=int(round(fontHeight)), image=fontChar)
 		boxIndex += 1
 	
+	#if numCharsInRow > 0 and boxIndex < len(boxes) and \
+	#   boxes[boxIndex]['boxLeft'] >= boxes[boxIndex-1]['boxLeft'] and \
+	#   boxes[boxIndex]['boxBottom'] <= sumBottomsInRow/numCharsInRow + rowFloor:
 	if numCharsInRow > 0 and boxIndex < len(boxes) and \
 	   boxes[boxIndex]['boxLeft'] >= boxes[boxIndex-1]['boxLeft'] and \
-	   boxes[boxIndex]['boxBottom'] <= sumBottomsInRow/numCharsInRow + rowFloor:
+	   boxes[boxIndex]['boxBottom'] <= avgBottom + rowFloor:
 	   	#print 'Extra boxes in row', row
 		while boxIndex < len(boxes):
+			#if boxes[boxIndex]['boxLeft'] < boxes[boxIndex-1]['boxLeft'] or \
+			#   boxes[boxIndex]['boxBottom'] > sumBottomsInRow/numCharsInRow + rowFloor:
 			if boxes[boxIndex]['boxLeft'] < boxes[boxIndex-1]['boxLeft'] or \
-			   boxes[boxIndex]['boxBottom'] > sumBottomsInRow/numCharsInRow + rowFloor:
+			   boxes[boxIndex]['boxBottom'] > avgBottom + rowFloor:
 				break
 			else:
 				boxTop = boxes[boxIndex]['boxTop']
@@ -562,11 +664,27 @@ for row in range(0, len(lines)):
 				draw.line((boxLeft,boxTop), (boxLeft,boxBottom))
 			boxIndex += 1
 
+# If there are still boxes left over, perhaps there were some comments at the end
+# of the page that never made it into the source.  Better show them all as orange
+# boxes.
+# Draw empty frames around all of the rejected boxes.
+if boxIndex < len(boxes):
+	for i in range(boxIndex,len(boxes)):
+		boxTop = boxes[i]['boxTop']
+		boxBottom= boxes[i]['boxBottom']
+		boxLeft = boxes[i]['boxLeft']
+		boxRight = boxes[i]['boxRight']
+		draw.line((boxLeft,boxTop), (boxRight,boxTop))
+		draw.line((boxLeft,boxBottom), (boxRight,boxBottom))
+		draw.line((boxRight,boxTop), (boxRight,boxBottom))
+		draw.line((boxLeft,boxTop), (boxLeft,boxBottom))
+
 # Perform all the pending drawing operations.
 draw(img)
 
 # Create the output image.
-img.format = 'png'
+img.format = 'jpg'
+img.compression_quality = 50
 img.save(filename=outImage)
 print 'output =', outImage
 
