@@ -17,6 +17,7 @@
 ## Mod history: 2016-12-13 MAS  Created from Luminary 99.
 ##              2016-12-15 MAS  Updated from comment-proofed Luminary 99 version.
 ##              2017-01-21 HG   Transcribed
+##              2017-01-23 HG   Fix operand FIRSTIME -> FIRSTTME
 
 ## Page 759
 # PROGRAM DESCRIPTION  P40BOTH    DECEMBER 22, 1966
@@ -1244,7 +1245,7 @@ ENDS40.9        EXIT
 INITINIT        CALL
                                 HAVEGUES
                 GOTO
-                                FIRSTIME
+                                FIRSTTME
 # MOD 0     24 FEB 67     PETER ADLER
 # FUNCTION:
 #          TRIMS DPS ENGINE TO MINIMIZE THRUST/CG OFFSET. ENGINE IS GIMBALLED TO FULL + PITCH AND + ROLL (TO LOCK)

@@ -17,6 +17,10 @@
 ## Mod history: 2016-12-13 MAS  Created from Luminary 99.
 ##              2016-12-18 MAS  Updated from comment-proofed Luminary 99 version.
 ##              2017-01-07 HG   Transcribed
+##              2017-01-23 HG   Add missing statement TS L
+##                              Fix operator CS -> TC
+##                                           INDEX -> CCS
+##                              Fix interpretive operator STODL -> STORE
 
 ## Page 802
                 EBANK=          E2DPS
@@ -181,7 +185,7 @@ STABL?          CAF             BIT13                   # IS UN-ATTITUDE-HOLD DI
                 RAND            CHAN31
                 CCS             A
                 TCF             GUILDRET                # YES: ALL'S WELL
-P66NOW?         CS              CHECKMM                 # NO:  SRE WE IN P66 NOW
+P66NOW?         TC              CHECKMM                 # NO:  ARE WE IN P66 NOW
                 DEC             66
                 TCF             STARTP66                # NO
 
@@ -298,7 +302,7 @@ TTFINCR         TC              INTPRET
                                 NORMUNIT
                 VXSC            VSL1
                                 /LAND/
-                STODL           LANDTEMP
+                STORE           LANDTEMP
                 VSU             ABVAL
                                 R
                 STODL           RANGEDSP
@@ -597,7 +601,7 @@ AFCCALC1        VXM             VSL1                    # VERTGUID COMES HERE
                 BVSU            STADR
                 STORE           UNFC/2                  # UNFC/2 NEED NOT BE UNITIZED
                 ABVAL
-AFCCALC2        STODL           /AFC/                   # MAGNITUDE OF AFC FOR THROTTLE
+AFCCALC2        STORE           /AFC/                   # MAGNITUDE OF AFC FOR THROTTLE
                 BON             DLOAD
                                 2PHASFLG
                                 AFCCLEND
@@ -663,7 +667,7 @@ CGCALC          TC              INTPRET
 
 # DECIDE (1) HOW TO EXIT, AND (2) WHETHER TO SWITCH PHASES
 
-EXTLOGIC        INDEX           WCHPHASE
+EXTLOGIC        CCS             WCHPHASE
                 INDEX           A                       # WCHPHASE = +2    APPRQUAD    A = 1
                 CA              TENDBRAK                # WCHPHASE = +0    BRAKQUAD    A = 0
                 TCF             EXSPOT1         -1      # WCHPHASE = -1    IGNALG      A = 0
@@ -1228,6 +1232,7 @@ TDISPSET        CA              TTF/8
                 CA              TTF/8
                 EXTEND
                 MP              SCTTFDSP
+                TS              L
                 AD              99+LINT
                 EXTEND
                 BZMF            +11

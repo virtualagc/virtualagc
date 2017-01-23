@@ -16,7 +16,20 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2016-12-13 MAS  Created from Luminary 99.
 ##              2016-12-14 MAS  Updated from comment-proofed Luminary 99 version.
-##              2016-01-16 HG   Trasncribed
+##              2016-01-16 HG   Transcribed
+##              2017-01-22 HG   Shift pseudo label +3 to column 2.
+##                              Add missing operator INHINT
+##              2017-01-23 HG   Fix operator CCS -> CA
+##                              Fix value TENDEG .27... -> .027...
+##                              Fix operand R22LEM42 -> R22LEM
+##                                          GOXDSPF  -> GOXDSPFR
+##                                          BIT13    -> BIT3
+##                              Fix operand modifier WWPOS +6 -> WWPOS +4
+##                              Fix statement CA FLAGWRD2 -> CS FLAGWRD0
+##                                            EXTEND      -> CCS A
+##                                            BZF NOTP20  -> TC  NOTP20
+
+##
 ## Page 504
 
 # RENDEZVOUS NAVIGATION PROGRAM 20
@@ -392,7 +405,7 @@ P20LEMC1        CAE             FLAGWRD0                # IS RENDEZVOUS FLAG SET
                 CAF             PRIO26                  # YES-SCHEDULE R22 JOB (RR DATA READ)
                 TC              FINDVAC
                 EBANK=          LOSCOUNT
-                2CADR           R22LEM42
+                2CADR           R22LEM
                 TC              TASKOVER
 
 
@@ -1188,7 +1201,7 @@ R61C+L06        CAF             R61FLBIT
                 EXTEND
                 BZF             +2
                 TC              R61C+L4
-                CCS             R65CNTR
+                CA              R65CNTR
                 CCS             A
                 TC              +2
                 TC              R61C+L4                 # R65CNTR = 0 - EXIT ROUTINE
@@ -1216,7 +1229,7 @@ R61C+L1         CAF             BIT7+9PV                # IS RENDEZVOUS OR P25FL
                 BZF             ENDOFJOB                # NO-EXIT ROUTINE AND PROGRAM.
                 TC              R61C+L06                # YES EXIT ROUTINE
 BIT7+9PV        OCT             00500
-TENDEG          2DEC            0.2777777               # SCALED UNTS OF REVOLUTION B0
+TENDEG          2DEC            .02777777               # SCALED UNTS OF REVOLUTION B0
 06SEC           DEC             600
 PHI             EQUALS          20D
                 EBANK=          CDUXD
@@ -2377,7 +2390,7 @@ DONBRD          STODL           32D
                 BZF             +3                      # GYRO CAUSES A POSITIVE CHANGE IN THE
                 CA              TANG            +1      # SHAFT ANGLE. COMPENSATE FOR THIS SWITCH
                 TCF             +2                      # BY CHANGING THE POLARITY OF OUR COMMAND.
-        +3      CS              TANG            +1
+ +3             CS              TANG            +1
                 EXTEND
                 MP              RDESGAIN                # SCALING ON INPUT ANGLE WAS 4 RADIANS.
                 TS              TANG            +1      # SHAFT COMMAND.
@@ -2444,10 +2457,10 @@ RRDESDUN        CS              BIT10                   # WHEN PROBLEM DONE, REM
                 WAND            CHAN12
                 TCF             ENDOFJOB                # WITH ECTR DISABLED.
 
-DORROUT         CA              FLAGWRD2                # IF NOT IN P20/P22 BUT V41,DON'T DO
+DORROUT         CS              FLAGWRD0                # IF NOT IN P20/P22 BUT V41,DON'T DO
                 MASK            RNDVZBIT                # VELOCITY CORRECTION
-                EXTEND
-                BZF             NOTP20
+                CCS             A
+                TC              NOTP20
                 TC              INTPRET
                 VLOAD           VXSC                    # MULTIPLY UNIT LOS BY MAGNITUDE
                                 RRTARGET
@@ -3001,6 +3014,7 @@ CSMINT          STCALL          TDEC1
                 MXV             VSL1
                                 REFSMMAT
                 EXIT
+                INHINT
                 TC              KILLTASK                # KILL THE TASK WHICH CALLS DODES SINCE
                 CADR            DESLOOP         +2      # STORING INTO ERASEABLES DODES USES
                 TC              INTPRET
@@ -4866,11 +4880,11 @@ V67CALL         TC              INTPRET
                 DXCH            WWVEL           +4
 V06N99DS        CAF             V06N99
                 TC              BANKCALL
-                CADR            GOXDSPF
+                CADR            GOXDSPFR
                 TCF             ENDEXT
                 TCF             +5
                 TCF             V06N99DS
-                CAF             BIT13
+                CAF             BIT3
                 TC              BLANKET
                 TC              ENDOFJOB
  +5             ZL
@@ -4879,7 +4893,7 @@ N99LOOP         TS              Q
                 INDEX           Q
                 CS              WWPOS
                 INDEX           Q
-                AD              WWPOS           +6
+                AD              WWPOS           +4
                 ADS             L
                 CCS             Q                       # THE SUM OF ALL DIFFERENCES MUST BE ZERO.
                 TCF             N99LOOP

@@ -19,6 +19,11 @@
 ##		2017-01-09 RRB	Updated for Luminary 69.
 ##              2017-01-20 HG   Fix pseudo code 2CARD -> 2CADR
 ##              2017-01-21 HG   Fix operand XDEVLFLG -> XDELVFLG
+##              2017-01-22 HG   commented statements. Looks like code but are type A comments
+##                              Add missing statements  TC    DOWNFLAG
+##                                                      ADRES AVEGFLAG
+##                                                      STOVL   RTIG
+##                                                              VN1
 
 ## Page 829
 		BANK	21
@@ -254,11 +259,11 @@ P70INIT		TC	INTPRET
 			COMMINIT
 INJTARG		GOTO			# *** BYPASS ZONE 0 ***
 			UPTHROT		# *** BYPASS ZONE 0 ***
-		DLOAD	DSU
-			TGO
-			50SECS
-		BPL	EXIT
-			UPTHROT
+#		DLOAD	DSU
+#			TGO
+#			50SECS
+#		BPL	EXIT
+#			UPTHROT
 
 		TC	CHECKMM
 		DEC	70
@@ -282,6 +287,9 @@ ZONEZERO	TC	IBNKCALL
 		CAF	ZERETAD
 		TS	OUTROUTE
 
+                TC      DOWNFLAG
+                ADRES   AVEGFLAG
+                
 		TC	DOWNFLAG
 		ADRES	V37FLAG
 
@@ -354,6 +362,8 @@ PREBRET1	EXIT
 		ABVAL
 		STOVL	DELVSAB
 			RN1
+                STOVL   RTIG
+                        VN1
 		STODL	VTIG
 			PIPTIME1
 		STORE	TIG
