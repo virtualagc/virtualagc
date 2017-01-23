@@ -16,7 +16,9 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2016-12-13 MAS  Created from Luminary 99.
 ##              2016-12-18 MAS  Updated from comment-proofed Luminary 99 version.
-##              2017-01-xx HG   Transcribed
+##              2017-01-21 HG   Transcribed
+##              2017-01-23 HG   Fix operation DAS -> DXCH
+##                                            CS  -> CA
 
 ## Page 858
                 BANK            37
@@ -209,7 +211,7 @@ MASSMON         CS              FLAGWRD8                # ARE WE ON THE SURFACE?
 OCT10002        DV              Q                       # WHERE APPROPRIATE VEX RESIDES
                 EXTEND
                 MP              MASS
-                DAS             MASS1
+                DXCH            MASS1
                 EXTEND
                 DCA             MASS
                 DAS             MASS1
@@ -1311,7 +1313,7 @@ VUPDAT          CS              FLGWRD11
                 TCF             VALTCHK                 # UPDATE INHIBITED
 
                 TS              MPAC            +1      # ZERO MPAC +1 FOR MULTIPLY LATER
-                CA              ABVEL
+                CS              ABVEL
                 AD              LRVMAX                  # VMAX - V
                 EXTEND
                 BZMF            VALTCHK                 # IF V > VMAX BYPASS UPDATE

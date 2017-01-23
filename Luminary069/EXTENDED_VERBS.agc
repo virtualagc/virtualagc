@@ -16,6 +16,7 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2016-12-13 MAS  Created from Luminary 99.
 ##              2017-01-11 HG   Transcribed
+##              2017-01-23 HG   Remove SBANK= Workaround. Not needed in this version
 
 ## Page 277
                 BANK    7
@@ -515,9 +516,6 @@ GOLOADLV        TC              FLASHOFF
 V47TXACT        TC              TESTXACT        # NO OTHER EXTVERB.
                 CAF             PRIO4
                 TC              FINDVAC
-## [WORKAROUND] RSB 2009
-                SBANK=          LOWSUPER
-## [WORKAROUND]
                 EBANK=          AGSBUFF
                 2CADR           AGSINIT
 
@@ -674,9 +672,6 @@ R04C            CAF             BIT14                   # ENABLE RR AUTO TRACKER
                 TS              RTSTMAX                 # FOR SEQUENTIAL STORAGE
 
                 TC              WAITLIST
-## [WORKAROUND] RSB 2009
-                SBANK=          PINSUPER
-## [WORKAROUND]
                 EBANK=          RSTACK
                 2CADR           RADSAMP
 
