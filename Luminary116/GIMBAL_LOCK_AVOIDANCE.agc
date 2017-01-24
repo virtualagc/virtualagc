@@ -17,49 +17,49 @@
 ## NOTE: Page numbers below have not yet been updated to reflect Luminary 116.
 
 ## Page 364
-		BANK	15
-		
-		SETLOC	KALCMON1
-		BANK
-		
-# DETECTING GIMBAL LOCK
-LOCSKIRT	EQUALS	NOGIMLOC
+                BANK            15                              
 
-NOGIMLOC	SET
-			CALCMAN3
-WCALC		LXC,1	DLOAD*
-			RATEINDX	# CHOOSE THE DESIRED MANEUVER RATE
-			ARATE,1		# FROM A LIST OF FOUR
-		SR4	CALL		# COMPUTE THE INCREMENTAL ROTATION MATRIX
-			DELCOMP		# DEL CORRESPONDING TO A 1 SEC ROTATION
-					# ABOUT COF
-		DLOAD*	VXSC
-			ARATE,1
-			COF
-		STODL	BRATE		# COMPONENT MANEUVER RATES 45 DEG/SEC
-			AM
-		DMP	DDV*
-			ANGLTIME
-			ARATE,1
-		SR
-			5
-		STORE	TM		# MANEUVER EXECUTION TIME SCALED AS T2
-		SETGO	
-			CALCMAN2	# D(OFF) = CONTINUE MANEUVER
-			NEWANGL +1	# 1(ON) = START MANEUVER
-			
+                SETLOC          KALCMON1                        
+                BANK                                            
+
+# DETECTING GIMBAL LOCK
+LOCSKIRT        EQUALS          NOGIMLOC                        
+
+NOGIMLOC        SET                                             
+                                CALCMAN3                        
+WCALC           LXC,1           DLOAD*                          
+                                RATEINDX                        # CHOOSE THE DESIRED MANEUVER RATE
+                                ARATE,1                         # FROM A LIST OF FOUR
+                SR4             CALL                            # COMPUTE THE INCREMENTAL ROTATION MATRIX
+                                DELCOMP                         # DEL CORRESPONDING TO A 1 SEC ROTATION
+                                                                # ABOUT COF
+                DLOAD*          VXSC                            
+                                ARATE,1                         
+                                COF                             
+                STODL           BRATE                           # COMPONENT MANEUVER RATES 45 DEG/SEC
+                                AM                              
+                DMP             DDV*                            
+                                ANGLTIME                        
+                                ARATE,1                         
+                SR                                              
+                                5                               
+                STORE           TM                              # MANEUVER EXECUTION TIME SCALED AS T2
+                SETGO                                           
+                                CALCMAN2                        # D(OFF) = CONTINUE MANEUVER
+                                NEWANGL         +1              # 1(ON) = START MANEUVER
+
 # THE FOUR SELECTABLE FREE FALL MANEUVER RATES SELECTED BY
 # LOADING RATEINDX WITH 0, 2, 4, 6, RESPECTIVELY
 
-ARATE		2DEC	.0088888888	# = 0.2 DEG/SEC		$ 22.5 DEG/SEC
+ARATE           2DEC            .0088888888                     # = 0.2 DEG/SEC         $ 22.5 DEG/SEC
 
-		2DEC	.0222222222	# = 0.5 DEG/SEC		$ 22.5 DEG/SEC
-		
-		2DEC	.0888888888	# = 2.0 DEG/SEC		$ 22.5 DEG/SEC
-		
-		2DEC	.4444444444	# = 10.0 DEG/SEC	$ 22.5 DEG/SEC
-		
-ANGLTIME	2DEC	.0001907349	# = 100B-19 FUDGE FACTOR TO CONVERT
-					# MANEUVER ANGLE TO MANEUVER TIME
-					
+                2DEC            .0222222222                     # = 0.5 DEG/SEC         $ 22.5 DEG/SEC
+
+                2DEC            .0888888888                     # = 2.0 DEG/SEC         $ 22.5 DEG/SEC
+
+                2DEC            .4444444444                     # = 10.0 DEG/SEC        $ 22.5 DEG/SEC
+
+ANGLTIME        2DEC            .0001907349                     # = 100B-19 FUDGE FACTOR TO CONVERT
+                                                                # MANEUVER ANGLE TO MANEUVER TIME
+
 

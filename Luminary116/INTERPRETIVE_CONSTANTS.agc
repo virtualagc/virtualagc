@@ -17,55 +17,55 @@
 ## NOTE: Page numbers below have not yet been updated to reflect Luminary 116.
 
 ## Page 1100
-		SETLOC	INTPRET1
-		BANK
+                SETLOC          INTPRET1                        
+                BANK                                            
 
-		COUNT*	$$/ICONS
-DP1/4TH		2DEC	.25
+                COUNT*          $$/ICONS                        
+DP1/4TH         2DEC            .25                             
 
-UNITZ		2DEC	0
+UNITZ           2DEC            0                               
 
-UNITY		2DEC	0
+UNITY           2DEC            0                               
 
-UNITX		2DEC	.5
+UNITX           2DEC            .5                              
 
-ZEROVECS	2DEC	0
+ZEROVECS        2DEC            0                               
 
-		2DEC	0
-		
-		2DEC	0
+                2DEC            0                               
 
-DPHALF		=	UNITX
-DPPOSMAX	OCT	37777
-		OCT	37777
+                2DEC            0                               
+
+DPHALF          =               UNITX                           
+DPPOSMAX        OCT             37777                           
+                OCT             37777                           
 
 ## Page 1101
 # INTERPRETIVE CONSTANTS IN THE OTHER HALF-MEMORY
 
-		SETLOC	INTPRET2
-		BANK
+                SETLOC          INTPRET2                        
+                BANK                                            
 
-		COUNT*	$$/ICONS
-ZUNIT		2DEC	0
+                COUNT*          $$/ICONS                        
+ZUNIT           2DEC            0                               
 
-YUNIT		2DEC	0
+YUNIT           2DEC            0                               
 
-XUNIT		2DEC	.5
+XUNIT           2DEC            .5                              
 
-ZEROVEC		2DEC	0
+ZEROVEC         2DEC            0                               
 
-		2DEC	0
-		
-		2DEC	0
-		
-		OCT	77777		# -0, -6, -12 MUST REMAIN IN THIS ORDER
-DFC-6		DEC	-6
-DFC-12		DEC	-12
-LODPMAX		2OCT	3777737777	# THESE TWO CONSTANTS MUST REMAIN
+                2DEC            0                               
 
-LODPMAX1	2OCT	3777737777	# ADJACENT AND THE SAME FOR INTEGRATION
+                2DEC            0                               
 
-ZERODP		=	ZEROVEC
-HALFDP		=	XUNIT
+                OCT             77777                           # -0, -6, -12 MUST REMAIN IN THIS ORDER
+DFC-6           DEC             -6                              
+DFC-12          DEC             -12                             
+LODPMAX         2OCT            3777737777                      # THESE TWO CONSTANTS MUST REMAIN
+
+LODPMAX1        2OCT            3777737777                      # ADJACENT AND THE SAME FOR INTEGRATION
+
+ZERODP          =               ZEROVEC                         
+HALFDP          =               XUNIT                           
 
 

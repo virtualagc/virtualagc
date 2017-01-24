@@ -17,14 +17,14 @@
 ## NOTE: Page numbers below have not yet been updated to reflect Luminary 116.
 
 ## Page 105
-                SUBRO           LUMERASE        102
-                SUBRO           LEMONAID        070
-                SUBRO           LEMP20S         114
-                SUBRO           LEMP30S         102
-                SUBRO           KISSING         040
-                SUBRO           FLY             109
-                SUBRO           LEMP50S         103
-                SUBRO           SKIPPER         070
-                SUBRO           LMDAP           012
+                SUBRO           LUMERASE        102             
+                SUBRO           LEMONAID        070             
+                SUBRO           LEMP20S         114             
+                SUBRO           LEMP30S         102             
+                SUBRO           KISSING         040             
+                SUBRO           FLY             109             
+                SUBRO           LEMP50S         103             
+                SUBRO           SKIPPER         070             
+                SUBRO           LMDAP           012             
 
 
