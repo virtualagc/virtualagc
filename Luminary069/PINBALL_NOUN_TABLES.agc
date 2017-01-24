@@ -1,8 +1,9 @@
+### FILE="Main.annotation"
 ## Copyright:   Public domain.
 ## Filename:    PINBALL_NOUN_TABLES.agc
 ## Purpose:     The main source file for Luminary revision 069.
 ##              It is part of the source code for the original release
-##              of the source code for the Lunar Module's (LM) Apollo
+##              of the flight software for the Lunar Module's (LM) Apollo
 ##              Guidance Computer (AGC) for Apollo 10. The actual flown
 ##              version was Luminary 69 revision 2, which included a
 ##              newer lunar gravity model and only affected module 2.
@@ -16,6 +17,9 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2016-12-13 MAS  Created from Luminary 99.
 ##              2017-01-19 HG   Transcribed
+##              2017-01023 HG   Fix value OCT 24033 -> OCT 22033 (49 DELTA R)
+##                                        OCT 24261 -> OCT 22261 (99 RMS IN POSITION)
+##                                        OCT 71572 -> OCT 01572 (99 3COMP  POS9, VEL4, RADIANS)
 
 ## Page 316
 # THE FOLLOWING REFERS TO THE NOUN TABLES
@@ -266,7 +270,7 @@ NNADTAB         OCT             00000                   # 00 NOT IN USE
                                                         #    CSM WEIGHT
                 OCT             22030                   # 48 GIMBAL PITCH TRIM
                                                         #    GIMBAL ROLL TRIM
-                OCT             24033                   # 49 DELTA R
+                OCT             22033                   # 49 DELTA R
                                                         #    DELTA V
                 OCT             0                       # 50 SPARE
                 OCT             22041                   # 51 S-BAND ANTENNA PITCH
@@ -362,7 +366,7 @@ NNADTAB         OCT             00000                   # 00 NOT IN USE
                 OCT             0                       # 96 SPARE
                 OCT             04253                   # 97 SYSTEM TEST INPUTS
                 OCT             04256                   # 98 SYSTEM TEST RESULTS
-                OCT             24261                   # 99 RMS IN POSITION
+                OCT             22261                   # 99 RMS IN POSITION
                                                         #    RMS IN VELOCITY
 # END OF NNADTAB FOR MIXED NOUNS
 
@@ -512,7 +516,7 @@ NNTYPTAB        OCT             00000                   # 00 NOT IN USE
                 OCT             0                       # 96        SPARE
                 OCT             00000                   # 97 3COMP  WHOLE FOR EACH
                 OCT             00000                   # 98 3COMP  WHOLE, FRAC, WHOLE
-                OCT             71572                   # 99 3COMP  POS9, VEL4, RADIANS
+                OCT             01572                   # 99 3COMP  POS9, VEL4, RADIANS
                                                         #           (DEC ONLY)
 # END OF NNTYPTAB FOR MIXED NOUNS
 

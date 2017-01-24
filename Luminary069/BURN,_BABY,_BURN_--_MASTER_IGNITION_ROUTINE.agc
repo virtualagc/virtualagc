@@ -1,8 +1,9 @@
+### FILE="Main.annotation"
 ## Copyright:   Public domain.
 ## Filename:    BURN,_BABY,_BURN_--_MASTER_IGNITION_ROUTINE.agc
 ## Purpose:     The main source file for Luminary revision 069.
 ##              It is part of the source code for the original release
-##              of the source code for the Lunar Module's (LM) Apollo
+##              of the flight software for the Lunar Module's (LM) Apollo
 ##              Guidance Computer (AGC) for Apollo 10. The actual flown
 ##              version was Luminary 69 revision 2, which included a
 ##              newer lunar gravity model and only affected module 2.
@@ -17,6 +18,7 @@
 ## Mod history: 2016-12-13 MAS  Created from Luminary 99.
 ##              2016-12-15 MAS  Updated from comment-proofed Luminary 99 version.
 ##              2017-01-20 HG   Transcribed
+##              2017-01-22 HG   Shift pseudo label +3 to column 2
 
 ## Page 739
 ## <br><br>
@@ -572,7 +574,7 @@ COMFAIL         TC              UPFLAG                  # (15)
                 TCF             +3                      # YES
                 TC              BANKCALL                # OTHERWISE, START IT UP
                 CADR            STCLOK1
-        +3      CS              VB97DEX
+ +3             CS              VB97DEX
                 TS              DISPDEX
                 TC              PHASCHNG                # TURN OFF GROUP 4.
                 OCT             00004

@@ -1,10 +1,11 @@
+### FILE="Main.annotation"
 ## Copyright:   Public domain.
 ## Filename:    P-AXIS_RCS_AUTOPILOT.agc
 ## Purpose:     The main source file for Luminary revision 069.
-##              It is part of the source code for the original release 
-##              of the source code for the Lunar Module's (LM) Apollo 
-##              Guidance Computer (AGC) for Apollo 10. The actual flown 
-##              version was Luminary 69 revision 2, which included a 
+##              It is part of the source code for the original release
+##              of the flight software for the Lunar Module's (LM) Apollo
+##              Guidance Computer (AGC) for Apollo 10. The actual flown
+##              version was Luminary 69 revision 2, which included a
 ##              newer lunar gravity model and only affected module 2.
 ##              This file is intended to be a faithful transcription, except
 ##              that the code format has been changed to conform to the
@@ -17,6 +18,10 @@
 ## Mod history: 2016-12-13 MAS  Created from Luminary 99.
 ##              2016-12-18 MAS  Updated from comment-proofed Luminary 99 version.
 ##		2017-01-05 RRB	Updated for Luminary 69.
+##              2017-01-22 HG   Add a "D" to opernad +8 -> +8D. 
+##                              Should actually be changed in yaYul but it might be the only case of this 
+##                              kind in the existing code 
+##              2017-01-22 HG   Fix operand DAPTREG4 -> ITEMP1
 
 ## Page 1416
 		BANK	16
@@ -105,7 +110,7 @@ SUBDIVDE	EXTEND			# OVERFLOW PROCTION ROUTINE TO GIVE
 
 DIVIDER		DXCH	OMEGAU
 		EXTEND
-		DV	DAPTREG4
+		DV	ITEMP1
 		TC	Q
 
 OVERSUB		TS	7		# RETURNS A UNCHANGED OR LIMITED TO
@@ -715,7 +720,9 @@ RATERROR	CA	CDUX		# FINDCDUW REQUIRES THAT CDUXD=CDUX DURING
 		TS	EDOTP
 		CCS	DAPTEMP1	# IF P COMMAND CHANGE EXCEEDS BREAKOUT
 		TCF	+3		# LEVEL, GO TO DIRECT RATE CONTROL. IF NOT
-		TCF	+8		# CHECK FOR DIRECT RATE CONTROL LAST TIME.
+## Note: The subsequent operand +8D is a +8 in the original. Seemingly the original
+##       Yul/GAP assembler could handle this.                
+		TCF	+8D		# CHECK FOR DIRECT RATE CONTROL LAST TIME.
 		TCF	+1		
 		AD	-RATEDB
 		EXTEND

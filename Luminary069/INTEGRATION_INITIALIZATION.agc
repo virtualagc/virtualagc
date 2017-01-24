@@ -1,10 +1,11 @@
+### FILE="Main.annotation"
 ## Copyright:   Public domain.
 ## Filename:    INTEGRATION_INITIALIZATION.agc
 ## Purpose:     The main source file for Luminary revision 069.
-##              It is part of the source code for the original release 
-##              of the source code for the Lunar Module's (LM) Apollo 
-##              Guidance Computer (AGC) for Apollo 10. The actual flown 
-##              version was Luminary 69 revision 2, which included a 
+##              It is part of the source code for the original release
+##              of the flight software for the Lunar Module's (LM) Apollo
+##              Guidance Computer (AGC) for Apollo 10. The actual flown
+##              version was Luminary 69 revision 2, which included a
 ##              newer lunar gravity model and only affected module 2.
 ##              This file is intended to be a faithful transcription, except
 ##              that the code format has been changed to conform to the
@@ -17,6 +18,9 @@
 ## Mod history: 2016-12-13 MAS  Created from Luminary 99.
 ##              2016-12-18 MAS  Updated from comment-proofed Luminary 99 version.
 ##              2017-01-22 MAS  Updated for Luminary 69.
+##              2017-01-22 HG   Add missing label ALLSTALL
+##                              Add missing operation INDEX L
+##                              Fix interpretive operator BOF -> BOFCLR
 
 ## Page 1200
 # 1.0 INTRODUCTION
@@ -601,7 +605,7 @@ ALOADED         DLOAD
                         INTYPFLG
                         TESTLOOP
                         RVCON
-A-PCHK          BOF     EXIT
+A-PCHK          BOFCLR  EXIT
                         STATEFLG
                         RECTOUT
                 TC      PHASCHNG
@@ -774,6 +778,7 @@ ALLSTALL        TS      L
                 MASK    INTBITAB        # IS THIS STALL AREA FREE
                 EXTEND
                 BZF     OKTOGRAB        # YES
+                INDEX   L
                 CAF     WAKESTAL
                 TC      JOBSLEEP
 INTWAKE0        EXIT
