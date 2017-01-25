@@ -18,10 +18,12 @@
 ## Mod history: 2016-12-13 MAS  Created from Luminary 99.
 ##              2016-12-20 MAS  Began transcription.
 ##              2016-12-23 MAS  Completed transcription.
+##		2017-01-25 RSB	Proofed comment text using octopus/prooferComments
+##				and fixed errors found.
 
 ## Page 37
 #        ******  FORMAT  ******
-# SEMBLE REVISION 069 OF AGC PROGRAM LUMINARY BY NASA 2021112-011      19:02 NOV.
+
 # NAMETAG  LENGTH TYPE ?? (GSOP NAME)        PROGRAMS                     SAMPLE VALUE / UNITS
 #                                                                         DESCRIPTION
 #                                                                         MORE DESCRIPTION
@@ -71,10 +73,11 @@
 ## Page 38
 # FLAGWRD8 (1D)   P(PGM)                       MANY PROGRAMS              (THERE ARE 8 POSSIBLE CONFIGURATIONS)
 #                                                                         CMOON, LMOON, & SURFFLAG ARE NOT INITIAL
-#                 OCT: BITS 8,11,12 NEED TO BE SET AS YOU DESIRE          IZED BY FRESH START AS OTHER BITS ARE.
+#                 						          IZED BY FRESH START AS OTHER BITS ARE.
+#                 OCT; BITS 8,11,12 NEED TO BE SET AS YOU DESIRE
 #
 
-# HIASCENT (1D)   P(F)    (HIASCENT)         DIGITAL AUTOPILOT            (5000 KG.: 11,100 LBS.)
+# HIASCENT (1D)   P(F)    (HIASCENT)         DIGITAL AUTOPILOT            (5000 KG.; 11,100 LBS.)
 #                                                                         INITIAL STAGED MASS
 #                 1DEC     5050  B-16                   SUNLITER # 147
 #
@@ -107,7 +110,7 @@
 #                 1OCT     00000              R557 GSOP SEC 3.3.2.3 JUNE68
 #
 
-# LMKAOSN  (1D)   P(F)    (N-ALPHA-N)        DAP STATE ESTIMATOR PARAM.   ( 60 DEC )
+# LMKAOSN  (1D)   P(F)    (N-ALPHA-L)        DAP STATE ESTIMATOR PARAM.   ( 60 DEC )
 #                                                                         LEM-ALONE, ACCELERATION GAIN CONSTANT
 #                 1OCT     00074              R557 GSOP SEC 3.3.2.3 JUNE68
 #
@@ -148,8 +151,8 @@
 #                 1OCT    00000               PCR 616
 #
 
-# POSTORKV (1D)   P(PGM)  (POSTORKV)         DAP                          ACCUMULATED JET TORQUE ABOUT +V AXIS
-#                                                                         SCALED AS POSTORKP.
+# POSTORKV (1D)   P(PCM)  (POSTORKV)         DAP                          ACCUMULATED JET TORQUE ABOUT +V AXIS
+#                                                                         SCALED AS POSTORKP
 #                 1OCT    00000               PCR 616
 #
 
@@ -276,7 +279,7 @@
 #                 VALUE UNCERTAIN
 #
 
-# WTRUN    (1D)   P(I)     (W-BETA)          P20-RENDESVOUS NAVIGATION    ( 10 MILLIRADIANS)
+# WTRUN    (1D)   P(I)     (W-BETA)          P20-RENDESVOUS NAVIGATION    ( 10 MILLIRADIANS  -MR- )
 #                                                                         W-MATRIX INERTIAL DIAGONAL ELEMENT
 #                                                                         TRUNNIUN PRESELECTED ERROR TRANSITION
 #                 VALUE UNCERTAIN
@@ -288,17 +291,17 @@
 #
 
 # VMAX     (1D)   P(I)     (DELTA-VMAX)      P20-RENDESVOUS NAVIGATION    (9.144 TIMES 10 METERS PER SECOND)
-#                                                                         THRESHOLD LIMIT FOR POSITION CORRECTION
+#                                                                         THRESHOLD LIMIT FOR VELOCITY CORRECTION
 #                 VALUE UNCERTAIN
 #
 
-# SHAFTVAR (1D)   P(U)     (VAR-BETA)        P22-RENDEZVOUS RADAR         ( 10 TO 6TH POWER SQUARE RADIANS)
+# SHAFTVAR (1D)   P(U)     (VAR-BETA)        P22-RENDESVOUS RADAR         ( 10 TO 6TH POWER SQUARE RADIANS)
 #                                                                         RR SHAFT ANGLE ERROR VARIANCE
 #                 VALUE UNCERTAIN
 #
 
-# TRUNVAR  (1D)   P(U)     (VAR-THETA)       P22-RENDEZVOUS RADAR         ( 10 TO 6TH POWER SQUARE RADIANS)
-#                                                                         RR SHAFT ANGLE ERROR VARIANCE
+# TRUNVAR  (1D)   P(U)     (VAR-THETA)       P22-RENDESVOUS RADAR         ( 10 TO 6TH POWER SQUARE RADIANS)
+#                                                                         RR TRUNNION ANGLE ERROR VARIANCE
 #                 VALUE UNCERTAIN
 #
 
@@ -318,7 +321,7 @@
 #                                                                         (1/3 % QUANTITY SQUARED OR .11111111 E-4
 #                                                                         RANGE ERROR VARIANCE CORRESPONDING TO
 #                                                                              A PERCENTAGE ERROR
-#                 2DEC*    .11111111 E-4 B-12*                GSOP
+#                 2DEC*    .111111111 E-4 B12*                GSOP
 #
 
 ## Page 43
@@ -414,7 +417,7 @@
 #          +4     2DEC*   -2.86621213 E- 4 B+04 *
 #
 
-# VBRFG*   (2D)   P(I)                     LUNAR LANDING TARGET PARAMETERS (  METERS PER CSEC )   HIGHGATE
+# VBRFG*   (2D)   P(I)                     LUNAR LANDING TARGET PARAMETERS (  METERS PER CSEC )
 #                                                                         VELOCITY SCALAR, BRAKING PHASE, HIGHGATE
 #                 2DEC*   +3.86517612 E+ 0 B-10 *    23A LUNAR LANDING PGM
 #
@@ -440,7 +443,7 @@
 # VAPFG    (6D)   P(I)     (V-1FG)         LUNAR LANDING TARGET PARAMETERS (  METERS PER CSEC )
 #                                                                         VELOCITY VECTOR, APPROACH PHASE, LOWGATE
 #          +0     2DEC*   -9.44879999 E- 3 B-10 *
-#          +2     2DEC*   +0.00000000 E+ 0 B-10 *    23A LUNAR LANDING PGM
+#          +2     2DEC*   +0.00000000 E+ 0 B-10 *    23A LUNAR LANDNNG PGM
 #          +4     2DEC*   +3.96239999 E- 3 B-10 *
 #
 
@@ -518,7 +521,7 @@
 #                                                                                                   LUM MEMO # 45
 
 # TENDBRAK (1D)   P(I)                      LUNAR LANDING TARGET PARAMETER  ( 200 SECONDS )
-#                                                                         TIME CRITERION FOR SWITCHING TO APPROACH
+#                                                                         TIME CRITERION FOR SWITCH TO APPROACH
 #                                                                         PHASE  (P64 )
 #                 DEC     +20  E2 B-17  (TWO-PHASE LANDING MODE)  LUM MEMO
 #                 DEC     +200 E2 B-17  (ONE-PHASE LANDING MODE)     #45
@@ -532,7 +535,7 @@
 #                 DEC     +300 E2 B-17  (ONE-PHASE LANDING MODE)     #45
 #
 
-# RPCCTQSW (1D)   P(2)                     LUNAR LANDING TARGET PARAMETERS  ( COS 45 DEGREES SCALED AT B+1 )
+# RPCRTQSW (1D)   P(2)                     LUNAR LANDING TARGET PARAMETERS  ( COS 45 DEGREES SCALED AT B+1 )
 #                                                                         X COMPONENT OF X-AXIS OF VEHICLE IN
 #                                                                         STABLE MEMBER COORDINATES: CRITERION FOR
 #                                                                         REPOSITIONING LR ANTENNA
@@ -542,7 +545,7 @@
 
 # LRALPHA  (1D)   P(I)     (ALPHA-1)         LANDING RADAR  P63-67        ( 6 DEGREES)
 #                                                                         POSITION 1, X ROTATION
-#                 1OCT     01402                           SUNLITER # 168
+#                 1OCT     01042                           SUNLITER # 168
 #
 
 # LRBETA1  (1D)   P(I)     (BETA-1)          LANDING RADAR  P63-67        ( 24 DEGREES)
@@ -596,7 +599,7 @@
 #                 2DEC    15.24 B-24                  PCRS 639 &248
 #
 
-# TBRKPNT  (1D)   P(I)            DELQFIX            P70-71 ASCENT        (540 SEC OR 54000 CSEC )
+# TBRKPNT  (1D)   P(I)                               P70-71 ASCENT        (540 SEC OR 54000 CSEC )
 #                                                                         TFI BRANCH TIME;  ABORT TARGET
 #                 1DEC    54000 B-17                 PCR # 133
 #
@@ -662,7 +665,7 @@
 #                 LAUNCH DATE DEPENDENT
 #
 
-# AZO      (2D)   P(I)     (A-Z-O)         PLANETARY INERTIAL ORIENTATION ( .7753 REVOLUTIONS)
+# AZO      (2D)   P(I)     (A-Z-O)         PLANETARY INERITAL ORIENTATION ( .7753 REVOLUTIONS)
 #                                                                         ANGLE BETWEEN THE X AXIS OF BASIC REF
 #                                                                          COORDINATE SYSTEM AND THE X AXIS OF THE
 #                                                                          EARTH-FIXED COORDINATE SYSTEM AT

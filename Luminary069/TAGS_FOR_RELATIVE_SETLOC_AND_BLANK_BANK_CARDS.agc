@@ -18,6 +18,8 @@
 ## Mod history: 2016-12-13 MAS  Created from Luminary 99.
 ##              2017-01-03 HG   Transcribed
 ##              2017-01-06 HG   Fix label INPRET2 -> INTPRET2
+##		2017-01-25 RSB	Proofed comment text with octopus/prooferComments.
+##				No errors were found.
 
 ## Page 27
                 COUNT           BANKSUM
