@@ -19,6 +19,7 @@
 ##		2017-01-06 RSB	Page numbers now agree with those on the
 ##				original harcopy, as opposed to the PDF page
 ##				numbers in 1701.pdf.
+##		2017-01-25 RSB	Back-ported a typo-fix found while proofing Luminary 69.
 
 ## Page 1
 
@@ -338,7 +339,7 @@
 # MIXED NOUNS				   COMPONENTS	SCALE AND DECIMAL POINT			RESTRICTIONS
 # 40	TIME FROM IGNITION/CUTOFF		3COMP	xxBxx MIN/SEC				NO LOAD, DEC ONLY
 #	VG,						xxxx.x FT/SEC
-#	DELTA V (ACCUMULATED)				xxxx.x FT.SEC
+#	DELTA V (ACCUMULATED)				xxxx.x FT/SEC
 # 41	TARGET	AXIMUTH				2COMP	xxx.xx DEG				(FOR SYSTEM TEST)
 #		ELEVATION				xx.xxx DEG
 # 42	APOGEE,					3COMP	xxxx.x NAUT MI				DEC ONLY

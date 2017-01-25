@@ -18,6 +18,8 @@
 ## Mod history: 2016-12-13 MAS  Created from Luminary 99.
 ##              2016-12-23 MAS  Began updating for Luminary 69
 ##              2017-01-04 MAS  Completed updating for Luminary 69.
+##		2017-01-25 RSB	Proofed comment text using octopus/prooferComments
+##				and fixed the (single) error found.
 
 ## Page 1
 # THIS LGC PROGRAM IS INTENDED FOR USE IN THE LM DURING THE MANNED LUNAR LANDING MISSION OR ANY SUBSET THEREOF.
@@ -353,7 +355,7 @@
 
 # 40  TIME FROM IGNITION/CUTOFF              3COMP   XXBXX  MIN/SEC                      NO LOAD, DEC ONLY
 #     VG,                                            XXXX.X FT/SEC
-#     DELTA V (ACCUMULATED)                          XXXX.X FT.SEC
+#     DELTA V (ACCUMULATED)                          XXXX.X FT/SEC
 # 41  TARGET  AZIMUTH.                       2COMP   XXX.XX DEG                          (FOR SYSTEM TEST)
 #             ELEVATION                              XX.XXX DEG
 # 42  APOGEE,                                3COMP   XXXX.X NAUT MI                      DEC ONLY

@@ -13,6 +13,7 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-01-22 MAS  Created from Luminary 99.
+##		2017-01-25 RSB	Back-ported a typo-fix found while proofing Luminary 69.
 
 ## NOTE: Page numbers below have not yet been updated to reflect Luminary 116.
 
@@ -347,7 +348,7 @@
 # MIXED NOUNS                               COMPONENTS  SCALE AND DECIMAL POINT                 RESTRICTIONS
 # 40    TIME FROM IGNITION/CUTOFF               3COMP   XXBXX  MIN/SEC                          NO LOAD, DEC ONLY
 #       VG,                                             XXXX.X FT/SEC
-#       DELTA V (ACCUMULATED)                           XXXX.X FT.SEC
+#       DELTA V (ACCUMULATED)                           XXXX.X FT/SEC
 # 41    TARGET  AZIMUTH.                        2COMP   XXX.XX DEG                              (FOR SYSTEM TEST)
 #               ELEVATION                               XX.XXX DEG
 # 42    APOGEE,                                 3COMP   XXXX.X NAUT MI                          DEC ONLY

@@ -13,6 +13,7 @@
 ##		2016-12-11 RSB	Proofed text comments with octopus/ProoferComments
 ##				and corrected the errors found.
 ##		2017-01-04 MAS	A few typos found during Luminary 69 transcription.
+##		2017-01-25 RSB	Back-ported a typo-fix found while proofing Luminary 69.
 ##
 ## This source code has been transcribed or otherwise adapted from digitized
 ## images of a hardcopy from the MIT Museum.  The digitization was performed
@@ -359,7 +360,7 @@
 # MIXED NOUNS				    COMPONENTS	SCALE AND DECIMAL POINT			RESTRICTIONS
 # 40	TIME FROM IGNITION/CUTOFF		3COMP	XXBXX  MIN/SEC				NO LOAD, DEC ONLY
 #	VG,						XXXX.X FT/SEC
-#	DELTA V (ACCUMULATED)				XXXX.X FT.SEC
+#	DELTA V (ACCUMULATED)				XXXX.X FT/SEC
 # 41	TARGET	AZIMUTH.			2COMP	XXX.XX DEG				(FOR SYSTEM TEST)
 #		ELEVATION				XX.XXX DEG
 # 42	APOGEE,					3COMP	XXXX.X NAUT MI				DEC ONLY
