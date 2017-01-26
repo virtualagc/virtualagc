@@ -421,7 +421,7 @@ SCALLOOP        CS      FUNCTION
                 BZMF    MULBUSH         # IF ARG IS NOT LESS THAN REFERENCE, GO
                                         # AROUND THE MULBERRY BUSH ONCE MORE.
                 INDEX   ININDEX
-## Page 1476.
+## Page 1476
                 CA      BIT15           # THIS IS THE SCALE MAGNITUDE
                 XCH     Q               # 2**(-ININDEX) IS THE SHIFT DIVISOR.
                 EXTEND                  # RESCALE ARGUMENT.

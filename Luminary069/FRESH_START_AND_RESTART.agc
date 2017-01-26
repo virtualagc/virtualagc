@@ -17,6 +17,8 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2016-12-13 MAS  Created from Luminary 99.
 ##              2017-01-09 HG   Transcribed
+##		2017-01-25 RSB	Proofed comment text using octopus/prooferComments
+##				and fixed errors found.
 
 ## Page 226
                 BANK            10
@@ -196,7 +198,7 @@ V37KLEAN        EXTEND
 ## Page 230
 #          COMES HERE FROM LOCATION 4000, GOJAM. RESTART ANY PROGRAMS WHIC
 
-                EBANK=          LST1                    # H MAY HAVE BEEN RUNNING AT TEH TIME.
+                EBANK=          LST1                    # H MAY HAVE BEEN RUNNING AT THE TIME.
 GOPROG          INCR            REDOCTR                 # ADVANCE RESTART COUNTER.
 
                 LXCH            Q

@@ -16,6 +16,7 @@
 ##		2017-01-06 RSB	Page numbers now agree with those on the
 ##				original harcopy, as opposed to the PDF page
 ##				numbers in 1701.pdf.
+##		2017-01-26 RSB	Back-ported a comment-text fix from Luminary 69.
 
 ## Page 340
 # SUBROUTINE NAME:	V89CALL
@@ -107,7 +108,7 @@ V89RECL		TC	INTPRET		#			2 FOR X AXIS
 		MXV	RTB		# (REFSMAT X LOS).  TRANSFORMS LOS FROM
 			REFSMMAT	# REFERENCE COORD TO STAB MEMB COORD. (garbled)
 			NORMUNIT
-		STORE	POINTVSM	# STORE LOS FOR VECPOINT CALCULATION
+		STORE	POINTVSM	# STORE LOS FOR VECPOINT CALC
 		EXIT
 		CS	OPTIONX +1	# 1 FOR Z AXIS.  2 FOR X AXIS.
 		AD	ONE

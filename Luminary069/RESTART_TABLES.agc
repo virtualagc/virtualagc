@@ -17,6 +17,8 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2016-12-13 MAS  Created from Luminary 99.
 ##              2017-01-09 HG   Transcribed
+##		2017-01-25 RSB	Proofed comment text using octopus/prooferComments
+##				but no errors found.
 
 ## Page 253
 # RESTART TABLES

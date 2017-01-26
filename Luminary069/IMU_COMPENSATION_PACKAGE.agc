@@ -18,6 +18,8 @@
 ## Mod history: 2016-12-13 MAS  Created from Luminary 99.
 ##              2016-12-14 MAS  Updated from comment-proofed Luminary 99 version.
 ##		2017-01-19 RRB	Updated for Luminary 69.
+##		2017-01-25 RSB	Proofed comment text using octopus/prooferComments
+##				and fixed errors found.
 
 ## Page 339
 		BANK	7
@@ -60,6 +62,7 @@
 
 ## Lines from here to the bottom of the page angle and start to overlap. The code until the MP BIT4 is legible.
 ## It is assumed that the illegible portions are identical to their Luminary 99 counterparts. - RRB 2017
+## <br>The comments are legible, except that the last line is rather tricky, and can be verified directly. - RSB 2017
 		INDEX	BUF +2
 		CS	PIPABIAS	# (PIPA PULSES)/(CS) X 2(-5)		 *
 		EXTEND
@@ -322,7 +325,7 @@ NBD3		EXTEND			# C(A) = DELTAT		(CS) X 2(+14)
 		
 		CA	ZERO
 		TS	GCOMPSW		# INDICATE COMMANDS 2 PULSES OR LESS.
-		TS	BUF		# INDEX- X, Y, Z.
+		TS	BUF		# INDEX  X, Y, Z.
 		
 		CCS	TEM1		# IF SURFACE FLAG IS SET,
 		TC	IRIGX		# COMPENSATE ACCELERATION TERMS.

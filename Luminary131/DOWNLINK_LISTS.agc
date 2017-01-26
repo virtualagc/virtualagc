@@ -16,6 +16,8 @@
 ##		2017-01-06 RSB	Page numbers now agree with those on the
 ##				original harcopy, as opposed to the PDF page
 ##				numbers in 1701.pdf.
+##		2017-01-26 RSB	Back-ported comment-text fixes found while
+##				proofing corresponding Luminary 69 file.	
 
 ## Page 195
 		BANK	22
@@ -130,7 +132,7 @@ LMORBM04	2DNADR	OMEGAPD				# OMEGAPD,OMEGAQD,OMEGARD,GARBAGE
 		-1DNADR	RADMODES			# RADMODES,DAPBOOLS	COMMON DATA
 
 LMORBM05	2DNADR	OMEGAP				# OMEGAP,OMEGAQ,OMEGAR,GARBAGE
-		2DNADR	CDUXD				# CDUXD,CDUYD,CDUZD,GARBAGE
+		2DNADR	CDUXD				# CDUXD,CDUXD,CDUZD,GARBAGE
 		2DNADR	CDUX				# CDUX,CDUY,CDUZ,CDUT
 		1DNADR	ALPHAQ				# ALPHAQ,ALPHAR		COMMON DATA
 		1DNADR	POSTORKP			# POSTORKP,NEGTORKP

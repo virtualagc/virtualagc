@@ -13,6 +13,7 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-01-22 MAS  Created from Luminary 99.
+##		2017-01-26 RSB	Back-ported a comment-text fix from Luminary 69.
 
 ## NOTE: Page numbers below have not yet been updated to reflect Luminary 116.
 
@@ -106,7 +107,7 @@ V89RECL         TC              INTPRET                         #               
                 MXV             RTB                             # (REFSMMAT X LOS).  TRANSFORMS LOS FROM
                                 REFSMMAT                        # REFERENCE COORD TO STAB MEMB COORD.
                                 NORMUNIT                        
-                STORE           POINTVSM                        # STORE LOS FOR VECPOINT CALC
+                STORE           POINTVSM                        # STORE LOS FOR VECPOINT CALL
                 EXIT                                            
                 CS              OPTIONX         +1              # 1 FOR Z AXIS.  2 FOR X AXIS.
                 AD              ONE                             

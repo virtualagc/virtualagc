@@ -17,6 +17,8 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2016-12-13 MAS  Created from Luminary 99.
 ##              2017-01-10 HG   Transcribed
+##		2017-01-25 RSB	Proofed comment text using octopus/prooferComments
+##				and fixed errors found.
 
 ## Page 259
                 BANK            12
@@ -98,7 +100,7 @@ GETDAT          CS              MARKSTAT                # SET BIT12 TO DISCOURAG
 ENTERDAT        TCF             GETDAT                  # ENTER-REDISPLAY STAR CODE
 
 DODAT           CAF             HIGH9                   # PICK DETENT CODE FROM BITS7-9 OF AOTCODE
-                MASK            AOTCODE                 # AND SEE IF CODE 1,2 OR 3
+                MASK            AOTCODE                 # AND SEE IF CODE IS 1,2 OR 3
                 EXTEND
                 MP              BIT9
                 TS              XYMARK                  # STORE DETENT
@@ -144,7 +146,7 @@ CODE123         INDEX           XYMARK                  # INDEX DET CODE 1,2 OR 
                 INDEX           FIXLOC
                 TS              8D                      # STORE AZIMUTH IN VAC+8D
 
-CODE4           CA              AOTAZ +1                # COMPENSATION FOR APPARENT ROTATION OF
+CODE4           CA              AOTAZ +1                # COMPENSATION FOR APPARENT RATATION OF
                 EXTEND                                  # AOT FIELD OF VIEW IN LEFT AND RIGTHT
                 INDEX           FIXLOC                  # DETENTS IS STORED IN VAC +10D IN SP
                 MSU             8D                      # PRECISION ONES COMPLEMENT
@@ -159,7 +161,7 @@ CODE5           INDEX           FIXLOC
 # OPTAXIS USES OANB TO COMPUTE THE OPTIC AXIS
 #  INPUT-AZIMUTH ANGLE IN SINGLE PREC AT CDU SCALE IN 8D OF JOB VAC
 #        ELEVATION ANGLE IN SINGLE PREC AT CDU SCALE IN 9D OF JOB VAC
-#        ROTATION ANGLE IN SINGLE PREC IS COMP SCALED BY PI IN 10D OF VAC
+#        ROTATION ANGLE IN SINGLE PREC 1S COMP SCALED BY PI IN 10D OF VAC
 #  OUTPUT-OPTIC AXIS VEC IN NG COORDS IN SCAXIS
 #         X-MARK PLANE 1/4VEC IN NB COORDS AT 18D OF JOB VAC
 #         Y-MARK PLANE 1/4VEC IN NB COORDS AT 12D OF JOB VAC

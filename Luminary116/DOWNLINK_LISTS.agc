@@ -13,6 +13,8 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-01-22 MAS  Created from Luminary 99.
+##		2017-01-26 RSB	Back-ported comment-text fixes found while
+##				proofing corresponding Luminary 69 file.	
 
 ## NOTE: Page numbers below have not yet been updated to reflect Luminary 116.
 
@@ -131,7 +133,7 @@ LMORBM04        2DNADR          OMEGAPD                         # OMEGAPD,OMEGAQ
                 -1DNADR         RADMODES                        # RADMODES,DAPBOOLS     COMMON DATA
 
 LMORBM05        2DNADR          OMEGAP                          # OMEGAP,OMEGAQ,OMEGAR,GARBAGE
-                2DNADR          CDUXD                           # CDUXD,CDUYD,CDUZD,GARBAGE
+                2DNADR          CDUXD                           # CDUXD,CDUXD,CDUZD,GARBAGE
                 2DNADR          CDUX                            # CDUX,CDUY,CDUZ,CDUT
                 1DNADR          ALPHAQ                          # ALPHAQ,ALPHAR         COMMON DATA
                 1DNADR          POSTORKP                        # POSTORKP,NEGTORKP

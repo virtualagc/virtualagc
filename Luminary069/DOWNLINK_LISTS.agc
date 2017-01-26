@@ -17,6 +17,8 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2016-12-13 MAS  Created from Luminary 99.
 ##              2017-01-08 HG   Transcribed
+##		2017-01-25 RSB	Proofed comment text using octopus/prooferComments
+##				and fixed errors found.
 
 ## Page 208
                 BANK            22
@@ -135,7 +137,7 @@ LMORBM04        2DNADR          OMEGAPD                 # OMEGAPD,OMEGAQD,OMEGAR
                 -1DNADR         RADMODES                # RADMODES,DAPBOOLS        COMMON DATA
 
 LMORBM05        2DNADR          OMEGAP                  # OMEGAP,OMEGAQ,OMEGAR,GARBAGE
-                2DNADR          CDUXD                   # CDUXD,CDUYD,CDUZD,GARBAGE
+                2DNADR          CDUXD                   # CDUXD,CDUXD,CDUZD,GARBAGE
                 2DNADR          CDUX                    # CDUX,CDUY,CDUZ,CDUT
                 1DNADR          ALPHAQ                  # ALPHAQ,ALPHAR            COMMON DATA
                 1DNADR          POSTORKP                # POSTORKP,NEGTORKP
@@ -273,7 +275,7 @@ LMREND07        -1DNADR         AIG                     # AIG,AMG              S
 ## Page 215
 # LM DESCENT AND ASCENT DOWNLIST
 
-#     -----------------  CONTROL LIST    -------------------------
+#     -----------------  CONTROL LIST   --------------------------
 
 LMDSASDL        EQUALS                                  # SEND ID BY SPECIAL CODING
                 DNPTR           LMDSAS07                # COLLECT SNAPSHOT
