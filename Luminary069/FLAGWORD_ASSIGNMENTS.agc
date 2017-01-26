@@ -18,6 +18,8 @@
 ## Mod history: 2016-12-13 MAS  Created from Luminary 99.
 ##              2016-01-03 HG   Transcribed
 ##              2017-01-21 HG   Fix label CHIPFLAG -> CPHIFLAG
+##		2017-01-25 RSB	Proofed comment text using octopus/prooferComments
+##				and fixed errors found.
 
 ## Page 77
 #          FLAGWORDS 0-11  ARE DOWNLINKED AND CAN BE SET AND CLEARED BY UP-FLAG AND DOWN-FLAG INSTRUCTIONS IN THE
@@ -138,7 +140,7 @@
 # MUNFLAG         097             BIT 8 FLAG 6         MUNFLBIT
 # MWAITFLG        064             BIT 11 FLAG 4        MWAITBIT
 # NEEDLFLG        011             BIT 4  FLAG 0        NEEDLBIT
-# NEWIFLG         122             BIT 3  FLAG 8        NEWIBIT
+# NEWIFLG         122             BIT 13  FLAG 8       NEWIBIT
 # NJETSFLG        015             BIT 15 FLAG          NJETSBIT
 # NODOFLAG        044             BIT 1  FLAG 2        NODOBIT
 # NOLRREAD        170             BIT 10 FLAG 11       NOLRRBIT

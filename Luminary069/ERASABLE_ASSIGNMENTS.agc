@@ -23,6 +23,9 @@
 ##                                          TABLTFF-> TABLTTF
 ##              2017-01-08 HG   fix operand modifier JBRFG* +1 -> JBRFG* +2
 ##              2017-01-16 HG   uncomment LMPOS and LMVEL
+##		2017-01-25 RSB	Proofed comment text using octopus/prooferComments
+##				and fixed errors found.
+
 ## Page 106
 # CONVENTIONS AND NOTATIONS UTILIZED FOR ERASABLE ASSIGNMENTS.
 
@@ -1287,7 +1290,7 @@ RSTACK          EQUALS          RANGE                   # B(8) BUFFER FOR R04 NO
 #
 
 
-#          INITVEL STORAGE.  ALSO USED BY P31,P34 P35,P74,P75,P10,P11,MIDGIM,S40.1 AND S40.9. (18D)
+#          INITVEL STORAGE.  ALSO USED BY P31,P34,P35,P74,P75,P10,P11,MIDGIM,S40.1 AND S40.9. (18D)
 
 #                  (POSSIBLY RINIT & VINIT CAN OVERLAY DELVEET1 & 2 ABOVE)
 
@@ -1319,7 +1322,7 @@ RSAMPDT         ERASE                                   # (1)
 RFAILCNT        ERASE                                   # (1)
 #
 
-#*         LPS20.1 STORAGE                                       (12D)
+#*         LPS20.1 STORAGE 
 
 #*(12D)
 
@@ -1334,7 +1337,7 @@ END-E4          EQUALS                                  # FIRST UNUSED LOCATION 
 
 VHORIZ          EQUALS          PIPTEM          +3      # I(2) DISPLAY
 ACG             EQUALS          VHORIZ          +2      # I(6) GUIDANCE
-JLING           EQUALS          ACG             +6      # i(6) GUIDANCE
+JLING           EQUALS          ACG             +6      # I(6) GUIDANCE
 ANGTERM         EQUALS          JLING           +6      # I(6) GUIDANCE
 HBEAMNB         EQUALS          ANGTERM         +6      # I(6) LANDING RADAR
 LRXCDUDL        EQUALS          /LAND/          +2      # B(1) LANDING RADAR DOWNLINK
@@ -2140,7 +2143,7 @@ DELVEET3        ERASE           +5                      # I(6)     DELTA V IN IN
 
 #          P32-P33 STORAGE.                                             (2)
 
-TCDH            ERASE           +1                      #  I(2) T2 CDH TIME IN C.C. ALSO DOWNLINKED
+TCDH            ERASE           +1                      #  I(2) T2 CDH TIME IN C.S. ALSO DWNLINKED
 #
 
 
@@ -2166,8 +2169,8 @@ PTIGINC         ERASE           +1                      # B(2)PL
 
 #          AOTMARK STORAGE.       -PAD LOADED-                          (6D)
 
-AOTAZ           ERASE           +2                      # B(6)PL
-AOTEL           ERASE           +2                      # B(6)PL
+AOTAZ           ERASE           +2                      # B(3)PL
+AOTEL           ERASE           +2                      # B(3)PL
 
 
 #          LANDING RADAR.         -PAD LOADED-                          (10D)
@@ -2254,9 +2257,9 @@ SUBEXIT         ERASE                                   # B(1) PRM SAVE Q
 
 ## Page 155
 
-E7OVERLA        EQUALS                                  #          START OF E7 OVERLAYS.
+E7OVERLA        EQUALS                                  #          START OF E7 OVERLAYS
 
-WHOCARES        EQUALS          E7OVERLA                # A DUMMY FOR E-BANK INSENSITIVE 2CADRS
+WHOCARES        EQUALS          E7OVERLA                # A DUMMY FOR E-BANK INSENSITIVE 2CADRS.
 
 ## Page 156
 # *******  OVERLAY NUMBER 0 IN EBANK 7  *******
@@ -2593,7 +2596,7 @@ NCSMVEL         EQUALS          TRANSTM         +2      # I(6)S-S NEW CSM VELOCI
 
 #          AUTO-OPTICS STORAGE.  -R52-                                  (1)
 
-XNB1            =               WHOCARES                # THESE WHOCARES THINGS ARE REFERENCED
+XNB1            =               WHOCARES                # THESE WHOCARES THINGS ARE REFERENCED.
 YNB1            =               WHOCARES                # BUT NOT USED IN SUNDANCE
 ZNB1            =               WHOCARES
 #
@@ -2665,7 +2668,7 @@ EOURPERM        EQUALS          FUNNYDSP        +2      # NEXT AVAILABLE ERASABL
 
 # (ERASABLES WHICH OVERLAY THE ABOVE BLOCK)
 
-VDGVERT         =               ELINCR1                 # B(2)    P65,P66
+VDGVERT         =               ELINCR1                 # B(2)    P65,66
 NIGNLOOP        =               ZERLINA                 # B(1)    IGNALG
 NGUIDSUB        =               ELVIRA                  # B(1)    IGNALG
 RODCOUNT        =               ZERLINA                 # B(1)    P66

@@ -18,6 +18,8 @@
 ##				vs the already-proofed corresponding Colossus
 ##				237 and Comanche 55 source-code files
 ##				and corrected errors found.
+##		2017-01-26 RSB	Back-ported comment-text fixes found while
+##				proofing corresponding Luminary 69 file.	
 ##
 ## The contents of the "Colossus249" files, in general, are transcribed 
 ## from a scanned copy of the program listing.  Notations on this
@@ -715,7 +717,7 @@ TEMPOK		TC	LAMPTEST		# IF TEMP NOW OK, DONT TURN OFF LAMP IF
 # PROCESSING ANY CHANGES.  THIS BIT WILL BE RESET BY THE ENDTNON ROUTINE WHEN THE CURRENT 90 SECOND DELAY PERIOD
 # ENDS.
 #
-# CALLING SEQUENCE:  FROM IMUMON WHEN ISS TURN-ON REQUEST CHANGES STATE.
+# CALLING SEQUENCE:  FROM IMUMOM WHEN ISS TURN-ON REQUEST CHANGES STATE.
 #
 # JOBS OR TASKS INITIATED:  NONE.
 #
@@ -877,7 +879,7 @@ IMUOP2		CAF	BIT2			# SEE IF FAILED ISS TURN-ON SEQ IN PROG.
 #
 # JOBS OR TASKS INITIATED:  NONE.
 #
-# SUBROUTINES CALLED:  1) SETISSW, AND 2) ALARM (SEE FUNCITONAL DESCRIPTION).
+# SUBROUTINES CALLED:  1) SETISSW, AND 2) ALARM (SEE FUNCTIONAL DESCRIPTION).
 #
 # ERASABLE INITIALIZATION:  SEE IMUMON FOR INITIALIZATION OF IMODES30.  THE RELAVANT BITS ARE 5, 7, 8, 9, AND 10.
 #
