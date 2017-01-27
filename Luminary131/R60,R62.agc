@@ -16,6 +16,7 @@
 ##		2017-01-06 RSB	Page numbers now agree with those on the
 ##				original harcopy, as opposed to the PDF page
 ##				numbers in 1701.pdf.
+##		2017-01-27 RSB	Back-ported a comment-text fix identified in Luminary 69.
 
 ## Page 476
 # MOD NO: 0				DATE: 1 MAY 1968
@@ -503,7 +504,7 @@ FINDGIMB	AXC,1	CALL
 		GOTO
 			VECQTEMP	# RETURN TO CALLER
 			
-PICKAXIS	VLOAD	DOT		# IF VF X VI = 0, FIND VF, VI
+PICKAXIS	VLOAD	DOT		# IF VF X VI = 0, FIND VF . VI
 			28D
 			SCAXIS
 		BMN	TLOAD

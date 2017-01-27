@@ -16,6 +16,7 @@
 ## 		2010-01-31 JL	Fixed build errors.
 ## 		2010-02-01 JL	Fixed build errors.
 ##		2010-02-20 RSB	Un-##'d this header.
+##		2017-01-27 RSB	Back-ported a comment-text fix identified in Luminary 69.
 
 ## Page 394
 		SETLOC	MANUVER
@@ -296,7 +297,7 @@ VECPTRET	SETPD	GOTO
 			0
 			VECQTEMP	# RETURN TO CALLER
 			
-PICKAXIS	VLOAD	DOT		# IF VF X VI = 0, FIND VF, VI
+PICKAXIS	VLOAD	DOT		# IF VF X VI = 0, FIND VF . VI
 			28D
 			SCAXIS
 		BMN	TLOAD

@@ -14,6 +14,7 @@
 ##		2016-12-13 RSB	GOTOP00H -> GOTOPOOH
 ##		2016-12-14 RSB	Proofed text comments with octopus/ProoferComments
 ##				and corrected the errors found.
+##		2017-01-27 RSB	Back-ported a comment-text fix identified in Luminary 69.
 ##
 ## This source code has been transcribed or otherwise adapted from
 ## digitized images of a hardcopy from the MIT Museum.  The digitization
@@ -514,7 +515,7 @@ FINDGIMB	AXC,1	CALL
 		GOTO
 			VECQTEMP	# RETURN TO CALLER
 			
-PICKAXIS	VLOAD	DOT		# IF VF X VI = 0, FIND VF, VI
+PICKAXIS	VLOAD	DOT		# IF VF X VI = 0, FIND VF . VI
 			28D
 			SCAXIS
 		BMN	TLOAD
