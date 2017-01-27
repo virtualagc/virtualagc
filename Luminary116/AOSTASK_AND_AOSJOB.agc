@@ -13,58 +13,61 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-01-22 MAS  Created from Luminary 99.
+##              2017-01-27 RRB  Updated for Luminary 116.
 
-## NOTE: Page numbers below have not yet been updated to reflect Luminary 116.
-
-## Page 1485
-# PROGRAM NAME:         1/ACCS
-# PROGRAM WRITTEN BY:   BOB COVELLI AND MIKE HOUSTON
-# LAST MODIFICATION:    FEB. 14, 1969 BY G. KALAN
+## Page 1475
+# PROGRAM NAME: 1/ACCS
+# PROGRAM WRITTEN BY: BOB COVELLI AND MIKE HOUSTON
+# LAST MODIFICATION: FEB. 14, 1969 BY G. KALAN
 
 # PROGRAM DESCRIPTION:
-#       1/ACCS PROVIDES THE INTERFACE BETWEEN THE GUIDANCE PROGRAMS AND THE DIGITAL AUTOPILOT.  WHENEVER THERE IS A
-#       CHANGE IN THE MASS OF THE VEHICLE, IN THE DEADBAND SELECTED, IN THE VEHICLE CONFIGURATION (ASCENT-DESCENT-
-#       DOCKED), AND DURING A FRESH START OR A RESTART, 1/ACCS IS CALLED TO COMMUNICATE THE DATA CHANGES TO THE DAP.
+#    1/ACCS PROVIDES THE INTERFACE BETWEEN THE GUIDANCE PROGRAMS AND THE DIGITAL AUTOPILOT. WHENEVER THERE IS A
+# CHANGE IN THE MASS OF THE VEHICLE, IN THE DEADBAND SELECTED, IN THE VEHICLE CONFIGURATION (ASCENT-DESCENT-
+# DOCKED), AND DURING A FRESH START OR A RESTART, 1/ACCS IS CALLED TO COMMUNICATE THE DATA CHANGES TO THE DAP.
 
-#       THE INPUTS TO 1/ACCS ARE MASS, ACCELERATION (ABDELV), DEADBAND (DB), OFFSET ACCELERATIONS (AOSQ AND AOSR),
-#       STAGE VERIFY BIT (CHAN30, BIT2), DOCKED BIT (DAPBOOLS, BIT13), DRIFT BIT (DAPBOOLS, BIT8), USEQRJTS (DAPBOOLS,
-#       BIT14), AND SURFACE FLAG (FLAGWRDB, BIT8), AND CH5MASK.
+#    THE INPUTS TO 1/ACCS ARE MASS, ACCELERATION (ABDELV), DEADBAND (DB), OFFSET ACCELERATIONS (AOSQ AND AOSR),
+# STAGE VERIFY BIT (CHAN30, BIT2), DOCKED BIT (DAPBOOLS, BIT13), DRIFT BIT (DAPBOOLS, BIT8), USEQRJTS (DAPBOOLS,
+# BIT14), AND SURFACE FLAG (FLAGWRDB, BIT8), AND CH5MASK.
 
-#       1/ACCS COMPUTES THE JET ACCELERATIONS (1JACC, 1JACCQ, 1JACCR) AS FUNCTIONS OF MASS.  1JACCU AND 1JACCV ARE
-#       FORMED BY RESOLVING 1JACCQ NAD 1JACCR.  IN THE DESCENT CASE, THE DESCENT ENGINE MOMENT ARM (L, PVT-CG) IS ALSO
-#       COMPUTED AS A FUNCTION OF MASS.  THE RATE OF CHANGE OF ACCELERATION DUE TO ROTATION OF THE GIMBAL (ACCDOTQ,
-#       ACCDOTR) IS ALSO COMPUTED IN THE DESCENT CASE.
+#    1/ACCS COMPUTES THE JET ACCELERATIONS (1JACC, 1JACCQ, 1JACCR) AS FUNCTIONS OF MASS. 1JACCU AND 1JACCV ARE
+# FORMED BY RESOLVING 1JACCQ NAD 1JACCR. IN THE DESCENT CASE, THE DESCENT ENGINE MOMENT ARM (L, PVT-CG) IS ALSO
+# COMPUTED AS A FUNCTION OF MASS. THE RATE OF CHANGE OF ACCELERATION DUE TO ROTATION OF THE GIMBAL (ACCDOTQ,
+# ACCDOTR) IS ALSO COMPUTED IN THE DESCENT CASE.
 
-#       AFTER THE ABOVE COMPUTATIONS, THE PROGRAM 1/ACCONT COMPUTES THE RECIPROCAL NET ACCELERATIONS ABOUT THE P, U,
-#       AND V AXES (2 JETS FOR P AXIS, BOTH 1 AND 2 JETS FOR U AND V AXES), AND THE RECIPROCAL COAST ACCELERATIONS ABOUT
-#       THE P, U, AND V AXES.  THE ACCELERATION FUNCTIONS (ACCFCTZ1 AND ACCFCTZ5) ARE ALSO COMPUTED FOR THESE AXES.  THE
-#       FIRE AND COAST DEADBANDS AND AXISDIST ARE COMPUTED FOR EACH AXIS.  FLAT AND ZONE3LIM, THE WIDTH AND HEIGHT OF THE
-#       MINIMUM IMPULSE ZONE, ARE COMPUTED.  1/ACCONT ALSO SETS ACCSWU AND ACCSWV, WHICH INDICATE WHEN 1 JET ACCELERATION
-#       IS NOT SUFFICIENT TO PRODUCE MINIMUM ACCELERATION.  AT THE COMPLETION OF 1/ACCS, THE ACCSOKAY BIT IS SET.
+#    AFTER THE ABOVE COMPUTATIONS, THE PROGRAM 1/ACCONT COMPUTES THE RECIPROCAL NET ACCELERATIONS ABOUT THE P, U,
+# AND V AXES (2 JETS FOR P AXIS, BOTH 1 AND 2 JETS FOR U AND V AXES), AND THE RECIPROCAL COAST ACCELERATIONS ABOUT
+# THE P, U, AND V AXES. THE ACCELERATION FUNCTIONS (ACCFCTZ1 AND ACCFCTZ5) ARE ALSO COMPUTED FOR THESE AXES. THE
+# FIRE AND COAST DEADBANDS AND AXISDIST ARE COMPUTED FOR EACH AXIS.  FLAT AND ZONE3LIM, THE WIDTH AND HEIGHT OF THE
+# MINIMUM IMPULSE ZONE, ARE COMPUTED. 1/ACCONT ALSO SETS ACCSWU AND ACCSWV, WHICH INDICATE WHEN 1 JET ACCELERATION
+# IS NOT SUFFICIENT TO PRODUCE MINIMUM ACCELERATION. AT THE COMPLETION OF 1/ACCS, THE ACCSOKAY BIT IS SET.
 
 # SUBBOUTINES CALLED:
-#       TIMEGMBL
-#       MAKECADR
-#       ROT45DEG
+
+#          TIMEGMBL
+#          MAKECADR
+#          ROT45DEG
 
 # CALLING SEQUENCE:
-#               TC      BANKCALL        (1/ACCS MUST BE CALL BY BANKCALL
-#               CADR    1/ACCS
 
-# NORMAL EXIT:  VIA BANKJUMP            ALARM AND ABORT EXIT MODES:  NONE.
+#                                                  TC    BANKCALL         (1/ACCS MUST BE CALL BY BANKCALL
+#                                                  CADR  1/ACCS
 
-# INPUT/OUTPUT:  SEE PROGRAM DESCRIPTION
+# NORMAL EXIT: VIA BANKJUMP       ALARM AND ABORT EXIT MODES: NONE.
+
+# INPUT/OUTPUT: SEE PROGRAM DESCRIPTION
 
 # DEBRIS:
-#       ALL OF THE EXECUTIVE TEMPORARY REGISTERS, EXCEPT FIXLOC AND OVFIND, AND THE CORE SET AREA FROM MPAC TO BANKSET.
+
+# ALL OF THE EXECUTIVE TEMPORARY REGISTERS, EXCEPT FIXLOC AND OVFIND, AND THE CORE SET AREA FROM MPAC TO BANKSET.
 
 # RESTRICTIONS:
-#       1/ACCS MUST BE CALLED BY BANKCALL
-#       EBANK IS SET TO 6, BUT NOT RESTORED.
-## Page 1486
 
-                BANK            20                              
-                SETLOC          DAPS3                           
+# 1/ACCS MUST BE CALLED BY BANKCALL
+# EBANK IS SET TO 6, BUT NOT RESTORED.
+## Page 1476
+
+                BANK            21                              
+                SETLOC          DAPS4                           
                 BANK                                            
 
                 COUNT*          $$/DAPAO                        
@@ -72,13 +75,14 @@
                 EBANK=          AOSQ                            
 
 # ENTRY IS THROUGH 1/ACCJOB OR 1/ACCSET WHEN 1/ACCS IS TO BE DONE AS A SEPARATE NOVAC JOB.
+
 # IT IS POSSIBLE FOR MORE THAN ONE OF THESE JOBS TO BE SET UP CONCURRENTLY.  HOWEVER, SINCE THERE IS NO CHECK OF
 # NEWJOB, A SECOND MANIFESTATION CANNOT BE STARTED UNTIL THE FIRST IS COMPLETED.
 
 1/ACCSET        CAF             ZERO                            # ENTRY FROM FRESH START/RESTART CODING.
-                TS              AOSQ                            #       NULL THE OFFSET ESTIMATES FOR 1/ACCS.
+                TS              AOSQ                            #   NULL THE OFFSET ESTIMATES FOR 1/ACCS.
                 TS              AOSR                            
-                TS              ALPHAQ                          #       NULL THE OFFSET ESTIMATES FOR DOWNLIST
+                TS              ALPHAQ                          #   NULL THE OFFSET ESTIMATES FOR DOWNLIST
                 TS              ALPHAR                          
 
 1/ACCJOB        TC              BANKCALL                        # 1/ACCS ASSUMES ENTRY VIA BANKCALL.
@@ -93,26 +97,26 @@
                 TS              ACCRETRN                        
 
 # DETERMINE MASS OF THE LEM.
-
                 CA              DAPBOOLS                        # IS CSM DOCKED
                 MASK            CSMDOCKD                        
                 TS              DOCKTEMP                        # STORE RECORD OF STATE IN TEMP (MPAC +3).
                 CCS             A                               
-                CS              CSMMASS                         #       DOCKED:  LEMMASS = MASS - CSMMASS
-                AD              MASS                            #       LEM ALONE:  LEMMASS = MASS
+                CS              CSMMASS                         #   DOCKED:  LEMMASS = MASS - CSMMASS
+                AD              MASS                            #   LEM ALONE:  LEMMASS = MASS
                 TS              LEMMASS                         
 
 # ON THE BASIS OF APSFLAG:
-#       SET THE P-AXIS RATE COMMAND LIMIT FOR 2-JET/4-JET CONTROL
-#       SET MPAC, WHICH INDICATES THE PROPER SET OF COEFFICIENTS FOR THE LEM-ALONE F(MASS) CALCULATIONS
-#       ENSURE THAT THE LEM MASS VALUE IS WITHIN THE ACCEPTABLE RANGE
+#      SET THE P-AXIS RATE COMMAND LIMIT FOR 2-JET/4-JET CONTROL
+#      SET MPAC, WHICH INDICATES THE PROPER SET OF COEFFICIENTS FOR THE LEM-ALONE F(MASS) CALCULATIONS
+#      ENSURE THAT THE LEM MASS VALUE IS WITHIN THE ACCEPTABLE RANGE
 
-                INHINT                                          
+                INHINT
+## Page 1477                                          
                 CAE             FLGWRD10                        # DETERMINE WHETHER STAGED.
                 MASK            APSFLBIT                        
                 EXTEND                                          
                 BZF             DPSFLITE                        
-## Page 1487
+
                 CS              POSMAX                          # ASCENT (OR ON LUNAR SURFACE)
                 TS              -2JETLIM                        # ALWAYS 2 JETS FOR P-AXIS RATE COMMAND
                 CAF             OCT14                           # INITIALIZE INDEX AT 12.
@@ -122,28 +126,28 @@
                 EXTEND                                          
                 BZMF            MASSFIX                         
                 CS              LEMMASS                         # CHECK IF MASS TOO LOW.  THIS LIMITS THE
-                AD              LOASCENT                        #       DECREMENTING BY MASSMON.
+                AD              LOASCENT                        #   DECREMENTING BY MASSMON.
                 EXTEND                                          
                 BZMF            F(MASS)                         
 
 MASSFIX         ADS             LEMMASS                         # STORE THE VIOLATED LIMIT AS LEMMASS.
-                ZL                                              #       ALSO CORRECT TOTAL MASS, ZEROING THE
-                CCS             DOCKTEMP                        #       LOW-ORDER WORD.
-                CAE             CSMMASS                         #               DOCKED:  MASS = LEMMASS + CSMMASS
-                AD              LEMMASS                         #               LEM ALONE:  MASS = LEMMASS
+                ZL                                              #   ALSO CORRECT TOTAL MASS, ZEROING THE
+                CCS             DOCKTEMP                        #   LOW-ORDER WORD.
+                CAE             CSMMASS                         #     DOCKED:  MASS = LEMMASS + CSMMASS
+                AD              LEMMASS                         #     LEM ALONE:  MASS = LEMMASS
                 DXCH            MASS                            
                 TCF             F(MASS)                         
 
 DPSFLITE        CS              BIT10                           # FOUR JETS FOR P-AXIS RATE COMMAND ERRORS
-                TS              -2JETLIM                        #       EXCEEDING 1.4 DEG/SEC (SCALED AT 45)
+                TS              -2JETLIM                        #   EXCEEDING 1.4 DEG/SEC (SCALED AT 45)
                 CAF             SIX                             # INITIALIZE INDEX AT 6.
                 TS              MPAC                            
                 CS              LEMMASS                         # CHECK IF MASS TOO HIGH.  SHOULD NEVER
-                AD              HIDESCNT                        #       OCCUR EXCEPT PERHAPS BEFORE THE PAD
-                EXTEND                                          #       LOAD IS DONE.
+                AD              HIDESCNT                        #   OCCUR EXCEPT PERHAPS BEFORE THE PAD
+                EXTEND                                          #   LOAD IS DONE.
                 BZMF            MASSFIX                         
                 CS              LEMMASS                         # CHECK IF MASS TOO LOW.  THIS LIMITS THE
-                AD              LODESCNT                        #       DECREMENTING BY MASSMON.
+                AD              LODESCNT                        #   DECREMENTING BY MASSMON.
                 AD              HIASCENT                        
                 EXTEND                                          
                 BZMF            F(MASS)                         
@@ -159,12 +163,11 @@ STCTR           TS              MPAC            +1              # J=2,1,0 FOR 1J
 
                 CS              TWO                             
                 ADS             MPAC                            # JX=10,8,6 OR 4,2,0 TO INDEX COEFS.
-
+## Page 1478
 STCTR1          CAE             LEMMASS                         
                 INDEX           MPAC                            
                 AD              INERCONC                        
                 TS              MPAC            +2              # MASS + C
-## Page 1488
                 EXTEND                                          
                 INDEX           MPAC                            
                 DCA             INERCONA                        
@@ -180,7 +183,7 @@ STCTR1          CAE             LEMMASS
                 TCF             COMMEQS                         
                 TCF             LRESC                           
 
-# COEFFQ AND COEFFR ARE COMPUTED IN THIS SECTION.  THEY ARE USED TO RESOLVE Q-R COMPONENTS INTO NON-ORTHOGONAL
+#   COEFFQ AND COEFFR ARE COMPUTED IN THIS SECTION. THEY ARE USED TO RESOLVE Q-R COMPONENTS INTO NON-ORTHOGONAL
 # U AND V COMPONENTS (SEE ROT-TOUV SECTION).
 
 COMMEQS         CS              1JACCR                          
@@ -210,12 +213,12 @@ BIGIQ           EXTEND                                          # EPSILON IS DEF
                 DV              1JACCR                          # GREATER THAN IR.  -EPSILON IS COMPUTED
                 TS              -EPSILON                        # RATHER THAN EPSILON FOR CONVENIENCE
                 CS              -EPSILON                        
-                AD              -EPSMAX                         
+                AD              -EPSMAX
+## Page 1479                         
                 EXTEND                                          
                 BZMF            GOODEPS2                        
                 CA              -EPSMAX                         
                 TS              -EPSILON                        # EPSILON IS LIMITED TO A MAX. OF .42265
-## Page 1489
 GOODEPS2        CA              -EPSILON                        
                 EXTEND                                          
                 MP              0.35356                         
@@ -240,7 +243,7 @@ JACCUV          CS              COEFFQ
                 TS              1JACCV                          # SCALED AT PI/2 RADIANS/SEC(2)
                 CCS             MPAC                            # COMPUTE L,PVT-CG IF IN DESCENT
                 CAF             ZERO                            # ZERO SWITCHES AND GO TO 1/ACCONT IN
-                TS              ALLOWGTS                        #       ASCENT
+                TS              ALLOWGTS                        #   ASCENT
                 TCF             1/ACCONT        -1              
 
                 CS              TWO                             
@@ -251,9 +254,9 @@ JACCUV          CS              COEFFQ
 
 # THIS SECTION COMPUTES THE RATE OF CHANGE OF ACCELERATION DUE TO THE ROTATION OF THE GIMBALS.  THE EQUATION IMPLE
 # MENTED IN BOTH THE Y-X PLANE AND THE Z-X PLANE IS -- D(ALPHA)/DT = TL/I*D(DELTA)/DT, WHERE
-#       T = ENGINE THRUST FORCE
-#       L = PIVOT TO CG DISTANCE OF ENGINE
-#       I = MOMENT OF INERTIA
+#      T = ENGINE THRUST FORCE
+#      L = PIVOT TO CG DISTANCE OF ENGINE
+#      I = MOMENT OF INERTIA
 
 LRESC           CAE             ABDELV                          # SCALED AT 2(13) CM/SEC(2)
                 EXTEND                                          
@@ -263,11 +266,12 @@ LRESC           CAE             ABDELV                          # SCALED AT 2(13
 
 # MASS IS DIVIDED BY ACCELERATION OF GRAVITY IN ORDER TO MATCH THE UNITS OF IXX,IYY,IZZ, WHICH ARE SLUG-FT(2).
 # THE RATIO OF ACCELERATION FROM PIPAS TO ACCELERATION OF GRAVITY IS THE SAME IN METRIC OR ENGINEERING UNITS, SO
+## Page 1480
 # THAT IS UNCONVERTED.  2.20462 CONVERTS KG. TO LB.  NOW T IS IN A SCALED AT 2(14).
 
                 EXTEND                                          
                 MP              L,PVT-CG                        # SCALED AT 8 FEET.
-## Page 1490		
+		
                 INHINT                                          
                 TS              MPAC                            
                 EXTEND                                          
@@ -292,7 +296,7 @@ SPSCONT         TS              ACCDOTQ                         # SCALED AT PI/2
                 TS              KRDAP                           
                 EXTEND                                          # NOW COMPUTE QACCDOT, RACCDOT, THE SIGNED
                 READ            CHAN12                          # JERK TERMS.  STORE CHANNEL 12. WITH GIM
-                TS              MPAC            +1              # BAL DRIVE BITS 9 THROUGH 12. SET LOOP
+                TS              MPAC            +1              # BAL DRIVE BITS 9 THROUGH 12.  SET LOOP
                 CAF             BIT2                            # INDEX TO COMPUTE RACCDOT, THEN QACCDOT.
                 TCF             LOOP3                           
                 CAF             ZERO                            # ACCDOTQ AND ACCDOTR ARE NOT NEGATIVE,
@@ -313,12 +317,12 @@ LOOP3           TS              MPAC                            # BECAUSE THEY A
 FRSTZERO        INDEX           MPAC                            # NEGATIVE ROTATION, POSITIVE Q(R)ACCDOT.
                 CA              ACCDOTQ                         
                 TCF             STACCDOT                        
-ZACCDOT         CAF             ZERO                            
+ZACCDOT         CAF             ZERO
+## Page 1481                            
 STACCDOT        INDEX           MPAC                            
                 TS              QACCDOT                         # STORE Q(R)ACCDOT.
                 CCS             MPAC                            
                 TCF             LOOP3           -1              # NOW DO QACCDOT.
-## Page 1491
                 CS              DAPBOOLS                        # IS GIMBAL USABLE?
                 MASK            USEQRJTS                        
                 EXTEND                                          
@@ -337,27 +341,35 @@ DOCKTEST        CCS             DOCKTEMP                        # BYPASS 1/ACCON
                 TCF             1/ACCRET                        
                 TCF             1/ACCONT                        
 
-## Page 1492
-# SUBROUTINE:   DVOVSUB
-# AUTHOR:       C. WORK, MOD 0 12 JUNE 68
-# PURPOSE:      THIS SUBROUTINE PROVIDES A SINGLE-PRECISION MACHINE LANGUAGE DIVISION OPERATION WHICH RETURNS
-#               (1) THE QUOTIENT, IF THE DIVISION WAS NORMAL.
-#               (2) NEGMAX, IF THE QUOTIENT WAS IMPROPER AND NEGATIVE.
-#               (3) POSMAX, IF THE QUOTIENT WAS IMPROPER AND POSITIVE OR IF THERE WAS A ZERO DIVISOR.
-#               THE CALLING PROGRAM IS PRESUMED TO BE A JOB IN THE F BANK WHICH CONTAINS DVOVSUB.  E BANK MUST BE 6.
-#               THE DIVISOR FOR THIS ROUTINE MAY BE IN EITHER FIXED OR ERASABLE STORAGE.  SIGN AGREEMENT IS
-#               ASSUMED BETWEEN THE TWO HALVES OF THE DIVIDEND.  (THIS IS CERTAIN IF THE A AND L REGISTERS ARE THE RE-
-#               SULT OF A MULTIPLICATION OPERATION.)
+## Page 1482
+# SUBROUTINE:  DVOVSUB
+
+# AUTHOR:  C. WORK, MOD 0 12 JUNE 68
+
+# PURPOSE:  THIS SUBROUTINE PROVIDES A SINGLE-PRECISION MACHINE LANGUAGE DIVISION OPERATION WHICH RETURNS
+#           (1) THE QUOTIENT, IF THE DIVISION WAS NORMAL.
+#           (2) NEGMAX, IF THE QUOTIENT WAS IMPROPER AND NEGATIVE.
+#           (3) POSMAX, IF THE QUOTIENT WAS IMPROPER AND POSITIVE OR IF THERE WAS A ZERO DIVISOR.
+#           THE CALLING PROGRAM IS PRESUMED TO BE A JOB IN THE F BANK WHICH CONTAINS DVOVSUB. E BANK MUST BE 6.
+#           THE DIVISOR FOR THIS ROUTINE MAY BE IN EITHER FIXED OR ERASABLE STORAGE.  SIGN AGREEMENT IS
+#           ASSUMED BETWEEN THE TWO HALVES OF THE DIVIDEND.  (THIS IS CERTAIN IF THE A AND L REGISTERS ARE THE RE-
+#           SULT OF A MULTIPLICATION OPERATION.)
 # CALL SEQUENCE:
-#                       L       TC      DVOVSUB
-#                       L +1    ADRES   (DIVISOR)
-#                       L +2    RETURN HERE, WITH RESULT IN A,L
-# INPUT:        DIVIDEND IN A,L (SIGN AGREEMENT ASSUMED), DIVISOR IN LOCATION DESIGNATED BY "ADRES".
-#               DIVISOR MAY BE IN THE DVOVSUB FBANK,FIXED-FIXED FBANK,EBANK 6, OR UNSWITCHED ERASABLE.
-# OUTPUT:       QUOTIENT AND REMAINDER, OR POSMAX (NEGMAX), WHICHEVER IS APPROPRIATE.
-# DEBRIS:       SCRATCHX,SCRATCHY,SCRATCHZ,A,L  (NOTE: SCRATCHX,Y,Z ARE EQUATED TO MPAC +4,+5, AND +6.)
+#                                         L        TC     DVOVSUB
+#                                         L +1     ADRES  (DIVISOR)
+#                                         L +2     RETURN HERE, WITH RESULT IN A,L
+
+# INPUT: DIVIDEND IN A,L (SIGN AGREEMENT ASSUMED), DIVISOR IN LOCATION DESIGNATED BY "ADRES".
+#        DIVISOR MAY BE IN THE DVOVSUB FBANK,FIXED-FIXED FBANK,EBANK 6, OR UNSWITCHED ERASABLE.
+
+# OUTPUT: QUOTIENT AND REMAINDER, OR POSMAX (NEGMAX), WHICHEVER IS APPROPRIATE.
+
+# DEBRIS: SCRATCHX,SCRATCHY,SCRATCHZ,A,L  (NOTE: SCRATCHX,Y,Z ARE EQUATED TO MPAC +4,+5, AND +6.)
+
 # ABORTS OR ALARMS:  NONE
-# EXITS:        TO THE CALL POINT +2.
+
+# EXITS:  TO THE CALL POINT +2.
+
 # SUBROUTINES CALLED:  NONE.
 
 DVOVSUB         TS              SCRATCHY                        # SAVE UPPER HALF OF DIVIDEND
@@ -380,7 +392,7 @@ DVOVSUB         TS              SCRATCHY                        # SAVE UPPER HAL
 ZEROPLUS        XCH             SCRATCHY                        # STORE ABS(DIVISOR).  PICK UP TOP HALF OF
                 EXTEND                                          # DIVIDEND.
                 BZMF            GOODNEG                         # GET -ABS(DIVIDEND)
-## Page 1493
+## Page 1483
                 CS              A                               
 
 GOODNEG         AD              SCRATCHY                        # ABS(DIVISOR) - ABS(DIVIDEND)
@@ -404,7 +416,7 @@ MAXPLUS         CAF             POSMAX                          # -,- OR +,+
 # COEFFICIENTS FOR THE JET ACCELERATION CURVE FITS
 # THE CURVE FITS ARE OF THE FORM -
 
-#       1JACC = A/(MASS + C) + B
+#          1JACC = A/(MASS + C) + B
 
 # A IS SCALED AT PI/4 RAD/SEC**2 B+16KG, B IS SCALED AT PI/4 RAD/SEC**2, AND C IS SCALED AT B +16 KG.
 
@@ -427,7 +439,7 @@ INERCONA        2DEC            +.0059347674                    # 1JACCP        
 
                 DEC             +.155044                        # L             B               DESCENT
                 DEC             -.025233                        # L             C               DESCENT
-## Page 1494
+## Page 1484
 INERCONB        DEC             +.002989                        # 1JACCP        B               DESCENT
 INERCONC        DEC             +.008721                        # 1JACCP        C               DESCENT
                 DEC             +.018791                        # 1JACCQ        B               DESCENT
@@ -446,7 +458,7 @@ GIMBLBTS        OCTAL           01400
                 OCTAL           01000                           
                 OCTAL           06000                           
                 OCTAL           04000                           
-DGBF            DEC             0.6                             # .3 SCALED AT 1/2
+DGBF            DEC             0.6                             #  .3 SCALED AT 1/2
 0.35356         DEC             0.35356                         # .70711 SCALED AT 2
 GFACTM          OCT             337                             # 979.24/2.20462 AT B+15
 .7071           DEC             .70711                          
@@ -455,7 +467,7 @@ GFACTM          OCT             337                             # 979.24/2.20462
 
 # CSM-DOCKED INERTIA COMPUTATIONS
 
-DOCKED          CA              ONE                             # COEFTR  = 1 FOR INERTIA COEFFICIENTS
+DOCKED          CA              ONE                             # COEFTR = 1 FOR INERTIA COEFFICIENTS
 SPSLOOP1        TS              COEFCTR                         #         = 7 FOR CG COEFFICIENTS
                 CA              ONE                             # MASSCTR = 1 FOR CSM
                 TS              MASSCTR                         #         = 0 FOR LEM
@@ -478,7 +490,7 @@ SPSLOOP2        TS              MASSCTR                         # LOOP TWICE THR
                 INDEX           COEFCTR                         
                 CA              COEFF           +2              # COEFF +2 = A OR B
                 EXTEND                                          
-## Page 1495
+## Page 1485
                 INDEX           MASSCTR                         
                 MP              LEMMASS                         
                 INDEX           COEFCTR                         
@@ -529,7 +541,7 @@ TORQCONS        2DEC            0.51443         B-14            # CORRESPONDS TO
                 EXTEND                                          
                 MP              ABDELV                          # SCALED AT 2(13) CM/SEC(2)
                 TC              DVOVSUB                         # GET QUOTIENT WITH OVERFLOW PROTECTION
-## Page 1496
+## Page 1486
                 ADRES           MPAC            +1              
 
                 TS              ACCDOTR                         
@@ -567,7 +579,7 @@ EPSILON         EQUALS          MPAC            +1
 -EPSILON        EQUALS          EPSILON                         
 -.1875          DEC             -.18750                         
 
-## Page 1497
+## Page 1487
                 BANK            20                              
                 SETLOC          DAPS3                           
                 BANK                                            
@@ -589,7 +601,7 @@ EPSILON         EQUALS          MPAC            +1
 
 GETAOSUV        INHINT                                          
                 CAE             AOSR                            # COMPUTE AOSU AND AOSV BY ROTATING
-                TS              L                               #       AOSQ AND AOSR.
+                TS              L                               #      AOSQ AND AOSR.
                 CAE             AOSQ                            
                 TC              IBNKCALL                        
                 CADR            ROT-TOUV                        
@@ -599,7 +611,7 @@ GETAOSUV        INHINT
                 CA              DAPBOOLS                        
                 MASK            DRIFTBIT                        # ZERO DURING ULLAGE AND POWERED FLIGHT.
                 CCS             A                               # IF DRIFTING FLIGHT,
-                CA              ONE                             #       SET DRIFTER TO 1
+                CA              ONE                             #      SET DRIFTER TO 1
                 TS              DRIFTER                         # SAVE TO TEST FOR DRIFTING FLIGHT LATER
                 AD              ALLOWGTS                        # NON-ZERO IF DRIFT OR GTS NEAR
                 CCS             A                               
@@ -617,7 +629,7 @@ DOPAXIS         CA              1JACC                           # 1JACC AT PI/4 
                 TS              FUNTEM                          
 
                 CA              1JACC                           
-## Page 1498
+## Page 1488
                 TC              INVERT                          
                 INHINT                                          # P AXIS DATA MUST BE CONSISTENT
                 TS              1/ANETP                         # SCALED AT 2(7)/PI.
@@ -667,7 +679,7 @@ BIGAOS          CCS             FLATEMP                         # AGS(AOS) GREAT
 
                 CA              DBVAL1                          
                 INDEX           -SIGNAOS                        
-## Page 1499
+## Page 1489
                 ADS             DBB2                            # DB2(1) = 2 DB
                 INDEX           SIGNAOS                         
                 TS              DBB4                            # DB4(3) = 1 DB
@@ -718,7 +730,7 @@ SKIPDB1         CA              ABSAOS                          # ABS(AOS) GREAT
                 XCH             ANET                            # SAVE IN ANET, WHILE PICKING UP ANET
                 TC              INVERT                          
                 EXTEND                                          
-## Page 1500
+## Page 1490
                 MP              BIT14                           # SCALE 1/ANET AT 2(7)/PI
                 TS              1/ANET                          
 
@@ -741,7 +753,6 @@ NOTMUCH         TS              L                               # ABS(AOS) LESS 
                 AD              L                               # L HAS ABS(AOS) - AMIN
                 EXTEND                                          # RESULT IS ABS(AOS)- AMIN/2
                 BZMF            NOAOS                           # ABS(AOS) LESS THAN AMIN/2
-
 SOMEAOS         CA              DBVAL3                          # AMIN/2 LT ABS(AOS) LT AMIN
                 INDEX           -SIGNAOS                        
                 TS              DBB3                            # DB3(4) = DB/2
@@ -767,9 +778,9 @@ ACCTHERE        INDEX           -SIGNAOS
                 TS              1/ATEM2         +2              # STORE 1/ANET IN TEMPORARY BUFFER
 
                 CA              ABSAOS                          # SEE IF OVERFLOW IN MIN CASE
-                AD              1JACCU                          
-## Page 1501		
+                AD              1JACCU                          		
                 AD              BIT9                            # MAXIMUM POSSIBLE VALUE
+## Page 1491
                 TS              A                               # OVERFLOW POSSIBLE BUT REMOTE
                 TCF             +2                              
                 CA              POSMAX                          # IF OVERFLOW, TRUNCATE TO PI/2
@@ -817,8 +828,8 @@ STMIN-          INDEX           SIGNAOS                         # STORE VALUES
                 CA              Z5TEM                           # JET (OR AMIN) FUNCTION VALUES
                 TS              Z5TEM           +2              
 FAIL-           INDEX           UV                              
-## Page 1502
-                CA              -UMASK                          
+                CA              -UMASK
+## Page 1492                          
                 MASK            CH5MASK                         # TEST FOR -U (-V) JET FAILURES
                 EXTEND                                          
                 BZF             DBFUN                           
@@ -838,9 +849,9 @@ DBFUN           CS              DBB3                            # COMPUTE AXISDI
 
                 INHINT                                          
                 CCS             UV                              # TEST FOR U OR V AXIS
-                TCF             STORV                           # V AXIS        STORE V VALUES
+                TCF             STORV                           # V AXIS   STORE V VALUES
 
-                CA              ACCSW                           # U AXIS        STORE U VALUES
+                CA              ACCSW                           # U AXIS   STORE U VALUES
                 TS              ACCSWU                          
 
                 CA              NINE                            # TRANSFER 10 WORDS VIA GENTRAN
@@ -865,9 +876,9 @@ DBFUN           CS              DBB3                            # COMPUTE AXISDI
 STORV           CA              ACCSW                           # STORE V AXIS VALUES
                 TS              ACCSWV                          
                 CA              NINE                            
-                TC              GENTRAN         +1              
-## Page 1503		
+                TC              GENTRAN         +1              		
                 ADRES           1/ATEM1                         # TEMPORARY BUFFER
+## Page 1493
                 ADRES           1/ANET1         +16D            # THE REAL PLACE
 
                                                                 # NOW STORE DEADBANDS FOR ALL AXES
@@ -917,8 +928,8 @@ DRFDB           CA              DBVAL1                          # DRIFT DEADBAND
                 TS              AXISDIST        +16D            
                 TS              AXISDIST        +17D            
 
-## Page 1504
-1/ACCRET        INHINT                                          
+1/ACCRET        INHINT
+## Page 1494                                          
                 CS              DAPBOOLS                        # SET BIT TO INDICATE DATA GOOD.
                 MASK            ACCSOKAY                        
                 ADS             DAPBOOLS                        
@@ -934,7 +945,7 @@ INVERT          TS              HOLD                            # ROUTINE TO INV
                 TC              Q                               # RESULT AT 2(7)/PI
 
 DOWNGTS         CAF             ZERO                            # ZERO SWITCHES WHEN USEQRJTS BIT IS UP
-                TS              ALLOWGTS                        #       OR DAP IS OFF.
+                TS              ALLOWGTS                        #   OR DAP IS OFF.
                 TS              INGTS                           
                 TCF             DOCKTEST                        
 
@@ -950,7 +961,7 @@ DOWNGTS         CAF             ZERO                            # ZERO SWITCHES 
                 MP              1/ACOSTT        +1              # ANETNEG(POS)/ACOASTPOS(NEG) AT 2(6)
 
 # THE FOLLOWING CODING IS VALID FOR BOTH POS OR NEG
-#       VALUES OF AOS
+#         VALUES OF AOS
 
 DO1/NET+        AD              BIT9                            # 1 + ANET/ACOAST AT 2(6)
                 XCH             ANET                            # SAVE AND PICK UP ANET
@@ -966,10 +977,9 @@ DOACCFUN        EXTEND
                 TC              ARET                            # RETURN
 
 NETNEG          CS              -.03R/S2                        # ANET LESS THAN AMIN - SET EQUAL TO AMIN
-                TS              ANET                            
-## Page 1505		
+                TS              ANET                            		
                 TCF             1/NETMIN        +1              # CONTINUE AS IF NOTHING HAPPENED
-
+## Page 1495
 FIXMIN          CCS             SIGNAOS                         
                 CA              TWO                             # IF AOS NEG, ACCSW = +1
                 AD              NEGONE                          # IF AOS POS, ACCSW = -1
@@ -998,7 +1008,7 @@ PDB3            EQUALS          BLOCKTOP        +13D
 PAXDIST         EQUALS          BLOCKTOP        +14D            
 
 ACCSW           EQUALS          VBUF                            # EXECUTIVE TEMPORARIES
-                                                                # CANNOT DO CCS NEWJOB DURING 1/ACCS
+                                                                # CANNOT DO CCS     NEWJOB DURING 1/ACCS
 1/ATEM1         EQUALS          ACCSW           +1              # TEMP BUFFER FOR U AND V AXES
 1/ATEM2         EQUALS          1/ATEM1         +1              
 1/ACOSTT        EQUALS          1/ATEM1         +4              
@@ -1017,10 +1027,9 @@ DBB4            EQUALS          1/ATEM1         +18D
 DBB3            EQUALS          1/ATEM1         +19D            
 AXDSTEM         EQUALS          1/ATEM1         +20D            
 
-## Page 1506
 FLATEMP         EQUALS          1/ATEM1         +22D            
 Z3TEM           EQUALS          1/ATEM1         +23D            # MUST FOLLOW FLATEMP
-
+## Page 1496
 DBVAL1          EQUALS          DB                              
 DBVAL2          EQUALS          INTB15+                         
 DBVAL3          EQUALS          INTB15+         +1              
