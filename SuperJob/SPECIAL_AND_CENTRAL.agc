@@ -5,7 +5,7 @@
 ##              at Raytheon to exercise the Auxiliary Memory for the AGC.
 ##              It appears to have been developed from scratch, and shares
 ##              no heritage with any programs from MIT. It was also built
-##              with an Raytheon assembler other than YUL or GAP.
+##              with a Raytheon assembler rather than YUL or GAP.
 ## Reference:   pp. D-2 - D-4
 ## Assembler:   yaYUL
 ## Contact:     Ron Burkey <info@sandroid.org>.
