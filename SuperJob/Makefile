@@ -6,7 +6,7 @@
 # Mod history:	2016-12-13 MAS  Created from Aurora 12 Makefile.
 
 BASENAME=SuperJob
-EXTRA_YAYUL_ARGS=
+EXTRA_YAYUL_ARGS=--no-checksums
 
 NO_BINSOURCE=YES
 include ../Makefile.inc
