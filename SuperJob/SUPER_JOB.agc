@@ -11,18 +11,21 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     https://www.ibiblio.org/apollo/index.html
 ## Page Scans:  TBD
-## Mod history: 2017-01-27 MAS  Created and transcribed.
+## Mod history: 2017-01-27 MAS  Created and transcribed, then corrected
+##                              errors until assembly succeeded. Octals
+##                              have not yet been extracted, so errors
+##                              almost certainly remain.
 
 ## Page D-4 (continued)
                 SETLOC  FF024000
 GOJAM           INHINT                  # 4000
                 TC      GOJAMPR         # 4001
-VHCDEL          OCT     00021           # VERB CODE
+VBCDEL          OCT     00021           # VERB CODE
 ONE             OCT     00001
 T6RUPT          RESUME                  # 4004
 ZERO            OCT     00000
 D520            OCT     01010
-VB8             OCT     50000           # CODE TO BLANK DSKY VERB
+VBB             OCT     50000           # CODE TO BLANK DSKY VERB
 T5RUPT          RESUME                  # 4010
 THIRTY          OCT     00030
 FIRST5          OCT     00037
@@ -102,7 +105,7 @@ KYPROC2L        DXCH    ARUPT           # START PROCESSING NAV DSKY
 PROCL           MSK     FIRST5
                 TS      TEMP1L          # STORE DSKY OUTPUT CODE
                 CS      TEMP1L
-                AD      ERMSTL          # ERROR RESET CODE
+                AD      ERRSTL          # ERROR RESET CODE
                 CCS     A               # WAS ERROR RESET HIT+
                 TC      +6              # NO
                 TC      MERR
@@ -165,7 +168,7 @@ NONVERBL        CS      ONE
                 CS      TEMP1L
                 MSK     THIRTY
                 CCS     A               # WAS A DIGIT HIT+
-                TC      PROCDICT        # YES
+                TC      PROCDIGT        # YES
                 CS      TEMP1L          # NO
                 AD      ENTRCDEL
                 CCS     A               # WAS ENTER HIT+
@@ -274,7 +277,7 @@ PROCDIGT        CS      ONE
                 TC      FRSTDIG         # 1
                 INCR    DCNTL           # 2
                 CA      TEMP1L
-                MSK     OCT17
+                MSK     OC17
                 TS      VERBREGL        # STORE 2ND DIGIT
                 NDX     A
                 CA      VB0F
@@ -312,7 +315,7 @@ OPERROR         CA      COMOUT
                 EXTEND
                 WRITE   CH11
                 TC      RETURNL
-T3RUPTPR        DXCH    ARUPT
+T3RPTPR         DXCH    ARUPT
                 EXTEND
                 QXCH    QRUPT
                 CA      4TOGO
@@ -419,7 +422,7 @@ BLANKNA         CA      Q
                 CA      ZEROS
                 AD      ADDRESSA
                 TC      WRITEBA
-                TC      RESUEMA
+                TC      RESUMEA
 BLANKR1A        CA      Q
                 TS      RESUMEA
                 CA      ZEROS
@@ -513,7 +516,7 @@ UPDATENA        CA      Q
                 TC      ROUTINA
                 TC      RESUMEA
 UPDATE1A        CA      Q
-                TS      RESUEMA
+                TS      RESUMEA
                 CA      R1
                 TS      ITA
                 CA      ADDRESSA +3
@@ -604,7 +607,7 @@ UPDATE3A        CA      Q
                 MASK    MASKAA
                 TS      TEMPA
                 CA      STATUS
-                MASK    MASK42CA        # IS R2 BLANK+
+                MASK    MASKR2CA        # IS R2 BLANK+
                 CCS     A
                 TC      PARTCONA
                 CA      R2
@@ -736,17 +739,17 @@ SUCCESBA        CA      OUTCONBA
                 READ    CONOUT          # CH25
                 MASK    BOTEOT6A        # ELIMINATE BITS 5 AND 6
                 TS      TEMPA
-                CS      OUTCONA
+                CS      OUTCONCA
                 AD      TEMPA
                 CCS     A
                 TC      CONT3A
                 TC      CONT3A
                 TC      CONT3A
-                TC      SUCCESSCA
+                TC      SUCCESCA
 CONT3A          CA      C3A             # ERROR N3 N0 74000
                 TS      NOUN
                 TC      TERR
-SUCCESSA        TC      AMSTAT
+SUCCESCA        TC      AMSTAT
                 TC      SUCCESS
 V02             TC      DISPLAY         # TURN ON ACM
                 CA      COMOUT
@@ -769,7 +772,7 @@ V02             TC      DISPLAY         # TURN ON ACM
                 TC      CONT1A
                 TC      CONT1A
                 TC      SUCCESDA
-SUCCESSDA       CA      OC10
+SUCCESDA        CA      OC10
                 TS      ACMSTAT
                 EXTEND
                 READ    CH27            # CLEAR VFAIL
@@ -777,7 +780,7 @@ SUCCESSDA       CA      OC10
                 READ    CH26
                 CCS     A
                 TC      CONT2A
-                TC      SUCCESSCA
+                TC      SUCCESCA
                 TC      CONT2A
                 TC      CONT2A          # ERROR N2 N0 0000
 V03             TC      DISPLAY         # TURN OFF ACM AND ATM
@@ -803,7 +806,7 @@ V03             TC      DISPLAY         # TURN OFF ACM AND ATM
                 TC      TERR
 DDA             CA      ZEROS
                 TS      ACMSTAT
-                TC      SUCCESSA
+                TC      SUCCESCA
 V04             TC      DISPLAY         # TURN OFF ATM
                 CA      OUTCONDA
                 EXTEND
@@ -823,7 +826,7 @@ V04             TC      DISPLAY         # TURN OFF ATM
                 TC      TERR
                 TC      TERR
                 TC      TERR
-                TC      SUCCESSCA
+                TC      SUCCESCA
 V05             TC      DISPLAY         # TURN ATM TO STANBY
                 CA      OUTCONFA
                 EXTEND
@@ -950,7 +953,7 @@ SUCCESS         CA      OC17            # LOAD NOUN R1 R2 R3 WITH ALL 7S
                 TS      NOUN
                 TS      DISPLAY
                 TC      IDLE
-FXDPB           CA      BANKNO
+FXDPR           CA      BANKNO
                 TS      CYR
                 CA      CYR
                 CA      CYR
@@ -968,7 +971,7 @@ SHIFT3L         TS      1STBNKNO
                 CA      CYL
 ## Page D-21
                 CA      CYL
-                TS      HOLDBKOG
+                TS      HOLDBKDG
                 TC      RETURNL
 BIT4            OCT     00010
 BIT13           OCT     10000
@@ -985,7 +988,7 @@ LOW5            OCT     00037
 HIGH10          OCT     77740
 LOW11           OCT     03777
 WAIT2L          OCT     00124
-PBS             OCT     37777
+PFS             OCT     37777
 BIT8            OCT     00200
 ABORTL          OCT     07700
 WAIT1L          OCT     31145
@@ -1043,7 +1046,7 @@ BBKIA           OCT     64030           # FEXT 6 F BANK 32 EBANK 30
 BBKJA           OCT     66034           # FEXT 6 F BANK 33 EBANK 34
 OCT51010        OCT     51010
 MINUS20         OCT     77757
-MINSU6          OCT     77771
+MINUS6          OCT     77771
 NOUN66          OCT     00066
                 SETLOC  FF036000
 MERR            CA      OC17            # LOAD NOUN R1 R2 WITH ALL 6S
@@ -1128,7 +1131,7 @@ FPARPRO         CA      FOUR2S
                 AD      R1ADD
                 TS      R1
                 TC      OUTCMSET
-ECHKPRO         CA      FOUR3S
+ECHCKPRO        CA      FOUR3S
                 AD      R1ADD
                 TS      R1
                 TC      OUTCMSET
@@ -1272,7 +1275,7 @@ FNDTRNSP        EXTEND                  # LOOK FOR TRNSIP
                 MSK     ABORTL
                 CCS     A               # HAS AN ABORT BIT APPEARED
                 TC      ABORTER1        # YES
-                TC      LOOGAGAN        # NO
+                TC      LOOKAGAN        # NO
 DATATRAN        CA      ONE             # AM DATA TRANSFER IS IN PROGRESS
                 TS      CNTDWN2L
 STARTCNT        CA      WAIT1L
@@ -1562,7 +1565,7 @@ SOMEA           CA      CH25LOAD
                 MSK     LASTBNK
                 TS      HOLD1STB
                 CA      IDSTOPL
-                MSK     LASTBKN
+                MSK     LASTBNK
                 CS      A
                 AD      HOLD1STB
                 CCS     A
@@ -1573,7 +1576,7 @@ SOMEA           CA      CH25LOAD
                 CA      FB
                 TC      STARTSUM
 GETSUM          TS      CNTDWN1L
-                TS      L               # ADDRESS 200G IN L
+                TS      L               # ADDRESS 2000 IN L
                 NDX     A
                 CA      2000
                 AD      SUML
@@ -1621,7 +1624,7 @@ CONTTRNS        NDX     FBCOUNT
                 NDX     EBCOUNT
                 TS      1400
                 INCR    FBCOUNT
-                INCR    ECOUNT
+                INCR    EBCOUNT
                 CA      FBCOUNT
                 TS      L               # ADDRESS 1400 IN L
                 CS      EBFULL
@@ -1645,7 +1648,7 @@ CLRACM          CA      BBK             # CLEAR ACM
                 TS      EBCOUNT
                 CA      Q
                 TS      QSTORE
-CONTCLP         CA      FBCOUNT
+CONTCLR         CA      FBCOUNT
                 TS      TEMPA
                 CA      ZEROS
                 NDX     EBCOUNT
@@ -1753,7 +1756,7 @@ ZEROA           CA      ZERO
 INCREBA         INCR    BB
                 CA      ZERO
                 TS      EBCOUNT
-                TC      COUNTCLR
+                TC      CONTCLR
 CLRERROR        CA      FBFULL          # LOAD NOUN WITH 57
                 AD      FBCOUNT         # INDICATES ACM DID NOT CLEAR AFTER
                 TS      R1              # DATA WAS SENT TO ATM
@@ -1773,11 +1776,11 @@ V16             TC      DISPLAY
                 CA      4THBKA
                 TS      BNKNUMBA
                 TC      TRFRA
-                TC      NAPTCAPA
+                TC      NARTCAPA
 TRFRA           CA      Q
                 TS      QSTORE
-                CA      BANKNUMAA
-                TS      BP
+                CA      BNKNUMAA
+                TS      BB
                 CA      2000            # LOAD ID FOR EBANK
                 TS      1400            # ENDING ZERO
                 CA      OC10
@@ -2098,30 +2101,30 @@ LISTID          EXTEND
                 CA      LASTBNK
                 TS      LDEBLL
                 NDX     HOLDIT
-                TC      WHCHMDD
-WHCHBDD         TC      OPERROR
+                TC      WHCHMBD
+WHCHMBD         TC      OPERROR
                 TC      OPERROR
                 TC      OPERROR
                 TC      RLRD            # THREE READ
-                TC      RL1D            # FOUR LOAD
+                TC      RLLD            # FOUR LOAD
                 TC      LDPN5
                 TC      AMCHKL
                 TC      OPERROR
-ANCHKL          CA      ONE
+AMCHKL          CA      ONE
                 TS      PUNCH6
                 TS      PUNCH5
-                TC      SLTSW
-PLRD            CA      ONE
+                TC      SETSW
+RLRD            CA      ONE
                 TS      RDLD
                 TC      +3
 RLLD            CA      ZERO
                 TS      RDLD
                 CA      ZERO
                 TS      HOLDIT
-SHISW           TS      SWITCH
-                TC      OPDISPLA
-STCATTB         CCS     PUNCH5
-                TC      TRPACHNK
+SETSW           TS      SWITCH
+                TC      UPDISPLA
+STDATTR         CCS     PUNCH5
+                TC      TRPACBNK
                 CS      TEMP1L
                 MSK     THIRTY
                 CCS     A               # DIGIT
@@ -2138,9 +2141,9 @@ ENTCHK          CS      TEMP1L
                 TC      OPERROR         # NO
                 TC      OPERROR         # NO
                 TC      OPERROR         # NO
-ENTRER          CA      TEMP1L
+ENTROK          CA      TEMP1L
                 MSK     MASKBA
-                TS      MELONL
+                TS      HOLDNO
 ## Page D-41
                 CA      ONETO5
                 CCS     A
@@ -2225,27 +2228,27 @@ KEEPGNG         CA      EIGHTH
                 TC      WRITTPL         # NO
                 CCS     RDLD            # YES WAS A READ REQUESTED
                 TC      +2              # YES
-                TC      CPERROR         # NO
+                TC      OPERROR         # NO
 EXITLLL         CA      R1
-                TS      IDSTAPIL
+                TS      IDSTARTL
                 CA      R2
                 TS      IDSTOPL
                 CA      R3
                 TS      CH25LOAD
                 CA      ZERO
                 TS      ZZTAG
-                CA      GO1
+                CA      GOL
                 TS      BRUPT
                 RESUME
 WRITTPL         CCS     RDLD
-                TC      DPLRRGP
+                TC      OPERROR
                 CA      HOLDNO
                 CCS     A
                 CCS     A
                 CCS     A
                 CA      A
                 CCS     A
-                TC      CPLERROR
+                TC      OPERROR
                 CA      HOLDNO
                 TS      CYL
                 CA      CYL
@@ -2253,7 +2256,7 @@ WRITTPL         CCS     RDLD
                 TS      R2
                 CA      NOOFBNKS
                 AD      HOLDNO
-                MSK     CBA
+                MSK     C3A
                 AD      R2
                 TS      R2
                 CA      ONE
@@ -2330,10 +2333,10 @@ SHEBNK          CA      SEVENTH
                 TC      UPDISPLA
 TWOSHE          CA      SIXTH
                 AD      SEVENTH
-                TS      RL
+                TS      R1
                 TS      BBK
                 TC      UPDISPLA
-GETRPAC         CS      TEMP1L
+GOTRPAC         CS      TEMP1L
                 AD      ENTRCDEL
                 CCS     A
                 TC      OPERROR
@@ -2368,7 +2371,7 @@ YYY             TC      SUCCESS
 FIVE            OCT     00005
 GOL             TC      V11
 ZZZ             TC      TRXYB
-DINXTBK         CCS     ONLTO5
+GTNXTBK         CCS     ONETO5
                 TC      +5
                 CA      SIXTH
                 TS      ACMFBK

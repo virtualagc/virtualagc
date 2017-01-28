@@ -50,5 +50,5 @@
 $SPECIAL_AND_CENTRAL.agc  # D-2
 $CHANNELS.agc             # D-4
 $SUPER_JOB.agc            # D-4
-$ACM_DEMONSTRATION.agc    # D-46
+$AM_DEMONSTRATION.agc     # D-46
 

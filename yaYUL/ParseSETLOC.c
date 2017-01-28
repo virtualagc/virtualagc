@@ -23,6 +23,8 @@
                 07/24/04 RSB.   Now allow offsets.
                 12/18/16 MAS.   Added support for relative arguments
                                 (eg. SETLOC +2)
+                01/27/17 MAS.   Added support for Raytheon-style
+                                absolute addresses (eg. FF024000)
  */
 
 #include "yaYUL.h"
@@ -66,11 +68,33 @@ int ParseSETLOC(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
     } else {
         Symbol = GetSymbol(InRecord->Operand);
         if (!Symbol) {
-            sprintf(OutRecord->ErrorMessage, "Symbol \"%s\" undefined or offset bad", InRecord->Operand);
-            OutRecord->Fatal = 1;
-            OutRecord->ProgramCounter.Invalid = 1;
-        } else
+            char MemType;
+            int Bank, SReg;
+            int RaytheonAddr = 0;
+            if (3 == sscanf(InRecord->Operand, "%cF%2o%4o", &MemType, &Bank, &SReg)) {
+                if (MemType == 'C' || MemType == 'F') {
+                    OutRecord->ProgramCounter = VALID_ADDRESS;
+                    OutRecord->ProgramCounter.Address = 1;
+                    OutRecord->ProgramCounter.Fixed = 1;
+                    OutRecord->ProgramCounter.SReg = SReg;
+                    if (MemType == 'C') {
+                        OutRecord->ProgramCounter.Banked = 1;
+                        OutRecord->ProgramCounter.FB = Bank;
+                    } else {
+                        OutRecord->ProgramCounter.Unbanked = 1;
+                    }
+                    RaytheonAddr = 1;
+                }
+            }
+
+            if (!RaytheonAddr) {
+                sprintf(OutRecord->ErrorMessage, "Symbol \"%s\" undefined or offset bad", InRecord->Operand);
+                OutRecord->Fatal = 1;
+                OutRecord->ProgramCounter.Invalid = 1;
+            }
+        } else {
             OutRecord->ProgramCounter = Symbol->Value;
+        }
     }
 
     i = GetOctOrDec(InRecord->Mod1, &Value);

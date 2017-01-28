@@ -11,7 +11,10 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     https://www.ibiblio.org/apollo/index.html
 ## Page Scans:  TBD
-## Mod history: 2017-01-27 MAS  Created and transcribed.
+## Mod history: 2017-01-27 MAS  Created and transcribed, then corrected
+##                              errors until assembly succeeded. Octals
+##                              have not yet been extracted, so errors
+##                              almost certainly remain.
 
 ## Page D-2
 # C       SPECIAL AND CENTRAL
@@ -103,7 +106,7 @@ SUML            =       0130
 OVFLOL          =       0131
 INCRDEDA        =       0132
 BANKNUMA        =       0133
-LUCA            =       0134
+LOCA            =       0134
 DISYES          =       0135
 READKSTA        =       0136
 QSTORL          =       0137
@@ -137,7 +140,7 @@ ONETO5          =       0172
 SIXTH           =       0173
 SEVENTH         =       0174
 EIGHTH          =       0175
-ROLD            =       0176
+RDLD            =       0176
 HOLDNO          =       0177
 NOOFBNKS        =       0200
 PUNCH5          =       0201
