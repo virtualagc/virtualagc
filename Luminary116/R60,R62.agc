@@ -13,6 +13,7 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-01-22 MAS  Created from Luminary 99.
+##		2017-01-27 RSB	Back-ported a comment-text fix identified in Luminary 69.
 
 ## NOTE: Page numbers below have not yet been updated to reflect Luminary 116.
 
@@ -500,7 +501,7 @@ FINDGIMB        AXC,1           CALL
                 GOTO                                            
                                 VECQTEMP                        # RETURN TO CALLER
 
-PICKAXIS        VLOAD           DOT                             # IF VF X VI = 0, FIND VF, VI
+PICKAXIS        VLOAD           DOT                             # IF VF X VI = 0, FIND VF . VI
                                 28D                             
                                 SCAXIS                          
                 BMN             TLOAD                           

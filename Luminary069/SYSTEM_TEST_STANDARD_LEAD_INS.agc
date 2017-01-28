@@ -18,6 +18,8 @@
 ## Mod history: 2016-12-13 MAS  Created from Luminary 99.
 ##              2016-12-14 MAS  Updated from comment-proofed Luminary 99 version.
 ##		2017-01-17 RRB	Updated for Luminary 69.
+##		2017-01-27 RSB	Proofed comment text using octopus/prooferComments
+##				and fixed errors found.
 
 ## Page 383
 		EBANK=	XSM
@@ -84,7 +86,7 @@ E/CALL		LXCH	LOC		# ADRES -1 OF CADR.
 		DXCH	EBUF2		# STORE CADR AND RETURN.
 		TC	INTPRET
 		CALL
-			EBUF2		# INDIRECTLY EXECUTE ROUTING.  IT MUST
+			EBUF2		# INDIRECTLY EXECUTE ROUTINE.  IT MUST
 		EXIT			# LEAVE VIA RVQ OR EQUIVALENT.
 		LXCH	EBUF2 +1	# PICK UP RETURN.
 		TCF	INTPRET +2	# SET LOC AND RETURN TO CALLER.

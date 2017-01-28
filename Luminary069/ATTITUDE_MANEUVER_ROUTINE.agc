@@ -18,6 +18,8 @@
 ## Mod history: 2016-12-13 MAS  Created from Luminary 99.
 ##              2016-12-14 MAS  Updated from comment-proofed Luminary 99 version.
 ##              2017-01-19 MAS  Updated for Luminary 69 -- just whitespace.
+##		2017-01-27 RSB	Proofed comment text using octopus/prooferComments
+##				and fixed errors found.
 
 ## Page 355
 # BLOCK 2 LGC ATTITUDE MANEUVER ROUTINE-KALCMANU
@@ -680,7 +682,7 @@ MXM3            SETPD   VLOAD*          # MXM3 MULTIPLIES 2 3X3 MATRICES
                 RVQ
                 
 
-#                          RETURN WITH MIXM2 IN PD LIST
+#                          RETURN WITH M1XM2 IN PD LIST
 #
 TRANSPOS        SETPD   VLOAD*          # TRANSPOS TRANSPOSES A 3X3 MATRIX
                         0               #  AND LEAVES RESULT IN PD LIST
