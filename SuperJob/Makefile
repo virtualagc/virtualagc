@@ -7,10 +7,10 @@
 
 BASENAME=SuperJob
 EXTRA_YAYUL_ARGS=--no-checksums
+OCT2BIN_ARGS=--no-checksums
 
-NO_BINSOURCE=YES
 include ../Makefile.inc
 
-# ${BASENAME}.binsource: ${BASENAME}.binsource2.txt
-# 	../Tools/listing2binsource ${VERBOSE} $^ $@
+${BASENAME}.binsource: ${BASENAME}.binsource2.txt
+	../Tools/listing2binsource ${VERBOSE} $^ $@
 
