@@ -2385,8 +2385,15 @@ GTNXTBK         CCS     ONETO5
 ## Page D-45
                 CA      C2A
                 TS      LDFBLL
+## The note preceding this listing suggests that the following word be replaced with 12453, or "TCF 2453", if certain
+## functionalities are to be executed. This transfers control to just past the end of this program at FINKBKA.
                 TC      UPDISPLA
 BLOBA           CA      FINKBKA
                 TS      BRUPT
                 RESUME
 FINKBKA         TC      AMCHKLA
+## As above, three extra words are required to be added here in order to execute a particular function. The words, and their
+## associated disassemblies, are: <br />
+## 30007    CA   ZEROS <br/>
+## 54173    TS   SIXTH <br/>
+## 07446    TC   UPDISPLA <br/>
