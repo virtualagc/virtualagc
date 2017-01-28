@@ -19,13 +19,15 @@
 ##              2016-12-15 MAS  Updated from comment-proofed Luminary 99 version.
 ##              2017-01-20 HG   Transcribed
 ##              2017-01-22 HG   Shift pseudo label +3 to column 2
+##		2017-01-28 RSB	Proofed comment text using octopus/prooferComments
+##				and fixed errors found.
 
 ## Page 739
 ## <br><br>
 ## At the get-together of the AGC developers celebrating the 40th anniversary
 ## of the first moonwalk, Don Eyles (one of the authors of this routine along
-## with Peter Adler) has related to us a little interesting history behind the
-## naming of the routine.<br>
+## with Peter Adler) related a little interesting history behind the
+## naming of the routine to one of us.<br>
 ## <br>
 ## It traces back to 1965 and the Los Angeles riots, and was inspired
 ## by disc jockey extraordinaire and radio station owner Magnificent Montague.
@@ -466,7 +468,7 @@ P40IGN          CS              FLAGWRD5                # (13)
                 MASK            NOTHRBIT
                 EXTEND
                 BZF             P42IGN
-                CA              ZOOMTIME                # WAITLIST FRO ZOOM (FLATOUT. ETC.)
+                CA              ZOOMTIME                # WAITLIST FOR ZOOM (FLATOUT. ETC.)
                 TC              TWIDDLE
                 ADRES           ZOOM
 
@@ -478,7 +480,7 @@ P63IGN1         TC              2PHSCHNG
                 TCF             P42IGN
 ABRTIGN         TC              CHECKMM                 # (13) BRANCH TO APPROPRIATE ABORT
                 DEC             71                      # ENGINE-ON SEQUENCE.
-                TCF             P42IGN                  # CONRINUE ENGINE-ON SEQUENCE
+                TCF             P42IGN                  # CONTINUE ENGINE-ON SEQUENCE
 P12IGN          CA              Z                       # (13)     KILL CLOKTASK
                 TS              DISPDEX
 
@@ -525,7 +527,7 @@ WAITABIT        EXTEND                                  # KILL GROUP 4
 
 #               ****************************************
 
-TIGTASK         CAF             PRIO16                  # TIGNOW MUST BE A JOB
+TIGTASK         CAF             PRIO16                  # TIGNOW MUST BE A JOB.
                 TC              NOVAC
                 EBANK=          TRKMKCNT
                 2CADR           TIGNOW
@@ -721,7 +723,7 @@ CLOKJOB         EXTEND
 
 VB97DEX         =               34DEC
 
- -42            CA              NVWORD          +2      # NVWROD+2 CONTAINS V06 & APPROPRIATE NOUN
+ -42            CA              NVWORD          +2      # NVWORD+2 CONTAINS V06 & APPROPRIATE NOUN
                 TC              BANKCALL
                 CADR            GOFLASHR
                 TCF             STOPCLOK                # TERMINATE CLOKTASK ON THE WAY TO P00H
@@ -741,7 +743,7 @@ V97ORV99        TS              NVWORD1
                 TCF             ASTNRETN
                 TCF             -6
 
-CNTDNDEX        =               OCT20                   # NAEGATIVE OF THIS PROPER FOR DISPDEX
+CNTDNDEX        =               OCT20                   # NEGATIVE OF THIS IS PROPER FOR DISPDEX
 
  -20            INDEX           WHICH                   # THIS DISPLAY COMES UP AT ONE SECOND
                 CAF             0                       # INTERVALS.  IT IS NORMALLY OPERATED

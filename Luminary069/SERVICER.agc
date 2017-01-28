@@ -20,6 +20,8 @@
 ##              2017-01-21 HG   Transcribed
 ##              2017-01-23 HG   Fix operation DAS -> DXCH
 ##                                            CS  -> CA
+##		2017-01-28 RSB	Proofed comment text using octopus/prooferComments
+##				and fixed errors found.
 
 ## Page 858
                 BANK            37
@@ -237,7 +239,7 @@ MOONSPOT        CA              KPIP1                   # TP MPAC = ABDELV AT 2(
                                 XNBNDX
                 EXIT
 
-                CA              PRIO20                  # RETORE PRIO 20
+                CA              PRIO20                  # RESTORE PRIO 20
                 TC              PRIOCHNG
 
                 TC              INTPRET
@@ -281,7 +283,7 @@ DVMON           CS              DVTHRUSH
                 ADS             FLAGWRD2
 
 DVCNTSET        CAF             ONE                     # ALLOW TWO PASSES MAXIMUM NOW THAT
-                TS              DVCNTR                  # THRUST HAS BEEN DETECTED.
+                TS              DVCNTR                  # THRUXT HAS BEEN DETECTED.
 
                 CA              FLGWRD10                # BRANCH IF APSFLAG IS SET.
                 MASK            APSFLBIT
@@ -1432,7 +1434,7 @@ NOLITE          CA              LRMCTR                  # SET S = M
                 TCF             ENDVDAT                 # NOT Z, DO NOT SET VX INHIBIT
 
                 TC              UPFLAG                  # Z COMPONENT - SET FLAG TO SKIP X
-                ADRES           VXINH                   # COMPONENT AS ERROR MAY BE DUE TO CROSS
+                ADRES           VXINH                   # COMPONENT,AS ERROR MAY BE DUE TO CROSS
                 TCF             ENDVDAT                 # LOBE LOCK UP NOT DETECTED ON X AXIS.
 
 ## Page 892

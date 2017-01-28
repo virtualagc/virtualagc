@@ -13,6 +13,8 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-01-22 MAS  Created from Luminary 99.
+##		2017-01-28 RSB	Proofed comment text using octopus/prooferComments
+##				and fixed errors found.
 
 ## NOTE: Page numbers below have not yet been updated to reflect Luminary 116.
 
@@ -83,7 +85,7 @@ P12LMB          DLOAD
                 MXV             VSL6                            
                                 REFSMMAT                        
                 STCALL          R                               # COMPUTE R = POS(TIG)*2(-24) M.
-                                MUNGRAV                         # COMPUTE GDT1/2(TIG)*2(-T)M/CS.
+                                MUNGRAV                         # COMPUTE GDT1/2(TIG)*2(-7)M/CS.
                 VLOAD           UNIT                            
                                 R                               
                 STCALL          UNIT/R/                         # COMPUTE UNIT/R/ FOR YCOMP.

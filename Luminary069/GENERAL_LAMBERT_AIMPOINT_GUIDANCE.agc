@@ -18,6 +18,8 @@
 ## Mod history: 2016-12-13 MAS  Created from Luminary 99.
 ##              2016-12-14 MAS  Updated from comment-proofed Luminary 99 version.
 ##		2016-12-17 RRB	Updated for Luminary 69.
+##		2017-01-28 RSB	Proofed comment text using octopus/prooferComments
+##				and fixed errors found.
 
 ## Page 661
 
@@ -154,4 +156,3 @@ REVN1645	SET	CALL		# TRKMKCNT, TTOGO, +MGA
 			VN1645
 		GOTO
 			REVN1645
-# *** END OF LMP30S .102 ***

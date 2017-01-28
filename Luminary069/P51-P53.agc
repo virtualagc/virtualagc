@@ -195,7 +195,7 @@ P52D            CALL                                    # READ VEHICLE ATTITUDE 
                 CADR            GOFLASH
                 TC              GOTOPOOH
                 TCF             COARSTYP                # V33-PROCEED, SEE IF GYRO TORQUE COARSE
-                TC              INTPRET                 # RECYCLE - VEHICLE HAS BEEN MANEUVERED
+                TC              INTPRET                 # RECYCLE - VEHICLE HAS BEEN MANUEVERED
                 GOTO
                                 P52D
 REGCOARS        TC              INTPRET
@@ -879,7 +879,7 @@ VB6N5           VN              605
                 COUNT*          $$/R50
 CAL53A          STQ             CALL
                                 29D
-                                S52.2                   # MAKE ONE FINAL COMP OF GIMBALE ANGLES
+                                S52.2                   # MAKE ONE FINAL COMP OF GIMBLE ANGLES
                 RTB             SSP
                                 RDCDUS                  # READ CDUS
                                 S1
@@ -939,7 +939,7 @@ RDCDUS          INHINT                                  # READ CDUS
                 INDEX           FIXLOC
                 TS              3
                 RELINT
-                TC              DANZIG
+                TC              DANZIG			#					+
                 COUNT*          $$/INFLT
 CALCSMSC        AXC,1
                                 XNB
@@ -1276,7 +1276,7 @@ R52B            TC              DOWNFLAG
                 CA              STARCODE                # GRAB DETENT CODE
                 MASK            HIGH9
                 EXTEND
-                BZMF            R52A                    # DONT ALLOW ZERO-RECYCLE
+                BZMF            R52A                    # DONT ALLOW ZERO CODE-RECYCLE
                 MASK            BIT9                    # SEE IF CODE 4 OR 5
                 CCS             A
                 TCF             GETAZEL                 # CODE 4 OR 5-GET CALIBRATION AZ EL
@@ -1370,12 +1370,12 @@ R59A            CS              HIGH9                   # GRAB STARCODE FOR INDE
 
                 TC              INTPRET
                 CALL
-                                CDUTRIG                 # GET CDU JAZZ FROM SMNB
+                                CDUTRIG                 # GET CDU JAZZ FOR SMNB
                 VLOAD*          MXV
                                 CATLOG,1                # GRAB STAR VECTOR
                                 REFSMMAT                # TRANSFORM TO SM
                 UNIT            CALL
-                                *SMNB*
+                                *SMNB*			# TRANSFORM TO NB
                 STORE           STAR                    # TEMP STORE STAR VEC(NB)
                 EXIT
 
@@ -1505,7 +1505,7 @@ R59E            CAF             BIT3                    # GET DETENT CORRESPONDI
                 CS              HIGH9
                 MASK            AOTCODE
                 AD              QMIN
-                TS              AOTCODE                 # STORE DETENT 7-9
+                TS              AOTCODE                 # STORE DETENT IN 7-9
 
 R59OUT          TC              BANKCALL                # GO TO AOTMARK FOR SIGHTING
                 CADR            AOTMARK
@@ -1626,7 +1626,7 @@ PIPSRINE        =               PIPASR          +3      # EBANK NOT 4 SO DONT LO
 #          *NBSM* ,*SNMB*, CALCGA,FOFLASH
 # DEBRIS-
 #          VAC,SAC,STARAD,XSM,XNB,THETAD,DELV,COSCDU,SINCDU
-GVDETER         CS              BIT13
+GVDETER         CS              BIT13			# JAM 45 DEG IN DESIRED GIMBAL ANGLES
                 TS              THETAD          +1
                 COM
                 TS              THETAD          +2
@@ -1974,7 +1974,7 @@ SURFSUP         STORE           OGCT
 
 SURFDISP        EXIT
                 TC              PHASCHNG
-                OCT             05024                   # STORE REFSMMAT ,SET REFSMLAG   AND
+                OCT             05024                   # STORE REFSMMAT ,SET REFSMFLG   AND
                 OCT             13000                   # DISPLAY ORIGINAL  TORQ ANGLES
                 TC              INTPRET
                 AXC,1           AXC,2
@@ -2051,7 +2051,7 @@ P57AA           CAF             V06N34*                 # DISPLAY TALIGN, TALIGN
                 TC              INTPRET
                 DLOAD           BMN
                                 DSPTEM1
-                                PACKOPTN        -1      # NEG TIME-PREF ORIENT IN XSMD MARIX
+                                PACKOPTN        -1      # NEG TIME-PREF ORIENT IN XSMD MATRIX
                 RTB             PDDL
                                 LOADTIME                # PUSH CURRENT TIME AND PICK UP KEY IN
                                 DSPTEM1

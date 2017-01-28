@@ -26,6 +26,8 @@
 ##                                                                          RN
 ##                              Fix operator TS -> DXCH
 ##                              Fix value for GUIDDURN  +66440 -> +65164
+##		2017-01-28 RSB	Proofed comment text using octopus/prooferComments
+##				and fixed errors found.
 
 
 ## Page 789

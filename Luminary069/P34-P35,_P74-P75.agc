@@ -25,6 +25,8 @@
 ##              2017-01-22 HG   Remove CAF P30ZERO
 ##              2017-01-23 HG   Add interpretive operation PUSH
 ##                              Fix operand GOFLASH -> GOFLASHR
+##		2017-01-28 RSB	Proofed comment text using octopus/prooferComments
+##				and fixed errors found.
 
 
 ## Page 667
@@ -1228,7 +1230,7 @@ INITVEL4        LXA,2   SXA,2
 
                         LAMBERT
 
-#       DELETE THRU 452I
+#       DELETE THRU 4521
 # ARRIVED AT SOLUTION IS GOOD ENOUGH ACCORDING TO SLIGHTLY WIDER BOUNDS.
 
                 CLEAR   VLOAD
@@ -1530,6 +1532,8 @@ PERIAPO         STQ     CALL
                         NORMEX
 
 ## Page 705
+# SETRAD
+
 SETRAD          DLOAD   PUSH
                         RPAD
                 SXA,1   INCR,2
@@ -1544,6 +1548,8 @@ SETRAD          DLOAD   PUSH
 SETRADX         DLOAD   RVQ
 
 ## Page 706
+# PRECSET
+
 PRECSET         STQ
                         NORMEX
                 STCALL  TDEC2
@@ -1576,6 +1582,7 @@ PASSIVE         STOVL   RPASS3
                 RVQ
 
 ## Page 707
+# VECSHIFT 
 VECSHIFT        LXA,2   VSR*
                         RTX2
                         0,2
@@ -1586,6 +1593,8 @@ VECSHIFT        LXA,2   VSR*
                 RVQ
 
 ## Page 708
+# SHIFTR1
+
 SHIFTR1         LXA,2   SL*
                         RTX2
                         0,2
