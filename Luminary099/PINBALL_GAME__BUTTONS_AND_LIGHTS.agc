@@ -15,6 +15,7 @@
 ##		2016-12-14 RSB	Proofed text comments with octopus/ProoferComments
 ##				and corrected the errors found.
 ##		2017-01-21 MAS	Corrected some lingering comment errors.
+##		2017-01-28 RSB	WTIH -> WITH.
 ##
 ## This source code has been transcribed or otherwise adapted from digitized
 ## images of a hardcopy from the MIT Museum.  The digitization was performed
@@ -2846,7 +2847,7 @@ SETVAC		CAF	TCFINDVC
 		
 # VBRQWAIT ENTERS REQUEST TO WAITLIST FOR ANY ADDRESS WITH ANY DELAY.
 # IT DOES ENDOFJOB AFTER ENTERING REQUEST. DISPLAY SYST IS RELEASED.
-# IT ASSUMES NOUN 26 HAS BEEN PRELOADED WTIH
+# IT ASSUMES NOUN 26 HAS BEEN PRELOADED WITH
 # COMPONENT 1  DELAY (LOW BITS)
 # COMPONENT 2  TASK ADRES (12 BIT)
 # COMPONENT 3  BBCON

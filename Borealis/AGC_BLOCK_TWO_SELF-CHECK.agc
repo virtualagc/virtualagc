@@ -16,6 +16,7 @@
 ##              2017-01-04 MAS  Fleshed out the rest of the hardware alarm tests. Also
 ##                              pulled back all updates added by the time of Sunburst 120.
 ##                              and put in jumps to Retread instruction checks and back.
+##		2017-01-28 RSB	WTIH -> WITH.
 
 # PROGRAM DESCRIPTION                                                         DATE  14 FEBRUARY 1967
 # PROGRAM NAME - SELF-CHECK                                                   LOG SECTION AGC BLOCK TWO SELF-CHECK
@@ -81,7 +82,7 @@
 # FRESH START
 #      DSKYCHK LIGHTS UP THE DSKY DISPLAY ELEMENTS STARTING WITH THE DIGIT9 IN ALL POSITIONS. EACH DISPLAY LASTS
 # 5 SECONDS
-#      SHOW-BANKSUM STARTING WTIH BANK 0 DISPLAYS IN R1 +- THE BANK SUM (SHOULD EQUAL THE BANK NUMBER), IN R2 THE
+#      SHOW-BANKSUM STARTING WITH BANK 0 DISPLAYS IN R1 +- THE BANK SUM (SHOULD EQUAL THE BANK NUMBER), IN R2 THE
 # BANK NUMBER, AND IN R3 THE BUGGER WORD.
 
 

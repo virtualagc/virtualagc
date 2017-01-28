@@ -12,6 +12,7 @@
 ##               2016-10-10 PDJ  Updated based on Sunburst120 scans. 
 ##		 2016-12-06 RSB	 Comments proofed using octopus/ProoferComments,
 ##				 changes made.
+##		2017-01-28 RSB	WTIH -> WITH.
 
 ## Page 1062
 
@@ -74,7 +75,7 @@
 
 # OUTPUT--
 
-#       LST1 AND LST2 UPDATED WTIH NEW TASK AND ASSOCIATED TIME.
+#       LST1 AND LST2 UPDATED WITH NEW TASK AND ASSOCIATED TIME.
 
 # DEBRIS-
 

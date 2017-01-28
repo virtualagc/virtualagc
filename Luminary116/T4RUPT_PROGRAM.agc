@@ -15,6 +15,7 @@
 ## Mod history: 2017-01-22 MAS  Created from Luminary 99.
 ##		2017-01-26 RSB	Back-ported comment-text fixes found while
 ##				proofing corresponding Luminary 69 file.	
+##		2017-01-28 RSB	WTIH -> WITH.
 
 ## NOTE: Page numbers below have not yet been updated to reflect Luminary 116.
 
@@ -574,7 +575,7 @@ NXTFL33         CCS             RUPTREG2                        # PROCESS POSSIB
 
 # ERASABLE INITIALIZATION:
 #               1) FRESH START OR RESTART WITH NO GROUPS ACTIVE:  C(CDUZ) = 0, IMODES30 BIT 6 = 0, IMODES33 BIT 1 =  0.
-#               2) RESTART WTIH GROUPS ACTIVE:  SAME AS FRESH START EXCEPT C(CDUZ) NOT CHANGED SO GIMBAL MONITOR
+#               2) RESTART WITH GROUPS ACTIVE:  SAME AS FRESH START EXCEPT C(CDUZ) NOT CHANGED SO GIMBAL MONITOR
 #                                               PROCEEDS AS BEFORE.
 
 # ALARMS:       1) MGA REGION (2) CAUSES GIMBAL LOCK LAMP TO BE LIT.

@@ -18,6 +18,7 @@
 ## Mod history: 2016-12-13 MAS  Created from Luminary 99.
 ##              2016-12-18 MAS  Updated from comment-proofed Luminary 99 version.
 ##		2016-12-26 RRB	Updated for Luminary 69.
+##		2017-01-28 RSB	WTIH -> WITH.
 
 ## Page 1112
 # PROGRAM DESCRIPTION								DATE - 10 OCTOBER 1966
@@ -83,7 +84,7 @@
 #				      LST1, ..., LST1 +7  = NEG1/2
 #
 # OUTPUT --
-#	LST1 AND LST2 UPDATED WTIH NEW TASK AND ASSOCIATED TIME.
+#	LST1 AND LST2 UPDATED WITH NEW TASK AND ASSOCIATED TIME.
 #
 # DEBRIS -
 #	CENTRALS - A,Q,L

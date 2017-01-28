@@ -14,6 +14,7 @@
 ##		2009-06-07 RSB	Corrected two typos.
 ##		2016-12-13 RSB	Proofed text comments with octopus/ProoferComments
 ##				and corrected the errors found.
+##		2017-01-28 RSB	WTIH -> WITH.
 ##
 ## This source code has been transcribed or otherwise adapted from
 ## digitized images of a hardcopy from the MIT Museum.  The digitization
@@ -236,7 +237,7 @@ NNADTAB		OCT	00000			# 00 	NOT IN USE
 		OCT	00000			# 23	SPARE
 		ECADR	DSPTEM2 +1		# 24	DELTA TIME FOR AGC CLOCK (HRS,MIN,SEC)
 		ECADR	DSPTEM1			# 25	CHECKLIST
-						#	(USED WTIH PLEASE PERFORM ONLY)
+						#	(USED WITH PLEASE PERFORM ONLY)
 		ECADR	DSPTEM1			# 26	PRIO/DELAY, ADRES, BBCON
 		ECADR	SMODE			# 27	SELF TEST ON/OFF SWITCH
 ## Page 306

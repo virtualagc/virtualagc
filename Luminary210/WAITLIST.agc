@@ -17,6 +17,7 @@
 ##              2016-12-07 HG   Fix P00 -> POO
 ##		2016-12-26 RSB	Comment-text proofed using ProoferComments
 ##				and corrected errors found.
+##		2017-01-28 RSB	WTIH -> WITH.
 
 ## Page 1115
 # PROGRAM DESCRIPTION                                                                     DATE - 10 OCTOBER 1966
@@ -92,7 +93,7 @@
 
 # OUTPUT--
 
-#              LST1 AND LST2 UPDATED WTIH NEW TASK AND ASSOCIATED TIME.
+#              LST1 AND LST2 UPDATED WITH NEW TASK AND ASSOCIATED TIME.
 
 # DEBRIS-
 
