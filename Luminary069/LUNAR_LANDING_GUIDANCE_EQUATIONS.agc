@@ -22,6 +22,8 @@
 ##                              Fix operator CS -> TC
 ##                                           INDEX -> CCS
 ##                              Fix interpretive operator STODL -> STORE
+##		2017-01-28 RSB	Proofed comment text using octopus/prooferComments
+##				and fixed errors found.
 
 ## Page 802
                 EBANK=          E2DPS
@@ -40,7 +42,7 @@
 #                                                  WCHPHASE  =   3  --->  APPRLING
 #                                                  WCHPHASE  =   4  --->  VERTICAL
 
-#****************************************************************************************************************
+# ***************************************************************************************************************
 
 # ROUTINES FOR STARTING NEW GUIDANCE PHASES:
 
@@ -161,7 +163,7 @@ DEC66           DEC             66
                 CAF             ZERO
                 TS              RODCOUNT
 VRTSTART        TS              WCHVERT
-                CAF             FOUR                    # WCHPHASE = 4 ---> VERTICAL: P65,P66,P67
+                CAF             FOUR                    # WCHPHASE = 4 --> VERTICAL: P65,P66,P67
                 TS              WCHPHOLD
                 TS              WCHPHASE
                 TC              BANKCALL                # TEMPORARY, I HOPE HOPE HOPE
@@ -178,7 +180,7 @@ STARTP67        TC              NEWMODEX                # NO HARM IN "STARTING" 
                 DEC             67                      #   SO NO NEED FOR A FASTCHNG AND NO NEED
 
 ## Page 805
-                CAF             TEN                     #   TO SEE IF ALREADY IN P67.
+                CAF             TEN                     #   TO SEE IF ALREADY IN P67
                 TCF             VRTSTART
 
 STABL?          CAF             BIT13                   # IS UN-ATTITUDE-HOLD DISCRETE PRESENT?
@@ -186,7 +188,7 @@ STABL?          CAF             BIT13                   # IS UN-ATTITUDE-HOLD DI
                 RAND            CHAN31
                 CCS             A
                 TCF             GUILDRET                # YES: ALL'S WELL
-P66NOW?         TC              CHECKMM                 # NO:  ARE WE IN P66 NOW
+P66NOW?         TC              CHECKMM                 # NO:  ARE WE IN P66 NOW?
                 DEC             66
                 TCF             STARTP66                # NO
 
@@ -248,9 +250,9 @@ STARTP64        CAF             DELTTFAP                # AUGMENT TTF/8 (TWO-PHA
                 ADRES           REDFLAG
                 TCF             COMSTART
 
-#*****************************************************************************************************************
+# ****************************************************************************************************************
 # SET LINEAR GUIDANCE COEFFICIENTS
-#*****************************************************************************************************************
+# ****************************************************************************************************************
 
 LINSET?         CA              FLAGWRD6                # ONE-PHASE OR TWO-PHASE?
                 MASK            2PHASBIT
@@ -551,9 +553,9 @@ TTF/8CL         TC              INTPRETX
 
 #                                              (CONTINUE TO QUADGUID)
 
-# ***************************************************************************************************************
+# ****************************************************************************************************************
 # MAIN GUIDANCE EQUATION
-# ***************************************************************************************************************
+# ****************************************************************************************************************
 
 #                      AS PUBLISHED:-
 
@@ -572,7 +574,7 @@ TTF/8CL         TC              INTPRETX
 #                                                 TTF/8
 
 QUADGUID        CAF             30SEC*17                # PULSE-OUTS ARE INHIBITED WHENEVER
-                AD              TTF/8                   #   TTF < 30 SECONDS, REGRDLESS OF
+                AD              TTF/8                   #   TTF < 30 SECONDS, REGARDLESS OF
                 EXTEND                                  #   THE DURATION OF LINEAR GUIDANCE
                 BZMF            Q**DG**D
                 TC              UPFLAG
@@ -592,7 +594,7 @@ Q**DG**D        TC              INTPRETX
 ## Page 813
                                 3/4DP
 AFCCALC         VAD*
-                                ADG,1                   # CURRENT TARGET ACCELERATIONS
+                                ADG,1                   # CURRENT TARGET ACCELERATION
                 STORE           ACG
 AFCCALC1        VXM             VSL1                    # VERTGUID COMES HERE
                                 CG
@@ -797,7 +799,7 @@ EXOVFLOW        TC              ALARM                   # SOUND THE ALARM NON-AB
 
 RATESTOP        TC              BANKCALL                # CLEAN UP AFTER LAST FINDCDUW
 
-# Page 817
+## Page 817
                 CADR            STOPRATE
 
                 TCF             DISPEXIT
@@ -819,7 +821,7 @@ DISPEXIT        EXTEND                                  # KILL GROUP 3:  DISPLAY
                 DCA             NEG0                    #   RESTORED BY NEXT GUIDANCE CYCLE
                 DXCH            -PHASE3
 
-                CS              FLAGWRD8                # IF FLUNDISP IS SET, NO DISPLAY THIS PASS
+                CS              FLAGWRD8                # IF FLUNDISP SET, NO DISPLAY THIS PASS
                 MASK            FLUNDBIT
                 EXTEND
                 BZF             ENDLLJOB                # TO PICK UP THE TAG
@@ -885,9 +887,9 @@ VERTGUID        CCS             WCHVERT
 
 #          THE P65 GUIDANCE EQUATION IS AS FOLLOWS:-
 
-#                            -          -
-#                     -      VDGVERT -  VGU
-#                     ACG = --------------  , WHERE VDGVERT = (-3FPS,0,0)
+#                           -         -
+#                     -     VDGVERT - VGU	   -
+#                     ACG = -------------  , WHERE VDGVERT = (-3FPS,0,0)
 #                              TAUVERT
 
 P65VERT         EXTEND                                  # NEGATIVE
@@ -908,11 +910,11 @@ P65VERT         EXTEND                                  # NEGATIVE
 
 #          THE R.O.D. EQUATION IS AS FOLLOWS:-
 
-#                            (VDGVERT - VGUX)/TAUVERT - GMOON
-#                    /AFC/ = --------------------------------
-#                                     UNIT/R/ . XNB
+#                            (VDGVERTX - VGUX)/TAUVERT - GMOON
+#                    /AFC/ = ---------------------------------
+#                                      UNIT/R/ . XNB
 
-P66VERT         XCH             RODCOUNT                # RESTAT COULD CAUSE RODCOUNTS TO BE LOST
+P66VERT         XCH             RODCOUNT                # RESTART COULD CAUSE RODCOUNTS TO BE LOST
                 EXTEND
                 MP              +1FPS
                 DAS             VDGVERT
@@ -1084,7 +1086,7 @@ DESCBITS        MASK            BIT7                    # COME HERE FROM MARKRUP
 #                                         LOC+2    SP     PRECROOT         PREC RQD OF ROOT (AS FRACT OF 1ST GUESS)
 
 # THE DP RESULT IS LEFT IN MPAC UPON EXIT, AND A SP COUNT OF THE ITERATIONS TO CONVERGENCE IS LEFT IN MPAC+2.
-# RETURN IS NORMALLY TO LOC(TC ROOTPSRS)+3.   IF ROOTPSRS FAILS TO CONVERGE IN 8 PASSES, RETURN IS TO LOC+1 AND
+# RETURN IS NORMALLY TO LOC(TC ROOTPSRS)+3.   IF ROOTPSRS FAILS TO CONVERGE IN 32 PASSES, RETURN IS TO LOC+1 AND
 # OUTPUTS ARE NOT TO BE TRUSTED.
 
 #          PRECAUTION: ROOTPSRS MAKES NO CHECKS FOR OVERFLOW OR FOR IMPROPER USAGE. IMPROPER USAGE COULD
@@ -1214,9 +1216,9 @@ ROOTSTOR        DXCH            ROOTPS
 
 DERTABLL        ADRES           DERCOFN         -3
 
-# *****************************************************************************************************************
+# ****************************************************************************************************************
 # TRASHY LITTLE SUBROUTINES
-# *****************************************************************************************************************
+# ****************************************************************************************************************
 
 INTPRETX        INDEX           WCHPHASE                # SET X1 ON THE WAY TO THE INTERPRETER
                 CS              TARGTDEX
@@ -1310,7 +1312,7 @@ TSCALINV        =               BIT4
 -LINT           DEC             -20
 
 
-SCTTFDSP        DEC             .08                     # RESCLES DEOM 2(-17) CS TO WHOLE SECONDS
+SCTTFDSP        DEC             .08                     # RESCALES FROM 2(-17) CS TO WHOLE SECONDS
 
 
 ## Page 827

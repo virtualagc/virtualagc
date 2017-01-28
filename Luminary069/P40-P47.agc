@@ -19,6 +19,8 @@
 ##              2016-12-15 MAS  Updated from comment-proofed Luminary 99 version.
 ##              2017-01-21 HG   Transcribed
 ##              2017-01-23 HG   Fix operand FIRSTIME -> FIRSTTME
+##		2017-01-28 RSB	Proofed comment text using octopus/prooferComments
+##				and fixed errors found.
 
 ## Page 759
 # PROGRAM DESCRIPTION  P40BOTH    DECEMBER 22, 1966
@@ -530,7 +532,7 @@ STEERING        TC              INTPRET
 NSTEER          INHINT
                 CA              EBANK7
                 TS              EBANK
-# PHASE CHANGE IN SERVICER NEEDED HERE ******************************
+# PHASE CHANGE IN SERVERICER NEEDED HERE *********************************
                 CS              FLAGWRD2                # CHECK IMPULSE SWITCH.  IT IS SET EITHER
                 MASK            IMPULBIT                # BY S40.13 IF TBURN<6 SECS OR BY S40.8 IF
                 CCS             A                       # STEERING IS ALMOST DONE.
@@ -872,7 +874,7 @@ FIXY            VLOAD           VXV                     # IN THIS CASE,
 
 # ALARM
 
-#      IF VG . DELVREF IS NEGATIVE (VG AND DELVREF OVER 90 DEGREES APART), BYPASS TGO COMPUTATIONS
+#      IF VG . DELVREF IS NEGATIVE (VG AND DELVREF OVER 90 DEGREES APART), BYPASS TGO AND STEERING COMPUTATIONS
 # AND SET ALARM 1407.  RETURN TO CALLER NORMALLY.
 
 # INPUT AND INITIALIZATION

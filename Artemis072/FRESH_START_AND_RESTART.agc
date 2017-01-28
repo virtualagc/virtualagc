@@ -17,6 +17,7 @@
 ##		2010-02-11 JL	Fixed errors on p201, p226.
 ##		2010-02-20 RSB	Un-##'d this header.
 ##		2010-12-29 JL	Fixed indentation.
+##		2017-01-28 RSB	WTIH -> WITH.
 
 ## Page 192
 
@@ -121,7 +122,7 @@
 #	B.	ALARMS
 #
 #		1107	PHASE TABLE ERROR
-#		1110	RESTART WTIH NO ACTIVE GROUPS
+#		1110	RESTART WITH NO ACTIVE GROUPS
 
 ## Page 194
 		SETLOC	FRANDRES

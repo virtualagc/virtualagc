@@ -19,6 +19,8 @@
 ##              2016-12-18 MAS  Updated from comment-proofed Luminary 99 version.
 ##		2017-01-04 RRB	Updated for Luminary 69. Notes on handwritted notations in Luminary 99
 ##				were retained and marked as being from Lum99.
+##		2017-01-28 RSB	Proofed comment text using octopus/prooferComments
+##				and fixed errors found.
 
 ## Page 979
 # NAME - LSPOS  - LOCATE SUN AND MOON			DATE - 25 OCT 67
@@ -36,7 +38,7 @@
 #
 #	LOS = LOS +LOS *T-(C *SIN(2PI*T)/365.24 +C *COS(2PI*T)/365.24)
 #	         0    R     0                     1
-#	LOS  (RAD) IS THE LONGITUDE OF THE SUN FOR MIGNIGHT JUNE 30TH OF THE PARTICULAR YEAR.
+#	LOS  (RAD) IS THE LONGITUDE OF THE SUN FOR MIDNIGHT JUNE 30TH OF THE PARTICULAR YEAR.
 #          0
 #	LOS  (RAD/DAY) IS THE MEAN RATE FOR THE PARTICULAR YEAR.
 #    	   R
@@ -189,6 +191,4 @@ STMP		EQUALS	16D
 GTMP		EQUALS	22D
 
 TIMEP		EQUALS	24D
-
-# *** END OF LEMP50S .103 ***
 

@@ -16,6 +16,8 @@
 ##		2017-01-06 RSB	Page numbers now agree with those on the
 ##				original harcopy, as opposed to the PDF page
 ##				numbers in 1701.pdf.
+##		2017-01-28 RSB	Proofed comment text using octopus/prooferComments
+##				and fixed errors found.
 
 ## Page 831
 		BANK	24
@@ -79,7 +81,7 @@ P12LMB		DLOAD
 		MXV	VSL6
 			REFSMMAT
 		STCALL	R		# COMPUTE R = POS(TIG)*2(-24) M.
-			MUNGRAV		# COMPUTE GDT1/2(TIG)*2(-T)M/CS.
+			MUNGRAV		# COMPUTE GDT1/2(TIG)*2(-7)M/CS.
 		VLOAD	UNIT
 			R
 		STCALL	UNIT/R/		# COMPUTE UNIT/R/ FOR YCOMP.

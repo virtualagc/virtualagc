@@ -18,6 +18,8 @@
 ## Mod history: 2016-12-13 MAS  Created from Luminary 99.
 ##              2016-12-14 MAS  Updated from comment-proofed Luminary 99 version.
 ##		2016-12-17 RRB	Updated for Luminary 69.
+##		2017-01-27 RSB	Proofed comment text using octopus/prooferComments
+##				but no errors found.
 
 ## Page 624
 # PROGRAM DESCRIPTION P30	DATE 3-6-67

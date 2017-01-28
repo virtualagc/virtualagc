@@ -18,6 +18,7 @@
 ##		2017-01-06 RSB	Page numbers now agree with those on the
 ##				original harcopy, as opposed to the PDF page
 ##				numbers in 1701.pdf.
+##		2017-01-28 RSB	WTIH -> WITH.
 
 ## Page 1111
 # PROGRAM DESCRIPTION						DATE -- 10 OCTOBER 1966
@@ -81,7 +82,7 @@
 #					LST1, ..., LST1 +7  = NEG1/2
 #
 # OUTPUT --
-#	LST1 AND LST2 UPDATED WTIH NEW TASK AND ASSOCIATED TIME.
+#	LST1 AND LST2 UPDATED WITH NEW TASK AND ASSOCIATED TIME.
 #
 # DEBRIS --
 #	CENTRALS -- A,Q,L

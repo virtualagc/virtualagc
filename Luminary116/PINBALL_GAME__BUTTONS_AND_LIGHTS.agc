@@ -13,6 +13,7 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-01-22 MAS  Created from Luminary 99.
+##		2017-01-28 RSB	WTIH -> WITH.
 
 ## NOTE: Page numbers below have not yet been updated to reflect Luminary 116.
 
@@ -2832,7 +2833,7 @@ SETVAC          CAF             TCFINDVC
 
 # VBRQWAIT ENTERS REQUEST TO WAITLIST FOR ANY ADDRESS WITH ANY DELAY.
 # IT DOES ENDOFJOB AFTER ENTERING REQUEST. DISPLAY SYST IS RELEASED.
-# IT ASSUMES NOUN 26 HAS BEEN PRELOADED WTIH
+# IT ASSUMES NOUN 26 HAS BEEN PRELOADED WITH
 # COMPONENT 1  DELAY (LOW BITS)
 # COMPONENT 2  TASK ADRES (12 BIT)
 # COMPONENT 3  BBCON

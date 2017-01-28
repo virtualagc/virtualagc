@@ -13,6 +13,7 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-01-22 MAS  Created from Luminary 99.
+##		2017-01-28 RSB	WTIH -> WITH.
 
 ## NOTE: Page numbers below have not yet been updated to reflect Luminary 116.
 
@@ -222,7 +223,7 @@ NNADTAB         OCT             00000                           # 00    NOT IN U
                 OCT             00000                           # 23    SPARE
                 ECADR           DSPTEM2         +1              # 24    DELTA TIME FOR AGC CLOCK (HRS,MIN,SEC)
                 ECADR           DSPTEM1                         # 25    CHECKLIST
-                                                                #       (USED WTIH PLEASE PERFORM ONLY)
+                                                                #       (USED WITH PLEASE PERFORM ONLY)
                 ECADR           DSPTEM1                         # 26    PRIO/DELAY, ADRES, BBCON
                 ECADR           SMODE                           # 27    SELF TEST ON/OFF SWITCH
 ## Page 306

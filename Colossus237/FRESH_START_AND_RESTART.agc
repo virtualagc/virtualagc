@@ -14,6 +14,7 @@
 ##				and corrected errors found.
 ##		2017-01-14 RSB	Fixed comment-text errors discovered while proofing
 ##				Colossus 249 comment text.
+##		2017-01-28 RSB	WTIH -> WITH.
 
 ## Page 176
 
@@ -116,7 +117,7 @@
 #     B. ALARMS
 
 #          1107  PHASE TABLE ERROR
-#          1110  RESTART WTIH NO ACTIVE GROUPS
+#          1110  RESTART WITH NO ACTIVE GROUPS
 
 ## Page 178
 		BANK	10

@@ -25,8 +25,10 @@
 ##                                          REFSMAT -> REFSMMAT
 ##                                          RHTETA  -> RTHETA
 ##                                          EDNEXT  -> ENDEXT
-##             2017-01-22 HG   Add missing segemnt of interpretive statements
-##                             Fix some comments, remove tabs
+##              2017-01-22 HG   Add missing segemnt of interpretive statements
+##                              Fix some comments, remove tabs
+##		2017-01-28 RSB	Proofed comment text using octopus/prooferComments
+##				and fixed errors found.
 
 ## Page 712
                 BANK    34
@@ -137,9 +139,9 @@ V16N54          VN      1654
 #                 THIS VEHICLES BASE VECTOR IS CONIC EXTRAPOLATED TO
 #                 PRESENT TIME AND SAVED AS RONE, VONE.
 #                 THE OTHER VEHICLES BASE VECTOR IS CONIC EXTRAPOLATED
-#                 TO THE SAME TIME, THE OUTPUT BEING LEFT IS RATT, VATT.
+#                 TO THE SAME TIME, THE OUTPUT BEING LEFT IN RATT, VATT.
 # IF SERVICER IS ON ---
-#                 RONE, VONE ARE SET EQUAL TO RN, VN, AND THE OTHER
+#                 RONE, VONE ARE SET EQUAL TO RN, VN AND THE OTHER
 #                 VEHICLES STATE VECTOR IS PREC. EXTRAPOLATED TO PIPTIME.
 
 STATEXTP        STQ     RTB
@@ -160,7 +162,7 @@ STATEXTP        STQ     RTB
                         RATT1
                 STOVL   BASETHP         # THIS POS.
                         VATT1
-                STORE   BASETHV         # THIS VEL.
+                STORE   BASETHV         # THIS VEL
 HAVEBASE        BON     RTB
                         AVEGFLAG
                         GETRVN          # IF AVG ON ,GET RN ETC.
@@ -227,7 +229,7 @@ GETRVN2         CALL
                 CLEAR   GOTO
                         INTYPFLG        # PREC EXTRAP FOR OTHER
                         OTHINT
-R31SURF         STCALL  TDEC1           # LM ON SURFACE
+R31SURF         STCALL  TDEC1           # LM ON SURFACE.
                         LEMPREC
                 GOTO                    # DO CSM CONIC
                         OTHCONIC

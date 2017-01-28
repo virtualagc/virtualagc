@@ -1,6 +1,6 @@
 ### FILE="Main.annotation"
 ## Copyright:	Public domain.
-## Filename:	STABLE_ORBIT.agc
+## Filename:	STABLE_ORBIT_-_P38-P39.agc
 ## Purpose: 	Part of the source code for Luminary 1A build 099.
 ##		It is part of the source code for the Lunar Module's (LM)
 ##		Apollo Guidance Computer (AGC), for Apollo 11.
@@ -17,6 +17,13 @@
 ##		2016-12-13 RSB	GOTOP00H -> GOTOPOOH
 ##		2016-12-15 RSB	Proofed text comments with octopus/ProoferComments
 ##				and corrected the errors found.
+##		2017-01-28 RSB	Back-ported a comment-text fix from proofing
+##				of Luminary 69.  Also, changed the filename
+##				(from STABLE_ORBIT.agc) so as to agree with 
+##				the other AGC versions having a corresponding
+##				log section (making it easier to perform diffs 
+##				between versions), and to agree with what it 
+##				says in ASSEMBLY AND OPERATION INFORMATION.
 ##
 ## This source code has been transcribed or otherwise adapted from
 ## digitized images of a hardcopy from the MIT Museum.  The digitization
@@ -289,7 +296,7 @@ DSPLY81		CAF	V06N81SR	# DISPLAY DELTA V (LV)
 # STABLE ORBIT MIDCOURSE PROGRAM (P39 AND P79)
 #
 # MOD NO -1		LOG SECTION - STABLE ORBIT - P38-P39
-# MOD BY RUDNICKI, S	DATE 25JAN68
+# MOD BY RUDNICKI.S	DATE 25JAN68
 #
 ## Page 728
 # FUNCTIONAL DESCRIPTION

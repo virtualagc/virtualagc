@@ -29,6 +29,9 @@
 ##                              Fix statement CA FLAGWRD2 -> CS FLAGWRD0
 ##                                            EXTEND      -> CCS A
 ##                                            BZF NOTP20  -> TC  NOTP20
+##		2017-01-27 RSB	Proofed comment text using octopus/prooferComments
+##				and fixed errors found.
+##		2017-01-28 RSB	WTIH -> WITH.
 
 ##
 ## Page 504
@@ -357,7 +360,7 @@ P20LEMB4        CAF             250DEC
 P20LEMC3        TC              INTPRET
                 CALL                                    # DO A PERMANENT MEMORY PRECISION
                                 UPPSV                   # INTEGRATION TO ESTABLISH AN UP-TO-DATE
-                BOFF            VLOAD                   # BASE FOR CONICS (KELPLER) IN R21
+                BOFF            VLOAD                   # BASE FOR CONICS (KEPLER) IN R21
                                 SURFFLAG
                                 P20LEMC4
                                 RCVLEM                  # WHEN ON LUNAR SURFACE
@@ -744,7 +747,7 @@ R22WAIT         CAF             1500DEC
 
 
 R22LEM46        CAF             2SECS
-                TC              P20LEMWT        +1      # WAIT 2 SECONDS AND TAKE ANOTHER MARK
+                TC              P20LEMWT        +1
 
 
 N49DSP          CAF             V06N49NB
@@ -1123,7 +1126,7 @@ R61C+L03        TC              INTPRET                 # SET
                 STORE           SCAXIS                  # TRACK AXIS UNIT VECTOR
                 RTB
                                 LOADTIME                # PRESENT TIME
-                DAD                                     # EXTARPULATE FORWARD FORWARD TO CENTER OF
+                DAD                                     # EXTRAPULATE FORWARD FORWARD TO CENTER OF
                                 3SECONDS                # SIX SECOND PERIOD.
                 STCALL          TDEC1
                                 LPS20.1                 # LOS DETERMINATION + VEH ATTITUDE
@@ -1230,7 +1233,7 @@ R61C+L1         CAF             BIT7+9PV                # IS RENDEZVOUS OR P25FL
                 BZF             ENDOFJOB                # NO-EXIT ROUTINE AND PROGRAM.
                 TC              R61C+L06                # YES EXIT ROUTINE
 BIT7+9PV        OCT             00500
-TENDEG          2DEC            .02777777               # SCALED UNTS OF REVOLUTION B0
+TENDEG          2DEC            .02777777               # SCALED UNITS OF REVOLUTION B0
 06SEC           DEC             600
 PHI             EQUALS          20D
                 EBANK=          CDUXD
@@ -1415,7 +1418,7 @@ ENDRMODF        EQUALS
 
 # FUNCTIONAL DESCRIPTION_
 
-# RRTURNON IS THE TURN-ON SEQUENCE WHICH, ALONG WTIH
+# RRTURNON IS THE TURN-ON SEQUENCE WHICH, ALONG WITH
 # RRZEROSB, ZEROS THE CDU:S AND DETERMINES THE RR MODE.
 # INITIALLY, CONTROL IS TRANSFERRED TO RRZEROSB FOR THE
 # ACTUAL TURN-ON SEQUENCE. UPON RETURN THE PROGRAM
@@ -2042,7 +2045,7 @@ STARTDES        INCR            DESRET
                 CS              RADMODES
                 MASK            BIT10
                 ADS             RADMODES
-                MASK            BIT11                   # SEE IF REPOSITIONING IN PROGRESS.
+                MASK            BIT11                   # SEE IF REPOSITION IN PROGRESS.
                 CCS             A
                 TCF             DESRETRN                # ECTR ALREADY SET UP.
 
@@ -2144,7 +2147,7 @@ RRLIMNB         INDEX           Q                       # THIS ROUTINE IS IDENTI
                 DXCH            ITEMP1
                 LXCH            Q                       # L(CALLER +2) TO L
 
-                CAF             BIT12                   # SEE WHICH MODE RR IS IN.
+                CAF             BIT12                   # SEE WHICH MODE RR IS IN
                 MASK            RADMODES
                 CCS             A
                 TCF             MODE2CHK                # MODE 2 CAN USE RRLIMCHK CODING
@@ -2459,7 +2462,7 @@ RRDESDUN        CS              BIT10                   # WHEN PROBLEM DONE, REM
                 TCF             ENDOFJOB                # WITH ECTR DISABLED.
 
 DORROUT         CS              FLAGWRD0                # IF NOT IN P20/P22 BUT V41,DON'T DO
-                MASK            RNDVZBIT                # VELOCITY CORRECTION
+                MASK            RNDVZBIT                # VELOCITY CORRECTION.
                 CCS             A
                 TC              NOTP20
                 TC              INTPRET
@@ -2858,7 +2861,7 @@ DATAFAIL        CS              ITEMP1                  # IN THE ABOVE CASE, SET
 LRPOS2          INHINT
 
                 CS              RADMODES
-                MASK            BIT6                    # SHOW DESIRED LR POSITION IS 2
+                MASK            BIT6                    # SET BIT6 TO SHOW DESIRED LR POS IS 2
                 ADS             RADMODES
 
                 CAF             BIT7
@@ -3041,7 +3044,7 @@ NOTSHIFT        UNIT
                                 LS21X
 
 ## Page 577
-# PROGRAM NAME_ : LPS20.2 400 NM RANGE CHECK
+# PROGRAM NAME_ LPS20.2 400 NM RANGE CHECK
 # MOD. NO. 2   BY J.D. COYNE    SDC    DATE  12-7-66
 
 
@@ -3169,7 +3172,7 @@ LRS22.1         TC              MAKECADR
                 EXTEND                                  # GET RR RANGE SCALE
                 RAND            CHAN33                  # FROM CHANNEL 33 BIT 3
                 TS              L
-                CS              BIT3
+                CS              BIT3			# AND SET IN RADMODES BIT3
                 MASK            RADMODES
                 AD              L
                 TS              RADMODES
@@ -3182,7 +3185,7 @@ READRDOT        TC              BANKCALL
 
                 INHINT                                  # NO INTERRUPTS WHILE READING TIME AND CDU
                 DXCH            TIMEHOLD                # SET MARK TIME EQUAL TO THE MID-POINT
-                DXCH            MKTIME                  # TEMP BUFFER FOR DOWNLINK
+                DXCH            MKTIME                  # TIME OF THE RANGE-RATE READING
                 DXCH            SAMPLSUM                # SAVE RANGE-RATE READING
                 DXCH            RDOTMSAV
                 EXTEND
@@ -4303,7 +4306,7 @@ DEC13T          DEC             13
 JOBOVER         EQUALS          LRS24.1                 # ****  TEMPORARY DEFINITION ******
 
 # END OF TEST PROGRAM
-# ***********************************************
+#  ****************************************
 ZERO/SP         EQUALS          HI6ZEROS
                 BLOCK           02
                 SETLOC          FFTAG5
@@ -4315,9 +4318,8 @@ GOTOV56         EXTEND                                  # P20 TERMINATES BY GOTO
                 EBANK=          WHOCARES
 VB56CADR        2CADR           TRMTRACK
 
-## Page 605
 
-## Page 594
+## Page 605
 # PROGRAM NAME: R29  (RENDEZVOUS RADAR DESIGNATE DURING POWERED FLIGHT)
 # MOD NO. 2       BY H. BLAIR-SMITH       JULY 2, 1968.
 

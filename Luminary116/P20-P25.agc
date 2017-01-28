@@ -13,6 +13,7 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-01-22 MAS  Created from Luminary 99.
+##		2017-01-28 RSB	WTIH -> WITH.
 
 ## NOTE: Page numbers below have not yet been updated to reflect Luminary 116.
 
@@ -1584,7 +1585,7 @@ ENDRMODF        EQUALS
 
 # FUNCTIONAL DESCRIPTION_
 
-#       RRTURNON IS THE TURN-ON SEQUENCE WHICH, ALONG WTIH
+#       RRTURNON IS THE TURN-ON SEQUENCE WHICH, ALONG WITH
 #       RRZEROSB, ZEROS THE CDU:S AND DETERMINES THE RR MODE.
 #       INITIALLY, CONTROL IS TRANSFERRED TO RRZEROSB FOR THE
 #       ACTUAL TURN-ON SEQUENCE.  UPON RETURN THE PROGRAM
