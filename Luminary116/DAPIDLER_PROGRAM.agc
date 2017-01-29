@@ -13,6 +13,7 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-01-22 MAS  Created from Luminary 99.
+##		2017-01-28 RSB	Comment-text fixes identified for Luminary 69.
 
 ## NOTE: Page numbers below have not yet been updated to reflect Luminary 116.
 
@@ -366,7 +367,7 @@ DSPLYTOT        EXTEND
 #                       CHAN12  BIT 6 (IMU ERROR COUNTER ENABLE)
 #                       CHAN14  BIT 13,14,15 (DAC ACTIVITY)
 
-# SIGN CONVENTION:      AK = THETAC - THETA
+# SIGN CONVENTION<      AK = THETAC - THETA
 #                       WHERE   THETAC = COMMAND ANGLE
 #                               THETA = PRESENT ANGLE
 

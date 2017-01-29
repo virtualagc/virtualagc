@@ -17,6 +17,7 @@
 ##		2011-05-07 JL	Flag SBANK= workaround.
 ##		2016-12-18 RSB	Proofed text comments with octopus/ProoferComments
 ##				and corrected the errors found.
+##		2017-01-28 RSB	Comment-text fixes identified for Luminary 69.
 
 ## This source code has been transcribed or otherwise adapted from
 ## digitized images of a hardcopy from the MIT Museum.  The digitization
@@ -486,7 +487,7 @@ UPOUT		EQUALS
 
 		TC	ENDEXT		# EXTENDED VERB EXIT
 
-# VERB TO BRANCH
+# VERB 70 BRANCH
 
 UPEND70		EXTEND			# V70 DOES THE FOLLOWING WITH DP DELTA
 		DCS	UPBUFF		# TIME IN UPBUFF

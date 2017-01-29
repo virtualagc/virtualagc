@@ -21,6 +21,8 @@
 ##              2017-01-21 HG   Fix opcode RELINS -> RELINT
 ##                                         DXVH   -> DXCH
 ##              2017-01-22 HG   Fix operand modifier 10d -> 10D
+##		2017-01-28 RSB	Proofed comment text using octopus/prooferComments
+##				and fixed errors found.
 
 ## Page 1390
 		BANK	22
@@ -69,7 +71,7 @@ READPIPS	INHINT
 		TS	MPAC +4
 		TS	MPAC +6
 		
-VECMODE	TCF	VMODE
+VECMODE		TCF	VMODE
 
 # FORCE TP SIGN AGREEMENT IN MPAC:
 
@@ -305,5 +307,3 @@ NOSHIFT		CAF	ZERO
 VECSGNAG	TC	BANKCALL
 		CADR	VECAGREE
 		TC	DANZIG
-
-# *** END OF SKIPPER .070 ***

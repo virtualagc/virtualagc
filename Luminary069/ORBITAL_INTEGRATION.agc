@@ -20,7 +20,9 @@
 ##		2017-01-21 RRB	Updated for Luminary 69.
 ##              2017-01-22 HG   Remove non existent code arround label GOBAQUE
 ##                              Remove incorrect "," in interpretative operand
-#3                              Fic interpretive operators VXSC BOV -> VXSC
+##                              Fix interpretive operators VXSC BOV -> VXSC
+##		2017-01-28 RSB	Proofed comment text using octopus/prooferComments
+##				and fixed errors found.
 
 ## Page 1223
 # DELETE
@@ -409,7 +411,7 @@ COMTERM		STORE	UZ
 			URPV		# X  B-2 TO 2D
 		PDDL	DSQ
 			URPV +2		#  2  2
-		DAD	PDDL		# Y +X  B2 TO 2D
+		DAD	PDDL		# Y +X  B-2 TO 2D
 			2D
 		SL1	DSU
 
@@ -861,6 +863,8 @@ DP2/3		2DEC	.6666666667
 
 2/3		EQUALS	DP2/3
 OCT27		OCT	27
+
+# LM504 IS TEMPORARY
 
 		BANK	13
 		SETLOC	ORBITAL2

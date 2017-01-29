@@ -22,6 +22,8 @@
 ##                                          +X0RULGE -> +XORULGE
 ##                              Add missing declaration .707 DEC .70711
 ##              2017-01-23 HG   Add mising statement CA POSMAX
+##		2017-01-28 RSB	Proofed comment text using octopus/prooferComments
+##				and fixed errors found.
 
 ## Page 1436
                 BANK    17
@@ -513,7 +515,7 @@ TJLAW           CA      TJLAWADR
                 MASK    USEQRJTS        #  ON THE NEXT PASS.
                 CCS     A               # USEQRJTS BIT MUST NOT BE BIT 15.
                 TS      COTROLER        # GIMBAL USABLE.  STORE POSITIVE VALUE.
-                TC      SPSRCS          # DETERMINE RCS CONTROL
+                TC      SPSRCS          # DETERMINE RCS CONTROL.
                 CAF     FOUR            # ALWAYS CALL FOR 2-JET CONTROL ABOUT U,V.
                 TS      NUMBERT         # FALL THROUGH TO JET SELECTION, ETC.
 

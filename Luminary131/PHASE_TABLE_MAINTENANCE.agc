@@ -17,6 +17,7 @@
 ##		2017-01-06 RSB	Page numbers now agree with those on the
 ##				original harcopy, as opposed to the PDF page
 ##				numbers in 1701.pdf.
+##		2017-01-28 RSB	Back-ported some comment-text fixes from Luminary 69.
 
 ## Page 1286
 # SUBROUTINE TO UPDATE THE PROGRAM NUMBER DISPLAY ON THE DSKY.
@@ -324,16 +325,16 @@ PHSCHNG2	LXCH	TEMPBBCN
 		TS	PHASE1 -2
 
 BELOW1		CCS	TEMPSW2		# IS IT A PHASCHNG OR A 2PHSCHNG
-		TCF	BELOW2		# IT'S A PHASCHNG
+		TCF	BELOW2		# IT:S A PHASCHNG
 
-		TCF	+1		# IT'S A 2PHSCHNG
+		TCF	+1		# IT:S A 2PHSCHNG
 		CS	TEMPP2
 		LXCH	TEMPP2
 		NDX	TEMPG2
 		DXCH	-PHASE1 -2
 
 		CCS	TEMPSW2
-		NOOP			# CAN'T GET HERE
+		NOOP			# CAN:T GET HERE
 		TCF	BELOW2
 
 		CS	TIME1

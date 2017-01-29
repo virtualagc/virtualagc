@@ -13,7 +13,7 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-01-22 MAS  Created from Luminary 99.
-##		2017-01-28 RSB	WTIH -> WITH.
+##		2017-01-28 RSB	WTIH -> WITH and WHCIH -> WHICH.
 
 ## NOTE: Page numbers below have not yet been updated to reflect Luminary 116.
 
@@ -126,7 +126,7 @@
 #       VCV             * +7 FOR EARTH  *       DP TERMINAL VELOCITY VECTOR IN METERS/CENTISEC
 #                       * +5 FOR MOON   *
 #       TC              * +28           *       DP TRANSFER TIME IN CENTISECS TO WHICH KEPLER CONVERGED. ALWAYS LESS THAN ONE PERIOD.
-#       XPREV           * +17 FOR EARTH *       DP VALUE OF X IN SQRT(METERS) TO WHCIH KEPLER CONVERGED. ALWAYS LESS THAN THE X
+#       XPREV           * +17 FOR EARTH *       DP VALUE OF X IN SQRT(METERS) TO WHICH KEPLER CONVERGED. ALWAYS LESS THAN THE X
 #                       * +16 FOR MOON  *               CORRESPONDING TO ONE PERIOD.
 ## Page 1162
 # FOR OTHER OUTPUT WHICH MAY BE OF USE, SEE DEBRIS.
