@@ -297,6 +297,10 @@
  *				to get an erasable parity fail, because I
  *				haven't come up with a program that can cause
  *				one to happen.
+ *		01/29/17 MAS	Hard-wired the DKSY's RSET button to turning
+ *				off the RESTART light (the button had its
+ *				own discrete to reset the RESTART flip flop
+ *				in the real AGC/DSKY).
  *
  * The technical documentation for the Apollo Guidance & Navigation (G&N) system,
  * or more particularly for the Apollo Guidance Computer (AGC) may be found at
@@ -483,8 +487,11 @@ WriteIO (agc_t * State, int Address, int Value)
     Value = 0;
 
   // The DSKY RESTART light is reset whenever CH11 bit 10 is written
-  // with a 1.
-  if (Address == 011 && (Value & 01000))
+  // with a 1. The controlling flip-flop in the AGC also has a hard
+  // line to the DSKY's RSET button, so on depression of RSET the
+  // light is turned off without need for software intervention.
+  if ((Address == 011 && (Value & 01000)) ||
+      ((Address == 015 || Address == 016) && Value == 022))
     DskyChannel163 &= ~DSKY_RESTART;
 
   State->InputChannel[Address] = Value;
