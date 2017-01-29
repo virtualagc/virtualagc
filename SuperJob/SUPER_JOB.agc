@@ -15,6 +15,8 @@
 ##                              errors until assembly succeeded. Octals
 ##                              have not yet been extracted, so errors
 ##                              almost certainly remain.
+##              2017-01-28 MAS  Corrected errors found by counting lines
+##                              on each page (there should be 58).
 
 ## Page D-4 (continued)
                 SETLOC  FF024000
@@ -449,6 +451,7 @@ AAA             TS      NUMA            # SET NUMA EQUAL TO NUMAA FOR CCS E
                 CCS     NUMA
                 TC      AAA
                 CA      CYR             # SHIFT ONE POSITION
+                MASK    MASKBA
                 INDEX   A
                 CA      LOOKUPA
                 MASK    MASKAA
@@ -725,6 +728,9 @@ SUCCESAA        CA      OC10
                 READ    CH26
                 CCS     A
                 TC      CONT2A
+                TC      SUCCESBA
+                TC      CONT2A
+                TC      CONT2A
 CONT2A          CA      C2A             # ERROR N2 N0 00000
                 TS      NOUN
                 TC      TERR
@@ -755,6 +761,7 @@ V02             TC      DISPLAY         # TURN ON ACM
                 CA      COMOUT
                 EXTEND
                 WRITE   CH11            # SET OUTCOM
+                CA      STATUS1A
                 TS      STATUS
                 CA      C1A
                 TS      ACMSTAT
@@ -1574,6 +1581,8 @@ SOMEA           CA      CH25LOAD
                 TC      +2
                 TC      BEGINL
                 CA      FB
+                AD      INCRFB
+                TS      FB
                 TC      STARTSUM
 GETSUM          TS      CNTDWN1L
                 TS      L               # ADDRESS 2000 IN L
@@ -1786,6 +1795,7 @@ TRFRA           CA      Q
                 CA      OC10
                 TS      EBCOUNT
                 TS      FBCOUNT
+                TC      PACTRNS
                 CA      BNKNUMBA
                 TS      BB
                 CA      ZEROS
@@ -1961,6 +1971,7 @@ CONTDATA        TS      GETDATA
                 TC      UPDISPLA
 7SCHKA          EXTEND
                 READ    CH23
+                CCS     A
                 TC      QSTORL
                 TC      QSTORL
                 TC      QSTORL
@@ -2016,6 +2027,7 @@ V22             TC      DISPLAY
                 TS      BB
                 CA      OUTCONCA        # 74000
                 TS      ACMFBK
+                CA      OC10
                 TS      FBCOUNT
                 TS      EBCOUNT
                 TC      CONTCLR -2
@@ -2080,8 +2092,6 @@ LISTID          EXTEND
                 INCR    LSTCNT
                 CA      COMOUT
                 INDEX   LSTCNT
-                CA      COMOUT
-                INDEX   LSTCNT
                 TS      A
                 TC      FNDTRNSP
                 SETLOC  CF162000
@@ -2092,6 +2102,7 @@ LISTID          EXTEND
                 CA      ZERO
                 TS      SIXTH
                 TS      SEVENTH
+                TS      EIGHTH
                 TS      PUNCH5
                 TS      PUNCH6
                 CA      OC17
@@ -2121,7 +2132,8 @@ RLLD            CA      ZERO
                 TS      RDLD
                 CA      ZERO
                 TS      HOLDIT
-SETSW           TS      SWITCH
+SETSW           CA      ONE
+                TS      SWITCH
                 TC      UPDISPLA
 STDATTR         CCS     PUNCH5
                 TC      TRPACBNK
@@ -2208,8 +2220,6 @@ ONEBNK          CA      ZERO
                 TS      SEVENTH
                 TC      UPDISPLA
 BNKGD           CA      R1
-                MSK     FIRST5
-                AD      HOLDNO
                 MSK     FIRST5
                 AD      HOLDNO
                 MSK     FIRST5
