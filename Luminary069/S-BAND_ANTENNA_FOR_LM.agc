@@ -20,7 +20,7 @@
 ##		2016-12-18 RRB	Updated for Luminary 69.
 ##              2016-12-27 HG   Comment last line *** END OF LEMONAID.070 ***
 ##		2017-01-27 RSB	Proofed comment text using octopus/prooferComments
-##				but no errors found.
+##				and fixed errors found.
 
 ## Page 498
 # SUBROUTINE NAME: R05 - S-BAND ANTENNA FOR LM
@@ -191,5 +191,3 @@ V06N51		VN	0651
 UR		EQUALS	0D
 URP		EQUALS	6D
 		SBANK=	LOWSUPER
-		
-# *** END OF LEMONAID.070 ***

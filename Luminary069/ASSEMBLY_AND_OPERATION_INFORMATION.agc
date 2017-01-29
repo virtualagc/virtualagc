@@ -20,6 +20,7 @@
 ##              2017-01-04 MAS  Completed updating for Luminary 69.
 ##		2017-01-25 RSB	Proofed comment text using octopus/prooferComments
 ##				and fixed the (single) error found.
+##		2017-01-29 RSB	Some of my fixes disappeared, for some reason.
 
 ## Page 1
 # THIS LGC PROGRAM IS INTENDED FOR USE IN THE LM DURING THE MANNED LUNAR LANDING MISSION OR ANY SUBSET THEREOF.
@@ -472,7 +473,7 @@
 # 98  SYSTEM TEST RESULTS AND INPUTS         3COMP   XXXXX.
 #                                                    .XXXXX
 #                                                    XXXXX.
-# 99  RMS IN POSITION                        2COMP   XXXXX. FT                           DEC ONLY
+# 99  RMS IN POSITION                        2COMP   XXX.XX NAUT MI                      DEC ONLY
 #     RMS IN VELOCITY                                XXXX.X FT/SEC
 
 ## Page 13

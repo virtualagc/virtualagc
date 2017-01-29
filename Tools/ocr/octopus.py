@@ -53,6 +53,7 @@ group.add_argument('--luminary116', help="Perform LUMINARY 116 processing (for o
 group.add_argument('--solarium55', help="Perform SOLARIUM 55 processing", action="store_true")
 group.add_argument('--colossus237', help="Perform COLOSSUS 237 processing", action="store_true")
 group.add_argument('--artemis72', help="Perform COLOSSUS 237 processing", action="store_true")
+group.add_argument('--simAP11ROPE', help="Perform AP11ROPE Digital Simulation processing", action="store_true")
 
 args = parser.parse_args()
 if not os.path.isfile(args.input_file):
@@ -140,6 +141,14 @@ elif args.artemis72:
     lines_only = cv2.erode(~blurred, np.ones((1,21), np.uint8), iterations=1)
     diff = blurred + lines_only
     _,thresh = cv2.threshold(diff, 240, 255, cv2.THRESH_BINARY)
+elif args.simAP11ROPE:
+    _,_,r_channel = cv2.split(img)
+    blurred = cv2.GaussianBlur(r_channel, (7,7), 0)
+    # Isolate the bands by eroding very strongly horizontally
+    lines_only = cv2.erode(~blurred, np.ones((1,51), np.uint8), iterations=1)
+    # Difference the original R channel with the isolated bands
+    diff = blurred + lines_only
+    _,thresh = cv2.threshold(diff, 245, 255, cv2.THRESH_BINARY)
 else:
     raise RuntimeError("Unknown program type selected")
 
