@@ -40,6 +40,9 @@
 				being used and was generating
 				compiler warnings.
 	        08/01/16 RSB    Initialized an uninitialized variable.
+	        01/29/17 MAS    Switched off the infinite loop check if
+                                alarms aren't inhibited (so the TC Trap
+                                can do its thing).
  */
 
 #include <stdio.h>
@@ -204,7 +207,7 @@ DbgHasBreakEvent ()
 	  Value = DbgGetFromZ (Debugger.State);
 
 	  /* Detect certain types of impending infinite loops. */
-	  if (!(Value & 0177777) && !Debugger.State->Erasable[0][0])
+	  if (InhibitAlarms && !(Value & 0177777) && !Debugger.State->Erasable[0][0])
 	    {
 	      /* Infinite Loop break on next instruction */
 	      BreakFlag = DebugMode = 1;
