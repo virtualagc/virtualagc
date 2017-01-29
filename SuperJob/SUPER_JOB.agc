@@ -17,6 +17,8 @@
 ##                              almost certainly remain.
 ##              2017-01-28 MAS  Corrected errors found by counting lines
 ##                              on each page (there should be 58).
+##              2017-01-29 MAS  Fixed a few errors identified during
+##                              octal transcription.
 
 ## Page D-4 (continued)
                 SETLOC  FF024000
@@ -958,7 +960,7 @@ SUCCESS         CA      OC17            # LOAD NOUN R1 R2 R3 WITH ALL 7S
                 TS      R2
                 TS      R3
                 TS      NOUN
-                TS      DISPLAY
+                TC      DISPLAY
                 TC      IDLE
 FXDPR           CA      BANKNO
                 TS      CYR
@@ -1041,7 +1043,7 @@ BBKBA           OCT     22024           # PAC BANK 11
 FULLESS2        OCT     01776
 1STBKA          OCT     12020           # FBANK  5 EBANK 20
 2NDBKA          OCT     14024           #        6       24
-3RDBKA          OCT     01776           #        7       30
+3RDBKA          OCT     16030           #        7       30
 4THBKA          OCT     20034           #       10       34
 BBKCA           OCT     24100           # F BANK 12 EBANK 100
 BBKDA           OCT     26104           # F BANK 13 EBANK 104

@@ -33,7 +33,8 @@
  *                              and hopefully more-correctly, because the old
  *                              method was failing for the very large mods
  *                              found some places in SUNBURST.  However, I
- *                              kept the older algorithm for --block1 targets.
+ *               01/29/17 MAS   Added an address calculation tweak for
+ *                              the --raytheon option.
  */
 
 #include "yaYUL.h"
@@ -217,6 +218,12 @@ ParseEQUALS(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
                 Value = -16383;
               else if (Value > 32767)
                 Value = 32767;
+            }
+
+          if (Raytheon && Value >= 02000 && Value < 04000)
+            {
+              // For Raytheon builds, shift common-fixed literals into the expected range
+              Value += 010000 + InRecord->ProgramCounter.FB * 02000;
             }
 
           LabelValue.Invalid = 0;
