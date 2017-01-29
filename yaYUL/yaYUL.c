@@ -89,6 +89,7 @@
  *                              to EQUALS/= needed for Sunburst120 were made.
  *              2016-11-14 RSB  Added --to-yul.
  *              2016-12-18 MAS  Added --no-checksums.
+ *              2017-01-29 MAS  Added --raytheon.
  */
 
 #include "yaYUL.h"
@@ -211,6 +212,10 @@ main(int argc, char *argv[])
         {
           Block1 = 1;
           assemblyTarget = "BLK1";
+        }
+      else if (!strcmp(argv[i], "--raytheon"))
+        {
+          Raytheon = 1;
         }
       else if (!strcmp(argv[i], "--blk2"))
         {
@@ -572,6 +577,8 @@ main(int argc, char *argv[])
           "                 is correct for almost all surviving AGC software.\n");
       printf(
           "                 general, though, and not for any flown missions.\n");
+      printf(
+          "--raytheon       Assembles Raytheon-style code.  The default is MIT.\n");
       printf("--no-checksums   Don't emit bank checksums. For use with Retread 44.\n");
       printf("--hardware       Emit binary with hardware bank order, and\n"
           "                 enable parity bit calculation\n");

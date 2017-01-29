@@ -550,6 +550,7 @@ Parser_t ParseBLOCK, ParseEQUALS, ParseEqualsECADR, ParseCHECKequals, ParseBANK,
     ParseEqMinus, ParseXCADR, ParseSECSIZ;
 
 extern int Block1;
+extern int Raytheon;
 extern int blk2;
 extern char *assemblyTarget;
 extern int Html;

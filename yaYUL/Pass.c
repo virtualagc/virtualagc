@@ -170,6 +170,7 @@ static int NumFields = 0;
 
 char *assemblyTarget = "AGC4";
 int Block1 = 0;
+int Raytheon = 0;
 int blk2 = 0;
 int Html = 0;
 FILE *HtmlOut = NULL;
