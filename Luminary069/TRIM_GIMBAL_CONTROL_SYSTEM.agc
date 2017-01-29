@@ -21,6 +21,8 @@
 ##              2017-01-21 HG   Fix operand BIT 12 -> BIT12
 ##                                          NEGSUM -> NEGUSUM
 ##              2017-01-23 Fix operator TC -> TCF
+##		2017-01-28 RSB	Proofed comment text using octopus/prooferComments
+##				and fixed errors found.
 
 ## Page 1467
                 BANK    21
@@ -51,7 +53,7 @@ GTS             CAF     NEGONE          # MAKE THE NEXT PASS THROUGH THE DAP BE
 
 # THE DRIVE SETTING ALGORITHM
 #
-#       DEL = SGN(OMEGA*K + ALPHA*ABS(ALPHA)/2*)
+#       DEL = SGN(OMEGA*K + ALPHA*ABS(ALPHA)/2).
 #
 #       NEGUSUM = ERROR.K(2) + DEL(OMEGA.K.DEL + ALPHA(2)/2)(3/2) + ALPHA(OMEGA.K.DEL + ALPHA(2)/3)
 #
@@ -86,7 +88,7 @@ GTSQAXIS        DXCH    WCENTRAL
                 CAE     QDIFF
 
 ALGORTHM        EXTEND                  # Q(R)DIFF IS THETA (ERROR) SCALED AT PI.
-                MP      K2CNTRAL        # FORM K*THETA, IN D.P.
+                MP      K2CNTRAL        # FORM K(2)*THETA IN D.P.
                 LXCH    K2THETA
                 EXTEND                  # FORM K(2)*THETA*SF2 IN D.P.
                 MP      BIT9
@@ -106,7 +108,7 @@ ALGORTHM        EXTEND                  # Q(R)DIFF IS THETA (ERROR) SCALED AT PI
                 MP      BIT12
                 ADS     OMEGA.K +1
 
-                CAE     ACENTRAL        # FORM ALPHA(2)/(2) IN D.P.,
+                CAE     ACENTRAL        # FORM ALPHA(2)/2 IN D.P.
                 EXTEND
                 SQUARE
                 DXCH    A2CNTRAL
@@ -120,7 +122,7 @@ ALGORTHM        EXTEND                  # Q(R)DIFF IS THETA (ERROR) SCALED AT PI
                 TCF     +3
                 EXTEND
                 DCS     A2CNTRAL
-                DXCH    FUNCTION        # SAVE AS SGN(ALPHA)*(ALPHA(2)/2
+                DXCH    FUNCTION        # SAVE AS SGN(ALPHA)*ALPHA(2)/2
 ## Page 1469
                 EXTEND
                 DCA     OMEGA.K
@@ -161,7 +163,7 @@ FUNCT3          CAE     A2CNTRAL        # CALCULATE (2/3)*ALPHA(2)/2 = ALPHA(2)/
                 TS      L
                 TCF      +2
                 ADS     A2CNTRAL
-                DXCH    OMEGA.K
+                DXCH    OMEGA.K		# DEL*OMEGA*K + ALPHA(2)/3 = G
                 DAS     A2CNTRAL
                 CAE     A2CNTRAL        # G*ALPHA IN D.P.
                 EXTEND
@@ -396,7 +398,9 @@ ZEROHIGH        CA      FOURTEEN        # ARG LESS THAN 2(-14) MEANS 3/2 POWER
 
                 CA      TWO
                 TS      ININDEX         # INITIALIZE THE SHIFT LOOP.
-                XCH     FUNCTION +1
+                
+                			# COLLECT THE 14 MOST SIGNIFICANT BITS OF
+                XCH     FUNCTION +1	# THE 28 INTO THE HIGH ORDER WORD.
                 XCH     FUNCTION
                 TCF     SCALLOOP
 GOODARG         CA      TWELVE
@@ -444,12 +448,12 @@ SCALDONE        EXTEND                  # AFTER 3/2 POWER IS TAKEN, SCALE FACTOR
                 DXCH    FUNCTION
 
 DOSHIFT         CA      SHFTFLAG        # HOW MANY SHIFT BITS ARE THERE?
-                AD      ININDEX         # 2**(-ININDEX) WAS SHIFT DIVISOR
+                AD      ININDEX         # 2**(-ININDEX) WAS SHIFT DIVISOR.
                 TS      SR
-                AD      SR
+                AD      SR		# THIS MANY SHIFTS ARE REQUIRED.
 SAVESHFT        TS      Q               # Q BOUNDS ARE ZERO AND 24 (DECIMAL).
                 EXTEND
-                BZMF    SUMNEGU         # BRANCH IF SHIFTING IN UNNECCESARY.
+                BZMF    SUMNEGU         # BRANCH IF SHIFTING IS UNNECESSARY.
 
                 CS      FOURTEEN
                 AD      Q
@@ -487,7 +491,7 @@ SUMNEGU         CS      DEL             # INCLUDE DEL FACTOR IN PRODUCT TERM.
 SUMTERMS        EXTEND
                 BZF     NEGUSUM         # BRANCH IF DEL IS ZERO.
 
-                EXTEND                  # DEL FUNCTION IS +1.
+                EXTEND                  # DEL FACTOR IS +1.
                 DCA     FUNCTION
                 DAS     K2THETA         # NOW ADD IN THE K2THETA TERM.
 NEGUSUM         CCS     K2THETA         # TEST SIGN OF HIGH ORDER PART.
@@ -540,7 +544,7 @@ CLOSEADR        2CADR   CLOSEOUT        # TERMINATE THE JASK.
 
 TWELVE          EQUALS  OCT14
 GMBLBITA        OCTAL   01400           # INDEXED WRT GMBLBITB   DO NOT MOVE ******
-STARTER         DEC     .53033          # INITIAL VALUE FOR SQRT ALGORITHM
+STARTER         DEC     .53033          # INITIAL VALUE FOR SQRT ALGORITHM.
 GMBLBITB        OCTAL   06000           # INDEXED WRT GMBLBITA   DO NOT MOVE ******
 
 # SUBROUTINE ROOTCYCL:  BY CRAIG WORK,3 APRIL 68

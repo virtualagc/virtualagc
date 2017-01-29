@@ -13,6 +13,7 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-01-22 MAS  Created from Luminary 99.
+##		2017-01-28 RSB	Comment-text fixes identified for Luminary 69.
 
 ## NOTE: Page numbers below have not yet been updated to reflect Luminary 116.
 
@@ -469,7 +470,7 @@ UPOUT           EQUALS
 
                 TC              ENDEXT                          # EXTENDED VERB EXIT
 
-# VERB TO BRANCH
+# VERB 70 BRANCH
 
 UPEND70         EXTEND                                          # V70 DOES THE FOLLOWING WITH DP DELTA
                 DCS             UPBUFF                          # TIME IN UPBUFF

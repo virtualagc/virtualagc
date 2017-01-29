@@ -23,6 +23,8 @@
 ##                              kind in the existing code 
 ##              2017-01-22 HG   Fix operand DAPTREG4 -> ITEMP1
 ##              2017-01-28 MAS  Removed the +8D workaround.
+##		2017-01-28 RSB	Proofed comment text using octopus/prooferComments
+##				but no errors found.
 
 ## Page 1416
 		BANK	16

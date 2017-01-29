@@ -13,6 +13,7 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-01-22 MAS  Created from Luminary 99.
+##		2017-01-28 RSB	Back-ported some comment-text fixes made in Luminary 69.
 
 ## NOTE: Page numbers below have not yet been updated to reflect Luminary 116.
 
@@ -2803,7 +2804,7 @@ TCSUBTR         TCF             SUBTR
 ## Page 1087
 # THE FOLLOWING INSTRUCTIONS ARE AVAILABLE FOR SETTING, MODIFYING, AND BRANCHING ON INDEX REGISTERS:
 #       1.      AXT     ADDRESS TO INDEX TRUE.
-#       2.      AXC     ADDRESS TO INDEX COMPLEMENTED.
+#       1.      AXC     ADDRESS TO INDEX COMPLEMENTED.
 #       3.      LXA     LOAD INDEX FROM ERASABLE.
 #       4.      LXC     LOAD INDEX COMPLEMENTED FROM ERASABLE.
 #       5.      SXA     STORE INDEX IN ERASABLE.

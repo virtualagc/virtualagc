@@ -13,6 +13,7 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-01-22 MAS  Created from Luminary 99.
+##		2017-01-28 RSB	Comment-text fixes identified for Luminary 69.
 
 ## NOTE: Page numbers below have not yet been updated to reflect Luminary 116.
 
@@ -365,7 +366,7 @@ NOATTOFF        CS              OCT40010                        # SUBROUTINE TO 
                 TC              Q                               
 
 ## Page 1318
-# ROUTINES TO INITIATE AND TERMINATE PROGRAM USE OF THE PIPAS.  NO IMUSTALL REQUIRED IN EITHER CASE.
+# ROUITNES TO INITIATE AND TERMINATE PROGRAM USE OF THE PIPAS.  NO IMUSTALL REQUIRED IN EITHER CASE.
 
 PIPUSE          CS              ZERO                            
                 TS              PIPAX                           

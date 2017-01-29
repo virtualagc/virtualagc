@@ -16,6 +16,7 @@
 ##		2017-01-06 RSB	Page numbers now agree with those on the
 ##				original harcopy, as opposed to the PDF page
 ##				numbers in 1701.pdf.
+##		2017-01-28 RSB	Comment-text fixes identified for Luminary 69.
 
 ## Page 1402
 # THE DAPIDLER PROGRAM IS STARTED BY FRESH START AND RESTART.  THE DAPIDLER PROGRAM IS DONE 10 TIMES
@@ -379,7 +380,7 @@ DSPLYTOT	EXTEND
 #			CHAN12	BIT 6 (IMU ERROR COUNTER ENABLE)
 #			CHAN14	BIT 13,14,15 (DAC ACTIVITY)
 #
-# SIGN CONVENTION:	AK = THETAC - THETA
+# SIGN CONVENTION<	AK = THETAC - THETA
 #			WHERE	THETAC = COMMAND ANGLE
 #				THETA = PRESENT ANGLE
 

@@ -23,6 +23,8 @@
 ##              2017-01-16 MAS  Fixed a page number and changed to spaces-only in
 ##                              the line comments.
 ##              2017-01-22 HG   Add workaround for SBANK
+##		2017-01-28 RSB	Proofed comment text using octopus/prooferComments
+##				and fixed errors found.
 
 ## Page 1379
 # PROGRAM NAME:   P27
@@ -478,7 +480,7 @@ UPOUT           EQUALS
 
                 TC      ENDEXT          # EXTENDED VERB EXIT
 
-#          VERB TO BRANCH
+#          VERB 70 BRANCH
 
 UPEND70         EXTEND                  # V70 DOES THE FOLLOWING WITH DP DELTA
                 DCS     UPBUFF          # TIME IN UPBUFF

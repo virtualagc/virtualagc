@@ -18,6 +18,8 @@
 ## Mod history: 2016-12-13 MAS  Created from Luminary 99.
 ##              2016-12-18 MAS  Updated from comment-proofed Luminary 99 version.
 ##		2017-01-11 RRB	Updated for Luminary 69.
+##		2017-01-28 RSB	Proofed comment text using octopus/prooferComments
+##				and fixed errors found.
 
 ## Page 1288
 # SUBROUTINE TO UPDATE THE PROGRAM NUMBER DISPLAY ON THE DSKY.
@@ -333,7 +335,7 @@ BELOW1		CCS	TEMPSW2		# IS IT A PHASCHNG OR A 2PHSCHNG
 		DXCH	-PHASE1 -2
 
 		CCS	TEMPSW2
-		NOOP			# CAN'T GET HERE
+		NOOP			# CAN:T GET HERE
 		TCF	BELOW2
 
 		CS	TIME1

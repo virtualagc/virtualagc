@@ -8,11 +8,12 @@
 ## Contact:	Ron Burkey <info@sandroid.org>.
 ## Website:	www.ibiblio.org/apollo.
 ## Pages:	1410-1420
-## Mod history:  2009-05-10 SN  (Sergio Navarro).  Started adapting
+## Mod history: 2009-05-10 SN  (Sergio Navarro).  Started adapting
 ##				from the Luminary131/ file of the same
 ##				name, using Luminary099 page images.
 ##		2016-12-18 RSB	Proofed text comments with octopus/ProoferComments
 ##				and corrected the errors found.
+##		2017-01-28 RSB	Comment-text fixes identified for Luminary 69.
 ##
 ## This source code has been transcribed or otherwise adapted from
 ## digitized images of a hardcopy from the MIT Museum.  The digitization
@@ -379,7 +380,7 @@ DSPLYTOT	EXTEND
 #			CHAN12	BIT 6 (IMU ERROR COUNTER ENABLE)
 #			CHAN14	BIT 13,14,15 (DAC ACTIVITY)
 #
-# SIGN CONVENTION:	AK = THETAC - THETA
+# SIGN CONVENTION<	AK = THETAC - THETA
 #			WHERE	THETAC = COMMAND ANGLE
 #				THETA = PRESENT ANGLE
 

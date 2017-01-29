@@ -16,6 +16,7 @@
 ##		2010-07-18 JL	Fixed indentation.
 ##		2011-05-07 JL	Flagged SBANK= workarounds for future removal.
 ##		2011-05-17 JL	Removed all SBANK= workarounds.
+##		2017-01-28 RSB	Comment-text fixes identified for Luminary 69.
 
 ## Page 1490
 
@@ -485,7 +486,7 @@ UPOUT		EQUALS
 
 		TC	ENDEXT		# EXTENDED VERB EXIT
 
-# VERB TO BRANCH
+# VERB 70 BRANCH
 
 UPEND70		EXTEND			# V70 DOES THE FOLLOWING WITH DP DELTA
 		DCS	UPBUFF		# TIME IN UPBUFF

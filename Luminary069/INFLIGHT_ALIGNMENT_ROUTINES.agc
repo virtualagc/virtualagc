@@ -19,6 +19,8 @@
 ##              2016-12-18 MAS  Updated from comment-proofed Luminary 99 version.
 ##		2017-01-16 RRB	Updated for Luminary 69.
 ##              2017-01-21 HG   Add missing interpretive operation BONCLR
+##		2017-01-28 RSB	Proofed comment text using octopus/prooferComments
+##				but no errors found.
 
 ## Page 1244
 		BANK	22

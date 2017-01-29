@@ -20,6 +20,8 @@
 ##              2016-12-24 RRB  Updated for Luminary 69.
 ##              2017-01-22 HG   Fix operand PLANTIN1 -> PLANTIN
 ##              2017-01-23 HG   Fix operand LO6ZEROS -> HI6ZEROS
+##		2017-01-28 RSB	Proofed comment text using octopus/prooferComments
+##				and fixed errors found.
 
 ## Page 1135
 # ..... RP-TO-R SUBROUTINE .....
@@ -244,7 +246,7 @@ MOONMX          STQ     SETPD
                         EARTHMXX
 
 # COMPUTE X=X0+(XDOT)(T+T0)
-# 8-9D= X0 (REVS B-0), PUSHLOC SET AT 12D
+# 8-9D= XO (REVS B-0), PUSHLOC SET AT 12D
 # 10-11D=XDOT (REVS/CSEC) SCALED B+23 FOR WEARTH,B+28 FOR NODDOT AND BDOT
 #                       AND B+27 FOR FDOT
 #  X1=DIFFERENCE IN 23 AND SCALING OF XDOT,=0 FOR WEARTH,5 FOR NODDOT AND
@@ -260,7 +262,7 @@ NEWANGLE        DLOAD   SR              # ENTER PD 12D
                 STODL   TIMSUBM         # T+T0 CSEC B-42
                         TIMSUBM +1
                 DMP                     # PD 10D        MULT BY XDOT IN 10-11D
-                SL*     DAD             # PD 8D         ADD X0 IN 8-9D AFTER SHIFTING
+                SL*     DAD             # PD 8D         ADD XO IN 8-9D AFTER SHIFTING
                         5,1             #               SUCH THAT SCALING IS B-0
                 PUSH    SLOAD           # PD 10D  SAVE PARTIAL (X0+XDOT*T) IN 8-9D
                         TIMSUBM

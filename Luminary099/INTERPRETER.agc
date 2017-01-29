@@ -15,6 +15,7 @@
 ##		2011-05-08 JL	Removed workarounds.
 ##		2016-12-17 RSB	Proofed text comments with octopus/ProoferComments
 ##				and corrected the errors found.
+##		2017-01-28 RSB	Back-ported some comment-text fixes made in Luminary 69.
 
 ## This source code has been transcribed or otherwise adapted from
 ## digitized images of a hardcopy from the MIT Museum.  The digitization
@@ -2818,7 +2819,7 @@ TCSUBTR		TCF	SUBTR
 ## Page 1087
 # THE FOLLOWING INSTRUCTIONS ARE AVAILABLE FOR SETTING, MODIFYING, AND BRANCHING ON INDEX REGISTERS:
 #	1.	AXT	ADDRESS TO INDEX TRUE.
-#	2.	AXC	ADDRESS TO INDEX COMPLEMENTED.
+#	1.	AXC	ADDRESS TO INDEX COMPLEMENTED.
 #	3.	LXA	LOAD INDEX FROM ERASABLE.
 #	4.	LXC	LOAD INDEX COMPLEMENTED FROM ERASABLE.
 #	5.	SXA	STORE INDEX IN ERASABLE.

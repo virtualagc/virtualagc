@@ -16,6 +16,7 @@
 ##				removal.
 ##		2016-12-17 RSB	Proofed text comments with octopus/ProoferComments
 ##				and corrected the errors found.
+##		2017-01-28 RSB	Back-ported a comment-text fix from Luminary 69.
 
 ## This source code has been transcribed or otherwise adapted from
 ## digitized images of a hardcopy from the MIT Museum.  The digitization
@@ -347,7 +348,7 @@ BELOW1		CCS	TEMPSW2		# IS IT A PHASCHNG OR A 2PHSCHNG
 		DXCH	-PHASE1 -2
 
 		CCS	TEMPSW2
-		NOOP			# CAN'T GET HERE
+		NOOP			# CAN:T GET HERE
 		TCF	BELOW2
 
 		CS	TIME1

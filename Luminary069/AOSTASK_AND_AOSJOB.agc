@@ -28,6 +28,8 @@
 ##                                                                   TC  INVERT
 ##                                                                   EXTEND
 ##                                                                   MP  BIT14
+##		2017-01-28 RSB	Proofed comment text using octopus/prooferComments
+##				and fixed errors found.
 
 ##
 
@@ -196,14 +198,14 @@ STCTR1          CAE     LEMMASS
                 TCF     COMMEQS
                 TCF     LRESC
 
-COMMEQS         CA      1JACCR          # SCALED at PI/4
+COMMEQS         CA      1JACCR          # SCALED AT PI/4
                 AD      1JACCQ
                 EXTEND
                 MP      0.35356         # .70711 SCALED BY (+1)
                 TS      1JACCU
                 TS      1JACCV          # SCALED AT PI/2 RAD/SEC**2
 
-                CCS     MPAC            # COMPUTE L,PVT-GC IF IN DESCENT
+                CCS     MPAC            # COMPUTE L,PVT-CG IF IN DESCENT
                 CAF     ZERO            # ZERO SWITCHES AND GO TO 1/ACCONT IN
                 TS      ALLOWGTS        #   ASCENT
                 TCF     1/ACCONT -1

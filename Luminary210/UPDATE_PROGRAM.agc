@@ -19,6 +19,7 @@
 ##              2016-12-11 HG   Add missing operation  AD BIT1
 ##		2016-12-26 RSB	Comment-text proofed using ProoferComments
 ##				and corrected errors found.
+##		2017-01-28 RSB	Comment-text fixes identified for Luminary 69.
 
 ## Page 1383
 # PROGRAM NAME:		P27
@@ -466,7 +467,7 @@ UPOUT		EQUALS
 
 		TC	ENDEXT		# EXTENDED VERB EXIT
 
-# VERB TO BRANCH
+# VERB 70 BRANCH
 
 UPEND70		EXTEND			# V70 DOES THE FOLLOWING WITH DP DELTA
 		DCS	UPBUFF		# TIME IN UPBUFF

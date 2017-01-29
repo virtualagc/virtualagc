@@ -21,6 +21,8 @@
 ##              2017-01-22 HG   Add missing label ALLSTALL
 ##                              Add missing operation INDEX L
 ##                              Fix interpretive operator BOF -> BOFCLR
+##		2017-01-28 RSB	Proofed comment text using octopus/prooferComments
+##				but no errors found.
 
 ## Page 1200
 # 1.0 INTRODUCTION

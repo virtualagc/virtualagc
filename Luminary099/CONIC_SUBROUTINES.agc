@@ -14,7 +14,7 @@
 ##		2010-12-31 JL	Fixed page number comments.
 ##		2016-12-17 RSB	Proofed text comments with octopus/ProoferComments
 ##				and corrected the errors found.
-##		2017-01-28 RSB	WTIH -> WITH.
+##		2017-01-28 RSB	WTIH -> WITH and WHCIH -> WHICH.
 ##
 ## This source code has been transcribed or otherwise adapted from digitized
 ## images of a hardcopy from the MIT Museum.  The digitization was performed
@@ -139,7 +139,7 @@
 #	VCV		* +7 FOR EARTH	*	DP TERMINAL VELOCITY VECTOR IN METERS/CENTISEC
 #			* +5 FOR MOON	*
 #	TC		* +28		*	DP TRANSFER TIME IN CENTISECS TO WHICH KEPLER CONVERGED. ALWAYS LESS THAN ONE PERIOD.
-#	XPREV		* +17 FOR EARTH	*	DP VALUE OF X IN SQRT(METERS) TO WHCIH KEPLER CONVERGED. ALWAYS LESS THAN THE X
+#	XPREV		* +17 FOR EARTH	*	DP VALUE OF X IN SQRT(METERS) TO WHICH KEPLER CONVERGED. ALWAYS LESS THAN THE X
 #			* +16 FOR MOON	*		CORRESPONDING TO ONE PERIOD.
 ## Page 1162
 # FOR OTHER OUTPUT WHICH MAY BE OF USE, SEE DEBRIS.
