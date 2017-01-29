@@ -10,7 +10,7 @@
 ## Assembler:   yaYUL
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     https://www.ibiblio.org/apollo/index.html
-## Page Scans:  TBD
+## Page Scans:  http://www.ibiblio.org/apollo/Documents/R68-4125-Volume2.pdf
 ## Mod history: 2017-01-27 MAS  Created and transcribed, then corrected
 ##                              errors until assembly succeeded. Octals
 ##                              have not yet been extracted, so errors
