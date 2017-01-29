@@ -13,30 +13,30 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-01-22 MAS  Created from Luminary 99.
+##              2017-01-28 RRB  Updated for Luminary 116.
 
-## NOTE: Page numbers below have not yet been updated to reflect Luminary 116.
-
-## Page 1133
+## Page 1125
 # SUBROUTINE TO CONVERT RAD VECTOR AT GIVEN TIME TO LAT,LONG AND ALT
 
 # CALLING SEQUENCE
-#       L-1     CALL
-#       L               LAT-LONG
 
+#   L-1    CALL
+#   L             LAT-LONG
 # SUBROUTINES USED
-#       R-TO-RP, ARCTAN, SFTGAMMA, SETRE
 
+#  R-TO-RP,ARCTAN,SFTGAMMA,SETRE
 # ERASABLE INIT. REQ.
-#       AXO, -AYO, AZO, TEPHEM (SET AT LAUNCH TIME)
-#       ALPHAV = POSITION VECTOR METERS B-29
-#       MPAC -- TIME (CSECS B-28)
-#       ERADFLAG =1, TO COMPUTE EARTH RADIUS, =0 FOR FIXED EARTH RADIUS
-#       LUNAFLAG=0 FOR EARTH, 1 FOR MOON
 
+#   AXO,-AYO,AZO,TEPHEM (SET AT LAUNCH TIME)
+# ALPHAV = POSITION VECTOR METERS B-29
+#   MPAC-- TIME  (CSECS B-28)
+#  ERADFLAG =1, TO COMPUTE EARTH RADIUS, =0 FOR FIXED EARTH RADIUS
+#  LUNAFLAG=0 FOR EARTH,1 FOR MOON
 # OUTPUT
-#       LATITUDE IN LAT         (REVS. B-0)
-#       LONGITUDE IN LONG       (REVS. B-0)
-#       ALTITUDE IN ALT         METERS B-29
+
+#   LATITUDE IN LAT    (REVS. B-0)
+#   LONGITUDE IN LONG   (REVS. B-0)
+# ALTITUDE IN ALT METERS B-29
 
                 BANK            30                              
                 SETLOC          LATLONG                         
@@ -59,15 +59,15 @@ CALLRTRP        CALL
                                 R-TO-RP                         # RP VECTOR CONVERTED FROM R B-29
                 UNIT                                            # UNIT RP B-1
                 STCALL          ALPHAV                          # U2= 1/2 SINL FOR SETRE SUBR BELOW
-                                SETGAMMA                        #       SET GAMMA=B2/A2 FOR EARTH, =1 FOR MOON
-                CALL                                            #       SCALED B-1
+                                SETGAMMA                        #  SET GAMMA=B2/A2 FOR EARTH, =1 FOR MOON
+                CALL                                            #  SCALED B-1
                                 SETRE                           # CALC RE METERS B-29
                 DLOAD           DSQ                             
                                 ALPHAV                          
                 PDDL            DSQ                             
                                 ALPHAV          +2              
                 DAD             SQRT                            
-## Page 1134
+## Page 1126
                 DMP             SL1R                            
                                 GAMRP                           
                 STODL           COSTH                           # COS(LAT) B-1
@@ -86,27 +86,29 @@ CALLRTRP        CALL
                                 ERADM                           
                 STCALL          ALT                             # EXIT WITH ALT METERS B-29
                                 INCORPEX                        
-## Page 1135
+## Page 1127
 # SUBROUTINE TO CONVERT LAT,LONG.ALT AT GIVEN TIME TO RADIUS VECTOR
 
 # CALLING SEQUENCE
-#       L-1     CALL
-#       L               LALOTORV
 
+#   L-1    CALL
+#   L             LALOTORV
 # SUBROUTINES USED
-#       SETGAMMA, SETRE, RP-TO-R
 
+#  SETGAMMA,SETRE,RP-TO-R
 # ERASABLE INIT. REQ.
-#       AXO, AYO, AZO, TEPHEM SET AT LAUNCH TIME
-#       LAT -- LATITUDE         (REVS B0)
-#       LONG -- LONGITUDE       (REVS B0)
-#       ALT -- ALTITUDE         (METERS) B-29
-#       MPAC -- TIME            (CSECS B-28)
-#       ERADFLAG =1 TO COMPUTE EARTH RADIUS, =0 FOR FIXED EARTH RADIUS
-#       LUNAFLAG=0 FOR EARTH, 1 FOR MOON
+
+#   AXO,AYO,AZO,TEPHEM SET AT LAUNCH TIME
+#   LAT-- LATITUDE  (REVS B0)
+#   LONG-- LONGITUDE  (REVS B0)
+# ALT--ALTITUDE (METERS) B-29
+#   MPAC-- TIME  (CSECS B-28)
+#   ERADFLAG =1 TO COMPUTE EARTH RADIUS, =0 FOR FIXED EARTH RADIUS
+#  LUNAFLAG=0 FOR EARTH, 1 FOR MOON
 
 # OUTPUT
-#       R-VECTOR IN ALPHAV      (METERS B-29)
+
+# R-VECTOR IN ALPHAV (METERS B-29)
 
 LALOTORV        STQ             SETPD                           # LAT,LONG,ALT TO R VECTOR
                                 INCORPEX                        
@@ -114,22 +116,22 @@ LALOTORV        STQ             SETPD                           # LAT,LONG,ALT T
                 STCALL          6D                              # 6-7D= TIME FOR RP-TO-R
                                 SETGAMMA                        # GAMMA=B2/A2 FOR EARTH, 1 FOR MOON B-1
                 DLOAD           SIN                             #               COS(LONG)COS(LAT) IN MPAC
-                                LAT                             #     UNIT RP = SIN(LONG)COS(LAT)    2-3D
+                                LAT                             #      UNIT RP= SIN(LONG)COS(LAT)    2-3D
                 DMPR            PDDL                            # PD 2          GAMMA*SIN(LAT)       0-1D
                                 GAMRP                           
-                                LAT                             #        0-1D = GAMMA*SIN(LAT) B-2
-                COS             PDDL                            # PD4    2-3D = COS(LAT) B-1 TEMPORARILY
+                                LAT                             #         0-1D= GAMMA*SIN(LAT) B-2
+                COS             PDDL                            # PD4      2-3D=COS(LAT) B-1 TEMPORARILY
                                 LONG                            
                 SIN             DMPR                            # PD 2
-                PDDL            COS                             # PD 4   2-3D = SIN(LONG)COS(LAT) B-2
+                PDDL            COS                             # PD 4    2-3D=SIN(LONG)COS(LAT) B-2
                                 LAT                             
-                PDDL            COS                             # PD 6   4-5D = COS(LAT) B-1 TEMPORARILY
+                PDDL            COS                             # PD 6     4-5D=COS(LAT) B-1 TEMPORARILY
                                 LONG                            
-                DMPR            VDEF                            # PD 4   MPAC = COS(LONG)COS(LAT) B-2
+                DMPR            VDEF                            # PD 4    MPAC= COS(LONG)COS(LAT) B-2
                 UNIT            PUSH                            # 0-5D= UNIT RP FOR RP-TO-R SUBR.
                 STCALL          ALPHAV                          # ALPHAV +4= SINL FOR SETRE SUBR.
                                 SETRE                           # RE METERS B-29
-                DLOAD           BOFF                            # SET MPAC=0 FOR EARTH, NON-ZERO FOR MOON
+                DLOAD           BOFF                            # SET MPAC=0 FOR EARTH,NON-ZERO FOR MOON
                                 ZEROVEC                         
                                 LUNAFLAG                        
                                 CALLRPRT                        
@@ -138,7 +140,7 @@ CALLRPRT        CALL
                                 RP-TO-R                         # EXIT WITH UNIT R VECTOR IN MPAC
                 STODL           ALPHAV                          
                                 ERADM                           
-## Page 1136
+## Page 1128
                 DAD             VXSC                            # (RE + ALT)(UNIT R) METERS B-30
                                 ALT                             
                                 ALPHAV                          
@@ -149,10 +151,12 @@ CALLRPRT        CALL
 # SUBROUTINE TO COMPUTE EARTH RADIUS
 
 # INPUT
-#       1/2 SIN LAT IN ALPHAV +4
+
+#   1/2 SIN LAT IN ALPHAV +4
 
 # OUTPUT
-#       EARTH RADIUS IN ERADM AND MPAC (METERS B-29)
+
+#   EARTH RADIUS IN ERADM AND MPAC (METERS B-29)
 
 GETERAD         DLOAD           DSQ                             
                                 ALPHAV          +4              # SIN**2(L)
@@ -177,16 +181,17 @@ DP1/2           =               XUNIT
 B2/A2           2DEC            .9933064884     B-1             # GAMMA= B**2/A**2 B-1
 EE              2DEC            6.6935116       E-3             # (1-B**2/A**2) B-0
 
-## Page 1137
+## Page 1129
 # ARCTAN SUBROUTINE
 
 # CALLING SEQUENCE
-#       SIN THETA IN SINTH B-1
-#       COS THETA IN COSTH B-1
-#       CALL ARCTAN
+
+#   SIN THETA IN SINTH B-1
+#   COS THETA IN COSTH B-1
+#   CALL ARCTAN
 
 # OUTPUT
-#       ARCTAN THETA IN MPAC AND THETA B-0 IN RANGE -1/2 TO +1/2
+#   ARCTAN THETA IN MPAC AND THETA B-0 IN RANGE -1/2 TO +1/2
 
 ARCTAN          BOV                                             
                                 CLROVFLW                        
@@ -224,22 +229,22 @@ ATAN=90         DLOAD           SIGN
 
 2DZERO          =               DPZERO                          
 
-## Page 1138
+## Page 1130
 # ..... SETGAMMA SUBROUTINE .....
 # SUBROUTINE TO SET GAMMA FOR THE LAT-LONG AND LALOTORV SUBROUTINES
 
-# GAMMA = B**2/A**2 FOR EARTH (B-1)
-# GAMMA = 1 FOR MOON (B-1)
+#  GAMMA = B**2/A**2 FOR EARTH (B-1)
+#  GAMMA = 1 FOR MOON (B-1)
 
 # CALLING SEQUENCE
-#       L       CALL
-#       L+1             SETGAMMA
+#  L       CALL
+#  L+1            SETGAMMA
 
 # INPUT
-#       LUNAFLAG=0 FOR EARTH, =1 FOR MOON
+#  LUNAFLAG=0 FOR EARTH,=1 FOR MOON
 
 # OUTPUT
-#       GAMMA IN GAMRP (B-1)
+#   GAMMA IN GAMRP (B-1)
 
 SETGAMMA        DLOAD           BOFF                            # BRANCH FOR EARTH
                                 B2/A2                           # EARTH GAMMA
@@ -251,28 +256,28 @@ SETGMEX         STORE           GAMRP
                 RVQ                                             
 GAMRP           =               8D                              
 
-## Page 1139
+## Page 1131
 # ..... SETRE SUBROUTINE .....
 # SUBROUTINE TO SET RE (EARTH OR MOON RADIUS)
 
-#       RE = RM FOR MOON
-#       RE = RREF FOR FIXED EARTH RADIUS OR COMPUTED RF FOR FISCHER ELLIPSOID
+# RE = RM FOR MOON
+#  RE = RREF FOR FIXED EARTH RADIUS OR COMPUTED RF FOR FISCHER ELLIPSOID
 
 # CALLING SEQUENCE
-#       L       CALL
-#       L+1             SETRE
+#  L       CALL
+#  L+1            SETRE
 
 # SUBROUTINES USED
-#       GETERAD
+#  GETERAD
 
 # INPUT
-#       ERADFLAG = 0 FOR FIXED RE, 1 FOR COMPUTED RE
-#       ALPHAV +4 = 1/2 SINL IF GETERAD IS CALLED
-#       LUNAFLAG = 0 FOR EARTH, =1 FOR MOON
+#  ERADFLAG=0 FOR FIXED RE, 1 FOR COMPUTED RE
+#  ALPHAV +4= 1/2 SINL IF GETERAD IS CALLED
+#  LUNAFLAG=0 FOR EARTH,=1 FOR MOON
 
 # OUTPUT
-#       ERADM = 504RM FOR MOON (METERS B-29)
-#       ERADM = ERAD OR COMPUTED RE FOR EARTH (METERS B-29)
+#  ERADM= 504RM FOR MOON (METERS B-29)
+#  ERADM= ERAD OR COMPUTED RE FOR EARTH (METERS B-29)
 
 SETRE           STQ             DLOAD                           
                                 SETREX                          
@@ -287,8 +292,8 @@ SETRE           STQ             DLOAD
                                 GETERAD                         
 SETRXX          STCALL          ERADM                           # EXIT WITH RE OR RM METERS B-29
                                 SETREX                          
-TSTRLSRM        BON             VLOAD                           # ERADFLAG=0, SET R0=RLS
-                                ERADFLAG                        #         =1      R0=RM
+TSTRLSRM        BON             VLOAD                           # ERADFLAG=0,SET R0=RLS
+                                ERADFLAG                        #         =1     R0=RM
                                 SETRXX                          
                                 RLS                             
                 ABVAL           SR2R                            # SCALE FROM B-27 TO B-29
