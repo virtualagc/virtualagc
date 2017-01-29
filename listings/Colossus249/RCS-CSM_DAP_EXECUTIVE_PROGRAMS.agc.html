@@ -66,7 +66,8 @@ color: #993399;
 <img alt="" src="Apollo32.png" style="width: 32px; height: 32px;" align="left">
 </td>
 <td style="vertical-align: middle;">
-These source-code files were derived originally from the scan from MIT's Dibner Institute's 
+This is the source-code for the Apollo 9 Command Module's Guidance Computer.
+These files were derived originally from the scan from MIT's Dibner Institute's 
 now-discontinued website titled "History of Recent Science and Technology", which
 in turn was originally created by Gary Neff, though his high-quality scans were
 unfortunately reduced in legibility when presented online.
@@ -91,41 +92,47 @@ Note that the date is the date of the printout, not the date of the program revi
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-044611,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
-044612,000003:                                                                                                  <span class="co">## Filename:    RCS-CSM_DAP_EXECUTIVE_PROGRAMS.agc</span>
-044613,000004:                                                                                                  <span class="co">## Purpose:     Part of the source code for Colossus, build 249.</span>
-044614,000005:                                                                                                  <span class="co">##              It is part of the source code for the Command Module's (CM)</span>
-044615,000006:                                                                                                  <span class="co">##              Apollo Guidance Computer (AGC), possibly for Apollo 8 and 9.</span>
-044616,000007:                                                                                                  <span class="co">## Assembler:   yaYUL</span>
-044617,000008:                                                                                                  <span class="co">## Reference:   Starts on p. 1012 of 1701.pdf.</span>
-044618,000009:                                                                                                  <span class="co">## Contact:     Ron Burkey &lt;info@sandroid.org>.</span>
-044619,000010:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo.</span>
-044620,000011:                                                                                                  <span class="co">## Mod history: 08/26/04 RSB.   Began transcribing.</span>
-044621,000012:                                                                                                  <span class="co">##</span>
-044622,000013:                                                                                                  <span class="co">## The contents of the "Colossus249" files, in general, are transcribed </span>
-044623,000014:                                                                                                  <span class="co">## from a scanned document obtained from MIT's website,</span>
-044624,000015:                                                                                                  <span class="co">## http://hrst.mit.edu/hrs/apollo/public/archive/1701.pdf.  Notations on this</span>
-044625,000016:                                                                                                  <span class="co">## document read, in part:</span>
-044626,000017:                                                                                                  <span class="co">##</span>
-044627,000018:                                                                                                  <span class="co">##      Assemble revision 249 of AGC program Colossus by NASA</span>
-044628,000019:                                                                                                  <span class="co">##      2021111-041.  October 28, 1968.  </span>
-044629,000020:                                                                                                  <span class="co">##</span>
-044630,000021:                                                                                                  <span class="co">##      This AGC program shall also be referred to as</span>
-044631,000022:                                                                                                  <span class="co">##                              Colossus 1A</span>
-044632,000023:                                                                                                  <span class="co">##</span>
-044633,000024:                                                                                                  <span class="co">##      Prepared by</span>
-044634,000025:                                                                                                  <span class="co">##                      Massachusetts Institute of Technology</span>
-044635,000026:                                                                                                  <span class="co">##                      75 Cambridge Parkway</span>
-044636,000027:                                                                                                  <span class="co">##                      Cambridge, Massachusetts</span>
-044637,000028:                                                                                                  <span class="co">##      under NASA contract NAS 9-4065.</span>
-044638,000029:                                                                                                  <span class="co">##</span>
-044639,000030:                                                                                                  <span class="co">## Refer directly to the online document mentioned above for further information.</span>
-044640,000031:                                                                                                  <span class="co">## Please report any errors (relative to 1701.pdf) to info@sandroid.org.</span>
-044641,000032:                                                                                                  <span class="co">##</span>
-044642,000033:                                                                                                  <span class="co">## In some cases, where the source code for Luminary 131 overlaps that of </span>
-044643,000034:                                                                                                  <span class="co">## Colossus 249, this code is instead copied from the corresponding Luminary 131</span>
-044644,000035:                                                                                                  <span class="co">## source file, and then is proofed to incorporate any changes.</span>
-044645,000036: 
+045034,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
+045035,000003:                                                                                                  <span class="co">## Filename:    RCS-CSM_DAP_EXECUTIVE_PROGRAMS.agc</span>
+045036,000004:                                                                                                  <span class="co">## Purpose:     Part of the source code for Colossus, build 249.</span>
+045037,000005:                                                                                                  <span class="co">##              It is part of the source code for the Command Module's (CM)</span>
+045038,000006:                                                                                                  <span class="co">##              Apollo Guidance Computer (AGC), for Apollo 9.</span>
+045039,000007:                                                                                                  <span class="co">## Assembler:   yaYUL</span>
+045040,000008:                                                                                                  <span class="co">## Reference:   Starts on p. 1008</span>
+045041,000009:                                                                                                  <span class="co">## Contact:     Ron Burkey &lt;info@sandroid.org>.</span>
+045042,000010:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo.</span>
+045043,000011:                                                                                                  <span class="co">## Mod history: 08/26/04 RSB.   Began transcribing.</span>
+045044,000012:                                                                                                  <span class="co">##              2017-01-06 RSB  Page numbers now agree with those on the</span>
+045045,000013:                                                                                                  <span class="co">##                              original harcopy, as opposed to the PDF page</span>
+045046,000014:                                                                                                  <span class="co">##                              numbers in 1701.pdf.</span>
+045047,000015:                                                                                                  <span class="co">##              2017-01-18 RSB  Cross-diff'd comment text (not whitespace)</span>
+045048,000016:                                                                                                  <span class="co">##                              vs the already-proofed corresponding Colossus</span>
+045049,000017:                                                                                                  <span class="co">##                              237 and Comanche 55 source-code files</span>
+045050,000018:                                                                                                  <span class="co">##                              but no errors found.</span>
+045051,000019:                                                                                                  <span class="co">##</span>
+045052,000020:                                                                                                  <span class="co">## The contents of the "Colossus249" files, in general, are transcribed </span>
+045053,000021:                                                                                                  <span class="co">## from a scanned copy of the program listing.  Notations on this</span>
+045054,000022:                                                                                                  <span class="co">## document read, in part:</span>
+045055,000023:                                                                                                  <span class="co">##</span>
+045056,000024:                                                                                                  <span class="co">##      Assemble revision 249 of AGC program Colossus by NASA</span>
+045057,000025:                                                                                                  <span class="co">##      2021111-041.  October 28, 1968.  </span>
+045058,000026:                                                                                                  <span class="co">##</span>
+045059,000027:                                                                                                  <span class="co">##      This AGC program shall also be referred to as</span>
+045060,000028:                                                                                                  <span class="co">##                              Colossus 1A</span>
+045061,000029:                                                                                                  <span class="co">##</span>
+045062,000030:                                                                                                  <span class="co">##      Prepared by</span>
+045063,000031:                                                                                                  <span class="co">##                      Massachusetts Institute of Technology</span>
+045064,000032:                                                                                                  <span class="co">##                      75 Cambridge Parkway</span>
+045065,000033:                                                                                                  <span class="co">##                      Cambridge, Massachusetts</span>
+045066,000034:                                                                                                  <span class="co">##      under NASA contract NAS 9-4065.</span>
+045067,000035:                                                                                                  <span class="co">##</span>
+045068,000036:                                                                                                  <span class="co">## Refer directly to the online document mentioned above for further information.</span>
+045069,000037:                                                                                                  <span class="co">## Please report any errors (relative to the scanned pages) to info@sandroid.org.</span>
+045070,000038:                                                                                                  <span class="co">##</span>
+045071,000039:                                                                                                  <span class="co">## In some cases, where the source code for Luminary 131 overlaps that of </span>
+045072,000040:                                                                                                  <span class="co">## Colossus 249, this code is instead copied from the corresponding Luminary 131</span>
+045073,000041:                                                                                                  <span class="co">## source file, and then is proofed to incorporate any changes.</span>
+045074,000042: 
 </pre>
 </span>
 </p>
@@ -136,60 +143,60 @@ Note that the date is the date of the printout, not the date of the program revi
 <img alt="" src="Apollo32.png" style="width: 32px; height: 32px;" align="left">
 </td>
 <td style="vertical-align: middle;">
-Page 1012
+Page 1008
 </td></tr></tbody></table>
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-044647,000038:                                                                                                  <span class="co">#  CALCULATION OF  AMGB, AMBG  ONCE EVERY SECOND</span>
-044648,000039: 
-044649,000040:                                                                                                  <span class="co">#        AMGB =  1       SIN(PSI)                0</span>
-044650,000041:                                                                                                  <span class="co">#                0       COS(PSI)COS(PHI)        SIN(PHI)</span>
-044651,000042:                                                                                                  <span class="co">#                0       -COS(PSI)SIN(PHI)       COS(PHI)</span>
-044652,000043: 
-044653,000044:                                                                                                  <span class="co">#        AMBG =  1       -TAN(PSI)COS(PHI)       TAN(PSI)SIN(PHI)</span>
-044654,000045:                                                                                                  <span class="co">#                0       COS(PHI)/COS(PSI)       -SIN(PHI)/COS(PSI)</span>
-044655,000046:                                                                                                  <span class="co">#                0       SIN(PHI)                COS(PHI)</span>
-044656,000047: 
-044657,000048:                                                                                                  <span class="co">#  WHERE PHI AND PSI ARE CDU ANGLES</span>
-044658,000049: 
-044659,000050: 20,3565                                           <span class="ps">BANK    </span> 20                                    
-044660,000051: 22,2000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC.agc.html#4441505338">DAPS8</a>                                 
-044661,000052: 22,2000                                           <span class="ps">BANK    </span>                                       
-044662,000053: 
-044663,000054: 22,3444                                           <span class="ps">COUNT*  </span> $$/DAPEX                              
-044664,000055: 22,3444  E6,1510                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4B4D504143">KMPAC</a>                                 
-<a name="414D424755504454"></a>044665,000056: 22,3444           30102        <span class="sm">AMBGUPDT</span>           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#464C414757524436">FLAGWRD6</a>                              <span class="co">#  CHECK FOR RCS AUTOPILOT</span>
-044666,000057: 22,3445           00006                           <span class="op">EXTEND  </span>                                       
-044667,000058: 22,3446           65112                           <span class="op">BZMF    </span> <a href="EXECUTIVE.agc.html#454E444F464A4F42">ENDOFJOB</a>                              <span class="co">#  BIT15 = 0, BIT14 = 1</span>
-044668,000059: 22,3447           74675                           <span class="op">MASK    </span> <a href="FIXED_FIXED_CONSTANT_POOL.agc.html#4249543134">BIT14</a>                                 <span class="co">#  IF NOT RCS, EXIT</span>
-044669,000060: 22,3450           00006                           <span class="op">EXTEND  </span>                                       
-044670,000061: 22,3451           15112                           <span class="op">BZF     </span> <a href="EXECUTIVE.agc.html#454E444F464A4F42">ENDOFJOB</a>                              <span class="co">#  TO PROTECT TVC DAP ON SWITCHOVER</span>
-044671,000062: 
-044672,000063: 22,3452           30034                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4344555A">CDUZ</a>                                  
-044673,000064: 22,3453           04770                           <span class="op">TC      </span> <a href="MYSUBS.agc.html#535053494E32">SPSIN2</a>                                
-044674,000065: 22,3454           55640                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414D474231">AMGB1</a>                                 <span class="co">#  CALCULATE AMGB</span>
-044675,000066: 22,3455           30034                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4344555A">CDUZ</a>                                  
-044676,000067: 22,3456           04767                           <span class="op">TC      </span> <a href="MYSUBS.agc.html#5350434F5332">SPCOS2</a>                                
-044677,000068: 22,3457           55645                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4341505349">CAPSI</a>                                 <span class="co">#  MUST CHECK FOR GIMBAL LOCK</span>
-044678,000069: 22,3460           33504                           <span class="op">CAF     </span> <a href="#51554144414E474C">QUADANGL</a>                              <span class="co">#  = 7.25  DEGREES JET QUAD ANGULAR OFFSET</span>
-044679,000070: 22,3461           00006                           <span class="op">EXTEND  </span>                                       
-044680,000071: 22,3462           20032                           <span class="op">MSU     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43445558">CDUX</a>                                  
-044681,000072: 22,3463           40000                           <span class="op">COM     </span>                                       <span class="co">#  CDUX - 7.25 DEG</span>
-044682,000073: 22,3464           04767                           <span class="op">TC      </span> <a href="MYSUBS.agc.html#5350434F5331">SPCOS1</a>                                
-044683,000074: 22,3465           55644                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414D474238">AMGB8</a>                                 
-044684,000075: 22,3466           00006                           <span class="op">EXTEND  </span>                                       
-044685,000076: 22,3467           71645                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4341505349">CAPSI</a>                                 
-044686,000077: 22,3470           55641                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414D474234">AMGB4</a>                                 
-044687,000078: 22,3471           33504                           <span class="op">CAF     </span> <a href="#51554144414E474C">QUADANGL</a>                              
-044688,000079: 22,3472           00006                           <span class="op">EXTEND  </span>                                       
-044689,000080: 22,3473           20032                           <span class="op">MSU     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43445558">CDUX</a>                                  
-044690,000081: 22,3474           40000                           <span class="op">COM     </span>                                       <span class="co">#  CDUX - 7.25 DEG</span>
-044691,000082: 22,3475           04770                           <span class="op">TC      </span> <a href="MYSUBS.agc.html#535053494E31">SPSIN1</a>                                
-044692,000083: 22,3476           55642                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414D474235">AMGB5</a>                                 
-044693,000084: 22,3477           00006                           <span class="op">EXTEND  </span>                                       
-044694,000085: 22,3500           71645                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4341505349">CAPSI</a>                                 
-044695,000086: 22,3501           40000                           <span class="op">COM     </span>                                       
+045076,000044:                                                                                                  <span class="co">#  CALCULATION OF  AMGB, AMBG  ONCE EVERY SECOND</span>
+045077,000045: 
+045078,000046:                                                                                                  <span class="co">#        AMGB =  1       SIN(PSI)                0</span>
+045079,000047:                                                                                                  <span class="co">#                0       COS(PSI)COS(PHI)        SIN(PHI)</span>
+045080,000048:                                                                                                  <span class="co">#                0       -COS(PSI)SIN(PHI)       COS(PHI)</span>
+045081,000049: 
+045082,000050:                                                                                                  <span class="co">#        AMBG =  1       -TAN(PSI)COS(PHI)       TAN(PSI)SIN(PHI)</span>
+045083,000051:                                                                                                  <span class="co">#                0       COS(PHI)/COS(PSI)       -SIN(PHI)/COS(PSI)</span>
+045084,000052:                                                                                                  <span class="co">#                0       SIN(PHI)                COS(PHI)</span>
+045085,000053: 
+045086,000054:                                                                                                  <span class="co">#  WHERE PHI AND PSI ARE CDU ANGLES</span>
+045087,000055: 
+045088,000056: 20,3565                                           <span class="ps">BANK    </span> 20                                    
+045089,000057: 22,2000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#4441505338">DAPS8</a>                                 
+045090,000058: 22,2000                                           <span class="ps">BANK    </span>                                       
+045091,000059: 
+045092,000060: 22,3444                                           <span class="ps">COUNT*  </span> $$/DAPEX                              
+045093,000061: 22,3444  E6,1510                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4B4D504143">KMPAC</a>                                 
+<a name="414D424755504454"></a>045094,000062: 22,3444           30102        <span class="sm">AMBGUPDT</span>           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#464C414757524436">FLAGWRD6</a>                              <span class="co">#  CHECK FOR RCS AUTOPILOT</span>
+045095,000063: 22,3445           00006                           <span class="op">EXTEND  </span>                                       
+045096,000064: 22,3446           65112                           <span class="op">BZMF    </span> <a href="EXECUTIVE.agc.html#454E444F464A4F42">ENDOFJOB</a>                              <span class="co">#  BIT15 = 0, BIT14 = 1</span>
+045097,000065: 22,3447           74675                           <span class="op">MASK    </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4249543134">BIT14</a>                                 <span class="co">#  IF NOT RCS, EXIT</span>
+045098,000066: 22,3450           00006                           <span class="op">EXTEND  </span>                                       
+045099,000067: 22,3451           15112                           <span class="op">BZF     </span> <a href="EXECUTIVE.agc.html#454E444F464A4F42">ENDOFJOB</a>                              <span class="co">#  TO PROTECT TVC DAP ON SWITCHOVER</span>
+045100,000068: 
+045101,000069: 22,3452           30034                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4344555A">CDUZ</a>                                  
+045102,000070: 22,3453           04770                           <span class="op">TC      </span> <a href="MYSUBS.agc.html#535053494E32">SPSIN2</a>                                
+045103,000071: 22,3454           55640                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414D474231">AMGB1</a>                                 <span class="co">#  CALCULATE AMGB</span>
+045104,000072: 22,3455           30034                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4344555A">CDUZ</a>                                  
+045105,000073: 22,3456           04767                           <span class="op">TC      </span> <a href="MYSUBS.agc.html#5350434F5332">SPCOS2</a>                                
+045106,000074: 22,3457           55645                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4341505349">CAPSI</a>                                 <span class="co">#  MUST CHECK FOR GIMBAL LOCK</span>
+045107,000075: 22,3460           33504                           <span class="op">CAF     </span> <a href="#51554144414E474C">QUADANGL</a>                              <span class="co">#  = 7.25  DEGREES JET QUAD ANGULAR OFFSET</span>
+045108,000076: 22,3461           00006                           <span class="op">EXTEND  </span>                                       
+045109,000077: 22,3462           20032                           <span class="op">MSU     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43445558">CDUX</a>                                  
+045110,000078: 22,3463           40000                           <span class="op">COM     </span>                                       <span class="co">#  CDUX - 7.25 DEG</span>
+045111,000079: 22,3464           04767                           <span class="op">TC      </span> <a href="MYSUBS.agc.html#5350434F5331">SPCOS1</a>                                
+045112,000080: 22,3465           55644                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414D474238">AMGB8</a>                                 
+045113,000081: 22,3466           00006                           <span class="op">EXTEND  </span>                                       
+045114,000082: 22,3467           71645                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4341505349">CAPSI</a>                                 
+045115,000083: 22,3470           55641                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414D474234">AMGB4</a>                                 
+045116,000084: 22,3471           33504                           <span class="op">CAF     </span> <a href="#51554144414E474C">QUADANGL</a>                              
+045117,000085: 22,3472           00006                           <span class="op">EXTEND  </span>                                       
+045118,000086: 22,3473           20032                           <span class="op">MSU     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43445558">CDUX</a>                                  
+045119,000087: 22,3474           40000                           <span class="op">COM     </span>                                       <span class="co">#  CDUX - 7.25 DEG</span>
+045120,000088: 22,3475           04770                           <span class="op">TC      </span> <a href="MYSUBS.agc.html#535053494E31">SPSIN1</a>                                
+045121,000089: 22,3476           55642                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414D474235">AMGB5</a>                                 
+045122,000090: 22,3477           00006                           <span class="op">EXTEND  </span>                                       
+045123,000091: 22,3500           71645                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4341505349">CAPSI</a>                                 
+045124,000092: 22,3501           40000                           <span class="op">COM     </span>                                       
 </pre>
 </span>
 </p>
@@ -200,15 +207,15 @@ Page 1012
 <img alt="" src="Apollo32.png" style="width: 32px; height: 32px;" align="left">
 </td>
 <td style="vertical-align: middle;">
-Page 1013
+Page 1009
 </td></tr></tbody></table>
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-044697,000088: 22,3502           55643                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414D474237">AMGB7</a>                                 
-044698,000089: 22,3503           15112                           <span class="op">TCF     </span> <a href="EXECUTIVE.agc.html#454E444F464A4F42">ENDOFJOB</a>                              
-<a name="51554144414E474C"></a>044699,000090: 22,3504           01224        <span class="sm">QUADANGL</span>           <span class="ps">DEC     </span> 660        B-14                       <span class="co">#  = 7.25 DEGREES</span>
-044700,000091: 
+045126,000094: 22,3502           55643                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414D474237">AMGB7</a>                                 
+045127,000095: 22,3503           15112                           <span class="op">TCF     </span> <a href="EXECUTIVE.agc.html#454E444F464A4F42">ENDOFJOB</a>                              
+<a name="51554144414E474C"></a>045128,000096: 22,3504           01224        <span class="sm">QUADANGL</span>           <span class="ps">DEC     </span> 660        B-14                       <span class="co">#  = 7.25 DEGREES</span>
+045129,000097: 
 
 End of include-file RCS-CSM_DAP_EXECUTIVE_PROGRAMS.agc.  Parent file is <a href="MAIN.agc.html">MAIN.agc</a>
 </pre>

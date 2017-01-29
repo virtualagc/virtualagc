@@ -66,7 +66,8 @@ color: #993399;
 <img alt="" src="Apollo32.png" style="width: 32px; height: 32px;" align="left">
 </td>
 <td style="vertical-align: middle;">
-These source-code files were derived originally from the scan from MIT's Dibner Institute's 
+This is the source-code for the Apollo 9 Command Module's Guidance Computer.
+These files were derived originally from the scan from MIT's Dibner Institute's 
 now-discontinued website titled "History of Recent Science and Technology", which
 in turn was originally created by Gary Neff, though his high-quality scans were
 unfortunately reduced in legibility when presented online.
@@ -91,41 +92,46 @@ Note that the date is the date of the printout, not the date of the program revi
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-043031,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
-043032,000003:                                                                                                  <span class="co">## Filename:    MYSUBS.agc</span>
-043033,000004:                                                                                                  <span class="co">## Purpose:     Part of the source code for Colossus, build 249.</span>
-043034,000005:                                                                                                  <span class="co">##              It is part of the source code for the Command Module's (CM)</span>
-043035,000006:                                                                                                  <span class="co">##              Apollo Guidance Computer (AGC), possibly for Apollo 8 and 9.</span>
-043036,000007:                                                                                                  <span class="co">## Assembler:   yaYUL</span>
-043037,000008:                                                                                                  <span class="co">## Reference:   Begins on p. 974 of 1701.pdf.</span>
-043038,000009:                                                                                                  <span class="co">## Contact:     Ron Burkey &lt;info@sandroid.org>.</span>
-043039,000010:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo.</span>
-043040,000011:                                                                                                  <span class="co">## Mod history: 08/25/04 RSB.   Began transcribing.</span>
-043041,000012:                                                                                                  <span class="co">##</span>
-043042,000013:                                                                                                  <span class="co">## The contents of the "Colossus249" files, in general, are transcribed </span>
-043043,000014:                                                                                                  <span class="co">## from a scanned document obtained from MIT's website,</span>
-043044,000015:                                                                                                  <span class="co">## http://hrst.mit.edu/hrs/apollo/public/archive/1701.pdf.  Notations on this</span>
-043045,000016:                                                                                                  <span class="co">## document read, in part:</span>
-043046,000017:                                                                                                  <span class="co">##</span>
-043047,000018:                                                                                                  <span class="co">##      Assemble revision 249 of AGC program Colossus by NASA</span>
-043048,000019:                                                                                                  <span class="co">##      2021111-041.  October 28, 1968.  </span>
-043049,000020:                                                                                                  <span class="co">##</span>
-043050,000021:                                                                                                  <span class="co">##      This AGC program shall also be referred to as</span>
-043051,000022:                                                                                                  <span class="co">##                              Colossus 1A</span>
-043052,000023:                                                                                                  <span class="co">##</span>
-043053,000024:                                                                                                  <span class="co">##      Prepared by</span>
-043054,000025:                                                                                                  <span class="co">##                      Massachusetts Institute of Technology</span>
-043055,000026:                                                                                                  <span class="co">##                      75 Cambridge Parkway</span>
-043056,000027:                                                                                                  <span class="co">##                      Cambridge, Massachusetts</span>
-043057,000028:                                                                                                  <span class="co">##      under NASA contract NAS 9-4065.</span>
-043058,000029:                                                                                                  <span class="co">##</span>
-043059,000030:                                                                                                  <span class="co">## Refer directly to the online document mentioned above for further information.</span>
-043060,000031:                                                                                                  <span class="co">## Please report any errors (relative to 1701.pdf) to info@sandroid.org.</span>
-043061,000032:                                                                                                  <span class="co">##</span>
-043062,000033:                                                                                                  <span class="co">## In some cases, where the source code for Luminary 131 overlaps that of </span>
-043063,000034:                                                                                                  <span class="co">## Colossus 249, this code is instead copied from the corresponding Luminary 131</span>
-043064,000035:                                                                                                  <span class="co">## source file, and then is proofed to incorporate any changes.</span>
-043065,000036: 
+043435,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
+043436,000003:                                                                                                  <span class="co">## Filename:    MYSUBS.agc</span>
+043437,000004:                                                                                                  <span class="co">## Purpose:     Part of the source code for Colossus, build 249.</span>
+043438,000005:                                                                                                  <span class="co">##              It is part of the source code for the Command Module's (CM)</span>
+043439,000006:                                                                                                  <span class="co">##              Apollo Guidance Computer (AGC), for Apollo 9.</span>
+043440,000007:                                                                                                  <span class="co">## Assembler:   yaYUL</span>
+043441,000008:                                                                                                  <span class="co">## Reference:   Begins on p. 970.</span>
+043442,000009:                                                                                                  <span class="co">## Contact:     Ron Burkey &lt;info@sandroid.org>.</span>
+043443,000010:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo.</span>
+043444,000011:                                                                                                  <span class="co">## Mod history: 08/25/04 RSB.   Began transcribing.</span>
+043445,000012:                                                                                                  <span class="co">##              2017-01-06 RSB  Page numbers now agree with those on the</span>
+043446,000013:                                                                                                  <span class="co">##                              original harcopy, as opposed to the PDF page</span>
+043447,000014:                                                                                                  <span class="co">##                              numbers in 1701.pdf.</span>
+043448,000015:                                                                                                  <span class="co">##              2017-01-15 RSB  Comment-text proofed by 3-way diff'ing vs</span>
+043449,000016:                                                                                                  <span class="co">##                              Colossus 237 and Comanche 55.  No differences</span>
+043450,000017:                                                                                                  <span class="co">##                              were found, so no corrections were made.</span>
+043451,000018:                                                                                                  <span class="co">##</span>
+043452,000019:                                                                                                  <span class="co">## The contents of the "Colossus249" files, in general, are transcribed </span>
+043453,000020:                                                                                                  <span class="co">## from a scanned copy of the program listing.  Notations on this</span>
+043454,000021:                                                                                                  <span class="co">## document read, in part:</span>
+043455,000022:                                                                                                  <span class="co">##</span>
+043456,000023:                                                                                                  <span class="co">##      Assemble revision 249 of AGC program Colossus by NASA</span>
+043457,000024:                                                                                                  <span class="co">##      2021111-041.  October 28, 1968.  </span>
+043458,000025:                                                                                                  <span class="co">##</span>
+043459,000026:                                                                                                  <span class="co">##      This AGC program shall also be referred to as</span>
+043460,000027:                                                                                                  <span class="co">##                              Colossus 1A</span>
+043461,000028:                                                                                                  <span class="co">##</span>
+043462,000029:                                                                                                  <span class="co">##      Prepared by</span>
+043463,000030:                                                                                                  <span class="co">##                      Massachusetts Institute of Technology</span>
+043464,000031:                                                                                                  <span class="co">##                      75 Cambridge Parkway</span>
+043465,000032:                                                                                                  <span class="co">##                      Cambridge, Massachusetts</span>
+043466,000033:                                                                                                  <span class="co">##      under NASA contract NAS 9-4065.</span>
+043467,000034:                                                                                                  <span class="co">##</span>
+043468,000035:                                                                                                  <span class="co">## Refer directly to the online document mentioned above for further information.</span>
+043469,000036:                                                                                                  <span class="co">## Please report any errors (relative to the scanned pages) to info@sandroid.org.</span>
+043470,000037:                                                                                                  <span class="co">##</span>
+043471,000038:                                                                                                  <span class="co">## In some cases, where the source code for Luminary 131 overlaps that of </span>
+043472,000039:                                                                                                  <span class="co">## Colossus 249, this code is instead copied from the corresponding Luminary 131</span>
+043473,000040:                                                                                                  <span class="co">## source file, and then is proofed to incorporate any changes.</span>
+043474,000041: 
 </pre>
 </span>
 </p>
@@ -136,59 +142,59 @@ Note that the date is the date of the printout, not the date of the program revi
 <img alt="" src="Apollo32.png" style="width: 32px; height: 32px;" align="left">
 </td>
 <td style="vertical-align: middle;">
-Page 974
+Page 970
 </td></tr></tbody></table>
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-043067,000038: 20,3565                                           <span class="ps">BANK    </span> 20                                    
-043068,000039: 21,2000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC.agc.html#4D5953554253">MYSUBS</a>                                
-043069,000040: 21,2000                                           <span class="ps">BANK    </span>                                       
-043070,000041: 
-043071,000042: 21,2026     0154                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
-<a name="5350434F5331"></a>043072,000043: 21,2026     4767               <span class="sm">SPCOS1  </span>           <span class="ps">EQUALS  </span> <a href="SINGLE_PRECISION_SUBROUTINES.agc.html#5350434F53">SPCOS</a>                                 
-<a name="535053494E31"></a>043073,000044: 21,2026     4770               <span class="sm">SPSIN1  </span>           <span class="ps">EQUALS  </span> <a href="SINGLE_PRECISION_SUBROUTINES.agc.html#535053494E">SPSIN</a>                                 
-<a name="5350434F5332"></a>043074,000045: 21,2026     4767               <span class="sm">SPCOS2  </span>           <span class="ps">EQUALS  </span> <a href="SINGLE_PRECISION_SUBROUTINES.agc.html#5350434F53">SPCOS</a>                                 
-<a name="535053494E32"></a>043075,000046: 21,2026     4770               <span class="sm">SPSIN2  </span>           <span class="ps">EQUALS  </span> <a href="SINGLE_PRECISION_SUBROUTINES.agc.html#535053494E">SPSIN</a>                                 
-043076,000047: 21,2026                                           <span class="ps">COUNT   </span> 21/DAPMS                              
-043077,000048: 
-043078,000049:                                                                                                  <span class="co">#  ONE AND ONE HALF PRECISION MULTIPLICATION ROUTINE</span>
-043079,000050: 
-<a name="534D414C4C4D50"></a>043080,000051: 21,2026           55512        <span class="sm">SMALLMP </span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4B4D5054454D50">KMPTEMP</a>                               <span class="co">#  A(X+Y)</span>
-043081,000052: 21,2027           00006                           <span class="op">EXTEND  </span>                                       
-043082,000053: 21,2030           71511                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4B4D504143">KMPAC</a>      +1                         
-043083,000054: 21,2031           55511                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4B4D504143">KMPAC</a>      +1                         <span class="co">#  AY</span>
-043084,000055: 21,2032           34714                           <span class="op">CAF     </span> <a href="FIXED_FIXED_CONSTANT_POOL.agc.html#5A45524F">ZERO</a>                                  
-043085,000056: 21,2033           57510                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4B4D504143">KMPAC</a>                                 
-043086,000057: 21,2034           00006                           <span class="op">EXTEND  </span>                                       
-043087,000058: 21,2035           71512                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4B4D5054454D50">KMPTEMP</a>                               <span class="co">#  AX</span>
-043088,000059: 21,2036           21511                           <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4B4D504143">KMPAC</a>                                 <span class="co">#  AX+AY</span>
-043089,000060: 21,2037           00002                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
-043090,000061: 
-043091,000062:                                                                                                  <span class="co">#  SUBROUTINE FOR DOUBLE PRECISION ADDITIONS OF ANGLES</span>
-043092,000063:                                                                                                  <span class="co">#  A AND L CONTAIN A DP(1S) ANGLE SCALED BY 180 DEGS TO BE ADDED TO KMPAC.</span>
-043093,000064:                                                                                                  <span class="co">#  RESULT IS PLACED IN KMPAC.  TIMING = 6 MCT (22 MCT ON OVERFLOW)</span>
-043094,000065: 
-<a name="4450414444"></a>043095,000066: 21,2040           21511        <span class="sm">DPADD   </span>           <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4B4D504143">KMPAC</a>                                 
-043096,000067: 21,2041           00006                           <span class="op">EXTEND  </span>                                       
-043097,000068: 21,2042           12057                           <span class="op">BZF     </span> <a href="#54534B">TSK</a>        +1                         <span class="co">#  NO OVERFLOW</span>
-043098,000069: 21,2043           11510                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4B4D504143">KMPAC</a>                                 
-043099,000070: 21,2044           12060                           <span class="op">TCF     </span> <a href="#44504144442B">DPADD+</a>                                <span class="co">#  + OVERFLOW</span>
-043100,000071: 21,2045           12047                           <span class="op">TCF     </span> +2                                    
-043101,000072: 21,2046           12062                           <span class="op">TCF     </span> <a href="#44504144442D">DPADD-</a>                                <span class="co">#  - OVERFLOW</span>
-043102,000073: 21,2047           11511                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4B4D504143">KMPAC</a>      +1                         
-043103,000074: 21,2050           12065                           <span class="op">TCF     </span> <a href="#4450414444322B">DPADD2+</a>                               <span class="co">#  UPPER = 0, LOWER +</span>
-043104,000075: 21,2051           12053                           <span class="op">TCF     </span> +2                                    
-043105,000076: 21,2052           40000                           <span class="op">COM     </span>                                       <span class="co">#  UPPER = 0, LOWER -</span>
-043106,000077: 21,2053           64672                           <span class="op">AD      </span> <a href="FIXED_FIXED_CONSTANT_POOL.agc.html#504F534D4158">POSMAX</a>                                <span class="co">#  LOWER = 0, A = 0</span>
-043107,000078: 21,2054           55511                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4B4D504143">KMPAC</a>      +1                         <span class="co">#  CAN NOT OVERFLOW</span>
-043108,000079: 21,2055           34672                           <span class="op">CA      </span> <a href="FIXED_FIXED_CONSTANT_POOL.agc.html#504F534D4158">POSMAX</a>                                <span class="co">#  UPPER WAS = 0</span>
-<a name="54534B"></a>043109,000080: 21,2056           55510        <span class="sm">TSK     </span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4B4D504143">KMPAC</a>                                 
-043110,000081: 21,2057           00002                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
-043111,000082: 
-<a name="44504144442B"></a>043112,000083: 21,2060           64674        <span class="sm">DPADD+  </span>           <span class="op">AD      </span> <a href="FIXED_FIXED_CONSTANT_POOL.agc.html#4E45474D4158">NEGMAX</a>                                <span class="co">#  KMPAC GREATER THAN 0</span>
-043113,000084: 21,2061           12056                           <span class="op">TCF     </span> <a href="#54534B">TSK</a>                                   
-043114,000085: 
+043476,000043: 20,3565                                           <span class="ps">BANK    </span> 20                                    
+043477,000044: 21,2000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#4D5953554253">MYSUBS</a>                                
+043478,000045: 21,2000                                           <span class="ps">BANK    </span>                                       
+043479,000046: 
+043480,000047: 21,2026     0154                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
+<a name="5350434F5331"></a>043481,000048: 21,2026     4767               <span class="sm">SPCOS1  </span>           <span class="ps">EQUALS  </span> <a href="SINGLE_PRECISION_SUBROUTINES.agc.html#5350434F53">SPCOS</a>                                 
+<a name="535053494E31"></a>043482,000049: 21,2026     4770               <span class="sm">SPSIN1  </span>           <span class="ps">EQUALS  </span> <a href="SINGLE_PRECISION_SUBROUTINES.agc.html#535053494E">SPSIN</a>                                 
+<a name="5350434F5332"></a>043483,000050: 21,2026     4767               <span class="sm">SPCOS2  </span>           <span class="ps">EQUALS  </span> <a href="SINGLE_PRECISION_SUBROUTINES.agc.html#5350434F53">SPCOS</a>                                 
+<a name="535053494E32"></a>043484,000051: 21,2026     4770               <span class="sm">SPSIN2  </span>           <span class="ps">EQUALS  </span> <a href="SINGLE_PRECISION_SUBROUTINES.agc.html#535053494E">SPSIN</a>                                 
+043485,000052: 21,2026                                           <span class="ps">COUNT   </span> 21/DAPMS                              
+043486,000053: 
+043487,000054:                                                                                                  <span class="co">#  ONE AND ONE HALF PRECISION MULTIPLICATION ROUTINE</span>
+043488,000055: 
+<a name="534D414C4C4D50"></a>043489,000056: 21,2026           55512        <span class="sm">SMALLMP </span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4B4D5054454D50">KMPTEMP</a>                               <span class="co">#  A(X+Y)</span>
+043490,000057: 21,2027           00006                           <span class="op">EXTEND  </span>                                       
+043491,000058: 21,2030           71511                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4B4D504143">KMPAC</a>      +1                         
+043492,000059: 21,2031           55511                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4B4D504143">KMPAC</a>      +1                         <span class="co">#  AY</span>
+043493,000060: 21,2032           34714                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5A45524F">ZERO</a>                                  
+043494,000061: 21,2033           57510                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4B4D504143">KMPAC</a>                                 
+043495,000062: 21,2034           00006                           <span class="op">EXTEND  </span>                                       
+043496,000063: 21,2035           71512                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4B4D5054454D50">KMPTEMP</a>                               <span class="co">#  AX</span>
+043497,000064: 21,2036           21511                           <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4B4D504143">KMPAC</a>                                 <span class="co">#  AX+AY</span>
+043498,000065: 21,2037           00002                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
+043499,000066: 
+043500,000067:                                                                                                  <span class="co">#  SUBROUTINE FOR DOUBLE PRECISION ADDITIONS OF ANGLES</span>
+043501,000068:                                                                                                  <span class="co">#  A AND L CONTAIN A DP(1S) ANGLE SCALED BY 180 DEGS TO BE ADDED TO KMPAC.</span>
+043502,000069:                                                                                                  <span class="co">#  RESULT IS PLACED IN KMPAC.  TIMING = 6 MCT (22 MCT ON OVERFLOW)</span>
+043503,000070: 
+<a name="4450414444"></a>043504,000071: 21,2040           21511        <span class="sm">DPADD   </span>           <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4B4D504143">KMPAC</a>                                 
+043505,000072: 21,2041           00006                           <span class="op">EXTEND  </span>                                       
+043506,000073: 21,2042           12057                           <span class="op">BZF     </span> <a href="#54534B">TSK</a>        +1                         <span class="co">#  NO OVERFLOW</span>
+043507,000074: 21,2043           11510                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4B4D504143">KMPAC</a>                                 
+043508,000075: 21,2044           12060                           <span class="op">TCF     </span> <a href="#44504144442B">DPADD+</a>                                <span class="co">#  + OVERFLOW</span>
+043509,000076: 21,2045           12047                           <span class="op">TCF     </span> +2                                    
+043510,000077: 21,2046           12062                           <span class="op">TCF     </span> <a href="#44504144442D">DPADD-</a>                                <span class="co">#  - OVERFLOW</span>
+043511,000078: 21,2047           11511                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4B4D504143">KMPAC</a>      +1                         
+043512,000079: 21,2050           12065                           <span class="op">TCF     </span> <a href="#4450414444322B">DPADD2+</a>                               <span class="co">#  UPPER = 0, LOWER +</span>
+043513,000080: 21,2051           12053                           <span class="op">TCF     </span> +2                                    
+043514,000081: 21,2052           40000                           <span class="op">COM     </span>                                       <span class="co">#  UPPER = 0, LOWER -</span>
+043515,000082: 21,2053           64672                           <span class="op">AD      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#504F534D4158">POSMAX</a>                                <span class="co">#  LOWER = 0, A = 0</span>
+043516,000083: 21,2054           55511                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4B4D504143">KMPAC</a>      +1                         <span class="co">#  CAN NOT OVERFLOW</span>
+043517,000084: 21,2055           34672                           <span class="op">CA      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#504F534D4158">POSMAX</a>                                <span class="co">#  UPPER WAS = 0</span>
+<a name="54534B"></a>043518,000085: 21,2056           55510        <span class="sm">TSK     </span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4B4D504143">KMPAC</a>                                 
+043519,000086: 21,2057           00002                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
+043520,000087: 
+<a name="44504144442B"></a>043521,000088: 21,2060           64674        <span class="sm">DPADD+  </span>           <span class="op">AD      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4E45474D4158">NEGMAX</a>                                <span class="co">#  KMPAC GREATER THAN 0</span>
+043522,000089: 21,2061           12056                           <span class="op">TCF     </span> <a href="#54534B">TSK</a>                                   
+043523,000090: 
 </pre>
 </span>
 </p>
@@ -199,20 +205,20 @@ Page 974
 <img alt="" src="Apollo32.png" style="width: 32px; height: 32px;" align="left">
 </td>
 <td style="vertical-align: middle;">
-Page 975
+Page 971
 </td></tr></tbody></table>
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-<a name="44504144442D"></a>043116,000087: 21,2062           40000        <span class="sm">DPADD-  </span>           <span class="op">COM     </span>                                       
-043117,000088: 21,2063           64672                           <span class="op">AD      </span> <a href="FIXED_FIXED_CONSTANT_POOL.agc.html#504F534D4158">POSMAX</a>                                <span class="co">#  KMPAC LESS THAN 0</span>
-043118,000089: 21,2064           12056                           <span class="op">TCF     </span> <a href="#54534B">TSK</a>                                   
-043119,000090: 
-<a name="4450414444322B"></a>043120,000091: 21,2065           64674        <span class="sm">DPADD2+ </span>           <span class="op">AD      </span> <a href="FIXED_FIXED_CONSTANT_POOL.agc.html#4E45474D4158">NEGMAX</a>                                <span class="co">#  CAN NOT OVERFLOW</span>
-043121,000092: 21,2066           55511                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4B4D504143">KMPAC</a>      +1                         
-043122,000093: 21,2067           34674                           <span class="op">CA      </span> <a href="FIXED_FIXED_CONSTANT_POOL.agc.html#4E45474D4158">NEGMAX</a>                                <span class="co">#  UPPER WAS = 0</span>
-043123,000094: 21,2070           12056                           <span class="op">TCF     </span> <a href="#54534B">TSK</a>                                   
-043124,000095: 
+<a name="44504144442D"></a>043525,000092: 21,2062           40000        <span class="sm">DPADD-  </span>           <span class="op">COM     </span>                                       
+043526,000093: 21,2063           64672                           <span class="op">AD      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#504F534D4158">POSMAX</a>                                <span class="co">#  KMPAC LESS THAN 0</span>
+043527,000094: 21,2064           12056                           <span class="op">TCF     </span> <a href="#54534B">TSK</a>                                   
+043528,000095: 
+<a name="4450414444322B"></a>043529,000096: 21,2065           64674        <span class="sm">DPADD2+ </span>           <span class="op">AD      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4E45474D4158">NEGMAX</a>                                <span class="co">#  CAN NOT OVERFLOW</span>
+043530,000097: 21,2066           55511                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4B4D504143">KMPAC</a>      +1                         
+043531,000098: 21,2067           34674                           <span class="op">CA      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4E45474D4158">NEGMAX</a>                                <span class="co">#  UPPER WAS = 0</span>
+043532,000099: 21,2070           12056                           <span class="op">TCF     </span> <a href="#54534B">TSK</a>                                   
+043533,000100: 
 </pre>
 </span>
 </p>
@@ -223,13 +229,13 @@ Page 975
 <img alt="" src="Apollo32.png" style="width: 32px; height: 32px;" align="left">
 </td>
 <td style="vertical-align: middle;">
-Page 976
+Page 972
+This page is empty.
 </td></tr></tbody></table>
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-043126,000097:                                                                                                  <span class="co">#  This page is empty ... woo-hoo!! -- RSB 2004</span>
-043127,000098: 
+043536,000103: 
 
 End of include-file MYSUBS.agc.  Parent file is <a href="MAIN.agc.html">MAIN.agc</a>
 </pre>

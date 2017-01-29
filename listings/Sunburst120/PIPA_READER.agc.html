@@ -96,20 +96,20 @@ Note that the date is the date of the printout, not the date of the program revi
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-035529,000002:                                                                                                  <span class="co">## Copyright:    Public domain.</span>
-035530,000003:                                                                                                  <span class="co">## Filename:     PIPA_READER.agc</span>
-035531,000004:                                                                                                  <span class="co">## Purpose:      A module for revision 0 of BURST120 (Sunburst). It </span>
-035532,000005:                                                                                                  <span class="co">##               is part of the source code for the Lunar Module's</span>
-035533,000006:                                                                                                  <span class="co">##               (LM) Apollo Guidance Computer (AGC) for Apollo 5.</span>
-035534,000007:                                                                                                  <span class="co">## Assembler:    yaYUL</span>
-035535,000008:                                                                                                  <span class="co">## Contact:      Ron Burkey &lt;info@sandroid.org>.</span>
-035536,000009:                                                                                                  <span class="co">## Website:      www.ibiblio.org/apollo/index.html</span>
-035537,000010:                                                                                                  <span class="co">## Mod history:  2016-09-30 RSB  Created draft version.</span>
-035538,000011:                                                                                                  <span class="co">##               2016-10-29 MAS  Adapted from Luminary 099.</span>
-035539,000012:                                                                                                  <span class="co">##               2016-10-31 RSB  Typos.</span>
-035540,000013:                                                                                                  <span class="co">##               2016-12-06 RSB  Comment-proofing via octopus/ProoferComments;</span>
-035541,000014:                                                                                                  <span class="co">##                               changes were made.</span>
-035542,000015: 
+035534,000002:                                                                                                  <span class="co">## Copyright:    Public domain.</span>
+035535,000003:                                                                                                  <span class="co">## Filename:     PIPA_READER.agc</span>
+035536,000004:                                                                                                  <span class="co">## Purpose:      A module for revision 0 of BURST120 (Sunburst). It </span>
+035537,000005:                                                                                                  <span class="co">##               is part of the source code for the Lunar Module's</span>
+035538,000006:                                                                                                  <span class="co">##               (LM) Apollo Guidance Computer (AGC) for Apollo 5.</span>
+035539,000007:                                                                                                  <span class="co">## Assembler:    yaYUL</span>
+035540,000008:                                                                                                  <span class="co">## Contact:      Ron Burkey &lt;info@sandroid.org>.</span>
+035541,000009:                                                                                                  <span class="co">## Website:      www.ibiblio.org/apollo/index.html</span>
+035542,000010:                                                                                                  <span class="co">## Mod history:  2016-09-30 RSB  Created draft version.</span>
+035543,000011:                                                                                                  <span class="co">##               2016-10-29 MAS  Adapted from Luminary 099.</span>
+035544,000012:                                                                                                  <span class="co">##               2016-10-31 RSB  Typos.</span>
+035545,000013:                                                                                                  <span class="co">##               2016-12-06 RSB  Comment-proofing via octopus/ProoferComments;</span>
+035546,000014:                                                                                                  <span class="co">##                               changes were made.</span>
+035547,000015: 
 </pre>
 </span>
 </p>
@@ -125,54 +125,54 @@ Page 835
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-035544,000017:                                                                                                  <span class="co">#  *****  PIPA READER *****</span>
-035545,000018: 
-035546,000019:                                                                                                  <span class="co">#                  MOD NO. 00  BY D. LICKLY  DEC.9 1966</span>
-035547,000020: 
-035548,000021:                                                                                                  <span class="co">#  FUNCTIONAL DESCRIPTION</span>
-035549,000022: 
-035550,000023:                                                                                                  <span class="co">#     SUBROUTINE TO READ PIPA COUNTERS, TRYING TO BE VERY CAREFUL SO THAT IT WILL BE RESTARTABLE.</span>
-035551,000024:                                                                                                  <span class="co">#     PIPA READINGS ARE STORED IN THE VECTOR DELV. THE HIGH ORDER PART OF EACH COMPONENT CONTAINS THE PIPA READING,</span>
-035552,000025:                                                                                                  <span class="co">#     RESTARTS BEGIN AT REREADAC.</span>
-035553,000026: 
-035554,000027: 
-035555,000028:                                                                                                  <span class="co">#     AT THE END OF THE PIPA READER THE CDUS ARE READ AND STORED AS A</span>
-035556,000029:                                                                                                  <span class="co">#  VECTOR IN CDUTEMP.  THE HIGH ORDER PART OF EACH COMPONENT CONTAINS</span>
-035557,000030:                                                                                                  <span class="co">#  THE CDU READING IN 25 COMP IN THE ORDER CDUX,Y,Z.  THE THRUST</span>
-035558,000031:                                                                                                  <span class="co">#  VECTOR ESTIMATOR IN FINDCDUD REQUIRES THE CDUS BE READ AT PIPTIME.</span>
-035559,000032: 
-035560,000033:                                                                                                  <span class="co">#  CALLING SEQUENCE AND EXIT</span>
-035561,000034: 
-035562,000035:                                                                                                  <span class="co">#     CALL VIA TC, ISWCALL, ETC.</span>
-035563,000036: 
-035564,000037:                                                                                                  <span class="co">#     EXIT IS VIA Q.</span>
-035565,000038: 
-035566,000039: 
-035567,000040:                                                                                                  <span class="co">#  INPUT</span>
-035568,000041: 
-035569,000042:                                                                                                  <span class="co">#     INPUT IS THROUGH THE COUNTERS PIPAX, PIPAY, PIPAZ, AND TIME2.</span>
-035570,000043: 
-035571,000044:                                                                                                  <span class="co">#  OUTPUT</span>
-035572,000045: 
-035573,000046:                                                                                                  <span class="co">#     HIGH ORDER COMPONENTS OF THE VECTOR DELV CONTAIN THE PIPA READINGS.</span>
-035574,000047:                                                                                                  <span class="co">#     PIPTIME CONTAINS TIME OF PIPA READING.</span>
-035575,000048: 
-035576,000049: 
-035577,000050:                                                                                                  <span class="co">#  DEBRIS (ERASABLE LOCATIONS DESTROYED BY PROGRAM)</span>
-035578,000051: 
-035579,000052:                                                                                                  <span class="co">#           TEMX   TEMY   TEMZ   PIPAGE</span>
-035580,000053: 
-035581,000054: 
-035582,000055: 30,2574                                           <span class="ps">BANK    </span> 30                                    
-<a name="504950415352"></a>035583,000056: 30,2574           00006        <span class="sm">PIPASR  </span>           <span class="op">EXTEND  </span>                                       
-035584,000057: 30,2575           30025                           <span class="op">DCA     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54494D4532">TIME2</a>                                 
-035585,000058: 30,2576           53307                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#50495054494D45">PIPTIME</a>                               <span class="co">#  CURRENT TIME  POSITIVE VALUE.</span>
-035586,000059: 
-035587,000060: 30,2577           47767                           <span class="op">CS      </span> <a href="INTERPRETER.agc.html#5A45524F">ZERO</a>                                  <span class="co">#  INITIALIZE THESE AT NEG ZERO.</span>
-035588,000061: 30,2600           55155                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D58">TEMX</a>                                  
-035589,000062: 30,2601           55156                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D59">TEMY</a>                                  
-035590,000063: 30,2602           55157                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D5A">TEMZ</a>                                  
-035591,000064: 
+035549,000017:                                                                                                  <span class="co">#  *****  PIPA READER *****</span>
+035550,000018: 
+035551,000019:                                                                                                  <span class="co">#                  MOD NO. 00  BY D. LICKLY  DEC.9 1966</span>
+035552,000020: 
+035553,000021:                                                                                                  <span class="co">#  FUNCTIONAL DESCRIPTION</span>
+035554,000022: 
+035555,000023:                                                                                                  <span class="co">#     SUBROUTINE TO READ PIPA COUNTERS, TRYING TO BE VERY CAREFUL SO THAT IT WILL BE RESTARTABLE.</span>
+035556,000024:                                                                                                  <span class="co">#     PIPA READINGS ARE STORED IN THE VECTOR DELV. THE HIGH ORDER PART OF EACH COMPONENT CONTAINS THE PIPA READING,</span>
+035557,000025:                                                                                                  <span class="co">#     RESTARTS BEGIN AT REREADAC.</span>
+035558,000026: 
+035559,000027: 
+035560,000028:                                                                                                  <span class="co">#     AT THE END OF THE PIPA READER THE CDUS ARE READ AND STORED AS A</span>
+035561,000029:                                                                                                  <span class="co">#  VECTOR IN CDUTEMP.  THE HIGH ORDER PART OF EACH COMPONENT CONTAINS</span>
+035562,000030:                                                                                                  <span class="co">#  THE CDU READING IN 25 COMP IN THE ORDER CDUX,Y,Z.  THE THRUST</span>
+035563,000031:                                                                                                  <span class="co">#  VECTOR ESTIMATOR IN FINDCDUD REQUIRES THE CDUS BE READ AT PIPTIME.</span>
+035564,000032: 
+035565,000033:                                                                                                  <span class="co">#  CALLING SEQUENCE AND EXIT</span>
+035566,000034: 
+035567,000035:                                                                                                  <span class="co">#     CALL VIA TC, ISWCALL, ETC.</span>
+035568,000036: 
+035569,000037:                                                                                                  <span class="co">#     EXIT IS VIA Q.</span>
+035570,000038: 
+035571,000039: 
+035572,000040:                                                                                                  <span class="co">#  INPUT</span>
+035573,000041: 
+035574,000042:                                                                                                  <span class="co">#     INPUT IS THROUGH THE COUNTERS PIPAX, PIPAY, PIPAZ, AND TIME2.</span>
+035575,000043: 
+035576,000044:                                                                                                  <span class="co">#  OUTPUT</span>
+035577,000045: 
+035578,000046:                                                                                                  <span class="co">#     HIGH ORDER COMPONENTS OF THE VECTOR DELV CONTAIN THE PIPA READINGS.</span>
+035579,000047:                                                                                                  <span class="co">#     PIPTIME CONTAINS TIME OF PIPA READING.</span>
+035580,000048: 
+035581,000049: 
+035582,000050:                                                                                                  <span class="co">#  DEBRIS (ERASABLE LOCATIONS DESTROYED BY PROGRAM)</span>
+035583,000051: 
+035584,000052:                                                                                                  <span class="co">#           TEMX   TEMY   TEMZ   PIPAGE</span>
+035585,000053: 
+035586,000054: 
+035587,000055: 30,2574                                           <span class="ps">BANK    </span> 30                                    
+<a name="504950415352"></a>035588,000056: 30,2574           00006        <span class="sm">PIPASR  </span>           <span class="op">EXTEND  </span>                                       
+035589,000057: 30,2575           30025                           <span class="op">DCA     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54494D4532">TIME2</a>                                 
+035590,000058: 30,2576           53307                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#50495054494D45">PIPTIME</a>                               <span class="co">#  CURRENT TIME  POSITIVE VALUE.</span>
+035591,000059: 
+035592,000060: 30,2577           47767                           <span class="op">CS      </span> <a href="INTERPRETER.agc.html#5A45524F">ZERO</a>                                  <span class="co">#  INITIALIZE THESE AT NEG ZERO.</span>
+035593,000061: 30,2600           55155                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D58">TEMX</a>                                  
+035594,000062: 30,2601           55156                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D59">TEMY</a>                                  
+035595,000063: 30,2602           55157                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D5A">TEMZ</a>                                  
+035596,000064: 
 </pre>
 </span>
 </p>
@@ -188,56 +188,56 @@ Page 836
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-035593,000066: 30,2603           37767                           <span class="op">CA      </span> <a href="INTERPRETER.agc.html#5A45524F">ZERO</a>                                  
-035594,000067: 30,2604           54407                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C565A">DELVZ</a>                                 <span class="co">#  OTHER DELVS OK INCLUDING LOW ORDER</span>
-035595,000068: 30,2605           54405                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C5659">DELVY</a>                                 
-035596,000069: 
-035597,000070: 30,2606           55331                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43445554454D50">CDUTEMP</a>    +1                         <span class="co">#  INITIALIZE THESE FOR FINDCDUD</span>
-035598,000071: 30,2607           55333                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43445554454D50">CDUTEMP</a>    +3                         
-035599,000072: 30,2610           55335                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43445554454D50">CDUTEMP</a>    +5                         
-035600,000073: 
-035601,000074: 30,2611           55161                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#504950414745">PIPAGE</a>                                <span class="co">#  SHOW PIPA READING IN PROGRESS</span>
-035602,000075: 
-<a name="524550495031"></a>035603,000076: 30,2612           00006        <span class="sm">REPIP1  </span>           <span class="op">EXTEND  </span>                                       
-035604,000077: 30,2613           40040                           <span class="op">DCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5049504158">PIPAX</a>                                 <span class="co">#  X AND Y PIPS READ</span>
-035605,000078: 30,2614           53156                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D58">TEMX</a>                                  
-035606,000079: 30,2615           52040                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5049504158">PIPAX</a>                                 <span class="co">#  PIPAS SET TO NEG ZERO AS READ.</span>
-035607,000080: 30,2616           54403                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C5658">DELVX</a>                                 
-035608,000081: 30,2617           22405                           <span class="op">LXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C5659">DELVY</a>                                 
-035609,000082: 
-<a name="524550495033"></a>035610,000083: 30,2620           40041        <span class="sm">REPIP3  </span>           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#504950415A">PIPAZ</a>                                 <span class="co">#  REPEAT PROCESS FOR Z PIP</span>
-035611,000084: 30,2621           57157                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D5A">TEMZ</a>                                  
-035612,000085: 30,2622           56041                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#504950415A">PIPAZ</a>                                 
-<a name="444F44454C565A"></a>035613,000086: 30,2623           54407        <span class="sm">DODELVZ </span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C565A">DELVZ</a>                                 
-035614,000087: 
-<a name="524550495034"></a>035615,000088: 30,2624           30032        <span class="sm">REPIP4  </span>           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43445558">CDUX</a>                                  <span class="co">#  READ CDUS INTO HIGH ORDER CDUTEMPS</span>
-035616,000089: 30,2625           55330                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43445554454D50">CDUTEMP</a>                               
-035617,000090: 30,2626           30033                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43445559">CDUY</a>                                  
-035618,000091: 30,2627           55332                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43445554454D50">CDUTEMP</a>    +2                         
-035619,000092: 30,2630           30034                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4344555A">CDUZ</a>                                  
-035620,000093: 30,2631           55334                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43445554454D50">CDUTEMP</a>    +4                         
-035621,000094: 
-035622,000095: 30,2632           00002                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
-035623,000096: 
-035624,000097: 
-035625,000098: 
-<a name="5245524541444143"></a>035626,000099: 30,2633           11110        <span class="sm">REREADAC</span>           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#504841534535">PHASE5</a>                                <span class="co">#  COMES HERE ON RESARTS.   IS PHASE 5 ON?</span>
-035627,000100: 30,2634           12636                           <span class="op">TCF     </span> +2                                    <span class="co">#  YES..  GO ON.</span>
-035628,000101: 30,2635           15727                           <span class="op">TCF     </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              <span class="co">#  NO.. HAVE BEEN TO AVGEND SINCE GOJAM.</span>
-035629,000102: 
-035630,000103: 30,2636           11161                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#504950414745">PIPAGE</a>                                <span class="co">#  WAS 1 READING THE PIPS WHEN GOJAM OCCURD</span>
-035631,000104: 30,2637           12064                           <span class="op">TCF     </span> <a href="206_SERVICE_ROUTINES.agc.html#50495052454144">PIPREAD</a>                               <span class="co">#  PIP READING NOT STARTED. GO TO BEGINNING</span>
-035632,000105: 30,2640           32676                           <span class="op">CAF     </span> <a href="#444F4E45414452">DONEADR</a>                               <span class="co">#  SET UP RETURN FROM PIPASR</span>
-035633,000106: 30,2641           54002                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
-035634,000107: 
-035635,000108: 30,2642           10407                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C565A">DELVZ</a>                                 
-035636,000109: 30,2643           12624                           <span class="op">TCF     </span> <a href="#524550495034">REPIP4</a>                                <span class="co">#  Z DONE, GO DO CDUS</span>
-035637,000110: 30,2644           12647                           <span class="op">TCF     </span> +3                                    <span class="co">#  Z NOT DONE, CHECK Y.</span>
-035638,000111: 30,2645           12624                           <span class="op">TCF     </span> <a href="#524550495034">REPIP4</a>                                
-035639,000112: 30,2646           12624                           <span class="op">TCF     </span> <a href="#524550495034">REPIP4</a>                                
-035640,000113: 
-035641,000114: 30,2647           22007                           <span class="op">ZL      </span>                                       
-035642,000115: 30,2650           10405                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C5659">DELVY</a>                                 
+035598,000066: 30,2603           37767                           <span class="op">CA      </span> <a href="INTERPRETER.agc.html#5A45524F">ZERO</a>                                  
+035599,000067: 30,2604           54407                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C565A">DELVZ</a>                                 <span class="co">#  OTHER DELVS OK INCLUDING LOW ORDER</span>
+035600,000068: 30,2605           54405                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C5659">DELVY</a>                                 
+035601,000069: 
+035602,000070: 30,2606           55331                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43445554454D50">CDUTEMP</a>    +1                         <span class="co">#  INITIALIZE THESE FOR FINDCDUD</span>
+035603,000071: 30,2607           55333                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43445554454D50">CDUTEMP</a>    +3                         
+035604,000072: 30,2610           55335                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43445554454D50">CDUTEMP</a>    +5                         
+035605,000073: 
+035606,000074: 30,2611           55161                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#504950414745">PIPAGE</a>                                <span class="co">#  SHOW PIPA READING IN PROGRESS</span>
+035607,000075: 
+<a name="524550495031"></a>035608,000076: 30,2612           00006        <span class="sm">REPIP1  </span>           <span class="op">EXTEND  </span>                                       
+035609,000077: 30,2613           40040                           <span class="op">DCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5049504158">PIPAX</a>                                 <span class="co">#  X AND Y PIPS READ</span>
+035610,000078: 30,2614           53156                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D58">TEMX</a>                                  
+035611,000079: 30,2615           52040                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5049504158">PIPAX</a>                                 <span class="co">#  PIPAS SET TO NEG ZERO AS READ.</span>
+035612,000080: 30,2616           54403                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C5658">DELVX</a>                                 
+035613,000081: 30,2617           22405                           <span class="op">LXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C5659">DELVY</a>                                 
+035614,000082: 
+<a name="524550495033"></a>035615,000083: 30,2620           40041        <span class="sm">REPIP3  </span>           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#504950415A">PIPAZ</a>                                 <span class="co">#  REPEAT PROCESS FOR Z PIP</span>
+035616,000084: 30,2621           57157                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D5A">TEMZ</a>                                  
+035617,000085: 30,2622           56041                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#504950415A">PIPAZ</a>                                 
+<a name="444F44454C565A"></a>035618,000086: 30,2623           54407        <span class="sm">DODELVZ </span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C565A">DELVZ</a>                                 
+035619,000087: 
+<a name="524550495034"></a>035620,000088: 30,2624           30032        <span class="sm">REPIP4  </span>           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43445558">CDUX</a>                                  <span class="co">#  READ CDUS INTO HIGH ORDER CDUTEMPS</span>
+035621,000089: 30,2625           55330                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43445554454D50">CDUTEMP</a>                               
+035622,000090: 30,2626           30033                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43445559">CDUY</a>                                  
+035623,000091: 30,2627           55332                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43445554454D50">CDUTEMP</a>    +2                         
+035624,000092: 30,2630           30034                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4344555A">CDUZ</a>                                  
+035625,000093: 30,2631           55334                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43445554454D50">CDUTEMP</a>    +4                         
+035626,000094: 
+035627,000095: 30,2632           00002                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
+035628,000096: 
+035629,000097: 
+035630,000098: 
+<a name="5245524541444143"></a>035631,000099: 30,2633           11110        <span class="sm">REREADAC</span>           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#504841534535">PHASE5</a>                                <span class="co">#  COMES HERE ON RESARTS.   IS PHASE 5 ON?</span>
+035632,000100: 30,2634           12636                           <span class="op">TCF     </span> +2                                    <span class="co">#  YES..  GO ON.</span>
+035633,000101: 30,2635           15727                           <span class="op">TCF     </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              <span class="co">#  NO.. HAVE BEEN TO AVGEND SINCE GOJAM.</span>
+035634,000102: 
+035635,000103: 30,2636           11161                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#504950414745">PIPAGE</a>                                <span class="co">#  WAS 1 READING THE PIPS WHEN GOJAM OCCURD</span>
+035636,000104: 30,2637           12064                           <span class="op">TCF     </span> <a href="206_SERVICE_ROUTINES.agc.html#50495052454144">PIPREAD</a>                               <span class="co">#  PIP READING NOT STARTED. GO TO BEGINNING</span>
+035637,000105: 30,2640           32676                           <span class="op">CAF     </span> <a href="#444F4E45414452">DONEADR</a>                               <span class="co">#  SET UP RETURN FROM PIPASR</span>
+035638,000106: 30,2641           54002                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
+035639,000107: 
+035640,000108: 30,2642           10407                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C565A">DELVZ</a>                                 
+035641,000109: 30,2643           12624                           <span class="op">TCF     </span> <a href="#524550495034">REPIP4</a>                                <span class="co">#  Z DONE, GO DO CDUS</span>
+035642,000110: 30,2644           12647                           <span class="op">TCF     </span> +3                                    <span class="co">#  Z NOT DONE, CHECK Y.</span>
+035643,000111: 30,2645           12624                           <span class="op">TCF     </span> <a href="#524550495034">REPIP4</a>                                
+035644,000112: 30,2646           12624                           <span class="op">TCF     </span> <a href="#524550495034">REPIP4</a>                                
+035645,000113: 
+035646,000114: 30,2647           22007                           <span class="op">ZL      </span>                                       
+035647,000115: 30,2650           10405                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C5659">DELVY</a>                                 
 </pre>
 </span>
 </p>
@@ -253,34 +253,34 @@ Page 837
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-035644,000117: 30,2651           12654                           <span class="op">TCF     </span> +3                                    
-035645,000118: 30,2652           12663                           <span class="op">TCF     </span> <a href="#43484B54454D58">CHKTEMX</a>                               <span class="co">#  Y NOT DONE, CHECK X.</span>
-035646,000119: 30,2653           12654                           <span class="op">TCF     </span> +1                                    
-035647,000120: 30,2654           22041                           <span class="op">LXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#504950415A">PIPAZ</a>                                 <span class="co">#  Y DONE, ZERO Z PIP.</span>
-035648,000121: 
-035649,000122: 30,2655           11157                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D5A">TEMZ</a>                                  
-035650,000123: 30,2656           41157                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D5A">TEMZ</a>                                  <span class="co">#  TEMZ NOT = -0, CONTAINS -PIPAZ VALUE.</span>
-035651,000124: 30,2657           12623                           <span class="op">TCF     </span> <a href="#444F44454C565A">DODELVZ</a>                               
-035652,000125: 30,2660           12656                           <span class="op">TCF     </span> -2                                    
-035653,000126: 30,2661           22407                           <span class="op">LXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C565A">DELVZ</a>                                 <span class="co">#  TEMZ = -0, L HAS ZPIP VALUE.</span>
-035654,000127: 30,2662           12624                           <span class="op">TCF     </span> <a href="#524550495034">REPIP4</a>                                
-035655,000128: 
-<a name="43484B54454D58"></a>035656,000129: 30,2663           11155        <span class="sm">CHKTEMX </span>           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D58">TEMX</a>                                  <span class="co">#  HAS THIS CHANGED</span>
-035657,000130: 30,2664           41155                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D58">TEMX</a>                                  <span class="co">#  YES</span>
-035658,000131: 30,2665           12670                           <span class="op">TCF     </span> +3                                    <span class="co">#  YES</span>
-035659,000132: 30,2666           12664                           <span class="op">TCF     </span> -2                                    <span class="co">#  YES</span>
-035660,000133: 30,2667           12612                           <span class="op">TCF     </span> <a href="#524550495031">REPIP1</a>                                <span class="co">#  NO</span>
-035661,000134: 30,2670           54403                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C5658">DELVX</a>                                 
-035662,000135: 
-035663,000136: 30,2671           41156                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D59">TEMY</a>                                  
-035664,000137: 30,2672           54405                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C5659">DELVY</a>                                 
-035665,000138: 
-035666,000139: 30,2673           47767                           <span class="op">CS      </span> <a href="INTERPRETER.agc.html#5A45524F">ZERO</a>                                  <span class="co">#  ZERO X AND Y PIPS</span>
-035667,000140: 30,2674           52040                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5049504158">PIPAX</a>                                 <span class="co">#  L STILL ZERO FROM ABOVE</span>
-035668,000141: 
-035669,000142: 30,2675           12620                           <span class="op">TCF     </span> <a href="#524550495033">REPIP3</a>                                
-035670,000143: 
-<a name="444F4E45414452"></a>035671,000144: 30,2676           02065        <span class="sm">DONEADR </span>           <span class="ps">GENADR  </span> <a href="206_SERVICE_ROUTINES.agc.html#50495053444F4E45">PIPSDONE</a>                              
+035649,000117: 30,2651           12654                           <span class="op">TCF     </span> +3                                    
+035650,000118: 30,2652           12663                           <span class="op">TCF     </span> <a href="#43484B54454D58">CHKTEMX</a>                               <span class="co">#  Y NOT DONE, CHECK X.</span>
+035651,000119: 30,2653           12654                           <span class="op">TCF     </span> +1                                    
+035652,000120: 30,2654           22041                           <span class="op">LXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#504950415A">PIPAZ</a>                                 <span class="co">#  Y DONE, ZERO Z PIP.</span>
+035653,000121: 
+035654,000122: 30,2655           11157                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D5A">TEMZ</a>                                  
+035655,000123: 30,2656           41157                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D5A">TEMZ</a>                                  <span class="co">#  TEMZ NOT = -0, CONTAINS -PIPAZ VALUE.</span>
+035656,000124: 30,2657           12623                           <span class="op">TCF     </span> <a href="#444F44454C565A">DODELVZ</a>                               
+035657,000125: 30,2660           12656                           <span class="op">TCF     </span> -2                                    
+035658,000126: 30,2661           22407                           <span class="op">LXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C565A">DELVZ</a>                                 <span class="co">#  TEMZ = -0, L HAS ZPIP VALUE.</span>
+035659,000127: 30,2662           12624                           <span class="op">TCF     </span> <a href="#524550495034">REPIP4</a>                                
+035660,000128: 
+<a name="43484B54454D58"></a>035661,000129: 30,2663           11155        <span class="sm">CHKTEMX </span>           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D58">TEMX</a>                                  <span class="co">#  HAS THIS CHANGED</span>
+035662,000130: 30,2664           41155                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D58">TEMX</a>                                  <span class="co">#  YES</span>
+035663,000131: 30,2665           12670                           <span class="op">TCF     </span> +3                                    <span class="co">#  YES</span>
+035664,000132: 30,2666           12664                           <span class="op">TCF     </span> -2                                    <span class="co">#  YES</span>
+035665,000133: 30,2667           12612                           <span class="op">TCF     </span> <a href="#524550495031">REPIP1</a>                                <span class="co">#  NO</span>
+035666,000134: 30,2670           54403                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C5658">DELVX</a>                                 
+035667,000135: 
+035668,000136: 30,2671           41156                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D59">TEMY</a>                                  
+035669,000137: 30,2672           54405                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C5659">DELVY</a>                                 
+035670,000138: 
+035671,000139: 30,2673           47767                           <span class="op">CS      </span> <a href="INTERPRETER.agc.html#5A45524F">ZERO</a>                                  <span class="co">#  ZERO X AND Y PIPS</span>
+035672,000140: 30,2674           52040                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5049504158">PIPAX</a>                                 <span class="co">#  L STILL ZERO FROM ABOVE</span>
+035673,000141: 
+035674,000142: 30,2675           12620                           <span class="op">TCF     </span> <a href="#524550495033">REPIP3</a>                                
+035675,000143: 
+<a name="444F4E45414452"></a>035676,000144: 30,2676           02065        <span class="sm">DONEADR </span>           <span class="ps">GENADR  </span> <a href="206_SERVICE_ROUTINES.agc.html#50495053444F4E45">PIPSDONE</a>                              
 
 End of include-file PIPA_READER.agc.  Parent file is <a href="MAIN.agc.html">MAIN.agc</a>
 </pre>

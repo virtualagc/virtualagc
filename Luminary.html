@@ -1,1275 +1,1591 @@
 <!DOCTYPE doctype PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
 <html>
-<head>
-  <meta name="generator" content=
-  "HTML Tidy for HTML5 for Linux version 5.3.14">
-  <meta http-equiv="Content-Type" content=
-  "text/html; charset=utf-8">
-  <meta name="GENERATOR" content=
-  "Mozilla/4.7 [en] (X11; I; Linux 2.4.16 ppc) [Netscape]">
-  <meta name="Author" content="Ronald Burkey">
-  <title>Virtual AGC Luminary Page</title>
-  <meta name="author" content="Ronald S. Burkey">
-  <script type="text/javascript" src="Header.js">
+  <head>
+    <meta name="generator" content="HTML Tidy for HTML5 for Linux
+      version 5.3.14">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="GENERATOR" content="Mozilla/4.7 [en] (X11; I; Linux
+      2.4.16 ppc) [Netscape]">
+    <meta name="Author" content="Ronald Burkey">
+    <title>Virtual AGC Luminary Page</title>
+    <meta name="author" content="Ronald S. Burkey">
+    <script type="text/javascript" src="Header.js">
   </script>
-</head>
-<body style="background-image: url(gray3.jpg);">
-  <script type="text/javascript">
+  </head>
+  <body style="background-image: url(gray3.jpg);">
+    <script type="text/javascript">
   document.write(headerTemplate.replace("@TITLE@","Luminary &mdash; Sunburst &mdash; Sundance").replace("@SUBTITLE@","Lunar Module Flight Software"))
   </script>
-  <h2>Contents</h2>
-  <ul>
-    <li><a href="#What_is_Luminary_">What is "Luminary"?</a></li>
-    <li><a href="#Known_Software_Versions">Known Software
-    Versions</a></li>
-    <li><a href="#Source_Code_and_Binary">Source Code and
-    Binary</a></li>
-    <li><a href="#Validity">Validation</a></li>
+    <h2>Contents</h2>
     <ul>
-      <li><a href=
-      "#Validity_of_the_Luminary_131_Source_Code">Validity of the
-      Luminary 131 Source Code and of the Binary (Apollo
-      13)</a></li>
-      <li><a href="#Validity_of_the_Luminary_099_Code_">Validity of
-      the Luminary 099 Code (Apollo 11)</a></li>
+      <li><a href="#What_is_Luminary_">What is "Luminary"?</a></li>
+      <li><a href="#Known_Software_Versions">Known Software Versions</a></li>
+      <li><a href="#Source_Code_and_Binary">Source Code and Binary</a></li>
+      <li><a href="#Validity">Validation</a></li>
+      <ul>
+        <li><a href="#Validity_of_the_Luminary_131_Source_Code">Validity
+            of the Luminary 131 Source Code and of the Binary (Apollo
+            13)</a></li>
+        <li><a href="#Validity_of_the_Luminary_099_Code_">Validity of
+            the Luminary 099 Code (Apollo 11)</a></li>
+      </ul>
     </ul>
-  </ul>
-  <h2><a name="What_is_Luminary_" id=
-  "What_is_Luminary_"></a><small><big>What is
-  "Luminary"?</big><br></small></h2><a href=
-  "AGC-versions.jpg"><span style="font-weight: bold;"><img alt=
-  "AGC software family tree" title="Click on the image to enlarge."
-  src="AGC-versions-thumb.jpg" style=
-  "border: 2px solid ; width: 132px; height: 160px;" height="360"
-  hspace="16" align="left" border="0" width=
-  "219"></span></a><a href="R700-3-Table4-11.jpg"><img alt=""
-  title="Click to enlarge" src="R700-3-Table4-11-small.jpg" height=
-  "160" hspace="16" align="right" border="2" width=
-  "171"></a><span style="font-weight: bold;">Luminary</span> is the
-  program which was run on the Apollo Guidance Computer installed
-  in the Lunar Module (LM).&nbsp; In order to be loaded into the
-  AGC—actually, to be converted to the "core ropes" within the
-  AGC—it was necessary to "assemble" <span style=
-  "font-weight: bold;">Luminary</span>'s source code into binary
-  machine language, using a computer program called <span style=
-  "font-weight: bold;">YUL</span>.&nbsp; In the context of the
-  Virtual AGC project, of course, the process is somewhat
-  different:&nbsp; <span style="font-weight: bold;">Luminary</span>
-  source code is assembled by the <span style=
-  "font-weight: bold;">yaYUL</span> program, and then loaded into
-  the <span style="font-weight: bold;">yaAGC</span> simulation.<br>
-  <br>
-  The figure at left (click to enlarge) concisely depicts the
-  relationships among the LM AGC software and the relationship with
-  the CM's AGC software, while the table to the right (click to
-  enlarge) depicts the various versions of the software, at least
-  for Apollo 5-14, though it has unfortunately been roughed up
-  somewhat by optical-character recognition processing and so its
-  contents can't be fully trusted<br>
-  <h2><a name="Known_Software_Versions" id=
-  "Known_Software_Versions"></a>Known Software Versions</h2>
-  <h3>Summary of the Versions Available Here at this Site<br></h3>
-  <ul>
-    <li><a href="listings/Retread44/MAIN.agc.html">Retread
-    44</a><br></li>
-    <li><a href="listings/Aurora12/MAIN.agc.html">Aurora
-    12</a></li>
-    <li><a href="listings/Sunburst120/MAIN.agc.html">Apollo 5 —
-    Sunburst 120</a></li>
-    <li><a href=
-    "http://www.ibiblio.org/apollo/ScansForConversion/Luminary069/">
-    Apollo 10 (almost!) — Luminary 1, build 069</a></li>
-    <li><a href="listings/Luminary099/MAIN.agc.html">Apollo 11 —
-    Luminary 1A, build 099/1</a></li>
-    <li><a href=
-    "http://www.ibiblio.org/apollo/ScansForConversion/Luminary116/">
-    Apollo 12 — Luminary 1B, build 116<br></a></li>
-    <li><a href="listings/Luminary131/MAIN.agc.html">Apollo 13
-    (almost!) — Luminary 1C, build 131</a></li>
-    <li><a href="listings/Luminary210/MAIN.agc.html">Apollo 15-17 —
-    Luminary 1E, build 210</a></li>
-  </ul>
-  <h3>All Versions, in Gory Detail, Whether We Have Them or
-  Not<br></h3>
-  <table summary="" style=
-  "width: 95%; text-align: left; margin-left: auto; margin-right: auto;"
-  border="1" cellpadding="2" cellspacing="2">
-    <tbody>
-      <tr>
-        <td style="font-weight: bold; text-align: center;">
-        Mission</td>
-        <td style="font-weight: bold; text-align: center;">LM
-        Number</td>
-        <td style="font-weight: bold; text-align: center;">
-        Mission<br>
-        Type</td>
-        <td style="font-weight: bold; text-align: center;">LM
-        Program</td>
-        <td style="font-weight: bold; text-align: center;">
-        Version</td>
-        <td style="font-weight: bold; text-align: center;">Source
-        Code<br></td>
-        <td style="text-align: center;"><span style=
-        "font-weight: bold;">Mission-specific
-        documentation</span><br></td>
-        <td style="font-weight: bold; text-align: center;">What We
-        Know About It, in a Nutshell<br></td>
-      </tr>
-      <tr>
-        <td align="center" valign="middle">N/A<br></td>
-        <td align="center" valign="middle">N/A<br></td>
-        <td align="center" valign="middle">N/A<br></td>
-        <td align="center" valign="middle"><b>Retread</b><br></td>
-        <td align="center" valign="middle">44<br></td>
-        <td align="center" valign="middle"><a href=
-        "listings/Retread44/MAIN.agc.html">As colorized,
-        hyperlinked,&nbsp; HTML</a><br>
-        <br>
-        or<br>
-        <br>
-        <a href=
-        "http://www.ibiblio.org/apollo/ScansForConversion/Aurora12">
-        Reduced-size&nbsp; scanned JPG</a><br>
-        (43MB)<br>
-        <br>
-        or<br>
-        <br>
-        <a href=
-        "https://archive.org/details/aurora00dapg">High-quality
-        scanned JPEG 2000</a><br>
-        (82MB)</td>
-        <td align="center" valign="middle">N/A<br></td>
-        <td valign="middle"><a name="RetreadNutshell" id=
-        "RetreadNutshell"></a>As you've seen elsewhere on this
-        site, there where two major versions of the AGC, the Block
-        I and Block II models.&nbsp; While there was never any
-        Block I code for the Lunar Module, as far as I am aware
-        anyway, there was certainly Block I code for the Command
-        Module, and at some point a transition was made both from
-        writing Block I code to writing Block II code ... but also
-        from writing CM code to writing LM code, and Retread marks
-        that transition point!&nbsp; It's the veritable Missing
-        Link of AGC code, which is particularly <i>a propos</i>
-        since in fact the YUL development system employed for AGC
-        development didn't sport a linker.&nbsp; (Joke!&nbsp; Feel
-        free to ignore.)<br>
-        <br>
-        In other words, Retread was when Block I code for the CM
-        began to be adapted into Block II code for the LM.&nbsp;
-        Thus, like Aurora below, Retread was never intended to be
-        mission code, and was never flown.&nbsp; But it has the
-        honor of being the "first" LM software.&nbsp; It is, in
-        fact, more than a year older than any other AGC software of
-        any kind (Block I, Block II, CM, LM) available publicly at
-        the present time, as far as I'm aware!<br>
-        <br>
-        Indeed, if you look at the date on this software — I'll
-        save you the trouble; it's July 9, 1965 — that's the same
-        time (within a month or two) of when the first Block II
-        AGCs were actually becoming available, and thus the only
-        way to have run RETREAD at that time was probably in a
-        digital simulation.&nbsp; But of course, digital
-        simulations in advance of actual hardware are never
-        <i>perfect</i>, so there would be every possibility that
-        RETREAD 44 may not be exactly compatible with Block II AGC
-        hardware yet ... and it turns out that that's the
-        case.&nbsp; If, for example, you look at <a href=
-        "listings/Retread44/AGC_BLK2_INSTRUCTION_CHECK.agc.html">the
-        self-check code</a>, run by VERB 21 NOUN 27 ENTER 1 ENTER,
-        not all of the CPU tests pass!&nbsp; (There is <a href=
-        "https://github.com/virtualagc/virtualagc/issues/562">a
-        detailed write-up of this issue</a>, if you're
-        interested.)<br>
-        <br>
-        At any rate, this particular program listing came to us
-        from Don Eyles, via scanning at <a href=
-        "http://www.archive.org">archive.org</a>,
-        financially-sponsored by Mike Higgins.<br></td>
-      </tr>
-      <tr>
-        <td align="center" valign="middle">N/A<br></td>
-        <td align="center" valign="middle">N/A<br></td>
-        <td align="center" valign="middle">N/A<br></td>
-        <td align="center" valign="middle"><b>Aurora</b><br></td>
-        <td align="center" valign="middle">12<br></td>
-        <td align="center" valign="middle"><a href=
-        "listings/Aurora12/MAIN.agc.html">As colorized,
-        hyperlinked,&nbsp; HTML</a><br>
-        <br>
-        or<br>
-        <br>
-        <a href=
-        "http://www.ibiblio.org/apollo/ScansForConversion/Aurora12">
-        Reduced-size&nbsp; scanned JPG</a><br>
-        (100MB)<br>
-        <br>
-        or<br>
-        <br>
-        <a href=
-        "https://archive.org/details/aurora00dapg">High-quality
-        scanned JPEG 2000</a><br>
-        (500MB)<br></td>
-        <td align="center" valign="middle">N/A<br></td>
-        <td valign="middle"><a name="AuroraNutshell" id=
-        "AuroraNutshell"></a>Don Eyles, one of the AGC developers
-        who you may know as <a href=
-        "http://www.doneyles.com/LM/Tales.html">the hero of Apollo
-        14</a>, has contributed the hardcopy of this program from
-        his personal collection.&nbsp; We have had it scanned by
-        <a href="http://www.archive.org">archive.org</a>, and Mike
-        Stewart has generously financially-sponsored the
-        scanning.&nbsp; So, thanks Don and Mike!&nbsp; As usual, we
-        provide it here in the form of reduced-size (but therefore
-        reduced-quality) images for easier access, but the original
-        scans in their full quality are still available in <a href=
-        "https://archive.org/details/virtualagcproject">our Virtual
-        AGC collection at archive.org</a>.<br>
-        <br>
-        I suppose I should mention that if page 52 or 70 of the
-        reduced-sized images look a little weird to you (oh, you
-        conspiracy theorists with your Photoshopping theories!), I
-        should mention that those were places where there was a
-        paper-change on the printer, and I simply glued two partial
-        pages together to make it look pretty.&nbsp; You can look
-        at the high-quality scans to see <i>all</i> of the pages in
-        their original, un-Photoshopped glory, if you like.&nbsp;
-        There are also a couple of pages (622 and 623, I think),
-        which are missing right now, but which archive.org should
-        add within a couple of days of when I'm writing this.<br>
-        <br>
-        Now before you go all elitist and thumb your nose at Aurora
-        just because it never flew on an actual mission (even an
-        unmanned one), let me tell you that from this project's
-        standpoint it is quite a terrific find.&nbsp; For one
-        thing, it employs unique flavor of the AGC programming
-        language; although it is a&nbsp; Block 2 program for a
-        Block 2 computer, the language version precedes its final
-        form as used in the later software versions we have
-        available, requiring changes to the assembler just to
-        assemble it.&nbsp; Technically, it was targeted at the
-        "BLK2" software architecture rather than the "AGC" software
-        architecture.<br>
-        <br>
-        More significantly, it was the <i>last</i> version we know
-        of to incorporate the full range of AGC testing software
-        that had been created.&nbsp; In actual mission software,
-        most of this testing software was removed due to size
-        constraints, and due to the fact (I presume) that most of
-        the tests were more-appropriately done in the lab, as
-        acceptance tests, rather than in space where nothing could
-        be done about the failures anyway.&nbsp; Why do we care
-        about that?&nbsp; Well, how do you think we test the AGC
-        simulator anyway?&nbsp; Pre-Aurora, our only choice was to
-        roll our own tests, which the original AGC may not have
-        even been able to pass for all we know.&nbsp; But now that
-        we have Aurora?&nbsp; Well, we haven't yet converted it to
-        source code, and couldn't assemble it yet without modifying
-        the assembler to accept this flavor of assembly language
-        anyway, so it's too early to say.&nbsp; But once we do
-        that, we hope that some lingering bugs in the simulator
-        will be ferreted out, as well as to give us additional
-        confidence in the simulator.&nbsp; It's also a boon to
-        developers of hardware AGC simulations, like Mike (who
-        sponsored this), because they would like to validate their
-        own simulators just as we would.<br>
-        <br>
-        Finally, there's something of a mystery associated with
-        Aurora 12.&nbsp; The hardcopy we have of it is from
-        November 10, 1966, and Aurora at the point should have had
-        a version number in the 80's.&nbsp; How could it be version
-        12?&nbsp; Perhaps one day we'll know!<br></td>
-      </tr>
-      <tr>
-        <td style="text-align: center;">Apollo 5<br></td>
-        <td style="text-align: center;">LM-1<br></td>
-        <td style="text-align: center;"><br></td>
-        <td style="text-align: center;"><span style=
-        "font-weight: bold;">Sunburst</span><br></td>
-        <td style="text-align: center;">120<br></td>
-        <td align="center"><a href=
-        "listings/Sunburst120/MAIN.agc.html">As colorized,
-        hyperlinked,&nbsp; HTML</a><br>
-        <br>
-        or<br>
-        <br>
-        <a href=
-        "http://www.ibiblio.org/apollo/ScansForConversion/Sunburst120">
-        Reduced-size&nbsp; scanned JPG</a><br>
-        (200MB)<br>
-        <br>
-        or<br>
-        <br>
-        <a href=
-        "https://archive.org/details/yulsystemforagcr00nasa">High-quality
-        scanned JPEG 2000</a><br>
-        (500MB)<br></td>
-        <td>
-          <span style="text-decoration: underline;">GSOP
-          (R-527)</span><br>
-          <ul>
-            <li><a href=
-            "http://www.ibiblio.org/apollo/Documents/R-527-GSOP-Sunburst-Section7-GNErrorAnalyses.pdf">
-            Section 7</a></li>
-          </ul>"<a href=
-          "http://www.ibiblio.org/apollo/Documents/ApolloExperienceReport-GuidanceAndControlSystems-LunarModuleMissionProgramer.pdf">Apollo
-          Experience Report—Guidance and Control Systems: Lunar
-          Module Mission Programer</a>"
-        </td>
-        <td>Apollo 5 was an unmanned mission to test the LM, and as
-        such it had a working AGC.&nbsp; Due to software bugs, it
-        was necessary for ground controllers to deactivate the AGC
-        at certain points in the mission.<br>
-        <br>
-        The "Programer"—actually some sources spell it "programer"
-        and some "programmer"—was the robotic gadget that was the
-        stand-in for the crew.<br>
-        <br>
-        Don Eyles provided the hardcopy for our the scan we present
-        here.&nbsp; It was scanned by archive.org, which was
-        generously sponsored by Mike Stewart.&nbsp; The original
-        printout unfortunately has some problems in the vicinity of
-        pp. 820-830, but we naturally correct those in our
-        transcription.<br></td>
-      </tr>
-      <tr align="center">
-        <td style="vertical-align: middle; white-space: nowrap;">
-        Apollo 9<br></td>
-        <td style="text-align: center; vertical-align: middle;">
-        LM-3<br></td>
-        <td style="text-align: center; vertical-align: middle;">
-        D<br></td>
-        <td style=
-        "font-weight: bold; vertical-align: middle; white-space: nowrap;">
-        Sundance<br></td>
-        <td style="vertical-align: middle;">306<br></td>
-        <td style="text-align: center; vertical-align: middle;">
-        <br></td>
-        <td style="text-align: left;">
-          GSOP (R-557)<br>
-          <ul>
-            <li><a href=
-            "http://www.ibiblio.org/apollo/NARA-SW/R-557-sec1-rev1.pdf">
-            Section 1</a><br></li>
-          </ul><a href=
-          "http://www.ibiblio.org/apollo/Documents/Apollo9FlightPlan.pdf">Flight
-          Plan</a>
-        </td>
-        <td style="text-align: left; vertical-align: middle;">
-          Here is some info from James Kernan, one of the LGC
-          developers, in response to my question about correct
-          versioning of Sundance:<br>
-          <br>
-          <div style="margin-left: 40px;">
-            <small>Sundance 306 is correct.&nbsp; I was the "rope
-            mother" for Sundance-Apollo 9.&nbsp; ...&nbsp; Sundance
-            was not only the Apollo 9 LM flight program, it was
-            also the development bed for the Lunar orbit and
-            landing software.&nbsp; At some point we created a
-            version and called it Luminary.&nbsp; I think the last
-            few revisions of Sundance were devoted to disabling
-            crew access to the Lunar orbit and landing software
-            that was present in the build.<br></small>
-          </div><br>
-          Jim also tells me that a copy of Sundance 306 may still
-          "be in the building".&nbsp; I'm not certain which
-          building he's talking about, but it's nevertheless
-          interesting news that a copy of the program does exist
-          somewhere.<br>
-        </td>
-      </tr>
-      <tr align="center">
-        <td style="vertical-align: middle; white-space: nowrap;">
-        Apollo 10<br></td>
-        <td style="text-align: center; vertical-align: middle;">
-        LM-4<br></td>
-        <td style="text-align: center; vertical-align: middle;">
-        F<br></td>
-        <td style=
-        "font-weight: bold; vertical-align: middle; white-space: nowrap;">
-        Luminary 1<br></td>
-        <td style="vertical-align: middle;">069/2<br></td>
-        <td style="text-align: center; vertical-align: middle;">As
-        colorized, hyperlinked,&nbsp; HTML ... soon, perhaps!<br>
-        <br>
-        or<br>
-        <br>
-        <a href=
-        "http://www.ibiblio.org/apollo/ScansForConversion/Luminary069/">
-        Reduced-size&nbsp; scanned JPG</a><br>
-        (200MB)<br>
-        <br>
-        or<br>
-        <br>
-        <a href=
-        "https://archive.org/details/luminary6900miti">High-quality
-        scanned JPEG 2000</a><br>
-        (730MB)</td>
-        <td style="text-align: left;">
-          GSOP (R-557)<br>
-          <ul>
-            <li><a href=
-            "http://www.ibiblio.org/apollo/NARA-SW/R-557-sec1-rev1.pdf">
-            Section 1</a></li>
-          </ul>
-          <p><a href=
-          "http://www.ibiblio.org/apollo/Documents/LUM75-001.pdf">LUMINARY
-          Memo #75</a><br></p>
-        </td>
-        <td style="text-align: left; vertical-align: middle;">The
-        version we have here is from Don Eyle's private collection,
-        as scanned by archive.org, and financially sponsored by our
-        Onno Hommes.<br>
-        <br>
-        Actually, though, it may not be quite the version actually
-        flown on Apollo 10.&nbsp; As it says right at the top of
-        every page, it is <tt>REVISION 069 OF AGC PROGRAM LUMINARY
-        BY NASA 2021112-011</tt>, whereas it is known that the
-        version flown on Apollo 10 was Luminary 69 Rev. 2,
-        2021112-031, which was released five months later.&nbsp;
-        Such last-minute changes were often the result of ephemeris
-        upddates or other time-sensitive data that had to be
-        specific to the launch window, but we don't know this for
-        sure at the moment.<br>
-        <br>
-        Regardless, this is the closest thing to Apollo 11 mission
-        software we have, or are likely to find, so beggars can't
-        be choosers!<br></td>
-      </tr>
-      <tr align="center">
-        <td style="vertical-align: middle; white-space: nowrap;">
-        Apollo 11<br></td>
-        <td style="text-align: center; vertical-align: middle;">
-        LM-5<br></td>
-        <td style="text-align: center; vertical-align: middle;">
-        G<br></td>
-        <td style=
-        "font-weight: bold; vertical-align: middle; white-space: nowrap;">
-        Luminary 1A<br></td>
-        <td style="vertical-align: middle;">099/1<br></td>
-        <td style="text-align: center; vertical-align: middle;">
-        <a href="listings/Luminary099/MAIN.agc.html">As colorized,
-        hyperlinked,&nbsp; HTML</a><br>
-        <br>
-        <a href=
-        "http://www.ibiblio.org/apollo/ScansForConversion/Luminary099">
-        As scanned page images (<span style=
-        "font-style: italic;">very</span> big!)</a><br>
-        <br>
-        <a href="AP11ROPEpage1472.jpg">Page 1472</a><br>
-        <br>
-        <a href="AP11ROPEpage1473.jpg">Page 1473</a><br></td>
-        <td style="text-align: left; white-space: nowrap;">
-          <a href=
-          "http://www.ibiblio.org/apollo/Documents/Luminary99PadLoads.pdf">
-          Erasable pad loads</a><br>
-          <br>
-          <a href=
-          "http://www.ibiblio.org/apollo/Documents/LM_Systems_Handbook_060269.pdf">
-          Excerpted LM Systems Handbook</a><br>
-          <br>
-          <a href="http://www.doneyles.com/LM/Tales.html">The
-          1201/1202 alarms</a><br>
-          <br>
-          <a href=
-          "http://www.ibiblio.org/apollo/NARA-SW/TheApollo11Adventure.pdf"
-          style="font-style: italic;">The Apollo 11
-          Adventure</a><br>
-          <br>
-          <span style="text-decoration: underline;">Operational
-          Data Book</span><br>
-          <ul>
-            <li><a href=
-            "http://www.ibiblio.org/apollo/Documents/SNA-8-D-027III-Rev2-CsmLmSpacecraftOperationalDataBook-Volume3-MassProperties.pdf">
-            Volume 3</a></li>
-          </ul><span style="text-decoration: underline;">Crew
-          Debriefing</span><br>
-          <ul>
-            <li><a href=
-            "http://www.ibiblio.org/apollo/Documents/Apollo11TechnicalCrewDebriefing-Volume1.pdf">
-            Volume 1</a></li>
-            <li><a href=
-            "http://www.ibiblio.org/apollo/Documents/Apollo11TechnicalCrewDebriefing-Volume2.pdf">
-            Volume 2</a></li>
-          </ul><a href=
-          "http://www.ibiblio.org/apollo/Documents/Apollo11FlightPlan.pdf">Flight
-          Plan</a><br>
-          <br>
-          <a href=
-          "http://www.ibiblio.org/apollo/Documents/CherryApollo11Exegesis.pdf">
-          "Exegesis of the 1201<br>
-          and 1202 Alarms Which<br>
-          Occurred During the<br>
-          Mission G Lunar<br>
-          Landing"</a><br>
-        </td>
-        <td style="text-align: left; vertical-align: middle;">
-          Page images have been taken from a hardcopy from the
-          Charles Stark Draper Historical Collection, MIT Museum,
-          and then converted to source code by a team of
-          volunteers.<br>
-          <br>
-          <table summary="" style=
-          "text-align: left; margin-left: auto; margin-right: auto;"
-          border="1" cellpadding="2" cellspacing="2">
-            <tbody>
-              <tr>
-                <td style="vertical-align: top;">
-                  <div style="text-align: center;">
-                    <span style="font-weight: bold;"><span style=
-                    "text-decoration: underline;">Honor
-                    Roll</span><br></span>
-                    <div style="text-align: left;">
-                      <span style="font-style: italic;"><br>
-                      <span style=
-                      "text-decoration: underline;">Organizational
-                      honors</span></span><br>
-                    </div>
-                  </div>
-                  <table summary="" style=
-                  "text-align: left; width: 100%;" border="0"
-                  cellpadding="2" cellspacing="2">
-                    <tbody>
-                      <tr>
-                        <td style="vertical-align: middle;">
-                        <big><span style=
-                        "font-family: sans-serif;">Massachusetts
-                        Institute of Technology / MIT
-                        Museum</span><br style=
-                        "font-family: sans-serif;">
-                        <span style=
-                        "font-family: sans-serif;">Building N51,
-                        265 Massachusetts Avenue</span><br style=
-                        "font-family: sans-serif;">
-                        <span style=
-                        "font-family: sans-serif;">Cambridge,
-                        MA&nbsp; 02139<br>
-                        <a href=
-                        "http://web.mit.edu/museum/"><small>web.mit.edu/museum/</small></a><br>
-                        </span></big></td>
-                        <td style=
-                        "text-align: center; vertical-align: middle;">
-                        <a href=
-                        "http://web.mit.edu/museum/"><img alt=""
-                        title=
-                        "Click to visit the MIT Museum website"
-                        src="MITMuseumLogo_red.gif" style=
-                        "border: 0px solid ; width: 107px; height: 101px;"
-                        height="101" width="107"></a><br></td>
-                      </tr>
-                    </tbody>
-                  </table><br>
-                  <span style=
-                  "font-style: italic; text-decoration: underline;">
-                  Individual honors</span><br>
-                  <ul>
-                    <li>Deborah Douglas, the Museum's Curator of
-                    Science and Technology, who conceived the idea
-                    of making this material available to us, and
-                    without whom we had literally no chance of
-                    obtaining it.</li>
-                    <li>Paul Fjeld, for digitizing the
-                    hardcopy.</li>
-                    <li>(In alphabetical order) Fabrizio
-                    Bernardini, Hartmuth Gutshe, Onno Hommes, Jim
-                    Lawton, and Sergio Navarro, for converting the
-                    page images to source code.</li>
-                    <li>Steve Case and Dawn Masuoka for helping in
-                    proofing the executable binary.<br></li>
-                    <li>... and those whose names I do not know at
-                    the Charles Stark Draper Laboratory and NASA
-                    who allowed us to do this.<br></li>
-                  </ul>
-                </td>
-              </tr>
-            </tbody>
-          </table><br>
-          The MIT Museum copy is dated 14 July, 1969, which seems
-          odd at first glance, since it would be far too late to
-          actually have been included in the Apollo 11
-          mission.&nbsp; Hugh Blair-Smith speculates that this is
-          the date of the printing rather than of the program
-          build, and that seems plausible.&nbsp;<br>
-          <br>
-          Don Eyles also has a copy of this, with identical
-          memory-bank checksums, though oddly named AP11ROPE BY
-          EYLES rather than LMY99 BY NASA, and was printed in 1970
-          for some reason.&nbsp; At some point, we may scan
-          it.&nbsp; At any rate, the MIT Museum copy is missing
-          portions of pp. 1472-1473, and Don has kindly sent us
-          some snapshots of those pages from his copy, which we do
-          present here.<br>
-          <br>
-          Another one of the original AGC programmers, Allan
-          Klumpp, also had a copy, since donated to <a href=
-          "http://www.klabs.org">klabs.org</a>.&nbsp; A comparison
-          of memory-bank checksums ("bugger words") has been made
-          between the MIT and Klumpp listings (thanks to Paul Fjeld
-          and Allan Klumpp), and it has been found that these two
-          listings have a small difference in memory bank 6.&nbsp;
-          In other words, they are not precisely the same!&nbsp; So
-          presumably Allan's version is not the software that was
-          actually flown.&nbsp; Perhaps someday we'll be able to
-          scan that version as well.<br>
-          <br>
-          <a name="Kernan" id="Kernan"></a>Mr. James Kernan,
-          another of the original AGC developers, has sent us some
-          facts that may explain the confusion.&nbsp; I'll let Jim
-          tell it in his own words:<br>
-          <br>
-          <div style="margin-left: 40px;">
-            <small>I was an employee at Draper Lab, and was in
-            charge of the Lunar Module LGC computer programming
-            group and also in charge of Assembly Control for the
-            flight software during the Apollo 9-12 software
-            development period.&nbsp; The latter responsibility
-            included reviewing all proposed alterations to the
-            flight software and the YUL assembler inputs.<br>
-            <br>
-            I can explain the confusion over the Luminary version
-            that flew on Apollo 11.&nbsp; We were aiming for
-            Luminary Revision 99 as the Apollo 11 Lunar Module
-            flight software.&nbsp; There was a tradition (or rule)
-            that the flight software version should have no
-            revision, so we renamed Luminary Revision 099 as Lum99
-            Revision 0.&nbsp; At the last minute, Dan Lickly, our
-            chief engineer, appeared with ephemerides updates and
-            it took two tries to get it right.&nbsp; The result was
-            that we created Lum99 Revision 1 and Lum99 Revision
-            2.&nbsp; We made a no-change version of the later and
-            named it Lum99R2 Revision 0.<br>
-            <br>
-            The tapes and ropes were made from that.&nbsp;&nbsp;
-            That is my recollection.&nbsp; Unfortunately, I did not
-            have the foresight to keep a printout of the flight
-            version.</small>
-          </div>
-        </td>
-      </tr>
-      <tr align="center">
-        <td style="vertical-align: middle; white-space: nowrap;">
-        Apollo 12<br></td>
-        <td style="text-align: center; vertical-align: middle;">
-        LM-6<br></td>
-        <td style="text-align: center; vertical-align: middle;">
-        H<br></td>
-        <td style=
-        "font-weight: bold; vertical-align: middle; white-space: nowrap;">
-        Luminary 1B<br></td>
-        <td style="vertical-align: middle;">116<br></td>
-        <td style="text-align: center; vertical-align: middle;">As
-        colorized, hyperlinked,&nbsp; HTML ... soon, perhaps!<br>
-        <br>
-        or<br>
-        <br>
-        <a href=
-        "http://www.ibiblio.org/apollo/ScansForConversion/Luminary116/">
-        Reduced-size&nbsp; scanned JPG</a><br>
-        (300MB)<br>
-        <br>
-        or<br>
-        <br>
-        <a href=
-        "https://archive.org/details/luminary11600nasa">High-quality
-        scanned JPEG 2000</a><br>
-        (700MB)</td>
-        <td style="text-align: left;">
-          <a href=
-          "http://www.ibiblio.org/apollo/Documents/LM_Systems_Handbook_060269.pdf">
-          Excerpted LM Systems Handbook</a><br>
-          <br>
-          <span style="text-decoration: underline;">Operational
-          Data Book</span><br>
-          <ul>
-            <li><a href=
-            "http://www.ibiblio.org/apollo/Documents/SNA-8-D-027III-Rev2-CsmLmSpacecraftOperationalDataBook-Volume3-MassProperties.pdf">
-            Volume 3</a></li>
-          </ul><a href=
-          "http://www.ibiblio.org/apollo/Documents/Apollo12FlightPlan.pdf">Flight
-          Plan</a>
-        </td>
-        <td style="text-align: left; vertical-align: middle;">This
-        is from the hardcopy in Don Eyles's private collection, as
-        scanned at archive.org (sponsored, by Ron Burkey,
-        me).&nbsp; Unfortunately, the printout is pretty faint, and
-        pp. 217-220, 226 are entirely missing.&nbsp; But source
-        code is source code, and we'll work around those problems
-        in transcribing it.<br></td>
-      </tr>
-      <tr align="center">
-        <td style=
-        "color: rgb(255, 0, 0); vertical-align: middle; white-space: nowrap;">
-        Apollo 13<br></td>
-        <td style="text-align: center; vertical-align: middle;">
-        LM-7<br></td>
-        <td style="text-align: center; vertical-align: middle;">
-        H-2<br></td>
-        <td style=
-        "font-weight: bold; color: rgb(255, 0, 0); vertical-align: middle; white-space: nowrap;">
-        Luminary 1C<br></td>
-        <td style=
-        "color: rgb(255, 0, 0); vertical-align: middle; white-space: nowrap;">
-        131<br></td>
-        <td style="text-align: center; vertical-align: middle;">
-        <a href="listings/Luminary131/MAIN.agc.html">As colorized,
-        hyperlinked,&nbsp; HTML</a><br>
-        <br>
-        <a href=
-        "http://www.ibiblio.org/apollo/ScansForConversion/Luminary131">
-        <span style="text-decoration: underline;">As scanned page
-        images (<span style="font-style: italic;">very</span>
-        big!)</span></a><br></td>
-        <td style="text-align: left;">
-          <span style="text-decoration: underline;">GSOP
-          (R-567)</span><br>
-          <ul>
-            <li><a href=
-            "http://www.ibiblio.org/apollo/NARA-SW/R-557-sec1-rev1.pdf">
-            Section 1</a><br></li>
-            <li><a href=
-            "http://www.ibiblio.org/apollo/NARA-SW/R-567-sec2-rev8.pdf">
-            Section 2</a></li>
-            <li><a href=
-            "http://www.ibiblio.org/apollo/NARA-SW/R-567-sec3-rev4.pdf">
-            Section 3</a></li>
-            <li>Section 4:</li>
-            <ul>
-              <li><a href=
-              "http://www.ibiblio.org/apollo/NARA-SW/R-567-sec4-rev7-intro.pdf">
-              Introduction</a></li>
-              <li><a href=
-              "http://www.ibiblio.org/apollo/NARA-SW/R-567-sec4-rev7-P00-P39.pdf">
-              P00-P39</a><br></li>
-              <li><a href=
-              "http://www.ibiblio.org/apollo/NARA-SW/R-567-sec4-rev7-P40-P69.pdf">
-              P40-P69</a><br></li>
-              <li><a href=
-              "http://www.ibiblio.org/apollo/NARA-SW/R-567-sec4-rev7-P70-R09.pdf">
-              P70-R09</a>.&nbsp; (192 pages, 3.3M bytes.)<br></li>
-              <li><a href=
-              "http://www.ibiblio.org/apollo/NARA-SW/R-567-sec4-rev7-R10-R56.pdf">
-              R10-R56</a><br></li>
-              <li><a href=
-              "http://www.ibiblio.org/apollo/NARA-SW/R-567-sec4-rev7-R57-end.pdf">
-              R57-</a><br></li>
-            </ul>
-            <li>Section 5:</li>
-            <ul>
-              <li><a href=
-              "http://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.1-5.2.pdf">
-              5.1-5.2</a><br></li>
-              <li><a href=
-              "http://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.3.pdf">
-              5.3</a><br></li>
-              <li><a href=
-              "http://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf">
-              5.4-5.5</a><br></li>
-              <li><a href=
-              "http://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.6-end.pdf">
-              5.6-</a><br></li>
-            </ul>
-            <li><a href=
-            "http://www.ibiblio.org/apollo/NARA-SW/R-567-sec6.pdf">Section
-            6</a></li>
-          </ul><a href=
-          "http://www.ibiblio.org/apollo/Documents/LM7_Pad_loads.pdf">Pad
-          loads for LM-7</a><br>
-          <br>
-          <a href=
-          "http://www.ibiblio.org/apollo/Documents/LM_Systems_Handbook_060269.pdf">
-          Excerpted LM Systems Handbook</a><br>
-          <br>
-          <span style="text-decoration: underline;">Operational
-          Data Book</span><br>
-          <ul>
-            <li><a href=
-            "http://www.ibiblio.org/apollo/Documents/SNA-8-D-027III-Rev2-CsmLmSpacecraftOperationalDataBook-Volume3-MassProperties.pdf">
-            Volume 3</a></li>
-          </ul>
-          <p><a href=
-          "http://www.ibiblio.org/apollo/Documents/LUM127-001.pdf">LUMINARY
-          Memo #127</a><br></p>
-          <p><a href=
-          "http://www.ibiblio.org/apollo/Documents/LUM129-001.pdf">LUMINARY
-          Memo #129</a><br></p>
-        </td>
-        <td style="text-align: left; vertical-align: middle;">
-        Unfortunately, the version we have here is not <i>quite</i>
-        the version flown in Apollo 13, though for many years we
-        thought it was.&nbsp; Niklas Beug was sharp enough to
-        notice what I was not, namely in the table from <a href=
-        "http://www.ibiblio.org/apollo/R700-3-Table4-11.jpg">document
-        R-700 shown at the top of this very web-page</a> that what
-        <i>we</i> have is the first version (December 1969) of
-        Luminary 131, but that subsequent versions were released in
-        January and February 1970, and it was the latter of which
-        that was flown.&nbsp; Well ... we have what we have, and
-        not necessarily precisely what we'd want to have in an
-        ideal world!<br>
-        <br>
-        Mr. Paul Fjeld has also told me (or speculated) that the
-        listing from which these scans were created was originally
-        preserved by Don Eyles (one of the programmers), and then
-        copied/reduced by Hugh Blair-Smith (whose name appears
-        frequently on this site), via James Kernan (another of the
-        original programmers), for David Craig (whose <span style=
-        "font-style: italic;">ex libris</span> appears on p. 2 of
-        the scan, and who is apparently a great collector of Apollo
-        artifacts).&nbsp; Somehow it was passed to Mr. Gary Neff,
-        who created the scans, which he gave back to Mr. Craig, and
-        which were then placed online at MIT's History of Recent
-        Science and Technology website.&nbsp; Unfortunately, the
-        quality of the page images was somehow greatly reduced in
-        the latter steps, and the high-quality page images that Mr.
-        Neff produced were discarded in the process.&nbsp; MIT's
-        HRST website has subsequently disappeared, but eventually
-        was mirrored elsewhere on the web, and is partially
-        mirrored here.&nbsp; However, <span style=
-        "font-style: italic;">we</span> choose to present this
-        listing as a set of individual page images rather than as a
-        single gigantic PDF file you'll find elsewhere on the
-        web.&nbsp; (Whew!&nbsp; "Many hands make the work
-        Luminary.")&nbsp; By the way, Mr. Neff also kindly provided
-        me with a replacement for a page which is garbled in the
-        MIT version, and consequently is probably available only
-        here.</td>
-      </tr>
-      <tr align="center">
-        <td style=
-        "color: rgb(255, 0, 0); vertical-align: middle; white-space: nowrap;">
-        <span style="color: rgb(0, 0, 0);">Apollo
-        14</span><br></td>
-        <td style="text-align: center; vertical-align: middle;">
-        LM-8<br></td>
-        <td style="text-align: center; vertical-align: middle;">
-        H-3<br></td>
-        <td style=
-        "font-weight: bold; color: rgb(255, 0, 0); vertical-align: middle; white-space: nowrap;">
-        <span style="color: rgb(0, 0, 0);">Luminary
-        1D</span><br></td>
-        <td style="color: rgb(255, 0, 0); vertical-align: middle;">
-        <span style="color: rgb(0, 0, 0);">178</span><br></td>
-        <td style="text-align: center; vertical-align: middle;">
-        <br></td>
-        <td style="text-align: left;">
-          <a href=
-          "http://www.ibiblio.org/apollo/Documents/LM_Systems_Handbook_060269.pdf">
-          Excerpted LM Systems Handbook</a><br>
-          <br>
-          <a href="http://www.doneyles.com/LM/Tales.html">The
-          solder ball</a><br>
-          <br>
-          <span style="text-decoration: underline;">Operational
-          Data Book</span><br>
-          <ul>
-            <li><a href=
-            "http://www.ibiblio.org/apollo/Documents/SNA-8-D-027III-Rev2-CsmLmSpacecraftOperationalDataBook-Volume3-MassProperties.pdf">
-            Volume 3</a><br></li>
-          </ul>
-        </td>
-        <td style="text-align: left; vertical-align: middle;">
-        <br></td>
-      </tr>
-      <tr align="center">
-        <td style="vertical-align: middle; white-space: nowrap;">
-        Apollo 15<br></td>
-        <td style="text-align: center; vertical-align: middle;">
-        LM-10<br></td>
-        <td style="text-align: center; vertical-align: middle;">
-        J-1<br></td>
-        <td colspan="1" rowspan="3" style=
-        "font-weight: bold; vertical-align: middle; white-space: nowrap;">
-        Luminary 1E</td>
-        <td colspan="1" rowspan="3" style=
-        "vertical-align: middle;">210<br></td>
-        <td colspan="1" rowspan="3" style=
-        "text-align: center; vertical-align: middle;"><br>
-        <br>
-        <a href="listings/Luminary210/MAIN.agc.html">As colorized,
-        hyperlinked,&nbsp; HTML</a><br>
-        <br>
-        or<br>
-        <br>
-        <a href=
-        "http://www.ibiblio.org/apollo/ScansForConversion/Luminary210-BW/">
-        Reduced-resolution&nbsp; high-contrast black&amp;white
-        PNG</a><br>
-        (300MB)<br>
-        <br>
-        or<br>
-        <br>
-        <a href=
-        "http://www.ibiblio.org/apollo/ScansForConversion/Luminary210/">
-        Reduced-resolution&nbsp; scanned color JPG</a><br>
-        (250MB)<br>
-        <br>
-        or<br>
-        <br>
-        <a href=
-        "https://archive.org/details/luminary21000miti">High-resolution
-        scanned JPEG 2000</a><br>
-        (500MB)<br>
-        <br>
-        <br></td>
-        <td colspan="1" rowspan="1" style="text-align: left;">
-          <a href=
-          "http://www.ibiblio.org/apollo/Documents/LmQuickReferenceApollo15.zip">
-          LGC Data Cards</a><br>
-          <br>
-          <a href=
-          "http://www.ibiblio.org/apollo/Documents/msc05225.pdf"><span style="font-style: italic;">
-          Program Notes</span></a><br>
-          <br>
-          <a href=
-          "http://www.hq.nasa.gov/alsj/a15/a15.CMsoftware.html">Delco
-          Manual</a><br>
-          <br>
-          <span style="text-decoration: underline;">GSOP
-          (R-567)</span><br>
-          <ul>
-            <li><a href=
-            "http://www.ibiblio.org/apollo/Documents/R-567-GSOP-Luminary1E-Section2-DataLinks.pdf">
-            Section 2</a></li>
-            <li><a href=
-            "http://www.ibiblio.org/apollo/Documents/R-567-GSOP-Luminary1E-Section7-ErasableMemoryPrograms.pdf">
-            Section 7</a></li>
-          </ul><span style="text-decoration: underline;">Operations
-          Handbook</span><br>
-          <ul>
-            <li><a href=
-            "http://www.ibiblio.org/apollo/Documents/LMA790-3-LM10-ApolloOperationsHandbookLunarModuleLM10AndSubsequent-Volume1-SubsystemsData.pdf">
-            Volume 1</a></li>
-            <li>Volume 2</li>
-          </ul><span style=
-          "text-decoration: underline;">Operational Data
-          Book</span><br>
-          <ul>
-            <li><a href=
-            "http://www.ibiblio.org/apollo/Documents/SNA-8-D-027III-Rev2-CsmLmSpacecraftOperationalDataBook-Volume3-MassProperties.pdf">
-            Volume 3</a></li>
-          </ul><a href=
-          "http://www.ibiblio.org/apollo/Documents/Apollo15TechnicalCrewDebriefing.pdf">Crew
-          Debriefing</a><br>
-          <br>
-          <a href=
-          "http://www.ibiblio.org/apollo/Documents/Apollo15FlightPlan.pdf">
-          Flight Plan</a><br>
-          <br>
-          <span style=
-          "text-decoration: underline;">Checklists</span><br>
-          <ul>
-            <li><a href=
-            "http://www.ibiblio.org/apollo/Documents/Apollo15LMActivationChecklist.pdf">
-            LM Activation</a></li>
-          </ul><a href=
-          "http://www.ibiblio.org/apollo/Documents/LMA790-2-LunarModuleLM10Through14VehicleFamiliarizationManual.pdf">LM
-          Familiarization Manual</a><br>
-        </td>
-        <td colspan="1" rowspan="3" style=
-        "text-align: left; vertical-align: middle;">Allan Klumpp
-        (one of the AGC programmers) tells me that he believes
-        Luminary 1D build 209 was used for these flights, and he
-        was certainly in a position to know.&nbsp; But it does
-        contradict the statements in the A17 Flight Readiness
-        Review (Fabrizio Bernardini tells me), which agree with the
-        information to the left.&nbsp; Unfortunately, Allan's copy
-        of Luminary 209 is not available to us at present.<br>
-        <br>
-        At any rate, the version we have is Luminary 210, from Don
-        Eyle's collection, as scanned by archive.org, and
-        financially sponsored by our Jim Lawton.&nbsp; Thanks,
-        Jim!<br></td>
-      </tr>
-      <tr align="center">
-        <td style="vertical-align: middle; white-space: nowrap;">
-        Apollo 16<br></td>
-        <td style="text-align: center; vertical-align: middle;">
-        LM-11<br></td>
-        <td style="text-align: center; vertical-align: middle;">
-        J-2<br></td>
-        <td rowspan="1" style="text-align: left;">
-          <a href=
-          "http://www.ibiblio.org/apollo/Documents/msc05225.pdf"><span style="font-style: italic;">
-          Program Notes</span></a><br>
-          <br>
-          <span style="text-decoration: underline;">GSOP
-          (R-567)</span><br>
-          <ul>
-            <li><a href=
-            "http://www.ibiblio.org/apollo/Documents/R-567-GSOP-Luminary1E-Section2-DataLinks.pdf">
-            Section 2</a></li>
-            <li><a href=
-            "http://www.ibiblio.org/apollo/Documents/R-567-GSOP-Luminary1E-Section7-ErasableMemoryPrograms.pdf">
-            Section 7</a></li>
-          </ul><span style="text-decoration: underline;">Operations
-          Handbook</span><br>
-          <ul>
-            <li><a href=
-            "http://www.ibiblio.org/apollo/Documents/LMA790-3-LM10-ApolloOperationsHandbookLunarModuleLM10AndSubsequent-Volume1-SubsystemsData.pdf">
-            Volume 1</a></li>
-            <li><a href=
-            "http://www.ibiblio.org/apollo/Documents/LMA790-3-LM11-ApolloOperationsHandbookLunarModuleLM11AndSubsequent-Volume2-OperationalProcedures.pdf">
-            Volume 2</a></li>
-          </ul><span style=
-          "text-decoration: underline;">Operational Data
-          Book</span><br>
-          <ul>
-            <li><a href=
-            "http://www.ibiblio.org/apollo/Documents/SNA-8-D-027III-Rev2-CsmLmSpacecraftOperationalDataBook-Volume3-MassProperties.pdf">
-            Volume 3</a></li>
-          </ul><a href=
-          "http://www.ibiblio.org/apollo/Documents/Apollo16FlightPlan.pdf">Flight
-          Plan</a><br>
-          <br>
-          <a href=
-          "http://www.ibiblio.org/apollo/Documents/LMA790-2-LunarModuleLM10Through14VehicleFamiliarizationManual.pdf">
-          LM Familiarization Manual</a><br>
-        </td>
-      </tr>
-      <tr>
-        <td style=
-        "text-align: center; vertical-align: middle; white-space: nowrap;">
-        Apollo 17<br></td>
-        <td style="text-align: center; vertical-align: middle;">
-        LM-12<br></td>
-        <td style="text-align: center; vertical-align: middle;">
-        J-3<br></td>
-        <td>
-          <a href=
-          "http://www.ibiblio.org/apollo/Documents/LM_Systems_Handbook_Apollo17.pdf">
-          Excerpted LM Systems Handbook</a><br>
-          <br>
-          <a href=
-          "http://www.ibiblio.org/apollo/Documents/msc05225.pdf"><span style="font-style: italic;">
-          Program Notes</span></a><br>
-          <br>
-          <span style="text-decoration: underline;">GSOP
-          (R-567)</span><br>
-          <ul>
-            <li><a href=
-            "http://www.ibiblio.org/apollo/Documents/R-567-GSOP-Luminary1E-Section2-DataLinks.pdf">
-            Section 2</a></li>
-            <li><a href=
-            "http://www.ibiblio.org/apollo/Documents/R-567-GSOP-Luminary1E-Section7-ErasableMemoryPrograms.pdf">
-            Section 7</a></li>
-          </ul><span style="text-decoration: underline;">Operations
-          Handbook</span><br>
-          <ul>
-            <li><a href=
-            "http://www.ibiblio.org/apollo/Documents/LMA790-3-LM10-ApolloOperationsHandbookLunarModuleLM10AndSubsequent-Volume1-SubsystemsData.pdf">
-            Volume 1</a></li>
-            <li><a href=
-            "http://www.ibiblio.org/apollo/Documents/LMA790-3-LM11-ApolloOperationsHandbookLunarModuleLM11AndSubsequent-Volume2-OperationalProcedures.pdf">
-            Volume 2</a></li>
-          </ul><span style=
-          "text-decoration: underline;">Operational Data
-          Book</span><br>
-          <ul>
-            <li><a href=
-            "http://www.ibiblio.org/apollo/Documents/SNA-8-D-027III-Rev2-CsmLmSpacecraftOperationalDataBook-Volume3-MassProperties.pdf">
-            Volume 3</a></li>
-          </ul><a href=
-          "http://www.ibiblio.org/apollo/Documents/Apollo17TechnicalCrewDebriefing.pdf">Crew
-          Debriefing</a><br>
-          <br>
-          <a href=
-          "http://www.ibiblio.org/apollo/Documents/Apollo17FlightPlan.pdf">
-          Flight Plan</a><br>
-          <br>
-          <a href=
-          "http://www.ibiblio.org/apollo/Documents/LMA790-2-LunarModuleLM10Through14VehicleFamiliarizationManual.pdf">
-          LM Familiarization Manual</a><br>
-        </td>
-      </tr>
-      <tr>
-        <td colspan="8" rowspan="1" style="vertical-align: top;">
-          <div style="text-align: left;">
-            <span style="font-style: italic;">(The data in this
-            table originally came from on-line sources, but in the
-            form shown contains many corrections supplied by Mr.
-            Paul Fjeld.&nbsp; <span style=
-            "font-weight: bold;">Please don't take this information
-            as authoritative!</span>)</span><br>
-          </div>
-        </td>
-      </tr>
-    </tbody>
-  </table>
-  <div style="text-align: left;">
+    <h2><a name="What_is_Luminary_" id="What_is_Luminary_"></a><small><big>What
+
+
+
+          is "Luminary"?</big><br>
+      </small></h2>
+    <a href="AGC-versions.jpg"><span style="font-weight: bold;"><img
+          alt="AGC software family tree" title="Click on the image to
+          enlarge." src="AGC-versions-thumb.jpg" style="border: 2px
+          solid ; width: 132px; height: 160px;" height="360" hspace="16"
+          align="left" border="0" width="219"></span></a><a
+      href="R700-3-Table4-11.jpg"><img alt="" title="Click to enlarge"
+        src="R700-3-Table4-11-small.jpg" height="160" hspace="16"
+        align="right" border="2" width="171"></a><span
+      style="font-weight: bold;">Luminary</span> is the program which
+    was run on the Apollo Guidance Computer installed in the Lunar
+    Module (LM).&nbsp; In order to be loaded into the AGC—actually, to
+    be converted to the "core ropes" within the AGC—it was necessary to
+    "assemble" <span style="font-weight: bold;">Luminary</span>'s
+    source code into binary machine language, using a computer program
+    called <span style="font-weight: bold;">YUL</span>.&nbsp; In the
+    context of the Virtual AGC project, of course, the process is
+    somewhat different:&nbsp; <span style="font-weight: bold;">Luminary</span>
+    source code is assembled by the <span style="font-weight: bold;">yaYUL</span>
+    program, and then loaded into the <span style="font-weight: bold;">yaAGC</span>
+    simulation.<br>
     <br>
-    <h2><a name="Source_Code_and_Binary" id=
-    "Source_Code_and_Binary"></a>Source Code and Binary</h2>Both
-    source code and (independently derived) binary code are
-    provided within the yaAGC tarball downlod.&nbsp; The files are
-    contained within a subdirectory named after the software
-    version (such as "Luminary131").&nbsp; The more important files
-    supplied are these:<br>
-    <br>
-    <div style="margin-left: 40px;">
-      <table summary="" style=
-      "width: 75%; text-align: left; margin-left: auto; margin-right: auto;"
-      border="0" cellpadding="2" cellspacing="2">
-        <tbody>
-          <tr>
-            <td style="vertical-align: top;"><span style=
-            "font-style: italic;">Filename</span>.agc<br></td>
-            <td style="vertical-align: top; text-align: left;">
-            Source code for major subdivisions of the <span style=
-            "font-weight: bold;">Luminary</span> program.</td>
-          </tr>
-          <tr>
-            <td style="vertical-align: top;">MAIN.agc<br></td>
-            <td style="vertical-align: top;">Organizer which treats
-            all of the other assembly-language files (*.agc) as
-            include-files, to form the complete program.<br></td>
-          </tr>
-          <tr>
-            <td style="vertical-align: top;"><span style=
-            "font-style: italic;">Filename</span>.binsource<br></td>
-            <td style="vertical-align: top;">Human-readable form of
-            the Luminary binary executable, as an octal
-            listing.<br></td>
-          </tr>
-          <tr>
-            <td style="vertical-align: top;"><span style=
-            "font-style: italic;">Filename</span>.bin<br></td>
-            <td style="vertical-align: top;">Binary executable
-            created from binsource (octal listing) file.<br></td>
-          </tr>
-        </tbody>
-      </table><br>
-    </div>In other words, to create a <span style=
-    "font-weight: bold;">Luminary</span> binary executable rather
-    than using the one provided with yaAGC (such as
-    Luminary131.bin), one simply needs to assemble the file
-    MAIN.agc.&nbsp; Typically, if all files remain organized the
-    way they are in the yaAGC distribution tarball, the sequence of
-    steps for doing so (from a command-line prompt) would be
-    something like this:<br>
-    <div style="margin-left: 40px;">
-      <br>
-      <span style="font-family: monospace;">cd
-      Luminary131</span><br style="font-family: monospace;">
-      <span style="font-family: monospace;">../yaYUL/yaYUL --force
-      MAIN.agc &gt;Luminary131.lst</span><br>
-    </div><br>
-    The listfile (Luminary131.lst) so produced is a bit more
-    manageable than the scanned version at MIT's website, in that
-    it is a hundredth the size and you can perform text-searches on
-    it.&nbsp; The binary so produced, MAIN.agc.bin, should be
-    byte-for-byte identical to the binary (Luminary131.bin)
-    provided with the yaAGC distribution.&nbsp; Therefore, the
-    following Linux command should reveal no differences between
-    the two:<br>
-    <br>
-    <div style="margin-left: 40px;">
-      <span style="font-family: monospace;">diff -s MAIN.agc.bin
-      Luminary131.bin</span><br>
-    </div><br>
-    (Replace "diff -s" with "fc /b" in Windows.)&nbsp;<br>
-    <br>
-    <table summary="" style=
-    "width: 60%; text-align: left; margin-left: auto; margin-right: auto;"
-    border="1" cellpadding="2" cellspacing="2">
+    The figure at left (click to enlarge) concisely depicts the
+    relationships among the LM AGC software and the relationship with
+    the CM's AGC software, while the table to the right (click to
+    enlarge) depicts the various versions of the software, at least for
+    Apollo 5-14, though it has unfortunately been roughed up somewhat by
+    optical-character recognition processing and so its contents can't
+    be fully trusted<br>
+    <h2><a name="Known_Software_Versions" id="Known_Software_Versions"></a>Known
+
+
+
+      Software Versions</h2>
+    <h3>Summary of the Versions Available Here at this Site<br>
+    </h3>
+    <ul>
+      <li><a href="listings/Retread44/MAIN.agc.html">Retread 44</a><br>
+      </li>
+      <li><a href="listings/Aurora12/MAIN.agc.html">Aurora 12</a></li>
+      <li><a href="listings/Sunburst120/MAIN.agc.html">Apollo 5 —
+          Sunburst 120</a></li>
+      <li><a
+          href="http://www.ibiblio.org/apollo/ScansForConversion/Luminary069/">
+          Apollo 10 (almost!) — Luminary 1, build 069</a></li>
+      <li><a href="listings/Luminary099/MAIN.agc.html">Apollo 11 —
+          Luminary 1A, build 099/1</a></li>
+      <li><a
+          href="http://www.ibiblio.org/apollo/ScansForConversion/Luminary116/">
+          Apollo 12 — Luminary 1B, build 116<br>
+        </a></li>
+      <li><a href="listings/Luminary131/MAIN.agc.html">Apollo 13
+          (almost!) — Luminary 1C, build 131</a></li>
+      <li><a href="listings/Luminary210/MAIN.agc.html">Apollo 15-17 —
+          Luminary 1E, build 210</a></li>
+    </ul>
+    <h3>All Versions, in Gory Detail, Whether We Have Them or Not<br>
+    </h3>
+    <table summary="" style="width: 95%; text-align: left; margin-left:
+      auto; margin-right: auto;" border="1" cellpadding="2"
+      cellspacing="2">
       <tbody>
         <tr>
-          <td style="vertical-align: top;">
-            <h3 style="text-align: left;">Technically
-            speaking....</h3>A point which may not be completely
-            appreciated is that Luminary131.bin was <span style=
-            "font-style: italic;">not</span> created from the
-            assembly-language source files.&nbsp; Therefore, the
-            byte-for-byte equivalence mentioned above actually has
-            some significance.&nbsp; In fact, both the
-            assembly-language source code and Luminary131.bin (or
-            Luminary131.binsource) come from separate readings of
-            the original <span style=
-            "font-weight: bold;">Luminary</span> assembly listing
-            scan, so their equivalence provides an important check
-            on validity.&nbsp; (See below.)&nbsp; The file
-            Luminary131.bin was created from the
-            human-readable/editable ASCII file
-            Luminary131.binsource by means of the program
-            <span style="font-weight: bold;">Oct2Bin</span>, with
-            the following steps:<br>
+          <td style="font-weight: bold; text-align: center;"> Mission</td>
+          <td style="font-weight: bold; text-align: center;">LM Number</td>
+          <td style="font-weight: bold; text-align: center;"> Mission<br>
+            Type</td>
+          <td style="font-weight: bold; text-align: center;">LM Program</td>
+          <td style="font-weight: bold; text-align: center;"> Version</td>
+          <td style="font-weight: bold; text-align: center;">Source Code<br>
+          </td>
+          <td style="text-align: center;"><span style="font-weight:
+              bold;">Mission-specific documentation</span><br>
+          </td>
+          <td style="font-weight: bold; text-align: center;">What We
+            Know About It, in a Nutshell<br>
+          </td>
+        </tr>
+        <tr>
+          <td align="center" valign="middle">N/A<br>
+          </td>
+          <td align="center" valign="middle">N/A<br>
+          </td>
+          <td align="center" valign="middle">N/A<br>
+          </td>
+          <td align="center" valign="middle"><b>Retread</b><br>
+          </td>
+          <td align="center" valign="middle">44<br>
+          </td>
+          <td align="center" valign="middle"><a
+              href="listings/Retread44/MAIN.agc.html">As colorized,
+              hyperlinked,&nbsp; HTML</a><br>
             <br>
-            <div style=
-            "margin-left: 40px; font-family: monospace;">
-              cd Luminary131<br>
-              ./Oct2Bin &lt;Luminary131.binsource<br>
-              mv Oct2Bin.bin Luminary131.bin<br>
-            </div><br>
-            Admittedly, few people are likely to perform any
-            processing of this kind unless contributing a new
-            version of the Luminary code to the Virtual AGC
-            project.
+            or<br>
+            <br>
+            <a
+              href="http://www.ibiblio.org/apollo/ScansForConversion/Aurora12">
+              Reduced-size&nbsp; scanned JPG</a><br>
+            (43MB)<br>
+            <br>
+            or<br>
+            <br>
+            <a href="https://archive.org/details/aurora00dapg">High-quality
+
+
+
+
+              scanned JPEG 2000</a><br>
+            (82MB)</td>
+          <td align="center" valign="middle">N/A<br>
+          </td>
+          <td valign="middle"><a name="RetreadNutshell"
+              id="RetreadNutshell"></a>As you've seen elsewhere on this
+            site, there where two major versions of the AGC, the Block I
+            and Block II models.&nbsp; While there was never any Block I
+            code for the Lunar Module, as far as I am aware anyway,
+            there was certainly Block I code for the Command Module, and
+            at some point a transition was made both from writing Block
+            I code to writing Block II code ... but also from writing CM
+            code to writing LM code, and Retread marks that transition
+            point!&nbsp; It's the veritable Missing Link of AGC code,
+            which is particularly <i>a propos</i> since in fact the YUL
+            development system employed for AGC development didn't sport
+            a linker.&nbsp; (Joke!&nbsp; Feel free to ignore.)<br>
+            <br>
+            In other words, Retread was when Block I code for the CM
+            began to be adapted into Block II code for the LM.&nbsp;
+            Thus, like Aurora below, Retread was never intended to be
+            mission code, and was never flown.&nbsp; But it has the
+            honor of being the "first" LM software.&nbsp; It is, in
+            fact, more than a year older than any other AGC software of
+            any kind (Block I, Block II, CM, LM) available publicly at
+            the present time, as far as I'm aware!<br>
+            <br>
+            Indeed, if you look at the date on this software — I'll save
+            you the trouble; it's July 9, 1965 — that's the same time
+            (within a month or two) of when the first Block II AGCs were
+            actually becoming available, and thus the only way to have
+            run RETREAD at that time was probably in a digital
+            simulation.&nbsp; But of course, digital simulations in
+            advance of actual hardware are never <i>perfect</i>, so
+            there would be every possibility that RETREAD 44 may not be
+            exactly compatible with Block II AGC hardware yet ... and it
+            turns out that that's the case.&nbsp; If, for example, you
+            look at <a
+              href="listings/Retread44/AGC_BLK2_INSTRUCTION_CHECK.agc.html">the
+
+
+
+
+              self-check code</a>, run by VERB 21 NOUN 27 ENTER 1 ENTER,
+            not all of the CPU tests pass!&nbsp; (There is <a
+              href="https://github.com/virtualagc/virtualagc/issues/562">a
+              detailed write-up of this issue</a>, if you're
+            interested.)<br>
+            <br>
+            At any rate, this particular program listing came to us from
+            Don Eyles, via scanning at <a href="http://www.archive.org">archive.org</a>,
+            financially-sponsored by Mike Higgins.<br>
+          </td>
+        </tr>
+        <tr>
+          <td align="center" valign="middle">N/A<br>
+          </td>
+          <td align="center" valign="middle">N/A<br>
+          </td>
+          <td align="center" valign="middle">N/A<br>
+          </td>
+          <td align="center" valign="middle"><b>Aurora</b><br>
+          </td>
+          <td align="center" valign="middle">12<br>
+          </td>
+          <td align="center" valign="middle"><a
+              href="listings/Aurora12/MAIN.agc.html">As colorized,
+              hyperlinked,&nbsp; HTML</a><br>
+            <br>
+            or<br>
+            <br>
+            <a
+              href="http://www.ibiblio.org/apollo/ScansForConversion/Aurora12">
+              Reduced-size&nbsp; scanned JPG</a><br>
+            (100MB)<br>
+            <br>
+            or<br>
+            <br>
+            <a href="https://archive.org/details/aurora00dapg">High-quality
+
+
+
+
+              scanned JPEG 2000</a><br>
+            (500MB)<br>
+          </td>
+          <td align="center" valign="middle">N/A<br>
+          </td>
+          <td valign="middle"><a name="AuroraNutshell"
+              id="AuroraNutshell"></a>Don Eyles, one of the AGC
+            developers who you may know as <a
+              href="http://www.doneyles.com/LM/Tales.html">the hero of
+              Apollo 14</a>, has contributed the hardcopy of this
+            program from his personal collection.&nbsp; We have had it
+            scanned by <a href="http://www.archive.org">archive.org</a>,
+            and Mike Stewart has generously financially-sponsored the
+            scanning.&nbsp; So, thanks Don and Mike!&nbsp; As usual, we
+            provide it here in the form of reduced-size (but therefore
+            reduced-quality) images for easier access, but the original
+            scans in their full quality are still available in <a
+              href="https://archive.org/details/virtualagcproject">our
+              Virtual AGC collection at archive.org</a>.<br>
+            <br>
+            I suppose I should mention that if page 52 or 70 of the
+            reduced-sized images look a little weird to you (oh, you
+            conspiracy theorists with your Photoshopping theories!), I
+            should mention that those were places where there was a
+            paper-change on the printer, and I simply glued two partial
+            pages together to make it look pretty.&nbsp; You can look at
+            the high-quality scans to see <i>all</i> of the pages in
+            their original, un-Photoshopped glory, if you like.&nbsp;
+            There are also a couple of pages (622 and 623, I think),
+            which are missing right now, but which archive.org should
+            add within a couple of days of when I'm writing this.<br>
+            <br>
+            Now before you go all elitist and thumb your nose at Aurora
+            just because it never flew on an actual mission (even an
+            unmanned one), let me tell you that from this project's
+            standpoint it is quite a terrific find.&nbsp; For one thing,
+            it employs unique flavor of the AGC programming language;
+            although it is a&nbsp; Block 2 program for a Block 2
+            computer, the language version precedes its final form as
+            used in the later software versions we have available,
+            requiring changes to the assembler just to assemble
+            it.&nbsp; Technically, it was targeted at the "BLK2"
+            software architecture rather than the "AGC" software
+            architecture.<br>
+            <br>
+            More significantly, it was the <i>last</i> version we know
+            of to incorporate the full range of AGC testing software
+            that had been created.&nbsp; In actual mission software,
+            most of this testing software was removed due to size
+            constraints, and due to the fact (I presume) that most of
+            the tests were more-appropriately done in the lab, as
+            acceptance tests, rather than in space where nothing could
+            be done about the failures anyway.&nbsp; Why do we care
+            about that?&nbsp; Well, how do you think we test the AGC
+            simulator anyway?&nbsp; Pre-Aurora, our only choice was to
+            roll our own tests, which the original AGC may not have even
+            been able to pass for all we know.&nbsp; But now that we
+            have Aurora?&nbsp; Well, we haven't yet converted it to
+            source code, and couldn't assemble it yet without modifying
+            the assembler to accept this flavor of assembly language
+            anyway, so it's too early to say.&nbsp; But once we do that,
+            we hope that some lingering bugs in the simulator will be
+            ferreted out, as well as to give us additional confidence in
+            the simulator.&nbsp; It's also a boon to developers of
+            hardware AGC simulations, like Mike (who sponsored this),
+            because they would like to validate their own simulators
+            just as we would.<br>
+            <br>
+            Finally, there's something of a mystery associated with
+            Aurora 12.&nbsp; The hardcopy we have of it is from November
+            10, 1966, and Aurora at the point should have had a version
+            number in the 80's.&nbsp; How could it be version 12?&nbsp;
+            Perhaps one day we'll know!<br>
+          </td>
+        </tr>
+        <tr>
+          <td style="text-align: center;">Apollo 5<br>
+          </td>
+          <td style="text-align: center;">LM-1<br>
+          </td>
+          <td style="text-align: center;"><br>
+          </td>
+          <td style="text-align: center;"><span style="font-weight:
+              bold;">Sunburst</span><br>
+          </td>
+          <td style="text-align: center;">120<br>
+          </td>
+          <td align="center"><a
+              href="listings/Sunburst120/MAIN.agc.html">As colorized,
+              hyperlinked,&nbsp; HTML</a><br>
+            <br>
+            or<br>
+            <br>
+            <a
+              href="http://www.ibiblio.org/apollo/ScansForConversion/Sunburst120">
+              Reduced-size&nbsp; scanned JPG</a><br>
+            (200MB)<br>
+            <br>
+            or<br>
+            <br>
+            <a href="https://archive.org/details/yulsystemforagcr00nasa">High-quality
+
+
+
+
+              scanned JPEG 2000</a><br>
+            (500MB)<br>
+          </td>
+          <td> <span style="text-decoration: underline;">GSOP (R-527)</span><br>
+            <ul>
+              <li><a
+href="http://www.ibiblio.org/apollo/Documents/R-527-GSOP-Sunburst-Section7-GNErrorAnalyses.pdf">
+                  Section 7</a></li>
+            </ul>
+            "<a
+href="http://www.ibiblio.org/apollo/Documents/ApolloExperienceReport-GuidanceAndControlSystems-LunarModuleMissionProgramer.pdf">Apollo
+
+
+
+
+              Experience Report—Guidance and Control Systems: Lunar
+              Module Mission Programer</a>" </td>
+          <td>Apollo 5 was an unmanned mission to test the LM, and as
+            such it had a working AGC.&nbsp; Due to software bugs, it
+            was necessary for ground controllers to deactivate the AGC
+            at certain points in the mission.<br>
+            <br>
+            The "Programer"—actually some sources spell it "programer"
+            and some "programmer"—was the robotic gadget that was the
+            stand-in for the crew.<br>
+            <br>
+            Don Eyles provided the hardcopy for our the scan we present
+            here.&nbsp; It was scanned by archive.org, which was
+            generously sponsored by Mike Stewart.&nbsp; The original
+            printout unfortunately has some problems in the vicinity of
+            pp. 820-830, but we naturally correct those in our
+            transcription.<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="middle">N/A<br>
+          </td>
+          <td valign="middle">N/A<br>
+          </td>
+          <td valign="middle">N/A<br>
+          </td>
+          <td align="center" valign="middle"><b>Super Job</b><br>
+          </td>
+          <td align="center" valign="middle">N/A<br>
+          </td>
+          <td align="center" valign="middle">As colorized, hyperlinked,
+            HTML ... hopefully soon!<br>
+            <br>
+            or<br>
+            <br>
+            Appendix D of Volume 2 of Raytheon document R68-4125<br>
+          </td>
+          <td valign="middle"><a
+              href="http://www.ibiblio.org/apollo/Documents/R68-4125-Volume1.pdf">Raytheon
+
+
+
+              R68-4125, volume 1, "Final Report: Auxiliary Memory for
+              Apollo Guidance Computer"</a><br>
+            <br>
+            <a
+              href="http://www.ibiblio.org/apollo/Documents/R68-4125-Volume2.pdf">Raytheon
+
+
+
+              R68-4125, volume 2, "Final Report: Auxiliary Memory for
+              Apollo Guidance Computer"</a><br>
+          </td>
+          <td valign="middle"><a name="SuperJob"></a>This program, Super
+            Job, is a very unusual offering, in that it is AGC code not
+            written by the MIT Instrumentation Lab, but rather by
+            Raytheon.&nbsp; Of course, sub-contractors from Raytheon,
+            A.C. Electronics, and others, were used to help write the
+            "regular" AGC programs as well, but this program is entirely
+            written by Raytheon.&nbsp; <br>
+            <br>
+            Nor does it seem that the YUL or GAP assemblers used to
+            assemble all of the other AGC code, but rather (as far as we
+            can tell!) an in-house Raytheon assembler that is almost,
+            but not quite, compatible with YUL/GAP: slightly different
+            address formats were used, and the interpretation of certain
+            operands is slightly different.&nbsp; We are trying to
+            support that with a special command-line switch (--raytheon)
+            in yaYUL.<br>
+            <br>
+            The way this program came about is that Raytheon was
+            contracted to do a feasibility study for potentially
+            expanding the AGC memory capacity by adding a tape
+            memory.&nbsp; If you have looked at <a href="Gemini.html">our
+
+
+
+              Gemini OBC (on-board computer) page</a>, you'll know that
+            the later Gemini missions did use a tape-memory unit to load
+            different OBC software for different mission phases, and
+            this is presumably a similar idea.&nbsp; The problem was
+            that as "feature creep" (or perhaps "feature explosion")
+            occurred during AGC development, more and more memory was
+            required, surpassing the physical resources of the AGC
+            itself.&nbsp; Many "<a href="http://www.tindallgrams.net">Tindallgrams</a>"
+            cover this, and indeed, very significant features were
+            developed in software and then simply discarded due to
+            memory constraints.&nbsp; For example, code was developed
+            for the LM for something called a Lunar Optical Rendezvous
+            System (LORS) that could potentially have been used in place
+            of the Rendezvous Radar (RR).&nbsp; However, the code for
+            LORS was larger (much larger) than the code for the RR, so
+            the only place it exists today is as a vague reference in a
+            Tindallgram.&nbsp; I wish we could see the code for LORS,
+            but we cannot.&nbsp; Perhaps if Raytheon's auxiliary tape
+            memory for the AGC had eventually been adopted, we might be
+            able to do just that!&nbsp; But the tape memory was <i>not</i>
+            adopted, so we cannot.<br>
+            <br>
+            At any rate, Super Job is a test program for this tape-drive
+            system.&nbsp; The transcribed version of Super Job is in <a
+href="https://github.com/virtualagc/virtualagc/tree/master/SuperJob">our
+              GitHub repository</a>.&nbsp; It's very preliminary so far,
+            so we don't guarantee it's correct, nor assemblable, nor
+            runnable in the AGC simulator.&nbsp; Probably the tape drive
+            itself will have to be simulated as well, perhaps with a new
+            program that might be named yaTape.&nbsp; Or not; we'll have
+            to wait and see.<br>
+            <br>
+            There is, in fact, no particular reason for including Super
+            Job here on the Luminary page.&nbsp; It really has nothing
+            specifically to do with the LM, nor with the CM, since it's
+            just a generic concept, so it would be just as logical to
+            cover it on the Colossus page, or somewhere else
+            entirely.&nbsp; But it has to go somewhere, so here it
+            stays!<br>
+          </td>
+        </tr>
+        <tr align="center">
+          <td style="vertical-align: middle; white-space: nowrap;">
+            Apollo 9<br>
+          </td>
+          <td style="text-align: center; vertical-align: middle;"> LM-3<br>
+          </td>
+          <td style="text-align: center; vertical-align: middle;"> D<br>
+          </td>
+          <td style="font-weight: bold; vertical-align: middle;
+            white-space: nowrap;"> Sundance<br>
+          </td>
+          <td style="vertical-align: middle;">306<br>
+          </td>
+          <td style="text-align: center; vertical-align: middle;"> <br>
+          </td>
+          <td style="text-align: left;"> GSOP (R-557)<br>
+            <ul>
+              <li><a
+                  href="http://www.ibiblio.org/apollo/NARA-SW/R-557-sec1-rev1.pdf">
+                  Section 1</a><br>
+              </li>
+            </ul>
+            <a
+              href="http://www.ibiblio.org/apollo/Documents/Apollo9FlightPlan.pdf">Flight
+
+
+
+
+              Plan</a> </td>
+          <td style="text-align: left; vertical-align: middle;"> Here is
+            some info from James Kernan, one of the LGC developers, in
+            response to my question about correct versioning of
+            Sundance:<br>
+            <br>
+            <div style="margin-left: 40px;"> <small>Sundance 306 is
+                correct.&nbsp; I was the "rope mother" for
+                Sundance-Apollo 9.&nbsp; ...&nbsp; Sundance was not only
+                the Apollo 9 LM flight program, it was also the
+                development bed for the Lunar orbit and landing
+                software.&nbsp; At some point we created a version and
+                called it Luminary.&nbsp; I think the last few revisions
+                of Sundance were devoted to disabling crew access to the
+                Lunar orbit and landing software that was present in the
+                build.<br>
+              </small> </div>
+            <br>
+            Jim also tells me that a copy of Sundance 306 may still "be
+            in the building".&nbsp; I'm not certain which building he's
+            talking about, but it's nevertheless interesting news that a
+            copy of the program does exist somewhere.<br>
+          </td>
+        </tr>
+        <tr align="center">
+          <td style="vertical-align: middle; white-space: nowrap;">
+            Apollo 10<br>
+          </td>
+          <td style="text-align: center; vertical-align: middle;"> LM-4<br>
+          </td>
+          <td style="text-align: center; vertical-align: middle;"> F<br>
+          </td>
+          <td style="font-weight: bold; vertical-align: middle;
+            white-space: nowrap;"> Luminary 1<br>
+          </td>
+          <td style="vertical-align: middle;">069/2<br>
+          </td>
+          <td style="text-align: center; vertical-align: middle;"><a
+              href="listings/Luminary069/MAIN.agc.html">As colorized,
+              hyperlinked,&nbsp; HTML</a><br>
+            <br>
+            or<br>
+            <br>
+            <a
+              href="http://www.ibiblio.org/apollo/ScansForConversion/Luminary069/">
+              Reduced-size&nbsp; scanned JPG</a><br>
+            (200MB)<br>
+            <br>
+            or<br>
+            <br>
+            <a href="https://archive.org/details/luminary6900miti">High-quality
+
+
+
+
+              scanned JPEG 2000</a><br>
+            (730MB)</td>
+          <td style="text-align: left;"> GSOP (R-557)<br>
+            <ul>
+              <li><a
+                  href="http://www.ibiblio.org/apollo/NARA-SW/R-557-sec1-rev1.pdf">
+                  Section 1</a></li>
+            </ul>
+            <p><a
+                href="http://www.ibiblio.org/apollo/Documents/LUM75-001.pdf">LUMINARY
+
+
+
+
+                Memo #75</a><br>
+            </p>
+          </td>
+          <td style="text-align: left; vertical-align: middle;"><a
+              name="Apollo10"></a>The version we have here is from Don
+            Eyle's private collection, as scanned by archive.org, and
+            financially sponsored by our Onno Hommes.<br>
+            <br>
+            Actually, though, it may not be quite the version actually
+            flown on Apollo 10.&nbsp; As it says right at the top of
+            every page, it is <tt>REVISION 069 OF AGC PROGRAM LUMINARY
+              BY NASA 2021112-011</tt>, whereas it is known that the
+            version flown on Apollo 10 was Luminary 69 Rev. 2,
+            2021112-031, which was released five months later.&nbsp;
+            Such last-minute changes were often the result of ephemeris
+            upddates or other time-sensitive data that had to be
+            specific to the launch window, but we don't know this for
+            sure at the moment.<br>
+            <br>
+            Regardless, this is the closest thing to Apollo 10 mission
+            software we have, or are likely to find, so beggars can't be
+            choosers!<br>
+          </td>
+        </tr>
+        <tr align="center">
+          <td style="vertical-align: middle; white-space: nowrap;">
+            Apollo 11<br>
+          </td>
+          <td style="text-align: center; vertical-align: middle;"> LM-5<br>
+          </td>
+          <td style="text-align: center; vertical-align: middle;"> G<br>
+          </td>
+          <td style="font-weight: bold; vertical-align: middle;
+            white-space: nowrap;"> Luminary 1A<br>
+          </td>
+          <td style="vertical-align: middle;">099/1<br>
+          </td>
+          <td style="text-align: center; vertical-align: middle;"> <a
+              href="listings/Luminary099/MAIN.agc.html">As colorized,
+              hyperlinked,&nbsp; HTML</a><br>
+            <br>
+            <a
+              href="http://www.ibiblio.org/apollo/ScansForConversion/Luminary099">
+              As scanned page images (<span style="font-style: italic;">very</span>
+              big!)</a><br>
+            <br>
+            <a href="AP11ROPEpage1472.jpg">Page 1472</a><br>
+            <br>
+            <a href="AP11ROPEpage1473.jpg">Page 1473</a><br>
+          </td>
+          <td style="text-align: left; white-space: nowrap;"> <a
+              href="http://www.ibiblio.org/apollo/Documents/Luminary99PadLoads.pdf">
+              Erasable pad loads</a><br>
+            <br>
+            <a
+href="http://www.ibiblio.org/apollo/Documents/LM_Systems_Handbook_060269.pdf">
+              Excerpted LM Systems Handbook</a><br>
+            <br>
+            <a href="http://www.doneyles.com/LM/Tales.html">The
+              1201/1202 alarms</a><br>
+            <br>
+            <a
+              href="http://www.ibiblio.org/apollo/NARA-SW/TheApollo11Adventure.pdf"
+              style="font-style: italic;">The Apollo 11 Adventure</a><br>
+            <br>
+            <span style="text-decoration: underline;">Operational Data
+              Book</span><br>
+            <ul>
+              <li><a
+href="http://www.ibiblio.org/apollo/Documents/SNA-8-D-027III-Rev2-CsmLmSpacecraftOperationalDataBook-Volume3-MassProperties.pdf">
+                  Volume 3</a></li>
+            </ul>
+            <span style="text-decoration: underline;">Crew Debriefing</span><br>
+            <ul>
+              <li><a
+href="http://www.ibiblio.org/apollo/Documents/Apollo11TechnicalCrewDebriefing-Volume1.pdf">
+                  Volume 1</a></li>
+              <li><a
+href="http://www.ibiblio.org/apollo/Documents/Apollo11TechnicalCrewDebriefing-Volume2.pdf">
+                  Volume 2</a></li>
+            </ul>
+            <a
+              href="http://www.ibiblio.org/apollo/Documents/Apollo11FlightPlan.pdf">Flight
+
+
+
+
+              Plan</a><br>
+            <br>
+            <a
+href="http://www.ibiblio.org/apollo/Documents/CherryApollo11Exegesis.pdf">
+              "Exegesis of the 1201<br>
+              and 1202 Alarms Which<br>
+              Occurred During the<br>
+              Mission G Lunar<br>
+              Landing"</a><br>
+            <br>
+            Digital simulations of the landing:<br>
+            <ul>
+              <li>1968:&nbsp; Coming soon!</li>
+              <li>1971:&nbsp; <br>
+              </li>
+              <ul>
+                <li>Color scan (soon!)</li>
+                <li><a
+href="http://www.ibiblio.org/apollo/ScansForConversion/DigitalSimulationAP11ROPE.pdf">B&amp;W
+
+
+
+                    PDF</a><br>
+                </li>
+              </ul>
+            </ul>
+          </td>
+          <td style="text-align: left; vertical-align: middle;"> Page
+            images have been taken from a hardcopy from the Charles
+            Stark Draper Historical Collection, MIT Museum, and then
+            converted to source code by a team of volunteers.<br>
+            <br>
+            <table summary="" style="text-align: left; margin-left:
+              auto; margin-right: auto;" border="1" cellpadding="2"
+              cellspacing="2">
+              <tbody>
+                <tr>
+                  <td style="vertical-align: top;">
+                    <div style="text-align: center;"> <span
+                        style="font-weight: bold;"><span
+                          style="text-decoration: underline;">Honor Roll</span><br>
+                      </span>
+                      <div style="text-align: left;"> <span
+                          style="font-style: italic;"><br>
+                          <span style="text-decoration: underline;">Organizational
+
+
+
+
+                            honors</span></span><br>
+                      </div>
+                    </div>
+                    <table summary="" style="text-align: left; width:
+                      100%;" border="0" cellpadding="2" cellspacing="2">
+                      <tbody>
+                        <tr>
+                          <td style="vertical-align: middle;"> <big><span
+                                style="font-family: sans-serif;">Massachusetts
+
+
+
+
+                                Institute of Technology / MIT Museum</span><br
+                                style="font-family: sans-serif;">
+                              <span style="font-family: sans-serif;">Building
+
+
+
+                                N51, 265 Massachusetts Avenue</span><br
+                                style="font-family: sans-serif;">
+                              <span style="font-family: sans-serif;">Cambridge,
+
+
+
+
+                                MA&nbsp; 02139<br>
+                                <a href="http://web.mit.edu/museum/"><small>web.mit.edu/museum/</small></a><br>
+                              </span></big></td>
+                          <td style="text-align: center; vertical-align:
+                            middle;"> <a
+                              href="http://web.mit.edu/museum/"><img
+                                alt="" title="Click to visit the MIT
+                                Museum website"
+                                src="MITMuseumLogo_red.gif"
+                                style="border: 0px solid ; width: 107px;
+                                height: 101px;" height="101" width="107"></a><br>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                    <br>
+                    <span style="font-style: italic; text-decoration:
+                      underline;"> Individual honors</span><br>
+                    <ul>
+                      <li>Deborah Douglas, the Museum's Curator of
+                        Science and Technology, who conceived the idea
+                        of making this material available to us, and
+                        without whom we had literally no chance of
+                        obtaining it.</li>
+                      <li>Paul Fjeld, for digitizing the hardcopy.</li>
+                      <li>(In alphabetical order) Fabrizio Bernardini,
+                        Hartmuth Gutshe, Onno Hommes, Jim Lawton, and
+                        Sergio Navarro, for converting the page images
+                        to source code.</li>
+                      <li>Steve Case and Dawn Masuoka for helping in
+                        proofing the executable binary.<br>
+                      </li>
+                      <li>... and those whose names I do not know at the
+                        Charles Stark Draper Laboratory and NASA who
+                        allowed us to do this.<br>
+                      </li>
+                    </ul>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            <br>
+            The MIT Museum copy is dated 14 July, 1969, which seems odd
+            at first glance, since it would be far too late to actually
+            have been included in the Apollo 11 mission.&nbsp; Hugh
+            Blair-Smith speculates that this is the date of the printing
+            rather than of the program build, and that seems
+            plausible.&nbsp;<br>
+            <br>
+            Don Eyles also has a copy of this, with identical
+            memory-bank checksums, though oddly named AP11ROPE BY EYLES
+            rather than LMY99 BY NASA, and was printed in 1970 for some
+            reason.&nbsp; At some point, we may scan it.&nbsp; At any
+            rate, the MIT Museum copy is missing portions of pp.
+            1472-1473, and Don has kindly sent us some snapshots of
+            those pages from his copy, which we do present here.<br>
+            <br>
+            Another one of the original AGC programmers, Allan Klumpp,
+            also had a copy, since donated to <a
+              href="http://www.klabs.org">klabs.org</a>.&nbsp; A
+            comparison of memory-bank checksums ("bugger words") has
+            been made between the MIT and Klumpp listings (thanks to
+            Paul Fjeld and Allan Klumpp), and it has been found that
+            these two listings have a small difference in memory bank
+            6.&nbsp; In other words, they are not precisely the
+            same!&nbsp; So presumably Allan's version is not the
+            software that was actually flown.&nbsp; Perhaps someday
+            we'll be able to scan that version as well.<br>
+            <br>
+            <a name="Kernan" id="Kernan"></a>James Kernan, another of
+            the original AGC developers, has sent us some facts that may
+            explain the confusion.&nbsp; I'll let Jim tell it in his own
+            words:<br>
+            <br>
+            <div style="margin-left: 40px;"> <small>I was an employee
+                at Draper Lab, and was in charge of the Lunar Module LGC
+                computer programming group and also in charge of
+                Assembly Control for the flight software during the
+                Apollo 9-12 software development period.&nbsp; The
+                latter responsibility included reviewing all proposed
+                alterations to the flight software and the YUL assembler
+                inputs.<br>
+                <br>
+                I can explain the confusion over the Luminary version
+                that flew on Apollo 11.&nbsp; We were aiming for
+                Luminary Revision 99 as the Apollo 11 Lunar Module
+                flight software.&nbsp; There was a tradition (or rule)
+                that the flight software version should have no
+                revision, so we renamed Luminary Revision 099 as Lum99
+                Revision 0.&nbsp; At the last minute, Dan Lickly, our
+                chief engineer, appeared with ephemerides updates and it
+                took two tries to get it right.&nbsp; The result was
+                that we created Lum99 Revision 1 and Lum99 Revision
+                2.&nbsp; We made a no-change version of the later and
+                named it Lum99R2 Revision 0.<br>
+                <br>
+                The tapes and ropes were made from that.&nbsp;&nbsp;
+                That is my recollection.&nbsp; Unfortunately, I did not
+                have the foresight to keep a printout of the flight
+                version.</small><br>
+            </div>
+            <br>
+            Regarding the "digital simulations" mentioned to the right,
+            these are simulations performed during the Apollo era, not
+            simulations we have performed as part of the Virtual AGC
+            project.&nbsp; They are very complete, containing not only
+            pad loads, but also position/velocity data, notations of
+            what the astronaut is supposed to input on the DSKY, what
+            the DSKY is displaying on a moment-to-moment basis,
+            occasional memory dumps, and so on. &nbsp; There are two
+            such surviving simulations for Apollo 11, both from Don
+            Eyles's personal collection.&nbsp; We have had them scanned,
+            with Matthew Fite financially sponsoring the 1968 version
+            and Fabrizio Bernardini financially sponsoring the 1971
+            version.&nbsp; (Thanks Matthew and Fabrizio!)&nbsp; The two
+            simulations are somewhat different; i.e., these are <i>not</i>
+            merely two different scans of the same thing.&nbsp;
+            Unfortunately, the printout for the 1971 simulation is quite
+            low-contrast, and its full-color scans quite hard to read,
+            so I've provided a highly-processed, high-contrast B&amp;W
+            version as well.<br>
+            <br>
+            But why, you wonder, was there a digital simulation of
+            Apollo 11 in 1971, a couple of years <i>after</i> Apollo 11
+            landed on the moon?&nbsp; Shouldn't the simulations only
+            have been useful <i>before</i> the landing?&nbsp; Well, Don
+            Eyles had this simulation performed for his own purposes and
+            (after nearly 50 years!) is no longer sure quite what that
+            purpose was.&nbsp; Now, he worked on several off-the-main
+            branch AGC programs, such as ZERLINA (coming soon!),
+            intended to explore improved methods for performing the
+            landing; my theory is that this simulation provided baseline
+            data against which to measure such improvements, and Don
+            admits that this is a plausible theory.<br>
+            <br>
+            Speaking of ZERLINA, if you examine the full-color scans for
+            the digital simulation found at archive.org, you may notice
+            that the label on the binder (removed in the B&amp;W PDF
+            I've posted here at this site) identifies the 1971
+            simulation as "DIANA Rev. 12".&nbsp; It is <i>not</i>
+            DIANA, however: the binder containing the simulation's
+            printout had <i>formerly</i> contained a copy of DIANA, we
+            believe, and Don simply reused it for this printout without
+            relabeling it.&nbsp; DIANA was another off-the-main-branch
+            program, like ZERLINA, which was developed by Peter Adler
+            and Don Eyles in order to explore an improved time-sharing
+            technique that would avoid the 1201 and 1202 program alarms
+            experienced in the Apollo 11 landing.&nbsp; The approach
+            wasn't adopted, though, and copies of DIANA no longer exist
+            as far as we know.&nbsp; (At any rate, neither Don nor Peter
+            has a copy.)<br>
+            <br>
+          </td>
+        </tr>
+        <tr align="center">
+          <td style="vertical-align: middle; white-space: nowrap;">
+            Apollo 12<br>
+          </td>
+          <td style="text-align: center; vertical-align: middle;"> LM-6<br>
+          </td>
+          <td style="text-align: center; vertical-align: middle;"> H<br>
+          </td>
+          <td style="font-weight: bold; vertical-align: middle;
+            white-space: nowrap;"> Luminary 1B<br>
+          </td>
+          <td style="vertical-align: middle;">116<br>
+          </td>
+          <td style="text-align: center; vertical-align: middle;">As
+            colorized, hyperlinked,&nbsp; HTML ... soon, perhaps!<br>
+            <br>
+            or<br>
+            <br>
+            <a
+              href="http://www.ibiblio.org/apollo/ScansForConversion/Luminary116/">
+              Reduced-size&nbsp; scanned JPG</a><br>
+            (300MB)<br>
+            <br>
+            or<br>
+            <br>
+            <a href="https://archive.org/details/luminary11600nasa">High-quality
+
+
+
+
+              scanned JPEG 2000</a><br>
+            (700MB)</td>
+          <td style="text-align: left;"> <a
+href="http://www.ibiblio.org/apollo/Documents/LM_Systems_Handbook_060269.pdf">
+              Excerpted LM Systems Handbook</a><br>
+            <br>
+            <span style="text-decoration: underline;">Operational Data
+              Book</span><br>
+            <ul>
+              <li><a
+href="http://www.ibiblio.org/apollo/Documents/SNA-8-D-027III-Rev2-CsmLmSpacecraftOperationalDataBook-Volume3-MassProperties.pdf">
+                  Volume 3</a></li>
+            </ul>
+            <a
+              href="http://www.ibiblio.org/apollo/Documents/Apollo12FlightPlan.pdf">Flight
+
+
+
+
+              Plan</a> </td>
+          <td style="text-align: left; vertical-align: middle;">This is
+            from the hardcopy in Don Eyles's private collection, as
+            scanned at archive.org (sponsored, by Ron Burkey, me).&nbsp;
+            Unfortunately, the printout is pretty faint, and pp.
+            217-220, 226 are entirely missing.&nbsp; But source code is
+            source code, and we'll work around those problems in
+            transcribing it.<br>
+          </td>
+        </tr>
+        <tr align="center">
+          <td style="color: rgb(255, 0, 0); vertical-align: middle;
+            white-space: nowrap;"> Apollo 13<br>
+          </td>
+          <td style="text-align: center; vertical-align: middle;"> LM-7<br>
+          </td>
+          <td style="text-align: center; vertical-align: middle;"> H-2<br>
+          </td>
+          <td style="font-weight: bold; color: rgb(255, 0, 0);
+            vertical-align: middle; white-space: nowrap;"> Luminary 1C<br>
+          </td>
+          <td style="color: rgb(255, 0, 0); vertical-align: middle;
+            white-space: nowrap;"> 131<br>
+          </td>
+          <td style="text-align: center; vertical-align: middle;"> <a
+              href="listings/Luminary131/MAIN.agc.html">As colorized,
+              hyperlinked,&nbsp; HTML</a><br>
+            <br>
+            <a
+              href="http://www.ibiblio.org/apollo/ScansForConversion/Luminary131">
+              <span style="text-decoration: underline;">As scanned page
+                images (<span style="font-style: italic;">very</span>
+                big!)</span></a><br>
+          </td>
+          <td style="text-align: left;"> <span style="text-decoration:
+              underline;">GSOP (R-567)</span><br>
+            <ul>
+              <li><a
+                  href="http://www.ibiblio.org/apollo/NARA-SW/R-557-sec1-rev1.pdf">
+                  Section 1</a><br>
+              </li>
+              <li><a
+                  href="http://www.ibiblio.org/apollo/NARA-SW/R-567-sec2-rev8.pdf">
+                  Section 2</a></li>
+              <li><a
+                  href="http://www.ibiblio.org/apollo/NARA-SW/R-567-sec3-rev4.pdf">
+                  Section 3</a></li>
+              <li>Section 4:</li>
+              <ul>
+                <li><a
+                    href="http://www.ibiblio.org/apollo/NARA-SW/R-567-sec4-rev7-intro.pdf">
+                    Introduction</a></li>
+                <li><a
+                    href="http://www.ibiblio.org/apollo/NARA-SW/R-567-sec4-rev7-P00-P39.pdf">
+                    P00-P39</a><br>
+                </li>
+                <li><a
+                    href="http://www.ibiblio.org/apollo/NARA-SW/R-567-sec4-rev7-P40-P69.pdf">
+                    P40-P69</a><br>
+                </li>
+                <li><a
+                    href="http://www.ibiblio.org/apollo/NARA-SW/R-567-sec4-rev7-P70-R09.pdf">
+                    P70-R09</a>.&nbsp; (192 pages, 3.3M bytes.)<br>
+                </li>
+                <li><a
+                    href="http://www.ibiblio.org/apollo/NARA-SW/R-567-sec4-rev7-R10-R56.pdf">
+                    R10-R56</a><br>
+                </li>
+                <li><a
+                    href="http://www.ibiblio.org/apollo/NARA-SW/R-567-sec4-rev7-R57-end.pdf">
+                    R57-</a><br>
+                </li>
+              </ul>
+              <li>Section 5:</li>
+              <ul>
+                <li><a
+                    href="http://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.1-5.2.pdf">
+                    5.1-5.2</a><br>
+                </li>
+                <li><a
+                    href="http://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.3.pdf">
+                    5.3</a><br>
+                </li>
+                <li><a
+                    href="http://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.4-5.5.pdf">
+                    5.4-5.5</a><br>
+                </li>
+                <li><a
+                    href="http://www.ibiblio.org/apollo/NARA-SW/R-567-sec5-rev8-5.6-end.pdf">
+                    5.6-</a><br>
+                </li>
+              </ul>
+              <li><a
+                  href="http://www.ibiblio.org/apollo/NARA-SW/R-567-sec6.pdf">Section
+
+
+
+
+                  6</a></li>
+            </ul>
+            <a
+              href="http://www.ibiblio.org/apollo/Documents/LM7_Pad_loads.pdf">Pad
+
+
+
+
+              loads for LM-7</a><br>
+            <br>
+            <a
+href="http://www.ibiblio.org/apollo/Documents/LM_Systems_Handbook_060269.pdf">
+              Excerpted LM Systems Handbook</a><br>
+            <br>
+            <span style="text-decoration: underline;">Operational Data
+              Book</span><br>
+            <ul>
+              <li><a
+href="http://www.ibiblio.org/apollo/Documents/SNA-8-D-027III-Rev2-CsmLmSpacecraftOperationalDataBook-Volume3-MassProperties.pdf">
+                  Volume 3</a></li>
+            </ul>
+            <p><a
+                href="http://www.ibiblio.org/apollo/Documents/LUM127-001.pdf">LUMINARY
+
+
+
+
+                Memo #127</a><br>
+            </p>
+            <p><a
+                href="http://www.ibiblio.org/apollo/Documents/LUM129-001.pdf">LUMINARY
+
+
+
+
+                Memo #129</a><br>
+            </p>
+          </td>
+          <td style="text-align: left; vertical-align: middle;">
+            Unfortunately, the version we have here is not <i>quite</i>
+            the version flown in Apollo 13, though for many years we
+            thought it was.&nbsp; Niklas Beug was sharp enough to notice
+            what I was not, namely in the table from <a
+              href="http://www.ibiblio.org/apollo/R700-3-Table4-11.jpg">document
+
+
+
+
+              R-700 shown at the top of this very web-page</a> that what
+            <i>we</i> have is the first version (December 1969) of
+            Luminary 131, but that subsequent versions were released in
+            January and February 1970, and it was the latter of which
+            that was flown.&nbsp; Well ... we have what we have, and not
+            necessarily precisely what we'd want to have in an ideal
+            world!<br>
+            <br>
+            Mr. Paul Fjeld has also told me (or speculated) that the
+            listing from which these scans were created was originally
+            preserved by Don Eyles (one of the programmers), and then
+            copied/reduced by Hugh Blair-Smith (whose name appears
+            frequently on this site), via James Kernan (another of the
+            original programmers), for David Craig (whose <span
+              style="font-style: italic;">ex libris</span> appears on p.
+            2 of the scan, and who is apparently a great collector of
+            Apollo artifacts).&nbsp; Somehow it was passed to Mr. Gary
+            Neff, who created the scans, which he gave back to Mr.
+            Craig, and which were then placed online at MIT's History of
+            Recent Science and Technology website.&nbsp; Unfortunately,
+            the quality of the page images was somehow greatly reduced
+            in the latter steps, and the high-quality page images that
+            Mr. Neff produced were discarded in the process.&nbsp; MIT's
+            HRST website has subsequently disappeared, but eventually
+            was mirrored elsewhere on the web, and is partially mirrored
+            here.&nbsp; However, <span style="font-style: italic;">we</span>
+            choose to present this listing as a set of individual page
+            images rather than as a single gigantic PDF file you'll find
+            elsewhere on the web.&nbsp; (Whew!&nbsp; "Many hands make
+            the work Luminary.")&nbsp; By the way, Mr. Neff also kindly
+            provided me with a replacement for a page which is garbled
+            in the MIT version, and consequently is probably available
+            only here.</td>
+        </tr>
+        <tr align="center">
+          <td style="color: rgb(255, 0, 0); vertical-align: middle;
+            white-space: nowrap;"> <span style="color: rgb(0, 0, 0);">Apollo
+
+
+
+
+              14</span><br>
+          </td>
+          <td style="text-align: center; vertical-align: middle;"> LM-8<br>
+          </td>
+          <td style="text-align: center; vertical-align: middle;"> H-3<br>
+          </td>
+          <td style="font-weight: bold; color: rgb(255, 0, 0);
+            vertical-align: middle; white-space: nowrap;"> <span
+              style="color: rgb(0, 0, 0);">Luminary 1D</span><br>
+          </td>
+          <td style="color: rgb(255, 0, 0); vertical-align: middle;"> <span
+              style="color: rgb(0, 0, 0);">178</span><br>
+          </td>
+          <td style="text-align: center; vertical-align: middle;"> <br>
+          </td>
+          <td style="text-align: left;"> <a
+href="http://www.ibiblio.org/apollo/Documents/LM_Systems_Handbook_060269.pdf">
+              Excerpted LM Systems Handbook</a><br>
+            <br>
+            <a href="http://www.doneyles.com/LM/Tales.html">The solder
+              ball</a><br>
+            <br>
+            <span style="text-decoration: underline;">Operational Data
+              Book</span><br>
+            <ul>
+              <li><a
+href="http://www.ibiblio.org/apollo/Documents/SNA-8-D-027III-Rev2-CsmLmSpacecraftOperationalDataBook-Volume3-MassProperties.pdf">
+                  Volume 3</a><br>
+              </li>
+            </ul>
+          </td>
+          <td style="text-align: left; vertical-align: middle;"> <br>
+          </td>
+        </tr>
+        <tr align="center">
+          <td style="vertical-align: middle; white-space: nowrap;">
+            Apollo 15<br>
+          </td>
+          <td style="text-align: center; vertical-align: middle;"> LM-10<br>
+          </td>
+          <td style="text-align: center; vertical-align: middle;"> J-1<br>
+          </td>
+          <td colspan="1" rowspan="3" style="font-weight: bold;
+            vertical-align: middle; white-space: nowrap;"> Luminary 1E</td>
+          <td colspan="1" rowspan="3" style="vertical-align: middle;">210<br>
+          </td>
+          <td colspan="1" rowspan="3" style="text-align: center;
+            vertical-align: middle;"><br>
+            <br>
+            <a href="listings/Luminary210/MAIN.agc.html">As colorized,
+              hyperlinked,&nbsp; HTML</a><br>
+            <br>
+            or<br>
+            <br>
+            <a
+              href="http://www.ibiblio.org/apollo/ScansForConversion/Luminary210-BW/">
+              Reduced-resolution&nbsp; high-contrast black&amp;white PNG</a><br>
+            (300MB)<br>
+            <br>
+            or<br>
+            <br>
+            <a
+              href="http://www.ibiblio.org/apollo/ScansForConversion/Luminary210/">
+              Reduced-resolution&nbsp; scanned color JPG</a><br>
+            (250MB)<br>
+            <br>
+            or<br>
+            <br>
+            <a href="https://archive.org/details/luminary21000miti">High-resolution
+
+
+
+
+              scanned JPEG 2000</a><br>
+            (500MB)<br>
+            <br>
+            <br>
+          </td>
+          <td colspan="1" rowspan="1" style="text-align: left;"> <a
+href="http://www.ibiblio.org/apollo/Documents/LmQuickReferenceApollo15.zip">
+              LGC Data Cards</a><br>
+            <br>
+            <a
+              href="http://www.ibiblio.org/apollo/Documents/msc05225.pdf"><span
+                style="font-style: italic;"> Program Notes</span></a><br>
+            <br>
+            <a
+              href="http://www.hq.nasa.gov/alsj/a15/a15.CMsoftware.html">Delco
+
+
+
+
+              Manual</a><br>
+            <br>
+            <span style="text-decoration: underline;">GSOP (R-567)</span><br>
+            <ul>
+              <li><a
+href="http://www.ibiblio.org/apollo/Documents/R-567-GSOP-Luminary1E-Section2-DataLinks.pdf">
+                  Section 2</a></li>
+              <li><a
+href="http://www.ibiblio.org/apollo/Documents/R-567-GSOP-Luminary1E-Section7-ErasableMemoryPrograms.pdf">
+                  Section 7</a></li>
+            </ul>
+            <span style="text-decoration: underline;">Operations
+              Handbook</span><br>
+            <ul>
+              <li><a
+href="http://www.ibiblio.org/apollo/Documents/LMA790-3-LM10-ApolloOperationsHandbookLunarModuleLM10AndSubsequent-Volume1-SubsystemsData.pdf">
+                  Volume 1</a></li>
+              <li>Volume 2</li>
+            </ul>
+            <span style="text-decoration: underline;">Operational Data
+              Book</span><br>
+            <ul>
+              <li><a
+href="http://www.ibiblio.org/apollo/Documents/SNA-8-D-027III-Rev2-CsmLmSpacecraftOperationalDataBook-Volume3-MassProperties.pdf">
+                  Volume 3</a></li>
+            </ul>
+            <a
+href="http://www.ibiblio.org/apollo/Documents/Apollo15TechnicalCrewDebriefing.pdf">Crew
+
+
+
+
+              Debriefing</a><br>
+            <br>
+            <a
+              href="http://www.ibiblio.org/apollo/Documents/Apollo15FlightPlan.pdf">
+              Flight Plan</a><br>
+            <br>
+            <span style="text-decoration: underline;">Checklists</span><br>
+            <ul>
+              <li><a
+href="http://www.ibiblio.org/apollo/Documents/Apollo15LMActivationChecklist.pdf">
+                  LM Activation</a></li>
+            </ul>
+            <a
+href="http://www.ibiblio.org/apollo/Documents/LMA790-2-LunarModuleLM10Through14VehicleFamiliarizationManual.pdf">LM
+
+
+
+
+              Familiarization Manual</a><br>
+          </td>
+          <td colspan="1" rowspan="3" style="text-align: left;
+            vertical-align: middle;">Allan Klumpp (one of the AGC
+            programmers) tells me that he believes Luminary 1D build 209
+            was used for these flights, and he was certainly in a
+            position to know.&nbsp; But it does contradict the
+            statements in the A17 Flight Readiness Review (Fabrizio
+            Bernardini tells me), which agree with the information to
+            the left.&nbsp; Unfortunately, Allan's copy of Luminary 209
+            is not available to us at present.<br>
+            <br>
+            At any rate, the version we have is Luminary 210, from Don
+            Eyle's collection, as scanned by archive.org, and
+            financially sponsored by our Jim Lawton.&nbsp; Thanks, Jim!<br>
+          </td>
+        </tr>
+        <tr align="center">
+          <td style="vertical-align: middle; white-space: nowrap;">
+            Apollo 16<br>
+          </td>
+          <td style="text-align: center; vertical-align: middle;"> LM-11<br>
+          </td>
+          <td style="text-align: center; vertical-align: middle;"> J-2<br>
+          </td>
+          <td rowspan="1" style="text-align: left;"> <a
+              href="http://www.ibiblio.org/apollo/Documents/msc05225.pdf"><span
+                style="font-style: italic;"> Program Notes</span></a><br>
+            <br>
+            <span style="text-decoration: underline;">GSOP (R-567)</span><br>
+            <ul>
+              <li><a
+href="http://www.ibiblio.org/apollo/Documents/R-567-GSOP-Luminary1E-Section2-DataLinks.pdf">
+                  Section 2</a></li>
+              <li><a
+href="http://www.ibiblio.org/apollo/Documents/R-567-GSOP-Luminary1E-Section7-ErasableMemoryPrograms.pdf">
+                  Section 7</a></li>
+            </ul>
+            <span style="text-decoration: underline;">Operations
+              Handbook</span><br>
+            <ul>
+              <li><a
+href="http://www.ibiblio.org/apollo/Documents/LMA790-3-LM10-ApolloOperationsHandbookLunarModuleLM10AndSubsequent-Volume1-SubsystemsData.pdf">
+                  Volume 1</a></li>
+              <li><a
+href="http://www.ibiblio.org/apollo/Documents/LMA790-3-LM11-ApolloOperationsHandbookLunarModuleLM11AndSubsequent-Volume2-OperationalProcedures.pdf">
+                  Volume 2</a></li>
+            </ul>
+            <span style="text-decoration: underline;">Operational Data
+              Book</span><br>
+            <ul>
+              <li><a
+href="http://www.ibiblio.org/apollo/Documents/SNA-8-D-027III-Rev2-CsmLmSpacecraftOperationalDataBook-Volume3-MassProperties.pdf">
+                  Volume 3</a></li>
+            </ul>
+            <a
+              href="http://www.ibiblio.org/apollo/Documents/Apollo16FlightPlan.pdf">Flight
+
+
+
+
+              Plan</a><br>
+            <br>
+            <a
+href="http://www.ibiblio.org/apollo/Documents/LMA790-2-LunarModuleLM10Through14VehicleFamiliarizationManual.pdf">
+              LM Familiarization Manual</a><br>
+          </td>
+        </tr>
+        <tr>
+          <td style="text-align: center; vertical-align: middle;
+            white-space: nowrap;"> Apollo 17<br>
+          </td>
+          <td style="text-align: center; vertical-align: middle;"> LM-12<br>
+          </td>
+          <td style="text-align: center; vertical-align: middle;"> J-3<br>
+          </td>
+          <td> <a
+href="http://www.ibiblio.org/apollo/Documents/LM_Systems_Handbook_Apollo17.pdf">
+              Excerpted LM Systems Handbook</a><br>
+            <br>
+            <a
+              href="http://www.ibiblio.org/apollo/Documents/msc05225.pdf"><span
+                style="font-style: italic;"> Program Notes</span></a><br>
+            <br>
+            <span style="text-decoration: underline;">GSOP (R-567)</span><br>
+            <ul>
+              <li><a
+href="http://www.ibiblio.org/apollo/Documents/R-567-GSOP-Luminary1E-Section2-DataLinks.pdf">
+                  Section 2</a></li>
+              <li><a
+href="http://www.ibiblio.org/apollo/Documents/R-567-GSOP-Luminary1E-Section7-ErasableMemoryPrograms.pdf">
+                  Section 7</a></li>
+            </ul>
+            <span style="text-decoration: underline;">Operations
+              Handbook</span><br>
+            <ul>
+              <li><a
+href="http://www.ibiblio.org/apollo/Documents/LMA790-3-LM10-ApolloOperationsHandbookLunarModuleLM10AndSubsequent-Volume1-SubsystemsData.pdf">
+                  Volume 1</a></li>
+              <li><a
+href="http://www.ibiblio.org/apollo/Documents/LMA790-3-LM11-ApolloOperationsHandbookLunarModuleLM11AndSubsequent-Volume2-OperationalProcedures.pdf">
+                  Volume 2</a></li>
+            </ul>
+            <span style="text-decoration: underline;">Operational Data
+              Book</span><br>
+            <ul>
+              <li><a
+href="http://www.ibiblio.org/apollo/Documents/SNA-8-D-027III-Rev2-CsmLmSpacecraftOperationalDataBook-Volume3-MassProperties.pdf">
+                  Volume 3</a></li>
+            </ul>
+            <a
+href="http://www.ibiblio.org/apollo/Documents/Apollo17TechnicalCrewDebriefing.pdf">Crew
+
+
+
+
+              Debriefing</a><br>
+            <br>
+            <a
+              href="http://www.ibiblio.org/apollo/Documents/Apollo17FlightPlan.pdf">
+              Flight Plan</a><br>
+            <br>
+            <a
+href="http://www.ibiblio.org/apollo/Documents/LMA790-2-LunarModuleLM10Through14VehicleFamiliarizationManual.pdf">
+              LM Familiarization Manual</a><br>
+          </td>
+        </tr>
+        <tr>
+          <td colspan="8" rowspan="1" style="vertical-align: top;">
+            <div style="text-align: left;"> <span style="font-style:
+                italic;">(The data in this table originally came from
+                on-line sources, but in the form shown contains many
+                corrections supplied by Mr. Paul Fjeld.&nbsp; <span
+                  style="font-weight: bold;">Please don't take this
+                  information as authoritative!</span>)</span><br>
+            </div>
           </td>
         </tr>
       </tbody>
-    </table><br>
-    <h2><a name="Validity" id="Validity"></a>Validation</h2>
-    <h3><a name="Validity_of_the_Luminary_131_Source_Code" id=
-    "Validity_of_the_Luminary_131_Source_Code"></a>Validity of the
-    Luminary 131 Source Code and of the Binary (Apollo
-    13)<br></h3>I believe that the core-rope image (which is what
-    is needed to actually run the <span style=
-    "font-weight: bold;">Luminary</span> software in the yaAGC CPU
-    emulator) I've provided for <span style=
-    "font-weight: bold;">Luminary</span> 1C (build 131) is 100%
-    accurate.&nbsp; If you're not willing to take my word for that,
-    and if the discussion in the preceding section doesn't convince
-    you, an extended discussion of proofing and validation of the
-    core-rope appears in the description of the <a href=
-    "Colossus.html#Validity">Colossus</a> software.<br>
-    <h3><a name="Validity_of_the_Luminary_099_Code_" id=
-    "Validity_of_the_Luminary_099_Code_"></a>Validity of the
-    Luminary 099 Code (Apollo 11)<br></h3>The Luminary 099 page
-    images became available after the Colossus 249 and Luminary
-    131page images had already been converted to source-code files,
-    and prior to any other missions becoming available.&nbsp; The
-    conversion technique was very abbreviated compared to that of
-    Luminary 131, as follows:<br>
-    <ul>
-      <li>A small corps of volunteers—thanks (in alphabetical
-      order) Fabrizio Bernardini, Hartmuth Gutshe, Onno Hommes, Jim
-      Lawton, and Sergio Navarro!—took the existing Luminary 131
-      source-code files and laboriously compared them line-by-line
-      to the Luminary 099 assembly-listing page images, porting the
-      differences they found.</li>
-      <li>The resulting Luminary 099 source code was assembled
-      using <span style="font-weight: bold;">yaYUL</span> to
-      produce a binary executable, which was horribly wrong at this
-      point, but was used to create a "binsource" file (which is an
-      octal listing of the entire program).</li>
-      <li>The binsource file was laboriously proofed against the
-      octal listing in the page images (this time by me), and
-      corrected.&nbsp; As a double-check, the bank checksums are
-      all correct.</li>
-      <li>Finally, at every point where the binary created from the
-      source code by <span style="font-weight: bold;">yaYUL</span>
-      differed from the binsource file, the source code was
-      compared to the page images and corrected.&nbsp; After all
-      corrections were made, the binary created by <span style=
-      "font-weight: bold;">yaYUL</span> was identical to the binary
-      created from the binsource file.<br></li>
-    </ul>The binary thus produced by <span style=
-    "font-weight: bold;">yaYUL</span> is supplied in the source
-    tree and used for regression testing.<br>
-  </div><br>
-  <hr style="width: 100%; height: 2px;">
-  <center>
+    </table>
+    <div style="text-align: left;"> <br>
+      <h2><a name="Source_Code_and_Binary" id="Source_Code_and_Binary"></a>Source
+
+
+
+        Code and Binary</h2>
+      Both source code and (independently derived) binary code are
+      provided within the yaAGC tarball downlod.&nbsp; The files are
+      contained within a subdirectory named after the software version
+      (such as "Luminary131").&nbsp; The more important files supplied
+      are these:<br>
+      <br>
+      <div style="margin-left: 40px;">
+        <table summary="" style="width: 75%; text-align: left;
+          margin-left: auto; margin-right: auto;" border="0"
+          cellpadding="2" cellspacing="2">
+          <tbody>
+            <tr>
+              <td style="vertical-align: top;"><span style="font-style:
+                  italic;">Filename</span>.agc<br>
+              </td>
+              <td style="vertical-align: top; text-align: left;"> Source
+                code for major subdivisions of the <span
+                  style="font-weight: bold;">Luminary</span> program.</td>
+            </tr>
+            <tr>
+              <td style="vertical-align: top;">MAIN.agc<br>
+              </td>
+              <td style="vertical-align: top;">Organizer which treats
+                all of the other assembly-language files (*.agc) as
+                include-files, to form the complete program.<br>
+              </td>
+            </tr>
+            <tr>
+              <td style="vertical-align: top;"><span style="font-style:
+                  italic;">Filename</span>.binsource<br>
+              </td>
+              <td style="vertical-align: top;">Human-readable form of
+                the Luminary binary executable, as an octal listing.<br>
+              </td>
+            </tr>
+            <tr>
+              <td style="vertical-align: top;"><span style="font-style:
+                  italic;">Filename</span>.bin<br>
+              </td>
+              <td style="vertical-align: top;">Binary executable created
+                from binsource (octal listing) file.<br>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <br>
+      </div>
+      In other words, to create a <span style="font-weight: bold;">Luminary</span>
+      binary executable rather than using the one provided with yaAGC
+      (such as Luminary131.bin), one simply needs to assemble the file
+      MAIN.agc.&nbsp; Typically, if all files remain organized the way
+      they are in the yaAGC distribution tarball, the sequence of steps
+      for doing so (from a command-line prompt) would be something like
+      this:<br>
+      <div style="margin-left: 40px;"> <br>
+        <span style="font-family: monospace;">cd Luminary131</span><br
+          style="font-family: monospace;">
+        <span style="font-family: monospace;">../yaYUL/yaYUL --force
+          MAIN.agc &gt;Luminary131.lst</span><br>
+      </div>
+      <br>
+      The listfile (Luminary131.lst) so produced is a bit more
+      manageable than the scanned version at MIT's website, in that it
+      is a hundredth the size and you can perform text-searches on
+      it.&nbsp; The binary so produced, MAIN.agc.bin, should be
+      byte-for-byte identical to the binary (Luminary131.bin) provided
+      with the yaAGC distribution.&nbsp; Therefore, the following Linux
+      command should reveal no differences between the two:<br>
+      <br>
+      <div style="margin-left: 40px;"> <span style="font-family:
+          monospace;">diff -s MAIN.agc.bin Luminary131.bin</span><br>
+      </div>
+      <br>
+      (Replace "diff -s" with "fc /b" in Windows.)&nbsp;<br>
+      <br>
+      <table summary="" style="width: 60%; text-align: left;
+        margin-left: auto; margin-right: auto;" border="1"
+        cellpadding="2" cellspacing="2">
+        <tbody>
+          <tr>
+            <td style="vertical-align: top;">
+              <h3 style="text-align: left;">Technically speaking....</h3>
+              A point which may not be completely appreciated is that
+              Luminary131.bin was <span style="font-style: italic;">not</span>
+              created from the assembly-language source files.&nbsp;
+              Therefore, the byte-for-byte equivalence mentioned above
+              actually has some significance.&nbsp; In fact, both the
+              assembly-language source code and Luminary131.bin (or
+              Luminary131.binsource) come from separate readings of the
+              original <span style="font-weight: bold;">Luminary</span>
+              assembly listing scan, so their equivalence provides an
+              important check on validity.&nbsp; (See below.)&nbsp; The
+              file Luminary131.bin was created from the
+              human-readable/editable ASCII file Luminary131.binsource
+              by means of the program <span style="font-weight: bold;">Oct2Bin</span>,
+              with the following steps:<br>
+              <br>
+              <div style="margin-left: 40px; font-family: monospace;">
+                cd Luminary131<br>
+                ./Oct2Bin &lt;Luminary131.binsource<br>
+                mv Oct2Bin.bin Luminary131.bin<br>
+              </div>
+              <br>
+              Admittedly, few people are likely to perform any
+              processing of this kind unless contributing a new version
+              of the Luminary code to the Virtual AGC project. </td>
+          </tr>
+        </tbody>
+      </table>
+      <br>
+      <h2><a name="Validity" id="Validity"></a>Validation</h2>
+      <h3><a name="Validity_of_the_Luminary_131_Source_Code"
+          id="Validity_of_the_Luminary_131_Source_Code"></a>Validity of
+        the Luminary 131 Source Code and of the Binary (Apollo 13)<br>
+      </h3>
+      I believe that the core-rope image (which is what is needed to
+      actually run the <span style="font-weight: bold;">Luminary</span>
+      software in the yaAGC CPU emulator) I've provided for <span
+        style="font-weight: bold;">Luminary</span> 1C (build 131) is
+      100% accurate.&nbsp; If you're not willing to take my word for
+      that, and if the discussion in the preceding section doesn't
+      convince you, an extended discussion of proofing and validation of
+      the core-rope appears in the description of the <a
+        href="Colossus.html#Validity">Colossus</a> software.<br>
+      <h3><a name="Validity_of_the_Luminary_099_Code_"
+          id="Validity_of_the_Luminary_099_Code_"></a>Validity of the
+        Luminary 099 Code (Apollo 11)<br>
+      </h3>
+      The Luminary 099 page images became available after the Colossus
+      249 and Luminary 131page images had already been converted to
+      source-code files, and prior to any other missions becoming
+      available.&nbsp; The conversion technique was very abbreviated
+      compared to that of Luminary 131, as follows:<br>
+      <ul>
+        <li>A small corps of volunteers—thanks (in alphabetical order)
+          Fabrizio Bernardini, Hartmuth Gutshe, Onno Hommes, Jim Lawton,
+          and Sergio Navarro!—took the existing Luminary 131 source-code
+          files and laboriously compared them line-by-line to the
+          Luminary 099 assembly-listing page images, porting the
+          differences they found.</li>
+        <li>The resulting Luminary 099 source code was assembled using <span
+            style="font-weight: bold;">yaYUL</span> to produce a binary
+          executable, which was horribly wrong at this point, but was
+          used to create a "binsource" file (which is an octal listing
+          of the entire program).</li>
+        <li>The binsource file was laboriously proofed against the octal
+          listing in the page images (this time by me), and
+          corrected.&nbsp; As a double-check, the bank checksums are all
+          correct.</li>
+        <li>Finally, at every point where the binary created from the
+          source code by <span style="font-weight: bold;">yaYUL</span>
+          differed from the binsource file, the source code was compared
+          to the page images and corrected.&nbsp; After all corrections
+          were made, the binary created by <span style="font-weight:
+            bold;">yaYUL</span> was identical to the binary created from
+          the binsource file.<br>
+        </li>
+      </ul>
+      The binary thus produced by <span style="font-weight: bold;">yaYUL</span>
+      is supplied in the source tree and used for regression testing.<br>
+    </div>
     <br>
-    <span style=
-    "color: rgb(84, 89, 93); font-family: sans-serif; font-size: 11.05px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 16.575px; orphans: auto; text-align: center; text-indent: 0px; text-transform: none; white-space: normal; widows: 1; word-spacing: 0px; -webkit-text-stroke-width: 0px; display: inline !important; float: none; background-color: rgb(255, 255, 255);">
-    This page is available under the <a href=
-    "https://creativecommons.org/publicdomain/zero/1.0/">Creative
-    Commons No Rights Reserved License</a></span><br>
-    <i><font size="-1">Last modified by <a href=
-    "mailto:info@sandroid.org">Ronald Burkey</a> on 2017-01-11.<br>
+    <hr style="width: 100%; height: 2px;">
+    <center> <br>
+      <span style="color: rgb(84, 89, 93); font-family: sans-serif;
+        font-size: 11.05px; font-style: normal; font-variant: normal;
+        font-weight: normal; letter-spacing: normal; line-height:
+        16.575px; orphans: auto; text-align: center; text-indent: 0px;
+        text-transform: none; white-space: normal; widows: 1;
+        word-spacing: 0px; -webkit-text-stroke-width: 0px; display:
+        inline !important; float: none; background-color: rgb(255, 255,
+        255);"> This page is available under the <a
+          href="https://creativecommons.org/publicdomain/zero/1.0/">Creative
+
+
+
+
+          Commons No Rights Reserved License</a></span><br>
+      <i><font size="-1">Last modified by <a
+            href="mailto:info@sandroid.org">Ronald Burkey</a> on
+          2017-01-29.<br>
+          <br>
+          <a href="http://www.ibiblio.org"><img style="border: 0px solid
+              ; width: 300px; height: 100px;" alt="Virtual AGC is hosted
+              by ibiblio.org" src="hosted.png" height="100" width="300"></a><br>
+        </font></i> </center>
     <br>
-    <a href="http://www.ibiblio.org"><img style=
-    "border: 0px solid ; width: 300px; height: 100px;" alt=
-    "Virtual AGC is hosted by ibiblio.org" src="hosted.png" height=
-    "100" width="300"></a><br></font></i>
-  </center><br>
-</body>
+  </body>
 </html>

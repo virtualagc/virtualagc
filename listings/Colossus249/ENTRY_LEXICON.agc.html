@@ -66,7 +66,8 @@ color: #993399;
 <img alt="" src="Apollo32.png" style="width: 32px; height: 32px;" align="left">
 </td>
 <td style="vertical-align: middle;">
-These source-code files were derived originally from the scan from MIT's Dibner Institute's 
+This is the source-code for the Apollo 9 Command Module's Guidance Computer.
+These files were derived originally from the scan from MIT's Dibner Institute's 
 now-discontinued website titled "History of Recent Science and Technology", which
 in turn was originally created by Gary Neff, though his high-quality scans were
 unfortunately reduced in legibility when presented online.
@@ -91,41 +92,331 @@ Note that the date is the date of the printout, not the date of the program revi
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-035001,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
-035002,000003:                                                                                                  <span class="co">## Filename:    ENTRY_LEXICON.agc</span>
-035003,000004:                                                                                                  <span class="co">## Purpose:     Part of the source code for Colossus, build 249.</span>
-035004,000005:                                                                                                  <span class="co">##              It is part of the source code for the Command Module's (CM)</span>
-035005,000006:                                                                                                  <span class="co">##              Apollo Guidance Computer (AGC), possibly for Apollo 8 and 9.</span>
-035006,000007:                                                                                                  <span class="co">## Assembler:   yaYUL</span>
-035007,000008:                                                                                                  <span class="co">## Reference:   pp. 795-801 of 1701.pdf.</span>
-035008,000009:                                                                                                  <span class="co">## Contact:     Ron Burkey &lt;info@sandroid.org>.</span>
-035009,000010:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo.</span>
-035010,000011:                                                                                                  <span class="co">## Mod history: 08/19/04 RSB.   Transcribed     .</span>
-035011,000012:                                                                                                  <span class="co">##</span>
-035012,000013:                                                                                                  <span class="co">## The contents of the "Colossus249" files, in general, are transcribed </span>
-035013,000014:                                                                                                  <span class="co">## from a scanned document obtained from MIT's website,</span>
-035014,000015:                                                                                                  <span class="co">## http://hrst.mit.edu/hrs/apollo/public/archive/1701.pdf.  Notations on this</span>
-035015,000016:                                                                                                  <span class="co">## document read, in part:</span>
-035016,000017:                                                                                                  <span class="co">##</span>
-035017,000018:                                                                                                  <span class="co">##      Assemble revision 249 of AGC program Colossus by NASA</span>
-035018,000019:                                                                                                  <span class="co">##      2021111-041.  October 28, 1968.  </span>
-035019,000020:                                                                                                  <span class="co">##</span>
-035020,000021:                                                                                                  <span class="co">##      This AGC program shall also be referred to as</span>
-035021,000022:                                                                                                  <span class="co">##                              Colossus 1A</span>
-035022,000023:                                                                                                  <span class="co">##</span>
-035023,000024:                                                                                                  <span class="co">##      Prepared by</span>
-035024,000025:                                                                                                  <span class="co">##                      Massachusetts Institute of Technology</span>
-035025,000026:                                                                                                  <span class="co">##                      75 Cambridge Parkway</span>
-035026,000027:                                                                                                  <span class="co">##                      Cambridge, Massachusetts</span>
-035027,000028:                                                                                                  <span class="co">##      under NASA contract NAS 9-4065.</span>
-035028,000029:                                                                                                  <span class="co">##</span>
-035029,000030:                                                                                                  <span class="co">## Refer directly to the online document mentioned above for further information.</span>
-035030,000031:                                                                                                  <span class="co">## Please report any errors (relative to 1701.pdf) to info@sandroid.org.</span>
-035031,000032:                                                                                                  <span class="co">##</span>
-035032,000033:                                                                                                  <span class="co">## In some cases, where the source code for Luminary 131 overlaps that of </span>
-035033,000034:                                                                                                  <span class="co">## Colossus 249, this code is instead copied from the corresponding Luminary 131</span>
-035034,000035:                                                                                                  <span class="co">## source file, and then is proofed to incorporate any changes.</span>
-035035,000036: 
+035313,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
+035314,000003:                                                                                                  <span class="co">## Filename:    ENTRY_LEXICON.agc</span>
+035315,000004:                                                                                                  <span class="co">## Purpose:     Part of the source code for Colossus, build 249.</span>
+035316,000005:                                                                                                  <span class="co">##              It is part of the source code for the Command Module's (CM)</span>
+035317,000006:                                                                                                  <span class="co">##              Apollo Guidance Computer (AGC), for Apollo 9.</span>
+035318,000007:                                                                                                  <span class="co">## Assembler:   yaYUL</span>
+035319,000008:                                                                                                  <span class="co">## Reference:   pp. 791-797.</span>
+035320,000009:                                                                                                  <span class="co">## Contact:     Ron Burkey &lt;info@sandroid.org>.</span>
+035321,000010:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo.</span>
+035322,000011:                                                                                                  <span class="co">## Mod history: 08/19/04 RSB.   Transcribed     .</span>
+035323,000012:                                                                                                  <span class="co">##              2017-01-06 RSB  Page numbers now agree with those on the</span>
+035324,000013:                                                                                                  <span class="co">##                              original harcopy, as opposed to the PDF page</span>
+035325,000014:                                                                                                  <span class="co">##                              numbers in 1701.pdf.</span>
+035326,000015:                                                                                                  <span class="co">##              2017-01-07 RSB  Cross-diff'd comment text (not whitespace)</span>
+035327,000016:                                                                                                  <span class="co">##                              vs the already-proofed corresponding Colossus</span>
+035328,000017:                                                                                                  <span class="co">##                              237 and Comanche 55 source-code files</span>
+035329,000018:                                                                                                  <span class="co">##                              and corrected errors found.</span>
+035330,000019:                                                                                                  <span class="co">##              2017-01-22 RSB  Back-ported comment error fixes detected in diff'ing</span>
+035331,000020:                                                                                                  <span class="co">##                              Artemis 72 vs Comanche 55.</span>
+035332,000021:                                                                                                  <span class="co">##</span>
+035333,000022:                                                                                                  <span class="co">## The contents of the "Colossus249" files, in general, are transcribed </span>
+035334,000023:                                                                                                  <span class="co">## from a scanned copy of the program listing.  Notations on this</span>
+035335,000024:                                                                                                  <span class="co">## document read, in part:</span>
+035336,000025:                                                                                                  <span class="co">##</span>
+035337,000026:                                                                                                  <span class="co">##      Assemble revision 249 of AGC program Colossus by NASA</span>
+035338,000027:                                                                                                  <span class="co">##      2021111-041.  October 28, 1968.  </span>
+035339,000028:                                                                                                  <span class="co">##</span>
+035340,000029:                                                                                                  <span class="co">##      This AGC program shall also be referred to as</span>
+035341,000030:                                                                                                  <span class="co">##                              Colossus 1A</span>
+035342,000031:                                                                                                  <span class="co">##</span>
+035343,000032:                                                                                                  <span class="co">##      Prepared by</span>
+035344,000033:                                                                                                  <span class="co">##                      Massachusetts Institute of Technology</span>
+035345,000034:                                                                                                  <span class="co">##                      75 Cambridge Parkway</span>
+035346,000035:                                                                                                  <span class="co">##                      Cambridge, Massachusetts</span>
+035347,000036:                                                                                                  <span class="co">##      under NASA contract NAS 9-4065.</span>
+035348,000037:                                                                                                  <span class="co">##</span>
+035349,000038:                                                                                                  <span class="co">## Refer directly to the online document mentioned above for further information.</span>
+035350,000039:                                                                                                  <span class="co">## Please report any errors (relative to the scanned pages) to info@sandroid.org.</span>
+035351,000040:                                                                                                  <span class="co">##</span>
+035352,000041:                                                                                                  <span class="co">## In some cases, where the source code for Luminary 131 overlaps that of </span>
+035353,000042:                                                                                                  <span class="co">## Colossus 249, this code is instead copied from the corresponding Luminary 131</span>
+035354,000043:                                                                                                  <span class="co">## source file, and then is proofed to incorporate any changes.</span>
+035355,000044: 
+</pre>
+</span>
+</p>
+<table style="text-align: left;" border="1" cellpadding="2" cellspacing="2">
+<tbody>
+<tr>
+<td style="white-space: nowrap; vertical-align: middle;">
+<img alt="" src="Apollo32.png" style="width: 32px; height: 32px;" align="left">
+</td>
+<td style="vertical-align: middle;">
+Page 791
+</td></tr></tbody></table>
+<p class="nobreak">
+<span style="font-family: monospace;">
+<pre>
+035357,000046:                                                                                                  <span class="co">#  VARIABLE      DESCRIPTION                             MAXIMUM VALUE *         COMPUTER NAME</span>
+035358,000047:                                                                                                  <span class="co">#  --------      -----------                             ------- -----           -------- ----</span>
+035359,000048:                                                                                                  <span class="co">#  -</span>
+035360,000049:                                                                                                  <span class="co">#  URT0          INITIAL TARGET VECTOR                   2 (UNIT VECTOR)         = RTINIT</span>
+035361,000050:                                                                                                  <span class="co">#  -</span>
+035362,000051:                                                                                                  <span class="co">#  UZ            UNIT VECTOR NORTH                       1                       = UNITW</span>
+035363,000052:                                                                                                  <span class="co">#  -</span>
+035364,000053:                                                                                                  <span class="co">#  V             VELOCITY VECTOR                         2 VSAT                  = VEL</span>
+035365,000054:                                                                                                  <span class="co">#  -</span>
+035366,000055:                                                                                                  <span class="co">#  R             POSITION VECTOR                         2 EXP 29 METERS         = RN</span>
+035367,000056:                                                                                                  <span class="co">#  -</span>
+035368,000057:                                                                                                  <span class="co">#  VI            INERTIAL VELOCITY                       128 M/CENTISEC          = VN</span>
+035369,000058:                                                                                                  <span class="co">#  -</span>
+035370,000059:                                                                                                  <span class="co">#  RTE           VECTOR EAST AT INITIAL TARGET           2                       = RTEAST</span>
+035371,000060:                                                                                                  <span class="co">#  -</span>
+035372,000061:                                                                                                  <span class="co">#  UTR           NORMAL TO RTE AND UZ                    2                       = RTNORM</span>
+035373,000062:                                                                                                  <span class="co">#  -</span>
+035374,000063:                                                                                                  <span class="co">#  URT           TARGET VECTOR                           2                       = RT</span>
+035375,000064:                                                                                                  <span class="co">#  -</span>
+035376,000065:                                                                                                  <span class="co">#  UNI           UNIT NORMAL TO TRAJECTORY PLANE         2       </span>
+035377,000066:                                                                                                  <span class="co">#  -</span>
+035378,000067:                                                                                                  <span class="co">#  DELV          INTEGRATED ACCEL. FROM PIPAS            5.85 16384 CM/S</span>
+035379,000068:                                                                                                  <span class="co">#  -</span>
+035380,000069:                                                                                                  <span class="co">#  G             GRAVITY VECTOR                          128 M/CENTISEC          = GDT/2</span>
+035381,000070: 
+035382,000071:                                                                                                  <span class="co">#  A0            INITIAL DRAG FOR UPCONTRL               805 FPSS                FPSS=FT/SEC/SEC</span>
+035383,000072: 
+035384,000073:                                                                                                  <span class="co">#  AHOOKDV       TERM IN GAMMAL CALC. = AHOOK DVL        16</span>
+035385,000074: 
+035386,000075:                                                                                                  <span class="co">#  A1            DRAG VALUE IN FACTOR CALCULATION        805 FPSS</span>
+035387,000076: 
+035388,000077:                                                                                                  <span class="co">#  ALP           CONST FOR UPCONTRL                      1</span>
+035389,000078: 
+035390,000079:                                                                                                  <span class="co">#  ASKEP         KEPLER RANGE                            21600 NM                NM = NAUTICAL MILE</span>
+035391,000080: 
+035392,000081:                                                                                                  <span class="co">#  ASP1          FINAL PHASE RANGE                       21600 NM</span>
+035393,000082: 
+035394,000083:                                                                                                  <span class="co">#  ASPUP         UP-RANGE                                21600 NM</span>
+035395,000084: 
+035396,000085:                                                                                                  <span class="co">#  ASP3          GAMMA CORRECTION                        21600 NM</span>
+035397,000086: 
+035398,000087:                                                                                                  <span class="co">#  ASPDWN        RANGE DOWN TO PULL-UP                   21600 NM</span>
+035399,000088: 
+035400,000089:                                                                                                  <span class="co">#  ASP           PREDICTED RANGE                         21600 NM                NOT STORED</span>
+035401,000090: 
+035402,000091:                                                                                                  <span class="co">#  COSG          COSINE(GAMMAL)                          2                       = COSG/2</span>
+035403,000092: 
+035404,000093:                                                                                                  <span class="co">#  C/D0          RECIPROCAL DRAG, -4/D0 B-8              64/FPSS</span>
+035405,000094: 
+035406,000095:                                                                                                  <span class="co">#  D             TOTAL ACCELERATION                      805 FPSS</span>
+035407,000096: 
+035408,000097:                                                                                                  <span class="co">#  D0            CONTROLLED CONSTANT D                   805 FPSS</span>
+035409,000098: 
+035410,000099:                                                                                                  <span class="co">#  DHOOK         TERM IN GAMMAL COMPUTATION              805 FPSS</span>
+035411,000100: 
+035412,000101:                                                                                                  <span class="co">#  DIFF          THETNM-ASP (RANGE DIFFERENCE)           21600 NM</span>
+035413,000102: 
+035414,000103:                                                                                                  <span class="co">#  DIFFOLD       PREVIOUS VALUE OF DIFF                  21600 NM</span>
+035415,000104: 
+035416,000105:                                                                                                  <span class="co">#  DLEWD         CHANGE IN LEWD                          1</span>
+035417,000106: 
+035418,000107:                                                                                                  <span class="co">#  DR            REFERENCE DRAG FOR DOWNCONTROL          805 FPSS                NOT STORED</span>
+035419,000108: 
+035420,000109:                                                                                                  <span class="co">#  DREFR         REFERENCE DRAG                          805 FPSS                NOT STORED</span>
+035421,000110: 
+035422,000111:                                                                                                  <span class="co">#  DVL           VS1-VL                                  2 VSAT</span>
+035423,000112: 
+035424,000113:                                                                                                  <span class="co">#  E             ECCENTRICITY                            4                       NOT STORED</span>
+035425,000114: 
+035426,000115:                                                                                                  <span class="co">#  F1            DRANGE/D DRAG   (FINAL PHASE)           2700/805                = FX +5</span>
+035427,000116: 
+035428,000117:                                                                                                  <span class="co">#  F2            DRANGE/D RDOT   (FINAL PHASE)           2700/2VS NM/FPS         = FX +4</span>
+</pre>
+</span>
+</p>
+<table style="text-align: left;" border="1" cellpadding="2" cellspacing="2">
+<tbody>
+<tr>
+<td style="white-space: nowrap; vertical-align: middle;">
+<img alt="" src="Apollo32.png" style="width: 32px; height: 32px;" align="left">
+</td>
+<td style="vertical-align: middle;">
+Page 792
+</td></tr></tbody></table>
+<p class="nobreak">
+<span style="font-family: monospace;">
+<pre>
+035430,000119: 
+035431,000120:                                                                                                  <span class="co">#  F3            DRANGE/D (L/D)                          2700 NM                 = FX</span>
+035432,000121: 
+035433,000122:                                                                                                  <span class="co">#  FACT1         CONST FOR UPCONTRL                      805 FPSS</span>
+035434,000123: 
+035435,000124:                                                                                                  <span class="co">#  FACT2         CONST FOR UPCONTRL                      1/805 FPSS</span>
+035436,000125: 
+035437,000126:                                                                                                  <span class="co">#  FACTOR        USED IN UPCONTRL                        1                       * MAXIMUM VALUE DENOTES UNSCALED</span>
+035438,000127:                                                                                                  <span class="co">#                                                                </span>
+035439,000128:                                                                                                  <span class="co">#  GAMMAL        FLIGHT PATH ANGLE AT VL                 1 RADIAN                  VARIABLE VALUE WHEN SCALED</span>
+035440,000129: 
+035441,000130:                                                                                                  <span class="co">#  GAMMAL1       SIMPLE FORM OF GAMMAL                   1 RADIAN                  VARIABLE HAS MAXIMUM VALUE OF ONE.</span>
+</pre>
+</span>
+</p>
+<table style="text-align: left;" border="1" cellpadding="2" cellspacing="2">
+<tbody>
+<tr>
+<td style="white-space: nowrap; vertical-align: middle;">
+<img alt="" src="Apollo32.png" style="width: 32px; height: 32px;" align="left">
+</td>
+<td style="vertical-align: middle;">
+Page 793
+</td></tr></tbody></table>
+<p class="nobreak">
+<span style="font-family: monospace;">
+<pre>
+035443,000132:                                                                                                  <span class="co">#  VARIABLE      DESCRIPTION                             MAXIMUM VALUE           COMPUTER NAME</span>
+035444,000133:                                                                                                  <span class="co">#  --------      -----------                             ------- -----           -------- ----</span>
+035445,000134: 
+035446,000135:                                                                                                  <span class="co">#  HEADSUP       INDICATOR FOR INITIAL ROLL              1</span>
+035447,000136: 
+035448,000137:                                                                                                  <span class="co">#  KA            DRAG TO LIFT UP IF DOWN                 805 FPSS                = KAT</span>
+035449,000138: 
+035450,000139:                                                                                                  <span class="co">#  KLAT          LATERAL SWITCH GAIN                     1                       (NOM = .0125)</span>
+035451,000140: 
+035452,000141:                                                                                                  <span class="co">#  K2ROLL        INDICATOR FOR ROLL SWITCH               </span>
+035453,000142: 
+035454,000143:                                                                                                  <span class="co">#  LAD           MAX L/D (MIN ACTUAL VEHICLE L/D)        1</span>
+035455,000144: 
+035456,000145:                                                                                                  <span class="co">#  LADPAD        NOMINAL VEHICLE L/D, SP PAD LOAD        1                       (NOM = 0.3)</span>
+035457,000146: 
+035458,000147:                                                                                                  <span class="co">#  LATANG        LATERAL RANGE                           4 RADIANS</span>
+035459,000148: 
+035460,000149:                                                                                                  <span class="co">#  LEQ           EXCESS C.F. OVER GRAV=(VSQ-1)GS         128.8 FPSS</span>
+035461,000150: 
+035462,000151:                                                                                                  <span class="co">#  LEWD          UPCONTROL REFERENCE L/D                 1</span>
+035463,000152: 
+035464,000153:                                                                                                  <span class="co">#  LOD           FINAL PHASE L/D                         1                       (NOM = 0.18)</span>
+035465,000154: 
+035466,000155:                                                                                                  <span class="co">#  LODPAD        FINAL PHASE L/D, SP PAD LOAD            1</span>
+035467,000156: 
+035468,000157:                                                                                                  <span class="co">#  L/D           DESIRED LIFT TO DRAG RATIO              1</span>
+035469,000158:                                                                                                  <span class="co">#                (VERTICAL PLANE)</span>
+035470,000159:                                                                                                  <span class="co">#  </span>
+035471,000160:                                                                                                  <span class="co">#  L/D1          TEMP STORAGE FOR L/D IN LATERAL         1</span>
+035472,000161: 
+035473,000162:                                                                                                  <span class="co">#  L/DCMINR      LAD COS(15DEG)                          1                       (NOM = 0.2895)</span>
+035474,000163: 
+035475,000164:                                                                                                  <span class="co">#  PREDANGL      PREDICTED RANGE (FINAL PHASE)           2700 NM                 = PREDANG</span>
+035476,000165: 
+035477,000166:                                                                                                  <span class="co">#  Q2            FINAL PHASE RANGE -23500 Q3             21600 NM</span>
+035478,000167:                                                                                                  <span class="co">#                Q2 = FCN(LAD)</span>
+035479,000168: 
+035480,000169:                                                                                                  <span class="co">#  Q7            MINIMUM DRAG FOR UPCONTROL              805FPSS</span>
+035481,000170: 
+035482,000171:                                                                                                  <span class="co">#  RDOT          ALTITUDE RATE                           2 VSAT</span>
+035483,000172: 
+035484,000173:                                                                                                  <span class="co">#  RDOTREF       REFERENCE RDOT FOR UPCONTROL            2 VSAT</span>
+035485,000174: 
+035486,000175:                                                                                                  <span class="co">#  RDTR          REFERENCE RDOT FOR DOWNCONT             2 VSAT                  NOT SAVED</span>
+035487,000176: 
+035488,000177:                                                                                                  <span class="co">#  ROLLC         ROLL COMMAND                            1 REVOLUTION</span>
+035489,000178: 
+035490,000179:                                                                                                  <span class="co">#  RTOGO         RANGE TO GO (FINAL PHASE)               2700 NM                 = FX +2</span>
+035491,000180: 
+035492,000181:                                                                                                  <span class="co">#  SL            SINE OF LATITUDE                        1                       NOT SAVED</span>
+035493,000182: 
+035494,000183:                                                                                                  <span class="co">#  T             TIME                                    B 28 CENTISEC           = TIME2,TIME1</span>
+035495,000184: 
+035496,000185:                                                                                                  <span class="co">#  THETA         DESIRED RANGE (RADIANS)                 2 PI RADIANS            = THETAH</span>
+035497,000186: 
+035498,000187:                                                                                                  <span class="co">#  THETNM        DESIRED RANGE (NM)                      21600 NM                NON EXISTENT</span>
+035499,000188: 
+035500,000189:                                                                                                  <span class="co">#  V             VELOCITY MAGNITUDE                      2 VSAT</span>
+035501,000190:                                                                                                  <span class="co">#  </span>
+035502,000191:                                                                                                  <span class="co">#  V1            INITIAL VELOCITY FOR UPCONTROL          2 VSAT</span>
+035503,000192: 
+035504,000193:                                                                                                  <span class="co">#  VL            EXIT VELOCITY FOR UPCONTROL             2 VSAT</span>
+035505,000194: 
+035506,000195:                                                                                                  <span class="co">#  VREF          REFERENCE VELOCITY FOR UPCONTROL        2 VSAT</span>
+035507,000196: 
+035508,000197:                                                                                                  <span class="co">#  VS1           VSAT OR V1, WHICHEVER IS SMALLER        2 VSAT</span>
+035509,000198:                                                                                                  <span class="co">#                  2     2</span>
+035510,000199:                                                                                                  <span class="co">#  VBARS         VL /VSAT                                4</span>
+035511,000200:                                                                                                  <span class="co">#                                           2     2</span>
+035512,000201:                                                                                                  <span class="co">#  VSQ           NORMALISED VEL. SQUARED = V /VSAT       4                       = VSQUARE</span>
+035513,000202: 
+035514,000203:                                                                                                  <span class="co">#  WT            EARTH RATE TIMES TIME                   1 REVOLUTION            NOT SAVED</span>
+035515,000204:                                                                                                  <span class="co">#                                                                                = WIE (DTEAROT)</span>
+035516,000205:                                                                                                  <span class="co">#  X             INTERMEDIATE VARIABLE IN G-LIMITER      2 VSAT                  NOT SAVED</span>
+035517,000206: 
+035518,000207:                                                                                                  <span class="co">#  Y             LATERAL MISS LIMIT                      4 RADIANS               NOT SAVED</span>
+035519,000208: 
+</pre>
+</span>
+</p>
+<table style="text-align: left;" border="1" cellpadding="2" cellspacing="2">
+<tbody>
+<tr>
+<td style="white-space: nowrap; vertical-align: middle;">
+<img alt="" src="Apollo32.png" style="width: 32px; height: 32px;" align="left">
+</td>
+<td style="vertical-align: middle;">
+Page 794
+</td></tr></tbody></table>
+<p class="nobreak">
+<span style="font-family: monospace;">
+<pre>
+035521,000210:                                                                                                  <span class="co">#  EXTRA COMPUTER ERASABLE LOCATIONS NOT SHOWN ON FLOW CHARTS</span>
+035522,000211:                                                                                                  <span class="co">#  -----------------------------------------------------------</span>
+035523,000212: 
+035524,000213:                                                                                                  <span class="co">#  VARIABLE      DESCRIPTION                             MAXIMUM VALUE</span>
+035525,000214:                                                                                                  <span class="co">#  --------      -----------                             ------- -----</span>
+035526,000215: 
+035527,000216:                                                                                                  <span class="co">#  GOTOADDR      ADDRESS SELECTED BY SEQUENCER</span>
+035528,000217: 
+035529,000218:                                                                                                  <span class="co">#  XPIPBUF       BUFFER TO STORE X PIPA COUNTS</span>
+035530,000219: 
+035531,000220:                                                                                                  <span class="co">#  YPIPBUF       BUFFER TO STORE Y PIPA COUNTS</span>
+035532,000221: 
+035533,000222:                                                                                                  <span class="co">#  ZPIPBUF       BUFFER TO STORE Z PIPA COUNTS</span>
+035534,000223: 
+035535,000224:                                                                                                  <span class="co">#  PIPCTR        COUNTS PASSES THRU PIPA READ ROUTINE</span>
+035536,000225: 
+035537,000226:                                                                                                  <span class="co">#  JJ            INDEX IN FINAL PHASE TABLE LOOK-UP</span>
+035538,000227: 
+035539,000228:                                                                                                  <span class="co">#  MM            INDEX IN FINAL PHASE TABLE LOOK-UP</span>
+035540,000229: 
+035541,000230:                                                                                                  <span class="co">#  GRAD          INTERPOLATION FACTOR IN FINAL PHASE</span>
+035542,000231: 
+035543,000232:                                                                                                  <span class="co">#  FX            DRANGE/D L/D = F3                       2700 NM</span>
+035544,000233: 
+035545,000234:                                                                                                  <span class="co">#  FX +1         AREF                                    805 FPSS</span>
+035546,000235: 
+035547,000236:                                                                                                  <span class="co">#  FX +2         RTOGO                                   2700 NM</span>
+035548,000237: 
+035549,000238:                                                                                                  <span class="co">#  FX +3         RDOTREF                                 VSAT/4</span>
+035550,000239: 
+035551,000240:                                                                                                  <span class="co">#  FX +4         DRANGE/D RDOT = F2                      21600/2VS NM/FPS</span>
+035552,000241: 
+035553,000242:                                                                                                  <span class="co">#  FX +5         DRANGE/D DRAG = F1                      2700/805 NM/FPSS</span>
+035554,000243: 
+035555,000244:                                                                                                  <span class="co">#  TEM1B         TEMPORARY LOCATION</span>
+035556,000245: 
+035557,000246:                                                                                                  <span class="co">#  TIME/RTO      TIME OF INITIAL TARGET RTINIT           B 28 CENTISEC</span>
+035558,000247: 
+035559,000248:                                                                                                  <span class="co">#  DTEAROT       EST TIME BETWEEN RTINIT AND RT          B 28 CENTISEC</span>
+035560,000249:                                                                                                  <span class="co">#  -</span>
+035561,000250:                                                                                                  <span class="co">#  UNITV         UNIT V VECTOR                           2</span>
+035562,000251:                                                                                                  <span class="co">#  -</span>
+035563,000252:                                                                                                  <span class="co">#  UNITR         UNIT R VECTOR                           2</span>
+035564,000253:                                                                                                  <span class="co">#   -</span>
+035565,000254:                                                                                                  <span class="co">#  -VREL         NEGATIVE VELOCITY REL TO ATMOSP         2 VSAT</span>
+035566,000255: 
+035567,000256:                                                                                                  <span class="co">#  COMPUTER SWITCHES                                     INITIAL STATE           CM/FLAGS = STATE +6</span>
+035568,000257:                                                                                                  <span class="co">#  -------- --------                                     -------------           -------------------</span>
+035569,000258: 
+035570,000259:                                                                                                  <span class="co">#  ENTRYDSP      DO ENTRY DISPLAY, IF SET                NON-BRANCH (1)          92D, BIT 13</span>
+035571,000260:                                                                                                  <span class="co">#  GONEPAST      INDICATES OVERSHOOT OF TARGET           NON-BRANCH (0)          95D, BIT 10</span>
+035572,000261:                                                                                                  <span class="co">#  RELVELSW      RELATIVE VELOCITY SWITCH                NON-BRANCH (0)          96D, BIT 9</span>
+035573,000262:                                                                                                  <span class="co">#  EGSW          FINAL PHASE SWITCH                      NON-BRANCH (0)          97D, BIT 8</span>
+035574,000263:                                                                                                  <span class="co">#  FIRSTPAS      INITIAL PASS THRU HUNTEST               NON-BRANCH (0)          98D, BIT 7</span>
+035575,000264:                                                                                                  <span class="co">#  HIND          INDICATES ITERATION IN HUNTEST          NON-BRANCH (0)          99D, BIT 6</span>
+035576,000265:                                                                                                  <span class="co">#  INRLSW        INDICATES INIT ROLL ATTITUDE SET        NON-BRANCH (0)          100D, BIT 5</span>
+035577,000266:                                                                                                  <span class="co">#  LATSW         INHIBIT DOWNLIFT SWITCH IF NOT SET          BRANCH (1)          101D, BIT 4</span>
+035578,000267:                                                                                                  <span class="co">#  .05GSW        INDICATES DRAG EXCEEDS .05 GS               BRANCH (0)          102D, BIT 3</span>
+035579,000268: 
+035580,000269:                                                                                                  <span class="co">#  GONEBY        INDICATES GONE PAST TARGET (SET)        SELF-INITIALZNG         112D, BIT 8</span>
+035581,000270: 
 </pre>
 </span>
 </p>
@@ -141,78 +432,52 @@ Page 795
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-035037,000038:                                                                                                  <span class="co">#  VARIABLE      DESCRIPTION                             MAXIMUM VALUE *         COMPUTER NAME</span>
-035038,000039:                                                                                                  <span class="co">#  --------      -----------                             ---------------         -------------</span>
-035039,000040:                                                                                                  <span class="co">#  _</span>
-035040,000041:                                                                                                  <span class="co">#  URT0          INITIAL TARGET VECTOR                   2 (UNIT VECTOR)         = RTINIT</span>
-035041,000042:                                                                                                  <span class="co">#  _</span>
-035042,000043:                                                                                                  <span class="co">#  UZ            UNIT VECTOR NORTH                       1                       = UNITW</span>
-035043,000044:                                                                                                  <span class="co">#  _</span>
-035044,000045:                                                                                                  <span class="co">#  V             VELOCITY VECTOR                         2 VSAT                  = VEL</span>
-035045,000046:                                                                                                  <span class="co">#  _</span>
-035046,000047:                                                                                                  <span class="co">#  R             POSITION VECTOR                         2 EXP 29 METERS         = RN</span>
-035047,000048:                                                                                                  <span class="co">#  _</span>
-035048,000049:                                                                                                  <span class="co">#  VI            INERTIAL VELOCITY                       128 M/CENTISEC          = VN</span>
-035049,000050:                                                                                                  <span class="co">#  _</span>
-035050,000051:                                                                                                  <span class="co">#  RTE           VECTOR EAST AT INITIAL TARGET           2                       = RTEAST</span>
-035051,000052:                                                                                                  <span class="co">#  _</span>
-035052,000053:                                                                                                  <span class="co">#  UTR           NORMAL TO RTE AND UZ                    2                       = RTNORM</span>
-035053,000054:                                                                                                  <span class="co">#  _</span>
-035054,000055:                                                                                                  <span class="co">#  URT           TARGET VECTOR                           2                       = RT</span>
-035055,000056:                                                                                                  <span class="co">#  _</span>
-035056,000057:                                                                                                  <span class="co">#  UNI           UNIT NORMAL TO TRAJECTORY PLANE         2       </span>
-035057,000058:                                                                                                  <span class="co">#  _</span>
-035058,000059:                                                                                                  <span class="co">#  DELV          INTEGRATED ACCEL. FROM PIPAS            5.85 16384 CM/S</span>
-035059,000060:                                                                                                  <span class="co">#  _</span>
-035060,000061:                                                                                                  <span class="co">#  G             GRAVITY VECTOR                          128 M/CENTISEC          = GDT/2</span>
-035061,000062: 
-035062,000063:                                                                                                  <span class="co">#  A0            INITIAL DRAG FOR UPCONTRL               805 FPSS                FPSS=FT/SEC/SEC</span>
-035063,000064: 
-035064,000065:                                                                                                  <span class="co">#  AHOOKDV       TERM IN GAMMAL CALC. = AHOOK DVL        16</span>
-035065,000066: 
-035066,000067:                                                                                                  <span class="co">#  A1            DRAG VALUE IN FACTOR CALCULATION        805 FPSS</span>
-035067,000068: 
-035068,000069:                                                                                                  <span class="co">#  ALP           CONST FOR UPCONTRL                      1</span>
-035069,000070: 
-035070,000071:                                                                                                  <span class="co">#  ASKEP         KEPLER RANGE                            21600 NM                NM = NAUTICAL MILE</span>
-035071,000072: 
-035072,000073:                                                                                                  <span class="co">#  ASP1          FINAL PHASE RANGE                       21600 NM</span>
-035073,000074: 
-035074,000075:                                                                                                  <span class="co">#  ASPUP         UP-RANGE                                21600 NM</span>
-035075,000076: 
-035076,000077:                                                                                                  <span class="co">#  ASP3          GAMMA CORRECTION                        21600 NM</span>
-035077,000078: 
-035078,000079:                                                                                                  <span class="co">#  ASPDWN        RANGE DOWN TO PULL-UP                   21600 NM</span>
-035079,000080: 
-035080,000081:                                                                                                  <span class="co">#  ASP           PREDICTED RANGE                         21600 NM                NOT STORED</span>
-035081,000082: 
-035082,000083:                                                                                                  <span class="co">#  COSG          COSINE(GAMMAL)                          2                       = COSG/2</span>
-035083,000084: 
-035084,000085:                                                                                                  <span class="co">#  C/D0          RECIPROCAL DRAG, -4/D0 B-8              64/FPSS</span>
-035085,000086: 
-035086,000087:                                                                                                  <span class="co">#  D             TOTAL ACCELERATION                      805 FPSS</span>
-035087,000088: 
-035088,000089:                                                                                                  <span class="co">#  D0            CONTROLLED CONSTANT D                   805 FPSS</span>
-035089,000090: 
-035090,000091:                                                                                                  <span class="co">#  DHOOK         TERM IN GAMMAL COMPUTATION              805 FPSS</span>
-035091,000092: 
-035092,000093:                                                                                                  <span class="co">#  DIFF          THETNM-ASP (RANGE DIFFERENCE)           21600 NM</span>
-035093,000094: 
-035094,000095:                                                                                                  <span class="co">#  DIFFOLD       PREVIOUS VALUE OF DIFF                  21600 NM</span>
-035095,000096: 
-035096,000097:                                                                                                  <span class="co">#  DLEWD         CHANGE IN LEWD                          1</span>
-035097,000098: 
-035098,000099:                                                                                                  <span class="co">#  DR            REFERENCE DRAG FOR DOWNCONTROL          805 FPSS                NOT STORED</span>
-035099,000100: 
-035100,000101:                                                                                                  <span class="co">#  DREFR         REFERENCE DRAG                          805 FPSS                NOT STORED</span>
-035101,000102: 
-035102,000103:                                                                                                  <span class="co">#  DVL           VS1-VL                                  2 VSAT</span>
-035103,000104: 
-035104,000105:                                                                                                  <span class="co">#  E             ECCENTRICITY                            4                       NOT STORED</span>
-035105,000106: 
-035106,000107:                                                                                                  <span class="co">#  F1            DRANGE/D DRAG   (FINAL PHASE)           2700/805                = FX +5</span>
-035107,000108: 
-035108,000109:                                                                                                  <span class="co">#  F2            DRANGE/D RDOT   (FINAL PHASE)           2700/2VS NM/FPS         = FX +4</span>
+035583,000272:                                                                                                  <span class="co">#  CONSTANTS AND GAINS                                                   VALUE</span>
+035584,000273:                                                                                                  <span class="co">#  -------------------                                                   -----</span>
+035585,000274: 
+035586,000275:                                                                                                  <span class="co">#  C1            FACTOR IN ALP COMPUTATION                               1.25</span>
+035587,000276:                                                                                                  <span class="co">#  C16           CONSTD GAIN ON DRAG                                     .01</span>
+035588,000277:                                                                                                  <span class="co">#  C17           CONSTD GAIN ON RDOT                                     .001</span>
+035589,000278:                                                                                                  <span class="co">#  C18           BIAS VEL. FOR FINAL PHASE START                         500     FPS</span>
+035590,000279:                                                                                                  <span class="co">#  C20           MAX DRAG FOR DOWN-LIFT                                  175     FPSS</span>
+035591,000280:                                                                                                  <span class="co">#  CHOOK         FACTOR IN AHOOK COMPUTATION                             .25</span>
+035592,000281:                                                                                                  <span class="co">#  CH1           FACTOR IN GAMMAL COMPUTATION                            1.0</span>
+035593,000282:                                                                                                  <span class="co">#  COS15         COS( 15 DEG )                                           .965</span>
+035594,000283:                                                                                                  <span class="co">#  DLEWD0        INITIAL VARIATION IN LEWD                               -.05</span>
+035595,000284:                                                                                                  <span class="co">#  D2            DRAG TO CHANGE LEWD                                     175     FPSS</span>
+035596,000285:                                                                                                  <span class="co">#  DT            COMPUTATION CYCLE TIME INTERVAL                         2       SEC.</span>
+035597,000286:                                                                                                  <span class="co">#  GMAX          MAXIMUM ACCELERATION                                    257.6   FPSS    (8 G-S)</span>
+035598,000287:                                                                                                  <span class="co">#  KA1           FACTOR IN KA CALC                                       1.3     GS</span>
+035599,000288:                                                                                                  <span class="co">#  KA2           FACTOR IN KA CALC                                       .2      GS</span>
+035600,000289:                                                                                                  <span class="co">#  KA3           FACTOR IN D0 CALC                                       90 FPSS</span>
+035601,000290:                                                                                                  <span class="co">#  KA4           FACTOR IN D0 CALC                                       40 FPSS</span>
+035602,000291:                                                                                                  <span class="co">#  KB1           OPTIMIZED UPCONTROL GAIN                                3.4</span>
+035603,000292:                                                                                                  <span class="co">#  KB2           OPTIMIZED UPCONTROL GAIN                                .0034</span>
+035604,000293:                                                                                                  <span class="co">#  KDMIN         INCREMENT ON Q7 TO DETECT END OF KEPLER PHASE           .5      FPSS</span>
+035605,000294:                                                                                                  <span class="co">#  KTETA         TIME OF FLIGHT CONSTANT                                 1000</span>
+035606,000295:                                                                                                  <span class="co">#  KLAT1         FACTOR IN KLAT CALC                                     1/24</span>
+035607,000296:                                                                                                  <span class="co">#  K44           GAIN USED IN INITIAL ROLL SECTION                       19749550 FPS</span>
+035608,000297:                                                                                                  <span class="co">#  LATBIAS       LATERAL SWITCH BIAS TERM                                .41252961 NM</span>
+035609,000298:                                                                                                  <span class="co">#  LEWD1         NOMINAL UPCONTROL L/D                                   .15</span>
+035610,000299:                                                                                                  <span class="co">#  POINT1        FACTOR TO REDUCE UPCONTROL GAIN                         .1</span>
+035611,000300:                                                                                                  <span class="co">#  Q2            FINAL PHASE RANGE - 23500 Q3                            -1002   NM</span>
+035612,000301:                                                                                                  <span class="co">#  Q3            FINAL PHASE DRANGE/D V                                  .07     NM/FPS</span>
+035613,000302:                                                                                                  <span class="co">#  Q5            FINAL PHASE DRANGE/D GAMMA                              7050    NM/RAD</span>
+035614,000303:                                                                                                  <span class="co">#  Q6            FINAL PHASE INITIAL FLIGHT PATH ANGLE                   .0349   RAD</span>
+035615,000304:                                                                                                  <span class="co">#  Q7F           MIN DRAG FOR UPCONTROL                                  6       FPSS</span>
+035616,000305:                                                                                                  <span class="co">#  Q7MIN         MIN VALUE FOR Q7 IN FACTOR CALCULATION                  40      FPSS</span>
+035617,000306:                                                                                                  <span class="co">#  Q19           FACTOR IN GAMMAL1 CALCULATION                           .5</span>
+035618,000307:                                                                                                  <span class="co">#  Q21           FACTOR IN Q2 CALCULATION.                               1000    NM</span>
+035619,000308:                                                                                                  <span class="co">#  Q22           FACTOR IN Q2 CALCULATION.                               -1302   NM</span>
+035620,000309:                                                                                                  <span class="co">#  VFINAL1       VELOCITY TO START FINAL PHASE ON INITIAL ENTRY          27000   FPS</span>
+035621,000310:                                                                                                  <span class="co">#  VFINAL        FACTOR IN INITIAL UP-DOWN CALC                          26600   FPS</span>
+035622,000311:                                                                                                  <span class="co">#  VLMIN         MINIMUM VL                                              18000   FPS</span>
+035623,000312:                                                                                                  <span class="co">#  VMIN          VELOCITY TO SWITCH TO RELATIVE VEL                      VSAT/2</span>
+035624,000313:                                                                                                  <span class="co">#  VRCONTRL      RDOT TO START INTO HUNTEST                              700     FPS</span>
+035625,000314:                                                                                                  <span class="co">#                VRCONT=COMPUTER NAME</span>
+035626,000315:                                                                                                  <span class="co">#  25NM          TOLERANCE TO STOP RANGE ITERATION                       25      NM</span>
+035627,000316:                                                                                                  <span class="co">#  VQUIT         VELOCITY TO STOP STEERING                               1000    FPS</span>
+035628,000317: 
 </pre>
 </span>
 </p>
@@ -228,18 +493,54 @@ Page 796
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-035110,000111: 
-035111,000112:                                                                                                  <span class="co">#  F3            DRANGE/D (L/D)                          2700 NM                 = FX</span>
-035112,000113: 
-035113,000114:                                                                                                  <span class="co">#  FACT1         CONST FOR UPCONTRL                      805 FPSS</span>
-035114,000115: 
-035115,000116:                                                                                                  <span class="co">#  FACT2         CONST FOR UPCONTRL                      1/805 FPSS</span>
-035116,000117: 
-035117,000118:                                                                                                  <span class="co">#  FACTOR        USED IN UPCONTRL                        1                       * MAXIMUM VALUE DENOTES UNSCALED</span>
-035118,000119:                                                                                                  <span class="co">#                                                                                  VARIABLE VALUE WHEN SCALED</span>
-035119,000120:                                                                                                  <span class="co">#  GAMMAL        FLIGHT PATH ANGLE AT VL                 1 RADIAN                  VARIABLE HAS MAXIMUM VALUE OF ONE.</span>
-035120,000121: 
-035121,000122:                                                                                                  <span class="co">#  GAMMAL1       SIMPLE FORM OF GAMMAL                   1 RADIAN</span>
+035630,000319:                                                                                                  <span class="co">#  CONVERSION FACTORS AND SCALING CONSTANTS</span>
+035631,000320:                                                                                                  <span class="co">#  ---------- ------- --- ------- ---------</span>
+035632,000321: 
+035633,000322:                                                                                                  <span class="co">#  ATK   ANGLE IN RAD TO NM                                              3437.7468       NM/RAD</span>
+035634,000323:                                                                                                  <span class="co">#  GS    NOMINAL G VALUE FOR SCALING                                     32.2            FPSS</span>
+035635,000324:                                                                                                  <span class="co">#  HS    ATMOSPHERE SCALE HEIGHT                                         28500           FT</span>
+035636,000325:                                                                                                  <span class="co">#  J     GRAVITY HARMONIC COEFFICIENT                                    .00162346       </span>
+035637,000326:                                                                                                  <span class="co">#  KWE   EQUATORIAL EARTH RATE                                           1546.70168      FPS</span>
+035638,000327:                                                                                                  <span class="co">#  MUE   EARTH GRAVITATIONAL CONSTANT                                    3.986032233 E14 CUBIC M/ SEC SEC</span>
+035639,000328:                                                                                                  <span class="co">#  RE    EARTH RADIUS                                                    21202900        FT</span>
+035640,000329:                                                                                                  <span class="co">#  REQ   EARTH EQUATORIAL RADIUS                                         20925738.2      FT</span>
+035641,000330:                                                                                                  <span class="co">#  VSAT  SATELLITE VELOCITY AT RE                                        25766.1973      FPS</span>
+035642,000331:                                                                                                  <span class="co">#  WIE   EARTH RATE                                                      .0000729211505  RAD/SEC</span>
+035643,000332: 
+035644,000333:                                                                                                  <span class="co">#                (END GSOP AS-278, VOL 1, FIG. 5.6-3 CONSTANTS, GAINS, ETC.)</span>
+035645,000334: 
+035646,000335:                                                                                                  <span class="co">#  DISPLAY QUANTITIES</span>
+035647,000336:                                                                                                  <span class="co">#  ------------------</span>
+035648,000337: 
+035649,000338:                                                                                                  <span class="co">#  (SEE SECTION 4 OF THE GSOP FOR SIGN CONVENTIONS.)</span>
+035650,000339: 
+035651,000340:                                                                                                  <span class="co">#  VARIABLE      DESCRIPTION                             MAXIMUM VALUE</span>
+035652,000341:                                                                                                  <span class="co">#  --------      -----------                             ------- -----</span>
+035653,000342: 
+035654,000343:                                                                                                  <span class="co">#  QMAX          PREDICTED MAXIMUM ENTRY ACCEL           163.84 GS       N 60</span>
+035655,000344:                                                                                                  <span class="co">#  VPRED         PREDICTED VELOCITY AT ALTITUDE          128 M/CENTISEC  N 60</span>
+035656,000345:                                                                                                  <span class="co">#                400K FT ABOVE FISCHER RADIUS.</span>
+035657,000346:                                                                                                  <span class="co">#  GAMMAEI       PREDICTED GAMMA AT ALTITUDE             1 REVOLUTION    N 60</span>
+035658,000347:                                                                                                  <span class="co">#                400K FT ABOVE FISCHER RADIUS.</span>
+035659,000348:                                                                                                  <span class="co">#  D             DRAG ACCELERATION                       805 FPSS        N 64</span>
+035660,000349:                                                                                                  <span class="co">#  VMAGI         INERTIAL VELOCITY MAGNITUDE             128 M/CENTISEC  N 64, N 68</span>
+035661,000350:                                                                                                  <span class="co">#  THETAH        DESIRED RANGE ANGLE NM                  1 REVOLUTION    N 64, N 67</span>
+035662,000351:                                                                                                  <span class="co">#  LAT           PRESENT LATITUDE                        1 REVOLUTION    N 67</span>
+035663,000352:                                                                                                  <span class="co">#  LONG          PRESENT LONGITUDE                       1 REVOLUTION    N 67</span>
+035664,000353:                                                                                                  <span class="co">#  RTOGO         RANGE ANGLE TO SPLASH FROM              1 REVOLUTION    N 63</span>
+035665,000354:                                                                                                  <span class="co">#                EMSALT FT ABOVE FISCHER RADIUS. (IN NM) </span>
+035666,000355:                                                                                                  <span class="co">#  VIO           PREDICTED VELOCITY AT ALTITUDE          128 M/CENTISEC  N 63</span>
+035667,000356:                                                                                                  <span class="co">#                EMSALT FT ABOVE FISCHER RADIUS.</span>
+035668,000357:                                                                                                  <span class="co">#  TTE           TIME OF FREE FALL TO ALT                B 28 CENTISEC   N 63</span>
+035669,000358:                                                                                                  <span class="co">#                EMSALT FT ABOVE FISCHER RADIUS.</span>
+035670,000359:                                                                                                  <span class="co">#  ROLLC         ROLL COMMAND                            1 REVOLUTION    N 66, N 68, N 69</span>
+035671,000360:                                                                                                  <span class="co">#  LATANG        CROSS-RANGE ERROR (XRNGERR)             4 RADIANS       N 66</span>
+035672,000361:                                                                                                  <span class="co">#  DNRNGERR      DOWN RANGE ERROR                        1 REVOLUTION    N 66</span>
+035673,000362:                                                                                                  <span class="co">#                (PREDANG - THETAH IN NM)</span>
+035674,000363:                                                                                                  <span class="co">#  HDOT          ALTITUDE RATE                           128 M/CENTISEC  N 68</span>
+035675,000364:                                                                                                  <span class="co">#  Q7            MINIMUM DRAG FOR UPCONTROL              805 FPSS        N 69</span>
+035676,000365:                                                                                                  <span class="co">#  VL            EXIT VELOCITY FOR UP-CONTROL            2 VSAT          N 69</span>
+035677,000366: 
 </pre>
 </span>
 </p>
@@ -255,318 +556,28 @@ Page 797
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-035123,000124: 
-035124,000125:                                                                                                  <span class="co">#  HEADSUP       INDICATOR FOR INITIAL ROLL              1</span>
-035125,000126: 
-035126,000127:                                                                                                  <span class="co">#  KA            DRAG TO LIFT UP IF DOWN                 805 FPSS                = KAT</span>
-035127,000128: 
-035128,000129:                                                                                                  <span class="co">#  KLAT          LATERAL SWITCH GAIN                     1                       (NOM = .0125)</span>
-035129,000130: 
-035130,000131:                                                                                                  <span class="co">#  K2ROLL        INDICATOR FOR ROLL SWITCH               </span>
-035131,000132: 
-035132,000133:                                                                                                  <span class="co">#  LAD           MAX L/D (MIN ACTUAL VEHICLE L/D)        1</span>
-035133,000134: 
-035134,000135:                                                                                                  <span class="co">#  LADPAD        NOMINAL VEHICLE L/D, SP PAD LOAD        1                       (NOM = 0.3)</span>
-035135,000136: 
-035136,000137:                                                                                                  <span class="co">#  LATANG        LATERAL RANGE                           4 RADIANS</span>
-035137,000138: 
-035138,000139:                                                                                                  <span class="co">#  LEQ           EXCESS C.F. OVER GRAV=(VSQ-1)GS         128.8 FPSS</span>
-035139,000140: 
-035140,000141:                                                                                                  <span class="co">#  LEWD          UPCONTROL REFERENCE L/D                 1</span>
-035141,000142: 
-035142,000143:                                                                                                  <span class="co">#  LOD           FINAL PHASE L/D                         1                       (NOM = 0.18)</span>
-035143,000144: 
-035144,000145:                                                                                                  <span class="co">#  LODPAD        FINAL PHASE L/D, SP PAD LOAD            1</span>
-035145,000146: 
-035146,000147:                                                                                                  <span class="co">#  L/D           DESIRED LIFT TO DRAG RATIO              1</span>
-035147,000148:                                                                                                  <span class="co">#                (VERTICAL PLANE)</span>
-035148,000149:                                                                                                  <span class="co">#  </span>
-035149,000150:                                                                                                  <span class="co">#  L/D1          TEMP STORAGE FOR L/D IN LATERAL         1</span>
-035150,000151: 
-035151,000152:                                                                                                  <span class="co">#  L/DCMINR      LAD COS(15DEG)                          1                       (NOM = 0.2895)</span>
-035152,000153: 
-035153,000154:                                                                                                  <span class="co">#  PREDANGLE     PREDICTED RANGE (FINAL PHASE)           2700 NM                 = PREDANG</span>
-035154,000155: 
-035155,000156:                                                                                                  <span class="co">#  Q2            FINAL PHASE RANGE -23500 Q3             21600 NM</span>
-035156,000157:                                                                                                  <span class="co">#                Q2 = FCN(LAD)</span>
-035157,000158: 
-035158,000159:                                                                                                  <span class="co">#  Q7            MINIMUM DRAG FOR UPCONTROL              805FPSS</span>
-035159,000160: 
-035160,000161:                                                                                                  <span class="co">#  RDOT          ALTITUDE RATE                           2 VSAT</span>
-035161,000162: 
-035162,000163:                                                                                                  <span class="co">#  RDOTREF       REFERENCE RDOT FOR UPCONTROL            2 VSAT</span>
-035163,000164: 
-035164,000165:                                                                                                  <span class="co">#  RDTR          REFERENCE RDOT FOR DOWNCONT             2 VSAT                  NOT SAVED</span>
-035165,000166: 
-035166,000167:                                                                                                  <span class="co">#  ROLLC         ROLL COMMAND                            1 REVOLUTION</span>
-035167,000168: 
-035168,000169:                                                                                                  <span class="co">#  RTOGO         RANGE TO GO (FINAL PHASE)               2700 NM                 = FX +2</span>
-035169,000170: 
-035170,000171:                                                                                                  <span class="co">#  SL            SINE OF LATITUDE                        1                       NOT SAVED</span>
-035171,000172: 
-035172,000173:                                                                                                  <span class="co">#  T             TIME                                    B 28 CENTISEC           = TIME2,TIME1</span>
-035173,000174: 
-035174,000175:                                                                                                  <span class="co">#  THETA         DESIRED RANGE (RADIANS)                 2 PI RADIANS            = THETAH</span>
-035175,000176: 
-035176,000177:                                                                                                  <span class="co">#  THETNM        DESIRED RANGE (NM)                      21600 NM                NON EXISTENT</span>
-035177,000178: 
-035178,000179:                                                                                                  <span class="co">#  V             VELOCITY MAGNITUDE                      2 VSAT</span>
-035179,000180:                                                                                                  <span class="co">#  </span>
-035180,000181:                                                                                                  <span class="co">#  V1            INITIAL VELOCITY FOR UPCONTROL          2 VSAT</span>
-035181,000182: 
-035182,000183:                                                                                                  <span class="co">#  VL            EXIT VELOCITY FOR UPCONTROL             2 VSAT</span>
-035183,000184: 
-035184,000185:                                                                                                  <span class="co">#  VREF          REFERENCE VELOCITY FOR UPCONTROL        2 VSAT</span>
-035185,000186: 
-035186,000187:                                                                                                  <span class="co">#  VS1           VSAT OR V1, WHICHEVER IS SMALLER        2 VSAT</span>
-035187,000188:                                                                                                  <span class="co">#                  2     2</span>
-035188,000189:                                                                                                  <span class="co">#  VBARS         VL /VSAT                                4</span>
-035189,000190:                                                                                                  <span class="co">#                                           2     2</span>
-035190,000191:                                                                                                  <span class="co">#  VSQ           NORMALIZED VEL. SQUARED = V /VSAT       4                       = VSQUARE</span>
-035191,000192: 
-035192,000193:                                                                                                  <span class="co">#  WT            EARTH RATE TIMES TIME                   1 REVOLUTION            NOT SAVED</span>
-035193,000194: 
-035194,000195:                                                                                                  <span class="co">#  X             INTERMEDIATE VARIABLE IN G-LIMITER      2 VSAT                  NOT SAVED</span>
-035195,000196: 
-035196,000197:                                                                                                  <span class="co">#  Y             LATERAL MISS LIMIT                      4 RADIANS               NOT SAVED</span>
-035197,000198: 
-</pre>
-</span>
-</p>
-<table style="text-align: left;" border="1" cellpadding="2" cellspacing="2">
-<tbody>
-<tr>
-<td style="white-space: nowrap; vertical-align: middle;">
-<img alt="" src="Apollo32.png" style="width: 32px; height: 32px;" align="left">
-</td>
-<td style="vertical-align: middle;">
-Page 798
-</td></tr></tbody></table>
-<p class="nobreak">
-<span style="font-family: monospace;">
-<pre>
-035199,000200:                                                                                                  <span class="co">#  EXTRA COMPUTER ERASABLE LOCATIONS NOT SHOWN ON FLOW CHARTS</span>
-035200,000201:                                                                                                  <span class="co">#  ----------------------------------------------------------</span>
-035201,000202: 
-035202,000203:                                                                                                  <span class="co">#  VARIABLE      DESCRIPTION                             MAXIMUM VALUE</span>
-035203,000204:                                                                                                  <span class="co">#  --------      -----------                             -------------</span>
-035204,000205: 
-035205,000206:                                                                                                  <span class="co">#  GOTOADDR      ADDRESS SELECTED BY SEQUENCER</span>
-035206,000207: 
-035207,000208:                                                                                                  <span class="co">#  XPIPBUF       BUFFER TO STORE X PIPA COUNTS</span>
-035208,000209: 
-035209,000210:                                                                                                  <span class="co">#  YPIPBUF       BUFFER TO STORE Y PIPA COUNTS</span>
-035210,000211: 
-035211,000212:                                                                                                  <span class="co">#  ZPIPBUF       BUFFER TO STORE Z PIPA COUNTS</span>
-035212,000213: 
-035213,000214:                                                                                                  <span class="co">#  PIPCTR        COUNTS PASSES THRU PIPA READ ROUTINE</span>
-035214,000215: 
-035215,000216:                                                                                                  <span class="co">#  JJ            INDEX IN FINAL PHASE TABLE LOOK-UP</span>
-035216,000217: 
-035217,000218:                                                                                                  <span class="co">#  MM            INDEX IN FINAL PHASE TABLE LOOK-U</span>
-035218,000219: 
-035219,000220:                                                                                                  <span class="co">#  GRAD          INTERPOLATION FACTOR IN FINAL PHASE</span>
-035220,000221: 
-035221,000222:                                                                                                  <span class="co">#  FX            DRANGE/D L/D = F3                       2700 NM</span>
-035222,000223: 
-035223,000224:                                                                                                  <span class="co">#  FX +1         AREF                                    805 FPSS</span>
-035224,000225: 
-035225,000226:                                                                                                  <span class="co">#  FX +2         RTOGO                                   2700 NM</span>
-035226,000227: 
-035227,000228:                                                                                                  <span class="co">#  FX +3         RDOTREF                                 VSAT/4</span>
-035228,000229: 
-035229,000230:                                                                                                  <span class="co">#  FX +4         DRANGE/D RDOT = F2                      21600/2VS NM/FPS</span>
-035230,000231: 
-035231,000232:                                                                                                  <span class="co">#  FX +5         DRANGE/D DRAG = F1                      2700/805 NM/FPSS</span>
-035232,000233: 
-035233,000234:                                                                                                  <span class="co">#  TEM1B         TEMPORARY LOCATION</span>
-035234,000235: 
-035235,000236:                                                                                                  <span class="co">#  TIME/RTO      TIME OF INITIAL TARGET RTINIT           B 28 CENTISEC</span>
-035236,000237: 
-035237,000238:                                                                                                  <span class="co">#  DTEAROT       EST TIME BETWEEN RTINIT AND RT          B 28 CENTISEC</span>
-035238,000239:                                                                                                  <span class="co">#  _</span>
-035239,000240:                                                                                                  <span class="co">#  UNITV         UNIT V VECTOR                           2</span>
-035240,000241:                                                                                                  <span class="co">#  _</span>
-035241,000242:                                                                                                  <span class="co">#  UNITR         UNIT R VECTOR                           2</span>
-035242,000243:                                                                                                  <span class="co">#   _</span>
-035243,000244:                                                                                                  <span class="co">#  -VREL         NEGATIVE VELOCITY REL TO ATMOSP         2 VSAT</span>
-035244,000245: 
-035245,000246:                                                                                                  <span class="co">#  COMPUTER SWITCHES                                     INITIAL STATE           CM/FLAGS = STATE +6</span>
-035246,000247:                                                                                                  <span class="co">#  -----------------                                     -------------           -------------------</span>
-035247,000248: 
-035248,000249:                                                                                                  <span class="co">#  ENTRYDSP      DO ENTRY DISPLAY, IF SET                NON-BRANCH (1)          92D, BIT 13</span>
-035249,000250:                                                                                                  <span class="co">#  GONEPAST      INDICATES OVERSHOOT OF TARGET           NON-BRANCH (0)          95D, BIT 10</span>
-035250,000251:                                                                                                  <span class="co">#  RELVELSW      RELATIVE VELOCITY SWITCH                NON-BRANCH (0)          96D, BIT 9</span>
-035251,000252:                                                                                                  <span class="co">#  EGSW          FINAL PHASE SWITCH                      NON-BRANCH (0)          97D, BIT 8</span>
-035252,000253:                                                                                                  <span class="co">#  FIRSTPAS      INITIAL PASS THRU HUNTEST               NON-BRANCH (0)          98D, BIT 7</span>
-035253,000254:                                                                                                  <span class="co">#  HIND          INDICATES ITERATION IN HUNTEST          NON-BRANCH (0)          99D, BIT 6</span>
-035254,000255:                                                                                                  <span class="co">#  INRLSW        INDICATES INIT ROLL ATTITUDE SET        NON-BRANCH (0)          100D, BIT 5</span>
-035255,000256:                                                                                                  <span class="co">#  LATSW         INHIBIT DOWNLIFT SWITCH IF NOT SET          BRANCH (1)          101D, BIT 4</span>
-035256,000257:                                                                                                  <span class="co">#  .05GSW        INDICATES DRAG EXCEEDS .05 GS               BRANCH (0)          102D, BIT 3</span>
-035257,000258: 
-035258,000259:                                                                                                  <span class="co">#  GONEBY        INDICATES GONE PAST TARGET (SET)        SELF-INITIALIZING       112D, BIT 6</span>
-035259,000260: 
-</pre>
-</span>
-</p>
-<table style="text-align: left;" border="1" cellpadding="2" cellspacing="2">
-<tbody>
-<tr>
-<td style="white-space: nowrap; vertical-align: middle;">
-<img alt="" src="Apollo32.png" style="width: 32px; height: 32px;" align="left">
-</td>
-<td style="vertical-align: middle;">
-Page 799
-</td></tr></tbody></table>
-<p class="nobreak">
-<span style="font-family: monospace;">
-<pre>
-035261,000262:                                                                                                  <span class="co">#  CONSTANTS AND GAINS                                                   VALUE</span>
-035262,000263:                                                                                                  <span class="co">#  -------------------                                                   -----</span>
-035263,000264: 
-035264,000265:                                                                                                  <span class="co">#  C1            FACTOR IN ALP COMPUTATION                               1.25</span>
-035265,000266:                                                                                                  <span class="co">#  C16           CONSTD GAIN ON DRAG                                     .01</span>
-035266,000267:                                                                                                  <span class="co">#  C17           CONSTD GAIN ON RDOT                                     .001</span>
-035267,000268:                                                                                                  <span class="co">#  C18           BIAS VEL. FOR FINAL PHASE START                         500     FPS</span>
-035268,000269:                                                                                                  <span class="co">#  C20           MAX DRAG FOR DOWN-LIFT                                  175     FPSS</span>
-035269,000270:                                                                                                  <span class="co">#  CHOOK         FACTOR IN AHOOK COMPUTATION                             .25</span>
-035270,000271:                                                                                                  <span class="co">#  CH1           FACTOR IN GAMMAL COMPUTATION                            1.0</span>
-035271,000272:                                                                                                  <span class="co">#  COS15         COS( 15 DEG )                                           .965</span>
-035272,000273:                                                                                                  <span class="co">#  DLEWD0        INITIAL VARIATION IN LEWD                               -.05</span>
-035273,000274:                                                                                                  <span class="co">#  D2            DRAG TO CHANGE LEWD                                     175     FPSS</span>
-035274,000275:                                                                                                  <span class="co">#  DT            COMPUTATION CYCLE TIME INTERVAL                         2       SEC.</span>
-035275,000276:                                                                                                  <span class="co">#  GMAX          MAXIMUM ACCELERATION                                    257.6   FPSS    (6 G-S)</span>
-035276,000277:                                                                                                  <span class="co">#  KA1           FACTOR IN KA CALC                                       1.3     GS</span>
-035277,000278:                                                                                                  <span class="co">#  KA2           FACTOR IN KA CALC                                       .2      GS</span>
-035278,000279:                                                                                                  <span class="co">#  KA3           FACTOR IN D0 CALC                                       90 FPSS</span>
-035279,000280:                                                                                                  <span class="co">#  KA4           FACTOR IN D0 CALC                                       40 FPSS</span>
-035280,000281:                                                                                                  <span class="co">#  KB1           OPTIMIZED UPCONTROL GAIN                                3.4</span>
-035281,000282:                                                                                                  <span class="co">#  KB2           OPTIMIZED UPCONTROL GAIN                                .0034</span>
-035282,000283:                                                                                                  <span class="co">#  KDMIN         INCREMENT ON Q7 TO DETECT END OF KEPLER PHASE           .5      FPSS</span>
-035283,000284:                                                                                                  <span class="co">#  KTETA         TIME OF FLIGHT CONSTANT                                 1000</span>
-035284,000285:                                                                                                  <span class="co">#  KLAT1         FACTOR IN KLAT CALC                                     1/24</span>
-035285,000286:                                                                                                  <span class="co">#  K44           GAIN USED IN INITIAL ROLL SECTION                       19749550 FPS</span>
-035286,000287:                                                                                                  <span class="co">#  LATBIAS       LATERAL SWITCH BIAS TERM                                .41252961 NM</span>
-035287,000288:                                                                                                  <span class="co">#  LEWD1         NOMINAL UPCONTROL L/D                                   .15</span>
-035288,000289:                                                                                                  <span class="co">#  POINT1        FACTOR TO REDUCE UPCONTROL GAIN                         .1</span>
-035289,000290:                                                                                                  <span class="co">#  Q2            FINAL PHASE RANGE - 23500 Q3                            -1002   NM</span>
-035290,000291:                                                                                                  <span class="co">#  Q3            FINAL PHASE DRANGE/D V                                  .07     NM/FPS</span>
-035291,000292:                                                                                                  <span class="co">#  Q5            FINAL PHASE DRANGE/D GAMMA                              7050    NM/RAD</span>
-035292,000293:                                                                                                  <span class="co">#  Q6            FINAL PHASE INITIAL FLIGHT PATH ANGLE                   .0349   RAD</span>
-035293,000294:                                                                                                  <span class="co">#  Q7F           MIN DRAG FOR UPCONTROL                                  6       FPSS</span>
-035294,000295:                                                                                                  <span class="co">#  Q7MIN         IN VALUE FOR Q7 IN FACTOR CALCULATION                   40      FPSS</span>
-035295,000296:                                                                                                  <span class="co">#  Q19           FACTOR IN GAMMAL1 CALCULATION                           .5</span>
-035296,000297:                                                                                                  <span class="co">#  Q21           FACTOR IN Q2 CALCULATION                                1000    NM</span>
-035297,000298:                                                                                                  <span class="co">#  Q22           FACTOR IN Q2 CALCULATION                                -1302   NM</span>
-035298,000299:                                                                                                  <span class="co">#  VFINAL1       VELOCITY TO START FINAL PHASE ON INITIAL ENTRY          27000   FPS</span>
-035299,000300:                                                                                                  <span class="co">#  VFINAL        FACTOR IN INITIAL UP-DOWN CALC                          26600   FPS</span>
-035300,000301:                                                                                                  <span class="co">#  VLMIN         MINIMUM VL                                              18000   FPS</span>
-035301,000302:                                                                                                  <span class="co">#  VMIN          VELOCITY TO SWITCH TO RELATIVE VEL                      VSAT/2</span>
-035302,000303:                                                                                                  <span class="co">#  VRCONTRL      RDOT TO START INTO HUNTEST                              700     FPS</span>
-035303,000304:                                                                                                  <span class="co">#                VRCONT=COMPUTER NAME</span>
-035304,000305:                                                                                                  <span class="co">#  25NM          TOLERANCE TO STOP RANGE ITERATION                       25      NM</span>
-035305,000306:                                                                                                  <span class="co">#  VQUIT         VELOCITY TO STOP STEERING                               1000    FPS</span>
-035306,000307: 
-</pre>
-</span>
-</p>
-<table style="text-align: left;" border="1" cellpadding="2" cellspacing="2">
-<tbody>
-<tr>
-<td style="white-space: nowrap; vertical-align: middle;">
-<img alt="" src="Apollo32.png" style="width: 32px; height: 32px;" align="left">
-</td>
-<td style="vertical-align: middle;">
-Page 800
-</td></tr></tbody></table>
-<p class="nobreak">
-<span style="font-family: monospace;">
-<pre>
-035308,000309:                                                                                                  <span class="co">#  CONVERSION FACTORS AND SCALING CONSTANTS</span>
-035309,000310:                                                                                                  <span class="co">#  ----------------------------------------</span>
-035310,000311: 
-035311,000312:                                                                                                  <span class="co">#  ATK   ANGLE IN RAD TO NM                                              3437.7466       NM/RAD</span>
-035312,000313:                                                                                                  <span class="co">#  G5    NOMINAL G VALUE FOR SCALING                                     (?)             FPSS</span>
-035313,000314:                                                                                                  <span class="co">#  H5    ATMOSPHERE SCALE HEIGHT                                         28500           FT</span>
-035314,000315:                                                                                                  <span class="co">#  J     GRAVITY HARMONIC COEFFICIENT                                    .00162346       </span>
-035315,000316:                                                                                                  <span class="co">#  (?)   EQUATORIAL EARTH RATE                                           1546.10168      FPS</span>
-035316,000317:                                                                                                  <span class="co">#  MUE   EARTH GRAVITATIONAL CONSTANT                                    3.986032233 E14 CUBIC M/ SEC SEC</span>
-035317,000318:                                                                                                  <span class="co">#  RE    EARTH RADIUS                                                    21202900        FT</span>
-035318,000319:                                                                                                  <span class="co">#  REQ   EARTH EQUATORIAL RADIUS                                         20925738.2      FT</span>
-035319,000320:                                                                                                  <span class="co">#  VSAT  SATELLITE VELOCITY AT RE                                        25766.1973      FPS</span>
-035320,000321:                                                                                                  <span class="co">#  WIE   EARTH RATE                                                      .0000729211505  RAD/SEC</span>
-035321,000322: 
-035322,000323:                                                                                                  <span class="co">#                (END GSOP AS-276, VOL 1, FIG. 5.6-3 CONSTANTS, GAINS, ETC.)</span>
-035323,000324: 
-035324,000325:                                                                                                  <span class="co">#  DISPLAY QUANTITIES</span>
-035325,000326:                                                                                                  <span class="co">#  ------------------</span>
-035326,000327: 
-035327,000328:                                                                                                  <span class="co">#  (SEE SECTION 4 OF THE GSOP FOR SIGN CONVENTIONS.)</span>
-035328,000329: 
-035329,000330:                                                                                                  <span class="co">#  VARIABLE      DESCRIPTION                             MAXIMUM VALUE</span>
-035330,000331:                                                                                                  <span class="co">#  --------      -----------                             -------------</span>
-035331,000332: 
-035332,000333:                                                                                                  <span class="co">#  QMAX          PREDICTED MAXIMUM ENTRY ACCEL           163.84 GS       N 60</span>
-035333,000334:                                                                                                  <span class="co">#  VPRED         PREDICTED VELOCITY AT ALTITUDE          128 M/CENTISEC  N 60</span>
-035334,000335:                                                                                                  <span class="co">#                400K FT ABOVE FISCHER RADIUS.</span>
-035335,000336:                                                                                                  <span class="co">#  GAMMAEI       PREDICTED GAMMA AT ALTITUDE             1 REVOLUTION    N 60</span>
-035336,000337:                                                                                                  <span class="co">#                400K FT ABOVE FISCHER RADIUS</span>
-035337,000338:                                                                                                  <span class="co">#  D             DRAG ACCELERATION                       805 FPSS        N 64</span>
-035338,000339:                                                                                                  <span class="co">#  VMAGI         INERTIAL VELOCITY MAGNITUDE             128 M/CENTISEC  N 64, N 68</span>
-035339,000340:                                                                                                  <span class="co">#  THETAH        DESIRED RANGE ANGLE NM                  1 REVOLUTION    N 64, N 67</span>
-035340,000341:                                                                                                  <span class="co">#  LAT           PRESENT LATITUDE                        1 REVOLUTION    N 67</span>
-035341,000342:                                                                                                  <span class="co">#  LONG          PRESENT LONGITUDE                       1 REVOLUTION    N 67</span>
-035342,000343:                                                                                                  <span class="co">#  RTOGO         RANGE ANGLE TO SPLASH FROM              1 REVOLUTION    N 67</span>
-035343,000344:                                                                                                  <span class="co">#                EMSALT FT ABOVE FISCHER RADIUS (IN NM)  </span>
-035344,000345:                                                                                                  <span class="co">#  VIO           PREDICTED VELOCITY AT ALTITUDE          128 M/CENTISEC  N 63</span>
-035345,000346:                                                                                                  <span class="co">#                EMSALT FT ABOVE FISCHER RADIUS.</span>
-035346,000347:                                                                                                  <span class="co">#  TTE           TIME OF FREE FALL TO ALT                B 28 CENTISEC   N 63</span>
-035347,000348:                                                                                                  <span class="co">#                EMSALT FT ABOVE FISCHER RADIUS</span>
-035348,000349:                                                                                                  <span class="co">#  ROLLC         ROLL COMMAND                            1 REVOLUTION    N 68, N 68, N 69</span>
-035349,000350:                                                                                                  <span class="co">#  LATANG        CROSS-RANGE ERROR (XRNGERR)             4 RADIANS       N 66</span>
-035350,000351:                                                                                                  <span class="co">#  DNRNGERR      DOWN RANGE ERROR                        1 REVOLUTION    N 66</span>
-035351,000352:                                                                                                  <span class="co">#                (PREDANG - THETAH IN NM)</span>
-035352,000353:                                                                                                  <span class="co">#  HDOT          ALTITUDE RATE                           128 M/CENTISEC  N 68</span>
-035353,000354:                                                                                                  <span class="co">#  QT            MINIMUM DRAG FOR UPCONTROL              805 FPSS        N 69</span>
-035354,000355:                                                                                                  <span class="co">#  VL            EXIT VELOCITY FOR UP-CONTROL            2 VSAT          N 69</span>
-035355,000356: 
-</pre>
-</span>
-</p>
-<table style="text-align: left;" border="1" cellpadding="2" cellspacing="2">
-<tbody>
-<tr>
-<td style="white-space: nowrap; vertical-align: middle;">
-<img alt="" src="Apollo32.png" style="width: 32px; height: 32px;" align="left">
-</td>
-<td style="vertical-align: middle;">
-Page 801
-</td></tr></tbody></table>
-<p class="nobreak">
-<span style="font-family: monospace;">
-<pre>
-035357,000358:                                                                                                  <span class="co">#  BODY ATTITUDE QUANTITIES (CM/POSE)</span>
-035358,000359:                                                                                                  <span class="co">#  ----------------------------------</span>
-035359,000360: 
-035360,000361:                                                                                                  <span class="co">#  VARIABLE      DECRIPTION                              MAXIMUM VALUE</span>
-035361,000362:                                                                                                  <span class="co">#  --------      ----------                              -------------</span>
-035362,000363:                                                                                                  <span class="co">#   _</span>
-035363,000364:                                                                                                  <span class="co">#  -VREL         NEGATIVE VELOCITY REL TO ATMOS.         2 VSAT</span>
-035364,000365:                                                                                                  <span class="co">#  _</span>
-035365,000366:                                                                                                  <span class="co">#  OLDUYA        USED FOR UYA BELOW 1000 FPS             2</span>
-035366,000367:                                                                                                  <span class="co">#  _</span>
-035367,000368:                                                                                                  <span class="co">#  UXA/2         UNIT VECTOR TRIAD                       2</span>
-035368,000369:                                                                                                  <span class="co">#  _</span>
-035369,000370:                                                                                                  <span class="co">#  UYA/2                 BASED ON                        2</span>
-035370,000371:                                                                                                  <span class="co">#  _</span>
-035371,000372:                                                                                                  <span class="co">#  UZA/2                         THE TRAJECTORY          2</span>
-035372,000373:                                                                                                  <span class="co">#  _</span>
-035373,000374:                                                                                                  <span class="co">#  UBX/2         UNIT VECTOR                             2</span>
-035374,000375:                                                                                                  <span class="co">#  _</span>
-035375,000376:                                                                                                  <span class="co">#  UBY/2                 BODY TRIAD                      2</span>
-035376,000377:                                                                                                  <span class="co">#  _</span>
-035377,000378:                                                                                                  <span class="co">#  UBZ/2                         FOR CM.                 2</span>
-035378,000379: 
+035679,000368:                                                                                                  <span class="co">#  BODY ATTITUDE QUANTITIES  (CM/POSE)</span>
+035680,000369:                                                                                                  <span class="co">#  -----------------------------------</span>
+035681,000370: 
+035682,000371:                                                                                                  <span class="co">#  VARIABLE      DESCRIPTION                             MAXIMUM VALUE</span>
+035683,000372:                                                                                                  <span class="co">#  --------      -----------                             ------- -----</span>
+035684,000373:                                                                                                  <span class="co">#   -</span>
+035685,000374:                                                                                                  <span class="co">#  -VREL         NEGATIVE VELOCITY REL TO ATMOS.         2 VSAT</span>
+035686,000375:                                                                                                  <span class="co">#  -</span>
+035687,000376:                                                                                                  <span class="co">#  OLDUYA        USED FOR UYA BELOW 1000 FPS             2</span>
+035688,000377:                                                                                                  <span class="co">#  -</span>
+035689,000378:                                                                                                  <span class="co">#  UXA/2         UNIT VECTOR TRIAD                       2</span>
+035690,000379:                                                                                                  <span class="co">#  -</span>
+035691,000380:                                                                                                  <span class="co">#  UYA/2                 BASED ON                        2</span>
+035692,000381:                                                                                                  <span class="co">#  -</span>
+035693,000382:                                                                                                  <span class="co">#  UZA/2                         THE TRAJECTORY.         2</span>
+035694,000383:                                                                                                  <span class="co">#  -</span>
+035695,000384:                                                                                                  <span class="co">#  UBX/2         UNIT VECTOR                             2</span>
+035696,000385:                                                                                                  <span class="co">#  -</span>
+035697,000386:                                                                                                  <span class="co">#  UBY/2                 BODY TRIAD                      2</span>
+035698,000387:                                                                                                  <span class="co">#  -</span>
+035699,000388:                                                                                                  <span class="co">#  UBZ/2                         FOR CM.                 2</span>
+035700,000389: 
 
 End of include-file ENTRY_LEXICON.agc.  Parent file is <a href="MAIN.agc.html">MAIN.agc</a>
 </pre>

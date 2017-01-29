@@ -96,20 +96,20 @@ Note that the date is the date of the printout, not the date of the program revi
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-039605,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
-039606,000003:                                                                                                  <span class="co">## Filename:    THRUST_MAGNITUDE_FILTER.agc</span>
-039607,000004:                                                                                                  <span class="co">## Purpose:     A module for revision 0 of BURST120 (Sunburst). It </span>
-039608,000005:                                                                                                  <span class="co">##              is part of the source code for the Lunar Module's</span>
-039609,000006:                                                                                                  <span class="co">##              (LM) Apollo Guidance Computer (AGC) for Apollo 5.</span>
-039610,000007:                                                                                                  <span class="co">## Assembler:   yaYUL</span>
-039611,000008:                                                                                                  <span class="co">## Contact:     Ron Burkey &lt;info@sandroid.org>.</span>
-039612,000009:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo/index.html</span>
-039613,000010:                                                                                                  <span class="co">## Mod history: 2016-09-30 RSB  Created draft version.</span>
-039614,000011:                                                                                                  <span class="co">##              2016-10-19 RSB  Transcribed.</span>
-039615,000012:                                                                                                  <span class="co">##              2016-10-31 RSB  Typos.</span>
-039616,000013:                                                                                                  <span class="co">##              2016-12-06 RSB  Comment proofing via octopus/ProoferComments</span>
-039617,000014:                                                                                                  <span class="co">##                              performed, and changes made.</span>
-039618,000015: 
+039610,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
+039611,000003:                                                                                                  <span class="co">## Filename:    THRUST_MAGNITUDE_FILTER.agc</span>
+039612,000004:                                                                                                  <span class="co">## Purpose:     A module for revision 0 of BURST120 (Sunburst). It </span>
+039613,000005:                                                                                                  <span class="co">##              is part of the source code for the Lunar Module's</span>
+039614,000006:                                                                                                  <span class="co">##              (LM) Apollo Guidance Computer (AGC) for Apollo 5.</span>
+039615,000007:                                                                                                  <span class="co">## Assembler:   yaYUL</span>
+039616,000008:                                                                                                  <span class="co">## Contact:     Ron Burkey &lt;info@sandroid.org>.</span>
+039617,000009:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo/index.html</span>
+039618,000010:                                                                                                  <span class="co">## Mod history: 2016-09-30 RSB  Created draft version.</span>
+039619,000011:                                                                                                  <span class="co">##              2016-10-19 RSB  Transcribed.</span>
+039620,000012:                                                                                                  <span class="co">##              2016-10-31 RSB  Typos.</span>
+039621,000013:                                                                                                  <span class="co">##              2016-12-06 RSB  Comment proofing via octopus/ProoferComments</span>
+039622,000014:                                                                                                  <span class="co">##                              performed, and changes made.</span>
+039623,000015: 
 </pre>
 </span>
 </p>
@@ -125,56 +125,56 @@ Page 923
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-039620,000017:                                                                                                  <span class="co">#  PROGRAM NAME - ATMAG</span>
-039621,000018: 
-039622,000019:                                                                                                  <span class="co">#  MODIFICATION BY - BERMAN AND CATTANACH</span>
-039623,000020: 
-039624,000021:                                                                                                  <span class="co">#  FUNCTIONAL DESCRIPTION -</span>
-039625,000022: 
-039626,000023:                                                                                                  <span class="co">#      THE THRUST MAGNITUDE FILTER CONVERTS ABDELV TO M/CS, INVERTS AND COMBINES IT WITH TWO PRECEDING</span>
-039627,000024:                                                                                                  <span class="co">#  INPUTS TO PRODUCE THE INVERTED EXHAUST VELOCITY, BURN UP TIME, AND ANTICIPATED THRUST ACCELERATION FOR</span>
-039628,000025:                                                                                                  <span class="co">#  THE NEXT TIME INCREMENT.  THRUST MAGNITUDE FILTER IS BYPASSED UNTIL AFTER THE MAIN ENGINE GOES ON.</span>
-039629,000026: 
-039630,000027:                                                                                                  <span class="co">#  CALLING SEQUENCE - ATMAG IS ENTERED BY EXTEND                 AND        EXTEND</span>
-039631,000028:                                                                                                  <span class="co">#                                       DCA      ATMAGAD                   DCA     ATMAG4</span>
-039632,000029:                                                                                                  <span class="co">#                                       DXCH     AVGEXIT                   DXCH    AVGEXIT</span>
-039633,000030:                                                                                                  <span class="co">#  NORMAL EXIT - FROM ATMAG BY GOTO</span>
-039634,000031:                                                                                                  <span class="co">#                                   ASCENT</span>
-039635,000032: 
-039636,000033:                                                                                                  <span class="co">#  OUTPUT - INVERTED EXHAUST VELOCITY, BURN UP TIME, AND ANTICIPATED THRUST ACCELERATION</span>
-039637,000034: 
-039638,000035:                                                                                                  <span class="co">#  ERASABLE INITIALIZATION REQUIRED - THIS IS DONE BY PRE-APS PROGRAMS</span>
-039639,000036: 
-039640,000037:                                                                                                  <span class="co">#  DEBRIS - ABDVCONV, 1/DV1, 1/DV2, 1/VE, TBUP, AT.</span>
-039641,000038: 
-039642,000039:                                                                                                  <span class="co">#  ALARM OR ABORT EXIT MODES - </span>
-039643,000040: 
-039644,000041:                                                                                                  <span class="co">#  SUBROUTINES CALLED - NONE</span>
-039645,000042: 
-039646,000043: 32,3005                                           <span class="ps">BANK    </span> 32                                    
-039647,000044: 
-039648,000045: 32,3005  E4,1452                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54434F">TCO</a>                                   <span class="co">#  EBANK4</span>
-039649,000046: 
-<a name="41544D4147"></a>039650,000047: 32,3005           06112        <span class="sm">ATMAG   </span>           <span class="op">TC      </span> <a href="INTERPRETER.agc.html#494E5450524554">INTPRET</a>                               
-039651,000048: 32,3006           57545                           <span class="in">DLOAD   </span> <span class="in">DCOMP     </span>                            <span class="co">#  LOAD -VE*2(-6)</span>
-039652,000049: 32,3007           02556                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4E4547564558">NEGVEX</a>                                
-039653,000050: 32,3010           77742                           <span class="in">SR1     </span>                                       
-039654,000051: 32,3011           02025                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5645">VE</a>                                    <span class="co">#  VE*2(-7)</span>
-039655,000052: 32,3012           67201                           <span class="in">SETPD   </span> <span class="in">SLOAD     </span>                            
-039656,000053: 32,3013           00001                                    00D                                   
-039657,000054: 32,3014           25052                                    <a href="#4249543448">BIT4H</a>                                 
-039658,000055: 32,3015           77471                           <span class="in">DDV     </span> <span class="in">EXIT      </span>                            
-039659,000056: 32,3016           03624                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#41424456434F4E56">ABDVCONV</a>                              
-039660,000057: 
-039661,000058: 32,3017           52145                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
-039662,000059: 32,3020           53435                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#312F445633">1/DV3</a>                                 
-039663,000060: 32,3021           53433                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#312F445632">1/DV2</a>                                 
-039664,000061: 32,3022           53431                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#312F445631">1/DV1</a>                                 
-039665,000062: 32,3023           52145                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  <span class="co">#  MPAC=1/DV0*2(-7)</span>
-039666,000063: 32,3024           06112                           <span class="op">TC      </span> <a href="INTERPRETER.agc.html#494E5450524554">INTPRET</a>                               
-039667,000064: 32,3025           77615                           <span class="in">DAD     </span>                                       
-039668,000065: 32,3026           02031                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#312F445631">1/DV1</a>                                 <span class="co">#  (1/DV0+1/DV1)*2(-7)</span>
-039669,000066: 32,3027           43215                           <span class="in">DAD     </span> <span class="in">DAD       </span>                            
+039625,000017:                                                                                                  <span class="co">#  PROGRAM NAME - ATMAG</span>
+039626,000018: 
+039627,000019:                                                                                                  <span class="co">#  MODIFICATION BY - BERMAN AND CATTANACH</span>
+039628,000020: 
+039629,000021:                                                                                                  <span class="co">#  FUNCTIONAL DESCRIPTION -</span>
+039630,000022: 
+039631,000023:                                                                                                  <span class="co">#      THE THRUST MAGNITUDE FILTER CONVERTS ABDELV TO M/CS, INVERTS AND COMBINES IT WITH TWO PRECEDING</span>
+039632,000024:                                                                                                  <span class="co">#  INPUTS TO PRODUCE THE INVERTED EXHAUST VELOCITY, BURN UP TIME, AND ANTICIPATED THRUST ACCELERATION FOR</span>
+039633,000025:                                                                                                  <span class="co">#  THE NEXT TIME INCREMENT.  THRUST MAGNITUDE FILTER IS BYPASSED UNTIL AFTER THE MAIN ENGINE GOES ON.</span>
+039634,000026: 
+039635,000027:                                                                                                  <span class="co">#  CALLING SEQUENCE - ATMAG IS ENTERED BY EXTEND                 AND        EXTEND</span>
+039636,000028:                                                                                                  <span class="co">#                                       DCA      ATMAGAD                   DCA     ATMAG4</span>
+039637,000029:                                                                                                  <span class="co">#                                       DXCH     AVGEXIT                   DXCH    AVGEXIT</span>
+039638,000030:                                                                                                  <span class="co">#  NORMAL EXIT - FROM ATMAG BY GOTO</span>
+039639,000031:                                                                                                  <span class="co">#                                   ASCENT</span>
+039640,000032: 
+039641,000033:                                                                                                  <span class="co">#  OUTPUT - INVERTED EXHAUST VELOCITY, BURN UP TIME, AND ANTICIPATED THRUST ACCELERATION</span>
+039642,000034: 
+039643,000035:                                                                                                  <span class="co">#  ERASABLE INITIALIZATION REQUIRED - THIS IS DONE BY PRE-APS PROGRAMS</span>
+039644,000036: 
+039645,000037:                                                                                                  <span class="co">#  DEBRIS - ABDVCONV, 1/DV1, 1/DV2, 1/VE, TBUP, AT.</span>
+039646,000038: 
+039647,000039:                                                                                                  <span class="co">#  ALARM OR ABORT EXIT MODES - </span>
+039648,000040: 
+039649,000041:                                                                                                  <span class="co">#  SUBROUTINES CALLED - NONE</span>
+039650,000042: 
+039651,000043: 32,3005                                           <span class="ps">BANK    </span> 32                                    
+039652,000044: 
+039653,000045: 32,3005  E4,1452                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54434F">TCO</a>                                   <span class="co">#  EBANK4</span>
+039654,000046: 
+<a name="41544D4147"></a>039655,000047: 32,3005           06112        <span class="sm">ATMAG   </span>           <span class="op">TC      </span> <a href="INTERPRETER.agc.html#494E5450524554">INTPRET</a>                               
+039656,000048: 32,3006           57545                           <span class="in">DLOAD   </span> <span class="in">DCOMP     </span>                            <span class="co">#  LOAD -VE*2(-6)</span>
+039657,000049: 32,3007           02556                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4E4547564558">NEGVEX</a>                                
+039658,000050: 32,3010           77742                           <span class="in">SR1     </span>                                       
+039659,000051: 32,3011           02025                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5645">VE</a>                                    <span class="co">#  VE*2(-7)</span>
+039660,000052: 32,3012           67201                           <span class="in">SETPD   </span> <span class="in">SLOAD     </span>                            
+039661,000053: 32,3013           00001                                    00D                                   
+039662,000054: 32,3014           25052                                    <a href="#4249543448">BIT4H</a>                                 
+039663,000055: 32,3015           77471                           <span class="in">DDV     </span> <span class="in">EXIT      </span>                            
+039664,000056: 32,3016           03624                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#41424456434F4E56">ABDVCONV</a>                              
+039665,000057: 
+039666,000058: 32,3017           52145                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
+039667,000059: 32,3020           53435                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#312F445633">1/DV3</a>                                 
+039668,000060: 32,3021           53433                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#312F445632">1/DV2</a>                                 
+039669,000061: 32,3022           53431                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#312F445631">1/DV1</a>                                 
+039670,000062: 32,3023           52145                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  <span class="co">#  MPAC=1/DV0*2(-7)</span>
+039671,000063: 32,3024           06112                           <span class="op">TC      </span> <a href="INTERPRETER.agc.html#494E5450524554">INTPRET</a>                               
+039672,000064: 32,3025           77615                           <span class="in">DAD     </span>                                       
+039673,000065: 32,3026           02031                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#312F445631">1/DV1</a>                                 <span class="co">#  (1/DV0+1/DV1)*2(-7)</span>
+039674,000066: 32,3027           43215                           <span class="in">DAD     </span> <span class="in">DAD       </span>                            
 </pre>
 </span>
 </p>
@@ -190,31 +190,31 @@ Page 924
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-039671,000068: 32,3030           02033                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#312F445632">1/DV2</a>                                 
-039672,000069: 32,3031           02035                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#312F445633">1/DV3</a>                                 <span class="co">#  SUM(1/DV)*2(-7)</span>
-039673,000070: 32,3032           41205                           <span class="in">DMP     </span> <span class="in">DMP       </span>                            <span class="co">#  VE SUM(1/DV)*2(-14)</span>
-039674,000071: 32,3033           02025                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5645">VE</a>                                    <span class="co">#  DT VE SUM(1/DV)*2(-21)</span>
-039675,000072: 32,3034           21400                                    <a href="MASS_CALCULATOR.agc.html#32534543283929">2SEC(9)</a>                               
-039676,000073: 32,3035           65252                           <span class="in">SL3     </span> <span class="in">PDDL      </span>                            <span class="co">#  1/8 DT VE SUM(1/DV)*2(-17)</span>
-039677,000074: 32,3036           02027                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#54425550">TBUP</a>                                  <span class="co">#  LOAD TBUP*2(-17)</span>
-039678,000075: 32,3037           43342                           <span class="in">SR1     </span> <span class="in">DAD       </span>                            <span class="co">#  1/2 OLD TBUP*2(-17)</span>
-039679,000076: 32,3040           77625                           <span class="in">DSU     </span>                                       
-039680,000077: 32,3041           25053                                    <a href="#3653454328313829">6SEC(18)</a>                              <span class="co">#  GET NEW TBUP *2(-17)</span>
-039681,000078: 32,3042           16027                           <span class="in">STODL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54425550">TBUP</a>                                  
-039682,000079: 32,3043           02025                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5645">VE</a>                                    
-039683,000080: 32,3044           56342                           <span class="in">SR1     </span> <span class="in">DDV       </span>                            <span class="co">#  VE*2(-8)</span>
-039684,000081: 32,3045           02027                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#54425550">TBUP</a>                                  <span class="co">#  AT*2(9)</span>
-039685,000082: 32,3046           02023                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4154">AT</a>                                    
-<a name="46494C54454E44"></a>039686,000083: 32,3047           77650        <span class="sm">FILTEND </span>           <span class="in">GOTO    </span>                                       
-039687,000084: 32,3050           64125                                    <a href="ASCENT_STEERING.agc.html#415343454E54">ASCENT</a>                                
-039688,000085: 
-<a name="4249543448"></a>039689,000086: 32,3051           00010        <span class="sm">BIT4H   </span>           <span class="ps">OCT     </span> 10                                    
-<a name="3653454328313829"></a>039690,000087: 32,3052           00045 20000  <span class="sm">6SEC(18)</span>           <span class="ps">2DEC    </span> 600        B-28                       
-039691,000088: 
-<a name="4153435041544348"></a>039692,000089: 32,3054           25715        <span class="sm">ASCPATCH</span>           <span class="in">STOVL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#554E4E4F524D">UNNORM</a>                                <span class="co">#  PATCH FROM ASCENT STEERING LOG SECTION.</span>
-039693,000090: 32,3055           02340                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#52434F56">RCOV</a>                                  
-039694,000091: 32,3056           52056                           <span class="in">UNIT    </span> <span class="in">GOTO      </span>                            
-039695,000092: 32,3057           64327                                    <a href="ASCENT_STEERING.agc.html#454E445041544348">ENDPATCH</a>                              
+039676,000068: 32,3030           02033                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#312F445632">1/DV2</a>                                 
+039677,000069: 32,3031           02035                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#312F445633">1/DV3</a>                                 <span class="co">#  SUM(1/DV)*2(-7)</span>
+039678,000070: 32,3032           41205                           <span class="in">DMP     </span> <span class="in">DMP       </span>                            <span class="co">#  VE SUM(1/DV)*2(-14)</span>
+039679,000071: 32,3033           02025                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5645">VE</a>                                    <span class="co">#  DT VE SUM(1/DV)*2(-21)</span>
+039680,000072: 32,3034           21400                                    <a href="MASS_CALCULATOR.agc.html#32534543283929">2SEC(9)</a>                               
+039681,000073: 32,3035           65252                           <span class="in">SL3     </span> <span class="in">PDDL      </span>                            <span class="co">#  1/8 DT VE SUM(1/DV)*2(-17)</span>
+039682,000074: 32,3036           02027                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#54425550">TBUP</a>                                  <span class="co">#  LOAD TBUP*2(-17)</span>
+039683,000075: 32,3037           43342                           <span class="in">SR1     </span> <span class="in">DAD       </span>                            <span class="co">#  1/2 OLD TBUP*2(-17)</span>
+039684,000076: 32,3040           77625                           <span class="in">DSU     </span>                                       
+039685,000077: 32,3041           25053                                    <a href="#3653454328313829">6SEC(18)</a>                              <span class="co">#  GET NEW TBUP *2(-17)</span>
+039686,000078: 32,3042           16027                           <span class="in">STODL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54425550">TBUP</a>                                  
+039687,000079: 32,3043           02025                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5645">VE</a>                                    
+039688,000080: 32,3044           56342                           <span class="in">SR1     </span> <span class="in">DDV       </span>                            <span class="co">#  VE*2(-8)</span>
+039689,000081: 32,3045           02027                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#54425550">TBUP</a>                                  <span class="co">#  AT*2(9)</span>
+039690,000082: 32,3046           02023                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4154">AT</a>                                    
+<a name="46494C54454E44"></a>039691,000083: 32,3047           77650        <span class="sm">FILTEND </span>           <span class="in">GOTO    </span>                                       
+039692,000084: 32,3050           64125                                    <a href="ASCENT_STEERING.agc.html#415343454E54">ASCENT</a>                                
+039693,000085: 
+<a name="4249543448"></a>039694,000086: 32,3051           00010        <span class="sm">BIT4H   </span>           <span class="ps">OCT     </span> 10                                    
+<a name="3653454328313829"></a>039695,000087: 32,3052           00045 20000  <span class="sm">6SEC(18)</span>           <span class="ps">2DEC    </span> 600        B-28                       
+039696,000088: 
+<a name="4153435041544348"></a>039697,000089: 32,3054           25715        <span class="sm">ASCPATCH</span>           <span class="in">STOVL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#554E4E4F524D">UNNORM</a>                                <span class="co">#  PATCH FROM ASCENT STEERING LOG SECTION.</span>
+039698,000090: 32,3055           02340                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#52434F56">RCOV</a>                                  
+039699,000091: 32,3056           52056                           <span class="in">UNIT    </span> <span class="in">GOTO      </span>                            
+039700,000092: 32,3057           64327                                    <a href="ASCENT_STEERING.agc.html#454E445041544348">ENDPATCH</a>                              
 
 End of include-file THRUST_MAGNITUDE_FILTER.agc.  Parent file is <a href="MAIN.agc.html">MAIN.agc</a>
 </pre>

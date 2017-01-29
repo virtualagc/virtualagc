@@ -67,9 +67,9 @@ color: #993399;
 </td>
 <td style="vertical-align: middle;">
 These source-code files were derived from scans of the
-Colossus 237 program listing from the private collection of original
+Colossus 237 (Apollo 8 Command Module) program listing from the private collection of original
 AGC developer Fred Martin. Scanning was by Ron Burkey.  Pre-existing Colossus 249
-(Apollo 9) source files were used as a template, and changes between Colossus 249
+(Apollo 9 CM) source files were used as a template, and changes between Colossus 249
 and Colossus 237 were manually transcribed by a team of volunteers. Note 
 that the page images <a href="http://www.ibiblio.org/apollo/ScansForConversion/Colossus237/">
 presented online</a> are of reduced quality, and that additional images 
@@ -87,17 +87,21 @@ Note that the date is the date of the printout, not the date of the program revi
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-008878,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
-008879,000003:                                                                                                  <span class="co">## Filename:    RESTART_TABLES.agc</span>
-008880,000004:                                                                                                  <span class="co">## Purpose:     Part of the source code for Colossus build 237.  </span>
-008881,000005:                                                                                                  <span class="co">##              This is for the Command Module's (CM) Apollo Guidance</span>
-008882,000006:                                                                                                  <span class="co">##              Computer (AGC), we believe for Apollo 8.</span>
-008883,000007:                                                                                                  <span class="co">## Assembler:   yaYUL</span>
-008884,000008:                                                                                                  <span class="co">## Contact:     Jim Lawton &lt;jim DOT lawton AT gmail DOT com></span>
-008885,000009:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo/index.html</span>
-008886,000010:                                                                                                  <span class="co">## Page Scans:  www.ibiblio.org/apollo/ScansForConversion/Colossus237/</span>
-008887,000011:                                                                                                  <span class="co">## Mod history: 2011-01-12 JL   Adapted from corresponding Colossus 249 file.</span>
-008888,000012: 
+008906,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
+008907,000003:                                                                                                  <span class="co">## Filename:    RESTART_TABLES.agc</span>
+008908,000004:                                                                                                  <span class="co">## Purpose:     Part of the source code for Colossus build 237.  </span>
+008909,000005:                                                                                                  <span class="co">##              This is for the Command Module's (CM) Apollo Guidance</span>
+008910,000006:                                                                                                  <span class="co">##              Computer (AGC), for Apollo 8.</span>
+008911,000007:                                                                                                  <span class="co">## Assembler:   yaYUL</span>
+008912,000008:                                                                                                  <span class="co">## Contact:     Jim Lawton &lt;jim DOT lawton AT gmail DOT com></span>
+008913,000009:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo/index.html</span>
+008914,000010:                                                                                                  <span class="co">## Page Scans:  www.ibiblio.org/apollo/ScansForConversion/Colossus237/</span>
+008915,000011:                                                                                                  <span class="co">## Mod history: 2011-01-12 JL   Adapted from corresponding Colossus 249 file.</span>
+008916,000012:                                                                                                  <span class="co">##              2016-12-30 RSB  Proofed comment text using octopus/ProoferComments,</span>
+008917,000013:                                                                                                  <span class="co">##                              and corrected errors found.</span>
+008918,000014:                                                                                                  <span class="co">##              2017-01-18 RSB  Fixed comment-text errors noted while diff'ing</span>
+008919,000015:                                                                                                  <span class="co">##                              vs Colossus 249.</span>
+008920,000016: 
 </pre>
 </span>
 </p>
@@ -113,57 +117,57 @@ Page 204
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-008890,000014: 
-008891,000015:                                                                                                  <span class="co">#  RESTART TABLES</span>
-008892,000016: 
-008893,000017:                                                                                                  <span class="co">#  --------------</span>
-008894,000018: 
-008895,000019:                                                                                                  <span class="co">#  THERE ARE TWO FORMS OF RESTART TABLES FOR EACH GROUP.  THEY ARE KNOWN AS THE EVEN RESTART TABLES AND THE ODD</span>
-008896,000020:                                                                                                  <span class="co">#  RESTART TABLES.  THE ODD TABLES HAVE ONLY ONE ENTRY OF THREE LOCATIONS WHILE THE EVEN TABLES HAVE TWO ENTRIES</span>
-008897,000021:                                                                                                  <span class="co">#  EACH USING THREE LOCATIONS. THE INFORMATION AS TO WHETHER IT IS A JOB, WAITLIST, OR A LONGCALL IS GIVEN BY THE</span>
-008898,000022:                                                                                                  <span class="co">#  WAY THINGS ARE PUT INTO THE TABLES.</span>
-008899,000023:                                                                                                  <span class="co">#       A JOB HAS ITS PRIORITY STORED IN A PRDTTAB OF THE CORRECT PHASE SPOT - A POSITIVE PRIORITY INDICATES A</span>
-008900,000024:                                                                                                  <span class="co">#  FINDVAC JOB, A NEGATIVE PRIORITY A NOVAC.  THE 2CADR OF THE JOB IS STORED IN THE CADRTAB.</span>
-008901,000025:                                                                                                  <span class="co">#  FOR EXAMPLE,</span>
-008902,000026: 
-008903,000027:                                                                                                  <span class="co">#                                          5.7SPOT  OCT    23000</span>
-008904,000028:                                                                                                  <span class="co">#                                                   2CADR  SOMEJOB</span>
-008905,000029: 
-008906,000030:                                                                                                  <span class="co">#  A RESTART OF GROUP 5 WITH PHASE SEVEN WOULD THEN CAUSE SOMEJOB TO BE RESTARTED AS A FINDVAC WITH PRIORITY 23.</span>
-008907,000031: 
-008908,000032:                                                                                                  <span class="co">#  5.5SPOT  OCT    -23000</span>
-008909,000033:                                                                                                  <span class="co">#                                                   2CADR  ANYJOB</span>
-008910,000034: 
-008911,000035:                                                                                                  <span class="co">#  HERE A RESTART OF GROUP 5 WITH PHASE 7 WOULD CAUSE ANYJOB TO BE RESTARTED AS A NOVAC WITH PRIORITY 23.</span>
-008912,000036:                                                                                                  <span class="co">#  A LONGCALL HAS ITS GENADR OF ITS 2CADR STORED NEGATIVELY AND ITS BBCON STORED POSITIVELY.  IN ITS PRDTTAB IS</span>
-008913,000037:                                                                                                  <span class="co">#  PLACED THE LOCATION OF A DP REGISTER THAT CONTAINS THE DELTA TIME THAT LONGCALL HAD BEEN ORIGINALLY STARTED</span>
-008914,000038:                                                                                                  <span class="co">#  WITH.  EXAMPLE,</span>
-008915,000039: 
-008916,000040:                                                                                                  <span class="co">#                                          3.6SPOT  GENADR DELTAT</span>
-008917,000041:                                                                                                  <span class="co">#                                                  -GENADR LONGTASK</span>
-008918,000042:                                                                                                  <span class="co">#                                                   BBCON  LONGTASK</span>
-008919,000043: 
-008920,000044:                                                                                                  <span class="co">#                                                   OCT    31000</span>
-008921,000045:                                                                                                  <span class="co">#                                                   2CADR  JOBAGAIN</span>
-008922,000046: 
-008923,000047:                                                                                                  <span class="co">#  THIS WOULD START UP LONGTASK AT THE APPROPRIATE TIME, OR IMMEDIATELY IF THE TIME HAD ALREADY PASSED. IT SHOULD</span>
-008924,000048:                                                                                                  <span class="co">#  BE NOTED THAT IF DELTAT IS IN A SWITCHED E BANK, THIS INFORMATION SHOULD BE IN THE BBCON OFTHE 2CADR OF THE</span>
-008925,000049:                                                                                                  <span class="co">#  TASK.  FROM ABOVE, WE SEE THAT THE SECOND PART OF THIS PHASE WOULD BE STARTED AS A JOB WITH A PRIORITY OF 31.</span>
-008926,000050: 
-008927,000051:                                                                                                  <span class="co">#  WAITLIST CALLS ARE IDENTIFIED BY THE FACT THAT THEIR 2CADR IS STORED NEGATIVELY.  IF PRDTTAB OF THE PHASE SPOT</span>
-008928,000052:                                                                                                  <span class="co">#  IS POSITIVE, THEN IT CONTAINS THE DELTA TIME, IF PRDTTAB IS NEGATIVE THEN IT IS THE -GENADR OF AN ERASABLE</span>
-008929,000053:                                                                                                  <span class="co">#  LOCATION CONTAINING THE DELTA TIME, THAT IS, THE TIME IS STORED INDIRECTLY.  IT SHOULD BE NOTED AS ABOVE, THAT</span>
-008930,000054:                                                                                                  <span class="co">#  IF THE TIME IS STORED INDIRECTLY, THE BBCON MUST CONTAIN THE NECESSARY E BANK INFORMATION IF APPLICABLE.  WITH</span>
-008931,000055:                                                                                                  <span class="co">#  WAITLIST WE HAVE ONE FURTHER OPTION, IF -0 IS STORED IN PRDTTAB, IT WILL CAUSE AN IMMEDIATE RESTART OF THE</span>
-008932,000056:                                                                                                  <span class="co">#  TASK.  EXAMPLES,</span>
-008933,000057: 
-008934,000058:                                                                                                  <span class="co">#                                                   OCT    77777           THIS WILL CAUSE AN IMMEDIATE RESTART</span>
-008935,000059:                                                                                                  <span class="co">#                                                  -2CADR  ATASK           OF THE TASK 'ATASK'</span>
-008936,000060: 
-008937,000061:                                                                                                  <span class="co">#                                                   DEC    200             IF THE TIME OF THE 2 SECONDS SINCE DUMMY</span>
-008938,000062:                                                                                                  <span class="co">#                                                  -2CADR  DUMMY           WAS PUT ON THE WAITLIST IS UP, IT WILL BEGIN</span>
-008939,000063:                                                                                                  <span class="co">#                                                                          IN 10 MS, OTHERWISE IT WILL BEGIN WHEN</span>
-008940,000064:                                                                                                  <span class="co">#                                                                          IT NORMALLY WOULD HAVE BEGUN.</span>
+008922,000018: 
+008923,000019:                                                                                                  <span class="co">#  RESTART TABLES</span>
+008924,000020: 
+008925,000021:                                                                                                  <span class="co">#  --------------</span>
+008926,000022: 
+008927,000023:                                                                                                  <span class="co">#  THERE ARE TWO FORMS OF RESTART TABLES FOR EACH GROUP.  THEY ARE KNOWN AS THE EVEN RESTART TABLES AND THE ODD</span>
+008928,000024:                                                                                                  <span class="co">#  RESTART TABLES.  THE ODD TABLES HAVE ONLY ONE ENTRY OF THREE LOCATIONS WHILE THE EVEN TABLES HAVE TWO ENTRIES</span>
+008929,000025:                                                                                                  <span class="co">#  EACH USING THREE LOCATIONS. THE INFORMATION AS TO WHETHER IT IS A JOB, WAITLIST, OR A LONGCALL IS GIVEN BY THE</span>
+008930,000026:                                                                                                  <span class="co">#  WAY THINGS ARE PUT INTO THE TABLES.</span>
+008931,000027:                                                                                                  <span class="co">#       A JOB HAS ITS PRIORITY STORED IN PRDTTAB OF THE CORRECT PHASE SPOT - A POSITIVE PRIORITY INDICATES A</span>
+008932,000028:                                                                                                  <span class="co">#  FINDVAC JOB, A NEGATIVE PRIORITY A NOVAC.  THE 2CADR OF THE JOB IS STORED IN THE CADRTAB.</span>
+008933,000029:                                                                                                  <span class="co">#  FOR EXAMPLE,</span>
+008934,000030: 
+008935,000031:                                                                                                  <span class="co">#                                          5.7SPOT  OCT    23000</span>
+008936,000032:                                                                                                  <span class="co">#                                                   2CADR  SOMEJOB</span>
+008937,000033: 
+008938,000034:                                                                                                  <span class="co">#  A RESTART OF GROUP 5 WITH PHASE SEVEN WOULD THEN CAUSE SOMEJOB TO BE RESTARTED AS A FINDVAC WITH PRIORITY 23.</span>
+008939,000035: 
+008940,000036:                                                                                                  <span class="co">#  5.5SPOT  OCT    -23000</span>
+008941,000037:                                                                                                  <span class="co">#                                                   2CADR  ANYJOB</span>
+008942,000038: 
+008943,000039:                                                                                                  <span class="co">#  HERE A RESTART OF GROUP 5 WITH PHASE 7 WOULD CAUSE ANYJOB TO BE RESTARTED AS A NOVAC WITH PRIORITY 23.</span>
+008944,000040:                                                                                                  <span class="co">#  A LONGCALL HAS ITS GENADR OF ITS 2CADR STORED NEGATIVELY AND ITS BBCON STORED POSITIVELY.  IN ITS PRDTTAB IS</span>
+008945,000041:                                                                                                  <span class="co">#  PLACED THE LOCATION OF A DP REGISTER THAT CONTAINS THE DELTA TIME THAT LONGCALL HAD BEEN ORIGINALLY STARTED</span>
+008946,000042:                                                                                                  <span class="co">#  WITH.  EXAMPLE,</span>
+008947,000043: 
+008948,000044:                                                                                                  <span class="co">#                                          3.6SPOT  GENADR DELTAT</span>
+008949,000045:                                                                                                  <span class="co">#                                                  -GENADR LONGTASK</span>
+008950,000046:                                                                                                  <span class="co">#                                                   BBCON  LONGTASK</span>
+008951,000047: 
+008952,000048:                                                                                                  <span class="co">#                                                   OCT    31000</span>
+008953,000049:                                                                                                  <span class="co">#                                                   2CADR  JOBAGAIN</span>
+008954,000050: 
+008955,000051:                                                                                                  <span class="co">#  THIS WOULD START UP LONGTASK AT THE APPROPRIATE TIME, OR IMMEDIATELY IF THE TIME HAD ALREADY PASSED. IT SHOULD</span>
+008956,000052:                                                                                                  <span class="co">#  BE NOTED THAT IF DELTAT IS IN A SWITCHED E BANK, THIS INFORMATOIN SHOULD BE IN THE BBCON OFTHE 2CADR OF THE</span>
+008957,000053:                                                                                                  <span class="co">#  TASK.  FROM ABOVE, WE SEE THAT THE SECOND PART OF THIS PHASE WOULD BE STARTED AS A JOB WITH A PRIORITY OF 31.</span>
+008958,000054: 
+008959,000055:                                                                                                  <span class="co">#  WAITLIST CALLS ARE IDENTIFIED BY THE FACT THAT THEIR 2CADR IS STORED NEGATIVELY.  IF PRDTTAB OF THE PHASE SPOT</span>
+008960,000056:                                                                                                  <span class="co">#  IS POSITIVE, THEN IT CONTAINS THE DELTA TIME, IF PRDTTAB IS NEGATIVE THEN IT IS THE -GENADR OF AN ERASABLE</span>
+008961,000057:                                                                                                  <span class="co">#  LOCATION CONTAINING THE DELTA TIME, THAT IS, THE TIME IS STORED INDIRECTLY.  IT SHOULD BE NOTED AS ABOVE, THAT</span>
+008962,000058:                                                                                                  <span class="co">#  IF THE TIME IS STORED INDIRECTLY, THE BBCON MUST CONTAIN THE NECESSARY E BANK INFORMATION IF APPLICABLE.  WITH</span>
+008963,000059:                                                                                                  <span class="co">#  WAITLIST WE HAVE ONE FURTHER OPTION, IF -0 IS STORED IN PRDTTAB, IT WILL CAUSE AN IMMEDIATE RESTART OF THE</span>
+008964,000060:                                                                                                  <span class="co">#  TASK.  EXAMPLES,</span>
+008965,000061: 
+008966,000062:                                                                                                  <span class="co">#                                                   OCT    77777           THIS WILL CAUSE AN IMMEDIATE RESTART</span>
+008967,000063:                                                                                                  <span class="co">#                                                  -2CADR  ATASK           OF THE TASK :ATASK:</span>
+008968,000064: 
+008969,000065:                                                                                                  <span class="co">#                                                   DEC    200             IF THE TIME OF THE 2 SECONDS SINCE DUMMY</span>
+008970,000066:                                                                                                  <span class="co">#                                                  -2CADR  DUMMY           WAS PUT ON WAITLIST IS UP, IT WILL BEGIN</span>
+008971,000067:                                                                                                  <span class="co">#                                                                          IN 10 MS, OTHERWISE IT WILL BEGIN WHEN</span>
+008972,000068:                                                                                                  <span class="co">#                                                                          IT NORMALLY WOULD HAVE BEGUN.</span>
 </pre>
 </span>
 </p>
@@ -179,52 +183,52 @@ Page 205
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-008942,000066:                                                                                                  <span class="co">#                                                  -GENADR DTIME           WHERE DTIME CONTAINS THE DELTA TIME</span>
-008943,000067:                                                                                                  <span class="co">#                                                  -2CADR  TASKTASK        OTHERWISE THIS IS AS ABOVE</span>
-008944,000068: 
-008945,000069:                                                                                                  <span class="co">#  *****    NOW THE TABLES THEMSELVES *****</span>
-008946,000070: 
-008947,000071: 01,2000                                           <span class="ps">BANK    </span> 01                                    
-008948,000072: 01,2000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#52455354415254">RESTART</a>                               
-008949,000073: 01,2000                                           <span class="ps">BANK    </span>                                       
-008950,000074: 
-008951,000075: 01,2000                                           <span class="ps">COUNT   </span> 01/RSTAB                              
-008952,000076: 
-<a name="50524454544142"></a>008953,000077: 01,2000                        <span class="sm">PRDTTAB </span>           <span class="ps">EQUALS  </span> 12000                                 <span class="co">#  USED TO FIND THE PRIORITY OR DELTATIME</span>
-<a name="43414452544142"></a>008954,000078: 01,2000                        <span class="sm">CADRTAB </span>           <span class="ps">EQUALS  </span> 12001                                 <span class="co">#  THIS AND THE NEXT RELATIVE LOC CONTAIN</span>
-008955,000079:                                                                                                  <span class="co">#  RESTART 2CADR</span>
-008956,000080: 
-<a name="53495A45544142"></a>008957,000081: 01,2000           00063        <span class="sm">SIZETAB </span>           <span class="op">TC      </span> <a href="#312E3253504F54">1.2SPOT</a>    -12006                     
-008958,000082: 01,2001           00010                           <span class="op">TC      </span> <a href="#312E3353504F54">1.3SPOT</a>    -12004                     
-008959,000083: 01,2002           00063                           <span class="op">TC      </span> <a href="#322E3253504F54">2.2SPOT</a>    -12006                     
-008960,000084: 01,2003           00024                           <span class="op">TC      </span> <a href="#322E3353504F54">2.3SPOT</a>    -12004                     
-008961,000085: 01,2004           00063                           <span class="op">TC      </span> <a href="#332E3253504F54">3.2SPOT</a>    -12006                     
-008962,000086: 01,2005           00043                           <span class="op">TC      </span> <a href="#332E3353504F54">3.3SPOT</a>    -12004                     
-008963,000087: 01,2006           00063                           <span class="op">TC      </span> <a href="#342E3253504F54">4.2SPOT</a>    -12006                     
-008964,000088: 01,2007           00107                           <span class="op">TC      </span> <a href="#342E3353504F54">4.3SPOT</a>    -12004                     
-008965,000089: 01,2010           00242                           <span class="op">TC      </span> <a href="#352E3253504F54">5.2SPOT</a>    -12006                     
-008966,000090: 01,2011           00260                           <span class="op">TC      </span> <a href="#352E3353504F54">5.3SPOT</a>    -12004                     
-008967,000091: 01,2012           00336                           <span class="op">TC      </span> <a href="#362E3253504F54">6.2SPOT</a>    -12006                     
-008968,000092: 01,2013           00346                           <span class="op">TC      </span> <a href="#362E3353504F54">6.3SPOT</a>    -12004                     
-<a name="312E3253504F54"></a>008969,000093: 01,2014  01,2071               <span class="sm">1.2SPOT </span>           <span class="ps">EQUALS  </span> <a href="#332E3253504F54">3.2SPOT</a>                               
-008970,000094:                                                                                                  <span class="co">#  ANY MORE GROUP 1.EVEN RESTART VALUES SHOULD GO HERE</span>
-008971,000095: 
-<a name="312E3353504F54"></a>008972,000096: 01,2014           00170        <span class="sm">1.3SPOT </span>           <span class="ps">DEC     </span> 120        B-14                       <span class="co">#  THIS NUMBER MUST BE EQUAL C(JTAGTIME)</span>
-008973,000097: 01,2015  E6,1661                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414F47">AOG</a>                                   
-008974,000098: 01,2015           74555 45711                     <span class="ps">-2CADR  </span> <a href="CM_ENTRY_DIGITAL_AUTOPILOT.agc.html#5345544A544147">SETJTAG</a>                               
-<a name="312E3553504F54"></a>008975,000099: 01,2017           10000        <span class="sm">1.5SPOT </span>           <span class="ps">OCT     </span> 10000                                 
-008976,000100: 01,2020  E6,1466                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4441504441545231">DAPDATR1</a>                              
-008977,000101: 01,2020           02362 34066                     <span class="ps">2CADR   </span> <a href="P40-P47.agc.html#5245444F34302E39">REDO40.9</a>                              
-<a name="312E3753504F54"></a>008978,000102: 01,2022           10000        <span class="sm">1.7SPOT </span>           <span class="ps">OCT     </span> 10000                                 
-008979,000103: 01,2023  E6,1412                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#455354524F4B4552">ESTROKER</a>                              
-008980,000104: 01,2023           02074 56066                     <span class="ps">2CADR   </span> <a href="R60,R62.agc.html#52454C494E5553">RELINUS</a>                               
-<a name="312E313153504F54"></a>008981,000105: 01,2025           10000        <span class="sm">1.11SPOT</span>           <span class="ps">OCT     </span> 10000                                 
-008982,000106: 01,2026  E6,1412                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#455354524F4B4552">ESTROKER</a>                              
-008983,000107: 01,2026           02273 76066                     <span class="ps">2CADR   </span> <a href="P20-P25.agc.html#50494B55503230">PIKUP20</a>                               
-008984,000108:                                                                                                  <span class="co">#  ANY MORE GROUP 1.ODD RESTART VALUES SHOULD GO HERE</span>
-008985,000109: 
-<a name="322E3253504F54"></a>008986,000110: 01,2030  01,2071               <span class="sm">2.2SPOT </span>           <span class="ps">EQUALS  </span> <a href="#312E3253504F54">1.2SPOT</a>                               
-008987,000111:                                                                                                  <span class="co">#  ANY MORE GROUP 2.EVEN RESTART VALUES SHOULD GO HERE</span>
+008974,000070:                                                                                                  <span class="co">#                                                  -GENADR DTIME           WHERE DTIME CONTAINS THE DELTA TIME</span>
+008975,000071:                                                                                                  <span class="co">#                                                  -2CADR  TASKTASK        OTHERWISE THIS IS AS ABOVE</span>
+008976,000072: 
+008977,000073:                                                                                                  <span class="co">#  *****    NOW THE TABLES THEMSELVES *****</span>
+008978,000074: 
+008979,000075: 01,2000                                           <span class="ps">BANK    </span> 01                                    
+008980,000076: 01,2000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#52455354415254">RESTART</a>                               
+008981,000077: 01,2000                                           <span class="ps">BANK    </span>                                       
+008982,000078: 
+008983,000079: 01,2000                                           <span class="ps">COUNT   </span> 01/RSTAB                              
+008984,000080: 
+<a name="50524454544142"></a>008985,000081: 01,2000                        <span class="sm">PRDTTAB </span>           <span class="ps">EQUALS  </span> 12000                                 <span class="co">#  USED TO FIND THE PRIORITY OR DELTATIME</span>
+<a name="43414452544142"></a>008986,000082: 01,2000                        <span class="sm">CADRTAB </span>           <span class="ps">EQUALS  </span> 12001                                 <span class="co">#  THIS AND THE NEXT RELATIVE LOC CONTAIN</span>
+008987,000083:                                                                                                  <span class="co">#  RESTART 2CADR</span>
+008988,000084: 
+<a name="53495A45544142"></a>008989,000085: 01,2000           00063        <span class="sm">SIZETAB </span>           <span class="op">TC      </span> <a href="#312E3253504F54">1.2SPOT</a>    -12006                     
+008990,000086: 01,2001           00010                           <span class="op">TC      </span> <a href="#312E3353504F54">1.3SPOT</a>    -12004                     
+008991,000087: 01,2002           00063                           <span class="op">TC      </span> <a href="#322E3253504F54">2.2SPOT</a>    -12006                     
+008992,000088: 01,2003           00024                           <span class="op">TC      </span> <a href="#322E3353504F54">2.3SPOT</a>    -12004                     
+008993,000089: 01,2004           00063                           <span class="op">TC      </span> <a href="#332E3253504F54">3.2SPOT</a>    -12006                     
+008994,000090: 01,2005           00043                           <span class="op">TC      </span> <a href="#332E3353504F54">3.3SPOT</a>    -12004                     
+008995,000091: 01,2006           00063                           <span class="op">TC      </span> <a href="#342E3253504F54">4.2SPOT</a>    -12006                     
+008996,000092: 01,2007           00107                           <span class="op">TC      </span> <a href="#342E3353504F54">4.3SPOT</a>    -12004                     
+008997,000093: 01,2010           00242                           <span class="op">TC      </span> <a href="#352E3253504F54">5.2SPOT</a>    -12006                     
+008998,000094: 01,2011           00260                           <span class="op">TC      </span> <a href="#352E3353504F54">5.3SPOT</a>    -12004                     
+008999,000095: 01,2012           00336                           <span class="op">TC      </span> <a href="#362E3253504F54">6.2SPOT</a>    -12006                     
+009000,000096: 01,2013           00346                           <span class="op">TC      </span> <a href="#362E3353504F54">6.3SPOT</a>    -12004                     
+<a name="312E3253504F54"></a>009001,000097: 01,2014  01,2071               <span class="sm">1.2SPOT </span>           <span class="ps">EQUALS  </span> <a href="#332E3253504F54">3.2SPOT</a>                               
+009002,000098:                                                                                                  <span class="co">#  ANY MORE GROUP 1.EVEN RESTART VALUES SHOULD GO HERE</span>
+009003,000099: 
+<a name="312E3353504F54"></a>009004,000100: 01,2014           00170        <span class="sm">1.3SPOT </span>           <span class="ps">DEC     </span> 120        B-14                       <span class="co">#  THIS NUMBER MUST EQUAL C(JTAGTIME)</span>
+009005,000101: 01,2015  E6,1661                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414F47">AOG</a>                                   
+009006,000102: 01,2015           74555 45711                     <span class="ps">-2CADR  </span> <a href="CM_ENTRY_DIGITAL_AUTOPILOT.agc.html#5345544A544147">SETJTAG</a>                               
+<a name="312E3553504F54"></a>009007,000103: 01,2017           10000        <span class="sm">1.5SPOT </span>           <span class="ps">OCT     </span> 10000                                 
+009008,000104: 01,2020  E6,1466                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4441504441545231">DAPDATR1</a>                              
+009009,000105: 01,2020           02362 34066                     <span class="ps">2CADR   </span> <a href="P40-P47.agc.html#5245444F34302E39">REDO40.9</a>                              
+<a name="312E3753504F54"></a>009010,000106: 01,2022           10000        <span class="sm">1.7SPOT </span>           <span class="ps">OCT     </span> 10000                                 
+009011,000107: 01,2023  E6,1412                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#455354524F4B4552">ESTROKER</a>                              
+009012,000108: 01,2023           02074 56066                     <span class="ps">2CADR   </span> <a href="R60,R62.agc.html#52454C494E5553">RELINUS</a>                               
+<a name="312E313153504F54"></a>009013,000109: 01,2025           10000        <span class="sm">1.11SPOT</span>           <span class="ps">OCT     </span> 10000                                 
+009014,000110: 01,2026  E6,1412                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#455354524F4B4552">ESTROKER</a>                              
+009015,000111: 01,2026           02273 76066                     <span class="ps">2CADR   </span> <a href="P20-P25.agc.html#50494B55503230">PIKUP20</a>                               
+009016,000112:                                                                                                  <span class="co">#  ANY MORE GROUP 1.ODD RESTART VALUES SHOULD GO HERE</span>
+009017,000113: 
+<a name="322E3253504F54"></a>009018,000114: 01,2030  01,2071               <span class="sm">2.2SPOT </span>           <span class="ps">EQUALS  </span> <a href="#312E3253504F54">1.2SPOT</a>                               
+009019,000115:                                                                                                  <span class="co">#  ANY MORE GROUP 2.EVEN RESTART VALUES SHOULD GO HERE</span>
 </pre>
 </span>
 </p>
@@ -240,48 +244,48 @@ Page 206
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-008989,000113: 
-<a name="322E3353504F54"></a>008990,000114: 01,2030           02605        <span class="sm">2.3SPOT </span>           <span class="ps">GENADR  </span> <a href="INTEGRATION_INITIALIZATION.agc.html#36303053454353">600SECS</a>                               
-008991,000115: 01,2031           75216                           <span class="ps">-GENADR </span> <a href="INTEGRATION_INITIALIZATION.agc.html#5354415445494E54">STATEINT</a>                              
-008992,000116: 01,2032  E3,1554                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#525245435443534D">RRECTCSM</a>                              
-008993,000117: 01,2032           26063                           <span class="ps">BBCON   </span> <a href="INTEGRATION_INITIALIZATION.agc.html#5354415445494E54">STATEINT</a>                              
-008994,000118: 
-<a name="322E3553504F54"></a>008995,000119: 01,2033           05000        <span class="sm">2.5SPOT </span>           <span class="ps">OCT     </span> 05000                                 
-008996,000120: 01,2034  E3,1554                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#525245435443534D">RRECTCSM</a>                              
-008997,000121: 01,2034           02570 26063                     <span class="ps">2CADR   </span> <a href="INTEGRATION_INITIALIZATION.agc.html#53544154494E5431">STATINT1</a>                              
-<a name="322E3753504F54"></a>008998,000122: 01,2036           10000        <span class="sm">2.7SPOT </span>           <span class="ps">OCT     </span> 10000                                 
-008999,000123: 01,2037  E7,1734                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D524B42554632">MRKBUF2</a>                               
-009000,000124: 01,2037           02512 70067                     <span class="ps">2CADR   </span> <a href="P20-P25.agc.html#523232">R22</a>                                   
-<a name="322E313153504F54"></a>009001,000125: 01,2041           14000        <span class="sm">2.11SPOT</span>           <span class="ps">OCT     </span> 14000                                 
-009002,000126: 01,2042  E5,1751                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C414E444D41524B">LANDMARK</a>                              
-009003,000127: 01,2042           02173 62065                     <span class="ps">2CADR   </span> <a href="P20-P25.agc.html#563934454E544552">V94ENTER</a>                              
-<a name="322E313353504F54"></a>009004,000128: 01,2044           10000        <span class="sm">2.13SPOT</span>           <span class="ps">OCT     </span> 10000                                 
-009005,000129: 01,2045  E7,1734                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D524B42554632">MRKBUF2</a>                               
-009006,000130: 01,2045           02377 56067                     <span class="ps">2CADR   </span> <a href="P20-P25.agc.html#5245444F523232">REDOR22</a>                               
-009007,000131:                                                                                                  <span class="co">#  ANY MORE GROUP 2.ODD RESTART VALUES SHOULD GO HERE</span>
-009008,000132: 
-<a name="332E3253504F54"></a>009009,000133: 01,2047  01,2071               <span class="sm">3.2SPOT </span>           <span class="ps">EQUALS  </span> <a href="#342E3253504F54">4.2SPOT</a>                               
-009010,000134: 
-009011,000135:                                                                                                  <span class="co">#  ANY MORE GROUP 3.EVEN RESTART VALUES SHOULD GO HERE</span>
-009012,000136: 
-<a name="332E3353504F54"></a>009013,000137: 01,2047           20000        <span class="sm">3.3SPOT </span>           <span class="ps">OCT     </span> 20000                                 
-009014,000138: 01,2050  E7,1427                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54474F">TGO</a>                                   
-009015,000139: 01,2050           02404 34067                     <span class="ps">2CADR   </span> <a href="P40-P47.agc.html#5334302E3133">S40.13</a>                                
-<a name="332E3553504F54"></a>009016,000140: 01,2052           00000        <span class="sm">3.5SPOT </span>           <span class="ps">DEC     </span> 0          B-14                       
-009017,000141: 01,2053           00000                           <span class="ps">DEC     </span> 0          B-14                       
-009018,000142: 01,2054           00000                           <span class="ps">DEC     </span> 0          B-14                       
-<a name="332E3753504F54"></a>009019,000143: 01,2055           22000        <span class="sm">3.7SPOT </span>           <span class="ps">OCT     </span> 22000                                 
-009020,000144: 01,2056  E3,1706                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54455048454D">TEPHEM</a>                                
-009021,000145: 01,2056           02127 70063                     <span class="ps">2CADR   </span> <a href="P11.agc.html#4D415452584A4F42">MATRXJOB</a>                              
-<a name="332E313153504F54"></a>009022,000146: 01,2060           22000        <span class="sm">3.11SPOT</span>           <span class="ps">OCT     </span> 22000                                 
-009023,000147: 01,2061  E3,1706                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54455048454D">TEPHEM</a>                                
-009024,000148: 01,2061           02247 70063                     <span class="ps">2CADR   </span> <a href="P11.agc.html#5245503131">REP11</a>                                 
-<a name="332E313353504F54"></a>009025,000149: 01,2063           22000        <span class="sm">3.13SPOT</span>           <span class="ps">OCT     </span> 22000                                 
-009026,000150: 01,2064  E3,1706                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54455048454D">TEPHEM</a>                                
-009027,000151: 01,2064           02026 70063                     <span class="ps">2CADR   </span> <a href="P11.agc.html#524550313141">REP11A</a>                                
-<a name="332E313553504F54"></a>009028,000152: 01,2066           76347        <span class="sm">3.15SPOT</span>           <span class="ps">-GENADR </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54474F">TGO</a>        +1                         
-009029,000153: 01,2067  E7,1427                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54474F">TGO</a>                                   
-009030,000154: 01,2067           75067 27710                     <span class="ps">-2CADR  </span> <a href="P40-P47.agc.html#454E47494E4F4646">ENGINOFF</a>                              
+009021,000117: 
+<a name="322E3353504F54"></a>009022,000118: 01,2030           02605        <span class="sm">2.3SPOT </span>           <span class="ps">GENADR  </span> <a href="INTEGRATION_INITIALIZATION.agc.html#36303053454353">600SECS</a>                               
+009023,000119: 01,2031           75216                           <span class="ps">-GENADR </span> <a href="INTEGRATION_INITIALIZATION.agc.html#5354415445494E54">STATEINT</a>                              
+009024,000120: 01,2032  E3,1554                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#525245435443534D">RRECTCSM</a>                              
+009025,000121: 01,2032           26063                           <span class="ps">BBCON   </span> <a href="INTEGRATION_INITIALIZATION.agc.html#5354415445494E54">STATEINT</a>                              
+009026,000122: 
+<a name="322E3553504F54"></a>009027,000123: 01,2033           05000        <span class="sm">2.5SPOT </span>           <span class="ps">OCT     </span> 05000                                 
+009028,000124: 01,2034  E3,1554                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#525245435443534D">RRECTCSM</a>                              
+009029,000125: 01,2034           02570 26063                     <span class="ps">2CADR   </span> <a href="INTEGRATION_INITIALIZATION.agc.html#53544154494E5431">STATINT1</a>                              
+<a name="322E3753504F54"></a>009030,000126: 01,2036           10000        <span class="sm">2.7SPOT </span>           <span class="ps">OCT     </span> 10000                                 
+009031,000127: 01,2037  E7,1734                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D524B42554632">MRKBUF2</a>                               
+009032,000128: 01,2037           02512 70067                     <span class="ps">2CADR   </span> <a href="P20-P25.agc.html#523232">R22</a>                                   
+<a name="322E313153504F54"></a>009033,000129: 01,2041           14000        <span class="sm">2.11SPOT</span>           <span class="ps">OCT     </span> 14000                                 
+009034,000130: 01,2042  E5,1751                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C414E444D41524B">LANDMARK</a>                              
+009035,000131: 01,2042           02173 62065                     <span class="ps">2CADR   </span> <a href="P20-P25.agc.html#563934454E544552">V94ENTER</a>                              
+<a name="322E313353504F54"></a>009036,000132: 01,2044           10000        <span class="sm">2.13SPOT</span>           <span class="ps">OCT     </span> 10000                                 
+009037,000133: 01,2045  E7,1734                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D524B42554632">MRKBUF2</a>                               
+009038,000134: 01,2045           02377 56067                     <span class="ps">2CADR   </span> <a href="P20-P25.agc.html#5245444F523232">REDOR22</a>                               
+009039,000135:                                                                                                  <span class="co">#  ANY MORE GROUP 2.ODD RESTART VALUES SHOULD GO HERE</span>
+009040,000136: 
+<a name="332E3253504F54"></a>009041,000137: 01,2047  01,2071               <span class="sm">3.2SPOT </span>           <span class="ps">EQUALS  </span> <a href="#342E3253504F54">4.2SPOT</a>                               
+009042,000138: 
+009043,000139:                                                                                                  <span class="co">#  ANY MORE GROUP 3.EVEN RESTART VALUES SHOULD GO HERE</span>
+009044,000140: 
+<a name="332E3353504F54"></a>009045,000141: 01,2047           20000        <span class="sm">3.3SPOT </span>           <span class="ps">OCT     </span> 20000                                 
+009046,000142: 01,2050  E7,1427                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54474F">TGO</a>                                   
+009047,000143: 01,2050           02404 34067                     <span class="ps">2CADR   </span> <a href="P40-P47.agc.html#5334302E3133">S40.13</a>                                
+<a name="332E3553504F54"></a>009048,000144: 01,2052           00000        <span class="sm">3.5SPOT </span>           <span class="ps">DEC     </span> 0          B-14                       
+009049,000145: 01,2053           00000                           <span class="ps">DEC     </span> 0          B-14                       
+009050,000146: 01,2054           00000                           <span class="ps">DEC     </span> 0          B-14                       
+<a name="332E3753504F54"></a>009051,000147: 01,2055           22000        <span class="sm">3.7SPOT </span>           <span class="ps">OCT     </span> 22000                                 
+009052,000148: 01,2056  E3,1706                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54455048454D">TEPHEM</a>                                
+009053,000149: 01,2056           02127 70063                     <span class="ps">2CADR   </span> <a href="P11.agc.html#4D415452584A4F42">MATRXJOB</a>                              
+<a name="332E313153504F54"></a>009054,000150: 01,2060           22000        <span class="sm">3.11SPOT</span>           <span class="ps">OCT     </span> 22000                                 
+009055,000151: 01,2061  E3,1706                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54455048454D">TEPHEM</a>                                
+009056,000152: 01,2061           02247 70063                     <span class="ps">2CADR   </span> <a href="P11.agc.html#5245503131">REP11</a>                                 
+<a name="332E313353504F54"></a>009057,000153: 01,2063           22000        <span class="sm">3.13SPOT</span>           <span class="ps">OCT     </span> 22000                                 
+009058,000154: 01,2064  E3,1706                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54455048454D">TEPHEM</a>                                
+009059,000155: 01,2064           02026 70063                     <span class="ps">2CADR   </span> <a href="P11.agc.html#524550313141">REP11A</a>                                
+<a name="332E313553504F54"></a>009060,000156: 01,2066           76347        <span class="sm">3.15SPOT</span>           <span class="ps">-GENADR </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54474F">TGO</a>        +1                         
+009061,000157: 01,2067  E7,1427                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54474F">TGO</a>                                   
+009062,000158: 01,2067           75067 27710                     <span class="ps">-2CADR  </span> <a href="P40-P47.agc.html#454E47494E4F4646">ENGINOFF</a>                              
 </pre>
 </span>
 </p>
@@ -297,45 +301,45 @@ Page 207
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-009032,000156:                                                                                                  <span class="co">#  ANY MORE GROUP 3.ODD RESTART VALUES SHOULD GO HERE</span>
-009033,000157: 
-<a name="342E3253504F54"></a>009034,000158: 01,2071           77777        <span class="sm">4.2SPOT </span>           <span class="ps">OCT     </span> 77777                                 
-009035,000159: 01,2072  E7,1412                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544947">TIG</a>                                   
-009036,000160: 01,2072           75260 27710                     <span class="ps">-2CADR  </span> <a href="P40-P47.agc.html#505245434845434B">PRECHECK</a>                              
-009037,000161: 01,2074           30000                           <span class="ps">OCT     </span> 30000                                 
-009038,000162: 01,2075  E7,1674                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C56494D55">DELVIMU</a>                               
-009039,000163: 01,2075           02463 50067                     <span class="ps">2CADR   </span> <a href="P40-P47.agc.html#503437424F4459">P47BODY</a>                               
-<a name="342E3453504F54"></a>009040,000164: 01,2077           77777        <span class="sm">4.4SPOT </span>           <span class="ps">OCT     </span> 77777                                 
-009041,000165: 01,2100  E7,1412                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544947">TIG</a>                                   
-009042,000166: 01,2100           75260 27710                     <span class="ps">-2CADR  </span> <a href="P40-P47.agc.html#505245434845434B">PRECHECK</a>                              
-009043,000167: 01,2102           05664                           <span class="ps">DEC     </span> 2996       B-14                       
-009044,000168: 01,2103  E6,1466                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4441504441545231">DAPDATR1</a>                              
-009045,000169: 01,2103           75517 27711                     <span class="ps">-2CADR  </span> <a href="P40-P47.agc.html#5454472F30">TTG/0</a>                                 
-<a name="342E3653504F54"></a>009046,000170: 01,2105           77777        <span class="sm">4.6SPOT </span>           <span class="ps">OCT     </span> 77777                                 
-009047,000171: 01,2106  E7,1412                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544947">TIG</a>                                   
-009048,000172: 01,2106           75260 27710                     <span class="ps">-2CADR  </span> <a href="P40-P47.agc.html#505245434845434B">PRECHECK</a>                              
-009049,000173: 01,2110           04700                           <span class="ps">DEC     </span> 2496       B-14                       
-009050,000174: 01,2111  E7,1412                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544947">TIG</a>                                   
-009051,000175: 01,2111           75254 27710                     <span class="ps">-2CADR  </span> <a href="P40-P47.agc.html#5449472D35">TIG-5</a>                                 
-009052,000176:                                                                                                  <span class="co">#  ANY MORE GROUP 4.EVEN RESTART VALUES SHOULD GO HERE</span>
-009053,000177: 
-<a name="342E3353504F54"></a>009054,000178: 01,2113           00050        <span class="sm">4.3SPOT </span>           <span class="ps">DEC     </span> 40         B-14                       
-009055,000179: 01,2114  E6,1425                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#504143544F4646">PACTOFF</a>                               
-009056,000180: 01,2114           75166 27711                     <span class="ps">-2CADR  </span> <a href="P40-P47.agc.html#444F5456434F4E">DOTVCON</a>                               
-<a name="342E3553504F54"></a>009057,000181: 01,2116           00240        <span class="sm">4.5SPOT </span>           <span class="ps">DEC     </span> 160        B-14                       
-009058,000182: 01,2117  E6,1425                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#504143544F4646">PACTOFF</a>                               
-009059,000183: 01,2117           75140 27711                     <span class="ps">-2CADR  </span> <a href="P40-P47.agc.html#444F535452554C4C">DOSTRULL</a>                              
-<a name="342E3753504F54"></a>009060,000184: 01,2121           00764        <span class="sm">4.7SPOT </span>           <span class="ps">DEC     </span> 500        B-14                       
-009061,000185: 01,2122  E6,1425                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#504143544F4646">PACTOFF</a>                               
-009062,000186: 01,2122           75236 27711                     <span class="ps">-2CADR  </span> <a href="P40-P47.agc.html#5449472D30">TIG-0</a>                                 
-<a name="342E313153504F54"></a>009063,000187: 01,2124           00372        <span class="sm">4.11SPOT</span>           <span class="ps">DEC     </span> 250        B-14                       
-009064,000188: 01,2125  E6,1466                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4441504441545231">DAPDATR1</a>                              
-009065,000189: 01,2125           74315 27711                     <span class="ps">-2CADR  </span> <a href="P40-P47.agc.html#5639374534302E36">V97E40.6</a>                              
-<a name="342E313353504F54"></a>009066,000190: 01,2127           00310        <span class="sm">4.13SPOT</span>           <span class="ps">DEC     </span> 200        B-14                       
-009067,000191: 01,2130  0003777                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#57484F4341524553">WHOCARES</a>                              
-009068,000192: 01,2130           74350 27710                     <span class="ps">-2CADR  </span> <a href="P40-P47.agc.html#523430454E41424C">R40ENABL</a>                              
-<a name="342E313553504F54"></a>009069,000193: 01,2132           16000        <span class="sm">4.15SPOT</span>           <span class="ps">OCT     </span> 16000                                 <span class="co">#  PRELAUNCH OPTICAL VERIFICATION</span>
-009070,000194: 01,2133  E5,1757                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4743">OGC</a>                                   
+009064,000160:                                                                                                  <span class="co">#  ANY MORE GROUP 3.ODD RESTART VALUES SHOULD GO HERE</span>
+009065,000161: 
+<a name="342E3253504F54"></a>009066,000162: 01,2071           77777        <span class="sm">4.2SPOT </span>           <span class="ps">OCT     </span> 77777                                 
+009067,000163: 01,2072  E7,1412                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544947">TIG</a>                                   
+009068,000164: 01,2072           75260 27710                     <span class="ps">-2CADR  </span> <a href="P40-P47.agc.html#505245434845434B">PRECHECK</a>                              
+009069,000165: 01,2074           30000                           <span class="ps">OCT     </span> 30000                                 
+009070,000166: 01,2075  E7,1674                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C56494D55">DELVIMU</a>                               
+009071,000167: 01,2075           02463 50067                     <span class="ps">2CADR   </span> <a href="P40-P47.agc.html#503437424F4459">P47BODY</a>                               
+<a name="342E3453504F54"></a>009072,000168: 01,2077           77777        <span class="sm">4.4SPOT </span>           <span class="ps">OCT     </span> 77777                                 
+009073,000169: 01,2100  E7,1412                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544947">TIG</a>                                   
+009074,000170: 01,2100           75260 27710                     <span class="ps">-2CADR  </span> <a href="P40-P47.agc.html#505245434845434B">PRECHECK</a>                              
+009075,000171: 01,2102           05664                           <span class="ps">DEC     </span> 2996       B-14                       
+009076,000172: 01,2103  E6,1466                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4441504441545231">DAPDATR1</a>                              
+009077,000173: 01,2103           75517 27711                     <span class="ps">-2CADR  </span> <a href="P40-P47.agc.html#5454472F30">TTG/0</a>                                 
+<a name="342E3653504F54"></a>009078,000174: 01,2105           77777        <span class="sm">4.6SPOT </span>           <span class="ps">OCT     </span> 77777                                 
+009079,000175: 01,2106  E7,1412                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544947">TIG</a>                                   
+009080,000176: 01,2106           75260 27710                     <span class="ps">-2CADR  </span> <a href="P40-P47.agc.html#505245434845434B">PRECHECK</a>                              
+009081,000177: 01,2110           04700                           <span class="ps">DEC     </span> 2496       B-14                       
+009082,000178: 01,2111  E7,1412                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544947">TIG</a>                                   
+009083,000179: 01,2111           75254 27710                     <span class="ps">-2CADR  </span> <a href="P40-P47.agc.html#5449472D35">TIG-5</a>                                 
+009084,000180:                                                                                                  <span class="co">#  ANY MORE GROUP 4.EVEN RESTART VALUES SHOULD GO HERE</span>
+009085,000181: 
+<a name="342E3353504F54"></a>009086,000182: 01,2113           00050        <span class="sm">4.3SPOT </span>           <span class="ps">DEC     </span> 40         B-14                       
+009087,000183: 01,2114  E6,1425                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#504143544F4646">PACTOFF</a>                               
+009088,000184: 01,2114           75166 27711                     <span class="ps">-2CADR  </span> <a href="P40-P47.agc.html#444F5456434F4E">DOTVCON</a>                               
+<a name="342E3553504F54"></a>009089,000185: 01,2116           00240        <span class="sm">4.5SPOT </span>           <span class="ps">DEC     </span> 160        B-14                       
+009090,000186: 01,2117  E6,1425                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#504143544F4646">PACTOFF</a>                               
+009091,000187: 01,2117           75140 27711                     <span class="ps">-2CADR  </span> <a href="P40-P47.agc.html#444F535452554C4C">DOSTRULL</a>                              
+<a name="342E3753504F54"></a>009092,000188: 01,2121           00764        <span class="sm">4.7SPOT </span>           <span class="ps">DEC     </span> 500        B-14                       
+009093,000189: 01,2122  E6,1425                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#504143544F4646">PACTOFF</a>                               
+009094,000190: 01,2122           75236 27711                     <span class="ps">-2CADR  </span> <a href="P40-P47.agc.html#5449472D30">TIG-0</a>                                 
+<a name="342E313153504F54"></a>009095,000191: 01,2124           00372        <span class="sm">4.11SPOT</span>           <span class="ps">DEC     </span> 250        B-14                       
+009096,000192: 01,2125  E6,1466                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4441504441545231">DAPDATR1</a>                              
+009097,000193: 01,2125           74315 27711                     <span class="ps">-2CADR  </span> <a href="P40-P47.agc.html#5639374534302E36">V97E40.6</a>                              
+<a name="342E313353504F54"></a>009098,000194: 01,2127           00310        <span class="sm">4.13SPOT</span>           <span class="ps">DEC     </span> 200        B-14                       
+009099,000195: 01,2130  0003777                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#57484F4341524553">WHOCARES</a>                              
+009100,000196: 01,2130           74350 27710                     <span class="ps">-2CADR  </span> <a href="P40-P47.agc.html#523430454E41424C">R40ENABL</a>                              
+<a name="342E313553504F54"></a>009101,000197: 01,2132           16000        <span class="sm">4.15SPOT</span>           <span class="ps">OCT     </span> 16000                                 <span class="co">#  PRELAUNCH OPTICAL VERIFICATION</span>
+009102,000198: 01,2133  E5,1757                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4743">OGC</a>                                   
 </pre>
 </span>
 </p>
@@ -351,45 +355,45 @@ Page 208
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-009072,000196: 01,2133           02000 66065                     <span class="ps">2CADR   </span> <a href="SYSTEM_TEST_STANDARD_LEAD_INS.agc.html#434F4D50564552">COMPVER</a>                               <span class="co">#  CALLS FOR OPTICS DATA AGAIN (STD LEADIN)</span>
-<a name="342E313753504F54"></a>009073,000197: 01,2135           16000        <span class="sm">4.17SPOT</span>           <span class="ps">OCT     </span> 16000                                 
-009074,000198: 01,2136  E5,1671                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#58534D">XSM</a>                                   
-009075,000199: 01,2136           03737 66065                     <span class="ps">2CADR   </span> <a href="IMU_CALIBRATION_AND_ALIGNMENT.agc.html#415A4D5448434731">AZMTHCG1</a>                              
-<a name="342E323153504F54"></a>009076,000200: 01,2140           01672        <span class="sm">4.21SPOT</span>           <span class="ps">GENADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#503430544D50">P40TMP</a>                                <span class="co">#  DELTA TIME USED IN SETTING UP</span>
-009077,000201: 01,2141           75411                           <span class="ps">-GENADR </span> <a href="P40-P47.agc.html#544947424C4E4B">TIGBLNK</a>                               <span class="co">#  LONG CALL OF TIGBLNK  BY P40,P41</span>
-009078,000202: 01,2142  E7,1672                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#503430544D50">P40TMP</a>                                
-009079,000203: 01,2142           50067                           <span class="ps">BBCON   </span> <a href="P40-P47.agc.html#544947424C4E4B">TIGBLNK</a>                               
-<a name="342E323353504F54"></a>009080,000204: 01,2143           12000        <span class="sm">4.23SPOT</span>           <span class="ps">OCT     </span> 12000                                 <span class="co">#  PROTECT P40S/SV BY P40 P41</span>
-009081,000205: 01,2144  E7,1412                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544947">TIG</a>                                   
-009082,000206: 01,2144           02113 50067                     <span class="ps">2CADR   </span> <a href="P40-P47.agc.html#503430532F5356">P40S/SV</a>                               
-009083,000207: 
-<a name="342E323553504F54"></a>009084,000208: 01,2146           24000        <span class="sm">4.25SPOT</span>           <span class="ps">OCT     </span> 24000                                 
-009085,000209: 01,2147     0302                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4245535449">BESTI</a>                                 
-009086,000210: 01,2147           02000 32060                     <span class="ps">2CADR   </span> <a href="P51-P53.agc.html#50524F473532">PROG52</a>                                
-009087,000211: 
-<a name="342E323753504F54"></a>009088,000212: 01,2151           00372        <span class="sm">4.27SPOT</span>           <span class="ps">DEC     </span> 250        B-14                       
-009089,000213: 01,2152  E6,1425                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#504143544F4646">PACTOFF</a>                               
-009090,000214: 01,2152           75053 27711                     <span class="ps">-2CADR  </span> <a href="P40-P47.agc.html#444F545643524353">DOTVCRCS</a>                              
-<a name="342E333153504F54"></a>009091,000215: 01,2154           13000        <span class="sm">4.31SPOT</span>           <span class="ps">OCT     </span> 13000                                 
-009092,000216: 01,2155  E5,1765                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#53544152">STAR</a>                                  
-009093,000217: 01,2155           02523 30065                     <span class="ps">2CADR   </span> <a href="P51-P53.agc.html#523531">R51</a>                                   
-<a name="342E333353504F54"></a>009094,000218: 01,2157           04064        <span class="sm">4.33SPOT</span>           <span class="ps">DEC     </span> 2100       B-14                       <span class="co">#  PROTECT CONTINUING JOB TO START P63</span>
-009095,000219: 01,2160  E6,1661                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414F47">AOG</a>                                   
-009096,000220: 01,2160           75403 23711                     <span class="ps">-2CADR  </span> <a href="P61-P67.agc.html#57414B45503632">WAKEP62</a>                               
-<a name="342E333553504F54"></a>009097,000221: 01,2162           12000        <span class="sm">4.35SPOT</span>           <span class="ps">OCT     </span> 12000                                 
-009098,000222: 01,2163  E6,1466                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4441504441545231">DAPDATR1</a>                              
-009099,000223: 01,2163           02155 50066                     <span class="ps">2CADR   </span> <a href="P40-P47.agc.html#504F53544255524E">POSTBURN</a>                              
-<a name="342E333753504F54"></a>009100,000224: 01,2165           00764        <span class="sm">4.37SPOT</span>           <span class="ps">DEC     </span> 500        B-14                       
-009101,000225: 01,2166  E7,1412                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544947">TIG</a>                                   
-009102,000226: 01,2166           75273 27710                     <span class="ps">-2CADR  </span> <a href="P40-P47.agc.html#54494741564547">TIGAVEG</a>                               
-<a name="342E343153504F54"></a>009103,000227: 01,2170           17000        <span class="sm">4.41SPOT</span>           <span class="ps">OCT     </span> 17000                                 <span class="co">#  PROTECT DISPLAY JOB IN P67</span>
-009104,000228: 01,2171  E6,1661                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414F47">AOG</a>                                   
-009105,000229: 01,2171           02511 54066                     <span class="ps">2CADR   </span> <a href="P61-P67.agc.html#5036372E31">P67.1</a>                                 
-<a name="342E343353504F54"></a>009106,000230: 01,2173           76003        <span class="sm">4.43SPOT</span>           <span class="ps">-GENADR </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5336314454">S61DT</a>                                 <span class="co">#  PROTECT TASK TO START PREREAD,ENTRY</span>
-009107,000231: 01,2174  E6,1774                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5336314454">S61DT</a>                                 <span class="co">#  S61.1C WILL CHANGE EBANK=EB7 FOR PREREAD</span>
-009108,000232: 01,2174           75213 23711                     <span class="ps">-2CADR  </span> <a href="P61-P67.agc.html#5336312E3143">S61.1C</a>                                
-<a name="342E343553504F54"></a>009109,000233: 01,2176           13000        <span class="sm">4.45SPOT</span>           <span class="ps">OCT     </span> 13000                                 <span class="co">#  PROTECT CONTINUING JOB S61.1</span>
-009110,000234: 01,2177  E6,1661                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414F47">AOG</a>                                   <span class="co">#  (ENTRY IMU ALIGNMENT)</span>
+009104,000200: 01,2133           02000 66065                     <span class="ps">2CADR   </span> <a href="SYSTEM_TEST_STANDARD_LEAD_INS.agc.html#434F4D50564552">COMPVER</a>                               <span class="co">#  CALLS FOR OPTICS DATA AGAIN (STD LEADIN)</span>
+<a name="342E313753504F54"></a>009105,000201: 01,2135           16000        <span class="sm">4.17SPOT</span>           <span class="ps">OCT     </span> 16000                                 <span class="co">#   PRELAUNCH AZIMUTH CHANGE</span>
+009106,000202: 01,2136  E5,1671                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#58534D">XSM</a>                                   
+009107,000203: 01,2136           03737 66065                     <span class="ps">2CADR   </span> <a href="IMU_CALIBRATION_AND_ALIGNMENT.agc.html#415A4D5448434731">AZMTHCG1</a>                              
+<a name="342E323153504F54"></a>009108,000204: 01,2140           01672        <span class="sm">4.21SPOT</span>           <span class="ps">GENADR  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#503430544D50">P40TMP</a>                                <span class="co">#  DELTA TIME USED IN SETTING UP</span>
+009109,000205: 01,2141           75411                           <span class="ps">-GENADR </span> <a href="P40-P47.agc.html#544947424C4E4B">TIGBLNK</a>                               <span class="co">#  LONG CALL OF TIGBLNK  BY P40,P41</span>
+009110,000206: 01,2142  E7,1672                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#503430544D50">P40TMP</a>                                
+009111,000207: 01,2142           50067                           <span class="ps">BBCON   </span> <a href="P40-P47.agc.html#544947424C4E4B">TIGBLNK</a>                               
+<a name="342E323353504F54"></a>009112,000208: 01,2143           12000        <span class="sm">4.23SPOT</span>           <span class="ps">OCT     </span> 12000                                 <span class="co">#  PROTECT P40S/SV BY P40 P41</span>
+009113,000209: 01,2144  E7,1412                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544947">TIG</a>                                   
+009114,000210: 01,2144           02113 50067                     <span class="ps">2CADR   </span> <a href="P40-P47.agc.html#503430532F5356">P40S/SV</a>                               
+009115,000211: 
+<a name="342E323553504F54"></a>009116,000212: 01,2146           24000        <span class="sm">4.25SPOT</span>           <span class="ps">OCT     </span> 24000                                 
+009117,000213: 01,2147     0302                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4245535449">BESTI</a>                                 
+009118,000214: 01,2147           02000 32060                     <span class="ps">2CADR   </span> <a href="P51-P53.agc.html#50524F473532">PROG52</a>                                
+009119,000215: 
+<a name="342E323753504F54"></a>009120,000216: 01,2151           00372        <span class="sm">4.27SPOT</span>           <span class="ps">DEC     </span> 250        B-14                       
+009121,000217: 01,2152  E6,1425                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#504143544F4646">PACTOFF</a>                               
+009122,000218: 01,2152           75053 27711                     <span class="ps">-2CADR  </span> <a href="P40-P47.agc.html#444F545643524353">DOTVCRCS</a>                              
+<a name="342E333153504F54"></a>009123,000219: 01,2154           13000        <span class="sm">4.31SPOT</span>           <span class="ps">OCT     </span> 13000                                 
+009124,000220: 01,2155  E5,1765                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#53544152">STAR</a>                                  
+009125,000221: 01,2155           02523 30065                     <span class="ps">2CADR   </span> <a href="P51-P53.agc.html#523531">R51</a>                                   
+<a name="342E333353504F54"></a>009126,000222: 01,2157           04064        <span class="sm">4.33SPOT</span>           <span class="ps">DEC     </span> 2100       B-14                       <span class="co">#  PROTECT CONTINUING JOB TO START P63</span>
+009127,000223: 01,2160  E6,1661                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414F47">AOG</a>                                   
+009128,000224: 01,2160           75403 23711                     <span class="ps">-2CADR  </span> <a href="P61-P67.agc.html#57414B45503632">WAKEP62</a>                               
+<a name="342E333553504F54"></a>009129,000225: 01,2162           12000        <span class="sm">4.35SPOT</span>           <span class="ps">OCT     </span> 12000                                 
+009130,000226: 01,2163  E6,1466                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4441504441545231">DAPDATR1</a>                              
+009131,000227: 01,2163           02155 50066                     <span class="ps">2CADR   </span> <a href="P40-P47.agc.html#504F53544255524E">POSTBURN</a>                              
+<a name="342E333753504F54"></a>009132,000228: 01,2165           00764        <span class="sm">4.37SPOT</span>           <span class="ps">DEC     </span> 500        B-14                       
+009133,000229: 01,2166  E7,1412                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544947">TIG</a>                                   
+009134,000230: 01,2166           75273 27710                     <span class="ps">-2CADR  </span> <a href="P40-P47.agc.html#54494741564547">TIGAVEG</a>                               
+<a name="342E343153504F54"></a>009135,000231: 01,2170           17000        <span class="sm">4.41SPOT</span>           <span class="ps">OCT     </span> 17000                                 <span class="co">#  PROTECT DISPLAY JOB IN P67</span>
+009136,000232: 01,2171  E6,1661                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414F47">AOG</a>                                   
+009137,000233: 01,2171           02511 54066                     <span class="ps">2CADR   </span> <a href="P61-P67.agc.html#5036372E31">P67.1</a>                                 
+<a name="342E343353504F54"></a>009138,000234: 01,2173           76003        <span class="sm">4.43SPOT</span>           <span class="ps">-GENADR </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5336314454">S61DT</a>                                 <span class="co">#  PROTECT TASK TO START PREREAD,ENTRY</span>
+009139,000235: 01,2174  E6,1774                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5336314454">S61DT</a>                                 <span class="co">#  S61.1C WILL CHANGE EBANK=EB7 FOR PREREAD</span>
+009140,000236: 01,2174           75213 23711                     <span class="ps">-2CADR  </span> <a href="P61-P67.agc.html#5336312E3143">S61.1C</a>                                
+<a name="342E343553504F54"></a>009141,000237: 01,2176           13000        <span class="sm">4.45SPOT</span>           <span class="ps">OCT     </span> 13000                                 <span class="co">#  PROTECT CONTINUING JOB S61.1</span>
+009142,000238: 01,2177  E6,1661                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414F47">AOG</a>                                   <span class="co">#  (ENTRY IMU ALIGNMENT)</span>
 </pre>
 </span>
 </p>
@@ -405,43 +409,43 @@ Page 209
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-009112,000236: 01,2177           02602 54066                     <span class="ps">2CADR   </span> <a href="P61-P67.agc.html#5336312E3141">S61.1A</a>     -1                         
-<a name="342E343753504F54"></a>009113,000237: 01,2201           17000        <span class="sm">4.47SPOT</span>           <span class="ps">OCT     </span> 17000                                 <span class="co">#  PROTECT HUNTEST ITERATION.</span>
-009114,000238: 01,2202  E6,1661                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414F47">AOG</a>                                   
-009115,000239: 01,2202           03006 52066                     <span class="ps">2CADR   </span> <a href="REENTRY_CONTROL.agc.html#5052452D48554E54">PRE-HUNT</a>                              
-<a name="342E353153504F54"></a>009116,000240: 01,2204           77777        <span class="sm">4.51SPOT</span>           <span class="ps">OCT     </span> 77777                                 <span class="co">#  PROTECT FDAI ATTITUDE</span>
-009117,000241: 01,2205  E6,1704                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#424F445933">BODY3</a>                                 <span class="co">#  ERROR DISPLAY IN P11</span>
-009118,000242: 01,2205           75463 07711                     <span class="ps">-2CADR  </span> <a href="P11.agc.html#415445525441534B">ATERTASK</a>                              
-<a name="342E353353504F54"></a>009119,000243: 01,2207           77777        <span class="sm">4.53SPOT</span>           <span class="ps">DEC     </span> -0         B-14                       
-009120,000244: 01,2210  0003777                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#454E442D4537">END-E7</a>                                <span class="co">#  EBANK7 FOR TIG</span>
-009121,000245: 01,2210           74334 27710                     <span class="ps">-2CADR  </span> <a href="P40-P47.agc.html#563937455441534B">V97ETASK</a>                              
-<a name="342E353553504F54"></a>009122,000246: 01,2212           13000        <span class="sm">4.55SPOT</span>           <span class="ps">OCT     </span> 13000                                 <span class="co">#  PROTECT  P65 RESPONSIVE DISPLAY.</span>
-009123,000247: 01,2213  E7,1451                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5254494E4954">RTINIT</a>                                
-009124,000248: 01,2213           02456 54067                     <span class="ps">2CADR   </span> <a href="P61-P67.agc.html#5036352E31">P65.1</a>                                 
-<a name="342E353753504F54"></a>009125,000249: 01,2215           76105        <span class="sm">4.57SPOT</span>           <span class="ps">-GENADR </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#503430544D50">P40TMP</a>                                
-009126,000250: 01,2216  E7,1672                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#503430544D50">P40TMP</a>                                
-009127,000251: 01,2216           75350 27710                     <span class="ps">-2CADR  </span> <a href="P40-P47.agc.html#5449474F4E">TIGON</a>                                 
-<a name="342E363153504F54"></a>009128,000252: 01,2220           77777        <span class="sm">4.61SPOT</span>           <span class="ps">OCT     </span> 77777                                 
-009129,000253: 01,2221  E6,1425                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#504143544F4646">PACTOFF</a>                               
-009130,000254: 01,2221           75223 27711                     <span class="ps">-2CADR  </span> <a href="P40-P47.agc.html#49474E4954494F4E">IGNITION</a>                              
-<a name="342E363353504F54"></a>009131,000255: 01,2223           77777        <span class="sm">4.63SPOT</span>           <span class="ps">OCT     </span> 77777                                 
-009132,000256: 01,2224  E6,1425                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#504143544F4646">PACTOFF</a>                               
-009133,000257: 01,2224           75061 27711                     <span class="ps">-2CADR  </span> <a href="P40-P47.agc.html#444F5350534F4646">DOSPSOFF</a>                              
-<a name="342E363553504F54"></a>009134,000258: 01,2226           00012        <span class="sm">4.65SPOT</span>           <span class="ps">DEC     </span> 10         B-14                       
-009135,000259: 01,2227  E7,1412                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544947">TIG</a>                                   
-009136,000260: 01,2227           75254 27710                     <span class="ps">-2CADR  </span> <a href="P40-P47.agc.html#5449472D35">TIG-5</a>                                 
-<a name="342E363753504F54"></a>009137,000261: 01,2231           77777        <span class="sm">4.67SPOT</span>           <span class="ps">DEC     </span> -0         B-14                       
-009138,000262: 01,2232  E6,1474                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43534D4D415353">CSMMASS</a>                               
-009139,000263: 01,2232           74416 27711                     <span class="ps">-2CADR  </span> <a href="P40-P47.agc.html#563937545441534B">V97TTASK</a>                              
-<a name="342E373153504F54"></a>009140,000264: 01,2234           00372        <span class="sm">4.71SPOT</span>           <span class="ps">DEC     </span> 250        B-14                       
-009141,000265: 01,2235  E6,1466                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4441504441545231">DAPDATR1</a>                              <span class="co">#  (FOR RCSDAPON)</span>
-009142,000266: 01,2235           74401 27711                     <span class="ps">-2CADR  </span> <a href="P40-P47.agc.html#56393754524353">V97TRCS</a>                               
-<a name="342E373353504F54"></a>009143,000267: 01,2237           77777        <span class="sm">4.73SPOT</span>           <span class="ps">DEC     </span> -0         B-14                       
-009144,000268: 01,2240  E6,1444                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#56393756434E5452">V97VCNTR</a>                              
-009145,000269: 01,2240           74364 27711                     <span class="ps">-2CADR  </span> <a href="P40-P47.agc.html#563937505441534B">V97PTASK</a>                              
-<a name="342E373553504F54"></a>009146,000270: 01,2242           77777        <span class="sm">4.75SPOT</span>           <span class="ps">DEC     </span> -0         B-14                       
-009147,000271: 01,2243  E6,1466                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4441504441545231">DAPDATR1</a>                              
-009148,000272: 01,2243           74322 27711                     <span class="ps">-2CADR  </span> <a href="P40-P47.agc.html#5350534F46463937">SPSOFF97</a>                              
+009144,000240: 01,2177           02602 54066                     <span class="ps">2CADR   </span> <a href="P61-P67.agc.html#5336312E3141">S61.1A</a>     -1                         
+<a name="342E343753504F54"></a>009145,000241: 01,2201           17000        <span class="sm">4.47SPOT</span>           <span class="ps">OCT     </span> 17000                                 <span class="co">#  PROTECT HUNTEST ITERATION.</span>
+009146,000242: 01,2202  E6,1661                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414F47">AOG</a>                                   
+009147,000243: 01,2202           03006 52066                     <span class="ps">2CADR   </span> <a href="REENTRY_CONTROL.agc.html#5052452D48554E54">PRE-HUNT</a>                              
+<a name="342E353153504F54"></a>009148,000244: 01,2204           77777        <span class="sm">4.51SPOT</span>           <span class="ps">OCT     </span> 77777                                 <span class="co">#  PROTECT FDAI ATTITUDE</span>
+009149,000245: 01,2205  E6,1704                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#424F445933">BODY3</a>                                 <span class="co">#  ERROR DISPLAY IN P11</span>
+009150,000246: 01,2205           75463 07711                     <span class="ps">-2CADR  </span> <a href="P11.agc.html#415445525441534B">ATERTASK</a>                              
+<a name="342E353353504F54"></a>009151,000247: 01,2207           77777        <span class="sm">4.53SPOT</span>           <span class="ps">DEC     </span> -0         B-14                       
+009152,000248: 01,2210  0003777                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#454E442D4537">END-E7</a>                                <span class="co">#  EBANK7 FOR TIG</span>
+009153,000249: 01,2210           74334 27710                     <span class="ps">-2CADR  </span> <a href="P40-P47.agc.html#563937455441534B">V97ETASK</a>                              
+<a name="342E353553504F54"></a>009154,000250: 01,2212           13000        <span class="sm">4.55SPOT</span>           <span class="ps">OCT     </span> 13000                                 <span class="co">#  PROTECT  P65 RESPONSIVE DISPLAY.</span>
+009155,000251: 01,2213  E7,1451                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5254494E4954">RTINIT</a>                                
+009156,000252: 01,2213           02456 54067                     <span class="ps">2CADR   </span> <a href="P61-P67.agc.html#5036352E31">P65.1</a>                                 
+<a name="342E353753504F54"></a>009157,000253: 01,2215           76105        <span class="sm">4.57SPOT</span>           <span class="ps">-GENADR </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#503430544D50">P40TMP</a>                                
+009158,000254: 01,2216  E7,1672                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#503430544D50">P40TMP</a>                                
+009159,000255: 01,2216           75350 27710                     <span class="ps">-2CADR  </span> <a href="P40-P47.agc.html#5449474F4E">TIGON</a>                                 
+<a name="342E363153504F54"></a>009160,000256: 01,2220           77777        <span class="sm">4.61SPOT</span>           <span class="ps">OCT     </span> 77777                                 
+009161,000257: 01,2221  E6,1425                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#504143544F4646">PACTOFF</a>                               
+009162,000258: 01,2221           75223 27711                     <span class="ps">-2CADR  </span> <a href="P40-P47.agc.html#49474E4954494F4E">IGNITION</a>                              
+<a name="342E363353504F54"></a>009163,000259: 01,2223           77777        <span class="sm">4.63SPOT</span>           <span class="ps">OCT     </span> 77777                                 
+009164,000260: 01,2224  E6,1425                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#504143544F4646">PACTOFF</a>                               
+009165,000261: 01,2224           75061 27711                     <span class="ps">-2CADR  </span> <a href="P40-P47.agc.html#444F5350534F4646">DOSPSOFF</a>                              
+<a name="342E363553504F54"></a>009166,000262: 01,2226           00012        <span class="sm">4.65SPOT</span>           <span class="ps">DEC     </span> 10         B-14                       
+009167,000263: 01,2227  E7,1412                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544947">TIG</a>                                   
+009168,000264: 01,2227           75254 27710                     <span class="ps">-2CADR  </span> <a href="P40-P47.agc.html#5449472D35">TIG-5</a>                                 
+<a name="342E363753504F54"></a>009169,000265: 01,2231           77777        <span class="sm">4.67SPOT</span>           <span class="ps">DEC     </span> -0         B-14                       
+009170,000266: 01,2232  E6,1474                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43534D4D415353">CSMMASS</a>                               
+009171,000267: 01,2232           74416 27711                     <span class="ps">-2CADR  </span> <a href="P40-P47.agc.html#563937545441534B">V97TTASK</a>                              
+<a name="342E373153504F54"></a>009172,000268: 01,2234           00372        <span class="sm">4.71SPOT</span>           <span class="ps">DEC     </span> 250        B-14                       
+009173,000269: 01,2235  E6,1466                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4441504441545231">DAPDATR1</a>                              <span class="co">#  (FOR RCSDAPON)</span>
+009174,000270: 01,2235           74401 27711                     <span class="ps">-2CADR  </span> <a href="P40-P47.agc.html#56393754524353">V97TRCS</a>                               
+<a name="342E373353504F54"></a>009175,000271: 01,2237           77777        <span class="sm">4.73SPOT</span>           <span class="ps">DEC     </span> -0         B-14                       
+009176,000272: 01,2240  E6,1444                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#56393756434E5452">V97VCNTR</a>                              
+009177,000273: 01,2240           74364 27711                     <span class="ps">-2CADR  </span> <a href="P40-P47.agc.html#563937505441534B">V97PTASK</a>                              
+<a name="342E373553504F54"></a>009178,000274: 01,2242           77777        <span class="sm">4.75SPOT</span>           <span class="ps">DEC     </span> -0         B-14                       
+009179,000275: 01,2243  E6,1466                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4441504441545231">DAPDATR1</a>                              
+009180,000276: 01,2243           74322 27711                     <span class="ps">-2CADR  </span> <a href="P40-P47.agc.html#5350534F46463937">SPSOFF97</a>                              
 </pre>
 </span>
 </p>
@@ -457,45 +461,45 @@ Page 210
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-<a name="342E373753504F54"></a>009150,000274: 01,2245           77777        <span class="sm">4.77SPOT</span>           <span class="ps">DEC     </span> -0         B-14                       
-009151,000275: 01,2246  E6,1425                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#504143544F4646">PACTOFF</a>                               
-009152,000276: 01,2246           75236 27711                     <span class="ps">-2CADR  </span> <a href="P40-P47.agc.html#5449472D30">TIG-0</a>                                 
-009153,000277:                                                                                                  <span class="co">#  ANY MORE GROUP 4.ODD RESTART VALUES SHOULD GO HERE</span>
-009154,000278: 
-<a name="352E3253504F54"></a>009155,000279: 01,2250           32000        <span class="sm">5.2SPOT </span>           <span class="ps">OCT     </span> 32000                                 
-009156,000280: 01,2251  E7,1431                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4456434E5452">DVCNTR</a>                                
-009157,000281: 01,2251           03145 76067                     <span class="ps">2CADR   </span> <a href="SERVICER207.agc.html#4E4F524D4C495A45">NORMLIZE</a>                              
-009158,000282: 01,2253           00310                           <span class="ps">DEC     </span> 200        B-14                       
-009159,000283: 01,2254  E6,1661                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414F47">AOG</a>                                   
-009160,000284: 01,2254           74563 01711                     <span class="ps">-2CADR  </span> <a href="SERVICER207.agc.html#5245524541444143">REREADAC</a>                              
-<a name="352E3453504F54"></a>009161,000285: 01,2256           20000        <span class="sm">5.4SPOT </span>           <span class="ps">OCT     </span> 20000                                 
-009162,000286: 01,2257  E7,1431                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4456434E5452">DVCNTR</a>                                
-009163,000287: 01,2257           03013 76067                     <span class="ps">2CADR   </span> <a href="SERVICER207.agc.html#5345525649434552">SERVICER</a>                              
-009164,000288: 01,2261           00310                           <span class="ps">DEC     </span> 200        B-14                       
-009165,000289: 01,2262  E6,1661                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414F47">AOG</a>                                   
-009166,000290: 01,2262           74563 01711                     <span class="ps">-2CADR  </span> <a href="SERVICER207.agc.html#5245524541444143">REREADAC</a>                              
-009167,000291:                                                                                                  <span class="co">#  ANY MORE GROUP 5.EVEN RESTART VALUES SHOULD GO HERE</span>
-009168,000292: 
-<a name="352E3353504F54"></a>009169,000293: 01,2264           00310        <span class="sm">5.3SPOT </span>           <span class="ps">DEC     </span> 200        B-14                       
-009170,000294: 01,2265  E6,1661                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414F47">AOG</a>                                   
-009171,000295: 01,2265           74563 01711                     <span class="ps">-2CADR  </span> <a href="SERVICER207.agc.html#5245524541444143">REREADAC</a>                              
-<a name="352E3553504F54"></a>009172,000296: 01,2267           77777        <span class="sm">5.5SPOT </span>           <span class="ps">OCT     </span> 77777                                 
-009173,000297: 01,2270  E6,1661                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414F47">AOG</a>                                   
-009174,000298: 01,2270           75117 01711                     <span class="ps">-2CADR  </span> <a href="SERVICER207.agc.html#5245444F352E35">REDO5.5</a>                               
-<a name="352E3753504F54"></a>009175,000299: 01,2272           20000        <span class="sm">5.7SPOT </span>           <span class="ps">OCT     </span> 20000                                 <span class="co">#  USED BY PRELAUNCH</span>
-009176,000300: 01,2273  E5,1671                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#58534D">XSM</a>                                   
-009177,000301: 01,2273           02456 66065                     <span class="ps">2CADR   </span> <a href="IMU_CALIBRATION_AND_ALIGNMENT.agc.html#52535447545331">RSTGTS1</a>                               
-<a name="352E313153504F54"></a>009178,000302: 01,2275           77777        <span class="sm">5.11SPOT</span>           <span class="ps">OCT     </span> 77777                                 
-009179,000303: 01,2276  E5,1671                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#58534D">XSM</a>                                   
-009180,000304: 01,2276           75174 11712                     <span class="ps">-2CADR  </span> <a href="IMU_CALIBRATION_AND_ALIGNMENT.agc.html#414C4C4F4F5031">ALLOOP1</a>                               
-<a name="352E313353504F54"></a>009181,000305: 01,2300           20000        <span class="sm">5.13SPOT</span>           <span class="ps">OCT     </span> 20000                                 
-009182,000306: 01,2301  E5,1671                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#58534D">XSM</a>                                   
-009183,000307: 01,2301           02527 66065                     <span class="ps">2CADR   </span> <a href="IMU_CALIBRATION_AND_ALIGNMENT.agc.html#57544C4953544E54">WTLISTNT</a>                              
-<a name="352E313553504F54"></a>009184,000308: 01,2303           20000        <span class="sm">5.15SPOT</span>           <span class="ps">OCT     </span> 20000                                 
-009185,000309: 01,2304  E5,1671                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#58534D">XSM</a>                                   
-009186,000310: 01,2304           03320 66065                     <span class="ps">2CADR   </span> <a href="IMU_CALIBRATION_AND_ALIGNMENT.agc.html#5245535445535431">RESTEST1</a>                              
-<a name="352E313753504F54"></a>009187,000311: 01,2306           20000        <span class="sm">5.17SPOT</span>           <span class="ps">OCT     </span> 20000                                 
-009188,000312: 01,2307  E5,1671                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#58534D">XSM</a>                                   
+<a name="342E373753504F54"></a>009182,000278: 01,2245           77777        <span class="sm">4.77SPOT</span>           <span class="ps">DEC     </span> -0         B-14                       
+009183,000279: 01,2246  E6,1425                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#504143544F4646">PACTOFF</a>                               
+009184,000280: 01,2246           75236 27711                     <span class="ps">-2CADR  </span> <a href="P40-P47.agc.html#5449472D30">TIG-0</a>                                 
+009185,000281:                                                                                                  <span class="co">#  ANY MORE GROUP 4.ODD RESTART VALUES SHOULD GO HERE</span>
+009186,000282: 
+<a name="352E3253504F54"></a>009187,000283: 01,2250           32000        <span class="sm">5.2SPOT </span>           <span class="ps">OCT     </span> 32000                                 
+009188,000284: 01,2251  E7,1431                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4456434E5452">DVCNTR</a>                                
+009189,000285: 01,2251           03145 76067                     <span class="ps">2CADR   </span> <a href="SERVICER207.agc.html#4E4F524D4C495A45">NORMLIZE</a>                              
+009190,000286: 01,2253           00310                           <span class="ps">DEC     </span> 200        B-14                       
+009191,000287: 01,2254  E6,1661                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414F47">AOG</a>                                   
+009192,000288: 01,2254           74563 01711                     <span class="ps">-2CADR  </span> <a href="SERVICER207.agc.html#5245524541444143">REREADAC</a>                              
+<a name="352E3453504F54"></a>009193,000289: 01,2256           20000        <span class="sm">5.4SPOT </span>           <span class="ps">OCT     </span> 20000                                 
+009194,000290: 01,2257  E7,1431                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4456434E5452">DVCNTR</a>                                
+009195,000291: 01,2257           03013 76067                     <span class="ps">2CADR   </span> <a href="SERVICER207.agc.html#5345525649434552">SERVICER</a>                              
+009196,000292: 01,2261           00310                           <span class="ps">DEC     </span> 200        B-14                       
+009197,000293: 01,2262  E6,1661                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414F47">AOG</a>                                   
+009198,000294: 01,2262           74563 01711                     <span class="ps">-2CADR  </span> <a href="SERVICER207.agc.html#5245524541444143">REREADAC</a>                              
+009199,000295:                                                                                                  <span class="co">#  ANY MORE GROUP 5.EVEN RESTART VALUES SHOULD GO HERE</span>
+009200,000296: 
+<a name="352E3353504F54"></a>009201,000297: 01,2264           00310        <span class="sm">5.3SPOT </span>           <span class="ps">DEC     </span> 200        B-14                       
+009202,000298: 01,2265  E6,1661                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414F47">AOG</a>                                   
+009203,000299: 01,2265           74563 01711                     <span class="ps">-2CADR  </span> <a href="SERVICER207.agc.html#5245524541444143">REREADAC</a>                              
+<a name="352E3553504F54"></a>009204,000300: 01,2267           77777        <span class="sm">5.5SPOT </span>           <span class="ps">OCT     </span> 77777                                 
+009205,000301: 01,2270  E6,1661                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414F47">AOG</a>                                   
+009206,000302: 01,2270           75117 01711                     <span class="ps">-2CADR  </span> <a href="SERVICER207.agc.html#5245444F352E35">REDO5.5</a>                               
+<a name="352E3753504F54"></a>009207,000303: 01,2272           20000        <span class="sm">5.7SPOT </span>           <span class="ps">OCT     </span> 20000                                 <span class="co">#  USED BY PRELAUNCH</span>
+009208,000304: 01,2273  E5,1671                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#58534D">XSM</a>                                   
+009209,000305: 01,2273           02456 66065                     <span class="ps">2CADR   </span> <a href="IMU_CALIBRATION_AND_ALIGNMENT.agc.html#52535447545331">RSTGTS1</a>                               
+<a name="352E313153504F54"></a>009210,000306: 01,2275           77777        <span class="sm">5.11SPOT</span>           <span class="ps">OCT     </span> 77777                                 
+009211,000307: 01,2276  E5,1671                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#58534D">XSM</a>                                   
+009212,000308: 01,2276           75174 11712                     <span class="ps">-2CADR  </span> <a href="IMU_CALIBRATION_AND_ALIGNMENT.agc.html#414C4C4F4F5031">ALLOOP1</a>                               
+<a name="352E313353504F54"></a>009213,000309: 01,2300           20000        <span class="sm">5.13SPOT</span>           <span class="ps">OCT     </span> 20000                                 
+009214,000310: 01,2301  E5,1671                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#58534D">XSM</a>                                   
+009215,000311: 01,2301           02527 66065                     <span class="ps">2CADR   </span> <a href="IMU_CALIBRATION_AND_ALIGNMENT.agc.html#57544C4953544E54">WTLISTNT</a>                              
+<a name="352E313553504F54"></a>009216,000312: 01,2303           20000        <span class="sm">5.15SPOT</span>           <span class="ps">OCT     </span> 20000                                 
+009217,000313: 01,2304  E5,1671                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#58534D">XSM</a>                                   
+009218,000314: 01,2304           03320 66065                     <span class="ps">2CADR   </span> <a href="IMU_CALIBRATION_AND_ALIGNMENT.agc.html#5245535445535431">RESTEST1</a>                              
+<a name="352E313753504F54"></a>009219,000315: 01,2306           20000        <span class="sm">5.17SPOT</span>           <span class="ps">OCT     </span> 20000                                 
+009220,000316: 01,2307  E5,1671                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#58534D">XSM</a>                                   
 </pre>
 </span>
 </p>
@@ -511,45 +515,45 @@ Page 211
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-009190,000314: 01,2307           05112 04065                     <span class="ps">2CADR   </span> <a href="IMU_CALIBRATION_AND_ALIGNMENT.agc.html#47454F5354525434">GEOSTRT4</a>                              
-<a name="352E323153504F54"></a>009191,000315: 01,2311           20000        <span class="sm">5.21SPOT</span>           <span class="ps">OCT     </span> 20000                                 
-009192,000316: 01,2312  E5,1671                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#58534D">XSM</a>                                   
-009193,000317: 01,2312           02640 66065                     <span class="ps">2CADR   </span> <a href="IMU_CALIBRATION_AND_ALIGNMENT.agc.html#414C464C5431">ALFLT1</a>                                
-<a name="352E323353504F54"></a>009194,000318: 01,2314           77777        <span class="sm">5.23SPOT</span>           <span class="ps">OCT     </span> 77777                                 
-009195,000319: 01,2315  E5,1671                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#58534D">XSM</a>                                   
-009196,000320: 01,2315           75154 11712                     <span class="ps">-2CADR  </span> <a href="IMU_CALIBRATION_AND_ALIGNMENT.agc.html#53504543535453">SPECSTS</a>                               
-<a name="352E323553504F54"></a>009197,000321: 01,2317           20000        <span class="sm">5.25SPOT</span>           <span class="ps">OCT     </span> 20000                                 
-009198,000322: 01,2320  E5,1671                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#58534D">XSM</a>                                   
-009199,000323: 01,2320           03331 66065                     <span class="ps">2CADR   </span> <a href="IMU_CALIBRATION_AND_ALIGNMENT.agc.html#5245535445535433">RESTEST3</a>                              
-<a name="352E323753504F54"></a>009200,000324: 01,2322           20000        <span class="sm">5.27SPOT</span>           <span class="ps">OCT     </span> 20000                                 
-009201,000325: 01,2323  E5,1671                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#58534D">XSM</a>                                   
-009202,000326: 01,2323           03277 66065                     <span class="ps">2CADR   </span> <a href="IMU_CALIBRATION_AND_ALIGNMENT.agc.html#5245535441494552">RESTAIER</a>                              
-<a name="352E333153504F54"></a>009203,000327: 01,2325           77777        <span class="sm">5.31SPOT</span>           <span class="ps">OCT     </span> 77777                                 
-009204,000328: 01,2326  E7,1431                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4456434E5452">DVCNTR</a>                                
-009205,000329: 01,2326           75163 01710                     <span class="ps">-2CADR  </span> <a href="SERVICER207.agc.html#5245444F352E3331">REDO5.31</a>                              
-<a name="352E333353504F54"></a>009206,000330: 01,2330           20000        <span class="sm">5.33SPOT</span>           <span class="ps">OCT     </span> 20000                                 
-009207,000331: 01,2331  E5,1671                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#58534D">XSM</a>                                   
-009208,000332: 01,2331           03354 66065                     <span class="ps">2CADR   </span> <a href="IMU_CALIBRATION_AND_ALIGNMENT.agc.html#52455343484E47">RESCHNG</a>                               
-<a name="352E333553504F54"></a>009209,000333: 01,2333           00000        <span class="sm">5.35SPOT</span>           <span class="ps">DEC     </span> 0          B-14                       
-009210,000334: 01,2334           00000 00000                     <span class="ps">2DEC    </span> 0          B-28                       
-<a name="352E333753504F54"></a>009211,000335: 01,2336           77777        <span class="sm">5.37SPOT</span>           <span class="ps">OCT     </span> 77777                                 
-009212,000336: 01,2337  E6,1661                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414F47">AOG</a>                                   
-009213,000337: 01,2337           75035 01711                     <span class="ps">-2CADR  </span> <a href="SERVICER207.agc.html#4348454B41564547">CHEKAVEG</a>                              
-<a name="352E343153504F54"></a>009214,000338: 01,2341           77777        <span class="sm">5.41SPOT</span>           <span class="ps">OCT     </span> 77777                                 <span class="co">#  TO PROTECT PREREAD AT TIG-30A</span>
-009215,000339: 01,2342  E7,1431                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4456434E5452">DVCNTR</a>                                <span class="co">#     TIG-15 T+60</span>
-009216,000340: 01,2342           75173 01710                     <span class="ps">-2CADR  </span> <a href="SERVICER207.agc.html#50524552454144">PREREAD</a>                               
-009217,000341:                                                                                                  <span class="co">#  ANY MORE GROUP 5.ODD RESTART VALUES SHOULD GO HERE</span>
-009218,000342: 
-<a name="362E3253504F54"></a>009219,000343: 01,2344           77777        <span class="sm">6.2SPOT </span>           <span class="ps">OCT     </span> 77777                                 <span class="co">#  USED BY P40 AFTER GIMB DR TST TO REPOS'N</span>
-009220,000344: 01,2345  E6,1476                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414B">AK</a>                                    <span class="co">#  ENGINE UNTIL TVCDAPON</span>
-009221,000345: 01,2345           75737 37711                     <span class="ps">-2CADR  </span> <a href="P40-P47.agc.html#50524534302E36">PRE40.6</a>                               
-009222,000346: 
-009223,000347: 01,2347           00144                           <span class="ps">DEC     </span> 100        B-14                       
-009224,000348: 01,2350  E7,1660                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54544F474F">TTOGO</a>                                 
-009225,000349: 01,2350           74603 27710                     <span class="ps">-2CADR  </span> <a href="P40-P47.agc.html#434C4F4B5441534B">CLOKTASK</a>                              
-009226,000350: 
-009227,000351:                                                                                                  <span class="co">#  ANY MORE 6.ODD RESTART VALUES SHOULD GO HERE</span>
-009228,000352: 
+009222,000318: 01,2307           05112 04065                     <span class="ps">2CADR   </span> <a href="IMU_CALIBRATION_AND_ALIGNMENT.agc.html#47454F5354525434">GEOSTRT4</a>                              
+<a name="352E323153504F54"></a>009223,000319: 01,2311           20000        <span class="sm">5.21SPOT</span>           <span class="ps">OCT     </span> 20000                                 
+009224,000320: 01,2312  E5,1671                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#58534D">XSM</a>                                   
+009225,000321: 01,2312           02640 66065                     <span class="ps">2CADR   </span> <a href="IMU_CALIBRATION_AND_ALIGNMENT.agc.html#414C464C5431">ALFLT1</a>                                
+<a name="352E323353504F54"></a>009226,000322: 01,2314           77777        <span class="sm">5.23SPOT</span>           <span class="ps">OCT     </span> 77777                                 
+009227,000323: 01,2315  E5,1671                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#58534D">XSM</a>                                   
+009228,000324: 01,2315           75154 11712                     <span class="ps">-2CADR  </span> <a href="IMU_CALIBRATION_AND_ALIGNMENT.agc.html#53504543535453">SPECSTS</a>                               
+<a name="352E323553504F54"></a>009229,000325: 01,2317           20000        <span class="sm">5.25SPOT</span>           <span class="ps">OCT     </span> 20000                                 
+009230,000326: 01,2320  E5,1671                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#58534D">XSM</a>                                   
+009231,000327: 01,2320           03331 66065                     <span class="ps">2CADR   </span> <a href="IMU_CALIBRATION_AND_ALIGNMENT.agc.html#5245535445535433">RESTEST3</a>                              
+<a name="352E323753504F54"></a>009232,000328: 01,2322           20000        <span class="sm">5.27SPOT</span>           <span class="ps">OCT     </span> 20000                                 
+009233,000329: 01,2323  E5,1671                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#58534D">XSM</a>                                   
+009234,000330: 01,2323           03277 66065                     <span class="ps">2CADR   </span> <a href="IMU_CALIBRATION_AND_ALIGNMENT.agc.html#5245535441494552">RESTAIER</a>                              
+<a name="352E333153504F54"></a>009235,000331: 01,2325           77777        <span class="sm">5.31SPOT</span>           <span class="ps">OCT     </span> 77777                                 
+009236,000332: 01,2326  E7,1431                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4456434E5452">DVCNTR</a>                                
+009237,000333: 01,2326           75163 01710                     <span class="ps">-2CADR  </span> <a href="SERVICER207.agc.html#5245444F352E3331">REDO5.31</a>                              
+<a name="352E333353504F54"></a>009238,000334: 01,2330           20000        <span class="sm">5.33SPOT</span>           <span class="ps">OCT     </span> 20000                                 
+009239,000335: 01,2331  E5,1671                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#58534D">XSM</a>                                   
+009240,000336: 01,2331           03354 66065                     <span class="ps">2CADR   </span> <a href="IMU_CALIBRATION_AND_ALIGNMENT.agc.html#52455343484E47">RESCHNG</a>                               
+<a name="352E333553504F54"></a>009241,000337: 01,2333           00000        <span class="sm">5.35SPOT</span>           <span class="ps">DEC     </span> 0          B-14                       
+009242,000338: 01,2334           00000 00000                     <span class="ps">2DEC    </span> 0          B-28                       
+<a name="352E333753504F54"></a>009243,000339: 01,2336           77777        <span class="sm">5.37SPOT</span>           <span class="ps">OCT     </span> 77777                                 
+009244,000340: 01,2337  E6,1661                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414F47">AOG</a>                                   
+009245,000341: 01,2337           75035 01711                     <span class="ps">-2CADR  </span> <a href="SERVICER207.agc.html#4348454B41564547">CHEKAVEG</a>                              
+<a name="352E343153504F54"></a>009246,000342: 01,2341           77777        <span class="sm">5.41SPOT</span>           <span class="ps">OCT     </span> 77777                                 <span class="co">#  TO PROTECT PREREAD AT TIG-30A</span>
+009247,000343: 01,2342  E7,1431                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4456434E5452">DVCNTR</a>                                <span class="co">#     TIG-15 T+60</span>
+009248,000344: 01,2342           75173 01710                     <span class="ps">-2CADR  </span> <a href="SERVICER207.agc.html#50524552454144">PREREAD</a>                               
+009249,000345:                                                                                                  <span class="co">#  ANY MORE GROUP 5.ODD RESTART VALUES SHOULD GO HERE</span>
+009250,000346: 
+<a name="362E3253504F54"></a>009251,000347: 01,2344           77777        <span class="sm">6.2SPOT </span>           <span class="ps">OCT     </span> 77777                                 <span class="co">#  USED BY P40 AFTER GIMB DR TST TO REPOS'N</span>
+009252,000348: 01,2345  E6,1476                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414B">AK</a>                                    <span class="co">#  ENGINE UNTIL TVCDAPON</span>
+009253,000349: 01,2345           75737 37711                     <span class="ps">-2CADR  </span> <a href="P40-P47.agc.html#50524534302E36">PRE40.6</a>                               
+009254,000350: 
+009255,000351: 01,2347           00144                           <span class="ps">DEC     </span> 100        B-14                       
+009256,000352: 01,2350  E7,1660                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54544F474F">TTOGO</a>                                 
+009257,000353: 01,2350           74603 27710                     <span class="ps">-2CADR  </span> <a href="P40-P47.agc.html#434C4F4B5441534B">CLOKTASK</a>                              
+009258,000354: 
+009259,000355:                                                                                                  <span class="co">#  ANY MORE 6.ODD RESTART VALUES SHOULD GO HERE</span>
+009260,000356: 
 </pre>
 </span>
 </p>
@@ -565,24 +569,24 @@ Page 212
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-009230,000354: 
-<a name="362E3353504F54"></a>009231,000355: 01,2352           00144        <span class="sm">6.3SPOT </span>           <span class="ps">DEC     </span> 100        B-14                       
-009232,000356: 01,2353  E7,1412                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544947">TIG</a>                                   
-009233,000357: 01,2353           74603 27710                     <span class="ps">-2CADR  </span> <a href="P40-P47.agc.html#434C4F4B5441534B">CLOKTASK</a>                              
-<a name="362E3553504F54"></a>009234,000358: 01,2355           30000        <span class="sm">6.5SPOT </span>           <span class="ps">OCT     </span> 30000                                 <span class="co">#  PROTECT INCREMENTING OF TIME2,TIME1 BY</span>
-009235,000359: 01,2356  E3,1706                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54455048454D">TEPHEM</a>                                <span class="co">#  P27NUPDATE PROGRAM)</span>
-009236,000360: 01,2356           03535 56063                     <span class="ps">2CADR   </span> <a href="UPDATE_PROGRAM.agc.html#54494D4544494452">TIMEDIDR</a>                              
-<a name="362E3753504F54"></a>009237,000361: 01,2360           00000        <span class="sm">6.7SPOT </span>           <span class="ps">OCT     </span> 0                                     
-009238,000362: 01,2361           00000                           <span class="ps">OCT     </span> 0                                     
-009239,000363: 01,2362           00000                           <span class="ps">OCT     </span> 0                                     
-009240,000364: 
-<a name="362E313153504F54"></a>009241,000365: 01,2363           76052        <span class="sm">6.11SPOT</span>           <span class="ps">-GENADR </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#434D2F47594D4454">CM/GYMDT</a>                              <span class="co">#  PROTECT TASK TO READ CDUS.</span>
-009242,000366: 01,2364  E6,1725                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#434D2F47594D4454">CM/GYMDT</a>                              <span class="co">#  FOR ENTRY DAP</span>
-009243,000367: 01,2364           75323 45711                     <span class="ps">-2CADR  </span> <a href="CM_ENTRY_DIGITAL_AUTOPILOT.agc.html#5245414447594D42">READGYMB</a>                              
-<a name="362E313353504F54"></a>009244,000368: 01,2366           00000        <span class="sm">6.13SPOT</span>           <span class="ps">DEC     </span> 0          B-14                       
-009245,000369: 01,2367           00000                           <span class="ps">DEC     </span> 0          B-14                       
-009246,000370: 01,2370           00000                           <span class="ps">DEC     </span> 0          B-14                       
-009247,000371: 
+009262,000358: 
+<a name="362E3353504F54"></a>009263,000359: 01,2352           00144        <span class="sm">6.3SPOT </span>           <span class="ps">DEC     </span> 100        B-14                       
+009264,000360: 01,2353  E7,1412                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544947">TIG</a>                                   
+009265,000361: 01,2353           74603 27710                     <span class="ps">-2CADR  </span> <a href="P40-P47.agc.html#434C4F4B5441534B">CLOKTASK</a>                              
+<a name="362E3553504F54"></a>009266,000362: 01,2355           30000        <span class="sm">6.5SPOT </span>           <span class="ps">OCT     </span> 30000                                 <span class="co">#  PROTECT INCREMENTING OF TIME2,TIME1 BY</span>
+009267,000363: 01,2356  E3,1706                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54455048454D">TEPHEM</a>                                <span class="co">#  P27NUPDATE PROGRAM)</span>
+009268,000364: 01,2356           03535 56063                     <span class="ps">2CADR   </span> <a href="UPDATE_PROGRAM.agc.html#54494D4544494452">TIMEDIDR</a>                              
+<a name="362E3753504F54"></a>009269,000365: 01,2360           00000        <span class="sm">6.7SPOT </span>           <span class="ps">OCT     </span> 0                                     
+009270,000366: 01,2361           00000                           <span class="ps">OCT     </span> 0                                     
+009271,000367: 01,2362           00000                           <span class="ps">OCT     </span> 0                                     
+009272,000368: 
+<a name="362E313153504F54"></a>009273,000369: 01,2363           76052        <span class="sm">6.11SPOT</span>           <span class="ps">-GENADR </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#434D2F47594D4454">CM/GYMDT</a>                              <span class="co">#  PROTECT TASK TO READ CDUS.</span>
+009274,000370: 01,2364  E6,1725                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#434D2F47594D4454">CM/GYMDT</a>                              <span class="co">#  FOR ENTRY DAP</span>
+009275,000371: 01,2364           75323 45711                     <span class="ps">-2CADR  </span> <a href="CM_ENTRY_DIGITAL_AUTOPILOT.agc.html#5245414447594D42">READGYMB</a>                              
+<a name="362E313353504F54"></a>009276,000372: 01,2366           00000        <span class="sm">6.13SPOT</span>           <span class="ps">DEC     </span> 0          B-14                       
+009277,000373: 01,2367           00000                           <span class="ps">DEC     </span> 0          B-14                       
+009278,000374: 01,2370           00000                           <span class="ps">DEC     </span> 0          B-14                       
+009279,000375: 
 </pre>
 </span>
 </p>
@@ -598,56 +602,56 @@ Page 213
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-009249,000373:                                                                                                  <span class="co">#  PROGRAM DESCRIPTION: NEWPHASE                                           DATE: 11 NOV 1966</span>
-009250,000374:                                                                                                  <span class="co">#  MOD: 1                                                                  ASSEMBLY:  SUNBURST REV</span>
-009251,000375:                                                                                                  <span class="co">#  MOD BY: COPPS                                                           LOG SECTION: PHASE TABLE MAINTENANCE</span>
-009252,000376:                                                                                                  <span class="co">#  FUNCTIONAL DESCRIPTION:</span>
-009253,000377:                                                                                                  <span class="co">#                NEWPHASE IS THE QUICK WAY TO MAKE A NON VARIABLE PHASE CHANGE. IT INCLUDES THE OPTION OF SETTING</span>
-009254,000378:                                                                                                  <span class="co">#           TBASE OF THE GROUP. IF TBASE IS TO BE SET,  -C(TIME1) IS STORED IN THE TBASE TABLE AS FOLLOWS:</span>
-009255,000379: 
-009256,000380:                                                                                                  <span class="co">#                  (L-1) TBASE0</span>
-009257,000381:                                                                                                  <span class="co">#                  (L)   TBASE1 (IF GROUP=1)</span>
-009258,000382:                                                                                                  <span class="co">#                  (L+1)</span>
-009259,000383:                                                                                                  <span class="co">#                  (L+2) TBASE2 (IF GROUP=2)</span>
-009260,000384:                                                                                                  <span class="co">#                  -----</span>
-009261,000385:                                                                                                  <span class="co">#                  (L+6) TBASE4 (IF GROUP=4)</span>
-009262,000386:                                                                                                  <span class="co">#                  (L+7)</span>
-009263,000387:                                                                                                  <span class="co">#                  (L+8) TBASE5 (IF GROUP=5)</span>
-009264,000388: 
-009265,000389:                                                                                                  <span class="co">#           IN ANY CASE, THE NEGATIVE OF THE PHASE, FOLLOWED (IN THE NEXT REGISTER)  BY THE PHASE, IS STORED IN THE</span>
-009266,000390:                                                                                                  <span class="co">#           PHASE TABLE AS FOLLOWS:</span>
-009267,000391: 
-009268,000392:                                                                                                  <span class="co">#                  (L)   -PHASE1 (IF GROUP=1)</span>
-009269,000393:                                                                                                  <span class="co">#                  (L+1) PHASE1</span>
-009270,000394:                                                                                                  <span class="co">#                  (L+2) -PHASE2 (IF GROUP=2)</span>
-009271,000395:                                                                                                  <span class="co">#                  (L+3) PHASE 2</span>
-009272,000396:                                                                                                  <span class="co">#                  -----</span>
-009273,000397:                                                                                                  <span class="co">#                  (L+7) PHASE4</span>
-009274,000398:                                                                                                  <span class="co">#                  (L+8) -PHASE5 (IF GROUP=5)</span>
-009275,000399:                                                                                                  <span class="co">#                  (L+9) PHASE5</span>
-009276,000400: 
-009277,000401:                                                                                                  <span class="co">#  CALLING SEQUENCE:</span>
-009278,000402:                                                                                                  <span class="co">#                EXAMPLE IS FOR PLACING A PHASE OF FIVE INTO GROUP THREE:</span>
-009279,000403: 
-009280,000404:                                                                                                  <span class="co">#           1) IF TBASE IS NOT TO BE SET:</span>
-009281,000405:                                                                                                  <span class="co">#                                          L-1      CA     FIVE</span>
-009282,000406:                                                                                                  <span class="co">#                                          L        TC     NEWPHASE</span>
-009283,000407:                                                                                                  <span class="co">#                                          L+1      OCT    00003</span>
-009284,000408: 
-009285,000409:                                                                                                  <span class="co">#           2) IF TBASE IS TO BE SET:</span>
-009286,000410:                                                                                                  <span class="co">#                                          L-1      CS     FIVE</span>
-009287,000411:                                                                                                  <span class="co">#                                          L        TC     NEWPHASE</span>
-009288,000412:                                                                                                  <span class="co">#                                          L+1      OCT    00003</span>
-009289,000413: 
-009290,000414:                                                                                                  <span class="co">#  SUBROUTINES CALLED: NONE</span>
-009291,000415: 
-009292,000416:                                                                                                  <span class="co">#  NORMAL EXIT MODE: AT L+2 OF CALLING SEQUENCE</span>
-009293,000417: 
-009294,000418:                                                                                                  <span class="co">#  ALARM OR ABORT EXITS: NONE</span>
-009295,000419: 
-009296,000420:                                                                                                  <span class="co">#  OUTPUT: PHASE TABLE AND TBASE TABLE UPDATED</span>
-009297,000421: 
-009298,000422:                                                                                                  <span class="co">#  ERASABLE INITIALIZATION REQ,D: NONE</span>
+009281,000377:                                                                                                  <span class="co">#  PROGRAM DESCRIPTION: NEWPHASE                                           DATE: 11 NOV 1966</span>
+009282,000378:                                                                                                  <span class="co">#  MOD: 1                                                                  ASSEMBLY:  SUNBURST REV</span>
+009283,000379:                                                                                                  <span class="co">#  MOD BY: COPPS                                                           LOG SECTION: PHASE TABLE MAINTENANCE</span>
+009284,000380:                                                                                                  <span class="co">#  FUNCTIONAL DESCRIPTION:</span>
+009285,000381:                                                                                                  <span class="co">#                NEWPHASE IS THE QUICK WAY TO MAKE A NON VARIABLE PHASE CHANGE. IT INCLUDES THE OPTION OF SETTING</span>
+009286,000382:                                                                                                  <span class="co">#           TBASE OF THE GROUP. IF TBASE IS TO BE SET,  -C(TIME1) IS STORED IN THE TBASE TABLE AS FOLLOWS:</span>
+009287,000383: 
+009288,000384:                                                                                                  <span class="co">#                  (L-1) TBASE0</span>
+009289,000385:                                                                                                  <span class="co">#                  (L)   TBASE1 (IF GROUP=1)</span>
+009290,000386:                                                                                                  <span class="co">#                  (L+1)</span>
+009291,000387:                                                                                                  <span class="co">#                  (L+2) TBASE2 (IF GROUP=2)</span>
+009292,000388:                                                                                                  <span class="co">#                  -----</span>
+009293,000389:                                                                                                  <span class="co">#                  (L+6) TBASE4 (IF GROUP=4)</span>
+009294,000390:                                                                                                  <span class="co">#                  (L+7)</span>
+009295,000391:                                                                                                  <span class="co">#                  (L+8) TBASE5 (IF GROUP=5)</span>
+009296,000392: 
+009297,000393:                                                                                                  <span class="co">#           IN ANY CASE, THE NEGATIVE OF THE PHASE, FOLLOWED (IN THE NEXT REGISTER)  BY THE PHASE, IS STORED IN THE</span>
+009298,000394:                                                                                                  <span class="co">#           PHASE TABLE AS FOLLOWS:</span>
+009299,000395: 
+009300,000396:                                                                                                  <span class="co">#                  (L)   -PHASE1 (IF GROUP=1)</span>
+009301,000397:                                                                                                  <span class="co">#                  (L+1) PHASE1</span>
+009302,000398:                                                                                                  <span class="co">#                  (L+2) -PHASE2 (IF GROUP=2)</span>
+009303,000399:                                                                                                  <span class="co">#                  (L+3) PHASE 2</span>
+009304,000400:                                                                                                  <span class="co">#                  -----</span>
+009305,000401:                                                                                                  <span class="co">#                  (L+7) PHASE4</span>
+009306,000402:                                                                                                  <span class="co">#                  (L+8) -PHASE5 (IF GROUP=5)</span>
+009307,000403:                                                                                                  <span class="co">#                  (L+9) PHASE5</span>
+009308,000404: 
+009309,000405:                                                                                                  <span class="co">#  CALLING SEQUENCE:</span>
+009310,000406:                                                                                                  <span class="co">#                EXAMPLE IS FOR PLACING A PHASE OF FIVE INTO GROUP THREE:</span>
+009311,000407: 
+009312,000408:                                                                                                  <span class="co">#           1) IF TBASE IS NOT TO BE SET:</span>
+009313,000409:                                                                                                  <span class="co">#                                          L-1      CA     FIVE</span>
+009314,000410:                                                                                                  <span class="co">#                                          L        TC     NEWPHASE</span>
+009315,000411:                                                                                                  <span class="co">#                                          L+1      OCT    00003</span>
+009316,000412: 
+009317,000413:                                                                                                  <span class="co">#           2) IF TBASE IS TO BE SET:</span>
+009318,000414:                                                                                                  <span class="co">#                                          L-1      CS     FIVE</span>
+009319,000415:                                                                                                  <span class="co">#                                          L        TC     NEWPHASE</span>
+009320,000416:                                                                                                  <span class="co">#                                          L+1      OCT    00003</span>
+009321,000417: 
+009322,000418:                                                                                                  <span class="co">#  SUBROUTINES CALLED: NONE</span>
+009323,000419: 
+009324,000420:                                                                                                  <span class="co">#  NORMAL EXIT MODE: AT L+2 OF CALLING SEQUENCE</span>
+009325,000421: 
+009326,000422:                                                                                                  <span class="co">#  ALARM OR ABORT EXITS: NONE</span>
+009327,000423: 
+009328,000424:                                                                                                  <span class="co">#  OUTPUT: PHASE TABLE AND TBASE TABLE UPDATED</span>
+009329,000425: 
+009330,000426:                                                                                                  <span class="co">#  ERASABLE INITIALIZATION REQ,D: NONE</span>
 </pre>
 </span>
 </p>
@@ -663,43 +667,43 @@ Page 214
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-009300,000424:                                                                                                  <span class="co">#  DEBRIS: A,L,TEMPG</span>
-009301,000425: 
-009302,000426:                                                                                                  <span class="co">#  ***WARNING*** THIS PROGRAM IS TO BE PLACED IN FIXED-FIXED AND UNSWITCHED ERASABLE.</span>
-009303,000427: 
-009304,000428:    4114                                           <span class="ps">BLOCK   </span> 02                                    
-009305,000429:    4000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#464654414731">FFTAG1</a>                                
-009306,000430:    4000                                           <span class="ps">BANK    </span>                                       
-009307,000431: 
-009308,000432:    4114                                           <span class="ps">COUNT*  </span> $$/PHASE                              
-009309,000433: 
-<a name="4E45575048415345"></a>009310,000434:    4114           00004        <span class="sm">NEWPHASE</span>           <span class="op">INHINT  </span>                                       
-009311,000435: 
-009312,000436:    4115           54001                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     <span class="co">#  SAVE FOR FURTHER USE</span>
-009313,000437: 
-009314,000438:    4116           50002                           <span class="op">NDX     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     <span class="co">#  OBTAIN THE GROUP NUMBER</span>
-009315,000439:    4117           30000                           <span class="op">CA      </span> 0                                     
-009316,000440:    4120           24002                           <span class="op">INCR    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     <span class="co">#  OBTAIN THE RETURN ADDRESS</span>
-009317,000441:    4121           60000                           <span class="op">DOUBLE  </span>                                       <span class="co">#  SAVE THE GROUP IN A FORM USED FOR</span>
-009318,000442:    4122           54061                           <span class="op">TS      </span> <a href="PHASE_TABLE_MAINTENANCE.agc.html#54454D5047">TEMPG</a>                                 <span class="co">#  INDEXING</span>
-009319,000443: 
-009320,000444:    4123           10001                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     <span class="co">#  SEE IF WE ARE TO SET TBASE</span>
-009321,000445:    4124           14133                           <span class="op">TCF     </span> +7                                    <span class="co">#  NO, THE DELTA T WAS POSITIVE</span>
-009322,000446:    4125           14133                           <span class="op">TCF     </span> +6                                    
-009323,000447: 
-<a name="4E5546415A2B3130"></a>009324,000448:    4126           24000        <span class="sm">NUFAZ+10</span>           <span class="op">INCR    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#  SET TBASE AND STORE PHASE CORRECTLY</span>
-009325,000449:    4127           54001                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
-009326,000450: 
-009327,000451:    4130           40025                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54494D4531">TIME1</a>                                 <span class="co">#  SET TBASE</span>
-009328,000452:    4131           50061                           <span class="op">NDX     </span> <a href="PHASE_TABLE_MAINTENANCE.agc.html#54454D5047">TEMPG</a>                                 
-009329,000453:    4132           55051                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544241534531">TBASE1</a>     -2                         
-009330,000454: 
-009331,000455:    4133           40001                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     <span class="co">#  NOW PUT THE PHASE IN THE RIGHT TABLE LOC</span>
-009332,000456:    4134           50061                           <span class="op">NDX     </span> <a href="PHASE_TABLE_MAINTENANCE.agc.html#54454D5047">TEMPG</a>                                 
-009333,000457:    4135           52751                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#2D504841534531">-PHASE1</a>    -2                         
-009334,000458: 
-009335,000459:    4136           00003                           <span class="op">RELINT  </span>                                       
-009336,000460:    4137           00002                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     <span class="co">#  NOW RETURN TO CALLER</span>
+009332,000428:                                                                                                  <span class="co">#  DEBRIS: A,L,TEMPG</span>
+009333,000429: 
+009334,000430:                                                                                                  <span class="co">#  ***WARNING*** THIS PROGRAM IS TO BE PLACED IN FIXED-FIXED AND UNSWITCHED ERASABLE.</span>
+009335,000431: 
+009336,000432:    4114                                           <span class="ps">BLOCK   </span> 02                                    
+009337,000433:    4000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#464654414731">FFTAG1</a>                                
+009338,000434:    4000                                           <span class="ps">BANK    </span>                                       
+009339,000435: 
+009340,000436:    4114                                           <span class="ps">COUNT*  </span> $$/PHASE                              
+009341,000437: 
+<a name="4E45575048415345"></a>009342,000438:    4114           00004        <span class="sm">NEWPHASE</span>           <span class="op">INHINT  </span>                                       
+009343,000439: 
+009344,000440:    4115           54001                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     <span class="co">#  SAVE FOR FURTHER USE</span>
+009345,000441: 
+009346,000442:    4116           50002                           <span class="op">NDX     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     <span class="co">#  OBTAIN THE GROUP NUMBER</span>
+009347,000443:    4117           30000                           <span class="op">CA      </span> 0                                     
+009348,000444:    4120           24002                           <span class="op">INCR    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     <span class="co">#  OBTAIN THE RETURN ADDRESS</span>
+009349,000445:    4121           60000                           <span class="op">DOUBLE  </span>                                       <span class="co">#  SAVE THE GROUP IN A FORM USED FOR</span>
+009350,000446:    4122           54061                           <span class="op">TS      </span> <a href="PHASE_TABLE_MAINTENANCE.agc.html#54454D5047">TEMPG</a>                                 <span class="co">#  INDEXING</span>
+009351,000447: 
+009352,000448:    4123           10001                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     <span class="co">#  SEE IF WE ARE TO SET TBASE</span>
+009353,000449:    4124           14133                           <span class="op">TCF     </span> +7                                    <span class="co">#  NO, THE DELTA T WAS POSITIVE</span>
+009354,000450:    4125           14133                           <span class="op">TCF     </span> +6                                    
+009355,000451: 
+<a name="4E5546415A2B3130"></a>009356,000452:    4126           24000        <span class="sm">NUFAZ+10</span>           <span class="op">INCR    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#  SET TBASE AND STORE PHASE CORRECTLY</span>
+009357,000453:    4127           54001                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
+009358,000454: 
+009359,000455:    4130           40025                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54494D4531">TIME1</a>                                 <span class="co">#  SET TBASE</span>
+009360,000456:    4131           50061                           <span class="op">NDX     </span> <a href="PHASE_TABLE_MAINTENANCE.agc.html#54454D5047">TEMPG</a>                                 
+009361,000457:    4132           55051                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544241534531">TBASE1</a>     -2                         
+009362,000458: 
+009363,000459:    4133           40001                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     <span class="co">#  NOW PUT THE PHASE IN THE RIGHT TABLE LOC</span>
+009364,000460:    4134           50061                           <span class="op">NDX     </span> <a href="PHASE_TABLE_MAINTENANCE.agc.html#54454D5047">TEMPG</a>                                 
+009365,000461:    4135           52751                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#2D504841534531">-PHASE1</a>    -2                         
+009366,000462: 
+009367,000463:    4136           00003                           <span class="op">RELINT  </span>                                       
+009368,000464:    4137           00002                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     <span class="co">#  NOW RETURN TO CALLER</span>
 
 End of include-file RESTART_TABLES.agc.  Parent file is <a href="MAIN.agc.html">MAIN.agc</a>
 </pre>

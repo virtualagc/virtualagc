@@ -66,7 +66,8 @@ color: #993399;
 <img alt="" src="Apollo32.png" style="width: 32px; height: 32px;" align="left">
 </td>
 <td style="vertical-align: middle;">
-These source-code files were derived originally from the scan from MIT's Dibner Institute's 
+This is the source-code for the Apollo 9 Command Module's Guidance Computer.
+These files were derived originally from the scan from MIT's Dibner Institute's 
 now-discontinued website titled "History of Recent Science and Technology", which
 in turn was originally created by Gary Neff, though his high-quality scans were
 unfortunately reduced in legibility when presented online.
@@ -91,41 +92,47 @@ Note that the date is the date of the printout, not the date of the program revi
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-050991,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
-050992,000003:                                                                                                  <span class="co">## Filename:    SINGLE_PRECISION_SUBROUTINES.agc</span>
-050993,000004:                                                                                                  <span class="co">## Purpose:     Part of the source code for Colossus, build 249.</span>
-050994,000005:                                                                                                  <span class="co">##              It is part of the source code for the Command Module's (CM)</span>
-050995,000006:                                                                                                  <span class="co">##              Apollo Guidance Computer (AGC), possibly for Apollo 8 and 9.</span>
-050996,000007:                                                                                                  <span class="co">## Assembler:   yaYUL</span>
-050997,000008:                                                                                                  <span class="co">## Reference:   p. 1189 of 1701.pdf.</span>
-050998,000009:                                                                                                  <span class="co">## Contact:     Ron Burkey &lt;info@sandroid.org>.</span>
-050999,000010:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo.</span>
-051000,000011:                                                                                                  <span class="co">## Mod history: 08/29/04 RSB.   Adapted from corresponding Luminary131 file.</span>
-051001,000012:                                                                                                  <span class="co">##</span>
-051002,000013:                                                                                                  <span class="co">## The contents of the "Colossus249" files, in general, are transcribed </span>
-051003,000014:                                                                                                  <span class="co">## from a scanned document obtained from MIT's website,</span>
-051004,000015:                                                                                                  <span class="co">## http://hrst.mit.edu/hrs/apollo/public/archive/1701.pdf.  Notations on this</span>
-051005,000016:                                                                                                  <span class="co">## document read, in part:</span>
-051006,000017:                                                                                                  <span class="co">##</span>
-051007,000018:                                                                                                  <span class="co">##      Assemble revision 249 of AGC program Colossus by NASA</span>
-051008,000019:                                                                                                  <span class="co">##      2021111-041.  October 28, 1968.  </span>
-051009,000020:                                                                                                  <span class="co">##</span>
-051010,000021:                                                                                                  <span class="co">##      This AGC program shall also be referred to as</span>
-051011,000022:                                                                                                  <span class="co">##                              Colossus 1A</span>
-051012,000023:                                                                                                  <span class="co">##</span>
-051013,000024:                                                                                                  <span class="co">##      Prepared by</span>
-051014,000025:                                                                                                  <span class="co">##                      Massachusetts Institute of Technology</span>
-051015,000026:                                                                                                  <span class="co">##                      75 Cambridge Parkway</span>
-051016,000027:                                                                                                  <span class="co">##                      Cambridge, Massachusetts</span>
-051017,000028:                                                                                                  <span class="co">##      under NASA contract NAS 9-4065.</span>
-051018,000029:                                                                                                  <span class="co">##</span>
-051019,000030:                                                                                                  <span class="co">## Refer directly to the online document mentioned above for further information.</span>
-051020,000031:                                                                                                  <span class="co">## Please report any errors (relative to 1701.pdf) to info@sandroid.org.</span>
-051021,000032:                                                                                                  <span class="co">##</span>
-051022,000033:                                                                                                  <span class="co">## In some cases, where the source code for Luminary 131 overlaps that of </span>
-051023,000034:                                                                                                  <span class="co">## Colossus 249, this code is instead copied from the corresponding Luminary 131</span>
-051024,000035:                                                                                                  <span class="co">## source file, and then is proofed to incorporate any changes.</span>
-051025,000036: 
+051468,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
+051469,000003:                                                                                                  <span class="co">## Filename:    SINGLE_PRECISION_SUBROUTINES.agc</span>
+051470,000004:                                                                                                  <span class="co">## Purpose:     Part of the source code for Colossus, build 249.</span>
+051471,000005:                                                                                                  <span class="co">##              It is part of the source code for the Command Module's (CM)</span>
+051472,000006:                                                                                                  <span class="co">##              Apollo Guidance Computer (AGC), for Apollo 9.</span>
+051473,000007:                                                                                                  <span class="co">## Assembler:   yaYUL</span>
+051474,000008:                                                                                                  <span class="co">## Reference:   p. 1177</span>
+051475,000009:                                                                                                  <span class="co">## Contact:     Ron Burkey &lt;info@sandroid.org>.</span>
+051476,000010:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo.</span>
+051477,000011:                                                                                                  <span class="co">## Mod history: 08/29/04 RSB.   Adapted from corresponding Luminary131 file.</span>
+051478,000012:                                                                                                  <span class="co">##              2017-01-06 RSB  Page numbers now agree with those on the</span>
+051479,000013:                                                                                                  <span class="co">##                              original harcopy, as opposed to the PDF page</span>
+051480,000014:                                                                                                  <span class="co">##                              numbers in 1701.pdf.</span>
+051481,000015:                                                                                                  <span class="co">##              2017-01-18 RSB  Cross-diff'd comment text (not whitespace)</span>
+051482,000016:                                                                                                  <span class="co">##                              vs the already-proofed corresponding Colossus</span>
+051483,000017:                                                                                                  <span class="co">##                              237 and Comanche 55 source-code files</span>
+051484,000018:                                                                                                  <span class="co">##                              and corrected errors found.</span>
+051485,000019:                                                                                                  <span class="co">##</span>
+051486,000020:                                                                                                  <span class="co">## The contents of the "Colossus249" files, in general, are transcribed </span>
+051487,000021:                                                                                                  <span class="co">## from a scanned copy of the program listing.  Notations on this</span>
+051488,000022:                                                                                                  <span class="co">## document read, in part:</span>
+051489,000023:                                                                                                  <span class="co">##</span>
+051490,000024:                                                                                                  <span class="co">##      Assemble revision 249 of AGC program Colossus by NASA</span>
+051491,000025:                                                                                                  <span class="co">##      2021111-041.  October 28, 1968.  </span>
+051492,000026:                                                                                                  <span class="co">##</span>
+051493,000027:                                                                                                  <span class="co">##      This AGC program shall also be referred to as</span>
+051494,000028:                                                                                                  <span class="co">##                              Colossus 1A</span>
+051495,000029:                                                                                                  <span class="co">##</span>
+051496,000030:                                                                                                  <span class="co">##      Prepared by</span>
+051497,000031:                                                                                                  <span class="co">##                      Massachusetts Institute of Technology</span>
+051498,000032:                                                                                                  <span class="co">##                      75 Cambridge Parkway</span>
+051499,000033:                                                                                                  <span class="co">##                      Cambridge, Massachusetts</span>
+051500,000034:                                                                                                  <span class="co">##      under NASA contract NAS 9-4065.</span>
+051501,000035:                                                                                                  <span class="co">##</span>
+051502,000036:                                                                                                  <span class="co">## Refer directly to the online document mentioned above for further information.</span>
+051503,000037:                                                                                                  <span class="co">## Please report any errors (relative to the scanned pages) to info@sandroid.org.</span>
+051504,000038:                                                                                                  <span class="co">##</span>
+051505,000039:                                                                                                  <span class="co">## In some cases, where the source code for Luminary 131 overlaps that of </span>
+051506,000040:                                                                                                  <span class="co">## Colossus 249, this code is instead copied from the corresponding Luminary 131</span>
+051507,000041:                                                                                                  <span class="co">## source file, and then is proofed to incorporate any changes.</span>
+051508,000042: 
 </pre>
 </span>
 </p>
@@ -136,55 +143,55 @@ Note that the date is the date of the printout, not the date of the program revi
 <img alt="" src="Apollo32.png" style="width: 32px; height: 32px;" align="left">
 </td>
 <td style="vertical-align: middle;">
-Page 1189
+Page 1177
 </td></tr></tbody></table>
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-051027,000038:    4767                                           <span class="ps">BLOCK   </span> 02                                    
-051028,000039: 
-051029,000040:                                                                                                  <span class="co">#  SINGLE PRECISION SINE AND COSINE</span>
-051030,000041: 
-051031,000042:    4767                                           <span class="ps">COUNT   </span> 02/INTER                              
-051032,000043: 
-<a name="5350434F53"></a>051033,000044:    4767           64675        <span class="sm">SPCOS   </span>           <span class="op">AD      </span> <a href="FIXED_FIXED_CONSTANT_POOL.agc.html#48414C46">HALF</a>                                  <span class="co">#  ARGUMENTS SCALED AT PI</span>
-<a name="535053494E"></a>051034,000045:    4770           55075        <span class="sm">SPSIN   </span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D4B">TEMK</a>                                  
-051035,000046:    4771           14773                           <span class="op">TCF     </span> <a href="#535054">SPT</a>                                   
-051036,000047:    4772           41075                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D4B">TEMK</a>                                  
-<a name="535054"></a>051037,000048:    4773           60000        <span class="sm">SPT     </span>           <span class="op">DOUBLE  </span>                                       
-051038,000049:    4774           55075                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D4B">TEMK</a>                                  
-051039,000050:    4775           15006                           <span class="op">TCF     </span> <a href="#504F4C4C4559">POLLEY</a>                                
-051040,000051:    4776           57075                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D4B">TEMK</a>                                  
-051041,000052:    4777           51075                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D4B">TEMK</a>                                  
-051042,000053:    5000           64673                           <span class="op">AD      </span> <a href="FIXED_FIXED_CONSTANT_POOL.agc.html#4C494D495453">LIMITS</a>                                
-051043,000054:    5001           40000                           <span class="op">COM     </span>                                       
-051044,000055:    5002           61075                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D4B">TEMK</a>                                  
-051045,000056:    5003           55075                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D4B">TEMK</a>                                  
-051046,000057:    5004           15006                           <span class="op">TCF     </span> <a href="#504F4C4C4559">POLLEY</a>                                
-051047,000058:    5005           15024                           <span class="op">TCF     </span> <a href="#4152473930">ARG90</a>                                 
-<a name="504F4C4C4559"></a>051048,000059:    5006           00006        <span class="sm">POLLEY  </span>           <span class="op">EXTEND  </span>                                       
-051049,000060:    5007           71075                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D4B">TEMK</a>                                  
-051050,000061:    5010           55076                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5351">SQ</a>                                    
-051051,000062:    5011           00006                           <span class="op">EXTEND  </span>                                       
-051052,000063:    5012           74742                           <span class="op">MP      </span> <a href="FIXED_FIXED_CONSTANT_POOL.agc.html#43352F32">C5/2</a>                                  
-051053,000064:    5013           67706                           <span class="op">AD      </span> <a href="FIXED_FIXED_CONSTANT_POOL.agc.html#43332F32">C3/2</a>                                  
-051054,000065:    5014           00006                           <span class="op">EXTEND  </span>                                       
-051055,000066:    5015           71076                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5351">SQ</a>                                    
-051056,000067:    5016           67666                           <span class="op">AD      </span> <a href="FIXED_FIXED_CONSTANT_POOL.agc.html#43312F32">C1/2</a>                                  
-051057,000068:    5017           00006                           <span class="op">EXTEND  </span>                                       
-051058,000069:    5020           71075                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D4B">TEMK</a>                                  
-051059,000070:    5021           20001                           <span class="op">DDOUBL  </span>                                       
-051060,000071:    5022           55075                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D4B">TEMK</a>                                  
-051061,000072:    5023           00002                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
-<a name="4152473930"></a>051062,000073:    5024           50000        <span class="sm">ARG90   </span>           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
-051063,000074:    5025           44673                           <span class="op">CS      </span> <a href="FIXED_FIXED_CONSTANT_POOL.agc.html#4C494D495453">LIMITS</a>                                
-051064,000075:    5026           00002                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     <span class="co">#  RESULT SCALED AT 1.</span>
-051065,000076: 
-051066,000077:                                                                                                  <span class="co">#  SPROOT WAS DELETED IN REV 51 OF MASTER. ASS. CONT. HAS CARDS.</span>
-051067,000078: 
-051068,000079: 
-051069,000080: 
-051070,000081: 
+051510,000044:    4767                                           <span class="ps">BLOCK   </span> 02                                    
+051511,000045: 
+051512,000046:                                                                                                  <span class="co">#  SINGLE PRECISION SINE AND COSINE</span>
+051513,000047: 
+051514,000048:    4767                                           <span class="ps">COUNT   </span> 02/INTER                              
+051515,000049: 
+<a name="5350434F53"></a>051516,000050:    4767           64675        <span class="sm">SPCOS   </span>           <span class="op">AD      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#48414C46">HALF</a>                                  <span class="co">#  ARGUMENTS SCALED AT PI</span>
+<a name="535053494E"></a>051517,000051:    4770           55075        <span class="sm">SPSIN   </span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D4B">TEMK</a>                                  
+051518,000052:    4771           14773                           <span class="op">TCF     </span> <a href="#535054">SPT</a>                                   
+051519,000053:    4772           41075                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D4B">TEMK</a>                                  
+<a name="535054"></a>051520,000054:    4773           60000        <span class="sm">SPT     </span>           <span class="op">DOUBLE  </span>                                       
+051521,000055:    4774           55075                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D4B">TEMK</a>                                  
+051522,000056:    4775           15006                           <span class="op">TCF     </span> <a href="#504F4C4C4559">POLLEY</a>                                
+051523,000057:    4776           57075                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D4B">TEMK</a>                                  
+051524,000058:    4777           51075                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D4B">TEMK</a>                                  
+051525,000059:    5000           64673                           <span class="op">AD      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4C494D495453">LIMITS</a>                                
+051526,000060:    5001           40000                           <span class="op">COM     </span>                                       
+051527,000061:    5002           61075                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D4B">TEMK</a>                                  
+051528,000062:    5003           55075                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D4B">TEMK</a>                                  
+051529,000063:    5004           15006                           <span class="op">TCF     </span> <a href="#504F4C4C4559">POLLEY</a>                                
+051530,000064:    5005           15024                           <span class="op">TCF     </span> <a href="#4152473930">ARG90</a>                                 
+<a name="504F4C4C4559"></a>051531,000065:    5006           00006        <span class="sm">POLLEY  </span>           <span class="op">EXTEND  </span>                                       
+051532,000066:    5007           71075                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D4B">TEMK</a>                                  
+051533,000067:    5010           55076                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5351">SQ</a>                                    
+051534,000068:    5011           00006                           <span class="op">EXTEND  </span>                                       
+051535,000069:    5012           74742                           <span class="op">MP      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#43352F32">C5/2</a>                                  
+051536,000070:    5013           67706                           <span class="op">AD      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#43332F32">C3/2</a>                                  
+051537,000071:    5014           00006                           <span class="op">EXTEND  </span>                                       
+051538,000072:    5015           71076                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5351">SQ</a>                                    
+051539,000073:    5016           67666                           <span class="op">AD      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#43312F32">C1/2</a>                                  
+051540,000074:    5017           00006                           <span class="op">EXTEND  </span>                                       
+051541,000075:    5020           71075                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D4B">TEMK</a>                                  
+051542,000076:    5021           20001                           <span class="op">DDOUBL  </span>                                       
+051543,000077:    5022           55075                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D4B">TEMK</a>                                  
+051544,000078:    5023           00002                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
+<a name="4152473930"></a>051545,000079:    5024           50000        <span class="sm">ARG90   </span>           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
+051546,000080:    5025           44673                           <span class="op">CS      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4C494D495453">LIMITS</a>                                
+051547,000081:    5026           00002                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     <span class="co">#  RESULT SCALED AT 1</span>
+051548,000082: 
+051549,000083:                                                                                                  <span class="co">#  SPROOT WAS DELETED IN REV 51 OF MASTER. ASS. CONT. HAS CARDS.</span>
+051550,000084: 
+051551,000085: 
+051552,000086: 
+051553,000087: 
 
 End of include-file SINGLE_PRECISION_SUBROUTINES.agc.  Parent file is <a href="MAIN.agc.html">MAIN.agc</a>
 </pre>

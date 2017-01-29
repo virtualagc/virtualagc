@@ -66,7 +66,8 @@ color: #993399;
 <img alt="" src="Apollo32.png" style="width: 32px; height: 32px;" align="left">
 </td>
 <td style="vertical-align: middle;">
-These source-code files were derived originally from the scan from MIT's Dibner Institute's 
+This is the source-code for the Apollo 9 Command Module's Guidance Computer.
+These files were derived originally from the scan from MIT's Dibner Institute's 
 now-discontinued website titled "History of Recent Science and Technology", which
 in turn was originally created by Gary Neff, though his high-quality scans were
 unfortunately reduced in legibility when presented online.
@@ -91,42 +92,180 @@ Note that the date is the date of the printout, not the date of the program revi
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-017751,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
-017752,000003:                                                                                                  <span class="co">## Filename:    KALCMANU_STEERING.agc</span>
-017753,000004:                                                                                                  <span class="co">## Purpose:     Part of the source code for Colossus, build 249.</span>
-017754,000005:                                                                                                  <span class="co">##              It is part of the source code for the Command Module's (CM)</span>
-017755,000006:                                                                                                  <span class="co">##              Apollo Guidance Computer (AGC), possibly for Apollo 8 and 9.</span>
-017756,000007:                                                                                                  <span class="co">## Assembler:   yaYUL</span>
-017757,000008:                                                                                                  <span class="co">## Reference:   pp. 409-414 of 1701.pdf.</span>
-017758,000009:                                                                                                  <span class="co">## Contact:     Ron Burkey &lt;info@sandroid.org>.</span>
-017759,000010:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo.</span>
-017760,000011:                                                                                                  <span class="co">## Mod history: 08/10/04 RSB.   Began adapting from corresponding Luminary131</span>
-017761,000012:                                                                                                  <span class="co">##                              source file.</span>
-017762,000013:                                                                                                  <span class="co">##</span>
-017763,000014:                                                                                                  <span class="co">## The contents of the "Colossus249" files, in general, are transcribed </span>
-017764,000015:                                                                                                  <span class="co">## from a scanned document obtained from MIT's website,</span>
-017765,000016:                                                                                                  <span class="co">## http://hrst.mit.edu/hrs/apollo/public/archive/1701.pdf.  Notations on this</span>
-017766,000017:                                                                                                  <span class="co">## document read, in part:</span>
-017767,000018:                                                                                                  <span class="co">##</span>
-017768,000019:                                                                                                  <span class="co">##      Assemble revision 249 of AGC program Colossus by NASA</span>
-017769,000020:                                                                                                  <span class="co">##      2021111-041.  October 28, 1968.  </span>
-017770,000021:                                                                                                  <span class="co">##</span>
-017771,000022:                                                                                                  <span class="co">##      This AGC program shall also be referred to as</span>
-017772,000023:                                                                                                  <span class="co">##                              Colossus 1A</span>
-017773,000024:                                                                                                  <span class="co">##</span>
-017774,000025:                                                                                                  <span class="co">##      Prepared by</span>
-017775,000026:                                                                                                  <span class="co">##                      Massachusetts Institute of Technology</span>
-017776,000027:                                                                                                  <span class="co">##                      75 Cambridge Parkway</span>
-017777,000028:                                                                                                  <span class="co">##                      Cambridge, Massachusetts</span>
-017778,000029:                                                                                                  <span class="co">##      under NASA contract NAS 9-4065.</span>
-017779,000030:                                                                                                  <span class="co">##</span>
-017780,000031:                                                                                                  <span class="co">## Refer directly to the online document mentioned above for further information.</span>
-017781,000032:                                                                                                  <span class="co">## Please report any errors (relative to 1701.pdf) to info@sandroid.org.</span>
-017782,000033:                                                                                                  <span class="co">##</span>
-017783,000034:                                                                                                  <span class="co">## In some cases, where the source code for Luminary 131 overlaps that of </span>
-017784,000035:                                                                                                  <span class="co">## Colossus 249, this code is instead copied from the corresponding Luminary 131</span>
-017785,000036:                                                                                                  <span class="co">## source file, and then is proofed to incorporate any changes.</span>
-017786,000037: 
+017939,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
+017940,000003:                                                                                                  <span class="co">## Filename:    KALCMANU_STEERING.agc</span>
+017941,000004:                                                                                                  <span class="co">## Purpose:     Part of the source code for Colossus, build 249.</span>
+017942,000005:                                                                                                  <span class="co">##              It is part of the source code for the Command Module's (CM)</span>
+017943,000006:                                                                                                  <span class="co">##              Apollo Guidance Computer (AGC), for Apollo 9.</span>
+017944,000007:                                                                                                  <span class="co">## Assembler:   yaYUL</span>
+017945,000008:                                                                                                  <span class="co">## Reference:   pp. 407-412.</span>
+017946,000009:                                                                                                  <span class="co">## Contact:     Ron Burkey &lt;info@sandroid.org>.</span>
+017947,000010:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo.</span>
+017948,000011:                                                                                                  <span class="co">## Mod history: 08/10/04 RSB.   Began adapting from corresponding Luminary131</span>
+017949,000012:                                                                                                  <span class="co">##                              source file.</span>
+017950,000013:                                                                                                  <span class="co">##              2017-01-06 RSB  Page numbers now agree with those on the</span>
+017951,000014:                                                                                                  <span class="co">##                              original harcopy, as opposed to the PDF page</span>
+017952,000015:                                                                                                  <span class="co">##                              numbers in 1701.pdf.</span>
+017953,000016:                                                                                                  <span class="co">##              2017-01-15 RSB  Cross-diff'd comment text (not whitespace)</span>
+017954,000017:                                                                                                  <span class="co">##                              vs the already-proofed corresponding Colossus</span>
+017955,000018:                                                                                                  <span class="co">##                              237 and Comanche 55 source-code files</span>
+017956,000019:                                                                                                  <span class="co">##                              and corrected errors found.  No differences</span>
+017957,000020:                                                                                                  <span class="co">##                              remained afterward.</span>
+017958,000021:                                                                                                  <span class="co">##              2017-01-28 RSB  WTIH -> WITH.</span>
+017959,000022:                                                                                                  <span class="co">##</span>
+017960,000023:                                                                                                  <span class="co">## The contents of the "Colossus249" files, in general, are transcribed </span>
+017961,000024:                                                                                                  <span class="co">## from a scanned copy of the program listing.  Notations on this</span>
+017962,000025:                                                                                                  <span class="co">## document read, in part:</span>
+017963,000026:                                                                                                  <span class="co">##</span>
+017964,000027:                                                                                                  <span class="co">##      Assemble revision 249 of AGC program Colossus by NASA</span>
+017965,000028:                                                                                                  <span class="co">##      2021111-041.  October 28, 1968.  </span>
+017966,000029:                                                                                                  <span class="co">##</span>
+017967,000030:                                                                                                  <span class="co">##      This AGC program shall also be referred to as</span>
+017968,000031:                                                                                                  <span class="co">##                              Colossus 1A</span>
+017969,000032:                                                                                                  <span class="co">##</span>
+017970,000033:                                                                                                  <span class="co">##      Prepared by</span>
+017971,000034:                                                                                                  <span class="co">##                      Massachusetts Institute of Technology</span>
+017972,000035:                                                                                                  <span class="co">##                      75 Cambridge Parkway</span>
+017973,000036:                                                                                                  <span class="co">##                      Cambridge, Massachusetts</span>
+017974,000037:                                                                                                  <span class="co">##      under NASA contract NAS 9-4065.</span>
+017975,000038:                                                                                                  <span class="co">##</span>
+017976,000039:                                                                                                  <span class="co">## Refer directly to the online document mentioned above for further information.</span>
+017977,000040:                                                                                                  <span class="co">## Please report any errors (relative to the scanned pages) to info@sandroid.org.</span>
+017978,000041:                                                                                                  <span class="co">##</span>
+017979,000042:                                                                                                  <span class="co">## In some cases, where the source code for Luminary 131 overlaps that of </span>
+017980,000043:                                                                                                  <span class="co">## Colossus 249, this code is instead copied from the corresponding Luminary 131</span>
+017981,000044:                                                                                                  <span class="co">## source file, and then is proofed to incorporate any changes.</span>
+017982,000045: 
+</pre>
+</span>
+</p>
+<table style="text-align: left;" border="1" cellpadding="2" cellspacing="2">
+<tbody>
+<tr>
+<td style="white-space: nowrap; vertical-align: middle;">
+<img alt="" src="Apollo32.png" style="width: 32px; height: 32px;" align="left">
+</td>
+<td style="vertical-align: middle;">
+Page 407
+</td></tr></tbody></table>
+<p class="nobreak">
+<span style="font-family: monospace;">
+<pre>
+017984,000047:                                                                                                  <span class="co">#  GENERATION OF STEERING COMMANDS FOR DIGITAL AUTOPILOT FREE FALL MANEUVERS</span>
+017985,000048: 
+017986,000049:                                                                                                  <span class="co">#  NEW COMMANDS WILL BE GENERATED EVERY ONE SECOND DURING THE MANEUVER</span>
+017987,000050: 
+017988,000051: 15,2000                                           <span class="ps">BANK    </span> 15                                    
+017989,000052: 22,2000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#4B414C434D4F4E31">KALCMON1</a>                              
+017990,000053: 22,2000                                           <span class="ps">BANK    </span>                                       
+017991,000054: 
+017992,000055: 22,3027  E6,1661                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#42434455">BCDU</a>                                  
+017993,000056: 
+017994,000057: 22,3027                                           <span class="ps">COUNT   </span> 22/KALC                               
+017995,000058: 
+<a name="4E455744454C4849"></a>017996,000059: 22,3027           41332        <span class="sm">NEWDELHI</span>           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#484F4C44464C4147">HOLDFLAG</a>                              <span class="co">#  SEE IF MANEUVER HAS BEEN INTERRUPTED</span>
+017997,000060: 22,3030           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  BY ASTRONAUT</span>
+017998,000061: 22,3031           62725                           <span class="op">BZMF    </span> <a href="ANGLFIND.agc.html#4E4F474F">NOGO</a>       -2                         <span class="co">#  IF SO, TERMINATE KALCMANU</span>
+<a name="4E4557414E474C"></a>017999,000062: 22,3032           06006        <span class="sm">NEWANGL </span>           <span class="op">TC      </span> <a href="INTERPRETER.agc.html#494E5450524554">INTPRET</a>                               
+018000,000063: 22,3033           75160                           <span class="in">AXC,1   </span> <span class="in">AXC,2     </span>                            
+018001,000064: 22,3034           03320                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4D4953">MIS</a>                                   <span class="co">#  COMPUTE THE NEW MATRIX FROM S/C TO</span>
+018002,000065: 22,3035           03425                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C">DEL</a>                                   <span class="co">#  STABLE MEMBER AXES</span>
+018003,000066: 22,3036           77624                           <span class="in">CALL    </span>                                       
+018004,000067: 22,3037           44304                                    <a href="ANGLFIND.agc.html#4D584D33">MXM3</a>                                  
+018005,000068: 22,3040           45575                           <span class="in">VLOAD   </span> <span class="in">STADR     </span>                            
+018006,000069: 22,3041           50442                           <span class="in">STOVL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D4953">MIS</a>        +12D                       <span class="co">#  CALCULATE NEW DESIRED CDU ANGLES</span>
+018007,000070: 22,3042           77626                           <span class="in">STADR   </span>                                       
+018008,000071: 22,3043           50450                           <span class="in">STOVL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D4953">MIS</a>        +6D                        
+018009,000072: 22,3044           77626                           <span class="in">STADR   </span>                                       
+018010,000073: 22,3045           74456                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D4953">MIS</a>                                   
+018011,000074: 22,3046           45160                           <span class="in">AXC,1   </span> <span class="in">CALL      </span>                            
+018012,000075: 22,3047           03320                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4D4953">MIS</a>                                   
+018013,000076: 22,3050           44655                                    <a href="ANGLFIND.agc.html#44434D544F434455">DCMTOCDU</a>                              <span class="co">#  PICK UP THE NEW CDU ANGLES FROM MATRIX</span>
+018014,000077: 22,3051           77634                           <span class="in">RTB     </span>                                       
+018015,000078: 22,3052           45547                                    <a href="RTB_OP_CODES.agc.html#563153544F3253">V1STO2S</a>                               
+018016,000079: 22,3053           03267                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E434455">NCDU</a>                                  <span class="co">#  NEW CDU ANGLES</span>
+018017,000080: 22,3054           77414                           <span class="in">BONCLR  </span> <span class="in">EXIT      </span>                            
+018018,000081: 22,3055           01215                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#43414C434D414E32">CALCMAN2</a>                              
+018019,000082: 22,3056           45142                                    <a href="#4D414E5553544154">MANUSTAT</a>                              <span class="co">#  TO START MANEUVER</span>
+018020,000083: 22,3057           34711                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#54574F">TWO</a>                                   <span class="co">#        +0 OTHERWISE</span>
+<a name="494E435244434455"></a>018021,000084: 22,3060           55664        <span class="sm">INCRDCDU</span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4B53504E4458">KSPNDX</a>                                
+018022,000085: 22,3061           60000                           <span class="op">DOUBLE  </span>                                       
+018023,000086: 22,3062           55665                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4B53504E4458">KSPNDX</a>     +1                         
+018024,000087: 22,3063           51664                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4B53504E4458">KSPNDX</a>                                
+018025,000088: 22,3064           31666                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E434455">NCDU</a>                                  <span class="co">#  NEW DESIRED CDU ANGLES</span>
+018026,000089: 22,3065           00006                           <span class="op">EXTEND  </span>                                       
+018027,000090: 22,3066           51664                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4B53504E4458">KSPNDX</a>                                
+018028,000091: 22,3067           21661                           <span class="op">MSU     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#42434455">BCDU</a>                                  <span class="co">#  INITIAL S/C ANGLE OR PREVIOUS DESIRED</span>
+018029,000092: 22,3070           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  CDU ANGLES</span>
+018030,000093: 22,3071           73141                           <span class="op">MP      </span> <a href="#44542F544155">DT/TAU</a>                                
+018031,000094: 22,3072           51665                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4B44504E4458">KDPNDX</a>                                
+018032,000095: 22,3073           53576                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C43445558">DELCDUX</a>                               <span class="co">#  ANGLE INCREMENTS TO BE ADDED TO</span>
+</pre>
+</span>
+</p>
+<table style="text-align: left;" border="1" cellpadding="2" cellspacing="2">
+<tbody>
+<tr>
+<td style="white-space: nowrap; vertical-align: middle;">
+<img alt="" src="Apollo32.png" style="width: 32px; height: 32px;" align="left">
+</td>
+<td style="vertical-align: middle;">
+Page 408
+</td></tr></tbody></table>
+<p class="nobreak">
+<span style="font-family: monospace;">
+<pre>
+018034,000097: 22,3074           51664                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4B53504E4458">KSPNDX</a>                                <span class="co">#  DCDU EVERY TENTH SEC</span>
+018035,000098: 22,3075           31666                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E434455">NCDU</a>                                  <span class="co">#  BY LEM DAP</span>
+018036,000099: 22,3076           51664                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4B53504E4458">KSPNDX</a>                                
+018037,000100: 22,3077           57661                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#42434455">BCDU</a>                                  
+018038,000101: 22,3100           51665                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4B53504E4458">KSPNDX</a>     +1                         
+018039,000102: 22,3101           55646                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4344555844">CDUXD</a>                                 
+018040,000103: 22,3102           11664                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4B53504E4458">KSPNDX</a>                                
+018041,000104: 22,3103           13060                           <span class="op">TCF     </span> <a href="#494E435244434455">INCRDCDU</a>                              <span class="co">#  LOOP FOR THREE AXES</span>
+018042,000105: 
+018043,000106: 22,3104           00003                           <span class="op">RELINT  </span>                                       
+018044,000107: 
+018045,000108:                                                                                                  <span class="co">#  COMPARE PRESENT TIME WITH TIME TO TERMINATE MANEUVER</span>
+018046,000109: 
+<a name="544D414E5543484B"></a>018047,000110: 22,3105           03115        <span class="sm">TMANUCHK</span>           <span class="op">TC      </span> <a href="#54494D4543484B">TIMECHK</a>                               
+018048,000111: 22,3106           13206                           <span class="op">TCF     </span> <a href="#434F4E544D414E55">CONTMANU</a>                              
+018049,000112: 22,3107           34712                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4F4E45">ONE</a>                                   
+<a name="4D414E555354414C"></a>018050,000113: 22,3110           05140        <span class="sm">MANUSTAL</span>           <span class="op">TC      </span> <a href="WAITLIST.agc.html#574149544C495354">WAITLIST</a>                              
+018051,000114: 22,3111  E6,1661                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#42434455">BCDU</a>                                  
+018052,000115: 22,3111           03232 44106                     <span class="ps">2CADR   </span> <a href="#4D414E5553544F50">MANUSTOP</a>                              
+018053,000116: 
+018054,000117: 22,3113           00003                           <span class="op">RELINT  </span>                                       
+018055,000118: 22,3114           15112                           <span class="op">TCF     </span> <a href="EXECUTIVE.agc.html#454E444F464A4F42">ENDOFJOB</a>                              
+018056,000119: 
+<a name="54494D4543484B"></a>018057,000120: 22,3115           00006        <span class="sm">TIMECHK </span>           <span class="op">EXTEND  </span>                                       
+018058,000121: 22,3116           40025                           <span class="op">DCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54494D4532">TIME2</a>                                 
+018059,000122: 22,3117           53673                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5454454D50">TTEMP</a>                                 
+018060,000123: 22,3120           00006                           <span class="op">EXTEND  </span>                                       
+018061,000124: 22,3121           31717                           <span class="op">DCA     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544D">TM</a>                                    
+018062,000125: 22,3122           21673                           <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5454454D50">TTEMP</a>                                 
+018063,000126: 22,3123           11672                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5454454D50">TTEMP</a>                                 
+018064,000127: 22,3124           00002                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
+018065,000128: 22,3125           13127                           <span class="op">TCF     </span> +2                                    
+018066,000129: 22,3126           13137                           <span class="op">TCF     </span> <a href="#324E44524554524E">2NDRETRN</a>                              
+018067,000130: 22,3127           11673                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5454454D50">TTEMP</a>      +1                         
+018068,000131: 22,3130           00002                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
+018069,000132: 22,3131           13133                           <span class="op">TCF     </span> <a href="#4D414E554F4646">MANUOFF</a>                               
+018070,000133: 22,3132           40000                           <span class="op">COM     </span>                                       
+<a name="4D414E554F4646"></a>018071,000134: 22,3133           63205        <span class="sm">MANUOFF </span>           <span class="op">AD      </span> <a href="#4F4E45534543">ONESEC</a>     +1                         
+018072,000135: 22,3134           00006                           <span class="op">EXTEND  </span>                                       
+018073,000136: 22,3135           63137                           <span class="op">BZMF    </span> <a href="#324E44524554524E">2NDRETRN</a>                              
+018074,000137: 22,3136           24002                           <span class="op">INCR    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
+<a name="324E44524554524E"></a>018075,000138: 22,3137           24002        <span class="sm">2NDRETRN</span>           <span class="op">INCR    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
+018076,000139: 22,3140           00002                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
+018077,000140: 
+<a name="44542F544155"></a>018078,000141: 22,3141           03146        <span class="sm">DT/TAU  </span>           <span class="ps">DEC     </span> .1                                    
+018079,000142: 
+<a name="4D414E5553544154"></a>018080,000143: 22,3142           77776        <span class="sm">MANUSTAT</span>           <span class="in">EXIT    </span>                                       <span class="co">#  INITIALIZATION ROUTINE</span>
+018081,000144: 22,3143           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  FOR AUTOMATIC MANEUVERS</span>
+018082,000145: 22,3144           30025                           <span class="op">DCA     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54494D4532">TIME2</a>                                 
+018083,000146: 22,3145           21717                           <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544D">TM</a>                                    <span class="co">#  TM+T0         MANEUVER COMPLETION TIME</span>
+018084,000147: 22,3146           00006                           <span class="op">EXTEND  </span>                                       
 </pre>
 </span>
 </p>
@@ -142,55 +281,54 @@ Page 409
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-017788,000039:                                                                                                  <span class="co">#  GENERATION OF STEERING COMMANDS FOR DIGITAL AUTOPILOT FREE FALL MANEUVERS</span>
-017789,000040: 
-017790,000041:                                                                                                  <span class="co">#  NEW COMMANDS WILL BE GENERATED EVERY ONE SECOND DURING THE MANEUVER</span>
-017791,000042: 
-017792,000043: 15,2000                                           <span class="ps">BANK    </span> 15                                    
-017793,000044: 22,2000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC.agc.html#4B414C434D4F4E31">KALCMON1</a>                              
-017794,000045: 22,2000                                           <span class="ps">BANK    </span>                                       
-017795,000046: 
-017796,000047: 22,3027  E6,1661                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#42434455">BCDU</a>                                  
-017797,000048: 
-017798,000049: 22,3027                                           <span class="ps">COUNT   </span> 22/KALC                               
-017799,000050: 
-<a name="4E455744454C4849"></a>017800,000051: 22,3027           41332        <span class="sm">NEWDELHI</span>           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#484F4C44464C4147">HOLDFLAG</a>                              <span class="co">#  SEE IF MANEUVER HAS BEEN INTERRUPTED</span>
-017801,000052: 22,3030           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  BY ASTRONAUT.</span>
-017802,000053: 22,3031           62725                           <span class="op">BZMF    </span> <a href="ANGLFIND.agc.html#4E4F474F">NOGO</a>       -2                         <span class="co">#  IF SO, TERMINATE KALCMANU</span>
-<a name="4E4557414E474C"></a>017803,000054: 22,3032           06006        <span class="sm">NEWANGL </span>           <span class="op">TC      </span> <a href="INTERPRETER.agc.html#494E5450524554">INTPRET</a>                               
-017804,000055: 22,3033           75160                           <span class="in">AXC,1   </span> <span class="in">AXC,2     </span>                            
-017805,000056: 22,3034           03320                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4D4953">MIS</a>                                   <span class="co">#  COMPUTE THE NEW MATRIX FROM S/C TO</span>
-017806,000057: 22,3035           03425                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C">DEL</a>                                   <span class="co">#  STABLE MEMBER AXES</span>
-017807,000058: 22,3036           77624                           <span class="in">CALL    </span>                                       
-017808,000059: 22,3037           44304                                    <a href="ANGLFIND.agc.html#4D584D33">MXM3</a>                                  
-017809,000060: 22,3040           45575                           <span class="in">VLOAD   </span> <span class="in">STADR     </span>                            
-017810,000061: 22,3041           50442                           <span class="in">STOVL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D4953">MIS</a>        +12D                       <span class="co">#  CALCULATE NEW DESIRED CDU ANGLES</span>
-017811,000062: 22,3042           77626                           <span class="in">STADR   </span>                                       
-017812,000063: 22,3043           50450                           <span class="in">STOVL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D4953">MIS</a>        +6D                        
-017813,000064: 22,3044           77626                           <span class="in">STADR   </span>                                       
-017814,000065: 22,3045           74456                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D4953">MIS</a>                                   
-017815,000066: 22,3046           45160                           <span class="in">AXC,1   </span> <span class="in">CALL      </span>                            
-017816,000067: 22,3047           03320                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4D4953">MIS</a>                                   
-017817,000068: 22,3050           44655                                    <a href="ANGLFIND.agc.html#44434D544F434455">DCMTOCDU</a>                              <span class="co">#  PICK UP THE NEW CDU ANGLES FROM MATRIX</span>
-017818,000069: 22,3051           77634                           <span class="in">RTB     </span>                                       
-017819,000070: 22,3052           45547                                    <a href="RT8_OP_CODES.agc.html#563153544F3253">V1STO2S</a>                               
-017820,000071: 22,3053           03267                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E434455">NCDU</a>                                  <span class="co">#  NEW CDU ANGLES</span>
-017821,000072: 22,3054           77414                           <span class="in">BONCLR  </span> <span class="in">EXIT      </span>                            
-017822,000073: 22,3055           01215                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#43414C434D414E32">CALCMAN2</a>                              
-017823,000074: 22,3056           45142                                    <a href="#4D414E5553544154">MANUSTAT</a>                              <span class="co">#  TO START MANEUVER</span>
-017824,000075: 22,3057           34711                           <span class="op">CAF     </span> <a href="FIXED_FIXED_CONSTANT_POOL.agc.html#54574F">TWO</a>                                   <span class="co">#        +0 OTHERWISE</span>
-<a name="494E435244434455"></a>017825,000076: 22,3060           55664        <span class="sm">INCRDCDU</span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4B53504E4458">KSPNDX</a>                                
-017826,000077: 22,3061           60000                           <span class="op">DOUBLE  </span>                                       
-017827,000078: 22,3062           55665                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4B53504E4458">KSPNDX</a>     +1                         
-017828,000079: 22,3063           51664                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4B53504E4458">KSPNDX</a>                                
-017829,000080: 22,3064           31666                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E434455">NCDU</a>                                  <span class="co">#  NEW DESIRED CDU ANGLES</span>
-017830,000081: 22,3065           00006                           <span class="op">EXTEND  </span>                                       
-017831,000082: 22,3066           51664                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4B53504E4458">KSPNDX</a>                                
-017832,000083: 22,3067           21661                           <span class="op">MSU     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#42434455">BCDU</a>                                  <span class="co">#  INITIAL S/C ANGLE OR PRVIOUS DESIRED</span>
-017833,000084: 22,3070           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  CDU ANGLES</span>
-017834,000085: 22,3071           73141                           <span class="op">MP      </span> <a href="#44542F544155">DT/TAU</a>                                
-017835,000086: 22,3072           51665                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4B44504E4458">KDPNDX</a>                                
-017836,000087: 22,3073           53576                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C43445558">DELCDUX</a>                               <span class="co">#  ANGEL INCREMENTS TO BE ADDED TO</span>
+018086,000149: 22,3147           43205                           <span class="op">DCS     </span> <a href="#4F4E45534543">ONESEC</a>                                
+018087,000150: 22,3150           21717                           <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544D">TM</a>                                    <span class="co">#  (TM+T0)-1</span>
+018088,000151: 22,3151           00004                           <span class="op">INHINT  </span>                                       
+018089,000152: 22,3152           44712                           <span class="op">CS      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4F4E45">ONE</a>                                   <span class="co">#  ENABLE AUTOPILOT TO PERFORM</span>
+018090,000153: 22,3153           55332                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#484F4C44464C4147">HOLDFLAG</a>                              <span class="co">#  AUTOMATIC MANEUVERS</span>
+018091,000154: 22,3154           41130                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#52415445494E4458">RATEINDX</a>                              <span class="co">#  SEE IF MANEUVERING AT HIGH RATE</span>
+018092,000155: 22,3155           66211                           <span class="op">AD      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#534958">SIX</a>                                   
+018093,000156: 22,3156           00006                           <span class="op">EXTEND  </span>                                       
+018094,000157: 22,3157           63161                           <span class="op">BZMF    </span> <a href="#484947484741494E">HIGHGAIN</a>                              
+018095,000158: 22,3160           13164                           <span class="op">TCF     </span> +4                                    
+<a name="484947484741494E"></a>018096,000159: 22,3161           41501        <span class="sm">HIGHGAIN</span>           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524353464C414753">RCSFLAGS</a>                              <span class="co">#  IF SO, SET HIGH RATE FLAG (BIT 15 OF</span>
+018097,000160: 22,3162           74674                           <span class="op">MASK    </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4249543135">BIT15</a>                                 <span class="co">#  RCSFLAGS)</span>
+018098,000161: 22,3163           27501                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524353464C414753">RCSFLAGS</a>                              
+018099,000162: 22,3164           53711                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4252415445">BRATE</a>                                 <span class="co">#  X-AXIS MANEUVER RATE</span>
+018100,000163: 22,3165           53526                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#57424F4459">WBODY</a>                                 
+018101,000164: 22,3166           53713                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4252415445">BRATE</a>      +2                         <span class="co">#  Y-AXIS MANEUVER RATE</span>
+018102,000165: 22,3167           53530                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#57424F445931">WBODY1</a>                                
+018103,000166: 22,3170           53715                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4252415445">BRATE</a>      +4                         <span class="co">#  Z-AXIS MANEUVER RATE</span>
+018104,000167: 22,3171           53532                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#57424F445932">WBODY2</a>                                
+018105,000168: 22,3172           31675                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4249415354454D50">BIASTEMP</a>   +1                         <span class="co">#  INSERT ATTITUDE ERROR BIASES</span>
+018106,000169: 22,3173           55564                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#42494153">BIAS</a>                                  <span class="co">#  INTO AUTOPILOT</span>
+018107,000170: 22,3174           31677                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4249415354454D50">BIASTEMP</a>   +3                         
+018108,000171: 22,3175           55565                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4249415331">BIAS1</a>                                 
+018109,000172: 22,3176           31701                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4249415354454D50">BIASTEMP</a>   +5                         
+018110,000173: 22,3177           55566                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4249415332">BIAS2</a>                                 
+018111,000174: 22,3200           30025                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54494D4531">TIME1</a>                                 
+018112,000175: 22,3201           63205                           <span class="op">AD      </span> <a href="#4F4E45534543">ONESEC</a>     +1                         
+018113,000176: 22,3202           57671                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E455854494D45">NEXTIME</a>                               
+018114,000177: 22,3203           13057                           <span class="op">TCF     </span> <a href="#494E435244434455">INCRDCDU</a>   -1                         
+018115,000178: 
+<a name="4F4E45534543"></a>018116,000179: 22,3204           00000        <span class="sm">ONESEC  </span>           <span class="ps">DEC     </span> 0          B-14                       
+018117,000180: 22,3205           00144                           <span class="ps">DEC     </span> 100        B-14                       
+018118,000181: 
+<a name="434F4E544D414E55"></a>018119,000182: 22,3206           00004        <span class="sm">CONTMANU</span>           <span class="op">INHINT  </span>                                       
+018120,000183: 22,3207           40025                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54494D4531">TIME1</a>                                 <span class="co">#  CONTINUE WITH UPDATE PROCESS</span>
+018121,000184: 22,3210           61671                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E455854494D45">NEXTIME</a>                               
+018122,000185: 22,3211           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
+018123,000186: 22,3212           64712                           <span class="op">AD      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4F4E45">ONE</a>                                   
+018124,000187: 22,3213           13216                           <span class="op">TCF     </span> <a href="#4D414E5543414C4C">MANUCALL</a>                              
+018125,000188: 22,3214           64674                           <span class="op">AD      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4E45474D4158">NEGMAX</a>                                
+018126,000189: 22,3215           40000                           <span class="op">COM     </span>                                       
+<a name="4D414E5543414C4C"></a>018127,000190: 22,3216           05140        <span class="sm">MANUCALL</span>           <span class="op">TC      </span> <a href="WAITLIST.agc.html#574149544C495354">WAITLIST</a>                              
+018128,000191: 22,3217  E6,1661                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#42434455">BCDU</a>                                  
+018129,000192: 22,3217           03225 44106                     <span class="ps">2CADR   </span> <a href="#5550445443414C4C">UPDTCALL</a>                              
+018130,000193: 22,3221           00003                           <span class="op">RELINT  </span>                                       
+018131,000194: 22,3222           33205                           <span class="op">CAF     </span> <a href="#4F4E45534543">ONESEC</a>     +1                         <span class="co">#  INCREMENT TIME FOR NEXT UPDATE</span>
+018132,000195: 22,3223           27671                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E455854494D45">NEXTIME</a>                               
+018133,000196: 22,3224           15112                           <span class="op">TCF     </span> <a href="EXECUTIVE.agc.html#454E444F464A4F42">ENDOFJOB</a>                              
 </pre>
 </span>
 </p>
@@ -206,57 +344,14 @@ Page 410
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-017838,000089: 22,3074           51664                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4B53504E4458">KSPNDX</a>                                <span class="co">#  DCDU EVERY TENTH SEC</span>
-017839,000090: 22,3075           31666                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E434455">NCDU</a>                                  <span class="co">#  BY LEM DAP</span>
-017840,000091: 22,3076           51664                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4B53504E4458">KSPNDX</a>                                
-017841,000092: 22,3077           57661                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#42434455">BCDU</a>                                  
-017842,000093: 22,3100           51665                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4B53504E4458">KSPNDX</a>     +1                         
-017843,000094: 22,3101           55646                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4344555844">CDUXD</a>                                 
-017844,000095: 22,3102           11664                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4B53504E4458">KSPNDX</a>                                
-017845,000096: 22,3103           13060                           <span class="op">TCF     </span> <a href="#494E435244434455">INCRDCDU</a>                              <span class="co">#  LOOP FOR THREE AXES</span>
-017846,000097: 
-017847,000098: 22,3104           00003                           <span class="op">RELINT  </span>                                       
-017848,000099: 
-017849,000100:                                                                                                  <span class="co">#  COMPARE PRESENT TIME WTIH TIME TO TERMINATE MANEUVER</span>
-017850,000101: 
-<a name="544D414E5543484B"></a>017851,000102: 22,3105           03115        <span class="sm">TMANUCHK</span>           <span class="op">TC      </span> <a href="#54494D4543484B">TIMECHK</a>                               
-017852,000103: 22,3106           13206                           <span class="op">TCF     </span> <a href="#434F4E544D414E55">CONTMANU</a>                              
-017853,000104: 22,3107           34712                           <span class="op">CAF     </span> <a href="FIXED_FIXED_CONSTANT_POOL.agc.html#4F4E45">ONE</a>                                   
-<a name="4D414E555354414C"></a>017854,000105: 22,3110           05140        <span class="sm">MANUSTAL</span>           <span class="op">TC      </span> <a href="WAITLIST.agc.html#574149544C495354">WAITLIST</a>                              
-017855,000106: 22,3111  E6,1661                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#42434455">BCDU</a>                                  
-017856,000107: 22,3111           03232 44106                     <span class="ps">2CADR   </span> <a href="#4D414E5553544F50">MANUSTOP</a>                              
-017857,000108: 
-017858,000109: 22,3113           00003                           <span class="op">RELINT  </span>                                       
-017859,000110: 22,3114           15112                           <span class="op">TCF     </span> <a href="EXECUTIVE.agc.html#454E444F464A4F42">ENDOFJOB</a>                              
-017860,000111: 
-<a name="54494D4543484B"></a>017861,000112: 22,3115           00006        <span class="sm">TIMECHK </span>           <span class="op">EXTEND  </span>                                       
-017862,000113: 22,3116           40025                           <span class="op">DCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54494D4532">TIME2</a>                                 
-017863,000114: 22,3117           53673                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5454454D50">TTEMP</a>                                 
-017864,000115: 22,3120           00006                           <span class="op">EXTEND  </span>                                       
-017865,000116: 22,3121           31717                           <span class="op">DCA     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544D">TM</a>                                    
-017866,000117: 22,3122           21673                           <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5454454D50">TTEMP</a>                                 
-017867,000118: 22,3123           11672                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5454454D50">TTEMP</a>                                 
-017868,000119: 22,3124           00002                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
-017869,000120: 22,3125           13127                           <span class="op">TCF     </span> +2                                    
-017870,000121: 22,3126           13137                           <span class="op">TCF     </span> <a href="#324E44524554524E">2NDRETRN</a>                              
-017871,000122: 22,3127           11673                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5454454D50">TTEMP</a>      +1                         
-017872,000123: 22,3130           00002                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
-017873,000124: 22,3131           13133                           <span class="op">TCF     </span> <a href="#4D414E554F4646">MANUOFF</a>                               
-017874,000125: 22,3132           40000                           <span class="op">COM     </span>                                       
-<a name="4D414E554F4646"></a>017875,000126: 22,3133           63205        <span class="sm">MANUOFF </span>           <span class="op">AD      </span> <a href="#4F4E45534543">ONESEC</a>     +1                         
-017876,000127: 22,3134           00006                           <span class="op">EXTEND  </span>                                       
-017877,000128: 22,3135           63137                           <span class="op">BZMF    </span> <a href="#324E44524554524E">2NDRETRN</a>                              
-017878,000129: 22,3136           24002                           <span class="op">INCR    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
-<a name="324E44524554524E"></a>017879,000130: 22,3137           24002        <span class="sm">2NDRETRN</span>           <span class="op">INCR    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
-017880,000131: 22,3140           00002                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
-017881,000132: 
-<a name="44542F544155"></a>017882,000133: 22,3141           03146        <span class="sm">DT/TAU  </span>           <span class="ps">DEC     </span> .1                                    
-017883,000134: 
-<a name="4D414E5553544154"></a>017884,000135: 22,3142           77776        <span class="sm">MANUSTAT</span>           <span class="in">EXIT    </span>                                       <span class="co">#  INITIALIZATION ROUTINE</span>
-017885,000136: 22,3143           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  FOR AUTOMATIC MANEUVERS</span>
-017886,000137: 22,3144           30025                           <span class="op">DCA     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54494D4532">TIME2</a>                                 
-017887,000138: 22,3145           21717                           <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544D">TM</a>                                    <span class="co">#  TM+TO         MANEUVER COMPLETION TIME</span>
-017888,000139: 22,3146           00006                           <span class="op">EXTEND  </span>                                       
+018135,000198: 
+<a name="5550445443414C4C"></a>018136,000199: 22,3225           37663        <span class="sm">UPDTCALL</span>           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5052494F3236">PRIO26</a>                                <span class="co">#  CALL FOR UPDATE</span>
+018137,000200: 22,3226           05042                           <span class="op">TC      </span> <a href="EXECUTIVE.agc.html#46494E44564143">FINDVAC</a>                               <span class="co">#  OF STEERING COMMANDS</span>
+018138,000201: 22,3227  E6,1661                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#42434455">BCDU</a>                                  
+018139,000202: 22,3227           03027 44106                     <span class="ps">2CADR   </span> <a href="#4E455744454C4849">NEWDELHI</a>                              
+018140,000203: 
+018141,000204: 22,3231           05213                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              
+018142,000205: 
 </pre>
 </span>
 </p>
@@ -272,54 +367,56 @@ Page 411
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-017890,000141: 22,3147           43205                           <span class="op">DCS     </span> <a href="#4F4E45534543">ONESEC</a>                                
-017891,000142: 22,3150           21717                           <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544D">TM</a>                                    <span class="co">#  (TM+TO)-1</span>
-017892,000143: 22,3151           00004                           <span class="op">INHINT  </span>                                       
-017893,000144: 22,3152           44712                           <span class="op">CS      </span> <a href="FIXED_FIXED_CONSTANT_POOL.agc.html#4F4E45">ONE</a>                                   <span class="co">#  ENABLE AUTOPILOT TO PERFORM</span>
-017894,000145: 22,3153           55332                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#484F4C44464C4147">HOLDFLAG</a>                              <span class="co">#  AUTOMATIC MANEUVERS</span>
-017895,000146: 22,3154           41130                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#52415445494E4458">RATEINDX</a>                              <span class="co">#  SEE IF MANEUVERING AT HIGH RATE</span>
-017896,000147: 22,3155           66211                           <span class="op">AD      </span> <a href="FIXED_FIXED_CONSTANT_POOL.agc.html#534958">SIX</a>                                   
-017897,000148: 22,3156           00006                           <span class="op">EXTEND  </span>                                       
-017898,000149: 22,3157           63161                           <span class="op">BZMF    </span> <a href="#484947484741494E">HIGHGAIN</a>                              
-017899,000150: 22,3160           13164                           <span class="op">TCF     </span> +4                                    
-<a name="484947484741494E"></a>017900,000151: 22,3161           41501        <span class="sm">HIGHGAIN</span>           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524353464C414753">RCSFLAGS</a>                              <span class="co">#  IF SO, SET HIGH RATE FLAG (BIT 15 OF</span>
-017901,000152: 22,3162           74674                           <span class="op">MASK    </span> <a href="FIXED_FIXED_CONSTANT_POOL.agc.html#4249543135">BIT15</a>                                 <span class="co">#  RCSFLAGS)</span>
-017902,000153: 22,3163           27501                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524353464C414753">RCSFLAGS</a>                              
-017903,000154: 22,3164           53711                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4252415445">BRATE</a>                                 <span class="co">#  X-AXIS MANEUVER RATE</span>
-017904,000155: 22,3165           53526                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#57424F4459">WBODY</a>                                 
-017905,000156: 22,3166           53713                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4252415445">BRATE</a>      +2                         <span class="co">#  Y-AXIS MANEUVER RATE</span>
-017906,000157: 22,3167           53530                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#57424F445931">WBODY1</a>                                
-017907,000158: 22,3170           53715                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4252415445">BRATE</a>      +4                         <span class="co">#  Z-AXIS MANEUVER RATE</span>
-017908,000159: 22,3171           53532                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#57424F445932">WBODY2</a>                                
-017909,000160: 22,3172           31675                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4249415354454D50">BIASTEMP</a>   +1                         <span class="co">#  INSERT ATTITUDE ERROR BIASES</span>
-017910,000161: 22,3173           55564                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#42494153">BIAS</a>                                  <span class="co">#  INTO AUTOPILOT</span>
-017911,000162: 22,3174           31677                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4249415354454D50">BIASTEMP</a>   +3                         
-017912,000163: 22,3175           55565                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4249415331">BIAS1</a>                                 
-017913,000164: 22,3176           31701                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4249415354454D50">BIASTEMP</a>   +5                         
-017914,000165: 22,3177           55566                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4249415332">BIAS2</a>                                 
-017915,000166: 22,3200           30025                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54494D4531">TIME1</a>                                 
-017916,000167: 22,3201           63205                           <span class="op">AD      </span> <a href="#4F4E45534543">ONESEC</a>     +1                         
-017917,000168: 22,3202           57671                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E455854494D45">NEXTIME</a>                               
-017918,000169: 22,3203           13057                           <span class="op">TCF     </span> <a href="#494E435244434455">INCRDCDU</a>   -1                         
-017919,000170: 
-<a name="4F4E45534543"></a>017920,000171: 22,3204           00000        <span class="sm">ONESEC  </span>           <span class="ps">DEC     </span> 0          B-14                       
-017921,000172: 22,3205           00144                           <span class="ps">DEC     </span> 100        B-14                       
-017922,000173: 
-<a name="434F4E544D414E55"></a>017923,000174: 22,3206           00004        <span class="sm">CONTMANU</span>           <span class="op">INHINT  </span>                                       
-017924,000175: 22,3207           40025                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54494D4531">TIME1</a>                                 <span class="co">#  CONTINUE WITH UPDATE PROCESS</span>
-017925,000176: 22,3210           61671                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E455854494D45">NEXTIME</a>                               
-017926,000177: 22,3211           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
-017927,000178: 22,3212           64712                           <span class="op">AD      </span> <a href="FIXED_FIXED_CONSTANT_POOL.agc.html#4F4E45">ONE</a>                                   
-017928,000179: 22,3213           13216                           <span class="op">TCF     </span> <a href="#4D414E5543414C4C">MANUCALL</a>                              
-017929,000180: 22,3214           64674                           <span class="op">AD      </span> <a href="FIXED_FIXED_CONSTANT_POOL.agc.html#4E45474D4158">NEGMAX</a>                                
-017930,000181: 22,3215           40000                           <span class="op">COM     </span>                                       
-<a name="4D414E5543414C4C"></a>017931,000182: 22,3216           05140        <span class="sm">MANUCALL</span>           <span class="op">TC      </span> <a href="WAITLIST.agc.html#574149544C495354">WAITLIST</a>                              
-017932,000183: 22,3217  E6,1661                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#42434455">BCDU</a>                                  
-017933,000184: 22,3217           03225 44106                     <span class="ps">2CADR   </span> <a href="#5550445443414C4C">UPDTCALL</a>                              
-017934,000185: 22,3221           00003                           <span class="op">RELINT  </span>                                       
-017935,000186: 22,3222           33205                           <span class="op">CAF     </span> <a href="#4F4E45534543">ONESEC</a>     +1                         <span class="co">#  INCREMENT TIME FOR NEXT UPDATE</span>
-017936,000187: 22,3223           27671                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E455854494D45">NEXTIME</a>                               
-017937,000188: 22,3224           15112                           <span class="op">TCF     </span> <a href="EXECUTIVE.agc.html#454E444F464A4F42">ENDOFJOB</a>                              
+018144,000207:                                                                                                  <span class="co">#  ROUTINE FOR TERMINATING AUTOMATIC MANEUVERS</span>
+018145,000208: 
+<a name="4D414E5553544F50"></a>018146,000209: 22,3232           03256        <span class="sm">MANUSTOP</span>           <span class="op">TC      </span> <a href="#53544F50595A">STOPYZ</a>                                
+018147,000210: 22,3233           03303                           <span class="op">TC      </span> <a href="#4C4F4144595A">LOADYZ</a>                                
+018148,000211: 
+<a name="454E44524F4C4C"></a>018149,000212: 22,3234           31155        <span class="sm">ENDROLL </span>           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43504849">CPHI</a>                                  
+018150,000213: 22,3235           55646                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4344555844">CDUXD</a>                                 <span class="co">#  SET CDUXD TO THE COMMANDED OUTER GIMBAL</span>
+018151,000214: 22,3236           03245                           <span class="op">TC      </span> <a href="#53544F5052415445">STOPRATE</a>                              
+<a name="454E444D414E55"></a>018152,000215: 22,3237           31327        <span class="sm">ENDMANU </span>           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4154545052494F">ATTPRIO</a>                               <span class="co">#  RESTORE USERS PRIORITY</span>
+018153,000216: 22,3240           54063                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E45575052494F">NEWPRIO</a>                               
+018154,000217: 
+018155,000218: 22,3241           34714                           <span class="op">CA      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5A45524F">ZERO</a>                                  <span class="co">#  ZERO ATTCADR</span>
+018156,000219: 22,3242           53326                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41545443414452">ATTCADR</a>                               
+018157,000220: 
+018158,000221: 22,3243           05053                           <span class="op">TC      </span> <a href="EXECUTIVE.agc.html#5350564143">SPVAC</a>                                 <span class="co">#  RETURN TO USER OF GOMANUR</span>
+018159,000222: 
+018160,000223: 22,3244           05213                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              
+018161,000224: 
+<a name="53544F5052415445"></a>018162,000225: 22,3245           34714        <span class="sm">STOPRATE</span>           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5A45524F">ZERO</a>                                  
+018163,000226: 22,3246           55575                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C43445558">DELCDUX</a>                               
+018164,000227: 22,3247           55576                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C43445558">DELCDUX</a>    +1                         <span class="co">#  ZERO ROLL INCREMENTAL ANGLES</span>
+018165,000228: 22,3250           55525                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#57424F4459">WBODY</a>                                 <span class="co">#  RATE</span>
+018166,000229: 22,3251           55526                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#57424F4459">WBODY</a>      +1                         
+018167,000230: 22,3252           55564                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#42494153">BIAS</a>                                  <span class="co">#  BIAS</span>
+018168,000231: 
+018169,000232: 22,3253           44674                           <span class="op">CS      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4249543135">BIT15</a>                                 <span class="co">#  MAKE SURE HIGH RATE FLAG (BIT 15 OF</span>
+018170,000233: 22,3254           71501                           <span class="op">MASK    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524353464C414753">RCSFLAGS</a>                              <span class="co">#  RCSFLAGS) IS RESET.</span>
+018171,000234: 22,3255           55501                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524353464C414753">RCSFLAGS</a>                              
+018172,000235: 
+<a name="53544F50595A"></a>018173,000236: 22,3256           34714        <span class="sm">STOPYZ  </span>           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5A45524F">ZERO</a>                                  
+018174,000237: 22,3257           55577                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C43445559">DELCDUY</a>                               <span class="co">#  ZERO PITCH, YAW</span>
+018175,000238: 22,3260           55600                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C43445559">DELCDUY</a>    +1                         <span class="co">#  INCREMENTAL ANGLES</span>
+018176,000239: 22,3261           55601                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C4344555A">DELCDUZ</a>                               
+018177,000240: 22,3262           55602                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C4344555A">DELCDUZ</a>    +1                         
+018178,000241: 22,3263           55527                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#57424F445931">WBODY1</a>                                <span class="co">#  RATES</span>
+018179,000242: 22,3264           55530                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#57424F445931">WBODY1</a>     +1                         
+018180,000243: 22,3265           55531                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#57424F445932">WBODY2</a>                                
+018181,000244: 22,3266           55532                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#57424F445932">WBODY2</a>     +1                         
+018182,000245: 22,3267           55565                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4249415331">BIAS1</a>                                 <span class="co">#  BIASES</span>
+018183,000246: 22,3270           55566                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4249415332">BIAS2</a>                                 
+018184,000247: 22,3271           00002                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
+018185,000248: 
+<a name="5A45524F4552524F"></a>018186,000249: 22,3272           30032        <span class="sm">ZEROERROR</span>           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43445558">CDUX</a>                                  <span class="co">#  PICK UP CDU ANGLES AND STORE IN</span>
+018187,000250: 22,3273           55646                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4344555844">CDUXD</a>                                 <span class="co">#  CDU DESIRED</span>
+018188,000251: 22,3274           30033                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43445559">CDUY</a>                                  
+018189,000252: 22,3275           55650                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4344555944">CDUYD</a>                                 
+018190,000253: 22,3276           30034                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4344555A">CDUZ</a>                                  
+018191,000254: 22,3277           55652                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4344555A44">CDUZD</a>                                 
+018192,000255: 22,3300           00002                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
+018193,000256: 
 </pre>
 </span>
 </p>
@@ -335,102 +432,14 @@ Page 412
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-017939,000190: 
-<a name="5550445443414C4C"></a>017940,000191: 22,3225           37663        <span class="sm">UPDTCALL</span>           <span class="op">CAF     </span> <a href="FIXED_FIXED_CONSTANT_POOL.agc.html#5052494F3236">PRIO26</a>                                <span class="co">#  CALL FOR UPDATE</span>
-017941,000192: 22,3226           05042                           <span class="op">TC      </span> <a href="EXECUTIVE.agc.html#46494E44564143">FINDVAC</a>                               <span class="co">#  OF STEERING COMMANDS</span>
-017942,000193: 22,3227  E6,1661                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#42434455">BCDU</a>                                  
-017943,000194: 22,3227           03027 44106                     <span class="ps">2CADR   </span> <a href="#4E455744454C4849">NEWDELHI</a>                              
-017944,000195: 
-017945,000196: 22,3231           05213                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              
-017946,000197: 
-</pre>
-</span>
-</p>
-<table style="text-align: left;" border="1" cellpadding="2" cellspacing="2">
-<tbody>
-<tr>
-<td style="white-space: nowrap; vertical-align: middle;">
-<img alt="" src="Apollo32.png" style="width: 32px; height: 32px;" align="left">
-</td>
-<td style="vertical-align: middle;">
-Page 413
-</td></tr></tbody></table>
-<p class="nobreak">
-<span style="font-family: monospace;">
-<pre>
-017948,000199:                                                                                                  <span class="co">#  ROUTINE FOR TERMINATING AUTOMATIC MANEUVERS</span>
-017949,000200: 
-<a name="4D414E5553544F50"></a>017950,000201: 22,3232           03256        <span class="sm">MANUSTOP</span>           <span class="op">TC      </span> <a href="#53544F50595A">STOPYZ</a>                                
-017951,000202: 22,3233           03303                           <span class="op">TC      </span> <a href="#4C4F4144595A">LOADYZ</a>                                
-017952,000203: 
-<a name="454E44524F4C4C"></a>017953,000204: 22,3234           31155        <span class="sm">ENDROLL </span>           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43504849">CPHI</a>                                  
-017954,000205: 22,3235           55646                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4344555844">CDUXD</a>                                 <span class="co">#  SET CDUXD TO THE COMMANDED OUTER GIMBAL</span>
-017955,000206: 22,3236           03245                           <span class="op">TC      </span> <a href="#53544F5052415445">STOPRATE</a>                              
-<a name="454E444D414E55"></a>017956,000207: 22,3237           31327        <span class="sm">ENDMANU </span>           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4154545052494F">ATTPRIO</a>                               <span class="co">#  RESTORE USERS PRIO</span>
-017957,000208: 22,3240           54063                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E45575052494F">NEWPRIO</a>                               
-017958,000209: 
-017959,000210: 22,3241           34714                           <span class="op">CA      </span> <a href="FIXED_FIXED_CONSTANT_POOL.agc.html#5A45524F">ZERO</a>                                  <span class="co">#  ZERO ATTCADR</span>
-017960,000211: 22,3242           53326                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41545443414452">ATTCADR</a>                               
-017961,000212: 
-017962,000213: 22,3243           05053                           <span class="op">TC      </span> <a href="EXECUTIVE.agc.html#5350564143">SPVAC</a>                                 <span class="co">#  RETURN TO USER</span>
-017963,000214: 
-017964,000215: 22,3244           05213                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              
-017965,000216: 
-<a name="53544F5052415445"></a>017966,000217: 22,3245           34714        <span class="sm">STOPRATE</span>           <span class="op">CAF     </span> <a href="FIXED_FIXED_CONSTANT_POOL.agc.html#5A45524F">ZERO</a>                                  
-017967,000218: 22,3246           55575                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C43445558">DELCDUX</a>                               
-017968,000219: 22,3247           55576                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C43445558">DELCDUX</a>    +1                         <span class="co">#  ZERO ROLL INCREMENTAL ANGLES</span>
-017969,000220: 22,3250           55525                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#57424F4459">WBODY</a>                                 <span class="co">#  RATE</span>
-017970,000221: 22,3251           55526                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#57424F4459">WBODY</a>      +1                         
-017971,000222: 22,3252           55564                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#42494153">BIAS</a>                                  <span class="co">#  BIAS</span>
-017972,000223: 
-017973,000224: 22,3253           44674                           <span class="op">CS      </span> <a href="FIXED_FIXED_CONSTANT_POOL.agc.html#4249543135">BIT15</a>                                 <span class="co">#  MAKE SURE HIGH RATE FLAG (BIT 15 OF</span>
-017974,000225: 22,3254           71501                           <span class="op">MASK    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524353464C414753">RCSFLAGS</a>                              <span class="co">#  RCSFLAGS) IS RESET.</span>
-017975,000226: 22,3255           55501                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524353464C414753">RCSFLAGS</a>                              
-017976,000227: 
-<a name="53544F50595A"></a>017977,000228: 22,3256           34714        <span class="sm">STOPYZ  </span>           <span class="op">CAF     </span> <a href="FIXED_FIXED_CONSTANT_POOL.agc.html#5A45524F">ZERO</a>                                  
-017978,000229: 22,3257           55577                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C43445559">DELCDUY</a>                               <span class="co">#  ZERO PITCH, YAW</span>
-017979,000230: 22,3260           55600                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C43445559">DELCDUY</a>    +1                         <span class="co">#  INCREMENTAL ANGLES</span>
-017980,000231: 22,3261           55601                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C4344555A">DELCDUZ</a>                               
-017981,000232: 22,3262           55602                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C4344555A">DELCDUZ</a>    +1                         
-017982,000233: 22,3263           55527                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#57424F445931">WBODY1</a>                                <span class="co">#  RATES</span>
-017983,000234: 22,3264           55530                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#57424F445931">WBODY1</a>     +1                         
-017984,000235: 22,3265           55531                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#57424F445932">WBODY2</a>                                
-017985,000236: 22,3266           55532                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#57424F445932">WBODY2</a>     +1                         
-017986,000237: 22,3267           55565                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4249415331">BIAS1</a>                                 <span class="co">#  BIASES</span>
-017987,000238: 22,3270           55566                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4249415332">BIAS2</a>                                 
-017988,000239: 22,3271           00002                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
-017989,000240: 
-<a name="5A45524F4552524F"></a>017990,000241: 22,3272           30032        <span class="sm">ZEROERROR</span>           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43445558">CDUX</a>                                  <span class="co">#  PICK UP CDU ANGLES AND STORE IN</span>
-017991,000242: 22,3273           55646                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4344555844">CDUXD</a>                                 <span class="co">#  CDU DESIRED</span>
-017992,000243: 22,3274           30033                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43445559">CDUY</a>                                  
-017993,000244: 22,3275           55650                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4344555944">CDUYD</a>                                 
-017994,000245: 22,3276           30034                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4344555A">CDUZ</a>                                  
-017995,000246: 22,3277           55652                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4344555A44">CDUZD</a>                                 
-017996,000247: 22,3300           00002                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
-017997,000248: 
-</pre>
-</span>
-</p>
-<table style="text-align: left;" border="1" cellpadding="2" cellspacing="2">
-<tbody>
-<tr>
-<td style="white-space: nowrap; vertical-align: middle;">
-<img alt="" src="Apollo32.png" style="width: 32px; height: 32px;" align="left">
-</td>
-<td style="vertical-align: middle;">
-Page 414
-</td></tr></tbody></table>
-<p class="nobreak">
-<span style="font-family: monospace;">
-<pre>
-<a name="4C4F414443445544"></a>017999,000250: 22,3301           31155        <span class="sm">LOADCDUD</span>           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43504849">CPHI</a>                                  <span class="co">#  STORE TERMINAL ANGLES INTO</span>
-018000,000251: 22,3302           55646                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4344555844">CDUXD</a>                                 <span class="co">#  COMMAND ANGLES</span>
-<a name="4C4F4144595A"></a>018001,000252: 22,3303           31156        <span class="sm">LOADYZ  </span>           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#435448455441">CTHETA</a>                                
-018002,000253: 22,3304           55650                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4344555944">CDUYD</a>                                 
-018003,000254: 22,3305           31157                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43505349">CPSI</a>                                  
-018004,000255: 22,3306           55652                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4344555A44">CDUZD</a>                                 
-018005,000256: 22,3307           00002                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
-018006,000257: 
+<a name="4C4F414443445544"></a>018195,000258: 22,3301           31155        <span class="sm">LOADCDUD</span>           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43504849">CPHI</a>                                  <span class="co">#  STORE TERMINAL ANGLES INTO</span>
+018196,000259: 22,3302           55646                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4344555844">CDUXD</a>                                 <span class="co">#  COMMAND ANGLES</span>
+<a name="4C4F4144595A"></a>018197,000260: 22,3303           31156        <span class="sm">LOADYZ  </span>           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#435448455441">CTHETA</a>                                
+018198,000261: 22,3304           55650                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4344555944">CDUYD</a>                                 
+018199,000262: 22,3305           31157                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43505349">CPSI</a>                                  
+018200,000263: 22,3306           55652                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4344555A44">CDUZD</a>                                 
+018201,000264: 22,3307           00002                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
+018202,000265: 
 
 End of include-file KALCMANU_STEERING.agc.  Parent file is <a href="MAIN.agc.html">MAIN.agc</a>
 </pre>
