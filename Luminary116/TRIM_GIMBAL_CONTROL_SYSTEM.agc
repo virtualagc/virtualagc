@@ -13,10 +13,9 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-01-22 MAS  Created from Luminary 99.
+##              2017-01-30 RRB  Updated for Luminary 116.
 
-## NOTE: Page numbers below have not yet been updated to reflect Luminary 116.
-
-## Page 1472
+## Page 1462
                 BANK            21                              
                 EBANK=          QDIFF                           
                 SETLOC          DAPS4                           
@@ -26,15 +25,16 @@
 
 # CONTROL REACHES THIS POINT UNDER EITHER OF THE FOLLOWING TWO CONDITIONS ONCE THE DESCENT ENGINE AND THE DIGITAL
 # AUTOPILOT ARE BOTH ON:
-#       A) THE TRIM GIMBAL CONTROL LAW WAS ON DURING THE PREVIOUS Q,R-AXIS TIME5 INTERRUPT (OR THE DAPIDLER
-#          INITIALIZATION WAS SET FOR TRIM GIMBAL CONTROL AND THIS IS THE FIRST PASS), OR
-#       B) THE Q,R-AXES RCS AUTOPILOT DETERMINED THAT THE VEHICLE WAS ENTERING (OR HAD JUST ENTERED) A COAST
-#          ZONE WITH A SMALL OFFSET ANGULAR ACCELERATION.
+#          A) THE TRIM GIMBAL CONTROL LAW WAS ON DURING THE PREVIOUS Q,R-AXIS TIME5 INTERRUPT (OR THE DAPIDLER
+#             INITIALIZATION WAS SET FOR TRIM GIMBAL CONTROL AND THIS IS THE FIRST PASS), OR
+#          B) THE Q,R-AXES RCS AUTOPILOT DETERMINED THAT THE VEHICLE WAS ENTERING (OR HAD JUST ENTERED) A COAST
+#             ZONE WITH A SMALL OFFSET ANGULAR ACCELERATION.
+
 # GTS IS THE ENTRY TO THE GIMBAL TRIM SYSTEM FOR CONTROLLING ATTITUDE ERRORS AND RATES AS WELL AS ACCELERATIONS.
 
 GTS             CAF             NEGONE                          # MAKE THE NEXT PASS THROUGH THE DAP BE
-                TS              COTROLER                        #       THROUGH RCS CONTROL,
-                CAF             FOUR                            #       AND ENSURE THAT IT IS NOT A SKIP.
+                TS              COTROLER                        #   THROUGH RCS CONTROL,
+                CAF             FOUR                            #   AND ENSURE THAT IT IS NOT A SKIP.
                 TS              SKIPU                           
                 TS              SKIPV                           
 
@@ -45,11 +45,11 @@ GTS             CAF             NEGONE                          # MAKE THE NEXT 
 
 # THE DRIVE SETTING ALGORITHM
 
-#       DEL = SGN(OMEGA + ALPHA*ABS(ALPHA)/(2*K))
-#                                                   2               1/2                  2       3/2
-#       NEGUSUM = ERROR*K + ALPHA*(DEL*OMEGA + ALPHA /(3*K)) + DEL*K   (DEL*OMEGA + ALPHA /(2*K))
+# DEL = SGN(OMEGA + ALPHA*ABS(ALPHA)/(2*K))
+#                                             2               1/2                  2       3/2
+# NEGUSUM = ERROR*K + ALPHA*(DEL*OMEGA + ALPHA /(3*K)) + DEL*K   (DEL*OMEGA + ALPHA /(2*K))
 
-#       DRIVE = -SGN(NEGUSUM)
+# DRIVE = -SGN(NEGUSUM)
 
                 CA              SR                              # SAVE THE SR.  SHIFT IT LEFT TO CORRECT
                 AD              A                               # FOR THE RIGHT SHIFT DUE TO EDITING.
@@ -61,17 +61,11 @@ GTSGO+DN        CAF             TWO                             # SET INDEXER FO
 GOQTRIMG        CAF             ZERO                            # SET INDEXER FOR Q-AXIS CALCULATIONS
                 TS              QRCNTR                          
 
-## RSB 2016 &mdash; Everything between this line and the corresponding
-## line below was missing in the Luminary 099 print-out from the MIT Museum
-## (from which the remainder of the source-code was transcribed), presumably
-## due to some problem with the printer. It has been filled in from 
-## snapshots of page 1472 and 1473 of a different Luminary 99 print-out, 
-## thoughtfully made for us by Don Eyles.
                 INDEX           QRCNTR                          # AOS SCALED AT PI/2
                 CA              AOSQ                            
                 EXTEND                                          
                 MP              BIT2                            # RESCALE AOS TO PI/4
-## Page 1473
+## Page 1463
                 EXTEND                                          
                 BZF             GTSQAXIS        -3              # USE FULL SCALE FOR LARGER AOS ESTIMATES.
 
@@ -102,7 +96,7 @@ ALGORTHM        EXTEND                                          # Q(R)DIFF IS TH
                 DXCH            K2THETA                         
                 EXTEND                                          
                 MP              BIT5                            # FIRST TERM OF NEGUSUM IN K2THETA.
-                ADS             K2THETA         +1              # NO CARRY NEEDED       D.P. AT 4*PI(2)
+                ADS             K2THETA         +1              # NO CARRY NEEDED    D.P. AT 4*PI(2)
 
                 CS              ACENTRAL                        # FORM ALPHA(2)/(2*K) AT 16*PI, IN D.P.,
                 EXTEND                                          # LIMITING QUOTIENT TO AVOID OVERFLOW.
@@ -116,15 +110,13 @@ ALGORTHM        EXTEND                                          # Q(R)DIFF IS TH
                 EXTEND                                          
                 DCS             A                               # ALPHA(2)/2 - K
                 AD              KCENTRAL                        
-## RSB 2016 &mdash; End of material from Don Eyles's printout.  The non-blank portion
-## of page 1473 continues below:
                 EXTEND                                          
                 DV              KCENTRAL                        # HIGH ORDER OF QUOTIENT.
                 XCH             A2CNTRAL                        
                 CA              L                               # SHIFT UP THE REMAINDER.
                 LXCH            7                               # ZERO LOW-ORDER DIVIDEND.
                 EXTEND                                          
-## Page 1474
+## Page 1464
                 DV              KCENTRAL                        
                 XCH             A2CNTRAL        +1              # QUOTIENT STORED AT 16*PI, D.P.
                 TCF             HAVEQUOT                        
@@ -175,7 +167,7 @@ DEFUNCT         TS              K2CNTRAL
                 TS              K2CNTRAL        +1              
                 TCF             FUNCT2                          
 
-## Page 1475
+## Page 1465
 NEG1/3          DEC             -.33333                         
 
 NEGFNCT2        EXTEND                                          
@@ -225,7 +217,7 @@ GETROOT         CA              K2CNTRAL                        # K*(DEL*OMEGA +
                 TS              L                               
                 TCF             +2                              
                 ADS             FUNCTION                        # DESIRED TERM IN FUNCTION, AT PI(2)/16
-## Page 1476
+## Page 1466
                 CCS             DEL                             
                 TCF             RSTOFGTS                        
                 TCF             NEGUSUM                         
@@ -276,7 +268,7 @@ ACDT+C12        CS              NEGUQ
                 AD              CHNL12                          
                 EXTEND                                          
                 WRITE           CHAN12                          
-## Page 1477
+## Page 1467
                 CS              CALLGMBL                        # TURN OFF REQUEST FOR ACDT+C12 EXECUTION.
                 MASK            RCSFLAGS                        
                 TS              RCSFLAGS                        
@@ -288,32 +280,32 @@ ACDT+C12        CS              NEGUQ
                 SETLOC          DAPS4                           
                 BANK                                            
 
-## Page 1478
+## Page 1468
 # SUBROUTINE TIMEGMBL:  MOD 0, OCTOBER 1967, CRAIG WORK
 
 # TIMEGMBL COMPUTES THE DRIVE TIME NEEDED FOR THE TRIM GIMBAL TO POSITION THE DESCENT ENGINE NOZZLE SO AS TO NULL
 # THE OFFSET ANGULAR ACCELERATION ABOUT THE Q (OR R) AXIS.  INSTEAD OF USING AOSQ(R), TIMEGMBL USES .4*AOSQ(R),
-# SCALED AT PI/8.  FOR EACH AXIS, THE DRIVE TIME IS COMPUTED AS ABS(ALPHA/ACCDOT).  A ZERO
+# SCALED AT PI/8.                         FOR EACH AXIS, THE DRIVE TIME IS COMPUTED AS ABS(ALPHA/ACCDOT).  A ZERO
 # ALPHA OR ACCDOT OR A ZERO QUOTIENT TURNS OFF THE GIMBAL DRIVE IMMEDIATELY.  OTHERWISE, THE GIMBAL IS TURNED ON
 # DRIVING IN THE CORRECT DIRECTION.  THE Q(R)GIMTIMR IS SET TO TERMINATE THE DRIVE AND Q(R)ACCDOT
 # IS STORED TO REFLECT THE NEW ACCELERATION DERIVATIVE.  NEGUQ(R) WILL CONTAIN +1,+0,-1 FOR A Q(R)ACCDOT VALUE
 # WHICH IS NEGATIVE, ZERO, OR POSITIVE.
 
-# INPUTS:       AOSQ,AOSR, SCALED AT P1/2, AND ACCDOTQ, ACCDOTR AT PI/2(7).     PI/2(7).
+# INPUTS:  AOSQ,AOSR, SCALED AT P1/2, AND ACCDOTQ, ACCDOTR AT PI/2(7).       PI/2(7).
 
-# OUTPUTS:      NEW GIMBAL DRIVE BITS IN CHANNEL 12, NEGUQ, NEGUR, QACCDOT AND RACCDOT, THE LAST SCALED AT PI/2(7).
-#               Q(R)GIMTIMR WILL BE SET TO TIME AND TERMINATE GIMBAL DRIVE(S)
+# OUTPUTS:   NEW GIMBAL DRIVE BITS IN CHANNEL 12, NEGUQ, NEGUR, QACCDOT AND RACCDOT, THE LAST SCALED AT PI/2(7).
+#            Q(R)GIMTIMR WILL BE SET TO TIME AND TERMINATE GIMBAL DRIVE(S)
 
-# DEBRIS:       A, L, Q, ITEMPS 2, 3, 6, RUPTREG2 AND ACDT+C12 DEBRIS.
+# DEBRIS:   A, L, Q, ITEMPS 2, 3, 6, RUPTREG2 AND ACDT+C12 DEBRIS.
 
-# EXITS:        VIA TC Q.
+# EXITS:   VIA TC Q.
 
 # ALARMS, ABORTS, :  NONE
 
 # SUBROUTINES:  ACDT+C12, IBNKCALL
 
-# WARNING:      THIS SUBROUTINE WRITES INTO CHANNEL 12 AND USES THE ITEMPS.  THEREFORE IT MAY ONLY BE CALLED WITH
-#               INTERRUPT INHIBITED.
+# WARNING:  THIS SUBROUTINE WRITES INTO CHANNEL 12 AND USES THE ITEMPS.  THEREFORE IT MAY ONLY BE CALLED WITH
+# INTERRUPT INHIBITED.
 
 # ERASABLE STORAGE CONFIGURATION (NEEDED BY THE INDEXING METHODS):
 #       NEGUQ           ERASE   +2              NEGATIVE OF Q-AXIS GIMBAL DRIVE
@@ -336,7 +328,7 @@ TIMEGMBL        CAF             ONE                             # INITIALIZE ALL
                 CAF             TWO                             # SET UP LOOP FOR R AXIS.
                 LXCH            Q                               # SAVE RETURN ADDRESS.
                 LXCH            RUPTREG2                        
-## Page 1479
+## Page 1469
                 TCF             +2                              
 TIMQGMBL        CAF             ZERO                            # NOW DO THE Q-AXIS
                 TS              QRNDXER                         
@@ -358,7 +350,7 @@ ALPHATRY        INDEX           QRNDXER
                 TS              L                               # WAS THERE OVERFLOW?
                 TCF             SETNEGU                         # NO.  COMPUTE DRIVE TIME.
 
-                CS              A                               # RECOVER -SGN(AOS) IN THE A REGISTER.
+                CS              A                               # RECOVER  -SGN(AOS) IN THE A REGISTER.
                 INDEX           QRNDXER                         # YES.  START DRIVE WITHOUT WAITLIST.
                 XCH             NEGUQ                           
                 TCF             NOTALLOW                        # KNOCK DOWN THE ALLOWGTS FLAG.
@@ -367,10 +359,10 @@ SETNEGU         EXTEND
                 BZMF            POSALPH                         
 
                 COM                                             
-                TS              ITEMP2                          # STORE -ABS(.4*AOS) SCALED AT PI/8.
+                TS              ITEMP2                          # STORE  -ABS(.4*AOS) SCALED AT PI/8.
                 CS              BIT1                            
                 TCF             POSALPH         +2              
-POSALPH         TS              ITEMP2                          # STORE -ABS(.4*AOS) SCALED AT PI/8.
+POSALPH         TS              ITEMP2                          # STORE  -ABS(.4*AOS) SCALED AT PI/8.
                 CA              BIT1                            
  +2             INDEX           QRNDXER                         # SGN(AOS) INTO NEGU
                 TS              NEGUQ                           # STORE SGN(APLHA) AS NEGU
@@ -386,7 +378,7 @@ POSALPH         TS              ITEMP2                          # STORE -ABS(.4*
                 MP              OCT00240                        # DECIMAL 10/1024
                 EXTEND                                          # QUOTIENT IS DRIVE TIME AT WAITLIST.
                 DV              NZACCDOT                        # ABS(ALPHA)/ACCDOT AT 2(14)/100
-## Page 1480
+## Page 1470
                 EXTEND                                          
                 BZF             TGOFFNOW                        # DRIVE TIME MUST BE GREATER THAN ZERO.
 
@@ -425,8 +417,8 @@ DONEYET         CCS             QRNDXER
 
 OCT00240        OCTAL           00240                           # DECIMAL 10/1024
 
-## Page 1481
-# THE FOLLOWING SECTION IS A CONTINUATION OF THE TRIM GIMBAL CONTROL FROM THE LAST GTS ENTRY.  THE QUANTITY NEGUSUM
+## Page 1471
+# THE FOLLOWING SECTION IS A CONTINUATION OF THE TRIM GIMBAL CONTROL FROM THE LAST GTS ENTRY. THE QUANTITY NEGUSUM
 # IS COMPUTED FOR EACH AXIS (Q,R), .707*DEL*FUNCTION(3/2) + K2THETA = NEGUSUM.  NEW DRIVES ARE ENTERED TO CH 12.
 
 # THE SUBROUTINE GTSQRT ACCEPTS A DOUBLE PRECISION VALUE IN FUNCTION, FUNCTION +1 AND RETURNS A SINGLE-PRECISION
@@ -476,7 +468,7 @@ SCALLOOP        CS              FUNCTION
                 EXTEND                                          
                 BZMF            MULBUSH                         # IF ARG IS NOT LESS THAN REFERENCE, GO
                                                                 # AROUND THE MULBERRY BUSH ONCE MORE.
-## Page 1482
+## Page 1472
                 INDEX           ININDEX                         
                 CA              BIT15                           # THIS IS THE SCALE MAGNITUDE
                 XCH             HALFARG                         # 2**(-ININDEX) IS THE SHIFT DIVISOR.
@@ -485,6 +477,7 @@ SCALLOOP        CS              FUNCTION
                 EXTEND                                          
                 DV              HALFARG                         
                                                                 # ININDEX AND SHFTFLAG PRESERVE INFO FOR
+
                                                                 # RESCALING AFTER ROOT PROCESS.
 SCALDONE        EXTEND                                          
                 QXCH            FUNCTION        +1              # SAVE Q FOR RETURN
@@ -507,12 +500,12 @@ PRODUCT         XCH             K2CNTRAL
                 EXTEND                                          
                 MP              K2CNTRAL                        
                 DXCH            K2CNTRAL                        
-                EXTEND                                          #               THE PRODUCT OF
+                EXTEND                                          #              THE PRODUCT OF
                 MP              L                               #  1/2                   2       1/2
                 ADS             K2CNTRAL        +1              # K   *(DEL*OMEGA + ALPHA /(2*K))
                 TS              L                               #                     AND
-                TCF             +2                              #                       2
-                ADS             K2CNTRAL                        # DEL*(DEL*OMEGA + ALPHA /(2*K)) NOW IN 
+                TCF             +2                              #                        2
+                ADS             K2CNTRAL                        #  DEL*(DEL*OMEGA + ALPHA /(2*K)) NOW IN 
                                                                 # K2CNTRAL
 
 DOSHIFT         CA              ININDEX                         
@@ -523,7 +516,7 @@ DOSHIFT         CA              ININDEX
                 BZF             ADDITIN                         
                 INDEX           SHFTFLAG                        
                 CA              BIT15                           
-## Page 1483
+## Page 1473
                 XCH             K2CNTRAL                        
                 EXTEND                                          
                 MP              K2CNTRAL                        
@@ -574,7 +567,7 @@ REVERSAL        INDEX           QRCNTR                          # A ZERO-DRIVE P
 ZEROLOUP        CS              RCSFLAGS                        # SET UP REQUEST FOR ACDT+C12 CALL.
                 MASK            CALLGMBL                        
                 ADS             RCSFLAGS                        
-## Page 1484
+## Page 1474
 LOUPE           CCS             QRCNTR                          # HAVE BOTH AXES BEEN PROCESSED?
                 TCF             GOQTRIMG                        # NO.  DO Q AXIS NEXT.
 
@@ -595,7 +588,6 @@ OCT11276        OCTAL           11276                           # POSMAX - ROOTH
 GMBLBITB        OCTAL           06000                           # INDEXED WRT GMBLBITA  DO NOT MOVE ******
 
 # SUBROUTINE ROOTCYCL:  BY CRAIG WORK, 3 APRIL 68
-
 # ROOTCYCL IS A SUBROUTINE WHICH EXECUTES ONE NEWTON SQUARE ROOT ALGORITHM ITERATION.  THE INITIAL GUESS AT THE
 # SQUARE ROOT IS PRESUMED TO BE IN THE A REGISTER AND ONE-HALF THE SQUARE IS TAKEN FROM HALFARG.  THE NEW APPROXI-
 # MATION TO THE SQUARE ROOT IS RETURNED IN THE A REGISTER.  DEBRIS:  A, L, SR, SCRATCH.  ROOTCYCL IS CALLED FROM
