@@ -13,10 +13,9 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-01-22 MAS  Created from Luminary 99.
+##              2017-01-30 RRB  Updated for Luminary 116.
 
-## NOTE: Page numbers below have not yet been updated to reflect Luminary 116.
-
-## Page 1100
+## Page 1092
                 SETLOC          INTPRET1                        
                 BANK                                            
 
@@ -39,7 +38,7 @@ DPHALF          =               UNITX
 DPPOSMAX        OCT             37777                           
                 OCT             37777                           
 
-## Page 1101
+## Page 1093
 # INTERPRETIVE CONSTANTS IN THE OTHER HALF-MEMORY
 
                 SETLOC          INTPRET2                        
@@ -58,7 +57,7 @@ ZEROVEC         2DEC            0
 
                 2DEC            0                               
 
-                OCT             77777                           # -0, -6, -12 MUST REMAIN IN THIS ORDER
+                OCT             77777                           # -0,-6,-12 MUST REMAIN IN THIS ORDER
 DFC-6           DEC             -6                              
 DFC-12          DEC             -12                             
 LODPMAX         2OCT            3777737777                      # THESE TWO CONSTANTS MUST REMAIN
