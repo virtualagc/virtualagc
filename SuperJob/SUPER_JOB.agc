@@ -19,6 +19,11 @@
 ##                              on each page (there should be 58).
 ##              2017-01-29 MAS  Fixed a few errors identified during
 ##                              octal transcription.
+##              2017-01-30 MAS  Fixed a transcription error in the octals
+##                              noticed while transcribing the inline
+##                              assembled octals. There are probably more
+##                              of those left, but for now the assembly
+##                              matches the binsource.
 
 ## Page D-4 (continued)
                 SETLOC  FF024000
