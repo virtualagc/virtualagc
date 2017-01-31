@@ -534,6 +534,8 @@ void
 PrintOutputRecord(const ParseOutput_t *record);
 void
 PrintTrace(const ParseInput_t *inRecord, const ParseOutput_t *outRecord);
+int
+AddParity(int Value);
 
 // Various parsers.
 Parser_t ParseBLOCK, ParseEQUALS, ParseEqualsECADR, ParseCHECKequals, ParseBANK,

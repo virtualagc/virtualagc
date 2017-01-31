@@ -30,6 +30,7 @@
 
 #include "yaYUL.h"
 #include <stdlib.h>
+#include <stdint.h>
 #include <string.h>
 
 //-------------------------------------------------------------------------
@@ -192,4 +193,22 @@ PrintTrace(const ParseInput_t *inRecord, const ParseOutput_t *outRecord)
   printf("--- out");
   PrintOutputRecord(outRecord);
   printf("\n");
+}
+
+//-------------------------------------------------------------------------
+// Add an odd parity bit to the end of a data word.
+int 
+AddParity(int Value)
+{
+    uint16_t p = 1;
+    uint16_t n = Value;
+
+    Value <<= 1;
+    while (n)
+    {
+        n &= (n - 1);
+        p = !p;
+    }
+
+    return (Value | p);
 }

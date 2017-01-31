@@ -2582,8 +2582,8 @@ Pass(int WriteOutput, const char *InputFilename, FILE *OutputFile, int *Fatals,
                           for (i = 0; i < ParseOutputRecord.NumWords; i++)
                             {
                               ObjectCode[bank][(ParseInputRecord.ProgramCounter.SReg
-                                  + i) & 01777] = ParseOutputRecord.Words[i]
-                                  & 077777;
+                                  + i) & 01777] = AddParity(ParseOutputRecord.Words[i]
+                                  & 077777);
                             }
 
                           // JMS: 07.28
@@ -2808,4 +2808,3 @@ Pass(int WriteOutput, const char *InputFilename, FILE *OutputFile, int *Fatals,
 
   return (RetVal);
 }
-

@@ -469,12 +469,12 @@ main(int argc, char *argv[])
                     {
                       if (Value < 01776)
                         {
-                          ObjectCode[Bank][Value] = Value + Offset;
+                          ObjectCode[Bank][Value] = AddParity(Value + Offset);
                           Value++;
                         }
                       if (Value < 01777)
                         {
-                          ObjectCode[Bank][Value] = Value + Offset;
+                          ObjectCode[Bank][Value] = AddParity(Value + Offset);
                           Value++;
                         }
                     }
@@ -482,13 +482,13 @@ main(int argc, char *argv[])
                     {
                       int tryBank;
                       for (Bugger = Offset = 0; Offset < Value; Offset++)
-                        Bugger = Add(Bugger, ObjectCode[Bank][Offset]);
+                        Bugger = Add(Bugger, ObjectCode[Bank][Offset] >> 1);
                       tryBank = 077777 & (flipBugger[Bank] ? ~Bank : Bank);
                       if (0 == (040000 & Bugger))
                         GuessBugger = Add(tryBank, 077777 & ~Bugger);
                       else
                         GuessBugger = Add(077777 & ~tryBank, 077777 & ~Bugger);
-                      ObjectCode[Bank][Value] = GuessBugger;
+                      ObjectCode[Bank][Value] = AddParity(GuessBugger);
                       printf("Bugger word %05o at %02o,%04o.\n", GuessBugger, Bank,
                           (Block1 ? 06000 : 02000) + Value);
                       if (HtmlOut != NULL)
@@ -500,22 +500,11 @@ main(int argc, char *argv[])
           // Output the binary data.
           for (Offset = 0; Offset < 02000; Offset++)
             {
-              Value = (ObjectCode[Bank][Offset] << 1);
+              Value = ObjectCode[Bank][Offset];
 
-              if (Hardware)
-                {
-                  // Calculate the odd parity of the word using Brian Kernigan's bit-counting method
-                  uint16_t p = 1;
-                  uint16_t n = Value;
-
-                  while (n)
-                    {
-                      n &= (n - 1);
-                      p = !p;
-                    }
-
-                  Value |= p;
-                }
+              // Remove the parity bit if not building for hardware.
+              if (!Hardware)
+                Value &= 0177776;
 
               fputc(Value >> 8, OutputFile);
               fputc(Value, OutputFile);
