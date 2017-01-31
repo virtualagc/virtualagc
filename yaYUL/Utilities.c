@@ -26,6 +26,7 @@
  *                              It *still* doesn't work like I expect, but
  *                              at least it lets me assemble Sunburst 120
  *                              (and all prior AGC programs).
+ *              2017-01-30 MAS  Added a function to calculate parity.
  */
 
 #include "yaYUL.h"
@@ -196,19 +197,18 @@ PrintTrace(const ParseInput_t *inRecord, const ParseOutput_t *outRecord)
 }
 
 //-------------------------------------------------------------------------
-// Add an odd parity bit to the end of a data word.
-int 
-AddParity(int Value)
+// Calculat the parity bit for a data word.
+int
+CalculateParity(int Value)
 {
-    uint16_t p = 1;
+    int p = 1;
     uint16_t n = Value;
 
-    Value <<= 1;
     while (n)
     {
         n &= (n - 1);
         p = !p;
     }
 
-    return (Value | p);
+    return p;
 }

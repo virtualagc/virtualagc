@@ -90,6 +90,9 @@
  *              2016-11-14 RSB  Added --to-yul.
  *              2016-12-18 MAS  Added --no-checksums.
  *              2017-01-29 MAS  Added --raytheon.
+ *              2017-01-30 MAS  Split parity bit calculation into a separate array that is
+ *                              updated on the fly during assembly. This prevents parity
+ *                              bits from being generated for unused words.
  */
 
 #include "yaYUL.h"
@@ -469,12 +472,14 @@ main(int argc, char *argv[])
                     {
                       if (Value < 01776)
                         {
-                          ObjectCode[Bank][Value] = AddParity(Value + Offset);
+                          ObjectCode[Bank][Value] = Value + Offset;
+                          Parities[Bank][Value] = CalculateParity(Value + Offset);
                           Value++;
                         }
                       if (Value < 01777)
                         {
-                          ObjectCode[Bank][Value] = AddParity(Value + Offset);
+                          ObjectCode[Bank][Value] = Value + Offset;
+                          Parities[Bank][Value] = CalculateParity(Value + Offset);
                           Value++;
                         }
                     }
@@ -482,13 +487,14 @@ main(int argc, char *argv[])
                     {
                       int tryBank;
                       for (Bugger = Offset = 0; Offset < Value; Offset++)
-                        Bugger = Add(Bugger, ObjectCode[Bank][Offset] >> 1);
+                        Bugger = Add(Bugger, ObjectCode[Bank][Offset]);
                       tryBank = 077777 & (flipBugger[Bank] ? ~Bank : Bank);
                       if (0 == (040000 & Bugger))
                         GuessBugger = Add(tryBank, 077777 & ~Bugger);
                       else
                         GuessBugger = Add(077777 & ~tryBank, 077777 & ~Bugger);
-                      ObjectCode[Bank][Value] = AddParity(GuessBugger);
+                      ObjectCode[Bank][Value] = GuessBugger;
+                      Parities[Bank][Value] = CalculateParity(GuessBugger);
                       printf("Bugger word %05o at %02o,%04o.\n", GuessBugger, Bank,
                           (Block1 ? 06000 : 02000) + Value);
                       if (HtmlOut != NULL)
@@ -500,11 +506,11 @@ main(int argc, char *argv[])
           // Output the binary data.
           for (Offset = 0; Offset < 02000; Offset++)
             {
-              Value = ObjectCode[Bank][Offset];
+              Value = ObjectCode[Bank][Offset] << 1;
 
-              // Remove the parity bit if not building for hardware.
-              if (!Hardware)
-                Value &= 0177776;
+              // If building for hardware, add in the parity bits.
+              if (Hardware)
+                Value |= Parities[Bank][Offset];
 
               fputc(Value >> 8, OutputFile);
               fputc(Value, OutputFile);
