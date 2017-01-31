@@ -1,20 +1,14 @@
 # Copyright:	Public domain.
 # Filename:	Makefile
-# Purpose:	Makefile for Aurora (revision 12).
+# Purpose:	Makefile for Borealis.
 # Contact:	Ron Burkey <info@sandroid.org>.
 # Website:	http://www.ibiblio.org/apollo
-# Mod history:	2016-09-20 JL	Adapted from similar Luminary 099 Makefile.
-#		2016-10-04 JL	Change to use Makefile.inc.
-#		2016-10-05 JL	Pass --blk2 to yaYUL.
-#		2016-10-05 JL	Pass --syntax to yaYUL for proofing.
-#		2016-10-21 RSB	Changed to "production" settings.
+# Mod history:	2017-01-30 MAS	Cleaned up from Aurora12 Makefile.
 
 BASENAME=Borealis
+EXTRA_YAYUL_ARGS+=--blk2
 
-# Disable binsource checking until ready.
+# Borealis, being a custom program, will never have a binsource.
 NO_BINSOURCE=yes
-
-# Only do syntax checking until proofing complete.
-EXTRA_YAYUL_ARGS=--blk2
 
 include ../Makefile.inc

@@ -9,7 +9,6 @@
 #		2016-11-11 RSB	Added MAIN-test.agc for testing .yul.
 
 BASENAME=Sunburst120
-EXTRA_YAYUL_ARGS=
 EXTRA_TARGETS=MAIN-test.agc.bin MAIN-test.agc.lst
 
 include ../Makefile.inc

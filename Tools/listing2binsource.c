@@ -56,6 +56,8 @@
  *                                 filenames as arguments.
  *               2012-09-18 JL     Add bugger word generation. Add
  *                                 verbose option. Add debug prints.
+ *               2017-01-30 MAS    Added 'y' (check parity) and 'n'
+ *                                 (no banksums) options.
  *
  * For listing2binsource.c, the octal codes are provided in an input file
  * created by moving through the assembly-language portion of the
@@ -151,7 +153,7 @@ int main(int argc, char *argv[])
     char lastLineType = 'c';
     int count = 0 /*, page = 2000 */;
     int useParity = 0;
-    int noBanksums = 1;
+    int noBanksums = 0;
     FILE *infile, *outfile;
 
     if (argc < 3) {
