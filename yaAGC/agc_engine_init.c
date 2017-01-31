@@ -196,28 +196,6 @@ agc_load_binfile(agc_t *State, const char *RomImage)
 	}
     }
 
-  if (State->CheckParity)
-    {
-      // Hardware rope files are ordered 0, 1, 2, 3..., so we need to swap
-      // banks 0 and 1 with 2 and 3 to put them back into the right place.
-      for (j = 0; j < 04000; j++)
-        {
-          int16_t temp;
-          Bank = j / 02000;
-          temp = State->Fixed[Bank][j % 02000];
-          State->Fixed[Bank][j % 02000] = State->Fixed[Bank+2][j % 02000];
-          State->Fixed[Bank+2][j % 02000] = temp;
-        }
-
-      for (j = 0; j < (04000/32); j++)
-        {
-          uint32_t temp;
-          temp = State->Parities[j];
-          State->Parities[j] = State->Parities[j+(04000/32)];
-          State->Parities[j+(04000/32)] = temp;
-        }
-    }
-
 Done:
   if (fp != NULL) fclose (fp);
   return (RetVal);
