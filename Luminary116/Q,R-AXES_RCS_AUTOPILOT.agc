@@ -13,10 +13,9 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-01-22 MAS  Created from Luminary 99.
+##              2017-01-31 RRB  Updated for Luminary 116.
 
-## NOTE: Page numbers below have not yet been updated to reflect Luminary 116.
-
-## Page 1442
+## Page 1432
                 BANK            17                              
                 SETLOC          DAPS2                           
                 BANK                                            
@@ -37,8 +36,8 @@ CALLQERR        CA              BIT13                           # CALCULATE Q,R 
                 TC              QERRCALC                        
 
 Q,RORGTS        CCS             COTROLER                        # CHOOSE CONTROL SYSTEM FOR THIS DAP PASS:
-                TCF             GOTOGTS                         #       GTS (ALTERNATES WITH RCS WHEN DOCKED)
-                TCF             TRYGTS                          #       GTS IF ALLOWED, OTHERWISE RCS
+                TCF             GOTOGTS                         #   GTS (ALTERNATES WITH RCS WHEN DOCKED)
+                TCF             TRYGTS                          #   GTS IF ALLOWED, OTHERWISE RCS
 RCS             CAF             ZERO                            #       RCS (TRYGTS MAY BRANCH TO HERE)
                 TS              COTROLER                        
 
@@ -48,13 +47,13 @@ RCS             CAF             ZERO                            #       RCS (TRY
 
 # X - TRANSLATION:
 
-# INPUT:        BITS 7,8 OF CH31 (TRANSLATION CONTROLLER)
-#               ULLAGER
-#               APSFLAG, DRIFTBIT
-#               ACC40R2X, ACRBTRAN
+# INPUT:   BITS 7,8 OF CH31 (TRANSLATION CONTROLLER)
+#          ULLAGER
+#          APSFLAG, DRIFTBIT
+#          ACC40R2X, ACRBTRAN
 
-# OUTPUT:       NEXTU, NEXTV    CODES OF TRANSLATION FOR AFTER ROTATION
-#               SENSETYP        TELL ROTATION DIRECTION AND DESIRE
+# OUTPUT:  NEXTU, NEXTV       CODES OF TRANSLATION FOR AFTER ROTATION
+#          SENSETYP           TELL ROTATION DIRECTION AND DESIRE
 
 # X-TRANS POLICIES ARE EITHER 4 JETS OR A DIAGONAL PAIR.  IN 2-JET TRANSLATION THE SYSTEM IS SPECIFIED.  A FAILURE
 # WILL OVERRIDE THIS SPECIFICATION.  AN ALARM RESULTS WHEN NO POLICY IS AVAILABLE BECAUSE OF FAILURES.
@@ -64,7 +63,7 @@ SENSEGET        CA              BIT7                            # INPUT BITS OVE
                 RAND            CHAN31                          
                 EXTEND                                          
                 BZF             +X0RULGE                        
-## Page 1443
+## Page 1433
                 CA              BIT8                            
                 EXTEND                                          
                 RAND            CHAN31                          
@@ -115,16 +114,18 @@ TSNUMBRT        TS              NUMBERT
                 CA              00314OCT                        
                 MASK            POLYTEMP                        
 TSNEXTS         TS              NEXTU                           
-## Page 1444
+## Page 1434
                 CS              00314OCT                        
                 MASK            POLYTEMP                        
                 TS              NEXTV                           
 
 # Q,R-AXES RCS CONTROL MODE SELECTION
-#       SWITCHES        INDICATION WHEN SET
-#       BIT13/CHAN31    AUTO, GO TO ATTSTEER
-#       PULSES          MINIMUM IMPULSE MODE
-#       (OTHERWISE)     RATE COMMAND/ATTITUDE HOLD MODE
+
+#   SWITCHES                INDICATION WHEN SET
+
+#   BIT13/CHAN31            AUTO, GO TO ATTSTEER
+#   PULSES                  MINIMUM IMPULSE MODE
+#   (OTHERWISE)             RATE COMMAND/ATTITUDE HOLD MODE
 
 QRCONTRL        CA              BIT13                           # CHECK MODE SELECT SWITCH.
                 EXTEND                                          
@@ -164,7 +165,7 @@ FIREQR          CA              TEMP31
 
                 CA              TEMP31                          
                 MASK            BIT5                            
-## Page 1445
+## Page 1435
                 EXTEND                                          
                 BZF             +RMIN                           
 
@@ -202,7 +203,7 @@ MINRTN          TS              AXISCTR
                 MASK            CSMDOCKD                        
                 EXTEND                                          
                 BZF             MIMRET                          
-                INDEX           AXISCTR                         # IF DOCKED, USE 60MS MINIMUM IMPULSE
+                INDEX           AXISCTR                         # IF DOCKED,USE 60MS MINIMUM IMPULSE
                 CCS             TJU                             
                 CA              60MS                            
                 TCF             +2                              
@@ -215,10 +216,10 @@ MIMRET          CA              DAPBOOLS
                 CA              ONE                             
                 AD              TWO                             
                 TS              NUMBERT                         
-## Page 1446
+## Page 1436
                 TCF             AFTERTJ                         
 
-60MS            DEC             96.0                            
+60MS            =               OCT140                           
 MINADR          GENADR          MINRTN                          
 OCT63           OCT             63                              
 14MS            =               +TJMINT6                        
@@ -245,8 +246,8 @@ CHEKSTIK        TS              INGTS                           # NOT IN GTS WHE
                 MASK            RCSFLAGS                        
                 TS              RCSFLAGS                        # BIT 9 IS 0.
                 TCF             DAMPING                         
-40CYCL          OCT             50                              
-1/10S           OCT             1                               
+40CYCL          =               OCT50                             
+1/10S           =               BIT1                            
 LINRAT          DEC             46                              
 
 # ===========================================================
@@ -268,7 +269,7 @@ RHCACTIV        CCS             SAVEHAND                        # **************
                 MP              STIKSENS                        
                 XCH             QLAST                           # COMMAND Q RATE     SCALED 45 DEG/SEC
                 COM                                             
-## Page 1447
+## Page 1437
                 AD              QLAST                           
                 TS              DAPTEMP3                        
                 CCS             SAVEHAND        +1              
@@ -319,7 +320,7 @@ ENTERQR         DXCH            QRATEDIF                        # TRANSFORM RATE
                 TCF             ENTERUV                         # CONTINUE DIRECT RATE CONTROL.
                 TCF             STILLRCS                        # PSEUDO-AUTO CONTROL.
                 CA              40CYCL                          
-## Page 1448
+## Page 1438
                 TS              TCQR                            
 ENTERUV         INHINT                                          # DIRECT RATE CONTROL.
                 TC              IBNKCALL                        
@@ -371,7 +372,7 @@ TOPSEUDO        CS              QRBIT
                 TS              RETJADR                         
                 CA              ONE                             
 
-## Page 1449
+## Page 1439
 BACKHAND        TS              AXISCTR                         
 
                 CA              FOUR                            
@@ -423,7 +424,7 @@ TRYGTS          CAF             USEQRJTS                        # IS JET USE MAN
                 CCS             A                               
                 TCF             RCS                             
                 CCS             ALLOWGTS                        # NO.  DOES AOSTASK OK CONTROL FOR GTS?
-## Page 1450
+## Page 1440
                 TCF             +2                              
                 TCF             RCS                             
                 EXTEND                                          
@@ -448,7 +449,7 @@ CHKINGTS        CCS             INGTS                           # WAS THE TRIM G
                 EBANK=          CDUXD                           
 GTSCADR         2CADR           GTS                             
 
-## Page 1451
+## Page 1441
 # SUBROUTINE TO COMPUTE Q,R-AXES ATTITUDE ERRORS FOR USE IN THE RCS AND GTS CONTROL LAWS AND THE DISPLAYS.
 
 QERRCALC        CAE             CDUY                            # Q-ERROR CALCULATION
@@ -480,7 +481,7 @@ RERRCALC        CAE             DAPTEMP1                        # R-ERROR CALCUL
                 XCH             RERROR                          # SAVE R-ERROR FOR EIGHT-BALL DISPLAY.
                 TC              Q                               
 
-## Page 1452
+## Page 1442
 # "ATTSTEER" IS THE ENTRY POINT FOR Q,R-AXES (U,V-AXES) ATTITUDE CONTROL USING THE REACTION CONTROL SYSTEM
 
 ATTSTEER        EQUALS          STILLRCS                        # "STILLRCS" IS THE RCS EXIT FROM TRYGTS.
@@ -518,7 +519,7 @@ TJLAW           CA              TJLAWADR
                 TC              TJETLAW                         
                 TCF             AFTERTJ                         
  +3             CS              DAPBOOLS                        # DOCKED.  IF GIMBAL USABLE DO GTS CONTROL
-                MASK            USEQRJTS                        #       ON THE NEXT PASS.
+                MASK            USEQRJTS                        #   ON THE NEXT PASS.
                 CCS             A                               # USEQRJTS BIT MUST NOT BE BIT 15.
                 TS              COTROLER                        # GIMBAL USABLE.  STORE POSITIVE VALUE.
                 INHINT                                          
@@ -532,7 +533,7 @@ TJLAW           CA              TJLAWADR
 
 # INPUT:        AXISCTR         0,1 FOR U,V
 #               SNUFFBIT        ZERO TJETU,V AND TRANS. ONLY IF SET IN A DPS BURN
-## Page 1453
+## Page 1443
 #               TJU,TJV         JET TIME SCALED 10.24 SEC.
 #               NUMBERT         INDICATES NUMBER OF JETS AND TYPE OF POLICY
 #               RETJADR         WHERE TO RETURN TO
@@ -550,7 +551,7 @@ TJLAW           CA              TJLAWADR
 #               MINIMUM IMPULSE, WITH THE JET CHOSEN SEMI-RANDOMLY.
 
 AFTERTJ         CA              FLAGWRD5                        # IF SNUFFBIT SET DURING A DPS BURN GO TO
-                MASK            SNUFFBIT                        # XTRANS; THAT IS, INHIBIT CONTROL.
+                MASK            SNUFFBIT                        #   XTRANS; THAT IS, INHIBIT CONTROL.
                 EXTEND                                          
                 BZF             DOROTAT                         
                 CS              FLGWRD10                        
@@ -582,7 +583,7 @@ DOROTAT         CAF             TWO
                 AD              -150MS                          
                 EXTEND                                          
                 BZMF            DOSKIP                          
-## Page 1454
+## Page 1444
                 TC              SELCTSUB                        
 
                 INDEX           AXISCTR                         
@@ -633,7 +634,7 @@ NOTMIN          TC              SELCTSUB
                 INDEX           AXISCTR                         
                 CA              INDEXES                         
                 INHINT                                          
-## Page 1455
+## Page 1445
                 TS              T6FURTHA        +1              
                 CA              POLYTEMP                        
                 INDEX           T6FURTHA        +1              
@@ -684,7 +685,7 @@ XTRANS          CA              ZERO
 INDEXES         DEC             4                               
                 DEC             13                              
 +TJMINT6        DEC             22                              
-## Page 1456
+## Page 1446
 -150MS          DEC             -240                            
 BIT8,9          OCT             00600                           
 SCLNORM         OCT             266                             
@@ -731,12 +732,17 @@ JTLST           CS              T6FURTHA
                 TS              TIME6                           
                 LXCH            NXT6ADR                         
 
-TURNON          CA              BIT15                           
+TURNON          EXTEND
+                QXCH            C13QSAV
+                TC              C13STALL
+
+                CA              BIT15
+## Page 1447                           
                 EXTEND                                          
                 WOR             CHAN13                          
-                TC              Q                               
+                TC              C13QSAV                               
 
-## Page 1457
+
 MIDORLST        AD              T6NEXT                          
                 EXTEND                                          
                 BZMF            LASTCHG                         # TIME6 + T6NEXT - T IS IN A
@@ -781,12 +787,13 @@ ROT-TOUV        LXCH            ROTEMP2                         # (R) IS PUT INT
                 CS              LIMITS                          # AND IS LIMITED TO POSMAX OR NEGMAX
                 LXCH            ROTEMP1                         # COEFFQ.(Q) + COEFFR.(R) IS PUT INTO L
                 TC              Q                               
-SELCTSUB        INDEX           ROTINDEX                        
+SELCTSUB        INDEX           ROTINDEX
+## Page 1448                        
                 CA              ALLJETS                         
                 INDEX           NUMBERT                         
                 MASK            TYPEPOLY                        
                 TS              POLYTEMP                        
-## Page 1458
+
                 MASK            CH5MASK                         
                 CCS             A                               
                 TCF             +2                              
@@ -813,6 +820,7 @@ FAILOOP         TS              NUMBERT
 ALLJETS         OCT             00110                           #       -U      6 13
                 OCT             00022                           #       -V      2 9
                 OCT             00204                           #       +U      5 14
+
                 OCT             00041                           #       +V      1 10
 TYPEPOLY        OCT             00125                           #       -X      1 5 9 13
                 OCT             00252                           #       +X      2 6 10 14
@@ -830,13 +838,13 @@ ADRRUPT         ADRES           ENDJASK
 ENDJASK         DXCH            DAPARUPT                        
                 DXCH            ARUPT                           
                 DXCH            DAPBQRPT                        
-                XCH             BRUPT                           
+                XCH             BRUPT
+## Page 1449                           
                 LXCH            Q                               
                 CAF             NEGMAX                          # NEGATIVE DAPZRUPT SIGNALS JASK IS OVER.
                 DXCH            DAPZRUPT                        
                 DXCH            ZRUPT                           
                 TCF             NOQRSM                          
-## Page 1459		
                 BLOCK           3                               
                 SETLOC          FFTAG6                          
                 BANK                                            
