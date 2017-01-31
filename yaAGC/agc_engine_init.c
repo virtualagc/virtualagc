@@ -76,12 +76,17 @@
 		08/14/16 OH	Issue #29 fix return value of agc_engine_init.
 		09/30/16 MAS    Added initialization of NightWatchman.
 		01/04/17 MAS    Added initialization of ParityFail.
+		01/30/17 MAS    Added support for heuristic loading of ROM files
+                		produced with --hardware, by looking for any set
+                                parity bits. If such a file is detected, parity
+                                bit checking is enabled.
 */
 
 // For Orbiter.
 #ifndef AGC_SOCKET_ENABLED
 
 #include <stdio.h>
+#include <string.h>
 #include "yaAGC.h"
 #include "agc_engine.h"
 FILE *rfopen (const char *Filename, const char *mode);
@@ -140,10 +145,15 @@ agc_load_binfile(agc_t *State, const char *RomImage)
     goto Done;
   }
 
+  State->CheckParity = 0;
+  memset(&State->Parities, 0, sizeof(State->Parities));
+
   Bank = 2;
   for (Bank = 2, j = 0, i = 0; i < n; i++)
     {
       unsigned char In[2];
+      uint8_t Parity;
+      int16_t RawValue;
       m = fread (In, 1, 2, fp);
       if (m != 2){
 	RetVal = 5;
@@ -157,7 +167,18 @@ agc_load_binfile(agc_t *State, const char *RomImage)
 	  RetVal = 2;
 	  goto Done;
 	}
-      State->Fixed[Bank][j++] = (In[0] * 256 + In[1]) >> 1;
+      RawValue = (In[0] * 256 + In[1]);
+      Parity = RawValue & 1;
+
+      State->Fixed[Bank][j] =  RawValue >> 1;
+      State->Parities[(Bank*02000 + j) / 32] |= Parity << (j % 32);
+      j++;
+
+      // If any of the parity bits are actually set, this must be a ROM built with
+      // --hardware. Enable parity checking.
+      if (Parity)
+        State->CheckParity = 1;
+
       if (j == 02000)
 	{
 	  j = 0;
@@ -173,6 +194,28 @@ agc_load_binfile(agc_t *State, const char *RomImage)
 	  else
 	    Bank++;
 	}
+    }
+
+  if (State->CheckParity)
+    {
+      // Hardware rope files are ordered 0, 1, 2, 3..., so we need to swap
+      // banks 0 and 1 with 2 and 3 to put them back into the right place.
+      for (j = 0; j < 04000; j++)
+        {
+          int16_t temp;
+          Bank = j / 02000;
+          temp = State->Fixed[Bank][j % 02000];
+          State->Fixed[Bank][j % 02000] = State->Fixed[Bank+2][j % 02000];
+          State->Fixed[Bank+2][j % 02000] = temp;
+        }
+
+      for (j = 0; j < (04000/32); j++)
+        {
+          uint32_t temp;
+          temp = State->Parities[j];
+          State->Parities[j] = State->Parities[j+(04000/32)];
+          State->Parities[j+(04000/32)] = temp;
+        }
     }
 
 Done:

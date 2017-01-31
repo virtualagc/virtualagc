@@ -301,6 +301,9 @@
  *				off the RESTART light (the button had its
  *				own discrete to reset the RESTART flip flop
  *				in the real AGC/DSKY).
+ *		01/30/17 MAS	Added parity bit checking for fixed memory
+ *				when running with a ROM that contains
+ *				parity bits.
  *
  * The technical documentation for the Apollo Guidance & Navigation (G&N) system,
  * or more particularly for the Apollo Guidance Computer (AGC) may be found at
@@ -537,6 +540,7 @@ FindMemoryWord (agc_t * State, int Address12)
 {
   //int PseudoAddress;
   int AdjustmentEB, AdjustmentFB;
+  int16_t *Addr;
 
   // Get rid of the parity bit.
   //Address12 = Address12;
@@ -572,20 +576,34 @@ FindMemoryWord (agc_t * State, int Address12)
       // Account for the superbank bit. 
       if (030 == (AdjustmentFB & 030) && (State->OutputChannel7 & 0100) != 0)
       AdjustmentFB += 010;
-      if (AdjustmentFB > 043)
-        {
-          // The program is trying to access banks that don't exist. Raise
-          // a parity fail alarm and return something that holds zero
-          State->ParityFail = 1;
-          State->InputChannel[077] |= CH77_PARITY_FAIL;
-          return (&State->Erasable[0][7]); // Not really, but we know this is zero
-        }
-      return (&State->Fixed[AdjustmentFB][Address12 & 01777]);
     }
   else if (Address12 < 06000)	// Fixed-fixed.
-  return (&State->Fixed[2][Address12 & 01777]);
+  AdjustmentFB = 2;
   else			  // Fixed-fixed (continued).
-  return (&State->Fixed[3][Address12 & 01777]);
+  AdjustmentFB = 3;
+
+  Addr = (&State->Fixed[AdjustmentFB][Address12 & 01777]);
+
+  if (State->CheckParity)
+    {
+      // Check parity for fixed memory if such checking is enabled
+      int16_t LinearAddr = AdjustmentFB*02000 + (Address12 & 01777);
+      int16_t ExpectedParity = (State->Parities[LinearAddr / 32] >> (LinearAddr % 32)) & 1;
+      int16_t Word = ((*Addr) << 1) | ExpectedParity;
+      Word ^= (Word >> 8);
+      Word ^= (Word >> 4);
+      Word ^= (Word >> 2);
+      Word ^= (Word >> 1);
+      Word &= 1;
+      if (Word != 1)
+        {
+          // The program is trying to access unused fixed memory, which
+          // will trigger a parity alarm.
+          State->ParityFail = 1;
+          State->InputChannel[077] |= CH77_PARITY_FAIL;
+        }
+    }
+  return Addr;
 }
 
 // Same thing, basically, but for collecting coverage data.
