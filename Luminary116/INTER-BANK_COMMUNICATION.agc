@@ -13,11 +13,10 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-01-22 MAS  Created from Luminary 99.
+##              2017-01-30 RRB  Updated for Luminary 116.
 
-## NOTE: Page numbers below have not yet been updated to reflect Luminary 116.
-
-## Page 998
-# THE FOLLOWING ROUTINE CAN BE USED TO CALL A SUBROUTINE IN ANOTHER BANK. IN THE BANKCALL VERSION, THE
+## Page 990
+#          THE FOLLOWING ROUTINE CAN BE USED TO CALL A SUBROUTINE IN ANOTHER BANK. IN THE BANKCALL VERSION, THE
 # CADR OF THE SUBROUTINE IMMEDIATELY FOLLOWS THE TC BANKCALL INSTRUCTION, WITH C(A) AND C(L) PRESERVED.
 
                 BLOCK           02                              
@@ -27,7 +26,7 @@ BANKCALL        DXCH            BUF2                            # SAVE INCOMING 
                 CA              0                               
                 INCR            Q                               # SO WE RETURN TO THE LOC. AFTER THE CADR.
 
-# SWCALL IS  IDENTICAL TO BANKCALL, EXCEPT THAT THE CADR ARRIVES IN A.
+#          SWCALL IS IDENTICAL TO BANKCALL, EXCEPT THAT THE CADR ARRIVES IN A.
 
 SWCALL          TS              L                               
                 LXCH            FBANK                           # SWITCH BANKS, SAVING RETURN.
@@ -42,23 +41,23 @@ SWRETURN        XCH             BUF2            +1              # COMES HERE TO 
                 XCH             BUF2            +1              
                 TC              BUF2                            
 
-# THE FOLLOWING ROUTINE CAN BE USED AS A UNILATERAL JUMP WITH C(A,L) PRESERVED AND THE CADR IMMEDIATELY
+#          THE FOLLOWING ROUTINE CAN BE USED AS A UNILATERAL JUMP WITH C(A,L) PRESERVED AND THE CADR IMMEDIATELY
 # FOLLOWING THE TC POSTJUMP INSTRUCTION.
 
 POSTJUMP        XCH             Q                               # SAVE INCOMING C(A).
                 INDEX           A                               # GET CADR.
                 CA              0                               
 
-# BANKJUMP IS THE SAME AS POSTJUMP, EXCEPT THAT THE CADR ARRIVES IN A.
+#          BANKJUMP IS THE SAME AS POSTJUMP, EXCEPT THAT THE CADR ARRIVES IN A.
 
 BANKJUMP        TS              FBANK                           
                 MASK            LOW10                           
                 XCH             Q                               # RESTORING INPUT C(A) IF THIS WAS A
 Q+10000         INDEX           Q                               # POSTJUMP.
-PRIO12          TCF             10000                           # PRIO12 = TCF  10000 = 12000
+PRIO12          TCF             10000                           # PRIO12 = TCF   10000 = 12000
 
-## Page 999
-# THE FOLLOWING ROUTINE GETS THE RETURN CADR SAVED BY SWCALL OR BANKCALL AND LEAVES IT IN A.
+## Page 991
+#          THE FOLLOWING ROUTINE GETS THE RETURN CADR SAVED BY SWCALL OR BANKCALL AND LEAVES IT IN A.
 
 MAKECADR        CAF             LOW10                           
                 MASK            BUF2                            
@@ -69,7 +68,7 @@ SUPDACAL        TS              MPTEMP
                 XCH             FBANK                           # SET FBANK FOR DATA.
                 EXTEND                                          
                 ROR             SUPERBNK                        # SAVE FBANK IN BITS 15-11, AND
-                XCH             MPTEMP                          # SUPERBANK IN BITS 7-5.
+                XCH             MPTEMP                          # S UPERBANK IN BITS 7-5.
                 MASK            LOW10                           
                 XCH             L                               # SAVE REL. ADR. IN BANK, FETCH SUPERBITS.
                 INHINT                                          # BECAUSE RUPT DOES NOT SAVE SUPERBANK.
@@ -85,7 +84,7 @@ SUPDACAL        TS              MPTEMP
                 CA              MPTEMP                          # RECOVER FIRST WORD OF DATA.
                 RETURN                                          # 24 WDS. DATACALL 516 MU, SUPDACAL 432 MU
 
-## Page 1000
+## Page 992
 # THE FOLLOWING ROUTINES ARE IDENTICAL TO BANKCALL AND SWCALL EXCEPT THAT THEY ARE USED IN INTERRUPT.
 
 IBNKCALL        DXCH            RUPTREG3                        # USES RUPTREG3,4 FOR DP RETURN ADDRESS.
@@ -107,6 +106,7 @@ ISWRETRN        XCH             RUPTREG4
                 TC              RUPTREG3                        
 
 # 2. USPRCADR ACCESSES INTERPRETIVE CODING IN OTHER THAN THE USER'S FBANK.  THE CALLING SEQUENCE IS AS FOLLOWS:
+
 #       L       TC      USPRCADR
 #       L+1     CADR    INTPRETX        INTPRETX IS THE INTERPRETIVE CODING
 #                                       RETURN IS TO L+2
@@ -124,8 +124,8 @@ USPRCADR        TS              LOC                             # SAVE A
                 XCH             LOC                             # L+1 TO LOC, RETRIEVING ORIGINAL A
                 TCF             Q+10000                         
 
-## Page 1001
-# THERE ARE FOUR POSSIBLE SETTINGS FOR CHANNEL 07.  (CHANNEL 07 CONTAINS THE SUPERBANK SETTING.)
+## Page 993
+# THERE ARE FOUR POSSIBLE SETTINGS FOR CHANNEL 07. (CHANNEL 07 CONTAINS THE SUPERBANK SETTING.)
 
 #                                       PSEUDO-FIXED      OCTAL PSEUDO
 # SUPERBANK     SETTING S-REG. VALUE    BANK NUMBERS      ADDRESSES
@@ -143,7 +143,7 @@ USPRCADR        TS              LOC                             # SAVE A
 # SUPERBANK SHOULD USE SUPERSW. ***
 
 # SUPERSW MAY BE CALLED IN THIS FASHION:
-#       CAF     ABBCON          WHERE      ABBCON   BBCON  SOMETHIN
+#       CAF     ABBCON          WHERE  --  ABBCON   BBCON  SOMETHIN  --
 #       TCR     SUPERSW         (THE SUPERBNK BITS ARE IN THE BBCON)
 #       ...       ...
 #        .         .
@@ -160,5 +160,5 @@ SUPERSW         EXTEND
                 WRITE           SUPERBNK                        # WRITE BITS 7-6-5 OF THE ACCUMULATOR INTO
                                                                 # CHANNEL 07
                 TC              Q                               # TC TO INSTRUCTION FOLLOWING
-                                                                #       TC SUPERSW
+                                                                #   TC SUPERSW
 
