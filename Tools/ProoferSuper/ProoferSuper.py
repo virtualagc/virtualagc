@@ -31,14 +31,15 @@ if 'BLATANT7' in environ:
 print blatant
 
 # Parse command-line arguments
-if len(sys.argv) != 4:
+if len(sys.argv) != 5:
 	print 'Usage:'
-	print '\t./ProoferSuper.py BWINPUTIMAGE OUTPUTIMAGE BINSOURCE'
+	print '\t./ProoferSuper.py BWINPUTIMAGE OUTPUTIMAGE PAGENUMBER BINSOURCE'
 	sys.exit()
 
 backgroundImage = sys.argv[1]
 outImage = sys.argv[2]
-binsourceFilename = sys.argv[3]
+pageNumber = sys.argv[3]
+binsourceFilename = sys.argv[4]
 
 # Shell out to have tesseract generate the box file, and read it in..
 call([ 'tesseract', backgroundImage, 'octal.burst.exp0', '-psm', '6', 'batch.nochop', 'makebox', 'octals' ])
@@ -55,20 +56,61 @@ for line in file:
 	boxWidth = boxRight + 1 - boxLeft
 	boxHeight = boxTop + 1 - boxBottom
 	#print boxChar, boxWidth, boxHeight
-	if boxWidth >= 8 and boxWidth <= 24 and boxHeight >= 16 and boxHeight <= 36:
+	if (boxChar == '(' or boxChar == ')') and boxWidth >= 10 and boxWidth <= 16 and boxHeight >= 16 and boxHeight <= 24:
 		boxes.append(line)
+	elif boxChar == '7' and boxWidth >= 8 and boxWidth <= 20 and boxHeight >= 16 and boxHeight <= 24:
+		boxes.append(line)
+	elif boxChar == '3' and boxWidth >= 4 and boxWidth <= 16 and boxHeight >= 12 and boxHeight <= 24:
+		boxes.append(line)
+	elif boxChar != '1' and boxChar != '(' and boxChar != ')' and boxWidth >= 8 and boxWidth <= 16 and boxHeight >= 16 and boxHeight <= 24:
+		boxes.append(line)
+	elif boxChar == '1' and boxWidth >= 5 and boxWidth <= 16 and boxHeight >= 18 and boxHeight <= 24:
+		boxes.append(line) 
 	else:
-		rejectedBoxes.append(line)
+		replaced = 0
+		if len(rejectedBoxes) > 0:
+			rejected = rejectedBoxes[len(rejectedBoxes)-1]
+			rejectedFields = rejected.split()
+			rejectedChar = rejectedFields[0]
+			rejectedLeft = int(rejectedFields[1])
+			rejectedBottom = int(rejectedFields[2])
+			rejectedRight = int(rejectedFields[3])
+			rejectedTop = int(rejectedFields[4])
+			if boxLeft >= rejectedRight:
+				boxLeft = rejectedLeft
+				if rejectedBottom < boxBottom:
+					boxBottom = rejectedBottom
+				if rejectedTop > boxTop:
+					boxTop = rejectedTop 
+				boxWidth = boxRight + 1 - boxLeft
+				boxHeight = boxTop + 1 - boxBottom
+				if boxWidth >= 9 and boxWidth <= 16 and boxHeight >= 16 and boxHeight <= 24:
+					line = '0 ' + str(boxLeft) + ' ' + str(boxBottom) + ' ' + str(boxRight) + ' ' + str(boxTop) + ' 0'
+					boxes.append(line)
+					replaced = 1
+					del rejectedBoxes[len(rejectedBoxes)-1]
+		if replaced == 0:
+			rejectedBoxes.append(line)
 file.close()
 
 # Read in the binsource file.
 file = open (binsourceFilename, 'r')
 lines = []
 octalPattern = re.compile(r"[0-7]{6}")
+pagePattern = re.compile(r"^p[0-9][0-9]*$")
+inPage = 0
 for line in file:
-	if octalPattern.match(line):
-		lines.append(line)
+	if pagePattern.match(line):
+		inPage = 0
+		if line == "p" + pageNumber + "\n":
+			print "Found page " + pageNumber
+			inPage = 1
+	else:
+		if octalPattern.match(line):
+			if inPage != 0:
+				lines.append(line)
 file.close()
+print lines
 #if len(lines) != 044 * 4 * 8 * 4:
 #	print "Binsource file", binsourceFilename, "is not 044 banks long."
 #	sys.exit()
@@ -130,7 +172,7 @@ for i in range(0,len(rejectedBoxes)):
 
 # Loop on lines on the selected page.  We're going to assume that the boxes are
 # in 1-to-1 correspondence with the binsource digit, in the order read from 
-# disk, except that there may be less boxes (on the last page of a bank).
+# disk.
 row = 0
 lastRight = 1000000
 boxIndex = 0
@@ -148,7 +190,10 @@ for index in range(startIndex, endIndex):
 			break
 		# Parse the box entry.
 		boxFields = boxes[boxIndex].split()
-		boxOctal = int(boxFields[0])
+		if boxFields[0] == '~' or boxFields[0] == '(' or boxFields[0] == ')':
+			boxOctal = -1
+		else:
+			boxOctal = int(boxFields[0])
 		boxLeft = int(boxFields[1])
 		boxBottom = backgroundHeight -1 - int(boxFields[2])
 		boxRight = int(boxFields[3])
