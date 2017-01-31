@@ -13,8 +13,7 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-01-22 MAS  Created from Luminary 99.
-
-## NOTE: Page numbers below have not yet been updated to reflect Luminary 116.
+##              2017-01-31 RRB  Updated for Luminary 116.
 
 ## Page 984
 # NAME - LSPOS - LOCATE SUN AND MOON                    DATE - 25 OCT 67
@@ -27,22 +26,19 @@
 # LOCATED VIA TWO ANGLES. THE FIRST ANGLE(OBLIQUITY) IS THE ANGLE BETWEEN THE EARTH EQUATOR AND THE ECLIPTIC. THE
 # SECOND ANGLE IS THE LONGITUDE OF THE SUN MEASURED IN THE ECLIPTIC.
 # THE POSITION VECTOR OF THE SUN IS
-#       -
-#       S = (COS(LOS), COS(OBL)*SIN(LOS), SIN(OBL)*SIN(LOS)), WHERE
+#        -
+#        S = (COS(LOS), COS(OBL)*SIN(LOS), SIN(OBL)*SIN(LOS)), WHERE
 
-#       LOS = LOS +LOS *T-(C *SIN(2PI*T)/365.24 +C *COS(2PI*T)/365.24)
-#                0    R     0                     1
-#       LOS  (RAD) IS THE LONGITUDE OF THE SUN FOR MIGNIGHT JUNE 30TH OF THE PARTICULAR YEAR.
-#          0
-#       LOS  (RAD/DAY) IS THE MEAN RATE FOR THE PARTICULAR YEAR.
-#          R
-
+#      LOS = LOS +LOS *T-(C *SIN(2PI*T)/365.24 +C *COS(2PI*T)/365.24)
+#               0    R     0                     1
+#      LOS  (RAD) IS THE LONGITUDE OF THE SUN FOR MIGNIGHT JUNE 30TH OF THE PARTICULAR YEAR.
+#         0
+#      LOS  (RAD/DAY) IS THE MEAN RATE FOR THE PARTICULAR YEAR.
+#         R
 # LOS  AND LOS  ARE STORED AS LOSC AND LOSR IN RATESP.
 #    0        R
 # COS(OBL) AND SIN(OBL) ARE STORED IN THE MATRIX KONMAT.
-
 # T, TIME MEASURED IN DAYS (24 HOURS), IS STORED IN TIMEP.
-
 # C  AND C  ARE FUDGE FACTORS TO MINIMIZE THE DEVIATION.  THEY ARE STORED AS ONE CONSTANT (CMOD), SINCE
 #  0      1                               2  2 1/2
 # C *SIN(X)+C *COS(X) CAN BE WRITTEN AS (C +C )   *SIN(X+PHI), WHERE PHI=ARCTAN(C /C ).
@@ -54,14 +50,14 @@
 # OF THE NODE OF THE MOON, MEASURED IN THE LUNAR ORBIT.  LET THESE ANGLES BE OBL,LOM,IM, AND LON RESPECTIVELY.
 
 # THE SIMPLIFIED POSITION VECTOR OF THE MOON IS
-#       -
-#       M=(COS(LOM), COS(OBL)*SIN(LOM)-SIN(OBL)*SIN(IM)*SIN(LOM-LON), SIN(OBL)*SIN(LOM)+COS(OBL)*SIN(IM)*SIN(LOM-LON))
+#   -
+#   M=(COS(LOM), COS(OBL)*SIN(LOM)-SIN(OBL)*SIN(IM)*SIN(LOM-LON), SIN(OBL)*SIN(LOM)+COS(OBL)*SIN(IM)*SIN(LOM-LON))
 
-# WHERE
-#       LOM=LOM +LOM *T-(A *SIN 2PI*T/27.5545+A *COS(2PI*T/27.5545)+B *SIN 2PI*T/32+B *COS(2PI*T/32)), AND
-#              0    R     0                    1                     0               1
-#       LON=LON +LON
-#              0    R
+#   WHERE
+#      LOM=LOM +LOM *T-(A *SIN 2PI*T/27.5545+A *COS(2PI*T/27.5545)+B *SIN 2PI*T/32+B *COS(2PI*T/32)), AND
+#             0    R     0                    1                     0               1
+#      LON=LON +LON
+#             0    R
 # A , A , B  AND B  ARE STORED AS AMOD AND BMOD (SEE DESCRIPTION OF CMOD, ABOVE).  COS(OBL), SIN(OBL)*SIN(IM),
 #  0   1   0      1
 # SIN(OBL), AND COS(OBL)*SIN(IM) ARE STORED IN KONMAT AS K1, K2, K3 AND K4, RESPECTIVELY.  LOM , LOM , LON , LON                                   
@@ -69,27 +65,26 @@
 # THE THREE PHIS ARE STORED AS AARG, BARG, AND CARG(SUN).  ALL CONSTANTS ARE UPDATED BY YEAR.
 
 # CALLING SEQUENCE
-## Page 985
-#       CALL LSPOS.  RETURN IS VIA CPRET.
+## Page 977
+#   CALL LSPOS.  RETURN IS VIA CPRET.
 
 # ALARMS OR ABORTS
-#       NONE
+#   NONE
 
 # ERASABLE INITIALIZATION REQUIRED
-#       TEPHEM - TIME FROM MIDNIGHT 1 JULY PRECEDING THE LAUNCH TO THE TIME OF THE LAUNCH (WHEN THE AGC CLOCK WENT
-#       TO ZERO).  TEPHEM IS TP WITH UNITS OF CENTI-SECONDS.
-
-#       TIME2 AND TIME1 ARE IN MPAC AND MPAC +1 WHEN PROGRAM IS CALLED.
+#   TEPHEM - TIME FROM MIDNIGHT 1 JULY PRECEDING THE LAUNCH TO THE TIME OF THE LAUNCH (WHEN THE AGC CLOCK WENT
+# TO ZERO).  TEPHEM IS TP WITH UNITS OF CENTI-SECONDS.
+#   TIME2 AND TIME1 ARE IN MPAC AND MPAC +1 WHEN PROGRAM IS CALLED.
 
 # OUTPUT
-#       UNIT POSITIONAL VECTOR OF SUN IN VSUN.  (SCALED B-1)
-#       UNIT POSITIONAL VECTOR OF MOON IN VMOON.  (SCALED B-1)
+#   UNIT POSITIONAL VECTOR OF SUN IN VSUN.  (SCALED B-1)
+#   UNIT POSITIONAL VECTOR OF MOON IN VMOON.  (SCALED B-1)
 
 # SUBROUTINES USED
-#       NONE
+#   NONE
 
 # DEBRIS
-#       CURRENT CORE SET, WORK AREA AND FREEFLAG
+#   CURRENT CORE SET, WORK AREA AND FREEFLAG
 
                 BANK            04                              
                 SETLOC          EPHEM                           
@@ -102,13 +97,10 @@ LUNPOS          EQUALS          LSPOS
 LSPOS           SETPD           SR                              
                                 0                               
                                 14D                             # TP
-                TAD             DDV                             
-## The hand-written notation "in centisec B 42" appears to the right.	
+                TAD             DDV                             	
                                 TEPHEM                          # TIME OF LAUNCH
                                 CSTODAY                         # 24 HOURS-8640000 CENTI-SECS/DAY B-33
-## The hand-written notation "@ B 9 = 512 days" appears to the right.
                 STORE           TIMEP                           # T IN DAYS
-## The hand-written notation "&there4; granularity &asymp; 0.164 sec" appears to the right.
                 AXT,1           AXT,2                           
                                 0                               
                                 0                               
@@ -120,7 +112,7 @@ POSITA          DLOAD
 POSITB          DLOAD           DMP*                            
                                 TIMEP                           # T
                                 VAL67           +4,1            # 1/27 OR 1/32 OR 1/365
-## Page 986
+## Page 978
                 SL              DAD*                            
                                 8D                              
                                 VAL67           +2,1            # AARG
@@ -138,7 +130,7 @@ POSITD          DLOAD           DMP*
                                 RATESP,2                        # LOMR,LOSR,LONR
                 SL              DAD*                            
                                 5D                              
-                                RATESP          +6,2            # LOM0,LOS0,LON0
+                                RATESP          +6,2            # LOMO,LOSO,LONO
                 DSU                                             
                                 GTMP                            
                 STORE           STMP,2                          # LOM,LOS,LON
@@ -171,18 +163,20 @@ POSITF          DLOAD           DSU                             # 3RD
                                 KONMAT                          
                 STORE           VSUN                            
                 RVQ                                             
-## Page 987
+## Page 979
 POSITE          DLOAD                                           
                                 KONMAT          +2              # ZEROS
                 STORE           GTMP                            
                 GOTO                                            
                                 POSITD                          
-LUNVEL          RVQ                                             #        TO FOOL INTEGRATION
                 SETLOC          EPHEM1                          
                 BANK                                            
 
-                COUNT*          $$/EPHEM                        
-STMP            EQUALS          16D                             
-GTMP            EQUALS          22D                             
+                COUNT*          $$/EPHEM
+                        
+STMP            EQUALS          16D
+                             
+GTMP            EQUALS          22D
+                             
 TIMEP           EQUALS          24D                             
 
