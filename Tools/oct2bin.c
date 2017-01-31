@@ -100,6 +100,9 @@
  *              		Now they also include an estimate from the number
  *              		of lines of octals already read.
  *              2016-12-16 RSB	Added --no-checksums (for Retread 44).
+ *              2017-01-31 MAS	Added --parity for generating parity bits for
+ *              		emitted words, and support for @ to denote
+ *              		unused words in the assembly.
  *
  *  The format of the file is simple.  Each line just consists of 8 fields,
  *  delimited by whitespace.  Each field consists of 5 octal digits.  Blank
@@ -219,11 +222,11 @@ int
 main(int argc, char *argv[])
 {
   FILE *outfile, *proofFile;
-  int dummy, data[8], line, checked = 1, octLine = 0, octPage, octOffset, firstPage = -1;
+  int dummy, data[8], line, checked = 1, octLine = 0, octPage, octOffset, firstPage = -1, unused[8];
   uint16_t dummy16, banknum = 0;
   int count, checkWords = 0;
   char s[129], *ss;
-  int i, j, invert = 0, page = 0, verbose = 0, useParity = 0, noChecksums = 0;
+  int i, j, invert = 0, page = 0, verbose = 0, useParity = 0, noChecksums = 0, parity = 0;
   int currentPage = 0;
 
   // Parse the command-line switches.
@@ -240,6 +243,8 @@ main(int argc, char *argv[])
         Block1 = 1;
       else if (!strcmp(argv[i], "--no-checksums"))
         noChecksums = 1;
+      else if (!strcmp(argv[i], "--parity"))
+        parity = 1;
       else
         {
           fprintf(stderr, "Error: Unknown command-line switch \"%s\"\n",
@@ -349,7 +354,7 @@ main(int argc, char *argv[])
         {
           if (*ss == ',')	// 01/02/06 RSB.  Remove comma delimiters.
             *ss = ' ';
-          else if (!isspace(*ss) && (*ss < '0' || *ss > '7'))
+          else if (!isspace(*ss) && (*ss != '@') && (*ss < '0' || *ss > '7'))
             {
               errorCount++;
               fprintf(stderr,
@@ -366,13 +371,22 @@ main(int argc, char *argv[])
             break;
           for (j = 0; *ss && !isspace(*ss); ss++, j++)
             ;
-          if (j != (useParity ? 6 : 5))
+          if (j == 1 && *(ss-1) == '@' && i < 8)
+            {
+              // A lone @ means the word is unused. Mark it so and replace it with
+              // a 0 so parsing won't choke on it.
+              unused[i] = 1;
+              *(ss-1) = '0';
+            }
+          else if (j != (useParity ? 6 : 5))
             {
               errorCount++;
               fprintf(stderr,
                   "Bank %o, page %d(%d:%d), line %d: Field is not correct width.\n",
                   banknum, currentPage, octPage, octOffset, line);
             }
+          else
+            unused[i] = 0;
         }
 
       if (i > 8)
@@ -422,15 +436,27 @@ main(int argc, char *argv[])
           // Note that the data is 15-bits which has been input right-aligned
           // (aligned at bit 0) but must be output left-aligned (aligned at
           // bit 1).
-          dummy16 = data[dummy];
-          putc(dummy16 >> 7, outfile);
-          putc((dummy16 << 1) & 255, outfile);
+          dummy16 = data[dummy] << 1;
+          if (parity && !unused[dummy])
+            {
+              // If parity bits have been requested, add parity bits only to
+              // words that are not marked as unused.
+              int16_t word = dummy16;
+              word ^= (dummy16 >> 8);
+              word ^= (word >> 4);
+              word ^= (word >> 2);
+              word ^= (word >> 1);
+              word ^= 1;
+              dummy16 |= (word & 1);
+            }
+          putc(dummy16 >> 8, outfile);
+          putc(dummy16 & 255, outfile);
           if (checkWords > 0)
             {
               // Normally, checkWords will always be >=0, unless
               // CHECKWORDS=something variable assignment was made for
               // the bank.
-              checksum = addAgc(checksum, dummy16);
+              checksum = addAgc(checksum, dummy16 >> 1);
               checkWords--;
             }
           fprintf(proofFile, "%s%05o", ((dummy == 0) ? "" : " "), data[dummy]);
