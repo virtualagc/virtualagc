@@ -13,6 +13,7 @@
 ##				images from Luminary 1A.
 ##		2016-12-14 RSB	Proofed text comments with octopus/ProoferComments
 ##				and corrected the errors found.
+##		2017-01-26 RSB	Back-ported a comment-text fix from Luminary 69.
 ##
 ## This source code has been transcribed or otherwise adapted from
 ## digitized images of a hardcopy from the MIT Museum.  The digitization
@@ -119,7 +120,7 @@ V89RECL		TC	INTPRET		#		    = 2 FOR X AXIS
 		MXV	RTB		# (REFSMMAT X LOS).  TRANSFORMS LOS FROM
 			REFSMMAT	# REFERENCE COORD TO STAB MEMB COORD.
 			NORMUNIT
-		STORE	POINTVSM	# STORE LOS FOR VECPOINT CALC
+		STORE	POINTVSM	# STORE LOS FOR VECPOINT CALL
 		EXIT
 		CS	OPTIONX +1	# 1 FOR Z AXIS.  2 FOR X AXIS.
 		AD	ONE

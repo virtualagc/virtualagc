@@ -37,6 +37,8 @@
                 2016-12-18 MAS  Weakened erroneous EXTEND checks when dealing
                                 with explicit TC 6's, which can show up as
                                 targets for an INDEX and so don't actually extend.
+                2017-01-29 MAS  Added some special logic for handling Raython-
+                                style literal operands.
  */
 
 #include "yaYUL.h"
@@ -133,6 +135,10 @@ int ParseGeneral(ParseInput_t *InRecord, ParseOutput_t *OutRecord, int Opcode, i
     if (!i && (Flags & ENUMBER) && *InRecord->Operand != '+' && *InRecord->Operand != '-') {
         int Offset;
 
+        if (Raytheon && Value >= 02000 && Value < 04000) {
+            // For Raytheon builds, shift common-fixed literals into the expected range
+            Value += 010000 + InRecord->ProgramCounter.FB * 02000;
+        }
         PseudoToStruct(Value, &K);
 
         if (!GetOctOrDec(args, &Offset))

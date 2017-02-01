@@ -11,6 +11,8 @@
 ## Mod history:	05/07/09 OH	Transcription Batch 1 Assignment 
 ##		2016-12-10 RSB	Proofed comments with octopus/ProoferComments
 ##				and fixed the errors found.
+##		2017-01-18 RSB	Fixed comment-text errors noted while diff'ing
+##				vs Colossus 249.
 ##
 ## The contents of the "Comanche055" files, in general, are transcribed 
 ## from scanned documents. 
@@ -96,7 +98,7 @@ E/CALL		LXCH	LOC		# ADRES -1 OF CADR.
 		DXCH	EBUF2		# STORE CADR AND RETURN.
 		TC	INTPRET
 		CALL
-			EBUF2		# INDIRECTLY EXECUTE ROUTING.  IT MUST
+			EBUF2		# INDIRECTLY EXECUTE ROUTINE.  IT MUST
 		EXIT			# LEAVE VIA RVQ OR EQUIVALENT.
 		LXCH	EBUF2 +1	# PICK UP RETURN.
 		TCF	INTPRET +2	# SET LOC AND RETURB TO CALLER

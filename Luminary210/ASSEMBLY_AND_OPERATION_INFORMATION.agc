@@ -17,6 +17,7 @@
 ##              2016-12-03 MAS  Finished transcribing.
 ##		2016-12-15 RSB	Proofed comment text with octopus/ProoferComments,
 ##				and corrected the errors found.
+##		2017-01-25 RSB	Back-ported a typo-fix found while proofing Luminary 69.
 
 ## Page 2
 
@@ -363,7 +364,7 @@
 
 # 40  TIME FROM IGNITION/CUTOFF              3COMP   XXBXX  MIN/SEC                      NO LOAD, DEC ONLY
 #     VG,                                            XXXX.X FT/SEC
-#     DELTA V (ACCUMULATED)                          XXXX.X FT/SEC
+#     DELTA V (ACCUMULATED)                          XXXX/X FT/SEC
 # 41  TARGET  AZIMUTH,                       2COMP   XXX.XX DEG                          (FOR SYSTEM TEST)
 #             ELEVATION                              XX.XXX DEG
 # 42  APOGEE,                                3COMP   XXXX.X NAUT MI                      DEC ONLY

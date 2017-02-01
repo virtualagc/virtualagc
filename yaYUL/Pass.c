@@ -106,6 +106,10 @@
  *                              the operand if so. This is needed for a word in the Retread
  *                              instruction checks.
  *              2017-01-05 RSB  Added BBCON* as distinct from BBCON.
+ *              2017-01-27 MAS  Added "MSK" as an alias for "MASK", as supported by the
+ *                              Raytheon assembler.
+ *              2017-01-30 MAS  Added an array to store parity bites calculated on the fly,
+ *                              for use with --hardware.
  *
  * I don't really try to duplicate the formatting used by the original
  * assembly-language code, since that format was appropriate for
@@ -168,6 +172,7 @@ static int NumFields = 0;
 
 char *assemblyTarget = "AGC4";
 int Block1 = 0;
+int Raytheon = 0;
 int blk2 = 0;
 int Html = 0;
 FILE *HtmlOut = NULL;
@@ -275,6 +280,7 @@ static ParserMatch_t ParsersBlock2[] =
     { "INHINT", OP_BASIC, NULL, "TC", "$4" },
     { "LXCH", OP_BASIC, ParseLXCH },
     { "MASK", OP_BASIC, ParseMASK },
+    { "MSK", OP_BASIC, ParseMASK },
     { "MEMORY", OP_PSEUDO, NULL, "", "" },
     { "MM", OP_PSEUDO, ParseDEC },
     { "MP", OP_BASIC, ParseMP },
@@ -1201,6 +1207,7 @@ static int NUM_INTERPRETERS = NUM_INTERPRETERS_BLOCK2;
 
 // Buffer for binary data.
 int ObjectCode[044][02000];
+unsigned char Parities[044][02000];
 
 int NumInterpretiveOperands = 0, RawNumInterpretiveOperands;
 int nnnnFields[4];
@@ -1505,7 +1512,10 @@ Pass(int WriteOutput, const char *InputFilename, FILE *OutputFile, int *Fatals,
 
   for (i = 0; i < 044; i++)
     for (j = 0; j < 02000; j++)
-      ObjectCode[i][j] = 0;
+      {
+        ObjectCode[i][j] = 0;
+        Parities[i][j] = 0;
+      }
 
   // Open the input file.
   strcpy(CurrentFilename, InputFilename);
@@ -2577,9 +2587,10 @@ Pass(int WriteOutput, const char *InputFilename, FILE *OutputFile, int *Fatals,
 
                           for (i = 0; i < ParseOutputRecord.NumWords; i++)
                             {
-                              ObjectCode[bank][(ParseInputRecord.ProgramCounter.SReg
-                                  + i) & 01777] = ParseOutputRecord.Words[i]
-                                  & 077777;
+                              int SReg = (ParseInputRecord.ProgramCounter.SReg + i) & 01777;
+                              int Data = ParseOutputRecord.Words[i] & 077777;
+                              ObjectCode[bank][SReg] = Data;
+                              Parities[bank][SReg] = CalculateParity(Data);
                             }
 
                           // JMS: 07.28
@@ -2804,4 +2815,3 @@ Pass(int WriteOutput, const char *InputFilename, FILE *OutputFile, int *Fatals,
 
   return (RetVal);
 }
-

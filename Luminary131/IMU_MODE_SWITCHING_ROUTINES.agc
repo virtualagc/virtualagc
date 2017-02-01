@@ -20,6 +20,7 @@
 ##		2017-01-06 RSB	Page numbers now agree with those on the
 ##				original harcopy, as opposed to the PDF page
 ##				numbers in 1701.pdf.
+##		2017-01-28 RSB	Comment-text fixes identified for Luminary 69.
 
 ## Page 1301
 		BLOCK	02
@@ -370,7 +371,7 @@ NOATTOFF	CS	OCT40010	# SUBROUTINE TO TURN OFF NO ATT LAMP.
 		TC	Q
 
 ## Page 1310
-# ROUTINES TO INITIATE AND TERMINATE PROGRAM USE OF THE PIPAS.  NO IMUSTALL REQUIRED IN EITHER CASE.
+# ROUITNES TO INITIATE AND TERMINATE PROGRAM USE OF THE PIPAS.  NO IMUSTALL REQUIRED IN EITHER CASE.
 
 PIPUSE		CS	ZERO
 		TS	PIPAX

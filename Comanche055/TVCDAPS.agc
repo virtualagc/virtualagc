@@ -17,6 +17,8 @@
 ##				an MP operation in 2CASFLTR.
 ##		2016-12-21 RSB	Proofed comment text using octopus/ProoferComments
 ##				and corrected the errors found.
+##		2017-01-20 RSB	Fixed comment-text errors noted while diff'ing
+##				vs Colossus 249.
 ##
 ## This source code has been transcribed or otherwise adapted from digitized
 ## images of a hardcopy from the MIT Museum.  The digitization was performed
@@ -222,7 +224,7 @@ PACLIM		TCR	ACTLIM		# ROUND OFF & LIMIT PITCH ACTUATOR COMMAND
 POUT		CS	PCMD		# INCREMENTAL PITCH COMMAND
 		AD	CMDTMP
 		ADS	TVCPITCH	# UPDATE THE ERROR COUNTER (NO RESTART-
-					#	PROTECT. SINCE ERROR CNTR ZEROED)
+					#	PROTECT, SINCE ERROR CNTR ZEROED)
 					
 		CAF	BIT11		# BIT FOR TVCPITCH COUNT RELEASE
 		EXTEND

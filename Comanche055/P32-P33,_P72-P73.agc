@@ -22,6 +22,7 @@
 ##				GOTOPOOH, and I've changed them back.
 ##		2016-12-11 RSB	Proofed comments with octopus/ProoferComments
 ##				and fixed the errors found.
+##		2017-01-28 RSB	WTIH -> WITH.
 ##
 ## This source code has been transcribed or otherwise adapted from digitized
 ## images of a hardcopy from the MIT Museum.  The digitization was performed
@@ -47,7 +48,7 @@
 # MOD BY WHITE.P	DATE 1 JUNE 67
 #
 # PURPOSE
-#	(1)	TO CALCULATE PARAMETERS ASSOCIATED WTIH THE FOLLOWING
+#	(1)	TO CALCULATE PARAMETERS ASSOCIATED WITH THE FOLLOWING
 #		CONCENTRIC FLIGHT PLAN MANEUVERS - THE CO-ELLIPTIC SEQUENCE
 #		INITIATION (CSI) MANEUVER AND THE CONSTANT DELTA ALTITUDE
 #		(CDH) MANEUVER.

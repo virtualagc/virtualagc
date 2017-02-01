@@ -17,6 +17,8 @@
 ##				Colossus 249, but only through page 87 of Colossus
 ##				249 -- page 86 of Colossus 237 -- so far.
 ##		2017-01-12 RSB	Completed the 3-way cross-proofing.
+##		2017-01-22 RSB	Back-ported comment error fixes detected in diff'ing
+##				Artemis 72 vs Comanche 55.
 
 ## Page 34
 
@@ -1731,7 +1733,7 @@ DNTMBUFF	ERASE	+11D		# B(12) PRM DOWNLINK SNAPSHOT BUFFER
 #
 
 
-#	    OPTICS MARKING , UNSHARED.	(8D)
+#	    OPTICS MARKING . UNSHARED.	(8D)
 
 MKNDX		ERASE
 MKT2T1		ERASE	+1
@@ -3268,7 +3270,7 @@ Y5TMP		=	J5TMP		#     (B(2))
 Y6TMP		=	J6TMP		#     (B(2))
 
 
-# 	   540.9 STORAGE..........
+# 	   S40.9 STORAGE..........
 
 NBRCYCLS	EQUALS	CMDTMP	 +2	# B(1)     COUNTER FOR P40,41 STEERING
 NBRCYCLP	EQUALS	NBRCYCLS +1	# B(1) MAINTAIN ORDER
@@ -3790,7 +3792,7 @@ L/DCALC		=	TTE		# 2P  CALCULATED L/D FOR TM:  P64 - P67.
 GAMMAL		=	GAMMAEI		# 2P  SHARED FOR TM   P64
 PREDANG		=	GAMMAEI		#      FOR TM IN P67.
 JJ		=	PREDANG	 +1	#      FOR TM IN P67.
-VMAGI		EQUALS	GMAX	 +1	# 2P DSP NOUN 62,64,66 FOR P11,63,64.
+VMAGI		EQUALS	GMAX	 +1	# 2P DSP NOUN 62,64,68 FOR P11,63,64.
 VIO		EQUALS	VMAGI	 +2	# 2P DSP NOUN 63 FOR P61.
 TTE		EQUALS	VIO	 +2	# 2P DSP NOUN 63 FOR P61.
 

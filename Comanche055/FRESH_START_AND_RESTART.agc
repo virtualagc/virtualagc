@@ -17,6 +17,7 @@
 ##				and fixed the errors found.
 ##		2017-01-14 RSB	Fixed comment-text errors discovered while proofing
 ##				Colossus 249 comment text.
+##		2017-01-28 RSB	WTIH -> WITH.
 ##
 ## The contents of the "Comanche055" files, in general, are transcribed
 ## from scanned documents.
@@ -135,7 +136,7 @@
 #	B.	ALARMS
 #
 #		1107	PHASE TABLE ERROR
-#		1110	RESTART WTIH NO ACTIVE GROUPS
+#		1110	RESTART WITH NO ACTIVE GROUPS
 
 ## Page 183
 		BANK	10

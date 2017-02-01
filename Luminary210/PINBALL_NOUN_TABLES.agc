@@ -20,6 +20,7 @@
 ##              2016-12-12 HG   fix value for forward/lateral velocity
 ##		2016-12-23 RSB	Proofed comment text with octopus/ProoferComments
 ##				and fixed all errors found.
+##		2017-01-28 RSB	WTIH -> WITH.
 
 ## Page 313
 # THE FOLLOWING REFERS TO THE NOUN TABLES
@@ -228,7 +229,7 @@ NNADTAB		OCT	00000			# 00 NOT IN USE
 		OCT	00000			# 23 SPARE
 		ECADR	DSPTEM2 +1		# 24 DELTA TIME FOR AGC CLOCK(HRS,MIN,SEC)
 		ECADR	DSPTEM1			# 25 CHECKLIST
-						#       (USED WTIH PLEASE PERFORM ONLY)
+						#       (USED WITH PLEASE PERFORM ONLY)
 		ECADR	N26/PRI			# 26 PRIO/DELAY, ADRES, BBCON
 		ECADR	SMODE			# 27 SELF TEST ON/OFF SWITCH
 ## Page 318

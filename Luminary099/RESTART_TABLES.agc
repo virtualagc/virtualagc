@@ -8,7 +8,7 @@
 ## Contact:	Ron Burkey <info@sandroid.org>.
 ## Website:	www.ibiblio.org/apollo.
 ## Pages:	238-243
-## Mod history:  2009-05-10 SN  (Sergio Navarro).  Started adapting
+## Mod history: 2009-05-10 SN  (Sergio Navarro).  Started adapting
 ##				from the Luminary131/ file of the same
 ##				name, using Luminary099 page images.
 ##		2016-12-13 RSB	Proofed text comments with octopus/ProoferComments

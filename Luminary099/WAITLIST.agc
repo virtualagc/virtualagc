@@ -15,6 +15,7 @@
 ##		2011-05-07 JL	Removed workarounds.
 ##		2016-12-17 RSB	Proofed text comments with octopus/ProoferComments
 ##				and corrected the errors found.
+##		2017-01-28 RSB	WTIH -> WITH.
 ##
 ## This source code has been transcribed or otherwise adapted from
 ## digitized images of a hardcopy from the MIT Museum.  The digitization
@@ -93,7 +94,7 @@
 #					LST1, ..., LST1 +7  = NEG1/2
 #
 # OUTPUT --
-#	LST1 AND LST2 UPDATED WTIH NEW TASK AND ASSOCIATED TIME.
+#	LST1 AND LST2 UPDATED WITH NEW TASK AND ASSOCIATED TIME.
 #
 # DEBRIS -
 #	CENTRALS - A,Q,L

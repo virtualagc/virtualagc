@@ -1,8 +1,9 @@
+### FILE="Main.annotation"
 ## Copyright:   Public domain.
 ## Filename:    FLAGWORD_ASSIGNMENTS.agc
 ## Purpose:     The main source file for Luminary revision 069.
 ##              It is part of the source code for the original release
-##              of the source code for the Lunar Module's (LM) Apollo
+##              of the flight software for the Lunar Module's (LM) Apollo
 ##              Guidance Computer (AGC) for Apollo 10. The actual flown
 ##              version was Luminary 69 revision 2, which included a
 ##              newer lunar gravity model and only affected module 2.
@@ -16,6 +17,9 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2016-12-13 MAS  Created from Luminary 99.
 ##              2016-01-03 HG   Transcribed
+##              2017-01-21 HG   Fix label CHIPFLAG -> CPHIFLAG
+##		2017-01-25 RSB	Proofed comment text using octopus/prooferComments
+##				and fixed errors found.
 
 ## Page 77
 #          FLAGWORDS 0-11  ARE DOWNLINKED AND CAN BE SET AND CLEARED BY UP-FLAG AND DOWN-FLAG INSTRUCTIONS IN THE
@@ -136,7 +140,7 @@
 # MUNFLAG         097             BIT 8 FLAG 6         MUNFLBIT
 # MWAITFLG        064             BIT 11 FLAG 4        MWAITBIT
 # NEEDLFLG        011             BIT 4  FLAG 0        NEEDLBIT
-# NEWIFLG         122             BIT 3  FLAG 8        NEWIBIT
+# NEWIFLG         122             BIT 13  FLAG 8       NEWIBIT
 # NJETSFLG        015             BIT 15 FLAG          NJETSBIT
 # NODOFLAG        044             BIT 1  FLAG 2        NODOBIT
 # NOLRREAD        170             BIT 10 FLAG 11       NOLRRBIT
@@ -244,7 +248,7 @@ FLAGWRD0        =               STATE           +0      # (000-014)
                                                         # (SET)              (RESET)
 
 # BIT 15 FLAG 0 (S)
-CHIPFLAG        =               000D                    # OUTPUT OF CALCGA IS OUTPUT OF CALCGA IS
+CPHIFLAG        =               000D                    # OUTPUT OF CALCGA IS OUTPUT OF CALCGA IS
 CPHIBIT         =               BIT15                   # CPHIX               THETAD
 #
 

@@ -12,6 +12,8 @@
 ##		2016-11-02 RSB	Typo (offset-reference +1 was not indented).
 ##		2017-01-01 RSB	Proofed comment text using octopus/ProoferComments,
 ##				and fixed errors found.
+##		2017-01-22 RSB	Back-ported comment error fixes detected in diff'ing
+##				Artemis 72 vs Comanche 55.
 
 ## Page 1175
 		BLOCK	02
@@ -163,7 +165,7 @@ CORFOUND	CA	NEWPRIO		# SET THE PRIORITY OF THIS JOB IN THE CORE
 		TS	FIXLOC
 
 SPECTEST	CCS	NEWJOB		# SEE IF ANY ACTIVE JOBS WAITING (RARE).
-		TCF	SETLOC		# MUST BE AWAKENED OUT UNCHANGED JOB.
+		TCF	SETLOC		# MUST BE AWAKENED BUT UNCHANGED JOB.
 		TC	CCSHOLE
 		TC	CCSHOLE
 		TS	NEWJOB		# +0 SHOWS ACTIVE JOB ALREADY SET.

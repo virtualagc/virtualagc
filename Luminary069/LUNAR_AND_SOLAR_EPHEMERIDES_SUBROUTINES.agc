@@ -1,10 +1,11 @@
+### FILE="Main.annotation"
 ## Copyright:   Public domain.
 ## Filename:    LUNAR_AND_SOLAR_EPHEMERIDES_SUBROUTINES.agc
 ## Purpose:     The main source file for Luminary revision 069.
-##              It is part of the source code for the original release 
-##              of the source code for the Lunar Module's (LM) Apollo 
-##              Guidance Computer (AGC) for Apollo 10. The actual flown 
-##              version was Luminary 69 revision 2, which included a 
+##              It is part of the source code for the original release
+##              of the flight software for the Lunar Module's (LM) Apollo
+##              Guidance Computer (AGC) for Apollo 10. The actual flown
+##              version was Luminary 69 revision 2, which included a
 ##              newer lunar gravity model and only affected module 2.
 ##              This file is intended to be a faithful transcription, except
 ##              that the code format has been changed to conform to the
@@ -18,6 +19,8 @@
 ##              2016-12-18 MAS  Updated from comment-proofed Luminary 99 version.
 ##		2017-01-04 RRB	Updated for Luminary 69. Notes on handwritted notations in Luminary 99
 ##				were retained and marked as being from Lum99.
+##		2017-01-28 RSB	Proofed comment text using octopus/prooferComments
+##				and fixed errors found.
 
 ## Page 979
 # NAME - LSPOS  - LOCATE SUN AND MOON			DATE - 25 OCT 67
@@ -35,7 +38,7 @@
 #
 #	LOS = LOS +LOS *T-(C *SIN(2PI*T)/365.24 +C *COS(2PI*T)/365.24)
 #	         0    R     0                     1
-#	LOS  (RAD) IS THE LONGITUDE OF THE SUN FOR MIGNIGHT JUNE 30TH OF THE PARTICULAR YEAR.
+#	LOS  (RAD) IS THE LONGITUDE OF THE SUN FOR MIDNIGHT JUNE 30TH OF THE PARTICULAR YEAR.
 #          0
 #	LOS  (RAD/DAY) IS THE MEAN RATE FOR THE PARTICULAR YEAR.
 #    	   R
@@ -188,6 +191,4 @@ STMP		EQUALS	16D
 GTMP		EQUALS	22D
 
 TIMEP		EQUALS	24D
-
-# *** END OF LEMP50S .103 ***
 

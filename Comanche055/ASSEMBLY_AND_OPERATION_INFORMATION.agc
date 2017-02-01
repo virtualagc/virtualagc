@@ -11,8 +11,10 @@
 ##				same name, using Comanche055 page images.
 ##		2016-12-09 RSB	Proofed comments with octopus/ProoferComments
 ##				and fixed the errors found.
-##		2017-01-07 RSB	Fixed comment errors detected in cross-diff vs
-##				Colossus 237 and Colossus 249.
+##		2017-01-07 RSB	Fixed comment errors detected in diff vs
+##				Colossus 249.
+##		2017-01-21 RSB	Fixed comment errors detected in diff vs
+##				Artemis 72.
 ##
 ## This source code has been transcribed or otherwise adapted from digitized
 ## images of a hardcopy from the MIT Museum.  The digitization was performed
@@ -68,7 +70,7 @@
 #		TPI SEARCH
 #		P20-P25
 #		P30,P37
-#		P32-P33. P72-P73
+#		P32-P33, P72-P73
 #		P40-P47
 #		P51-P53
 #		LUNAR AND SOLAR EPHEMERIDES SUBROUTINES
@@ -930,7 +932,7 @@
 # 00401		DESIRED GIMBAL ANGLES YIELD GIMBAL LOCK		IMF ALIGN, IMU-2			ALARM
 # 00404		TARGET OUT OF VIEW - TRUN ANGLE > 90 DEG	R52					PRIOLARM
 # 00405		TWO STARS NOT AVAILABLE				P52,P54					ALARM
-# 00406		REND NAVIGATION NOT OPERATING			P21,R23					ALARM
+# 00406		REND NAVIGATION NOT OPERATING			R21,R23					ALARM
 # 00407		AUTO OPTICS REQUEST TRUN ANGLE > 50 DEG.	R52					ALARM
 # 00421		W-MATRIX OVERFLOW				INTEGRV					VARALARM
 # 00430	     *	INTEG. ABORT DUE TO SUBSURFACE S. V.		ALL CALLS TO INTEG			POODOO

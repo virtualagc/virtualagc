@@ -11,11 +11,13 @@
 ## Mod history: 2011-03-12 JL	Adapted from corresponding Colossus 249 file.
 ##		2017-01-01 RSB	Proofed comment text using octopus/ProoferComments,
 ##				and fixed  errors found.
+##		2017-01-20 RSB	Fixed comment-text errors noted while diff'ing
+##				vs Colossus 249.
 
 ## Page 945
 # PROGRAM NAME....ROLL AUTOPILOT, CONSISTING OF ROLLDAP,DURATION,NOROLL1,E
 # ORIGINAL CODING BY F.W.MARTIN, 1965 (SUNDIAL)                           TC.
-# LOC SECTION....ROLL AUTOPILOT   SUBROUTINE....DAPCSM
+# LOG SECTION....ROLL AUTOPILOT   SUBROUTINE....DAPCSM
 # MOD BY ENGEL                    DATE 28 DEC, 1967 (SUNDISK TO COLOSSUS)
 # FUNCTIONAL DESCRIPTION....
 
@@ -37,7 +39,7 @@
 #     *ROLLDAP CALL VIA WAITLIST, IN PARTICULAR BY TVCEXEC (EVERY 1/2 SEC)
 #      WITH A 3CS DELAY TO ALLOW FREE TIME FOR OTHER RUPTS (DWNRPT, ETC.)
 
-# NORMAL EXIT MODES.... ENDOFJOG
+# NORMAL EXIT MODES.... ENDOFJOB
 
 # ALARM OR ABORT EXIT MODES.... NONE
 
@@ -166,7 +168,7 @@
 ## Page 948
 # EQUATION FOR INTERSECTION, CONTROL PARABOLA AND STRAIGHT SWITCH LINE....
 
-#      COGADOT = NUM/DEN, WHERE
+#      DOGADOT = NUM/DEN, WHERE
 #                                 2
 #          NUM = (-SLOPE)(OGARATE) (1/CONACC)
 #                  +SGN(DELOGA)(-SLOPE)(OGAERROR - SGN(DELOGA)(DB))

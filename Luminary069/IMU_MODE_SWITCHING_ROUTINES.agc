@@ -1,10 +1,11 @@
+### FILE="Main.annotation"
 ## Copyright:   Public domain.
 ## Filename:    IMU_MODE_SWITCHING_ROUTINES.agc
 ## Purpose:     The main source file for Luminary revision 069.
-##              It is part of the source code for the original release 
-##              of the source code for the Lunar Module's (LM) Apollo 
-##              Guidance Computer (AGC) for Apollo 10. The actual flown 
-##              version was Luminary 69 revision 2, which included a 
+##              It is part of the source code for the original release
+##              of the flight software for the Lunar Module's (LM) Apollo
+##              Guidance Computer (AGC) for Apollo 10. The actual flown
+##              version was Luminary 69 revision 2, which included a
 ##              newer lunar gravity model and only affected module 2.
 ##              This file is intended to be a faithful transcription, except
 ##              that the code format has been changed to conform to the
@@ -17,6 +18,8 @@
 ## Mod history: 2016-12-13 MAS  Created from Luminary 99.
 ##              2016-12-18 MAS  Updated from comment-proofed Luminary 99 version.
 ##		2017-01-18 RRB	Updated for Luminary 69.
+##		2017-01-28 RSB	Proofed comment text using octopus/prooferComments
+##				and fixed errors found.
 
 ## Page 1303
 		BLOCK	02
@@ -343,7 +346,7 @@ IFAILOK		TC	CAGETSTQ	# ENABLE IMU FIAL UNLESS IMU BEING CAGED.
 PFAILOK2	MASK	IMODES30
 		TS	IMODES30
 		TC	IBNKCALL	# THE ISS WARNING LIGHT MAY COME ON NOW
-		CADR	SETISSW		# THAT THE INHIBIT WAS BEEN REMOVED.
+		CADR	SETISSW		# THAT THE INHIBIT HAS BEEN REMOVED.
 		TCF	TASKOVER
 
 PFAILOK		TC	CAGETSTQ	# ENABLE PIP FAIL PROG ALARM.
@@ -367,7 +370,7 @@ NOATTOFF	CS	OCT40010	# SUBROUTINE TO TURN OFF NO ATT LAMP.
 		TC	Q
 
 ## Page 1312
-# ROUTINES TO INITIATE AND TERMINATE PROGRAM USE OF THE PIPAS.  NO IMUSTALL REQUIRED IN EITHER CASE.
+# ROUITNES TO INITIATE AND TERMINATE PROGRAM USE OF THE PIPAS.  NO IMUSTALL REQUIRED IN EITHER CASE.
 
 PIPUSE		CS	ZERO
 		TS	PIPAX
@@ -790,7 +793,7 @@ AOTSTALL	CAF	ONE		# AOT.
 RADSTALL	CAF	TWO
 		TCF	STALL
 
-## Page 1330
+## Page 1324
 OPTSTALL	EQUALS	AOTSTALL
 
 IMUSTALL	CAF	ZERO		# IMU.

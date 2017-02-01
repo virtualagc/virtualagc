@@ -20,6 +20,7 @@
 ##                                          CAGETEST -> COARSTST    
 ##		2016-12-26 RSB	Comment-text proofed using ProoferComments
 ##				and corrected errors found.
+##		2017-01-28 RSB	Comment-text fixes identified for Luminary 69.
 
 ## Page 1306
 		SETLOC	FFTAG3
@@ -377,7 +378,7 @@ NOATTOFF	CS	OCT40010	# SUBROUTINE TO TURN OFF NO ATT LAMP.
 		TC	Q
 
 ## Page 1315
-#          ROUTINES TO INITIATE AND TERMINATE PROGRAM USE OF THE PIPAS. NO IMUSTALL REQUIRED IN EITHER CASE.
+#          ROUITNES TO INITIATE AND TERMINATE PROGRAM USE OF THE PIPAS. NO IMUSTALL REQUIRED IN EITHER CASE.
 
 PIPUSE		CS	ZERO
 		TS	PIPAX

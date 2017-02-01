@@ -1,5 +1,5 @@
 ---
-We are currently in the process of transcribing Luminary 69 (the original release of the Apollo 10 LM flight software), and are looking for volunteers to help out. If you're interested, **[click here!](https://github.com/virtualagc/virtualagc/wiki/Luminary-69-Transcription)**
+We are currently in the process of transcribing Luminary 116 (the Apollo 12 LM flight software), and are looking for volunteers to help out. If you're interested, **[click here!](https://github.com/virtualagc/virtualagc/wiki/Luminary-116-Transcription)**
 ---
 
 Virtual Apollo Guidance Computer

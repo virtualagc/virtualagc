@@ -17,6 +17,8 @@
 ##		2011-05-08 JL	Flagged workaround.
 ##		2016-12-21 RSB	Proofed comment text using octopus/ProoferComments
 ##				and corrected the errors found.
+##		2017-01-20 RSB	Fixed comment-text errors noted while diff'ing
+##				vs Colossus 249.
 
 ## This source code has been transcribed or otherwise adapted from digitized
 ## images of a hardcopy from the MIT Museum.  The digitization was performed
@@ -136,7 +138,7 @@ VARGAINS	CAF	BIT13		# CHECK ENGINE-ON BIT TO INHIBIT VARIABLE
 ## Page 947		
 		TCF	GAINCHNG	#		NOW
 		TCF	+0		#		NOT USED
-		TCF	VARGAINS +5	#		NO, LOTHRUST (S40.6 R40)
+		TCF	VARGAINS +5	#		NO, LOTHRUST (S40.8 R40)
 		
  +4		TS	VCNTRTMP	#	PROTECT VCNTR AND
 		CAE	CSMMASS		#	CSMMASS DURING AN IMPULSIVE BURN

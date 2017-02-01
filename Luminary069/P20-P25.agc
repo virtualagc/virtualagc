@@ -1,8 +1,9 @@
+### FILE="Main.annotation"
 ## Copyright:   Public domain.
 ## Filename:    P20-P25.agc
 ## Purpose:     The main source file for Luminary revision 069.
 ##              It is part of the source code for the original release
-##              of the source code for the Lunar Module's (LM) Apollo
+##              of the flight software for the Lunar Module's (LM) Apollo
 ##              Guidance Computer (AGC) for Apollo 10. The actual flown
 ##              version was Luminary 69 revision 2, which included a
 ##              newer lunar gravity model and only affected module 2.
@@ -16,7 +17,23 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2016-12-13 MAS  Created from Luminary 99.
 ##              2016-12-14 MAS  Updated from comment-proofed Luminary 99 version.
-##              2016-01-16 HG   Trasncribed
+##              2016-01-16 HG   Transcribed
+##              2017-01-22 HG   Shift pseudo label +3 to column 2.
+##                              Add missing operator INHINT
+##              2017-01-23 HG   Fix operator CCS -> CA
+##                              Fix value TENDEG .27... -> .027...
+##                              Fix operand R22LEM42 -> R22LEM
+##                                          GOXDSPF  -> GOXDSPFR
+##                                          BIT13    -> BIT3
+##                              Fix operand modifier WWPOS +6 -> WWPOS +4
+##                              Fix statement CA FLAGWRD2 -> CS FLAGWRD0
+##                                            EXTEND      -> CCS A
+##                                            BZF NOTP20  -> TC  NOTP20
+##		2017-01-27 RSB	Proofed comment text using octopus/prooferComments
+##				and fixed errors found.
+##		2017-01-28 RSB	WTIH -> WITH.
+
+##
 ## Page 504
 
 # RENDEZVOUS NAVIGATION PROGRAM 20
@@ -343,7 +360,7 @@ P20LEMB4        CAF             250DEC
 P20LEMC3        TC              INTPRET
                 CALL                                    # DO A PERMANENT MEMORY PRECISION
                                 UPPSV                   # INTEGRATION TO ESTABLISH AN UP-TO-DATE
-                BOFF            VLOAD                   # BASE FOR CONICS (KELPLER) IN R21
+                BOFF            VLOAD                   # BASE FOR CONICS (KEPLER) IN R21
                                 SURFFLAG
                                 P20LEMC4
                                 RCVLEM                  # WHEN ON LUNAR SURFACE
@@ -392,7 +409,7 @@ P20LEMC1        CAE             FLAGWRD0                # IS RENDEZVOUS FLAG SET
                 CAF             PRIO26                  # YES-SCHEDULE R22 JOB (RR DATA READ)
                 TC              FINDVAC
                 EBANK=          LOSCOUNT
-                2CADR           R22LEM42
+                2CADR           R22LEM
                 TC              TASKOVER
 
 
@@ -730,7 +747,7 @@ R22WAIT         CAF             1500DEC
 
 
 R22LEM46        CAF             2SECS
-                TC              P20LEMWT        +1      # WAIT 2 SECONDS AND TAKE ANOTHER MARK
+                TC              P20LEMWT        +1
 
 
 N49DSP          CAF             V06N49NB
@@ -1109,7 +1126,7 @@ R61C+L03        TC              INTPRET                 # SET
                 STORE           SCAXIS                  # TRACK AXIS UNIT VECTOR
                 RTB
                                 LOADTIME                # PRESENT TIME
-                DAD                                     # EXTARPULATE FORWARD FORWARD TO CENTER OF
+                DAD                                     # EXTRAPULATE FORWARD FORWARD TO CENTER OF
                                 3SECONDS                # SIX SECOND PERIOD.
                 STCALL          TDEC1
                                 LPS20.1                 # LOS DETERMINATION + VEH ATTITUDE
@@ -1188,7 +1205,7 @@ R61C+L06        CAF             R61FLBIT
                 EXTEND
                 BZF             +2
                 TC              R61C+L4
-                CCS             R65CNTR
+                CA              R65CNTR
                 CCS             A
                 TC              +2
                 TC              R61C+L4                 # R65CNTR = 0 - EXIT ROUTINE
@@ -1216,7 +1233,7 @@ R61C+L1         CAF             BIT7+9PV                # IS RENDEZVOUS OR P25FL
                 BZF             ENDOFJOB                # NO-EXIT ROUTINE AND PROGRAM.
                 TC              R61C+L06                # YES EXIT ROUTINE
 BIT7+9PV        OCT             00500
-TENDEG          2DEC            0.2777777               # SCALED UNTS OF REVOLUTION B0
+TENDEG          2DEC            .02777777               # SCALED UNITS OF REVOLUTION B0
 06SEC           DEC             600
 PHI             EQUALS          20D
                 EBANK=          CDUXD
@@ -1401,7 +1418,7 @@ ENDRMODF        EQUALS
 
 # FUNCTIONAL DESCRIPTION_
 
-# RRTURNON IS THE TURN-ON SEQUENCE WHICH, ALONG WTIH
+# RRTURNON IS THE TURN-ON SEQUENCE WHICH, ALONG WITH
 # RRZEROSB, ZEROS THE CDU:S AND DETERMINES THE RR MODE.
 # INITIALLY, CONTROL IS TRANSFERRED TO RRZEROSB FOR THE
 # ACTUAL TURN-ON SEQUENCE. UPON RETURN THE PROGRAM
@@ -2028,7 +2045,7 @@ STARTDES        INCR            DESRET
                 CS              RADMODES
                 MASK            BIT10
                 ADS             RADMODES
-                MASK            BIT11                   # SEE IF REPOSITIONING IN PROGRESS.
+                MASK            BIT11                   # SEE IF REPOSITION IN PROGRESS.
                 CCS             A
                 TCF             DESRETRN                # ECTR ALREADY SET UP.
 
@@ -2130,7 +2147,7 @@ RRLIMNB         INDEX           Q                       # THIS ROUTINE IS IDENTI
                 DXCH            ITEMP1
                 LXCH            Q                       # L(CALLER +2) TO L
 
-                CAF             BIT12                   # SEE WHICH MODE RR IS IN.
+                CAF             BIT12                   # SEE WHICH MODE RR IS IN
                 MASK            RADMODES
                 CCS             A
                 TCF             MODE2CHK                # MODE 2 CAN USE RRLIMCHK CODING
@@ -2377,7 +2394,7 @@ DONBRD          STODL           32D
                 BZF             +3                      # GYRO CAUSES A POSITIVE CHANGE IN THE
                 CA              TANG            +1      # SHAFT ANGLE. COMPENSATE FOR THIS SWITCH
                 TCF             +2                      # BY CHANGING THE POLARITY OF OUR COMMAND.
-        +3      CS              TANG            +1
+ +3             CS              TANG            +1
                 EXTEND
                 MP              RDESGAIN                # SCALING ON INPUT ANGLE WAS 4 RADIANS.
                 TS              TANG            +1      # SHAFT COMMAND.
@@ -2444,10 +2461,10 @@ RRDESDUN        CS              BIT10                   # WHEN PROBLEM DONE, REM
                 WAND            CHAN12
                 TCF             ENDOFJOB                # WITH ECTR DISABLED.
 
-DORROUT         CA              FLAGWRD2                # IF NOT IN P20/P22 BUT V41,DON'T DO
-                MASK            RNDVZBIT                # VELOCITY CORRECTION
-                EXTEND
-                BZF             NOTP20
+DORROUT         CS              FLAGWRD0                # IF NOT IN P20/P22 BUT V41,DON'T DO
+                MASK            RNDVZBIT                # VELOCITY CORRECTION.
+                CCS             A
+                TC              NOTP20
                 TC              INTPRET
                 VLOAD           VXSC                    # MULTIPLY UNIT LOS BY MAGNITUDE
                                 RRTARGET
@@ -2844,7 +2861,7 @@ DATAFAIL        CS              ITEMP1                  # IN THE ABOVE CASE, SET
 LRPOS2          INHINT
 
                 CS              RADMODES
-                MASK            BIT6                    # SHOW DESIRED LR POSITION IS 2
+                MASK            BIT6                    # SET BIT6 TO SHOW DESIRED LR POS IS 2
                 ADS             RADMODES
 
                 CAF             BIT7
@@ -3001,6 +3018,7 @@ CSMINT          STCALL          TDEC1
                 MXV             VSL1
                                 REFSMMAT
                 EXIT
+                INHINT
                 TC              KILLTASK                # KILL THE TASK WHICH CALLS DODES SINCE
                 CADR            DESLOOP         +2      # STORING INTO ERASEABLES DODES USES
                 TC              INTPRET
@@ -3026,7 +3044,7 @@ NOTSHIFT        UNIT
                                 LS21X
 
 ## Page 577
-# PROGRAM NAME_ : LPS20.2 400 NM RANGE CHECK
+# PROGRAM NAME_ LPS20.2 400 NM RANGE CHECK
 # MOD. NO. 2   BY J.D. COYNE    SDC    DATE  12-7-66
 
 
@@ -3154,7 +3172,7 @@ LRS22.1         TC              MAKECADR
                 EXTEND                                  # GET RR RANGE SCALE
                 RAND            CHAN33                  # FROM CHANNEL 33 BIT 3
                 TS              L
-                CS              BIT3
+                CS              BIT3			# AND SET IN RADMODES BIT3
                 MASK            RADMODES
                 AD              L
                 TS              RADMODES
@@ -3167,7 +3185,7 @@ READRDOT        TC              BANKCALL
 
                 INHINT                                  # NO INTERRUPTS WHILE READING TIME AND CDU
                 DXCH            TIMEHOLD                # SET MARK TIME EQUAL TO THE MID-POINT
-                DXCH            MKTIME                  # TEMP BUFFER FOR DOWNLINK
+                DXCH            MKTIME                  # TIME OF THE RANGE-RATE READING
                 DXCH            SAMPLSUM                # SAVE RANGE-RATE READING
                 DXCH            RDOTMSAV
                 EXTEND
@@ -4288,7 +4306,7 @@ DEC13T          DEC             13
 JOBOVER         EQUALS          LRS24.1                 # ****  TEMPORARY DEFINITION ******
 
 # END OF TEST PROGRAM
-# ***********************************************
+#  ****************************************
 ZERO/SP         EQUALS          HI6ZEROS
                 BLOCK           02
                 SETLOC          FFTAG5
@@ -4300,9 +4318,8 @@ GOTOV56         EXTEND                                  # P20 TERMINATES BY GOTO
                 EBANK=          WHOCARES
 VB56CADR        2CADR           TRMTRACK
 
-## Page 605
 
-## Page 594
+## Page 605
 # PROGRAM NAME: R29  (RENDEZVOUS RADAR DESIGNATE DURING POWERED FLIGHT)
 # MOD NO. 2       BY H. BLAIR-SMITH       JULY 2, 1968.
 
@@ -4866,11 +4883,11 @@ V67CALL         TC              INTPRET
                 DXCH            WWVEL           +4
 V06N99DS        CAF             V06N99
                 TC              BANKCALL
-                CADR            GOXDSPF
+                CADR            GOXDSPFR
                 TCF             ENDEXT
                 TCF             +5
                 TCF             V06N99DS
-                CAF             BIT13
+                CAF             BIT3
                 TC              BLANKET
                 TC              ENDOFJOB
  +5             ZL
@@ -4879,7 +4896,7 @@ N99LOOP         TS              Q
                 INDEX           Q
                 CS              WWPOS
                 INDEX           Q
-                AD              WWPOS           +6
+                AD              WWPOS           +4
                 ADS             L
                 CCS             Q                       # THE SUM OF ALL DIFFERENCES MUST BE ZERO.
                 TCF             N99LOOP

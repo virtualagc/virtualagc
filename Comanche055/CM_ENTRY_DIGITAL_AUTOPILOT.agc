@@ -18,6 +18,8 @@
 ##				and corrected the errors found.
 ##		2017-01-07 RSB	Fixed comment errors detected in cross-diff vs
 ##				Colossus 249.
+##		2017-01-21 RSB	Fixed comment errors detected in diff vs
+##				Artemis 72.
 ##
 ## This source code has been transcribed or otherwise adapted from digitized
 ## images of a hardcopy from the MIT Museum.  The digitization was performed
@@ -1142,7 +1144,7 @@ JETCALL		CAF	BIT2		# CM/DSTBY =103D BIT2
 
 DZCALL		CS	CMDAPMOD	# POSSIBLE VALUES OF CMDAPMOD: -1, +0, -0.
 		MASK	BIT1
-		TS	L		# C(L)=0 FOR -0: C(L)=1 FOR -1 OR +0.
+		TS	L		# C(L)=0 FOR -0; C(L)=1 FOR -1 OR +0.
 		INDEX	A		# ERASBLE ORDER:  ROLLTM,ROLLC,ROLLC +1.
 		CA	ROLLTM		# GET ROLL/180 OR ROLLC (/360).
 		INDEX	L

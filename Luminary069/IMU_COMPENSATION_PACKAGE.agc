@@ -1,10 +1,11 @@
+### FILE="Main.annotation"
 ## Copyright:   Public domain.
 ## Filename:    IMU_COMPENSATION_PACKAGE.agc
 ## Purpose:     The main source file for Luminary revision 069.
-##              It is part of the source code for the original release 
-##              of the source code for the Lunar Module's (LM) Apollo 
-##              Guidance Computer (AGC) for Apollo 10. The actual flown 
-##              version was Luminary 69 revision 2, which included a 
+##              It is part of the source code for the original release
+##              of the flight software for the Lunar Module's (LM) Apollo
+##              Guidance Computer (AGC) for Apollo 10. The actual flown
+##              version was Luminary 69 revision 2, which included a
 ##              newer lunar gravity model and only affected module 2.
 ##              This file is intended to be a faithful transcription, except
 ##              that the code format has been changed to conform to the
@@ -17,6 +18,8 @@
 ## Mod history: 2016-12-13 MAS  Created from Luminary 99.
 ##              2016-12-14 MAS  Updated from comment-proofed Luminary 99 version.
 ##		2017-01-19 RRB	Updated for Luminary 69.
+##		2017-01-25 RSB	Proofed comment text using octopus/prooferComments
+##				and fixed errors found.
 
 ## Page 339
 		BANK	7
@@ -59,6 +62,7 @@
 
 ## Lines from here to the bottom of the page angle and start to overlap. The code until the MP BIT4 is legible.
 ## It is assumed that the illegible portions are identical to their Luminary 99 counterparts. - RRB 2017
+## <br>The comments are legible, except that the last line is rather tricky, and can be verified directly. - RSB 2017
 		INDEX	BUF +2
 		CS	PIPABIAS	# (PIPA PULSES)/(CS) X 2(-5)		 *
 		EXTEND
@@ -321,7 +325,7 @@ NBD3		EXTEND			# C(A) = DELTAT		(CS) X 2(+14)
 		
 		CA	ZERO
 		TS	GCOMPSW		# INDICATE COMMANDS 2 PULSES OR LESS.
-		TS	BUF		# INDEX- X, Y, Z.
+		TS	BUF		# INDEX  X, Y, Z.
 		
 		CCS	TEM1		# IF SURFACE FLAG IS SET,
 		TC	IRIGX		# COMPENSATE ACCELERATION TERMS.

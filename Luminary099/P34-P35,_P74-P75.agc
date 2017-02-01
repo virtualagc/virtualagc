@@ -19,6 +19,8 @@
 ##		2016-12-14 RSB	VNP00H -> VNPOOH.
 ##		2016-12-14 RSB	Proofed text comments with octopus/ProoferComments
 ##				and corrected the errors found.
+##		2017-01-28 RSB	Back-ported some comment fixes I noticed while
+##				proofing Luminary 69.
 
 ## This source code has been transcribed or otherwise adapted from
 ## digitized images of a hardcopy from the MIT Museum.  The digitization
@@ -1556,6 +1558,8 @@ PERIAPO		STQ	CALL
 			NORMEX
 
 ## Page 696
+# SETRAD
+
 SETRAD		DLOAD	PUSH
 			RPAD
 		SXA,1	INCR,2
@@ -1570,6 +1574,8 @@ SETRAD		DLOAD	PUSH
 SETRADX		DLOAD	RVQ
 
 ## Page 697
+# PRECSET
+
 PRECSET		STQ
 			NORMEX
 		STCALL	TDEC2
@@ -1602,6 +1608,8 @@ PASSIVE		STOVL	RPASS3
 		RVQ
 
 ## Page 698
+# VECSHIFT
+
 VECSHIFT	LXA,2	VSR*
 			RTX2
 			0,2
@@ -1612,6 +1620,8 @@ VECSHIFT	LXA,2	VSR*
 		RVQ
 
 ## Page 699
+# SHIFTR1 
+
 SHIFTR1		LXA,2	SL*
 			RTX2
 			0,2

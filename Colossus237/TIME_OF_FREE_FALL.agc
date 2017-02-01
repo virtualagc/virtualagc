@@ -13,6 +13,8 @@
 ##		2016-11-02 RSB	Typo (various offset-references +2 and +3 not indented).
 ##		2017-01-01 RSB	Proofed comment text using octopus/ProoferComments,
 ##				and fixed errors found.
+##		2017-01-20 RSB	Fixed comment-text errors noted while diff'ing
+##				vs Colossus 249.
 
 ## Page 1337
 #          THE TFF SUBROUTINES MAY BE USED IN EITHER EARTH OR MOON CENTERED COORDINATES. THE TFF ROUTINES NEVER
@@ -358,7 +360,7 @@ DUMPRPRA	RVQ
 #                 M: (-27+NR)
 #          X1                     -NR, NORM COUNT                         LEFT BY TFFCONIC
 #          TFFNP  E: (-38+2NR)	M   LCP, SEMI LATUS RECTUM, WEIGHT  NR    LEFT BY TFFCONIC
-#                 M: (-36+2N4)
+#                 M: (-36+2NR)
 #          TFFALFA  E: (26-NR)    1/M  ALFA, WEIGHT  NR                   LEFT BY TFFCONIC
 #                   M: (24-NR)
 #          TFFRTALF  E:(10+NA)    SQRT(ALFA), NORMALIZED                  LEFT BY TFFCONIC

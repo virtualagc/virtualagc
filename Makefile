@@ -361,7 +361,7 @@ BUILD = $(MAKE) PREFIX=$(PREFIX) NVER=$(NVER) CFLAGS="$(CFLAGS)" CURSES="$(CURSE
 # List of mission software directories to be built.
 MISSIONS = Validation Luminary131 Colossus249 Comanche055 
 MISSIONS += Luminary099 Artemis072 Colossus237 Solarium055
-MISSIONS += Aurora12 Sunburst120 Luminary210 Retread44
+MISSIONS += Aurora12 Sunburst120 Luminary210 Retread44 Luminary069
 export MISSIONS
 
 # Missions needing code::blocks project files.

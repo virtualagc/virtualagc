@@ -18,6 +18,7 @@
 ##              2016-12-07 HG   fix P00 -> POO (only in operand POODOO1)
 ##		2016-12-26 RSB	Comment-text proofed using ProoferComments
 ##				and corrected errors found.
+##		2017-01-28 RSB	Back-ported some comment-text fixes made in Luminary 69.
 
 ## Page 1000
 # SECTION 1  DISPATCHER
@@ -2844,7 +2845,7 @@ TCSUBTR		TCF	SUBTR
 #          THE FOLLOWING INSTRUCTIONS ARE AVAILABLE FOR SETTING, MODIFYING, AND BRANCHING ON INDEX REGISTERS:
 
 #          1.  AXT                ADDRESS TO INDEX TRUE.
-#          2.  AXC                ADDRESS TO INDEX COMPLEMENTED.
+#          1.  AXC                ADDRESS TO INDEX COMPLEMENTED.
 #          3.  LXA                LOAD INDEX FROM ERASABLE.
 #          4.  LXC                LOAD INDEX COMPLEMENTED FROM ERASABLE.
 #          5.  SXA                STORE INDEX IN ERASABLE.

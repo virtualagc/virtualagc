@@ -19,6 +19,7 @@
 ##				and therefore was not used.) There were no
 ##				differences between the comment text in the 
 ##				different versions after these corrections.
+##		2017-01-28 RSB	WTIH -> WITH.
 ##
 ## The contents of the "Colossus249" files, in general, are transcribed 
 ## from a scanned copy of the program listing.  Notations on this
@@ -100,7 +101,7 @@ CALCTLS		TC	INTPRET
 DISTLS		CAF	V06N31**	# DISPLAY TIME TO LANDING SITE
 		TC	BANKCALL
 		CADR	GOMARKF
-		TC	ENDEXT		# TERMINATE WTIH V34E
+		TC	ENDEXT		# TERMINATE WITH V34E
 		TC	PROCLMKS	# PROCEED WITH V33E
 		TC	DISTLS		# ILLEGAL RESPONSE, DO AGAIN
 PROCLMKS	TC	INTPRET		# BEGIN LANDMARK PROCESSING
@@ -161,7 +162,7 @@ DISLID		SLOAD	SR1		# ID = -INDEXNUM/2 + 1
 		TC	BANKCALL
 		CADR	GOMARKFR
 		TC	ENDEXT		# TERMINATE WITH V34E
-		TC	DISTTL		# PROCEED WTIH V33E
+		TC	DISTTL		# PROCEED WITH V33E
 		TC	NEXTBAND	# RECYCLE WITH V32E
 		CAF	FIVE		# BLANK R1 AND R3
 		TC	BLANKET

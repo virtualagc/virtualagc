@@ -20,6 +20,7 @@
 ##				vs the already-proofed corresponding Colossus
 ##				237 and Comanche 55 source-code files
 ##				and corrected errors found.
+##		2017-01-28 RSB	WTIH -> WITH.
 ##
 ## The contents of the "Colossus249" files, in general, are transcribed 
 ## from a scanned copy of the program listing.  Notations on this
@@ -143,7 +144,7 @@
 #	B.	ALARMS
 #
 #		1107	PHASE TABLE ERROR
-#		1110	RESTART WTIH NO ACTIVE GROUPS
+#		1110	RESTART WITH NO ACTIVE GROUPS
 
 ## Page 179
 		BANK	10

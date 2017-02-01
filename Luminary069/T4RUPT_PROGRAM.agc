@@ -1,8 +1,9 @@
+### FILE="Main.annotation"
 ## Copyright:   Public domain.
 ## Filename:    T4RUPT_PROGRAM.agc
 ## Purpose:     The main source file for Luminary revision 069.
 ##              It is part of the source code for the original release
-##              of the source code for the Lunar Module's (LM) Apollo
+##              of the flight software for the Lunar Module's (LM) Apollo
 ##              Guidance Computer (AGC) for Apollo 10. The actual flown
 ##              version was Luminary 69 revision 2, which included a
 ##              newer lunar gravity model and only affected module 2.
@@ -16,6 +17,10 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2016-12-13 MAS  Created from Luminary 99.
 ##              2017-01-05 HG   Transcribed
+##              2017-01-22 HG   Fix operand BIT1 -> BIT11
+##		2017-01-25 RSB	Proofed comment text using octopus/prooferComments
+##				and fixed errors found.
+##		2017-01-28 RSB	WTIH -> WITH.
 
 ## Page 170
                 BANK            12
@@ -334,7 +339,7 @@ NXTIFAIL        CCS             RUPTREG2                # PROCESS ANY ADDITIONAL
 # INHIBIT BIT IN 10.24 SECONDS.  IF A MISSION PROGRAM WAS WAITING IT IS INFORMED VIA ENDIMU.
 
 # AT PROCTNON, IF ONLY ISS OPERATE IS PRESENT (OPONLY), THE CDU'S ARE ZEROED UNLESS THE PLATFORM IS IN COARSE
-# ALIGN (= GIMBAL LOCK HERE) OR A MISSION PROGRAM IS USING THE IMU (INUSEFLG = 1).
+# ALIGN (= GIMBAL LOCK HERE) OR A MISSION PROGRAM IS USING THE IMU (IMUSEFLG = 1).
 
 # CALLING SEQUENCE:  T4RUPT EVERY 480 MILLISECONDS AFTER IMUMON.
 
@@ -584,7 +589,7 @@ NXTFL33         CCS             RUPTREG2                # PROCESS POSSIBLE ADDIT
 
 # ERASABLE INITIALIZATION:
 #          1) FRESH START OR RESTART WITH NO GROUPS ACTIVE:  C(CDUZ) = 0, IMODES30 BIT 6 = 0, IMODES33 BIT 1 =  0.
-#          2) RESTART WTIH GROUPS ACTIVE:  SAME AS FRESH START EXCEPT C(CDUZ) NOT CHANGED SO GIMBAL MONITOR
+#          2) RESTART WITH GROUPS ACTIVE:  SAME AS FRESH START EXCEPT C(CDUZ) NOT CHANGED SO GIMBAL MONITOR
 #                                          PROCEEDS AS BEFORE.
 
 # ALARMS:  1) MGA REGION (2) CAUSES GIMBAL LOCK LAMP TO BE LIT.
@@ -708,7 +713,7 @@ TEMPOK          TC              LAMPTEST                # IF TEMP NOW OK, DONT T
 # PROCESSING ANY CHANGES.  THIS BIT WILL BE RESET BY THE ENDTNON ROUTINE WHEN THE CURRENT 90 SECOND DELAY PERIOD
 # ENDS.
 
-# CALLING SEQUENCE:  FROM IMUMON WHEN ISS TURN-ON REQUEST CHANGES STATE.
+# CALLING SEQUENCE:  FROM IMUMOM WHEN ISS TURN-ON REQUEST CHANGES STATE.
 
 # JOBS OR TASKS INITIATED:  NONE.
 
@@ -881,7 +886,7 @@ IMUOP2          CAF             BIT2                    # SEE IF FAILED ISS TURN
 
 # JOBS OR TASKS INITIATED:  NONE.
 
-# SUBROUTINES CALLED:  1) SETISSW, AND 2) ALARM (SEE FUNCITONAL DESCRIPTION).
+# SUBROUTINES CALLED:  1) SETISSW, AND 2) ALARM (SEE FUNCTIONAL DESCRIPTION).
 
 # ERASABLE INITIALIZATION:  SEE IMUMON FOR INITIALIZATION OF IMODES30.  THE RELAVANT BITS ARE 5, 7, 8, 9, AND 10.
 
@@ -1273,7 +1278,7 @@ RRGIMON         CAE             FLAGWRD5                # IS NO ANGLE MONITOR FL
 
                 TCF             NORRGMON                # (ADDITIONAL CODING MAY GO HERE).
 
-MONREPOS        CAF             BIT1                    # SET FLAG TO SHOW REPOSITION IN PROGRESS.
+MONREPOS        CAF             BIT11                   # SET FLAG TO SHOW REPOSITION IN PROGRESS.
                 ADS             RADMODES
 
                 CS              OCT20002                # DISABLE TRACKER AND ERROR COUNTER.
@@ -1313,7 +1318,7 @@ OCT02100        OCT             02100                   # P20,P22 MASK BITS
 
 # INPUT:  CDUX, CDUY, CDUZ.
 
-# OUTPUT:  M11, M21, M32, M22, M32.
+# OUTPUT:  M11, M21, M31, M22, M32.
 
 # AOG = CDUX, AIG = CDUY, AMG = CDUZ: MNEMONIC IS : OIM = XYZ
 

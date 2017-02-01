@@ -16,6 +16,8 @@
 ##				vs the already-proofed corresponding Colossus
 ##				237 and Comanche 55 source-code files
 ##				and corrected errors found.
+##		2017-01-21 RSB	Back-ported comment error fixes detected in diff'ing
+##				Artemis 72 vs Comanche 55.
 ##
 ## The contents of the "Colossus249" files, in general, are transcribed 
 ## from a scanned copy of the program listing.  Notations on this
@@ -48,9 +50,9 @@
 		EBANK=	DNTMBUFF
 
 # SPECIAL DOWNLINK OP CODES
-#	OP CODE		ADDRESS (EXAMPLE)	  SENDS..		BIT 15		BITS 14-12	BITS 11
+#	OP CODE		ADDRESS(EXAMPLE)	  SENDS..		BIT 15		BITS 14-12	BITS 11
 #													     -0
-#	------	       -----------		----------		------		----------	-------
+#	------	       ----------		----------		------		----------	-------
 #													     --
 #	1DNADR		TIME2			(2 AGC WDS)		0		0		ECADR
 #	2DNADR		TEPHEM			(4 AGC WDS)		0		1		ECADR

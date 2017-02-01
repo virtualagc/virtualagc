@@ -13,6 +13,7 @@
 ##		2016-11-01 RSB	More typos.
 ##		2016-12-06 RSB	Comments proofed using octopus/ProoferComments,
 ##				no changes made.
+##		2017-01-28 RSB	WTIH -> WITH.
 
 ## Page 668
 # GENERATION OF STEERING COMMANDS FOR DIGITAL AUTOPILOT FREE FALL MANEUVERS
@@ -67,7 +68,7 @@ INCRDCDU        TS              SPNDX
                 TCF             INCRDCDU                        # LOOP FOR THREE AXES
 
 ## Page 669
-# COMPARE PRESENT TIME WTIH TIME TO TERMINATE MANEUVER
+# COMPARE PRESENT TIME WITH TIME TO TERMINATE MANEUVER
 
 TMANUCHK        EXTEND                                          
                 DCS             TIME2                           

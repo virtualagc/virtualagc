@@ -23,11 +23,20 @@
 #				and therefore diff errors are no longer 
 #				ignored.
 # 		2016-10-04 JL	Change to use Makefile.inc.
+# 		2017-01-30 MAS	Moved the Makefile include to ensure the
+#				correct target gets built by default (it
+#				hasn't been building lately, just making
+#				the binsource). Also added a clean rule
+#				extension to clean the binsource.
 
 BASENAME=Colossus237
-EXTRA_YAYUL_ARGS=
+
+include ../Makefile.inc
 
 ${BASENAME}.binsource: ${BASENAME}.binsource2.txt
 	../Tools/listing2binsource ${VERBOSE} $^ $@
 
-include ../Makefile.inc
+clean: clean-binsource
+
+clean-binsource:
+	rm -f $(BASENAME).binsource

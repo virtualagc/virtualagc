@@ -16,6 +16,10 @@
 ##				the actual name from the log section, and with
 ##				the naming in Colossus 237.
 ##		2017-01-19 RSB	A few comment-text typos were corrected.
+##		2017-01-20 RSB	Cross-diff'd comment text (not whitespace)
+##				vs the already-proofed corresponding Colossus
+##				237 and Comanche 55 source-code files
+##				and corrected errors found.
 ##
 ## The contents of the "Colossus249" files, in general, are transcribed 
 ## from a scanned copy of the program listing.  Notations on this

@@ -11,6 +11,7 @@
 ## Mod history:	05/07/09 OH	Transcription Batch 1 Assignment 
 ##		2016-12-10 RSB	Proofed comments with octopus/ProoferComments
 ##				and fixed the errors found.
+##		2017-01-28 RSB	WTIH -> WITH.
 ##
 ## The contents of the "Comanche055" files, in general, are transcribed 
 ## from scanned documents. 
@@ -92,7 +93,7 @@ INCRDCDU	TS	KSPNDX
 		TCF	INCRDCDU	# LOOP FOR THREE AXES
 		
 		RELINT		
-# COMPARE PRESENT TIME WTIH TIME TO TERMINATE MANEUVER
+# COMPARE PRESENT TIME WITH TIME TO TERMINATE MANEUVER
 
 TMANUCHK	TC	TIMECHK
 		TC	POSTJUMP

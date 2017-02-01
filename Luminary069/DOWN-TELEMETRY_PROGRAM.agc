@@ -1,10 +1,11 @@
+### FILE="Main.annotation"
 ## Copyright:   Public domain.
 ## Filename:    DOWN-TELEMETRY_PROGRAM.agc
 ## Purpose:     The main source file for Luminary revision 069.
-##              It is part of the source code for the original release 
-##              of the source code for the Lunar Module's (LM) Apollo 
-##              Guidance Computer (AGC) for Apollo 10. The actual flown 
-##              version was Luminary 69 revision 2, which included a 
+##              It is part of the source code for the original release
+##              of the flight software for the Lunar Module's (LM) Apollo
+##              Guidance Computer (AGC) for Apollo 10. The actual flown
+##              version was Luminary 69 revision 2, which included a
 ##              newer lunar gravity model and only affected module 2.
 ##              This file is intended to be a faithful transcription, except
 ##              that the code format has been changed to conform to the
@@ -17,6 +18,9 @@
 ## Mod history: 2016-12-13 MAS  Created from Luminary 99.
 ##              2016-12-18 MAS  Updated from comment-proofed Luminary 99 version.
 ##		2017-01-04 RRB	Updated for Luminary 69.
+##              2017-01-21 HG   fix statement TCF WOTEST --> CA BIT7
+##		2017-01-28 RSB	Proofed comment text using octopus/prooferComments
+##				and fixed errors found.
 
 ## Page 983
 # PROGRAM NAME - DOWN TELEMETRY PROGRAM
@@ -98,7 +102,7 @@
 #		SAME AS ECADR, BUT USED WHEN THE WORD ADDRESSED IS THE LEFT
 #		HALF OF A DOUBLE-PRECISION WORD FOR DOWN TELEMETRY.
 #	B.	2DNADR - 6DNADR		N-WORD DOWNLIST ADDRESS, N = 2 - 6.
-#		SAME AS 1DNADR, BUT WTIH THE 4 UNUSED BITS OF THE ECADR FORMAT
+#		SAME AS 1DNADR, BUT WITH THE 4 UNUSED BITS OF THE ECADR FORMAT
 #		FILLED IN WITH 0001-0101.  USED TO POINT TO A LIST OF N DOUBLE-
 #		PRECISION WORDS, STORED CONSECUTIVELY, FOR DOWN TELEMETRY.
 #	C.	DNCHAN			DOWNLIST CHANNEL ADDRESS.
@@ -152,15 +156,15 @@
 DODOWNTM	TS	BANKRUPT
 		EXTEND
 		QXCH	QRUPT		# SAVE Q
-		TCF	WOTEST
-WO1		EXTEND			# SET WORD ORDER BIT TO 1 ONLY IF IT
-		WOR	CHAN13		# ALREADY ISN'T.
-		TC	DNTMGOTO	# GOTO APPROPRIATE PHASE OF PROGRAM
+		CA      BIT7		# SET WORD ORDER CODE TO 1. EXCEPTION- AT
+WO1		EXTEND			# THE BEGINNING OF EACH LIST THE WORD
+		WOR	CHAN13		# CODE WILL BE SET BACK TO 0.
+		TC	DNTMGOTO	# GO TO APPROPRIATE PHASE OF PROGRAM
 
 DNPHASE1	CA	NEGONE		# INITIALIZE ALL CONTROL WORDS
 		TS	SUBLIST		# WORDS TO MINUS ONE
 		TS	DNECADR
-		CA	LDNPHAS2	# SET DNTMGOTO =0 ALL SUBSEQUENT DOWNRUPTS
+		CA	LDNPHAS2	# SET DNTMGOTO =O ALL SUBSEQUENT DOWNRUPTS
 		TS	DNTMGOTO	# GO TO DNPHASE2
 		TCF	NEWLIST
 DNPHASE2	CCS	DNECADR		# SENDING OF DATA IN PROGRESS

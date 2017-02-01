@@ -11,6 +11,8 @@
 ## Mod history:	2009-05-19 HG	Transcribed from page images.
 ##		2016-12-13 RSB	Proofed text comments with octopus/ProoferComments
 ##				and corrected the errors found.
+##		2017-01-26 RSB	Back-ported comment-text fixes found while
+##				proofing corresponding Luminary 69 file.	
 ##
 ## This source code has been transcribed or otherwise adapted from
 ## digitized images of a hardcopy from the MIT Museum.  The digitization
@@ -142,7 +144,7 @@ LMORBM04	2DNADR	OMEGAPD				# OMEGAPD,OMEGAQD,OMEGARD,GARBAGE
 		-1DNADR	RADMODES			# RADMODES,DAPBOOLS	COMMON DATA
 
 LMORBM05	2DNADR	OMEGAP				# OMEGAP,OMEGAQ,OMEGAR,GARBAGE
-		2DNADR	CDUXD				# CDUXD,CDUYD,CDUZD,GARBAGE
+		2DNADR	CDUXD				# CDUXD,CDUXD,CDUZD,GARBAGE
 		2DNADR	CDUX				# CDUX,CDUY,CDUZ,CDUT
 		1DNADR	ALPHAQ				# ALPHAQ,ALPHAR		COMMON DATA
 		1DNADR	POSTORKP			# POSTORKP,NEGTORKP

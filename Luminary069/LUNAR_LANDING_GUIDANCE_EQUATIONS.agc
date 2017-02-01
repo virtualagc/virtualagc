@@ -1,8 +1,9 @@
+### FILE="Main.annotation"
 ## Copyright:   Public domain.
 ## Filename:    LUNAR_LANDING_GUIDANCE_EQUATIONS.agc
 ## Purpose:     The main source file for Luminary revision 069.
 ##              It is part of the source code for the original release
-##              of the source code for the Lunar Module's (LM) Apollo
+##              of the flight software for the Lunar Module's (LM) Apollo
 ##              Guidance Computer (AGC) for Apollo 10. The actual flown
 ##              version was Luminary 69 revision 2, which included a
 ##              newer lunar gravity model and only affected module 2.
@@ -17,6 +18,12 @@
 ## Mod history: 2016-12-13 MAS  Created from Luminary 99.
 ##              2016-12-18 MAS  Updated from comment-proofed Luminary 99 version.
 ##              2017-01-07 HG   Transcribed
+##              2017-01-23 HG   Add missing statement TS L
+##                              Fix operator CS -> TC
+##                                           INDEX -> CCS
+##                              Fix interpretive operator STODL -> STORE
+##		2017-01-28 RSB	Proofed comment text using octopus/prooferComments
+##				and fixed errors found.
 
 ## Page 802
                 EBANK=          E2DPS
@@ -35,7 +42,7 @@
 #                                                  WCHPHASE  =   3  --->  APPRLING
 #                                                  WCHPHASE  =   4  --->  VERTICAL
 
-#****************************************************************************************************************
+# ***************************************************************************************************************
 
 # ROUTINES FOR STARTING NEW GUIDANCE PHASES:
 
@@ -156,7 +163,7 @@ DEC66           DEC             66
                 CAF             ZERO
                 TS              RODCOUNT
 VRTSTART        TS              WCHVERT
-                CAF             FOUR                    # WCHPHASE = 4 ---> VERTICAL: P65,P66,P67
+                CAF             FOUR                    # WCHPHASE = 4 --> VERTICAL: P65,P66,P67
                 TS              WCHPHOLD
                 TS              WCHPHASE
                 TC              BANKCALL                # TEMPORARY, I HOPE HOPE HOPE
@@ -173,7 +180,7 @@ STARTP67        TC              NEWMODEX                # NO HARM IN "STARTING" 
                 DEC             67                      #   SO NO NEED FOR A FASTCHNG AND NO NEED
 
 ## Page 805
-                CAF             TEN                     #   TO SEE IF ALREADY IN P67.
+                CAF             TEN                     #   TO SEE IF ALREADY IN P67
                 TCF             VRTSTART
 
 STABL?          CAF             BIT13                   # IS UN-ATTITUDE-HOLD DISCRETE PRESENT?
@@ -181,7 +188,7 @@ STABL?          CAF             BIT13                   # IS UN-ATTITUDE-HOLD DI
                 RAND            CHAN31
                 CCS             A
                 TCF             GUILDRET                # YES: ALL'S WELL
-P66NOW?         CS              CHECKMM                 # NO:  SRE WE IN P66 NOW
+P66NOW?         TC              CHECKMM                 # NO:  ARE WE IN P66 NOW?
                 DEC             66
                 TCF             STARTP66                # NO
 
@@ -243,9 +250,9 @@ STARTP64        CAF             DELTTFAP                # AUGMENT TTF/8 (TWO-PHA
                 ADRES           REDFLAG
                 TCF             COMSTART
 
-#*****************************************************************************************************************
+# ****************************************************************************************************************
 # SET LINEAR GUIDANCE COEFFICIENTS
-#*****************************************************************************************************************
+# ****************************************************************************************************************
 
 LINSET?         CA              FLAGWRD6                # ONE-PHASE OR TWO-PHASE?
                 MASK            2PHASBIT
@@ -298,7 +305,7 @@ TTFINCR         TC              INTPRET
                                 NORMUNIT
                 VXSC            VSL1
                                 /LAND/
-                STODL           LANDTEMP
+                STORE           LANDTEMP
                 VSU             ABVAL
                                 R
                 STODL           RANGEDSP
@@ -546,9 +553,9 @@ TTF/8CL         TC              INTPRETX
 
 #                                              (CONTINUE TO QUADGUID)
 
-# ***************************************************************************************************************
+# ****************************************************************************************************************
 # MAIN GUIDANCE EQUATION
-# ***************************************************************************************************************
+# ****************************************************************************************************************
 
 #                      AS PUBLISHED:-
 
@@ -567,7 +574,7 @@ TTF/8CL         TC              INTPRETX
 #                                                 TTF/8
 
 QUADGUID        CAF             30SEC*17                # PULSE-OUTS ARE INHIBITED WHENEVER
-                AD              TTF/8                   #   TTF < 30 SECONDS, REGRDLESS OF
+                AD              TTF/8                   #   TTF < 30 SECONDS, REGARDLESS OF
                 EXTEND                                  #   THE DURATION OF LINEAR GUIDANCE
                 BZMF            Q**DG**D
                 TC              UPFLAG
@@ -587,7 +594,7 @@ Q**DG**D        TC              INTPRETX
 ## Page 813
                                 3/4DP
 AFCCALC         VAD*
-                                ADG,1                   # CURRENT TARGET ACCELERATIONS
+                                ADG,1                   # CURRENT TARGET ACCELERATION
                 STORE           ACG
 AFCCALC1        VXM             VSL1                    # VERTGUID COMES HERE
                                 CG
@@ -597,7 +604,7 @@ AFCCALC1        VXM             VSL1                    # VERTGUID COMES HERE
                 BVSU            STADR
                 STORE           UNFC/2                  # UNFC/2 NEED NOT BE UNITIZED
                 ABVAL
-AFCCALC2        STODL           /AFC/                   # MAGNITUDE OF AFC FOR THROTTLE
+AFCCALC2        STORE           /AFC/                   # MAGNITUDE OF AFC FOR THROTTLE
                 BON             DLOAD
                                 2PHASFLG
                                 AFCCLEND
@@ -663,7 +670,7 @@ CGCALC          TC              INTPRET
 
 # DECIDE (1) HOW TO EXIT, AND (2) WHETHER TO SWITCH PHASES
 
-EXTLOGIC        INDEX           WCHPHASE
+EXTLOGIC        CCS             WCHPHASE
                 INDEX           A                       # WCHPHASE = +2    APPRQUAD    A = 1
                 CA              TENDBRAK                # WCHPHASE = +0    BRAKQUAD    A = 0
                 TCF             EXSPOT1         -1      # WCHPHASE = -1    IGNALG      A = 0
@@ -792,7 +799,7 @@ EXOVFLOW        TC              ALARM                   # SOUND THE ALARM NON-AB
 
 RATESTOP        TC              BANKCALL                # CLEAN UP AFTER LAST FINDCDUW
 
-# Page 817
+## Page 817
                 CADR            STOPRATE
 
                 TCF             DISPEXIT
@@ -814,7 +821,7 @@ DISPEXIT        EXTEND                                  # KILL GROUP 3:  DISPLAY
                 DCA             NEG0                    #   RESTORED BY NEXT GUIDANCE CYCLE
                 DXCH            -PHASE3
 
-                CS              FLAGWRD8                # IF FLUNDISP IS SET, NO DISPLAY THIS PASS
+                CS              FLAGWRD8                # IF FLUNDISP SET, NO DISPLAY THIS PASS
                 MASK            FLUNDBIT
                 EXTEND
                 BZF             ENDLLJOB                # TO PICK UP THE TAG
@@ -880,9 +887,9 @@ VERTGUID        CCS             WCHVERT
 
 #          THE P65 GUIDANCE EQUATION IS AS FOLLOWS:-
 
-#                            -          -
-#                     -      VDGVERT -  VGU
-#                     ACG = --------------  , WHERE VDGVERT = (-3FPS,0,0)
+#                           -         -
+#                     -     VDGVERT - VGU	   -
+#                     ACG = -------------  , WHERE VDGVERT = (-3FPS,0,0)
 #                              TAUVERT
 
 P65VERT         EXTEND                                  # NEGATIVE
@@ -903,11 +910,11 @@ P65VERT         EXTEND                                  # NEGATIVE
 
 #          THE R.O.D. EQUATION IS AS FOLLOWS:-
 
-#                            (VDGVERT - VGUX)/TAUVERT - GMOON
-#                    /AFC/ = --------------------------------
-#                                     UNIT/R/ . XNB
+#                            (VDGVERTX - VGUX)/TAUVERT - GMOON
+#                    /AFC/ = ---------------------------------
+#                                      UNIT/R/ . XNB
 
-P66VERT         XCH             RODCOUNT                # RESTAT COULD CAUSE RODCOUNTS TO BE LOST
+P66VERT         XCH             RODCOUNT                # RESTART COULD CAUSE RODCOUNTS TO BE LOST
                 EXTEND
                 MP              +1FPS
                 DAS             VDGVERT
@@ -1079,7 +1086,7 @@ DESCBITS        MASK            BIT7                    # COME HERE FROM MARKRUP
 #                                         LOC+2    SP     PRECROOT         PREC RQD OF ROOT (AS FRACT OF 1ST GUESS)
 
 # THE DP RESULT IS LEFT IN MPAC UPON EXIT, AND A SP COUNT OF THE ITERATIONS TO CONVERGENCE IS LEFT IN MPAC+2.
-# RETURN IS NORMALLY TO LOC(TC ROOTPSRS)+3.   IF ROOTPSRS FAILS TO CONVERGE IN 8 PASSES, RETURN IS TO LOC+1 AND
+# RETURN IS NORMALLY TO LOC(TC ROOTPSRS)+3.   IF ROOTPSRS FAILS TO CONVERGE IN 32 PASSES, RETURN IS TO LOC+1 AND
 # OUTPUTS ARE NOT TO BE TRUSTED.
 
 #          PRECAUTION: ROOTPSRS MAKES NO CHECKS FOR OVERFLOW OR FOR IMPROPER USAGE. IMPROPER USAGE COULD
@@ -1209,9 +1216,9 @@ ROOTSTOR        DXCH            ROOTPS
 
 DERTABLL        ADRES           DERCOFN         -3
 
-# *****************************************************************************************************************
+# ****************************************************************************************************************
 # TRASHY LITTLE SUBROUTINES
-# *****************************************************************************************************************
+# ****************************************************************************************************************
 
 INTPRETX        INDEX           WCHPHASE                # SET X1 ON THE WAY TO THE INTERPRETER
                 CS              TARGTDEX
@@ -1228,6 +1235,7 @@ TDISPSET        CA              TTF/8
                 CA              TTF/8
                 EXTEND
                 MP              SCTTFDSP
+                TS              L
                 AD              99+LINT
                 EXTEND
                 BZMF            +11
@@ -1304,7 +1312,7 @@ TSCALINV        =               BIT4
 -LINT           DEC             -20
 
 
-SCTTFDSP        DEC             .08                     # RESCLES DEOM 2(-17) CS TO WHOLE SECONDS
+SCTTFDSP        DEC             .08                     # RESCALES FROM 2(-17) CS TO WHOLE SECONDS
 
 
 ## Page 827

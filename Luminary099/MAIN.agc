@@ -9,6 +9,7 @@
 # Website:	www.ibiblio.org/apollo/index.html
 # Mod history:	2009-05-05 RSB	Adapted from Luminary131/MAIN.agc.
 #		2016-11-03 RSB	Removed duplicate page #1.
+#		2017-01-28 RSB	Renamed STABLE_ORBIT.agc.
 #
 # The contents of the "Luminary099" files, in general, are
 # transcribed from a digital images created from a hardcopy of the program
@@ -108,7 +109,7 @@ $P34-P35,_P74-P75.agc				        # pp. 658-702
 $R31.agc					        # pp. 703-708
 $P76.agc					        # pp. 709-711
 $R30.agc					        # pp. 712-722
-$STABLE_ORBIT.agc				        # pp. 723-730
+$STABLE_ORBIT_-_P38-P39.agc			        # pp. 723-730
 $BURN,_BABY,_BURN_--_MASTER_IGNITION_ROUTINE.agc	# pp. 731-751
 $P40-P47.agc					        # pp. 752-784
 $THE_LUNAR_LANDING.agc				        # pp. 785-792

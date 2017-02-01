@@ -1,10 +1,11 @@
+### FILE="Main.annotation"
 ## Copyright:   Public domain.
 ## Filename:    P70-P71.agc
 ## Purpose:     The main source file for Luminary revision 069.
-##              It is part of the source code for the original release 
-##              of the source code for the Lunar Module's (LM) Apollo 
-##              Guidance Computer (AGC) for Apollo 10. The actual flown 
-##              version was Luminary 69 revision 2, which included a 
+##              It is part of the source code for the original release
+##              of the flight software for the Lunar Module's (LM) Apollo
+##              Guidance Computer (AGC) for Apollo 10. The actual flown
+##              version was Luminary 69 revision 2, which included a
 ##              newer lunar gravity model and only affected module 2.
 ##              This file is intended to be a faithful transcription, except
 ##              that the code format has been changed to conform to the
@@ -17,6 +18,15 @@
 ## Mod history: 2016-12-13 MAS  Created from Luminary 99.
 ##              2016-12-18 MAS  Updated from comment-proofed Luminary 99 version.
 ##		2017-01-09 RRB	Updated for Luminary 69.
+##              2017-01-20 HG   Fix pseudo code 2CARD -> 2CADR
+##              2017-01-21 HG   Fix operand XDEVLFLG -> XDELVFLG
+##              2017-01-22 HG   commented statements. Looks like code but are type A comments
+##                              Add missing statements  TC    DOWNFLAG
+##                                                      ADRES AVEGFLAG
+##                                                      STOVL   RTIG
+##                                                              VN1
+##		2017-01-28 RSB	Proofed comment text using octopus/prooferComments
+##				and fixed errors found.
 
 ## Page 829
 		BANK	21
@@ -45,7 +55,7 @@ R10,R11A	CS	IMODES33	# IF LAMP TEST, DO NOT CHANGE LR LITES.
 		EXTEND
 		BZF	10,11
 
-FLASHH?		MASK	FLGWRD11	# C(A) = 1 - HFLASH BIT
+FLASHH?		MASK	FLGWRD11	# C(A) = 1 = HFLASH BIT
 		EXTEND
 		BZF	FLASHV?		# H FLASH OFF, SO LEAVE ALONE
 
@@ -252,16 +262,16 @@ P70INIT		TC	INTPRET
 			COMMINIT
 INJTARG		GOTO			# *** BYPASS ZONE 0 ***
 			UPTHROT		# *** BYPASS ZONE 0 ***
-		DLOAD	DSU
-			TGO
-			50SECS
-		BPL	EXIT
-			UPTHROT
+#		DLOAD	DSU
+#			TGO
+#			50SECS
+#		BPL	EXIT
+#			UPTHROT
 
 		TC	CHECKMM
 		DEC	70
 		CAF	DEC299		# P71.  DELAY 3 SECONDS.
-		AD	BIT1		# P70.  DELAY ONE CENTISECOND
+		AD	BIT1		# P70.  DELAY 1 CENTISECOND.
 		TS	ENGOFFDT
 		TC	TWIDDLE
 		ADRES	ZONEZERO
@@ -270,7 +280,7 @@ INJTARG		GOTO			# *** BYPASS ZONE 0 ***
 		OCT	47014
 		-GENADR	ENGOFFDT
 		EBANK=	DVCNTR
-		2CARD	ZONEZERO
+		2CADR	ZONEZERO
 ## Page 834
 		TCF	ENDOFJOB
 
@@ -280,6 +290,9 @@ ZONEZERO	TC	IBNKCALL
 		CAF	ZERETAD
 		TS	OUTROUTE
 
+                TC      DOWNFLAG
+                ADRES   AVEGFLAG
+                
 		TC	DOWNFLAG
 		ADRES	V37FLAG
 
@@ -352,11 +365,13 @@ PREBRET1	EXIT
 		ABVAL
 		STOVL	DELVSAB
 			RN1
+                STOVL   RTIG
+                        VN1
 		STODL	VTIG
 			PIPTIME1
 		STORE	TIG
 		SET	CLEAR
-			XDEVLFLG
+			XDELVFLG
 			LETABORT
 		EXIT
 
@@ -371,7 +386,7 @@ PREBRET1	EXIT
 		TS	AGSWORD
 
 		TC	CHECKMM
-		DEC	70		# FOR MODE=70,USE P40,OTHERWISE P42.
+		DEC	70		# FOR MODE=70,USE P40,OTHERWISE P42
 		TCF	42SET
 40SET		CAF	P40CADR
 		TS	CADRSAVE
@@ -472,7 +487,7 @@ TGOCOMP		RTB	DSU
 		STORE	TGO
 		RVQ
 
-# ************************************************************************
+#  ************************************************************************
 
 THROTUP		CAF	BIT13
 		TS	THRUST
@@ -481,7 +496,7 @@ THROTUP		CAF	BIT13
 		WOR	CHAN14
 		TC	Q
 
-# ************************************************************************
+# *************************************************************************
 
 DEC299		DEC	299
 

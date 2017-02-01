@@ -18,6 +18,7 @@
 ##				237 and Comanche 55 source-code files
 ##				and corrected errors found.  No differences
 ##				remained afterward.
+##		2017-01-28 RSB	WTIH -> WITH.
 ##
 ## The contents of the "Colossus249" files, in general, are transcribed 
 ## from a scanned copy of the program listing.  Notations on this
@@ -104,7 +105,7 @@ INCRDCDU	TS	KSPNDX
 		
 		RELINT
 		
-# COMPARE PRESENT TIME WTIH TIME TO TERMINATE MANEUVER
+# COMPARE PRESENT TIME WITH TIME TO TERMINATE MANEUVER
 
 TMANUCHK	TC	TIMECHK
 		TCF	CONTMANU

@@ -14,6 +14,8 @@
 ##				and corrected errors found.
 ##		2017-01-07 RSB	Fixed comment errors detected in cross-diff vs
 ##				Colossus 249.
+##		2017-01-21 RSB	Back-ported a comment-text fix identified while
+##				proofing Artemis 72.
 
 ## Page 1
 
@@ -876,7 +878,7 @@
 # 00401	   DESIRED GIMBAL ANGLES YIELD GIMBAL LOCK   IMF ALIGN, IMU-2			  ALARM
 # 00404	   TARGET OUT OF VIEW - TRUN ANGLE > 90 DEG  R52				  PRIOLARM
 # 00405	   TWO STARS NOT AVAILABLE		     P52,P54				  ALARM
-# 00406	   REND NAVIGATION NOT OPERATING	     P21,R23				  ALARM
+# 00406	   REND NAVIGATION NOT OPERATING	     R21,R23				  ALARM
 # 00407	   AUTO OPTICS REQUEST TRUN ANGLE > 50 DEG.  R52				  ALARM
 # 00420	   THIRD CALL TO ORBITAL INTEGRATION	     ALL CALLS TO INTEG			  ?
 # 00421	   W-MATRIX OVERFLOW			     INTEGRV				  ALARM
