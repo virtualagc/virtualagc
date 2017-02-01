@@ -13,10 +13,9 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-01-22 MAS  Created from Luminary 99.
+##              2017-02-01 RRB  Updated for Luminary 116.
 
-## NOTE: Page numbers below have not yet been updated to reflect Luminary 116.
-
-## Page 1421
+## Page 1411
                 BANK            16                              
                 SETLOC          DAPS1                           
                 BANK                                            
@@ -38,8 +37,8 @@ PAXIS           CA              MS100
 # CHECK IF DAP PASS IS PERMISSIBLE
 
                 CCS             DAPZRUPT                        # IF DAPZRUPT POSITIVE, DAP (JASK) IS
-                TC              BAILOUT                         # STILL IN PROGRESS AND A RESTART IS
-                OCT             02000                           # CALLED FOR.  IT IS NEVER ZERO.
+                TC              BAILOUT                         #    STILL IN PROGRESS AND A RESTART IS
+                OCT             02000                           #   CALLED FOR.  IT IS NEVER ZERO.
 
                 TC              CHEKBITS                        # RETURN IS TC I+1 IF DAP SHOULD STAY ON.
 
@@ -68,7 +67,7 @@ PAXIS           CA              MS100
                 CA              CDUZD                           
                 EXTEND                                          
                 MSU             DELCDUZ                         
-## Page 1422
+## Page 1412
                 TC              1STOTWOS                        
                 TS              CDUZD                           
                 EXTEND                                          # DIMINISH MANUAL CONTROL DIRECT RATE
@@ -77,11 +76,11 @@ PAXIS           CA              MS100
                 DIM             TCQR                            
 
 # RATFLOOP COMPUTES JETRATEQ, JETRATER, AND 1JACC*NO. PJETS IN ITEMP1.
-# RETURNS TO BACKP.
+#   RETURNS TO BACKP.
 
-# JETRATE = 1JACC*NO.PJETS*TJP          (NOTE TJ IS THE TIME FIRED DURING CSP)
-# JETRATEQ = 1JACCQ(TJU*NO.UJETS - TJV*NO.VJETS)
-# JETRATER = 1JACCR(TJU*NO.UJETS + TJV*NO.VJETS)
+#   JETRATE = 1JACC*NO.PJETS*TJP   (NOTE TJ IS THE TIME FIRED DURING CSP)
+#   JETRATEQ = 1JACCQ(TJU*NO.UJETS - TJV*NO.VJETS)
+#   JETRATER = 1JACCR(TJU*NO.UJETS + TJV*NO.VJETS)
 
                 TCF             PAXFILT                         # PROCEEDS TO RATELOOP AFTER SUPERJOB
 1STOTWOS        CCS             A                               
@@ -90,8 +89,8 @@ PAXIS           CA              MS100
                 CS              A                               
                 TC              Q                               
 SUBDIVDE        EXTEND                                          # OVERFLOW PROCTION ROUTINE TO GIVE
-                MP              DAPTEMP3                        # POSMAX OR NEGMAX IF THE DIVIDE WOULD
-                DAS             OMEGAU                          # OVERFLOW
+                MP              DAPTEMP3                        #   POSMAX OR NEGMAX IF THE DIVIDE WOULD
+                DAS             OMEGAU                          #   OVERFLOW
 
  +3             EXTEND                                          
                 DCA             OMEGAU                          
@@ -115,10 +114,10 @@ DIVIDER         DXCH            OMEGAU
                 TC              Q                               
 
 OVERSUB         TS              7                               # RETURNS A UNCHANGED OR LIMITED TO
-                TC              Q                               # POSMAX OR NEGMAX IF A HAS OVERFLOW
+                TC              Q                               #   POSMAX OR NEGMAX IF A HAS OVERFLOW
                 INDEX           A                               
                 CS              BIT15           -1              
-## Page 1423
+## Page 1413
                 TC              Q                               
 
 -OCT630         OCT             77147                           
@@ -129,13 +128,14 @@ BACKP           CA              DAPTEMP1
                 TS              JETRATE                         
 
 # BEGINNING OF THE RATE DERIVATION
-#       OMEGAP,Q,R      BODY RATES SCALED AT PI/4
-#       TRAPER,Q,R      BODY ANGLE ERRORS FROM PREDICTED ANGLE (PI/40)
-#       NP(QR)TRAPS     NUMBER OF TIMES ANGLE ERROR HAS BEEN ACCUMULATED
-#       AOSQ(R)TERM     CHANGE IN RATE DUE TO OFFSET ACCELLERATION.  (PI/4)
-#       JETRATE,Q,R     CHANGE IN RATE DUE TO  JET   ACCELLERATION.  (PI/4)
-#       TRAPSIZE        NEGATIVE LIMIT OF MAGNITUDE OF TRAPEDP, ECT.
-#       OMEGAU          DP-TEMPORARY STORAGE
+# OMEGAP,Q,R      BODY RATES SCALED AT PI/4
+# TRAPER,Q,R      BODY ANGLE ERRORS FROM PREDICTED ANGLE (PI/40)
+# NP(QR)TRAPS     NUMBER OF TIMES ANGLE ERROR HAS BEEN ACCUMULATED
+# AOSQ(R)TERM     CHANGE IN RATE DUE TO OFFSET ACCELLERATION.  (PI/4)
+# JETRATE,Q,R     CHANGE IN RATE DUE TO  JET   ACCELLERATION.  (PI/4)
+# TRAPSIZE        NEGATIVE LIMIT OF MAGNITUDE OF TRAPEDP, ECT.
+# OMEGAU          DP-TEMPORARY STORAGE
+
 # OMEGA = OMEGA + JETRATE + AOSTERM (+TRAPED/NTRAPS IF TRAPED BIG)
 
                 CAE             DAPTREG4                        # CDUX IS STORED HERE
@@ -169,7 +169,7 @@ BACKP           CA              DAPTEMP1
                 TS              DAPTEMP2                        
                 EXTEND                                          
                 MP              M11                             # M11 SCALED AT 1
-## Page 1424
+## Page 1414
                 AD              DAPTEMP1                        
                 DXCH            OMEGAU                          
 
@@ -219,7 +219,7 @@ BACKP           CA              DAPTEMP1
                 CA              M32                             
 
                 TC              SUBDIVDE                        
-## Page 1425
+## Page 1415
                 EXTEND                                          
                 SU              OMEGAR                          
                 ADS             TRAPEDR                         
@@ -270,7 +270,7 @@ P-RATE          CA              JETRATE
                 TS              OMEGAP                          
 
                 CCS             TRAPEDQ                         
-## Page 1426
+## Page 1416
                 TCF             +2                              
                 TCF             Q-RATE                          
                 AD              DAPTREG6                        # TRAPSIZE > ABOUT 77001 %-1.4DEG/SEC"
@@ -321,7 +321,7 @@ Q-RATE          INCR            NQTRAPS
                 AD              DAPTREG5                        # KAOS > ABOUT 60D %N/N_60"
                 XCH             DAPTEMP2                        
                 EXTEND                                          
-## Page 1427
+## Page 1417
                 MP              FIVE                            
                 EXTEND                                          
                 DV              DAPTEMP2                        
@@ -334,9 +334,12 @@ R-RATE          INCR            NRTRAPS
                 TS              OMEGAR                          
 
 # END OF RATE DERIVATION
-#       BEGIN OFFSET ESTIMATER
-#               IN POWERED FLIGHT, AOSTASK WILL BE CALLED EVERY 2 SECONDS.
-#                       AOS = AOS + K*SUMRATE
+
+#  BEGIN OFFSET ESTIMATER
+
+#   IN POWERED FLIGHT, AOSTASK WILL BE CALLED EVERY 2 SECONDS.
+
+#   AOS = AOS + K*SUMRATE
 
                 CS              DAPBOOLS                        
                 MASK            DRIFTBIT                        
@@ -370,7 +373,7 @@ WORKTIME        CA              QACCDOT
                 TS              AOSRTERM                        
                 TCF             PRETIMCK                        
 
-## Page 1428
+## Page 1418
 PAXFILT         CA              CALLGMBL                        # EXECUTE ACDT+C12, IF NEEDED.
                 MASK            RCSFLAGS                        
                 CCS             A                               # CALLGMBL IS NOT BIT15, SO THIS TEST IS
@@ -386,7 +389,7 @@ PAXFILT         CA              CALLGMBL                        # EXECUTE ACDT+C
                 DXCH            ZRUPT                           
                 DXCH            DAPZRUPT                        
                 TCF             NOQBRSM         +1              # RELINT (JUST IN CASE) AND RESUME, IN THE
-                                                                #       FORM OF A JASK, AT SUPERJOB.
+                                                                #   FORM OF A JASK, AT SUPERJOB.
 
 SUPERADR        GENADR          SUPERJOB        +1              
 
@@ -420,7 +423,7 @@ TURNOFFQ        TS              NEGUQ                           # HALT DRIVES.
                 TS              QACCDOT                         
                 CS              QGIMBITS                        
                 EXTEND                                          
-## Page 1429
+## Page 1419
                 WAND            CHAN12                          
                 CAF             NEGMAX                          
                 TS              QGIMTIMR                        
@@ -443,16 +446,18 @@ SKIPPAXS        CS              RCSFLAGS
 
 # Y-Z TRANSLATION
 
-# INPUT:        BITS 9-12 OF CH31 (FROM TRANSLATION CONTROLER)
+# INPUT:  BITS 9-12 OF CH31 (FROM TRANSLATION CONTROLER)
 
-# OUTPUT:       NEXTP
+# OUTPUT: NEXTP
 
-#               NEXTP IS THE CHANNEL 6 CODE OF JETS FOR THE DESIRED TRANSLATION.
-#               IF THERE ARE FAILURES IN THE DESIRED POLICY, THEN
-#               (1) FOR DIAGONAL TRANS:         UNFAILED PAIR
-#                                               ALARM (IF NO PAIR)
-#               (2) FOR PRINCIPAL TRANS:        TRY TO TACK WITH DIAGONAL PAIRS
-#                                               ALARM (IF DIAGONAL PAIRS ARE FAILED)
+#   NEXTP IS THE CHANNEL 6 CODE OF JETS FOR THE DESIRED TRANSLATION.
+#   IF THERE ARE FAILURES IN THE DESIRED POLICY, THEN
+
+#      (1) FOR DIAGONAL TRANS:  UNFAILED PAIR
+#                               ALARM (IF NO PAIR)
+
+#      (2) FOR PRINCIPAL TRANS: TRY TO TACK WITH DIAGONAL PAIRS
+#                               ALARM (IF DIAGONAL PAIRS ARE FAILED)
 
 CHKVISFZ        EXTEND                                          
                 READ            CHAN31                          
@@ -470,7 +475,7 @@ TRYUORV         CA              SIX
                 CS              SIX                             
                 AD              NUMBERT                         
                 EXTEND                                          
-## Page 1430
+## Page 1420
                 BZF             TSNEXTP         -1              
                 CS              FIVE                            
                 AD              ROTINDEX                        
@@ -502,11 +507,11 @@ ALTERYZ         CA              BIT1                            # INVERT BIT 1 O
 TSNEXTP         TS              NEXTP                           
 
 # STATE LOGIC
-#       CHECK IN ORDER:         IF ON
-#       LPDPHASE                GO TO PURGENCY
-#       PULSES                  MINIMUM PULSE LOGIC
-#       DETENT(BIT15 CH31)      RATE COMMAND
-#       GO TO PURGENCY
+#  CHECK IN ORDER:           IF ON
+#    LPDPHASE                GO TO PURGENCY
+#    PULSES                  MINIMUM PULSE LOGIC
+#    DETENT(BIT15 CH31)      RATE COMMAND
+#    GO TO PURGENCY
 
                 CA              BIT13                           # CHECK STICK IF IN ATT. HOLD.
                 EXTEND                                          
@@ -522,7 +527,7 @@ TSNEXTP         TS              NEXTP
                 TCF             DETENTCK                        
 MANMODE         CA              PULSES                          # PULSES IS ONE FOR PULSE MODE
                 MASK            DAPBOOLS                        
-## Page 1431
+## Page 1421
                 EXTEND                                          
                 BZF             DETENTCK                        # BRANCH FOR RATE COMMAND
 
@@ -559,26 +564,25 @@ CHECKP          EXTEND
                 TCF             JETSOFF                         
 
 -XMIN           CS              TEN                             # ANYTHING LESS THAN 14MS. CORRECTED
-                TCF             +2                              #       IN JET SELECTION ROUTINE
+                TCF             +2                              #   IN JET SELECTION ROUTINE
 +XMIN           CA              TEN                             
                 TS              TJP                             
                 CA              ONE                             
                 TS              OLDPMIN                         
                 TCF             PJETSLEC        -6              
 
-#                                       MANUAL RATE COMMAND MODE
-#                                       ========================
-#                                         BY ROBERT F. STENGEL
+#                  MANUAL RATE COMMAND MODE
+#                  ========================
+#                    BY ROBERT F. STENGEL
 
-# THIS MODE PROVIDES RCAH MANUAL CONTROL THRU 2 CONTROL LAWS:  1) DIRECT RATE AND 2) PSEUDO-AUTO.
-# THE DIRECT RATE MODE AFFORDS IMMEDIATE CONTROL WITHOUT OVERSHOOT.  THE PSEUDO-AUTO MODE PROVIDES PRECISE
+# THIS MODE PROVIDES RCAH MANUAL CONTROL THRU 2 CONTROL LAWS:                    1) DIRECT RATE AND 2) PSEUDO-AUTO.
+# THE DIRECT RATE MODE AFFORDS IMMEDIATE CONTROL WITHOUT OVERSHOOT. THE PSEUDO-AUTO MODE PROVIDES PRECISE
 # RATE CONTROL AND ATTITUDE HOLD.
 
 ## Page 1432
 # IN DIRECT RATE, JETS ARE FIRED WHEN STICK POSITION CHANGES BY A FIXED NUMBER OF INCREMENTS IN ONE DAP CYCLE.
-# THE 'BREAKOUT LEVEL' IS .6 D/S FOR LM-ONLY AND .3 D/S FOR CSM-DOCKED.  THIS LAW NULLS THE RATE ERROR TO WITHIN
+# THE 'BREAKOUT LEVEL' IS .6 D/S FOR LM-ONLY AND .3 D/S FOR CSM-DOCKED. THIS LAW NULLS THE RATE ERROR TO WITHIN
 # THE 'TARGET DEADBAND', WHICH EQUALS THE BREAKOUT LEVEL.
-
 # IN PSEUDO-AUTO, BODY-FIXED RATE AND ATTITUDE ERRORS ARE SUPPLIED TO TJETLAW, WHICH EXERCISES CONTROL.
 # CONTROL SWITCHES FROM DIRECT RATE TO PSEUDO-AUTO IF THE TARGET DB IS ACHIEVED OR IF TIME IN (1) EXCEEDS 4 SEC.
 # IF THE INITIAL COMMAND DOES NOT EXCEED THE BREAKOUT LEVEL, CONTROL GOES TO PSEUDO-AUTO IMMEDIATELY.
@@ -587,9 +591,9 @@ CHECKP          EXTEND
 # OR VICE VERSA.  THIS ALLOWS A DEGREE OF ATTITUDE HOLD IN UNCONTROLLED AXES.  DUE TO U,V CONTROL, HOWEVER, Q AND
 # R AXES ARE COUPLED AND MUST USE THE SAME CONTROL LAW.
 
-# HAND CONTROLLER COMMANDS ARE SCALED BY A LINEAR/QUADRATIC LAW.  FOR THE LM-ALONE, MAXIMUM COMMANDED RATES ARE 20
+# HAND CONTROLLER COMMANDS ARE SCALED BY A LINEAR/QUADRATIC LAW. FOR THE LM-ALONE, MAXIMUM COMMANDED RATES ARE 20
 # AND 4 D/S IN NORMAL AND FINE SCALING; HOWEVER, STICK SENSITIVITY AT ZERO COUNTS (OBTAINED AT A STICK DEFLECTION
-# OF 2 DEGREES FROM THE CENTERED POSITION) IS .5 OR .1 D/S PER DEGREE.  NORMAL AND FINE SCALINGS FOR THE CSM-DOCKED
+# OF 2 DEGREES FROM THE CENTERED POSITION) IS .5 OR .1 D/S PER DEGREE. NORMAL AND FINE SCALINGS FOR THE CSM-DOCKED
 # CASE IS AUTOMATICALLY SET TO 1/10 THE ABOVE VALUES.  SCALING IS DETERMINED IN ROUTINE 3.
 
 # ZEROENBL      ENABLES COUNTERS SO THEY CAN BE READ NEXT TIME
@@ -629,7 +633,7 @@ RUTH            CA              RCSFLAGS
                 BZF             +2                              # BRANCH IF P-RATE DAMPING IS FINISHED.
                 TCF             RATEDAMP                        
 
-## Page 1433
+## Page 1423
                 CA              RCSFLAGS                        
                 MASK            QRBIT                           
                 EXTEND                                          
@@ -684,7 +688,7 @@ JUSTOUT         CA              OURRCBIT                        # INITIALIZATION
                 CA              PQRBIT                          
                 MASK            RCSFLAGS                        
                 TS              RCSFLAGS                        # BITS 10 AND 11 OF RCSFLAGS ARE 0.
-## Page 1434
+## Page 1424
                 CS              RCSFLAGS                        # SET 'JUST-IN' BIT TO 1.
                 MASK            BIT9                            
                 ADS             RCSFLAGS                        
@@ -696,7 +700,12 @@ ZEROENBL        LXCH            R-RHCCTR
                 CA              ZERO                            
                 TS              P-RHCCTR                        
                 TS              Q-RHCCTR                        
-                TS              R-RHCCTR                        
+                TS              R-RHCCTR
+                INHINT
+                EXTEND
+                QXCH            O13QSAV
+                TC              O13STALL
+                       
                 CA              BITS8,9                         
                 EXTEND                                          
                 WOR             CHAN13                          # COUNTERS ZEROED AND ENABLED
@@ -728,14 +737,14 @@ RATERROR        CA              CDUX                            # FINDCDUW REQUI
                 AD              PLAST                           
                 TS              DAPTEMP1                        
                 TC              ZEROENBL                        # INTERVAL.  ZERO AND ENABLE ACA COUNTERS.
+## Page 1425
                 CS              PLAST                           
                 AD              OMEGAP                          
                 TS              EDOTP                           
                 CCS             DAPTEMP1                        # IF P COMMAND CHANGE EXCEEDS BREAKOUT
-                TCF             +3                              # LEVEL, GO TO DIRECT RATE CONTROL.  IF NOT
+                TCF             +3                              # LEVEL, GO TO DIRECT RATE CONTROL. IF NOT
                 TCF             +8D                             # CHECK FOR DIRECT RATE CONTROL LAST TIME.
-                TCF             +1                              
-## Page 1435		
+                TCF             +1                              	
                 AD              -RATEDB                         
                 EXTEND                                          
                 BZMF            +4                              
@@ -766,7 +775,7 @@ PEGI            CA              CDUX                            # DIRECT RATE CO
                 EXTEND                                          # IF RATE ERROR IS LESS THAN DEADBAND,
                 BZMF            LAST                            # FIRE, AND SWITCH TO PSEUDO-AUTO.
                 CA              TCP                             
-                EXTEND                                          # IF TIME IN RATE COMMAND EXCEEDS 4 SEC..
+                EXTEND                                          # IF TIME IN RATE COMMAND EXCEEDS 4 SEC.,
                 BZMF            LAST                            
                 CS              RCSFLAGS                        
                 MASK            PBIT                            
@@ -778,6 +787,7 @@ LAST            CS              PBIT
                 CS              EDOTP                           
                 EXTEND                                          
                 MP              1/ANETP                         # 1/2JTACC SCALED AT 2EXP(7)/PI
+## Page 1426
                 DAS             A                               
                 TC              OVERSUB                         
                 EXTEND                                          
@@ -786,7 +796,6 @@ LAST            CS              PBIT
                 CA              ABSEDOTP                        
                 AD              -2JETLIM                        # COMPARING DELTA RATE WITH 2 JET LIMIT
                 EXTEND                                          
-## Page 1436
                 BZMF            +3                              
 
                 CA              SIX                             
@@ -815,7 +824,7 @@ LAST            CS              PBIT
 #       ALARM   ALARM
 
                 CA              AORBSYST                        
-                MASK            DAPBOOLS                        
+                MASK            FLAGWRD5                        
                 CCS             A                               
                 CA              ONE                             
                 AD              FOUR                            
@@ -829,7 +838,8 @@ PJETSLEC        CA              ONE
                 TCF             JETSOFF                         
                 ZL                                              
                 AD              ONE                             
-                TS              ABSTJ                           
+                TS              ABSTJ   
+## Page 1427                        
                 LXCH            ROTINDEX                        
                 TC              SELECTP                         
                 CS              SIX                             
@@ -838,8 +848,6 @@ PJETSLEC        CA              ONE
                 BZF             +2                              
 
                 CS              TWO                             
-
-## Page 1437
                 AD              FOUR                            
                 TS              NO.PJETS                        
                 CA              POLYTEMP                        
@@ -870,7 +878,7 @@ PJETSLEC        CA              ONE
                 TC              ALTSYST                         
                 TCF             QRAXIS                          
 
-ALTSYST         CA              DAPBOOLS                        # ALTERNATE P-AXIS JETS
+ALTSYST         CA              FLAGWRD5                        # ALTERNATE P-AXIS JETS
                 TS              L                               
                 CA              AORBSYST                        
                 EXTEND                                          
@@ -881,7 +889,8 @@ ALTSYST         CA              DAPBOOLS                        # ALTERNATE P-AX
 
 DKALT           TC              ALTSYST                         
 
-JETSOFF         TC              WRITEP          -1              
+JETSOFF         TC              WRITEP          -1
+## Page 1428              
                 CA              ZERO                            
                 TS              TJP                             
                 TCF             QRAXIS                          
@@ -890,8 +899,7 @@ JETSOFF         TC              WRITEP          -1
 
 CALCPERR        CA              CDUY                            # P-ERROR CALCULATION.
                 EXTEND                                          
-                MSU             CDUYD                           # CDU VALUE - ANGLE DESIRED (Y-AXIS)
-## Page 1438		
+                MSU             CDUYD                           # CDU VALUE - ANGLE DESIRED (Y-AXIS)		
                 EXTEND                                          
                 MP              M11                             # (CDUY-CDUYD)M11 SCALED AT PI RADIANS
                 XCH             E                               # SAVE FIRST TERM (OF TWO)
@@ -926,22 +934,22 @@ PURGENCY        TC              CALCPERR                        # CALCULATE P-AX
                 EXTEND                                          
                 BZF             DKALT                           # IF TJP = ZERO, CHANGE AORBSYST.
                 RELINT                                          
-                TCF             PJETSLEC        -6              # SELECT AORBSYST AND USE TWO JETS
+                TCF             PJETSLEC        -6              #    SELECT AORBSYST AND USE TWO JETS
 HEADTJET        CA              ZERO                            
                 TS              SENSETYP                        
                 INHINT                                          
                 TC              IBNKCALL                        
                 CADR            TJETLAW                         
-                RELINT                                          
-
+                RELINT
+                                          
+## Page 1429
                 CS              FIREFCT                         
                 AD              -FOURDEG                        
                 EXTEND                                          
                 BZMF            PJETSLEC        -6              
                 CCS             TJP                             
                 TCF             +2                              
-                TCF             JETSOFF                         
-## Page 1439		
+                TCF             JETSOFF                         		
                 AD              -160MST6                        
                 EXTEND                                          
                 BZMF            PJETSLEC        -6              
@@ -950,12 +958,12 @@ HEADTJET        CA              ZERO
 -160MST6        DEC             -256                            
 -FOURDEG        DEC             -.08888                         
 
-## Page 1440
+## Page 1430
 # JET POLICY CONSTRUCTION SUBROUTINE
 
-# INPUT:        ROTINDEX, NUMBERT
+# INPUT: ROTINDEX, NUMBERT
 
-# OUTPUT:       POLYTEMP (JET POLICY)
+# OUTPUT: POLYTEMP (JET POLICY)
 
 # THIS SUBROUTINE SELECT A SUBSET OF THE DESIRED JETS WHICH HAS NO FAILURE
 
@@ -1002,12 +1010,12 @@ INDXYZ          =               -136MST6
                 DEC             10                              
                 OCT             07776                           
                 DEC             3                               
-## Page 1441
+## Page 1431
                 DEC             8                               
                 DEC             7                               
-                OCT             07776                           # THESE INDEXES OF MASK JETSALL WILL
+                OCT             07776                           # THESE INDEXES OF  MASK JETSALL WILL
                 OCT             07776                           # CHANGE THE INSTRUCTION AT SELECTP +4
-                OCT             07776                           # TO BE         TC JETSALL -1
+                OCT             07776                           # TO BE    TC  JETSALL -1
                 OCT             07776                           # ONLY USED FOR TRANSLATION FAILURE
                 OCT             07776                           
 +150MST6        DEC             240                             
