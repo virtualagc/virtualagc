@@ -7,6 +7,7 @@
 # Page scans:   https://archive.org/details/yulsystemsourcec00hugh
 # Pages:        631-671
 # Mod history:  2016-10-06 JL   Created.
+#               2017-02-01 JL   Transcribed pages 631-644.
 
 # Annotations:
 #
@@ -25,58 +26,527 @@ L      @YUL SYSTEM MANUFACTURING - BLK2
 # Page 631
 #      @YUL SYSTEM MANUFACTURING - BLK2                                          USER'S OWN PAGE NO.   1        PAGE  56
 
+R0001   WE ARE DEEPLY INDEBTED TO THE ONE, THE ONLY, THE GREAT JOHN SHAW FOR THE FOLLOWING STRONG MAGIC....
+R0003   JSOCTL
+
+
+
+ 0004              SETLOC,1     0             B2
+
+
+
+ 0005              MASKGRP,1    S,1           F,1
+
+
+
+R0006              THIS BLK2 MANUFACTURING PROGRAM IS LOADED IN RESPONSE TO A WELL-FORMED YUL DIRECTOR CARD SPECIFYING
+R0008   MANUFACTURING FOR A CORRECTLY ASSEMBLED BLK2 PROGRAM.  IT COMMUNICATES WITH SUBROUTINES IN PASS 0 AS WITH A
+R0010   MONITOR.  IT EXAMINES ONE OR MORE SUBDIRECTOR CARDS ("S" IN COLUMN 1) TO DETERMINE THE TASK REQUIRED.  SUBDIREC-
+R0012   TOR CARDS OBEY THE SAME SYNTACTICAL RULES AS DIRECTOR CARDS.  EXAMPLES OF ALL CURRENTLY AVAILABLE TYPES FOLLOW:
+
+R0014   S       PUNCH 36K CORE ROPE SIMULATOR TAPE
+R0015   S       PUNCH RAYTHEON WIRING TAPE
+R0016   S       PUNCH RAYTHEON TESTER TAPE
+R0017   S       PUNCH MASTER DECK
+R0018   S       PUNCH SYMBOL TABLE
+R0029  *S       PUNCH SYMBOL TABLE AND MASTER DECK
+R001901*S       PUNCH SIMULATION DECK
+
+R00191  S       COPY ONTO WORKER                                                (USED WITH COMPARE, BELOW).
+R00192  S       COMPARE PROGRAM PROGNAME FROM WORKER                            (PROGNAME IS NAME OF COPIED PROGRAM).
+
+R0020   FOR ALL TAPE PUNCHING A *USE* SUBDIRECTOR IS AVAILABLE.  SEE PAGE 23.
+
+R0021   FOR WIRING AND TESTER TAPE RUNS A *MODULE DECK NUMBERS* SUBDIRECTOR IS REQUIRED.  SEE PAGE 24.
+
+R0023   AN OPTIONAL FEATURE EXISTS FOR PRINTING OUT THE RESULTS OF A TAPE/CARD PUNCHING RUN AND/OR SUPPRESSING PUNCHING.
+R0025   SEE PAGE 30.
+
+R0026   FOR ALL TAPE PUNCHING A *PARAGRAPH* SUBDIRECTOR IS REQUIRED. SEE P 21.
+
+ 0027   BLK2  MANU TS           BANK 1        Z,X0          WHAT SUBD           THIS ORDER IS AT BASE ADDR. OF PROGRAM.
+
+R0029   MAIN PART OF PROGRAM FOLLOWS CONSTANTS, ETC.
 
 # Page 632
 #      @YUL SYSTEM MANUFACTURING - BLK2                                          USER'S OWN PAGE NO.   2        PAGE  57
 
+P0030   FIELD AND SHIFT MASKS FOR BLK2 MANUFACTURING.
+
+ 0031   B,D3D4     DEC          00GG
+ 0032   B,CHAR6    OCT          -77 0000
+ 0033   B,CHAR8    OCT          -77
+ 0034   B,C4T7     OCT          -7777777700
+ 0035   B,CHAR5    OCT          -77000000
+ 0036   B,LOADG    OCT          -101
+ 0037   B,B42      OCT          -100
+ 0038   B,B21T24   OCT          00000017
+ 0039   B,B14T24   OCT          00003777
+ 0040   B,C1T3     OCT          777777
+
+ 0041   B,C5T8     OCT          -77777777
+ 0042   B,C1T6     OCT          7777 7777 7777
+ 0043   B,CAC3     DEC          -GGGG
+ 0044   B,BIT MASK OCT          0
+ 0045   B,ONES     DEC          GGGG GGGG GGGG
+
+ 0046   B,ONE      DEC          -1
+ 0047   B,TWO      OCT          -2
+ 0048   B,THREE    DEC          -3
+ 0049   B,FOUR     DEC          -4
+ 0050   B,SEVEN    DEC          -7
+
+ 0051   B,EIGHT    DEC          -8
+
+ 0052   B,B44T48   OCT          -37
+ 0053   B,C1T4     OCT          77777777
+ 00532  B,C7T8     OCT          -7777
+ 00533  B,BANBITS  OCT          -760 0000
+ 00534 *B,B1T 7    OCT          004
 
 # Page 633
 #      @YUL SYSTEM MANUFACTURING - BLK2                                          USER'S OWN PAGE NO.   3        PAGE  58
 
+P0054   FURTHER SHIFT MASKS
+
+ 0057   S,C2T3     OCT          007777
+ 0058   S,C4578    OCT          -7777007777
+
+ 0060   S,D12      DEC          -G
+ 0061   S,CHAR1    OCT          77
+ 0063   S,D4T7     DEC          000GGGG
+ 0065   S,ACD2     OCT          0017
+
+ 0071   S,1 C5     OCT          -0100 0000
+ 0072   S,1 C6     OCT          -01 0000
+ 0074   S,ACO1     OCT          07
+ 0075   S,ACO2     OCT          0007
+ 0076   S,ACO3     OCT          000007
+ 0077   S,ACO4     OCT          00000007
+ 0078   S,ACO5     OCT          -700 0000
+ 0079   S,ACO6     OCT          -7 0000
+ 0080   S,ACO7     OCT          -700
+ 0081   S,C1T2     OCT          7777
+ 0082   S,CHAR3    OCT          000077
+ 0085   S,B45T47   OCT          -16
+ 0087   S,B43T47   OCT          -76
+ 0088   S,B41      OCT          -200
+ 0089   S,B12      OCT          0001
 
 # Page 634
 #      @YUL SYSTEM MANUFACTURING - BLK2                                          USER'S OWN PAGE NO.   4        PAGE  59
 
+P0091   ALPHABETIC CONSTANTS.
+
+ 009199*W BAD WORD ALF          BADWORD
+ 0092   BLANKS     ALF          
+ 0093   W NASA     ALF          NASA
+ 0094   W CORE     ALF          CORE
+ 0095   W ROPE     ALF          ROPE
+ 0096   W SMULATO  ALF,2        SIMULATOR
+ 0098   W TAPE     ALF          TAPE
+
+ 0099   W RATHEON  ALF          RAYTHEON
+ 0100   W WIRING   ALF          WIRING
+ 0101   W TESTER   ALF          TESTER
+ 0102   W ACM      ALF              ACM
+ 0107   W CARD OUT ALF,2        CARD OUTPUT SENT
+ 0108  *WSIMLATN   ALF,2        SIMULATION
+ 0111   W PAPER TA ALF,3        PAPER TAPE OUTPUT SENT
 
 # Page 635
 #      @YUL SYSTEM MANUFACTURING - BLK2                                          USER'S OWN PAGE NO.   5        PAGE  60
 
+P0112   ALPHABETIC CONSTANTS CONTINUED.
+
+ 0113              OCT          0
+ 0114   CARDS      ALF,5        
+ 0115              ALF,5        
+ 0116              OCT          0
+ 0117   CARD       ALF,5        L0000004BLK2 MASTER DECK
+ 0118              ALF,5          1ST PARAGRAPH
+ 01185 *SIM CARD   ALF,3        L      4AGC SIM DECK OF
+ 0119   ALF 370    ALF           370
+ 0120   W PARAGRA  ALF,2              PARAGRAPH
+
+ 0121   RC1&2C8    ALF          R      2
+ 0122   RC1&8C8    ALF          R      8
+ 01221 *E COMMA XX ALF          E0,0000
+ 01222 *4 ZEROS    ALF             0000
+ 01223 *OCT FORM   ALF          77777
+ 01224 *W OCT      ALF          OCT
+ 01225 *FBANK 00   ALF          00,
+ 0123   W SYMBOL   ALF          SYMBOL
+ 0124   W TABLE    ALF          TABLE
+ 0125   W AND      ALF          AND
+ 0126   W MASTER   ALF          MASTER
+ 0127   W DECK     ALF          DECK
+ 0128   W END DECK ALF,3         END OF BLK2 MASTER DECK
+ 0129   W END SYMT ALF,3         END OF SYMBOL TABLE
+ 0131   W PARAGRF  ALF,2        PARAGRAPH
+ 0132   W CRW      ALF           C R W
+ 0133   W CRT      ALF           C R T
+ 0134   W USE      ALF          USE
+ 0135   W PINK     ALF          PINK
+ 0136   W OILED    ALF          OILED
+ 0137   W PAPER    ALF          PAPER
+ 0138   W BLACK    ALF          BLACK
+ 0139   W BLUE     ALF          BLUE
+ 0140   W MYLAR    ALF          MYLAR
+ 0141   W GRAY     ALF          GRAY
+ 0142   W GREY     ALF          GREY
+ 0143   W FIBER    ALF          FIBER
+ 0144   W ALUMINM  ALF          ALUMINUM
+ 014401 W DIGSTOR  ALF,2        DIGISTORE
+ 01441  W ONTO     ALF          ONTO
+ 01442  W FROM     ALF          FROM
+ 01443  W WORKER   ALF          WORKER
+ 01444  W PROGRAM  ALF          PROGRAM
+ 0145   W MODULE   ALF          MODULE
+ 0146   W NUMBERS  ALF          NUMBERS
+ 0147   W ALL      ALF          ALL
+ 0148   W THRU     ALF          THRU
+ 0149   W THROUGH  ALF          THROUGH
+ 0150   W TESTING  ALF          TESTING
+ 0151   W NOPUNCH  ALF          NOPUNCH
+ 0152   W LIST     ALF          LIST
+ 0155   W36K       ALF          36K
+ 0156   WB3 36K    ALF             36K
 
 # Page 636
 #      @YUL SYSTEM MANUFACTURING - BLK2                                          USER'S OWN PAGE NO.   6        PAGE  61
 
+ 0157   W HEAD     ALF            HEAD
+ 0158   W TAIL     ALF            TAIL
+ 0159   W PUNCHED  ALF           PUNCHED
+ 0160   EBK        ALF          E-BANK 0
+ 0161   EBNK       ALF              EBK0
+ 0162   NO MDN MSG ALF,5        MODULE DECK NUMBERS SUBDIRECTOR MISSING.
+ 0163              ALF            ABORT
+ 01631  CMPAR MSG  ALF,3        COMPARE FROM WORKER
+ 016312 CMPR LINE  ALF,3        COMPARING FOR BLK2:
+ 01632  COPY MSG   ALF,2        COPY ONTO WORKER
+ 016322 COPY LINE  ALF,3        COPYING FOR BLK2:
+ 01633  E COPY MSG ALF,5        COPYING DONE. NEXT TASK COMPARES A PROGR
+ 01634             ALF,2        AM WITH THIS ONE
+ 01635  E CMPR MSG ALF,2        COMPARING DONE.
+ 0164   CHK M MSG  ALF,5        MODULE DECK NUMBER NEEDED FOR MODULE
+ 0165   X MDN MSG  ALF,5        NOT TO BE WIRED MODULE      ASSIGNED DEC
+ 01651             ALF          K NUMBER
+# I wonder if the ½ in the line below was really meant to be a question mark?
+ 01659  NO WT2 MSG ALF,5        YULWRK2 MISSING. WASN'T COPY TASK DONE½
+ 01661  CMPFL MSG  ALF,5        PARAGRAPH    000 FAILED COMPARISON FOR T
+ 01662             ALF,5        HESE PARAGRAPH RELATIVE LOCATIONS
+ 0167   PRTTP MSG  ALF,4        PUNCH RAYTHEON TESTER TAPE
+ 01673  C FIRST RC ALF,5        PROGRAM      000 BLK2 COPY COMPARE WORKE
+ 01674             ALF,4        R
+ 0168   EXCES MSG  ALF,4        EXCESS SUBDIRECTOR ENCOUNTERED
+ 0169   P36KT MSG  ALF,5        PUNCH 36K CORE ROPE SIMULATOR TAPE
+ 0170   CRWT MSG   ALF,5        COMPUTER BLK2   MODULE DECK NUMBER NNNN
+ 0171              ALF,5           MODULE 0A  STRAND  00  WIRES  YYYYYYYY
+ 0172   36KSM MSG  ALF,5          COMPUTER BLK2   MODULE  0A     BANK  00
+ 0173              ALF            FEB 0
+ 0174   PRWTP MSG  ALF,4        PUNCH RAYTHEON WIRING TAPE
+ 0175   2 LONP MSG ALF,3        PARAGRAPH NO. TOO LONG
+ 0176   UNOPN MSG  ALF,3        PARAGRAPH NO. NOT OCTAL
+ 0177   ILLPN MSG  ALF,3        ILLEGAL PARAGRAPH NO.
+ 0178   DUPPN MSG  ALF,3        DUPLICATE PARAGRAPH NO.
+ 0179   PNHER MSG  ALF,3        PARAGRAPH 000 NOT HERE
+ 0180   NO GUD MSG ALF,2        NO GOOD REQUESTS
+ 01801 *SMDSO MSG  ALF,5        SIMULATION DECK IS FOR SEGMENTS ONLY
+ 0181   E MEM      ALF,2           E - MEMORY
+ 0182   SYMBL MSG  ALF,3        PUNCH SYMBOL TABLE
+ 0183   SYMAS MSG  ALF,5        PUNCH SYMBOL TABLE AND MASTER DECK
+ 01831 *SIMDK MSG  ALF,3        PUNCH SIMULATION DECK
+ 0184   NO SYM MSG ALF,3        PROGRAM HAS NO SYMBOLS
+ 0185   PALL MSG   ALF,5        *PARAGRAPH ALL* CARD INVALIDATED BY PREV
+ 0186              ALF,2        IOUS CARD
+ 0187   NASA MSG   ALF,5        RAYTHEON TAPE PUNCHING REQUIRES NASA DWG
+ 0188              ALF          NUMBER
 
 # Page 637
 #      @YUL SYSTEM MANUFACTURING - BLK2                                          USER'S OWN PAGE NO.   7        PAGE  62
 
+P0189   ALPHABETIC CONSTANTS CONTINUED.
+
+ 0190   END PARAG  ALF,5               END OF PARAGRAPH          NEXT PA
+ 0191              ALF          RAGRAPH
+ 0192   BLK2 NAME  ALF              BLK2
+ 0193   BLKC1C8    ALF           000000
+ 0194   EMPTY WD   ALF            777771
+ 0195   PMSTR MSG  ALF,3        PUNCH MASTER DECK
+ 0196   PH NUMBER  ALF          777=2B00
+ 0197   WIRE NOS   ALF,4         1-16    17-32   33-48   49-64
+ 0198              ALF,4         65-80   81-96   97-112  113-128
+
+ 0199              ALF,4         129-144 145-160 161-176 177-192
+ 0200  *W EDRUPT   ALF          EDRUPT
+ 02001 *W EXTEND   ALF          EXTEND
+ 02002 *W INHINT   ALF          INHINT
+ 02003 *W RELINT   ALF          RELINT
+ 02004 *W RESUME   ALF          RESUME
+ 02005 *W EXERASE  ALF          EXERASE
+
+ 0201  *OP CODES   ALF          TC
+ 02011 *           SPEC                                     CCS TCF        -
+ 02012 *           SPEC                                     DAS ETC
+ 02013 *           ALF,2        CA      CS
+ 02014 *           SPEC                                     INDEX ETC
+ 02015 *           ALF,2        AD      MASK
+ 02016 *           SPEC                                     DV BZF         -
+ 02017 *           SPEC                                     MSU ETC
+ 02018 *           ALF,3        DCA     DCS     INDEX
+ 02019 *           SPEC                                     SU BZMF        -
+ 0202  *           ALF          MP
+
+ 0203  *CHAN OPS   ALF,4        READ    WRITE   RAND    WAND
+ 02031 *           ALF,3        ROR     WOR     RXOR
+
+ 0204  *CCS TCF    ALF,2        CCS     TCF
+ 0205  *DAS ETC    ALF,4        DAS     LXCH    INCR    ADS
+ 0206  *INDEX ETC  ALF,4        INDEX   DXCH    TS      XCH
+ 0207  *DV BZF     ALF,2        DV      BZF
+ 0208  *MSU ETC    ALF,4        MSU     QXCH    AUG     DIM
+ 0209  *SU BZMF    ALF,2        SU      BZMF
 
 # Page 638
 #      @YUL SYSTEM MANUFACTURING - BLK2                                          USER'S OWN PAGE NO.   8        PAGE  63
 
+P0213   NUMERIC CONSTANTS FOR BLK2 MANUFACTURING.
+
+ 0214  *TCF 7777   OCT          -37776
+ 0215   C1C8       OCT          7700 0000 0000 0077
+ 0216   C2T7       OCT          0077 7777 7777 77
+ 0217   BANEOFRI   OCT          -420 0000
+ 0219   THREAD 11  OCT          -3777
+
+ 0220   D2         DEC          0G
+ 0221   1 D2       DEC          01
+ 0222   1 D4       DEC          0001
+ 0223   7 D2       DEC          07
+ 0224   4 C6       OCT          -4 0000
+ 0225   ZERO       OCT          0
+ 0227   SIX        OCT          -6
+ 0228   FIVE       OCT          -5
+ 0229   NINE       DEC          -9
+ 0231   ELEVEN     FXBIN        -11
+ 0233   THIRTY     FXBIN        -30
+ 0234   C32        FXBIN        -32
+ 0235   DEC 0033   DEC          0033
+ 0237   C255       FXBIN        -255
+ 0238   C256       FXBIN        -256
+
+ 0239   OCT 00047  OCT          00047
+ 0240   DEC M 16   DEC          -16
+ 02402  OCT INC    OCT          000071
+ 0245   WIR TENS   DEC          -10
+ 0246   X UNITS    DEC          -20
+ 0247   WIR HUNDS  DEC          -30
+ 0248   X TENS     DEC          -40
+ 0249   WIR UNITS  DEC          -50
+ 0250   SPEC FRAM  DEC          -60
+ 0251   FEED 1T7   DEC          -7G
+ 02511  B1         OCT          4
+ 0252   2 C5       OCT          -0200 0000
+ 02522  OCT 17     OCT          -17
+ 02524 *OCT 117    OCT          -117
+ 02526 *OCT 3776   OCT          -3776
+ 02527 *OCT 10000  OCT          -10000
+ 02528 *OCT 2776   OCT          -2776
+ 02529 *OCT 17777  OCT          -17777
+ 0253   OCT 157    OCT          -157
+ 0254   OCT 60     OCT          -60
+ 0255   OCT 240    OCT          -240
+ 0256   OCT 37     OCT          -37
+ 0257   OCT 27     OCT          -27
+ 0266   B24K       OCT          00000001
+ 0267   B 34       OCT          -40000
+ 0268   B23K       OCT          00000002
+ 0261   B30        OCT          -1000000
+ 0269   B23T24K    OCT          00000003
+ 0264   OCT 66     OCT          -66
+ 0265   OCT 217    OCT          -217
+ 0270   B22K       OCT          00000004
 
 # Page 639
 #      @YUL SYSTEM MANUFACTURING - BLK2                                          USER'S OWN PAGE NO.   9        PAGE  64
 
+ 02661  B22B24K    OCT          0000 0005
+ 02662 *RESUME WD  OCT          -50017
+ 0271   K6M        OCT          -6
+ 0272   CORE  000  OCT          -1 00000
+ 0273   CORE  400  OCT          -1 00400
+ 0276   STOP       OCT          -200
+ 0277   RESET      OCT          -140
+ 0278   SENSE A    OCT          -300
+ 0279   SENSE B    OCT          -240
+ 0280   CORE NO A  OCT          -040
+ 0281   CORE NO B  OCT          -100
+ 0282   87 PUNCH   OCT          -300
+ 0283   STOP36K    OCT          -301
+ 0285   FS         OCT          -361
+ 0287   DATA       OCT          -340
+ 0288   Z UNITS    DEC          -80
 
 # Page 640
 #      @YUL SYSTEM MANUFACTURING - BLK2                                          USER'S OWN PAGE NO.  10        PAGE  65
 
+P0289   ADDRESS CONSTANTS.
+
+ 0290   L RSPEX P8 SPEC                                     R SPECS +8
+ 0291   R SPECS    SPEC, B3                                 262            -
+ 0292              SPEC, B3                                 DAMN ZERO
+ 0293              SPEC, B3                                 198
+ 0294              SPEC, B3                                 64             -
+ 0295              SPEC, B3                                 132
+ 0296              SPEC, B3                                 130            -
+ 0297              SPEC, B3                                 196            -
+ 0298              SPEC, B3                                 66
+ 0299   L END RASS SPEC, B3                                 263
+
+ 0300   R SPECSP   SPEC,B3                                  262
+ 0301   BANK 1     SPEC,B1                                  DAMN ZERO
+ 0302   BLK2 MSKS  MASKBASE     S,1           F,1
+ 0303   L B2 SUBDS SPEC                                     B2 SUBDRS
+ 0304   L NEX PARH SPEC                                     NEXT PARH
+ 0305   L CARDS    SPEC                                     CARDS
+ 0306   CARDS P10  SPEC                                     CARDS +10
+ 0307   CARD WD2   SPEC                                     CARD +1
+ 0308   CARD WD10  SPEC                                     CARD +9
+ 0309  *L OP CODES SPEC                                     OP CODES
+ 03091 *L CHAN OPS SPEC                                     CHAN OPS
+ 0310   ST WIR CAC CAC                                      WIRENOS -1
+ 0311   L REQ LIST SPEC                                     REQ LIST
+ 0312   L CPY AREA SPEC                                     COPY AREA
+ 0313   L ARTSDK N CAC                        W CRT         ARTS DK NO
+ 0314   END SUBDS  SPEC                                     LAST SDRC
 
 # Page 641
 #      @YUL SYSTEM MANUFACTURING - BLK2                                          USER'S OWN PAGE NO.  11        PAGE  66
 
+P0315   RESERVATIONS.
+
+ 0316   WIRE NO    RESERVE      1
+ 0317   REQ LIST   RESERVE      240
+ 0318              OCT          0
+ 0320   BEGIN ADR  RESERVE      1
+ 0321   SS FWA     RESERVE      1
+ 0322   LAST FWA   RESERVE      1
+ 0323   MDN MARK   RESERVE      1
+ 0324   KCOMMON    RESERVE      10
+ 0325   FIRST WD   RESERVE      1
+ 0326   E 256 LOC  RESERVE      1
+ 0327   HOLD LOC   RESERVE      1
+ 0328   IN OR OUT  RESERVE      1
+ 0329   BANK NUM   RESERVE      1
+ 0330   LAST BANK  RESERVE      1
+ 0331   ALLOW E    RESERVE      1
+ 0332   STOP BANK  RESERVE      1
+ 0333   MASTR TOO  RESERVE      1
+ 0334   PARA DEEP  RESERVE      1
+ 0335   TEST INST  RESERVE      1
+ 0336   SENSE      RESERVE      1
+ 0337   DELTA FWA  RESERVE      1
 
 # Page 642
 #      @YUL SYSTEM MANUFACTURING - BLK2                                          USER'S OWN PAGE NO.  12        PAGE  67
 
+P03438   EQUIVALENCES
+
+ 0339   DAMN ZERO  EQUALS       0
+ 0342   SPRA       EQUALS       128
+ 0343   SPRAMR     EQUALS       384
+ 0344   SPRAM      EQUALS       896
+ 0345   ALPHA      EQUALS       0
+ 0346   BINARY     EQUALS       16
+ 0348   PARAG NO   EQUALS       BEGIN ADR
+ 0349   REQ PLACE  EQUALS       SS FWA
+ 0351   STIK WIRE  EQUALS       LAST FWA
 
 # Page 643
 #      @YUL SYSTEM MANUFACTURING - BLK2                                          USER'S OWN PAGE NO.  13        PAGE  68
 
+P0353   ASSIGNMENTS FOR BLK2 MANUFACTURING.
+
+ 0354   SWITCH     ASSIGN       0,2
+ 0355   L AUTH NAM ASSIGN       0,51
+ 0357   YUL TYPER  ASSIGN       0,63
+ 0358   RD SBDIRC  ASSIGN       0,65
+ 0359   HOWZAT     ASSIGN       0,66
+ 0360   PCH LEDER  ASSIGN       0,67
+ 0361   IGN SUBDR  ASSIGN       0,68
+ 0362   UNRC SBDR  ASSIGN       0.69
+ 0363   E SYLT OK  ASSIGN       0,70
+ 0364   FETCH SS   ASSIGN       0,71
+
+ 0366   PCH TITLE  ASSIGN       0,73
+ 0367   MANUF RTN  ASSIGN       0,76
+ 0368   YUL MASKS  ASSIGN       0,77
+
+ 0369   OCTAL 20   ASSIGN       0,78
+ 0370   WHODUNIT   ASSIGN       0,80
+ 0371   6 COMMA 19 ASSIGN       0,81
+ 0372   L DIRECTY  ASSIGN       0,83
+ 0374   FRAME      ASSIGN       0,85
+ 0375   TYP ABORT  ASSIGN       0,89
+ 0376   L OBJC MSG ASSIGN       0,90
+
+ 0377   REJEC DIR  ASSIGN       0,91
+ 0378   YUL D2A ZS ASSIGN       0,119
+ 0379   SYMS OR NO ASSIGN       0,124
+ 03791  DISASTER   ASSIGN       0,126
+
+ 0380   MON TAPE   ASSIGN       7,1
+ 0381   MON PEEK   ASSIGN       7,3
+ 03812  PHI SNACH  ASSIGN       7,2
+ 0382   EOR        ASSIGN       7,4
+
+ 0383   MON READ   ASSIGN       7,15
+ 0384   PHI PRINT  ASSIGN       7,23
+ 03842  MON EOFRI  ASSIGN       7,31
+ 0385   MON TADDR  ASSIGN       7,223
+ 0386   MON TYPER  ASSIGN       7,215
 
 # Page 644
 #      @YUL SYSTEM MANUFACTURING - BLK2                                          USER'S OWN PAGE NO.  14        PAGE  69
 
+P0387              PROCEDURE TO DETERMINE WHICH SUBDIRECTOR WAS SUBMITTED.
+
+
+
+ 0388   WHAT SUBD  SETLOC
+ 0390   BLK2 MSKR  TX           BLK2 MSKS     -             Z,MXR
+ 0291              TX           L B2SUBDS     -             Z,X4                BASE OF BLK2 MANUFACTURING SUBDIRECTORS.
+ 0393   COMP SDRC  NA           N,X4,1        6,16          TRY SDREC           COMPARE FIRST WORD ON SUBDIRECTOR CD.
+ 0395              NA, C1T6     4,0           6,17          TRY SDREC           DEMAND 14-CHARACTER MATCH.
+ 0397              SS           N,X4          THREAD 11     C,+1
+ 0398              TS           6 COMMA 19    Z,X5                              SET TO LOOK AT 2ND WORD, GO TO TASK.
+
+
+
+ 0400   TRY SDREC  NA           Z,X4,1        END SUBDS     COMP SDRC           BRANCH IF THERE ARE MORE TO LOOK AT.
+ 0402              TS           6 COMMA 19    Z,X5          BAD SD              SET UP TO CUSS 1ST WD, ABORT TASK.
+
+
+
+R0404   TABLE OF 14-CHARACTER SUBDIRECTOR FIRST WORDS FOR BLK2.
+
+ 0405   B2 SUBDRS  ALF          PUNCH                                           PUNCH CARDS OR PAPER TAPE.
+ 0407              M,A,         A,            A,            BLK2 PNCH
+ 04071             ALF          COPY                                            COPYING JOBS
+ 04072             M,A,         A,            A,            BLK2 COPY
+ 04073             ALF          COMPARE                                         COMPARING JOB
+ 04074  LASTSDRC   M,A,         A,            A,            BLK2 CMPR
+
+
+
+R0408   FATAL EXIT ROUTINE FOR BAD SUBDIRECTORS
+
+ 0409   BAD SD     WD           Z,X5          THREE         WHO DUN IT          STEP X5 DOWN ONE WORD.
+ 0411   HOW ZIS    TS           YUL MASKS     Z,MXR         HOW ZAT             EXIT FOR FATAL CUSS OF SUBDIRECTOR WORD.
+ 0413   BAD SD2    TS           Z,X5,2        -             BAD SD
+ 0414   BAD SDN    TS           Z,X5          WHO DUN IT    HOW ZIS
+ 0415   BAD SD6    TS           Z,X5,6        -             BAD SD
 
 # Page 645
 #      @YUL SYSTEM MANUFACTURING - BLK2                                          USER'S OWN PAGE NO.  15        PAGE  70
