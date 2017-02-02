@@ -58,6 +58,8 @@
  *                                 verbose option. Add debug prints.
  *               2017-01-30 MAS    Added 'y' (check parity) and 'n'
  *                                 (no banksums) options.
+ *               2017-02-01 MAS    Changed UNASSIGNED words to print
+ *                                 out @ instead of 00000.
  *
  * For listing2binsource.c, the octal codes are provided in an input file
  * created by moving through the assembly-language portion of the
@@ -409,14 +411,6 @@ ProcessAorC:
             char bankString[33];
             for (j = 0; j < WORDS_PER_BANK; j++) {
                 int16_t value = rope[bank][j];
-
-                // Subsequent unassigned words in the same bank will be set to zero.
-                if (/*value > 077777 ||*/ value < 0) {
-                    //if (verbose)
-                    //    printf("Zeroing unassigned word at (%02o,%04o).\n", bank, BANK_OFFSET + j);
-                    value = 0;
-                }
-
                 if ((count % 8) == 0)
                     fprintf(outfile, "\n");
 
@@ -434,7 +428,10 @@ ProcessAorC:
                 if ((count % 1024) == 0)
                     fprintf(outfile, "BANK=%o\n", bank);
 
-                fprintf(outfile, "%05o ", value);
+                if (value >= 0)
+                    fprintf(outfile, "%05o ", value);
+                else
+                    fprintf(outfile, "  @   ");
                 count++;
             }
         }

@@ -103,6 +103,7 @@
  *              2017-01-31 MAS	Added --parity for generating parity bits for
  *              		emitted words, and support for @ to denote
  *              		unused words in the assembly.
+ *              2017-02-01 MAS	Disabled parity checking for unused words.
  *
  *  The format of the file is simple.  Each line just consists of 8 fields,
  *  delimited by whitespace.  Each field consists of 5 octal digits.  Blank
@@ -404,7 +405,7 @@ main(int argc, char *argv[])
           // If PARITY=1, then the data is going to be 6 octal digits, of which
           // the least-significant digit is the parity and must be stripped
           // off.
-          if (useParity)
+          if (useParity && !unused[dummy])
             {
               int parity = data[dummy] & 07;
               data[dummy] = (data[dummy] >> 3);
