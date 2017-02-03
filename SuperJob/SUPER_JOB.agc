@@ -24,6 +24,8 @@
 ##                              assembled octals. There are probably more
 ##                              of those left, but for now the assembly
 ##                              matches the binsource.
+##              2017-02-02 MAS  Did a quick visual proofing pass over the
+##                              comments and fixed a few errors.
 
 ## Page D-4 (continued)
                 SETLOC  FF024000
@@ -118,7 +120,7 @@ PROCL           MSK     FIRST5
                 CCS     A               # WAS ERROR RESET HIT+
                 TC      +6              # NO
                 TC      MERR
-                TC      +4
+                TC      +4              # NO
                 CA      ZEROS           # YES
                 TS      SWITCH
                 TC      PRERSTL
@@ -1313,7 +1315,7 @@ DEVIDES         EXTEND
                 BZF     +2              # HAVE EITHER GOATM OR TRNSIP GONE
                 TC      ONEUPERR        # YES
                 CA      CNTDWN1L
-                CCS     A               # 1S FIRST COUNTDOWN OVER
+                CCS     A               # IS FIRST COUNTDOWN OVER
                 TC      CONTINUE        # NO
                 CA      CNTDWN2L        # YES
                 CCS     A               # HAVE 16 SECONDS PASSED
@@ -1924,13 +1926,13 @@ MIKEB           CA      V00BK
                 TS      FB
                 TC      2001
 LDBNKL          TS      BNKPR
-                CCS     1STBNKNO        # IS THIS THE 1ST BANK NO
+                CCS     1STBNKNO        # IS THIS THE 1ST BNK NO
                 TC      SHIFT3L         # YES
                 CA      HOLDIT          # NO
 ## Page D-37
                 AD      HOLDBKDG
                 TS      BANKNO
-                CCS     BNKSHFT         # IS THE ADDRESS FXDOR ERR
+                CCS     BNKSHFT         # IS THE ADDRESS FXD OR ERR
                 TC      FXDPR
                 CA      BANKNO
                 TS      R1

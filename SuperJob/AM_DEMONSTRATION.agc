@@ -13,6 +13,8 @@
 ## Page Scans:  http://www.ibiblio.org/apollo/Documents/R68-4125-Volume2.pdf
 ## Mod history: 2017-01-27 MAS  Created, and transcribed pages D-46 through D-134.
 ##              2017-01-28 MAS  Completed transcribing.
+##              2017-02-02 MAS  Corrected out-of-order numbers found during
+##                              proofing of octals.
 
 ## Page D-46
 ## [WORKAROUND] The following line did not have the "SETLOC" in the original listing, only the address.
@@ -1020,8 +1022,8 @@
                 OCT     01727
                 OCT     01730
                 OCT     01731
-                OCT     01732
                 OCT     01733
+                OCT     01732
                 OCT     01734
                 OCT     01735
                 OCT     01736
@@ -2361,8 +2363,8 @@
                 OCT     04374
                 OCT     04375
                 OCT     04376
-                OCT     04377
                 OCT     04400
+                OCT     04377
                 OCT     04401
                 OCT     04402
                 OCT     04403
@@ -7276,8 +7278,8 @@
                 OCT     01727
                 OCT     01730
                 OCT     01731
-                OCT     01732
                 OCT     01733
+                OCT     01732
                 OCT     01734
                 OCT     01735
                 OCT     01736
