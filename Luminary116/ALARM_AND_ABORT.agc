@@ -13,11 +13,10 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-01-22 MAS  Created from Luminary 99.
-
-## NOTE: Page numbers below have not yet been updated to reflect Luminary 116.
+##              2017-02-03 RRB  Updated for Luminar 116.
 
 ## Page 1381
-# THE FOLLOWING SUBROUTINE MAY BE CALLED TO DISPLAY A NON-ABORTIVE ALARM CONDITION.  IT MAY BE CALLED
+#          THE FOLLOWING SUBROUTINE MAY BE CALLED TO DISPLAY A NON-ABORTIVE ALARM CONDITION. IT MAY BE CALLED
 # EITHER IN INTERRUPT OR UNDER EXECUTIVE CONTROL.
 
 # CALLING SEQUENCE IS AS FOLLOWS:
@@ -53,44 +52,34 @@ LARMENT         CA              Q                               # STORE RETURN F
 
 CHKFAIL1        CCS             FAILREG                         # IS ANYTHING IN FAILREG
                 TCF             CHKFAIL2                        # YES TRY NEXT REG
+                CA              :
                 LXCH            FAILREG                         
                 TCF             PROGLARM                        # TURN ALARM LIGHT ON FOR FIRST ALARM
 
 CHKFAIL2        CCS             FAILREG         +1              
-                TCF             FAIL3                           
-                LXCH            FAILREG         +1              
-                TCF             MULTEXIT                        
+                TCF             PROGLARM                         
+                CA              L
+                TS              FAILREG         +1                      
 
-FAIL3           CA              FAILREG         +2              
-                MASK            POSMAX                          
-                CCS             A                               
-                TCF             MULTFAIL                        
-                LXCH            FAILREG         +2              
-                TCF             MULTEXIT                        
 
-## Page 1382
+PROGLARM        LXCH            FAILREG         +2              # STORE AS "MOST RECENT" ALARM CODE
 
-PROGLARM        CS              DSPTAB          +11D            
+                CS              DSPTAB          +11D            # TURN ON PROGRAM ALARM IF OFF       
                 MASK            OCT40400                        
                 ADS             DSPTAB          +11D            
-
+## Page 1372
 
 MULTEXIT        XCH             ITEMP1                          # OBTAIN RETURN ADDRESS IN A
                 RELINT                                          
                 INDEX           A                               
-                TC              1                               
-
-MULTFAIL        CA              L                               
-                AD              BIT15                           
-                TS              FAILREG         +2              
-
-                TCF             MULTEXIT                        
+                TC              1                                                  
 
 # PRIOLARM DISPLAYS V05N09 VIA PRIODSPR WITH 3 RETURNS TO THE USER FROM THE ASTRONAUT AT CALL LOC +1,+2,+3 AND
-# AN IMMEDIATE RETURN TO THE USER AT CALL LOC +4.  EXAMPLE FOLLOWS,
+# AN IMMEDIATE RETURN TO THE USER AT CALL LOC +4. EXAMPLE FOLLOWS,
 #               CAF     OCTXX           ALARM CODE
 #               TC      BANKCALL
 #               CADR    PRIOLARM
+
 #               ...     ...
 #               ...     ...
 #               ...     ...             ASTRONAUT RETURN
@@ -120,7 +109,6 @@ PRIOLARM        INHINT                                          # * * * KEEP IN 
                 COUNT*          $$/ALARM                        
 BAILOUT         INHINT                                          
                 CA              Q                               
-## Page 1383
                 TS              ALMCADR                         
 
                 INDEX           Q                               
@@ -130,9 +118,11 @@ OCT40400        OCT             40400
 
                 INHINT                                          
 WHIMPER         CA              TWO                             
-                AD              Z                               
+                AD              Z
+## Page 1373                               
                 TS              BRUPT                           
-                RESUME                                          
+                RESUME
+## The command RESUME is circled in red ink - RRB 2017                                         
                 TC              POSTJUMP                        # RESUME SENDS CONTROL HERE
                 CADR            ENEMA                           
 POODOO          INHINT                                          
@@ -166,12 +156,11 @@ STRTIDLE        CAF             BBSERVDL
 CCSHOLE         INHINT                                          
                 CA              Q                               
                 TC              ABORT2                          
-OCT21103        OCT             1103                            
+OCT21103        OCT             21103                            
 CURTAINS        INHINT                                          
                 CA              Q                               
                 TC              ALARM2                          
 OCT217          OCT             00217                           
-## Page 1384
                 TC              ALMCADR                         # RETURN TO USER
 
 BAILOUT1        INHINT                                          
@@ -181,7 +170,8 @@ BOTHABRT        TS              ITEMP1
                 INDEX           Q                               
                 CAF             0                               
                 TS              L                               
-                TCF             CHKFAIL1                        
+                TCF             CHKFAIL1
+## Page 1374                        
 POODOO1         INHINT                                          
                 DXCH            ALMCADR                         
                 CAF             ADR77770                        
@@ -200,8 +190,8 @@ ADR40400        TCF             OCT40400
 DOALARM         EQUALS          ENDOFJOB                        
                 EBANK=          DVCNTR                          
 BBSERVDL        BBCON           SERVIDLE                        
-
 # CALLING SEQUENCE FOR VARALARM
+
 #               CAF     (ALARM)
 #               TC      VARALARM
 
@@ -223,7 +213,6 @@ ABORT           EQUALS          WHIMPER
                 BANK            13                              
                 SETLOC          ABTFLGS                         
                 BANK                                            
-## Page 1385
                 COUNT*          $$/ALARM                        
 
 FLAGS           CS              STATEBIT                        
@@ -233,7 +222,8 @@ FLAGS           CS              STATEBIT
                 MASK            FLGWRD10                        
                 TS              FLGWRD10                        
                 CS              NODOBIT                         
-                MASK            FLAGWRD2                        
+                MASK            FLAGWRD2
+## Page 1375                        
                 TS              FLAGWRD2                        
                 TC              Q                               
 
