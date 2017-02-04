@@ -7,6 +7,7 @@
 # Page scans:   https://archive.org/details/yulsystemsourcec00hugh
 # Pages:        672-700
 # Mod history:  2016-10-06 JL   Created.
+#               2017-02-04 JL   Transcribed pages 672-682.
 
 # Annotations:
 #
@@ -25,46 +26,453 @@ L      @YUL SYSTEM SIMULATORS -- AGC4
 # Page 672
 #      @YUL SYSTEM SIMULATORS -- AGC4                                            USER'S OWN PAGE NO.   1        PAGE   1
 
+# (jl) Annotation: this page (and probably the whole log section) is marked "FOR REFERENCE ONLY".
+
+R0001   WE ARE DEEPLY INDEBTED TO THE ONE, THE ONLY, THE GREAT JOHN SHAW FOR THE FOLLOWING STRONG MAGIC....
+R0003   JSOCTL
+
+
+
+ 0004              SETLOC,1     0             B4
+
+
+
+ 0005              MASKGRP,1    S,1           F,1
+
+
+
+R0006              THIS PROGRAM IS LOADED BY YUL PASS 0 IN RESPONSE TO A YUL DIRECTOR CARD CORRECTLY SPECIFYING A SIMU-
+R0008   LATION RUN FOR AGC4.  WHEN MISCGA SIMULATION IS DESIRED, THE VERB ON THE DIRECTOR CARD IS "ETALIMUS".  MISCGA 1
+R0010   AND MISCGA 2 ARE THE CREATIONS OF CHARLES "MADMAN" MUNTZ, WHO DERIVED THE NAME BY SPELLING "AGCSIM" BACKWARDS.
+R0012   AT PRESENT, THIS PROGRAM RESPONDS ONLY TO THE VERB "ETALIMUS", AND INCORPORATES MISCGA 2.  A PROGRAM DEFINED FOR
+R0014   LOCATIONS 0000-7777 (FIRST SWITCHABLE BANK ONLY) CAN BE SIMULATED, PROVIDED THAT NO USE OF INPUT-OUTPUT OR OF
+R0016   PROGRAM INTERRUPT IS REQUIRED.  ALSO, CERTAIN CASES OF ADDRESSING CENTRAL REGISTERS MAY NOT WORK.  EVERY INSTRU-
+R0018   CTION SIMULATED IS TRACED IN PRINT, EXCEPT AS MODIFIED BY TRACE ON/OFF SUBDIRECTORS (SEE BELOW).  THE RUN IS
+R0019   TERMINATED BY ANY OF THE FOLLOWING OCCURRENCES:
+
+R0020   EXECUTION OF AN ILLEGAL OPERATION CODE,
+R0021   A CCS ADDRESS IN FIXED MEMORY,
+R0022   DIVIDE OVERFLOW,
+R0023   DETECTION OF AN INFINITE LOOP (UP TO ABOUT 300 INSTRUCTIONS IN LENGTH),
+R0024   EXCEEDING THE PRESET PRINT LIMIT,
+R0025   OVERFLOW OUT OF THE TIME3 REGISTER, OR
+R0026   ABORT BY THE OPERATOR, USING FB9 (B = FIRST SIDE-GROUP).
+
+R0027              THE SUBDIRECTORS USED WITH MISCGA 2 ARE:
+
+R0028   S       START AT NNNN                 (NNNN OCTAL, 1 TO 4 DIGITS).  THIS CARD IS REQUIRED, AND MUST BE FIRST.
+R0030   S       PRINT LIMIT = DDDDD           (DDDDD DECIMAL, 1 TO 5 DIGITS. "=" OPTIONAL).  THIS CARD IS OPTIONAL.  IF
+R0032                                         IT IS LACKING OR INVALID, THE PRINT LIMIT IS 5000 LINES.
+R00331  S       TRACE ON NNNN                 TURN ON TRACE JUST BEFORE C(NNNN) IS EXECUTED.
+R00332  S       TRACE OFF NNNN                TURN OFF TRACE JUST AFTER C(NNNN) IS EXECUTED.
+R00333  S       TRACE ON R:NNNN               TURN TRACE ON JUST BEFORE NNNN IS REFERRED TO.
+R00334  S       TRACE OFF R:NNNN              TURN TRACE OFF JUST AFTER NNNN IS REFERRED TO.
+R00335                                        ANY NUMBER OF TRACE ON/OFF SUBDIRECTORS MAY BE SUBMITTED, PROVIDED THAT
+R00336                                        THEY SPECIFY UNIQUE OCTAL ADDRESSES NNNN.
+
+ 0034   AGC4  SIMU TS           BANK 1        Z,X0          WHAT SUBD           THIS INSTRUCTION IS AT BASE ADDRESS.
+
+R0036   MAIN BODY OF PROGRAM FOLLOWS CONSTANTS, ETC.
 
 # Page 673
 #      @YUL SYSTEM SIMULATORS -- AGC4                                            USER'S OWN PAGE NO.   2        PAGE   2
 
+P0037   FIELD AND SHIFT MASKS.
+
+
+
+ 0038   B,B3TB12   OCT          -7774
+ 0039   B,CHAR1    OCT          77
+ 0040   B,CHAR6    OCT          -77 0000
+ 00401  B,CHAR7    OCT          -7700
+ 0041   B,CHAR8    OCT          -77
+
+ 0042   B,EFLAG    OCT          00001
+ 0043   B,EDITFLG  OCT          00002
+ 0044   B,LPFLAG   OCT          00004
+ 0045   B,FLAGS    OCT          00007
+
+ 0046   B,C7T8     OCT          -7777
+ 0047   B,CAC3     DEC          -GGGG
+ 0048   B,SIGN     OCT          -100000
+ 00489  B,CHANGMSK OCT          3
+
+ 0049   B,DCHECK   OCT          6060 6060 6060 6060
+
+
+
+P0050   FURTHER SHIFT MASKS.
+
+ 0051   S,D12      DEC          -G
+ 0052   S,C1T3     OCT          777777
+ 00522  S, ACO6    OCT          -70000
+ 0053   S,ACO8     OCT          -7
+ 0054   S,ACH7     OCT          -1700
+
+ 0055   S,MSK5     OCT          -700000000
+ 0056   S,MSK4     OCT          -7000000
+ 0057   S,MSK3     OCT          -70000
+ 0058   S,MSK2     OCT          -700
+
+ 0059   S,ONE      OCT          -1
+ 0060   S,THREE    OCT          -3
+ 0061   S,LOW14    OCT          -37777
+ 0062   S,LOW15    OCT          -77777
+
+ 0063   S,CAC1     DEC          GGGG
+ 0064   S,CAC2     DEC          0000 GGGG
+ 0065   S,ONES     DEC          GGGG GGGG GGGG
+
+ 0066   S,US       OCT          -40000
+ 0067   S,DVMSK    OCT          037777
 
 # Page 674
 #      @YUL SYSTEM SIMULATORS -- AGC4                                            USER'S OWN PAGE NO.   3        PAGE   3
 
+P0068   RESERVATIONS.
+
+
+
+ 0069   T1         RESERVE      1
+ 0070   T2         RESERVE      1
+ 0071   T3         RESERVE      1
+ 0072   T4         RESERVE      1
+
+ 0073   INSTR      RESERVE      1
+ 0074   INSTR2     RESERVE      1
+ 0075   D8EF       RESERVE      1
+ 0076   DATA       RESERVE      1
+
+ 0077   LOCATION   RESERVE      1
+ 0078   ZDECR      RESERVE      1
+ 0079   NEW Z      RESERVE      1
+ 0080   EDIT WD    RESERVE      1
+
+ 0081   PAT PTR    RESERVE      1
+
+
+
+R0083   ADDRESS CONSTANTS.
+
+ 0084   BANK 1     SPEC,B1                                  DAMN ZERO
+ 0085   BANK 2     SPEC,B2                                  DAMN ZERO
+ 0086   BANK 8     SPEC,B8                                  DAMN ZERO
+ 0087   BANK 5     SPEC,B5                                  DAMN ZERO
+
+ 0088   BANK8 M3   SPEC,B7                                  2045
+ 0089   SPEC 1777  SPEC,B2                                  1023
+ 0090   L SIXES    SPEC                                     SIXES
+ 0091   OP ALF     SPEC                                     OP ALF T
+
+ 0092   PRIN SPEX  SPEC                                     LINE +3
+ 0093              SPEC                                     NEXT LINE +3
+ 0094              SPEC                                     NEXT LINE +9
+ 0095              SPEC                                     LINE +9
+
+ 0096   IN PTR     SPEC                                     MASK LOC +64
+ 0097   OUT PTR    SPEC                                     MASK LOC +64
+ 00971  LAST PTR   SPEC                                     MASK LOC +64
+ 0098   L STD PLIM SPEC                                     UNRC SUBD +1
+
+ 0099   L GOGO P1  SPEC                                     CONTINUE +1
+ 00991  L RECYCLE  SPEC                                     RECYCLE
+ 00992  L TRON OFF SPEC                                     TR ON OFF
+ 0100   DEC 853    SPEC,B0                                  853
+
+ 01008  PHI WAA    SPEC,B7                                  600
+ 0101   AGC4 MSKS  MASKBASE     S,1           F,1
 
 # Page 675
 #      @YUL SYSTEM SIMULATORS -- AGC4                                            USER'S OWN PAGE NO.   4        PAGE   4
 
+P0102   ALPHABETIC CONSTANTS -- FIRST OF FOUR PAGES.
+
+
+
+ 0103   W SUBDIRC  ALF,2        SUBDIRECTOR:
+ 0104   W START    ALF          START
+ 0105   W AT       ALF          AT
+ 0106   START MSG  ALF,2        START AT
+
+ 0107   W PRINT    ALF          PRINT
+ 0108   W LIMIT    ALF          LIMIT
+ 0109   ALF 5000   ALF          5000
+ 0110   PLIM MSG   ALF,3        PRINT LIMIT =
+
+ 0111   2 LONS MSG ALF,3        START ADDRESS TOO LONG
+ 0112   UNOCS MSG  ALF,3        START ADDRESS NOT OCTAL
+ 0113   2 LONP MSG ALF,3        PRINT LIMIT TOO LONG
+ 0114   UNDPL MSG  ALF,3        PRINT LIMIT NOT DECIMAL
+
+ 0116   NO PAL MSG ALF,3        NO PARAGRAPHS LOADED
+ 0117   EMRGY MSG  ALF,4        IN EMERGENCY, ABORT TASK BY F79
+ 0118   PAGE 1     ALF          PAGE   1
+
+ 0119   SIMU HEAD  OCT          0024
+ 0120              ALF,5                YUL SYSTEM (MISCGA 2) FOR AGC4:
+ 0121              ALF,5        
+ 0122              ALF,5        
 
 # Page 676
 #      @YUL SYSTEM SIMULATORS -- AGC4                                            USER'S OWN PAGE NO.   5        PAGE   5
 
+P0123   ALPHABETIC CONSTANTS -- SECOND OF FOUR PAGES.
+
+
+
+ 0124   SUBHEAD    OCT          0002
+ 0125              ALF,5            LOC     OP      ADDR     A      B(X)
+ 0126              ALF,5           A(X)     LP      Q       OVCTR    T3
+ 0127              ALF,5
+
+ 0128              OCT          4
+ 0129   LINE       ALF,5
+ 0130              ALF,5
+ 0131              ALF,5
+
+ 0132   OP ALF 1   ALF,4              TC     CCS   INDEX      XCH
+ 0133              ALF,4
+ 0134              ALF,4                      MP      DV       SU
+ 0135              ALF,4              CS      TS      AD     MASK
 
 # Page 677
 #      @YUL SYSTEM SIMULATORS -- AGC4                                            USER'S OWN PAGE NO.   6        PAGE   6
 
+P0136   ALPHABETIC CONSTANTS -- THIRD OF FOUR PAGES.
+
+
+
+ 0137   SP1        OCT          0001
+ 0138   NEXT LINE  ALF,5
+ 0139              ALF,5
+ 0140              ALF,5
+
+ 01401             RESERVE      7                                               USED IN DITTO PROCEDURE.
+
+ 01403  W TRACE    ALF          TRACE
+ 01404  W ON       ALF          ON
+ 01405  W OFF      ALF          OFF
+ 01406  W R        ALF          R
+
+ 0141   BLANK 1T3  ALF             00000
+ 0142   BLANK 1T4  ALF              0000
+ 0143   OVF BLOT   ALF            ▪00000
+ 01431  ZERO C6    ALF               0
+ 0144   DITTO      ALF               "
+
+ 0145              DEC          -5000
+ 0146   PRINT LIM  DEC          -5000
+ 0147   SKIP       OCT          4
+ 0148   BLANKS     ALF
+
+ 01488  W CUT OFF  ALF          CUT OFF
+ 0149   W ILLEGOP  ALF          ILLEGOP
+ 0150   W LOOPING  ALF          LOOPING
+ 0151   W PRNT MAX ALF          PRINTMAX
+
+ 01519  W INF LOOP ALF,2           INFINITE LOOP
+ 015199 CAUSE      ALF,2        00000000
+ 0152   T DUMP MSG ALF,5        TERMINAL DUMP OF ERASABLE MEMORY FOLLOWS
+ 0153   END SI MSG ALF,2        END SIMULATION
 
 # Page 678
 #      @YUL SYSTEM SIMULATORS -- AGC4                                            USER'S OWN PAGE NO.   7        PAGE   7
 
+P015301 ALPHABETIC CONSTANTS -- FOURTH OF FOUR PAGES.
+
+
+
+ 015302 2 LONT MSG ALF,4        TRACE ON/OFF ADDRESS TOO LONG
+ 015303 UNOTR MSG  ALF,4        TRACE ON/OFF ADDRESS NOT OCTAL
+ 015304 DUPTR MSG  ALF,4        TRACE ON/OFF ADDRESS DUPLICATED
+ 015305 OMIT MSG   ALF,5          TRACE OFF FOR          INSTRUCTIONS
+
+ 015306 W CORONER  ALF,2        CORONER'S REPORT
 
 # Page 679
 #      @YUL SYSTEM SIMULATORS -- AGC4                                            USER'S OWN PAGE NO.   8        PAGE   8
 
+P0154   NUMERIC CONSTANTS.
+
+
+
+ 0155   ZERO       OCT          0
+ 0156   TWO        OCT          -2
+ 0157   FOUR       OCT          -4
+ 0158   EIGHT      DEC          -8
+
+ 01581  TWEVLE     FXBIN        -12
+ 0160   FIFTY      FXBIN        -50
+ 0161   C65        FXBIN        -65
+ 0162   DEC 852    FXBIN        -852
+
+ 0163   2K         OCT          -2000
+ 0164   5 C6       OCT          -5 0000
+ 0165   6 C6       OCT          -6 0000
+
+ 0167   SIXES      OCT          06, 06, 0606, 060606, 0606 0606
+ 0168              OCT          0606 0606 06
+ 0169   SP3        OCT          0003
+ 0170   NEG ONE    OCT          -177776
+ 0171   BIT 14     OCT          -20000
+
+ 0172   SIGN CLIP  DEC          0GGG GGGG
+ 0173   BANK MASK  OCT          -36000
+ 0174   EDIT PREF  OCT          -20
+ 0175   GENERASE   OCT          -25
+
+ 0176   L BANK REG OCT          -15
+ 0177   START ADR  OCT          0
+ 0179   HOLD LINE  DEC          GGGG GGGG GGGG,-1, 0
+
+ 0180   LINE CNT   FXBIN        -51
+ 0181   TASK LINS  DEC          0
+ 0182   PAGE NO    DEC          -1
+ 01821  TRACE OFF  DEC          0
+
+ 01822  LOC FLAG   OCT          2
+ 01823  ON         OCT          3
+ 01824  OFF        OCT          5
+ 01825  B1B2       OCT          6
 
 # Page 680
 #      @YUL SYSTEM SIMULATORS -- AGC4                                            USER'S OWN PAGE NO.   9        PAGE   9
 
+P0183   ASSIGNMENTS.
+
+
+
+ 01831  PAGE HEAD  ASSIGN       0,20
+
+ 0184   YUL TYPER  ASSIGN       0,63
+ 0185   RD SBDIRC  ASSIGN       0,65
+ 0186   HOWZAT     ASSIGN       0,66
+ 0187   IGN SUBDR  ASSIGN       0,68
+
+ 0188   UNRC SBDR  ASSIGN       0,69
+ 0189   E SYLT OK  ASSIGN       0,70
+ 0190   FETCH SS   ASSIGN       0,71
+ 0191   MANUF RTN  ASSIGN       0,76
+
+ 0192   YUL MASKS  ASSIGN       0,77
+ 0193   OCTAL 20   ASSIGN       0,78
+ 0194   WHODUNIT   ASSIGN       0,80
+
+ 0195   TYP ABORT  ASSIGN       0,89
+ 0196   L OBJC MSG ASSIGN       0,90
+ 01961  RJEC SUBD  ASSIGN       0,91
+ 01962  DEPAGIN8   ASSIGN       0,101
+ 01963  YUL D2A ZS ASSIGN       0,119
+
+ 0197   A          ASSIGN       4,0
+ 0198   Q          ASSIGN       4,1
+ 0199   Z          ASSIGN       4,2
+ 0200   LP         ASSIGN       4,3
+
+ 0201   BANKREG    ASSIGN       4,13
+ 0202   CYR        ASSIGN       4,16
+ 0203   SR         ASSIGN       4,17
+ 0204   CYL        ASSIGN       4,18
+
+ 0205   SL         ASSIGN       4,19
+ 0206   OVCTR      ASSIGN       4,28
+ 0207   TIME1      ASSIGN       4,29
+ 0208   TIME2      ASSIGN       4,30
+
+ 0209   TIME3      ASSIGN       4,31
+
+ 0210   MON TAPE   ASSIGN       7,1
+ 0211   EOR        ASSIGN       7,4
+ 0212   MON PRINT  ASSIGN       7,23
+ 0213   MON A2D    ASSIGN       7,41
+
+ 0214   MON WAKE   ASSIGN       7,99
+ 0215   MON SLEEP  ASSIGN       7,166
 
 # Page 681
 #      @YUL SYSTEM SIMULATORS -- AGC4                                            USER'S OWN PAGE NO.  10        PAGE  10
 
+P0217   EQUIVALENCES.
+
+
+
+ 0218   DAMN ZERO  EQUALS       0
+ 0219   AA         EQUALS       128
+ 0220   AMTF       EQUALS       384
+ 02201  SPRA       EQUALS       128
+ 0221   SP2        EQUALS       SUBHEAD
+
+ 0222   OCT T      EQUALS       ACO8
+ 0223   LOW2       EQUALS       THREE
+ 0224   LOW4       EQUALS       D12
+ 0225   LOW12      EQUALS       C7T8
+
+# (jl) Note: The following two cards seem to specify the same equivalence. Does the assembler ignore 
+# multiple identical equivalences?
+ 0226   16 ONES    EQUALS       CAC3
+ 0227   16 ONES    EQUALS       CAC3
+ 0228   E BIT      EQUALS       E FLAG
+ 0229   LP BIT     EQUALS       LP FLAG
+
+ 02291  LOW 16     EQUALS       CAC3
+ 0230   SPEC ZERO  EQUALS       SIGN
+ 0231   POINTERS   EQUALS       IN PTR
 
 # Page 682
 #      @YUL SYSTEM SIMULATORS -- AGC4                                            USER'S OWN PAGE NO.  11        PAGE  11
 
+P0232              TWO PRIMARY SUBDIRECTORS ARE RECOGNIZED FOR USE WITH MISCGA.  THE FIRST, WHICH IS REQUIRED, SPECIFIES
+R0234   THE STARTING ADDRESS BY "START AT NNNN", WHERE NNNN IS FROM 1 TO 4 OCTAL DIGITS.  THE SECOND IS OPTIONAL AND
+R0236   SPECIFIES A PRINT LINE LIMIT BY "PRINT LIMIT = DDDDD" (THE "=" IS OPTIONAL, AND "DDDDD" IS FROM 1 TO 5 DECIMAL
+R0238   DIGITS).  IF THE PRINT LIMIT SUBDIRECTOR IS MISSING OR INVALID, THE PRINT LIMIT IS 5000 LINES.
+
+ 0240   WHAT SUBD  TX           YUL MASKS     -             Z,MXR
+ 0241              S,YUL TYPER  W SUBDIRC     AA+2          C,+1                TYPE "SUBDIRECTOR:".
+ 0243              WA           Z,X6          OCTAL 20      Z,X5
+ 0244   SUSPECT    TX           Z,X5          -             WHODUNIT
+ 0245              NA           N,X5,3        W START       HOWZAT              "START" IS REQUIRED.
+ 0247              TS           AGC4 MSKS     Z,MXR         C,-2           C
+ 0248              NA           N,X5,3        W AT          HOWZIS              "AT" IS REQUIRED.
+ 0250              LA, CHAR6    5 C6          5,2           ILL START           BRANCH IF START ADR MORE THAN 4 DIGITS.
+ 02511             LA, CHAR6    5,2           ZERO          UNO START           BRANCH IF START ADDRESS IS BLANK.
+ 0252              LA, CHAR8    EIGHT         5,2           UNO START           BRANCH IF START ADDRESS NOT OCTAL.
+ 0254              WA           Z,X5          THREE         WHODUNIT
+ 0255              NA           5,3           ONES          HOWZIS              SUPERFLUOUS WORDS ARE FORBIDDEN.
+
+ 0257              SWS, ONES    N,X5          A,1           START MSG +1
+ 0258              TS           YUL MASKS     Z,MXR         E SYLT OK           MAKE GRP B SEEK DESIRED PROGRAM.
+ 0260              S, YUL TYPER START MSG     AA+2          C,+1                TYPE START ADDRESS.
+ 0262              TS           AGC4 MSKS     Z,MXR         C,+3
+
+ 0263              SWS, ONES    START ADR     3,L           START ADR           SHIFT UP DIGITS THUS FAR.
+ 0265              SWS, ACO8    START MSG +1  A,7           START ADR           CONVERT ALPHA START ADR TO OCTAL.
+ 0267              SWS, ONES    START MSG +1  A,1,L         START MSG +1        POSITION NEXT ALPHA OCTAL DIGIT.
+ 0269              NA, CHAR1    START MSG +1  BLANKS        C,-3                BRANCH IF MORE START ADR DIGITS.
+
+ 0271              WA           Z,X6          OCTAL 20      Z,X5
+ 0272              TS           Z,X5          WHODUNIT      RD SBDIRC           READ 2ND SUBDIRECTOR IF ANY.
+
+ 0274   STD PLIM   TS           ALF 5000      ALF PLIM      PROC PLIM           WHEN 2ND SUBDIRECTOR LACKING OR BAD.
+
+ 02751             TX           WHODUNIT      -             Z,X5
+ 02753             TX           TWO           -             HOLD LINE +1        SHOW THAT A SUBDIRECTOR WAS READ.
+ 0276              NA           N,X5,3        W PRINT       STD PLIM            IF NOT "PRINT", MAYBE "TRACE".
+ 0278              TS           ZERO          HOLD LINE +1  SUSPECT        C    SHOW THAT PRINT LIMIT CARD WAS READ.
+ 0279              NA           N,X5,3        W LIMIT       UNRC SUBD           "LIMIT" IS REQUIRED.
+ 0281              LA, CHAR8    6 C6          5,2           ILL PLIM            BRANCH IF PRINT LIMIT OVER 5 DIGITS.
+ 0283              SWE, CHAR8   5,2           A,2           Z,AU1
+ 0284              WA           Z,AU1         L SIXES       Z,AU1
+ 0285              WA           N,AU1         N,X5          PRINT LIM
+ 0286              NA, DCHECK   PRINT LIM     ZERO          UNDC PLIM           BRANCH IF PRINT LIMIT NOT DECIMAL.
+ 0288              TS           N,X5,3        ALF PLIM      SUSPECT        C
+ 0289              NA           N,X5          ONES          UNRC SUBD           SUPERFLUOUS WORDS ARE FORBIDDEN.
+
+ 0291   PROC PLIM  SWS, C7T8    ALF PLIM      A,2,L         PLIM MSG +1         USE CORRECTLY SPECIFIED PRINT LIMIT OR
+ 0293              SWS, C1T3    ALF PLIM      A,2,L         PLIM MSG +2         USE 5000 LINES OTHERWISE.
+ 0295              TS           Z,SC,1        Z,X4          MON A2D             COMVERT ALPHA TO DECIMAL.
+ 02961  ALF PLIM   RESERVE      2
+ 0297              TS           ALF PLIM +1   PRINT LIM     WHAT SUBD      C    STORE LIMIT, RECOVER BK 1 MASKS.
+ 0299              S, YUL TYPER PLIM MSG      AA+3          C,+1                TYPE PRINT LIMIT.
 
 # Page 683
 #      @YUL SYSTEM SIMULATORS -- AGC4                                            USER'S OWN PAGE NO.  12        PAGE  12
