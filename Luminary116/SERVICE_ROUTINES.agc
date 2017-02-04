@@ -13,10 +13,9 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-01-22 MAS  Created from Luminary 99.
+##              2017-02-03 RRB  Updated for Luminary 116.
 
-## NOTE: Page numbers below have not yet been updated to reflect Luminary 116.
-
-## Page 1374
+## Page 1364
                 BANK            10                              
                 SETLOC          DISPLAYS                        
                 BANK                                            
@@ -40,21 +39,21 @@ DOWNENT2        INHINT
 
 OCT7            EQUALS          SEVEN                           
 
-## Page 1375
-# UPFLAG AND DOWNFLAG ARE ENTIRELY GENERAL FLAG SETTING AND CLEARING SUBROUTINES.  USING THEM, WHETHER OR
+## Page 1365
+#     UPFLAG AND DOWNFLAG ARE ENTIRELY GENERAL FLAG SETTING AND CLEARING SUBROUTINES.  USING THEM, WHETHER OR
 # NOT IN INTERRUPT, ONE MAY SET OR CLEAR ANY SINGLE, NAMED BIT IN ANY ERASABLE REGISTER, SUBJECT OF COURSE TO
-# EBANK SETTING.  A "NAMED" BIT, AS THE WORD IS USED HERE, IS ANY BIT WITH A NAME FORMALLY ASSIGNED BY THE YUL
+# EBANK SETTING.   A "NAMED" BIT, AS THE WORD IS USED HERE, IS ANY BIT WITH A NAME FORMALLY ASSIGNED BY THE YUL
 # ASSEMBLER.
 
-# AT PRESENT THE ONLY NAMED BITS ARE THOSE IN THE FLAGWORDS.  ASSEMBLER CHANGES WILL MAKE IT POSSIBLE TO
+#     AT PRESENT THE ONLY NAMED BITS ARE THOSE IN THE FLAGWORDS.  ASSEMBLER CHANGES WILL MAKE IT POSSIBLE TO
 # NAME ANY BIT IN ERASABLE MEMORY.
 
-# CALLING SEQUENCES ARE AS FOLLOWS :-
+#     CALLING SEQUENCES ARE AS FOLLOWS:-
 #               TC      UPFLAG                  TC      DOWNFLAG
 #               ADRES   NAME OF FLAG            ADRES   NAME OF FLAG
 
-# RETURN IS TO THE LOCATION FOLLOWING THE "ADRES" ABOUT .58 MS AFTER THE "TC".
-# UPON RETURN A CONTAINS THE CURRENT FLAGWRD SETTING.
+#     RETURN IS TO THE LOCATION FOLLOWING THE "ADRES" ABOUT .58 MS AFTER THE "TC".
+#     UPON RETURN A CONTAINS THE CURRENT FLAGWRD SETTING.
 
                 BLOCK           02                              
                 SETLOC          FFTAG1                          
@@ -86,7 +85,7 @@ DEBIT           AD              ONE                             # CET DE BITS
                 CA              0               -1              # ADRES
                 TS              L                               
                 CA              ZERO                            
-## Page 1376
+## Page 1366
                 EXTEND                                          
                 DV              ITEMP1                          # A = FLAGWRD, L = (15 - BIT)
                 DXCH            ITEMP1                          
@@ -97,8 +96,8 @@ DEBIT           AD              ONE                             # CET DE BITS
                 CS              BIT15                           # -(15 - BIT)
                 TC              Q                               
 
-## Page 1377
-# DELAYJOB - A GENERAL ROUTINE TO DELAY A JOB A SPECIFIC AMOUNT OF TIME BEFORE PICKING UP AGAIN.
+## Page 1367
+# DELAYJOB- A GENERAL ROUTINE TO DELAY A JOB A SPECIFIC AMOUNT OF TIME BEFORE PICKING UP AGAIN.
 
 # ENTRANCE REQUIREMENTS ...
 #               CAF     DT              DELAY JOB FOR DT CENTISECS
@@ -114,6 +113,7 @@ DEBIT           AD              ONE                             # CET DE BITS
                 COUNT*          $$/DELAY                        
 DELAYJOB        INHINT                                          
                 TS              Q                               # STORE DELAY DT IN Q FOR DLY -1 IN
+
                 CAF             DELAYNUM                        # WAITLIST
 DELLOOP         TS              RUPTREG1                        
                 INDEX           A                               
@@ -146,9 +146,9 @@ TCGETCAD        TC              MAKECADR                        # GET CALLERS FC
                 TC              JOBSLEEP                        
 
 WAKER           CAF             ZERO                            
-                INDEX           BBANK                           
+                INDEX           BBANK
+## Page 1368                           
                 XCH             DELAYLOC                        # MAKE DELAYLOC AVAILABLE
-## Page 1378
                 TC              JOBWAKE                         
 
                 TC              TASKOVER                        
@@ -156,10 +156,12 @@ WAKER           CAF             ZERO
 TCSLEEP         GENADR          TCGETCAD        -2              
 WAKECAD         GENADR          WAKER                           
 
-## Page 1379
+## Page 1369
 # GENTRAN, A BLOCK TRANSFER ROUTINE.
+
 # WRITTEN BY D. EYLES
 # MOD 1 BY KERNAN                               UTILITYM REV 17 11/18/67
+
 # MOD 2 BY SCHULENBERG (REMOVE RELINT) SKIPPER REV 4 2/28/68
 
 # THIS ROUTINE IS USEFULL FOR TRANSFERING N CONSECUTIVE ERASABLE OR FIXED QUANTITIES TO SOME OTHER N
@@ -173,6 +175,7 @@ WAKECAD         GENADR          WAKER
 #       I +4                            RETURNS HERE.
 
 # GENTRAN TAKES 25 MCT'S (300 MICROSECONDS) PER ITEM + 5 MCT'S (60 MICS) FOR ENTERING AND EXITING.
+
 # A, L AND ITEMP1 ARE NOT PRESERVED.
 
                 BLOCK           02                              
@@ -199,8 +202,9 @@ GENTRAN         INHINT
                 TCF             GENTRAN         +1              
                 TCF             Q+2                             # RETURN TO CALLER.
 
-## Page 1380
+## Page 1370
 # B5OFF         ZERO BIT 5 OF EXTVBACT, WHICH IS SET BY TESTXACT.
+
 # MAY BE USED AS NEEDED BY ANY EXTENDED VERB WHICH HAS DONE TESTXACT
 
                 COUNT*          $$/EXTVB                        
