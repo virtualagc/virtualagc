@@ -1669,7 +1669,7 @@ P18095 *PROCEDURE TO RECONSTITUTE THE MENMONIC OP CODE OF INSTRUCTIONS.
  1843  *           TS           W EXTEND      CARDS +3      IMPLAD OP
  1844  *           NA           K COMMON +1   RESUME WD     C,+3
  1845  *           TX           W RESUME      -             CARDS +3
- # (jl) Annotation: the following line has "SIM LOCFD" crossed out and replaced with "SIM OCTWD -1".
+# (jl) Annotation: the following line has "SIM LOCFD" crossed out and replaced with "SIM OCTWD -1".
  1846  *IMPLAD OP  TS           BLANKS        CARDS +4      SIM LOCFD           CLEAR ADDRESS FIELD FOR IMPLIED-ADDRESS.
 
  1848  *           WA           Z,R1          K COMMON      Z,R1                POINT TO FULL CODE OR POINTER TO 1ST QC.
@@ -1695,9 +1695,11 @@ P18095 *PROCEDURE TO RECONSTITUTE THE MENMONIC OP CODE OF INSTRUCTIONS.
 P18755 *PROCEDURE TO SET UP ADDRESS FIELD OF INSTRUCTIONS, USING BANK NOTATION WHERE APPROPRIATE.
 
  1876  *12 BIT ADR EX           N,X5          OCT 17777     N,X5
+# (jl) Annotation: the following line has "OCT 3776" replaced with "OCT 3777".
  1877  *           LA           N,X5          OCT 3776      C,+3                BRANCH IF ADDRESS IS IN ERASABLE.
  1879  *           LA           OCT 10000     N,X5          C,+4                BRANCH IF ADDRESS IS IN FIXED-FIXED.
  1881  *           TS, C1T3     FBANK 00      CARDS +4      C,+3                ADDRESS IS IN A FIXED BANK.  ASSUME 00.
+# (jl) Annotation: the following line has "OCT 2776" replaced with "OCT 2777".
  1883  *ADR IN E   LA           N,X5          OCT 2776      C,+2                BRANCH IF ADDRESS IS IN UNSWITCHED E.
  1885  *           SS           CARDS +1      C1T3          CARDS +4            ADDRESS IN EBANK. ASSUME SAME AS LOC.
  1887  *           SWS, ACO4    N,X5          14,L          CARDS +4
