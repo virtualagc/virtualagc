@@ -13,10 +13,9 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-01-22 MAS  Created from Luminary 99.
+##              2017-02-03 RRB  Updated for Luminary 116.
 
-## NOTE: Page numbers below have not yet been updated to reflect Luminary 116.
-
-## Page 1338
+## Page 1328
                 BANK            14                              
                 SETLOC          KEYRUPT                         
                 BANK                                            
@@ -44,7 +43,7 @@ ACCEPTUP        CAF             CHRPRIO                         # (NOTE: RUPTREG
                 TS              MPAC                            # LEAVE 5 BIT KEY CDE IN MPAC FOR CHARIN
                 TC              RESUME                          
 
-## Page 1339
+## Page 1329
 # UPRUPT PROGRAM
 
 UPRUPT          TS              BANKRUPT                        
@@ -73,8 +72,8 @@ UPRPT1          CAF             LOW5                            # TEST FOR TRIPL
                 COM                                             
                 TC              UPTEST                          
 
-UPCK            CS              ELRCODE                         # CODE IS GOOD.  IF CODE = 'ERROR RESET',
-                AD              KEYTEMP1                        # CLEAR UPLOCKFL (SET BIT4 OF FLAGWRD7 = 0)
+UPCK            CS              ELRCODE                         # CODE IS GOOD. IF CODE = 'ERROR RESET',
+                AD              KEYTEMP1                        # CLEAR UPLOCKFL(SET BIT4 OF FLAGWRD7 = 0)
                 EXTEND                                          # IF CODE DOES NOT = 'ERROR RESET', ACCEPT
                 BZF             CLUPLOCK                        # CODE ONLY IF UPLOCKFL IS CLEAR (=0).
 
@@ -95,7 +94,7 @@ TMFAIL2         CS              FLAGWRD7                        # LOCK OUT FURTH
                 ADS             FLAGWRD7                        # 'ERROR RESET' IS SENT VIA UPLINK.
                 TC              RESUME                          
 UPTEST          AD              KEYTEMP1                        
-## Page 1340
+## Page 1330
                 CCS             A                               
                 TC              TMFAIL2                         
 HI10            OCT             77740                           
@@ -105,18 +104,16 @@ HI10            OCT             77740
 ELRCODE         OCT             22                              
 
 # 'UPLINK ACTIVITY LIGHT' IS TURNED OFF BY .....
-#       1.      VBRELDSP
-#       2.      ERROR RESET
-#       3.      UPDATE PROGRAM (P27) ENTERED BY V70,V71,V72, AND V73.
+#          1.     VBRELDSP
+#          2.     ERROR RESET
+#          3.     UPDATE PROGRAM (P27) ENTERED BY V70,V71,V72, AND V73.
 #                                    -
 # THE RECEPTION OF A BAD CODE (I.E  CCC FAILURE) LOCKS OUT FURTHER UPLINK ACTIVITY BY SETTING BIT4 OF FLAGWRD7 = 1.
 # THIS INDICATION WILL BE TRANSFERRED TO THE GROUND BY THE DOWNLINK WHICH DOWNLINKS ALL FLAGWORDS.
 # WHEN UPLINK ACTIVITY IS LOCKED OUT, IT CAN BE ALLOWED WHEN THE GROUND UPLINKS AND 'ERROR RESET' CODE.
 # (IT IS RECOMMENDED THAT THE 'ERROR LIGHT RESET' CODE IS PRECEEDED BY 16 BITS THE FIRST OF WHICH IS 1 FOLLOWED
-# BY 15 ZEROES.  THIS WILL ELIMINATE EXTRANEOUS BITS FROM INLINK WHICH MAY HAVE BEEN LEFT OVER FROM THE ORIGINAL
+# BY 15 ZEROES. THIS WILL ELIMINATE EXTRANEOUS BITS FROM INLINK WHICH MAY HAVE BEEN LEFT OVER FROM THE ORIGINAL
 # FAILURE)
 
 # UPLINK ACTIVITY IS ALSO ALLOWED (UNLOCKED) DURING FRESH START WHEN FRESH START SETS BIT4 OF FLAGWRD7 = 0.
-
-                CS              XDSPBIT                         
-
+                       
