@@ -98,7 +98,7 @@ SUPER101        OCT             120                             # BITS FOR SUPER
 # OCT121        OCT     121             SERVICE ROUTINES
                                                                 # (FIRST 8K OF ACM)
 SUPER110        OCT             140                             # BITS FOR SUPERBNK SETTING 110.
-                                                                # (LAST BK OF ACM)
+                                                                # (LAST 8K OF ACM)
 1SEC            DEC             100                             
 # LOW7          OCT     177             INTERPRETER
 # BIT8          OCT     00200
