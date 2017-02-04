@@ -10,6 +10,7 @@
 #               2017-02-01 JL   Transcribed pages 631-644.
 #               2017-02-03 JL   Transcribed pages 645-662.
 #               2017-02-04 JL   Transcribed pages 663-667.
+#               2017-02-04 JL   Transcribed pages 668-671.
 
 # Annotations:
 #
@@ -1585,17 +1586,142 @@ R1568   S       COMPARE PROGRAM PROGNAME FROM WORKER
 # Page 668
 #      @YUL SYSTEM MANUFACTURING - BLK2                                          USER'S OWN PAGE NO.  38        PAGE  93
 
+P1736  *           "PUNCH SIMULATION DECK" SUBDIRECTOR ROUTINE, FOR USE WITH SEGMENTS ONLY.  SUBDIRECTOR "TESTING" IS
+R1738  *OPTIONAL.  SEE PAGE 30.  THIS ROUTINE PUNCHES SPECIAL REQUESTS CARDS FOR THE SIMULATOR, TO ALLOW TESTING OF SEG-
+R1740  *MENTS IN CONJUNCTION WITH A PROGRAM.
+
+
+
+ 1741  *TRY SMLTN  NA           K COMMON      W SIMLATN     BAD SD
+ 1742  *           NA           K COMMON +1   W SIMLATN +1  BAD SD              "SIMULATION" IS REQUIRED.
+ 1744  *           NA           N,X5,3        W DECK        BAD SD              "DECK" IS REQUIRED.
+ 1746  *           NA           N,X5          ONES          BAD SD              FURTHER WORDS ARE FORBIDDEN.
+ 1748  *           TS           -             -             CHK TEST            SEE IF "TESTING" SUBDIRECTOR IS THERE.
+ 1750  *           S, MON TYPER SIMDK MSG     SPRA +24      -                   "PUNCH SIMULATION DECK".
+ 1752  *           NA, BIT7     SWITCH        ZERO          C,+2                BRANCH IF MANUFACTURING A SEGMENT.
+ 1754  *           S, MON TYPER SMDSO MSG     SPRAMR +40    TYP ABORT           "SIMULATION DECK IS FOR SEGMENTS ONLY".
+ 1756  *           TS           L OBJC MSG    Z,R1          E SYLT OK
+ 1757  *           TN           SIM CARD      3             CARDS
+ 1758  *           MT           N,R1,1        7             N,AU2,1
+ 1759  *           S, PUNCH CD  CARDS -1      ALPHA         C,+1                SET UP AND PUNCH IDENTIFYING CARD.
+ 1761  *           TX           BLANKS        -             CARDS
+ 1762  *           TN           CARDS         9             CARDS +1
+ 1763  *           TX           W EXERASE     -             CARDS +3
+ 1764  *           S, PUNCH CD  CARDS -1      ALPHA         C,+1                POLICE UP AND GIVE HIM A FREE EXERASE.
+
+R1766  *LOOP FOR EACH PARAGRAPH (EQUALS ONE EBANK).
+
+ 1767  *SIMDEK PH  TS           E COMMA XX    CARDS +1      FETCH SS            INITIALIZE LOC FIELD AND GET A PARAG.
+ 1769  *           S, PUNCH CD  EOR           BINARY        CLOSE PCH +1        EXIT IF NO MORE PARAGRAPHS.
+ 1771  *           LA           EIGHT         1,2           C,-1                EXIT IF WANDERED INTO FIXED MEMORY.
+ 1773  *           LA           THREE         1,2           SIM EBANK           BRANCH IF PART OF SWITCHED ERASBLE.
+ 1775  *           SWE, ONES    1,2           8,L           BEGIN ADR           FORM LOCATION VALUE IN UNSWITCHED E.
+ 1777  *           TS           4 ZEROS       CARDS +1      C,+3                NO EBANK NOTATION IN LOC FIELD HERE.
+ 1779  *SIM EBANK  SWE, ONES    RESET         3,L           BEGIN ADR           LOC VALUE INIT = 1400 FOR ALL EBANKS.
+ 1781  *           SWS, ACO2    1,2           A,2           CARDS +1            SUPPLY EBANK NUMBER TO LOC FIELD.
+ 1783  *           WA           Z,X1          THREE         Z,X5                POINT TO FIRST AGC WORD IN PARAGRAPH.
+
+R1785  *LOOP FOR EACH WORD IN AN OCCUPIED PARAGRAPH.
+
+ 1786  *SIM DEK WD NA           N,X5          ZERO          C,+2                BRANCH IF LOCATION IS OCCUPIED.
+ 1788  *           TS           Z,X5,1        CARDS +3      ADV SMLOC           CLOBBER OP FIELD AND GO ON TO NEXT WORD.
+ 1790  *           SSL, SEVEN   N,X5          27            C,+1                SELECT ON TYPE FLAG.
+ 1792  *           NA, ONE      SWITCH        ONES          C,+3                IF INDEXED INSTRUCTION, PUNCH AS OCT.
+ 1794  *           TS           OCT FORM      CARDS +4      SIM OCTWD           INTERPRETIVE OPERATOR WORDS.
+ 1796  *           TS           OCT FORM      CARDS +4      SIM OCTWD           CONSTANTS OF ALL SORTS.
+ 1798  *           TS           4 ZEROS       CARDS +4      SIM INSTR           BASIC INSTRUCTIONS WITH REF CUSSES.
+ 1800  *           TN           W BAD WORD    2             CARDS +3            BAD OR CONFLICT: OP = "BADWORD", NO ADR.
+ 1802  *           TS           Z,X5,1        -             SIM LOCFD
+ 
+ 1803  *SIM OCTWD  SWS, ACO1    N,X5          29,L          CARDS +4
+ 1804  *           SWS, ACO2    N,X5          26,L          CARDS +4
+ 1805  *           SWS, ACO3    N,X5          23,L          CARDS +4
+ 1806  *           SWS, ACO4    N,X5          20,L          CARDS +4
+ 1807  *           SWS, ACO5    N,X5          17,L          CARDS +4
+ 1808  *           TS           W OCT         CARDS +3      SIM LOCFD           FORM ADDRESS AND OP FIELDS OF OCT CARD.
 
 # Page 669
 #      @YUL SYSTEM MANUFACTURING - BLK2                                          USER'S OWN PAGE NO.  39        PAGE  94
 
+P18095 *PROCEDURE TO RECONSTITUTE THE MENMONIC OP CODE OF INSTRUCTIONS.
+
+ 1810  *SIM INSTR  SWE, SEVEN   N,X5          13            K COMMON            ISOLATE 3-BIT FULL OP CODE.
+ 1812  *           SSL, ONE     N,X5          21            C,+1                "BRANCH" IF IT'S AN EXTRACODE INSTR.
+ 1814  *           TS           L OP CODES    Z,R1          SIM BCODS           POINT TO ARRAY OF NON-EXTRACODE OPS.
+
+ 1816  *SIM XCODS  WA           L OP CODES    SEVEN         Z,R1                POINT TO ARRAY OF EXTRACODE OPS.
+ 1818  *           LA           FIVE          K COMMON      IMPLAD OP +1        BRANCH IF INDEX, SU, BZMF, OR MP.
+ 1820  *           LA           K COMMON      TWO           C,+2                BRANCH IF NOT DCA OR DCS.
+ 1822  *           WD           N,X5          TWO           N,X5                (BECAUSE SIMULATOR WILL INCREMENT DP'S).
+ 1825  *           NA           K COMMON      ZERO          IMPLAD OP +1        BRANCH IF NOT ONE OF THE CHANNEL OPS.
+ 1827  *           SWE, SEVEN   N,X5          10            K COMMON            ISOLATE THE 3-BIT EXTENSION OF OP.
+ 1829  *           NA           K COMMON      SEVEN         C,+2                BRANCH IF NOT AN EDRUPT.
+ 1831  *           TS           W EDRUPT      CARDS +3      12 BIT ADR          TREAT EDRUPT LIKE A FULL CODE.
+ 1833  *           WA           L CHAN OPS    K COMMON      Z,R1
+ 1834  *           TS           N,R1          CARDS +3      9 BIT ADR           SET UP CHANNEL OP FIELD, GO FOR ADDRESS.
+ 
+ 1836  *SIM BCODS  SWE, CAC3    N,X5          1             K COMMON +1         MOVE WORD FOR SPECIAL-CASE CHECK.
+ 1838  *           NA           K COMMON +1   THREE         C,+2
+ 1839  *           TS           W RELINT      CARDS +3      IMPLAD OP
+ 1840  *           NA           K COMMON +1   FOUR          C,+2
+ 1841  *           TS           W INHINT      CARDS +3      IMPLAD OP
+ 1842  *           NA           K COMMON +1   SIX           C,+2
+ 1843  *           TS           W EXTEND      CARDS +3      IMPLAD OP
+ 1844  *           NA           K COMMON +1   RESUME WD     C,+3
+ 1845  *           TX           W RESUME      -             CARDS +3
+ # (jl) Annotation: the following line has "SIM LOCFD" crossed out and replaced with "SIM OCTWD -1".
+ 1846  *IMPLAD OP  TS           BLANKS        CARDS +4      SIM LOCFD           CLEAR ADDRESS FIELD FOR IMPLIED-ADDRESS.
+
+ 1848  *           WA           Z,R1          K COMMON      Z,R1                POINT TO FULL CODE OR POINTER TO 1ST QC.
+ 1850  *           TX           N,R1          -             CARDS +3            INITIALLY ASSUME FULL CODE.
+ 1852  *           LA           CAC3          CARDS +3      12 BIT ADR          BRANCH IF INDEED A FULL CODE.
+ 1854  *           SWE, THREE   N,X5          11            K COMMON            ISOLATE QUARTER-CODE BITS.
+ 1856  *           WA           CARDS +3      K COMMON      Z,R1                POINT TO QUARTER CODE.
+ 1858  *           LA           CORE 000      CARDS +3      SIM QCODS           BRANCH IF TRULY FOUR QUARTER CODES.
+ 1860  *           LA           K COMMON      ZERO          C,+2                BRANCH IF ONE-QUARTER, NOT 3-QUARTER.
+ 1862  *           WA           CARDS +3      ONE           Z,R1                POINT TO THREE-QUARTER CODE.
+ 1864  *           TS           N,R1          CARDS +3      12 BIT ADR          SET UP ONE- OR THREE-QUARTER-CODE OP.
+
+ 1866  *SIM QCODS  NA           N,R1          DAS ETC       C,+2
+ 1867  *           TX           Z,SC,1        -             -                   DECREMENT ADDRESS OF DAS.
+ 1869  *           NA           N,R1          INDEX ETC +1  C,+2
+ 1870  *           WD           N,X5          TWO           N,X5                DECREMENT ADDRESS OF DXCH.
+ 1872  *           EX           N,X5          OCT 3776      N,X5                ISOLATE ADDRESS VALUE OF QC INSTRUCTION.
+ 1874  *           TS           N,R1          CARDS +3      ADR IN E            ...AND SET UP ITS OP CODE FIELD.
 
 # Page 670
 #      @YUL SYSTEM MANUFACTURING - BLK2                                          USER'S OWN PAGE NO.  40        PAGE  95
 
+P18755 *PROCEDURE TO SET UP ADDRESS FIELD OF INSTRUCTIONS, USING BANK NOTATION WHERE APPROPRIATE.
+
+ 1876  *12 BIT ADR EX           N,X5          OCT 17777     N,X5
+ 1877  *           LA           N,X5          OCT 3776      C,+3                BRANCH IF ADDRESS IS IN ERASABLE.
+ 1879  *           LA           OCT 10000     N,X5          C,+4                BRANCH IF ADDRESS IS IN FIXED-FIXED.
+ 1881  *           TS, C1T3     FBANK 00      CARDS +4      C,+3                ADDRESS IS IN A FIXED BANK.  ASSUME 00.
+ 1883  *ADR IN E   LA           N,X5          OCT 2776      C,+2                BRANCH IF ADDRESS IS IN UNSWITCHED E.
+ 1885  *           SS           CARDS +1      C1T3          CARDS +4            ADDRESS IN EBANK. ASSUME SAME AS LOC.
+ 1887  *           SWS, ACO4    N,X5          14,L          CARDS +4
+ 1888  *9 BIT ADR  SWS, ACO5    N,X5          11,L          CARDS +4
+ 1889  *           SWS, ACO6    N,X5           8,L          CARDS +4
+ 1890  *           SWS, ACO7    N,X5,1         5,L          CARDS +4            SET UP ADDRESS FIELD OF ANY INSTRUCTION.
+ 
+ 1892  *SIM LOCFD  SWS, ACO4    BEGIN ADR     15,L          CARDS +1
+ 1893  *           SWS, ACO5    BEGIN ADR     12,L          CARDS +1
+ 1894  *           SWS, ACO6    BEGIN ADR      9,L          CARDS +1
+ 1895  *           SWS, ACO7    BEGIN ADR      6,L          CARDS +1
+ 1896  *           S, PUNCH CD  CARDS -1      ALPHA         C,+1                SET UP LOCATION FIELD AND PUNCH CARD.
+ 
+ 1898  *ADV SMLOC  WA           BEGIN ADR     ONE           BEGIN ADR           STEP LOCATION VALUE.
+ 1900  *           NA           CARDS +3      INDEX ETC     C,+2                BRANCH IF NOT AN INDEX INSTRUCTION.
+ 1902  *           TS, ONE      ONES          SWITCH        C,+2                FLAG TO MAKE NEXT INSTR PUNCH AS OCT.
+ 1904  *           SS           ZERO          ONE           SWITCH
+ 1905  *           NA           5,2           EOR           SIM DEK WD          CONTINUE IF NOT END OF PARAGRAPH.
+ 
+ 1907  *           TS           ZERO          CARDS +3      SIM DEK PH          CLOBBER OP FIELD AND GET NEXT PARAGRAPH.
+
+# END OF REVISION 9 OF PROGRAM YULMANUF BY HB-S
 
 # Page 671
 #      @YUL SYSTEM MANUFACTURING - BLK2                                          USER'S OWN PAGE NO.  41        PAGE  96
 
-
- SEQBRK            END          YUL MANUF     BLK2
+# No source code on this page.
