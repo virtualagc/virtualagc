@@ -9,6 +9,7 @@
 # Mod history:  2016-10-06 JL   Created.
 #               2017-02-01 JL   Transcribed pages 631-644.
 #               2017-02-03 JL   Transcribed pages 645-662.
+#               2017-02-04 JL   Transcribed pages 663-667.
 
 # Annotations:
 #
@@ -1386,204 +1387,200 @@ P1405   PROCEDURE TO  PUNCH CARDS/TAPE IN CORRELATION WITH *TESTING* SUBDIRECTOR
 # Page 663
 #      @YUL SYSTEM MANUFACTURING - BLK2                                          USER'S OWN PAGE NO.  33        PAGE  88
 
-XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+P1474   PROCEDURE TO SET UP REQUEST FOR EITHER NO PUNCHING AND/OR LISTING OF  CURRENT TASK VIA *TESTING* SUBDIRECTOR
 
-P1521   PROCEDURE TO SET UP REQUEST FOR EITHER NO PUNCHING AND/OR LISTING OF  CURRENT TASK VIA *TESTING* SUBDIRECTOR.
-
- 1523   TRY TEST   NA           KCOMMON       W TESTING     TRY USE
- 1524              TS           Z,SC          Z,R1          UP WORD
- 1525              TS           -             -             READ A REQ
- 1526   CHK TEST   TS           Z,SH          Z,R1          RD SBDIRC           IS NEXT CARD A SUBDIRECTOR
- 1528              TS           -             -             N,R1                NO
- 1530              WA           Z,X6          OCTAL 20      Z,X5                YES
- 1532              NA           N,X5,3        W TESTING     BAD SD              WORD TESTING IS REQUIRED
- 1534   UP WORD    TX           N,X5,3        -             KCOMMON
- 1535              NA           KCOMMON       W NOPUNCH     C,+2
- 1536              TS,ONE       ONE           TEST INST     UP WORD        C    SET INHIBIT PUNCH SWITCH
- 1538              NA           KCOMMON       W LIST        C,+2
- 1539              TS,TWO       TWO           TEST INST     UP WORD        C    SET LISTING REQUESTED SWITCH
- 1541              NA           KCOMMON       W CHECK       C,+2
- 1542              TS,FOUR      ONES          TEST INST     UPWORD         C
- 1543              NA           ONES          KCOMMON       BAD SD
- 1544              TS           -             -             N,R1
+ 1476   TRY TEST   NA           KCOMMON       W TESTING     TRY USE
+ 1477              TS           Z,SC          Z,R1          UP WORD
+ 1478              TS           -             -             READ A REQ
+ 1479   CHK TEST   TS           Z,SH          Z,R1          RD SBDIRC           IS NEXT CARD A SUBDIRECTOR
+ 1481              TS           -             -             N,R1                NO
+ 1483              WA           Z,X6          OCTAL 20      Z,X5                YES
+ 1485              NA           N,X5,3        W TESTING     BAD SD              WORD TESTING IS REQUIRED
+ 1487   UP WORD    TX           N,X5,3        -             KCOMMON
+ 1488              NA           KCOMMON       W NOPUNCH     C,+2
+ 1489              TS,ONE       ONE           TEST INST     UP WORD        C    SET INHIBIT PUNCH SWITCH
+ 14902             NA           KCOMMON       W LIST        C,+2
+ 1491              TS,TWO       TWO           TEST INST     UP WORD        C    SET LISTING REQUESTED SWITCH
+ 1493              NA           ONES          KCOMMON       BAD SD
+ 1495              TS           -             -             N,R1
 
 # Page 664
 #      @YUL SYSTEM MANUFACTURING - BLK2                                          USER'S OWN PAGE NO.  34        PAGE  89
 
-P1689              PROCEDURE TO COPY THE BINARY RECORD OF A PRORGRAM ONTO WORK TAPE 2 FOR COMPARISON WITH ANOTHER BY THE
-R1691   FOLLOWING TASK.  SUBDIRECTOR IS:
-R1692   S       COPY ONTO WORKER
+P1500              PROCEDURE TO COPY THE BINARY RECORD OF A PRORGRAM ONTO WORK TAPE 2 FOR COMPARISON WITH ANOTHER BY THE
+R1502   FOLLOWING TASK.  SUBDIRECTOR IS:
+R1503   S       COPY ONTO WORKER
 
- 1693   AGC4 COPY  NA           N,X5,3        W ONTO        BAD SD              WORD ONTO IS REQUIRED
- 1695              NA           N,X5,3        W WORKER      BAD SD              WORD WORKER IS REQUIRED
- 1697              TX           BY PAS MDN    -             ANY MDN             * MODULE DECK NUMBERS* SD NOT ALLOWED
- 1699              TS           Z,SC          HOLD LOC      RY COMMOP           ZERO PARAGRAPH REEQUESTS
- 1701              S,MON TYPER  COPY MSG      SPRA+16       C,+1                PRINT OUT COPY MESSAGE
- 1703              TS           Z,SC          HOLD LOC      READ A REQ          GO READ TASK SUBDIRECTORS
- 1705              TS           Z,SC          HOLD LOC      GET WORKR           GO RESERVE YUL WORKER 2
- 1707   COPY XA    TS           Z,SC          Z,X5          GET REQ PN          GO GET NEXT PARAGRAPH
- 1709              TS           -             -             COPY XB             NO MORE PARAGRAPHS
- 1711   COPY XD    TX           1,1           -             C FIRST RC +1       PROGRAM NAME INTO STATEMENT WHICH
- 1713              CC           C FIRST RC    -             C FIRST RC +6       IDENTIFIES THIS PARTICULAR COPY JOB TO
- 1715              TS           -             -             MON TAPE            IT'S PARTICULAR COMPARE JOB.  NOW WRITE
- 1717              WF,2         C FIRST RC    -             -                   IT ONTO THE WORKER
- 1719              TN           COPY LINE     3             PRINT BUF +1
- 1720              TX           L OBJC MSG    -             Z,AU1
- 1721   OBJ MANUF  MT           N,AU1,1       7             N,AU2,1
- 1722              TS           Z,SC          K COMMON +5   GO BOY              PREPARE AND PRINT PAGE HEAD FOR COPY.
- 1724              TS           -             -             MON TAPE
- 1725              WF,2         -             -             -
- 1726              TX           N,SC,1        -             COPY XD
- 1727              TS           -             -             C,+1
- 1728              TS           -             -             MON TAPE
- 1729              WF,2         1,0           -             -
- 1730              TS           -             -             MON TAPE            WAIT UNTIL WRITE DONE
- 1732              WF,2         -             -             -
- 1733              TS           -             -             COPY XA
- 1734   COPY XB    S,MON EOFRI  TAPE ORDR     -             ZERO                WRITE END OF FILE RECORDS
- 1736              S,MON TYPER  E COPY MSG    SPRAMR +56    C,+1                TYPE OUT COPYING DONE MESSAGE.
- 1738              TX           ZERO          -             LAS MF LIN
- 1739              TX           AGC4 CMPR -1  -             AGC4 CMPR -4        PREVENT FINAL PRINTING IF COPYING.
- 1741   COPY XC    TS           B1            PRINT BUF     MON TAPE            REWIND WORKER
- 1743              RW,2         -             -             -
- 1744              TN           E CMPR MSG    2             PRINT BUF +1
- 1745   LAS MF LIN TS           Z,SC          K COMMON +5   GO BOY
- 1746              TS           OCT 00047     PRINT BUF     MON TAPE            REWIND YULPROGS
- 1748              RW,1         -             -             -
- 1749              S, PHI PRINT PRINT BUF
- 1750              S, PHI PRINT PRINT BUF
- 1751              S, PHI PRINT PRINT BUF
- 1752              TS           -             -             MANUF RTN
+ 1504   BLK2 COPY  NA           N,X5,3        W ONTO        BAD SD              WORD ONTO IS REQUIRED
+ 1506              NA           N,X5,3        W WORKER      BAD SD              WORD WORKER IS REQUIRED
+ 1508              TX           BY PAS MDN    -             ANY MDN             * MODULE DECK NUMBERS* SD NOT ALLOWED
+ 1510              TS           Z,SC          HOLD LOC      RY COMMOP           ZERO PARAGRAPH REEQUESTS
+ 1512              S,MON TYPER  COPY MSG      SPRA+16       C,+1                PRINT OUT COPY MESSAGE
+ 1514              TS           Z,SC          HOLD LOC      READ A REQ          GO READ TASK SUBDIRECTORS
+ 1516              TS           Z,SC          HOLD LOC      GET WORKR           GO RESERVE YUL WORKER 2
+ 1518   COPY XA    TS           Z,SC          Z,X5          GET REQ PN          GO GET NEXT PARAGRAPH
+ 1520              TS           -             -             COPY XB             NO MORE PARAGRAPHS
+ 1522   COPY XD    TX           1,1           -             C FIRST RC +1       PROGRAM NAME INTO STATEMENT WHICH
+ 1524              CC           C FIRST RC    -             C FIRST RC +6       IDENTIFIES THIS PARTICULAR COPY JOB TO
+ 1526              TS           -             -             MON TAPE            IT'S PARTICULAR COMPARE JOB.  NOW WRITE
+ 1528              WF,2         C FIRST RC    -             -                   IT ONTO THE WORKER
+ 1530              TN           COPY LINE     3             PRINT BUF +1
+ 1531              TX           L OBJC MSG    -             Z,AU1
+ 1532   OBJ MANUF  MT           N,AU1,1       7             N,AU2,1
+ 1533              TS           Z,SC          K COMMON +5   GO BOY              PREPARE AND PRINT PAGE HEAD FOR COPY.
+ 1535              TS           -             -             MON TAPE
+ 1536              WF,2         -             -             -
+ 1537              TX           N,SC,1        -             COPY XD
+ 1538              TS           -             -             C,+1
+ 1539              TS           -             -             MON TAPE
+ 1541              WF,2         1,0           -             -
+ 1542              TS           -             -             MON TAPE            WAIT UNTIL WRITE DONE
+ 1544              WF,2         -             -             -
+ 1545              TS           -             -             COPY XA
+ 1546   COPY XB    S,MON EOFRI  TAPE ORDR     -             ZERO                WRITE END OF FILE RECORDS
+ 1548              S,MON TYPER  E COPY MSG    SPRAMR +56    C,+1                TYPE OUT COPYING DONE MESSAGE.
+ 1550              TX           ZERO          -             LAS MF LIN
+ 1551              TX           BLK2 CMPR -1  -             BLK2 CMPR -4        PREVENT FINAL PRINTING IF COPYING.
+ 1553   COPY XC    TS           B1            PRINT BUF     MON TAPE            REWIND WORKER
+ 1555              RW,2         -             -             -
+ 1556              TN           E CMPR MSG    2             PRINT BUF +1
+ 1557   LAS MF LIN TS           Z,SC          K COMMON +5   GO BOY
+ 1558              TS           OCT 00047     PRINT BUF     MON TAPE            REWIND YULPROGS
+ 1560              RW,1         -             -             -
+ 1561              S, PHI PRINT PRINT BUF
+ 1562              S, PHI PRINT PRINT BUF
+ 1563              S, PHI PRINT PRINT BUF
+ 1564              TS           -             -             MANUF RTN
 
 # Page 665
 #      @YUL SYSTEM MANUFACTURING - BLK2                                          USER'S OWN PAGE NO.  35        PAGE  90
 
-P1753              PROCEDURE TO COMPARE THE BINARY RECORD OF A PROGRAM WITH ANOTHER STORED ON WORK TAPE 2 BY THE PRECED-
-R1755   ING TASK.  SUBDIRECTOR IS:
-R1756   S       COMPARE PROGRAM PROGNAME FROM WORKER
+P1565              PROCEDURE TO COMPARE THE BINARY RECORD OF A PROGRAM WITH ANOTHER STORED ON WORK TAPE 2 BY THE PRECED-
+R1567   ING TASK.  SUBDIRECTOR IS:
+R1568   S       COMPARE PROGRAM PROGNAME FROM WORKER
 
- 1757   AGC4 CMPR  NA           N,X5,3        W PROGNAM     BAD SD              WORD PROGRAM IS REQUIRED
- 1759              TX           N,X5,3        -             C FIRST RC +1       EXTRACT COPY PROGRAM NAME
- 1761              NA           N,X5,3        W FROM        BAD SD              WORD FROM IS REQUIRED
- 1763              NA           N,X5,3        W WORKER      BAD SD              WORD WORKER IS REQUIRED
- 1765              TX           BY PAS MDN    -             ANY MDN             * MODULE DECK NUMBER* SD IS NOT ALLOWED.
- 1767              TS           Z,SC          HOLD LOC      RY COMMOP           ZERO PARAGRAPH REQUESTS
- 1769              S,MON TYPER  CMPAR MSG     SPRA+24       C,+1                PRINT OUT COMPARE MESSAGE
- 1771              TS           Z,SC          HOLD LOC      READ A REQ          GO READ TASK SUBDIRECTORS
- 1773              S,MONTADDR   TAPE ORDR                                       MUST OWN WORKER 2 CUZ MUST FOLLOW COPY
- 1775              TS           C,+2          HOLD LOC      TAPE ORDE
- 1776              S, MON TYPER NO WT2 MSG    SPRAMR +40    TYP ABORT
- 1777              SPEC                                     C,+1
- 1778              TX           THREE         -             TEST INST           ENABLE PRINTING/NO PUNCH OF PCH FRAME
- 1780   CMPR XA    TS           Z,SC          Z,X5          GET REQ PN          GET NEXT PARAGRAPH.
- 1782              TS           -             -             CMPR XB             NO MORE PARAGRAPHS
- 1784              TX           ZERO          -             KCOMMON +7          SHOW ZERO ERRORS SO FAR IN NEW PARA
- 1786   CMPR XR    TX           L CPY AREA    -             Z,X4                COPY AREA BASE ADDRESS
- 1788              TS           -             -             MON TAPE            READ A RECORD FROM THE WORKER
- 1790              RF,2         4,0           -             -                   WAIT UNTIL READ IN
- 1792              TS           -             -             MON TAPE
- 1793              RF,2         -             -             -
- 1794   CMPR XU    NA,BANBITS   4,0           BAN EOFRI     CMPR XH
- 1795              TS           -             -             CMPR XS
- 1796   CMPR XH    NA           C FIRST RC    4,0           CMPR XK             DEMAND MATCH OF FIRST SIX WORDS OF
- 1798              NA           C FIRST RC +1 4,1           CMPR XK             FIRST WORKER RECORD
- 1800              NA           C FIRST RC +2 4,2           CMPR XK
- 1801              NA           C FIRST RC +3 4,3           CMPR XK
- 1802              NA           C FIRST RC +4 4,4           CMPR XK
- 1803              NA           C FIRST RC +5 4,5           CMPR XK
- 1804              TN           CMPR LINE     3             PRINT BUF +1
- 1805              TS           L OBJC MSG    Z,AU1         OBJ MANUF      C
- 1806              TS           Z,SC          K COMMON +5   GO BOY              PREPARE AND PRINT PAGE HEAD FOR COMPARE.
- 1808              TS           N,SC          CMPR XH       CMPR XR
- 1809              TS           -             -             C,+1
- 1810   CMPR XN    NA           4,2           1,2           CMPR XC             JUMP IF PARAGRAPH NUMBERS DISAGREE
- 1812              WA           Z,X1          THREE         Z,X5
- 1813              TX           Z,X4,3        -             -                   POINT TO FIRST AGC WORDS IN EACH PARA
- 1815              TX           Z,X5          -             KCOMMON + 3
- 1816   CMPR XG    NA,CAC3      4,0           5,0           CMPR XD             JUMP IF AGC WORDS DISAGREE FOR THIS LOC
- 1818   CMPR XQ    WA           Z,X4,1        Z,X5,1        -
- 1819              TS           -             -             CMPR XG
- 1820   CMPR XD    WD           Z,X5          C255          Z,R1                LOOK TO SEE IF PARA BOUNDARAY EXCEEDED
- 1822              LA           Z,R1          KCOMMON +3    CMPR XE             JUMP IF PARAGRAPH NOT DONE
- 1824              LA           KCOMMON + 9   HOT DOG       CMPR XA             JUMP IF NO PARTIAL LINE WAITING
- 1826              TS           Z,SC          KCOMMON +5    GO BOY              PRINT REMAINING PARTIAL LINE
- 1828              TS           -             -             CMPR XA
- 1829   CMPR XE    WA           KCOMMON + 7   ONE           KCOMMON +7          NUMBER OF LOCS WITH DIFFERENT VALUES
- 1831              LA           TWO           KCOMMON +7    CMPR XF             JUMP IF ONE ALREADY FOUND FOR THIS PARA
- 1833              TN           CMPFL MSG     10            PRINT BUF +1
- 1834              SWS,ACO6     1,2           6,L           PRINT BUF +2        SET PARAGRAPH NUMBER INTO COMPARE FAIL
- 1836              SWS,ACO7     1,2           3,L           PRINT BUF +3        MESSAGE
+ 1569   BLK2 CMPR  NA           N,X5,3        W PROGNAM     BAD SD              WORD PROGRAM IS REQUIRED
+ 1571              TX           N,X5,3        -             C FIRST RC +1       EXTRACT COPY PROGRAM NAME
+ 1573              NA           N,X5,3        W FROM        BAD SD              WORD FROM IS REQUIRED
+ 1575              NA           N,X5,3        W WORKER      BAD SD              WORD WORKER IS REQUIRED
+ 1577              TX           BY PAS MDN    -             ANY MDN             * MODULE DECK NUMBER* SD NOT ALLOWED.
+ 1579              TS           Z,SC          HOLD LOC      RY COMMOP           ZERO PARAGRAPH REQUESTS
+ 1581              S,MON TYPER  CMPAR MSG     SPRA+24       C,+1                PRINT OUT COMPARE MESSAGE
+ 1583              TS           Z,SC          HOLD LOC      READ A REQ          GO READ TASK SUBDIRECTORS
+ 1585              S,MONTADDR   TAPE ORDR                                       MUST OWN WORKER 2 CUZ MUST FOLLOW COPY
+ 1587              TS           C,+2          HOLD LOC      TAPE ORDE
+ 1588              S, MON TYPER NO WT2 MSG    SPRAMR +40    TYP ABORT
+ 1589              SPEC                                     C,+1
+ 1590              TX           THREE         -             TEST INST           ENABLE PRINTING/NO PUNCH OF PCH FRAME
+ 1592   CMPR XA    TS           Z,SC          Z,X5          GET REQ PN          GET NEXT PARAGRAPH.
+ 1594              TS           -             -             CMPR XB             NO MORE PARAGRAPHS
+ 1596              TX           ZERO          -             KCOMMON +7          SHOW ZERO ERRORS SO FAR IN NEW PARA
+ 1598   CMPR XR    TX           L CPY AREA    -             Z,X4                COPY AREA BASE ADDRESS
+ 1600              TS           -             -             MON TAPE            READ A RECORD FROM THE WORKER
+ 1602              RF,2         4,0           -             -
+ 1603              TS           -             -             MON TAPE            WAIT UNTIL READ IN
+ 1605              RF,2         -             -             -
+ 1606   CMPR XU    NA,BANBITS   4,0           BAN EOFRI     CMPR XH
+ 1607              TS           -             -             CMPR XS
+ 1608   CMPR XH    NA           C FIRST RC    4,0           CMPR XK             DEMAND MATCH OF FIRST SIX WORDS OF
+ 1610              NA           C FIRST RC +1 4,1           CMPR XK             FIRST WORKER RECORD
+ 1612              NA           C FIRST RC +2 4,2           CMPR XK
+ 1613              NA           C FIRST RC +3 4,3           CMPR XK
+ 1614              NA           C FIRST RC +4 4,4           CMPR XK
+ 1615              NA           C FIRST RC +5 4,5           CMPR XK
+ 1616              TN           CMPR LINE     3             PRINT BUF +1
+ 1617              TS           L OBJC MSG    Z,AU1         OBJ MANUF      C
+ 1618              TS           Z,SC          K COMMON +5   GO BOY              PREPARE AND PRINT PAGE HEAD FOR COMPARE.
+ 1620              TS           N,SC          CMPR XH       CMPR XR
+ 1621              TS           -             -             C,+1
+ 1622   CMPR XN    NA           4,2           1,2           CMPR XC
+ 1623              WA           Z,X1          THREE         Z,X5
+ 1624              TX           Z,X4,3        -             -                   POINT TO FIRST AGC WORDS IN EACH PARA
+ 1626              TX           Z,X5          -             KCOMMON + 3
+ 1627   CMPR XG    NA,CAC3      4,0           5,0           CMPR XD             JUMP IF AGC WORDS DISAGREE FOR THIS LOC
+ 1629   CMPR XQ    WA           Z,X4,1        Z,X5,1        -
+ 1630              TS           -             -             CMPR XG
+ 1631   CMPR XD    WD           Z,X5          C255          Z,R1                LOOK TO SEE IF PARA BOUNDARAY EXCEEDED
+ 1633              LA           Z,R1          KCOMMON +3    CMPR XE             JUMP IF PARAGRAPH NOT DONE
+ 1635              LA           KCOMMON + 9   HOT DOG       CMPR XA             JUMP IF NO PARTIAL LINE WAITING
+ 1637              TS           Z,SC          KCOMMON +5    GO BOY              PRINT REMAINING PARTIAL LINE
+ 1639              TS           -             -             CMPR XA
+ 1640   CMPR XE    WA           KCOMMON + 7   ONE           KCOMMON +7          NUMBER OF LOCS WITH DIFFERENT VALUES
+ 1642              LA           TWO           KCOMMON +7    CMPR XF             JUMP IF ONE ALREADY FOUND FOR THIS PARA
+ 1644              TN           CMPFL MSG     10            PRINT BUF +1
+ 1645              SWS,ACO6     1,2           6,L           PRINT BUF +2        SET PARAGRAPH NUMBER INTO COMPARE FAIL
+ 1647              SWS,ACO7     1,2           3,L           PRINT BUF +3        MESSAGE
 
 # Page 666
 #      @YUL SYSTEM MANUFACTURING - BLK2                                          USER'S OWN PAGE NO.  36        PAGE  91
 
- 1838              SS           1,2           SEVEN         PRINT BUF + 2
- 1839              TS           Z,SC          KCOMMON +5    GO BOY              PRINT COMPARE FAIL MESSAGE
- 1841   CMPR XF    WD           Z,X5          KCOMMON+3     FRAME               DETERMINE WORD'S RELATIVE PARAGRAPH LOC
- 1843              TS           -             -             PCH FRAE       C    SET WORD RELATIVE LOC ONTO PRINT LINE
- 1845              TS           -             -             CMPR XQ
- 1846   CMPR XC    LA           4,2           1,2           CMPR XL             JUMP IF PARAGRAPH NOT ON YULPROGS
- 1848              SWS,ACO6     1,2           6,L           CMPR XM +1          COMPLAIN ABOUT PARAGRAPH BEING MISSING
- 1850              SWS,ACO7     1,2           3,L           CMPR XM +1          IN THE COPY PROGRAM
- 1852              SS           1,2           SEVEN         CMPR XM +1
- 1853              TN           CMPR XM       5             PRINT BUF +1
- 1854              TS           Z,SC          KCOMMON +5    GO BOY
- 1855              S,MON TYPER  CMPR XM       SPRA+40       C,+1
- 1856              TX           Z,X4          -             KCOMMON+8
- 1857              TS           Z,SC          Z,X5          GET REQ PN          GET NEXT PARAGRAPH
- 1859              TS           KCOMMON +8    Z,X4          CMPRXB
- 1860              TS           KCOMMON +8    Z,X4          CMPR XN
- 1861   CMPR XM    ALF,5        PARAGRAPH    000 MISSING IN COPY PROGRAM
- 1862   CMPR XL    SWS,ACO6     4,2           6,L           CMPR XP +1          COMPLAIN ABOUT PARAGRAPH BEING MISSING
- 1864              SWS,ACO7     4,2           3,L           CMPR XP +1          IN COMPARE PROGRAM
- 1866              SS           4,2           SEVEN         CMPR XP +1
- 1867              TN           CMPR XP       6             PRINT BUF + 1
- 1868              TS           Z,SC          KCOMMON +5    GO BOY
- 1869              S,MON TYPER  CMPR XP       SPRA +48      CMPR XR
- 1870   CMPR XP    ALF,5        PARAGRAPH    000 MISSING IN COMPARE PROG
- 1871              ALF,1        RAM
- 1872   CMPR XB    TS           N,SC          CMPR XU       CMPR XR             READ WORKER RECORD
- 1874              TS           -             -             C,+1
- 1875              NA,BANBITS   4,0           BANEOFRI      CMPR XW             JUMP IF NOT END OF WORKER
- 1877              S,MON TYPER  E CMPR MSG    SPRAMR+16     COPY XC             PRINT COMPARE DONE MESSAGE
- 1879   CMPR XW    SWS,ACO6     4,2           6,L           CMPR XX +1          COMPLAIN ABOUT POSSIBLE MISSING 
- 1881              SWS,ACO7     4,2           3,L           CMPR XX +1          PARAGRAPHS IN THE COMPARE PROGRAM
- 1883              SS           4,2           SEVEN         CMPR XX +1
- 1884              TN           CMPR XX       7             PRINT BUF +1
- 1885              TS           Z,SC          KCOMMON +5    GO BOY
- 1886              S,MON TYPER  CMPR XX       SPRAMR+56     COPY XC
- 1887   CMPR XX    ALF,5        PARAGRAPHS   000 AND ABOVE MISSING FROM
- 1888              ALF,2        COMPARE PROGRAM
- 1889   CMPR XS    SWS,ACO6     1,2           6,L           CMPR XT +1          COMPLAIN ABOUT MISSIGN PARAGRAPHS IN
- 1891              SWS,ACO7     1,2           3,L           CMPR XT +1          THE COPY PROGRAM
- 1893              SS           1,2           SEVEN         CMPR XT +1
- 1894              TN           CMPR XT       7             PRINT BUF +1
- 1895              TS           Z,SC          KCOMMON +5    GO BOY
- 1896              S,MON TYPER  CMPR XT       SPRAMR+56     COPY XC
- 1897   CMPR XT    ALF,5        PARAGRAPHS   000 AND ABOVE MISSING FROM
- 1898              ALF,2        COPY PROGRAM
- 1899   CMPR XK    S,MONTYPER   C,+1          SPRAMR +56    CMPR XJ
- 1900              ALF,5        COPY JOB EITHER MISSING, UNSUCCESSFUL,
- 1901              ALF,2        NOT MATCHING OR
- 1902   CMPR XJ    S,MONTYPER   C,+1          SPRAMR +56    COPY XC
- 1903              ALF,5        WAS NOT IMMEDIATELY FOLLOWED BY THIS COM
- 1904              ALF,2        PARE JOB
- 1905   GET WORKER S,MON TADDR  TAPE ORDR                                       ASK IF YUL SYSTEM HAS RESERVED A WORKER
- 1907              TS           -             -             TAPE ORDE           IT CALLS 2.  YES IT HAS.
- 1909              TS           ONES          C,+3          PHI SNACH           NO IT HAS NOT, GO GET IT.
- 1911              ALF,3        W00Y0102YULWRK2
+ 1649              SS           1,2           SEVEN         PRINT BUF + 2
+ 1650              TS           Z,SC          KCOMMON +5    GO BOY              PRINT COMPARE FAIL MESSAGE
+ 1652   CMPR XF    WD           Z,X5          KCOMMON+3     FRAME               DETERMINE WORD'S RELATIVE PARAGRAPH LOC
+ 1654              TS           -             -             PCH FRAE       C    SET WORD RELATIVE LOC ONTO PRINT LINE
+ 1656              TS           -             -             CMPR XQ
+ 1657   CMPR XC    LA           4,2           1,2           CMPR XL             JUMP IF PARAGRAPH NOT ON YULPROGS
+ 1659              SWS,ACO6     1,2           6,L           CMPR XM +1          COMPLAIN ABOUT PARAGRAPH BEING MISSING
+ 1661              SWS,ACO7     1,2           3,L           CMPR XM +1          IN THE COPY PROGRAM
+ 1663              SS           1,2           SEVEN         CMPR XM +1
+ 1664              TN           CMPR XM       5             PRINT BUF +1
+ 1665              TS           Z,SC          KCOMMON +5    GO BOY
+ 1666              S,MON TYPER  CMPR XM       SPRA+40       C,+1
+ 1667              TX           Z,X4          -             KCOMMON+8
+ 1668              TS           Z,SC          Z,X5          GET REQ PN          GET NEXT PARAGRAPH
+ 1670              TS           KCOMMON +8    Z,X4          CMPRXB
+ 1671              TS           KCOMMON +8    Z,X4          CMPR XN
+ 1672   CMPR XM    ALF,5        PARAGRAPH    000 MISSING IN COPY PROGRAM
+ 1673   CMPR XL    SWS,ACO6     4,2           6,L           CMPR XP +1          COMPLAIN ABOUT PARAGRAPH BEING MISSING
+ 1675              SWS,ACO7     4,2           3,L           CMPR XP +1          IN COMPARE PROGRAM
+ 1677              SS           4,2           SEVEN         CMPR XP +1
+ 1678              TN           CMPR XP       6             PRINT BUF + 1
+ 1679              TS           Z,SC          KCOMMON +5    GO BOY
+ 1680              S,MON TYPER  CMPR XP       SPRA +48      CMPR XR
+ 1681   CMPR XP    ALF,5        PARAGRAPH    000 MISSING IN COMPARE PROG
+ 1682              ALF,1        RAM
+ 1683   CMPR XB    TS           N,SC          CMPR XU       CMPR XR             READ WORKER RECORD
+ 1685              TS           -             -             C,+1
+ 1686              NA,BANBITS   4,0           BANEOFRI      CMPR XW             JUMP IF NOT END OF WORKER
+ 1688              S,MON TYPER  E CMPR MSG    SPRAMR+16     COPY XC             PRINT COMPARE DONE MESSAGE
+ 1690   CMPR XW    SWS,ACO6     4,2           6,L           CMPR XX +1          COMPLAIN ABOUT POSSIBLE MISSING 
+ 1692              SWS,ACO7     4,2           3,L           CMPR XX +1          PARAGRAPHS IN THE COMPARE PROGRAM
+ 1694              SS           4,2           SEVEN         CMPR XX +1
+ 1695              TN           CMPR XX       7             PRINT BUF +1
+ 1696              TS           Z,SC          KCOMMON +5    GO BOY
+ 1697              S,MON TYPER  CMPR XX       SPRAMR+56     COPY XC
+ 1698   CMPR XX    ALF,5        PARAGRAPHS   000 AND ABOVE MISSING FROM
+ 1699              ALF,2        COMPARE PROGRAM
+ 1700   CMPR XS    SWS,ACO6     1,2           6,L           CMPR XT +1          COMPLAIN ABOUT MISSIGN PARAGRAPHS IN
+ 1702              SWS,ACO7     1,2           3,L           CMPR XT +1          THE COPY PROGRAM
+ 1704              SS           1,2           SEVEN         CMPR XT +1
+ 1705              TN           CMPR XT       7             PRINT BUF +1
+ 1706              TS           Z,SC          KCOMMON +5    GO BOY
+ 1707              S,MON TYPER  CMPR XT       SPRAMR+56     COPY XC
+ 1708   CMPR XT    ALF,5        PARAGRAPHS   000 AND ABOVE MISSING FROM
+ 1709              ALF,2        COPY PROGRAM
+ 1710   CMPR XK    S,MONTYPER   C,+1          SPRAMR +56    CMPR XJ
+ 1711              ALF,5        COPY JOB EITHER MISSING, UNSUCCESSFUL,
+ 1712              ALF,2        NOT MATCHING OR
+ 1713   CMPR XJ    S,MONTYPER   C,+1          SPRAMR +56    COPY XC
+ 1714              ALF,5        WAS NOT IMMEDIATELY FOLLOWED BY THIS COM
+ 1715              ALF,2        PARE JOB
+ 1716   GET WORKER S,MON TADDR  TAPE ORDR                                       ASK IF YUL SYSTEM HAS RESERVED A WORKER
+ 1718              TS           -             -             TAPE ORDE           IT CALLS 2.  YES IT HAS.
+ 1720              TS           ONES          C,+3          PHI SNACH           NO IT HAS NOT, GO GET IT.
+ 1722              ALF,3        W00Y0102YULWRK2
 
 # Page 667
 #      @YUL SYSTEM MANUFACTURING - BLK2                                          USER'S OWN PAGE NO.  37        PAGE  92
 
- 1912   TAPE ORDE  TS           -             -             MON TAPE            REWIND WORKER
- 1914   TAPE ORDR  RW,2         -             -             -
- 1915              TS           CAC3          Z,X4          MON TAPE            SKIP OVER LABEL RECORD
- 1917              RF,2         4,0           -             -
- 1918              TS           -             -             MON TAPE            WAIT UNTIL SKIP DONE
- 1920              RF,2         -             -             -
- 1921              TX           HOLD LOC      -             Z,SC                RETURN TO CALLER
- 1923   COPY AREA  RESERVE      262                                             WORK AREA FOR COPY AND COMPARE ROUTINES
+ 1723   TAPE ORDE  TS           -             -             MON TAPE            REWIND WORKER
+ 1725   TAPE ORDR  RW,2         -             -             -
+ 1726              TS           CAC3          Z,X4          MON TAPE            SKIP OVER LABEL RECORD
+ 1728              RF,2         4,0           -             -
+ 1729              TS           -             -             MON TAPE            WAIT UNTIL SKIP DONE
+ 1731              RF,2         -             -             -
+ 1732              TX           HOLD LOC      -             Z,SC                RETURN TO CALLER
+ 1734   COPY AREA  RESERVE      262                                             WORK AREA FOR COPY AND COMPARE ROUTINES
 
 # Page 668
 #      @YUL SYSTEM MANUFACTURING - BLK2                                          USER'S OWN PAGE NO.  38        PAGE  93
@@ -1601,4 +1598,4 @@ R1756   S       COMPARE PROGRAM PROGNAME FROM WORKER
 #      @YUL SYSTEM MANUFACTURING - BLK2                                          USER'S OWN PAGE NO.  41        PAGE  96
 
 
- SEQBRK            END          YUL MANUF     AGC4
+ SEQBRK            END          YUL MANUF     BLK2
