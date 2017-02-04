@@ -142,7 +142,7 @@ P0054   FURTHER SHIFT MASKS
 P0091   ALPHABETIC CONSTANTS.
 
  009199*W BAD WORD ALF          BADWORD
- 0092   BLANKS     ALF          
+ 0092   BLANKS     ALF
  0093   W NASA     ALF          NASA
  0094   W CORE     ALF          CORE
  0095   W ROPE     ALF          ROPE
@@ -163,8 +163,8 @@ P0091   ALPHABETIC CONSTANTS.
 P0112   ALPHABETIC CONSTANTS CONTINUED.
 
  0113              OCT          0
- 0114   CARDS      ALF,5        
- 0115              ALF,5        
+ 0114   CARDS      ALF,5
+ 0115              ALF,5
  0116              OCT          0
  0117   CARD       ALF,5        L0000004BLK2 MASTER DECK
  0118              ALF,5          1ST PARAGRAPH
@@ -1544,7 +1544,7 @@ R1568   S       COMPARE PROGRAM PROGNAME FROM WORKER
  1685              TS           -             -             C,+1
  1686              NA,BANBITS   4,0           BANEOFRI      CMPR XW             JUMP IF NOT END OF WORKER
  1688              S,MON TYPER  E CMPR MSG    SPRAMR+16     COPY XC             PRINT COMPARE DONE MESSAGE
- 1690   CMPR XW    SWS,ACO6     4,2           6,L           CMPR XX +1          COMPLAIN ABOUT POSSIBLE MISSING 
+ 1690   CMPR XW    SWS,ACO6     4,2           6,L           CMPR XX +1          COMPLAIN ABOUT POSSIBLE MISSING
  1692              SWS,ACO7     4,2           3,L           CMPR XX +1          PARAGRAPHS IN THE COMPARE PROGRAM
  1694              SS           4,2           SEVEN         CMPR XX +1
  1695              TN           CMPR XX       7             PRINT BUF +1
@@ -1632,7 +1632,7 @@ R1785  *LOOP FOR EACH WORD IN AN OCCUPIED PARAGRAPH.
  1798  *           TS           4 ZEROS       CARDS +4      SIM INSTR           BASIC INSTRUCTIONS WITH REF CUSSES.
  1800  *           TN           W BAD WORD    2             CARDS +3            BAD OR CONFLICT: OP = "BADWORD", NO ADR.
  1802  *           TS           Z,X5,1        -             SIM LOCFD
- 
+
  1803  *SIM OCTWD  SWS, ACO1    N,X5          29,L          CARDS +4
  1804  *           SWS, ACO2    N,X5          26,L          CARDS +4
  1805  *           SWS, ACO3    N,X5          23,L          CARDS +4
@@ -1659,7 +1659,7 @@ P18095 *PROCEDURE TO RECONSTITUTE THE MENMONIC OP CODE OF INSTRUCTIONS.
  1831  *           TS           W EDRUPT      CARDS +3      12 BIT ADR          TREAT EDRUPT LIKE A FULL CODE.
  1833  *           WA           L CHAN OPS    K COMMON      Z,R1
  1834  *           TS           N,R1          CARDS +3      9 BIT ADR           SET UP CHANNEL OP FIELD, GO FOR ADDRESS.
- 
+
  1836  *SIM BCODS  SWE, CAC3    N,X5          1             K COMMON +1         MOVE WORD FOR SPECIAL-CASE CHECK.
  1838  *           NA           K COMMON +1   THREE         C,+2
  1839  *           TS           W RELINT      CARDS +3      IMPLAD OP
@@ -1706,19 +1706,19 @@ P18755 *PROCEDURE TO SET UP ADDRESS FIELD OF INSTRUCTIONS, USING BANK NOTATION W
  1888  *9 BIT ADR  SWS, ACO5    N,X5          11,L          CARDS +4
  1889  *           SWS, ACO6    N,X5           8,L          CARDS +4
  1890  *           SWS, ACO7    N,X5,1         5,L          CARDS +4            SET UP ADDRESS FIELD OF ANY INSTRUCTION.
- 
+
  1892  *SIM LOCFD  SWS, ACO4    BEGIN ADR     15,L          CARDS +1
  1893  *           SWS, ACO5    BEGIN ADR     12,L          CARDS +1
  1894  *           SWS, ACO6    BEGIN ADR      9,L          CARDS +1
  1895  *           SWS, ACO7    BEGIN ADR      6,L          CARDS +1
  1896  *           S, PUNCH CD  CARDS -1      ALPHA         C,+1                SET UP LOCATION FIELD AND PUNCH CARD.
- 
+
  1898  *ADV SMLOC  WA           BEGIN ADR     ONE           BEGIN ADR           STEP LOCATION VALUE.
  1900  *           NA           CARDS +3      INDEX ETC     C,+2                BRANCH IF NOT AN INDEX INSTRUCTION.
  1902  *           TS, ONE      ONES          SWITCH        C,+2                FLAG TO MAKE NEXT INSTR PUNCH AS OCT.
  1904  *           SS           ZERO          ONE           SWITCH
  1905  *           NA           5,2           EOR           SIM DEK WD          CONTINUE IF NOT END OF PARAGRAPH.
- 
+
  1907  *           TS           ZERO          CARDS +3      SIM DEK PH          CLOBBER OP FIELD AND GET NEXT PARAGRAPH.
 
 # END OF REVISION 9 OF PROGRAM YULMANUF BY HB-S

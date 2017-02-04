@@ -2184,52 +2184,52 @@ R1725   STATUS AS SOON AS IT IS FULL.  EXPECTS INPUT TO START IN N,X0.  ENTER WI
 R17261  IS ON, RENUMBERS MOST CARDS, STARTING OVER AT EACH LOG CARD.
 
  1727   SEND POPO  TS           N,CSC,1       SEND POPO     GRAB FREE      C    INITAL, OR BUFFER-SEEKING, MODE.
- 1729              TS           POB PLACE     Z,X4          RNUM TEST      C    
+ 1729              TS           POB PLACE     Z,X4          RNUM TEST      C
  1731              TX           ZERO          -             N,AU1          C    PUT POPO FLAG IN FIRST WORD OF BUFFER.
- 1733              TX           Z,AU1,1       -             POPO BUFF      C    
+ 1733              TX           Z,AU1,1       -             POPO BUFF      C
  1741              WA           Z,AU1         C253          END POBUF      C    COMPUTE END OF BUFFER.
- 1743              TS           Z,AU1         Z,X4          RNUM TEST      C    
+ 1743              TS           Z,AU1         Z,X4          RNUM TEST      C
  17432  NON RNUM   LA           (CARD NO)     N,X0          MOVE POPO      C    BRANCH IF MERGE CONTROL CARD.
  17434             SS           Z,CSC,1       BIT 1         SWITCH         C    SHUT OFF RENUMBERING ON BAD MERGE.
 
  17436  RNUM TEST  LA           BIT 1         SWITCH        REM CHECK      C    BRANCH IF RENUMBERING IS ON.
- 1744   MOVE POPO  TN           N,X0          11            N,X4,11        C    
+ 1744   MOVE POPO  TN           N,X0          11            N,X4,11        C
  1745              NA           Z,X4          END POBUF     POPO EXIT      C    BRANCH IF BUFFER IS NOT FULL.
 
- 1747              TX           POPO BUFF     -             Z,SH           C    
- 1748              CC           N,SH          -             N,X4           C    
+ 1747              TX           POPO BUFF     -             Z,SH           C
+ 1748              CC           N,SH          -             N,X4           C
  1749              TX           N,CSC,3       -             SEND POPO      C    SET UP BUFFER-SEEKING MODE.
- 1750              TS           N,CSC,1       SEND POPO     GRAB FREE      C    
+ 1750              TS           N,CSC,1       SEND POPO     GRAB FREE      C
  1751              LA           N,R7          ZERO          C,+3           C    BRANCH IF SAPO LIST IS NOT FULL.
  1752              TS           Z,SC          Z,AU1         CSC SLEEP      S    OTHERWISE SLEEP UNTIL THERE'S A VACANCY.
- 1753              TS           SAPO NTRY     Z,R7          C,-2           C    
+ 1753              TS           SAPO NTRY     Z,R7          C,-2           C
  1755              TS           POPO BUFF     N,R7,1        -              C    PUT BUFFER INTO SAPO STATUS.
- 1756              SM           Z,R7          BIT 46 R      SAPO NTRY      C    
+ 1756              SM           Z,R7          BIT 46 R      SAPO NTRY      C
  1757              TS           Z,SC          Z,CSC         MON WAKE       C    MODULATE SAPO ENTRY POINTER AND EXIT.
  1761   POPO EXIT  TX           Z,X4          -             POB PLACE           MARK PLACE IN BUFFER AND EXIT.
 
  176203 REM CHECK  LA           (RIGHT P)     N,X0          RNUM CARD      C    GO TO RENUMBER MOST CARD TYPES.
  17621             NA, CHAR1    0,0           (REMARK)      NON RNUM       C    BR IF MERGE CONTROL OR MERGE ERROR CARD.
  176216            NA, CHAR1    0,1           L COLUMN 1    RNUM CARD      C    BRANCH TO RENUMBER NON-LOG REMARKS.
- 176223 RESTART N  TX           ZERO          -             FIELD COD +1   C    
+ 176223 RESTART N  TX           ZERO          -             FIELD COD +1   C
  176224            TS           ZERO          RENUMBER      MOVE POPO      C    RESTART NUMBER SEQUENCE AFTER LOG ETC.
 
  17623  RNUM CARD  SS           ZERO          BIT 7         N,X0           C    WIPE OUT OBSOLETE SEQUENCE ERROR BIT.
- 176236            LA           RENUMBER      MAX CARDN     C,+3           C    
- 17624             SM           0,1           BIT 43        0,1            C    
+ 176236            LA           RENUMBER      MAX CARDN     C,+3           C
+ 17624             SM           0,1           BIT 43        0,1            C
  176243            TS, C2T7     W SQBR MIN    0,1           RESTART N      C    GENERATE SEQBREAK AFTER CARD 9998.98.
 
- 17625             DA           RENUMBER      BIT 20        RENUMBER       C    
+ 17625             DA           RENUMBER      BIT 20        RENUMBER       C
  176252            SS           ZERO          BIT 43        0,1            C    ERASE OLD SEQUENCE BREAK FLAG.
- 176255            TX           RENUMBER      -             POB PLACE      C    
- 17626             SWS, C5T8    POB PLACE     8             POB PLACE      C    
- 176265            TX           DEC ALF M1    -             ALF MASK       C    
- 17627             SWS, ALFMASK POB PLACE     4             POB PLACE      C    
- 176275            TX           DEC ALF M2    -             ALF MASK       C    
- 17628             SWS, ALFMASK POB PLACE     2             POB PLACE      C    
- 176285            TX           DEC ALF M3    -             ALF MASK       C    
+ 176255            TX           RENUMBER      -             POB PLACE      C
+ 17626             SWS, C5T8    POB PLACE     8             POB PLACE      C
+ 176265            TX           DEC ALF M1    -             ALF MASK       C
+ 17627             SWS, ALFMASK POB PLACE     4             POB PLACE      C
+ 176275            TX           DEC ALF M2    -             ALF MASK       C
+ 17628             SWS, ALFMASK POB PLACE     2             POB PLACE      C
+ 176285            TX           DEC ALF M3    -             ALF MASK       C
  17629             SWE, ALFMASK POB PLACE     2             POB PLACE      C    CONVERT NEW CARD NUMBER TO ALPHABETIC.
- 176293            TX           POB PLACE     -             FIELD COD +1   C    
+ 176293            TX           POB PLACE     -             FIELD COD +1   C
  176295            TS, C2T7     POB PLACE     0,1           MOVE POPO      C    PLANT IT AND GO TO MOVE CARD.
 
 # Page 197
@@ -2263,7 +2263,7 @@ R1779   IF THE LOCATION IS SYMBOLIC, THE TRANSFORMED SYMBOL HEALTH IS STORED.
 
  1794              SM           LOC STATE     BIT 8         LOC STATE           SIGNAL SYMBOLIC LOC.
  1796              TS           L SYM THR     Z,X5          ANAL SYMB +1   C    ANALYZE HISTORY OF SYMBOL.
- 1798              NA           COMMON +2     ONES          C,+3                
+ 1798              NA           COMMON +2     ONES          C,+3
  17982             SM           LOC STATE     BIT 17        LOC STATE           COMMON+2 IS ALL ONES IF SYM TAB FULL.
  1800              TS           -             -             BLANK LOC           IN WHICH CASE TREAT LOC AS BLANK.
 
@@ -2276,30 +2276,30 @@ R1779   IF THE LOCATION IS SYMBOLIC, THE TRANSFORMED SYMBOL HEALTH IS STORED.
  1818              TX           LOC CTR       -             FIELD COD +1        IN CASE OF ILL-TYPE INSTANT SETLOC.
  1820              EX           COMMON +1     FIX MAG       LOC CTR             USE EXPLICIT DEFINITION TO RESET L.C.
 
- 1823   BLANK LOC  TX           LOC CTR       LOC VALUE     INCR LCTR      C    
+ 1823   BLANK LOC  TX           LOC CTR       LOC VALUE     INCR LCTR      C
  1825              TX           ONES          -             FIELD COD +1        SHOW NO INSTANT SETLOC.
- 1827              LA           LOC VALUE     MAX LOC       OK L SIZE           
+ 1827              LA           LOC VALUE     MAX LOC       OK L SIZE
 
- 1828   BAD L SIZE TX           ONES          -             LOC CTR             
+ 1828   BAD L SIZE TX           ONES          -             LOC CTR
  1830              SM           LOC STATE     BIT 14        LOC STATE           SIGNAL OVERSIZE.
  1832              SWS, D8      N,S0          D,5           COMMON +2           USE OVERSIZE TRANSFORM ON SYMBOL HEALTH.
- 1834              TS           ZERO          LOC VALUE     LOC EXIT -2         
+ 1834              TS           ZERO          LOC VALUE     LOC EXIT -2
 
 # Page 198
 #      @YUL SYSTEM ASSEMBLER -- PASS 1                                           USER'S OWN PAGE NO.  46        PAGE  46
 
 P18345  CHECK OTHER QUALITIES OF A LOCATION VALUE OF USABLE SIZE.
 
- 1835   OK L SIZE  TX           L TYP TAB     -             Z,X5                
+ 1835   OK L SIZE  TX           L TYP TAB     -             Z,X5
  1836              LA, CAC3     LOC VALUE     5,0           C,+2                LOOK UP MEMORY TYPE.
- 1838              TS           Z,X5,1        -             C,-1                
+ 1838              TS           Z,X5,1        -             C,-1
 
  1839              NA, LSTYPE   5,0           SWITCH        BAD L TYPE          BRANCH IF TYPE DOESNT MATCH THAT SUPLYD.
  1841              NA           N,S0          XFORMS +5     OK L TYPE           BRANCH IF OLD HEALTH WAS NOT LEFTOVER.
  1843              SSL, ONE     COMMON +2     15            C,+2                SIGN BIT TELLS WHETHER FIXED OR ERASABL.
 
  1845              TS           Z,SH          Z,SC          BAD L TYPE     C    TYPE TROUBLE FOR SYM ONLY, THEN CHEK AV.
- 1847              TS           TYPE F        COMMON        C,+2                
+ 1847              TS           TYPE F        COMMON        C,+2
  1848              TX           TYPE E        -             COMMON              CHOOSE CRITERION FOR LEFTOVER TYPE.
  1850              NA, LSTYPE   COMMON        SWITCH        C,-3                BRANCH IF LEFTOVER USED WRONG MEM TYPE.
 
@@ -2312,21 +2312,21 @@ P18345  CHECK OTHER QUALITIES OF A LOCATION VALUE OF USABLE SIZE.
  1862              SM           LOC STATE     BIT 15        LOC STATE           SIGNAL WRONG MEMORY TYPE.
  18632             LA           ONES          FIELD COD +1  LOC EXIT            EXIT IF THERE WAS NO INSTANT SETLOC.
  18634             TS           FIELD COD +1  LOC CTR       BLANK LOC      C    RESTORE LOC CTR AFTER ILL-TYPE NUM LOC.
- 1864   LOC EXIT   SM           LOC STATE     LOC VALUE     LOC STATE           
+ 1864   LOC EXIT   SM           LOC STATE     LOC VALUE     LOC STATE
  1865              NA, BIT 8    LOC STATE     ONES          6,0                 EXIT IF LOCATION WASNT SYMBOLIC.
 
- 1867              SS           LOC VALUE     CAC3          COMMON +2           
+ 1867              SS           LOC VALUE     CAC3          COMMON +2
 
 # Page 199
 #      @YUL SYSTEM ASSEMBLER -- PASS 1                                           USER'S OWN PAGE NO.  47        PAGE  47
 
 P18671  EVERY SYMBOL DEFINED OR NEARLY DEFINED IN PASS 1 COMES THROUGH MY DEF XIT.
 
- 18672  SY DEF XIT TN           COMMON +1     2             COMMON              
+ 18672  SY DEF XIT TN           COMMON +1     2             COMMON
  18674             LA           N,X2          CAC3          ONLY DEF            BRANCH IF THIS IS THE FIRST DEFINITION.
 
  186752            SWE, D12     N,X2          D,8           Z,S0                GET TRANSFORMS FOR HEALTH OF 1ST DEF.
- 186756            WA           Z,S0          L XFORMS      Z,S0                
+ 186756            WA           Z,S0          L XFORMS      Z,S0
  18676             S, ETS       3,0           ZX +4         C,+1                POINT TO SYMBOL OR TO MULT DEF FLAG.
  18678             LA           CAC12         4,2           ALREDY MD           BRANCH IF THIS IS THE 3RD OR SUBSEQ DEF.
  186792            SWS, D4      N,S0          D,6,L         N,X2                SHOW MULTIPLE DEFINITION ON 1ST ENTRY.
@@ -2335,20 +2335,20 @@ P18671  EVERY SYMBOL DEFINED OR NEARLY DEFINED IN PASS 1 COMES THROUGH MY DEF XI
  18682  MD UNFITS  SM           LOC STATE     BIT 17        LOC STATE           LOCATION-SYMBOL-DIDN'T-FIT-IN-TABLE FLG.
  18686             TS           Z,X6          Z,SC          FULLNESS       C    COUNT UNFITTING SYMBOL AND EXIT.
 
- 186884 4TH DIMEN  NA           SYM PLACE     SPEC MAG      C,+2                
+ 186884 4TH DIMEN  NA           SYM PLACE     SPEC MAG      C,+2
  186886            WA           SYM PLACE     THREE         SYM PLACE      S    SKIP OVER 32 STOPPER.
- 186888            EBA          SYM PLACE     BIT 25        Z,X2                
+ 186888            EBA          SYM PLACE     BIT 25        Z,X2
  18689             TN           N,X4          3             N,X2,1              MOVE MULT. DEF. SYMBOL INTO THE 4TH DIM.
  1869              SM           CAC12         SYM PLACE     4,2                 CONVERT OLD ENTRY INTO MULT DEF FLAG.
  18692             TS, CAC3     SYM PLACE     2,0           4TH DIMEN +1   C    FIRST MULT DEF SYM POINTS TO SELF.
 
  18695  ALREDY MD  LA           END SY TAB    SYM PLACE     MD UNFITS           BRANCH IF SYMBOL TABLE IS FULL.
- 186965            NA           SYM PLACE     SPEC MAG      C,+2                
+ 186965            NA           SYM PLACE     SPEC MAG      C,+2
  18697             WA           SYM PLACE     THREE         SYM PLACE           SKIP OVER 32K STOPPER.
  186975            SM           CAC12         SYM PLACE     4,2                 MAKE MULT DEF FLAG POINT TO LATEST DEF.
- 18698             TX           N,X2          -             Z,X4                
+ 18698             TX           N,X2          -             Z,X4
  186985            SS           SYM PLACE     CAC3          N,X2                MULTIPLE DEFS ARE THREADED IN A CIRCLE.
- 18699             EBA          SYM PLACE     BIT 25        Z,X2                
+ 18699             EBA          SYM PLACE     BIT 25        Z,X2
  1870              TS           COMMON        N,X2,1        4TH DIMEN +1   C    EXTEND LIST INTO THE 4TH DIMENSION.
  18702             TX           Z,X4          -             N,X2                MULT. DEF. SYMS ARE THREADED IN A RING.
  187032            EX           COMMON +3     CAC 12        COMMON +3           NEW MULDEF CAN'T DEF EARLIER NEAR DEFS.
@@ -2370,7 +2370,7 @@ R1885   NEW SYMBOL FOR WHICH THERE IS NO ROOM IN THE SYMBOL TABLE.  OTHER OUTPUT
  1887   LFTVR LOC  TS           Z,SC          Z,X4          C,+1                SET RETURN AND GET INTO SEQUENCE MODE.
  1889              SS           TYPE F        L STYPE       SWITCH              SPECIFY FIXED MEMORY.
  1891              TX           BIT 12        -             LOC STATE           INDICATE LEFTOVER (TENTATIVELY).
- 1893              TS           LOC FIELD     COMMON        ANAL SUBF      C    
+ 1893              TS           LOC FIELD     COMMON        ANAL SUBF      C
  1894              TX           LXFORMS       -             Z,S0                INITIALIZE TRANSFORM ADDRESS.
  1896              NA           FIELD COD     BIT 1         NUM LEFTO           BRANCH IF FIELD IS NOT SYMBOLIC.
 
@@ -2380,8 +2380,8 @@ R1885   NEW SYMBOL FOR WHICH THERE IS NO ROOM IN THE SYMBOL TABLE.  OTHER OUTPUT
 
  1905              SWE, D12     COMMON +2     16            LOC VALUE           USE OLD SYMBOL HEALTH...
  1907              WA           Z,S0          LOC VALUE     Z,S0                ...TO GET ADDRESS OF TRANSFORM.
- 19082             LA           3 D8          COMMON +2     S LFT HLTH          
- 1909              LA           COMMON +2     ZERO          S LFT HLTH          
+ 19082             LA           3 D8          COMMON +2     S LFT HLTH
+ 1909              LA           COMMON +2     ZERO          S LFT HLTH
  1910              TS, BIT 10   ONES          LOC STATE     REJECT +1      C    INDICATE PREDEFINITION FAILURE.
  19112             SM           LOC STATE     BIT 14        LOC STATE           INDICATE ILL-DEFINED LOCATION VALUE.
  19114             TS           D8            COMMON +2     NUM LEFTO -1        FAILED ATTEMPT TO PREDEFINE LEFTOVER.
@@ -2391,7 +2391,7 @@ R1885   NEW SYMBOL FOR WHICH THERE IS NO ROOM IN THE SYMBOL TABLE.  OTHER OUTPUT
 
  1916              HA           LOC STATE     BIT 12        LOC STATE           REMOVE LEFTOVER STATUS.
  1918              EX           COMMON +2     CAC3          LOC VALUE           USE PREDEFINED VALUE (ALWAYS OK SIZE).
- 1919              TS           Z,X4          Z,X6          OK L SIZE           
+ 1919              TS           Z,X4          Z,X6          OK L SIZE
 
  1923   LEFTOVER   LA           N,S0          BIT 2         REJECT              BRANCH IF DEFINED BY OTHER THAN IS OR =.
 
@@ -2403,7 +2403,7 @@ R1885   NEW SYMBOL FOR WHICH THERE IS NO ROOM IN THE SYMBOL TABLE.  OTHER OUTPUT
  1930   NUM LEFTO  NA, BIT 6    FIELD COD     ONES          REJECT              BRANCH IF NOT UNSIGNED NUMERIC.
 
  1932              HA           LOC STATE     BIT 12        LOC STATE           REMOVE LEFTOVER STATUS.
- 1934              TX           LOC CTR       -             SAVE LOC            
+ 1934              TX           LOC CTR       -             SAVE LOC
  1935              TS           Z,SC          Z,X6          NUM LOC +1          USE REGULAR LOC PROCEDURE.
  1937              TS           SAVE LOC      LOC CTR       N,X4                RESTORE LC SETTING AND EXIT.
 
@@ -2429,64 +2429,64 @@ R1955   USES ANALSUBF, S3, X3, AND X5.
 
 
 
- 1956   ADR FIELD  NA           ADDRESS 1     BLANKS        TEST WD2            
- 1957              NA           ADDRESS 2     BLANKS        MOV ADRES           
+ 1956   ADR FIELD  NA           ADDRESS 1     BLANKS        TEST WD2
+ 1957              NA           ADDRESS 2     BLANKS        MOV ADRES
  1958              TS           ZERO          FIELD COD     N,X4                INDICATE BLANK ADDRESS FIELD AND EXIT.
 
  1960   TEST WD2   NA           ADDRESS 2     BLANKS        MOV ADRES           BRANCH IF BOTH WORDS NON-BLANK.
- 1962              TX           ADDRESS 1     -             AFIELD +1           
+ 1962              TX           ADDRESS 1     -             AFIELD +1
  1963              TS           BLANKS        AFIELD        MOV ADRES +1        SHORT CUT WHEN WORD 2 IS BLANK.
 
- 1965   MOV ADRES  TN           ADDRESS 1     2             AFIELD              
+ 1965   MOV ADRES  TN           ADDRESS 1     2             AFIELD
 
  1966              SWE, ONES    C,+3          16            Z,X3                INITIAL PROCEDURE FOR NON-NUM ADDRESS.
  1968              TX           ZERO          -             FIELD COD +1        INITIALLY ASSUME NO MODIFIER.
- 1970              TS           C,+1          Z,X5          LD A2 S3            
+ 1970              TS           C,+1          Z,X5          LD A2 S3
 
  1971              CAC                        NO MODIF      FOUND RNB           SET UP TO LOOK FOR SIGNS INITIALLY.
 
  1973   LD A2 S3   TX           EIGHT         -             Z,S3                MAXIMUM NUMBER OF NBCS IN A SUBFIELD.
- 1975              TS           BLANKS        AFIELD +2     FIND NBCS           
+ 1975              TS           BLANKS        AFIELD +2     FIND NBCS
 
 
 
 R1976   MINOR SUBROUTINES TO SHIFT TWO OR THREE WORDS RIGHT BY ONE CHARACTER.
 
- 1977   3SRT 1C    SWS, ONES    AFIELD +2     A,1           AFIELD +2      C    
- 1978              SWS, CHAR1   AFIELD +1     A,1           AFIELD +2      C    
+ 1977   3SRT 1C    SWS, ONES    AFIELD +2     A,1           AFIELD +2      C
+ 1978              SWS, CHAR1   AFIELD +1     A,1           AFIELD +2      C
 
- 1979   2SRT 1C    SWS, ONES    AFIELD +1     A,1           AFIELD +1      C    
- 1980              SWS, ONES    AFIELD        A,1           AFIELD         C    
- 1981              SS           AFIELD        CHAR1         AFIELD +1      C    
- 1982              SS           BLANKS        CHAR1         AFIELD         C    
+ 1979   2SRT 1C    SWS, ONES    AFIELD +1     A,1           AFIELD +1      C
+ 1980              SWS, ONES    AFIELD        A,1           AFIELD         C
+ 1981              SS           AFIELD        CHAR1         AFIELD +1      C
+ 1982              SS           BLANKS        CHAR1         AFIELD         C
 
 # Page 202
 #      @YUL SYSTEM ASSEMBLER -- PASS 1                                           USER'S OWN PAGE NO.  50        PAGE  50
 
-P1983   
+P1983
 
  1984   FIND NBCS  NA, CHAR8    AFIELD +1     BLANKS        5,0                 BRANCH WHEN 2 WORDS ARE RIGHT-JUSTIFIED.
 
  1986              TS           C,+1          Z,SC          2SRT 1C        C    SHIFT AFIELD AND AFIELD+1 RIGHT 1 CHAR.
- 1988              SPEC         Z,S3,1                      FIND NBCS           
+ 1988              SPEC         Z,S3,1                      FIND NBCS
 
  1989   FOUND RNB  TS           Z,S3,1        -             3SRT 1C        C    PROCEDURE WHEN SEEKING SIGN.
- 1991              NA, B3T6     AFIELD +2     ZERO          NOT SIGN            
- 1992              LA, CHAR1    AFIELD +2     ZERO          NOT SIGN            
+ 1991              NA, B3T6     AFIELD +2     ZERO          NOT SIGN
+ 1992              LA, CHAR1    AFIELD +2     ZERO          NOT SIGN
 
  1993              NA, CHAR8    AFIELD +1     BLANKS        NO MODIF            BRANCH IF SIGN NOT PRECEDED BY A BLANK.
 
  1995              TS           AFIELD +2     COMMON        ANAL SUBF +2   C    ANALYZE POSSIBLE MODIFIER.
  1997              NA, B2B6     FIELD COD     BIT2          NO MODIF            BRANCH IF TWASNT A SIGNED NUMERIC SUBF.
 
- 1999              NA           AFIELD +1     BLANKS        ALSO MAIN           
+ 1999              NA           AFIELD +1     BLANKS        ALSO MAIN
  2000              NA           AFIELD        BLANKS        ALSO MAIN           BRANCH IF COMPOUND ADDRESS.
 
  2002              TS           COMMON +1     ADR WD        N,X4                EXIT FOR SIGNED NUMERIC FIELD.
 
  2004   FOUND MNB  TS           Z,S3,1        -             3SRT 1C        C    PROCEDURE WHEN NOT SEEKING SIGN.
 
- 2006   NOT SIGN   NA           AFIELD +1     BLANKS        8 NBC Q             
+ 2006   NOT SIGN   NA           AFIELD +1     BLANKS        8 NBC Q
  2007              NA           AFIELD        BLANKS        8 NBC Q             BRANCH IF MORE NBCS TO EXAMINE.
 
  2009              TS           AFIELD +2     COMMON        ANAL SUBF +2   C    ANALYZE POSSIBLE MAIN ADDRESS.
@@ -2495,34 +2495,34 @@ P1983
  2013              TS           COMMON +1     ADR WD        N,X4                EXIT WHEN MAIN ADDRESS IS S OR US NUM.
 
  2015   NO MODIF   TN           ADDRESS 1     2             AFIELD              SET UP PUTATIVE SYMBOLIC SUBFIELD.
- 2017              TS           BLANKS        AFIELD +2     SEEK HEAD +1        
+ 2017              TS           BLANKS        AFIELD +2     SEEK HEAD +1
 
  2018              TN           ALSO MAIN -2  2             AFIELD              RECOVER NON-MODIFIER PART OF ADR FIELD.
- 2020              TS           BLANKS        AFIELD +2     SEEK HEAD +1        
+ 2020              TS           BLANKS        AFIELD +2     SEEK HEAD +1
 
  2021   SEEK HEAD  NA, CHAR1    AFIELD +2     BLANKS        C,+3                BRANCH WHEN POSSIBLE HEAD FOUND.
 
  2023              TS           C,+1          Z,SC          3SRT 1C        C    TRIPLE SHIFT RIGHT TO FIND HEAD.
- 2025              SPEC                                     SEEK HEAD           
+ 2025              SPEC                                     SEEK HEAD
 
 # Page 203
 #      @YUL SYSTEM ASSEMBLER -- PASS 1                                           USER'S OWN PAGE NO.  51        PAGE  51
 
-P2026   
+P2026
 
  2027              NA, CHAR8    AFIELD +1     BLANKS        NO HEAD             CHAR. PRECEDED BY NON-BLANK ISNT HEAD.
 
  2029              NA           AFIELD        BLANKS        SRT SYM             MOVE SYMBOL RIGHT TO INSERT HEAD.
 
- 2031              NA           AFIELD +1     BLANKS        C,+2                
+ 2031              NA           AFIELD +1     BLANKS        C,+2
 
  2032              TS           AFIELD +2     ADR WD        N,X4                EXIT WHEN MAIN ADDRESS IS 1-CHAR SYM.
 
  2034              NA, CHAR1    AFIELD +1     BLANKS        PLACE HED           MOVE SYMBOL LEFT TO INSERT HEAD.
- 2036              SWS, ONES    AFIELD +1     A,1,L         AFIELD +1           
- 2037              TS           -             -             C,-2                
+ 2036              SWS, ONES    AFIELD +1     A,1,L         AFIELD +1
+ 2037              TS           -             -             C,-2
 
- 2038   SRT SYM    TS           -             -             2SRT 1C        C    
+ 2038   SRT SYM    TS           -             -             2SRT 1C        C
  2039              NA, CHAR8    AFIELD +1     BLANKS        BAD ADRES           ERROR IF NO ROOM FOR HEAD.
  2041              NA           AFIELD        BLANKS        C,-2                SHIFT UNTIL NORMALIZED IN AFIELD +1.
 
@@ -2536,14 +2536,14 @@ P2026
 
  2053              SWS, CHAR8   AFIELD +2     A,1,L         AFIELD +1           FIONISH BACKTRACKING.
  2055              NA, CHAR1    AFIELD +1     BLANKS        PLACE HED +1        BRANCH WHEN SYMBOL IS NORMALIZED.
- 2057              SWS, ONES    AFIELD +1     A,1,L         AFIELD +1           
- 2058              TS           -             -             C,-2                
+ 2057              SWS, ONES    AFIELD +1     A,1,L         AFIELD +1
+ 2058              TS           -             -             C,-2
 
  2059   8 NBC Q    NA           Z,S3          ZERO          FIND NBCS           SEEK ANOTHER NON-BLANK CHARACTER.
 
  2061   BAD ADRES  TS           ONES          FIELD COD     N,X4                ERROR EXIT.
 
- 2063              RESERVE      2                                               
+ 2063              RESERVE      2
  2064   ALSO MAIN  TX           FIELD COD     -             FIELD COD +1        INDICATE PRESENCE OF MODIFIER.
  2066              TN           AFIELD        2             ALSO MAIN -2        SAVE ORIGINAL FORM OF REST OF FIELD.
  2068              SM           Z,X3,2        Z,X5,9        -                   SET UP TO OMIT SIGN SEARCH.
@@ -2563,20 +2563,20 @@ R2084   BIT 6      ZERO -- SIGNED NUMERIC SUBFIELD          ONE -- UNSIGNED NUME
 
 R2086   BIT 9 OF HEALTH IS SET TO 1 IF A DECIMAL SUBFIELD IS WRITTEN WITHOUT A D
 
- 2087   ANAL SUBF  NA           COMMON        BLANKS        C,+2           C    
+ 2087   ANAL SUBF  NA           COMMON        BLANKS        C,+2           C
  2088              TX           ZERO          -             FIELD COD           INDICATE BLANK SUBFIELD AND EXIT.
 
  2090              TS           UNSIG NUM     FIELD COD     NORMALED -1    C    TEMPORARILY ASSUME UNSIGNED NUMERIC.
- 2092              NA, CHAR1    COMMON        BLANKS        NORMALED       C    
+ 2092              NA, CHAR1    COMMON        BLANKS        NORMALED       C
  2093              SWS, ONES    COMMON        A,1,L         COMMON         C    NORMALIZE.
- 2095              TS           COMMON        COMMON +1     C,-2           C    
+ 2095              TS           COMMON        COMMON +1     C,-2           C
 
  2096   NORMALED   LA, CHAR1    COMMON +1     ZERO          SET DIG        C    BR IF 1ST CHAR OF SUBFIELD IS ZERO.
 
  2098              TX           ONES          -             DIG FILE       C    INDICATE NO DIGITS YET.
  2100              NA, B3T6     COMMON +1     ZERO          NO SIGN        C    BR IF 1ST CHAR OF SUBFIELD ISNT A SIGN.
  2102              SWS, B5T6    COMMON +1     3             FIELD COD      C    INDICATE SIGN AND WHICH SIGN.
- 2104              NA, C2T8     COMMON +1     BLANKS        BLANK FIL +2   C    
+ 2104              NA, C2T8     COMMON +1     BLANKS        BLANK FIL +2   C
 
  2105   SYMBOLIC   TX           BIT 1         -             FIELD COD           INDICATE SYMBOLIC AND EXIT.
 
@@ -2591,21 +2591,21 @@ R2107   NO SIGN IS THE BEGINNING OF THE LOOP TO EXAMINE EACH CHARACTER.
  2114              LA           ONES          DIG FILE      SYMBOLIC       C    BRANCH IF D WITH NO PRECEDING NUMERALS.
 
  2116   DECIMAL)   TS           C,+1          CONV LOOP     CONV LOOP -1   C    SET UP CONVERSION, DECIMAL TO BINARY.
- 2118              BT           COMMON +1     10            COMMON +1      C    
+ 2118              BT           COMMON +1     10            COMMON +1      C
 
 # Page 205
 #      @YUL SYSTEM ASSEMBLER -- PASS 1                                           USER'S OWN PAGE NO.  53        PAGE  53
 
-P2119   
+P2119
 
  2120   DIGITS     SM, BIT3     FIELD COD     COMMON +1     FIELD COD      C    TELLTALE BIT FOR 8S AND 9S.
  2122              NA           DIG FILE      ONES          FILE DIG       C    BRANCH IF 2ND OR SUBSEQUENT DIGIT.
 
  2124   SET DIG    TX           L DIG FILE    -             Z,S0           C    PROCEDURE FOR FIRST DIGIT.
  2126              TX           ZERO          -             DIG FILE       C    FAKE A ZERO PRECEDING FIRST DIGIT.
- 2128              TX           L DIG FILE    -             Z,S1           C    
+ 2128              TX           L DIG FILE    -             Z,S1           C
 
- 2129   FILE DIG   NA, CHAR1    COMMON +1     ZERO          NZ DIGIT       C    
+ 2129   FILE DIG   NA, CHAR1    COMMON +1     ZERO          NZ DIGIT       C
  2130              LA           DIG FILE      ZERO          NZ DIGIT +1    C    SUPPRESS INSIGNIFICANT ZEROS.
 
  2132   NZ DIGIT   SWE, D12     COMMON +1     A,7           N,S0,1         C    FILE SIGNIFICANT DIGIT.
@@ -2615,16 +2615,16 @@ P2119
 
  2138              TS, BIT9     ONES          HEALTH        DECIMAL)       C    SET COMPLAINT WHEN 8S OR 9S AND NO D.
 
- 2140   BLANK FIL  SWS, ONES    COMMON +1     A,1,L         COMMON +1      C    
- 2141              NA, CHAR1    COMMON +1     BLANKS        NO SIGN        C    
+ 2140   BLANK FIL  SWS, ONES    COMMON +1     A,1,L         COMMON +1      C
+ 2141              NA, CHAR1    COMMON +1     BLANKS        NO SIGN        C
  2142              TS, CHAR1    BLANKS        COMMON +1     BLANK FIL      C    INSERT BLANK FOR USED DIGIT, NORMALIZE.
 
  2144   OCTAL)     TS           C,+1          CONV LOOP     CONV LOOP -1   C    SET UP CONVERSION, OCTAL TO BINARY.
- 2146              SWE, OCTMASK COMMON +1     3,L           COMMON +1      C    
+ 2146              SWE, OCTMASK COMMON +1     3,L           COMMON +1      C
 
- 2147              TS           ZERO          COMMON +1     CONV LOOP +2   C    
+ 2147              TS           ZERO          COMMON +1     CONV LOOP +2   C
  2148   CONV LOOP  TS           -             -             DISASTER            (SHOULD ALWAYS GET REPLACED)
- 2150              WA           COMMON +1     N,S1,1        COMMON +1      C    
+ 2150              WA           COMMON +1     N,S1,1        COMMON +1      C
  2151              WA           Z,S0          Z,S1          CONV LOOP      C    LOOP UNTIL ALL SIGNIFICANT DIGITS USED.
 
  2153              SWS, BIT1    FIELD COD     4,L           COMMON +1           INSERT CORRECT SIGN AND EXIT.
@@ -2637,17 +2637,17 @@ R2156   PREVAILING HEAD IS APPENDED TO SYMBOL IN COMMON IF THERE IS ROOM.  THE P
 R2157   ARE DELIVERED IN COMMON+2 IN BITS 17-48, BUT ALL ONES IS DELIVERED IN COMMON+2 IF THE SYMBOL IS NEW AND THERE
 R2158   IS NO ROOM IN THE TABLE.  Z,X2 IS SET TO THE ADDRESS OF THE SECOND WORD OF THE TABLE ENTRY, OR TO COPY BUFF -1
 R2159   IF THE TABLE IS FULL.  Z,X3 IS SET TO THE ADDRESS OF A WORD WHOSE RIGHT CAC FIELD POINTS TO THE SYMBOL, EXCEPT
-R2160   IF THE TABLE IS FULL.  NEW SYMBOLS ARE INSERTED IN THE TABLE WITH ALPHABETICAL ORDERING BY A COMBINATION OF 
+R2160   IF THE TABLE IS FULL.  NEW SYMBOLS ARE INSERTED IN THE TABLE WITH ALPHABETICAL ORDERING BY A COMBINATION OF
 R2161   ASSOCIATIVE REFERENCING ON THE FRONT 7 BITS AND THREADING FROM SYMBOL TO SYMBOL.  SEARCHING IS AIDED BY DIVIDING
 R2162   THE SET OF SYMBOLS UP INTO STRINGS WHOSE MAXIMUM SIZE IS 11 SYMBOLS, THE DIVIDERS BEING UP TO 1024 PAIRS OF SPEC
 R2163   FIELDS.  THE FIRST AND SECOND SPECS IN EACH PAIR POINT TO THE END AND BEGINNING OF ITS STRING.
 
- 
+
 
  2164   ANAL SYMB  TX           L SYM THR     -             Z,X5           C    ADDRESS OF LIST OF 126 SPECPAIR THREADS.
  2165              TX           ZERO          -             COMMON +2      C    IN CASE SYM IS IN 1ST STRING OR IN NONE.
  2166              TX           ZERO          -             COMMON +3      C    IN CASE THIS WILL BE A NON-EQUALS DEF.
- 2167              NA, CHAR8    COMMON        BLANKS        C,+2           C    
+ 2167              NA, CHAR8    COMMON        BLANKS        C,+2           C
  21675             TX, CHAR8    HEAD          -             COMMON         C    APPEND HEAD IF THERE IS ROOM.
  21685             SWS,B19T25   COMMON        18            SYM SHIFT      C    CHOOSE THREAD BY 7 FRONT BITS OF SYMBOL.
  21695  SYM SHIFT  SWE, CAC3    5,0           0             Z,X3           C    THREAD FOR 1 OF 126 OF 1024 SPEC PAIRS.
@@ -2659,9 +2659,9 @@ R2163   FIELDS.  THE FIRST AND SECOND SPECS IN EACH PAIR POINT TO THE END AND BE
  21744             TS           N,X2          Z,X3          SEEK STRG      C    POINT TO SPEC PAIR FOR NEXT STRING.
  21755  IN STRING  TS           Z,X3,1        Z,SH          SEEK SYMB +3   C    SAVE ADDRESS OF SPEC PAIR.
 
- 21775  SEEK SYMB  LA           COMMON        N,X2          FIND OR NO     C    
+ 21775  SEEK SYMB  LA           COMMON        N,X2          FIND OR NO     C
  2178              S, ETS       2,1           ZX +3         C,+1                ARGUMENT IS GREATER.  TRY NEXT SYMBOL.
- 2179              LA           COMMON        N,X3,1        C,+2           C    
+ 2179              LA           COMMON        N,X3,1        C,+2           C
  21795             S, ETS       3,0           ZX +2         SEEK SYMB           ARGUMENT IS GREATER.  TRY NEXT SYMBOL.
 
  21805             EBA          Z,X2          ONE           Z,X3           C    POINT TO SECOND WORD OF PRECEDING SYMB.
@@ -2689,36 +2689,36 @@ R21845  OUT BY THESE BITS MUST BE CHANGED SO AS TO POINT TO THIS STRING, BECAUSE
 
 P2197   CREATE 3-WORD SYMBOL TABLE ENTRY.  WD 2 = CAC  HEALTH  DEFINITION  THREAD  -  .  WD 3 = 0 (ANALYZER IN PASS 2).
 
- 21982  NEW SYMB   NA           SYM PLACE     SPEC MAG      C,+2           C    
+ 21982  NEW SYMB   NA           SYM PLACE     SPEC MAG      C,+2           C
  21983             WA           SYM PLACE     THREE         SYM PLACE      C    SKIP OVER 32 STOPPER.
  21985             EX           N,X3          CAC3          CACN           C    SAVE ADDRESS OF NEXT SYM OR SPEC PAIR.
  21995             SS           SYM PLACE     CAC3          N,X3           C    THREAD TO THIS FROM LAST SYM OR SPEC PR.
- 22005             EBA          SYM PLACE     BIT 25        Z,X2           C    
+ 22005             EBA          SYM PLACE     BIT 25        Z,X2           C
  2201              TX           COMMON        -             N,X2,1         C    PUT NEW SYMBOL IN SYMBOL TABLE.
  2202              TX           CACN          -             N,X2           C    THREAD TO NEXT SYMBOL OR SPEC PAIR.
  2203              TX           ZERO          -             2,1            C    INITIALIZE ANALYZER WORD.
  2204   SYM OR NOT WA           SYM PLACE     THREE         SYM PLACE      C    LEFT SIX BITS MUST BE 60.
  2207              EX           N,SH          CAC3          CACN           C    POINT TO LAST SYMBOL IN STRING.
  2208              WA           Z,SH          ONE           Z,AU1          C    POINT TO POINTER TO HEAD OF STRING.
- 2209              WA           NINE          TWO           Z,AU2          C    
+ 2209              WA           NINE          TWO           Z,AU2          C
 
  2211   MEASURE    EX           N,AU1         CAC3          ETS            C    POINT TO A SYMBOL IN THE STRING.
  2212              NA           ETS           CACN          C,+2           C    BRANCH IF NOT LOOKING AT LAST IN STRING.
 
  2214   CLR COMM 2 TX           ZERO          -             COMMON +2      S    RETURN AFTER NEW SYMBOL BUT NO NEW STR.
 
- 2216              EBA          ETS           ONE           Z,AU1          C    
- 2217              NA           Z,AU2         SIX           C,+2           C    
+ 2216              EBA          ETS           ONE           Z,AU1          C
+ 2217              NA           Z,AU2         SIX           C,+2           C
  2218              SM           ETS           BIT 25        COMMON +2      C    SAVE ADDRESS OF SIXTH SYMBOL IN STRING.
  22195             NA           Z,AU2,1       ONE           MEASURE        C    BRANCH UNLESS STRING JUST GREW TO 12.
 
- 22205  SPLIT STR  WA           5,13          BIT 15        5,13           C    
+ 22205  SPLIT STR  WA           5,13          BIT 15        5,13           C
  22207             LA, CHAR1    EOR           5,13          MEASURE +2     C    IF NO AVAIL. SPEC PAIRS, KEEP SAME STR.
  2221              SWE, CAC3    5,13          32            Z,AU2          C    INCREMENT & GET ADDR OF NEXT SPEC PAIR.
  2222              SS           CACN          CAC3          N,AU2          C    POINTER TO LAST SYMBOL IN NEW STRING.
  2223              SS           COMMON +2     CAC3          N,SH           C    POINTER TO NEW LAST SYM IN OLD STRING.
  2224              EBA          COMMON +2     ONE           Z,AU1          C    POINT TO SECOND WORD OF SAME.
- 2225              WA           Z,AU2         ONE           Z,SH           C    
+ 2225              WA           Z,AU2         ONE           Z,SH           C
  22255             SS           N,AU1         CAC3          N,SH           C    NEW SPEC PR POINTS TO START OF NEW STR.
  22265             SS           Z,AU2         CAC3          N,AU1          C    OLD STRING POINTS TO NEW SPEC PAIR.
 
@@ -2747,7 +2747,7 @@ R2240   RETURN.  ENTER AT AVAIL1 FOR A NON-DESTRUCTIVE TEST, OR AT AVAIL2 TO LEA
  2254              SS           ZERO          AVAIL MSK     N,SH                RESERVE LOCATION.
 
  2256   RST AV2    TX           C,+1          -             C,-1                RESTORE AVAIL1 TO AVAIL2.
- 2258              SS           ZERO          AVAIL MSK     N,SH                
+ 2258              SS           ZERO          AVAIL MSK     N,SH
 
 
 
@@ -2756,7 +2756,7 @@ R225806 PRETED AS THE NAME OF A ROUTINE WHOSE WORDS ARE TO BE COUNTED.  A BLANK 
 
  22581             TS, BIT8     ONES          HEALTH        C,+3                MILDLY CUSS NON-BLANK LOC FIELD.
  225814 COUNT      TX, CD TYPE  (COUNT)       -             HEALTH              ASTERISK ON CODE ASKS SPECIAL PROCESS.
- 225818            NA           LOC FIELD     BLANKS        C,-2                
+ 225818            NA           LOC FIELD     BLANKS        C,-2
  22582             TS, D12      ONE           HEALTH        BLOCK +1       C    DECODE ADDRESS FIELD.
  225824            LA           ONES          FIELD COD     ILL COUNT           BRANCH IF ADDRESS FIELD IS MEANINGLESS.
  225828            EBA          SPEC SIGN     BIT 25        Z,X2                POINT TO ORIGIN OF LIST.
@@ -2766,19 +2766,19 @@ R225806 PRETED AS THE NAME OF A ROUTINE WHOSE WORDS ARE TO BE COUNTED.  A BLANK 
  22584             LA           FIELD COD +1  ZERO          C,+2                FALL THRU TO ERROR IF THERE IS A MODIF.
  225844 ILL COUNT  TS, BIT 9    ONES          HEALTH        XMIT RTRN           "ADDRESS FIELD IS MEANINGLESS".
 
- 225846            NA, BIT11    HEALTH        ONES          C,+2                
+ 225846            NA, BIT11    HEALTH        ONES          C,+2
  225847            SWS, SPECMAG W COUNSP      32            Z,CSC          C    DO SPECIAL PROCESSING FOR "COUNT*" CODE.
- 225849            EBA          SPEC SIGN     BIT 25        Z,X3                
+ 225849            EBA          SPEC SIGN     BIT 25        Z,X3
  22585             TS           ADR WD        COMMON        C,+3                MOVE NAME OF ROUTINE.
  225854            LA           COMMON        N,X2          C,+3                BRANCH WHEN PLACE IN ALPHA LIST FOUND.
  225858            EBA          Z,X2          ONE           Z,X3                KEEP X3 ONE PLACE BEHIND.
  225862            S, ETS       3,0           ZX +2         C,-2                STEP THRU ALPHA-THREADED ROUTINE LIST.
 
- 225866            NA           COMMON        N,X2,1        NEW RTINE           
+ 225866            NA           COMMON        N,X2,1        NEW RTINE
  225868 COUNT PTR  EBA          HEALTH        Z,X2          HEALTH              LET CARD POINT TO WORD 3 OF TABLE ENTRY.
- 225872            TS, B25T27   ZERO          HEALTH        XMIT RTRN           
+ 225872            TS, B25T27   ZERO          HEALTH        XMIT RTRN
 
- 225874 NEW RTINE  NA           SYM PLACE     END SY TAB    C,+2                
+ 225874 NEW RTINE  NA           SYM PLACE     END SY TAB    C,+2
  225876            TS, BIT 10   ONES          HEALTH        XMIT RTRN           CUSS NO ROOM IN SYMTAB FOR RTNE NAME.
  22588  NEW UNSYM  TS, CHAR1    BIT 2         SYM OR NOT    NEW SYMB       C    (ALSO USED BY SUBRO).
  225884            TS, CHAR1    END ERR M +1  SYM OR NOT    COUNT PTR           RESTORE SYMBOL SUBROUTINE.
@@ -2792,22 +2792,22 @@ P2800   LOAD EPILOGUE INTO PARTICULAR PASS AREA AND FINISH PASS 1.
 
  2802   END PASS 1 S, PHI LOAD  P1 EPILOG     1             BASE ADDR           EPILOGUE WILL LOAD PASSES 1.5 AND 2.
 
- 2804   FILL       MODLOC       64 
+ 2804   FILL       MODLOC       64
 
 
 
 R28041  THIS PART OF INITIALIZATION IS PERFORMED AFTER THE LOADING OF PARTICULAR PASS 1.
 
- 280414            SETLOC       RL CD HLTH 
+ 280414            SETLOC       RL CD HLTH
 
- 280418 POST SPEC  SM           M TYP TAB     SPEC SIGN     Z,X1 
+ 280418 POST SPEC  SM           M TYP TAB     SPEC SIGN     Z,X1
  28042             IT           N,X1          1,27          N,X2                MOVE MEMORY TYPE TABLE.
  280424            WD           Z,AU2         TWO           END TYP TA
  280426            TS           RL TYP TAB    Z,X2          C,-2           C    STANDARD MEMORY TYPE CONFIG FOR BYPT.
  28043             SS           MOD SHIFT     COUNT FLD     SHIFT NOP           SHIFT FOR NUMERIC OP CODE.
  280434            TX           P1 MASKS      -             Z,MXR
  280436            SWS,COUNTFLD MOD SHIFT     6             BLOK SHIF           LOG (BASE 2) OF BLOCK LENGTH.
- 280439            TX           L END OF      -             Z,X0 
+ 280439            TX           L END OF      -             Z,X0
  28044             SWE, CAC3    M SUBR LOC    16            LOC CTR             LOCATION COUNTER HAS GOOD INITIAL VALUE
  280444            NA, BIT9     SWITCH        ZERO          GET REAL            FOR SUBROUTINE ASSEMBLY, BUT IN PROGRAM
  280448            TS           ONES          LOC CTR       GET REAL            ASSEMBLY IT IS MADE HIDEOUS.
@@ -2821,13 +2821,13 @@ R280452            ITEMS TO BE FILLED IN BY THE PARTICULAR PART OF PASS 1.
  280456 M OP THRS  EQUALS       FILL +64
  280458 MAX NUM OP EQUALS       FILL +65
  28046  MAX LOC    EQUALS       FILL +66
- 280462 MAX ISEQL  EQUALS       MAX LOC 
+ 280462 MAX ISEQL  EQUALS       MAX LOC
  280464 ADR LIMIT  EQUALS       FILL +67                                        ONE GREATER THAN MAX LOC.
  280468 BLOK ONES  EQUALS       FILL +68                                        ONE LESS THAN BLOCK SIZE.
  280472 MOD SHIFT  EQUALS       FILL +69
  280474 M TYP TAB  EQUALS       FILL +70
- 280476 M SUBR LOC EQUALS       M TYP TAB 
- 280477 M COUNSP   EQUALS       M TYP TAB 
+ 280476 M SUBR LOC EQUALS       M TYP TAB
+ 280477 M COUNSP   EQUALS       M TYP TAB
  280478 M SPECIAL  EQUALS       FILL +71
  28048  M ELEFTO P EQUALS       FILL +73
  280482 M FLEFTO P EQUALS       FILL +74
@@ -2839,17 +2839,17 @@ P2805              INITIALIZING SEQUENCE FOR PASS 1, OVERLAID BY THE PARTICULAR 
 R2807   BUFFER-SHARING, MOVES "END OF" INFO AND COVER SHEET CONTENTS INTO PLACE, STARTS THE PARAPROGRAMS, LOADS THE PAR-
 R2809   TICULAR PART OF PASS 1, AND PARTICULARIZES THE MEMORY TYPE TABLE AND OTHER CONSTANTS.
 
- 2811              SETLOC,7C    SIZ PASS 1    B1 
+ 2811              SETLOC,7C    SIZ PASS 1    B1
 
  2816   INISH P1   TX           INPUT XIT     -             Z,R5                LOAD INPUT BUFFER LIST ADDRESS.
  2818              TN           OLD LINE +6   8             END OF 1 +1         MOVE "END OF" INFORMATION TO ITS IMAGE.
  2820              TN           PAGE HEAD +1  13            OLD LINE +1         COVER IT UP WITH PAGE HEAD INFORMATION.
  28214             SWS, B8B17   SWITCH        9,L           SWITCH              MOVE FREEZE INDICATOR TO BIT 8, B17 = 0.
- 28216             SS           PASS 2        C1T3          P1 SIDE GP 
+ 28216             SS           PASS 2        C1T3          P1 SIDE GP
  28217             SS           PASS 2        C1T3          P1 EPILOG           SELECT VERSION OF YUL SYSTEM.
  28218             S, PHI LOAD  P1 SIDE GP    1             C,+1                LOAD PASS 1 PARAPROGRAMS.
- 28219             TX           P1 MASKS      -             Z,MXR 
- 2822              SWE, CAC3    SOURCE        32            Z,X6 
+ 28219             TX           P1 MASKS      -             Z,MXR
+ 2822              SWE, CAC3    SOURCE        32            Z,X6
  2823              MT           N,SC,1        2             N,X6,3              START GROUPS B AND C (RD1 AND WWT).
 
  2835              SPEC,B7                                  1056
@@ -2857,7 +2857,7 @@ R2809   TICULAR PART OF PASS 1, AND PARTICULARIZES THE MEMORY TYPE TABLE AND OTH
 
  2837              EBA          SPEC SIGN     BIT 25        Z,AU1               POINT TO ORIGIN OF ROUTINE LIST, WHICH
  2838              TX           INIT UNCO     -             N,AU1,1             MAINTAINS THE COUNT OF "UNCOUNTED" WDS.
- 2839              TX           ZERO          -             N,AU1               
+ 2839              TX           ZERO          -             N,AU1
  2841              TS           L COMP NAM    Z,X6          MON WAKE       C    GET ADDRESS OF COMPUTER NAME.
  2844              SWS,THREAD10 6,1           36            Z,X6                ADDRESS OF PREFIX FOR PARTIC. PASS NAME.
  2846              TX           CHAR1         -             ALF MASK            MOVE LEADING NON-BLANK CHARACTERS OF
@@ -2868,9 +2868,9 @@ R2809   TICULAR PART OF PASS 1, AND PARTICULARIZES THE MEMORY TYPE TABLE AND OTH
  2853              TX           L TYP TAB     -             Z,X2                ADDRESS OF WORKING MEMORY TYPE TABLE.
  2855              S, PHI LOAD  PARP NAME     1             M SPECIAL           LOAD PARTICULAR PART OF PASS 1.
 
- 2857   INPUT XIT  OCT          -133770 
+ 2857   INPUT XIT  OCT          -133770
  2858   C1T3       OCT          777777
- 28581  INIT UNCO  OCT          0001 0000 0003 4007 
+ 28581  INIT UNCO  OCT          0001 0000 0003 4007
  2859   P1 SIDE GP ALF          YULSIDE1
 
 

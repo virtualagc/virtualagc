@@ -143,7 +143,7 @@ P0051              SPECIAL ROUTINE IN PASS 1 FOR AGC4 TO RESPOND TO THE FINDING 
 R0053   THE CODE IS A POLISH OR STORE ADDRESS CONSTANT, RESETS THE BEGINNING-OF-EQUATION INDICATOR (BIT 29 OF SWITCH)
 R0055   AND RETURNS TO THE GENERAL INSTRUCTION-PROCESSING PROCEDURE.  IF THE CODE IS A POLISH OPERATOR, THE SEVEN-BIT
 R0057   EQUIVALENT IS PLACED IN BITS 18-24 OF HEALTH AND THE BEGINNING-OF-EQUATION INDICATOR IS EXAMINED.  IF IT IS
-R0059   RESET (AS IS TRUE INITIALLY), IT IS NOW SET AND 07 IS SUPPLIED AS THE SECOND OPERATOR, TO INDICATE THAT PASS 2 
+R0059   RESET (AS IS TRUE INITIALLY), IT IS NOW SET AND 07 IS SUPPLIED AS THE SECOND OPERATOR, TO INDICATE THAT PASS 2
 R0061   IS TO DECODE AN OPERATOR WORD COUNT FROM THERE.  OTHERWISE, THE ADDRESS FIELD IS INTERPRETED AS FOLLOWS...
 R0063   BLANK: OPERATOR 00, NUMERIC: OPERATOR 07 (ASSUME NEW EQUATION), SYMBOLIC WITH MODIFIER: OPERATION 17 (ILLEGAL
 R0065   FORMAT), SYMBOLIC: VALUE FROM OPERATION CODE TABLE IF POLISH OPERATOR, OR OPERATOR 27 OTHERWISE.
@@ -233,9 +233,9 @@ R0017              OPERATION CODE THREADS AND TABLES FOR AGC4, USED IN PASS 1.
  0125              CAC          CODES 71                    CODES 70
 
 # These are opcode tables, constructed using the "M" opcode, which means 'mixed constant',
-# i.e. the 'alphanumeric compressed' data type. This is a 48-bit word structured as 6 6-bit 
-# characters and 3 4-bit BCD digits. So, in the table entries below, each "A" operand to the 
-# "M" code is part of the 6-character string part, and the "B" operand supplies an octal 
+# i.e. the 'alphanumeric compressed' data type. This is a 48-bit word structured as 6 6-bit
+# characters and 3 4-bit BCD digits. So, in the table entries below, each "A" operand to the
+# "M" code is part of the 6-character string part, and the "B" operand supplies an octal
 # number representing 0-4095.
 
 # So, for example, applying this to the tables below, we get:
