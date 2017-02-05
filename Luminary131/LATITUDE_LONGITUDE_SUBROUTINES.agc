@@ -17,6 +17,8 @@
 ##		2017-01-06 RSB	Page numbers now agree with those on the
 ##				original harcopy, as opposed to the PDF page
 ##				numbers in 1701.pdf.
+##		2017-02-05 RSB	Back-ported comment corrections 
+##				identified while proofing Artemis 072.
 
 ## Page 1127
 # SUBROUTINE TO CONVERT RAD VECTOR AT GIVEN TIME TO LAT,LONG AND ALT
@@ -265,7 +267,7 @@ GAMRP		=	8D
 #	L+1		SETRE
 #
 # SUBROUTINES USED
-#	CETERAD
+#	GETERAD
 #
 # INPUT
 #	ERADFLAG = 0 FOR FIXED RE, 1 FOR COMPUTED RE

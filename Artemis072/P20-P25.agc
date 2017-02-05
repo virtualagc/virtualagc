@@ -9,29 +9,40 @@
 ## Contact:	Jim Lawton <jim DOT lawton AT gmail DOT com>
 ## Website:	www.ibiblio.org/apollo/index.html
 ## Page Scans:	www.ibiblio.org/apollo/ScansForConversion/Artemis072/
-## Mod history:	2010-01-26 JL	Started Artemis072 conversion based on Comanche055 module.
+## Mod history:	2010-01-26 JL	Started Artemis072 conversion based on Comanche055 
+##				module.
 ## 		2010-01-31 JL	Finished Artemis072 conversion. Fixed build errors.
 ## 		2010-02-01 JL	Fixed build errors.
-## 		2010-02-02 JL	Fixed page numbers. Removed duplicated code section on page 611.
-## 		2010-02-06 JL	Added missing "DEC 18" instruction. Added missing code on page 618. Added missing line 
-##				on page 601. Fixed line 5 on p580, which is overprinted in the scan. Fixed an EQUALS on
-##				p589. Removed spurious PUSH on p598.
+## 		2010-02-02 JL	Fixed page numbers. Removed duplicated code section
+##				on page 611.
+## 		2010-02-06 JL	Added missing "DEC 18" instruction. Added missing 
+##				code on page 618. Added missing line on page 601. 
+##				Fixed line 5 on p580, which is overprinted in the 
+##				scan. Fixed an EQUALS on p589. Removed spurious 
+##				PUSH on p598.
 ##		2010-02-13 JL	Fixed errors on pages 563, 589, 604, 619, 629.
 ##		2010-02-20 RSB	Un-##'d this header.
+##		2017-02-05 RSB	Proofed comment text by diff'ing vs Comanche 55
+##				and corrected errors found, but only through about 
+##				p. 571 so far.  Note that while P20 is supposedly an 
+##				identical rev in the the two AGC versions, in fact
+##				the comments are rather  different, so that portion
+##				was proofed by traditional means, and the same is 
+##				true of a lesser degree to the 	rest of it as well. 
 
 ## Page 552
 
 # RENDEZVOUS NAVIGATION PROGRAM 20
 # PROGRAM DESCRIPTION
 # MOD NO -1
-# MOD BY - N. BRODEUR
+# MOD BY - N.BRODEUR
 #
 # FUNCTIONAL DESCRIPTION
 #
 # TO INITIALIZE THE RENDEZVOUS NAVIGATION SUBROUTINES R22, R61CSM, AND
-# R52, WHICH IN TURN CONTROL THE CSM ATTITUDE AND OPTICS POSITIONING.
+# R52, WHICH IN TURN CONTROL THE CSM ATTITUDE AND OPTICS POSITIONING,
 # PROCESS BOTH OPTICS AND VHF TRACKING DATA, AND UPDATE EITHER THE LM
-# OR THE CSM STATE VECTOR.
+# OR THE CSM STATE VECTORS.
 #
 # CALLING SEQUENCE
 #   V37E20E
@@ -46,7 +57,7 @@
 #   ENDOFJOB	       MKRLEES		   FINDVAC
 #
 # NORMAL EXIT MODES
-#   RENDEZVOUS BAVIGATION MAY BE TERMINATED BY THE SELECTION OF
+#   RENDEZVOUS NAVIGATION MAY BE TERMINATED BY THE SELECTION OF
 #   P00, P06, P22, P23, V34E FROM R60, AND V56E
 #
 # ALARM OR ABORT EXIT MODES
@@ -407,7 +418,7 @@ UTPRFAX		DLOAD	SIN		# COMPUTE PREFERRED UNIT VECTOR
 		PDDL	SIN		# PDX+4=COS(P) USED WITH FIRST  DMP BELOW
 			UTYAW
 		DMP	SL1		# MPAC=COS(P)SIN(Y)
-		PDDL			# REPLACE PDX+2 WITH COS(P)SIN(Y)
+		PDDL			# REPLACE PDX+2 WITH COS"P)SIN(Y)
 		PDDL	COS		# REPLACE PDX+4 WITH COS(P) IN ORDER TO
 			UTYAW		#  POSITION PD COUNTER FOR DMP
 		DMP	SL1
@@ -578,7 +589,7 @@ S22DSPPA	CA	8KK		# V05N70 OR V05N71
 		AD	CXOFF
 		EXTEND
 		BZMF	+2		# OFF=0 THRU 5 OK
-		TC	S22DSPP		# OFF=6.7 ILLEGAL REDISPLAY
+		TC	S22DSPP		# OFF=6,7 ILLEGAL REDISPLAY
 		TC	DOWNFLAG
 		ADRES	KNOWNFLG	# CLEAR KNOWNFLG
 		CA	LANDMARK	# MASK A FROM ABCDE
@@ -699,7 +710,7 @@ ZERODNLK	STORE	SVMRKDAT +36D,1
 # MOD BY- TOM KNATT
 #
 # FUNCTIONAL DESCRIPTION- TO MEASURE THE EFFECT OF SOLAR RADIATION ON
-#   THE SXT TRUNNION ANGLE AND STORE THE MEASURED TRUNNION BIAS FOR P23
+#   THE SXT TRUNNION ANGLE AND TO STORE THE MEASURED TRUNNION BIAS FOR P23
 #
 # CALLING SEQUENCE- CALL
 #			  R57
@@ -799,7 +810,7 @@ V51N45		VN	5145
 # FUNCTIONAL DESCRIPTION
 #
 #   TO PERFORM SIGHTING MARKS IN CONJUNCTION WITH THE RENDEZVOUS NAVIG-
-# ATION PROGRAM. CALLED BY ASTRONAUT VIA EXTENDED VERB.
+# ATION PROGRAM. CALLED BY ASTRONAUT VIA EXTENDED VERB
 # CALLING SEQUENCE -
 #	  R21 VIA V 57
 #	  R23 VIA V 54
@@ -818,7 +829,7 @@ V51N45		VN	5145
 # OUTPUT -
 #   7 REGISTER MRKBUF2 CONTAINING TIME2,TIME1,CDUY,OPTICS X,CDUZ, OPTICS Y,
 # CDUX.
-# ERASABLE INTIALIZATION REQUIRED
+# ERASABLE INITIALIZATION REQUIRED
 # FLAGS SET AND RESET
 #   R21MARK   (COMMUNICATION TO MARKRUPT TO STORE MARKS IN MRKBUF1 + 2)
 #   R23FLG  INDICATES COAS MARKING
@@ -949,7 +960,7 @@ R61C1		TC	DOWNFLAG	# RESET 3-AXIS FLAG
 		CS	ONE		# SET R61CNTR NEG. TO INDICATE KALCMANU
 		TS	R61CNTR
 		
-		TC	UPFLAG		# SET FLAG FOR PROIRITY DISPLAYS FOR R60
+		TC	UPFLAG		# SET FLAG FOR PRIORITY DISPLAYS FOR R60
 		ADRES	PDSPFLAG	# BIT 12  FLAG 4
 		TC	BANKCALL
 		CADR	R60CSM

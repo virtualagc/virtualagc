@@ -11,6 +11,8 @@
 ## Mod history: 2011-04-13 JL	Adapted from corresponding Colossus 249 file.
 ##		2017-01-01 RSB	Proofed comment text using octopus/ProoferComments,
 ##				and fixed errors found.
+##		2017-02-05 RSB	Back-ported comment corrections 
+##				identified while proofing Artemis 072.
 
 ## Page 1203
 # SUBROUTINE TO CONVERT RAD VECTOR AT GIVEN TIME TO LAT,LONG AND ALT
@@ -265,7 +267,7 @@ GAMRP		=	8D
 #  L+1            SETRE
 
 # SUBROUTINES USED
-#  CETERAD
+#  GETERAD
 
 # INPUT
 #  ERADFLAG=0 FOR FIXED RE, 1 FOR COMPUTED RE

@@ -18,6 +18,8 @@
 ##				and corrected the errors found.
 ##		2017-01-14 RSB	Fixed comment-text errors located by diff'ing 
 ##				against Colossus 249.
+##		2017-02-05 RSB	Back-ported a pair of comment corrections 
+##				identified while proofing Artemis 072.
 ##
 ## This source code has been transcribed or otherwise adapted from digitized
 ## images of a hardcopy from the MIT Museum.  The digitization was performed
@@ -1085,9 +1087,9 @@ MID2		DLOAD	DSU
 			TET
 		DSU	BPL
 			5.6SECS
-			A-PCHK		# YES. GET OUT.
+			A-PCHK		# YES,GET OUT.
 			
-		DLOAD	DAD		# NO. ADD TIMEDELT TO T-TO-ADD AND TRY
+		DLOAD	DAD		# NO,ADD TIMEDELT TO T-TO-ADD AND TRY
 			T-TO-ADD	# AGAIN.
 			TIMEDELT
 		STCALL	T-TO-ADD

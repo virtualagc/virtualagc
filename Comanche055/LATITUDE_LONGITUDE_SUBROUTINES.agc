@@ -13,6 +13,8 @@
 ##		2010-08-20 JL	Fixed indentation of RVQ opcode on line 180.
 ##		2016-12-21 RSB	Proofed comment text using octopus/ProoferComments
 ##				and corrected the errors found.
+##		2017-02-05 RSB	Back-ported comment corrections 
+##				identified while proofing Artemis 072.
 ##
 ## This source code has been transcribed or otherwise adapted from digitized
 ## images of a hardcopy from the MIT Museum.  The digitization was performed
@@ -283,7 +285,7 @@ GAMRP		=	8D
 #	L+1		SETRE
 #
 # SUBROUTINES USED
-#	CETERAD
+#	GETERAD
 #
 # INPUT
 #	ERADFLAG = 0 FOR FIXED RE, 1 FOR COMPUTED RE

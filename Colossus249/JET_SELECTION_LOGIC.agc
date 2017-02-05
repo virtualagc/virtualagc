@@ -17,6 +17,8 @@
 ##				237 and Comanche 55 source-code files
 ##				and corrected errors found.  No differences
 ##				remained afterward.
+##		2017-02-05 RSB	Back-ported comment corrections 
+##				identified while proofing Artemis 072.
 ##
 ## The contents of the "Colossus249" files, in general, are transcribed 
 ## from a scanned copy of the program listing.  Notations on this
@@ -623,7 +625,7 @@ RBLASTOK	CA	BLAST
 		
 ## Page 1025
 		DEC	-.333333	# = -1/3
-		DEC	-.500000	# = -1.2
+		DEC	-.500000	# = -1/2
 		DEC	-.999999	# = -1 (NEGMAX)
 NJET		DEC	0
 		DEC	.999999		# = +1 (POSMAX)

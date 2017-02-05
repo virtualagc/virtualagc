@@ -1,20 +1,22 @@
 ### FILE="Main.annotation"
-## Copyright:    Public domain.
-## Filename:     LIST_PROCESSING_INTERPRETER.agc
-## Purpose:      Part of the source code for Aurora (revision 12).
-## Assembler:    yaYUL
-## Contact:      Hartmuth Gutsche <hgutsche@xplornet.com>.
-## Website:      https://www.ibiblio.org/apollo.
-## Pages:        34-122
-## Mod history:  2016-09-20 JL   Created.
-##               2016-09-22 HG   Start trancription from scans using Luminary099\INTERPRETER.agc as base
-##               2016-10-04 HG   Fix FBBANK -> FBANK
-##               2016-10-12 HG   Fix operand MAPC +1  -> MPAC +1
-##               2016-10-15 HG   fix label EIHGT -> EIGHT 
-##                               fix operand BIT14 -> BIT4   
-##               2016-10-16      fix label NEGO -> NEG0  
-##		 2016-12-07 RSB	 Proofed comments with octopus/ProoferComments
-##				 and made changes.
+## Copyright:   Public domain.
+## Filename:    LIST_PROCESSING_INTERPRETER.agc
+## Purpose:     Part of the source code for Aurora (revision 12).
+## Assembler:   yaYUL
+## Contact:     Hartmuth Gutsche <hgutsche@xplornet.com>.
+## Website:     https://www.ibiblio.org/apollo.
+## Pages:       34-122
+## Mod history: 2016-09-20 JL   Created.
+##              2016-09-22 HG   Start trancription from scans using Luminary099\INTERPRETER.agc as base
+##              2016-10-04 HG   Fix FBBANK -> FBANK
+##              2016-10-12 HG   Fix operand MAPC +1  -> MPAC +1
+##              2016-10-15 HG   fix label EIHGT -> EIGHT 
+##                              fix operand BIT14 -> BIT4   
+##              2016-10-16      fix label NEGO -> NEG0  
+##		2016-12-07 RSB	Proofed comments with octopus/ProoferComments
+##			 	and made changes.
+##		2017-02-05 RSB	Back-ported comment corrections 
+##				identified while proofing Artemis 072.
 
 ## This source code has been transcribed or otherwise adapted from
 ## digitized images of a hardcopy from the private collection of
@@ -1739,7 +1741,7 @@ VRIGHT2         AD              NEG12
                 EXTEND
                 BZMF            VSSR                    # IF SO, BRANCH AND SHIFT IMMEDIATELY.
 
-                AD              NEGONE                  # IF NOT, REDUCE MPTEMP BY A TOTAL OF 14.
+                AD              NEGONE                  # IF NOT, REDUCE MPTEMP BY A TOTAL OF 14,
                 TS              MPTEMP                  # AND DO A SHIFT RIGHT AND ROUND BY 14.
                 CAF             ZERO                    # THE ROUND AT THIS STAGE MAY INTRODUCE A
                 TS              L                       # ONE BIT ERROR IN A SHIFT RIGHT 15D.
@@ -2548,7 +2550,7 @@ SMPAC+          AD              -1/2+2                  # SEE IF ARGUMENT GREATE
                 XCH             SR
                 ADS             MPAC            +1      # GUARANTEED NO OVERFLOW.
 
-ARGHI           CAF             SLOPEHI                 # ARGUMENT BETWEEN .25 AND .5, GET A
+ARGHI           CAF             SLOPEHI                 # ARGUMENT BETWEEN .25 AND .5. GET A
                 EXTEND                                  # LINEAR APPROXIMATION FOR THIS RANGE.
                 MP              MPAC
                 AD              BIASHI                  # X0/2 = (MPAC/2)(SLOPEHI) + BIASHI/2.

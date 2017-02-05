@@ -13,6 +13,8 @@
 ##				and fixed errors found.
 ##		2017-01-15 RSB	Fixed comment-text errors identified by diff'ing
 ##				against Colossus 249.
+##		2017-02-05 RSB	Back-ported comment corrections 
+##				identified while proofing Artemis 072.
 
 ## Page 1007
 		BANK	21
@@ -586,7 +588,7 @@ RBLASTOK	CA	BLAST
 		TCF	ASMBLWR
 ## Page 1022
 		DEC	-.333333	# = -1/3
-		DEC	-.500000	# = -1.2
+		DEC	-.500000	# = -1/2
 		DEC	-.999999	# = -1 (NEGMAX)
 NJET		DEC	0
 		DEC	.999999		# = +1 (POSMAX)

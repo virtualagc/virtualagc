@@ -11,6 +11,8 @@
 ## Page Scans:	www.ibiblio.org/apollo/ScansForConversion/Artemis072/
 ## Mod history:	2009-08-22 JL	Adapted from corresponding Comanche 055 file.
 ##		2010-02-20 RSB	Un-##'d this header.
+##		2017-02-05 RSB	Proofed comment text by diff'ing vs Comanche 55
+##				but no differences found.
 
 ## Page 1205
 		SETLOC	INTPRET1

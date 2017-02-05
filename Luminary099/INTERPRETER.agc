@@ -16,6 +16,8 @@
 ##		2016-12-17 RSB	Proofed text comments with octopus/ProoferComments
 ##				and corrected the errors found.
 ##		2017-01-28 RSB	Back-ported some comment-text fixes made in Luminary 69.
+##		2017-02-05 RSB	Back-ported comment corrections 
+##				identified while proofing Artemis 072.
 
 ## This source code has been transcribed or otherwise adapted from
 ## digitized images of a hardcopy from the MIT Museum.  The digitization
@@ -1692,7 +1694,7 @@ VRIGHT2		AD	NEG12
 		EXTEND
 		BZMF	VSSR		# IF SO, BRANCH AND SHIFT IMMEDIATELY.
 
-		AD	NEGONE		# IF NOT, REDUCE MPTEMP BY A TOTAL OF 14.
+		AD	NEGONE		# IF NOT, REDUCE MPTEMP BY A TOTAL OF 14,
 		TS	MPTEMP		# AND DO A SHIFT RIGHT AND ROUND BY 14.
 		CAF	ZERO		# THE ROUND AT THIS STAGE MAY INTRODUCE A
 		TS	L		# ONE BIT ERROR IN A SHIFT RIGHT 15D.
@@ -2551,7 +2553,7 @@ SMPAC+		AD	-1/2+2		# SEE IF ARGUMENT GREATER THAN OR EQUAL TO
 		XCH	SR
 		ADS	MPAC 	+1	# GUARANTEED NO OVERFLOW.
 
-ARGHI		CAF	SLOPEHI		# ARGUMENT BETWEEN .25 AND .5, GET A
+ARGHI		CAF	SLOPEHI		# ARGUMENT BETWEEN .25 AND .5. GET A
 		EXTEND			# LINEAR APPROXIMATION FOR THIS RANGE.
 		MP	MPAC
 		AD	BIASHI		# X0/2 = (MPAC/2)(SLOPEHI) + BIASHI/2.

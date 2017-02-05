@@ -12,6 +12,8 @@
 ## Mod history:	2009-07-25 JL	Adapted from corresponding Comanche 055 file.
 ## 		2010-02-02 JL	Added missing RESUME.
 ##		2010-02-20 RSB	Un-##'d this header.
+##		2017-02-05 RSB	Proofed comment text by diff'ing vs Comanche 55
+##				but no differences found.
 
 ## Page 139
 		SETLOC	4000
