@@ -14,6 +14,8 @@
 ##				and corrected the errors found.
 ##		2017-01-15 RSB	Fixed comment-text errors identified by diff'ing
 ##				against Colossus 249.
+##		2017-02-05 RSB	Back-ported comment corrections 
+##				identified while proofing Artemis 072.
 ##
 ## This source code has been transcribed or otherwise adapted from digitized
 ## images of a hardcopy from the MIT Museum.  The digitization was performed
@@ -610,7 +612,7 @@ RBLASTOK	CA	BLAST
 		
 ## Page 1054
 		DEC	-.333333	# = -1/3
-		DEC	-.500000	# = -1.2
+		DEC	-.500000	# = -1/2
 		DEC	-.999999	# = -1 (NEGMAX)
 NJET		DEC	0
 		DEC	.999999		# = +1 (POSMAX)

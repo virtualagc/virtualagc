@@ -19,6 +19,8 @@
 ##				and corrected errors found. There were no
 ##				differences between the comment text in the 
 ##				different versions after these corrections.
+##		2017-02-05 RSB	Back-ported comment corrections 
+##				identified while proofing Artemis 072.
 ##
 ## The contents of the "Colossus249" files, in general, are transcribed 
 ## from a scanned copy of the program listing.  Notations on this
@@ -292,7 +294,7 @@ GAMRP		=	8D
 #	L+1		SETRE
 #
 # SUBROUTINES USED
-#	CETERAD
+#	GETERAD
 #
 # INPUT
 #	ERADFLAG = 0 FOR FIXED RE, 1 FOR COMPUTED RE

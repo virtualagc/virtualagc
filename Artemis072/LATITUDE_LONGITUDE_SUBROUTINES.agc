@@ -14,6 +14,8 @@
 ##		2010-02-20 RSB	Un-##'d this header.
 ##		2010-04-13 JL	Fixed a typo (' instead of #).
 ##		2010-08-15 JL	Fixed indentation.
+##		2017-02-05 RSB	Proofed comment text by diff'ing vs Comanche 55
+##				and corrected errors found.
 
 ## Page 1236
 # SUBROUTINE TO CONVERT RAD VECTOR AT GIVEN TIME TO LAT,LONG AND ALT
@@ -62,7 +64,7 @@ CALLRTRP	CALL
 		UNIT			# UNIT RP B-1
 		STCALL	ALPHAV		# U2= 1/2 SINL FOR SETRE SUBR BELOW
 			SETGAMMA	#  SET GAMMA=B2/A2 FOR EARTH, =1 FOR MOON
-		CALL			#  SCALED B-1.
+		CALL			#  SCALED B-1
 			SETRE		# CALC RE METERS B-29
 		DLOAD	DSQ
 			ALPHAV

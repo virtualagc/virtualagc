@@ -12,6 +12,8 @@
 ## Mod history:	2009-08-27 SN	Adapted from corresponding Comanche 055 file.
 ## 		2009-09-04 JL	Fix typos.
 ##		2010-02-20 RSB	Un-##'d this header.
+##		2017-02-05 RSB	Proofed comment text by diff'ing vs Comanche 55
+##				but no differences found.
 
 ## Page 997
 
@@ -72,4 +74,5 @@ DPADD2+		AD	NEGMAX		# CAN NOT OVERFLOW
 		CA	NEGMAX		# UPPER WAS = 0
 		TCF	TSK
 
-## Page 999 (empty page)
+## Page 999
+## Empty page

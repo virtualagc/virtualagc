@@ -11,6 +11,8 @@
 ## Page Scans:	www.ibiblio.org/apollo/ScansForConversion/Artemis072/
 ## Mod history:	2009-08-21 JL	Adapted from corresponding Comanche 055 file.
 ##		2010-02-20 RSB	Un-##'d this header.
+##		2017-02-05 RSB	Proofed comment text by diff'ing vs Comanche 55
+##				and corrected errors found.
 
 ## Page 1333
 
@@ -211,9 +213,9 @@ GAMCOMP		VLOAD	VSR1
 ## Page 1338
 			36D
 		STORE	BETAM
-		NORM	BDDV		# FORM NORMALIZE QUOTIEN ALPHAM/BETAM
+		NORM	BDDV		# FORM NORMALIZED QUOTIENT ALPHAM/BETAM
 			33D
-		SR1R	PUSH		# C(PDL+2) = ALMOST NORMALIZE RHO.
+		SR1R	PUSH		# C(PDL+2) = ALMOST NORMALIZED RHO.
 		DLOAD*
 			ASCALE,1
 		STORE	S1
@@ -251,7 +253,7 @@ GAMCOMP		VLOAD	VSR1
 			14D
 		DMPR	VXSC
 			6
-			BETAV		#               _
+			BETAV		#               -
 		PDVL	VSR3		# (G/2)(C(PD+4))B/2 TO PD+16D
 			ALPHAV
 		VAD	PUSH		# A12 + C(PD+16D) TO PD+16D
@@ -344,7 +346,7 @@ COMTERM		STODL	UZ		# UZ	B-1	IN INERTIAL COORD	 AT 20D
 			3/32		#  2
 			COSPHI/2
 		DSQ	DMPR	
-			15/16		#  '                             2
+			15/16		#  '                            2
 		DSU	PUSH		# P	B-5	 ,(1/2)(15COSPHI -3)	 AT 02D
 			3/64		#  3
 		DMPR	DMP
@@ -369,10 +371,10 @@ COMTERM		STODL	UZ		# UZ	B-1	IN INERTIAL COORD	 AT 20D
 			4D		# 		        2     2  '              '
 			2J3RE/J2,2	# 	B	 ,(2J RP /J2 R )P  +(2J RP/J2R)P
 		DDV	DAD		# 		     4           5     3        4
-			ALPHAM		#  _        2 '  2         '        '
+			ALPHAM		#  -        2 '  2         '        '
 			2D		# (R/R)(J RP P /R + 2J RP P /  + J P )
 		VXSC			#        4    5       3    4  2   2 3
-			ALPHAV		#                   4       2  '           _
+			ALPHAV		#                   4       2  '           -
 		STODL	TVEC		# 	B-6	, (SUM((J /R )P   (COSPHI))UR)
 		DMP*	SR1		#                  I=2   I     I+1
 			J4REQ/J3,2	#                          '
@@ -382,10 +384,10 @@ COMTERM		STODL	UZ		# UZ	B-1	IN INERTIAL COORD	 AT 20D
 			2J3RE/J2,2	# 	(2J RP /J R )P  +(2J RP/J R)P
 		DDV	DAD		# 	   4     2    4     3    2   3
 			ALPHAM		# 
-		VXSC	VSL1		# 		 4   '        _
+		VXSC	VSL1		# 		 4   '        -
 			UZ		# 	B-6	SUM(P(COSPHI))UZ
 		BVSU			#		I=2  I
-			TVEC	        #  4              I-2   '          _
+			TVEC	        #  4              I-2   '          -
 		STODL	TVEC		# SUM((MU J (RP/R)   )(P   (COSPHI)UR -
 			ALPHAM		# I=2      I            I+2
 		NORM	DSQ		#             P (COSPHI)UZ))	B-6 	AT 20D
@@ -407,8 +409,8 @@ COMTERM		STODL	UZ		# UZ	B-1	IN INERTIAL COORD	 AT 20D
 			FV
 			GOBAQUE
 		STODL	FV		# B+16 FOR EARTH, B+20 FOR MOON
-			URPV		# B-1  X-COMPONENT OF POSITION IN
-		BOF	PUSH		# 	PLANETARY COORD.		AT 02D
+			URPV		# B-1  X-COMPONENT OF POSITION  IN
+		BOF	PUSH		# 	    PLANETORY COORD.	  AT 02D
 ## Page 1342
 			MOONFLAG
 			NBRANCH		# 	 2
@@ -416,18 +418,18 @@ COMTERM		STODL	UZ		# UZ	B-1	IN INERTIAL COORD	 AT 20D
 			URPV +2		# B-1	Y-COMPONENT
 		DSQ	DSU
 		DMP	VXSC
-			5/8		# 	   2  2 _
-			ALPHAV		# B-6	5(Y -X )UR	   2  2 _
+			5/8		# 	   2  2 -
+			ALPHAV		# B-6	5(Y -X )UR	   2  2 -
 		VSL3	PDDL		# B-3			5(Y -X )UR	AT 02D
 		VXSC	VAD
-			32D		#     2  2 _   2         _
+			32D		#     2  2 -   2         -
 		PDVL	VXV		# (5(Y.-X )UR/R ) +(2X/R)UX		AT 02D
 			32D		# B-1	 UX
 			UZ		# B-2	-UY =(UX * UZ)
 		VSL1	VXSC		# B-3	 -(2Y/R)UY
-			URPV +2		# 	    2  2 _   2        _
+			URPV +2		# 	    2  2 -   2        -
 		VAD	PUSH		# B-3	(5(X -Y )UR/R )+(2X/R)UX -(
-		DLOAD			# 	     _
+		DLOAD			# 	     -
 			COSPHI/2	# 	2Y/R)UY				AT 02D
 		DSQ	PUSH		# B-2	(Z.COMPONENT)			AT 08D
 		DMP	PDDL		# 		2
@@ -439,21 +441,21 @@ COMTERM		STODL	UZ		# UZ	B-1	IN INERTIAL COORD	 AT 20D
 			URPV
 		DMP	VXSC
 			5/8
-			ALPHAV		# 	                2 _
+			ALPHAV		# 	                2 -
 		VSL5	PDDL		# B-5	(5X/R)(1-7COSPHI )UR		AT 08D
 		DSU	VXSC
 			D1/32
 			32D
-		VSL1	VAD		# 	                2 _           _
+		VSL1	VAD		# 	                2 -           -
 		PDDL	DMP		# B-5	(5X/R)(1-7COSPHI )UR +(5COSPHI
-			URPV		#    _
+			URPV		#    -
 			URPV +4		# -1)UX					AT 08D
 		DMP	VXSC
 			5/8		# B-5	5X Y
 			UZ		# 	  M M
 		VSL2	VAD		# 	                2             2
 		PDDL	NORM		# B-5	(5X/R)(1-7COSPHI )UR +(5COSPHI
-			ALPHAM		#    _          2 _
+			ALPHAM		#    -          2 -
 			X2		# -1)UX +(10XZ/R )UZ			AT 08D
 		PUSH	SLOAD
 			E32C31RM
@@ -560,10 +562,10 @@ CHKSWTCH	STQ	BOF
 		STORE	RPQV
 RPQOK		LXA,2	VLOAD		# RESTORE X2 AFTER USING LUNPOS
 			PBODY
-			TDELTAV		#  _
+			TDELTAV		#  -
 		VSL*	VAD		# |RQC|-RSPHERE WHEN OUTSIDE THE SPHERE.
 ## Page 1345
-			0 -7,2		# _   _            _
+			0 -7,2		# -   -            -
 			RCV		# R = RDEVIATION + RCONIC
 		BOF	ABVAL
 			MOONFLAG
@@ -643,7 +645,7 @@ TINIRECT	STOVL	VCV
 
 ## Page 1347
 
-# THE THREE DIFEQ ROUTINES - DIFEQ+0, DIFEQ+12, DIFEQ+24 - ARE ENTERED TO PROCESS THE CONTRIBUTIONS AT THE
+# THE THREE DIFEQ ROUTINES - DIFEQ+0, DIFEQ+12, AND DIFEQ+24 - ARE ENTEREDTO PROCESS THE CONTRIBUTIONS AT THE
 # BEGINNING, MIDDLE, AND END OF THE TIMESTEP, RESPECTIVELY. THE UPDATING IS DONE BY THE NYSTROM METHOD.
 
 DIFEQ+0		VLOAD	VSR3
@@ -885,7 +887,7 @@ DPZERO		EQUALS	ZEROVEC
 DP2/3		2DEC	.6666666667
 
 2/3		EQUALS	DP2/3
-
+# LM504 IS TEMPORARY
 		SETLOC	ORBITAL2
 		BANK
 		COUNT*	$$/ORBIT

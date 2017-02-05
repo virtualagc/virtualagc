@@ -13,6 +13,8 @@
 ## 		2009-09-04 JL	Fix typos.
 ## 		2010-01-31 JL	Fixed build errors.
 ##		2010-02-20 RSB	Un-##'d this header.
+##		2017-02-05 RSB	Proofed comment text by diff'ing vs Comanche 55
+##				and corrected errors found.
 
 ## Page 418
 
@@ -74,7 +76,7 @@ INCRDCDU	TS	KSPNDX
 		EXTEND			# CDU ANGLES
 		MP	QUADROT
 		INDEX	KDPNDX
-		DXCH	DELCDUX		# ANGEL INCREMENTS TO BE ADDED TO
+		DXCH	DELCDUX		# ANGLE INCREMENTS TO BE ADDED TO
 		INDEX	KSPNDX		# DCDU EVERY TENTH SEC
 		CA	NCDU		# BY LEM DAP
 		INDEX	KSPNDX
