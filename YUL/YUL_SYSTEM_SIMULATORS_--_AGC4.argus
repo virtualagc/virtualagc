@@ -461,7 +461,7 @@ R0238   DIGITS).  IF THE PRINT LIMIT SUBDIRECTOR IS MISSING OR INVALID, THE PRIN
  0276              NA           N,X5,3        W PRINT       STD PLIM            IF NOT "PRINT", MAYBE "TRACE".
  0278              TS           ZERO          HOLD LINE +1  SUSPECT        C    SHOW THAT PRINT LIMIT CARD WAS READ.
  0279              NA           N,X5,3        W LIMIT       UNRC SUBD           "LIMIT" IS REQUIRED.
- 0281              LA, CHAR8    6 C6          5,2           ILL PLIM            BRANCH IF PRINT LIMIT OVER 5 DIGITS.
+ 0281              LA, CHAR6    6 C6          5,2           ILL PLIM            BRANCH IF PRINT LIMIT OVER 5 DIGITS.
  0283              SWE, CHAR8   5,2           A,2           Z,AU1
  0284              WA           Z,AU1         L SIXES       Z,AU1
  0285              WA           N,AU1         N,X5          PRINT LIM
