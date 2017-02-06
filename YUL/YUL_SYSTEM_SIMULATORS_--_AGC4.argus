@@ -9,6 +9,7 @@
 # Mod history:  2016-10-06 JL   Created.
 #               2017-02-04 JL   Transcribed pages 672-682.
 #               2017-02-05 JL   Transcribed pages 683-691.
+#               2017-02-06 JL   Transcribed pages 692-700.
 
 # Annotations:
 #
@@ -141,7 +142,7 @@ P0068   RESERVATIONS.
 
  0073   INSTR      RESERVE      1
  0074   INSTR2     RESERVE      1
- 0075   D8EF       RESERVE      1
+ 0075   DBEF       RESERVE      1
  0076   DATA       RESERVE      1
 
  0077   LOCATION   RESERVE      1
@@ -925,35 +926,384 @@ R0610   SUBROUTINE TO GENERATE SIGN AND ABSOLUTE VALUE OF AN OPERAND.  USED BY M
 # Page 692
 #      @YUL SYSTEM SIMULATORS -- AGC4                                            USER'S OWN PAGE NO.  21        PAGE  21
 
+P0621   PROCEDURE TO SIMULATE THE ACTION OF EDITING REGISTERS.
+
+ 0622   EDITCHK    NA,FLAGS     INSTR         ZERO          C,+2           C
+ 0623              TX           -                           -                   FAST EXIT WHEN NO EDITING REGS INVOLVED.
+
+ 0625              NA,EBIT      INSTR         ZERO          C,-1           C
+
+ 0626              NA,LPBIT     INSTR         ZERO          LPCYCLE        C    BRANCH WHEN OPERAND IS LP.
+
+ 0628              SSL,LOW4     INSTR         2,L           C,+1           C
+
+
+
+R0629   PROCEDURE TO SIMULATE CYR (CYCLE RIGHT).
+
+ 0630   CYRCYCLE   SWS,SIGN     CYR           15,L          CYR            C
+ 0631              SWS,LOW15    CYR           1             CYR
+ 0632              PR
+ 0633              PR
+
+
+
+R0634   PROCEDURE TO SIMULATE SR (SHIFT RIGHT).
+
+ 0635   SRCYCLE    SWS,LOW14    SR            1             SR
+
+
+
+R0636   PROCEDURE TO SIMULATE LP (LOW-ORDER PRODUCT REGISTER).
+
+ 0637   LRCYCLE    SWS,SIGN     LP            15,L          LP             C
+ 0638              SWS,LOW15    LP            1             LP             C
+ 0639              SS           ZERO          BIT14         LP
+
+
+
+R0640   PROCEDURE TO SIMULATE CYL (CYCLE LEFT).
+
+ 0641   CYLCYCLE   SWS,LOW15    CYL           1,L           CYL            C
+ 0642              SWS,ONE      CYL           15            CYL            C
+ 0643              SWS,SIGN     CYL           1,L           CYL
+ 0644              PR
+
+
+
+R0645   PROCEDURE TO SIMULATE SL (SHIFT LEFT).
+
+ 0646   SLCYCLE    SWS,LOW14    SL            1,L           SL             C
+ 0647              SWS,ONE      SL            14            SL
 
 # Page 693
 #      @YUL SYSTEM SIMULATORS -- AGC4                                            USER'S OWN PAGE NO.  22        PAGE  22
 
+P0648              EDITOR ROUTINE TO PREPARE PRINTED OUTPUT.  THIS PART DETECTS THE OCCURRENCE OF INFINITE LOOPS.  THE
+R0650   BINARY OUTPUT OF A TRACED INSTRUCTION, NINE AGC4 WORDS, IS CONDENSED INTO THREE CAC-WORDS.  A BUFFER OF FOUR-
+R0652   WORD ITEMS IS MAINTAINED, WHERE THE FIRST THREE WORDS ARE A TRIPLE OF CAC-WORDS FOR A LINE, AND THE FOURTH IS
+R0654   A CAC-WORD CONTAINING A THREAD TO THE NEXT ITEM (IN ORDER OF PRINTING) IN CAC2, AND A THREAD TO THE NEXT ITEM
+R0656   WITH THE SAME VALUE OF Z IN CAC3 (OR ZERO IF NONE).  BANKS 8 AND 9 CONTAIN SPECS, EACH POINTING TO THE EARLIEST
+R0658   ITEM IN THE BUFFER WITH THE CORRESPONDING VALUE OF Z.  BY "VALUE OF Z" HERE IS MEANT B(Z), I.E. THE LOCATION.
+R0660   AN INDICATOR IS KEPT IN START ADR SHOWING WHETHER A LOOP PATTERN IS IN A STATE OF PARTIAL COMPLETION.  UP TO
+R0662   FOUR POINTERS ARE KEPT (POINTERS ARE SPECS POINTING TO ITEMS IN THE BUFFER).  THE TWO THAT ARE ALWAYS KEPT ARE
+R0664   "IN PTR", POINTING TO THE NEXT ITEM-SLOT TO BE FILLED AND "OUT PTR" POINTING TO THE NEXT ITEM TO BE PRINTED.
+R0666   WHEN A LOOP PATTERN IS IN PROCESS, "PAT PTR" POINTS TO THE FIRST ITEM IN THE PATTERN, AND X3, THE COMPARISON
+R0668   POINTER, POINTS TO THE ITEM WITH WHICH THE NEXT INCOMING LINE IS TO BE COMPARED.  THE STRATEGY, WITH AND WITHOUT
+R0670   A PATTERN IN PROCESS, IS AS FOLLOWS:
+
+R0671   CASE 1: NO PATTERN (C(START ADR) NOT ALL ONES)
+
+R0672              IF THREAD IN BKS 8-9 IS VOID, THREAD IT TO A NEW ITEM FORMED FROM THIS LINE.
+R0674              IF NON-VOID, THREAD THROUGH ITEMS WITH SAME B(Z) AS THIS LINE, LOOKING FOR A 3-WORD MATCH.
+R0676                           IF NONE, THREAD LAST ITEM EXAMINED TO A NEW ITEM FORMED FROM THIS LINE.
+R0678                           IF FOUND, SET PAT PTR AND X3, DISCARD THIS LINE, AND SET START ADR TO ALL ONES.
+R0680                                         IF MATCH WAS WITH PRECEDING LINE, INDICATE TCA TRAP AND ABORT.
+
+R0682   CASE 2: PATTERN IN PROCESS (C(START ADR) IS ALL ONES)
+
+R0683              COMPARE THIS LINE WITH EXISTING ITEM ACCORDING TO X3 (THE COMPARISON POINTER).
+R0685              IF IT MATCHES, SEE IF MATCH WAS WITH THE LAST NON-REPEATING LINE.
+R0687                           IF SO, THE SIMULATED PROGRAM IS IN AN INFINITE LOOP, AND THE RUN IS ABORTED.
+R0689                           IF NOT, INDEX THE COMPARISON POINTER AND DISCARD THE CURRENT LINE.
+R0691              IF NO MATCH, THE PATTERN IS BROKEN.  USING PAT PTR AND X3, FEED ALL REPEATED LINES INTO THE BUFFER,
+R0693              THREADING ACCORDING TO LOCATION BUT NOT CHECKING FOR DUPLICATES.  RESET START ADR TO ZERO AND
+R0695              RESUBMIT THIS LINE.
 
 # Page 694
 #      @YUL SYSTEM SIMULATORS -- AGC4                                            USER'S OWN PAGE NO.  23        PAGE  23
 
+P06952  ENTER HERE AFTER EACH INSTRUCTION.
+
+ 0696   EDITOR     TX           IN PTR        -             Z,X1                AN ITEM-SLOT IS ALWAYS AVAILABLE HERE.
+ 0698              WD, LOW12    Z             ZDECR         LOCATION
+ 0699              TX           A             -             N,X1
+ 0700              SWS, CAC2    INSTR         16,L          N,X1
+ 0701              SWS, CAC1    LOCATION      32,L          N,X1,1              FORM FIRST CAC-WORD.
+
+ 0703              TX           LP            -             N,X1
+ 0704              SWS, CAC2    N,R1          16,L          N,X1                (D AFTER).
+ 0706              SWS, CAC1    D BEF         32,L          N,X1,1              FORM SECOND CAC-WORD.
+
+ 0708              TX           TIME3         -             N,X1
+ 0709              SWS, CAC2    OVCTR         16,L          N,X1
+ 0710              SWS, CAC1    Q             32,L          N,X1                FORM THIRD CAC-WORD.
+
+ 0712              TN           POINTERS      2             Z,X1                IN PTR TO X1, OUT PTR TO X2.
+ 0714              LA           ONES          START ADR     PATTERN             BRANCH IF THERE'S A PATTERN IN PROCESS.
+
+R0716   PROCEDURE TO LOOK FOR A MATCH WHEN NO PATTERN IS IN PROCESS.
+
+ 0717   NO PATERN  WA           BANK8 M3      LOCATION      Z,X3                LET 3,3 = INITIAL THREAD FOR THIS B(Z).
+
+ 0719   NOT MATCH  LA, CAC3     3,3           ZERO          NO MATCH            BRANCH IF NO MATCH IN WHOLE BUFFER.
+ 0721              TX           3,3           -             Z,X3                THREAD TO ITEM WITH THIS B(Z).
+ 0723              NA           N,X1          N,X3          NOT MATCH
+ 0724              NA           1,1           3,1           NOT MATCH
+ 0725              NA           1,2           3,2           NOT MATCH           BRANCH IF NO MATCH ON THIS ITEM.
+
+ 0727              TX           Z,X3          -             PAT PTR             PATTERN BEGINS NOW.  SET PAT PTR.
+ 0731              TS           ONES          START ADR     LOOP CHEK           SET PATTERN SIGNAL, CHECK ONE-ORDER LUP.
+
+ 0733   NO MATCH   SS           Z,X1          CAC3          3,3                 STORE LOCATION THREAD TO THIS ITEM.
+ 0735              TS           L GOGO P1     Z,S3          ADV IN PTR +1       ADVANCE INPUT POINTER, MAYBE PRINTING.
 
 # Page 695
 #      @YUL SYSTEM SIMULATORS -- AGC4                                            USER'S OWN PAGE NO.  24        PAGE  24
 
+P0737   PROCEDURE WHEN A PATTERN IS IN A STATE OF PARTIAL COMPLETION.
+
+ 0738   PATTERN    NA           N,X1          N,X3          BREAK PAT
+ 0739              NA           1,1           3,1           BREAK PAT
+ 0740              NA           1,2           3,2           BREAK PAT           BRANCH IF PATTERN IS NOW BROKEN.
+
+ 0742   LOOP CHEK  NA           Z,X3          LAST PTR      CONTINUE            BRANCH IF LOOP NOT CLOSED YET.
+ 0744              TX           ZERO          -             START ADR           CLEAR PATTERN-IN-PROCESS INDICATOR.
+ 0746              TX           PAT PTR       -             Z,X3
+ 0747              SM           3,3           CAC1          3,3                 FLAG BEGINNING OF INFINITE LOOP.
+ 0749              S, MON TYPER W LOOPING     SPRA +8       TERMDUMP
+
+ 0750   CONTINUE   SWE, CAC3    3,3           16            Z,X3                INDEX COMPARISON POINTER TO NEXT ITEM.
+ 0752              NA           T4            ZERO          RECYCLE
+ 0753              WA           NEWZ          ONE           Z
+ 0754              TS           INSTR2        INSTR         RECYCLE2
+
+ 0758   BREAK PAT  TN           N,X1          3             HOLD LINE           SAVE THIS LINE WHILE BREAKING UP PATERN.
+ 0760              TN           PRINT LIM     2             PRINT LIM -1        SAVE AND DISABLE PRINT LIMIT.
+ 0762              TX           PAT PTR       -             Z,S0                POINT TO BEGINNING OF PATTERN.
+
+ 0764   RPT LINES  TN           N,SC          3             N,X1                RE-FEED REPEATED LINE.
+ 0766              TS           Z,S0,3        Z,X5          C,+2
+ 0767              TX           5,3           -             Z,X5
+ 0768              NA, CAC3     5,3           ZERO          C,-1
+ 0769              SS           Z,X1          CAC3          5,3                 STORE LOCATION THREAD TO RE-FED LINE.
+ 0771              TS           ZERO          START ADR     ADV IN PTR          RESET PATTERN SIGNAL, ADVANCE IN PTR.
+ 0773              SWE, CAC3    N,S0          16            Z,S0                ADVANCE RE-FEEDING POINTER.
+ 0775              NA           Z,S0          Z,X3          RPT LINES           BRANCH IF MORE ITEMS TO REPEAT.
+
+ 0777              LA           ONES          HOLD LINE     END PRINT           BR IF CALLED BY TERMDUMP, NOT PAT BREAK.
+
+ 0779              TN           HOL LINE      3             N,X1                RESTORE THIS LINE.
+ 0781              TS           PRINT LIM -1  PRINT LIM     NO PATERN           RE-SUBMIT THIS LINE FOR MATCHING.
 
 # Page 696
 #      @YUL SYSTEM SIMULATORS -- AGC4                                            USER'S OWN PAGE NO.  25        PAGE  25
 
+P0783              EDITOR CONTINUED.  THIS PART IS A SUBROUTINE TO ADVANCE IN PTR.  IF THE RESULTING VALUE EQUALS THAT
+R0785   OF OUT PTR, THE BUFFER IS FULL (THIS IS THE NORMAL CASE AFTER THE FIRST 300 LINES OR THEREABOUTS).  A LINE IS
+R0787   PUSHED OUT OF THE BUFFER ACCORDING TO OUT PTR, AND OUT PTR IS ADVANCED.  THE LOCATION THREAD FOR THE LINE IS
+R0789   SEWN UP AROUND IT.  IF THE TRACE IS ON, THE FOLLOWING QUANTITIES ARE PRINTED:
+
+R0790   LOCATION  ALPHA-OP-CODE  ADDRESS  A  B(X)  A(X)  LP  Q  OVCTR  T3, AND (IF APPROPRIATE) "INFINITE LOOP".
+
+R0792   FOR EACH QUANTITY EXCEPT "INFINITE LOOP", DITTO MARKS ARE PRINTED IF APPROPRIATE, EXCEPT AT THE TOP OF A PAGE.
+R0794   FOR ANY FLIP-FLOP REGISTER CONTAINING OVERFLOW, THE OVERFLOW-CORRECTED CONTENTS ARE SHOWN, PRECEDED BY A BLOT.
+
+ 0796   ADV IN PTR TX           Z,SH          -             Z,S3
+ 0797              TX           Z,X1          -             LAST PTR            POINT TO LAST NEW LINE ACCEPTED.
+ 0799              SWE, CAC3    1,3           16            IN PTR              ADVANCE IN PTR.
+ 0801              TX           IN PTR        -             Z,X1                KEEP IN PTR IN X1 ALSO.
+ 0803              NA           Z,X1          OUT PTR       N,S3                FAST EXIT UNTIL BUFFER FILLS UP.
+
+ 0805              LA           2,3           CAC1          C,+2
+ 0806              TN           W INF LOOP    2             NEXT LINE +10       DO THIS WHERE LOOP BEGINS.
+ 0808              SWE, CAC3    N,X2          32            EDIT WD             RECOVER LOCATION.
+ 0810              WA           BANK8 M3      EDIT WD       Z,X5                LET 5,3 = INITIAL LOCATION THREAD.
+ 0812              NA, CAC3     5,3           OUT PTR       C,+2
+ 0813              TS, CAC3     2,3           5,3           C,+2                DELETE THIS LINE FROM LOCATION THREAD.
+ 0815              TS           5,3           Z,X5          C,-2
+ 0816              SS           ZERO          CAC3          2,3                 CLEAR LOCATION THREAD IN ITEM.
+
+ 081701 CHANGE Q   WA           BANK 8        EDIT WD       Z,X5
+ 081702            NA, CHANGMSK 5,0           LOC FLAG      C,+4                BRANCH IF NO TRACE CHANGE ON LOCATION.
+ 081704            HA           LOC FLAG      B1B2          LOC FLAG            CHANGE CRITERION FOR CHANGE ON LOCATION.
+ 081706            NA           CHANG MSK     ON            N OMITTED           BRANCH IF CHANGING OFF TO ON.
+ 081708            TS           OFF           CHANG MSK     SET UP LIN          CHANGE ON TO OFF BUT PRINT THIS INSTR.
+ 08171             SWS, LOW 12  N,X2          16            Z,X5
+ 081711            LA, CHANGMSK ONES          5,0           C,-4                BRANCH IF TRACE CHANGE ON ADDRESS.
+
+ 081713 OFF TEST   NA           CHANG MSK     OFF           SET UP LIN          BRANCH IF TRACE IS ON.
+ 081715            DA           TRACE OFF     ONE           TRACE OFF           STEP COUNT OF UNTRACED INSTRUCTIONS.
+ 081717            SWE, CAC3    2,3           16            OUT PTR             ADVANCE OUT PTR AND SAME IN X2.
+ 081719            TS           OUT PTR       Z,X2          N,S3                QUICK EXIT WHEN TRACE IS OFF.
+
+ 081721 N OMITTED  LA           TRACE OFF     ZERO          SET UP LIN          WHEN IT REALLY WASN'T OFF AT ALL.
+ 081723            SWE, ONES    TRACE OFF     D,4,L         MON ARG
+ 081724            TS           Z,SC          Z,AU1         YUL D2A ZS
+ 081725*         DELETE                 THIS BETTER BE R.P. AFTER 817.24
+ 081725 MON ARG    RESERVE      1
+ 081726*           MT           N,SH,2        2             OMIT MSG +2         EDIT TRACE-OFF COUNT FOR PRINTING.
+ 08173             TS           BLANKS        LINE          END PAGE +1    C    GENERATE BLANK LINE.
+ 081732            TS           Z,S3          CHANG MSK     END PRINT +2   C    SAVE RETURN, SET SP1.
+ 081734            TN           OMIT MSG      5             LINE +10
+ 081735            TS           Z,SC          Z,S3          PRINT LIN           PRINT NO. OF UNTRACED INSTRUCTIONS.
+ 081737            TX           CHANG MSK     -             Z,S3                RECOVER RETURN ADDRESS.
+ 081739            TX           ON            -             CHANG MSK           TURN ON THE TRACE.
+ 081741            TX           ZERO          -             TRACE OFF
 
 # Page 697
 #      @YUL SYSTEM SIMULATORS -- AGC4                                            USER'S OWN PAGE NO.  26        PAGE  26
 
+P081799 PROCEDURE TO SET UP A TRACE LINE IN PRINT.
+
+
+
+ 0818   SET UP LIN S, OCT2ALF4  EDIT WD                     NEXT LINE           EDIT LOCATION.
+ 0820              SWE, LOW4    N,X2          28            T1
+ 0821              WA           T1            OP ALF        Z,AU1
+ 0822              TX           N,AU1         -             NEXT LINE +1        SUPPLY ALPHABETIC OP CODE.
+ 0824              SWE, CAC3    N,X2          16            EDIT WD
+ 0825              S, OCT2ALF4  EDIT WD                     NEXT LINE +2        EDIT ADDRESS PART OF INSTRUCTION.
+ 0827              S, OCT2ALF5  2,0                         NEXT LINE +3        EDIT C(A).
+
+ 0829              SWE, CAC3    2,1           32            EDIT WD
+ 0830              S, OCT2ALF5  EDIT WD                     NEXT LINE +4        EDIT B(X).
+ 0832              SWE, CAC3    2,1           16            EDIT WD
+ 0833              S, OCT2ALF5  EDIT WD                     NEXT LINE +5        EDIT A(X).
+ 0835              S, OCT2ALF5  2,1                         NEXT LINE +6        EDIT C(LP).
+
+ 0837              SWE, CAC3    2,2           32            EDIT WD
+ 0838              S, OCT2ALF5  EDIT WD                     NEXT LINE +7        EDIT C(Q).
+ 0840              SWE, CAC3    2,2           16            EDIT WD
+ 0841              S, OCT2ALF5  EDIT WD                     NEXT LINE +8        EDIT C(OVCTR).
+ 0843              S, OCT2ALF5  2,2                         NEXT LINE +9        EDIT C(T3).
+
+ 0845              SWE, CAC3    2,3           16            OUT PTR             ADVANCE OUT PTR.
+ 0847              TX           OUT PTR       -             Z,X2                ALSO KEEP IT IN X2.
+ 0849              LA           LINE CNT      FIFTY         PRINT               BRANCH IF NOT END OF PAGE.
 
 # Page 698
 #      @YUL SYSTEM SIMULATORS -- AGC4                                            USER'S OWN PAGE NO.  27        PAGE  27
 
+P0851   AT END OF PAGE, PRINT A BLANK LINE AND SKIP.  THEN PRINT PAGE HEAD AND SUBHEAD.
+
+ 0853   END PAGE   TN           SKIP          2             LINE -1             SKIP-CODE AND BLANK WORD.
+ 0855              TN           LINE          14            LINE +1             GENERATE BLANK LINE.
+ 08562             S, MON PRINT DEPAGIN8
+ 0857              S, MON PRINT LINE -1                                         SKIP TO HEAD OF FORM.
+ 0859              S, MON PRINT SIMU HEAD                                       PRINT PAGE HEAD.
+ 0861              DA           PAGE NO       ONE           PAGE NO
+ 0862              SS           PAGE NO       D12           SIMU HEAD +15       STORE INCREASED PAGE NUMBER.
+ 0864              NA, CHAR8    SIMU HEAD +15 ZERO          C,+4                BRANCH IF NO CHANGE IN TENS DIGIT.
+
+ 0855              SWS, ACH7    PAGE NO       2,L           SIMU HEAD +15       SET UP CHANGED TENS DIGIT.
+ 0868              NA, CHAR7    SIMU HEAD +15 ZERO          C,+2                BRANCH IF NO CHANGE IN HUNDREDS DIGIT.
+
+ 0870              SWS, CHAR6   PAGE NO       4,L           SIMU HEAD +15       SET UP CHANGED HUNDREDS DIGIT.
+
+ 0872   RESET LC   TX           ONE           -             LINE CNT
+ 0873              S, MON PRINT SUB HEAD                                        PRINT COLUMN HEADINGS.
+
+ 0875   PRINT      TN           PRIN SPEX     2             Z,S1                SPECS FOR LINE +3 AND NEXT LINE +3.
+ 08764  DITO LOOP  NA           N,S2          N,S1          NOT SAME            BR IF THIS WD NO MATCH SAME IN LAST LIN.
+ 08768             WA           Z,S2          TWELVE        Z,AU1               HERE THIS WD IN LAST LINE NOT A DITTO.
+ 08772             TS           N,S1,1        N,AU1         PUT DITTO           SAVE REPEATED WORD FOR LATER COMPARISON.
+
+ 08776  NOT SAME   NA           N,S1,1        DITTO         PUT DITTO +1        BRANCH UNLESS NO-MATCH CAUSED BY DITTO.
+ 0878              WA           Z,S2          TWELVE        Z,AU1
+ 08784             NA           N,S2          N,AU1         PUT DITTO +1        BRANCH IF DITTO PATTERN BREAKS NOW.
+
+ 0879   PUT DITTO  TX           DITTO         -             N,S2                SUPPLY INIITAL OR CONTINUED DITTO.
+ 0880              NA           Z,S2,1        PRIN SPEX +2  DITO LOOP           DO THIS FOR RIGHT-HAND SEVEN FIELDS.
+
+ 0882              TN           NEXT LINE -1  16            LINE -1
+ 0883   PRINT LIN  S, MON PRINT LINE -1
+ 0884              WA           LINE CNT      ONE           LINE CNT
+ 0885              DA           TASK LINS     ONE           TASK LINS           COUNT PRINT LINES IN TASK.
+ 0887              LA           TASK LINS     PRINT LIM     N,S3                RETURN IF NOT TOO MANY.
+ 08882             LA           CHANG MSK     CAC 3         N,S3                RETURN IF LINE IS "TRACE OFF" TYPE.
+ 0889              S, MON TYPER W PRNT MAX    SPRA +8       TERMDUMP
 
 # Page 699
 #      @YUL SYSTEM SIMULATORS -- AGC4                                            USER'S OWN PAGE NO.  28        PAGE  28
 
+P0890              SUBROUTINE TO CONVERT LOW-ORDER BITS TO 5 ALPHA-OCTALS (CHECKING FOR OVERFLOW).  16 LOW-ORDER BITS AT
+R0892   A ARE MADE INTO A RIGHT-JUSTIFIED ALPHA WORD AT C.
+
+ 0893   OCT2ALF5   SIMULATE
+ 0894              SSL, LOW2    N,AU1         14            BLOT CHEK      C    TEST FOR OVERFLOW IN OPERAND.
+
+ 0896   OV CORECT  SWS, US      N,AU1         1             N,AU1          C    CORRECT IT IF REQUIRED.
+
+ 0898              SWS, MSK5    N,AU1         12,L          N,AU2          C    SET UP HIGH-ORDER DIGIT.
+
+ 0900   4 DIGITS   SWS, MSK4    N,AU1         9,L           N,AU2          C
+ 0901              SWS, MSK3    N,AU1         6,L           N,AU2          C
+ 0902              SWS, MSK2    N,AU1         3,L           N,AU2          C
+ 0903              SS           N,AU1         OCT7          N,AU2               SET UP LOW-ORDER DIGITS, RETURN.
+
+
+
+R0905   SIMILAR SUBROUTINE FOR 12 LOW-ORDER DIGITS INTO 4 ALPHA-OCTALS.
+
+ 0906   OCT2ALF4   SIMULATE
+ 0907              TS           BLANK 1T4     N,AU2         4 DIGITS       C
+
+
+
+R0908   FOUR ANSWERS TO OVERFLOW CHECK IN OCT2ALF5.
+
+ 0909   BLOT CHEK  TS           BLANK 1T3     N,AU2         OV CORECT +1   C
+ 0910              TS           OVF BLOT      N,AU2         OV CORECT      C
+ 0911              TS           OVF BLOT      N,AU2         OV CORECT      C
+ 0912              TS           BLANK 1T3     N,AU2         OV CORECT +1   C
 
 # Page 700
 #      @YUL SYSTEM SIMULATORS -- AGC4                                            USER'S OWN PAGE NO.  29        PAGE  29
+
+P0913              TERMINAL DUMP PROCEDURE, USED WHEN A PROPERLY STARTED RUN ENDS FOR ANY REASON.  GIVES THE CAUSE OF
+R0915   TERMINATION AND DUMPS LOCATIONS 0000-1777 ON FOUR PAGES.
+
+ 0916   MON TYPER  SIMULATE
+ 0917              TS           N,AU1         CAUSE         C,+1                SUPPLY CAUSE FOR PRINTING.
+ 091802 TERMDUMP   S, YUL TYPER CAUSE         AA +1         C,+1
+ 09181             TS           OFF TEST      CHANGE Q +1   MON WAKE       C    LOCK TRACE ON.
+ 09183             TN           W CORONER     2             NEXT LINE +13       LABEL CORONER'S REPORT AS SUCH.
+ 0919              TS           ONES          HOLD LINE     BREAK PAT +1   C    DISABLE LOCAL PRINT LIMIT.
+ 0920              LA           ONES          START ADR     BREAK PAT +2        BREAK PARTIAL PATTERN IF ANY.
+
+ 0922   END PRINT  NA           OUT PTR       IN PTR        ADV IN PTR
+ 0923              NA           OUT PTR       LAST PTR      ADV IN PTR +2       EMPTY OUT TRACE LINE BUFFER.
+
+ 0925              TX           SP1           -             LINE -1
+ 0926              TS           BLANKS        LINE          END PAGE +1    C
+ 0927              S, MON PRINT LINE -1                                         LEAVE A BLANK LINE.
+ 0929              TX           SKIP          -             LINE -1
+ 0931              TN           CAUSE         7             LINE +2             STATE CAUSE AND ANNOUNCE DUMP.
+ 09321             TX           BANK 2        -             Z,X3                H800 ADDRESS OF AGC4 ADDRESS 0000.
+ 0933              TS           C,+1          RESET LC      END PAGE +2         CHANGE RETURN FROM PAGE HEAD PRINT.
+ 0935              TS           EIGHT         Z,S1          C,+1                SET NUMBER OF 4-LINE GROUPS PER PAGE.
+
+ 0939              TS           SP1           LINE -1       END PAGE +1    C
+
+ 0940   4 LINES    TS           FOUR          Z,S2          C,+2                SET NUMBER OF LINES PER BUNCH.
+
+ 0942   1 LINE     S, MON PRINT LINE -1
+ 0943              WD           PRIN SPEX     ONE           Z,X5                FORM SPEC   LINE +2.
+ 0945              TX           Z,X3          -             EDIT WD
+ 0946              S, OCT2ALF4  EDIT WD                     LINE                EDIT ADDRESS OF 1ST WORD OF 8 ON A LINE.
+
+ 0948   1 WORD     S, OCT2ALF5  3,0                         5,0                 EDIT A WORD OF ERASABLE MEMORY.
+ 09492             NA           N,X5          BLANK 1T3     C,+2
+ 09494             TX           ZERO C6       -             N,X5                REPLACE ZERO WORD WITH A LONE ZERO.
+ 0950              LA           SPEC 1777     Z,X3,1        LAST LINE           BRANCH IF LAST WORD EDITED.
+ 0952              NA           Z,X5,1        PRIN SPEX +3  1 WORD
+
+ 0953              NA           Z,S2,1        ONE           1 LINE              BRANCH IF NOT LAST LINE OF BUNCH OF 4.
+
+ 0955              TX           SP2           -             LINE -1
+ 0956              S, MON PRINT LINE -1
+ 0957              LA           Z,S1,1        ONE           END PAGE
+
+ 0958              TS           SP1           LINE -1       4 LINES             GO TO PRINT NEXT FOUR LINES, SAME PAGE.
+
+ 0960   LAST LINE  TX           SKIP          -             LINE -1
+ 09601             S, MON PRINT DEPAGIN8
+ 0961              S, MON PRINT LINE -1
+ 0962              TX           YUL MASKS     -             Z,MXR
+ 0963              S, YUL TYPER END SI MSG    AMTF +2       MANUF RTN           TYPE "END SIMULATION", EXIT.
+ 0966   MASK LOC   MODLOC       64
+
+ 0000  *CORRECT  CARDNO TO 999999
+ SEQBRK*           END          YULSIMUL      AGC4
 
