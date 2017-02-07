@@ -13,10 +13,9 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-01-22 MAS  Created from Luminary 99.
+##              2017-02-07 NV   Updated for Luminary 116.
 
-## NOTE: Page numbers below have not yet been updated to reflect Luminary 116.
-
-## Page 1403
+## Page 1393
 # PROGRAM NAMES:        (1) T6JOBCHK    MOD. NO. 5      OCTOBER 2, 1967
 #                       (2) DOT6RUPT
 # MODIFICATION BY:      LOWELL G HULL (A.C.ELECTRONICS)
@@ -65,7 +64,7 @@
 # DEBRIS:       T6JOBCHK CLOBBERS A.  DOT6RUPT CLOBBERS NOTHING.
 
                 BLOCK           02                              
-## Page 1404
+## Page 1394
                 BANK            17                              
                 SETLOC          DAPS2                           
                 BANK                                            
@@ -75,15 +74,11 @@
 T6JOBCHK        CCS             TIME6                           # CHECK TIME6 FOR WAITING T6RUPT:
                 TC              Q                               # NONE: CLOCK COUTING DOWN.
                 TC              CCSHOLE                         
-                TC              T6JOBCHK        +3              
+                TC              CCSHOLE                         
 
 # CONTROL PASSES TO T6JOB ONLY WHEN C(TIME6) = -0 (I.E. WHEN A T6RUPT MUST BE PROCESSED).
 
-T6JOB           CAF             POSMAX                          # DISABLE CLOCK: NEEDED SINCE RUPT OCCURS
-                EXTEND                                          # 1 DINC AFTER T6 = 77777. FOR 625 MUSECS
-                WAND            CHAN13                          # MUST NOT HAVE T6 = +0 WITH ENABLE SET
-
-                CA              POSMAX                          
+T6JOB           CA              POSMAX                          
                 ZL                                              
                 DXCH            T6FURTHA                        
                 DXCH            T6NEXT                          
@@ -96,7 +91,14 @@ T6JOB           CAF             POSMAX                          # DISABLE CLOCK:
                 CA              POSMAX                          
                 TS              TIME6                           
                 TCF             GOCH56                          
-ENABLET6        CA              BIT15                           
+ENABLET6        EXTEND                                          
+                QXCH            C13QSAV                         
+                LXCH            RUPTREG1                        
+                TC              C13STALL                        
+                EXTEND                                          
+                QXCH            C13QSAV                         
+                LXCH            RUPTREG1                        
+                CAF             BIT15                           
                 EXTEND                                          
                 WOR             CHAN13                          
                 CA              T6NEXT                          
@@ -114,10 +116,10 @@ GOCH56          INDEX           L
                 EBANK=          CDUXD                           
                 COUNT*          $$/DAPT6                        
 
+## Page 1395
                 CA              NEXTP                           
 WRITEP          EXTEND                                          
                 WRITE           CHAN6                           
-## Page 1405
                 TC              Q                               
 
                 CA              NEXTU                           
