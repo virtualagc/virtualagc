@@ -8,6 +8,7 @@
 # Pages:        701-733
 # Mod history:  2016-10-06 JL   Created.
 #               2017-02-06 JL   Transcribed pages 701-724.
+#               2017-02-07 JL   Transcribed pages 725-733.
 
 # Annotations:
 #
@@ -1075,35 +1076,238 @@ P0839   PROCEDURE WHEN A PATTERN IS IN A STATE OF PARTIAL COMPLETION.
 # Page 725
 #      @YUL SYSTEM SIMULATORS -- SACO                                            USER'S OWN PAGE NO.  25        PAGE  54
 
+P0882              EDITOR CONTINUED.  THIS PART IS A SUBROUTINE TO ADVANCE IN PTR.  IF THE RESULTING VALUE EQUALS THAT
+R0884   OF OUT PTR, THE BUFFER IS FULL (THIS IS THE NORMAL CASE AFTER THE FIRST 300 LINES OR THEREABOUTS).  A LINE IS
+R0886   PUSHED OUT OF THE BUFFER ACCORDING TO OUT PTR, AND OUT PTR IS ADVANCED.  THE LOCATION THREAD FOR THE LINE IS
+R0888   SEWN UP AROUND IT.  IF THE TRACE IS ON, THE FOLLOWING QUANTITIES ARE PRINTED:
+
+R0890   LOCATION  ALPHA-OP-CODE  ADDRESS  A  B(X)  A(X)  LP  Q  OVCTR  T3, AND (IF APPROPRIATE) "INFINITE LOOP".
+
+R0892   FOR EACH QUANTITY EXCEPT "INFINITE LOOP", DITTO MARKS ARE PRINTED IF APPROPRIATE, EXCEPT AT THE TOP OF A PAGE.
+R0894   FOR ANY FLIP-FLOP REGISTER CONTAINING OVERFLOW, THE OVERFLOW-CORRECTED CONTENTS ARE SHOWN, PRECEDED BY A BLOT.
+
+ 0896   ADV IN PTR TX           Z,SH          -             Z,S3
+ 0897              TX           Z,X1          -             LAST PTR            POINT TO LAST NEW LINE ACCEPTED.
+ 0899              SWE, CAC3    1,3           16            IN PTR              ADVANCE IN PTR.
+ 0901              TX           IN PTR        -             Z,X1                KEEP IN PTR IN X1 ALSO.
+ 0903              NA           Z,X1          OUT PTR       N,S3                FAST EXIT UNTIL BUFFER FILLS UP.
+
+ 0905              LA           2,3           CAC1          C,+2
+ 0906              TN           W INF LOOP    2             NEXT LINE +10       DO THIS WHERE LOOP BEGINS.
+ 0908              SWE, CAC3    N,X2          32            EDIT WD             RECOVER LOCATION.
+ 0910              WA           BANK8 M3      EDIT WD       Z,X5                LET 5,3 = INITIAL LOCATION THREAD.
+ 0912              NA, CAC3     5,3           OUT PTR       C,+2
+ 0913              TS, CAC3     2,3           5,3           C,+2                DELETE THIS LINE FROM LOCATION THREAD.
+ 0915              TS           5,3           Z,X5          C,-2
+ 0916              SS           ZERO          CAC3          2,3                 CLEAR LOCATION THREAD IN ITEM.
+
+ 0918   CHANGE Q   WA           BANK 8        EDIT WD       Z,X5
+ 0919              NA, CHANGMSK 5,0           LOC FLAG      C,+4                BRANCH IF NO TRACE CHANGE ON LOCATION.
+ 0921              HA           LOC FLAG      B1B2          LOC FLAG            CHANGE CRITERION FOR CHANGE ON LOCATION.
+ 0923              NA           CHANG MSK     ON            N OMITTED           BRANCH IF CHANGING OFF TO ON.
+ 0925              TS           OFF           CHANG MSK     SET UP LIN          CHANGE ON TO OFF BUT PRINT THIS INSTR.
+ 0927              SWS, LOW 12  N,X2          16            Z,X5
+ 0928              LA, CHANGMSK ONES          5,0           C,-4                BRANCH IF TRACE CHANGE ON ADDRESS.
+
+ 0930   OFF TEST   NA           CHANG MSK     OFF           SET UP LIN          BRANCH IF TRACE IS ON.
+ 0932              DA           TRACE OFF     ONE           TRACE OFF           STEP COUNT OF UNTRACED INSTRUCTIONS.
+ 0934              SWE, CAC3    2,3           16            OUT PTR             ADVANCE OUT PTR AND SAME IN X2.
+ 0936              TS           OUT PTR       Z,X2          N,S3                QUICK EXIT WHEN TRACE IS OFF.
+
+ 0938   N OMITTED  LA           TRACE OFF     ZERO          SET UP LIN          WHEN IT REALLY WASN'T OFF AT ALL.
+ 0940              SWE, ONES    TRACE OFF     D,4,L         MON ARG
+ 0941              TS           Z,SC          Z,AU1         YUL D2A ZS          EDIT TRACE-OFF COUNT FOR PRINTING.
+ 0943   MON ARG    RESERVE      1
+ 0944              MT           N,SH,2        2             OMIT MSG +2         
+ 0949              TS           BLANKS        LINE          END PAGE +1    C    GENERATE BLANK LINE.
+ 0951              TS           Z,S3          CHANG MSK     END PRINT +2   C    SAVE RETURN, SET SP1.
+ 0953              TN           OMIT MSG      5             LINE +10
+ 0954              TS           Z,SC          Z,S3          PRINT LIN           PRINT NO. OF UNTRACED INSTRUCTIONS.
+ 0956              TX           CHANG MSK     -             Z,S3                RECOVER RETURN ADDRESS.
+ 0958              TX           ON            -             CHANG MSK           TURN ON THE TRACE.
+ 0960              TX           ZERO          -             TRACE OFF
 
 # Page 726
 #      @YUL SYSTEM SIMULATORS -- SACO                                            USER'S OWN PAGE NO.  26        PAGE  55
 
+P0961   PROCEDURE TO SET UP A TRACE LINE IN PRINT.
+
+
+
+ 0962   SET UP LIN S, OCT2ALF4  EDIT WD                     NEXT LINE           EDIT LOCATION.
+ 0964              SWE, LOW4    N,X2          28            T1
+ 0965              WA           T1            OP ALF        Z,AU1
+ 0966              TX           N,AU1         -             NEXT LINE +1        SUPPLY ALPHABETIC OP CODE.
+ 0968              SWE, CAC3    N,X2          16            EDIT WD
+ 0969              S, OCT2ALF4  EDIT WD                     NEXT LINE +2        EDIT ADDRESS PART OF INSTRUCTION.
+ 0971              S, OCT2ALF5  2,0                         NEXT LINE +3        EDIT C(A).
+
+ 0973              SWE, CAC3    2,1           32            EDIT WD
+ 0974              S, OCT2ALF5  EDIT WD                     NEXT LINE +4        EDIT B(X).
+ 0976              SWE, CAC3    2,1           16            EDIT WD
+ 0977              S, OCT2ALF5  EDIT WD                     NEXT LINE +5        EDIT A(X).
+ 0979              S, OCT2ALF5  2,1                         NEXT LINE +6        EDIT C(LP).
+
+ 0981              SWE, CAC3    2,2           32            EDIT WD
+ 0982              S, OCT2ALF5  EDIT WD                     NEXT LINE +7        EDIT C(Q).
+ 0984              SWE, CAC3    2,2           16            EDIT WD
+ 0985              S, OCT2ALF5  EDIT WD                     NEXT LINE +8        EDIT C(OVCTR).
+ 0987              S, OCT2ALF5  2,2                         NEXT LINE +9        EDIT C(T3).
+
+ 0989              SWE, CAC3    2,3           16            OUT PTR             ADVANCE OUT PTR.
+ 0991              TX           OUT PTR       -             Z,X2                ALSO KEEP IT IN X2.
+ 0993              LA           LINE CNT      FIFTY         PRINT               BRANCH IF NOT END OF PAGE.
 
 # Page 727
 #      @YUL SYSTEM SIMULATORS -- SACO                                            USER'S OWN PAGE NO.  27        PAGE  56
 
+P0995   AT END OF PAGE, PRINT A BLANK LINE AND SKIP.  THEN PRINT PAGE HEAD AND SUBHEAD.
+
+ 0997   END PAGE   TN           SKIP          2             LINE -1             SKIP-CODE AND BLANK WORD.
+ 0999              TN           LINE          14            LINE +1             GENERATE BLANK LINE.
+ 10002             S, MON PRINT DEPAGIN8
+ 1001              S, MON PRINT LINE -1                                         SKIP TO HEAD OF FORM.
+ 1003              S, MON PRINT SIMU HEAD                                       PRINT PAGE HEAD.
+ 1005              DA           PAGE NO       ONE           PAGE NO
+ 1006              SS           PAGE NO       D12           SIMU HEAD +15       STORE INCREASED PAGE NUMBER.
+ 1008              NA, CHAR8    SIMU HEAD +15 ZERO          C,+4                BRANCH IF NO CHANGE IN TENS DIGIT.
+
+ 1010              SWS, ACH7    PAGE NO       2,L           SIMU HEAD +15       SET UP CHANGED TENS DIGIT.
+ 1012              NA, CHAR7    SIMU HEAD +15 ZERO          C,+2                BRANCH IF NO CHANGE IN HUNDREDS DIGIT.
+
+ 1014              SWS, CHAR6   PAGE NO       4,L           SIMU HEAD +15       SET UP CHANGED HUNDREDS DIGIT.
+
+ 1016   RESET LC   TX           ONE           -             LINE CNT
+ 1017              S, MON PRINT SUB HEAD                                        PRINT COLUMN HEADINGS.
+
+ 1019   PRINT      TN           PRIN SPEX     2             Z,S1                SPECS FOR LINE +3 AND NEXT LINE +3.
+ 1021   DITO LOOP  NA           N,S2          N,S1          NOT SAME            BR IF THIS WD NO MATCH SAME IN LAST LIN.
+ 1023              WA           Z,S2          TWELVE        Z,AU1               HERE THIS WD IN LAST LINE NOT A DITTO.
+ 1025              TS           N,S1,1        N,AU1         PUT DITTO           SAVE REPEATED WORD FOR LATER COMPARISON.
+
+ 1027   NOT SAME   NA           N,S1,1        DITTO         PUT DITTO +1        BRANCH UNLESS NO-MATCH CAUSED BY DITTO.
+ 1029              WA           Z,S2          TWELVE        Z,AU1
+ 1030              NA           N,S2          N,AU1         PUT DITTO +1        BRANCH IF DITTO PATTERN BREAKS NOW.
+
+ 1032   PUT DITTO  TX           DITTO         -             N,S2                SUPPLY INIITAL OR CONTINUED DITTO.
+ 1034              NA           Z,S2,1        PRIN SPEX +2  DITO LOOP           DO THIS FOR RIGHT-HAND SEVEN FIELDS.
+
+ 1036              TN           NEXT LINE -1  16            LINE -1
+ 1037   PRINT LIN  S, MON PRINT LINE -1
+ 1038              WA           LINE CNT      ONE           LINE CNT
+ 1039              DA           TASK LINS     ONE           TASK LINS           COUNT PRINT LINES IN TASK.
+ 1041              LA           TASK LINS     PRINT LIM     N,S3                RETURN IF NOT TOO MANY.
+ 1043              LA           CHANG MSK     CAC 3         N,S3                RETURN IF LINE IS "TRACE OFF" TYPE.
+ 1045              S, MON TYPER W PRNT MAX    SPRA +8       TERMDUMP
 
 # Page 728
 #      @YUL SYSTEM SIMULATORS -- SACO                                            USER'S OWN PAGE NO.  28        PAGE  57
 
+P1046              SUBROUTINE TO CONVERT LOW-ORDER BITS TO 5 ALPHA-OCTALS (CHECKING FOR OVERFLOW).  16 LOW-ORDER BITS AT
+R1048   A ARE MADE INTO A RIGHT-JUSTIFIED ALPHA WORD AT C.
+
+ 1049   OCT2ALF5   SIMULATE
+ 1050              SSL, LOW2    N,AU1         14            BLOT CHEK      C    TEST FOR OVERFLOW IN OPERAND.
+
+ 1052   OV CORECT  SWS, US      N,AU1         1             N,AU1          C    CORRECT IT IF REQUIRED.
+
+ 1054              SWS, MSK5    N,AU1         12,L          N,AU2          C    SET UP HIGH-ORDER DIGIT.
+
+ 1056   4 DIGITS   SWS, MSK4    N,AU1         9,L           N,AU2          C
+ 1057              SWS, MSK3    N,AU1         6,L           N,AU2          C
+ 1058              SWS, MSK2    N,AU1         3,L           N,AU2          C
+ 1059              SS           N,AU1         OCT7          N,AU2               SET UP LOW-ORDER DIGITS, RETURN.
+
+
+
+R1061   SIMILAR SUBROUTINE FOR 12 LOW-ORDER DIGITS INTO 4 ALPHA-OCTALS.
+
+ 1062   OCT2ALF4   SIMULATE
+ 1063              TS           BLANK 1T4     N,AU2         4 DIGITS       C
+
+
+
+R1064   FOUR ANSWERS TO OVERFLOW CHECK IN OCT2ALF5.
+
+ 1065   BLOT CHEK  TS           BLANK 1T3     N,AU2         OV CORECT +1   C
+ 1066              TS           OVF BLOT      N,AU2         OV CORECT      C
+ 1067              TS           OVF BLOT      N,AU2         OV CORECT      C
+ 1068              TS           BLANK 1T3     N,AU2         OV CORECT +1   C
 
 # Page 729
 #      @YUL SYSTEM SIMULATORS -- SACO                                            USER'S OWN PAGE NO.  29        PAGE  58
 
+P1069              TERMINAL DUMP PROCEDURE, USED WHEN A PROPERLY STARTED RUN ENDS FOR ANY REASON.  GIVES THE CAUSE OF
+R1071   TERMINATION AND DUMPS LOCATIONS 0000-1777 ON FOUR PAGES.
+
+ 1072   MON TYPER  SIMULATE
+ 1073              TS           N,AU1         CAUSE         C,+1                SUPPLY CAUSE FOR PRINTING.
+ 10742  TERMDUMP   S, YUL TYPER CAUSE         AA +1         C,+1
+ 1075              TS           OFF TEST      CHANGE Q +1   MON WAKE       C    LOCK TRACE ON.
+ 1077              TN           W CORONER     2             NEXT LINE +13       LABEL CORONER'S REPORT AS SUCH.
+ 1079              TS           ONES          HOLD LINE     BREAK PAT +1   C    DISABLE LOCAL PRINT LIMIT.
+ 1081              LA           ONES          START ADR     BREAK PAT +2        BREAK PARTIAL PATTERN IF ANY.
+
+ 1083   END PRINT  NA           OUT PTR       IN PTR        ADV IN PTR
+ 1084              NA           OUT PTR       LAST PTR      ADV IN PTR +2       EMPTY OUT TRACE LINE BUFFER.
+
+ 1086              TX           SP1           -             LINE -1
+ 1087              TS           BLANKS        LINE          END PAGE +1    C
+ 1088              S, MON PRINT LINE -1                                         LEAVE A BLANK LINE.
+ 1090              TX           SKIP          -             LINE -1
+ 1091              TN           CAUSE         7             LINE +2             STATE CAUSE AND ANNOUNCE DUMP.
+ 1093              TX           BANK 2        -             Z,X3                H800 ADDRESS OF SACO ADDRESS 0000.
+ 1095              TS           C,+1          RESET LC      END PAGE +2         CHANGE RETURN FROM PAGE HEAD PRINT.
+ 1097              TS           EIGHT         Z,S1          C,+1                SET NUMBER OF 4-LINE GROUPS PER PAGE.
+
+ 1099              TS           SP1           LINE -1       END PAGE +1    C
+
+ 1100   4 LINES    TS           FOUR          Z,S2          C,+2                SET NUMBER OF LINES PER BUNCH.
+
+ 1102   1 LINE     S, MON PRINT LINE -1
+ 1103              WD           PRIN SPEX     ONE           Z,X5                FORM SPEC   LINE +2.
+ 1105              TX           Z,X3          -             EDIT WD
+ 1106              S, OCT2ALF4  EDIT WD                     LINE                EDIT ADDRESS OF 1ST WORD OF 8 ON A LINE.
+
+ 1108   1 WORD     S, OCT2ALF5  3,0                         5,0                 EDIT A WORD OF ERASABLE MEMORY.
+ 1110              NA           N,X5          BLANK 1T3     C,+2
+ 1111              TX           ZERO C6       -             N,X5                REPLACE ZERO WORD WITH A LONE ZERO.
+ 1113              LA           SPEC 1777     Z,X3,1        LAST LINE           BRANCH IF LAST WORD EDITED.
+ 1115              NA           Z,X5,1        PRIN SPEX +3  1 WORD
+
+ 1116              NA           Z,S2,1        ONE           1 LINE              BRANCH IF NOT LAST LINE OF BUNCH OF 4.
+
+ 1118              TX           SP2           -             LINE -1
+ 1119              S, MON PRINT LINE -1
+ 1120              LA           Z,S1,1        ONE           END PAGE
+
+ 1121              TS           SP1           LINE -1       4 LINES             GO TO PRINT NEXT FOUR LINES, SAME PAGE.
+
+ 1123   LAST LINE  TX           SKIP          -             LINE -1
+ 11231             S, MON PRINT DEPAGIN8
+ 1124              S, MON PRINT LINE -1
+ 1125              TX           YUL MASKS     -             Z,MXR
+ 1126              S, YUL TYPER END SI MSG    AMTF +2       MANUF RTN           TYPE "END SIMULATION", EXIT.
+ 1128   MASK LOC   MODLOC       64
+
+# END OF REVISION 1 OF PROGRAM YULSIMUL BY HB-S
 
 # Page 730
 #      @YUL SYSTEM SIMULATORS -- SACO                                            USER'S OWN PAGE NO.  30        PAGE  59
 
+# No source code on this page.
 
 # Page 731
 #      @YUL SYSTEM SIMULATORS -- SACO                                            USER'S OWN PAGE NO.  31        PAGE  60
 
+# No source code on this page.
 
 # Page 732
 #      @YUL SYSTEM SIMULATORS -- SACO                                            USER'S OWN PAGE NO.  32        PAGE  61
 
+# No source code on this page.
 
 # Page 733
 #      @YUL SYSTEM SIMULATORS -- SACO                                            USER'S OWN PAGE NO.  33        PAGE  62
 
+# No source code on this page.
