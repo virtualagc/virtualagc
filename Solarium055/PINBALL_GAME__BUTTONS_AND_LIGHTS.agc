@@ -14,6 +14,7 @@
 ## 		2016-12-28 RSB	Proofed comment text using octopus/ProoferComments,
 ##				and fixed errors found.
 ##		2017-01-28 RSB	WTIH -> WITH.
+##		2017-02-08 RSB	Comment-text fixes noted while proofing Artemis 72.
 
 ## Page 481
 

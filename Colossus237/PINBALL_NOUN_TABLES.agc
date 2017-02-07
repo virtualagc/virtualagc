@@ -12,6 +12,7 @@
 ##		2016-12-30 RSB	Proofed comment text using octopus/ProoferComments,
 ##				and corrected errors found.
 ##		2017-01-28 RSB	WTIH -> WITH.
+##		2017-02-08 RSB	Comment-text fixes identified in proofing Artemis 72.
 
 ## Page 261
 
@@ -271,7 +272,7 @@ NNADTAB		OCT	00000		# 00 NOT IN USE
 		OCT	24077		# 61 IMPACT LATITUDE
 					#    IMPACT LONGITUDE
 					#    HEADS UP/DOWN
-		OCT	24102		# 62 INERTIAL VEL MAG (V1)
+		OCT	24102		# 62 INERTIAL VEL MAG (VI)
 					#    ALT RATE CHANGE (HDOT)
 					#    ALT ABOVE PAD RADIUS (H)
 		OCT	64105		# 63 RANGE  297,431 TO SPLASH (RTGO)

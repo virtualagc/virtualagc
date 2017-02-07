@@ -21,6 +21,8 @@
 ##				and fixed the errors found.
 ##		2017-01-18 RSB	Fixed comment-text errors noted while diff'ing
 ##				vs Colossus 249.
+##		2017-02-08 RSB	Fixed comment-text errors noted while diff'ing
+##				vs Artemis 72.
 ##
 ## The contents of the "Comanche055" files, in general, are transcribed 
 ## from scanned documents. 
@@ -327,7 +329,7 @@ P63		TC	NEWMODEX
 		TC	PHASCHNG		# THIS IS REQUIRED TO PRESERVE CLEANDSP
 		OCT	00004			# RETURN IN EVENT OF AN EXTENDED VERB..
 		
-		TC	BANKCALL		# FLUSH 'N22' DISPLAY, IF ON, (OMIT
+		TC	BANKCALL		# FLUSH 'N22' DISPLAY, IF ON. (OMIT
 		CADR	CLEANDSP		# DISPLAY DURING 'STARTENT' PASS.)
 						
 P63.1		TC	PHASCHNG
@@ -952,7 +954,7 @@ FISHCALC	PDVL	VXV		# URPR = UR CDELF + UHOR SDELF
 		STORE	ALPHAV +4	# = .5 SIN(LAT)
 DUMPFISH	GOTO
 			GETERAD		# SAVES FISCHER RAD (-29) M IN ERADM AND
-					# IN MPAC.  RETURNS TO CALLER VIO QPRET.
+					# IN MPAC.  RETURNS TO CALLER VIQ QPRET.
 					
 ## Page 813
 # SUBROUTINE NAME:  VGAMCALC	(USED BY S61.2)				DATE:		01.21.67

@@ -21,6 +21,8 @@
 ##				vs the already-proofed corresponding Colossus
 ##				237 and Comanche 55 source-code files
 ##				and corrected errors found.
+##		2017-02-08 RSB	Fixed comment-text errors noted while diff'ing
+##				vs Artemis 72.
 ##
 ## The contents of the "Colossus249" files, in general, are transcribed 
 ## from a scanned copy of the program listing.  Notations on this
@@ -936,7 +938,7 @@ FISHCALC	PDVL	VXV		# URPR = UR CDELF + UHOR SDELF
 		STORE	ALPHAV +4	# = .5 SIN(LAT)
 DUMPFISH	GOTO
 			GETERAD		# SAVES FISCHER RAD (-29) M IN ERADM AND
-					# IN MPAC.  RETURNS TO CALLER VIO QPRET.
+					# IN MPAC.  RETURNS TO CALLER VIQ QPRET.
 					
 ## Page 767
 # SUBROUTINE NAME:  VGAMCALC	(USED BY S61.2)				DATE:		01.21.67
