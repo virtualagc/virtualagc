@@ -110,6 +110,7 @@
  *                              Raytheon assembler.
  *              2017-01-30 MAS  Added an array to store parity bites calculated on the fly,
  *                              for use with --hardware.
+ *              2017-02-05 MAS  Added BBCON* handling to BLK2 as well.
  *
  * I don't really try to duplicate the formatting used by the original
  * assembly-language code, since that format was appropriate for
@@ -365,7 +366,7 @@ static ParserMatch_t ParsersBLK2[] =
     { "BLOCK", OP_PSEUDO, ParseBLOCK },
     { "BBCON", OP_PSEUDO, ParseBBCON },
   /*{ "BBCON*", OP_PSEUDO, NULL, "OCT", "66100" },*/
-    { "BBCON*", OP_PSEUDO, ParseBBCON },
+    { "BBCON*", OP_PSEUDO, ParseBBCONstar },
     { "BNKSUM", OP_PSEUDO, NULL, "", "" },
     { "BZF", OP_BASIC, ParseBZF },
     { "BZMF", OP_BASIC, ParseBZMF },

@@ -17,6 +17,8 @@
 ##				and fixed the errors found.
 ##		2017-01-17 RSB	Fixed comment-text errors noted while diff'ing
 ##				vs Colossus 249.
+##		2017-01-28 RSB	Back-ported some comment fixes I noticed while
+##				proofing Artemis 72.
 
 ## The contents of the "Comanche055" files, in general, are transcribed 
 ## from scanned documents. 
@@ -1372,7 +1374,7 @@ GET.LVC		VLOAD	UNIT		# (PL 6D) R (+29) IN MPAC, UNITIZE UR
 			0D		# DELTA V (+7) IN 0D
 		MXV	VSL1		# CONVERT FROM INER COOR TO LV COOR (+8)
 			6D		# AND SCALE +7 IN MPAC
-		STORE	DELVLVC		# STORE IN DELVLVC (+7(
+		STORE	DELVLVC		# STORE IN DELVLVC (+7)
 		SET	RVQ		# SET MGLVFLAG TO INDICATE LVC CALC
 			MGLVFLAG	# AND EXIT
 

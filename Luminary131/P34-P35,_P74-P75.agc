@@ -19,6 +19,8 @@
 ##				numbers in 1701.pdf.
 ##		2017-01-28 RSB	Back-ported some comment fixes I noticed while
 ##				proofing Luminary 69.
+##		2017-01-28 RSB	Back-ported some comment fixes I noticed while
+##				proofing Artemis 72.
 
 ## Page 660
 # TRANSFER PHASE INITITIATION (TPI) PROGRAMS (P34 AND P74)
@@ -1362,7 +1364,7 @@ GET.LVC		VLOAD	UNIT		# (PL 6D) R (+29) IN MPAC UNITZE UR
 			0D		# DELTA V (+7) IN 0D
 		MXV	VSL1		# CONVERT FROM INER COOR TO LV COOR (+8)
 			6D		# AND SCALE +7 IN MPAC
-		STORE	DELVLVC		# STORE IN DELVLVC (+7(
+		STORE	DELVLVC		# STORE IN DELVLVC (+7)
 		SET	RVQ		# SET MGLVFLAG TO INDICATE LVC CALC
 			MGLVFLAG	# AND EXIT
 

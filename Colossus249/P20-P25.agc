@@ -20,6 +20,8 @@
 ##				vs the already-proofed corresponding Colossus
 ##				237 and Comanche 55 source-code files
 ##				and corrected errors found.
+##		2017-02-06 RSB	Fixed comment-text errors noted while proofing
+##				Artemis 72.
 ##
 ## The contents of the "Colossus249" files, in general, are transcribed 
 ## from a scanned copy of the program listing.  Notations on this
@@ -1464,7 +1466,7 @@ INITB		STORE	W +90D,1	# CLEAR 54 - 89
 # OUTPUT	NORMAL.  EXIT WITH S(MPAC) = 0.
 #
 #		(1)	CDUXD,CDUYD,CDUZD, DESIRED OUTER, INNER, MIDDLE CDU ANGLES,
-#			DP, IS COMPL, SCALED 180 DEGREES (HALF-REVS B0).
+#			DP, 1S COMPL, SCALED 180 DEGREES (HALF-REVS B0).
 #		(2)	DELCDUX,DELCDUY,DELCDUZ.  0.1 SEC DCU ANGULAR INCREMENTS,
 #			DP, 1S COMPL, SCALED 180 DEG.
 #		(3)	WBODY,WBODY1,WBODY2.  LOS ANGULAR RATE IN CONTROL COORDS,
@@ -1837,7 +1839,7 @@ FIG2EXIT	CALL
 		CALL	
 			S22FLGS
 #	FLOWCHART D=0	THEN DIM0FLAG=0 D6OR9FLG NOT TESTED
-#	FLOWCHART D=6	THEN DIM0FLAG=1 D60R9FLG=0
+#	FLOWCHART D=6	THEN DIM0FLAG=1 D6OR9FLG=0
 #	FLOWCHART D=9	THEN DIM0FLAG=1 D6OR9FLG=1
 
 		BOFF	CLRGO
@@ -2454,7 +2456,7 @@ LLASRDA		DLOAD			# ALT, LANDALT METERS B-29
 			HI6ZEROS
 		STORE	9DWP		# P,N,I=0
 		AXT,1	SSP
-		DEC	108		# CLEAR W0 TO W54
+		DEC	108		# CLEAR WO TO W54
 			S1
 			6
 CLEARW54	STORE	W +108D,1

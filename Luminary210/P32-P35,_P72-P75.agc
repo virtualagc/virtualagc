@@ -17,6 +17,8 @@
 ##              2012-12-07 HG   fix P00 -> POO
 ##		2016-12-25 RSB	Comment-text proofed using ProoferComments
 ##				and corrected errors found.
+##		2017-02-07 RSB	Comment-text corrections identified while 
+##				proofing Artemis 72.
 
 ## Page 624
 # COELLIPTIC SEQUENCE INITIATION (CSI) PROGRAMS (P32 AND P72)
@@ -418,7 +420,7 @@ P32/P72F        STORE           T2TOT3
 
 # INPUT
 
-#       (1) TTPIO     TIME OF THE TPI MANEUVER - SAVED FROM P32/P72
+#       (1) TTPI0     TIME OF THE TPI MANEUVER - SAVED FROM P32/P72
 
 ## Page 632
 #       (2) ELEV      DESIRED LOS ANGLE AT TPI - SAVED FROM P32/P72

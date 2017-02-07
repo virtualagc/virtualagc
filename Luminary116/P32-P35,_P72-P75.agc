@@ -13,6 +13,8 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-01-22 MAS  Created from Luminary 99.
+##		2017-02-07 RSB	Comment-text corrections identified while 
+##				proofing Artemis 72.
 
 ## NOTE: Page numbers below have not yet been updated to reflect Luminary 116.
 
@@ -314,7 +316,7 @@ P32/P72F        STORE           T2TOT3
 
 ## Page 624
 # CONSTANT DELTA HEIGHT (CDH) PROGRAMS (P33 AND P73)
-# MOD NO -1                     LOC SECTION - P32-P35, P72-P75
+# MOD NO -1                     LOG SECTION - P32-P35, P72-P75
 # MOD BY WHITE.P                DATE  1JUNE67
 
 # PURPOSE
@@ -412,7 +414,7 @@ P32/P72F        STORE           T2TOT3
 
 # INPUT
 
-#       (1)     TTPIO   TIME OF THE TPI MANEUVER - SAVED FROM P32/P72
+#       (1)     TTPI0   TIME OF THE TPI MANEUVER - SAVED FROM P32/P72
 ## Page 626
 #       (2)     ELEV    DESIRED LOS ANGLE AT TPI - SAVED FROM P32/P72
 #       (3)     TCDH    TIME OF THE CDH MANEUVER
