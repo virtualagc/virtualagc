@@ -13,12 +13,13 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-01-22 MAS  Created from Luminary 99.
+##		2017-02-08 RSB	Comment-text fixes identified while proofing Artemis 72.
 
 ## NOTE: Page numbers below have not yet been updated to reflect Luminary 116.
 
 ## Page 238
 # RESTART TABLES
-# --------------
+# ------------------
 
 # THERE ARE TWO FORMS OF RESTART TABLES FOR EACH GROUP.  THEY ARE KNOWN AS THE EVEN RESTART TABLES AND THE ODD
 # RESTART TABLES.  THE ODD TABLES HAVE ONLY ONE ENTRY OF THREE LOCATIONS WHILE THE EVEN TABLES HAVE TWO ENTRIES

@@ -14,6 +14,7 @@
 ##				and fixed the errors found.
 ##		2017-01-18 RSB	Fixed comment-text errors noted while diff'ing
 ##				vs Colossus 249.
+##		2017-02-08 RSB	Comment-text fixes identified in proofing Artemis 72.
 ##
 ## The contents of the "Comanche055" files, in general, are transcribed 
 ## from scanned documents. 
@@ -195,7 +196,7 @@ HAVEBASE	BON	RTB		# SUBSEQUENT INTEGRATIONS
 			V37FLAG
 			GETRVN5
 			LOADTIME
-		STCALL	TDEC1		# AV G OFF, SET INTEG, OF CM
+		STCALL	TDEC1		# AV G OFF. SET INTEG. OF CM
 			INTSTALL
 		VLOAD	CLEAR
 			BASETHP

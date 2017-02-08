@@ -18,11 +18,12 @@
 ##				complete.
 ##		2016-12-05 RSB	Fixed more comments with octopus/ProoferComments;
 ##				comment-proofing process complete.
+##		2017-02-08 RSB	Comment-text fixes identified while proofing Artemis 72.
 
 ## Page 62
 # RESTART TABLES
 #  DO NOT REMOVE FROM THE BEGINNING OF THIS BANK
-# --------------
+# ------------------
 #
 # THERE ARE TWO FORMS OF RESTART TABLES FOR EACH GROUP.  THEY ARE KNOWN AS THE EVEN RESTART TABLES AND THE ODD
 # RESTART TABLES.  THE ODD TABLES HAVE ONLY ONE ENTRY OF THREE LOCATIONS WHILE THE EVEN TABLES HAVE TWO ENTRIES
