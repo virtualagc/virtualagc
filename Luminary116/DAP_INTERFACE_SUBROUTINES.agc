@@ -13,10 +13,9 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-01-22 MAS  Created from Luminary 99.
+##              2017-02-08 NV   Updated for Luminary 116.
 
-## NOTE: Page numbers below have not yet been updated to reflect Luminary 116.
-
-## Page 1406
+## Page 1396
                 BANK            20                              
                 SETLOC          DAPS3                           
                 BANK                                            
@@ -47,7 +46,7 @@
 # DEBRIS
 #       A, L, AND SOMETIMES MDUETEMP                    ODE     NOT IN PULSES MODE
 
-## Page 1407
+## Page 1397
 # SUBROUTINE NAMES:
 #       SETMAXDB, SETMINDB, RESTORDB, PFLITEDB
 # MODIFIED:     30 JANUARY 1968 BY P S WEISSMAN TO CREATE RESTORDB.
@@ -56,7 +55,7 @@
 # FUNCTIONAL DESCRIPTION:
 #       SETMAXDB - SET DEADBAND TO 5.0 DEGREES
 #       SETMINDB - SET DEADBAND TO 0.3 DEGREE
-#       RESTORDB - SET DEADBAND TO MAX OR MIN ACCORDING TO SETTING OF DBSELECT BIT OF DAPBOOLS
+#       RESTORDB - SET DEADBAND TO .3, 1, OR 5 ACCORDING TO BITS 4 AND 5 OF DAPBOOLS
 #       PFLITEDB - SET DEADBAND TO 1.0 DEGREE AND ZERO THE COMMANDED ATTITUDE CHANGE AND COMMANDED RATE
 
 #       ALL ENTRIES SET UP A NOVAC JOB TO DO 1/ACCS SO THAT THE TJETLAW SWITCH CURVES ARE POSITIONED TO
@@ -70,10 +69,17 @@
 # DEBRIS:               A, L, Q, RUPTREG1, (ITEMPS IN NOVAC)
 
 RESTORDB        CAE             DAPBOOLS                        # DETERMINE CREW-SELECTED DEADBAND.
-                MASK            DBSELECT                        
+                MASK            DBSLECT2                        # CHECK FOR MAX DB (5 DEG)
+                EXTEND                                          
+                BZF             +2                              
+                TCF             SETMAXDB                        # BIT5 DAPBOOLS IS SET - CREW WANTS 5 DEG
+                CAE             DAPBOOLS                        
+                MASK            DBSELECT                        # CHECK FOR 1 DEG DEADBAND SELECTION
                 EXTEND                                          
                 BZF             SETMINDB                        
 
+                CAF             POWERDB                         # BIT4 DAPBOOLS IS SET - CREW WANTS 1 DEG
+                TCF             SETMAXDB        +1              
 SETMAXDB        CAF             WIDEDB                          # SET 5 DEGREE DEADBAND.
  +1             TS              DB                              
 
@@ -88,7 +94,7 @@ CALLACCS        CAF             PRIO27
 
 SETMINDB        CAF             NARROWDB                        # SET 0.3 DEGREE DEADBAND.
                 TCF             SETMAXDB        +1              
-
+## Page 1398
 PFLITEDB        EXTEND                                          # THE RETURN FROM CALLACCS IS TO RUPTREG1.
                 QXCH            RUPTREG1                        
                 TC              ZATTEROR                        # ZERO THE ERRORS AND COMMANDED RATES.
@@ -96,7 +102,6 @@ PFLITEDB        EXTEND                                          # THE RETURN FRO
                 TS              DB                              
                 TCF             CALLACCS                        # SET UP 1/ACCS AND RETURN TO CALLER.
 NARROWDB        OCTAL           00155                           # 0.3 DEGREE SCALED AT 45.
-## Page 1408
 WIDEDB          OCTAL           03434                           # 5.0 DEGREES SCALED AT 45.
 POWERDB         DEC             .02222                          # 1.0 DEGREE SCALED AT 45.
 
@@ -138,13 +143,13 @@ STOPRATE        CAF             EBANK6
 
 # ZERO:                 (FOR ALL AXES) AOS, ALPHA, AOSTERM, OMEGAD, DELCDU, DELEROR
 
+## Page 1399
 # OUTPUT:               DRIFTBIT/DAPBOOLS, DB, JOB TO DO 1/ACCS
 
 # DEBRIS:               A, L, Q, RUPTREG1, RUPTREG2, (ITEMPS IN NOVAC)
 
 ALLCOAST        EXTEND                                          # SAVE Q FOR RETURN
                 QXCH            RUPTREG2                        
-## Page 1409
                 TC              STOPRATE                        # CLEAR RATE INTERFACE.  RETURN WITH A=0
                 LXCH            EBANK                           # AND L=EBANK6.  SAVE CALLERS EBANK.
                 TS              AOSQ                            
