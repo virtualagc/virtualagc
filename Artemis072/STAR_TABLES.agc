@@ -12,6 +12,8 @@
 ## Mod history:	2009-08-19 JL	Adapted from corresponding Comanche 055 file.
 ##		2010-02-13 JL	Fixed error on pages 1387 and 1388.
 ##		2010-02-20 RSB	Un-##'d this header.
+##		2017-02-08 RSB	Proofed comment text by diff'ing vs Comanche 55
+##				and/or octopus/ProoferComments as most-appropriate.
 
 ## Page 1387
 

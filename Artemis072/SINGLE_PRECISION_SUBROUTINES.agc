@@ -11,6 +11,8 @@
 ## Page Scans:	www.ibiblio.org/apollo/ScansForConversion/Artemis072/
 ## Mod history:	2009-08-22 JL	Adapted from corresponding Comanche 055 file.
 ##		2010-02-20 RSB	Un-##'d this header.
+##		2017-02-08 RSB	Proofed comment text by diff'ing vs Comanche 55
+##				and/or octopus/ProoferComments as most-appropriate.
 
 ## Page 1207
 		SETLOC	FFTAG1
@@ -50,6 +52,6 @@ POLLEY		EXTEND
 		TC	Q
 ARG90		INDEX	A
 		CS	LIMITS
-		TC	Q		# RESULT SCALED AT 1.
+		TC	Q		# RESULT SCALED AT 1
 		
 # SPROOT WAS DELETED IN REV 51 OF MASTER. ASS. CONT. HAS CARDS.
