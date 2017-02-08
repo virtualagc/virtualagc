@@ -16,6 +16,7 @@
 ##				and corrected the errors found.
 ##		2017-01-21 MAS	Corrected some lingering comment errors.
 ##		2017-01-28 RSB	WTIH -> WITH.
+##		2017-02-08 RSB	Comment-text fixes identified while proofing Artemis 72.
 ##
 ## This source code has been transcribed or otherwise adapted from digitized
 ## images of a hardcopy from the MIT Museum.  The digitization was performed
@@ -171,7 +172,7 @@
 # THE FOLLOWING ARE OF GENERAL INTEREST -
 #
 # REMARKS CARDS PRECEDE THE REFERENCED SYMBOL DEFINITION.  SEE SYMBOL
-# TABLE TO FIND APPROPRIATE PACE NUMBERS.
+# TABLE TO FIND APPROPRIATE PAGE NUMBERS.
 #
 #	NVSUB		CALLING POINT FOR INTERNAL USE OF PINBALL.
 #			OF RELATED INTEREST	NVSBWAIT
@@ -781,7 +782,7 @@ CLPASHI		CCS	INREL
 		CA	MIXTEMP
 		TS	INREL		# RESTORE INREL
 CLEAR1		TC	CLR5
-		INCR	CLPASS		# ONLY IF CLPASS IS + OR +0.
+		INCR	CLPASS		# ONLY IF CLPASS IS + OR +0,
 		TC	ENDOFJOB	# SET FOR HIGHER PASS.
 CLR5		LXCH	Q		# USES 5BLANK BUT AVOIDS ITS TC GETINREL
 		TC	5BLANK +2

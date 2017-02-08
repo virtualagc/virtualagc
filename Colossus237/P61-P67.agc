@@ -16,6 +16,8 @@
 ##				and fixed errors found.
 ##		2017-01-18 RSB	Fixed comment-text errors noted while diff'ing
 ##				vs Colossus 249.
+##		2017-02-08 RSB	Fixed comment-text errors noted while diff'ing
+##				vs Artemis 72.
 
 ## Page 740
 # PROGRAM:             P61
@@ -908,7 +910,7 @@ FISHCALC	PDVL	VXV		# URPR = UR CDELF + UHOR SDELF
 		STORE	ALPHAV +4	#  = .5 SIN(LAT)
 DUMPFISH	GOTO
 			GETERAD		# SAVES FISCHER RAD (-29) M IN ERADM AND
-#					  IN MPAC. RETURNS TO CALLER VIO QPRET.
+#					  IN MPAC. RETURNS TO CALLER VIQ QPRET.
 					
 ## Page 764
 # SUBROUTINE NAME:   VGAMCALC	(USED BY S61.2)				DATE:		01.21.67

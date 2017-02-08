@@ -17,6 +17,7 @@
 ##		2016-12-05 RSB	Comment-proofing pass with octopus/ProoferComments completed;
 ##				changes made.
 ##		2017-01-28 RSB	WTIH -> WITH.
+##		2017-02-08 RSB	Comment-text fixes noted while proofing Artemis 72.
 
 ## Page 232
 # PROGRAM NAME - KEYBOARD AND DISPLAY PROGRAM		DATE - 22 NOV 1966
@@ -747,7 +748,7 @@ CLPASHI		CCS	INREL
 		CA	MIXTEMP
 		TS	INREL		# RESTORE INREL
 CLEAR1		TC	CLR5
-		INCR	CLPASS		# ONLY IF CLPASS IS + OR +0.
+		INCR	CLPASS		# ONLY IF CLPASS IS + OR +0,
 		TC	ENDOFJOB	# SET FOR HIGHER PASS.
 CLR5		LXCH	Q		# USES 5BLANK  BUT AVOIDS ITS TC GETINREL
 		TC	5BLANK +2

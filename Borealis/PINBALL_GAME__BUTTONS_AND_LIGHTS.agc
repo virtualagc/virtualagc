@@ -13,6 +13,7 @@
 ## Mod history: 2016-12-20 MAS  Created from Aurora 12 (with much DAP stuff removed).
 ##              2017-01-04 MAS  Pulled back PROCEED key functionality from Luminary 99.
 ##		2017-01-28 RSB	WTIH -> WITH.
+##		2017-02-08 RSB	Comment-text fixes noted while proofing Artemis 72.
 
 # KEYBOARD AND DISPLAY PROGRAM
 
@@ -622,7 +623,7 @@ CLPASHI         CCS             INREL
                 CA              MIXTEMP
                 TS              INREL                   # RESTORE INREL
 CLEAR1          TC              CLR5
-                INCR            CLPASS                  # ONLY IF CLPASS IS + OR +0.
+                INCR            CLPASS                  # ONLY IF CLPASS IS + OR +0,
                 TC              ENDOFJOB                # SET FOR HIGHER PASS.
 CLR5            LXCH            Q                       # USES 5BLANK BUT AVOIDS ITS TC GETINREL
                 TC              5BLANK          +2

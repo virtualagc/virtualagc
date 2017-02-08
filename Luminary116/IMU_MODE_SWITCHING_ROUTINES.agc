@@ -13,11 +13,10 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-01-22 MAS  Created from Luminary 99.
-##		2017-01-28 RSB	Comment-text fixes identified for Luminary 69.
+##              2017-01-28 RSB Comment-text fixes identified for Luminary 69.
+##              2017-02-07 RRB  Updated for Luminary 116.
 
-## NOTE: Page numbers below have not yet been updated to reflect Luminary 116.
-
-## Page 1309
+## Page 1299
                 BLOCK           02                              
                 SETLOC          FFTAG3                          
                 BANK                                            
@@ -35,7 +34,7 @@ ZEROICDU        CAF             ZERO                            # ZERO ICDU COUN
 
 SPSCODE         =               BIT9                            
 
-## Page 1310
+## Page 1300
 # IMU ZEROING ROUTINE.
 
                 BANK            11                              
@@ -57,7 +56,7 @@ IMUZERO         INHINT                                          # ROUTINE TO ZER
 IMUZEROA        TC              CAGETSTJ                        
 # DELETE
                 CS              IMODES33                        # DISABLE DAP AUTO AND HOLD MODES
-                MASK            SUPER011                        #       BIT5 FOR GROUND
+                MASK            SUPER011                        #     BIT5 FOR GROUND
                 ADS             IMODES33                        
 
                 CS              IMODES30                        # INHIBIT ICDUFAIL AND IMUFAIL (IN CASE WE
@@ -84,7 +83,7 @@ IMUZEROA        TC              CAGETSTJ
                 MASK            BIT9                            
                 CCS             A                               
                 TCF             MODEEXIT                        
-## Page 1311
+## Page 1301
                 TC              ALARM                           
                 OCT             210                             
 
@@ -107,7 +106,7 @@ IMUZERO3        TC              CAGETEST
                 TS              IMODES30                        
 
                 CS              SUPER011                        # ENABLE DAP AUTO AND HOLD MODES
-                MASK            IMODES33                        #       BIT5 FOR GROUND
+                MASK            IMODES33                        #     BIT5 FOR GROUND
                 TS              IMODES33                        
 
                 TC              IBNKCALL                        # SET ISS WARNING IF EITHER OF ABOVE ARE
@@ -115,7 +114,7 @@ IMUZERO3        TC              CAGETEST
 
                 TCF             ENDIMU                          
 
-## Page 1312
+## Page 1302
 # IMU COARSE ALIGN MODE.
 
 IMUCOARS        INHINT                                          
@@ -138,7 +137,7 @@ COARS           TC              CAGETEST
 COARS1          TS              CDUIND                          
 
                 INDEX           CDUIND                          # COMPUTE THETAD - THETAA IN 1:S
-                CA              THETAD                          #       COMPLEMENT FORM
+                CA              THETAD                          #   COMPLEMENT FORM
                 EXTEND                                          
                 INDEX           CDUIND                          
                 MSU             CDUX                            
@@ -158,7 +157,7 @@ COARS1          TS              CDUIND
                 CAF             TWO                             # MINIMUM OF 4 MS WAIT
                 TC              VARDELAY                        
 
-## Page 1313
+## Page 1303
 COARS2          TC              CAGETEST                        # DONT CONTINUE IF CAGED.
                 TS              ITEMP1                          # SETS TO +0.
                 CAF             TWO                             # SET CDU INDICATOR
@@ -172,11 +171,11 @@ COARS2          TC              CAGETEST                        # DONT CONTINUE 
                 TC              NEXTCDU         +1              
 
 COMPOS          AD              -COMMAX                         # COMMAX = MAX NUMBER OF PULSES ALLOWED
-                EXTEND                                          #       MINUS ONE
+                EXTEND                                          #   MINUS ONE
                 BZMF            COMZERO                         
                 INDEX           CDUIND                          
                 TS              COMMAND                         # REDUCE COMMAND BY MAX NUMBER OF PULSES
-                CS              -COMMAX-                        #       ALLOWED
+                CS              -COMMAX-                        #   ALLOWED
 
 NEXTCDU         INCR            ITEMP1                          
                 AD              NEG0                            
@@ -204,7 +203,7 @@ CHKCORS         TS              ITEMP1                          # GIMBALS ARE WI
                 TCF             CORSCHK2                        
                 TCF             COARSERR                        
 
-## Page 1314
+## Page 1304
 CORSCHK2        CCS             ITEMP1                          
                 TCF             CHKCORS                         
                 TCF             ENDIMU                          # END OF COARSE ALIGNMENT.
@@ -245,7 +244,7 @@ CA+ECE          CAF             BIT6                            # ENABLE ALL THR
                 WOR             CHAN12                          
                 TC              TASKOVER                        
 
-## Page 1315
+## Page 1305
 SETCOARS        CAF             BIT4                            # BYPASS IF ALREADY IN COARSE ALIGN
                 EXTEND                                          
                 RAND            CHAN12                          
@@ -294,7 +293,7 @@ RNDREFDR        CS              TRACKBIT                        # CLEAR TRACK FL
 
 OCT40010        OCT             40010                           
 
-## Page 1316
+## Page 1306
 # IMU FINE ALIGN MODE SWITCH.
 
 IMUFINE         INHINT                                          
@@ -325,7 +324,7 @@ IMUFINE         INHINT
 IMUFINED        TC              CAGETEST                        # SEE THAT NO ONE HAS CAGED THE IMU.
                 TCF             ENDIMU                          
 
-## Page 1317
+## Page 1307
 IFAILOK         TC              CAGETSTQ                        # ENABLE IMU FIAL UNLESS IMU BEING CAGED.
                 TCF             TASKOVER                        # IT IS.
 
@@ -365,8 +364,8 @@ NOATTOFF        CS              OCT40010                        # SUBROUTINE TO 
                 TS              DSPTAB          +11D            
                 TC              Q                               
 
-## Page 1318
-# ROUITNES TO INITIATE AND TERMINATE PROGRAM USE OF THE PIPAS.  NO IMUSTALL REQUIRED IN EITHER CASE.
+## Page 1308
+# ROUITNES TO INITIATE AND TERMINATE PROGRAM USE OF THE PIPAS. NO IMUSTALL REQUIRED IN EITHER CASE.
 
 PIPUSE          CS              ZERO                            
                 TS              PIPAX                           
@@ -402,9 +401,9 @@ PIPFREE         INHINT                                          # PROGRAM DONE W
 
                 TCF             PIPFREE2                        
 
-## Page 1319
-# THE FOLLOWING ROUTINE TORQUES THE IRIGS ACCORDING TO DOUBLE PRECISION INPUTS IN THE SIX REGISTERS
-# BEGINNING AT THE ECADR ARRIVING IN A.  THE MINIMUM SIZE OF ANY PULSE TRAIN IS 16 PULSES (.25 CDU COUNTS).  THE
+## Page 1309
+#          THE FOLLOWING ROUTINE TORQUES THE IRIGS ACCORDING TO DOUBLE PRECISION INPUTS IN THE SIX REGISTERS
+# BEGINNING AT THE ECADR ARRIVING IN A. THE MINIMUM SIZE OF ANY PULSE TRAIN IS 16 PULSES (.25 CDU COUNTS). THE
 # UNSENT PORTION OF THE COMMAND IS LEFT INTACT IN THE INPUT COMMAND REGISTERS.
 
                 EBANK=          1400                            # VARIABLE, ACTUALLY.
@@ -453,7 +452,7 @@ GYROAGRE        TS              MPAC            +3
                 TS              EBANK                           
                 TCF             MODEEXIT                        
 
-## Page 1320
+## Page 1310
 # ROUTINES TO ALLOW TORQUING BY ONLY ONE JOB AT A TIME.
 
 GYROBUSY        EXTEND                                          # SAVE RETURN 2FCADR.
@@ -474,7 +473,7 @@ GWAKE           CCS             LGYRO                           # WHEN AWAKENED,
 
 LGWAKE          CADR            GWAKE                           
 
-## Page 1321
+## Page 1311
 # GYRO-TORQUING WAITLIST TASKS.
 
 STRTGYRO        CS              GDESELCT                        # DE-SELECT LAST GYRO.
@@ -503,7 +502,7 @@ STRTGYR2        CA              LGYRO                           # JUMP ON PHASE 
                 TC              JOBWAKE                         
 
 NORESET         TCF             IMUFINED                        # DO NOT RESET POWER SUPPLY
-## Page 1322
+## Page 1312
  -2             CS              FOUR                            # SPECIAL ENTRY TO REGRESS LGYRO FOR X.
                 ADS             LGYRO                           
 
@@ -537,7 +536,7 @@ GSELECT         INDEX           Q                               # SELECT GYRO.
                 TCF             MIN-                            
                 TCF             STRTGYR2                        
 
-## Page 1323
+## Page 1313
 MIN+            AD              -GYROMIN                        # SMALL POSITIVE COMMAND.  SEE IF AT LEAST
                 EXTEND                                          # 16 GYRO PULSES.
                 BZMF            STRTGYR2                        
@@ -553,7 +552,7 @@ MAJ+            EXTEND                                          # DEFINITE POSIT
                 CAF             LOW7                            # LEAVE NUMBER OF POSSIBLE 8192 AUGMENTS
                 MASK            RUPTREG2                        # TO INITIAL COMMAND IN MAJOR PART OF LONG
                 XCH             RUPTREG2                        # TERM STORAGE AND TRUNCATED FRACTION
-GMERGE          EXTEND                                          # IN MINOR PART.  THE MAJOR PART WILL BE
+GMERGE          EXTEND                                          # IN MINOR PART. THE MAJOR PART WILL BE
                 MP              BIT8                            # COUNTED DOWN TO ZERO IN THE COURSE OF
                 TS              ITEMP2                          # PUTTING OUT THE ENTIRE COMMAND.
                 CA              RUPTREG1                        
@@ -579,7 +578,7 @@ GMERGE          EXTEND                                          # IN MINOR PART.
 
  +4             INDEX           ITEMP1                          
                 DXCH            1400                            
-## Page 1324
+## Page 1314
                 CA              ITEMP2                          # ENTIRE COMMAND.
 LASTSEG         TS              GYROCMD                         
                 EXTEND                                          
@@ -596,7 +595,7 @@ GYROEXIT        CAF             BIT10
 
 LONGGYRO        INDEX           ITEMP1                          
                 DXCH            1400                            # INITIAL COMMAND OUT PLUS N AUGMENTS OF
-                CAF             BIT14                           # 8192.  INITIAL COMMAND IS AT LEAST 8192.
+                CAF             BIT14                           # 8192. INITIAL COMMAND IS AT LEAST 8192.
                 AD              ITEMP2                          
                 TS              GYROCMD                         
 
@@ -629,14 +628,14 @@ AUG3            EXTEND                                          # GET WAITLIST D
                 ADS             GYROCMD                         
                 TCF             LASTSEG         +1              
 
-## Page 1325
+## Page 1315
 AUG2            INDEX           ITEMP1                          
                 TS              1400                            
                 CAF             BIT14                           
                 ADS             GYROCMD                         
                 TCF             AUG3                            # COMPUTE DT.
 
-## Page 1326
+## Page 1316
 MIN-            AD              -GYROMIN                        # POSSIBLE NEGATIVE OUTPUT.
                 EXTEND                                          
                 BZMF            STRTGYR2                        
@@ -663,7 +662,7 @@ GDESELCT        OCT             1700                            # TURN OFF SELEC
 
 GYROFRAC        2DEC            .215            B-21            
 
-## Page 1327
+## Page 1317
 # IMU MODE SWITCHING ROUTINES COME HERE WHEN ACTION COMPLETE.
 
 ENDIMU          EXTEND                                          # MODE IS BAD IF CAGE HAS OCCURED OR IF
@@ -698,9 +697,9 @@ CAGETSTJ        CS              IMODES30                        # IF DURING MODE
                 TS              IMUCADR                         
                 TCF             MODEEXIT                        
 
-## Page 1328
-# GENERALIZED MODE SWITCHING TERMINATION.  ENTER AT GOODEND FOR SUCCESSFUL COMPLETION OF AN I/O OPERATION
-# OR AT BADEND FOR AN UNSUCCESSFUL ONE.  C(A) OR ARRIVAL =0 FOR IMU, 1 FOR OPTICS.
+## Page 1318
+#          GENERALIZED MODE SWITCHING TERMINATION. ENTER AT GOODEND FOR SUCCESSFUL COMPLETION OF AN I/O OPERATION
+# OR AT BADEND FOR AN UNSUCCESSFUL ONE. C(A) OR ARRIVAL =0 FOR IMU, 1 FOR OPTICS.
 
 BADEND          TS              RUPTREG2                        # DEVICE INDEX.
                 CS              ZERO                            # FOR FAILURE.
@@ -730,57 +729,57 @@ GOODEND         TS              RUPTREG2
                 TCF             TASKOVER                        
 
 ENDMODE         CA              RUPTREG3                        # -0 INDICATES OPERATION COMPLETE BUT
- +1             INDEX           RUPTREG2                        # UNSUCCESSFUL:  -1 INDICATES COMPLETE AND
+ +1             INDEX           RUPTREG2                        # UNSUCCESSFUL: -1 INDICATES COMPLETE AND
                 TS              MODECADR                        # SUCCESSFUL.
                 TCF             TASKOVER                        
 
-## Page 1329
-# GENERAL STALLING ROUTINE.  USING PROGRAMS COME HERE TO WAIT FOR I/O COMPLETION.
+## Page 1319
+#          GENERAL STALLING ROUTINE.  USING PROGRAMS COME HERE TO WAIT FOR I/O COMPLETION.
 
-# PROGRAM DESCRIPTION                           DATE - 21 FEB 1967
-#                                               LOG SECTION IMU MODE SWITCHING
-# MOD BY - R. MELANSON TO ADD DOCUMENTATION     ASSEMBLY SUNDISK REV. 82
+# PROGRAM DESCRIPTION                                     DATE - 21 FEB 1967
+#                                             LOG SECTION IMU MODE SWITCHING
+# MOD BY- R.MELANSON TO ADD DOCUMENTATION         ASSEMBLY SUNDISK  REV.  82
 
-# FUNCTIONAL DESCRIPTION -
-#       TO DELAY FURTHER EXECUTION OF THE CALLING ROUTINE UNTIL ITS SELECTED
-#       I/O FUNCTION IS COMPLETE.  THE FOLLOWING CHECKS ON THE CALLING ROUTINE:S
-#       MODECADR ARE MADE AND ACTED UPON.
-#       1) +0 INDICATES INCOMPLETE I/O OPERATION.  CALLING ROUTINE IS PUT TO
-#          SLEEP.
-#       2) -1 INDICATES COMPLETED I/O OPERATION.  STALL BYPASSES JOBSLEEP
-#          CALL AND RETURNS TO CALLING ROUTINE AT L+3
-#       3) -0 INDICATES COMPLETED I/O WITH FAILURE.  STALL CLEARS MODECADR
-#          AND RETURNS TO CALLING ROUTINE AT L+2.
-#       4) VALUE GREATER THAN 0 INDICATES TWO ROUTINES CALLING FOR USE OF
-#          SAME DEVICE.  STALL EXITS TO ABORT WHICH EXECUTES A PROGRAM
-#          RESTART WHICH IN TURN CLEARS ALL MODECADR REGISTERS.
+# FUNCTIONAL DESCRIPTION-
+#   TO DELAY FURTHER EXECUTION OF THE CALLING ROUTINE UNTIL ITS SELECTED
+#   I/O FUNCTION IS COMPLETE.THE FOLLOWING CHECKS ON THE CALLING ROUTINE:S
+#   MODECADR ARE MADE AND ACTED UPON.
+#     1) +0 INDICATES INCOMPLETE I/O OPERATION.CALLING ROUTINE IS PUT TO
+#        SLEEP.
+#     2) -1 INDICATES COMPLETED I/O OPERATION. STALL BYPASSES JOBSLEEP
+#        CALL AND RETURNS TO CALLING ROUTINE AT L+3
+#     3) -0 INDICATES COMPLETED I/O WITH FAILURE. STALL CLEARS MODECADR
+#        AND RETURNS TO CALLING ROUTINE AT L+2.
+#     4) VALUE GREATER THAN 0 INDICATES TWO ROUTINES CALLING FOR USE OF
+#        SAME DEVICE. STALL EXITS TO ABORT WHICH EXECUTES A PROGRAM
+#        RESTART WHICH IN TURN CLEARS ALL MODECADR REGISTERS.
 
-# CALLING SEQUENCE -
-#       L       TC      BANKCALL
-#       L+1     CADR    (ONE OF 5 STALL ADDRESSES I.E. IMUSTALL, OPTSTALL, RADSTALL,
-#                       AOTSTALL, OR ATTSTALL)
+#  CALLING SEQUENCE-
+#   L   TC   BANKCALL
+#   L+1 CADR (ONE OF 5 STALL ADDRESSES I.E. IMUSTALL,OPTSTALL,RADSTALL,
+#            AOTSTALL,OR ATTSTALL)
 
-# NORMAL-EXIT MODE -
-#       TCF JOBSLEEP    OR      TCF MODEXIT
+#  NORMAL-EXIT MODE-
+#   TCF   JOBSLEEP OR TCF  MODEXIT
 
-# ALARM OR ABORT EXIT MODE -
-#       TC      ABORT
+# ALARM OR ABORT EXIT MODE-
+#   TC    ABORT
 
-# OUTPUT -
-#       MODECADR=CADR   IF JOBSLEEP
-#       MODECADR=+0     IF I/O COMPLETE
-#       BUF2=L+3        IF I/O COMPLETE AND GOOD.
-#       BUF2=L+2        IF I/O COMPLETE BUT FAILED.
+# OUTPUT-
+#   MODECADR=CADR  IF JOBSLEEP
+#   MODECADR=+0    IF I/O COMPLETE
+#   BUF2=L+3       IF I/O COMPLETE AND GOOD.
+#   BUF2=L+2 IF I/O COMPLETE BUT FAILED.
 
-# ERASABLE INITIALIZATION -
-#       BUF2 CONTAINS RETURN ADDRESS PLUS 1,(L+2)
-#       BUF2+1 CONTAINS FBANK VALUE OF CALLING ROUTINE.
-#       MODECADR OF CALLING ROUTINE CONTAINS +0,-1,-0 OR CADR RETURN ADDRESS.
+# ERASABLE INITIALIZATION-
+#   BUF2 CONTAINS RETURN ADDRESS PLUS 1,(L+2)
+#   BUF2+1 CONTAINS FBANK VALUE OF CALLING ROUTINE.
+#   MODECADR OF CALLING ROUTINE CONTAINS +0,-1,-0 OR CADR RETURN ADDRESS.
 
-# DEBRIS -
-#       RUPTREG2 AND CALLING ROUTINE MODECADR.
+# DEBRIS-
+#   RUPTREG2 AND CALLING ROUTINE MODECADR.
 
-## [yaYUL WORKAROUND] OH 2009
+## [yaYUL WORKAROUND] OH 2009 - kept by RRB for Luminary 116 - 2017
                 SBANK=          LOWSUPER                        
 
 AOTSTALL        CAF             ONE                             # AOT.
@@ -789,7 +788,7 @@ AOTSTALL        CAF             ONE                             # AOT.
 RADSTALL        CAF             TWO                             
                 TCF             STALL                           
 
-## Page 1330
+## Page 1320
 OPTSTALL        EQUALS          AOTSTALL                        
 
 IMUSTALL        CAF             ZERO                            # IMU.
@@ -802,7 +801,7 @@ STALL           INHINT
                 TCF             MODESLP                         # OPERATION INCOMPLETE.
                 TCF             MODEGOOD                        # COMPLETE AND GOOD IF = -1.
 
-MG2             INDEX           RUPTREG2                        # COMPLETE AND FAILED IF -0.  RESET TO +0.
+MG2             INDEX           RUPTREG2                        # COMPLETE AND FAILED IF -0. RESET TO +0.
                 TS              MODECADR                        # RETURN TO CALLER.
                 TCF             MODEEXIT                        
 
@@ -821,7 +820,7 @@ MODABORT        DXCH            BUF2
                 TC              BAILOUT1                        # TWO PROGRAMS USING THE SAME DEVICE.
                 OCT             1210                            
 
-## Page 1331
+## Page 1321
 # CONSTANTS FOR MODE SWITCHING ROUTINES
 
 BITS3&4         =               OCT14                           
@@ -834,12 +833,9 @@ IMUSEFLG        EQUALS          BIT8                            # INTERPRETER SW
 IMUFIN20        =               IMUFINE                         
 GOMANUR         CA              ATTCADR                         # IS KALCMANU FREE
                 EXTEND                                          
-                BZF             +3                              
-
-                TC              POODOO                          # NO
-                OCT             1210                            # 2 TRYING TO USE SAME DEVICE
-
- +3             EXTEND                                          
+                BZF             +2
+                TC              MODABORT                              
+ +2             EXTEND                                          
                 DCA             BUF2                            
                 DXCH            ATTCADR                         # SAVE FINAL RETURN FOR KALCMAN3
 
@@ -857,37 +853,36 @@ GOMANUR         CA              ATTCADR                         # IS KALCMANU FR
                 CADR            KALCMAN3                        
 KALEBCON        ECADR           BCDU                            
 
-## Page 1332
+## Page 1322
 # PROGRAM DESCRIPTION
 # IMU STATUS CHECK ROUTINE R02 (SUBROUTINE UTILITY)
 # MOD NO - 1
 # MOD BY - N.BRODEUR
-
 # FUNCTIONAL DESCRIPTION
-#       TO CHECK WHETHER IMU IS ON AND IF ON WHETHER IT IS ALIGNED TO AN
-#       ORIENTATION KNOWN BY THE CMC.  TO REQUEST SELECTION OF THE APPROPRIATE
-#       PROGRAM IF THE IMU IS OFF OR NOT ALIGNED TO AN ORIENTATION KNOWN BY THE
-#       CMC.  CALLED THROUGH BANKCALL
 
-# CALLING SEQUENCE -
-#       L       TC      BANKCALL
-#       L+1     CADR    R02BOTH
+# TO CHECK WHETHER IMU IS ON AND IF ON WHETHER IT IS ALIGNED TO AN
+# ORIENTATION KNOWN BY THE CMC. TO REQUEST SELECTION OF THE APPROPRIATE
+# PROGRAM IF THE IMU IS OFF OR NOT ALIGNED TO AN ORIENTATION KNOWN BY THE
+# CMC. CALLED THROUGH BANKCALL
+# CALLING SEQUENCE-
 
+# L        TC     BANKCALL
+# L+1      CADR   R02BOTH
 # SUBROUTINES CALLED
+
 #       VARALARM
 #       FLAGUP
-
 # NORMAL EXIT MODES
-#       AT L+2 OF CALLING SEQUENCE
 
+# AT L+2 OF CALLING SEQUENCE
 # ALARM OR ABORT EXIT MODES
 #       GOTOPOOH, WITH ALARM
-
 # ERASABLE INITIALIZATION REQUIRED
-#       NONE
+
+# NONE
 
 # DEBRIS
-#       CENTRALS - A,Q,L
+# CENTRALS-A,Q,L
 
                 BANK            34                              
                 SETLOC          R02                             
@@ -910,29 +905,29 @@ R02BOTH         CAF             REFSMBIT
                 TC              GOTOPOOH                        
 
 R02ZERO         TC              UPFLAG                          
-## Page 1333
+## Page 1323
                 ADRES           IMUSE                           
                 TCF             SWRETURN                        
 OCT220          OCT             220                             
 
-## Page 1334
-# PROGRAM DESCRIPTION           P06             10 FEB 67
+## Page 1324
+# PROGRAM DESCRIPTION   P06   10 FEB 67
 
 # TRANSFER THE ISS/CMC FROM THE OPERATE TO THE STANDBY CONDITION.
 
-# THE NORMAL CONDITION OF READINESS OF THE GNCS WHEN NOT IN USE IS STANDBY.  IN THIS CONDITION THE IMU
-# HEATER POWER IS ON.  THE IMU OPERATE POWER IS OFF.  THE COMPUTER POWER IS ON.  THE OPTICS POWER IS OFF.  THE
-# CMC STANDBY ON THE MAIN AND LEB DISKYS IS ON.
+# THE NORMAL CONDITION OF READINESS OF THE GNCS WHEN NOT IN USE IS STANDBY. IN THIS CONDITION THE IMU
+# HEATER POWER IS ON. THE IMU OPERATE POWER IS OFF. THE COMPUTER POWER IS ON. THE OPTICS POWER IS OFF.  THE
+# CMC  STANDBY ON THE MAIN AND LEB DISKYS IS ON.
 
 # CALLING SEQUENCE:
-#       ASTRONAUT REQUEST THROUGH DSKY  V37E 06E.
+#           ASTRONAUT REQUEST THROUGH DSKY  V37E 06E.
 
 # SUBROUTINES CALLED:
-#       GOPERF1
-#       BANKCALL
-#       FLAGDOWN
+#          GOPERF1
+#          BANKCALL
+#          FLAGDOWN
 
-## Page 1335
+## Page 1325
 # PRESTAND PREPARES FOR STANDBY BY SNAPSHOTTING THE SCALER AND TIME1 TIME2
 # THE LOW 5 BITS OF THE SCALER ARE INSPECTED TO INSURE COMPATIBILITY
 # BETWEEN THE SCALER READING AND THE TIME1 TIME2 READING.
@@ -968,7 +963,7 @@ PRESTAND        INHINT
                 WOR             CHAN13                          # SET STANDBY ENABLE BIT
 
                 TC              PHASCHNG                        # SET RESTART TO POSTAND WHEN STANDBY
-                OCT             07024                           #       RECOVERS
+                OCT             07024                           #   RECOVERS
                 OCT             20000                           
                 EBANK=          SCALSAVE                        
                 2CADR           POSTAND                         
@@ -983,16 +978,16 @@ PRESTAND        INHINT
 OCT62           EQUALS          .5SEC                           # DEC 50 = OCT 62
 
 # THE LOW 5 BITS OF THE SCALER READS 10000 FOR THE FIRST INTERVAL AFTER A
-## Page 1336
-# T1 INCREMENT.  IF SCALPREP DETECTS THIS INTERVAL THE T1,T2 AND SCALER
+## Page 1326
+# T1 INCREMENT. IF SCALPREP DETECTS THIS INTERVAL THE T1,T2 AND SCALER
 # DATA ARE NOT COMPATABLE AND RETURN IS TO L+1 FOR ANOTHER READING OF THE
-# DATA.  OTHERWISE, THE RETURN IS TO L+2 TO PROCEED.  ROUTINE ALSO PREPARES
-# THE SCALER READING FOR COMPUTATION OF THE INCREMENT TO UPDATE T1T2.  (THE
+# DATA. OTHERWISE, THE RETURN IS TO L+2 TO PROCEED. ROUTINE ALSO PREPARES
+# THE SCALER READING FOR COMPUTATION OF THE INCREMENT TO UPDATE T1T2. (THE
 # 10 MS BIT (BIT 6) OF THE SCALER IS INCREMENTED 5 MS OUT OF PHASE FROM
 # T1.) ADDITION OF 5 MS (BIT 5) TO THE SCALER READING HAS THE EFFECT OF
-# ADJUSTING BIT 6 IN THE SCALER TO BE IN PHASE WITH BIT 1 OF T1.  THE LOW 5
+# ADJUSTING BIT 6 IN THE SCALER TO BE IN PHASE WITH BIT 1 OF T1. THE LOW 5
 # BITS OF THE SCALER READING ARE THEN SET TO ZERO, TO TRUNCATE THE SCALER
-# DATA TO 10 MS.  RESULTS ARE STORED IN MPAC, +1.
+# DATA TO 10 MS. RESULTS ARE STORED IN MPAC, +1.
 
 SCALPREP        EXTEND                                          
                 QXCH            MPAC            +2              
@@ -1013,10 +1008,10 @@ SCALPREP        EXTEND
                 INCR            MPAC            +2              # NO
                 TC              MPAC            +2              # YES
 
-# POSTAND RECOVERS TIME AFTER STANDBY.  THE SCALER IS SNAPSHOTTED AND THE
-# TIME1 TIME2 COUNTER IS SET TO ZERO.  THE LOW 5 BITS OF THE SCALER ARE
+# POSTAND RECOVERS TIME AFTER STANDBY.THE SCALER IS SNAPSHOTTED AND THE
+# TIME1 TIME2 COUNTER IS SET TO ZERO. THE LOW 5 BITS OF THE SCALER ARE
 # INSPECTED TO INSURE COMPATABILITY BETWEEN THE SCALER READING AND THE
-# CLEARING OF THE TIME COUNTER.  IT THEN COMPUTES THE DIFFERENCE IN SCALER
+# CLEARING OF THE TIME COUNTER. IT THEN COMPUTES THE DIFFERENCE IN SCALER
 # VALUES (IN DP) AND ADDS THIS TO THE PREVIOUSLY SNAPSHOTTED VALUES OF
 # TIME1 TIME2 AND PLACES THIS NEW TIME INTO THE TIME1 TIME2 COUNTER.
 
@@ -1034,7 +1029,7 @@ POSTAND         CS              BIT11                           # RECOVER TIME A
                 EXTEND                                          # T1,T2 AND SCALER OK
                 DCS             SCALSAVE                        
                 DAS             MPAC                            # FORM DP DIFFERENCE OF POSTSTANDBY SCALER
-## Page 1337
+## Page 1327
                 CAF             BIT10                           # MINUS PRESTANDBY SCALER AND SHIFT RIGHT
                 TC              SHORTMP                         # 5 TO ALIGN BITS WITH TIME1 TIME2.
                 CAF             ZERO                            

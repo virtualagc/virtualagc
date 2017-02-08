@@ -17,6 +17,7 @@
 ##				vs the already-proofed corresponding Colossus
 ##				237 and Comanche 55 source-code files
 ##				and corrected errors found.
+##		2017-02-08 RSB	Added a note about a curiously-misprinted line.
 ##
 ## The contents of the "Colossus249" files, in general, are transcribed 
 ## from a scanned copy of the program listing.  Notations on this
@@ -185,7 +186,13 @@ NBSM		STQ
 # THESE INTERFACE ROUTINES ARE PERMANENT.  ALL RESTORE USER'S EBANK
 # SETTING. ALL ARE STRICT INTERPRETIVE SUBROUTINES, CALLED USING "CALL",
 # RETURNING VIA QPRET.  ALL EXPECT AND RETURN THE VECTOR TO BE TRANSFOR-
-# MED INTERPRETER-STYLE IN MPAC; COMPONENTS AT MPAC, MPAC +3, AND MPAC +5.
+# MED INTERPRETER-STYLE IN MPAC
+## In every other Colossus (and Luminary) version preceding or following this
+## one, the line corresponding to the line above reads:<br>
+## <pre>
+##    MED INTERPRETER-STYLE IN MPAC; COMPONENTS AT MPAC, MPAC +3, AND MPAC +5.
+## </pre>
+## I assume that the truncated line is thus a printer error. &mdash; RSB 2017.
 #
 # TRG*SMNB AND TRG*NBSM BOTH EXPECT TO SEE THE 2'S COMPLEMENT ANGLES
 # AT CDUSPOT (ORDER Y Z X, AT CDUSPOT, CDUSPOT +2, AND CDUSPOT +4; ODD
