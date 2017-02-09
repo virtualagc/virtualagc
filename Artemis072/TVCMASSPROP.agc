@@ -12,6 +12,8 @@
 ## Mod history:	2009-09-13 SMC	Adapted from Comanche055 files.
 ## 		2009-09-14 JL	Fix typos. Fix page numbers. Remove change comments. Restore hard tabs.
 ##		2010-02-20 RSB	Un-##'d this header.
+##		2017-02-09 RSB	Proofed comment text by diff'ing vs Comanche 55
+##				and/or octopus/ProoferComments as most-appropriate.
 
 ## Page 954
 
@@ -120,7 +122,7 @@
 		COUNT*	$$/MASP
 
 
-MASSPROP	CAF	NINE		# MASSPROP USES TVC/RCS INTERRUPT TEMPS
+MASSPROP	CAF	NINE		# MASSPROP USES TVC/RCS INTERUPT TEMPS
  +1		TS	PHI333		# SET UP TEN PASSES
 LEMTEST		CAE	DAPDATR1	# DETERMINE LEM STATUS
 		MASK	BIT13

@@ -19,6 +19,7 @@
 ##				original harcopy, as opposed to the PDF page
 ##				numbers in 1701.pdf.
 ##		2017-01-28 RSB	WTIH -> WITH.
+##		2017-02-09 RSB	Comment-text fixes identified in proofing Artemis 72
 
 ## Page 1111
 # PROGRAM DESCRIPTION						DATE -- 10 OCTOBER 1966
@@ -328,7 +329,7 @@ FILLED		DXCH	WAITEXIT
 		OCT	31203
 		
 ## Page 1121
-# THE ENTRY TC WTLST2 JUST PRECEDING OCT N IS FOR T  LE TD LE T   -1.
+# THE ENTRY TO WTLST2 JUST PRECEDING OCT N IS FOR T  LE TD LE T   -1.
 #                                                  N           N+1
 # (LE MEANS LESS THAN OR EQUAL TO).  AT ENTRY, C(A) = -(TD - T   + 1)
 #                                                             N+1

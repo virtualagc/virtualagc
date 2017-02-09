@@ -19,6 +19,7 @@
 ##				vs the already-proofed corresponding Colossus
 ##				237 and Comanche 55 source-code files
 ##				and corrected errors found.
+##		2017-02-09 RSB	Comment-text fixes identified in proofing Artemis 72
 ##
 ## The contents of the "Colossus249" files, in general, are transcribed 
 ## from a scanned copy of the program listing.  Notations on this
@@ -345,7 +346,7 @@ WTABORT		TC	BAILOUT		# NO ROOM IN THE INN.
 OCT40201	OCT	40201
 		
 ## Page 1200
-# THE ENTRY TC WTLST2 JUST PRECEDING OCT N IS FOR T  LE TD LE T   -1.
+# THE ENTRY TO WTLST2 JUST PRECEDING OCT N IS FOR T  LE TD LE T   -1.
 #                                                  N           N+1
 # (LE MEANS LESS THAN OR EQUAL TO).  AT ENTRY, C(A) = -(TD - T   + 1)
 #                                                             N+1

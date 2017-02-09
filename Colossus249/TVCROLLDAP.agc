@@ -19,6 +19,8 @@
 ##				vs the already-proofed corresponding Colossus
 ##				237 and Comanche 55 source-code files
 ##				and corrected errors found.
+##		2017-01-20 RSB	Fixed comment-text errors noted while diff'ing
+##				vs Colossus 249.
 ##
 ## The contents of the "Colossus249" files, in general, are transcribed 
 ## from a scanned copy of the program listing.  Notations on this
@@ -338,7 +340,7 @@ REG3TST		BZMF	RATELIM		# IF REGION 3 (RATES TOO HIGH, FIRE JETS)
 		AD	INTERCEP	# SCALED AT 2(-3) REV.
 		COM
 		EXTEND
-REG2TST		BZMF	NOROLL		# IP REGION 2 (COAST SIDE OF STRT LINE)
+REG2TST		BZMF	NOROLL		# IF REGION 2 (COAST SIDE OF STRT LINE)
 
 # CHECK TO SEE IF OGARATE IS ABOVE MINLIM
 
