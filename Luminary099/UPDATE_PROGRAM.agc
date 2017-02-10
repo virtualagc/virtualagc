@@ -18,6 +18,7 @@
 ##		2016-12-18 RSB	Proofed text comments with octopus/ProoferComments
 ##				and corrected the errors found.
 ##		2017-01-28 RSB	Comment-text fixes identified for Luminary 69.
+##		2017-02-09 RSB	Comment-text fixes identified for Artemis 72.
 
 ## This source code has been transcribed or otherwise adapted from
 ## digitized images of a hardcopy from the MIT Museum.  The digitization
@@ -320,7 +321,7 @@ UPSTORE		EQUALS			# GROUND HAS VERIFIED UPDATE.  STORE DATA.
 		OCT	04026		# DATA STORE IF A RESTART OCCURS.
 		INHINT			# (BECAUSE PHASCHNG DID A RELINT)
 
-		CS	TWO		# GO TO UPFNDVAC IF INSTALL IS REQUIRED.
+		CS	TWO		# GO TO UPFNDVAC IF INSTALL IS REQUIRED,
 		AD	UPVERB		# THAT IS, IF IT'S A V70 - V72.
 		EXTEND			# GO TO UPEND73 IF IT'S A V73.
 		BZMF	UPFNDVAC

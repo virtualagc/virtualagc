@@ -25,6 +25,7 @@
 ##              2017-01-22 HG   Add workaround for SBANK
 ##		2017-01-28 RSB	Proofed comment text using octopus/prooferComments
 ##				and fixed errors found.
+##		2017-02-09 RSB	Comment-text fixes identified for Artemis 72.
 
 ## Page 1379
 # PROGRAM NAME:   P27
@@ -313,7 +314,7 @@ UPSTORE         EQUALS                  # GROUND HAS VERIFIED UPDATE. STORE DATA
                 OCT     04026           # DATA STORE IF A RESTART OCCURS.
                 INHINT                  # (BECAUSE PHASCHNG DID A RELINT)
 
-                CS      TWO             # GO TO UPFNDVAC IF INSTALL IS REQUIRED.
+                CS      TWO             # GO TO UPFNDVAC IF INSTALL IS REQUIRED,
                 AD      UPVERB          # THAT IS, IF IT'S A V70 - V72.
                 EXTEND                  # GO TO UPEND73 IF IT'S A V73.
                 BZMF    UPFNDVAC

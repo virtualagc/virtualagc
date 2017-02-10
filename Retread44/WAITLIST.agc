@@ -16,6 +16,7 @@
 ##              2016-12-18 MAS  Transcribed.
 ## 		2016-12-27 RSB	Proofed comment text using octopus/ProoferComments,
 ##				and fixed errors found.
+##		2017-02-09 RSB	Comment-text fixes identified in proofing Artemis 72
 
 ## Page 118
 ## The log section named, WAITLIST, is circled in red.
@@ -158,7 +159,7 @@ WTABORT         TC                      # LIST OVERFLOW.
 
 
 ## Page 122
-# THE ENTRY TC WTLST2 JUST PRECEDING OCT  N  IS FOR T  LE TD LE T   -1.
+# THE ENTRY TO WTLST2 JUST PRECEDING OCT  N  IS FOR T  LE TD LE T   -1.
 #                                                    N           N+1
 
 # (LE MEANS LESS THAN OR EQUAL TO).  AT ENTRY, C(A) = -(TD - T   + 1)

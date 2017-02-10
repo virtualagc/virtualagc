@@ -14,6 +14,7 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-01-22 MAS  Created from Luminary 99.
 ##		2017-01-28 RSB	Comment-text fixes identified for Luminary 69.
+##		2017-02-09 RSB	Comment-text fixes identified for Artemis 72.
 
 ## NOTE: Page numbers below have not yet been updated to reflect Luminary 116.
 
@@ -303,7 +304,7 @@ UPSTORE         EQUALS                                          # GROUND HAS VER
                 OCT             04026                           # DATA STORE IF A RESTART OCCURS.
                 INHINT                                          # (BECAUSE PHASCHNG DID A RELINT)
 
-                CS              TWO                             # GO TO UPFNDVAC IF INSTALL IS REQUIRED.
+                CS              TWO                             # GO TO UPFNDVAC IF INSTALL IS REQUIRED,
                 AD              UPVERB                          # THAT IS, IF IT'S A V70 - V72.
                 EXTEND                                          # GO TO UPEND73 IF IT'S A V73.
                 BZMF            UPFNDVAC                        

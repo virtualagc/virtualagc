@@ -18,6 +18,7 @@
 ##				vs the already-proofed corresponding Colossus
 ##				237 and Comanche 55 source-code files
 ##				and corrected errors found.
+##		2017-02-09 RSB	Comment-text fixes identified for Artemis 72.
 ##
 ## The contents of the "Colossus249" files, in general, are transcribed 
 ## from a scanned copy of the program listing.  Notations on this
@@ -334,7 +335,7 @@ UPSTORE		EQUALS			# GROUND HAS VERIFIED UPDATE.  STORE DATA.
 		OCT	04026		# DATA STORE IF A RESTART OCCURS.
 		INHINT			# (BECAUSE PHASCHNG DID A RELINT)
 
-		CS	TWO		# GO TO UPFNDVAC IF INSTALL IS REQUIRED.
+		CS	TWO		# GO TO UPFNDVAC IF INSTALL IS REQUIRED,
 		AD	UPVERB		# THAT IS, IF IT'S A V70 - V72.
 		EXTEND			# GO TO UPEND73 IF IT'S A V73.
 		BZMF	UPFNDVAC
@@ -496,7 +497,7 @@ UPOUT		EQUALS
 
 		TC	ENDEXT		# EXTENDED VERB EXIT
 
-# VERB 7O BRANCH
+# VERB 70 BRANCH
 
 UPEND70		EXTEND			# V70 DOES THE FOLLOWING WITH DP DELTA
 		DCS	UPBUFF		# TIME IN UPBUFF

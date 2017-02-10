@@ -1,18 +1,19 @@
 ### FILE="Main.annotation"
-## Copyright:    Public domain.
-## Filename:     WAITLIST.agc
-## Purpose:      A module for revision 0 of BURST120 (Sunburst). It 
-##               is part of the source code for the Lunar Module's
-##               (LM) Apollo Guidance Computer (AGC) for Apollo 5.
-## Assembler:    yaYUL
-## Contact:      Ron Burkey <info@sandroid.org>.
-## Website:      www.ibiblio.org/apollo/index.html
-## Pages:        1062-1074
-## Mod history:  2016-09-30 RSB  Created draft version.
-##               2016-10-10 PDJ  Updated based on Sunburst120 scans. 
-##		 2016-12-06 RSB	 Comments proofed using octopus/ProoferComments,
-##				 changes made.
+## Copyright:   Public domain.
+## Filename:    WAITLIST.agc
+## Purpose:     A module for revision 0 of BURST120 (Sunburst). It 
+##              is part of the source code for the Lunar Module's
+##              (LM) Apollo Guidance Computer (AGC) for Apollo 5.
+## Assembler:   yaYUL
+## Contact:     Ron Burkey <info@sandroid.org>.
+## Website:     www.ibiblio.org/apollo/index.html
+## Pages:       1062-1074
+## Mod history: 2016-09-30 RSB  Created draft version.
+##              2016-10-10 PDJ  Updated based on Sunburst120 scans. 
+##		2016-12-06 RSB	Comments proofed using octopus/ProoferComments,
+##				changes made.
 ##		2017-01-28 RSB	WTIH -> WITH.
+##		2017-02-09 RSB	Comment-text fixes identified in proofing Artemis 72
 
 ## Page 1062
 
@@ -299,7 +300,7 @@ OCT40201        OCT             40201
 
 ## Page 1070
 
-# THE ENTRY TC WTLST2 JUST PRECEDING OCT N IS FOR T  LE TD LE T   -1.
+# THE ENTRY TO WTLST2 JUST PRECEDING OCT N IS FOR T  LE TD LE T   -1.
 #                                                  N           N+1
 # (LE MEANS LESS THAN OR EQUAL TO).  AT ENTRY, C(A) = -(TD - T   + 1)
 #                                                             N+1

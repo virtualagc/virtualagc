@@ -16,6 +16,7 @@
 ##		2016-12-17 RSB	Proofed text comments with octopus/ProoferComments
 ##				and corrected the errors found.
 ##		2017-01-28 RSB	WTIH -> WITH.
+##		2017-02-09 RSB	Comment-text fixes identified in proofing Artemis 72
 ##
 ## This source code has been transcribed or otherwise adapted from
 ## digitized images of a hardcopy from the MIT Museum.  The digitization
@@ -340,7 +341,7 @@ FILLED		DXCH	WAITEXIT
 		OCT	01203
 		
 ## Page 1127
-# THE ENTRY TC WTLST2 JUST PRECEDING OCT N IS FOR T  LE TD LE T   -1.
+# THE ENTRY TO WTLST2 JUST PRECEDING OCT N IS FOR T  LE TD LE T   -1.
 #                                                  N           N+1
 # (LE MEANS LESS THAN OR EQUAL TO).  AT ENTRY, C(A) = -(TD - T   + 1)
 #                                                             N+1

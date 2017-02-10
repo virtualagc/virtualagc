@@ -1,14 +1,15 @@
 ### FILE="Main.annotation"
-## Copyright:    Public domain.
-## Filename:     WAITLIST.agc
-## Purpose:      Part of the source code for Aurora (revision 12).
-## Assembler:    yaYUL
-## Contact:      Ron Burkey <info@sandroid.org>.
-## Website:      https://www.ibiblio.org/apollo.
-## Pages:        139-147
-## Mod history:  2016-09-20 JL   Created.
-##		 2016-12-08 RSB	 Proofed comments with octopus/ProoferComments
-##				 and fixed the errors found.
+## Copyright:   Public domain.
+## Filename:    WAITLIST.agc
+## Purpose:     Part of the source code for Aurora (revision 12).
+## Assembler:   yaYUL
+## Contact:     Ron Burkey <info@sandroid.org>.
+## Website:     https://www.ibiblio.org/apollo.
+## Pages:       139-147
+## Mod history: 2016-09-20 JL   Created.
+##		2016-12-08 RSB	Proofed comments with octopus/ProoferComments
+##				and fixed the errors found.
+##		2017-02-09 RSB	Comment-text fixes identified in proofing Artemis 72
 
 ## This source code has been transcribed or otherwise adapted from
 ## digitized images of a hardcopy from the private collection of 
@@ -228,7 +229,7 @@ OCT50001        OCT     50001
 
 ## Page 145
 
-# THE ENTRY TC WTLST2 JUST PRECEDING OCT  N  IS FOR T  LE TD LE T   -1.
+# THE ENTRY TO WTLST2 JUST PRECEDING OCT  N  IS FOR T  LE TD LE T   -1.
 #                                                    N           N+1
 #
 # (LE MEANS LESS THAN OR EQUAL TO).  AT ENTRY, C(A) = -(TD - T   + 1)
