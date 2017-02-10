@@ -13,10 +13,9 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-01-22 MAS  Created from Luminary 99.
+##              2017-02-10 NV   Updated for Luminary 116.
 
-## NOTE: Page numbers below have not yet been updated to reflect Luminary 116.
-
-## Page 206
+## Page 207
 
 # PROGRAM NAME:  AGS INITIALIZATION (R47)
 
@@ -69,7 +68,7 @@
 AGSINIT         CAF             REFSMBIT                        
                 MASK            FLAGWRD3                        # CHECK REFSMFLG.
                 CCS             A                               
-## Page 207
+## Page 208
                 TC              REDSPTEM                        # REFSMMAT IS OK
                 TC              ALARM                           # REFSMMAT IS BAD
                 OCT             220                             
@@ -120,7 +119,7 @@ AGSVCALC        TC              INTPRET
                                 CSMPREC                         # CALCULATE CSM STATE VECTOR FOR SAME TIME
                 CALL                                            
                                 SCALEVEC                        
-## Page 208
+## Page 209
                 STODL           AGSBUFF         +6              
                                 TAT                             
                 DSU             DDV                             # CALCULATE AND STORE THE TIME
@@ -171,7 +170,7 @@ SCALEVEC        VLOAD           MXV
                                 REFSMMAT                        
                 VXSC            VSL2                            
                                 VSCALE                          
-## Page 209
+## Page 210
                 VAD             VAD                             # THIS SECTION ROUNDS THE VECTOR, AND
                                 AGSRND1                         # CORRECTS FOR THE FACT THAT THE AGS
                                 AGSRND2                         # IS A 2 S COMPLIMENT MACHINE WHILE THE
@@ -214,7 +213,7 @@ AGSRND1         2OCT            0000060000
                 2OCT            0000060000                      
 AGSRND2         2OCT            0000037777                      
                 2OCT            0000037777                      
-## Page 210
+## Page 211
                 2OCT            0000037777                      
 
                 SBANK=          LOWSUPER                        # FOR SUBSEQUENT LOW 2CADRS.
