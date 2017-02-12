@@ -64,6 +64,7 @@ group.add_argument('--yul7', help="Perform processing for YUL pages 385-481", ac
 group.add_argument('--yul8', help="Perform processing for YUL pages 482-575", action="store_true")
 group.add_argument('--yul9', help="Perform processing for YUL pages 576-671", action="store_true")
 group.add_argument('--yul10', help="Perform processing for YUL pages 672-730", action="store_true")
+group.add_argument('--luminary131', help="Perform LUMINARY 131 (Eyles) processing", action="store_true")
 
 args = parser.parse_args()
 if not os.path.isfile(args.input_file):
@@ -84,6 +85,15 @@ elif args.luminary210:
     blurred = cv2.GaussianBlur(l_channel, (1,5), 0)
     thresh = cv2.adaptiveThreshold(blurred, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, 201, 11)
 elif args.luminary210A:
+    blurred = cv2.GaussianBlur(l_channel, (5,5), 0)
+    # Isolate the lines by eroding very strongly horizontally
+    lines_only = cv2.erode(~blurred, np.ones((1,21), np.uint8), iterations=1)
+    # Beef them up a bit by vertically dilating
+    thickend_lines = cv2.dilate(lines_only, np.ones((3,1), np.uint8), iterations=1)
+    # Difference the original L channel with the thickened lines (which is inverted)
+    diff = blurred + thickend_lines
+    thresh = cv2.adaptiveThreshold(blurred, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, 201, 11)
+elif args.luminary131:
     blurred = cv2.GaussianBlur(l_channel, (5,5), 0)
     # Isolate the lines by eroding very strongly horizontally
     lines_only = cv2.erode(~blurred, np.ones((1,21), np.uint8), iterations=1)
