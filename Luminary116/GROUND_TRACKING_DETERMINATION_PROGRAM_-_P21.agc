@@ -13,8 +13,7 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-01-22 MAS  Created from Luminary 99.
-
-## NOTE: Page numbers below have not yet been updated to reflect Luminary 116.
+##              2017-02-12 NV   Updated for Luminary 116.
 
 ## Page 654
 # GROUND TRACKING DETERMINATION PROGRAM P21
@@ -52,7 +51,7 @@
 #       DECIMAL DISPLAY OF LAT,LONG,ALT
 
 # ERASABLE INITIALIZATION REQUIRED
-#       AX0             2DEC    4.652459653 E-5 RADIANS         %68-69 CONSTANTS*
+#       AX0             2DEC    4.652459653 E-5 RADIANS         %68-69 CONSTANTS"
 #       -AY0            2DEC    2.147535898 E-5 RADIANS
 #       AZ0             2DEC    .7753206164     REVOLUTIONS
 #       FOR LUNAR ORBITS 504LM VECTOR IS NEEDED
@@ -84,6 +83,9 @@ PROG21          CAF             ONE
                 TC              GOTOPOOH                        # TERMINATE
                 TC              +2                              # PROCEED VALUE OF ASSUMED VEHICLE OK
                 TC              -5                              # R2 LOADED THROUGH DSKY
+                CAF             ZERO                            # INITIAL TIME = PRESENT TIME
+                TS              DSPTEM1
+                TS              DSPTEM1         +1
 P21PROG1        CAF             V6N34                           # LOAD DESIRED TIME OF LAT-LONG.
                 TC              BANKCALL                        
                 CADR            GOFLASH                         
@@ -91,9 +93,10 @@ P21PROG1        CAF             V6N34                           # LOAD DESIRED T
                 TC              +2                              # PROCEED VALUES OK
                 TC              -5                              # TIME LOADED THROUGH DSKY
                 TC              INTPRET                         
-                DLOAD                                           
+                DLOAD           BZE                             
                                 DSPTEM1                         
-                STCALL          TDEC1                           # INTEGRATE TO TIME SPECIFIED IN TDEC
+                                P21PRTM                         
+P21PROG2        STCALL          TDEC1                           # INTEG TO TIME SPECIFIED IN TDEC1
                                 INTSTALL                        
                 BON             CLEAR                           
                                 P21FLAG                         
@@ -110,11 +113,11 @@ P21PROG1        CAF             V6N34                           # LOAD DESIRED T
                 CALL                                            
                                 INTEGRV                         # CALCULATE
                 GOTO                                            # -AND
+## Page 656
                                 P21VSAVE                        # -SAVE BASE VECTOR
 P21CONT         VLOAD                                           
                                 P21BASER                        # RECYCLE -- INTEG FROM BASE VECTOR
-                STOVL           RCV                             # --POS
-## Page 656		
+                STOVL           RCV                             # --POS         
                                 P21BASEV                        
                 STODL           VCV                             # --VEL
                                 P21TIME                         
@@ -129,7 +132,7 @@ P21CONT         VLOAD
                                 MOONFLAG                        
  +3             CALL                                            
                                 INTEGRVS                        
-P21VSAVE        DLOAD                                           # SAVE CURRENT BASE VECTOR
+P21VSAVE        DLOAD                                           # SAVE CURRENT BASEVECTOR
                                 TAT                             
                 STOVL           P21TIME                         # --TIME
                                 RATT1                           
@@ -161,11 +164,11 @@ P21DSP          CLEAR           SLOAD                           # GENERATE DISPL
                                 LUNAFLAG                        
                                 X2                              
                 BZE             SET                             
+## Page 657                             
                                 +2                              # 0 = EARTH
                                 LUNAFLAG                        
                 VLOAD                                           
                                 RATT                            
-## Page 657			
                 STODL           ALPHAV                          
                                 TAT                             
                 CLEAR           CALL                            
@@ -186,7 +189,10 @@ P21DSP          CLEAR           SLOAD                           # GENERATE DISPL
                                 600SEC                          # 600 SECONDS OR 10 MIN
                 STORE           DSPTEM1                         
                 RTB                                             
-                                P21PROG1                        
+                                P21PROG1
+P21PRTM         RTB             GOTO
+                                LOADTIME
+                                P21PROG2                        
 600SEC          2DEC            60000                           # 10 MIN
 
 V06N43          VN              00643                           
