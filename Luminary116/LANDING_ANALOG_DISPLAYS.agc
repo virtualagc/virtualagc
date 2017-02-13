@@ -14,9 +14,7 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-01-22 MAS  Created from Luminary 99.
 
-## NOTE: Page numbers below have not yet been updated to reflect Luminary 116.
-
-## Page 898
+## Page 891
                 BANK            21                              
                 SETLOC          R10                             
                 BANK                                            
@@ -43,7 +41,7 @@ ALTROUT         TC              DISINDAT                        # CHECK MODE SEL
                 CAF             BIT2                            # RATE COMMAND IS EXECUTED BEFORE RANGE.
                 EXTEND                                          
                 WOR             CHAN14                          # ALTRATE (BIT2 = 1), ALTITUDE (BIT2 = 0).
-ARCOMP          CA              RUNIT                           # COMPUTE ALTRATE = RUNIT.VVECT M/CS *2(-6).
+ARCOMP          CA              RUNIT                           # COMPUTE ALTRATE=RUNIT.VVECT M/CS *2(-6).
                 EXTEND                                          
                 MP              VVECT                           # MULTIPLY X-COMPONENTS.
                 XCH             RUPTREG1                        # SAVE SINGLE PRECISION RESULT M/CS*2(-6).
@@ -67,7 +65,7 @@ ARCOMP          CA              RUNIT                           # COMPUTE ALTRAT
                 AD              RUPTREG1                        
                 TS              ALTRATE                         # ALTITUDE RATE IN BIT UNITS*2(-14).
                 CS              ALTRATE                         
-## Page 899
+## Page 892
                 EXTEND                                          # CHECK POLARITY OF ALTITUDE RATE.
                 BZMF            +2                              
                 TCF             DATAOUT                         # NEGATIVE - SEND POS. PULSES TO ALTM REG.
@@ -86,13 +84,13 @@ ALTOUT          TC              DISINDAT                        # CHECK MODE SEL
                 CS              BIT2                            
                 EXTEND                                          
                 WAND            CHAN14                          
-                CCS             ALTBITS                         # = -1 IF OLD ALT. DATA TO BE EXTRAPOLATED.
+                CCS             ALTBITS                         # =-1 IF OLD ALT. DATA TOBE EXTRAPOLATED.
                 TCF             +4                              
                 TCF             +3                              
                 TCF             OLDDATA                         
                 TS              ALTBITS                         # SET ALTBITS FROM -0 TO +0.
                 CS              ONE                             
-                DXCH            ALTBITS                         # SET ALTBITS = -1 FOR SWITCH USE NEXT PASS.
+                DXCH            ALTBITS                         # SET ALTBITS =-1 FOR SWITCH USE NEXT PASS.
                 DXCH            ALTSAVE                         
                 CA              BIT10                           # NEW ALTITUDE EXTRAPOLATION WITH ALTRATE.
                 XCH             Q                               
