@@ -14,6 +14,7 @@
 ##		2017-01-26 RSB	Back-ported comment-text fixes found while
 ##				proofing corresponding Luminary 69 file.	
 ##		2017-01-28 RSB	WTIH -> WITH.
+##		2017-02-08 RSB	Comment-text fixes identified while proofing Artemis 72.
 
 ## Page 128
 		BANK	12
@@ -82,7 +83,7 @@ CDRVE		CCS	DSPTAB +11D
 
 ## Page 130
 
-# DSPOUT PROGRAM, PUTS OUT DISPLAYS.
+# DSPOUT PROGRAM. PUTS OUT DISPLAYS.
 
 DSPOUTSB	TS	NOUT
 		CS	ZERO

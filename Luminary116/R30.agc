@@ -13,6 +13,7 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-01-22 MAS  Created from Luminary 99.
+##		2017-02-08 RSB	Comment-text fixes discovered while proofing Artemis 72.
 
 ## NOTE: Page numbers below have not yet been updated to reflect Luminary 116.
 
@@ -34,7 +35,7 @@
 #               SELECTED STATE VECTOR UPDATED BY THISPREC (OTHPREC).
 #               CALLS SR30.1 (WHICH CALLS TFFCONMU + TFFRP/RA) TO CALCULATE
 #                       RPER (PERIGEE RADIUS), RAPO (APOGEE RADIUS), HPER (PERIGEE
-#                       HEIGHT ABOVE LAUNCH PAD OR LUNAR LANDING SITE), HARD (APOGEE
+#                       HEIGHT ABOVE LAUNCH PAD OR LUNAR LANDING SITE), HAPO (APOGEE
 #                       HEIGHT AS ABOVE), TPER (TIME TO PERIGEE), TFF (TIME TO
 #                       INTERSECT 300 KFT ABOVE PAD OR 35KFT ABOVE LANDING SITE).
 #               FLASH MONITOR V16N44 (HAPO, HPER, TFF).  TFF IS -59M59S IF IT WAS
@@ -107,7 +108,7 @@ V82GOFF         EXIT                                            # ALLOW ASTRONAU
 V82GOFLP        CAF             TFFBANK                         # MAJOR RECYCLE LOOP ENTRY
                 TS              EBANK                           
                 CAF             ZERO                            
-                TS              V82FLAGS                        # ZERO FLAGS FOR TICKTEST, INHIBITS
+                TS              V82FLAGS                        # ZERO FLAGS FOR TICKTEST. INHIBITS
                                                                 # DECREMENTING OF TFF AND -TPER.
                 CAF             PRIO7                           
                 TC              FINDVAC                         # V82GOFF1 WILL EXECUTE STATE VECTOR

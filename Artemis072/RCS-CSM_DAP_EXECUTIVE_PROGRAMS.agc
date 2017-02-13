@@ -12,6 +12,8 @@
 ## Mod history:	2009-08-27 SN	Adapted from corresponding Comanche 055 file.
 ## 		2009-09-04 JL	Minor fixes.
 ##		2010-02-20 RSB	Un-##'d this header.
+##		2017-02-08 RSB	Proofed comment text by diff'ing vs Comanche 55
+##				and/or octopus/ProoferComments as most-appropriate.
 
 ## Page 1036
 # CALCULATION OF  AMGB, AMBG     ONCE EVERY SECOND

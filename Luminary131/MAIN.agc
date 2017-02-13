@@ -21,11 +21,20 @@
 #		2017-01-20 RSB	Changed GOTOP00H to GOTOPOOH in all *.agc
 #				files.  There are probably more POO problems
 #				but those are the only ones I fixed.
+#		2017-02-12 RSB	References to the scanned assembly listing
+#				have been updated now that a more-legible
+#				scan is available than before.
 #
-# The contents of the "Luminary131" files, in general, are
-# transcribed from a scanned document originally obtained from MIT's
-# now-defunct history or recent technology website.  However, you should
-# instead refer to material at http://www.ibiblio.org/apollo/ScansForConversion/.
+# The contents of these "Luminary131" files were originally (2003)
+# transcribed from a scanned document obtained from MIT's
+# now-defunct history or recent technology website, but which can be
+# consulted now at
+#	http://www.ibiblio.org/apollo/ScansForConversion/Luminary131
+# As of 2017, however, there is a far-more legible scan, created from the same
+# physical printout, which you should instead consult, at either
+# 	http://www.ibiblio.org/apollo/ScansForConversion/Luminary131-Eyles
+# or
+#	https://archive.org/details/luminary131agcpr00miti
 # Notations within the original program listing read, in part:
 #
 #	NASA Apollo LUMINARY 131 (1C) Program Source Code Listing.

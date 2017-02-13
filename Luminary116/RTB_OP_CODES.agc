@@ -13,10 +13,9 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-01-22 MAS  Created from Luminary 99.
+##              2017-02-09 RRB  Updated for Luminary 116.
 
-## NOTE: Page numbers below have not yet been updated to reflect Luminary 116.
-
-## Page 1397
+## Page 1387
                 BANK            22                              
                 SETLOC          RTBCODES                        
                 BANK                                            
@@ -30,7 +29,7 @@ LOADTIME        EXTEND
                 DCA             TIME2                           
                 TCF             SLOAD2                          
 
-# CONVERT THE SINGLE PRECISION 2'S COMPLEMENT NUMBER ARRIVING IN MPAC (SCALED IN HALF-REVOLUTIONS) TO A
+#          CONVERT THE SINGLE PRECISION 2'S COMPLEMENT NUMBER ARRIVING IN MPAC (SCALED IN HALF-REVOLUTIONS) TO A
 # DP 1'S COMPLEMENT NUMBER SCALED IN REVOLUTIONS.
 
 CDULOGIC        CCS             MPAC                            
@@ -52,7 +51,7 @@ CDULOGIC        CCS             MPAC
 SGNAGREE        TC              TPAGREE                         
                 TCF             DANZIG                          
 
-# CONVERT THE DP 1'S COMPLEMENT ANGLE SCALED IN REVOLUTIONS TO A SINGLE PRECISION 2'S COMPLEMENT ANGLE
+#          CONVERT THE DP 1'S COMPLEMENT ANGLE SCALED IN REVOLUTIONS TO A SINGLE PRECISION 2'S COMPLEMENT ANGLE
 # SCALED IN HALF-REVOLUTIONS.
 
 1STO2S          TC              1TO2SUB                         
@@ -67,7 +66,7 @@ V1STO2S         TC              1TO2SUB                         # ANSWER ARRIVES
                 DXCH            MPAC            +5              
                 DXCH            MPAC                            
                 TC              1TO2SUB                         
-## Page 1398
+## Page 1388
                 TS              MPAC            +2              
 
                 DXCH            MPAC            +3              
@@ -108,9 +107,9 @@ TPMODE          CAF             ONE                             # MODE IS TP.
                 ADS             MPAC                            
                 TC              Q                               
 
-# THE FOLLOWING ROUTINE INCREMENTS IN 2S COMPLEMENT THE REGISTER WHOSE ADDRESS IS IN BUF BY THE 1S COMPL.
-# QUANTITY FOUND IN TEM2.  THIS MAY BE USED TO INCREMENT DESIRED IMU AND OPTICS CDU ANGLES OR ANY OTHER 2S COMPL.
-# (+0 UNEQUAL TO -0) QUANTITY.  MAY BE CALLED BY BANKCALL/SWCALL.
+#          THE FOLLOWING ROUTINE INCREMENTS IN 2S COMPLEMENT THE REGISTER WHOSE ADDRESS IS IN BUF BY THE 1S COMPL.
+# QUANTITY FOUND IN TEM2. THIS MAY BE USED TO INCREMENT DESIRED IMU AND OPTICS CDU ANGLES OR ANY OTHER 2S COMPL.
+# (+0 UNEQUAL TO -0) QUANTITY. MAY BE CALLED BY BANKCALL/SWCALL.
 
 CDUINC          TS              TEM2                            # 1S COMPL.QUANT. ARRIVES IN ACC.  STORE IT
                 INDEX           BUF                             
@@ -118,7 +117,7 @@ CDUINC          TS              TEM2                            # 1S COMPL.QUANT
                 AD              ONE                             
                 TCF             +4                              
                 AD              ONE                             
-## Page 1399
+## Page 1389
                 AD              ONE                             # OVERFLOW HERE IF 2S COMPL. IS 180 DEG.
                 COM                                             
 
@@ -129,7 +128,7 @@ CDUINC          TS              TEM2                            # 1S COMPL.QUANT
                 COM                                             
                 TS              TEM2                            # STORE 14BIT QUANTITY WITH PRESENT SIGN
                 TCF             +4                              
-                INDEX           A                               # SIGN.
+                INDEX           A                               #  SIGN.
                 CAF             LIMITS                          # FIX IT, BY ADDING IN 37777 OR 40000
                 AD              TEM2                            
 
@@ -137,8 +136,8 @@ CDUINC          TS              TEM2                            # 1S COMPL.QUANT
                 TS              0                               # STORE NEW ANGLE IN 2S COMPLEMENT.
                 TC              Q                               
 
-## Page 1400
-# RTB TO TORQUE GYROS, EXCEPT FOR THE CALL TO IMUSTALL.  ECADR OF COMMANDS ARRIVES IN X1.
+## Page 1390
+# RTB TO TORQUE GYROS, EXCEPT FOR THE CALL TO IMUSTALL. ECADR OF COMMANDS ARRIVES IN X1.
 
 PULSEIMU        INDEX           FIXLOC                          # ADDRESS OF GYRO COMMANDS SHOULD BE IN X1
                 CA              X1                              
@@ -146,17 +145,20 @@ PULSEIMU        INDEX           FIXLOC                          # ADDRESS OF GYR
                 CADR            IMUPULSE                        
                 TCF             DANZIG                          
 
-## Page 1401
-# THE SUBROUTINE SIGNMPAC SETS C(MPAC, MPAC +1) TO SIGN(MPAC).
-# FOR THIS, ONLY THE CONTENTS OF MPAC ARE EXAMINED.  ALSO +0 YIELDS POSMAX AND -0 YIELDS NEGMAX.
+## Page 1391
+#          THE SUBROUTINE  SIGNMPAC  SETS C(MPAC, MPAC +1) TO SIGN(MPAC).
+# FOR THIS, ONLY THE CONTENTS OF MPAC ARE EXAMINED.    ALSO +0 YIELDS POSMAX AND -0 YIELDS NEGMAX.
 
 # ENTRY MAY BE BY EITHER OF THE FOLLOWING:
-#       1.      LIMIT THE SIZE OF MPAC ON INTERPRETIVE OVERFLOW:
-#               ENTRY:          BOVB
-#                                       SIGNMPAC
-#       2.      GENERATE IN MPAC THE SIGNUM FUNCTION OF MPAC:
-#               ENTRY:          RTB
-#                                       SIGNMPAC
+
+# 1.       LIMIT THE SIZE OF MPAC ON INTERPRETIVE OVERFLOW:
+# ENTRY:          BOVB
+#                        SIGNMPAC
+
+# 2.       GENERATE IN MPAC THE SIGNUM FUNCTION OF MPAC:
+# ENTRY:          RTB
+#                        SIGNMPAC
+
 # IN EITHER CASE, RETURN IS TO THE NEXT INTERPRETIVE INSTRUCTION IN THE CALLING SEQUENCE.
 
 SIGNMPAC        EXTEND                                          
@@ -170,7 +172,7 @@ DPMODE          CAF             ZERO                            # SETS MPAC +2 T
                 DCS             DPOSMAX                         
                 TCF             SLOAD2                          
 
-# RTB OP CODE NORMUNIT IS LIKE INTERPRETIVE INSTRUCTION UNIT, EXCEPT THAT IT CAN BE DEPENDED ON NOT TO BLOW
+#     RTB OP CODE NORMUNIT IS LIKE INTERPRETIVE INSTRUCTION UNIT, EXCEPT THAT IT CAN BE DEPENDED ON NOT TO BLOW
 # UP WHEN THE VECTOR BEING UNITIZED IS VERY SMALL -- IT WILL BLOW UP WHEN ALL COMPONENTS ARE ZERO.  IF NORMUNIT
 # IS USED AND THE UPPER ORDER HALVES OF ALL COMPONENTS ARE ZERO, THE MAGNITUDE RETURNED IN 36D WILL BE TOO LARGE
 # BY A FACTOR OF 2(13) AND THE SQUARED MAGNITUDE RETURNED AT 34D WILL BE TOO BIG BY A FACTOR OF 2(26).
@@ -194,7 +196,7 @@ NORMUNIT        CAF             ZERO
                 TCF             NOSHIFT                         
                 TCF             +2                              
                 TCF             NOSHIFT                         
-## Page 1402
+## Page 1392
                 CA              MPAC            +1              # SHIFT ALL COMPONENTS LEFT 13
                 EXTEND                                          
                 MP              BIT14                           

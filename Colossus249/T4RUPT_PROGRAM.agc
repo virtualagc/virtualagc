@@ -21,6 +21,7 @@
 ##		2017-01-26 RSB	Back-ported comment-text fixes found while
 ##				proofing corresponding Luminary 69 file.	
 ##		2017-01-28 RSB	WTIH -> WITH.
+##		2017-02-08 RSB	Comment-text fixes identified while proofing Artemis 72.
 ##
 ## The contents of the "Colossus249" files, in general, are transcribed 
 ## from a scanned copy of the program listing.  Notations on this
@@ -112,7 +113,7 @@ CDRVE		CCS	DSPTAB +11D
 		TC	HANG20
 
 ## Page 131
-# DSPOUT PROGRAM, PUTS OUT DISPLAYS.
+# DSPOUT PROGRAM. PUTS OUT DISPLAYS.
 
 DSPOUTSB	TS	NOUT
 		CS	ZERO

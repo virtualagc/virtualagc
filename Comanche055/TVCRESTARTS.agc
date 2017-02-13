@@ -18,6 +18,7 @@
 ##		2010-08-24 JL	Fixed page 958 number. Fixed some indentation.
 ##		2016-12-21 RSB	Proofed comment text using octopus/ProoferComments
 ##				and corrected the errors found.
+##		2017-02-09 RSB	Comment-text fixes identified while proofing Artemis 72.
 ##
 ## This source code has been transcribed or otherwise adapted from digitized
 ## images of a hardcopy from the MIT Museum.  The digitization was performed
@@ -175,7 +176,7 @@ TVCDAPHS	CS	OCT37776	# CHECK BITS 15 AND 1 OF TVCPHASE TO SEE
 		CS	TVCPHASE	# TEST FOR TVCPHASE = -2
 		MASK	BIT2		#	(THIS INDICATES RESTART OCCURRED
 		EXTEND			#	 DURING CSM/LM V46 SWITCH-OVER)
-		BZF	TRIM/CMD	# NO. TVCPHASE = -1. RSTRT WAS IN TVCINIT
+		BZF	TRIM/CMD	# NO, TVCPHASE = -1, RSTRT WAS IN TVCINIT
 		
 ENABL1		CAF	BIT8		# TVC ENABLE, FOLLOWED BY 40 MS (MIN) WAIT
 		AD	BIT11		#	SET BIT FOR OPTICS-DAC-ENABLE ALSO

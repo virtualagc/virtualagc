@@ -19,6 +19,7 @@
 ##				vs the already-proofed corresponding Colossus
 ##				237 and Comanche 55 source-code files
 ##				and corrected errors found.
+##		2017-02-08 RSB	Comment-text fixes identified while proofing Artemis 72.
 ##
 ## The contents of the "Colossus249" files, in general, are transcribed 
 ## from a scanned copy of the program listing.  Notations on this
@@ -45,7 +46,7 @@
 
 ## Page 205
 # RESTART TABLES
-# --------------
+# ------------------
 #
 # THERE ARE TWO FORMS OF RESTART TABLES FOR EACH GROUP.  THEY ARE KNOWN AS THE EVEN RESTART TABLES AND THE ODD
 # RESTART TABLES.  THE ODD TABLES HAVE ONLY ONE ENTRY OF THREE LOCATIONS WHILE THE EVEN TABLES HAVE TWO ENTRIES

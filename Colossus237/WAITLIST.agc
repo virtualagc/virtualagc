@@ -16,6 +16,7 @@
 ##				and fixed errors found.
 ##		2017-01-20 RSB	Fixed comment-text errors noted while diff'ing
 ##				vs Colossus 249.
+##		2017-02-09 RSB	Comment-text fixes identified in proofing Artemis 72
 
 ## Page 1188
 # PROGRAM DESCRIPTION                                                                     DATE - 10 OCTOBER 1966
@@ -330,7 +331,7 @@ WTABORT		TC	BAILOUT		# NO ROOM IN THE INN.
 OCT40201	OCT	40201
 		
 ## Page 1197
-# THE ENTRY TC WTLST2 JUST PRECEDING OCT  N  IS FOR T  LE TD LE T   -1.
+# THE ENTRY TO WTLST2 JUST PRECEDING OCT  N  IS FOR T  LE TD LE T   -1.
 #                                                    N           N+1
 
 # (LE MEANS LESS THAN OR EQUAL TO).  AT ENTRY, C(A) = -(TD - T   + 1)

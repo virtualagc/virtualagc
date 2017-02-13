@@ -54,6 +54,17 @@ group.add_argument('--solarium55', help="Perform SOLARIUM 55 processing", action
 group.add_argument('--colossus237', help="Perform COLOSSUS 237 processing", action="store_true")
 group.add_argument('--artemis72', help="Perform COLOSSUS 237 processing", action="store_true")
 group.add_argument('--simAP11ROPE', help="Perform AP11ROPE Digital Simulation processing", action="store_true")
+group.add_argument('--yul1', help="Perform processing for YUL pages 3-24", action="store_true")
+group.add_argument('--yul2', help="Perform processing for YUL pages 25-40", action="store_true")
+group.add_argument('--yul3', help="Perform processing for YUL pages 41-152", action="store_true")
+group.add_argument('--yul4', help="Perform processing for YUL pages 153-264", action="store_true")
+group.add_argument('--yul5', help="Perform processing for YUL pages 265-331", action="store_true")
+group.add_argument('--yul6', help="Perform processing for YUL pages 332-384", action="store_true")
+group.add_argument('--yul7', help="Perform processing for YUL pages 385-481", action="store_true")
+group.add_argument('--yul8', help="Perform processing for YUL pages 482-575", action="store_true")
+group.add_argument('--yul9', help="Perform processing for YUL pages 576-671", action="store_true")
+group.add_argument('--yul10', help="Perform processing for YUL pages 672-730", action="store_true")
+group.add_argument('--luminary131', help="Perform LUMINARY 131 (Eyles) processing", action="store_true")
 
 args = parser.parse_args()
 if not os.path.isfile(args.input_file):
@@ -74,6 +85,15 @@ elif args.luminary210:
     blurred = cv2.GaussianBlur(l_channel, (1,5), 0)
     thresh = cv2.adaptiveThreshold(blurred, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, 201, 11)
 elif args.luminary210A:
+    blurred = cv2.GaussianBlur(l_channel, (5,5), 0)
+    # Isolate the lines by eroding very strongly horizontally
+    lines_only = cv2.erode(~blurred, np.ones((1,21), np.uint8), iterations=1)
+    # Beef them up a bit by vertically dilating
+    thickend_lines = cv2.dilate(lines_only, np.ones((3,1), np.uint8), iterations=1)
+    # Difference the original L channel with the thickened lines (which is inverted)
+    diff = blurred + thickend_lines
+    thresh = cv2.adaptiveThreshold(blurred, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, 201, 11)
+elif args.luminary131:
     blurred = cv2.GaussianBlur(l_channel, (5,5), 0)
     # Isolate the lines by eroding very strongly horizontally
     lines_only = cv2.erode(~blurred, np.ones((1,21), np.uint8), iterations=1)
@@ -149,6 +169,34 @@ elif args.simAP11ROPE:
     # Difference the original R channel with the isolated bands
     diff = blurred + lines_only
     _,thresh = cv2.threshold(diff, 245, 255, cv2.THRESH_BINARY)
+elif args.yul1:
+    print('--yul1 not yet supported')
+elif args.yul2:
+    print('--yul2 not yet supported')
+elif args.yul3:
+    blurred = cv2.GaussianBlur(l_channel, (5,5), 0)
+    # Isolate the lines by eroding very strongly horizontally
+    lines_only = cv2.erode(~blurred, np.ones((1,21), np.uint8), iterations=1)
+    # Beef them up a bit by vertically dilating
+    thickend_lines = cv2.dilate(lines_only, np.ones((3,1), np.uint8), iterations=1)
+    # Difference the original L channel with the thickened lines (which is inverted)
+    diff = blurred + thickend_lines
+    thresh = cv2.adaptiveThreshold(blurred, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, 201, 11)
+    thresh = thresh[0:-100,80:-80]
+elif args.yul4:
+    print('--yul4 not yet supported')
+elif args.yul5:
+    print('--yul5 not yet supported')
+elif args.yul6:
+    print('--yul6 not yet supported')
+elif args.yul7:
+    print('--yul7 not yet supported')
+elif args.yul8:
+    print('--yul8 not yet supported')
+elif args.yul9:
+    print('--yul9 not yet supported')
+elif args.yul10:
+    print('--yul10 not yet supported')
 else:
     raise RuntimeError("Unknown program type selected")
 

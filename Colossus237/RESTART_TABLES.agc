@@ -13,12 +13,13 @@
 ##				and corrected errors found.
 ##		2017-01-18 RSB	Fixed comment-text errors noted while diff'ing
 ##				vs Colossus 249.
+##		2017-02-08 RSB	Comment-text fixes identified while proofing Artemis 72.
 
 ## Page 204
 
 # RESTART TABLES
 #
-# --------------
+# ------------------
 #
 # THERE ARE TWO FORMS OF RESTART TABLES FOR EACH GROUP.  THEY ARE KNOWN AS THE EVEN RESTART TABLES AND THE ODD
 # RESTART TABLES.  THE ODD TABLES HAVE ONLY ONE ENTRY OF THREE LOCATIONS WHILE THE EVEN TABLES HAVE TWO ENTRIES

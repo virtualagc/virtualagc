@@ -12,6 +12,8 @@
 ## Mod history:	2009-09-01 SMC	Adapted from Comanche055 files.
 ## 		2009-09-04 JL	Fixed page comments. Fixed typos.
 ##		2010-02-20 RSB	Un-##'d this header.
+##		2017-02-08 RSB	Proofed comment text by diff'ing vs Comanche 55
+##				and/or octopus/ProoferComments as most-appropriate.
 
 ## Page 940
 		SETLOC	SBAND
@@ -114,5 +116,6 @@ R		EQUALS	RCM
 		SBANK=	LOWSUPER
 
 ## Page 942
-# *** END OF MENELAUS.061 ***
+## This page contains only assembler-generated messages.
+
 

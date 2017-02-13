@@ -14,10 +14,10 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-01-22 MAS  Created from Luminary 99.
 ##		2017-01-28 RSB	Comment-text fixes identified for Luminary 69.
+##		2017-02-09 RSB	Comment-text fixes identified for Artemis 72.
+##              2017-02-10 RRB  Updated for Luminary 116.
 
-## NOTE: Page numbers below have not yet been updated to reflect Luminary 116.
-
-## Page 1386
+## Page 1376
 # PROGRAM NAME:         P27
 # WRITTEN BY:           KILROY/ DE WOLF
 
@@ -28,9 +28,9 @@
 # LOG SECTION:          UPDATE PROGRAM.
 
 # FUNCT. DESCR:         P27 (THE UPDATE PROGRAM) PROCESSES COMMANDS AND DATA
-#                       INSERTIONS REQUESTED BY THE GROUND VIA UPLINK.
-#                       THE P27 PROGRAM WILL ACCEPT UPDATES
-#                       ONLY DURING P00 FOR THE LM, AND ONLY DURING P00,
+#                           INSERTIONS REQUESTED BY THE GROUND VIA UPLINK.
+#                           THE P27 PROGRAM WILL ACCEPT UPDATES
+#                           ONLY DURING P00 FOR THE LM, AND ONLY DURING P00,
 #                       P02, AND FRESH START FOR THE CSM
 
 # CALLING SEQ:          PROGRAM IS INITIATED BY UPLINK ENTRY OF VERBS 70, 71, 72 AND 73.
@@ -43,13 +43,13 @@
 # ALARM/ABORT:          TC FALTON FOLLOWED BY TC ENDEXT
 
 # RESTARTS:             P27 IS RESTART PROTECTED IN TWO WAYS ...
-#                       1.      PRIOR TO VERIFLAG INVERSION (WHICH IS CAUSED BY THE GROUND/ASTRONAUT'S VERIFICATION OF UPDATE
-#                               DATA BY SENDING A V33E WHEN V21N02 IS FLASHING)---
-#                               NO PROTECTION EXCEPT PRE-P27 MODE IS RESTORED, COAST + ALIGN DOWNLIST IS SELECTED AND UPLINK
-#                               ACTIVITY LIGHT IS TURNED OFF.  (JUST AS IF A V34E WAS SENT DURING P27 DATA LOADS).
-#                               V70,V71,V72 OR V73 WILL HAVE TO BE COMPLETELY RESENT BY USER.
-#                       2.      AFTER VERIFLAG INVERSION (WHEN UPDATE OF THE SPECIFIED ERASABLES IS BEING PERFORMED)---
-#                               PROTECTED AGAINST RESTARTS.
+#                       1. PRIOR TO VERIFLAG INVERSION (WHICH IS CAUSED BY THE GROUND/ASTRONAUT'S VERIFICATION OF UPDATE
+#                          DATA BY SENDING A V33E WHEN V21N02 IS FLASHING)---
+#                          NO PROTECTION EXCEPT PRE-P27 MODE IS RESTORED, COAST + ALIGN DOWNLIST IS SELECTED AND UPLINK
+#                          ACTIVITY LIGHT IS TURNED OFF.(JUST AS IF A V34E WAS SENT DURING P27 DATA LOADS).
+#                          V70,V71,V72 OR V73 WILL HAVE TO BE COMPLETELY RESENT BY USER.
+#                       2. AFTER VERIFLAG INVERSION (WHEN UPDATE OF THE SPECIFIED ERASABLES IS BEING PERFORMED)---
+#                          PROTECTED AGAINST RESTARTS.
 
 # DEBRIS:               UPBUFF  (20D)   TEMP STORAGE FOR ADDRESSES AND CONTENTS.
 #                       UPVERB  (1)     VERB NUMBER MINUS 70D (E.G. FOR V72, UPVERB = 72D - 70D = 2)
@@ -65,13 +65,14 @@
 #                               IS ADDED TO TEPHEM, SUBTRACTED FROM AGC CLOCK(TIME2,TIME1), SUBTRACTED FROM CSM STATE
 #                               VECTOR TIME(TETCSM) AND SUBTRACTED FROM LEM STATE VECTOR TIME(TETLEM).
 #                               THE DP OCTAL TIME INCREMENT IS SCALED AT 2(28).
-## Page 1387
+## Page 1377
 #       V71EIIEAAAAE            (CONTIGUOUS BLOCK UPDATE) II-2 OCTAL COMPONENTS, XXXXX,
 #       XXXXXE                  ARE LOADED INTO ERASABLE STARTING AT ECADR, AAAA.
 #       XXXXXE                  IT IS .GE. 3 .AND. .LE. 200.,
 #                               AND (AAAA + II -3) DOES NOT PRODUCE AN ADDRESS IN THE
 #       9 NEXT BANK
 #         .                     SCALING IS SAME AS INTERNAL REGISTERS.
+
 #       V72EIIE                 (SCATTER UPDATE) (II-1)/2 OCTAL COMPONENTS, XXXXX, ARE
 #       AAAAEXXXXXE             LOADED INTO ERASABLE LOCATIONS, AAAA.
 #       AAAAEXXXXXE             II IS .GE. 3 .AND. .LE. 19D, AND MUST BE ODD.
@@ -109,7 +110,7 @@
 
 #       2.  REFSMMAT (ALL DATA ENTRIES IN OCTAL)
 #               ENTRIES:        DATA DEFINITIONS:                               SCALE FACTORS:
-## Page 1388
+## Page 1378
 #               V71E            CONTIGUOUS BLOCK UPDATE VERB
 #                  24E          NUMBER OF COMPONENTS FOR REFSMMAT UPDATE
 #                AAAAE          ECADR OF 'REFSMMAT'
@@ -158,7 +159,7 @@ UPERROR         TC              POSTJUMP                        # TURN ON 'OPERA
                 CAE             MODREG                          # UPDATE ALLOWED.
 CKMDMORE        =               UPERROR                         
                 TS              UPOLDMOD                        # SAVE CURRENT MAJOR MODE
-## Page 1389
+## Page 1379
                 CAE             UPVERBSV                        # SET UPVERB TO INDICATE TO P27
 
                 TS              UPVERB                          # WHICH EXTENDED VERB CALLED IT.
@@ -185,7 +186,7 @@ UPPART2         EQUALS                                          # UPDATE PROGRAM
                 TC              PHASCHNG                        # SET RESTART GROUP 6 TO RESTORE OLD MODE
                 OCT             07026                           # AND DOWNLIST AND EXIT IF RESTART OCCURS.
                 OCT             30000                           # PRIORITY SAME AS CHRPRIO
-## [WORKAROUND] RSB 2009
+## [WORKAROUND] RSB 2009 - kept for Luminary 116 RRB 2017.
                 SBANK=          PINSUPER                        
 ## [WORKAROUND]
                 EBANK=          UPBUFF                          
@@ -210,9 +211,9 @@ OHWELL1         CAF             ADUPBUFF                        # * REQUEST USER
                 TS              MPAC            +2              # * OF COMPONENTS PARAMETER(II).*
  +2             CAF             UPLOADNV                        # (CK4V32 RETURNS HERE IF V32 ENCOUNTERED)
                 TC              BANKCALL                        # DISPLAY A FLASHING V21N01
-## Page 1390
                 CADR            GOXDSPF                         # TO REQUEST II.
 
+## Page 1380
                 TCF             UPOUT4                          # V34 TERMINATE UPDATE (P27) RETURN
                 TCF             OHWELL1         +2              
                 TC              CK4V32                          # DATA OR V32 RETURN
@@ -260,11 +261,11 @@ UPVERIFY        CAF             ADUPTEMP                        # PLACE ECADR WH
                 BZMF            UPVERIFY                        # NO, IT IS NOT POSITIVE NONZERO
                 CS              UPTEMP                          
                 AD              COMPNUMB                        
-## Page 1391
-                AD              BIT1                            
+                AD              BIT1
+## Page 1381                            
                 EXTEND                                          
                 BZMF            UPVERIFY                        # NO
-                CAF             ADUPBFM1                        # YES - BASED ON THE COMPONENT NO. INDEX
+                CAF             ADUPBFM1                        # YES- BASED ON THE COMPONENT NO. INDEX
                 AD              UPTEMP                          # CALCULATE THE ECADR OF LOCATION IN
                 TCF             OHWELL2         +2              # UPBUFF WHICH USER WANTS TO CHANGE.
 
@@ -303,30 +304,30 @@ UPSTORE         EQUALS                                          # GROUND HAS VER
                 OCT             04026                           # DATA STORE IF A RESTART OCCURS.
                 INHINT                                          # (BECAUSE PHASCHNG DID A RELINT)
 
-                CS              TWO                             # GO TO UPFNDVAC IF INSTALL IS REQUIRED.
+                CS              TWO                             # GO TO UPFNDVAC IF INSTALL IS REQUIRED,
                 AD              UPVERB                          # THAT IS, IF IT'S A V70 - V72.
                 EXTEND                                          # GO TO UPEND73 IF IT'S A V73.
                 BZMF            UPFNDVAC                        
 
 # VERB 73 BRANCH
-## Page 1392
-UPEND73         EXTEND                                          # V73 - PERFORM DP OCTAL AGC CLOCK INCREMENT
 
+UPEND73         EXTEND                                          # V73 - PERFORM DP OCTAL AGC CLOCK INCREMENT
+## Page 1382
                 DCA             UPBUFF                          
                 DXCH            UPBUFF          +8D             
                 TC              TIMEDIDL                        
-                TC              FALTON                          # ERROR - TURN ON *OPERATOR ERROR* LIGHT
+                TC              FALTON                          # ERROR- TURN ON *OPERATOR ERROR* LIGHT
                 TC              UPOUT           +1              # GO TO COMMON UPDATE PROGRAM EXIT
 
 UPFNDVAC        CAF             CHRPRIO                         # (USE EXTENDED VERB PRIORITY)
                 TC              FINDVAC                         # GET VAC AREA FOR 'CALL INTSTALL'
                 EBANK=          TEPHEM                          
-                2CADR           UPJOB                           # (NOTE:  THIS WILL ALSO SET EBANK FOR
+                2CADR           UPJOB                           # (NOTE: THIS WILL ALSO SET EBANK FOR
                 TC              ENDOFJOB                        # 'TEPHEM' UPDATE BY V70)
 
-UPJOB           TC              INTPRET                         # THIS COULD BE A STATE VECTOR UPDATE -- SO
-                CALL                                            # WAIT (PUT JOB TO SLEEP) IF ORBIT INT(OI)
-                                INTSTALL                        # IS IN PROGRESS -- OR -- GRAB OI AND RETURN
+UPJOB           TC              INTPRET                         # THIS COULD BE A STATE VECTOR UPDATE--SO
+                CALL                                            # WAIT(PUT JOB TO SLEEP) IF ORBIT INT(OI)
+                                INTSTALL                        # IS IN PROGRESS--OR--GRAB OI AND RETURN
                                                                 # TO UPWAKE IF OI IS NOT IN PROGRESS.
 
 UPWAKE          EXIT                                            
@@ -358,9 +359,9 @@ TIMEDIDL        EXTEND
                 TS              L                               # A
                 COM                                             # QUICK
                 DXCH            -PHASE6                         # PHASCHNG
-## Page 1393
-TIMEDIDR        INHINT                                          
 
+TIMEDIDR        INHINT                                          
+## Page 1383
                 CAF             ZERO                            
                 ZL                                              # PICK UP INCREMENTER(AND ZERO
                 TS              MPAC            +2              # IT IN CASE OF RESTARTS) AND
@@ -395,7 +396,7 @@ DELTAOK         TC              TPAGREE                         # FORCE SIGN AGR
 # VERB 71 BRANCH
 
 UPEND71         CAE             UPBUFF          +1              # SET EBANK
-                TS              EBANK                           #       AND
+                TS              EBANK                           #   AND
                 MASK            LOW8                            # CALCULATE
                 TS              UPTEMP                          # S-REG VALUE OF RECEIVING AREA
 
@@ -410,10 +411,9 @@ UPEND71         CAE             UPBUFF          +1              # SET EBANK
                 CA              NEG3                            # NO - CALCULATE NUMBER OF
                 AD              COMPNUMB                        # WORDS TO BE STORED MINUS ONE
 STORLP71        TS              MPAC                            # SAVE NO. OF WORDS REMAINING MINUS ONE
-## Page 1394
                 INDEX           A                               # TAKE NEXT UPDATE WORD FROM
                 CA              UPBUFF          +2              # UPBUFF AND
-
+## Page 1384
                 TS              L                               # SAVE IT IN L
                 CA              MPAC                            # CALCULATE NEXT
                 AD              UPTEMP                          # RECEIVING ADDRESS
@@ -423,9 +423,9 @@ STORLP71        TS              MPAC                            # SAVE NO. OF WO
                 EBANK=          TEPHEM                          
                 CCS             MPAC                            # ARE THERE ANY WORDS LEFT TO BE STORED
                 TCF             STORLP71                        # YES
-                TCF             UPOUT                           # NO - THEN EXIT UPDATE PROGRAM
+                TCF             UPOUT                           # NO- THEN EXIT UPDATE PROGRAM
 ADUPBFM1        ADRES           UPBUFF          -1              # SAME AS ADUPBUFF BUT LESS 1 (DON'T MOVE)
-                TCF             UPOUT                           # NO - EXIT UPDATE (HERE WHEN COMPNUMB = 3)
+                TCF             UPOUT                           # NO- EXIT UPDATE (HERE WHEN COMPNUMB = 3)
 
 # VERB 72 BRANCH
 
@@ -433,7 +433,7 @@ UPEND72         CAF             BIT1                            # HAVE AN ODD NO
                 MASK            COMPNUMB                        # BEEN SENT FOR A V72 UPDATE ...
                 CCS             A                               
                 TCF             +2                              # YES
-                TCF             UPERROUT                        # ERROR - SHOULD BE ODD NO. OF COMPONENTS
+                TCF             UPERROUT                        # ERROR- SHOULD BE ODD NO. OF COMPONENTS
                 CS              BIT2                            
                 AD              COMPNUMB                        
 LDLOOP72        TS              MPAC                            # NOW PERFORM THE UPDATE
@@ -460,10 +460,9 @@ UPOUT           EQUALS
  +1             CAE             UPOLDMOD                        # RESTORE PRIOR P27 MODE
                 TC              NEWMODEX        +3              
                 CAF             ZERO                            
-## Page 1395
                 TS              DNLSTCOD                        
                 TC              UPACTOFF                        # TURN OFF 'UPLINK ACTIVITY' LIGHT
-
+## Page 1385
                 EXTEND                                          # KILL GROUP 6.
                 DCA             NEG0                            
                 DXCH            -PHASE6                         
@@ -510,9 +509,9 @@ UPEND70         EXTEND                                          # V70 DOES THE F
                 OCT             04026                           
 
                 EBANK=          UPBUFF                          
-## Page 1396
-                TC              UPOUT                           # GO TO STANDARD UPDATE PROGRAM EXIT
 
+                TC              UPOUT                           # GO TO STANDARD UPDATE PROGRAM EXIT
+## Page 1386
 
 # ERROR SEQUENCE
 
