@@ -116,7 +116,7 @@ OLDDATA         CA              ARTOA                           # RATE APPLIES F
                 AD              ONE                             # NON-NEGATIVE ALTSAVE.
                 AD              ALTSAVE         +1              # IF ALTSAVE IS NEGATIVE, ZERO ALTSAVE
                 TS              ALTSAVE         +1              # AND ALTSAVE +1 AT ZERODATA.
-## Page 900
+## Page 893
                 CAF             ZERO                            
                 AD              POSMAX                          
                 AD              ALTSAVE                         
@@ -167,7 +167,7 @@ DISINDAT        EXTEND
 INTLZE          CAF             BIT2                            
                 EXTEND                                          
                 WOR             CHAN12                          # ENABLE RR ERROR COUNTER.
-## Page 901
+## Page 894
                 CS              IMODES33                        
                 MASK            BIT8                            
                 ADS             IMODES33                        # SET INERTIAL DATA FLAG.
