@@ -14,6 +14,6 @@ EXTRA_TARGETS=MAIN-test.agc.bin MAIN-test.agc.lst
 include ../Makefile.inc
 
 $(EXTRA_TARGETS):
-	../yaYUL/yaYUL --unpound-page MAIN-test.agc >MAIN-test.agc.lst
+	../yaYUL/yaYUL --unpound-page ${EXTRA_YAYUL_ARGS} MAIN-test.agc >MAIN-test.agc.lst
 	diff MAIN-test.agc.bin Sunburst120.bin
 	@echo Build of MAIN-test.agc matches buildof MAIN.agc.

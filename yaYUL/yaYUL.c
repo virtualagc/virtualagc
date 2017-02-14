@@ -92,7 +92,9 @@
  *              2017-01-29 MAS  Added --raytheon.
  *              2017-01-30 MAS  Split parity bit calculation into a separate array that is
  *                              updated on the fly during assembly. This prevents parity
- *                              bits from being generated for unused words.
+ *                              bits from being generated for unused words. Also added a
+ *                              --parity flag which generates parity but does *not* swap
+ *                              the bank order.
  */
 
 #include "yaYUL.h"
@@ -115,6 +117,7 @@ char *InputFilename = NULL, *OutputFilename = NULL;
 //FILE *InputFile = NULL;
 FILE *OutputFile = NULL;
 static int NoChecksums = 0;
+static int Parity = 0;
 static int Hardware = 0;
 int flipBugger[044] =
   { 0 };
@@ -229,6 +232,8 @@ main(int argc, char *argv[])
         NoChecksums = 1;
       else if (!strcmp(argv[i], "--hardware"))
         Hardware = 1;
+      else if (!strcmp(argv[i], "--parity"))
+        Parity = 1;
       else if (!strcmp(argv[i], "--format"))
         formatOnly = 1;
       else if (!strcmp(argv[i], "--syntax"))
@@ -508,8 +513,8 @@ main(int argc, char *argv[])
             {
               Value = ObjectCode[Bank][Offset] << 1;
 
-              // If building for hardware, add in the parity bits.
-              if (Hardware)
+              // Add in the parity bits if requested (or if building for a hardware target)
+              if (Parity || Hardware)
                 Value |= Parities[Bank][Offset];
 
               fputc(Value >> 8, OutputFile);
@@ -575,8 +580,9 @@ main(int argc, char *argv[])
       printf(
           "--raytheon       Assembles Raytheon-style code.  The default is MIT.\n");
       printf("--no-checksums   Don't emit bank checksums. For use with Retread 44.\n");
-      printf("--hardware       Emit binary with hardware bank order, and\n"
-          "                 enable parity bit calculation\n");
+      printf("--parity         Enable parity bit calculation.\n");
+      printf("--hardware       Emit binary with hardware bank order. Also implies\n"
+          "                 --parity.\n");
       printf(
           "--format         Just reformat the file and re-output. Don't assemble.\n");
       printf(

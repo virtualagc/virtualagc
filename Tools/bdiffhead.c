@@ -34,6 +34,8 @@
  *              10/20/16 RSB    Somehow the --no-super option got messed up.
  *                              Also, introduced --no-super2.
  *              11/02/16 RSB    Added the case of 0 to --no-super.
+ *              02/01/17 MAS    Added display of parity if its presence is
+ *                              detected.
  *
  *  The idea is simple.  We just do a word-by-word compare until we run out of
  *  data, and print messages where the words differ.  Originally I intended to
@@ -190,7 +192,10 @@ main(int argc, char *argv[])
           printf(" or %04o): ", i + (Block1 ? 02000 : 04000));
         else
           printf("):         ");
-        printf("%05o %05o\n", n1, n2);
+        if ((d1[1] & 1) || (d2[1] & 1))
+          printf("%05o %o  %05o %o\n", n1, d1[1] & 1, n2, d2[1] & 1);
+        else
+          printf("%05o %05o\n", n1, n2);
       }
 
   // All done! 
