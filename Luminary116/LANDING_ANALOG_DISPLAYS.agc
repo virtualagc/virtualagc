@@ -13,10 +13,9 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-01-22 MAS  Created from Luminary 99.
+##              2017-02-15 NV   Updated for Luminary 116.
 
-## NOTE: Page numbers below have not yet been updated to reflect Luminary 116.
-
-## Page 898
+## Page 891
                 BANK            21                              
                 SETLOC          R10                             
                 BANK                                            
@@ -43,7 +42,7 @@ ALTROUT         TC              DISINDAT                        # CHECK MODE SEL
                 CAF             BIT2                            # RATE COMMAND IS EXECUTED BEFORE RANGE.
                 EXTEND                                          
                 WOR             CHAN14                          # ALTRATE (BIT2 = 1), ALTITUDE (BIT2 = 0).
-ARCOMP          CA              RUNIT                           # COMPUTE ALTRATE = RUNIT.VVECT M/CS *2(-6).
+ARCOMP          CA              RUNIT                           # COMPUTE ALTRATE=RUNIT.VVECT M/CS *2(-6).
                 EXTEND                                          
                 MP              VVECT                           # MULTIPLY X-COMPONENTS.
                 XCH             RUPTREG1                        # SAVE SINGLE PRECISION RESULT M/CS*2(-6).
@@ -67,7 +66,7 @@ ARCOMP          CA              RUNIT                           # COMPUTE ALTRAT
                 AD              RUPTREG1                        
                 TS              ALTRATE                         # ALTITUDE RATE IN BIT UNITS*2(-14).
                 CS              ALTRATE                         
-## Page 899
+## Page 892
                 EXTEND                                          # CHECK POLARITY OF ALTITUDE RATE.
                 BZMF            +2                              
                 TCF             DATAOUT                         # NEGATIVE - SEND POS. PULSES TO ALTM REG.
@@ -86,13 +85,13 @@ ALTOUT          TC              DISINDAT                        # CHECK MODE SEL
                 CS              BIT2                            
                 EXTEND                                          
                 WAND            CHAN14                          
-                CCS             ALTBITS                         # = -1 IF OLD ALT. DATA TO BE EXTRAPOLATED.
+                CCS             ALTBITS                         # =-1 IF OLD ALT. DATA TOBE EXTRAPOLATED.
                 TCF             +4                              
                 TCF             +3                              
                 TCF             OLDDATA                         
                 TS              ALTBITS                         # SET ALTBITS FROM -0 TO +0.
                 CS              ONE                             
-                DXCH            ALTBITS                         # SET ALTBITS = -1 FOR SWITCH USE NEXT PASS.
+                DXCH            ALTBITS                         # SET ALTBITS =-1 FOR SWITCH USE NEXT PASS.
                 DXCH            ALTSAVE                         
                 CA              BIT10                           # NEW ALTITUDE EXTRAPOLATION WITH ALTRATE.
                 XCH             Q                               
@@ -118,7 +117,7 @@ OLDDATA         CA              ARTOA                           # RATE APPLIES F
                 AD              ONE                             # NON-NEGATIVE ALTSAVE.
                 AD              ALTSAVE         +1              # IF ALTSAVE IS NEGATIVE, ZERO ALTSAVE
                 TS              ALTSAVE         +1              # AND ALTSAVE +1 AT ZERODATA.
-## Page 900
+## Page 893
                 CAF             ZERO                            
                 AD              POSMAX                          
                 AD              ALTSAVE                         
@@ -169,7 +168,7 @@ DISINDAT        EXTEND
 INTLZE          CAF             BIT2                            
                 EXTEND                                          
                 WOR             CHAN12                          # ENABLE RR ERROR COUNTER.
-## Page 901
+## Page 894
                 CS              IMODES33                        
                 MASK            BIT8                            
                 ADS             IMODES33                        # SET INERTIAL DATA FLAG.
@@ -220,7 +219,7 @@ SPEEDRUN        CS              PIPTIME         +1              # UPDATE THE VEL
                 EXTEND                                          
                 MP              KPIP1(5)                        
                 ADS             VVECT           +1              
-## Page 902
+## Page 895
                 EXTEND                                          
                 DCA             GDT/2           +4              # COMPUTE THE Z-COMPONENT OF VELOCITY.
                 DDOUBL                                          
@@ -252,13 +251,13 @@ SPEEDRUN        CS              PIPTIME         +1              # UPDATE THE VEL
 
                 CA              DELVS                           # HI X OF VELOCITY CORRECTION TERM.
                 AD              VVECT                           # HI X OF UPDATED VELOCITY VECTOR.
-                TS              ITEMP1                          # = VX - DVX M/CS *2(-5).
+                TS              ITEMP1                          # = VX - DVX M/CS*2(-5).
                 CA              DELVS           +2              #    Y
                 AD              VVECT           +1              #    Y
-                TS              ITEMP2                          # = VY - DVY M/CS *2(-5).
+                TS              ITEMP2                          # = VY - DVY M/CS*2(-5).
                 CA              DELVS           +4              #    Z
                 AD              VVECT           +2              #    Z
-                TS              ITEMP3                          # = VZ - DVZ M/CS *2(-5).
+                TS              ITEMP3                          # = VZ - DVZ M/CS*2(-5).
                 CA              ITEMP1                          # COMPUTE VHY, VELOCITY DIRECTED ALONG THE
                 EXTEND                                          # Y-COORDINATE.
                 MP              UHYP                            # HI X OF CROSS-RANGE HALF-UNIT VECTOR.
@@ -271,7 +270,7 @@ SPEEDRUN        CS              PIPTIME         +1              # UPDATE THE VEL
                 EXTEND                                          
                 MP              UHYP            +4              # Z
                 ADS             RUPTREG1                        
-## Page 903
+## Page 896
                 CA              RUPTREG1                        
                 DOUBLE                                          
                 XCH             VHY                             # VHY=VMP.UHYP M/CS*2(-5).
@@ -307,7 +306,7 @@ LATFWDV         CA              ITEMP4                          # COMPUTE LATERA
                 CA              ITEMP3                          
                 EXTEND                                          
                 MP              VHZ                             
-                ADS             RUPTREG1                        # = VHY(COS)AOG+VHZ(SIN)AOG M/CS *2(-5)
+                ADS             RUPTREG1                        # =VHY(COS)AOG+VHZ(SIN)AOG M/CS *2(-5)
                 CA              VELCONV                         # CONVERT LATERAL VELOCITY TO BIT UNITS.
                 EXTEND                                          
                 MP              RUPTREG1                        
@@ -322,7 +321,7 @@ LATFWDV         CA              ITEMP4                          # COMPUTE LATERA
                 MP              VHY                             
                 CS              A                               
                 ADS             RUPTREG1                        # =VHZ(COS)AOG-VHY(SIN)AOG M/CS *2(-5).
-## Page 904
+## Page 897
                 CA              VELCONV                         # CONVERT FORWARD VELOCITY TO BIT UNITS.
                 EXTEND                                          
                 MP              RUPTREG1                        
@@ -373,7 +372,7 @@ LASTOK          INDEX           ITEMP5
                 TCF             +2                              
                 TCF             LASTNEGY                        
                 INDEX           ITEMP5                          
-## Page 905
+## Page 898
                 CA              LATVEL                          
                 EXTEND                                          
                 BZMF            NEGVMAXY                        
@@ -417,7 +416,6 @@ LVLIMITS        INDEX           ITEMP5
                 BZMF            +2                              
                 TCF             NEGLMLV                         
                 INDEX           ITEMP5                          
-
                 CS              LATVEL                          
                 EXTEND                                          
                 BZMF            LVMINLM                         
@@ -425,7 +423,7 @@ LVLIMITS        INDEX           ITEMP5
                 INDEX           ITEMP5                          
                 AD              LATVMETR                        
                 EXTEND                                          
-## Page 906
+## Page 899
                 BZMF            LVMINLM                         
                 INDEX           ITEMP5                          
                 AD              LATVEL                          
@@ -476,7 +474,7 @@ ZEROLSTY        INDEX           ITEMP5
                 INDEX           ITEMP5                          
                 CA              RUPTREG3                        
                 AD              NEG0                            # AVOIDS +0 DINC HARDWARE MALFUNCTION
-## Page 907
+## Page 900
                 INDEX           ITEMP5                          
                 TS              CDUTCMD                         
                 INDEX           ITEMP5                          
