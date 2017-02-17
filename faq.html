@@ -20,9 +20,16 @@
       <li><a href="#Why_Does_it_Say_ibiblio_All_Over_these">Why Does it
           Say "ibiblio" All Over these Pages, and Yet the Site URL is
           "github" ... Maybe?</a></li>
+      <li><a
+href="file:///home/rburkey/git/virtualagc-web/faq.html#Is_this_site_mirrored_anywhere_">Is
+
+
+          this site mirrored anywhere?</a></li>
+      <li><a href="#What_other_websites_is_this_website">What other
+          websites is this website associated with?</a></li>
+      <li><a href="#Privacy_concerns">Privacy concerns?</a><br>
+      </li>
       <li><a href="#How_can_I_help">How can I help?</a></li>
-      <li><a href="#Is_this_site_mirrored_anywhere_">Is this site
-          mirrored anywhere?</a></li>
       <li><a href="#Is_there_a_Wiki_for_this_project_">Is there a Wiki
           for this project?</a></li>
       <li><a href="#Is_there_a_mailing_list_for_this">Is there a mailing
@@ -37,6 +44,9 @@
           involved?</a></li>
       <li><a
 href="file:///home/rburkey/git/virtualagc-web/faq.html#And_who_the_heck_are_you_anyway">And
+
+
+
 
 
 
@@ -84,56 +94,24 @@ href="file:///home/rburkey/git/virtualagc-web/faq.html#And_who_the_heck_are_you_
       Say "ibiblio" All Over these Pages, and Yet the Site URL is
       "github" ... Maybe?</h2>
     <blockquote>
-      <p>At the moment, there are two Virtual AGC websites.&nbsp;
-        Actually, it's even more confusing, as you may find the site
-        referenced as either of the following:<br>
+      <p>Our official Virtual AGC website is at URL <a
+          href="https://www.ibiblio.org/apollo">https://www.ibiblio.org/apollo</a>
+        (or http:).<br>
       </p>
-      <ul>
-        <li><a href="https://www.ibiblio.org/apollo">https://www.ibiblio.org/apollo</a></li>
-        <li><a href="https://virtualagc.github.io/virtualagc/index.html">https://virtualagc.github.io/virtualagc/index.html</a></li>
-      </ul>
-      <p>What a mess!&nbsp; The explanation is that the site is being
-        developed in conjunction with our github repository, using the
-        github website as a "staging area" for changes, and then the
-        content is pushed to our ibiblio website afterward. We're trying
-        an experiment in managing the site collaboratively rather than
-        having me (Ron Burkey) continue to manage it as an individual,
-        as well as tying the website more-closely to our github code
-        repository.&nbsp; It may eventually be an actual migration to
-        github, though that's undecided yet.&nbsp; In the interim, you
-        can view either site more-or-less interchangeably. The github
-        site is likely to be a little more up-to-date, but may have
-        errors in it that need to be fixed before pushing the content to
-        ibiblio.&nbsp; You choose which you'd prefer.&nbsp; Using the
-        Google search bar on the pages will always return results about
-        ibiblio and not github.<br>
-      </p>
-      <p>But there's no intention of abandoning ibiblio, regardless of
-        the eventual URL of the website.&nbsp; Only the web pages might
-        move over to github.&nbsp; The vast document library, page
-        images of AGC assembly listings, and supplemental materials that
-        people have sent me over the years will continue to be hosted at
-        ibiblio.&nbsp; At this writing, there's about 11GB of material
-        that we will continue to host at ibiblio, and that's expected
-        (hoped?) to continue to increase considerably in the future.<br>
-      </p>
+      <p>However, we find it convenient to manage the coding for the
+        website in our GitHub repository, and a side effect of this that
+        there is another version of the website at URL <a
+          href="https://virtualagc.github.io/virtualagc/index.html">https://virtualagc.github.io/virtualagc/index.html</a>.
+        This GitHub version website is a kind of "staging area" for
+        testing changes, and depending on circumstances at any given
+        moment, may be either more up-to-date or less up-to-date than
+        the main site.&nbsp; In general, though, it looks and feels
+        exactly the same as the main site.&nbsp; One important
+        difference is that the GitHub site does not have access to the
+        vast AGC-related documentation library (~10GB at this writing)
+        that's available on the main site, so clicking on most links to
+        documentation won't work properly.</p>
     </blockquote>
-    <h2><a name="How_can_I_help"></a>How can I help?</h2>
-    <div style="margin-left: 40px;"> If you want to participate directly
-      (in the sense of contributing effort), <a href="volunteer.html">there
-
-
-
-
-
-
-
-
-
-
-
-        are indeed some areas in which assistance would be helpful</a>.
-    </div>
     <h2><a name="Is_this_site_mirrored_anywhere_"></a>Is this site
       mirrored anywhere?<br>
     </h2>
@@ -151,7 +129,103 @@ href="file:///home/rburkey/git/virtualagc-web/faq.html#And_who_the_heck_are_you_
 
 
 
+
+
+
       Thanks, Jeff!<br>
+      <br>
+      Mirroring, of course, entails downloading of our entire
+      website.&nbsp; Using a program like 'wget' isn't recommended,
+      since as of right now, it's roughly an 11GB download and changes
+      fairly frequently.&nbsp; A program like 'rsync' is much better,
+      since it only downloads files that have changed.&nbsp; According
+      to my notes, the following command is supposed to work, though it
+      doesn't seem to be working for me:<br>
+      <blockquote>
+        <pre wrap="">rsync -av ibiblio.org::virtual-agc/ <i>YourLocalDirectory</i></pre>
+      </blockquote>
+    </div>
+    <h2><a name="What_other_websites_is_this_website"></a>What other
+      websites is this website associated with?</h2>
+    <blockquote>
+      <p>Other than the "staging" and mirror sites mentioned above,
+        these other sites are closely related to this site:<br>
+      </p>
+      <ul>
+        <li><a href="https://github.com/virtualagc/virtualagc">Our
+            GitHub software repository</a>.&nbsp; This is where all of
+          the software we provide (AGC source code, AGC assembler, AGC
+          simulator, etc.) is maintained, as well as the coding for this
+          website itself, our problem-reporting system, a simple wiki,
+          and so on.<br>
+        </li>
+        <li><a href="https://archive.org/details/virtualagcproject">Our
+            collection at the Internet Archive</a>.&nbsp; This is where
+          archival-quality page scans of many of the documents we
+          provide (Apollo-era AGC program listings in particular) are
+          kept.<br>
+        </li>
+      </ul>
+    </blockquote>
+    <h2><a name="Privacy_concerns"></a>Privacy concerns?</h2>
+    <blockquote>
+      <p>This website collects no data about you of any kind.&nbsp; It
+        does not send data about you anywhere.&nbsp; It uses no
+        cookies.&nbsp; It saves no data in your local browser's storage
+        area.&nbsp; It uses no analytics.&nbsp; It serves you no
+        ads.&nbsp; It loads no 3rd-party libraries.&nbsp; It is almost
+        entirely pure HTML, but does use a small amount of javascript to
+        make sure that the banners at the tops of the pages appear
+        correctly, and that you can hide information that's too old (if
+        you choose to do so) on the change-log page.&nbsp; In short, we
+        couldn't care less about you, either as an individual or a
+        demographic, unless you want to contact us directly.<br>
+      </p>
+      <p>In fact, our main site is entirely stand-alone, and can operate
+        perfectly well if you were to download the entire website onto
+        (say) a USB flash drive and disconnect the internet
+        entirely.&nbsp; (Not that we'd recommend downloading the entire
+        thing, since at the moment it would be an 11GB download.&nbsp;
+        But if you are interested in doing things like that, read the
+        advice in the <a href="#Is_this_site_mirrored_anywhere_">mirroring</a>
+        section above.)<br>
+      </p>
+      <p><b>Except</b> ... with that said, there <i>is</i> a Google
+        search bar at the top of every page, for your convenience in
+        finding documents on this site, which admittedly can sometimes
+        be rather difficult otherwise.&nbsp; Nor (obviously) does that
+        search work without the internet.&nbsp; And Google <i>will</i>
+        put some ad links in the search results.&nbsp; And I have to
+        admit I don't know what else Google might be doing.&nbsp; I'm
+        afraid you'll have to interpret that factoid for yourself,
+        applying whatever degree of paranoia you are personally feeling
+        at the moment.<br>
+      </p>
+      <p>I will tell you, though, that we derive no revenue or other
+        considerations from Google; the search bar is simply a free
+        feature that they provide, and that I think is a great
+        convenience for us.<br>
+      </p>
+    </blockquote>
+    <h2><a name="How_can_I_help"></a>How can I help?</h2>
+    <div style="margin-left: 40px;"> If you want to participate directly
+      (in the sense of contributing effort), <a
+        href="file:///home/rburkey/git/virtualagc-web/volunteer.html">there
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        are indeed some areas in which assistance would be helpful</a>.
     </div>
     <h2><a name="Is_there_a_Wiki_for_this_project_"></a>Is there a Wiki
       for this project?<br>
@@ -159,19 +233,7 @@ href="file:///home/rburkey/git/virtualagc-web/faq.html#And_who_the_heck_are_you_
     <div style="margin-left: 40px;"> If you have AGC/AGS information
       you'd like to contribute, you could do so by contacting me
       directly.&nbsp; However a more straightforward approach may be to
-      <a href="https://github.com/rburkey2005/virtualagc/wiki">contribute
-
-
-
-
-
-
-
-
-
-
-
-
+      <a href="https://github.com/virtualagc/virtualagc/wiki">contribute
         your knowledge to the wiki</a>.&nbsp; Examples of things that
       are useful are theoretical discussions, historical information or
       anecdotes, tutorials on how to perform certain tasks with the AGC
@@ -193,11 +255,11 @@ href="file:///home/rburkey/git/virtualagc-web/faq.html#And_who_the_heck_are_you_
     <div style="text-align: center;">
       <div style="text-align: left; margin-left: 40px;"> <br>
         <b>Important note:</b>&nbsp; For whatever reason, the mailing
-        list subscription form has been rejecting new subscribers with a
-        message like "invalid capcha".&nbsp; I have so far been unable
-        to resolve this with ibiblio.&nbsp; If this happens to you,
-        email me directly (at the address at the bottom of this page),
-        and I will manually subscribe you to the list.<br>
+        list subscription form rejects new subscribers with a message
+        like "invalid capcha".&nbsp; This may or may not be resolved
+        now.&nbsp; If this happens to you, email me directly (at the
+        address at the bottom of this page), and I will manually
+        subscribe you to the list.<br>
         <br>
         I expect this to be a <span style="font-style: italic;">very</span>
         low-traffic mailing list, devoted to very technical questions,
@@ -269,7 +331,8 @@ href="file:///home/rburkey/git/virtualagc-web/faq.html#And_who_the_heck_are_you_
       project affiliated somehow with NASA, or Draper Labs, or TRW
       Aerospace, or IBM, or ... are any former Apollo workers involved?</h2>
     <div style="margin-left: 40px;"> No, not in terms of running it or
-      providing any of the simulation software.&nbsp; However, in latter
+      providing any of the simulation software.&nbsp; We try to reach
+      out, from time to time, with little luck.&nbsp; However, in latter
       years it has been gratifying to see contributions of archived AGC
       documentation and program listings by various of the original AGC
       developers.<br>
@@ -310,6 +373,9 @@ href="file:///home/rburkey/git/virtualagc-web/faq.html#And_who_the_heck_are_you_
       original software developers were still <span style="font-style:
         italic;">reasonably</span> young.&nbsp; Nevertheless, the
       principle is correct, since <span style="font-style: italic;">very
+
+
+
 
 
 
@@ -503,12 +569,10 @@ href="file:///home/rburkey/git/virtualagc-web/faq.html#And_who_the_heck_are_you_
           Luminary 131 would be used on Apollo 13 after all, because Jim
           Lovell wanted it.</li>
         <li>The original source code for the AGC assembler program
-          called "YUL" is available <a
-            href="http://www.ibiblio.org/apollo/YUL">here</a>.&nbsp;
-          Examine (say) pages <a
-            href="http://www.ibiblio.org/apollo/YUL/yul-0005.jpg">2</a>
-          and <a href="http://www.ibiblio.org/apollo/YUL/yul-0006.jpg">3</a>
-          carefully.&nbsp; I needn't comment further.<br>
+          called "YUL" is available <a href="YUL">here</a>.&nbsp;
+          Examine (say) pages <a href="YUL/yul-0005.jpg">2</a> and <a
+            href="YUL/yul-0006.jpg">3</a> carefully.&nbsp; I needn't
+          comment further.<br>
         </li>
         <li>Not an AGC story, but I like it:&nbsp;&nbsp; I'm told that
           one of the perks of writing software at MSC (Manned Spacecraft
@@ -577,7 +641,12 @@ href="file:///home/rburkey/git/virtualagc-web/faq.html#And_who_the_heck_are_you_
           1969.&nbsp; It forms a model of a LM, which Peter (good for
           him!) still calls a LEM.&nbsp; Surprisingly, at least in 2017,
           you can still get these through eBay, at a not-too-outrageous
-          price.&nbsp; Mine arrives next week!</li>
+          price.&nbsp; I ordered mine right away!&nbsp; (Unfortunately,
+          now that it has arrived, pristine and unspoiled by human hands
+          in its plastic wrapper, I'm uncertain whether I should
+          actually build it or not.&nbsp; Why does nothing ever turn out
+          like we plan?)<br>
+        </li>
       </ul>
       <blockquote>
         <table width="100%" border="0" cellpadding="2" cellspacing="2">
@@ -938,6 +1007,9 @@ href="file:///home/rburkey/git/virtualagc-web/faq.html#And_who_the_heck_are_you_
 
 
 
+
+
+
           you can read all about it at this link</a>.<br>
       </p>
     </blockquote>
@@ -1160,6 +1232,9 @@ href="file:///home/rburkey/git/virtualagc-web/faq.html#And_who_the_heck_are_you_
 
 
 
+
+
+
       Running the Simulation<br>
     </h3>
     <div style="margin-left: 40px;"> Various things to to look out for
@@ -1200,6 +1275,9 @@ href="file:///home/rburkey/git/virtualagc-web/faq.html#And_who_the_heck_are_you_
 
 
 
+
+
+
         You can't start peripherals before you start <span
           style="font-weight: bold;">yaAGC</span>; if you do, the
         programs will not be able to communicate amongst
@@ -1210,6 +1288,9 @@ href="file:///home/rburkey/git/virtualagc-web/faq.html#And_who_the_heck_are_you_
         minute or two) before the operating system allows the port
         connecting the simulated CPU and peripherals to be reused.&nbsp;
         (In Win32, command "<span style="font-family: monospace;">netstat
+
+
+
 
 
 
@@ -1427,35 +1508,37 @@ href="file:///home/rburkey/git/virtualagc-web/faq.html#And_who_the_heck_are_you_
     <h2><a name="What_about_GitHub_Repositories"></a>What about GitHub
       Repositories?</h2>
     <blockquote>
-      <p>At the time I'm writing this (July 2016), Chris Garry's AGC
-        source-code repository has gotten a lot of press, and I've
-        gotten some mail in regard to it.&nbsp; I'm not involved with
-        it, but my understanding is that it is clone of some of the AGC
-        source files here at Virtual AGC, but with the distinction that
-        Chris has an active group of volunteers (more active than here,
-        anyway!) who are helping to track down discrepancies between
-        those source files and the page-images we've made of the
-        original printouts of those program listings.&nbsp; The
-        discrepancies are expected to relate entirely to comments in the
-        source code and not to any actual software.&nbsp; I'm not sure
-        if that site has other activities or not.&nbsp; At any rate, if
-        that sounds interesting to you, check it out!<br>
+      <p>Around mid-2016, Chris Garry's Apollo 11 source-code repository
+        got a lot of press, and I ended up getting some mail from
+        journalists and what-not in regard to it.&nbsp; I wasn't
+        involved with it, but it was a clone of the Apollo 11 AGC
+        source-code files here at Virtual AGC.&nbsp; There was a brief
+        flurry of activity at his repository, in which various typos in
+        the text of the program comments for that code were corrected
+        more quickly than here at Virtual AGC, though I doubt that
+        that's the case any longer, since we ended up correcting
+        literally thousands of such errors in our own Apollo 11 source
+        code.&nbsp; Regardless, the attendant publicity worked out well
+        in our favor, and I suspect that it indirectly resulted in us
+        getting various material offered to us which we've been quite
+        happy to get, from folks who might not have heard of us
+        otherwise.&nbsp; At any rate, if that sounds interesting to you,
+        check it out!<br>
       </p>
       <ul>
         <li><a href="https://github.com/chrislgarry/Apollo-11">Chris
             Garry's GitHub repository</a></li>
       </ul>
       <p>As it happens, Chris is neither the first nor the last to clone
-        some or all of Virtual AGC, and you'll find a number of them at
-        GitHub, and I'm not certain what most of them are for.&nbsp;
-        Just for clarification, however, our own (Virtual AGC's)
-        official GitHub repository is<br>
+        some or all of Virtual AGC (all of which is allowed and
+        perfectly fine, of course!), and you'll find a number of them at
+        GitHub.&nbsp; Though perhaps Chris was unique in discarding
+        everything that wasn't directly related to Apollo 11.&nbsp; I'm
+        not certain what most of the other clones are for.&nbsp; <br>
       </p>
-      <ul>
-        <li><a href="https://github.com/rburkey2005/virtualagc">Official
-            Virtual AGC GitHub repository</a></li>
-      </ul>
-      <p>The previously-existing subversion repository at <a
+      <p>Until early in 2016, our own subversion-based source-code
+        repository had resided at Google Code for about 10 years.&nbsp;
+        However, that earlier repository at <a
           href="http://code.google.com/p/virtualagc/source/checkout">Google
 
 
@@ -1469,8 +1552,19 @@ href="file:///home/rburkey/git/virtualagc-web/faq.html#And_who_the_heck_are_you_
 
 
 
+
+
+
           Code</a> no longer exists other than in archival form, since
-        Google Code ceased its normal operations.<br>
+        Google Code ceased its normal operations, and was migrated to
+        GitHub.&nbsp; Just for clarification, our (Virtual AGC's)
+        official GitHub repository is<br>
+      </p>
+      <ul>
+        <li><a href="https://github.com/virtual/virtualagc">Official
+            Virtual AGC GitHub repository</a></li>
+      </ul>
+      <p>Accept no substitutes!<br>
       </p>
     </blockquote>
     <h2><a name="other_websites"></a>Are there other websites I should
@@ -1503,11 +1597,17 @@ href="file:///home/rburkey/git/virtualagc-web/faq.html#And_who_the_heck_are_you_
 
 
 
+
+
+
           la Terre à la Lune</a>.&nbsp; This site is in French, but you
         don't have to speak the language to admire that amazing
         Apollo-related graphics and videos presented there.<br>
       </li>
       <li><a href="http://www.spacecraft.it/main/">spacecraft.it</a>.&nbsp;
+
+
+
 
 
 
@@ -1554,10 +1654,16 @@ href="http://www.hq.nasa.gov/office/pao/History/computers/Compspace.html">
 
 
 
+
+
+
           The NASA Office of Logic Design has various interesting
           AGC-related documents online.&nbsp; There's not a lot of
           unique content yet, but strides are being made and it looks
           like there soon will be, so it's worth checking out.</strike>&nbsp;
+
+
+
 
 
 
@@ -1586,11 +1692,17 @@ href="http://www.hq.nasa.gov/office/pao/History/computers/Compspace.html">
 
 
 
+
+
+
         A site which links an interesting collection of Apollo (and
         Mercury, Gemini, and shuttle) docs from a diverse set of
         websites.<br>
       </li>
       <li> <strike>www-lib.ksc.nasa.gov/lib/presskits.html</strike><strike>.&nbsp;
+
+
+
 
 
 
@@ -1624,8 +1736,14 @@ href="http://www.hq.nasa.gov/office/pao/History/computers/Compspace.html">
 
 
 
+
+
+
         Lots of useful miscellaneous info, including spacecraft photos.</li>
       <li><a href="http://www.jsc.nasa.gov/history">www.jsc.nasa.gov/history</a>.&nbsp;
+
+
+
 
 
 
@@ -1643,6 +1761,9 @@ href="http://www.hq.nasa.gov/office/pao/History/computers/Compspace.html">
         figuring out where existing records from Apollo are physically
         located.</li>
       <li><a href="http://perso.wanadoo.fr/max.q/main.htm">perso.wanadoo.fr/max.q/main.htm</a>.&nbsp;
+
+
+
 
 
 
@@ -1680,6 +1801,9 @@ href="http://www.hq.nasa.gov/office/pao/History/computers/Compspace.html">
 
 
 
+
+
+
           Flight Journal(s)</a>.&nbsp; But I imagine that anybody who
         has managed to find their way here already knows all about them
         anyhow.</li>
@@ -1690,6 +1814,9 @@ href="http://www.hq.nasa.gov/office/pao/History/computers/Compspace.html">
     <ul style="margin-left: 40px;">
       <li><a href="http://svtsim.com/moonjs/agc.html">Shariar
           Iravanian's javascript-based online AGC+DSKY+IMU simulator</a>.&nbsp;
+
+
+
 
 
 
@@ -1746,6 +1873,9 @@ href="http://www.hq.nasa.gov/office/pao/History/computers/Compspace.html">
 
 
 
+
+
+
           simulator.</strike>&nbsp; (Now defunct or renamed or
         something.)<br>
       </li>
@@ -1784,8 +1914,14 @@ href="http://www.hq.nasa.gov/office/pao/History/computers/Compspace.html">
 
 
 
+
+
+
             click the "<a
               href="http://nassp.sourceforge.net/user/virtualapollo/index.html">Virtual
+
+
+
 
 
 
@@ -1851,6 +1987,9 @@ href="http://www.hq.nasa.gov/office/pao/History/computers/Compspace.html">
     <div style="margin-left: 120px; font-style: italic;"></div>
     <ul style="margin-left: 40px;">
       <li><a href="http://www.flightgear.org/">www.flightgear.org</a>.&nbsp;
+
+
+
 
 
 
@@ -2138,8 +2277,8 @@ href="https://www.amazon.com/Journey-Moon-History-Guidance-Computer/dp/156347185
         that's not a misprint.&nbsp; Either price was a bargain compared
         to amazon.com, so I cleverly bid it up to $60.)&nbsp; Also, you
         should read Hugh Blair-Smith's <a
-href="http://www.ibiblio.org/apollo/hrst/HughBlairSmithsAnnotations.html">
-          annotations to the book</a>.</li>
+          href="hrst/HughBlairSmithsAnnotations.html"> annotations to
+          the book</a>.</li>
       <li><span style="font-style: italic;">This New Ocean</span>, by
         William E. Burrows.&nbsp; New York:&nbsp; Random House,
         1998.&nbsp; A very comprehensive and seemingly authoritative
@@ -2266,6 +2405,9 @@ href="http://www.ibiblio.org/apollo/hrst/HughBlairSmithsAnnotations.html">
 
 
 
+
+
+
         extraordinarily detailed argument given at this link</a>, which
       (at least at this moment) includes <a
         href="assembly_language_manual.html">the totality of our own
@@ -2356,10 +2498,13 @@ href="http://www.ibiblio.org/apollo/hrst/HughBlairSmithsAnnotations.html">
 
 
 
+
+
+
           Commons No Rights Reserved License</a></span><br>
       <i><font size="-1">Last modified by <a
             href="mailto:info@sandroid.org">Ronald Burkey</a> on
-          2017-02-16.<br>
+          2017-02-17.<br>
           <br>
           <a href="http://www.ibiblio.org"><img style="border: 0px solid
               ; width: 300px; height: 100px;" alt="Virtual AGC is hosted
