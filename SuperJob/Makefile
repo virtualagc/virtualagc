@@ -8,8 +8,8 @@
 # 		                added a rule to clean the binsource.
 
 BASENAME=SuperJob
-EXTRA_YAYUL_ARGS+=--raytheon --no-checksums
-OCT2BIN_ARGS+=--no-checksums
+EXTRA_YAYUL_ARGS+=--raytheon --no-checksums --parity
+OCT2BIN_ARGS+=--no-checksums --parity
 
 include ../Makefile.inc
 
