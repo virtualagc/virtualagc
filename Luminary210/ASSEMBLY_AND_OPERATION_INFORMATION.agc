@@ -18,6 +18,7 @@
 ##		2016-12-15 RSB	Proofed comment text with octopus/ProoferComments,
 ##				and corrected the errors found.
 ##		2017-01-25 RSB	Back-ported a typo-fix found while proofing Luminary 69.
+##		2017-02-18 MAS	Back-ported a typo-fix found while transcribing Luminary 116.
 
 ## Page 2
 
@@ -1034,7 +1035,7 @@
 # 21204    WAITLIST, VARDELAY, FIXDELAY, OR LONGCALL   WAITLIST ROUTINES
 #            CALLED WITH ZERO OR NEGATIVE DELTA-TIME
 # 21302    SQRT CALLED WITH NEGATIVE ARGUMENT        INTERPRETER
-# 21406    BAD RETURN FROM ROOTRSRS                  IGNITION ALGORITHMN
+# 21406    BAD RETURN FROM ROOTPSRS                  IGNITION ALGORITHMN
 # 21501    KEYBOARD AND DISPLAY ALARM DURING         PINBALL
 #            INTERNAL USE(NVSUB).ABORT
 # THE FOLLOWING CODES INDICATE A BAILOUT ABORT THAT RESULTS IN A SOFTWARE
