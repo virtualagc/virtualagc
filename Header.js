@@ -138,3 +138,49 @@ headerTemplate = '<table summary="" nosave="" width="100%" border="1" cellpaddin
   + '</tbody>' 
   + '</table>';
 
+/* 
+ * The following function is only used for host https://virtualagc.github.io/virtualagc.
+ * On that "staging" version of the website, there are no directories like 
+ * Documents, Downloads, hrst, klabs, etc., and so references to them need to be
+ * redirected to http://www.ibiblio.org/apollo + whatever.  We simply
+ * loop through all of the links in the page, and if any of them are to one fo the
+ * affected subdirectories, we prefix the href properly.
+ */
+var retargetedFolders = [ "/OnnoHommes/",
+                          "/AlessandroCinqueman/",
+                          "/DimitrisVitoris/",
+                          "/WebMirror/",
+                          "/FabrizioPresentationPhotos/",
+                          "/hrst/",
+                          "/NARASWoverflow/",
+                          "/Pultorak_files/",
+                          "/Downloads/",
+                          "/Artemis072Scans/",
+                          "/NARA-SW/",
+                          "/ScansForConversion/",
+                          "/Documents/",
+                          "/RileyRainey/",
+                          "/YUL/",
+                          "/ApolloProjectOnline/",
+                          "/doc/",
+                          "/klabs/"
+]
+var numRetargets = retargetedFolders.length
+window.onload = function() {
+	if (window.location.hostname != "virtualagc.github.io") 
+		return
+	var links = document.links
+	var numLinks = links.length
+	var i, j
+	for (i = 0; i < numLinks; i++) {
+		if ("href" in links[i]) {
+			for (j = 0; j < numRetargets; j++) {
+				var index = links[i].href.indexOf(retargetedFolders[j])
+				if (index >= 0) {
+					links[i].href = "http://www.ibiblio.org/apollo" + links[i].href.substring(index)
+					break
+				}
+			}
+		}
+	}
+}
