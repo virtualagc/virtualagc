@@ -19,6 +19,8 @@
 ##				vs Colossus 249.
 ##		2017-01-28 RSB	WTIH -> WITH.
 ##		2017-02-08 RSB	Comment-text fixes noted while proofing Artemis 72.
+##		2017-02-23 RSB	CHKP00H -> CHKPOOH.  My 2009 correction the other
+##				direction had been in error.
 ##
 ## This source code has been transcribed or otherwise adapted from digitized
 ## images of a hardcopy from the MIT Museum.  The digitization was performed
@@ -3612,7 +3614,7 @@ PINTEST		EQUALS	LST2FAN
 		COUNT	41/PIN
 		
 VBTSTLTS	TC	BANKCALL
-		CADR	CHKP00H
+		CADR	CHKPOOH
 		
 		INHINT
 		CS	BIT1		# SET BIT 1 OF IMODES33 SO IMUMON WONT

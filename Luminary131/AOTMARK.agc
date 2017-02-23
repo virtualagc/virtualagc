@@ -17,7 +17,7 @@
 ##		2017-01-06 RSB	Page numbers now agree with those on the
 ##				original harcopy, as opposed to the PDF page
 ##				numbers in 1701.pdf.
-##		2017-02-20 RSB	Proofed comment text using octopus/ProoferComments.
+##		2017-02-22 RSB	Proofed comment text using octopus/ProoferComments.
 
 ## Page 245
 		BANK	12

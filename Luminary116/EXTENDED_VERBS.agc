@@ -13,6 +13,7 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-01-22 MAS  Created from Luminary 99.
+##		2017-02-23 RSB	CHKP00H -> CHKPOOH
 
 ## NOTE: Page numbers below have not yet been updated to reflect Luminary 116.
 
@@ -128,7 +129,7 @@ ALM/END         TC              FALTON                          # TURN ON OPERAT
 GOPIN           TC              POSTJUMP                        
                 CADR            PINBRNCH                        
 
-CHKP00H         CA              MODREG                          # CHECK FOR P00 OR P00-.
+CHKPOOH         CA              MODREG                          # CHECK FOR P00 OR P00-.
                 EXTEND                                          
                 BZF             TCQ                             
                 TC              ALM/END                         
@@ -809,7 +810,7 @@ DEC22           DEC             22
 
                 COUNT*          $$/EXTVB                        
 
-VB64            TC              CHKP00H                         # DEMAND PROGRAM 00.            
+VB64            TC              CHKPOOH                         # DEMAND PROGRAM 00.            
                 TC              TESTXACT                        # IF DISPLAY SYS. NOT BUSY.MAKE IT BUSY.
                 CAF             PRIO4                           
                 TC              FINDVAC                         
@@ -828,7 +829,7 @@ VB64            TC              CHKP00H                         # DEMAND PROGRAM
 #       4.      REQUEST LOAD OF N22 (VAUES TO BE DISPLAYED).
 #       5.      ON PROCEED OR ENTER RE-DISPLAY V43 AND SEND PULSES.
 
-IMUATTCK        TC              CHKP00H                         # VB 76 - LOAD IMU ATT. ERROR METERS
+IMUATTCK        TC              CHKPOOH                         # VB 76 - LOAD IMU ATT. ERROR METERS
 
                 CAF             BITS4&5                         # SEE IF COARSE ALIGN ENABLE AND ZERO IMU
                 EXTEND                                          # CDUS BITS ARE ON
@@ -984,7 +985,7 @@ V83PERF         TC              TESTXACT
 #       TERMINATE - EXIT R63.
 #       PROCEED - RESET 3AXISFLG AND CALL R60LEM FOR ATTITUDE MANEUVER.
 
-V89PERF         TC              CHKP00H                         
+V89PERF         TC              CHKPOOH                         
                 TC              TESTXACT                        
                 CAF             PRIO10                          
                 TC              FINDVAC                         
@@ -1062,7 +1063,7 @@ NOMINIMP        INHINT
 #               C.      ENTER
 #                       1.      REPEAT FLASHING V06,N22.
 
-CREWMANU        TC              CHKP00H                         # DEMAND POO
+CREWMANU        TC              CHKPOOH                         # DEMAND POO
 
                 TC              TESTXACT                        
 
@@ -1205,7 +1206,7 @@ UPDATOFF        TC              UPFLAG                          # VB 95 SET NOUP
 
                 EBANK=          QPLACE                          
 
-SYSTEST         TC              CHKP00H                         # DEMAND P00
+SYSTEST         TC              CHKPOOH                         # DEMAND POO
 
                 TC              TESTXACT                        
 
@@ -1228,7 +1229,7 @@ WMATRXNG        INHINT
 
 GOSHOSUM        EQUALS          SHOWSUM                         
 
-SHOWSUM         TC              CHKP00H                         # *
+SHOWSUM         TC              CHKPOOH                         # *
                 TC              TESTXACT                        # *
                 CAF             PRIO7                           # ALLOW OTHER CHARINS.
                 TC              PRIOCHNG                        
