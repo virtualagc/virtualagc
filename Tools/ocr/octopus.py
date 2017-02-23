@@ -32,6 +32,7 @@ import math
 import argparse
 import functools
 import PIL
+import traceback
 from pytesseract import image_to_string
 
 parser = argparse.ArgumentParser(description='Prepare octal pages of AGC program listings for OCR')
@@ -321,6 +322,7 @@ if args.comments:
         # Locate the header in the boxes. It'll be towards the front (hopefully exactly the front), and
         # pretty wide
         header_box = None
+        header_start = 0
         for i,c in enumerate(contours):
             box = cv2.boundingRect(c)
             if (box[2] > 700):
@@ -339,6 +341,9 @@ if args.comments:
                 header_box[1] = min(box[1], header_box[1])
                 header_box[2] = rightmost-header_box[0]
                 header_box[3] = bottommost-header_box[0]
+
+        if header_box is None:
+            raise RuntimeError('Unable to find any sort of header')
 
         # Merge the bounding box we found with the rest on the line (needed for YUL listings since the
         # dilation above doesn't quite bleed everything together)
@@ -463,7 +468,9 @@ if args.comments:
         # else:
         #     final_image = inside_header
         final_image = inside_header
-    except:
+    except Exception as e:
+        print('Encountered an unexpected error, falling back on --no-crop')
+        traceback.print_exc()
         final_image = result
 
 
