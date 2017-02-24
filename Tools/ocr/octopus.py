@@ -25,13 +25,14 @@
 # likely need to be modified for use with other scripts.
 
 import os.path
+from os import environ
 import numpy as np
 import cv2
 import sys
 import math
 import argparse
 import functools
-import PIL
+from PIL import Image
 import traceback
 from pytesseract import image_to_string
 
@@ -72,6 +73,10 @@ args = parser.parse_args()
 if not os.path.isfile(args.input_file):
 	print("Cannot open file", args.input_file)
 	sys.exit(1)
+
+octcrop = ""
+if 'OCTCROP' in environ:
+	octcrop = environ['OCTCROP']
 
 img = cv2.imread(args.input_file)
 
@@ -210,6 +215,9 @@ elif args.yul10:
     print('--yul10 not yet supported')
 else:
     raise RuntimeError("Unknown program type selected")
+
+if octcrop != "":
+    exec(octcrop)
 
 # Eliminate random flecks. We do this by finding all the contours in the image
 # and taking a look at their relative locations and size. We'll be building up
@@ -407,8 +415,8 @@ if args.comments:
                     # For YUL listings, a card marker following a non-comment line might possibly be a C, indicating
                     # the second word of a multi-word pseudo op (2DEC, 2CADR, etc.). Try to determine whether or not
                     # we've got such a line.
-                    if line_num > 2 and hasattr(PIL, 'Image'):
-                        pil_img = PIL.Image.fromarray(target_image[y-1:y+h+1, x-5:x+column_width*6])
+                    if line_num > 2:
+                        pil_img = Image.fromarray(target_image[y-1:y+h+1, x-5:x+column_width*6])
                         txt = image_to_string(pil_img, config='-l eng -psm 6 -c tessedit_char_whitelist=CARP01234567')
                         if txt and (txt[0] == 'C' or txt[0] == '0'):
                             const_second_word = True
