@@ -16,7 +16,8 @@
 ##		2016-12-17 RSB	Proofed text comments with octopus/ProoferComments
 ##				and corrected the errors found.
 ##		2017-01-28 RSB	WTIH -> WITH.
-##		2017-02-09 RSB	Comment-text fixes identified in proofing Artemis 72
+##		2017-02-09 RSB	Comment-text fixes identified in proofing Artemis 72.
+##		2017-02-27 RSB	Corrected WAITP00H and LONGP00H to similar POOH names.
 ##
 ## This source code has been transcribed or otherwise adapted from
 ## digitized images of a hardcopy from the MIT Museum.  The digitization
@@ -208,7 +209,7 @@ SVCT3X		TC	FIXDELAY	# DELAY MAX OF 2 TIMES FOR IMUZERO.
 WAIT2		TS	WAITBANK	# BBANK OF CALLING PROGRAM.
 		CA	Q
 		EXTEND
-		BZMF	WAITP00H
+		BZMF	WAITPOOH
 
 		CS	TIME3
 		AD	BIT8		# BIT 8 = OCT 200
@@ -511,10 +512,10 @@ LNGCALL2	LXCH	LONGEXIT +1	# SAVE THE CORRECT BB FOR RETURN
 		CCS	A
 		TCF	LONGCYCL	# HI-ORDER OK --> ALL IS OK.
 		TCF	+2		# HI-ORDER ZERO --> CHECK LO-ORDER.
-		TCF	LONGP00H	# HI-ORDER NEG. --> NEG. DT
+		TCF	LONGPOOH	# HI-ORDER NEG. --> NEG. DT
  +2		CA	LONGTIME +1	# CHECK LO-ORDER FOR ZERO OR NEGATIVE.
 		EXTEND
-		BZMF	LONGP00H	# BAD DELTA-TIME.  ABORT
+		BZMF	LONGPOOH	# BAD DELTA-TIME.  ABORT
 
 # *** WAITLIST TASK LONGCYCL ***
 
@@ -561,9 +562,9 @@ GETCADR		DXCH	LONGCADR	# GET THE LONGCALL THAT WE WISHED TO START
 		DTCB			# AND TRANSFER CONTROL TO IT
 
 TSKOVCDR	GENADR	TASKOVER
-LONGP00H	DXCH	LONGEXIT
+LONGPOOH	DXCH	LONGEXIT
 		TCF	+2
-WAITP00H	DXCH	WAITEXIT
+WAITPOOH	DXCH	WAITEXIT
  +2		TC	POODOO1
 		OCT	01204
 		

@@ -15,6 +15,7 @@
 ## Mod history: 2017-01-22 MAS  Created from Luminary 99.
 ##		2017-01-28 RSB	WTIH -> WITH.
 ##		2017-02-09 RSB	Comment-text fixes identified in proofing Artemis 72
+##		2017-02-27 RSB	Corrected WAITP00H and LONGP00H to similar POOH names.
 
 ## NOTE: Page numbers below have not yet been updated to reflect Luminary 116.
 
@@ -193,7 +194,7 @@ SVCT3X          TC              FIXDELAY                        # DELAY MAX OF 2
 WAIT2           TS              WAITBANK                        # BBANK OF CALLING PROGRAM.
                 CA              Q                               
                 EXTEND                                          
-                BZMF            WAITP00H                        
+                BZMF            WAITPOOH                        
 
                 CS              TIME3                           
                 AD              BIT8                            # BIT 8 = OCT 200
@@ -496,10 +497,10 @@ LNGCALL2        LXCH            LONGEXIT        +1              # SAVE THE CORRE
                 CCS             A                               
                 TCF             LONGCYCL                        # HI-ORDER OK --> ALL IS OK.
                 TCF             +2                              # HI-ORDER ZERO --> CHECK LO-ORDER.
-                TCF             LONGP00H                        # HI-ORDER NEG. --> NEG. DT
+                TCF             LONGPOOH                        # HI-ORDER NEG. --> NEG. DT
  +2             CA              LONGTIME        +1              # CHECK LO-ORDER FOR ZERO OR NEGATIVE.
                 EXTEND                                          
-                BZMF            LONGP00H                        # BAD DELTA-TIME.  ABORT
+                BZMF            LONGPOOH                        # BAD DELTA-TIME.  ABORT
 
 # *** WAITLIST TASK LONGCYCL ***
 
@@ -546,9 +547,9 @@ GETCADR         DXCH            LONGCADR                        # GET THE LONGCA
                 DTCB                                            # AND TRANSFER CONTROL TO IT
 
 TSKOVCDR        GENADR          TASKOVER                        
-LONGP00H        DXCH            LONGEXIT                        
+LONGPOOH        DXCH            LONGEXIT                        
                 TCF             +2                              
-WAITP00H        DXCH            WAITEXIT                        
+WAITPOOH        DXCH            WAITEXIT                        
  +2             TC              POODOO1                         
                 OCT             01204                           
 
