@@ -19,6 +19,7 @@
 ##		2017-02-07 RSB	Comment-text corrections identified while 
 ##				proofing Artemis 72.
 ##		2017-02-24 RSB	Proofed comment text using octopus/ProoferComments.
+##		2017-02-28 RSB	Fixed lingering typos.
 
 ## Page 623
 # COELLIPTIC SEQUENCE INITIATION (CSI) PROGRAMS (P32 AND P72)
@@ -369,7 +370,7 @@ P32/P72F	STORE	T2TOT3
 #
 #	(6)	THE OPERATION OF THE PROGRAM UTILIZES THE FOLLOWING FLAGS -
 #
-#			ACTIVE VEHICLE FLAG - DESIGNATES THE VEHICLE WHICH IS
+#			ACTIVE VEGICLE FLAG - DESIGNATES THE VEHICLE WHICH IS
 #			DOING RENDEZVOUS THRUSTING MANEUVERS TO THE PROGRAM WHICH
 #			CALCULATES THE MANEUVER PARAMETERS.  SET AT THE START OF
 #			EACH RENDEZVOUS PRE-THRUSTING PROGRAM.
@@ -543,7 +544,7 @@ P33/P73F	ABS	DSU
 			P33/P73B
 
 ## Page 634
-# ***** AVFLAGA/P *****
+# ..... AVFLAGA/P .....
 #
 # SUBROUTINES USED
 #
@@ -569,7 +570,7 @@ P20FLGON	EXTEND
 		TC	SUBEXIT
 
 ## Page 635
-# ***** DISDVLVC *****
+# ..... DISDVLVC .....
 #
 # SUBROUTINES USED
 #
@@ -594,7 +595,7 @@ DISDVLVC	STORE	DELVLVC
 			NORMEX
 
 ## Page 636
-# ***** CONSTANTS *****
+# ..... CONSTANTS .....
 
 V06N11		VN	0611
 V06N13		VN	0613
@@ -613,7 +614,7 @@ ALARM/TB	OCT	00600		# NO 1
 		OCT	00606		#    7
 
 ## Page 637
-# ***** CSI/A *****
+# ..... CSI/A .....
 #
 # SUBROUTINES USED
 #
@@ -769,7 +770,7 @@ CSI/B23D	STCALL	VACT4
 			RACT1
 			VACT4
 		ABS	DDV
-			02D		# (/RDOTV/)/R1		B38-B29= B7
+			02D		# (/RDOTV/)/R1		B36-B29= B7
 		SL*	DSU
 			0,1
 			NICKELDP
@@ -787,7 +788,7 @@ CSI/B23D	STCALL	VACT4
 		CALL
 			SHIFTR1
 		SL4	SL1
-		SQRT	DMP		# ((P/MU)**.5)/R1	B14+B-14 = B-31 BL02D
+		SQRT	DMP		# ((P/MU)**.5)/R1	B14+B-45 = B-31 BL02D
 		BOFF	SL3
 			CMOONFLG
 			CSI/B3
@@ -1109,7 +1110,7 @@ SCNDSOL		BON	BOFF
 			CSI/B
 
 ## Page 647
-# ***** ADVANCE *****
+# ..... ADVANCE .....
 #
 # SUBROUTINES USED
 #	PRECSET
@@ -1145,7 +1146,7 @@ ADVANCE		STQ	DLOAD
 			SUBEXIT
 
 ## Page 648
-# ***** ROTATE *****
+# ..... ROTATE .....
 
 ROTATE		PUSH	PUSH
 		DOT	VXSC
@@ -1157,7 +1158,7 @@ ROTATE		PUSH	PUSH
 		VSL1	RVQ
 
 ## Page 649
-# ***** INTINTNA *****
+# ..... INTINTNA .....
 
 INTINT2C	PDDL	PDDL
 			TCSI
@@ -1175,7 +1176,7 @@ INTINT3P	PDDL	PDDL
 			INTINT
 
 ## Page 650
-# ***** S32/33.1 *****
+# ..... S32/33.1 .....
 #
 # SUBROUTINES USED
 #	S32/33.X
@@ -1198,7 +1199,7 @@ S32/33.1	STQ	AXT,1
 			SUBEXIT
 
 ## Page 651
-# ***** S32/33.X *****
+# ..... S32/33.X .....
 
 S32/33.X	SETPD	VLOAD
 			6D
@@ -1213,7 +1214,7 @@ S32/33.X	SETPD	VLOAD
 		RVQ
 
 ## Page 652
-# ***** CDHMVR *****
+# ..... CDHMVR .....
 #
 # SUBROUTINES USED
 #	VECSHIFT
@@ -1318,7 +1319,7 @@ CDHMVR		STQ	VLOAD
 			SUBEXIT
 
 ## Page 655
-# ***** COMPTGO *****
+# ..... COMPTGO .....
 #
 # SUBROUTINES USED
 #	CLOKTASK

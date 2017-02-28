@@ -18,6 +18,7 @@
 ##				numbers in 1701.pdf.
 ##		2017-01-27 RSB	Back-ported a comment-text fix identified in Luminary 69.
 ##		2017-02-23 RSB	Proofed comment text using octopus/ProoferComments.
+##		2017-02-28 RSB	Fixed lingering typos.
 
 ## Page 476
 # MOD NO: 0				DATE: 1 MAY 1968
@@ -517,7 +518,7 @@ PICKAXIS	VLOAD	DOT		# IF VF X VI = 0, FIND VF . VI
 		BANK	35
 		SETLOC	MANUVER1
 		BANK
-ROT180		VLOAD	VXV		# IF VF, VI ANTIPARALLEL, 180 DEG ROTATION
+ROT180		VLOAD	VXV		# IF VF, VI ANTIPARALLEL, 108 DEG ROTATION
 			MIS +6		# IS REQUIRED.  Y STABLE MEMBER AXIS IN
 			HIDPHALF	# INITIAL S/C AXES.
 		UNIT	VXV		# FIND Y(SM) X X(I)

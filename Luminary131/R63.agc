@@ -18,6 +18,7 @@
 ##				numbers in 1701.pdf.
 ##		2017-01-26 RSB	Back-ported a comment-text fix from Luminary 69.
 ##		2017-02-23 RSB	Proofed comment text using octopus/ProoferComments.
+##		2017-02-28 RSB	Fixed lingering typos.
 
 ## Page 340
 # SUBROUTINE NAME:	V89CALL
@@ -103,7 +104,7 @@ V89RECL		TC	INTPRET		#		     = 2 FOR X AXIS
 			TSTART82
 		STCALL	TDEC1		# STORE TIME FOR LEMCONIC CALL
 			LEMCONIC	# LEM STATE VECTOR UPDATE
-		VLOAD	VSU		# CSM POSITION - LEM POSITION - LOS
+		VLOAD	VSU		# CSM POSITION - LEM POSITION = LOS
 			RONE		# LOS VECTOR LEFT IN MPAC
 			RATT
 		MXV	RTB		# (REFSMMAT X LOS).  TRANSFORMS LOS FROM

@@ -19,6 +19,7 @@
 ##		2017-01-26 RSB	Back-ported comment-text fixes found while
 ##				proofing corresponding Luminary 69 file.	
 ##		2017-02-16 RSB	Proofed comment text using octopus/ProoferComments.
+##		2017-02-28 RSB	Fixed lingering typos.
 
 ## Page 195
 		BANK	22
@@ -152,7 +153,7 @@ LMORBM06	1DNADR	PIPTIME1			# PIPTIME,+1		COMMON DATA
 ## Page 198
 # LM COAST AND ALIGNMENT DOWNLIST
 #
-# -----------------  CONTROL LIST   -------------------------
+# -----------------  CONTROL LIST   --------------------------
 
 LMCSTADL	EQUALS					# SEND ID BY SPECIAL CODING
 		DNPTR	LMCSTA01			# COLLECT SNAPSHOT
@@ -338,7 +339,7 @@ LMLSALDL	EQUALS					# SEND ID BY SPECIAL CODING
 		4DNADR	DNTMBUFF			# SEND SHAPSHOT
 		1DNADR	TALIGN				# TALIGN,+1
 		6DNADR	REFSMMAT			# REFSMMAT +0...+11D
-		6DNADR	YNBSAV				# YNBSAV +0...+5,SNBSAV +0...+5
+		6DNADR	YNBSAV				# YNBSAV +0...+5,ZNBSAV +0...+5
 		DNPTR	LMLSAL08			# COMMON DATA
 		DNPTR	LMLSAL02			# COMMON DATA
 		1DNADR	TIME2				# TIME/1

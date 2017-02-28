@@ -21,6 +21,7 @@
 ##		2017-02-23 RSB	Proofed comment text using octopus/ProoferComments.
 ##				Removed an SBANK= workaround on pp. 276-277 that is
 ##				apparently no longer needed.  Changed CHKP00H -> CHKPOOH.
+##		2017-02-28 RSB	Fixed lingering typos.
 
 ## Page 263
 		BANK	7
@@ -1481,7 +1482,7 @@ LEMALONE	AD	LEMMASS		# LEM ALONE:  MASS = LEMMASS
 		DXCH	MASS
 		INHINT
 		TC	IBNKCALL	# SET DEADBANK AND COMPUTE MOMENTS OF
-		CADR	RESTORDB	#	INERTIA
+		CADR	RESTORDB	#	INERTIA.
 		RELINT			# PROCEED TO NOUN 48 (OR END).
 		
 DAPDATA3	CS	FLGWRD10
