@@ -13,70 +13,69 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-01-22 MAS  Created from Luminary 99.
+##              2017-03-01 RRB  Updated for Luminary 116.
 
-## NOTE: Page numbers below have not yet been updated to reflect Luminary 116.
-
-## Page 1205
+## Page 1196
 # 1.0 INTRODUCTION
 # ----------------
 
 # FROM A USERS POINT OF VIEW, ORBITAL INTEGRATION IS ESSENTIALLY THE SAME AS THE 278 INTEGRATION
-# PROGRAM.  THE SAME ENTRANCES TO THE PROGRAM WILL BE MAINTAINED, THE SAME STALLING ROUTINE WILL BE USED AND
-# OUTPUT WILL STILL BE VIA THE PUSHLIST.  THE PRIMARY DIFFERENCES TO A USER INVOLVE THE ADDED CAPABILITY OF
+# PROGRAM. THE SAME ENTRANCES TO THE PROGRAM WILL BE MAINTAINED, THE SAME STALLING ROUTINE WILL BE USED AND
+# OUTPUT WILL STILL BE VIA THE PUSHLIST. THE PRIMARY DIFFERENCES TO A USER INVOLVE THE ADDED CAPABILITY OF
 # TERMINATING INTEGRATION AT A SPECIFIC FINAL RADIUS AND THE DIFFERENCE IN STATE VECTOR SCALING INSIDE AND OUT-
 # SIDE THE LUNAR SPHERE OF INFLUENCE.
 
 # IN ORDER TO MAKE THE CSM(LEM)PREC AND CSM(LEM)CONIC ENTRANCES SIMILAR TO FLIGHT 278, THE INTEGRATION PROGRAM
 # WILL ITSELF SET THE FINAL RADIUS (RFINAL) TO 0 SO THAT REACHING THE DESIRED TIME ONLY WILL TERMINATE
-# INTEGRATION.  THE DP REGISTER RFINAL MUST BE SET BY USERS OF INTEGRVS AND INTEGRV, AND MUST BE DONE AFTER THE
+# INTEGRATION. THE DP REGISTER RFINAL MUST BE SET BY USERS OF INTEGRVS AND INTEGRV, AND MUST BE DONE AFTER THE
 # CALL TC INTSTALL.
 
 # WHEN THE LM IS ON THE LUNAR SURFACE (INDICATED BY LUNAR SURFACE FLAG SET) CALLS TO LEMCONIC, LEMPREC, AND
 # INTEGRV WITH VINFLAG = 0 WILL RESULT IN THE USE OF THE PLANETARY INERTIAL ORIENTATION SUBROUTINES TO PROVIDE
 # BOTH THE LMS POSITION AND VELOCITY IN THE REFERENCE COORDINATE SYSTEM.
-# THE PROGRAM WILL PROVIDE OUTPUT AS IF INTEGRATION WAS USED.  THAT IS, THE PUSHLIST WILL BE SET AS NOTED BELOW AND
+# THE PROGRAM WILL PROVIDE OUTPUT AS IF INTEGRATION WAS USED. THAT IS, THE PUSHLIST WILL BE SET AS NOTED BELOW AND
 # THE PERMANENT STATE VECTOR UPDATED WHEN SPECIFIED BY AN INTEGRV CALL.
 
 # USERS OF INTEGRVS DESIRING INTEGRATION (INTYPFLG = 0) SHOULD NOTE THAT THE OBLATENESS PERTURBATION COMPUTATION
-# IN LUNAR ORBIT IS TIME DEPENDENT.  THEREFORE, THE USER SHOULD SUPPLY AN INITIAL STATE VECTOR VALID AT SOME REAL
-# TIME AND THE DESIRED TIME (TDEC1) ALSO AT SOME REAL TIME.  FOR CONIC ,,INTEGRATION,, THE USER MAY STILL USE ZERO
+# IN LUNAR ORBIT IS TIME DEPENDENT. THEREFORE, THE USER SHOULD SUPPLY AN INITIAL STATE VECTOR VALID AT SOME REAL
+# TIME AND THE DESIRED TIME (TDEC1) ALSO AT SOME REAL TIME. FOR CONIC ,,INTEGRATION,, THE USER MAY STILL USE ZERO
 # AS THE INITIAL TIME AND DELTA TIME AS THE DESIRED TIME.
 
 # 2.0 GENERAL DESCRIPTION
 # -----------------------
 
-# THE INTEGRATION PROGRAM OPERATES AS A CLOSED INTERPRETIVE SUBROUTINE AND PERFORMS THESE FUNCTIONS ---
-#       1) INTEGRATES (PRECISION OR CONIC) EITHER CSM OR LM STATE VECTOR
-#       2) INTEGRATES THE W-MATRIX
-#       3) PERMANENT OR TEMPORARY UPDATE OF THE STATE VECTOR
+# THE INTEGRATION PROGRAM OPERATES AS A CLOSED INTERPRETIVE SUBROUTINE AND PERFORMS THESE FUNCTIONS---
+#    1) INTEGRATES (PRECISION OR CONIC) EITHER CSM OR LM STATE VECTOR
+#    2) INTEGRATES THE W-MATRIX
+#    3) PERMANENT OR TEMPORARY UPDATE OF THE STATE VECTOR
 
-# THERE ARE SIX ENTRANCES TO THE INTEGRATION PROGRAM.  FOUR OF THESE (CSMPREC, LEMPREC, CSMCONIC, LEMCONIC) SET
+# THERE ARE SIX ENTRANCES TO THE INTEGRATION PROGRAM. FOUR OF THESE (CSMPREC, LEMPREC, CSMCONIC, LEMCONIC) SET
 # ALL THE FLAGS REQUIRED IN THE INTEGRATION PROGRAM ITSELF TO CAUSE THE PRECISION OR CONIC INTEGRATION (KEPLER) OF
-# THE LM OR CSM STATE VECTOR, AS THE NAMES SUGGEST.  ONE ENTRANCE (INTEGRVS) PERMITS THE CALLING PROGRAM TO
-# PROVIDE A STATE VECTOR TO BE INTEGRATED.  THE CALLING PROGRAM MUST SET THE FLAGS INDICATING (1) PRECISION OR
+# THE LM OR CSM STATE VECTOR, AS THE NAMES SUGGEST. ONE ENTRANCE (INTEGRVS) PERMITS THE CALLING PROGRAM TO
+# PROVIDE A STATE VECTOR TO BE INTEGRATED. THE CALLING PROGRAM MUST SET THE FLAGS INDICATING (1) PRECISION OR
 # CONIC INTEGRATION, (2) IN OR OUT OF LUNAR SPHERE, (3) MIDCOURSE OR NOT, AND THE INTEGRATION PROGRAM COMPLETES
-# THE FLAG SETTING TO BYPASS W-MATRIX INTEGRATION.  THE LAST ENTRANCE (INTEGRV, USED IN GENERAL BY THE
+# THE FLAG SETTING TO BYPASS W-MATRIX INTEGRATION. THE LAST ENTRANCE (INTEGRV, USED IN GENERAL BY THE
 # NAVIGATION PROGRAMS) PERMITS THE CALLER TO SET FIVE FLAGS (NOT MOONFLAG OR MIDFLAG) BUT NOT TO INPUT A STATE
-# VECTOR.  ANY PROGRAM WHICH CALLS INTEGRVS OR INTEGRV MUST CALL INTSTALL BEFORE IT SETS THE INTEGRATION FLAGS
+# VECTOR. ANY PROGRAM WHICH CALLS INTEGRVS OR INTEGRV MUST CALL INTSTALL BEFORE IT SETS THE INTEGRATION FLAGS
 # AND/OR STATE VECTOR.
 
-# THREE SETS OF 42 REGISTERS AND 2 FLAGS ARE USED FOR THE STATE VECTORS.  TWO SETS, WHICH MAY NOT BE OVERLAYED, ARE
-# USED FOR THE PERMANENT STATE VECTORS FOR THE CSM AND LM.  THE THIRD SET, WHICH MAY BE OVERLAYED WHEN INTEGRATION
+# THREE SETS OF 42 REGISTERS AND 2 FLAGS ARE USED FOR THE STATE VECTORS. TWO SETS, WHICH MAY NOT BE OVERLAYED, ARE
+# USED FOR THE PERMANENT STATE VECTORS FOR THE CSM AND LM. THE THIRD SET, WHICH MAY BE OVERLAYED WHEN INTEGRATION
 # IS NOT BEING DONE, IS USED IN THE COMPUTATIONS.
 
 # THE PERMANENT STATE VECTORS WILL BE PERIODICALLY UPDATED SO THAT THE VECTORS WILL NOT BE OLDER THAN 4 TIMESTEPS.
 # THE PERMANENT STATE VECTORS WILL ALSO BE UPDATED WHENEVER THE W-MATRIX IS INTEGRATED OR WHEN A CALLER OF INTEGRV
 # SETS STATEFLG (THE NAVIGATION PROGRAMS P20, P22.)
 
-## Page 1206
+## Page 1197
 # APPENDIX B OF THE USERS GUIDE LISTS THE STATE VECTOR QUANTITIES.
 
 # 2.1 RESTARTS
 
 # PHASE CHANGES WILL BE MADE IN THE INTEGRATION PROGRAM ONLY FOR THE INTEGRV ENTRANCE (I.E., WHEN THE W-MATRIX IS
-# INTEGRATED OR PERMANENT STATE VECTOR IS UPDATED.)  THE GROUP NUMBER USED WILL BE THAT FOR THE P20-25 PROGRAMS
-# (I.E., GROUP2) SINCE THE INTEGRV ENTRANCE WILL ONLY BE USED BY THESE PROGRAMS.  IF A RESTART OCCURS DURING AN
-# INTEGRATION OF THE STATE VECTOR ONLY, THE RECOVERY WILL BE TO THE LAST PHASE IN THE CALLING PROGRAM.  CALLING
+# INTEGRATED OR PERMANENT STATE VECTOR IS UPDATED.) THE GROUP NUMBER USED WILL BE THAT FOR THE P20-25 PROGRAMS
+# (I.E., GROUP2) SINCE THE INTEGRV ENTRANCE WILL ONLY BE USED BY THESE PROGRAMS. IF A RESTART OCCURS DURING AN
+# INTEGRATION OF THE STATE VECTOR ONLY, THE RECOVERY WILL BE TO THE LAST PHASE IN THE CALLING PROGRAM. CALLING
 # PROGRAMS WHICH USE THE INTEGRV OR INTEGRVS ENTRANCE OF INTEGRATION SHOULD ENSURE THAT IF PHASE CHANGING IS DONE
 # THAT IT IS PRIOR TO SETTING THE INTEGRATION INPUTS IN THE PUSHLIST.
 # THIS IS BECAUSE THE PUSHLIST IS LOST DURING A RESTART.
@@ -84,9 +83,9 @@
 # 2.2 SCALING
 
 # THE INTEGRATION ROUTINE WILL MAINTAIN THE PERMANENT MEMORY STATE VECTORS IN THE SCALING AND UNITS DEFINED IN
-# APPENDIX B OF THE USERS GUIDE.  THE SCALING OF THE OUTPUT POSITION VECTOR DEPENDS ON THE ORIGIN OF THE COORDINATE
-# SYSTEM AT THE DESIRED INTEGRATION TIME.  THE COORDINATE SYSTEM TRANSFORMATION WILL BE DONE AUTOMATICALLY ON
-# MULTIPLE TIMESTEP ENCKE INTEGRATION ONLY.  THUS IT IS POSSIBLE TO HAVE OUTPUT FROM SUCCESSIVE INTEGRATIONS IN
+# APPENDIX B OF THE USERS GUIDE. THE SCALING OF THE OUTPUT POSITION VECTOR DEPENDS ON THE ORIGIN OF THE COORDINATE
+# SYSTEM AT THE DESIRED INTEGRATION TIME. THE COORDINATE SYSTEM TRANSFORMATION WILL BE DONE AUTOMATICALLY ON
+# MULTIPLE TIMESTEP ENCKE INTEGRATION ONLY. THUS IT IS POSSIBLE TO HAVE OUTPUT FROM SUCCESSIVE INTEGRATIONS IN
 # DIFFERENT SCALING.
 # HOWEVER, RATT, VATT WILL ALWAYS BE SCALED THE SAME.
 
@@ -95,166 +94,166 @@
 
 # PROGRAM INPUTS ARE THE FLAGS DESCRIBED IN APPENDIX A AND THE PERMANENT STATE VECTOR QUANTITIES DESCRIBED IN AP-
 # PENDIX B OF THE USERS GUIDE, PLUS THE DESIRED TIME TO INTEGRATE TO IN TDEC1 (A PUSH LIST LOCATION).
-# FOR INTEGRVS, THE RCV,VCV,TET OF THE TEMPORARY STATE VECTOR MUST BE SET, PLUS MOONFLAG AND MIDFLAG
+# FOR INTEGRVS, THE RCV,VCV, TET OF THE TEMPORARY STATE VECTOR MUST BE SET, PLUS MOONFLAG AND MIDFLAG
 
 # FOR SIMULATION THE FOLLOWING QUANTITIES MUST BE PRESET ---
-#                                                                               EARTH   MOON
-#                                                                                29      27
-#       RRECTCSM(LEM)   -       RECTIFIED POSITION VECTOR       METERS          2       2
+#                                                            EARTH   MOON
+#                                                             29      27
+#    RRECTCSM(LEM)  - RECTIFIED POSITION VECTOR      METERS  2       2
 
-#                                                                                7       5
-#       VRECTCSM(LEM)   -       RECTIFIED VELOCITY VECTOR       M/CSEC          2       2
+#                                                             7       5
+#    VRECTCSM(LEM)  - RECTIFIED VELOCITY VECTOR      M/CSEC  2       2
 
-#                                                                                28      28
-#       TETCSM(LEM)     -       TIME STATE VECTOR IS VALID      CSEC            2       2
-#                               CUSTOMARILY 0, BUT NOTE LUNAR
-#                               ORBIT DEPENDENCE ON REAL TIME.
+#                                                             28      28
+#    TETCSM(LEM)    - TIME STATE VECTOR IS VALID     CSEC    2       2
+#                     CUSTOMARILY 0, BUT NOTE LUNAR
+#                     ORBIT DEPENDENCE ON REAL TIME.
 
-#                                                                                22      18
-#       DELTAVCSM(LEM)  -       POSITION DEVIATION              METERS          2       2
-#                               0 IF TCCSM(LEM) = 0
+#                                                             22      18
+#    DELTAVCSM(LEM) - POSITION DEVIATION             METERS  2       2
+#                     0 IF TCCSM(LEM) = 0
 
-#                                                                                3       -1
-#       NUVCSM(LEM)     -       VELOCITY DEVIATION              M/CSEC          2       2
-#                               0 IF TCCSM(LEM) = 0
-## Page 1207
-#                                                                                29      27
-#       RCVCSM(LEM)     -       CONIC POSITION                  METERS          2       2
-#                               EQUALS RRECTCSM(LEM) IF
-#                               TCCSM(LEM) = 0
+#                                                             3       -1
+#    NUVCSM(LEM)    - VELOCITY DEVIATION             M/CSEC  2       2
+#                     0 IF TCCSM(LEM) = 0
+## Page 1198
+#                                                             29      27
+#    RCVCSM(LEM)    - CONIC POSITION                 METERS  2       2
+#                     EQUALS RRECTCSM(LEM) IF
+#                     TCCSM(LEM) = 0
 
-#                                                                                7       5
-#       VCVCSM(LEM)     -       CONIC VELOCITY                  M/CSEC          2       2
-#                               EQUALS VRECTCSM(LEM) IF
-#                               TCCSM(LEM) = 0
+#                                                             7       5
+#    VCVCSM(LEM)    - CONIC VELOCITY                 M/CSEC  2       2
+#                     EQUALS VRECTCSM(LEM) IF
+#                     TCCSM(LEM) = 0
 
-#                                                                                28      28
-#       TCCSM(LEM)      -       TIME SINCE RECTIFICATION        CSECS           2       2
-#                               CUSTOMARILY 0
+#                                                             28      28
+#    TCCSM(LEM)     - TIME SINCE RECTIFICATION       CSECS   2       2
+#                     CUSTOMARILY 0
 
-#                                                                1/2             17      16
-#       XKEPCSM(LEM)    -       ROOT OF KEPLERS EQUATION        M               2       2
-#                               0 IF TCCSM(LEM) = 0
+#                                                      1/2    17      16
+#    XKEPCSM(LEM)   - ROOT OF KEPLERS EQUATION       M       2       2
+#                     0 IF TCCSM(LEM) = 0
 
-#       CMOONFLG        -       PERMANENT FLAGS CORRESPONDING                   0       0
-#       OMIDFLAG                TO MOONFLAG AND MIDFLAG                         0,1     0,1
-#       LMOONFLG                C = CSM, L = LM                                 0       0
-#       LMIDFLG                                                                 0,1     0,1
+#    CMOONFLG       - PERMANENT FLAGS CORRESPONDING          0       0
+#    OMIDFLAG         TO MOONFLAG AND MIDFLAG                0,1     0,1
+#    LMOONFLG         C = CSM, L = LM                        0       0
+#    LMIDFLG                                                 0,1     0,1
 
-#       SURFFLAG        -       LUNAR SURFACE FLAG                              0,1     0,1
+#    SURFFLAG       - LUNAR SURFACE FLAG                     0,1     0,1
 
 # IN ADDITION, IF (L)CMIDFLAG IS SET, THE INITIAL INPUT VALUES FOR LUNAR
 # SOLAR EPHEMERIDES SUBROUTINE AND PLANETARY INERTIAL ORIENTATION SUB-
 # ROUTINE MUST BE PRESET.
 
 # OUTPUT
-#       AFTER EVERY CALL TO INTEGRATION
-#                                                                       EARTH   MOON
-#                                                                        29      29
-#       0D      RATT    POSITION                        METERS          2       2
+# AFTER EVERY CALL TO INTEGRATION
+#                                                            EARTH   MOON
+#                                                             29      29
+#     0D   RATT   POSITION                           METERS  2       2
 
-#                                                                        7       7
-#       6D      VATT    VELOCITY                        M/CSEC          2       2
+#                                                             7       7
+#     6D   VATT   VELOCITY                           M/CSEC  2       2
 
-#                                                                        28      28
-#       12D     TAT     TIME                                            2       2
+#                                                             28      28
+#    12D   TAT    TIME                                       2       2
 
-#                                                                        29      27
-#       14D     RATT1   POSITION                        METERS          2       2
+#                                                             29      27
+#    14D   RATT1  POSITION                           METERS  2       2
 
-#                                                                        7       5
-#       20D     VATT1   VELOCITY                        M/CSEC          2       2
+#                                                             7       5
+#    20D   VATT1  VELOCITY                           M/CSEC  2       2
 
-#                                                        3   2           36      30
-#       26D     MU(P)   MU                              M /CS           2       2
+#                                                     3   2   36      30
+#    26D   MU(P)  MU                                 M /CS   2       2
 
-#       X1              MUTABLE ENTRY                                   -2      -10D
+#    X1           MUTABLE ENTRY                              -2      -10D
 
-#       X2              COORDINT
-#       X2              COORDINATE SYSTEM ORIGEN                        0       2
-#                       (THIS, NOT MOONFLAG, SHOULD BE
-## Page 1208
-#                       USED TO DETERMINE ORIGIN.)
+#    X2           COORDINT
+#    X2           COORDINATE SYSTEM ORIGEN                   0       2
+#                 (THIS, NOT MOONFLAG, SHOULD BE
+## Page 1199
+#                 USED TO DETERMINE ORIGIN.)
 
 # IN ADDITION TO THE ABOVE, THE PERMANENT STATE VECTOR IS UPDATED WHENEVER
-# STATEFLG WAS SET AND WHENEVER A W-MATRIX IS TO BE INTEGRATED.  THE PUSH
+# STATEFLG WAS SET AND WHENEVER A W-MATRIX IS TO BE INTEGRATED. THE PUSH
 # COUNTER IS SET TO 0 AND OVERFLOW IS CLEARED BEFORE RETURNING TO THE
 # CALLING PROGRAM.
 
 # 4.0 CALLING SEQUENCES AND SAMPLE CODE
 # -------------------------------------
 
-#       A) PRECISION ORBITAL INTEGRATION.  CSMPREC, LEMPREC ENTRANCES
-#               L-X     STORE TIME TO 95T5791T5 T 95 PUS L9ST (T4531)
-#               L       CALL
-#               L+1             CSMPREC (OR LEMPREC)
-#               L+2     RETURN
-#          INPUT                                                           28
-#               TDEC1 (PD 32D) TIME TO INTEGRATE TO...CENTISECONDS SCALED 2
-#          OUTPUT
-#               THE DATA LISTED IN SECTION 3.0 PLUS
-#               RQVV    POSITION VECTOR OF VEHICLE WITH RESPECT TO SECONDARY
-#               BODY... METERS B-29 ONLY IF MIDFLAG = DIM0FLAG = 1
-#       B) CONIC INTEGRATION.  CSMCONIC, LEMCONIC ENTRANCES
-#               L-X     STORE TIME IN PUSH LIST (TDEC1)
-#               L       CALL
-#               L+1             CSMCONIC (OR LEMCONIC)
-#          INPUT/OUTPUT
-#               SAME AS PRECISION INTEGRATION, EXCEPT RQVV NOT SET
-#       C) INTEGRATE GIVEN STATE VECTOR.  INTEGRVS ENTRANCE
-#               CALL
-#                               INTSTALL
-#               VLOAD
-#                               POSITION VECTOR
-#               STOVL           RCV
-#                               VELOCITY VECTOR
-#               STODL           VCV
-#                               TIME STATE VECTOR VALID
-#               STODL           TET
-#                               FINAL RADIUS
-#               STORE           RFINAL
-#               SET(CLEAR)      SET(CLEAR)
-#                               INTYPFLAG
-#                               MOONFLAG
-#               SET(CLEAR)      DLOAD
-#                               DESIRED TIME
-#               STCALL          TDEC1
-#                               INTEGRVS
-#         INPUT
-#               RCV     POSITION VECTOR                 METERS
-#               VCV     VELOCITY VECTOR                 M/CSEC
-#               TET     TIME OF STATE VECTOR (MAY = 0)  CSEC B-28
-## Page 1209
-#               TDEC1   TIME TO INTEGRATE TO            CSEC B-28 (PD 32D)
-#                       (MAY BE INCREMENT IF TET=0)
-#         OUTPUT
-#               SAME AS FOR PRECISION OR CONIC INTEGRATION,
-#               DEPENDING ON INTYPFLG.
-#       D) INTEGRATE STATE VECTOR.  INTGRV ENTRANCE
-#               L-X     STORE TIME IN PUSH LIST (TDEC1) (MAY BE DONE AFTER CALL TO INTSTALL)
-#               L-8     CALL
-#               L-7
-#               L-6     SET(CLEAR)      SET(CLEAR)
-#               L-5                     VINTFLAG        1=CSM, 0=LM
-#               L-4                     INTYPFLAG       1=CONIC, 0=PRECISION
-#               L-3     SET(CLEAR)      SET(CLEAR)
-#               L-2                     DIM0FLAG        1=W-MATRIX, 0=NO W-MATRIX
-#               L-1                     D6OR9FLG        1=9X9, 0=6X6
-#               L       SET             DLOAD
-#               L+1                     STATEFLG        DESIRE PERMANENT UPDATE
-#               L+2                     FINAL RAD.      OF STATE VECTOR
-#               L+3     STCALL          RFINAL
-#               L+4                     INTEGRV
-#               L       CALL                            NORMAL USE -- WILL UPDATE STATE
-#               L+1                     INTEGRV         VECTOR IF DIM0FLAG=1. (STATEFLG IS
-#               L+2     RETURN                          ALWAYS RESET IN INTEGRATION AFTER
-#                                                       IT IS USED.)
-#         INPUT
-#               TDEC1 (PD 32D) TIME TO INTEGRATE TO     CSEC B-28
-#         OUTPUT
-#               SAME AS FOR PRECISION OR CONIC INTEGRATION
-#         THE PROGRAM WILL SET MOONFLAG, MIDFLAG DEPENDING ON
-#         THE PERMANENT STATE VECTOR REPRESENTATION.
+#     A) PRECISION ORBITAL INTEGRATION. CSMPREC, LEMPREC ENTRANCES
+#           L-X    STORE TIME TO 95T5791T5 T  95 PUS   L9ST (T4531)
+#           L      CALL
+#           L+1           CSMPREC (OR LEMPREC)
+#           L+2    RETURN
+#        INPUT                                                         28
+#           TDEC1 (PD 32D) TIME TO INTEGRATE TO...CENTISECONDS SCALED 2
+#        OUTPUT
+#           THE DATA LISTED IN SECTION 3.0 PLUS
+#           RQVV   POSITION VECTOR OF VEHICLE WITH RESPECT TO SECONDARY
+#           BODY... METERS B-29 ONLY IF MIDFLAG = DIM0FLAG = 1
+#     B) CONIC INTEGRATION.  CSMCONIC, LEMCONIC ENTRANCES
+#           L-X    STORE TIME IN PUSH LIST (TDEC1)
+#           L      CALL
+#           L+1           CSMCONIC (OR LEMCONIC)
+#        INPUT/OUTPUT
+#           SAME AS PRECISION INTEGRATION, EXCEPT RQVV NOT SET
+#     C) INTEGRATE GIVEN STATE VECTOR. INTEGRVS ENTRANCE
+#                  CALL
+#                         INTSTALL
+#                  VLOAD
+#                         POSITION VECTOR
+#                  STOVL  RCV
+#                         VELOCITY VECTOR
+#                  STODL  VCV
+#                         TIME STATE VECTOR VALID
+#                  STODL  TET
+#                         FINAL RADIUS
+#                  STORE  RFINAL
+#                  SET(CLEAR)  SET(CLEAR)
+#                              INTYPFLAG
+#                              MOONFLAG
+#                  SET(CLEAR)  DLOAD
+#                              DESIRED TIME
+#                  STCALL      TDEC1
+#                              INTEGRVS
+#        INPUT
+#           RCV    POSITION VECTOR                   METERS
+#           VCV    VELOCITY VECTOR                   M/CSEC
+#           TET    TIME OF STATE VECTOR (MAY = 0)    CSEC B-28
+## Page 1200
+#           TDEC1  TIME TO INTEGRATE TO             CSEC B-28 (PD 32D)
+#                  (MAY BE INCREMENT IF TET=0)
+#        OUTPUT
+#           SAME AS FOR PRECISION OR CONIC INTEGRATION,
+#           DEPENDING ON INTYPFLG.
+#    D) INTEGRATE STATE VECTOR.  INTGRV ENTRANCE
+#          L-X    STORE TIME IN PUSH LIST (TDEC1) (MAY BE DONE AFTER CALL TO INTSTALL)
+#          L-8    CALL
+#          L-7
+#          L-6    SET(CLEAR) SET(CLEAR)
+#          L-5               VINTFLAG   1=CSM, 0=LM
+#          L-4               INTYPFLAG  1=CONIC, 0=PRECISION
+#          L-3    SET(CLEAR) SET(CLEAR)
+#          L-2               DIM0FLAG   1=W-MATRIX, 0=NO W-MATRIX
+#          L-1               D6OR9FLG   1=9X9, 0=6X6
+#          L      SET        DLOAD
+#          L+1               STATEFLG   DESIRE PERMANENT UPDATE
+#          L+2               FINAL RAD. OF STATE VECTOR
+#          L+3    STCALL     RFINAL
+#          L+4               INTEGRV
+#          L      CALL                  NORMAL USE-- WILL UPDATE STATE
+#          L+1               INTEGRV    VECTOR IF DIM0FLAG=1.(STATEFLG IS
+#          L+2    RETURN                ALWAYS RESET IN INTEGRATION AFTER
+#                                       IT IS USED.)
+#       INPUT
+#          TDEC1 (PD 32D) TIME TO INTEGRATE TO    CSEC B-28
+#       OUTPUT
+#          SAME AS FOR PRECISION OR CONIC INTEGRATION
+#       THE PROGRAM WILL SET MOONFLAG, MIDFLAG DEPENDING ON
+#       THE PERMANENT STATE VECTOR REPRESENTATION.
 
                 BANK            11                              
                 SETLOC          INTINIT                         
@@ -275,7 +274,7 @@ STATINT1        TC              INTPRET
                                 NOINT                           
                                 LOADTIME                        
                 STORE           TDEC1                           
-## Page 1210
+## Page 1201
                 CALL                                            
                                 INTSTALL                        
                 SET             CALL                            
@@ -314,8 +313,8 @@ NOINT           EXIT
 # ATOPCSM TRANSFERS RRECT TO RRECT +41 TO RRECTCSM TO RRECTCSM +41
 
 # CALLING SEQUENCE
-#       L       CALL
-#       L+1             ATOPCSM
+#    L   CALL
+#    L+1       ATOPCSM
 
 # NORMAL EXIT AT L+2
 
@@ -324,9 +323,9 @@ ATOPCSM         STQ             RTB
                                 MOVEACSM                        
                 SET             CALL                            
                                 CMOONFLG                        
-                                SVDWN1                          
+                                SVDWN1
+## Page 1202                          
                 BON             CLRGO                           
-## Page 1211
                                 MOONFLAG                        
                                 S2                              
                                 CMOONFLG                        
@@ -344,8 +343,8 @@ MOVEACSM        TC              SETBANK
 # PTOACSM TRANSFERS RRECTCSM TO RRECTCSM +41 TO RRECT TO RRECT +41
 
 # CALLING SEQUENCE
-#       L       CALL
-#                       PTOACSM
+#    L   CALL
+#             PTOACSM
 
 # NORMAL EXIT AT L+2
 
@@ -374,8 +373,8 @@ MOVEPCSM        TC              SETBANK
                 TC              DANZIG                          
 
 # ATOPLEM TRANSFERS RRECT TO RRECT +41 TO RRECTLEM TO RRECTLEM +41
+## Page 1203
 ATOPLEM         STQ             RTB                             
-## Page 1212
                                 S2                              
                                 MOVEALEM                        
                 SET             CALL                            
@@ -422,9 +421,9 @@ USEPIOS         SETPD           VLOAD
                 PDDL            PUSH                            
                                 TDEC1                           
                 STODL           TET                             
-                                5/8                             
+                                5/8
+## Page 1204                             
                 CALL                                            
-## Page 1213
                                 RP-TO-R                         
                 STOVL           RCV                             
                                 ZUNIT                           
@@ -453,41 +452,39 @@ SETBANK         CAF             INTBANK
                 EBANK=          RRECTCSM                        
 INTBANK         BBCON           INTEGRV                         
 
-# SPECIAL PURPOSE ENTRIES TO ORBITAL INTEGRATION.  THESE ROUTINES PROVIDE ENTRANCES TO INTEGRATION WITH
+# SPECIAL PURPOSE ENTRIES TO ORBITAL INTEGRATION. THESE ROUTINES PROVIDE ENTRANCES TO INTEGRATION WITH
 # APPROPRIATE SWITCHES SET OR CLEARED FOR THE DESIRED INTEGRATION.
 
 # CSMPREC AND LEMPREC PERFORM ORBIT INTEGRATION BY THE ENCKE METHOD TO THE TIME INDICATED IN TDEC1
-# ACCELERATIONS DUE TO OBLATENESS ARE INCLUDED.  NO W-MATRIX INT. IS DONE.
+# ACCELERATIONS DUE TO OBLATENESS ARE INCLUDED. NO W-MATRIX INT. IS DONE.
 # THE PERMANENT STATE VECTOR IS NOT UPDATED.
-
 # CSMCONIC AND LEMCONIC PERFORM ORBIT INTEG. BY KEPLERS METHOD TO THE TIME INDICATED IN TDEC1
-# NO DISTURBING ACCELERATIONS ARE INCLUDED.  IN THE PROGRAM FLOW THE GIVEN
+# NO DISTURBING ACCELERATIONS ARE INCLUDED. IN THE PROGRAM FLOW THE GIVEN
 # STATE VECTOR IS RECTIFIED BEFORE SOLUTION OF KEPLERS EQUATION
 
 # THE ROUTINES ASSUME THAT THE CSM (LEM) STATE VECTOR IN P-MEM IS VALID.
 # SWITCHES SET PRIOR TO ENTRY TO THE MAIN INTEG. PROG ARE AS FOLLOWS
-#                       CSMPREC         CSMCONIC        LEMPREC         LEMCONIC
-#       VINTFLAG        SET             SET             CLEAR           CLEAR
-#       INTYPFLG        CLEAR           SET             CLEAR           SET
-#       DIM0FLAG        CLEAR           CLEAR           CLEAR           CLEAR
+#             CSMPREC  CSMCONIC   LEMPREC  LEMCONIC
+# VINTFLAG     SET       SET       CLEAR    CLEAR
+# INTYPFLG     CLEAR     SET       CLEAR    SET
+# DIM0FLAG     CLEAR     CLEAR     CLEAR    CLEAR
 
 # CALLING SEQUENCE
-#       L-X     STORE   TDEC1
-#       L       CALL                    (STCALL TDEC1)
-## Page 1214
-#       L+1             CSMPREC         (CSMCONIC, LEMPREC, LEMCONIC)
+#    L-X  STORE TDEC1
+## Page 1205
+#    L    CALL        (STCALL TDEC1)
+#    L+1          CSMPREC (CSMCONIC, LEMPREC, LEMCONIC)
 
-# NORMAL EXIT TO L+2
+#  NORMAL EXIT TO L+2
 
 # SUBROUTINES CALLED
-#       INTEGRV1
-#       PRECOUT FOR CSMPREC AND LEMPREC
-#       CONICOUT FOR CSMCONIC AND LEMCONIC
+#   INTEGRV1
+#   PRECOUT FOR CSMPREC AND LEMPREC
+#   CONICOUT FOR CSMCONIC AND LEMCONIC
 
 # OUTPUT - SEE PAGE 2 OF THIS LOG SECTION
-
 # INPUT
-#       TDEC1           TIME TO INTEGRATE TO.  CSECS B-28
+#  TDEC1   TIME TO INTEGRATE TO.  CSECS B-28
 
 CSMPREC         STQ             CALL                            
                                 X1                              
@@ -523,9 +520,9 @@ IFLAGC          CLEAR           SETGO
 LEMCONIC        STQ             CALL                            
                                 X1                              
                                 INTSTALL                        
-                SXA,1           CLRGO                           
+                SXA,1           CLRGO
+## Page 1215                           
                                 IRETURN                         
-## Page 1215
                                 VINTFLAG                        
                                 IFLAGC                          
 
@@ -552,37 +549,36 @@ INTEGRVS        SET             SSP
                                 ALOADED                         
 
 # INTEGRV IS AN ENTRY TO ORBIT INTEGRATION WHICH PERMITS THE CALLER,
-# NORMALLY THE NAVIGATION PROGRAM, TO SET THE INTEG. FLAGS.  THE ROUTINE
-# IS ENTERED AT INTEGRV1 BY CSMPREC ET. AL. AND AT ALOADED BY INTEGRVS.
+# NORMALLY THE NAVIGATION PROGRAM, TO SET THE INTEG. FLAGS. THE ROUTINE
+# IS ENTERED AT INTEGRV1 BY CSMPREC ET.AL. AND AT ALOADED BY INTEGRVS.
 # THE ROUTINE SETS UP A-MEMORY IF ENTERED AT INTEGRV,1 AND SETS THE INTEG.
 # PROGRAM FOR PRECISION OR CONIC
 
 # THE CALLER MUST FIRST CALL INTSTALL TO CHECK IF INTEG. IS IN USE BEFORE
 # SETTING ANY FLAGS.
-
 # THE FLAGS WHICH SHOULD BE SET OR CLEARED ARE
-#       VINTFLAG        (IGNORED WHEN ENTERED FROM INTEGRVS)
-#       INTYPFLG
-#       DIM0FLAG
-#       D6OR9FLG
+#   VINTFLAG    (IGNORED WHEN ENTERED FROM INTEGRVS)
+#   INTYPFLG
+#   DIM0FLAG
+#   D6OR9FLG
 
 # CALLING SEQUENCE
-#       L-X     CALL
-#       L-Y             INTSTALL
-#       L-1     SET OR CLEAR ALL FOUR FLAGS.  ALSO CAN SET STATEFLG IF DESIRED
-#               AND DIM0FLAG IS CLEAR.
-#       L       CALL
-#       L+1             INTEGRV
+#   L-X    CALL
+#   L-Y          INTSTALL
+#   L-1    SET OR CLEAR ALL FOUR FLAGS. ALSO CAN SET STATEFLG IF DESIRED
+#          AND DIM0FLAG IS CLEAR.
+#   L      CALL
+#   L+1           INTEGRV
 
 # INITIALIZATION
-#       FLAGS AS ABOVE
-#       STORE TIME TO INTEGRATE TO IN TDEC1
+#   FLAGS AS ABOVE
+#   STORE TIME TO INTEGRATE TO IN TDEC1
 
 # OUTPUT
-#       RATT    AS
-#       VATT          DEFINED
+#   RATT   AS
 ## Page 1216
-#       TAT                     BEFORE
+#   VATT   DEFINED
+#   TAT            BEFORE
 
 INTEGRV         STQ                                             
                                 IRETURN                         
@@ -630,8 +626,8 @@ RECTOUT         SETPD           CALL
                                 VRECT                           
                                 0,2                             
                 PDDL            PDVL                            # VATT TO PD6   TAT TO PD12
+## Page 1208
                                 TET                             
-## Page 1217
                                 RRECT                           
                 PDVL            PDDL*                           
                                 VRECT                           
@@ -673,7 +669,7 @@ RVCON           DLOAD           DSU
                 STCALL          TET                             
                                 RECTOUT                         
 
-## Page 1218
+## Page 1209
 # TESTLOOP
 
 TESTLOOP        BOF             CLRGO                           
@@ -700,10 +696,10 @@ NORFINAL        DLOAD           DMP
                                 MUEARTH,2                       
                 SQRT            DMP                             
                                 .3D                             
-                SR3             SR4                             # DT IS TRUNCATED TO A MULTIPLE
+                SR3             SR4                             # DT   IS TRUNCATED TO A MULTIPLE
                 DLOAD           SL                              
                                 MPAC                            
-                                15D                             #       OF 128 CSECS.
+                                15D                             #      OF 128 CSECS.
                 PUSH            BOV                             
                                 MAXDT                           
                 BDSU            BMN                             
@@ -724,7 +720,7 @@ DT/2COMP        DLOAD           DSU
 USEMAXDT        DLOAD           SIGN                            
                                 12D                             
                                 DT/2                            
-## Page 1219
+## Page 1210
                 STCALL          DT/2                            
                                 P00HCHK                         
 MAXDT           DLOAD           PDDL                            # EXCHANGE DT/2MAX WITH COMPUTED MAX.
@@ -739,15 +735,12 @@ P00HCHK         DLOAD           ABS
                                 DT/2                            
                 DSU             BMN                             
                                 DT/2MIN                         
-                                A-PCHK                          
-                SLOAD           BHIZ                            
-                                MODREG                          
-                                +3                              
-                GOTO                                            
-                                TIMESTEP                        
-                BON                                             # WAS THIS CALL VIA CSM(LEM)PREC
+                                A-PCHK
+                BOFF            BCN                            # NO BACKWARDS INTEGRATION
+                                POOFLAG                        # WHEN IN POO
+                                TIMESTEP
                                 PRECIFLG                        
-                                TIMESTEP                        # YES
+                                TIMESTEP
                 DLOAD           DSU                             
                                 DT/2                            
                                 12D                             
@@ -774,15 +767,15 @@ INTSTALL        EXIT
                 CA              RASFLAG                         
                 MASK            INTBITAB                        # IS THIS STALL AREA FREE
                 EXTEND                                          
-                BZF             OKTOGRAB                        # YES
-## Page 1220		
+                BZF             OKTOGRAB                        # YES		
                 CAF             WAKESTAL                        
                 TC              JOBSLEEP                        
-INTWAKE0        EXIT                                            
+INTWAKE0        EXIT
+## Page 1211                                            
                 TCF             INTWAKE1                        
 
 INTWAKE         CS              RASFLAG                         # IS THIS INTSTALLED ROUTINE TO BE
-                MASK            REINTBIT                        #       RESTARTED
+                MASK            REINTBIT                        #      RESTARTED
                 CCS             A                               
                 TC              INTWAKE1                        # NO
 
@@ -821,14 +814,14 @@ GOBAC           TC              INTPRET
 WAKESTAL        CADR            INTSTALL        +1              
 INTBITAB        OCT             20100                           
 
-## Page 1221
+## Page 1212
 # AVETOMID
 
 # THIS ROUTINE PERFORMS THE TRANSITION FROM A THRUSTING PHASE TO THE COAST
 # PHASE BY INITIALIZING THIS VEHICLES PERMANENT STATE VECTOR WITH THE
 # VALUES LEFT BY THE AVERAGEG ROUTINE IN RN,VN,PIPTIME.
 
-# BEFORE THIS IS DONE THE W-MATRIX, IF ITS VALID (OR WFLAG OR RENDWFLG IS
+# BEFORE THIS IS DONE THE W-MATRIX, IF ITS  VALID (OR WFLAG OR RENDWFLG IS
 # SET) IS INTEGRATED FORWARD TO PIPTIME WITH THE PRE-THRUST STATE VECTOR.
 
 # IN ADDITION, THE OTHER VEHICLE IS INTEGRATED (PERMANENT) TO PIPTIME.
@@ -871,7 +864,7 @@ OTHERS          DLOAD           CALL                            # GET SET FOR OT
                                 PIPTIME                         
                 STOVL           TET                             
                                 VN                              
-## Page 1222
+## Page 1213
                 VSR*            CALL                            
                                 0,2                             
                                 MINIRECT                        # FINISH SETTING UP STATE VECTOR
@@ -896,7 +889,7 @@ INT/W           DLOAD           CALL
                 GOTO                                            
                                 OTHERS                          # NOW GO DO THE OTHER VEHICLE
 
-## Page 1223
+## Page 1214
 # MIDTOAV1
 
 # THIS ROUTINE INTEGRATES (PRECISION) TO THE TIME SPECIFIED IN TDEC1.
@@ -909,15 +902,15 @@ INT/W           DLOAD           CALL
 # IF THE INTEGRATION IS FINISHED TO THE DESIRED TIME, RETURN IS IN BASIC
 # TO THE RETURN ADDRESS
 
-# IN EITHER CASE, BEFORE RETURNING, THE EXTRAPOLATED STATE VECTOR IS TRAN
+# IN EITHER CASE , BEFORE RETURNING, THE EXTRAPOLATED STATE VECTOR IS TRAN
 # FERRED FROM R,VATT TO R,VN1-PIPTIME1 IS SET TO THE FINISHING INTEGRA-
-# TION TIME AND MPAC IS SET TO THE DELTA TIME ---
-#                       TAT MINUS CURRENT TIME.
+# TION TIME AND MPAC IS SET TO THE DELTA TIME---
+#                                   TAT MINUS CURRENT TIME.
 
 # MIDTOAV2
 
 # THIS ROUTINE INTEGRATES THIS VEHICLES STATE VECTOR TO THE CURRENT TIME.
-# NO INPUTS ARE REQUIRED OF THE CALLER.  RETURN IS IN BASIC TO THE RETURN
+# NO INPUTS ARE REQUIRED OF THE CALLER. RETURN IS IN BASIC TO THE RETURN
 # ADDRESS WITH THE ABOVE TRANSFERS TO R,VN1-PIPTIME1-AND MPAC DONE
 
                 EBANK=          IRETURN1                        
@@ -946,14 +939,14 @@ ENTMID2         RTB             DAD
 ENTMID1         CALL                                            
                                 INTSTALL                        
                 CLEAR           CALL                            
-## Page 1224
+## Page 1215
                                 DIM0FLAG                        # NO W-MATRIX
                                 THISVINT                        
                 CLEAR           SET                             
                                 INTYPFLG                        
                                 MIDAVFLG                        # LET INTEG. KNOW THE CALL IS FOR MIDTOAV.
                 CALL                                            
-                                INTEGRV                         # GO INTEGRATE
+                                INTEGRV                         #  GO INTEGRATE
                 CLEAR           VLOAD                           
                                 MIDAVFLG                        
                                 RATT                            
@@ -998,7 +991,7 @@ MID2            DLOAD           DSU
                 ABS             DSU                             
                                 3CSECS                          
 
-## Page 1225
+## Page 1216
                 BMN             GOTO                            
                                 A-PCHK                          
                                 TIMEINC                         
@@ -1007,7 +1000,7 @@ NOTIME          CLEAR           EXIT                            # TOO LATE
                                 MID1FLAG                        
                 INCR            IRETURN1                        # SET ERROR EXIT (CALLOC +2)
                 TC              ALARM                           # INSUFFICIENT TIME FOR INTEGRATION --
-                OCT             1703                            #       TIG WILL BE SLIPPED...
+                OCT             1703                            #    TIG WILL BE SLIPPED...
                 TC              INTPRET                         
                 RVQ                                             
 
@@ -1031,14 +1024,14 @@ INTWAKEU        RELINT
                 TC              INTPRET                         
 
                 SLOAD           BZE                             # IS THIS A CSM/LEM STATE VECTOR UPDATE
-                                UPSVFLAG                        # REQUEST.  IF NOT GO TO INTWAKUP.
+                                UPSVFLAG                        # REQUEST. IF NOT GO TO INTWAKUP.
                                 INTWAKUP                        
 
                 VLOAD                                           # MOVE PRECT(6) AND VRECT(6) INTO
-                                RRECT                           #       RCV(6) AND VCV(6) RESPECTIVELY.
+                                RRECT                           #      RCV(6)   AND VCV(6) RESPECTIVELY.
                 STOVL           RCV                             
                                 VRECT                           # NOW GO TO 'RECTIFY +13D' TO
-                CALL                                            # STORE VRECT INTO VCV AND ZERO OUT
+                CALL                                            # STORE VRECT INTO VCV  AND ZERO OUT
                                 RECTIFY         +13D            # TDELTAV(6),TNUV(6),TC(2) AND XKEP(2)
                 SLOAD           ABS                             # COMPARE ABSOLUTE VALUE OF 'UPSVFLAG'
                                 UPSVFLAG                        # TO 'UPDATE MOON STATE VECTOR CODE'
@@ -1048,7 +1041,7 @@ INTWAKEU        RELINT
                 AXT,2           CLRGO                           # EARTH SPHERE OF INFLUENCE.
                 DEC             0                               
                                 MOONFLAG                        
-## Page 1226
+## Page 1217
                                 INTWAKEC                        
 INTWAKEM        AXT,2           SET                             # LUNAR SPHERE OF INFLUENCE.
                 DEC             2                               
@@ -1056,7 +1049,7 @@ INTWAKEM        AXT,2           SET                             # LUNAR SPHERE O
 INTWAKEC        SLOAD           BMN                             # COMMON CODING AFTER X2 INITIALIZED AND
                                                                 # MOONFLAG SET (OR CLEARED).
                                 UPSVFLAG                        # IS THIS A REQUEST FOR A LEM OR CSM
-                                INTWAKLM                        #       STATE VECTOR UPDATE......
+                                INTWAKLM                        #  STATE VECTOR UPDATE......
                 CALL                                            # UPDATE CSM STATE VECTOR
                                 ATOPCSM                         
 
