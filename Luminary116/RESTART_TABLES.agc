@@ -15,6 +15,8 @@
 ## Mod history: 2017-01-22 MAS  Created from Luminary 99.
 ##              2017-02-08 RSB  Comment-text fixes identified while proofing Artemis 72.
 ##              2-17-02-28 HG   Transcribed
+##		2017-03-01 RSB	Proofed comment text by diff vs Luminary 131
+##				but no errors found.
 
 ## Page 238
 # RESTART TABLES

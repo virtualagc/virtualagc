@@ -14,6 +14,8 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-01-22 MAS  Created from Luminary 99.
 ##              2017-02-10 NV   Updated for Luminary 116.
+##		2017-03-01 RSB	Proofed comment text by diff vs Luminary 131
+##				and fixed error found.
 
 ## Page 207
 
@@ -21,7 +23,7 @@
 
 # WRITTEN BY:  RHODE/KILROY/FOLLETT
 
-# MOD NO. .     0
+# MOD NO. :     0
 # DATE:         23 MARCH 1967
 # MOD BY:       KILROY
 

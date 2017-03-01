@@ -17,6 +17,7 @@
 ##				original harcopy, as opposed to the PDF page
 ##				numbers in 1701.pdf.
 ##		2017-02-24 RSB	Proofed comment text using octopus/ProoferComments.
+##		2017-03-01 RSB	Fixed a comment-text error found in diff'ing vs Luminary 116.
 
 ## Page 494
 		BANK	25
@@ -92,7 +93,7 @@ VARADAR		CAF	ONE		# WILL BE SENT TO RADAR ROUTINE IN A BY
 		TS	BUF2		# SWCALL.
 		INDEX	RTSTDEX
 		CAF	RDRLOCS
-		TCF	SWCALL		# NOT TOUCHING 0.
+		TCF	SWCALL		# NOT TOUCHING Q.
 		
 RDRLOCS		CADR	RRRANGE		# = 0
 		CADR	RRRDOT		# = 1

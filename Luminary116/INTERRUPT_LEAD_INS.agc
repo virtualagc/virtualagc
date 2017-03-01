@@ -14,6 +14,8 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-01-22 MAS  Created from Luminary 99.
 ##              2017-02-25 HG   Transcribed
+##		2017-03-01 RSB	Proofed comment text by diff vs Luminary 131
+##				but no errors found.
 
 ## Page 154
                 SETLOC          4000

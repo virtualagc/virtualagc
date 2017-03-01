@@ -18,6 +18,9 @@
 ##				numbers in 1701.pdf.
 ##		2017-02-08 RSB	Comment-text fixes identified while proofing Artemis 72.
 ##		2017-02-20 RSB	Proofed comment text using octopus/ProoferComments.
+##		2017-03-01 RSB	Restored a period which was present in both Luminary 116
+##				and 210, and was therefore presumably missing due to a 
+##				printer problem.
 
 ## Page 239
 # RESTART TABLES
@@ -35,7 +38,10 @@
 #		5.7SPOT		OCT	23000
 #				2CADR	SOMEJOB
 #
-# A RESTART OF GROUP 5 WITH PHASE SEVEN WOULD THEN CAUSE SOMEJOB TO BE RESTARTED AS A FINDVAC WITH PRIORITY 23
+## In the line below, the printout certainly has no period at the end of the line.  However,
+## the corresponding lines in Luminary 116 and 210 have such a period and are otherwise identical.  
+## Therefore, this is presumably a printer error, and the period has been restored.
+# A RESTART OF GROUP 5 WITH PHASE SEVEN WOULD THEN CAUSE SOMEJOB TO BE RESTARTED AS A FINDVAC WITH PRIORITY 23.
 #
 #		5.5SPOT		OCT	-23000
 #				2CADR	ANYJOB

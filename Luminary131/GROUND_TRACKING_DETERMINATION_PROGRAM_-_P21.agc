@@ -17,6 +17,8 @@
 ##				original harcopy, as opposed to the PDF page
 ##				numbers in 1701.pdf.
 ##		2017-02-24 RSB	Proofed comment text using octopus/ProoferComments.
+##		2017-03-01 RSB	Fixed a couple comment-text errors found while
+##				diff'ing vs Luminary 116.
 
 ## Page 656
 # GROUND TRACKING DETERMINATION PROGRAM P21
@@ -61,12 +63,12 @@
 # FOR LUNAR ORBITS 504LM VECTOR IS NEEDED
 #	504LM		2DEC	-2.700340600 E-5 RADIANS
 #	504LM _2	2DEC	-7.514128400 E-4 RADIANS
-#	504LM _4	2DEC	-2.553198641 E-4 RADIANS
+#	504LM _4	2DEC	_2.553198641 E-4 RADIANS
 #
 # NONE
 # DEBRIS
 ## Page 657
-#	CENTRALS - A,C,L
+#	CENTRALS - A,Q,L
 #	OTHER - THOSE USED BY THE ABOVE LISTED SUBROUTINES
 #	SEE LEMPREC, LAT-LONG
 

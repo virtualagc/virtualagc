@@ -15,6 +15,8 @@
 ## Mod history: 2017-01-22 MAS  Created from Luminary 99.
 ##              2017-02-28 f0n  Modified per scan 0365.jpg
 ##              2017-03-01 MAS  Removed some outdated/extra comments.
+##		2017-03-01 RSB	Proofed comment text by diff vs Luminary 131
+##				but no errors found.
 
 ## Page 365
                 BANK            15

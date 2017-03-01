@@ -16,6 +16,8 @@
 ##              2017-01-25 RSB  Back-ported a typo-fix found while proofing Luminary 69.
 ##              2017-02-16 MAS  Began updating for Luminary 116.
 ##              2017-02-16 MAS  Completed updating.
+##		2017-03-01 RSB	Proofed comment text by diff vs Luminary 131
+##				but no errors found.
 
 ## Page 1
 # THIS LGC PROGRAM IS INTENDED FOR USE IN THE LM DURING THE MANNED LUNAR LANDING MISSION OR ANY SUBSET THEREOF.

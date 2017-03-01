@@ -14,6 +14,8 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-01-22 MAS  Created from Luminary 99.
 ##              2017-02-10 RRB  Updated for Luminary 116.
+##		2017-03-01 RSB	Proofed comment text by diff vs Luminary 131
+##				and fixed error found.
 
 ## Page 709
 # 1) PROGRAM NAME - TARGET DELTA V PROGRAM (P76).
@@ -59,7 +61,7 @@ P76             TC              UPFLAG
                 TCF             ENDP76                          
                 TC              +2                              # PROCEED
                 TC              -5                              # STORE DATA AND REPEAT FLASHING
-                CAF             V06N84          +1              # FLASH VERB 06 NOUN 33, DISPLAY LAST TIG,
+                CAF             V06N84          +1              # FLASH LAST DELTA V,
                 TC              BANKCALL                        # AND WAIT FOR KEYBOARD ACTION.
                 CADR            GOFLASH                         
                 TCF             ENDP76                          
