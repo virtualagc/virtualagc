@@ -96,19 +96,19 @@ Note that the date is the date of the printout, not the date of the program revi
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-035679,000002:                                                                                                  <span class="co">## Copyright:    Public domain.</span>
-035680,000003:                                                                                                  <span class="co">## Filename:     FIND_CDU_DESIRED.agc</span>
-035681,000004:                                                                                                  <span class="co">## Purpose:      A module for revision 0 of BURST120 (Sunburst). It </span>
-035682,000005:                                                                                                  <span class="co">##               is part of the source code for the Lunar Module's</span>
-035683,000006:                                                                                                  <span class="co">##               (LM) Apollo Guidance Computer (AGC) for Apollo 5.</span>
-035684,000007:                                                                                                  <span class="co">## Assembler:    yaYUL</span>
-035685,000008:                                                                                                  <span class="co">## Contact:      Ron Burkey &lt;info@sandroid.org>.</span>
-035686,000009:                                                                                                  <span class="co">## Website:      www.ibiblio.org/apollo/index.html</span>
-035687,000010:                                                                                                  <span class="co">## Mod history:  2016-09-30 RSB  Created draft version.</span>
-035688,000011:                                                                                                  <span class="co">##               2016-10-29 MAS  Transcribed.</span>
-035689,000012:                                                                                                  <span class="co">##               2016-12-06 RSB  Comment-proofing via octopus/ProoferComments;</span>
-035690,000013:                                                                                                  <span class="co">##                               changes were made.</span>
-035691,000014: 
+035681,000002:                                                                                                  <span class="co">## Copyright:    Public domain.</span>
+035682,000003:                                                                                                  <span class="co">## Filename:     FIND_CDU_DESIRED.agc</span>
+035683,000004:                                                                                                  <span class="co">## Purpose:      A module for revision 0 of BURST120 (Sunburst). It </span>
+035684,000005:                                                                                                  <span class="co">##               is part of the source code for the Lunar Module's</span>
+035685,000006:                                                                                                  <span class="co">##               (LM) Apollo Guidance Computer (AGC) for Apollo 5.</span>
+035686,000007:                                                                                                  <span class="co">## Assembler:    yaYUL</span>
+035687,000008:                                                                                                  <span class="co">## Contact:      Ron Burkey &lt;info@sandroid.org>.</span>
+035688,000009:                                                                                                  <span class="co">## Website:      www.ibiblio.org/apollo/index.html</span>
+035689,000010:                                                                                                  <span class="co">## Mod history:  2016-09-30 RSB  Created draft version.</span>
+035690,000011:                                                                                                  <span class="co">##               2016-10-29 MAS  Transcribed.</span>
+035691,000012:                                                                                                  <span class="co">##               2016-12-06 RSB  Comment-proofing via octopus/ProoferComments;</span>
+035692,000013:                                                                                                  <span class="co">##                               changes were made.</span>
+035693,000014: 
 </pre>
 </span>
 </p>
@@ -124,56 +124,56 @@ Page 838
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-035693,000016:                                                                                                  <span class="co">#  THIS ROUTINE FINDCDUD COMPUTES DESIRED CDU,S WHICH CAN BE FED TO</span>
-035694,000017:                                                                                                  <span class="co">#  DAP LATER ON.</span>
-035695,000018:                                                                                                  <span class="co">#  DESIRED CDU,S WILL BE IN 2,S COMP</span>
-035696,000019: 
-035697,000020:                                                                                                  <span class="co">#  INPUT</span>
-035698,000021: 
-035699,000022:                                                                                                  <span class="co">#  DESIRED THRUST VECTOR AXISD COMING FROM GUIDANCE EQUATIONS</span>
-035700,000023:                                                                                                  <span class="co">#  CDUX,CDUY,CDUZ INFORM OF A SP VECTOR CDUTEMP,+2,+4.</span>
-035701,000024:                                                                                                  <span class="co">#  DELV HALF UNIT VECTOR. PIPAS READING</span>
-035702,000025:                                                                                                  <span class="co">#  AXISD IS A HALF UNIT VECTOR</span>
-035703,000026:                                                                                                  <span class="co">#  CDUX,Y,Z  ARE IN 2,S COMP</span>
-035704,000027: 
-035705,000028:                                                                                                  <span class="co">#  THIS ROUTINE CAN BE ENTERED FROM INTERPRETIVE . CALL FINDCDUD</span>
-035706,000029: 
-035707,000030:                                                                                                  <span class="co">#  CALLING SEQUENCE</span>
-035708,000031:                                                                                                  <span class="co">#  L-1  CALL</span>
-035709,000032:                                                                                                  <span class="co">#  L        FINDCDUD</span>
-035710,000033:                                                                                                  <span class="co">#  L+1              INTERPRETIVE RETURN</span>
-035711,000034: 
-035712,000035: 
-035713,000036: 
-035714,000037:                                                                                                  <span class="co">#  USER TO HAVE A UNIT VECTOR  AXIS   (1,0,0)</span>
-035715,000038: 
-035716,000039: 
-035717,000040: 
-035718,000041: 30,2677                                           <span class="ps">BANK    </span> 30                                    
-035719,000042: 30,2677  E4,1452                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C52">DELR</a>                                  
-<a name="322F5049"></a>035720,000043: 30,2677           24276 14076  <span class="sm">2/PI    </span>           <span class="ps">2DEC    </span> .6366198                              
-035721,000044: 
-<a name="4C494D4F4D47"></a>035722,000045: 30,2701           00002 00545  <span class="sm">LIMOMG  </span>           <span class="ps">2DEC    </span> .0001234                              
-035723,000046: 
-035724,000047: 
-035725,000048: 
-<a name="46494E4443445544"></a>035726,000049: 30,2703           77401        <span class="sm">FINDCDUD</span>           <span class="in">SETPD   </span> <span class="in">EXIT      </span>                            
-035727,000050: 30,2704           00001                                    0                                     
-035728,000051: 30,2705           31332                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43445554454D50">CDUTEMP</a>    +2                         
-035729,000052: 30,2706           55654                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#53494E434455">SINCDU</a>                                <span class="co">#  TEMPORARY LOCATION FOR CDUY</span>
-035730,000053: 30,2707           31334                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43445554454D50">CDUTEMP</a>    +4                         
-035731,000054: 30,2710           55656                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#53494E434455">SINCDU</a>     +2                         <span class="co">#  TEMPORARY LOCATION FOR CDUZ</span>
-035732,000055: 30,2711           31330                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43445554454D50">CDUTEMP</a>                               
-035733,000056: 30,2712           55660                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#53494E434455">SINCDU</a>     +4                         <span class="co">#  TEMPORARY LOCATION FOR CDUX</span>
-035734,000057: 
-035735,000058: 
-035736,000059: 
-035737,000060:                                                                                                  <span class="co">#  AXISFILT   COMPUTES AXIS AND CORRECTS IT FOR  QUANTIZATION ERROR AND OTH</span>
-035738,000061:                                                                                                  <span class="co">#  ER ERRORS</span>
-035739,000062: 
-035740,000063: 
-035741,000064: 30,2713  E6,1422                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4D454741">OMEGA</a>                                 
-035742,000065: 30,2713           35632                           <span class="op">CAF     </span> <a href="EXECUTIVE.agc.html#5052494F33">PRIO3</a>                                 <span class="co">#  OCT  03000     SWITCH EBANK</span>
+035695,000016:                                                                                                  <span class="co">#  THIS ROUTINE FINDCDUD COMPUTES DESIRED CDU,S WHICH CAN BE FED TO</span>
+035696,000017:                                                                                                  <span class="co">#  DAP LATER ON.</span>
+035697,000018:                                                                                                  <span class="co">#  DESIRED CDU,S WILL BE IN 2,S COMP</span>
+035698,000019: 
+035699,000020:                                                                                                  <span class="co">#  INPUT</span>
+035700,000021: 
+035701,000022:                                                                                                  <span class="co">#  DESIRED THRUST VECTOR AXISD COMING FROM GUIDANCE EQUATIONS</span>
+035702,000023:                                                                                                  <span class="co">#  CDUX,CDUY,CDUZ INFORM OF A SP VECTOR CDUTEMP,+2,+4.</span>
+035703,000024:                                                                                                  <span class="co">#  DELV HALF UNIT VECTOR. PIPAS READING</span>
+035704,000025:                                                                                                  <span class="co">#  AXISD IS A HALF UNIT VECTOR</span>
+035705,000026:                                                                                                  <span class="co">#  CDUX,Y,Z  ARE IN 2,S COMP</span>
+035706,000027: 
+035707,000028:                                                                                                  <span class="co">#  THIS ROUTINE CAN BE ENTERED FROM INTERPRETIVE . CALL FINDCDUD</span>
+035708,000029: 
+035709,000030:                                                                                                  <span class="co">#  CALLING SEQUENCE</span>
+035710,000031:                                                                                                  <span class="co">#  L-1  CALL</span>
+035711,000032:                                                                                                  <span class="co">#  L        FINDCDUD</span>
+035712,000033:                                                                                                  <span class="co">#  L+1              INTERPRETIVE RETURN</span>
+035713,000034: 
+035714,000035: 
+035715,000036: 
+035716,000037:                                                                                                  <span class="co">#  USER TO HAVE A UNIT VECTOR  AXIS   (1,0,0)</span>
+035717,000038: 
+035718,000039: 
+035719,000040: 
+035720,000041: 30,2677                                           <span class="ps">BANK    </span> 30                                    
+035721,000042: 30,2677  E4,1452                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C52">DELR</a>                                  
+<a name="322F5049"></a>035722,000043: 30,2677           24276 14076  <span class="sm">2/PI    </span>           <span class="ps">2DEC    </span> .6366198                              
+035723,000044: 
+<a name="4C494D4F4D47"></a>035724,000045: 30,2701           00002 00545  <span class="sm">LIMOMG  </span>           <span class="ps">2DEC    </span> .0001234                              
+035725,000046: 
+035726,000047: 
+035727,000048: 
+<a name="46494E4443445544"></a>035728,000049: 30,2703           77401        <span class="sm">FINDCDUD</span>           <span class="in">SETPD   </span> <span class="in">EXIT      </span>                            
+035729,000050: 30,2704           00001                                    0                                     
+035730,000051: 30,2705           31332                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43445554454D50">CDUTEMP</a>    +2                         
+035731,000052: 30,2706           55654                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#53494E434455">SINCDU</a>                                <span class="co">#  TEMPORARY LOCATION FOR CDUY</span>
+035732,000053: 30,2707           31334                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43445554454D50">CDUTEMP</a>    +4                         
+035733,000054: 30,2710           55656                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#53494E434455">SINCDU</a>     +2                         <span class="co">#  TEMPORARY LOCATION FOR CDUZ</span>
+035734,000055: 30,2711           31330                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43445554454D50">CDUTEMP</a>                               
+035735,000056: 30,2712           55660                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#53494E434455">SINCDU</a>     +4                         <span class="co">#  TEMPORARY LOCATION FOR CDUX</span>
+035736,000057: 
+035737,000058: 
+035738,000059: 
+035739,000060:                                                                                                  <span class="co">#  AXISFILT   COMPUTES AXIS AND CORRECTS IT FOR  QUANTIZATION ERROR AND OTH</span>
+035740,000061:                                                                                                  <span class="co">#  ER ERRORS</span>
+035741,000062: 
+035742,000063: 
+035743,000064: 30,2713  E6,1422                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4D454741">OMEGA</a>                                 
+035744,000065: 30,2713           35632                           <span class="op">CAF     </span> <a href="EXECUTIVE.agc.html#5052494F33">PRIO3</a>                                 <span class="co">#  OCT  03000     SWITCH EBANK</span>
 </pre>
 </span>
 </p>
@@ -189,57 +189,57 @@ Page 839
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-035744,000067: 30,2714           56003                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4542414E4B">EBANK</a>                                 
-035745,000068: 30,2715           54144                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
-035746,000069: 30,2716           37767                           <span class="op">CAF     </span> <a href="INTERPRETER.agc.html#5A45524F">ZERO</a>                                  
-035747,000070: 30,2717           55155                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D58">TEMX</a>                                  <span class="co">#  SQOMEGA</span>
-035748,000071: 30,2720           55156                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D58">TEMX</a>       +1                         <span class="co">#  SQOMEGA  +1</span>
-035749,000072: 30,2721           00004                           <span class="op">INHINT  </span>                                       
-035750,000073: 30,2722           31415                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4D45474150">OMEGAP</a>                                
-035751,000074: 30,2723           00006                           <span class="op">EXTEND  </span>                                       
-035752,000075: 30,2724           70000                           <span class="op">SQUARE  </span>                                       
-035753,000076: 30,2725           21156                           <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D58">TEMX</a>                                  <span class="co">#  SQOMEGA</span>
-035754,000077: 30,2726           31416                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4D45474151">OMEGAQ</a>                                
-035755,000078: 30,2727           00006                           <span class="op">EXTEND  </span>                                       
-035756,000079: 30,2730           70000                           <span class="op">SQUARE  </span>                                       
-035757,000080: 30,2731           21156                           <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D58">TEMX</a>                                  <span class="co">#  SQOMEGA</span>
-035758,000081: 30,2732           31420                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4D45474152">OMEGAR</a>                                
-035759,000082: 30,2733           00006                           <span class="op">EXTEND  </span>                                       
-035760,000083: 30,2734           70000                           <span class="op">SQUARE  </span>                                       
-035761,000084: 30,2735           21156                           <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D58">TEMX</a>                                  <span class="co">#  SQOMEGA</span>
-035762,000085: 30,2736           00003                           <span class="op">RELINT  </span>                                       
-035763,000086: 30,2737           56144                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
-035764,000087: 30,2740           54003                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4542414E4B">EBANK</a>                                 
-035765,000088: 30,2741           06112                           <span class="op">TC      </span> <a href="INTERPRETER.agc.html#494E5450524554">INTPRET</a>                               
-035766,000089: 30,2742  E4,1452                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C52">DELR</a>                                  
-035767,000090: 30,2742           77620                           <span class="in">STQ     </span>                                       
-035768,000091: 30,2743           01304                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#52455453415645">RETSAVE</a>                               
-<a name="4158495346494C54"></a>035769,000092: 30,2744           45345        <span class="sm">AXISFILT</span>           <span class="in">DLOAD   </span> <span class="in">DSU       </span>                            
-035770,000093: 
-035771,000094: 
-035772,000095: 
-035773,000096: 30,2745           01156                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D58">TEMX</a>                                  <span class="co">#  SQOMEGA</span>
-035774,000097: 30,2746           20702                                    <a href="#4C494D4F4D47">LIMOMG</a>                                
-035775,000098: 30,2747           72044                           <span class="in">BPL     </span> <span class="in">LXA,1     </span>                            
-035776,000099: 30,2750           60774                                    <a href="#524F54414E474C45">ROTANGLE</a>                              
-035777,000100: 30,2751           00110                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4649584C4F43">FIXLOC</a>                                
-035778,000101: 30,2752           64110                           <span class="in">INCR,1  </span> <span class="in">XCHX,1    </span>                            
-035779,000102: 30,2753           00024                                    20D                                   
-035780,000103: 30,2754           00050                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5331">S1</a>                                    
-035781,000104: 30,2755           77775                           <span class="in">VLOAD   </span>                                       
-035782,000105: 30,2756           02255                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#53494E434455">SINCDU</a>                                <span class="co">#  TEMPORARY LOCATION FOR CDUY,Z,X IN</span>
-035783,000106: 30,2757           00025                           <span class="in">STORE   </span> 20D                                   <span class="co">#  SP  2,S COMP</span>
-035784,000107: 30,2760           53575                           <span class="in">VLOAD   </span> <span class="in">UNIT      </span>                            
-035785,000108: 30,2761           00404                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C56">DELV</a>                                  
-035786,000109: 30,2762           00041                           <span class="in">STORE   </span> 32D                                   
-035787,000110: 30,2763           77624                           <span class="in">CALL    </span>                                       
-035788,000111: 30,2764           32531                                    <a href="INFLIGHT_ALIGNMENT_ROUTINES.agc.html#534D4E42">SMNB</a>                                  <span class="co">#  TRANSFORM DELV FROM SM TO NB</span>
-035789,000112: 30,2765           52201                           <span class="in">SETPD   </span> <span class="in">VSU       </span>                            
-035790,000113: 30,2766           00001                                    0                                     
-035791,000114: 30,2767           02241                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#41584953">AXIS</a>                                  
-035792,000115: 30,2770           53322                           <span class="in">VSR3    </span> <span class="in">VAD       </span>                            
-035793,000116: 30,2771           02241                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#41584953">AXIS</a>                                  
-035794,000117: 
+035746,000067: 30,2714           56003                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4542414E4B">EBANK</a>                                 
+035747,000068: 30,2715           54144                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
+035748,000069: 30,2716           37767                           <span class="op">CAF     </span> <a href="INTERPRETER.agc.html#5A45524F">ZERO</a>                                  
+035749,000070: 30,2717           55155                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D58">TEMX</a>                                  <span class="co">#  SQOMEGA</span>
+035750,000071: 30,2720           55156                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D58">TEMX</a>       +1                         <span class="co">#  SQOMEGA  +1</span>
+035751,000072: 30,2721           00004                           <span class="op">INHINT  </span>                                       
+035752,000073: 30,2722           31415                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4D45474150">OMEGAP</a>                                
+035753,000074: 30,2723           00006                           <span class="op">EXTEND  </span>                                       
+035754,000075: 30,2724           70000                           <span class="op">SQUARE  </span>                                       
+035755,000076: 30,2725           21156                           <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D58">TEMX</a>                                  <span class="co">#  SQOMEGA</span>
+035756,000077: 30,2726           31416                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4D45474151">OMEGAQ</a>                                
+035757,000078: 30,2727           00006                           <span class="op">EXTEND  </span>                                       
+035758,000079: 30,2730           70000                           <span class="op">SQUARE  </span>                                       
+035759,000080: 30,2731           21156                           <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D58">TEMX</a>                                  <span class="co">#  SQOMEGA</span>
+035760,000081: 30,2732           31420                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4D45474152">OMEGAR</a>                                
+035761,000082: 30,2733           00006                           <span class="op">EXTEND  </span>                                       
+035762,000083: 30,2734           70000                           <span class="op">SQUARE  </span>                                       
+035763,000084: 30,2735           21156                           <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D58">TEMX</a>                                  <span class="co">#  SQOMEGA</span>
+035764,000085: 30,2736           00003                           <span class="op">RELINT  </span>                                       
+035765,000086: 30,2737           56144                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
+035766,000087: 30,2740           54003                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4542414E4B">EBANK</a>                                 
+035767,000088: 30,2741           06112                           <span class="op">TC      </span> <a href="INTERPRETER.agc.html#494E5450524554">INTPRET</a>                               
+035768,000089: 30,2742  E4,1452                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C52">DELR</a>                                  
+035769,000090: 30,2742           77620                           <span class="in">STQ     </span>                                       
+035770,000091: 30,2743           01304                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#52455453415645">RETSAVE</a>                               
+<a name="4158495346494C54"></a>035771,000092: 30,2744           45345        <span class="sm">AXISFILT</span>           <span class="in">DLOAD   </span> <span class="in">DSU       </span>                            
+035772,000093: 
+035773,000094: 
+035774,000095: 
+035775,000096: 30,2745           01156                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D58">TEMX</a>                                  <span class="co">#  SQOMEGA</span>
+035776,000097: 30,2746           20702                                    <a href="#4C494D4F4D47">LIMOMG</a>                                
+035777,000098: 30,2747           72044                           <span class="in">BPL     </span> <span class="in">LXA,1     </span>                            
+035778,000099: 30,2750           60774                                    <a href="#524F54414E474C45">ROTANGLE</a>                              
+035779,000100: 30,2751           00110                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4649584C4F43">FIXLOC</a>                                
+035780,000101: 30,2752           64110                           <span class="in">INCR,1  </span> <span class="in">XCHX,1    </span>                            
+035781,000102: 30,2753           00024                                    20D                                   
+035782,000103: 30,2754           00050                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5331">S1</a>                                    
+035783,000104: 30,2755           77775                           <span class="in">VLOAD   </span>                                       
+035784,000105: 30,2756           02255                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#53494E434455">SINCDU</a>                                <span class="co">#  TEMPORARY LOCATION FOR CDUY,Z,X IN</span>
+035785,000106: 30,2757           00025                           <span class="in">STORE   </span> 20D                                   <span class="co">#  SP  2,S COMP</span>
+035786,000107: 30,2760           53575                           <span class="in">VLOAD   </span> <span class="in">UNIT      </span>                            
+035787,000108: 30,2761           00404                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C56">DELV</a>                                  
+035788,000109: 30,2762           00041                           <span class="in">STORE   </span> 32D                                   
+035789,000110: 30,2763           77624                           <span class="in">CALL    </span>                                       
+035790,000111: 30,2764           32531                                    <a href="INFLIGHT_ALIGNMENT_ROUTINES.agc.html#534D4E42">SMNB</a>                                  <span class="co">#  TRANSFORM DELV FROM SM TO NB</span>
+035791,000112: 30,2765           52201                           <span class="in">SETPD   </span> <span class="in">VSU       </span>                            
+035792,000113: 30,2766           00001                                    0                                     
+035793,000114: 30,2767           02241                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#41584953">AXIS</a>                                  
+035794,000115: 30,2770           53322                           <span class="in">VSR3    </span> <span class="in">VAD       </span>                            
+035795,000116: 30,2771           02241                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#41584953">AXIS</a>                                  
+035796,000117: 
 </pre>
 </span>
 </p>
@@ -255,56 +255,56 @@ Page 840
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-035796,000119: 30,2772           77656                           <span class="in">UNIT    </span>                                       
-035797,000120: 30,2773           02241                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41584953">AXIS</a>                                  
-<a name="524F54414E474C45"></a>035798,000121: 30,2774           62150        <span class="sm">ROTANGLE</span>           <span class="in">LXA,1   </span> <span class="in">INCR,1    </span>                            
-035799,000122: 30,2775           00110                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4649584C4F43">FIXLOC</a>                                
-035800,000123: 30,2776           00024                                    20D                                   
-035801,000124: 30,2777           77320                           <span class="in">XCHX,1  </span> <span class="in">VLOAD     </span>                            
-035802,000125: 30,3000           00050                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5331">S1</a>                                    
-035803,000126: 30,3001           02255                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#53494E434455">SINCDU</a>                                <span class="co">#  TEMPORARY LOCATION FOR CDUY,Z,X IN</span>
-035804,000127: 30,3002           00025                           <span class="in">STORE   </span> 20D                                   <span class="co">#  SP  2,S COMP</span>
-035805,000128: 30,3003           77775                           <span class="in">VLOAD   </span>                                       
-035806,000129: 30,3004           02241                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#41584953">AXIS</a>                                  
-035807,000130: 30,3005           00041                           <span class="in">STORE   </span> 32D                                   
-035808,000131: 30,3006           77624                           <span class="in">CALL    </span>                                       <span class="co">#  TRANSFORM  AXIS FROM NB TO SM</span>
-035809,000132: 30,3007           32555                                    <a href="INFLIGHT_ALIGNMENT_ROUTINES.agc.html#4E42534D">NBSM</a>                                  
-035810,000133: 30,3010           47201                           <span class="in">SETPD   </span> <span class="in">VXV       </span>                            
-035811,000134: 30,3011           00001                                    0                                     
-035812,000135: 30,3012           02233                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4158495344">AXISD</a>                                 
-035813,000136: 30,3013           77761                           <span class="in">VXSC    </span>                                       
-035814,000137: 30,3014           20700                                    <a href="#322F5049">2/PI</a>                                  
-035815,000138: 30,3015           00013                           <span class="in">STORE   </span> 10D                                   <span class="co">#  DTHETASM  SCALETO ONE REVOLUTION</span>
-035816,000139: 30,3016           77624                           <span class="in">CALL    </span>                                       <span class="co">#  COMPUTE SIN AND COS OF CDUS FOR</span>
-035817,000140: 30,3017           61064                                    <a href="#53494E434F534344">SINCOSCD</a>                              <span class="co">#  LATER USE</span>
-035818,000141: 
-035819,000142: 
-035820,000143:                                                                                                  <span class="co">#  SMCDURES     COMPUTES CDU(GIMBAL) ANGLES FROM INCREMENTAL</span>
-035821,000144:                                                                                                  <span class="co">#  CHANGES ABOUT SM AXES.    IT REQUIRES  SM  INCREMENTAL CHANGES</span>
-035822,000145:                                                                                                  <span class="co">#  AS DP  VECTOR SCALED AT  ONE REVOLUTION(DTHETASM,+2,+4).  SIN,COS(CDUX,Y</span>
-035823,000146:                                                                                                  <span class="co">#  ,Z)   ARE IN SINCDU,+2,+4 AND COSCDU,+2,+4  RESPECTIVELY,SCALED TO 2.</span>
-035824,000147:                                                                                                  <span class="co">#  CDU INCREMENTS  ARE PLACED IN DCDU,+2,+4   SCALED TO ONE REVOLUTION</span>
-035825,000148: 
-035826,000149: 
-035827,000150: 
-<a name="534D434455524553"></a>035828,000151: 30,3020           41345        <span class="sm">SMCDURES</span>           <span class="in">DLOAD   </span> <span class="in">DMP       </span>                            
-035829,000152: 30,3021           00013                                    10D                                   <span class="co">#  DTHETASM</span>
-035830,000153: 30,3022           02251                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#434F53434455">COSCDU</a>     +2                         
-035831,000154: 30,3023           41325                           <span class="in">PDDL    </span> <span class="in">DMP       </span>                            
-035832,000155: 30,3024           00017                                    14D                                   <span class="co">#  DTHETASM +4</span>
-035833,000156: 30,3025           02257                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#53494E434455">SINCDU</a>     +2                         
-035834,000157: 30,3026           77621                           <span class="in">BDSU    </span>                                       
-035835,000158: 30,3027           77671                           <span class="in">DDV     </span>                                       
-035836,000159: 30,3030           02253                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#434F53434455">COSCDU</a>     +4                         
-035837,000160: 30,3031           00025                           <span class="in">STORE   </span> 20D                                   <span class="co">#  DCDU</span>
-035838,000161: 30,3032           72405                           <span class="in">DMP     </span> <span class="in">SL1       </span>                            <span class="co">#  SCALE</span>
-035839,000162: 30,3033           02261                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#53494E434455">SINCDU</a>     +4                         
-035840,000163: 30,3034           77621                           <span class="in">BDSU    </span>                                       
-035841,000164: 30,3035           00015                                    12D                                   <span class="co">#  DTHETASM +2</span>
-035842,000165: 30,3036           14027                           <span class="in">STODL   </span> 22D                                   <span class="co">#  DCDU +2</span>
-035843,000166: 30,3037           00013                                    10D                                   
-035844,000167: 30,3040           65205                           <span class="in">DMP     </span> <span class="in">PDDL      </span>                            
-035845,000168: 30,3041           02257                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#53494E434455">SINCDU</a>     +2                         
+035798,000119: 30,2772           77656                           <span class="in">UNIT    </span>                                       
+035799,000120: 30,2773           02241                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41584953">AXIS</a>                                  
+<a name="524F54414E474C45"></a>035800,000121: 30,2774           62150        <span class="sm">ROTANGLE</span>           <span class="in">LXA,1   </span> <span class="in">INCR,1    </span>                            
+035801,000122: 30,2775           00110                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4649584C4F43">FIXLOC</a>                                
+035802,000123: 30,2776           00024                                    20D                                   
+035803,000124: 30,2777           77320                           <span class="in">XCHX,1  </span> <span class="in">VLOAD     </span>                            
+035804,000125: 30,3000           00050                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5331">S1</a>                                    
+035805,000126: 30,3001           02255                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#53494E434455">SINCDU</a>                                <span class="co">#  TEMPORARY LOCATION FOR CDUY,Z,X IN</span>
+035806,000127: 30,3002           00025                           <span class="in">STORE   </span> 20D                                   <span class="co">#  SP  2,S COMP</span>
+035807,000128: 30,3003           77775                           <span class="in">VLOAD   </span>                                       
+035808,000129: 30,3004           02241                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#41584953">AXIS</a>                                  
+035809,000130: 30,3005           00041                           <span class="in">STORE   </span> 32D                                   
+035810,000131: 30,3006           77624                           <span class="in">CALL    </span>                                       <span class="co">#  TRANSFORM  AXIS FROM NB TO SM</span>
+035811,000132: 30,3007           32555                                    <a href="INFLIGHT_ALIGNMENT_ROUTINES.agc.html#4E42534D">NBSM</a>                                  
+035812,000133: 30,3010           47201                           <span class="in">SETPD   </span> <span class="in">VXV       </span>                            
+035813,000134: 30,3011           00001                                    0                                     
+035814,000135: 30,3012           02233                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4158495344">AXISD</a>                                 
+035815,000136: 30,3013           77761                           <span class="in">VXSC    </span>                                       
+035816,000137: 30,3014           20700                                    <a href="#322F5049">2/PI</a>                                  
+035817,000138: 30,3015           00013                           <span class="in">STORE   </span> 10D                                   <span class="co">#  DTHETASM  SCALETO ONE REVOLUTION</span>
+035818,000139: 30,3016           77624                           <span class="in">CALL    </span>                                       <span class="co">#  COMPUTE SIN AND COS OF CDUS FOR</span>
+035819,000140: 30,3017           61064                                    <a href="#53494E434F534344">SINCOSCD</a>                              <span class="co">#  LATER USE</span>
+035820,000141: 
+035821,000142: 
+035822,000143:                                                                                                  <span class="co">#  SMCDURES     COMPUTES CDU(GIMBAL) ANGLES FROM INCREMENTAL</span>
+035823,000144:                                                                                                  <span class="co">#  CHANGES ABOUT SM AXES.    IT REQUIRES  SM  INCREMENTAL CHANGES</span>
+035824,000145:                                                                                                  <span class="co">#  AS DP  VECTOR SCALED AT  ONE REVOLUTION(DTHETASM,+2,+4).  SIN,COS(CDUX,Y</span>
+035825,000146:                                                                                                  <span class="co">#  ,Z)   ARE IN SINCDU,+2,+4 AND COSCDU,+2,+4  RESPECTIVELY,SCALED TO 2.</span>
+035826,000147:                                                                                                  <span class="co">#  CDU INCREMENTS  ARE PLACED IN DCDU,+2,+4   SCALED TO ONE REVOLUTION</span>
+035827,000148: 
+035828,000149: 
+035829,000150: 
+<a name="534D434455524553"></a>035830,000151: 30,3020           41345        <span class="sm">SMCDURES</span>           <span class="in">DLOAD   </span> <span class="in">DMP       </span>                            
+035831,000152: 30,3021           00013                                    10D                                   <span class="co">#  DTHETASM</span>
+035832,000153: 30,3022           02251                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#434F53434455">COSCDU</a>     +2                         
+035833,000154: 30,3023           41325                           <span class="in">PDDL    </span> <span class="in">DMP       </span>                            
+035834,000155: 30,3024           00017                                    14D                                   <span class="co">#  DTHETASM +4</span>
+035835,000156: 30,3025           02257                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#53494E434455">SINCDU</a>     +2                         
+035836,000157: 30,3026           77621                           <span class="in">BDSU    </span>                                       
+035837,000158: 30,3027           77671                           <span class="in">DDV     </span>                                       
+035838,000159: 30,3030           02253                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#434F53434455">COSCDU</a>     +4                         
+035839,000160: 30,3031           00025                           <span class="in">STORE   </span> 20D                                   <span class="co">#  DCDU</span>
+035840,000161: 30,3032           72405                           <span class="in">DMP     </span> <span class="in">SL1       </span>                            <span class="co">#  SCALE</span>
+035841,000162: 30,3033           02261                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#53494E434455">SINCDU</a>     +4                         
+035842,000163: 30,3034           77621                           <span class="in">BDSU    </span>                                       
+035843,000164: 30,3035           00015                                    12D                                   <span class="co">#  DTHETASM +2</span>
+035844,000165: 30,3036           14027                           <span class="in">STODL   </span> 22D                                   <span class="co">#  DCDU +2</span>
+035845,000166: 30,3037           00013                                    10D                                   
+035846,000167: 30,3040           65205                           <span class="in">DMP     </span> <span class="in">PDDL      </span>                            
+035847,000168: 30,3041           02257                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#53494E434455">SINCDU</a>     +2                         
 </pre>
 </span>
 </p>
@@ -320,51 +320,51 @@ Page 841
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-035847,000170: 30,3042           00017                                    14D                                   <span class="co">#  DTHETASM +4</span>
-035848,000171: 30,3043           43205                           <span class="in">DMP     </span> <span class="in">DAD       </span>                            
-035849,000172: 30,3044           02251                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#434F53434455">COSCDU</a>     +2                         
-035850,000173: 30,3045           77752                           <span class="in">SL1     </span>                                       <span class="co">#  SCALE</span>
-035851,000174: 30,3046           14031                           <span class="in">STODL   </span> 24D                                   <span class="co">#  DCDU +4</span>
-035852,000175: 30,3047           00027                                    22D                                   <span class="co">#  DCDU +2</span>
-035853,000176: 30,3050           57405                           <span class="in">DMP     </span> <span class="in">DCOMP     </span>                            
-035854,000177: 30,3051           02261                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#53494E434455">SINCDU</a>     +4                         <span class="co">#  DCDUX =-DCDUY*SIN(CDUZ)</span>
-035855,000178: 30,3052           77752                           <span class="in">SL1     </span>                                       <span class="co">#  SCALE</span>
-035856,000179: 30,3053           00025                           <span class="in">STORE   </span> 20D                                   <span class="co">#  DCDU</span>
-035857,000180: 30,3054           53375                           <span class="in">VLOAD   </span> <span class="in">VAD       </span>                            
-035858,000181: 30,3055           00025                                    20D                                   <span class="co">#  DCDU</span>
-035859,000182: 30,3056           01331                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#43445554454D50">CDUTEMP</a>                               
-035860,000183: 30,3057           77634                           <span class="in">RTB     </span>                                       
-035861,000184: 30,3060           33526                                    <a href="RTB_OP_CODES.agc.html#563153544F3253">V1STO2S</a>                               <span class="co">#  SCALE FROM 1,S TO 2,S</span>
-035862,000185: 30,3061           00767                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4344555844">CDUXD</a>                                 
-035863,000186: 30,3062           77650                           <span class="in">GOTO    </span>                                       
-035864,000187: 30,3063           01304                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#52455453415645">RETSAVE</a>                               
-035865,000188: 
-035866,000189: 
-035867,000190:                                                                                                  <span class="co">#  SINCOSCD    COMPUTES SIN AND COS OF CDU  AND STORES AS DP VECTORS</span>
-035868,000191:                                                                                                  <span class="co">#  SINCDU ,COSCDU</span>
-035869,000192:                                                                                                  <span class="co">#  INPUT IS CDUS AS A VECTOR CDUTEMP</span>
-035870,000193:                                                                                                  <span class="co">#  OUTPUT IS SIN AND COS OF CDU,S</span>
-035871,000194:                                                                                                  <span class="co">#  CDUS ARE AVAILABLE IN 2,S COMP</span>
-035872,000195:                                                                                                  <span class="co">#  SIN AND COS ARE SCALED TO 2</span>
-035873,000196:                                                                                                  <span class="co">#  SINCOSCD CAN BE ENTERED FROM INTERPRETIVE</span>
-035874,000197: 
-035875,000198: 
-035876,000199: 
-<a name="53494E434F534344"></a>035877,000200: 30,3064           76131        <span class="sm">SINCOSCD</span>           <span class="in">SSP     </span> <span class="in">AXT,1     </span>                            <span class="co">#  SET X1 TO 6</span>
-035878,000201: 30,3065           00051                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5331">S1</a>                                    <span class="co">#  SET S1 TO 2</span>
-035879,000202: 30,3066           00002                           <span class="ps">OCT     </span> 2                                     
-035880,000203: 30,3067           00006                           <span class="ps">OCT     </span> 6                                     
-<a name="52455045415431"></a>035881,000204: 30,3070           47133        <span class="sm">REPEAT1 </span>           <span class="in">SLOAD*  </span> <span class="in">RTB       </span>                            
-035882,000205: 30,3071           01337                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#43445554454D50">CDUTEMP</a>    +6,1                       
-035883,000206: 30,3072           33457                                    <a href="RTB_OP_CODES.agc.html#4344554C4F474943">CDULOGIC</a>                              <span class="co">#  CONVERT CDU FROM 2,S TO 1,S.  SCALE</span>
-035884,000207: 30,3073           05337                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43445554454D50">CDUTEMP</a>    +6,1                       <span class="co">#  TO ONE REVOLUTION</span>
-035885,000208: 30,3074           77756                           <span class="in">SIN     </span>                                       
-035886,000209: 30,3075           06263                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#53494E434455">SINCDU</a>     +6,1                       
-035887,000210: 30,3076           71543                           <span class="in">DLOAD*  </span> <span class="in">COS       </span>                            
-035888,000211: 30,3077           01337                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#43445554454D50">CDUTEMP</a>    +6,1                       
-035889,000212: 30,3100           06255                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#434F53434455">COSCDU</a>     +6,1                       
-035890,000213: 30,3101           43500                           <span class="in">TIX,1   </span> <span class="in">RVQ       </span>                            
-035891,000214: 30,3102           61070                                    <a href="#52455045415431">REPEAT1</a>                               
+035849,000170: 30,3042           00017                                    14D                                   <span class="co">#  DTHETASM +4</span>
+035850,000171: 30,3043           43205                           <span class="in">DMP     </span> <span class="in">DAD       </span>                            
+035851,000172: 30,3044           02251                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#434F53434455">COSCDU</a>     +2                         
+035852,000173: 30,3045           77752                           <span class="in">SL1     </span>                                       <span class="co">#  SCALE</span>
+035853,000174: 30,3046           14031                           <span class="in">STODL   </span> 24D                                   <span class="co">#  DCDU +4</span>
+035854,000175: 30,3047           00027                                    22D                                   <span class="co">#  DCDU +2</span>
+035855,000176: 30,3050           57405                           <span class="in">DMP     </span> <span class="in">DCOMP     </span>                            
+035856,000177: 30,3051           02261                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#53494E434455">SINCDU</a>     +4                         <span class="co">#  DCDUX =-DCDUY*SIN(CDUZ)</span>
+035857,000178: 30,3052           77752                           <span class="in">SL1     </span>                                       <span class="co">#  SCALE</span>
+035858,000179: 30,3053           00025                           <span class="in">STORE   </span> 20D                                   <span class="co">#  DCDU</span>
+035859,000180: 30,3054           53375                           <span class="in">VLOAD   </span> <span class="in">VAD       </span>                            
+035860,000181: 30,3055           00025                                    20D                                   <span class="co">#  DCDU</span>
+035861,000182: 30,3056           01331                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#43445554454D50">CDUTEMP</a>                               
+035862,000183: 30,3057           77634                           <span class="in">RTB     </span>                                       
+035863,000184: 30,3060           33526                                    <a href="RTB_OP_CODES.agc.html#563153544F3253">V1STO2S</a>                               <span class="co">#  SCALE FROM 1,S TO 2,S</span>
+035864,000185: 30,3061           00767                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4344555844">CDUXD</a>                                 
+035865,000186: 30,3062           77650                           <span class="in">GOTO    </span>                                       
+035866,000187: 30,3063           01304                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#52455453415645">RETSAVE</a>                               
+035867,000188: 
+035868,000189: 
+035869,000190:                                                                                                  <span class="co">#  SINCOSCD    COMPUTES SIN AND COS OF CDU  AND STORES AS DP VECTORS</span>
+035870,000191:                                                                                                  <span class="co">#  SINCDU ,COSCDU</span>
+035871,000192:                                                                                                  <span class="co">#  INPUT IS CDUS AS A VECTOR CDUTEMP</span>
+035872,000193:                                                                                                  <span class="co">#  OUTPUT IS SIN AND COS OF CDU,S</span>
+035873,000194:                                                                                                  <span class="co">#  CDUS ARE AVAILABLE IN 2,S COMP</span>
+035874,000195:                                                                                                  <span class="co">#  SIN AND COS ARE SCALED TO 2</span>
+035875,000196:                                                                                                  <span class="co">#  SINCOSCD CAN BE ENTERED FROM INTERPRETIVE</span>
+035876,000197: 
+035877,000198: 
+035878,000199: 
+<a name="53494E434F534344"></a>035879,000200: 30,3064           76131        <span class="sm">SINCOSCD</span>           <span class="in">SSP     </span> <span class="in">AXT,1     </span>                            <span class="co">#  SET X1 TO 6</span>
+035880,000201: 30,3065           00051                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#5331">S1</a>                                    <span class="co">#  SET S1 TO 2</span>
+035881,000202: 30,3066           00002                           <span class="ps">OCT     </span> 2                                     
+035882,000203: 30,3067           00006                           <span class="ps">OCT     </span> 6                                     
+<a name="52455045415431"></a>035883,000204: 30,3070           47133        <span class="sm">REPEAT1 </span>           <span class="in">SLOAD*  </span> <span class="in">RTB       </span>                            
+035884,000205: 30,3071           01337                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#43445554454D50">CDUTEMP</a>    +6,1                       
+035885,000206: 30,3072           33457                                    <a href="RTB_OP_CODES.agc.html#4344554C4F474943">CDULOGIC</a>                              <span class="co">#  CONVERT CDU FROM 2,S TO 1,S.  SCALE</span>
+035886,000207: 30,3073           05337                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43445554454D50">CDUTEMP</a>    +6,1                       <span class="co">#  TO ONE REVOLUTION</span>
+035887,000208: 30,3074           77756                           <span class="in">SIN     </span>                                       
+035888,000209: 30,3075           06263                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#53494E434455">SINCDU</a>     +6,1                       
+035889,000210: 30,3076           71543                           <span class="in">DLOAD*  </span> <span class="in">COS       </span>                            
+035890,000211: 30,3077           01337                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#43445554454D50">CDUTEMP</a>    +6,1                       
+035891,000212: 30,3100           06255                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#434F53434455">COSCDU</a>     +6,1                       
+035892,000213: 30,3101           43500                           <span class="in">TIX,1   </span> <span class="in">RVQ       </span>                            
+035893,000214: 30,3102           61070                                    <a href="#52455045415431">REPEAT1</a>                               
 
 End of include-file FIND_CDU_DESIRED.agc.  Parent file is <a href="MAIN.agc.html">MAIN.agc</a>
 </pre>

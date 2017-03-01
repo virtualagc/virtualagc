@@ -66,51 +66,54 @@ color: #993399;
 <img alt="" src="Apollo32.png" style="width: 32px; height: 32px;" align="left">
 </td>
 <td style="vertical-align: middle;">
-This is the source code for the Apollo 13 Lunar Module guidance computer.
-These files were derived originally from the scan from MIT's Dibner Institute's 
-now-discontinued website titled "History of Recent Science and Technology".  It is believed
-that the original listing was preserved by AGC developer Don Eyles, copied/reduced by
-AGC developer Hugh Blair-Smith, passed by AGC developer James Kernan to collector David Craig,
-scanned by Gary Neff, and then passed to the Dibner Institute 
-where unfortunately the high-quality scans were reduced in legibility as part of the 
-online-presentation process, and the original scans discarded.  
-The source code was transcribed from
-those images by Ron Burkey.  The images from the Dibner Institute website, and unfortunately not
-the discarded original high-quality scans, though with a few high-quality replacement scans
-provided directly by Gary Neff, are now available 
-<a href="http://www.ibiblio.org/apollo/ScansForConversion/Luminary131/">
-at the Virtual AGC project website</a>.  
-Report any conversion errors to info@sandroid.org. 
-Notations on the program listing read, in part:<br>
-<br>
+This source code is very close to the Apollo Guidance Computer software for the 
+Apollo 13 Lunar module.  This revision of the Luminary 131 program is from December
+of 1969, whereas there was a later revision in January of 1970, and still another
+revision in February, which is the code that flew on the mission.
+As far as this transcription is concerned, it was originally from a copy made in 1991 of 
+a printout from the collection of AGC developer Don Eyles for collector David Craig.
+It was subsequently scanned by Gary Neff, reprocessed for online 
+presentation at the now-discontinued History of Recent Science and Technology (HRST) website
+of MIT's Dibner Institute (the full-quality scans being discarded in the process),
+and finally transcribed by Ron Burkey for the Virtual AGC Project.  Although a
+high-quality replacement scan for a completely illegible page was later provided by Gary
+Neff, the reduced legibility of the reprocessed HRST posting nevertheless caused many 
+errors to be introduced into the transcription.  Accordingly, a second scan of the same physical
+printout was made in 2017 for the Virtual AGC Project's collection at the Internet Archive,
+and used to correct the transcription errors. All of the scanned materials mentioned,
+as well as other Luminary 131 related material, are <a href="../../Luminary.html#Luminary131">available online</a>.
+Don Eyles apprently made additional hand-written notes in printout between 1991 and 2017,
+so the two scans are not identical in that respect. The page-headings in the printout read, in part:<br>
 <pre>
 	GAP:  ASSEMBLE REVISION 131 OF AGC PROGRAM LUMINARY BY NASA 2021112-091
 	17:53 DEC. 19, 1969
 </pre>
-Note that the date is the date of the printout, not the date of the program revision.
+Note that the date is the date the printout was made, not the date on which the program
+revision was released, although these happen to be very close together.
 </td></tr></tbody></table>
 
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-061617,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
-061618,000003:                                                                                                  <span class="co">## Filename:    KALMAN_FILTER.agc</span>
-061619,000004:                                                                                                  <span class="co">## Purpose:     A section of Luminary 1C, revision 131.</span>
-061620,000005:                                                                                                  <span class="co">##              It is part of the source code for the Lunar Module's (LM)</span>
-061621,000006:                                                                                                  <span class="co">##              Apollo Guidance Computer (AGC) for Apollo 13.</span>
-061622,000007:                                                                                                  <span class="co">##              This file is intended to be a faithful transcription, except</span>
-061623,000008:                                                                                                  <span class="co">##              that the code format has been changed to conform to the</span>
-061624,000009:                                                                                                  <span class="co">##              requirements of the yaYUL assembler rather than the</span>
-061625,000010:                                                                                                  <span class="co">##              original YUL assembler.</span>
-061626,000011:                                                                                                  <span class="co">## Reference:   pp. 1462-1463</span>
-061627,000012:                                                                                                  <span class="co">## Contact:     Ron Burkey &lt;info@sandroid.org>.</span>
-061628,000013:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo/index.html</span>
-061629,000014:                                                                                                  <span class="co">## Mod history: 06/08/03 RSB.   Began transcribing.</span>
-061630,000015:                                                                                                  <span class="co">##              05/14/05 RSB    Corrected website reference above</span>
-061631,000016:                                                                                                  <span class="co">##              2017-01-06 RSB  Page numbers now agree with those on the</span>
-061632,000017:                                                                                                  <span class="co">##                              original harcopy, as opposed to the PDF page</span>
-061633,000018:                                                                                                  <span class="co">##                              numbers in 1701.pdf.</span>
-061634,000019: 
+061898,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
+061899,000003:                                                                                                  <span class="co">## Filename:    KALMAN_FILTER.agc</span>
+061900,000004:                                                                                                  <span class="co">## Purpose:     A section of Luminary 1C, revision 131.</span>
+061901,000005:                                                                                                  <span class="co">##              It is part of the source code for the Lunar Module's (LM)</span>
+061902,000006:                                                                                                  <span class="co">##              Apollo Guidance Computer (AGC) for Apollo 13.</span>
+061903,000007:                                                                                                  <span class="co">##              This file is intended to be a faithful transcription, except</span>
+061904,000008:                                                                                                  <span class="co">##              that the code format has been changed to conform to the</span>
+061905,000009:                                                                                                  <span class="co">##              requirements of the yaYUL assembler rather than the</span>
+061906,000010:                                                                                                  <span class="co">##              original YUL assembler.</span>
+061907,000011:                                                                                                  <span class="co">## Reference:   pp. 1462-1463</span>
+061908,000012:                                                                                                  <span class="co">## Contact:     Ron Burkey &lt;info@sandroid.org>.</span>
+061909,000013:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo/index.html</span>
+061910,000014:                                                                                                  <span class="co">## Mod history: 06/08/03 RSB.   Began transcribing.</span>
+061911,000015:                                                                                                  <span class="co">##              05/14/05 RSB    Corrected website reference above</span>
+061912,000016:                                                                                                  <span class="co">##              2017-01-06 RSB  Page numbers now agree with those on the</span>
+061913,000017:                                                                                                  <span class="co">##                              original hardcopy, as opposed to the PDF page</span>
+061914,000018:                                                                                                  <span class="co">##                              numbers in 1701.pdf.</span>
+061915,000019:                                                                                                  <span class="co">##              2017-02-28 RSB  Proofed comment text using octopus/ProoferComments.</span>
+061916,000020: 
 </pre>
 </span>
 </p>
@@ -126,56 +129,56 @@ Page 1462
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-061636,000021: 17,3777  E6,1522                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E4F2E554A455453">NO.UJETS</a>                              
-061637,000022: 16,3645                                           <span class="ps">BANK    </span> 16                                    
-061638,000023: 16,2000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#4441505331">DAPS1</a>                                 
-061639,000024: 16,2000                                           <span class="ps">BANK    </span>                                       
-061640,000025: 
-061641,000026: 16,3645                                           <span class="ps">COUNT*  </span> $$/DAP                                
-061642,000027: 
-<a name="524154454C4F4F50"></a>061643,000028: 16,3645           34752        <span class="sm">RATELOOP</span>           <span class="op">CA      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#54574F">TWO</a>                                   
-061644,000029: 16,3646           55743                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44415054454D5036">DAPTEMP6</a>                              
-061645,000030: 16,3647           60000                           <span class="op">DOUBLE  </span>                                       
-061646,000031: 16,3650           54002                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
-061647,000032: 16,3651           51743                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44415054454D5036">DAPTEMP6</a>                              
-061648,000033: 16,3652           11524                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544A50">TJP</a>                                   
-061649,000034: 16,3653           13655                           <span class="op">TCF     </span> +2                                    
-061650,000035: 16,3654           13674                           <span class="op">TCF     </span> <a href="#4C4F4F5052415445">LOOPRATE</a>                              
-061651,000036: 16,3655           63735                           <span class="op">AD      </span> <a href="#2D3130304D535436">-100MST6</a>                              
-061652,000037: 16,3656           00006                           <span class="op">EXTEND  </span>                                       
-061653,000038: 16,3657           63713                           <span class="op">BZMF    </span> <a href="#534D414C4C544A55">SMALLTJU</a>                              
-061654,000039: 16,3660           51743                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44415054454D5036">DAPTEMP6</a>                              
-061655,000040: 16,3661           11524                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544A50">TJP</a>                                   
-061656,000041: 16,3662           33735                           <span class="op">CA      </span> <a href="#2D3130304D535436">-100MST6</a>                              
-061657,000042: 16,3663           13665                           <span class="op">TCF     </span> +2                                    
-061658,000043: 16,3664           43735                           <span class="op">CS      </span> <a href="#2D3130304D535436">-100MST6</a>                              
-061659,000044: 16,3665           51743                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44415054454D5036">DAPTEMP6</a>                              
-061660,000045: 16,3666           27524                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544A50">TJP</a>                                   
-061661,000046: 16,3667           51743                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44415054454D5036">DAPTEMP6</a>                              
-061662,000047: 16,3670           11524                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544A50">TJP</a>                                   
-061663,000048: 16,3671           43621                           <span class="op">CS      </span> <a href="P-AXIS_RCS_AUTOPILOT.agc.html#2D3130304D53">-100MS</a>                                <span class="co">#  0.1 AT 1</span>
-061664,000049: 16,3672           13674                           <span class="op">TCF     </span> +2                                    
-061665,000050: 16,3673           33621                           <span class="op">CA      </span> <a href="P-AXIS_RCS_AUTOPILOT.agc.html#2D3130304D53">-100MS</a>                                
-<a name="4C4F4F5052415445"></a>061666,000051: 16,3674           00006        <span class="sm">LOOPRATE</span>           <span class="op">EXTEND  </span>                                       
-061667,000052: 16,3675           51743                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44415054454D5036">DAPTEMP6</a>                              
-061668,000053: 16,3676           71521                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E4F2E504A455453">NO.PJETS</a>                              
-061669,000054: 16,3677           30001                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
-061670,000055: 16,3700           51743                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44415054454D5036">DAPTEMP6</a>                              
-061671,000056: 16,3701           55736                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44415054454D5031">DAPTEMP1</a>                              <span class="co">#  SIGNED TORQUE AT 1 JET-SEC FOR FILTER</span>
-061672,000057: 16,3702           00006                           <span class="op">EXTEND  </span>                                       
-061673,000058: 16,3703           74742                           <span class="op">MP      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4249543130">BIT10</a>                                 <span class="co">#  RESCALE TO 32; ONE BIT ABOUT 2 JET-MSEC</span>
-061674,000059: 16,3704           00006                           <span class="op">EXTEND  </span>                                       
-061675,000060: 16,3705           63736                           <span class="op">BZMF    </span> <a href="#4E4547544F524B">NEGTORK</a>                               
-<a name="53544F52544F524B"></a>061676,000061: 16,3706           50002        <span class="sm">STORTORK</span>           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     <span class="co">#  INCREMENT DOWNLIST REGISTER.</span>
-061677,000062: 16,3707           27513                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444F574E544F524B">DOWNTORK</a>                              <span class="co">#        NOTE:  NOT INITIALIZED; OVERFLOWS.</span>
-061678,000063: 
-061679,000064: 16,3710           11743                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44415054454D5036">DAPTEMP6</a>                              
-061680,000065: 16,3711           13646                           <span class="op">TCF     </span> <a href="#524154454C4F4F50">RATELOOP</a>   +1                         
-061681,000066: 16,3712           13722                           <span class="op">TCF     </span> <a href="#524F544F52515545">ROTORQUE</a>                              
-<a name="534D414C4C544A55"></a>061682,000067: 16,3713           34755        <span class="sm">SMALLTJU</span>           <span class="op">CA      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5A45524F">ZERO</a>                                  
-061683,000068: 16,3714           51743                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44415054454D5036">DAPTEMP6</a>                              
-061684,000069: 16,3715           57524                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544A50">TJP</a>                                   
-061685,000070: 16,3716           00006                           <span class="op">EXTEND  </span>                                       
+061918,000022: 17,3777  E6,1522                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E4F2E554A455453">NO.UJETS</a>                              
+061919,000023: 16,3645                                           <span class="ps">BANK    </span> 16                                    
+061920,000024: 16,2000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#4441505331">DAPS1</a>                                 
+061921,000025: 16,2000                                           <span class="ps">BANK    </span>                                       
+061922,000026: 
+061923,000027: 16,3645                                           <span class="ps">COUNT*  </span> $$/DAP                                
+061924,000028: 
+<a name="524154454C4F4F50"></a>061925,000029: 16,3645           34752        <span class="sm">RATELOOP</span>           <span class="op">CA      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#54574F">TWO</a>                                   
+061926,000030: 16,3646           55743                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44415054454D5036">DAPTEMP6</a>                              
+061927,000031: 16,3647           60000                           <span class="op">DOUBLE  </span>                                       
+061928,000032: 16,3650           54002                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
+061929,000033: 16,3651           51743                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44415054454D5036">DAPTEMP6</a>                              
+061930,000034: 16,3652           11524                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544A50">TJP</a>                                   
+061931,000035: 16,3653           13655                           <span class="op">TCF     </span> +2                                    
+061932,000036: 16,3654           13674                           <span class="op">TCF     </span> <a href="#4C4F4F5052415445">LOOPRATE</a>                              
+061933,000037: 16,3655           63735                           <span class="op">AD      </span> <a href="#2D3130304D535436">-100MST6</a>                              
+061934,000038: 16,3656           00006                           <span class="op">EXTEND  </span>                                       
+061935,000039: 16,3657           63713                           <span class="op">BZMF    </span> <a href="#534D414C4C544A55">SMALLTJU</a>                              
+061936,000040: 16,3660           51743                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44415054454D5036">DAPTEMP6</a>                              
+061937,000041: 16,3661           11524                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544A50">TJP</a>                                   
+061938,000042: 16,3662           33735                           <span class="op">CA      </span> <a href="#2D3130304D535436">-100MST6</a>                              
+061939,000043: 16,3663           13665                           <span class="op">TCF     </span> +2                                    
+061940,000044: 16,3664           43735                           <span class="op">CS      </span> <a href="#2D3130304D535436">-100MST6</a>                              
+061941,000045: 16,3665           51743                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44415054454D5036">DAPTEMP6</a>                              
+061942,000046: 16,3666           27524                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544A50">TJP</a>                                   
+061943,000047: 16,3667           51743                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44415054454D5036">DAPTEMP6</a>                              
+061944,000048: 16,3670           11524                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544A50">TJP</a>                                   
+061945,000049: 16,3671           43621                           <span class="op">CS      </span> <a href="P-AXIS_RCS_AUTOPILOT.agc.html#2D3130304D53">-100MS</a>                                <span class="co">#  0.1 AT 1</span>
+061946,000050: 16,3672           13674                           <span class="op">TCF     </span> +2                                    
+061947,000051: 16,3673           33621                           <span class="op">CA      </span> <a href="P-AXIS_RCS_AUTOPILOT.agc.html#2D3130304D53">-100MS</a>                                
+<a name="4C4F4F5052415445"></a>061948,000052: 16,3674           00006        <span class="sm">LOOPRATE</span>           <span class="op">EXTEND  </span>                                       
+061949,000053: 16,3675           51743                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44415054454D5036">DAPTEMP6</a>                              
+061950,000054: 16,3676           71521                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E4F2E504A455453">NO.PJETS</a>                              
+061951,000055: 16,3677           30001                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
+061952,000056: 16,3700           51743                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44415054454D5036">DAPTEMP6</a>                              
+061953,000057: 16,3701           55736                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44415054454D5031">DAPTEMP1</a>                              <span class="co">#  SIGNED TORQUE AT 1 JET-SEC FOR FILTER</span>
+061954,000058: 16,3702           00006                           <span class="op">EXTEND  </span>                                       
+061955,000059: 16,3703           74742                           <span class="op">MP      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4249543130">BIT10</a>                                 <span class="co">#  RESCALE TO 32; ONE BIT ABOUT 2 JET-MSEC</span>
+061956,000060: 16,3704           00006                           <span class="op">EXTEND  </span>                                       
+061957,000061: 16,3705           63736                           <span class="op">BZMF    </span> <a href="#4E4547544F524B">NEGTORK</a>                               
+<a name="53544F52544F524B"></a>061958,000062: 16,3706           50002        <span class="sm">STORTORK</span>           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     <span class="co">#  INCREMENT DOWNLIST REGISTER.</span>
+061959,000063: 16,3707           27513                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444F574E544F524B">DOWNTORK</a>                              <span class="co">#        NOTE:  NOT INITIALIZED; OVERFLOWS.</span>
+061960,000064: 
+061961,000065: 16,3710           11743                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44415054454D5036">DAPTEMP6</a>                              
+061962,000066: 16,3711           13646                           <span class="op">TCF     </span> <a href="#524154454C4F4F50">RATELOOP</a>   +1                         
+061963,000067: 16,3712           13722                           <span class="op">TCF     </span> <a href="#524F544F52515545">ROTORQUE</a>                              
+<a name="534D414C4C544A55"></a>061964,000068: 16,3713           34755        <span class="sm">SMALLTJU</span>           <span class="op">CA      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5A45524F">ZERO</a>                                  
+061965,000069: 16,3714           51743                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44415054454D5036">DAPTEMP6</a>                              
+061966,000070: 16,3715           57524                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544A50">TJP</a>                                   
+061967,000071: 16,3716           00006                           <span class="op">EXTEND  </span>                                       
 </pre>
 </span>
 </p>
@@ -191,27 +194,27 @@ Page 1463
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-061687,000072: 16,3717           74760                           <span class="op">MP      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#454C4556454E">ELEVEN</a>                                <span class="co">#  10.24 PLUS</span>
-061688,000073: 16,3720           30001                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
-061689,000074: 16,3721           13674                           <span class="op">TCF     </span> <a href="#4C4F4F5052415445">LOOPRATE</a>                              
-<a name="524F544F52515545"></a>061690,000075: 16,3722           31737        <span class="sm">ROTORQUE</span>           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44415054454D5032">DAPTEMP2</a>                              
-061691,000076: 16,3723           61740                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44415054454D5033">DAPTEMP3</a>                              
-061692,000077: 16,3724           00006                           <span class="op">EXTEND  </span>                                       
-061693,000078: 16,3725           71532                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#314A41434352">1JACCR</a>                                
-061694,000079: 16,3726           55746                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4A45545241544552">JETRATER</a>                              
-061695,000080: 16,3727           41740                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44415054454D5033">DAPTEMP3</a>                              
-061696,000081: 16,3730           61737                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44415054454D5032">DAPTEMP2</a>                              
-061697,000082: 16,3731           00006                           <span class="op">EXTEND  </span>                                       
-061698,000083: 16,3732           71531                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#314A41434351">1JACCQ</a>                                
-061699,000084: 16,3733           55745                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4A45545241544551">JETRATEQ</a>                              
-061700,000085: 16,3734           12316                           <span class="op">TCF     </span> <a href="P-AXIS_RCS_AUTOPILOT.agc.html#4241434B50">BACKP</a>                                 
-<a name="2D3130304D535436"></a>061701,000086: 16,3735           77537        <span class="sm">-100MST6</span>           <span class="ps">DEC     </span> -160       B-14                       
-061702,000087: 
-<a name="4E4547544F524B"></a>061703,000088: 16,3736           40000        <span class="sm">NEGTORK </span>           <span class="op">COM     </span>                                       
-061704,000089: 16,3737           24002                           <span class="op">INCR    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
-061705,000090: 16,3740           13706                           <span class="op">TCF     </span> <a href="#53544F52544F524B">STORTORK</a>                              
-061706,000091: 
-061707,000092: 
+061969,000073: 16,3717           74760                           <span class="op">MP      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#454C4556454E">ELEVEN</a>                                <span class="co">#  10.24 PLUS</span>
+061970,000074: 16,3720           30001                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
+061971,000075: 16,3721           13674                           <span class="op">TCF     </span> <a href="#4C4F4F5052415445">LOOPRATE</a>                              
+<a name="524F544F52515545"></a>061972,000076: 16,3722           31737        <span class="sm">ROTORQUE</span>           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44415054454D5032">DAPTEMP2</a>                              
+061973,000077: 16,3723           61740                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44415054454D5033">DAPTEMP3</a>                              
+061974,000078: 16,3724           00006                           <span class="op">EXTEND  </span>                                       
+061975,000079: 16,3725           71532                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#314A41434352">1JACCR</a>                                
+061976,000080: 16,3726           55746                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4A45545241544552">JETRATER</a>                              
+061977,000081: 16,3727           41740                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44415054454D5033">DAPTEMP3</a>                              
+061978,000082: 16,3730           61737                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44415054454D5032">DAPTEMP2</a>                              
+061979,000083: 16,3731           00006                           <span class="op">EXTEND  </span>                                       
+061980,000084: 16,3732           71531                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#314A41434351">1JACCQ</a>                                
+061981,000085: 16,3733           55745                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4A45545241544551">JETRATEQ</a>                              
+061982,000086: 16,3734           12316                           <span class="op">TCF     </span> <a href="P-AXIS_RCS_AUTOPILOT.agc.html#4241434B50">BACKP</a>                                 
+<a name="2D3130304D535436"></a>061983,000087: 16,3735           77537        <span class="sm">-100MST6</span>           <span class="ps">DEC     </span> -160       B-14                       
+061984,000088: 
+<a name="4E4547544F524B"></a>061985,000089: 16,3736           40000        <span class="sm">NEGTORK </span>           <span class="op">COM     </span>                                       
+061986,000090: 16,3737           24002                           <span class="op">INCR    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
+061987,000091: 16,3740           13706                           <span class="op">TCF     </span> <a href="#53544F52544F524B">STORTORK</a>                              
+061988,000092: 
+061989,000093: 
 
 End of include-file KALMAN_FILTER.agc.  Parent file is <a href="MAIN.agc.html">MAIN.agc</a>
 </pre>

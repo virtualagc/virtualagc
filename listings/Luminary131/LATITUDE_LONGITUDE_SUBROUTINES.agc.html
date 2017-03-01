@@ -66,52 +66,57 @@ color: #993399;
 <img alt="" src="Apollo32.png" style="width: 32px; height: 32px;" align="left">
 </td>
 <td style="vertical-align: middle;">
-This is the source code for the Apollo 13 Lunar Module guidance computer.
-These files were derived originally from the scan from MIT's Dibner Institute's 
-now-discontinued website titled "History of Recent Science and Technology".  It is believed
-that the original listing was preserved by AGC developer Don Eyles, copied/reduced by
-AGC developer Hugh Blair-Smith, passed by AGC developer James Kernan to collector David Craig,
-scanned by Gary Neff, and then passed to the Dibner Institute 
-where unfortunately the high-quality scans were reduced in legibility as part of the 
-online-presentation process, and the original scans discarded.  
-The source code was transcribed from
-those images by Ron Burkey.  The images from the Dibner Institute website, and unfortunately not
-the discarded original high-quality scans, though with a few high-quality replacement scans
-provided directly by Gary Neff, are now available 
-<a href="http://www.ibiblio.org/apollo/ScansForConversion/Luminary131/">
-at the Virtual AGC project website</a>.  
-Report any conversion errors to info@sandroid.org. 
-Notations on the program listing read, in part:<br>
-<br>
+This source code is very close to the Apollo Guidance Computer software for the 
+Apollo 13 Lunar module.  This revision of the Luminary 131 program is from December
+of 1969, whereas there was a later revision in January of 1970, and still another
+revision in February, which is the code that flew on the mission.
+As far as this transcription is concerned, it was originally from a copy made in 1991 of 
+a printout from the collection of AGC developer Don Eyles for collector David Craig.
+It was subsequently scanned by Gary Neff, reprocessed for online 
+presentation at the now-discontinued History of Recent Science and Technology (HRST) website
+of MIT's Dibner Institute (the full-quality scans being discarded in the process),
+and finally transcribed by Ron Burkey for the Virtual AGC Project.  Although a
+high-quality replacement scan for a completely illegible page was later provided by Gary
+Neff, the reduced legibility of the reprocessed HRST posting nevertheless caused many 
+errors to be introduced into the transcription.  Accordingly, a second scan of the same physical
+printout was made in 2017 for the Virtual AGC Project's collection at the Internet Archive,
+and used to correct the transcription errors. All of the scanned materials mentioned,
+as well as other Luminary 131 related material, are <a href="../../Luminary.html#Luminary131">available online</a>.
+Don Eyles apprently made additional hand-written notes in printout between 1991 and 2017,
+so the two scans are not identical in that respect. The page-headings in the printout read, in part:<br>
 <pre>
 	GAP:  ASSEMBLE REVISION 131 OF AGC PROGRAM LUMINARY BY NASA 2021112-091
 	17:53 DEC. 19, 1969
 </pre>
-Note that the date is the date of the printout, not the date of the program revision.
+Note that the date is the date the printout was made, not the date on which the program
+revision was released, although these happen to be very close together.
 </td></tr></tbody></table>
 
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-046839,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
-046840,000003:                                                                                                  <span class="co">## Filename:    LATITUDE_LONGITUDE_SUBROUTINES.agc</span>
-046841,000004:                                                                                                  <span class="co">## Purpose:     A section of Luminary 1C, revision 131.</span>
-046842,000005:                                                                                                  <span class="co">##              It is part of the source code for the Lunar Module's (LM)</span>
-046843,000006:                                                                                                  <span class="co">##              Apollo Guidance Computer (AGC) for Apollo 13.</span>
-046844,000007:                                                                                                  <span class="co">##              This file is intended to be a faithful transcription, except</span>
-046845,000008:                                                                                                  <span class="co">##              that the code format has been changed to conform to the</span>
-046846,000009:                                                                                                  <span class="co">##              requirements of the yaYUL assembler rather than the</span>
-046847,000010:                                                                                                  <span class="co">##              original YUL assembler.</span>
-046848,000011:                                                                                                  <span class="co">## Reference:   pp. 1127-1133</span>
-046849,000012:                                                                                                  <span class="co">## Contact:     Ron Burkey &lt;info@sandroid.org>.</span>
-046850,000013:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo/index.html</span>
-046851,000014:                                                                                                  <span class="co">## Mod history: 05/31/03 RSB.   Began transcribing.</span>
-046852,000015:                                                                                                  <span class="co">##              05/14/05 RSB    Corrected website reference above.</span>
-046853,000016:                                                                                                  <span class="co">##              2011-01-05 JL   Fixed indentation of RVQ instruction.</span>
-046854,000017:                                                                                                  <span class="co">##              2017-01-06 RSB  Page numbers now agree with those on the</span>
-046855,000018:                                                                                                  <span class="co">##                              original harcopy, as opposed to the PDF page</span>
-046856,000019:                                                                                                  <span class="co">##                              numbers in 1701.pdf.</span>
-046857,000020: 
+047041,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
+047042,000003:                                                                                                  <span class="co">## Filename:    LATITUDE_LONGITUDE_SUBROUTINES.agc</span>
+047043,000004:                                                                                                  <span class="co">## Purpose:     A section of Luminary 1C, revision 131.</span>
+047044,000005:                                                                                                  <span class="co">##              It is part of the source code for the Lunar Module's (LM)</span>
+047045,000006:                                                                                                  <span class="co">##              Apollo Guidance Computer (AGC) for Apollo 13.</span>
+047046,000007:                                                                                                  <span class="co">##              This file is intended to be a faithful transcription, except</span>
+047047,000008:                                                                                                  <span class="co">##              that the code format has been changed to conform to the</span>
+047048,000009:                                                                                                  <span class="co">##              requirements of the yaYUL assembler rather than the</span>
+047049,000010:                                                                                                  <span class="co">##              original YUL assembler.</span>
+047050,000011:                                                                                                  <span class="co">## Reference:   pp. 1127-1133</span>
+047051,000012:                                                                                                  <span class="co">## Contact:     Ron Burkey &lt;info@sandroid.org>.</span>
+047052,000013:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo/index.html</span>
+047053,000014:                                                                                                  <span class="co">## Mod history: 05/31/03 RSB.   Began transcribing.</span>
+047054,000015:                                                                                                  <span class="co">##              05/14/05 RSB    Corrected website reference above.</span>
+047055,000016:                                                                                                  <span class="co">##              2011-01-05 JL   Fixed indentation of RVQ instruction.</span>
+047056,000017:                                                                                                  <span class="co">##              2017-01-06 RSB  Page numbers now agree with those on the</span>
+047057,000018:                                                                                                  <span class="co">##                              original harcopy, as opposed to the PDF page</span>
+047058,000019:                                                                                                  <span class="co">##                              numbers in 1701.pdf.</span>
+047059,000020:                                                                                                  <span class="co">##              2017-02-05 RSB  Back-ported comment corrections </span>
+047060,000021:                                                                                                  <span class="co">##                              identified while proofing Artemis 072.</span>
+047061,000022:                                                                                                  <span class="co">##              2017-02-27 RSB  Proofed comment text using octopus/ProoferComments.</span>
+047062,000023: 
 </pre>
 </span>
 </p>
@@ -127,56 +132,56 @@ Page 1127
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-046859,000022:                                                                                                  <span class="co">#  SUBROUTINE TO CONVERT RAD VECTOR AT GIVEN TIME TO LAT,LONG AND ALT</span>
-046860,000023: 
-046861,000024:                                                                                                  <span class="co">#  CALLING SEQUENCE</span>
-046862,000025:                                                                                                  <span class="co">#        L-1     CALL</span>
-046863,000026:                                                                                                  <span class="co">#        L               LAT-LONG</span>
-046864,000027: 
-046865,000028:                                                                                                  <span class="co">#  SUBROUTINES USED</span>
-046866,000029:                                                                                                  <span class="co">#        R-TO-RP, ARCTAN, SFTGAMMA, SETRE</span>
-046867,000030: 
-046868,000031:                                                                                                  <span class="co">#  ERASABLE INIT. REQ.</span>
-046869,000032:                                                                                                  <span class="co">#        AXO, -AYO, AZO, TEPHEM (SET AT LAUNCH TIME)</span>
-046870,000033:                                                                                                  <span class="co">#        ALPHAV = POSITION VECTOR METERS B-29</span>
-046871,000034:                                                                                                  <span class="co">#        MPAC -- TIME (CSECS B-28)</span>
-046872,000035:                                                                                                  <span class="co">#        ERADFLAG =1, TO COMPUTE EARTH RADIUS, =0 FOR FIXED EARTH RADIUS</span>
-046873,000036:                                                                                                  <span class="co">#        LUNAFLAG=0 FOR EARTH, 1 FOR MOON</span>
-046874,000037: 
-046875,000038:                                                                                                  <span class="co">#  OUTPUT</span>
-046876,000039:                                                                                                  <span class="co">#        LATITUDE IN LAT         (REVS. B-0)</span>
-046877,000040:                                                                                                  <span class="co">#        LONGITUDE IN LONG       (REVS. B-0)</span>
-046878,000041:                                                                                                  <span class="co">#        ALTITUDE IN ALT METERS  B-29</span>
-046879,000042: 
-046880,000043: 30,3766                                           <span class="ps">BANK    </span> 30                                    
-046881,000044: 13,2000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#4C41544C4F4E47">LATLONG</a>                               
-046882,000045: 13,2000                                           <span class="ps">BANK    </span>                                       
-046883,000046: 
-046884,000047: 13,2347                                           <span class="ps">COUNT*  </span> $$/LT-LG                              
-046885,000048: 13,2347  E4,1431                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414C50484156">ALPHAV</a>                                
-<a name="4C41542D4C4F4E47"></a>046886,000049: 13,2347           40220        <span class="sm">LAT-LONG</span>           <span class="in">STQ     </span> <span class="in">SETPD     </span>                            
-046887,000050: 13,2350           03674                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#494E434F52504558">INCORPEX</a>                              
-046888,000051: 13,2351           00001                                    0D                                    
-046889,000052: 13,2352           24007                           <span class="in">STOVL   </span> 6D                                    <span class="co">#  SAVE TIME IN 6-7D FOR R-TO-RP</span>
-046890,000053: 13,2353           02032                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#414C50484156">ALPHAV</a>                                
-046891,000054: 13,2354           51406                           <span class="in">PUSH    </span> <span class="in">ABVAL     </span>                            <span class="co">#  0-5D= R FOR R-TO-RP</span>
-046892,000055: 13,2355           16070                           <span class="in">STODL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414C5048414D">ALPHAM</a>                                <span class="co">#  ABS. VALUE OF R FOR ALT FORMULA BELOW</span>
-046893,000056: 13,2356           24007                                    <a href="INTERPRETIVE_CONSTANTS.agc.html#5A45524F564543">ZEROVEC</a>                               <span class="co">#  SET MPAC=0 FOR EARTH, NON-ZERO FOR MOON</span>
-046894,000057: 13,2357           71414                           <span class="in">BOFF    </span> <span class="in">COS       </span>                            <span class="co">#  USE COS(0) TO GET NON-ZERO IN MPAC</span>
-046895,000058: 13,2360           01743                                    <a href="FLAGWORD_ASSIGNMENTS.agc.html#4C554E41464C4147">LUNAFLAG</a>                              <span class="co">#  0=EARTH, 1=MOON</span>
-046896,000059: 13,2361           26362                                    <a href="#43414C4C52545250">CALLRTRP</a>                              
-<a name="43414C4C52545250"></a>046897,000060: 13,2362           77624        <span class="sm">CALLRTRP</span>           <span class="in">CALL    </span>                                       
-046898,000061: 13,2363           51700                                    <a href="PLANETARY_INERTIAL_ORIENTATION.agc.html#522D544F2D5250">R-TO-RP</a>                               <span class="co">#  RP VECTOR CONVERTED FROM R B-29</span>
-046899,000062: 13,2364           77656                           <span class="in">UNIT    </span>                                       <span class="co">#  UNIT RP B-1</span>
-046900,000063: 13,2365           36032                           <span class="in">STCALL  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414C50484156">ALPHAV</a>                                <span class="co">#  U2= 1/2 CINL FOR SETRE SUBR BELOW</span>
-046901,000064: 13,2366           26546                                    <a href="#53455447414D4D41">SETGAMMA</a>                              <span class="co">#        SET GAMMA=B2/A2 FOR EARTH, =1 FOR MOON</span>
-046902,000065: 13,2367           77624                           <span class="in">CALL    </span>                                       <span class="co">#        SCALED B-1.</span>
-046903,000066: 13,2370           26556                                    <a href="#5345545245">SETRE</a>                                 <span class="co">#  CALC RE METERS B-29</span>
-046904,000067: 13,2371           63545                           <span class="in">DLOAD   </span> <span class="in">DSQ       </span>                            
-046905,000068: 13,2372           02032                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#414C50484156">ALPHAV</a>                                
-046906,000069: 13,2373           63525                           <span class="in">PDDL    </span> <span class="in">DSQ       </span>                            
-046907,000070: 13,2374           02034                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#414C50484156">ALPHAV</a>     +2                         
-046908,000071: 13,2375           75415                           <span class="in">DAD     </span> <span class="in">SQRT      </span>                            
+047064,000025:                                                                                                  <span class="co">#  SUBROUTINE TO CONVERT RAD VECTOR AT GIVEN TIME TO LAT,LONG AND ALT</span>
+047065,000026: 
+047066,000027:                                                                                                  <span class="co">#  CALLING SEQUENCE</span>
+047067,000028:                                                                                                  <span class="co">#        L-1     CALL</span>
+047068,000029:                                                                                                  <span class="co">#        L               LAT-LONG</span>
+047069,000030: 
+047070,000031:                                                                                                  <span class="co">#  SUBROUTINES USED</span>
+047071,000032:                                                                                                  <span class="co">#        R-TO-RP, ARCTAN, SFTGAMMA, SETRE</span>
+047072,000033: 
+047073,000034:                                                                                                  <span class="co">#  ERASABLE INIT. REQ.</span>
+047074,000035:                                                                                                  <span class="co">#        AXO, -AYO, AZO, TEPHEM (SET AT LAUNCH TIME)</span>
+047075,000036:                                                                                                  <span class="co">#        ALPHAV = POSITION VECTOR METERS B-29</span>
+047076,000037:                                                                                                  <span class="co">#        MPAC -- TIME (CSECS B-28)</span>
+047077,000038:                                                                                                  <span class="co">#        ERADFLAG =1, TO COMPUTE EARTH RADIUS, =0 FOR FIXED EARTH RADIUS</span>
+047078,000039:                                                                                                  <span class="co">#        LUNAFLAG=0 FOR EARTH, 1 FOR MOON</span>
+047079,000040: 
+047080,000041:                                                                                                  <span class="co">#  OUTPUT</span>
+047081,000042:                                                                                                  <span class="co">#        LATITUDE IN LAT         (REVS. B-0)</span>
+047082,000043:                                                                                                  <span class="co">#        LONGITUDE IN LONG       (REVS. B-0)</span>
+047083,000044:                                                                                                  <span class="co">#        ALTITUDE IN ALT METERS  B-29</span>
+047084,000045: 
+047085,000046: 30,3766                                           <span class="ps">BANK    </span> 30                                    
+047086,000047: 13,2000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#4C41544C4F4E47">LATLONG</a>                               
+047087,000048: 13,2000                                           <span class="ps">BANK    </span>                                       
+047088,000049: 
+047089,000050: 13,2347                                           <span class="ps">COUNT*  </span> $$/LT-LG                              
+047090,000051: 13,2347  E4,1431                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414C50484156">ALPHAV</a>                                
+<a name="4C41542D4C4F4E47"></a>047091,000052: 13,2347           40220        <span class="sm">LAT-LONG</span>           <span class="in">STQ     </span> <span class="in">SETPD     </span>                            
+047092,000053: 13,2350           03674                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#494E434F52504558">INCORPEX</a>                              
+047093,000054: 13,2351           00001                                    0D                                    
+047094,000055: 13,2352           24007                           <span class="in">STOVL   </span> 6D                                    <span class="co">#  SAVE TIME IN 6-7D FOR R-TO-RP</span>
+047095,000056: 13,2353           02032                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#414C50484156">ALPHAV</a>                                
+047096,000057: 13,2354           51406                           <span class="in">PUSH    </span> <span class="in">ABVAL     </span>                            <span class="co">#  0-5D= R FOR R-TO-RP</span>
+047097,000058: 13,2355           16070                           <span class="in">STODL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414C5048414D">ALPHAM</a>                                <span class="co">#  ABS. VALUE OF R FOR ALT FORMULA BELOW</span>
+047098,000059: 13,2356           24007                                    <a href="INTERPRETIVE_CONSTANTS.agc.html#5A45524F564543">ZEROVEC</a>                               <span class="co">#  SET MPAC=0 FOR EARTH, NON-ZERO FOR MOON</span>
+047099,000060: 13,2357           71414                           <span class="in">BOFF    </span> <span class="in">COS       </span>                            <span class="co">#  USE COS(0) TO GET NON-ZERO IN MPAC</span>
+047100,000061: 13,2360           01743                                    <a href="FLAGWORD_ASSIGNMENTS.agc.html#4C554E41464C4147">LUNAFLAG</a>                              <span class="co">#  0=EARTH, 1=MOON</span>
+047101,000062: 13,2361           26362                                    <a href="#43414C4C52545250">CALLRTRP</a>                              
+<a name="43414C4C52545250"></a>047102,000063: 13,2362           77624        <span class="sm">CALLRTRP</span>           <span class="in">CALL    </span>                                       
+047103,000064: 13,2363           51700                                    <a href="PLANETARY_INERTIAL_ORIENTATION.agc.html#522D544F2D5250">R-TO-RP</a>                               <span class="co">#  RP VECTOR CONVERTED FROM R B-29</span>
+047104,000065: 13,2364           77656                           <span class="in">UNIT    </span>                                       <span class="co">#  UNIT RP B-1</span>
+047105,000066: 13,2365           36032                           <span class="in">STCALL  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414C50484156">ALPHAV</a>                                <span class="co">#  U2= 1/2 SINL FOR SETRE SUBR BELOW</span>
+047106,000067: 13,2366           26546                                    <a href="#53455447414D4D41">SETGAMMA</a>                              <span class="co">#        SET GAMMA=B2/A2 FOR EARTH, =1 FOR MOON</span>
+047107,000068: 13,2367           77624                           <span class="in">CALL    </span>                                       <span class="co">#        SCALED B-1</span>
+047108,000069: 13,2370           26556                                    <a href="#5345545245">SETRE</a>                                 <span class="co">#  CALC RE METERS B-29</span>
+047109,000070: 13,2371           63545                           <span class="in">DLOAD   </span> <span class="in">DSQ       </span>                            
+047110,000071: 13,2372           02032                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#414C50484156">ALPHAV</a>                                
+047111,000072: 13,2373           63525                           <span class="in">PDDL    </span> <span class="in">DSQ       </span>                            
+047112,000073: 13,2374           02034                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#414C50484156">ALPHAV</a>     +2                         
+047113,000074: 13,2375           75415                           <span class="in">DAD     </span> <span class="in">SQRT      </span>                            
 </pre>
 </span>
 </p>
@@ -192,24 +197,24 @@ Page 1128
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-046910,000073: 13,2376           76405                           <span class="in">DMP     </span> <span class="in">SL1R      </span>                            
-046911,000074: 13,2377           00011                                    <a href="#47414D5250">GAMRP</a>                                 
-046912,000075: 13,2400           14021                           <span class="in">STODL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#434F535448">COSTH</a>                                 <span class="co">#  COS(LAT) B-1</span>
-046913,000076: 13,2401           02036                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#414C50484156">ALPHAV</a>     +4                         
-046914,000077: 13,2402           34023                           <span class="in">STCALL  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#53494E5448">SINTH</a>                                 <span class="co">#  SIN(LAT) B-1</span>
-046915,000078: 13,2403           26506                                    <a href="#41524354414E">ARCTAN</a>                                
-046916,000079: 13,2404           15120                           <span class="in">STODL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4154">LAT</a>                                   <span class="co">#  LAT B0</span>
-046917,000080: 13,2405           02032                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#414C50484156">ALPHAV</a>                                
-046918,000081: 13,2406           14021                           <span class="in">STODL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#434F535448">COSTH</a>                                 <span class="co">#  COS(LONG) B-1</span>
-046919,000082: 13,2407           02034                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#414C50484156">ALPHAV</a>     +2                         
-046920,000083: 13,2410           34023                           <span class="in">STCALL  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#53494E5448">SINTH</a>                                 <span class="co">#  SIN(LONG) B-1</span>
-046921,000084: 13,2411           26506                                    <a href="#41524354414E">ARCTAN</a>                                
-046922,000085: 13,2412           15122                           <span class="in">STODL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4F4E47">LONG</a>                                  <span class="co">#  LONG. REVS B-0 IN RANGE -1/2 TO 1/2</span>
-046923,000086: 13,2413           02070                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#414C5048414D">ALPHAM</a>                                
-046924,000087: 13,2414           77625                           <span class="in">DSU     </span>                                       <span class="co">#  ALT= R-RE METERS B-29</span>
-046925,000088: 13,2415           03673                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#455241444D">ERADM</a>                                 
-046926,000089: 13,2416           35124                           <span class="in">STCALL  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414C54">ALT</a>                                   <span class="co">#  EXIT WITH ALT METERS B-29</span>
-046927,000090: 13,2417           03674                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#494E434F52504558">INCORPEX</a>                              
+047115,000076: 13,2376           76405                           <span class="in">DMP     </span> <span class="in">SL1R      </span>                            
+047116,000077: 13,2377           00011                                    <a href="#47414D5250">GAMRP</a>                                 
+047117,000078: 13,2400           14021                           <span class="in">STODL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#434F535448">COSTH</a>                                 <span class="co">#  COS(LAT) B-1</span>
+047118,000079: 13,2401           02036                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#414C50484156">ALPHAV</a>     +4                         
+047119,000080: 13,2402           34023                           <span class="in">STCALL  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#53494E5448">SINTH</a>                                 <span class="co">#  SIN(LAT) B-1</span>
+047120,000081: 13,2403           26506                                    <a href="#41524354414E">ARCTAN</a>                                
+047121,000082: 13,2404           15120                           <span class="in">STODL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4154">LAT</a>                                   <span class="co">#  LAT B0</span>
+047122,000083: 13,2405           02032                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#414C50484156">ALPHAV</a>                                
+047123,000084: 13,2406           14021                           <span class="in">STODL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#434F535448">COSTH</a>                                 <span class="co">#  COS(LONG) B-1</span>
+047124,000085: 13,2407           02034                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#414C50484156">ALPHAV</a>     +2                         
+047125,000086: 13,2410           34023                           <span class="in">STCALL  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#53494E5448">SINTH</a>                                 <span class="co">#  SIN(LONG) B-1</span>
+047126,000087: 13,2411           26506                                    <a href="#41524354414E">ARCTAN</a>                                
+047127,000088: 13,2412           15122                           <span class="in">STODL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4F4E47">LONG</a>                                  <span class="co">#  LONG. REVS B-0 IN RANGE -1/2 TO 1/2</span>
+047128,000089: 13,2413           02070                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#414C5048414D">ALPHAM</a>                                
+047129,000090: 13,2414           77625                           <span class="in">DSU     </span>                                       <span class="co">#  ALT= R-RE METERS B-29</span>
+047130,000091: 13,2415           03673                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#455241444D">ERADM</a>                                 
+047131,000092: 13,2416           35124                           <span class="in">STCALL  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414C54">ALT</a>                                   <span class="co">#  EXIT WITH ALT METERS B-29</span>
+047132,000093: 13,2417           03674                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#494E434F52504558">INCORPEX</a>                              
 </pre>
 </span>
 </p>
@@ -225,57 +230,57 @@ Page 1129
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-046929,000092:                                                                                                  <span class="co">#  SUBROUTINE TO CONVERT LAT,LONG.ALT AT GIVEN TIME TO RADIUS VECTOR</span>
-046930,000093: 
-046931,000094:                                                                                                  <span class="co">#  CALLING SEQUENCE</span>
-046932,000095:                                                                                                  <span class="co">#        L-1     CALL</span>
-046933,000096:                                                                                                  <span class="co">#        L               LALOTORV</span>
-046934,000097: 
-046935,000098:                                                                                                  <span class="co">#  SUBROUTINES USED</span>
-046936,000099:                                                                                                  <span class="co">#        SETGAMMA, SETRE, RP-TO-R</span>
-046937,000100: 
-046938,000101:                                                                                                  <span class="co">#  ERASABLE INIT. REQ.</span>
-046939,000102:                                                                                                  <span class="co">#        AXO, AYO, AZO, TEPHEM SET AT LAUNCH TIME</span>
-046940,000103:                                                                                                  <span class="co">#        LAT -- LATITUDE         (REVS B0)</span>
-046941,000104:                                                                                                  <span class="co">#        LONG -- LONGITUDE       (REVS B0)</span>
-046942,000105:                                                                                                  <span class="co">#        ALT -- ALTITUDE         (METERS) B-29</span>
-046943,000106:                                                                                                  <span class="co">#        MPAC -- TIME            (CSECS B-28)</span>
-046944,000107:                                                                                                  <span class="co">#        ERADFLAG =1 TO COMPUTE EARTH RADIUS, =0 FOR FIXED EARTH RADIUS</span>
-046945,000108:                                                                                                  <span class="co">#        LUNAFLAG=0 FOR EARTH, 1 FOR MOON</span>
-046946,000109: 
-046947,000110:                                                                                                  <span class="co">#  OUTPUT</span>
-046948,000111:                                                                                                  <span class="co">#        R-VECTOR IN ALPHAV      (METERS B-29)</span>
-046949,000112: 
-<a name="4C414C4F544F5256"></a>046950,000113: 13,2420           40220        <span class="sm">LALOTORV</span>           <span class="in">STQ     </span> <span class="in">SETPD     </span>                            <span class="co">#  LAT,LONG,ALT TO R VECTOR</span>
-046951,000114: 13,2421           03674                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#494E434F52504558">INCORPEX</a>                              
-046952,000115: 13,2422           00001                                    0D                                    
-046953,000116: 13,2423           34007                           <span class="in">STCALL  </span> 6D                                    <span class="co">#  6-7D= TIME FOR RP-TO-R</span>
-046954,000117: 13,2424           26546                                    <a href="#53455447414D4D41">SETGAMMA</a>                              <span class="co">#  GAMMA=B2/A2 FOR EARTH, 1 FOR MOON B-1</span>
-046955,000118: 13,2425           73545                           <span class="in">DLOAD   </span> <span class="in">SIN       </span>                            <span class="co">#            COS(LONG)COS(LAT) IN MPAC</span>
-046956,000119: 13,2426           01120                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4154">LAT</a>                                   <span class="co">#  UNIT RP = SIN(LONG)COS(LAT)    2-3D</span>
-046957,000120: 13,2427           65275                           <span class="in">DMPR    </span> <span class="in">PDDL      </span>                            <span class="co">#  PD 2      GAMMA*SIN(LAT)       0-1D</span>
-046958,000121: 13,2430           00011                                    <a href="#47414D5250">GAMRP</a>                                 
-046959,000122: 13,2431           01120                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4154">LAT</a>                                   <span class="co">#      0-1D= GAMMA*SIN(LAT) B-2</span>
-046960,000123: 13,2432           65346                           <span class="in">COS     </span> <span class="in">PDDL      </span>                            <span class="co">#  PD4 2-3D= COS(LAT) B-1 TEMPORARILY</span>
-046961,000124: 13,2433           01122                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4F4E47">LONG</a>                                  
-046962,000125: 13,2434           57356                           <span class="in">SIN     </span> <span class="in">DMPR      </span>                            <span class="co">#  PD 2</span>
-046963,000126: 13,2435           71525                           <span class="in">PDDL    </span> <span class="in">COS       </span>                            <span class="co">#  PD 4 2-3D = SIN(LONG)COS(LAT) B-2</span>
-046964,000127: 13,2436           01120                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4154">LAT</a>                                   
-046965,000128: 13,2437           71525                           <span class="in">PDDL    </span> <span class="in">COS       </span>                            <span class="co">#  PD 6 4-5D = COS(LAT) B-1 TEMPORARILY</span>
-046966,000129: 13,2440           01122                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4F4E47">LONG</a>                                  
-046967,000130: 13,2441           55475                           <span class="in">DMPR    </span> <span class="in">VDEF      </span>                            <span class="co">#  PD4 MPAC= COS(LONG)COS(LAT) B-2</span>
-046968,000131: 13,2442           41456                           <span class="in">UNIT    </span> <span class="in">PUSH      </span>                            <span class="co">#  0-5D= UNIT RP FOR RP-TO-R SUBR.</span>
-046969,000132: 13,2443           36032                           <span class="in">STCALL  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414C50484156">ALPHAV</a>                                <span class="co">#  ALPHAV +4= SINL FOR SETRE SUBR.</span>
-046970,000133: 13,2444           26556                                    <a href="#5345545245">SETRE</a>                                 <span class="co">#  RE METERS B-29</span>
-046971,000134: 13,2445           43145                           <span class="in">DLOAD   </span> <span class="in">BOFF      </span>                            <span class="co">#  SET MPAC=0 FOR EARTH, NON-ZERO IN MPAC</span>
-046972,000135: 13,2446           24007                                    <a href="INTERPRETIVE_CONSTANTS.agc.html#5A45524F564543">ZEROVEC</a>                               
-046973,000136: 13,2447           01743                                    <a href="FLAGWORD_ASSIGNMENTS.agc.html#4C554E41464C4147">LUNAFLAG</a>                              
-046974,000137: 13,2450           26452                                    <a href="#43414C4C52505254">CALLRPRT</a>                              
-046975,000138: 13,2451           77746                           <span class="in">COS     </span>                                       <span class="co">#  USE COS(0) TO GET NON-ZERO IN MPAC</span>
-<a name="43414C4C52505254"></a>046976,000139: 13,2452           77624        <span class="sm">CALLRPRT</span>           <span class="in">CALL    </span>                                       
-046977,000140: 13,2453           55716                                    <a href="PLANETARY_INERTIAL_ORIENTATION.agc.html#52502D544F2D52">RP-TO-R</a>                               <span class="co">#  EXIT WITH UNIT R VECTOR IN MPAC</span>
-046978,000141: 13,2454           16032                           <span class="in">STODL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414C50484156">ALPHAV</a>                                
-046979,000142: 13,2455           03673                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#455241444D">ERADM</a>                                 
+047134,000095:                                                                                                  <span class="co">#  SUBROUTINE TO CONVERT LAT,LONG.ALT AT GIVEN TIME TO RADIUS VECTOR</span>
+047135,000096: 
+047136,000097:                                                                                                  <span class="co">#  CALLING SEQUENCE</span>
+047137,000098:                                                                                                  <span class="co">#        L-1     CALL</span>
+047138,000099:                                                                                                  <span class="co">#        L               LALOTORV</span>
+047139,000100: 
+047140,000101:                                                                                                  <span class="co">#  SUBROUTINES USED</span>
+047141,000102:                                                                                                  <span class="co">#        SETGAMMA, SETRE, RP-TO-R</span>
+047142,000103: 
+047143,000104:                                                                                                  <span class="co">#  ERASABLE INIT. REQ.</span>
+047144,000105:                                                                                                  <span class="co">#        AXO, AYO, AZO, TEPHEM SET AT LAUNCH TIME</span>
+047145,000106:                                                                                                  <span class="co">#        LAT -- LATITUDE         (REVS B0)</span>
+047146,000107:                                                                                                  <span class="co">#        LONG -- LONGITUDE       (REVS B0)</span>
+047147,000108:                                                                                                  <span class="co">#        ALT -- ALTITUDE         (METERS) B-29</span>
+047148,000109:                                                                                                  <span class="co">#        MPAC -- TIME            (CSECS B-28)</span>
+047149,000110:                                                                                                  <span class="co">#        ERADFLAG =1 TO COMPUTE EARTH RADIUS, =0 FOR FIXED EARTH RADIUS</span>
+047150,000111:                                                                                                  <span class="co">#        LUNAFLAG=0 FOR EARTH, 1 FOR MOON</span>
+047151,000112: 
+047152,000113:                                                                                                  <span class="co">#  OUTPUT</span>
+047153,000114:                                                                                                  <span class="co">#        R-VECTOR IN ALPHAV      (METERS B-29)</span>
+047154,000115: 
+<a name="4C414C4F544F5256"></a>047155,000116: 13,2420           40220        <span class="sm">LALOTORV</span>           <span class="in">STQ     </span> <span class="in">SETPD     </span>                            <span class="co">#  LAT,LONG,ALT TO R VECTOR</span>
+047156,000117: 13,2421           03674                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#494E434F52504558">INCORPEX</a>                              
+047157,000118: 13,2422           00001                                    0D                                    
+047158,000119: 13,2423           34007                           <span class="in">STCALL  </span> 6D                                    <span class="co">#  6-7D= TIME FOR RP-TO-R</span>
+047159,000120: 13,2424           26546                                    <a href="#53455447414D4D41">SETGAMMA</a>                              <span class="co">#  GAMMA=B2/A2 FOR EARTH, 1 FOR MOON B-1</span>
+047160,000121: 13,2425           73545                           <span class="in">DLOAD   </span> <span class="in">SIN       </span>                            <span class="co">#            COS(LONG)COS(LAT) IN MPAC</span>
+047161,000122: 13,2426           01120                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4154">LAT</a>                                   <span class="co">#  UNIT RP = SIN(LONG)COS(LAT)    2-3D</span>
+047162,000123: 13,2427           65275                           <span class="in">DMPR    </span> <span class="in">PDDL      </span>                            <span class="co">#  PD 2      GAMMA*SIN(LAT)       0-1D</span>
+047163,000124: 13,2430           00011                                    <a href="#47414D5250">GAMRP</a>                                 
+047164,000125: 13,2431           01120                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4154">LAT</a>                                   <span class="co">#      0-1D= GAMMA*SIN(LAT) B-2</span>
+047165,000126: 13,2432           65346                           <span class="in">COS     </span> <span class="in">PDDL      </span>                            <span class="co">#  PD4 2-3D= COS(LAT) B-1 TEMPORARILY</span>
+047166,000127: 13,2433           01122                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4F4E47">LONG</a>                                  
+047167,000128: 13,2434           57356                           <span class="in">SIN     </span> <span class="in">DMPR      </span>                            <span class="co">#  PD 2</span>
+047168,000129: 13,2435           71525                           <span class="in">PDDL    </span> <span class="in">COS       </span>                            <span class="co">#  PD 4 2-3D = SIN(LONG)COS(LAT) B-2</span>
+047169,000130: 13,2436           01120                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4154">LAT</a>                                   
+047170,000131: 13,2437           71525                           <span class="in">PDDL    </span> <span class="in">COS       </span>                            <span class="co">#  PD 6 4-5D = COS(LAT) B-1 TEMPORARILY</span>
+047171,000132: 13,2440           01122                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4F4E47">LONG</a>                                  
+047172,000133: 13,2441           55475                           <span class="in">DMPR    </span> <span class="in">VDEF      </span>                            <span class="co">#  PD4 MPAC= COS(LONG)COS(LAT) B-2</span>
+047173,000134: 13,2442           41456                           <span class="in">UNIT    </span> <span class="in">PUSH      </span>                            <span class="co">#  0-5D= UNIT RP FOR RP-TO-R SUBR.</span>
+047174,000135: 13,2443           36032                           <span class="in">STCALL  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414C50484156">ALPHAV</a>                                <span class="co">#  ALPHAV +4= SINL FOR SETRE SUBR.</span>
+047175,000136: 13,2444           26556                                    <a href="#5345545245">SETRE</a>                                 <span class="co">#  RE METERS B-29</span>
+047176,000137: 13,2445           43145                           <span class="in">DLOAD   </span> <span class="in">BOFF      </span>                            <span class="co">#  SET MPAC=0 FOR EARTH, NON-ZERO FOR MOON</span>
+047177,000138: 13,2446           24007                                    <a href="INTERPRETIVE_CONSTANTS.agc.html#5A45524F564543">ZEROVEC</a>                               
+047178,000139: 13,2447           01743                                    <a href="FLAGWORD_ASSIGNMENTS.agc.html#4C554E41464C4147">LUNAFLAG</a>                              
+047179,000140: 13,2450           26452                                    <a href="#43414C4C52505254">CALLRPRT</a>                              
+047180,000141: 13,2451           77746                           <span class="in">COS     </span>                                       <span class="co">#  USE COS(0) TO GET NON-ZERO IN MPAC</span>
+<a name="43414C4C52505254"></a>047181,000142: 13,2452           77624        <span class="sm">CALLRPRT</span>           <span class="in">CALL    </span>                                       
+047182,000143: 13,2453           55716                                    <a href="PLANETARY_INERTIAL_ORIENTATION.agc.html#52502D544F2D52">RP-TO-R</a>                               <span class="co">#  EXIT WITH UNIT R VECTOR IN MPAC</span>
+047183,000144: 13,2454           16032                           <span class="in">STODL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414C50484156">ALPHAV</a>                                
+047184,000145: 13,2455           03673                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#455241444D">ERADM</a>                                 
 </pre>
 </span>
 </p>
@@ -291,44 +296,44 @@ Page 1130
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-046981,000144: 13,2456           74215                           <span class="in">DAD     </span> <span class="in">VXSC      </span>                            <span class="co">#  (RE + ALT)(UNIT R) METERS B-30</span>
-046982,000145: 13,2457           01124                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#414C54">ALT</a>                                   
-046983,000146: 13,2460           02032                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#414C50484156">ALPHAV</a>                                
-046984,000147: 13,2461           77772                           <span class="in">VSL1    </span>                                       <span class="co">#  R METERS B-29</span>
-046985,000148: 13,2462           36032                           <span class="in">STCALL  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414C50484156">ALPHAV</a>                                <span class="co">#  EXIT WITH R IN METERS B-29</span>
-046986,000149: 13,2463           03674                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#494E434F52504558">INCORPEX</a>                              
-046987,000150: 
-046988,000151:                                                                                                  <span class="co">#  SUBROUTINE TO COMPUTE EARTH RADIUS</span>
-046989,000152: 
-046990,000153:                                                                                                  <span class="co">#  INPUT</span>
-046991,000154:                                                                                                  <span class="co">#        1/2 SIN LAT IN ALPHAV +4</span>
-046992,000155: 
-046993,000156:                                                                                                  <span class="co">#  OUTPUT</span>
-046994,000157:                                                                                                  <span class="co">#        EARTH RADIUS IN ERADM AND MPAC (METERS B-29)</span>
-046995,000158: 
-<a name="47455445524144"></a>046996,000159: 13,2464           63545        <span class="sm">GETERAD </span>           <span class="in">DLOAD   </span> <span class="in">DSQ       </span>                            
-046997,000160: 13,2465           02036                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#414C50484156">ALPHAV</a>     +4                         <span class="co">#  SIN**2(L)</span>
-046998,000161: 13,2466           44352                           <span class="in">SL1     </span> <span class="in">BDSU      </span>                            
-046999,000162: 13,2467           24005                                    <a href="#4450312F32">DP1/2</a>                                 <span class="co">#  COS**2(L)</span>
-047000,000163: 13,2470           44275                           <span class="in">DMPR    </span> <span class="in">BDSU      </span>                            
-047001,000164: 13,2471           26505                                    <a href="#4545">EE</a>                                    
-047002,000165: 13,2472           24005                                    <a href="#4450312F32">DP1/2</a>                                 
-047003,000166: 13,2473           75465                           <span class="in">BDDV    </span> <span class="in">SQRT      </span>                            
-047004,000167: 13,2474           26501                                    <a href="#4232585343">B2XSC</a>                                 
-047005,000168: 13,2475           77622                           <span class="in">SR4R    </span>                                       
-047006,000169: 13,2476           03673                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#455241444D">ERADM</a>                                 
-047007,000170: 13,2477           77616                           <span class="in">RVQ     </span>                                       
-047008,000171: 
-047009,000172:                                                                                                  <span class="co">#  THE FOLLOWING CONSTANTS WERE COMPUTED WITH A=6378166, B=6356784 METERS</span>
-047010,000173:                                                                                                  <span class="co">#  B2XSC = B**2 SCALED B-51</span>
-047011,000174:                                                                                                  <span class="co">#  B2/A2 = B**2/A**2 SCALED B-1</span>
-047012,000175:                                                                                                  <span class="co">#  EE = (1-B**2/A**2) SCALED B-0</span>
-047013,000176: 
-<a name="4232585343"></a>047014,000177: 13,2500           00446 00305  <span class="sm">B2XSC   </span>           <span class="ps">2DEC    </span> .0179450689                            <span class="co">#  B**2 SCALED B-51</span>
-<a name="4450312F32"></a>047015,000178: 13,2502  12,2004               <span class="sm">DP1/2   </span>           <span class="ps">=       </span> <a href="INTERPRETIVE_CONSTANTS.agc.html#58554E4954">XUNIT</a>                                 
-<a name="42322F4132"></a>047016,000179: 13,2502           17711 05254  <span class="sm">B2/A2   </span>           <span class="ps">2DEC    </span> .9933064884 B-1                        <span class="co">#  GAMMA= B**2/A**2 B-1</span>
-<a name="4545"></a>047017,000180: 13,2504           00155 25250  <span class="sm">EE      </span>           <span class="ps">2DEC    </span> 6.6935116  E-3                        <span class="co">#  (1-B**2/A**2) B-0</span>
-047018,000181: 
+047186,000147: 13,2456           74215                           <span class="in">DAD     </span> <span class="in">VXSC      </span>                            <span class="co">#  (RE + ALT)(UNIT R) METERS B-30</span>
+047187,000148: 13,2457           01124                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#414C54">ALT</a>                                   
+047188,000149: 13,2460           02032                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#414C50484156">ALPHAV</a>                                
+047189,000150: 13,2461           77772                           <span class="in">VSL1    </span>                                       <span class="co">#  R METERS B-29</span>
+047190,000151: 13,2462           36032                           <span class="in">STCALL  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414C50484156">ALPHAV</a>                                <span class="co">#  EXIT WITH R IN METERS B-29</span>
+047191,000152: 13,2463           03674                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#494E434F52504558">INCORPEX</a>                              
+047192,000153: 
+047193,000154:                                                                                                  <span class="co">#  SUBROUTINE TO COMPUTE EARTH RADIUS</span>
+047194,000155: 
+047195,000156:                                                                                                  <span class="co">#  INPUT</span>
+047196,000157:                                                                                                  <span class="co">#        1/2 SIN LAT IN ALPHAV +4</span>
+047197,000158: 
+047198,000159:                                                                                                  <span class="co">#  OUTPUT</span>
+047199,000160:                                                                                                  <span class="co">#        EARTH RADIUS IN ERADM AND MPAC (METERS B-29)</span>
+047200,000161: 
+<a name="47455445524144"></a>047201,000162: 13,2464           63545        <span class="sm">GETERAD </span>           <span class="in">DLOAD   </span> <span class="in">DSQ       </span>                            
+047202,000163: 13,2465           02036                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#414C50484156">ALPHAV</a>     +4                         <span class="co">#  SIN**2(L)</span>
+047203,000164: 13,2466           44352                           <span class="in">SL1     </span> <span class="in">BDSU      </span>                            
+047204,000165: 13,2467           24005                                    <a href="#4450312F32">DP1/2</a>                                 <span class="co">#  COS**2(L)</span>
+047205,000166: 13,2470           44275                           <span class="in">DMPR    </span> <span class="in">BDSU      </span>                            
+047206,000167: 13,2471           26505                                    <a href="#4545">EE</a>                                    
+047207,000168: 13,2472           24005                                    <a href="#4450312F32">DP1/2</a>                                 
+047208,000169: 13,2473           75465                           <span class="in">BDDV    </span> <span class="in">SQRT      </span>                            
+047209,000170: 13,2474           26501                                    <a href="#4232585343">B2XSC</a>                                 
+047210,000171: 13,2475           77622                           <span class="in">SR4R    </span>                                       
+047211,000172: 13,2476           03673                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#455241444D">ERADM</a>                                 
+047212,000173: 13,2477           77616                           <span class="in">RVQ     </span>                                       
+047213,000174: 
+047214,000175:                                                                                                  <span class="co">#  THE FOLLOWING CONSTANTS WERE COMPUTED WITH A=6378166, B=6356784 METERS</span>
+047215,000176:                                                                                                  <span class="co">#  B2XSC = B**2 SCALED B-51</span>
+047216,000177:                                                                                                  <span class="co">#  B2/A2 = B**2/A**2 SCALED B-1</span>
+047217,000178:                                                                                                  <span class="co">#  EE = (1-B**2/A**2) SCALED B-0</span>
+047218,000179: 
+<a name="4232585343"></a>047219,000180: 13,2500           00446 00305  <span class="sm">B2XSC   </span>           <span class="ps">2DEC    </span> .0179450689                            <span class="co">#  B**2 SCALED B-51</span>
+<a name="4450312F32"></a>047220,000181: 13,2502  12,2004               <span class="sm">DP1/2   </span>           <span class="ps">=       </span> <a href="INTERPRETIVE_CONSTANTS.agc.html#58554E4954">XUNIT</a>                                 
+<a name="42322F4132"></a>047221,000182: 13,2502           17711 05254  <span class="sm">B2/A2   </span>           <span class="ps">2DEC    </span> .9933064884 B-1                        <span class="co">#  GAMMA= B**2/A**2 B-1</span>
+<a name="4545"></a>047222,000183: 13,2504           00155 25250  <span class="sm">EE      </span>           <span class="ps">2DEC    </span> 6.6935116  E-3                        <span class="co">#  (1-B**2/A**2) B-0</span>
+047223,000184: 
 </pre>
 </span>
 </p>
@@ -344,52 +349,52 @@ Page 1131
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-047020,000183:                                                                                                  <span class="co">#  ARCTAN SUBROUTINE</span>
-047021,000184: 
-047022,000185:                                                                                                  <span class="co">#  CALLING SEQUENCE</span>
-047023,000186:                                                                                                  <span class="co">#        SIN THETA IN SINTH B-1</span>
-047024,000187:                                                                                                  <span class="co">#        COS THETA IN COSTH B-1</span>
-047025,000188:                                                                                                  <span class="co">#        CALL ARCTAN</span>
-047026,000189: 
-047027,000190:                                                                                                  <span class="co">#  OUTPUT</span>
-047028,000191:                                                                                                  <span class="co">#        ARCTAN THETA IN MPAC AND THETA B-0 IN RANGE -1/2 TO +1/2</span>
-047029,000192: 
-<a name="41524354414E"></a>047030,000193: 13,2506           77600        <span class="sm">ARCTAN  </span>           <span class="in">BOV     </span>                                       
-047031,000194: 13,2507           26510                                    <a href="#434C524F56464C57">CLROVFLW</a>                              
-<a name="434C524F56464C57"></a>047032,000195: 13,2510           63545        <span class="sm">CLROVFLW</span>           <span class="in">DLOAD   </span> <span class="in">DSQ       </span>                            
-047033,000196: 13,2511           00023                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#53494E5448">SINTH</a>                                 
-047034,000197: 13,2512           63525                           <span class="in">PDDL    </span> <span class="in">DSQ       </span>                            
-047035,000198: 13,2513           00021                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#434F535448">COSTH</a>                                 
-047036,000199: 13,2514           77615                           <span class="in">DAD     </span>                                       
-047037,000200: 13,2515           75454                           <span class="in">BZE     </span> <span class="in">SQRT      </span>                            
-047038,000201: 13,2516           26534                                    <a href="#41524354414E5858">ARCTANXX</a>                              <span class="co">#  ATAN=0/0.  SET THETA=0</span>
-047039,000202: 13,2517           40065                           <span class="in">BDDV    </span> <span class="in">BOV       </span>                            
-047040,000203: 13,2520           00023                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#53494E5448">SINTH</a>                                 
-047041,000204: 13,2521           26541                                    <a href="#4154414E3D3930">ATAN=90</a>                               
-047042,000205: 13,2522           67542                           <span class="in">SR1     </span> <span class="in">ASIN      </span>                            
-047043,000206: 13,2523           00025                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5448455441">THETA</a>                                 
-047044,000207: 13,2524           50125                           <span class="in">PDDL    </span> <span class="in">BMN       </span>                            
-047045,000208: 13,2525           00021                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#434F535448">COSTH</a>                                 
-047046,000209: 13,2526           26530                                    <a href="#4E4547434F53">NEGCOS</a>                                
-047047,000210: 13,2527           43545                           <span class="in">DLOAD   </span> <span class="in">RVQ       </span>                            
-<a name="4E4547434F53"></a>047048,000211: 13,2530           57545        <span class="sm">NEGCOS  </span>           <span class="in">DLOAD   </span> <span class="in">DCOMP     </span>                            
-047049,000212: 13,2531           43244                           <span class="in">BPL     </span> <span class="in">DAD       </span>                            
-047050,000213: 13,2532           26536                                    <a href="#4E45474F5554">NEGOUT</a>                                
-047051,000214: 13,2533           24005                                    <a href="#4450312F32">DP1/2</a>                                 
-<a name="41524354414E5858"></a>047052,000215: 13,2534           00025        <span class="sm">ARCTANXX</span>           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5448455441">THETA</a>                                 
-047053,000216: 13,2535           77616                           <span class="in">RVQ     </span>                                       
-047054,000217: 
-<a name="4E45474F5554"></a>047055,000218: 13,2536           52025        <span class="sm">NEGOUT  </span>           <span class="in">DSU     </span> <span class="in">GOTO      </span>                            
-047056,000219: 13,2537           24005                                    <a href="#4450312F32">DP1/2</a>                                 
-047057,000220: 13,2540           26534                                    <a href="#41524354414E5858">ARCTANXX</a>                              
-<a name="4154414E3D3930"></a>047058,000221: 13,2541           75345        <span class="sm">ATAN=90 </span>           <span class="in">DLOAD   </span> <span class="in">SIGN      </span>                            
-047059,000222: 13,2542           11003                                    <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#4C4F4450312F34">LODP1/4</a>                               
-047060,000223: 13,2543           00023                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#53494E5448">SINTH</a>                                 
-047061,000224: 13,2544           00025                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5448455441">THETA</a>                                 
-047062,000225: 13,2545           77616                           <span class="in">RVQ     </span>                                       
-047063,000226: 
-<a name="32445A45524F"></a>047064,000227: 13,2546  12,2006               <span class="sm">2DZERO  </span>           <span class="ps">=       </span> <a href="ORBITAL_INTEGRATION.agc.html#44505A45524F">DPZERO</a>                                
-047065,000228: 
+047225,000186:                                                                                                  <span class="co">#  ARCTAN SUBROUTINE</span>
+047226,000187: 
+047227,000188:                                                                                                  <span class="co">#  CALLING SEQUENCE</span>
+047228,000189:                                                                                                  <span class="co">#        SIN THETA IN SINTH B-1</span>
+047229,000190:                                                                                                  <span class="co">#        COS THETA IN COSTH B-1</span>
+047230,000191:                                                                                                  <span class="co">#        CALL ARCTAN</span>
+047231,000192: 
+047232,000193:                                                                                                  <span class="co">#  OUTPUT</span>
+047233,000194:                                                                                                  <span class="co">#        ARCTAN THETA IN MPAC AND THETA B-0 IN RANGE -1/2 TO +1/2</span>
+047234,000195: 
+<a name="41524354414E"></a>047235,000196: 13,2506           77600        <span class="sm">ARCTAN  </span>           <span class="in">BOV     </span>                                       
+047236,000197: 13,2507           26510                                    <a href="#434C524F56464C57">CLROVFLW</a>                              
+<a name="434C524F56464C57"></a>047237,000198: 13,2510           63545        <span class="sm">CLROVFLW</span>           <span class="in">DLOAD   </span> <span class="in">DSQ       </span>                            
+047238,000199: 13,2511           00023                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#53494E5448">SINTH</a>                                 
+047239,000200: 13,2512           63525                           <span class="in">PDDL    </span> <span class="in">DSQ       </span>                            
+047240,000201: 13,2513           00021                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#434F535448">COSTH</a>                                 
+047241,000202: 13,2514           77615                           <span class="in">DAD     </span>                                       
+047242,000203: 13,2515           75454                           <span class="in">BZE     </span> <span class="in">SQRT      </span>                            
+047243,000204: 13,2516           26534                                    <a href="#41524354414E5858">ARCTANXX</a>                              <span class="co">#  ATAN=0/0  SET THETA=0</span>
+047244,000205: 13,2517           40065                           <span class="in">BDDV    </span> <span class="in">BOV       </span>                            
+047245,000206: 13,2520           00023                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#53494E5448">SINTH</a>                                 
+047246,000207: 13,2521           26541                                    <a href="#4154414E3D3930">ATAN=90</a>                               
+047247,000208: 13,2522           67542                           <span class="in">SR1     </span> <span class="in">ASIN      </span>                            
+047248,000209: 13,2523           00025                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5448455441">THETA</a>                                 
+047249,000210: 13,2524           50125                           <span class="in">PDDL    </span> <span class="in">BMN       </span>                            
+047250,000211: 13,2525           00021                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#434F535448">COSTH</a>                                 
+047251,000212: 13,2526           26530                                    <a href="#4E4547434F53">NEGCOS</a>                                
+047252,000213: 13,2527           43545                           <span class="in">DLOAD   </span> <span class="in">RVQ       </span>                            
+<a name="4E4547434F53"></a>047253,000214: 13,2530           57545        <span class="sm">NEGCOS  </span>           <span class="in">DLOAD   </span> <span class="in">DCOMP     </span>                            
+047254,000215: 13,2531           43244                           <span class="in">BPL     </span> <span class="in">DAD       </span>                            
+047255,000216: 13,2532           26536                                    <a href="#4E45474F5554">NEGOUT</a>                                
+047256,000217: 13,2533           24005                                    <a href="#4450312F32">DP1/2</a>                                 
+<a name="41524354414E5858"></a>047257,000218: 13,2534           00025        <span class="sm">ARCTANXX</span>           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5448455441">THETA</a>                                 
+047258,000219: 13,2535           77616                           <span class="in">RVQ     </span>                                       
+047259,000220: 
+<a name="4E45474F5554"></a>047260,000221: 13,2536           52025        <span class="sm">NEGOUT  </span>           <span class="in">DSU     </span> <span class="in">GOTO      </span>                            
+047261,000222: 13,2537           24005                                    <a href="#4450312F32">DP1/2</a>                                 
+047262,000223: 13,2540           26534                                    <a href="#41524354414E5858">ARCTANXX</a>                              
+<a name="4154414E3D3930"></a>047263,000224: 13,2541           75345        <span class="sm">ATAN=90 </span>           <span class="in">DLOAD   </span> <span class="in">SIGN      </span>                            
+047264,000225: 13,2542           11003                                    <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#4C4F4450312F34">LODP1/4</a>                               
+047265,000226: 13,2543           00023                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#53494E5448">SINTH</a>                                 
+047266,000227: 13,2544           00025                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5448455441">THETA</a>                                 
+047267,000228: 13,2545           77616                           <span class="in">RVQ     </span>                                       
+047268,000229: 
+<a name="32445A45524F"></a>047269,000230: 13,2546  12,2006               <span class="sm">2DZERO  </span>           <span class="ps">=       </span> <a href="ORBITAL_INTEGRATION.agc.html#44505A45524F">DPZERO</a>                                
+047270,000231: 
 </pre>
 </span>
 </p>
@@ -405,32 +410,32 @@ Page 1132
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-047067,000230:                                                                                                  <span class="co">#  ***** SETGAMMA SUBROUTINE *****</span>
-047068,000231:                                                                                                  <span class="co">#  SUBROUTINE TO SET GAMMA FOR THE LAT-LONG AND LALOTORV SUBROUTINES</span>
-047069,000232: 
-047070,000233:                                                                                                  <span class="co">#  GAMMA = B**2/A**2 FOR EARTH (B-1)</span>
-047071,000234:                                                                                                  <span class="co">#  GAMMA = 1 FOR MOON (B-1)</span>
-047072,000235: 
-047073,000236:                                                                                                  <span class="co">#  CALLING SEQUENCE</span>
-047074,000237:                                                                                                  <span class="co">#        L       CALL</span>
-047075,000238:                                                                                                  <span class="co">#        L+1             SETGAMMA</span>
-047076,000239: 
-047077,000240:                                                                                                  <span class="co">#  INPUT</span>
-047078,000241:                                                                                                  <span class="co">#        LUNAFLAG=0 FOR EARTH, =1 FOR MOON</span>
-047079,000242: 
-047080,000243:                                                                                                  <span class="co">#  OUTPUT</span>
-047081,000244:                                                                                                  <span class="co">#        GAMMA IN GAMRP (B-1)</span>
-047082,000245: 
-<a name="53455447414D4D41"></a>047083,000246: 13,2546           43145        <span class="sm">SETGAMMA</span>           <span class="in">DLOAD   </span> <span class="in">BOFF      </span>                            <span class="co">#  BRANCH FOR EARTH</span>
-047084,000247: 13,2547           26503                                    <a href="#42322F4132">B2/A2</a>                                 <span class="co">#  EARTH GAMMA</span>
-047085,000248: 13,2550           01743                                    <a href="FLAGWORD_ASSIGNMENTS.agc.html#4C554E41464C4147">LUNAFLAG</a>                              
-047086,000249: 13,2551           26554                                    <a href="#534554474D4558">SETGMEX</a>                               
-047087,000250: 13,2552           77735                           <span class="in">SLOAD   </span>                                       
-047088,000251: 13,2553           24005                                    <a href="PLANETARY_INERTIAL_ORIENTATION.agc.html#314231">1B1</a>                                   <span class="co">#  MOON GAMMA</span>
-<a name="534554474D4558"></a>047089,000252: 13,2554           00011        <span class="sm">SETGMEX </span>           <span class="in">STORE   </span> <a href="#47414D5250">GAMRP</a>                                 
-047090,000253: 13,2555           77616                           <span class="in">RVQ     </span>                                       
-<a name="47414D5250"></a>047091,000254: 13,2556                        <span class="sm">GAMRP   </span>           <span class="ps">=       </span> 8D                                    
-047092,000255: 
+047272,000233:                                                                                                  <span class="co">#  ..... SETGAMMA SUBROUTINE .....</span>
+047273,000234:                                                                                                  <span class="co">#  SUBROUTINE TO SET GAMMA FOR THE LAT-LONG AND LALOTORV SUBROUTINES</span>
+047274,000235: 
+047275,000236:                                                                                                  <span class="co">#  GAMMA = B**2/A**2 FOR EARTH (B-1)</span>
+047276,000237:                                                                                                  <span class="co">#  GAMMA = 1 FOR MOON (B-1)</span>
+047277,000238: 
+047278,000239:                                                                                                  <span class="co">#  CALLING SEQUENCE</span>
+047279,000240:                                                                                                  <span class="co">#        L       CALL</span>
+047280,000241:                                                                                                  <span class="co">#        L+1             SETGAMMA</span>
+047281,000242: 
+047282,000243:                                                                                                  <span class="co">#  INPUT</span>
+047283,000244:                                                                                                  <span class="co">#        LUNAFLAG=0 FOR EARTH, =1 FOR MOON</span>
+047284,000245: 
+047285,000246:                                                                                                  <span class="co">#  OUTPUT</span>
+047286,000247:                                                                                                  <span class="co">#        GAMMA IN GAMRP (B-1)</span>
+047287,000248: 
+<a name="53455447414D4D41"></a>047288,000249: 13,2546           43145        <span class="sm">SETGAMMA</span>           <span class="in">DLOAD   </span> <span class="in">BOFF      </span>                            <span class="co">#  BRANCH FOR EARTH</span>
+047289,000250: 13,2547           26503                                    <a href="#42322F4132">B2/A2</a>                                 <span class="co">#  EARTH GAMMA</span>
+047290,000251: 13,2550           01743                                    <a href="FLAGWORD_ASSIGNMENTS.agc.html#4C554E41464C4147">LUNAFLAG</a>                              
+047291,000252: 13,2551           26554                                    <a href="#534554474D4558">SETGMEX</a>                               
+047292,000253: 13,2552           77735                           <span class="in">SLOAD   </span>                                       
+047293,000254: 13,2553           24005                                    <a href="PLANETARY_INERTIAL_ORIENTATION.agc.html#314231">1B1</a>                                   <span class="co">#  MOON GAMMA</span>
+<a name="534554474D4558"></a>047294,000255: 13,2554           00011        <span class="sm">SETGMEX </span>           <span class="in">STORE   </span> <a href="#47414D5250">GAMRP</a>                                 
+047295,000256: 13,2555           77616                           <span class="in">RVQ     </span>                                       
+<a name="47414D5250"></a>047296,000257: 13,2556                        <span class="sm">GAMRP   </span>           <span class="ps">=       </span> 8D                                    
+047297,000258: 
 </pre>
 </span>
 </p>
@@ -446,51 +451,51 @@ Page 1133
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-047094,000257:                                                                                                  <span class="co">#  ***** SETRE SUBROUTINE *****</span>
-047095,000258:                                                                                                  <span class="co">#  SUBROUTINE TO SET RE (EARTH OR MOON RADIUS)</span>
-047096,000259: 
-047097,000260:                                                                                                  <span class="co">#        RE = RM FOR MOON</span>
-047098,000261:                                                                                                  <span class="co">#        RE = RREF FOR FIXED EARTH RADIUS OR COMPUTED RF FOR FISCHER ELLIPSOID</span>
-047099,000262: 
-047100,000263:                                                                                                  <span class="co">#  CALLING SEQUENCE</span>
-047101,000264:                                                                                                  <span class="co">#        L       CALL</span>
-047102,000265:                                                                                                  <span class="co">#        L+1             SETRE</span>
-047103,000266: 
-047104,000267:                                                                                                  <span class="co">#  SUBROUTINES USED</span>
-047105,000268:                                                                                                  <span class="co">#        CETERAD</span>
-047106,000269: 
-047107,000270:                                                                                                  <span class="co">#  INPUT</span>
-047108,000271:                                                                                                  <span class="co">#        ERADFLAG = 0 FOR FIXED RE, 1 FOR COMPUTED RE</span>
-047109,000272:                                                                                                  <span class="co">#        ALPHAV +4 = 1/2 SINL IF GETERAD IS CALLED</span>
-047110,000273:                                                                                                  <span class="co">#        LUNAFLAG = 0 FOR EARTH, =1 FOR MOON</span>
-047111,000274: 
-047112,000275:                                                                                                  <span class="co">#  OUTPUT</span>
-047113,000276:                                                                                                  <span class="co">#        ERADM = 504RM FOR MOON (METERS B-29)</span>
-047114,000277:                                                                                                  <span class="co">#        ERADM = ERAD OR COMPUTED RE FOR EARTH (METERS B-29)</span>
-047115,000278: 
-<a name="5345545245"></a>047116,000279: 13,2556           71220        <span class="sm">SETRE   </span>           <span class="in">STQ     </span> <span class="in">DLOAD     </span>                            
-047117,000280: 13,2557           00051                                    <a href="#534554524558">SETREX</a>                                
-047118,000281: 13,2560           10003                                    <a href="CONTROLLED_CONSTANTS.agc.html#353034524D">504RM</a>                                 
-047119,000282: 13,2561           71214                           <span class="in">BON     </span> <span class="in">DLOAD     </span>                            <span class="co">#  BRANCH FOR MOON</span>
-047120,000283: 13,2562           01703                                    <a href="FLAGWORD_ASSIGNMENTS.agc.html#4C554E41464C4147">LUNAFLAG</a>                              
-047121,000284: 13,2563           26573                                    <a href="#545354524C53524D">TSTRLSRM</a>                              
-047122,000285: 13,2564           10001                                    <a href="CONTROLLED_CONSTANTS.agc.html#45524144">ERAD</a>                                  
-047123,000286: 13,2565           45014                           <span class="in">BOFF    </span> <span class="in">CALL      </span>                            <span class="co">#  ERADFLAG=0 FOR FIXED RE, 1 FOR COMPUTED</span>
-047124,000287: 13,2566           00742                                    <a href="FLAGWORD_ASSIGNMENTS.agc.html#45524144464C4147">ERADFLAG</a>                              
-047125,000288: 13,2567           26571                                    <a href="#534554525858">SETRXX</a>                                
-047126,000289: 13,2570           26464                                    <a href="#47455445524144">GETERAD</a>                               
-<a name="534554525858"></a>047127,000290: 13,2571           37673        <span class="sm">SETRXX  </span>           <span class="in">STCALL  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#455241444D">ERADM</a>                                 <span class="co">#  EXIT WITH RE OR RM METERS B-29</span>
-047128,000291: 13,2572           00051                                    <a href="#534554524558">SETREX</a>                                
-<a name="545354524C53524D"></a>047129,000292: 13,2573           77214        <span class="sm">TSTRLSRM</span>           <span class="in">BON     </span> <span class="in">VLOAD     </span>                            <span class="co">#  ERADFLAG=0, SET R0=RLS</span>
-047130,000293: 13,2574           00702                                    <a href="FLAGWORD_ASSIGNMENTS.agc.html#45524144464C4147">ERADFLAG</a>                              <span class="co">#          =1      40=RM</span>
-047131,000294: 13,2575           26571                                    <a href="#534554525858">SETRXX</a>                                
-047132,000295: 13,2576           02023                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#524C53">RLS</a>                                   
-047133,000296: 13,2577           64446                           <span class="in">ABVAL   </span> <span class="in">SR2R      </span>                            <span class="co">#  SCALE FROM B-27 TO B-29</span>
-047134,000297: 13,2600           77650                           <span class="in">GOTO    </span>                                       
-047135,000298: 13,2601           26571                                    <a href="#534554525858">SETRXX</a>                                
-<a name="534554524558"></a>047136,000299: 13,2602  0000051               <span class="sm">SETREX  </span>           <span class="ps">=       </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5332">S2</a>                                    
-047137,000300: 
-047138,000301: 
+047299,000260:                                                                                                  <span class="co">#  ..... SETRE SUBROUTINE .....</span>
+047300,000261:                                                                                                  <span class="co">#  SUBROUTINE TO SET RE (EARTH OR MOON RADIUS)</span>
+047301,000262: 
+047302,000263:                                                                                                  <span class="co">#        RE = RM FOR MOON</span>
+047303,000264:                                                                                                  <span class="co">#        RE = RREF FOR FIXED EARTH RADIUS OR COMPUTED RF FOR FISCHER ELLIPSOID</span>
+047304,000265: 
+047305,000266:                                                                                                  <span class="co">#  CALLING SEQUENCE</span>
+047306,000267:                                                                                                  <span class="co">#        L       CALL</span>
+047307,000268:                                                                                                  <span class="co">#        L+1             SETRE</span>
+047308,000269: 
+047309,000270:                                                                                                  <span class="co">#  SUBROUTINES USED</span>
+047310,000271:                                                                                                  <span class="co">#        GETERAD</span>
+047311,000272: 
+047312,000273:                                                                                                  <span class="co">#  INPUT</span>
+047313,000274:                                                                                                  <span class="co">#        ERADFLAG = 0 FOR FIXED RE, 1 FOR COMPUTED RE</span>
+047314,000275:                                                                                                  <span class="co">#        ALPHAV +4 = 1/2 SINL IF GETERAD IS CALLED</span>
+047315,000276:                                                                                                  <span class="co">#        LUNAFLAG = 0 FOR EARTH, =1 FOR MOON</span>
+047316,000277: 
+047317,000278:                                                                                                  <span class="co">#  OUTPUT</span>
+047318,000279:                                                                                                  <span class="co">#        ERADM = 504RM FOR MOON (METERS B-29)</span>
+047319,000280:                                                                                                  <span class="co">#        ERADM = ERAD OR COMPUTED RE FOR EARTH (METERS B-29)</span>
+047320,000281: 
+<a name="5345545245"></a>047321,000282: 13,2556           71220        <span class="sm">SETRE   </span>           <span class="in">STQ     </span> <span class="in">DLOAD     </span>                            
+047322,000283: 13,2557           00051                                    <a href="#534554524558">SETREX</a>                                
+047323,000284: 13,2560           10003                                    <a href="CONTROLLED_CONSTANTS.agc.html#353034524D">504RM</a>                                 
+047324,000285: 13,2561           71214                           <span class="in">BON     </span> <span class="in">DLOAD     </span>                            <span class="co">#  BRANCH FOR MOON</span>
+047325,000286: 13,2562           01703                                    <a href="FLAGWORD_ASSIGNMENTS.agc.html#4C554E41464C4147">LUNAFLAG</a>                              
+047326,000287: 13,2563           26573                                    <a href="#545354524C53524D">TSTRLSRM</a>                              
+047327,000288: 13,2564           10001                                    <a href="CONTROLLED_CONSTANTS.agc.html#45524144">ERAD</a>                                  
+047328,000289: 13,2565           45014                           <span class="in">BOFF    </span> <span class="in">CALL      </span>                            <span class="co">#  ERADFLAG=0 FOR FIXED RE, 1 FOR COMPUTED</span>
+047329,000290: 13,2566           00742                                    <a href="FLAGWORD_ASSIGNMENTS.agc.html#45524144464C4147">ERADFLAG</a>                              
+047330,000291: 13,2567           26571                                    <a href="#534554525858">SETRXX</a>                                
+047331,000292: 13,2570           26464                                    <a href="#47455445524144">GETERAD</a>                               
+<a name="534554525858"></a>047332,000293: 13,2571           37673        <span class="sm">SETRXX  </span>           <span class="in">STCALL  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#455241444D">ERADM</a>                                 <span class="co">#  EXIT WITH RE OR RM METERS B-29</span>
+047333,000294: 13,2572           00051                                    <a href="#534554524558">SETREX</a>                                
+<a name="545354524C53524D"></a>047334,000295: 13,2573           77214        <span class="sm">TSTRLSRM</span>           <span class="in">BON     </span> <span class="in">VLOAD     </span>                            <span class="co">#  ERADFLAG=0, SET R0=RLS</span>
+047335,000296: 13,2574           00702                                    <a href="FLAGWORD_ASSIGNMENTS.agc.html#45524144464C4147">ERADFLAG</a>                              <span class="co">#          =1      40=RM</span>
+047336,000297: 13,2575           26571                                    <a href="#534554525858">SETRXX</a>                                
+047337,000298: 13,2576           02023                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#524C53">RLS</a>                                   
+047338,000299: 13,2577           64446                           <span class="in">ABVAL   </span> <span class="in">SR2R      </span>                            <span class="co">#  SCALE FROM B-27 TO B-29</span>
+047339,000300: 13,2600           77650                           <span class="in">GOTO    </span>                                       
+047340,000301: 13,2601           26571                                    <a href="#534554525858">SETRXX</a>                                
+<a name="534554524558"></a>047341,000302: 13,2602  0000051               <span class="sm">SETREX  </span>           <span class="ps">=       </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5332">S2</a>                                    
+047342,000303: 
+047343,000304: 
 
 End of include-file LATITUDE_LONGITUDE_SUBROUTINES.agc.  Parent file is <a href="MAIN.agc.html">MAIN.agc</a>
 </pre>

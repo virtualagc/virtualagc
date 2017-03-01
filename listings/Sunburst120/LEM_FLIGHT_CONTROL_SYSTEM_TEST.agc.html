@@ -96,21 +96,21 @@ Note that the date is the date of the printout, not the date of the program revi
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-015097,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
-015098,000003:                                                                                                  <span class="co">## Filename:    LEM_FLIGHT_CONTROL_SYSTEM_TEST.agc</span>
-015099,000004:                                                                                                  <span class="co">## Purpose:     A module for revision 0 of BURST120 (Sunburst). It </span>
-015100,000005:                                                                                                  <span class="co">##              is part of the source code for the Lunar Module's</span>
-015101,000006:                                                                                                  <span class="co">##              (LM) Apollo Guidance Computer (AGC) for Apollo 5.</span>
-015102,000007:                                                                                                  <span class="co">## Assembler:   yaYUL</span>
-015103,000008:                                                                                                  <span class="co">## Contact:     Ron Burkey &lt;info@sandroid.org>.</span>
-015104,000009:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo/index.html</span>
-015105,000010:                                                                                                  <span class="co">## Mod history: 2016-09-30 RSB  Created draft version.</span>
-015106,000011:                                                                                                  <span class="co">##              2016-10-18 RSB  Corrected against AURORA 12 version,</span>
-015107,000012:                                                                                                  <span class="co">##                              with which it is seemingly identical other than</span>
-015108,000013:                                                                                                  <span class="co">##                              a handful of comments and EBANK= placements.</span>
-015109,000014:                                                                                                  <span class="co">##              2016-12-05 RSB  Comment-proofing with octopus/ProoferComments</span>
-015110,000015:                                                                                                  <span class="co">##                              completed, changes made.</span>
-015111,000016: 
+015099,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
+015100,000003:                                                                                                  <span class="co">## Filename:    LEM_FLIGHT_CONTROL_SYSTEM_TEST.agc</span>
+015101,000004:                                                                                                  <span class="co">## Purpose:     A module for revision 0 of BURST120 (Sunburst). It </span>
+015102,000005:                                                                                                  <span class="co">##              is part of the source code for the Lunar Module's</span>
+015103,000006:                                                                                                  <span class="co">##              (LM) Apollo Guidance Computer (AGC) for Apollo 5.</span>
+015104,000007:                                                                                                  <span class="co">## Assembler:   yaYUL</span>
+015105,000008:                                                                                                  <span class="co">## Contact:     Ron Burkey &lt;info@sandroid.org>.</span>
+015106,000009:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo/index.html</span>
+015107,000010:                                                                                                  <span class="co">## Mod history: 2016-09-30 RSB  Created draft version.</span>
+015108,000011:                                                                                                  <span class="co">##              2016-10-18 RSB  Corrected against AURORA 12 version,</span>
+015109,000012:                                                                                                  <span class="co">##                              with which it is seemingly identical other than</span>
+015110,000013:                                                                                                  <span class="co">##                              a handful of comments and EBANK= placements.</span>
+015111,000014:                                                                                                  <span class="co">##              2016-12-05 RSB  Comment-proofing with octopus/ProoferComments</span>
+015112,000015:                                                                                                  <span class="co">##                              completed, changes made.</span>
+015113,000016: 
 </pre>
 </span>
 </p>
@@ -126,53 +126,53 @@ Page 367
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-015113,000018: 06,2736                                           <span class="ps">BANK    </span> 6                                     
-015114,000019: 06,2736  E4,1407                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4A455453544550">JETSTEP</a>                               
-015115,000020: 
-015116,000021:                                                                                                  <span class="co">#  LEM FCS TEST  ENTRY AND INITIALIZATION JOB.</span>
-015117,000022: 
-015118,000023:                                                                                                  <span class="co">#        THIS JOB INITIALIZES THE ERASABLE TABLES FOR THE FCS TEST AND PUTS THE FOLLOWING PROGRAMS UNDER</span>
-015119,000024:                                                                                                  <span class="co">#  WAITLIST CONTROL.</span>
-015120,000025:                                                                                                  <span class="co">#             (1) RCS JET SET TASK</span>
-015121,000026:                                                                                                  <span class="co">#             (2) ENGINE ON - OFF TASK</span>
-015122,000027:                                                                                                  <span class="co">#             (3) DESCENT ENGINE GIMBAL TRIM TASK</span>
-015123,000028:                                                                                                  <span class="co">#             (4) DESCENT ENGINE THROTTLE TASK</span>
-015124,000029:                                                                                                  <span class="co">#             (5) INTERFACE CHANNEL LOOK TASK</span>
-015125,000030: 
-015126,000031: 
-<a name="4643535354415254"></a>015127,000032: 06,2736           04644        <span class="sm">FCSSTART</span>           <span class="op">TC      </span> <a href="PINBALL_GAME__BUTTONS_AND_LIGHTS.agc.html#4752414257414954">GRABWAIT</a>                              <span class="co">#  SO NOTHING DISRUPTS THE LOAD.</span>
-015128,000033: 06,2737           33012                           <span class="op">CAF     </span> <a href="#4A53544550414452">JSTEPADR</a>                              <span class="co">#  THE START OF THE LIST.</span>
-<a name="46435333"></a>015129,000034: 06,2740           10000        <span class="sm">FCS3    </span>           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
-015130,000035: 06,2741           54146                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +2                         
-<a name="46435332"></a>015131,000036: 06,2742           33015        <span class="sm">FCS2    </span>           <span class="op">CAF     </span> <a href="#5630344E30314B">V04N01K</a>                               <span class="co">#  DISPLAY PRESENT CONTENTS IN R2.</span>
-015132,000037: 06,2743           04657                           <span class="op">TC      </span> <a href="PINBALL_GAME__BUTTONS_AND_LIGHTS.agc.html#4E56534257414954">NVSBWAIT</a>                              
-015133,000038: 06,2744           24146                           <span class="op">INCR    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +2                         
-015134,000039: 06,2745           33013                           <span class="op">CAF     </span> <a href="#5632314E30324B">V21N02K</a>                               
-015135,000040: 06,2746           04657                           <span class="op">TC      </span> <a href="PINBALL_GAME__BUTTONS_AND_LIGHTS.agc.html#4E56534257414954">NVSBWAIT</a>                              <span class="co">#  IN CASE IT'S BUSY BUT IT SHOULDN'T BE.</span>
-015136,000041: 06,2747           04475                           <span class="op">TC      </span> <a href="PINBALL_GAME__BUTTONS_AND_LIGHTS.agc.html#454E4449444C45">ENDIDLE</a>                               <span class="co">#  WHILE LOADING.</span>
-015137,000042: 06,2750           02753                           <span class="op">TC      </span> +3                                    <span class="co">#  V34E. TERMINATE LOAD OF THIS LIST</span>
-015138,000043:                                                                                                  <span class="co">#  SECTION, GO TO NEW SECTION OR TO TEST.</span>
-015139,000044: 06,2751           02752                           <span class="op">TC      </span> +1                                    <span class="co">#  V33E. PRESENT CONTENTS OK, PROCEED TO</span>
-015140,000045:                                                                                                  <span class="co">#  NEXT LOCATION IN LIST.</span>
-015141,000046: 06,2752           02742                           <span class="op">TC      </span> <a href="#46435332">FCS2</a>                                  
-015142,000047: 06,2753           33014                           <span class="op">CAF     </span> <a href="#5632314E33304B">V21N30K</a>                               
-015143,000048: 06,2754           04657                           <span class="op">TC      </span> <a href="PINBALL_GAME__BUTTONS_AND_LIGHTS.agc.html#4E56534257414954">NVSBWAIT</a>                              
-015144,000049: 06,2755           04475                           <span class="op">TC      </span> <a href="PINBALL_GAME__BUTTONS_AND_LIGHTS.agc.html#454E4449444C45">ENDIDLE</a>                               
-015145,000050: 06,2756           05566                           <span class="op">TC      </span> <a href="EXECUTIVE.agc.html#454A46524545">EJFREE</a>                                
-015146,000051: 06,2757           02762                           <span class="op">TC      </span> <a href="#4643535445535431">FCSTEST1</a>                              <span class="co">#  PROCEED TO TEST.</span>
-015147,000052: 06,2760           30337                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44535054454D31">DSPTEM1</a>                               <span class="co">#  NEW ADDRESS.</span>
-015148,000053: 06,2761           02740                           <span class="op">TC      </span> <a href="#46435333">FCS3</a>                                  
-<a name="4643535445535431"></a>015149,000054: 06,2762           33016        <span class="sm">FCSTEST1</span>           <span class="op">CAF     </span> <a href="#5634374B">V47K</a>                                  
-015150,000055: 06,2763           04657                           <span class="op">TC      </span> <a href="PINBALL_GAME__BUTTONS_AND_LIGHTS.agc.html#4E56534257414954">NVSBWAIT</a>                              <span class="co">#  OUR VERB IN THE LIGHTS.</span>
-<a name="46435354455354"></a>015151,000056: 06,2764           00004        <span class="sm">FCSTEST </span>           <span class="op">INHINT  </span>                                       
-015152,000057: 06,2765           37762                           <span class="op">CAF     </span> <a href="INTERPRETER.agc.html#54574F">TWO</a>                                   <span class="co">#  20MS.</span>
-015153,000058: 06,2766           05663                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#574149544C495354">WAITLIST</a>                              
-015154,000059: 06,2767  E4,1407                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4A455453544550">JETSTEP</a>                               
-015155,000060: 06,2767           03023 14064                     <span class="ps">2CADR   </span> <a href="#4A45545354415254">JETSTART</a>                              
-015156,000061: 
-015157,000062: 06,2771           37763                           <span class="op">CAF     </span> <a href="INTERPRETER.agc.html#42495431">BIT1</a>                                  <span class="co">#  10MS.</span>
-015158,000063: 06,2772           05663                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#574149544C495354">WAITLIST</a>                              
-015159,000064: 06,2773  E4,1407                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4A455453544550">JETSTEP</a>                               
+015115,000018: 06,2736                                           <span class="ps">BANK    </span> 6                                     
+015116,000019: 06,2736  E4,1407                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4A455453544550">JETSTEP</a>                               
+015117,000020: 
+015118,000021:                                                                                                  <span class="co">#  LEM FCS TEST  ENTRY AND INITIALIZATION JOB.</span>
+015119,000022: 
+015120,000023:                                                                                                  <span class="co">#        THIS JOB INITIALIZES THE ERASABLE TABLES FOR THE FCS TEST AND PUTS THE FOLLOWING PROGRAMS UNDER</span>
+015121,000024:                                                                                                  <span class="co">#  WAITLIST CONTROL.</span>
+015122,000025:                                                                                                  <span class="co">#             (1) RCS JET SET TASK</span>
+015123,000026:                                                                                                  <span class="co">#             (2) ENGINE ON - OFF TASK</span>
+015124,000027:                                                                                                  <span class="co">#             (3) DESCENT ENGINE GIMBAL TRIM TASK</span>
+015125,000028:                                                                                                  <span class="co">#             (4) DESCENT ENGINE THROTTLE TASK</span>
+015126,000029:                                                                                                  <span class="co">#             (5) INTERFACE CHANNEL LOOK TASK</span>
+015127,000030: 
+015128,000031: 
+<a name="4643535354415254"></a>015129,000032: 06,2736           04644        <span class="sm">FCSSTART</span>           <span class="op">TC      </span> <a href="PINBALL_GAME__BUTTONS_AND_LIGHTS.agc.html#4752414257414954">GRABWAIT</a>                              <span class="co">#  SO NOTHING DISRUPTS THE LOAD.</span>
+015130,000033: 06,2737           33012                           <span class="op">CAF     </span> <a href="#4A53544550414452">JSTEPADR</a>                              <span class="co">#  THE START OF THE LIST.</span>
+<a name="46435333"></a>015131,000034: 06,2740           10000        <span class="sm">FCS3    </span>           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
+015132,000035: 06,2741           54146                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +2                         
+<a name="46435332"></a>015133,000036: 06,2742           33015        <span class="sm">FCS2    </span>           <span class="op">CAF     </span> <a href="#5630344E30314B">V04N01K</a>                               <span class="co">#  DISPLAY PRESENT CONTENTS IN R2.</span>
+015134,000037: 06,2743           04657                           <span class="op">TC      </span> <a href="PINBALL_GAME__BUTTONS_AND_LIGHTS.agc.html#4E56534257414954">NVSBWAIT</a>                              
+015135,000038: 06,2744           24146                           <span class="op">INCR    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +2                         
+015136,000039: 06,2745           33013                           <span class="op">CAF     </span> <a href="#5632314E30324B">V21N02K</a>                               
+015137,000040: 06,2746           04657                           <span class="op">TC      </span> <a href="PINBALL_GAME__BUTTONS_AND_LIGHTS.agc.html#4E56534257414954">NVSBWAIT</a>                              <span class="co">#  IN CASE IT'S BUSY BUT IT SHOULDN'T BE.</span>
+015138,000041: 06,2747           04475                           <span class="op">TC      </span> <a href="PINBALL_GAME__BUTTONS_AND_LIGHTS.agc.html#454E4449444C45">ENDIDLE</a>                               <span class="co">#  WHILE LOADING.</span>
+015139,000042: 06,2750           02753                           <span class="op">TC      </span> +3                                    <span class="co">#  V34E. TERMINATE LOAD OF THIS LIST</span>
+015140,000043:                                                                                                  <span class="co">#  SECTION, GO TO NEW SECTION OR TO TEST.</span>
+015141,000044: 06,2751           02752                           <span class="op">TC      </span> +1                                    <span class="co">#  V33E. PRESENT CONTENTS OK, PROCEED TO</span>
+015142,000045:                                                                                                  <span class="co">#  NEXT LOCATION IN LIST.</span>
+015143,000046: 06,2752           02742                           <span class="op">TC      </span> <a href="#46435332">FCS2</a>                                  
+015144,000047: 06,2753           33014                           <span class="op">CAF     </span> <a href="#5632314E33304B">V21N30K</a>                               
+015145,000048: 06,2754           04657                           <span class="op">TC      </span> <a href="PINBALL_GAME__BUTTONS_AND_LIGHTS.agc.html#4E56534257414954">NVSBWAIT</a>                              
+015146,000049: 06,2755           04475                           <span class="op">TC      </span> <a href="PINBALL_GAME__BUTTONS_AND_LIGHTS.agc.html#454E4449444C45">ENDIDLE</a>                               
+015147,000050: 06,2756           05566                           <span class="op">TC      </span> <a href="EXECUTIVE.agc.html#454A46524545">EJFREE</a>                                
+015148,000051: 06,2757           02762                           <span class="op">TC      </span> <a href="#4643535445535431">FCSTEST1</a>                              <span class="co">#  PROCEED TO TEST.</span>
+015149,000052: 06,2760           30337                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44535054454D31">DSPTEM1</a>                               <span class="co">#  NEW ADDRESS.</span>
+015150,000053: 06,2761           02740                           <span class="op">TC      </span> <a href="#46435333">FCS3</a>                                  
+<a name="4643535445535431"></a>015151,000054: 06,2762           33016        <span class="sm">FCSTEST1</span>           <span class="op">CAF     </span> <a href="#5634374B">V47K</a>                                  
+015152,000055: 06,2763           04657                           <span class="op">TC      </span> <a href="PINBALL_GAME__BUTTONS_AND_LIGHTS.agc.html#4E56534257414954">NVSBWAIT</a>                              <span class="co">#  OUR VERB IN THE LIGHTS.</span>
+<a name="46435354455354"></a>015153,000056: 06,2764           00004        <span class="sm">FCSTEST </span>           <span class="op">INHINT  </span>                                       
+015154,000057: 06,2765           37762                           <span class="op">CAF     </span> <a href="INTERPRETER.agc.html#54574F">TWO</a>                                   <span class="co">#  20MS.</span>
+015155,000058: 06,2766           05663                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#574149544C495354">WAITLIST</a>                              
+015156,000059: 06,2767  E4,1407                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4A455453544550">JETSTEP</a>                               
+015157,000060: 06,2767           03023 14064                     <span class="ps">2CADR   </span> <a href="#4A45545354415254">JETSTART</a>                              
+015158,000061: 
+015159,000062: 06,2771           37763                           <span class="op">CAF     </span> <a href="INTERPRETER.agc.html#42495431">BIT1</a>                                  <span class="co">#  10MS.</span>
+015160,000063: 06,2772           05663                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#574149544C495354">WAITLIST</a>                              
+015161,000064: 06,2773  E4,1407                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4A455453544550">JETSTEP</a>                               
 </pre>
 </span>
 </p>
@@ -188,31 +188,31 @@ Page 368
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-015161,000066: 06,2773           03156 14064                     <span class="ps">2CADR   </span> <a href="#454E475354415254">ENGSTART</a>                              
-015162,000067: 
-015163,000068: 06,2775           36311                           <span class="op">CAF     </span> <a href="INTERPRETER.agc.html#5448524545">THREE</a>                                 <span class="co">#  30MS.</span>
-015164,000069: 06,2776           05663                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#574149544C495354">WAITLIST</a>                              
-015165,000070: 06,2777  E4,1407                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4A455453544550">JETSTEP</a>                               
-015166,000071: 06,2777           03253 14064                     <span class="ps">2CADR   </span> <a href="#5452494D544F50">TRIMTOP</a>                               
-015167,000072: 
-015168,000073: 06,3001           37761                           <span class="op">CAF     </span> <a href="INTERPRETER.agc.html#464F5552">FOUR</a>                                  <span class="co">#  40MS.</span>
-015169,000074: 06,3002           05663                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#574149544C495354">WAITLIST</a>                              
-015170,000075: 06,3003  E4,1407                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4A455453544550">JETSTEP</a>                               
-015171,000076: 06,3003           03373 14064                     <span class="ps">2CADR   </span> <a href="#5448525354415254">THRSTART</a>                              
-015172,000077: 
-015173,000078: 06,3005           37766                           <span class="op">CAF     </span> <a href="INTERPRETER.agc.html#46495645">FIVE</a>                                  <span class="co">#  50MS.</span>
-015174,000079: 06,3006           05663                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#574149544C495354">WAITLIST</a>                              
-015175,000080: 06,3007  E4,1407                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4A455453544550">JETSTEP</a>                               
-015176,000081: 06,3007           03461 14064                     <span class="ps">2CADR   </span> <a href="#4C4F4F4B544F50">LOOKTOP</a>                               
-015177,000082: 
-015178,000083: 06,3011           05566                           <span class="op">TC      </span> <a href="EXECUTIVE.agc.html#454A46524545">EJFREE</a>                                <span class="co">#  NOW THEY START.</span>
-015179,000084: 
-<a name="4A53544550414452"></a>015180,000085: 06,3012           02007        <span class="sm">JSTEPADR</span>           <span class="ps">ECADR   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4A455453544550">JETSTEP</a>                               
-<a name="5632314E30324B"></a>015181,000086: 06,3013           02102        <span class="sm">V21N02K </span>           <span class="ps">OCT     </span> 02102                                 
-<a name="5632314E33304B"></a>015182,000087: 06,3014           02130        <span class="sm">V21N30K </span>           <span class="ps">OCT     </span> 02130                                 
-<a name="5630344E30314B"></a>015183,000088: 06,3015           00401        <span class="sm">V04N01K </span>           <span class="ps">OCT     </span> 00401                                 
-<a name="5634374B"></a>015184,000089: 06,3016           04700        <span class="sm">V47K    </span>           <span class="ps">OCT     </span> 04700                                 
-015185,000090: 
+015163,000066: 06,2773           03156 14064                     <span class="ps">2CADR   </span> <a href="#454E475354415254">ENGSTART</a>                              
+015164,000067: 
+015165,000068: 06,2775           36311                           <span class="op">CAF     </span> <a href="INTERPRETER.agc.html#5448524545">THREE</a>                                 <span class="co">#  30MS.</span>
+015166,000069: 06,2776           05663                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#574149544C495354">WAITLIST</a>                              
+015167,000070: 06,2777  E4,1407                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4A455453544550">JETSTEP</a>                               
+015168,000071: 06,2777           03253 14064                     <span class="ps">2CADR   </span> <a href="#5452494D544F50">TRIMTOP</a>                               
+015169,000072: 
+015170,000073: 06,3001           37761                           <span class="op">CAF     </span> <a href="INTERPRETER.agc.html#464F5552">FOUR</a>                                  <span class="co">#  40MS.</span>
+015171,000074: 06,3002           05663                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#574149544C495354">WAITLIST</a>                              
+015172,000075: 06,3003  E4,1407                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4A455453544550">JETSTEP</a>                               
+015173,000076: 06,3003           03373 14064                     <span class="ps">2CADR   </span> <a href="#5448525354415254">THRSTART</a>                              
+015174,000077: 
+015175,000078: 06,3005           37766                           <span class="op">CAF     </span> <a href="INTERPRETER.agc.html#46495645">FIVE</a>                                  <span class="co">#  50MS.</span>
+015176,000079: 06,3006           05663                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#574149544C495354">WAITLIST</a>                              
+015177,000080: 06,3007  E4,1407                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4A455453544550">JETSTEP</a>                               
+015178,000081: 06,3007           03461 14064                     <span class="ps">2CADR   </span> <a href="#4C4F4F4B544F50">LOOKTOP</a>                               
+015179,000082: 
+015180,000083: 06,3011           05566                           <span class="op">TC      </span> <a href="EXECUTIVE.agc.html#454A46524545">EJFREE</a>                                <span class="co">#  NOW THEY START.</span>
+015181,000084: 
+<a name="4A53544550414452"></a>015182,000085: 06,3012           02007        <span class="sm">JSTEPADR</span>           <span class="ps">ECADR   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4A455453544550">JETSTEP</a>                               
+<a name="5632314E30324B"></a>015183,000086: 06,3013           02102        <span class="sm">V21N02K </span>           <span class="ps">OCT     </span> 02102                                 
+<a name="5632314E33304B"></a>015184,000087: 06,3014           02130        <span class="sm">V21N30K </span>           <span class="ps">OCT     </span> 02130                                 
+<a name="5630344E30314B"></a>015185,000088: 06,3015           00401        <span class="sm">V04N01K </span>           <span class="ps">OCT     </span> 00401                                 
+<a name="5634374B"></a>015186,000089: 06,3016           04700        <span class="sm">V47K    </span>           <span class="ps">OCT     </span> 04700                                 
+015187,000090: 
 </pre>
 </span>
 </p>
@@ -228,55 +228,55 @@ Page 369
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-015187,000092:                                                                                                  <span class="co">#  LEM FCS TEST   RCS JETSET TASK</span>
-015188,000093:                                                                                                  <span class="co">#      THIS JOB ISSUES A PROFILE OF  JET ON-OFF SIGNALS AS DETERMINED BY THE CONSTANTS IN A SET OF SIX REGISTERS.</span>
-015189,000094:                                                                                                  <span class="co">#  THE SIX REGISTERS ARE, (1) NTIMES, THE NUMBER OF TIMES A PARTICULAR STEP WILL BE PERFORMED. (2) NEXTTIME, THE</span>
-015190,000095:                                                                                                  <span class="co">#  TIME BETWEEN STEPS, A MAXIMUM OF 2 MINUTES, (3) JETONTM, THE TIME TO TURN THE JETS ON, SCALED FOR T3, (4) JET-</span>
-015191,000096:                                                                                                  <span class="co">#  OFFTM, THE TIME AFTER ONTM TO TURN THE JETS OFF, (5) XJETS, THE PARTICULAR X JETS TO BE TURNED ON AND OFF</span>
-015192,000097:                                                                                                  <span class="co">#  DURING EACH REPEAT OF A STEP, AND (6) YZJETS,, THE Y AND Z JETS TO BE TURNED ON AND OFF DURING EACH REPEAT OF A</span>
-015193,000098:                                                                                                  <span class="co">#  STEP.  XJETS AND YZJETS MUST BE IN THE SAME FORMAT AS CHANNELS 5 AND6 RESPECTIVELY.  THERE ARE EIGHT SETS OF</span>
-015194,000099:                                                                                                  <span class="co">#  THESE SIX REGISTERS.</span>
-015195,000100:                                                                                                  <span class="co">#      THE REGISTER JETSTEP IS USED TO INDEX THE 8 SETS OF REGISTERS, THE ALLOWABLE VALUES OF JETSTEP ARE +0 THRU 7</span>
-015196,000101:                                                                                                  <span class="co">#      THIS JOB WILL BE ENTERED BUT IMMEDIATELY ENDED IF THE INITIAL VALUES OF JETSTEP AND NTIMES ARE +0.</span>
-015197,000102: 
-015198,000103: 
-<a name="4E455854534554"></a>015199,000104: 06,3017           11407        <span class="sm">NEXTSET </span>           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4A455453544550">JETSTEP</a>                               <span class="co">#  IT MAY BE ZERO.</span>
-015200,000105: 06,3020           03022                           <span class="op">TC      </span> +2                                    <span class="co">#  NOPE</span>
-015201,000106: 06,3021           05727                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              <span class="co">#  IT IS SO WE ARE DONE WITH THIS TASK.</span>
-015202,000107: 06,3022           55407                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4A455453544550">JETSTEP</a>                               
-015203,000108: 
-<a name="4A45545354415254"></a>015204,000109: 06,3023           51407        <span class="sm">JETSTART</span>           <span class="op">NDX     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4A455453544550">JETSTEP</a>                               <span class="co">#  ENTER HERE.</span>
-015205,000110: 06,3024           11410                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E54494D4553">NTIMES</a>                                <span class="co">#  SEE IF THIS STEP IS FINISHED.</span>
-015206,000111: 06,3025           03027                           <span class="op">TC      </span> +2                                    <span class="co">#  NO</span>
-015207,000112: 06,3026           03017                           <span class="op">TC      </span> <a href="#4E455854534554">NEXTSET</a>                               <span class="co">#  YES</span>
-015208,000113: 06,3027           51407                           <span class="op">NDX     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4A455453544550">JETSTEP</a>                               
-015209,000114: 06,3030           31420                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E45585454494D45">NEXTTIME</a>                              <span class="co">#  MUST BE SCALED FOR T3.  REMEMBER TO BIAS</span>
-015210,000115:                                                                                                  <span class="co">#  THIS FOR ON TIME.</span>
-015211,000116: 06,3031           05663                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#574149544C495354">WAITLIST</a>                              
-015212,000117: 06,3032  E4,1407                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4A455453544550">JETSTEP</a>                               
-015213,000118: 06,3032           03046 14064                     <span class="ps">2CADR   </span> <a href="#4A544F50">JTOP</a>                                  
-015214,000119: 
-015215,000120: 06,3034           05727                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              
-015216,000121: 
-<a name="4A45544F4646"></a>015217,000122: 06,3035           37767        <span class="sm">JETOFF  </span>           <span class="op">CAF     </span> <a href="INTERPRETER.agc.html#5A45524F">ZERO</a>                                  
-015218,000123: 06,3036           00006                           <span class="op">EXTEND  </span>                                       
-015219,000124: 06,3037           01005                           <span class="op">WRITE   </span> 5                                     
-015220,000125: 06,3040           00006                           <span class="op">EXTEND  </span>                                       
-015221,000126: 06,3041           01006                           <span class="op">WRITE   </span> 6                                     
-015222,000127: 06,3042           51407                           <span class="op">NDX     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4A455453544550">JETSTEP</a>                               
-015223,000128: 06,3043           11410                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E54494D4553">NTIMES</a>                                
-015224,000129: 06,3044           51407                           <span class="op">NDX     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4A455453544550">JETSTEP</a>                               
-015225,000130: 06,3045           55410                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E54494D4553">NTIMES</a>                                <span class="co">#  ONE LESS TIME.</span>
-<a name="4A544F50"></a>015226,000131: 06,3046           51407        <span class="sm">JTOP    </span>           <span class="op">NDX     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4A455453544550">JETSTEP</a>                               
-015227,000132: 06,3047           11410                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E54494D4553">NTIMES</a>                                <span class="co">#  FOR LOOPING.</span>
-015228,000133: 06,3050           03052                           <span class="op">TC      </span> +2                                    
-015229,000134: 06,3051           03017                           <span class="op">TC      </span> <a href="#4E455854534554">NEXTSET</a>                               
-015230,000135: 06,3052           51407                           <span class="op">NDX     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4A455453544550">JETSTEP</a>                               
-015231,000136: 06,3053           31430                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4A45544F4E544D">JETONTM</a>                               <span class="co">#  SCALED FOR T3.  TIME FOR JETS ON.</span>
-015232,000137: 06,3054           05663                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#574149544C495354">WAITLIST</a>                              
-015233,000138: 06,3055  E4,1407                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4A455453544550">JETSTEP</a>                               
-015234,000139: 06,3055           03060 14064                     <span class="ps">2CADR   </span> <a href="#4A45544F4E">JETON</a>                                 
-015235,000140: 
+015189,000092:                                                                                                  <span class="co">#  LEM FCS TEST   RCS JETSET TASK</span>
+015190,000093:                                                                                                  <span class="co">#      THIS JOB ISSUES A PROFILE OF  JET ON-OFF SIGNALS AS DETERMINED BY THE CONSTANTS IN A SET OF SIX REGISTERS.</span>
+015191,000094:                                                                                                  <span class="co">#  THE SIX REGISTERS ARE, (1) NTIMES, THE NUMBER OF TIMES A PARTICULAR STEP WILL BE PERFORMED. (2) NEXTTIME, THE</span>
+015192,000095:                                                                                                  <span class="co">#  TIME BETWEEN STEPS, A MAXIMUM OF 2 MINUTES, (3) JETONTM, THE TIME TO TURN THE JETS ON, SCALED FOR T3, (4) JET-</span>
+015193,000096:                                                                                                  <span class="co">#  OFFTM, THE TIME AFTER ONTM TO TURN THE JETS OFF, (5) XJETS, THE PARTICULAR X JETS TO BE TURNED ON AND OFF</span>
+015194,000097:                                                                                                  <span class="co">#  DURING EACH REPEAT OF A STEP, AND (6) YZJETS,, THE Y AND Z JETS TO BE TURNED ON AND OFF DURING EACH REPEAT OF A</span>
+015195,000098:                                                                                                  <span class="co">#  STEP.  XJETS AND YZJETS MUST BE IN THE SAME FORMAT AS CHANNELS 5 AND6 RESPECTIVELY.  THERE ARE EIGHT SETS OF</span>
+015196,000099:                                                                                                  <span class="co">#  THESE SIX REGISTERS.</span>
+015197,000100:                                                                                                  <span class="co">#      THE REGISTER JETSTEP IS USED TO INDEX THE 8 SETS OF REGISTERS, THE ALLOWABLE VALUES OF JETSTEP ARE +0 THRU 7</span>
+015198,000101:                                                                                                  <span class="co">#      THIS JOB WILL BE ENTERED BUT IMMEDIATELY ENDED IF THE INITIAL VALUES OF JETSTEP AND NTIMES ARE +0.</span>
+015199,000102: 
+015200,000103: 
+<a name="4E455854534554"></a>015201,000104: 06,3017           11407        <span class="sm">NEXTSET </span>           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4A455453544550">JETSTEP</a>                               <span class="co">#  IT MAY BE ZERO.</span>
+015202,000105: 06,3020           03022                           <span class="op">TC      </span> +2                                    <span class="co">#  NOPE</span>
+015203,000106: 06,3021           05727                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              <span class="co">#  IT IS SO WE ARE DONE WITH THIS TASK.</span>
+015204,000107: 06,3022           55407                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4A455453544550">JETSTEP</a>                               
+015205,000108: 
+<a name="4A45545354415254"></a>015206,000109: 06,3023           51407        <span class="sm">JETSTART</span>           <span class="op">NDX     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4A455453544550">JETSTEP</a>                               <span class="co">#  ENTER HERE.</span>
+015207,000110: 06,3024           11410                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E54494D4553">NTIMES</a>                                <span class="co">#  SEE IF THIS STEP IS FINISHED.</span>
+015208,000111: 06,3025           03027                           <span class="op">TC      </span> +2                                    <span class="co">#  NO</span>
+015209,000112: 06,3026           03017                           <span class="op">TC      </span> <a href="#4E455854534554">NEXTSET</a>                               <span class="co">#  YES</span>
+015210,000113: 06,3027           51407                           <span class="op">NDX     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4A455453544550">JETSTEP</a>                               
+015211,000114: 06,3030           31420                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E45585454494D45">NEXTTIME</a>                              <span class="co">#  MUST BE SCALED FOR T3.  REMEMBER TO BIAS</span>
+015212,000115:                                                                                                  <span class="co">#  THIS FOR ON TIME.</span>
+015213,000116: 06,3031           05663                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#574149544C495354">WAITLIST</a>                              
+015214,000117: 06,3032  E4,1407                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4A455453544550">JETSTEP</a>                               
+015215,000118: 06,3032           03046 14064                     <span class="ps">2CADR   </span> <a href="#4A544F50">JTOP</a>                                  
+015216,000119: 
+015217,000120: 06,3034           05727                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              
+015218,000121: 
+<a name="4A45544F4646"></a>015219,000122: 06,3035           37767        <span class="sm">JETOFF  </span>           <span class="op">CAF     </span> <a href="INTERPRETER.agc.html#5A45524F">ZERO</a>                                  
+015220,000123: 06,3036           00006                           <span class="op">EXTEND  </span>                                       
+015221,000124: 06,3037           01005                           <span class="op">WRITE   </span> 5                                     
+015222,000125: 06,3040           00006                           <span class="op">EXTEND  </span>                                       
+015223,000126: 06,3041           01006                           <span class="op">WRITE   </span> 6                                     
+015224,000127: 06,3042           51407                           <span class="op">NDX     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4A455453544550">JETSTEP</a>                               
+015225,000128: 06,3043           11410                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E54494D4553">NTIMES</a>                                
+015226,000129: 06,3044           51407                           <span class="op">NDX     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4A455453544550">JETSTEP</a>                               
+015227,000130: 06,3045           55410                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E54494D4553">NTIMES</a>                                <span class="co">#  ONE LESS TIME.</span>
+<a name="4A544F50"></a>015228,000131: 06,3046           51407        <span class="sm">JTOP    </span>           <span class="op">NDX     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4A455453544550">JETSTEP</a>                               
+015229,000132: 06,3047           11410                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E54494D4553">NTIMES</a>                                <span class="co">#  FOR LOOPING.</span>
+015230,000133: 06,3050           03052                           <span class="op">TC      </span> +2                                    
+015231,000134: 06,3051           03017                           <span class="op">TC      </span> <a href="#4E455854534554">NEXTSET</a>                               
+015232,000135: 06,3052           51407                           <span class="op">NDX     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4A455453544550">JETSTEP</a>                               
+015233,000136: 06,3053           31430                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4A45544F4E544D">JETONTM</a>                               <span class="co">#  SCALED FOR T3.  TIME FOR JETS ON.</span>
+015234,000137: 06,3054           05663                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#574149544C495354">WAITLIST</a>                              
+015235,000138: 06,3055  E4,1407                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4A455453544550">JETSTEP</a>                               
+015236,000139: 06,3055           03060 14064                     <span class="ps">2CADR   </span> <a href="#4A45544F4E">JETON</a>                                 
+015237,000140: 
 </pre>
 </span>
 </p>
@@ -292,53 +292,53 @@ Page 370
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-015237,000142: 06,3057           05727                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              
-015238,000143: 
-<a name="4A45544F4E"></a>015239,000144: 06,3060           51407        <span class="sm">JETON   </span>           <span class="op">NDX     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4A455453544550">JETSTEP</a>                               
-015240,000145: 06,3061           31440                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#584A455453">XJETS</a>                                 <span class="co">#  MUST BE IN CHANNEL 5 FORMAT.</span>
-015241,000146: 06,3062           55401                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#584A425546">XJBUF</a>                                 
-015242,000147: 06,3063           51407                           <span class="op">NDX     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4A455453544550">JETSTEP</a>                               
-015243,000148: 06,3064           31450                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#595A4A455453">YZJETS</a>                                <span class="co">#  MUST BE IN CHANNEL 6 FORMAT.</span>
-015244,000149: 06,3065           55402                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#595A4A425546">YZJBUF</a>                                
-<a name="4A4641494C434B"></a>015245,000150: 06,3066           00006        <span class="sm">JFAILCK </span>           <span class="op">EXTEND  </span>                                       <span class="co">#  THIS ROUTINE EXAMINES EACH JETFAIL BIT</span>
-015246,000151: 06,3067           00032                           <span class="op">READ    </span> 32                                    <span class="co">#  AND IF A FAILURE IS INDICATED THE CORRES</span>
-015247,000152: 06,3070           40000                           <span class="op">COM     </span>                                       <span class="co">#  PONDING COMMANDS ARE MASKED OUT .</span>
-015248,000153: 06,3071           55403                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4A46425546">JFBUF</a>                                 <span class="co">#  SAVE 32 REINVERTED.</span>
-015249,000154: 06,3072           37765                           <span class="op">CAF     </span> <a href="INTERPRETER.agc.html#534556454E">SEVEN</a>                                 
-<a name="4A4633"></a>015250,000155: 06,3073           55404        <span class="sm">JF3     </span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#46434E5452">FCNTR</a>                                 
-015251,000156: 06,3074           31403                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4A46425546">JFBUF</a>                                 
-015252,000157: 06,3075           51404                           <span class="op">NDX     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#46434E5452">FCNTR</a>                                 
-015253,000158: 06,3076           77754                           <span class="op">MASK    </span> <a href="INTERPRETER.agc.html#42495438">BIT8</a>                                  
-015254,000159: 06,3077           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
-015255,000160: 06,3100           03117                           <span class="op">TC      </span> <a href="#4A4641494C">JFAIL</a>                                 
-<a name="4A4641494C31"></a>015256,000161: 06,3101           11404        <span class="sm">JFAIL1  </span>           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#46434E5452">FCNTR</a>                                 
-015257,000162: 06,3102           03073                           <span class="op">TC      </span> <a href="#4A4633">JF3</a>                                   
-015258,000163: 06,3103           31401                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#584A425546">XJBUF</a>                                 
-015259,000164: 06,3104           00006                           <span class="op">EXTEND  </span>                                       
-015260,000165: 06,3105           01005                           <span class="op">WRITE   </span> 5                                     <span class="co">#  XJETS GO ON.</span>
-015261,000166: 06,3106           31402                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#595A4A425546">YZJBUF</a>                                
-015262,000167: 06,3107           00006                           <span class="op">EXTEND  </span>                                       
-015263,000168: 06,3110           01006                           <span class="op">WRITE   </span> 6                                     <span class="co">#  YZJETS GO ON.</span>
-015264,000169: 06,3111           51407                           <span class="op">NDX     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4A455453544550">JETSTEP</a>                               
-015265,000170: 06,3112           31460                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4A45544F4646544D">JETOFFTM</a>                              <span class="co">#  JET OFF TIME SCALED FOR T3.</span>
-015266,000171: 06,3113           05663                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#574149544C495354">WAITLIST</a>                              
-015267,000172: 06,3114  E4,1407                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4A455453544550">JETSTEP</a>                               
-015268,000173: 06,3114           03035 14064                     <span class="ps">2CADR   </span> <a href="#4A45544F4646">JETOFF</a>                                
-015269,000174: 
-015270,000175: 06,3116           05727                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              
-015271,000176: 
-<a name="4A4641494C"></a>015272,000177: 06,3117           51404        <span class="sm">JFAIL   </span>           <span class="op">NDX     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#46434E5452">FCNTR</a>                                 
-015273,000178: 06,3120           43142                           <span class="op">CS      </span> <a href="#584A45544D41534B">XJETMASK</a>                              
-015274,000179: 06,3121           71401                           <span class="op">MASK    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#584A425546">XJBUF</a>                                 
-015275,000180: 06,3122           55401                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#584A425546">XJBUF</a>                                 
-015276,000181: 06,3123           51404                           <span class="op">NDX     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#46434E5452">FCNTR</a>                                 
-015277,000182: 06,3124           43132                           <span class="op">CS      </span> <a href="#595A4A45544D534B">YZJETMSK</a>                              
-015278,000183: 06,3125           71402                           <span class="op">MASK    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#595A4A425546">YZJBUF</a>                                
-015279,000184: 06,3126           55402                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#595A4A425546">YZJBUF</a>                                
-015280,000185: 06,3127           04755                           <span class="op">TC      </span> <a href="ALARM_AND_ABORT.agc.html#414C41524D">ALARM</a>                                 
-015281,000186: 06,3130           01410                           <span class="ps">OCT     </span> 01410                                 <span class="co">#  TEMPORARY JET FAIL ALARM CODE.</span>
-015282,000187: 06,3131           03101                           <span class="op">TC      </span> <a href="#4A4641494C31">JFAIL1</a>                                
-015283,000188: 
+015239,000142: 06,3057           05727                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              
+015240,000143: 
+<a name="4A45544F4E"></a>015241,000144: 06,3060           51407        <span class="sm">JETON   </span>           <span class="op">NDX     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4A455453544550">JETSTEP</a>                               
+015242,000145: 06,3061           31440                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#584A455453">XJETS</a>                                 <span class="co">#  MUST BE IN CHANNEL 5 FORMAT.</span>
+015243,000146: 06,3062           55401                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#584A425546">XJBUF</a>                                 
+015244,000147: 06,3063           51407                           <span class="op">NDX     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4A455453544550">JETSTEP</a>                               
+015245,000148: 06,3064           31450                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#595A4A455453">YZJETS</a>                                <span class="co">#  MUST BE IN CHANNEL 6 FORMAT.</span>
+015246,000149: 06,3065           55402                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#595A4A425546">YZJBUF</a>                                
+<a name="4A4641494C434B"></a>015247,000150: 06,3066           00006        <span class="sm">JFAILCK </span>           <span class="op">EXTEND  </span>                                       <span class="co">#  THIS ROUTINE EXAMINES EACH JETFAIL BIT</span>
+015248,000151: 06,3067           00032                           <span class="op">READ    </span> 32                                    <span class="co">#  AND IF A FAILURE IS INDICATED THE CORRES</span>
+015249,000152: 06,3070           40000                           <span class="op">COM     </span>                                       <span class="co">#  PONDING COMMANDS ARE MASKED OUT .</span>
+015250,000153: 06,3071           55403                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4A46425546">JFBUF</a>                                 <span class="co">#  SAVE 32 REINVERTED.</span>
+015251,000154: 06,3072           37765                           <span class="op">CAF     </span> <a href="INTERPRETER.agc.html#534556454E">SEVEN</a>                                 
+<a name="4A4633"></a>015252,000155: 06,3073           55404        <span class="sm">JF3     </span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#46434E5452">FCNTR</a>                                 
+015253,000156: 06,3074           31403                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4A46425546">JFBUF</a>                                 
+015254,000157: 06,3075           51404                           <span class="op">NDX     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#46434E5452">FCNTR</a>                                 
+015255,000158: 06,3076           77754                           <span class="op">MASK    </span> <a href="INTERPRETER.agc.html#42495438">BIT8</a>                                  
+015256,000159: 06,3077           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
+015257,000160: 06,3100           03117                           <span class="op">TC      </span> <a href="#4A4641494C">JFAIL</a>                                 
+<a name="4A4641494C31"></a>015258,000161: 06,3101           11404        <span class="sm">JFAIL1  </span>           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#46434E5452">FCNTR</a>                                 
+015259,000162: 06,3102           03073                           <span class="op">TC      </span> <a href="#4A4633">JF3</a>                                   
+015260,000163: 06,3103           31401                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#584A425546">XJBUF</a>                                 
+015261,000164: 06,3104           00006                           <span class="op">EXTEND  </span>                                       
+015262,000165: 06,3105           01005                           <span class="op">WRITE   </span> 5                                     <span class="co">#  XJETS GO ON.</span>
+015263,000166: 06,3106           31402                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#595A4A425546">YZJBUF</a>                                
+015264,000167: 06,3107           00006                           <span class="op">EXTEND  </span>                                       
+015265,000168: 06,3110           01006                           <span class="op">WRITE   </span> 6                                     <span class="co">#  YZJETS GO ON.</span>
+015266,000169: 06,3111           51407                           <span class="op">NDX     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4A455453544550">JETSTEP</a>                               
+015267,000170: 06,3112           31460                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4A45544F4646544D">JETOFFTM</a>                              <span class="co">#  JET OFF TIME SCALED FOR T3.</span>
+015268,000171: 06,3113           05663                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#574149544C495354">WAITLIST</a>                              
+015269,000172: 06,3114  E4,1407                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4A455453544550">JETSTEP</a>                               
+015270,000173: 06,3114           03035 14064                     <span class="ps">2CADR   </span> <a href="#4A45544F4646">JETOFF</a>                                
+015271,000174: 
+015272,000175: 06,3116           05727                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              
+015273,000176: 
+<a name="4A4641494C"></a>015274,000177: 06,3117           51404        <span class="sm">JFAIL   </span>           <span class="op">NDX     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#46434E5452">FCNTR</a>                                 
+015275,000178: 06,3120           43142                           <span class="op">CS      </span> <a href="#584A45544D41534B">XJETMASK</a>                              
+015276,000179: 06,3121           71401                           <span class="op">MASK    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#584A425546">XJBUF</a>                                 
+015277,000180: 06,3122           55401                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#584A425546">XJBUF</a>                                 
+015278,000181: 06,3123           51404                           <span class="op">NDX     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#46434E5452">FCNTR</a>                                 
+015279,000182: 06,3124           43132                           <span class="op">CS      </span> <a href="#595A4A45544D534B">YZJETMSK</a>                              
+015280,000183: 06,3125           71402                           <span class="op">MASK    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#595A4A425546">YZJBUF</a>                                
+015281,000184: 06,3126           55402                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#595A4A425546">YZJBUF</a>                                
+015282,000185: 06,3127           04755                           <span class="op">TC      </span> <a href="ALARM_AND_ABORT.agc.html#414C41524D">ALARM</a>                                 
+015283,000186: 06,3130           01410                           <span class="ps">OCT     </span> 01410                                 <span class="co">#  TEMPORARY JET FAIL ALARM CODE.</span>
+015284,000187: 06,3131           03101                           <span class="op">TC      </span> <a href="#4A4641494C31">JFAIL1</a>                                
+015285,000188: 
 </pre>
 </span>
 </p>
@@ -354,24 +354,24 @@ Page 371
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-<a name="595A4A45544D534B"></a>015285,000190: 06,3132           00010        <span class="sm">YZJETMSK</span>           <span class="ps">OCT     </span> 00010                                 <span class="co">#  JET 11</span>
-015286,000191: 06,3133           00020                           <span class="ps">OCT     </span> 00020                                 <span class="co">#  JET 12</span>
-015287,000192: 06,3134           00004                           <span class="ps">OCT     </span> 00004                                 <span class="co">#  JET 15</span>
-015288,000193: 06,3135           00200                           <span class="ps">OCT     </span> 00200                                 <span class="co">#  JET 16</span>
-015289,000194: 06,3136           00001                           <span class="ps">OCT     </span> 00001                                 <span class="co">#  JET 7</span>
-015290,000195: 06,3137           00002                           <span class="ps">OCT     </span> 00002                                 <span class="co">#  JET 3</span>
-015291,000196: 06,3140           00040                           <span class="ps">OCT     </span> 00040                                 <span class="co">#  JET 8</span>
-015292,000197: 06,3141           00100                           <span class="ps">OCT     </span> 00100                                 <span class="co">#  JET 4</span>
-015293,000198: 
-<a name="584A45544D41534B"></a>015294,000199: 06,3142           00040        <span class="sm">XJETMASK</span>           <span class="ps">OCT     </span> 00040                                 <span class="co">#  JET 10</span>
-015295,000200: 06,3143           00020                           <span class="ps">OCT     </span> 00020                                 <span class="co">#  JET 9</span>
-015296,000201: 06,3144           00100                           <span class="ps">OCT     </span> 00100                                 <span class="co">#  JET 13</span>
-015297,000202: 06,3145           00200                           <span class="ps">OCT     </span> 00200                                 <span class="co">#  JET 14</span>
-015298,000203: 06,3146           00010                           <span class="ps">OCT     </span> 00010                                 <span class="co">#  JET 6</span>
-015299,000204: 06,3147           00001                           <span class="ps">OCT     </span> 00001                                 <span class="co">#  JET 1</span>
-015300,000205: 06,3150           00004                           <span class="ps">OCT     </span> 00004                                 <span class="co">#  JET 5</span>
-015301,000206: 06,3151           00002                           <span class="ps">OCT     </span> 00002                                 <span class="co">#  JET 2</span>
-015302,000207: 
+<a name="595A4A45544D534B"></a>015287,000190: 06,3132           00010        <span class="sm">YZJETMSK</span>           <span class="ps">OCT     </span> 00010                                 <span class="co">#  JET 11</span>
+015288,000191: 06,3133           00020                           <span class="ps">OCT     </span> 00020                                 <span class="co">#  JET 12</span>
+015289,000192: 06,3134           00004                           <span class="ps">OCT     </span> 00004                                 <span class="co">#  JET 15</span>
+015290,000193: 06,3135           00200                           <span class="ps">OCT     </span> 00200                                 <span class="co">#  JET 16</span>
+015291,000194: 06,3136           00001                           <span class="ps">OCT     </span> 00001                                 <span class="co">#  JET 7</span>
+015292,000195: 06,3137           00002                           <span class="ps">OCT     </span> 00002                                 <span class="co">#  JET 3</span>
+015293,000196: 06,3140           00040                           <span class="ps">OCT     </span> 00040                                 <span class="co">#  JET 8</span>
+015294,000197: 06,3141           00100                           <span class="ps">OCT     </span> 00100                                 <span class="co">#  JET 4</span>
+015295,000198: 
+<a name="584A45544D41534B"></a>015296,000199: 06,3142           00040        <span class="sm">XJETMASK</span>           <span class="ps">OCT     </span> 00040                                 <span class="co">#  JET 10</span>
+015297,000200: 06,3143           00020                           <span class="ps">OCT     </span> 00020                                 <span class="co">#  JET 9</span>
+015298,000201: 06,3144           00100                           <span class="ps">OCT     </span> 00100                                 <span class="co">#  JET 13</span>
+015299,000202: 06,3145           00200                           <span class="ps">OCT     </span> 00200                                 <span class="co">#  JET 14</span>
+015300,000203: 06,3146           00010                           <span class="ps">OCT     </span> 00010                                 <span class="co">#  JET 6</span>
+015301,000204: 06,3147           00001                           <span class="ps">OCT     </span> 00001                                 <span class="co">#  JET 1</span>
+015302,000205: 06,3150           00004                           <span class="ps">OCT     </span> 00004                                 <span class="co">#  JET 5</span>
+015303,000206: 06,3151           00002                           <span class="ps">OCT     </span> 00002                                 <span class="co">#  JET 2</span>
+015304,000207: 
 </pre>
 </span>
 </p>
@@ -387,55 +387,55 @@ Page 372
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-015304,000209:                                                                                                  <span class="co">#  LEM FCS TEST  ENGINE ON - OFF TASK</span>
-015305,000210:                                                                                                  <span class="co">#  THIS TASK TURNS THE LEM ASCENT OR DESCENT ENGINE ON AND OFF ACCORDING TOTHE CONSTANTS STORED IN THE FIVE SETS OF</span>
-015306,000211:                                                                                                  <span class="co">#  REGISTERS, (1) CYLTIMES, WHICH CONTAINS THE NUMBER OF TIMES A PARTICULARSTEP WILL BE REPEATED, (2) NEXTCYLT,</span>
-015307,000212:                                                                                                  <span class="co">#   WHICH CONTAINS THE TIME BETWEEN STEPS SCALED FOR T3, (3) ONTIME, WHICH CONTAINS THE TIME TO TURN THE ENGINE ON</span>
-015308,000213:                                                                                                  <span class="co">#  WHICH ALSO DETERMINES THE LENGTH OF TIME THE ENGINE WILL BE OFF WITHIN A SERIES OF ON:OFF CYCLES, (4) OFFTIME,</span>
-015309,000214:                                                                                                  <span class="co">#   WHICH CONTAINS THE NUMBER OF 2 MINUTES BEFORE THE ENGINE WILL BE TURNED OFF, AND (5) OFFTIMER, WHICH</span>
-015310,000215:                                                                                                  <span class="co">#  CONTAINS THE RESIDUAL TIME BEFORE THE ENGINE WILL BE TURNED OFF.  OFFTIME AND OFFTIMER DETERMINE THE LENGTH</span>
-015311,000216:                                                                                                  <span class="co">#  OF TIME THE ENGINE WILL BE ON IN ANY ONE CYCLE. THERE ARE THREE SETS OF THESE REGISTERS.</span>
-015312,000217:                                                                                                  <span class="co">#      THE ENGSTEP REGISTER IS USED AS AN INDEX TO PICK UP A PARTICULAR SET  OF THE ABOVE 5 REGISTERS.  THIS TASK</span>
-015313,000218:                                                                                                  <span class="co">#  WILL BE ENTERED BUT IMMEDIATELY ENDED IF ENGSTEP AND CYLTIMES = +0.     THE ALLOWABLE VALUES OF ENGSTEP ARE +0,</span>
-015314,000219:                                                                                                  <span class="co">#  1 AND 2.</span>
-015315,000220: 
-015316,000221: 
-<a name="4E58544F4E4F4646"></a>015317,000222: 06,3152           11470        <span class="sm">NXTONOFF</span>           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#454E4753544550">ENGSTEP</a>                               
-015318,000223: 06,3153           03155                           <span class="op">TC      </span> +2                                    
-015319,000224: 06,3154           05727                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              <span class="co">#  EXIT HERE WHEN STEP AND CYL ARE +0.</span>
-015320,000225: 06,3155           55470                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#454E4753544550">ENGSTEP</a>                               <span class="co">#  ONE LESS.</span>
-015321,000226: 
-<a name="454E475354415254"></a>015322,000227: 06,3156           51470        <span class="sm">ENGSTART</span>           <span class="op">NDX     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#454E4753544550">ENGSTEP</a>                               <span class="co">#  ENTER HERE.</span>
-015323,000228: 06,3157           11471                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43594C54494D4553">CYLTIMES</a>                              <span class="co">#  NUM OF EACH  ON/OFF SET</span>
-015324,000229: 06,3160           03162                           <span class="op">TC      </span> +2                                    
-015325,000230: 06,3161           03152                           <span class="op">TC      </span> <a href="#4E58544F4E4F4646">NXTONOFF</a>                              <span class="co">#  NO MORE OF THIS SET</span>
-015326,000231: 06,3162           51470                           <span class="op">NDX     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#454E4753544550">ENGSTEP</a>                               
-015327,000232: 06,3163           31474                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E45585443594C54">NEXTCYLT</a>                              <span class="co">#  START OF NEXT CYCLE.</span>
-015328,000233: 06,3164           05663                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#574149544C495354">WAITLIST</a>                              
-015329,000234: 06,3165  E4,1470                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#454E4753544550">ENGSTEP</a>                               
-015330,000235: 06,3165           03206 14064                     <span class="ps">2CADR   </span> <a href="#454E474F4E544D">ENGONTM</a>                               
-015331,000236: 
-015332,000237: 06,3167           05727                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              
-015333,000238: 
-<a name="454E475245534554"></a>015334,000239: 06,3170           45210        <span class="sm">ENGRESET</span>           <span class="op">CS      </span> <a href="EXECUTIVE.agc.html#5052494F3330">PRIO30</a>                                <span class="co">#  BITS 13 AND 14.</span>
-015335,000240: 06,3171           00006                           <span class="op">EXTEND  </span>                                       
-015336,000241: 06,3172           02011                           <span class="op">RAND    </span> 11                                    
-015337,000242: 06,3173           67746                           <span class="op">AD      </span> <a href="INTERPRETER.agc.html#4249543134">BIT14</a>                                 
-015338,000243: 06,3174           00006                           <span class="op">EXTEND  </span>                                       
-015339,000244: 06,3175           01011                           <span class="op">WRITE   </span> 11                                    <span class="co">#  ENG ON = 0, ENG OFF = 1.</span>
-015340,000245: 06,3176           51470                           <span class="op">NDX     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#454E4753544550">ENGSTEP</a>                               
-015341,000246: 06,3177           11471                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43594C54494D4553">CYLTIMES</a>                              
-015342,000247: 06,3200           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
-015343,000248: 06,3201           03203                           <span class="op">TC      </span> +2                                    
-015344,000249: 06,3202           03152                           <span class="op">TC      </span> <a href="#4E58544F4E4F4646">NXTONOFF</a>                              <span class="co">#  WAS ONE.</span>
-015345,000250: 06,3203           67763                           <span class="op">AD      </span> <a href="INTERPRETER.agc.html#4F4E45">ONE</a>                                   <span class="co">#  WAS MORE THAN ONE.</span>
-015346,000251: 06,3204           51470                           <span class="op">NDX     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#454E4753544550">ENGSTEP</a>                               
-015347,000252: 06,3205           55471                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43594C54494D4553">CYLTIMES</a>                              
-015348,000253: 
-<a name="454E474F4E544D"></a>015349,000254: 06,3206           51470        <span class="sm">ENGONTM </span>           <span class="op">NDX     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#454E4753544550">ENGSTEP</a>                               
-015350,000255: 06,3207           31502                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F464654494D45">OFFTIME</a>                               
-015351,000256: 06,3210           55406                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4646544D425546">OFFTMBUF</a>                              
-015352,000257: 06,3211           51470                           <span class="op">NDX     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#454E4753544550">ENGSTEP</a>                               
+015306,000209:                                                                                                  <span class="co">#  LEM FCS TEST  ENGINE ON - OFF TASK</span>
+015307,000210:                                                                                                  <span class="co">#  THIS TASK TURNS THE LEM ASCENT OR DESCENT ENGINE ON AND OFF ACCORDING TOTHE CONSTANTS STORED IN THE FIVE SETS OF</span>
+015308,000211:                                                                                                  <span class="co">#  REGISTERS, (1) CYLTIMES, WHICH CONTAINS THE NUMBER OF TIMES A PARTICULARSTEP WILL BE REPEATED, (2) NEXTCYLT,</span>
+015309,000212:                                                                                                  <span class="co">#   WHICH CONTAINS THE TIME BETWEEN STEPS SCALED FOR T3, (3) ONTIME, WHICH CONTAINS THE TIME TO TURN THE ENGINE ON</span>
+015310,000213:                                                                                                  <span class="co">#  WHICH ALSO DETERMINES THE LENGTH OF TIME THE ENGINE WILL BE OFF WITHIN A SERIES OF ON:OFF CYCLES, (4) OFFTIME,</span>
+015311,000214:                                                                                                  <span class="co">#   WHICH CONTAINS THE NUMBER OF 2 MINUTES BEFORE THE ENGINE WILL BE TURNED OFF, AND (5) OFFTIMER, WHICH</span>
+015312,000215:                                                                                                  <span class="co">#  CONTAINS THE RESIDUAL TIME BEFORE THE ENGINE WILL BE TURNED OFF.  OFFTIME AND OFFTIMER DETERMINE THE LENGTH</span>
+015313,000216:                                                                                                  <span class="co">#  OF TIME THE ENGINE WILL BE ON IN ANY ONE CYCLE. THERE ARE THREE SETS OF THESE REGISTERS.</span>
+015314,000217:                                                                                                  <span class="co">#      THE ENGSTEP REGISTER IS USED AS AN INDEX TO PICK UP A PARTICULAR SET  OF THE ABOVE 5 REGISTERS.  THIS TASK</span>
+015315,000218:                                                                                                  <span class="co">#  WILL BE ENTERED BUT IMMEDIATELY ENDED IF ENGSTEP AND CYLTIMES = +0.     THE ALLOWABLE VALUES OF ENGSTEP ARE +0,</span>
+015316,000219:                                                                                                  <span class="co">#  1 AND 2.</span>
+015317,000220: 
+015318,000221: 
+<a name="4E58544F4E4F4646"></a>015319,000222: 06,3152           11470        <span class="sm">NXTONOFF</span>           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#454E4753544550">ENGSTEP</a>                               
+015320,000223: 06,3153           03155                           <span class="op">TC      </span> +2                                    
+015321,000224: 06,3154           05727                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              <span class="co">#  EXIT HERE WHEN STEP AND CYL ARE +0.</span>
+015322,000225: 06,3155           55470                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#454E4753544550">ENGSTEP</a>                               <span class="co">#  ONE LESS.</span>
+015323,000226: 
+<a name="454E475354415254"></a>015324,000227: 06,3156           51470        <span class="sm">ENGSTART</span>           <span class="op">NDX     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#454E4753544550">ENGSTEP</a>                               <span class="co">#  ENTER HERE.</span>
+015325,000228: 06,3157           11471                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43594C54494D4553">CYLTIMES</a>                              <span class="co">#  NUM OF EACH  ON/OFF SET</span>
+015326,000229: 06,3160           03162                           <span class="op">TC      </span> +2                                    
+015327,000230: 06,3161           03152                           <span class="op">TC      </span> <a href="#4E58544F4E4F4646">NXTONOFF</a>                              <span class="co">#  NO MORE OF THIS SET</span>
+015328,000231: 06,3162           51470                           <span class="op">NDX     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#454E4753544550">ENGSTEP</a>                               
+015329,000232: 06,3163           31474                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E45585443594C54">NEXTCYLT</a>                              <span class="co">#  START OF NEXT CYCLE.</span>
+015330,000233: 06,3164           05663                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#574149544C495354">WAITLIST</a>                              
+015331,000234: 06,3165  E4,1470                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#454E4753544550">ENGSTEP</a>                               
+015332,000235: 06,3165           03206 14064                     <span class="ps">2CADR   </span> <a href="#454E474F4E544D">ENGONTM</a>                               
+015333,000236: 
+015334,000237: 06,3167           05727                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              
+015335,000238: 
+<a name="454E475245534554"></a>015336,000239: 06,3170           45210        <span class="sm">ENGRESET</span>           <span class="op">CS      </span> <a href="EXECUTIVE.agc.html#5052494F3330">PRIO30</a>                                <span class="co">#  BITS 13 AND 14.</span>
+015337,000240: 06,3171           00006                           <span class="op">EXTEND  </span>                                       
+015338,000241: 06,3172           02011                           <span class="op">RAND    </span> 11                                    
+015339,000242: 06,3173           67746                           <span class="op">AD      </span> <a href="INTERPRETER.agc.html#4249543134">BIT14</a>                                 
+015340,000243: 06,3174           00006                           <span class="op">EXTEND  </span>                                       
+015341,000244: 06,3175           01011                           <span class="op">WRITE   </span> 11                                    <span class="co">#  ENG ON = 0, ENG OFF = 1.</span>
+015342,000245: 06,3176           51470                           <span class="op">NDX     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#454E4753544550">ENGSTEP</a>                               
+015343,000246: 06,3177           11471                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43594C54494D4553">CYLTIMES</a>                              
+015344,000247: 06,3200           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
+015345,000248: 06,3201           03203                           <span class="op">TC      </span> +2                                    
+015346,000249: 06,3202           03152                           <span class="op">TC      </span> <a href="#4E58544F4E4F4646">NXTONOFF</a>                              <span class="co">#  WAS ONE.</span>
+015347,000250: 06,3203           67763                           <span class="op">AD      </span> <a href="INTERPRETER.agc.html#4F4E45">ONE</a>                                   <span class="co">#  WAS MORE THAN ONE.</span>
+015348,000251: 06,3204           51470                           <span class="op">NDX     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#454E4753544550">ENGSTEP</a>                               
+015349,000252: 06,3205           55471                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43594C54494D4553">CYLTIMES</a>                              
+015350,000253: 
+<a name="454E474F4E544D"></a>015351,000254: 06,3206           51470        <span class="sm">ENGONTM </span>           <span class="op">NDX     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#454E4753544550">ENGSTEP</a>                               
+015352,000255: 06,3207           31502                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F464654494D45">OFFTIME</a>                               
+015353,000256: 06,3210           55406                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4646544D425546">OFFTMBUF</a>                              
+015354,000257: 06,3211           51470                           <span class="op">NDX     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#454E4753544550">ENGSTEP</a>                               
 </pre>
 </span>
 </p>
@@ -451,42 +451,42 @@ Page 373
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-015354,000259: 06,3212           31477                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4E54494D45">ONTIME</a>                                
-015355,000260: 06,3213           05663                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#574149544C495354">WAITLIST</a>                              
-015356,000261: 06,3214  E4,1470                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#454E4753544550">ENGSTEP</a>                               
-015357,000262: 06,3214           03217 14064                     <span class="ps">2CADR   </span> <a href="#454E47534554">ENGSET</a>                                
-015358,000263: 
-015359,000264: 06,3216           05727                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              
-015360,000265: 
-<a name="454E47534554"></a>015361,000266: 06,3217           45210        <span class="sm">ENGSET  </span>           <span class="op">CS      </span> <a href="EXECUTIVE.agc.html#5052494F3330">PRIO30</a>                                
-015362,000267: 06,3220           00006                           <span class="op">EXTEND  </span>                                       
-015363,000268: 06,3221           02011                           <span class="op">RAND    </span> 11                                    
-015364,000269: 06,3222           67747                           <span class="op">AD      </span> <a href="INTERPRETER.agc.html#4249543133">BIT13</a>                                 
-015365,000270: 06,3223           00006                           <span class="op">EXTEND  </span>                                       
-015366,000271: 06,3224           01011                           <span class="op">WRITE   </span> 11                                    <span class="co">#  ENG ON = 1, ENG OFF = 0.</span>
-<a name="454E47525354"></a>015367,000272: 06,3225           11406        <span class="sm">ENGRST  </span>           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4646544D425546">OFFTMBUF</a>                              
-015368,000273: 06,3226           03235                           <span class="op">TC      </span> <a href="#4C54494D454F4E">LTIMEON</a>                               <span class="co">#  AT LEAST 2MIN. BEFORE ENGINE OFF.</span>
-015369,000274: 06,3227           51470                           <span class="op">NDX     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#454E4753544550">ENGSTEP</a>                               
-015370,000275: 06,3230           31505                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F464654494D4552">OFFTIMER</a>                              <span class="co">#  LESS THAN 2MIN. TO ENGINE OFF.</span>
-015371,000276: 06,3231           05663                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#574149544C495354">WAITLIST</a>                              
-015372,000277: 06,3232  E4,1470                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#454E4753544550">ENGSTEP</a>                               
-015373,000278: 06,3232           03170 14064                     <span class="ps">2CADR   </span> <a href="#454E475245534554">ENGRESET</a>                              
-015374,000279: 
-015375,000280: 06,3234           05727                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              
-015376,000281: 
-<a name="4C54494D454F4E"></a>015377,000282: 06,3235           11406        <span class="sm">LTIMEON </span>           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4646544D425546">OFFTMBUF</a>                              <span class="co">#  IS THERE ANY MORE.</span>
-015378,000283: 06,3236           03240                           <span class="op">TC      </span> +2                                    <span class="co">#  YES.</span>
-015379,000284: 06,3237           03225                           <span class="op">TC      </span> <a href="#454E47525354">ENGRST</a>                                <span class="co">#  NO.</span>
-015380,000285: 06,3240           55406                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4646544D425546">OFFTMBUF</a>                              <span class="co">#  ONE LESS.</span>
-015381,000286: 06,3241           33246                           <span class="op">CAF     </span> <a href="#324D494E">2MIN</a>                                  
-015382,000287: 06,3242           05663                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#574149544C495354">WAITLIST</a>                              
-015383,000288: 06,3243  E4,1470                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#454E4753544550">ENGSTEP</a>                               
-015384,000289: 06,3243           03235 14064                     <span class="ps">2CADR   </span> <a href="#4C54494D454F4E">LTIMEON</a>                               
-015385,000290: 
-015386,000291: 06,3245           05727                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              
-015387,000292: 
-<a name="324D494E"></a>015388,000293: 06,3246           27340        <span class="sm">2MIN    </span>           <span class="ps">DEC     </span> 12000      B-14                       
-015389,000294: 
+015356,000259: 06,3212           31477                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4E54494D45">ONTIME</a>                                
+015357,000260: 06,3213           05663                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#574149544C495354">WAITLIST</a>                              
+015358,000261: 06,3214  E4,1470                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#454E4753544550">ENGSTEP</a>                               
+015359,000262: 06,3214           03217 14064                     <span class="ps">2CADR   </span> <a href="#454E47534554">ENGSET</a>                                
+015360,000263: 
+015361,000264: 06,3216           05727                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              
+015362,000265: 
+<a name="454E47534554"></a>015363,000266: 06,3217           45210        <span class="sm">ENGSET  </span>           <span class="op">CS      </span> <a href="EXECUTIVE.agc.html#5052494F3330">PRIO30</a>                                
+015364,000267: 06,3220           00006                           <span class="op">EXTEND  </span>                                       
+015365,000268: 06,3221           02011                           <span class="op">RAND    </span> 11                                    
+015366,000269: 06,3222           67747                           <span class="op">AD      </span> <a href="INTERPRETER.agc.html#4249543133">BIT13</a>                                 
+015367,000270: 06,3223           00006                           <span class="op">EXTEND  </span>                                       
+015368,000271: 06,3224           01011                           <span class="op">WRITE   </span> 11                                    <span class="co">#  ENG ON = 1, ENG OFF = 0.</span>
+<a name="454E47525354"></a>015369,000272: 06,3225           11406        <span class="sm">ENGRST  </span>           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4646544D425546">OFFTMBUF</a>                              
+015370,000273: 06,3226           03235                           <span class="op">TC      </span> <a href="#4C54494D454F4E">LTIMEON</a>                               <span class="co">#  AT LEAST 2MIN. BEFORE ENGINE OFF.</span>
+015371,000274: 06,3227           51470                           <span class="op">NDX     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#454E4753544550">ENGSTEP</a>                               
+015372,000275: 06,3230           31505                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F464654494D4552">OFFTIMER</a>                              <span class="co">#  LESS THAN 2MIN. TO ENGINE OFF.</span>
+015373,000276: 06,3231           05663                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#574149544C495354">WAITLIST</a>                              
+015374,000277: 06,3232  E4,1470                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#454E4753544550">ENGSTEP</a>                               
+015375,000278: 06,3232           03170 14064                     <span class="ps">2CADR   </span> <a href="#454E475245534554">ENGRESET</a>                              
+015376,000279: 
+015377,000280: 06,3234           05727                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              
+015378,000281: 
+<a name="4C54494D454F4E"></a>015379,000282: 06,3235           11406        <span class="sm">LTIMEON </span>           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4646544D425546">OFFTMBUF</a>                              <span class="co">#  IS THERE ANY MORE.</span>
+015380,000283: 06,3236           03240                           <span class="op">TC      </span> +2                                    <span class="co">#  YES.</span>
+015381,000284: 06,3237           03225                           <span class="op">TC      </span> <a href="#454E47525354">ENGRST</a>                                <span class="co">#  NO.</span>
+015382,000285: 06,3240           55406                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4646544D425546">OFFTMBUF</a>                              <span class="co">#  ONE LESS.</span>
+015383,000286: 06,3241           33246                           <span class="op">CAF     </span> <a href="#324D494E">2MIN</a>                                  
+015384,000287: 06,3242           05663                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#574149544C495354">WAITLIST</a>                              
+015385,000288: 06,3243  E4,1470                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#454E4753544550">ENGSTEP</a>                               
+015386,000289: 06,3243           03235 14064                     <span class="ps">2CADR   </span> <a href="#4C54494D454F4E">LTIMEON</a>                               
+015387,000290: 
+015388,000291: 06,3245           05727                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              
+015389,000292: 
+<a name="324D494E"></a>015390,000293: 06,3246           27340        <span class="sm">2MIN    </span>           <span class="ps">DEC     </span> 12000      B-14                       
+015391,000294: 
 </pre>
 </span>
 </p>
@@ -502,55 +502,55 @@ Page 374
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-015391,000296:                                                                                                  <span class="co">#  LEM FCS TEST  TRIM TASK</span>
-015392,000297:                                                                                                  <span class="co">#  THIS PROGRAM ISSUES A PROFILE OF PITCH AND ROLL TRIM COMMANDS TO THE LEM DESCENT ENGINE GIMBAL IN ACCORDANCEWITH</span>
-015393,000298:                                                                                                  <span class="co">#  THE VALUE S IN THE TRIMSTEP REGISTER AND THE 12 SETS OF 5 REGISTERS CALLED NUMTIMES, STEPDLYT, TRIMONT, TRIMOFFT</span>
-015394,000299:                                                                                                  <span class="co">#  AND TRIMIND.  TRIMSTEP IS USED TO PICK UP A PARTICULAR SET OF THE 5 REGISTERS AND HAS ALLOWABLE VALUES FROM +0</span>
-015395,000300:                                                                                                  <span class="co">#  THROUGH +11 DECIMAL.  THE 5 REGISTERS IN EACH SET ARE DEFINED AS FOLLOWS</span>
-015396,000301:                                                                                                  <span class="co">#      (1) NUMTIMES DETERMINES THE NUMBER OF TIMES THE COMMAND IN TRIMIND  WILL BE ISSUED.  VALUES FROM +0 TO</span>
-015397,000302:                                                                                                  <span class="co">#  OCT 37777 ARE PERMITTED.</span>
-015398,000303:                                                                                                  <span class="co">#      (2) STEPDLYT DETERMINES THE TIME BETWEEN THE START OF A STEP AND THE BEGINNING OF TRIMONT.  STEPDLYT MUST BE</span>
-015399,000304:                                                                                                  <span class="co">#  FORMATTED FOR T3, ITS MAXIMUM VALUE IS 2 MINUTES.</span>
-015400,000305:                                                                                                  <span class="co">#      (3) TRIMONT DETERMINES THE TIME BETWEEN THE END OF STEPDLYT OR TRIMOFFT AND THE TIME THE TRIM COMMANDS ARE</span>
-015401,000306:                                                                                                  <span class="co">#  ISSUED.  IT MUST BE FORMATTED FOR T3.</span>
-015402,000307:                                                                                                  <span class="co">#      (4) TRIMOFFT DETERMINES THE LENGTH OF TIME THE TRIM COMMAND WILL BE ON, FORMATTED FOR T3.</span>
-015403,000308:                                                                                                  <span class="co">#      (5) TRIMIND DETERMINES THE PITCH AND ROLL COMMAND TO BE ISSUED.  THE FORMAT IS, BIT9=1=+ PITCH COMMAND,</span>
-015404,000309:                                                                                                  <span class="co">#  BIT10=1=-PITCH, BIT11=1= +ROLL, BIT12=1= -ROLL.  A BIT=0 INDICATES NO COMMAND.  ANY COMBINATION OF COMMANDS IS</span>
-015405,000310:                                                                                                  <span class="co">#  PERMITTED.</span>
-015406,000311:                                                                                                  <span class="co">#     THIS TASK WILL BE ENTERED BUT IMMEDIATELY ENDED IF TRIMSTEP AND NUMTIMES = +0.</span>
-015407,000312: 
-015408,000313: 
-<a name="4E4558545452494D"></a>015409,000314: 06,3247           11510        <span class="sm">NEXTTRIM</span>           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5452494D53544550">TRIMSTEP</a>                              
-015410,000315: 06,3250           03252                           <span class="op">TC      </span> +2                                    
-015411,000316: 06,3251           05727                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              <span class="co">#  EXIT HERE.</span>
-015412,000317: 06,3252           55510                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5452494D53544550">TRIMSTEP</a>                              <span class="co">#  LESS ONE.</span>
-015413,000318: 
-<a name="5452494D544F50"></a>015414,000319: 06,3253           51510        <span class="sm">TRIMTOP </span>           <span class="op">NDX     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5452494D53544550">TRIMSTEP</a>                              <span class="co">#  ENTER HERE.</span>
-015415,000320: 06,3254           11511                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E554D54494D4553">NUMTIMES</a>                              
-015416,000321: 06,3255           03257                           <span class="op">TC      </span> +2                                    
-015417,000322: 06,3256           03247                           <span class="op">TC      </span> <a href="#4E4558545452494D">NEXTTRIM</a>                              
-015418,000323: 06,3257           51510                           <span class="op">NDX     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5452494D53544550">TRIMSTEP</a>                              
-015419,000324: 06,3260           31525                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#53544550444C5954">STEPDLYT</a>                              
-015420,000325: 06,3261           05663                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#574149544C495354">WAITLIST</a>                              
-015421,000326: 06,3262  E4,1510                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5452494D53544550">TRIMSTEP</a>                              
-015422,000327: 06,3262           03300 14064                     <span class="ps">2CADR   </span> <a href="#5452494D534554">TRIMSET</a>                               
-015423,000328: 
-015424,000329: 06,3264           05727                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              
-015425,000330: 
-<a name="5452494D4F4646"></a>015426,000331: 06,3265           43364        <span class="sm">TRIMOFF </span>           <span class="op">CS      </span> <a href="#5452494D4D41534B">TRIMMASK</a>                              
-015427,000332: 06,3266           00006                           <span class="op">EXTEND  </span>                                       
-015428,000333: 06,3267           03012                           <span class="op">WAND    </span> 12                                    <span class="co">#  TRIM GOES OFF.</span>
-<a name="4E554D53544550"></a>015429,000334: 06,3270           51510        <span class="sm">NUMSTEP </span>           <span class="op">NDX     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5452494D53544550">TRIMSTEP</a>                              
-015430,000335: 06,3271           11511                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E554D54494D4553">NUMTIMES</a>                              
-015431,000336: 06,3272           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
-015432,000337: 06,3273           03275                           <span class="op">TC      </span> +2                                    
-015433,000338: 06,3274           03247                           <span class="op">TC      </span> <a href="#4E4558545452494D">NEXTTRIM</a>                              <span class="co">#  WAS ONE.</span>
-015434,000339: 06,3275           67763                           <span class="op">AD      </span> <a href="INTERPRETER.agc.html#4F4E45">ONE</a>                                   
-015435,000340: 06,3276           51510                           <span class="op">NDX     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5452494D53544550">TRIMSTEP</a>                              
-015436,000341: 06,3277           55511                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E554D54494D4553">NUMTIMES</a>                              
-<a name="5452494D534554"></a>015437,000342: 06,3300           51510        <span class="sm">TRIMSET </span>           <span class="op">NDX     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5452494D53544550">TRIMSTEP</a>                              
-015438,000343: 06,3301           31541                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5452494D4F4E54">TRIMONT</a>                               
-015439,000344: 06,3302           05663                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#574149544C495354">WAITLIST</a>                              
+015393,000296:                                                                                                  <span class="co">#  LEM FCS TEST  TRIM TASK</span>
+015394,000297:                                                                                                  <span class="co">#  THIS PROGRAM ISSUES A PROFILE OF PITCH AND ROLL TRIM COMMANDS TO THE LEM DESCENT ENGINE GIMBAL IN ACCORDANCEWITH</span>
+015395,000298:                                                                                                  <span class="co">#  THE VALUE S IN THE TRIMSTEP REGISTER AND THE 12 SETS OF 5 REGISTERS CALLED NUMTIMES, STEPDLYT, TRIMONT, TRIMOFFT</span>
+015396,000299:                                                                                                  <span class="co">#  AND TRIMIND.  TRIMSTEP IS USED TO PICK UP A PARTICULAR SET OF THE 5 REGISTERS AND HAS ALLOWABLE VALUES FROM +0</span>
+015397,000300:                                                                                                  <span class="co">#  THROUGH +11 DECIMAL.  THE 5 REGISTERS IN EACH SET ARE DEFINED AS FOLLOWS</span>
+015398,000301:                                                                                                  <span class="co">#      (1) NUMTIMES DETERMINES THE NUMBER OF TIMES THE COMMAND IN TRIMIND  WILL BE ISSUED.  VALUES FROM +0 TO</span>
+015399,000302:                                                                                                  <span class="co">#  OCT 37777 ARE PERMITTED.</span>
+015400,000303:                                                                                                  <span class="co">#      (2) STEPDLYT DETERMINES THE TIME BETWEEN THE START OF A STEP AND THE BEGINNING OF TRIMONT.  STEPDLYT MUST BE</span>
+015401,000304:                                                                                                  <span class="co">#  FORMATTED FOR T3, ITS MAXIMUM VALUE IS 2 MINUTES.</span>
+015402,000305:                                                                                                  <span class="co">#      (3) TRIMONT DETERMINES THE TIME BETWEEN THE END OF STEPDLYT OR TRIMOFFT AND THE TIME THE TRIM COMMANDS ARE</span>
+015403,000306:                                                                                                  <span class="co">#  ISSUED.  IT MUST BE FORMATTED FOR T3.</span>
+015404,000307:                                                                                                  <span class="co">#      (4) TRIMOFFT DETERMINES THE LENGTH OF TIME THE TRIM COMMAND WILL BE ON, FORMATTED FOR T3.</span>
+015405,000308:                                                                                                  <span class="co">#      (5) TRIMIND DETERMINES THE PITCH AND ROLL COMMAND TO BE ISSUED.  THE FORMAT IS, BIT9=1=+ PITCH COMMAND,</span>
+015406,000309:                                                                                                  <span class="co">#  BIT10=1=-PITCH, BIT11=1= +ROLL, BIT12=1= -ROLL.  A BIT=0 INDICATES NO COMMAND.  ANY COMBINATION OF COMMANDS IS</span>
+015407,000310:                                                                                                  <span class="co">#  PERMITTED.</span>
+015408,000311:                                                                                                  <span class="co">#     THIS TASK WILL BE ENTERED BUT IMMEDIATELY ENDED IF TRIMSTEP AND NUMTIMES = +0.</span>
+015409,000312: 
+015410,000313: 
+<a name="4E4558545452494D"></a>015411,000314: 06,3247           11510        <span class="sm">NEXTTRIM</span>           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5452494D53544550">TRIMSTEP</a>                              
+015412,000315: 06,3250           03252                           <span class="op">TC      </span> +2                                    
+015413,000316: 06,3251           05727                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              <span class="co">#  EXIT HERE.</span>
+015414,000317: 06,3252           55510                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5452494D53544550">TRIMSTEP</a>                              <span class="co">#  LESS ONE.</span>
+015415,000318: 
+<a name="5452494D544F50"></a>015416,000319: 06,3253           51510        <span class="sm">TRIMTOP </span>           <span class="op">NDX     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5452494D53544550">TRIMSTEP</a>                              <span class="co">#  ENTER HERE.</span>
+015417,000320: 06,3254           11511                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E554D54494D4553">NUMTIMES</a>                              
+015418,000321: 06,3255           03257                           <span class="op">TC      </span> +2                                    
+015419,000322: 06,3256           03247                           <span class="op">TC      </span> <a href="#4E4558545452494D">NEXTTRIM</a>                              
+015420,000323: 06,3257           51510                           <span class="op">NDX     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5452494D53544550">TRIMSTEP</a>                              
+015421,000324: 06,3260           31525                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#53544550444C5954">STEPDLYT</a>                              
+015422,000325: 06,3261           05663                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#574149544C495354">WAITLIST</a>                              
+015423,000326: 06,3262  E4,1510                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5452494D53544550">TRIMSTEP</a>                              
+015424,000327: 06,3262           03300 14064                     <span class="ps">2CADR   </span> <a href="#5452494D534554">TRIMSET</a>                               
+015425,000328: 
+015426,000329: 06,3264           05727                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              
+015427,000330: 
+<a name="5452494D4F4646"></a>015428,000331: 06,3265           43364        <span class="sm">TRIMOFF </span>           <span class="op">CS      </span> <a href="#5452494D4D41534B">TRIMMASK</a>                              
+015429,000332: 06,3266           00006                           <span class="op">EXTEND  </span>                                       
+015430,000333: 06,3267           03012                           <span class="op">WAND    </span> 12                                    <span class="co">#  TRIM GOES OFF.</span>
+<a name="4E554D53544550"></a>015431,000334: 06,3270           51510        <span class="sm">NUMSTEP </span>           <span class="op">NDX     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5452494D53544550">TRIMSTEP</a>                              
+015432,000335: 06,3271           11511                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E554D54494D4553">NUMTIMES</a>                              
+015433,000336: 06,3272           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
+015434,000337: 06,3273           03275                           <span class="op">TC      </span> +2                                    
+015435,000338: 06,3274           03247                           <span class="op">TC      </span> <a href="#4E4558545452494D">NEXTTRIM</a>                              <span class="co">#  WAS ONE.</span>
+015436,000339: 06,3275           67763                           <span class="op">AD      </span> <a href="INTERPRETER.agc.html#4F4E45">ONE</a>                                   
+015437,000340: 06,3276           51510                           <span class="op">NDX     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5452494D53544550">TRIMSTEP</a>                              
+015438,000341: 06,3277           55511                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E554D54494D4553">NUMTIMES</a>                              
+<a name="5452494D534554"></a>015439,000342: 06,3300           51510        <span class="sm">TRIMSET </span>           <span class="op">NDX     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5452494D53544550">TRIMSTEP</a>                              
+015440,000343: 06,3301           31541                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5452494D4F4E54">TRIMONT</a>                               
+015441,000344: 06,3302           05663                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#574149544C495354">WAITLIST</a>                              
 </pre>
 </span>
 </p>
@@ -566,55 +566,55 @@ Page 375
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-015441,000346: 06,3303  E4,1510                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5452494D53544550">TRIMSTEP</a>                              
-015442,000347: 06,3303           03306 14064                     <span class="ps">2CADR   </span> <a href="#5452494D4F4E">TRIMON</a>                                
-015443,000348: 
-015444,000349: 06,3305           05727                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              
-015445,000350: 
-<a name="5452494D4F4E"></a>015446,000351: 06,3306           33363        <span class="sm">TRIMON  </span>           <span class="op">CAF     </span> <a href="#42495453392C3130">BITS9,10</a>                              <span class="co">#  CHECK PITCH AND ROLL TRIM FAIL BITS.</span>
-015447,000352: 06,3307           00006                           <span class="op">EXTEND  </span>                                       
-015448,000353: 06,3310           06032                           <span class="op">RXOR    </span> 32                                    
-015449,000354: 06,3311           73363                           <span class="op">MASK    </span> <a href="#42495453392C3130">BITS9,10</a>                              
-015450,000355: 06,3312           00006                           <span class="op">EXTEND  </span>                                       
-015451,000356: 06,3313           13321                           <span class="op">BZF     </span> <a href="#5452494D4F4E31">TRIMON1</a>                               
-015452,000357: 06,3314           35656                           <span class="op">CAF     </span> <a href="EXECUTIVE.agc.html#5052494F3335">PRIO35</a>                                <span class="co">#  FAIL IS ON. FLASH FAIL CODE (01400) AND</span>
-015453,000358: 06,3315           05505                           <span class="op">TC      </span> <a href="EXECUTIVE.agc.html#4E4F564143">NOVAC</a>                                 <span class="co">#  IDLE UNTIL SOMEONE RESETS IT, TERMINATES</span>
-015454,000359: 06,3316  E4,1407                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4A455453544550">JETSTEP</a>                               
-015455,000360: 06,3316           03334 14064                     <span class="ps">2CADR   </span> <a href="#504552464F524D">PERFORM</a>                               <span class="co">#  THE TASK, OR DECIDES TO PROCEED WITH IT.</span>
-015456,000361: 
-015457,000362: 06,3320           05727                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              
-015458,000363: 
-<a name="5452494D4F4E31"></a>015459,000364: 06,3321           51510        <span class="sm">TRIMON1 </span>           <span class="op">NDX     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5452494D53544550">TRIMSTEP</a>                              
-015460,000365: 06,3322           31571                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5452494D494E44">TRIMIND</a>                               
-015461,000366: 06,3323           73364                           <span class="op">MASK    </span> <a href="#5452494D4D41534B">TRIMMASK</a>                              <span class="co">#  SAFETY PLAY</span>
-015462,000367: 06,3324           00006                           <span class="op">EXTEND  </span>                                       
-015463,000368: 06,3325           05012                           <span class="op">WOR     </span> 12                                    <span class="co">#  TRIM STARTS.</span>
-015464,000369: 06,3326           51510                           <span class="op">NDX     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5452494D53544550">TRIMSTEP</a>                              
-015465,000370: 06,3327           31555                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5452494D4F464654">TRIMOFFT</a>                              
-015466,000371: 06,3330           05663                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#574149544C495354">WAITLIST</a>                              
-015467,000372: 06,3331  E4,1510                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5452494D53544550">TRIMSTEP</a>                              
-015468,000373: 06,3331           03265 14064                     <span class="ps">2CADR   </span> <a href="#5452494D4F4646">TRIMOFF</a>                               
-015469,000374: 
-015470,000375: 06,3333           05727                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              
-015471,000376: 
-<a name="504552464F524D"></a>015472,000377: 06,3334           04644        <span class="sm">PERFORM </span>           <span class="op">TC      </span> <a href="PINBALL_GAME__BUTTONS_AND_LIGHTS.agc.html#4752414257414954">GRABWAIT</a>                              <span class="co">#  KEY RELEASE MAY COME ON.</span>
-015473,000378: 06,3335           33363                           <span class="op">CAF     </span> <a href="#5452494D434F4445">TRIMCODE</a>                              <span class="co">#  01400</span>
-015474,000379: 06,3336           54337                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44535054454D31">DSPTEM1</a>                               
-015475,000380: 06,3337           33365                           <span class="op">CAF     </span> <a href="#5630314E32354B">V01N25K</a>                               
-015476,000381: 06,3340           04657                           <span class="op">TC      </span> <a href="PINBALL_GAME__BUTTONS_AND_LIGHTS.agc.html#4E56534257414954">NVSBWAIT</a>                              
-015477,000382: 06,3341           33366                           <span class="op">CAF     </span> <a href="#5635304B">V50K</a>                                  <span class="co">#  PLEASE PERFORM.</span>
-015478,000383: 06,3342           04657                           <span class="op">TC      </span> <a href="PINBALL_GAME__BUTTONS_AND_LIGHTS.agc.html#4E56534257414954">NVSBWAIT</a>                              
-015479,000384: 06,3343           04622                           <span class="op">TC      </span> <a href="PINBALL_GAME__BUTTONS_AND_LIGHTS.agc.html#464C4153484F4E">FLASHON</a>                               <span class="co">#  ANY RESPONSE TURNS IT OFF.</span>
-015480,000385: 06,3344           04475                           <span class="op">TC      </span> <a href="PINBALL_GAME__BUTTONS_AND_LIGHTS.agc.html#454E4449444C45">ENDIDLE</a>                               <span class="co">#  WAIT FOR SOMEONE TO DO SOMETHING.</span>
-015481,000386: 06,3345           05566                           <span class="op">TC      </span> <a href="EXECUTIVE.agc.html#454A46524545">EJFREE</a>                                <span class="co">#  V34E. TERMINATE THE TASK.</span>
-015482,000387: 06,3346           03355                           <span class="op">TC      </span> <a href="#545231">TR1</a>                                   <span class="co">#  V33E. PROCEED WITH THE FAIL ON.</span>
-015483,000388: 06,3347           00004                           <span class="op">INHINT  </span>                                       <span class="co">#  ENTER. THE FAIL HAS BEEN RESET.</span>
-015484,000389: 06,3350           37762                           <span class="op">CAF     </span> <a href="INTERPRETER.agc.html#42495432">BIT2</a>                                  <span class="co">#  20MS.</span>
-015485,000390: 06,3351           05663                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#574149544C495354">WAITLIST</a>                              
-015486,000391: 06,3352           03306 14064                     <span class="ps">2CADR   </span> <a href="#5452494D4F4E">TRIMON</a>                                <span class="co">#  CHECK AGAIN TO BE SURE, THEN PROCEED..</span>
-015487,000392: 
-015488,000393: 06,3354           05566                           <span class="op">TC      </span> <a href="EXECUTIVE.agc.html#454A46524545">EJFREE</a>                                
-015489,000394: 
+015443,000346: 06,3303  E4,1510                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5452494D53544550">TRIMSTEP</a>                              
+015444,000347: 06,3303           03306 14064                     <span class="ps">2CADR   </span> <a href="#5452494D4F4E">TRIMON</a>                                
+015445,000348: 
+015446,000349: 06,3305           05727                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              
+015447,000350: 
+<a name="5452494D4F4E"></a>015448,000351: 06,3306           33363        <span class="sm">TRIMON  </span>           <span class="op">CAF     </span> <a href="#42495453392C3130">BITS9,10</a>                              <span class="co">#  CHECK PITCH AND ROLL TRIM FAIL BITS.</span>
+015449,000352: 06,3307           00006                           <span class="op">EXTEND  </span>                                       
+015450,000353: 06,3310           06032                           <span class="op">RXOR    </span> 32                                    
+015451,000354: 06,3311           73363                           <span class="op">MASK    </span> <a href="#42495453392C3130">BITS9,10</a>                              
+015452,000355: 06,3312           00006                           <span class="op">EXTEND  </span>                                       
+015453,000356: 06,3313           13321                           <span class="op">BZF     </span> <a href="#5452494D4F4E31">TRIMON1</a>                               
+015454,000357: 06,3314           35656                           <span class="op">CAF     </span> <a href="EXECUTIVE.agc.html#5052494F3335">PRIO35</a>                                <span class="co">#  FAIL IS ON. FLASH FAIL CODE (01400) AND</span>
+015455,000358: 06,3315           05505                           <span class="op">TC      </span> <a href="EXECUTIVE.agc.html#4E4F564143">NOVAC</a>                                 <span class="co">#  IDLE UNTIL SOMEONE RESETS IT, TERMINATES</span>
+015456,000359: 06,3316  E4,1407                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4A455453544550">JETSTEP</a>                               
+015457,000360: 06,3316           03334 14064                     <span class="ps">2CADR   </span> <a href="#504552464F524D">PERFORM</a>                               <span class="co">#  THE TASK, OR DECIDES TO PROCEED WITH IT.</span>
+015458,000361: 
+015459,000362: 06,3320           05727                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              
+015460,000363: 
+<a name="5452494D4F4E31"></a>015461,000364: 06,3321           51510        <span class="sm">TRIMON1 </span>           <span class="op">NDX     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5452494D53544550">TRIMSTEP</a>                              
+015462,000365: 06,3322           31571                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5452494D494E44">TRIMIND</a>                               
+015463,000366: 06,3323           73364                           <span class="op">MASK    </span> <a href="#5452494D4D41534B">TRIMMASK</a>                              <span class="co">#  SAFETY PLAY</span>
+015464,000367: 06,3324           00006                           <span class="op">EXTEND  </span>                                       
+015465,000368: 06,3325           05012                           <span class="op">WOR     </span> 12                                    <span class="co">#  TRIM STARTS.</span>
+015466,000369: 06,3326           51510                           <span class="op">NDX     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5452494D53544550">TRIMSTEP</a>                              
+015467,000370: 06,3327           31555                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5452494D4F464654">TRIMOFFT</a>                              
+015468,000371: 06,3330           05663                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#574149544C495354">WAITLIST</a>                              
+015469,000372: 06,3331  E4,1510                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5452494D53544550">TRIMSTEP</a>                              
+015470,000373: 06,3331           03265 14064                     <span class="ps">2CADR   </span> <a href="#5452494D4F4646">TRIMOFF</a>                               
+015471,000374: 
+015472,000375: 06,3333           05727                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              
+015473,000376: 
+<a name="504552464F524D"></a>015474,000377: 06,3334           04644        <span class="sm">PERFORM </span>           <span class="op">TC      </span> <a href="PINBALL_GAME__BUTTONS_AND_LIGHTS.agc.html#4752414257414954">GRABWAIT</a>                              <span class="co">#  KEY RELEASE MAY COME ON.</span>
+015475,000378: 06,3335           33363                           <span class="op">CAF     </span> <a href="#5452494D434F4445">TRIMCODE</a>                              <span class="co">#  01400</span>
+015476,000379: 06,3336           54337                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44535054454D31">DSPTEM1</a>                               
+015477,000380: 06,3337           33365                           <span class="op">CAF     </span> <a href="#5630314E32354B">V01N25K</a>                               
+015478,000381: 06,3340           04657                           <span class="op">TC      </span> <a href="PINBALL_GAME__BUTTONS_AND_LIGHTS.agc.html#4E56534257414954">NVSBWAIT</a>                              
+015479,000382: 06,3341           33366                           <span class="op">CAF     </span> <a href="#5635304B">V50K</a>                                  <span class="co">#  PLEASE PERFORM.</span>
+015480,000383: 06,3342           04657                           <span class="op">TC      </span> <a href="PINBALL_GAME__BUTTONS_AND_LIGHTS.agc.html#4E56534257414954">NVSBWAIT</a>                              
+015481,000384: 06,3343           04622                           <span class="op">TC      </span> <a href="PINBALL_GAME__BUTTONS_AND_LIGHTS.agc.html#464C4153484F4E">FLASHON</a>                               <span class="co">#  ANY RESPONSE TURNS IT OFF.</span>
+015482,000385: 06,3344           04475                           <span class="op">TC      </span> <a href="PINBALL_GAME__BUTTONS_AND_LIGHTS.agc.html#454E4449444C45">ENDIDLE</a>                               <span class="co">#  WAIT FOR SOMEONE TO DO SOMETHING.</span>
+015483,000386: 06,3345           05566                           <span class="op">TC      </span> <a href="EXECUTIVE.agc.html#454A46524545">EJFREE</a>                                <span class="co">#  V34E. TERMINATE THE TASK.</span>
+015484,000387: 06,3346           03355                           <span class="op">TC      </span> <a href="#545231">TR1</a>                                   <span class="co">#  V33E. PROCEED WITH THE FAIL ON.</span>
+015485,000388: 06,3347           00004                           <span class="op">INHINT  </span>                                       <span class="co">#  ENTER. THE FAIL HAS BEEN RESET.</span>
+015486,000389: 06,3350           37762                           <span class="op">CAF     </span> <a href="INTERPRETER.agc.html#42495432">BIT2</a>                                  <span class="co">#  20MS.</span>
+015487,000390: 06,3351           05663                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#574149544C495354">WAITLIST</a>                              
+015488,000391: 06,3352           03306 14064                     <span class="ps">2CADR   </span> <a href="#5452494D4F4E">TRIMON</a>                                <span class="co">#  CHECK AGAIN TO BE SURE, THEN PROCEED..</span>
+015489,000392: 
+015490,000393: 06,3354           05566                           <span class="op">TC      </span> <a href="EXECUTIVE.agc.html#454A46524545">EJFREE</a>                                
+015491,000394: 
 </pre>
 </span>
 </p>
@@ -630,20 +630,20 @@ Page 376
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-<a name="545231"></a>015491,000396: 06,3355           00004        <span class="sm">TR1     </span>           <span class="op">INHINT  </span>                                       <span class="co">#  PROCEED WITH THE FAIL.</span>
-015492,000397: 06,3356           37762                           <span class="op">CAF     </span> <a href="INTERPRETER.agc.html#42495432">BIT2</a>                                  <span class="co">#  20MS.</span>
-015493,000398: 06,3357           05663                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#574149544C495354">WAITLIST</a>                              
-015494,000399: 06,3360  E4,1407                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4A455453544550">JETSTEP</a>                               
-015495,000400: 06,3360           03321 14064                     <span class="ps">2CADR   </span> <a href="#5452494D4F4E31">TRIMON1</a>                               <span class="co">#  BYPASS THE RECHECK.</span>
-015496,000401: 
-015497,000402: 06,3362           05566                           <span class="op">TC      </span> <a href="EXECUTIVE.agc.html#454A46524545">EJFREE</a>                                
-015498,000403: 
-<a name="42495453392C3130"></a>015499,000404: 06,3363           01400        <span class="sm">BITS9,10</span>           <span class="ps">OCT     </span> 01400                                 
-<a name="5452494D434F4445"></a>015500,000405: 06,3364  06,3363               <span class="sm">TRIMCODE</span>           <span class="ps">EQUALS  </span> <a href="#42495453392C3130">BITS9,10</a>                              
-<a name="5452494D4D41534B"></a>015501,000406: 06,3364           07400        <span class="sm">TRIMMASK</span>           <span class="ps">OCT     </span> 07400                                 
-<a name="5630314E32354B"></a>015502,000407: 06,3365           00125        <span class="sm">V01N25K </span>           <span class="ps">OCT     </span> 00125                                 
-<a name="5635304B"></a>015503,000408: 06,3366           05000        <span class="sm">V50K    </span>           <span class="ps">OCT     </span> 05000                                 
-015504,000409: 
+<a name="545231"></a>015493,000396: 06,3355           00004        <span class="sm">TR1     </span>           <span class="op">INHINT  </span>                                       <span class="co">#  PROCEED WITH THE FAIL.</span>
+015494,000397: 06,3356           37762                           <span class="op">CAF     </span> <a href="INTERPRETER.agc.html#42495432">BIT2</a>                                  <span class="co">#  20MS.</span>
+015495,000398: 06,3357           05663                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#574149544C495354">WAITLIST</a>                              
+015496,000399: 06,3360  E4,1407                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4A455453544550">JETSTEP</a>                               
+015497,000400: 06,3360           03321 14064                     <span class="ps">2CADR   </span> <a href="#5452494D4F4E31">TRIMON1</a>                               <span class="co">#  BYPASS THE RECHECK.</span>
+015498,000401: 
+015499,000402: 06,3362           05566                           <span class="op">TC      </span> <a href="EXECUTIVE.agc.html#454A46524545">EJFREE</a>                                
+015500,000403: 
+<a name="42495453392C3130"></a>015501,000404: 06,3363           01400        <span class="sm">BITS9,10</span>           <span class="ps">OCT     </span> 01400                                 
+<a name="5452494D434F4445"></a>015502,000405: 06,3364  06,3363               <span class="sm">TRIMCODE</span>           <span class="ps">EQUALS  </span> <a href="#42495453392C3130">BITS9,10</a>                              
+<a name="5452494D4D41534B"></a>015503,000406: 06,3364           07400        <span class="sm">TRIMMASK</span>           <span class="ps">OCT     </span> 07400                                 
+<a name="5630314E32354B"></a>015504,000407: 06,3365           00125        <span class="sm">V01N25K </span>           <span class="ps">OCT     </span> 00125                                 
+<a name="5635304B"></a>015505,000408: 06,3366           05000        <span class="sm">V50K    </span>           <span class="ps">OCT     </span> 05000                                 
+015506,000409: 
 </pre>
 </span>
 </p>
@@ -659,55 +659,55 @@ Page 377
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-015506,000411:                                                                                                  <span class="co">#  LEM FCS TEST  THROTTLE TASK</span>
-015507,000412:                                                                                                  <span class="co">#     THIS PROGRAM ISSUES A PROFILE OF THROTTLE COMMANDS TO THE LEM DESCENT ENGINE.  THE PROFILE IS DETERMINED BY</span>
-015508,000413:                                                                                                  <span class="co">#  THE VALUES IN THE THRTSTEP REGISTER AND THE 6  SETS OF REGISTERS, 5 PER SET, CALLED  DOTIMES, DELAY, THR1TIME,</span>
-015509,000414:                                                                                                  <span class="co">#  THCOMM1 AND THCOMM2.  THE THRTSTEP REGISTER VALUE IS USED TO INDEX THE  6  SETS OF 5 REGISTERS AND HAS ALLOWABLE</span>
-015510,000415:                                                                                                  <span class="co">#  VALUES OF +0 THROUGH +5.  THE 5 REGISTERS PER SET ARE DEFINED AS FOLLOWS</span>
-015511,000416:                                                                                                  <span class="co">#      (1) DOTIMES DETERMINES THE NUMBER OF TIMES THE THROTTLE WILL BE EXERCISED AS PER THE VALUES OF THR1TIME,</span>
-015512,000417:                                                                                                  <span class="co">#  THCOMM1 AND THCOMM2 OF THE CURRENT STEP.  IT HAS ALLOWABLE VALUES OF +0 THROUGH 37777 OCT.</span>
-015513,000418:                                                                                                  <span class="co">#      (2) DELAY DETERMINES THE TIME BETWEEN THE START OF A STEP AND THE BE GINNING OF THR1TIME. ITIS CALLED ONLY</span>
-015514,000419:                                                                                                  <span class="co">#  ONCE PER STEP,I.E., REPEATS OF THE SAME THCOMM1 AND THCOMM2 START AT THR1TIME.  DELAY MUST BE FORMATTED FOR T3</span>
-015515,000420:                                                                                                  <span class="co">#  AND HENCE HAS A MAXIMUM VALUE OF 2 MINUTES.</span>
-015516,000421:                                                                                                  <span class="co">#      (3) THR1TIME DETERMINES THE TIME BETWEEN THE END OF DELAY OR THE END   OF THCOMM2 AND THE START OF</span>
-015517,000422:                                                                                                  <span class="co">#  THCOMM1.  IT MUST BE FORMATTED FOR T3.</span>
-015518,000423:                                                                                                  <span class="co">#      (4) THCOMM1 AND (5) THCOMM2 DETERMINE THE NUMBER OF THRUST INCREASE  OR DECREASE PULSES TOBE ISSUED AT A</span>
-015519,000424:                                                                                                  <span class="co">#  3.2KPPS RATE.  THE RANGE OF POSSIBLE VALUES OF EITHER IS FROM POSMAX (OCT 37777) TO NEGMAX (OCT 40000) ALTHOUGH</span>
-015520,000425:                                                                                                  <span class="co">#  THE ACTUAL THROTTLE RANGE IS FROM OCT 6116 TO OCT 71661 (+,- 3150 DEC).</span>
-015521,000426:                                                                                                  <span class="co">#     THIS TASK WILL BE ENTERED BUT IMMEDIATELY ENDED IF THE INITIAL VALUES OF THRTSTEP AND DOTIMES ARE +0.</span>
-015522,000427: 
-015523,000428: 
-<a name="4E45585454485254"></a>015524,000429: 06,3367           11605        <span class="sm">NEXTTHRT</span>           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5448525453544550">THRTSTEP</a>                              
-015525,000430: 06,3370           03372                           <span class="op">TC      </span> +2                                    
-015526,000431: 06,3371           05727                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              <span class="co">#  EXIT HERE.</span>
-015527,000432: 06,3372           55605                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5448525453544550">THRTSTEP</a>                              
-015528,000433: 
-<a name="5448525354415254"></a>015529,000434: 06,3373           51605        <span class="sm">THRSTART</span>           <span class="op">NDX     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5448525453544550">THRTSTEP</a>                              <span class="co">#  ENTER HERE.</span>
-015530,000435: 06,3374           11606                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444F54494D4553">DOTIMES</a>                               <span class="co">#  NUMBER OF TIMES COMMANDS 1 AND 2 DONE.</span>
-015531,000436: 06,3375           03377                           <span class="op">TC      </span> +2                                    
-015532,000437: 06,3376           03367                           <span class="op">TC      </span> <a href="#4E45585454485254">NEXTTHRT</a>                              
-015533,000438: 06,3377           51605                           <span class="op">NDX     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5448525453544550">THRTSTEP</a>                              
-015534,000439: 06,3400           31614                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C4159">DELAY</a>                                 <span class="co">#  TIME BETWEEN STEPS.  BIAS FOR THR1TIME.</span>
-015535,000440:                                                                                                  <span class="co">#  MUST BE SCALED FOR T3.</span>
-015536,000441: 06,3401           05663                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#574149544C495354">WAITLIST</a>                              
-015537,000442: 06,3402  E4,1605                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5448525453544550">THRTSTEP</a>                              
-015538,000443: 06,3402           03425 14064                     <span class="ps">2CADR   </span> <a href="#5448524F544F4E31">THROTON1</a>                              
-015539,000444: 
-015540,000445: 06,3404           05727                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              
-015541,000446: 
-<a name="54485232434F4D4D"></a>015542,000447: 06,3405           51605        <span class="sm">THR2COMM</span>           <span class="op">NDX     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5448525453544550">THRTSTEP</a>                              
-015543,000448: 06,3406           31636                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5448434F4D4D32">THCOMM2</a>                               <span class="co">#  SAME REMARKS AS FOR THCOMM1.</span>
-015544,000449: 06,3407           03443                           <span class="op">TC      </span> <a href="#5448524F544F4E">THROTON</a>                               
-015545,000450: 06,3410           67763                           <span class="op">AD      </span> <a href="INTERPRETER.agc.html#42495431">BIT1</a>                                  <span class="co">#  10MS IN CASE OF NO THCOMM2.</span>
-015546,000451: 06,3411           05663                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#574149544C495354">WAITLIST</a>                              
-015547,000452: 06,3412  E4,1605                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5448525453544550">THRTSTEP</a>                              
-015548,000453: 06,3412           03415 14064                     <span class="ps">2CADR   </span> <a href="#434B444F54494D45">CKDOTIME</a>                              
-015549,000454: 
-015550,000455: 06,3414           05727                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              
-015551,000456: 
-<a name="434B444F54494D45"></a>015552,000457: 06,3415           51605        <span class="sm">CKDOTIME</span>           <span class="op">NDX     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5448525453544550">THRTSTEP</a>                              
-015553,000458: 06,3416           11606                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444F54494D4553">DOTIMES</a>                               
-015554,000459: 06,3417           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
+015508,000411:                                                                                                  <span class="co">#  LEM FCS TEST  THROTTLE TASK</span>
+015509,000412:                                                                                                  <span class="co">#     THIS PROGRAM ISSUES A PROFILE OF THROTTLE COMMANDS TO THE LEM DESCENT ENGINE.  THE PROFILE IS DETERMINED BY</span>
+015510,000413:                                                                                                  <span class="co">#  THE VALUES IN THE THRTSTEP REGISTER AND THE 6  SETS OF REGISTERS, 5 PER SET, CALLED  DOTIMES, DELAY, THR1TIME,</span>
+015511,000414:                                                                                                  <span class="co">#  THCOMM1 AND THCOMM2.  THE THRTSTEP REGISTER VALUE IS USED TO INDEX THE  6  SETS OF 5 REGISTERS AND HAS ALLOWABLE</span>
+015512,000415:                                                                                                  <span class="co">#  VALUES OF +0 THROUGH +5.  THE 5 REGISTERS PER SET ARE DEFINED AS FOLLOWS</span>
+015513,000416:                                                                                                  <span class="co">#      (1) DOTIMES DETERMINES THE NUMBER OF TIMES THE THROTTLE WILL BE EXERCISED AS PER THE VALUES OF THR1TIME,</span>
+015514,000417:                                                                                                  <span class="co">#  THCOMM1 AND THCOMM2 OF THE CURRENT STEP.  IT HAS ALLOWABLE VALUES OF +0 THROUGH 37777 OCT.</span>
+015515,000418:                                                                                                  <span class="co">#      (2) DELAY DETERMINES THE TIME BETWEEN THE START OF A STEP AND THE BE GINNING OF THR1TIME. ITIS CALLED ONLY</span>
+015516,000419:                                                                                                  <span class="co">#  ONCE PER STEP,I.E., REPEATS OF THE SAME THCOMM1 AND THCOMM2 START AT THR1TIME.  DELAY MUST BE FORMATTED FOR T3</span>
+015517,000420:                                                                                                  <span class="co">#  AND HENCE HAS A MAXIMUM VALUE OF 2 MINUTES.</span>
+015518,000421:                                                                                                  <span class="co">#      (3) THR1TIME DETERMINES THE TIME BETWEEN THE END OF DELAY OR THE END   OF THCOMM2 AND THE START OF</span>
+015519,000422:                                                                                                  <span class="co">#  THCOMM1.  IT MUST BE FORMATTED FOR T3.</span>
+015520,000423:                                                                                                  <span class="co">#      (4) THCOMM1 AND (5) THCOMM2 DETERMINE THE NUMBER OF THRUST INCREASE  OR DECREASE PULSES TOBE ISSUED AT A</span>
+015521,000424:                                                                                                  <span class="co">#  3.2KPPS RATE.  THE RANGE OF POSSIBLE VALUES OF EITHER IS FROM POSMAX (OCT 37777) TO NEGMAX (OCT 40000) ALTHOUGH</span>
+015522,000425:                                                                                                  <span class="co">#  THE ACTUAL THROTTLE RANGE IS FROM OCT 6116 TO OCT 71661 (+,- 3150 DEC).</span>
+015523,000426:                                                                                                  <span class="co">#     THIS TASK WILL BE ENTERED BUT IMMEDIATELY ENDED IF THE INITIAL VALUES OF THRTSTEP AND DOTIMES ARE +0.</span>
+015524,000427: 
+015525,000428: 
+<a name="4E45585454485254"></a>015526,000429: 06,3367           11605        <span class="sm">NEXTTHRT</span>           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5448525453544550">THRTSTEP</a>                              
+015527,000430: 06,3370           03372                           <span class="op">TC      </span> +2                                    
+015528,000431: 06,3371           05727                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              <span class="co">#  EXIT HERE.</span>
+015529,000432: 06,3372           55605                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5448525453544550">THRTSTEP</a>                              
+015530,000433: 
+<a name="5448525354415254"></a>015531,000434: 06,3373           51605        <span class="sm">THRSTART</span>           <span class="op">NDX     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5448525453544550">THRTSTEP</a>                              <span class="co">#  ENTER HERE.</span>
+015532,000435: 06,3374           11606                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444F54494D4553">DOTIMES</a>                               <span class="co">#  NUMBER OF TIMES COMMANDS 1 AND 2 DONE.</span>
+015533,000436: 06,3375           03377                           <span class="op">TC      </span> +2                                    
+015534,000437: 06,3376           03367                           <span class="op">TC      </span> <a href="#4E45585454485254">NEXTTHRT</a>                              
+015535,000438: 06,3377           51605                           <span class="op">NDX     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5448525453544550">THRTSTEP</a>                              
+015536,000439: 06,3400           31614                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C4159">DELAY</a>                                 <span class="co">#  TIME BETWEEN STEPS.  BIAS FOR THR1TIME.</span>
+015537,000440:                                                                                                  <span class="co">#  MUST BE SCALED FOR T3.</span>
+015538,000441: 06,3401           05663                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#574149544C495354">WAITLIST</a>                              
+015539,000442: 06,3402  E4,1605                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5448525453544550">THRTSTEP</a>                              
+015540,000443: 06,3402           03425 14064                     <span class="ps">2CADR   </span> <a href="#5448524F544F4E31">THROTON1</a>                              
+015541,000444: 
+015542,000445: 06,3404           05727                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              
+015543,000446: 
+<a name="54485232434F4D4D"></a>015544,000447: 06,3405           51605        <span class="sm">THR2COMM</span>           <span class="op">NDX     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5448525453544550">THRTSTEP</a>                              
+015545,000448: 06,3406           31636                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5448434F4D4D32">THCOMM2</a>                               <span class="co">#  SAME REMARKS AS FOR THCOMM1.</span>
+015546,000449: 06,3407           03443                           <span class="op">TC      </span> <a href="#5448524F544F4E">THROTON</a>                               
+015547,000450: 06,3410           67763                           <span class="op">AD      </span> <a href="INTERPRETER.agc.html#42495431">BIT1</a>                                  <span class="co">#  10MS IN CASE OF NO THCOMM2.</span>
+015548,000451: 06,3411           05663                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#574149544C495354">WAITLIST</a>                              
+015549,000452: 06,3412  E4,1605                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5448525453544550">THRTSTEP</a>                              
+015550,000453: 06,3412           03415 14064                     <span class="ps">2CADR   </span> <a href="#434B444F54494D45">CKDOTIME</a>                              
+015551,000454: 
+015552,000455: 06,3414           05727                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              
+015553,000456: 
+<a name="434B444F54494D45"></a>015554,000457: 06,3415           51605        <span class="sm">CKDOTIME</span>           <span class="op">NDX     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5448525453544550">THRTSTEP</a>                              
+015555,000458: 06,3416           11606                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444F54494D4553">DOTIMES</a>                               
+015556,000459: 06,3417           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
 </pre>
 </span>
 </p>
@@ -723,45 +723,45 @@ Page 378
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-015556,000461: 06,3420           03422                           <span class="op">TC      </span> +2                                    
-015557,000462: 06,3421           03367                           <span class="op">TC      </span> <a href="#4E45585454485254">NEXTTHRT</a>                              <span class="co">#  WAS ONE.</span>
-015558,000463: 06,3422           67763                           <span class="op">AD      </span> <a href="INTERPRETER.agc.html#4F4E45">ONE</a>                                   
-015559,000464: 06,3423           51605                           <span class="op">NDX     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5448525453544550">THRTSTEP</a>                              
-015560,000465: 06,3424           55606                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444F54494D4553">DOTIMES</a>                               
-<a name="5448524F544F4E31"></a>015561,000466: 06,3425           51605        <span class="sm">THROTON1</span>           <span class="op">NDX     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5448525453544550">THRTSTEP</a>                              
-015562,000467: 06,3426           31622                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5448523154494D45">THR1TIME</a>                              <span class="co">#  TIME BETWEEN DOTIMES.  SCALED FOR T3.</span>
-015563,000468: 06,3427           05663                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#574149544C495354">WAITLIST</a>                              
-015564,000469: 06,3430  E4,1605                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5448525453544550">THRTSTEP</a>                              
-015565,000470: 06,3430           03433 14064                     <span class="ps">2CADR   </span> <a href="#54485231434F4D4D">THR1COMM</a>                              
-015566,000471: 
-015567,000472: 06,3432           05727                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              
-015568,000473: 
-<a name="54485231434F4D4D"></a>015569,000474: 06,3433           51605        <span class="sm">THR1COMM</span>           <span class="op">NDX     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5448525453544550">THRTSTEP</a>                              
-015570,000475: 06,3434           31630                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5448434F4D4D31">THCOMM1</a>                               <span class="co">#  SHOULD BE NO LARGER THAN 3150DEC.</span>
-015571,000476: 06,3435           03443                           <span class="op">TC      </span> <a href="#5448524F544F4E">THROTON</a>                               
-015572,000477: 06,3436           63460                           <span class="op">AD      </span> <a href="#3235304D53">250MS</a>                                 <span class="co">#  SO ACE CAN SAMPLE.</span>
-015573,000478: 06,3437           05663                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#574149544C495354">WAITLIST</a>                              
-015574,000479: 06,3440  E4,1605                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5448525453544550">THRTSTEP</a>                              
-015575,000480: 06,3440           03405 14064                     <span class="ps">2CADR   </span> <a href="#54485232434F4D4D">THR2COMM</a>                              
-015576,000481: 
-015577,000482: 06,3442           05727                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              
-015578,000483: 
-<a name="5448524F544F4E"></a>015579,000484: 06,3443           54055        <span class="sm">THROTON </span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544852555354">THRUST</a>                                <span class="co">#  THROTTLE OUTPUT COUNTER.</span>
-015580,000485: 06,3444           55405                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5448425546">THBUF</a>                                 <span class="co">#  SAVE FOR BZMF.</span>
-015581,000486: 06,3445           37760                           <span class="op">CAF     </span> <a href="INTERPRETER.agc.html#42495434">BIT4</a>                                  
-015582,000487: 06,3446           00006                           <span class="op">EXTEND  </span>                                       
-015583,000488: 06,3447           05014                           <span class="op">WOR     </span> 14                                    <span class="co">#  ENABLE THRUST DRIVE.  COMMAND STARTS NOW</span>
-015584,000489: 06,3450           31405                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5448425546">THBUF</a>                                 
-015585,000490: 06,3451           00006                           <span class="op">EXTEND  </span>                                       
-015586,000491: 06,3452           63454                           <span class="op">BZMF    </span> +2                                    
-015587,000492: 06,3453           40000                           <span class="op">COM     </span>                                       
-015588,000493: 06,3454           40000                           <span class="op">COM     </span>                                       
-015589,000494: 06,3455           00006                           <span class="op">EXTEND  </span>                                       
-015590,000495: 06,3456           77752                           <span class="op">MP      </span> <a href="INTERPRETER.agc.html#4249543130">BIT10</a>                                 <span class="co">#  SCALES FOR T3.</span>
-015591,000496: 06,3457           00002                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
-015592,000497: 
-<a name="3235304D53"></a>015593,000498: 06,3460           00031        <span class="sm">250MS   </span>           <span class="ps">OCT     </span> 00031                                 
-015594,000499: 
+015558,000461: 06,3420           03422                           <span class="op">TC      </span> +2                                    
+015559,000462: 06,3421           03367                           <span class="op">TC      </span> <a href="#4E45585454485254">NEXTTHRT</a>                              <span class="co">#  WAS ONE.</span>
+015560,000463: 06,3422           67763                           <span class="op">AD      </span> <a href="INTERPRETER.agc.html#4F4E45">ONE</a>                                   
+015561,000464: 06,3423           51605                           <span class="op">NDX     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5448525453544550">THRTSTEP</a>                              
+015562,000465: 06,3424           55606                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444F54494D4553">DOTIMES</a>                               
+<a name="5448524F544F4E31"></a>015563,000466: 06,3425           51605        <span class="sm">THROTON1</span>           <span class="op">NDX     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5448525453544550">THRTSTEP</a>                              
+015564,000467: 06,3426           31622                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5448523154494D45">THR1TIME</a>                              <span class="co">#  TIME BETWEEN DOTIMES.  SCALED FOR T3.</span>
+015565,000468: 06,3427           05663                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#574149544C495354">WAITLIST</a>                              
+015566,000469: 06,3430  E4,1605                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5448525453544550">THRTSTEP</a>                              
+015567,000470: 06,3430           03433 14064                     <span class="ps">2CADR   </span> <a href="#54485231434F4D4D">THR1COMM</a>                              
+015568,000471: 
+015569,000472: 06,3432           05727                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              
+015570,000473: 
+<a name="54485231434F4D4D"></a>015571,000474: 06,3433           51605        <span class="sm">THR1COMM</span>           <span class="op">NDX     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5448525453544550">THRTSTEP</a>                              
+015572,000475: 06,3434           31630                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5448434F4D4D31">THCOMM1</a>                               <span class="co">#  SHOULD BE NO LARGER THAN 3150DEC.</span>
+015573,000476: 06,3435           03443                           <span class="op">TC      </span> <a href="#5448524F544F4E">THROTON</a>                               
+015574,000477: 06,3436           63460                           <span class="op">AD      </span> <a href="#3235304D53">250MS</a>                                 <span class="co">#  SO ACE CAN SAMPLE.</span>
+015575,000478: 06,3437           05663                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#574149544C495354">WAITLIST</a>                              
+015576,000479: 06,3440  E4,1605                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5448525453544550">THRTSTEP</a>                              
+015577,000480: 06,3440           03405 14064                     <span class="ps">2CADR   </span> <a href="#54485232434F4D4D">THR2COMM</a>                              
+015578,000481: 
+015579,000482: 06,3442           05727                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              
+015580,000483: 
+<a name="5448524F544F4E"></a>015581,000484: 06,3443           54055        <span class="sm">THROTON </span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544852555354">THRUST</a>                                <span class="co">#  THROTTLE OUTPUT COUNTER.</span>
+015582,000485: 06,3444           55405                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5448425546">THBUF</a>                                 <span class="co">#  SAVE FOR BZMF.</span>
+015583,000486: 06,3445           37760                           <span class="op">CAF     </span> <a href="INTERPRETER.agc.html#42495434">BIT4</a>                                  
+015584,000487: 06,3446           00006                           <span class="op">EXTEND  </span>                                       
+015585,000488: 06,3447           05014                           <span class="op">WOR     </span> 14                                    <span class="co">#  ENABLE THRUST DRIVE.  COMMAND STARTS NOW</span>
+015586,000489: 06,3450           31405                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5448425546">THBUF</a>                                 
+015587,000490: 06,3451           00006                           <span class="op">EXTEND  </span>                                       
+015588,000491: 06,3452           63454                           <span class="op">BZMF    </span> +2                                    
+015589,000492: 06,3453           40000                           <span class="op">COM     </span>                                       
+015590,000493: 06,3454           40000                           <span class="op">COM     </span>                                       
+015591,000494: 06,3455           00006                           <span class="op">EXTEND  </span>                                       
+015592,000495: 06,3456           77752                           <span class="op">MP      </span> <a href="INTERPRETER.agc.html#4249543130">BIT10</a>                                 <span class="co">#  SCALES FOR T3.</span>
+015593,000496: 06,3457           00002                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
+015594,000497: 
+<a name="3235304D53"></a>015595,000498: 06,3460           00031        <span class="sm">250MS   </span>           <span class="ps">OCT     </span> 00031                                 
+015596,000499: 
 </pre>
 </span>
 </p>
@@ -777,53 +777,53 @@ Page 379
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-015596,000501:                                                                                                  <span class="co">#  LEM FCS TEST  INTERFACE LOOK TASK.</span>
-015597,000502: 
-015598,000503:                                                                                                  <span class="co">#      THIS PROGRAM KEEPS A RUNNING HISTORY OF THE STATE OF ALL THE BITS IN INPUT CHANNELS 30, 31, 32 AND 33.</span>
-015599,000504:                                                                                                  <span class="co">#  IT DOES THIS BY DETECTING A CHANGE OF AN INPUT BIT FROM AN INITIAL ONE STATE TO A ZERO STATE OR FROM AN INITIAL</span>
-015600,000505:                                                                                                  <span class="co">#  ZERO TO A ONE.  THE HISTORY IS MAINTAINED IN TWO BUFFER REGISTERS FOR EACH CHANNEL, ONE FOR STORING ONE TO ZERO</span>
-015601,000506:                                                                                                  <span class="co">#  CHANGES (30BUF1, +1, +2, AND +3) AND ONE FOR ZERO TO ONE CHANGES (30BUF0, +1 +2 AND +3).  THE OPERATOR MUST</span>
-015602,000507:                                                                                                  <span class="co">#  LOAD THE INITIAL STATES OF THE INPUT CHANNELS INTO THEIR RESPECTIVE BUFFER REGISTERS BEFORE THIS PROGRAM IS IN-</span>
-015603,000508:                                                                                                  <span class="co">#  ITIATED.</span>
-015604,000509:                                                                                                  <span class="co">#      TO ALLOW THIS PROGRAM TO RUN C(QUITLOOK) MUST BE SET GREATER THAN +0 BEFORE IT IS STARTED.  IF THE OPERATOR</span>
-015605,000510:                                                                                                  <span class="co">#  DOES NOT DESIRE THIS PROGRAM TO RUN HE SHOULD SET C(QUITLOOK)=+0 BEFORE STARTING THE FCS TEST.  AFTER THIS TASK</span>
-015606,000511:                                                                                                  <span class="co">#  IS RUNNING THE OPERATOR CAN STOP IT BY SETTING C(QUITLOOK) = +0.</span>
-015607,000512:                                                                                                  <span class="co">#      NO DISPLAYS OF EITHER THE BUFFER REGISTERS OR CHANNELS ARE INCORPORATED INTO THIS PROGRAM.  THIS WAS DONE TO</span>
-015608,000513:                                                                                                  <span class="co">#  ALLOW THE TEST OPERATOR MONITORING FLEXIBILITY.  FOR REAL TIME MONITORING IT IS SUGGESTED THAT THE BUFFER</span>
-015609,000514:                                                                                                  <span class="co">#  REGISTERS BE DISPLAYED WITH THE MONITOR VERBS (11 THROUGH 15).  ON THE OTHER HAND, THE OPERATOR MAY ELECT TO</span>
-015610,000515:                                                                                                  <span class="co">#  PERFORM NO REAL TIME MONITORING UNTIL THE TEST IS COMPLETED, WHEN THE BUFFER REGISTERS WOULD BE CALLED FOR</span>
-015611,000516:                                                                                                  <span class="co">#  DISPLAY (VERB 01) AND RECORDED.</span>
-015612,000517:                                                                                                  <span class="co">#      THIS PROGRAM IS PRIMARILY INTENDED FOR INTERFACE MONITORING DURING THE LEM VIBRATION TEST AT BETHPAGE, N.Y.,</span>
-015613,000518:                                                                                                  <span class="co">#  ALTHOUGH IT MAY ALSO BE USEFUL DURING VEHICAL LEVEL EMI TESTS.</span>
-015614,000519: 
-<a name="4C4F4F4B544F50"></a>015615,000520: 06,3461           11654        <span class="sm">LOOKTOP </span>           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#515549544C4F4F4B">QUITLOOK</a>                              <span class="co">#  IS THIS TASK WANTED.</span>
-015616,000521: 06,3462           03464                           <span class="op">TC      </span> +2                                    <span class="co">#  YES.</span>
-015617,000522: 06,3463           05727                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              <span class="co">#  NO.</span>
-015618,000523: 06,3464           36311                           <span class="op">CAF     </span> <a href="INTERPRETER.agc.html#5448524545">THREE</a>                                 <span class="co">#  START SCAN OF CHANNELS.</span>
-<a name="4C4F4F4B4C4F4F50"></a>015619,000524: 06,3465           55655        <span class="sm">LOOKLOOP</span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4348434E5452">CHCNTR</a>                                <span class="co">#  3, 2, 1, 0.</span>
-015620,000525: 06,3466           51655                           <span class="op">NDX     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4348434E5452">CHCNTR</a>                                
-015621,000526: 06,3467           31644                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#333042554631">30BUF1</a>                                
-015622,000527: 06,3470           00006                           <span class="op">EXTEND  </span>                                       
-015623,000528: 06,3471           51655                           <span class="op">NDX     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4348434E5452">CHCNTR</a>                                
-015624,000529: 06,3472           02030                           <span class="op">RAND    </span> 30                                    <span class="co">#  DETECTS CHANGES FROM 1 TO 0.</span>
-015625,000530: 06,3473           51655                           <span class="op">NDX     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4348434E5452">CHCNTR</a>                                
-015626,000531: 06,3474           57644                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#333042554631">30BUF1</a>                                <span class="co">#  STORE NEW ZEROS.</span>
-015627,000532: 06,3475           51655                           <span class="op">NDX     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4348434E5452">CHCNTR</a>                                
-015628,000533: 06,3476           31650                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#333042554630">30BUF0</a>                                
-015629,000534: 06,3477           00006                           <span class="op">EXTEND  </span>                                       
-015630,000535: 06,3500           51655                           <span class="op">NDX     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4348434E5452">CHCNTR</a>                                
-015631,000536: 06,3501           04030                           <span class="op">ROR     </span> 30                                    <span class="co">#  DETECTS CHANGES FROM 0 TO 1.</span>
-015632,000537: 06,3502           51655                           <span class="op">NDX     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4348434E5452">CHCNTR</a>                                
-015633,000538: 06,3503           57650                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#333042554630">30BUF0</a>                                <span class="co">#  STORE NEW ONES.</span>
-015634,000539: 06,3504           11655                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4348434E5452">CHCNTR</a>                                <span class="co">#  IS THIS SCAN DONE.</span>
-015635,000540: 06,3505           03465                           <span class="op">TC      </span> <a href="#4C4F4F4B4C4F4F50">LOOKLOOP</a>                              <span class="co">#  NO.</span>
-015636,000541: 06,3506           34570                           <span class="op">CAF     </span> <a href="INTERPRETER.agc.html#54454E">TEN</a>                                   <span class="co">#  YES.  100MS RECALL.</span>
-015637,000542: 06,3507           05663                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#574149544C495354">WAITLIST</a>                              
-015638,000543: 06,3510  E4,1654                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#515549544C4F4F4B">QUITLOOK</a>                              
-015639,000544: 06,3510           03461 14064                     <span class="ps">2CADR   </span> <a href="#4C4F4F4B544F50">LOOKTOP</a>                               
-015640,000545: 
-015641,000546: 06,3512           05727                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              
-015642,000547: 
+015598,000501:                                                                                                  <span class="co">#  LEM FCS TEST  INTERFACE LOOK TASK.</span>
+015599,000502: 
+015600,000503:                                                                                                  <span class="co">#      THIS PROGRAM KEEPS A RUNNING HISTORY OF THE STATE OF ALL THE BITS IN INPUT CHANNELS 30, 31, 32 AND 33.</span>
+015601,000504:                                                                                                  <span class="co">#  IT DOES THIS BY DETECTING A CHANGE OF AN INPUT BIT FROM AN INITIAL ONE STATE TO A ZERO STATE OR FROM AN INITIAL</span>
+015602,000505:                                                                                                  <span class="co">#  ZERO TO A ONE.  THE HISTORY IS MAINTAINED IN TWO BUFFER REGISTERS FOR EACH CHANNEL, ONE FOR STORING ONE TO ZERO</span>
+015603,000506:                                                                                                  <span class="co">#  CHANGES (30BUF1, +1, +2, AND +3) AND ONE FOR ZERO TO ONE CHANGES (30BUF0, +1 +2 AND +3).  THE OPERATOR MUST</span>
+015604,000507:                                                                                                  <span class="co">#  LOAD THE INITIAL STATES OF THE INPUT CHANNELS INTO THEIR RESPECTIVE BUFFER REGISTERS BEFORE THIS PROGRAM IS IN-</span>
+015605,000508:                                                                                                  <span class="co">#  ITIATED.</span>
+015606,000509:                                                                                                  <span class="co">#      TO ALLOW THIS PROGRAM TO RUN C(QUITLOOK) MUST BE SET GREATER THAN +0 BEFORE IT IS STARTED.  IF THE OPERATOR</span>
+015607,000510:                                                                                                  <span class="co">#  DOES NOT DESIRE THIS PROGRAM TO RUN HE SHOULD SET C(QUITLOOK)=+0 BEFORE STARTING THE FCS TEST.  AFTER THIS TASK</span>
+015608,000511:                                                                                                  <span class="co">#  IS RUNNING THE OPERATOR CAN STOP IT BY SETTING C(QUITLOOK) = +0.</span>
+015609,000512:                                                                                                  <span class="co">#      NO DISPLAYS OF EITHER THE BUFFER REGISTERS OR CHANNELS ARE INCORPORATED INTO THIS PROGRAM.  THIS WAS DONE TO</span>
+015610,000513:                                                                                                  <span class="co">#  ALLOW THE TEST OPERATOR MONITORING FLEXIBILITY.  FOR REAL TIME MONITORING IT IS SUGGESTED THAT THE BUFFER</span>
+015611,000514:                                                                                                  <span class="co">#  REGISTERS BE DISPLAYED WITH THE MONITOR VERBS (11 THROUGH 15).  ON THE OTHER HAND, THE OPERATOR MAY ELECT TO</span>
+015612,000515:                                                                                                  <span class="co">#  PERFORM NO REAL TIME MONITORING UNTIL THE TEST IS COMPLETED, WHEN THE BUFFER REGISTERS WOULD BE CALLED FOR</span>
+015613,000516:                                                                                                  <span class="co">#  DISPLAY (VERB 01) AND RECORDED.</span>
+015614,000517:                                                                                                  <span class="co">#      THIS PROGRAM IS PRIMARILY INTENDED FOR INTERFACE MONITORING DURING THE LEM VIBRATION TEST AT BETHPAGE, N.Y.,</span>
+015615,000518:                                                                                                  <span class="co">#  ALTHOUGH IT MAY ALSO BE USEFUL DURING VEHICAL LEVEL EMI TESTS.</span>
+015616,000519: 
+<a name="4C4F4F4B544F50"></a>015617,000520: 06,3461           11654        <span class="sm">LOOKTOP </span>           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#515549544C4F4F4B">QUITLOOK</a>                              <span class="co">#  IS THIS TASK WANTED.</span>
+015618,000521: 06,3462           03464                           <span class="op">TC      </span> +2                                    <span class="co">#  YES.</span>
+015619,000522: 06,3463           05727                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              <span class="co">#  NO.</span>
+015620,000523: 06,3464           36311                           <span class="op">CAF     </span> <a href="INTERPRETER.agc.html#5448524545">THREE</a>                                 <span class="co">#  START SCAN OF CHANNELS.</span>
+<a name="4C4F4F4B4C4F4F50"></a>015621,000524: 06,3465           55655        <span class="sm">LOOKLOOP</span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4348434E5452">CHCNTR</a>                                <span class="co">#  3, 2, 1, 0.</span>
+015622,000525: 06,3466           51655                           <span class="op">NDX     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4348434E5452">CHCNTR</a>                                
+015623,000526: 06,3467           31644                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#333042554631">30BUF1</a>                                
+015624,000527: 06,3470           00006                           <span class="op">EXTEND  </span>                                       
+015625,000528: 06,3471           51655                           <span class="op">NDX     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4348434E5452">CHCNTR</a>                                
+015626,000529: 06,3472           02030                           <span class="op">RAND    </span> 30                                    <span class="co">#  DETECTS CHANGES FROM 1 TO 0.</span>
+015627,000530: 06,3473           51655                           <span class="op">NDX     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4348434E5452">CHCNTR</a>                                
+015628,000531: 06,3474           57644                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#333042554631">30BUF1</a>                                <span class="co">#  STORE NEW ZEROS.</span>
+015629,000532: 06,3475           51655                           <span class="op">NDX     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4348434E5452">CHCNTR</a>                                
+015630,000533: 06,3476           31650                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#333042554630">30BUF0</a>                                
+015631,000534: 06,3477           00006                           <span class="op">EXTEND  </span>                                       
+015632,000535: 06,3500           51655                           <span class="op">NDX     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4348434E5452">CHCNTR</a>                                
+015633,000536: 06,3501           04030                           <span class="op">ROR     </span> 30                                    <span class="co">#  DETECTS CHANGES FROM 0 TO 1.</span>
+015634,000537: 06,3502           51655                           <span class="op">NDX     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4348434E5452">CHCNTR</a>                                
+015635,000538: 06,3503           57650                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#333042554630">30BUF0</a>                                <span class="co">#  STORE NEW ONES.</span>
+015636,000539: 06,3504           11655                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4348434E5452">CHCNTR</a>                                <span class="co">#  IS THIS SCAN DONE.</span>
+015637,000540: 06,3505           03465                           <span class="op">TC      </span> <a href="#4C4F4F4B4C4F4F50">LOOKLOOP</a>                              <span class="co">#  NO.</span>
+015638,000541: 06,3506           34570                           <span class="op">CAF     </span> <a href="INTERPRETER.agc.html#54454E">TEN</a>                                   <span class="co">#  YES.  100MS RECALL.</span>
+015639,000542: 06,3507           05663                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#574149544C495354">WAITLIST</a>                              
+015640,000543: 06,3510  E4,1654                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#515549544C4F4F4B">QUITLOOK</a>                              
+015641,000544: 06,3510           03461 14064                     <span class="ps">2CADR   </span> <a href="#4C4F4F4B544F50">LOOKTOP</a>                               
+015642,000545: 
+015643,000546: 06,3512           05727                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              
+015644,000547: 
 
 End of include-file LEM_FLIGHT_CONTROL_SYSTEM_TEST.agc.  Parent file is <a href="MAIN.agc.html">MAIN.agc</a>
 </pre>

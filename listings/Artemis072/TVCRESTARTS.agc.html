@@ -88,20 +88,22 @@ Note that the date is the date of the printout, not the date of the program revi
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-042241,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
-042242,000003:                                                                                                  <span class="co">## Filename:    TVCRESTARTS.agc</span>
-042243,000004:                                                                                                  <span class="co">## Purpose:     Part of the source code for Artemis (i.e., Colossus 3),</span>
-042244,000005:                                                                                                  <span class="co">##              build 072.  This is for the Command Module's (CM)</span>
-042245,000006:                                                                                                  <span class="co">##              Apollo Guidance Computer (AGC), for</span>
-042246,000007:                                                                                                  <span class="co">##              Apollo 15-17.</span>
-042247,000008:                                                                                                  <span class="co">## Assembler:   yaYUL</span>
-042248,000009:                                                                                                  <span class="co">## Contact:     Steve Case &lt;case1780@adelphia.net></span>
-042249,000010:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo/index.html</span>
-042250,000011:                                                                                                  <span class="co">## Page Scans:  www.ibiblio.org/apollo/ScansForConversion/Artemis072/</span>
-042251,000012:                                                                                                  <span class="co">## Mod history: 2009-09-13 SMC  Adapted from Comanche055 files.</span>
-042252,000013:                                                                                                  <span class="co">##              2009-09-14 JL   Fix typos. Fix page numbers. Remove change comments. Restore hard tabs.</span>
-042253,000014:                                                                                                  <span class="co">##              2010-02-20 RSB  Un-##'d this header.</span>
-042254,000015: 
+042336,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
+042337,000003:                                                                                                  <span class="co">## Filename:    TVCRESTARTS.agc</span>
+042338,000004:                                                                                                  <span class="co">## Purpose:     Part of the source code for Artemis (i.e., Colossus 3),</span>
+042339,000005:                                                                                                  <span class="co">##              build 072.  This is for the Command Module's (CM)</span>
+042340,000006:                                                                                                  <span class="co">##              Apollo Guidance Computer (AGC), for</span>
+042341,000007:                                                                                                  <span class="co">##              Apollo 15-17.</span>
+042342,000008:                                                                                                  <span class="co">## Assembler:   yaYUL</span>
+042343,000009:                                                                                                  <span class="co">## Contact:     Steve Case &lt;case1780@adelphia.net></span>
+042344,000010:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo/index.html</span>
+042345,000011:                                                                                                  <span class="co">## Page Scans:  www.ibiblio.org/apollo/ScansForConversion/Artemis072/</span>
+042346,000012:                                                                                                  <span class="co">## Mod history: 2009-09-13 SMC  Adapted from Comanche055 files.</span>
+042347,000013:                                                                                                  <span class="co">##              2009-09-14 JL   Fix typos. Fix page numbers. Remove change comments. Restore hard tabs.</span>
+042348,000014:                                                                                                  <span class="co">##              2010-02-20 RSB  Un-##'d this header.</span>
+042349,000015:                                                                                                  <span class="co">##              2017-02-09 RSB  Proofed comment text by diff'ing vs Comanche 55</span>
+042350,000016:                                                                                                  <span class="co">##                              and/or octopus/ProoferComments as most-appropriate.</span>
+042351,000017: 
 </pre>
 </span>
 </p>
@@ -117,57 +119,57 @@ Page 959
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-042256,000017: 
-042257,000018:                                                                                                  <span class="co">#  NAME....TVCRESTART PACKAGE,  CONSISTING OF REDOTVC, ENABL1, 2, CMDSOUT, PHSCHK2, ETC.</span>
-042258,000019:                                                                                                  <span class="co">#  LOG SECTION...TVCRESTARTS                     SUBROUTINE...DAPCSM</span>
-042259,000020:                                                                                                  <span class="co">#  MODIFIED BY SCHLUNDT                          21 OCTOBER 1968</span>
-042260,000021:                                                                                                  <span class="co">#  MODIFIED BY BEALS TO ELIMINATE CSMMASS UPDATE LOGIC (NOW DONE IN S40.8)</span>
-042261,000022:                                                                                                  <span class="co">#  FUNCTIONAL DESCRIPTION....</span>
-042262,000023: 
-042263,000024:                                                                                                  <span class="co">#       *RESTART-PROOFS THE TVC DAPS, INCLUDING PITCHDAP, YAWDAP,</span>
-042264,000025:                                                                                                  <span class="co">#        TVCEXECUTIVE, ROLLDAP, TVCINIT4, TVCDAPON, AND CSM/.M V46 SWTCHOVR.</span>
-042265,000026:                                                                                                  <span class="co">#       *TVC RESTARTS DESERVE SPECIAL CONSIDERATION IN SEVERAL AREAS.</span>
-042266,000027:                                                                                                  <span class="co">#        RESTART DOWN-TIME IS IMPORTANT BECAUSE OF THE TRANSIENTS INTRODUCED</span>
-042267,000028:                                                                                                  <span class="co">#        BY THE THRUST VECTOR RETURN TO THE ACTUATOR MECHANICAL NULLS</span>
-042268,000029:                                                                                                  <span class="co">#        FOLLOWING TVC- AND OPTICS-ERROR-COUNTER-DISENABLES (CHANNEL 12).</span>
-042269,000030:                                                                                                  <span class="co">#        TVC    USES A MIXTURE OF WAITLIST, T5, T6, AND JOB CALLS. THERE IS</span>
-042270,000031:                                                                                                  <span class="co">#        FILTER MEMORY (UP TO 6TH ORDER) TO BE PROTECTED IF WILD TRANSIENTS</span>
-042271,000032:                                                                                                  <span class="co">#        ARE TO BE AVOIDED. COUNTERS ARE INVOLVED FOR ONE-SHOT</span>
-042272,000033:                                                                                                  <span class="co">#        CORRECTIONS AND GAIN UPDATES. THE GIMBAL TRIM ESTIMATORS AND THE</span>
-042273,000034:                                                                                                  <span class="co">#        BODY AXIS ATTITUDE ERROR INTEGRATORS INVOLVE DIGITAL SUMMATION.</span>
-042274,000035:                                                                                                  <span class="co">#        DIGITAL DIFFERENTIATORS ARE INVOLVED IN THE BODY AXIS RATE ESTIMA-</span>
-042275,000036:                                                                                                  <span class="co">#        TIONS AND IN THE OUTPUTTING OF ACTUATOR COMMANDS. THERE IS AN</span>
-042276,000037:                                                                                                  <span class="co">#        OFFSET-TRACKER-FILTER TO PROTECT. ETC., ETC.</span>
-042277,000038:                                                                                                  <span class="co">#       *THOSE QUANTITIES WHICH MUST BE PROTECTED ARE STORED IN TEMPORARY</span>
-042278,000039:                                                                                                  <span class="co">#        REGISTERS AS THEY ARE COMPUTED, FOR UPDATING THE REAL REGISTERS</span>
-042279,000040:                                                                                                  <span class="co">#        DURING COPYCYCLES.</span>
-042280,000041:                                                                                                  <span class="co">#       *THE SEVERAL COPYCYCLES ARE EACH PROTECTED BY PHASE POINTS AT THEIR</span>
-042281,000042:                                                                                                  <span class="co">#        BEGINNING AND AT THEIR TERMINATION. THE PHASE POINTS ARE SIMPLY</span>
-042282,000043:                                                                                                  <span class="co">#        ''INCR'' INSTRUCTIONS, EITHER ''INCR TVCEXPHS'' FOR COPYCYCLES</span>
-042283,000044:                                                                                                  <span class="co">#        IN THE TVCEXECUTIVE, OR ''INCR TVCPHASE'' FOR THE PITCH AND YAW</span>
-042284,000045:                                                                                                  <span class="co">#        COPYCYCLES. INDEXING ON EACH OF THESE POINTERS THEN PERMITS A</span>
-042285,000046:                                                                                                  <span class="co">#        RETURN TO THE APPROPRIATE RESTART POINTS.</span>
-042286,000047:                                                                                                  <span class="co">#       *IF A RESTART OCCURS DURING EITHER COPYCYCLE, THAT COPYCYCLE IS</span>
-042287,000048:                                                                                                  <span class="co">#        COMPLETED. THEN THE NORMAL TVCINIT4....DAPINIT....PITCHDAP STARTUP</span>
-042288,000049:                                                                                                  <span class="co">#        SEQUENCE IS CALLED UPON TO GET THINGS GOING AGAIN.</span>
-042289,000050:                                                                                                  <span class="co">#       *TVC-ENABLE AND OPTICS-ERROR-COUNTER ENABLE MUST BE SET ASAP</span>
-042290,000051:                                                                                                  <span class="co">#        (ALLOWING FOR PROCEDURAL DELAYS). THEN THE ENGINES ARE COMMANDED</span>
-042291,000052:                                                                                                  <span class="co">#        TO THE P,YACTOFF TRIM VALUES. THE DAPS ARE THEN READY TO GO ON THE</span>
-042292,000053:                                                                                                  <span class="co">#        AIR, WITH THE REGULAR STARTUP SEQUENCE, EITHER AT MRCLEAN FOR A</span>
-042293,000054:                                                                                                  <span class="co">#        COMPLETE INITIALIZATION OR AT TVCINIT4 FOR A PARTIAL INITIALIZATION</span>
-042294,000055:                                                                                                  <span class="co">#       *FOR RESTARTS PRIOR TO THE SETTING OF THE T5 BITS AT DOTVCON THE</span>
-042295,000056:                                                                                                  <span class="co">#        PRE40.6 SECTION OF S40.6 TAKES CARE OF RE-ESTABLISHING TRIMS.</span>
-042296,000057:                                                                                                  <span class="co">#       *IF A RESTART OCCURS DURING THE TVCEXEC....TVCEXFIN SEQUENCE THE</span>
-042297,000058:                                                                                                  <span class="co">#        COMPUTATIONS WILL BE COMPLETED, STARTING AT THE APPROPRIATE RESTART</span>
-042298,000059:                                                                                                  <span class="co">#        POINT, AFTER THE DAPS ARE READY TO GO ON THE AIR.</span>
-042299,000060:                                                                                                  <span class="co">#       *IF A RESTART OCCURS PRIOR TO TVCINIT4 (TVCPHASE = -1) E.G. DURING</span>
-042300,000061:                                                                                                  <span class="co">#        THE EARLY DAP INITIALIZATION PHASE, THE DAP STARTUP SEQUENCE IS</span>
-042301,000062:                                                                                                  <span class="co">#        ENTERED AT MRCLEAN FOR A FULL INITIALIZATION.</span>
-042302,000063:                                                                                                  <span class="co">#       *FOR RESTARTS DURING CSM/LM V46 SWITCH-OVER, TVCPHASE IS SET TO -2.</span>
-042303,000064:                                                                                                  <span class="co">#        AND THE RESTART LOGIC GOES BACK TO REDO SWITCH-OVER (AFTER THE</span>
-042304,000065:                                                                                                  <span class="co">#        NORMAL DAP RESTART SEQUENCE IS FOLLOWED.)</span>
-042305,000066:                                                                                                  <span class="co">#       *RESTARTS ARE NOT CRITICAL TO THE ROLL DAP PERFORMANCES HENCE THE</span>
-042306,000067:                                                                                                  <span class="co">#        THE ROLL DAP IS MERELY RESTARTED.</span>
+042353,000019: 
+042354,000020:                                                                                                  <span class="co">#  NAME....TVCRESTART PACKAGE,  CONSISTING OF REDOTVC, ENABL1, 2, CMDSOUT, PHSCHK2, ETC.</span>
+042355,000021:                                                                                                  <span class="co">#  LOG SECTION...TVCRESTARTS                     SUBROUTINE...DAPCSM</span>
+042356,000022:                                                                                                  <span class="co">#  MODIFIED BY SCHLUNDT                          21 OCTOBER 1968</span>
+042357,000023:                                                                                                  <span class="co">#  MODIFIED BY BEALS TO ELIMINATE CSMMASS UPDATE LOGIC (NOW DONE IN S40.8)</span>
+042358,000024:                                                                                                  <span class="co">#  FUNCTIONAL DESCRIPTION....</span>
+042359,000025: 
+042360,000026:                                                                                                  <span class="co">#       *RESTART-PROOFS THE TVC DAPS, INCLUDING PITCHDAP, YAWDAP,</span>
+042361,000027:                                                                                                  <span class="co">#        TVCEXECUTIVE, ROLLDAP, TVCINIT4, TVCDAPON, AND CSM/.M V46 SWTCHOVR.</span>
+042362,000028:                                                                                                  <span class="co">#       *TVC RESTARTS DESERVE SPECIAL CONSIDERATION IN SEVERAL AREAS.</span>
+042363,000029:                                                                                                  <span class="co">#        RESTART DOWN-TIME IS IMPORTANT BECAUSE OF THE TRANSIENTS INTRODUCED</span>
+042364,000030:                                                                                                  <span class="co">#        BY THE THRUST VECTOR RETURN TO THE ACTUATOR MECHANICAL NULLS</span>
+042365,000031:                                                                                                  <span class="co">#        FOLLOWING TVC- AND OPTICS-ERROR-COUNTER-DISENABLES (CHANNEL 12).</span>
+042366,000032:                                                                                                  <span class="co">#        TVC    USES A MIXTURE OF WAITLIST, T5, T6, AND JOB CALLS. THERE IS</span>
+042367,000033:                                                                                                  <span class="co">#        FILTER MEMORY (UP TO 6TH ORDER) TO BE PROTECTED IF WILD TRANSIENTS</span>
+042368,000034:                                                                                                  <span class="co">#        ARE TO BE AVOIDED. COUNTERS ARE INVOLVED FOR ONE-SHOT</span>
+042369,000035:                                                                                                  <span class="co">#        CORRECTIONS AND GAIN UPDATES. THE GIMBAL TRIM ESTIMATORS AND THE</span>
+042370,000036:                                                                                                  <span class="co">#        BODY AXIS ATTITUDE ERROR INTEGRATORS INVOLVE DIGITAL SUMMATION.</span>
+042371,000037:                                                                                                  <span class="co">#        DIGITAL DIFFERENTIATORS ARE INVOLVED IN THE BODY AXIS RATE ESTIMA-</span>
+042372,000038:                                                                                                  <span class="co">#        TIONS AND IN THE OUTPUTTING OF ACTUATOR COMMANDS. THERE IS AN</span>
+042373,000039:                                                                                                  <span class="co">#        OFFSET-TRACKER-FILTER TO PROTECT. ETC., ETC.</span>
+042374,000040:                                                                                                  <span class="co">#       *THOSE QUANTITIES WHICH MUST BE PROTECTED ARE STORED IN TEMPORARY</span>
+042375,000041:                                                                                                  <span class="co">#        REGISTERS AS THEY ARE COMPUTED, FOR UPDATING THE REAL REGISTERS</span>
+042376,000042:                                                                                                  <span class="co">#        DURING COPYCYCLES.</span>
+042377,000043:                                                                                                  <span class="co">#       *THE SEVERAL COPYCYCLES ARE EACH PROTECTED BY PHASE POINTS AT THEIR</span>
+042378,000044:                                                                                                  <span class="co">#        BEGINNING AND AT THEIR TERMINATION. THE PHASE POINTS ARE SIMPLY</span>
+042379,000045:                                                                                                  <span class="co">#        ..INCR.. INSTRUCTIONS, EITHER ..INCR TVCEXPHS.. FOR COPYCYCLES</span>
+042380,000046:                                                                                                  <span class="co">#        IN THE TVCEXECUTIVE, OR ..INCR TVCPHASE.. FOR THE PITCH AND YAW</span>
+042381,000047:                                                                                                  <span class="co">#        COPYCYCLES. INDEXING ON EACH OF THESE POINTERS THEN PERMITS A</span>
+042382,000048:                                                                                                  <span class="co">#        RETURN TO THE APPROPRIATE RESTART POINTS.</span>
+042383,000049:                                                                                                  <span class="co">#       *IF A RESTART OCCURS DURING EITHER COPYCYCLE, THAT COPYCYCLE IS</span>
+042384,000050:                                                                                                  <span class="co">#        COMPLETED. THEN THE NORMAL TVCINIT4....DAPINIT....PITCHDAP STARTUP</span>
+042385,000051:                                                                                                  <span class="co">#        SEQUENCE IS CALLED UPON TO GET THINGS GOING AGAIN.</span>
+042386,000052:                                                                                                  <span class="co">#       *TVC-ENABLE AND OPTICS-ERROR-COUNTER ENABLE MUST BE SET ASAP</span>
+042387,000053:                                                                                                  <span class="co">#        (ALLOWING FOR PROCEDURAL DELAYS). THEN THE ENGINES ARE COMMANDED</span>
+042388,000054:                                                                                                  <span class="co">#        TO THE P,YACTOFF TRIM VALUES. THE DAPS ARE THEN READY TO GO ON THE</span>
+042389,000055:                                                                                                  <span class="co">#        AIR, WITH THE REGULAR STARTUP SEQUENCE, EITHER AT MRCLEAN FOR A</span>
+042390,000056:                                                                                                  <span class="co">#        COMPLETE INITIALIZATION OR AT TVCINIT4 FOR A PARTIAL INITIALIZATION</span>
+042391,000057:                                                                                                  <span class="co">#       *FOR RESTARTS PRIOR TO THE SETTING OF THE T5 BITS AT DOTVCON THE</span>
+042392,000058:                                                                                                  <span class="co">#        PRE40.6 SECTION OF S40.6 TAKES CARE OF RE-ESTABLISHING TRIMS.</span>
+042393,000059:                                                                                                  <span class="co">#       *IF A RESTART OCCURS DURING THE TVCEXEC....TVCEXFIN SEQUENCE THE</span>
+042394,000060:                                                                                                  <span class="co">#        COMPUTATIONS WILL BE COMPLETED, STARTING AT THE APPROPRIATE RESTART</span>
+042395,000061:                                                                                                  <span class="co">#        POINT, AFTER THE DAPS ARE READY TO GO ON THE AIR.</span>
+042396,000062:                                                                                                  <span class="co">#       *IF A RESTART OCCURS PRIOR TO TVCINIT4 (TVCPHASE = -1) E.G. DURING</span>
+042397,000063:                                                                                                  <span class="co">#        THE EARLY DAP INITIALIZATION PHASE, THE DAP STARTUP SEQUENCE IS</span>
+042398,000064:                                                                                                  <span class="co">#        ENTERED AT MRCLEAN FOR A FULL INITIALIZATION.</span>
+042399,000065:                                                                                                  <span class="co">#       *FOR RESTARTS DURING CSM/LM V46 SWITCH-OVER, TVCPHASE IS SET TO -2.</span>
+042400,000066:                                                                                                  <span class="co">#        AND THE RESTART LOGIC GOES BACK TO REDO SWITCH-OVER (AFTER THE</span>
+042401,000067:                                                                                                  <span class="co">#        NORMAL DAP RESTART SEQUENCE IS FOLLOWED).</span>
+042402,000068:                                                                                                  <span class="co">#       *RESTARTS ARE NOT CRITICAL TO THE ROLL DAP PERFORMANCES HENCE THE</span>
+042403,000069:                                                                                                  <span class="co">#        THE ROLL DAP IS MERELY RESTARTED.</span>
 </pre>
 </span>
 </p>
@@ -183,45 +185,45 @@ Page 960
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-042308,000069:                                                                                                  <span class="co">#       *REDOTVC IS REACHED FOLLOWING ANY RESTART WHICH FINDS THE T5 BITS</span>
-042309,000070:                                                                                                  <span class="co">#        (BITS 15,14 OF FLAGWRD6) SET FOR TVC. DOTVCON SETS TVCPHASE = -1</span>
-042310,000071:                                                                                                  <span class="co">#        AND TVC EXPHS = 0 JUST BEFORE SETTING THESE BITS, JUST BEFORE</span>
-042311,000072:                                                                                                  <span class="co">#        MAKING THE T5 CALL TO TVCDAPON. ON A NORMAL SHUTDOWN DOTVCRCS</span>
-042312,000073:                                                                                                  <span class="co">#        CALLS RCSDAPON, WHICH RESETS THE T5 BIT FOR RCS</span>
-042313,000074:                                                                                                  <span class="co">#  CALLING SEQUENCE....T5, IN PARTICULAR BY ELRSKIP OF FRESH START/RESTART</span>
-042314,000075: 
-042315,000076:                                                                                                  <span class="co">#  NORMAL EXIT MODES....RESUME, NOQRSM, POSTJUMP (TO TVCINIT4 OR MRCLEAN)</span>
-042316,000077: 
-042317,000078:                                                                                                  <span class="co">#  ALARM OR ABORT EXIT MODES....NONE</span>
-042318,000079: 
-042319,000080:                                                                                                  <span class="co">#  SUBROUTINES CALLED....</span>
-042320,000081: 
-042321,000082:                                                                                                  <span class="co">#       *PCOPY+1, YCOPY+1 (PITCH AND YAW COPYCYCLES)</span>
-042322,000083:                                                                                                  <span class="co">#       *ENABLE1,2, CMDSOUT (RE-ESTABLISH ACTUATOR TRIMS)</span>
-042323,000084:                                                                                                  <span class="co">#       *MRCLEAN OR TVCINIT4 (TVCDAP INITIALIZATIONS)</span>
-042324,000085:                                                                                                  <span class="co">#       *SWITCHOVR +5  (CSM/LM V46 SWITCH-OVER)</span>
-042325,000086:                                                                                                  <span class="co">#       *EXRSTRT AND TVCEXECUTIVE PHASE POINTS 1 THRU 6</span>
-042326,000087:                                                                                                  <span class="co">#       *WAITLIST, IBNKCALL, POSTJUMP, ISWCALL</span>
-042327,000088: 
-042328,000089:                                                                                                  <span class="co">#  OTHER INTERFACES....DOTVCON AND RCSDAPON (T5 BITS), ELRSKIP (CALLS IT)</span>
-042329,000090:                                                                                                  <span class="co">#  ERASABLE ININTIALIZATION REQUIRED....</span>
-042330,000091: 
-042331,000092:                                                                                                  <span class="co">#       *T5 BITS (1,0), TVCPHASE (-2,-1,0,1,2,3), TVCEXPHS (1 THRU 6)</span>
-042332,000093:                                                                                                  <span class="co">#       *TVC DAP VARIABLES</span>
-042333,000094:                                                                                                  <span class="co">#       *OPERATIONS PERFORMED BY REDOTVC ARE BASED ON THE ASSUMPTION THAT</span>
-042334,000095:                                                                                                  <span class="co">#        THE TVC DAPS ARE RUNNING NORMALLY</span>
-042335,000096: 
-042336,000097:                                                                                                  <span class="co">#  OUTPUT....</span>
-042337,000098: 
-042338,000099:                                                                                                  <span class="co">#       *PITCH AND YAW TVC DAP COPYCYCLES COMPLETED IF INTERRUPTED</span>
-042339,000100:                                                                                                  <span class="co">#       *TVCEXECUTIVE COMPLETED IF INTERRUPTED</span>
-042340,000101:                                                                                                  <span class="co">#       *CSM/LM V46 SWITCH-OVER REPEATED IF INTERRUPTED</span>
-042341,000102:                                                                                                  <span class="co">#       *ACTUATOR TRIMS RE-ESTABLISHED (ACTUATORS BACK ON THE AIR)</span>
-042342,000103:                                                                                                  <span class="co">#       *TVC DAP INITIALIZATION AS REQUIRED</span>
-042343,000104:                                                                                                  <span class="co">#       *ALL TVC DAP OPERATIONS ON THE AIR</span>
-042344,000105: 
-042345,000106:                                                                                                  <span class="co">#  DEBRIS....TVC TEMPORARIES IN EBANK6</span>
-042346,000107: 
+042405,000071:                                                                                                  <span class="co">#       *REDOTVC IS REACHED FOLLOWING ANY RESTART WHICH FINDS THE T5 BITS</span>
+042406,000072:                                                                                                  <span class="co">#        (BITS 15,14 OF FLAGWRD6) SET FOR TVC. DOTVCON SETS TVCPHASE = -1</span>
+042407,000073:                                                                                                  <span class="co">#        AND TVC EXPHS = 0 JUST BEFORE SETTING THESE BITS, JUST BEFORE</span>
+042408,000074:                                                                                                  <span class="co">#        MAKING THE T5 CALL TO TVCDAPON. ON A NORMAL SHUTDOWN DOTVCRCS</span>
+042409,000075:                                                                                                  <span class="co">#        CALLS RCSDAPON, WHICH RESETS THE T5 BITS FOR RCS.</span>
+042410,000076:                                                                                                  <span class="co">#  CALLING SEQUENCE....T5, IN PARTICULAR BY ELRSKIP OF FRESH START/RESTART</span>
+042411,000077: 
+042412,000078:                                                                                                  <span class="co">#  NORMAL EXIT MODES....RESUME, NOQRSM, POSTJUMP (TO TVCINIT4 OR MRCLEAN)</span>
+042413,000079: 
+042414,000080:                                                                                                  <span class="co">#  ALARM OR ABORT EXIT MODES....NONE</span>
+042415,000081: 
+042416,000082:                                                                                                  <span class="co">#  SUBROUTINES CALLED....</span>
+042417,000083: 
+042418,000084:                                                                                                  <span class="co">#       *PCOPY+1, YCOPY+1 (PITCH AND YAW COPYCYCLES)</span>
+042419,000085:                                                                                                  <span class="co">#       *ENABLE1,2, CMDSOUT (RE-ESTABLISH ACTUATOR TRIMS)</span>
+042420,000086:                                                                                                  <span class="co">#       *MRCLEAN OR TVCINIT4 (TVCDAP INITIALIZATIONS)</span>
+042421,000087:                                                                                                  <span class="co">#       *SWICHOVR +5  (CSM/LM V46 SWITCH-OVER)</span>
+042422,000088:                                                                                                  <span class="co">#       *EXRSTRT AND TVCEXECUTIVE PHASE POINTS 1 THRU 6</span>
+042423,000089:                                                                                                  <span class="co">#       *WAITLIST, IBNKCALL, POSTJUMP, ISWCALL</span>
+042424,000090: 
+042425,000091:                                                                                                  <span class="co">#  OTHER INTERFACES....DOTVCON AND RCSDAPON (T5 BITS), ELRSKIP (CALLS IT)</span>
+042426,000092:                                                                                                  <span class="co">#  ERASABLE INITIALIZATION REQUIRED....</span>
+042427,000093: 
+042428,000094:                                                                                                  <span class="co">#       *T5 BITS (1,0), TVCPHASE (-2,-1,0,1,2,3), TVCEXPHS (1 THRU 6)</span>
+042429,000095:                                                                                                  <span class="co">#       *TVC DAP VARIABLES</span>
+042430,000096:                                                                                                  <span class="co">#       *OPERATIONS PERFORMED BY REDOTVC ARE BASED ON THE ASSUMPTION THAT</span>
+042431,000097:                                                                                                  <span class="co">#        THE TVC DAPS ARE RUNNING NORMALLY</span>
+042432,000098: 
+042433,000099:                                                                                                  <span class="co">#  OUTPUT....</span>
+042434,000100: 
+042435,000101:                                                                                                  <span class="co">#       *PITCH AND YAW TVC DAP COPYCYCLES COMPLETED IF INTERUPTED</span>
+042436,000102:                                                                                                  <span class="co">#       *TVCEXECUTIVE COMPLETED IF INTERUPTED</span>
+042437,000103:                                                                                                  <span class="co">#       *CSM/LM V46 SWITCH-OVER REPEATED IF INTERRUPTED</span>
+042438,000104:                                                                                                  <span class="co">#       *ACTUATOR TRIMS RE-ESTABLISHED (ACTUATORS BACK ON THE AIR)</span>
+042439,000105:                                                                                                  <span class="co">#       *TVC DAP INITIALIZATION AS REQUIRED</span>
+042440,000106:                                                                                                  <span class="co">#       *ALL TVC DAP OPERATIONS ON THE AIR</span>
+042441,000107: 
+042442,000108:                                                                                                  <span class="co">#  DEBRIS....TVC TEMPORARIES IN EBANK6</span>
+042443,000109: 
 </pre>
 </span>
 </p>
@@ -237,53 +239,53 @@ Page 961
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-042348,000109: 16,2000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#444150524F4C4C">DAPROLL</a>                               
-042349,000110: 16,2000                                           <span class="ps">BANK    </span>                                       
-042350,000111: 16,3222  E6,1635                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5456435048415345">TVCPHASE</a>                              
-042351,000112: 16,3222                                           <span class="ps">COUNT*  </span> $$/RSRT                               
-042352,000113: 
-<a name="5245444F545643"></a>042353,000114: 16,3222           22016        <span class="sm">REDOTVC </span>           <span class="op">LXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#42414E4B52555054">BANKRUPT</a>                              <span class="co">#  TVC RESTART PACKAGE</span>
-042354,000115: 16,3223           00006                           <span class="op">EXTEND  </span>                                       
-042355,000116: 16,3224           22012                           <span class="op">QXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5152555054">QRUPT</a>                                 <span class="co">#  (  ''TCR''  IN  ''FINCOPY''  )</span>
-042356,000117: 
-<a name="45584543504853"></a>042357,000118: 16,3225           11644        <span class="sm">EXECPHS </span>           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5456434558504853">TVCEXPHS</a>                              <span class="co">#  CHECK TVCEXECUTIVE PHASE</span>
-042358,000119: 16,3226           13230                           <span class="op">TCF     </span> +2                                    <span class="co">#        MUST RESTART TVCEXECUTIVE</span>
-042359,000120: 16,3227           13233                           <span class="op">TCF     </span> <a href="#5456434441504853">TVCDAPHS</a>                              <span class="co">#        NO NEED TO RESTART TVCEXECUTIVE</span>
-042360,000121: 
-042361,000122: 16,3230           34322                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4E494E45">NINE</a>                                  <span class="co">#  9CS DELAY TO FORCE EXRSTRT TO OCCUR</span>
-042362,000123: 16,3231           05223                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#54574944444C45">TWIDDLE</a>                               <span class="co">#        BEFORE PITCHDAP, AFTER CMDSOUT</span>
-042363,000124: 16,3232           03325                           <span class="ps">ADRES   </span> <a href="#45585253545254">EXRSTRT</a>                               
-<a name="5456434441504853"></a>042364,000125: 16,3233           47663        <span class="sm">TVCDAPHS</span>           <span class="op">CS      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4F43543337373736">OCT37776</a>                              <span class="co">#  CHECK BITS 15 AND 1 OF TVCPHASE TO SEE</span>
-042365,000126: 16,3234           71635                           <span class="op">MASK    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5456435048415345">TVCPHASE</a>                              <span class="co">#        DAP RESTART LOCATION (-1,1,2,3)</span>
-042366,000127: 16,3235           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
-042367,000128: 16,3236           13315                           <span class="op">TCF     </span> <a href="#46494E434F5059">FINCOPY</a>                               <span class="co">#        FINISH THE COPYCYCLE FIRST</span>
-042368,000129: 16,3237           13244                           <span class="op">TCF     </span> <a href="#454E41424C31">ENABL1</a>                                <span class="co">#        JUST PREPARE THE OUTCOUNTERS AND GO</span>
-042369,000130: 
-042370,000131: 16,3240           41635                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5456435048415345">TVCPHASE</a>                              <span class="co">#  TEST FOR TVCPHASE = -2</span>
-042371,000132: 16,3241           74767                           <span class="op">MASK    </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495432">BIT2</a>                                  <span class="co">#        (THIS INDICATES RESTART OCCURRED</span>
-042372,000133: 16,3242           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#        DURING CSM/LM V46 SWITCH-OVER)</span>
-042373,000134: 16,3243           13321                           <span class="op">BZF     </span> <a href="#5452494D2F434D44">TRIM/CMD</a>                              <span class="co">#  NO, TVCPHASE = -1, RSTRT WAS IN TVCINIT</span>
-042374,000135: 
-<a name="454E41424C31"></a>042375,000136: 16,3244           34761        <span class="sm">ENABL1  </span>           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495438">BIT8</a>                                  <span class="co">#  TVC ENABLE, FOLLOWED BY 40 MS (MIN) WAIT</span>
-042376,000137: 16,3245           64756                           <span class="op">AD      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4249543131">BIT11</a>                                 <span class="co">#  SET BIT FOR OPTICS-DAC-ENABLE ALSO</span>
-042377,000138: 16,3246           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  (ENABL1 ENTERED FROM TVCDAPHS / FINCOPY)</span>
-042378,000139: 16,3247           05012                           <span class="op">WOR     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4348414E3132">CHAN12</a>                                
-042379,000140: 16,3250           33331                           <span class="op">CAF     </span> <a href="#54564341444452">TVCADDR</a>                               <span class="co">#  WAIT,  CALLING ENABL2  (BBCON THERE)</span>
-042380,000141: 16,3251           54112                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54354C4F43">T5LOC</a>                                 
-042381,000142: 16,3252           33335                           <span class="op">CAF     </span> <a href="#54564341444452">TVCADDR</a>    +4                         <span class="co">#        60 MS  (TVCEXADR)</span>
-042382,000143: 16,3253           54030                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54494D4535">TIME5</a>                                 
-042383,000144: 
-042384,000145: 16,3254           15323                           <span class="op">TCF     </span> <a href="WAITLIST.agc.html#524553554D45">RESUME</a>                                
-042385,000146: 
-<a name="454E41424C32"></a>042386,000147: 16,3255           22016        <span class="sm">ENABL2  </span>           <span class="op">LXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#42414E4B52555054">BANKRUPT</a>                              <span class="co">#  CONTINUE PREPARATION OF OUTCOUNTERS</span>
-042387,000148: 
-042388,000149: 16,3256           34767                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495432">BIT2</a>                                  <span class="co">#  OPTICS ERROR CNTR ENABLE, 4MS MIN WAIT</span>
-042389,000150: 16,3257           00006                           <span class="op">EXTEND  </span>                                       
-042390,000151: 16,3260           05012                           <span class="op">WOR     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4348414E3132">CHAN12</a>                                
-042391,000152: 16,3261           33333                           <span class="op">CAF     </span> <a href="#54564341444452">TVCADDR</a>    +2                         <span class="co">#  WAIT, CALLING CMDSOUT (BBCON THERE)</span>
-042392,000153: 16,3262           54112                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54354C4F43">T5LOC</a>                                 
-042393,000154: 16,3263           37663                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4F43543337373736">OCT37776</a>                              <span class="co">#        20MS</span>
-042394,000155: 16,3264           54030                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54494D4535">TIME5</a>                                 
+042445,000111: 16,2000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#444150524F4C4C">DAPROLL</a>                               
+042446,000112: 16,2000                                           <span class="ps">BANK    </span>                                       
+042447,000113: 16,3222  E6,1635                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5456435048415345">TVCPHASE</a>                              
+042448,000114: 16,3222                                           <span class="ps">COUNT*  </span> $$/RSRT                               
+042449,000115: 
+<a name="5245444F545643"></a>042450,000116: 16,3222           22016        <span class="sm">REDOTVC </span>           <span class="op">LXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#42414E4B52555054">BANKRUPT</a>                              <span class="co">#  TVC RESTART PACKAGE</span>
+042451,000117: 16,3223           00006                           <span class="op">EXTEND  </span>                                       
+042452,000118: 16,3224           22012                           <span class="op">QXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5152555054">QRUPT</a>                                 <span class="co">#  (  ..TCR..  IN  ..FINCOPY..  )</span>
+042453,000119: 
+<a name="45584543504853"></a>042454,000120: 16,3225           11644        <span class="sm">EXECPHS </span>           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5456434558504853">TVCEXPHS</a>                              <span class="co">#  CHECK TVCEXECUTIVE PHASE</span>
+042455,000121: 16,3226           13230                           <span class="op">TCF     </span> +2                                    <span class="co">#        MUST RESTART TVCEXECUTIVE</span>
+042456,000122: 16,3227           13233                           <span class="op">TCF     </span> <a href="#5456434441504853">TVCDAPHS</a>                              <span class="co">#        NO NEED TO RESTART TVCEXECUTIVE</span>
+042457,000123: 
+042458,000124: 16,3230           34322                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4E494E45">NINE</a>                                  <span class="co">#  9CS DELAY TO FORCE EXRSTRT TO OCCUR</span>
+042459,000125: 16,3231           05223                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#54574944444C45">TWIDDLE</a>                               <span class="co">#        BEFORE PITCHDAP, AFTER CMDSOUT</span>
+042460,000126: 16,3232           03325                           <span class="ps">ADRES   </span> <a href="#45585253545254">EXRSTRT</a>                               
+<a name="5456434441504853"></a>042461,000127: 16,3233           47663        <span class="sm">TVCDAPHS</span>           <span class="op">CS      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4F43543337373736">OCT37776</a>                              <span class="co">#  CHECK BITS 15 AND 1 OF TVCPHASE TO SEE</span>
+042462,000128: 16,3234           71635                           <span class="op">MASK    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5456435048415345">TVCPHASE</a>                              <span class="co">#        DAP RESTART LOCATION (-1,1,2,3)</span>
+042463,000129: 16,3235           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
+042464,000130: 16,3236           13315                           <span class="op">TCF     </span> <a href="#46494E434F5059">FINCOPY</a>                               <span class="co">#        FINISH THE COPYCYCLE FIRST</span>
+042465,000131: 16,3237           13244                           <span class="op">TCF     </span> <a href="#454E41424C31">ENABL1</a>                                <span class="co">#        JUST PREPARE THE OUTCOUNTERS AND GO</span>
+042466,000132: 
+042467,000133: 16,3240           41635                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5456435048415345">TVCPHASE</a>                              <span class="co">#  TEST FOR TVCPHASE = -2</span>
+042468,000134: 16,3241           74767                           <span class="op">MASK    </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495432">BIT2</a>                                  <span class="co">#        (THIS INDICATES RESTART OCCURRED</span>
+042469,000135: 16,3242           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#        DURING CSM/LM V46 SWITCH-OVER)</span>
+042470,000136: 16,3243           13321                           <span class="op">BZF     </span> <a href="#5452494D2F434D44">TRIM/CMD</a>                              <span class="co">#  NO, TVCPHASE = -1, RSTRT WAS IN TVCINIT</span>
+042471,000137: 
+<a name="454E41424C31"></a>042472,000138: 16,3244           34761        <span class="sm">ENABL1  </span>           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495438">BIT8</a>                                  <span class="co">#  TVC ENABLE, FOLLOWED BY 40 MS (MIN) WAIT</span>
+042473,000139: 16,3245           64756                           <span class="op">AD      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4249543131">BIT11</a>                                 <span class="co">#  SET BIT FOR OPTICS-DAC-ENABLE ALSO</span>
+042474,000140: 16,3246           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  (ENABL1 ENTERED FROM TVCDAPHS / FINCOPY)</span>
+042475,000141: 16,3247           05012                           <span class="op">WOR     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4348414E3132">CHAN12</a>                                
+042476,000142: 16,3250           33331                           <span class="op">CAF     </span> <a href="#54564341444452">TVCADDR</a>                               <span class="co">#  WAIT,  CALLING ENABL2  (BBCON THERE)</span>
+042477,000143: 16,3251           54112                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54354C4F43">T5LOC</a>                                 
+042478,000144: 16,3252           33335                           <span class="op">CAF     </span> <a href="#54564341444452">TVCADDR</a>    +4                         <span class="co">#        60 MS  (TVCEXADR)</span>
+042479,000145: 16,3253           54030                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54494D4535">TIME5</a>                                 
+042480,000146: 
+042481,000147: 16,3254           15323                           <span class="op">TCF     </span> <a href="WAITLIST.agc.html#524553554D45">RESUME</a>                                
+042482,000148: 
+<a name="454E41424C32"></a>042483,000149: 16,3255           22016        <span class="sm">ENABL2  </span>           <span class="op">LXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#42414E4B52555054">BANKRUPT</a>                              <span class="co">#  CONTINUE PREPARATION OF OUTCOUNTERS</span>
+042484,000150: 
+042485,000151: 16,3256           34767                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#42495432">BIT2</a>                                  <span class="co">#  OPTICS ERROR CNTR ENABLE, 4MS MIN WAIT</span>
+042486,000152: 16,3257           00006                           <span class="op">EXTEND  </span>                                       
+042487,000153: 16,3260           05012                           <span class="op">WOR     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4348414E3132">CHAN12</a>                                
+042488,000154: 16,3261           33333                           <span class="op">CAF     </span> <a href="#54564341444452">TVCADDR</a>    +2                         <span class="co">#  WAIT, CALLING CMDSOUT (BBCON THERE)</span>
+042489,000155: 16,3262           54112                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54354C4F43">T5LOC</a>                                 
+042490,000156: 16,3263           37663                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4F43543337373736">OCT37776</a>                              <span class="co">#        20MS</span>
+042491,000157: 16,3264           54030                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54494D4535">TIME5</a>                                 
 </pre>
 </span>
 </p>
@@ -299,55 +301,55 @@ Page 962
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-042396,000157: 16,3265           15325                           <span class="op">TCF     </span> <a href="WAITLIST.agc.html#4E4F5152534D">NOQRSM</a>                                
-042397,000158: 
-<a name="434D44534F5554"></a>042398,000159: 16,3266           22016        <span class="sm">CMDSOUT </span>           <span class="op">LXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#42414E4B52555054">BANKRUPT</a>                              <span class="co">#  CONTNUE PREPARATION OF OUTCOUNTERS</span>
-042399,000160: 16,3267           00006                           <span class="op">EXTEND  </span>                                       
-042400,000161: 16,3270           22012                           <span class="op">QXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5152555054">QRUPT</a>                                 
-042401,000162: 
-042402,000163: 16,3271           44772                           <span class="op">CS      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5A45524F">ZERO</a>                                  <span class="co">#  MOST RECENT ACTUATOR COMMANDS</span>
-042403,000164: 16,3272           61623                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#50434D44">PCMD</a>                                  <span class="co">#        (AVOID +0)</span>
-042404,000165: 16,3273           54054                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5456435049544348">TVCPITCH</a>                              
-042405,000166: 16,3274           44772                           <span class="op">CS      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5A45524F">ZERO</a>                                  
-042406,000167: 16,3275           61624                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#59434D44">YCMD</a>                                  
-042407,000168: 16,3276           54053                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#545643594157">TVCYAW</a>                                
-042408,000169: 
-042409,000170: 16,3277           35050                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5052494F36">PRIO6</a>                                 <span class="co">#  RELEASE THE COUNTERS (BITS 11,12)</span>
-042410,000171: 16,3300           00006                           <span class="op">EXTEND  </span>                                       
-042411,000172: 16,3301           05014                           <span class="op">WOR     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4348414E3134">CHAN14</a>                                
-042412,000173: 
-<a name="50485343484B32"></a>042413,000174: 16,3302           11635        <span class="sm">PHSCHK2 </span>           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5456435048415345">TVCPHASE</a>                              <span class="co">#  CHECK TVCPHASE AGAIN</span>
-042414,000175: 16,3303           13313                           <span class="op">TCF     </span> <a href="#4A554D5054564334">JUMPTVC4</a>                              
-042415,000176: 16,3304           13313                           <span class="op">TCF     </span> <a href="#4A554D5054564334">JUMPTVC4</a>                              
-042416,000177: 16,3305           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#  A CONTAINS THE DIMINISHED ABSOLUTE OF</span>
-042417,000178: 16,3306           03311                           <span class="op">TC      </span> +3                                    <span class="co">#  TVCPHASE (-2 BECOMES +1. -1 BECOMES +0)</span>
-042418,000179: 
-042419,000180: 16,3307           04655                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#504F53544A554D50">POSTJUMP</a>                              <span class="co">#        REPEAT TVC INITIALIZATION</span>
-042420,000181: 16,3310           36166                           <span class="ps">CADR    </span> <a href="TVCINITIALIZE.agc.html#4D52434C45414E">MRCLEAN</a>                               <span class="co">#        (DO NOT RETURN)</span>
-042421,000182: 
-042422,000183: 16,3311           04714                 +3        <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#49424E4B43414C4C">IBNKCALL</a>                              <span class="co">#        REPEAT CSM/LM V46 SWITCH-OVER</span>
-042423,000184: 16,3312           36351                           <span class="ps">CADR    </span> <a href="TVCINITIALIZE.agc.html#53574943484F5652">SWICHOVR</a>   +5                         <span class="co">#        (RETURN TO CHECK FOR STROKE TEST)</span>
-042424,000185: 
-<a name="4A554D5054564334"></a>042425,000186: 16,3313           04655        <span class="sm">JUMPTVC4</span>           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#504F53544A554D50">POSTJUMP</a>                              <span class="co">#        IF POSITIVE OR ZERO, RESTART AT</span>
-042426,000187: 16,3314           36326                           <span class="ps">CADR    </span> <a href="TVCINITIALIZE.agc.html#545643494E495434">TVCINIT4</a>                              <span class="co">#                TVCINIT4 (ZEROS TVCPHASE, AND</span>
-042427,000188:                                                                                                  <span class="co">#                CALLS TVC DAPS VIA DAPINIT)</span>
-<a name="46494E434F5059"></a>042428,000189: 16,3315           51635        <span class="sm">FINCOPY </span>           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5456435048415345">TVCPHASE</a>                              <span class="co">#  PICK UP THE APPROPRIATE COPYCYCLE</span>
-042429,000190: 16,3316           33331                           <span class="op">CAF     </span> <a href="#54564343414452">TVCCADR</a>                               
-042430,000191: 16,3317           04720                           <span class="op">TCR     </span> <a href="INTER-BANK_COMMUNICATION.agc.html#49535743414C4C">ISWCALL</a>                               <span class="co">#  RE-ENTER THE COPYCYCLE, RETURN AT END</span>
-042431,000192: 16,3320           13244                           <span class="op">TCF     </span> <a href="#454E41424C31">ENABL1</a>                                <span class="co">#  NOW PREPARE THE OUTCOUNTERS</span>
-042432,000193: 
-042433,000194: 
-<a name="5452494D2F434D44"></a>042434,000195: 16,3321           00006        <span class="sm">TRIM/CMD</span>           <span class="op">EXTEND  </span>                                       <span class="co">#  TVCDAPON INITIALIZATION NOT COMPLETED,</span>
-042435,000196: 16,3322           31424                           <span class="op">DCA     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#504143544F4646">PACTOFF</a>                               <span class="co">#        EG.  P,YCMD MAY NOT BE SET.  SET...</span>
-042436,000197: 16,3323           53624                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#50434D44">PCMD</a>                                  
-042437,000198: 16,3324           13244                           <span class="op">TCF     </span> <a href="#454E41424C31">ENABL1</a>                                <span class="co">#  NOW PREPARE THE OUTCOUNTERS</span>
-042438,000199: 
-042439,000200: 
-<a name="45585253545254"></a>042440,000201: 16,3325           51644        <span class="sm">EXRSTRT </span>           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5456434558504853">TVCEXPHS</a>                              <span class="co">#  TVCEXECUTIVE RESTARTS....GO TO</span>
-042441,000202: 16,3326           33335                           <span class="op">CAF     </span> <a href="#5456434558414452">TVCEXADR</a>                              <span class="co">#        APPROPRIATE RESTART POINT</span>
-042442,000203: 16,3327           50000                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
-042443,000204: 16,3330           10000                           <span class="op">TCF     </span> 0                                     
-042444,000205: 
+042493,000159: 16,3265           15325                           <span class="op">TCF     </span> <a href="WAITLIST.agc.html#4E4F5152534D">NOQRSM</a>                                
+042494,000160: 
+<a name="434D44534F5554"></a>042495,000161: 16,3266           22016        <span class="sm">CMDSOUT </span>           <span class="op">LXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#42414E4B52555054">BANKRUPT</a>                              <span class="co">#  CONTINUE PREPARATION OF OUTCOUNTERS</span>
+042496,000162: 16,3267           00006                           <span class="op">EXTEND  </span>                                       
+042497,000163: 16,3270           22012                           <span class="op">QXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5152555054">QRUPT</a>                                 
+042498,000164: 
+042499,000165: 16,3271           44772                           <span class="op">CS      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5A45524F">ZERO</a>                                  <span class="co">#  MOST RECENT ACTUATOR COMMANDS</span>
+042500,000166: 16,3272           61623                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#50434D44">PCMD</a>                                  <span class="co">#        (AVOID +0)</span>
+042501,000167: 16,3273           54054                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5456435049544348">TVCPITCH</a>                              
+042502,000168: 16,3274           44772                           <span class="op">CS      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5A45524F">ZERO</a>                                  
+042503,000169: 16,3275           61624                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#59434D44">YCMD</a>                                  
+042504,000170: 16,3276           54053                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#545643594157">TVCYAW</a>                                
+042505,000171: 
+042506,000172: 16,3277           35050                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5052494F36">PRIO6</a>                                 <span class="co">#  RELEASE THE COUNTERS (BITS 11,12)</span>
+042507,000173: 16,3300           00006                           <span class="op">EXTEND  </span>                                       
+042508,000174: 16,3301           05014                           <span class="op">WOR     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4348414E3134">CHAN14</a>                                
+042509,000175: 
+<a name="50485343484B32"></a>042510,000176: 16,3302           11635        <span class="sm">PHSCHK2 </span>           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5456435048415345">TVCPHASE</a>                              <span class="co">#  CHECK TVCPHASE AGAIN</span>
+042511,000177: 16,3303           13313                           <span class="op">TCF     </span> <a href="#4A554D5054564334">JUMPTVC4</a>                              
+042512,000178: 16,3304           13313                           <span class="op">TCF     </span> <a href="#4A554D5054564334">JUMPTVC4</a>                              
+042513,000179: 16,3305           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#  A CONTAINS THE DIMINISHED ABSOLUTE OF</span>
+042514,000180: 16,3306           03311                           <span class="op">TC      </span> +3                                    <span class="co">#  TVCPHASE (-2 BECOMES +1. -1 BECOMES +0)</span>
+042515,000181: 
+042516,000182: 16,3307           04655                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#504F53544A554D50">POSTJUMP</a>                              <span class="co">#        REPEAT TVC INITIALIZATION</span>
+042517,000183: 16,3310           36166                           <span class="ps">CADR    </span> <a href="TVCINITIALIZE.agc.html#4D52434C45414E">MRCLEAN</a>                               <span class="co">#        (DO NOT RETURN)</span>
+042518,000184: 
+042519,000185: 16,3311           04714                 +3        <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#49424E4B43414C4C">IBNKCALL</a>                              <span class="co">#        REPEAT CSM/LM V46 SWITCH-OVER</span>
+042520,000186: 16,3312           36351                           <span class="ps">CADR    </span> <a href="TVCINITIALIZE.agc.html#53574943484F5652">SWICHOVR</a>   +5                         <span class="co">#        (RETURN TO CHECK FOR STROKE TEST)</span>
+042521,000187: 
+<a name="4A554D5054564334"></a>042522,000188: 16,3313           04655        <span class="sm">JUMPTVC4</span>           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#504F53544A554D50">POSTJUMP</a>                              <span class="co">#        IF POSITIVE OR ZERO, RESTART AT</span>
+042523,000189: 16,3314           36326                           <span class="ps">CADR    </span> <a href="TVCINITIALIZE.agc.html#545643494E495434">TVCINIT4</a>                              <span class="co">#                TVCINIT4 (ZEROS TVCPHASE, AND</span>
+042524,000190:                                                                                                  <span class="co">#                CALLS TVC DAPS VIA DAPINIT)</span>
+<a name="46494E434F5059"></a>042525,000191: 16,3315           51635        <span class="sm">FINCOPY </span>           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5456435048415345">TVCPHASE</a>                              <span class="co">#  PICK UP THE APPROPRIATE COPYCYCLE</span>
+042526,000192: 16,3316           33331                           <span class="op">CAF     </span> <a href="#54564343414452">TVCCADR</a>                               
+042527,000193: 16,3317           04720                           <span class="op">TCR     </span> <a href="INTER-BANK_COMMUNICATION.agc.html#49535743414C4C">ISWCALL</a>                               <span class="co">#  RE-ENTER THE COPYCYCLE, RETURN AT END</span>
+042528,000194: 16,3320           13244                           <span class="op">TCF     </span> <a href="#454E41424C31">ENABL1</a>                                <span class="co">#  NOW PREPARE THE OUTCOUNTERS</span>
+042529,000195: 
+042530,000196: 
+<a name="5452494D2F434D44"></a>042531,000197: 16,3321           00006        <span class="sm">TRIM/CMD</span>           <span class="op">EXTEND  </span>                                       <span class="co">#  TVCDAPON INITIALIZATION NOT COMPLETED,</span>
+042532,000198: 16,3322           31424                           <span class="op">DCA     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#504143544F4646">PACTOFF</a>                               <span class="co">#        EG.  P,YCMD MAY NOT BE SET.  SET...</span>
+042533,000199: 16,3323           53624                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#50434D44">PCMD</a>                                  
+042534,000200: 16,3324           13244                           <span class="op">TCF     </span> <a href="#454E41424C31">ENABL1</a>                                <span class="co">#  NOW PREPARE THE OUTCOUNTERS</span>
+042535,000201: 
+042536,000202: 
+<a name="45585253545254"></a>042537,000203: 16,3325           51644        <span class="sm">EXRSTRT </span>           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5456434558504853">TVCEXPHS</a>                              <span class="co">#  TVCEXECUTIVE RESTARTS....GO TO</span>
+042538,000204: 16,3326           33335                           <span class="op">CAF     </span> <a href="#5456434558414452">TVCEXADR</a>                              <span class="co">#        APPROPRIATE RESTART POINT</span>
+042539,000205: 16,3327           50000                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
+042540,000206: 16,3330           10000                           <span class="op">TCF     </span> 0                                     
+042541,000207: 
 </pre>
 </span>
 </p>
@@ -363,19 +365,19 @@ Page 963
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-042446,000207: 
-042447,000208:                                                                                                  <span class="co">#  TVC RESTART TABLES.... ORDER IS REQUIRED.   HI-ORDER WORDS ONLY, OF 2CADRS, SINCE BBCON IS ALREADY THERE.</span>
-042448,000209: 
-<a name="54564341444452"></a>042449,000210: 16,3331  16,3331               <span class="sm">TVCADDR </span>           <span class="ps">=       </span> <a href="#54564343414452">TVCCADR</a>                               <span class="co">#  TABLE OF CADRS, UNUSED LOCS FOR GENADRS</span>
-<a name="54564343414452"></a>042450,000211: 16,3331           03255        <span class="sm">TVCCADR </span>           <span class="ps">GENADR  </span> <a href="#454E41424C32">ENABL2</a>                                <span class="co">#  (FOR T5 CALL, UNUSED TABLE LOC)</span>
-042451,000212: 16,3332           41005                 +1        <span class="ps">CADR    </span> <a href="TVCDAPS.agc.html#50434F5059">PCOPY</a>      +1                         <span class="co">#  PITCH COPYCYCLE</span>
-042452,000213: 16,3333           03266                 +2        <span class="ps">GENADR  </span> <a href="#434D44534F5554">CMDSOUT</a>                               <span class="co">#  (FOR T5 CALL, UNUSED TABLE LOC)</span>
-042453,000214: 16,3334           41171                 +3        <span class="ps">CADR    </span> <a href="TVCDAPS.agc.html#59434F5059">YCOPY</a>      +1                         <span class="co">#  YAW COPYCYCLE</span>
-<a name="5456434558414452"></a>042454,000215: 16,3335           37772        <span class="sm">TVCEXADR</span>           <span class="ps">OCT     </span> 37772                                 <span class="co">#  (UNUSED TABLE LOC, FILL WITH 60MS, T5)</span>
-042455,000216: 16,3336           03123                 +1        <span class="ps">GENADR  </span> <a href="TVCEXECUTIVE.agc.html#54454D50534554">TEMPSET</a>                               <span class="co">#  TVCEXECUTIVE RESTART POINTS (ORDERED)</span>
-042456,000217: 16,3337           03126                 +2        <span class="ps">GENADR  </span> <a href="TVCEXECUTIVE.agc.html#434F525345545550">CORSETUP</a>                              
-042457,000218: 16,3340           03204                 +3        <span class="ps">GENADR  </span> <a href="TVCEXECUTIVE.agc.html#434F52434F5059">CORCOPY</a>    +1                         
-042458,000219: 16,3341           03215                 +4        <span class="ps">GENADR  </span> <a href="TVCEXECUTIVE.agc.html#434E5452434F5059">CNTRCOPY</a>                              
+042543,000209: 
+042544,000210:                                                                                                  <span class="co">#  TVC RESTART TABLES.... ORDER IS REQUIRED.   HI-ORDER WORDS ONLY, OF 2CADRS, SINCE BBCON IS ALREADY THERE.</span>
+042545,000211: 
+<a name="54564341444452"></a>042546,000212: 16,3331  16,3331               <span class="sm">TVCADDR </span>           <span class="ps">=       </span> <a href="#54564343414452">TVCCADR</a>                               <span class="co">#  TABLE OF CADRS, UNUSED LOCS FOR GENADRS</span>
+<a name="54564343414452"></a>042547,000213: 16,3331           03255        <span class="sm">TVCCADR </span>           <span class="ps">GENADR  </span> <a href="#454E41424C32">ENABL2</a>                                <span class="co">#  (FOR T5 CALL, UNUSED TABLE LOC)</span>
+042548,000214: 16,3332           41005                 +1        <span class="ps">CADR    </span> <a href="TVCDAPS.agc.html#50434F5059">PCOPY</a>      +1                         <span class="co">#  PITCH COPYCYCLE</span>
+042549,000215: 16,3333           03266                 +2        <span class="ps">GENADR  </span> <a href="#434D44534F5554">CMDSOUT</a>                               <span class="co">#  (FOR T5 CALL, UNUSED TABLE LOC)</span>
+042550,000216: 16,3334           41171                 +3        <span class="ps">CADR    </span> <a href="TVCDAPS.agc.html#59434F5059">YCOPY</a>      +1                         <span class="co">#  YAW COPYCYCLE</span>
+<a name="5456434558414452"></a>042551,000217: 16,3335           37772        <span class="sm">TVCEXADR</span>           <span class="ps">OCT     </span> 37772                                 <span class="co">#  (UNUSED TABLE LOC, FILL WITH 60MS, T5)</span>
+042552,000218: 16,3336           03123                 +1        <span class="ps">GENADR  </span> <a href="TVCEXECUTIVE.agc.html#54454D50534554">TEMPSET</a>                               <span class="co">#  TVCEXECUTIVE RESTART POINTS (ORDERED)</span>
+042553,000219: 16,3337           03126                 +2        <span class="ps">GENADR  </span> <a href="TVCEXECUTIVE.agc.html#434F525345545550">CORSETUP</a>                              
+042554,000220: 16,3340           03204                 +3        <span class="ps">GENADR  </span> <a href="TVCEXECUTIVE.agc.html#434F52434F5059">CORCOPY</a>    +1                         
+042555,000221: 16,3341           03215                 +4        <span class="ps">GENADR  </span> <a href="TVCEXECUTIVE.agc.html#434E5452434F5059">CNTRCOPY</a>                              
 
 End of include-file TVCRESTARTS.agc.  Parent file is <a href="MAIN.agc.html">MAIN.agc</a>
 </pre>
