@@ -15,6 +15,8 @@
 ## Mod history: 2017-01-22 MAS  Created from Luminary 99.
 ##		2017-01-28 RSB	Comment-text fixes identified for Luminary 69.
 ##              2017-02-23 RRB  Updated for Luminary 116.
+##              2017-03-01 HG   Fix operator CAE  ->  CS
+##                                           CAF  ->  CAE
 
 ## Page 1400
 # THE DAPIDLER PROGRAM IS STARTED BY FRESH START AND RESTART.             THE DAPIDLER PROGRAM IS DONE 10 TIMES
@@ -245,12 +247,12 @@ ALTDSPLY        CA              RCSFLAGS                        # INVERT THE DIS
 ## Page 1405
                 TCF             NEEDLER                         
 
-                CAE             FLAGWRD0                        # CHECK FOR RATE DISPLAY TO ERROR NEEDLES
+                CS              FLAGWRD0                        # CHECK FOR RATE DISPLAY TO ERROR NEEDLES
                 MASK            NEED2BIT                        # VIA EXTENDED VERB 60
                 EXTEND                               
                 BZF             DISPRATE
 
-                CAF             FLAGWRD0                        # NEEDLFLG WILL INDICATE TOTAL OR DAP AT-
+                CAE             FLAGWRD0                        # NEEDLFLG WILL INDICATE TOTAL OR DAP AT-
                 MASK            NEEDLBIT                        # TITUDE ERROR DISPLAY REQUEST.
                 CCS             A
                 TCF             DSPLYTOT                        # TOTAL ERROR IS NEEDED IN AK,AK +1,AK +2
