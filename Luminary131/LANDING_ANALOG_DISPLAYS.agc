@@ -17,6 +17,7 @@
 ##				original harcopy, as opposed to the PDF page
 ##				numbers in 1701.pdf.
 ##		2017-02-26 RSB	Proofed comment text using octopus/ProoferComments.
+##		2017-03-01 RSB	Fixed lingering typos.
 
 ## Page 891
 		BANK	21
@@ -202,7 +203,7 @@ SPEEDRUN	CS	PIPTIME +1	# UPDATE THE VELOCITY VECTOR
 		AD	PIPATMPX	# IN CASE PIPAX HAS BEEN ZEROED
 		EXTEND
 		MP	KPIP1(5)	# DELV M/CS *2(-5)
-		ADS	VVECT		# VVECT = VN + DELV * GN(T-TN) M/CS *2(-5)
+		ADS	VVECT		# VVECT = VN + DELV + GN(T-TN) M/CS *2(-5)
 		EXTEND
 		DCA	GDT/2 +2	# COMPUTE THE Y-COMPONENT OF VELOCITY.
 		DDOUBL

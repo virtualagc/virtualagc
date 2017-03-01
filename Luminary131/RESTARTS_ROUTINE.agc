@@ -18,6 +18,7 @@
 ##				original hardcopy, as opposed to the PDF page
 ##				numbers in 1701.pdf.
 ##		2017-02-27 RSB	Proofed comment text using octopus/ProoferComments.
+##		2017-03-01 RSB	Fixed lingering comment-text typos.
 
 ## Page 1295
 		BANK	01
@@ -40,7 +41,7 @@ RESTARTS	CA	MPAC +5		# GET GROUP NUMBER -1
 		CA	TEMPPHS
 		MASK	OCT1400
 		CCS	A		# IS IT A VARIABLE OR TABLE RESTART
-		TCF	ITSAVAR		# IT'S A VARIABLE RESTART
+		TCF	ITSAVAR		# IT:S A VARIABLE RESTART
 
 GETPART2	CCS	TEMPPHS		# IS IT AN X.1 RESTART
 		CCS	A
@@ -162,7 +163,7 @@ ITSNOVAC	CAF	NOVACADR	# NEGATIVE,
 
 ITSATBL		TS	CYR		# FIND OUT IF THE PHASE IS ODD OR EVEN
 		CCS	CYR
-		TCF	+1		# IT'S EVEN
+		TCF	+1		# IT:S EVEN
 		TCF	ITSEVEN
 
 		CA	RTRNCADR	# IN CASE THIS IS THE SECOND PART OF A

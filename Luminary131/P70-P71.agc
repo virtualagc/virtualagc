@@ -16,6 +16,7 @@
 ##				original hardcopy, as opposed to the PDF page
 ##				numbers in 1701.pdf.
 ##		2017-02-26 RSB	Proofed comment text using octopus/ProoferComments.
+##		2017-03-01 RSB	Fixed lingering typos.
 
 ## Page 823
 		BANK	21
@@ -242,7 +243,7 @@ P70INIT		TC	INTPRET
 			COMMINIT
 INJTARG		DLOAD
 			ABTRDOT
-		STCALL	RDOTD		# INITIALIZE ROOTD.
+		STCALL	RDOTD		# INITIALIZE RDOTD.
 			YCOMP		# COMPUTE Y
 		ABS	DSU
 			YLIM		# /Y/-DYMAX

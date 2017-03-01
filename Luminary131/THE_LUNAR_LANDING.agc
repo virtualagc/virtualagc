@@ -17,6 +17,7 @@
 ##				original hardcopy, as opposed to the PDF page
 ##				numbers in 1701.pdf.
 ##		2017-02-25 RSB	Proofed comment text using octopus/ProoferComments.
+##		2017-03-01 RSB	Fixed lingering typos.
 
 ## Page 780
 		BANK	32

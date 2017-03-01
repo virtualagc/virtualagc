@@ -14,6 +14,7 @@
 ## Mod history:	05/28/03 RSB.	Began transcribing.
 ## 		05/14/05 RSB	Corrected website reference above.
 ##		2017-02-26 RSB	Proofed comment text using octopus/ProoferComments.
+##		2017-03-01 RSB	Fixed lingering typos.
 
 ## Page 902
 # PROGRAM NAME:  FINDCDUW
@@ -361,7 +362,7 @@ DELGMBLP	TS	TEM2
 ## Page 912
 # COMPLTE COMMANDED ATTITUDE RATES
 #
-#	* OMEGAPD *   * -2         -4 SINCDUZ              +0    * * -DELGMBZ *
+#	* OMEGAPD *   * -2         -4 SINCDUZ              +0    * * -DELGMBX *
 #	*         *   *                                          * *          *
 #	* OMEGAQD * = * +0     -8 COSCDUZ COSCDUX     -4 SINCDUX * * -DELGMBY *
 #	*         *   *                                          * *          *
@@ -485,7 +486,7 @@ UNWCTEST 	DOT	DSQ
 
 ## Page 915
 # NB2CDUSP RETURNS THE 2'S COMPLEMENT, PI, SP CDU ANGLES X,Y,Z IN MPAC,+1,+2 GIVEN THE MATRIX WHOSE ROW VECTORS
-# ARE THE SEMI-UNIT NAV BASE VECTORS X,Y,X EXPRESSED IN STABLE MEMBER COORDINATES, LOCATED AT 0 IN THE PUSH LIST.
+# ARE THE SEMI-UNIT NAV BASE VECTORS X,Y,Z EXPRESSED IN STABLE MEMBER COORDINATES, LOCATED AT 0 IN THE PUSH LIST.
 
 # NB2CDUSP USES ARCTRGSP WHICH HAS A MAXIMUM ERROR OF +-4 BITS.
 

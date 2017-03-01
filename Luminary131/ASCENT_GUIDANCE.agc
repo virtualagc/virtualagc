@@ -18,6 +18,7 @@
 ##				original hardcopy, as opposed to the PDF page
 ##				numbers in 1701.pdf.
 ##		2017-02-26 RSB	Proofed comment text using octopus/ProoferComments.
+##		2017-03-01 RSB	Fixed lingering typos.
 
 ## Page 836
 		BANK	34
@@ -476,7 +477,7 @@ ENGOFF		RTB
 			PIPTIME
 			TTOGO
 		DCOMP	EXIT
-		TC	TPAGREE		# FORCH SIGN AGREEMENT ON MPAC, MPAC +1.
+		TC	TPAGREE		# FORCE SIGN AGREEMENT ON MPAC, MPAC +1.
 		CAF	EBANK7
 		TS	EBANK
 ## Page 846

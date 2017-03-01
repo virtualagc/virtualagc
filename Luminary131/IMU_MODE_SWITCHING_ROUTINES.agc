@@ -22,6 +22,7 @@
 ##				numbers in 1701.pdf.
 ##		2017-01-28 RSB	Comment-text fixes identified for Luminary 69.
 ##		2017-02-27 RSB	Proofed comment text using octopus/ProoferComments.
+##		2017-03-01 RSB	Fixed lingering comment-text typos.
 
 ## Page 1301
 		BLOCK	02
@@ -397,7 +398,7 @@ PIPFREE		INHINT			# PROGRAM DONE WITH PIPAS.  DONT LIGHT
 		MASK	BIT1
 		ADS	IMODES30
 
-		MASK	BIT10		# IF PIP FAIL ON, DO PROG ALARM AND RESET
+		MASK	BIT10		# IF PIP FAIL ON, DO PROG ALSRM AND RESET
 		CCS	A		# ISS WARNING.
 		TCF	MODEEXIT
 

@@ -18,6 +18,7 @@
 ##				original hardcopy, as opposed to the PDF page
 ##				numbers in 1701.pdf.
 ##		2017-02-28 RSB	Proofed comment text using octopus/ProoferComments.
+##		2017-03-01 RSB	Fixed lingering comment-text typos.
 
 ## Page 1398
 		BANK	20
@@ -27,7 +28,7 @@
 		EBANK=	CDUXD
 		COUNT*	$$/DAPIF
 
-# MOD 0		DATE	11/16/66	BY GEORGE W. CHERRY
+# MOD 0		DATE	11/15/66	BY GEORGE W. CHERRY
 # MOD 1			 1/23/67	MODIFICATION BY PETER ADLER
 #
 # FUNCTIONAL DESCRIPTION

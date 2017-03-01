@@ -18,6 +18,7 @@
 ##				original hardcopy, as opposed to the PDF page
 ##				numbers in 1701.pdf.
 ##		2017-02-27 RSB	Proofed comment text using octopus/ProoferComments.
+##		2017-03-01 RSB	Fixed lingering comment-text typos.
 
 ## Page 1198
 # 1.0 INTRODUCTION
@@ -189,7 +190,7 @@
 # -------------------------------------
 #
 #	A) PRECISION ORBITAL INTEGRATION.  CSMPREC, LEMPREC ENTRANCES
-#		L-X	STORE TIME TO 96T5791T5 T 95 PUS L9ST (T4531)
+#		L-X	STORE TIME TO 95T5791T5 T 95 PUS L9ST (T4531)
 #		L	CALL
 #		L+1		CSMPREC (OR LEMPREC)
 #		L+2	RETURN
