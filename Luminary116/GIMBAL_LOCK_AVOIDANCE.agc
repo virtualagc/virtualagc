@@ -14,10 +14,7 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-01-22 MAS  Created from Luminary 99.
 ##              2017-02-28 f0n  Modified per scan 0365.jpg
-## NOTE: Page numbers below have not yet been updated to reflect Luminary 116.
-##
-## Assemble revision 116 of AGC program Luminary by NASA 2021112-071
-## 19:09 AUG. 11, 1969
+##              2017-03-01 MAS  Removed some outdated/extra comments.
 
 ## Page 365
                 BANK            15
