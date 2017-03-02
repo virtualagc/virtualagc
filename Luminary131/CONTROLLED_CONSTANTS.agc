@@ -16,6 +16,8 @@
 ##				numbers in 1701.pdf.
 ##		2017-02-12 RSB	Proofed comment text using octopus/ProoferComments.
 ##		2017-02-28 RSB	Lingering typos repaired.
+##		2017-03-02 RSB	Fixes some comment-text errors noted whilst proofing
+##				Luminary 116.
 
 ## Page 38
 # DPS AND APS ENGINE PARAMETERS
@@ -50,7 +52,7 @@ FRCS2		2DEC	0.08896 B-7		# 200 LBS FORCE IN NEWTONS
 
 K1VAL		2DEC	124.55 B-23		# 2800 LB-SEC
 K2VAL		2DEC	31.138 B-24		# 700 LB-SEC
-K3VAL		2DEC	1.5569 B-10		# FARS (3500 LBS THRUST)
+K3VAL		2DEC	1.5569 B-10		# FAPS (3500 LBS THRUST)
 
 # ************************************************************************
 
@@ -123,7 +125,7 @@ THRESH2		DEC	308
 		BANK
 		COUNT*	$$/THROT
 		
-FMAXODD		DEC	+3841			# FSAT +4.31454413 E+4
+FMAXODD		DEC	+3841			# FSAT +4.81454413 E+4
 FMAXPOS		DEC	+3467			# FMAX +4.34546769 E+4
 THROTLAG	DEC	+20			# TAU (TH) +1.99999999 E-1
 SCALEFAC	2DEC*	+7.97959872 E+2 B-16*	# BITPERF +7.97959872 E-2

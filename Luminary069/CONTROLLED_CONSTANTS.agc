@@ -19,6 +19,7 @@
 ##              2017-01-03 HG   Transcribed
 ##		2017-01-25 RSB	Proofed comment text using octopus/prooferComments
 ##				and fixed errors found.
+##		2017-03-02 RSB	$$/DAPAD --> $$/DAPAO.
 
 ## Page 53
 # DPS AND APS ENGINE PARAMETERS
@@ -225,7 +226,7 @@ MINCSM          =               BIT11                   # MIN CSM MASS (OK FOR 1
 
                 SETLOC          DAPS3
                 BANK
-                COUNT*          $$/DAPAD
+                COUNT*          $$/DAPAO
 
 LOASCENT        DEC             2200            B-16    # MIN ASCENT LEM MASS -- 2(16) KG.
 
