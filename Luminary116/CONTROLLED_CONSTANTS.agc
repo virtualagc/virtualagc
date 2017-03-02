@@ -127,7 +127,7 @@ THRESH2         DEC             308
 ## next two lines (including the octal to which they assemble) to actually appear as:
 ## <pre>
 ## 07401 0     <u>FMAXODD</u>     DEC     +3841     # FSAT     +4.8145|4413E +4
-##         								4.4482     10500
+##         						       4.4482     10500
 ## 0<u>6613 0</u>     <u>FMAXPOS</u>     DEC     +3467     # FMAX     +4.3454|6769E+ 4          
 ## </pre>
 FMAXODD         DEC             +3841                           # FSAT          +4.81454413E +4
