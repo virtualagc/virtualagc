@@ -17,6 +17,8 @@
 ##              2016-12-07 HG   Fix P00 -> POO 
 ##		2016-12-15 RSB	Proofed comment text with octopus/ProoferComments,
 ##				and corrected the errors found.
+##		2017-03-02 RSB	Fixed comment-text errors noticed while proofing
+##				Luminary 116.
 
 ## Page 63
 #         FLAGWORDS 0-11 ARE DOWNLINKED AND CAN BE SET AND CLEARED BY UP-FLAG AND DOWN-FLAG INSTRUCTIONS IN THE
@@ -1248,7 +1250,7 @@ FLGWRD12        =               STATE           +12D    #       (180-194)       
 
 # BIT 15 FLAG 12
 CDESFLAG        =               180D                    #       CONTINUOUS DESIG-       LGC CHECKS FOR LOCK-
-CDESBIT         =               BIT15                   #       NATE, LGC COMMANDS      ON WHEN ANTENNA
+CDESBIT         =               BIT15                   #       NATE. LGC COMMANDS      ON WHEN ANTENNA
                                                         #       RR REGARDLESS OF        BEING DESIGNATED
                                                         #       LOCK-ON
 
@@ -1408,7 +1410,7 @@ ACCSOKAY        =               BIT3                    #       VALUES FROM 1/AC
 #
 
 # BIT 2 FLAG 13
-AUTR2FLG        =               208D                    #       THESE FLAGS ARE USED TOGETHER TO INDICATE
+AUTR2FLG        =               208D                    #       THESE FLAGS ARE USED TOGETHER TO INDICAT
 AUTRATE2        =               BIT2                    #       ASTRONAUT-CHOSEN KALCMANU MANEUVER RATES
                                                         #       (0,0)=(BIT2,BIT1)= 0.2 DEG/SEC
                                                         #       (0,1)=  0.5 DEG/SEC

@@ -19,6 +19,7 @@
 ##				numbers in 1701.pdf.
 ##		2017-02-27 RSB	Proofed comment text using octopus/ProoferComments.
 ##		2017-03-01 RSB	Fixed lingering comment-text typos.
+##		2017-03-02 RSB	P00HFLAG --> POOHFLAG.
 
 ## Page 1198
 # 1.0 INTRODUCTION
@@ -287,7 +288,7 @@ STATINT1	TC	INTPRET
 			NODOFLAG
 			SETIFLGS
 		SET	GOTO
-			P00HFLAG
+			POOHFLAG
 			STATEUP
 600SECS		2DEC	60000
 
@@ -747,7 +748,7 @@ P00HCHK		DLOAD	ABS
 			DT/2MIN
 			A-PCHK
 		BOFF	BON		# NO BACKWARDS INTEGRATION
-			P00HFLAG	# WHEN IN P00
+			POOHFLAG	# WHEN IN P00
 			TIMESTEP
 			PRECIFLG
 			TIMESTEP

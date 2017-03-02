@@ -20,6 +20,7 @@
 ##		2017-02-22 RSB	Proofed comment text using octopus/ProoferComments.
 ##				Changed P00H to POOH.
 ##		2017-02-28 RSB	Fixed lingering typos.
+##		2017-03-02 RSB	P00HFLAG --> POOHFLAG.
 
 ## Page 213
 		BANK	10
@@ -838,7 +839,7 @@ DUMMYAD		EXIT
 		ADRES	3AXISFLG		# RESET 3-AXIS FLAG
 		
 		TC	DOWNFLAG
-		ADRES	P00HFLAG
+		ADRES	POOHFLAG
 		
 		CAF	LRBYBIT			# CLEAN UP THE R12 FLAGWORD.
 		TS	FLGWRD11
