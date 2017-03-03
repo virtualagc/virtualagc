@@ -13,18 +13,18 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-01-22 MAS  Created from Luminary 99.
+##              2017-03-01 f0n  Modified per scan 0089.jpg 
 
-## NOTE: Page numbers below have not yet been updated to reflect Luminary 116.
 
-## Page 105
-                SUBRO           LUMERASE        102             
-                SUBRO           LEMONAID        070             
-                SUBRO           LEMP20S         114             
-                SUBRO           LEMP30S         102             
-                SUBRO           KISSING         040             
-                SUBRO           FLY             109             
-                SUBRO           LEMP50S         103             
-                SUBRO           SKIPPER         070             
-                SUBRO           LMDAP           012             
+## Page 89
+                SUBRO           LUMERASE        128             
+                SUBRO           LEMONAID        099             
+                SUBRO           LEMP20S         140             
+                SUBRO           LEMP30S         105             
+                SUBRO           KISSING         053             
+                SUBRO           FLY             146             
+                SUBRO           LEMP50S         118             
+                SUBRO           SKIPPER         097             
+                SUBRO           LMDAP           023             
 
 
