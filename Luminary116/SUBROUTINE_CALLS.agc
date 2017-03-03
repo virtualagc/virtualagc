@@ -14,7 +14,7 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-01-22 MAS  Created from Luminary 99.
 ##              2017-03-01 f0n  Modified per scan 0089.jpg 
-## NOTE: Page numbers below have not yet been updated to reflect Luminary 116.
+
 
 ## Page 89
                 SUBRO           LUMERASE        128             
