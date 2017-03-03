@@ -12,22 +12,7 @@
 ## Mod history:	05/06/09 FB	Transcription Batch 4 Assignment.
 ##		2016-12-17 RSB	Proofed text comments with octopus/ProoferComments
 ##				and corrected the errors found.
-##
-## The contents of the "Luminary099" files, in general, are transcribed 
-## from scanned documents. 
-##
-##	Assemble revision 001 of AGC program Luminary099 by NASA
-##	2021112-061.  July 14, 1969.  
-##
-##	Prepared by
-##			Massachusetts Institute of Technology
-##			75 Cambridge Parkway
-##			Cambridge, Massachusetts
-##
-##	under NASA contract NAS 9-4065.
-##
-## Refer directly to the online document mentioned above for further
-## information.  Please report any errors to info@sandroid.org.
+##		2017-03-03 RSB	Snapshot of Luminary 99 Rev 1. 
 
 ## Page 898
 		BANK	21

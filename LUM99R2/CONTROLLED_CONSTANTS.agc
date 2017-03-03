@@ -14,21 +14,8 @@
 ##				and corrected the errors found.
 ##		2017-03-02 RSB	$$/DAPAD --> $$/DAPAO.
 ##		2017-03-03 RSB	Replaced the end of the file, beginning
-##				at SETLOC PLANTIN2, from Luminary 116.
-##
-## This source code has been transcribed or otherwise adapted from digitized
-## images of a hardcopy from the MIT Museum.  The digitization was performed
-## by Paul Fjeld, and arranged for by Deborah Douglas of the Museum.  Many
-## thanks to both.  The images (with suitable reduction in storage size and
-## consequent reduction in image quality as well) are available online at
-## www.ibiblio.org/apollo.  If for some reason you find that the images are
-## illegible, contact me at info@sandroid.org about getting access to the
-## (much) higher-quality images which Paul actually created.
-##
-## Notations on the hardcopy document read, in part:
-##
-##    Assemble revision 001 of AGC program LMY99 by NASA 2021112-061
-##    16:27 JULY 14, 1969
+##				at SETLOC PLANTIN2, from Luminary 116. In
+##				other respects, is a snapshot of Luminary 99 Rev 1.
 
 ## Page 38
 # DPS AND APS ENGINE PARAMETERS

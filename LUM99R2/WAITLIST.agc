@@ -18,21 +18,7 @@
 ##		2017-01-28 RSB	WTIH -> WITH.
 ##		2017-02-09 RSB	Comment-text fixes identified in proofing Artemis 72.
 ##		2017-02-27 RSB	Corrected WAITP00H and LONGP00H to similar POOH names.
-##
-## This source code has been transcribed or otherwise adapted from
-## digitized images of a hardcopy from the MIT Museum.  The digitization
-## was performed by Paul Fjeld, and arranged for by Deborah Douglas of
-## the Museum.  Many thanks to both.  The images (with suitable reduction
-## in storage size and consequent reduction in image quality as well) are
-## available online at www.ibiblio.org/apollo.  If for some reason you
-## find that the images are illegible, contact me at info@sandroid.org
-## about getting access to the (much) higher-quality images which Paul
-## actually created.
-##
-## Notations on the hardcopy document read, in part:
-##
-##	Assemble revision 001 of AGC program LMY99 by NASA 2021112-61
-##	16:27 JULY 14, 1969 
+##		2017-03-03 RSB	Snapshot of Luminary 99 Rev 1. 
 
 ## Page 1117
 # PROGRAM DESCRIPTION								DATE - 10 OCTOBER 1966
