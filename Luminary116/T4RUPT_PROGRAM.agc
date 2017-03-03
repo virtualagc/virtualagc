@@ -17,10 +17,10 @@
 ##				proofing corresponding Luminary 69 file.	
 ##		2017-01-28 RSB	WTIH -> WITH.
 ##		2017-02-08 RSB	Comment-text fixes identified while proofing Artemis 72.
+##		2017-03-03 RSB	Transcribed, and then proofed comment-text using
+##				diff vs Luminary 131.
 
-## NOTE: Page numbers below have not yet been updated to reflect Luminary 116.
-
-## Page 155
+## Page 156
                 BANK            12                              
                 SETLOC          T4RUP                           
                 BANK                                            
@@ -48,8 +48,8 @@ NORMT4          CAF             SEVEN
 
                 COUNT*          $$/T4RPT                        
 100MRUPT        =               OCT37766                        # (DEC 16374)
-                                                                # RELTAB IS A PACKED TABLE. RELAYWORD CODE IN UPPER 4 BITS, RELAY CODE
-                                                                # IN LOWER 5 BITS.
+# RELTAB IS A PACKED TABLE. RELAYWORD CODE IN UPPER 4 BITS, RELAY CODE
+# IN LOWER 5 BITS.
 
 RELTAB          OCT             04025                           
                 OCT             10003                           
@@ -64,8 +64,8 @@ RELTAB          OCT             04025
                 OCT             54000                           
 RELTAB11        OCT             60000                           
 
-## Page 156
-                                                                # SWITCHED-BANK PORTION.
+## Page 157
+# SWITCHED-BANK PORTION.
 
                 BANK            12                              
                 SETLOC          T4RUP                           
@@ -84,8 +84,8 @@ CDRVE           CCS             DSPTAB          +11D
                 WRITE           OUT0                            
                 TC              HANG20                          
 
-## Page 157		
-                                                                # DSPOUT PROGRAM. PUTS OUT DISPLAYS.
+## Page 158		
+# DSPOUT PROGRAM. PUTS OUT DISPLAYS.
 
 DSPOUTSB        TS              NOUT                            
                 CS              ZERO                            
@@ -98,13 +98,13 @@ DSPSCAN         INDEX           DSPCNT
                 CCS             DSPCNT                          # IF DSPTAB ENTRY +, SKIP
                 TCF             DSPSCAN         -2              # IF DSPCNT +, TRY AGAIN
                 TCF             DSPLAY                          # IF DSPTAB ENTRY -, DISPLAY
-TABLNTH         OCT             12                              # DEC 10  LENGTH OF DSPTAB
-                CCS             DSRUPTEM                        # IF DSRUPTEM=+0, 2ND PASS THRU DSPTAB
-120MRUPT        DEC             16372                           # (DSPCNT = 0).  +0 INTO NOUT.
+TABLNTH         OCT             12                              # DEC 10   LENGTH OF DSPTAB
+                CCS             DSRUPTEM                        # IF DSRUPTEM=+0,2ND PASS THRU DSPTAB
+120MRUPT        DEC             16372                           # (DSPCNT = 0). +0 INTO NOUT.
                 TS              NOUT                            
                 TC              Q                               
                 TS              DSRUPTEM                        # IF DSRUPTEM=-0, 1ST PASS THRU DSPTAB
-                CAF             TABLNTH                         # (DSPCNT=0).+0 INTO DSRUPTEM. PASS AGAIN
+                CAF             TABLNTH                         # (DSPCNT=0). +0 INTO DSRUPTEM. PASS AGAIN
                 TCF             DSPSCAN         -1              
 
 DSPLAY          AD              ONE                             
@@ -135,14 +135,16 @@ HANG20          CS              14,11,9
 
 SETTIME4        TS              TIME4                           
 
-## Page 158
-                                                                # THE STATUS OF THE PROCEED PUSHBUTTON IS MONITORED EVERY 120 MILLISECONDS VIA THE CHANNEL 32 BIT 14 INBIT.
-                                                                #  THE STATE OF THIS INBIT IS COMPARED WITH ITS STATE DURING THE PREVIOUS T4RUPT AND IS PROCESSED AS FOLLOWS.
-                                                                #       IF PREV ON AND NOW ON   - BYPASS
-                                                                #       IF PREV ON AND NOW OFF  - UPDATE IMODES33
-                                                                #       IF PREV OFF AND NOW ON  - UPDATE IMODES33 AND PROCESS VIA PINBALL
-                                                                #       IF PREV OFF AND NOW OFF - BYPASS
-                                                                # THE LOGIC EMPLOYED REQUIRES ONLY 9 MCT (APPROX. 108 MICROSECONDS) OF COMPUTER TIME WHEN NO CHANGES OCCUR.
+## Page 159
+# THE STATUS OF THE PROCEED PUSHBUTTON IS MONITORED EVERY 120 MILLISECONDS VIA THE CHANNEL 32 BIT 14 INBIT.
+# THE STATE OF THIS INBIT IS COMPARED WITH ITS STATE DURING THE PREVIOUS T4RUPT AND IS PROCESSED AS FOLLOWS.
+
+#       IF PREV ON AND NOW ON   - BYPASS
+#       IF PREV ON AND NOW OFF  - UPDATE IMODES33
+#       IF PREV OFF AND NOW ON  - UPDATE IMODES33 AND PROCESS VIA PINBALL
+#       IF PREV OFF AND NOW OFF - BYPASS
+
+# THE LOGIC EMPLOYED REQUIRES ONLY 9 MCT (APPROX. 108 MICROSECONDS) OF COMPUTER TIME WHEN NO CHANGES OCCUR.
 
 PROCEEDE        CA              IMODES33                        # MONITIOR FOR PROCEED BUTTON
                 EXTEND                                          
@@ -164,8 +166,8 @@ PROCEEDE        CA              IMODES33                        # MONITIOR FOR P
                 EBANK=          DSPCOUNT                        
                 2CADR           PROCKEY                         
 
-## Page 159
-                                                                # JUMP TO APPROPRIATE ONCE-PER SECOND (.96 SEC ACTUALLY) ACTIVITY
+## Page 160
+# JUMP TO APPROPRIATE ONCE-PER SECOND (.96 SEC ACTUALLY) ACTIVITY
 
 T4JUMP          INDEX           RUPTREG1                        
                 TCF             +1                              
@@ -181,13 +183,13 @@ T4JUMP          INDEX           RUPTREG1
 
 20MRUPT         =               OCT37776                        # (DEC 16382)
 
-## Page 160
-                                                                # ADDITIONAL ROUTINES FOR 20MS. KEYBOARD ACTIVITY
+## Page 161
+# ADDITIONAL ROUTINES FOR 20MS. KEYBOARD ACTIVITY
 
 NODSPOUT        EXTEND                                          
                 WRITE           OUT0                            
 
-                CAF             120MRUPT                        #SET FOR NEXT CDRIVE
+                CAF             120MRUPT                        # SET FOR NEXT CDRIVE
                 TCF             SETTIME4                        
 
 QUIKDSP         CAF             BIT14                           
@@ -231,7 +233,7 @@ QUIKOFF         EXTEND
 
 14,11,9         OCT             22400                           
 
-## Page 161
+## Page 162
 # PROGRAM NAME:  IMUMON
 
 # FUNCTIONAL DESCRIPTION:  THIS PROGRAM IS ENTERED EVERY 480 MS.  IT DETECTS CHANGES OF THE IMU STATUS BITS IN
@@ -246,7 +248,7 @@ QUIKOFF         EXTEND
 #       IMU CAGE                 11     IMUCAGE
 #       IMU OPERATE               9     IMUOP
 
-# THE LAST SAMPLED STATE OF THESE BITS IS LEFT IN IMODES30.  ALSO, EACH SUBROUTINE CALLED FINDS THE NEW
+#          THE LAST SAMPLED STATE OF THESE BITS IS LEFT IN IMODES30.  ALSO, EACH SUBROUTINE CALLED FINDS THE NEW
 # VALUE OF THE BIT IN A, WITH Q SET TO THE PROPER RETURN LOCATION, NXTIFAIL.
 
 # CALLING SEQUENCE:  T4RUPT EVERY 480 MILLISECONDS.
@@ -256,8 +258,8 @@ QUIKOFF         EXTEND
 # SUBROUTINES CALLED:  TLIM, ITURNON, SETISSW, IMUCAGE, IMUOP.
 
 # ERASABLE INITIALIZATION:
-#       FRESH START OR RESTART WITH NO GROUPS ACTIVE:  C((MODES30) = OCT 37411.
-#       RESTART WITH ACTIVE GROUPS:     C(IMODES30) = (B(IMODES30)AND(OCT 00035)) PLUS OCT 37400.
+#          FRESH START OR RESTART WITH NO GROUPS ACTIVE: C(IMODES30) = OCT 37411.
+#          RESTART WITH ACTIVE GROUPS:  C(IMODES30) = (B(IMODES30)AND(OCT 00035)) PLUS OCT 37400.
 #                                       THIS LEAVES IMU FAIL BITS INTACT.
 
 # ALARMS:  NONE.
@@ -282,7 +284,7 @@ IMUMON          CA              IMODES30                        # SEE IF THERE H
                 CS              ONE                             
                 XCH             RUPTREG1                        
                 EXTEND                                          
-## Page 162
+## Page 163
                 BZMF            TLIM                            # CHANGE IN IMU TEMP.
                 TCF             NXTIFBIT                        # BEGIN BIT SCAN.
 
@@ -302,31 +304,31 @@ NXTIFBIT        INCR            RUPTREG1                        # ADVANCE BIT PO
 NXTIFAIL        CCS             RUPTREG2                        # PROCESS ANY ADDITIONAL CHANGES.
                 TCF             NXTIFBIT        -1              
 
-## Page 163
+## Page 164
 # PROGRAM NAME:  TNONTEST.
 
 # FUNCTIONAL DESCRIPTION:  THIS PROGRAM HONORS REQUESTS FOR ISS INITIALIZATION.  ISS TURN-ON (CHANNEL 30 BIT 14)
 # AND ISS OPERATE (CHANNEL 30 BIT 9) REQUESTS ARE TREATED AS A PAIR AND PROCESSING TAKES PLACE .480 SECONDS
 # AFTER EITHER ONE APPEARS.  THIS INITIALIZATION TAKES ON ONE OF THE FOLLOWING THREE FORMS:
 
-#       1) ISS TURN-ON:  IN THIS SITUATION THE COMPUTER IS OPERATING WHEN THE ISS IS TURNED ON.  NOMINALLY,
-#       BOTH ISS TURN-ON AND ISS OPERATE APPEAR.  THE PLATFORM IS CAGED FOR 90 SECONDS AND THE ICDU'S ZEROED
-#       SO THAT AT THE END OF THE PROCESS THE GIMBAL LOCK MONITOR WILL FUNCTION PROPERLY.
+#          1)  ISS TURN-ON:  IN THIS SITUATION THE COMPUTER IS OPERATING WHEN THE ISS IS TURNED ON.  NOMINALLY,
+#          BOTH ISS TURN-ON AND ISS OPERATE APPEAR.  THE PLATFORM IS CAGED FOR 90 SECONDS AND THE ICDU'S ZEROED
+#          SO THAT AT THE END OF THE PROCESS THE GIMBAL LOCK MONITOR WILL FUNCTION PROPERLY.
 
-#       2) ICDU INITIALIZATION:  IN THIS CASE THE COMPUTER WAS PROBABLY TURNED ON WITH THE ISS IN OPERATE OR
-#       A FRESH START WAS DONE WITH THE ISS IN OPERATE.  IN THIS CASE ONLY ISS OPERATE IS ON.  THE ICDU'S ARE
-#       ZEROED SO THE GIMBAL LOCK MONITOR WILL FUNCTION.  AN EXCEPTION IS IF THE ISS IS IN GIMBAL LOCK AFTER
-#       A RESTART, THE ICDU'S WILL NOT BE ZEROED.
+#          2)  ICDU INITIALIZATION:  IN THIS CASE THE COMPUTER WAS PROBABLY TURNED ON WITH THE ISS IN OPERATE OR
+#          A FRESH START WAS DONE WITH THE ISS IN OPERATE.  IN THIS CASE ONLY ISS OPERATE IS ON.  THE ICDU'S ARE
+#          ZEROED SO THE GIMBAL LOCK MONITOR WILL FUNCTION.  AN EXCEPTION IS IF THE ISS IS IN GIMBAL LOCK AFTER
+#          A RESTART, THE ICDU'S WILL NOT BE ZEROED.
 
-#       3) RESTART WITH RESTARTABLE PROGRAM USING THE IMU:  IN THIS CASE, NO INITIALIZATION TAKES PLACE SINCE
-#       IT IS ASSUMED THAT THE USING PROGRAM DID THE INITIALIZATION AND THEREFORE T4RUPT SHOULD NOT INTERFERE.
+#          3)  RESTART WITH RESTARTABLE PROGRAM USING THE IMU:  IN THIS CASE, NO INITIALIZATION TAKES PLACE SINCE
+#          IT IS ASSUMED THAT THE USING PROGRAM DID THE INITIALIZATION AND THEREFORE T4RUPT SHOULD NOT INTERFERE.
 
-# IMODES30 BIT 7 IS SET = 1 BY THE FIRST BIT (CHANNEL 30 BIT 14 OR 9) WHICH ARRIVES.  FOLLOWING THIS, TNONTEST IS
+# IMODES30 BIT 7 IS SET = 1 BY THE FIRST BIT (CHANNEL 30 BIT 14 OR 9) WHICH ARRIVES.  FOLLOWING THIS. TNONTEST IS
 # ENTERED, FINDS BIT 7 = 1 BUT BIT 8 = 0, SO IT SETS BIT 8 = 1 AND EXITS.  THE NEXT TIME IT FINDS BIT 8 = 1 AND
 # PROCEEDS, SETTING BITS 8 AND 7 = 0.  AT PROCTNON, IF ISS TURN-ON REQUEST IS PRESENT, THE ISS IS CAGED (ZERO +
 # COARSE).  IF ISS OPERATE IS NOT PRESENT PROGRAM ALARM 00213 IS ISSUED.  AT THE END OF A 90 SECOND CAGE, BIT 2
 # OF IMODES30 IS TESTED.  IF IT IS = 1, ISS TURN-ON WAS NOT PRESENT FOR THE ENTIRE 90 SECONDS.  IN THAT CASE, IF
-# THE ISS TURN-ON REQUEST IS PRESENT THE 90 SECOND WAIT IS REPEATED.  OTHERWISE NO ACTION OCCURS UNLESS A PROGRAM
+# THE ISS TURN-ON REQUEST IS PRESENT THE 90 SECOND WAIT IS REPEATED, OTHERWISE NO ACTION OCCURS UNLESS A PROGRAM
 # WAS WAITING FOR THE INITIALIZATION IN WHICH CASE THE PROGRAM IS GIVEN AN IMUSTALL ERROR RETURN.  IF THE DELAY
 # WENT PROPERLY, THE ISS DELAY OUTBIT IS SENT AND THE ICDU'S ZEROED.  A TASK IS INITIATED TO REMOVE THE PIPA FAIL
 # INHIBIT BIT IN 10.24 SECONDS.  IF A MISSION PROGRAM WAS WAITING IT IS INFORMED VIA ENDIMU.
@@ -337,10 +339,10 @@ NXTIFAIL        CCS             RUPTREG2                        # PROCESS ANY AD
 # CALLING SEQUENCE:  T4RUPT EVERY 480 MILLISECONDS AFTER IMUMON.
 
 # JOBS OR TASKS INITIATED:  1) ENDTNON, 90 SECONDS AFTER CAGING STARTED.  2) ISSUP, 4 SECONDS AFTER CAGING DONE.
-#       3) PFAILOK, 10.24 SECONDS AFTER INITIALIZATION COMPLETED.  4) UNZ2, 320 MILLISECONDS AFTER ZEROING
-#       STARTED.
+#          3) PFAILOK, 10.24 SECONDS AFTER INITIALIZATION COMPLETED.  4) UNZ2, 320 MILLISECONDS AFTER ZEROING
+#          STARTED.
 
-# SUBROUTINES CALLED: CAGESUB, CAGESUB2, ZEROICDU, ENDIMU, IMUBAD, NOATTOFF, SETISSW, VARDELAY.
+# SUBROUTINES CALLED:  CAGESUB, CAGESUB2, ZEROICDU, ENDIMU, IMUBAD, NOATTOFF, SETISSW, VARDELAY.
 
 # ERASABLE INITIALIZATION:  SEE IMUMON.
 
@@ -353,7 +355,7 @@ NXTIFAIL        CCS             RUPTREG2                        # PROCESS ANY AD
 # OUTPUT:  ISS INITIALIZED.
 
 TNONTEST        CS              IMODES30                        # AFTER PROCESSING ALL CHANGES, SEE IF IT
-## Page 164
+## Page 165
                 MASK            BIT7                            # IS TIME TO ACT ON A TURN-ON SEQUENCE.
                 CCS             A                               
                 TCF             C33TEST                         # NO - EXAMINE CHANNEL 33.
@@ -367,7 +369,7 @@ TNONTEST        CS              IMODES30                        # AFTER PROCESSI
                 ADS             IMODES30                        # TIME.
                 TCF             C33TEST                         
 
-                                                                # PROCESS IMU TURN-ON REQUESTS AFTER WAITING 1 SAMPLE FOR ALL SIGNALS TO ARRIVE.
+# PROCESS IMU TURN-ON REQUESTS AFTER WAITING 1 SAMPLE FOR ALL SIGNALS TO ARRIVE.
 
 PROCTNON        CS              BITS7&8                         
                 MASK            IMODES30                        
@@ -403,7 +405,7 @@ ENDTNON         CS              BIT2                            # RESET TURN-ON 
                 BZF             ENDTNON2                        
 
                 CAF             BIT14                           # IF IT WAS ON AND TURN-ON REQUEST NOW
-## Page 165
+## Page 166
                 MASK            IMODES30                        # PRESENT, RE-ENTER 90 SEC DELAY IN WL.
                 EXTEND                                          
                 BZF             RETNON                          
@@ -440,7 +442,7 @@ ISSUP           CS              OCT54                           # REMOVE CAGING,
                 TS              IMODES33                        
 
                 CS              FLAGWRD2                        # TEST DRIFTFLG: IF ON, DO NOTHING BECAUSE
-                MASK            DRFTBIT                         # IMUCOMP SHOULD BE ALL SET UP (RESTART
+                MASK            DRFTBIT                         # IMUCOMP SHOULD BE ALL SET UP(RESTART
                 EXTEND                                          # WITH IMUSE DOWN).  IF OFF, SET DRIFTFLG
                 BZF             +4                              # AND 1/PIPADT TO GET FREEFALL IMUCOMP
                 ADS             FLAGWRD2                        # GOING (FRESH START OR ISS TURN-ON).
@@ -454,7 +456,7 @@ ISSUP           CS              OCT54                           # REMOVE CAGING,
                 WAND            CHAN12                          
 
                 CAF             4SECS                           # DONT ENABLE PROG ALARM ON PIP FAIL FOR
-## Page 166
+## Page 167
                 TC              WAITLIST                        # ANOTHER 4 SECS.
                 EBANK=          CDUIND                          
                 2CADR           PFAILOK                         
@@ -489,13 +491,14 @@ ISSZERO         TC              IBNKCALL                        # TURN OFF NO AT
 
                 TCF             C33TEST                         
 
-## Page 167
+## Page 168
 # PROGRAM NAME:  C33TEST
 
 # FUNCTIONAL DESCRIPTION:  THIS PROGRAM MONITORS THREE FLIP-FLOP INBITS OF CHANNEL 33 AND CALLS THE APPROPRIATE
 # SUBROUTINE TO PROCESS A CHANGE.  IT IS ANALOGOUS TO IMUMON, WHICH MONITORS CHANNEL 30, EXCEPT THAT IT READS
 # CHANNEL 33 WITH A WAND INSTRUCTION BECAUSE A 'WRITE' PULSE IS REQUIRED TO RESET THE FLIP-FLOPS.  THE BITS
 # PROCESSED AND THE SUBROUTINES CALLED ARE:
+
 #       BIT     FUNCTION                SUBROUTINE
 #       ---     --------                ----------
 #        13     PIPA FAIL               PIPFAIL
@@ -539,7 +542,7 @@ C33TEST         CA              IMODES33                        # SEE IF RELEVAN
                 CAF             ZERO                            
                 XCH             RUPTREG1                        
                 DOUBLE                                          
-## Page 168
+## Page 169
                 TCF             NXTIBT          +1              # SCAN FOR BIT CHANGES.
 
  -1             AD              ONE                             
@@ -557,15 +560,15 @@ NXTIBT          INCR            RUPTREG1
 NXTFL33         CCS             RUPTREG2                        # PROCESS POSSIBLE ADDITIONAL CHANGES.
                 TCF             NXTIBT          -1              
 
-## Page 169
+## Page 170
 # PROGRAM NAME:  GLOCKMON
 
 # FUNCTIONAL DESCRIPTION:  THIS PROGRAM MONITORS THE CDUZ COUNTER TO DETERMINE WHETHER THE ISS IS IN GIMBAL LOCK
 # AND TAKES ACTION IF IT IS.  THREE REGIONS OF MIDDLE GIMBAL ANGLE (MGA) ARE USED:
 
-#       1) ABS(MGA) LESS THAN OR EQUAL TO 70 DEGREES - NORMAL MODE.
-#       2) ABS(MGA) GREATER THAN 70 DEGREES AND LESS THAN OR EQUAL TO 85 DEGREES - GIMBAL LOCK LAMP TURNED ON.
-#       3) ABS(MGA) GREATER THAN 85 DEGREES - ISS PUT IN COARSE ALIGN AND NO ATT LAMP TURNED ON.
+#          1) ABS(MGA) LESS THAN OR EQUAL TO 70 DEGREES - NORMAL MODE.
+#          2) ABS(MGA) GREATER THAN 70 DEGREES AND LESS THAN OR EQUAL TO 85 DEGREES - GIMBAL LOCK LAMP TURNED ON.
+#          3) ABS(MGA) GREATER THAN 85 DEGREES - ISS PUT IN COARSE ALIGN AND NO ATT LAMP TURNED ON.
 
 # CALLING SEQUENCE:  EVERY 480 MILLISECONDS AFTER C33TEST.
 
@@ -575,13 +578,13 @@ NXTFL33         CCS             RUPTREG2                        # PROCESS POSSIB
 #                       2) LAMPTEST BEFORE TURNING OFF GIMBAL LOCK LAMP.
 
 # ERASABLE INITIALIZATION:
-#               1) FRESH START OR RESTART WITH NO GROUPS ACTIVE:  C(CDUZ) = 0, IMODES30 BIT 6 = 0, IMODES33 BIT 1 =  0.
-#               2) RESTART WITH GROUPS ACTIVE:  SAME AS FRESH START EXCEPT C(CDUZ) NOT CHANGED SO GIMBAL MONITOR
-#                                               PROCEEDS AS BEFORE.
+#          1) FRESH START OR RESTART WITH NO GROUPS ACTIVE:  C(CDUZ) = 0, IMODES30 BIT 6 = 0, IMODES33 BIT 1 =  0.
+#          2) RESTART WITH GROUPS ACTIVE:  SAME AS FRESH START EXCEPT C(CDUZ) NOT CHANGED SO GIMBAL MONITOR
+#                                          PROCEEDS AS BEFORE.
 
-# ALARMS:       1) MGA REGION (2) CAUSES GIMBAL LOCK LAMP TO BE LIT.
-#               2) MGA REGION (3) CAUSES THE ISS TO BE PUT IN COARSE ALIGN AND THE NO ATT LAMP TO BE LIT IF EITHER NOT
-#                  SO ALREADY.
+# ALARMS:  1) MGA REGION (2) CAUSES GIMBAL LOCK LAMP TO BE LIT.
+#          2) MGA REGION (3) CAUSES THE ISS TO BE PUT IN COARSE ALIGN AND THE NO ATT LAMP TO BE LIT IF EITHER NOT
+#             SO ALREADY.
 
 GLOCKMON        CCS             CDUZ                            
                 TCF             GLOCKCHK                        # SEE IF MAGNITUDE OF MGA IS GREATER THAN
@@ -608,7 +611,7 @@ GLOCKCHK        AD              -70DEGS
 
                 CAF             SIX                             # ENABLE ISS ERROR COUNTERS IN 60 MS
                 TC              WAITLIST                        
-## Page 170
+## Page 171
                 EBANK=          CDUIND                          
                 2CADR           CA+ECE                          
 
@@ -645,7 +648,7 @@ GLAMPTST        TC              LAMPTEST                        # TURN OFF UNLES
 -70DEGS         DEC             -.38888                         # -70 DEGREES SCALED IN HALF-REVOLUTIONS.
 -15DEGS         DEC             -.08333                         
 
-## Page 171
+## Page 172
 # PROGRAM NAME:  TLIM.
 
 # FUNCTIONAL DESCRIPTION:  THIS PROGRAM MAINTAINS THE TEMP LAMP (BIT 4 OF CHANNEL 11) ON THE DSKY TO AGREE WITH
@@ -664,7 +667,7 @@ GLAMPTST        TC              LAMPTEST                        # TURN OFF UNLES
 
 # EXIT:  NXTIFAIL.
 
-# OUTPUT:  SERVICE OF TEMP LAMP.                  IN A, EXCEPT FOR TLIM.
+# OUTPUT:  SERVICE OF TEMP LAMP.                                 IN A, EXCEPT FOR TLIM.
 
 TLIM            MASK            POSMAX                          # REMOVE BIT FROM WORD OF CHANGES AND SET
                 TS              RUPTREG2                        # DSKY TEMP LAMP ACCORDINGLY.
@@ -686,7 +689,7 @@ TEMPOK          TC              LAMPTEST                        # IF TEMP NOW OK
                 WAND            DSALMOUT                        # TURN OFF LAMP
                 TCF             NXTIFAIL                        
 
-## Page 172
+## Page 173
 # PROGRAM NAME:  ITURNON.
 
 # FUNCTIONAL DESCRIPTION:  THIS PROGRAM IS CALLED BY IMUMON WHEN A CHANGE OF BIT 14 OF CHANNEL 30 (ISS TURN-ON
@@ -695,8 +698,7 @@ TEMPOK          TC              LAMPTEST                        # IF TEMP NOW OK
 # THAT TNONTEST WILL INITIATE THE ISS INITIALIZATION SEQUENCE.  IF OFF, THE TURN-ON DELAY SIGNAL, CHANNEL 12 BIT
 # 15, IS CHECKED AND IF IT IS ON, ITURNON EXITS.  IF THE DELAY SIGNAL IS OFF, PROGRAM ALARM 00207 IS ISSUED, BIT 2
 # OF IMODES30 IS SET TO 1 AND THE PROGRAM EXITS.
-
-# THE SETTING OF BIT 2 OF IMODES30 (ISS DELAY SEQUENCE FAIL) INHIBITS THIS ROUTINE AND IMUOP FROM
+#          THE SETTING OF BIT 2 OF IMODES30 (ISS DELAY SEQUENCE FAIL) INHIBITS THIS ROUTINE AND IMUOP FROM
 # PROCESSING ANY CHANGES.  THIS BIT WILL BE RESET BY THE ENDTNON ROUTINE WHEN THE CURRENT 90 SECOND DELAY PERIOD
 # ENDS.
 
@@ -739,7 +741,7 @@ ITURNON         CAF             BIT2                            # IF DELAY REQUE
                 OCT             207                             
                 TCF             NXTIFAIL                        
 
-## Page 173
+## Page 174
 ITURNON2        CS              IMODES30                        # SET BIT7 TO INDICATE WAIT OF 1 SAMPLE
                 MASK            BIT7                            
                 ADS             IMODES30                        
@@ -749,7 +751,7 @@ ITURNON2        CS              IMODES30                        # SET BIT7 TO IN
 
 RRINIT          OCT             00102                           
 
-## Page 174
+## Page 175
 # PROGRAM NAME:  IMUCAGE.
 
 # FUNCTIONAL DESCRIPTION:  THIS PROGRAM PROCESSES CHANGES OF THE IMUCAGE INBIT, CHANNEL 30 BIT 11.  IF THE BIT
@@ -774,7 +776,7 @@ RRINIT          OCT             00102
 
 IMUCAGE         CCS             A                               # NO ACTION IF GOING OFF.
                 TCF             ISSZERO                         
-                CS              OCT77000                        # TERMINATE ICDU, RCDU, GYRO PULSE TRAINS
+                CS              OCT77000                        # TERMINATE ICDU,RCDU, GYRO PULSE TRAINS
                 EXTEND                                          
                 WAND            CHAN14                          
 
@@ -800,7 +802,7 @@ IMUCAGE         CCS             A                               # NO ACTION IF G
                 CS              ZERO                            
                 TS              CDUXCMD                         
                 TS              CDUYCMD                         
-## Page 175
+## Page 176
                 TS              CDUZCMD                         
                 TS              GYROCMD                         
 
@@ -809,7 +811,7 @@ IMUCAGE         CCS             A                               # NO ACTION IF G
                 WAND            CHAN14                          # DE-SELECT THE GYROS
                 TCF             NXTIFAIL                        
 
-## Page 176
+## Page 177
 # PROGRAM NAME:  IMUOP.
 
 # FUNCTIONAL DESCRIPTION:  THIS PROGRAM PROCESSES CHANGES IN THE ISS OPERATE DISCRETE, BIT 9 OF CHANNEL 30.
@@ -861,11 +863,11 @@ IMUOP2          CAF             BIT2                            # SEE IF FAILED 
                 TCF             NXTIFAIL                        # IF SO, DONT PROCESS UNTIL PRESENT 90
                 TCF             ITURNON2                        # SECONDS EXPIRES.
 
-## Page 177
+## Page 178
 # PROGRAM NAME:  PIPFAIL
 
 # FUNCTIONAL DESCRIPTION:  THIS PROGRAM PROCESSES CHANGES OF BIT 13 OF CHANNEL 33, PIPA FAIL.  IT SETS BIT 10 OF
-# IMODES30 TO AGREE.  IT CALLS SETISSW IN CASE A PIPA FAIL NECESSITATES AN ISS WARNING.  IF NOT, I.E., IMODES30
+# IMODES30 TO AGREE.  IT CALLS SETISSW IN CASE A PIPA FAIL NECESSITATES AN ISS WARNING.  IF NOT,I.E., IMODES30
 # BIT 1 = 1, AND A PIPA FAIL IS PRESENT AND THE ISS IS NOT BEING INITIALIZED, PROGRAM ALARM 00212 IS ISSUED.
 
 # CALLING SEQUENCE:  BY C33TEST ON CHANGES OF CHANNEL 33 BIT 13.
@@ -905,7 +907,7 @@ PIPFAIL         CCS             A                               # SET BIT10 IN I
                 OCT             212                             
                 TCF             NXTFL33                         
 
-## Page 178
+## Page 179
 # PROGRAM NAMES:  DNTMFAST, UPTMFAST
 
 # FUNCTIONAL DESCRIPTION:  THESE PROGRAMS PROCESS CHANGES OF BITS 12 AND 11 OF CHANNEL 33.  IF A BIT CHANGES TO A
@@ -941,7 +943,7 @@ UPTMFAST        CCS             A                               # SAME AS DNLINK
                 TC              ALARM                           
                 OCT             1106                            
                 TCF             NXTFL33                         
-## Page 179
+## Page 180
 # PROGRAM NAME:  SETISSW
 
 # FUNCTIONAL DESCRIPTION:  THIS PROGRAM TURNS THE ISS WARNING LAMP ON AND OFF (CHANNEL 11 BIT 1 = 1 FOR ON,
@@ -960,19 +962,19 @@ UPTMFAST        CCS             A                               # SAME AS DNLINK
 
 # ERASABLE INITIALIZATION:
 
-#       1) IMODES30 - SEE IMUMON.
-#       2) IMODES33 BIT 1 = 0 (LAMP TEST NOT IN PROGRESS).
+#          1) IMODES30 - SEE IMUMON.
+#          2) IMODES33 BIT 1 = 0 (LAMP TEST NOT IN PROGRESS).
 
 # ALARMS:  ISS WARNING.
 
 # THE FOLLOWING PROGRAM ALARMS WILL SHOW WHICH FAILURE CAUSED THE ISS WARN
 #       PROGRAM ALARM 00777     PIPA FAIL
 #       PROGRAM ALARM 03777     ICDU FAIL
-#       PROGRAM ALARM 04777     ICDU, PIPA FAILS
+#       PROGRAM ALARM 04777     ICDU , PIPA FAILS
 #       PROGRAM ALARM 07777     IMU FAIL
-#       PROGRAM ALARM 10777     IMU, PIPA FAILS
-#       PROGRAM ALARM 13777     IMU, ICDU FAILS
-#       PROGRAM ALARM 14777     IMU, ICDU, PIPA FAILS
+#       PROGRAM ALARM 10777     IMU , PIPA FAILS
+#       PROGRAM ALARM 13777     IMU , ICDU FAILS
+#       PROGRAM ALARM 14777     IMU , ICDU , PIPA FAILS
 
 # EXIT: VIA Q.
 
@@ -992,7 +994,7 @@ SETISSW         CAF             OCT15                           # SET ISS WARNIN
 
 ISSWOFF         CAF             BIT1                            # DONT TURN OFF ISS WARNING IF LAMP TEST
                 MASK            IMODES33                        # IN PROGRESS.
-## Page 180
+## Page 181
                 CCS             A                               
                 TC              Q                               
 
@@ -1010,7 +1012,7 @@ ISSWON          EXTEND
                 TC              ITEMP6                          
 
 CAGESUB         CS              BITS6&15                        # SET OUTBITS AND INTERNAL FLAGS FOR
-                EXTEND                                          # SYSTEM TURN-ON OR CAGE.  DISABLE THE
+                EXTEND                                          # SYSTEM TURN-ON OR CAGE. DISABLE THE
                 WAND            CHAN12                          # ERROR COUNTER AND REMOVE IMU DELAY COMP.
                 CAF             BITS4&5                         # SEND ZERO AND COARSE.
                 EXTEND                                          
@@ -1021,7 +1023,7 @@ CAGESUB1        CS              DSPTAB          +11D            # TURN ON NO ATT
                 ADS             DSPTAB          +11D            
 
 CAGESUB2        CS              IMODES30                        # SET FLAGS TO INDICATE CAGING OR TURN-ON
-                MASK            OCT75                           # AND INHIBIT ALL ISS WARNING INFO
+                MASK            OCT75                           #     AND INHIBIT ALL ISS WARNING INFO
                 ADS             IMODES30                        
 
                 CS              IMODES33                        # DISABLE DAP AUTO AND HOLD MODES
@@ -1033,7 +1035,7 @@ CAGESUB2        CS              IMODES30                        # SET FLAGS TO I
 IMUFAIL         EQUALS          SETISSW                         
 ICDUFAIL        EQUALS          SETISSW                         
 
-## Page 181
+## Page 182
 # JUMP TABLES AND CONSTANTS.
 
 IFAILJMP        TCF             ITURNON                         # CHANNEL 30 DISPATCH.
@@ -1071,21 +1073,21 @@ BITS6&15        OCT             40040
 120MS           =               OCT14                           # (DEC12)
 GLOCKOK         EQUALS          RESUME                          
 
-## Page 182
+## Page 183
 # PROGRAM NAME_  RRAUTCHK
 
 # FUNCTIONAL DESCRIPTION_
-# RRAUTCHK IS THE RENDEZVOUS RADAR INBIT MONITOR.  INITIALLY THE RR
+# RRAUTCHK IS THE RENDEZVOUS RADAR INBIT MONITOR. INITIALLY THE RR
 # POWER ON AUTO (CHAN 33 BIT 2) INBIT IS CHECKED.  IF NO CHANGE, THE
-# PROGRAM EXITS TO RRCDUCHK.  IF A CHANGE, RADMODES IS UPDATED
-# AND A CHECK MADE IF RR POWER HAS JUST COME ON.  IF JUST OFF, A CHECK
-# IS MADE TO SEE IF A PROGRAM WAS USING THE RR (STATE BIT 7).  IF NO,
-# THE PROGRAM EXITS TO RRCDUCHK.  IF YES, PROGRAM ALARM 00514
-# IS REQUESTED BEFORE EXITING TO RRCDUCHK.  IF RR POWER HAS JUST COME
+# PROGRAM EXITS TO RRCDUCHK. IF A CHANGE, RADMODES IS UPDATED
+# AND A CHECK MADE IF RR POWER HAS JUST COME ON. IF JUST OFF, A CHECK
+# IS MADE TO SEE IF A PROGRAM WAS USING THE RR (STATE BIT 7). IF NO,
+# THE PROGRAM EXITS TO RRCDUCHK. IF YES, PROGRAM ALARM 00514
+# IS REQUESTED BEFORE EXITING TO RRCDUCHK. IF RR POWER HAS JUST COME
 # ON, A CHECK IS MADE TO SEE IF A PROGRAM WAS USING THE RR (STATE BIT 7).
 # IF YES, THE PROGRAM EXITS TO RRCDUCHK WITHOUT REQUESTING THE TURN-ON
-# SEQUENCE.  IF NO, RADMODES IS UPDATED TO INDICATE RR CDU ZERO AND
-# RR TURN-ON SEQUENCE (BITS 13, 1).  A 10 MILLISECOND WAITLIST CALL
+# SEQUENCE. IF NO, RADMODES IS UPDATED TO INDICATE RR CDU ZERO AND
+# RR TURN-ON SEQUENCE (BITS 13, 1). A 10 MILLISECOND WAITLIST CALL
 # IS THEN SET FOR RRTURNON BEFORE THE PROGRAM EXITS TO NORRGMON.
 
 # CALLING SEQUENCE_
@@ -1116,14 +1118,14 @@ RRAUTCHK        CA              RADMODES                        # SEE IF CHANGE 
                 EXTEND                                          
                 RXOR            LCHAN                           
                 MASK            OCT05776                        # CLR CONT. DES., REMODE, REPOS, CDUZERO,
-                TS              RADMODES                        # AND TURNON BITS.
+                TS              RADMODES                        #   AND TURNON BITS.
                 MASK            BIT2                            # SEE IF JUST ON.
                 CCS             A                               
                 TCF             RRCDUCHK        -3              # OFF.  GO DISABLE RR CDU ERROR COUNTERS.
                 CA              OCT10001                        # SET RRCDUZRO AND TURNON BITS.
                 ADS             RADMODES                        
 
-## Page 183		
+## Page 184		
                 CAF             ONE                             
                 TC              WAITLIST                        
                 EBANK=          LOSCOUNT                        
@@ -1133,18 +1135,18 @@ RRAUTCHK        CA              RADMODES                        # SEE IF CHANGE 
 
 OCT05776        OCT             5776                            
 
-## Page 184
+## Page 185
 # PROGRAM NAME_ RRCDUCHK
 
 # FUNCTIONAL DESCRIPTION_
-# RRCDUCHK CHECKS FOR RR CDU FAIL (CHAN 30 BIT 7).  INITIALLY THE
-# RR CDU FAIL BIT IS SAMPLED (CHAN 30 BIT 7).  IF NO CHANGE, THE
-# PROGRAM EXITS TO RRGIMON.  IF A CHANGE, THE RR AUTO MODE
-# (RADMODES BIT 2) BIT IS CHECKED.  IF NOT IN RR AUTO MODE, THE
-# PROGRAM EXITS TO NORRGMON.  IF IN AUTO MODE, RADMODES BIT 7
+# RRCDUCHK CHECKS FOR RR CDU FAIL (CHAN 30 BIT 7). INITIALLY THE
+# RR CDU FAIL BIT IS SAMPLED (CHAN 30 BIT 7). IF NO CHANGE, THE
+# PROGRAM EXITS TO RRGIMON. IF A CHANGE, THE RR AUTO MODE
+# (RADMODES BIT 2) BIT IS CHECKED. IF NOT IN RR AUTO MODE, THE
+# PROGRAM EXITS TO NORRGMON. IF IN AUTO MODE, RADMODES BIT 7
 # (RR CDU OK) IS UPDATED AND IF P-20 IS OPERATING PROGRAM ALARM 00515 IS
-# REQUESTED.  CONTROL IS TRANSFERRED TO SETTRKF TO UPDATE
-# THE TRACKER FAIL LAMP (DSPTAB+11D BIT 8).  CONTROL RETURNS TO
+# REQUESTED. CONTROL IS TRANSFERRED TO SETTRKF TO UPDATE
+# THE TRACKER FAIL LAMP (DSPTAB+11D BIT 8). CONTROL RETURNS TO
 # RRGIMON.
 
 # CALLING SEQUENCE_
@@ -1179,19 +1181,19 @@ RRCDUCHK        CA              RADMODES                        # LAST SAMPLED B
                 BZF             RRGIMON                         
 
                 CAF             AUTOMBIT                        # IF RR NOT IN AUTO MODE, DON'T CHANGE BIT
-                MASK            RADMODES                        # 7 OF RADMODES.  IF THIS WERE NOT DONE,
+                MASK            RADMODES                        # 7 OF RADMODES. IF THIS WERE NOT DONE,
                 CCS             A                               # THE TRACKER FAIL MIGHT COME ON WHEN
                 TCF             NORRGMON                        # JUST READING LR DATA.
 
                 CAF             RCDUFBIT                        # SET BIT 7 OF RADMODES FOR SETTRKF.
-## Page 185
+## Page 186
                 LXCH            RADMODES                        # UPDATE RADMODES.
                 EXTEND                                          
                 RXOR            L                               
                 TS              RADMODES                        
 
                 CA              RADMODES                        # DID RR CDU FAIL
-                MASK            RCDUFBIT                        
+                MASK            13,7,2				# CDU ZERO+ CDUFAIL+ RR AUTO                       
                 CCS             A                               
                 TCF             TRKFLCDU                        # NO
                 CS              FLAGWRD0                        # RNDVFLG P20 OR P22 OPERATING
@@ -1202,17 +1204,17 @@ RRCDUCHK        CA              RADMODES                        # LAST SAMPLED B
                 OCT             00515                           
 TRKFLCDU        TC              SETTRKF                         # UPDATE TRACKER FAIL LAMP ON DSKY.
 
-## Page 186
+## Page 187
 # PROGRAM NAME_  RRGIMON                                                E AUTO MODE EXCEPT WHEN THE RR CDUS ARE
 
 # FUNCTIONAL DESCRIPTION_                                               TTER IS INITIATED BY THIS MONITOR WHEN
-# RRGIMON IS THE RR GIMBAL LIMIT MONITOR.  INITIALLY THE FOLLOWING IS   ED TO DRIVE THE GIMBALS TO T = 0 AND
-# CHECKED_  REMODE, RR CDU:S BEING ZEROED, REPOSITION, AND RR
+# RRGIMON IS THE RR GIMBAL LIMIT MONITOR. INITIALLY THE FOLLOWING IS    ED TO DRIVE THE GIMBALS TO T = 0 AND
+# CHECKED_ REMODE, RR CDU:S BEING ZEROED, REPOSITION, AND RR
 # NOT IN AUTO MODE (RADMODES BITS 14, 13, 11 2). IF ANY OF THESE
-# EXIST THE PROGRAM EXITS TO GPMATRIX.  IF NONE ARE PRESENT RRLIMCHK
+# EXIST THE PROGRAM EXITS TO GPMATRIX. IF NONE ARE PRESENT RRLIMCHK
 # IS CALLED TO SEE IF THE PRESENT RR CDU ANGLES (OPTY, OPTX) ARE WITHIN
-# THE LIMITS OF THE CURRENT MODE.  IF WITHIN LIMITS, THE PROGRAM EXITS
-# TO NORRGMON.  IF NOT WITHIN LIMITS, THE REPOSITION FLAG (RADMODES
+# THE LIMITS OF THE CURRENT MODE. IF WITHIN LIMITS, THE PROGRAM EXITS
+# TO NORRGMON. IF NOT WITHIN LIMITS, THE REPOSITION FLAG (RADMODES
 # BIT 11) IS SET, THE RR AUTO TRACKER AND RR ERROR COUNTER
 # (CHAN 12 BITS 14, 2) ARE DISABLED, AND A 20 MILLISECOND WAITLIST
 # CALL IS SET FOR DORREPOS AFTER WHICH THE PROGRAM EXITS TO NORRGMON.
@@ -1244,16 +1246,16 @@ RRGIMON         CAE             FLAGWRD5                        # IS NO ANGLE MO
                 CS              FLAGWRD7                        # IS SERVICER RUNNING?
                 MASK            AVEGFBIT                        
                 CCS             A                               
-                TCF             +5                              # NO. DO R25
-                CA              FLAGWRD6                        # YES. IS MUNFLAG SET?
+                TCF             +5                              # NO.  DO R25
+                CA              FLAGWRD6                        # YES.  IS MUNFLAG SET?
                 MASK            MUNFLBIT                        
                 CCS             A                               
-                TCF             NORRGMON                        # YES. DON'T DO R25
- +5             CAF             OCT32002                        # INHIBIT BY REMODE, ZEROING, MONITOR.
+                TCF             NORRGMON                        # YES.  DON'T DO R25
+ +5             CAF             OCT32002                        # INHIBIT BY REMODE,ZEROING,MONITOR.
                 MASK            RADMODES                        # OR RR NOT IN AUTO.
                 CCS             A                               
                 TCF             NORRGMON                        
-## Page 187
+## Page 188
                 TC              RRLIMCHK                        # SEE IF ANGLES IN LIMITS.
                 ADRES           CDUT                            
 
@@ -1273,14 +1275,22 @@ MONREPOS        CAF             REPOSBIT                        # SET FLAG TO SH
                 EBANK=          LOSCOUNT                        
                 2CADR           DORREPOS                        
 
-                TCF             NORRGMON                        
+NORRGMON	CA		RADMODES			# IF SELECT SWITCH IS NOT IN LGC, SEND RR
+		MASK		AUTOMBIT			#  CDU ZERO BIT TO PREVENT MEMORY CYCLE
+		CCS		A				#  SNATCHING BY MANIC RR CDUS.  BIT2 OF
+		NOOP						#  RADMODES AGREES WITH BIT2 OF CHANNEL
+		EXTEND						#  33.  FOR THIS CODING, WHICH ASSUMES
+		WOR		CHAN12				#  AUTOMBIT = BIT2, THANKS TO HUGH B-S.
+		TCF		ENDRRMON
+		
+ENDRRMON	EQUALS		DAPT4S
 
 OCT32002        OCT             32002                           
 OCT20002        OCT             20002                           
 OCT02100        OCT             02100                           # P20, P22 MASK BITS
 
-## Page 188
-# PROGRAM NAME:  GPMATRIX (DAPT4S) MCD. NO. 2 DATE: OCTOBER 27, 1966
+## Page 189
+# PROGRAM NAME: GPMATRIX (DAPT4S) MOD. NO. 2 DATE: OCTOBER 27, 1966
 
 # AUTHOR: JONATHAN D. ADDELSTON (ADAMS ASSOCIATES)
 
@@ -1290,18 +1300,18 @@ OCT02100        OCT             02100                           # P20, P22 MASK 
 # FROM GIMBAL TO PILOT (BODY) AXES AND BACK AGAIN.  THESE ELEMENTS ARE USED EXCLUSIVELY BY BASIC LANGUAGE ROUTINES
 # AND THEREFORE ARE NOT ARRAYED FOR USE BY INTERPRETIVE PROGRAMS.
 
-# CALLING SEQUENCE:  GPMATRIX IS TRANSFERRED TO FROM DAPT4S AND IS THUS EXECUTED 4 TIMES A SECOND BY T4RUPT.
+# CALLING SEQUENCE: GPMATRIX IS TRANSFERRED TO FROM DAPT4S AND IS THUS EXECUTED 4 TIMES A SECOND BY T4RUPT.
 # DAPT4S IS LISTED IN T4JUMP TABLE TWICE EXPLICITLY AND ALSO OCCURS AFTER RRAUTCHK (WHICH IS ALSO LISTED TWICE).
 
 # SUBROUTINES CALLED: SPSIN, SPCOS.
 
-# NORMAL EXIT MODE:  TCF RESUME
+# NORMAL EXIT MODE:  TCF   RESUME
 
 # ALARM AND ABORT MODES:  NONE.
 
 # INPUT: CDUX, CDUY, CDUZ.
 
-# OUTPUT:  M11, M21, M32, M22, M32.
+# OUTPUT:  M11, M21, M31, M22, M32.
 
 # AOG = CDUX, AIG = CDUY, AMG = CDUZ: MNEMONIC IS : OIM = XYZ
 
@@ -1331,7 +1341,7 @@ GPMATRIX        CAE             CDUZ                            # SINGLE ENTRY P
                 TS              M22                             # SCALED AT 1 (ALSO IS MR22)
 
                 CS              M22                             
-## Page 189
+## Page 190
                 EXTEND                                          
                 MP              COSMG                           # -SIN(OG)COS(MG)
                 TS              M31                             # SCALED AT 1
@@ -1346,5 +1356,4 @@ GPMATRIX        CAE             CDUZ                            # SINGLE ENTRY P
 
                 TC              RESUME                          
 
-NORRGMON        EQUALS          DAPT4S                          
 ENDDAPT4        EQUALS          RESUME                          
