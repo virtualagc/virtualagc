@@ -96,19 +96,19 @@ Note that the date is the date of the printout, not the date of the program revi
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-034081,000002:                                                                                                  <span class="co">## Copyright:    Public domain.</span>
-034082,000003:                                                                                                  <span class="co">## Filename:     LMP_COMMAND_ROUTINES.agc</span>
-034083,000004:                                                                                                  <span class="co">## Purpose:      A module for revision 0 of BURST120 (Sunburst). It</span>
-034084,000005:                                                                                                  <span class="co">##               is part of the source code for the Lunar Module's</span>
-034085,000006:                                                                                                  <span class="co">##               (LM) Apollo Guidance Computer (AGC) for Apollo 5.</span>
-034086,000007:                                                                                                  <span class="co">## Assembler:    yaYUL</span>
-034087,000008:                                                                                                  <span class="co">## Contact:      Ron Burkey &lt;info@sandroid.org>.</span>
-034088,000009:                                                                                                  <span class="co">## Website:      www.ibiblio.org/apollo/index.html</span>
-034089,000010:                                                                                                  <span class="co">## Mod history:  2016-09-30 RSB  Created draft version.</span>
-034090,000011:                                                                                                  <span class="co">##               2016-10-28 HG   transcribed</span>
-034091,000012:                                                                                                  <span class="co">##               2016-12-06 RSB  Comments proofed using octopus/ProoferComments,</span>
-034092,000013:                                                                                                  <span class="co">##                               changes made.</span>
-034093,000014: 
+034083,000002:                                                                                                  <span class="co">## Copyright:    Public domain.</span>
+034084,000003:                                                                                                  <span class="co">## Filename:     LMP_COMMAND_ROUTINES.agc</span>
+034085,000004:                                                                                                  <span class="co">## Purpose:      A module for revision 0 of BURST120 (Sunburst). It</span>
+034086,000005:                                                                                                  <span class="co">##               is part of the source code for the Lunar Module's</span>
+034087,000006:                                                                                                  <span class="co">##               (LM) Apollo Guidance Computer (AGC) for Apollo 5.</span>
+034088,000007:                                                                                                  <span class="co">## Assembler:    yaYUL</span>
+034089,000008:                                                                                                  <span class="co">## Contact:      Ron Burkey &lt;info@sandroid.org>.</span>
+034090,000009:                                                                                                  <span class="co">## Website:      www.ibiblio.org/apollo/index.html</span>
+034091,000010:                                                                                                  <span class="co">## Mod history:  2016-09-30 RSB  Created draft version.</span>
+034092,000011:                                                                                                  <span class="co">##               2016-10-28 HG   transcribed</span>
+034093,000012:                                                                                                  <span class="co">##               2016-12-06 RSB  Comments proofed using octopus/ProoferComments,</span>
+034094,000013:                                                                                                  <span class="co">##                               changes made.</span>
+034095,000014: 
 </pre>
 </span>
 </p>
@@ -124,56 +124,56 @@ Page 799
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-034095,000016:                                                                                                  <span class="co">#           THE FOLLOWING SUBROUTINES ALLOW MISSION PROGRAMS TO REQUEST LMP (LEM MISSION PROGRAMMER) OUTPUTS.</span>
-034096,000017:                                                                                                  <span class="co">#  THE PROPER DECIMAL CODE IS ENTERED INTO A TABLE AND FROM THENCE TO CHANNEL 10 VIA T4RUPT AND ARE INCLUDED IN</span>
-034097,000018:                                                                                                  <span class="co">#  THE DOWNLINK.</span>
-034098,000019: 
-034099,000020:                                                                                                  <span class="co">#           FOUR ROUTINES ARE PROVIDED:</span>
-034100,000021: 
-034101,000022:                                                                                                  <span class="co">#                                                   TC     1LMP            CALLED UNDER EXEC OR RUPT. DELIVERS CODE</span>
-034102,000023:                                                                                                  <span class="co">#                                                   DEC    LMPCODE         AND RETURNS IMMEDIATELY.</span>
-034103,000024: 
-034104,000025:                                                                                                  <span class="co">#                                                   TC     2LMP            SAME AS 1LMP BUT TWO CODES ARE</span>
-034105,000026:                                                                                                  <span class="co">#                                                   DEC    LMPCODE1        SENT.</span>
-034106,000027:                                                                                                  <span class="co">#                                                   DEC    LMPCODE2</span>
-034107,000028: 
-034108,000029:                                                                                                  <span class="co">#                                                   TC     1LMP+DT         ASSUMES CALLED AS PART OF WAITLIST TASK.</span>
-034109,000030:                                                                                                  <span class="co">#                                                   DEC    LMPCODE         DELIVERS LMP CODE, DOES A VARDELAY FOR</span>
-034110,000031:                                                                                                  <span class="co">#                                                   DEC    DT              DT, AND THEN RETURNS UNDER WL CONTROL.</span>
-034111,000032: 
-034112,000033:                                                                                                  <span class="co">#                                                   TC     2LMP+DT         SAME AS 1LMP+DT BUT TWO CODES SENT.</span>
-034113,000034:                                                                                                  <span class="co">#                                                   DEC    LMPCODE1</span>
-034114,000035:                                                                                                  <span class="co">#                                                   DEC    LMPCODE2</span>
-034115,000036:                                                                                                  <span class="co">#                                                   DEC    DT</span>
-034116,000037: 
-034117,000038:                                                                                                  <span class="co">#  WARNING  ***** PROGRAMS UNDER EXEC WHICH CALL 1LMP + 2LMP MUST FIRST</span>
-034118,000039:                                                                                                  <span class="co">#                 INHIBIT INTERRUPT....RETURNS STILL INHIBITED.</span>
-034119,000040: 
-034120,000041: 
-034121,000042: 
-034122,000043:    5052                                           <span class="ps">BLOCK   </span> 02                                    
-<a name="324C4D50"></a>034123,000044:    5052           50002        <span class="sm">2LMP    </span>           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     <span class="co">#  PICK UP 1ST CODE</span>
-034124,000045:    5053           30000                           <span class="op">CA      </span> 0                                     
-034125,000046:    5054           24002                           <span class="op">INCR    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
-034126,000047:    5055           22002                           <span class="op">LXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     <span class="co">#  SAVE 2ND CODE ADDRESS IN L</span>
-034127,000048: 
-<a name="4C4D5047524F5550"></a>034128,000049:    5056                        <span class="sm">LMPGROUP</span>           <span class="ps">EQUALS  </span> 2                                     
-<a name="4C4D505442415345"></a>034129,000050:    5056     1115               <span class="sm">LMPTBASE</span>           <span class="ps">EQUALS  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544241534532">TBASE2</a>                                
-<a name="4C4D505048415345"></a>034130,000051:    5056     1102               <span class="sm">LMPPHASE</span>           <span class="ps">EQUALS  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#504841534532">PHASE2</a>                                
-034131,000052: 
-034132,000053:    5056           05063                           <span class="op">TC      </span> <a href="#53544F52434F4D">STORCOM</a>    -1                         <span class="co">#  TO STORE IN BUFFER AND UPDATE POINTER</span>
-034133,000054: 
-034134,000055:    5057           22002                           <span class="op">LXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     <span class="co">#  RETRIEVE 2ND CODE ADDRESS FROM L.</span>
-034135,000056: 
-<a name="314C4D50"></a>034136,000057:    5060           50002        <span class="sm">1LMP    </span>           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
-034137,000058:    5061           30000                           <span class="op">CA      </span> 0                                     <span class="co">#  GET LMP CODE</span>
-034138,000059:    5062           24002                           <span class="op">INCR    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     <span class="co">#  SET RETURN.</span>
-034139,000060:    5063           67745                           <span class="op">AD      </span> <a href="INTERPRETER.agc.html#4249543135">BIT15</a>                                 <span class="co">#  SET SIGN TO SHOW NEW COMMAND IN BUFFER</span>
-<a name="53544F52434F4D"></a>034140,000061:    5064           51143        <span class="sm">STORCOM </span>           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4D50494E">LMPIN</a>                                 
-034141,000062:    5065           55133                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4D50434D44">LMPCMD</a>                                <span class="co">#  INSERT IN NEXT SLOT IN BUFFER</span>
-034142,000063: 
-<a name="55504C4D50494E"></a>034143,000064:    5066           11143        <span class="sm">UPLMPIN </span>           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4D50494E">LMPIN</a>                                 <span class="co">#  UPDATE POINTER</span>
-034144,000065: 
+034097,000016:                                                                                                  <span class="co">#           THE FOLLOWING SUBROUTINES ALLOW MISSION PROGRAMS TO REQUEST LMP (LEM MISSION PROGRAMMER) OUTPUTS.</span>
+034098,000017:                                                                                                  <span class="co">#  THE PROPER DECIMAL CODE IS ENTERED INTO A TABLE AND FROM THENCE TO CHANNEL 10 VIA T4RUPT AND ARE INCLUDED IN</span>
+034099,000018:                                                                                                  <span class="co">#  THE DOWNLINK.</span>
+034100,000019: 
+034101,000020:                                                                                                  <span class="co">#           FOUR ROUTINES ARE PROVIDED:</span>
+034102,000021: 
+034103,000022:                                                                                                  <span class="co">#                                                   TC     1LMP            CALLED UNDER EXEC OR RUPT. DELIVERS CODE</span>
+034104,000023:                                                                                                  <span class="co">#                                                   DEC    LMPCODE         AND RETURNS IMMEDIATELY.</span>
+034105,000024: 
+034106,000025:                                                                                                  <span class="co">#                                                   TC     2LMP            SAME AS 1LMP BUT TWO CODES ARE</span>
+034107,000026:                                                                                                  <span class="co">#                                                   DEC    LMPCODE1        SENT.</span>
+034108,000027:                                                                                                  <span class="co">#                                                   DEC    LMPCODE2</span>
+034109,000028: 
+034110,000029:                                                                                                  <span class="co">#                                                   TC     1LMP+DT         ASSUMES CALLED AS PART OF WAITLIST TASK.</span>
+034111,000030:                                                                                                  <span class="co">#                                                   DEC    LMPCODE         DELIVERS LMP CODE, DOES A VARDELAY FOR</span>
+034112,000031:                                                                                                  <span class="co">#                                                   DEC    DT              DT, AND THEN RETURNS UNDER WL CONTROL.</span>
+034113,000032: 
+034114,000033:                                                                                                  <span class="co">#                                                   TC     2LMP+DT         SAME AS 1LMP+DT BUT TWO CODES SENT.</span>
+034115,000034:                                                                                                  <span class="co">#                                                   DEC    LMPCODE1</span>
+034116,000035:                                                                                                  <span class="co">#                                                   DEC    LMPCODE2</span>
+034117,000036:                                                                                                  <span class="co">#                                                   DEC    DT</span>
+034118,000037: 
+034119,000038:                                                                                                  <span class="co">#  WARNING  ***** PROGRAMS UNDER EXEC WHICH CALL 1LMP + 2LMP MUST FIRST</span>
+034120,000039:                                                                                                  <span class="co">#                 INHIBIT INTERRUPT....RETURNS STILL INHIBITED.</span>
+034121,000040: 
+034122,000041: 
+034123,000042: 
+034124,000043:    5052                                           <span class="ps">BLOCK   </span> 02                                    
+<a name="324C4D50"></a>034125,000044:    5052           50002        <span class="sm">2LMP    </span>           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     <span class="co">#  PICK UP 1ST CODE</span>
+034126,000045:    5053           30000                           <span class="op">CA      </span> 0                                     
+034127,000046:    5054           24002                           <span class="op">INCR    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
+034128,000047:    5055           22002                           <span class="op">LXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     <span class="co">#  SAVE 2ND CODE ADDRESS IN L</span>
+034129,000048: 
+<a name="4C4D5047524F5550"></a>034130,000049:    5056                        <span class="sm">LMPGROUP</span>           <span class="ps">EQUALS  </span> 2                                     
+<a name="4C4D505442415345"></a>034131,000050:    5056     1115               <span class="sm">LMPTBASE</span>           <span class="ps">EQUALS  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544241534532">TBASE2</a>                                
+<a name="4C4D505048415345"></a>034132,000051:    5056     1102               <span class="sm">LMPPHASE</span>           <span class="ps">EQUALS  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#504841534532">PHASE2</a>                                
+034133,000052: 
+034134,000053:    5056           05063                           <span class="op">TC      </span> <a href="#53544F52434F4D">STORCOM</a>    -1                         <span class="co">#  TO STORE IN BUFFER AND UPDATE POINTER</span>
+034135,000054: 
+034136,000055:    5057           22002                           <span class="op">LXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     <span class="co">#  RETRIEVE 2ND CODE ADDRESS FROM L.</span>
+034137,000056: 
+<a name="314C4D50"></a>034138,000057:    5060           50002        <span class="sm">1LMP    </span>           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
+034139,000058:    5061           30000                           <span class="op">CA      </span> 0                                     <span class="co">#  GET LMP CODE</span>
+034140,000059:    5062           24002                           <span class="op">INCR    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     <span class="co">#  SET RETURN.</span>
+034141,000060:    5063           67745                           <span class="op">AD      </span> <a href="INTERPRETER.agc.html#4249543135">BIT15</a>                                 <span class="co">#  SET SIGN TO SHOW NEW COMMAND IN BUFFER</span>
+<a name="53544F52434F4D"></a>034142,000061:    5064           51143        <span class="sm">STORCOM </span>           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4D50494E">LMPIN</a>                                 
+034143,000062:    5065           55133                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4D50434D44">LMPCMD</a>                                <span class="co">#  INSERT IN NEXT SLOT IN BUFFER</span>
+034144,000063: 
+<a name="55504C4D50494E"></a>034145,000064:    5066           11143        <span class="sm">UPLMPIN </span>           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4D50494E">LMPIN</a>                                 <span class="co">#  UPDATE POINTER</span>
+034146,000065: 
 </pre>
 </span>
 </p>
@@ -189,46 +189,46 @@ Page 800
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-034146,000067:    5067           15071                           <span class="op">TCF     </span> +2                                    
-034147,000068:    5070           37765                           <span class="op">CAF     </span> <a href="INTERPRETER.agc.html#534556454E">SEVEN</a>                                 
-034148,000069:    5071           55143                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4D50494E">LMPIN</a>                                 
-034149,000070:    5072           00002                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
-034150,000071: 
-<a name="324C4D502B4454"></a>034151,000072:    5073           50002        <span class="sm">2LMP+DT </span>           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
-034152,000073:    5074           30000                           <span class="op">CA      </span> 0                                     <span class="co">#  PICK UP 1ST CODE</span>
-034153,000074:    5075           24002                           <span class="op">INCR    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
-034154,000075:    5076           22002                           <span class="op">LXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     <span class="co">#  2ND CODE ADDRESS IN L.</span>
-034155,000076: 
-034156,000077:    5077           05063                           <span class="op">TC      </span> <a href="#53544F52434F4D">STORCOM</a>    -1                         <span class="co">#  STORE IN BUFFER AND UPDATE POINTER</span>
-034157,000078: 
-034158,000079:    5100           15102                           <span class="op">TCF     </span> +2                                    
-034159,000080: 
-<a name="314C4D502B4454"></a>034160,000081:    5101           00006        <span class="sm">1LMP+DT </span>           <span class="op">EXTEND  </span>                                       <span class="co">#  SAVE RETURN FOR RESTARTS</span>
-034161,000082:    5102           23146                           <span class="op">QXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4D50524554">LMPRET</a>                                <span class="co">#  IS LXCH IF FROM ABOVE</span>
-034162,000083:    5103           30006                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4242414E4B">BBANK</a>                                 
-034163,000084:    5104           55147                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4D504242414E4B">LMPBBANK</a>                              
-034164,000085: 
-034165,000086:    5105           00006                           <span class="op">EXTEND  </span>                                       
-034166,000087:    5106           51146                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4D50524554">LMPRET</a>                                
-034167,000088:    5107           30001                           <span class="op">DCA     </span> 0                                     <span class="co">#  PICK UP CODE AND DT</span>
-034168,000089:    5110           05063                           <span class="op">TC      </span> <a href="#53544F52434F4D">STORCOM</a>    -1                         <span class="co">#  GO TO STORE CODE AND UPDATE POINTER</span>
-034169,000090: 
-034170,000091:    5111           23150                           <span class="op">LXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5341564454">SAVDT</a>                                 <span class="co">#  SAVE FOR RESTART</span>
-034171,000092:    5112           04161                           <span class="op">TC      </span> <a href="PHASE_TABLE_MAINTENANCE.agc.html#5048415343484E47">PHASCHNG</a>                              <span class="co">#  RESTART PROTECT DELAY</span>
-034172,000093:    5113           47012                           <span class="ps">OCT     </span> 47012                                 
-034173,000094:    5114           76627                           <span class="ps">-GENADR </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5341564454">SAVDT</a>                                 
-034174,000095:    5115     1115                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544241534532">TBASE2</a>                                
-034175,000096:    5115           05123 04062                     <span class="ps">2CADR   </span> <a href="#4C4D50525354">LMPRST</a>                                
-034176,000097: 
-034177,000098:    5117           31150                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5341564454">SAVDT</a>                                 <span class="co">#  WAIT DT SECONDS</span>
-034178,000099:    5120           05704                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#56415244454C4159">VARDELAY</a>                              
-034179,000100: 
-<a name="4C4D5045584954"></a>034180,000101:    5121           51146        <span class="sm">LMPEXIT </span>           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4D50524554">LMPRET</a>                                
-034181,000102:    5122           00002                           <span class="op">TC      </span> 2                                     
-034182,000103: 
-<a name="4C4D50525354"></a>034183,000104:    5123           31147        <span class="sm">LMPRST  </span>           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4D504242414E4B">LMPBBANK</a>                              <span class="co">#  LMP+DT RESTARTS COME HERE</span>
-034184,000105:    5124           54006                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4242414E4B">BBANK</a>                                 <span class="co">#  AFTER DELAY.</span>
-034185,000106:    5125           05121                           <span class="op">TC      </span> <a href="#4C4D5045584954">LMPEXIT</a>                               
+034148,000067:    5067           15071                           <span class="op">TCF     </span> +2                                    
+034149,000068:    5070           37765                           <span class="op">CAF     </span> <a href="INTERPRETER.agc.html#534556454E">SEVEN</a>                                 
+034150,000069:    5071           55143                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4D50494E">LMPIN</a>                                 
+034151,000070:    5072           00002                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
+034152,000071: 
+<a name="324C4D502B4454"></a>034153,000072:    5073           50002        <span class="sm">2LMP+DT </span>           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
+034154,000073:    5074           30000                           <span class="op">CA      </span> 0                                     <span class="co">#  PICK UP 1ST CODE</span>
+034155,000074:    5075           24002                           <span class="op">INCR    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
+034156,000075:    5076           22002                           <span class="op">LXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     <span class="co">#  2ND CODE ADDRESS IN L.</span>
+034157,000076: 
+034158,000077:    5077           05063                           <span class="op">TC      </span> <a href="#53544F52434F4D">STORCOM</a>    -1                         <span class="co">#  STORE IN BUFFER AND UPDATE POINTER</span>
+034159,000078: 
+034160,000079:    5100           15102                           <span class="op">TCF     </span> +2                                    
+034161,000080: 
+<a name="314C4D502B4454"></a>034162,000081:    5101           00006        <span class="sm">1LMP+DT </span>           <span class="op">EXTEND  </span>                                       <span class="co">#  SAVE RETURN FOR RESTARTS</span>
+034163,000082:    5102           23146                           <span class="op">QXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4D50524554">LMPRET</a>                                <span class="co">#  IS LXCH IF FROM ABOVE</span>
+034164,000083:    5103           30006                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4242414E4B">BBANK</a>                                 
+034165,000084:    5104           55147                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4D504242414E4B">LMPBBANK</a>                              
+034166,000085: 
+034167,000086:    5105           00006                           <span class="op">EXTEND  </span>                                       
+034168,000087:    5106           51146                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4D50524554">LMPRET</a>                                
+034169,000088:    5107           30001                           <span class="op">DCA     </span> 0                                     <span class="co">#  PICK UP CODE AND DT</span>
+034170,000089:    5110           05063                           <span class="op">TC      </span> <a href="#53544F52434F4D">STORCOM</a>    -1                         <span class="co">#  GO TO STORE CODE AND UPDATE POINTER</span>
+034171,000090: 
+034172,000091:    5111           23150                           <span class="op">LXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5341564454">SAVDT</a>                                 <span class="co">#  SAVE FOR RESTART</span>
+034173,000092:    5112           04161                           <span class="op">TC      </span> <a href="PHASE_TABLE_MAINTENANCE.agc.html#5048415343484E47">PHASCHNG</a>                              <span class="co">#  RESTART PROTECT DELAY</span>
+034174,000093:    5113           47012                           <span class="ps">OCT     </span> 47012                                 
+034175,000094:    5114           76627                           <span class="ps">-GENADR </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5341564454">SAVDT</a>                                 
+034176,000095:    5115     1115                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544241534532">TBASE2</a>                                
+034177,000096:    5115           05123 04062                     <span class="ps">2CADR   </span> <a href="#4C4D50525354">LMPRST</a>                                
+034178,000097: 
+034179,000098:    5117           31150                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5341564454">SAVDT</a>                                 <span class="co">#  WAIT DT SECONDS</span>
+034180,000099:    5120           05704                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#56415244454C4159">VARDELAY</a>                              
+034181,000100: 
+<a name="4C4D5045584954"></a>034182,000101:    5121           51146        <span class="sm">LMPEXIT </span>           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4D50524554">LMPRET</a>                                
+034183,000102:    5122           00002                           <span class="op">TC      </span> 2                                     
+034184,000103: 
+<a name="4C4D50525354"></a>034185,000104:    5123           31147        <span class="sm">LMPRST  </span>           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4D504242414E4B">LMPBBANK</a>                              <span class="co">#  LMP+DT RESTARTS COME HERE</span>
+034186,000105:    5124           54006                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4242414E4B">BBANK</a>                                 <span class="co">#  AFTER DELAY.</span>
+034187,000106:    5125           05121                           <span class="op">TC      </span> <a href="#4C4D5045584954">LMPEXIT</a>                               
 
 End of include-file LMP_COMMAND_ROUTINES.agc.  Parent file is <a href="MAIN.agc.html">MAIN.agc</a>
 </pre>
