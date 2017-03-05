@@ -8,12 +8,19 @@
 #
 # What gets transferred is any *.agc.html or *.aea.html files files found
 # under virtualagc/VirtualAGC/temp/lVirtualAGC/Resources/source/, to
-# virtualagc-web/listings/.
+# virtualagc-web/listings/, so a 'make' must have been previously successful,
+# or else the source directory won't even exist.
+#
+# Regardless of timestamp (within a certain, very large range) only files with
+# a changed checksum get transferred.
 
 DEST=`pwd`-web/listings
+
 cd VirtualAGC/temp/lVirtualAGC/Resources/source
+rename 's/[.]html$/htmltemp/' Validation/*.html
 for n in aea agc
 do
-	find -name "*."$n".html" -exec cp {} $DEST/{} \;
+	find -name "*."$n".html" -exec rsync -av -c --modify-window=1000000000  {} $DEST/{} \;
 done
+rename 's/[.]htmltemp$/html/' Validation/*.html
 cd -
