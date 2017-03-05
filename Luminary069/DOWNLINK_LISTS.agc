@@ -19,6 +19,8 @@
 ##              2017-01-08 HG   Transcribed
 ##		2017-01-25 RSB	Proofed comment text using octopus/prooferComments
 ##				and fixed errors found.
+##		2017-03-05 RSB	A few comment-text fixes identified while proofing
+##				Luminary 116.
 
 ## Page 208
                 BANK            22
@@ -220,7 +222,7 @@ LMRENDDL        EQUALS                                  # SEND ID BY SPECIAL COD
                 3DNADR          RTARG                   # RTARG+0...+5
                 3DNADR          DELVSLV                 # DELVSLV+0...+5
                 1DNADR          TCSI                    # TCSI,+1
-                3DNADR          DELVEET1                # DELVEET+0...+5
+                3DNADR          DELVEET1                # DELVEET+0-..+5
                 1DNADR          SPARE
                 1DNADR          TPASS4                  # TPASS4,+1
                 DNPTR           LMREND06                # COMMON DATA

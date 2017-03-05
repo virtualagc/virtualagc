@@ -26,9 +26,9 @@
                 EBANK=          DNTMBUFF                        
 
 # SPECIAL DOWNLINK OP CODES
-#       OP CODE         ADDRESS (EXAMPLE)       SENDS..                 BIT 15          BITS 14-12      BITS 11
+#       OP CODE         ADDRESS(EXAMPLE)        SENDS..                 BIT 15          BITS 14-12      BITS 11
 #                                                                                                            -0
-#       ------          -----------             ----------              ------          ----------      -------
+#       ------          ----------              ----------              ------          ----------      -------
 #                                                                                                            --
 #       1DNADR          TIME2                   (2 AGC WDS)             0               0               ECADR
 #       2DNADR          TEPHEM                  (4 AGC WDS)             0               1               ECADR
@@ -256,12 +256,12 @@ LMREND07        -1DNADR         AIG                             # AIG,AMG       
                 1DNADR          MKTIME                          # MKTIME,+1
                 -1DNADR         RANGRDOT                        # DNRRANGE,DNRRDOT
 
-# ------------------------------------------------------------
+# ---------------------------------------------------------
 
 ## Page 201
 # LM DESCENT AND ASCENT DOWNLIST
 
-# -----------------  CONTROL LIST    -------------------------
+# -----------------  CONTROL LIST   --------------------------
 
 LMDSASDL        EQUALS                                          # SEND ID BY SPECIAL CODING
                 DNPTR           LMDSAS07                        # COLLECT SNAPSHOT
@@ -322,7 +322,7 @@ LMDSAS08        6DNADR          DNTMBUFF                        # SEND SNAPSHOT
 
 LMDSAS09        EQUALS          LMCSTA06                        # COMMON DOWNLIST DATA
 
-# -----------------------------------------------------------
+# ---------------------------------------------------------
 
 ## Page 203
 # LM LUNAR SURFACE ALIGN DOWNLIST
@@ -368,7 +368,7 @@ LMLSAL08        EQUALS          LMCSTA06                        # COMMON DOWNLIS
 LMLSAL09        EQUALS          LMCSTA07                        # COMMON DOWNLIST DATA
 
 ## Page 204
-# -----------------------------------------------------------
+# ---------------------------------------------------------
 
 ## Page 205
 # LM AGS INITIALIZATION AND UPDATE DOWNLIST
@@ -411,7 +411,7 @@ LMAGSI03        EQUALS          LMORBM03                        # COMMON DOWNLIS
 LMAGSI04        EQUALS          LMORBM04                        # COMMON DOWNLIST DATA
 LMAGSI05        EQUALS          LMORBM05                        # COMMON DOWNLIST DATA
 
-# -----------------------------------------------------------
+# ---------------------------------------------------------
 
 DNTABLE         GENADR          LMCSTADL                        # LM COAST AND ALIGN DOWNLIST
                 GENADR          LMAGSIDL                        # LM AGS INITIALIZATION/UPDATE DOWNLIST
