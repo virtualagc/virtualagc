@@ -20,6 +20,8 @@
 ##				proofing corresponding Luminary 69 file.	
 ##		2017-02-16 RSB	Proofed comment text using octopus/ProoferComments.
 ##		2017-02-28 RSB	Fixed lingering typos.
+##		2017-03-05 RSB	A few comment-text fixes identified while proofing
+##				Luminary 116.
 
 ## Page 195
 		BANK	22
@@ -104,7 +106,7 @@ LMORBMDL	EQUALS					# SEND ID BY SPECIAL CODING
 		1DNADR	SPARE				# FORMERLY PIF
 		-1DNADR	TGO				# TGO,+1
 
-# -----------------  SUB-LISTS   -----------------------------
+# -----------------  SUB-LISTS   ----------------------------
 
 LMORBM01	-1DNADR	R-OTHER +2			# R-OTHER +2,+3		SNAPSHOT
 		1DNADR	R-OTHER +4			# R-OTHER +4,+5
@@ -148,7 +150,7 @@ LMORBM05	2DNADR	OMEGAP				# OMEGAP,OMEGAQ,OMEGAR,GARBAGE
 LMORBM06	1DNADR	PIPTIME1			# PIPTIME,+1		COMMON DATA
 		-3DNADR	DELV				# DELV +0...+5
 
-# --------------------------------------------------------------------
+# -----------------------------------------------------------
 
 ## Page 198
 # LM COAST AND ALIGNMENT DOWNLIST
@@ -183,7 +185,7 @@ LMCSTADL	EQUALS					# SEND ID BY SPECIAL CODING
 		DNPTR	LMCSTA05			# COMMON DATA
 		-6DNADR	DSPTAB				# DSPTAB +0...+11D TABLE
 
-# -----------------  SUB-LISTS   ----------------------------
+# -----------------  SUB-LISTS   --------------------------
 
 LMCSTA01	EQUALS	LMORBM01			# COMMON DOWNLIST DATA
 LMCSTA02	EQUALS	LMORBM02			# COMMON DOWNLIST DATA
@@ -214,7 +216,7 @@ LMRENDDL	EQUALS					# SEND ID BY SPECIAL CODING
 		3DNADR	RTARG				# RTARG +0...+5
 		3DNADR	DELVSLV				# DELVSLV +0...+5
 		1DNADR	TCSI				# TCSI,+1
-		3DNADR	DELVEET1			# DELVEET +0...+5
+		3DNADR	DELVEET1			# DELVEET +0-..+5
 		1DNADR	SPARE
 		1DNADR	TPASS4				# TPASS4,+1
 		DNPTR	LMREND06			# COMMON DATA
@@ -259,7 +261,7 @@ LMREND07	-1DNADR	AIG				# AIG,AMG		SNAPSHOT
 		1DNADR	MKTIME				# MKTIME,+1
 		-1DNADR	RANGRDOT			# DNRRANGE,DNRRDOT
 
-# -----------------------------------------------------------
+# ---------------------------------------------------------
 
 ## Page 202
 # LM DESCENT AND ASCENT DOWNLIST
@@ -371,7 +373,7 @@ LMLSAL08	EQUALS	LMCSTA06			# COMMON DOWNLIST DATA
 LMLSAL09	EQUALS	LMCSTA07			# COMMON DOWNLIST DATA
 
 ## Page 205
-# --------------------------------------------------------
+# ---------------------------------------------------------
 
 ## Page 206
 # LM AGS INITIALIZATION AND UPDATE DOWNLIST
@@ -414,7 +416,7 @@ LMAGSI03	EQUALS	LMORBM03			# COMMON DOWNLIST DATA
 LMAGSI04	EQUALS	LMORBM04			# COMMON DOWNLIST DATA
 LMAGSI05	EQUALS	LMORBM05			# COMMON DOWNLIST DATA
 
-# ------------------------------------------------------
+# ---------------------------------------------------------
 
 DNTABLE		GENADR	LMCSTADL			# LM COAST AND ALIGN DOWNLIST
 		GENADR	LMAGSIDL			# LM AGS INITIALIZATION/UPDATE DOWNLIST

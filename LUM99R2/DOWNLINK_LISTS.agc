@@ -14,6 +14,8 @@
 ##		2017-01-26 RSB	Back-ported comment-text fixes found while
 ##				proofing corresponding Luminary 69 file.	
 ##		2017-03-03 RSB	Snapshot of Luminary 99 Rev 1. 
+##		2017-03-05 RSB	A few comment-text fixes identified while proofing
+##				Luminary 116.
 
 ## Page 193
 		BANK	22
@@ -208,7 +210,7 @@ LMRENDDL	EQUALS					# SEND ID BY SPECIAL CODING
 		3DNADR	RTARG				# RTARG +0...+5
 		3DNADR	DELVSLV				# DELVSLV +0...+5
 		1DNADR	TCSI				# TCSI,+1
-		3DNADR	DELVEET1			# DELVEET +0...+5
+		3DNADR	DELVEET1			# DELVEET +0-..+5
 		1DNADR	SPARE
 		1DNADR	TPASS4				# TPASS4,+1
 		DNPTR	LMREND06			# COMMON DATA
