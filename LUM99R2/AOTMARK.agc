@@ -15,6 +15,8 @@
 ##		2016-12-13 RSB	Proofed text comments with octopus/ProoferComments
 ##				and corrected the errors found.
 ##		2017-03-03 RSB	Snapshot of Luminary 99 Rev 1. 
+##		2017-03-06 RSB	Some comment-text fixes identified while proofing
+##				Luminary 116.
 
 ## Page 244
 		BANK	12
@@ -214,12 +216,12 @@ OANB		SETPD	STQ
 		RTB
 			CDULOGIC
 		PUSH	COS
-		STORE	20D		# STORE UYP(Y) 	20-21
-		PDDL	SIN		# 1/2COS(AZ) 	PD 2-3
-		PUSH	DCOMP		# PUSH 1/2S IN (AZ)	4-5
-		STODL	22D		# STORE UYP(Z)	22-23
-			LO6ZEROS
-		STODL	18D		# STORE UYP(X)	18-19	UP 4-5
+                STORE   20D             # STORE UYP(Y) 20-21
+                PDDL    SIN             # 1/2COS(AZ) PD 2-3
+                PUSH    DCOMP           # PUSH 1/2SIN(AZ) 4-5
+                STODL   22D             # STORE UYP(Z) 22-23
+                        LO6ZEROS                        
+                STODL   18D             # STORE UYP(X) 18-19   UP 4-5
 		DMP	SL1
 			0
 		STODL	SCAXIS +2	# OAY=1/2COS(ELV)SIN(AZ)
@@ -360,7 +362,7 @@ AVESTAR		CAF	BIT12		# INITIALIZE MKDEX FOR STAR LOS COUNTER
 			SURFSTAR
 			1,1		# PUT Y-MARK CDUS IN CDUSPOT FOR TRG*NBSM
 		STOVL	CDUSPOT
-			12D		# LOAD Y-PLANE VECTOR IN NG
+			12D		# LOAD Y-PLANE VECTOR IN NB
 		CALL
 			TRG*NBSM	# CONVERT IT TO STABLE MEMBER
 		PUSH	VLOAD*
