@@ -13,10 +13,9 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-01-22 MAS  Created from Luminary 99.
+##              2017-03-06 RRB  Updated for Luminary 116.
 
-## NOTE: Page numbers below have not yet been updated to reflect Luminary 116.
-
-## Page 1303
+## Page 1293
                 BANK            01                              
                 SETLOC          RESTART                         
                 BANK                                            
@@ -52,7 +51,7 @@ GETPART2        CCS             TEMPPHS                         # IS IT AN X.1 R
 
 ITSAVAR         MASK            OCT1400                         # IS IT TYPE B ?
                 CCS             A                               
-                TCF             ITSLIKEB                        # YES, IT IS TYPE B
+                TCF             ITSLIKEB                        # YES,IT IS TYPE B
 
                 EXTEND                                          # STORE THE JOB (OR TASK) 2CADR FOR EXIT
                 NDX             TEMP2G                          
@@ -66,7 +65,7 @@ ITSAVAR         MASK            OCT1400                         # IS IT TYPE B ?
                 TCF             ITSLNGCL                        # ITS A LONGCALL
 
 RTRNCADR        TC              SWRETURN                        # CANT GET HERE
-## Page 1304
+## Page 1294
                 TCF             ITSAWAIT                        
 
                 TCF             ITSAJOB                         # ITS A JOB
@@ -77,7 +76,7 @@ ITSAWAIT        CA              WTLTCADR                        # SET UP WAITLIS
                 NDX             TEMP2G                          # DIRECTLY STORED
                 CA              PHSPRDT1                        
 TIMETEST        CCS             A                               # IS IT AN IMMEDIATE RESTART
-                INCR            A                               # NO.
+                INCR            A                               # NO,
                 TCF             FINDTIME                        # FIND OUT WHEN IT SHOULD BEGIN
 
                 TCF             ITSINDIR                        # STORED INDIRECTLY
@@ -117,7 +116,7 @@ FINDTIME        COM                                             # MAKE NEGITIVE 
                 SU              TIME1                           
                 CCS             A                               
                 COM                                             
-## Page 1305
+## Page 1295
                 AD              OCT37776                        
                 AD              ONE                             
                 AD              L                               
@@ -127,7 +126,7 @@ FINDTIME        COM                                             # MAKE NEGITIVE 
                 TCF             +1                              
 IMEDIATE        AD              ONE                             
                 TC              GOLOC           -1              
-ITSLIKEB        CA              RTRNCADR                        # TYPE B, SO STORE RETURN IN
+ITSLIKEB        CA              RTRNCADR                        # TYPE B,             SO STORE RETURN IN
                 TS              TEMPSWCH                        # TEMPSWCH IN CASE OF AN EVEN PHASE
 
                 CA              PRT2CADR                        # SET UP EXIT TO GET TABLE PART OF THIS
@@ -168,7 +167,7 @@ ITSATBL         TS              CYR                             # FIND OUT IF TH
                 CA              TEMPPHS                         # SET UP POINTER FOR FINDING OUR PLACE IN
                 TS              SR                              # THE RESTART TABLES
                 AD              SR                              
-## Page 1306
+## Page 1296
                 NDX             TEMP2G                          
                 AD              SIZETAB         +1              
                 TS              POINTER                         
@@ -193,7 +192,7 @@ CONTBL2         EXTEND                                          # FIND OUT WHAT:
                 MASK            BIT10                           # THIS SHOULD BE ONE IF WE HAVE -BB
                 CCS             A                               # FOR THAT MATTER SO SHOULD BE BITS 9,8,7,
                                                                 # 6,5, AND LAST BUT NOT LEAST (PERHAPS NOT
-                                                                # IN IMPORTANCE ANYWAY.  BIT 4
+                                                                # IN IMPORTANCE ANYWAY. BIT 4
                 TCF             ITSWTLST                        # IT IS A WAITLIST CALL
 
                 NDX             POINTER                         # OBTAIN THE ORIGINAL DELTA T
@@ -219,7 +218,7 @@ ITSLGCL1        LXCH            GOLOC           +1              # OBTAIN THE COR
                 LXCH            GOLOC           +1              # RESTORE OUR E AND F BANK
                 LXCH            BB                              # RESTORE THE TASKS E AND F BANKS
                 LXCH            GOLOC           +1              # AND PRESERVE OUR L
-## Page 1307
+## Page 1297
                 TCF             ITSLGCL2                        # NOW LET:S PROCESS THIS LONGCALL
 
 # ***** YOU MAY RETURN TO SWITCHED FIXED *****
@@ -244,7 +243,7 @@ ITSLGCL2        DXCH            LONGTIME
                 TCF             IMEDIATE        -3              
                 CCS             LONGTIME        +1              
                 TCF             LONGCLCL                        
-                NOOP                                            # CAN:T GET HERE *********
+                NOOP                                            # CAN:T GET HERE    *********
                 TCF             IMEDIATE        -3              
                 TCF             IMEDIATE                        
 
@@ -271,7 +270,7 @@ ITSWTLST        CS              GOLOC           +1              # CORRECT THE BB
 
                 TCF             TIMETEST                        # FIND OUT HOW THE TIME IS STORED
 
-## Page 1308
+## Page 1298
 ITSAJOB2        XCH             GOLOC                           # STORE THE CADR
 
                 NDX             POINTER                         # ADD THE PRIORITY AND LET:S GO
