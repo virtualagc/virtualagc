@@ -20,6 +20,7 @@
 ##		2017-01-19 RRB	Updated for Luminary 69.
 ##		2017-01-25 RSB	Proofed comment text using octopus/prooferComments
 ##				and fixed errors found.
+##		2017-03-07 RSB	Comment-text fixes noted in proofing Luminary 116.
 
 ## Page 339
 		BANK	7
@@ -90,7 +91,7 @@ IRIGCOMP	TS	GCOMPSW		# INDICATE COMMANDS 2 PULSES OR LESS.
 		TC	IRIGY		# COMPENSATE ACCELERATION TERMS
 		
 		CS	NBDY		# (GYRO PULSES)/(CS) X 2(-5)
-		TC	DRIFTSUB	# +(NBDY)(DELTAT)   (GYRO PULSES) X 2(+14)
+		TC	DRIFTSUB	# -(NBDY)(DELTAT)   (GYRO PULSES) X 2(+14)
 		
 		TC	IRIGZ		# COMPENSATE ACCELERATION TERMS
 		

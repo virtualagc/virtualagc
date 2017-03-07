@@ -20,6 +20,7 @@
 ##				original harcopy, as opposed to the PDF page
 ##				numbers in 1701.pdf.
 ##		2017-02-23 RSB	Proofed comment text using octopus/ProoferComments.
+##		2017-03-07 RSB	Comment-text fixes noted in proofing Luminary 116.
 
 ## Page 328
 		BANK	7
@@ -125,7 +126,7 @@ IRIGX		EXTEND
 		TC	GCOMPSUB	# 	-(ADSRAX)(PIPAY)	(GYRO PULSES) X 2(+14)
 
 #		EXTEND			***
-#		DCS	DELVY		***	(PIPA PULSES) X 2(+14)
+#		DCS	DELVZ		***	(PIPA PULSES) X 2(+14)
 #		DXCH	MPAC		***
 #		CA	ADOAX		***	(GYRO PULSES)/(PIPA PULSE) X 2(-6)	*
 #		TC	GCOMPSUB	***	-(ADOAX)(PIPAZ)		(GYRO PULSES) X 2(+14)
@@ -157,7 +158,7 @@ IRIGY		EXTEND
 IRIGZ		EXTEND
 		QXCH	MPAC +2		# SAVE Q
 		EXTEND
-		DCS	DELVY		# (PIPA PULSES) X 2(-14)
+		DCS	DELVY		# (PIPA PULSES) X 2(+14)
 		DXCH	MPAC
 		CA	ADSRAZ		# (GYRO PULSES)/(PIPA PULSE) X 2(-6)		*
 ## Page 332

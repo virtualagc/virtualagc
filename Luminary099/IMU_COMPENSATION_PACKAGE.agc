@@ -14,6 +14,7 @@
 ##		2009-06-07 RSB	Corrected a typo.
 ##		2016-12-14 RSB	Proofed text comments with octopus/ProoferComments
 ##				and corrected the errors found.
+##		2017-03-07 RSB	Comment-text fixes noted in proofing Luminary 116.
 ##
 ## This source code has been transcribed or otherwise adapted from
 ## digitized images of a hardcopy from the MIT Museum.  The digitization
@@ -96,7 +97,7 @@ IRIGCOMP	TS	GCOMPSW		# INDICATE COMMANDS 2 PULSES OR LESS.
 		TC	IRIGY		# COMPENSATE ACCELERATION TERMS
 		
 		CS	NBDY		# (GYRO PULSES)/(CS) X 2(-5)
-		TC	DRIFTSUB	# +(NBDY)(DELTAT)	(GYRO PULSES) X 2(+14)
+		TC	DRIFTSUB	# -(NBDY)(DELTAT)	(GYRO PULSES) X 2(+14)
 		
 		TC	IRIGZ		# COMPENSATE ACCELERATION TERMS
 		
@@ -331,7 +332,7 @@ NBD3		EXTEND			# C(A) = DELTAT		(CS) X 2(+14)
 		
 		CA	ZERO
 		TS	GCOMPSW		# INDICATE COMMANDS 2 PULSES OR LESS.
-		TS	BUF		# INDEX- X, Y, Z.
+		TS	BUF		# INDEX X, Y, Z.
 		
 		CCS	TEM1		# IF SURFACE FLAG IS SET,
 		TC	IRIGX		# COMPENSATE ACCELERATION TERMS.

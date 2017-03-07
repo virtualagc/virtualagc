@@ -13,10 +13,12 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-01-22 MAS  Created from Luminary 99.
+##		2017-03-07 RSB	Transcribed, and then proofed comment-text using
+##				3-way diff vs Luminary 99 and Luminary 131.
+##				(Admittedly, the former is more for detecting errors
+##				in Luminary 99 than the other way around.)
 
-## NOTE: Page numbers below have not yet been updated to reflect Luminary 116.
-
-## Page 326
+## Page 327
                 BANK            7                               
                 SETLOC          IMUCOMP                         
                 BANK                                            
@@ -56,23 +58,23 @@
                 DAS             DELVX                           # (PIPAI) + (PIPAI)(SFE)
 
                 INDEX           BUF             +2              
-                CS              PIPABIAS                        # (PIPA PULSES)/(CS) X 2(-5)             *
+                CS              PIPABIAS                        # (PIPA PULSES)/(CS) X 2(-3)             *
                 EXTEND                                          
-                MP              1/PIPADT                        # (CS) X 2(+8) NOW (PIPA PULSES) X 2(+3) *
+                MP              1/PIPADT                        # (CS) X 2(+8) NOW (PIPA PULSES) X 2(+5) *
                 EXTEND                                          
-                MP              BIT4                            # SCALE 2(+11) SHIFT RIGHT 11            *
+                MP              BIT4                            # SCALE 2(+9) SHIFT RIGHT 9              *
                 INDEX           BUF             +2              
                 DAS             DELVX                           # (PIPAI) + (PIPAI)(SFE) - (BIAS)(DELTAT)
 
                 CCS             BUF             +2              # PIPAZ, PIPAY, PIPAX
                 AD              NEG1                            
                 TCF             1/PIPA1         +1              
-## Page 327
+## Page 328
                 NOOP                                            # LESS THAN ZERO IMPOSSIBLE
 
-## Page 328
+## Page 329
 IRIGCOMP        TS              GCOMPSW                         # INDICATE COMMANDS 2 PULSES OR LESS.
-                TS              BUF                             # INDEX COUNTER.  IRIGX, IRIGY, IRIGZ.
+                TS              BUF                             # INDEX COUNTER . IRIGX, IRIGY, IRIGZ.
 
                 TC              IRIGX                           # COMPENSATE ACCELERATION TERMS
 
@@ -82,7 +84,7 @@ IRIGCOMP        TS              GCOMPSW                         # INDICATE COMMA
                 TC              IRIGY                           # COMPENSATE ACCELERATION TERMS
 
                 CS              NBDY                            # (GYRO PULSES)/(CS) X 2(-5)
-                TC              DRIFTSUB                        # +(NBDY)(DELTAT)       (GYRO PULSES) X 2(+14)
+                TC              DRIFTSUB                        # -(NBDY)(DELTAT)       (GYRO PULSES) X 2(+14)
 
                 TC              IRIGZ                           # COMPENSATE ACCELERATION TERMS
 
@@ -103,7 +105,7 @@ IRIG1           CA              MODE                            # RESTORE CALLER
                 TS              EBANK                           
                 TCF             SWRETURN                        
 
-## Page 329
+## Page 330
 IRIGX           EXTEND                                          
                 QXCH            MPAC            +2              # SAVE Q
                 EXTEND                                          
@@ -138,7 +140,7 @@ IRIGY           EXTEND
                 DCS             DELVZ                           # (PIPA PULSES) X 2(+14)
                 DXCH            MPAC                            
                 CS              ADSRAY                          # (GYRO PULSES)/(PIPA PULSE) X 2(-6)            *
-                TC              GCOMPSUB                        # +(ADSRAY)(PIPAZ)              (GYRO PULSES) X 2(+14)
+                TC              GCOMPSUB                        # +(ADSRAY)(PIPAZ)         (GYRO PULSES) X 2(+14)
 
 #               EXTEND                  ***
 #               DCS     DELVX           ***     (PIPA PULSES) X 2(+14)
@@ -154,7 +156,7 @@ IRIGZ           EXTEND
                 DCS             DELVY                           # (PIPA PULSES) X 2(+14)
                 DXCH            MPAC                            
                 CA              ADSRAZ                          # (GYRO PULSES)/(PIPA PULSE) X 2(-6)            *
-## Page 330
+## Page 331
                 TC              GCOMPSUB                        # -(ADSRAZ)(PIPAY)        (GYRO PULSES) X 2(+14)
 
                 EXTEND                                          
@@ -171,7 +173,7 @@ IRIGZ           EXTEND
 
                 TC              MPAC            +2              
 
-## Page 331
+## Page 332
 GCOMPSUB        XCH             MPAC                            # ADIA OR ADSRA COEFFICIENT ARRIVES IN A
                 EXTEND                                          # C(MPAC) = (PIPA PULSES) X 2(+14)
                 MP              MPAC                            # (GYRO PULSES)/(PIPA PULSE) X 2(-6)            *
@@ -188,7 +190,7 @@ GCOMPSUB        XCH             MPAC                            # ADIA OR ADSRA 
                 EXTEND                                          
                 MP              BIT9                            # SCALE 2(+6)   SHIFT RIGHT 6                   *
                 INDEX           BUF                             # RESULT = (GYRO PULSES) X 2(+14)
-                DAS             GCOMP                           # HI(ADIA)(PIPAI) OR HI(ADSRA)(PIPAI)
+                DAS             GCOMP                           # HI(ADIA)(PIPAI)  OR  HI(ADSRA)(PIPAI)
 
                 CA              VBUF            +1              # PARTIAL RESULT - MINOR
                 EXTEND                                          
@@ -196,11 +198,11 @@ GCOMPSUB        XCH             MPAC                            # ADIA OR ADSRA 
                 TS              L                               
                 CAF             ZERO                            
                 INDEX           BUF                             # RESULT = (GYRO PULSES) X 2(+14)
-                DAS             GCOMP                           # (ADIA)(PIPAI) OR (ADSRA)(PIPAI)
+                DAS             GCOMP                           # (ADIA)(PIPAI)  OR  (ADSRA)(PIPAI)
 
                 TC              Q                               
 
-## Page 332
+## Page 333
 DRIFTSUB        EXTEND                                          
                 QXCH            BUF             +1              
 
@@ -233,7 +235,7 @@ DRFTSUB2        CAF             TWO                             # PIPAX, PIPAY, 
                 TS              GCOMPSW                         # YES - SET GCOMPSW POSITIVE
                 TC              BUF             +1              # NO
 
-## Page 333
+## Page 334
 1/GYRO          CAF             FOUR                            # PIPAZ, PIPAY, PIPAX
                 TS              BUF                             
 
@@ -280,7 +282,7 @@ GCOMP1          CAF             FOUR                            # PIPAZ, PIPAY, 
 COMPCHK         DEC             -1                              # LESS THAN ZERO IMPOSSIBLE
                 TCF             ENDOFJOB                        
 
-## Page 334
+## Page 335
 NBDONLY         CCS             GCOMPSW                         # BYPASS IF GCOMPSW NEGATIVE
                 TCF             +3                              
                 TCF             +2                              
@@ -317,7 +319,7 @@ NBD3            EXTEND                                          # C(A) = DELTAT 
 
                 CA              ZERO                            
                 TS              GCOMPSW                         # INDICATE COMMANDS 2 PULSES OR LESS.
-                TS              BUF                             # INDEX- X, Y, Z.
+                TS              BUF                             # INDEX  X, Y, Z.
 
                 CCS             TEM1                            # IF SURFACE FLAG IS SET,
                 TC              IRIGX                           # COMPENSATE ACCELERATION TERMS.
@@ -331,7 +333,7 @@ NBD3            EXTEND                                          # C(A) = DELTAT 
 
                 CCS             TEM1                            # IF SURFACE FLAG IS SET,
                 TC              IRIGY                           # COMPENSATE ACCELERATION TERMS.
-## Page 335
+## Page 336
                 EXTEND                                          
                 DCS             VBUF            +2              
                 DXCH            MPAC                            # DELTAT SCALED (CS) X 2(+19)
@@ -351,7 +353,7 @@ NBD3            EXTEND                                          # C(A) = DELTAT 
                 TCF             1/GYRO                          # YES
                 TCF             ENDOFJOB                        # NO
 
-## Page 336
+## Page 337
 FBIASSUB        XCH             Q                               
                 TS              BUF             +1              
 
@@ -400,7 +402,7 @@ GCOMPZER        CAF             LGCOMP                          # ROUTINE TO ZER
                 TS              GCOMP           +2              
                 TS              GCOMP           +3              
                 TS              GCOMP           +4              
-## Page 337
+## Page 338
                 TS              GCOMP           +5              
 
                 TCF             IRIG1                           # RESTORE EBANK AND RETURN
