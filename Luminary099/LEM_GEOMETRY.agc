@@ -13,6 +13,8 @@
 ##				images from Luminary 1A.
 ##		2016-12-13 RSB	Proofed text comments with octopus/ProoferComments
 ##				and corrected the errors found.
+##		2017-03-07 RSB	Fixed comment-text error noticed while proofing
+##				Luminary 116.
 ##
 ## This source code has been transcribed or otherwise adapted from
 ## digitized images of a hardcopy from the MIT Museum.  The digitization
@@ -112,7 +114,7 @@ RRANGLES	STORE	32D
 			34D		# ANGLE LATER, WE CAN FIND THE MODE 1
 		SETPD	ASIN		# TRUNNION BY SIMPLY TAKING THE ARCSIN OF
 			0		# THE Y COMPONENT, THE ASIN GIVING AN
-		PUSH	BDSU		# ANSWER WHOSE ABS VAL IS LESS THAN 90 DEG.
+		PUSH	BDSU		# ANSWER WHOSE ABS VAL IS LESS THAN 90 DEG
 			LODPHALF
 		STODL	4		# MODE 2 TRUNNION TO 4.
 		
@@ -207,6 +209,6 @@ RRNBMPAC	STODL	20D		# SAVE SHAFT CDU IN 21.
 		GOTO
 			RRNB1
 ## Page 325
-# (This page has nothing on it.)
+## <br>This page has nothing on it.
 
 			
