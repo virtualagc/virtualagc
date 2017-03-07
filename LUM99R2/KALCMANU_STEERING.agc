@@ -15,6 +15,8 @@
 ##		2016-12-14 RSB	Proofed text comments with octopus/ProoferComments
 ##				and corrected the errors found.
 ##		2017-03-03 RSB	Snapshot of Luminary 99 Rev 1. 
+##		2017-03-07 RSB	Removed yaYUL workaround that no longer 
+##				seems to be needed.
 
 ## Page 365
 # GENERATION OF STEERING COMMANDS FOR DIGITAL AUTOPILOT FREE FALL MANEUVERS
@@ -55,15 +57,9 @@ INCRDCDU	TS	SPNDX
 		EXTEND			# OR PREVIOUS DESIRED CDU ANGLES
 		INDEX	SPNDX
 		MSU	NCDU
-		EXTEND
-		
-## The following 2 lines seem to have no purpose at all.
-## I am removing them because they only serve to confuse
-## the assembler by getting in between EXTEND and MP.<br>&mdash;RSB 2009
-## <pre>
-##		SETLOC	KALCMON1
-##		BANK
-## </pre>		
+		EXTEND	
+		SETLOC	KALCMON1
+		BANK
 		
 		MP	DT/TAU
 		CCS	A		# CONVERT TO 2S COMPLEMENT
