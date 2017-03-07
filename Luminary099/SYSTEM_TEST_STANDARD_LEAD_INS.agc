@@ -13,7 +13,8 @@
 ##				images from Luminary 1A.
 ##		2016-12-14 RSB	Proofed text comments with octopus/ProoferComments
 ##				and corrected the errors found.
-##
+##		2017-03-07 RSB	Comment-text fixes noted in proofing Luminary 116.
+
 ## This source code has been transcribed or otherwise adapted from
 ## digitized images of a hardcopy from the MIT Museum.  The digitization
 ## was performed by Paul Fjeld, and arranged for by Deborah Douglas of
@@ -94,7 +95,7 @@ E/CALL		LXCH	LOC		# ADRES -1 OF CADR.
 		DXCH	EBUF2		# STORE CADR AND RETURN.
 		TC	INTPRET
 		CALL
-			EBUF2		# INDIRECTLY EXECUTE ROUTING.  IT MUST
+			EBUF2		# INDIRECTLY EXECUTE ROUTINE.  IT MUST
 		EXIT			# LEAVE VIA RVQ OR EQUIVALENT.
 		LXCH	EBUF2 	+1	# PICK UP RETURN.
 		TCF	INTPRET +2	# SET LOC AND RETURN TO CALLER.
