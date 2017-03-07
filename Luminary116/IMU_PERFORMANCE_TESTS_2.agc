@@ -13,23 +13,25 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-01-22 MAS  Created from Luminary 99.
+##		2017-03-07 RSB	Transcribed, and then proofed comment-text using
+##				3-way diff vs Luminary 99 and Luminary 131.
+##				(Admittedly, the former is more for detecting errors
+##				in Luminary 99 than the other way around.)
 
-## NOTE: Page numbers below have not yet been updated to reflect Luminary 116.
-
-## Page 373
+## Page 374
 # NAME -        IMU PERFORMANCE TESTS 2
 
 # DATE -        MARCH 20, 1967
 
 # BY -          SYSTEM TEST GROUP 864-6900 EXT. 1274
 
-# MODNO. -      ZERO
+# MODNO.-       ZERO
 
 # FUNCTIONAL DESCRIPTION
 
 # POSITIONING ROUTINES FOR THE IMU PERFORMANCE TESTS AS WELL AS SOME OF
 # THE TESTS THEMSELVES.  FOR A DESCRIPTION OF THESE SUBROUTINES AND THE
-# OPERATING PROCEDURES (TYPICALLY) SEE STG MEMO 685.  THEORETICAL REF. E-1973
+# OPERATING PROCEDURES (TYPICALLY) SEE STG MEMO 685.THEORETICAL REF.E-1973
 
                 BANK            33                              
                 SETLOC          IMU2                            
@@ -67,7 +69,7 @@ LATAZCHK        DLOAD           SL2
                 TC              ENDTEST1                        
                 TC              +2                              
                 TC              -5                              
-## Page 374
+## Page 375
                 TC              INTPRET                         
                 SLOAD           RTB                             
                                 DSPTEM1                         
@@ -118,7 +120,7 @@ GOESTIMS        CA              ESTICADR
                 TC              TASKOVER                        
 ESTICADR        CADR            ESTIMS                          
 TORQUE          CA              ZERO                            
-## Page 375
+## Page 376
                 TS              DSPTEM2                         
                 CA              DRIFTI                          
                 TS              DSPTEM2         +1              
@@ -167,7 +169,7 @@ PIPJOBB         INDEX           NDXCTR
                 TC              +1                              
                 TC              EARTHR*                         
                 CA              LENGTHOT                        
-## Page 376
+## Page 377
                 EXTEND                                          
                 BZMF            +2                              
                 TC              ENDOFJOB                        
@@ -186,7 +188,7 @@ PIPJOBB         INDEX           NDXCTR
 
                 TC              INTPRET                         
                 DLOAD           DSU                             
-                                DATAPL          +6              
+                                 DATAPL         +6              
                                 DATAPL          +2              
                 BPL             CALL                            
                                 AINGOTN                         
@@ -218,7 +220,7 @@ PON4            CS              BIT5
                 CA              BIT5                            
                 ADS             ERCOMP                          
 PON             TC              EARTHR*                         
-## Page 377
+## Page 378
                 CA              ZERO                            # ALLOW ONLY SOUTH GYRO EARTH RATE COMPENS
                 TS              ERVECTOR                        
                 TS              ERVECTOR        +1              
@@ -240,7 +242,7 @@ ENDTEST1        TC              DOWNFLAG
                 TC              NEWMODEA                        
                 TC              ENDEXT                          
 
-## Page 378
+## Page 379
 OVERFFIX        DAD             DAD                             
                                 DPPOSMAX                        
                                 ONEDPP                          
@@ -288,7 +290,7 @@ CHECKG1         RELINT
                 CS              PIPAX                           
                 TS              ZERONDX                         
                 INHINT                                          
-## Page 379
+## Page 380
                 INDEX           PIPINDEX                        
                 CA              PIPAX                           
                 AD              ZERONDX                         
@@ -317,7 +319,7 @@ ZEROING1        TS              ZERONDX
                 TCF             ZEROING1                        
                 TC              Q                               
 
-## Page 380
+## Page 381
 ERTHRVSE        DLOAD           PDDL                            
                                 SCHZEROS                        # PD24 = (SIN             -COS     0)(OMEG/MS)
                                 LATITUDE                        
@@ -368,15 +370,15 @@ EARTHR*         EXTEND
                 TC              QPLACES                         
 
 SHOW            EXTEND                                          
-## Page 381
+## Page 382
                 QXCH            QPLACE                          
 SHOW1           CA              POSITON                         
                 TS              DSPTEM2         +2              
                 CA              VB06N98                         
                 TC              BANKCALL                        
                 CADR            GOFLASH                         
-                TC              ENDTEST1                        # V34
-                TC              QPLACE                          # V33
+                TC              ENDTEST1                        # V 34
+                TC              QPLACE                          #  V33
                 TCF             SHOW1                           
 
 3990DEC         DEC             3990                            
