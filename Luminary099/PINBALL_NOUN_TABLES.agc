@@ -15,6 +15,7 @@
 ##		2016-12-13 RSB	Proofed text comments with octopus/ProoferComments
 ##				and corrected the errors found.
 ##		2017-01-28 RSB	WTIH -> WITH.
+##		2017-03-07 RSB	Fixed comment-text errors noted while proofing Luminary 116.
 ##
 ## This source code has been transcribed or otherwise adapted from
 ## digitized images of a hardcopy from the MIT Museum.  The digitization
@@ -246,7 +247,7 @@ NNADTAB		OCT	00000			# 00 	NOT IN USE
 		OCT	0			# 30	SPARE
 		OCT	0			# 31	SPARE
 		ECADR	-TPER			# 32	TIME TO PERIGEE (HRS,MIN,SEC)
-		ECADR	TIG			# 33	TIME OF IGNITION (HRS,MIN,SEC)
+		ECADR	TIG			# 33	TIME OF IGNITION (HRS,MIN(SEC)
 		ECADR	DSPTEM1			# 34	TIME OF EVENT (HRS,MIN,SEC)
 		ECADR	TTOGO			# 35	TIME TO GO TO EVENT (HRS,MIN,SEC)
 		ECADR	TIME2			# 36	TIME OF AGC CLOCK (HRS,MIN,SEC)
