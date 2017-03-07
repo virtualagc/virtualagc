@@ -14,10 +14,13 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-01-22 MAS  Created from Luminary 99.
 ##		2017-01-26 RSB	Back-ported a comment-text fix from Luminary 69.
+## Mod history: 2017-01-22 MAS  Created from Luminary 99.
+##		2017-03-07 RSB	Transcribed, and then proofed comment-text using
+##				3-way diff vs Luminary 99 and Luminary 131.
+##				(Admittedly, the former is more for detecting errors
+##				in Luminary 99 than the other way around.)
 
-## NOTE: Page numbers below have not yet been updated to reflect Luminary 116.
-
-## Page 338
+## Page 339
 # SUBROUTINE NAME:      V89CALL
 # MOD NO:       0                       DATE:           9 JAN 1968
 # MOD BY:       DIGITAL DEVEL GROUP     LOG SECTION:    R63
@@ -45,7 +48,7 @@
 # PREPARED FOR VECPOINT.
 
 # 6. GIMBAL ANGLES FROM VECPOINT TRANSFORMED INTO FDAI BALL ANGLES BY
-# BALLANGS.  FLASH DISPLAY V 06 N 18 AND AWAIT RESPONSE.
+# BALLANGS. FLASH DISPLAY V 06 N 18 AND AWAIT RESPONSE.
 
 # 7.    RECYCLE - RETURN TO STEP 4.
 #       TERMINATE - EXIT R63.
@@ -66,8 +69,8 @@
 
 # ERASABLE INITIALIZATION REQUIRED:  NONE
 
-# DEBRIS:       OPTION1, +1, TDEC1, PCINTVSM, SCAXIS, CPHI, CTHETA, CPSI,
-## Page 339
+# DEBRIS:       OPTION1, +1, TDEC1, POINTVSM, SCAXIS, CPHI, CTHETA, CPSI,
+## Page 340
 #               3AXISFLG.
 
                 EBANK=          RONE                            
@@ -76,8 +79,8 @@
                 BANK                                            
 
                 COUNT*          $$/R63                          
-V89CALL         TC              BANKCALL                        # IMU STATUS CHECK.  RETURNS IF ORIENTATION
-                CADR            R02BOTH                         # KNOWN.  ALARMS IF NOT.
+V89CALL         TC              BANKCALL                        # IMU STATUS CHECK. RETURNS IF ORIENTATION
+                CADR            R02BOTH                         # KNOWN. ALARMS IF NOT.
                 CAF             THREE                           # ALLOW ASTRONAUT TO SELECT DESIRED
                 TS              OPTIONX                         # TRACKING ATTITUDE AXIS.
                 CAF             ONE                             
@@ -101,7 +104,7 @@ V89RECL         TC              INTPRET                         #               
                                 TSTART82                        
                 STCALL          TDEC1                           # STORE TIME FOR LEMCONIC CALL
                                 LEMCONIC                        # LEM STATE VECTOR UPDATE
-                VLOAD           VSU                             # CSM POSITION - LEM POSITION - LOS
+                VLOAD           VSU                             # CSM POSITION - LEM POSITION = LOS
                                 RONE                            # LOS VECTOR LEFT IN MPAC
                                 RATT                            
                 MXV             RTB                             # (REFSMMAT X LOS).  TRANSFORMS LOS FROM
@@ -109,14 +112,14 @@ V89RECL         TC              INTPRET                         #               
                                 NORMUNIT                        
                 STORE           POINTVSM                        # STORE LOS FOR VECPOINT CALL
                 EXIT                                            
-                CS              OPTIONX         +1              # 1 FOR Z AXIS.  2 FOR X AXIS.
+                CS              OPTIONX         +1              # 1 FOR Z AXIS. 2 FOR X AXIS.
                 AD              ONE                             
                 EXTEND                                          
                 BZF             ALINEZ                          
 ALINEX          TC              INTPRET                         # X AXIS ALIGNMENT
                 VLOAD                                           
                                 UNITX                           # READ (.5, 0, 0)
-## Page 340
+## Page 341
 V89CALL1        STCALL          SCAXIS                          # STORE SELECTED ALIGNMENT AXIS
                                 VECPOINT                        # PUTS DESIRED GIM ANG (OG,IG,MG) IN TMPAC
                 STORE           CPHI                            # STORE GIMBAL ANGLES FOR BALLANGS CALL.
@@ -142,6 +145,6 @@ ALINEZ          TC              INTPRET                         # Z AXIS ALIGNME
 
 VB04N12         VN              412                             
 VB06N18         VN              0618                            
-## Page 341
+## Page 342
 DP1MIN          2DEC            6000                            
 
