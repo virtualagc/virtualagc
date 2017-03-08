@@ -14,7 +14,9 @@
 ##		2011-01-06 JL	Added missing comment characters.
 ##		2016-12-14 RSB	Proofed text comments with octopus/ProoferComments
 ##				and corrected the errors found.
-##
+##		2017-03-07 RSB	Removed yaYUL workaround that no longer 
+##				seems to be needed.
+
 ## This source code has been transcribed or otherwise adapted from
 ## digitized images of a hardcopy from the MIT Museum.  The digitization
 ## was performed by Paul Fjeld, and arranged for by Deborah Douglas of
@@ -70,14 +72,8 @@ INCRDCDU	TS	SPNDX
 		INDEX	SPNDX
 		MSU	NCDU
 		EXTEND
-		
-## The following 2 lines seem to have no purpose at all.
-## I am removing them because they only serve to confuse
-## the assembler by getting in between EXTEND and MP.<br>&mdash;RSB 2009
-## <pre>
-##		SETLOC	KALCMON1
-##		BANK
-## </pre>		
+		SETLOC	KALCMON1
+		BANK
 		
 		MP	DT/TAU
 		CCS	A		# CONVERT TO 2S COMPLEMENT

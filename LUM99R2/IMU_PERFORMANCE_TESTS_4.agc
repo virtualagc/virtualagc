@@ -14,6 +14,7 @@
 ##		2016-12-14 RSB	Proofed text comments with octopus/ProoferComments
 ##				and corrected the errors found.
 ##		2017-03-03 RSB	Snapshot of Luminary 99 Rev 1. 
+##		2017-03-07 RSB	Comment-text error-fixes noted in proofing Luminary 116.
 
 ## Page 382
 # PROGRAM -	IMU PERFORMANCE TESTS 4
@@ -21,7 +22,7 @@
 # BY -		GEORGE SCHMIDT IL7-146 EXT 1126
 # MOD NO-ZERO
 #
-# FUNCITONAL DESCRIPTION
+# FUNCTIONAL DESCRIPTION
 #
 # THIS SECTION CONSISTS OF THE FILTER FOR THE GYRO DRIFT TESTS.  NO COMPASS
 # IS DONE IN LEM.  FOR A DESCRIPTION OF THE FILTER SEE E-1973.  THIS

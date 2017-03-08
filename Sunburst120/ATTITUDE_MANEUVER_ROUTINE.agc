@@ -15,6 +15,7 @@
 ##		2016-11-02 RSB	More typos.
 ##		2016-12-06 RSB	Comment-proofing with octopus/ProoferComments,
 ##				changes made.
+##		2017-03-07 RSB	Comment-text fixes noted in proofing Luminary 116.
 
 ## Page 636
 # BLOCK 2 LGC ATTITUDE MANEUVER ROUTINE-KALCMANU
@@ -990,7 +991,7 @@ DELCOMP         SETPD           PUSH                            # MPAC CONTAINS 
                 BDSU            BOVB                            
                                 HALFA                         
                                 SIGNMPAC                        
-                PDDL                                            # PDA = 1-COS(A)
+                PDDL                                            # PD4 = 1-COS(A)
 
 # COMPUTE THE DIAGONAL COMPONENTS OF DEL
 

@@ -14,6 +14,8 @@
 ##		2016-12-13 RSB	Proofed text comments with octopus/ProoferComments
 ##				and corrected the errors found.
 ##		2017-03-03 RSB	Snapshot of Luminary 99 Rev 1. 
+##		2017-03-07 RSB	Fixed comment-text error noticed while proofing
+##				Luminary 116.
 
 ## Page 320
 		BANK	23
@@ -98,7 +100,7 @@ RRANGLES	STORE	32D
 			34D		# ANGLE LATER, WE CAN FIND THE MODE 1
 		SETPD	ASIN		# TRUNNION BY SIMPLY TAKING THE ARCSIN OF
 			0		# THE Y COMPONENT, THE ASIN GIVING AN
-		PUSH	BDSU		# ANSWER WHOSE ABS VAL IS LESS THAN 90 DEG.
+		PUSH	BDSU		# ANSWER WHOSE ABS VAL IS LESS THAN 90 DEG
 			LODPHALF
 		STODL	4		# MODE 2 TRUNNION TO 4.
 		

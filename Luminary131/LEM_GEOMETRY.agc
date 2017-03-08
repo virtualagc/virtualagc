@@ -18,6 +18,8 @@
 ##				original harcopy, as opposed to the PDF page
 ##				numbers in 1701.pdf.
 ##		2017-02-23 RSB	Proofed comment text using octopus/ProoferComments.
+##		2017-03-07 RSB	Fixed comment-text error noted while proofing
+##				Luminary 116.
 
 ## Page 322
 		BANK	23
@@ -114,7 +116,7 @@ RRANGLES	STORE	32D
 			32D
 		SR1	STQ
 			S2
-		STODL	SINTH		# USE ARCTRIG SINCE SHAFT COULD BE ARG.
+		STODL	SINTH		# USE ARCTRIG SINCE SHAFT COULD BE ARB.
 			36D
 		SR1
 		STCALL	COSTH

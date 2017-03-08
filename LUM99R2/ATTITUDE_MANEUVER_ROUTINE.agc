@@ -15,7 +15,8 @@
 ##				and corrected the errors found.
 ##		2017-01-19 MAS	Corrected some USER'S to USER:S
 ##		2017-03-03 RSB	Snapshot of Luminary 99 Rev 1. 
-##
+##		2017-03-07 RSB	Comment-text fixes noted in proofing Luminary 116.
+
 ## Notations on the hardcopy document read, in part:
 ##
 ##	Assemble revision 001 of AGC program LMY99 by NASA 2021112-61
@@ -404,7 +405,7 @@
 #
 #	MXM3
 ## Page 350
-#	TRANSPGS
+#	TRANSPOS
 #	SIGNMPAC
 #	READCDUK
 #	CDUTODCM
@@ -827,7 +828,7 @@ DELCOMP		SETPD	PUSH		# MPAC CONTAINS THE ANGLE A
 		BDSU	BOVB
 			DPHALF
 			SIGNMPAC
-		PDDL			# PDA = 1-COS(A)
+		PDDL			# PD4 = 1-COS(A)
 		
 # COMPUTE THE DIAGONAL COMPONENTS OF DEL
 

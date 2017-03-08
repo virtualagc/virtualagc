@@ -24,6 +24,7 @@
 ##		2017-01-28 RSB	WTIH -> WITH.
 ##		2017-02-24 RSB	Proofed comment text using octopus/ProoferComments.
 ##		2017-02-28 RSB	Fixed lingering typos.
+##		2017-03-07 RSB	Comment-text error-fixes noted in proofing Luminary 116.
 
 ## Page 496
 # RENDEZVOUS NAVIGATION PROGRAM 20
@@ -4242,7 +4243,7 @@ WSIZE		DEC	161
 
 ## Page 593
 # PROGRAM NAME LRS24.1		RR SEARCH ROUTINE
-# MCD NO  0			BY P VOLANTE  SDC		DATE 1-15-67
+# MOD NO  0			BY P VOLANTE  SDC		DATE 1-15-67
 #
 # FUNCTIONAL DESCRIPTION
 #

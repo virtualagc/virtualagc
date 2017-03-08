@@ -13,10 +13,12 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-01-22 MAS  Created from Luminary 99.
+##		2017-03-07 RSB	Transcribed, and then proofed comment-text using
+##				3-way diff vs Luminary 99 and Luminary 131.
+##				(Admittedly, the former is more for detecting errors
+##				in Luminary 99 than the other way around.)
 
-## NOTE: Page numbers below have not yet been updated to reflect Luminary 116.
-
-## Page 370
+## Page 371
                 EBANK=          XSM                             
 
                 BANK            33                              
@@ -63,7 +65,7 @@ E/BKCALL        DXCH            BUF2                            # SAVE A,L AND G
 E/SWITCH        DXCH            EBUF2                           
                 DTCB                                            
 
-## Page 371
+## Page 372
 # E/CALL        FOR CALLING A FIXED MEMORY INTERPRETIVE SUBROUTINE FROM ERASABLE AND RETURNING TO ERASABLE.
 
 # THE CALLING SEQUENCE IS...
@@ -81,12 +83,12 @@ E/CALL          LXCH            LOC                             # ADRES -1 OF CA
                 DXCH            EBUF2                           # STORE CADR AND RETURN.
                 TC              INTPRET                         
                 CALL                                            
-                                EBUF2                           # INDIRECTLY EXECUTE ROUTING.  IT MUST
+                                EBUF2                           # INDIRECTLY EXECUTE ROUTINE.  IT MUST
                 EXIT                                            # LEAVE VIA RVQ OR EQUIVALENT.
                 LXCH            EBUF2           +1              # PICK UP RETURN.
                 TCF             INTPRET         +2              # SET LOC AND RETURN TO CALLER.
 
-## Page 372
+## Page 373
 # E/JOBWAK      FOR WAKING UP ERASABLE MEMORY JOBS.
 
 # THIS ROUTINE MUST BE CALLED IN INTERRUPT OR WITH INTERRUPTS INHIBITED.
