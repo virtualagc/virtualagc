@@ -971,44 +971,29 @@ R21DISP         TC              PHASCHNG
 ## Page 514
 V06N72PV        VN              00672
 
-## Page 515XXXXXXX
+## Page 515
 # MANUAL ACQUISITION ROUTINE R23LEM
 # PROGRAM DESCRIPTION
-
-#       MOD NO - 2
-#       BY P VOLANTE
-
+# MOD NO - 2
+# BY P VOLANTE
 # FUNCTIONAL DESCRIPTION
-
-#       TO ACQUIRE THE CSM BY MANUAL OPERATION OF THE RENDEZVOUS RADAR
-
+#
+#   TO ACQUIRE THE CSM BY MANUAL OPERATION OF THE RENDEZVOUS RADAR
 # CALLING SEQUENCE -
-
-#       TC      R23LEM
-
+#          TC     R23LEM
 # SUBROUTINES CALLED
-
-#       BANKCALL        R61LEM
-#       SETMINDB        GOPERF1
-
+#   BANKCALL        R61LEM
+#   SETMINDB        GOPERF1
 # NORMAL EXIT MODES -
-
-#       IN RESPONSE TO THE GOPERF1      ,SELECTION OF ENTER WILL RECYCLE R23
-#                                       ,SELECTION OF PROC WILL CONTINUE R23
-#                                       ,SELECTION OF TERM WILL TERMINATE R23 +P20
-
+#   IN RESPONSE TO THE GOPERF1 ,SELECTION OF ENTER WILL RECYCLE R23
+#                              ,SELECTION OF PROC  WILL CONTINUE R23
+#                              ,SELECTION OF TERM  WILL TERMINATE R23 +P20
 # ALARM OR ABORT EXIT MODES -
-
-#       SEE NORMAL EXIT MODES ABOVE
-
+#   SEE NORMAL EXIT MODES ABOVE
 # OUTPUT
-
-#       N.A.
-
-# ERASABLE INITIALIZATION REQUIRED -
-
-#       ACMODFLG MUST BE SET TO 1 (MANUAL MODE)
-
+#   N.A.
+# ERASABLE INITIALIZATION REQUIRED-
+#   ACMODFLG MUST BE SET TO 1 (MANUAL MODE)
                 EBANK=          GENRET
                 COUNT*          $$/R23
 R23LEM          TC              UPFLAG                          # SET NO ANGLE MONITOR FLAG
@@ -1025,7 +1010,7 @@ R23LEM1         CAF             BIT14                           # ENABLE TRACKER
                 CADR            GOPERF1
                 TC              R23LEM2                         # TERMINATE
                 TC              R23LEM11                        # PROCEDE
-                TC              R23LEM3                         # ENTER - DO ANOTHER MANUVER
+                TC              R23LEM3                         # ENTER- DO ANOTHER MANUVER
 R23LEM11        INHINT
                 TC              RRLIMCHK                        # YES - CHECK IF ANTENNA IS WITHIN LIMITS
                 ADRES           CDUT
@@ -1037,13 +1022,14 @@ R23LEM11        INHINT
                 ADRES           NORRMON
                 TC              P20LEMB1                        # RADAR IS LOCKED ON CONTINUE IN P20
 OUTOFLIM        RELINT
-## Page 514
+
+## Page 516
                 CAF             OCT501PV
                 TC              BANKCALL                        # ISSUE ALARM - RR ANTENNA NOT WITHIN
                 CADR            PRIOLARM                        # LIMITS
-                TC              R23LEM2                         # TERMINATE - EXIT R23 TO R00 (GO TO POOH)
+                TC              R23LEM2                         # TERMINATE - EXIT R23 TO R00 (GO TO P00H)
                 TC              OUTOFLIM        +1              # PROCEED ILLEGAL
-                TC              R23LEM3                         # RECYCLE - DO ANOTHER MANUVER
+                TC              R23LEM3                         # RECYCLE- DO ANOTHER MANUVER
                 TC              ENDOFJOB
 R23LEM2         TC              DOWNFLAG                        # CLEAR NO ANGLE MONITOR FLAG
                 ADRES           NORRMON
@@ -1052,57 +1038,41 @@ R23LEM3         TC              BANKCALL
                 CADR            R61LEM
                 TC              R23LEM1
 
+                
 OCT501PV        OCT             501
 OCT205          OCT             205
 
-## Page 515
+## Page 517
 # SEARCH ROUTINE R24LEM
 # PROGRAM DESCRIPTION
-
-#       MOD NO - 2
-#       BY P. VOLANTE
-
+# MOD NO - 2
+# BY  P. VOLANTE
 # FUNCTIONAL DESCRIPTION
-
-#       TO ACQUIRE THE CSM BY A SEARCH PATTERN WHEN THE RENDEZVOUS RADAR HAS
-#       FAILED TO ACQUIRE THE CSM IN THE AUTOMATIC TRACKING MODE AND TO ALLOW
-#       THE ASTRONAUT TO CONFIRM THAT REACQUISITION HAS NOT BEEN BY SIDELOBE.
-
+#
+#   TO ACQUIRE THE CSM BY A SEARCH PATTERN WHEN THE RENDEZVOUS RADAR HAS
+# FAILED TO ACQUIRE THE CSM IN THE AUTOMATIC TRACKING MODE AND TO ALLOW
+# THE ASTRONAUT TO CONFIRM THAT REACQUISITION HAS NOT BEEN BY SIDELOBE.
 # CALLING SEQUENCE
-
-#       CAF     PRIONN
-#       TC      FINDVAC
-#       EBANK=  DATAGOOD
-#       2CADR   R24LEM
-
+#          CAF    PRIONN
+#          TC     FINDVAC
+#          EBANK= DATAGOOD
+#          2CADR  R24LEM
 # SUBROUTINES CALLED
-
-#       FLAGUP          FLAGDOWN        BANKCALL
-#       R61LEM          GOFLASHR        FINDVAC
-#       ENDOFJOB        NOVAC           LSR24.1
-
-# NORMAL EXIT MODES -
-
-#       ASTRONAUT RESPONSE TO DISPLAY OF OMEGA AND DATAGOOD.  HE CAN EITHER
-#       REJECT BY TERMINATING (SEARCH OPTION AND RESELECTING P20) OR ACCEPT BY
-#       PROCEEDING (EXIT ROUTINE AND RETURN TO AUTO MODE IN P20)
-
-# ALARM OR ABORT EXIT MODES -
-
-#       SEE NORMAL EXIT MODES ABOVE
-
+#   FLAGUP        FLAGDOWN      BANKCALL
+#   R61LEM        GOFLASHR      FINDVAC
+#   ENDOFJOB      NOVAC         LSR24.1
+# NORMAL EXIT MODES-
+#   ASTRONAUT RESPONSE TO DISPLAY OF OMEGA AND DATAGOOD.HE CAN EITHER
+# REJECT BY TERMINATING (SEARCH OPTION AND RESELECTING P20) OR ACCEPT BY
+# PROCEEDING (EXIT ROUTINE AND RETURN TO AUTO MODE IN P20)
+# ALARM OR ABORT EXIT MODES-
+#   SEE NORMAL EXIT MODES ABOVE
 # OUTPUT -
-
-#       SEE OUTPUT FROM LSR24.1 + R61LEM
-
+#   SEE OUTPUT FROM LSR24.1 + R61LEM
 # ERASABLE INITIALIZATION REQUIRED
-
-#       SEE INPUT FOR LSR24.1
-
+#   SEE INPUT FOR LSR24.1
 # FLAGS SET + RESET
-
-#       SRCHOPT, ACMODFLG
-
+#   SRCHOPT,ACMODFLG
                 EBANK=          DATAGOOD
                 COUNT*          $$/R24
 R24LEM          TC              UPFLAG
@@ -1121,8 +1091,10 @@ R24LEM2         TC              PHASCHNG
                 TC              GOTOV56
                 TC              R24END                          # PROCEED EXIT R24 TO P20LEM1
 
+                
                 TC              R24LEM3                         # RECYCLE - CALL R61 TO MANEUVER S/C
-## Page 516
+                
+## Page 518
                 TC              BANKCALL
                 CADR            LRS24.1
 R24END          TC              KILLTASK
@@ -1145,6 +1117,7 @@ CLRADMOD        CS              BIT10+15
 
                 TC              Q
 
+                
 BIT10+15        OCT             41000
                 BANK            24
                 SETLOC          P20S
@@ -1155,13 +1128,12 @@ R24LEM3         TC              PHASCHNG
                 OCT             04022
                 TC              KILLTASK
                 CADR            CALLDGCH                        # KILL WAITLIST FOR NEXT POINT IN PATTERN
-                TC              CLRADMOD                        # CLEAR BITS 10 + 15 OF RADMODES TO KILL
-                RELINT                                          # HALF SECOND DESIGNATE LOOP
+                TC              CLRADMOD                        # CLEAR BITS 10 + 15 OF RADMODES
                 CAF             .5SEC
                 TC              BANKCALL                        # WAIT FOR DESIGNATE LOOP TO DIE
                 CADR            DELAYJOB
                 TC              LUNSFCHK                        # CHECK IF ON LUNAR SURFACE
-                TC              R24LEM4                         # YES - DONT DO ATTITUDE MANEUVER
+                TC              R24LEM4                         # YES-DONT DO ATTITUDE MANEUVER
                 TC              BANKCALL                        # CALL R61 TO DO PREFERRED TRACKING
                 CADR            R61LEM                          # ATTITUDE MANEUVER
 R24LEM4         CAF             ZERO                            # ZERO OUT RADCADR (WHICH WAS SET BY
@@ -1169,56 +1141,41 @@ R24LEM4         CAF             ZERO                            # ZERO OUT RADCA
                                                                 # RRDESSM WILL RETURN TO CALLER
                 TC              R24LEM2                         # AND GO BACK TO PUT UP V16 N80 DISPLAY
 
+                
 V16N80          VN              01680
 
-## Page 517
+## Page 519
 # PREFERRED TRACKING ATTITUDE ROUTINE R61LEM
 # PROGRAM DESCRIPTION
+# MOD NO : 3                      DATE: 4-11-67
+# MOD BY : P VOLANTE  SDC
 
-#       MOD NO: 3               DATE: 4-11-67
-#       MOD BY: P VOLANTE   SDC
 
-# FUNCTIONAL DESCRIPTION -
-
-#       TO COMPUTE THE PREFERRED TRACKING ATTITUDE OF THE LM TO ENABLE RR
-#       TRACKING OF THE CSM AND TO PERFORM THE MANEUVER TO THE PREFERRED
-#       ATTITUDE.
-
-# CALLING SEQUENCE -
-
-#       TC      BANKCALL
-#       CADR    R61LEM
-
+# FUNCTIONAL DESCRIPTION-
+#   TO COMPUTE THE PREFERRED TRACKING ATTITUDE OF THE LM TO ENABLE RR
+# TRACKING OF THE CSM AND TO PERFORM THE MANEUVER TO THE PREFERRED
+# ATTITUDE.
+# CALLING SEQUENCE-
+#          TC     BANKCALL
+#          CADR   R61LEM
 # SUBROUTINES CALLED
+#     LPS20.1       VECPOINT
+#     KALCMAN3
 
-#       LPS20.1         VECPOINT
-#       KALCMAN3
 
-# NORMAL EXIT MODES -
-
-#       NORMAL RETURN IS TO CALLER + 1
-
-# ALARM OR ABORT EXIT MODES -
-
-#       TERMINATE P20 + R61 BY BRANCHING TO P20END IF BOTH TRACKFLAG +
-#       RENDEZVOUS FLAG ARE NOT SET.
-
+# NORMAL EXIT MODES-
+#   NORMAL RETURN IS TO CALLER + 1
+# ALARM OR ABORT EXIT MODES-
+#   TERMINATE P20 + R61 BY BRANCHING TO P20END IF BOTH TRACKFLAG +
+# RENDEZVOUS FLAG ARE NOT SET.
 # OUTPUT -
-
-#       SEE OUTPUT FOR LPS20.1 + ATTITUDE MANEUVER ROUTINE (R60)
-
+#   SEE OUTPUT FOR LPS20.1 + ATTITUDE MANEUVER ROUTINE (R60)
 # ERASABLE INITIALIZATION REQUIRED
-
-#       GENRET USED TO SAVE Q FOR RETURN
-
+#   GENRET USED TO SAVE Q FOR RETURN
 # FLAGS SET + RESET
-
-#       3AXISFLG
-
+#   3AXISFLG
 # DEBRIS
-
-#       SEE SUBROUTINES
-
+#   SEE SUBROUTINES
                 SETLOC          R61
                 BANK
                 EBANK=          LOSCOUNT
@@ -1227,18 +1184,38 @@ R61LEM          TC              MAKECADR
                 TS              GENRET
                 TC              UPFLAG                          # SET R61 FLAG
                 ADRES           R61FLAG
-                TC              R61C+L01
+                TC              R61C+L02
 R65LEM          TC              MAKECADR
                 TS              GENRET
                 TC              DOWNFLAG                        # RESET R61 FLAG
                 ADRES           R61FLAG
-R61C+L01        CAF             TRACKBIT                        # TRACKFLAG
+R61C+L01        CAF             BIT4                            # BYPASS RADAR READING IF DATA
+                EXTEND                                          # GOOD NOT PRESENT
+                RAND            CHAN33
+                CCS             A
+                TCF             R61C+L02                        # NO DATA GOOD
+                TC              UPFLAG
+                
+## Page 520     
+                ADRES           R04FLAG                         # PREVENT 521 ALM
+                TC              BANKCALL                        # READ RR RANGE AND RDOT
+                CADR            RRRDOT                          #  EVERY R65 PASS (3 TIMES
+                TC              BANKCALL                        #  BEFORE FIRST MARK, ONCE
+                CADR            RADSTALL                        #  DURING ANY MARK PROCESSING
+                NOOP
+                TC              BANKCALL
+                CADR            RRRANGE
+                TC              BANKCALL
+                CADR            RADSTALL
+                NOOP
+                TC              DOWNFLAG
+                ADRES           R04FLAG
+R61C+L02        CAF             TRACKBIT                        # TRACKFLAG
                 MASK            STATE           +1
                 EXTEND
                 BZF             R65WAIT                         # NOT SET
 R61C+L03        TC              INTPRET
                 VLOAD
-## Page 518
                                 HIUNITZ
                 STORE           SCAXIS                          # TRACK AXIS UNIT VECTOR
 R61LEM1         RTB             DAD
@@ -1249,14 +1226,14 @@ R61LEM1         RTB             DAD
                 VLOAD
                                 RRTARGET
                 STORE           POINTVSM
-                RTB             CALL                            # GET DESIRED CDU'S FOR VECPNT1
+                RTB             CALL                            #    GET DESIRED CDU'S FOR VECPNT1
                                 READCDUD
                                 VECPNT1                         # COMPUTES FINAL ANGLES FROM PRESENT CDUDS
-                STORE           CPHI                            # STORE FINAL ANGLES - CPHI, CTHETA, CPSI
+                STORE           CPHI                            # STORE FINAL ANGLES - CPHI,CTHETA,CPSI
                 EXIT
                 TC              PHASCHNG
                 OCT             04022
-                CAF             TRACKBIT                        # IS TRACK FLAG SET
+                CAF             TRACKBIT                        #  IS TRACK FLAG SET
                 MASK            FLAGWRD1
                 EXTEND
                 BZF             R65WAIT
@@ -1270,6 +1247,8 @@ R61LEM1         RTB             DAD
                                 CDU*SMNB
                 DLOAD           DSU                             # GET PHI - ARCCOS OF Z-COMPONENT OF LOS
                                 MPAC            +5
+                                
+## Page 521                              
                                 COS15DEG
 R61LEM2         BMN             EXIT                            # BRANCH - PHI > 15 DEGREES
                                 R61C+L05                        # PHI GRE 10DEG
@@ -1289,7 +1268,6 @@ R61LEM2         BMN             EXIT                            # BRANCH - PHI >
                 TC              R61C+L06
 R61C+L05        EXIT
                 INHINT
-## Page 519
                 TC              IBNKCALL
                 FCADR           ZATTEROR
                 TC              IBNKCALL
@@ -1321,9 +1299,10 @@ R61C+L06        CA              FLAGWRD1
                 TC              ENDOFJOB
 R61C+L2         CAF             PRIO26
                 TC              FINDVAC
+                
+## Page 522               
                 EBANK=          LOSCOUNT
                 2CADR           R61C+L01
-
                 TC              TASKOVER
 R61C+L04        TC              BANKCALL                        # TO CONVERT ANGLES TO FDAI
                 CADR            BALLANGS
@@ -1333,15 +1312,14 @@ R61C+L4         CAE             GENRET
 R61C+L1         CAF             BIT7+9PV                        # IS RENDEZVOUS OR P25FLAG SET
                 MASK            STATE
                 EXTEND
-                BZF             ENDOFJOB                        # NO - EXIT ROUTINE AND PROGRAM.
+                BZF             ENDOFJOB                        # NO-EXIT ROUTINE AND PROGRAM.
                 TC              R61C+L06                        # YES EXIT ROUTINE
 R65WAIT         TC              POSTJUMP
                 CADR            P20LEMWT
 
+                
 BIT7+9PV        OCT             00500
-## Page 520
 COS15DEG        2DEC            0.96593         B-1
-
 06SEC           DEC             600
 PHI             EQUALS          20D
 READCDUD        INHINT                                          # READS DESIRED CDU'S AND STORES IN
@@ -1365,7 +1343,7 @@ READCDUD        INHINT                                          # READS DESIRED 
                 EBANK=          LOSCOUNT
                 COUNT*          $$/RRSUB
 
-## Page 521
+## Page 523XXXX
 # THE FOLLOWING SUBROUTINE RETURNS TO CALLER +2 IF THE ABSOLUTE VALUE OF VALUE OF C(A) IS GREATER THAN THE
 # NEGATIVE OF THE NUMBER AT CALLER +1.  OTHERWISE IT RETURNS TO CALLER +3.  MAY BE CALLED IN RUPT OR UNDER EXEC.
 
