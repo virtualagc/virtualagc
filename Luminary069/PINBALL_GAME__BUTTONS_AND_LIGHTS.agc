@@ -22,6 +22,8 @@
 ##				but no errors found.
 ##		2017-01-28 RSB	WTIH -> WITH.
 ##		2017-02-08 RSB	Comment-text fixes identified while proofing Artemis 72.
+##		2017-03-08 RSB	Comment-text fixes noted while proofing Luminary 116.
+##		2017-03-08 RSB	Changed DSPOCTWO to DSPOCTWD.
 
 ## Page 403
 # PROGRAM NAME - KEYBOARD AND DISPLAY PROGRAM
@@ -250,7 +252,7 @@
 # MONSAVE  ERASE                  N/V CODE FOR MONITOR. (= MONSAVE1-1)
 # MONSAVE1 ERASE                  NOUNCADR FOR MONITOR (MATBS) =MONSAVE+1
 # MONSAVE2 ERASE                  NVMONOPT OPTIONS
-# DSPTAB   ERASE          +13D    0-10,DISPLAY PANEL BUFFER,11-13,C RELAYS
+# DSPTAB   ERASE          +13D    0-10,DISPLAY PANEL BUFFER.11-13,C RELAYS
 # CADRSTOR ERASE                  ENDIDLE STORAGE
 # NVQTEM   ERASE                  NVSUB STORAGE FOR CALLING ADDRESS
 #                                 MUST = NVBNKTEM-1
@@ -975,7 +977,7 @@ INTMCTBS        CA      MPAC    +2      # INTERNAL MACH CADR TO BE SPECIFIED.
                 CAF     R3D1            # VB NOT = 05. DISPLAY CADR.
                 TS      DSPCOUNT
                 CA      NOUNCADR
-                TC      DSPOCTWO
+                TC      DSPOCTWD
                 TC      VERBFAN
                 
                 AD      ONE
@@ -1249,7 +1251,7 @@ DSPCOM3         TS      DISTEM          # +0,+1,+2 INTO DISTEM
                 TS      DSPCOUNT
                 INDEX   DISTEM
                 CS      BUF
-                TC      DSPOCTWO
+                TC      DSPOCTWD
                 XCH     DISTEM
                 TC      DSPCOM2 +2
                 
@@ -2392,7 +2394,7 @@ MONIT1          TS      MPAC +1         # TEMP STORAGE
                 TC      MONIT2
 BIT15/14        OCT     60000
                 TC      MONIT2
-                CAF     BIT14           # EXTERNALLY INITIATED MONITOR.
+                CAF     BIT14           # EXTERNALLY INITIATED MONITOR,
                 ADS     MPAC +1         # SET BIT 14 FOR MONSAVE1.
                 CAF     ZERO
                 TS      MONSAVE2        # ZERO NVMONOPT OPTIONS
@@ -2526,7 +2528,7 @@ DSPFMEM         CAF     R1D1            # IF F/F, DATACALL USES BANK 02 OR 03.
                 TS      L               # 3RD COMPONENT OF NOUN 26.
                 CA      NOUNCADR        # ORIGINAL FCADR LOADED STILL IN NOUNCADR.
                 TC      SUPDACAL        # CALL WITH FCADR IN A, SUPERBITS IN L.
-                TC      DSPOCTWO
+                TC      DSPOCTWD
 ENDSPF          TC      ENDOFJOB
 
 ## Page 454
@@ -2656,7 +2658,7 @@ ENDECVN         EQUALS
 # DSPOCTWD DISPLAYS C(A) UPON ENTRY AS A 5 CHAR OCT STARTING IN THE DSP
 # CHAR SPECIFIED IN DSPCOUNT. IT STOPS AFTER 5 CHAR HAVE BEEN DISPLAYED.
 
-DSPOCTWO        TS      CYL
+DSPOCTWD        TS      CYL
                 XCH     Q
                 TS      WDRET           # MUST USE SAME RETURN AS DSP2BIT.
                 CAF     BIT14           # TO BLANK SIGNS
@@ -2779,7 +2781,7 @@ DSMSK           OCT     37
                 TC      DSPIN1
 
                 
-DSPOCTIN        TC      DSPIN           # SO DSPOCTWO DOESNT USE SWCALL
+DSPOCTIN        TC      DSPIN           # SO DSPOCTWD DOESNT USE SWCALL
                 CAF     +2
                 TC      BANKJUMP
 ENDSPOCT        CADR    OCTBACK
@@ -3079,7 +3081,7 @@ NVMONOPT        TS      NVTEMP
                 MASK    MONSAVE1        # EXTERNAL MONITOR BIT
                 AD      DSPLOCK
                 CCS     A
-                TC      Q               # DSP SYST BLOCKED, RET TO 1+ CALLING LOC
+                TC      Q               # DSP SYST BLOCKED. RET TO 1+ CALLING LOC
                 CAF     ONE             # DSP SYST AVAILABLE
 NVSBCOM         AD      Q
                 TS      NVQTEM          # 2+ CALLING LOC INTO NVQTEM
@@ -3159,7 +3161,7 @@ NVSUB2          CCS     MPAC +4         # TEST VERB
                 TC      +4              # IF VERB NOT +0, GO ON
                 CA      MPAC +3
 ## Page 467
-                TC      UPDATNN -1      # IF VERB = +0, DISPLAY NOUN, THEN RETURN
+                TC      UPDATNN -1      # IF VERB = +0, DISPLAY NOUN. THEN RETURN
                 TC      NVSUBEND
                 CA      MPAC +2         # TEMP FOR MACH CADR TO BE SPEC. (DSPDECVN
                 TS      MPAC +5         #              USES MPAC, +1, +2)
@@ -3757,10 +3759,10 @@ TSTLTS1         TS      ERCNT
 FULLDSP         OCT     05675           # DISPLAY ALL 8:S
 FULLDSP1        OCT     07675           # DISPLAY ALL 8:S AND +
 TSTCON1         OCT     00175
-                                        # UPLINK ACTIVITY, TEMP. KEY RLSE,
+                                        # UPLINK ACTIVITY, TEMP, KEY RLSE,
                                         # V/N FLASH, OPERATOR ERROR.
 ## Page 481
-TSTCON2         OCT     40674           # DSPTAB+11D BITS 3,4,5,6,8,9, LR LITES,
+TSTCON2         OCT     40674           # DSPTAB+11D BITS 3,4,5,6,8,9. LR LITES,
                                         # NO ATT, GIMBAL LOCK, TRACKER, PROG ALM.
 TSTCON3         OCT     00115           # CHAN 11  BITS 1, 3, 4, 7.
                                         # UPLINK ACTIVITY, TEMP, OPERATOR ERROR.
@@ -3817,7 +3819,7 @@ OCT55000        OCT     55000
 ENDPINS2        EQUALS
 
 ## Page 483
-# ERROR LIGHT RESET (RSET) TURNS OFF:
+# ERROR LIGHT RESET (RSET) TURNS OFF,
 # UPLINK ACTIVITY, AUTO, HOLD, FREE, OPERATOR ERROR,
 # PROG ALM, TRACKER FAIL.
 # LEAVES GIMBAL LOCK AND NO ATT ALONE.

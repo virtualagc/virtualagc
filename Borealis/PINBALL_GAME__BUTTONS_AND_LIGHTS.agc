@@ -14,6 +14,8 @@
 ##              2017-01-04 MAS  Pulled back PROCEED key functionality from Luminary 99.
 ##		2017-01-28 RSB	WTIH -> WITH.
 ##		2017-02-08 RSB	Comment-text fixes noted while proofing Artemis 72.
+##		2017-03-08 RSB	Changed DSPOCTWO to DSPOCTWD.
+##		2017-03-08 RSB	Comment-text fixes noted in proofing Luminary 116.
 
 # KEYBOARD AND DISPLAY PROGRAM
 
@@ -404,7 +406,7 @@ DECON           2DEC            E-5 B14                 # 2EXP14/10EXP5 = .16384
 
 GETINREL        INDEX           DSPCOUNT
                 CAF             INRELTAB
-                TS              INREL                   # (A TEMP. REG)
+                TS              INREL                   # (A TEMP, REG)
                 TC              Q
 
 INRELTAB        OCT             4                       # R3D5 (DSPCOUNT = 0)
@@ -452,7 +454,7 @@ NEGSGN          TC              SIGNTEST
                 TC              -ON
                 CAF             TWO
 BOTHSGN         INDEX           INREL                   # SET DEC COMP BIT TO 1 (IN DECBRNCH)
-                AD              BIT7                    # BIT 5 FOR R1.  BIT 4 FOR R2.
+                AD              BIT7                    # BIT 5 FOR R1, BIT 4 FOR R2,
                 ADS             DECBRNCH                # BIT 3 FOR R3.
 FIXCLPAS        CCS             CLPASS                  # IF CLPASS IS + OR +0, MAKE IT +0.
                 CAF             ZERO
@@ -612,7 +614,7 @@ CLEAR           CCS             DSPCOUNT
 CLPASHI         CCS             INREL
                 TS              INREL
                 TC              LEGALTST
-                CAF             DOUBLK          +2       # +3 TO - NUMBER, BACKS DATA REQUESTS.
+                CAF             DOUBLK          +2       # +3 TO - NUMBER. BACKS DATA REQUESTS.
                 ADS             REQRET
                 CA              INREL
                 TS              MIXTEMP                 # TEMP STORAGE FOR INREL
@@ -764,7 +766,7 @@ TESTNN          EXTEND                                  # VERB L/ 30
                 TC              GODSPALM                # NOT IN USE     IF +0
                 TC              REQADD                  # SPECIFY MACHINE CADR IF -
                 INCR            NOUNCADR                # AUGMENT MACHINE CADR IF -0
-                TC              SETNADD                 # ECADR FROM NOUNCADR, SETS EB, NOUNADD.
+                TC              SETNADD                 # ECADR FROM NOUNCADR. SETS EB, NOUNADD.
                 TC              INTMCTBS        +2
 REQADD          CAF             BIT15                   # SET CLPASS FOR PASS0 ONLY
                 TS              CLPASS
@@ -2123,7 +2125,7 @@ DSMSK           OCT             37
 
 
 
-DSPOCTIN        TC              DSPIN                   # SO DSPOCTWO DOESNT USE SWCALL
+DSPOCTIN        TC              DSPIN                   # SO DSPOCTWD DOESNT USE SWCALL
                 CAF             +2
                 TC              BANKJUMP
 ENDSPOCT        CADR            OCTBACK
@@ -2374,7 +2376,7 @@ SWTAB           OCT             0                       # -R3
                 SETLOC          MIDSIX          +1
 NVSUB           TS              NVTEMP                  # IN FIXED FIXED
                 CCS             DSPLOCK
-                TC              Q                       # DSP SYST BLOCKED, RET TO 1+ CALLING LOC
+                TC              Q                       # DSP SYST BLOCKED. RET TO 1+ CALLING LOC
                 CA              Q                       # DSP SYST AVAILABLE
                 AD              ONE
                 TS              NVQTEM                  # 2+ CALLING LOC INTO NVQTEM
