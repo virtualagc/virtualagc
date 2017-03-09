@@ -22,6 +22,7 @@
 ##				and fixed errors found.
 ##		2017-02-07 RSB	Comment-text corrections identified while 
 ##				proofing Artemis 72.
+##		2017-03-09 RSB	Comment-text fixes noted in proofing Luminary 116.
 
 ## Page 628
 # COELLIPTIC SEQUENCE INITIATION (CSI) PROGRAMS (P32 AND P72)
@@ -382,7 +383,7 @@ P32/P72F        STORE   T2TOT3
 #       (7) IT IS NORMALLY REQUIRED THAT THE ISS BE ON FOR 1 HOUR PRIOR TO
 #           A THRUSTING MANEUVER.
 
-#       (8) THIS PROGRAM IS SELECTED BY THE ASTRONAUT BY DSKY ENTRY.
+#       (8) THIS PROGRAM IS SELECTED BY THE ASTRONAUT BY DSKY ENTRY -
 
 #               P33 IF THIS VEHICLE IS ACTIVE VEHICLE.
 

@@ -18,6 +18,7 @@
 ##		2017-01-28 RSB	WTIH -> WITH.
 ##		2017-02-07 RSB	Proofed comment text by diff'ing vs Comanche 55
 ##				and corrected errors found.
+##		2017-03-09 RSB	Comment-text fixes noted in proofing Luminary 116.
 
 ## Page 658
 
@@ -413,7 +414,7 @@ PASSNN		EXIT
 #	(7) IT IS NORMALLY REQUIRED THAT THE ISS BE ON FOR 1 HOUR PRIOR TO
 #	    A THRUSTING MANEUVER.
 #
-#	(8) THIS PROGRAM IS SELECTED BY THE ASTRONAUT BY DSKY ENTRY.
+#	(8) THIS PROGRAM IS SELECTED BY THE ASTRONAUT BY DSKY ENTRY -
 #
 #		P33 IF THIS VEHICLE IS ACTIVE VEHICLE.
 #
