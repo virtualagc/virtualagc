@@ -13,10 +13,12 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-01-22 MAS  Created from Luminary 99.
+##		2017-03-09 RSB	Transcribed, and then proofed comment-text using
+##				3-way diff vs Luminary 99 and Luminary 131.
+##				(Admittedly, the former is more for detecting errors
+##				in Luminary 99 than the other way around.)
 
-## NOTE: Page numbers below have not yet been updated to reflect Luminary 116.
-
-## Page 486
+## Page 488
 # SUBROUTINE NAME: R05 - S-BAND ANTENNA FOR LM
 
 # MOD0 BY T. JAMES
@@ -30,12 +32,13 @@
 # NAUT VIA DSKY ENTRY DURING COASTING FLIGHT OR WHEN THE LM IS ON THE MOON
 # SURFACE.  THE EARTH OR MOON REFERENCE COORDINATE SYSTEM IS USED DEPENDING
 # ON WHETHER THE LM IS ABOUT TO ENTER OR HAS ALREADY ENTERED THE MOON
-# SPHERE OF INFLUENCE, RESPECTIVELY
+# SPHERE OF INFLUENCE, RESPECTIVELY.  CAN BE CALLED ANY TIME EXCEPT WHEN
+# ANOTHER EXTENDED VERB IS IN USE. DISPLAY IS MEANINGLESS WITH IMU OFF.
 
 # TO CALL SUBROUTINE, ASTRONAUT KEYS IN V 64 E
 
 # SUBROUTINES CALLED -
-#       R02BOTH
+
 #       INTPRET
 #       LOADTIME
 #       LEMCONIC
@@ -48,6 +51,7 @@
 #       BLANKET
 
 # RETURNS WITH
+
 #       PITCH ANGLE IN PITCHANG         REV. B0
 #       YAW ANGLE IN YAWANG             REV. B0
 
@@ -63,10 +67,8 @@
 
                 EBANK=          WHOCARES                        
                 COUNT*          $$/R05                          
-SBANDANT        TC              BANKCALL                        
-## Page 487
-                CADR            R02BOTH                         # CHECK IF IMU IS ON AND ALIGNED
-                TC              INTPRET                         
+SBANDANT        TC              INTPRET                        
+## Page 489
                 SETPD           RTB                             
                                 0D                              
                                 LOADTIME                        # PICK UP CURRENT TIME
@@ -115,9 +117,9 @@ CONV5           SETPD           UNIT                            # UE = -UNIT((RE
                 STOVL           RLM                             # R B-1
                                 RLM                             
                 UNIT            PDVL                            
-## Page 488		
                                 RLM                             
                 VPROJ           VSL2                            # PROJECTION OF R ONTO LM XZ PLANE
+## Page 490		
                                 HIUNITY                         
                 BVSU            BOV                             # CLEAR OVERFLOW INDICATOR IF ON
                                 RLM                             
@@ -166,9 +168,9 @@ SBANDEX         EXIT
                 EXTEND                                          
                 BZF             ENDEXT                          # NO
                 CAF             PRIO5                           
-## Page 489		
                 TC              PRIOCHNG                        
                 CAF             V06N51                          # DISPLAY ANGLES
+## Page 491		
                 TC              BANKCALL                        
                 CADR            GOMARKFR                        
                 TC              B5OFF                           # TERMINATE
@@ -178,7 +180,7 @@ SBANDEX         EXIT
                 TC              BLANKET                         # BLANK R3
                 CAF             PRIO4                           
                 TC              PRIOCHNG                        
-                TC              SBANDANT        +2              # YES, CONTINUE DISPLAYING ANGLES
+                TC              SBANDANT        +2              # YES, CONTINUE DISPLAYING ANGLES.
 V06N51          VN              0651                            
 1OVSQRT2        2DEC            .7071067815                     # 1/SQRT(2)
 
