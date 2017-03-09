@@ -20,6 +20,7 @@
 ##                                  operator TCF, BZF -> TC                                 
 ##		2016-12-25 RSB	Comment-text proofed using ProoferComments
 ##				and corrected errors found.
+##		2017-03-09 RSB	Comment-text fixes noted in proofing Luminary 116.
 
 ## Page 726
 
@@ -355,7 +356,7 @@ TIG-5           EXTEND
                 TC              TWIDDLE
                 ADRES           TIG-0
 
-                TC              DOWNFLAG                # RESET IGNFLAG AND ASINFLAG
+                TC              DOWNFLAG                # RESET IGNFLAG AND ASTNFLAG
                 ADRES           IGNFLAG                 #   FOR LIGHT-UP LOGIC
                 TC              DOWNFLAG
                 ADRES           ASTNFLAG

@@ -15,8 +15,10 @@
 ## Mod history: 2017-01-22 MAS  Created from Luminary 99.
 ##		2017-01-28 RSB	Back-ported some comment fixes I noticed while
 ##				proofing Luminary 69.
-
-## NOTE: Page numbers below have not yet been updated to reflect Luminary 116.
+##		2017-03-09 RSB	Transcribed, and then proofed comment-text using
+##				3-way diff vs Luminary 99 and Luminary 131.
+##				(Admittedly, the former is more for detecting errors
+##				in Luminary 99 than the other way around.)
 
 ## Page 658
 # TRANSFER PHASE INITIATION (TPI) PROGRAMS (P34 AND P74)
@@ -112,7 +114,7 @@
 
 #       (7)     ONCE THE PARAMETWRS REQUIRED FOR COMPUTION OF THE MANEUVER
 #               HAVE BEEN COMPLETELY SPECIFIED, THE VALUE OF THE ACTIVE
-#               VEHICLE CENTRAL ANGLE OF TRANSFER IS COMPUTED AND STURED.
+#               VEHICLE CENTRAL ANGLE OF TRANSFER IS COMPUTED AND STORED.
 #               THIS NUMBER WILL BE AVAILABLE FOR DISPLAY TO THE ASTRONAUT
 #               THROUGH THE USE OF V06N52.
 
@@ -628,7 +630,7 @@ REVERS          DLOAD           DCOMP
                                 ADTIME                          
 STORDELT        STORE           DELTEEO                         
 ADTIME          DAD                                             
-                                NOMTPI                          # SUM OF DELTA T'S
+                                NOMTPI                          # SUM OF DELTA T:S
                 STORE           NOMTPI                          
                 VLOAD           PDVL                            
                                 VAPREC                          
@@ -889,8 +891,7 @@ NTARGCHK        TS              Q
 ## Page 679
                                 NOCHG                           
                                 S34/35.3                        
-NOCHG           CLEAR           VLOAD                           
-                                XDELVFLG                        
+NOCHG           VLOAD                           
                                 DELVEET3                        
                 STORE           DELVSIN                         
 FLAGOFF         CALL                                            
@@ -1218,13 +1219,15 @@ INITVEL4        LXA,2           SXA,2
 
 # SET INPUTS UP FOR LAMBERT
 
-                LXA,1           CALL                            
-                                RTX1                            
+                LXA,1           SSP                            
+                                RTX1    
+                                ITERCTR
+                                20D                        
 
 #  OPERATE THE LAMBERT CONIC ROUTINE (COASTFLT SUBROUTINE)
 
-                                SETITCTR                        # GO TO END OF BANK TO SET ITERCTR BEFORE
-                                                                # CALLING LAMBERT (FOR REMANUFACTURE ONLY)
+                CALL
+                                LAMBERT
 
 # ARRIVED AT SOLUTION IS GOOD ENOUGH ACCORDING TO SLIGHTLY WIDER BOUNDS.
 
@@ -1247,8 +1250,8 @@ INITVEL4        LXA,2           SXA,2
                                 RTX2                            
                                 MOONFLAG                        
                 BHIZ            SET                             
-                                INITVEL5                        
 ## Page 689
+                                INITVEL5                        
                                 MOONFLAG                        
 INITVEL5        VLOAD                                           
                                 RINIT                           
@@ -1300,8 +1303,8 @@ INITVEL6        VLOAD
 INITVEL7        VLOAD           VSU                             
                                 VIPRIME                         
                                 VINIT                           
-                STOVL           DELVEET3                        # DELVEET3 = VIPRIME-VINIT (+7)
 ## Page 690
+                STOVL           DELVEET3                        # DELVEET3 = VIPRIME-VINIT (+7)
                                 VTARGET                         
                 STORE           VTPRIME                         
                 SLOAD           BHIZ                            
@@ -1333,7 +1336,9 @@ INITVELX        LXA,1           DLOAD*
                 SETPD           VLOAD                           
                                 0D                              
                                 RTARG1                          
-                STCALL          RTARG                           
+                STORE           RTARG
+                CLEAR		GOTO
+                		XDELVFLG                           
                                 NORMEX                          
 
 # ..... END OF INITVEL ROUTINE .....
@@ -1391,7 +1396,7 @@ INITVELX        LXA,1           DLOAD*
 
 HALFREV         2DEC            1               B-1             
 
-GET+MGA         VLOAD           UNIT                            # (PL 0D) V (+7) TO MPAC. UNITIZE UV (+1)
+GET+MGA         VLOAD           UNIT                            # (PL 0D) V (+7) TO MPAC, UNITIZE UV (+1)
                 UNIT                                            
                 DOT             SL1                             # DOT UV WITH Y(STABLE MEMBER) AND RESCALE
                                 REFSMMAT        +6              # FROM +2 TO +1 FOR ASIN ROUTINE
@@ -1403,7 +1408,7 @@ GET+MGA         VLOAD           UNIT                            # (PL 0D) V (+7)
 SETMGA          STORE           +MGA                            
                 CLR             RVQ                             # CLEAR MGLVFLAG TO INDICATE +MGA CALC
                                 MGLVFLAG                        # AND EXIT
-GET.LVC         VLOAD           UNIT                            # (PL 6D) R (+29) IN MPAC. UNITIZE UR
+GET.LVC         VLOAD           UNIT                            # (PL 6D) R (+29) IN MPAC, UNITIZE UR
                                 RINIT                           
                 VCOMP                                           # U(-R)
                 STORE           18D                             # U(-R) TO 18D
@@ -1483,14 +1488,14 @@ RTRNMU          STORE           RTMU
 #       (2)     VVEC    VELOCITY VECTOR IN METERS/CENTISECOND
 #                       SCALE FACTOR - EARTH +7, MOON +5
 #       (3)     X1      PRIMARY BODY INDICATOR
-#                       EARTH -1, MOON -10
+#                       EARTH -2, MOON -10
 
 # OUTPUT
 
 #       (1)     2D      APOCENTER RADIUS IN METERS
 #                       SCALE FACTOR - EARTH +29, MOON +27
 #       (2)     4D      APOCENTER ALTITUDE IN METERS
-#                       SCALE FACTOR - EARTH +29, MOON +27
+#                       SCALE FACTOR - EARTH +29, MOON P27
 #       (3)     6D      PERICENTER RADIUS IN METERS
 #                       SCALE FACTOR - EARTH +29, MOON +27
 #       (4)     8D      PERICENTER ALTITUDE IN METERS

@@ -17,6 +17,7 @@
 ##				original hardcopy, as opposed to the PDF page
 ##				numbers in 1701.pdf.
 ##		2017-02-24 RSB	Proofed comment text using octopus/ProoferComments.
+##		2017-03-09 RSB	Comment-text fixes noted in proofing Luminary 116.
 
 ## Page 705
 		BANK	40
@@ -59,7 +60,7 @@ DISPN5X		CAF	V16N54
 V83CALL		CS	FLAGWRD7	# TEST AVERAGE G FLAG
 		MASK	AVEGFBIT
 		EXTEND
-		BZF	MUNG?		# ON.  TEST MUNFLAG
+		BZF	MUNG?		# ON - TEST MUNFLAG
 
 		CS	FLAGWRD8
 		MASK	SURFFBIT
@@ -91,7 +92,7 @@ DOCMBASE	STORE	BASETIME	# PRECISION BASE VECTOR FOR CM
 REV83		CS	FLAGWRD7
 		MASK	AVEGFBIT
 		EXTEND
-		BZF	GETRVN		# TF AVEGFLAG SET, USE RN,VN
+		BZF	GETRVN		# IF AVEGFLAG SET, USE RN,VN
 
 		CS	FLAGWRD8
 		MASK	SURFFBIT
@@ -256,5 +257,5 @@ ONEBASE		TC	INTPRET		# GET CSM BASE VECTOR
 V16N54		VN	1654
 
 ## Page 710
-## The original program listing had no source lines on this page.
+## <br>The original program listing had no source lines on this page.
 
