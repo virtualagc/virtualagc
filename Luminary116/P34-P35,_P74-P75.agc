@@ -19,6 +19,7 @@
 ##				3-way diff vs Luminary 99 and Luminary 131.
 ##				(Admittedly, the former is more for detecting errors
 ##				in Luminary 99 than the other way around.)
+
 ## Page 658
 # TRANSFER PHASE INITIATION (TPI) PROGRAMS (P34 AND P74)
 
