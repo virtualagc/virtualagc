@@ -19,6 +19,7 @@
 ##				numbers in 1701.pdf.
 ##		2017-02-28 RSB	Proofed comment text using octopus/ProoferComments.
 ##		2017-03-01 RSB	Fixed lingering comment-text typos.
+##		2017-03-10 RSB	Comment-text fixes noted in proofing Luminary 116.
 
 ## Page 1398
 		BANK	20
@@ -150,7 +151,7 @@ STOPRATE	CAF	EBANK6
 # ZERO:			(FOR ALL AXES) AOS, ALPHA, AOSTERM, OMEGAD, DELCDU, DELEROR
 ## Page 1401
 #
-# OUTPUT:		DRIFTBIT/DAPBOOLS, OE, JOB TO DO 1/ACCS
+# OUTPUT:		DRIFTBIT/DAPBOOLS, DB, JOB TO DO 1/ACCS
 #
 # DEBRIS:		A, L, Q, RUPTREG1, RUPTREG2, (ITEMPS IN NOVAC)
 

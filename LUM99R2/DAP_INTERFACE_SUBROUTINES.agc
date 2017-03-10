@@ -15,6 +15,7 @@
 ##		2016-12-18 RSB	Proofed text comments with octopus/ProoferComments
 ##				and corrected the errors found.
 ##		2017-03-03 RSB	Snapshot of Luminary 99 Rev 1. 
+##		2017-03-10 RSB	Comment-text fixes noted in proofing Luminary 116.
 
 ## Page 1406
 		BANK	20
@@ -128,7 +129,7 @@ STOPRATE	CAF	EBANK6
 		TC	Q
 
 # SUBROUTINE NAME:	ALLCOAST
-# WILL BE CALLED BY FRESH STARTS AND ENGINE OFF ROUTINES.		-
+# WILL BE CALLED BY FRESH STARTS AND ENGINE OFF ROUTINES.		.
 #
 # CALLING SEQUENCE:	(SAME AS ABOVE)
 #
