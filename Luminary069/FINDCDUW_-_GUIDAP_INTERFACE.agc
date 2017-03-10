@@ -20,6 +20,7 @@
 ##              2017-01-22 HG   Transcribed
 ##		2017-01-28 RSB	Proofed comment text using octopus/prooferComments
 ##				and fixed errors found.
+##		2017-03-10 RSB	Comment-text fixes noted in proofing Luminary 116.
 
 ## Page 907
 # PROGRAM NAME:   FINDCDUW
@@ -137,7 +138,7 @@ FINDCDUW        BOV             SETPD                   # FINDCDUW: ENTRY WHEN U
                 TS              FLPAUTNO                # SET TO POS-NON-ZERO FLAG PNGCS AUTO NOT
 
                 MASK            DAPBOOLS
-                TS              FLAGOODW                # FLAG0ODW = ANY PNZ NUMBER IF XOV INHIBTD
+                TS              FLAGOODW                # FLAGOODW = ANY PNZ NUMBER IF XOV INHIBTD
 
 ## Page 910
 # FETCH BASIC DATA
@@ -608,7 +609,7 @@ ARCTRGSP        EXTEND
                 TC              TEM4
 
 USECOS          CS              TEM3                    # COS IS SMALLER
-                TC              SPARCSIN        -1      # ANGLE = SIGN(SIN)(FI/2-ARCSIN(COS))
+                TC              SPARCSIN        -1      # ANGLE = SIGN(SIN)(PI/2-ARCSIN(COS))
                 AD              HALF
                 TS              TEM3                    # WE NO LONGER NEED COS
                 CCS             TEM2
@@ -743,6 +744,6 @@ CDUZDLIM        DEC             .3888888888             # 70 DEG LIMIT FOR MGA, 
 DT/DELT         DEC             .05                     # .1 SEC/2 SEC WHICH IS THE AUTOPILOT
                                                         # CONTROL SAMPLE PERIOD/COMPUTATION PERIOD
 
-DELERLIM        =               DAY/2MAX                # 1D DEG LIMIT FOR LAG ANGLES, 1'S, PI
+DELERLIM        =               DAY/2MAX                # 10 DEG LIMIT FOR LAG ANGLES, 1'S, PI
 
 
