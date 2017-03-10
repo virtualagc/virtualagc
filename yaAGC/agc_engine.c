@@ -304,6 +304,9 @@
  *		01/30/17 MAS	Added parity bit checking for fixed memory
  *				when running with a ROM that contains
  *				parity bits.
+ *		03/09/17 MAS	Prevented yaAGC from exiting standby if PRO is
+ *				still held down from entry to standby.
+ *
  *
  * The technical documentation for the Apollo Guidance & Navigation (G&N) system,
  * or more particularly for the Apollo Guidance Computer (AGC) may be found at
@@ -1734,6 +1737,13 @@ agc_engine (agc_t * State)
       return (0);
     }
 
+  if (State->InputChannel[032] & 020000)
+    {
+      State->SbyPressed = 0;
+      State->SbyStillPressed = 0;
+    }
+   
+
   //----------------------------------------------------------------------
   // Here we take care of counter-timers.  There is a basic 1/3200 second
   // clock that is used to drive the timers.  1/3200 second happens to
@@ -1778,6 +1788,7 @@ agc_engine (agc_t * State)
                 {
                   // Standby is enabled, and PRO has been held down for the required amount of time.
                   State->Standby = 1;
+                  State->SbyStillPressed = 1;
 
                   // While this isn't technically an alarm, it causes GOJAM just like all the rest
                   TriggeredAlarm = 1;
@@ -1786,7 +1797,7 @@ agc_engine (agc_t * State)
                   DskyChannel163 |= DSKY_STBY;
                   ChannelOutput(State, 0163, DskyChannel163);
                 }
-              else
+              else if (!State->SbyStillPressed)
                 {
                   // PRO was pressed for long enough to turn us back on. Let's get going!
                   State->Standby = 0;

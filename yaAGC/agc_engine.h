@@ -94,6 +94,8 @@
 		01/04/17 MAS	Added the fixed parity fail CH77 bit.
 		01/30/17 MAS	Added storage for parity bits and a flag to enable
                 		parity bit checking.
+		03/09/17 MAS	Added a bit, SbyStillPressed, that makes sure PRO
+                		is released before standby can be exited.
    
   For more insight, I'd highly recommend looking at the documents
   http://hrst.mit.edu/hrs/apollo/public/archive/1689.pdf and
@@ -346,6 +348,7 @@ typedef struct
   unsigned NoTC:1;              // Set when TC is being watched. Cleared by executing TC or TCF
   unsigned Standby:1;           // Set while the computer is in standby mode.
   unsigned SbyPressed:1;        // Set while PRO is being held down; cleared by releasing PRO
+  unsigned SbyStillPressed:1;   // Set upon entry to standby, until PRO is released
   unsigned ParityFail:1;        // Set when a parity failure is encountered accessing memory (in yaAGC, just hitting banks 44+)
   unsigned CheckParity:1;       // Enable parity checking for fixed memory.
   uint64_t /*unsigned long long */ DownruptTime;	// Time when next DOWNRUPT occurs.
