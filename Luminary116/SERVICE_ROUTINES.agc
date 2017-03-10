@@ -14,6 +14,8 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-01-22 MAS  Created from Luminary 99.
 ##              2017-02-03 RRB  Updated for Luminary 116.
+##              2017-03-09 HG   Add missing statement
+##                                  2SECDELY  CAF  2SECS 
 
 ## Page 1364
                 BANK            10                              
@@ -110,7 +112,8 @@ DEBIT           AD              ONE                             # CET DE BITS
 
 # THIS MUST REMAIN IN BANK 0 *****************************************
 
-                COUNT*          $$/DELAY                        
+                COUNT*          $$/DELAY        
+2SECDELY        CAF             2SECS                
 DELAYJOB        INHINT                                          
                 TS              Q                               # STORE DELAY DT IN Q FOR DLY -1 IN
 

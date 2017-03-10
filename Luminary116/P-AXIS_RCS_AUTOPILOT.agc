@@ -14,6 +14,9 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-01-22 MAS  Created from Luminary 99.
 ##              2017-02-01 RRB  Updated for Luminary 116.
+##              2017-02-09 HG   Fix operand O13QSAV  --> C13QSAV
+##                                          O13STALL --> C13STALL
+##                                          Q        --> C13QSAV         
 
 ## Page 1411
                 BANK            16                              
@@ -703,13 +706,14 @@ ZEROENBL        LXCH            R-RHCCTR
                 TS              R-RHCCTR
                 INHINT
                 EXTEND
-                QXCH            O13QSAV
-                TC              O13STALL
+                QXCH            C13QSAV
+                TC              C13STALL
                        
                 CA              BITS8,9                         
                 EXTEND                                          
                 WOR             CHAN13                          # COUNTERS ZEROED AND ENABLED
-                TC              Q                               
+                TC              C13QSAV
+                
 RATEDAMP        CA              ZERO                            
                 TS              P-RHCCTR                        
                 TCF             RATERROR                        

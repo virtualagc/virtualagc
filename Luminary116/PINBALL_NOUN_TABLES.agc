@@ -13,11 +13,13 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-01-22 MAS  Created from Luminary 99.
-##		2017-01-28 RSB	WTIH -> WITH.
-##		2017-03-07 RSB	Transcribed, and then proofed comment-text using
-##				3-way diff vs Luminary 99 and Luminary 131.
-##				(Admittedly, the former is more for detecting errors
-##				in Luminary 99 than the other way around.)
+##              2017-01-28 RSB  WTIH -> WITH.
+##              2017-03-07 RSB  Transcribed, and then proofed comment-text using
+##                              3-way diff vs Luminary 99 and Luminary 131.
+##                              (Admittedly, the former is more for detecting errors
+##                              in Luminary 99 than the other way around.)
+##              2017-03-09      fix  ECADR 0 --> OCT 0
+##                                   OCT     --> ECADR
 
 ## Page 302
 # THE FOLLOWING REFERS TO THE NOUN TABLES
@@ -44,15 +46,15 @@
 #       01000                   WHOLE HOURS IN R1, WHOLE MINUTES (MOD 60) IN R2,
 #                                  SECONDS (MOD 60) 0XX.XX IN R3. *** ALARMS IF USED WITH OCTAL
 #       01001                   MINUTES (MOD 60) IN D1D2, D3 BLANK, SECONDS (MOD 60) IN D4D5
-#                                       	LIMITS TO 59B59 IF MAG EXCEEDS THIS VALUE.
-#                                       	ALARMS IF USED WITH OCTAL ******** IN (ALARM)
+#                                               LIMITS TO 59B59 IF MAG EXCEEDS THIS VALUE.
+#                                               ALARMS IF USED WITH OCTAL ******** IN (ALARM)
 #       01010                   ARITH DP4       OUT (STRAIGHT)                    IN (SL 3 AT END)
 #       01011                   ARITH1 SF       OUT (MULT BY 2EXP14 AT END)     IN(STRAIGHT)
 #       01100                   2 INTEGERS IN D1D2, D4D5, D3 BLANK.
-#                                       	ALARMS IF USED WITH OCTAL  ******** IN (ALARM)
+#                                               ALARMS IF USED WITH OCTAL  ******** IN (ALARM)
 #       01101                   360-CDU DEGREES (XXX.XX)
-#	01110			RR RANGE	15 BIT MAG TO DP, THEN SCALE ******* IN (ALARM)
-#	01111			RR RANGE RATE	15 BIT MAG TO DP, THEN SCALE ******* IN (ALARM)
+#       01110                   RR RANGE        15 BIT MAG TO DP, THEN SCALE ******* IN (ALARM)
+#       01111                   RR RANGE RATE   15 BIT MAG TO DP, THEN SCALE ******* IN (ALARM)
 # END OF SF ROUTINE CODE NUMBERS
 
 # SF CONSTANT CODE NUMBER       INTERPRETATION
@@ -311,8 +313,8 @@ NNADTAB         OCT             00000                           # 00    NOT IN U
                                                                 #       TIME TO GO IN BRAKING PHASE
                                                                 #       LR ALTITUDE - COMPUTED ALTITUDE
                 OCT             24127                           # 69    LANDING SITE CORRECTION, Z-COMPONENT
-                						# 	LANDING SITE CORRECTION, Y-COMPONENT
-                						#	LANDING SITE CORRECTION, X-COMPONENT
+                                                                #       LANDING SITE CORRECTION, Y-COMPONENT
+                                                                #       LANDING SITE CORRECTION, X-COMPONENT
                 OCT             04132                           # 70    AOT DETENT CODE/STAR CODE
                 OCT             04135                           # 71    AOT DETENT CODE/STAR CODE
                 OCT             02140                           # 72    RR  360 - TRUNNION ANGLE
@@ -333,7 +335,7 @@ NNADTAB         OCT             00000                           # 00    NOT IN U
                                                                 #       VELOCITY NORMAL TO CSM PLANE
                 OCT             64162                           # 78    RR RANGE
                                                                 #          RANGE RATE
-                                                                #	TIME FROM IGNITION
+                                                                #       TIME FROM IGNITION
                 OCT             24165                           # 79    CURSOR ANGLE
                                                                 #       SPIRAL ANGLE
                                                                 #       POSITION CODE
@@ -389,7 +391,7 @@ NNTYPTAB        OCT             00000                           # 00 NOT IN USE
                 OCT             04140                           # 14 3COMP  WHOLE
                 OCT             00000                           # 15 1COMP  OCTAL ONLY
                 OCT             24400                           # 16 3COMP  HMS (DEC ONLY)
-                OCT             0                               # 17 	   SPARE
+                OCT             0                               # 17       SPARE
                 OCT             04102                           # 18 3COMP  CDU DEG
                 OCT             00000                           # 19        SPARE
                 OCT             04102                           # 20 3COMP  CDU DEGREES
@@ -466,7 +468,7 @@ NNTYPTAB        OCT             00000                           # 00 NOT IN USE
                 OCT             60026                           # 68 3COMP  POS7, MIN/SEC, COMP ALT
                                                                 #           (NO LOAD, DEC ONLY)
                 OCT             61430                           # 69 3COMP  COMP ALT, COMP ALT, COMP ALT
-                						# 	    (DEC ONLY)
+                                                                #           (DEC ONLY)
                 OCT             0                               # 70 3COMP  OCTAL ONLY FOR EACH
                 OCT             0                               # 71 3COMP  OCTAL ONLY FOR EACH
                 OCT             00102                           # 72 2COMP  360-CDU DEG, CDU DEG
@@ -481,7 +483,7 @@ NNTYPTAB        OCT             00000                           # 00 NOT IN USE
                 OCT             00500                           # 77 2COMP  MIN/SEC, VEL3
                                                                 #           (NO LOAD, DEC ONLY)
                 OCT             00654                           # 78 3COMP  RR RANGE, RR RANGE RATE, M/S
-        							#           (NO LOAD, DEC ONLY)
+                                                                #           (NO LOAD, DEC ONLY)
                 OCT             00102                           # 79 3COMP  CDU DEG, CDU DEG, WHOLE
                                                                 #           (DEC ONLY)
                 OCT             00200                           # 80 2COMP  WHOLE, DPDEG(360)
@@ -628,7 +630,7 @@ SFOUTAB         OCT             05174                           # WHOLE, DP TIME
                 OCT             33675                           
                 OCT             01046                           # COMPUTED ALTITUDE
                 OCT             15700                           
-## Page 315		
+## Page 315             
                 OCT             00321                           # DP DEGREES
                 OCT             26706                           
                 2DEC            17.2010499      B-7             # POSITION 9
@@ -692,7 +694,7 @@ IDADDTAB        ECADR           TTOGO                           # 40    MIN/SEC 
                 ECADR           RR-AZ                           # 56    DPDEG(360)              DP4
                 ECADR           RR-ELEV                         # 56    DPDEG(360)              DP4
                 OCT             0                               # 56    SPARE COMPONENT
-                ECADR           0                               # 57    SPARE                  
+                OCT             0                               # 57    SPARE                  
                 OCT             0                               # 57    SPARE 
                 OCT             0                               # 57    SPARE 
                 ECADR           POSTTPI                         # 58    POS4                    DP3
@@ -729,9 +731,9 @@ IDADDTAB        ECADR           TTOGO                           # 40    MIN/SEC 
                 ECADR           TTFDISP                         # 68    MIN/SEC                 M/S
                 ECADR           DELTAH                          # 68    COMP ALT                DP1
 ## Page 317
-                OCT             DLANDZ                          # 69    COMP ALT		DP1
-                OCT             DLANDY                          # 69    COMP ALT		DP1
-                OCT             DLANDX                          # 69    COMP ALT		DP1
+                ECADR           DLANDZ                          # 69    COMP ALT                DP1
+                ECADR           DLANDY                          # 69    COMP ALT                DP1
+                ECADR           DLANDX                          # 69    COMP ALT                DP1
                 ECADR           AOTCODE                         # 70    OCTAL ONLY              OCT
                 ECADR           AOTCODE         +1              # 70    OCTAL ONLY              OCT
                 ECADR           AOTCODE         +2              # 70    OCTAL ONLY              OCT
@@ -757,8 +759,8 @@ IDADDTAB        ECADR           TTOGO                           # 40    MIN/SEC 
                 ECADR           YDOT                            # 77    VEL3                    DP3
                 OCT             0                               # 77    SPARE COMPONENT
                 ECADR           DNRANGE                         # 78    RR RANGE            RR RANGE
-                ECADR           DNRRDCT			        # 78    RR RANGE RATE  RR RANGE RATE
-                OCT             TTOTIG                          # 78    MIN/SEC			 M/S
+                ECADR           DNRRDCT                         # 78    RR RANGE RATE  RR RANGE RATE
+                ECADR           TTOTIG                          # 78    MIN/SEC                  M/S
                 ECADR           CURSOR                          # 79    CDU DEG                 CDU
                 ECADR           SPIRAL                          # 79    CDU DEG                 CDU
                 ECADR           POSCODE                         # 79    WHOLE                   ARTH
@@ -845,7 +847,7 @@ RUTMXTAB        OCT             16351                           # 40    M/S, DP3
                 OCT             24344                           # 54    DP1, DP3, DP4
                 OCT             24503                           # 55    ARTH, DP4, DP4
                 OCT             00512                           # 56    DP4, DP4
-                OCT             0                          	# 57    SPARE
+                OCT             0                               # 57    SPARE
                 OCT             16347                           # 58    DP3, DP3, DP3
                 OCT             16347                           # 59    DP3, DP3, DP3
                 OCT             10347                           # 60    DP3, DP3, DP1
