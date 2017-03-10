@@ -90,24 +90,24 @@ Note that the date is the date of the printout, not the date of the program revi
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-047368,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
-047369,000003:                                                                                                  <span class="co">## Filename:    EXECUTIVE.agc</span>
-047370,000004:                                                                                                  <span class="co">## Purpose:     A section of Luminary revision 210.</span>
-047371,000005:                                                                                                  <span class="co">##              It is part of the source code for the Lunar Module's (LM)</span>
-047372,000006:                                                                                                  <span class="co">##              Apollo Guidance Computer (AGC) for Apollo 15-17.</span>
-047373,000007:                                                                                                  <span class="co">##              This file is intended to be a faithful transcription, except</span>
-047374,000008:                                                                                                  <span class="co">##              that the code format has been changed to conform to the</span>
-047375,000009:                                                                                                  <span class="co">##              requirements of the yaYUL assembler rather than the</span>
-047376,000010:                                                                                                  <span class="co">##              original YUL assembler.</span>
-047377,000011:                                                                                                  <span class="co">## Reference:   pp. 1101-1114</span>
-047378,000012:                                                                                                  <span class="co">## Assembler:   yaYUL</span>
-047379,000013:                                                                                                  <span class="co">## Contact:     Ron Burkey &lt;info@sandroid.org>.</span>
-047380,000014:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo/index.html</span>
-047381,000015:                                                                                                  <span class="co">## Mod history: 2016-11-17 JL   Created from Luminary131 version.</span>
-047382,000016:                                                                                                  <span class="co">##              2016-11-18 MAS  Transcribed.</span>
-047383,000017:                                                                                                  <span class="co">##              2016-12-26 RSB  Comment-text proofed using ProoferComments</span>
-047384,000018:                                                                                                  <span class="co">##                              and corrected errors found.</span>
-047385,000019: 
+047378,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
+047379,000003:                                                                                                  <span class="co">## Filename:    EXECUTIVE.agc</span>
+047380,000004:                                                                                                  <span class="co">## Purpose:     A section of Luminary revision 210.</span>
+047381,000005:                                                                                                  <span class="co">##              It is part of the source code for the Lunar Module's (LM)</span>
+047382,000006:                                                                                                  <span class="co">##              Apollo Guidance Computer (AGC) for Apollo 15-17.</span>
+047383,000007:                                                                                                  <span class="co">##              This file is intended to be a faithful transcription, except</span>
+047384,000008:                                                                                                  <span class="co">##              that the code format has been changed to conform to the</span>
+047385,000009:                                                                                                  <span class="co">##              requirements of the yaYUL assembler rather than the</span>
+047386,000010:                                                                                                  <span class="co">##              original YUL assembler.</span>
+047387,000011:                                                                                                  <span class="co">## Reference:   pp. 1101-1114</span>
+047388,000012:                                                                                                  <span class="co">## Assembler:   yaYUL</span>
+047389,000013:                                                                                                  <span class="co">## Contact:     Ron Burkey &lt;info@sandroid.org>.</span>
+047390,000014:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo/index.html</span>
+047391,000015:                                                                                                  <span class="co">## Mod history: 2016-11-17 JL   Created from Luminary131 version.</span>
+047392,000016:                                                                                                  <span class="co">##              2016-11-18 MAS  Transcribed.</span>
+047393,000017:                                                                                                  <span class="co">##              2016-12-26 RSB  Comment-text proofed using ProoferComments</span>
+047394,000018:                                                                                                  <span class="co">##                              and corrected errors found.</span>
+047395,000019: 
 </pre>
 </span>
 </p>
@@ -123,56 +123,56 @@ Page 1101
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-047387,000021:    5063                                           <span class="ps">BLOCK   </span> 02                                    
-047388,000022:                                                                                                  <span class="co">#           TO ENTER A JOB REQUEST REQUIRING NO VAC AREA:</span>
-047389,000023: 
-047390,000024:    5063                                           <span class="ps">COUNT*  </span> $$/EXEC                               
-<a name="4E4F564143"></a>047391,000025:    5063           00004        <span class="sm">NOVAC   </span>           <span class="op">INHINT  </span>                                       
-047392,000026:    5064           65155                           <span class="op">AD      </span> <a href="#46414B4550524554">FAKEPRET</a>                              <span class="co">#  LOC(MPAC +6) - LOC(QPRET)</span>
-047393,000027:    5065           54063                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E45575052494F">NEWPRIO</a>                               <span class="co">#  PRIORITY OF NEW JOB + NOVAC C(FIXLOC)</span>
-047394,000028: 
-047395,000029:    5066           00006                           <span class="op">EXTEND  </span>                                       
-047396,000030:    5067           50002                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     <span class="co">#  Q WILL BE UNDISTURBED THROUGHOUT.</span>
-047397,000031:    5070           30001                           <span class="op">DCA     </span> 0                                     <span class="co">#  2CADR OF JOB ENTERED.</span>
-047398,000032:    5071           52066                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E45574C4F43">NEWLOC</a>                                
-047399,000033:    5072           35154                           <span class="op">CAF     </span> <a href="#4558454342414E4B">EXECBANK</a>                              
-047400,000034:    5073           56004                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4642414E4B">FBANK</a>                                 
-047401,000035:    5074           54061                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4558454354454D31">EXECTEM1</a>                              
-047402,000036:    5075           12631                           <span class="op">TCF     </span> <a href="#4E4F56414332">NOVAC2</a>                                <span class="co">#  ENTER EXECUTIVE BANK.</span>
-047403,000037: 
-047404,000038:                                                                                                  <span class="co">#           TO ENTER A JOB REQUEST REQUIRING A VAC AREA - E.G., ALL (PARTIALLY) INTERPRETIVE JOBS.</span>
-047405,000039: 
-<a name="46494E44564143"></a>047406,000040:    5076           00004        <span class="sm">FINDVAC </span>           <span class="op">INHINT  </span>                                       
-047407,000041:    5077           54063                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E45575052494F">NEWPRIO</a>                               
-047408,000042:    5100           00006                           <span class="op">EXTEND  </span>                                       
-047409,000043:    5101           50002                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
-047410,000044:    5102           30001                           <span class="op">DCA     </span> 0                                     
-<a name="5350564143494E"></a>047411,000045:    5103           52066        <span class="sm">SPVACIN </span>           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E45574C4F43">NEWLOC</a>                                
-047412,000046:    5104           35154                           <span class="op">CAF     </span> <a href="#4558454342414E4B">EXECBANK</a>                              
-047413,000047:    5105           56004                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4642414E4B">FBANK</a>                                 
-047414,000048:    5106           12605                           <span class="op">TCF     </span> <a href="#46494E4456414332">FINDVAC2</a>                              <span class="co">#  OFF TO EXECUTIVE SWITCHED-BANK.</span>
-047415,000049: 
-047416,000050:                                                                                                  <span class="co">#           TO ENTER A FINDVAC WITH THE PRIORITY IN NEWPRIO TO THE 2CADR ARRIVING IN A AND L:</span>
-047417,000051: 
-047418,000052:                                                                                                  <span class="co">#           USERS OF SPVAC MUST INHINT BEFORE STORING IN NEWPRIO.</span>
-047419,000053: 
-<a name="5350564143"></a>047420,000054:    5107           56002        <span class="sm">SPVAC   </span>           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
-047421,000055:    5110           67767                           <span class="op">AD      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4E454732">NEG2</a>                                  
-047422,000056:    5111           56002                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
-047423,000057:    5112           15103                           <span class="op">TCF     </span> <a href="#5350564143494E">SPVACIN</a>                               
-047424,000058: 
-047425,000059:                                                                                                  <span class="co">#           TO SUSPEND A BASIC JOB SO A HIGHER PRIORITY JOB MAY BE SERVICED:</span>
-047426,000060: 
-<a name="4348414E4731"></a>047427,000061:    5113           22002        <span class="sm">CHANG1  </span>           <span class="op">LXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
-047428,000062:    5114           35154                           <span class="op">CAF     </span> <a href="#4558454342414E4B">EXECBANK</a>                              
-047429,000063:    5115           56006                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4242414E4B">BBANK</a>                                 
-047430,000064:    5116           12712                           <span class="op">TCF     </span> <a href="#4348414E4A4F42">CHANJOB</a>                               
-047431,000065: 
-047432,000066:                                                                                                  <span class="co">#           TO SUSPEND AN INTERPRETIVE JOB:</span>
-047433,000067: 
-<a name="4348414E4732"></a>047434,000068:    5117           40164        <span class="sm">CHANG2  </span>           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4F43">LOC</a>                                   <span class="co">#  NEGATIVE LOC SHOWS JOB = INTERPRETIVE.</span>
-047435,000069:                                                                                                  <span class="co">#           ITRACE (4) REFERS TO "CHANG2".</span>
-047436,000070:    5120           54001                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
+047397,000021:    5063                                           <span class="ps">BLOCK   </span> 02                                    
+047398,000022:                                                                                                  <span class="co">#           TO ENTER A JOB REQUEST REQUIRING NO VAC AREA:</span>
+047399,000023: 
+047400,000024:    5063                                           <span class="ps">COUNT*  </span> $$/EXEC                               
+<a name="4E4F564143"></a>047401,000025:    5063           00004        <span class="sm">NOVAC   </span>           <span class="op">INHINT  </span>                                       
+047402,000026:    5064           65155                           <span class="op">AD      </span> <a href="#46414B4550524554">FAKEPRET</a>                              <span class="co">#  LOC(MPAC +6) - LOC(QPRET)</span>
+047403,000027:    5065           54063                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E45575052494F">NEWPRIO</a>                               <span class="co">#  PRIORITY OF NEW JOB + NOVAC C(FIXLOC)</span>
+047404,000028: 
+047405,000029:    5066           00006                           <span class="op">EXTEND  </span>                                       
+047406,000030:    5067           50002                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     <span class="co">#  Q WILL BE UNDISTURBED THROUGHOUT.</span>
+047407,000031:    5070           30001                           <span class="op">DCA     </span> 0                                     <span class="co">#  2CADR OF JOB ENTERED.</span>
+047408,000032:    5071           52066                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E45574C4F43">NEWLOC</a>                                
+047409,000033:    5072           35154                           <span class="op">CAF     </span> <a href="#4558454342414E4B">EXECBANK</a>                              
+047410,000034:    5073           56004                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4642414E4B">FBANK</a>                                 
+047411,000035:    5074           54061                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4558454354454D31">EXECTEM1</a>                              
+047412,000036:    5075           12631                           <span class="op">TCF     </span> <a href="#4E4F56414332">NOVAC2</a>                                <span class="co">#  ENTER EXECUTIVE BANK.</span>
+047413,000037: 
+047414,000038:                                                                                                  <span class="co">#           TO ENTER A JOB REQUEST REQUIRING A VAC AREA - E.G., ALL (PARTIALLY) INTERPRETIVE JOBS.</span>
+047415,000039: 
+<a name="46494E44564143"></a>047416,000040:    5076           00004        <span class="sm">FINDVAC </span>           <span class="op">INHINT  </span>                                       
+047417,000041:    5077           54063                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E45575052494F">NEWPRIO</a>                               
+047418,000042:    5100           00006                           <span class="op">EXTEND  </span>                                       
+047419,000043:    5101           50002                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
+047420,000044:    5102           30001                           <span class="op">DCA     </span> 0                                     
+<a name="5350564143494E"></a>047421,000045:    5103           52066        <span class="sm">SPVACIN </span>           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E45574C4F43">NEWLOC</a>                                
+047422,000046:    5104           35154                           <span class="op">CAF     </span> <a href="#4558454342414E4B">EXECBANK</a>                              
+047423,000047:    5105           56004                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4642414E4B">FBANK</a>                                 
+047424,000048:    5106           12605                           <span class="op">TCF     </span> <a href="#46494E4456414332">FINDVAC2</a>                              <span class="co">#  OFF TO EXECUTIVE SWITCHED-BANK.</span>
+047425,000049: 
+047426,000050:                                                                                                  <span class="co">#           TO ENTER A FINDVAC WITH THE PRIORITY IN NEWPRIO TO THE 2CADR ARRIVING IN A AND L:</span>
+047427,000051: 
+047428,000052:                                                                                                  <span class="co">#           USERS OF SPVAC MUST INHINT BEFORE STORING IN NEWPRIO.</span>
+047429,000053: 
+<a name="5350564143"></a>047430,000054:    5107           56002        <span class="sm">SPVAC   </span>           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
+047431,000055:    5110           67767                           <span class="op">AD      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4E454732">NEG2</a>                                  
+047432,000056:    5111           56002                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
+047433,000057:    5112           15103                           <span class="op">TCF     </span> <a href="#5350564143494E">SPVACIN</a>                               
+047434,000058: 
+047435,000059:                                                                                                  <span class="co">#           TO SUSPEND A BASIC JOB SO A HIGHER PRIORITY JOB MAY BE SERVICED:</span>
+047436,000060: 
+<a name="4348414E4731"></a>047437,000061:    5113           22002        <span class="sm">CHANG1  </span>           <span class="op">LXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
+047438,000062:    5114           35154                           <span class="op">CAF     </span> <a href="#4558454342414E4B">EXECBANK</a>                              
+047439,000063:    5115           56006                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4242414E4B">BBANK</a>                                 
+047440,000064:    5116           12712                           <span class="op">TCF     </span> <a href="#4348414E4A4F42">CHANJOB</a>                               
+047441,000065: 
+047442,000066:                                                                                                  <span class="co">#           TO SUSPEND AN INTERPRETIVE JOB:</span>
+047443,000067: 
+<a name="4348414E4732"></a>047444,000068:    5117           40164        <span class="sm">CHANG2  </span>           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4F43">LOC</a>                                   <span class="co">#  NEGATIVE LOC SHOWS JOB = INTERPRETIVE.</span>
+047445,000069:                                                                                                  <span class="co">#           ITRACE (4) REFERS TO "CHANG2".</span>
+047446,000070:    5120           54001                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
 </pre>
 </span>
 </p>
@@ -188,10 +188,10 @@ Page 1102
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-047438,000072:    5121           35154                 +2        <span class="op">CAF     </span> <a href="#4558454342414E4B">EXECBANK</a>                              
-047439,000073:    5122           54006                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4242414E4B">BBANK</a>                                 
-047440,000074:    5123           12711                           <span class="op">TCF     </span> <a href="#4348414E4A4F42">CHANJOB</a>    -1                         
-047441,000075: 
+047448,000072:    5121           35154                 +2        <span class="op">CAF     </span> <a href="#4558454342414E4B">EXECBANK</a>                              
+047449,000073:    5122           54006                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4242414E4B">BBANK</a>                                 
+047450,000074:    5123           12711                           <span class="op">TCF     </span> <a href="#4348414E4A4F42">CHANJOB</a>    -1                         
+047451,000075: 
 </pre>
 </span>
 </p>
@@ -207,57 +207,57 @@ Page 1103
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-047443,000077:                                                                                                  <span class="co">#           TO VOLUNTARILY SUSPEND A JOB UNTIL THE COMPLETION OF SOME ANTICIPATED EVENT (I/O EVENT ETC.):</span>
-047444,000078: 
-<a name="4A4F42534C454550"></a>047445,000079:    5124           54164        <span class="sm">JOBSLEEP</span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4F43">LOC</a>                                   
-047446,000080:    5125           35154                           <span class="op">CAF     </span> <a href="#4558454342414E4B">EXECBANK</a>                              
-047447,000081:    5126           54004                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4642414E4B">FBANK</a>                                 
-047448,000082:    5127           13002                           <span class="op">TCF     </span> <a href="#4A4F42534C5031">JOBSLP1</a>                               
-047449,000083: 
-047450,000084:                                                                                                  <span class="co">#           TO AWAKEN A JOB PUT TO SLEEP IN THE ABOVE FASHION:</span>
-047451,000085: 
-<a name="4A4F4257414B45"></a>047452,000086:    5130           00004        <span class="sm">JOBWAKE </span>           <span class="op">INHINT  </span>                                       
-047453,000087:    5131           54065                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E45574C4F43">NEWLOC</a>                                
-047454,000088:    5132           44743                           <span class="op">CS      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#54574F">TWO</a>                                   <span class="co">#  EXIT IS VIA FINDVAC/NOVAC PROCEDURES.</span>
-047455,000089:    5133           26002                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
-047456,000090:    5134           35154                           <span class="op">CAF     </span> <a href="#4558454342414E4B">EXECBANK</a>                              
-047457,000091:    5135           56004                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4642414E4B">FBANK</a>                                 
-047458,000092:    5136           13027                           <span class="op">TCF     </span> <a href="#4A4F4257414B4532">JOBWAKE2</a>                              
-047459,000093: 
-047460,000094:                                                                                                  <span class="co">#           TO CHANGE THE PRIORITY OF A JOB CURRENTLY UNDER EXECUTION:</span>
-047461,000095: 
-<a name="5052494F43484E47"></a>047462,000096:    5137           00004        <span class="sm">PRIOCHNG</span>           <span class="op">INHINT  </span>                                       <span class="co">#  NEW PRIORITY ARRIVES IN A. RETURNS TO</span>
-047463,000097:    5140           54063                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E45575052494F">NEWPRIO</a>                               <span class="co">#  CALLER AS SOON AS NEW JOB PRIORITY IS</span>
-047464,000098:    5141           35154                           <span class="op">CAF     </span> <a href="#4558454342414E4B">EXECBANK</a>                              <span class="co">#  HIGHEST. PREPARE FOR POSSIBLE BASIC-</span>
-047465,000099:    5142           56006                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4242414E4B">BBANK</a>                                 <span class="co">#  STYLE CHANGE-JOB.</span>
-047466,000100:    5143           54165                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#42414E4B534554">BANKSET</a>                               
-047467,000101:    5144           30002                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
-047468,000102:    5145           13076                           <span class="op">TCF     </span> <a href="#5052494F434832">PRIOCH2</a>                               
-047469,000103: 
-047470,000104:                                                                                                  <span class="co">#           TO REMOVE A JOB FROM EXECUTIVE CONSIDERATIONS:</span>
-047471,000105: 
-<a name="454E444F464A4F42"></a>047472,000106:    5146           35154        <span class="sm">ENDOFJOB</span>           <span class="op">CAF     </span> <a href="#4558454342414E4B">EXECBANK</a>                              
-047473,000107:    5147           54004                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4642414E4B">FBANK</a>                                 
-047474,000108:    5150           13107                           <span class="op">TCF     </span> <a href="#454E444A4F4231">ENDJOB1</a>                               
-047475,000109: 
-<a name="454E4446494E44"></a>047476,000110:    5151           30061        <span class="sm">ENDFIND </span>           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4558454354454D31">EXECTEM1</a>                              <span class="co">#  RETURN TO CALLER AFTER JOB ENTRY</span>
-047477,000111:    5152           54004                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4642414E4B">FBANK</a>                                 <span class="co">#  COMPLETE.</span>
-047478,000112:    5153           16762                           <span class="op">TCF     </span> <a href="INTERPRETER.agc.html#512B32">Q+2</a>                                   
-<a name="4558454342414E4B"></a>047479,000113:    5154           02605        <span class="sm">EXECBANK</span>           <span class="ps">CADR    </span> <a href="#46494E4456414332">FINDVAC2</a>                              
-047480,000114: 
-<a name="46414B4550524554"></a>047481,000115:    5155           00110        <span class="sm">FAKEPRET</span>           <span class="ps">ADRES   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       -36D                       <span class="co">#  LOC(MPAC +6) - LOC(QPRET)</span>
-047482,000116: 
-047483,000117:                                                                                                  <span class="co">#           TO CHANGE A "FINDVAC" JOB TO A "NOVAC" -- RELEASE ITS VAC AREA:</span>
-<a name="564143524C454153"></a>047484,000118:    5156           30167        <span class="sm">VACRLEAS</span>           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5052494F52495459">PRIORITY</a>                              <span class="co">#  CHANGE TO NOVAC VALUE</span>
-047485,000119:    5157           77746                           <span class="op">MASK    </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5052494F3337">PRIO37</a>                                
-047486,000120:    5160           65155                           <span class="op">AD      </span> <a href="#46414B4550524554">FAKEPRET</a>                              
-047487,000121:    5161           56167                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5052494F52495459">PRIORITY</a>                              
-047488,000122:    5162           74775                           <span class="op">MASK    </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4C4F5739">LOW9</a>                                  
-047489,000123:    5163           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
-047490,000124:    5164           50000                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
-047491,000125:    5165           54000                           <span class="op">TS      </span> 0                                     <span class="co">#  RELEASE VAC AREA</span>
-047492,000126:    5166           00002                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
-047493,000127: 
+047453,000077:                                                                                                  <span class="co">#           TO VOLUNTARILY SUSPEND A JOB UNTIL THE COMPLETION OF SOME ANTICIPATED EVENT (I/O EVENT ETC.):</span>
+047454,000078: 
+<a name="4A4F42534C454550"></a>047455,000079:    5124           54164        <span class="sm">JOBSLEEP</span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4F43">LOC</a>                                   
+047456,000080:    5125           35154                           <span class="op">CAF     </span> <a href="#4558454342414E4B">EXECBANK</a>                              
+047457,000081:    5126           54004                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4642414E4B">FBANK</a>                                 
+047458,000082:    5127           13002                           <span class="op">TCF     </span> <a href="#4A4F42534C5031">JOBSLP1</a>                               
+047459,000083: 
+047460,000084:                                                                                                  <span class="co">#           TO AWAKEN A JOB PUT TO SLEEP IN THE ABOVE FASHION:</span>
+047461,000085: 
+<a name="4A4F4257414B45"></a>047462,000086:    5130           00004        <span class="sm">JOBWAKE </span>           <span class="op">INHINT  </span>                                       
+047463,000087:    5131           54065                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E45574C4F43">NEWLOC</a>                                
+047464,000088:    5132           44743                           <span class="op">CS      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#54574F">TWO</a>                                   <span class="co">#  EXIT IS VIA FINDVAC/NOVAC PROCEDURES.</span>
+047465,000089:    5133           26002                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
+047466,000090:    5134           35154                           <span class="op">CAF     </span> <a href="#4558454342414E4B">EXECBANK</a>                              
+047467,000091:    5135           56004                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4642414E4B">FBANK</a>                                 
+047468,000092:    5136           13027                           <span class="op">TCF     </span> <a href="#4A4F4257414B4532">JOBWAKE2</a>                              
+047469,000093: 
+047470,000094:                                                                                                  <span class="co">#           TO CHANGE THE PRIORITY OF A JOB CURRENTLY UNDER EXECUTION:</span>
+047471,000095: 
+<a name="5052494F43484E47"></a>047472,000096:    5137           00004        <span class="sm">PRIOCHNG</span>           <span class="op">INHINT  </span>                                       <span class="co">#  NEW PRIORITY ARRIVES IN A. RETURNS TO</span>
+047473,000097:    5140           54063                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E45575052494F">NEWPRIO</a>                               <span class="co">#  CALLER AS SOON AS NEW JOB PRIORITY IS</span>
+047474,000098:    5141           35154                           <span class="op">CAF     </span> <a href="#4558454342414E4B">EXECBANK</a>                              <span class="co">#  HIGHEST. PREPARE FOR POSSIBLE BASIC-</span>
+047475,000099:    5142           56006                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4242414E4B">BBANK</a>                                 <span class="co">#  STYLE CHANGE-JOB.</span>
+047476,000100:    5143           54165                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#42414E4B534554">BANKSET</a>                               
+047477,000101:    5144           30002                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
+047478,000102:    5145           13076                           <span class="op">TCF     </span> <a href="#5052494F434832">PRIOCH2</a>                               
+047479,000103: 
+047480,000104:                                                                                                  <span class="co">#           TO REMOVE A JOB FROM EXECUTIVE CONSIDERATIONS:</span>
+047481,000105: 
+<a name="454E444F464A4F42"></a>047482,000106:    5146           35154        <span class="sm">ENDOFJOB</span>           <span class="op">CAF     </span> <a href="#4558454342414E4B">EXECBANK</a>                              
+047483,000107:    5147           54004                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4642414E4B">FBANK</a>                                 
+047484,000108:    5150           13107                           <span class="op">TCF     </span> <a href="#454E444A4F4231">ENDJOB1</a>                               
+047485,000109: 
+<a name="454E4446494E44"></a>047486,000110:    5151           30061        <span class="sm">ENDFIND </span>           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4558454354454D31">EXECTEM1</a>                              <span class="co">#  RETURN TO CALLER AFTER JOB ENTRY</span>
+047487,000111:    5152           54004                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4642414E4B">FBANK</a>                                 <span class="co">#  COMPLETE.</span>
+047488,000112:    5153           16762                           <span class="op">TCF     </span> <a href="INTERPRETER.agc.html#512B32">Q+2</a>                                   
+<a name="4558454342414E4B"></a>047489,000113:    5154           02605        <span class="sm">EXECBANK</span>           <span class="ps">CADR    </span> <a href="#46494E4456414332">FINDVAC2</a>                              
+047490,000114: 
+<a name="46414B4550524554"></a>047491,000115:    5155           00110        <span class="sm">FAKEPRET</span>           <span class="ps">ADRES   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       -36D                       <span class="co">#  LOC(MPAC +6) - LOC(QPRET)</span>
+047492,000116: 
+047493,000117:                                                                                                  <span class="co">#           TO CHANGE A "FINDVAC" JOB TO A "NOVAC" -- RELEASE ITS VAC AREA:</span>
+<a name="564143524C454153"></a>047494,000118:    5156           30167        <span class="sm">VACRLEAS</span>           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5052494F52495459">PRIORITY</a>                              <span class="co">#  CHANGE TO NOVAC VALUE</span>
+047495,000119:    5157           77746                           <span class="op">MASK    </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5052494F3337">PRIO37</a>                                
+047496,000120:    5160           65155                           <span class="op">AD      </span> <a href="#46414B4550524554">FAKEPRET</a>                              
+047497,000121:    5161           56167                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5052494F52495459">PRIORITY</a>                              
+047498,000122:    5162           74775                           <span class="op">MASK    </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4C4F5739">LOW9</a>                                  
+047499,000123:    5163           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
+047500,000124:    5164           50000                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
+047501,000125:    5165           54000                           <span class="op">TS      </span> 0                                     <span class="co">#  RELEASE VAC AREA</span>
+047502,000126:    5166           00002                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
+047503,000127: 
 </pre>
 </span>
 </p>
@@ -273,43 +273,43 @@ Page 1104
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-047495,000129:                                                                                                  <span class="co">#           LOCATE AN AVAILABLE VAC AREA.</span>
-047496,000130: 
-047497,000131: 01,2605                                           <span class="ps">BANK    </span> 01                                    
-047498,000132: 01,2605                                           <span class="ps">COUNT*  </span> $$/EXEC                               
-<a name="46494E4456414332"></a>047499,000133: 01,2605           54061        <span class="sm">FINDVAC2</span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4558454354454D31">EXECTEM1</a>                              <span class="co">#  (SAVE CALLER'S BANK FIRST.)</span>
-047500,000134: 01,2606           10400                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#56414331555345">VAC1USE</a>                               
-047501,000135: 01,2607           12624                           <span class="op">TCF     </span> <a href="#564143464F554E44">VACFOUND</a>                              
-047502,000136: 01,2610           10454                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#56414332555345">VAC2USE</a>                               
-047503,000137: 01,2611           12624                           <span class="op">TCF     </span> <a href="#564143464F554E44">VACFOUND</a>                              
-047504,000138: 01,2612           10530                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#56414333555345">VAC3USE</a>                               
-047505,000139: 01,2613           12624                           <span class="op">TCF     </span> <a href="#564143464F554E44">VACFOUND</a>                              
-047506,000140: 01,2614           10604                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#56414334555345">VAC4USE</a>                               
-047507,000141: 01,2615           12624                           <span class="op">TCF     </span> <a href="#564143464F554E44">VACFOUND</a>                              
-047508,000142: 01,2616           10660                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#56414335555345">VAC5USE</a>                               
-047509,000143: 01,2617           12624                           <span class="op">TCF     </span> <a href="#564143464F554E44">VACFOUND</a>                              
-047510,000144: 01,2620           22061                           <span class="op">LXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4558454354454D31">EXECTEM1</a>                              
-047511,000145: 01,2621           30002                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
-047512,000146: 01,2622           05712                           <span class="op">TC      </span> <a href="ALARM_AND_ABORT.agc.html#4241494C4F555431">BAILOUT1</a>                              
-047513,000147: 01,2623           31201                           <span class="ps">OCT     </span> 31201                                 <span class="co">#  NO VAC AREAS</span>
-047514,000148: 
-<a name="564143464F554E44"></a>047515,000149: 01,2624           64743        <span class="sm">VACFOUND</span>           <span class="op">AD      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#54574F">TWO</a>                                   <span class="co">#  RESERVE THIS VAC AREA BY STORING A ZERO</span>
-047516,000150: 01,2625           22007                           <span class="op">ZL      </span>                                       <span class="co">#  IN ITS VAC USE REGISTER AND STORE THE</span>
-047517,000151: 01,2626           50000                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#  ADDRESS OF THE FIRST WORD OF IT IN THE</span>
-047518,000152: 01,2627           21777                           <span class="op">LXCH    </span> 0          -1                         <span class="co">#  LOW NINE BITS OF THE PRIORITY WORD.</span>
-047519,000153: 01,2630           26063                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E45575052494F">NEWPRIO</a>                               
-047520,000154: 
-<a name="4E4F56414332"></a>047521,000155: 01,2631           34746        <span class="sm">NOVAC2  </span>           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5A45524F">ZERO</a>                                  <span class="co">#  NOVAC ENTERS HERE. FIND A CORE SET.</span>
-047522,000156: 01,2632           54064                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4F43435452">LOCCTR</a>                                
-047523,000157: 01,2633           32640                           <span class="op">CAF     </span> <a href="#4E4F2E434F524553">NO.CORES</a>                              <span class="co">#  SEVEN SETS OF ELEVEN REGISTERS EACH.</span>
-<a name="4E4F56414333"></a>047524,000158: 01,2634           54062        <span class="sm">NOVAC3  </span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4558454354454D32">EXECTEM2</a>                              
-047525,000159: 01,2635           50064                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4F43435452">LOCCTR</a>                                
-047526,000160: 01,2636           10167                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5052494F52495459">PRIORITY</a>                              <span class="co">#  EACH PRIORITY REGISTER CONTAINS -0 IF</span>
-047527,000161: 01,2637           12700                           <span class="op">TCF     </span> <a href="#4E455854434F5245">NEXTCORE</a>                              <span class="co">#  THE CORRESPONDING CORE SET IS AVAILABLE.</span>
-<a name="4E4F2E434F524553"></a>047528,000162: 01,2640           00007        <span class="sm">NO.CORES</span>           <span class="ps">DEC     </span> 7          B-14                       
-047529,000163: 01,2641           12700                           <span class="op">TCF     </span> <a href="#4E455854434F5245">NEXTCORE</a>                              <span class="co">#  AN ACTIVE JOB HAS A POSITIVE PRIORITY</span>
-047530,000164:                                                                                                  <span class="co">#  BUT A DORMANT JOB'S PRIORITY IS NEGATIVE</span>
-047531,000165: 
+047505,000129:                                                                                                  <span class="co">#           LOCATE AN AVAILABLE VAC AREA.</span>
+047506,000130: 
+047507,000131: 01,2605                                           <span class="ps">BANK    </span> 01                                    
+047508,000132: 01,2605                                           <span class="ps">COUNT*  </span> $$/EXEC                               
+<a name="46494E4456414332"></a>047509,000133: 01,2605           54061        <span class="sm">FINDVAC2</span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4558454354454D31">EXECTEM1</a>                              <span class="co">#  (SAVE CALLER'S BANK FIRST.)</span>
+047510,000134: 01,2606           10400                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#56414331555345">VAC1USE</a>                               
+047511,000135: 01,2607           12624                           <span class="op">TCF     </span> <a href="#564143464F554E44">VACFOUND</a>                              
+047512,000136: 01,2610           10454                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#56414332555345">VAC2USE</a>                               
+047513,000137: 01,2611           12624                           <span class="op">TCF     </span> <a href="#564143464F554E44">VACFOUND</a>                              
+047514,000138: 01,2612           10530                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#56414333555345">VAC3USE</a>                               
+047515,000139: 01,2613           12624                           <span class="op">TCF     </span> <a href="#564143464F554E44">VACFOUND</a>                              
+047516,000140: 01,2614           10604                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#56414334555345">VAC4USE</a>                               
+047517,000141: 01,2615           12624                           <span class="op">TCF     </span> <a href="#564143464F554E44">VACFOUND</a>                              
+047518,000142: 01,2616           10660                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#56414335555345">VAC5USE</a>                               
+047519,000143: 01,2617           12624                           <span class="op">TCF     </span> <a href="#564143464F554E44">VACFOUND</a>                              
+047520,000144: 01,2620           22061                           <span class="op">LXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4558454354454D31">EXECTEM1</a>                              
+047521,000145: 01,2621           30002                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
+047522,000146: 01,2622           05712                           <span class="op">TC      </span> <a href="ALARM_AND_ABORT.agc.html#4241494C4F555431">BAILOUT1</a>                              
+047523,000147: 01,2623           31201                           <span class="ps">OCT     </span> 31201                                 <span class="co">#  NO VAC AREAS</span>
+047524,000148: 
+<a name="564143464F554E44"></a>047525,000149: 01,2624           64743        <span class="sm">VACFOUND</span>           <span class="op">AD      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#54574F">TWO</a>                                   <span class="co">#  RESERVE THIS VAC AREA BY STORING A ZERO</span>
+047526,000150: 01,2625           22007                           <span class="op">ZL      </span>                                       <span class="co">#  IN ITS VAC USE REGISTER AND STORE THE</span>
+047527,000151: 01,2626           50000                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#  ADDRESS OF THE FIRST WORD OF IT IN THE</span>
+047528,000152: 01,2627           21777                           <span class="op">LXCH    </span> 0          -1                         <span class="co">#  LOW NINE BITS OF THE PRIORITY WORD.</span>
+047529,000153: 01,2630           26063                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E45575052494F">NEWPRIO</a>                               
+047530,000154: 
+<a name="4E4F56414332"></a>047531,000155: 01,2631           34746        <span class="sm">NOVAC2  </span>           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5A45524F">ZERO</a>                                  <span class="co">#  NOVAC ENTERS HERE. FIND A CORE SET.</span>
+047532,000156: 01,2632           54064                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4F43435452">LOCCTR</a>                                
+047533,000157: 01,2633           32640                           <span class="op">CAF     </span> <a href="#4E4F2E434F524553">NO.CORES</a>                              <span class="co">#  SEVEN SETS OF ELEVEN REGISTERS EACH.</span>
+<a name="4E4F56414333"></a>047534,000158: 01,2634           54062        <span class="sm">NOVAC3  </span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4558454354454D32">EXECTEM2</a>                              
+047535,000159: 01,2635           50064                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4F43435452">LOCCTR</a>                                
+047536,000160: 01,2636           10167                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5052494F52495459">PRIORITY</a>                              <span class="co">#  EACH PRIORITY REGISTER CONTAINS -0 IF</span>
+047537,000161: 01,2637           12700                           <span class="op">TCF     </span> <a href="#4E455854434F5245">NEXTCORE</a>                              <span class="co">#  THE CORRESPONDING CORE SET IS AVAILABLE.</span>
+<a name="4E4F2E434F524553"></a>047538,000162: 01,2640           00007        <span class="sm">NO.CORES</span>           <span class="ps">DEC     </span> 7          B-14                       
+047539,000163: 01,2641           12700                           <span class="op">TCF     </span> <a href="#4E455854434F5245">NEXTCORE</a>                              <span class="co">#  AN ACTIVE JOB HAS A POSITIVE PRIORITY</span>
+047540,000164:                                                                                                  <span class="co">#  BUT A DORMANT JOB'S PRIORITY IS NEGATIVE</span>
+047541,000165: 
 </pre>
 </span>
 </p>
@@ -325,48 +325,48 @@ Page 1105
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-<a name="434F52464F554E44"></a>047533,000167: 01,2642           30063        <span class="sm">CORFOUND</span>           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E45575052494F">NEWPRIO</a>                               <span class="co">#  SET THE PRIORITY OF THIS JOB IN THE CORE</span>
-047534,000168: 01,2643           50064                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4F43435452">LOCCTR</a>                                <span class="co">#  SET'S PRIORITY REGISTER AND SET THE</span>
-047535,000169: 01,2644           54167                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5052494F52495459">PRIORITY</a>                              <span class="co">#  JOB'S PUSH-DOWN POINTER AT THE BEGINNING</span>
-047536,000170: 01,2645           74775                           <span class="op">MASK    </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4C4F5739">LOW9</a>                                  <span class="co">#  OF THE WORK AREA AND OVERFLOW INDICATOR</span>
-047537,000171: 01,2646           50064                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4F43435452">LOCCTR</a>                                
-047538,000172: 01,2647           54166                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#505553484C4F43">PUSHLOC</a>                               <span class="co">#  OFF TO PREPARE FOR INTERPRETIVE PROGRAMS</span>
-047539,000173: 
-047540,000174: 01,2650           10064                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4F43435452">LOCCTR</a>                                <span class="co">#  IF CORE SET ZERO IS BEING LOADED, SET UP</span>
-047541,000175: 01,2651           12665                           <span class="op">TCF     </span> <a href="#5345544C4F43">SETLOC</a>                                <span class="co">#  OVFIND AND FIXLOC IMMEDIATELY .</span>
-047542,000176: 01,2652           54121                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F5646494E44">OVFIND</a>                                
-047543,000177: 01,2653           30166                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#505553484C4F43">PUSHLOC</a>                               
-047544,000178: 01,2654           54120                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4649584C4F43">FIXLOC</a>                                
-047545,000179: 
-<a name="5350454354455354"></a>047546,000180: 01,2655           10067        <span class="sm">SPECTEST</span>           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E45574A4F42">NEWJOB</a>                                <span class="co">#  SEE IF ANY ACTIVE JOBS WAITING (RARE).</span>
-047547,000181: 01,2656           12665                           <span class="op">TCF     </span> <a href="#5345544C4F43">SETLOC</a>                                <span class="co">#  MUST BE AWAKENED BUT UNCHANGED JOB.</span>
-047548,000182: 01,2657           05701                           <span class="op">TC      </span> <a href="ALARM_AND_ABORT.agc.html#434353484F4C45">CCSHOLE</a>                               
-047549,000183: 01,2660           05701                           <span class="op">TC      </span> <a href="ALARM_AND_ABORT.agc.html#434353484F4C45">CCSHOLE</a>                               
-047550,000184: 01,2661           54067                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E45574A4F42">NEWJOB</a>                                <span class="co">#  +0 SHOWS ACTIVE JOB ALREADY SET.</span>
-047551,000185: 01,2662           52066                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E45574C4F43">NEWLOC</a>                                
-047552,000186: 01,2663           52165                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4F43">LOC</a>                                   
-047553,000187: 01,2664           15151                           <span class="op">TCF     </span> <a href="#454E4446494E44">ENDFIND</a>                               
-047554,000188: 
-<a name="5345544C4F43"></a>047555,000189: 01,2665           52066        <span class="sm">SETLOC  </span>           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E45574C4F43">NEWLOC</a>                                <span class="co">#  SET UP THE LOCATION REGISTERS FOR THIS</span>
-047556,000190: 01,2666           50064                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4F43435452">LOCCTR</a>                                
-047557,000191: 01,2667           52165                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4F43">LOC</a>                                   
-047558,000192: 01,2670           50067                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E45574A4F42">NEWJOB</a>                                <span class="co">#  THIS INDEX INSTRUCTION INSURES THAT THE</span>
-047559,000193: 01,2671           40167                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5052494F52495459">PRIORITY</a>                              <span class="co">#  HIGHEST ACTIVE PRIORITY WILL BE COMPARED</span>
-047560,000194: 01,2672           60063                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E45575052494F">NEWPRIO</a>                               <span class="co">#  WITH THE NEW PRIORITY TO SEE IF NEWJOB</span>
-047561,000195: 01,2673           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  SHOULD BE SET TO SIGNAL A SWITCH.</span>
-047562,000196: 01,2674           65151                           <span class="op">BZMF    </span> <a href="#454E4446494E44">ENDFIND</a>                               
-047563,000197: 01,2675           30064                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4F43435452">LOCCTR</a>                                <span class="co">#  LOCCTR IS LEFT SET AT THIS CORE SET IF</span>
-047564,000198: 01,2676           54067                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E45574A4F42">NEWJOB</a>                                <span class="co">#  THE CALLER WANTS TO LOAD ANY MPAC</span>
-047565,000199: 01,2677           15151                           <span class="op">TCF     </span> <a href="#454E4446494E44">ENDFIND</a>                               <span class="co">#  REGISTERS, ETC.</span>
-047566,000200: 
-<a name="4E455854434F5245"></a>047567,000201: 01,2700           33037        <span class="sm">NEXTCORE</span>           <span class="op">CAF     </span> <a href="#434F5245494E43">COREINC</a>                               
-047568,000202: 01,2701           26064                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4F43435452">LOCCTR</a>                                
-047569,000203: 01,2702           10062                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4558454354454D32">EXECTEM2</a>                              
-047570,000204: 01,2703           12634                           <span class="op">TCF     </span> <a href="#4E4F56414333">NOVAC3</a>                                
-047571,000205: 01,2704           22061                           <span class="op">LXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4558454354454D31">EXECTEM1</a>                              
-047572,000206: 01,2705           30002                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
-047573,000207: 01,2706           05712                           <span class="op">TC      </span> <a href="ALARM_AND_ABORT.agc.html#4241494C4F555431">BAILOUT1</a>                              <span class="co">#  NO CORE SETS AVAILABLE.</span>
-047574,000208: 01,2707           31202                           <span class="ps">OCT     </span> 31202                                 
+<a name="434F52464F554E44"></a>047543,000167: 01,2642           30063        <span class="sm">CORFOUND</span>           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E45575052494F">NEWPRIO</a>                               <span class="co">#  SET THE PRIORITY OF THIS JOB IN THE CORE</span>
+047544,000168: 01,2643           50064                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4F43435452">LOCCTR</a>                                <span class="co">#  SET'S PRIORITY REGISTER AND SET THE</span>
+047545,000169: 01,2644           54167                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5052494F52495459">PRIORITY</a>                              <span class="co">#  JOB'S PUSH-DOWN POINTER AT THE BEGINNING</span>
+047546,000170: 01,2645           74775                           <span class="op">MASK    </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4C4F5739">LOW9</a>                                  <span class="co">#  OF THE WORK AREA AND OVERFLOW INDICATOR</span>
+047547,000171: 01,2646           50064                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4F43435452">LOCCTR</a>                                
+047548,000172: 01,2647           54166                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#505553484C4F43">PUSHLOC</a>                               <span class="co">#  OFF TO PREPARE FOR INTERPRETIVE PROGRAMS</span>
+047549,000173: 
+047550,000174: 01,2650           10064                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4F43435452">LOCCTR</a>                                <span class="co">#  IF CORE SET ZERO IS BEING LOADED, SET UP</span>
+047551,000175: 01,2651           12665                           <span class="op">TCF     </span> <a href="#5345544C4F43">SETLOC</a>                                <span class="co">#  OVFIND AND FIXLOC IMMEDIATELY .</span>
+047552,000176: 01,2652           54121                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F5646494E44">OVFIND</a>                                
+047553,000177: 01,2653           30166                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#505553484C4F43">PUSHLOC</a>                               
+047554,000178: 01,2654           54120                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4649584C4F43">FIXLOC</a>                                
+047555,000179: 
+<a name="5350454354455354"></a>047556,000180: 01,2655           10067        <span class="sm">SPECTEST</span>           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E45574A4F42">NEWJOB</a>                                <span class="co">#  SEE IF ANY ACTIVE JOBS WAITING (RARE).</span>
+047557,000181: 01,2656           12665                           <span class="op">TCF     </span> <a href="#5345544C4F43">SETLOC</a>                                <span class="co">#  MUST BE AWAKENED BUT UNCHANGED JOB.</span>
+047558,000182: 01,2657           05701                           <span class="op">TC      </span> <a href="ALARM_AND_ABORT.agc.html#434353484F4C45">CCSHOLE</a>                               
+047559,000183: 01,2660           05701                           <span class="op">TC      </span> <a href="ALARM_AND_ABORT.agc.html#434353484F4C45">CCSHOLE</a>                               
+047560,000184: 01,2661           54067                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E45574A4F42">NEWJOB</a>                                <span class="co">#  +0 SHOWS ACTIVE JOB ALREADY SET.</span>
+047561,000185: 01,2662           52066                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E45574C4F43">NEWLOC</a>                                
+047562,000186: 01,2663           52165                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4F43">LOC</a>                                   
+047563,000187: 01,2664           15151                           <span class="op">TCF     </span> <a href="#454E4446494E44">ENDFIND</a>                               
+047564,000188: 
+<a name="5345544C4F43"></a>047565,000189: 01,2665           52066        <span class="sm">SETLOC  </span>           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E45574C4F43">NEWLOC</a>                                <span class="co">#  SET UP THE LOCATION REGISTERS FOR THIS</span>
+047566,000190: 01,2666           50064                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4F43435452">LOCCTR</a>                                
+047567,000191: 01,2667           52165                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4F43">LOC</a>                                   
+047568,000192: 01,2670           50067                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E45574A4F42">NEWJOB</a>                                <span class="co">#  THIS INDEX INSTRUCTION INSURES THAT THE</span>
+047569,000193: 01,2671           40167                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5052494F52495459">PRIORITY</a>                              <span class="co">#  HIGHEST ACTIVE PRIORITY WILL BE COMPARED</span>
+047570,000194: 01,2672           60063                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E45575052494F">NEWPRIO</a>                               <span class="co">#  WITH THE NEW PRIORITY TO SEE IF NEWJOB</span>
+047571,000195: 01,2673           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  SHOULD BE SET TO SIGNAL A SWITCH.</span>
+047572,000196: 01,2674           65151                           <span class="op">BZMF    </span> <a href="#454E4446494E44">ENDFIND</a>                               
+047573,000197: 01,2675           30064                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4F43435452">LOCCTR</a>                                <span class="co">#  LOCCTR IS LEFT SET AT THIS CORE SET IF</span>
+047574,000198: 01,2676           54067                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E45574A4F42">NEWJOB</a>                                <span class="co">#  THE CALLER WANTS TO LOAD ANY MPAC</span>
+047575,000199: 01,2677           15151                           <span class="op">TCF     </span> <a href="#454E4446494E44">ENDFIND</a>                               <span class="co">#  REGISTERS, ETC.</span>
+047576,000200: 
+<a name="4E455854434F5245"></a>047577,000201: 01,2700           33037        <span class="sm">NEXTCORE</span>           <span class="op">CAF     </span> <a href="#434F5245494E43">COREINC</a>                               
+047578,000202: 01,2701           26064                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4F43435452">LOCCTR</a>                                
+047579,000203: 01,2702           10062                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4558454354454D32">EXECTEM2</a>                              
+047580,000204: 01,2703           12634                           <span class="op">TCF     </span> <a href="#4E4F56414333">NOVAC3</a>                                
+047581,000205: 01,2704           22061                           <span class="op">LXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4558454354454D31">EXECTEM1</a>                              
+047582,000206: 01,2705           30002                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
+047583,000207: 01,2706           05712                           <span class="op">TC      </span> <a href="ALARM_AND_ABORT.agc.html#4241494C4F555431">BAILOUT1</a>                              <span class="co">#  NO CORE SETS AVAILABLE.</span>
+047584,000208: 01,2707           31202                           <span class="ps">OCT     </span> 31202                                 
 </pre>
 </span>
 </p>
@@ -382,57 +382,57 @@ Page 1106
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-047576,000210:                                                                                                  <span class="co">#           THE FOLLOWING ROUTINE SWAPS CORE SET 0 WITH THAT WHOSE RELATIVE ADDRESS IS IN NEWJOB.</span>
-047577,000211: 
-047578,000212: 01,2710           22164                 -2        <span class="op">LXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4F43">LOC</a>                                   
-047579,000213: 01,2711           30165                 -1        <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#42414E4B534554">BANKSET</a>                               <span class="co">#  BANKSET, NOT BBANK, HAS RIGHT CONTENTS.</span>
-<a name="4348414E4A4F42"></a>047580,000214: 01,2712           00004        <span class="sm">CHANJOB </span>           <span class="op">INHINT  </span>                                       
-047581,000215: 01,2713           00006                           <span class="op">EXTEND  </span>                                       
-047582,000216: 01,2714           04007                           <span class="op">ROR     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5355504552424E4B">SUPERBNK</a>                              <span class="co">#  PICK UP CURRENT SBANK FOR BBCON</span>
-047583,000217: 01,2715           56001                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     <span class="co">#  LOC IN A AND BBCON IN L.</span>
-047584,000218: 01,2716           50067                 +4        <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E45574A4F42">NEWJOB</a>                                <span class="co">#  SWAP LOC AND BANKSET.</span>
-047585,000219: 01,2717           52165                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4F43">LOC</a>                                   
-047586,000220: 01,2720           52165                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4F43">LOC</a>                                   
-047587,000221: 
-047588,000222: 01,2721           30165                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#42414E4B534554">BANKSET</a>                               
-047589,000223: 01,2722           00006                           <span class="op">EXTEND  </span>                                       
-047590,000224: 01,2723           01007                           <span class="op">WRITE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5355504552424E4B">SUPERBNK</a>                              <span class="co">#  SET SBANK FOR NEW JOB.</span>
-047591,000225: 01,2724           52155                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  <span class="co">#  SWAP MULTI-PURPOSE ACCUMULATOR AREAS.</span>
-047592,000226: 01,2725           50067                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E45574A4F42">NEWJOB</a>                                
-047593,000227: 01,2726           52155                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
-047594,000228: 01,2727           52155                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
-047595,000229: 01,2730           52157                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +2                         
-047596,000230: 01,2731           50067                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E45574A4F42">NEWJOB</a>                                
-047597,000231: 01,2732           52157                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +2                         
-047598,000232: 01,2733           52157                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +2                         
-047599,000233: 01,2734           52161                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +4                         
-047600,000234: 01,2735           50067                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E45574A4F42">NEWJOB</a>                                
-047601,000235: 01,2736           52161                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +4                         
-047602,000236: 01,2737           52161                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +4                         
-047603,000237: 01,2740           52163                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +6                         
-047604,000238: 01,2741           50067                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E45574A4F42">NEWJOB</a>                                
-047605,000239: 01,2742           52163                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +6                         
-047606,000240: 01,2743           52163                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +6                         
-047607,000241: 
-047608,000242: 01,2744           34746                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5A45524F">ZERO</a>                                  
-047609,000243: 01,2745           56121                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F5646494E44">OVFIND</a>                                <span class="co">#  MAKE PUSHLOC NEGATIVE IF OVFIND NZ.</span>
-047610,000244: 01,2746           00006                           <span class="op">EXTEND  </span>                                       
-047611,000245: 01,2747           12752                           <span class="op">BZF     </span> +3                                    
-047612,000246: 01,2750           40166                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#505553484C4F43">PUSHLOC</a>                               
-047613,000247: 01,2751           54166                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#505553484C4F43">PUSHLOC</a>                               
-047614,000248: 
-047615,000249: 01,2752           52167                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#505553484C4F43">PUSHLOC</a>                               
-047616,000250: 01,2753           50067                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E45574A4F42">NEWJOB</a>                                
-047617,000251: 01,2754           52167                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#505553484C4F43">PUSHLOC</a>                               
-047618,000252: 01,2755           52167                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#505553484C4F43">PUSHLOC</a>                               <span class="co">#  SWAPS PUSHLOC AND PRIORITY.</span>
-047619,000253: 01,2756           34775                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4C4F5739">LOW9</a>                                  <span class="co">#  SET FIXLOC TO BASE OF VAC AREA.</span>
-047620,000254: 01,2757           70167                           <span class="op">MASK    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5052494F52495459">PRIORITY</a>                              
-047621,000255: 01,2760           54120                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4649584C4F43">FIXLOC</a>                                
-047622,000256: 
-047623,000257: 01,2761           10166                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#505553484C4F43">PUSHLOC</a>                               <span class="co">#  SET OVERFLOW INDICATOR ACCORDING TO</span>
-047624,000258: 01,2762           34746                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5A45524F">ZERO</a>                                  
-047625,000259: 01,2763           12770                           <span class="op">TCF     </span> <a href="#454E445052434847">ENDPRCHG</a>   -1                         
-047626,000260: 
+047586,000210:                                                                                                  <span class="co">#           THE FOLLOWING ROUTINE SWAPS CORE SET 0 WITH THAT WHOSE RELATIVE ADDRESS IS IN NEWJOB.</span>
+047587,000211: 
+047588,000212: 01,2710           22164                 -2        <span class="op">LXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4F43">LOC</a>                                   
+047589,000213: 01,2711           30165                 -1        <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#42414E4B534554">BANKSET</a>                               <span class="co">#  BANKSET, NOT BBANK, HAS RIGHT CONTENTS.</span>
+<a name="4348414E4A4F42"></a>047590,000214: 01,2712           00004        <span class="sm">CHANJOB </span>           <span class="op">INHINT  </span>                                       
+047591,000215: 01,2713           00006                           <span class="op">EXTEND  </span>                                       
+047592,000216: 01,2714           04007                           <span class="op">ROR     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5355504552424E4B">SUPERBNK</a>                              <span class="co">#  PICK UP CURRENT SBANK FOR BBCON</span>
+047593,000217: 01,2715           56001                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     <span class="co">#  LOC IN A AND BBCON IN L.</span>
+047594,000218: 01,2716           50067                 +4        <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E45574A4F42">NEWJOB</a>                                <span class="co">#  SWAP LOC AND BANKSET.</span>
+047595,000219: 01,2717           52165                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4F43">LOC</a>                                   
+047596,000220: 01,2720           52165                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4F43">LOC</a>                                   
+047597,000221: 
+047598,000222: 01,2721           30165                           <span class="op">CAE     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#42414E4B534554">BANKSET</a>                               
+047599,000223: 01,2722           00006                           <span class="op">EXTEND  </span>                                       
+047600,000224: 01,2723           01007                           <span class="op">WRITE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5355504552424E4B">SUPERBNK</a>                              <span class="co">#  SET SBANK FOR NEW JOB.</span>
+047601,000225: 01,2724           52155                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  <span class="co">#  SWAP MULTI-PURPOSE ACCUMULATOR AREAS.</span>
+047602,000226: 01,2725           50067                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E45574A4F42">NEWJOB</a>                                
+047603,000227: 01,2726           52155                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
+047604,000228: 01,2727           52155                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
+047605,000229: 01,2730           52157                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +2                         
+047606,000230: 01,2731           50067                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E45574A4F42">NEWJOB</a>                                
+047607,000231: 01,2732           52157                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +2                         
+047608,000232: 01,2733           52157                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +2                         
+047609,000233: 01,2734           52161                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +4                         
+047610,000234: 01,2735           50067                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E45574A4F42">NEWJOB</a>                                
+047611,000235: 01,2736           52161                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +4                         
+047612,000236: 01,2737           52161                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +4                         
+047613,000237: 01,2740           52163                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +6                         
+047614,000238: 01,2741           50067                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E45574A4F42">NEWJOB</a>                                
+047615,000239: 01,2742           52163                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +6                         
+047616,000240: 01,2743           52163                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +6                         
+047617,000241: 
+047618,000242: 01,2744           34746                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5A45524F">ZERO</a>                                  
+047619,000243: 01,2745           56121                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F5646494E44">OVFIND</a>                                <span class="co">#  MAKE PUSHLOC NEGATIVE IF OVFIND NZ.</span>
+047620,000244: 01,2746           00006                           <span class="op">EXTEND  </span>                                       
+047621,000245: 01,2747           12752                           <span class="op">BZF     </span> +3                                    
+047622,000246: 01,2750           40166                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#505553484C4F43">PUSHLOC</a>                               
+047623,000247: 01,2751           54166                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#505553484C4F43">PUSHLOC</a>                               
+047624,000248: 
+047625,000249: 01,2752           52167                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#505553484C4F43">PUSHLOC</a>                               
+047626,000250: 01,2753           50067                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E45574A4F42">NEWJOB</a>                                
+047627,000251: 01,2754           52167                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#505553484C4F43">PUSHLOC</a>                               
+047628,000252: 01,2755           52167                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#505553484C4F43">PUSHLOC</a>                               <span class="co">#  SWAPS PUSHLOC AND PRIORITY.</span>
+047629,000253: 01,2756           34775                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4C4F5739">LOW9</a>                                  <span class="co">#  SET FIXLOC TO BASE OF VAC AREA.</span>
+047630,000254: 01,2757           70167                           <span class="op">MASK    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5052494F52495459">PRIORITY</a>                              
+047631,000255: 01,2760           54120                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4649584C4F43">FIXLOC</a>                                
+047632,000256: 
+047633,000257: 01,2761           10166                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#505553484C4F43">PUSHLOC</a>                               <span class="co">#  SET OVERFLOW INDICATOR ACCORDING TO</span>
+047634,000258: 01,2762           34746                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5A45524F">ZERO</a>                                  
+047635,000259: 01,2763           12770                           <span class="op">TCF     </span> <a href="#454E445052434847">ENDPRCHG</a>   -1                         
+047636,000260: 
 </pre>
 </span>
 </p>
@@ -448,18 +448,18 @@ Page 1107
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-047628,000262: 01,2764           40166                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#505553484C4F43">PUSHLOC</a>                               
-047629,000263: 01,2765           54166                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#505553484C4F43">PUSHLOC</a>                               
-047630,000264: 01,2766           34744                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4F4E45">ONE</a>                                   
-047631,000265: 01,2767           56121                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F5646494E44">OVFIND</a>                                
-047632,000266: 01,2770           54067                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E45574A4F42">NEWJOB</a>                                
-047633,000267: 
-<a name="454E445052434847"></a>047634,000268: 01,2771           00003        <span class="sm">ENDPRCHG</span>           <span class="op">RELINT  </span>                                       
-047635,000269: 01,2772           52165                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4F43">LOC</a>                                   <span class="co">#  BASIC JOBS HAVE POSITIVE ADDRESSES, SO</span>
-047636,000270: 01,2773           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  DISPATCH WITH A DTCB.</span>
-047637,000271: 01,2774           62776                           <span class="op">BZMF    </span> +2                                    <span class="co">#  IF INTERPRETIVE, SET UP EBANK, ETC.</span>
-047638,000272: 01,2775           52006                           <span class="op">DTCB    </span>                                       
-047639,000273: 
+047638,000262: 01,2764           40166                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#505553484C4F43">PUSHLOC</a>                               
+047639,000263: 01,2765           54166                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#505553484C4F43">PUSHLOC</a>                               
+047640,000264: 01,2766           34744                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4F4E45">ONE</a>                                   
+047641,000265: 01,2767           56121                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F5646494E44">OVFIND</a>                                
+047642,000266: 01,2770           54067                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E45574A4F42">NEWJOB</a>                                
+047643,000267: 
+<a name="454E445052434847"></a>047644,000268: 01,2771           00003        <span class="sm">ENDPRCHG</span>           <span class="op">RELINT  </span>                                       
+047645,000269: 01,2772           52165                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4F43">LOC</a>                                   <span class="co">#  BASIC JOBS HAVE POSITIVE ADDRESSES, SO</span>
+047646,000270: 01,2773           00006                           <span class="op">EXTEND  </span>                                       <span class="co">#  DISPATCH WITH A DTCB.</span>
+047647,000271: 01,2774           62776                           <span class="op">BZMF    </span> +2                                    <span class="co">#  IF INTERPRETIVE, SET UP EBANK, ETC.</span>
+047648,000272: 01,2775           52006                           <span class="op">DTCB    </span>                                       
+047649,000273: 
 </pre>
 </span>
 </p>
@@ -475,37 +475,37 @@ Page 1108
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-047641,000275: 01,2776           40000                           <span class="op">COM     </span>                                       <span class="co">#  EPILOGUE TO JOB CHANGE FOR INTERPRETIVE</span>
-047642,000276: 01,2777           64744                           <span class="op">AD      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4F4E45">ONE</a>                                   
-047643,000277: 01,3000           54164                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4F43">LOC</a>                                   <span class="co">#  RESUME.</span>
-047644,000278: 01,3001           16071                           <span class="op">TCF     </span> <a href="INTERPRETER.agc.html#494E5452534D">INTRSM</a>                                
-047645,000279: 
-047646,000280:                                                                                                  <span class="co">#           COMPLETE JOBSLEEP PREPARATIONS.</span>
-047647,000281: 
-<a name="4A4F42534C5031"></a>047648,000282: 01,3002           00004        <span class="sm">JOBSLP1 </span>           <span class="op">INHINT  </span>                                       
-047649,000283: 01,3003           40167                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5052494F52495459">PRIORITY</a>                              <span class="co">#  NNZ PRIORITY SHOWS JOB ASLEEP.</span>
-047650,000284: 01,3004           54167                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5052494F52495459">PRIORITY</a>                              
-047651,000285: 01,3005           36115                           <span class="op">CAF     </span> <a href="INTERPRETER.agc.html#4C4F5737">LOW7</a>                                  
-047652,000286: 01,3006           70006                           <span class="op">MASK    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4242414E4B">BBANK</a>                                 
-047653,000287: 01,3007           00006                           <span class="op">EXTEND  </span>                                       
-047654,000288: 01,3010           04007                           <span class="op">ROR     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5355504552424E4B">SUPERBNK</a>                              <span class="co">#  SAVE OLD SUPERBANK VALUE.</span>
-047655,000289: 01,3011           54165                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#42414E4B534554">BANKSET</a>                               
-047656,000290: 01,3012           44746                           <span class="op">CS      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5A45524F">ZERO</a>                                  
-<a name="4A4F42534C5032"></a>047657,000291: 01,3013           54131        <span class="sm">JOBSLP2 </span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>        +1                         <span class="co">#  HOLDS - HIGHEST PRIORITY.</span>
-047658,000292: 01,3014           13124                           <span class="op">TCF     </span> <a href="#454A5343414E">EJSCAN</a>                                <span class="co">#  SCAN FOR HIGHEST PRIORITY ALA ENDOFJOB.</span>
-047659,000293: 
-<a name="4E554348414E4732"></a>047660,000294: 01,3015           00004        <span class="sm">NUCHANG2</span>           <span class="op">INHINT  </span>                                       <span class="co">#  QUICK... DONT LET NEWJOB CHANGE TO +0 .</span>
-047661,000295: 01,3016           10067                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E45574A4F42">NEWJOB</a>                                
-047662,000296: 01,3017           13022                           <span class="op">TCF     </span> +3                                    <span class="co">#  NEWJOB STILL PNZ</span>
-047663,000297: 01,3020           00003                           <span class="op">RELINT  </span>                                       <span class="co">#  NEWJOB HAS CHANGED TO +0. WAKE UP JOB</span>
-047664,000298: 01,3021           13220                           <span class="op">TCF     </span> <a href="#414456414E">ADVAN</a>      +2                         <span class="co">#  VIA NUDIRECT. (VERY RARE CASE.)</span>
-047665,000299: 
-047666,000300: 01,3022           34743                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#54574F">TWO</a>                                   
-047667,000301: 01,3023           00006                           <span class="op">EXTEND  </span>                                       
-047668,000302: 01,3024           05011                           <span class="op">WOR     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4453414C4D4F5554">DSALMOUT</a>                              <span class="co">#  TURN ON ACTIVITY LIGHT</span>
-047669,000303: 01,3025           52165                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4F43">LOC</a>                                   <span class="co">#  AND SAVE ADDRESS INFO FOR BENEFIT OF</span>
-047670,000304: 01,3026           12716                           <span class="op">TCF     </span> <a href="#4348414E4A4F42">CHANJOB</a>    +4                         <span class="co">#   POSSIBLE SLEEPING JOB.</span>
-047671,000305: 
+047651,000275: 01,2776           40000                           <span class="op">COM     </span>                                       <span class="co">#  EPILOGUE TO JOB CHANGE FOR INTERPRETIVE</span>
+047652,000276: 01,2777           64744                           <span class="op">AD      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4F4E45">ONE</a>                                   
+047653,000277: 01,3000           54164                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4F43">LOC</a>                                   <span class="co">#  RESUME.</span>
+047654,000278: 01,3001           16071                           <span class="op">TCF     </span> <a href="INTERPRETER.agc.html#494E5452534D">INTRSM</a>                                
+047655,000279: 
+047656,000280:                                                                                                  <span class="co">#           COMPLETE JOBSLEEP PREPARATIONS.</span>
+047657,000281: 
+<a name="4A4F42534C5031"></a>047658,000282: 01,3002           00004        <span class="sm">JOBSLP1 </span>           <span class="op">INHINT  </span>                                       
+047659,000283: 01,3003           40167                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5052494F52495459">PRIORITY</a>                              <span class="co">#  NNZ PRIORITY SHOWS JOB ASLEEP.</span>
+047660,000284: 01,3004           54167                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5052494F52495459">PRIORITY</a>                              
+047661,000285: 01,3005           36115                           <span class="op">CAF     </span> <a href="INTERPRETER.agc.html#4C4F5737">LOW7</a>                                  
+047662,000286: 01,3006           70006                           <span class="op">MASK    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4242414E4B">BBANK</a>                                 
+047663,000287: 01,3007           00006                           <span class="op">EXTEND  </span>                                       
+047664,000288: 01,3010           04007                           <span class="op">ROR     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5355504552424E4B">SUPERBNK</a>                              <span class="co">#  SAVE OLD SUPERBANK VALUE.</span>
+047665,000289: 01,3011           54165                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#42414E4B534554">BANKSET</a>                               
+047666,000290: 01,3012           44746                           <span class="op">CS      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5A45524F">ZERO</a>                                  
+<a name="4A4F42534C5032"></a>047667,000291: 01,3013           54131        <span class="sm">JOBSLP2 </span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>        +1                         <span class="co">#  HOLDS - HIGHEST PRIORITY.</span>
+047668,000292: 01,3014           13124                           <span class="op">TCF     </span> <a href="#454A5343414E">EJSCAN</a>                                <span class="co">#  SCAN FOR HIGHEST PRIORITY ALA ENDOFJOB.</span>
+047669,000293: 
+<a name="4E554348414E4732"></a>047670,000294: 01,3015           00004        <span class="sm">NUCHANG2</span>           <span class="op">INHINT  </span>                                       <span class="co">#  QUICK... DONT LET NEWJOB CHANGE TO +0 .</span>
+047671,000295: 01,3016           10067                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E45574A4F42">NEWJOB</a>                                
+047672,000296: 01,3017           13022                           <span class="op">TCF     </span> +3                                    <span class="co">#  NEWJOB STILL PNZ</span>
+047673,000297: 01,3020           00003                           <span class="op">RELINT  </span>                                       <span class="co">#  NEWJOB HAS CHANGED TO +0. WAKE UP JOB</span>
+047674,000298: 01,3021           13220                           <span class="op">TCF     </span> <a href="#414456414E">ADVAN</a>      +2                         <span class="co">#  VIA NUDIRECT. (VERY RARE CASE.)</span>
+047675,000299: 
+047676,000300: 01,3022           34743                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#54574F">TWO</a>                                   
+047677,000301: 01,3023           00006                           <span class="op">EXTEND  </span>                                       
+047678,000302: 01,3024           05011                           <span class="op">WOR     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4453414C4D4F5554">DSALMOUT</a>                              <span class="co">#  TURN ON ACTIVITY LIGHT</span>
+047679,000303: 01,3025           52165                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4F43">LOC</a>                                   <span class="co">#  AND SAVE ADDRESS INFO FOR BENEFIT OF</span>
+047680,000304: 01,3026           12716                           <span class="op">TCF     </span> <a href="#4348414E4A4F42">CHANJOB</a>    +4                         <span class="co">#   POSSIBLE SLEEPING JOB.</span>
+047681,000305: 
 </pre>
 </span>
 </p>
@@ -521,55 +521,55 @@ Page 1109
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-047673,000307:                                                                                                  <span class="co">#           TO WAKE UP A JOB, EACH CORE SET IS FOUND TO LOCATE ALL JOBS WHICH ARE ASLEEP. IF THE FCADR IN THE</span>
-047674,000308:                                                                                                  <span class="co">#  LOC REGISTER OF ANY SUCH JOB MATCHES THAT SUPPLIED BY THE CALLER, THAT JOB IS AWAKENED. IF NO JOB IS FOUND,</span>
-047675,000309:                                                                                                  <span class="co">#  LOCCTR IS SET TO -1 AND NO FURTHER ACTION TAKES PLACE.</span>
-047676,000310: 
-<a name="4A4F4257414B4532"></a>047677,000311: 01,3027           54061        <span class="sm">JOBWAKE2</span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4558454354454D31">EXECTEM1</a>                              
-047678,000312: 01,3030           34746                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5A45524F">ZERO</a>                                  <span class="co">#  BEGIN CORE SET SCAN.</span>
-047679,000313: 01,3031           54064                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4F43435452">LOCCTR</a>                                
-047680,000314: 01,3032           32640                           <span class="op">CAF     </span> <a href="#4E4F2E434F524553">NO.CORES</a>                              
-<a name="4A4F4257414B4534"></a>047681,000315: 01,3033           54062        <span class="sm">JOBWAKE4</span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4558454354454D32">EXECTEM2</a>                              
-047682,000316: 01,3034           50064                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4F43435452">LOCCTR</a>                                
-047683,000317: 01,3035           10167                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5052494F52495459">PRIORITY</a>                              
-047684,000318: 01,3036           13041                           <span class="op">TCF     </span> <a href="#4A4F4257414B4533">JOBWAKE3</a>                              <span class="co">#  ACTIVE JOB - CHECK NEXT CORE SET.</span>
-<a name="434F5245494E43"></a>047685,000319: 01,3037           00014        <span class="sm">COREINC </span>           <span class="ps">DEC     </span> 12         B-14                       <span class="co">#  12 REGISTERS PER CORE SET.</span>
-047686,000320: 01,3040           13050                           <span class="op">TCF     </span> <a href="#57414B4554455354">WAKETEST</a>                              <span class="co">#  SLEEPING JOB - SEE IF CADR MATCHES.</span>
-047687,000321: 
-<a name="4A4F4257414B4533"></a>047688,000322: 01,3041           33037        <span class="sm">JOBWAKE3</span>           <span class="op">CAF     </span> <a href="#434F5245494E43">COREINC</a>                               
-047689,000323: 01,3042           26064                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4F43435452">LOCCTR</a>                                
-047690,000324: 01,3043           10062                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4558454354454D32">EXECTEM2</a>                              
-047691,000325: 01,3044           13033                           <span class="op">TCF     </span> <a href="#4A4F4257414B4534">JOBWAKE4</a>                              
-047692,000326: 01,3045           44744                           <span class="op">CS      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4F4E45">ONE</a>                                   <span class="co">#  EXIT IF SLEEPING JOB NOT FOUND.</span>
-047693,000327: 01,3046           54064                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4F43435452">LOCCTR</a>                                
-047694,000328: 01,3047           15151                           <span class="op">TCF     </span> <a href="#454E4446494E44">ENDFIND</a>                               
-047695,000329: 
-<a name="57414B4554455354"></a>047696,000330: 01,3050           40065        <span class="sm">WAKETEST</span>           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E45574C4F43">NEWLOC</a>                                
-047697,000331: 01,3051           50064                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4F43435452">LOCCTR</a>                                
-047698,000332: 01,3052           60164                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4F43">LOC</a>                                   
-047699,000333: 01,3053           00006                           <span class="op">EXTEND  </span>                                       
-047700,000334: 01,3054           13056                           <span class="op">BZF     </span> +2                                    <span class="co">#  IF MATCH.</span>
-047701,000335: 01,3055           13041                           <span class="op">TCF     </span> <a href="#4A4F4257414B4533">JOBWAKE3</a>                              <span class="co">#  EXAMINE NEXT CORE SET IF NO MATCH.</span>
-047702,000336: 
-047703,000337: 01,3056           50064                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4F43435452">LOCCTR</a>                                <span class="co">#  RE-COMPLEMENT PRIORITY TO SHOW JOB AWAKE</span>
-047704,000338: 01,3057           40167                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5052494F52495459">PRIORITY</a>                              
-047705,000339: 01,3060           54063                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E45575052494F">NEWPRIO</a>                               
-047706,000340: 01,3061           50064                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4F43435452">LOCCTR</a>                                
-047707,000341: 01,3062           54167                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5052494F52495459">PRIORITY</a>                              
-047708,000342: 
-047709,000343: 01,3063           44341                           <span class="op">CS      </span> <a href="INTERPRETER.agc.html#4642414E4B4D534B">FBANKMSK</a>                              <span class="co">#  MASK UP THE 2CADR OF THE WAKE ADDRESS</span>
-047710,000344: 01,3064           70065                           <span class="op">MASK    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E45574C4F43">NEWLOC</a>                                <span class="co">#  USING THE CADR IN NEWLOC AND THE EBANK</span>
-047711,000345: 01,3065           64732                           <span class="op">AD      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#324B">2K</a>                                    <span class="co">#  HALF OF BBANK SAVED IN BANKSET.</span>
-047712,000346: 01,3066           56065                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E45574C4F43">NEWLOC</a>                                
-047713,000347: 01,3067           74341                           <span class="op">MASK    </span> <a href="INTERPRETER.agc.html#4642414E4B4D534B">FBANKMSK</a>                              
-047714,000348: 01,3070           50064                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4F43435452">LOCCTR</a>                                
-047715,000349: 01,3071           60165                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#42414E4B534554">BANKSET</a>                               
-047716,000350: 01,3072           54066                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E45574C4F43">NEWLOC</a>     +1                         
-047717,000351: 
-047718,000352: 01,3073           10064                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4F43435452">LOCCTR</a>                                <span class="co">#  SPECIAL TREATMENT IF THIS JOB WAS</span>
-047719,000353: 01,3074           12665                           <span class="op">TCF     </span> <a href="#5345544C4F43">SETLOC</a>                                <span class="co">#  ALREADY IN THE RUN (0) POSITION.</span>
-047720,000354: 01,3075           12655                           <span class="op">TCF     </span> <a href="#5350454354455354">SPECTEST</a>                              
-047721,000355: 
+047683,000307:                                                                                                  <span class="co">#           TO WAKE UP A JOB, EACH CORE SET IS FOUND TO LOCATE ALL JOBS WHICH ARE ASLEEP. IF THE FCADR IN THE</span>
+047684,000308:                                                                                                  <span class="co">#  LOC REGISTER OF ANY SUCH JOB MATCHES THAT SUPPLIED BY THE CALLER, THAT JOB IS AWAKENED. IF NO JOB IS FOUND,</span>
+047685,000309:                                                                                                  <span class="co">#  LOCCTR IS SET TO -1 AND NO FURTHER ACTION TAKES PLACE.</span>
+047686,000310: 
+<a name="4A4F4257414B4532"></a>047687,000311: 01,3027           54061        <span class="sm">JOBWAKE2</span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4558454354454D31">EXECTEM1</a>                              
+047688,000312: 01,3030           34746                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5A45524F">ZERO</a>                                  <span class="co">#  BEGIN CORE SET SCAN.</span>
+047689,000313: 01,3031           54064                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4F43435452">LOCCTR</a>                                
+047690,000314: 01,3032           32640                           <span class="op">CAF     </span> <a href="#4E4F2E434F524553">NO.CORES</a>                              
+<a name="4A4F4257414B4534"></a>047691,000315: 01,3033           54062        <span class="sm">JOBWAKE4</span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4558454354454D32">EXECTEM2</a>                              
+047692,000316: 01,3034           50064                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4F43435452">LOCCTR</a>                                
+047693,000317: 01,3035           10167                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5052494F52495459">PRIORITY</a>                              
+047694,000318: 01,3036           13041                           <span class="op">TCF     </span> <a href="#4A4F4257414B4533">JOBWAKE3</a>                              <span class="co">#  ACTIVE JOB - CHECK NEXT CORE SET.</span>
+<a name="434F5245494E43"></a>047695,000319: 01,3037           00014        <span class="sm">COREINC </span>           <span class="ps">DEC     </span> 12         B-14                       <span class="co">#  12 REGISTERS PER CORE SET.</span>
+047696,000320: 01,3040           13050                           <span class="op">TCF     </span> <a href="#57414B4554455354">WAKETEST</a>                              <span class="co">#  SLEEPING JOB - SEE IF CADR MATCHES.</span>
+047697,000321: 
+<a name="4A4F4257414B4533"></a>047698,000322: 01,3041           33037        <span class="sm">JOBWAKE3</span>           <span class="op">CAF     </span> <a href="#434F5245494E43">COREINC</a>                               
+047699,000323: 01,3042           26064                           <span class="op">ADS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4F43435452">LOCCTR</a>                                
+047700,000324: 01,3043           10062                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4558454354454D32">EXECTEM2</a>                              
+047701,000325: 01,3044           13033                           <span class="op">TCF     </span> <a href="#4A4F4257414B4534">JOBWAKE4</a>                              
+047702,000326: 01,3045           44744                           <span class="op">CS      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4F4E45">ONE</a>                                   <span class="co">#  EXIT IF SLEEPING JOB NOT FOUND.</span>
+047703,000327: 01,3046           54064                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4F43435452">LOCCTR</a>                                
+047704,000328: 01,3047           15151                           <span class="op">TCF     </span> <a href="#454E4446494E44">ENDFIND</a>                               
+047705,000329: 
+<a name="57414B4554455354"></a>047706,000330: 01,3050           40065        <span class="sm">WAKETEST</span>           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E45574C4F43">NEWLOC</a>                                
+047707,000331: 01,3051           50064                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4F43435452">LOCCTR</a>                                
+047708,000332: 01,3052           60164                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4F43">LOC</a>                                   
+047709,000333: 01,3053           00006                           <span class="op">EXTEND  </span>                                       
+047710,000334: 01,3054           13056                           <span class="op">BZF     </span> +2                                    <span class="co">#  IF MATCH.</span>
+047711,000335: 01,3055           13041                           <span class="op">TCF     </span> <a href="#4A4F4257414B4533">JOBWAKE3</a>                              <span class="co">#  EXAMINE NEXT CORE SET IF NO MATCH.</span>
+047712,000336: 
+047713,000337: 01,3056           50064                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4F43435452">LOCCTR</a>                                <span class="co">#  RE-COMPLEMENT PRIORITY TO SHOW JOB AWAKE</span>
+047714,000338: 01,3057           40167                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5052494F52495459">PRIORITY</a>                              
+047715,000339: 01,3060           54063                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E45575052494F">NEWPRIO</a>                               
+047716,000340: 01,3061           50064                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4F43435452">LOCCTR</a>                                
+047717,000341: 01,3062           54167                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5052494F52495459">PRIORITY</a>                              
+047718,000342: 
+047719,000343: 01,3063           44341                           <span class="op">CS      </span> <a href="INTERPRETER.agc.html#4642414E4B4D534B">FBANKMSK</a>                              <span class="co">#  MASK UP THE 2CADR OF THE WAKE ADDRESS</span>
+047720,000344: 01,3064           70065                           <span class="op">MASK    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E45574C4F43">NEWLOC</a>                                <span class="co">#  USING THE CADR IN NEWLOC AND THE EBANK</span>
+047721,000345: 01,3065           64732                           <span class="op">AD      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#324B">2K</a>                                    <span class="co">#  HALF OF BBANK SAVED IN BANKSET.</span>
+047722,000346: 01,3066           56065                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E45574C4F43">NEWLOC</a>                                
+047723,000347: 01,3067           74341                           <span class="op">MASK    </span> <a href="INTERPRETER.agc.html#4642414E4B4D534B">FBANKMSK</a>                              
+047724,000348: 01,3070           50064                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4F43435452">LOCCTR</a>                                
+047725,000349: 01,3071           60165                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#42414E4B534554">BANKSET</a>                               
+047726,000350: 01,3072           54066                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E45574C4F43">NEWLOC</a>     +1                         
+047727,000351: 
+047728,000352: 01,3073           10064                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4F43435452">LOCCTR</a>                                <span class="co">#  SPECIAL TREATMENT IF THIS JOB WAS</span>
+047729,000353: 01,3074           12665                           <span class="op">TCF     </span> <a href="#5345544C4F43">SETLOC</a>                                <span class="co">#  ALREADY IN THE RUN (0) POSITION.</span>
+047730,000354: 01,3075           12655                           <span class="op">TCF     </span> <a href="#5350454354455354">SPECTEST</a>                              
+047731,000355: 
 </pre>
 </span>
 </p>
@@ -585,18 +585,18 @@ Page 1110
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-047723,000357:                                                                                                  <span class="co">#           PRIORITY CHANGE. CHANGE THE CONTENTS OF PRIORITY AND SCAN FOR THE JOB OF HIGHEST PRIORITY.</span>
-047724,000358: 
-<a name="5052494F434832"></a>047725,000359: 01,3076           54164        <span class="sm">PRIOCH2 </span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4F43">LOC</a>                                   
-047726,000360: 01,3077           34746                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5A45524F">ZERO</a>                                  <span class="co">#  SET FLAG TO TELL ENDJOB SCANNER IF THIS</span>
-047727,000361: 01,3100           54130                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>                                   <span class="co">#  JOB IS STILL HIGHEST PRIORITY.</span>
-047728,000362: 01,3101           34775                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4C4F5739">LOW9</a>                                  
-047729,000363: 01,3102           70167                           <span class="op">MASK    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5052494F52495459">PRIORITY</a>                              
-047730,000364: 01,3103           60063                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E45575052494F">NEWPRIO</a>                               
-047731,000365: 01,3104           54167                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5052494F52495459">PRIORITY</a>                              
-047732,000366: 01,3105           40000                           <span class="op">COM     </span>                                       
-047733,000367: 01,3106           13013                           <span class="op">TCF     </span> <a href="#4A4F42534C5032">JOBSLP2</a>                               <span class="co">#  AND TO EJSCAN.</span>
-047734,000368: 
+047733,000357:                                                                                                  <span class="co">#           PRIORITY CHANGE. CHANGE THE CONTENTS OF PRIORITY AND SCAN FOR THE JOB OF HIGHEST PRIORITY.</span>
+047734,000358: 
+<a name="5052494F434832"></a>047735,000359: 01,3076           54164        <span class="sm">PRIOCH2 </span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4F43">LOC</a>                                   
+047736,000360: 01,3077           34746                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5A45524F">ZERO</a>                                  <span class="co">#  SET FLAG TO TELL ENDJOB SCANNER IF THIS</span>
+047737,000361: 01,3100           54130                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>                                   <span class="co">#  JOB IS STILL HIGHEST PRIORITY.</span>
+047738,000362: 01,3101           34775                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4C4F5739">LOW9</a>                                  
+047739,000363: 01,3102           70167                           <span class="op">MASK    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5052494F52495459">PRIORITY</a>                              
+047740,000364: 01,3103           60063                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E45575052494F">NEWPRIO</a>                               
+047741,000365: 01,3104           54167                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5052494F52495459">PRIORITY</a>                              
+047742,000366: 01,3105           40000                           <span class="op">COM     </span>                                       
+047743,000367: 01,3106           13013                           <span class="op">TCF     </span> <a href="#4A4F42534C5032">JOBSLP2</a>                               <span class="co">#  AND TO EJSCAN.</span>
+047744,000368: 
 </pre>
 </span>
 </p>
@@ -612,56 +612,56 @@ Page 1111
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-047736,000370:                                                                                                  <span class="co">#           RELEASE THIS CORE SET AND VAC AREA AND SCAN FOR THE JOB OF HIGHEST ACTIVE PRIORITY.</span>
-047737,000371: 
-<a name="454E444A4F4231"></a>047738,000372: 01,3107           00004        <span class="sm">ENDJOB1 </span>           <span class="op">INHINT  </span>                                       
-047739,000373: 01,3110           44746                           <span class="op">CS      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5A45524F">ZERO</a>                                  
-047740,000374: 01,3111           54131                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>        +1                         
-047741,000375: 01,3112           56167                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5052494F52495459">PRIORITY</a>                              
-047742,000376: 01,3113           74775                           <span class="op">MASK    </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4C4F5739">LOW9</a>                                  
-047743,000377: 01,3114           54001                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
-047744,000378: 
-047745,000379: 01,3115           45155                           <span class="op">CS      </span> <a href="#46414B4550524554">FAKEPRET</a>                              
-047746,000380: 01,3116           60001                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
-047747,000381: 
-047748,000382: 01,3117           00006                           <span class="op">EXTEND  </span>                                       
-047749,000383: 01,3120           63124                           <span class="op">BZMF    </span> <a href="#454A5343414E">EJSCAN</a>                                <span class="co">#  NOVAC ENDOFJOB</span>
-047750,000384: 
-047751,000385: 01,3121           10001                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
-047752,000386: 01,3122           50000                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
-047753,000387: 01,3123           54000                           <span class="op">TS      </span> 0                                     
-047754,000388: 
-<a name="454A5343414E"></a>047755,000389: 01,3124           10203        <span class="sm">EJSCAN  </span>           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5052494F52495459">PRIORITY</a>   +12D                       
-047756,000390: 01,3125           03175                           <span class="op">TC      </span> <a href="#454A31">EJ1</a>                                   
-047757,000391: 01,3126           05701                           <span class="op">TC      </span> <a href="ALARM_AND_ABORT.agc.html#434353484F4C45">CCSHOLE</a>                               
-047758,000392: 01,3127           13130                           <span class="op">TCF     </span> +1                                    
-047759,000393: 
-047760,000394: 01,3130           10217                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5052494F52495459">PRIORITY</a>   +24D                       <span class="co">#  EXAMINE EACH PRIORITY REGISTER TO FIND</span>
-047761,000395: 01,3131           03175                           <span class="op">TC      </span> <a href="#454A31">EJ1</a>                                   <span class="co">#  THE JOB OF HIGHEST ACTIVE PRIORITY.</span>
-047762,000396: 01,3132           05701                           <span class="op">TC      </span> <a href="ALARM_AND_ABORT.agc.html#434353484F4C45">CCSHOLE</a>                               
-047763,000397: 01,3133           13134                           <span class="op">TCF     </span> +1                                    
-047764,000398: 
-047765,000399: 01,3134           10233                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5052494F52495459">PRIORITY</a>   +36D                       
-047766,000400: 01,3135           03175                           <span class="op">TC      </span> <a href="#454A31">EJ1</a>                                   
-<a name="2D4343535052"></a>047767,000401: 01,3136           67610        <span class="sm">-CCSPR  </span>           <span class="op">-CCS    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5052494F52495459">PRIORITY</a>                              
-047768,000402: 01,3137           13140                           <span class="op">TCF     </span> +1                                    
-047769,000403: 
-047770,000404: 01,3140           10247                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5052494F52495459">PRIORITY</a>   +48D                       
-047771,000405: 01,3141           03175                           <span class="op">TC      </span> <a href="#454A31">EJ1</a>                                   
-047772,000406: 01,3142           05701                           <span class="op">TC      </span> <a href="ALARM_AND_ABORT.agc.html#434353484F4C45">CCSHOLE</a>                               
-047773,000407: 01,3143           13144                           <span class="op">TCF     </span> +1                                    
-047774,000408: 
-047775,000409: 01,3144           10263                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5052494F52495459">PRIORITY</a>   +60D                       
-047776,000410: 01,3145           03175                           <span class="op">TC      </span> <a href="#454A31">EJ1</a>                                   
-047777,000411: 01,3146           05701                           <span class="op">TC      </span> <a href="ALARM_AND_ABORT.agc.html#434353484F4C45">CCSHOLE</a>                               
-047778,000412: 01,3147           13150                           <span class="op">TCF     </span> +1                                    
-047779,000413: 
-047780,000414: 01,3150           10277                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5052494F52495459">PRIORITY</a>   +72D                       
-047781,000415: 01,3151           03175                           <span class="op">TC      </span> <a href="#454A31">EJ1</a>                                   
-047782,000416: 01,3152           05701                           <span class="op">TC      </span> <a href="ALARM_AND_ABORT.agc.html#434353484F4C45">CCSHOLE</a>                               
-047783,000417: 01,3153           13154                           <span class="op">TCF     </span> +1                                    
-047784,000418: 
-047785,000419: 01,3154           10313                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5052494F52495459">PRIORITY</a>   +84D                       
+047746,000370:                                                                                                  <span class="co">#           RELEASE THIS CORE SET AND VAC AREA AND SCAN FOR THE JOB OF HIGHEST ACTIVE PRIORITY.</span>
+047747,000371: 
+<a name="454E444A4F4231"></a>047748,000372: 01,3107           00004        <span class="sm">ENDJOB1 </span>           <span class="op">INHINT  </span>                                       
+047749,000373: 01,3110           44746                           <span class="op">CS      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5A45524F">ZERO</a>                                  
+047750,000374: 01,3111           54131                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>        +1                         
+047751,000375: 01,3112           56167                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5052494F52495459">PRIORITY</a>                              
+047752,000376: 01,3113           74775                           <span class="op">MASK    </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4C4F5739">LOW9</a>                                  
+047753,000377: 01,3114           54001                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
+047754,000378: 
+047755,000379: 01,3115           45155                           <span class="op">CS      </span> <a href="#46414B4550524554">FAKEPRET</a>                              
+047756,000380: 01,3116           60001                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
+047757,000381: 
+047758,000382: 01,3117           00006                           <span class="op">EXTEND  </span>                                       
+047759,000383: 01,3120           63124                           <span class="op">BZMF    </span> <a href="#454A5343414E">EJSCAN</a>                                <span class="co">#  NOVAC ENDOFJOB</span>
+047760,000384: 
+047761,000385: 01,3121           10001                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
+047762,000386: 01,3122           50000                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
+047763,000387: 01,3123           54000                           <span class="op">TS      </span> 0                                     
+047764,000388: 
+<a name="454A5343414E"></a>047765,000389: 01,3124           10203        <span class="sm">EJSCAN  </span>           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5052494F52495459">PRIORITY</a>   +12D                       
+047766,000390: 01,3125           03175                           <span class="op">TC      </span> <a href="#454A31">EJ1</a>                                   
+047767,000391: 01,3126           05701                           <span class="op">TC      </span> <a href="ALARM_AND_ABORT.agc.html#434353484F4C45">CCSHOLE</a>                               
+047768,000392: 01,3127           13130                           <span class="op">TCF     </span> +1                                    
+047769,000393: 
+047770,000394: 01,3130           10217                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5052494F52495459">PRIORITY</a>   +24D                       <span class="co">#  EXAMINE EACH PRIORITY REGISTER TO FIND</span>
+047771,000395: 01,3131           03175                           <span class="op">TC      </span> <a href="#454A31">EJ1</a>                                   <span class="co">#  THE JOB OF HIGHEST ACTIVE PRIORITY.</span>
+047772,000396: 01,3132           05701                           <span class="op">TC      </span> <a href="ALARM_AND_ABORT.agc.html#434353484F4C45">CCSHOLE</a>                               
+047773,000397: 01,3133           13134                           <span class="op">TCF     </span> +1                                    
+047774,000398: 
+047775,000399: 01,3134           10233                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5052494F52495459">PRIORITY</a>   +36D                       
+047776,000400: 01,3135           03175                           <span class="op">TC      </span> <a href="#454A31">EJ1</a>                                   
+<a name="2D4343535052"></a>047777,000401: 01,3136           67610        <span class="sm">-CCSPR  </span>           <span class="op">-CCS    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5052494F52495459">PRIORITY</a>                              
+047778,000402: 01,3137           13140                           <span class="op">TCF     </span> +1                                    
+047779,000403: 
+047780,000404: 01,3140           10247                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5052494F52495459">PRIORITY</a>   +48D                       
+047781,000405: 01,3141           03175                           <span class="op">TC      </span> <a href="#454A31">EJ1</a>                                   
+047782,000406: 01,3142           05701                           <span class="op">TC      </span> <a href="ALARM_AND_ABORT.agc.html#434353484F4C45">CCSHOLE</a>                               
+047783,000407: 01,3143           13144                           <span class="op">TCF     </span> +1                                    
+047784,000408: 
+047785,000409: 01,3144           10263                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5052494F52495459">PRIORITY</a>   +60D                       
+047786,000410: 01,3145           03175                           <span class="op">TC      </span> <a href="#454A31">EJ1</a>                                   
+047787,000411: 01,3146           05701                           <span class="op">TC      </span> <a href="ALARM_AND_ABORT.agc.html#434353484F4C45">CCSHOLE</a>                               
+047788,000412: 01,3147           13150                           <span class="op">TCF     </span> +1                                    
+047789,000413: 
+047790,000414: 01,3150           10277                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5052494F52495459">PRIORITY</a>   +72D                       
+047791,000415: 01,3151           03175                           <span class="op">TC      </span> <a href="#454A31">EJ1</a>                                   
+047792,000416: 01,3152           05701                           <span class="op">TC      </span> <a href="ALARM_AND_ABORT.agc.html#434353484F4C45">CCSHOLE</a>                               
+047793,000417: 01,3153           13154                           <span class="op">TCF     </span> +1                                    
+047794,000418: 
+047795,000419: 01,3154           10313                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5052494F52495459">PRIORITY</a>   +84D                       
 </pre>
 </span>
 </p>
@@ -677,10 +677,10 @@ Page 1112
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-047787,000421: 01,3155           03175                           <span class="op">TC      </span> <a href="#454A31">EJ1</a>                                   
-047788,000422: 01,3156           05701                           <span class="op">TC      </span> <a href="ALARM_AND_ABORT.agc.html#434353484F4C45">CCSHOLE</a>                               
-047789,000423: 01,3157           13160                           <span class="op">TCF     </span> +1                                    
-047790,000424: 
+047797,000421: 01,3155           03175                           <span class="op">TC      </span> <a href="#454A31">EJ1</a>                                   
+047798,000422: 01,3156           05701                           <span class="op">TC      </span> <a href="ALARM_AND_ABORT.agc.html#434353484F4C45">CCSHOLE</a>                               
+047799,000423: 01,3157           13160                           <span class="op">TCF     </span> +1                                    
+047800,000424: 
 </pre>
 </span>
 </p>
@@ -696,37 +696,37 @@ Page 1113
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-047792,000426:                                                                                                  <span class="co">#           EVALUATE THE RESULTS OF THE SCAN.</span>
-047793,000427: 
-047794,000428: 01,3160           10131                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>        +1                         <span class="co">#  SEE IF THERE ARE ANY ACTIVE JOBS WAITING</span>
-047795,000429: 01,3161           05701                           <span class="op">TC      </span> <a href="ALARM_AND_ABORT.agc.html#434353484F4C45">CCSHOLE</a>                               
-047796,000430: 01,3162           05701                           <span class="op">TC      </span> <a href="ALARM_AND_ABORT.agc.html#434353484F4C45">CCSHOLE</a>                               
-047797,000431: 
-047798,000432: 01,3163           13165                           <span class="op">TCF     </span> +2                                    
-047799,000433: 01,3164           13210                           <span class="op">TCF     </span> <a href="#44554D4D594A4F42">DUMMYJOB</a>                              
-047800,000434: 01,3165           10130                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>                                   <span class="co">#  BUF IS ZERO IF THIS IS A PRIOCHNG AND</span>
-047801,000435: 01,3166           13170                           <span class="op">TCF     </span> +2                                    <span class="co">#  CHANGED PRIORITY IS STILL HIGHEST.</span>
-047802,000436: 01,3167           12770                           <span class="op">TCF     </span> <a href="#454E445052434847">ENDPRCHG</a>   -1                         
-047803,000437: 
-047804,000438: 01,3170           50000                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#  OTHERWISE, SET NEWJOB TO THE RELATIVE</span>
-047805,000439: 01,3171           27777                           <span class="op">CAF     </span> 0          -1                         <span class="co">#  ADDRESS OF THE NEW JOB'S CORE SET.</span>
-047806,000440: 01,3172           63136                           <span class="op">AD      </span> <a href="#2D4343535052">-CCSPR</a>                                
-047807,000441: 01,3173           54067                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E45574A4F42">NEWJOB</a>                                
-047808,000442: 01,3174           12710                           <span class="op">TCF     </span> <a href="#4348414E4A4F42">CHANJOB</a>    -2                         
-047809,000443: 
-<a name="454A31"></a>047810,000444: 01,3175           54132        <span class="sm">EJ1     </span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>        +2                         
-047811,000445: 01,3176           60131                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>        +1                         <span class="co">#  - OLD HIGH PRIORITY.</span>
-047812,000446: 01,3177           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
-047813,000447: 01,3200           40132                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>        +2                         
-047814,000448: 01,3201           13204                           <span class="op">TCF     </span> <a href="#454A32">EJ2</a>                                   <span class="co">#  NEW HIGH PRIORITY.</span>
-047815,000449: 01,3202           13203                           <span class="op">NOOP    </span>                                       
-047816,000450: 01,3203           16762                           <span class="op">TCF     </span> <a href="INTERPRETER.agc.html#512B32">Q+2</a>                                   
-047817,000451: 
-<a name="454A32"></a>047818,000452: 01,3204           54131        <span class="sm">EJ2     </span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>        +1                         
-047819,000453: 01,3205           30002                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
-047820,000454: 01,3206           54130                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>                                   
-047821,000455: 01,3207           16762                           <span class="op">TCF     </span> <a href="INTERPRETER.agc.html#512B32">Q+2</a>                                   
-047822,000456: 
+047802,000426:                                                                                                  <span class="co">#           EVALUATE THE RESULTS OF THE SCAN.</span>
+047803,000427: 
+047804,000428: 01,3160           10131                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>        +1                         <span class="co">#  SEE IF THERE ARE ANY ACTIVE JOBS WAITING</span>
+047805,000429: 01,3161           05701                           <span class="op">TC      </span> <a href="ALARM_AND_ABORT.agc.html#434353484F4C45">CCSHOLE</a>                               
+047806,000430: 01,3162           05701                           <span class="op">TC      </span> <a href="ALARM_AND_ABORT.agc.html#434353484F4C45">CCSHOLE</a>                               
+047807,000431: 
+047808,000432: 01,3163           13165                           <span class="op">TCF     </span> +2                                    
+047809,000433: 01,3164           13210                           <span class="op">TCF     </span> <a href="#44554D4D594A4F42">DUMMYJOB</a>                              
+047810,000434: 01,3165           10130                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>                                   <span class="co">#  BUF IS ZERO IF THIS IS A PRIOCHNG AND</span>
+047811,000435: 01,3166           13170                           <span class="op">TCF     </span> +2                                    <span class="co">#  CHANGED PRIORITY IS STILL HIGHEST.</span>
+047812,000436: 01,3167           12770                           <span class="op">TCF     </span> <a href="#454E445052434847">ENDPRCHG</a>   -1                         
+047813,000437: 
+047814,000438: 01,3170           50000                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#  OTHERWISE, SET NEWJOB TO THE RELATIVE</span>
+047815,000439: 01,3171           27777                           <span class="op">CAF     </span> 0          -1                         <span class="co">#  ADDRESS OF THE NEW JOB'S CORE SET.</span>
+047816,000440: 01,3172           63136                           <span class="op">AD      </span> <a href="#2D4343535052">-CCSPR</a>                                
+047817,000441: 01,3173           54067                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E45574A4F42">NEWJOB</a>                                
+047818,000442: 01,3174           12710                           <span class="op">TCF     </span> <a href="#4348414E4A4F42">CHANJOB</a>    -2                         
+047819,000443: 
+<a name="454A31"></a>047820,000444: 01,3175           54132        <span class="sm">EJ1     </span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>        +2                         
+047821,000445: 01,3176           60131                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>        +1                         <span class="co">#  - OLD HIGH PRIORITY.</span>
+047822,000446: 01,3177           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
+047823,000447: 01,3200           40132                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>        +2                         
+047824,000448: 01,3201           13204                           <span class="op">TCF     </span> <a href="#454A32">EJ2</a>                                   <span class="co">#  NEW HIGH PRIORITY.</span>
+047825,000449: 01,3202           13203                           <span class="op">NOOP    </span>                                       
+047826,000450: 01,3203           16762                           <span class="op">TCF     </span> <a href="INTERPRETER.agc.html#512B32">Q+2</a>                                   
+047827,000451: 
+<a name="454A32"></a>047828,000452: 01,3204           54131        <span class="sm">EJ2     </span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>        +1                         
+047829,000453: 01,3205           30002                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
+047830,000454: 01,3206           54130                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>                                   
+047831,000455: 01,3207           16762                           <span class="op">TCF     </span> <a href="INTERPRETER.agc.html#512B32">Q+2</a>                                   
+047832,000456: 
 </pre>
 </span>
 </p>
@@ -742,51 +742,51 @@ Page 1114
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-047824,000458:                                                                                                  <span class="co">#           IDLING AND COMPUTER ACTIVITY (GREEN) LIGHT MAINTENANCE. THE IDLING ROUTINE IS NOT A JOB IN ITSELF,</span>
-047825,000459:                                                                                                  <span class="co">#  BUT RATHER A SUBROUTINE OF THE EXECUTIVE.</span>
-047826,000460: 
-047827,000461: 01,3210     1361                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#53454C46524554">SELFRET</a>                               <span class="co">#  SELF-CHECK STORAGE IN EBANK.</span>
-047828,000462: 
-<a name="44554D4D594A4F42"></a>047829,000463: 01,3210           44746        <span class="sm">DUMMYJOB</span>           <span class="op">CS      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5A45524F">ZERO</a>                                  <span class="co">#  SET NEWJOB TO -0 FOR IDLING.</span>
-047830,000464: 01,3211           54067                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E45574A4F42">NEWJOB</a>                                
-047831,000465: 01,3212           00003                           <span class="op">RELINT  </span>                                       
-047832,000466: 01,3213           44743                           <span class="op">CS      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#54574F">TWO</a>                                   <span class="co">#  TURN OFF THE ACTIVITY LIGHT.</span>
-047833,000467: 01,3214           00006                           <span class="op">EXTEND  </span>                                       
-047834,000468: 01,3215           03011                           <span class="op">WAND    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4453414C4D4F5554">DSALMOUT</a>                              
-<a name="414456414E"></a>047835,000469: 01,3216           10067        <span class="sm">ADVAN   </span>           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E45574A4F42">NEWJOB</a>                                <span class="co">#  IS A NEWJOB ACTIVE ?</span>
-047836,000470: 01,3217           13015                           <span class="op">TCF     </span> <a href="#4E554348414E4732">NUCHANG2</a>                              <span class="co">#  YES... ONE REQUIRING A CHANGE JOB.</span>
-047837,000471: 01,3220           34743                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#54574F">TWO</a>                                   <span class="co">#  NEW JOB ALREADY IN POSITION FOR</span>
-047838,000472: 01,3221           13230                           <span class="op">TCF     </span> <a href="#4E55444952454354">NUDIRECT</a>                              <span class="co">#  EXECUTION.</span>
-047839,000473: 
-047840,000474: 01,3222           25356                           <span class="op">INCR    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44554D4C4F4F5053">DUMLOOPS</a>                              <span class="co">#  COUNT DUMMYJOB LOOPS FOR DOWNLINK</span>
-047841,000475: 
-047842,000476: 01,3223           31361                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#53454C46524554">SELFRET</a>                               
-047843,000477: 01,3224           54001                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     <span class="co">#  PUT RETURN ADDRESS IN L.</span>
-047844,000478: 01,3225           33227                           <span class="op">CAF     </span> <a href="#53454C4642414E4B">SELFBANK</a>                              
-047845,000479: 01,3226           15170                           <span class="op">TCF     </span> <a href="#535550445843485A">SUPDXCHZ</a>   +1                         <span class="co">#   AND DISPATCH JOB.</span>
-047846,000480: 
-047847,000481: 01,3227     1361                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#53454C46524554">SELFRET</a>                               
-<a name="53454C4642414E4B"></a>047848,000482: 01,3227           66102        <span class="sm">SELFBANK</span>           <span class="ps">BBCON   </span> <a href="AGC_BLOCK_TWO_SELF-CHECK.agc.html#53454C4643484B">SELFCHK</a>                               
-047849,000483: 
-<a name="4E55444952454354"></a>047850,000484: 01,3230           00006        <span class="sm">NUDIRECT</span>           <span class="op">EXTEND  </span>                                       <span class="co">#  TURN THE GREEN LIGHT BACK ON.</span>
-047851,000485: 01,3231           05011                           <span class="op">WOR     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4453414C4D4F5554">DSALMOUT</a>                              
-047852,000486: 01,3232           52165                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4F43">LOC</a>                                   <span class="co">#  JOBS STARTED IN THIS FASHION MUST BE</span>
-047853,000487: 01,3233           15167                           <span class="op">TCF     </span> <a href="#535550445843485A">SUPDXCHZ</a>                              
-047854,000488: 
-047855,000489:    5167                                           <span class="ps">BLOCK   </span> 2                                     <span class="co">#  IN FIXED-FIXED SO OTHERS MAY USE.</span>
-047856,000490: 
-047857,000491:    5167                                           <span class="ps">COUNT*  </span> $$/EXEC                               
-047858,000492:                                                                                                  <span class="co">#  SUPDXCHZ - ROUTINE TO TRANSFER TO SUPERBANK.</span>
-047859,000493:                                                                                                  <span class="co">#  CALLING SEQUENCE</span>
-047860,000494:                                                                                                  <span class="co">#                                                 TCF     SUPDXCHZ         WITH 2CADR OF DESIRED LOCATION IN A + L.</span>
-047861,000495: 
-<a name="535550445843485A"></a>047862,000496:    5167           56001        <span class="sm">SUPDXCHZ</span>           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     <span class="co">#  BASIC.</span>
-047863,000497:    5170           00006                 +1        <span class="op">EXTEND  </span>                                       
-047864,000498:    5171           01007                           <span class="op">WRITE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5355504552424E4B">SUPERBNK</a>                              
-047865,000499:    5172           54006                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4242414E4B">BBANK</a>                                 
-047866,000500:    5173           00001                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
-047867,000501: 
-<a name="4E4547313030"></a>047868,000502:    5174           77677        <span class="sm">NEG100  </span>           <span class="ps">OCT     </span> 77677                                 
+047834,000458:                                                                                                  <span class="co">#           IDLING AND COMPUTER ACTIVITY (GREEN) LIGHT MAINTENANCE. THE IDLING ROUTINE IS NOT A JOB IN ITSELF,</span>
+047835,000459:                                                                                                  <span class="co">#  BUT RATHER A SUBROUTINE OF THE EXECUTIVE.</span>
+047836,000460: 
+047837,000461: 01,3210     1361                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#53454C46524554">SELFRET</a>                               <span class="co">#  SELF-CHECK STORAGE IN EBANK.</span>
+047838,000462: 
+<a name="44554D4D594A4F42"></a>047839,000463: 01,3210           44746        <span class="sm">DUMMYJOB</span>           <span class="op">CS      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5A45524F">ZERO</a>                                  <span class="co">#  SET NEWJOB TO -0 FOR IDLING.</span>
+047840,000464: 01,3211           54067                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E45574A4F42">NEWJOB</a>                                
+047841,000465: 01,3212           00003                           <span class="op">RELINT  </span>                                       
+047842,000466: 01,3213           44743                           <span class="op">CS      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#54574F">TWO</a>                                   <span class="co">#  TURN OFF THE ACTIVITY LIGHT.</span>
+047843,000467: 01,3214           00006                           <span class="op">EXTEND  </span>                                       
+047844,000468: 01,3215           03011                           <span class="op">WAND    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4453414C4D4F5554">DSALMOUT</a>                              
+<a name="414456414E"></a>047845,000469: 01,3216           10067        <span class="sm">ADVAN   </span>           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4E45574A4F42">NEWJOB</a>                                <span class="co">#  IS A NEWJOB ACTIVE ?</span>
+047846,000470: 01,3217           13015                           <span class="op">TCF     </span> <a href="#4E554348414E4732">NUCHANG2</a>                              <span class="co">#  YES... ONE REQUIRING A CHANGE JOB.</span>
+047847,000471: 01,3220           34743                           <span class="op">CAF     </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#54574F">TWO</a>                                   <span class="co">#  NEW JOB ALREADY IN POSITION FOR</span>
+047848,000472: 01,3221           13230                           <span class="op">TCF     </span> <a href="#4E55444952454354">NUDIRECT</a>                              <span class="co">#  EXECUTION.</span>
+047849,000473: 
+047850,000474: 01,3222           25356                           <span class="op">INCR    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#44554D4C4F4F5053">DUMLOOPS</a>                              <span class="co">#  COUNT DUMMYJOB LOOPS FOR DOWNLINK</span>
+047851,000475: 
+047852,000476: 01,3223           31361                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#53454C46524554">SELFRET</a>                               
+047853,000477: 01,3224           54001                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     <span class="co">#  PUT RETURN ADDRESS IN L.</span>
+047854,000478: 01,3225           33227                           <span class="op">CAF     </span> <a href="#53454C4642414E4B">SELFBANK</a>                              
+047855,000479: 01,3226           15170                           <span class="op">TCF     </span> <a href="#535550445843485A">SUPDXCHZ</a>   +1                         <span class="co">#   AND DISPATCH JOB.</span>
+047856,000480: 
+047857,000481: 01,3227     1361                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#53454C46524554">SELFRET</a>                               
+<a name="53454C4642414E4B"></a>047858,000482: 01,3227           66102        <span class="sm">SELFBANK</span>           <span class="ps">BBCON   </span> <a href="AGC_BLOCK_TWO_SELF-CHECK.agc.html#53454C4643484B">SELFCHK</a>                               
+047859,000483: 
+<a name="4E55444952454354"></a>047860,000484: 01,3230           00006        <span class="sm">NUDIRECT</span>           <span class="op">EXTEND  </span>                                       <span class="co">#  TURN THE GREEN LIGHT BACK ON.</span>
+047861,000485: 01,3231           05011                           <span class="op">WOR     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4453414C4D4F5554">DSALMOUT</a>                              
+047862,000486: 01,3232           52165                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4F43">LOC</a>                                   <span class="co">#  JOBS STARTED IN THIS FASHION MUST BE</span>
+047863,000487: 01,3233           15167                           <span class="op">TCF     </span> <a href="#535550445843485A">SUPDXCHZ</a>                              
+047864,000488: 
+047865,000489:    5167                                           <span class="ps">BLOCK   </span> 2                                     <span class="co">#  IN FIXED-FIXED SO OTHERS MAY USE.</span>
+047866,000490: 
+047867,000491:    5167                                           <span class="ps">COUNT*  </span> $$/EXEC                               
+047868,000492:                                                                                                  <span class="co">#  SUPDXCHZ - ROUTINE TO TRANSFER TO SUPERBANK.</span>
+047869,000493:                                                                                                  <span class="co">#  CALLING SEQUENCE</span>
+047870,000494:                                                                                                  <span class="co">#                                                 TCF     SUPDXCHZ         WITH 2CADR OF DESIRED LOCATION IN A + L.</span>
+047871,000495: 
+<a name="535550445843485A"></a>047872,000496:    5167           56001        <span class="sm">SUPDXCHZ</span>           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     <span class="co">#  BASIC.</span>
+047873,000497:    5170           00006                 +1        <span class="op">EXTEND  </span>                                       
+047874,000498:    5171           01007                           <span class="op">WRITE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5355504552424E4B">SUPERBNK</a>                              
+047875,000499:    5172           54006                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4242414E4B">BBANK</a>                                 
+047876,000500:    5173           00001                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
+047877,000501: 
+<a name="4E4547313030"></a>047878,000502:    5174           77677        <span class="sm">NEG100  </span>           <span class="ps">OCT     </span> 77677                                 
 
 End of include-file EXECUTIVE.agc.  Parent file is <a href="MAIN.agc.html">MAIN.agc</a>
 </pre>

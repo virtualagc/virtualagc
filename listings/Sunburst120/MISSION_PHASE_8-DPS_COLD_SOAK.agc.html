@@ -96,19 +96,19 @@ Note that the date is the date of the printout, not the date of the program revi
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-030775,000002:                                                                                                  <span class="co">## Copyright:    Public domain.</span>
-030776,000003:                                                                                                  <span class="co">## Filename:     MISSION_PHASE_8-DPS_COLD_SOAK.agc</span>
-030777,000004:                                                                                                  <span class="co">## Purpose:      A module for revision 0 of BURST120 (Sunburst). It </span>
-030778,000005:                                                                                                  <span class="co">##               is part of the source code for the Lunar Module's</span>
-030779,000006:                                                                                                  <span class="co">##               (LM) Apollo Guidance Computer (AGC) for Apollo 5.</span>
-030780,000007:                                                                                                  <span class="co">## Assembler:    yaYUL</span>
-030781,000008:                                                                                                  <span class="co">## Contact:      Ron Burkey &lt;info@sandroid.org>.</span>
-030782,000009:                                                                                                  <span class="co">## Website:      www.ibiblio.org/apollo/index.html</span>
-030783,000010:                                                                                                  <span class="co">## Mod history:  2016-09-30 RSB  Created draft version.</span>
-030784,000011:                                                                                                  <span class="co">##               2016-10-28 MAS  Transcribed.</span>
-030785,000012:                                                                                                  <span class="co">##               2016-12-06 RSB  Comments proofed using octopus/ProoferComments,</span>
-030786,000013:                                                                                                  <span class="co">##                               changes made.</span>
-030787,000014: 
+030777,000002:                                                                                                  <span class="co">## Copyright:    Public domain.</span>
+030778,000003:                                                                                                  <span class="co">## Filename:     MISSION_PHASE_8-DPS_COLD_SOAK.agc</span>
+030779,000004:                                                                                                  <span class="co">## Purpose:      A module for revision 0 of BURST120 (Sunburst). It </span>
+030780,000005:                                                                                                  <span class="co">##               is part of the source code for the Lunar Module's</span>
+030781,000006:                                                                                                  <span class="co">##               (LM) Apollo Guidance Computer (AGC) for Apollo 5.</span>
+030782,000007:                                                                                                  <span class="co">## Assembler:    yaYUL</span>
+030783,000008:                                                                                                  <span class="co">## Contact:      Ron Burkey &lt;info@sandroid.org>.</span>
+030784,000009:                                                                                                  <span class="co">## Website:      www.ibiblio.org/apollo/index.html</span>
+030785,000010:                                                                                                  <span class="co">## Mod history:  2016-09-30 RSB  Created draft version.</span>
+030786,000011:                                                                                                  <span class="co">##               2016-10-28 MAS  Transcribed.</span>
+030787,000012:                                                                                                  <span class="co">##               2016-12-06 RSB  Comments proofed using octopus/ProoferComments,</span>
+030788,000013:                                                                                                  <span class="co">##                               changes made.</span>
+030789,000014: 
 </pre>
 </span>
 </p>
@@ -124,57 +124,57 @@ Page 720
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-030789,000016: 27,2564                                           <span class="ps">BANK    </span> 27                                    
-030790,000017: 27,2564  E3,1652                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#52415445494E4458">RATEINDX</a>                              
-030791,000018:                                                                                                  <span class="co">#  PROGRAM DESCRIPTION-            DATE- 07 DEC 66</span>
-030792,000019: 
-030793,000020:                                                                                                  <span class="co">#  MOD NO- 4                       LOG SECTION-</span>
-030794,000021:                                                                                                  <span class="co">#  MOD BY- ELIASSEN                MISSION PHASE 8 - DPS COLD SOAK</span>
-030795,000022:                                                                                                  <span class="co">#  FUNCTIONAL DESCRIPTION-</span>
-030796,000023: 
-030797,000024:                                                                                                  <span class="co">#  0/54/23  START MISSION PHASE 8 WHEN MISSION TIMER 4 COUNTS TO ZERO.</span>
-030798,000025: 
-030799,000026:                                                                                                  <span class="co">#           CHANGE MAJOR MODE TO 15.</span>
-030800,000027: 
-030801,000028:                                                                                                  <span class="co">#           DO DFI T/M CALIBRATION  (14 SECONDS).</span>
-030802,000029: 
-030803,000030:                                                                                                  <span class="co">#           WAIT 1 SECOND</span>
-030804,000031: 
-030805,000032:                                                                                                  <span class="co">#  0/54/38  LMP COMMANDS-</span>
-030806,000033:                                                                                                  <span class="co">#                  LANDING RADAR POWER ON*</span>
-030807,000034:                                                                                                  <span class="co">#                  RADAR SELF TEST ON*</span>
-030808,000035: 
-030809,000036:                                                                                                  <span class="co">#           CALL TO CALCULATE REQUIRED ATTITUDE</span>
-030810,000037:                                                                                                  <span class="co">#                  FOR DPS COLD SOAK -</span>
-030811,000038:                                                                                                  <span class="co">#                  LM X-AXIS NORMAL TO THE ECLIPTIC PLANE</span>
-030812,000039:                                                                                                  <span class="co">#                  AND BISECTOR OF LM +Z/-Y AXES TOWARD THE SUN.</span>
-030813,000040: 
-030814,000041:                                                                                                  <span class="co">#                  CHANGE THE ATTITUDE OF THE</span>
-030815,000042:                                                                                                  <span class="co">#                  SPACECRAFT TO THAT REQUIRED FOR DPS COLD SOAK</span>
-030816,000043:                                                                                                  <span class="co">#                  USING KALCMANU ROUTINE - MANEUVER RATE= 5 DEG/SEC.</span>
-030817,000044: 
-030818,000045:                                                                                                  <span class="co">#           WAIT 60 SECONDS</span>
-030819,000046: 
-030820,000047:                                                                                                  <span class="co">#           LMP COMMAND-</span>
-030821,000048:                                                                                                  <span class="co">#                  RADAR SELF TEST OFF*</span>
-030822,000049: 
-030823,000050:                                                                                                  <span class="co">#           WAIT 60 SECONDS</span>
-030824,000051: 
-030825,000052:                                                                                                  <span class="co">#  0/56/38  LMP COMMAND-</span>
-030826,000053:                                                                                                  <span class="co">#                  LANDING RADAR POWER OFF*</span>
-030827,000054: 
-030828,000055:                                                                                                  <span class="co">#           WAIT 15 SECONDS</span>
-030829,000056: 
-030830,000057:                                                                                                  <span class="co">#  0/56/53  VERIFY THAT MANEUVER IS COMPLETE.</span>
-030831,000058:                                                                                                  <span class="co">#                  (IF NOT GO TO CURTAINS)</span>
-030832,000059: 
-030833,000060:                                                                                                  <span class="co">#           SET MAXIMUM DEADBAND FOR LM-DAP.</span>
-030834,000061: 
-030835,000062:                                                                                                  <span class="co">#           CALL SCHEDULE ENTRY ROUTINE FOR DPS 1 WITH</span>
-030836,000063:                                                                                                  <span class="co">#                  J=2</span>
-030837,000064:                                                                                                  <span class="co">#                  MP=9</span>
-030838,000065:                                                                                                  <span class="co">#                  DT= 2H 59M 14S</span>
-030839,000066: 
+030791,000016: 27,2564                                           <span class="ps">BANK    </span> 27                                    
+030792,000017: 27,2564  E3,1652                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#52415445494E4458">RATEINDX</a>                              
+030793,000018:                                                                                                  <span class="co">#  PROGRAM DESCRIPTION-            DATE- 07 DEC 66</span>
+030794,000019: 
+030795,000020:                                                                                                  <span class="co">#  MOD NO- 4                       LOG SECTION-</span>
+030796,000021:                                                                                                  <span class="co">#  MOD BY- ELIASSEN                MISSION PHASE 8 - DPS COLD SOAK</span>
+030797,000022:                                                                                                  <span class="co">#  FUNCTIONAL DESCRIPTION-</span>
+030798,000023: 
+030799,000024:                                                                                                  <span class="co">#  0/54/23  START MISSION PHASE 8 WHEN MISSION TIMER 4 COUNTS TO ZERO.</span>
+030800,000025: 
+030801,000026:                                                                                                  <span class="co">#           CHANGE MAJOR MODE TO 15.</span>
+030802,000027: 
+030803,000028:                                                                                                  <span class="co">#           DO DFI T/M CALIBRATION  (14 SECONDS).</span>
+030804,000029: 
+030805,000030:                                                                                                  <span class="co">#           WAIT 1 SECOND</span>
+030806,000031: 
+030807,000032:                                                                                                  <span class="co">#  0/54/38  LMP COMMANDS-</span>
+030808,000033:                                                                                                  <span class="co">#                  LANDING RADAR POWER ON*</span>
+030809,000034:                                                                                                  <span class="co">#                  RADAR SELF TEST ON*</span>
+030810,000035: 
+030811,000036:                                                                                                  <span class="co">#           CALL TO CALCULATE REQUIRED ATTITUDE</span>
+030812,000037:                                                                                                  <span class="co">#                  FOR DPS COLD SOAK -</span>
+030813,000038:                                                                                                  <span class="co">#                  LM X-AXIS NORMAL TO THE ECLIPTIC PLANE</span>
+030814,000039:                                                                                                  <span class="co">#                  AND BISECTOR OF LM +Z/-Y AXES TOWARD THE SUN.</span>
+030815,000040: 
+030816,000041:                                                                                                  <span class="co">#                  CHANGE THE ATTITUDE OF THE</span>
+030817,000042:                                                                                                  <span class="co">#                  SPACECRAFT TO THAT REQUIRED FOR DPS COLD SOAK</span>
+030818,000043:                                                                                                  <span class="co">#                  USING KALCMANU ROUTINE - MANEUVER RATE= 5 DEG/SEC.</span>
+030819,000044: 
+030820,000045:                                                                                                  <span class="co">#           WAIT 60 SECONDS</span>
+030821,000046: 
+030822,000047:                                                                                                  <span class="co">#           LMP COMMAND-</span>
+030823,000048:                                                                                                  <span class="co">#                  RADAR SELF TEST OFF*</span>
+030824,000049: 
+030825,000050:                                                                                                  <span class="co">#           WAIT 60 SECONDS</span>
+030826,000051: 
+030827,000052:                                                                                                  <span class="co">#  0/56/38  LMP COMMAND-</span>
+030828,000053:                                                                                                  <span class="co">#                  LANDING RADAR POWER OFF*</span>
+030829,000054: 
+030830,000055:                                                                                                  <span class="co">#           WAIT 15 SECONDS</span>
+030831,000056: 
+030832,000057:                                                                                                  <span class="co">#  0/56/53  VERIFY THAT MANEUVER IS COMPLETE.</span>
+030833,000058:                                                                                                  <span class="co">#                  (IF NOT GO TO CURTAINS)</span>
+030834,000059: 
+030835,000060:                                                                                                  <span class="co">#           SET MAXIMUM DEADBAND FOR LM-DAP.</span>
+030836,000061: 
+030837,000062:                                                                                                  <span class="co">#           CALL SCHEDULE ENTRY ROUTINE FOR DPS 1 WITH</span>
+030838,000063:                                                                                                  <span class="co">#                  J=2</span>
+030839,000064:                                                                                                  <span class="co">#                  MP=9</span>
+030840,000065:                                                                                                  <span class="co">#                  DT= 2H 59M 14S</span>
+030841,000066: 
 </pre>
 </span>
 </p>
@@ -190,57 +190,57 @@ Page 721
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-030841,000068:                                                                                                  <span class="co">#  SUBROUTINES CALLED-</span>
-030842,000069:                                                                                                  <span class="co">#           FINDVAC, ENDOFJOB</span>
-030843,000070:                                                                                                  <span class="co">#           WAITLIST, TASKOVER</span>
-030844,000071:                                                                                                  <span class="co">#           NEWMODEX, MPENTRY, PHASCHNG, 2PHSCHNG</span>
-030845,000072:                                                                                                  <span class="co">#           INTPRET, BANKCALL, IBNKCALL, ATTSTALL, CURTAINS, P00H</span>
-030846,000073:                                                                                                  <span class="co">#           FLAG1DWN, FLAG2DWN, SETMINDB, SETMAXDB</span>
-030847,000074:                                                                                                  <span class="co">#           KALCMAN3, DCMTOCDU, V1STO2S</span>
-030848,000075:                                                                                                  <span class="co">#           1LMP, 1LMP+DT, 2LMP+DT</span>
-030849,000076: 
-030850,000077:                                                                                                  <span class="co">#  NORMAL EXIT MODES-</span>
-030851,000078:                                                                                                  <span class="co">#           TC    ENDOFJOB/TASKOVER</span>
-030852,000079:                                                                                                  <span class="co">#  ALARM OR ABORT EXIT MODES-   NONE</span>
-030853,000080:                                                                                                  <span class="co">#  OUTPUT- (INTERFACE, DISPLAYS, MEANINGFUL INFORMATION LEFT IN ERASABLE)</span>
-030854,000081:                                                                                                  <span class="co">#           SAME AS FOR KALCMANU</span>
-030855,000082:                                                                                                  <span class="co">#  ERASABLE INITIALIZATION REQUIRED-</span>
-030856,000083:                                                                                                  <span class="co">#           TEPHEM   IN CENTISECONDS TRIPLE PRECISION</span>
-030857,000084:                                                                                                  <span class="co">#           MP8TO9   DT FOR CALLING MP9- IN SECONDS(SEE ABOVE)</span>
-030858,000085: 
-030859,000086:                                                                                                  <span class="co">#  DEBRIS- (ERASABLE LOCATIONS DESTROYED BY THIS PROGRAM)</span>
-030860,000087:                                                                                                  <span class="co">#           SAME AS FOR KALCMANU</span>
-<a name="5052494F4B4D"></a>030861,000088: 27,2564     7746               <span class="sm">PRIOKM  </span>           <span class="ps">EQUALS  </span> <a href="EXECUTIVE.agc.html#5052494F3230">PRIO20</a>                                <span class="co">#  PRIORITY FOR KALCMANU PHASE 8 + 16</span>
-<a name="4D50384A4F42"></a>030862,000089: 27,2564           04117        <span class="sm">MP8JOB  </span>           <span class="op">TC      </span> <a href="PHASE_TABLE_MAINTENANCE.agc.html#4E45574D4F444558">NEWMODEX</a>                              <span class="co">#  UPDATE PROGRAM NUMBER</span>
-030863,000090: 27,2565           00015                           <span class="ps">OCT     </span> 15                                    <span class="co">#  ON DSKY</span>
-030864,000091: 
-030865,000092: 27,2566           04161                           <span class="op">TC      </span> <a href="PHASE_TABLE_MAINTENANCE.agc.html#5048415343484E47">PHASCHNG</a>                              
-030866,000093: 27,2567           05022                           <span class="ps">OCT     </span> 05022                                 
-030867,000094: 27,2570           20000                           <span class="ps">OCT     </span> 20000                                 
-030868,000095: 27,2571           37754                           <span class="op">CAF     </span> <a href="INTERPRETER.agc.html#42495438">BIT8</a>                                  
-030869,000096: 27,2572           04105                           <span class="op">TC      </span> <a href="RESTART_TABLES_AND_RESTARTS_ROUTINE.agc.html#5345545253545254">SETRSTRT</a>                              <span class="co">#  SET RESTART FLAG</span>
-030870,000097: 
-030871,000098: 27,2573           37763                           <span class="op">CAF     </span> <a href="INTERPRETER.agc.html#4F4E45">ONE</a>                                   <span class="co">#  ESTABLISH TASK TO</span>
-030872,000099: 27,2574           00004                           <span class="op">INHINT  </span>                                       <span class="co">#  PERFORM DFI T/M CAL.</span>
-030873,000100: 27,2575           05663                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#574149544C495354">WAITLIST</a>                              
-030874,000101: 27,2576  E3,1652                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#52415445494E4458">RATEINDX</a>                              
-030875,000102: 27,2576           02601 56063                     <span class="ps">2CADR   </span> <a href="#4D50385441534B">MP8TASK</a>                               
-030876,000103: 
-030877,000104: 27,2600           05567                           <span class="op">TC      </span> <a href="EXECUTIVE.agc.html#454E444F464A4F42">ENDOFJOB</a>                              
-030878,000105: 
-<a name="4D50385441534B"></a>030879,000106: 27,2601           05101        <span class="sm">MP8TASK </span>           <span class="op">TC      </span> <a href="LMP_COMMAND_ROUTINES.agc.html#314C4D502B4454">1LMP+DT</a>                               <span class="co">#  LMP COMMAND</span>
-030880,000107: 27,2602           00354                           <span class="ps">DEC     </span> 236        B-14                       <span class="co">#  DFI T/M CALIBRATE ON*</span>
-030881,000108: 27,2603           02260                           <span class="ps">DEC     </span> 1200       B-14                       <span class="co">#  12 SECONDS DELAY</span>
-030882,000109: 
-030883,000110: 27,2604           05073                           <span class="op">TC      </span> <a href="LMP_COMMAND_ROUTINES.agc.html#324C4D502B4454">2LMP+DT</a>                               <span class="co">#  LMP COMMANDS</span>
-030884,000111: 27,2605           00355                           <span class="ps">DEC     </span> 237        B-14                       <span class="co">#  DFI T/M CALIBRATE OFF*</span>
-030885,000112: 27,2606           00306                           <span class="ps">DEC     </span> 198        B-14                       <span class="co">#  MASTER C+W ALARM RESET**  COMMAND</span>
-030886,000113: 27,2607           00310                           <span class="ps">DEC     </span> 200        B-14                       <span class="co">#  2 SECONDS DELAY</span>
-030887,000114: 
-030888,000115: 27,2610           05101                           <span class="op">TC      </span> <a href="LMP_COMMAND_ROUTINES.agc.html#314C4D502B4454">1LMP+DT</a>                               <span class="co">#  LMP COMMAND</span>
-030889,000116: 27,2611           00307                           <span class="ps">DEC     </span> 199        B-14                       <span class="co">#  MASTER C+W ALARM RESET- COMMAND RESET</span>
-030890,000117: 27,2612           00144                           <span class="ps">DEC     </span> 100        B-14                       <span class="co">#  1 SECOND</span>
-030891,000118: 
+030843,000068:                                                                                                  <span class="co">#  SUBROUTINES CALLED-</span>
+030844,000069:                                                                                                  <span class="co">#           FINDVAC, ENDOFJOB</span>
+030845,000070:                                                                                                  <span class="co">#           WAITLIST, TASKOVER</span>
+030846,000071:                                                                                                  <span class="co">#           NEWMODEX, MPENTRY, PHASCHNG, 2PHSCHNG</span>
+030847,000072:                                                                                                  <span class="co">#           INTPRET, BANKCALL, IBNKCALL, ATTSTALL, CURTAINS, P00H</span>
+030848,000073:                                                                                                  <span class="co">#           FLAG1DWN, FLAG2DWN, SETMINDB, SETMAXDB</span>
+030849,000074:                                                                                                  <span class="co">#           KALCMAN3, DCMTOCDU, V1STO2S</span>
+030850,000075:                                                                                                  <span class="co">#           1LMP, 1LMP+DT, 2LMP+DT</span>
+030851,000076: 
+030852,000077:                                                                                                  <span class="co">#  NORMAL EXIT MODES-</span>
+030853,000078:                                                                                                  <span class="co">#           TC    ENDOFJOB/TASKOVER</span>
+030854,000079:                                                                                                  <span class="co">#  ALARM OR ABORT EXIT MODES-   NONE</span>
+030855,000080:                                                                                                  <span class="co">#  OUTPUT- (INTERFACE, DISPLAYS, MEANINGFUL INFORMATION LEFT IN ERASABLE)</span>
+030856,000081:                                                                                                  <span class="co">#           SAME AS FOR KALCMANU</span>
+030857,000082:                                                                                                  <span class="co">#  ERASABLE INITIALIZATION REQUIRED-</span>
+030858,000083:                                                                                                  <span class="co">#           TEPHEM   IN CENTISECONDS TRIPLE PRECISION</span>
+030859,000084:                                                                                                  <span class="co">#           MP8TO9   DT FOR CALLING MP9- IN SECONDS(SEE ABOVE)</span>
+030860,000085: 
+030861,000086:                                                                                                  <span class="co">#  DEBRIS- (ERASABLE LOCATIONS DESTROYED BY THIS PROGRAM)</span>
+030862,000087:                                                                                                  <span class="co">#           SAME AS FOR KALCMANU</span>
+<a name="5052494F4B4D"></a>030863,000088: 27,2564     7746               <span class="sm">PRIOKM  </span>           <span class="ps">EQUALS  </span> <a href="EXECUTIVE.agc.html#5052494F3230">PRIO20</a>                                <span class="co">#  PRIORITY FOR KALCMANU PHASE 8 + 16</span>
+<a name="4D50384A4F42"></a>030864,000089: 27,2564           04117        <span class="sm">MP8JOB  </span>           <span class="op">TC      </span> <a href="PHASE_TABLE_MAINTENANCE.agc.html#4E45574D4F444558">NEWMODEX</a>                              <span class="co">#  UPDATE PROGRAM NUMBER</span>
+030865,000090: 27,2565           00015                           <span class="ps">OCT     </span> 15                                    <span class="co">#  ON DSKY</span>
+030866,000091: 
+030867,000092: 27,2566           04161                           <span class="op">TC      </span> <a href="PHASE_TABLE_MAINTENANCE.agc.html#5048415343484E47">PHASCHNG</a>                              
+030868,000093: 27,2567           05022                           <span class="ps">OCT     </span> 05022                                 
+030869,000094: 27,2570           20000                           <span class="ps">OCT     </span> 20000                                 
+030870,000095: 27,2571           37754                           <span class="op">CAF     </span> <a href="INTERPRETER.agc.html#42495438">BIT8</a>                                  
+030871,000096: 27,2572           04105                           <span class="op">TC      </span> <a href="RESTART_TABLES_AND_RESTARTS_ROUTINE.agc.html#5345545253545254">SETRSTRT</a>                              <span class="co">#  SET RESTART FLAG</span>
+030872,000097: 
+030873,000098: 27,2573           37763                           <span class="op">CAF     </span> <a href="INTERPRETER.agc.html#4F4E45">ONE</a>                                   <span class="co">#  ESTABLISH TASK TO</span>
+030874,000099: 27,2574           00004                           <span class="op">INHINT  </span>                                       <span class="co">#  PERFORM DFI T/M CAL.</span>
+030875,000100: 27,2575           05663                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#574149544C495354">WAITLIST</a>                              
+030876,000101: 27,2576  E3,1652                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#52415445494E4458">RATEINDX</a>                              
+030877,000102: 27,2576           02601 56063                     <span class="ps">2CADR   </span> <a href="#4D50385441534B">MP8TASK</a>                               
+030878,000103: 
+030879,000104: 27,2600           05567                           <span class="op">TC      </span> <a href="EXECUTIVE.agc.html#454E444F464A4F42">ENDOFJOB</a>                              
+030880,000105: 
+<a name="4D50385441534B"></a>030881,000106: 27,2601           05101        <span class="sm">MP8TASK </span>           <span class="op">TC      </span> <a href="LMP_COMMAND_ROUTINES.agc.html#314C4D502B4454">1LMP+DT</a>                               <span class="co">#  LMP COMMAND</span>
+030882,000107: 27,2602           00354                           <span class="ps">DEC     </span> 236        B-14                       <span class="co">#  DFI T/M CALIBRATE ON*</span>
+030883,000108: 27,2603           02260                           <span class="ps">DEC     </span> 1200       B-14                       <span class="co">#  12 SECONDS DELAY</span>
+030884,000109: 
+030885,000110: 27,2604           05073                           <span class="op">TC      </span> <a href="LMP_COMMAND_ROUTINES.agc.html#324C4D502B4454">2LMP+DT</a>                               <span class="co">#  LMP COMMANDS</span>
+030886,000111: 27,2605           00355                           <span class="ps">DEC     </span> 237        B-14                       <span class="co">#  DFI T/M CALIBRATE OFF*</span>
+030887,000112: 27,2606           00306                           <span class="ps">DEC     </span> 198        B-14                       <span class="co">#  MASTER C+W ALARM RESET**  COMMAND</span>
+030888,000113: 27,2607           00310                           <span class="ps">DEC     </span> 200        B-14                       <span class="co">#  2 SECONDS DELAY</span>
+030889,000114: 
+030890,000115: 27,2610           05101                           <span class="op">TC      </span> <a href="LMP_COMMAND_ROUTINES.agc.html#314C4D502B4454">1LMP+DT</a>                               <span class="co">#  LMP COMMAND</span>
+030891,000116: 27,2611           00307                           <span class="ps">DEC     </span> 199        B-14                       <span class="co">#  MASTER C+W ALARM RESET- COMMAND RESET</span>
+030892,000117: 27,2612           00144                           <span class="ps">DEC     </span> 100        B-14                       <span class="co">#  1 SECOND</span>
+030893,000118: 
 </pre>
 </span>
 </p>
@@ -256,56 +256,56 @@ Page 722
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-<a name="4D385241444F4E"></a>030893,000120: 27,2613           37747        <span class="sm">M8RADON </span>           <span class="op">CAF     </span> <a href="EXECUTIVE.agc.html#5052494F3130">PRIO10</a>                                <span class="co">#  SET UP JOB TO CALCULATE</span>
-030894,000121: 27,2614           05516                           <span class="op">TC      </span> <a href="EXECUTIVE.agc.html#46494E44564143">FINDVAC</a>                               <span class="co">#  REQ CDU ANGLES</span>
-030895,000122: 27,2615  E3,1652                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#52415445494E4458">RATEINDX</a>                              
-030896,000123: 27,2615           02670 56063                     <span class="ps">2CADR   </span> <a href="#434F4C44534F414B">COLDSOAK</a>                              
-030897,000124: 
-030898,000125: 27,2617           04141                           <span class="op">TC      </span> <a href="PHASE_TABLE_MAINTENANCE.agc.html#3250485343484E47">2PHSCHNG</a>                              
-030899,000126: 27,2620           00054                           <span class="ps">OCT     </span> 00054                                 
-030900,000127: 27,2621           05012                           <span class="ps">OCT     </span> 05012                                 
-030901,000128: 27,2622           77777                           <span class="ps">OCT     </span> 77777                                 
-030902,000129: 
-030903,000130: 27,2623           05073                           <span class="op">TC      </span> <a href="LMP_COMMAND_ROUTINES.agc.html#324C4D502B4454">2LMP+DT</a>                               <span class="co">#  LMP COMMANDS</span>
-030904,000131: 27,2624           00266                           <span class="ps">DEC     </span> 182        B-14                       <span class="co">#  LANDING RADAR POWER ON*</span>
-030905,000132: 27,2625           00032                           <span class="ps">DEC     </span> 26         B-14                       <span class="co">#  RADAR SELF TEST ON*</span>
-030906,000133: 27,2626           13560                           <span class="ps">DEC     </span> 6000       B-14                       <span class="co">#  WAIT 1 MIN</span>
-030907,000134: 
-030908,000135: 27,2627           05101                           <span class="op">TC      </span> <a href="LMP_COMMAND_ROUTINES.agc.html#314C4D502B4454">1LMP+DT</a>                               <span class="co">#  LMP COMMAND</span>
-030909,000136: 27,2630           00033                           <span class="ps">DEC     </span> 27         B-14                       <span class="co">#  RADAR SELF TEST OFF*</span>
-030910,000137: 27,2631           13560                           <span class="ps">DEC     </span> 6000       B-14                       <span class="co">#  WAIT 1 MIN</span>
-030911,000138: 
-030912,000139: 27,2632           05101                           <span class="op">TC      </span> <a href="LMP_COMMAND_ROUTINES.agc.html#314C4D502B4454">1LMP+DT</a>                               
-030913,000140: 27,2633           00267                           <span class="ps">DEC     </span> 183        B-14                       <span class="co">#  LANDING RADAR POWER OFF*</span>
-030914,000141: 27,2634           02734                           <span class="ps">DEC     </span> 1500       B-14                       <span class="co">#  15 SECONDS</span>
-030915,000142: 
-030916,000143: 27,2635           35656                           <span class="op">CAF     </span> <a href="EXECUTIVE.agc.html#5052494F3335">PRIO35</a>                                <span class="co">#  SET UP JOB TO</span>
-030917,000144: 27,2636           05505                           <span class="op">TC      </span> <a href="EXECUTIVE.agc.html#4E4F564143">NOVAC</a>                                 <span class="co">#  END MISSION PHASE</span>
-030918,000145: 27,2637  E3,1400                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535431">LST1</a>                                  
-030919,000146: 27,2637           02642 56063                     <span class="ps">2CADR   </span> <a href="#4D503943414C4C">MP9CALL</a>                               
-030920,000147: 
-030921,000148: 27,2641           05727                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              
-<a name="4D503943414C4C"></a>030922,000149: 27,2642           30076        <span class="sm">MP9CALL </span>           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#464C414757524432">FLAGWRD2</a>                              <span class="co">#  CHECK IF MANEUVER</span>
-030923,000150: 27,2643           77751                           <span class="op">MASK    </span> <a href="INTERPRETER.agc.html#4249543131">BIT11</a>                                 <span class="co">#  WAS COMPLETED</span>
-030924,000151: 27,2644           00006                           <span class="op">EXTEND  </span>                                       
-030925,000152: 27,2645           12647                           <span class="op">BZF     </span> +2                                    
-030926,000153: 27,2646           04743                           <span class="op">TC      </span> <a href="ALARM_AND_ABORT.agc.html#4355525441494E53">CURTAINS</a>                              <span class="co">#  MANEUVER NOT COMPLETED</span>
-030927,000154: 27,2647           05206                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#42414E4B43414C4C">BANKCALL</a>                              
-030928,000155: 27,2650           26743                           <span class="ps">CADR    </span> <a href="IMU_MODE_SWITCHING_ROUTINES.agc.html#4154545354414C4C">ATTSTALL</a>                              
-030929,000156: 27,2651           04743                           <span class="op">TC      </span> <a href="ALARM_AND_ABORT.agc.html#4355525441494E53">CURTAINS</a>                              <span class="co">#  SICK RETURN</span>
-030930,000157: 
-030931,000158:                                                                                                  <span class="co">#                                          SET LM-DAP DEADBAND TO MAX-</span>
-030932,000159: 
-030933,000160: 27,2652           04161                           <span class="op">TC      </span> <a href="PHASE_TABLE_MAINTENANCE.agc.html#5048415343484E47">PHASCHNG</a>                              
-030934,000161: 27,2653           00002                           <span class="ps">OCT     </span> 00002                                 <span class="co">#  DEACTIVATE GR 2</span>
-030935,000162: 
-030936,000163: 27,2654           04141                           <span class="op">TC      </span> <a href="PHASE_TABLE_MAINTENANCE.agc.html#3250485343484E47">2PHSCHNG</a>                              
-030937,000164: 27,2655           00004                           <span class="ps">OCT     </span> 00004                                 
-030938,000165: 27,2656           05023                           <span class="ps">OCT     </span> 05023                                 
-030939,000166: 27,2657           30000                           <span class="ps">OCT     </span> 30000                                 
-030940,000167: 
-030941,000168: 27,2660           00004                           <span class="op">INHINT  </span>                                       
-030942,000169: 27,2661           05206                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#42414E4B43414C4C">BANKCALL</a>                              
+<a name="4D385241444F4E"></a>030895,000120: 27,2613           37747        <span class="sm">M8RADON </span>           <span class="op">CAF     </span> <a href="EXECUTIVE.agc.html#5052494F3130">PRIO10</a>                                <span class="co">#  SET UP JOB TO CALCULATE</span>
+030896,000121: 27,2614           05516                           <span class="op">TC      </span> <a href="EXECUTIVE.agc.html#46494E44564143">FINDVAC</a>                               <span class="co">#  REQ CDU ANGLES</span>
+030897,000122: 27,2615  E3,1652                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#52415445494E4458">RATEINDX</a>                              
+030898,000123: 27,2615           02670 56063                     <span class="ps">2CADR   </span> <a href="#434F4C44534F414B">COLDSOAK</a>                              
+030899,000124: 
+030900,000125: 27,2617           04141                           <span class="op">TC      </span> <a href="PHASE_TABLE_MAINTENANCE.agc.html#3250485343484E47">2PHSCHNG</a>                              
+030901,000126: 27,2620           00054                           <span class="ps">OCT     </span> 00054                                 
+030902,000127: 27,2621           05012                           <span class="ps">OCT     </span> 05012                                 
+030903,000128: 27,2622           77777                           <span class="ps">OCT     </span> 77777                                 
+030904,000129: 
+030905,000130: 27,2623           05073                           <span class="op">TC      </span> <a href="LMP_COMMAND_ROUTINES.agc.html#324C4D502B4454">2LMP+DT</a>                               <span class="co">#  LMP COMMANDS</span>
+030906,000131: 27,2624           00266                           <span class="ps">DEC     </span> 182        B-14                       <span class="co">#  LANDING RADAR POWER ON*</span>
+030907,000132: 27,2625           00032                           <span class="ps">DEC     </span> 26         B-14                       <span class="co">#  RADAR SELF TEST ON*</span>
+030908,000133: 27,2626           13560                           <span class="ps">DEC     </span> 6000       B-14                       <span class="co">#  WAIT 1 MIN</span>
+030909,000134: 
+030910,000135: 27,2627           05101                           <span class="op">TC      </span> <a href="LMP_COMMAND_ROUTINES.agc.html#314C4D502B4454">1LMP+DT</a>                               <span class="co">#  LMP COMMAND</span>
+030911,000136: 27,2630           00033                           <span class="ps">DEC     </span> 27         B-14                       <span class="co">#  RADAR SELF TEST OFF*</span>
+030912,000137: 27,2631           13560                           <span class="ps">DEC     </span> 6000       B-14                       <span class="co">#  WAIT 1 MIN</span>
+030913,000138: 
+030914,000139: 27,2632           05101                           <span class="op">TC      </span> <a href="LMP_COMMAND_ROUTINES.agc.html#314C4D502B4454">1LMP+DT</a>                               
+030915,000140: 27,2633           00267                           <span class="ps">DEC     </span> 183        B-14                       <span class="co">#  LANDING RADAR POWER OFF*</span>
+030916,000141: 27,2634           02734                           <span class="ps">DEC     </span> 1500       B-14                       <span class="co">#  15 SECONDS</span>
+030917,000142: 
+030918,000143: 27,2635           35656                           <span class="op">CAF     </span> <a href="EXECUTIVE.agc.html#5052494F3335">PRIO35</a>                                <span class="co">#  SET UP JOB TO</span>
+030919,000144: 27,2636           05505                           <span class="op">TC      </span> <a href="EXECUTIVE.agc.html#4E4F564143">NOVAC</a>                                 <span class="co">#  END MISSION PHASE</span>
+030920,000145: 27,2637  E3,1400                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C535431">LST1</a>                                  
+030921,000146: 27,2637           02642 56063                     <span class="ps">2CADR   </span> <a href="#4D503943414C4C">MP9CALL</a>                               
+030922,000147: 
+030923,000148: 27,2641           05727                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              
+<a name="4D503943414C4C"></a>030924,000149: 27,2642           30076        <span class="sm">MP9CALL </span>           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#464C414757524432">FLAGWRD2</a>                              <span class="co">#  CHECK IF MANEUVER</span>
+030925,000150: 27,2643           77751                           <span class="op">MASK    </span> <a href="INTERPRETER.agc.html#4249543131">BIT11</a>                                 <span class="co">#  WAS COMPLETED</span>
+030926,000151: 27,2644           00006                           <span class="op">EXTEND  </span>                                       
+030927,000152: 27,2645           12647                           <span class="op">BZF     </span> +2                                    
+030928,000153: 27,2646           04743                           <span class="op">TC      </span> <a href="ALARM_AND_ABORT.agc.html#4355525441494E53">CURTAINS</a>                              <span class="co">#  MANEUVER NOT COMPLETED</span>
+030929,000154: 27,2647           05206                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#42414E4B43414C4C">BANKCALL</a>                              
+030930,000155: 27,2650           26743                           <span class="ps">CADR    </span> <a href="IMU_MODE_SWITCHING_ROUTINES.agc.html#4154545354414C4C">ATTSTALL</a>                              
+030931,000156: 27,2651           04743                           <span class="op">TC      </span> <a href="ALARM_AND_ABORT.agc.html#4355525441494E53">CURTAINS</a>                              <span class="co">#  SICK RETURN</span>
+030932,000157: 
+030933,000158:                                                                                                  <span class="co">#                                          SET LM-DAP DEADBAND TO MAX-</span>
+030934,000159: 
+030935,000160: 27,2652           04161                           <span class="op">TC      </span> <a href="PHASE_TABLE_MAINTENANCE.agc.html#5048415343484E47">PHASCHNG</a>                              
+030936,000161: 27,2653           00002                           <span class="ps">OCT     </span> 00002                                 <span class="co">#  DEACTIVATE GR 2</span>
+030937,000162: 
+030938,000163: 27,2654           04141                           <span class="op">TC      </span> <a href="PHASE_TABLE_MAINTENANCE.agc.html#3250485343484E47">2PHSCHNG</a>                              
+030939,000164: 27,2655           00004                           <span class="ps">OCT     </span> 00004                                 
+030940,000165: 27,2656           05023                           <span class="ps">OCT     </span> 05023                                 
+030941,000166: 27,2657           30000                           <span class="ps">OCT     </span> 30000                                 
+030942,000167: 
+030943,000168: 27,2660           00004                           <span class="op">INHINT  </span>                                       
+030944,000169: 27,2661           05206                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#42414E4B43414C4C">BANKCALL</a>                              
 </pre>
 </span>
 </p>
@@ -321,17 +321,17 @@ Page 723
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-030944,000171: 27,2662           40054                           <span class="ps">CADR    </span> <a href="DAP_INTERFACE_SUBROUTINES.agc.html#5345544D41584442">SETMAXDB</a>                              
-030945,000172: 
-030946,000173:                                                                                                  <span class="co">#                                          CALL MISSION PHASE 9</span>
-030947,000174: 
-030948,000175: 27,2663           05126                           <span class="op">TC      </span> <a href="AS206_MISSION_SCHEDULING_PACKAGE.agc.html#4D50454E545259">MPENTRY</a>                               <span class="co">#  MANEUVER SUCCESSFUL</span>
-030949,000176: 27,2664           00002                           <span class="ps">DEC     </span> 2          B-14                       <span class="co">#  J=2</span>
-030950,000177: 27,2665           00011                           <span class="ps">DEC     </span> 9          B-14                       <span class="co">#  MP=9</span>
-030951,000178: 27,2666           01773                           <span class="ps">ADRES   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D5038544F39">MP8TO9</a>                                <span class="co">#  DT = 2H 59M 14S</span>
-030952,000179: 
-030953,000180: 27,2667           04272                           <span class="op">TC      </span> <a href="FRESH_START_AND_RESTART.agc.html#50303048">P00H</a>                                  <span class="co">#  END OF MISSION PHASE 8</span>
-030954,000181: 
+030946,000171: 27,2662           40054                           <span class="ps">CADR    </span> <a href="DAP_INTERFACE_SUBROUTINES.agc.html#5345544D41584442">SETMAXDB</a>                              
+030947,000172: 
+030948,000173:                                                                                                  <span class="co">#                                          CALL MISSION PHASE 9</span>
+030949,000174: 
+030950,000175: 27,2663           05126                           <span class="op">TC      </span> <a href="AS206_MISSION_SCHEDULING_PACKAGE.agc.html#4D50454E545259">MPENTRY</a>                               <span class="co">#  MANEUVER SUCCESSFUL</span>
+030951,000176: 27,2664           00002                           <span class="ps">DEC     </span> 2          B-14                       <span class="co">#  J=2</span>
+030952,000177: 27,2665           00011                           <span class="ps">DEC     </span> 9          B-14                       <span class="co">#  MP=9</span>
+030953,000178: 27,2666           01773                           <span class="ps">ADRES   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D5038544F39">MP8TO9</a>                                <span class="co">#  DT = 2H 59M 14S</span>
+030954,000179: 
+030955,000180: 27,2667           04272                           <span class="op">TC      </span> <a href="FRESH_START_AND_RESTART.agc.html#50303048">P00H</a>                                  <span class="co">#  END OF MISSION PHASE 8</span>
+030956,000181: 
 </pre>
 </span>
 </p>
@@ -347,56 +347,56 @@ Page 724
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-030956,000183:                                                                                                  <span class="co">#           CALCULATE CDU ANGLES FOR REQUIRED</span>
-030957,000184:                                                                                                  <span class="co">#           COLDSOAK ATTITUDE - LEM X-AXIS NORMAL TO THE</span>
-030958,000185:                                                                                                  <span class="co">#           ECLIPTIC AND BISECTOR OF -Y/+Z AXES TOWARD THE SUN.</span>
-<a name="434F4C44534F414B"></a>030959,000186: 27,2670           00006        <span class="sm">COLDSOAK</span>           <span class="op">EXTEND  </span>                                       
-030960,000187: 27,2671           30025                           <span class="op">DCA     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54494D4532">TIME2</a>                                 
-030961,000188: 27,2672           52145                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
-030962,000189: 27,2673           00006                           <span class="op">EXTEND  </span>                                       
-030963,000190: 27,2674           31741                           <span class="op">DCA     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544C4946544F4646">TLIFTOFF</a>                              
-030964,000191: 27,2675           20145                           <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  <span class="co">#  ADD TIME CLOCK ZEROED TO TIME2</span>
-030965,000192: 
-030966,000193: 27,2676           37767                           <span class="op">CA      </span> <a href="INTERPRETER.agc.html#5A45524F">ZERO</a>                                  
-030967,000194: 27,2677           54153                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D4F4445">MODE</a>                                  
-030968,000195: 27,2700           06112                           <span class="op">TC      </span> <a href="INTERPRETER.agc.html#494E5450524554">INTPRET</a>                               
-030969,000196:                                                                                                  <span class="co">#  CALCULATE TRANSFORMATION MATRIX FROM RCS COLD SOAK ATTITUDE</span>
-030970,000197:                                                                                                  <span class="co">#  TO STABLE MEMBER COORDINATES.   CONVERT TO CDU ANGLES.</span>
-030971,000198: 27,2701           54201                           <span class="in">SETPD   </span> <span class="in">SR        </span>                            
-030972,000199: 27,2702           00001                                    0                                     
-030973,000200: 27,2703           20617                                    14D                                   
-030974,000201: 27,2704           56371                           <span class="in">TAD     </span> <span class="in">DDV       </span>                            
-030975,000202: 27,2705           01754                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#54455048454D">TEPHEM</a>                                <span class="co">#  TIME IN CENTISEC SINCE PRECEDING JUNE 30</span>
-030976,000203: 27,2706           17113                                    <a href="#4353504552444159">CSPERDAY</a>                              <span class="co">#  CENTISEC PER DAY</span>
-030977,000204: 27,2707           77606                           <span class="in">PUSH    </span>                                       <span class="co">#  T/2**9 = (DAYS SINCE JUNE 30TH)/2**9</span>
-030978,000205: 
-030979,000206:                                                                                                  <span class="co">#                                          COMPUTE  SIN(2*PI*T/365.25), COS(2*PI*T/365.25)  WHERE</span>
-030980,000207:                                                                                                  <span class="co">#                                          T= NUMBER OF DAYS SINCE MIDNIGHT OF PRECEDING JUNE 30TH.</span>
-030981,000208: 
-<a name="414C5441"></a>030982,000209: 27,2710           51025        <span class="sm">ALTA    </span>           <span class="in">DSU     </span> <span class="in">BPL       </span>                            <span class="co">#  DIMINISH T/2**9 BY 365.25/2**9</span>
-030983,000210: 27,2711           17111                                    <a href="#4F4E455952">ONEYR</a>                                 <span class="co">#  UNTIL A NEGATIVE RESULT OCCURS.</span>
-030984,000211: 27,2712           56710                                    <a href="#414C5441">ALTA</a>                                  
-030985,000212: 27,2713           56215                           <span class="in">DAD     </span> <span class="in">DDV       </span>                            <span class="co">#  ADD BACK 365.25/2**9 ONCE.</span>
-030986,000213: 27,2714           17111                                    <a href="#4F4E455952">ONEYR</a>                                 <span class="co">#  LET Y=RESULT</span>
-030987,000214: 27,2715           17111                                    <a href="#4F4E455952">ONEYR</a>                                 <span class="co">#  Y/365.25 IS LESS THAN ONE AND POSITIVE.</span>
-030988,000215: 27,2716           73406                           <span class="in">PUSH    </span> <span class="in">SIN       </span>                            <span class="co">#  .5*SIN(2*PI*Y/365.25)</span>
-030989,000216: 27,2717           71525                           <span class="in">PDDL    </span> <span class="in">COS       </span>                            <span class="co">#  .5*COS(2*PI*Y/365.25)</span>
-030990,000217: 
-030991,000218:                                                                                                  <span class="co">#                                          COMPUTE (1/8 +LOS) IN REVOLUTIONS WHERE</span>
-030992,000219:                                                                                                  <span class="co">#                                          LOS= LOS0+LOSR*T-C0Y*SIN(2*PI*Y/365.25)-C1Y*COS(2*PI*Y/365.25) .</span>
-030993,000220:                                                                                                  <span class="co">#                                          LOS = LONGITUDE OF SUN IN PLANE OF ECLIPTIC.</span>
-030994,000221: 
-030995,000222: 27,2720           65205                           <span class="in">DMP     </span> <span class="in">PDDL      </span>                            
-030996,000223: 27,2721           17073                                    <a href="#433159">C1Y</a>                                   <span class="co">#  .5*C1Y*COS/2</span>
-030997,000224: 27,2722           43205                           <span class="in">DMP     </span> <span class="in">DAD       </span>                            
-030998,000225: 27,2723           17071                                    <a href="#433059">C0Y</a>                                   <span class="co">#  (C0Y*SIN +C1Y*COS)/4</span>
-030999,000226: 27,2724           77725                           <span class="in">PDDL    </span>                                       <span class="co">#  T/2**9</span>
-031000,000227: 27,2725           54205                           <span class="in">DMP     </span> <span class="in">SL        </span>                            
-031001,000228: 27,2726           17067                                    <a href="#4C4F5352">LOSR</a>                                  <span class="co">#  LOSR*T/2**9</span>
-031002,000229: 27,2727           20210                                    7                                     <span class="co">#  LOSR*T/4</span>
-031003,000230: 27,2730           77625                           <span class="in">DSU     </span>                                       <span class="co">#  (LOSR*T-C0Y*SIN-C1Y*COS)/4</span>
-031004,000231: 27,2731           43215                           <span class="in">DAD     </span> <span class="in">DAD       </span>                            
-031005,000232: 27,2732           17065                                    <a href="#4C4F5330">LOS0</a>                                  <span class="co">#  LOS/4= (LOS0+LOSR*T-C0Y*SIN-C1Y*COS)/4</span>
+030958,000183:                                                                                                  <span class="co">#           CALCULATE CDU ANGLES FOR REQUIRED</span>
+030959,000184:                                                                                                  <span class="co">#           COLDSOAK ATTITUDE - LEM X-AXIS NORMAL TO THE</span>
+030960,000185:                                                                                                  <span class="co">#           ECLIPTIC AND BISECTOR OF -Y/+Z AXES TOWARD THE SUN.</span>
+<a name="434F4C44534F414B"></a>030961,000186: 27,2670           00006        <span class="sm">COLDSOAK</span>           <span class="op">EXTEND  </span>                                       
+030962,000187: 27,2671           30025                           <span class="op">DCA     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54494D4532">TIME2</a>                                 
+030963,000188: 27,2672           52145                           <span class="op">DXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
+030964,000189: 27,2673           00006                           <span class="op">EXTEND  </span>                                       
+030965,000190: 27,2674           31741                           <span class="op">DCA     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544C4946544F4646">TLIFTOFF</a>                              
+030966,000191: 27,2675           20145                           <span class="op">DAS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  <span class="co">#  ADD TIME CLOCK ZEROED TO TIME2</span>
+030967,000192: 
+030968,000193: 27,2676           37767                           <span class="op">CA      </span> <a href="INTERPRETER.agc.html#5A45524F">ZERO</a>                                  
+030969,000194: 27,2677           54153                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D4F4445">MODE</a>                                  
+030970,000195: 27,2700           06112                           <span class="op">TC      </span> <a href="INTERPRETER.agc.html#494E5450524554">INTPRET</a>                               
+030971,000196:                                                                                                  <span class="co">#  CALCULATE TRANSFORMATION MATRIX FROM RCS COLD SOAK ATTITUDE</span>
+030972,000197:                                                                                                  <span class="co">#  TO STABLE MEMBER COORDINATES.   CONVERT TO CDU ANGLES.</span>
+030973,000198: 27,2701           54201                           <span class="in">SETPD   </span> <span class="in">SR        </span>                            
+030974,000199: 27,2702           00001                                    0                                     
+030975,000200: 27,2703           20617                                    14D                                   
+030976,000201: 27,2704           56371                           <span class="in">TAD     </span> <span class="in">DDV       </span>                            
+030977,000202: 27,2705           01754                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#54455048454D">TEPHEM</a>                                <span class="co">#  TIME IN CENTISEC SINCE PRECEDING JUNE 30</span>
+030978,000203: 27,2706           17113                                    <a href="#4353504552444159">CSPERDAY</a>                              <span class="co">#  CENTISEC PER DAY</span>
+030979,000204: 27,2707           77606                           <span class="in">PUSH    </span>                                       <span class="co">#  T/2**9 = (DAYS SINCE JUNE 30TH)/2**9</span>
+030980,000205: 
+030981,000206:                                                                                                  <span class="co">#                                          COMPUTE  SIN(2*PI*T/365.25), COS(2*PI*T/365.25)  WHERE</span>
+030982,000207:                                                                                                  <span class="co">#                                          T= NUMBER OF DAYS SINCE MIDNIGHT OF PRECEDING JUNE 30TH.</span>
+030983,000208: 
+<a name="414C5441"></a>030984,000209: 27,2710           51025        <span class="sm">ALTA    </span>           <span class="in">DSU     </span> <span class="in">BPL       </span>                            <span class="co">#  DIMINISH T/2**9 BY 365.25/2**9</span>
+030985,000210: 27,2711           17111                                    <a href="#4F4E455952">ONEYR</a>                                 <span class="co">#  UNTIL A NEGATIVE RESULT OCCURS.</span>
+030986,000211: 27,2712           56710                                    <a href="#414C5441">ALTA</a>                                  
+030987,000212: 27,2713           56215                           <span class="in">DAD     </span> <span class="in">DDV       </span>                            <span class="co">#  ADD BACK 365.25/2**9 ONCE.</span>
+030988,000213: 27,2714           17111                                    <a href="#4F4E455952">ONEYR</a>                                 <span class="co">#  LET Y=RESULT</span>
+030989,000214: 27,2715           17111                                    <a href="#4F4E455952">ONEYR</a>                                 <span class="co">#  Y/365.25 IS LESS THAN ONE AND POSITIVE.</span>
+030990,000215: 27,2716           73406                           <span class="in">PUSH    </span> <span class="in">SIN       </span>                            <span class="co">#  .5*SIN(2*PI*Y/365.25)</span>
+030991,000216: 27,2717           71525                           <span class="in">PDDL    </span> <span class="in">COS       </span>                            <span class="co">#  .5*COS(2*PI*Y/365.25)</span>
+030992,000217: 
+030993,000218:                                                                                                  <span class="co">#                                          COMPUTE (1/8 +LOS) IN REVOLUTIONS WHERE</span>
+030994,000219:                                                                                                  <span class="co">#                                          LOS= LOS0+LOSR*T-C0Y*SIN(2*PI*Y/365.25)-C1Y*COS(2*PI*Y/365.25) .</span>
+030995,000220:                                                                                                  <span class="co">#                                          LOS = LONGITUDE OF SUN IN PLANE OF ECLIPTIC.</span>
+030996,000221: 
+030997,000222: 27,2720           65205                           <span class="in">DMP     </span> <span class="in">PDDL      </span>                            
+030998,000223: 27,2721           17073                                    <a href="#433159">C1Y</a>                                   <span class="co">#  .5*C1Y*COS/2</span>
+030999,000224: 27,2722           43205                           <span class="in">DMP     </span> <span class="in">DAD       </span>                            
+031000,000225: 27,2723           17071                                    <a href="#433059">C0Y</a>                                   <span class="co">#  (C0Y*SIN +C1Y*COS)/4</span>
+031001,000226: 27,2724           77725                           <span class="in">PDDL    </span>                                       <span class="co">#  T/2**9</span>
+031002,000227: 27,2725           54205                           <span class="in">DMP     </span> <span class="in">SL        </span>                            
+031003,000228: 27,2726           17067                                    <a href="#4C4F5352">LOSR</a>                                  <span class="co">#  LOSR*T/2**9</span>
+031004,000229: 27,2727           20210                                    7                                     <span class="co">#  LOSR*T/4</span>
+031005,000230: 27,2730           77625                           <span class="in">DSU     </span>                                       <span class="co">#  (LOSR*T-C0Y*SIN-C1Y*COS)/4</span>
+031006,000231: 27,2731           43215                           <span class="in">DAD     </span> <span class="in">DAD       </span>                            
+031007,000232: 27,2732           17065                                    <a href="#4C4F5330">LOS0</a>                                  <span class="co">#  LOS/4= (LOS0+LOSR*T-C0Y*SIN-C1Y*COS)/4</span>
 </pre>
 </span>
 </p>
@@ -412,57 +412,57 @@ Page 725
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-031007,000234: 27,2733           17107                                    <a href="#4547485448">EGHTH</a>                                 <span class="co">#  (1/8 +LOS)/4  ,  1/8 REV = 45 DEG</span>
-031008,000235: 
-<a name="414C5442"></a>031009,000236: 27,2734           51025        <span class="sm">ALTB    </span>           <span class="in">DSU     </span> <span class="in">BPL       </span>                            <span class="co">#  DIMINISH (1/8 +LOS)/4 REVS BY (1REV)/4</span>
-031010,000237: 27,2735           17105                                    <a href="#4F4E45524556">ONEREV</a>                                <span class="co">#  UNTIL A NEGATIVE RESULT OCCURS.</span>
-031011,000238: 27,2736           56734                                    <a href="#414C5442">ALTB</a>                                  
-031012,000239: 27,2737           62415                           <span class="in">DAD     </span> <span class="in">SL2       </span>                            <span class="co">#  ADD BACK (1REV)/4 .</span>
-031013,000240: 27,2740           17105                                    <a href="#4F4E45524556">ONEREV</a>                                <span class="co">#  AND MULTIPLY BY FOUR.</span>
-031014,000241: 27,2741           77606                           <span class="in">PUSH    </span>                                       <span class="co">#  (1/8 +LOS) POSITIVE AND LESS THAN ONE.</span>
-031015,000242: 
-031016,000243:                                                                                                  <span class="co">#                                          CONSTRUCT TRANSFORMATION MATRIX FROM RCS COLD SOAK ATTITUDE</span>
-031017,000244:                                                                                                  <span class="co">#                                          TO EARTH REFERENCE COORDINATES.  MATRIX IS SCALED BY -1 .</span>
-031018,000245:                                                                                                  <span class="co">#                                          MATRIX TRANSPOSE IS STORED STARTING IN FIRST LOCATION OF PUSHDOWN LIST.</span>
-031019,000246:                                                                                                  <span class="co">#                                          OBL= OBLIQUITY= ANGLE BETWEEN ECLIPTIC AND EQUATORIAL PLANES.</span>
-031020,000247:                                                                                                  <span class="co">#                                          DEFINE LOSR= 2*PI*LOS</span>
-031021,000248: 
-031022,000249: 27,2742           57546                           <span class="in">COS     </span> <span class="in">DCOMP     </span>                            
-031023,000250: 27,2743           00007                           <span class="in">STORE   </span> 6                                     <span class="co">#  -.5*COS(PI/4+LOSR)</span>
-031024,000251: 27,2744           77605                           <span class="in">DMP     </span>                                       
-031025,000252: 27,2745           17077                                    <a href="#434F534F424C">COSOBL</a>                                
-031026,000253: 27,2746           00017                           <span class="in">STORE   </span> 14D                                   <span class="co">#  -.5*COS(PI/4+LOSR)*COS(OBL)</span>
-031027,000254: 27,2747           77605                           <span class="in">DMP     </span>                                       
-031028,000255: 27,2750           17101                                    <a href="#54414E4F424C">TANOBL</a>                                
-031029,000256: 27,2751           14021                           <span class="in">STODL   </span> 16D                                   <span class="co">#  -.5*COS(PI/4+LOSR)*SIN(OBL)</span>
-031030,000257: 27,2752           00001                                    0                                     
-031031,000258: 27,2753           77756                           <span class="in">SIN     </span>                                       
-031032,000259: 27,2754           00015                           <span class="in">STORE   </span> 12D                                   <span class="co">#   .5*SIN(PI/4+LOSR)</span>
-031033,000260: 27,2755           57405                           <span class="in">DMP     </span> <span class="in">DCOMP     </span>                            
-031034,000261: 27,2756           17077                                    <a href="#434F534F424C">COSOBL</a>                                
-031035,000262: 27,2757           00011                           <span class="in">STORE   </span> 8D                                    <span class="co">#  -.5*SIN(PI/4+LOSR)*COS(OBL)</span>
-031036,000263: 27,2760           77605                           <span class="in">DMP     </span>                                       
-031037,000264: 27,2761           17101                                    <a href="#54414E4F424C">TANOBL</a>                                
-031038,000265: 27,2762           14013                           <span class="in">STODL   </span> 10D                                   <span class="co">#  -.5*SIN(PI/4+LOSR)*SIN(OBL)</span>
-031039,000266: 27,2763           17077                                    <a href="#434F534F424C">COSOBL</a>                                
-031040,000267: 27,2764           77742                           <span class="in">SR1     </span>                                       
-031041,000268: 27,2765           14005                           <span class="in">STODL   </span> 4                                     <span class="co">#   .5*COS(OBL)</span>
-031042,000269: 27,2766           17075                                    <a href="#53494E4F424C">SINOBL</a>                                
-031043,000270: 27,2767           57542                           <span class="in">SR1     </span> <span class="in">DCOMP     </span>                            
-031044,000271: 27,2770           14003                           <span class="in">STODL   </span> 2                                     <span class="co">#  -.5*SIN(OBL)</span>
-031045,000272: 27,2771           17103                                    <a href="#44505A524F">DPZRO</a>                                 
-031046,000273: 27,2772           00001                           <span class="in">STORE   </span> 0                                     <span class="co">#   0</span>
-031047,000274: 
-031048,000275:                                                                                                  <span class="co">#                                          PERFORM THE MATRIX MULTIPLICATION (REFSMMAT)X(RCS TO REF MATRIX)/2</span>
-031049,000276: 27,2773           64375                           <span class="in">VLOAD   </span> <span class="in">MXV       </span>                            
-031050,000277: 27,2774           00001                                    0                                     
-031051,000278: 27,2775           01263                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#524546534D4D4154">REFSMMAT</a>                              
-031052,000279: 27,2776           77772                           <span class="in">VSL1    </span>                                       
-031053,000280: 27,2777           24001                           <span class="in">STOVL   </span> 0                                     
-031054,000281: 27,3000           00007                                    6                                     
-031055,000282: 27,3001           76521                           <span class="in">MXV     </span> <span class="in">VSL1      </span>                            
-031056,000283: 27,3002           01263                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#524546534D4D4154">REFSMMAT</a>                              
-031057,000284: 
+031009,000234: 27,2733           17107                                    <a href="#4547485448">EGHTH</a>                                 <span class="co">#  (1/8 +LOS)/4  ,  1/8 REV = 45 DEG</span>
+031010,000235: 
+<a name="414C5442"></a>031011,000236: 27,2734           51025        <span class="sm">ALTB    </span>           <span class="in">DSU     </span> <span class="in">BPL       </span>                            <span class="co">#  DIMINISH (1/8 +LOS)/4 REVS BY (1REV)/4</span>
+031012,000237: 27,2735           17105                                    <a href="#4F4E45524556">ONEREV</a>                                <span class="co">#  UNTIL A NEGATIVE RESULT OCCURS.</span>
+031013,000238: 27,2736           56734                                    <a href="#414C5442">ALTB</a>                                  
+031014,000239: 27,2737           62415                           <span class="in">DAD     </span> <span class="in">SL2       </span>                            <span class="co">#  ADD BACK (1REV)/4 .</span>
+031015,000240: 27,2740           17105                                    <a href="#4F4E45524556">ONEREV</a>                                <span class="co">#  AND MULTIPLY BY FOUR.</span>
+031016,000241: 27,2741           77606                           <span class="in">PUSH    </span>                                       <span class="co">#  (1/8 +LOS) POSITIVE AND LESS THAN ONE.</span>
+031017,000242: 
+031018,000243:                                                                                                  <span class="co">#                                          CONSTRUCT TRANSFORMATION MATRIX FROM RCS COLD SOAK ATTITUDE</span>
+031019,000244:                                                                                                  <span class="co">#                                          TO EARTH REFERENCE COORDINATES.  MATRIX IS SCALED BY -1 .</span>
+031020,000245:                                                                                                  <span class="co">#                                          MATRIX TRANSPOSE IS STORED STARTING IN FIRST LOCATION OF PUSHDOWN LIST.</span>
+031021,000246:                                                                                                  <span class="co">#                                          OBL= OBLIQUITY= ANGLE BETWEEN ECLIPTIC AND EQUATORIAL PLANES.</span>
+031022,000247:                                                                                                  <span class="co">#                                          DEFINE LOSR= 2*PI*LOS</span>
+031023,000248: 
+031024,000249: 27,2742           57546                           <span class="in">COS     </span> <span class="in">DCOMP     </span>                            
+031025,000250: 27,2743           00007                           <span class="in">STORE   </span> 6                                     <span class="co">#  -.5*COS(PI/4+LOSR)</span>
+031026,000251: 27,2744           77605                           <span class="in">DMP     </span>                                       
+031027,000252: 27,2745           17077                                    <a href="#434F534F424C">COSOBL</a>                                
+031028,000253: 27,2746           00017                           <span class="in">STORE   </span> 14D                                   <span class="co">#  -.5*COS(PI/4+LOSR)*COS(OBL)</span>
+031029,000254: 27,2747           77605                           <span class="in">DMP     </span>                                       
+031030,000255: 27,2750           17101                                    <a href="#54414E4F424C">TANOBL</a>                                
+031031,000256: 27,2751           14021                           <span class="in">STODL   </span> 16D                                   <span class="co">#  -.5*COS(PI/4+LOSR)*SIN(OBL)</span>
+031032,000257: 27,2752           00001                                    0                                     
+031033,000258: 27,2753           77756                           <span class="in">SIN     </span>                                       
+031034,000259: 27,2754           00015                           <span class="in">STORE   </span> 12D                                   <span class="co">#   .5*SIN(PI/4+LOSR)</span>
+031035,000260: 27,2755           57405                           <span class="in">DMP     </span> <span class="in">DCOMP     </span>                            
+031036,000261: 27,2756           17077                                    <a href="#434F534F424C">COSOBL</a>                                
+031037,000262: 27,2757           00011                           <span class="in">STORE   </span> 8D                                    <span class="co">#  -.5*SIN(PI/4+LOSR)*COS(OBL)</span>
+031038,000263: 27,2760           77605                           <span class="in">DMP     </span>                                       
+031039,000264: 27,2761           17101                                    <a href="#54414E4F424C">TANOBL</a>                                
+031040,000265: 27,2762           14013                           <span class="in">STODL   </span> 10D                                   <span class="co">#  -.5*SIN(PI/4+LOSR)*SIN(OBL)</span>
+031041,000266: 27,2763           17077                                    <a href="#434F534F424C">COSOBL</a>                                
+031042,000267: 27,2764           77742                           <span class="in">SR1     </span>                                       
+031043,000268: 27,2765           14005                           <span class="in">STODL   </span> 4                                     <span class="co">#   .5*COS(OBL)</span>
+031044,000269: 27,2766           17075                                    <a href="#53494E4F424C">SINOBL</a>                                
+031045,000270: 27,2767           57542                           <span class="in">SR1     </span> <span class="in">DCOMP     </span>                            
+031046,000271: 27,2770           14003                           <span class="in">STODL   </span> 2                                     <span class="co">#  -.5*SIN(OBL)</span>
+031047,000272: 27,2771           17103                                    <a href="#44505A524F">DPZRO</a>                                 
+031048,000273: 27,2772           00001                           <span class="in">STORE   </span> 0                                     <span class="co">#   0</span>
+031049,000274: 
+031050,000275:                                                                                                  <span class="co">#                                          PERFORM THE MATRIX MULTIPLICATION (REFSMMAT)X(RCS TO REF MATRIX)/2</span>
+031051,000276: 27,2773           64375                           <span class="in">VLOAD   </span> <span class="in">MXV       </span>                            
+031052,000277: 27,2774           00001                                    0                                     
+031053,000278: 27,2775           01263                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#524546534D4D4154">REFSMMAT</a>                              
+031054,000279: 27,2776           77772                           <span class="in">VSL1    </span>                                       
+031055,000280: 27,2777           24001                           <span class="in">STOVL   </span> 0                                     
+031056,000281: 27,3000           00007                                    6                                     
+031057,000282: 27,3001           76521                           <span class="in">MXV     </span> <span class="in">VSL1      </span>                            
+031058,000283: 27,3002           01263                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#524546534D4D4154">REFSMMAT</a>                              
+031059,000284: 
 </pre>
 </span>
 </p>
@@ -478,57 +478,57 @@ Page 726
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-031059,000286: 27,3003           24007                           <span class="in">STOVL   </span> 6                                     
-031060,000287: 27,3004           00015                                    12D                                   
-031061,000288: 27,3005           76521                           <span class="in">MXV     </span> <span class="in">VSL1      </span>                            
-031062,000289: 27,3006           01263                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#524546534D4D4154">REFSMMAT</a>                              
-031063,000290: 27,3007           00015                           <span class="in">STORE   </span> 12D                                   
-031064,000291: 27,3010           77776                           <span class="in">EXIT    </span>                                       
-031065,000292: 
-031066,000293:                                                                                                  <span class="co">#                                          TRANSPOSE RESULTING DIRECTION COSINE MATRIX.</span>
-031067,000294: 
-031068,000295: 27,3011           50110                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4649584C4F43">FIXLOC</a>                                
-031069,000296: 27,3012           52003                           <span class="op">DXCH    </span> 2                                     
-031070,000297: 27,3013           50110                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4649584C4F43">FIXLOC</a>                                
-031071,000298: 27,3014           52007                           <span class="op">DXCH    </span> 6                                     
-031072,000299: 27,3015           50110                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4649584C4F43">FIXLOC</a>                                
-031073,000300: 27,3016           52003                           <span class="op">DXCH    </span> 2                                     
-031074,000301: 27,3017           50110                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4649584C4F43">FIXLOC</a>                                
-031075,000302: 27,3020           52005                           <span class="op">DXCH    </span> 4                                     
-031076,000303: 27,3021           50110                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4649584C4F43">FIXLOC</a>                                
-031077,000304: 27,3022           52015                           <span class="op">DXCH    </span> 12D                                   
-031078,000305: 27,3023           50110                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4649584C4F43">FIXLOC</a>                                
-031079,000306: 27,3024           52005                           <span class="op">DXCH    </span> 4                                     
-031080,000307: 27,3025           50110                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4649584C4F43">FIXLOC</a>                                
-031081,000308: 27,3026           52013                           <span class="op">DXCH    </span> 10D                                   
-031082,000309: 27,3027           50110                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4649584C4F43">FIXLOC</a>                                
-031083,000310: 27,3030           52017                           <span class="op">DXCH    </span> 14D                                   
-031084,000311: 27,3031           50110                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4649584C4F43">FIXLOC</a>                                
-031085,000312: 27,3032           52013                           <span class="op">DXCH    </span> 10D                                   
-031086,000313: 27,3033           06112                           <span class="op">TC      </span> <a href="INTERPRETER.agc.html#494E5450524554">INTPRET</a>                               
-031087,000314: 
-031088,000315:                                                                                                  <span class="co">#                                          CALL ROUTINE TO CONVERT DIRECTION COSINE MATRIX TO CDU ANGLES.</span>
-031089,000316: 
-031090,000317: 27,3034           74001                           <span class="in">SETPD   </span> <span class="in">AXC,1     </span>                            
-031091,000318: 27,3035           00023                                    18D                                   
-031092,000319: 27,3036           00000                                    0                                     
-031093,000320: 27,3037           77624                           <span class="in">CALL    </span>                                       
-031094,000321: 27,3040           70711                                    <a href="ATTITUDE_MANEUVER_ROUTINE.agc.html#44434D544F434455">DCMTOCDU</a>                              
-031095,000322: 
-031096,000323:                                                                                                  <span class="co">#                                          CONVERT CDU ANGLES FROM ONES TO TWOS COMPLEMENT.</span>
-031097,000324: 
-031098,000325: 27,3041           47131                           <span class="in">SSP     </span> <span class="in">RTB       </span>                            
-031099,000326: 27,3042           01653                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#52415445494E4458">RATEINDX</a>                              
-031100,000327: 27,3043           00004                                    4                                     <span class="co">#  CODE FOUR = MANEUVER RATE OF 5 DEG/SEC.</span>
-031101,000328: 27,3044           33526                                    <a href="RTB_OP_CODES.agc.html#563153544F3253">V1STO2S</a>                               <span class="co">#      STORE CDU ANGLES IN CONSECUTIVE</span>
-031102,000329: 27,3045           01632                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43504849">CPHI</a>                                  <span class="co">#      LOCATIONS  CPHI,CTHETA,CPSI.</span>
-031103,000330: 27,3046           77776                           <span class="in">EXIT    </span>                                       
-031104,000331: 
-031105,000332:                                                                                                  <span class="co">#                                          SET UP PARAMETERS FOR KALCMANU MANEUVER ROUTINE</span>
-031106,000333: 
-031107,000334: 27,3047           06076                           <span class="op">TC      </span> <a href="206_SERVICE_ROUTINES.agc.html#464C41473244574E">FLAG2DWN</a>                              <span class="co">#  RESET STATE SWITCH 33 (BIT 12)</span>
-031108,000335: 27,3050           04000                           <span class="ps">OCT     </span> 04000                                 <span class="co">#  FOR FINAL ROLL , IF ANY.</span>
-031109,000336: 
+031061,000286: 27,3003           24007                           <span class="in">STOVL   </span> 6                                     
+031062,000287: 27,3004           00015                                    12D                                   
+031063,000288: 27,3005           76521                           <span class="in">MXV     </span> <span class="in">VSL1      </span>                            
+031064,000289: 27,3006           01263                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#524546534D4D4154">REFSMMAT</a>                              
+031065,000290: 27,3007           00015                           <span class="in">STORE   </span> 12D                                   
+031066,000291: 27,3010           77776                           <span class="in">EXIT    </span>                                       
+031067,000292: 
+031068,000293:                                                                                                  <span class="co">#                                          TRANSPOSE RESULTING DIRECTION COSINE MATRIX.</span>
+031069,000294: 
+031070,000295: 27,3011           50110                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4649584C4F43">FIXLOC</a>                                
+031071,000296: 27,3012           52003                           <span class="op">DXCH    </span> 2                                     
+031072,000297: 27,3013           50110                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4649584C4F43">FIXLOC</a>                                
+031073,000298: 27,3014           52007                           <span class="op">DXCH    </span> 6                                     
+031074,000299: 27,3015           50110                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4649584C4F43">FIXLOC</a>                                
+031075,000300: 27,3016           52003                           <span class="op">DXCH    </span> 2                                     
+031076,000301: 27,3017           50110                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4649584C4F43">FIXLOC</a>                                
+031077,000302: 27,3020           52005                           <span class="op">DXCH    </span> 4                                     
+031078,000303: 27,3021           50110                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4649584C4F43">FIXLOC</a>                                
+031079,000304: 27,3022           52015                           <span class="op">DXCH    </span> 12D                                   
+031080,000305: 27,3023           50110                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4649584C4F43">FIXLOC</a>                                
+031081,000306: 27,3024           52005                           <span class="op">DXCH    </span> 4                                     
+031082,000307: 27,3025           50110                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4649584C4F43">FIXLOC</a>                                
+031083,000308: 27,3026           52013                           <span class="op">DXCH    </span> 10D                                   
+031084,000309: 27,3027           50110                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4649584C4F43">FIXLOC</a>                                
+031085,000310: 27,3030           52017                           <span class="op">DXCH    </span> 14D                                   
+031086,000311: 27,3031           50110                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4649584C4F43">FIXLOC</a>                                
+031087,000312: 27,3032           52013                           <span class="op">DXCH    </span> 10D                                   
+031088,000313: 27,3033           06112                           <span class="op">TC      </span> <a href="INTERPRETER.agc.html#494E5450524554">INTPRET</a>                               
+031089,000314: 
+031090,000315:                                                                                                  <span class="co">#                                          CALL ROUTINE TO CONVERT DIRECTION COSINE MATRIX TO CDU ANGLES.</span>
+031091,000316: 
+031092,000317: 27,3034           74001                           <span class="in">SETPD   </span> <span class="in">AXC,1     </span>                            
+031093,000318: 27,3035           00023                                    18D                                   
+031094,000319: 27,3036           00000                                    0                                     
+031095,000320: 27,3037           77624                           <span class="in">CALL    </span>                                       
+031096,000321: 27,3040           70711                                    <a href="ATTITUDE_MANEUVER_ROUTINE.agc.html#44434D544F434455">DCMTOCDU</a>                              
+031097,000322: 
+031098,000323:                                                                                                  <span class="co">#                                          CONVERT CDU ANGLES FROM ONES TO TWOS COMPLEMENT.</span>
+031099,000324: 
+031100,000325: 27,3041           47131                           <span class="in">SSP     </span> <span class="in">RTB       </span>                            
+031101,000326: 27,3042           01653                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#52415445494E4458">RATEINDX</a>                              
+031102,000327: 27,3043           00004                                    4                                     <span class="co">#  CODE FOUR = MANEUVER RATE OF 5 DEG/SEC.</span>
+031103,000328: 27,3044           33526                                    <a href="RTB_OP_CODES.agc.html#563153544F3253">V1STO2S</a>                               <span class="co">#      STORE CDU ANGLES IN CONSECUTIVE</span>
+031104,000329: 27,3045           01632                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#43504849">CPHI</a>                                  <span class="co">#      LOCATIONS  CPHI,CTHETA,CPSI.</span>
+031105,000330: 27,3046           77776                           <span class="in">EXIT    </span>                                       
+031106,000331: 
+031107,000332:                                                                                                  <span class="co">#                                          SET UP PARAMETERS FOR KALCMANU MANEUVER ROUTINE</span>
+031108,000333: 
+031109,000334: 27,3047           06076                           <span class="op">TC      </span> <a href="206_SERVICE_ROUTINES.agc.html#464C41473244574E">FLAG2DWN</a>                              <span class="co">#  RESET STATE SWITCH 33 (BIT 12)</span>
+031110,000335: 27,3050           04000                           <span class="ps">OCT     </span> 04000                                 <span class="co">#  FOR FINAL ROLL , IF ANY.</span>
+031111,000336: 
 </pre>
 </span>
 </p>
@@ -544,46 +544,46 @@ Page 727
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-031111,000338: 27,3051           06060                           <span class="op">TC      </span> <a href="206_SERVICE_ROUTINES.agc.html#464C4147325550">FLAG2UP</a>                               <span class="co">#  SET BIT FOR KALCMANU</span>
-031112,000339: 27,3052           02000                           <span class="ps">OCT     </span> 02000                                 <span class="co">#  BIT 11</span>
-031113,000340: 
-031114,000341: 27,3053           04161                           <span class="op">TC      </span> <a href="PHASE_TABLE_MAINTENANCE.agc.html#5048415343484E47">PHASCHNG</a>                              
-031115,000342: 27,3054           05024                           <span class="ps">OCT     </span> 05024                                 
-031116,000343: 27,3055           20000                           <span class="ps">OCT     </span> 20000                                 
-031117,000344: 
-<a name="434F4C44534B31"></a>031118,000345: 27,3056           37746        <span class="sm">COLDSK1 </span>           <span class="op">CAF     </span> <a href="#5052494F4B4D">PRIOKM</a>                                <span class="co">#  SCHEDULE KALCMANU</span>
-031119,000346: 27,3057           00004                           <span class="op">INHINT  </span>                                       
-031120,000347: 27,3060           05516                           <span class="op">TC      </span> <a href="EXECUTIVE.agc.html#46494E44564143">FINDVAC</a>                               
-031121,000348: 27,3061  E3,1652                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#52415445494E4458">RATEINDX</a>                              
-031122,000349: 27,3061           02067 70063                     <span class="ps">2CADR   </span> <a href="ATTITUDE_MANEUVER_ROUTINE.agc.html#4B414C434D414E33">KALCMAN3</a>                              
-031123,000350: 
-031124,000351: 27,3063           05567                           <span class="op">TC      </span> <a href="EXECUTIVE.agc.html#454E444F464A4F42">ENDOFJOB</a>                              
-031125,000352: 
-<a name="4C4F5330"></a>031126,000353: 27,3064           02142 00045  <span class="sm">LOS0    </span>           <span class="ps">2DEC    </span> .273926331 B-2                        <span class="co">#  1966-67,IN REVOLUTIONS</span>
-031127,000354: 
-<a name="4C4F5352"></a>031128,000355: 27,3066           00054 33312  <span class="sm">LOSR    </span>           <span class="ps">2DEC    </span> .0027377992                            <span class="co">#  1966-67,IN REVOLUTIONS</span>
-031129,000356: 
-<a name="433059"></a>031130,000357: 27,3070           00053 17056  <span class="sm">C0Y     </span>           <span class="ps">2DEC    </span> .005306583 B-1                        <span class="co">#  1966-67,IN REVOLUTIONS</span>
-031131,000358: 
-<a name="433159"></a>031132,000359: 27,3072           77774 66451  <span class="sm">C1Y     </span>           <span class="ps">2DEC    </span> -.000402139 B-1                        <span class="co">#  1966-67,IN REVOLUTIONS</span>
-031133,000360: 
-<a name="53494E4F424C"></a>031134,000361: 27,3074           14566 11602  <span class="sm">SINOBL  </span>           <span class="ps">2DEC    </span> .397845753                            <span class="co">#  1966-67</span>
-031135,000362: 
-<a name="434F534F424C"></a>031136,000363: 27,3076           35267 21173  <span class="sm">COSOBL  </span>           <span class="ps">2DEC    </span> .917452318                            <span class="co">#  1966-67</span>
-031137,000364: 
-<a name="54414E4F424C"></a>031138,000365: 27,3100           15700 31171  <span class="sm">TANOBL  </span>           <span class="ps">2DEC    </span> .433641885                            <span class="co">#  1966-67</span>
-031139,000366: 
-<a name="44505A524F"></a>031140,000367: 27,3102           00000 00000  <span class="sm">DPZRO   </span>           <span class="ps">2DEC    </span> 0          B-28                       
-031141,000368: 
-<a name="4F4E45524556"></a>031142,000369: 27,3104           10000 00000  <span class="sm">ONEREV  </span>           <span class="ps">2DEC    </span> .999999999 B-2                        
-031143,000370: 
-<a name="4547485448"></a>031144,000371: 27,3106           01000 00000  <span class="sm">EGHTH   </span>           <span class="ps">2DEC    </span> .125       B-2                        
-031145,000372: 
-<a name="4F4E455952"></a>031146,000373: 27,3110           26650 00000  <span class="sm">ONEYR   </span>           <span class="ps">2DEC    </span> 365.25     B-9                        
-031147,000374: 
-<a name="4353504552444159"></a>031148,000375: 27,3112           00020 17260  <span class="sm">CSPERDAY</span>           <span class="ps">2DEC    </span> 8640000    B-33                       <span class="co">#  CENTISEC PER DAY</span>
-031149,000376: 
-031150,000377:                                                                                                  <span class="co">#  END OF MISSION PHASE 8</span>
+031113,000338: 27,3051           06060                           <span class="op">TC      </span> <a href="206_SERVICE_ROUTINES.agc.html#464C4147325550">FLAG2UP</a>                               <span class="co">#  SET BIT FOR KALCMANU</span>
+031114,000339: 27,3052           02000                           <span class="ps">OCT     </span> 02000                                 <span class="co">#  BIT 11</span>
+031115,000340: 
+031116,000341: 27,3053           04161                           <span class="op">TC      </span> <a href="PHASE_TABLE_MAINTENANCE.agc.html#5048415343484E47">PHASCHNG</a>                              
+031117,000342: 27,3054           05024                           <span class="ps">OCT     </span> 05024                                 
+031118,000343: 27,3055           20000                           <span class="ps">OCT     </span> 20000                                 
+031119,000344: 
+<a name="434F4C44534B31"></a>031120,000345: 27,3056           37746        <span class="sm">COLDSK1 </span>           <span class="op">CAF     </span> <a href="#5052494F4B4D">PRIOKM</a>                                <span class="co">#  SCHEDULE KALCMANU</span>
+031121,000346: 27,3057           00004                           <span class="op">INHINT  </span>                                       
+031122,000347: 27,3060           05516                           <span class="op">TC      </span> <a href="EXECUTIVE.agc.html#46494E44564143">FINDVAC</a>                               
+031123,000348: 27,3061  E3,1652                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#52415445494E4458">RATEINDX</a>                              
+031124,000349: 27,3061           02067 70063                     <span class="ps">2CADR   </span> <a href="ATTITUDE_MANEUVER_ROUTINE.agc.html#4B414C434D414E33">KALCMAN3</a>                              
+031125,000350: 
+031126,000351: 27,3063           05567                           <span class="op">TC      </span> <a href="EXECUTIVE.agc.html#454E444F464A4F42">ENDOFJOB</a>                              
+031127,000352: 
+<a name="4C4F5330"></a>031128,000353: 27,3064           02142 00045  <span class="sm">LOS0    </span>           <span class="ps">2DEC    </span> .273926331 B-2                        <span class="co">#  1966-67,IN REVOLUTIONS</span>
+031129,000354: 
+<a name="4C4F5352"></a>031130,000355: 27,3066           00054 33312  <span class="sm">LOSR    </span>           <span class="ps">2DEC    </span> .0027377992                            <span class="co">#  1966-67,IN REVOLUTIONS</span>
+031131,000356: 
+<a name="433059"></a>031132,000357: 27,3070           00053 17056  <span class="sm">C0Y     </span>           <span class="ps">2DEC    </span> .005306583 B-1                        <span class="co">#  1966-67,IN REVOLUTIONS</span>
+031133,000358: 
+<a name="433159"></a>031134,000359: 27,3072           77774 66451  <span class="sm">C1Y     </span>           <span class="ps">2DEC    </span> -.000402139 B-1                        <span class="co">#  1966-67,IN REVOLUTIONS</span>
+031135,000360: 
+<a name="53494E4F424C"></a>031136,000361: 27,3074           14566 11602  <span class="sm">SINOBL  </span>           <span class="ps">2DEC    </span> .397845753                            <span class="co">#  1966-67</span>
+031137,000362: 
+<a name="434F534F424C"></a>031138,000363: 27,3076           35267 21173  <span class="sm">COSOBL  </span>           <span class="ps">2DEC    </span> .917452318                            <span class="co">#  1966-67</span>
+031139,000364: 
+<a name="54414E4F424C"></a>031140,000365: 27,3100           15700 31171  <span class="sm">TANOBL  </span>           <span class="ps">2DEC    </span> .433641885                            <span class="co">#  1966-67</span>
+031141,000366: 
+<a name="44505A524F"></a>031142,000367: 27,3102           00000 00000  <span class="sm">DPZRO   </span>           <span class="ps">2DEC    </span> 0          B-28                       
+031143,000368: 
+<a name="4F4E45524556"></a>031144,000369: 27,3104           10000 00000  <span class="sm">ONEREV  </span>           <span class="ps">2DEC    </span> .999999999 B-2                        
+031145,000370: 
+<a name="4547485448"></a>031146,000371: 27,3106           01000 00000  <span class="sm">EGHTH   </span>           <span class="ps">2DEC    </span> .125       B-2                        
+031147,000372: 
+<a name="4F4E455952"></a>031148,000373: 27,3110           26650 00000  <span class="sm">ONEYR   </span>           <span class="ps">2DEC    </span> 365.25     B-9                        
+031149,000374: 
+<a name="4353504552444159"></a>031150,000375: 27,3112           00020 17260  <span class="sm">CSPERDAY</span>           <span class="ps">2DEC    </span> 8640000    B-33                       <span class="co">#  CENTISEC PER DAY</span>
+031151,000376: 
+031152,000377:                                                                                                  <span class="co">#  END OF MISSION PHASE 8</span>
 
 End of include-file MISSION_PHASE_8-DPS_COLD_SOAK.agc.  Parent file is <a href="MAIN.agc.html">MAIN.agc</a>
 </pre>
