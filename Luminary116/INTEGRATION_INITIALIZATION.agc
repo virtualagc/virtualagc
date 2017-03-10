@@ -14,6 +14,8 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-01-22 MAS  Created from Luminary 99.
 ##              2017-03-01 RRB  Updated for Luminary 116.
+##              2017-03-09 HG   Fix interpretive opcode   BCN  --> BON
+##                                               operand POOFLAG  --> POOHFLAG                                     
 
 ## Page 1196
 # 1.0 INTRODUCTION
@@ -736,8 +738,8 @@ P00HCHK         DLOAD           ABS
                 DSU             BMN                             
                                 DT/2MIN                         
                                 A-PCHK
-                BOFF            BCN                            # NO BACKWARDS INTEGRATION
-                                POOFLAG                        # WHEN IN POO
+                BOFF            BON                            # NO BACKWARDS INTEGRATION
+                                POOHFLAG                       # WHEN IN POO
                                 TIMESTEP
                                 PRECIFLG                        
                                 TIMESTEP

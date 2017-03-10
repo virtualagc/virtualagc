@@ -14,6 +14,8 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-01-22 MAS  Created from Luminary 99.
 ##              2017-01-31 RRB  Updated for Luminary 116.
+##              2017-03-17 HG   Fix operand O13QSAV  --> C13QSAV
+##                                          C13QSAV  --> C13STALL  
 
 ## Page 980
 # PROGRAM NAME- DOWN TELEMETRY PROGRAM
@@ -230,15 +232,15 @@ DODNCHAN        TC              6                               # (EXECUTED AS E
                 TCF             DNTMEXIT                        # GO SEND CHANNELS
 
 WOZERO          EXTEND
-                QXCH            O13QSAV
+                QXCH            C13QSAV
                 LXCH            RUPTREG1
-                TC              O13QSAV
+                TC              C13STALL
 
                 LXCH            RUPTREG1
                 CS              BIT7
                 EXTEND                
                 WAND            CHAN13                          # SET WORD ORDER CODE TO ZERO		
-                TC              O13QSAV
+                TC              C13QSAV
 
 DODNPTR         INDEX           DNECADR                         # DNECADR CONTAINS ADRES OF SUBLIST
                 0               0                               # CLEAR AND ADD LIST ENTRY INTO A.

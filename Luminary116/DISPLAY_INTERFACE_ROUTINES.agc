@@ -14,6 +14,7 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-01-22 MAS  Created from Luminary 99.
 ##              2017-02-02 RRB  Updated for Luminary 116.
+##              2017-03-09 HG   Fix operand PBAILOUT  --> BAILOUT
 
 ## Page 1331
 # DISPLAYS CAN BE CLASSIFIED INTO THE FOLLOWING CATEGORIES
@@ -854,7 +855,7 @@ IFLEGAL         CAF             TWO
                 EXTEND                                          
                 BZF             OKTOPLAY                        # NO
 
-PRIOBORT        TC              PBAILOUT                         
+PRIOBORT        TC              BAILOUT                         
                 OCT             31502                            
 
 OKTOPLAY        TC              COPIES2                         

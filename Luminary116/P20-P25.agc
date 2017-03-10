@@ -422,7 +422,7 @@ ALRM526         OCT             00526
 OCT201          OCT             00201
 ALRM514         OCT             514
 MAXTRIES        DEC             60
-OCT00012        OCT             BINCON
+OCT00012        EQUALS          BINCON
 ONEB-2          EQUALS          DP1/4TH
 V06N33*         VN              0633
 UPPSV           STQ             CALL                            # UPDATES PERMANENT STATE VECTORS
@@ -530,7 +530,7 @@ PROG25          TC              2PHSCHNG
                 ADRES           TRACKFLG                        # SET TRACK FLAG
                 TC              UPFLAG
                 ADRES           P25FLAG                         # SET P25FLAG
-                TC              DOWNFLG
+                TC              DOWNFLAG
                 ADRES           RNDVZFLG
 P25LEM1         TC              PHASCHNG
                 OCT             04022
@@ -699,10 +699,10 @@ R22LEM96        EXIT
                 GOTO                                            # DISPLAY ANSWERED BY RECYCLE-INCORPORATE
                                 LGRET                           #       NEXT MEASUREMENT
 V34TON49        CS              TWO
-                TS              N49FLG
+                TS              N49FLAG
                 TC              ENDOFJOB
 R22LEM7         EXIT
-                CA              N49FLG                          # WAS ANSWERED TO DISPLAY PRO OR TERM
+                CA              N49FLAG                         # WAS ANSWERED TO DISPLAY PRO OR TERM
                 AD              TWO
                 EXTEND
                 BZF             R22LEM                          # BRANCH - TERM - TAKE ANOTHER RR READING
@@ -883,7 +883,7 @@ R21LEM4         CAF             MAXTRIES                        # SET UP COUNTER
                 TC              DOWNFLAG                        # RESET LOS BEING
                 ADRES           LOSCMFLG                        # COMPUTED FLAG
                 TC              INTPRET
-R21LEM12        RTB
+R21LEM12        RTB             DAD
                                 LOADTIME
                                 TENSEC                          # TIME T = T + 10 SECS.
                 STORE           REPOSTM                         # SAVE FOR LONGCALL AND UPPSV
@@ -2664,7 +2664,7 @@ INITREAD        INHINT
 
                 INDEX           Q
                 CAF             0
-                TC              IBANKCALL
+                TC              IBNKCALL
                 CADR            RADSTART
 
                 EXTEND
@@ -2773,7 +2773,7 @@ RESAMPLE        CCS             SAMPLIM                         # SEE IF ANY MOR
                 TCF             +2
                 TCF             DATAFAIL                        # N SAMPLES NOT AVAILABLE.
                 CAF             BIT4                            # RESET ACTIVITY BIT.
-                TC              IBANKCALL
+                TC              IBNKCALL
                 CADR            RADSTART
 
                 TC              RESUME
@@ -2956,13 +2956,13 @@ RADSTART        TS              Q
                 TC              ISWRETRN
 
 
-C13STALL        TS              C13SAV
+C13STAL1        TS              C13FSAV
 
                 CA              BIT4
                 EXTEND
                 RAND            CHAN13
                 EXTEND
-                BZF             T0QSTAL                         # IF NO RADAR ACTIVITY, RETURN
+                BZF             TCQSTAL                         # IF NO RADAR ACTIVITY, RETURN
 
 C13SLOOP        NOOP                                            # *** NECESSARY TO PREVENT A TC TRAP ***
                 EXTEND
@@ -4972,7 +4972,7 @@ ENDRRD29        CS              BIT14                           # TROUBLE MADE U
                 WAND            CHAN12
 ENDR29RD        CA              ZERO
                 TS              TRKMKCNT
-                TC              DOWNFLG
+                TC              DOWNFLAG
 
 ## Page 610
                 ADRES           READRFLG
