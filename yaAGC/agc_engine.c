@@ -307,7 +307,9 @@
  *		03/09/17 MAS	Prevented yaAGC from exiting standby if PRO is
  *				still held down from entry to standby. Also
  *				corrected turning off of RESTART, and in the
- *				process improved DSKY light latency.
+ *				process improved DSKY light latency. Last,
+ *				added a new channel 163 bit that indicates
+ *				power for the DSKY EL panel is switched off.
  *
  *
  * The technical documentation for the Apollo Guidance & Navigation (G&N) system,
@@ -1809,8 +1811,8 @@ agc_engine (agc_t * State)
                   // While this isn't technically an alarm, it causes GOJAM just like all the rest
                   TriggeredAlarm = 1;
 
-                  // Turn on the STBY light
-                  DskyChannel163 |= DSKY_STBY;
+                  // Turn on the STBY light, and switch off the EL segments
+                  DskyChannel163 |= DSKY_STBY | DSKY_EL_OFF;
                   ChannelOutput(State, 0163, DskyChannel163);
                 }
               else if (!State->SbyStillPressed)
@@ -1819,7 +1821,7 @@ agc_engine (agc_t * State)
                   State->Standby = 0;
 
                   // Turn off the STBY light
-                  DskyChannel163 &= ~DSKY_STBY;
+                  DskyChannel163 &= ~(DSKY_STBY | DSKY_EL_OFF);
                   ChannelOutput(State, 0163, DskyChannel163);
                 }
             }

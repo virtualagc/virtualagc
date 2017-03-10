@@ -95,7 +95,10 @@
 		01/30/17 MAS	Added storage for parity bits and a flag to enable
                 		parity bit checking.
 		03/09/17 MAS	Added a bit, SbyStillPressed, that makes sure PRO
-                		is released before standby can be exited.
+                		is released before standby can be exited. Also
+                                added a new channel 163 bit, DSKY_EL_OFF, that
+                                signifies when the power supply for the EL lights
+                                should go off. yaDSKY2 support to follow.
    
   For more insight, I'd highly recommend looking at the documents
   http://hrst.mit.edu/hrs/apollo/public/archive/1689.pdf and
@@ -244,6 +247,7 @@ extern long random (void);
 #define DSKY_OPER_ERR 000100
 #define DSKY_RESTART  000200
 #define DSKY_STBY     000400
+#define DSKY_EL_OFF   001000
 
 #define NUM_INTERRUPT_TYPES 10
 
