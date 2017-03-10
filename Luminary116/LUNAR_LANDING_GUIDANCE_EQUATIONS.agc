@@ -1054,7 +1054,9 @@ RODCOMP         INHINT
                 TS              TEMZ                            
                 CS              ONE 
 ## In <a href="https://archive.org/stream/luminary11600nasa#page/n811/mode/1up">the printout</a>,
-## to the right of the following two lines, there is an illegible hand-written note.                            
+## to the right of the following two lines, there is a hand-written note.  Don Eyles says he
+## believes it reads "pipa accel", which makes sense given that the comment that follows refers to rescaling
+## the PIPA reading in the MPAC.                      
                 TS              MODE                            
                 TC              INTPRET                         
 ITRPNT1         VXSC            PDDL                            # SCALE MPAC TO M/CS *2(-7) AND PUSH    (6)
