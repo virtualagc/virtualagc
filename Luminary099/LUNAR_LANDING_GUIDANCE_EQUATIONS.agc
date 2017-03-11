@@ -19,6 +19,8 @@
 ##		2016-12-13 RSB	GOTOP00H -> GOTOPOOH
 ##		2016-12-16 RSB	Proofed text comments with octopus/ProoferComments
 ##				and corrected the errors found.
+##		2017-03-10 RSB	Comment-text fixes noted while transcribing Luminary 116.
+##				The label 1406P00 was replaced with 1406POO.
 
 ## This source code has been transcribed or otherwise adapted from
 ## digitized images of a hardcopy from the MIT Museum.  The digitization
@@ -49,7 +51,7 @@
 #	WCHPHASE =  1 ---> APPRQUAD
 #	WCHPHASE =  2 ---> VERTICAL
 
-#****************************************************************************************************************
+# ***************************************************************************************************************
 
 # ROUTINES FOR STARTING NEW GUIDANCE PHASES:
 
@@ -94,7 +96,7 @@ WHATDISP	TCF	P63DISPS	# BRAKQUAD
 
 # ALARM ROUTINE FOR TTF COMPUTATION:
 
-		TCF	1406P00		# IGNALG
+		TCF	1406POO		# IGNALG
 WHATALM		TCF	1406ALM		# BRAKQUAD
 		TCF	1406ALM		# APPRQUAD
 
@@ -104,11 +106,11 @@ WHATALM		TCF	1406ALM		# BRAKQUAD
 TARGTDEX	OCT	0		# BRAKQUAD
 		OCT	34		# APPRQUAD
 
-#****************************************************************************************************************
+# ***************************************************************************************************************
 # ENTRY POINTS:  ?GUIDSUB FOR THE IGNITION ALGORITHM, LUNLAND FOR SERVOUT
-#****************************************************************************************************************
+# ***************************************************************************************************************
 
-# IGNITION ALGORITHM ENTRY:  DELIVERS N PASSES OF QUADRATIC GUIDANCE
+# IGNITION ALGORITHM ENTRY:  DELIVERS N PASSES OF QUADRATIC QUIDANCE
 
 ?GUIDSUB	EXIT
 		CAF	TWO		# N = 3
@@ -127,14 +129,14 @@ LUNLAND		TC	PHASCHNG
 		OCT	21000		#	JUST HIGHER THAN SERVICER'S PRIORITY
 
 ## Page 800
-#****************************************************************************************************************
+# ****************************************************************************************************************
 # GUILDENSTERN:  AUTO-MODES MONITOR (R13)
-#****************************************************************************************************************
+# ****************************************************************************************************************
 
 		COUNT*	$$/R13
 
 # HERE IS THE PHILOSOPHY OF GUILDENSTERN:	ON EVERY APPEARANCE OR DISAPPEARANCE OF THE MANUAL THROTTLE
-# DISCRETE TO SELECT P67 OR P66 RESPECTIVELY:   ON EVERY APPEARANCE OF THE ATTITUDE-HOLD DISCRETE TO SELECT P66
+# DISCRETE TO SELECT P67 OR P66 RESPECTIVELY;   ON EVERY APPEARANCE OF THE ATTITUDE-HOLD DISCRETE TO SELECT P66
 # UNLESS THE CURRENT PROGRAM IS P67 IN WHICH CASE THERE IS NO CHANGE.
 
 GUILDEN		EXTEND			# IS UN-AUTO-THROTTLE DISCRETE PRESENT?
@@ -1172,7 +1174,7 @@ REDESMON	EXTEND
 ## Page 821
 		CCS	ZERLINA		#	N: 	HAS ZERLINA REACHED ZERO YET?
 		TCF	PREMON1		#		N:	DIMINISH ZERLINA, CONTINUE
-RESETRPT	CAF	BIT12		#		Y:	RESET RUPT. TERMINATE
+RESETRPT	CAF	BIT12		#		Y:	RESET RUPT, TERMINATE
 		EXTEND
 		WOR	CHAN13
 		TCF	TASKOVER
@@ -1227,7 +1229,7 @@ ELEACH		DEC	.00873		# 1/2 DEGREE
 		COUNT*	$$/F2DPS	# ****************************************
 
 DESCBITS	MASK	BIT7		# COME HERE FROM MARKRUPT CODING WITH BIT
-		CCS	A		#	7 OR 6 OF CHANNEL 16 IN A; BIT 7 MEANS
+		CCS	A		#	7 OR 6 OF CHANNEL 16 IN A: BIT 7 MEANS
 		CS	TWO		#	- RATE INCREMENT, BIT 6 + INCREMENT
 		AD	ONE
 		ADS	RODCOUNT
@@ -1377,9 +1379,9 @@ ROOTSTOR	DXCH	ROOTPS
 
 DERTABLL	ADRES	DERCOFN -3
 
-# *****************************************************************************************************************
+# ****************************************************************************************************************
 # TRASHY LITTLE SUBROUTINES
-# *****************************************************************************************************************
+# ****************************************************************************************************************
 
 INTPRETX	INDEX	WCHPHASE	# SET X1 ON THE WAY TO THE INTERPRETER
 		CS	TARGTDEX
@@ -1415,7 +1417,7 @@ TDISPSET	CA	TTF/8
 		ADS	TREDES
 		TC	Q
 
-1406P00		TC	POODOO
+1406POO		TC	POODOO
 		OCT	01406
 1406ALM		TC	ALARM
 		OCT	01406

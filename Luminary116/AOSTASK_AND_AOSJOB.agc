@@ -19,7 +19,8 @@
 ##                                              SETLOC   DAPS3
 ##                                              BANK   
 ##                                              COUNT*   $$/DAPAO
- 
+##		2017-03-10 RSB	Proofed comment text via 3-way diff vs
+##				Luminary 99 and 132 ... no problems found.
 
 ## Page 1475
 # PROGRAM NAME: 1/ACCS
