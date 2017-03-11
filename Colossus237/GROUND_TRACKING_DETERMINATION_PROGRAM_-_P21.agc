@@ -11,6 +11,8 @@
 ## Mod history: 2011-02-02 JL   Adapted from corresponding Colossus 249 file.
 ##		2016-12-31 RSB	Proofed comment text using octopus/ProoferComments,
 ##				and corrected errors found.
+##		2017-01-14 RSB	Corrected comment-errors located in diff'ing
+##				vs Colossus 249
 
 ## Page 447
 # GROUND TRACKING DETERMINATION PROGRAM P21
@@ -48,7 +50,7 @@
 # DECIMAL DISPLAY OF LAT,LONG,ALT
 # ERASABLE INITIALIZATION REQUIRED
 #
-# AX0      2DEC   4.652459653 E-5   RADIANS       $68-69 CONSTANTS"
+# AX0      2DEC   4.652459653 E-5   RADIANS       %68-69 CONSTANTS"
 #
 # -AY0     2DEC   2.147535898 E-5   RADIANS
 #

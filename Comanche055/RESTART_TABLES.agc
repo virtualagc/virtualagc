@@ -15,6 +15,9 @@
 ##		2009-05-21 RSB	Fixed value of 5.21SPOT.
 ##		2016-12-10 RSB	Proofed comments with octopus/ProoferComments
 ##				and fixed the errors found.
+##		2017-01-18 RSB	Fixed comment-text errors noted while diff'ing
+##				vs Colossus 249.
+##		2017-02-08 RSB	Comment-text fixes identified while proofing Artemis 72.
 ##
 ## The contents of the "Comanche055" files, in general, are transcribed
 ## from scanned documents.
@@ -36,7 +39,7 @@
 
 ## Page 211
 # RESTART TABLES
-# --------------
+# ------------------
 #
 # THERE ARE TWO FORMS OF RESTART TABLES FOR EACH GROUP.  THEY ARE KNOWN AS THE EVEN RESTART TABLES AND THE ODD
 # RESTART TABLES.  THE ODD TABLES HAVE ONLY ONE ENTRY OF THREE LOCATIONS WHILE THE EVEN TABLES HAVE TWO ENTRIES
@@ -518,7 +521,7 @@ SIZETAB		TC	1.2SPOT -12006
 #
 # OUTPUT:  PHASE TABLE AND TBASE TABLE UPDATED
 #
-# ERASABLE INITIALIZATION REQ'D:  NONE
+# ERASABLE INITIALIZATION REQ,D:  NONE
 ## Page 221
 # DEBRIS:  A,L,TEMPG
 

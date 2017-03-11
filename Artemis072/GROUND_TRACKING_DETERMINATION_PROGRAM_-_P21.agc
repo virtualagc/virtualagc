@@ -1,6 +1,6 @@
 ### FILE="Main.annotation"
 ## Copyright:	Public domain.
-## Filename:	GROUND_TRACKING_DETERMINATION_PROGRAM.agc
+## Filename:	GROUND_TRACKING_DETERMINATION_PROGRAM_-_P21.agc
 ## Purpose:	Part of the source code for Artemis (i.e., Colossus 3),
 ##		build 072.  This is for the Command Module's (CM) 
 ##		Apollo Guidance Computer (AGC), for 
@@ -15,6 +15,8 @@
 ## 		2009-09-05 JL	Fixed typos.
 ## 		2010-01-31 JL	Fixed build errors.
 ##		2010-02-20 RSB	Un-##'d this header.
+##		2017-02-05 RSB	Proofed comment text by diff'ing vs Comanche 55
+##				and fixed errors found.
 
 ## Page 455
 # GROUND TRACKING DETERMINATION PROGRAM P21
@@ -23,7 +25,7 @@
 # MOD NO - 1
 # MOD BY - N. M. NEVILLE
 #
-# FUNCTIONAL DESCRIPTION-
+# FUNCTIONAL DECRIPTION-
 #
 # 	TO PROVIDE THE ASTRONAUT DETAILS OF THE LM OR CSM GROUND TRACK WITHOUT
 # 	THE NEED FOR GROUND COMMUNICATION (REQUESTED BY DSKY).
@@ -42,7 +44,7 @@
 #
 # NORMAL EXIT MODES-
 #
-# 	ASTRONAUT REQUEST THROUGH DSKY TO TERMINATE PROGRAM V34E
+# 	ASTRONAUT REQUEST TROUGH DSKY TO TERMINATE PROGRAM V34E
 #
 # ALARM OR ABORT EXIT MODES-
 # 
@@ -60,7 +62,7 @@
 #
 # ERASABLE INITIALIZATION REQUIRED
 #
-#	AX0	 2DEC	4.652459653 E-5   RADIANS       $68-69 CONSTANTS"
+#	AX0	 2DEC	4.652459653 E-5   RADIANS       %68-69 CONSTANTS"
 #
 #	-AY0	 2DEC	2.147535898 E-5   RADIANS
 #

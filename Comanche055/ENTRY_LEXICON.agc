@@ -1,17 +1,21 @@
 ### FILE="Main.annotation"
-## Copyright:    Public domain.
-## Filename:     ENTRY_LEXICON.agc
-## Purpose:      Part of the source code for Comanche, build 055. It
-##               is part of the source code for the Command Module's
-##               (CM) Apollo Guidance Computer (AGC), Apollo 11.
-## Assembler:    yaYUL
-## Reference:    pp. 837-843
-## Contact:      Ron Burkey <info@sandroid.org>
-## Website:      http://www.ibiblio.org/apollo.
-## Mod history:  2009-05-12 RSB	Adapted from Colossus249 file of the same
+## Copyright:   Public domain.
+## Filename:    ENTRY_LEXICON.agc
+## Purpose:     Part of the source code for Comanche, build 055. It
+##              is part of the source code for the Command Module's
+##              (CM) Apollo Guidance Computer (AGC), Apollo 11.
+## Assembler:   yaYUL
+## Reference:   pp. 837-843
+## Contact:     Ron Burkey <info@sandroid.org>
+## Website:     http://www.ibiblio.org/apollo.
+## Mod history: 2009-05-12 RSB	Adapted from Colossus249 file of the same
 ##				name and Comanche 055 page images.
 ##		2016-12-11 RSB	Proofed comments with octopus/ProoferComments
 ##				and fixed the errors found.
+##		2017-01-08 RSB	Fixed comment errors detected in cross-diff vs
+##				Colossus 249.
+##		2017-01-22 RSB	Fixed comment errors detected in cross-diff vs
+##				Artemis 72.
 ##
 ## The contents of the "Comanche055" files, in general, are transcribed 
 ## from scanned documents. 
@@ -33,7 +37,7 @@
 
 ## Page 837
 # VARIABLE	DESCRIPTION				MAXIMUM VALUE *		COMPUTER NAME
-# --------	-----------				---------------		-------------
+# --------	-----------				------- -----		-------- ----
 # -
 # URT0		INITIAL TARGET VECTOR			2 (UNIT VECTOR)		= RTINIT
 # -
@@ -198,10 +202,10 @@
 
 ## Page 840
 # EXTRA COMPUTER ERASABLE LOCATIONS NOT SHOWN ON FLOW CHARTS
-# ----------------------------------------------------------
+# -----------------------------------------------------------
 #
 # VARIABLE	DESCRIPTION				MAXIMUM VALUE
-# --------	-----------				-------------
+# --------	-----------				------- -----
 #
 # GOTOADDR	ADDRESS SELECTED BY SEQUENCER
 #
@@ -244,7 +248,7 @@
 # -VREL		NEGATIVE VELOCITY REL TO ATMOSP		2 VSAT
 
 # COMPUTER SWITCHES					INITIAL STATE		CM/FLAGS = STATE +6
-# -----------------					-------------		-------------------
+# -------- --------					-------------		-------------------
 #
 # ENTRYDSP	DO ENTRY DISPLAY, IF SET		NON-BRANCH (1)		92D, BIT 13
 # GONEPAST	INDICATES OVERSHOOT OF TARGET		NON-BRANCH (0)		95D, BIT 10
@@ -307,13 +311,13 @@
 
 ## Page 842
 # CONVERSION FACTORS AND SCALING CONSTANTS
-# ----------------------------------------
+# ---------- ------- --- ------- ---------
 #
 # ATK	ANGLE IN RAD TO NM						3437.7468	NM/RAD
 # GS	NOMINAL G VALUE FOR SCALING					32.2		FPSS
 # HS	ATMOSPHERE SCALE HEIGHT						28500		FT
 # J	GRAVITY HARMONIC COEFFICIENT					.00162346	
-# KWE	EQUATORIAL EARTH RATE						1546.10168	FPS
+# KWE	EQUATORIAL EARTH RATE						1546.70168	FPS
 # MUE	EARTH GRAVITATIONAL CONSTANT					3.986032233 E14	CUBIC M/ SEC SEC
 # RE	EARTH RADIUS							21202900	FT
 # REQ	EARTH EQUATORIAL RADIUS						20925738.2	FT
@@ -328,7 +332,7 @@
 # (SEE SECTION 4 OF THE GSOP FOR SIGN CONVENTIONS.)
 #
 # VARIABLE	DESCRIPTION				MAXIMUM VALUE
-# --------	-----------				-------------
+# --------	-----------				------- -----
 #
 # QMAX		PREDICTED MAXIMUM ENTRY ACCEL		163.84 GS	N 60
 # VPRED		PREDICTED VELOCITY AT ALTITUDE		128 M/CENTISEC	N 60
@@ -351,15 +355,15 @@
 # DNRNGERR	DOWN RANGE ERROR			1 REVOLUTION	N 66
 #		(PREDANG - THETAH IN NM)
 # HDOT		ALTITUDE RATE				128 M/CENTISEC	N 68
-# QT		MINIMUM DRAG FOR UPCONTROL		805 FPSS	N 69
+# Q7		MINIMUM DRAG FOR UPCONTROL		805 FPSS	N 69
 # VL		EXIT VELOCITY FOR UP-CONTROL		2 VSAT		N 69
 
 ## Page 843
-# BODY ATTITUDE QUANTITIES (CM/POSE)
-# ----------------------------------
+# BODY ATTITUDE QUANTITIES  (CM/POSE)
+# -----------------------------------
 #
 # VARIABLE	DESCRIPTION				MAXIMUM VALUE
-# --------	-----------				-------------
+# --------	-----------				------- -----
 #  -
 # -VREL		NEGATIVE VELOCITY REL TO ATMOS.		2 VSAT
 # -

@@ -12,6 +12,7 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2016-12-20 MAS  Created from Aurora 12 (with much DAP stuff removed).
 ##              2017-01-15 MAS  Added setting of LASTIMER in T3RUPT.
+##		2017-02-09 RSB	Comment-text fixes identified in proofing Artemis 72
 
 # GROUNDRULE....DELTA T SHOULD NOT EXCEED 12000 (= 2 MINUTES)
 
@@ -205,7 +206,7 @@ WTABORT         TC      ABORT           # NO ROOM IN THE INN.
 OCT50001        OCT     50001
 
 
-# THE ENTRY TC WTLST2 JUST PRECEDING OCT  N  IS FOR T  LE TD LE T   -1.
+# THE ENTRY TO WTLST2 JUST PRECEDING OCT  N  IS FOR T  LE TD LE T   -1.
 #                                                    N           N+1
 #
 # (LE MEANS LESS THAN OR EQUAL TO).  AT ENTRY, C(A) = -(TD - T   + 1)

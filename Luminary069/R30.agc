@@ -1,10 +1,11 @@
+### FILE="Main.annotation"
 ## Copyright:   Public domain.
 ## Filename:    R30.agc
 ## Purpose:     The main source file for Luminary revision 069.
-##              It is part of the source code for the original release 
-##              of the source code for the Lunar Module's (LM) Apollo 
-##              Guidance Computer (AGC) for Apollo 10. The actual flown 
-##              version was Luminary 69 revision 2, which included a 
+##              It is part of the source code for the original release
+##              of the flight software for the Lunar Module's (LM) Apollo
+##              Guidance Computer (AGC) for Apollo 10. The actual flown
+##              version was Luminary 69 revision 2, which included a
 ##              newer lunar gravity model and only affected module 2.
 ##              This file is intended to be a faithful transcription, except
 ##              that the code format has been changed to conform to the
@@ -16,10 +17,12 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2016-12-13 MAS  Created from Luminary 99.
 ##              2016-12-14 MAS  Updated from comment-proofed Luminary 99 version.
+##		2017-01-18 RRB	Updated for Luminary 69.
+##		2017-01-28 RSB	Proofed comment text using octopus/prooferComments
+##				and fixed errors found.
+##		2017-02-08 RSB	Comment-text fixes discovered while proofing Artemis 72.
 
-## NOTE: Page numbers below have not yet been updated to reflect Luminary 69.
-
-## Page 712
+## Page 720
 # SUBROUTINE NAME:  V82CALL
 # MOD NO: 0								DATE: 16 FEB 67
 # MOD BY: RR BAIRNSFATHER						LOG SECTION:  R30
@@ -37,7 +40,7 @@
 #		SELECTED STATE VECTOR UPDATED BY THISPREC (OTHPREC).
 #		CALLS SR30.1 (WHICH CALLS TFFCONMU + TFFRP/RA) TO CALCULATE
 #			RPER (PERIGEE RADIUS), RAPO (APOGEE RADIUS), HPER (PERIGEE
-#			HEIGHT ABOVE LAUNCH PAD OR LUNAR LANDING SITE), HARD (APOGEE
+#			HEIGHT ABOVE LAUNCH PAD OR LUNAR LANDING SITE), HAPO (APOGEE
 #			HEIGHT AS ABOVE), TPER (TIME TO PERIGEE), TFF (TIME TO
 #			INTERSECT 300 KFT ABOVE PAD OR 35KFT ABOVE LANDING SITE).
 #		FLASH MONITOR V16N44 (HAPO, HPER, TFF).  TFF IS -59M59S IF IT WAS
@@ -71,7 +74,7 @@
 #		TFF	(-28) CS	CONTAINS NEGATIVE QUANTITY
 #		-TPER	(-28) CS	CONTAINS NEGATIVE QUANTITY
 #
-## Page 713
+## Page 721
 # ERASABLE INITIALIZATION REQUIRED:  STATE VECTOR.
 #
 # DEBRIS:	QPRET, RONE, VONE, TFF/RTMU, HPERMIN, RPADTEM, V82EMFLG.
@@ -110,7 +113,7 @@ V82GOFF		EXIT			# ALLOW ASTRONAUT TO SELECT VEHICLE
 V82GOFLP	CAF	TFFBANK		# MAJOR RECYCLE LOOP ENTRY
 		TS	EBANK
 		CAF	ZERO
-		TS	V82FLAGS	# ZERO FLAGS FOR TICKTEST, INHIBITS
+		TS	V82FLAGS	# ZERO FLAGS FOR TICKTEST. INHIBITS
 					# DECREMENTING OF TFF AND -TPER.
 		CAF	PRIO7
 		TC	FINDVAC		# V82GOFF1 WILL EXECUTE STATE VECTOR
@@ -119,7 +122,7 @@ V82GOFLP	CAF	TFFBANK		# MAJOR RECYCLE LOOP ENTRY
 
 		RELINT
 V82STALL	CAF	THREE		# STALL IN THIS LOOP AND WITHOLD V 16 N 44
-## Page 714
+## Page 722
 		MASK	V82FLAGS	# UNTIL STATE VECTOR UPDATE SETS ONE OF
 		CCS	A		# OUR FLAG BITS.
 		TC	FLAGGON		# EXIT FROM STALL LOOP.
@@ -168,7 +171,7 @@ BOTHSHIP	VLOAD			# MOVE RESULTS INTO TFFCONIC STORAGE AREAS
 			EARTHPAD
 		GOTO
 			MOONPAD
-## Page 715
+## Page 723
 THISSHIP	TC	INTPRET
 		CALL			# CALL STATE VECTOR UPDATE FOR THIS SHIP.
 			THISPREC
@@ -217,7 +220,7 @@ TICKTIFF	DLOAD	DAD		# (-TPER=0) TFF WAS COMPUTED.  TICK TFF.
 		TS	V82FLAGS	# INFORMS TICKTEST TO INCREMENT ONLY TFF.
 		TC	ENDOFJOB
 
-## Page 716
+## Page 724
 TICKTEST	CAF	BIT5		# THIS WAITLIST PROGRAM PERPETUATES ITSELF
 		MASK	EXTVBACT	# ONCE A SEC UNTIL BIT 5 OF EXTVBACT =0.
 		CCS	A
@@ -251,7 +254,7 @@ TPERTICK	CAF	1SEC
 		DAS	-TPER
 		TC	TASKOVER
 
-## Page 717
+## Page 725
 V82GON		EXIT			# AVERAGE G ON.  USE CURRENT STATE VECTOR
 					# FOR ORBITAL PARAMETER CALCULATIONS.
 		CAF	PRIO7		# LESS THAN LAMBERT
@@ -302,7 +305,7 @@ EARTHGON	CLEAR	DLOAD
 			RPAD
 V82GON2		STCALL	RPADTEM		# COMMON CODE FOR EARTH & MOON.
 			SR30.1
-## Page 718
+## Page 726
 		EXIT
 V82GON3		CAF	BIT5
 		MASK	EXTVBACT	# SEE IF ASTRONAUT HAS SIGNALLED TERMINATE
@@ -315,7 +318,7 @@ V82GON3		CAF	BIT5
 
 SPLRET		=	V82GON3
 
-## Page 719
+## Page 727
 # SUBROUTINE NAME: SR30.1
 # MOD NO: 0								DATE: 16 FEB 67
 # MOD BY: RR BAIRNSFATHER						LOG SECTION: R32
@@ -369,7 +372,7 @@ SPLRET		=	V82GON3
 #
 # DEBRIS:	QPRET, PDL, S2
 
-## Page 720
+## Page 728
 		COUNT*	$$/SR30S
 
 SR30.1		SETPD	STQ		# INITIALIZE PUSHDOWN LIST.
@@ -420,7 +423,7 @@ STORHAPO	STODL	HAPOX
 			+1
 		CALL			# IF HPER > MAXNM, SET HPER = 9999.9 NM.
 			MAXCHK
-## Page 721
+## Page 729
 STORHPER	STODL	HPERX		# STORE (RPER - RPADTEM) INTO HPERX.
 			MPAC 	+4
 		DSU	BPL		# HPERMIN AT (-29)M FOR EARTH, (-27)M MOON
@@ -450,8 +453,8 @@ MAXCHK		DSU	BPL		# IF C(MPAC) > 9999.9 NM. MPAC = 9999.9 NM
  +3		DLOAD	RVQ		# (USED BY P30 - P37 ALSO)
 			MAXNM
 
-MAXNM		2OCT	0106505603
+MAXNM		2OCT	01065 05603
 
-## Page 722
+## Page 730
 ## Empty page.
 

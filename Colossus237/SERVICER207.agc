@@ -11,6 +11,8 @@
 ## Mod history: 2011-02-28 JL	Adapted from corresponding Colossus 249 file.
 ##		2017-01-01 RSB	Proofed comment text using octopus/ProoferComments,
 ##				and fixed errors found.
+##		2017-01-18 RSB	Fixed comment-text errors noted while diff'ing
+##				vs Colossus 249.
 
 ## Page 770
 # PROGRAM NAME - PREREAD, READACCS, SERVICER, AVERAGE G.
@@ -49,7 +51,7 @@
 #                              2) TOTAL ACCUMULATED DELV VALUE (DVTOTAL) - SET TO ZERO.
 #                              3) AXIS VECTOR (AXIS) - SET TO (.5,0,0).
 #          NORMLIZE JOB SCHEDULED.
-#          READACCS TASH CALLED IN 2 SECONDS.
+#          READACCS TASK CALLED IN 2 SECONDS.
 
 
 #    NORMLIZE

@@ -12,6 +12,10 @@
 ##				same name, using Comanche055 page images.
 ##		2016-12-21 RSB	Proofed comment text using octopus/ProoferComments
 ##				and corrected the errors found.
+##		2017-01-15 RSB	Fixed comment-text errors identified by diff'ing
+##				against Colossus 249.
+##		2017-02-05 RSB	Back-ported comment corrections 
+##				identified while proofing Artemis 072.
 ##
 ## This source code has been transcribed or otherwise adapted from digitized
 ## images of a hardcopy from the MIT Museum.  The digitization was performed
@@ -124,7 +128,7 @@ AFAILP		CAF	NINE		# IF FAILURE IS PRESENT 1JET OPERATION
 CFAILP		CAF	TWELVE
 		TCF	TABPCOM +2
 		
-XLNNDX		DEC	0		# INDICES FOR TRANSLATION COMMANDS
+XLNNDX		DEC	0		# INDECES FOR TRANSLATION COMMANDS
 		DEC	3		# FOR USE IN TABLE LOOK UP
 		DEC	6
 		DEC	0
@@ -156,7 +160,7 @@ YWORD		CCS	TAU2		# CHECK FOR YAW COMMANDS
 		
 		CCS	RBDFAIL		# FLAG FOR B OR D QUAD FAILURES
 		TCF	BFAILY		# 0 = NO BD FAILURE
-		TCF	TABYCOM		# + - B QUAD FAILED
+		TCF	TABYCOM		# + = B QUAD FAILED
 		TCF	DFAILY		# - = D QUAD FAILED
 		TCF	TABYCOM
 		
@@ -608,7 +612,7 @@ RBLASTOK	CA	BLAST
 		
 ## Page 1054
 		DEC	-.333333	# = -1/3
-		DEC	-.500000	# = -1.2
+		DEC	-.500000	# = -1/2
 		DEC	-.999999	# = -1 (NEGMAX)
 NJET		DEC	0
 		DEC	.999999		# = +1 (POSMAX)

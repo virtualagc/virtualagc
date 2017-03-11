@@ -14,6 +14,8 @@
 ##		2010-01-26 JL	Updated header comments.
 ##		2010-01-31 JL	Fixed page number.
 ##		2010-02-20 RSB	Un-##'d this header.
+##		2017-02-08 RSB	Proofed comment text by diff'ing vs Comanche 55
+##				and/or octopus/ProoferComments as most-appropriate.
 
 ## Page 507
 		SETLOC	R31
@@ -178,7 +180,7 @@ HAVEBASE	BON	RTB		# SUBSEQUENT INTEGRATIONS
 			V37FLAG
 			GETRVN5
 			LOADTIME
-		STCALL	TDEC1		# AV G OFF, SET INTEG. OF CM
+		STCALL	TDEC1		# AV G OFF. SET INTEG. OF CM
 			INTSTALL
 		VLOAD	CLEAR
 			BASETHP
@@ -204,7 +206,7 @@ HAVEBASE	BON	RTB		# SUBSEQUENT INTEGRATIONS
 			RATT
 		STOVL	RONE
 			VATT
-		STODL	VONE		# GET SET FOR CONIC EXTRAP.,OTHER.
+		STODL	VONE		# GET SET FOR CONIC EXTRAP.,OTHER
 			TAT
 		BON	CALL
 			SURFFLAG

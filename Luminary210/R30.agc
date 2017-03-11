@@ -18,6 +18,7 @@
 ##				program comments.
 ##		2016-12-25 RSB	Comment-text proofed using ProoferComments
 ##				and corrected errors found.
+##		2017-02-08 RSB	Comment-text fixes discovered while proofing Artemis 72.
 
 ## Page 715
 # SUBROUTINE NAME:     V82CALL
@@ -110,7 +111,7 @@ V82GOFF		EXIT			# ALLOW ASTRONAUT TO SELECT VEHICLE
 V82GOFLP	CAF	TFFBANK		# MAJOR RECYCLE LOOP ENTRY
 		TS	EBANK
 		CAF	ZERO
-		TS	V82FLAGS	# ZERO FLAGS FOR TICKTEST, INHIBITS
+		TS	V82FLAGS	# ZERO FLAGS FOR TICKTEST. INHIBITS
 					# DECREMENTING OF TFF AND -TPER.
 		CAF	PRIO7
 		TC	FINDVAC		# V82GOFF1 WILL EXECUTE STATE VECTOR

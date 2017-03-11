@@ -15,6 +15,10 @@
 ##		2011-05-08 JL	Removed workaround.
 ##		2016-12-10 RSB	Proofed comments with octopus/ProoferComments
 ##				and fixed the errors found.
+##		2017-01-17 RSB	Fixed comment-text errors noted while diff'ing
+##				vs Colossus 249.
+##		2017-01-28 RSB	Back-ported some comment fixes I noticed while
+##				proofing Artemis 72.
 
 ## The contents of the "Comanche055" files, in general, are transcribed 
 ## from scanned documents. 
@@ -825,7 +829,7 @@ ALLSET		STOVL	TET
 #	GOFLASH
 #	GOTOPOOH
 #	S34/35.3
-#	S34.35.4
+#	S34/35.4
 #	VNPOOH
 
 S34/35.5	STQ	BON
@@ -1308,7 +1312,7 @@ INITVELX	SETPD	VLOAD
 #   NAME     MEANING						UNITS/SCALING/MODE
 #   +MGA     + MIDDLE GIMBAL ANGLE				REVOLUTIONS (+0) DP
 #   DELVLVC  DELTA VELOCITY VECTOR IN LV COORD.			METERS/CSEC (+7) VT
-#   MGLVFLAG INT FLAG - 0 IS +MGA COMPUTED, 1 IS DELVLVC COMP.	                BIT
+#   MGLVFLAG INT FLAG - 0 IS +MGA COMPUTED, 1 IS DELVLVC COMP.	      -         BIT
 #
 # .. CALLING SEQUENCE ..
 #	L 	CALL
@@ -1339,7 +1343,7 @@ MIDGIM		BON	BOFF
 			
 # COMPUTE +MGA IF AVFLAG AND COMPUTER HAVE OPPOSITE VALUES.
 
-GET+MGA		VLOAD	UNIT		# (PL 0D) V (+7) TO MPAC. UNITIZE UV (+1)
+GET+MGA		VLOAD	UNIT		# (PL 0D) V (+7) TO MPAC, UNITIZE UV (+1)
 		DOT	SL1		# DOT UV WITH Y(STABLE MEMBER) AND RESCALE
 			REFSMMAT +6	# FROM +2 TO +1 FOR ASIN ROUTINE
 		ARCSIN	BPL
@@ -1357,7 +1361,7 @@ MIDGIM1		BOFF
 			
 # COMPUTE DELVLVC IF AVFLAG AND COMPUTER HAVE SAME VALUES.
 			
-GET.LVC		VLOAD	UNIT		# (PL 6D) R (+29) IN MPAC. UNITIZE UR
+GET.LVC		VLOAD	UNIT		# (PL 6D) R (+29) IN MPAC, UNITIZE UR
 			RINIT
 		VCOMP			# U(-R)
 		STORE	18D		# U(-R) TO 18D
@@ -1370,7 +1374,7 @@ GET.LVC		VLOAD	UNIT		# (PL 6D) R (+29) IN MPAC. UNITIZE UR
 			0D		# DELTA V (+7) IN 0D
 		MXV	VSL1		# CONVERT FROM INER COOR TO LV COOR (+8)
 			6D		# AND SCALE +7 IN MPAC
-		STORE	DELVLVC		# STORE IN DELVLVC (+7(
+		STORE	DELVLVC		# STORE IN DELVLVC (+7)
 		SET	RVQ		# SET MGLVFLAG TO INDICATE LVC CALC
 			MGLVFLAG	# AND EXIT
 
@@ -1699,14 +1703,14 @@ R36PROG5	VLOAD	PDVL		#			-
 
 R36B		STOVL	00D		# UNIT HORIZONTAL IN FORWARD DIR. 00D
 			18D
-		DOT	VXSC		# _
+		DOT	VXSC		# -
 			12D		# U
 		VSL2			#  L
 		BVSU	UNIT
 		UNIT
 		PUSH	DOT		# LOS PROJECTED INTO HORIZONTAL  12D
 			00D		# PLANE
-		SL1	ARCCOS		#              _   _
+		SL1	ARCCOS		#              -   -
 		STOVL	RTHETA		# PSI = ARCCOS(U . U )
 		VXV	DOT		#               A   L
 			00D

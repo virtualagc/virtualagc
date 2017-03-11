@@ -14,8 +14,9 @@
 ## Mod history:	06/08/03 RSB.	Began transcribing.
 ##		05/14/05 RSB	Corrected website reference above
 ##		2017-01-06 RSB	Page numbers now agree with those on the
-##				original harcopy, as opposed to the PDF page
+##				original hardcopy, as opposed to the PDF page
 ##				numbers in 1701.pdf.
+##		2017-02-28 RSB	Proofed comment text using octopus/ProoferComments.
 
 ## Page 1462
 		EBANK=	NO.UJETS

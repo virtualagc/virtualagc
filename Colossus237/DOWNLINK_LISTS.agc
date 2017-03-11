@@ -15,6 +15,8 @@
 ##				and corrected errors found.
 ##		2017-01-08 RSB	Fixed comment errors detected in cross-diff vs
 ##				Colossus 249.
+##		2017-01-21 RSB	Back-ported comment error fixes detected in diff'ing
+##				Artemis 72 vs Comanche 55.
 
 ## Page 165
 
@@ -25,9 +27,9 @@
 		EBANK=	DNTMBUFF
 
 # SPECIAL DOWNLINK OP CODES
-#		OP CODE	ADDRESS (EXAMPLE) SENDS..     BIT 15  BITS 14-12 BITS 11
+#		OP CODE	ADDRESS(EXAMPLE)  SENDS..     BIT 15  BITS 14-12 BITS 11
 #									      -0
-#		------ -----------	----------    ------  ---------- -------
+#		------ ----------	----------    ------  ---------- -------
 #									      --
 #		1DNADR TIME2		(2 AGC WDS)	0	  0	 ECADR
 #		2DNADR TEPHEM		(4 AGC WDS)	0	  1	 ECADR

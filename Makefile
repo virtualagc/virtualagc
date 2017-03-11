@@ -1,4 +1,4 @@
-# Copyright 2003-2007,2009-2010,2016 Ronald S. Burkey <info@sandroid.org>
+# Copyright 2003-2007,2009-2010,2016,2017 Ronald S. Burkey <info@sandroid.org>
 #
 # This file is part of yaAGC.
 #
@@ -155,6 +155,8 @@
 #				same operating systems.
 #		2016-11-18 RSB	Removed yaACA2 from FreeBSD build.
 #		2016-12-28 RSB	Added RETREAD44 to the mission list.
+#		2017-02-04 RSB	Added SuperJob to the mission list.
+#		2017-03-03 RSB	Added LUM99R2 to the list of missions.
 #
 # The build box is always Linux for cross-compiles.  For native compiles:
 #	Use "make MACOSX=yes" for Mac OS X.
@@ -361,7 +363,8 @@ BUILD = $(MAKE) PREFIX=$(PREFIX) NVER=$(NVER) CFLAGS="$(CFLAGS)" CURSES="$(CURSE
 # List of mission software directories to be built.
 MISSIONS = Validation Luminary131 Colossus249 Comanche055 
 MISSIONS += Luminary099 Artemis072 Colossus237 Solarium055
-MISSIONS += Aurora12 Sunburst120 Luminary210 Retread44
+MISSIONS += Aurora12 Sunburst120 Luminary210 Retread44 Luminary069
+MISSIONS += SuperJob LUM99R2
 export MISSIONS
 
 # Missions needing code::blocks project files.

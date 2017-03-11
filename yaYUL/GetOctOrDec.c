@@ -21,6 +21,9 @@
   Purpose:      Interprets a field as a decimal or octal number.
   Mod History:  04/25/03 RSB   Split off from Parse2DEC.c.  Added a 
                                bunch of checking to it.
+                01/28/17 MAS   Added support for implicit decimals
+                               (numbers are automatical decimal if they
+                               have an 8 or a 9)
 */
 
 #include "yaYUL.h"
@@ -34,6 +37,7 @@ int
 GetOctOrDec(const char *s, int *Value)
 {
   const char *ss;
+  int has_8_or_9 = 0;
 
   // Well, let's see if this is an octal number.
   ss = s;
@@ -58,10 +62,12 @@ GetOctOrDec(const char *s, int *Value)
     ss++;
 
   for (; *ss; ss++)
-    if (*ss < '0' || *ss > '9')
+    if (*ss == '8' || *ss == '9')   
+      has_8_or_9 = 1;
+    else if (*ss < '0' || *ss > '9') 
       break;
 
-  if (*ss == 'D' && ss[1] == 0 && ss != s)
+  if ((*ss == 'D' && ss[1] == 0 && ss != s) || (has_8_or_9 && ss[0] == 0))
     {
       // It is, it is!
       sscanf(s, "%d", Value);

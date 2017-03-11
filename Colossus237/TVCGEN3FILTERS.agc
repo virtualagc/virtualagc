@@ -11,6 +11,8 @@
 ## Mod history: 2011-03-12 JL	Adapted from corresponding Colossus 249 file.
 ##		2017-01-01 RSB	Proofed comment text using octopus/ProoferComments,
 ##				and fixed errors found.
+##		2017-01-20 RSB	Fixed comment-text errors noted while diff'ing
+##				vs Colossus 249.
 
 ## Page 958
 # PROGRAM NAME.... GEN3DAP FILTERS, CONSISTING OF NP0NODE, NP1NODE, NY0NODE, NY1NODE, ETC.
@@ -39,7 +41,7 @@
 #                    *****************************************           *
 #                    *                                       *           *
 #                    *              -1        -2        -3   *           *
-#       EP = ERRBTMP *    AP0 + AP1 Z   + AP2 Z   + AP3 Z     *   NP0          NPD = CMDTMP  **
+#       EP = ERRBTMP *    APO + AP1 Z   + AP2 Z   + AP3 Z     *   NPO          NPD = CMDTMP  **
 #      ***************  -----------------------------------  **********( X )*********************
 #                    *              -1        -2        -3   *                               **
 #                    *    1  + BP1 Z   + BP2 Z   + BP3 Z     *
@@ -54,7 +56,7 @@
 #                   *****************************************           *
 #                   *                                       *           *
 #                   *              -1        -2        -3   *           *
-#      EY = ERRBTMP *    AY0 + AY1 Z   + AY2 Z   + AY3 Z     *   NY0          NYP = CMDTMP  **
+#      EY = ERRBTMP *    AYO + AY1 Z   + AY2 Z   + AY3 Z     *   NY0          NYP = CMDTMP  **
 #     ***************  -----------------------------------  **********( X )*********************
 #                   *              -1        -2        -3   *                               **
 #                   *    1  + BY1 Z   + BY2 Z   + BY3 Z     *
@@ -68,8 +70,8 @@
 #          NPD = (B+4) KPGEN3 NP0                            NYD = (B+4) KYGEN3 NY0
 #          NP0 = AP0 EP	          +4(Z-1) NP1                NY0 = AY0 EY           +4(Z-1) NY1
 #          NY1 = AP1 EP - BP1 NP0 + (Z-1) NP2                NY1 = AY1 EY - BY1 NY0 + (Z-1) NY2
-#          NF2 = AP2 EP - BP2 NP0 + (Z-1) NP3                NY2 = AY2 EY - BY2 NY0 + (Z-1) NY3
-#          NF3 = AP3 EP - BP3 NP0                            NY3 = AY3 EY - BY3 NY0
+#          NP2 = AP2 EP - BP2 NP0 + (Z-1) NP3                NY2 = AY2 EY - BY2 NY0 + (Z-1) NY3
+#          NP3 = AP3 EP - BP3 NP0                            NY3 = AY3 EY - BY3 NY0
 
 
 #      FILTER INPUTS EP AND EY ARE PICKED UP FROM REGULAR LEM-ON CODING AT ERRBTMP  (UPPER WORD ONLY),  THUS ARE

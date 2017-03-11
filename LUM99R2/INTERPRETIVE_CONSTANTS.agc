@@ -1,0 +1,70 @@
+### FILE="Main.annotation"
+## Copyright:	Public domain.
+## Filename:	INTERPRETIVE_CONSTANT.agc
+## Purpose: 	Part of the source code for Luminary 1A build 099.
+##		It is part of the source code for the Lunar Module's (LM)
+##		Apollo Guidance Computer (AGC), for Apollo 11.
+## Assembler:	yaYUL
+## Contact:	Ron Burkey <info@sandroid.org>.
+## Website:	www.ibiblio.org/apollo.
+## Pages:	1100-1101
+## Mod history:	2009-05-25 RSB	Adapted from the corresponding 
+##				Luminary131 file, using page 
+##				images from Luminary 1A.
+##		2016-12-17 RSB	Proofed text comments with octopus/ProoferComments
+##				but no errors found.
+##		2017-03-03 RSB	Snapshot of Luminary 99 Rev 1. 
+
+## Page 1100
+		SETLOC	INTPRET1
+		BANK
+
+		COUNT*	$$/ICONS
+DP1/4TH		2DEC	.25
+
+UNITZ		2DEC	0
+
+UNITY		2DEC	0
+
+UNITX		2DEC	.5
+
+ZEROVECS	2DEC	0
+
+		2DEC	0
+		
+		2DEC	0
+
+DPHALF		=	UNITX
+DPPOSMAX	OCT	37777
+		OCT	37777
+
+## Page 1101
+# INTERPRETIVE CONSTANTS IN THE OTHER HALF-MEMORY
+
+		SETLOC	INTPRET2
+		BANK
+
+		COUNT*	$$/ICONS
+ZUNIT		2DEC	0
+
+YUNIT		2DEC	0
+
+XUNIT		2DEC	.5
+
+ZEROVEC		2DEC	0
+
+		2DEC	0
+		
+		2DEC	0
+		
+		OCT	77777		# -0, -6, -12 MUST REMAIN IN THIS ORDER
+DFC-6		DEC	-6
+DFC-12		DEC	-12
+LODPMAX		2OCT	3777737777	# THESE TWO CONSTANTS MUST REMAIN
+
+LODPMAX1	2OCT	3777737777	# ADJACENT AND THE SAME FOR INTEGRATION
+
+ZERODP		=	ZEROVEC
+HALFDP		=	XUNIT
+
+

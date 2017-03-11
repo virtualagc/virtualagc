@@ -8,13 +8,9 @@
 #		2016-10-05 JL	Pass --blk2 to yaYUL.
 #		2016-10-05 JL	Pass --syntax to yaYUL for proofing.
 #		2016-10-21 RSB	Changed to "production" settings.
+#		2017-01-30 MAS	Removed cruft and changed EXTRA_YAYUL_ARGS to +=
 
 BASENAME=Aurora12
-
-# Disable binsource checking until ready.
-#NO_BINSOURCE=yes
-
-# Only do syntax checking until proofing complete.
-EXTRA_YAYUL_ARGS=--blk2 --flip=7
+EXTRA_YAYUL_ARGS+=--blk2 --flip=7
 
 include ../Makefile.inc

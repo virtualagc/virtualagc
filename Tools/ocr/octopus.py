@@ -25,13 +25,15 @@
 # likely need to be modified for use with other scripts.
 
 import os.path
+from os import environ
 import numpy as np
 import cv2
 import sys
 import math
 import argparse
 import functools
-import PIL
+from PIL import Image
+import traceback
 from pytesseract import image_to_string
 
 parser = argparse.ArgumentParser(description='Prepare octal pages of AGC program listings for OCR')
@@ -53,11 +55,28 @@ group.add_argument('--luminary116', help="Perform LUMINARY 116 processing (for o
 group.add_argument('--solarium55', help="Perform SOLARIUM 55 processing", action="store_true")
 group.add_argument('--colossus237', help="Perform COLOSSUS 237 processing", action="store_true")
 group.add_argument('--artemis72', help="Perform COLOSSUS 237 processing", action="store_true")
+group.add_argument('--simAP11ROPE', help="Perform AP11ROPE Digital Simulation processing", action="store_true")
+group.add_argument('--yul1', help="Perform processing for YUL pages 3-24", action="store_true")
+group.add_argument('--yul2', help="Perform processing for YUL pages 25-40", action="store_true")
+group.add_argument('--yul3', help="Perform processing for YUL pages 41-152", action="store_true")
+group.add_argument('--yul4', help="Perform processing for YUL pages 153-264", action="store_true")
+group.add_argument('--yul5', help="Perform processing for YUL pages 265-331", action="store_true")
+group.add_argument('--yul6', help="Perform processing for YUL pages 332-384", action="store_true")
+group.add_argument('--yul7', help="Perform processing for YUL pages 385-481", action="store_true")
+group.add_argument('--yul8', help="Perform processing for YUL pages 482-575", action="store_true")
+group.add_argument('--yul9', help="Perform processing for YUL pages 576-671", action="store_true")
+group.add_argument('--yul10', help="Perform processing for YUL pages 672-730", action="store_true")
+group.add_argument('--luminary131', help="Perform LUMINARY 131 (Eyles) processing", action="store_true")
+group.add_argument('--luminary131A', help="Perform LUMINARY 131 (Eyles, lighter) processing", action="store_true")
 
 args = parser.parse_args()
 if not os.path.isfile(args.input_file):
 	print("Cannot open file", args.input_file)
 	sys.exit(1)
+
+octcrop = ""
+if 'OCTCROP' in environ:
+	octcrop = environ['OCTCROP']
 
 img = cv2.imread(args.input_file)
 
@@ -81,6 +100,24 @@ elif args.luminary210A:
     # Difference the original L channel with the thickened lines (which is inverted)
     diff = blurred + thickend_lines
     thresh = cv2.adaptiveThreshold(blurred, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, 201, 11)
+elif args.luminary131:
+    blurred = cv2.GaussianBlur(l_channel, (5,5), 0)
+    # Isolate the lines by eroding very strongly horizontally
+    lines_only = cv2.erode(~blurred, np.ones((1,21), np.uint8), iterations=1)
+    # Beef them up a bit by vertically dilating
+    thickend_lines = cv2.dilate(lines_only, np.ones((3,1), np.uint8), iterations=1)
+    # Difference the original L channel with the thickened lines (which is inverted)
+    diff = blurred + thickend_lines
+    thresh = cv2.adaptiveThreshold(blurred, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, 201, 11)
+elif args.luminary131A:
+    blurred = cv2.GaussianBlur(l_channel, (5,5), 0)
+    # Isolate the lines by eroding very strongly horizontally
+    lines_only = cv2.erode(~blurred, np.ones((1,21), np.uint8), iterations=1)
+    # Beef them up a bit by vertically dilating
+    thickend_lines = cv2.dilate(lines_only, np.ones((3,1), np.uint8), iterations=1)
+    # Difference the original L channel with the thickened lines (which is inverted)
+    diff = blurred + thickend_lines
+    thresh = cv2.adaptiveThreshold(blurred, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, 141, 11)
 elif args.luminary69 or args.aurora12 or args.sunburst120:
     blurred = cv2.GaussianBlur(l_channel, (5,5), 0)
     # Isolate the lines by eroding very strongly horizontally
@@ -140,8 +177,47 @@ elif args.artemis72:
     lines_only = cv2.erode(~blurred, np.ones((1,21), np.uint8), iterations=1)
     diff = blurred + lines_only
     _,thresh = cv2.threshold(diff, 240, 255, cv2.THRESH_BINARY)
+elif args.simAP11ROPE:
+    _,_,r_channel = cv2.split(img)
+    blurred = cv2.GaussianBlur(r_channel, (7,7), 0)
+    # Isolate the bands by eroding very strongly horizontally
+    lines_only = cv2.erode(~blurred, np.ones((1,51), np.uint8), iterations=1)
+    # Difference the original R channel with the isolated bands
+    diff = blurred + lines_only
+    _,thresh = cv2.threshold(diff, 245, 255, cv2.THRESH_BINARY)
+elif args.yul1:
+    print('--yul1 not yet supported')
+elif args.yul2:
+    print('--yul2 not yet supported')
+elif args.yul3:
+    blurred = cv2.GaussianBlur(l_channel, (5,5), 0)
+    # Isolate the lines by eroding very strongly horizontally
+    lines_only = cv2.erode(~blurred, np.ones((1,21), np.uint8), iterations=1)
+    # Beef them up a bit by vertically dilating
+    thickend_lines = cv2.dilate(lines_only, np.ones((3,1), np.uint8), iterations=1)
+    # Difference the original L channel with the thickened lines (which is inverted)
+    diff = blurred + thickend_lines
+    thresh = cv2.adaptiveThreshold(blurred, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, 201, 11)
+    thresh = thresh[0:-100,80:-80]
+elif args.yul4:
+    print('--yul4 not yet supported')
+elif args.yul5:
+    print('--yul5 not yet supported')
+elif args.yul6:
+    print('--yul6 not yet supported')
+elif args.yul7:
+    print('--yul7 not yet supported')
+elif args.yul8:
+    print('--yul8 not yet supported')
+elif args.yul9:
+    print('--yul9 not yet supported')
+elif args.yul10:
+    print('--yul10 not yet supported')
 else:
     raise RuntimeError("Unknown program type selected")
+
+if octcrop != "":
+    exec(octcrop)
 
 # Eliminate random flecks. We do this by finding all the contours in the image
 # and taking a look at their relative locations and size. We'll be building up
@@ -254,6 +330,7 @@ if args.comments:
         # Locate the header in the boxes. It'll be towards the front (hopefully exactly the front), and
         # pretty wide
         header_box = None
+        header_start = 0
         for i,c in enumerate(contours):
             box = cv2.boundingRect(c)
             if (box[2] > 700):
@@ -272,6 +349,9 @@ if args.comments:
                 header_box[1] = min(box[1], header_box[1])
                 header_box[2] = rightmost-header_box[0]
                 header_box[3] = bottommost-header_box[0]
+
+        if header_box is None:
+            raise RuntimeError('Unable to find any sort of header')
 
         # Merge the bounding box we found with the rest on the line (needed for YUL listings since the
         # dilation above doesn't quite bleed everything together)
@@ -336,7 +416,7 @@ if args.comments:
                     # the second word of a multi-word pseudo op (2DEC, 2CADR, etc.). Try to determine whether or not
                     # we've got such a line.
                     if line_num > 2:
-                        pil_img = PIL.Image.fromarray(target_image[y-1:y+h+1, x-5:x+column_width*6])
+                        pil_img = Image.fromarray(target_image[y-1:y+h+1, x-5:x+column_width*6])
                         txt = image_to_string(pil_img, config='-l eng -psm 6 -c tessedit_char_whitelist=CARP01234567')
                         if txt and (txt[0] == 'C' or txt[0] == '0'):
                             const_second_word = True
@@ -396,7 +476,9 @@ if args.comments:
         # else:
         #     final_image = inside_header
         final_image = inside_header
-    except:
+    except Exception as e:
+        print('Encountered an unexpected error, falling back on --no-crop')
+        traceback.print_exc()
         final_image = result
 
 

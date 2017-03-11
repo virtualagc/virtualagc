@@ -11,6 +11,8 @@
 ## Mod history: 2011-04-17 JL	Adapted from corresponding Colossus 249 file.
 ##		2017-01-01 RSB	Proofed comment text using octopus/ProoferComments,
 ##				and fixed errors found.
+##		2017-01-15 RSB	Fixed comment-text errors identified by diff'ing
+##				against Colossus 249.
 
 ## Page 1413
 		BANK	14
@@ -24,7 +26,7 @@ KEYRUPT1	TS	BANKRUPT
 		TC	LODSAMPT	# TIME IS SNATCHED IN RUPT FOR NOUN 65.
 		CAF	LOW5
 		EXTEND
-		RAND	MNKEYIN		# CHECK IF KEYS 5M-IM ON
+		RAND	MNKEYIN		# CHECK IF KEYS 5M-1M ON
 KEYCOM		TS	RUPTREG4
 		CS	FLAGWRD5
 		MASK	BIT15

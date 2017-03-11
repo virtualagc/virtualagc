@@ -11,6 +11,10 @@
 ## Mod history: 2011-04-06 JL	Adapted from corresponding Colossus 249 file.
 ##		2017-01-01 RSB	Proofed comment text using octopus/ProoferComments,
 ##				and fixed errors found.
+##		2017-01-15 RSB	Fixed comment-text errors identified by diff'ing
+##				against Colossus 249.
+##		2017-02-05 RSB	Back-ported comment corrections 
+##				identified while proofing Artemis 072.
 
 ## Page 1007
 		BANK	21
@@ -174,7 +178,7 @@ PYTABLE		OCT	0		#  0     0            0
 PJETS		OCT	1417
 YJETS		OCT	6360
 
-# TABLE LOOK UP FOR YAW COMMANDS WTIH AND WITHOUT X-TRANSLATION AND AC QUAD FAILURES PRESENT
+# TABLE LOOK UP FOR YAW COMMANDS WITH AND WITHOUT X-TRANSLATION AND AC QUAD FAILURES PRESENT
 # BITS 11, 12 CONTAIN THE NUMBER OF YAW JETS USED TO PERFORM THE YAW ROTATION
 
 TABYCOM		INDEX	XNDX2
@@ -584,7 +588,7 @@ RBLASTOK	CA	BLAST
 		TCF	ASMBLWR
 ## Page 1022
 		DEC	-.333333	# = -1/3
-		DEC	-.500000	# = -1.2
+		DEC	-.500000	# = -1/2
 		DEC	-.999999	# = -1 (NEGMAX)
 NJET		DEC	0
 		DEC	.999999		# = +1 (POSMAX)
@@ -761,7 +765,7 @@ T6SETUP		CAF	ZERO		# BRANCH INDEX FOR ROLL
 		CS	BLAST
 		AD	BLAST1
 		EXTEND
-		BZMF	DXCHT12		# T1 OR T2
+		BZMF	DXCHT12		# T1 GR T2
 CHECKT23	CS	BLAST1
 		AD	BLAST2
 		EXTEND

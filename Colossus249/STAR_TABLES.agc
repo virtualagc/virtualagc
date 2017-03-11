@@ -12,6 +12,10 @@
 ##		2017-01-06 RSB	Page numbers now agree with those on the
 ##				original harcopy, as opposed to the PDF page
 ##				numbers in 1701.pdf.
+##		2017-01-20 RSB	Cross-diff'd comment text (not whitespace)
+##				vs the already-proofed corresponding Colossus
+##				237 and Comanche 55 source-code files
+##				but no errors found.
 ##
 ## The contents of the "Colossus249" files, in general, are transcribed 
 ## from a scanned copy of the program listing.  Notations on this

@@ -1,8 +1,8 @@
 # Copyright:    Public domain.
 # Filename:     YUL_SYSTEM_ASSEMBLER__END_PASS_1.mitigus
-# Purpose:      Part of the source code for YUL (revision 9),
+# Purpose:      Part of the source code for YUL (revision 9).
 # Assembler:    TBD
-# Contact:      Ron Burkey <info@sandroid.org>.
+# Contact:      Jim Lawton <jim.lawton@gmail.com>
 # Website:      https://www.ibiblio.org/apollo/index.html
 # Page scans:   https://archive.org/details/yulsystemsourcec00hugh
 # Pages:        223-224
@@ -39,13 +39,13 @@ R0003   JSOCTL
 
 
 
-R2726              FINALIZING SEQUENCE FOR PASS 1.  CALLS ..GET TAPE.. TWICE TO ENSURE THAT END SYLT AND EOFRI ARE 
+R2726              FINALIZING SEQUENCE FOR PASS 1.  CALLS ..GET TAPE.. TWICE TO ENSURE THAT END SYLT AND EOFRI ARE
 R2728   PROPERLY RECEIVED, FINISHES AND TRANSMITS THE LAST POPO BUFFER, SNATCHES ANOTHER WORKER FOR EXTRA COPIES IF RE-
 R2729   QUIRED, WAITS FOR THE PARAPROGRAMS TO DIE, AND LOADS PASS 1.5 TOGETHER WITH THE GENERAL PART OF PASS 2.
 
  27305  FINISH P1  TX           P1 MASKS      -             Z,MXR
  2731              TS           Z,SC          Z,S3          GET TAPE       C
- 2732              TS           Z,SC          Z,S3          GET TAPE       C    THESE SHOULD MAKE EOF RETURN VIA S3.    
+ 2732              TS           Z,SC          Z,S3          GET TAPE       C    THESE SHOULD MAKE EOF RETURN VIA S3.
 
  27332             LA           HEALTH        ZERO          C,+4                LAST CARD PROCESSED SHOULD BE "END OF",
  273325            NA           END YUL +1    END YUL +2    DISASTER            EXCEPT POSSIBLY IN BAD MERGE, IN WHICH

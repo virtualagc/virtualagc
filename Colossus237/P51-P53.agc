@@ -12,6 +12,8 @@
 ##		2011-04-17 JL	Removed temporary line.
 ##		2016-12-31 RSB	Proofed comment text using octopus/ProoferComments,
 ##				and corrected errors found.
+##		2017-01-18 RSB	Fixed comment-text errors noted while diff'ing
+##				vs Colossus 249.
 
 ## Page 690
 # PROGRAM NAME- PROG52                                                                   DATE- NOV 30, 1966
@@ -1263,11 +1265,11 @@ CALCSMSC	DLOAD	DMP
 #             X  = U  *U + V  *V + W  *W
 #                   B1  A   B1  A   B1  A
 
-#             _        _       _       _            (REFSMMAT)
+#             -        -       -       -            (REFSMMAT)
 #             Y  = U  *U + V  *V + W  *W
 #                   B2  A   B2  A   B2  A
 
-#             _        _       _       _
+#             -        -       -       -
 #             Z  = U  *U + V  *V + W  *W
 #                   B3  A   B3  A   B3  A
 

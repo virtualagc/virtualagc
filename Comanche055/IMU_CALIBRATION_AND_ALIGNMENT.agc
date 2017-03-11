@@ -9,7 +9,7 @@
 ## Contact:     Onno Hommes <ohommes@cmu.edu>
 ## Website:     http://www.ibiblio.org/apollo.
 ## Mod history: 2009-05-10 OH	Batch 1 Assignment Comanche Transcription
-##		2009-05-20 RSB	Corrections: P00D00H -> P00DOOH, definition
+##		2009-05-20 RSB	Corrections: P00D00H -> POODOOH, definition
 ##				of 25DECML fixed.
 ##		2009-05-23 RSB	At SPECSTS, corrected to PRIO22.
 ##		2010-08-28 JL	Fixed indentation.
@@ -17,6 +17,8 @@
 ##		2011-05-17 JL	Removed all SBANK= workarounds.
 ##		2016-12-10 RSB	Proofed comments with octopus/ProoferComments
 ##				and fixed the errors found.
+##		2017-01-14 RSB	Fixed comment-text errors located while 
+##				diff'ing with Colossus 249.
 
 ## The contents of the "Comanche055" files, in general, are transcribed 
 ## from scanned documents. 
@@ -471,7 +473,7 @@ FINETIME	INHINT			# RETURNS WITH INTERRUPT INHIBITED
 #
 # NORMAL EXIT
 #
-# DRIFT TESTS.  LENGTHOT GOES TO ZERO-RETURN TO IMU PERF TEST2 CONTROL
+# DRIFT TESTS-  LENGTHOT GOES TO ZERO-RETURN TO IMU PERF TEST2 CONTROL
 # GYROCOMPASS-MANY, SEE THE LISTING
 #
 # ALARMS
@@ -869,7 +871,7 @@ GTSCPSS		CA	FLAGWRD1	# CALLED BY V37
 ## Page 443
 		EXTEND
 		BZF	GTSCPSSA
-		TC	P00DOO
+		TC	POODOO
 		OCT	1521		# NODO ALARM FOR P01 - P11 ALREADY DONE
 		
 GTSCPSSA	CAF	ONE

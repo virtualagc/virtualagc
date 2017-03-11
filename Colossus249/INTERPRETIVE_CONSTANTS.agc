@@ -12,6 +12,11 @@
 ##		2017-01-06 RSB	Page numbers now agree with those on the
 ##				original harcopy, as opposed to the PDF page
 ##				numbers in 1701.pdf.
+##		2017-01-14 RSB	Cross-diff'd comment text (not whitespace)
+##				vs the already-proofed corresponding Colossus
+##				237 and Comanche 55 source-code files
+##				and corrected errors found.  No differences
+##				remain.
 ##
 ## The contents of the "Colossus249" files, in general, are transcribed 
 ## from a scanned copy of the program listing.  Notations on this
@@ -72,7 +77,7 @@ ZEROVEC		2DEC	0
 		OCT	77777		# -0, -6, -12 MUST REMAIN IN THIS ORDER
 DFC-6		DEC	-6
 DFC-12		DEC	-12
-LODPMAX		2OCT	3777737777	# THESE TWO CONSTANTS MUS REMAIN
+LODPMAX		2OCT	3777737777	# THESE TWO CONSTANTS MUST REMAIN
 LODPMAX1	2OCT	3777737777	# ADJACENT AND THE SAME FOR INTEGRATION
 
 ZERODP		=	ZEROVEC

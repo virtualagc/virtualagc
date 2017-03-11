@@ -14,7 +14,8 @@
 ##		2011-01-06 JL	Fixed pseudo-label indentation.
 ##		2016-12-18 RSB	Proofed text comments with octopus/ProoferComments
 ##				and corrected the errors found.
-##
+##		2017-03-10 RSB	Comment-text fixes noted in proofing Luminary 116.
+
 ## This source code has been transcribed or otherwise adapted from
 ## digitized images of a hardcopy from the MIT Museum.  The digitization
 ## was performed by Paul Fjeld, and arranged for by Deborah Douglas of
@@ -142,7 +143,7 @@ STOPRATE	CAF	EBANK6
 		TC	Q
 
 # SUBROUTINE NAME:	ALLCOAST
-# WILL BE CALLED BY FRESH STARTS AND ENGINE OFF ROUTINES.		-
+# WILL BE CALLED BY FRESH STARTS AND ENGINE OFF ROUTINES.		.
 #
 # CALLING SEQUENCE:	(SAME AS ABOVE)
 #

@@ -12,6 +12,8 @@
 ##				same name, using Comanche055 page images.
 ##		2016-12-21 RSB	Proofed comment text using octopus/ProoferComments
 ##				and corrected the errors found.
+##		2017-01-18 RSB	Fixed comment-text errors noted while diff'ing
+##				vs Colossus 249.
 ##
 ## This source code has been transcribed or otherwise adapted from digitized
 ## images of a hardcopy from the MIT Museum.  The digitization was performed
@@ -367,7 +369,7 @@ SINNODI		=	8D		# 2		SIN(NODI)
 DVECTR		=	8D		# 6		D VECTOR MOON
 CVECTR		=	8D		# 6		C VECTR MOON
 504AZ		=	18D		# 2		AZ
-TIMSUBM		=	14D		# 3		TIME SUB M (MOON) T+10 IN GETAZ
+TIMSUBM		=	14D		# 3		TIME SUB M (MOON) T+T0 IN GETAZ
 504LPL		=	14D		# 6		L OR LP VECTOR
 AVECTR		=	20D		# 6		A VECTOR (MOON)
 BVECTR		=	26D		# 6		B VECTOR (MOON)

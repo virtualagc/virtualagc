@@ -13,6 +13,8 @@
 ##		2010-08-28 JL	Fixed indentation.
 ##		2016-12-10 RSB	Proofed comments with octopus/ProoferComments
 ##				and fixed the errors found.
+##		2017-01-18 RSB	Fixed comment-text errors noted while diff'ing
+##				vs Colossus 249.
 ##
 ## The contents of the "Comanche055" files, in general, are transcribed 
 ## from scanned documents. 
@@ -165,7 +167,7 @@ MKVACFND	AD	TWO			# ADDRESS OF VAC AREA
 #
 #	1)	BIT9 OPTMODES SET TO 0
 #	2)	OPTIND SET TO -1
-#	3)	1ST WORD OF VAC AREA SET TO VAC ADDRESS TO SIGNIFY AVAILABILITY
+#	3)	1ST WORD OF VAC AREA SET TO VAC ADDRESS TO SIGNIFY AVAILABILITY.
 #	4)	MARKSTAT CLEARED
 #	5)	BIT2 CHANNEL 12 SET TO 0
 #
@@ -425,7 +427,7 @@ VACSTOR		EXTEND
 		
 ## Page 230
 # PROGRAM NAME - MKREJECT					DATE - 5 APRIL 1967
-# PROGRAM MODIFIED BY 258/276 PROGRAMMERS			LOG SECTION SXTMARK
+# PROGRAM MODIFIED BY 258/278 PROGRAMMERS			LOG SECTION SXTMARK
 # MOD BY - R. MELANSON TO ADD DOCUMENTATION			ASSEMBLY SUNDISK REV. 116
 #
 # FUNCTIONAL DESCRIPTION-

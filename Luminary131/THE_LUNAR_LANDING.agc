@@ -14,8 +14,10 @@
 ## Mod history:	05/25/03 RSB.	Began transcribing.
 ##		05/14/05 RSB	Corrected website reference above.
 ##		2017-01-06 RSB	Page numbers now agree with those on the
-##				original harcopy, as opposed to the PDF page
+##				original hardcopy, as opposed to the PDF page
 ##				numbers in 1701.pdf.
+##		2017-02-25 RSB	Proofed comment text using octopus/ProoferComments.
+##		2017-03-01 RSB	Fixed lingering typos.
 
 ## Page 780
 		BANK	32
@@ -24,9 +26,9 @@
 
 		EBANK=	E2DPS
 
-#	*************************************
+#	****************************************
 #	P63: THE LUNAR LANDING, BRAKING PHASE
-#	*************************************
+#	****************************************
 
 		COUNT*	$$/P63
 
@@ -63,11 +65,11 @@ FLAGORGY	TC	INTPRET		# DIONYSIAN FLAG WAVING
 			MUNFLAG
 		CLEAR	CLEAR
 			P25FLAG		# TERMINATE P25 IF IT IS RUNNING.
-			RNDVZFLG	# TERMINATE P20 IF IT IS RUNNING.
+			RNDVZFLG	# TERMINATE P20 IF IT IS RUNNING
 
-					# ********************************
+					# ****************************************
 
-IGNALG		SETPD	VLOAD		# FIRST SET UP INPUTS FOR RP-TO-R:
+IGNALG		SETPD	VLOAD		# FIRST SET UP INPUTS FOR RP-TO-R:-
 ## Page 781
 			0		# 	AT 0D LANDING SITE IN MOON FIXED FRAME
 			RLS		#	AT 6D ESTIMATED TIME OF LANDING
@@ -111,15 +113,15 @@ IGNALOOP	DLOAD
 		STCALL	GDT/2
 			?GUIDSUB	# WHICH DELIVERS N PASSES OF GUIDANCE
 
-# DDUMCALC IS PROGRAMMED AS FOLLOWS:
-#                                         2                                           ___
+# DDUMCALC IS PROGRAMMED AS FOLLOWS:-
+#                                         2                                           -
 #              (RIGNZ - RGU )/16 + 16(RGU  )KIGNY/B8 + (RGU - RIGNX)KIGNX/B4 + (ABVAL(VGU) - VIGN)KIGNV/B4
 #                          2             1                 0
 #	DDUM = -------------------------------------------------------------------------------------------
 #                                                10
 #                                               2   (VGU - 16 VGU KIGNX/B4)
-#                                                       2        0
 ## Page 782
+#                                                       2        0
 # THE NUMERATOR IS SCALED IN METERS AT 2(28).  THE DENOMINATOR IS A VELOCITY IN UNITS OF 2(10) M/CS.
 # THE QUOTIENT IS THUS A TIME IN UNITS OF 2(18) CENTISECONDS.  THE FINAL SHIFT RESCALES TO UNITS OF 2(28) CS.
 # THERE IS NO DAMPING FACTOR.  THE CONSTANTS KIGNX/B4, KIGNY/88 AND KIGNV/B4 ARE ALL NEGATIVE IN SIGN.
@@ -182,16 +184,16 @@ DDUMGOOD	SLOAD	SR
 		BDSU
 			TDEC1
 		STOVL	TIG		# COMPUTE DISTANCE LANDING SITE WILL BE
-			V		#	OUT OF LM'S ORBITAL PLANE AT IGNITION:
-		VXV	UNIT		#	SIGN IS + IF LANDING SITE IS TO THE
-			R		#	RIGHT, NORTH; IF TO THE LEFT, SOUTH.
+			V		#   OUT OF LM'S ORBITAL PLANE AT IGNITION:
+		VXV	UNIT		#   SIGN IS + IF LANDING SITE IS TO THE
+			R		#   RIGHT, NORTH; - IF TO THE LEFT, SOUTH.
 		DOT	SL1
 			LAND
 R60INIT		STOVL	OUTOFPLN	# INITIALIZATION FOR CALCMANU
 			UNFC/2
-		STORE	R60VSAVE		# STORE UNFC/2 TEMPORARILY IN R60SAVE
+		STORE	R60VSAVE	# STORE UNFC/2 TEMPORARILY IN R60SAVE
 		EXIT
-					# *******************************************
+					# ****************************************
 
 IGNALGRT	TC	PHASCHNG	# PREVENT REPEATING IGNALG
 		OCT	04024
@@ -225,7 +227,7 @@ P63SPOT2	VLOAD	UNIT		# INITIALIZE KALCMANU FOR BURN ATTITUDE
 		TC	BANKCALL
 		CADR	R60LEM
 
-		TC	PHASCHNG	# PREVENT RECALLINE R60
+		TC	PHASCHNG	# PREVENT RECALLING R60
 		OCT	04024
 
 P63SPOT3	CA	BIT6		# IS THE LR ANTENNA IN POSITION 1 YET
@@ -237,7 +239,7 @@ P63SPOT3	CA	BIT6		# IS THE LR ANTENNA IN POSITION 1 YET
 		CAF	CODE500		# ASTRONAUT:	PLEASE CRANK THE
 		TC	BANKCALL	#		SILLY THING AROUND
 		CADR	GOPERF1
-		TCF	GOTOP00H	# TERMINATE
+		TCF	GOTOPOOH	# TERMINATE
 		TCF	P63SPOT3	# PROCEED	SEE IF HE'S LYING
 
 P63SPOT4	TC	BANKCALL	# ENTER		INITIALIZE LANDING RADAR
@@ -265,9 +267,9 @@ DDUMCRIT	2DEC	+8 B-28		# CRITERION FOR IGNALG CONVERGENCE
 #	--------------------------------
 
 ## Page 786
-#	*************************
+#	****************************************
 #	P68: LANDING CONFIRMATION
-#	*************************
+#	****************************************
 
 		BANK	34
 		SETLOC	F2DPS*34
@@ -282,8 +284,8 @@ LANDJUNK	TC	PHASCHNG
 		TC	BANKCALL	# ZERO ATTITUDE ERROR
 		CADR	ZATTEROR
 
-		TC	INTPRET		# TO INTERPRETATIVE AS TIME IS NOT CRITICAL
-		SET			# PREVENT RCS JET FIRINGS IF MOD CONT IS
+		TC	INTPRET		# TO INTERPRETIVE AS TIME IS NOT CRITICAL
+		SET			# PREVENT RCS JET FIRINGS IF MODE CONT IS
 			PULSEFLG	# IN ATT HOLD
 		SET	CLEAR
 			SURFFLAG
@@ -305,10 +307,10 @@ LANDJUNK	TC	PHASCHNG
 			R-TO-RP
 		STORE	RLS
 		EXIT
-		CAF	V06N43*		# ASTRONAUT:  NOW LOOK WHERE TO ENDED UP
+		CAF	V06N43*		# ASTRONAUT:  NOW LOOK WHERE YOU ENDED UP
 		TC	BANKCALL
 		CADR	GOFLASH
-		TCF	GOTOP00H	# TERMINATE
+		TCF	GOTOPOOH	# TERMINATE
 		TCF	+2		# PROCEED
 		TCF	-5		# RECYCLE
 
@@ -320,7 +322,7 @@ LANDJUNK	TC	PHASCHNG
 			REFMF
 		EXIT
 
-		TCF	GOTOP00H	# ASTRONAUT:  PLEASE SELECT P57
+		TCF	GOTOPOOH	# ASTRONAUT:  PLEASE SELECT P57
 
 V06N43*		VN	0643
 

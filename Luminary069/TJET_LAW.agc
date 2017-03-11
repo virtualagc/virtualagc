@@ -1,10 +1,11 @@
+### FILE="Main.annotation"
 ## Copyright:   Public domain.
 ## Filename:    TJET_LAW.agc
 ## Purpose:     The main source file for Luminary revision 069.
-##              It is part of the source code for the original release 
-##              of the source code for the Lunar Module's (LM) Apollo 
-##              Guidance Computer (AGC) for Apollo 10. The actual flown 
-##              version was Luminary 69 revision 2, which included a 
+##              It is part of the source code for the original release
+##              of the flight software for the Lunar Module's (LM) Apollo
+##              Guidance Computer (AGC) for Apollo 10. The actual flown
+##              version was Luminary 69 revision 2, which included a
 ##              newer lunar gravity model and only affected module 2.
 ##              This file is intended to be a faithful transcription, except
 ##              that the code format has been changed to conform to the
@@ -17,6 +18,10 @@
 ## Mod history: 2016-12-13 MAS  Created from Luminary 99.
 ##              2016-12-18 MAS  Updated from comment-proofed Luminary 99 version.
 ##		2016-12-23 RRB	Updated for Luminary 69.
+##              2017-01-21 HG   Fix operand -3DEG   -> -2DEG
+##                                          RUFRATE -> BIT12
+##		2017-01-28 RSB	Proofed comment text using octopus/prooferComments
+##				and fixed errors found.
 
 ## Page 1454
 # PROGRAM DESCRIPTION
@@ -137,15 +142,15 @@ SCALEDOT	LXCH	EDOT		# EDOT IS SCALED AT PI/32 RADIANS/SECOND.
 		MP	BIT13		# SHIFT RIGHT TWO BITS TO RESCALE EDOTSQ
 		TS	EDOTSQ		#	TO PI(2)/2(8) RAD(2)/SEC(2).
 
-ERRTEST		CCS	E		# DOES BIG ERROR (THREE DEG BEYOND THE
-		AD	-3DEG		# DEADBAND) REQUIRE MAXIMUM JETS?
+ERRTEST		CCS	E		# DOES BIG ERROR (TWO DEGREES BEYOND THE
+		AD	-2DEG		# DEADBAND) REQUIRE MAXIMUM JETS?
 		TCF	+2
-		AD	-3DEG
+		AD	-2DEG
 		EXTEND
 		INDEX	ADRSDIF1
 		SU	FIREDB
 		EXTEND
-		BZMF	SENSTEST	# IF NOT:  ARE UNBALANCED JETS PREFERRED?
+		BZMF	SENSTEST	# IF NOT:  ARE UNBALANCED JETS PREFERRED|
 MAXJETS		CAF	TWO		# IF YES:  INCREMENT ADDRESS LOCATOR AND
 		ADS	ADRSDIF2	#	   SET SWITCH FOR JET SELECT LOGIC TO 4.
 		CAF	FOUR		#	   (ALWAYS DO THIS FOR P-AXIS)
@@ -414,12 +419,12 @@ CHKMINTJ	AD	-TJMIN		# IS COMPUTED TIME LESS THAN THE MINIMUM.
 #	3. E IS SCALED AT PI RADIANS AND EDOT AT PI/4 RAD/SEC.
 #	   (EXCEPT THE RUFLAW3 ENTRY WHEN E IS AT PI/4)
 #
-# RUFLAW1:	ERROR MORE NEGATIVE THAN PI/16 RAD.  FIRE TO A RATE OF 6.5 DEG/SEC (IF JET TIME EXCEEDS 20 MSEC.).
-# RUFLAW2:	ERROR MORE POSITIVE THAN PI/16 RAD.  FIRE TO AN OPPOSING RATE OF 6.5 DEG/SEC.
+# RUFLAW1:	ERROR MORE NEGATIVE THAN PI/16 RAD.  FIRE TO A RATE OF PI/32 RAD/SEC (IF JET TIME EXCEEDS 20 MSEC.).
+# RUFLAW2:	ERROR MORE POSITIVE THAN PI/16 RAD.  FIRE TO OPPOSING RATE OF PI/32 RAD/SEC.
 # RUFLAW3:	ERROR RATE GREATER THAN PI/32 RAD/SEC AND ERROR WITHIN BOUNDS.  COAST IF BELOW FIREFCT, FIRE IF ABOVE
 
 RUFLAW1		CS	BIT12		# DECREMENT EDOT BY PI/32 RAD/SEC, WHICH
-		ADS	EDOT		#	IS THE TARGET RATE
+		ADS	EDOT		#	IS THE TARGET RATE.
 		EXTEND
 		BZMF	SMALRATE	# BRANCH IF RATE LESS THAN TARGET.
 		TC	RUFSETUP	# REVERSE ROTSENSE AND INDICATE MAX JETS.
@@ -447,12 +452,12 @@ SMALRATE	TC	RUFSETUP +2	# SET NUMBERT AND FIREFCT FOR MAXIMUM JETS
 		CAF	NEGONE
 		ADS	ADRSDIF2
 
-		CS	EDOT		# PICK UP (PI/32-EDOT) = DESIRED RATE CHNG.
+		CS	EDOT		# PICK UP (PI/32-EDOT)=DESIRED CHANGE.
 		TCF	RUFLAW12
 
 RUFLAW2		TC	RUFSETUP	# REVERSE ROTSENSE AND INDICATE MAX JETS.
-		CAF	RUFRATE
-		AD	EDOT		# PICK UP(PI/32+EDOT) = DESIRED CHANGE.
+		CAF	BIT12
+		AD	EDOT		# PICK UP(PI/32+EDOT) = DESIRED RATE CHANGE
 		TS	A		# IF OVERFLOW SKIP, FIRE FOR FULL TIME.
 
 ## Page 1463

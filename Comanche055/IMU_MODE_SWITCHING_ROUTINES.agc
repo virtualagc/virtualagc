@@ -13,7 +13,7 @@
 ##				using Comanche055 page images.
 ##		2010-08-20 JL	Fixed page number comment (p1447).
 ##				Fixed some pseudo-label indents.
-##		2016-12-10 RSB	All of the GOTOP00H's should have been
+##		2016-12-10 RSB	All of the GOTOPOOH's should have been
 ##				GOTOPOOH, and I've changed them back.
 ##		2016-12-22 RSB	Proofed comment text using octopus/ProoferComments
 ##				and corrected the errors found.
@@ -832,7 +832,7 @@ MODESLP		TC	MAKECADR	# CALL FROM SWITCHABLE FIXED ONLY.
 		TS	MODECADR
 		TCF	JOBSLEEP
 
-MODABORT	TC	P00DOO		# TWO PROGRAMS USING SAME DEVICE.
+MODABORT	TC	POODOO		# TWO PROGRAMS USING SAME DEVICE.
 		OCT	1210
 
 ## Page 1442
@@ -849,7 +849,7 @@ IMUFIN20	=	IMUFINE
 GOMANUR		CA	ATTCADR		# IS KALCMANU FREE
 		EXTEND
 		BZF	+3
-		TC	P00DOO		# NO
+		TC	POODOO		# NO
 		OCT	1210		# 2 TRYING TO USE SAME DEVICE
 
  +3		EXTEND

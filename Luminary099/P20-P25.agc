@@ -20,6 +20,7 @@
 ##		2016-12-13 RSB	GOTOP00H -> GOTOPOOH
 ##		2016-12-14 RSB	Proofed text comments with octopus/ProoferComments
 ##				and corrected the errors found.
+##		2017-01-28 RSB	WTIH -> WITH.
 
 ## This source code has been transcribed or otherwise adapted from
 ## digitized images of a hardcopy from the MIT Museum.  The digitization
@@ -1604,7 +1605,7 @@ ENDRMODF	EQUALS
 #
 # FUNCTIONAL DESCRIPTION_
 #
-#	RRTURNON IS THE TURN-ON SEQUENCE WHICH, ALONG WTIH
+#	RRTURNON IS THE TURN-ON SEQUENCE WHICH, ALONG WITH
 #	RRZEROSB, ZEROS THE CDU:S AND DETERMINES THE RR MODE.
 #	INITIALLY, CONTROL IS TRANSFERRED TO RRZEROSB FOR THE
 #	ACTUAL TURN-ON SEQUENCE.  UPON RETURN THE PROGRAM

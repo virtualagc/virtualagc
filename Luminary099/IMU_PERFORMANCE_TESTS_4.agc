@@ -13,7 +13,8 @@
 ##				images from Luminary 1A.
 ##		2016-12-14 RSB	Proofed text comments with octopus/ProoferComments
 ##				and corrected the errors found.
-##
+##		2017-03-07 RSB	Comment-text error-fixes noted in proofing Luminary 116.
+
 ## This source code has been transcribed or otherwise adapted from
 ## digitized images of a hardcopy from the MIT Museum.  The digitization
 ## was performed by Paul Fjeld, and arranged for by Deborah Douglas of
@@ -35,7 +36,7 @@
 # BY -		GEORGE SCHMIDT IL7-146 EXT 1126
 # MOD NO-ZERO
 #
-# FUNCITONAL DESCRIPTION
+# FUNCTIONAL DESCRIPTION
 #
 # THIS SECTION CONSISTS OF THE FILTER FOR THE GYRO DRIFT TESTS.  NO COMPASS
 # IS DONE IN LEM.  FOR A DESCRIPTION OF THE FILTER SEE E-1973.  THIS

@@ -11,6 +11,8 @@
 ## Contact:     Mike Stewart <mastewar1@gmail.com>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2016-12-20 MAS  Created from Aurora 12 (with much DAP stuff removed).
+##		2017-02-05 RSB	Back-ported comment corrections 
+##				identified while proofing Artemis 072.
 
 # SECTION 1  DISPATCHER
 #
@@ -1664,7 +1666,7 @@ VRIGHT2         AD              NEG12
                 EXTEND
                 BZMF            VSSR                    # IF SO, BRANCH AND SHIFT IMMEDIATELY.
 
-                AD              NEGONE                  # IF NOT, REDUCE MPTEMP BY A TOTAL OF 14.
+                AD              NEGONE                  # IF NOT, REDUCE MPTEMP BY A TOTAL OF 14,
                 TS              MPTEMP                  # AND DO A SHIFT RIGHT AND ROUND BY 14.
                 CAF             ZERO                    # THE ROUND AT THIS STAGE MAY INTRODUCE A
                 TS              L                       # ONE BIT ERROR IN A SHIFT RIGHT 15D.
@@ -2449,7 +2451,7 @@ SMPAC+          AD              -1/2+2                  # SEE IF ARGUMENT GREATE
                 XCH             SR
                 ADS             MPAC            +1      # GUARANTEED NO OVERFLOW.
 
-ARGHI           CAF             SLOPEHI                 # ARGUMENT BETWEEN .25 AND .5, GET A
+ARGHI           CAF             SLOPEHI                 # ARGUMENT BETWEEN .25 AND .5. GET A
                 EXTEND                                  # LINEAR APPROXIMATION FOR THIS RANGE.
                 MP              MPAC
                 AD              BIASHI                  # X0/2 = (MPAC/2)(SLOPEHI) + BIASHI/2.

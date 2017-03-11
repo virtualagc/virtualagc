@@ -20,6 +20,8 @@
 ##              2016-12-12 MAS  Fixed a couple more typos.
 ##		2016-12-23 RSB	Proofed comment text with octopus/ProoferComments
 ##				and fixed all errors found.
+##		2017-01-26 RSB	Back-ported comment-text fixes found while
+##				proofing corresponding Luminary 69 file.	
 
 ## Page 204
                 BANK            22
@@ -137,7 +139,7 @@ LMORBM04        2DNADR          OMEGAPD                 # OMEGAPD,OMEGAQD,OMEGAR
                 -1DNADR         RADMODES                # RADMODES,DAPBOOLS        COMMON DATA
 
 LMORBM05        2DNADR          OMEGAP                  # OMEGAP,OMEGAQ,OMEGAR,GARBAGE
-                2DNADR          CDUXD                   # CDUXD,CDUYD,CDUZD,GARBAGE
+                2DNADR          CDUXD                   # CDUXD,CDUXD,CDUZD,GARBAGE
                 2DNADR          CDUX                    # CDUX,CDUY,CDUZ,CDUT
                 1DNADR          ALPHAQ                  # ALPHAQ,ALPHAR            COMMON DATA
 LMORB10         1DNADR          POSTORKP                # POSTORKP,NEGTORKP

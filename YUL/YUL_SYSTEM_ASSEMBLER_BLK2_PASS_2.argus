@@ -1,8 +1,8 @@
 # Copyright:    Public domain.
 # Filename:     YUL_SYSTEM_ASSEMBLER_BLK2_PASS_2.mitigus
-# Purpose:      Part of the source code for YUL (revision 9),
+# Purpose:      Part of the source code for YUL (revision 9).
 # Assembler:    TBD
-# Contact:      Ron Burkey <info@sandroid.org>.
+# Contact:      Jim Lawton <jim.lawton@gmail.com>
 # Website:      https://www.ibiblio.org/apollo/index.html
 # Page scans:   https://archive.org/details/yulsystemsourcec00hugh
 # Pages:        385-430
@@ -500,7 +500,7 @@ P0401   SPECIFIC PROCESSING FOR 6 OF THE 8 TYPE 0 ADDRESS CONSTANTS.
  043417            NA           ADDRESS 1     BLANKS        BBC STAR Q -1
  043418            NA           ADDRESS 2     BLANKS        BBC STAR Q -1
  04343  EDS BNKNO  TS, BIT1M    ZERO          CUSS LIST +30 HOW HIGH F     C    IGNORE ADDRESS FIELD OF BBCON* AND
- 04345             TX           USED FMAX     -             ADDRESS             SUPPLY THE BANK NUMBER OF THE HIGHEST 
+ 04345             TX           USED FMAX     -             ADDRESS             SUPPLY THE BANK NUMBER OF THE HIGHEST
  04347             LA           ONES          ADDRESS       RNG ERROR           BANK OCCUPIED IN THIS ASSEMBLY.
 
  0435   BBCON      LA           ADDRESS       OCT 3777      BANK NO             IF NOT IN FIXED, SHOULD BE BANK NUMBER.
@@ -754,7 +754,7 @@ P0548   PRINTING PROCEDURES FOR BASIC INSTRUCTIONS AND ADDRESS CONSTANTS.
  06162             TX, BIT6M    ZERO          -             SWITCH              TURN OFF D.P. OP CODE SWITCH.
  0617              TS, CHAR8M   EIGHT         EBANK REG     SET EBCON      C    TURN OFF "JUST-DID-EBANK=" SWITCH.
  06182             TS, B25T27M  BIT 25        SBANK REG     SET SBCON      C    TURN OFF "JUST-DID-SBANK=" SWITCH.
- 0619   INSTR XIT  TS           MOD RETRN     Z,SC          RSTOR MXR      C    RETURN TO GENERAL PROCEDURE.           
+ 0619   INSTR XIT  TS           MOD RETRN     Z,SC          RSTOR MXR      C    RETURN TO GENERAL PROCEDURE.
 
 # Page 400
 #      @YUL SYSTEM ASSEMBLER BLK2 PASS 2                                         USER'S OWN PAGE NO.  16        PAGE 136
@@ -940,7 +940,7 @@ R1118   THE BANK INDICATOR, IF ANY.  BLOTS OUT AN INVALID LOCATION.
  1123              SS           ZERO          C3T6          LINE +6        C
  1124              TX           LOCATION      -             COMMON         C    ISOLATE LOCATION VALUE.
  1126              LA           COMMON        OCT 3777      E PREL         C    BRANCH IF LOCATION IS IN ERASABLE.
- 1128              LA           COMMON        OCT 7777      PRINT VAL      C    BRANCH IF LOCATION IS NOT IN A BANK. 
+ 1128              LA           COMMON        OCT 7777      PRINT VAL      C    BRANCH IF LOCATION IS NOT IN A BANK.
  1130              TX           COMMA C2      -             LINE +6        C
  1131              WD           COMMON        OCT 10000     COMMON         C    REDUCE TO STANDARD BANK NOTATION.
  1133              SWS, CHAR8M  COMMON        13            LINE +5        C
@@ -1318,7 +1318,7 @@ P1670   CONSTANTS AND MISCELLANEOUS
  1805   MB36T48M   OCT          +17777
  1810   I LOW HALF OCT          -47777
  1815   B2MAXP1    OCT          -170000
- 1820   BLANKSM    ALF          
+ 1820   BLANKSM    ALF
  1821   K 16 M     OCT          -16
  1825   K 17 M     OCT          -17
  1830   K 20 M     OCT          -20
@@ -1622,7 +1622,7 @@ R2745   FOR GENERAL SHIFTS BITS 25 TO 27 OF INT ADDR HOLD LIMITS DESIGNATION AND
 #      @YUL SYSTEM ASSEMBLER BLK2 PASS 2                                         USER'S OWN PAGE NO.  40        PAGE 160
 
 P3536   ROUTINE TO HANDLE INTERPRETIVE ADDRESS WORDS
- 
+
  3570   INT AD GO  NA           CARDM +3      BLANKS M      C,+3
  3572              NA           CARDM +4      BLANKS M      C,+2
  3574              TX, B17M     ONESM         -             1,11                CUSS POLISH ADDRESS WITH BLANK ADR FLD.

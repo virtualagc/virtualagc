@@ -66,6 +66,8 @@
 				data stream on the tcp port.
 		03/19/09 RSB	Added DedaQuiet.
 		11/18/16 RSB	Worked around lack of MSG_NOSIGNAL in Solaris.
+		03/09/17 MAS	Moved SbyPressed logic into agc_engine.c, where
+				it makes more sense.
 */
 
 #include <errno.h>
@@ -265,10 +267,6 @@ ChannelInput (agc_t *State)
 			      State->InterruptRequests[10] = 1;
 			    LastInDetent = InDetent;
 			  }
-                        else if (Channel == 032 && 0 != (Value & 020000))
-			  {
-			    State->SbyPressed = 0;
-			  }
 			//---------------------------------------------------------------
 			// For --debug-dsky mode.
 			if (DebugDsky)
@@ -281,7 +279,6 @@ ChannelInput (agc_t *State)
 				  {
 				    Channel = 015;
 				    Value = 0;
-				    State->SbyPressed = 0;
 				  }
 			      }
 			    if (Channel == 015)

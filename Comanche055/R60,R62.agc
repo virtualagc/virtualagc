@@ -13,8 +13,10 @@
 ##				images. 
 ##		2016-12-10 RSB	Proofed comments with octopus/ProoferComments
 ##				and fixed the errors found.
-##		2016-12-10 RSB	All of the GOTOP00H's should have been
+##		2016-12-10 RSB	All of the GOTOPOOH's should have been
 ##				GOTOPOOH, and I've changed them back.
+##		2017-01-18 RSB	Fixed comment-text errors noted while diff'ing
+##				vs Colossus 249.
 ##
 ## This source code has been transcribed or otherwise adapted from digitized
 ## images of a hardcopy from the MIT Museum.  The digitization was performed
@@ -100,12 +102,12 @@ ENDMANUV	TCF	TOBALL		# FINISHED MANEUVER
 
 ENDMANU1	TC	DOWNFLAG	# RESET 3-AXIS FLAG
 		ADRES	3AXISFLG	# BIT 6 FLAG 5
-		CAE	TEMPR60
-		TC	BANKJUMP
+		CAE	TEMPR60		#					-
+		TC	BANKJUMP	#					-
 		
 CHKLINUS	CS	FLAGWRD4
-		MASK	BIT12		# IS PRIORITY DISPLAY FLAG SET
-		CCS	A
+		MASK	BIT12		# IS PRIORITY DISPLAY FLAG SET		-
+		CCS	A		#					-
 		TC	Q		# NO - EXIT
 		CA	Q
 		TS	MPAC +2		# SAVE RETURN
@@ -117,7 +119,7 @@ CHKLINUS	CS	FLAGWRD4
 		OCT	71		# 1.7SPOT FOR RELINUS
 		
 		CAF	BIT7
-		TC	LINUS		# GO SET BITS FOR PRIORITY DISPLA
+		TC	LINUS		# GO SET BITS FOR PRIORITY DISPLAY	-
 		TC	MPAC +2
 		
 RELINUS		CAF	BIT5		# IS TRACK FLAG ON
@@ -154,7 +156,7 @@ R61TEST		CA	MODREG		# ARE WE IN P00.  IF YES THIS MUST BE
 		BZF	GOTOPOOH	# NO
 		TC	GOTOV56		# YES
 				
-BIT14+7		OCT	20100
+BIT14+7		OCT	20100		#					-
 V06N18		VN	0618
 
 ## Page 393
@@ -275,7 +277,7 @@ COMPMATX	CALL			# NOW COMPUTE THE TRANSFORMATION FROM
 IGSAMEX		VXV	BMN		# FIND THE SHORTEST WAY OF ROTATING THE 
 			SCAXIS		# S/C OUT OF GIMBAL LOCK BY A ROTATION 
 			U=SCAXIS	# ABOUT +- SCAXIS, I.E. IF  (IG (SGN MFS3)
-					# X SCAXIS . XF) LESS THAN Q, U = SCAXIS
+					# X SCAXIS . XF) LESS THAN 0, U = SCAXIS
 					# OTHERWISE U = -SCAXIS
 					
 		VLOAD	VCOMP
@@ -315,7 +317,7 @@ FINDGIMB	AXC,1	CALL
 		GOTO
 			VECQTEMP	# RETURN TO CALLER
 			
-PICKAXIS	VLOAD	DOT		# IF VF X VI = 0, FIND VF, VI
+PICKAXIS	VLOAD	DOT		# IF VF X VI = 0, FIND VF . VI
 			28D
 			SCAXIS
 		BMN	TLOAD

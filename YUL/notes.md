@@ -20,20 +20,82 @@ The architecture is big-endian (sorta). Bit 1 is the MSB and bit N is the LSB. S
 However, there is no sub-48-bit access to memory, so the issue of endianess doesn't really apply.
 
 
-Monitor Calls
--------------
+Instruction Set
+---------------
 
- - MON TYPER
- - MON TADDR
- - MON LOK
- - MON RELOX 
- - MON WAKE
- - MON SLEEP
- - MON RLEAS
- - MON PCR
- - MONITOR
-
- - $PAR IDLE ?
+- BA    (Binary Add)
+- BD    (Fixed Binary Divide)
+- BM    (Binary Multiply)
+- BS    (Binary Subtract)
+- BT    (Binary Accumulate)
+- CC    (Compute Orthocount)
+- COREDUMP (?)
+- CP    (Check Parity)
+- CSCON (Cosequence Control)
+- DA    (Decimal Add)
+- DD    (Fixed Decimal Divide)
+- DM    (Decimal Multiply)
+- DOFF  (Demand Off)
+- DON   (Demand On)
+- DS    (Decimal Subtract)
+- DT    (Decimal Accumulate)
+- DUMP  (?)
+- EBA   (Extended Binary Add)
+- EBS   (Extended Binary Subtract)
+- EX    (Extract)
+- FBA   (Floating Binary Add)
+- FBAE  (Floating Binary Add, Extended Precision)
+- FBAU  (Floating Binary Add, Unnormalized)
+- FBD   (Floating Binary Divide)
+- FBM   (Floating Binary Multiply)
+- FBS   (Floating Binary Subtract)
+- FBSE  (Floating Binary Subtract, Extended Precision)
+- FBSU  (Floating Binary Subtract, Unnormalized)
+- FCON  (Conversion)
+- FDA   (Floating Decimal Add)
+- FDAU  (Floating Decimal Add, Unnormalized)
+- FDD   (Floating Decimal Divide)
+- FDM   (Floating Decimal Multiply)
+- FDS   (Floating Decimal Subtract)
+- FDSU  (Floating Decimal Subtract, Unnormalized)
+- FFN   (Fixed-to-Floating Normalize)
+- FLN   (Floating Less than, Normalized)
+- FNN   (Floating Not Equal, Normalized)
+- HA    (Half add)
+- IT    (Item Transfer)
+- LA    (Less than or equal, alphabetic)
+- LN    (Less than or equal, numeric)
+- MPC   (Multiprogram Control)
+- MT    (Multiple Transfer)
+- NA    (Not equal, alphabetic)
+- NN    (Not equal, numeric)
+- PR    (Proceed)
+- PRA   (Print Alphabetic)
+- PRD   (Print Decimal)
+- PRO   (Print Octal)
+- RB    (Read Backward)
+- RF    (Read Forward)
+- RT    (Record Transfer)
+- RW    (Rewind)
+- S     (Simulate)
+- SCON  (Sequence Control)
+- SIMULATE (?)
+- SM    (Superimpose)
+- SPCR  (Save Program Control Register) (?)
+- SPE   (Shift Preserving Sign and Extract)
+- SPS   (Shift Preserving Sign and Substitute)
+- SS    (Substitute)
+- SSL   (Shift and Select)
+- STOP  (Stop calling program)
+- SWE   (Shift Word and Extract)
+- SWS   (Shift Word and Substitute)
+- TN    (N-word Transfer)
+- TS    (Transfer A to B, go to C)
+- TX    (Transfer A to C)
+- ULD   (Multiple Unload)
+- WA    (Word Add)
+- WD    (Word Difference)
+- WF    (Write Forward)
 
 
 Unknown ARGUS Opcodes
@@ -47,8 +109,10 @@ Unknown ARGUS Opcodes
 - SPEC
 -- Special register, 16-bit word (see p29); note: systems with greater that 32KW have 24-bit special registers)
 - CAC (function unknown)
+-- I think this is for forming compressed address constants. Since H-x800 words are 48 bits wide, and addresses are only 16 bits, then 3 addresses can be packed into one memory word. I think this is what CAC does, and I hypothesise that it stands for "Condensed Address Constant". It seems to take from one to three arguments, I assume any unspecified argument is replaced by zero in the memory word formed, but that is a guess.
 - EQUALS
-- MASKGRP (function unknown - declaration of masks, fields?) 
+- MASKGRP (function unknown - declaration of masks, fields?)
+- MASKBASE 
 
 
 Constants
@@ -210,5 +274,62 @@ There are other names by which tapes (disks?) are referred to also:
 
     YULPROGS    
     EXPEROGS    
+
+
+Supported machine architectures
+-------------------------------
+
+There are several supported machine architectures. These are referred to as "COMPUTER" in the YUL source, sometimes as "MACHINE". The general parts of YUL refer to machine-specific variables as "M varname"; these are replaced at linkage by the machine-dependant variants. E.g. "M EXPLAIN" is replaced by 
+"AG EXPLAN", "SC EXPLAN", "B2 EXPLAN", "A4 EXPLAN".
+
+ - "SACO" (abbreviated "SC") 
+   This seems to be a variant of the AGC for use in a proposed Air Force program called "SABRE", hence probably "SAbre COmputer".
+
+ - "AGC"  (abbreviated "AG")
+   This is the Block I AGC.
+
+ - "BLK2" (abbreviated "B2") 
+   This is the original Block II AGC.
+
+ - "AGC4" (abbreviated "A4")
+   This is the revised, final, as-flown Block II AGC.
+
+
+Monitor Calls
+-------------
+
+ - MON EOFRI
+ - MON LOK
+ - MON PCR
+ - MON PEEK
+ - MON PUNCH
+ - MON READ
+ - MON RELOX 
+ - MON RLEAS
+ - MON SLEEP
+ - MON TADDR
+ - MON TYPER
+ - MON UNLOK
+ - MON WAKE
+ - MONITOR
+
+ - $PAR IDLE ?
+
+I think "MON WAA" is a block of memory used for passing data into and out of the Monitor, but I can't be completely sure yet.
+
+
+PHI Routines
+------------
+
+There are a bunch of subroutines used throughout YUL, referred to as "PHI name". These mainly have to do with tape operations. It may be that these routine were developed for YUL by a contractor, Philip Hankins Inc., hence "PHI".
+
+ - PHI LABEL
+ - PHI LOAD
+ - PHI PEEK
+ - PHI PRINT
+ - PHI READ
+ - PHI SNACH
+ - PHI TAPE
+ - PHI WAA
 
 -end-

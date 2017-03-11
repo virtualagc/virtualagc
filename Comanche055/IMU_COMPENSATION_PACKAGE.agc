@@ -14,6 +14,8 @@
 ##		2010-08-24 JL	Fixed page 306 number.
 ##		2016-12-10 RSB	Proofed comments with octopus/ProoferComments
 ##				and fixed the errors found.
+##		2017-01-14 RSB	Fixed comment-text errors located while 
+##				diff'ing against Colossus 249.
 ##
 ## This source code has been transcribed or otherwise adapted from digitized
 ## images of a hardcopy from the MIT Museum.  The digitization was performed
@@ -104,7 +106,7 @@ IRIGX		EXTEND
 		DCS	DELVY		# 	(PIPA PULSES) X 2(+14)
 		DXCH	MPAC		# 
 		CS	ADSRAX		# 	(GYRO PULSES)/(PIPA PULSE) X 2(-3)	*
-		TC	GCOMPSUB	# 	-(ADSRAX)(PIPAY)	(GYRO PULSES) X 2(+14)
+		TC	GCOMPSUB	# 	+(ADSRAX)(PIPAY)	(GYRO PULSES) X 2(+14)
 
 #		EXTEND			***
 #		DCS	DELVZ		***	(PIPA PULSES) X 2(+14)
@@ -137,7 +139,7 @@ IRIGY		EXTEND
 		TC	DRIFTSUB	#	-(NBDY)(DELTAT)	(GYRO PULSES) X 2(+14)
 
 IRIGZ		EXTEND
-		DCS	DELVY		# (PIPA PULSES) X 2(-14)
+		DCS	DELVY		# (PIPA PULSES) X 2(+14)
 		DXCH	MPAC
 		CA	ADSRAZ		# (GYRO PULSES)/(PIPA PULSE) X 2(-3)		*
 ## Page 300
@@ -317,10 +319,10 @@ NBD3		EXTEND			# C(A) = DELTAT		(CS) X 2(+14)
 		
 		CAF	ZERO
 		TS	GCOMPSW		# INDICATE COMMANDS 2 PULSES OR LESS
-		TS	BUF		# PIPAX. PIPAY. PIPAZ
+		TS	BUF		# PIPAX, PIPAY, PIPAZ
 		
 		CS	NBDX		# (GYRO PULSES)/(CS) X 2(-5)
-		TC	FBIASSUB	# -(NBOX)(DELTAT) 	(GYRO PULSES) X 2(+14)
+		TC	FBIASSUB	# -(NBDX)(DELTAT) 	(GYRO PULSES) X 2(+14)
 		
 		EXTEND
 		DCS	VBUF 

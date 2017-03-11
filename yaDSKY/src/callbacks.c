@@ -43,6 +43,9 @@
 				bits are set, based on newly discovered
                                 diagrams of DSKY relay wiring. This fixes
                                 the Aurora12/Sunburst 120 DSKY relay test.
+		01/15/17 MAS	Backported yaDSKY2's new light mappings and
+				flashing behavior, and set sane defaults for
+                                the indicators.
 */
 
 #ifdef HAVE_CONFIG_H
@@ -127,78 +130,76 @@ my_gtk_image_set_from_file (GtkImage *Image, const char *Filename0)
 #define gtk_image_set_from_file(i,f) my_gtk_image_set_from_file (i, f)
 
 // Here are the defaults used for indicator lamps in the absence of a configuration file.
-// In cases where we don't know that channel/bit corresponds to the lamp, we use 
-// channel -1.
 Ind_t Inds[14] = {
   {				// 11
     "UplinkActyOn.jpg",
     "UplinkActyOff.jpg",
-    011, 4, 0, 0
+    011, 04, 0, 0, 0, 0, 0, 0
   },
   {				// 12
     "NoAttOn.jpg",
     "NoAttOff.jpg",
-    010, 9, 0, 0
+    010, 010, 0, 0, 0, 1, 074000, 060000
   },
   {				// 13
     "StbyOn.jpg",
     "StbyOff.jpg",
-    013, 11, 0, 0
+    0163, 0400, 0, 0, 0, 0, 0, 0 
   },
   {				// 14
     "KeyRelOn.jpg",
     "KeyRelOff.jpg",
-    011, 16, 0, 0
+    0163, 020, 0, 0, 0, 0, 0, 0
   },
   {				// 15
     "OprErrOn.jpg",
     "OprErrOff.jpg",
-    011, 64, 0, 0
+    0163, 0100, 0, 0, 0, 0, 0, 0
   },
   {				// 16
     "PrioDispOn.jpg",
     "PrioDispOff.jpg",
-    99, 0, 0, 0
+    010, 01, 0, 0, 0, 1, 074000, 060000
   },
   {				// 17
     "NoDapOn.jpg",
     "NoDapOff.jpg",
-    99, 0, 0, 0
+    010, 02, 0, 0, 0, 1, 074000, 060000
   },
   {				// 21
     "TempOn.jpg",
     "TempOff.jpg",
-    011, 8, 0, 0
+    011, 010, 0, 0, 0, 0, 0, 0
   },
   {				// 22
     "GimbalLockOn.jpg",
     "GimbalLockOff.jpg",
-    010, 6, 0, 0
+    010, 040, 0, 0, 0, 1, 074000, 060000
   },
   {				// 23
     "ProgOn.jpg",
     "ProgOff.jpg",
-    010, 9, 0, 0
+    010, 0400, 0, 0, 0, 1, 074000, 060000
   },
   {				// 24
     "RestartOn.jpg",
     "RestartOff.jpg",
-    99, 0, 0, 0
+    0163, 0200, 0, 0, 0, 0, 0, 0
   },
   {				// 25
     "TrackerOn.jpg",
     "TrackerOff.jpg",
-    010, 8, 0, 0
+    010, 0200, 0, 0, 0, 1, 074000, 060000
   },
   {				// 26
     "AltOn.jpg",
     "AltOff.jpg",
-    99, 0, 0, 0
+    010, 020, 0, 0, 0, 1, 074000, 060000
   },
   {				// 27
     "VelOn.jpg",
     "VelOff.jpg",
-    99, 0, 0, 0
+    010, 04, 0, 0, 0, 1, 074000, 060000
   }
 };
 
@@ -489,7 +490,6 @@ ActOnIncomingIO (GtkWidget *widget, unsigned char *Packet)
     }
   else if (Channel == 011)
     {
-      int i;
       // Here are appropriate Luminary 131 actions for various discrete
       // annunciations.
       if ((Value & 2) != (Last11 & 2))
@@ -499,25 +499,25 @@ ActOnIncomingIO (GtkWidget *widget, unsigned char *Packet)
 	  else
 	    gtk_image_set_from_file (CompActyAnnunciator, "CompActyOn.jpg");
 	}
-      i = (0 != (Value & 32));
-      if (VerbNounFlashing && !i)
-        {
-#if 1
+
+      Last11 = Value;	
+    }
+  else if (Channel == 0163)
+    {
+      if (Value & DSKY_VN_FLASH)
+	{
+	  gtk_image_set_from_file (VD1Digit, CurrentBlank);
+	  gtk_image_set_from_file (VD2Digit, CurrentBlank);
+	  gtk_image_set_from_file (ND1Digit, CurrentBlank);
+	  gtk_image_set_from_file (ND2Digit, CurrentBlank);
+	}
+      else
+	{
 	  gtk_image_set_from_file (VD1Digit, CurrentVD1);
 	  gtk_image_set_from_file (VD2Digit, CurrentVD2);
 	  gtk_image_set_from_file (ND1Digit, CurrentND1);
 	  gtk_image_set_from_file (ND2Digit, CurrentND2);
-	  if (OprErrAnnunciator != NULL)
-	    gtk_image_set_from_file (OprErrAnnunciator, CurrentOprErr);
-	  if (KeyRelAnnunciator != NULL)
-	    gtk_image_set_from_file (KeyRelAnnunciator, CurrentKeyRel);
-#else // 1
-	  gtk_image_set_from_file (VerbAnnunciator, "VerbOn.jpg");
-	  gtk_image_set_from_file (NounAnnunciator, "NounOn.jpg");
-#endif // 1
 	}
-      VerbNounFlashing = i;
-      Last11 = Value;	
     }
   // If in --test-uplink mode, decode the digital downlink data.  
   if (TestDownlink && (Channel == 013 || Channel == 034 || Channel == 035))

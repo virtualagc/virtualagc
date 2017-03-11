@@ -1,10 +1,11 @@
+### FILE="Main.annotation"
 ## Copyright:   Public domain.
 ## Filename:    P70-P71.agc
 ## Purpose:     The main source file for Luminary revision 069.
-##              It is part of the source code for the original release 
-##              of the source code for the Lunar Module's (LM) Apollo 
-##              Guidance Computer (AGC) for Apollo 10. The actual flown 
-##              version was Luminary 69 revision 2, which included a 
+##              It is part of the source code for the original release
+##              of the flight software for the Lunar Module's (LM) Apollo
+##              Guidance Computer (AGC) for Apollo 10. The actual flown
+##              version was Luminary 69 revision 2, which included a
 ##              newer lunar gravity model and only affected module 2.
 ##              This file is intended to be a faithful transcription, except
 ##              that the code format has been changed to conform to the
@@ -16,8 +17,16 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2016-12-13 MAS  Created from Luminary 99.
 ##              2016-12-18 MAS  Updated from comment-proofed Luminary 99 version.
-
-## NOTE: Page numbers below have not yet been updated to reflect Luminary 69.
+##		2017-01-09 RRB	Updated for Luminary 69.
+##              2017-01-20 HG   Fix pseudo code 2CARD -> 2CADR
+##              2017-01-21 HG   Fix operand XDEVLFLG -> XDELVFLG
+##              2017-01-22 HG   commented statements. Looks like code but are type A comments
+##                              Add missing statements  TC    DOWNFLAG
+##                                                      ADRES AVEGFLAG
+##                                                      STOVL   RTIG
+##                                                              VN1
+##		2017-01-28 RSB	Proofed comment text using octopus/prooferComments
+##				and fixed errors found.
 
 ## Page 829
 		BANK	21
@@ -46,7 +55,7 @@ R10,R11A	CS	IMODES33	# IF LAMP TEST, DO NOT CHANGE LR LITES.
 		EXTEND
 		BZF	10,11
 
-FLASHH?		MASK	FLGWRD11	# C(A) = 1 - HFLASH BIT
+FLASHH?		MASK	FLGWRD11	# C(A) = 1 = HFLASH BIT
 		EXTEND
 		BZF	FLASHV?		# H FLASH OFF, SO LEAVE ALONE
 
@@ -70,11 +79,11 @@ FLASHV?		CA	VFLSHBIT	# VFLASHBIT MUST BE BIT 2.
 
 P71NOW?		CS	MODREG		# YES.  ARE WE IN P71 NOW?
 ## Page 830
-		AD	1DEC71
+		AD	MODE71
 		EXTEND
 		BZF	LANDISP		# YES.  PROCEED TO R10.
 		
-		EXTEND			# NO. IS AN ABORT STAGE COMMANDED?
+		EXTEND			# NO.  IS AN ABORT STAGE COMMANDED?
 		READ	CHAN30
 		COM
 		TS	L
@@ -83,7 +92,7 @@ P71NOW?		CS	MODREG		# YES.  ARE WE IN P71 NOW?
 		TCF	P71A		# YES.
 
 P70NOW?		CS	MODREG		# NO. ARE WE IN P70 NOW?
-		AD	1DEC70
+		AD	MODE70
 		EXTEND
 		BZF	LANDISP		# YES.  PROCEED TO R10.
 
@@ -100,27 +109,11 @@ P70A		CS	ZERO
 		TCF	+3
 P71		TC	LEGAL?
 P71A		CAF	TWO
- +3		TS	Q
+   +3		TS	Q
 		INHINT
-		EXTEND
-		DCA	CNTABTAD
-		DTCB
-
-		EBANK=	DVCNTR
-CNTABTAD	2CADR	CONTABRT
-
-1DEC70		DEC	70
-1DEC71		DEC	71
-
-		BANK	05
-		SETLOC	ABORTS1
-		BANK
-		COUNT*	$$/P70
-
-CONTABRT	CAF	ABRTJADR
+		CAF	ABRTJADR
 		TS	BRUPT
 		RESUME
-## Page 831
 
 ABRTJADR	TCF	ABRTJASK
 
@@ -136,6 +129,7 @@ ABRTJASK	CAF	OCTAL27
 		TS	DISPDEX		# INSURE DISPDEX IS POSITIVE.
 
 		CCS	Q		# SET APSFLAG IF P71.
+## Page 831
 		CS	FLGWRD10	# SET APSFLAG PRIOR TO THE ENEMA.
 		MASK	APSFLBIT
 		ADS	FLGWRD10
@@ -160,8 +154,8 @@ ABRTJASK	CAF	OCTAL27
 		CS	FLAGWRD0	# SET R10FLAG TO SUPPRESS OUTPUTS TO THE
 		MASK	R10FLBIT	# CROSS-POINTER DISPLAY.
 		ADS	FLAGWRD0	# THE FOLLOWING ENEMA WILL REMOVE THE
-					# DISPLAY INERTIAL DATA OUTBIT.
-		TC	CLRADMOD	# INSURE RADMODES PROPERLY SET FOR R29.
+					# DISPLAY INERTIAL DATA OUTBIT AND
+					# DISABLE THE RR ERROR CTRS FOR US.
 
 		EXTEND			# LOAD TEVENT FOR THE DOWNLINK.
 		DCA	TIME2
@@ -171,7 +165,6 @@ ABRTJASK	CAF	OCTAL27
 		DCA	SVEXITAD
 		DXCH	AVGEXIT
 
-## Page 832
 		EXTEND
 		DCA	NEG0
 		DXCH	-PHASE1
@@ -187,6 +180,7 @@ ABRTJASK	CAF	OCTAL27
 		CAF	THREE		# SET UP 4.3SPOT FOR GOABORT
 		TS	L
 		COM
+## Page 832
 		DXCH	-PHASE4
 
 		CAF	OCT37774	# SET T5RUPT TO CALL DAPIDLER IN	
@@ -222,7 +216,7 @@ GOABORT		TC	INTPRET
 
 		TC	DOWNFLAG
 		ADRES	FLRCS
-## Page 833
+
 		TC	DOWNFLAG
 		ADRES	FLUNDISP
 		
@@ -237,6 +231,7 @@ GOABORT		TC	INTPRET
 		TCF	P71RET
 
 P70INIT		TC	INTPRET
+## Page 833
 		CALL
 			TGOCOMP
 		DLOAD	SL
@@ -265,58 +260,56 @@ P70INIT		TC	INTPRET
 		SET	CALL
 			FLAP
 			COMMINIT
-		AXC,1	GOTO		# RETURN HERE IN P70, SE X1 FOR DPS COEFF.
-			0D
-			BOTHPOLY
-INJTARG		AXC,1			# RETURN HERE IN P71, SET X1 FOR APS COEFF
-			8D
-BOTHPOLY	DLOAD*	DMP		# TGO D
-			ABTCOF,1
-			TGO
+INJTARG		GOTO			# *** BYPASS ZONE 0 ***
+			UPTHROT		# *** BYPASS ZONE 0 ***
+#		DLOAD	DSU
+#			TGO
+#			50SECS
+#		BPL	EXIT
+#			UPTHROT
+
+		TC	CHECKMM
+		DEC	70
+		CAF	DEC299		# P71.  DELAY 3 SECONDS.
+		AD	BIT1		# P70.  DELAY 1 CENTISECOND.
+		TS	ENGOFFDT
+		TC	TWIDDLE
+		ADRES	ZONEZERO
+
+		TC	PHASCHNG
+		OCT	47014
+		-GENADR	ENGOFFDT
+		EBANK=	DVCNTR
+		2CADR	ZONEZERO
 ## Page 834
-		DAD*	DMP
-			ABTCOF +2,1	# TGO(C+TGO D)
-			TGO
-		DAD*	DMP
-			ABTCOF +4,1	# TGO(B+TGO(C + TGO D))
-			TGO
-		DAD*
-			ABTCOF +6,1	# A+TGO(B+TGO(C+TGO D))	
-		STORE	ZDOTD		# STORE TENTATIVELY IN ZDOTD
-		DSU	BPL		# CHECK AGAINST MINIMUM
-			VMIN
-			UPRATE		# IF BIG ENOUGH, LEAVE ZDOTD AS IS .
-		DLOAD
-			VMIN
-		STORE	ZDOTD		# IF TOO SMALL, REPLACE WITH MINIMUM.
-UPRATE		DLOAD
-			ABTRDOT
-		STCALL	RDOTD		# INITIALIZE RDOTD.
-			YCOMP		# COMPUTE Y
-		ABS	DSU
-			YLIM		# /Y/-DYMAX
-		BMN	SIGN		# IF <0, XR<.5DEG, LEAVE YCO AT 0
-			YOK		# IF >0, FIX SIGN OF DEFICIT.  THIS IS YCO.
-			Y
-		STORE	YCO
-YOK		DLOAD	DSU
-			YCO
-			Y		# COMPUTE XRANGE IN CASE ASTRONAUT WANTS
-		SR
-			5D
-		STORE	XRANGE		# TO LOOK.
+		TCF	ENDOFJOB
+
+ZONEZERO	TC	IBNKCALL
+		CADR	ENGINOF2
+
+		CAF	ZERETAD
+		TS	OUTROUTE
+
+                TC      DOWNFLAG
+                ADRES   AVEGFLAG
+                
+		TC	DOWNFLAG
+		ADRES	V37FLAG
+
+		TC	PHASCHNG
+		OCT	00004
+		
+		TCF	TASKOVER
+
 UPTHROT		SET	EXIT
 			FLVR
-			
-		TC	UPFLAG		# SET ROTFLAG
-		ADRES	ROTFLAG
 		
 		TC	THROTUP
 
 		TC	PHASCHNG
 		OCT	04024
 
- -3		TC	BANKCALL	# VERIFY THAT THE PANEL SWITCHES 
+  -3		TC	BANKCALL	# VERIFY THAT THE PANEL SWITCHES 
 		CADR	P40AUTO		# ARE PROPERLY SET.
 		
 		TC	THROTUP
@@ -324,11 +317,101 @@ UPTHROT		SET	EXIT
 UPTHROT1	EXTEND			# SET SERVICER TO CALL ASCENT GUIDANCE.
 		DCA	ATMAGAD
 		DXCH	AVGEXIT
-## Page 835
+
 GRP4OFF		TC	PHASCHNG	# TERMINATE USE OF GROUP 4.
 		OCT	00004
 
 		TCF	ENDOFJOB
+
+ZERETAD		CADR	ZONE0RET
+ZONE0RET	TC	2PHSCHNG
+		OCT	00002
+		OCT	05024
+		OCT	25000
+		
+		TC	INTPRET
+		RTB	DAD
+## Page 835
+			LOADTIME
+			90SEC
+		STORE	PIPTIME1	# STORE TEMPORARILY IN PIPTIME1.
+		STCALL	TDEC1
+			LEMPREC
+		VLOAD
+			VATT
+		STORE	VN1		# STORE VTIG TEMPORARILY IN VN1.
+		MXV	VSL1
+			REFSMMAT
+		STOVL	V
+			RATT
+		STORE	RN1		# STORE RTIG TEMPORARILY IN RN1.
+		MXV	VSL6
+			REFSMMAT
+		STCALL	R
+			MUNGRAV
+		SET	CALL
+			FLZONE0
+			ASCENT
+PREBRET1	EXIT
+		TC	PHASCHNG
+		OCT	04024
+		TC	INTPRET
+		CLEAR	VLOAD
+			FLZONE0
+			VGVECT
+		VXM	VSL1
+			REFSMMAT
+		STORE	DELVSIN
+		ABVAL
+		STOVL	DELVSAB
+			RN1
+                STOVL   RTIG
+                        VN1
+		STODL	VTIG
+			PIPTIME1
+		STORE	TIG
+		SET	CLEAR
+			XDELVFLG
+			LETABORT
+		EXIT
+
+		CAF	SIX		# SET UP R60 FOR A 10 DEG/SEC MANUV. RATE.
+		TS	RATEINDX
+
+		CAF	PRIO13		# REDUCE PRIORITY TO LEVEL EXPECTED BY
+		TC	PRIOCHNG	# P40 AND P42.
+		CAF	ORBMANAD	# INITIALIZE FOR ORBITAL MANEUVERS LIST.
+		TS	DNLSTCOD
+## Page 836
+		TS	AGSWORD
+
+		TC	CHECKMM
+		DEC	70		# FOR MODE=70,USE P40,OTHERWISE P42
+		TCF	42SET
+40SET		CAF	P40CADR
+		TS	CADRSAVE
+		CAF	DEC40
+COMMSET		TS	MMSAVE
+		TC	PHASCHNG
+		OCT	05024
+		OCT	13000
+
+		CA	MMSAVE
+		TC	NEWMODEA
+
+		CA	CADRSAVE
+		TC	BANKJUMP
+42SET		CAF	P42CADR
+		TS	CADRSAVE
+		CAF	DEC42
+		TCF	COMMSET
+
+P40CADR		CADR	P40LM
+P42CADR		CADR	P42LM
+CADRSAVE	=	MASS1
+MMSAVE		=	MASS1 +1
+DEC40		DEC	40
+DEC42		DEC	42
 
 P71RET		TC	DOWNFLAG
 		ADRES	LETABORT
@@ -349,6 +432,7 @@ OLDTIME		DLOAD	SL1		# IF FLAP=1,TGO=2 TGO
 			TGO
 		STCALL	TGO1
 			P12INIT
+## Page 837
 		EXIT
 		TC	PHASCHNG
 		OCT	04024
@@ -358,12 +442,13 @@ OLDTIME		DLOAD	SL1		# IF FLAP=1,TGO=2 TGO
 		DXCH	TGO
 		TCF	UPTHROT1 -3
 
-TGO1		=	VGBODY
+TGO1		=	APO
 # ************************************************************************
 
 		BANK	21
 		SETLOC	R11
 		BANK
+
 		COUNT*	$$/P70
 
 LEGAL?		CS	MMNUMBER	# IS THE DESIRED PGM ALREADY IN PROGRESS?
@@ -374,7 +459,6 @@ LEGAL?		CS	MMNUMBER	# IS THE DESIRED PGM ALREADY IN PROGRESS?
 		CS	FLAGWRD9	# ARE THE ABORTS ENABLED?
 		MASK	LETABBIT
 		CCS	A
-## Page 836
 		TCF	ABORTALM
 
 		CA	FLAGWRD7	# IS SERVICER ON THE AIR?
@@ -398,11 +482,12 @@ TGOCOMP		RTB	DSU
 			LOADTIME
 			TIG
 		SL
+## Page 838
 			11D
 		STORE	TGO
 		RVQ
 
-# ************************************************************************
+#  ************************************************************************
 
 THROTUP		CAF	BIT13
 		TS	THRUST
@@ -411,17 +496,27 @@ THROTUP		CAF	BIT13
 		WOR	CHAN14
 		TC	Q
 
-# ************************************************************************
+# *************************************************************************
+
+DEC299		DEC	299
 
 10SECS		2DEC	1000
+
+90SEC		2DEC	9000
+
+50SECS		2DEC	5000 B-17
+
 HINJECT		2DEC	18288 B-24	# 60,000 FEET EXPRESSED IN METERS.
+
 (TGO)A		2DEC	37000 B-17
+
 K(AT)		2DEC	.02		# SCALING CONSTANT
+
 WHICHADR	REMADR	ABRTABLE
 
 # ************************************************************************
-## Page 837
 		EBANK=	DVCNTR
 ATMAGAD		2CADR	ATMAG
+
 ORBMANAD	ADRES	ORBMANUV
 

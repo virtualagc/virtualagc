@@ -14,6 +14,8 @@
 ##		2010-08-29 JL	Fixed indentation, whitespace.
 ##		2016-12-22 RSB	Proofed comment text using octopus/ProoferComments
 ##				and corrected the errors found.
+##		2017-01-20 RSB	Fixed comment-text errors noted while diff'ing
+##				vs Colossus 249.
 ##
 ## This source code has been transcribed or otherwise adapted from digitized
 ## images of a hardcopy from the MIT Museum.  The digitization was performed
@@ -162,7 +164,7 @@ TFFTEM		=	36D	#	TEMPORARY
 #		VONE		E:(-7) M:(-5)		M/CS  STATE VECTOR	LEFT BY CALLER
 #		TFF/RTMU	E:(17) M:(14)		1/RT(CS SQ/M CUBE)	IF ENTER VIA TFFCONMU.
 #
-# DEBRIS:	QPRET.		PDL+0 ... PDL+3
+# DEBRIS:	QPRET,	PDL+0 ... PDL+3
 
 		BANK	33
 		SETLOC	TOF-FF
@@ -602,7 +604,7 @@ TFFEL1		DLOAD	DSU		# (ENTER WITH D/N=0 IN PDL+0)
 			RMAG1		# E:(-29) M:(-27)
 		SL2	DAD
 			TFFQ1		# Q1  E:(-16) M:(-15)
-		STODL	TFFTEM		# (Q1+R 1/Z) =SGN OF SDELF  E:(-16) M:(-15)
+		STODL	TFFTEM		# (Q1+R 1/Z) =SGN OF SDELF  E:(-16) M:(-15
 			TFFNP		# LC P  E:(-38+2NR) M:(-36+2NR)
 		DMP	SL*		# CALC FOR ARG FOR TFF/TRIG.
 ## Page 1386

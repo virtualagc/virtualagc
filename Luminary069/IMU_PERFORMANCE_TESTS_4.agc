@@ -1,10 +1,11 @@
+### FILE="Main.annotation"
 ## Copyright:   Public domain.
 ## Filename:    IMU_PERFORMANCE_TESTS_4.agc
 ## Purpose:     The main source file for Luminary revision 069.
-##              It is part of the source code for the original release 
-##              of the source code for the Lunar Module's (LM) Apollo 
-##              Guidance Computer (AGC) for Apollo 10. The actual flown 
-##              version was Luminary 69 revision 2, which included a 
+##              It is part of the source code for the original release
+##              of the flight software for the Lunar Module's (LM) Apollo
+##              Guidance Computer (AGC) for Apollo 10. The actual flown
+##              version was Luminary 69 revision 2, which included a
 ##              newer lunar gravity model and only affected module 2.
 ##              This file is intended to be a faithful transcription, except
 ##              that the code format has been changed to conform to the
@@ -16,32 +17,34 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2016-12-13 MAS  Created from Luminary 99.
 ##              2016-12-14 MAS  Updated from comment-proofed Luminary 99 version.
+##		2017-01-11 RRB	Updated for Luminary 69.
+##		2017-01-27 RSB	Proofed comment text using octopus/prooferComments
+##				and fixed errors found.
+##		2017-03-07 RSB	Comment-text error-fixes noted in proofing Luminary 116.
 
-## NOTE: Page numbers below have not yet been updated to reflect Luminary 69.
-
-## Page 382
-# PROGRAM -	IMU PERFORMANCE TESTS 4
-# DATE -	NOV 15, 1966
-# BY -		GEORGE SCHMIDT IL7-146 EXT 1126
+## Page 395
+# PROGRAM-IMU PERFORMANCE TESTS 4
+# DATE-NOV 15, 1966
+# BY-GEORGE SCHMIDT IL7-146 EXT 1126
 # MOD NO-ZERO
 #
-# FUNCITONAL DESCRIPTION
+# FUNCTIONAL DESCRIPTION
 #
-# THIS SECTION CONSISTS OF THE FILTER FOR THE GYRO DRIFT TESTS.  NO COMPASS
-# IS DONE IN LEM.  FOR A DESCRIPTION OF THE FILTER SEE E-1973.  THIS
-# SECTION IS ENTERED FROM IMU 2.  IT RETURNS THERE AT END OF TEST.
+# THIS SECTION CONSISTS OF THE FILTER FOR THE GYRO DRIFT TESTS. NO COMPASS
+# IS DONE IN LEM. FOR A DESCRIPTION OF THE FILTER SEE E-1973. THIS
+# SECTION IS ENTERED FROM IMU 2. IT RETURNS THERE AT END OF TEST.
 #
 # EARTHR,OGC ZERO,ERTHRVSE
 #
 # NORMAL EXIT
 #
-# LENGTHOT GOES TO ZERO - RETURN TO IMU PERF TESTS 2 CONTROL
+# LENGTHOT GOES TO ZERO-RETURN TO IMU PERF TESTS 2 CONTROL
 #
 # ALARMS
 #
 # 1600	OVERFLOW IN DRIFT TEST
 # 1601	BAD IMU MODING IN ANY ROUTINE THAT USES IMUSTALL
-#	OUTPUT
+# OUTPUT
 #
 # FLASHING DISPLAY OF RESULTS - CONTROLLED IN IMU PERF TESTS 2
 #
@@ -49,7 +52,7 @@
 #
 # ALL CENTRALS - ALL OF EBANK XSM
 
-## Page 383
+## Page 396
 		BANK	33
 		SETLOC	IMU4
 		BANK
@@ -89,7 +92,7 @@ ESTIMS		INHINT
 VERTSKIP	EXIT
 		TC	SLEEPIE +1
 		
-## Page 384
+## Page 397
 ALLOOP		CA	OVFLOWCK
 		EXTEND
 		BZF	+2
@@ -126,7 +129,7 @@ SPECSTS		CAF	PRIO20
 		
 		TC	TASKOVER
 		
-## Page 385
+## Page 398
 ALFLT		CCS	GEOCOMPS
 		TC	+2
 		TC	NORMLOP
@@ -177,7 +180,7 @@ DELMLP		DLOAD*	DMP
 		STORE	INTY 	+8D,1
 		PDDL	DMP*
 			VELSC
-## Page 386
+## Page 399
 			VLAUN 	+8D,1
 		SL2R
 		DSU	STADR
@@ -227,7 +230,7 @@ LOOSE		DLOAD*	PDDL*
 			POSNV 	+8D,1
 		MXV	VSL1
 			TRANSM1
-## Page 387
+## Page 400
 		DLOAD
 			MPAC
 		STORE	POSNV	 +8D,1
@@ -277,7 +280,7 @@ PERFERAS	EXIT
 		CA	CDUX
 		TS	LOSVEC	 +1	# FOR TROUBLESHOOTING VD POSNS 2$4
 		
-## Page 388
+## Page 401
 SETUPER1	TC	INTPRET
 		DLOAD	PDDL		# ANGLES FROM DRIFT TEST ONLY
 			ANGZ
@@ -322,9 +325,9 @@ SOMERR2		CAF	OCT1601
 		TC	ENDOFJOB
 		
 OCT1601		OCT	01601
-DEC585		OCT	06200		# 3200 B+14 ORDER IS IMPORTANT
+DEC585		OCT	06200		# 3200 B+14  ORDER IS IMPORTANT
 SCHZEROS	2DEC	.00000000
-## Page 389
+## Page 402
 		2DEC	.00000000
 		
 		OCT	00000

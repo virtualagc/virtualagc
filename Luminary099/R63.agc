@@ -13,7 +13,9 @@
 ##				images from Luminary 1A.
 ##		2016-12-14 RSB	Proofed text comments with octopus/ProoferComments
 ##				and corrected the errors found.
-##
+##		2017-01-26 RSB	Back-ported a comment-text fix from Luminary 69.
+##		2017-03-07 RSB	Comment-text fixes noted in proofing Luminary 116.
+
 ## This source code has been transcribed or otherwise adapted from
 ## digitized images of a hardcopy from the MIT Museum.  The digitization
 ## was performed by Paul Fjeld, and arranged for by Deborah Douglas of
@@ -78,7 +80,7 @@
 #
 # ERASABLE INITIALIZATION REQUIRED:  NONE
 #
-# DEBRIS:	OPTION1, +1, TDEC1, PCINTVSM, SCAXIS, CPHI, CTHETA, CPSI,
+# DEBRIS:	OPTION1, +1, TDEC1, POINTVSM, SCAXIS, CPHI, CTHETA, CPSI,
 ## Page 339
 #		3AXISFLG.
 
@@ -113,13 +115,13 @@ V89RECL		TC	INTPRET		#		    = 2 FOR X AXIS
 			TSTART82
 		STCALL	TDEC1		# STORE TIME FOR LEMCONIC CALL
 			LEMCONIC	# LEM STATE VECTOR UPDATE
-		VLOAD	VSU		# CSM POSITION - LEM POSITION - LOS
+		VLOAD	VSU		# CSM POSITION - LEM POSITION = LOS
 			RONE		# LOS VECTOR LEFT IN MPAC
 			RATT
 		MXV	RTB		# (REFSMMAT X LOS).  TRANSFORMS LOS FROM
 			REFSMMAT	# REFERENCE COORD TO STAB MEMB COORD.
 			NORMUNIT
-		STORE	POINTVSM	# STORE LOS FOR VECPOINT CALC
+		STORE	POINTVSM	# STORE LOS FOR VECPOINT CALL
 		EXIT
 		CS	OPTIONX +1	# 1 FOR Z AXIS.  2 FOR X AXIS.
 		AD	ONE

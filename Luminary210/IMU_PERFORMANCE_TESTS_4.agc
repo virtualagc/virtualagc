@@ -16,12 +16,13 @@
 ##              2016-11-26 HG   Transcribed
 ##		2016-12-23 RSB	Proofed comment text with octopus/ProoferComments
 ##				and fixed all errors found.
+##		2017-03-07 RSB	Comment-text error-fixes noted in proofing Luminary 116.
 
 ## Page 394
 # PROGRAM- IMU PERFORMANCE TESTS 4
 # DATE- NOV 15, 1966
 # BY- GEORGE SCHMIDT IL7-146 EXT 1126
-# MCD NO-ZERO
+# MOD NO-ZERO
 
 
 # FUNCTIONAL DESCRIPTION

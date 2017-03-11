@@ -1,10 +1,11 @@
+### FILE="Main.annotation"
 ## Copyright:   Public domain.
 ## Filename:    KALCMANU_STEERING.agc
 ## Purpose:     The main source file for Luminary revision 069.
-##              It is part of the source code for the original release 
-##              of the source code for the Lunar Module's (LM) Apollo 
-##              Guidance Computer (AGC) for Apollo 10. The actual flown 
-##              version was Luminary 69 revision 2, which included a 
+##              It is part of the source code for the original release
+##              of the flight software for the Lunar Module's (LM) Apollo
+##              Guidance Computer (AGC) for Apollo 10. The actual flown
+##              version was Luminary 69 revision 2, which included a
 ##              newer lunar gravity model and only affected module 2.
 ##              This file is intended to be a faithful transcription, except
 ##              that the code format has been changed to conform to the
@@ -16,10 +17,13 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2016-12-13 MAS  Created from Luminary 99.
 ##              2016-12-14 MAS  Updated from comment-proofed Luminary 99 version.
+##		2017-01-17 RRB	Updated for Luminary 69.
+##		2017-01-27 RSB	Proofed comment text using octopus/prooferComments
+##				and fixed errors found.
+##		2017-03-07 RSB	Removed yaYUL workaround that no longer 
+##				seems to be needed.
 
-## NOTE: Page numbers below have not yet been updated to reflect Luminary 69.
-
-## Page 365
+## Page 378
 # GENERATION OF STEERING COMMANDS FOR DIGITAL AUTOPILOT FREE FALL MANEUVERS
 #
 # NEW COMMANDS WILL BE GENERATED EVERY ONE SECOND DURING THE MANEUVER
@@ -59,14 +63,8 @@ INCRDCDU	TS	SPNDX
 		INDEX	SPNDX
 		MSU	NCDU
 		EXTEND
-		
-## The following 2 lines seem to have no purpose at all.
-## I am removing them because they only serve to confuse
-## the assembler by getting in between EXTEND and MP.<br>&mdash;RSB 2009
-## <pre>
-##		SETLOC	KALCMON1
-##		BANK
-## </pre>		
+		SETLOC	KALCMON1
+		BANK
 		
 		MP	DT/TAU
 		CCS	A		# CONVERT TO 2S COMPLEMENT
@@ -76,7 +74,7 @@ INCRDCDU	TS	SPNDX
 		INDEX	SPNDX
 		TS	DELDCDU		# ANGLE INCREMENTS TO BE ADDED TO
 		INDEX	SPNDX		# CDUXD, CDUYD, CDUZD EVERY TENTH SECOND
-## Page 366
+## Page 379
 		CA	NCDU		# BY LEM DAP
 		INDEX	SPNDX
 		XCH	BCDU
@@ -126,7 +124,7 @@ DT/TAU		DEC	.1
 MANUSTAT	EXIT			# INITIALIZATION ROUTINE
 		EXTEND			# FOR AUTOMATIC MANEUVERS
 		DCA	TIME2
-## Page 367
+## Page 380
 		DAS	TM		# TM+TO		MANEUVER COMPLETION TIME
 		EXTEND
 		DCS	ONESEK
@@ -177,7 +175,7 @@ MANUCALL	INHINT			# CALL FOR NEXT UPDATE VIA WAITLIST
 		TC	WAITLIST
 		EBANK=	TTEMP
 		2CADR	UPDTCALL
-## Page 368
+## Page 381
 		CAF	ONESEK 	+1	# INCREMENT TIME FOR NEXT UPDATE
 		ADS	NEXTIME
 		TCF	ENDOFJOB
@@ -189,7 +187,7 @@ UPDTCALL	CAF	PRIO26		# SATELLITE PROGRAM TO CALL FOR UPDATE
 
 		TC	TASKOVER
 		
-## Page 369
+## Page 382
 # ROUTINE FOR TERMINATING AUTOMATIC MANEUVERS
 
 MANUSTOP	CAF	ZERO		# ZERO MANEUVER RATES

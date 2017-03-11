@@ -1,10 +1,11 @@
+### FILE="Main.annotation"
 ## Copyright:   Public domain.
 ## Filename:    SYSTEM_TEST_STANDARD_LEAD_INS.agc
 ## Purpose:     The main source file for Luminary revision 069.
-##              It is part of the source code for the original release 
-##              of the source code for the Lunar Module's (LM) Apollo 
-##              Guidance Computer (AGC) for Apollo 10. The actual flown 
-##              version was Luminary 69 revision 2, which included a 
+##              It is part of the source code for the original release
+##              of the flight software for the Lunar Module's (LM) Apollo
+##              Guidance Computer (AGC) for Apollo 10. The actual flown
+##              version was Luminary 69 revision 2, which included a
 ##              newer lunar gravity model and only affected module 2.
 ##              This file is intended to be a faithful transcription, except
 ##              that the code format has been changed to conform to the
@@ -16,10 +17,11 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2016-12-13 MAS  Created from Luminary 99.
 ##              2016-12-14 MAS  Updated from comment-proofed Luminary 99 version.
+##		2017-01-17 RRB	Updated for Luminary 69.
+##		2017-01-27 RSB	Proofed comment text using octopus/prooferComments
+##				and fixed errors found.
 
-## NOTE: Page numbers below have not yet been updated to reflect Luminary 69.
-
-## Page 370
+## Page 383
 		EBANK=	XSM
 		
 		BANK	33
@@ -54,9 +56,9 @@ E/BKCALL	DXCH	BUF2		# SAVE A,L AND GET DP RETURN.
 		INCR	EBUF2		# RETURN +1 BECAUSE DOUBLE CADR.
 		CA	BBANK
 		MASK	LOW10		# GET CURRENT EBANK.  (SBANK SOMEDAY)
-		ADS	EBUF2	+1	# FORM BBCON.  (WAS FBANK)
+		ADS	EBUF2 +1	# FORM BBCON.  (WAS FBANK)
 		NDX	EBUF2
-		CA	0 	-1	# GET CADR OF ROUTINE.
+		CA	0 -1		# GET CADR OF ROUTINE.
 		TC	SWCALL		# GO TO ROUTINE, SETTING Q TO SWRETURN
 					# AND RESTORING A + L.
 		TC	+4		# TX Q, V34, OR BAD STALL RETURN.
@@ -66,7 +68,7 @@ E/BKCALL	DXCH	BUF2		# SAVE A,L AND GET DP RETURN.
 E/SWITCH	DXCH	EBUF2
 		DTCB
 		
-## Page 371
+## Page 384
 # E/CALL	FOR CALLING A FIXED MEMORY INTERPRETIVE SUBROUTINE FROM ERASABLE AND RETURNING TO ERASABLE.
 #
 # THE CALLING SEQUENCE IS...
@@ -84,12 +86,12 @@ E/CALL		LXCH	LOC		# ADRES -1 OF CADR.
 		DXCH	EBUF2		# STORE CADR AND RETURN.
 		TC	INTPRET
 		CALL
-			EBUF2		# INDIRECTLY EXECUTE ROUTING.  IT MUST
+			EBUF2		# INDIRECTLY EXECUTE ROUTINE.  IT MUST
 		EXIT			# LEAVE VIA RVQ OR EQUIVALENT.
-		LXCH	EBUF2 	+1	# PICK UP RETURN.
+		LXCH	EBUF2 +1	# PICK UP RETURN.
 		TCF	INTPRET +2	# SET LOC AND RETURN TO CALLER.
 		
-## Page 372
+## Page 385
 # E/JOBWAK	FOR WAKING UP ERASABLE MEMORY JOBS.
 #
 # THIS ROUTINE MUST BE CALLED IN INTERRUPT OR WITH INTERRUPTS INHIBITED.

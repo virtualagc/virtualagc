@@ -12,6 +12,7 @@
 ##		2016-12-13 RSB	GOTOP00H -> GOTOPOOH
 ##		2016-12-17 RSB	Proofed text comments with octopus/ProoferComments
 ##				and corrected the errors found.
+##		2017-01-28 RSB	Back-ported a comment fix from Luminary 69.
 ##
 ## This source code has been transcribed or otherwise adapted from
 ## digitized images of a hardcopy from the MIT Museum.  The digitization
@@ -95,7 +96,7 @@ P12LMB		DLOAD
 		MXV	VSL6
 			REFSMMAT
 		STCALL	R		# COMPUTE R = POS(TIG)*2(-24) M.
-			MUNGRAV		# COMPUTE GDT1/2(TIG)*2(-T)M/CS.
+			MUNGRAV		# COMPUTE GDT1/2(TIG)*2(-7)M/CS.
 		VLOAD	UNIT
 			R
 		STCALL	UNIT/R/		# COMPUTE UNIT/R/ FOR YCOMP.

@@ -11,10 +11,12 @@
 ## Mod history:	2009-05-15 RSB	Adapted from the Colossus249/ file of the
 ##				same name, using Comanche055 page images.
 ##		2009-05-20 RSB	Corrections:  On p. 551, "SETLOC P17S" -> P17S1.
-##		2016-12-10 RSB	All of the GOTOP00H's should have been
+##		2016-12-10 RSB	All of the GOTOPOOH's should have been
 ##				GOTOPOOH, and I've changed them back.
 ##		2016-12-10 RSB	Proofed comments with octopus/ProoferComments
 ##				and fixed the errors found.
+##		2017-01-20 RSB	Fixed comment-text errors noted while diff'ing
+##				vs Colossus 249.
 ##
 ## This source code has been transcribed or otherwise adapted from digitized
 ## images of a hardcopy from the MIT Museum.  The digitization was performed
@@ -76,7 +78,7 @@
 
 HPE		2DEC	157420.0 B-29		# EARTH'S MIN. PERICENTER ALTITUDE 85 N.M.
 
-HPL		2DEC	10668.0213 B-29		# MOON'S MIN. PERICENTER ALTITUDE 35000 FT
+HPL		2DEC	10668.0213 B-29		# MOON:S MIN. PERICENTER ALTITUDE 35000 FT
 
 CDSEC		2DEC	40000
 
@@ -372,7 +374,7 @@ LRGRDVO		DLOAD
 			CLSEC
 		GOTO
 			JUNCT1
-# TIME RAN OUT ASSUME SOLUTION IF SAVE PERICENTER
+# TIME RAN OUT ASSUME SOLUTION IF SAFE PERICENTER
 RNGETEST	DLOAD	DSU
 			HP
 			HPERMIN

@@ -16,6 +16,7 @@
 ##		2017-01-06 RSB	Page numbers now agree with those on the
 ##				original harcopy, as opposed to the PDF page
 ##				numbers in 1701.pdf.
+##		2017-02-12 RSB	Proofed comment text using octopus/ProoferComments.
 
 ## Page 155
 		SETLOC	4000 
@@ -31,7 +32,7 @@
 		DCA	T6ADR
 		DTCB
 		
-		DXCH	ARUPT		# T5RUPT -- AUTOPILOT
+		DXCH	ARUPT		# T5RUPT - AUTOPILOT
 		EXTEND
 		DCA	T5ADR
 		DTCB

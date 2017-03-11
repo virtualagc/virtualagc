@@ -1,10 +1,11 @@
+### FILE="Main.annotation"
 ## Copyright:   Public domain.
 ## Filename:    STABLE_ORBIT_-_P38-P39.agc
 ## Purpose:     The main source file for Luminary revision 069.
-##              It is part of the source code for the original release 
-##              of the source code for the Lunar Module's (LM) Apollo 
-##              Guidance Computer (AGC) for Apollo 10. The actual flown 
-##              version was Luminary 69 revision 2, which included a 
+##              It is part of the source code for the original release
+##              of the flight software for the Lunar Module's (LM) Apollo
+##              Guidance Computer (AGC) for Apollo 10. The actual flown
+##              version was Luminary 69 revision 2, which included a
 ##              newer lunar gravity model and only affected module 2.
 ##              This file is intended to be a faithful transcription, except
 ##              that the code format has been changed to conform to the
@@ -16,10 +17,12 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2016-12-13 MAS  Created from Luminary 99.
 ##              2016-12-15 MAS  Updated from comment-proofed Luminary 99 version.
+##		2017-01-11 RRB	Updated for Luminary 69.
+##              2017-01-20 HG   Remove DECTWO
+##		2017-01-28 RSB	Proofed comment text using octopus/prooferComments
+##				and fixed errors found.
 
-## NOTE: Page numbers below have not yet been updated to reflect Luminary 69.
-
-## Page 723
+## Page 731
 # STABLE ORBIT RENDEZVOUS PROGRAMS (P38 AND P78)
 #
 # MOD NO -1		LOG SECTION - STABLE ORBIT - P38-P39
@@ -70,14 +73,14 @@
 #	(1)  TRKMKCNT	NUMBER OF MARKS
 #	(2)  TTOGO	TIME TO GO
 #	(3)  +MGA	MIDDLE GIMBAL ANGLE
-## Page 724
+## Page 732
 #	(4)  DSPTEM1	TIME OF INTERCEPT OF PASSIVE VEHICLE ORBIT
 #			(FOR SOI ONLY)
 #	(5)  POSTTPI	PERIGEE ALTITUDE OF ACTIVE VEHICLE ORBIT AFTER
 #			THE SOI (SOR) MANEUVER
 #	(6)  DELVTPI	MAGNITUDE OF DELTA V AT SOI (SOR) TIME
 #	(7)  DELVTPF	MAGNITUDE OF DELTA V AT INTERCEPT TIME
-#	(8)  DELVLVE 	DELTA VELOCITY AT SOI (AND SOR) - LOCAL VERTICAL
+#	(8)  DELVLVC 	DELTA VELOCITY AT SOI (AND SOR) - LOCAL VERTICAL
 #			COORDINATES
 #
 # SUBROUTINES USED
@@ -109,8 +112,6 @@ P78		TC	BANKCALL
 		CADR	AVFLAGP		# OTHER VEHICLE ACTIVE
 		TC	BANKCALL
 		CADR	P20FLGON	# SET UPDATFLG, TRACKFLG
-		CAF	DECTWO
-		TS	NN
 		CAF	V06N33SR	# DISPLAY TIG
 		TC	VNDSPLY
 		CAF	V06N55SR	# DISPLAY CENTANG
@@ -120,10 +121,10 @@ P78		TC	BANKCALL
 		TCF	+5		# PROCEED
 		TCF	-5		# RECYCLE
 		CAF	THREE		# IMMEDIATE RETURN - BLANK R1, R2
-		TCR	BLANKET
-## Page 725		
+		TCR	BLANKET		
 		TCF	ENDOFJOB
 		CAF	FIVE
+## Page 733
 		TS	OPTION1
 		CAF	ONE
 		TS	OPTION2		# OPTION CODE IS SET TO 1
@@ -172,9 +173,9 @@ OPTN1		SET	CLEAR		# SOI
 		TC	VNDSPLY
 		TC	INTPRET
 JUNCTN1		CLEAR	CALL
-## Page 726
 			P39/79SW
 			SELECTMU	# SELECT MU, CLEAR FINALFLG, GO TO VN1645
+## Page 734
 RECYCLE		CALL
 			PREC/TT
 		BOFF	DLOAD
@@ -182,7 +183,7 @@ RECYCLE		CALL
 			OPTN2
 			TINT
 		STCALL	TDEC1		# PRECISION UPDATE PASSIVE VEHICLE TO
-			INTRPVP		# 	INTERCEPT TIME
+			INTRPVP		#    INTERCEPT TIME
 		VLOAD	UNIT
 			RATT		# RP/(RP)
 		PDVL	VXV
@@ -192,7 +193,7 @@ RECYCLE		CALL
 		PDDL	DDV
 			DELTAR
 		SL*			# DELTA R / (VP X RP/RP)
-			0 	-7,1
+			0 -7,1
 		STCALL	DELTTIME	# DELTA T = (RP) DELTA R / (VP X RP)
 			JUNCTN2
 OPTN2		DLOAD	DAD
@@ -218,16 +219,16 @@ JUNCTN2		DLOAD	DSU
 #	VN1645
 
 MAINRTNE	STCALL	TDEC1		# PRECISION UPDATE PASSIVE VEHICLE TO
-			INTRPVP		#	TARGET TIME
+			INTRPVP		#    TARGET TIME
 		DLOAD
 			TIG
 		STORE	INTIME
 		SSP	VLOAD
 			SUBEXIT
-			TEST3979
-## Page 727			
+			TEST3979			
 			RATT
 		CALL
+## Page 735
 			S3435.25
 TEST3979	BOFF	BON
 			P39/79SW
@@ -275,10 +276,10 @@ DSPLY81		CAF	V06N81SR	# DISPLAY DELTA V (LV)
 # STABLE ORBIT MIDCOURSE PROGRAM (P39 AND P79)
 #
 # MOD NO -1		LOG SECTION - STABLE ORBIT - P38-P39
-# MOD BY RUDNICKI, S	DATE 25JAN68
+# MOD BY RUDNICKI.S	DATE 25JAN68
 #
-## Page 728
 # FUNCTIONAL DESCRIPTION
+## Page 736
 #
 #	P39 AND P79 CALCULATE THE REQUIRED DELTA V AND OTHER INITIAL
 #	CONDITIONS REQUIRED BY THE AGC TO MAKE A MIDCOURSE CORRECTION
@@ -327,17 +328,17 @@ P79		TC	BANKCALL
 P39/P79A	DXCH	KT		# TIME TO PREPARE FOR BURN
 		TC	BANKCALL
 		CADR	P20FLGON	# SET UPDATFLG, TRACKFLG
-		TC	INTPRET
-## Page 729		
+		TC	INTPRET		
 		SET	CALL
 			P39/79SW
+## Page 737
 			SELECTMU	# SELECT MU, CLEAR FINALFLG, GO TO VN1645
 P39/P79B	RTB	DAD
 			LOADTIME
 			KT
 		STORE	TIG		# TIG = T (PRESENT) + PREPARATION TIME
 		STCALL	TDEC1		# PRECISION UPDATE ACTIVE AND PASSIVE
-			PRECSET		# 	VEHICLES TO TIG
+			PRECSET		#    VEHICLES TO TIG
 		CALL
 			S34/35.1	# GET UNIT NORMAL
 		DLOAD	GOTO
@@ -345,7 +346,6 @@ P39/P79B	RTB	DAD
 			MAINRTNE	# CALCULATE DELTA V AND DELTA V (LV)
 			
 # .... PREC/TT ....
-#
 # SUBROUTINES USED
 #
 #	PRECSET
@@ -356,7 +356,7 @@ PREC/TT		STQ	DLOAD
 			RTRN
 			TIG
 		STCALL	TDEC1		# PRECISION UPDATE ACTIVE AND PASSIVE
-			PRECSET		#	VEHICLES TO TIG
+			PRECSET		#    VEHICLES TO TIG
 		VLOAD	VSR*
 			RPASS3
 			0,2
@@ -371,7 +371,7 @@ PREC/TT		STQ	DLOAD
 		VSR*
 			0,2
 		STCALL	VVEC		# GET TRANSFER TIME BASED ON CENTANG OF
-			TIMETHET	#	PASSIVE VEHICLE
+			TIMETHET	#    PASSIVE VEHICLE
 		CALL
 			S34/35.1	# GET UNIT NORMAL
 		DLOAD	GOTO
@@ -379,15 +379,13 @@ PREC/TT		STQ	DLOAD
 			RTRN
 			
 # .... INTRPVP ....
-#
 # SUBROUTINES USED
 #
 #	CSMPREC
-## Page 730
 #	LEMPREC
-
+## Page 738
 INTRPVP		STQ	BOFF		# PRECISION UPDATE PASSIVE VEHICLE TO
-			RTRN		#	TDEC1
+			RTRN		#    TDEC1
 			AVFLAG
 			OTHERV
 		CALL
@@ -400,7 +398,6 @@ OTHERV		CALL
 			RTRN
 			
 # .... VNDSPLY ....
-#
 # SUBROUTINES USED
 #
 #	BANKCALL
@@ -423,9 +420,6 @@ V06N57SR	VN	0657
 V06N34SR	VN	0634
 V06N58SR	VN	0658
 V06N81SR	VN	0681
-DECTWO		OCT	2
-
-
 
 
 

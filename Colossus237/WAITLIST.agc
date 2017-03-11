@@ -14,6 +14,9 @@
 ##		2016-11-02 RSB	Typo (offset-reference -1 was not indented).
 ##		2017-01-01 RSB	Proofed comment text using octopus/ProoferComments,
 ##				and fixed errors found.
+##		2017-01-20 RSB	Fixed comment-text errors noted while diff'ing
+##				vs Colossus 249.
+##		2017-02-09 RSB	Comment-text fixes identified in proofing Artemis 72
 
 ## Page 1188
 # PROGRAM DESCRIPTION                                                                     DATE - 10 OCTOBER 1966
@@ -90,7 +93,7 @@
 
 # OUTPUT--
 
-#              LST1 AND LST2 UPDATED WTIH NEW TASK AND ASSOCIATED TIME.
+#              LST1 AND LST2 UPDATED WITH NEW TASK AND ASSOCIATED TIME.
 # DEBRIS-
 
 #              CENTRALS- A,Q,L
@@ -328,7 +331,7 @@ WTABORT		TC	BAILOUT		# NO ROOM IN THE INN.
 OCT40201	OCT	40201
 		
 ## Page 1197
-# THE ENTRY TC WTLST2 JUST PRECEDING OCT  N  IS FOR T  LE TD LE T   -1.
+# THE ENTRY TO WTLST2 JUST PRECEDING OCT  N  IS FOR T  LE TD LE T   -1.
 #                                                    N           N+1
 
 # (LE MEANS LESS THAN OR EQUAL TO).  AT ENTRY, C(A) = -(TD - T   + 1)
@@ -445,7 +448,7 @@ NOQBRSM		DXCH	ARUPT
 # LONGCALL IS CALLED WITH THE DELTA TIME ARRIVING IN A,L SCALED AS TIME2,TIME1 WITH THE 2CADR OF THE TASK
 # IMMEDIATELY FOLLOWING THE TC LONGCALL.  FOR EXAMPLE, IT MIGHT BE DONE AS FOLLOWS WHERE TIMELOC IS THE NAME OF
 # A DP REGISTER CONTAINING A DELTA TIME AND WHERE TASKTODO IS THE NAME OF THE LOCATION AT WHICH LONGCALL IS TO
-# START.
+# START
 
 # CALLING SEQUENCE-
 #                                                  EXTEND

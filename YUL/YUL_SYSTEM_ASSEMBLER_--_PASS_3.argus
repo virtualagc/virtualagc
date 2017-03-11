@@ -1,8 +1,8 @@
 # Copyright:    Public domain.
 # Filename:     YUL_SYSTEM_ASSEMBLER_--_PASS_3.mitigus
-# Purpose:      Part of the source code for YUL (revision 9),
+# Purpose:      Part of the source code for YUL (revision 9).
 # Assembler:    TBD
-# Contact:      Ron Burkey <info@sandroid.org>.
+# Contact:      Jim Lawton <jim.lawton@gmail.com>
 # Website:      https://www.ibiblio.org/apollo/index.html
 # Page scans:   https://archive.org/details/yulsystemsourcec00hugh
 # Pages:        482-539
@@ -10,6 +10,9 @@
 #               2016-12-29 JL   Transcribed pages 482-501.
 #               2016-12-31 JL   Transcribed pages 502-507.
 #               2017-01-02 JL   Transcribed pages 508-516.
+#               2017-01-08 JL   Transcribed pages 517-525.
+#               2017-01-10 JL   Transcribed pages 526-535.
+#               2017-01-11 JL   Transcribed pages 536-539.
 
 # Annotations:
 #
@@ -386,7 +389,7 @@ P0835   FOURTH PAGE OF ALPHABETIC CONSTANTS.  SEE ALSO THIRD PAGE.
  0185              ALF,2        SABLE MEMORY
  0186   HEALTH C   ALF,5        MULTIPLY DEFINED; OVERSIZE- OR ILL-DEFIN
  0187              ALF          ED
- 0189   HEALTH D   ALF,5        MULTIPLY DEFINED; ASSOCIATED WITH WRONG 
+ 0189   HEALTH D   ALF,5        MULTIPLY DEFINED; ASSOCIATED WITH WRONG
  0190              ALF,2        MEMORY TYPE
  0191   HEALTH E   ALF,5        MULTIPLY DEFINED; ASSOCIATED WITH CONFLI
  0192              ALF,4        CT IN FIXED OR ERASABLE MEMORY
@@ -439,7 +442,7 @@ P02166  SIXTH PAGE OF ALPHABETIC CONSTANTS.
  0222   LAST LINE  ALF,3        -0000000THE ASSEMBLY WAS
  0223   GOOD BAD   ALF,5         NAWSTY MANUFACTURABLE BINARY RECORDS ST
  0224              ALF,5        ORED ON YULPROGS
- 0225              ALF,3        
+ 0225              ALF,3
 
  0226   GOOD       ALF           GOOD:
  0227   MEDIOCRE   ALF           FAIR:
@@ -1089,7 +1092,7 @@ R052578 BLY HAD NO COUNT CARDS.
  052776            EBA          THREAD 1      BIT 25        Z,X1                REARRANGE THREADING ORDER WITHIN ROUTINE
  052784            EX           2,1           CAC3          THREAD 2            LIST SO THAT THE 80 OR LESS ITEMS FOR
  052792            SS           THREAD 1      CAC3          2,1                 THIS PAGE ARE THREADED FROM TOP OF LEFT
- 0528              EBA          THREAD2       BIT 25        Z,X2                COLUMN TO TOP OF RIGHT COLUMN TO SECOND 
+ 0528              EBA          THREAD2       BIT 25        Z,X2                COLUMN TO TOP OF RIGHT COLUMN TO SECOND
  052808 BGIN LACE  EX           1,1           CAC3          THREAD 1            OF LEFT COLUMN TO SECOND OF RIGHT COLUMN
  052814            SS           THREAD 2      CAC3          1,1                 TO THIRD OF LEFT COLUMN ETC.
  052824            NA, CAC3     THREAD 1      ARG 1         WC LACING           EXIT IF AGAIN POINTING TO TOP OF RIGHT.
@@ -1847,7 +1850,7 @@ R1039   THE RESULTING BYPT RECORD CONSISTS OF A BANNER WORD WITH SERIAL FROM X1,
 R1041   AGRAPH NUMBER (EQUAL TO THE ADDRESS OF THE FIRST WORD IN THE RECORD DIVIDED BY 256, STORED AS A BINARY IN-
 R1043   TEGER), 256 WORD POSITIONS, TWO ORTHOWORDS, AND THE EOR WORD.  EACH WORD POSITION MAY BE AVAILABLE (ALL ZEROS),
 R1045   AN OBJECT MACHINE WORD WITH CORRECT PARITY AND CONSTANT OR INTERPRETIVE FLAGS IF REQUIRED, OR ONE OF THE ALPHA-
-R1047   BETIC FLAGS ..BAD WORD.. OR ..CONFLICT..  WHEN A PARAGRAPH IS COMPLETED, IT IS HANDED OVER TO THE EDITOR IN MAIN 
+R1047   BETIC FLAGS ..BAD WORD.. OR ..CONFLICT..  WHEN A PARAGRAPH IS COMPLETED, IT IS HANDED OVER TO THE EDITOR IN MAIN
 R1049   PASS 3.  THE WORD RECORDS ARE OBTAINED FROM RD4, WHICH DELIVERS THEM IN 8 BUFFERS SO THAT THE SET OF WORD REC-
 R0151   ORDS MAY BE SCANNED IN ALTERNATING ORDER FOR SUCCESSIVE PARAGRAPHS.
 
@@ -1905,63 +1908,798 @@ P1057   CONSTANTS AND ASSIGNMENTS.
 # Page 524
 #      @YUL SYSTEM ASSEMBLER -- PASS 3                                           USER'S OWN PAGE NO.  43        PAGE  43
 
+P1083              INITIALIZING OF WS3 AND FIRST TASK: TO WRITE THE "AUTHMEMO" RECORD ON YULPROGS JUST AFTER THE SAVED
+R1085   BYPT RECORDS AND FOLLOW IT BY THE ALPHABETICALLY SORTED SYMBOL TABLE.
+
+ 1086   WS3        SPCR                                     WS3
+ 10862             TS           P3 MASKS      Z,MXR         LD EBUF 2      C
+ 1087              SWE,GROUPIND WS3           17            WS3
+ 1088              TX           PROG NAME     -             E BUFFER 2 +1       PROGRAM NAME FOR MISCELLANY RECORD.
+ 108812            TX           W AUTMEMO     -             E BUFFER 2 +2
+ 10882             SWS,THREAD10 0,1           12            Z,X0                FOLLOW AUTHOR THREADS IN PROGRAM NAME.
+ 10884             NA, D1       0,1           ONES          C,-1                ENTRIES UNTIL AUTHOR NAME ENTRY FOUND.
+ 1089              TX           N,X0,1        -             E BUFFER 2 +3       FETCH FIRST 8 CHARACTERS.
+ 10892             SS           N,X0          THREAD 11     Z,X0                THREAD TO REMAINDER.
+ 10894             TX           N,X0          -             E BUFFER 2 +4       FETCH SECOND 8 CHARACTERS.
+ 1090              TN           SUBSTRAB      8             E BUFFER 2 +5       SUBSTRAND TABLE.
+ 1092              TX           L SYM THR     -             Z,AU1
+ 1093              MT           N,AU1,1       58            N,AU2,1
+ 10932             TN           N,AU1         6             EBUFFER2 +102       SYMBOL TABLE INITIAL THREADS.
+ 1095              WD           SYM PLACE     L SYM TAB     E BUFFER 2 +71
+ 10952             BM           E BUFFER2 +71 2 THIRDS      E BUFFER2 +71       TWICE THE NUMBER OF SYMBOLS IN TABLE.
+ 10961             TS           L PROG FIL    Z,X0          REVNO SSL           ADDRESS OF PROGRAM NAME IN DIRECTORY.
+
+ 10963  WS3 REVNO  SS           0,1           A ADRES       E BUFFER 2 +71      SUPPLY REVISION NO. WHEN NO SUBROUTINES.
+ 10965             SWS,THREAD11 0,1           24            Z,X0           C
+ 10966             SWS, A ADRES N,X0          12            E BUFFER 2 +71      SUPPLY REVNO WHEN THERE ARE SUBROS.
+
+ 10968  REVNO SSL  SSL, ONE     0,1           23            WS3 REVNO      C    CHOOSE HOW TO GET REVISION NUMBER.
+ 1097              TX           RL TYP TAB    -             Z,S2
+ 1098              IT           N,S2,27       N,S2          E BUFFER 2 +72      STANDARD MEMORY TYPE TABLE.
+ 10991             TS           ZERO          EBUFFER2 +100 SET EBUF1      C
+ 10993             TX           ZERO          -             EBUFFER2 +101  C    SHOW NOT OBS., LET X1 POINT TO EBUFFER1.
+ 109942            NA, BIT34    SWITCH        ONES          C,+3
+ 109944            TX           BIT 1         -             EBUFFER2 +100
+ 109946            TX           BIT 1         -             INDEX +11           MARK BAD ASSEMBLY ON TAPE AND DISC.
+ 10995             TX           E BUFFERS     -             Z,X0                LET X0 POINT TO E BUFFER 2.
+ 10997             TX           PROG NAME     -             E BUFFER 1 +1
+ 10999             TX           Z,X1          -             Z,S0                SET UP INITIAL CONDITIONS FOR SORTING.
+ 1100              LA           E BUFFER 2    CAC3          PARAP NAP           SLEEP UNTIL PREVIOUS BYPT IS RESTORED.
+
+ 11016             WA           E BUFFER 2    ONE           N,S0
+ 11018             NA, BIT11    SWITCH        ZERO          EN TAP SYM +2       BRANCH TO BYPASS WRITING FOR ANY REASON.
+ 110195            TX           END SY BUF +1 -             Z,SH
+ 1102              CC           E BUFFER 2    -             N,SH
+ 1103              TS, D4       C,+1          WRIT DISC +1  PHI TAPE            SUPPLY INDEX NUMBER TO DISC-WRITER.
+ 1104              WF,1         3,0           -             DISASTER            WRITE AUTHMEMO RECORD.
+ 11054             NA           DISC ADRS     ZERO          WRIT DISC           SEND AUTHMEMO RECD TO DISC IF POSSIBLE.
+ 1106   SET EBUF1  SWE, CAC3    E BUFFERS     16            Z,R1
+ 1107              TX           Z,R1,3        -             Z,X1
+ 1108              TN           WS3 SY SPX    2             Z,R3
+ 1109              WA           E BUFFER 2    ONE           E BUFFER 1          SET UP E BUFFER 1 AND SPEC REGS FOR
+ 1111              TX           PROG NAME     -             E BUFFER 1 +1       RECEPTION OF SYMBOLS FROM READ SYMS.
+ 11122             TX           W SYMBLS 1    -             E BUFFER 1 +2
+ 1113              LA           SYM PLACE     L SYM TAB     EN TAP SYM          BRANCH IF NO SYMBOLS IN PROGRAM.
+ 1115              TS           -             -             READ SYMS
 
 # Page 525
 #      @YUL SYSTEM ASSEMBLER -- PASS 3                                           USER'S OWN PAGE NO.  44        PAGE  44
 
+P1117   PROCEDURE TO ACCEPT TWO-WORD SYMBOL TABLE ENTRIES FROM READ SYMS AND WRITE THEM ON YULPROGS IN LOTS OF 256,
+R1119   DOUBLE-BUFFERING THROUGH E BUFFER 1 AND E BUFFER 2.
 
+ 1120   TAPE SYM   NA, D4       3,0           6 D4          C,+2                BRANCH IF NOT NORMALLY DEFINED.
+ 11202             TX           Z,SC,1        -             -
+ 11204             NA, D4       3,0           3 D4          TBAD SYM            BRANCH IF NOT DEFINED BY EQUALS.
+ 11206             TX           N,X3          -             N,R1                ACCEPT ONLY GOOD DEFINITIONS.
+ 112072            SS           3,1           C1T2          N,R1,1              SEND PAGE OF DEFINITION TO SIM & EDIT.
+ 112074            TX           Z,SC,1        -             -
+
+ 11208  TRAD SYM   SM           CAC12         N,X3          N,R1,1              SPECIAL FLAG FOR BAD DEFINITION.
+ 1122              NA           Z,R1          END SY BUF    THREAD              RETURN IF NOT AT END OF BUFFER.
+
+ 1124              TX           Z,R1          -             END SY BUF +2       END-OF-BUFFER SPECS ARE ROTATED.
+ 1126              CC           N,X1          -             N,R1
+ 1127              TS           Z,X0          Z,R1          PHI TAPE            FETCH NAME OF ALTERNATE BUFFER.
+ 1129              WF,1         1,0           -             DISASTER
+ 1130              SS           C,-1          D4            WRIT DISC +1        SUPPLY INDEX NUMBER TO DISC-WRITER.
+ 1131              NA           DISC ADRS     ZERO          WRIT DISC           SEND SYMBOL RECORD TO DISC IF POSSIBLE.
+ 1132              WA           N,X1          ONE           N,X0                INCREMENT BANNER SERIAL.
+ 1134              WA           1,2           ONE           0,2                 INCREMENT N IN "SYMBOLSN".
+ 1136              TN           END SY BUF +1 2             END SY BUF          ROTATE END-OF-BUFFER SPECS.
+ 1138              TX           Z,X1          -             Z,X0
+ 1139              TS           Z,R1,3        Z,X1          THREAD              SET R1 FOR NEW BUFFER AND RETURN.
+
+
+R1141   PROCEDURE TO POLISH UP SYMBOL TABLE WRITING AND INITIALIZE FOR SORTING OPERATIONS.
+
+ 1147   EN TAP SYM TX           Z,X1,3        -             Z,S0                SET UP S0 FOR WORD-SORTING OPERATION.
+ 1149              NA           Z,X1          Z,R1          MID BUFF            BRANCH IF DIDN'T FILL LAST SYMBOL BUFFR.
+
+ 1151              TX           Z,S0          -             Z,X2                SET UP X2 FOR SORTING OPERATION.
+ 1153              WA           N,S0          SPEC SIGN     Z,X1                PUT BANNER SERIAL INTO X1.
+ 1157              WA           L B BUF1      L B BUF8      SJ LIM 9            SET UP FOR 2-WAY SCAN OF WORD RECORDS.
+ 1161              TX           L B BUF1      -             Z,X4
+ 1162              TX           SPEC SIGN     -             Z,R5                INITIALIZE NUMBER OF SUBSTRANDS.
+ 1164              SWE, CAC1    N WD RECS     32,L          W SERL LIM
+ 1165              WA           W SERL LIM    W SERL        HI RECS P1
+ 1166              TS           Z,X0          PH FLAG C     BARREN Q            CORRECT FLAG AND CHECK ON WORDLESSNESS.
+
+ 1168   MID BUFF   MT           ONES          2             N,R1,1
+ 1169              NA           Z,R1          END SY BUF    C,-1                FILL OUT LAST BUFFER WITH ONES.
+ 1171              CC           N,S0          -             N,R1
+ 1172              TS           Z,S0          Z,X2          PHI TAPE
+ 1173              WF,1         2,0           -             DISASTER            WRITE FINAL SYMBOL TABLE RECORD.
+ 11742             SS           C,-1          D4            WRIT DISC +1        SUPPLY INDEX NUMBER TO DISC-WRITER.
+ 11744             NA           DISC ADRS     ZERO          WRIT DISC           SEND IT TO DISC TOO IF POSSIBLE.
+ 1175              WA           N,X2          ONE           N,X0                PROVIDE SERIAL FOR 1ST SUBSTRAND RECORD.
+ 11752             TX           Z,X0          -             Z,S0                USE S0 AS TEMPORARY STORAGE.
+ 11754             TS           Z,X2          Z,X0          EN TAP SYM +2       GO TO INITIALIZATION OF SORTING.
+
+ 1177   BARREN Q   LA           N RECORDS     ONE           END WS3             BRANCH TO QUICK END IF NO WORDS.
 # Page 526
 #      @YUL SYSTEM ASSEMBLER -- PASS 3                                           USER'S OWN PAGE NO.  45        PAGE  45
 
+P1179              PROCEDURE TO SORT FWA-LWA WORDS FROM THE WORD RECORDS IN ORDER TO MAKE UP PRINTED ITEMS HAVING A FORM
+R1181   SIMILAR TO THOSE OF THE AVAILABILITY DISPLAY, EXCEPT THAT WITH EACH RANGE OF ADDRESSES IS ASSOCIATED A PAGE NUM-
+R1183   BER, WHICH IS THE PAGE ON WHICH THE CONTENTS OF THE NAMED LOCATIONS ARE DEFINED.  THESE ARE PRINTED AT UP TO 160
+R1185   PER PAGE IN FOUR COLUMNS -- QUITE PRETTY, IF I SAY IT MYSELF.
+
+
+
+ 1186              WA           B5 LOC 129    C320          END LX BUF          INITIALIZE BUFFER END CONSTANT.
+
+ 1188   LOC INDEX  TX           B5 LOC 129    -             Z,R7                INITIALIZE ADDRESS OF NEXT AVAILABLE.
+ 1190              TX           B5 LOC 129    -             MIN PTR             INITIALIZE MINIMUM POINTER.
+ 1192              TX           L ZERO        -             Z,X5                INITIALIZE MAX POINTER TO POINT TO ZERO.
+ 11932             TS           ONES          BLOCK IND     INC NLXPH      C    SYNCHRONIZE RD4 RESCAN DECISIONS.
+ 1194              TS           Z,SC          Z,R1          RCV WORDS           GO GET A WORD RECORD.
+
+ 1196   LOX LOOP   TX           N,X4          -             Z,R4                SAVE FWA.
+ 1198              SWE, ONES    N,X4,2        16            FLW                 CONVERT TO FORM  CAC  FWA  PAGE  LWA  .
+ 1200              WD           FLW           Z,R4          COMMON
+ 1201              WA           Z,X4          COMMON        Z,X4                LET X4 POINT TO NEXT FWA-LWA WORD.
+ 1203              LA           FLW           LAST MAX      LOX EOR Q           BRANCH IF DONE ON SOME PRECEDING PAGE.
+
+ 1205              LA           FLW           INDEX MAX     C,+2
+ 1206              TS           FLW           INDEX MAX     C,+2                KEEP TRACK OF GREATEST FLW OF ALL.
+ 1208              LA           FLW           N,X5          LOX LUKUP           BR UNLESS GREATER THAN ANY ON THIS PAGE.
+
+R1210   HEWERE FWA-LWA-PAGE ITEM IS KNOWN TO BE GREATER THAN ANY ON THIS PAGE.
+
+ 1211              NA, CAC2     FLW           5,0           FUL PAG Q1          BRANCH IF DIFF. PAGE NUMBER FROM PAGMAX.
+ 1213              WA           N,X5          ONE           Z,SH
+ 1214              NA           Z,R4          Z,SH          FUL PAG Q1
+ 1215              TS, CAC3     FLW           5,0           LOX EOR Q           (IF CONTINUATION OF PAGE MAX.)
+
+ 1217   FUL PAG Q1 LA           END LX BUF    Z,R7          LOX EOR Q           FORGET GREATER ITEM IF PAGE IS FULL.
+ 1219              TX           FLW           -             N,R7                PLANT HIGHEST ITEM OF PAGE SO FAR.
+ 1221              NA           N,X5          ZERO          C,+3                BRANCH UNLESS FIRST ITEM OF PAGE.
+ 1223              TX           Z,R7,1        -             Z,X5
+ 1224              TS           L ONES        N,R7,1        LOX EOR Q           SET FORWARD THREAD.
+
+ 1226              SS           Z,R7,1        CAC3          5,1                 SET FORWARD THREAD FROM FORMER GREATEST.
+ 1228              TX           L ONES        -             N,R7                FORWARD THREAD FOR NEW GREATEST.
+ 1230              SWS, CAC2    Z,X5,1        16,L          N,R7,1              BACKWARD THREAD FOR NEW GREATEST.
+ 1232              TS           N,X5          Z,X5          LOX EOR Q           NEW VALUE FOR MAX POINTER.
 
 # Page 527
 #      @YUL SYSTEM ASSEMBLER -- PASS 3                                           USER'S OWN PAGE NO.  46        PAGE  46
 
+P1234   FWA-LWA-PAGE ITEM IS NOW KNOWN TO BE IN CORRECT RANGE FOR THIS PAGE.
+
+ 1235   LOX LUKUP  TX           MIN PTR       -             Z,S1
+ 1236              LA           FLW           N,S1,1        S1 FOUND
+ 1237              TX           N,S1          -             Z,S2
+ 1238              LA           FLW           N,S2,1        S2 FOUND
+ 1239              TS           N,S2          Z,S1          LOX LUKUP +1        FIND FIRST ITEM GREATER THAN THIS ONE.
+
+ 1241   S1 FOUND   TX           Z,S1          -             Z,S3                LET S1 POINT TO NEXT LESS AND S2 POINT
+ 1243              TN           Z,S2          2             Z,S1                TO NEXT GREATER, WHICHEVER SN FOUND IT.
+ 1245   S2 FOUND   WD           Z,S1          ONE           Z,S1
+ 1246              WD           Z,S2          ONE           Z,S2
+ 1247              LA           N,S2          FLW           LOX EOR Q           IGNORE IF = FOUND ITEM (VERY QUEER).
+ 1249              NA           Z,S2          MIN PTR       COMB DOWN           BRANCH IF NOT LESS THAN ANY IN PAGE.
+ 1251              TS           Z,S2          Z,X3          COMBIN UP           GO TRY TO COMBINE WITH NEXT GREATER.
+
+ 1253   COMB DOWN  TX           Z,S1          -             Z,X3                TRY TO COMBINE WITH NEXT LESSER.
+ 1255              NA, CAC2     FLW           3,0           COMB DOWN -1        BRANCH IF WRONG PAGE NUMBER.
+ 1257              WA           N,X3          ONE           Z,SH                FORM LWA +1 OF NEXT LESSER ITEM.
+ 1259              NA           Z,R4          Z,SH          COMB DOWN -1        COMPARE FWA OF CURRENT ITEM.
+ 1261              TS, CAC3     FLW           3,0           LOX EOR Q           SUBSTITUTE LWA OF CURRENT ITEM.
+
+ 1263   COMBIN UP  NA, CAC2     FLW           3,0           FUL PAG Q2          BRANCH IF WRONG PAGE NUBER.
+ 1265              SWE, CAC3    N,X3          32            COMMON              ISOLATE FWA OF NEXT GREATER.
+ 1267              WA           FLW           ONE           Z,SH
+ 1268              NA           Z,SH          COMMON        FUL PAG Q2          COMPARE LWA +1 OF CURRENT ITEM.
+ 1270              TS, CAC1     FLW           3,0           LOX EOR Q           SUBSTITUTE FWA OF CURRENT ITEM.
+
+ 1272   FUL PAG Q2 NA           Z,R7          END LX BUF    LOX ON RYE          BRANCH IF THERES ROOM TO SANDWICH IT IN.
+ 1274              NA           Z,S2          Z,X5          C,+2                BRANCH UNLESS NEXT GREATER IS PAGE MAX.
+ 1276              TS           FLW           N,X5          LOX EOR Q           ...IN WHICH CASE REPLACE IT SANS FUSS.
+ 1278              TX           Z,X5          -             Z,S3                REPLACE PAGE MAX HERE ALSO, BUT ELECT A
+ 1280              SWE, CAC3    5,1           16            Z,X5                NEW PAGE MAX AND REARRANGE THREADS.
+ 1282              TS, CAC2     L ONES        5,1           LOX ON RYE +1       FORWARD THREAD FOR NEW PAGE MAX.
+
+ 1284   LOX ON RYE TX           Z,R7,2        -             Z,S3
+ 1285              TX           FLW           -             N,S3                PLANT NEW ITEM WHICH IS NOT PAGE MAX.
+ 1287              SWS, CAC2    Z,S3          16,L          3,1                 BACKWARD THREAD OF NEXT GREATER TO HERE.
+ 1289              NA           Z,S2          MIN PTR       C,+2                BRANCH UNLESS PLANTING PAGE MINIMUM.
+ 1291              TS           Z,S3,1        MIN PTR       LOX EOR Q -1        ...IN WHICH CASE OMIT SOME THREADING.
+ 1293              TX           Z,S1          -             Z,X3
+ 1294              SS           Z,S3,1        CAC3          3,1                 FORWARD THREAD OF NEXT LESSER TO HERE.
+ 1296              SWE, CAC2    Z,S1          16,L          N,S3                BACKWARD THREAD OF THIS TO NEXT LESSER.
+ 1298              SS           Z,S2          CAC3          N,S3                FORWARD THREAD OF THIS TO NEXT GREATER.
+
+ 1300   LOX EOR Q  NA           N,X4          ONES          LOX LOOP            BRANCH IF WORD RECORD NOT EXHAUSTED.
+
+ 1302              NA, CAC1     0,0           W SERL LIM    NEND SS             BRANCH IF NOT END OF SCAN.
+
+ 1304              TX           N,X5          -             LAST MAX            PRESERVE LARGEST ITEM OF PAGE.
+ 13052             TS           ZERO          BLOCK IND     MON WAKE       C    MAKE RD4 DECIDE ON RESCAN NOW.
 
 # Page 528
 #      @YUL SYSTEM ASSEMBLER -- PASS 3                                           USER'S OWN PAGE NO.  47        PAGE  47
 
+P1306   WAIT UNTIL MAIN PASS 3 (IN GROUP A) IS READY, THEN PRINT A PAGE.
+
+ 1307   PLOX GATE  TS           -             -             PARAP NAP           (CLEARED WHEN PASS 3 IS WAITING.)
+ 1309              WD           Z,R7          B5 LOC 129    COMMON              FORM TWICE NUMBER OF ITEMS ON PAGE.
+ 1311              TX           COMMON        -             Z,R6
+ 1312              TN           Z,X0          6             N,R7                SAVE X0 TO X5.
+ 1315              TS           L OLD LINE    Z,X5          AV DIS PAG     C
+ 1317              TN           LOX SB HED    4             PAGE HED2 +1        SET UP FIRST FOUR WORDS OF PAGE SUBHEAD.
+ 1319              LA           COMMON        ACO 8         C,+2                BRANCH IF LESS THAT 4 ITEMS ON PAGE.
+ 1321              TS           Z,SC,1        -             NORM LOXH      C    FORM FULL SUBHEAD AND SKIP ONE.
+ 1323              SSL, ACO8    COMMON        0             C, +0          C    FORM AS MUCH SUBHEAD AS NEEDED.
+ 1325              TS           MIN PTR       Z,X3          QUARTERS
+
+ 1326              TN           PAGE HED2 +4  11            PAGE HED2 +5        ONE COLUMN ONLY.  FILL WITH BLANKS.
+ 1328   NORM LOXH  TN           PAGE HED2 +1  11            PAGE HED2 +5        NORMAL CASE: FOUR COLUMNS.
+ 1330              TN           PAGE HED2 +1  4             PAGE HED2 +5   C    TWO COLUMNS.  REPEAT COLUMN HEADING...
+ 1332              TN           PAGE HED2 +8  7             PAGE HED2 +9        ...AND FILL OUT WITH BLANKS.
+ 1334              TN           PAGE HED2 +1  8             PAGE HED2 +5   C    THREE COLUMNS.  REPEAT COLUMN HEAD TWICE
+ 1336              TN           PAGE HED2 +12 3             PAGE HED2 +13       ... AND FILL OUT WITH BLANKS.
+
+ 1338   QUARTERS   TX           Z,X3          -             Z,S0                SET 1ST OF 4 QUARTER-THREADS.
+ 1340              TX           3,1           -             Z,X3                FOLLOW THREAD FOR 1ST QUARTER-PAGE.
+ 1342              LA           NINE          Z,R6,8        C,-1
+ 1343              TS           Z,X3          Z,S1          PLOX GATE +2   C    SET 2ND QUARTER-THREAD, RESET R6.
+ 1345              LA           ONES          N,X3          PLOX GRP            BRANCH IF ONLY ONE ITEM ON PAGE.
+ 1347              TX           3,1           -             Z,X3                FOLLOW THREAD THROUGH 2ND QUARTER-PAGE.
+ 1349              LA           ELEVEN        Z,R6,8        C,-1
+ 1350              TS           Z,X3          Z,S2          PLOX GATE +2   C    SET 3RD QUARTER-THREAD, RESET R6.
+ 1352              LA           ONES          N,X3          PLOX GRP            BRANCH IF ONLY 2 ITEMS ON PAGE.
+ 1354              TX           3,1           -             Z,X3                FOLLOW THREAD THROUGH 3RD QUARTER-PAGE.
+ 1356              LA           THIRTEEN      Z,R6,8        C,-1
+ 1357              TX           Z,X3          -             Z,S3                SET 4TH QUARTER-THREAD.
 
 # Page 529
 #      @YUL SYSTEM ASSEMBLER -- PASS 3                                           USER'S OWN PAGE NO.  48        PAGE  48
 
+P1359   PAGE IS ORGANIZED IN DOUBLE-SPACED GROUPS OF FOUR SINGLE-SPACED LINES.
+
+ 1360   PLOX GRP   TX           FOUR          -             Z,R6                INITIALIZE EACH GROUP OF FOUR LINES.
+
+ 1362   PLOX LINE  TS           L NEW LINE    Z,X0          AV LINE        C
+ 1365              LA           ONES          N,S0          EN LOX PAG          PAGE IS DONE IF FIRST COLUMN IS DONE.
+ 1367              SM           SPEC SIGN     WS3           Z,X4
+ 1368              TX           Z,X4,3        -             Z,X6                INITIALIZE FOR PRINT LINE.
+
+ 1370   PLOX COLM  TX           6,N,S0        -             FLW
+ 1371              EX           FLW           CAC3          EQIVLENT            ISOLATE LWA.
+ 1373              WA           M EDIT DEF    TWO           Z,CSC          C    SET LWA IN PRINT.
+ 1375              SWE, CAC3    FLW           32            ADDRESS             ISOLATE FWA.
+ 1377              LA           EQIVLENT      ADDRESS       C,+3                PRINT LWA ONLY IF FWA = LWA.
+ 1379              SWE, CAC3    M EDIT AV1    16            Z,CSC          C    SET FWA IN PRINT.
+ 1381              SS           M W TO        MW TO MASK    LINE +2
+ 1382              EX           FLW           CAC2          ARG 1               ISOLATE PAGE NUMBER.
+ 1386              TS           -             -             P3 D2A LZS     C
+ 1388              SS           ARG2          C5T8          LINE +3             SET PAGE NUMBER IN PRINT.
+ 1390              SM           Z,X0,4        ONES          6,N,S0,1            ERASE ITEM, ADVANCE QUARTER-LINE.
+ 1392              TX           6,N,S0        -             6,Z,S0
+ 1393              LA           Z,X4          Z,X6,1        C,+2                BRANCH IF FOURTH COLUMN IS DONE.
+ 1395              NA           6,N,S0        ONES          PLOX COLM           GO DO NEXT COLUMN UNLESS IT IS VOID.
+
+ 1397              TS           L NEW LINE    Z,X0          PRINT AVL      C    RESET X0 TO BEGINNING OF LINE, PRINT.
+ 1399              TX           Z,X0          -             L NEW LINE          INFORM GROUP A OF LINE PHASE.
+ 1400              NA           Z,R6,1        ONE           PLOX LINE           BRANCH IF NOT FOURTH LINE OF GROUP.
+
+ 1402              TS           SPACE 2       OLD SPACE     PLOX GRP
+
+ 1405   EN LOX PAG TN           N,R7          6             Z,X0                RESTORE X0 TO X5.
+ 1406              TS           L B BUF1      Z,R3          RE USE +1      C    REVERSE DIRECTION OF WORD RECORD SCAN.
+ 1408              NA, CAC3     LAST MAX      INDEX MAX     LOC INDEX           BRANCH IF MORE PAGES OF LOCATION INDEX.
+
+ 1410              TS           ZERO          E LOX GATE    MON WAKE       C    LET PASS 3 CARRY ON.
 
 # Page 530
 #      @YUL SYSTEM ASSEMBLER -- PASS 3                                           USER'S OWN PAGE NO.  49        PAGE  49
 
+P1413   PROCEDURE TO INITIALIZE EACH SUBSTRAND, AND SORTING LOOP FOR EACH WORD RECORD.
+
+ 1415   WS3 LOOP   TX           Z,X2          -             Z,S3                BEGIN PREPARATION OF A SUBSTRAND.
+ 1417              SS           Z,X1,1        SPEC MAG      N,S3,2              INSERT BANNER, STEP SERIAL.
+ 1419   FIND SS    SWE, D12     Z,R5          5             Z,R6                REL ADR OF SS USE WD -- INIT. =0.
+ 1421              WA           Z,R6          L WS3 SST     Z,R6
+ 1422              LA           BIT 1         N,R6          C,+3                BRANCH WHEN NEXT USED SUBSTRAND FOUND.
+ 1424              WA           N,R6          N,R6          N,R6                SHIFT OFF ZERO BIT FOR UNUSED SUBSTRAND.
+ 1426              TS           Z,R5,1        -             FIND SS             ADVANCE SUBSTRAND NUMBER AND LOOK AGAIN.
+
+ 1428              SWE, CAC12   N,R6          1,L           N,R6                SHIFT OFF 1-BIT FOR USED SUBSTRAND.
+ 1430              WD           Z,R5,1        SPEC SIGN     N,S3                STORE SUBSTRAND NUMBER.
+ 1432              SWE, ONES    N,S3,1        8,L           BLOCK IND           BLOCK INDICATOR = 256 X SUBSTRAND NO.
+ 1434              TX           Z,S3          -             Z,R4                SAVE ADDRESS FOR FIRST SUBSTRAND WORD.
+ 1436              MT           ZERO          63            N,S3,1
+ 1437              MT           ZERO          63            N,S3,1
+ 1438              MT           ZERO          63            N,S3,1
+ 1439              MT           ZERO          63            N,S3,1
+ 1440              MT           ZERO          4             N,S3,1              CLEAR 256 WORDS.
+ 1442              TS           Z,SC          Z,R1          RVC WORDS           GO TO RECEIVE A WORD BUFFER.
+
+ 1444   SORT LOOP  SWE, CAC3    N,X4          16            LWA                 ADDRESS OF LAST WORD IN STRING.
+ 1446              EX           N,X4,1        CAC3          FWA                 ADDRESS OF FIRST WORD IN STRING.
+ 1448              TX           Z,X4,1        -             Z,R6                SAVE ADDRESS OF ACTUAL STRING.
+ 1450              WD           LWA           FWA           LENGTH
+ 1451              WA           Z,X4          LENGTH        Z,X4                FORM ADDRESS OF NEXT LWA-FWA WORD.
+ 1453              NA, B33T40   FWA           BLOCK IND     FWA NOT IN          BRANCH IF BEGINNING OF STRING NOT IN SS.
+
+ 1455              WD           FWA           BLOCK IND     COMMON
+ 1456              WA           Z,R4          COMMON        Z,R7                FORM INITIAL DESTINATION ADDRESS.
+ 1458              LA, B33T40   LWA           BLOCK IND     BOTH IN             BRANCH IF ALL OF STRING IS IN SUBSTRAND.
+
+ 1460              WA           Z,R4          N,SC,7        R7 LIM              FINAL DESTINATION ADR, FWA IN, LWA NOT.
+ 1462              OCT          -377
+
+ 1463   FWA NOT IN NA, B33T40   LWA           BLOCK IND     SORT EOR Q          BRANCH IF NONE OF STRING IN SUBSTRAND.
+
+ 1465              TX           Z,R4          -             Z,R7                INITIAL DESTINATION ADDRESS.
+ 1467              WD           BLOCK IND     FWA           COMMON
+ 1468              WA           Z,R6          COMMON        Z,R6                MODIFY INITIAL ORIGIN ADDRESS.
+
+ 1470   BOTH IN    WD           LWA           BLOCK IND     COMMON
+ 1471              WA           Z,R4          COMMON        R7 LIM              FINAL DESTINATION ADDRESS, LWA IN.
+
+ 1473   CONF CHEK  LA           N,R7          ZERO          C,+3                BRANCH IF NO FIXED STORAGE CONFLICT.
+ 1475              SWS, BIT34   Z,R6,1        1             SWITCH              CONFLICT IS ENOUGH FOR BAD ASSEMBLY.
+ 1477              TS           W CONFLIC     N,R7          C,+2                PUT ALF CONFLICT INSTEAD OF WORD.
+ 1479              TX           N,R6,1        -             N,R7                PUT NON-CONFLICTING WORD INTO SUBSTRAND.
+ 1481              NA           Z,R7,1        R7 LIM        CONF CHEK
+
+ 1482   SORT EOR Q NA           N,X4          ONES          SORT LOOP           BRANCH IF LWA-FWA WORD, NOT EOR FLAG.
 
 # Page 531
 #      @YUL SYSTEM ASSEMBLER -- PASS 3                                           USER'S OWN PAGE NO.  50        PAGE  50
 
+P1484   PROCEDURE AFTER EACH WORD RECORD IS FINISHED (FOR THIS SUBSTRAND).
+
+ 1485              NA, CAC1     0,0           W SERL LIM    NEND SS             BRANCH IF NOT END OF SUBSTRAND.
+ 1489   DONT SORT  NA           PH GLAG A     ZERO          PARAP NAP           SLEEP IF PASS 3 UNREADY TO RECEIVE BYPT.
+ 1492              TS           Z,X2          PH FLAG A     MON WAKE       C    WAKE PASS 3 AND GIVE IT THE BYPT.
+ 1500              SWE, D12     Z,R5          5             Z,R6
+ 1501              WA           Z,R6          N,SC,2        Z,R6                SET UP ANY-MORE-SUBSTRANDS CHECK.
+ 1503   L WS3 SST  SPEC                                     WS3 SST
+ 1504              LA           WS3 SST P8    Z,R6          END WS3             BRANCH IF NO MORE SUBSTRANDS.
+ 1506              LA           N,R6,1        ZERO          C,-1
+
+ 1507              TS           L B BUF1      Z,R3          RE USE +1      C
+ 1510              LA           PH FLAG C     ZERO          PARAP NAP           SLEEP IF PASS 3 USING OTHER BUFFER.
+ 1512              TS           PH FLAG C     Z,X2          -                   ACCEPT USED BUFFER AND WAKE PASS 3.
+ 1515              TS           ZERO          PH FLAG C     MON WAKE       C    SIGNAL READINESS FOR BUFFER JUST SENT.
+ 151602            NA, BIT11    SWITCH        ZERO          WS3 LOOP            BRANCH TO BYPASS WRITING FOR ANY REASON.
+ 151604            TS           -             -             PHI TAPE
+ 15162             WF,1         -             -             -                   MAKE SURE PASS 3 IS THROUGH WITH BUFFER.
+ 15164             TS           Z,X2          Z,S3          WS3 LOOP +1
+
+ 1517   NEND SS    NA           Z,X0          SJ LIM        C,+3                BRANCH IF NOT AT BUFFER MODULATION.
+ 1519              WD           N,SC,2        SJ LIM        Z,X4                BUF MODULATION... 1 TO 8 OR VICE VERSA.
+ 1521   SJ LIM 9   RESERVE      1
+
+ 1522              BA           Z,X0          DELT SBUF     Z,X4                INCREM OR DECREM BUFFER ADDRESS.
+
+ 1524              SM           N,X0          BIT 1         N,X0                FLAG BUFFER AS USED.
+ 1526              TS           -             -             MON WAKE       C    WAKE RD4.
+ 1528              BA           W SERL        N,SC,2        W SERL              INCREM OR DECREM WORD SERIAL.
+ 1530   DELT SJ    DEC          0001
+
+ 15308             TS           -             -             MON SLEEP      C
+ 1531   RCV WORDS  CP           N,X4          -             PARAP NAP           SLEEP IF SEEING AN UNCORRECTED READ ERR.
+ 1533              NA, CAC1     4,0           W SERL        C,-2                SLEEP UNTIL RD4 PREPARES A BUFFER.
+ 1534              TS           Z,X4,1        Z,X0          N,R1                PROCESS NEW BUFFER IN SAME SUBSTRAND.
+
+R1536   SUBROUTINE TO REVERSE DIRECTION OF BUFFER SCAN.
+
+ 1537   RE USE     WA           Z,R3          BUF SIZE      Z,R3           C
+ 1538              SS           ZERO          BIT 1         N,R3           C    MARK BUFFERS FOR RE-USE AT TURNAROUND.
+ 1540              NA           Z,R3          L B BUF8      C,-2           C
+
+ 1541   REVERSE    BS           ZERO          DELT SBUF     DELT SBUF      C
+ 1542              BS           ZERO          DELT SJ       DELT SJ        C    CHANGE SIGNS OF INCREMENTS.
+ 1544              WD           HI RECS P1    W SERL LIM    W SERL LIM     C
+ 1545              WD           SJ LIM 9      SJ LIM        SJ LIM         C    SWITCH LIMITS TO OTHER STATES.
+ 1547              TX           Z,X0          -             Z,X4                BEGIN NEW SS WITH LAST BUFFER DONE.
+
+
+
+ 1548   END WS3    NA           PH FLAG A     ZERO          PARAP NAP           SLEEP IF PASS 3 HAS EARS CLOSED.
+ 15482             EX           Z,X1          SPEC MAG      BANNER              STORE RECORD COUNT FOR EOFRI BANNER.
+ 15484             TS           ZERO          PH FLAG C     -                   CLEAR FLAG AGAIN JUST IN CASE.
+ 15486             TS           ONES          PH FLAG A     DEAD STOP           TELL PASS 3 IT IS ALL OVER.
 
 # Page 532
 #      @YUL SYSTEM ASSEMBLER -- PASS 3                                           USER'S OWN PAGE NO.  51        PAGE  51
 
+P1549   PROCEDURE FOR PASS 3 TO CLEAN UP THE END OF YULPROGS. IF THE ASSEMBLY IS A REPRINT OR A REJECTED ASSY. OR A SUB-
+R15492  ROUTINE, YULPROGS HAS ALREADY BEEN CLOSED AND REWOUND, AND BIT 11 SET.  OTHERWISE THE EXISTENCE OF A BYPT RECORD
+R15494  FOR THE PROGRAM IS NOTED IN THE DIRECTORY, UNLESS THE ASSEMBLY IS BAD.  THE FILE TAPE IS CLOSED AND REWOUND.
+
+ 1551   CLOSE YUL  NA, BIT11    SWITCH        ONES          YULPROP -1          BRANCH IF NEW BYPT RECORDS WERE WRITTEN.
+ 1554              LA           SWITCH        BIT 1         C,+2                BRANCH IF BAD MERGE.
+ 1556              TS           ZERO          BIT 37        WHICH WD            REPRINT MUST NOT CHANGE BYPT BIT STATUS.
+ 1558              TN           REJECT        8             LAST LINE +1
+ 1559              S, MON TYPER REJAS MSG     SPRAMR +24    FINISH T1 +1        BE MOST EMPHATIC ABOUT REJECTION.
+ 1561              TS           ZERO          PH FLAG A     PHI TAPE
+ 1562   YULPROP    WF,1         -             -             DISASTER            CHECK-WRITE LAST BYPT RECORD.
+ 15621             LA           DISC ADRS     ZERO          WHICH WD
+ 15622             LA           DF PLACE      L DISC BUF    CONFIRM             BRANCH IF LAST BUFFER CAME OUT EVEN.
+ 15626             TS           DF PLACE      END OF BUF    LAST RITE           FORCE WRITING OF SHORT LAST BLOCK.
+
+ 156262 CONFIRM    LA           C7T8          N ERR LINS    ECCH                LET'S NOT DEFILE THE DISC WITH A YUCCHH.
+ 156264            TN           DISC TOO      2             GOOD BAD +4         LET LAST LINE SHOW FILING ON DISC.
+ 15627             TS           ZERO          INDEX +4      DISCAP         C
+ 15628             OCT          -14                                             CONFIRM BINARY RECORDS FOR THIS PROGRAM.
+ 1563              SPEC                                     INDEX
+
+ 15631  WHICH WD   LA           N ERR LINS    TWO           C,+8
+ 15632             LA           N ERR LINS    D12           C,+6
+ 15633             LA           N ERR LINS    B41T48        C,+4
+ 156332            LA           N ERR LINS    C7T8          C,+2
+ 156334 ECCH       TS           KEEP BYPT -1  KEEP BYPT -2  C,+4                1000 CUSSES OR MORE RATE A YUCCCHHHH.
+ 15634             TS           WORSE +2      HORRID        C,+3
+ 15635             TS           WORSE +1      HORRID        C,+2
+ 15636             TX           WORSE         -             HORRID              DEGREE OF ASPERSION GIVES THE BAD NEWS.
+ 1564              NA, PROG SUB SWITCH        ZERO          NEUTRAL             BRANCH IF SUBROUTINE, NOT PROGRAM.
+ 1566              NA, BIT 34   SWITCH        ONES          KEEP BYPT           ADMIT TO BYPT IF GOOD/FAIR PROG ASSY.
+
+ 1577   MAIN CUSS  TS           BAD           GOOD BAD      KEEP BYPT      C    FETCH ADDRESS OF PROG/SUB NAME.
+ 1581              SS           ZERO          BIT 37        1,1                 INDICATE THAT NO BINARY RECORDS EXIST.
+ 1583              S, MON TYPER HORRID        SPRAM +8      FINISH T1
+ 15832             S, MON TYPER YUCCHHH       SPRAMR +16    FINISH T1 +1
+
+ 1586   KEEP BYPT  TX           L PROG FIL    -             Z,X1                LOCATION OF PROGRAM NAME IN YUL FILE.
+ 1588              SM           1,1           BIT 37        1,1                 DECLARE EXISTENCE OF BYPT RECORD.
+ 1590              NA           N ERR LINS    ZERO          C,+3
+ 1591              TX           GOOD          -             GOOD BAD
+ 1592              S, MON TYPER JOYFUL        SPRAM +8      FINISH T1
+ 1593              TX           MEDIOCRE      -             GOOD BAD
+ 1594              S, MON TYPER HO HUM        SPRAM +8      FINISH T1
+
+ 15942  NEUTRAL    S, MON TYPER W END OF      SPRAM +8      -
+
+ 1595   FINISH T1  S, MON TYPER ASSEMBLY      SPRAMR +8     -
 
 # Page 533
 #      @YUL SYSTEM ASSEMBLER -- PASS 3                                           USER'S OWN PAGE NO.  52        PAGE  52
 
+P1618              FINALIZING ROUTINE FOR PASS 3.  PRINTS A LINE CONCERNING THE QUALITY OF THE ASSEMBLY.  IF MORE COPIES
+R1620   OF THE LISTING WERE CALLED FOR, AND THE ASSEMBLY WAS GOOD OR FAIR, PRINTS THE ENTIRE LISTING FROM TAPE 5 AS MANY
+R1622   TIMES AS REQUIRED.  REWINDS (RELEASES) TAPE 5 IF THERE IS (IS NOT) ANOTHER TASK, TERMINATES BY RELOADING PASS 0.
+
+
+
+ 1624   END PASS 3 TN           LAST LINE     16            LINE
+ 1625              LA           N ERR LINS    ZERO          SEND LAST           BRANCH IF NO ERRORS IN PROGRAM.
+ 1627              SWE, CAC12   N ERR LINS    D,4,L         ARG 1
+ 1628              TS           -             -             P3 D2A LZS     C    EDIT ERROR COUNT FOR PRINTING.
+ 1634              SS           ARG 2         C3T8          LINE +10            SET ERROR COUNT IN PRINT.
+ 1636              TN           ERR SUMM L    5             LINE +11
+ 1637              SWS, C5T8    ERR PAGES     A,4           LINE +14
+ 16372             SWE, ONES    LINE +14      A,1,L         LINE +14
+ 1638              SS           ERR PAGES     C5T8          LINE +15
+ 16382             SWE, ONES    LINE +15      A,1,L         LINE +15            SET ERROR PAGE NUMBERS IN PRINT.
+ 16392             S, MON TYPER LINE +10      SPRAMR +48    -
+
+ 1640   SEND LAST  TX           SPACE 4       -             OLD SPACE
+ 16401             S, MON TYPER BLANKS        SPRA +8       -
+ 16402             TX           ZERO          -             LIN COUNT           DON'T LET LAST LINE HAVE A PAGE TO SELF.
+ 1641              TS, CHAR1    PERIOD C1     LINE +10      GO PRINT       C    PRINT END OF LAST PH OR OF SUBRO LIST.
+ 1643              TS           Z,SC          Z,X4          PRINT OLD           PRINT LAST LINE OF ASSEMBLY OUTPUT.
+
+ 1647              TS           SPACE 4       N,X0          GET LOG NO     C
+ 1648              SS           ZERO          D8T12         N,AU2               CLEAR MONITOR'S COUNT OF PRINT LINES.
+ 1649   RD4 WAIT   TS           -             -             PARAP NAP           SET TO PROCEED WHEN RD4 DIES.
+
+ 16502             NA, BIT11    SWITCH        ZERO          C,+4                BYPASS IF YULPROGS HAS BEEN CLOSED OUT.
+ 16504             S, MON TYPER YULPROP       -             BANNER              CLOSE OUT YULPROGS.
+ 16506             TS           -             -             PHI TAPE
+ 16508             RW,1         -             -             -
+ 1651              LA           N COPIES      ZERO          RELOAD P0           RETURN TO PASS 0 IF NO COPY TAPE EXISTS.
+ 16522             NA           Z,X0          L COP BUFS    C,+5                BRANCH IF LAST COPY BUF CAME OUT EVEN.
+ 16524             TN           ZERO          1             N,X0
+ 16526             MT           BLANKS        15            N,AU2,1             MAKE UP NO-PRINT-NO-SPACE LINE.
+ 16528             TS           -             -             COPY PRT5
+ 16529             TS           LINE          LINE          C,-4                FILL OUT LAST COPY BUFFER.
+ 1653              S, MON EOFRI COPIES +1     -             ZERO                CLOSE OUT TAPE WITH COPIES OF LISTING.
+ 1655              LA           BIT 1         SWITCH        COPIES              IF REPRINT, ALWAYS DO REQUESTED COPIES.
+ 1657              LA           GOOD BAD      BAD           REL PRT5            OMIT EXTRA COPIES IF BAD ASSEMBLY.
 
 # Page 534
 #      @YUL SYSTEM ASSEMBLER -- PASS 3                                           USER'S OWN PAGE NO.  53        PAGE  53
 
+P1659   PROCEDURE TO PRINT ADDITIONAL COPIES OF ASSEMBLY LISTINGS.
+
+ 1660   COPIES     TS           TWO           Z,R2          PHI TAPE
+ 1661              RW,5         -             -             -
+ 1662              SWE, CAC3    E BUFFERS     16            Z,X2
+ 1663              TS           E BUFFERS     Z,X1          PHI TAPE            LOAD ADDRESSES FOR DOUBLE-BUFFERING.
+ 1665              RF,5         1,0           -             -                   PASS OVER LABEL, READ FIRST LINE.
+ 1667              NA           Z,R2,1        ONE           C,-2
+
+ 1668              WD           N COPIES      PAPER PLY     N COPIES
+ 1669              TS           -             -             PRINT COP +4
+
+ 1670   PRINT COP  S, PHI PRINT 2,0
+ 16702             S, PHI PRINT 2,16
+ 16704             S, PHI PRINT 2,32
+ 16706             S, PHI PRINT 2,48
+ 1671              TS           Z,X1          Z,X3          PHI TAPE
+ 1672              RF,5         2,0           -             -
+ 1673              TN           Z,X2          2             Z,X1                SWAP BUFFER NAMES.
+ 1675              NA, BANBITS  2,0           BAN EOFRI     PRINT COP           BRANCH UNLESS EOFRI WAS READ.
+
+ 16762             TS           -             -             GET LOG NO     C
+ 16764             SS           ZERO          D8T12         N,AU2               CLEAR MONITOR'S COUNT OF PRINT LINES.
+ 1677              TS           -             -             PHI TAPE
+ 1678              RF,5         -             -             -                   FINISH READING SECOND EOFRI.
+ 1680              NA           N COPIES      PAPER PLY     COPIES              BRANCH IF MORE COPIES TO PRINT.
+
+ 1682   REL PRT5   SSL, ONE     SWITCH        44            C,+1                SEE IF ANOTHER YUL TASK FOLLOWS.
+ 1684              TS           Z,SC,1        -             PHI RLEAS
+ 1685              TS           -             -             PHI TAPE
+ 1686              RW,5         -             -             -                   REWIND OR RELEASE COPY TAPE ACCORDINGLY.
+
+ 1688   RELOAD P0  S, PHI PRINT 0,0
+ 16882             S, PHI PRINT 0,0
+ 16884             S, PHI PRINT 0,0                                             BE SURE TO RUN OUT PRINT LINES.
+ 16886             S, PHI LOAD  YUL PASS 0    15            BASE ADDR           CHANGE B ADR BY HAND AS YUL SYST GROWS.
+
+R1690              QUANTITIES TO BE FILLED IN BY THE PARTICULAR PART OF PASS 3.
+
+ 1691   FILL       MODLOC       64
+
+ 1692   SIZ PASS 3 EQUALS       FILL - PROG NAME + 64
+
+ 1693   M EDIT DEF EQUALS       FILL +64                                        SUBROUTINE ENTRY CACS.
+ 1695   M EDIT AV1 EQUALS       FILL +64
+ 1696   M PRINT PN EQUALS       FILL +64
+ 1697   M EDIT WD  EQUALS       FILL +65
+ 1698   M EXPLAIN  EQUALS       FILL +65
+
+ 1699   MAX LOC    EQUALS       FILL +66                                        MACHINE PARAMETERS.
+ 1701   MAX SSNO   EQUALS       FILL +67
+ 1702   MW TO      EQUALS       FILL +68
+ 1703   MW TO MASK EQUALS       FILL +69
 
 # Page 535
 #      @YUL SYSTEM ASSEMBLER -- PASS 3                                           USER'S OWN PAGE NO.  54        PAGE  54
+
+P1704              INITIALIZING SEQUENCE FOR PASS 3, SETTING UP RD4 AND WS3.  IF NECESSARY, MAKES UP OWN DISC DIRECTORY.
+
+
+
+ 1706              SETLOC,7C    SIZ PASS 3    B1
+
+
+
+ 17061  PARP NAME  ALF          ????PAS3
+ 1707   BIT 19     OCT          0000 0040
+ 1708   BIT 42     OCT          -100
+ 1709   DF NDX LIM OCT          0000 1000
+ 17092  HOLE       OCT          0075 7575 7575 7575
+
+ 1710   WS3 SST P7 SPEC                                     WS3 SST +7
+ 1711   L PARA PRS SPEC,B7                                  7D7
+ 17126  BLOT C1    ALF          ▪
+ 17127  W END YUL  ALF,2        END YUL PASS 2
+ 17128  NORUM CUS  ALF,4        BINARY RECORDS WON'T FIT ON DISC
+ 1713   2 MANY PGS ALF,4        OVER 500 YUL PROGRAMS ON DISC ▪▪
+
+ 1714   ALT WORDS  ALF,3         SUPERB   SO-SO  DISMAL
+ 1715              ALF,3          AWFUL    VILE  PUTRID
+ 1716   SUB LASTL  ALF,5              THIS SUBROUTINE IS MAINTAINED IN S        1657 COMPARES "IS SUBRO" VS " BAD. UN".
+ 1717              ALF,2        YMBOLIC FORM ON
+
+ 17172  BCGROUND   MPC, H       Z,0           301           MON PCR
+ 17173  DF NDX BUF EQUALS       L DISC BUF
+ 17174  DF NDX ADR EQUALS       EQIVLENT
+ 17175  4 COUNTER  EQUALS       ADDRESS
+ 171755 TAPE NAME  EQUALS       COMP BITS
+ 17176  DISC BUFF  EQUALS       7144
+ 17177  L BANK 3   EQUALS       L PROG TAB
 
 
 # Page 536
 #      @YUL SYSTEM ASSEMBLER -- PASS 3                                           USER'S OWN PAGE NO.  55        PAGE  55
 
+P17179  GENERAL INITIALIZATION: ACCOUNT FOR DIFFERENCE BETWEEN PROGRAMS AND SUBROUTINES, START PARAPROGRAMS, ETC.
+
+ 1718   INISH P3   TS           5,1           GOOD BAD +6   P3 MASKER      C    PUT CORRECT NAME OF TAPE INTO LAST LINE.
+ 17192             S, MON TYPER W END YUL     SPRA +16      C,+3                TYPE "END YUL PASS 2  ".
+ 17194             SS           BLANKS        CHAR 8        PAGE HEAD +13
+ 17196             TS           BLANKS        PAGE HEAD +14 C,+2                CLEAR SUBROUTINE NAME SLOT IN PAGE HEAD.
+ 17198             NA, CHAR1    PAGE HEAD +14 BLOT C1       C,-2                BRANCH IF NOT REJECT OR OBSOLETE.
+ 171992            EBA          SPEC SIGN     BIT 25        Z,X4                POINT TO ORIGIN OF ROUTINE LIST.
+ 171994            S, ETS       4,0           ZX +4         REDUCYMS            REMOVE ROUTINE NAMES FROM SYMBOL COUNT.
+ 1720   SUB REDUC  TX           L SYM THR     -             Z,X4
+ 17201             EBA          4,13          BIT 25        Z,X4                POINT TO BEGINNING OF AD HOC SUBRO DIR.
+ 172015            TX           N,SC,1        -             N,SC                CHANGE EXIT FROM LOOP.
+ 17202             LA           ONES          N,X4,1        SELF OBS Q -2       BRANCH IF NO MORE SUBROUTINES THIS ASSY.
+ 17204  REDUCYMS   LA           ONES          N,X4,1        SUB REDUC           BRANCH IF NO MORE WORD-COUNT ROUTINES.
+ 17205             WD           SYM PLACE     THREE         SYM PLACE           REMOVE NON-SYMBOL ENTRY FROM SYM COUNT.
+ 17206             S, ETS       4,0           ZX +4         REDUCYMS            THREAD TO NEXT NON-SYMBOL ENTRY.
+ 172064            LA           SYM PLACE     SPEC MAG      SELF OBS Q
+ 172066            WD           SYM PLACE     THREE         SYM PLACE           COMPENSATE FOR SKIPPING OVER 32K STOPPR.
+ 17207  SELF OBS Q SSL, ONE     SWITCH        36            C,+1           C    CHANGE REJECTION LINE IN VERSION ASSY.
+ 172072            SSL, ONE     SWITCH        37            C,+2                TEST WHETHER RECORDING BINARY RECORDS.
+ 172074            TN           REJ VERS      4             REJ REV
+ 17208             TX           PROG NAME     -             LAST PROG           CAUSE OBSOLETING OF OLD REVS OF THIS PR.
+ 17209             NA, PROG SUB SWITCH        ONES          JUDGE WDS           BRANCH IF DOING PROGRAM ASSEMBLY.
+ 1722              TX           BLANKS        -             SUBL HEAD +3        FIX SUBROUTINE LIST PAGE SUBHEAD.
+ 1724              TN           SUB LASTL     7             LAST LINE +2
+ 1725              TS           BLANKS        LAST LINE +1  COPY SST            FIX FINAL ASSEMBLY PRINTOUT.
+
+ 1727   JUDGE WDS  HA           SYM PLACE     PAGE NO       C,+0                GENERATE A RANDOM BIT IN BIT 47.
+ 1729              SSL, ONE     C,-1          1             C,+1
+ 1730              TN           ALT WORDS     6             JOYFUL
+
+ 17331  COPY SST   TN           SUBSTRAB      8             WS3 SST             MAKE A COPY OF THE SUBSTRAND TABLE.
+ 17333             TS           ONE           N RECORDS     LD EBUF 2      C
+ 173333            MT           ZERO          52            N,X3,1
+ 173336            LA           Z,X3          END SY BUF +1 C,-1                CLEAN OUT AUTHMEMO BUFFER.
+ 17334             TS           L WS3 SST     Z,X6          LD EBUF 2      C
+ 17335             TS           BIT 32        AVAIL MSK     C,+2
+ 17336  PH COUNT   WA           AVAIL MSK     AVAIL MSK     AVAIL MSK
+ 17337             NA, AVAILMSK 6,0           ONES          C,+2
+ 17338             WA           N RECORDS     ONE           N RECORDS           COUNT UP THE NUMBER OF PARAGRAPHS.
+ 1734              NA           AVAIL MSK     BIT 1         PH COUNT            BRANCH UNTIL SUBSTRAND TABLE WD IS DONE.
+ 17342             NA           Z,X6,1        WS3 SST P7    PH COUNT -1         BRANCH UNTIL ALL SS TABLE WORDS DONE.
+
+ 17344             TX           ZERO          -             DISC ADRS           IN CASE WE CANNOT OR SHOULDN'T USE DISC.
+ 17346             TX           L COMP NAM    -             Z,X6
+ 17347             SWS,THREAD10 6,1           12            Z,X6
+ 17348             SWE, ONES    CHAR 8        A,1           AVAIL MSK           MOVE LEADING NON-BLANK CHARACTERS OF
+ 1735              SS           N,X6          AVAIL MSK     PARP NAME           REFERENCED COMPUTER NAME TO FORM
+ 17352             SWE, C1T4    AVAIL MSK     A,1           AVAIL MSK           COMPLETE NAME OF PARTICULAR PASS 3.
+ 17354             NA, AVAILMSK 6,0           BLANKS        C,-2
+
+ 17355             NA, BIT11    SWITCH        ZERO          PAGE SIZQ -2        BRANCH IF BAD MERGE OR REPRINT.
+ 17357             LA           N RECORDS     ONE           PAGE SIZQ -1        TREAT CASE OF NO WORDS LIKE BAD MERGE.
+ 17361             NA, PROG SUB SWITCH        ZERO          PAGE SIZQ           NO BYPT-WRITING ON DISC FROM SUBRO ASSY.
+ 17363             LA, C5T8     DISC STAT     C6T8          PAGE SIZQ           BRANCH IF DISC IS INOPERABLE.
 
 # Page 537
 #      @YUL SYSTEM ASSEMBLER -- PASS 3                                           USER'S OWN PAGE NO.  56        PAGE  56
 
+P173645 WE ARE SURE OF WRITING BINARY RECORDS; DESTROY DUPLICATES IF ANY, CREATE FILE, AND PREPARE FOR CONFIRMATION.
+
+ 17365             TX           COMPUTER      -             INDEX               PUT BLANKLESS COMPUTER NAME INTO INDEX.
+ 17367             SWS, C5T8    5,1           A,4           INDEX               PUT FIRST LETTER OF TAPE NAME IN CHAR 5.
+ 17369             TS           L PROG FIL    Z,X6          C,+4
+ 1737              SWE, C7T8    6,1           24            DEC▪REVN       S    REVISION # OF PROGRAM WITHOUT SUBROS.
+ 17372             SWS,THREAD11 6,1           24            Z,X6           C
+ 17373             SWE, C7T8    N,X6          36            DEC▪REVN       S    REVISION # OF PROGRAM WITH SUBROUTINES.
+ 17375             SSL, ONE     6,1           23            C,-3           C
+ 17376             SS           ZERO          C6T8          INDEX
+ 17377             SS           DEC▪REVN      D12           INDEX
+ 17378             SWS, B39T42  DEC▪REVN      2,L           INDEX
+ 17379             SWS, CHAR5   DEC▪REVN      4,L           INDEX               PUT REVISION NUMBER INTO FILE NAME.
+ 17381             TX           ONES          -             INDEX +2            INITIALIZE SUCCESSIVE LOOKUPS.
+
+ 17383  DF LOOKUP  TS           PROG NAME     INDEX +1      DISCAP         C
+ 17384             OCT          -15                                             LOOKUP AND/OR DELETE EXISTING INSTANCES.
+ 17386             SPEC                                     INDEX
+ 17387             SSL, ONE     DF LOOKUP +1  3             C,+2                SELECT ON MODE (6=DELETE OR 15=LOOKUP).
+ 17389             TS           YUL WAA       Z,X6          C,+4                XIT HERE WHEN ALL OLD INSTANCES DELETED.
+ 1739              TS, CHAR8    BLANKS        DF LOOKUP +1  DF LOOKUP -1        RESTORE LOOKUP MODE, UNLOG AFTER DELETE.
+ 17391             NA, D10D11   INDEX +3      YUL FILE      DF LOOKUP           LOOK AGAIN IF NOT A GENUINE YUL PROGRAM.
+ 17394             TS, CHAR8    SIX           DF LOOKUP +1  DF LOOKUP           DELETE THE OLD VERSION WE FOUND.
+
+ 17396             WD           SYM PLACE     L SYM TAB     N SYM RECS
+ 173965            BM           N SYM RECS    2 THIRDS      N SYM RECS
+ 17397             WA           N SYM RECS    OCT 377       N SYM RECS
+ 17398             SWE, C7T8    N SYM RECS    8             N SYM RECS          GET NUMBER OF SYMBOL TABLE RECORDS.
+ 1740              SM           YUL LOG       C5T8          INDEX +2
+ 17401             WA           N SYM RECS    N RECORDS     N SUBFIL 1          GET TOTAL NUMBER OF RECORDS.
+ 174015            LA           OCT 377       N SUBFIL 1    PREP CONF -1        BRANCH IF FILE TOO BIG FOR DISC FILE.
+ 17402             SWE, ONES    N SUBFIL 1    1             Z,AU1               HALF THE NUMBER OF RECORDS OR JUST LESS.
+ 174025            WA           N SYM RECS    ONE           Z,AU2               NUMBER OF NON-PARAGRAPH RECORDS.
+ 17403             LA           Z,AU2         Z,AU1         C,+2                BRANCH IF THOSE WILL FIT IN 1ST SUBFILE.
+ 174035            WD           N SUBFIL 1    Z,AU2         Z,AU1               IF NOT, 2ND SUBFILE HAS PARAGRAPHS ONLY.
+ 17404             WD           N SUBFIL 1    Z,AU1         N SUBFIL 1          NUMBER OF RECORDS IN 1ST SUBFILE.
+ 174045            SWS, B31T39  N SUBFIL 1    11,L          CREATE WD
+ 17405             SWS, B31T39  Z,AU1         11,L          CREATE W2           TWO CREATIONS SNATCH ALL NEEDED DISC.
+ 174055            TS           -             -             DISCAP         C
+ 17406  CREATE WD  OCT          -400
+ 174065            SPEC                                     INDEX
+ 17407             TS           Z,SC,1        -             DISCAP         C
+ 174075            TS           -             -             PREP CONF -1        BAD RETURN MEANS NO ROOM IN DISC FILE.
+ 1741   CREATE W2  OCT          -1 000 402                                      CREATE FILE FOR THIS NON-REJECTED PROG.
+ 17411             SPEC                                     INDEX
+ 17412             TS           CREATE WD     DISC ADRS     PREP CONF           SUCCESS: GO PREPARE FOR CONFIRMATION.
+ 17414             S, MON TYPER NO RUM CUS    SPRA +32      PAGE SIZQ           CUSS NO ROOM AND FORGET ABOUT DISC USE.
 
 # Page 538
 #      @YUL SYSTEM ASSEMBLER -- PASS 3                                           USER'S OWN PAGE NO.  57        PAGE  57
 
+P174155 PREPARE FOR CONFIRMATION, WHICH WILL BE DONE WHEN AND IF THE RUN GETS THROUGH PASS 3.
+
+ 17416  PREP CONF  WA           FINISH T1     BIT 32        FINISH T1           ADD "; FILED ON DISC" TO FINAL TYPEOUT.
+ 17418             SM           YUL LOG       N,SC,1        INDEX +5            FORM CHARLIE WORD.
+ 1742              DEC          -2500
+ 17426             TX           DEC▪REVN      -             INDEX +8            REVISION NUMBER IN DECIMAL
+ 17428             TX           L AUTH NAM    -             Z,SH                AND AUTHOR NAME, ALL FOR BENEFIT OF THE
+ 1743              TX           N,SH,1        -             INDEX +9            SIMULATOR.
+ 17432             SS           N,SH          THREAD 11     Z,SH
+ 17433             TN           N,SH          1             INDEX +10
+ 17434             MT           ZERO          4             N,AU2,1
+ 174345            TX           N SYM RECS    -             INDEX +13           NUMBER OF SYMBOL TABLE RECORDS.
+ 17435             TX, D10D11   YUL FILE      -             INDEX +3            SUPPLY DISCAP'S CODE FOR YUL PROGRAMS.
+
+ 174362            NA, BIT34    SWITCH        ONES          PAGE SIZQ           BRANCH IF GOOD OR FAIR PROGRAM ASSEMBLY.
+ 17437             SWS, B15T16  SWITCH        4,L           SWITCH              BAD ASSEMBLY SETS CONDISH SUPPRESSIONS.
+
+ 1750   PAGE SIZ Q WA           L AV TABLE    ONE           Z,X1                POINT TO 1ST SPEC PAIR OF SYMBOL TABLE.
+ 1752              LA           N LINES       54 LINES      CH NEX SYM +2
+ 1753              TS           54 LINES      N LINES       CH NEX SYM +2       RESTORE ARTIFICIALLY OVERSIZE PAGE.
+
+ 17542  MD SYM CHK LA           ONES          N,X1,1        CH NEX SYM +3       BRANCH IF THERE ARE NO MORE SYMBOLS.
+ 17544             LA           1,1           CAC12         CH NEX SYM          BRANCH IF SYMBOL, NOT MULT. DEF. FLAG.
+ 17546             S, ETS       1,1           ZX +2         C,+1                POINT TO LAST OF MULTIPLE DEFINITIONS.
+ 17547             TX           2,1           -             Z,AU1               POINT TO FIRST OF MULTIPLE DEFINITIONS.
+ 17548             SS           N,X1          CAC3          2,1                 THREAD LAST MULT DEF TO NEXT SYMBOL.
+ 17549             SM           CAC12         Z,AU1         N,X1                MAKE FLAG LOOK LIKE BAD SYM ON DISC.
+ 175496 CH NEX SYM LA, CAC3     1,0           L AV TABLE    C,+2                BRANCH IF SYMBOL, NOT SPEC PAIR.
+ 175498            WA           N,X1          ONE           Z,X1
+ 1755              S, ETS       1,0           ZX +1         MD SYM CHK          GO SEEK ANOTHER MULTIPLY DEFINED SYMBOL.
+
+ 17551             LA, C5T8     DISC STAT     C6T8          SET Z(A)            BRANCH IF DISC IS INOPERABLE.
+ 17552             NA, PROGSUB  SWITCH        ONES          C,+2                BRANCH IF DOING PROGRAM ASSEMBLY.
+ 17553             NA, BIT13    SWITCH        ONES          SET Z(A)            BR. IF THIS ASSY OBSOLETED NO PROGRAMS.
 
 # Page 539
 #      @YUL SYSTEM ASSEMBLER -- PASS 3                                           USER'S OWN PAGE NO.  58        PAGE  58
 
+P17565  MAKE UP OWN DIRECTORY OF PROGRAMS FOR THIS COMPUTER ON THE DISC -- 500 AT MOST.
+
+ 1757              SWE, C2T4    L DF NDX AD   B,24,L        DF NDX ADR
+ 1758              WA           DF NDX ADR    BIT 19        DF NDX ADR
+ 1759              WA           DF NDX LIM    DF NDX ADR    DF NDX LIM          SET UP LIMITS OF DISCAP INDEX AREA.
+
+ 1761   RD DF NDX  LA           DF NDX LIM    DF NDX ADR    SET Z(A)            BRANCH IF WHOLE INDEX HAS BEEN EXAMINED.
+ 1763              TX           DF NDX BUF    -             Z,X1                POINT TO BANK 3 OWN-DIRECTORY AREA.
+ 1765              S, DISCREAD  1,0           16            DF NDX ADR          READ 16 SECTORS = 1024 WORDS OF INDEX.
+ 1767              WA           DF NDX ADR    BIT 20        DF NDX ADR          INCREMEMENT DISC ADDRESS FOR NEXT READ.
+ 1769              TS           ZERO          4 COUNTER     DISC CHEK           WAIT FOR DISC READ TO FINISH.
+
+ 1771   FILE TYP Q NA           N,X1          HOLE          C,+2
+ 1772              TS           Z,X1,15       -             NXT (NDX) +1        REJECT A HOLE IN THE INDEX.
+ 1774              NA           N,X1          BCGROUND      C,+2
+ 1775              TS           Z,X1,15       -             NXT (NDX) +1        REJECT NEVER-USED PART OF INDEX AREA.
+ 1777              NA, D10D11   1,3           YUL FILE      NXT (NDX)
+ 1780              NA, C1T4     1,0           COMPUTER      NXT (NDX)
+ 1781              SWE, CHAR1   N,X1          A,4,L         TAPE NAME
+ 1782              NA, CHAR1    TAPE NAME     5,1           NXT (NDX)           DEMAND CORRECT COMPUTER AND TAPE.
+ 1784              TX           L END PTAB    -             Z,AU1
+ 1785              TS           L PROG TAB    Z,X2          C,+2
+ 1786              TX           Z,X2,1        -             -
+ 1787              LA           Z,AU1         Z,X2          ADD PROGN           BRANCH IF NAME NOT IN OWN DIRECTORY.
+ 1789              NA           N,X2,1        1,1           C,-2
+ 1790              NA, C6T8     2,0           1,0           C,-3                SEARCH OWN DIRECTORY FOR NAME AND REVNO.
+ 1792              TS           Z,X1,15       -             NXT (NDX) +1        GO TO NEXT WHEN FOUND DIFFERENT VERSION.
+
+ 1794   ADD PROGN  TX           1,1           -             N,AU1,1             STORE PROGRAM NAME.
+ 1796              TX           N,X1          -             N,AU1,1             STORE COMPUTER-TAPE-REVNO WORD.
+ 1798              TX           Z,AU1         -             L END PTAB
+ 1799              NA           L END PTAB    DF NDX BUF    NXT (NDX)           BRANCH IF OWN DIRECTORY DIDN'T OVERFLOW.
+ 1801              S, MON TYPER 2 MANY PGS    SPRA +32      SET Z(A)            "OVER 500 YUL PROGRAMS ON DISC ▪▪".
+
+ 1803   NXT (NDX)  TX           Z,X1,15       -             -
+ 1804              WA           4 COUNTER     ONE           4 COUNTER
+ 1805              NA, THREE    4 COUNTER     ZERO          FILE TYP Q          BRANCH IF IN SAME SECTOR.
+ 1807              LA           BIT 42        4 COUNTER     RD DF NDX           BRANCH IF END OF DISCAP BUFFER.
+ 1809              TS           Z,X1,4        -             FILE TYP Q          JUMP TO NEXT SECTOR WITHIN BUFFER.
+
+ 1811   SET Z(A)   TS           ZERO          N EECRS       PRINT LIN      C
+ 1812              TX           L LINSTOR     -             Z,X0                SET UP DELAY BUFFERING OF PRINT LINES.
+ 1814              TN           YP3 SY SPX    2             Z,R3                SET OWN ADDRESSES INTO JOINT SYM SEARCH.
+ 1816              TX           L PARA PRS    -             Z,X6
+ 1817              MT           Z,SC,1        2             N,X6,3              SET UP STARTING ADDRESSES FOR SIDE GRPS.
+ 1819   PASS 3 GPB TS           E SYLT BAN    Z,X5          RD4                 INITIALIZE RECORD COUNT FOR BYPT COPY.
+ 1821   PASS 3 GPC TS           L PROG FIL    Z,X0          WS3                 GO TO FORM AUTHMEMO RECORD.
+ 1823              TS           Z,X0          Z,R1          MON WAKE       C    SET UP DESTINATION OF FOUND SYMBOL, AND
+ 1825              SPCR                                     YP3                 LET SIDE GROUPS BEGIN.
+ 1827              SWE,GROUPIND YP3           17            YP3                 SET UP GROUP INDICATOR FOR GROUP A.
+ 1829              S, PHI LOAD  PARP NAME     1             P3 MASKER
+
+
+ SEQBRK            END          YUL PASS 3    GENERAL

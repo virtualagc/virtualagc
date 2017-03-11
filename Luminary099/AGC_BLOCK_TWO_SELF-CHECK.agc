@@ -11,6 +11,7 @@
 ## Mod history:	2009-05-27 OH	Transcribed from page images.
 ##		2016-12-17 RSB	Proofed text comments with octopus/ProoferComments
 ##				and corrected the errors found.
+##		2017-01-28 RSB	WTIH -> WITH.
 ##
 ## This source code has been transcribed or otherwise adapted from
 ## digitized images of a hardcopy from the MIT Museum.  The digitization
@@ -81,7 +82,7 @@
 #	IN R2 THE BBCON OF SELF-CHECK, AND IN R3 THE TOTAL NUMBER OF ERRORS DETECTED BY SELF-CHECK SINCE THE LAST MAN
 #	INITIATED FRESH START (SLAP1).
 #
-#	SHOW-BANKSUM STARTING WTIH BANK 0 DISPLAYS IN R1 THE BANK SUM (A +-NUMBER EQUAL TO THE BANK NUMBER), IN R2
+#	SHOW-BANKSUM STARTING WITH BANK 0 DISPLAYS IN R1 THE BANK SUM (A +-NUMBER EQUAL TO THE BANK NUMBER), IN R2
 #	THE BANK NUMBER, AND IN R3 THE BUGGER WORD.
 #
 # ERASABLE INITIALIZATION REQUIRED

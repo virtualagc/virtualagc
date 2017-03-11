@@ -21,33 +21,42 @@
 #				log sections have now had their internal page-numbering
 #				adjusted to conform to the numbering of the printed 
 #				pages.
+#		2017-01-20 RSB	Changed GOTOP00H to GOTOPOOH in all *.agc
+#				files.  There are probably more POO problems
+#				but those are the only ones I fixed.
 #
 # The contents of the "Colossus249" files, in general, are transcribed 
 # from a scanned document originally obtained from MIT's website,
 # http://hrst.mit.edu/hrs/apollo/public/archive/1701.pdf, though this has
-# been superceded by a different, much-clearn copy of the same printout 
-# we received from AGC developer Fred Martin.  I'd like to note
-# that the character-set of the line-printer used must not have completely
+# been superceded by a different, much-cleaner copy of the same printout 
+# we received from AGC developer Fred Martin at one of the following sites:
+
+# Note that the character-set of the line-printer used did not completely
 # agreed with the one the developers had in mind --- and this is supported by
 # detailed comparison to printouts of the slightly earlier Colossus 237 program
-# and the later Comanche 55 program ---  so I've interpreted various
-# wacky symbols appearing in the print as follows:
+# and the later Comanche 55 program.  I've been told that this was printed on 
+# a "page printer" as opposed to the normal line printer used for other AGC 
+# printouts, and that the page printer had a configurable character set that 
+# must have been configured incorrectly.  I've interpreted various
+# wacky symbols appearing in the printout as follows:
 #
 #	Printed Character		Intended Character
 #	-----------------		------------------
 #	plus-minus			      	<
 #	lower-case Greek alpha		      	'
+#	lower-case Greek beta			"
 #	lower-case Greek delta		      	>
 #	lower-case Greek gamma 		      	|
 #	lower-case Greek pi		      	?
+#	upper-case Greek Sigma			%
 #	strange lower-case d		      	&
+#	integral symbol				#
 #	'			      	      	:
 #	:				      	@ 
 #	(discarded)				_
-# As for whether a printed ' or : might sometimes really supposed to be ' or :, I don't know.
 # As far as the underscore character is concerned (_), I will insert it if it appears from
 # closely-related program versions that it ought to be there, but there won't be anything
-# in the actual printout that tells me it should.
+# in the actual printout that tells me it should be there.
 #
 # Notations on the scanned document read, in part:
 #
@@ -64,7 +73,8 @@
 #	under NASA contract NAS 9-4065.
 #
 # Refer directly to the online document mentioned above for further information.
-# Please report any errors (relative to 1701.pdf) to info@sandroid.org.
+# Please report any errors (relative to scans of the Fred Martin version of the 
+# printout) to info@sandroid.org.
 #
 # This file is a little different from the other Colossus249 files I'm providing, 
 # in that it doesn't represent anything that appears directly in the original source.  
@@ -120,7 +130,7 @@ $P34-P35,_P74-P75.agc				        # pp. 452-495
 $R31.agc					        # pp. 496-501
 $P76.agc					        # pp. 502-504
 $R30.agc					        # pp. 505-515
-$STABLE_ORBIT.agc				        # pp. 516-523
+$STABLE_ORBIT_-_P38-P39.agc			        # pp. 516-523
 
 # PANDORA
 $P11.agc					        # pp. 524-540

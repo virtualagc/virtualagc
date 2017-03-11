@@ -1,10 +1,11 @@
+### FILE="Main.annotation"
 ## Copyright:   Public domain.
 ## Filename:    DAPIDLER_PROGRAM.agc
 ## Purpose:     The main source file for Luminary revision 069.
-##              It is part of the source code for the original release 
-##              of the source code for the Lunar Module's (LM) Apollo 
-##              Guidance Computer (AGC) for Apollo 10. The actual flown 
-##              version was Luminary 69 revision 2, which included a 
+##              It is part of the source code for the original release
+##              of the flight software for the Lunar Module's (LM) Apollo
+##              Guidance Computer (AGC) for Apollo 10. The actual flown
+##              version was Luminary 69 revision 2, which included a
 ##              newer lunar gravity model and only affected module 2.
 ##              This file is intended to be a faithful transcription, except
 ##              that the code format has been changed to conform to the
@@ -17,6 +18,8 @@
 ## Mod history: 2016-12-13 MAS  Created from Luminary 99.
 ##              2016-12-18 MAS  Updated from comment-proofed Luminary 99 version.
 ##		2016-12-23 RRB	Updated for Luminary 69.
+##		2017-01-28 RSB	Proofed comment text using octopus/prooferComments
+##				and fixed errors found.
 
 ## Page 1405
 # THE DAPIDLER PROGRAM IS STARTED BY FRESH START AND RESTART.  THE DAPIDLER PROGRAM IS DONE 10 TIMES
@@ -216,7 +219,7 @@ DSPCADR		2CADR	ALTDSPLY
 # WARNING:	EBANK MUST BE SET TO 6 WHEN USING THIS ROUTINE.
 #
 # INPUT:	RCSFLAGS AND	1) IF NEEDLFLG = 0, INPUT PERROR, QERROR, RERROR.
-#				2) IF NEEDLFLG = 1, INPUT CPHI,CTHETA,CPSI,CDUX,CDUY,CDUZ,M11,M21,M32,M22,M32.  (GPMATRIX)
+#				2) IF NEEDLFLG = 1, INPUT CPHI,CTHETA,CPSI,CDUX,CDUY,CDUZ,M11,M21,M31,M22,M32.  (GPMATRIX)
 #
 #
 # OUTPUTS:	RCSFLAGS WITH DSPLYALT REVERSED, AK, AK1, AK2, + NEEDLER OUTPUTS.
@@ -364,7 +367,7 @@ DSPLYTOT	EXTEND
 #			CHAN12	BIT 6 (IMU ERROR COUNTER ENABLE)
 #			CHAN14	BIT 13,14,15 (DAC ACTIVITY)
 #
-# SIGN CONVENTION:	AK = THETAC - THETA
+# SIGN CONVENTION<	AK = THETAC - THETA
 #			WHERE	THETAC = COMMAND ANGLE
 #				THETA = PRESENT ANGLE
 

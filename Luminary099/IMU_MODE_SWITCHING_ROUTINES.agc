@@ -16,6 +16,8 @@
 ##		2016-12-13 RSB	GOTOP00H -> GOTOPOOH
 ##		2016-12-18 RSB	Proofed text comments with octopus/ProoferComments
 ##				and corrected the errors found.
+##		2017-01-18 RRB	Found typo while updating for Luminary 69.
+##		2017-01-28 RSB	Comment-text fixes identified for Luminary 69.
 
 ## This source code has been transcribed or otherwise adapted from
 ## digitized images of a hardcopy from the MIT Museum.  The digitization
@@ -382,7 +384,7 @@ NOATTOFF	CS	OCT40010	# SUBROUTINE TO TURN OFF NO ATT LAMP.
 		TC	Q
 
 ## Page 1318
-# ROUTINES TO INITIATE AND TERMINATE PROGRAM USE OF THE PIPAS.  NO IMUSTALL REQUIRED IN EITHER CASE.
+# ROUITNES TO INITIATE AND TERMINATE PROGRAM USE OF THE PIPAS.  NO IMUSTALL REQUIRED IN EITHER CASE.
 
 PIPUSE		CS	ZERO
 		TS	PIPAX
@@ -852,7 +854,7 @@ GOMANUR		CA	ATTCADR		# IS KALCMANU FREE
 		EXTEND
 		BZF	+3
 		
-		TC	P00DOO		# NO
+		TC	POODOO		# NO
 		OCT	1210		# 2 TRYING TO USE SAME DEVICE
 		
  +3		EXTEND

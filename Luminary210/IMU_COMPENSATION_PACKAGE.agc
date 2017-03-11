@@ -16,6 +16,7 @@
 ##              2016-11-24 HG   Transcribed
 ##		2016-12-23 RSB	Proofed comment text with octopus/ProoferComments
 ##				and fixed all errors found.
+##		2017-03-07 RSB	Comment-text fixes noted in proofing Luminary 116.
 
 ## Page 338
                 BANK            7
@@ -153,7 +154,7 @@ IRIGY           EXTEND
 IRIGZ           EXTEND
                 QXCH            MPAC            +2      # SAVE Q
                 EXTEND
-                DCS             DELVY                   # (PIPA PULSES) X 2(-14)
+                DCS             DELVY                   # (PIPA PULSES) X 2(+14)
                 DXCH            MPAC
                 CA              ADSRAZ                  # (GYRO PULSES)/(PIPA PULSE) X 2(-6)    *
 

@@ -20,6 +20,7 @@
 ##                              fix opcode CAF -> TC
 ##		2016-12-25 RSB	Comment-text proofed using ProoferComments
 ##				and corrected errors found.
+##		2017-03-10 RSB	Comment-text fixes noted while transcribing Luminary 116.
 
 ## Page 794
                 EBANK=          E2DPS
@@ -103,7 +104,7 @@ TARGTDEX        OCT             0                       # BRAKQUAD
 # ENTRY POINTS:  ?GUIDSUB FOR THE IGNITION ALGORITHM, LUNLAND FOR SERVOUT
 # ===============================================================================================================:
 
-# IGNITION ALGORITHM ENTRY:  DELIVERS N PASSES OF QUADRATIC GUIDANCE
+# IGNITION ALGORITHM ENTRY:  DELIVERS N PASSES OF QUADRATIC QUIDANCE
 
 ?GUIDSUB        EXIT
                 CAF             TWO                     # N = 3

@@ -20,6 +20,8 @@
 ##              2016-12-12 HG   fix value for forward/lateral velocity
 ##		2016-12-23 RSB	Proofed comment text with octopus/ProoferComments
 ##				and fixed all errors found.
+##		2017-01-28 RSB	WTIH -> WITH.
+##		2017-03-07 RSB	Fixed comment-text errors noted while proofing Luminary 116.
 
 ## Page 313
 # THE FOLLOWING REFERS TO THE NOUN TABLES
@@ -106,7 +108,7 @@
 # 11000                           COMPUTED ALTITUDE (XXXXX. FEET)
 #                                                             USE ARITHDP1
 # 11001                           DP DEGREES (XXXX.X DEG)     USE ARITHDP3
-# 11010                           POSITION9 (XXXX.X FT)       USE ARITHDP3
+# 11010                           POSITION9 (XXXXX. FT)       USE ARITHDP3
 # 11011                           VELOCITY4 (XXXX.X FT/SEC)   USE ARITHDP2
 # 11100                           RADIANS (XX.XXX RADIANS)    USE ARITHDP4
 # 11101                           VELOCITY5 (XXXX.X FT/SEC)   USE ARITHDP3
@@ -228,7 +230,7 @@ NNADTAB		OCT	00000			# 00 NOT IN USE
 		OCT	00000			# 23 SPARE
 		ECADR	DSPTEM2 +1		# 24 DELTA TIME FOR AGC CLOCK(HRS,MIN,SEC)
 		ECADR	DSPTEM1			# 25 CHECKLIST
-						#       (USED WTIH PLEASE PERFORM ONLY)
+						#       (USED WITH PLEASE PERFORM ONLY)
 		ECADR	N26/PRI			# 26 PRIO/DELAY, ADRES, BBCON
 		ECADR	SMODE			# 27 SELF TEST ON/OFF SWITCH
 ## Page 318

@@ -56,6 +56,10 @@
  *                                 filenames as arguments.
  *               2012-09-18 JL     Add bugger word generation. Add
  *                                 verbose option. Add debug prints.
+ *               2017-01-30 MAS    Added 'y' (check parity) and 'n'
+ *                                 (no banksums) options.
+ *               2017-02-01 MAS    Changed UNASSIGNED words to print
+ *                                 out @ instead of 00000.
  *
  * For listing2binsource.c, the octal codes are provided in an input file
  * created by moving through the assembly-language portion of the
@@ -64,6 +68,7 @@
  * (whichever seems convenient at the time).  Interspersed with lines
  * containing octal codes are lines of one of the following forms:
  *
+ * y           (Octals that follow have parity bits)
  * pN          (N being a 1-4 digit page number from the assembly listing)
  * aNNNN       (NNNN being a 4-digit octal number indicating the
  *             CPU location counter for the next section of octal codes)
@@ -149,6 +154,8 @@ int main(int argc, char *argv[])
     int bank = -1, offset = -1;
     char lastLineType = 'c';
     int count = 0 /*, page = 2000 */;
+    int useParity = 0;
+    int noBanksums = 0;
     FILE *infile, *outfile;
 
     if (argc < 3) {
@@ -246,12 +253,16 @@ int main(int argc, char *argv[])
 
         // Now that the input lines have been completely normalized,
         // we can begin parsing them.
-        if (inputLine[0] == 'p') {
+        if (inputLine[0] == 'y') {
+            useParity = 1;
+        } else if (inputLine[0] == 'n') {
+            noBanksums = 1;
+        } else if (inputLine[0] == 'p') {
             s = strstr(inputLine, ",");
             if ((s == &inputLine[inputLength - 1]) && (sscanf(inputLine, "p%d%c", &i, &c) == 2) && (c == ',')) {
                 if (i != currentPage + 1)
                     retval = printError(currentPage, line, "Page number out of sequence.");
-                if (lastLineType != 'c' && lastLineType != 'p' && lastLineType != 'a')
+                if (lastLineType != 'c' && lastLineType != 'p' && lastLineType != 'a' && lastLineType != 'y' && lastLineType != 'n')
                     retval = printError(currentPage, line, "Missing address-check line.");
                 currentPage = i;
             } else
@@ -306,10 +317,30 @@ ProcessAorC:
             // This also handles the case of one word per line, which is an easier format
             // to enter if using the keyboard.
             for (s = inputLine; (ss = strstr(s, ",")) != NULL && ss < &inputLine[inputLength]; s = ss + 1) {
-
                 if (sscanf(s, "%o%c", &i, &c) != 2 || (c != ',' && c != ' ' && c != '\t')) {
                     i = CORRUPTED;
                     retval = printError(currentPage, line, "Illegal characters in octal field.");
+                }
+
+                if (useParity) {
+                    int parity = i & 07;
+                    int word;
+                    if (parity > 1) {
+                        i = CORRUPTED;
+                        retval = printError(currentPage, line, "Illegal parity digit (must be 0 or 1)");
+                    }
+                    i >>= 3;
+                    // Check parity
+                    word = i | (parity << 15);
+                    word ^= (word >> 8);
+                    word ^= (word >> 4);
+                    word ^= (word >> 2);
+                    word ^= (word >> 1);
+                    word &= 1;
+                    if (word != 1) {
+                        i = CORRUPTED;
+                        retval = printError(currentPage, line, "Parity error");
+                    }
                 }
 
                 if (retval == 0 && (i < 0 || i > 077777)) {
@@ -324,8 +355,9 @@ ProcessAorC:
                     retval = printError(currentPage, line, msgStr);
                 }
 
-                if (retval == 0)
+                if (retval == 0) {
                     rope[bank][offset] = i;
+                }
 
                 offset++;
             }
@@ -337,7 +369,7 @@ ProcessAorC:
     // possible for there to be unassigned words in the middle of a bank if some
     // words are unused (might be a transcription error?). Colossus237 banks 4 and
     // 23 illustrate this phenomenon.
-    if (retval == 0) {
+    if (retval == 0 && !noBanksums) {
         for (i = 0; i < NUM_BANKS; i++) {
             int bank = (i < 4) ? (i ^ 2) : i;
             if (verbose)
@@ -379,14 +411,6 @@ ProcessAorC:
             char bankString[33];
             for (j = 0; j < WORDS_PER_BANK; j++) {
                 int16_t value = rope[bank][j];
-
-                // Subsequent unassigned words in the same bank will be set to zero.
-                if (/*value > 077777 ||*/ value < 0) {
-                    //if (verbose)
-                    //    printf("Zeroing unassigned word at (%02o,%04o).\n", bank, BANK_OFFSET + j);
-                    value = 0;
-                }
-
                 if ((count % 8) == 0)
                     fprintf(outfile, "\n");
 
@@ -404,7 +428,10 @@ ProcessAorC:
                 if ((count % 1024) == 0)
                     fprintf(outfile, "BANK=%o\n", bank);
 
-                fprintf(outfile, "%05o ", value);
+                if (value >= 0)
+                    fprintf(outfile, "%05o ", value);
+                else
+                    fprintf(outfile, "  @   ");
                 count++;
             }
         }

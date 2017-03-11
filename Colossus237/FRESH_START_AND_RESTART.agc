@@ -12,6 +12,9 @@
 ##		2011-04-27 JL	Minor fixes.
 ##		2016-12-29 RSB	Proofed comment text using octopus/ProoferComments,
 ##				and corrected errors found.
+##		2017-01-14 RSB	Fixed comment-text errors discovered while proofing
+##				Colossus 249 comment text.
+##		2017-01-28 RSB	WTIH -> WITH.
 
 ## Page 176
 
@@ -114,7 +117,7 @@
 #     B. ALARMS
 
 #          1107  PHASE TABLE ERROR
-#          1110  RESTART WTIH NO ACTIVE GROUPS
+#          1110  RESTART WITH NO ACTIVE GROUPS
 
 ## Page 178
 		BANK	10
@@ -893,7 +896,7 @@ DUMMYAD		EXIT
 		
 POOH		TC	RELDSP		# RELEASE DISPLAY SYSTEM
 ## Page 195
-		CAF	PRIO5		# SET VARIABLE RESTART REGISTER FOR POO.
+		CAF	PRIO5		# SET VARIABLE RESTART REGISTER FOR P00.
 		TS	PHSPRDT2	
 		
 		INHINT
@@ -909,7 +912,7 @@ POOH		TC	RELDSP		# RELEASE DISPLAY SYSTEM
 		
 		CS	BIT7-8		# RESET IMUSE + KILL P20 BY TURNING OFF
 		MASK	FLAGWRD0
-		TS	FLAGWRD0	#			 REMDFLG
+		TS	FLAGWRD0	#			 RENDFLG
 		
 		CAF	DNLADP00
 
