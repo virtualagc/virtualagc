@@ -15,6 +15,7 @@
 ## Mod history: 2017-01-22 MAS  Created from Luminary 99.
 ##              2017-02-18 MAS  Began updating for Luminary 116.
 ##              2017-03-11 MAS  Complated updating for Luminary 116.
+##              2017-03-12 HG   Fix label BLINCR1  -> ELINCR1
 
 ## Page 90
 # CONVENTIONS AND NOTATIONS UTILIZED FOR ERASABLE ASSIGNMENTS.
@@ -2354,7 +2355,7 @@ FP              EQUALS          FCODD           +2              # B(2)TMP    THR
 ZERLINA         EQUALS          RTARG                           # B(1)  P64
 ELVIRA          EQUALS          ZERLINA         +1              # B(1)  P64
 AZINCR1         EQUALS          ELVIRA          +1              # B(1)  P64
-BLINCR1         EQUALS          AZINCR1         +1              # B(1)  P64
+ELINCR1         EQUALS          AZINCR1         +1              # B(1)  P64
 #
 
 ## Page 142

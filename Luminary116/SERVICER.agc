@@ -14,6 +14,7 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-01-22 MAS  Created from Luminary 99.
 ##              2017-03-11 HG   Transcribed
+##              2017-03-12 HG   Fix label REREPCS -> REREPOS
 
 ## Page 852
                 BANK            37
@@ -1605,7 +1606,7 @@ RDGIMS          EXTEND
 #    RESPECT TO THE NB.  BIT10 OF LRSTAT IS CLEARED TO ALLOW LR
 #    MEASUREMENTS AND THE JOB TERMINATES.
 
-REREPCS         INHINT
+REREPOS         INHINT
                 CS              FLGWRD11
                 MASK            PRIO3
                 ADS             FLGWRD11

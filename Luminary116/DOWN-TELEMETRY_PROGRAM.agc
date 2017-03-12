@@ -14,8 +14,9 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-01-22 MAS  Created from Luminary 99.
 ##              2017-01-31 RRB  Updated for Luminary 116.
-##              2017-03-17 HG   Fix operand O13QSAV  --> C13QSAV
+##              2017-03-07 HG   Fix operand O13QSAV  --> C13QSAV
 ##                                          C13QSAV  --> C13STALL  
+##              2017-03-12 HG   Fix operand DNTMGCTC --> DNTMGOTO
 
 ## Page 980
 # PROGRAM NAME- DOWN TELEMETRY PROGRAM
@@ -162,7 +163,7 @@ DODOWNTM        TS              BANKRUPT
                 EXTEND                                          # ORDER BIT WILL BE SET BACK TO ZERO.
                 RAND            CHAN13
                 CCS             A
-                TC              DNTMGCTC
+                TC              DNTMGOTO
                 TC              C13STALL
                 CA              BIT7                        
                 EXTEND                                          # SET WORD ORDER BIT TO 1 ONLY IF IT

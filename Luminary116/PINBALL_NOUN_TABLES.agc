@@ -20,6 +20,8 @@
 ##                              in Luminary 99 than the other way around.)
 ##              2017-03-09      fix  ECADR 0 --> OCT 0
 ##                                   OCT     --> ECADR
+##              2007-03-12      Fix operand DNRANGE  -> DNRRANGE
+##                                          DNRRDCT  -> DNRRDOT 
 
 ## Page 302
 # THE FOLLOWING REFERS TO THE NOUN TABLES
@@ -758,8 +760,8 @@ IDADDTAB        ECADR           TTOGO                           # 40    MIN/SEC 
                 ECADR           TTOGO                           # 77    MIN/SEC                 M/S
                 ECADR           YDOT                            # 77    VEL3                    DP3
                 OCT             0                               # 77    SPARE COMPONENT
-                ECADR           DNRANGE                         # 78    RR RANGE            RR RANGE
-                ECADR           DNRRDCT                         # 78    RR RANGE RATE  RR RANGE RATE
+                ECADR           DNRRANGE                        # 78    RR RANGE            RR RANGE
+                ECADR           DNRRDOT                         # 78    RR RANGE RATE  RR RANGE RATE
                 ECADR           TTOTIG                          # 78    MIN/SEC                  M/S
                 ECADR           CURSOR                          # 79    CDU DEG                 CDU
                 ECADR           SPIRAL                          # 79    CDU DEG                 CDU

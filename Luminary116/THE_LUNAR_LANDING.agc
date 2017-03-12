@@ -14,6 +14,7 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-01-22 MAS  Created from Luminary 99.
 ##              2017-03-10 HG   Transcribed
+##              2017-03-12 HG   Fix SELOC operand  F2DPS*31 --> F2DPS*34
 
 ## Page 778
                 BANK            32
@@ -281,7 +282,7 @@ DDUMCRIT        2DEC            +8              B-28            # CRITERION FOR 
 #               ****************************************
 
                 BANK            34
-                SETLOC          F2DPS*31
+                SETLOC          F2DPS*34
                 BANK
 
                 COUNT*          $$/P6567
