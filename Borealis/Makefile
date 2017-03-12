@@ -6,7 +6,7 @@
 # Mod history:	2017-01-30 MAS	Cleaned up from Aurora12 Makefile.
 
 BASENAME=Borealis
-EXTRA_YAYUL_ARGS+=--blk2
+EXTRA_YAYUL_ARGS+=--blk2 --parity
 
 # Borealis, being a custom program, will never have a binsource.
 NO_BINSOURCE=yes
