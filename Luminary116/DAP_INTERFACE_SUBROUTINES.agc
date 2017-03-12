@@ -14,6 +14,8 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-01-22 MAS  Created from Luminary 99.
 ##              2017-02-08 NV   Updated for Luminary 116.
+##		2017-03-10 RSB	Proofed comment text via 3-way diff vs
+##				Luminary 99 and 132 ... no problems found.
 
 ## Page 1396
                 BANK            20                              
@@ -133,7 +135,7 @@ STOPRATE        CAF             EBANK6
                 TC              Q                               
 
 # SUBROUTINE NAME:      ALLCOAST
-# WILL BE CALLED BY FRESH STARTS AND ENGINE OFF ROUTINES.               -
+# WILL BE CALLED BY FRESH STARTS AND ENGINE OFF ROUTINES.               .
 
 # CALLING SEQUENCE:     (SAME AS ABOVE)
 

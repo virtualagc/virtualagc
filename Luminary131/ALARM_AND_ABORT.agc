@@ -19,6 +19,7 @@
 ##				original hardcopy, as opposed to the PDF page
 ##				numbers in 1701.pdf.
 ##		2017-02-28 RSB	Proofed comment text using octopus/ProoferComments.
+##		2017-03-10 RSB	Comment-text fixes noted in proofing Luminary 116.
 
 ## Page 1373
 # THE FOLLOWING SUBROUTINE MAY BE CALLED TO DISPLAY A NON-ABORTIVE ALARM CONDITION.  IT MAY BE CALLED
@@ -66,7 +67,7 @@ CHKFAIL2	CCS	FAILREG +1
 		CA	L
 		TS	FAILREG +1
 
-PROGLARM	LXCH	FAILREG +2	# STORE AS "MCST RECENT" ALARM CODE
+PROGLARM	LXCH	FAILREG +2	# STORE AS "MOST RECENT" ALARM CODE
 
 		CS	DSPTAB +11D	# TURN ON PROGRAM ALARM IF OFF
 		MASK	OCT40400

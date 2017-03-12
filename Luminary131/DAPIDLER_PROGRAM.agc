@@ -18,6 +18,7 @@
 ##				numbers in 1701.pdf.
 ##		2017-01-28 RSB	Comment-text fixes identified for Luminary 69.
 ##		2017-02-28 RSB	Proofed comment text using octopus/ProoferComments.
+##		2017-03-10 RSB	Comment-text fixes noted in proofing Luminary 116.
 
 ## Page 1402
 # THE DAPIDLER PROGRAM IS STARTED BY FRESH START AND RESTART.  THE DAPIDLER PROGRAM IS DONE 10 TIMES
@@ -232,7 +233,7 @@ DSPCADR		2CADR	ALTDSPLY
 #
 # ALARM OR ABORT EXITS:  NONE
 #
-# SUBPROGRAMS CALLED:  NEEDLER, CVERSUB2
+# SUBPROGRAMS CALLED:  NEEDLER, OVERSUB2
 #
 # DEBRIS:	A, L, AND NEEDLER DEBRIS.
 

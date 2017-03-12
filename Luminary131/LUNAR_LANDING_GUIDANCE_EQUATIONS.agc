@@ -19,6 +19,8 @@
 ##				numbers in 1701.pdf.
 ##		2017-02-25 RSB	Proofed comment text using octopus/ProoferComments.
 ##		2017-03-01 RSB	Fixed lingering typos.
+##		2017-03-10 RSB	Comment-text fixes noted while transcribing Luminary 116.
+##				The label 1406P00 was replaced with 1406POO.
 
 ## Page 793
 		EBANK=	E2DPS
@@ -79,7 +81,7 @@ WHATDISP	TCF	P63DISPS	# BRAKQUAD
 
 # ALARM ROUTINE FOR TTF COMPUTATION:
 
-		TCF	1406P00		# IGNALG
+		TCF	1406POO		# IGNALG
 WHATALM		TCF	1406ALM		# BRAKQUAD
 		TCF	1406ALM		# APPRQUAD
 
@@ -526,9 +528,9 @@ TTF/8CL		TC	INTPRETX
 
 # 		(CONTINUE TO QUADGUID)
 
-# ****************************************************************************************************************
+# ***************************************************************************************************************
 # MAIN GUIDANCE EQUATION
-# ****************************************************************************************************************
+# ***************************************************************************************************************
 #
 #	AS PUBLISHED:-
 #		              -     -        -     -
@@ -546,7 +548,7 @@ TTF/8CL		TC	INTPRETX
 QUADGUID	CS	TTF/8
 		AD	LEADTIME	# LEADTIME IS A NEGATIVE NUMBER
 		AD	POSMAX		# SAFEGUARD THE COMPUTATIONS THAT FOLLOW
-		TS	L		#	BY FORCING -TTF*LEADTIME > OR - ZERO
+		TS	L		#	BY FORCING -TTF*LEADTIME > OR = ZERO
 		CS	L
 		AD	L
 		ZL
@@ -634,9 +636,9 @@ AFCCLEND	EXIT
 BRSPOT4		INDEX	WCHPHASE
 		TCF	AFTRGUID
 
-# ****************************************************************************************************************
+# ***************************************************************************************************************
 # NEW PHASE NOW?
-# ****************************************************************************************************************
+# ***************************************************************************************************************
 
 EXTLOGIC	INDEX	WCHPHASE	# IS TTF NEARER ZERO THAN CRITERION?
 		CA	TENDBRAK
@@ -1201,7 +1203,7 @@ ELEACH		DEC	.00873		# 1/2 DEGREE
 		COUNT*	$$/F2DPS	# ****************************************
 
 DESCBITS	MASK	BIT7		# COME HERE FROM MARKRUPT CODING WITH BIT
-		CCS	A		#	7 OR 6 OF CHANNEL 16 IN A; BIT 7 MEANS
+		CCS	A		#	7 OR 6 OF CHANNEL 16 IN A: BIT 7 MEANS
 		CS	TWO		#	- RATE INCREMENT, BIT 6 + INCREMENT
 		AD	ONE
 		ADS	RODCOUNT
@@ -1388,7 +1390,7 @@ TDISPSET	CA	TTF/8
 		TC	Q
 
 ## Page 821
-1406P00		TC	POODOO
+1406POO		TC	POODOO
 		OCT	21406
 1406ALM		TC	ALARM
 		OCT	01406

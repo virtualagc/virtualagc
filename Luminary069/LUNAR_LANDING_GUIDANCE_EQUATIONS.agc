@@ -24,6 +24,7 @@
 ##                              Fix interpretive operator STODL -> STORE
 ##		2017-01-28 RSB	Proofed comment text using octopus/prooferComments
 ##				and fixed errors found.
+##		2017-03-10 RSB	Comment-text fixes noted while transcribing Luminary 116.
 
 ## Page 802
                 EBANK=          E2DPS
@@ -116,7 +117,7 @@ TARGTDEX        OCT             0                       # BRAKQUAD
 # ENTRY POINTS:   2GUIDSUB FOR THE IGNITION ALGORITHM, LUNLAND FOR SERVOUT
 #****************************************************************************************************************
 
-# IGNITION ALGORITHM ENTRY:  DELIVERS N PASSES OF QUADRATIC GUIDANCE
+# IGNITION ALGORITHM ENTRY:  DELIVERS N PASSES OF QUADRATIC QUIDANCE
 
 ?GUIDSUB        EXIT
                 CAF             TWO                     # N = 3
@@ -989,7 +990,7 @@ REDESMON        EXTEND
                 TCF             COUNT'EM                #      Y: COUNT 'EM, RESET RUPT, TERMINATE
                 CCS             ZERLINA                 #      N: HAS ZERLINA REACHED ZERO YET?
                 TCF             PREMON1                 #         N: DIMINISH ZERLINA, CONTINUE
-RESETRPT        CAF             BIT12                   #         Y: RESET RUPT. TERMINATE
+RESETRPT        CAF             BIT12                   #         Y: RESET RUPT, TERMINATE
                 EXTEND
                 WOR             CHAN13
                 TCF             TASKOVER

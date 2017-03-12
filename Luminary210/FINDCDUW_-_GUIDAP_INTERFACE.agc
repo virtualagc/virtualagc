@@ -17,6 +17,7 @@
 ##              2016-12-12 MAS  Pushed in a +1 relative label.
 ##		2016-12-25 RSB	Comment-text proofed using ProoferComments
 ##				and corrected errors found.
+##		2017-03-10 RSB	Comment-text fixes noted in proofing Luminary 116.
 
 ## Page 905
 # PROGRAM NAME:   FINDCDUW
@@ -143,7 +144,7 @@ FINDCDUW        BOV             SETPD                   # FINDCDUW: ENTRY WHEN U
 
                 CA              XOVINHIB                # XOVINHIB MUST NOT BE BIT15
                 MASK            DAPBOOLS
-                TS              FLAGOODW                # FLAG0ODW = ANY PNZ NUMBER IF XOV INHIBTD
+                TS              FLAGOODW                # FLAGOODW = ANY PNZ NUMBER IF XOV INHIBTD
 
 ## Page 908
 # FETCH BASIC DATA
@@ -432,7 +433,7 @@ CDUWXFR         TS              TEM2
                 INDEX           TEM2
                 CA              -DELGMB
                 EXTEND
-                MP              DT/DELT                 # RATIO OF DAP INTERVAL TC CDUW INTERVAL
+                MP              DT/DELT                 # RATIO OF DAP INTERVAL TO CDUW INTERVAL
                 TC              ONESTO2S
                 INDEX           TEM2
                 TS              DELCDUX                 # ANGLE INTERFACE
