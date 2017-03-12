@@ -310,6 +310,9 @@
  *				process improved DSKY light latency. Last,
  *				added a new channel 163 bit that indicates
  *				power for the DSKY EL panel is switched off.
+ *		03/11/17 MAS	Further improved DSKY light responsiveness,
+ *				and split the logic out to its own function
+ *				as a bit of housekeeping.
  *
  *
  * The technical documentation for the Apollo Guidance & Navigation (G&N) system,
@@ -1549,6 +1552,55 @@ BurstOutput (agc_t *State, int DriveBitMask, int CounterRegister, int Channel)
   return (DriveCountSaved);
 }
 
+static void 
+UpdateDSKY(agc_t *State)
+{
+  unsigned LastChannel163 = DskyChannel163;
+
+  DskyChannel163 &= ~(DSKY_KEY_REL | DSKY_VN_FLASH | DSKY_OPER_ERR | DSKY_RESTART | DSKY_STBY);
+
+  if (State->InputChannel[013] & 01000)
+    // The light test is active. Light RESTART and STBY.
+    DskyChannel163 |= DSKY_RESTART | DSKY_STBY; // 
+
+  // If we're in standby, light the standby light
+  if (State->Standby)
+    DskyChannel163 |= DSKY_STBY;
+
+  // Make the RESTART light mirror RestartLight.
+  if (RestartLight)
+    DskyChannel163 |= DSKY_RESTART;
+
+  // Set KEY REL and OPER ERR according to channel 11
+  if (State->InputChannel[011] & DSKY_KEY_REL)
+    DskyChannel163 |= DSKY_KEY_REL;
+  if (State->InputChannel[011] & DSKY_OPER_ERR)
+    DskyChannel163 |= DSKY_OPER_ERR;
+
+  // Update the DSKY flash counter based on the DSKY timer
+  while (DskyTimer >= DSKY_OVERFLOW)
+    {
+      DskyTimer -= DSKY_OVERFLOW;
+      DskyFlash = (DskyFlash + 1) % DSKY_FLASH_PERIOD;
+    }
+
+  // Flashing lights on the DSKY have a period of 1.28s, and a 75% duty cycle
+  if (!State->Standby && DskyFlash == 0)
+    {
+      // If V/N FLASH is high, then the lights are turned off
+      if (State->InputChannel[011] & DSKY_VN_FLASH)
+        DskyChannel163 |= DSKY_VN_FLASH;
+
+      // Flash off the KEY REL and OPER ERR lamps
+      DskyChannel163 &= ~DSKY_KEY_REL;
+      DskyChannel163 &= ~DSKY_OPER_ERR;
+    }
+
+  // Send out updated display information, if something on the DSKY changed
+  if (DskyChannel163 != LastChannel163)
+    ChannelOutput(State, 0163, DskyChannel163);
+}
+
 //-----------------------------------------------------------------------------
 // Execute one machine-cycle of the simulation.  Use agc_engine_init prior to 
 // the first call of agc_engine, to initialize State, and then call agc_engine 
@@ -1663,61 +1715,13 @@ agc_engine (agc_t * State)
     ChannelRoutine (State);
   Count = ((Count + 1) & 017777);
 
+  // Update the various hardware-driven DSKY lights
+  UpdateDSKY(State);
+
   // Get data from input channels.  Return immediately if a unprogrammed 
   // counter-increment was performed.
   if (ChannelInput (State))
     return (0);
-
-  // Update DSKY lights before we potentially leave due to 
-  // --debug-dsky mode
-  unsigned LastChannel163 = DskyChannel163;
-
-  if (State->InputChannel[013] & 01000)
-    // The light test is active. Light RESTART and STBY.
-    DskyChannel163 |= DSKY_RESTART | DSKY_STBY; // 
-  else 
-    {
-      // Otherwise, if we're not in standby, clear the STBY light.
-      if (!State->Standby)
-        DskyChannel163 &= ~DSKY_STBY;
-
-      // Make the RESTART light mirror RestartLight.
-      if (RestartLight)
-        DskyChannel163 |= DSKY_RESTART;
-      else
-        DskyChannel163 &= ~DSKY_RESTART;
-    }
-
-  // Check for timing-related DSKY changes
-  while (DskyTimer >= DSKY_OVERFLOW)
-    {
-      DskyTimer -= DSKY_OVERFLOW;
-      DskyFlash = (DskyFlash + 1) % DSKY_FLASH_PERIOD;
-      DskyChannel163 &= ~(DSKY_KEY_REL | DSKY_VN_FLASH | DSKY_OPER_ERR);
-
-      // Flashing lights on the DSKY have a period of 1.28s, and a 75% duty cycle
-      if (!State->Standby)
-        {
-          if (DskyFlash == 0)
-            {
-              // If V/N FLASH is high, then the lights are turned off
-              if (State->InputChannel[011] & DSKY_VN_FLASH)
-                DskyChannel163 |= DSKY_VN_FLASH;
-            }
-            else
-            {
-              // If KEY REL or OPER ERR are high, those lights are turned on
-              if (State->InputChannel[011] & DSKY_KEY_REL)
-                DskyChannel163 |= DSKY_KEY_REL;
-              if (State->InputChannel[011] & DSKY_OPER_ERR)
-                DskyChannel163 |= DSKY_OPER_ERR;
-            }
-        }
-    }
-
-  // Send out updated display information, if something on the DSKY changed
-  if (DskyChannel163 != LastChannel163)
-    ChannelOutput(State, 0163, DskyChannel163);
 
   // If in --debug-dsky mode, don't want to take the chance of executing
   // any AGC code, since there isn't any loaded anyway.
