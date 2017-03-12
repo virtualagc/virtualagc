@@ -25,6 +25,7 @@
 ##              2017-01-16 HG   uncomment LMPOS and LMVEL
 ##		2017-01-25 RSB	Proofed comment text using octopus/prooferComments
 ##				and fixed errors found.
+##		2017-03-11 MAS	Corrected errors found during transcription of Luminary 116.
 
 ## Page 106
 # CONVENTIONS AND NOTATIONS UTILIZED FOR ERASABLE ASSIGNMENTS.
@@ -530,7 +531,7 @@ CLPASS          ERASE                                   # PASS INDICATOR CLEAR
 NOUT            ERASE                                   # ACTIVITY COUNTER FOR DSPTAB
 NOUNCADR        ERASE                                   # MACHINE CADR FOR NOUN
 MONSAVE         ERASE                                   # N/V CODE FOR MONITOR. (= MONSAVE1-1)
-MONSAVE1        ERASE                                   # NOUNCADR FOR MONITOR(MATBS1 =MONSAVE +1
+MONSAVE1        ERASE                                   # NOUNCADR FOR MONITOR(MATBS) =MONSAVE +1
 MONSAVE2        ERASE                                   # NVMONOPT OPTIONS
 DSPTAB          ERASE           +11D                    # 0-10D, DISPLAY PANEL BUFF. 11D, C/S LTS.
 NVQTEM          ERASE                                   # NVSUB STORAGE FOR CALLING ADDRESS
@@ -706,7 +707,7 @@ T5ADR           ERASE           +1                      # GENADR OF NEXT LM DAP 
                                                         # BBCON  OF NEXT LM DAP T5RUPT.   2CADR
 
 
-#          RCS FAILURE MONITOR STORAGE.                                 (1)
+#          RCS FAILURE MONITOR STORAGE                                  (1)
 
 ## Page 122
 PVALVEST        ERASE                                   # B(1)PRM

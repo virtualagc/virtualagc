@@ -32,6 +32,7 @@
 ##              2016-12-11 HG   Fix operand modification VVECT(X,Y,Z) + 1 -> VVECT(X,Y,Z)+ 2
 ##		2016-12-22 RSB	Proofed comment text with octopus/ProoferComments
 ##				and fixed all errors found.
+##		2017-03-11 MAS	Corrected errors found during transcription of Luminary 116.
 
 ## Page 92
 # CONVENTIONS AND NOTATIONS UTILIZED FOR ERASABLE ASSIGNMENTS.
@@ -74,7 +75,7 @@
 #                 N INDICATES THE NATURE OF PERMANENCE OF THE CONTENTS.
 #                      PL  MEANS THAT THE CONTENTS ARE PAD LOADED.
 #                      DSP MEANS THAT THE REGISTER IS USED FOR A DISPLAY.
-#                      PRM MEANS THAT THE REGISTER IS PERMANENT. IE. IT
+#                      PRM MEANS THAT THE REGISTER IS PERMANENT, IE. IT
 #                          IS USED DURING THE ENTIRE MISSION FOR ONE
 #                          PURPOSE AND CANNOT BE SHARED.
 #                      TMP MEANS THAT THE REGISTER IS USED TEMPORARILY OR
@@ -353,7 +354,7 @@ TERM1TMP        EQUALS          MPAC            +3      # B(2)TMP
 DEXI            =               DEX1
 
 #          THE FOLLOWING 10 REGISTERS ARE USED FOR TEMPORARY STORAGE OF THE DERIVATIVE COEFFICIENT TABLE OF
-# SUBROUTINE ROOTPSRS.   THEY MUST REMAIN WITHOUT INTERFERENCE WITH ITS SUBROUTINES WHICH ARE POWRSERS (POLY).
+# SUBROUTINE ROOTPSRS.   THEY MUST REMAIN WITHOUT INTERFERENCE WITH ITS SUBROUTINES WHICH ARE POWRSERS (POLY),
 # DMPSUB, DMPNSUB, SHORTMP, DDV/BDDV, ABS, AND USPRCADR.
 
 DERCOF-8        =               MPAC            -12     # ROOTPSRS DER COF N-4 HI ORDER
@@ -1139,7 +1140,7 @@ TIMSUBO         EQUALS          TEPHEM                  # CSEC B-42 (TRIPLE PREC
 
 LS21X           ERASE                                   # I(1)
 LOSVEL          ERASE           +5                      # I(6)
-MLOSV           ERASE           +1                      # I(2) MAGNITUDE OF LOS. METERS B-29
+MLOSV           ERASE           +1                      # I(2) MAGNITUDE OF LOS, METERS B-29
 
 
 #      ***** P22  *****  (OVERLAYS LPS 20.1 STORAGE)     (6D)
