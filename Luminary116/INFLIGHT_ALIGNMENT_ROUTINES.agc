@@ -14,6 +14,8 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-01-22 MAS  Created from Luminary 99.
 ##              2017-01-26 RRB  Updated for Luminary 116.
+##		2017-03-13 RSB	Proofed comment text via 3-way diff vs
+##				Luminary 99 and 131, but no changes were needed.
 
 ## Page 1239
                 BANK            22                              
@@ -286,4 +288,4 @@ QTSN45          2DEC            .1768
 .166...         2DEC            .1666666667                     
 
 ## Page 1248
-## Empty page
+## <br>Empty page

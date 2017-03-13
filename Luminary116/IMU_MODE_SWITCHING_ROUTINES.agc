@@ -16,7 +16,7 @@
 ##              2017-01-28 RSB Comment-text fixes identified for Luminary 69.
 ##              2017-02-07 RRB  Updated for Luminary 116.
 ##		2017-03-13 RSB	Proofed comment text via 3-way diff vs
-##				Luminary 99 and 132.
+##				Luminary 99 and 131.
 
 ## Page 1299
                 BLOCK           02                              
