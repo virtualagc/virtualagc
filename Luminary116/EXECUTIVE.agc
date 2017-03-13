@@ -14,6 +14,8 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-01-22 MAS  Created from Luminary 99.
 ##              2017-03-10 HG   Transcribed
+##		2017-03-13 RSB	Proofed comment text via 3-way diff vs
+##				Luminary 99 and 132.
 
 ## Page 1095
                 BLOCK           02
@@ -132,7 +134,7 @@ FINDVAC2        TS              EXECTEM1                        # (SAVE CALLER'S
                 LXCH            EXECTEM1
                 CA              Q
                 TC              BAILOUT1
-                OCT             31201                           # NO VAC AREAS.
+                OCT             31201                           # NO VAC AREAS
 
 VACFOUND        AD              TWO                             # RESERVE THIS VAC AREA BY STORING A ZERO
                 ZL                                              # IN ITS VAC USE REGISTER AND STORE THE
@@ -260,7 +262,7 @@ ENDPRCHG        RELINT
                 EXTEND                                          # DISPATCH WITH A DTCB.
                 BZMF            +2                              # IF INTERPRETIVE, SET UP EBANK, ETC.
                 DTCB
-## Note: After the statmenets a note in blue pencil is written diagonally from left bottom to top right:
+## Note: After the statments a note in blue pencil is written diagonally from left bottom to top right:
 ## ENDPRCHG and in a second line underneath it +4
 
 ## Page 1102

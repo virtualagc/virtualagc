@@ -18,6 +18,7 @@
 ##				vs the already-proofed corresponding Colossus
 ##				237 and Comanche 55 source-code files
 ##				and corrected errors found.
+##		2017-03-13 RSB	Comment-text fixes noted in proofing Luminary 116.
 ##
 ## The contents of the "Colossus249" files, in general, are transcribed 
 ## from a scanned copy of the program listing.  Notations on this
@@ -107,7 +108,7 @@
 #				CAF	VXXNYY
 #				TC	BANKCALL
 #				CADR	GODSP
-#			VXXNYY	OCT	OXXYY
+#			VXXNYY	OCT	0XXYY
 #	GODSPR IS THE SAME AS GODSP ONLY RETURN IS TO THE USER.
 #				CAF	VXXNYY
 #				TC	BANKCALL

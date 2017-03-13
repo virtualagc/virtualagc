@@ -20,6 +20,7 @@
 ##              2016-12-12 MAS  "PRIOSAVE EQUALS R1SAVE" is sneakily a comment.
 ##		2016-12-26 RSB	Comment-text proofed using ProoferComments
 ##				and corrected errors found.
+##		2017-03-13 RSB	Comment-text fixes noted in proofing Luminary 116.
 
 ## Page 1338
 # DISPLAYS CAN BE CLASSIFIED INTO THE FOLLOWING CATEGORIES-
@@ -86,7 +87,7 @@
 #				CAF	VXXNYY
 #				TC	BANKCALL
 #				CADR	GODSP
-#			VXXNYY	OCT	OXXYY
+#			VXXNYY	OCT	0XXYY
 #	GODSPR IS THE SAME AS GODSP ONLY RETURN IS TO THE USER.
 #				CAF	VXXNYY
 #				TC	BANKCALL

@@ -15,6 +15,7 @@
 ##		2011-05-08 JL	Removed workaround.
 ##		2016-12-18 RSB	Proofed text comments with octopus/ProoferComments
 ##				and corrected the errors found.
+##		2017-03-13 RSB	Comment-text fixes noted in proofing Luminary 116.
 
 ## This source code has been transcribed or otherwise adapted from
 ## digitized images of a hardcopy from the MIT Museum.  The digitization
@@ -425,7 +426,7 @@
 #	    11	EBANK
 #	    12	-----			-----			V99PASTE
 #	    13	2ND PART OF PERFORM
-#	    14	REFLASH OR REDO		-----			REFLASH OR REDO
+#	    15	REFLASH OR REDO		-----			REFLASH OR REDO
 #	    15	-----			MARK REQUEST		-----
 #
 # RESTARTING DISPLAYS --
