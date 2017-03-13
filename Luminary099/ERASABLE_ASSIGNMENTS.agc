@@ -15,6 +15,7 @@
 ##		2016-12-13 RSB	Proofed text comments with octopus/ProoferComments
 ##				and corrected the errors found.
 ##		2017-03-11 MAS	Corrected errors found during transcription of Luminary 116.
+##		2017-03-13 RSB	Comment-text fixes noted in proofing Luminary 116.
 ##
 ## This source code has been transcribed or otherwise adapted from
 ## digitized images of a hardcopy from the MIT Museum.  The digitization
@@ -2158,7 +2159,7 @@ LOSCOUNT	ERASE			# B(1)
 
 # RETAIN THE ORDER OF AIG TO TRKMKCNT FOR DOWNLINK PURPOSES.
 
-AIG		ERASE			# B(1)OUT GIMBAL ANGLES
+AIG		ERASE			# B(1)OUT GIMGAL ANGLES
 AMG		ERASE			# B(1)OUT (MUST BE
 AOG		ERASE			# B(1)OUT  CONSECUTIVE)
 

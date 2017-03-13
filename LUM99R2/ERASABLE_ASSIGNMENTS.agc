@@ -16,6 +16,7 @@
 ##				and corrected the errors found.
 ##		2017-03-03 RSB	Snapshot of Luminary 99 Rev 1. 
 ##		2017-03-11 MAS	Corrected errors found during transcription of Luminary 116.
+##		2017-03-13 RSB	Comment-text fixes noted in proofing Luminary 116.
 
 ## Page 90
 # CONVENTIONS AND NOTATIONS UTILIZED FOR ERASABLE ASSIGNMENTS.
@@ -2144,7 +2145,7 @@ LOSCOUNT	ERASE			# B(1)
 
 # RETAIN THE ORDER OF AIG TO TRKMKCNT FOR DOWNLINK PURPOSES.
 
-AIG		ERASE			# B(1)OUT GIMBAL ANGLES
+AIG		ERASE			# B(1)OUT GIMGAL ANGLES
 AMG		ERASE			# B(1)OUT (MUST BE
 AOG		ERASE			# B(1)OUT  CONSECUTIVE)
 
