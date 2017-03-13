@@ -15,9 +15,11 @@
 ## Mod history: 2017-01-22 MAS  Created from Luminary 99.
 ##              2017-02-02 RRB  Updated for Luminary 116.
 ##              2017-03-09 HG   Fix operand PBAILOUT  --> BAILOUT
+##		2017-03-13 RSB	Proofed comment text via 3-way diff vs
+##				Luminary 99 and 132.
 
 ## Page 1331
-# DISPLAYS CAN BE CLASSIFIED INTO THE FOLLOWING CATEGORIES
+# DISPLAYS CAN BE CLASSIFIED INTO THE FOLLOWING CATEGORIES-
 
 #     1.  PRIORITY DISPLAYS- DISPLAYS WHICH TAKE PRIORITY OVER ALL OTHER DISPLAYS. USUALLY THESE DISPLAYS ARE SENT
 #         OUT UNDER CRITICAL ALARM CONDITIONS.
@@ -208,7 +210,7 @@
 #                               ...     ...             IMMEDIATE RETURN FROM GOPERF1R
 
 # GOPERF2R IS THE SAME AS GOPERF2 ONLY AN IMMEDIATE RETURN IS MADE TO USERS CALL CADR +4.
-## Page 1345
+## Page 1335
 # GOPERF2R DOES NOT BLANK ANY REGISTERS
 
 #                               CAF     VXXNYY          VARIABLE NOUN YY REQUESTED.  XX=00 OR 01
@@ -268,7 +270,7 @@
 
 #                               CAF     VXXNYY          VXXNYY CONTAINS VERB AND NOUN
 #                               TC      BANKCALL
-#                               CADR    GOMARK          OTHER EXTENDED VERBS USE CADR GOXDSP\
+#                               CADR    GOMARK          OTHER EXTENDED VERBS USE CADR GOXDSP
 
 #       GOMARKR IS THE SAME AS GOMARK ONLY RETURN IS TO THE USER.
 
@@ -378,7 +380,7 @@
 # HAVE BEEN CLEANED OUT.
 
 #                               TC      BANKCALL
-#                               CADR    KLEENEX\
+#                               CADR    KLEENEX
 
 #                               ...     ...             RETURN TO USER
 
@@ -433,7 +435,7 @@
 #                               TC      BANKCALL
 #                               CADR    CLEANDSP
 #                               ...     ...             RETURN TO USER
-## Page 1351
+## Page 1341
 
 # GENERAL INFORMATION
 # -------------------
