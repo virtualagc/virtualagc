@@ -17,6 +17,7 @@
 ##			 	and made changes.
 ##		2017-02-05 RSB	Back-ported comment corrections 
 ##				identified while proofing Artemis 072.
+##		2017-03-13 RSB	Comment-text fixes noted in proofing Luminary 116.
 
 ## This source code has been transcribed or otherwise adapted from
 ## digitized images of a hardcopy from the private collection of
@@ -891,7 +892,7 @@ SETOVF          TS              OVFIND                  # SET OVFIND IF SUCH OCC
 ## Page 61
 # ARITHMETIC SUBROUTINES REQUIRED IN FIXED-FIXED.
 
-#          1.  DMPSUB     DOUBLE PRECISION MULTIPLY, MULTIPLY THE CONTENTS OF MPAC,+1 BY THE DP WORD WHOSE ADDRESS
+#          1.  DMPSUB     DOUBLE PRECISION MULTIPLY. MULTIPLY THE CONTENTS OF MPAC,+1 BY THE DP WORD WHOSE ADDRESS
 #                         IS IN ADDRWD AND LEAVE A TRIPLE PRECISION RESULT IN MPAC.
 #          2.  ROUNDSUB   ROUND THE TRIPLE PRECISON CONTENTS OF MPAC TO DOUBLE PRECISION.
 #          3.  DOTSUB     TAKE THE DOT PRODUCT OF THE VECTOR IN MPAC AND THE VECTOR WHOSE ADDRESS IS IN ADDRWD
@@ -1121,7 +1122,7 @@ SHORTMP         TS              MPTEMP
                 TC              Q
 
 ## Page 67
-# MISCELLANEOUS VECTOR OPERATIONS. INCLUDED HERE ARE THE FOLLOWING.
+# MISCELLANEOUS VECTOR OPERATIONS. INCLUDED HERE ARE THE FOLLOWING:
 
 #          1.  DOT                DP VECTOR DOT PRODUCT.
 #          2.  VXV                DP VECTOR CROSS PRODUCT.

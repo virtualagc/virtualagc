@@ -22,6 +22,7 @@
 ##				and fixed errors found.
 ##		2017-02-05 RSB	Back-ported comment corrections 
 ##				identified while proofing Artemis 072.
+##		2017-03-13 RSB	Comment-text fixes noted in proofing Luminary 116.
 
 ## Page 997
 # SECTION 1  DISPATCHER
@@ -891,7 +892,7 @@ TAD             EXTEND
 ## Page 1026
 # ARITHMETIC SUBROUTINES REQUIRED IN FIXED-FIXED.
 
-#          1.  DMPSUB     DOUBLE PRECISION MULTIPLY, MULTIPLY THE CONTENTS OF MPAC,+1 BY THE DP WORD WHOSE ADDRESS
+#          1.  DMPSUB     DOUBLE PRECISION MULTIPLY. MULTIPLY THE CONTENTS OF MPAC,+1 BY THE DP WORD WHOSE ADDRESS
 #                         IS IN ADDRWD AND LEAVE A TRIPLE PRECISION RESULT IN MPAC.
 #          2.  ROUNDSUB   ROUND THE TRIPLE PRECISON CONTENTS OF MPAC TO DOUBLE PRECISION.
 #          3.  DOTSUB     TAKE THE DOT PRODUCT OF THE VECTOR IN MPAC AND THE VECTOR WHOSE ADDRESS IS IN ADDRWD
@@ -1178,7 +1179,7 @@ VXM/MXV         TS      DOTINC
                 ADS     ADDRWD          # FORMS BASE ADDRESS OF NEXT COLUMN(ROW).
 
                 TC      DOTSUB
-                DXCH    VBUF            # MORE GIVEN VECTOR BACK TO MPAC, SAVING Y
+                DXCH    VBUF            # MOVE GIVEN VECTOR BACK TO MPAC, SAVING Y
                 DXCH    MPAC            # COMPONENT OF ANSWER IN VBUF +2.
                 DXCH    VBUF    +2
                 DXCH    MPAC    +3
