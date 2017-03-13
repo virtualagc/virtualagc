@@ -14,8 +14,10 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-01-22 MAS  Created from Luminary 99.
 ##              2017-02-18 MAS  Began updating for Luminary 116.
-##              2017-03-11 MAS  Complated updating for Luminary 116.
+##              2017-03-11 MAS  Completed updating for Luminary 116.
 ##              2017-03-12 HG   Fix label BLINCR1  -> ELINCR1
+##		        2017-03-13 RSB	Proofed comment text via 3-way diff vs
+##				Luminary 99 and 132.
 
 ## Page 90
 # CONVENTIONS AND NOTATIONS UTILIZED FOR ERASABLE ASSIGNMENTS.
@@ -2323,7 +2325,7 @@ LOSCOUNT        ERASE                                           # B(1)
 #          LSR22.3 (RENDEZVOUS NAVIGATION) STORAGE.                       (4D)
 
 #    RETAIN THE ORDER OF AIG TO TRKMKCNT FOR DOWNLINK PURPOSES.
-AIG             ERASE                                           # B(1)OUT  GIMBAL ANGLES
+AIG             ERASE                                           # B(1)OUT  GIMGAL ANGLES
 AMG             ERASE                                           # B(1)OUT  (MUST BE
 AOG             ERASE                                           # B(1)OUT   CONSECUTIVE)
 

@@ -33,6 +33,7 @@
 ##		2016-12-22 RSB	Proofed comment text with octopus/ProoferComments
 ##				and fixed all errors found.
 ##		2017-03-11 MAS	Corrected errors found during transcription of Luminary 116.
+##		2017-03-13 RSB	Comment-text fixes noted in proofing Luminary 116.
 
 ## Page 92
 # CONVENTIONS AND NOTATIONS UTILIZED FOR ERASABLE ASSIGNMENTS.
@@ -565,7 +566,7 @@ NOUNCADR        ERASE                                   # MACHINE CADR FOR NOUN
 MONSAVE         ERASE                                   # N/V CODE FOR MONITOR. (= MONSAVE1-1)
 MONSAVE1        ERASE                                   # NOUNCADR FOR MONITOR(MATBS) =MONSAVE+1
 MONSAVE2        ERASE                                   # NVMONOPT OPTIONS
-DSPTAB          ERASE           +11D                    # 0-100, DISPLAY PANEL BUFF. 11D, C/S LTS.
+DSPTAB          ERASE           +11D                    # 0-10D, DISPLAY PANEL BUFF. 11D, C/S LTS.
 NVQTEM          ERASE                                   # NVSUB STORAGE FOR CALLING ADDRESS
                                                         # MUST = NVBNKTEM-1
 NVBNKTEM        ERASE                                   # NVSUB STORAGE FOR CALLING BANK
@@ -2063,14 +2064,14 @@ L,PVT-CG        ERASE
 
 SKIPU           ERASE           +1
 SKIPV           =               SKIPU           +1
-# THE FOLLOWING LM DAP ERASABLES ARE ZEROED IN THE STARTDAP SECTION OF THE DAPIDLER PROGRAM AND THE CDASTASC
+# THE FOLLOWING LM DAP ERASABLES ARE ZEROED IN THE STARTDAP SECTION OF THE DAPIDLER PROGRAM AND THE COASTASC
 # SECTION OF THE AOSTASK.  THE ORDER MUST BE PRESERVED FOR THE INDEXING METHODS WHICH ARE EMPLOYED IN THOSE
 # SECTIONS AND ELSEWHERE.
 
 AOSQ            ERASE           +5                      # OFFSET ACC. ESTIMATES, UPDATED IN D.P.,
 AOSR            EQUALS          AOSQ            +2      # AND SCALED AT PI/2.
 AOSU            EQUALS          AOSQ            +4      # UV-AXES OFFSET ACC. FROMED BY VECTOR
-AOSV            EQUALS          AOSQ            +5      # ADDITION OF Q.R.  AT PI/2 RAD/SEC(2).
+AOSV            EQUALS          AOSQ            +5      # ADDITION OF Q,R.  AT PI/2 RAD/SEC(2).
 
 AOSQTERM        ERASE           +1                      # (.1-.05K)AOS
 AOSRTERM        EQUALS          AOSQTERM        +1      # SCALED AT PI/4 RADIANS/SECOND.
@@ -2404,7 +2405,7 @@ LOSCOUNT        ERASE                                   # B(1)
 
 #    RETAIN THE ORDER OF AIG TO TRKMKCNT FOR DOWNLINK PURPOSES.
 
-AIG             ERASE                                   # B(1)OUT  GIMBAL ANGLES
+AIG             ERASE                                   # B(1)OUT  GIMGAL ANGLES
 AMG             ERASE                                   # B(1)OUT  (MUST BE
 AOG             ERASE                                   # B(1)OUT   CONSECUTIVE)
 

@@ -20,6 +20,7 @@
 ##              2017-01-16 MAS  Updated for Luminary 69.
 ##		2017-01-28 RSB	Proofed comment text using octopus/prooferComments
 ##				but no errors found.
+##		2017-03-13 RSB	Comment-text fixes noted in proofing Luminary 116.
 
 ## Page 1335
 # DISPLAYS CAN BE CLASSIFIED INTO THE FOLLOWING CATEGORIES-
@@ -525,7 +526,7 @@
 #     11 EBANK
 #     12 -----           -----       V99PASTE
 #     13 2ND PART OF PERFORM
-#     14 REFLASH OR REDO  -----           REFLASH OR REDO
+#     15 REFLASH OR REDO  -----           REFLASH OR REDO
 #     15 -----          MARK REQUEST          -----
 # RESTARTING DISPLAYS--
 

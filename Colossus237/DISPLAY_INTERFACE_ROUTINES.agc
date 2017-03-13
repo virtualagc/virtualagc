@@ -14,6 +14,7 @@
 ##				and fixed errors found.
 ##		2017-01-08 RSB	Fixed comment errors detected in cross-diff vs
 ##				Colossus 249.
+##		2017-03-13 RSB	Comment-text fixes noted in proofing Luminary 116.
 
 ## Page 1416
 # DISPLAYS CAN BE CLASSIFIED INTO THE FOLLOWING CATEGORIES-
@@ -90,7 +91,7 @@
 #                                                  TC     BANKCALL
 #                                                  CADR   GODSP
 
-#                                        VXXNYY    OCT    OXXYY
+#                                        VXXNYY    OCT    0XXYY
 
 # GODSPR IS THE SAME AS GODSP ONLY RETURN IS TO THE USER.
 
