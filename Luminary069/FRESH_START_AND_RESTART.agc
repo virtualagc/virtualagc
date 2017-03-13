@@ -434,7 +434,7 @@ STARTSB2        CAF             OCT30001                # DURING SOFTWARE RESTAR
                 MASK            NR29FBIT                # REPOSITION,CDU ZERO AND REMODE BITS
                 EXTEND                                  # IN RADMODES,SINCE TASKS ASSOCIATED
                 BZF             +2                      # WITH THESE BITS HAVE BEEN KILLED
-                CAF             BIT10                   # ALSO IF R29 HAD BEEN REQUESTED.
+                CAF             BIT10                   # ALSO IF R29 HAD BEEN REQUESTED,
                 AD              OCT32001                # (NOR29FLG = 0) CLEAR BIT 10 RADMODES
                 COM                                     # TO MAKE R29 FORGET IT HAD STARTED
                 MASK            RADMODES                # DESIGNATING

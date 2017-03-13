@@ -24,6 +24,7 @@
 ##              2016-12-11 HG  Fix operator CA BANKCALL -> TC BANKCALL
 ##		2016-12-23 RSB	Proofed comment text with octopus/ProoferComments
 ##				and fixed all errors found.
+##		2017-03-13 RSB	Comment-text fixes noted in proofing Luminary 116.
 
 ## Page 222
                 BANK            10
@@ -198,7 +199,7 @@ ABTKLEAN        EXTEND
                 TC              Q
 
 ## Page 226
-#          COMES HERE FROM LOCATION 4000, GOJAM, RESTART ANY PROGRAMS WHICH MAY HAVE BEEN RUNNING AT THE TIME
+#          COMES HERE FROM LOCATION 4000, GOJAM. RESTART ANY PROGRAMS WHICH MAY HAVE BEEN RUNNING AT THE TIME
 
                 EBANK=          LST1
 GOPROG          INCR            REDOCTR                 # ADVANCE RESTART COUNTER.
@@ -253,11 +254,11 @@ SETINFL         CS              INTFLBIT
                 AD              BIT15
                 XCH             DSPTAB          +11D
                 CAF             IFAILINH                # LEAVE IMU FAILURE INHIBITS INTACT ON
-                MASK            IMODES30                # HARDWARE RESTART, RESET ALL FAILURE
+                MASK            IMODES30                # HARDWARE RESTART. RESET ALL FAILURE
                 AD              IM30INIR                # CODES.
                 TS              IMODES30
 
-                CA              AGSWORD                 # BE SURE OF CORRECT DOWNLTST
+                CA              AGSWORD                 # BE SURE OF CORRECT DOWNLIST
                 TS              DNLSTCOD
 
                 CA              BIT4                    # TURN ON THROTTLE COUNTER

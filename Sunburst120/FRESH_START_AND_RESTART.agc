@@ -1,21 +1,22 @@
 ### FILE="Main.annotation"
-## Copyright:    Public domain.
-## Filename:     FRESH_START_AND_RESTART.agc
-## Purpose:      A module for revision 0 of BURST120 (Sunburst). It 
-##               is part of the source code for the Lunar Module's
-##               (LM) Apollo Guidance Computer (AGC) for Apollo 5.
-## Assembler:    yaYUL
-## Contact:      Ron Burkey <info@sandroid.org>.
-## Website:      www.ibiblio.org/apollo/index.html
-## Mod history:  2016-09-30 RSB  Created draft version.
-##               2016-10-05 RSB  Finished transcription.
-##               2016-10-30 MAS  A bunch of small corrections, and some missing lines.
-##		 2016-11-01 RSB	 More typos.
-##		 2016-12-03 RSB	 Fixed various typos using octopus/ProoferComments, but
-##				 there are still a couple of pages that are problematic
-##				 with respect to octopus, so the process isn't completed.
-##		 2016-12-05 RSB	 octopus/ProoferComments based comment-proofing completed;
-##				 some corrections made.
+## Copyright:   Public domain.
+## Filename:    FRESH_START_AND_RESTART.agc
+## Purpose:     A module for revision 0 of BURST120 (Sunburst). It 
+##              is part of the source code for the Lunar Module's
+##              (LM) Apollo Guidance Computer (AGC) for Apollo 5.
+## Assembler:   yaYUL
+## Contact:     Ron Burkey <info@sandroid.org>.
+## Website:     www.ibiblio.org/apollo/index.html
+## Mod history: 2016-09-30 RSB  Created draft version.
+##              2016-10-05 RSB  Finished transcription.
+##              2016-10-30 MAS  A bunch of small corrections, and some missing lines.
+##		2016-11-01 RSB	More typos.
+##		2016-12-03 RSB	Fixed various typos using octopus/ProoferComments, but
+##				there are still a couple of pages that are problematic
+##				with respect to octopus, so the process isn't completed.
+##		2016-12-05 RSB	octopus/ProoferComments based comment-proofing completed;
+##				some corrections made.
+##		2017-03-13 RSB	Comment-text fixes noted in proofing Luminary 116.
 
 ## Page 88
                 BANK            01                              
@@ -184,7 +185,7 @@ MR.CLEAN        CAF             ELEVEN                          # INITIALIZE PHA
                 TC              Q                               
 
 ## Page 92
-# COMES HERE FROM LOCATION 4000, GOJAM, RESTART ANY PROGRAMS WHICH MAY HAVE BEEN RUNNING AT THE TIME.
+# COMES HERE FROM LOCATION 4000, GOJAM. RESTART ANY PROGRAMS WHICH MAY HAVE BEEN RUNNING AT THE TIME.
 
 GOPROG          INCR            REDOCTR                         # ANOTHER RESTART.
 

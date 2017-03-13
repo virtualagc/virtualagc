@@ -21,6 +21,7 @@
 ##				237 and Comanche 55 source-code files
 ##				and corrected errors found.
 ##		2017-01-28 RSB	WTIH -> WITH.
+##		2017-03-13 RSB	GOP00FIX -> GOPOOFIX.
 ##
 ## The contents of the "Colossus249" files, in general, are transcribed 
 ## from a scanned copy of the program listing.  Notations on this
@@ -700,14 +701,14 @@ GOTOPOOH	TC	PHASCHNG		# RESTART GOTOPOOH
 		OCT	14
 		
 		TC	POSTJUMP
-		CADR	GOP00FIX
+		CADR	GOPOOFIX
 		BANK	10
 		SETLOC	VERB37
 		BANK
 		
 		COUNT	04/P00
 		
-GOP00FIX	TC	INITSUB
+GOPOOFIX	TC	INITSUB
 		CAF	V37N99
 		TC	BANKCALL
 		CADR	GOFLASH
