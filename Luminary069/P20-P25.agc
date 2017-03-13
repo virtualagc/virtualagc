@@ -32,6 +32,7 @@
 ##		2017-01-27 RSB	Proofed comment text using octopus/prooferComments
 ##				and fixed errors found.
 ##		2017-01-28 RSB	WTIH -> WITH.
+##		2017-03-13 RSB	Comment-text fixes noted in proofing Luminary 116.
 
 ##
 ## Page 504
@@ -459,7 +460,7 @@ UPPSV           STQ             CALL                    # UPDATES PERMANENT STAT
                 BOF             SET                     # IF W-MATRIX INVALID,DONT INTEGRATE IT
                                 RENDWFLG
                                 UPPSV1
-                                DIM0FLAG                # SET DIM0FLAG TO INTEGRATE W-MATRIX
+                                DIM0FLAG                # SET DIMOFLAG TO INTEGRATE W-MATRIX
                 BON             SET
                                 SURFFLAG                # IF ON LUNAR SURFACE W IS 6X6
                                 UPPSV5

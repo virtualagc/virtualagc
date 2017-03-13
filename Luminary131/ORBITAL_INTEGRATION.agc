@@ -17,6 +17,7 @@
 ##				original hardcopy, as opposed to the PDF page
 ##				numbers in 1701.pdf.
 ##		2017-02-27 RSB	Proofed comment text using octopus/ProoferComments.
+##		2017-03-13 RSB	Comment-text fixes noted in proofing Luminary 116.
 
 ## Page 1220
 # DELETE
@@ -342,15 +343,15 @@ OBLATE		LXA,2	DLOAD
 		PUSH	CALL		# XUNIT B-1 IN PLANETARY COORD. AT 06D
 			MATRIX
 		VSL1
-		STOVL	32D		# UX B-1 IN IN ERT. COORD       AT 32D
+		STOVL	32D		# UX B-1 IN INERT. COORD       AT 32D
 		VSL1
 COMTERM		STODL	UZ		# UZ B-1 IN INERTIAL COORD      AT 20D
-			COSPHI/2	#  ,	Z-COMPONENT OF URPV
+			COSPHI/2	#  '	Z-COMPONENT OF URPV
 		DMPR	PDDL		# P  B-6, 3COSPHI/64            AT 00D
 			3/32		#  2
 			COSPHI/2
 		DSQ	DMPR
-			15/16		#  ,                    2
+			15/16		#  '                    2
 		DSU	PUSH		# P  B-5, (1/2)(15COSPHI -3)    AT 02D
 			3/64		#  3
 		DMPR	DMP
@@ -359,39 +360,39 @@ COMTERM		STODL	UZ		# UZ B-1 IN INERTIAL COORD      AT 20D
 		SL1R	PDDL
 			0D
 		DMPR	BDSU
-			2/3		#  ,                     ,   ,
+			2/3		#  '                     '   '
 		PUSH	DMPR		# P  B-7, (1/3)(7COSPHI P -4P ) AT 04D
 			COSPHI/2	#  4                     3   2
 		DMPR	PDDL
 			9/16
 ## Page 1228
-			2D		#  ,                      ,    ,
+			2D		#  '                      '    '
 		DMPR	BDSU		# P  B-10, (J/4)(9COSPHI P  -5P )
 			5/128		#  5                      4    3
-		DMP*	DDV		#                 ,
+		DMP*	DDV		#                 '
 			J4REQ/J3,2	# B- , (J RP/J R)P
 			ALPHAM		#        4    3   5
 		DAD	DMPR*
-			4D		#           2     2  ,              ,
+			4D		#           2     2  '              '
 			2J3RE/J2,2	# B , (2J RP /J2 R )P  +(2J RP/J2R)P
 		DDV	DAD		#        4           5     3        4
-			ALPHAM		#  -        2 ,  2         ,        ,
+			ALPHAM		#  -        2 '  2         '        '
 			2D		# (R/R)(J RP P /R + 2J RP P /  + J P )
 		VXSC			#        4    5       3    4  2   2 3
-			ALPHAV		#       4       2  ,           -
+			ALPHAV		#       4       2  '           -
 		STODL	TVEC		# B-6,(SUM((J /R )P   (COSPHI))UR)
 		DMP*	SR1		#      I=2   I     I+1
-			J4REQ/J3,2	#            ,
+			J4REQ/J3,2	#            '
 		DDV	DAD		# (J RP/J R)P
 			ALPHAM		#   4    3   4
-		DMPR*	SR3		#       2    2  ,              ,
+		DMPR*	SR3		#       2    2  '              '
 			2J3RE/J2,2	# (2J RP /J R )P  +(2J RP/J R)P
 		DDV	DAD		#    4     2    4     3    2   3
 			ALPHAM
-		VXSC	VSL1		#       4   ,         -
+		VXSC	VSL1		#       4   '         -
 			UZ		# B-6  SUM(P (COSPHI))UZ
 		BVSU			#      I=2  I
-			TVEC		#  4              I-2   ,          -
+			TVEC		#  4              I-2   '          -
 		STODL	TVEC		# SUM((MU J (RP/R)   )(P   (COSPHI)UR -
 			ALPHAM		# I=2      I            I+2
 		NORM	DSQ		#             P (COSPHI)UZ))  B-6 AT 20D

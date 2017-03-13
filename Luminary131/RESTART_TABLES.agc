@@ -21,6 +21,7 @@
 ##		2017-03-01 RSB	Restored a period which was present in both Luminary 116
 ##				and 210, and was therefore presumably missing due to a 
 ##				printer problem.
+##		2017-03-13 RSB	GOP00FIX -> GOPOOFIX.
 
 ## Page 239
 # RESTART TABLES
@@ -239,7 +240,7 @@ SIZETAB		TC	1.2SPOT -12006
 
 4.33SPOT	OCT	46777
 		EBANK=	DVCNTR
-		2CADR	GOP00FIX
+		2CADR	GOPOOFIX
 		
 4.35SPOT	OCT	46777
 		EBANK=	DVCNTR

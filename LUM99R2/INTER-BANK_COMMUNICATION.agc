@@ -15,6 +15,7 @@
 ##		2016-12-17 RSB	Proofed text comments with octopus/ProoferComments
 ##				and corrected the errors found.
 ##		2017-03-03 RSB	Snapshot of Luminary 99 Rev 1. 
+##		2017-03-13 RSB	Comment-text fixes noted in proofing Luminary 116.
 
 ## Page 998
 # THE FOLLOWING ROUTINE CAN BE USED TO CALL A SUBROUTINE IN ANOTHER BANK. IN THE BANKCALL VERSION, THE
@@ -143,7 +144,7 @@ USPRCADR	TS	LOC		# SAVE A
 # SUPERBANK SHOULD USE SUPERSW. ***
 #
 # SUPERSW MAY BE CALLED IN THIS FASHION:
-#	CAF	ABBCON		WHERE      ABBCON   BBCON  SOMETHIN
+#	CAF	ABBCON		WHERE  --  ABBCON   BBCON  SOMETHIN --
 #	TCR	SUPERSW		(THE SUPERBNK BITS ARE IN THE BBCON)
 #	...	  ...
 #	 .	   .

@@ -16,6 +16,8 @@
 ##              2017-03-01 RRB  Updated for Luminary 116.
 ##              2017-03-09 HG   Fix interpretive opcode   BCN  --> BON
 ##                                               operand POOFLAG  --> POOHFLAG                                     
+##		2017-03-13 RSB	Proofed comment text via 3-way diff vs
+##				Luminary 99 and 131.
 
 ## Page 1196
 # 1.0 INTRODUCTION
@@ -138,7 +140,7 @@
 #                     0 IF TCCSM(LEM) = 0
 
 #    CMOONFLG       - PERMANENT FLAGS CORRESPONDING          0       0
-#    OMIDFLAG         TO MOONFLAG AND MIDFLAG                0,1     0,1
+#    CMIDFLAG         TO MOONFLAG AND MIDFLAG                0,1     0,1
 #    LMOONFLG         C = CSM, L = LM                        0       0
 #    LMIDFLG                                                 0,1     0,1
 
