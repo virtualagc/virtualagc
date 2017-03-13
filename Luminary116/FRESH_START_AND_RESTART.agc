@@ -14,8 +14,11 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-01-22 MAS  Created from Luminary 99.
 ##              2017-02-19 HG   Transcribed and partially reconstructed
-##		2017-03-13 RSB	Proofed comment text via 3-way diff vs
-##				Luminary 99 and 132.
+##              2017-03-13 RSB  Proofed comment text via 3-way diff vs
+##                              Luminary 99 and 132.
+##              2017-03-13 HG   Fix mixed up operands -PHASE1 --> -PHASE5
+##                                                    -PHASE5 --> -PHASE1
+##                              Value for BOOLSTRT reconstructed from core listing  OCT 21312 -> OCT 21322
 
 ## Page 212
                 BANK            10
@@ -177,13 +180,13 @@ POOKLEAN        EXTEND
                 DXCH            -PHASE4
 V37KLEAN        EXTEND
                 DCA             NEG0
-                DXCH            -PHASE1
+                DXCH            -PHASE5
 ABTKLEAN        EXTEND
                 DCA             NEG0
                 DXCH            -PHASE3
                 EXTEND
                 DCA             NEG0
-                DXCH            -PHASE5
+                DXCH            -PHASE1
                 EXTEND
                 DCA             NEG0
                 DXCH            -PHASE6
@@ -359,7 +362,8 @@ OCT7777         OCT             7777
 STIKSTRT        DEC             0.825268                        # 20 D/S MAXIMUM COMPANDED RATE
 RATESTRT        DEC             -218
 RACTCADR        CADR            RESTARTS
-BOOLSTRT        OCT             21312
+BOOLSTRT        OCT             21322
+## Note: The value of "BOOLSTRT" has been reconstructed from the core listing.
 77001OCT        OCT             77001                           # .14 DEG SCALED AT 4.5 DEG
 60DEC           DEC             60
 RSFLGBTS        OCT             20100
