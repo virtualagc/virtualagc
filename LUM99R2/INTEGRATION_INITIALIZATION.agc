@@ -16,6 +16,7 @@
 ##				and corrected the errors found.
 ##		2017-01-22 MAS	Fixed some lingering comment errors.
 ##		2017-03-03 RSB	Snapshot of Luminary 99 Rev 1. 
+##		2017-03-13 RSB	Comment-text fixes noted in proofing Luminary 116.
 
 ## Page 1205
 # 1.0 INTRODUCTION
@@ -138,7 +139,7 @@
 #				0 IF TCCSM(LEM) = 0
 #
 #	CMOONFLG	-	PERMANENT FLAGS CORRESPONDING			0	0
-#	OMIDFLAG		TO MOONFLAG AND MIDFLAG				0,1	0,1
+#	CMIDFLAG		TO MOONFLAG AND MIDFLAG				0,1	0,1
 #	LMOONFLG		C = CSM, L = LM					0	0
 #	LMIDFLG									0,1	0,1
 #

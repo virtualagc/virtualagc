@@ -23,6 +23,7 @@
 ##                              Fix interpretive operator BOF -> BOFCLR
 ##		2017-01-28 RSB	Proofed comment text using octopus/prooferComments
 ##				but no errors found.
+##		2017-03-13 RSB	Comment-text fixes noted in proofing Luminary 116.
 
 ## Page 1200
 # 1.0 INTRODUCTION
@@ -145,7 +146,7 @@
 #                     0 IF TCCSM(LEM) = 0
 #
 #    CMOONFLG       - PERMANENT FLAGS CORRESPONDING          0      0
-#    OMIDFLAG         TO MOONFLAG AND MIDFLAG                0,1    0,1
+#    CMIDFLAG         TO MOONFLAG AND MIDFLAG                0,1    0,1
 #    LMOONFLG         C = CSM, L = LM                        0      0
 #    LMIDFLG                                                 0,1    0,1
 #
