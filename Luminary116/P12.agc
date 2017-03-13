@@ -16,6 +16,8 @@
 ##              2017-01-28 RSB  Proofed comment text using octopus/prooferComments
 ##                              and fixed errors found.
 ##              2017-03-09 HG   Transcribed
+##		2017-03-13 RSB	Proofed comment text via 3-way diff vs
+##				Luminary 99 and 131.
 
 ## Page 831
                 BANK            24                              

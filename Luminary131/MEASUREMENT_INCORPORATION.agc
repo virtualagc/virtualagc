@@ -18,6 +18,7 @@
 ##				original hardcopy, as opposed to the PDF page
 ##				numbers in 1701.pdf.
 ##		2017-02-27 RSB	Proofed comment text using octopus/ProoferComments.
+##		2017-03-13 RSB	Comment-text fixes noted in proofing Luminary 116.
 
 ## Page 1143
 #  INCORP1--PERFORMS THE SIX DIMENSIONAL STATE VECTOR DEVIATION FOR POSITI
@@ -204,7 +205,7 @@ INCOR3		VLOAD*
 #
 # INPUT
 #	PERMANENT STATE VECTOR FOR EITHER THE LEM OR CSM
-#	VEHUPFLG = UPDATE VEHICLE C=LEM 1=CSM
+#	VEHUPFLG = UPDATE VEHICLE 0=LEM 1=CSM
 #	W = ERROR TRANSITION MATRIX
 #	DELTAX = COMPUTED STATE VECTOR DEVIATIONS
 # 	DMENFLG = SIZE OF W MATRIX (ZERO=6X6) (1=9X9)

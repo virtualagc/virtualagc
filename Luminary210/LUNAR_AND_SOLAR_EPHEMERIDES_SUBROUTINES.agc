@@ -18,6 +18,7 @@
 ##                                                            5D -> 6D 
 ##		2016-12-26 RSB	Comment-text proofed using ProoferComments
 ##				and corrected errors found.
+##		2017-03-13 RSB	Comment-text fixes noted in proofing Luminary 116.
 
 ## Page 982
 # NAME - LSPOS  - LOCATE SUN AND MOON                   DATE - 25 OCT 67
@@ -139,7 +140,7 @@ POSITD          DLOAD           DMP*
                                 RATESP,2                # LOMR,LOSR,LONR
                 SL              DAD*
                                 6D
-                                RATESP          +6,2    # LOM0,LOS0,LON0
+                                RATESP          +6,2    # LOMO,LOSO,LONO
                 DSU
                                 GTMP
                 STORE           STMP,2                  # LOM,LOS,LON

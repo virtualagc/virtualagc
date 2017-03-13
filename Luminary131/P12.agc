@@ -19,6 +19,7 @@
 ##		2017-01-28 RSB	Proofed comment text using octopus/prooferComments
 ##				and fixed errors found.
 ##		2017-02-26 RSB	Proofed comment text using octopus/ProoferComments.
+##		2017-03-13 RSB	Comment-text fixes noted in proofing Luminary 116.
 
 ## Page 831
 		BANK	24
@@ -32,7 +33,7 @@ P12LM		TC	PHASCHNG
 		OCT	04024
 
 		TC	BANKCALL
-		CADR	R02BOTH		# CHECK THE STATUS OF THE IMU
+		CADR	R02BOTH		# CHECK THE STATUS OF THE IMU.
 		TC	CLRADMOD	# INITIALIZE RADMODES FOR R29.
 		CAF	THRESH2		# INITIALIZE DVMON
 		TS	DVTHRUSH
