@@ -1071,7 +1071,7 @@ POSUPDAT        CA              FIXLOC                          # SET PUSHLIST T
                                 V1S                             # SCALE V AT 2(5) M/CS
                 VAD             DOT
                                 DELVS                           # V RELATIVE TO SURFACE AT 2(5) M/CS
-## Note: START (see below)                                
+## Note: START (see below)
                                 0D                              # V ALONG HBEAM AT 2(7) M/CS
                 DMP             EXIT
                                 RADSKAL                         # SCALE TO RADAR COUNTS X 5
@@ -1091,7 +1091,7 @@ POSUPDAT        CA              FIXLOC                          # SET PUSHLIST T
                 DMP             VXSC                            # SLANT RANGE AT 2(21),PUSH UP FOR HBEAM
                                 HSCAL                           # SLANT RANGE VECTOR AT 2(23) M
                 DOT             DSU
-## Note: END (See below)                
+## Note: END (See below)
                                 UNIT/R/                         # ALTITUDE AT 2(24)M
                                 HCALC                           # DELTA H AT 2(24)M
 ## Note: To the right of the comments section two samll drwaing in black ink can be found between
@@ -1099,7 +1099,7 @@ POSUPDAT        CA              FIXLOC                          # SET PUSHLIST T
 ##       All drwaings are excuted in black ink.
 ##       The first drawing is a rectangle which is open at the bottom (big staple, upside down U.)
 ##       At the top, inside of the retangle, is a circle ("face") containing three small circles that are positioned on a
-##       horizontal line through the centers off all the circles. The two circles left and right ("eyes") of the center have 
+##       horizontal line through the centers off all the circles. The two circles left and right ("eyes") of the center have
 ##       a radius of about 1/3rd of the large containing circle while the smallest circle in the center ("nose") has again a radius of about
 ##       1/3rd of the two other circles. To the right and left of the large containing circle within in the surroundin rectangle
 ##       are two (one on each side) small rectangles ("ears") of about 3/4 of the diameter of the large circle's length giving in total
@@ -1108,7 +1108,7 @@ POSUPDAT        CA              FIXLOC                          # SET PUSHLIST T
 ##
 ##       Below this rectangle with circles described above is another small drawing is made up of a short rectangle with an open
 ##       bottom and and the upper side curved up giving it the appearance of a short "tombstone".
-##                                
+##
                 STORE           DELTAH
                 EXIT
 

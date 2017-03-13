@@ -2,7 +2,7 @@
 ## Copyright:   Public domain.
 ## Filename:    INTEGRATION_INITIALIZATION.agc
 ## Purpose:     A section of Luminary revision 116.
-##              It is part of the source code for the Lunar Module's (LM) 
+##              It is part of the source code for the Lunar Module's (LM)
 ##              Apollo Guidance Computer (AGC) for Apollo 12.
 ##              This file is intended to be a faithful transcription, except
 ##              that the code format has been changed to conform to the
@@ -15,7 +15,8 @@
 ## Mod history: 2017-01-22 MAS  Created from Luminary 99.
 ##              2017-03-01 RRB  Updated for Luminary 116.
 ##              2017-03-09 HG   Fix interpretive opcode   BCN  --> BON
-##                                               operand POOFLAG  --> POOHFLAG                                     
+##                                               operand POOFLAG  --> POOHFLAG
+##              2017-03-13 HG   Fix missing operator and operand  SET POOHFLAG
 
 ## Page 1196
 # 1.0 INTRODUCTION
@@ -257,60 +258,61 @@
 #       THE PROGRAM WILL SET MOONFLAG, MIDFLAG DEPENDING ON
 #       THE PERMANENT STATE VECTOR REPRESENTATION.
 
-                BANK            11                              
-                SETLOC          INTINIT                         
-                BANK                                            
-                EBANK=          RRECTCSM                        
-                COUNT*          $$/INTIN                        
-STATEINT        TC              PHASCHNG                        
-                OCT             00052                           
-                CAF             PRIO5                           
-                TC              FINDVAC                         
-                EBANK=          RRECTCSM                        
-                2CADR           STATINT1                        
+                BANK            11
+                SETLOC          INTINIT
+                BANK
+                EBANK=          RRECTCSM
+                COUNT*          $$/INTIN
+STATEINT        TC              PHASCHNG
+                OCT             00052
+                CAF             PRIO5
+                TC              FINDVAC
+                EBANK=          RRECTCSM
+                2CADR           STATINT1
 
-                TC              TASKOVER                        
-STATINT1        TC              INTPRET                         
-                BON             RTB                             
+                TC              TASKOVER
+STATINT1        TC              INTPRET
+                BON             RTB
                                 QUITFLAG                        # KILL INTEGRATION UNTIL NEXT P00.
-                                NOINT                           
-                                LOADTIME                        
-                STORE           TDEC1                           
+                                NOINT
+                                LOADTIME
+                STORE           TDEC1
 ## Page 1201
-                CALL                                            
-                                INTSTALL                        
-                SET             CALL                            
-                                NODOFLAG                        
-                                SETIFLGS                        
-                GOTO                                            
-                                STATEUP                         
-600SECS         2DEC            60000                           
+                CALL
+                                INTSTALL
+                SET             CALL
+                                NODOFLAG
+                                SETIFLGS
+                SET     GOTO
+                                POOHFLAG
+                                STATEUP
+600SECS         2DEC            60000
 
-ENDINT          CLEAR           EXIT                            
-                                STATEFLG                        
-                TC              PHASCHNG                        
-                OCT             20032                           
-                EXTEND                                          
-                DCA             600SECS                         
-                TC              LONGCALL                        
-                EBANK=          RRECTHIS                        
-                2CADR           STATEINT                        
+ENDINT          CLEAR           EXIT
+                                STATEFLG
+                TC              PHASCHNG
+                OCT             20032
+                EXTEND
+                DCA             600SECS
+                TC              LONGCALL
+                EBANK=          RRECTHIS
+                2CADR           STATEINT
 
-                TC              ENDOFJOB                        
-SETIFLGS        SET             CLEAR                           
-                                STATEFLG                        
-                                INTYPFLG                        
-                CLEAR           CLEAR                           
-                                DIM0FLAG                        
-                                D6OR9FLG                        
-                RVQ                                             
-NOINT           EXIT                                            
-                TC              PHASCHNG                        
-                OCT             00002                           
+                TC              ENDOFJOB
+SETIFLGS        SET             CLEAR
+                                STATEFLG
+                                INTYPFLG
+                CLEAR           CLEAR
+                                DIM0FLAG
+                                D6OR9FLG
+                RVQ
+NOINT           EXIT
+                TC              PHASCHNG
+                OCT             00002
 
-                TC              DOWNFLAG                        
-                ADRES           QUITFLAG                        
-                TC              ENDOFJOB                        
+                TC              DOWNFLAG
+                ADRES           QUITFLAG
+                TC              ENDOFJOB
 
 # ATOPCSM TRANSFERS RRECT TO RRECT +41 TO RRECTCSM TO RRECTCSM +41
 
@@ -320,24 +322,24 @@ NOINT           EXIT
 
 # NORMAL EXIT AT L+2
 
-ATOPCSM         STQ             RTB                             
-                                S2                              
-                                MOVEACSM                        
-                SET             CALL                            
-                                CMOONFLG                        
+ATOPCSM         STQ             RTB
+                                S2
+                                MOVEACSM
+                SET             CALL
+                                CMOONFLG
                                 SVDWN1
-## Page 1202                          
-                BON             CLRGO                           
-                                MOONFLAG                        
-                                S2                              
-                                CMOONFLG                        
-                                S2                              
-MOVEACSM        TC              SETBANK                         
+## Page 1202
+                BON             CLRGO
+                                MOONFLAG
+                                S2
+                                CMOONFLG
+                                S2
+MOVEACSM        TC              SETBANK
                 TS              DIFEQCNT                        # INITIALIZE INDEX
-                INDEX           DIFEQCNT                        
-                CA              RRECT                           
-                INDEX           DIFEQCNT                        
-                TS              RRECTCSM                        
+                INDEX           DIFEQCNT
+                CA              RRECT
+                INDEX           DIFEQCNT
+                TS              RRECTCSM
                 CCS             DIFEQCNT                        # IS TRANSFER COMPLETE
                 TCF             MOVEACSM        +1              # NO-LOOP
                 TC              DANZIG                          # COMPLETE - RETURN
@@ -350,109 +352,109 @@ MOVEACSM        TC              SETBANK
 
 # NORMAL EXIT AT L+2
 
-PTOACSM         RTB             BON                             
-                                MOVEPCSM                        
-                                CMOONFLG                        
-                                SETMOON                         
-CLRMOON         CLEAR           SSP                             
-                                MOONFLAG                        
-                                PBODY                           
-                                0                               
-                RVQ                                             
-SETMOON         SET             SSP                             
-                                MOONFLAG                        
-                                PBODY                           
-                                2                               
-                RVQ                                             
-MOVEPCSM        TC              SETBANK                         
-                TS              DIFEQCNT                        
-                INDEX           DIFEQCNT                        
-                CA              RRECTCSM                        
-                INDEX           DIFEQCNT                        
-                TS              RRECT                           
-                CCS             DIFEQCNT                        
-                TCF             MOVEPCSM        +1              
-                TC              DANZIG                          
+PTOACSM         RTB             BON
+                                MOVEPCSM
+                                CMOONFLG
+                                SETMOON
+CLRMOON         CLEAR           SSP
+                                MOONFLAG
+                                PBODY
+                                0
+                RVQ
+SETMOON         SET             SSP
+                                MOONFLAG
+                                PBODY
+                                2
+                RVQ
+MOVEPCSM        TC              SETBANK
+                TS              DIFEQCNT
+                INDEX           DIFEQCNT
+                CA              RRECTCSM
+                INDEX           DIFEQCNT
+                TS              RRECT
+                CCS             DIFEQCNT
+                TCF             MOVEPCSM        +1
+                TC              DANZIG
 
 # ATOPLEM TRANSFERS RRECT TO RRECT +41 TO RRECTLEM TO RRECTLEM +41
 ## Page 1203
-ATOPLEM         STQ             RTB                             
-                                S2                              
-                                MOVEALEM                        
-                SET             CALL                            
-                                LMOONFLG                        
-                                SVDWN2                          
-                BON             CLRGO                           
-                                MOONFLAG                        
-                                S2                              
-                                LMOONFLG                        
-                                S2                              
-MOVEALEM        TC              SETBANK                         
-                TS              DIFEQCNT                        
-                INDEX           DIFEQCNT                        
-                CA              RRECT                           
-                INDEX           DIFEQCNT                        
-                TS              RRECTLEM                        
-                CCS             DIFEQCNT                        
-                TCF             MOVEALEM        +1              
-                TC              DANZIG                          
+ATOPLEM         STQ             RTB
+                                S2
+                                MOVEALEM
+                SET             CALL
+                                LMOONFLG
+                                SVDWN2
+                BON             CLRGO
+                                MOONFLAG
+                                S2
+                                LMOONFLG
+                                S2
+MOVEALEM        TC              SETBANK
+                TS              DIFEQCNT
+                INDEX           DIFEQCNT
+                CA              RRECT
+                INDEX           DIFEQCNT
+                TS              RRECTLEM
+                CCS             DIFEQCNT
+                TCF             MOVEALEM        +1
+                TC              DANZIG
 
 # PTOALEM TRANSFERS RRECTLEM TO RRECTLEM +41 TO RRECT TO RRECT +41
 
-PTOALEM         BON             RTB                             
-                                SURFFLAG                        
-                                USEPIOS                         
-                                MOVEPLEM                        
-                BON             GOTO                            
-                                LMOONFLG                        
-                                SETMOON                         
-                                CLRMOON                         
-MOVEPLEM        TC              SETBANK                         
-                TS              DIFEQCNT                        
-                INDEX           DIFEQCNT                        
-                CA              RRECTLEM                        
-                INDEX           DIFEQCNT                        
-                TS              RRECT                           
-                CCS             DIFEQCNT                        
-                TCF             MOVEPLEM        +1              
-                TC              DANZIG                          
+PTOALEM         BON             RTB
+                                SURFFLAG
+                                USEPIOS
+                                MOVEPLEM
+                BON             GOTO
+                                LMOONFLG
+                                SETMOON
+                                CLRMOON
+MOVEPLEM        TC              SETBANK
+                TS              DIFEQCNT
+                INDEX           DIFEQCNT
+                CA              RRECTLEM
+                INDEX           DIFEQCNT
+                TS              RRECT
+                CCS             DIFEQCNT
+                TCF             MOVEPLEM        +1
+                TC              DANZIG
 
-USEPIOS         SETPD           VLOAD                           
-                                0                               
-                                RLS                             
-                PDDL            PUSH                            
-                                TDEC1                           
-                STODL           TET                             
+USEPIOS         SETPD           VLOAD
+                                0
+                                RLS
+                PDDL            PUSH
+                                TDEC1
+                STODL           TET
                                 5/8
-## Page 1204                             
-                CALL                                            
-                                RP-TO-R                         
-                STOVL           RCV                             
-                                ZUNIT                           
-                STODL           0D                              
-                                TET                             
-                STODL           6D                              
-                                5/8                             
+## Page 1204
+                CALL
+                                RP-TO-R
+                STOVL           RCV
+                                ZUNIT
+                STODL           0D
+                                TET
+                STODL           6D
+                                5/8
                 SET             CALL                            # NEEDED FOR SETTING X1 ON EXIT
-                                MOONFLAG                        
-                                RP-TO-R                         
-                VXV             VXSC                            
-                                RCV                             
-                                OMEGMOON                        
-                STOVL           VCV                             
-                                ZEROVEC                         
-                STORE           TDELTAV                         
-                AXT,2           SXA,2                           
-                                2                               
-                                PBODY                           
-                STCALL          TNUV                            
-                                A-PCHK                          
-SETBANK         CAF             INTBANK                         
-                TS              BBANK                           
-                CAF             FORTYONE                        
-                TC              Q                               
-                EBANK=          RRECTCSM                        
-INTBANK         BBCON           INTEGRV                         
+                                MOONFLAG
+                                RP-TO-R
+                VXV             VXSC
+                                RCV
+                                OMEGMOON
+                STOVL           VCV
+                                ZEROVEC
+                STORE           TDELTAV
+                AXT,2           SXA,2
+                                2
+                                PBODY
+                STCALL          TNUV
+                                A-PCHK
+SETBANK         CAF             INTBANK
+                TS              BBANK
+                CAF             FORTYONE
+                TC              Q
+                EBANK=          RRECTCSM
+INTBANK         BBCON           INTEGRV
 
 # SPECIAL PURPOSE ENTRIES TO ORBITAL INTEGRATION. THESE ROUTINES PROVIDE ENTRANCES TO INTEGRATION WITH
 # APPROPRIATE SWITCHES SET OR CLEARED FOR THE DESIRED INTEGRATION.
@@ -488,67 +490,67 @@ INTBANK         BBCON           INTEGRV
 # INPUT
 #  TDEC1   TIME TO INTEGRATE TO.  CSECS B-28
 
-CSMPREC         STQ             CALL                            
-                                X1                              
-                                INTSTALL                        
-                SXA,1           SET                             
-                                IRETURN                         
-                                VINTFLAG                        
+CSMPREC         STQ             CALL
+                                X1
+                                INTSTALL
+                SXA,1           SET
+                                IRETURN
+                                VINTFLAG
 
-IFLAGP          SET             CLEAR                           
-                                PRECIFLG                        
-                                DIM0FLAG                        
-                CLRGO                                           
-                                INTYPFLG                        
-                                INTEGRV1                        
-LEMPREC         STQ             CALL                            
-                                X1                              
-                                INTSTALL                        
-                SXA,1           CLRGO                           
-                                IRETURN                         
-                                VINTFLAG                        
-                                IFLAGP                          
-
-CSMCONIC        STQ             CALL                            
-                                X1                              
-                                INTSTALL                        
-                SXA,1           SET                             
-                                IRETURN                         
-                                VINTFLAG                        
-IFLAGC          CLEAR           SETGO                           
-                                DIM0FLAG                        
-                                INTYPFLG                        
-                                INTEGRV1                        
-LEMCONIC        STQ             CALL                            
-                                X1                              
-                                INTSTALL                        
+IFLAGP          SET             CLEAR
+                                PRECIFLG
+                                DIM0FLAG
+                CLRGO
+                                INTYPFLG
+                                INTEGRV1
+LEMPREC         STQ             CALL
+                                X1
+                                INTSTALL
                 SXA,1           CLRGO
-## Page 1215                           
-                                IRETURN                         
-                                VINTFLAG                        
-                                IFLAGC                          
+                                IRETURN
+                                VINTFLAG
+                                IFLAGP
 
-INTEGRVS        SET             SSP                             
-                                PRECIFLG                        
-                                PBODY                           
-                                0                               
-                BOF             SSP                             
-                                MOONFLAG                        
-                                +3                              
-                                PBODY                           
-                                2                               
-                STQ             VLOAD                           
-                                IRETURN                         
-                                ZEROVEC                         
-                STORE           TDELTAV                         
-                STCALL          TNUV                            
-                                RECTIFY                         
-                CLEAR           SET                             
-                                DIM0FLAG                        
-                                NEWIFLG                         
-                SETGO                                           
-                                RPQFLAG                         
-                                ALOADED                         
+CSMCONIC        STQ             CALL
+                                X1
+                                INTSTALL
+                SXA,1           SET
+                                IRETURN
+                                VINTFLAG
+IFLAGC          CLEAR           SETGO
+                                DIM0FLAG
+                                INTYPFLG
+                                INTEGRV1
+LEMCONIC        STQ             CALL
+                                X1
+                                INTSTALL
+                SXA,1           CLRGO
+## Page 1215
+                                IRETURN
+                                VINTFLAG
+                                IFLAGC
+
+INTEGRVS        SET             SSP
+                                PRECIFLG
+                                PBODY
+                                0
+                BOF             SSP
+                                MOONFLAG
+                                +3
+                                PBODY
+                                2
+                STQ             VLOAD
+                                IRETURN
+                                ZEROVEC
+                STORE           TDELTAV
+                STCALL          TNUV
+                                RECTIFY
+                CLEAR           SET
+                                DIM0FLAG
+                                NEWIFLG
+                SETGO
+                                RPQFLAG
+                                ALOADED
 
 # INTEGRV IS AN ENTRY TO ORBIT INTEGRATION WHICH PERMITS THE CALLER,
 # NORMALLY THE NAVIGATION PROGRAM, TO SET THE INTEG. FLAGS. THE ROUTINE
@@ -582,239 +584,239 @@ INTEGRVS        SET             SSP
 #   VATT   DEFINED
 #   TAT            BEFORE
 
-INTEGRV         STQ                                             
-                                IRETURN                         
-INTEGRV1        SET             SET                             
-                                RPQFLAG                         
-                                NEWIFLG                         
-INTEGRV2        SSP                                             
-                                QPRET                           
-                                ALOADED                         
-                BON             GOTO                            
-                                VINTFLAG                        
-                                PTOACSM                         
-                                PTOALEM                         
-ALOADED         DLOAD                                           
-                                TDEC1                           
-                STORE           TDEC                            
-                BOFF            GOTO                            
-                                INTYPFLG                        
-                                TESTLOOP                        
-                                RVCON                           
-A-PCHK          BOF             EXIT                            
-                                STATEFLG                        
-                                RECTOUT                         
-                TC              PHASCHNG                        
-                OCT             04022                           
+INTEGRV         STQ
+                                IRETURN
+INTEGRV1        SET             SET
+                                RPQFLAG
+                                NEWIFLG
+INTEGRV2        SSP
+                                QPRET
+                                ALOADED
+                BON             GOTO
+                                VINTFLAG
+                                PTOACSM
+                                PTOALEM
+ALOADED         DLOAD
+                                TDEC1
+                STORE           TDEC
+                BOFF            GOTO
+                                INTYPFLG
+                                TESTLOOP
+                                RVCON
+A-PCHK          BOF             EXIT
+                                STATEFLG
+                                RECTOUT
+                TC              PHASCHNG
+                OCT             04022
                 TC              UPFLAG                          # PHASE CHANGE HAS OCCURRED BETWEEN
                 ADRES           REINTFLG                        # INTSTALL AND INTWAKE
-                TC              INTPRET                         
-                SSP                                             
-                                QPRET                           
-                                PHEXIT                          
-                BON             GOTO                            
-                                VINTFLAG                        
-                                ATOPCSM                         
-                                ATOPLEM                         
-PHEXIT          CALL                                            
-                                GRP2PC                          
-RECTOUT         SETPD           CALL                            
-                                0                               
-                                RECTIFY                         
-                VLOAD           VSL*                            
-                                RRECT                           
-                                0,2                             
+                TC              INTPRET
+                SSP
+                                QPRET
+                                PHEXIT
+                BON             GOTO
+                                VINTFLAG
+                                ATOPCSM
+                                ATOPLEM
+PHEXIT          CALL
+                                GRP2PC
+RECTOUT         SETPD           CALL
+                                0
+                                RECTIFY
+                VLOAD           VSL*
+                                RRECT
+                                0,2
                 PDVL            VSL*                            # RATT TO PD0
-                                VRECT                           
-                                0,2                             
+                                VRECT
+                                0,2
                 PDDL            PDVL                            # VATT TO PD6   TAT TO PD12
 ## Page 1208
-                                TET                             
-                                RRECT                           
-                PDVL            PDDL*                           
-                                VRECT                           
-                                MUEARTH,2                       
-                PUSH            AXT,1                           
-                DEC             -10                             
-                BON             AXT,1                           
-                                MOONFLAG                        
-                                +2                              
-                DEC             -2                              
-INTEXIT         SETPD           BOV                             
-                                0                               
-                                +1                              
-                CLEAR           CLEAR                           
+                                TET
+                                RRECT
+                PDVL            PDDL*
+                                VRECT
+                                MUEARTH,2
+                PUSH            AXT,1
+                DEC             -10
+                BON             AXT,1
+                                MOONFLAG
+                                +2
+                DEC             -2
+INTEXIT         SETPD           BOV
+                                0
+                                +1
+                CLEAR           CLEAR
                                 AVEMIDSW                        # ALLOW UPDATE OF DOWNLINK STATE VECTOR
-                                PRECIFLG                        
-                CLEAR                                           
-                                STATEFLG                        
-                SLOAD           EXIT                            
-                                IRETURN                         
-                CA              MPAC                            
-                INDEX           FIXLOC                          
-                TS              QPRET                           
-                TC              INTWAKE                         
+                                PRECIFLG
+                CLEAR
+                                STATEFLG
+                SLOAD           EXIT
+                                IRETURN
+                CA              MPAC
+                INDEX           FIXLOC
+                TS              QPRET
+                TC              INTWAKE
 
 # RVCON SETS UP ORBIT INTEGRATION TO DO A CONIC SOLUTION FOR POSITION AND
 # VELOCITY FOR THE INTERVAL (TET-TDEC)
 
-RVCON           DLOAD           DSU                             
-                                TDEC                            
-                                TET                             
-                STCALL          TAU.                            
-                                RECTIFY                         
-                CALL                                            
-                                KEPPREP                         
-                DLOAD           DAD                             
-                                TC                              
-                                TET                             
-                STCALL          TET                             
-                                RECTOUT                         
+RVCON           DLOAD           DSU
+                                TDEC
+                                TET
+                STCALL          TAU.
+                                RECTIFY
+                CALL
+                                KEPPREP
+                DLOAD           DAD
+                                TC
+                                TET
+                STCALL          TET
+                                RECTOUT
 
 ## Page 1209
 # TESTLOOP
 
-TESTLOOP        BOF             CLRGO                           
-                                QUITFLAG                        
-                                +3                              
-                                STATEFLG                        
+TESTLOOP        BOF             CLRGO
+                                QUITFLAG
+                                +3
+                                STATEFLG
                                 INTEXIT                         # STOP INTEGRATION
- +3             SETPD           LXA,2                           
-                                10D                             
-                                PBODY                           
-                VLOAD           ABVAL                           
-                                RCV                             
+ +3             SETPD           LXA,2
+                                10D
+                                PBODY
+                VLOAD           ABVAL
+                                RCV
                 PUSH            CLEAR                           # RC TO 10D
-                                MIDFLAG                         
+                                MIDFLAG
                 DSU*            BMN                             # MIDFLAG=0 IF R G.T. RMP
-                                RME,2                           
-                                +3                              
-                SET                                             
-                                MIDFLAG                         
-NORFINAL        DLOAD           DMP                             
-                                10D                             
-                                34D                             
-                SR1R            DDV*                            
-                                MUEARTH,2                       
-                SQRT            DMP                             
-                                .3D                             
+                                RME,2
+                                +3
+                SET
+                                MIDFLAG
+NORFINAL        DLOAD           DMP
+                                10D
+                                34D
+                SR1R            DDV*
+                                MUEARTH,2
+                SQRT            DMP
+                                .3D
                 SR3             SR4                             # DT   IS TRUNCATED TO A MULTIPLE
-                DLOAD           SL                              
-                                MPAC                            
+                DLOAD           SL
+                                MPAC
                                 15D                             #      OF 128 CSECS.
-                PUSH            BOV                             
-                                MAXDT                           
-                BDSU            BMN                             
-                                DT/2MAX                         
-                                MAXDT                           
-DT/2COMP        DLOAD           DSU                             
-                                TDEC                            
-                                TET                             
-                RTB             SL                              
-                                SGNAGREE                        
-                                8D                              
+                PUSH            BOV
+                                MAXDT
+                BDSU            BMN
+                                DT/2MAX
+                                MAXDT
+DT/2COMP        DLOAD           DSU
+                                TDEC
+                                TET
+                RTB             SL
+                                SGNAGREE
+                                8D
                 STORE           DT/2                            # B-19
-                BOV             ABS                             
-                                GETMAXDT                        
+                BOV             ABS
+                                GETMAXDT
                 DSU             BMN                             # IS TIME TO INTEG. TO GR THAN MAXTIME
-                                12D                             
-                                P00HCHK                         
-USEMAXDT        DLOAD           SIGN                            
-                                12D                             
-                                DT/2                            
+                                12D
+                                P00HCHK
+USEMAXDT        DLOAD           SIGN
+                                12D
+                                DT/2
 ## Page 1210
-                STCALL          DT/2                            
-                                P00HCHK                         
+                STCALL          DT/2
+                                P00HCHK
 MAXDT           DLOAD           PDDL                            # EXCHANGE DT/2MAX WITH COMPUTED MAX.
-                                DT/2MAX                         
-                GOTO                                            
-                                DT/2COMP                        
-GETMAXDT        RTB                                             
-                                SIGNMPAC                        
-                STCALL          DT/2                            
-                                USEMAXDT                        
-P00HCHK         DLOAD           ABS                             
-                                DT/2                            
-                DSU             BMN                             
-                                DT/2MIN                         
+                                DT/2MAX
+                GOTO
+                                DT/2COMP
+GETMAXDT        RTB
+                                SIGNMPAC
+                STCALL          DT/2
+                                USEMAXDT
+P00HCHK         DLOAD           ABS
+                                DT/2
+                DSU             BMN
+                                DT/2MIN
                                 A-PCHK
                 BOFF            BON                            # NO BACKWARDS INTEGRATION
                                 POOHFLAG                       # WHEN IN POO
                                 TIMESTEP
-                                PRECIFLG                        
+                                PRECIFLG
                                 TIMESTEP
-                DLOAD           DSU                             
-                                DT/2                            
-                                12D                             
-                BMN             BOFCLR                          
-                                A-PCHK                          
-                                NEWIFLG                         
-                                TIMESTEP                        
-                DLOAD           DSU                             
-                                TDEC                            
-                                TET                             
+                DLOAD           DSU
+                                DT/2
+                                12D
+                BMN             BOFCLR
+                                A-PCHK
+                                NEWIFLG
+                                TIMESTEP
+                DLOAD           DSU
+                                TDEC
+                                TET
                 BMN                                             # NO BACKWARD INTEGRATION
-                                INTEXIT                         
-                PDDL            SR4                             
+                                INTEXIT
+                PDDL            SR4
                                 DT/2                            # IS 4(DT) LS (TDEC - TET)
                 SR2R            BDSU                            # NO
-                BMN             GOTO                            
-                                INTEXIT                         
-                                TIMESTEP                        
-DT/2MIN         2DEC            3               B-20            
+                BMN             GOTO
+                                INTEXIT
+                                TIMESTEP
+DT/2MIN         2DEC            3               B-20
 
-DT/2MAX         2DEC            4000            E2      B-20    
+DT/2MAX         2DEC            4000            E2      B-20
 
-INTSTALL        EXIT                                            
-                CA              RASFLAG                         
+INTSTALL        EXIT
+                CA              RASFLAG
                 MASK            INTBITAB                        # IS THIS STALL AREA FREE
-                EXTEND                                          
-                BZF             OKTOGRAB                        # YES		
-                CAF             WAKESTAL                        
-                TC              JOBSLEEP                        
+                EXTEND
+                BZF             OKTOGRAB                        # YES
+                CAF             WAKESTAL
+                TC              JOBSLEEP
 INTWAKE0        EXIT
-## Page 1211                                            
-                TCF             INTWAKE1                        
+## Page 1211
+                TCF             INTWAKE1
 
 INTWAKE         CS              RASFLAG                         # IS THIS INTSTALLED ROUTINE TO BE
                 MASK            REINTBIT                        #      RESTARTED
-                CCS             A                               
+                CCS             A
                 TC              INTWAKE1                        # NO
 
-                INDEX           FIXLOC                          
-                CA              QPRET                           
+                INDEX           FIXLOC
+                CA              QPRET
                 TS              TBASE2                          # YES, DONT RESTART WITH SOMEONE ELSES Q
 
-                TC              PHASCHNG                        
-                OCT             04022                           
+                TC              PHASCHNG
+                OCT             04022
 
-                CA              TBASE2                          
-                INDEX           FIXLOC                          
-                TS              QPRET                           
+                CA              TBASE2
+                INDEX           FIXLOC
+                TS              QPRET
 
-                CAF             REINTBIT                        
-                MASK            RASFLAG                         
-                EXTEND                                          
+                CAF             REINTBIT
+                MASK            RASFLAG
+                EXTEND
                 BZF             GOBAC                           # DONT INTWAKE IF WE CAME HERE VIA RESTART
 
-INTWAKE1        CAF             WAKESTAL                        
-                INHINT                                          
-                TC              JOBWAKE                         
-                CCS             LOCCTR                          
-                TCF             INTWAKE1                        
-FORTYONE        DEC             41                              
-                CS              INTBITAB                        
-                MASK            RASFLAG                         
+INTWAKE1        CAF             WAKESTAL
+                INHINT
+                TC              JOBWAKE
+                CCS             LOCCTR
+                TCF             INTWAKE1
+FORTYONE        DEC             41
+                CS              INTBITAB
+                MASK            RASFLAG
                 TS              RASFLAG                         # RELEASE STALL AREA
-                RELINT                                          
-                TCF             GOBAC                           
-OKTOGRAB        CAF             INTFLBIT                        
-                INHINT                                          
-                ADS             RASFLAG                         
-GOBAC           TC              INTPRET                         
-                RVQ                                             
-WAKESTAL        CADR            INTSTALL        +1              
-INTBITAB        OCT             20100                           
+                RELINT
+                TCF             GOBAC
+OKTOGRAB        CAF             INTFLBIT
+                INHINT
+                ADS             RASFLAG
+GOBAC           TC              INTPRET
+                RVQ
+WAKESTAL        CADR            INTSTALL        +1
+INTBITAB        OCT             20100
 
 ## Page 1212
 # AVETOMID
@@ -830,65 +832,65 @@ INTBITAB        OCT             20100
 
 # FINALLY TRKMKCNT IS ZEROED
 
-                SETLOC          INTINIT                         
-                BANK                                            
+                SETLOC          INTINIT
+                BANK
 
-                COUNT*          $$/INTIN                        
-AVETOMID        STQ             BON                             
-                                EGRESS                          
-                                RENDWFLG                        
+                COUNT*          $$/INTIN
+AVETOMID        STQ             BON
+                                EGRESS
+                                RENDWFLG
                                 INT/W                           # W-MATRIX VALID, GO INTEGRATE IT
-                BON                                             
-                                ORBWFLAG                        
+                BON
+                                ORBWFLAG
                                 INT/W                           # W-MATRIX VALID, GO INTEGRATE IT
 
 OTHERS          DLOAD           CALL                            # GET SET FOR OTHER VEHICLE INTEGRATION
                                 PIPTIME                         # DESIRED TIME
-                                INTSTALL                        
-                SET             CALL                            
+                                INTSTALL
+                SET             CALL
                                 VINTFLAG                        # CM
                                 SETIFLGS                        # SETS UP NONE W-MAT. PERMANENT INTEG.
-                STCALL          TDEC1                           
-                                INTEGRV                         
+                STCALL          TDEC1
+                                INTEGRV
 
                 AXT,2           CALL                            # NOW MOVE PROPERLY SCALE RN,UN AS WELL AS
                                 2                               # PIPTIME TO INTEGRATION ERASABLES.
-                                INTSTALL                        
-                BON             AXT,2                           
-                                MOONTHIS                        
-                                +2                              
-                                0                               
-                VLOAD           VSR*                            
-                                RN                              
-                                0,2                             
-                STORE           RRECT                           
-                STODL           RCV                             
-                                PIPTIME                         
-                STOVL           TET                             
-                                VN                              
+                                INTSTALL
+                BON             AXT,2
+                                MOONTHIS
+                                +2
+                                0
+                VLOAD           VSR*
+                                RN
+                                0,2
+                STORE           RRECT
+                STODL           RCV
+                                PIPTIME
+                STOVL           TET
+                                VN
 ## Page 1213
-                VSR*            CALL                            
-                                0,2                             
+                VSR*            CALL
+                                0,2
                                 MINIRECT                        # FINISH SETTING UP STATE VECTOR
-                RTB             SSP                             
+                RTB             SSP
                                 MOVATHIS                        # PUT TEMP STATE VECTOR INTO PERMANENT
-                                TRKMKCNT                        
-                                0                               
-                GOTO                                            
-                                FAZAB5                          
+                                TRKMKCNT
+                                0
+                GOTO
+                                FAZAB5
 
-INT/W           DLOAD           CALL                            
+INT/W           DLOAD           CALL
                                 PIPTIME                         # INTEGRATE W THRU BURN
-                                INTSTALL                        
-                SET             SET                             
+                                INTSTALL
+                SET             SET
                                 DIM0FLAG                        # DO W-MATRIX
                                 AVEMIDSW                        # SO WONT CLOBBER RN,VN,PIPTIME
-                SET             CLEAR                           
+                SET             CLEAR
                                 D6OR9FLG                        # 9X9 FOR LM
                                 VINTFLAG                        # LM
-                STCALL          TDEC1                           
-                                INTEGRV                         
-                GOTO                                            
+                STCALL          TDEC1
+                                INTEGRV
+                GOTO
                                 OTHERS                          # NOW GO DO THE OTHER VEHICLE
 
 ## Page 1214
@@ -915,123 +917,123 @@ INT/W           DLOAD           CALL
 # NO INPUTS ARE REQUIRED OF THE CALLER. RETURN IS IN BASIC TO THE RETURN
 # ADDRESS WITH THE ABOVE TRANSFERS TO R,VN1-PIPTIME1-AND MPAC DONE
 
-                EBANK=          IRETURN1                        
+                EBANK=          IRETURN1
 MIDTOAV2        STQ             CLRGO                           # INTEGRATE TO PRESENT TIME PLUS TIMEDELT
-                                IRETURN1                        
-                                MID1FLAG                        
-                                ENTMID2                         
+                                IRETURN1
+                                MID1FLAG
+                                ENTMID2
 
 MIDTOAV1        STQ             SET                             # INTEGRATE TO TDEC1
-                                IRETURN1                        
-                                MID1FLAG                        
+                                IRETURN1
+                                MID1FLAG
                 RTB             DAD                             # INITIAL CHECK, IS TDEC1 IN THE FUTURE
-                                LOADTIME                        
-                                TIMEDELT                        
-                BDSU            BPL                             
-                                TDEC1                           
+                                LOADTIME
+                                TIMEDELT
+                BDSU            BPL
+                                TDEC1
                                 ENTMID1                         # Y5S
-                CALL                                            
+                CALL
                                 NOTIME                          # NO, SET ALARM, SWITCH TO MIDTOAV2
 
-ENTMID2         RTB             DAD                             
-                                LOADTIME                        
-                                TIMEDELT                        
-                STORE           TDEC1                           
+ENTMID2         RTB             DAD
+                                LOADTIME
+                                TIMEDELT
+                STORE           TDEC1
 
-ENTMID1         CALL                                            
-                                INTSTALL                        
-                CLEAR           CALL                            
+ENTMID1         CALL
+                                INTSTALL
+                CLEAR           CALL
 ## Page 1215
                                 DIM0FLAG                        # NO W-MATRIX
-                                THISVINT                        
-                CLEAR           SET                             
-                                INTYPFLG                        
+                                THISVINT
+                CLEAR           SET
+                                INTYPFLG
                                 MIDAVFLG                        # LET INTEG. KNOW THE CALL IS FOR MIDTOAV.
-                CALL                                            
+                CALL
                                 INTEGRV                         #  GO INTEGRATE
-                CLEAR           VLOAD                           
-                                MIDAVFLG                        
-                                RATT                            
-                STOVL           RN1                             
-                                VATT                            
-                STODL           VN1                             
-                                TAT                             
-                STORE           PIPTIME1                        
-                SXA,2           SXA,1                           
-                                RTX2                            
-                                RTX1                            
-                EXIT                                            
+                CLEAR           VLOAD
+                                MIDAVFLG
+                                RATT
+                STOVL           RN1
+                                VATT
+                STODL           VN1
+                                TAT
+                STORE           PIPTIME1
+                SXA,2           SXA,1
+                                RTX2
+                                RTX1
+                EXIT
 
-                INHINT                                          
-                EXTEND                                          
-                DCS             TIME2                           
-                DAS             MPAC                            
-                TC              TPAGREE                         
+                INHINT
+                EXTEND
+                DCS             TIME2
+                DAS             MPAC
+                TC              TPAGREE
 
-                CA              IRETURN1                        
-                TC              BANKJUMP                        
-CKMID2          BOF             RTB                             
-                                MID1FLAG                        
-                                MID2                            
-                                LOADTIME                        
-                DAD             BDSU                            
-                                TIMEDELT                        
-                                TDEC                            
-                BPL             CALL                            
+                CA              IRETURN1
+                TC              BANKJUMP
+CKMID2          BOF             RTB
+                                MID1FLAG
+                                MID2
+                                LOADTIME
+                DAD             BDSU
+                                TIMEDELT
+                                TDEC
+                BPL             CALL
                                 TESTLOOP                        # YES
-                                NOTIME                          
+                                NOTIME
 
-TIMEINC         RTB             DAD                             
-                                LOADTIME                        
-                                TIMEDELT                        
-                STCALL          TDEC                            
-                                TESTLOOP                        
+TIMEINC         RTB             DAD
+                                LOADTIME
+                                TIMEDELT
+                STCALL          TDEC
+                                TESTLOOP
 
-MID2            DLOAD           DSU                             
-                                TDEC                            
-                                TET                             
-                ABS             DSU                             
-                                3CSECS                          
+MID2            DLOAD           DSU
+                                TDEC
+                                TET
+                ABS             DSU
+                                3CSECS
 
 ## Page 1216
-                BMN             GOTO                            
-                                A-PCHK                          
-                                TIMEINC                         
+                BMN             GOTO
+                                A-PCHK
+                                TIMEINC
 
 NOTIME          CLEAR           EXIT                            # TOO LATE
-                                MID1FLAG                        
+                                MID1FLAG
                 INCR            IRETURN1                        # SET ERROR EXIT (CALLOC +2)
                 TC              ALARM                           # INSUFFICIENT TIME FOR INTEGRATION --
                 OCT             1703                            #    TIG WILL BE SLIPPED...
-                TC              INTPRET                         
-                RVQ                                             
+                TC              INTPRET
+                RVQ
 
-3CSECS          2DEC            3                               
+3CSECS          2DEC            3
 
-TIMEDELT        2DEC            2000                            
+TIMEDELT        2DEC            2000
 
-                BANK            27                              
-                SETLOC          UPDATE2                         
-                BANK                                            
-                EBANK=          INTWAKUQ                        
+                BANK            27
+                SETLOC          UPDATE2
+                BANK
+                EBANK=          INTWAKUQ
 
-                COUNT*          $$/INTIN                        
+                COUNT*          $$/INTIN
 
 INTWAKUQ        =               INTWAK1Q                        # TEMPORARY UNTIL NAME OF INTWAK1Q IS CHNG
 
-INTWAKEU        RELINT                                          
-                EXTEND                                          
+INTWAKEU        RELINT
+                EXTEND
                 QXCH            INTWAKUQ                        # SAVE Q FOR RETURN
 
-                TC              INTPRET                         
+                TC              INTPRET
 
                 SLOAD           BZE                             # IS THIS A CSM/LEM STATE VECTOR UPDATE
                                 UPSVFLAG                        # REQUEST. IF NOT GO TO INTWAKUP.
-                                INTWAKUP                        
+                                INTWAKUP
 
                 VLOAD                                           # MOVE PRECT(6) AND VRECT(6) INTO
                                 RRECT                           #      RCV(6)   AND VCV(6) RESPECTIVELY.
-                STOVL           RCV                             
+                STOVL           RCV
                                 VRECT                           # NOW GO TO 'RECTIFY +13D' TO
                 CALL                                            # STORE VRECT INTO VCV  AND ZERO OUT
                                 RECTIFY         +13D            # TDELTAV(6),TNUV(6),TC(2) AND XKEP(2)
@@ -1041,48 +1043,48 @@ INTWAKEU        RELINT
                                 UPMNSVCD                        # BE UPDATED IS IN THE EARTH OR LUNAR
                                 INTWAKEM                        # SPHERE OF INFLUENCE.........
                 AXT,2           CLRGO                           # EARTH SPHERE OF INFLUENCE.
-                DEC             0                               
-                                MOONFLAG                        
+                DEC             0
+                                MOONFLAG
 ## Page 1217
-                                INTWAKEC                        
+                                INTWAKEC
 INTWAKEM        AXT,2           SET                             # LUNAR SPHERE OF INFLUENCE.
-                DEC             2                               
-                                MOONFLAG                        
+                DEC             2
+                                MOONFLAG
 INTWAKEC        SLOAD           BMN                             # COMMON CODING AFTER X2 INITIALIZED AND
                                                                 # MOONFLAG SET (OR CLEARED).
                                 UPSVFLAG                        # IS THIS A REQUEST FOR A LEM OR CSM
                                 INTWAKLM                        #  STATE VECTOR UPDATE......
                 CALL                                            # UPDATE CSM STATE VECTOR
-                                ATOPCSM                         
+                                ATOPCSM
 
-                CLEAR           GOTO                            
-                                ORBWFLAG                        
-                                INTWAKEX                        
+                CLEAR           GOTO
+                                ORBWFLAG
+                                INTWAKEX
 
 INTWAKLM        CALL                                            # UPDATE LM STATE VECTOR
-                                ATOPLEM                         
+                                ATOPLEM
 
-INTWAKEX        CLEAR                                           
-                                RENDWFLG                        
+INTWAKEX        CLEAR
+                                RENDWFLG
 
 INTWAKUP        SSP             CALL                            # REMOVE :UPDATE STATE VECTOR INDICATOR:
-                                UPSVFLAG                        
-                                0                               
+                                UPSVFLAG
+                                0
                                 INTWAKE0                        # RELEASE :GRAB: OF ORBIT INTEG
-                EXIT                                            
+                EXIT
 
-                TC              PHASCHNG                        
-                OCT             04026                           
-                TC              INTWAKUQ                        
+                TC              PHASCHNG
+                OCT             04026
+                TC              INTWAKUQ
 
-UPMNSVCD        OCT             2                               
-                OCT             0                               
+UPMNSVCD        OCT             2
+                OCT             0
 
-GRP2PC          STQ             EXIT                            
-                                GRP2SVQ                         
-                TC              PHASCHNG                        
-                OCT             04022                           
-                TC              INTPRET                         
-                GOTO                                            
-                                GRP2SVQ                         
+GRP2PC          STQ             EXIT
+                                GRP2SVQ
+                TC              PHASCHNG
+                OCT             04022
+                TC              INTPRET
+                GOTO
+                                GRP2SVQ
 

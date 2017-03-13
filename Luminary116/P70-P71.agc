@@ -14,6 +14,7 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-01-22 MAS  Created from Luminary 99.
 ##              2017-03-10 HG   Transcribed
+##              2017-03-13 HG   Fix operand ROO --> RCO
 
 ## Page 823
                 BANK            21
@@ -271,7 +272,7 @@ YOK             DLOAD           DSU
     +4          VLOAD
                                 J2PARM
     +3          STODL           JPARM
-                                ROO
+                                RCO
 
 ## Page 828
                 STORE           RP

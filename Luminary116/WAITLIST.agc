@@ -17,6 +17,7 @@
 ##              2017-02-09 RSB  Comment-text fixes identified in proofing Artemis 72
 ##              2017-02-27 RSB  Corrected WAITP00H and LONGP00H to similar POOH names.
 ##              2017-03-10 HG   Transcribed
+##              2017-03-13 HG   Fix value OCT 01204 -> OCT 21204
 
 ## Page 1109
 # PROGRAM DESCRIPTION                                                                     DATE - 10 OCTOBER 1966
@@ -589,4 +590,4 @@ LONGPOOH        DXCH            LONGEXIT
                 TCF             +2
 WAITPOOH        DXCH            WAITEXIT
  +2             TC              POODOO1
-                OCT             01204
+                OCT             21204

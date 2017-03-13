@@ -16,7 +16,12 @@
 ##              2017-02-01 RRB  Updated for Luminary 116.
 ##              2017-02-09 HG   Fix operand O13QSAV  --> C13QSAV
 ##                                          O13STALL --> C13STALL
-##                                          Q        --> C13QSAV         
+##                                          Q        --> C13QSAV  
+##              2017-03-13 HG   Fix definition of 1/10SEC, 40CYC    
+##                              i.e. no storage allocated
+##                              Add missing statements RELINT     
+##                              Fix value OCT 02000 --> OCT 32000   
+##                              Fix operand DAPBOOLS --> FLAGWRD5       
 
 ## Page 1411
                 BANK            16                              
@@ -41,7 +46,7 @@ PAXIS           CA              MS100
 
                 CCS             DAPZRUPT                        # IF DAPZRUPT POSITIVE, DAP (JASK) IS
                 TC              BAILOUT                         #    STILL IN PROGRESS AND A RESTART IS
-                OCT             02000                           #   CALLED FOR.  IT IS NEVER ZERO.
+                OCT             32000                           #   CALLED FOR.  IT IS NEVER ZERO.
 
                 TC              CHEKBITS                        # RETURN IS TC I+1 IF DAP SHOULD STAY ON.
 
@@ -645,8 +650,8 @@ RUTH            CA              RCSFLAGS
 
 # ============================================
 
-1/10SEC         OCT             1                               
-40CYC           OCT             50                              
+1/10SEC         =               BIT1                               
+40CYC           =               OCT50                              
 PQRBIT          OCT             74777                           
 BITS9,11        EQUALS          EBANK5                          
 LINRATP         DEC             46                              
@@ -695,7 +700,8 @@ JUSTOUT         CA              OURRCBIT                        # INITIALIZATION
                 CS              RCSFLAGS                        # SET 'JUST-IN' BIT TO 1.
                 MASK            BIT9                            
                 ADS             RCSFLAGS                        
-                TC              ZEROENBL                        
+                TC              ZEROENBL  
+                RELINT
                 TCF             JETSOFF                         
 ZEROENBL        LXCH            R-RHCCTR                        
                 CA              Q-RHCCTR                        
@@ -742,6 +748,7 @@ RATERROR        CA              CDUX                            # FINDCDUW REQUI
                 TS              DAPTEMP1                        
                 TC              ZEROENBL                        # INTERVAL.  ZERO AND ENABLE ACA COUNTERS.
 ## Page 1425
+                RELINT
                 CS              PLAST                           
                 AD              OMEGAP                          
                 TS              EDOTP                           
@@ -887,7 +894,7 @@ ALTSYST         CA              FLAGWRD5                        # ALTERNATE P-AX
                 CA              AORBSYST                        
                 EXTEND                                          
                 RXOR            LCHAN                           
-                TS              DAPBOOLS                        
+                TS              FLAGWRD5                        
                 RELINT                                          
                 TC              Q                               
 

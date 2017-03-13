@@ -15,6 +15,9 @@
 ## Mod history: 2017-01-22 MAS  Created from Luminary 99.
 ##              2017-01-28 RSB  WTIH -> WITH.
 ##              2017-03-09 HG   Transcribed
+##              2017-03-14 HG   Fix operator CALL  --> VLOAD
+##                              Fix statement CA BIT1  --> CS BIT5
+##                              Fix operand   ENDRRD29 --> ENDR29RD
 
 ## Page 494
 # RENDEZVOUS NAVIGATION PROGRAM 20
@@ -3824,7 +3827,7 @@ MXMYMZ          CAF             AIGBANK
                                 REFSMMAT
 SHAFTBQ         STCALL          MZ
                                 RADARANG
-                SSP             CALL                            # STORE SHAFT CODE (3) FOR R3 IN NOUN 49
+                SSP             VLOAD                           # STORE SHAFT CODE (3) FOR R3 IN NOUN 49
                                 WHCHREAD
                 DEC             3
                                 ULC
@@ -4910,7 +4913,7 @@ R29READ         CAF             PRIO26                          # CALLED BY WAIT
 R29RDJOB        CA              FLAGWRD3                        # CALLED VIA NOVAC.
                 MASK            NR29FBIT
                 CCS             A                               # TEST "NOR29FLG".
-                TCF             ENDRRD29                        # R29 OVER,EXIT WITH RR STILL LOCKED ON
+                TCF             ENDR29RD                        # R29 OVER,EXIT WITH RR STILL LOCKED ON
                 CA              RADMODES
                 MASK            AUTOMBIT
                 CCS             A                               # TEST RR-NOT-IN-AUTO-MODE BIT.
@@ -5150,7 +5153,7 @@ FT99999         2DEC            30479           B-19
 
                 EBANK=          LOSCOUNT
 
-RADLITES        CA              BIT1
+RADLITES        CS              BIT5
                 AD              ITEMP1
                 CCS             A
                 CS              ONE

@@ -2,7 +2,7 @@
 ## Copyright:   Public domain.
 ## Filename:    PINBALL_NOUN_TABLES.agc
 ## Purpose:     A section of Luminary revision 116.
-##              It is part of the source code for the Lunar Module's (LM) 
+##              It is part of the source code for the Lunar Module's (LM)
 ##              Apollo Guidance Computer (AGC) for Apollo 12.
 ##              This file is intended to be a faithful transcription, except
 ##              that the code format has been changed to conform to the
@@ -21,7 +21,7 @@
 ##              2017-03-09      fix  ECADR 0 --> OCT 0
 ##                                   OCT     --> ECADR
 ##              2007-03-12      Fix operand DNRANGE  -> DNRRANGE
-##                                          DNRRDCT  -> DNRRDOT 
+##                                          DNRRDCT  -> DNRRDOT
 
 ## Page 302
 # THE FOLLOWING REFERS TO THE NOUN TABLES
@@ -33,7 +33,7 @@
 #       00010                   3 COMPONENT
 #       X1XXX                   BIT 4 = 1. DECIMAL ONLY
 #       1XXXX                   BIT 5 = 1. NO LOAD
-# END OF COMPONENT CODE NUMBERS 
+# END OF COMPONENT CODE NUMBERS
 
 # SF ROUTINE CODE NUMBER        INTERPRETATION
 
@@ -139,40 +139,40 @@
 # IDADDTAB ENTRY, RUTMXTEM WITH THE RUTMXTAB ENTRY. MIXBR IS SET FOR
 # MIXED OR NORMAL NOUN.
 
-                BANK            6                               
-                SETLOC          PINBALL3                        
-                BANK                                            
-                COUNT*          $$/NOUNS                        
+                BANK            6
+                SETLOC          PINBALL3
+                BANK
+                COUNT*          $$/NOUNS
 LODNNTAB        DXCH            IDAD2TEM                        # SAVE RETURN INFO IN IDAD2TEM, IDAD3TEM.
-                INDEX           NOUNREG                         
-                CAF             NNADTAB                         
-                TS              NNADTEM                         
-                INDEX           NOUNREG                         
-                CAF             NNTYPTAB                        
-                TS              NNTYPTEM                        
-                CS              NOUNREG                         
-                AD              MIXCON                          
-                EXTEND                                          
+                INDEX           NOUNREG
+                CAF             NNADTAB
+                TS              NNADTEM
+                INDEX           NOUNREG
+                CAF             NNTYPTAB
+                TS              NNTYPTEM
+                CS              NOUNREG
+                AD              MIXCON
+                EXTEND
                 BZMF            LODMIXNN                        # NOUN NUMBER G/E FIRST MIXED NOUN
                 CAF             ONE                             # NOUN NUMBER L/ FIRST MIXED NOUN
                 TS              MIXBR                           # NORMAL.  +1 INTO MIXBR.
-                TC              LODNLV                          
+                TC              LODNLV
 LODMIXNN        CAF             TWO                             # MIXED.  +2 INTO MIXBR.
-                TS              MIXBR                           
-                INDEX           NOUNREG                         
+                TS              MIXBR
+                INDEX           NOUNREG
                 CAF             RUTMXTAB        -40D            # FIRST MIXED NOUN = 40.
-                TS              RUTMXTEM                        
-                CAF             LOW10                           
-                MASK            NNADTEM                         
+                TS              RUTMXTEM
+                CAF             LOW10
+                MASK            NNADTEM
                 TS              Q                               # TEMP
-                INDEX           A                               
-                CAF             IDADDTAB                        
+                INDEX           A
+                CAF             IDADDTAB
                 TS              IDAD1TEM                        # LOAD IDAD1TEM WITH FIRST IDADDTAB ENTRY
-                EXTEND                                          
+                EXTEND
                 INDEX           Q                               # LOAD IDAD2TEM WITH 2ND IDADDTAB ENTRY
                 DCA             IDADDTAB        +1              # LOAD IDAD3TEM WITH 3RD IDADDTAB ENTRY.
 LODNLV          DXCH            IDAD2TEM                        # PUT RETURN INFO INTO A, L.
-                DXCH            Z                               
+                DXCH            Z
 
 MIXCON          =               OCT50                           # (DEC 40)
 
@@ -180,19 +180,19 @@ MIXCON          =               OCT50                           # (DEC 40)
 
 GTSFOUT         DXCH            SFTEMP1                         # 2X(SFCONUM) ARRIVES IN SFTEMP1.
 ## Page 306
-                EXTEND                                          
-                INDEX           A                               
-                DCA             SFOUTAB                         
-SFCOM           DXCH            SFTEMP1                         
-                DXCH            Z                               
+                EXTEND
+                INDEX           A
+                DCA             SFOUTAB
+SFCOM           DXCH            SFTEMP1
+                DXCH            Z
 
 # GTSFIN LOADS SFTEMP1, SFTEMP2 WITH THE DP SFINTAB ENTRIES.
 
 GTSFIN          DXCH            SFTEMP1                         # 2X(SFCONUM) ARRIVES IN SFTEMP1.
-                EXTEND                                          
-                INDEX           A                               
-                DCA             SFINTAB                         
-                TCF             SFCOM                           
+                EXTEND
+                INDEX           A
+                DCA             SFINTAB
+                TCF             SFCOM
 
                                                                 # NN    NORMAL NOUNS
 NNADTAB         OCT             00000                           # 00    NOT IN USE
@@ -419,7 +419,7 @@ NNTYPTAB        OCT             00000                           # 00 NOT IN USE
 # END OF NNTYPTAB FOR NORMAL NOUNS
                                                                 # NN   MIXED NOUNS
                 OCT             24500                           # 40 3COMP  MIN/SEC, VEL3, VEL3
-                                                                #           (NO LOAD, DEC ONLY)     
+                                                                #           (NO LOAD, DEC ONLY)
                 OCT             00542                           # 41 2COMP  CDU DEG, ELEV DEG
                 OCT             24410                           # 42 3COMP  POS4, POS4, VEL3
                                                                 #           (DEC ONLY)
@@ -521,9 +521,9 @@ NNTYPTAB        OCT             00000                           # 00 NOT IN USE
 # END OF NNTYPTAB FOR MIXED NOUNS
 
 SFINTAB         OCT             00006                           # WHOLE, DP TIME (SEC)
-                OCT             03240                           
+                OCT             03240
                 OCT             00000                           # SPARE
-                OCT             00000                           
+                OCT             00000
                 OCT             00000                           # CDU DEGREES, 360-CDU DEGREES
                 OCT             00000                           #     (SFCONS IN DEGINSF)
                 OCT             10707                           # DP DEGREES (90)
@@ -532,33 +532,33 @@ SFINTAB         OCT             00006                           # WHOLE, DP TIME
                 OCT             34345                           #         UPPED BY 1
                 OCT             00005                           # DEGREES (180)
 ## Page 313
-                OCT             21616                           
+                OCT             21616
                 OCT             26113                           # WEIGHT2
-                OCT             31713                           
+                OCT             31713
                 OCT             00070                           # POSITION5
-                OCT             20460                           
+                OCT             20460
                 OCT             01065                           # POSITION4
-                OCT             05740                           
+                OCT             05740
                 OCT             11414                           # VELOCITY2     (POINT BETWN BITS 11-12)
-                OCT             31463                           
+                OCT             31463
                 OCT             07475                           # VELOCITY3
-                OCT             16051                           
+                OCT             16051
                 OCT             00001                           # ELEVATION DEGREES
-                OCT             03434                           
+                OCT             03434
                 OCT             00047                           # RENDEZVOUS RADAR RANGE
-                OCT             21135                           
+                OCT             21135
                 OCT             77766                           # RENDEZVOUS RADAR RANGE RATE
-                OCT             50711                           
+                OCT             50711
                 2DEC*           .9267840599     E5      B-28*   # LANDING RADAR ALTITUDE
 
                 OCT             00002                           # INITIAL/FINAL ALTITUDE
-                OCT             23224                           
+                OCT             23224
                 OCT             00014                           # ALTITUDE RATE
-                OCT             06500                           
+                OCT             06500
                 OCT             00012                           # FORWARD/LATERAL VELOCITY
-                OCT             36455                           
+                OCT             36455
                 OCT             04256                           # ROT HAND CONT ANGLE RATE
-                OCT             07071                           
+                OCT             07071
                 2DEC*           -1.552795030    E5      B-28*   # LANDING RADAR VELX
 
                 2DEC*           .8250825087     E5      B-28*   # LANDING RADAR VELY
@@ -566,13 +566,13 @@ SFINTAB         OCT             00006                           # WHOLE, DP TIME
                 2DEC*           1.153668673     E5      B-28*   # LANDING RADAR VELZ
 
                 OCT             04324                           # POSITION7
-                OCT             27600                           
+                OCT             27600
                 OCT             00036                           # TRIM DEGREES2
-                OCT             20440                           
+                OCT             20440
                 OCT             00035                           # COMPUTED ALTITUDE
-                OCT             30400                           
+                OCT             30400
                 OCT             23420                           # DP DEGREES
-                OCT             00000                           
+                OCT             00000
                 2DEC            30480           B-19            # POSITION 9
 
                 2DEC            30.48           B-7             # VELOCITY4
@@ -583,43 +583,43 @@ SFINTAB         OCT             00006                           # WHOLE, DP TIME
 ## Page 314
 
 SFOUTAB         OCT             05174                           # WHOLE, DP TIME (SEC)
-                OCT             13261                           
+                OCT             13261
                 OCT             00000                           # SPARE
-                OCT             00000                           
+                OCT             00000
                 OCT             00000                           # CDU DEGREES, 360-CDU DEGREES
                 OCT             00000                           #     (SFCONS IN DEGOUTSF, 360-CDUD)
                 OCT             00714                           # DP DEGREES (90) (POINT BETWN BITS 7-8)
-                OCT             31463                           
+                OCT             31463
                 OCT             13412                           # DP DEGREES (360)
-                OCT             07534                           
+                OCT             07534
                 OCT             05605                           # DEGREES (180)
-                OCT             03656                           
+                OCT             03656
                 OCT             00001                           # WEIGHT2
-                OCT             16170                           
+                OCT             16170
                 OCT             00441                           # POSITION5
-                OCT             34306                           
+                OCT             34306
                 OCT             07176                           # POSITION4     (POINT BETWN BITS 7-8)
-                OCT             21603                           
+                OCT             21603
                 OCT             15340                           # VELOCITY2
-                OCT             15340                           
+                OCT             15340
                 OCT             01031                           # VELOCITY3     (POINT BETWN BITS 7-8)
-                OCT             21032                           
+                OCT             21032
                 OCT             34631                           # ELEVATION DEGREES
-                OCT             23146                           
+                OCT             23146
                 OCT             00636                           # RENDEZVOUS RADAR RANGE
-                OCT             14552                           
+                OCT             14552
                 OCT             74552                           # RENDEZVOUS RADAR RANGE RATE
-                OCT             70307                           
+                OCT             70307
                 2DEC            1.079           E-5     B14     # LANDING RADAR ALTITUDE
 
                 OCT             14226                           # INITIAL/FINAL ALTITUDE
-                OCT             31757                           
+                OCT             31757
                 OCT             02476                           # ALTITUDE RATE
-                OCT             05531                           
+                OCT             05531
                 OCT             02727                           # FORWARD/LATERAL VELOCITY
-                OCT             16415                           
+                OCT             16415
                 OCT             00007                           # ROT HAND CONT ANGLE RATE
-                OCT             13734                           
+                OCT             13734
                 2DEC            -.6440          E-5     B14     # LANDING RADAR VELX
 
                 2DEC            1.212           E-5     B14     # LANDING RADAR VELY
@@ -627,14 +627,14 @@ SFOUTAB         OCT             05174                           # WHOLE, DP TIME
                 2DEC            .8668           E-5     B14     # LANDING RADAR VELZ
 
                 OCT             34772                           # POSITION7
-                OCT             07016                           
+                OCT             07016
                 OCT             01030                           # TRIM DEGREES2
-                OCT             33675                           
+                OCT             33675
                 OCT             01046                           # COMPUTED ALTITUDE
-                OCT             15700                           
-## Page 315             
+                OCT             15700
+## Page 315
                 OCT             00321                           # DP DEGREES
-                OCT             26706                           
+                OCT             26706
                 2DEC            17.2010499      B-7             # POSITION 9
 
                 2DEC            .032808399                      # VELOCITY4
@@ -643,7 +643,7 @@ SFOUTAB         OCT             05174                           # WHOLE, DP TIME
                                                                 # END OF SFOUTAB
 
                                                                 # NN     SF CONSTANT      SF ROUTINE
-                                                                
+
 IDADDTAB        ECADR           TTOGO                           # 40    MIN/SEC                 M/S
                 ECADR           VGDISP                          # 40    VEL3                    DP3
                 ECADR           DVTOTAL                         # 40    VEL3                    DP3
@@ -685,8 +685,8 @@ IDADDTAB        ECADR           TTOGO                           # 40    MIN/SEC 
                 OCT             00000                           # 52    SPARE COMPONENT
                 OCT             00000                           # 52    SPARE COMPONENT
                 OCT             00000                           # 53    SPARE
-                OCT             00000                           # 53    
-                OCT             00000                           # 53    
+                OCT             00000                           # 53
+                OCT             00000                           # 53
                 ECADR           RANGE                           # 54    POS5                    DP1
                 ECADR           RRATE                           # 54    VEL3                    DP3
                 ECADR           RTHETA                          # 54    DPDEG(360)              DP4
@@ -696,9 +696,9 @@ IDADDTAB        ECADR           TTOGO                           # 40    MIN/SEC 
                 ECADR           RR-AZ                           # 56    DPDEG(360)              DP4
                 ECADR           RR-ELEV                         # 56    DPDEG(360)              DP4
                 OCT             0                               # 56    SPARE COMPONENT
-                OCT             0                               # 57    SPARE                  
-                OCT             0                               # 57    SPARE 
-                OCT             0                               # 57    SPARE 
+                OCT             0                               # 57    SPARE
+                OCT             0                               # 57    SPARE
+                OCT             0                               # 57    SPARE
                 ECADR           POSTTPI                         # 58    POS4                    DP3
                 ECADR           DELVTPI                         # 58    VEL3                    DP3
                 ECADR           DELVTPF                         # 58    VEL3                    DP3
@@ -744,7 +744,7 @@ IDADDTAB        ECADR           TTOGO                           # 40    MIN/SEC 
                 ECADR           AOTCODE         +2              # 71    OCTAL ONLY              OCT
                 ECADR           CDUT                            # 72    360-CDU DEG          360-CDU
                 ECADR           CDUS                            # 72    CDU DEG                 CDU
-                OCT             0                               # 72    SPARE COMPONENT 
+                OCT             0                               # 72    SPARE COMPONENT
                 ECADR           TANG                            # 73    360-CDU DEG          360-CDU
                 ECADR           TANG            +1              # 73    CDU DEG                 CDU
                 OCT             0                               # 73    SPARE COMPONENT
@@ -810,8 +810,8 @@ IDADDTAB        ECADR           TTOGO                           # 40    MIN/SEC 
                 ECADR           OGC             +2              # 93    DPDEG(90)               DP3
                 ECADR           OGC             +4              # 93    DPDEG(90)               DP3
                 OCT             00000                           # 94    SPARE
-                OCT             00000                           # 94 
-                OCT             00000                           # 94 
+                OCT             00000                           # 94
+                OCT             00000                           # 94
                 OCT             0                               # 95    SPARE
                 OCT             0                               # 95    SPARE
                 OCT             0                               # 95    SPARE
@@ -830,7 +830,7 @@ IDADDTAB        ECADR           TTOGO                           # 40    MIN/SEC 
 # END OF IDADDTAB
 
                                                                 # NN    SF ROUTINES
-                                                                
+
 RUTMXTAB        OCT             16351                           # 40    M/S, DP3, DP3
                 OCT             00142                           # 41    CDU, ARTH
 ## Page 319
@@ -895,5 +895,5 @@ RUTMXTAB        OCT             16351                           # 40    M/S, DP3
                 OCT             24247                           # 99    DP3, DP2, DP4
 # END OF RUTMXTAB
 
-                SBANK=          LOWSUPER                        
+                SBANK=          LOWSUPER
 

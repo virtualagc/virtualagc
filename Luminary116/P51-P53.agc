@@ -14,6 +14,7 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-01-22 MAS  Created from Luminary 99.
 ##              2017-03-11 HG   Transcribed
+##              2017-03-13 HG   Fix operator STODL --> STORE
 
 ## Page 919
 # PROGRAM NAME- PROG52                                                                   DATE- JAN 9, 1967
@@ -275,7 +276,7 @@ N89DISP         STQ
                                 ALT
                 STODL           LANDALT
                                 LAT
-                STODL           LANDLAT
+                STORE           LANDLAT
                 EXIT
 
 LSDISP          CAF             V06N89*                         # DISPLAY LAT,LONG/2,ALT
