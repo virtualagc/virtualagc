@@ -15,6 +15,7 @@
 ## Mod history: 2017-01-22 MAS  Created from Luminary 99.
 ##              2017-03-11 HG   Transcribed
 ##              2017-03-12 HG   Fix label REREPCS -> REREPOS
+##              2017-03-13 HG   Fix operand XCVINFLG --> XOVINFLG
 
 ## Page 852
                 BANK            37
@@ -743,7 +744,7 @@ MUNRETRN        EXIT
                 CCS             A
                 TCF             R12                             # ALTITUDE > 30KFT
                 TC              UPFLAG                          # ALTITUDE < 30KFT SET X-AXIS OVERRIDE
-                ADRES           XCVINFLG
+                ADRES           XOVINFLG
                 TC              UPFLAG
                 ADRES           XORFLG
 
