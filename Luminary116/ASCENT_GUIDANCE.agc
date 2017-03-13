@@ -353,7 +353,7 @@ CLRXFLAG        CLEAR           BON                             # ALLOW X-AXIS O
                                 P7071FLG                        # ONLY ACTIVATE R29 IF IN P12
                                 ASCTERM
                 CLEAR
-                                NOR2SFLG
+                                NOR29FLG
 ASCTERM         EXIT
                 CA              FLAGWRD9
                 MASK            FLRCSBIT
@@ -619,7 +619,7 @@ ZDOTCOMP        STQ             CALL                            # COMPUTE CETRAL
                 BDDV            SQRT                            #                                     (0)
                 STADR
                 STCALL          ZDOTD                           # UPDATE ZDOTD FOR GUIDANCE AND DOWNLINK.
-                                ACSAVE
+                                ASCSAVE
 
 THETCOMP        VLOAD           UNIT
                                 R
@@ -635,7 +635,7 @@ THETCOMP        VLOAD           UNIT
                                 30D
                 RVQ
 
-ASCAVE          =               CQ
+ASCSAVE         =               CG
 
 ## Page 849
                 BANK            27
