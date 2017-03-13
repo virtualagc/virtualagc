@@ -14,6 +14,7 @@
 ##		2016-12-17 RSB	Proofed text comments with octopus/ProoferComments
 ##				and corrected the errors found.
 ##		2017-03-03 RSB	Snapshot of Luminary 99 Rev 1. 
+##		2017-03-13 RSB	Comment-text fixes noted in proofing Luminary 116.
 
 ## Page 1095
 		BLOCK	02
@@ -68,7 +69,7 @@ OCT15		OCT	15
 LOW4		OCT	17
 ## Page 1096
 # BIT5		OCT	00020
-# NC1		OCT	21		PINBALL
+# ND1		OCT	21		PINBALL
 # VD1		OCT	23		PINBALL
 # OCT24		OCT	24		SERVICE ROUTINES
 # MD1		OCT	25		PINBALL
