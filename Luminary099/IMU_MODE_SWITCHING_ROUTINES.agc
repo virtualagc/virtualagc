@@ -18,6 +18,7 @@
 ##				and corrected the errors found.
 ##		2017-01-18 RRB	Found typo while updating for Luminary 69.
 ##		2017-01-28 RSB	Comment-text fixes identified for Luminary 69.
+##		2017-03-13 RSB	Comment-text fixes noted in proofing Luminary 116.
 
 ## This source code has been transcribed or otherwise adapted from
 ## digitized images of a hardcopy from the MIT Museum.  The digitization
@@ -952,7 +953,7 @@ OCT220		OCT	220
 #
 ## Page 1335
 # PRESTAND PREPARES FOR STANDBY BY SNAPSHOTTING THE SCALER AND TIME1 TIME2
-# THE LOW 5 BITS OF THE SCALER ARE INSPECTED TO INSURE COMPATIBILITY
+# THE LOW 5 BITS OF THE SCALER ARE INSPECTED TO INSURE COMPATABILITY
 # BETWEEN THE SCALER READING AND THE TIME1 TIME2 READING.
 
 		SETLOC	P05P06
