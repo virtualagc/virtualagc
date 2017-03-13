@@ -18,6 +18,7 @@
 ##				and corrected errors found. There were no
 ##				differences between the comment text in the 
 ##				different versions after these corrections.
+##		2017-03-13 RSB	Comment-text fixes noted in proofing Luminary 116.
 ##
 ## The contents of the "Colossus249" files, in general, are transcribed 
 ## from a scanned copy of the program listing.  Notations on this
@@ -134,7 +135,7 @@ ELRCODE		OCT	22
 #	1.	VBRELDSP
 #	2.	ERROR RESET
 #	3.	UPDATE PROGRAM (P27) ENTERED BY V70,V71,V72, AND V73.
-#
+#				    -
 # THE RECEPTION OF A BAD CODE (I.E CCC FAILURE) LOCKS OUT FURTHER UPLINK ACTIVITY BY SETTING BIT4 OF FLAGWRD7 = 1.
 # THIS INDICATION WILL BE TRANSFERRED TO THE GROUND BY THE DOWNLINK WHICH DOWNLINKS ALL FLAGWORDS.
 # WHEN UPLINK ACTIVITY IS LOCKED OUT, IT CAN BE ALLOWED WHEN THE GROUND UPLINKS AND 'ERROR RESET' CODE.

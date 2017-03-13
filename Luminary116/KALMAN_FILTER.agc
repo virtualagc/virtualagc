@@ -14,6 +14,8 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-01-22 MAS  Created from Luminary 99.
 ##		2017-01-23 RRB	Updated for Luminary 116.
+##		2017-03-13 RSB	Proofed comment text via 3-way diff vs
+##				Luminary 99 and 131 ... no problems found.
 
 ## Page 1460
                 EBANK=          NO.UJETS                        
