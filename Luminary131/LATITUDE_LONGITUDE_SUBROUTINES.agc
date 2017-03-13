@@ -20,6 +20,7 @@
 ##		2017-02-05 RSB	Back-ported comment corrections 
 ##				identified while proofing Artemis 072.
 ##		2017-02-27 RSB	Proofed comment text using octopus/ProoferComments.
+##		2017-03-13 RSB	Comment-text fixes noted in proofing Luminary 116.
 
 ## Page 1127
 # SUBROUTINE TO CONVERT RAD VECTOR AT GIVEN TIME TO LAT,LONG AND ALT
@@ -293,7 +294,7 @@ SETRE		STQ	DLOAD
 SETRXX		STCALL	ERADM		# EXIT WITH RE OR RM METERS B-29
 			SETREX
 TSTRLSRM	BON	VLOAD		# ERADFLAG=0, SET R0=RLS
-			ERADFLAG	#         =1      40=RM
+			ERADFLAG	#         =1      R0=RM
 			SETRXX
 			RLS
 		ABVAL	SR2R		# SCALE FROM B-27 TO B-29

@@ -11,6 +11,7 @@
 ## Contact:     Mike Stewart <mastewar1@gmail.com>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2016-12-20 MAS  Created from Aurora 12 (with much DAP stuff removed).
+##		2017-03-13 RSB	Comment-text fixes noted in proofing Luminary 116.
 
                 SETLOC          ENDT4FF
                 EBANK=          COMMAND
@@ -116,7 +117,7 @@ COARS           TC              CAGETEST
                 CAF             TWO                             # SET CDU INDICATOR
 COARS1          TS              CDUIND                          
 
-                INDEX           CDUIND                          # COMPUTE THETAD - THETAA IN 1'S
+                INDEX           CDUIND                          # COMPUTE THETAD - THETAA IN 1:S
                 CA              THETAD                          #   COMPLEMENT FORM
                 EXTEND                                          
                 INDEX           CDUIND                          

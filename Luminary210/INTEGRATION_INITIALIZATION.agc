@@ -16,6 +16,7 @@
 ##              2016-12-1x HG   Transcribed
 ##		2016-12-26 RSB	Comment-text proofed using ProoferComments
 ##				and corrected errors found.
+##		2017-03-13 RSB	Comment-text fixes noted in proofing Luminary 116.
 
 ## Page 1202
 # 1.0 INTRODUCTION
@@ -188,7 +189,7 @@
 #          L+1           CSMPREC (OR LEMPREC)
 #          L+2    RETURN
 #       INPUT                                                         28
-#          TDEC1 (PD 32D) TIME TC INTEGRATE TO...CENTISECONDS SCALED 2
+#          TDEC1 (PD 32D) TIME TO INTEGRATE TO...CENTISECONDS SCALED 2
 #       OUTPUT
 #          THE DATA LISTED IN SECTION 3.0 PLUS
 #          RQVV   POSITION VECTOR OF VEHICLE WITH RESPECT TO SECONDARY

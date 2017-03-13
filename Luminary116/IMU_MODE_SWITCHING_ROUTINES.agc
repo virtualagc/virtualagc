@@ -16,6 +16,8 @@
 ##              2017-01-28 RSB Comment-text fixes identified for Luminary 69.
 ##              2017-02-07 RRB  Updated for Luminary 116.
 ##              2017-03-13 HG   Fix value  OCT 1210 --> OCT 31210
+##		2017-03-13 RSB	Proofed comment text via 3-way diff vs
+##				Luminary 99 and 131.
 
 ## Page 1299
                 BLOCK           02
@@ -930,7 +932,7 @@ OCT220          OCT             220
 
 ## Page 1325
 # PRESTAND PREPARES FOR STANDBY BY SNAPSHOTTING THE SCALER AND TIME1 TIME2
-# THE LOW 5 BITS OF THE SCALER ARE INSPECTED TO INSURE COMPATIBILITY
+# THE LOW 5 BITS OF THE SCALER ARE INSPECTED TO INSURE COMPATABILITY
 # BETWEEN THE SCALER READING AND THE TIME1 TIME2 READING.
 
                 SETLOC          P05P06

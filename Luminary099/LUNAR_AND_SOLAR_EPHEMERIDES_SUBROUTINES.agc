@@ -11,6 +11,7 @@
 ## Mod history:	2009-05-24 HG	Transcribed from page images.
 ##		2016-12-17 RSB	Proofed text comments with octopus/ProoferComments
 ##				and corrected the errors found.
+##		2017-03-13 RSB	Comment-text fixes noted in proofing Luminary 116.
 ##
 ## This source code has been transcribed or otherwise adapted from
 ## digitized images of a hardcopy from the MIT Museum.  The digitization
@@ -43,7 +44,7 @@
 #
 #	LOS = LOS +LOS *T-(C *SIN(2PI*T)/365.24 +C *COS(2PI*T)/365.24)
 #	         0    R     0                     1
-#	LOS  (RAD) IS THE LONGITUDE OF THE SUN FOR MIGNIGHT JUNE 30TH OF THE PARTICULAR YEAR.
+#	LOS  (RAD) IS THE LONGITUDE OF THE SUN FOR MIDNIGHT JUNE 30TH OF THE PARTICULAR YEAR.
 #          0
 #	LOS  (RAD/DAY) IS THE MEAN RATE FOR THE PARTICULAR YEAR.
 #    	   R
@@ -149,7 +150,7 @@ POSITD		DLOAD	DMP*
 			RATESP,2	# LOMR,LOSR,LONR
 		SL	DAD*
 			5D
-			RATESP +6,2	# LOM0,LOS0,LON0
+			RATESP +6,2	# LOMO,LOSO,LONO
 		DSU
 			GTMP
 		STORE	STMP,2		# LOM,LOS,LON

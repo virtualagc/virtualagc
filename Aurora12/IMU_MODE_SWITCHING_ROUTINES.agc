@@ -1,16 +1,17 @@
 ### FILE="Main.annotation"
-## Copyright:    Public domain.
-## Filename:     IMU_MODE_SWITCHING_ROUTINES.agc
-## Purpose:      Part of the source code for Aurora (revision 12).
-## Assembler:    yaYUL
-## Contact:      Ron Burkey <info@sandroid.org>.
-## Website:      https://www.ibiblio.org/apollo.
-## Pages:        189-208
-## Mod history:  2016-09-20 JL   Created.
-##               2016-09-28 MAS  Began.
-##               2016-09-30 MAS  Finished transcription.
-##		 2016-12-08 RSB	 Proofed comments with octopus/ProoferComments
-##				 and fixed the errors found.
+## Copyright:   Public domain.
+## Filename:    IMU_MODE_SWITCHING_ROUTINES.agc
+## Purpose:     Part of the source code for Aurora (revision 12).
+## Assembler:   yaYUL
+## Contact:     Ron Burkey <info@sandroid.org>.
+## Website:     https://www.ibiblio.org/apollo.
+## Pages:       189-208
+## Mod history: 2016-09-20 JL   Created.
+##              2016-09-28 MAS  Began.
+##              2016-09-30 MAS  Finished transcription.
+##		2016-12-08 RSB	Proofed comments with octopus/ProoferComments
+##				and fixed the errors found.
+##		2017-03-13 RSB	Comment-text fixes noted in proofing Luminary 116.
 
 ## This source code has been transcribed or otherwise adapted from
 ## digitized images of a hardcopy from the private collection of 
@@ -138,7 +139,7 @@ COARS           TC              CAGETEST
                 CAF             TWO                             # SET CDU INDICATOR
 COARS1          TS              CDUIND                          
 
-                INDEX           CDUIND                          # COMPUTE THETAD - THETAA IN 1'S
+                INDEX           CDUIND                          # COMPUTE THETAD - THETAA IN 1:S
                 CA              THETAD                          #   COMPLEMENT FORM
                 EXTEND                                          
                 INDEX           CDUIND                          

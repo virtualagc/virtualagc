@@ -18,6 +18,8 @@
 ##              2017-03-14 HG   Fix operator CALL  --> VLOAD
 ##                              Fix statement CA BIT1  --> CS BIT5
 ##                              Fix operand   ENDRRD29 --> ENDR29RD
+##		2017-03-13 RSB	Proofed comment text via 3-way diff vs
+##				Luminary 99 and 131.
 
 ## Page 494
 # RENDEZVOUS NAVIGATION PROGRAM 20
@@ -438,7 +440,7 @@ UPPSV           STQ             CALL                            # UPDATES PERMAN
 ## Page 502
                                 RENDWFLG
                                 UPPSV1
-                                DIM0FLAG                        # SET DIM0FLAG TO INTEGRATE W-MATRIX
+                                DIM0FLAG                        # SET DIMOFLAG TO INTEGRATE W-MATRIX
                 BON             SET
                                 SURFFLAG                        # IF ON LUNAR SURFACE W IS 6X6
                                 UPPSV5
@@ -705,7 +707,7 @@ V34TON49        CS              TWO
                 TS              N49FLAG
                 TC              ENDOFJOB
 R22LEM7         EXIT
-                CA              N49FLAG                         # WAS ANSWERED TO DISPLAY PRO OR TERM
+                CA              N49FLAG                         # WAS ANSWER TO DISPLAY PRO OR TERM
                 AD              TWO
                 EXTEND
                 BZF             R22LEM                          # BRANCH - TERM - TAKE ANOTHER RR READING
@@ -1030,7 +1032,7 @@ OUTOFLIM        RELINT
                 CAF             OCT501PV
                 TC              BANKCALL                        # ISSUE ALARM - RR ANTENNA NOT WITHIN
                 CADR            PRIOLARM                        # LIMITS
-                TC              R23LEM2                         # TERMINATE - EXIT R23 TO R00 (GO TO P00H)
+                TC              R23LEM2                         # TERMINATE - EXIT R23 TO R00 (GO TO POOH)
                 TC              OUTOFLIM        +1              # PROCEED ILLEGAL
                 TC              R23LEM3                         # RECYCLE- DO ANOTHER MANUVER
                 TC              ENDOFJOB
@@ -1204,7 +1206,7 @@ R61C+L01        CAF             BIT4                            # BYPASS RADAR R
                 TC              BANKCALL                        # READ RR RANGE AND RDOT
                 CADR            RRRDOT                          #  EVERY R65 PASS (3 TIMES
                 TC              BANKCALL                        #  BEFORE FIRST MARK, ONCE
-                CADR            RADSTALL                        #  DURING ANY MARK PROCESSING
+                CADR            RADSTALL                        #  DURING ANY MARK PROCESSING.
                 NOOP
                 TC              BANKCALL
                 CADR            RRRANGE
@@ -2970,7 +2972,7 @@ C13STAL1        TS              C13FSAV
 C13SLOOP        NOOP                                            # *** NECESSARY TO PREVENT A TC TRAP ***
                 EXTEND
                 READ            LOSCALAR
-                AD              RADTIME                         # COMPUTE DELTA T SINGLE LAST RADAR READ
+                AD              RADTIME                         # COMPUTE DELTA T SINCE LAST RADAR READ
                 AD              HALF
                 AD              HALF                            # CORRECT FOR TIME OVERFLOW
                 XCH             L
@@ -3441,7 +3443,6 @@ RRLOSVEC        EQUALS          RRTARGET
 # MOD. NO.: 1        BY: P VOLANTE  SDC           DATE   4-11-67
 
 # FUNCTIONAL DESCRIPTION-
-## Yes, I know point #1 is missing.  It is missing from the program listing &mdash; RSB 2003
 #    2)  CHECKS IF THE RR LOS (I.E. THE RADAR BORESIGHT VECTOR) IS WITHIN 30 DEGREES OF THE LM +Z AXIS
 
 
@@ -4970,8 +4971,8 @@ R29RRR?         CS              FLAGWRD5
                 ADRES           RNGSCFLG
                 TCF             R29RANGE                        # YES; CLEAR FLAG AND READ AGAIN.
 
-ENDRRD29        CS              BIT14                           # TROUBLE MADE US COME HERE TO LEAVE
-                EXTEND                                          # RR-READING MODE. DEICREDIT DOWNTEL
+ENDRRD29        CS              BIT14                           # TROUBLE MADE US COME HERE TO LEAVE THE
+                EXTEND                                          # RR-READING MODE. DISCREDIT DOWNTEL
                 WAND            CHAN12
 ENDR29RD        CA              ZERO
                 TS              TRKMKCNT

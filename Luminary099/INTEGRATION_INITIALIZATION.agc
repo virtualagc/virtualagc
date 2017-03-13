@@ -15,6 +15,7 @@
 ##		2016-12-17 RSB	Proofed text comments with octopus/ProoferComments
 ##				and corrected the errors found.
 ##		2017-01-22 MAS	Fixed some lingering comment errors.
+##		2017-03-13 RSB	Comment-text fixes noted in proofing Luminary 116.
 ##
 ## This source code has been transcribed or otherwise adapted from
 ## digitized images of a hardcopy from the MIT Museum.  The digitization
@@ -152,7 +153,7 @@
 #				0 IF TCCSM(LEM) = 0
 #
 #	CMOONFLG	-	PERMANENT FLAGS CORRESPONDING			0	0
-#	OMIDFLAG		TO MOONFLAG AND MIDFLAG				0,1	0,1
+#	CMIDFLAG		TO MOONFLAG AND MIDFLAG				0,1	0,1
 #	LMOONFLG		C = CSM, L = LM					0	0
 #	LMIDFLG									0,1	0,1
 #
