@@ -15,6 +15,7 @@
 ##		2010-04-04 JL	Added a missing # comment delimiter.
 ##		2017-02-08 RSB	Proofed comment text by diff'ing vs Comanche 55
 ##				and/or octopus/ProoferComments as most-appropriate.
+##		2017-03-14 RSB	Comment-text fixes noted in proofing Luminary 116.
 
 ## Page 1411
 		SETLOC	RESTART
@@ -76,7 +77,7 @@ ITSAWAIT	CA	WTLTCADR	# SET UP WAITLIST CALL
 		NDX	TEMP2G		# DIRECTLY STORED
 		CA	PHSPRDT1
 TIMETEST	CCS	A		# IS IT AN IMMEDIATE RESTART
-		INCR	A		# NO.
+		INCR	A		# NO,
 		TCF	FINDTIME	# FIND OUT WHEN IT SHOULD BEGIN
 
 		TCF	ITSINDIR	# STORED INDIRECTLY

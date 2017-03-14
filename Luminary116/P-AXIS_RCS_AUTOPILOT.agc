@@ -17,6 +17,9 @@
 ##              2017-02-09 HG   Fix operand O13QSAV  --> C13QSAV
 ##                                          O13STALL --> C13STALL
 ##                                          Q        --> C13QSAV         
+##		2017-03-14 RSB	Proofed comment text via 3-way diff vs
+##				Luminary 99 and 131.  
+##				Fixed an OCT also.
 
 ## Page 1411
                 BANK            16                              
@@ -41,7 +44,7 @@ PAXIS           CA              MS100
 
                 CCS             DAPZRUPT                        # IF DAPZRUPT POSITIVE, DAP (JASK) IS
                 TC              BAILOUT                         #    STILL IN PROGRESS AND A RESTART IS
-                OCT             02000                           #   CALLED FOR.  IT IS NEVER ZERO.
+                OCT             32000                           #   CALLED FOR.  IT IS NEVER ZERO
 
                 TC              CHEKBITS                        # RETURN IS TC I+1 IF DAP SHOULD STAY ON.
 
@@ -78,7 +81,7 @@ PAXIS           CA              MS100
                 EXTEND                                          
                 DIM             TCQR                            
 
-# RATFLOOP COMPUTES JETRATEQ, JETRATER, AND 1JACC*NO. PJETS IN ITEMP1.
+# RATELOOP COMPUTES JETRATEQ, JETRATER, AND 1JACC*NO. PJETS IN ITEMP1.
 #   RETURNS TO BACKP.
 
 #   JETRATE = 1JACC*NO.PJETS*TJP   (NOTE TJ IS THE TIME FIRED DURING CSP)

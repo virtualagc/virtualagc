@@ -17,6 +17,7 @@
 ##				original hardcopy, as opposed to the PDF page
 ##				numbers in 1701.pdf.
 ##		2017-02-27 RSB	Proofed comment text using octopus/ProoferComments.
+##		2017-03-14 RSB	Comment-text fixes noted in proofing Luminary 116.
 
 ## Page 1134
 # ..... RP-TO-R SUBROUTINE .....
@@ -290,7 +291,7 @@ NEWANGLE	DLOAD	SR		# ENTER PD 12D
 #	NEWANGLE
 #
 # INPUT
-#	INPUT AVAILABLE FROM LAUNCH DATA	AZC REVS B-0
+#	INPUT AVAILABLE FROM LAUNCH DATA	AZO REVS B-0
 #						TEPHEM CSEC B-42
 #	6-7D= TIME CSEC B-28
 #
@@ -371,7 +372,7 @@ SINNODI		=	8D		# 2		SIN(NODI)
 DVECTR		=	8D		# 6		D VECTOR MOON
 CVECTR		=	8D		# 6		C VECTR MOON
 504AZ		=	18D		# 2		AZ
-TIMSUBM		=	14D		# 3		TIME SUB M (MOON) T+10 IN GETAZ
+TIMSUBM		=	14D		# 3		TIME SUB M (MOON) T+T0 IN GETAZ
 504LPL		=	14D		# 6		L OR LP VECTOR
 AVECTR		=	20D		# 6		A VECTOR (MOON)
 BVECTR		=	26D		# 6		B VECTOR (MOON)

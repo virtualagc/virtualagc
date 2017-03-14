@@ -14,6 +14,9 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-01-22 MAS  Created from Luminary 99.
 ##              2017-03-11 HG   Transcribed
+##		2017-03-14 RSB	Proofed comment text via 3-way diff vs
+##				Luminary 99 and 131.
+##		2017-03-14 RSB	Comment-text fixes noted in proofing Luminary 116.
 
 ## Page 852
                 BANK            37
@@ -1356,9 +1359,9 @@ VALTCHK         TC              QUIKFAZ5                        # DO NOT REPEAT 
                 CS              ABVEL                           # NO - SEE IF VELOCITY < 6000 FT/SEC
                 AD              6KFT/SEC
                 EXTEND
-                BZMF            CONTSERV                        # V > 6000 FT/SEC  DO NOT READ VELOCITY.
+                BZMF            CONTSERV                        # V > 6000 FT/SEC.  DO NOT READ VELOCITY.
 
-                TC              UPFLAG                          # V < 6000 FT/SEC  SET READVEL AND READ.
+                TC              UPFLAG                          # V < 6000 FT/SEC.  SET READVEL AND READ.
                 ADRES           READVEL
 
 READV           CAF             PRIO32                          # SET UP JOB TO READ VELOCITY BEAMS.

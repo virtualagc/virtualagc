@@ -18,7 +18,8 @@
 ##		2011-01-06 JL	Added missing comment characters.
 ##		2016-12-18 RSB	Proofed text comments with octopus/ProoferComments
 ##				and corrected the errors found.
-##
+##		2017-03-14 RSB	Comment-text fixes noted in proofing Luminary 116.
+
 ## This source code has been transcribed or otherwise adapted from
 ## digitized images of a hardcopy from the MIT Museum.  The digitization
 ## was performed by Paul Fjeld, and arranged for by Deborah Douglas of
@@ -94,7 +95,7 @@ PAXIS		CA	MS100
 		EXTEND
 		DIM	TCQR
 
-# RATFLOOP COMPUTES JETRATEQ, JETRATER, AND 1JACC*NO. PJETS IN ITEMP1.
+# RATELOOP COMPUTES JETRATEQ, JETRATER, AND 1JACC*NO. PJETS IN ITEMP1.
 # RETURNS TO BACKP.
 #
 # JETRATE = 1JACC*NO.PJETS*TJP		(NOTE TJ IS THE TIME FIRED DURING CSP)
@@ -784,7 +785,7 @@ PEGI		CA	CDUX		# DIRECT RATE CONTROL.
 		EXTEND			# IF RATE ERROR IS LESS THAN DEADBAND,
 		BZMF	LAST		# FIRE, AND SWITCH TO PSEUDO-AUTO.
 		CA	TCP
-		EXTEND			# IF TIME IN RATE COMMAND EXCEEDS 4 SEC..
+		EXTEND			# IF TIME IN RATE COMMAND EXCEEDS 4 SEC.,
 		BZMF	LAST
 		CS	RCSFLAGS
 		MASK	PBIT

@@ -14,6 +14,8 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-01-22 MAS  Created from Luminary 99.
 ##              2017-03-11 HG   Transcribed
+##		2017-03-14 RSB	Proofed comment text via 3-way diff vs
+##				Luminary 99 and 131.
 
 ## Page 919
 # PROGRAM NAME- PROG52                                                                   DATE- JAN 9, 1967
@@ -56,7 +58,7 @@
 #      WAS LAST ALIGNED ONLY DUE TO GYRO DRIFT(I.E. NEITHER GIMBAL LOCK NOR IMU POWER INTERRUPTION HAS OCCURED
 #      SINCE THE LAST ALIGNMENT).
 
-#      AFTER A IMU ORIENTATION HAS BEEN SELECTED ROUTINE S52.2 IS OPEPATED TO COMPUTE THE GIMBAL ANGLES USING THE
+#      AFTER A IMU ORIENTATION HAS BEEN SELECTED ROUTINE S52.2 IS OPERATED TO COMPUTE THE GIMBAL ANGLES USING THE
 # NEW ORIENTATION AND THE PRESENT VEHICLE ATTITUDE. CAL52A THEN USES THESE ANGLES, STORED IN THETAD,+1,+2, TO
 # COARSE ALIGN THE IMU. THE STAR SELECTION ROUTINE, R56, IS THEN OPERATED. IF 2 STARS ARE NOT AVAILABLE AN ALARM
 # IS FLASHED TO NOTIFY THE ASTRONAUT. AT THIS POINT THE ASTRONAUT WILL MANUEVER THE VEHICLE AND SELECT 2 STARS
@@ -1108,7 +1110,7 @@ P51G            CALL
 ## Page 945
 V41K            VN              4100
 COARSE          EXIT
-  +1            CA              MODECADR                        # SEE IF IMU DEVICE IS IN USE
+  +1            CA              MODECADR                        # SEE IF IMU DEVICE IS IN USE.
                 EXTEND
                 BZF             DOCORS                          # NOT IN USE, DO COARSE ALIGN
                 CAF             1SEC                            # IN USE, DELAY ONE SEC

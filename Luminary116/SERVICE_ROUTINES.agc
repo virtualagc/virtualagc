@@ -16,6 +16,8 @@
 ##              2017-02-03 RRB  Updated for Luminary 116.
 ##              2017-03-09 HG   Add missing statement
 ##                                  2SECDELY  CAF  2SECS 
+##		2017-03-14 RSB	Proofed comment text via 3-way diff vs
+##				Luminary 99 and 131.
 
 ## Page 1364
                 BANK            10                              

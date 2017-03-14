@@ -14,6 +14,8 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-01-22 MAS  Created from Luminary 99.
 ##              2017-03-10 HG   Transcribed
+##		2017-03-14 RSB	Proofed comment text via 3-way diff vs
+##				Luminary 99 and 131.
 
 ## Page 823
                 BANK            21
@@ -134,7 +136,7 @@ ABRTJASK        CAF             OCTAL27
                 MASK            APSFLBIT
                 ADS             FLGWRD10
                 CS              DAPBITS                         # DAPBITS = OCT 40640 = BITS 6,8,9,15
-                MASK            DAPBOOLS                        # RESET ULLAGE,DRIFT,XOVINHIB,AND PULSES
+                MASK            DAPBOOLS                        # RESET ULLAGE,DRIFT,XOVRIINH,AND PULSES
                 TS              DAPBOOLS
 
                 CAF             1DEGDB                          # INSURE DAP DEADBAND IS SET TO 1 DEGREE

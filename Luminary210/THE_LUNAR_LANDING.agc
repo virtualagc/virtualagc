@@ -17,6 +17,7 @@
 ##              2016-12-07 HG   Fix P00 -> POO
 ##		2016-12-25 RSB	Comment-text proofed using ProoferComments
 ##				and corrected errors found.
+##		2017-03-13 RSB	Comment-text fixes noted in proofing Luminary 116.
 
 ## Page 781
                 BANK            32
@@ -259,7 +260,7 @@ P63SPOT4        CAF             TWO                     # ENTER      INITIALIZE 
 
 P63ADRES        GENADR          P63TABLE
 
-ASTNDEX         =               MD1                     # OCT 25:  INDEX FOR CLOKTASK
+ASTNDEX         =               MD1                     # OCT 25; INDEX FOR CLOKTASK
 
 CODE500         OCT             00500
 

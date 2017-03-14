@@ -14,6 +14,8 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-01-22 MAS  Created from Luminary 99.
 ##              2017-01-26 RRB  Updated for Luminary 116.
+##		2017-03-14 RSB	Proofed comment text via 3-way diff vs
+##				Luminary 99 and 131.
 
 ## Page 1450
 # PROGRAM DESCRIPTION
@@ -142,7 +144,7 @@ ERRTEST         CCS             E                               # DOES BIG ERROR
                 INDEX           ADRSDIF1                        
                 SU              FIREDB                          
                 EXTEND                                          
-                BZMF            SENSTEST                        # IF NOT: ARE UNBALANCED JETS PREFERRED?
+                BZMF            SENSTEST                        # IF NOT: ARE UNBALANCED JETS PREFERRED|
 MAXJETS         CAF             TWO                             # IF YES : INCREMENT ADDRESS LOCATOR AND
                 ADS             ADRSDIF2                        #   SET SWITCH FOR JET SELECT LOGIC TO 4.
                 CAF             FOUR                            #   (ALWAYS DO THIS FOR P-AXIS)

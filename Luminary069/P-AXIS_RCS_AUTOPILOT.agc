@@ -25,6 +25,7 @@
 ##              2017-01-28 MAS  Removed the +8D workaround.
 ##		2017-01-28 RSB	Proofed comment text using octopus/prooferComments
 ##				but no errors found.
+##		2017-03-14 RSB	Comment-text fixes noted in proofing Luminary 116.
 
 ## Page 1416
 		BANK	16
@@ -756,7 +757,7 @@ PEGI		CA	CDUX		# DIRECT RATE CONTROL.
 		EXTEND			# IF RATE ERROR IS LESS THAN DEADBAND,
 		BZMF	LAST		# FIRE, AND SWITCH TO PSEUDO-AUTO.
 		CA	TCP
-		EXTEND			# IF TIME IN RATE COMMAND EXCEEDS 4 SEC..
+		EXTEND			# IF TIME IN RATE COMMAND EXCEEDS 4 SEC.,
 		BZMF	LAST
 		CS	RCSFLAGS
 		MASK	PBIT

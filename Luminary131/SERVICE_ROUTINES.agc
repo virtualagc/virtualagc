@@ -18,6 +18,7 @@
 ##				numbers in 1701.pdf.
 ##		2017-02-28 RSB	Proofed comment text using octopus/ProoferComments.
 ##		2017-03-01 RSB	Fixed lingering comment-text typos.
+##		2017-03-14 RSB	Comment-text fixes noted in proofing Luminary 116.
 
 ## Page 1366
 		BANK	10
@@ -204,7 +205,7 @@ GENTRAN		INHINT
 		TCF	Q+2		# RETURN TO CALLER.
 
 ## Page 1372
-# B5OFF		ZERO BIT 5 OF EXTVBACK, WHICH IS SET BY TESTXACT.
+# B5OFF		ZERO BIT 5 OF EXTVBACT, WHICH IS SET BY TESTXACT.
 # MAY BE USED AS NEEDED BY ANY EXTENDED VERB WHICH HAS DONE TESTXACT
 
 		COUNT*	$$/EXTVB

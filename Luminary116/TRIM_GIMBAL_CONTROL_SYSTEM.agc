@@ -14,6 +14,8 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-01-22 MAS  Created from Luminary 99.
 ##              2017-01-30 RRB  Updated for Luminary 116.
+##		2017-03-14 RSB	Proofed comment text via 3-way diff vs
+##				Luminary 99 and 131.
 
 ## Page 1462
                 BANK            21                              
@@ -102,7 +104,7 @@ ALGORTHM        EXTEND                                          # Q(R)DIFF IS TH
                 EXTEND                                          # LIMITING QUOTIENT TO AVOID OVERFLOW.
                 MP              BIT14                           # -ALPHA/2 IN A, SCALED AT PI/4
                 EXTEND                                          
-                MP              ACENTRAL                        # -ALPHA(2)/2 IN A,L, SCALED AT PI(2)/16)
+                MP              ACENTRAL                        # -ALPHA(2)/2 IN A,L, SCALED AT PI(2)/16
                 AD              KCENTRAL                        
                 EXTEND                                          
                 BZMF            HUGEQUOT                        # K-ALPHA(2)/2 SHOULD BE PNZ FO DIVISION

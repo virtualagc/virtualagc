@@ -16,7 +16,8 @@
 ##				and corrected the errors found.
 ##		2017-01-20 RSB	Fixed comment-text errors noted while diff'ing
 ##				vs Colossus 249.
-##
+##		2017-03-14 RSB	Comment-text fixes noted in proofing Luminary 116.
+
 ## This source code has been transcribed or otherwise adapted from digitized
 ## images of a hardcopy from the MIT Museum.  The digitization was performed
 ## by Paul Fjeld, and arranged for by Deborah Douglas of the Museum.  Many
@@ -379,7 +380,7 @@ DUMPRPRA	RVQ
 #
 # ERASABLE INITIALIZATION REQUIRED:
 #		RONE		E:(-29) M:(-27)	M  STATE VECTOR				LEFT BY USER
-#		VONE'		E:(+10) M:(+9)	VN/SQRT(NU)				LEFT BY TFF/CONIC
+#		VONE'		E:(+10) M:(+9)	VN/SQRT(MU)				LEFT BY TFF/CONIC
 #		RMAG1		E:(-29) M:(-27)	PRESENT RADIUS, M			LEFT BY TFFCONIC
 #		C(MPAC)		E:(-29) M:(-27)	RTERM, TERMINAL RADIUS LENGTH, M	LEFT BY USER
 #

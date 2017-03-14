@@ -17,6 +17,8 @@
 ##              2017-02-09 RSB  Comment-text fixes identified in proofing Artemis 72
 ##              2017-02-27 RSB  Corrected WAITP00H and LONGP00H to similar POOH names.
 ##              2017-03-10 HG   Transcribed
+##		2017-03-14 RSB	Proofed comment text via 3-way diff vs
+##				Luminary 99 and 131.
 
 ## Page 1109
 # PROGRAM DESCRIPTION                                                                     DATE - 10 OCTOBER 1966
@@ -154,12 +156,13 @@ LVWTLIST        DXCH            WAITEXIT
 ## Note: In the comment section of the above three statements a small drawing in blank pen can be found made of two horizontal lines
 ##       and a small circle. The lines are of similar length. The left line ends at the cicumference of the circle, the right line starts
 ##       at the center of the circle similar to
-##                                   _ _
+## <pre>                                   _ _
 ##                                 /    \
 ##                     __________ /   ___\_________
 ##                                \      /
 ##                                 \    /
 ##                                   --
+## </pre>
                 EBANK=          LST1
 WAITBB          BBCON           WAIT2
 
@@ -550,7 +553,7 @@ LONGCYCL        EXTEND                                          # CAN WE SUCCESF
                 TCF             MUCHTIME                        # INVOLVED, TAKING INTO ACCOUNT THAT THE
                                                                 # WORDS MAY NOT BE SIGNED CORRECTED (DP
                                                                 # BASIC INSTRUCTIONS
-                                                                # DO NOT SIGN CORRECT) AND THAT WE SUBTRAC-
+                                                                # DO NOT SIGN CORRECT) AND THAT WE SUBTRAC
                                                                 # TED BIT14 (1 OVER HALF THE POS. VALUE
                                                                 # REPRESENTIBLE IN SINGLE WORD)
                 NOOP                                            # CAN:T GET HERE    **********

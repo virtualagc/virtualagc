@@ -12,7 +12,8 @@
 ##		2016-12-13 RSB	GOTOP00H -> GOTOPOOH
 ##		2016-12-16 RSB	Proofed text comments with octopus/ProoferComments
 ##				and corrected the errors found.
-##
+##		2017-03-13 RSB	Comment-text fixes noted in proofing Luminary 116.
+
 ## This source code has been transcribed or otherwise adapted from
 ## digitized images of a hardcopy from the MIT Museum.  The digitization
 ## was performed by Paul Fjeld, and arranged for by Deborah Douglas of
@@ -257,13 +258,13 @@ P63SPOT4	TC	BANKCALL	# ENTER		INITIALIZE LANDING RADAR
 		TC	POSTJUMP	# OFF TO SEE THE WIZARD ...
 		CADR	BURNBABY
 
-#	---------------------------------
+#       --------------------------------------------
 
 # CONSTANTS FOR P63LM AND IGNALG
 
 P63ADRES	GENADR	P63TABLE
 
-ASTNDEX		=	MD1		# OCT 25:  INDEX FOR CLOKTASK
+ASTNDEX		=	MD1		# OCT 25; INDEX FOR CLOKTASK
 
 CODE500		OCT	00500
 
@@ -273,7 +274,7 @@ GUIDDURN	2DEC	+66440		# GUIDDURN +6.64400314 E+2
 DDUMCRIT	2DEC	+8 B-28		# CRITERION FOR IGNALG CONVERGENCE
 
 ## Page 790
-#	--------------------------------
+#       --------------------------------------------
 
 ## Page 791
 #	****************************************

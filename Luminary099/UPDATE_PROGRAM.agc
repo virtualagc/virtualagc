@@ -19,6 +19,7 @@
 ##				and corrected the errors found.
 ##		2017-01-28 RSB	Comment-text fixes identified for Luminary 69.
 ##		2017-02-09 RSB	Comment-text fixes identified for Artemis 72.
+##		2017-03-14 RSB	Comment-text fixes noted in proofing Luminary 116.
 
 ## This source code has been transcribed or otherwise adapted from
 ## digitized images of a hardcopy from the MIT Museum.  The digitization
@@ -205,7 +206,6 @@ UPPART2		EQUALS			# UPDATE PROGRAM - PART 2
 		OCT	30000		# PRIORITY SAME AS CHRPRIO
 ## [WORKAROUND] RSB 2009
 		SBANK=	PINSUPER
-## [WORKAROUND]
 		EBANK=	UPBUFF
 		2CADR	UPOUT +1
 
