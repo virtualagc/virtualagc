@@ -15,6 +15,9 @@
 ## Mod history: 2017-01-22 MAS  Created from Luminary 99.
 ##		2017-01-28 RSB	WTIH -> WITH and WHCIH -> WHICH.
 ##              2017-03-13 RRB  Updated with Luminary 116.
+##		2017-03-14 RSB  Proofed comment-text via 3-way diff
+##				vs Luminary 99 and 131.	Added a few lines
+##				of missing code at the bottom of page 1187.
 
 ## Page 1151
 # PROGRAM DESCRIPTION - ENTIRE CONIC SUBROUTINE LOG SECTION                       DATE - 1 SEPTEMBER 1967
@@ -122,7 +125,7 @@
 # VCV     * +7 FOR EARTH *DP TERMINAL VELOCITY VECTOR IN METERS/CENTISEC
 #         * +5 FOR MOON  *
 # TC      * +28          *DP TRANSFER TIME IN CENTISECS TO WHICH KEPLER CONVERGED. ALWAYS LESS THAN ONE PERIOD.
-# XPREV   * +17 FOR EARTH*DP VALUE OF X IN SQRT(METERS) TO WHICH KEPLER CONVERGED. ALWAYS LESS THAN THE X
+# XPREV   * +17 FOR EARTH*DP VALUE OF X IN SQRT(METERS) TO WHCIH KEPLER CONVERGED. ALWAYS LESS THAN THE X
 #         * +16 FOR MOON *    CORRESPONDING TO ONE PERIOD.
 ## Page 1154
 # FOR OTHER OUTPUT WHICH MAY BE OF USE, SEE DEBRIS.
@@ -137,7 +140,7 @@
 #         * +27 FOR MOON *
 # ALPHA   * -22 FOR EARTH*DP INVERSE OF SEMIMAJOR AXIS IN 1/METERS
 #         * -20 FOR MOON *
-# TMODULO * +28          *DP INTEGRAL NUMBER OF PERIODS IN CENTISECS, WHICH WAS SUBTRACTED FROM TAU, TO PRODUCE A
+# TMODULO * +28          *DP INTEGRAL NUMBER OF PERIODS IN CENTISECS. WHICH WAS SUBTRACTED FROM TAU. TO PRODUCE A
 #         *              *TAU. OF LESS THAN ONE PERIOD.
 
 #      PARAMETERS OF NO USE -
@@ -1486,7 +1489,12 @@ GOITER          CALL
                                 COGA                            
                 STORE           COGA                            
                 GOTO                                            
-                                LAMBLOOP                        
+                                LAMBLOOP       
+
+
+NEGP		DLOAD		BPL				# IMPOSSIBLE TRAJECTORY DUE TO INACCURATE
+				DCOGA				# BOUND CALCULATION. TRY NEW COGA.
+				LOENERGY                 
 
 ## Page 1188
 HIENERGY        SETPD           DLOAD                           # HIGH ENERGY TRAJECTORY RESULTED
@@ -1822,7 +1830,7 @@ DCOGA           EQUALS          12D
 # RTNTT    EQUALS RTNLAMB
 # ECC      ERASE  +1
 # RTNTR    EQUALS RTNLAMB
-# RTNAPSE  EQUAL  RTNLAMB
+# RTNAPSE  EQUALS  RTNLAMB
 # R2       EQUALS MAGVEC2
 COSF            EQUALS          24D                             
 # RTNPRM   ERASE  +0

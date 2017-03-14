@@ -19,7 +19,8 @@
 ##		2017-01-21 RSB	Back-ported comment error fixes detected in diff'ing
 ##				Artemis 72 vs Comanche 55.
 ##		2017-01-28 RSB	WTIH -> WITH.
-##
+##		2017-03-14 RSB	Comment-text fixes noted in proofing Luminary 116.
+
 ## The contents of the "Colossus249" files, in general, are transcribed 
 ## from a scanned copy of the program listing.  Notations on this
 ## document read, in part:
@@ -147,7 +148,7 @@
 # VCV     * +7 FOR EARTH *DP TERMINAL VELOCITY VECTOR IN METERS/CENTISEC
 #         * +5 FOR MOON  *
 # TC      * +28          *DP TRANSFER TIME IN CENTISECS TO WHICH KEPLER CONVERGED.
-# XPREV   * +17 FOR EARTH*DP X IN METERS-TO-THE-ONE-HALF-POWER TO WHICH KEPLER CONVERGED.
+# XPREV   * +17 FOR EARTH*DP X IN METERS-TO-THE-ONE-HALF-POWER TO WHCIH KEPLER CONVERGED.
 #         * +16 FOR MOON *(DP)
 #	FOR OTHER OUTPUT WHICH MAY BE OF USE, SEE DEBRIS.
 #
