@@ -18,8 +18,7 @@
 ##                                          O13STALL --> C13STALL
 ##                                          Q        --> C13QSAV         
 ##		2017-03-14 RSB	Proofed comment text via 3-way diff vs
-##				Luminary 99 and 131.  
-##				Fixed an OCT also.
+##				Luminary 99 and 131.  Fixed an OCT also.
 
 ## Page 1411
                 BANK            16                              

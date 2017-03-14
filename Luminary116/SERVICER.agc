@@ -16,7 +16,6 @@
 ##              2017-03-11 HG   Transcribed
 ##		2017-03-14 RSB	Proofed comment text via 3-way diff vs
 ##				Luminary 99 and 131.
-##		2017-03-14 RSB	Comment-text fixes noted in proofing Luminary 116.
 
 ## Page 852
                 BANK            37
