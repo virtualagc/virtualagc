@@ -30,6 +30,8 @@
 ##                                                                   MP  BIT14
 ##		2017-01-28 RSB	Proofed comment text using octopus/prooferComments
 ##				and fixed errors found.
+##		2017-03-14 RSB	Comment-text fixes identified in 5-way
+##				side-by-side diff of Luminary 69/99/116/131/210.
 
 ##
 
@@ -46,7 +48,7 @@
 #
 #   THE INPUTS TO 1/ACCS ARE MASS, ACCELERATION (ABDELV), DEADBAND (DB), OFFSET ACCELERATIONS (AOSQ AND AOSR),
 # STAGE VERIFY BIT (CHAN30,BIT2), DOCKED BIT (DAPBOOLS,BIT13), DRIFT BIT (DAPBOOLS,BIT8), USEQRJTS (DAPBOOLS,
-# BIT14), AND SURFACE FLAG (FLAGWRDB,BIT8), AND CH5MASK.
+# BIT14), AND SURFACE FLAG (FLAGWRD8,BIT8), AND CH5MASK.
 #
 #   1/ACCS COMPUTES THE JET ACCELERATIONS (1JACC, 1JACCQ, 1JACCR) AS FUNCTIONS OF MASS. 1JACCU AND 1JACCV ARE
 # FORMED BY RESOLVING 1JACCQ NAD 1JACCR. IN THE DESCENT CASE, THE DESCENT ENGINE MOMENT ARM (L, PVT-CG) IS ALSO
@@ -655,7 +657,7 @@ SKIPDB1         CA      ABSAOS          # ABS(AOS) GREATER THAN AMIN, SO IT IS
                 MP      BIT14
                 AD      1JACCU          # 1 JACC AT PI/2 = 2JACC AT PI
                 TS      ANET            # ANETPOS(NEG) MAX SCALED AT PI  =
-                                        # ANETPOS(NEG) MAX/ACOASTMEG(POS) AT 2(7)
+                                        # ANETPOS(NEG) MAX/ACOASTNEG(POS) AT 2(7)
                 AD      BIT8            # 1 + ANETPOS/ACOASTNEG AT 2(7)
                 XCH     ANET            # SAVE IN ANET, WHILE PICKING UP ANET
                 TC      INVERT

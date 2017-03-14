@@ -21,6 +21,8 @@
 ##              2017-01-23 HG   Fix value of SIN5DEG .008716 -> 0.08716
 ##		2017-01-28 RSB	Proofed comment text using octopus/prooferComments
 ##				and fixed errors found.
+##		2017-03-14 RSB	Comment-text fixes identified in 5-way
+##				side-by-side diff of Luminary 69/99/116/131/210.
 
 ## Page 844
                 BANK            34
@@ -165,7 +167,7 @@ ASCENT          VLOAD           ABVAL
                 STOVL           VGBODY
                                 VGVECT
                 ABVAL           BOFF                    # MAGNITUDE OF VGVECT
-                                FLRCS                   # IF FLRCS=0,D0 NORMAL GUIDANCE
+                                FLRCS                   # IF FLRCS=0,DO NORMAL GUIDANCE
                                 MAINENG
                 DDV                                     # USE TGO=VG/AT  WITH RCS
                                 AT/RCS

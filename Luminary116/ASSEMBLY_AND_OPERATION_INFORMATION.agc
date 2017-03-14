@@ -18,6 +18,8 @@
 ##              2017-02-16 MAS  Completed updating.
 ##		2017-03-01 RSB	Proofed comment text by diff vs Luminary 131
 ##				but no errors found.
+##		2017-03-14 RSB	Comment-text fixes identified in 5-way
+##				side-by-side diff of Luminary 69/99/116/131/210.
 
 ## Page 1
 # THIS LGC PROGRAM IS INTENDED FOR USE IN THE LM DURING THE MANNED LUNAR LANDING MISSION OR ANY SUBSET THEREOF.
@@ -630,7 +632,7 @@
 #          2      YDOT            S
 # 78       1      DNRRANGE        U
 ## Page 16
-#          2      DNRRDCT         V
+#          2      DNRRDOT         V
 #          3      TTOTIG          L
 # 79       1      CURSOR          D
 #          2      SPIRAL          D
