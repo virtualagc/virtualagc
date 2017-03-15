@@ -21,6 +21,7 @@
 ##		2017-02-18 MAS	Back-ported a typo-fix found while transcribing Luminary 116.
 ##		2017-03-14 RSB	Comment-text fixes identified in 5-way
 ##				side-by-side diff of Luminary 69/99/116/131/210.
+##		2017-03-15 RSB	More of the same.
 
 ## Page 2
 
@@ -367,7 +368,7 @@
 
 # 40  TIME FROM IGNITION/CUTOFF              3COMP   XXBXX  MIN/SEC                      NO LOAD, DEC ONLY
 #     VG,                                            XXXX.X FT/SEC
-#     DELTA V (ACCUMULATED)                          XXXX/X FT/SEC
+#     DELTA V (ACCUMULATED)                          XXXX.X FT/SEC
 # 41  TARGET  AZIMUTH,                       2COMP   XXX.XX DEG                          (FOR SYSTEM TEST)
 #             ELEVATION                              XX.XXX DEG
 # 42  APOGEE,                                3COMP   XXXX.X NAUT MI                      DEC ONLY
