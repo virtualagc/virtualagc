@@ -19,6 +19,8 @@
 ##		2011-05-17 JL	Removed all SBANK= workarounds.
 ##		2017-01-22 RSB	Proofed comment text by diff'ing vs Comanche 55
 ##				and corrected errors found.
+##		2017-03-15 RSB	Comment-text fixes identified in 5-way
+##				side-by-side diff of Luminary 69/99/116/131/210.
 
 ## Page 249
 
@@ -311,7 +313,7 @@ IMUFINEK	TC	TESTXACT		# FINE ALIGN WITH GYRO TORQUING
 		CADR	IMUSTALL
 		TC	ENDEXTVB
 
-FINEK2		CAF	LGYROBIN		# PINBALL LEFT COMMANDS IN OGC REGISTERS
+FINEK2		CAF	LGYROBIN		# PINBALL LEFT COMMANDS IN OGC REGIST5RS
 		TC	BANKCALL
 		CADR	IMUPULSE
 

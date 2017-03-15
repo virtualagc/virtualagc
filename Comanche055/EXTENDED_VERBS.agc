@@ -30,6 +30,8 @@
 ##		2017-01-22 RSB	Fixed comment errors detected in cross-diff vs
 ##				Artemis 72.
 ##		2017-02-23 RSB	CHKP00H -> CHKPOOH
+##		2017-03-15 RSB	Comment-text fixes identified in 5-way
+##				side-by-side diff of Luminary 69/99/116/131/210.
 
 ## The contents of the "Comanche055" files, in general, are transcribed 
 ## from scanned documents. 
@@ -361,7 +363,7 @@ IMUFINEK	TC	CKMODCAD		# FINE ALIGN WITH GYRO TORQUING
 		CADR	IMUSTALL
 		TC	ENDEXTVB
 		
-FINEK2		CAF	LGYROBIN		# PINBALL LEFT COMMANDS IN OGC REGISTERS
+FINEK2		CAF	LGYROBIN		# PINBALL LEFT COMMANDS IN OGC REGIST5RS
 		TC	BANKCALL
 		CADR	IMUPULSE
 		

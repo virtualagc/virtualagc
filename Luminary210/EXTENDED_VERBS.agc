@@ -26,6 +26,8 @@
 ##				that we had apparently mistakenly commented out,
 ##				but wasn't noticed because it had no effect on
 ##				the generated octals.
+##		2017-03-15 RSB	Comment-text fixes identified in 5-way
+##				side-by-side diff of Luminary 69/99/116/131/210.
 
 ## Page 275
                 BANK    7
@@ -1169,7 +1171,7 @@ LDNDUMPI        REMADR  DNDUMPI
 ## Page 301
 #          LEMVEC     VERB 80              DESCRIPTION
 #              UPDATE LEM STATE VECTOR
-#                 RESET VEHUPFLG TC 0
+#                 RESET VEHUPFLG TO 0
 
 LEMVEC          TC      DOWNFLAG
                 ADRES   VEHUPFLG        # VB 80 - VEHUPFLG DOWN INDICATES LEM
@@ -1462,7 +1464,7 @@ LEMALONE        AD      LEMMASS         # LEM ALONE:  MASS = LEMMASS
 
 DAPDATA3        CS      FLGWRD10
                 MASK    APSFLBIT
-                EXTEND                  # END ROUTINE IF LEM HAS STAGED.
+                EXTEND                  # END ROUTINE IF LEM HAS STAGED,
                 BZF     ENDEXT
                 CAF     V06N48          # DISPLAY TRIM ANGLES AND REQUEST RESPONSE
                 TC      BANKCALL
@@ -1482,7 +1484,7 @@ DPDAT3          CAF     BIT1
 
                 TCF     ENDOFJOB        # DOES A RELINT
 TRIMDONE        CAF     V50N48
-                TC      BANKCALL        # TRIM IS FINISHED: PLEASE TERMINATE R03
+                TC      BANKCALL        # TRIM IS FINISHED; PLEASE TERMINATE R03
                 CADR    GOMARK3R -1
                 TC      ENDEXT          # V34E TERMINATE
                 TC      ENDEXT

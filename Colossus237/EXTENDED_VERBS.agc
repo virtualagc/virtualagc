@@ -15,6 +15,8 @@
 ##				Colossus 249.
 ##		2017-01-22 RSB	Back-ported comment error fixes detected in diff'ing
 ##				Artemis 72 vs Comanche 55.
+##		2017-03-15 RSB	Comment-text fixes identified in 5-way
+##				side-by-side diff of Luminary 69/99/116/131/210.
 
 ## Page 229
 		BANK	7
@@ -331,7 +333,7 @@ IMUFINEK	TC	CKMODCAD	# FINE ALIGN WITH GYRO TORQUING
 		CADR	IMUSTALL
 		TC	ENDEXTVB
 		
-FINEK2		CAF	LGYROBIN	# PINBALL LEFT COMMANDS IN OGC REGISTERS
+FINEK2		CAF	LGYROBIN	# PINBALL LEFT COMMANDS IN OGC REGIST5RS
 		TC	BANKCALL
 		CADR	IMUPULSE
 		
