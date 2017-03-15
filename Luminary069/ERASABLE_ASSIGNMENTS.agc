@@ -1305,13 +1305,13 @@ FDAIX           ERASE                                   # I(1)
 FDAIY           ERASE                                   # I(1)
 FDAIZ           ERASE                                   # I(1)
 
-# *        P34-P35 STORAGE.  DOWNLINKED.
+#         P34-P35 STORAGE.  DOWNLINKED.
 
-# *(2D)
+# (2D)
 
 ## Page 135
 DELVTPF         ERASE           +1                      # I(2) DELTA V FOR TPF
-#*
+#
 #          SOME R04(V62)-R77 RADAR TEST STORAGE                         (6D)
 
 RTSTDEX         ERASE                                   # (1)
@@ -1323,14 +1323,14 @@ RSAMPDT         ERASE                                   # (1)
 RFAILCNT        ERASE                                   # (1)
 #
 
-#*         LPS20.1 STORAGE 
+#         LPS20.1 STORAGE 
 
-#*(12D)
+# (12D)
 
 
 LMPOS           EQUALS          RTSTDEX                 # I(6)TEMP.  STORAGE FOR LM POS. VECTOR.
 LMVEL           EQUALS          LMPOS           +6      # I(6)TEMP.  STORAGE FOR LM VEL. VECTOR.
-#*
+#
 
 END-E4          EQUALS                                  # FIRST UNUSED LOCATION IN E4
 

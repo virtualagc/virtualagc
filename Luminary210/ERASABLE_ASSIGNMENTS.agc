@@ -34,6 +34,8 @@
 ##				and fixed all errors found.
 ##		2017-03-11 MAS	Corrected errors found during transcription of Luminary 116.
 ##		2017-03-13 RSB	Comment-text fixes noted in proofing Luminary 116.
+##		2017-03-15 RSB	Comment-text fixes identified in 5-way
+##				side-by-side diff of Luminary 69/99/116/131/210.
 
 ## Page 92
 # CONVENTIONS AND NOTATIONS UTILIZED FOR ERASABLE ASSIGNMENTS.
@@ -812,7 +814,7 @@ DELREROR        ERASE                                   # B(1)PRM
 #          MODE SWITCHING ERASABLE.                      (9D)
 
 ## Page 110
-#    RETAIN THE ORDER OF IMODES30 AND IMODES33 FOR DOWNLINK PURPOSES,
+#    RETAIN THE ORDER OF IMODES30 AND IMODES33 FOR DOWNLINK PURPOSES.
 IMODES30        ERASE                                   # B(1)
 IMODES33        ERASE
 MODECADR        ERASE           +2                      # B(3)PRM
@@ -1482,7 +1484,7 @@ ATY             EQUALS          YRATE           +2      # I(2)TMP  OUT-OF-PLANE 
 ATR             EQUALS          ATY             +2      # I(2)TMP  RADIAL THRUST COMP.* 2(9)
 ATP             EQUALS          ATR             +2      # I(2)TMP  DOWN-RANGE THRUST COMP
 YAW             EQUALS          ATP             +2      # I(2)TMP
-PITCH           EQUALS          YAW             +2      # I(2)TMP
+PITCH           EQUALS          YAW             +2      # I(2)RMP
 
 
 #          SERVICER FOR LUNAR ASCENT AND DESCENT         (14D)
@@ -1590,7 +1592,7 @@ SLOPE4          EQUALS          SLOPE3          +1      # B(1)
 ABVEL*          EQUALS          BUF                     # B(1)   LR TEMP
 VSELECT*        EQUALS          BUF             +1      # B(1)   LR TEMP
 
-RODSCALE        EQUALS          SLOPE4          +1      # I(1) CLICK SCALE FACTOR FOR R.O.D.
+RODSCALE        EQUALS          SLOPE4          +1      # I(2) CLICK SCALE FACTOR FOR R.O.D.
 TAUROD          EQUALS          RODSCALE        +1      # I(2) TIME CONSTANT FOR R.O.D.
 LAG/TAU         EQUALS          TAUROD          +2      # I(2) LAG TIME DIVIDED BY TAUROD (P66)
 MINFORCE        EQUALS          LAG/TAU         +2      # I(2) MINIMUM FORCE P66 WILL COMMAND.
@@ -2007,7 +2009,7 @@ K2CNTRAL        EQUALS          GTSTEMPS        +3      # D.P., GTS SCRATCH CELL
 WCENTRAL        EQUALS          GTSTEMPS        +4      # S.P., OMEGA, AT PI/4 RAD/SEC
 ACENTRAL        EQUALS          GTSTEMPS        +5      # S.P., ALPHA, AT PI/4 RAD/SEC(2)
 DEL             EQUALS          GTSTEMPS        +6      # S.P., SGN FUNCTION VALUE.
-A2CNTRAL        EQUALS          GTSTEMPS        +7      # D.P., GTS SCRATCH CECLS.
+A2CNTRAL        EQUALS          GTSTEMPS        +7      # D.P., GTS SCRATCH CELLS.
 QRCNTR          EQUALS          GTSTEMPS        +9D     # S.P.,INDEX FOR GTS LOOP THROUGH Q,R AXES
 FUNCTION        EQUALS          GTSTEMPS        +10D    # D.P.,ARGUMENT FOR GRSQRT,SCRATCH FOR GTS
 
@@ -2741,7 +2743,7 @@ SAVET-30        EQUALS          TTFDISP         +2      # B(2)TMP TIG-30 RESTART
 
 #          SERVICER STORAGE.                             (69D)
 
-VGBODY          EQUALS          SAVET-30        +2      # B(6)OUT SET,BY S41.1 VG LEM, SC.COORDS
+VGBODY          EQUALS          SAVET-30        +2      # B(6)OUT SET.BY S41.1 VG LEM, SC.COORDS
 DELVCTL         =               VGBODY
 DVTOTAL         EQUALS          VGBODY          +6      # B(2) DISPLAY NOUN
 GOBLTIME        EQUALS          DVTOTAL         +2      # B(2) NOMINAL TIG FOR CALC. OF GOBLATE.
@@ -2772,7 +2774,7 @@ V1S             EQUALS          R1S             +6      # I(6)
 TGO1            EQUALS          VGBODY                  # B(2)TMP
 
 
-#          ALIGNMENT/S40.2,3 COMMON STORAGE.             (18D)
+#          ALIGNMENT/S40.2.3 COMMON STORAGE.             (18D)
 
 XSMD            EQUALS          V1S             +6      # I(6)
 YSMD            EQUALS          XSMD            +6      # I(6)
