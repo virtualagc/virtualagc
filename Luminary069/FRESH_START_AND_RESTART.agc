@@ -19,6 +19,8 @@
 ##              2017-01-09 HG   Transcribed
 ##		2017-01-25 RSB	Proofed comment text using octopus/prooferComments
 ##				and fixed errors found.
+##		2017-03-15 RSB	Comment-text fixes identified in 5-way
+##				side-by-side diff of Luminary 69/99/116/131/210.
 
 ## Page 226
                 BANK            10
@@ -1061,7 +1063,7 @@ P70CADR         2CADR           P70
 #                                                  FCADR   PROG18          START OF P 18
 #                                                  FCADR   P01             START OF P 01
 
-# NOTE.    THE FIRST ENTRY MUST BE LABLED FCADRMM1.
+# NOTE,    THE FIRST ENTRY MUST BE LABLED FCADRMM1.
 # ----
 
 FCADRMM1        FCADR           P79
