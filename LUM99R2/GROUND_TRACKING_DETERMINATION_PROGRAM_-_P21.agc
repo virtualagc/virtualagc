@@ -15,6 +15,8 @@
 ##		2016-12-14 RSB	Proofed text comments with octopus/ProoferComments
 ##				but no errors found.
 ##		2017-03-03 RSB	Snapshot of Luminary 99 Rev 1. 
+##		2017-03-15 RSB	Comment-text fixes identified in 5-way
+##				side-by-side diff of Luminary 69/99/116/131/210.
 
 ## Page 654
 # GROUND TRACKING DETERMINATION PROGRAM P21
@@ -52,7 +54,7 @@
 #	DECIMAL DISPLAY OF LAT,LONG,ALT
 #
 # ERASABLE INITIALIZATION REQUIRED
-#	AX0		2DEC	4.652459653 E-5 RADIANS		%68-69 CONSTANTS*
+#	AX0		2DEC	4.652459653 E-5 RADIANS		%68-69 CONSTANTS"
 #	-AY0		2DEC	2.147535898 E-5 RADIANS
 #	AZ0		2DEC	.7753206164	REVOLUTIONS
 # 	FOR LUNAR ORBITS 504LM VECTOR IS NEEDED
