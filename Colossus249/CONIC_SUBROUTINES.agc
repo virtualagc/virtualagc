@@ -20,6 +20,8 @@
 ##				Artemis 72 vs Comanche 55.
 ##		2017-01-28 RSB	WTIH -> WITH.
 ##		2017-03-14 RSB	Comment-text fixes noted in proofing Luminary 116.
+##		2017-03-15 RSB	Comment-text fixes identified in 5-way
+##				side-by-side diff of Luminary 69/99/116/131/210.
 
 ## The contents of the "Colossus249" files, in general, are transcribed 
 ## from a scanned copy of the program listing.  Notations on this
@@ -301,7 +303,7 @@
 # THE RESTRICTIONS ARE -
 #	1. THE ANGLE BETWEEN ANY POSITION VECTOR AND ITS VELOCITY VECTOR MUST BE GREATER THAN 1 DEGREE 47.5 MINUTES
 #	   AND LESS THAN 178 DEGREES 12.5 MINUTES.
-#	2. THE PARAMETERS IN THE PROBLEM MUST NOT EXCEED THEIR SCALING LIMITS SPECIFIED IN THE GSCP.  IF THE LIMITS
+#	2. THE PARAMETERS IN THE PROBLEM MUST NOT EXCEED THEIR SCALING LIMITS SPECIFIED IN THE GSOP.  IF THE LIMITS
 #	   ARE EXCEEDED, THE RESULTING SOLUTION WILL BE MEANINGLESS.
 #
 #	THE AGC COMPUTATION TIME IS APPROXIMATELY .292 SECONDS.
@@ -1218,7 +1220,7 @@ GEOM		UNIT			# MPAC=V2VEC, 0D=R1VEC		PL AT 6
 		STORE	UR1		# UR1 (+1)
 		DOT	SL1
 			U2
-		PDDL			# 0D=CSTH (+1)			PL AT 2
+		PDDL			# OD=CSTH (+1)			PL AT 2
 			36D
 ## There is a handwritten note in this general vicinity, in Colossus 249, reading 
 ## "Same as Luminary" &mdash; RSB 2004

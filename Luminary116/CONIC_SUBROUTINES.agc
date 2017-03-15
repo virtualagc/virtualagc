@@ -18,6 +18,8 @@
 ##		2017-03-14 RSB  Proofed comment-text via 3-way diff
 ##				vs Luminary 99 and 131.	Added a few lines
 ##				of missing code at the bottom of page 1187.
+##		2017-03-15 RSB	Comment-text fixes identified in 5-way
+##				side-by-side diff of Luminary 69/99/116/131/210.
 
 ## Page 1151
 # PROGRAM DESCRIPTION - ENTIRE CONIC SUBROUTINE LOG SECTION                       DATE - 1 SEPTEMBER 1967
@@ -1163,7 +1165,7 @@ GEOM            UNIT                                            # MPAC=V2VEC, 0D
                 STORE           UR1                             # UR1 (+1)
                 DOT             SL1                             
                                 U2                              
-                PDDL                                            # 0D=CSTH (+1)                  PL AT 2
+                PDDL                                            # OD=CSTH (+1)                  PL AT 2
                                 36D                             
                 STOVL           R1                              # R1 (+29 OR +27)
                                 UR1                             
@@ -1834,7 +1836,7 @@ DCOGA           EQUALS          12D
 # R2       EQUALS MAGVEC2
 COSF            EQUALS          24D                             
 # RTNPRM   ERASE  +0
-# SCNRDOT  ERASE  +0
+# SGNRDOT  ERASE  +0
 # RDESIRED ERASE  +1
 
 # ITERATOR SUBROUTINE

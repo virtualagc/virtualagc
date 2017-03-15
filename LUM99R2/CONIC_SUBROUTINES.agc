@@ -17,6 +17,8 @@
 ##		2017-01-28 RSB	WTIH -> WITH and WHCIH -> WHICH.
 ##		2017-03-03 RSB	Snapshot of Luminary 99 Rev 1. 
 ##		2017-03-14 RSB	Comment-text fixes noted in proofing Luminary 116.
+##		2017-03-15 RSB	Comment-text fixes identified in 5-way
+##				side-by-side diff of Luminary 69/99/116/131/210.
 
 ## Page 1159
 # PROGRAM DESCRIPTION - ENTIRE CONIC SUBROUTINE LOG SECTION	DATE - 1 SEPTEMBER 1967
@@ -1166,7 +1168,7 @@ GEOM		UNIT			# MPAC=V2VEC, 0D=R1VEC		PL AT 6
 		STORE	UR1		# UR1 (+1)
 		DOT	SL1
 			U2
-		PDDL			# 0D=CSTH (+1)			PL AT 2
+		PDDL			# OD=CSTH (+1)			PL AT 2
 			36D
 		STOVL	R1		# R1 (+29 OR +27)
 			UR1
@@ -1831,7 +1833,7 @@ DCOGA		EQUALS	12D
 # R2		EQUALS	MAGVEC2
 COSF		EQUALS	24D
 # RTNPRM	ERASE	+0
-# SCNRDOT	ERASE	+0
+# SGNRDOT	ERASE	+0
 # RDESIRED	ERASE	+1
 
 
