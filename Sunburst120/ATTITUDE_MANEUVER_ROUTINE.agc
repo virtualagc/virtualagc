@@ -16,6 +16,8 @@
 ##		2016-12-06 RSB	Comment-proofing with octopus/ProoferComments,
 ##				changes made.
 ##		2017-03-07 RSB	Comment-text fixes noted in proofing Luminary 116.
+##		2017-03-15 RSB	Comment-text fixes identified in 5-way
+##				side-by-side diff of Luminary 69/99/116/131/210.
 
 ## Page 636
 # BLOCK 2 LGC ATTITUDE MANEUVER ROUTINE-KALCMANU
@@ -793,7 +795,7 @@ MXM3            SETPD                                           # MXM3 MULTIPLIE
                                 0,1
                 GOTO
                                 TRNSPSPD                        # REVERSE ROWS AND COLS IN PD AND 
-#                                 RETURN WITH MIXM2 IN PD LIST
+#                                 RETURN WITH M1XM2 IN PD LIST
 
 TRANSPOS        SETPD           VLOAD*                          # TRANSPOS TRANSPOSES A 3X3 MATRIX
                                 0                               #  AND LEAVES RESULT IN PD LIST
