@@ -13,7 +13,9 @@
 ##		2011-01-06 JL	Fixed interpretive indentation.
 ##		2016-12-17 RSB	Proofed text comments with octopus/ProoferComments
 ##				and corrected the errors found.
-##
+##		2017-03-15 RSB	Comment-text fixes identified in 5-way
+##				side-by-side diff of Luminary 69/99/116/131/210.
+
 ## This source code has been transcribed or otherwise adapted from digitized
 ## images of a hardcopy from the MIT Museum.  The digitization was performed
 ## by Paul Fjeld, and arranged for by Deborah Douglas of the Museum.  Many
@@ -36,7 +38,7 @@
 #	L		LAT-LONG
 #
 # SUBROUTINES USED
-#	R-TO-RP, ARCTAN, SFTGAMMA, SETRE
+#	R-TO-RP, ARCTAN, SETGAMMA, SETRE
 #
 # ERASABLE INIT. REQ.
 #	AXO, -AYO, AZO, TEPHEM (SET AT LAUNCH TIME)
@@ -99,7 +101,7 @@ CALLRTRP	CALL
 		STCALL	ALT		# EXIT WITH ALT METERS B-29
 			INCORPEX
 ## Page 1135
-# SUBROUTINE TO CONVERT LAT,LONG.ALT AT GIVEN TIME TO RADIUS VECTOR
+# SUBROUTINE TO CONVERT LAT,LONG,ALT AT GIVEN TIME TO RADIUS VECTOR
 #
 # CALLING SEQUENCE
 #	L-1	CALL
@@ -284,7 +286,7 @@ GAMRP		=	8D
 #
 # OUTPUT
 #	ERADM = 504RM FOR MOON (METERS B-29)
-#	ERADM = ERAD OR COMPUTED RE FOR EARTH (METERS B-29)
+#	ERADM = ERAD OR COMPUTED RF FOR EARTH (METERS B-29)
 
 SETRE		STQ	DLOAD
 			SETREX
