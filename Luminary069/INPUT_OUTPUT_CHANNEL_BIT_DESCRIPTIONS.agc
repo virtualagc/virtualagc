@@ -19,6 +19,8 @@
 ##              2017-01-03 HG   Transcribed
 ##		2017-01-25 RSB	Proofed comment text using octopus/prooferComments
 ##				but no errors found.
+##		2017-03-15 RSB	Comment-text fixes identified in 5-way
+##				side-by-side diff of Luminary 69/99/116/131/210.
 
 ## Page 70
 
@@ -155,7 +157,7 @@
 #       BIT 15      ENABLE T6 RUPT
 #
 
-#     CHANNEL 14    CHAN14: OUTPUT CHANNEL; USED TO CONTROL COMPUTER COUNTER CELLS (CDU,GYRO,SPACECRAFT FUNC.
+#     CHANNEL 14    CHAN14; OUTPUT CHANNEL; USED TO CONTROL COMPUTER COUNTER CELLS (CDU,GYRO,SPACECRAFT FUNC.
 #
 #       BIT 1       OUTLINK ACTIVITY (NOT USED)
 #
