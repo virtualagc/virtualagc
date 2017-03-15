@@ -15,6 +15,8 @@
 ##		2017-01-08 RSB	Fixed comment errors detected in cross-diff vs
 ##				Colossus 249.
 ##		2017-03-13 RSB	Comment-text fixes noted in proofing Luminary 116.
+##		2017-03-15 RSB	Comment-text fixes identified in 5-way
+##				side-by-side diff of Luminary 69/99/116/131/210.
 
 ## Page 1416
 # DISPLAYS CAN BE CLASSIFIED INTO THE FOLLOWING CATEGORIES-
@@ -634,7 +636,7 @@ GOMARK4		TS	PLAYTEM1
 		CAF	MARK4MSK	# MARK,PERFORM,FLASH,BLANK
 		TCF	GOFLASH2
 
-GOMARKR		TS	PLAYTEM1	# ENTRANCE FOR MARK GODSPR
+GOMARKR		TS	PLAYTEM1	# ENTR+NCE FOR MARK GODSPR
 
 		CAF	BIT15
 		TCF	GODSPR2
