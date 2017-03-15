@@ -18,6 +18,8 @@
 ##                                               operand POOFLAG  --> POOHFLAG                                     
 ##		2017-03-13 RSB	Proofed comment text via 3-way diff vs
 ##				Luminary 99 and 131.
+##		2017-03-15 RSB	Comment-text fixes identified in 5-way
+##				side-by-side diff of Luminary 69/99/116/131/210.
 
 ## Page 1196
 # 1.0 INTRODUCTION
@@ -274,7 +276,7 @@ STATEINT        TC              PHASCHNG
                 TC              TASKOVER                        
 STATINT1        TC              INTPRET                         
                 BON             RTB                             
-                                QUITFLAG                        # KILL INTEGRATION UNTIL NEXT P00.
+                                QUITFLAG                        # KILL INTEGRATION UNTIL NEXT POO.
                                 NOINT                           
                                 LOADTIME                        
                 STORE           TDEC1                           
@@ -1031,7 +1033,7 @@ INTWAKEU        RELINT
                                 UPSVFLAG                        # REQUEST. IF NOT GO TO INTWAKUP.
                                 INTWAKUP                        
 
-                VLOAD                                           # MOVE PRECT(6) AND VRECT(6) INTO
+                VLOAD                                           # MOVE RRECT(6) AND VRECT(6) INTO
                                 RRECT                           #      RCV(6)   AND VCV(6) RESPECTIVELY.
                 STOVL           RCV                             
                                 VRECT                           # NOW GO TO 'RECTIFY +13D' TO
