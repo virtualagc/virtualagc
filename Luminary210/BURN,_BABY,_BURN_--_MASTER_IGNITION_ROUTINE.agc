@@ -21,6 +21,8 @@
 ##		2016-12-25 RSB	Comment-text proofed using ProoferComments
 ##				and corrected errors found.
 ##		2017-03-09 RSB	Comment-text fixes noted in proofing Luminary 116.
+##		2017-03-15 RSB	Comment-text proofing using 5-way side-by-side diff
+##				of Luminary 69/99/116/131/210.  No problems were found.
 
 ## Page 726
 
