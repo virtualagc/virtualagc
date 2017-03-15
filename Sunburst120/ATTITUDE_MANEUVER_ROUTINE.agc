@@ -16,8 +16,9 @@
 ##		2016-12-06 RSB	Comment-proofing with octopus/ProoferComments,
 ##				changes made.
 ##		2017-03-07 RSB	Comment-text fixes noted in proofing Luminary 116.
-##		2017-03-15 RSB	Comment-text fixes identified in 5-way
-##				side-by-side diff of Luminary 69/99/116/131/210.
+##		2017-03-15 RSB	Comment-text fixes identified in 6-way
+##				side-by-side diff of Sunburst 120 and 
+##				Luminary 69/99/116/131/210.
 
 ## Page 636
 # BLOCK 2 LGC ATTITUDE MANEUVER ROUTINE-KALCMANU
@@ -217,7 +218,7 @@
 #      INDEX REGISTER X1 MUST BE LOADED WITH THE COMPLEMENT OF THE STARTING ADDRESS FOR M1, AND X2 MUST BE
 #                                                        *
 # LOADED WITH THE COMPLEMENT OF THE STARTING ADDRESS FOR M2.   THE ROUTINE USES THE FIRST 20 LOCATIONS OF THE PUSH
-# DOWN LIST.  THE FIRST ELEMENT OF THE MATRIX APPEARS IN PD0.  PUSH UP FOR M .
+# DOWN LIST.  THE FIRST ELEMENT OF THE MATRIX APPEARS IN PDO.  PUSH UP FOR M .
 #                                                                           8
 
 #      TRANSPOS
