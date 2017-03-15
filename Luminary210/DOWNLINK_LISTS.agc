@@ -152,7 +152,7 @@ LMORBM06        1DNADR          PIPTIME1                # PIPTIME,+1            
                 -3DNADR         DELV                    # DELV+0...+5
 
 #     ---------------------------------------------------------
-# *** THE FOLLOWING IS ALIST OF LOCATIONS IN DOWNLINK LISTS
+# *** THE FOLLOWING IS A LIST OF LOCATIONS IN DOWNLINK LISTS
 # *** BUT NOT REFERENCED IN THE DIRECTORY BECAUSE THEY ARE NOT
 # *** THE FIRST LOCATION REFERENCED IN AN INSTRUCTION
 # *** THIS LIST SHOULD BE UPDATED WHEN ANY CHANGES ARE MADE TO LISTS.
@@ -449,7 +449,7 @@ LMDSAS08        -1DNADR         DELTAH                  # DELTAH,+1
 
 LMDSAS09        EQUALS          LMCSTA06                # COMMON DOWNLIST DATA
 
-#     --------------------------------------------------------
+#     ---------------------------------------------------------
 
 # *** UNREFERENCED LOCATIONS USED IN LIST 4
 # *** UPDATE THIS LIST WHEN ANY CHANGES ARE MADE TO DOWNLINK LISTS.
@@ -527,7 +527,7 @@ LMLSAL07        -1DNADR         AIG                     # AIG,AMG              S
 
 LMLSAL08        EQUALS          LMCSTA07                # COMMON DOWNLIST DATA
 LMLSAL09        EQUALS          LMORBM09                # COMMON DOWNLIST DATA
-#     --------------------------------------------------------
+#     ---------------------------------------------------------
 # *** UNREFERENCED LOCATIONS USED IN LIST 5
 # *** UPDATE THIS LIST WHEN ANY CHANGES ARE MADE TO DOWNLINK LISTS.
 
@@ -620,13 +620,13 @@ DL608           =               NEGTORKV
 DL609           =               DUMLOOPS
 DL610           =               CSMMASS
 DL611           =               IMODES33
-#---------------------------------------------------------
+# -------------------------------------------------------------------
 DNTABLE         GENADR          COSTALIN                # LM COAST AND ALIGN DOWNLIST
                 GENADR          AGSI/UPD                # LM AGS INITIALIZATION/UPDATE DOWNLIST
                 GENADR          RENDEZVU                # LM RENDEZVOUS AND PRETHRUST DOWNLIST
                 GENADR          ORBMANUV                # LM ORBITAL MANEUVERS DOWNLIST
                 GENADR          DESC/ASC                # LM DESCENT AND ASCENT DOWNLIST
                 GENADR          SURFALIN                # LM LUNAR SURFACE ALIGN DOWNLIST
-# -------------------------------------------------
+# ----------------------------------------------------------     
 
 
