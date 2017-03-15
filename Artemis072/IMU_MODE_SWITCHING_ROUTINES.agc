@@ -26,6 +26,9 @@
 ##				"+" (on p. 1438).  While I feel this is likely a problem 
 ##				with the printer used for the Artemis printout, I've 
 ##				nevertheless omitted the "." (or "0.") in those cases.
+##		2017-03-15 RSB	Comment-text fixes identified in 6-way
+##				side-by-side diff of Sunburst 120 and Luminary 
+##				69/99/116/131/210.
 
 ## Page 1417
 		SETLOC	FFTAG3
@@ -733,7 +736,7 @@ CAGETSTQ	CS	IMODES30	# SKIP IF IMU NOT BEING CAGED.
 		MASK	IMUNITBT
 		TCF	INCRQCK
 CAGETSTJ	CS	IMODES30	# IF DURING MODE SWITCH INITIALIZATION
-		MASK	IMUNITBT	# IT IS FOUND THAT THE IMU IS BEING CAGED.
+		MASK	IMUNITBT	# IT IS FOUND THAT THE IMU IS BEING CAGED,
 		CCS	A		# SET IMUCADR TO -0 TO INDICATE OPERATION
 		TC	Q		# COMPLETE BUT FAILED. RETURN IMMEDIATELY
 

@@ -17,6 +17,9 @@
 ##              2017-02-07 RRB  Updated for Luminary 116.
 ##		2017-03-13 RSB	Proofed comment text via 3-way diff vs
 ##				Luminary 99 and 131.
+##		2017-03-15 RSB	Comment-text fixes identified in 6-way
+##				side-by-side diff of Sunburst 120 and Luminary 
+##				69/99/116/131/210.
 
 ## Page 1299
                 BLOCK           02                              
@@ -343,7 +346,7 @@ IFAILOK         TC              CAGETSTQ                        # ENABLE IMU FIA
 PFAILOK2        MASK            IMODES30                        
                 TS              IMODES30                        
                 TC              IBNKCALL                        # THE ISS WARNING LIGHT MAY COME ON NOW
-                CADR            SETISSW                         # THAT THE INHIBIT WAS BEEN REMOVED.
+                CADR            SETISSW                         # THAT THE INHIBIT HAS BEEN REMOVED.
                 TCF             TASKOVER                        
 
 PFAILOK         TC              CAGETSTQ                        # ENABLE PIP FAIL PROG ALARM.
@@ -691,7 +694,7 @@ CAGETSTQ        CS              IMODES30                        # SKIP IF IMU NO
                 TC              Q                               
 
 CAGETSTJ        CS              IMODES30                        # IF DURING MODE SWITCH INITIALIZATION
-                MASK            BIT6                            # IT IS FOUND THAT THE IMU IS BEING CAGED.
+                MASK            BIT6                            # IT IS FOUND THAT THE IMU IS BEING CAGED,
                 CCS             A                               # SET IMUCADR TO -0 TO INDICATE OPERATION
                 TC              Q                               # COMPLETE BUT FAILED.  RETURN IMMEDIATELY
 

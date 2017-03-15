@@ -17,6 +17,9 @@
 ##				pages that don't work well.
 ##		2016-12-05 RSB	Comment-proofing pass with octopus/ProoferComments
 ##				completed; fixes made.
+##		2017-03-15 RSB	Comment-text fixes identified in 6-way
+##				side-by-side diff of Sunburst 120 and Luminary 
+##				69/99/116/131/210.
 
 ## Page 137
 		BLOCK	02
@@ -135,8 +138,10 @@ COARS		TC	CAGETEST
 
 		CAF	TWO		# SET CDU INDICATOR
 COARS1		TS	CDUIND
-
-		INDEX	CDUIND		# COMPUTE THETAD - THETAA IN 1;S
+## At first glance, it <i>appears</i> to say "1;S" in the following line of the printout,
+## but it is rather smudged, and since every other AGC version says "1:S" and matches in
+## other respects as well, I assume that "1:S" is what it really says &mdash; RSB 2017.
+		INDEX	CDUIND		# COMPUTE THETAD - THETAA IN 1:S
 		CA	THETAD		#   COMPLEMENT FORM
 		EXTEND
 		INDEX	CDUIND
@@ -307,7 +312,7 @@ IFAILOK		TC	CAGETSTQ	# ENABLE IMU FIAL UNLESS IMU BEING CAGED.
 PFAILOK2	MASK	IMODES30
 		TS	IMODES30
 		TC	IBNKCALL	# THE ISS WARNING LIGHT MAY COME ON NOW
-		CADR	SETISSW		# THAT THE INHIBIT WAS BEEN REMOVED.
+		CADR	SETISSW		# THAT THE INHIBIT HAS BEEN REMOVED.
 		TCF	TASKOVER
 
 PFAILOK		TC	CAGETSTQ	# ENABLE PIP FAIL PROG ALARM.
@@ -655,7 +660,7 @@ CAGETSTQ	CS	IMODES30	# SKIP IF IMU NOT BEING CAGED.
 		TC	Q
 
 CAGETSTJ	CS	IMODES30	# IF DURING MODE SWITCH INITIALIZATION
-		MASK	BIT6		# IT IS FOUND THAT THE IMU IS BEING CAGED.
+		MASK	BIT6		# IT IS FOUND THAT THE IMU IS BEING CAGED,
 		CCS	A		# SET IMUCADR TO -0 TO INDICATE OPERATION
 		TC	Q		# COMPLETE BUT FAILED.  RETURN IMMEDIATELY
 		

@@ -21,6 +21,9 @@
 ##		2017-01-28 RSB	Proofed comment text using octopus/prooferComments
 ##				and fixed errors found.
 ##		2017-03-13 RSB	Comment-text fixes noted in proofing Luminary 116.
+##		2017-03-15 RSB	Comment-text fixes identified in 6-way
+##				side-by-side diff of Sunburst 120 and Luminary 
+##				69/99/116/131/210.
 
 ## Page 1303
 		BLOCK	02
@@ -695,7 +698,7 @@ CAGETSTQ	CS	IMODES30	# SKIP IF IMU NOT BEING CAGED.
 		TC	Q
 
 CAGETSTJ	CS	IMODES30	# IF DURING MODE SWITCH INITIALIZATION
-		MASK	BIT6		# IT IS FOUND THAT THE IMU IS BEING CAGED.
+		MASK	BIT6		# IT IS FOUND THAT THE IMU IS BEING CAGED,
 		CCS	A		# SET IMUCADR TO -0 TO INDICATE OPERATION
 		TC	Q		# COMPLETE BUT FAILED. RETURN IMMEDIATELY
 		
