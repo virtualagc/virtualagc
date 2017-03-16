@@ -16,7 +16,9 @@
 ##				and corrected the errors found.
 ##		2017-03-11 MAS	Corrected errors found during transcription of Luminary 116.
 ##		2017-03-13 RSB	Comment-text fixes noted in proofing Luminary 116.
-##
+##		2017-03-15 RSB	Comment-text fixes identified in 5-way
+##				side-by-side diff of Luminary 69/99/116/131/210.
+
 ## This source code has been transcribed or otherwise adapted from
 ## digitized images of a hardcopy from the MIT Museum.  The digitization
 ## was performed by Paul Fjeld, and arranged for by Deborah Douglas of
@@ -1814,7 +1816,7 @@ SAVESR		EQUALS	AXISCTR		# CANNOT BE A DAPTEMP - GTS USES THEM ALL.
 SCRATCH		EQUALS	GTSTEMPS +7	# ROOTCYCL ERASABLE
 HALFARG		EQUALS	GTSTEMPS +8D	# ROOTCYCL ERASABLE.
 
-K2THETA		EQUALS	GTSTEMPS	# D,P., K*ERROR, NEGUSUM
+K2THETA		EQUALS	GTSTEMPS	# D.P., K*ERROR, NEGUSUM
 KCENTRAL	EQUALS	GTSTEMPS +2	# S.P., K FROM KQ OR KRDAP, AT PI/2(8)
 K2CNTRAL	EQUALS	GTSTEMPS +3	# D.P., GTS SCRATCH CELLS.
 WCENTRAL	EQUALS	GTSTEMPS +4	# S.P., OMEGA, AT PI/4 RAD/SEC
@@ -2460,7 +2462,7 @@ MASS1		EQUALS	GDT1/2 +6	# I(2)		(   CYCLE  )
 R1S		EQUALS	MASS1 +2	# I(6)
 V1S		EQUALS	R1S +6		# I(6)
 
-# ALIGNMENT/S40.2,3 COMMON STORAGE.		(18D)
+# ALIGNMENT/S40.2.3 COMMON STORAGE.		(18D)
 
 XSMD		EQUALS	V1S +6		# I(6)
 YSMD		EQUALS	XSMD +6		# I(6)

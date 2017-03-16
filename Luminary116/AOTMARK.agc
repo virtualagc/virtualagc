@@ -17,6 +17,8 @@
 ##				3-way diff vs Luminary 99 and Luminary 131.
 ##				(Admittedly, the former is more for detecting errors
 ##				in Luminary 99 than the other way around.)
+##		2017-03-14 RSB	Comment-text fixes identified in 5-way
+##				side-by-side diff of Luminary 69/99/116/131/210.
 
 ## Page 244
                 BANK            12                              
@@ -75,7 +77,7 @@ MKABORT         DXCH            BUF2
 
 MKRELEAS        CAF             ZERO                            
                 XCH             MARKSTAT                        # SET MARKSTAT TO ZERO
-                MASK            LOW9                            # PICK UP VAC AREA AOR
+                MASK            LOW9                            # PICK UP VAC AREA ADR
                 CCS             A                               
                 INDEX           A                               
                 TS              0                               # SHOW MKVAC AREA AVAILABLE
@@ -122,7 +124,7 @@ CODE7           CAF             V06N87*                         # CODE 7, COAS S
                 TCF             +2                              # PROCEED
                 TCF             CODE7                           # ON ENTER, RECYCLE
                 EXTEND                                          
-                DCA             AZ                              # PICK UP AZ AND EL IN SP 25 COMP
+                DCA             AZ                              # PICK UP AZ AND EL IN SP 2S COMP
                 INDEX           FIXLOC                          
                 DXCH            8D                              # STORE IN 8D AND 9D OF LOCAL VAC
                 CAF             ZERO                            # BACKUP SYSTEM TO BE USED
@@ -154,7 +156,7 @@ COASCODE        INDEX           FIXLOC
 # OPTAXIS USES OANB TO COMPUTE THE OPTIC AXIS
 #  INPUT-AZIMUTH ANGLE IN SINGLE PREC AT CDU SCALE IN 8D OF JOB VAC
 #        ELEVATION ANGLE IN SINGLE PREC AT CDU SCALE IN 9D OF JOB VAC
-#        ROTATION ANGLE IN SINGLE PREC IS COMP SCALED BY PI IN 10D OF VAC
+#        ROTATION ANGLE IN SINGLE PREC 1S COMP SCALED BY PI IN 10D OF VAC
 #  OUTPUT-OPTIC AXIS VEC IN NG COORDS IN SCAXIS
 #         X-MARK PLANE 1/4VEC IN NB COORDS AT 18D OF JOB VAC
 #         Y-MARK PLANE 1/4VEC IN NB COORDS AT 12D OF JOB VAC
@@ -325,7 +327,7 @@ MARKCHEX        CS              MARKSTAT                        # SET BIT12 TO D
                 CAF             ZERO                            
                 TS              MKDEX                           # SET MKDEX ZERO FOR LOS VEC CNTR
                 CA              MARKSTAT                        
-                MASK            PRIO3                           # SEE IF LAST MK PART COMPLETE
+                MASK            PRIO3                           # SEE IF LAST MK PARI COMPLETE
                 TS              L                               
                 CAF             PRIO3                           # BITS10 AND 11
                 EXTEND                                          

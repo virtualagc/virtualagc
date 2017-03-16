@@ -18,6 +18,8 @@
 ##                                          C13QSAV  --> C13STALL  
 ##		2017-03-13 RSB	Proofed comment text via 3-way diff vs
 ##				Luminary 99 and 132.
+##		2017-03-15 RSB	Comment-text fixes identified in 5-way
+##				side-by-side diff of Luminary 69/99/116/131/210.
 
 ## Page 980
 # PROGRAM NAME- DOWN TELEMETRY PROGRAM
@@ -174,7 +176,7 @@ DODOWNTM        TS              BANKRUPT
 DNPHASE1        CA              NEGONE                          # INITIALIZE ALL CONTROL WORDS
                 TS              SUBLIST                         # WORDS TO MINUS ONE
                 TS              DNECADR                         
-                CA              LDNPHAS2                        # SET DNTMGOTO = 0 ALL SUBSEQUENT DOWNRUPTS
+                CA              LDNPHAS2                        # SET DNTMGOTO =O ALL SUBSEQUENT DOWNRUPTS
                 TS              DNTMGOTO                        # GO TO DNPHASE2
                 TCF             NEWLIST                         
 DNPHASE2        CCS             DNECADR                         # SENDING OF DATA IN PROGRESS
@@ -250,7 +252,7 @@ DODNPTR         INDEX           DNECADR                         # DNECADR CONTAI
                 CA              DNECADR                         # NO, IT IS A REGULAR SUBLIST.
                 TCF             DOSUBLST                        # A MUST NOT BE ZERO.
 
-                XCH             DNECADR                         # YES.  IT IS A SNAPSHOT SUBLIST.
+                XCH             DNECADR                         # YES, IT IS A SNAPSHOT SUBLIST.
                 TS              SUBLIST                         # C(DNECADR) INTO SUBLIST
                 CAF             ZERO                            #       A    INTO     A
                 XCH             TMINDEX                         # (NOTE..  TMINDEX = DNECADR)

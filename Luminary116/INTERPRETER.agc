@@ -19,6 +19,8 @@
 ##              2017-03-10 HG   Transcribed
 ##		2017-03-13 RSB	Proofed comment text via 3-way diff vs
 ##				Luminary 99 and 131.
+##		2017-03-15 RSB	Comment-text fixes identified in 5-way
+##				side-by-side diff of Luminary 69/99/116/131/210.
 
 ## Page 994
 # SECTION 1  DISPATCHER
@@ -1892,7 +1894,7 @@ MPAC+           CS              MPAC                            # CHECK FOR DIVI
                 CS              MPAC                            # CHECK MAGNITUDE OF SIGN-CORRECTED
                 AD              BUF                             # OPERANDS.
                 CCS             A
-                TCF             DVNORM                          # DIVIDE OK - WILL NOT BECOME MAXOV CASE.
+                TCF             DVNORM                          # DIVIDE OK - WILL NOT BECOME MAXDV CASE.
 LBUF2           ADRES           BUF2
                 TCF             DVOVF                           # DIVISOR NOT LESS THAN DIVIDEND - OVF.
 
@@ -2505,7 +2507,7 @@ VSQSUB          EXTEND                                          # DOTS THE VECTO
 ## Page 1071
 #          DOUBLE PRECISION SQUARE ROOT ROUTINE. TAKE THE SQUARE ROOT OF THE TRIPLE PRECISION (MPAC +2 USED ONLY
 # IN NORMALIZATION) CONTENTS OF MPAC AND LEAVE THE NORMALIZED RESULT IN MPAC (C(MPAC) GREATER THAN OR EQUAL TO
-# .5). THE RIGHT SHIFT COUNT (TC UNNORMALIZE) IS LEFT IN MPTEMP.
+# .5). THE RIGHT SHIFT COUNT (TO UNNORMALIZE) IS LEFT IN MPTEMP.
 
 
 SQRTSUB         CAF             ZERO                            # START BY ZEROING RIGHT SHIFT COUNT.
@@ -2527,7 +2529,7 @@ SQRTSUB         CAF             ZERO                            # START BY ZEROI
                 TCF             +2
                 TCF             ZEROANS                         # NEGATIVE BUT LESS THAN 10(-4) IN MAG.
 
-                XCH             MPAC            +1              # XERO - SHIFT LEFT 14 AGAIN.
+                XCH             MPAC            +1              # ZERO - SHIFT LEFT 14 AGAIN.
                 TS              MPAC
                 CAF             SEVEN                           # AUGMENT RIGHT SHIFT COUNTER.
                 ADS             MPTEMP

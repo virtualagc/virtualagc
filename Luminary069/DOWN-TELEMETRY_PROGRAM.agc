@@ -22,6 +22,8 @@
 ##		2017-01-28 RSB	Proofed comment text using octopus/prooferComments
 ##				and fixed errors found.
 ##		2017-03-13 RSB	Comment-text fixes noted in proofing Luminary 116.
+##		2017-03-15 RSB	Comment-text fixes identified in 5-way
+##				side-by-side diff of Luminary 69/99/116/131/210.
 
 ## Page 983
 # PROGRAM NAME - DOWN TELEMETRY PROGRAM
@@ -235,7 +237,7 @@ DODNPTR		INDEX	DNECADR		# DNECADR CONTAINS ADRES OF SUBLIST
 		CA	DNECADR		# NO, IT IS A REGULAR SUBLIST.
 		TCF	DOSUBLST	# A MUST NOT BE ZERO.
 
-		XCH	DNECADR		# YES.  IT IS A SNAPSHOT SUBLIST.
+		XCH	DNECADR		# YES, IT IS A SNAPSHOT SUBLIST.
 		TS	SUBLIST		# C(DNECADR) INTO SUBLIST
 		CAF	ZERO		#	A    INTO     A
 		XCH	TMINDEX		# (NOTE..  TMINDEX = DNECADR)

@@ -15,7 +15,9 @@
 ##				and corrected the errors found.
 ##		2017-03-02 RSB	Comment-text fixes identified whilst
 ##				proofing Luminary 116.
-##
+##		2017-03-15 RSB	Comment-text fixes identified in 5-way
+##				side-by-side diff of Luminary 69/99/116/131/210.
+
 ## This source code has been transcribed or otherwise adapted from
 ## digitized images of a hardcopy from the MIT Museum.  The digitization
 ## was performed by Paul Fjeld, and arranged for by Deborah Douglas of
@@ -81,7 +83,7 @@
 # D6OR9FLG	058		BIT  2 FLAG  3		D6OR9BIT
 # ENGONFLG	083		BIT  7 FLAG  5		ENGONBIT
 # ERADFLAG	017		BIT 13 FLAG  1		ERADFBIT
-# ETPIFLAG	038		BIT  7 FLAG  2		ETPIBIT		EQUIVALENT FLAG NAME: DPTNSW
+# ETPIFLAG	038		BIT  7 FLAG  2		ETPIBIT		EQUIVALENT FLAG NAME: OPTNSW
 # FINALFLG	039		BIT  6 FLAG  2		FINALBIT
 # FLAGWRD0	(000-014)	(STATE +0)
 # FLAGWRD1	(015-029)	(STATE +1)
@@ -1230,7 +1232,7 @@ ULLAGER		=	BIT6			#	MISSION PROGRAM		REQUEST
 
 # BIT 5 FLAG 13
 AORBSFLG	=	205D			#	P-AXIS COUPLES 7.15	P-AXIS COUPLES 4.12
-AORBSYST	=	BIT5			#	AND 8,16 PREFERRED	AND 3.11 PREFERRED
+AORBSYST	=	BIT5			#	AND 8,16 PREFERRED	AND 3,11 PREFERRED
 
 # BIT 4 FLAG 13
 DBSELFLG	=	206D			#	MAX DB SELECTED		MIN DB SELECTED BY

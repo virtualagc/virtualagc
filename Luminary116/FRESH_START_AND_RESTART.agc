@@ -16,6 +16,8 @@
 ##              2017-02-19 HG   Transcribed and partially reconstructed
 ##		2017-03-13 RSB	Proofed comment text via 3-way diff vs
 ##				Luminary 99 and 132.
+##		2017-03-15 RSB	Comment-text fixes identified in 5-way
+##				side-by-side diff of Luminary 69/99/116/131/210.
 
 ## Page 212
                 BANK            10
@@ -349,8 +351,10 @@ PTBAD           TC              ALARM                           # SET ALARM TO S
 
                 TCF             DOFSTRT1
 
-## Page 219
 ## <br>Note: Reconstructed from Luminary 099 p. 217 and Luminary 131 p. 219
+#******** ****** ******
+## Page 219
+
 # DO NOT USE GOPROG2 OR ENEMA WITHOUT CONSULTING POOH PEOPLE
 
 OCT10000        =               BIT13

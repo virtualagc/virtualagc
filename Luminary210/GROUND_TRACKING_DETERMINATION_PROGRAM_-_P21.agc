@@ -61,7 +61,7 @@
 #       504LM    2DEC   -2.700340600 E-5 RADIANS
 ## Should _2 and _4 be +2 and +4?  Value has _ instead of -, I think this is a typo &mdash; RRB
 #       504LM _2 2DEC   -7.514128400 E-4 RADIANS     
-#       504LM _4 2DEC   -2.553198641 E-4 RADIANS     
+#       504LM _4 2DEC   _2.553198641 E-4 RADIANS     
 #
 # NONE
 # DEBRIS

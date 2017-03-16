@@ -19,6 +19,7 @@
 ##				numbers in 1701.pdf.
 ##		2017-02-27 RSB	Proofed comment text using octopus/ProoferComments.
 ##		2017-03-01 RSB	Fixed lingering comment-text typos.
+##		2017-03-14 RSB	Comment-text fixes noted in proofing Luminary 116.
 
 ## Page 1295
 		BANK	01
@@ -81,7 +82,7 @@ ITSAWAIT	CA	WTLTCADR	# SET UP WAITLIST CALL
 		NDX	TEMP2G		# DIRECTLY STORED
 		CA	PHSPRDT1
 TIMETEST	CCS	A		# IS IT AN IMMEDIATE RESTART
-		INCR	A		# NO.
+		INCR	A		# NO,
 		TCF	FINDTIME	# FIND OUT WHEN IT SHOULD BEGIN
 
 		TCF	ITSINDIR	# STORED INDIRECTLY

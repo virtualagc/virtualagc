@@ -14,6 +14,8 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-01-22 MAS  Created from Luminary 99.
 ##              2017-03-12 HG   Transcribed
+##		2017-03-14 RSB	Proofed comment text via 3-way diff vs
+##				Luminary 99 and 131.
 
 ## Page 191
 # PROGRAM DESCRIPTION
@@ -77,7 +79,7 @@ RCSMON          CS              ZERO
                 MASK            LOW8                            # KEEP JET-FAIL BITS ONLY.
                 TS              Q
 
-                CS              PVALVEST                        #       _   _
+                CS              PVALVEST                        #       -   -
                 MASK            Q                               # FORM PC + PC.
                 TS              L                               #   (P = PREVIOUS ISOLATION VALVE STATE,
                 CS              Q                               #    C = CURRENT VALVE STATE (CH32)).

@@ -21,6 +21,7 @@
 ##		2017-01-28 RSB	Comment-text fixes identified for Luminary 69.
 ##		2017-02-09 RSB	Comment-text fixes identified for Artemis 72.
 ##		2017-02-28 RSB	Proofed comment text using octopus/ProoferComments.
+##		2017-03-13 RSB	Comment-text fixes noted in proofing Luminary 116.
 
 ## Page 1378
 # PROGRAM NAME:		P27
@@ -269,7 +270,7 @@ UPVERIFY	CAF	ADUPTEMP	# PLACE ECADR WHERE COMPONENT NO. INDEX
 		AD	UPTEMP		# CALCULATE THE ECADR OF LOCATION IN
 		TCF	OHWELL2 +2	# UPBUFF WHICH USER WANTS TO CHANGE.
 
-UPOUT4		EQUALS	UPOUT +1	# COMES HERE ON V34 TC TERMINATE UPDATE
+UPOUT4		EQUALS	UPOUT +1	# COMES HERE ON V34 TO TERMINATE UPDATE
 
 # CHECK FOR VERB 32 SEQUENCE
 

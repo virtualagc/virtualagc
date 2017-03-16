@@ -26,6 +26,7 @@
 ##                              matches the binsource.
 ##              2017-02-02 MAS  Did a quick visual proofing pass over the
 ##                              comments and fixed a few errors.
+##              2017-03-14 MAS  Fixed a comment text typo.
 
 ## Page D-4 (continued)
                 SETLOC  FF024000
@@ -352,7 +353,7 @@ V18             TC      DISPLAY         # GENERATES TC TRAP GOJAM
                 CA      ZERO
                 TC      A
                 TC      A
-V19             TC      DISPLAY         # GEENRATES RUPTLOC GOJAM
+V19             TC      DISPLAY         # GENERATES RUPTLOC GOJAM
                 INHINT
                 CA      A
                 TC      -1

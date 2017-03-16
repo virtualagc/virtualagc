@@ -14,6 +14,8 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-01-22 MAS  Created from Luminary 99.
 ##              2017-01-25 RRB  Updated for Luminary 116.
+##		2017-03-14 RSB	Proofed comment text via 3-way diff vs
+##				Luminary 99 and 131.
 
 ## Page 1132
 # ..... RP-TO-R SUBROUTINE .....
@@ -187,7 +189,7 @@ MOONMX          STQ             SETPD
                                 SOB                             
                 STODL           BVECTR          +4              # PD 8D
                 SIN             PUSH                            # PD 10D                 -SIN(NODI)   B-1
-                DCOMP           GOTO                            #          26-31D=BVECTR= COB*COS(NODI)
+                DCOMP           GOTO                            #          26-31D=BVECTR= COV*COS(NODI)
                                 MOONMXA
                 BANK            25
                 SETLOC          PLANTIN3

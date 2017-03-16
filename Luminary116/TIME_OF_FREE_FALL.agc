@@ -14,6 +14,8 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-01-22 MAS  Created from Luminary 99.
 ##              2017-02-09 RRB  Updated for Luminary 116.
+##		2017-03-14 RSB	Proofed comment text via 3-way diff vs
+##				Luminary 99 and 131.
 
 ## Page 1258
 #          THE TFF SUBROUTINES MAY BE USED IN EITHER EARTH OR MOON CENTERED COORDINATES. THE TFF ROUTINES NEVER
@@ -83,11 +85,11 @@ TFFTEM          =               36D                             # TEMPORARY
 # FUNCTIONAL DESCRIPTION:      THIS SUBROUTINE IS CALLED TO COMPUTE THOSE CONIC PARAMETERS REQUIRED BY THE TFF
 #          SUBROUTINES AND TO ESTABLISH THEM IN THE PUSH LIST AREA. THE PARAMETERS ARE LISTED UNDER OUTPUT.
 #          THE EQUATIONS ARE
-#                 _   _  _
+#                 -   -  -
 #                 H = RN*VN                                               ANGULAR MOMENTUM
-#                       _ _
+#                       - -
 #                 LCP = H.H / MU                                          SEMI LATUS RECTUM
-#                               _  _
+#                               -  -
 #                 ALFA = 2/RN - VN.VN / MU                                RECIPROCAL SEMI MAJ AXIS, SIGNED
 
 #          AND ALFA IS POS FOR ELLIPTIC ORBITS

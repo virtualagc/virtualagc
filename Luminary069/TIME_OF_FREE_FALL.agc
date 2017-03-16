@@ -20,6 +20,7 @@
 ##		2017-01-19 RRB	Updated for Luminary 69.
 ##		2017-01-28 RSB	Proofed comment text using octopus/prooferComments
 ##				but no errors found.
+##		2017-03-14 RSB	Comment-text fixes noted in proofing Luminary 116.
 
 ## Page 1262
 #          THE TFF SUBROUTINES MAY BE USED IN EITHER EARTH OR MOON CENTERED COORDINATES. THE TFF ROUTINES NEVER
@@ -149,7 +150,7 @@ TFFTEM		=	36D	#	TEMPORARY
 #		VONE		E:(-7) M:(-5)	M/CS  STATE VECTOR	LEFT BY CALLER
 #		TFF/RTMU	E:(17) M:(14)	1/RT(CS SQ/M CUBE)	IF ENTER VIA TFFCONMU.
 #
-# DEBRIS:	QPRET.		PDL+0 ... PDL+3
+# DEBRIS:	QPRET,		PDL+0 ... PDL+3
 
 		BANK	33
 		SETLOC	TOF-FF

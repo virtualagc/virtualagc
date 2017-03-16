@@ -18,6 +18,8 @@
 ##				3-way diff vs Luminary 99 and Luminary 131.
 ##				(Admittedly, the former is more for detecting errors
 ##				in Luminary 99 than the other way around.)
+##		2017-03-15 RSB	Comment-text fixes identified in 5-way
+##				side-by-side diff of Luminary 69/99/116/131/210.
 
 ## Page 262
                 BANK            7                               
@@ -221,7 +223,7 @@ RATEDISP	TC		UPFLAG
 #            1. COARSE ALIGN TO THE LOADED THETAD'S (ICORK2).
 #     ICORK2
 #        1. RE-DISPLAY VERB 41.
-#        2. EXECUTE IMUCCARS (IMU COARSE ALIGN).
+#        2. EXECUTE IMUCOARS (IMU COARSE ALIGN).
 #        3. EXECUTE IMUSTALL (ALLOW TIME FOR DATA TRANSFER).
 #        4. RELEASE EXT VERB DISPLAY SYSTEM.
 #     CASE 2     NOUN 72     (RCDU ANGLES)
@@ -503,7 +505,7 @@ IMUFINEK        TC              CKMODCAD
                 CADR            IMUSTALL                        
                 TC              ENDEXTVB                        
 
-FINEK2          CAF             LGYROBIN                        # PINBALL LEFT COMMANDS IN OGC REGISTERS
+FINEK2          CAF             LGYROBIN                        # PINBALL LEFT COMMANDS IN OGC REGIST5RS
                 TC              BANKCALL                        
                 CADR            IMUPULSE                        
 
@@ -1173,7 +1175,7 @@ LDNDUMPI        REMADR          DNDUMPI
 
 # LEMVEC     VERB 80             DESCRIPTION
 #     UPDATE LEM STATE VECTOR
-#        RESET VEHUPFLG TC 0
+#        RESET VEHUPFLG TO 0
 
 LEMVEC          TC              DOWNFLAG                        
                 ADRES           VEHUPFLG                        # VB 80 - VEHUPFLG DOWN INDICATES LEM

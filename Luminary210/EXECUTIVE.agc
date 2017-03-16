@@ -16,6 +16,8 @@
 ##              2016-11-18 MAS  Transcribed.
 ##		2016-12-26 RSB	Comment-text proofed using ProoferComments
 ##				and corrected errors found.
+##		2017-03-15 RSB	Comment-text fixes identified in 5-way
+##				side-by-side diff of Luminary 69/99/116/131/210.
 
 ## Page 1101
 		BLOCK	02
@@ -340,7 +342,7 @@ WAKETEST	CS	NEWLOC
 		INDEX	LOCCTR
 		TS	PRIORITY
 
-		CS	FBANKMSK	# MASK UP THE 2CADR OF THE WAKE ADDRESS
+		CS	FBANKMSK	# MAKE UP THE 2CADR OF THE WAKE ADDRESS
 		MASK	NEWLOC		# USING THE CADR IN NEWLOC AND THE EBANK
 		AD	2K		# HALF OF BBANK SAVED IN BANKSET.
 		XCH	NEWLOC

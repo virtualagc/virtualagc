@@ -13,7 +13,8 @@
 ##		2011-01-06 JL	Fixed pseudo-labels which were incorrectly real labels.
 ##		2016-12-17 RSB	Proofed text comments with octopus/ProoferComments
 ##				and corrected the errors found.
-##
+##		2017-03-14 RSB	Comment-text fixes noted in proofing Luminary 116.
+
 ## This source code has been transcribed or otherwise adapted from
 ## digitized images of a hardcopy from the MIT Museum.  The digitization
 ## was performed by Paul Fjeld, and arranged for by Deborah Douglas of
@@ -306,7 +307,7 @@ UPRATE		DLOAD
 		ABS	DSU
 			YLIM		# /Y/-DYMAX
 		BMN	SIGN		# IF <0, XR<.5DEG, LEAVE YCO AT 0
-			YOK		# IF >0, FIX SIGN OF DEFICIT.  THIS IS YCO.
+			YOK		# IF >0, FIX SIGN OF DEFICIT, THIS IS YCO.
 			Y
 		STORE	YCO
 YOK		DLOAD	DSU

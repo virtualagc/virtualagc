@@ -14,6 +14,8 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-01-22 MAS  Created from Luminary 99.
 ##              2017-03-02 HG   Transcribed
+##		2017-03-14 RSB	Proofed comment text via 3-way diff vs
+##				Luminary 99 and 131 ... no problems found.
 
 ## Page 617
 # PROGRAM DESCRIPTION P30     DATE 3-6-67

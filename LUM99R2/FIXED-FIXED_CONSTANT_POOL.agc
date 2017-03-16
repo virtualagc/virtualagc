@@ -15,6 +15,9 @@
 ##				and corrected the errors found.
 ##		2017-03-03 RSB	Snapshot of Luminary 99 Rev 1. 
 ##		2017-03-13 RSB	Comment-text fixes noted in proofing Luminary 116.
+##		2017-03-15 RSB	Proofed comment text using 5-way
+##				side-by-side diff of Luminary 69/99/116/131/210,
+##				but no errors were found.
 
 ## Page 1095
 		BLOCK	02

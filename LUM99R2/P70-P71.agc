@@ -14,6 +14,7 @@
 ##		2016-12-17 RSB	Proofed text comments with octopus/ProoferComments
 ##				and corrected the errors found.
 ##		2017-03-03 RSB	Snapshot of Luminary 99 Rev 1. 
+##		2017-03-14 RSB	Comment-text fixes noted in proofing Luminary 116.
 
 ## Page 829
 		BANK	21
@@ -292,7 +293,7 @@ UPRATE		DLOAD
 		ABS	DSU
 			YLIM		# /Y/-DYMAX
 		BMN	SIGN		# IF <0, XR<.5DEG, LEAVE YCO AT 0
-			YOK		# IF >0, FIX SIGN OF DEFICIT.  THIS IS YCO.
+			YOK		# IF >0, FIX SIGN OF DEFICIT, THIS IS YCO.
 			Y
 		STORE	YCO
 YOK		DLOAD	DSU

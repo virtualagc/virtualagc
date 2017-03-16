@@ -14,6 +14,8 @@
 ##		2017-02-05 RSB	Back-ported comment corrections 
 ##				identified while proofing Artemis 072.
 ##		2017-03-13 RSB	Comment-text fixes noted in proofing Luminary 116.
+##		2017-03-15 RSB	Comment-text fixes identified in 5-way
+##				side-by-side diff of Luminary 69/99/116/131/210.
 
 # SECTION 1  DISPATCHER
 #
@@ -1835,7 +1837,7 @@ MPAC+           CS              MPAC                    # CHECK FOR DIVISION OVE
                 CS              MPAC                    # CHECK MAGNITUDE OF SIGN-CORRECTED
                 AD              BUF                     # OPERANDS.
                 CCS             A
-                TCF             DVNORM                  # DIVIDE OK - WILL NOT BECOME MAXOV CASE.
+                TCF             DVNORM                  # DIVIDE OK - WILL NOT BECOME MAXDV CASE.
 LBUF2           ADRES           BUF2
                 TCF             DVOVF                   # DIVISOR NOT LESS THAN DIVIDEND - OVF.
 
@@ -2392,7 +2394,7 @@ VSQSUB          EXTEND                                  # DOTS THE VECTOR IN MPA
 
 #          DOUBLE PRECISION SQUARE ROOT ROUTINE. TAKE THE SQUARE ROOT OF THE TRIPLE PRECISION (MPAC +2 USED ONLY
 # IN NORMALIZATION) CONTENTS OF MPAC AND LEAVE THE NORMALIZED RESULT IN MPAC (C(MPAC) GREATER THAN OR EQUAL TO
-# .5).  THE RIGHT SHIFT COUNT (TC UNNORMALIZE) IS LEFT IN MPTEMP.
+# .5).  THE RIGHT SHIFT COUNT (TO UNNORMALIZE) IS LEFT IN MPTEMP.
 
 
 

@@ -22,6 +22,7 @@
 ##                                            CS  -> CA
 ##		2017-01-28 RSB	Proofed comment text using octopus/prooferComments
 ##				and fixed errors found.
+##		2017-03-14 RSB	Comment-text fixes noted in proofing Luminary 116.
 
 ## Page 858
                 BANK            37
@@ -1348,7 +1349,7 @@ VALTCHK         TC              QUIKFAZ5                # DO NOT REPEAT ABOVE
                 CAF             READVBIT                # TEST READVEL TO SEE IF VELOCITY READING
                 MASK            FLGWRD11                # IS DESIRED.
                 CCS             A
-                TCF             READV                   # YES - READ VELOCITY
+                TCF             READV                   # TES - READ VELOCITY
                 CS              ABVEL                   # NO - SEE IF VELOCITY < 2000 FT/SEC
                 AD              2KFT/SEC
                 EXTEND

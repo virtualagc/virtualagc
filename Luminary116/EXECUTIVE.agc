@@ -16,6 +16,8 @@
 ##              2017-03-10 HG   Transcribed
 ##		2017-03-13 RSB	Proofed comment text via 3-way diff vs
 ##				Luminary 99 and 132.
+##		2017-03-15 RSB	Comment-text fixes identified in 5-way
+##				side-by-side diff of Luminary 69/99/116/131/210.
 
 ## Page 1095
                 BLOCK           02
@@ -169,7 +171,7 @@ CORFOUND        CA              NEWPRIO                         # SET THE PRIORI
                 TS              FIXLOC
 
 SPECTEST        CCS             NEWJOB                          # SEE IF ANY ACTIVE JOBS WAITING (RARE).
-                TCF             SETLOC                          # MUST BE AWAKENED OUT UNCHANGED JOB.
+                TCF             SETLOC                          # MUST BE AWAKENED BUT UNCHANGED JOB.
                 TC              CCSHOLE
                 TC              CCSHOLE
                 TS              NEWJOB                          # +0 SHOWS ACTIVE JOB ALREADY SET.

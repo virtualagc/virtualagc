@@ -16,6 +16,8 @@
 ##		2017-01-28 RSB	Comment-text fixes identified for Luminary 69.
 ##		2017-02-09 RSB	Comment-text fixes identified for Artemis 72.
 ##              2017-02-10 RRB  Updated for Luminary 116.
+##		2017-03-14 RSB	Proofed comment text via 3-way diff vs
+##				Luminary 99 and 131.
 
 ## Page 1376
 # PROGRAM NAME:         P27
@@ -188,7 +190,6 @@ UPPART2         EQUALS                                          # UPDATE PROGRAM
                 OCT             30000                           # PRIORITY SAME AS CHRPRIO
 ## [WORKAROUND] RSB 2009 - kept for Luminary 116 RRB 2017.
                 SBANK=          PINSUPER                        
-## [WORKAROUND]
                 EBANK=          UPBUFF                          
                 2CADR           UPOUT           +1              
 

@@ -18,6 +18,7 @@
 ##              2016-12-07 HG   fix P00 -> POO
 ##		2016-12-25 RSB	Comment-text proofed using ProoferComments
 ##				and corrected errors found.
+##		2017-03-14 RSB	Comment-text fixes noted in proofing Luminary 116.
 
 ## Page 620
 # PROGRAM DESCRIPTION P30       DATE 3-6-67
@@ -31,7 +32,7 @@
 
 # CALLING SEQUENCE VIA JOB FROM V37
 
-# EXIT VIA V37 CALL CR TO GOTOPOOH (V34E)
+# EXIT VIA V37 CALL OR TO GOTOPOOH (V34E)
 
 # SUBROUTINE CALLS-FLAGUP, PHASCHNG, BANKCALL, ENDOFJOB, GOFLASH, GOFLASHR
 #                  GOPERF3R, INTPRET, BLANKET, GOTOPOOH, R02BOTH, S30.1,

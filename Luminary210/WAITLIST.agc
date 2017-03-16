@@ -18,6 +18,7 @@
 ##		2016-12-26 RSB	Comment-text proofed using ProoferComments
 ##				and corrected errors found.
 ##		2017-01-28 RSB	WTIH -> WITH.
+##		2017-03-14 RSB	Comment-text fixes noted in proofing Luminary 116.
 
 ## Page 1115
 # PROGRAM DESCRIPTION                                                                     DATE - 10 OCTOBER 1966
@@ -470,7 +471,7 @@ NOQBRSM		DXCH	ARUPT
 
 # NORMAL EXIT MODE-
 #    1). TC    WAITLIST
-#    2). DTCB  (TC L+3 OF CALLING ROUTINE 1ST PASS THRU LONGCYCL)
+#    2). DTCB  (TO L+3 OF CALLING ROUTINE 1ST PASS THRU LONGCYCL)
 #    3). DTCB  (TO TASKOVER ON SUBSEQUENT PASSES THRU LONGCYCL)
 
 # ALARM OR ABORT EXIT MODE-

@@ -14,6 +14,8 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-01-22 MAS  Created from Luminary 99.
 ##              2017-03-1x HG   Transcribed  (DONT SUBMIT YET)
+##		2017-03-14 RSB	Comment-text fixes identified in 5-way
+##				side-by-side diff of Luminary 69/99/116/131/210.
 
 ## Page 836
                 BANK            34
@@ -145,7 +147,7 @@ ASCENT          VLOAD           ABVAL
                 STOVL           VGBODY
                                 VGVECT
                 ABVAL           BOFF                            # MAGNITUDE OF VGVECT
-                                FLRCS                           # IF FLRCS=0,D0 NORMAL GUIDANCE
+                                FLRCS                           # IF FLRCS=0,DO NORMAL GUIDANCE
                                 MAINENG
                 DDV                                             # USE TGO=VG/AT  WITH RCS
                                 AT/RCS
@@ -233,11 +235,11 @@ RATES           DLOAD           DSU
                                 PROK
 CHKBMAG         SR4             DDV                             # B*2(4)
                                 TBUP                            # (B / TAU) * 2(21)
-                DSU             BPL
-                                PRLIMIT                         # ( B/ TAU) * 2(21) MAX.
-                                PROK
-                DLOAD           DMP
-                                PRLIMIT
+                DSU             BPL                             
+                                PRLIMIT                         # ( B / TAU ) * 2(21) MAX.
+                                PROK                            
+                DLOAD           DMP                             
+                                PRLIMIT                         
                                 TBUP                            # B MAX. * 2(4)
                 SL4                                             # BMAX*2(8)
                 STORE           PRATE
@@ -296,12 +298,12 @@ CMPONENT        SETPD           BOFF
                 DDV             SL1
                                 TBUP
                 STORE           ATY                             # ATY*2(9)
-                VXSC            PDDL                            # ATY UY*2(8)                          (6)
-                                LAXIS
-                                ATR                             #                                      (0)
-                VXSC            VAD
-                                UNIT/R/
-                VSL1            PUSH                            # AH*2(9) IN PDL(0)                    (6)
+                VXSC            PDDL                            # ATY UY*2(8)                   (6)
+                                LAXIS                           
+                                ATR
+                VXSC            VAD                             #                               (0)                             
+                                UNIT/R/                         
+                VSL1            PUSH                            # AH*2(9) IN PDL(0)             (6)
                 ABVAL           PDDL                            # AH(2) IN PDL(34)
                                 AT                              # AHMAG IN PDL(6)                      (8)
                 DSQ             DSU                             # (AT(2)-AH(2))*2(18)

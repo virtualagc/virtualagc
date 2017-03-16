@@ -25,6 +25,8 @@
 ##		2016-12-23 RSB	Proofed comment text with octopus/ProoferComments
 ##				and fixed all errors found.
 ##		2017-03-13 RSB	Comment-text fixes noted in proofing Luminary 116.
+##		2017-03-15 RSB	Comment-text fixes identified in 5-way
+##				side-by-side diff of Luminary 69/99/116/131/210.
 
 ## Page 222
                 BANK            10
@@ -310,7 +312,7 @@ PCLOOP          TS              MPAC            +5
 
                 CS              DIDFLBIT                # CLEAR DIDFLAG IN ORDER TO FORCE R10 TO
                 MASK            FLAGWRD1                # RE-INITIALIZE ITSELF IF IT HAD BEEN
-                TS              FLAGWRD1                # OPERATIMG AT THE TIME OF THE RESTART.
+                TS              FLAGWRD1                # OPERATING AT THE TIME OF THE RESTART.
 
                 CS              RODFLBIT                # CLEAR RODFLAG.  IF P66 IS IN OPERATION
                 MASK            FLAGWRD1                #      IT WILL RE-INITIALIZE ITSELF AND
@@ -784,7 +786,7 @@ V37             TS              MMNUMBER                # SAVE MAJOR MODE
                 CAF             PRIO30                  # RESTART AT PINBALL PRIORITY
                 TS              RESTREG
 
-                CA              IMODES30                # IS IMU BEING INITIALIZED
+                CA              IMODES30                # IS IMU BEINB INITIALIZED
                 MASK            BIT6
                 CCS             A
                 TCF             CANTROD
@@ -1129,7 +1131,7 @@ P70CADR         2CADR           P70
 
 ## Page 245
 #                                                  FCADR   P01             START OF P 01
-# NOTE.    THE FIRST ENTRY MUST BE LABLED FCADRMM1.
+# NOTE,    THE FIRST ENTRY MUST BE LABLED FCADRMM1.
 # ----
 
 FCADRMM1        EQUALS
@@ -1179,7 +1181,7 @@ FCADRMM1        EQUALS
 #                                                                          MAJOR MODE    31
 
 ## Page 246
-# NOTE.     THE FIRST ENTRY MUST BE LABELED PREMM1
+# NOTE,     THE FIRST ENTRY MUST BE LABELED PREMM1
 PREMM1          EQUALS
                 OCT             27715                   # MM 77 EBANK 7 PRIO 13
                 OCT             27714                   # MM 76  EBANK 7  PRIO 13
@@ -1207,7 +1209,7 @@ PREMM1          EQUALS
                 OCT             27624                   # MM 20  EBANK 7  PRIO 13
                 OCT             27614                   # MM 12  EBANK 7  PRIO 13
                 OCT             27006                   # MM 06  EBANK 4  PRIO 13
-# NOTE.     THE FOLLOWING CONSTANT IS THE NUMBER OF ENTRIES IN EACH OF
+# NOTE,     THE FOLLOWING CONSTANT IS THE NUMBER OF ENTRIES IN EACH OF
 # ----      THE ABOVE LISTS-1(IE, THE NUMBER OF MAJOR MODES(EXCEPT P00)
 #           THAT CAN BE CALLED FROM THE KEYBOARD MINUS ONE)
 

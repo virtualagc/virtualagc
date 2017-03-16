@@ -14,6 +14,7 @@
 ##				changes made.
 ##		2017-01-28 RSB	WTIH -> WITH.
 ##		2017-02-09 RSB	Comment-text fixes identified in proofing Artemis 72
+##		2017-03-14 RSB	Comment-text fixes noted in proofing Luminary 116.
 
 ## Page 1062
 
@@ -442,7 +443,7 @@ LONGCYCL        EXTEND                                          # CAN WE SUCCESF
                 TCF             MUCHTIME                        # INVOLVED, TAKING INTO ACCOUNT THAT THE
                                                                 # WORDS MAY NOT BE SIGNED CORRECTED (DP
                                                                 # BASIC INSTRUCTIONS
-                                                                # DO NOT SIGN CORRECT) AND THAT WE SUBTRAC-
+                                                                # DO NOT SIGN CORRECT) AND THAT WE SUBTRAC
                                                                 # TED BIT14 (1 OVER HALF THE POS. VALUE
                                                                 # REPRESENTABLE IN SINGLE WORD)
 

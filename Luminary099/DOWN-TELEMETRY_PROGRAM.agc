@@ -17,7 +17,9 @@
 ##		2017-01-28 RSB	Back-ported some comment-text fixes
 ##				identified from Luminary 69.
 ##		2017-03-13 RSB	Comment-text fixes noted in proofing Luminary 116.
-##
+##		2017-03-15 RSB	Comment-text fixes identified in 5-way
+##				side-by-side diff of Luminary 69/99/116/131/210.
+
 ## This source code has been transcribed or otherwise adapted from
 ## digitized images of a hardcopy from the MIT Museum.  The digitization
 ## was performed by Paul Fjeld, and arranged for by Deborah Douglas of
@@ -184,7 +186,7 @@ WO1		EXTEND			# SET WORD ORDER BIT TO 1 ONLY IF IT
 DNPHASE1	CA	NEGONE		# INITIALIZE ALL CONTROL WORDS
 		TS	SUBLIST		# WORDS TO MINUS ONE
 		TS	DNECADR
-		CA	LDNPHAS2	# SET DNTMGOTO = 0 ALL SUBSEQUENT DOWNRUPTS
+		CA	LDNPHAS2	# SET DNTMGOTO =O ALL SUBSEQUENT DOWNRUPTS
 		TS	DNTMGOTO	# GO TO DNPHASE2
 		TCF	NEWLIST
 DNPHASE2	CCS	DNECADR		# SENDING OF DATA IN PROGRESS
@@ -254,7 +256,7 @@ DODNPTR		INDEX	DNECADR		# DNECADR CONTAINS ADRES OF SUBLIST
 		CA	DNECADR		# NO, IT IS A REGULAR SUBLIST.
 		TCF	DOSUBLST	# A MUST NOT BE ZERO.
 
-		XCH	DNECADR		# YES.  IT IS A SNAPSHOT SUBLIST.
+		XCH	DNECADR		# YES, IT IS A SNAPSHOT SUBLIST.
 		TS	SUBLIST		# C(DNECADR) INTO SUBLIST
 		CAF	ZERO		#	A    INTO     A
 		XCH	TMINDEX		# (NOTE..  TMINDEX = DNECADR)

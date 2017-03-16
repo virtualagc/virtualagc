@@ -19,6 +19,9 @@
 ##				3-way diff vs Luminary 99 and Luminary 131.
 ##				(Admittedly, the former is more for detecting errors
 ##				in Luminary 99 than the other way around.)
+##		2017-03-14 RSB	Proofed comment text via 3-way diff vs
+##				Luminary 99 and 131 ... no problems found.
+
 ## Page 621
 # COELLIPTIC SEQUENCE INITIATION (CSI) PROGRAMS (P32 AND P72)
 
