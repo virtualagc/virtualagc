@@ -21,6 +21,8 @@
 ##		2017-01-28 RSB	Proofed comment text using octopus/prooferComments
 ##				and fixed errors found.
 ##		2017-02-08 RSB	Comment-text fixes discovered while proofing Artemis 72.
+##		2017-03-16 RSB	Comment-text fixes identified in 5-way
+##				side-by-side diff of Luminary 69/99/116/131/210.
 
 ## Page 720
 # SUBROUTINE NAME:  V82CALL
@@ -447,7 +449,7 @@ SKIPTPER	STODL	-TPER
 
 MAXCHK		DSU	BPL		# IF C(MPAC) > 9999.9 NM. MPAC = 9999.9 NM
 			MAXNM
-			+3		# OTHERWISE C(MPAC) - B(MPAC).
+			+3		# OTHERWISE C(MPAC) = B(MPAC).
 		DAD	RVQ
 			MAXNM
  +3		DLOAD	RVQ		# (USED BY P30 - P37 ALSO)

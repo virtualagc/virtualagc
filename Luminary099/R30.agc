@@ -16,7 +16,9 @@
 ##		2016-12-14 RSB	Proofed text comments with octopus/ProoferComments
 ##				and corrected the errors found.
 ##		2017-02-08 RSB	Comment-text fixes discovered while proofing Artemis 72.
-##
+##		2017-03-16 RSB	Comment-text fixes identified in 5-way
+##				side-by-side diff of Luminary 69/99/116/131/210.
+
 ## This source code has been transcribed or otherwise adapted from
 ## digitized images of a hardcopy from the MIT Museum.  The digitization
 ## was performed by Paul Fjeld, and arranged for by Deborah Douglas of
@@ -457,7 +459,7 @@ SKIPTPER	STODL	-TPER
 
 MAXCHK		DSU	BPL		# IF C(MPAC) > 9999.9 NM. MPAC = 9999.9 NM
 			MAXNM
-			+3		# OTHERWISE C(MPAC) - B(MPAC).
+			+3		# OTHERWISE C(MPAC) = B(MPAC).
 		DAD	RVQ
 			MAXNM
  +3		DLOAD	RVQ		# (USED BY P30 - P37 ALSO)

@@ -18,6 +18,8 @@
 ##				3-way diff vs Luminary 99 and Luminary 131.
 ##				(Admittedly, the former is more for detecting errors
 ##				in Luminary 99 than the other way around.)
+##		2017-03-16 RSB	Comment-text fixes identified in 5-way
+##				side-by-side diff of Luminary 69/99/116/131/210.
 
 ## Page 712
 # SUBROUTINE NAME:  V82CALL
@@ -444,7 +446,7 @@ SKIPTPER        STODL           -TPER
 
 MAXCHK          DSU             BPL                             # IF C(MPAC) > 9999.9 NM. MPAC = 9999.9 NM
                                 MAXNM                           
-                                +3                              # OTHERWISE C(MPAC) - B(MPAC).
+                                +3                              # OTHERWISE C(MPAC) = B(MPAC).
                 DAD             RVQ                             
                                 MAXNM                           
  +3             DLOAD           RVQ                             # (USED BY P30 - P37 ALSO)

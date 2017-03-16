@@ -19,6 +19,8 @@
 ##		2016-12-23 RSB	Proofed comment text with octopus/ProoferComments
 ##				and fixed all errors found.
 ##		2017-03-09 RSB	Comment text fixes noted in proofing Luminary 116.
+##		2017-03-16 RSB	Comment-text fixes identified in 5-way
+##				side-by-side diff of Luminary 69/99/116/131/210.
 
 ## Page 487
 # MOD NO: 0                             DATE: 1 MAY 1968
@@ -80,7 +82,7 @@
 # ERASABLE INITIALIZATION REQUIRED : SCAXIS, POINTVSM (FOR VECPOINT)
 #                                    3AXISFLG.
 
-# SUBROUTINES CALLED: VECPOINT, BALLANGS, GOPERF2R, LINUS, GOdSPER,
+# SUBROUTINES CALLED: VECPOINT, BALLANGS, GOPERF2R, LINUS, GODSPER,
 #                    GOMANUR, DOWNFLAG, PHASCHNG, UPFLAG
 
 # NORMAL EXIT MODES: CAE TEMPR60   (CALLERS RETURN ADDRESS)
@@ -162,14 +164,14 @@ STARTMNV        TC              BANKCALL                # PERFORM MANEUVER VIA K
 ENDMANUV        TCF             TOBALLA                 # FINISHED MANEUVER.
 ENDMANU1        TC              DOWNFLAG                # RESET 3-AXIS FLAG
                 ADRES           3AXISFLG
-                CAE             TEMPR60
-                TC              BANKJUMP
+                CAE             TEMPR60			#					-
+                TC              BANKJUMP		#					-
 
 STARTMNAD       ADRES           STARTMNV
 
 CHKLINUS        CS              FLAGWRD5
                 MASK            PDSPFBIT                # IS PRIORITY DISPLAY FLAG SET?
-                CCS             A
+                CCS             A			#					-
                 TC              Q                       # NO - EXIT
                 TCF             Q+1                     # GO BACK AND SET UP CORRECT RESTART ADDR.
 
@@ -514,7 +516,7 @@ FINDGIMB        AXC,1           CALL
                 GOTO
                                 VECQTEMP                # RETURN TO CALLER
 
-PICKAXIS        VLOAD           DOT                     # IF VF X VI = 0, FIND VF , VI
+PICKAXIS        VLOAD           DOT                     # IF VF X VI = 0, FIND VF . VI
                                 28D
                                 SCAXIS
                 BMN             TLOAD
