@@ -15,6 +15,8 @@
 ##		2010-02-20 RSB	Un-##'d this header.
 ##		2017-01-21 RSB	Proofed comment text by diff'ing vs Comanche 55
 ##				and corrected errors found.
+##		2017-03-16 RSB	Comment-text fixes identified in 4-way side-by-side
+##				diff of Colossus237/249/Comanche55/Artemis72.
 
 ## Page 1063
 
@@ -180,7 +182,7 @@ NOTYET		CA	.5SEC
 					# NEXT PASS.
 		TS	P63FLAG		# SO WAKEP62 WILL NOT BE INITIATED UNTIL
 					# HEADSUP IS SET IN P62.			
-				# FLAG TO PREVENT MULTIPLE CALLS TO WAKEP62.
+					# FLAG TO PREVENT MULTIPLE CALLS TO WAKEP62.
 
 		CA	7
 		TS	JETAG
@@ -1246,7 +1248,7 @@ T5IDLER2	2CADR	T5IDLOC
 # XBUF = 4DEG
 
 -T-3		DEC	-203		# CS
-#VSQMIN		DEC	.61050061 E-3	# VSQ MIN/4 A PI = 4/(4  (9.1)  180)
+#VSQMIN		DEC	.61050061 E-3	VSQ MIN/4 A PI = 4/(4  (9.1)  180)
 VSQMIN		=	OCT12
 2T/TCDU		=	OCT50		# T/TCDU  EXP-14   TCDU = .1SEC
 180/8ATT	DEC	.61813187	# 180/(8  (9.1) 4)=(180/ATT)  EXP -3
@@ -1256,8 +1258,8 @@ VSQMIN		=	OCT12
 XMIN/360	DEC	182		# XMIN/360 = 4/ 360  EXP 14  = 182 INTEGER
 -VM/360K	DEC	-.22222222	# =-20/( 360  (.25))
 1/16A1		=	180/8ATT
-				# 1/16A1  = 180/(16 A1 TT)
-				#         =180/(16  4.55  4)
+					# 1/16A1  = 180/(16 A1 TT)
+					#         =180/(16  4.55  4)
 XS/360		DEC	91		# =(XMIN +VI (T-1/K))/360 = 2/360 EXP 14
 BUFLIM		=	XS/360		# 4/(2  360)
 

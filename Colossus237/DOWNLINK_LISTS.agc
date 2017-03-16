@@ -17,6 +17,8 @@
 ##				Colossus 249.
 ##		2017-01-21 RSB	Back-ported comment error fixes detected in diff'ing
 ##				Artemis 72 vs Comanche 55.
+##		2017-03-16 RSB	Comment-text fixes identified in 4-way side-by-side
+##				diff of Colossus237/249/Comanche55/Artemis72.
 
 ## Page 165
 
@@ -347,7 +349,7 @@ CMENTR05	-1DNADR	DELV		# DELV,+1	    SNAPSHOT DATA
 
 CMENTR07	EQUALS	CMPOWE07	# COMMON DOWNLIST DATA
 
-# -----------------------------------------------------------------------
+# ------------------------------------------------------------------------
 
 ## Page 174
 

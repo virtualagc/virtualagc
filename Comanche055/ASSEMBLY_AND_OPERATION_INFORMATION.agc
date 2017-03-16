@@ -15,7 +15,9 @@
 ##				Colossus 249.
 ##		2017-01-21 RSB	Fixed comment errors detected in diff vs
 ##				Artemis 72.
-##
+##		2017-03-16 RSB	Comment-text fixes identified in 4-way side-by-side
+##				diff of Colossus237/249/Comanche55/Artemis72.
+
 ## This source code has been transcribed or otherwise adapted from digitized
 ## images of a hardcopy from the MIT Museum.  The digitization was performed
 ## by Paul Fjeld, and arranged for by Deborah Douglas of the Museum.  Many
@@ -937,8 +939,8 @@
 # 00421		W-MATRIX OVERFLOW				INTEGRV					VARALARM
 # 00430	     *	INTEG. ABORT DUE TO SUBSURFACE S. V.		ALL CALLS TO INTEG			POODOO
 # 00600		IMAGINARY ROOTS ON FIRST ITERATION		P32, P72				VARALARM
-# 00601		PERIGEE ALTITUDE LT PMIN1			P32,P72.				VARALARM
-# 00602		PERIGEE ALTITUDE LT PMIN2			P32,P72.				VARALARM
+# 00601		PERIGEE ALTITUDE LT PMIN1			P32,P72,				VARALARM
+# 00602		PERIGEE ALTITUDE LT PMIN2			P32,P72,				VARALARM
 # 00603		CSI TO CDH TIME LT PMIN22			P32,P72,P33,P73				VARALARM
 # 00604		CDH TO TPI TIME LT PMIN23			P32,P72					VARALARM
 # 00605		NUMBER OF ITERATIONS EXCEEDS LOOP MAXIMUM	P32,P72,P37				VARALARM
