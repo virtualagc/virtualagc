@@ -16,6 +16,8 @@
 ##              2017-02-20 RRB  Updated for Luminary 116.
 ##		2017-03-13 RSB	Proofed comment text via 3-way diff vs
 ##				Luminary 99 and 131.
+##		2017-03-16 RSB	Comment-text fixes identified in 5-way
+##				side-by-side diff of Luminary 69/99/116/131/210.
 
 ## Page 1218
 # DELETE
@@ -336,7 +338,7 @@ OBLATE          LXA,2           DLOAD
                                 ZUNIT                           
                 PUSH            CALL                            # ZUNIT B-1 IN PLANETARY COORDL AT 00D
                                 MATRIX                          
-                PDVL                                            # UZ    B-2 IN INERT COORD      AT 06D
+                PDVL                                            # UZ    B-2 IN INERT COORD      AT 00D
                                 XUNIT                           
                 PUSH            CALL                            # XUNIT B-1 IN PLANETARY COORD. AT 06D
                                 MATRIX                          
@@ -365,7 +367,7 @@ COMTERM         STODL           UZ                              # UZ  B-1 IN INE
                                 9/16                            
 ## Page 1226
                                 2D                              #  '                      '    '
-                DMPR            BDSU                            # P   B-10,(J/4)(9COSPHI P  -5P )
+                DMPR            BDSU                            # P   B-10,(1/4)(9COSPHI P  -5P )
                                 5/128                           #  5                      4    3
                 DMP*            DDV                             #                    '
                                 J4REQ/J3,2                      #    B- , (J RP/J R)P
@@ -379,7 +381,7 @@ COMTERM         STODL           UZ                              # UZ  B-1 IN INE
                 VXSC                                            #        4    5       3    4  2   2 3
                                 ALPHAV                          #         4       2  '           -
                 STODL           TVEC                            #   B-6,(SUM((J /R )P   (COSPHI))UR)
-                DMP*            SR1                             #         I=2        I+1
+                DMP*            SR1                             #         I=2  I     I+1
                                 J4REQ/J3,2                      #                 '
                 DDV             DAD                             #      (J RP/J R)P
                                 ALPHAM                          #        4    3   4
@@ -387,9 +389,9 @@ COMTERM         STODL           UZ                              # UZ  B-1 IN INE
                                 2J3RE/J2,2                      #    (2J RP /J R )P  +(2J RP/J R)P
                 DDV             DAD                             #       4     2    4     3    2   3
                                 ALPHAM                          
-                VXSC            VSL1                            #        4   '         -
-                                UZ                              #  B-6  SUM(P (COSPHI))UZ
-                BVSU                                            #      I=2  I
+                VXSC            VSL1                            #        4   '        -
+                                UZ                              #  B-6  SUM(P(COSPHI))UZ
+                BVSU                                            #       I=2  I
                                 TVEC                            #  4              I-2   '          -
                 STODL           TVEC                            # SUM((MU J (RP/R)   )(P   (COSPHI)UR -
                                 ALPHAM                          # I=2      I            I+2
@@ -426,7 +428,7 @@ COMTERM         STODL           UZ                              # UZ  B-1 IN INE
                 VSL3            PDDL                            # B-3            5(Y -X )UR        AT 02D
                 VXSC            VAD                             
                                 32D                             #       2  2 -   2          -
-                PDVL            VXV                             #   (5(Y.-X )UR/R ) +(2X/R)UX)     AT 02D
+                PDVL            VXV                             #   (5(Y.-X )UR/R ) +(2X/R)UX      AT 02D
                                 32D                             #    B-1   UX
                                 UZ                              #    B-2  -UY =(UX * UZ)
                 VSL1            VXSC                            #    B-3   -(2Y/R)UY

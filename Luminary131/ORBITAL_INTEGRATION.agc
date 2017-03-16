@@ -18,6 +18,8 @@
 ##				numbers in 1701.pdf.
 ##		2017-02-27 RSB	Proofed comment text using octopus/ProoferComments.
 ##		2017-03-13 RSB	Comment-text fixes noted in proofing Luminary 116.
+##		2017-03-16 RSB	Comment-text fixes identified in 5-way
+##				side-by-side diff of Luminary 69/99/116/131/210.
 
 ## Page 1220
 # DELETE
@@ -338,7 +340,7 @@ OBLATE		LXA,2	DLOAD
 			ZUNIT
 		PUSH	CALL		# ZUNIT B-1 IN PLANETARY COORDL AT 00D
 			MATRIX
-		PDVL			# UZ B-2 IN INERT COORD         AT 06D
+		PDVL			# UZ B-2 IN INERT COORD         AT 00D
 			XUNIT
 		PUSH	CALL		# XUNIT B-1 IN PLANETARY COORD. AT 06D
 			MATRIX
@@ -367,7 +369,7 @@ COMTERM		STODL	UZ		# UZ B-1 IN INERTIAL COORD      AT 20D
 			9/16
 ## Page 1228
 			2D		#  '                      '    '
-		DMPR	BDSU		# P  B-10, (J/4)(9COSPHI P  -5P )
+		DMPR	BDSU		# P  B-10, (1/4)(9COSPHI P  -5P )
 			5/128		#  5                      4    3
 		DMP*	DDV		#                 '
 			J4REQ/J3,2	# B- , (J RP/J R)P
