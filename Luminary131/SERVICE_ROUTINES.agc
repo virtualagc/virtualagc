@@ -19,6 +19,8 @@
 ##		2017-02-28 RSB	Proofed comment text using octopus/ProoferComments.
 ##		2017-03-01 RSB	Fixed lingering comment-text typos.
 ##		2017-03-14 RSB	Comment-text fixes noted in proofing Luminary 116.
+##		2017-03-16 RSB	Comment-text fixes identified in 5-way
+##				side-by-side diff of Luminary 69/99/116/131/210.
 
 ## Page 1366
 		BANK	10
@@ -81,7 +83,7 @@ DOWNFLAG	CA	Q
 		MASK	L		# RESET BIT
 		TCF	COMFLAG
 
-DEBIT		AD	ONE		# CET DE BITS
+DEBIT		AD	ONE		# GET DE BITS
 		INHINT
 		TS	ITEMP3
 		CA	LOW4		# DEC15

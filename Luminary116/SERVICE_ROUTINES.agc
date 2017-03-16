@@ -18,6 +18,8 @@
 ##                                  2SECDELY  CAF  2SECS 
 ##		2017-03-14 RSB	Proofed comment text via 3-way diff vs
 ##				Luminary 99 and 131.
+##		2017-03-16 RSB	Comment-text fixes identified in 5-way
+##				side-by-side diff of Luminary 69/99/116/131/210.
 
 ## Page 1364
                 BANK            10                              
@@ -80,7 +82,7 @@ DOWNFLAG        CA              Q
                 MASK            L                               # RESET BIT
                 TCF             COMFLAG                         
 
-DEBIT           AD              ONE                             # CET DE BITS
+DEBIT           AD              ONE                             # GET DE BITS
                 INHINT                                          
                 TS              ITEMP3                          
                 CA              LOW4                            # DEC15

@@ -18,6 +18,8 @@
 ##		2016-12-17 RSB	Proofed text comments with octopus/ProoferComments
 ##				and corrected the errors found.
 ##		2017-03-14 RSB	Comment-text fixes noted in proofing Luminary 116.
+##		2017-03-16 RSB	Comment-text fixes identified in 5-way
+##				side-by-side diff of Luminary 69/99/116/131/210.
 
 ## The contents of the "Luminary099" files, in general, are transcribed 
 ## from scanned documents. 
@@ -340,7 +342,7 @@ SERVOUT		RELINT
 		MASK	LOW9
 		TS	PUSHLOC
 		ZL
-		DXCH	FIXLOC		# FIXLOC AND DVFIND
+		DXCH	FIXLOC		# FIXLOC AND OVFIND
 
 		TC	QUIKFAZ5
 		EXTEND			# EXIT TO SELECTED ROUTINE WHETHER THERE
@@ -1312,7 +1314,7 @@ VELUPDAT	CS	VSELECT		# PROCESS VELOCITY DATA
 		ADRES	VXINH		# RESET VX INHIBIT
 
 		CA	VSELECT
-		AD	NEG2		# IF VSELECT = 2 (X AXIS).
+		AD	NEG2		# IF VSELECT = 2 (X AXIS),
 		EXTEND			# BYPASS UPDATE
 		BZF	ENDVDAT
 
