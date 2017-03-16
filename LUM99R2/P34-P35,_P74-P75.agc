@@ -23,6 +23,8 @@
 ##				proofing Luminary 69.
 ##		2017-03-03 RSB	Snapshot of Luminary 99 Rev 1.
 ##		2017-03-09 RSB	Comment-text fixes noted in proofing Luminary 116. 
+##		2017-03-16 RSB	Comment-text fixes identified in 5-way
+##				side-by-side diff of Luminary 69/99/116/131/210.
 
 ## Page 658
 # TRANSFER PHASE INITIATION (TPI) PROGRAMS (P34 AND P74)
@@ -849,7 +851,7 @@ ALLSET		STOVL	TET
 #	GOFLASH
 #	GOTOPOOH
 #	S34/35.3
-#	S34.35.4
+#	S34/35.4
 #	VNPOOH
 
 S34/35.5	STQ	BON
@@ -1164,7 +1166,7 @@ INITVEL1	SSP	DLOAD		# SET ITCTR TO -1,LOAD MPAC WITH E4 (PL 2D)
 			VINIT		# MPAC EQ UNIT(RI) X VI (+8)
 		STOVL	UN
 			RTARG1
-		UNIT	DOT		# TEMP*URT.URI (+2)		    (PL 0D)
+		UNIT	DOT		# TEMP=URT.URI (+2)		    (PL 0D)
 		DAD	CLEAR
 			COZY4
 			NORMSW
