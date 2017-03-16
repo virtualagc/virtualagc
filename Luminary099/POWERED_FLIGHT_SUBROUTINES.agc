@@ -14,7 +14,9 @@
 ##		2011-01-06 JL	Fixed pseudo-label indentation.
 ##		2016-12-17 RSB	Proofed text comments with octopus/ProoferComments
 ##				and corrected the errors found.
-##
+##		2017-03-16 RSB	Comment-text fixes identified in 5-way
+##				side-by-side diff of Luminary 69/99/116/131/210.
+
 ## This source code has been transcribed or otherwise adapted from
 ## digitized images of a hardcopy from the MIT Museum.  The digitization
 ## was performed by Paul Fjeld, and arranged for by Deborah Douglas of
@@ -152,7 +154,7 @@ QUICTRIG	INHINT			# INHINT SINCE DAP USES THE SAME TEMPS
 		TC	A
 
 ## Page 1262
-#****************************************************************************************************************
+# ****************************************************************************************************************
 # THESE INTERFACE ROUTINES MAKE IT POSSIBLE TO CALL AX*SR*T, ETC., IN
 # INTERPRETIVE.  LATER, WHERE POSSIBLE, THEY WILL BE ELIMINATED.
 #

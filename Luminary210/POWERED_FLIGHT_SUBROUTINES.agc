@@ -17,6 +17,8 @@
 ##              2016-12-11 HG   Fix operands    CDSPOTX,Y,Z -> CDUSPOTX,Y,Z
 ##		2016-12-26 RSB	Comment-text proofed using ProoferComments
 ##				and corrected errors found.
+##		2017-03-16 RSB	Comment-text fixes identified in 5-way
+##				side-by-side diff of Luminary 69/99/116/131/210.
 
 ## Page 1256
 		BANK	14		# SAME FBANK AS THE FINDCDUD SUB-PROGRAM
@@ -148,7 +150,7 @@ QUICTRIG	INHINT			# INHINT SINCE DAP USES THE SAME TEMPS
 		TC	A
 
 ## Page 1259
-#*****************************************************************************************************************
+# ****************************************************************************************************************
 # 	THESE INTERFACE ROUTINES MAKE IT POSSIBLE TO CALL AX*SR*T, ETC., IN
 # INTERPRETIVE.   LATER, WHERE POSSIBLE, THEY WILL BE ELIMINATED.
 #
