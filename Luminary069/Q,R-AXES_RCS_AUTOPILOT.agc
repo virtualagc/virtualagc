@@ -24,6 +24,8 @@
 ##              2017-01-23 HG   Add mising statement CA POSMAX
 ##		2017-01-28 RSB	Proofed comment text using octopus/prooferComments
 ##				and fixed errors found.
+##		2017-03-16 RSB	Comment-text fixes identified in 5-way
+##				side-by-side diff of Luminary 69/99/116/131/210.
 
 ## Page 1436
                 BANK    17
@@ -706,7 +708,7 @@ TJLAWADR        GENADR  TJLAW   +3      # RETURN ADDRESS FOR RCS ATTITUDE CONTRO
 #       TIME6           TIME OF NEXT RUPT
 #       T6NEXT          DELTA TIME TO NEXT RUPT
 #       T6FURTHA        DELTA TIME FROM 2ND TO LAST RUPT
-#       NXT6ADR         AXIS INDEX       0 - P-AXIS
+#       NXT6ADR         AXIS INDEX       Q - P-AXIS
 #       T6NEXT +1       AXIS INDEX       4 - U-AXIS
 #       T6FURTHA +1     AXIS INDEX      13 - V-AXIS
 

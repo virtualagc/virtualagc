@@ -18,6 +18,8 @@
 ##				original hardcopy, as opposed to the PDF page
 ##				numbers in 1701.pdf.
 ##		2017-02-28 RSB	Proofed comment text using octopus/ProoferComments.
+##		2017-03-16 RSB	Comment-text fixes identified in 5-way
+##				side-by-side diff of Luminary 69/99/116/131/210.
 
 ## Page 1434
 		BANK	17
@@ -252,7 +254,7 @@ CHEKSTIK	TS	INGTS		# NOT IN GTS WHEN IN ATT HOLD
 1/10S		=	BIT1
 LINRAT		DEC	46
 
-# ===========================================================
+# ================================
 
 DAMPING		CA	ZERO
 		TS	SAVEHAND
@@ -719,7 +721,7 @@ TJLAWADR	GENADR	TJLAW +3	# RETURN ADDRESS FOR RCS ATTITUDE CONTROL
 #	TIME6		TIME OF NEXT RUPT
 #	T6NEXT		DELTA TIME TO NEXT RUPT
 #	T6FURTHA	DELTA TIME FROM 2ND TO LAST RUPT
-#	NXT6ADR		AXIS INDEX	0 - P-AXIS
+#	NXT6ADR		AXIS INDEX	Q - P-AXIS
 #	T6NEXT +1	AXIS INDEX	4 - U-AXIS
 #	T6FURTHA +1	AXIS INDEX	13 - V-AXIS
 
