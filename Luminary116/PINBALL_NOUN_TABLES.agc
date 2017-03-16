@@ -20,6 +20,9 @@
 ##                              in Luminary 99 than the other way around.)
 ##              2017-03-09      fix  ECADR 0 --> OCT 0
 ##                                   OCT     --> ECADR
+##		2017-03-16 RSB	Comment-text fixes identified in 5-way
+##				side-by-side diff of Luminary 69/99/116/131/210.
+##				Changed 360-CDUD to 360-CDUO.
 
 ## Page 302
 # THE FOLLOWING REFERS TO THE NOUN TABLES
@@ -585,7 +588,7 @@ SFOUTAB         OCT             05174                           # WHOLE, DP TIME
                 OCT             00000                           # SPARE
                 OCT             00000                           
                 OCT             00000                           # CDU DEGREES, 360-CDU DEGREES
-                OCT             00000                           #     (SFCONS IN DEGOUTSF, 360-CDUD)
+                OCT             00000                           #     (SFCONS IN DEGOUTSF, 360-CDUO)
                 OCT             00714                           # DP DEGREES (90) (POINT BETWN BITS 7-8)
                 OCT             31463                           
                 OCT             13412                           # DP DEGREES (360)

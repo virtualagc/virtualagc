@@ -16,7 +16,10 @@
 ##				and corrected the errors found.
 ##		2017-01-28 RSB	WTIH -> WITH.
 ##		2017-03-07 RSB	Fixed comment-text errors noted while proofing Luminary 116.
-##
+##		2017-03-16 RSB	Comment-text fixes identified in 5-way
+##				side-by-side diff of Luminary 69/99/116/131/210.
+##				Changed 360-CDUD to 360-CDUO.
+
 ## This source code has been transcribed or otherwise adapted from
 ## digitized images of a hardcopy from the MIT Museum.  The digitization
 ## was performed by Paul Fjeld, and arranged for by Deborah Douglas of
@@ -599,7 +602,7 @@ SFOUTAB		OCT	05174			# WHOLE, DP TIME (SEC)
 		OCT	00000
 		OCT	00000			# CDU DEGREES, 360-CDU DEGREES
 ## Page 313
-		OCT	00000			#	(SFCONS IN DEGOUTSF, 360-CDUD)
+		OCT	00000			#	(SFCONS IN DEGOUTSF, 360-CDUO)
 		OCT	00714			# DP DEGREES (90) (POINT BETWN BITS 7-8)
 		OCT	31463
 		OCT	13412			# DP DEGREES (360)

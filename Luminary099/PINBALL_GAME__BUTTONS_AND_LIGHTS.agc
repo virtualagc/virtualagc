@@ -19,6 +19,9 @@
 ##		2017-02-08 RSB	Comment-text fixes identified while proofing Artemis 72.
 ##		2017-03-08 RSB	Comment-text fixes noted while proofing Luminary 116.
 ##		2017-03-08 RSB	Changed DSPOCTWO to DSPOCTWD.
+##		2017-03-16 RSB	Comment-text fixes identified in 5-way
+##				side-by-side diff of Luminary 69/99/116/131/210.
+##				Changed 360-CDUD to 360-CDUO.
 
 ## This source code has been transcribed or otherwise adapted from digitized
 ## images of a hardcopy from the MIT Museum.  The digitization was performed
@@ -1410,7 +1413,7 @@ DEGOUTSF	CAF	ZERO
 		TC	SETAUG		# SET AUGMENTER ACCORDING TO C(MPAC +2)
 		TC	DEGCOM
 		
-# 360-CDUD COMPUTES 360 - CDU ANGLE IN MPAC, STORES RESULT IN MPAC AND
+# 360-CDUO COMPUTES 360 - CDU ANGLE IN MPAC, STORES RESULT IN MPAC AND
 # GOES TO DEGOUTSF.
 
 360-CDUO	TC	360-CDU
@@ -1704,7 +1707,7 @@ SEPMIN		XCH	Q		# FINDS WHOLE MINUTES IN BIT13
 		MP	BIT3		# LEAVES WHOLE HOURS IN MPAC.
 		EXTEND			# SR 12, THROW AWAY LP.
 		MP	BIT13		# SR 2, TAKE FROM LP. = SL 12.
-		LXCH	MPAC +1		# THIS FORCES BITS 12-1 TO 0 IF +.
+		LXCH	MPAC +1		# THIS FORCES BITS 12-1 TO 0 IF +,
 					# FORCES BITS 12-1 TO 1 IF -.
 		CA	HITEMOUT
 		TS	MPAC
