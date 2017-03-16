@@ -20,6 +20,8 @@
 ##		2017-02-28 RSB	Proofed comment text using octopus/ProoferComments.
 ##		2017-03-01 RSB	Fixed lingering comment-text typos.
 ##		2017-03-14 RSB	Comment-text fixes noted in proofing Luminary 116.
+##		2017-03-16 RSB	Comment-text fixes identified in 5-way
+##				side-by-side diff of Luminary 69/99/116/131/210.
 
 ## Page 1413
 		BANK	16
@@ -46,7 +48,7 @@ PAXIS		CA	MS100
 		TC	BAILOUT		# STILL IN PROGRESS AND A RESTART IS
 		OCT	32000		# CALLED FOR.  IT IS NEVER ZERO
 
-		TC	CHEKBITS	# RETURN IS TC I+1 IF DAP SHOULD STAY ON.
+		TC	CHEKBITS	# RETURN IS TO I+1 IF DAP SHOULD STAY ON.
 
 		CA	CDUX		# READ AND STORE CDU'S
 		TS	DAPTREG4
@@ -444,7 +446,7 @@ RGIMBITS	EQUALS	PRIO6		# BITS 11 AND 12 (OF CHANNEL 12).
 SKIPPAXS	CS	RCSFLAGS
 		MASK	BIT12
 		ADS	RCSFLAGS	# BIT 12 SET TO 1.
-		TCF	QRAXIS		# GO TO QRAXIS OR TO CTS.
+		TCF	QRAXIS		# GO TO QRAXIS OR TO GTS.
 
 # Y-Z TRANSLATION
 #
