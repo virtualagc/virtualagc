@@ -17,6 +17,8 @@
 ##              2017-03-09 HG   Transcribed
 ##		2017-03-13 RSB	Proofed comment text via 3-way diff vs
 ##				Luminary 99 and 131.
+##		2017-03-16 RSB	Comment-text fixes identified in 5-way
+##				side-by-side diff of Luminary 69/99/116/131/210.
 
 ## Page 494
 # RENDEZVOUS NAVIGATION PROGRAM 20
@@ -1203,7 +1205,7 @@ R61C+L01        CAF             BIT4                            # BYPASS RADAR R
                 TC              BANKCALL                        # READ RR RANGE AND RDOT
                 CADR            RRRDOT                          #  EVERY R65 PASS (3 TIMES
                 TC              BANKCALL                        #  BEFORE FIRST MARK, ONCE
-                CADR            RADSTALL                        #  DURING ANY MARK PROCESSING.
+                CADR            RADSTALL                        #  DURING ANY MARK PROCESSING,
                 NOOP
                 TC              BANKCALL
                 CADR            RRRANGE
@@ -1928,7 +1930,7 @@ RRSPGAIN        DEC             .59062                          # NULL .7 ERROR 
 
 # ERASABLE INITIALIZATION REQUIRED:
 # TANG, TANG +1 (DESIRED COMMANDS), LASTYCMD, LASTXCMD
-# (1ST PASS = 0), RR ERROR COUNTER ENAGLE SET (CHAN 12 BIT 2).
+# (1ST PASS = 0), RR ERROR COUNTER ENABLE SET (CHAN 12 BIT 2).
 
 # SUBROUTINES CALLED_
 # MAGSUB
@@ -2343,7 +2345,7 @@ STDESIG         CAF             REPOSBIT
                 CCS             A                               # WITHIN LIMITS IF NOT). IF SO, EXIT AFTER
                 TCF             ENDRADAR                        # CHECKING RR CDU FAIL.
 
-STDESIG1        CCS             DESCOUNT                        # SEE IF THE TIME LIMIT HAS EXPIRED
+STDESIG1        CCS             DESCOUNT                        # SEE IF THE TINE LIMIT HAS EXPIRED
                 TCF             MOREDES
 
                 CS              B14+B2                          # IF OUT OF TIME, REMOVE ECR ENABLE + TRKR
@@ -3983,7 +3985,7 @@ LSR22.4         CALL
                                 INTSTALL
                 DLOAD           BHIZ                            # IS THIS FIRST TIME THROUGH
                                 MARKCTR
-                                INITWMX6                        # YES, INITIALIZE 6X6 W-MATRIX
+                                INITWMX6                        # YES. INITIALIZE 6X6 W-MATRIX
                 CLEAR           SET
                                 D6OR9FLG
                                 DIM0FLAG
@@ -4494,7 +4496,7 @@ VB56CADR        2CADR           TRMTRACK
 
 # COMPONENT JOBS AND TASKS:
 
-# INITIALIZING, IF RR IS FOUND TO BE IN MODE 1:  JOB R29REMOJ AND TASK REMODE:  ALWAYS: TASK PREPOS29.
+# INITIALIZING, IF RR IS FOUND TO BE IN MODE 1:  JOB R29REMOJ AND TASK REMODE;  ALWAYS: TASK PREPOS29.
 # DESIGNATING:  TASK BEGDES29 & JOB R29DODES.
 # RADAR READING:  TASK R29READ AND JOB R29RDJOB.  ALL JOBS ARE NOVAC TYPE.
 
