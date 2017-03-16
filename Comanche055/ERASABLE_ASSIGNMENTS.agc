@@ -21,7 +21,7 @@
 ##				chained to quite a lot of off-by-one errors.
 ##				Changed a +8 to a +8D.
 ##		2010-08-24 JL	Fixed page numbers. Added missing comment 
-#				character. Fixed page number comment.
+##				character. Fixed page number comment.
 ##		2011-05-08 JL	Removed workarounds.
 ##		2016-12-09 RSB	Proofed comments with octopus/ProoferComments
 ##				and fixed the errors found.
@@ -31,6 +31,7 @@
 ##		2017-01-12 RSB	Completed the 3-way cross-proofing.
 ##		2017-01-22 RSB	Fixed comment errors detected in cross-diff vs
 ##				Artemis 72.
+##		2017-03-16 RSB	Fixed a ##-style comment.
 
 ## This source code has been transcribed or otherwise adapted from digitized
 ## images of a hardcopy from the MIT Museum.  The digitization was performed

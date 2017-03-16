@@ -28,7 +28,9 @@
 ##		2017-01-12 RSB	Completed the 3-way cross-proofing.
 ##		2017-01-22 RSB	Back-ported comment error fixes detected in diff'ing
 ##				Artemis 72 vs Comanche 55.
-##
+##		2017-03-16 RSB	Comment-text fixes identified in 4-way side-by-side
+##				diff of Colossus237/249/Comanche55/Artemis72.
+
 ## The contents of the "Colossus249" files, in general, are transcribed 
 ## from a scanned copy of the program listing.  Notations on this
 ## document read, in part:
@@ -3037,7 +3039,7 @@ Y4TMP		=	J4TMP		# (B(2))
 Y5TMP		=	J5TMP		# (B(2))
 Y6TMP		=	J6TMP		# (B(2))
 
-# S40.9 STORAGE .............
+# S40.9 STORAGE..........
 
 NBRCYCLS	EQUALS	CMDTMP	+2	# B(1) COUNTER FOR P40,41 STEERING
 NBRCYCLP	EQUALS	NBRCYCLS +1	# B(1) MAINTAIN ORDER
