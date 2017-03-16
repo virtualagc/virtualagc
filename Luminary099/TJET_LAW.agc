@@ -17,6 +17,8 @@
 ##		2016-12-18 RSB	Proofed text comments with octopus/ProoferComments
 ##				and corrected the errors found.
 ##		2017-03-14 RSB	Comment-text fixes noted in proofing Luminary 116.
+##		2017-03-16 RSB	Comment-text fixes identified in 5-way
+##				side-by-side diff of Luminary 69/99/116/131/210.
 
 ## This source code has been transcribed or otherwise adapted from
 ## digitized images of a hardcopy from the MIT Museum.  The digitization
@@ -403,7 +405,7 @@ ZONE1		EXTEND
 		AD	.0375AT4	# .0375 SEC SCALED AT 4.
 		TCF	RETURNTJ	# END COMPUTATION.
 
-# TJET - H/.O25 + TTOAXIS 	FOR APPROXIMATION OVER LESS THAN 50 MSEC.
+# TJET = H/.O25 + TTOAXIS 	FOR APPROXIMATION OVER LESS THAN 50 MSEC.
 
 FORMULA3	CS	-.025AT2	# STORE +.025 SEC SCALED AT 2 FOR DIVISION
 		DXCH	HH		# PICK UP DP H AT 8, WHICH NEED NOT BE

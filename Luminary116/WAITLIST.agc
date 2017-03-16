@@ -19,6 +19,8 @@
 ##              2017-03-10 HG   Transcribed
 ##		2017-03-14 RSB	Proofed comment text via 3-way diff vs
 ##				Luminary 99 and 131.
+##		2017-03-16 RSB	Comment-text fixes identified in 5-way
+##				side-by-side diff of Luminary 69/99/116/131/210.
 
 ## Page 1109
 # PROGRAM DESCRIPTION                                                                     DATE - 10 OCTOBER 1966
@@ -106,8 +108,8 @@
 #         CONTROL WILL NOT BE RETURNED TO THE SPECIFIED ADDRESS (2CADR)   IN EXACTLY DELTA T CENTISECONDS.
 #    THE APPROXIMATE TIME MAY BE CALCULATED AS FOLLOWS
 
-#              LET T0 = THE TIME OF THE TC WAITLIST
-#              LET TS = T0 +147U + COUNTER INCREMENTS (SET UP TIME)
+#              LET TO = THE TIME OF THE TC WAITLIST
+#              LET TS = TO +147U + COUNTER INCREMENTS (SET UP TIME)
 #              LET X  = TS -(100TS)/100  (VARIANCE FROM COUNTERS)
 #              LET Y  = LENGTH OF TIME OF INHIBIT INTERRUPT AFTER T3RUPT
 #              LET Z  = LENGTH OF TIME TO PROCESS TASKS WHICH ARE DUE THIS T3RUPT BUT DISPATCHED EARLIER.

@@ -18,6 +18,8 @@
 ##				Luminary 99 and 131. No problems were found,
 ##				but a ##-comment that wouldn't have been 
 ##				displayed properly was fixed.
+##		2017-03-16 RSB	Comment-text fixes identified in 5-way
+##				side-by-side diff of Luminary 69/99/116/131/210.
 
 ## Page 786
                 BANK            31
@@ -218,7 +220,7 @@ MASSMULT        EXTEND
                 DXCH            MPAC
                 TC              DMP
                 ADRES           MASS
-                TC              DMP                             # LEAVES PROPERLY SCALED FORCE IN MPAC
+                TC              DMP                             # LEAVES PROPERLY SCALED FORCE IM MPAC
                 ADRES           SCALEFAC
                 TC              TPAGREE
                 CA              MPAC

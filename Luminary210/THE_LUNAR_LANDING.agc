@@ -254,7 +254,7 @@ P63SPOT4        CAF             TWO                     # ENTER      INITIALIZE 
                 TC              POSTJUMP                # OFF TO SEE THE WIZARD...
                 CADR            BURNBABY
 
-#       ------------------------------------------
+#       ----------------------------------------
 
 #             CONSTANTS FOR P63LM AND IGNALG
 
@@ -271,7 +271,7 @@ DDUMCRIT        2DEC            +8              B-28    # CRITERION FOR IGNALG C
 
 ## Page 786
 HLROFFF         DEC             15.24           B-10    # LOADED DP, BUT LOW ORDER DOESN'T MATTER
-#       --------------------------------
+#       ----------------------------------------
 
 ## Page 787
 #       ****************************************

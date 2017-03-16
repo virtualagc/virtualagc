@@ -16,6 +16,8 @@
 ##              2017-03-10 HG   Transcribed
 ##		2017-03-14 RSB	Proofed comment text via 3-way diff vs
 ##				Luminary 99 and 131.
+##		2017-03-16 RSB	Comment-text fixes identified in 5-way
+##				side-by-side diff of Luminary 69/99/116/131/210.
 
 ## Page 778
                 BANK            32
@@ -46,7 +48,7 @@ P63LM           TC              PHASCHNG
                 CAF             FOUR
                 TS              DVCNTR
 
-                CS              ONE                             # INITIALIZE WCHPHASE AND FLPASS0
+                CS              ONE                             # INITIALIZE WCHPHASE AND FLPASSO
                 TS              WCHPHASE
 
                 CA              ZERO
@@ -257,7 +259,7 @@ P63SPOT4        TC              BANKCALL                        # ENTER      INI
                 CADR            BURNBABY
 
 
-#               --------------------------------------------
+#               ---------------------------------------
 
 #                      CONSTANTS FOR P63LM AND IGNALG
 
@@ -275,7 +277,7 @@ GUIDDURN        2DEC            +66440                          #         GUIDDU
 DDUMCRIT        2DEC            +8              B-28            # CRITERION FOR IGNALG CONVERGENCE
 
 ## Page 783
-#               ---------------------------------------------
+#               ----------------------------------------
 
 ## Page 784
 #               ****************************************

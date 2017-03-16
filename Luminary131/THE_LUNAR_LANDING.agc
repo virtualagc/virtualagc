@@ -19,6 +19,8 @@
 ##		2017-02-25 RSB	Proofed comment text using octopus/ProoferComments.
 ##		2017-03-01 RSB	Fixed lingering typos.
 ##		2017-03-14 RSB	Comment-text fixes noted in proofing Luminary 116.
+##		2017-03-16 RSB	Comment-text fixes identified in 5-way
+##				side-by-side diff of Luminary 69/99/116/131/210.
 
 ## Page 780
 		BANK	32
@@ -47,7 +49,7 @@ P63LM		TC	PHASCHNG
 		CAF	FOUR
 		TS	DVCNTR
 
-		CS	ONE		# INITIALIZE WCHPHASE AND FLPASS0
+		CS	ONE		# INITIALIZE WCHPHASE AND FLPASSO
 		TS	WCHPHASE
 
 		CA	ZERO
@@ -249,7 +251,7 @@ P63SPOT4	TC	BANKCALL	# ENTER		INITIALIZE LANDING RADAR
 		TC	POSTJUMP	# OFF TO SEE THE WIZARD ...
 		CADR	BURNBABY
 
-#       --------------------------------------------
+#       ----------------------------------------
 
 # CONSTANTS FOR P63LM AND IGNALG
 
@@ -265,7 +267,7 @@ GUIDDURN	2DEC	+66440		# GUIDDURN +6.64400314 E+2
 DDUMCRIT	2DEC	+8 B-28		# CRITERION FOR IGNALG CONVERGENCE
 
 ## Page 785
-#       --------------------------------------------
+#       ----------------------------------------
 
 ## Page 786
 #	****************************************

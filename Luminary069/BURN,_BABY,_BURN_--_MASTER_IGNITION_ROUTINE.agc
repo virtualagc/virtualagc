@@ -21,6 +21,8 @@
 ##              2017-01-22 HG   Shift pseudo label +3 to column 2
 ##		2017-01-28 RSB	Proofed comment text using octopus/prooferComments
 ##				and fixed errors found.
+##		2017-03-16 RSB	Comment-text fixes identified in 5-way
+##				side-by-side diff of Luminary 69/99/116/131/210.
 
 ## Page 739
 ## <br><br>
@@ -457,7 +459,7 @@ P63IGN          EXTEND                                  # (13)     INITIATE BURN
                 DCA             TIME2
                 DXCH            TIG
 
-                CAF             ZERO                    # INITIALIZE WCHPHASE AND FLPASS0
+                CAF             ZERO                    # INITIALIZE WCHPHASE AND FLPASSO
                 TS              WCHPHASE
                 TS              WCHPHOLD                # ALSO WHCPHOLD
                 CA              TWO

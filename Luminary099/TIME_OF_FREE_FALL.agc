@@ -15,6 +15,8 @@
 ##		2016-12-17 RSB	Proofed text comments with octopus/ProoferComments
 ##				and corrected the errors found.
 ##		2017-03-14 RSB	Comment-text fixes noted in proofing Luminary 116.
+##		2017-03-16 RSB	Comment-text fixes identified in 5-way
+##				side-by-side diff of Luminary 69/99/116/131/210.
 
 ## This source code has been transcribed or otherwise adapted from
 ## digitized images of a hardcopy from the MIT Museum.  The digitization
@@ -365,7 +367,7 @@ DUMPRPRA	RVQ
 #		   THE SPECIFIED ALTITUDE.  ALSO INDICATES OUTBOUND PARABOLA OR HYPERBOLA.
 #
 # OUTPUT:	C(MPAC)		(-28) CS	TIME OF FLIGHT, OR TIME TO PERIGEE
-#		TFFX		(0)		X.					LEFT FOR ENTRY DISPLAY TFF ROUTINES
+#		TFFX		(0)		X,					LEFT FOR ENTRY DISPLAY TFF ROUTINES
 #		NRTERM		E:(-29+NR) M	RTERM, WEIGHTED BY NR			LEFT FOR ENTRY DISPLAY TFF ROUTINES
 #				M:(-27+NR)
 #		TFFTEM		E:(-59+2NR)	LCP Z Z SGN(SDELF)			LEFT FOR ENTRY DISPLAY TFF ROUTINES

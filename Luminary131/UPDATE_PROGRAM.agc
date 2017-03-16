@@ -22,6 +22,8 @@
 ##		2017-02-09 RSB	Comment-text fixes identified for Artemis 72.
 ##		2017-02-28 RSB	Proofed comment text using octopus/ProoferComments.
 ##		2017-03-13 RSB	Comment-text fixes noted in proofing Luminary 116.
+##		2017-03-16 RSB	Comment-text fixes identified in 5-way
+##				side-by-side diff of Luminary 69/99/116/131/210.
 
 ## Page 1378
 # PROGRAM NAME:		P27
@@ -74,7 +76,7 @@
 ## Page 1379
 #	V71EIIEAAAAE		(CONTIGUOUS BLOCK UPDATE) II-2 OCTAL COMPONENTS, XXXXX,
 #	XXXXXE			ARE LOADED INTO ERASABLE STARTING AT ECADR, AAAA.
-#	XXXXXE			IT IS .GE. 3 .AND. .LE. 200.,
+#	XXXXXE			IT IS .GE. 3 .AND. .LE. 20D.,
 #				AND (AAAA + II -3) DOES NOT PRODUCE AN ADDRESS IN THE
 #	9 NEXT BANK
 #	  .			SCALING IS SAME AS INTERNAL REGISTERS.

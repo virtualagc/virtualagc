@@ -13,6 +13,8 @@
 ##		2016-12-16 RSB	Proofed text comments with octopus/ProoferComments
 ##				and corrected the errors found.
 ##		2017-03-03 RSB	Snapshot of Luminary 99 Rev 1. 
+##		2017-03-16 RSB	Comment-text fixes identified in 5-way
+##				side-by-side diff of Luminary 69/99/116/131/210.
 
 ## Page 793
 		BANK	31
@@ -194,7 +196,7 @@ MASSMULT	EXTEND
 		DXCH	MPAC
 		TC	DMP
 		ADRES	MASS
-		TC	DMP		# LEAVES PROPERLY SCALED FORCE IN MPAC
+		TC	DMP		# LEAVES PROPERLY SCALED FORCE IM MPAC
 		ADRES	SCALEFAC
 		TC	TPAGREE
 		CA	MPAC

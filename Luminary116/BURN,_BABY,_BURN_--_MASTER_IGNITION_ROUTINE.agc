@@ -17,6 +17,8 @@
 ##				3-way diff vs Luminary 99 and Luminary 131.
 ##				(Admittedly, the former is more for detecting errors
 ##				in Luminary 99 than the other way around.)
+##		2017-03-16 RSB	Comment-text fixes identified in 5-way
+##				side-by-side diff of Luminary 69/99/116/131/210.
 
 ## Page 723
                 BANK            36                              
@@ -438,7 +440,7 @@ P63IGN          EXTEND                                          # (13)  INITIATE
                 DCA             TIME2                           
                 DXCH            TIG                             
 
-                CAF             ZERO                            # INITIALIZE WCHPHASE AND FLPASS0
+                CAF             ZERO                            # INITIALIZE WCHPHASE AND FLPASSO
                 TS              WCHPHASE                        
                 TS              WCHPHOLD                        # ALSO WHCPHOLD
                 CA              TWO                             

@@ -22,7 +22,7 @@
 ##				and corrected errors found.
 ##		2017-03-09 RSB	Comment-text fixes noted in proofing Luminary 116.
 ##		2017-03-15 RSB	Comment-text proofing using 5-way side-by-side diff
-##				of Luminary 69/99/116/131/210.  No problems were found.
+##				of Luminary 69/99/116/131/210.
 
 ## Page 726
 
@@ -460,7 +460,7 @@ P63IGN          EXTEND                                  # (13)  INITIATE BURN DI
                 DCA             TIME2
                 DXCH            TIG
 
-                CAF             ZERO                    # INITIALIZE WCHPHASE AND FLPASS0
+                CAF             ZERO                    # INITIALIZE WCHPHASE AND FLPASSO
                 TS              WCHPHASE
                 TS              WCHPHOLD                # ALSO WHCPHOLD
                 CA              TWO
