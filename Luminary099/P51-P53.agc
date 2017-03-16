@@ -14,6 +14,8 @@
 ##		2016-12-17 RSB	Proofed text comments with octopus/ProoferComments
 ##				and corrected the errors found.
 ##		2017-03-14 RSB	Comment-text fixes noted in proofing Luminary 116.
+##		2017-03-16 RSB	Comment-text fixes identified in 5-way
+##				side-by-side diff of Luminary 69/99/116/131/210.
 
 ## This source code has been transcribed or otherwise adapted from
 ## digitized images of a hardcopy from the MIT Museum.  The digitization
@@ -966,7 +968,7 @@ RDCDUS		INHINT			# READ CDUS
 		INDEX	FIXLOC
 		TS	3
 		RELINT
-		TC	DANZIG
+		TC	DANZIG		#					+
 		COUNT*	$$/INFLT
 
 ## Page 949
@@ -1997,7 +1999,7 @@ P57POST		EXIT
 		CALL
 			N89DISP		# SUBROUTINE TO CALC LS AND GIVE RLS BACK
 		STORE	RN		# RN=RLS B-29 = LM POSITION
-		VSL2	PDDL		# R-TO-RP GETS RLS B-27 AT 0-50 IN PDLIST
+		VSL2	PDDL		# R-TO-RP GETS RLS B-27 AT 0-5D IN PDLIST
 			GDT/2 +4	# TIME TEMP STORED IN N89DISP
 		PUSH			# TIME AT 6-7 IN PDLIST
 		STCALL	PIPTIME		# PIPTIME = LM STATE TIME

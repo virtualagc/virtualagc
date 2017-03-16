@@ -25,6 +25,8 @@
 ##                                                        STOVL -> STORE
 ##                              Fix operator XCH -> TS
 ##                                           +2  -> +5
+##		2017-03-16 RSB	Comment-text fixes identified in 5-way
+##				side-by-side diff of Luminary 69/99/116/131/210.
 
 ## Page 925
 # PROGRAM NAME- PROG52                                                                   DATE- JAN 9, 1967
@@ -1642,7 +1644,7 @@ GVDETER         CS              BIT13			# JAM 45 DEG IN DESIRED GIMBAL ANGLES
 #                      X    UNIT G
 #                  *   -               -
 #                  M=  Y =  UNITEZSM * X )
-#                      -               -
+#                      -         -     -
 #                      Z    UNIT(X   * Y )
 #  THEN   ROTATED  SM WRT  PRESENT IS
 #
