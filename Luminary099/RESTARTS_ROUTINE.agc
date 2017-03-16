@@ -12,6 +12,8 @@
 ##		2016-12-18 RSB	Proofed text comments with octopus/ProoferComments
 ##				and corrected the errors found.
 ##		2017-03-14 RSB	Comment-text fixes noted in proofing Luminary 116.
+##		2017-03-16 RSB	Comment-text fixes identified in 5-way
+##				side-by-side diff of Luminary 69/99/116/131/210.
 
 ## This source code has been transcribed or otherwise adapted from
 ## digitized images of a hardcopy from the MIT Museum.  The digitization
@@ -161,7 +163,7 @@ CHKNOVAC	TS	GOLOC -1	# SAVE PRIO UNTIL WE SEE IF ITS
 		BZMF	ITSNOVAC
 
 		CAF	FVACCADR	# POSITIVE, SET UP FINDVAC CALL.
-		XCH	GOLOC -1	# PICK UP PRIO.
+		XCH	GOLOC -1	# PICK UP PRIO,
 		TC	GOLOC -1	# AND GO
 
 ITSNOVAC	CAF	NOVACADR	# NEGATIVE,

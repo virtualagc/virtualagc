@@ -21,6 +21,8 @@
 ##		2017-01-28 RSB	Proofed comment text using octopus/prooferComments
 ##				but no errors found.
 ##		2017-03-14 RSB	Comment-text fixes noted in proofing Luminary 116.
+##		2017-03-16 RSB	Comment-text fixes identified in 5-way
+##				side-by-side diff of Luminary 69/99/116/131/210.
 
 ## Page 1297
 		BANK	01
@@ -155,7 +157,7 @@ CHKNOVAC	TS	GOLOC -1	# SAVE PRIO UNTIL WE SEE IF ITS
 		BZMF	ITSNOVAC
 
 		CAF	FVACCADR	# POSITIVE, SET UP FINDVAC CALL.
-		XCH	GOLOC -1	# PICK UP PRIO.
+		XCH	GOLOC -1	# PICK UP PRIO,
 		TC	GOLOC -1	# AND GO
 
 ITSNOVAC	CAF	NOVACADR	# NEGATIVE,
