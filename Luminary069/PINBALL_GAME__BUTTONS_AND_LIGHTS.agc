@@ -27,6 +27,8 @@
 ##		2017-03-16 RSB	Comment-text fixes identified in 5-way
 ##				side-by-side diff of Luminary 69/99/116/131/210.
 ##				Changed 360-CDUD to 360-CDUO.
+##		2017-03-17 RSB	Comment-text fixes identified in diff'ing
+##				Luminary 99 vs Comanche 55.
 
 ## Page 403
 # PROGRAM NAME - KEYBOARD AND DISPLAY PROGRAM
@@ -2793,7 +2795,7 @@ ENDSPOCT        CADR    OCTBACK
 # DSPALARM FINDS TC NVSUBEND IN ENTRET FOR NVSUB INITIATED ROUTINES.
 # ABORT WITH 01501.
 # DSPALARM FINDS TC ENDOFJOB IN ENTRET FOR KEYBOARD INITIATED ROUTINES.
-# DC TC ENTRET.
+# DO TC ENTRET.
 
 PREDSPAL        CS      VD1
                 TS      DSPCOUNT

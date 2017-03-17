@@ -20,6 +20,8 @@
 ##              2017-01-23 HG   Remove SBANK= Workaround. Not needed in this version
 ##		2017-01-25 RSB	Proofed comment text using octopus/prooferComments
 ##				and fixed errors found.
+##		2017-03-17 RSB	Comment-text fixes identified in diff'ing
+##				Luminary 99 vs Comanche 55.
 
 ## Page 277
                 BANK    7
@@ -915,7 +917,7 @@ V43K            VN              4300
 #           CAN CHANGE TO OTHER SHIP BY V22EXE, WHERE X NOT EQ 1.
 #          SELECTED STATE VECTOR UPDATED BY THISPREC (OTHPREC).
 #          CALLS SR30.1 (WHICH CALLS TFFCONMU + TFFRP/RA) TO CALCULATE
-#           RPER (PERIGEE RADIUS), RAP0 (APOGEE RADIUS), HPER (PERIGEE
+#           RPER (PERIGEE RADIUS), RAPO (APOGEE RADIUS), HPER (PERIGEE
 #           HEIGHT ABOVE LAUNCH PAD OR LUNAR LANDING SITE), HAPO (APOGEE
 #           HEIGHT AS ABOVE), TPER (TIME TO PERIGEE), TFF (TIME TO
 #           INTERSECT 300 KFT ABOVE PAD OR 35KFT ABOVE LANDING SITE).

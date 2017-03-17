@@ -16,6 +16,8 @@
 ##              2017-01-26 RRB  Updated for Luminary 116.
 ##		2017-03-13 RSB	Proofed comment text via 3-way diff vs
 ##				Luminary 99 and 131, but no changes were needed.
+##		2017-03-17 RSB	Comment-text fixes identified in diff'ing
+##				Luminary 99 vs Comanche 55.
 
 ## Page 1239
                 BANK            22                              
@@ -84,7 +86,7 @@ CALCGTA         ITA             DLOAD                           # PUSHDOWN  00-0
 ## Page 1241
 # ARCTRIG COMPUTES AN ANGLE GIVEN THE SINE AND COSINE OF THIS ANGLE.
 
-# THE INPUTS ARE SIN/4 AND COS/4 STORED UP AT SINTH AND COSTH.
+# THE INPUTS ARE SIN/4 AND COS/4 STORED DP AT SINTH AND COSTH.
 
 # THE OUTPUT IS THE CALCULATED ANGLE BETWEEN +.5 AND -.5 REVOLUTIONS AND STORED AT THETA. THE OUTPUT IS ALSO
 # AVAILABLE AT MPAC.

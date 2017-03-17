@@ -14,6 +14,8 @@
 ##		2017-02-08 RSB	Comment-text fixes noted while proofing Artemis 72.
 ##		2017-03-08 RSB	Changed DSPOCTWO to DSPOCTWD.
 ##		2017-03-08 RSB	Comment-text fixes noted in proofing Luminary 116.
+##		2017-03-17 RSB	Comment-text fixes identified in diff'ing
+##				Luminary 99 vs Comanche 55.
 
 ## This source code has been transcribed or otherwise adapted from
 ## digitized images of a hardcopy from the private collection of
@@ -2198,7 +2200,7 @@ ENDSPOCT        CADR            OCTBACK
 # DSPALARM FINDS TC NVSUBEND IN ENTRET FOR NVSUB INITIATED ROUTINES.
 # ABORT WITH 01501.
 # DSPALARM FINDS TC ENDOFJOB IN ENTRET FOR KEYBOARD INITIATED ROUTINES.
-# DC TC ENTRET.
+# DO TC ENTRET.
 
 CHARALRM        CAF             ENDINST                 # ALARMS WHICH MUST DO ENDOFJOBS COME
                 TS              ENTRET                  # HERE. ALLOWS ENTRET TO BE TEMP ERASABLE
@@ -2703,7 +2705,7 @@ DOPROC          CAF             ONE
 
 
 # LODNNTAB LOADS NNADTEM WITH THE NNADTAB ENTRY, NNTYPTEM WITH THE
-# NNTYPTAB ENTRY. IF THE NOUN IS MIXED, IDADITEM IS LOADED WITH THE FIRST
+# NNTYPTAB ENTRY. IF THE NOUN IS MIXED, IDAD1TEM IS LOADED WITH THE FIRST
 # IDADDTAB ENTRY, IDAD2TEM THE SECOND IDADDTAB ENTRY, IDAD3TEM THE THIRD
 # IDADDTAB ENTRY, RUTMXTEM WITH THE RUTMXTAB ENTRY. MIXBR IS SET FOR
 # MIXED OR NORMAL NOUN.

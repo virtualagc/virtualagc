@@ -24,7 +24,9 @@
 ##				log section (making it easier to perform diffs 
 ##				between versions), and to agree with what it 
 ##				says in ASSEMBLY AND OPERATION INFORMATION.
-##
+##		2017-03-17 RSB	Comment-text fixes identified in diff'ing
+##				Luminary 99 vs Comanche 55.
+
 ## This source code has been transcribed or otherwise adapted from
 ## digitized images of a hardcopy from the MIT Museum.  The digitization
 ## was performed by Paul Fjeld, and arranged for by Deborah Douglas of
@@ -98,7 +100,7 @@
 #			THE SOI (SOR) MANEUVER
 #	(6)  DELVTPI	MAGNITUDE OF DELTA V AT SOI (SOR) TIME
 #	(7)  DELVTPF	MAGNITUDE OF DELTA V AT INTERCEPT TIME
-#	(8)  DELVLVE 	DELTA VELOCITY AT SOI (AND SOR) - LOCAL VERTICAL
+#	(8)  DELVLVC 	DELTA VELOCITY AT SOI (AND SOR) - LOCAL VERTICAL
 #			COORDINATES
 #
 # SUBROUTINES USED
@@ -165,7 +167,7 @@ P78		TC	BANKCALL
 			TINT
 		STORE	TINTSOI		# STORE FOR SOR PHASE
 		CLRGO
-			OPTNSW		# OPTNSW: ON = SOI, OFF = SOR
+			OPTNSW		# OPTNSW; ON = SOI, OFF = SOR
 			JUNCTN1
 OPTN1		SET	CLEAR		# SOI
 			OPTNSW
