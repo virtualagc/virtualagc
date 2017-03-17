@@ -15,6 +15,8 @@
 ##				vs Colossus 249.
 ##		2017-02-06 RSB	Fixed comment-text errors noted while proofing
 ##				Artemis 72.
+##		2017-03-17 RSB	Comment-text fixes identified by 4-way diff'ing
+##				of Colossus 237 & 249, Comanche 55, and Artemis 72.
 
 ## Page 550
 # RENDEZVOUS NAVIGATION PROGRAM 20
@@ -1314,7 +1316,7 @@ INITB		STORE	W +90D,1	# CLEAR 54 - 89
 #                                                               CONVERSION
 #                                                                MATRIX
 
-#          (14)RESCALE WBODY TO UNITS OF 460 DEG/SEC BY APPLYING FACTOR
+#          (14)RESCALE WBODY TO UNITS OF 450 DEG/SEC BY APPLYING FACTOR
 #              OF 0.8 TO REVS/SEC.
 
 #          (15)ADDRESS LIVE AUTOPILOT REGISTERS IN BASIC (UNDER INHINT).

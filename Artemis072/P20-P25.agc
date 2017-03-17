@@ -38,6 +38,8 @@
 ##				tough to feel much confidence in this method, but 
 ##				combined with the manual proofing already-done, I 
 ##				feel much more confident of the results now.
+##		2017-03-17 RSB	Comment-text fixes identified by 4-way diff'ing
+##				of Colossus 237 & 249, Comanche 55, and Artemis 72.
 
 ## Page 552
 
@@ -3496,7 +3498,7 @@ R63COMP		EQUALS	R63
 # CALLING SEQUENCE- ASTRONAUT OPERATED
 # SUBROUTINES CALLED-R52,R53,R57,R60,ORBITAL INTEGRATION (INTEGRV)
 # INCORP1,INCORP2,LALOTORV,LUNPOS  ,AND DISPLAY INTERFACE ROUTINES.
-# NORMAL EXIT MODES- VIA R00
+# NORMAL EXIT MODES- VIA ROO
 # ALARMS- NONE
 # ABORT MODES- NONE
 # ERASABLE INITIALIZATION REQUIRED- PAD-LOADED ERASABLES,ORBWFLAG RESET,
