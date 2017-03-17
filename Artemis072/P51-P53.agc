@@ -18,6 +18,8 @@
 ##		2010-02-14 JL	Fixed error on page 753.
 ##		2017-02-08 RSB	Proofed comment text with octopus/ProoferComments.
 ##		2017-03-14 RSB	Comment-text fixes noted in proofing Luminary 116.
+##		2017-03-17 RSB	Comment-text fixes identified by 4-way diff'ing
+##				of Colossus 237 & 249, Comanche 55, and Artemis 72.
 
 ## Page 742
 
@@ -1881,7 +1883,7 @@ R53OUT		SETGO
 SIGHTSIX	=	SIX
 V01N71		VN	0171
 
-# ****** KEEP IN SAME BANK AS R51 AND R53 *******
+# ****** KEEP IN SAME BANK AS R51 AND R53 *********
 CHKSCODE	CCS	STARCODE
 		TCF	SCPOS		# > 0, CHECK IF <= 50
 		TCF	Q+2		# = +0, OK
