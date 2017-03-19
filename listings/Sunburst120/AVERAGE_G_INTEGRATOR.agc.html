@@ -96,20 +96,20 @@ Note that the date is the date of the printout, not the date of the program revi
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-035900,000002:                                                                                                  <span class="co">## Copyright:    Public domain.</span>
-035901,000003:                                                                                                  <span class="co">## Filename:     AVERAGE_G_INTEGRATOR.agc</span>
-035902,000004:                                                                                                  <span class="co">## Purpose:      A module for revision 0 of BURST120 (Sunburst). It </span>
-035903,000005:                                                                                                  <span class="co">##               is part of the source code for the Lunar Module's</span>
-035904,000006:                                                                                                  <span class="co">##               (LM) Apollo Guidance Computer (AGC) for Apollo 5.</span>
-035905,000007:                                                                                                  <span class="co">## Assembler:    yaYUL</span>
-035906,000008:                                                                                                  <span class="co">## Contact:      Ron Burkey &lt;info@sandroid.org>.</span>
-035907,000009:                                                                                                  <span class="co">## Website:      www.ibiblio.org/apollo/index.html</span>
-035908,000010:                                                                                                  <span class="co">## Mod history:  2016-09-30 RSB  Created draft version.</span>
-035909,000011:                                                                                                  <span class="co">##               2016-10-29 MAS  Adapted from Colossus 237.</span>
-035910,000012:                                                                                                  <span class="co">##               2016-10-31 RSB  Typos.</span>
-035911,000013:                                                                                                  <span class="co">##               2016-12-06 RSB  Comment-proofing via octopus/ProoferComments;</span>
-035912,000014:                                                                                                  <span class="co">##                               no changes were made.</span>
-035913,000015: 
+035919,000002:                                                                                                  <span class="co">## Copyright:    Public domain.</span>
+035920,000003:                                                                                                  <span class="co">## Filename:     AVERAGE_G_INTEGRATOR.agc</span>
+035921,000004:                                                                                                  <span class="co">## Purpose:      A module for revision 0 of BURST120 (Sunburst). It </span>
+035922,000005:                                                                                                  <span class="co">##               is part of the source code for the Lunar Module's</span>
+035923,000006:                                                                                                  <span class="co">##               (LM) Apollo Guidance Computer (AGC) for Apollo 5.</span>
+035924,000007:                                                                                                  <span class="co">## Assembler:    yaYUL</span>
+035925,000008:                                                                                                  <span class="co">## Contact:      Ron Burkey &lt;info@sandroid.org>.</span>
+035926,000009:                                                                                                  <span class="co">## Website:      www.ibiblio.org/apollo/index.html</span>
+035927,000010:                                                                                                  <span class="co">## Mod history:  2016-09-30 RSB  Created draft version.</span>
+035928,000011:                                                                                                  <span class="co">##               2016-10-29 MAS  Adapted from Colossus 237.</span>
+035929,000012:                                                                                                  <span class="co">##               2016-10-31 RSB  Typos.</span>
+035930,000013:                                                                                                  <span class="co">##               2016-12-06 RSB  Comment-proofing via octopus/ProoferComments;</span>
+035931,000014:                                                                                                  <span class="co">##                               no changes were made.</span>
+035932,000015: 
 </pre>
 </span>
 </p>
@@ -125,56 +125,56 @@ Page 842
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-035915,000017:                                                                                                  <span class="co">#  *************************************************************************************************************</span>
-035916,000018: 
-035917,000019:                                                                                                  <span class="co">#           ROUTINE CALCRVG INTEGRATES THE EQUATIONS OF MOTION BY AVERAGING THE THRUST AND GRAVITATIONAL</span>
-035918,000020:                                                                                                  <span class="co">#  ACCELERATIONS OVER A TIME INTERVAL OF 2 SECONDS.</span>
-035919,000021: 
-035920,000022:                                                                                                  <span class="co">#           FOR THE EARTH-CENTERED GRAVITATIONAL FIELD, THE PERTURBATION DUE TO OBLATENESS IS COMPUTED TO THE FIRST</span>
-035921,000023:                                                                                                  <span class="co">#  HARMONIC COEFFICIENT J.</span>
-035922,000024: 
-035923,000025:                                                                                                  <span class="co">#           ROUTINE CALCRVG REQUIRES...</span>
-035924,000026:                                                                                                  <span class="co">#                  1) THRUST ACCELERATION INCREMENTS IN DELV SCALED SAME AS PIPAX,Y,Z</span>
-035925,000027:                                                                                                  <span class="co">#                  2) VN SCALED 2(+7)M/CS.</span>
-035926,000028:                                                                                                  <span class="co">#                  3) PUSHDOWN COUNTER SET TO ZERO.</span>
-035927,000029:                                                                                                  <span class="co">#  IT LEAVES RN1 UPDATED (SCALED AT 2(+24)M, VN1 (SCALED AT 2(+7)M/CS), ANDGDT1/2 (SCALED AT 2(+7)M/CS).</span>
-035928,000030: 
-035929,000031: 
-035930,000032: 30,3103                                           <span class="ps">BANK    </span> 30                                    
-035931,000033: 30,3103  E5,1544                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45564558">EVEX</a>                                  
-035932,000034: 
-<a name="43414C4347524156"></a>035933,000035: 30,3103           77656        <span class="sm">CALCGRAV</span>           <span class="in">UNIT    </span>                                       <span class="co">#  ENTER WITH RN AT 2(+24)M IN VAC</span>
-035934,000036: 30,3104           01033                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#554E495452">UNITR</a>                                 
-035935,000037: 30,3105           41441                           <span class="in">DOT     </span> <span class="in">PUSH      </span>                            
-035936,000038: 30,3106           01041                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#554E495457">UNITW</a>                                 
-035937,000039: 30,3107           56316                           <span class="in">DSQ     </span> <span class="in">DDV       </span>                            
-035938,000040: 30,3110           21171                                    <a href="#4450312F3130">DP1/10</a>                                
-035939,000041: 30,3111           65221                           <span class="in">BDSU    </span> <span class="in">PDDL      </span>                            
-035940,000042: 30,3112           21167                                    <a href="#4450312F385448">DP1/8TH</a>                               
-035941,000043: 30,3113           00045                                    36D                                   
-035942,000044: 30,3114           15047                           <span class="in">STODL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524D4147">RMAG</a>                                  
-035943,000045: 30,3115           21173                                    <a href="#4A285245295351">J(RE)SQ</a>                               
-035944,000046: 30,3116           77671                           <span class="in">DDV     </span>                                       
-035945,000047: 30,3117           00043                                    34D                                   
-035946,000048: 30,3120           00041                           <span class="in">STORE   </span> 32D                                   
-035947,000049: 30,3121           77605                           <span class="in">DMP     </span>                                       
-035948,000050: 30,3122           65361                           <span class="in">VXSC    </span> <span class="in">PDDL      </span>                            
-035949,000051: 30,3123           01033                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#554E495452">UNITR</a>                                 
-035950,000052: 30,3124           74205                           <span class="in">DMP     </span> <span class="in">VXSC      </span>                            
-035951,000053: 30,3125           00041                                    32D                                   
-035952,000054: 30,3126           01041                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#554E495457">UNITW</a>                                 
-035953,000055: 30,3127           53255                           <span class="in">VAD     </span> <span class="in">VAD       </span>                            
-035954,000056: 30,3130           01033                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#554E495452">UNITR</a>                                 
-035955,000057: 30,3131           56325                           <span class="in">PDDL    </span> <span class="in">DDV       </span>                            
-035956,000058: 30,3132           21175                                    <a href="#2D4D554454">-MUDT</a>                                 
-035957,000059: 30,3133           00043                                    34D                                   
-035958,000060: 30,3134           45561                           <span class="in">VXSC    </span> <span class="in">STADR     </span>                            
-035959,000061: 30,3135           76712                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#474454312F32">GDT1/2</a>                                
-035960,000062: 
-035961,000063: 30,3136           77616                           <span class="in">RVQ     </span>                                       
-035962,000064: 
-<a name="43414C43525647"></a>035963,000065: 30,3137           74375        <span class="sm">CALCRVG </span>           <span class="in">VLOAD   </span> <span class="in">VXSC      </span>                            
-035964,000066: 30,3140           00404                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C56">DELV</a>                                  
+035934,000017:                                                                                                  <span class="co">#  *************************************************************************************************************</span>
+035935,000018: 
+035936,000019:                                                                                                  <span class="co">#           ROUTINE CALCRVG INTEGRATES THE EQUATIONS OF MOTION BY AVERAGING THE THRUST AND GRAVITATIONAL</span>
+035937,000020:                                                                                                  <span class="co">#  ACCELERATIONS OVER A TIME INTERVAL OF 2 SECONDS.</span>
+035938,000021: 
+035939,000022:                                                                                                  <span class="co">#           FOR THE EARTH-CENTERED GRAVITATIONAL FIELD, THE PERTURBATION DUE TO OBLATENESS IS COMPUTED TO THE FIRST</span>
+035940,000023:                                                                                                  <span class="co">#  HARMONIC COEFFICIENT J.</span>
+035941,000024: 
+035942,000025:                                                                                                  <span class="co">#           ROUTINE CALCRVG REQUIRES...</span>
+035943,000026:                                                                                                  <span class="co">#                  1) THRUST ACCELERATION INCREMENTS IN DELV SCALED SAME AS PIPAX,Y,Z</span>
+035944,000027:                                                                                                  <span class="co">#                  2) VN SCALED 2(+7)M/CS.</span>
+035945,000028:                                                                                                  <span class="co">#                  3) PUSHDOWN COUNTER SET TO ZERO.</span>
+035946,000029:                                                                                                  <span class="co">#  IT LEAVES RN1 UPDATED (SCALED AT 2(+24)M, VN1 (SCALED AT 2(+7)M/CS), ANDGDT1/2 (SCALED AT 2(+7)M/CS).</span>
+035947,000030: 
+035948,000031: 
+035949,000032: 30,3103                                           <span class="ps">BANK    </span> 30                                    
+035950,000033: 30,3103  E5,1544                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45564558">EVEX</a>                                  
+035951,000034: 
+<a name="43414C4347524156"></a>035952,000035: 30,3103           77656        <span class="sm">CALCGRAV</span>           <span class="in">UNIT    </span>                                       <span class="co">#  ENTER WITH RN AT 2(+24)M IN VAC</span>
+035953,000036: 30,3104           01033                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#554E495452">UNITR</a>                                 
+035954,000037: 30,3105           41441                           <span class="in">DOT     </span> <span class="in">PUSH      </span>                            
+035955,000038: 30,3106           01041                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#554E495457">UNITW</a>                                 
+035956,000039: 30,3107           56316                           <span class="in">DSQ     </span> <span class="in">DDV       </span>                            
+035957,000040: 30,3110           21171                                    <a href="#4450312F3130">DP1/10</a>                                
+035958,000041: 30,3111           65221                           <span class="in">BDSU    </span> <span class="in">PDDL      </span>                            
+035959,000042: 30,3112           21167                                    <a href="#4450312F385448">DP1/8TH</a>                               
+035960,000043: 30,3113           00045                                    36D                                   
+035961,000044: 30,3114           15047                           <span class="in">STODL   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524D4147">RMAG</a>                                  
+035962,000045: 30,3115           21173                                    <a href="#4A285245295351">J(RE)SQ</a>                               
+035963,000046: 30,3116           77671                           <span class="in">DDV     </span>                                       
+035964,000047: 30,3117           00043                                    34D                                   
+035965,000048: 30,3120           00041                           <span class="in">STORE   </span> 32D                                   
+035966,000049: 30,3121           77605                           <span class="in">DMP     </span>                                       
+035967,000050: 30,3122           65361                           <span class="in">VXSC    </span> <span class="in">PDDL      </span>                            
+035968,000051: 30,3123           01033                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#554E495452">UNITR</a>                                 
+035969,000052: 30,3124           74205                           <span class="in">DMP     </span> <span class="in">VXSC      </span>                            
+035970,000053: 30,3125           00041                                    32D                                   
+035971,000054: 30,3126           01041                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#554E495457">UNITW</a>                                 
+035972,000055: 30,3127           53255                           <span class="in">VAD     </span> <span class="in">VAD       </span>                            
+035973,000056: 30,3130           01033                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#554E495452">UNITR</a>                                 
+035974,000057: 30,3131           56325                           <span class="in">PDDL    </span> <span class="in">DDV       </span>                            
+035975,000058: 30,3132           21175                                    <a href="#2D4D554454">-MUDT</a>                                 
+035976,000059: 30,3133           00043                                    34D                                   
+035977,000060: 30,3134           45561                           <span class="in">VXSC    </span> <span class="in">STADR     </span>                            
+035978,000061: 30,3135           76712                           <span class="in">STORE   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#474454312F32">GDT1/2</a>                                
+035979,000062: 
+035980,000063: 30,3136           77616                           <span class="in">RVQ     </span>                                       
+035981,000064: 
+<a name="43414C43525647"></a>035982,000065: 30,3137           74375        <span class="sm">CALCRVG </span>           <span class="in">VLOAD   </span> <span class="in">VXSC      </span>                            
+035983,000066: 30,3140           00404                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#44454C56">DELV</a>                                  
 </pre>
 </span>
 </p>
@@ -190,19 +190,19 @@ Page 843
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-035966,000068: 30,3141           21165                                    <a href="#4B50495031">KPIP1</a>                                 
-035967,000069: 30,3142           44006                           <span class="in">PUSH    </span> <span class="in">STQ       </span>                            <span class="co">#  DV/2 TO PD SCALED AT 2(+7)M/CS</span>
-035968,000070: 30,3143           00037                                    31D                                   
-035969,000071: 30,3144           41455                           <span class="in">VAD     </span> <span class="in">PUSH      </span>                            <span class="co">#  (DV-OLDGDT)/2 TO PD SCALED AT 2(+7)M/CS</span>
-035970,000072: 30,3145           01025                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4744542F32">GDT/2</a>                                 
-035971,000073: 30,3146           74255                           <span class="in">VAD     </span> <span class="in">VXSC      </span>                            
-035972,000074: 30,3147           01017                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#564E">VN</a>                                    
-035973,000075: 30,3150           21177                                    <a href="#3253454328313729">2SEC(17)</a>                              
-035974,000076: 30,3151           77655                           <span class="in">VAD     </span>                                       
-035975,000077: 30,3152           01011                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#524E">RN</a>                                    
-035976,000078: 30,3153           35051                           <span class="in">STCALL  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524E31">RN1</a>                                   <span class="co">#  TEMP STORAGE OF RN SCALED 2(+24)M</span>
-035977,000079: 30,3154           61103                                    <a href="#43414C4347524156">CALCGRAV</a>                              
-035978,000080: 
+035985,000068: 30,3141           21165                                    <a href="#4B50495031">KPIP1</a>                                 
+035986,000069: 30,3142           44006                           <span class="in">PUSH    </span> <span class="in">STQ       </span>                            <span class="co">#  DV/2 TO PD SCALED AT 2(+7)M/CS</span>
+035987,000070: 30,3143           00037                                    31D                                   
+035988,000071: 30,3144           41455                           <span class="in">VAD     </span> <span class="in">PUSH      </span>                            <span class="co">#  (DV-OLDGDT)/2 TO PD SCALED AT 2(+7)M/CS</span>
+035989,000072: 30,3145           01025                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#4744542F32">GDT/2</a>                                 
+035990,000073: 30,3146           74255                           <span class="in">VAD     </span> <span class="in">VXSC      </span>                            
+035991,000074: 30,3147           01017                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#564E">VN</a>                                    
+035992,000075: 30,3150           21177                                    <a href="#3253454328313729">2SEC(17)</a>                              
+035993,000076: 30,3151           77655                           <span class="in">VAD     </span>                                       
+035994,000077: 30,3152           01011                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#524E">RN</a>                                    
+035995,000078: 30,3153           35051                           <span class="in">STCALL  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#524E31">RN1</a>                                   <span class="co">#  TEMP STORAGE OF RN SCALED 2(+24)M</span>
+035996,000079: 30,3154           61103                                    <a href="#43414C4347524156">CALCGRAV</a>                              
+035997,000080: 
 </pre>
 </span>
 </p>
@@ -218,31 +218,31 @@ Both VADs on the following line are circled.
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-035980,000082: 30,3155           53255                           <span class="in">VAD     </span> <span class="in">VAD       </span>                            
-035981,000083: 30,3156           77655                           <span class="in">VAD     </span>                                       
-035982,000084: 30,3157           01017                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#564E">VN</a>                                    
-035983,000085: 30,3160           35057                           <span class="in">STCALL  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#564E31">VN1</a>                                   <span class="co">#  TEMP STORAGE OF VN SCALED 2(+7)M/CS</span>
-035984,000086: 30,3161           00037                                    31D                                   
-035985,000087: 
-<a name="4B504950"></a>035986,000088: 30,3162           03215 27057  <span class="sm">KPIP    </span>           <span class="ps">2DEC    </span> .1024                                 <span class="co">#  SCALES DELV TO 2(+4)</span>
-035987,000089: 
-<a name="4B50495031"></a>035988,000090: 30,3164           00150 33343  <span class="sm">KPIP1   </span>           <span class="ps">2DEC    </span> 0.0064                                
-035989,000091: 
-<a name="4450312F385448"></a>035990,000092: 30,3166           04000 00000  <span class="sm">DP1/8TH </span>           <span class="ps">2DEC    </span> 0.125                                 
-035991,000093: 
-<a name="4450312F3130"></a>035992,000094: 30,3170           03146 14632  <span class="sm">DP1/10  </span>           <span class="ps">2DEC    </span> <a href="AOSTASK_AND_AOSJOB.agc.html#302E31">0.1</a>                                   
-035993,000095: 
-<a name="4A285245295351"></a>035994,000096: 30,3172           00036 30103  <span class="sm">J(RE)SQ </span>           <span class="ps">2DEC    </span> 0.060066630 B-5                        <span class="co">#       SCALED AT 2(+45)</span>
-035995,000097: 
-<a name="2D4D554454"></a>035996,000098: 30,3174           77774 53772  <span class="sm">-MUDT   </span>           <span class="ps">2DEC*   </span> -7.9720645 E+12       B-55*           
-035997,000099: 
-<a name="3253454328313729"></a>035998,000100: 30,3176           00031 00000  <span class="sm">2SEC(17)</span>           <span class="ps">2DEC    </span> 200        B-17                       
-035999,000101: 
-<a name="445032282D3329"></a>036000,000102: 30,3200           04000 00000  <span class="sm">DP2(-3) </span>           <span class="ps">2DEC    </span> 0.125                                 
-036001,000103: 
-<a name="4D554541525448"></a>036002,000104: 30,3202           00224 17561  <span class="sm">MUEARTH </span>           <span class="ps">2DEC    </span> 0.009063188                            <span class="co">#  3.98603223 E14 SCALED AT 2(42)M(3)/CS(2)</span>
-036003,000105: 
-<a name="4D554D4F4F4E"></a>036004,000106: 30,3204           00164 34414  <span class="sm">MUMOON  </span>           <span class="ps">2DEC    </span> 0.007134481                            <span class="co">#  4.90277800 E12 SCALED AT 2(36)M(3)/CS(2)</span>
+035999,000082: 30,3155           53255                           <span class="in">VAD     </span> <span class="in">VAD       </span>                            
+036000,000083: 30,3156           77655                           <span class="in">VAD     </span>                                       
+036001,000084: 30,3157           01017                                    <a href="ERASABLE_ASSIGNMENTS.agc.html#564E">VN</a>                                    
+036002,000085: 30,3160           35057                           <span class="in">STCALL  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#564E31">VN1</a>                                   <span class="co">#  TEMP STORAGE OF VN SCALED 2(+7)M/CS</span>
+036003,000086: 30,3161           00037                                    31D                                   
+036004,000087: 
+<a name="4B504950"></a>036005,000088: 30,3162           03215 27057  <span class="sm">KPIP    </span>           <span class="ps">2DEC    </span> .1024                                 <span class="co">#  SCALES DELV TO 2(+4)</span>
+036006,000089: 
+<a name="4B50495031"></a>036007,000090: 30,3164           00150 33343  <span class="sm">KPIP1   </span>           <span class="ps">2DEC    </span> 0.0064                                
+036008,000091: 
+<a name="4450312F385448"></a>036009,000092: 30,3166           04000 00000  <span class="sm">DP1/8TH </span>           <span class="ps">2DEC    </span> 0.125                                 
+036010,000093: 
+<a name="4450312F3130"></a>036011,000094: 30,3170           03146 14632  <span class="sm">DP1/10  </span>           <span class="ps">2DEC    </span> <a href="AOSTASK_AND_AOSJOB.agc.html#302E31">0.1</a>                                   
+036012,000095: 
+<a name="4A285245295351"></a>036013,000096: 30,3172           00036 30103  <span class="sm">J(RE)SQ </span>           <span class="ps">2DEC    </span> 0.060066630 B-5                        <span class="co">#       SCALED AT 2(+45)</span>
+036014,000097: 
+<a name="2D4D554454"></a>036015,000098: 30,3174           77774 53772  <span class="sm">-MUDT   </span>           <span class="ps">2DEC*   </span> -7.9720645 E+12       B-55*           
+036016,000099: 
+<a name="3253454328313729"></a>036017,000100: 30,3176           00031 00000  <span class="sm">2SEC(17)</span>           <span class="ps">2DEC    </span> 200        B-17                       
+036018,000101: 
+<a name="445032282D3329"></a>036019,000102: 30,3200           04000 00000  <span class="sm">DP2(-3) </span>           <span class="ps">2DEC    </span> 0.125                                 
+036020,000103: 
+<a name="4D554541525448"></a>036021,000104: 30,3202           00224 17561  <span class="sm">MUEARTH </span>           <span class="ps">2DEC    </span> 0.009063188                            <span class="co">#  3.98603223 E14 SCALED AT 2(42)M(3)/CS(2)</span>
+036022,000105: 
+<a name="4D554D4F4F4E"></a>036023,000106: 30,3204           00164 34414  <span class="sm">MUMOON  </span>           <span class="ps">2DEC    </span> 0.007134481                            <span class="co">#  4.90277800 E12 SCALED AT 2(36)M(3)/CS(2)</span>
 
 End of include-file AVERAGE_G_INTEGRATOR.agc.  Parent file is <a href="MAIN.agc.html">MAIN.agc</a>
 </pre>

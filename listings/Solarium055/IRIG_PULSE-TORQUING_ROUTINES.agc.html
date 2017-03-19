@@ -91,19 +91,19 @@ Note that the date is the date of the printout, not the date of the program revi
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-008676,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
-008677,000003:                                                                                                  <span class="co">## Filename:    IRIG_PULSE-TORQUING_ROUTINES.agc</span>
-008678,000004:                                                                                                  <span class="co">## Purpose:     Part of the source code for Solarium build 55. This</span>
-008679,000005:                                                                                                  <span class="co">##              is for the Command Module's (CM) Apollo Guidance</span>
-008680,000006:                                                                                                  <span class="co">##              Computer (AGC), for Apollo 6.</span>
-008681,000007:                                                                                                  <span class="co">## Assembler:   yaYUL --block1</span>
-008682,000008:                                                                                                  <span class="co">## Contact:     Jim Lawton &lt;jim DOT lawton AT gmail DOT com></span>
-008683,000009:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo/index.html</span>
-008684,000010:                                                                                                  <span class="co">## Page Scans:  www.ibiblio.org/apollo/ScansForConversion/Solarium055/</span>
-008685,000011:                                                                                                  <span class="co">## Mod history: 2009-10-07 JL   Created.</span>
-008686,000012:                                                                                                  <span class="co">##              2016-12-28 RSB  Proofed comment text using octopus/ProoferComments,</span>
-008687,000013:                                                                                                  <span class="co">##                              and fixed errors found.</span>
-008688,000014: 
+008677,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
+008678,000003:                                                                                                  <span class="co">## Filename:    IRIG_PULSE-TORQUING_ROUTINES.agc</span>
+008679,000004:                                                                                                  <span class="co">## Purpose:     Part of the source code for Solarium build 55. This</span>
+008680,000005:                                                                                                  <span class="co">##              is for the Command Module's (CM) Apollo Guidance</span>
+008681,000006:                                                                                                  <span class="co">##              Computer (AGC), for Apollo 6.</span>
+008682,000007:                                                                                                  <span class="co">## Assembler:   yaYUL --block1</span>
+008683,000008:                                                                                                  <span class="co">## Contact:     Jim Lawton &lt;jim DOT lawton AT gmail DOT com></span>
+008684,000009:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo/index.html</span>
+008685,000010:                                                                                                  <span class="co">## Page Scans:  www.ibiblio.org/apollo/ScansForConversion/Solarium055/</span>
+008686,000011:                                                                                                  <span class="co">## Mod history: 2009-10-07 JL   Created.</span>
+008687,000012:                                                                                                  <span class="co">##              2016-12-28 RSB  Proofed comment text using octopus/ProoferComments,</span>
+008688,000013:                                                                                                  <span class="co">##                              and fixed errors found.</span>
+008689,000014: 
 </pre>
 </span>
 </p>
@@ -119,52 +119,52 @@ Page 224
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-008690,000016: 
-008691,000017:                                                                                                  <span class="co">#        THE FOLLOWING PULSE-TORQUING OPTIONS ARE AVAILABLE:</span>
-008692,000018: 
-008693,000019:                                                                                                  <span class="co">#        GYROSPNT                SINGLE PRECISION INPUTS WITH NO TWITCH (IE ZERO OUTPUT ON ZERO COMMAND).</span>
-008694,000020:                                                                                                  <span class="co">#        GYROSPTW                SINGLE PRECISION INPUT WITH TWITCH ON ZERO (2+ THEN 2-).</span>
-008695,000021:                                                                                                  <span class="co">#        GYRODPNT                DOUBLE PRECISION INPUTS (SIGN AGREEMENT UNNECESSARY) WITH NO TWITCH.</span>
-008696,000022: 
-008697,000023:                                                                                                  <span class="co">#  ALL OF THE ABOVE SHOULD BE FOLLOWED EVENTUALLY BY A CALL TO IMUSTALL.</span>
-008698,000024: 
-008699,000025: 
-008700,000026: 
-008701,000027: 14,7347                                           <span class="ps">BANK    </span> 14                                    
-<a name="4759524F53504E54"></a>008702,000028: 14,7347           50115        <span class="sm">GYROSPNT</span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  <span class="co">#  ADDRESS OF THREE REGISTER COMMAND SET</span>
-008703,000029: 14,7350           10764                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4759524F">LGYRO</a>                                 <span class="co">#  ARRIVES IN A. SEE IF GYRO ROUTINES BUSY.</span>
-008704,000030: 14,7351           07524                           <span class="op">TC      </span> <a href="#4759524F42555359">GYROBUSY</a>                              <span class="co">#  (AND RETURN WHEN AVAILABLE.)</span>
-008705,000031: 
-<a name="53504E54"></a>008706,000032: 14,7352           35503        <span class="sm">SPNT    </span>           <span class="op">CAF     </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#54574F">TWO</a>                                   <span class="co">#  SET UP LOOP TO AUGMENT (+ OR -) EACH</span>
-008707,000033: 14,7353           50116                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +1                         <span class="co">#  COMMAND BY TWO IF NON-ZERO.</span>
-008708,000034: 14,7354           60000                           <span class="op">DOUBLE  </span>                                       
-008709,000035: 14,7355           60115                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
-008710,000036: 14,7356           50077                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>                                   
-008711,000037: 14,7357           20000                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
-008712,000038: 14,7360           10000                           <span class="op">CCS     </span> 0                                     
-008713,000039: 14,7361           35503                           <span class="op">CAF     </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#54574F">TWO</a>                                   
-008714,000040: 14,7362           07364                           <span class="op">TC      </span> +2                                    <span class="co">#  (NO INCREMENT IF +-0).</span>
-008715,000041: 14,7363           45503                           <span class="op">CS      </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#54574F">TWO</a>                                   
-008716,000042: 14,7364           20077                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>                                   
-008717,000043: 14,7365           60000                           <span class="op">AD      </span> 0                                     
-008718,000044: 14,7366           20077                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>                                   
-008719,000045: 14,7367           30000                           <span class="op">XCH     </span> 0                                     <span class="co">#  (JUST TO BE SAFE).</span>
-008720,000046: 
-008721,000047: 14,7370           10116                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +1                         
-008722,000048: 14,7371           07353                           <span class="op">TC      </span> <a href="#53504E54">SPNT</a>       +1                         
-008723,000049: 
-<a name="53504759524558"></a>008724,000050: 14,7372           20017        <span class="sm">SPGYREX </span>           <span class="op">INHINT  </span>                                       
-008725,000051: 14,7373           34516                           <span class="op">CAF     </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#4F4E45">ONE</a>                                   
-008726,000052: 14,7374           02173                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#574149544C495354">WAITLIST</a>                              
-008727,000053: 14,7375           21504                           <span class="ps">CADR    </span> <a href="#444F4759524F5350">DOGYROSP</a>                              
-008728,000054: 
-<a name="4759524F455832"></a>008729,000055: 14,7376           44473        <span class="sm">GYROEX2 </span>           <span class="op">CS      </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#5448524545">THREE</a>                                 <span class="co">#  INITIALIZE CDUIND TO START GYRO TASKS</span>
-008730,000056: 14,7377           50677                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#434455494E44">CDUIND</a>                                <span class="co">#  AT Y GYRO (ORDER IS YZX).</span>
-008731,000057: 14,7400           45502                           <span class="op">CS      </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#464F5552">FOUR</a>                                  
-008732,000058: 14,7401           60115                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  <span class="co">#  SET LGYROD PNZ TO INDICATE GYRO ACTIVITY</span>
-008733,000059: 14,7402           50764                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4759524F">LGYRO</a>                                 <span class="co">#  AND USE LGYRO TO STORE THE ADDRESS OFF</span>
-008734,000060: 14,7403           06020                           <span class="op">TC      </span> <a href="MODE_SWITCHING_AND_MARK_ROUTINES.agc.html#4D4F444545584954">MODEEXIT</a>                              <span class="co">#  THE COMMANDS.</span>
-008735,000061: 
+008691,000016: 
+008692,000017:                                                                                                  <span class="co">#        THE FOLLOWING PULSE-TORQUING OPTIONS ARE AVAILABLE:</span>
+008693,000018: 
+008694,000019:                                                                                                  <span class="co">#        GYROSPNT                SINGLE PRECISION INPUTS WITH NO TWITCH (IE ZERO OUTPUT ON ZERO COMMAND).</span>
+008695,000020:                                                                                                  <span class="co">#        GYROSPTW                SINGLE PRECISION INPUT WITH TWITCH ON ZERO (2+ THEN 2-).</span>
+008696,000021:                                                                                                  <span class="co">#        GYRODPNT                DOUBLE PRECISION INPUTS (SIGN AGREEMENT UNNECESSARY) WITH NO TWITCH.</span>
+008697,000022: 
+008698,000023:                                                                                                  <span class="co">#  ALL OF THE ABOVE SHOULD BE FOLLOWED EVENTUALLY BY A CALL TO IMUSTALL.</span>
+008699,000024: 
+008700,000025: 
+008701,000026: 
+008702,000027: 14,7347                                           <span class="ps">BANK    </span> 14                                    
+<a name="4759524F53504E54"></a>008703,000028: 14,7347           50115        <span class="sm">GYROSPNT</span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  <span class="co">#  ADDRESS OF THREE REGISTER COMMAND SET</span>
+008704,000029: 14,7350           10764                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4759524F">LGYRO</a>                                 <span class="co">#  ARRIVES IN A. SEE IF GYRO ROUTINES BUSY.</span>
+008705,000030: 14,7351           07524                           <span class="op">TC      </span> <a href="#4759524F42555359">GYROBUSY</a>                              <span class="co">#  (AND RETURN WHEN AVAILABLE.)</span>
+008706,000031: 
+<a name="53504E54"></a>008707,000032: 14,7352           35503        <span class="sm">SPNT    </span>           <span class="op">CAF     </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#54574F">TWO</a>                                   <span class="co">#  SET UP LOOP TO AUGMENT (+ OR -) EACH</span>
+008708,000033: 14,7353           50116                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +1                         <span class="co">#  COMMAND BY TWO IF NON-ZERO.</span>
+008709,000034: 14,7354           60000                           <span class="op">DOUBLE  </span>                                       
+008710,000035: 14,7355           60115                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
+008711,000036: 14,7356           50077                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>                                   
+008712,000037: 14,7357           20000                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
+008713,000038: 14,7360           10000                           <span class="op">CCS     </span> 0                                     
+008714,000039: 14,7361           35503                           <span class="op">CAF     </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#54574F">TWO</a>                                   
+008715,000040: 14,7362           07364                           <span class="op">TC      </span> +2                                    <span class="co">#  (NO INCREMENT IF +-0).</span>
+008716,000041: 14,7363           45503                           <span class="op">CS      </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#54574F">TWO</a>                                   
+008717,000042: 14,7364           20077                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>                                   
+008718,000043: 14,7365           60000                           <span class="op">AD      </span> 0                                     
+008719,000044: 14,7366           20077                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>                                   
+008720,000045: 14,7367           30000                           <span class="op">XCH     </span> 0                                     <span class="co">#  (JUST TO BE SAFE).</span>
+008721,000046: 
+008722,000047: 14,7370           10116                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +1                         
+008723,000048: 14,7371           07353                           <span class="op">TC      </span> <a href="#53504E54">SPNT</a>       +1                         
+008724,000049: 
+<a name="53504759524558"></a>008725,000050: 14,7372           20017        <span class="sm">SPGYREX </span>           <span class="op">INHINT  </span>                                       
+008726,000051: 14,7373           34516                           <span class="op">CAF     </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#4F4E45">ONE</a>                                   
+008727,000052: 14,7374           02173                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#574149544C495354">WAITLIST</a>                              
+008728,000053: 14,7375           21504                           <span class="ps">CADR    </span> <a href="#444F4759524F5350">DOGYROSP</a>                              
+008729,000054: 
+<a name="4759524F455832"></a>008730,000055: 14,7376           44473        <span class="sm">GYROEX2 </span>           <span class="op">CS      </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#5448524545">THREE</a>                                 <span class="co">#  INITIALIZE CDUIND TO START GYRO TASKS</span>
+008731,000056: 14,7377           50677                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#434455494E44">CDUIND</a>                                <span class="co">#  AT Y GYRO (ORDER IS YZX).</span>
+008732,000057: 14,7400           45502                           <span class="op">CS      </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#464F5552">FOUR</a>                                  
+008733,000058: 14,7401           60115                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  <span class="co">#  SET LGYROD PNZ TO INDICATE GYRO ACTIVITY</span>
+008734,000059: 14,7402           50764                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4759524F">LGYRO</a>                                 <span class="co">#  AND USE LGYRO TO STORE THE ADDRESS OFF</span>
+008735,000060: 14,7403           06020                           <span class="op">TC      </span> <a href="MODE_SWITCHING_AND_MARK_ROUTINES.agc.html#4D4F444545584954">MODEEXIT</a>                              <span class="co">#  THE COMMANDS.</span>
+008736,000061: 
 </pre>
 </span>
 </p>
@@ -180,38 +180,38 @@ Page 225
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-008737,000063: 
-008738,000064:                                                                                                  <span class="co">#        SINGLE PRECISION WITH TWITCH.</span>
-008739,000065: 
-<a name="4759524F53505457"></a>008740,000066: 14,7404           50115        <span class="sm">GYROSPTW</span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
-008741,000067: 14,7405           10764                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4759524F">LGYRO</a>                                 <span class="co">#  SAME PROLOGUE AS GYROSPNT</span>
-008742,000068: 14,7406           07524                           <span class="op">TC      </span> <a href="#4759524F42555359">GYROBUSY</a>                              
-008743,000069: 
-<a name="53505457"></a>008744,000070: 14,7407           35503        <span class="sm">SPTW    </span>           <span class="op">CAF     </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#54574F">TWO</a>                                   <span class="co">#  SET UP LOOP TO AUGMENT BY 2 (+ OR-),</span>
-008745,000071: 14,7410           50116                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +1                         <span class="co">#  WITH A PLUS TWO AUGMENT ON +-0.</span>
-008746,000072: 14,7411           60000                           <span class="op">DOUBLE  </span>                                       
-008747,000073: 14,7412           60115                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
-008748,000074: 14,7413           50077                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>                                   
-008749,000075: 14,7414           20000                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
-008750,000076: 14,7415           10000                           <span class="op">CCS     </span> 0                                     
-008751,000077: 14,7416           07421                           <span class="op">TC      </span> +3                                    
-008752,000078: 14,7417           07421                           <span class="op">TC      </span> +2                                    
-008753,000079: 14,7420           07423                           <span class="op">TC      </span> +3                                    
-008754,000080: 
-008755,000081: 14,7421           35503                           <span class="op">CAF     </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#54574F">TWO</a>                                   
-008756,000082: 14,7422           07424                           <span class="op">TC      </span> +2                                    
-008757,000083: 
-008758,000084: 14,7423           45503                 +3        <span class="op">CS      </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#54574F">TWO</a>                                   
-008759,000085: 14,7424           20077                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>                                   
-008760,000086: 14,7425           60000                           <span class="op">AD      </span> 0                                     
-008761,000087: 14,7426           20077                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>                                   
-008762,000088: 14,7427           30000                           <span class="op">XCH     </span> 0                                     
-008763,000089: 
-008764,000090: 14,7430           10116                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +1                         
-008765,000091: 14,7431           07410                           <span class="op">TC      </span> <a href="#53505457">SPTW</a>       +1                         
-008766,000092: 
-008767,000093: 14,7432           07372                           <span class="op">TC      </span> <a href="#53504759524558">SPGYREX</a>                               <span class="co">#  SET UP PULSE-TORQUING TASKS. </span>
-008768,000094: 
+008738,000063: 
+008739,000064:                                                                                                  <span class="co">#        SINGLE PRECISION WITH TWITCH.</span>
+008740,000065: 
+<a name="4759524F53505457"></a>008741,000066: 14,7404           50115        <span class="sm">GYROSPTW</span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
+008742,000067: 14,7405           10764                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4759524F">LGYRO</a>                                 <span class="co">#  SAME PROLOGUE AS GYROSPNT</span>
+008743,000068: 14,7406           07524                           <span class="op">TC      </span> <a href="#4759524F42555359">GYROBUSY</a>                              
+008744,000069: 
+<a name="53505457"></a>008745,000070: 14,7407           35503        <span class="sm">SPTW    </span>           <span class="op">CAF     </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#54574F">TWO</a>                                   <span class="co">#  SET UP LOOP TO AUGMENT BY 2 (+ OR-),</span>
+008746,000071: 14,7410           50116                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +1                         <span class="co">#  WITH A PLUS TWO AUGMENT ON +-0.</span>
+008747,000072: 14,7411           60000                           <span class="op">DOUBLE  </span>                                       
+008748,000073: 14,7412           60115                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
+008749,000074: 14,7413           50077                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>                                   
+008750,000075: 14,7414           20000                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
+008751,000076: 14,7415           10000                           <span class="op">CCS     </span> 0                                     
+008752,000077: 14,7416           07421                           <span class="op">TC      </span> +3                                    
+008753,000078: 14,7417           07421                           <span class="op">TC      </span> +2                                    
+008754,000079: 14,7420           07423                           <span class="op">TC      </span> +3                                    
+008755,000080: 
+008756,000081: 14,7421           35503                           <span class="op">CAF     </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#54574F">TWO</a>                                   
+008757,000082: 14,7422           07424                           <span class="op">TC      </span> +2                                    
+008758,000083: 
+008759,000084: 14,7423           45503                 +3        <span class="op">CS      </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#54574F">TWO</a>                                   
+008760,000085: 14,7424           20077                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>                                   
+008761,000086: 14,7425           60000                           <span class="op">AD      </span> 0                                     
+008762,000087: 14,7426           20077                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>                                   
+008763,000088: 14,7427           30000                           <span class="op">XCH     </span> 0                                     
+008764,000089: 
+008765,000090: 14,7430           10116                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +1                         
+008766,000091: 14,7431           07410                           <span class="op">TC      </span> <a href="#53505457">SPTW</a>       +1                         
+008767,000092: 
+008768,000093: 14,7432           07372                           <span class="op">TC      </span> <a href="#53504759524558">SPGYREX</a>                               <span class="co">#  SET UP PULSE-TORQUING TASKS. </span>
+008769,000094: 
 </pre>
 </span>
 </p>
@@ -227,53 +227,53 @@ Page 226
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-008770,000096: 
-008771,000097:                                                                                                  <span class="co">#        DOUBLE PRECISION INPUTS WITH NO TWITCH ON ZERO.</span>
-008772,000098: 
-<a name="4759524F44504E54"></a>008773,000099: 14,7433           50113        <span class="sm">GYRODPNT</span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4152455455524E">ARETURN</a>                               <span class="co">#  SAVE ADDRESS OF INPUT COMMANDS.</span>
-008774,000100: 14,7434           05706                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#4D414B4543414452">MAKECADR</a>                              <span class="co">#  SAVE RETURN ADDRESS SINCE WE MUST</span>
-008775,000101: 14,7435           30062                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414444525744">ADDRWD</a>                                <span class="co">#  DO A BANKCALL TO TPAGREE.</span>
-008776,000102: 14,7436           50064                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D3131">TEM11</a>                                 
-008777,000103: 14,7437           35501                           <span class="op">CAF     </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#5A45524F">ZERO</a>                                  
-008778,000104: 14,7440           50117                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +2                         
-<a name="44504E54"></a>008779,000105: 14,7441           35503        <span class="sm">DPNT    </span>           <span class="op">CAF     </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#54574F">TWO</a>                                   
-008780,000106: 
-008781,000107: 14,7442           50077                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>                                   <span class="co">#  THIS LOOP FORCES SIGN AGREEMENT IN THE</span>
-008782,000108: 14,7443           60000                           <span class="op">DOUBLE  </span>                                       <span class="co">#  DP INPUT COMMANDS, AUGMENTING ON</span>
-008783,000109: 14,7444           60113                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4152455455524E">ARETURN</a>                               <span class="co">#  NON-ZERO.</span>
-008784,000110: 14,7445           50100                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>        +1                         
-008785,000111: 14,7446           20000                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
-008786,000112: 14,7447           30000                           <span class="op">XCH     </span> 0                                     
-008787,000113: 14,7450           50115                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
-008788,000114: 14,7451           20100                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>        +1                         
-008789,000115: 14,7452           30001                           <span class="op">XCH     </span> 1                                     
-008790,000116: 14,7453           50116                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +1                         
-008791,000117: 14,7454           05654                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#42414E4B43414C4C">BANKCALL</a>                              
-008792,000118: 14,7455           07154                           <span class="ps">CADR    </span> <a href="BANK_03_INTERPRETER_SECTION.agc.html#54504147524545">TPAGREE</a>                               
-008793,000119: 
-008794,000120: 14,7456           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#  AUGMENT BYTWO IF NON-ZERO. TPAGREE</span>
-008795,000121: 14,7457           35503                           <span class="op">CAF     </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#54574F">TWO</a>                                   <span class="co">#  RETURNS +1,-0,-1.</span>
-008796,000122: 14,7460           65503                           <span class="op">AD      </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#54574F">TWO</a>                                   
-008797,000123: 14,7461           64340                           <span class="op">AD      </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#4E454732">NEG2</a>                                  
-008798,000124: 
-008799,000125: 14,7462           60116                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +1                         <span class="co">#  DIVIDE BY POSMAX - IE PLACE IN THE MAJOR</span>
-008800,000126: 14,7463           60115                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  <span class="co">#  PART OF EACH COMMAND THE NUMBER OF</span>
-008801,000127: 14,7464           20100                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>        +1                         <span class="co">#  POSMAX PULSE TRAINS TO BE PUT OUT, </span>
-008802,000128: 14,7465           50001                           <span class="op">TS      </span> 1                                     <span class="co">#  LEAVING THE REMAINDER IN THE MINOR PART.</span>
-008803,000129: 14,7466           07476                           <span class="op">TC      </span> +8D                                   
-008804,000130: 
-008805,000131: 14,7467           50001                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     <span class="co">#  ON OVERFLOW, ADD +-1 TO THE MINOR PART </span>
-008806,000132: 14,7470           20100                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>        +1                         <span class="co">#  AS WELL AS THE MAJOR PART.</span>
-008807,000133: 14,7471           60001                           <span class="op">AD      </span> 1                                     
-008808,000134: 14,7472           20100                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>        +1                         <span class="co">#  NO OVERFLOW HERE.</span>
-008809,000135: 14,7473           50001                           <span class="op">TS      </span> 1                                     
-008810,000136: 14,7474           30001                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
-008811,000137: 14,7475           07477                           <span class="op">TC      </span> +2                                    
-008812,000138: 
-008813,000139: 14,7476           35501                 +8D       <span class="op">CAF     </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#5A45524F">ZERO</a>                                  
-008814,000140: 14,7477           60115                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
-008815,000141: 14,7500           20100                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>        +1                         
-008816,000142: 14,7501           30000                           <span class="op">XCH     </span> 0                                     
+008771,000096: 
+008772,000097:                                                                                                  <span class="co">#        DOUBLE PRECISION INPUTS WITH NO TWITCH ON ZERO.</span>
+008773,000098: 
+<a name="4759524F44504E54"></a>008774,000099: 14,7433           50113        <span class="sm">GYRODPNT</span>           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4152455455524E">ARETURN</a>                               <span class="co">#  SAVE ADDRESS OF INPUT COMMANDS.</span>
+008775,000100: 14,7434           05706                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#4D414B4543414452">MAKECADR</a>                              <span class="co">#  SAVE RETURN ADDRESS SINCE WE MUST</span>
+008776,000101: 14,7435           30062                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414444525744">ADDRWD</a>                                <span class="co">#  DO A BANKCALL TO TPAGREE.</span>
+008777,000102: 14,7436           50064                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D3131">TEM11</a>                                 
+008778,000103: 14,7437           35501                           <span class="op">CAF     </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#5A45524F">ZERO</a>                                  
+008779,000104: 14,7440           50117                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +2                         
+<a name="44504E54"></a>008780,000105: 14,7441           35503        <span class="sm">DPNT    </span>           <span class="op">CAF     </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#54574F">TWO</a>                                   
+008781,000106: 
+008782,000107: 14,7442           50077                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>                                   <span class="co">#  THIS LOOP FORCES SIGN AGREEMENT IN THE</span>
+008783,000108: 14,7443           60000                           <span class="op">DOUBLE  </span>                                       <span class="co">#  DP INPUT COMMANDS, AUGMENTING ON</span>
+008784,000109: 14,7444           60113                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4152455455524E">ARETURN</a>                               <span class="co">#  NON-ZERO.</span>
+008785,000110: 14,7445           50100                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>        +1                         
+008786,000111: 14,7446           20000                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
+008787,000112: 14,7447           30000                           <span class="op">XCH     </span> 0                                     
+008788,000113: 14,7450           50115                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
+008789,000114: 14,7451           20100                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>        +1                         
+008790,000115: 14,7452           30001                           <span class="op">XCH     </span> 1                                     
+008791,000116: 14,7453           50116                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +1                         
+008792,000117: 14,7454           05654                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#42414E4B43414C4C">BANKCALL</a>                              
+008793,000118: 14,7455           07154                           <span class="ps">CADR    </span> <a href="BANK_03_INTERPRETER_SECTION.agc.html#54504147524545">TPAGREE</a>                               
+008794,000119: 
+008795,000120: 14,7456           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#  AUGMENT BYTWO IF NON-ZERO. TPAGREE</span>
+008796,000121: 14,7457           35503                           <span class="op">CAF     </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#54574F">TWO</a>                                   <span class="co">#  RETURNS +1,-0,-1.</span>
+008797,000122: 14,7460           65503                           <span class="op">AD      </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#54574F">TWO</a>                                   
+008798,000123: 14,7461           64340                           <span class="op">AD      </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#4E454732">NEG2</a>                                  
+008799,000124: 
+008800,000125: 14,7462           60116                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +1                         <span class="co">#  DIVIDE BY POSMAX - IE PLACE IN THE MAJOR</span>
+008801,000126: 14,7463           60115                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  <span class="co">#  PART OF EACH COMMAND THE NUMBER OF</span>
+008802,000127: 14,7464           20100                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>        +1                         <span class="co">#  POSMAX PULSE TRAINS TO BE PUT OUT, </span>
+008803,000128: 14,7465           50001                           <span class="op">TS      </span> 1                                     <span class="co">#  LEAVING THE REMAINDER IN THE MINOR PART.</span>
+008804,000129: 14,7466           07476                           <span class="op">TC      </span> +8D                                   
+008805,000130: 
+008806,000131: 14,7467           50001                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     <span class="co">#  ON OVERFLOW, ADD +-1 TO THE MINOR PART </span>
+008807,000132: 14,7470           20100                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>        +1                         <span class="co">#  AS WELL AS THE MAJOR PART.</span>
+008808,000133: 14,7471           60001                           <span class="op">AD      </span> 1                                     
+008809,000134: 14,7472           20100                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>        +1                         <span class="co">#  NO OVERFLOW HERE.</span>
+008810,000135: 14,7473           50001                           <span class="op">TS      </span> 1                                     
+008811,000136: 14,7474           30001                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
+008812,000137: 14,7475           07477                           <span class="op">TC      </span> +2                                    
+008813,000138: 
+008814,000139: 14,7476           35501                 +8D       <span class="op">CAF     </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#5A45524F">ZERO</a>                                  
+008815,000140: 14,7477           60115                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
+008816,000141: 14,7500           20100                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>        +1                         
+008817,000142: 14,7501           30000                           <span class="op">XCH     </span> 0                                     
 </pre>
 </span>
 </p>
@@ -289,28 +289,28 @@ Page 227
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-008818,000144: 14,7502           10077                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>                                   
-008819,000145: 14,7503           07442                           <span class="op">TC      </span> <a href="#44504E54">DPNT</a>       +1                         
-008820,000146: 
-008821,000147: 14,7504           30113                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4152455455524E">ARETURN</a>                               <span class="co">#  PREPARE FOR POSSIBLE GYROBUSY CALL.</span>
-008822,000148: 14,7505           50115                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
-008823,000149: 14,7506           10764                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4759524F">LGYRO</a>                                 
-008824,000150: 14,7507           07543                           <span class="op">TC      </span> <a href="#4759524F42535932">GYROBSY2</a>                              
-008825,000151: 
-008826,000152: 14,7510           32261                           <span class="op">CAF     </span> <a href="WAITLIST.agc.html#42414E4B4D41534B">BANKMASK</a>                              
-008827,000153: 14,7511           70064                           <span class="op">MASK    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D3131">TEM11</a>                                 
-008828,000154: 14,7512           50072                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#42414E4B54454D">BANKTEM</a>                               
-008829,000155: 14,7513           34606                           <span class="op">CAF     </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#4C4F573130">LOW10</a>                                 
-008830,000156: 14,7514           70064                           <span class="op">MASK    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D3131">TEM11</a>                                 
-008831,000157: 14,7515           64373                           <span class="op">AD      </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#364B">6K</a>                                    
-008832,000158: 14,7516           50071                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D5153">TEMQS</a>                                 
-008833,000159: 14,7517           20017                           <span class="op">INHINT  </span>                                       
-008834,000160: 14,7520           34516                           <span class="op">CAF     </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#4F4E45">ONE</a>                                   
-008835,000161: 14,7521           02173                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#574149544C495354">WAITLIST</a>                              
-008836,000162: 14,7522           21571                           <span class="ps">CADR    </span> <a href="#444F4759524F">DOGYRO</a>                                
-008837,000163: 
-008838,000164: 14,7523           07376                           <span class="op">TC      </span> <a href="#4759524F455832">GYROEX2</a>                               
-008839,000165: 
+008819,000144: 14,7502           10077                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#425546">BUF</a>                                   
+008820,000145: 14,7503           07442                           <span class="op">TC      </span> <a href="#44504E54">DPNT</a>       +1                         
+008821,000146: 
+008822,000147: 14,7504           30113                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4152455455524E">ARETURN</a>                               <span class="co">#  PREPARE FOR POSSIBLE GYROBUSY CALL.</span>
+008823,000148: 14,7505           50115                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>                                  
+008824,000149: 14,7506           10764                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4759524F">LGYRO</a>                                 
+008825,000150: 14,7507           07543                           <span class="op">TC      </span> <a href="#4759524F42535932">GYROBSY2</a>                              
+008826,000151: 
+008827,000152: 14,7510           32261                           <span class="op">CAF     </span> <a href="WAITLIST.agc.html#42414E4B4D41534B">BANKMASK</a>                              
+008828,000153: 14,7511           70064                           <span class="op">MASK    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D3131">TEM11</a>                                 
+008829,000154: 14,7512           50072                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#42414E4B54454D">BANKTEM</a>                               
+008830,000155: 14,7513           34606                           <span class="op">CAF     </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#4C4F573130">LOW10</a>                                 
+008831,000156: 14,7514           70064                           <span class="op">MASK    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D3131">TEM11</a>                                 
+008832,000157: 14,7515           64373                           <span class="op">AD      </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#364B">6K</a>                                    
+008833,000158: 14,7516           50071                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D5153">TEMQS</a>                                 
+008834,000159: 14,7517           20017                           <span class="op">INHINT  </span>                                       
+008835,000160: 14,7520           34516                           <span class="op">CAF     </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#4F4E45">ONE</a>                                   
+008836,000161: 14,7521           02173                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#574149544C495354">WAITLIST</a>                              
+008837,000162: 14,7522           21571                           <span class="ps">CADR    </span> <a href="#444F4759524F">DOGYRO</a>                                
+008838,000163: 
+008839,000164: 14,7523           07376                           <span class="op">TC      </span> <a href="#4759524F455832">GYROEX2</a>                               
+008840,000165: 
 </pre>
 </span>
 </p>
@@ -326,35 +326,35 @@ Page 228
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-008841,000167: 
-008842,000168:                                                                                                  <span class="co">#        GYRO STALLING ROUTINES - CALLED VERY RARELY BY AT MOST ONE ROUTINE AT A TIME.</span>
-008843,000169: 
-<a name="4759524F42555359"></a>008844,000170: 14,7524           30001        <span class="sm">GYROBUSY</span>           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     <span class="co">#  RETURN ADDRESS TO MPAC.</span>
-008845,000171: 14,7525           50117                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +2                         
-008846,000172: 
-008847,000173: 14,7526           05706                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#4D414B4543414452">MAKECADR</a>                              <span class="co">#  CALLERS RETURN CADR TO MPAC +1.</span>
-008848,000174: 14,7527           30062                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414444525744">ADDRWD</a>                                
-008849,000175: 14,7530           50116                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +1                         
-<a name="524547534C454550"></a>008850,000176: 14,7531           37547        <span class="sm">REGSLEEP</span>           <span class="op">CAF     </span> <a href="#434144524E455747">CADRNEWG</a>                              
-008851,000177: 14,7532           02127                           <span class="op">TC      </span> <a href="EXECUTIVE.agc.html#4A4F42534C454550">JOBSLEEP</a>                              <span class="co">#  AT STANDARD LOCATION.</span>
-008852,000178: 
-<a name="4E45574759524F"></a>008853,000179: 14,7533           10764        <span class="sm">NEWGYRO </span>           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4759524F">LGYRO</a>                                 <span class="co">#  SEE IF ROUTINES STILL AVAILABLE (SHOULD</span>
-008854,000180: 14,7534           07531                           <span class="op">TC      </span> <a href="#524547534C454550">REGSLEEP</a>                              <span class="co">#  BE). IF NOT, WAIT SOME MORE.</span>
-008855,000181: 
-008856,000182: 14,7535           30116                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +1                         <span class="co">#  RESTORE RETURN CADR TO STANDARD SWCALL</span>
-008857,000183: 14,7536           50072                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#42414E4B54454D">BANKTEM</a>                               <span class="co">#  (BANKCALL) FORM.</span>
-008858,000184: 14,7537           74606                           <span class="op">MASK    </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#4C4F573130">LOW10</a>                                 
-008859,000185: 14,7540           64373                           <span class="op">AD      </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#364B">6K</a>                                    
-008860,000186: 14,7541           50071                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D5153">TEMQS</a>                                 
-008861,000187: 14,7542           00117                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +2                         
-008862,000188: 
-<a name="4759524F42535932"></a>008863,000189: 14,7543           30001        <span class="sm">GYROBSY2</span>           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     <span class="co">#  DP WAIT.</span>
-008864,000190: 14,7544           50117                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +2                         
-008865,000191: 14,7545           30064                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D3131">TEM11</a>                                 
-008866,000192: 14,7546           07530                           <span class="op">TC      </span> <a href="#524547534C454550">REGSLEEP</a>   -1                         
-008867,000193: 
-<a name="434144524E455747"></a>008868,000194: 14,7547           31533        <span class="sm">CADRNEWG</span>           <span class="ps">CADR    </span> <a href="#4E45574759524F">NEWGYRO</a>                               
-008869,000195: 
+008842,000167: 
+008843,000168:                                                                                                  <span class="co">#        GYRO STALLING ROUTINES - CALLED VERY RARELY BY AT MOST ONE ROUTINE AT A TIME.</span>
+008844,000169: 
+<a name="4759524F42555359"></a>008845,000170: 14,7524           30001        <span class="sm">GYROBUSY</span>           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     <span class="co">#  RETURN ADDRESS TO MPAC.</span>
+008846,000171: 14,7525           50117                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +2                         
+008847,000172: 
+008848,000173: 14,7526           05706                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#4D414B4543414452">MAKECADR</a>                              <span class="co">#  CALLERS RETURN CADR TO MPAC +1.</span>
+008849,000174: 14,7527           30062                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#414444525744">ADDRWD</a>                                
+008850,000175: 14,7530           50116                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +1                         
+<a name="524547534C454550"></a>008851,000176: 14,7531           37547        <span class="sm">REGSLEEP</span>           <span class="op">CAF     </span> <a href="#434144524E455747">CADRNEWG</a>                              
+008852,000177: 14,7532           02127                           <span class="op">TC      </span> <a href="EXECUTIVE.agc.html#4A4F42534C454550">JOBSLEEP</a>                              <span class="co">#  AT STANDARD LOCATION.</span>
+008853,000178: 
+<a name="4E45574759524F"></a>008854,000179: 14,7533           10764        <span class="sm">NEWGYRO </span>           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4759524F">LGYRO</a>                                 <span class="co">#  SEE IF ROUTINES STILL AVAILABLE (SHOULD</span>
+008855,000180: 14,7534           07531                           <span class="op">TC      </span> <a href="#524547534C454550">REGSLEEP</a>                              <span class="co">#  BE). IF NOT, WAIT SOME MORE.</span>
+008856,000181: 
+008857,000182: 14,7535           30116                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +1                         <span class="co">#  RESTORE RETURN CADR TO STANDARD SWCALL</span>
+008858,000183: 14,7536           50072                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#42414E4B54454D">BANKTEM</a>                               <span class="co">#  (BANKCALL) FORM.</span>
+008859,000184: 14,7537           74606                           <span class="op">MASK    </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#4C4F573130">LOW10</a>                                 
+008860,000185: 14,7540           64373                           <span class="op">AD      </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#364B">6K</a>                                    
+008861,000186: 14,7541           50071                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D5153">TEMQS</a>                                 
+008862,000187: 14,7542           00117                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +2                         
+008863,000188: 
+<a name="4759524F42535932"></a>008864,000189: 14,7543           30001        <span class="sm">GYROBSY2</span>           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     <span class="co">#  DP WAIT.</span>
+008865,000190: 14,7544           50117                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4D504143">MPAC</a>       +2                         
+008866,000191: 14,7545           30064                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#54454D3131">TEM11</a>                                 
+008867,000192: 14,7546           07530                           <span class="op">TC      </span> <a href="#524547534C454550">REGSLEEP</a>   -1                         
+008868,000193: 
+<a name="434144524E455747"></a>008869,000194: 14,7547           31533        <span class="sm">CADRNEWG</span>           <span class="ps">CADR    </span> <a href="#4E45574759524F">NEWGYRO</a>                               
+008870,000195: 
 </pre>
 </span>
 </p>
@@ -370,57 +370,57 @@ Page 229
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-008871,000197: 
-008872,000198:                                                                                                  <span class="co">#        TASKS FOR SENDING OUT SINGLE PRECISION COMMANDS. </span>
-008873,000199: 
-008874,000200: 10,7504                                           <span class="ps">BANK    </span> 10                                    
-<a name="444F4759524F5350"></a>008875,000201: 10,7504           07704        <span class="sm">DOGYROSP</span>           <span class="op">TC      </span> <a href="#5345545550535542">SETUPSUB</a>                              <span class="co">#  COMMON INITIALIZATION SUBROUTINE.</span>
-008876,000202: 10,7505           20641                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5255505452454733">RUPTREG3</a>                              
-008877,000203: 10,7506           10000                           <span class="op">CCS     </span> 0                                     <span class="co">#  PUT OUT NEXT COMMAND.</span>
-008878,000204: 10,7507           07523                           <span class="op">TC      </span> <a href="#504F53474F555453">POSGOUTS</a>                              
-008879,000205: 10,7510           07512                           <span class="op">TC      </span> <a href="#4759524F41445653">GYROADVS</a>                              <span class="co">#  NO COMMAND IF +-0.</span>
-008880,000206: 10,7511           07537                           <span class="op">TC      </span> <a href="#4E4547474F555453">NEGGOUTS</a>                              
-008881,000207: 
-<a name="4759524F41445653"></a>008882,000208: 10,7512           40677        <span class="sm">GYROADVS</span>           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#434455494E44">CDUIND</a>                                <span class="co">#  ADVANCE TO NEXT GYRO IN ORDER YZX.</span>
-008883,000209: 10,7513           20000                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
-008884,000210: 10,7514           07513                           <span class="op">TC      </span> -1                                    
-008885,000211: 10,7515           07721                           <span class="op">TC      </span> <a href="#454E444759524F">ENDGYRO</a>                               
-008886,000212: 10,7516           34475                           <span class="op">CAF     </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#534958">SIX</a>                                   
-008887,000213: 10,7517           64340                           <span class="op">AD      </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#4E454732">NEG2</a>                                  
-008888,000214: 10,7520           40000                           <span class="op">COM     </span>                                       
-008889,000215: 10,7521           50677                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#434455494E44">CDUIND</a>                                
-008890,000216: 10,7522           07504                           <span class="op">TC      </span> <a href="#444F4759524F5350">DOGYROSP</a>                              
-008891,000217: 
-<a name="504F53474F555453"></a>008892,000218: 10,7523           64516        <span class="sm">POSGOUTS</span>           <span class="op">AD      </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#4F4E45">ONE</a>                                   
-008893,000219: 10,7524           50034                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F56435452">OVCTR</a>                                 
-008894,000220: 10,7525           06631                           <span class="op">TC      </span> <a href="T4RUPT_OUTPUT_CONTROL_PROGRAMS.agc.html#4F555432535542">OUT2SUB</a>                               <span class="co">#  PUT OUT COMMAND, SAVING COMMAND FOR</span>
-008895,000221: 10,7526           07672                           <span class="op">TC      </span> <a href="#4745544454">GETDT</a>                                 <span class="co">#  DT COMPUTATION.</span>
-008896,000222: 10,7527           30032                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C5052555054">LPRUPT</a>                                
-008897,000223: 10,7530           02173                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#574149544C495354">WAITLIST</a>                              
-008898,000224: 10,7531           21533                           <span class="ps">CADR    </span> <a href="#545745414B5350">TWEAKSP</a>                               <span class="co">#  PUT OUT 2- WHEN COMMAND IS OUT.</span>
-008899,000225: 10,7532           02256                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              <span class="co">#  ALL FOR NOW.</span>
-008900,000226: 
-<a name="545745414B5350"></a>008901,000227: 10,7533           07704        <span class="sm">TWEAKSP </span>           <span class="op">TC      </span> <a href="#5345545550535542">SETUPSUB</a>                              <span class="co">#  INITIALIZE.</span>
-008902,000228: 10,7534           45503                           <span class="op">CS      </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#54574F">TWO</a>                                   <span class="co">#  PUT OUT 2- AND ADVANCE TO NEXT GYRO.</span>
-008903,000229: 10,7535           06631                           <span class="op">TC      </span> <a href="T4RUPT_OUTPUT_CONTROL_PROGRAMS.agc.html#4F555432535542">OUT2SUB</a>                               
-008904,000230: 10,7536           07512                           <span class="op">TC      </span> <a href="#4759524F41445653">GYROADVS</a>                              
-008905,000231: 
-<a name="4E4547474F555453"></a>008906,000232: 10,7537           64516        <span class="sm">NEGGOUTS</span>           <span class="op">AD      </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#4F4E45">ONE</a>                                   <span class="co">#  GET ABS OF COMMAND AND SAVE IN OVCTR.</span>
-008907,000233: 10,7540           50034                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F56435452">OVCTR</a>                                 
-008908,000234: 
-008909,000235: 10,7541           35503                           <span class="op">CAF     </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#54574F">TWO</a>                                   <span class="co">#  PUT OUT 2+ BEFORE NEGATIVE PULSE TRAIN.</span>
-008910,000236: 10,7542           06631                           <span class="op">TC      </span> <a href="T4RUPT_OUTPUT_CONTROL_PROGRAMS.agc.html#4F555432535542">OUT2SUB</a>                               
-008911,000237: 10,7543           07672                           <span class="op">TC      </span> <a href="#4745544454">GETDT</a>                                 <span class="co">#  COMPUTE WAITLIST DELTA T.</span>
-008912,000238: 
-008913,000239: 10,7544           35362                           <span class="op">CAF     </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#534556454E">SEVEN</a>                                 <span class="co">#  PUT IN A DELAY TO ALLOW 2+ PULSES</span>
-008914,000240: 10,7545           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#  ENOUGH TIME TO GET OUT (3 PULSE TIMES).</span>
-008915,000241: 10,7546           07545                           <span class="op">TC      </span> -1                                    
-008916,000242: 
-008917,000243: 10,7547           40034                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F56435452">OVCTR</a>                                 <span class="co">#  PUT OUT NEGATIVE COMMAND.</span>
-008918,000244: 10,7550           06631                           <span class="op">TC      </span> <a href="T4RUPT_OUTPUT_CONTROL_PROGRAMS.agc.html#4F555432535542">OUT2SUB</a>                               
-008919,000245: 
-008920,000246: 10,7551           30032                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C5052555054">LPRUPT</a>                                <span class="co">#  CALL WAITLIST FOR TASK DUE WHEN PULSE</span>
-008921,000247: 10,7552           02173                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#574149544C495354">WAITLIST</a>                              <span class="co">#  TRAIN COMPLETE.</span>
+008872,000197: 
+008873,000198:                                                                                                  <span class="co">#        TASKS FOR SENDING OUT SINGLE PRECISION COMMANDS. </span>
+008874,000199: 
+008875,000200: 10,7504                                           <span class="ps">BANK    </span> 10                                    
+<a name="444F4759524F5350"></a>008876,000201: 10,7504           07704        <span class="sm">DOGYROSP</span>           <span class="op">TC      </span> <a href="#5345545550535542">SETUPSUB</a>                              <span class="co">#  COMMON INITIALIZATION SUBROUTINE.</span>
+008877,000202: 10,7505           20641                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5255505452454733">RUPTREG3</a>                              
+008878,000203: 10,7506           10000                           <span class="op">CCS     </span> 0                                     <span class="co">#  PUT OUT NEXT COMMAND.</span>
+008879,000204: 10,7507           07523                           <span class="op">TC      </span> <a href="#504F53474F555453">POSGOUTS</a>                              
+008880,000205: 10,7510           07512                           <span class="op">TC      </span> <a href="#4759524F41445653">GYROADVS</a>                              <span class="co">#  NO COMMAND IF +-0.</span>
+008881,000206: 10,7511           07537                           <span class="op">TC      </span> <a href="#4E4547474F555453">NEGGOUTS</a>                              
+008882,000207: 
+<a name="4759524F41445653"></a>008883,000208: 10,7512           40677        <span class="sm">GYROADVS</span>           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#434455494E44">CDUIND</a>                                <span class="co">#  ADVANCE TO NEXT GYRO IN ORDER YZX.</span>
+008884,000209: 10,7513           20000                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
+008885,000210: 10,7514           07513                           <span class="op">TC      </span> -1                                    
+008886,000211: 10,7515           07721                           <span class="op">TC      </span> <a href="#454E444759524F">ENDGYRO</a>                               
+008887,000212: 10,7516           34475                           <span class="op">CAF     </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#534958">SIX</a>                                   
+008888,000213: 10,7517           64340                           <span class="op">AD      </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#4E454732">NEG2</a>                                  
+008889,000214: 10,7520           40000                           <span class="op">COM     </span>                                       
+008890,000215: 10,7521           50677                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#434455494E44">CDUIND</a>                                
+008891,000216: 10,7522           07504                           <span class="op">TC      </span> <a href="#444F4759524F5350">DOGYROSP</a>                              
+008892,000217: 
+<a name="504F53474F555453"></a>008893,000218: 10,7523           64516        <span class="sm">POSGOUTS</span>           <span class="op">AD      </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#4F4E45">ONE</a>                                   
+008894,000219: 10,7524           50034                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F56435452">OVCTR</a>                                 
+008895,000220: 10,7525           06631                           <span class="op">TC      </span> <a href="T4RUPT_OUTPUT_CONTROL_PROGRAMS.agc.html#4F555432535542">OUT2SUB</a>                               <span class="co">#  PUT OUT COMMAND, SAVING COMMAND FOR</span>
+008896,000221: 10,7526           07672                           <span class="op">TC      </span> <a href="#4745544454">GETDT</a>                                 <span class="co">#  DT COMPUTATION.</span>
+008897,000222: 10,7527           30032                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C5052555054">LPRUPT</a>                                
+008898,000223: 10,7530           02173                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#574149544C495354">WAITLIST</a>                              
+008899,000224: 10,7531           21533                           <span class="ps">CADR    </span> <a href="#545745414B5350">TWEAKSP</a>                               <span class="co">#  PUT OUT 2- WHEN COMMAND IS OUT.</span>
+008900,000225: 10,7532           02256                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              <span class="co">#  ALL FOR NOW.</span>
+008901,000226: 
+<a name="545745414B5350"></a>008902,000227: 10,7533           07704        <span class="sm">TWEAKSP </span>           <span class="op">TC      </span> <a href="#5345545550535542">SETUPSUB</a>                              <span class="co">#  INITIALIZE.</span>
+008903,000228: 10,7534           45503                           <span class="op">CS      </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#54574F">TWO</a>                                   <span class="co">#  PUT OUT 2- AND ADVANCE TO NEXT GYRO.</span>
+008904,000229: 10,7535           06631                           <span class="op">TC      </span> <a href="T4RUPT_OUTPUT_CONTROL_PROGRAMS.agc.html#4F555432535542">OUT2SUB</a>                               
+008905,000230: 10,7536           07512                           <span class="op">TC      </span> <a href="#4759524F41445653">GYROADVS</a>                              
+008906,000231: 
+<a name="4E4547474F555453"></a>008907,000232: 10,7537           64516        <span class="sm">NEGGOUTS</span>           <span class="op">AD      </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#4F4E45">ONE</a>                                   <span class="co">#  GET ABS OF COMMAND AND SAVE IN OVCTR.</span>
+008908,000233: 10,7540           50034                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F56435452">OVCTR</a>                                 
+008909,000234: 
+008910,000235: 10,7541           35503                           <span class="op">CAF     </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#54574F">TWO</a>                                   <span class="co">#  PUT OUT 2+ BEFORE NEGATIVE PULSE TRAIN.</span>
+008911,000236: 10,7542           06631                           <span class="op">TC      </span> <a href="T4RUPT_OUTPUT_CONTROL_PROGRAMS.agc.html#4F555432535542">OUT2SUB</a>                               
+008912,000237: 10,7543           07672                           <span class="op">TC      </span> <a href="#4745544454">GETDT</a>                                 <span class="co">#  COMPUTE WAITLIST DELTA T.</span>
+008913,000238: 
+008914,000239: 10,7544           35362                           <span class="op">CAF     </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#534556454E">SEVEN</a>                                 <span class="co">#  PUT IN A DELAY TO ALLOW 2+ PULSES</span>
+008915,000240: 10,7545           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#  ENOUGH TIME TO GET OUT (3 PULSE TIMES).</span>
+008916,000241: 10,7546           07545                           <span class="op">TC      </span> -1                                    
+008917,000242: 
+008918,000243: 10,7547           40034                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F56435452">OVCTR</a>                                 <span class="co">#  PUT OUT NEGATIVE COMMAND.</span>
+008919,000244: 10,7550           06631                           <span class="op">TC      </span> <a href="T4RUPT_OUTPUT_CONTROL_PROGRAMS.agc.html#4F555432535542">OUT2SUB</a>                               
+008920,000245: 
+008921,000246: 10,7551           30032                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C5052555054">LPRUPT</a>                                <span class="co">#  CALL WAITLIST FOR TASK DUE WHEN PULSE</span>
+008922,000247: 10,7552           02173                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#574149544C495354">WAITLIST</a>                              <span class="co">#  TRAIN COMPLETE.</span>
 </pre>
 </span>
 </p>
@@ -436,9 +436,9 @@ Page 230
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-008923,000249: 10,7553           21512                           <span class="ps">CADR    </span> <a href="#4759524F41445653">GYROADVS</a>                              
-008924,000250: 10,7554           02256                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              
-008925,000251: 
+008924,000249: 10,7553           21512                           <span class="ps">CADR    </span> <a href="#4759524F41445653">GYROADVS</a>                              
+008925,000250: 10,7554           02256                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              
+008926,000251: 
 </pre>
 </span>
 </p>
@@ -454,47 +454,47 @@ Page 231
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-008927,000253: 
-008928,000254:                                                                                                  <span class="co">#        WAITLIST TASKS TO SEND OUT DP PULSE TRAINS TO THE GYROS.</span>
-008929,000255: 
-<a name="545745414B4759"></a>008930,000256: 10,7555           07704        <span class="sm">TWEAKGY </span>           <span class="op">TC      </span> <a href="#5345545550535542">SETUPSUB</a>                              <span class="co">#  FINISHED WITH POSITIVE TRAINS TO A GYRO.</span>
-008931,000257: 10,7556           45503                           <span class="op">CS      </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#54574F">TWO</a>                                   <span class="co">#   SEND OUT 2- TO LEAVE GYRO IN - STATE.</span>
-008932,000258: 10,7557           06631                           <span class="op">TC      </span> <a href="T4RUPT_OUTPUT_CONTROL_PROGRAMS.agc.html#4F555432535542">OUT2SUB</a>                               
-008933,000259: 
-<a name="4759524F414456"></a>008934,000260: 10,7560           40677        <span class="sm">GYROADV </span>           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#434455494E44">CDUIND</a>                                <span class="co">#  ADVANCE TO THE NEXT GYRO IN ORDER YZX.</span>
-008935,000261: 10,7561           74720                           <span class="op">MASK    </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#4C4F5737">LOW7</a>                                  <span class="co">#  BIT14 IS 1 IF 2+ PULSES HAD BEEN SENT</span>
-008936,000262: 10,7562           20000                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#   BEFORE A NEGATIVE COMMAND.</span>
-008937,000263: 10,7563           07562                           <span class="op">TC      </span> -1                                    
-008938,000264: 10,7564           07715                           <span class="op">TC      </span> <a href="#454E444759524F31">ENDGYRO1</a>                              
-008939,000265: 10,7565           34475                           <span class="op">CAF     </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#534958">SIX</a>                                   
-008940,000266: 10,7566           64340                           <span class="op">AD      </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#4E454732">NEG2</a>                                  <span class="co">#  (CAME HERE FROM TC WITH C(A)=4.)</span>
-008941,000267: 10,7567           40000                           <span class="op">COM     </span>                                       
-008942,000268: 10,7570           50677                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#434455494E44">CDUIND</a>                                
-008943,000269: 
-<a name="444F4759524F"></a>008944,000270: 10,7571           07704        <span class="sm">DOGYRO  </span>           <span class="op">TC      </span> <a href="#5345545550535542">SETUPSUB</a>                              <span class="co">#  SERVICE GYRO WHOSE *NUMBER* IS IN CDUIND</span>
-008945,000271: 10,7572           20641                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5255505452454733">RUPTREG3</a>                              
-008946,000272: 10,7573           10000                           <span class="op">CCS     </span> 0                                     <span class="co">#  MAJOR PART IS POSMAX COUNT.</span>
-008947,000273: 10,7574           07605                           <span class="op">TC      </span> <a href="#444F504F534D4158">DOPOSMAX</a>                              <span class="co">#  PUT OUT POSMAX.</span>
-008948,000274: 10,7575           07577                           <span class="op">TC      </span> <a href="#444F4D494E4F52">DOMINOR</a>                               
-008949,000275: 10,7576           07615                           <span class="op">TC      </span> <a href="#444F4E45474D4158">DONEGMAX</a>                              
-008950,000276: 
-<a name="444F4D494E4F52"></a>008951,000277: 10,7577           20641        <span class="sm">DOMINOR </span>           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5255505452454733">RUPTREG3</a>                              <span class="co">#  SEND OUT REMAINDER OF COMMAND.</span>
-008952,000278: 10,7600           10001                           <span class="op">CCS     </span> 1                                     
-008953,000279: 10,7601           07640                           <span class="op">TC      </span> <a href="#504F53474F5554">POSGOUT</a>                               
-008954,000280: 10,7602           07556                           <span class="op">TC      </span> <a href="#545745414B4759">TWEAKGY</a>    +1                         <span class="co">#  FINISHED WITH LONG . PULSE TRAIN.</span>
-008955,000281: 10,7603           07650                           <span class="op">TC      </span> <a href="#4E4547474F5554">NEGGOUT</a>                               
-008956,000282: 10,7604           07560                           <span class="op">TC      </span> <a href="#4759524F414456">GYROADV</a>                               <span class="co">#  DONE WITH LONG - TRAIN OR ZERO INPUT.</span>
-008957,000283: 
-<a name="444F504F534D4158"></a>008958,000284: 10,7605           20641        <span class="sm">DOPOSMAX</span>           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5255505452454733">RUPTREG3</a>                              <span class="co">#  PUT AWAY DECREMENTED POSMAX COUNT.</span>
-008959,000285: 10,7606           50000                           <span class="op">TS      </span> 0                                     
-008960,000286: 10,7607           34476                           <span class="op">CAF     </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#504F534D4158">POSMAX</a>                                
-<a name="444F4D4158"></a>008961,000287: 10,7610           06631        <span class="sm">DOMAX   </span>           <span class="op">TC      </span> <a href="T4RUPT_OUTPUT_CONTROL_PROGRAMS.agc.html#4F555432535542">OUT2SUB</a>                               
-008962,000288: 10,7611           37740                           <span class="op">CAF     </span> <a href="#46554C4C4454">FULLDT</a>                                
-008963,000289: 
-<a name="4759524F57414954"></a>008964,000290: 10,7612           02173        <span class="sm">GYROWAIT</span>           <span class="op">TC      </span> <a href="WAITLIST.agc.html#574149544C495354">WAITLIST</a>                              
-008965,000291: 10,7613           21571                           <span class="ps">CADR    </span> <a href="#444F4759524F">DOGYRO</a>                                
-008966,000292: 10,7614           02256                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              
-008967,000293: 
+008928,000253: 
+008929,000254:                                                                                                  <span class="co">#        WAITLIST TASKS TO SEND OUT DP PULSE TRAINS TO THE GYROS.</span>
+008930,000255: 
+<a name="545745414B4759"></a>008931,000256: 10,7555           07704        <span class="sm">TWEAKGY </span>           <span class="op">TC      </span> <a href="#5345545550535542">SETUPSUB</a>                              <span class="co">#  FINISHED WITH POSITIVE TRAINS TO A GYRO.</span>
+008932,000257: 10,7556           45503                           <span class="op">CS      </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#54574F">TWO</a>                                   <span class="co">#   SEND OUT 2- TO LEAVE GYRO IN - STATE.</span>
+008933,000258: 10,7557           06631                           <span class="op">TC      </span> <a href="T4RUPT_OUTPUT_CONTROL_PROGRAMS.agc.html#4F555432535542">OUT2SUB</a>                               
+008934,000259: 
+<a name="4759524F414456"></a>008935,000260: 10,7560           40677        <span class="sm">GYROADV </span>           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#434455494E44">CDUIND</a>                                <span class="co">#  ADVANCE TO THE NEXT GYRO IN ORDER YZX.</span>
+008936,000261: 10,7561           74720                           <span class="op">MASK    </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#4C4F5737">LOW7</a>                                  <span class="co">#  BIT14 IS 1 IF 2+ PULSES HAD BEEN SENT</span>
+008937,000262: 10,7562           20000                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#   BEFORE A NEGATIVE COMMAND.</span>
+008938,000263: 10,7563           07562                           <span class="op">TC      </span> -1                                    
+008939,000264: 10,7564           07715                           <span class="op">TC      </span> <a href="#454E444759524F31">ENDGYRO1</a>                              
+008940,000265: 10,7565           34475                           <span class="op">CAF     </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#534958">SIX</a>                                   
+008941,000266: 10,7566           64340                           <span class="op">AD      </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#4E454732">NEG2</a>                                  <span class="co">#  (CAME HERE FROM TC WITH C(A)=4.)</span>
+008942,000267: 10,7567           40000                           <span class="op">COM     </span>                                       
+008943,000268: 10,7570           50677                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#434455494E44">CDUIND</a>                                
+008944,000269: 
+<a name="444F4759524F"></a>008945,000270: 10,7571           07704        <span class="sm">DOGYRO  </span>           <span class="op">TC      </span> <a href="#5345545550535542">SETUPSUB</a>                              <span class="co">#  SERVICE GYRO WHOSE *NUMBER* IS IN CDUIND</span>
+008946,000271: 10,7572           20641                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5255505452454733">RUPTREG3</a>                              
+008947,000272: 10,7573           10000                           <span class="op">CCS     </span> 0                                     <span class="co">#  MAJOR PART IS POSMAX COUNT.</span>
+008948,000273: 10,7574           07605                           <span class="op">TC      </span> <a href="#444F504F534D4158">DOPOSMAX</a>                              <span class="co">#  PUT OUT POSMAX.</span>
+008949,000274: 10,7575           07577                           <span class="op">TC      </span> <a href="#444F4D494E4F52">DOMINOR</a>                               
+008950,000275: 10,7576           07615                           <span class="op">TC      </span> <a href="#444F4E45474D4158">DONEGMAX</a>                              
+008951,000276: 
+<a name="444F4D494E4F52"></a>008952,000277: 10,7577           20641        <span class="sm">DOMINOR </span>           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5255505452454733">RUPTREG3</a>                              <span class="co">#  SEND OUT REMAINDER OF COMMAND.</span>
+008953,000278: 10,7600           10001                           <span class="op">CCS     </span> 1                                     
+008954,000279: 10,7601           07640                           <span class="op">TC      </span> <a href="#504F53474F5554">POSGOUT</a>                               
+008955,000280: 10,7602           07556                           <span class="op">TC      </span> <a href="#545745414B4759">TWEAKGY</a>    +1                         <span class="co">#  FINISHED WITH LONG . PULSE TRAIN.</span>
+008956,000281: 10,7603           07650                           <span class="op">TC      </span> <a href="#4E4547474F5554">NEGGOUT</a>                               
+008957,000282: 10,7604           07560                           <span class="op">TC      </span> <a href="#4759524F414456">GYROADV</a>                               <span class="co">#  DONE WITH LONG - TRAIN OR ZERO INPUT.</span>
+008958,000283: 
+<a name="444F504F534D4158"></a>008959,000284: 10,7605           20641        <span class="sm">DOPOSMAX</span>           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5255505452454733">RUPTREG3</a>                              <span class="co">#  PUT AWAY DECREMENTED POSMAX COUNT.</span>
+008960,000285: 10,7606           50000                           <span class="op">TS      </span> 0                                     
+008961,000286: 10,7607           34476                           <span class="op">CAF     </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#504F534D4158">POSMAX</a>                                
+<a name="444F4D4158"></a>008962,000287: 10,7610           06631        <span class="sm">DOMAX   </span>           <span class="op">TC      </span> <a href="T4RUPT_OUTPUT_CONTROL_PROGRAMS.agc.html#4F555432535542">OUT2SUB</a>                               
+008963,000288: 10,7611           37740                           <span class="op">CAF     </span> <a href="#46554C4C4454">FULLDT</a>                                
+008964,000289: 
+<a name="4759524F57414954"></a>008965,000290: 10,7612           02173        <span class="sm">GYROWAIT</span>           <span class="op">TC      </span> <a href="WAITLIST.agc.html#574149544C495354">WAITLIST</a>                              
+008966,000291: 10,7613           21571                           <span class="ps">CADR    </span> <a href="#444F4759524F">DOGYRO</a>                                
+008967,000292: 10,7614           02256                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              
+008968,000293: 
 </pre>
 </span>
 </p>
@@ -510,57 +510,57 @@ Page 232
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-008969,000295: 
-<a name="444F4E45474D4158"></a>008970,000296: 10,7615           40000        <span class="sm">DONEGMAX</span>           <span class="op">COM     </span>                                       
-008971,000297: 10,7616           20641                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5255505452454733">RUPTREG3</a>                              
-008972,000298: 10,7617           50000                           <span class="op">TS      </span> 0                                     <span class="co">#  DECREMENTED POSMAX (NEGMAX) COUNT.</span>
-008973,000299: 10,7620           40677                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#434455494E44">CDUIND</a>                                <span class="co">#  SEE IF 2+ PULSES HAVE BEEN PUT OUT YET,</span>
-008974,000300: 10,7621           74520                           <span class="op">MASK    </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#4E4547312F32">NEG1/2</a>                                <span class="co">#   LEAVING WORD THAT THEY WILL BE OUT</span>
-008975,000301: 10,7622           64501                           <span class="op">AD      </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#4249543134">BIT14</a>                                 <span class="co">#   BY TASKOVER TIME.</span>
-008976,000302: 10,7623           40000                           <span class="op">COM     </span>                                       
-008977,000303: 10,7624           30677                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#434455494E44">CDUIND</a>                                
-008978,000304: 10,7625           74501                           <span class="op">MASK    </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#4249543134">BIT14</a>                                 
-008979,000305: 10,7626           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
-008980,000306: 10,7627           07631                           <span class="op">TC      </span> +2                                    
-008981,000307: 10,7630           07636                           <span class="op">TC      </span> <a href="#4E45474D415832">NEGMAX2</a>                               <span class="co">#  ALREADY OUT.</span>
-008982,000308: 
-008983,000309: 10,7631           35503                           <span class="op">CAF     </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#54574F">TWO</a>                                   <span class="co">#  NOT OUT YET - DO SO.</span>
-008984,000310: 10,7632           06631                           <span class="op">TC      </span> <a href="T4RUPT_OUTPUT_CONTROL_PROGRAMS.agc.html#4F555432535542">OUT2SUB</a>                               
-008985,000311: 10,7633           35503                           <span class="op">CAF     </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#54574F">TWO</a>                                   <span class="co">#  WAIT FOR THEM TO GET OUT BEFORE DELIVER-</span>
-008986,000312: 10,7634           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#   ING THE REAL COMMAND.</span>
-008987,000313: 10,7635           07634                           <span class="op">TC      </span> -1                                    
-008988,000314: 
-<a name="4E45474D415832"></a>008989,000315: 10,7636           44476        <span class="sm">NEGMAX2 </span>           <span class="op">CS      </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#504F534D4158">POSMAX</a>                                
-008990,000316: 10,7637           07610                           <span class="op">TC      </span> <a href="#444F4D4158">DOMAX</a>                                 
-008991,000317: 
-<a name="504F53474F5554"></a>008992,000318: 10,7640           64516        <span class="sm">POSGOUT </span>           <span class="op">AD      </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#4F4E45">ONE</a>                                   <span class="co">#  FRACTIONAL POSITIVE COMMAND.</span>
-008993,000319: 10,7641           50034                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F56435452">OVCTR</a>                                 
-008994,000320: 10,7642           06631                           <span class="op">TC      </span> <a href="T4RUPT_OUTPUT_CONTROL_PROGRAMS.agc.html#4F555432535542">OUT2SUB</a>                               <span class="co">#  DELIVER COMMAND.</span>
-008995,000321: 10,7643           07672                           <span class="op">TC      </span> <a href="#4745544454">GETDT</a>                                 <span class="co">#  GET TIME TO END OF PULSE TRAIN.</span>
-008996,000322: 10,7644           30032                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C5052555054">LPRUPT</a>                                <span class="co">#  (ANSWER LEFT IN LPRUPT).</span>
-008997,000323: 10,7645           02173                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#574149544C495354">WAITLIST</a>                              
-008998,000324: 10,7646           21555                           <span class="ps">CADR    </span> <a href="#545745414B4759">TWEAKGY</a>                               <span class="co">#  SUPPLY 2- PULSES AT END.</span>
-008999,000325: 10,7647           02256                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              
-009000,000326: 
-<a name="4E4547474F5554"></a>009001,000327: 10,7650           64516        <span class="sm">NEGGOUT </span>           <span class="op">AD      </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#4F4E45">ONE</a>                                   <span class="co">#  FRACTIONAL NEGATIVE COMMAND.</span>
-009002,000328: 10,7651           50034                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F56435452">OVCTR</a>                                 
-009003,000329: 10,7652           40677                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#434455494E44">CDUIND</a>                                <span class="co">#  SEE IF 2+ PULSES ALREADY OUT.</span>
-009004,000330: 10,7653           74501                           <span class="op">MASK    </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#4249543134">BIT14</a>                                 
-009005,000331: 10,7654           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
-009006,000332: 10,7655           07663                           <span class="op">TC      </span> <a href="#4E4547474F555432">NEGGOUT2</a>                              
-009007,000333: 
-009008,000334: 10,7656           35503                           <span class="op">CAF     </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#54574F">TWO</a>                                   
-009009,000335: 10,7657           06631                           <span class="op">TC      </span> <a href="T4RUPT_OUTPUT_CONTROL_PROGRAMS.agc.html#4F555432535542">OUT2SUB</a>                               
-009010,000336: 
-009011,000337: 10,7660           35362                           <span class="op">CAF     </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#534556454E">SEVEN</a>                                 <span class="co">#  ALLOW AT LEAST 3 PULSE TIMES FOR THE 2+</span>
-009012,000338: 10,7661           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#  PULSES TO GET OUT.</span>
-009013,000339: 10,7662           07661                           <span class="op">TC      </span> -1                                    
-009014,000340: 
-<a name="4E4547474F555432"></a>009015,000341: 10,7663           07672        <span class="sm">NEGGOUT2</span>           <span class="op">TC      </span> <a href="#4745544454">GETDT</a>                                 
-009016,000342: 10,7664           40034                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F56435452">OVCTR</a>                                 <span class="co">#  DELIVER COMMAND.</span>
-009017,000343: 10,7665           06631                           <span class="op">TC      </span> <a href="T4RUPT_OUTPUT_CONTROL_PROGRAMS.agc.html#4F555432535542">OUT2SUB</a>                               
-009018,000344: 10,7666           30032                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C5052555054">LPRUPT</a>                                <span class="co">#  GET WAITLIST DT LEFT BY  GETDT  .</span>
-009019,000345: 10,7667           02173                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#574149544C495354">WAITLIST</a>                              
+008970,000295: 
+<a name="444F4E45474D4158"></a>008971,000296: 10,7615           40000        <span class="sm">DONEGMAX</span>           <span class="op">COM     </span>                                       
+008972,000297: 10,7616           20641                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5255505452454733">RUPTREG3</a>                              
+008973,000298: 10,7617           50000                           <span class="op">TS      </span> 0                                     <span class="co">#  DECREMENTED POSMAX (NEGMAX) COUNT.</span>
+008974,000299: 10,7620           40677                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#434455494E44">CDUIND</a>                                <span class="co">#  SEE IF 2+ PULSES HAVE BEEN PUT OUT YET,</span>
+008975,000300: 10,7621           74520                           <span class="op">MASK    </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#4E4547312F32">NEG1/2</a>                                <span class="co">#   LEAVING WORD THAT THEY WILL BE OUT</span>
+008976,000301: 10,7622           64501                           <span class="op">AD      </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#4249543134">BIT14</a>                                 <span class="co">#   BY TASKOVER TIME.</span>
+008977,000302: 10,7623           40000                           <span class="op">COM     </span>                                       
+008978,000303: 10,7624           30677                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#434455494E44">CDUIND</a>                                
+008979,000304: 10,7625           74501                           <span class="op">MASK    </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#4249543134">BIT14</a>                                 
+008980,000305: 10,7626           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
+008981,000306: 10,7627           07631                           <span class="op">TC      </span> +2                                    
+008982,000307: 10,7630           07636                           <span class="op">TC      </span> <a href="#4E45474D415832">NEGMAX2</a>                               <span class="co">#  ALREADY OUT.</span>
+008983,000308: 
+008984,000309: 10,7631           35503                           <span class="op">CAF     </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#54574F">TWO</a>                                   <span class="co">#  NOT OUT YET - DO SO.</span>
+008985,000310: 10,7632           06631                           <span class="op">TC      </span> <a href="T4RUPT_OUTPUT_CONTROL_PROGRAMS.agc.html#4F555432535542">OUT2SUB</a>                               
+008986,000311: 10,7633           35503                           <span class="op">CAF     </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#54574F">TWO</a>                                   <span class="co">#  WAIT FOR THEM TO GET OUT BEFORE DELIVER-</span>
+008987,000312: 10,7634           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#   ING THE REAL COMMAND.</span>
+008988,000313: 10,7635           07634                           <span class="op">TC      </span> -1                                    
+008989,000314: 
+<a name="4E45474D415832"></a>008990,000315: 10,7636           44476        <span class="sm">NEGMAX2 </span>           <span class="op">CS      </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#504F534D4158">POSMAX</a>                                
+008991,000316: 10,7637           07610                           <span class="op">TC      </span> <a href="#444F4D4158">DOMAX</a>                                 
+008992,000317: 
+<a name="504F53474F5554"></a>008993,000318: 10,7640           64516        <span class="sm">POSGOUT </span>           <span class="op">AD      </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#4F4E45">ONE</a>                                   <span class="co">#  FRACTIONAL POSITIVE COMMAND.</span>
+008994,000319: 10,7641           50034                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F56435452">OVCTR</a>                                 
+008995,000320: 10,7642           06631                           <span class="op">TC      </span> <a href="T4RUPT_OUTPUT_CONTROL_PROGRAMS.agc.html#4F555432535542">OUT2SUB</a>                               <span class="co">#  DELIVER COMMAND.</span>
+008996,000321: 10,7643           07672                           <span class="op">TC      </span> <a href="#4745544454">GETDT</a>                                 <span class="co">#  GET TIME TO END OF PULSE TRAIN.</span>
+008997,000322: 10,7644           30032                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C5052555054">LPRUPT</a>                                <span class="co">#  (ANSWER LEFT IN LPRUPT).</span>
+008998,000323: 10,7645           02173                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#574149544C495354">WAITLIST</a>                              
+008999,000324: 10,7646           21555                           <span class="ps">CADR    </span> <a href="#545745414B4759">TWEAKGY</a>                               <span class="co">#  SUPPLY 2- PULSES AT END.</span>
+009000,000325: 10,7647           02256                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              
+009001,000326: 
+<a name="4E4547474F5554"></a>009002,000327: 10,7650           64516        <span class="sm">NEGGOUT </span>           <span class="op">AD      </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#4F4E45">ONE</a>                                   <span class="co">#  FRACTIONAL NEGATIVE COMMAND.</span>
+009003,000328: 10,7651           50034                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F56435452">OVCTR</a>                                 
+009004,000329: 10,7652           40677                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#434455494E44">CDUIND</a>                                <span class="co">#  SEE IF 2+ PULSES ALREADY OUT.</span>
+009005,000330: 10,7653           74501                           <span class="op">MASK    </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#4249543134">BIT14</a>                                 
+009006,000331: 10,7654           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
+009007,000332: 10,7655           07663                           <span class="op">TC      </span> <a href="#4E4547474F555432">NEGGOUT2</a>                              
+009008,000333: 
+009009,000334: 10,7656           35503                           <span class="op">CAF     </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#54574F">TWO</a>                                   
+009010,000335: 10,7657           06631                           <span class="op">TC      </span> <a href="T4RUPT_OUTPUT_CONTROL_PROGRAMS.agc.html#4F555432535542">OUT2SUB</a>                               
+009011,000336: 
+009012,000337: 10,7660           35362                           <span class="op">CAF     </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#534556454E">SEVEN</a>                                 <span class="co">#  ALLOW AT LEAST 3 PULSE TIMES FOR THE 2+</span>
+009013,000338: 10,7661           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     <span class="co">#  PULSES TO GET OUT.</span>
+009014,000339: 10,7662           07661                           <span class="op">TC      </span> -1                                    
+009015,000340: 
+<a name="4E4547474F555432"></a>009016,000341: 10,7663           07672        <span class="sm">NEGGOUT2</span>           <span class="op">TC      </span> <a href="#4745544454">GETDT</a>                                 
+009017,000342: 10,7664           40034                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F56435452">OVCTR</a>                                 <span class="co">#  DELIVER COMMAND.</span>
+009018,000343: 10,7665           06631                           <span class="op">TC      </span> <a href="T4RUPT_OUTPUT_CONTROL_PROGRAMS.agc.html#4F555432535542">OUT2SUB</a>                               
+009019,000344: 10,7666           30032                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C5052555054">LPRUPT</a>                                <span class="co">#  GET WAITLIST DT LEFT BY  GETDT  .</span>
+009020,000345: 10,7667           02173                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#574149544C495354">WAITLIST</a>                              
 </pre>
 </span>
 </p>
@@ -576,9 +576,9 @@ Page 233
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-009021,000347: 10,7670           21560                           <span class="ps">CADR    </span> <a href="#4759524F414456">GYROADV</a>                               
-009022,000348: 10,7671           02256                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              
-009023,000349: 
+009022,000347: 10,7670           21560                           <span class="ps">CADR    </span> <a href="#4759524F414456">GYROADV</a>                               
+009023,000348: 10,7671           02256                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              
+009024,000349: 
 </pre>
 </span>
 </p>
@@ -594,57 +594,57 @@ Page 234
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-009025,000351: 
-009026,000352:                                                                                                  <span class="co">#        SUBROUTINES USED BY TASKS.</span>
-009027,000353: 
-<a name="4745544454"></a>009028,000354: 10,7672           30003        <span class="sm">GETDT   </span>           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C50">LP</a>                                    <span class="co">#  COMPUTE NUMBER OF 10 MS TICKS IT WILL</span>
-009029,000355: 10,7673           50032                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C5052555054">LPRUPT</a>                                <span class="co">#   TAKE THE PULSE TRAIN WHOSE MAGNITUDE IS</span>
-009030,000356: 10,7674           34505                           <span class="op">CAF     </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#4249543130">BIT10</a>                                 <span class="co">#   IN OVCTR TO BE DELIVERED AT A RATE OF</span>
-009031,000357: 10,7675           25777                           <span class="op">EXTEND  </span>                                       <span class="co">#   3200 PPS.</span>
-009032,000358: 10,7676           40034                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F56435452">OVCTR</a>                                 
-009033,000359: 10,7677           65503                           <span class="op">AD      </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#54574F">TWO</a>                                   <span class="co">#  INTERRUPT AND ROUND-OFF UNCERTAINTIES.</span>
-009034,000360: 10,7700           30032                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C5052555054">LPRUPT</a>                                <span class="co">#  LEAVE ANSWER IN LPRUPT.</span>
-009035,000361: 10,7701           25777                           <span class="op">EXTEND  </span>                                       
-009036,000362: 10,7702           44516                           <span class="op">MP      </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#4F4E45">ONE</a>                                   
-009037,000363: 10,7703           00001                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
-009038,000364: 
-009039,000365: 
-009040,000366: 
-<a name="5345545550535542"></a>009041,000367: 10,7704           35501        <span class="sm">SETUPSUB</span>           <span class="op">CAF     </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#5A45524F">ZERO</a>                                  <span class="co">#  SETS UP MISCELLANEOUS REGISTERS.</span>
-009042,000368: 10,7705           50640                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5255505452454732">RUPTREG2</a>                              <span class="co">#  USED BY OUT2SUB.</span>
-009043,000369: 10,7706           40677                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#434455494E44">CDUIND</a>                                
-009044,000370: 10,7707           74720                           <span class="op">MASK    </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#4C4F5737">LOW7</a>                                  <span class="co">#  KILL 2+ BIT.</span>
-009045,000371: 10,7710           50637                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5255505452454731">RUPTREG1</a>                              
-009046,000372: 10,7711           60000                           <span class="op">DOUBLE  </span>                                       
-009047,000373: 10,7712           60764                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4759524F">LGYRO</a>                                 
-009048,000374: 10,7713           50641                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5255505452454733">RUPTREG3</a>                              <span class="co">#  USED FOR INDEXING GYROD SET.</span>
-009049,000375: 10,7714           00001                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
-009050,000376: 
-<a name="454E444759524F31"></a>009051,000377: 10,7715           34516        <span class="sm">ENDGYRO1</span>           <span class="op">CAF     </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#4F4E45">ONE</a>                                   <span class="co">#  SPLIT INTO TWO TASKS SO IT WONT LAST TOO</span>
-009052,000378: 10,7716           02173                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#574149544C495354">WAITLIST</a>                              <span class="co">#  LONG IN ANY ONE INTERRUPT.</span>
-009053,000379: 10,7717           21721                           <span class="ps">CADR    </span> <a href="#454E444759524F">ENDGYRO</a>                               
-009054,000380: 10,7720           02256                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              
-009055,000381: 
-<a name="454E444759524F"></a>009056,000382: 10,7721           35501        <span class="sm">ENDGYRO </span>           <span class="op">CAF     </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#5A45524F">ZERO</a>                                  <span class="co">#  SHOW THAT THE GYROS ARE NOW AVAILABLE.</span>
-009057,000383: 10,7722           50764                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4759524F">LGYRO</a>                                 
-009058,000384: 
-009059,000385: 10,7723           30007                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#494E33">IN3</a>                                   <span class="co">#  RESTORE CDUIND</span>
-009060,000386: 10,7724           30007                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#494E33">IN3</a>                                   <span class="co">#  BY CHECKING IMU MODE</span>
-009061,000387: 10,7725           77737                           <span class="op">MASK    </span> <a href="#4F4354313232">OCT122</a>                                <span class="co">#  IMUCOARS, IMUATTC, IMUREENT MASK</span>
-009062,000388: 10,7726           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
-009063,000389: 10,7727           45501                           <span class="op">CS      </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#5A45524F">ZERO</a>                                  <span class="co">#  TO +0 IF MODES ACTIVE</span>
-009064,000390: 10,7730           40000                           <span class="op">COM     </span>                                       <span class="co">#  TO -0 IF INACTIVE</span>
-009065,000391: 10,7731           50677                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#434455494E44">CDUIND</a>                                
-009066,000392: 
-009067,000393: 10,7732           37736                           <span class="op">CAF     </span> <a href="#4C4E45574759524F">LNEWGYRO</a>                              <span class="co">#  WAKE UP ANY JOB WHICH MIGHT BE WAITING</span>
-009068,000394: 10,7733           02060                           <span class="op">TC      </span> <a href="EXECUTIVE.agc.html#4A4F4257414B45">JOBWAKE</a>                               <span class="co">#  FOR THE GYROS (AT MOST ONE).</span>
-009069,000395: 
-009070,000396: 10,7734           05720                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#504F53544A554D50">POSTJUMP</a>                              <span class="co">#  RETURN TO ENDIMU SEQUENCE IN MAIN MODE</span>
-009071,000397: 10,7735           30171                           <span class="ps">CADR    </span> <a href="MODE_SWITCHING_AND_MARK_ROUTINES.agc.html#494D5546494E4544">IMUFINED</a>                              <span class="co">#  BANK (CHECKS IMU AND CDU FAIL SIGNALS).</span>
-009072,000398: 
-<a name="4C4E45574759524F"></a>009073,000399: 10,7736           31533        <span class="sm">LNEWGYRO</span>           <span class="ps">CADR    </span> <a href="#4E45574759524F">NEWGYRO</a>                               <span class="co">#  STANDARD SLEEPING LOCATION FOR GYROBUSY.</span>
-<a name="4F4354313232"></a>009074,000400: 10,7737           00122        <span class="sm">OCT122  </span>           <span class="ps">OCT     </span> 122                                   
-<a name="46554C4C4454"></a>009075,000401: 10,7740           01001        <span class="sm">FULLDT  </span>           <span class="ps">DEC     </span> 5.13       E2                         
+009026,000351: 
+009027,000352:                                                                                                  <span class="co">#        SUBROUTINES USED BY TASKS.</span>
+009028,000353: 
+<a name="4745544454"></a>009029,000354: 10,7672           30003        <span class="sm">GETDT   </span>           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C50">LP</a>                                    <span class="co">#  COMPUTE NUMBER OF 10 MS TICKS IT WILL</span>
+009030,000355: 10,7673           50032                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C5052555054">LPRUPT</a>                                <span class="co">#   TAKE THE PULSE TRAIN WHOSE MAGNITUDE IS</span>
+009031,000356: 10,7674           34505                           <span class="op">CAF     </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#4249543130">BIT10</a>                                 <span class="co">#   IN OVCTR TO BE DELIVERED AT A RATE OF</span>
+009032,000357: 10,7675           25777                           <span class="op">EXTEND  </span>                                       <span class="co">#   3200 PPS.</span>
+009033,000358: 10,7676           40034                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F56435452">OVCTR</a>                                 
+009034,000359: 10,7677           65503                           <span class="op">AD      </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#54574F">TWO</a>                                   <span class="co">#  INTERRUPT AND ROUND-OFF UNCERTAINTIES.</span>
+009035,000360: 10,7700           30032                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C5052555054">LPRUPT</a>                                <span class="co">#  LEAVE ANSWER IN LPRUPT.</span>
+009036,000361: 10,7701           25777                           <span class="op">EXTEND  </span>                                       
+009037,000362: 10,7702           44516                           <span class="op">MP      </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#4F4E45">ONE</a>                                   
+009038,000363: 10,7703           00001                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
+009039,000364: 
+009040,000365: 
+009041,000366: 
+<a name="5345545550535542"></a>009042,000367: 10,7704           35501        <span class="sm">SETUPSUB</span>           <span class="op">CAF     </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#5A45524F">ZERO</a>                                  <span class="co">#  SETS UP MISCELLANEOUS REGISTERS.</span>
+009043,000368: 10,7705           50640                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5255505452454732">RUPTREG2</a>                              <span class="co">#  USED BY OUT2SUB.</span>
+009044,000369: 10,7706           40677                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#434455494E44">CDUIND</a>                                
+009045,000370: 10,7707           74720                           <span class="op">MASK    </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#4C4F5737">LOW7</a>                                  <span class="co">#  KILL 2+ BIT.</span>
+009046,000371: 10,7710           50637                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5255505452454731">RUPTREG1</a>                              
+009047,000372: 10,7711           60000                           <span class="op">DOUBLE  </span>                                       
+009048,000373: 10,7712           60764                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4759524F">LGYRO</a>                                 
+009049,000374: 10,7713           50641                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#5255505452454733">RUPTREG3</a>                              <span class="co">#  USED FOR INDEXING GYROD SET.</span>
+009050,000375: 10,7714           00001                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
+009051,000376: 
+<a name="454E444759524F31"></a>009052,000377: 10,7715           34516        <span class="sm">ENDGYRO1</span>           <span class="op">CAF     </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#4F4E45">ONE</a>                                   <span class="co">#  SPLIT INTO TWO TASKS SO IT WONT LAST TOO</span>
+009053,000378: 10,7716           02173                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#574149544C495354">WAITLIST</a>                              <span class="co">#  LONG IN ANY ONE INTERRUPT.</span>
+009054,000379: 10,7717           21721                           <span class="ps">CADR    </span> <a href="#454E444759524F">ENDGYRO</a>                               
+009055,000380: 10,7720           02256                           <span class="op">TC      </span> <a href="WAITLIST.agc.html#5441534B4F564552">TASKOVER</a>                              
+009056,000381: 
+<a name="454E444759524F"></a>009057,000382: 10,7721           35501        <span class="sm">ENDGYRO </span>           <span class="op">CAF     </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#5A45524F">ZERO</a>                                  <span class="co">#  SHOW THAT THE GYROS ARE NOW AVAILABLE.</span>
+009058,000383: 10,7722           50764                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C4759524F">LGYRO</a>                                 
+009059,000384: 
+009060,000385: 10,7723           30007                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#494E33">IN3</a>                                   <span class="co">#  RESTORE CDUIND</span>
+009061,000386: 10,7724           30007                           <span class="op">XCH     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#494E33">IN3</a>                                   <span class="co">#  BY CHECKING IMU MODE</span>
+009062,000387: 10,7725           77737                           <span class="op">MASK    </span> <a href="#4F4354313232">OCT122</a>                                <span class="co">#  IMUCOARS, IMUATTC, IMUREENT MASK</span>
+009063,000388: 10,7726           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
+009064,000389: 10,7727           45501                           <span class="op">CS      </span> <a href="FIXED-FIXED_INTERPRETER_SECTION.agc.html#5A45524F">ZERO</a>                                  <span class="co">#  TO +0 IF MODES ACTIVE</span>
+009065,000390: 10,7730           40000                           <span class="op">COM     </span>                                       <span class="co">#  TO -0 IF INACTIVE</span>
+009066,000391: 10,7731           50677                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#434455494E44">CDUIND</a>                                
+009067,000392: 
+009068,000393: 10,7732           37736                           <span class="op">CAF     </span> <a href="#4C4E45574759524F">LNEWGYRO</a>                              <span class="co">#  WAKE UP ANY JOB WHICH MIGHT BE WAITING</span>
+009069,000394: 10,7733           02060                           <span class="op">TC      </span> <a href="EXECUTIVE.agc.html#4A4F4257414B45">JOBWAKE</a>                               <span class="co">#  FOR THE GYROS (AT MOST ONE).</span>
+009070,000395: 
+009071,000396: 10,7734           05720                           <span class="op">TC      </span> <a href="INTER-BANK_COMMUNICATION.agc.html#504F53544A554D50">POSTJUMP</a>                              <span class="co">#  RETURN TO ENDIMU SEQUENCE IN MAIN MODE</span>
+009072,000397: 10,7735           30171                           <span class="ps">CADR    </span> <a href="MODE_SWITCHING_AND_MARK_ROUTINES.agc.html#494D5546494E4544">IMUFINED</a>                              <span class="co">#  BANK (CHECKS IMU AND CDU FAIL SIGNALS).</span>
+009073,000398: 
+<a name="4C4E45574759524F"></a>009074,000399: 10,7736           31533        <span class="sm">LNEWGYRO</span>           <span class="ps">CADR    </span> <a href="#4E45574759524F">NEWGYRO</a>                               <span class="co">#  STANDARD SLEEPING LOCATION FOR GYROBUSY.</span>
+<a name="4F4354313232"></a>009075,000400: 10,7737           00122        <span class="sm">OCT122  </span>           <span class="ps">OCT     </span> 122                                   
+<a name="46554C4C4454"></a>009076,000401: 10,7740           01001        <span class="sm">FULLDT  </span>           <span class="ps">DEC     </span> 5.13       E2                         
 
 End of include-file IRIG_PULSE-TORQUING_ROUTINES.agc.  Parent file is <a href="MAIN.agc.html">MAIN.agc</a>
 </pre>

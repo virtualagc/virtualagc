@@ -90,24 +90,24 @@ Note that the date is the date of the printout, not the date of the program revi
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-065433,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
-065434,000003:                                                                                                  <span class="co">## Filename:    SPS_BACK-UP_RCS_CONTROL.agc</span>
-065435,000004:                                                                                                  <span class="co">## Purpose:     A section of Luminary revision 210.</span>
-065436,000005:                                                                                                  <span class="co">##              It is part of the source code for the Lunar Module's (LM)</span>
-065437,000006:                                                                                                  <span class="co">##              Apollo Guidance Computer (AGC) for Apollo 15-17.</span>
-065438,000007:                                                                                                  <span class="co">##              This file is intended to be a faithful transcription, except</span>
-065439,000008:                                                                                                  <span class="co">##              that the code format has been changed to conform to the</span>
-065440,000009:                                                                                                  <span class="co">##              requirements of the yaYUL assembler rather than the</span>
-065441,000010:                                                                                                  <span class="co">##              original YUL assembler.</span>
-065442,000011:                                                                                                  <span class="co">## Reference:   pp. 1505-1508</span>
-065443,000012:                                                                                                  <span class="co">## Assembler:   yaYUL</span>
-065444,000013:                                                                                                  <span class="co">## Contact:     Ron Burkey &lt;info@sandroid.org>.</span>
-065445,000014:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo/index.html</span>
-065446,000015:                                                                                                  <span class="co">## Mod history: 2016-11-17 JL   Created from Luminary131 version.</span>
-065447,000016:                                                                                                  <span class="co">##              2016-12-12 MAS  Transcribed.</span>
-065448,000017:                                                                                                  <span class="co">##              2016-12-26 RSB  Comment-text proofed using ProoferComments</span>
-065449,000018:                                                                                                  <span class="co">##                              and corrected errors found.</span>
-065450,000019: 
+065526,000002:                                                                                                  <span class="co">## Copyright:   Public domain.</span>
+065527,000003:                                                                                                  <span class="co">## Filename:    SPS_BACK-UP_RCS_CONTROL.agc</span>
+065528,000004:                                                                                                  <span class="co">## Purpose:     A section of Luminary revision 210.</span>
+065529,000005:                                                                                                  <span class="co">##              It is part of the source code for the Lunar Module's (LM)</span>
+065530,000006:                                                                                                  <span class="co">##              Apollo Guidance Computer (AGC) for Apollo 15-17.</span>
+065531,000007:                                                                                                  <span class="co">##              This file is intended to be a faithful transcription, except</span>
+065532,000008:                                                                                                  <span class="co">##              that the code format has been changed to conform to the</span>
+065533,000009:                                                                                                  <span class="co">##              requirements of the yaYUL assembler rather than the</span>
+065534,000010:                                                                                                  <span class="co">##              original YUL assembler.</span>
+065535,000011:                                                                                                  <span class="co">## Reference:   pp. 1505-1508</span>
+065536,000012:                                                                                                  <span class="co">## Assembler:   yaYUL</span>
+065537,000013:                                                                                                  <span class="co">## Contact:     Ron Burkey &lt;info@sandroid.org>.</span>
+065538,000014:                                                                                                  <span class="co">## Website:     www.ibiblio.org/apollo/index.html</span>
+065539,000015:                                                                                                  <span class="co">## Mod history: 2016-11-17 JL   Created from Luminary131 version.</span>
+065540,000016:                                                                                                  <span class="co">##              2016-12-12 MAS  Transcribed.</span>
+065541,000017:                                                                                                  <span class="co">##              2016-12-26 RSB  Comment-text proofed using ProoferComments</span>
+065542,000018:                                                                                                  <span class="co">##                              and corrected errors found.</span>
+065543,000019: 
 </pre>
 </span>
 </p>
@@ -123,56 +123,56 @@ Page 1505
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-065452,000021:                                                                                                  <span class="co">#  PROGRAM NAME:  SPSRCS</span>
-065453,000022: 
-065454,000023:                                                                                                  <span class="co">#  AUTHOR:  EDGAR M. OSHIKA (AC ELECTRONICS)</span>
-065455,000024: 
-065456,000025:                                                                                                  <span class="co">#  MODIFIED:  TO RETURN TO ALL AXES VIA Q BY P.S.WEISSMAN, OCT 7, 1968</span>
-065457,000026: 
-065458,000027:                                                                                                  <span class="co">#  MODIFIED TO IMPROVE BENDING STABILITY BY G.KALAN,FEB.14,1969</span>
-065459,000028:                                                                                                  <span class="co">#  FUNCTIONAL DESCRIPTION:</span>
-065460,000029: 
-065461,000030:                                                                                                  <span class="co">#  THIS PROGRAM CONTROLS THE FIRING OF ALL RCS JETS IN THE DOCKED CONFIGURATION ACCORDING TO THE FOLLOWING PHASE</span>
-065462,000031:                                                                                                  <span class="co">#  PLANE LOGIC.</span>
-065463,000032: 
-065464,000033:                                                                                                  <span class="co">#  1. JET SENSE TEST (SPSRCS)</span>
-065465,000034: 
-065466,000035:                                                                                                  <span class="co">#  IF JETS ARE FIRING NEGATIVELY,SET OLDSENSE NEGATIVE AND CONTINUE</span>
-065467,000036:                                                                                                  <span class="co">#  IF JETS ARE FIRING POSITIVELY,SET OLDSENSE POSITIVE AND CONTINUE</span>
-065468,000037:                                                                                                  <span class="co">#  IF JETS ARE NOT FIRING,SET OLDSENSE TO ZERO AND GO TO OUTER RATE LIMIT  TEST</span>
-065469,000038: 
-065470,000039:                                                                                                  <span class="co">#  2. RATE DEAD BAND TEST</span>
-065471,000040: 
-065472,000041:                                                                                                  <span class="co">#  IF JETS ARE FIRING NEGATIVELY AND RATE IS GREATER THAN TARGET RATE,LEAVE</span>
-065473,000042:                                                                                                  <span class="co">#  JETS ON AND GO TO INHIBITION LOGIC. OTHERWISE,CONTINUE.</span>
-065474,000043:                                                                                                  <span class="co">#  IF JETS ARE FIRING POSITIVELY AND RATE IS   LESS  THAN TARGET RATE,LEAVE</span>
-065475,000044:                                                                                                  <span class="co">#  JETS ON AND GO TO INHIBITION LOGIC. OTHERWISE,CONTINUE.</span>
-065476,000045: 
-065477,000046:                                                                                                  <span class="co">#  3. OUTER RATE LIMIT TEST (SPSSTART)</span>
-065478,000047: 
-065479,000048:                                                                                                  <span class="co">#  IF MAGNITUDE OF EDOT IS GREATER THAN 1.73 DEG/SEC SET JET FIRING TIME</span>
-065480,000049:                                                                                                  <span class="co">#   TO REDUCE RATE AND GO TO INHIBITION LOGIC. OTHERWISE,CONTINUE.</span>
-065481,000050: 
-065482,000051:                                                                                                  <span class="co">#  4. COAST ZONE TEST</span>
-065483,000052: 
-065484,000053:                                                                                                  <span class="co">#  IF STATE (E,EDOT) IS BELOW LINE  E + 4 X EDOT > -1.4 DEG  AND EDOT IS LESS THAN 1.30 DEG/SEC SET JET TIME POSI-</span>
-065485,000054:                                                                                                  <span class="co">#  TIVE AND CONTINUE. OTHERWISE,SET JET FIRING TIME TO ZERO AND CONTINUE.</span>
-065486,000055:                                                                                                  <span class="co">#  IF STATE IS ABOVE LINE  E + 4X EDOT > +1.4 DEG AND EDOT IS GREATER THAN -1.30 DEG/SEC, SET JET TIME NEGATIVE</span>
-065487,000056:                                                                                                  <span class="co">#  AND CONTINUE. OTHERWISE,SET JET FIRING TIME TO ZERO AND CONTINUE.</span>
-065488,000057: 
-065489,000058:                                                                                                  <span class="co">#  5. INHIBITION LOGIC</span>
-065490,000059: 
-065491,000060:                                                                                                  <span class="co">#  IF OLDSENSE IS NON-ZERO:</span>
-065492,000061:                                                                                                  <span class="co">#        A) RETURN IF JET TIME HAS SAME SIGN AS OLDSENSE</span>
-065493,000062:                                                                                                  <span class="co">#        B) SET INHIBITION COUNTER*AND RETURN IF JET TIME IS ZERO</span>
-065494,000063:                                                                                                  <span class="co">#        C) SET INHIBITION COUNTER,*SET JET TIME TO ZERO AND RETURN IF SIGN</span>
-065495,000064:                                                                                                  <span class="co">#           OF JET TIME IS OPPOSITE TO THAT OF OLDSENSE</span>
-065496,000065: 
-065497,000066:                                                                                                  <span class="co">#  IF OLDSENSE IS ZERO:</span>
-065498,000067:                                                                                                  <span class="co">#        A) RETURN IF INHIBITION COUNTER IS NOT POSITIVE</span>
-065499,000068:                                                                                                  <span class="co">#        B) SET JET TIME TO ZERO AND RETURN IF INHIBITION COUNTER IS POSITIVE</span>
-065500,000069:                                                                                                  <span class="co">#  *NOTE: INHIBITION COUNTERS CAN BE SET TO 4 OR 10 FOR THE P,AND UV AXES,</span>
-065501,000070:                                                                                                  <span class="co">#  RESPECTIVELY,IN SPSRCS. THEY ARE DECREMENTED BY ONE AT THE BEGINNING OF</span>
+065545,000021:                                                                                                  <span class="co">#  PROGRAM NAME:  SPSRCS</span>
+065546,000022: 
+065547,000023:                                                                                                  <span class="co">#  AUTHOR:  EDGAR M. OSHIKA (AC ELECTRONICS)</span>
+065548,000024: 
+065549,000025:                                                                                                  <span class="co">#  MODIFIED:  TO RETURN TO ALL AXES VIA Q BY P.S.WEISSMAN, OCT 7, 1968</span>
+065550,000026: 
+065551,000027:                                                                                                  <span class="co">#  MODIFIED TO IMPROVE BENDING STABILITY BY G.KALAN,FEB.14,1969</span>
+065552,000028:                                                                                                  <span class="co">#  FUNCTIONAL DESCRIPTION:</span>
+065553,000029: 
+065554,000030:                                                                                                  <span class="co">#  THIS PROGRAM CONTROLS THE FIRING OF ALL RCS JETS IN THE DOCKED CONFIGURATION ACCORDING TO THE FOLLOWING PHASE</span>
+065555,000031:                                                                                                  <span class="co">#  PLANE LOGIC.</span>
+065556,000032: 
+065557,000033:                                                                                                  <span class="co">#  1. JET SENSE TEST (SPSRCS)</span>
+065558,000034: 
+065559,000035:                                                                                                  <span class="co">#  IF JETS ARE FIRING NEGATIVELY,SET OLDSENSE NEGATIVE AND CONTINUE</span>
+065560,000036:                                                                                                  <span class="co">#  IF JETS ARE FIRING POSITIVELY,SET OLDSENSE POSITIVE AND CONTINUE</span>
+065561,000037:                                                                                                  <span class="co">#  IF JETS ARE NOT FIRING,SET OLDSENSE TO ZERO AND GO TO OUTER RATE LIMIT  TEST</span>
+065562,000038: 
+065563,000039:                                                                                                  <span class="co">#  2. RATE DEAD BAND TEST</span>
+065564,000040: 
+065565,000041:                                                                                                  <span class="co">#  IF JETS ARE FIRING NEGATIVELY AND RATE IS GREATER THAN TARGET RATE,LEAVE</span>
+065566,000042:                                                                                                  <span class="co">#  JETS ON AND GO TO INHIBITION LOGIC. OTHERWISE,CONTINUE.</span>
+065567,000043:                                                                                                  <span class="co">#  IF JETS ARE FIRING POSITIVELY AND RATE IS   LESS  THAN TARGET RATE,LEAVE</span>
+065568,000044:                                                                                                  <span class="co">#  JETS ON AND GO TO INHIBITION LOGIC. OTHERWISE,CONTINUE.</span>
+065569,000045: 
+065570,000046:                                                                                                  <span class="co">#  3. OUTER RATE LIMIT TEST (SPSSTART)</span>
+065571,000047: 
+065572,000048:                                                                                                  <span class="co">#  IF MAGNITUDE OF EDOT IS GREATER THAN 1.73 DEG/SEC SET JET FIRING TIME</span>
+065573,000049:                                                                                                  <span class="co">#   TO REDUCE RATE AND GO TO INHIBITION LOGIC. OTHERWISE,CONTINUE.</span>
+065574,000050: 
+065575,000051:                                                                                                  <span class="co">#  4. COAST ZONE TEST</span>
+065576,000052: 
+065577,000053:                                                                                                  <span class="co">#  IF STATE (E,EDOT) IS BELOW LINE  E + 4 X EDOT > -1.4 DEG  AND EDOT IS LESS THAN 1.30 DEG/SEC SET JET TIME POSI-</span>
+065578,000054:                                                                                                  <span class="co">#  TIVE AND CONTINUE. OTHERWISE,SET JET FIRING TIME TO ZERO AND CONTINUE.</span>
+065579,000055:                                                                                                  <span class="co">#  IF STATE IS ABOVE LINE  E + 4X EDOT > +1.4 DEG AND EDOT IS GREATER THAN -1.30 DEG/SEC, SET JET TIME NEGATIVE</span>
+065580,000056:                                                                                                  <span class="co">#  AND CONTINUE. OTHERWISE,SET JET FIRING TIME TO ZERO AND CONTINUE.</span>
+065581,000057: 
+065582,000058:                                                                                                  <span class="co">#  5. INHIBITION LOGIC</span>
+065583,000059: 
+065584,000060:                                                                                                  <span class="co">#  IF OLDSENSE IS NON-ZERO:</span>
+065585,000061:                                                                                                  <span class="co">#        A) RETURN IF JET TIME HAS SAME SIGN AS OLDSENSE</span>
+065586,000062:                                                                                                  <span class="co">#        B) SET INHIBITION COUNTER*AND RETURN IF JET TIME IS ZERO</span>
+065587,000063:                                                                                                  <span class="co">#        C) SET INHIBITION COUNTER,*SET JET TIME TO ZERO AND RETURN IF SIGN</span>
+065588,000064:                                                                                                  <span class="co">#           OF JET TIME IS OPPOSITE TO THAT OF OLDSENSE</span>
+065589,000065: 
+065590,000066:                                                                                                  <span class="co">#  IF OLDSENSE IS ZERO:</span>
+065591,000067:                                                                                                  <span class="co">#        A) RETURN IF INHIBITION COUNTER IS NOT POSITIVE</span>
+065592,000068:                                                                                                  <span class="co">#        B) SET JET TIME TO ZERO AND RETURN IF INHIBITION COUNTER IS POSITIVE</span>
+065593,000069:                                                                                                  <span class="co">#  *NOTE: INHIBITION COUNTERS CAN BE SET TO 4 OR 10 FOR THE P,AND UV AXES,</span>
+065594,000070:                                                                                                  <span class="co">#  RESPECTIVELY,IN SPSRCS. THEY ARE DECREMENTED BY ONE AT THE BEGINNING OF</span>
 </pre>
 </span>
 </p>
@@ -188,54 +188,54 @@ Page 1506
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-065503,000072:                                                                                                  <span class="co">#  EACH DAP PASS.</span>
-065504,000073: 
-065505,000074:                                                                                                  <span class="co">#  THE MINIMUM PULSE WIDTH OF THIS CONTROLLER IS DETERMINED BY THE REPETITION  RATE AT WHICH THIS ROUTINE IS CALLED</span>
-065506,000075:                                                                                                  <span class="co">#  AND IS NOMINALLY 100 MS FOR ALL AXES IN DRIFTING FLIGHT.   DURING POWERED FLIGHT THE MINIMUM IS 100 MS FOR THE</span>
-065507,000076:                                                                                                  <span class="co">#  P AXIS AND 200 MS FOR THE CONTROL OF THE U AND V AXES.</span>
-065508,000077: 
-065509,000078:                                                                                                  <span class="co">#  CALLING SEQUENCE:</span>
-065510,000079: 
-065511,000080:                                                                                                  <span class="co">#           INHINT</span>
-065512,000081:                                                                                                  <span class="co">#                      TC     IBNKCALL</span>
-065513,000082:                                                                                                  <span class="co">#                      CADR   SPSRCS</span>
-065514,000083: 
-065515,000084: 
-065516,000085:                                                                                                  <span class="co">#  EXIT:</span>
-065517,000086:                                                                                                  <span class="co">#           TC     Q</span>
-065518,000087:                                                                                                  <span class="co">#  ALARM/ABORT MODE:    NONE</span>
-065519,000088: 
-065520,000089:                                                                                                  <span class="co">#  SUBROUTINES CALLED:    NONE</span>
-065521,000090: 
-065522,000091:                                                                                                  <span class="co">#  INPUT:      E,EDOT</span>
-065523,000092:                                                                                                  <span class="co">#              TJP, TJV, TJU                   TJ MUST NOT BE NEGATIVE ZERO</span>
-065524,000093: 
-065525,000094:                                                                                                  <span class="co">#  OUTPUT:     TJP, TJV, TJU</span>
-065526,000095: 
-065527,000096: 
-065528,000097: 21,3606                                           <span class="ps">BANK    </span> 21                                    
-065529,000098: 21,2000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#4441505334">DAPS4</a>                                 
-065530,000099: 21,2000                                           <span class="ps">BANK    </span>                                       
-065531,000100: 
-065532,000101: 21,3606                                           <span class="ps">COUNT*  </span> $$/DAPBU                              
-065533,000102: 
-065534,000103: 21,3606  E6,1525                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544A55">TJU</a>                                   
-<a name="524154454C494D32"></a>065535,000104: 21,3606           00632        <span class="sm">RATELIM2</span>           <span class="ps">OCT     </span> 00632                                 <span class="co">#  1.125 DEG/SEC</span>
-<a name="504F535448525354"></a>065536,000105: 21,3607           34727        <span class="sm">POSTHRST</span>           <span class="op">CA      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#48414C46">HALF</a>                                  
-065537,000106: 
-065538,000107: 21,3610           51505                           <span class="op">NDX     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41584953435452">AXISCTR</a>                               
-065539,000108: 21,3611           55525                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544A55">TJU</a>                                   
-065540,000109: 21,3612           11744                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4C4453454E5345">OLDSENSE</a>                              
-065541,000110: 21,3613           13633                           <span class="op">TCF     </span> <a href="#504F53434845434B">POSCHECK</a>                              <span class="co">#  JETS FIRING POSITIVELY</span>
-065542,000111: 21,3614           13636                           <span class="op">TCF     </span> <a href="#435452434845434B">CTRCHECK</a>                              <span class="co">#  JETS OFF. CHECK INHIBITION CTR</span>
-<a name="4E4547434845434B"></a>065543,000112: 21,3615           51505        <span class="sm">NEGCHECK</span>           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41584953435452">AXISCTR</a>                               <span class="co">#  JETS FIRING NEGATIVELY</span>
-065544,000113: 21,3616           41525                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544A55">TJU</a>                                   
-065545,000114: 21,3617           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
-065546,000115: 21,3620           00002                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     <span class="co">#  RETURN</span>
-065547,000116: 21,3621           13623                           <span class="op">TCF     </span> +2                                    
-065548,000117: 21,3622           13623                           <span class="op">TCF     </span> +1                                    <span class="co">#  JETS COMMANDED OFF.SET CTR AND RETURN</span>
-<a name="534554435452"></a>065549,000118: 21,3623           51505        <span class="sm">SETCTR  </span>           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41584953435452">AXISCTR</a>                               <span class="co">#  JET FIRING REVERSAL COMMANDED. SET CTR,</span>
-065550,000119: 21,3624           33645                           <span class="op">CA      </span> <a href="#5554494D45">UTIME</a>                                 <span class="co">#  SET JET TIME TO ZERO,AND RETURN</span>
+065596,000072:                                                                                                  <span class="co">#  EACH DAP PASS.</span>
+065597,000073: 
+065598,000074:                                                                                                  <span class="co">#  THE MINIMUM PULSE WIDTH OF THIS CONTROLLER IS DETERMINED BY THE REPETITION  RATE AT WHICH THIS ROUTINE IS CALLED</span>
+065599,000075:                                                                                                  <span class="co">#  AND IS NOMINALLY 100 MS FOR ALL AXES IN DRIFTING FLIGHT.   DURING POWERED FLIGHT THE MINIMUM IS 100 MS FOR THE</span>
+065600,000076:                                                                                                  <span class="co">#  P AXIS AND 200 MS FOR THE CONTROL OF THE U AND V AXES.</span>
+065601,000077: 
+065602,000078:                                                                                                  <span class="co">#  CALLING SEQUENCE:</span>
+065603,000079: 
+065604,000080:                                                                                                  <span class="co">#           INHINT</span>
+065605,000081:                                                                                                  <span class="co">#                      TC     IBNKCALL</span>
+065606,000082:                                                                                                  <span class="co">#                      CADR   SPSRCS</span>
+065607,000083: 
+065608,000084: 
+065609,000085:                                                                                                  <span class="co">#  EXIT:</span>
+065610,000086:                                                                                                  <span class="co">#           TC     Q</span>
+065611,000087:                                                                                                  <span class="co">#  ALARM/ABORT MODE:    NONE</span>
+065612,000088: 
+065613,000089:                                                                                                  <span class="co">#  SUBROUTINES CALLED:    NONE</span>
+065614,000090: 
+065615,000091:                                                                                                  <span class="co">#  INPUT:      E,EDOT</span>
+065616,000092:                                                                                                  <span class="co">#              TJP, TJV, TJU                   TJ MUST NOT BE NEGATIVE ZERO</span>
+065617,000093: 
+065618,000094:                                                                                                  <span class="co">#  OUTPUT:     TJP, TJV, TJU</span>
+065619,000095: 
+065620,000096: 
+065621,000097: 21,3606                                           <span class="ps">BANK    </span> 21                                    
+065622,000098: 21,2000                                           <span class="ps">SETLOC  </span> <a href="TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc.html#4441505334">DAPS4</a>                                 
+065623,000099: 21,2000                                           <span class="ps">BANK    </span>                                       
+065624,000100: 
+065625,000101: 21,3606                                           <span class="ps">COUNT*  </span> $$/DAPBU                              
+065626,000102: 
+065627,000103: 21,3606  E6,1525                                  <span class="ps">EBANK=  </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544A55">TJU</a>                                   
+<a name="524154454C494D32"></a>065628,000104: 21,3606           00632        <span class="sm">RATELIM2</span>           <span class="ps">OCT     </span> 00632                                 <span class="co">#  1.125 DEG/SEC</span>
+<a name="504F535448525354"></a>065629,000105: 21,3607           34727        <span class="sm">POSTHRST</span>           <span class="op">CA      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#48414C46">HALF</a>                                  
+065630,000106: 
+065631,000107: 21,3610           51505                           <span class="op">NDX     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41584953435452">AXISCTR</a>                               
+065632,000108: 21,3611           55525                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544A55">TJU</a>                                   
+065633,000109: 21,3612           11744                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4C4453454E5345">OLDSENSE</a>                              
+065634,000110: 21,3613           13633                           <span class="op">TCF     </span> <a href="#504F53434845434B">POSCHECK</a>                              <span class="co">#  JETS FIRING POSITIVELY</span>
+065635,000111: 21,3614           13636                           <span class="op">TCF     </span> <a href="#435452434845434B">CTRCHECK</a>                              <span class="co">#  JETS OFF. CHECK INHIBITION CTR</span>
+<a name="4E4547434845434B"></a>065636,000112: 21,3615           51505        <span class="sm">NEGCHECK</span>           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41584953435452">AXISCTR</a>                               <span class="co">#  JETS FIRING NEGATIVELY</span>
+065637,000113: 21,3616           41525                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544A55">TJU</a>                                   
+065638,000114: 21,3617           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
+065639,000115: 21,3620           00002                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     <span class="co">#  RETURN</span>
+065640,000116: 21,3621           13623                           <span class="op">TCF     </span> +2                                    
+065641,000117: 21,3622           13623                           <span class="op">TCF     </span> +1                                    <span class="co">#  JETS COMMANDED OFF.SET CTR AND RETURN</span>
+<a name="534554435452"></a>065642,000118: 21,3623           51505        <span class="sm">SETCTR  </span>           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41584953435452">AXISCTR</a>                               <span class="co">#  JET FIRING REVERSAL COMMANDED. SET CTR,</span>
+065643,000119: 21,3624           33645                           <span class="op">CA      </span> <a href="#5554494D45">UTIME</a>                                 <span class="co">#  SET JET TIME TO ZERO,AND RETURN</span>
 </pre>
 </span>
 </p>
@@ -251,33 +251,33 @@ Page 1507
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-065552,000121: 21,3625           51505                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41584953435452">AXISCTR</a>                               
-065553,000122: 21,3626           55767                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#554A4554435452">UJETCTR</a>                               
-<a name="5A4150544A"></a>065554,000123: 21,3627           34746        <span class="sm">ZAPTJ   </span>           <span class="op">CA      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5A45524F">ZERO</a>                                  
-065555,000124: 21,3630           51505                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41584953435452">AXISCTR</a>                               
-065556,000125: 21,3631           55525                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544A55">TJU</a>                                   
-065557,000126: 21,3632           00002                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
-<a name="504F53434845434B"></a>065558,000127: 21,3633           51505        <span class="sm">POSCHECK</span>           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41584953435452">AXISCTR</a>                               
-065559,000128: 21,3634           31525                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544A55">TJU</a>                                   
-065560,000129: 21,3635           13617                           <span class="op">TCF     </span> <a href="#4E4547434845434B">NEGCHECK</a>   +2                         
-<a name="435452434845434B"></a>065561,000130: 21,3636           51505        <span class="sm">CTRCHECK</span>           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41584953435452">AXISCTR</a>                               <span class="co">#  CHECK JET INHIBITION COUNTER</span>
-065562,000131: 21,3637           11767                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#554A4554435452">UJETCTR</a>                               
-065563,000132: 21,3640           13642                           <span class="op">TCF     </span> +2                                    
-065564,000133: 21,3641           00002                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     <span class="co">#  CTR IS NOT POSITIVE. RETURN</span>
-065565,000134: 21,3642           13627                           <span class="op">TCF     </span> <a href="#5A4150544A">ZAPTJ</a>                                 <span class="co">#  CTR IS POSITIVE.INHIBIT FIRINGS</span>
-065566,000135: 21,3643           00002                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     <span class="co">#  CTR IS NOT POSITIVE.RETURN</span>
-065567,000136: 21,3644           00004                           <span class="ps">OCT     </span> 00004                                 
-<a name="5554494D45"></a>065568,000137: 21,3645           00012        <span class="sm">UTIME   </span>           <span class="ps">OCT     </span> 00012                                 
-065569,000138: 21,3646           00012                           <span class="ps">OCT     </span> 00012                                 
-<a name="4E454746495245"></a>065570,000139: 21,3647           44744        <span class="sm">NEGFIRE </span>           <span class="op">CS      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4F4E45">ONE</a>                                   <span class="co">#  JETS FIRING NEGATIVELY</span>
-065571,000140: 21,3650           55744                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4C4453454E5345">OLDSENSE</a>                              
-065572,000141: 21,3651           31427                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45444F54">EDOT</a>                                  
-065573,000142: 21,3652           13656                           <span class="op">TCF     </span> +4                                    
-<a name="504C555346495245"></a>065574,000143: 21,3653           34744        <span class="sm">PLUSFIRE</span>           <span class="op">CA      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4F4E45">ONE</a>                                   
-065575,000144: 21,3654           55744                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4C4453454E5345">OLDSENSE</a>                              
-065576,000145: 21,3655           41427                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45444F54">EDOT</a>                                  <span class="co">#  RATE DEAD BAND TEST</span>
-065577,000146: 21,3656           22000                           <span class="op">LXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
-065578,000147: 21,3657           40111                           <span class="op">CS      </span> <a href="FLAGWORD_ASSIGNMENTS.agc.html#444150424F4F4C53">DAPBOOLS</a>                              <span class="co">#  IF DRIFTBIT = 1, USE ZERO TARGET RATE</span>
+065645,000121: 21,3625           51505                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41584953435452">AXISCTR</a>                               
+065646,000122: 21,3626           55767                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#554A4554435452">UJETCTR</a>                               
+<a name="5A4150544A"></a>065647,000123: 21,3627           34746        <span class="sm">ZAPTJ   </span>           <span class="op">CA      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5A45524F">ZERO</a>                                  
+065648,000124: 21,3630           51505                           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41584953435452">AXISCTR</a>                               
+065649,000125: 21,3631           55525                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544A55">TJU</a>                                   
+065650,000126: 21,3632           00002                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     
+<a name="504F53434845434B"></a>065651,000127: 21,3633           51505        <span class="sm">POSCHECK</span>           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41584953435452">AXISCTR</a>                               
+065652,000128: 21,3634           31525                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544A55">TJU</a>                                   
+065653,000129: 21,3635           13617                           <span class="op">TCF     </span> <a href="#4E4547434845434B">NEGCHECK</a>   +2                         
+<a name="435452434845434B"></a>065654,000130: 21,3636           51505        <span class="sm">CTRCHECK</span>           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41584953435452">AXISCTR</a>                               <span class="co">#  CHECK JET INHIBITION COUNTER</span>
+065655,000131: 21,3637           11767                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#554A4554435452">UJETCTR</a>                               
+065656,000132: 21,3640           13642                           <span class="op">TCF     </span> +2                                    
+065657,000133: 21,3641           00002                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     <span class="co">#  CTR IS NOT POSITIVE. RETURN</span>
+065658,000134: 21,3642           13627                           <span class="op">TCF     </span> <a href="#5A4150544A">ZAPTJ</a>                                 <span class="co">#  CTR IS POSITIVE.INHIBIT FIRINGS</span>
+065659,000135: 21,3643           00002                           <span class="op">TC      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#51">Q</a>                                     <span class="co">#  CTR IS NOT POSITIVE.RETURN</span>
+065660,000136: 21,3644           00004                           <span class="ps">OCT     </span> 00004                                 
+<a name="5554494D45"></a>065661,000137: 21,3645           00012        <span class="sm">UTIME   </span>           <span class="ps">OCT     </span> 00012                                 
+065662,000138: 21,3646           00012                           <span class="ps">OCT     </span> 00012                                 
+<a name="4E454746495245"></a>065663,000139: 21,3647           44744        <span class="sm">NEGFIRE </span>           <span class="op">CS      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4F4E45">ONE</a>                                   <span class="co">#  JETS FIRING NEGATIVELY</span>
+065664,000140: 21,3650           55744                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4C4453454E5345">OLDSENSE</a>                              
+065665,000141: 21,3651           31427                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45444F54">EDOT</a>                                  
+065666,000142: 21,3652           13656                           <span class="op">TCF     </span> +4                                    
+<a name="504C555346495245"></a>065667,000143: 21,3653           34744        <span class="sm">PLUSFIRE</span>           <span class="op">CA      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#4F4E45">ONE</a>                                   
+065668,000144: 21,3654           55744                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4C4453454E5345">OLDSENSE</a>                              
+065669,000145: 21,3655           41427                           <span class="op">CS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45444F54">EDOT</a>                                  <span class="co">#  RATE DEAD BAND TEST</span>
+065670,000146: 21,3656           22000                           <span class="op">LXCH    </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
+065671,000147: 21,3657           40111                           <span class="op">CS      </span> <a href="FLAGWORD_ASSIGNMENTS.agc.html#444150424F4F4C53">DAPBOOLS</a>                              <span class="co">#  IF DRIFTBIT = 1, USE ZERO TARGET RATE</span>
 </pre>
 </span>
 </p>
@@ -293,29 +293,29 @@ A line is drawn immediately to the right of DRIFTBIT below.
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-065580,000149: 21,3660           74735                           <span class="op">MASK    </span> <a href="FLAGWORD_ASSIGNMENTS.agc.html#4452494654424954">DRIFTBIT</a>                              <span class="co">#  IF DRIFTBIT = 0, USE 0.10 RATE TARGET</span>
-065581,000150: 21,3661           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
-065582,000151: 21,3662           34760                           <span class="op">CA      </span> <a href="#52415445444231">RATEDB1</a>                               
-065583,000152: 21,3663           60001                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
-065584,000153: 21,3664           00006                           <span class="op">EXTEND  </span>                                       
-065585,000154: 21,3665           63675                           <span class="op">BZMF    </span> <a href="#5350535354415254">SPSSTART</a>                              
-065586,000155: 21,3666           13612                           <span class="op">TCF     </span> <a href="#504F535448525354">POSTHRST</a>   +3                         
-065587,000156: 
-<a name="535053524353"></a>065588,000157: 21,3667           51505        <span class="sm">SPSRCS  </span>           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41584953435452">AXISCTR</a>                               <span class="co">#  JET SENSE TEST</span>
-065589,000158: 21,3670           11525                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544A55">TJU</a>                                   
-065590,000159: 21,3671           13653                           <span class="op">TCF     </span> <a href="#504C555346495245">PLUSFIRE</a>                              <span class="co">#  JETS FIRING POSITIVELY</span>
-065591,000160: 21,3672           13674                           <span class="op">TCF     </span> +2                                    
-065592,000161: 21,3673           13647                           <span class="op">TCF     </span> <a href="#4E454746495245">NEGFIRE</a>                               <span class="co">#  JETS FIRING NEGATIVELY</span>
-065593,000162: 21,3674           55744                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4C4453454E5345">OLDSENSE</a>                              <span class="co">#  JETS OFF</span>
-<a name="5350535354415254"></a>065594,000163: 21,3675           31427        <span class="sm">SPSSTART</span>           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45444F54">EDOT</a>                                  <span class="co">#  OUTER RATE LIMIT TEST</span>
-065595,000164: 21,3676           00006                           <span class="op">EXTEND  </span>                                       
-065596,000165: 21,3677           74757                           <span class="op">MP      </span> <a href="#524154454C494D31">RATELIM1</a>                              
-065597,000166: 21,3700           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
-065598,000167: 21,3701           13720                           <span class="op">TCF     </span> <a href="#4E45475448525354">NEGTHRST</a>                              <span class="co">#  OUTER RATE LIMIT EXCEEDED</span>
-065599,000168: 21,3702           13704                           <span class="op">TCF     </span> +2                                    
-065600,000169: 21,3703           13607                           <span class="op">TCF     </span> <a href="#504F535448525354">POSTHRST</a>                              <span class="co">#  OUTER RATE LIMIT EXCEEDED</span>
-065601,000170: 21,3704           31427                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45444F54">EDOT</a>                                  <span class="co">#  COAST ZONE TEST</span>
-065602,000171: 21,3705           61751                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45">E</a>                                     
+065673,000149: 21,3660           74735                           <span class="op">MASK    </span> <a href="FLAGWORD_ASSIGNMENTS.agc.html#4452494654424954">DRIFTBIT</a>                              <span class="co">#  IF DRIFTBIT = 0, USE 0.10 RATE TARGET</span>
+065674,000150: 21,3661           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
+065675,000151: 21,3662           34760                           <span class="op">CA      </span> <a href="#52415445444231">RATEDB1</a>                               
+065676,000152: 21,3663           60001                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4C">L</a>                                     
+065677,000153: 21,3664           00006                           <span class="op">EXTEND  </span>                                       
+065678,000154: 21,3665           63675                           <span class="op">BZMF    </span> <a href="#5350535354415254">SPSSTART</a>                              
+065679,000155: 21,3666           13612                           <span class="op">TCF     </span> <a href="#504F535448525354">POSTHRST</a>   +3                         
+065680,000156: 
+<a name="535053524353"></a>065681,000157: 21,3667           51505        <span class="sm">SPSRCS  </span>           <span class="op">INDEX   </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41584953435452">AXISCTR</a>                               <span class="co">#  JET SENSE TEST</span>
+065682,000158: 21,3670           11525                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#544A55">TJU</a>                                   
+065683,000159: 21,3671           13653                           <span class="op">TCF     </span> <a href="#504C555346495245">PLUSFIRE</a>                              <span class="co">#  JETS FIRING POSITIVELY</span>
+065684,000160: 21,3672           13674                           <span class="op">TCF     </span> +2                                    
+065685,000161: 21,3673           13647                           <span class="op">TCF     </span> <a href="#4E454746495245">NEGFIRE</a>                               <span class="co">#  JETS FIRING NEGATIVELY</span>
+065686,000162: 21,3674           55744                           <span class="op">TS      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#4F4C4453454E5345">OLDSENSE</a>                              <span class="co">#  JETS OFF</span>
+<a name="5350535354415254"></a>065687,000163: 21,3675           31427        <span class="sm">SPSSTART</span>           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45444F54">EDOT</a>                                  <span class="co">#  OUTER RATE LIMIT TEST</span>
+065688,000164: 21,3676           00006                           <span class="op">EXTEND  </span>                                       
+065689,000165: 21,3677           74757                           <span class="op">MP      </span> <a href="#524154454C494D31">RATELIM1</a>                              
+065690,000166: 21,3700           10000                           <span class="op">CCS     </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#41">A</a>                                     
+065691,000167: 21,3701           13720                           <span class="op">TCF     </span> <a href="#4E45475448525354">NEGTHRST</a>                              <span class="co">#  OUTER RATE LIMIT EXCEEDED</span>
+065692,000168: 21,3702           13704                           <span class="op">TCF     </span> +2                                    
+065693,000169: 21,3703           13607                           <span class="op">TCF     </span> <a href="#504F535448525354">POSTHRST</a>                              <span class="co">#  OUTER RATE LIMIT EXCEEDED</span>
+065694,000170: 21,3704           31427                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45444F54">EDOT</a>                                  <span class="co">#  COAST ZONE TEST</span>
+065695,000171: 21,3705           61751                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45">E</a>                                     
 </pre>
 </span>
 </p>
@@ -331,29 +331,29 @@ Page 1508
 <p class="nobreak">
 <span style="font-family: monospace;">
 <pre>
-065604,000173: 21,3706           00006                           <span class="op">EXTEND  </span>                                       
-065605,000174: 21,3707           71411                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444B4442">DKDB</a>                                  <span class="co">#  PAD LOADED DEADBAND. FRESHSTART: 1.4 DEG</span>
-065606,000175: 21,3710           00006                           <span class="op">EXTEND  </span>                                       
-065607,000176: 21,3711           13726                           <span class="op">BZF     </span> <a href="#544A5A45524F">TJZERO</a>                                
-065608,000177: 
-065609,000178: 21,3712           00006                           <span class="op">EXTEND  </span>                                       
-065610,000179: 21,3713           63722                           <span class="op">BZMF    </span> +7                                    
-065611,000180: 21,3714           31427                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45444F54">EDOT</a>                                  
-065612,000181: 21,3715           63606                           <span class="op">AD      </span> <a href="#524154454C494D32">RATELIM2</a>                              
-065613,000182: 21,3716           00006                           <span class="op">EXTEND  </span>                                       
-065614,000183: 21,3717           63726                           <span class="op">BZMF    </span> <a href="#544A5A45524F">TJZERO</a>                                
-<a name="4E45475448525354"></a>065615,000184: 21,3720           44727        <span class="sm">NEGTHRST</span>           <span class="op">CS      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#48414C46">HALF</a>                                  
-065616,000185: 21,3721           13610                           <span class="op">TCF     </span> <a href="#504F535448525354">POSTHRST</a>   +1                         
-065617,000186: 21,3722           43606                 +7        <span class="op">CS      </span> <a href="#524154454C494D32">RATELIM2</a>                              
-065618,000187: 21,3723           61427                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45444F54">EDOT</a>                                  
-065619,000188: 21,3724           00006                           <span class="op">EXTEND  </span>                                       
-065620,000189: 21,3725           63607                           <span class="op">BZMF    </span> <a href="#504F535448525354">POSTHRST</a>                              
-<a name="544A5A45524F"></a>065621,000190: 21,3726           34746        <span class="sm">TJZERO  </span>           <span class="op">CA      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5A45524F">ZERO</a>                                  
-065622,000191: 21,3727           13610                           <span class="op">TCF     </span> <a href="#504F535448525354">POSTHRST</a>   +1                         
-065623,000192: 
-065624,000193: 
-<a name="524154454C494D31"></a>065625,000194: 21,3730     4757               <span class="sm">RATELIM1</span>           <span class="ps">=       </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#43414C4C434F4445">CALLCODE</a>                              <span class="co">#  = 00032, CORRESPONDING TO 1.73 DEG/SEC</span>
-<a name="52415445444231"></a>065626,000195: 21,3730     4760               <span class="sm">RATEDB1 </span>           <span class="ps">=       </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#544255494C444658">TBUILDFX</a>                              <span class="co">#   = 00045, CORRESPONDS TO 0.101 DEG/SEC</span>
+065697,000173: 21,3706           00006                           <span class="op">EXTEND  </span>                                       
+065698,000174: 21,3707           71411                           <span class="op">MP      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#444B4442">DKDB</a>                                  <span class="co">#  PAD LOADED DEADBAND. FRESHSTART: 1.4 DEG</span>
+065699,000175: 21,3710           00006                           <span class="op">EXTEND  </span>                                       
+065700,000176: 21,3711           13726                           <span class="op">BZF     </span> <a href="#544A5A45524F">TJZERO</a>                                
+065701,000177: 
+065702,000178: 21,3712           00006                           <span class="op">EXTEND  </span>                                       
+065703,000179: 21,3713           63722                           <span class="op">BZMF    </span> +7                                    
+065704,000180: 21,3714           31427                           <span class="op">CA      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45444F54">EDOT</a>                                  
+065705,000181: 21,3715           63606                           <span class="op">AD      </span> <a href="#524154454C494D32">RATELIM2</a>                              
+065706,000182: 21,3716           00006                           <span class="op">EXTEND  </span>                                       
+065707,000183: 21,3717           63726                           <span class="op">BZMF    </span> <a href="#544A5A45524F">TJZERO</a>                                
+<a name="4E45475448525354"></a>065708,000184: 21,3720           44727        <span class="sm">NEGTHRST</span>           <span class="op">CS      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#48414C46">HALF</a>                                  
+065709,000185: 21,3721           13610                           <span class="op">TCF     </span> <a href="#504F535448525354">POSTHRST</a>   +1                         
+065710,000186: 21,3722           43606                 +7        <span class="op">CS      </span> <a href="#524154454C494D32">RATELIM2</a>                              
+065711,000187: 21,3723           61427                           <span class="op">AD      </span> <a href="ERASABLE_ASSIGNMENTS.agc.html#45444F54">EDOT</a>                                  
+065712,000188: 21,3724           00006                           <span class="op">EXTEND  </span>                                       
+065713,000189: 21,3725           63607                           <span class="op">BZMF    </span> <a href="#504F535448525354">POSTHRST</a>                              
+<a name="544A5A45524F"></a>065714,000190: 21,3726           34746        <span class="sm">TJZERO  </span>           <span class="op">CA      </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#5A45524F">ZERO</a>                                  
+065715,000191: 21,3727           13610                           <span class="op">TCF     </span> <a href="#504F535448525354">POSTHRST</a>   +1                         
+065716,000192: 
+065717,000193: 
+<a name="524154454C494D31"></a>065718,000194: 21,3730     4757               <span class="sm">RATELIM1</span>           <span class="ps">=       </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#43414C4C434F4445">CALLCODE</a>                              <span class="co">#  = 00032, CORRESPONDING TO 1.73 DEG/SEC</span>
+<a name="52415445444231"></a>065719,000195: 21,3730     4760               <span class="sm">RATEDB1 </span>           <span class="ps">=       </span> <a href="FIXED-FIXED_CONSTANT_POOL.agc.html#544255494C444658">TBUILDFX</a>                              <span class="co">#   = 00045, CORRESPONDS TO 0.101 DEG/SEC</span>
 
 End of include-file SPS_BACK-UP_RCS_CONTROL.agc.  Parent file is <a href="MAIN.agc.html">MAIN.agc</a>
 </pre>
