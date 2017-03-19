@@ -2,7 +2,7 @@
 ## Copyright:   Public domain.
 ## Filename:    CONIC_SUBROUTINES.agc
 ## Purpose:     A section of Luminary revision 116.
-##              It is part of the source code for the Lunar Module's (LM) 
+##              It is part of the source code for the Lunar Module's (LM)
 ##              Apollo Guidance Computer (AGC) for Apollo 12.
 ##              This file is intended to be a faithful transcription, except
 ##              that the code format has been changed to conform to the
@@ -13,15 +13,17 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-01-22 MAS  Created from Luminary 99.
-##		2017-01-28 RSB	WTIH -> WITH and WHCIH -> WHICH.
+##              2017-01-28 RSB  WTIH -> WITH and WHCIH -> WHICH.
 ##              2017-03-13 RRB  Updated with Luminary 116.
-##		2017-03-14 RSB  Proofed comment-text via 3-way diff
-##				vs Luminary 99 and 131.	Added a few lines
-##				of missing code at the bottom of page 1187.
-##		2017-03-15 RSB	Comment-text fixes identified in 5-way
-##				side-by-side diff of Luminary 69/99/116/131/210.
-##		2017-03-17 RSB	Comment-text fixes identified in diff'ing
-##				Luminary 99 vs Comanche 55.
+##              2017-03-14 RSB  Proofed comment-text via 3-way diff
+##                              vs Luminary 99 and 131. Added a few lines
+##                              of missing code at the bottom of page 1187.
+##              2017-03-15 RSB  Comment-text fixes identified in 5-way
+##                              side-by-side diff of Luminary 69/99/116/131/210.
+##              2017-03-17 RSB  Comment-text fixes identified in diff'ing
+##                              Luminary 99 vs Comanche 55.
+##              2017-03-19 HG   Add missing sequence of statemens with label NEGP
+##                              Fix interpretive operator BCN --> BON
 
 ## Page 1151
 # PROGRAM DESCRIPTION - ENTIRE CONIC SUBROUTINE LOG SECTION                       DATE - 1 SEPTEMBER 1967
@@ -92,7 +94,7 @@
 #         * +27 FOR MOON *
 ## Page 1153
 # VRECT   * +7 FOR EARTH *DP INITIAL VELOCITY VECTOR IN METERS/CENTISECOND
-#         * +5 FOR MOON  * 
+#         * +5 FOR MOON  *
 # X1 (38D)* NONE         *INDEX REGISTER SET TO -2D OR -10D ACCORDING TO WHETHER THE EARTH OR MOON,
 #         *              *RESPECTIVELY, IS THE CENTRAL BODY
 # TAU.    * +28          *DESIRED TRANSFER TIME IN CENTISECONDS (DP)
@@ -182,7 +184,7 @@
 # SGA MEMO 67-4.
 
 # INPUT - ERASABLE INITIALIZATION REQUIRED
-# 
+#
 #         * SCALE FACTOR *
 # VARIABLE*IN POWERS OF 2*                         DESCRIPTION AND REMARKS
 # --------*--------------*                         -----------------------
@@ -358,7 +360,7 @@
 ## Page 1160
 # DEBRIS -
 #      PARAMETERS WHICH MAY BE OF USE -
-# 
+#
 #         * SCALE FACTOR *
 # VARIABLE*IN POWERS OF 2*                         DESCRIPTION AND REMARKS
 # --------*--------------*                         -----------------------
@@ -580,1157 +582,1157 @@
 # SP PARAMETERS - RTNAPSE, GEOMSGN, RTNPRM, PLUS PUSHLIST LOCATIONS 0-5, 10D-11D, 14D-21D, 31D-38D.
 # ADDITIONAL INTERPRETIVE SWITCHES USED - NORMSW
 
-                SETLOC          CONICS                          
+                SETLOC          CONICS
 ## Page 1166
-                BANK                                            
+                BANK
 
-                COUNT*          $$/CONIC                        
-                EBANK=          UR1                             
-KEPLERN         SETPD           BOV                             
-                                0                               
-                                +1                              
-                VLOAD*                                          
-                                MUTABLE,1                       
-                STOVL           14D                             
-                                RRECT                           
-                UNIT            SSP                             
-                                ITERCTR                         
-                                20D                             
-                STODL           URRECT                          
-                                36D                             
-                STOVL           R1                              
-                                RRECT                           
-                DOT             SL1R                            
-                                VRECT                           
-                DMP             SL1R                            
+                COUNT*          $$/CONIC
+                EBANK=          UR1
+KEPLERN         SETPD           BOV
+                                0
+                                +1
+                VLOAD*
+                                MUTABLE,1
+                STOVL           14D
+                                RRECT
+                UNIT            SSP
+                                ITERCTR
+                                20D
+                STODL           URRECT
+                                36D
+                STOVL           R1
+                                RRECT
+                DOT             SL1R
+                                VRECT
+                DMP             SL1R
                                 1/ROOTMU                        # 1/ROOTMU (-17 OR -14)
                 STOVL           KEPC1                           # C1=R.V/ROOTMU (+17 OR +16)
 
-                                VRECT                           
-                VSQ             DMPR                            
+                                VRECT
+                VSQ             DMPR
                                 1/MU                            # 1/MU (-34 OR -28)
-                DMP             SL3                             
-                                R1                              
-                DSU             ROUND                           
-                                D1/64                           
+                DMP             SL3
+                                R1
+                DSU             ROUND
+                                D1/64
                 STORE           KEPC2                           # C2=RV.V/MU -1 (+6)
 
-                BDSU            SR1R                            
-                                D1/64                           
-                DDV                                             
-                                R1                              
+                BDSU            SR1R
+                                D1/64
+                DDV
+                                R1
                 STORE           ALPHA                           # ALPHA=(1-C2)/R1 (-22 OR -20)
 
                 BPL             DLOAD                           # MAXIMUM X DEPENDS ON TYPE OF CONIC
-                                1REV                            
+                                1REV
                                 -50SC                           # -50SC (+12)
-                DDV             BOV                             
-                                ALPHA                           
-                                STOREMAX                        
-                SQRT            GOTO                            
-                                STOREMAX                        
+                DDV             BOV
+                                ALPHA
+                                STOREMAX
+                SQRT            GOTO
+                                STOREMAX
 
-1REV            SQRT            BDDV                            
+1REV            SQRT            BDDV
 ## Page 1167
                                 2PISC                           # 2PISC (+6)
-                BOV                                             
-                                STOREMAX                        
-STOREMAX        STORE           XMAX                            
-                DMP             PDDL                            
-                                1/ROOTMU                        
-                                ALPHA                           
-                NORM            PDDL                            
-                                X1                              
-                SL*             DDV                             
-                                0               -6,1            
-                BOV             BMN                             
-                                MODDONE                         
+                BOV
+                                STOREMAX
+STOREMAX        STORE           XMAX
+                DMP             PDDL
+                                1/ROOTMU
+                                ALPHA
+                NORM            PDDL
+                                X1
+                SL*             DDV
+                                0               -6,1
+                BOV             BMN
+                                MODDONE
                                 MODDONE                         # MPAC=PERIOD
 PERIODCH        PDDL            ABS                             # 0D=PERIOD
-                                TAU.                            
-                DSU             BMN                             
-                                0D                              
-                                MODDONE                         
-                SIGN                                            
-                                TAU.                            
-                STODL           TAU.                            
-                GOTO                                            
-                                PERIODCH                        
-MODDONE         SETPD           DLOAD                           
-                                0                               
-                                XKEPNEW                         
-                STORE           X                               
-                SIGN            BZE                             
-                                TAU.                            
-                                BADX                            
-                BMN             ABS                             
-                                BADX                            
-                DSU             BPL                             
-                                XMAX                            
-                                BADX                            
-STORBNDS        DLOAD           BPL                             
-                                TAU.                            
-                                STOREMIN                        
-                DLOAD           DCOMP                           
-                                XMAX                            
-                STODL           XMIN                            
-                                KEPZERO                         
-                STORE           XMAX                            
-                GOTO                                            
-                                DXCOMP                          
-STOREMIN        DLOAD                                           
-                                KEPZERO                         
-                STORE           XMIN                            
-DXCOMP          DLOAD           DMPR                            
+                                TAU.
+                DSU             BMN
+                                0D
+                                MODDONE
+                SIGN
+                                TAU.
+                STODL           TAU.
+                GOTO
+                                PERIODCH
+MODDONE         SETPD           DLOAD
+                                0
+                                XKEPNEW
+                STORE           X
+                SIGN            BZE
+                                TAU.
+                                BADX
+                BMN             ABS
+                                BADX
+                DSU             BPL
+                                XMAX
+                                BADX
+STORBNDS        DLOAD           BPL
+                                TAU.
+                                STOREMIN
+                DLOAD           DCOMP
+                                XMAX
+                STODL           XMIN
+                                KEPZERO
+                STORE           XMAX
+                GOTO
+                                DXCOMP
+STOREMIN        DLOAD
+                                KEPZERO
+                STORE           XMIN
+DXCOMP          DLOAD           DMPR
 ## Page 1168
-                                TAU.                            
-                                BEE22                           
-                ABS                                             
-                STODL           EPSILONT                        
-                                XPREV                           
-XDIFF           BDSU                                            
-                                X                               
-                STORE           DELX                            
+                                TAU.
+                                BEE22
+                ABS
+                STODL           EPSILONT
+                                XPREV
+XDIFF           BDSU
+                                X
+                STORE           DELX
 
-KEPLOOP         DLOAD           DSQ                             
+KEPLOOP         DLOAD           DSQ
                                 X                               # X=XKEP
                 NORM            PUSH                            # 0D=XSQ (+34 OR +32 -N1)       PL AT 2
-                                X1                              
-                DMP             SRR*                            
-                                ALPHA                           
-                                0               -6,1            
+                                X1
+                DMP             SRR*
+                                ALPHA
+                                0               -6,1
                 STCALL          XI                              # XI=ALPHA XSQ (+6)
-                                DELTIME                         
-                BOV             BDSU                            
+                                DELTIME
+                BOV             BDSU
                                 TIMEOVFL                        # UNLIKELY
-                                TAU.                            
+                                TAU.
                 STORE           DELT                            # DELT=DELINDEP
-                ABS             BDSU                            
-                                EPSILONT                        
-                BPL             DLOAD                           
-                                KEPCONVG                        
-                                T                               
-                DSU             NORM                            
-                                TC                              
-                                X1                              
-                PDDL            NORM                            
-                                DELX                            
-                                X2                              
-                XSU,1           DMP                             
-                                X2                              
-                                DELT                            
-                SLR*            DDV                             
-                                1,1                             
+                ABS             BDSU
+                                EPSILONT
+                BPL             DLOAD
+                                KEPCONVG
+                                T
+                DSU             NORM
+                                TC
+                                X1
+                PDDL            NORM
+                                DELX
+                                X2
+                XSU,1           DMP
+                                X2
+                                DELT
+                SLR*            DDV
+                                1,1
                 SR1             PUSH                            # 0D=TRIAL DELX         PL AT 2
-                BPL             DLOAD                           
-                                POSDELX                         
-                                X                               
+                BPL             DLOAD
+                                POSDELX
+                                X
                 STORE           XMAX                            # MOVE MAX BOUND IN
                 BDSU            DSU                             #                       PL AT 0
-                                XMIN                            
-                BOV             BPL                             
-                                NDXCHNGE                        
-                                NDXCHNGE                        
-                DLOAD           GOTO                            
+                                XMIN
+                BOV             BPL
+                                NDXCHNGE
+                                NDXCHNGE
+                DLOAD           GOTO
 ## Page 1169
-                                0D                              
-                                NEWDELX                         
+                                0D
+                                NEWDELX
 
-NDXCHNGE        DLOAD           DSU                             
-                                XMIN                            
-                                X                               
+NDXCHNGE        DLOAD           DSU
+                                XMIN
+                                X
                 DMPR            GOTO                            # TO FORCE MPAC +2 TO ZERO
-                                DP9/10                          
-                                NEWDELX                         
+                                DP9/10
+                                NEWDELX
 
-POSDELX         DLOAD                                           
-                                X                               
+POSDELX         DLOAD
+                                X
                 STORE           XMIN                            # MOVE MIN BOUND IN
                 BDSU            DSU                             #                       PL AT 0
-                                XMAX                            
-                BOV             BMN                             
-                                PDXCHNGE                        
-                                PDXCHNGE                        
-                DLOAD                                           
-                                0D                              
-NEWDELX         STORE           DELX                            
-                BZE             DAD                             
-                                KEPCONVG                        
-                                X                               
-                STODL           X                               
-                                T                               
-                STORE           TC                              
-BRNCHCTR        RTB             BHIZ                            
-                                CHECKCTR                        
-                                KEPCONVG                        
-                GOTO                                            
+                                XMAX
+                BOV             BMN
+                                PDXCHNGE
+                                PDXCHNGE
+                DLOAD
+                                0D
+NEWDELX         STORE           DELX
+                BZE             DAD
+                                KEPCONVG
+                                X
+                STODL           X
+                                T
+                STORE           TC
+BRNCHCTR        RTB             BHIZ
+                                CHECKCTR
+                                KEPCONVG
+                GOTO
                                 KEPLOOP                         # ITERATE
 
-PDXCHNGE        DLOAD           DSU                             
-                                XMAX                            
-                                X                               
+PDXCHNGE        DLOAD           DSU
+                                XMAX
+                                X
                 DMPR            GOTO                            # TO FORCE MPAC +2 TO ZERO
-                                DP9/10                          
-                                NEWDELX                         
+                                DP9/10
+                                NEWDELX
 
-BADX            DLOAD           SR1                             
-                                XMAX                            
-                SIGN                                            
-                                TAU.                            
-                STORE           X                               
-                GOTO                                            
+BADX            DLOAD           SR1
+                                XMAX
+                SIGN
+                                TAU.
+                STORE           X
+                GOTO
 ## Page 1170
-                                STORBNDS                        
+                                STORBNDS
 TIMEOVFL        DLOAD           BMN                             # X WAS TOO BIG
-                                X                               
-                                NEGTOVFL                        
-                STORE           XMAX                            
-CMNTOVFL        DLOAD           SR1                             
-                                DELX                            
-                STORE           DELX                            
-                BZE             BDSU                            
-                                KEPRTN                          
-                                X                               
-                STODL           X                               
-                                TC                              
-                STORE           T                               
-                GOTO                                            
-                                BRNCHCTR                        
-NEGTOVFL        STORE           XMIN                            
-                GOTO                                            
-                                CMNTOVFL                        
-KEPCONVG        DLOAD           SR4R                            
-                                R1                              
-                DSU             VXSC                            
-                                XSQC(XI)                        
-                                URRECT                          
+                                X
+                                NEGTOVFL
+                STORE           XMAX
+CMNTOVFL        DLOAD           SR1
+                                DELX
+                STORE           DELX
+                BZE             BDSU
+                                KEPRTN
+                                X
+                STODL           X
+                                TC
+                STORE           T
+                GOTO
+                                BRNCHCTR
+NEGTOVFL        STORE           XMIN
+                GOTO
+                                CMNTOVFL
+KEPCONVG        DLOAD           SR4R
+                                R1
+                DSU             VXSC
+                                XSQC(XI)
+                                URRECT
                 VSL1            PDDL                            # 0D=(R1-XSQC(XI))URRECT (+33 OR +31)
-                                X                               
-                DSQ             NORM                            
-                                X1                              
-                DMPR            DMPR                            
-                                1/ROOTMU                        
-                                X                               
-                DMP             SRR*                            
-                                S(XI)                           
-                                0               -7,1            
-                BDSU                                            
-                                T                               
-                SL1             VXSC                            
-                                VRECT                           
+                                X
+                DSQ             NORM
+                                X1
+                DMPR            DMPR
+                                1/ROOTMU
+                                X
+                DMP             SRR*
+                                S(XI)
+                                0               -7,1
+                BDSU
+                                T
+                SL1             VXSC
+                                VRECT
                 VSL1            VAD                             #                               PL AT 0
-                VSL4                                            
+                VSL4
                 STORE           RCV                             # RCV (+29 OR +27)
 
-                ABVAL           NORM                            
-                                X2                              
-                STODL           RCNORM                          
-                                XI                              
-                DMPR            DSU                             
-                                S(XI)                           
-                                D1/128                          
+                ABVAL           NORM
+                                X2
+                STODL           RCNORM
+                                XI
+                DMPR            DSU
+                                S(XI)
+                                D1/128
 ## Page 1171
-                DMP             SL1R                            
-                                ROOTMU                          
-                DMP             SLR*                            
-                                X                               
-                                0               -3,2            
-                DDV             VXSC                            
-                                RCNORM                          
-                                URRECT                          
+                DMP             SL1R
+                                ROOTMU
+                DMP             SLR*
+                                X
+                                0               -3,2
+                DDV             VXSC
+                                RCNORM
+                                URRECT
                 VSL1            PDDL                            # 0D=URRECT(XI S(XI)-1)X ROOTMU/RCV (+15
                                 XSQC(XI)                        # OR +13)                       PL AT 6
-                SLR*            DDV                             
-                                0               -4,2            
-                                RCNORM                          
-                BDSU            VXSC                            
-                                D1/256                          
-                                VRECT                           
-                VAD             VSL8                            
+                SLR*            DDV
+                                0               -4,2
+                                RCNORM
+                BDSU            VXSC
+                                D1/256
+                                VRECT
+                VAD             VSL8
                 STADR                                           #                               PL AT 0
                 STODL           VCV                             # VCV (+7 OR +5)
-                                T                               
-                STODL           TC                              
-                                X                               
-                STORE           XPREV                           
-                GOTO                                            
-                                KEPRTN                          
+                                T
+                STODL           TC
+                                X
+                STORE           XPREV
+                GOTO
+                                KEPRTN
 
 ## Page 1172
 DELTIME         EXIT                                            # MPAC=XI (+6), 0D=XSQ (+34 OR +32 -N1)
-                TC              POLY                            
-                DEC             8                               
-                2DEC            .083333334                      
-                2DEC            -.266666684                     
-                2DEC            .406349155                      
-                2DEC            -.361198675                     
-                2DEC            .210153242                      
-                2DEC            -.086221951                     
-                2DEC            .026268812                      
-                2DEC            -.006163316                     
-                2DEC            .001177342                      
-                2DEC            -.000199055                     
+                TC              POLY
+                DEC             8
+                2DEC            .083333334
+                2DEC            -.266666684
+                2DEC            .406349155
+                2DEC            -.361198675
+                2DEC            .210153242
+                2DEC            -.086221951
+                2DEC            .026268812
+                2DEC            -.006163316
+                2DEC            .001177342
+                2DEC            -.000199055
 
-                TC              INTPRET                         
-                STODL           S(XI)                           
-                                XI                              
-                EXIT                                            
-                TC              POLY                            
-                DEC             8                               
-                2DEC            .031250001                      
-                2DEC            -.166666719                     
-                2DEC            .355555413                      
-                2DEC            -.406347410                     
-                2DEC            .288962094                      
-                2DEC            -.140117894                     
-                2DEC            .049247387                      
-                2DEC            -.013081923                     
-                2DEC            .002806389                      
-                2DEC            -.000529414                     
-                TC              INTPRET                         
+                TC              INTPRET
+                STODL           S(XI)
+                                XI
+                EXIT
+                TC              POLY
+                DEC             8
+                2DEC            .031250001
+                2DEC            -.166666719
+                2DEC            .355555413
+                2DEC            -.406347410
+                2DEC            .288962094
+                2DEC            -.140117894
+                2DEC            .049247387
+                2DEC            -.013081923
+                2DEC            .002806389
+                2DEC            -.000529414
+                TC              INTPRET
 ## Page 1173
                 DMP             SRR*                            #                               PL AT 0
-                                0D                              
-                                0               -5,1            
+                                0D
+                                0               -5,1
                 STORE           XSQC(XI)                        # XSQC(XI) (+33 OR +31)
-                DMP             SL1                             
-                                KEPC1                           
+                DMP             SL1
+                                KEPC1
                 RTB             PDDL                            # XCH WITH PL. 0D=C1 XSQ C(XI) (+49 OR +46
                                 TPMODE                          #                               PL AT 0,3
-                DMP             SRR*                            
-                                S(XI)                           
-                                0               -5,1            
-                DMP             SL1                             
-                                KEPC2                           
+                DMP             SRR*
+                                S(XI)
+                                0               -5,1
+                DMP             SL1
+                                KEPC2
                 RTB             PDDL                            # 3D=C2 XSQ S(XI) (+35 OR +33)  PL AT 6
-                                TPMODE                          
-                                R1                              
+                                TPMODE
+                                R1
                 SR              TAD                             #                               PL AT 3
-                                6                               
+                                6
                 NORM            DMP                             # TO PRESERVE SIGNIF.
-                                X1                              
-                                X                               
+                                X1
+                                X
                 SR*             TAD                             # X(C2 XSQ S(XI) +R1) (+49 OR +46)  PL AT 0
-                                0               -3,1            
-                SL4R            DMPR                            
-                                1/ROOTMU                        
-                STORE           T                               
-                RVQ                                             
+                                0               -3,1
+                SL4R            DMPR
+                                1/ROOTMU
+                STORE           T
+                RVQ
 
 ## Page 1174
-ITERATOR        BONCLR          DLOAD                           
-                                SLOPESW                         
-                                FIRSTIME                        
-                                DEP                             
-                DSU             NORM                            
-                                DEPREV                          
-                                X1                              
-                PDDL            NORM                            
-                                DELINDEP                        
-                                X2                              
-                XSU,1           DMP                             
-                                X2                              
-                                DELDEP                          
+ITERATOR        BONCLR          DLOAD
+                                SLOPESW
+                                FIRSTIME
+                                DEP
+                DSU             NORM
+                                DEPREV
+                                X1
+                PDDL            NORM
+                                DELINDEP
+                                X2
+                XSU,1           DMP
+                                X2
+                                DELDEP
                 SLR*            DDV                             #                               PL UP 2
-                                1,1                             
-                SR1             BOFF                            
-                                ORDERSW                         
-                                SGNCHECK                        
+                                1,1
+                SR1             BOFF
+                                ORDERSW
+                                SGNCHECK
                 ABS             SIGN                            # IN CASE 2ND DERIV. CHANGED SIGN, MUST
                                 DELDEP                          # DISREGARD IT TO FIND MIN.
 
 SGNCHECK        PUSH            BPL                             # TRIAL DELINDEP                PL DOWN 2
-                                POSDEL                          
-                DLOAD           BON                             
-                                INDEP                           
-                                ORDERSW                         
-                                MINCHECK                        
+                                POSDEL
+                DLOAD           BON
+                                INDEP
+                                ORDERSW
+                                MINCHECK
                 STORE           MAX                             # IF NOT 2ND ORDER, CAN MOVE MAX BOUND IN.
 
-MINCHECK        BDSU            DSU                             
-                                MIN                             
-                BOV             BPL                             
-                                MODNGDEL                        
-                                MODNGDEL                        
-                GOTO                                            
-                                DELOK                           
+MINCHECK        BDSU            DSU
+                                MIN
+                BOV             BPL
+                                MODNGDEL
+                                MODNGDEL
+                GOTO
+                                DELOK
 
 MODNGDEL        DLOAD           DSU                             # TRIAL DELINDEP WOULD EXCEED MIN BOUND
-                                MIN                             
-                                INDEP                           
-                DMP             GOTO                            
-                                DP9/10                          
-                                NEWDEL                          
+                                MIN
+                                INDEP
+                DMP             GOTO
+                                DP9/10
+                                NEWDEL
 
-FIRSTIME        DLOAD           DMP                             
-                                MIN                             
+FIRSTIME        DLOAD           DMP
+                                MIN
                                 TWEEKIT                         # DLOAD TWEEKIT(40D) SENSITIVE TO CHANGE.
                 PDDL            DMP                             # S2(41D) SHOULDNT CONTAIN HI ORDER ONES
 ## Page 1175
-                                MAX                             
-                                TWEEKIT                         
-                DSU                                             
-                SIGN            GOTO                            
-                                DELDEP                          
-                                SGNCHECK                        
+                                MAX
+                                TWEEKIT
+                DSU
+                SIGN            GOTO
+                                DELDEP
+                                SGNCHECK
 
-POSDEL          DLOAD           BON                             
-                                INDEP                           
-                                ORDERSW                         
-                                MAXCHECK                        
+POSDEL          DLOAD           BON
+                                INDEP
+                                ORDERSW
+                                MAXCHECK
                 STORE           MIN                             # IF NOT 2ND ORDER, CAN MOVE MIN BOUND IN.
 
-MAXCHECK        BDSU            DSU                             
-                                MAX                             
-                BOV             BMN                             
-                                MODPSDEL                        
-                                MODPSDEL                        
-DELOK           DLOAD                                           
-                                0D                              
-NEWDEL          STORE           DELINDEP                        
-                RVQ                                             
+MAXCHECK        BDSU            DSU
+                                MAX
+                BOV             BMN
+                                MODPSDEL
+                                MODPSDEL
+DELOK           DLOAD
+                                0D
+NEWDEL          STORE           DELINDEP
+                RVQ
 
-MODPSDEL        DLOAD           DSU                             
-                                MAX                             
-                                INDEP                           
-                DMP             GOTO                            
-                                DP9/10                          
-                                NEWDEL                          
+MODPSDEL        DLOAD           DSU
+                                MAX
+                                INDEP
+                DMP             GOTO
+                                DP9/10
+                                NEWDEL
 
-CHECKCTR        CS              ONE                             
-                INDEX           FIXLOC                          
-                AD              ITERCTR                         
-                INDEX           FIXLOC                          
-                TS              ITERCTR                         
-                TS              MPAC                            
-                TC              DANZIG                          
+CHECKCTR        CS              ONE
+                INDEX           FIXLOC
+                AD              ITERCTR
+                INDEX           FIXLOC
+                TS              ITERCTR
+                TS              MPAC
+                TC              DANZIG
 
 ## Page 1176
-NEWSTATE        DLOAD           SR4R                            
-                                R1                              
-                DSU             VXSC                            
-                                XSQC(XI)                        
-                                UR1                             
+NEWSTATE        DLOAD           SR4R
+                                R1
+                DSU             VXSC
+                                XSQC(XI)
+                                UR1
                 VSL1            PDDL                            # 0D=(R1-XSQC(XI))UR1 (+33 OR 31) PL AT 6
-                                X                               
-                DSQ             NORM                            
-                                X1                              
-                DMPR            DMPR                            
-                                1/ROOTMU                        
-                                X                               
-                DMP             SRR*                            
-                                S(XI)                           
-                                0               -7,1            
-                BDSU                                            
-                                T                               
-                SL1             VXSC                            
-                                VVEC                            
+                                X
+                DSQ             NORM
+                                X1
+                DMPR            DMPR
+                                1/ROOTMU
+                                X
+                DMP             SRR*
+                                S(XI)
+                                0               -7,1
+                BDSU
+                                T
+                SL1             VXSC
+                                VVEC
                 VSL1            VAD                             #                               PL AT 0
-                VSL4            PUSH                            
-                ABVAL                                           
-LAMENTER        NORM                                            
-                                X1                              
-                STODL           R2                              
-                                XI                              
-                DMP             DSU                             
-                                S(XI)                           
-                                D1/128                          
-                DMP             SL1R                            
-                                ROOTMU                          
-                DMP             SLR*                            
-                                X                               
-                                0               -3,1            
-                DDV             VXSC                            
-                                R2                              
-                                UR1                             
+                VSL4            PUSH
+                ABVAL
+LAMENTER        NORM
+                                X1
+                STODL           R2
+                                XI
+                DMP             DSU
+                                S(XI)
+                                D1/128
+                DMP             SL1R
+                                ROOTMU
+                DMP             SLR*
+                                X
+                                0               -3,1
+                DDV             VXSC
+                                R2
+                                UR1
                 VSL1            PDDL                            # 6D=V2VEC PART (+15 OR 13)     PL AT 12
-                                XSQC(XI)                        
-                SLR*            DDV                             
-                                0               -4,1            
-                                R2                              
-                BDSU                                            
-                                D1/256                          
+                                XSQC(XI)
+                SLR*            DDV
+                                0               -4,1
+                                R2
+                BDSU
+                                D1/256
                 VXSC            VAD                             #                               PL AT 6
-                                VVEC                            
-                VSL8            RVQ                             
+                                VVEC
+                VSL8            RVQ
 
 ## Page 1177
-                SETLOC          CONICS1                         
-                BANK                                            
+                SETLOC          CONICS1
+                BANK
 
-                COUNT*          $$/CONIC                        
+                COUNT*          $$/CONIC
 # DO NOT DISTURB THE ORDER OF THESE CDS, OVERLAYS HAVE BEEN MADE.
 BEE17           DEC             0                               # KEEP WITH D1/8 2DEC 1.0B-17 (0000004000)
-D1/8            2DEC            1.0             B-3             
-D1/128          2DEC            1.0             B-7             
-D1/64           2DEC            1.0             B-6             
-D1/4            2DEC            1.0             B-2             
-D1/16           2DEC            1.0             B-4             
-D1/32           2DEC            1.0             B-5             
-D1/1024         2DEC            1.0             B-10            
-D1/256          2DEC            1.0             B-8             
-DP9/10          2DEC            .9                              
-KEPZERO         EQUALS          LO6ZEROS                        
--50SC           2DEC            -50.0           B-12            
-2PISC           2DEC            6.28318530      B-6             
+D1/8            2DEC            1.0             B-3
+D1/128          2DEC            1.0             B-7
+D1/64           2DEC            1.0             B-6
+D1/4            2DEC            1.0             B-2
+D1/16           2DEC            1.0             B-4
+D1/32           2DEC            1.0             B-5
+D1/1024         2DEC            1.0             B-10
+D1/256          2DEC            1.0             B-8
+DP9/10          2DEC            .9
+KEPZERO         EQUALS          LO6ZEROS
+-50SC           2DEC            -50.0           B-12
+2PISC           2DEC            6.28318530      B-6
 BEE19           EQUALS          D1/32           -1              # 2DEC 1.0 B-19 (00000 01000)
 BEE22           EQUALS          D1/256          -1              # 2DEC 1.0 B-22 (00000 00100)
-ONEBIT          2DEC            1.0             B-28            
-COGUPLIM        2DEC            .999511597                      
-COGLOLIM        2DEC            -.999511597                     
+ONEBIT          2DEC            1.0             B-28
+COGUPLIM        2DEC            .999511597
+COGLOLIM        2DEC            -.999511597
 
 ## Page 1178
-                SETLOC          CONICS                          
-                BANK                                            
+                SETLOC          CONICS
+                BANK
 
-                COUNT*          $$/CONIC                        
+                COUNT*          $$/CONIC
 TIMETHET        STQ             SETPD                           #                               PL AT 0
-                                RTNTT                           
-                                0                               
-                BOV                                             
-                                +1                              
+                                RTNTT
+                                0
+                BOV
+                                +1
                 VLOAD           PDVL                            # SETUP FOR PARAM CALL          PL AT 6
-                                RVEC                            
-                                VVEC                            
-                CALL                                            
-                                PARAM                           
+                                RVEC
+                                VVEC
+                CALL
+                                PARAM
                 BOV             CALL                            #                               PL AT 0
-                                COGAOVFL                        
-                                GETX                            
-COMMNOUT        DLOAD           BON                             
-                                XI                              
-                                INFINFLG                        
-                                ABTCONIC                        
-                CLEAR           CALL                            
-                                COGAFLAG                        
-                                DELTIME                         
-                BON             CALL                            
-                                RVSW                            
-                                RTNTT                           
-                                NEWSTATE                        
-                GOTO                                            
-                                RTNTT                           
+                                COGAOVFL
+                                GETX
+COMMNOUT        DLOAD           BON
+                                XI
+                                INFINFLG
+                                ABTCONIC
+                CLEAR           CALL
+                                COGAFLAG
+                                DELTIME
+                BON             CALL
+                                RVSW
+                                RTNTT
+                                NEWSTATE
+                GOTO
+                                RTNTT
 
-COGAOVFL        SETGO                                           
-                                COGAFLAG                        
-                                ABTCONIC                        
+COGAOVFL        SETGO
+                                COGAFLAG
+                                ABTCONIC
 
-                BANK            4                               
-                SETLOC          CONICS1                         
-                BANK                                            
-                COUNT*          $$/CONIC                        
+                BANK            4
+                SETLOC          CONICS1
+                BANK
+                COUNT*          $$/CONIC
 PARAM           STQ             CLEAR                           # MPAC=V1VEC, 0D=R1VEC          PL AT 6
-                                RTNPRM                          
-                                NORMSW                          
-                CLEAR                                           
-                                COGAFLAG                        
-                SSP             CALL                            
-                                GEOMSGN                         
+                                RTNPRM
+                                NORMSW
+                CLEAR
+                                COGAFLAG
+                SSP             CALL
+                                GEOMSGN
                                 37777                           # GAMMA ALWAYS LESS THAN 180DEG
                                 GEOM                            # MPAC=SNGA (+1), 0D=CSGA (+1)  PL AT 2
                 STODL           36D                             # 36D=SIN GAMMA (+1)            PL AT 0
-                SR              DDV                             
+                SR              DDV
 ## Page 1179
-                                5                               
-                                36D                             
-                STOVL*          COGA                            
-                                MUTABLE,1                       
-                STODL           1/MU                            
-                                MAGVEC2                         
-                DSQ             NORM                            
-                                X1                              
-                DMPR            DMP                             
-                                1/MU                            
-                                R1                              
-                SRR*                                            
-                                0               -3,1            
+                                5
+                                36D
+                STOVL*          COGA
+                                MUTABLE,1
+                STODL           1/MU
+                                MAGVEC2
+                DSQ             NORM
+                                X1
+                DMPR            DMP
+                                1/MU
+                                R1
+                SRR*
+                                0               -3,1
                 PUSH            BDSU                            # 0D=R1 V1SQ/MU (+6)            PL AT 2
-                                D1/32                           
+                                D1/32
                 STODL           R1A                             # R1A (+6)                      PL AT 0
 
-                DMP             NORM                            
-                                36D                             
-                                X1                              
-                DMP             SR*                             
-                                36D                             
-                                0               -4,1            
+                DMP             NORM
+                                36D
+                                X1
+                DMP             SR*
+                                36D
+                                0               -4,1
                 STORE           P                               # P (+4)
-                GOTO                                            
-                                RTNPRM                          
+                GOTO
+                                RTNPRM
 
 ## Page 1180
 GEOM            UNIT                                            # MPAC=V2VEC, 0D=R1VEC          PL AT 6
                 STODL           U2                              # U2 (+1)
-                                36D                             
+                                36D
                 STOVL           MAGVEC2                         #                               PL AT 0
-                UNIT                                            
+                UNIT
                 STORE           UR1                             # UR1 (+1)
-                DOT             SL1                             
-                                U2                              
+                DOT             SL1
+                                U2
                 PDDL                                            # OD=CSTH (+1)                  PL AT 2
-                                36D                             
+                                36D
                 STOVL           R1                              # R1 (+29 OR +27)
-                                UR1                             
-                VXV             VSL1                            
-                                U2                              
-                BON             SIGN                            
-                                NORMSW                          
-                                HAVENORM                        
-                                GEOMSGN                         
-                UNIT            BOV                             
-                                COLINEAR                        
+                                UR1
+                VXV             VSL1
+                                U2
+                BON             SIGN
+                                NORMSW
+                                HAVENORM
+                                GEOMSGN
+                UNIT            BOV
+                                COLINEAR
 UNITNORM        STODL           UN                              # UN (+1)
-                                36D                             
+                                36D
                 SIGN            RVQ                             # MPAC=SNTH (+1), 34D=SNTH.SNTH (+2)
-                                GEOMSGN                         
+                                GEOMSGN
 
-COLINEAR        VSR1            GOTO                            
-                                UNITNORM                        
+COLINEAR        VSR1            GOTO
+                                UNITNORM
 
-HAVENORM        ABVAL           SIGN                            
-                                GEOMSGN                         
+HAVENORM        ABVAL           SIGN
+                                GEOMSGN
                 RVQ                                             # MPAC=SNTH (+1), 34D=SNTH.SNTH (+2)
 
 ## Page 1181
-                BANK            12                              
-                SETLOC          CONICS                          
-                BANK                                            
+                BANK            12
+                SETLOC          CONICS
+                BANK
 
-                COUNT*          $$/CONIC                        
+                COUNT*          $$/CONIC
 GETX            AXT,2           SSP                             # ASSUMES P (+4) IN MPAC
-                                3                               
-                                S2                              
-                                1                               
-                CLEAR                                           
-                                360SW                           
+                                3
+                                S2
+                                1
+                CLEAR
+                                360SW
                 SQRT            PDDL                            # 0D=SQRT(P)                    PL AT 2
-                                CSTH                            
-                SR1             BDSU                            
-                                D1/4                            
+                                CSTH
+                SR1             BDSU
+                                D1/4
                 PDDL            SRR                             #                               PL AT 4D
-                                SNTH                            
-                                6                               
+                                SNTH
+                                6
                 DDV                                             #                               PL AT 2
-                BOV                                             
-                                360CHECK                        
-                DSU             DMP                             
+                BOV
+                                360CHECK
+                DSU             DMP
                                 COGA                            #                               PL AT 0
-                SL2R            BOV                             
-                                360CHECK                        
+                SL2R            BOV
+                                360CHECK
 WLOOP           PUSH            DSQ                             # 0D=W (+5)                     PL AT 2
                 TLOAD           PDDL                            # 2D=WSQ (+10)                  PL AT 5
-                                MPAC                            
-                                R1A                             
+                                MPAC
+                                R1A
                 SR4             TAD                             #                               PL AT 2
-                BMN             SQRT                            
-                                INFINITY                        
+                BMN             SQRT
+                                INFINITY
                 ROUND           DAD                             #                               PL AT 0D
-                BOV             TIX,2                           
-                                RESETX2                         
-                                WLOOP                           
+                BOV             TIX,2
+                                RESETX2
+                                WLOOP
 
-                BDDV            BOV                             
-                                D1/128                          
-                                INFINITY                        
+                BDDV            BOV
+                                D1/128
+                                INFINITY
 POLYCOEF        BMN             PUSH                            # 0D=1/W (+2) OR 16/W (+6)      PL AT 2
-                                INFINITY                        
-                DSQ                                             
-                NORM            DMP                             
-                                X1                              
-                                R1A                             
-                SRR*            EXIT                            
-                                0               -10D,1          
-                TC              POLY                            
+                                INFINITY
+                DSQ
+                NORM            DMP
+                                X1
+                                R1A
+                SRR*            EXIT
+                                0               -10D,1
+                TC              POLY
 ## Page 1182
-                DEC             5                               
-                2DEC            .5                              
-                2DEC            -.166666770                     
-                2DEC            .100000392                      
-                2DEC            -.071401086                     
-                2DEC            .055503292                      
-                2DEC            -.047264098                     
-                2DEC            .040694204                      
+                DEC             5
+                2DEC            .5
+                2DEC            -.166666770
+                2DEC            .100000392
+                2DEC            -.071401086
+                2DEC            .055503292
+                2DEC            -.047264098
+                2DEC            .040694204
 
-                TC              INTPRET                         
+                TC              INTPRET
                 DMP             SL1R                            #                               PL AT 0D
-                PUSH            BON                             
-                                360SW                           
-                                TRUE360X                        
-XCOMMON         DSQ             NORM                            
-                                X1                              
-                DMP             SRR*                            
-                                R1A                             
-                                0               -12D,1          
+                PUSH            BON
+                                360SW
+                                TRUE360X
+XCOMMON         DSQ             NORM
+                                X1
+                DMP             SRR*
+                                R1A
+                                0               -12D,1
                 STODL           XI                              # XI (+6)
-                                R1                              
-                SR1             SQRT                            
-                ROUND           DMP                             
+                                R1
+                SR1             SQRT
+                ROUND           DMP
                 SL4R                                            #                               PL AT 0
                 STORE           X                               # X (+17 OR +16)
 
-                DSQ             NORM                            
-                                X1                              
+                DSQ             NORM
+                                X1
                 PDDL            DMP                             # 0D=XSQ (+34 OR +32 -N1)       PL AT 2
-                                P                               
-                                R1                              
-                SL3             SQRT                            
-                DMP             SL3R                            
-                                COGA                            
-                STODL           KEPC1                           
-                                R1A                             
-                BDSU            CLEAR                           
-                                D1/64                           
-                                INFINFLG                        
-                STORE           KEPC2                           
-                RVQ                                             
+                                P
+                                R1
+                SL3             SQRT
+                DMP             SL3R
+                                COGA
+                STODL           KEPC1
+                                R1A
+                BDSU            CLEAR
+                                D1/64
+                                INFINFLG
+                STORE           KEPC2
+                RVQ
 
 ## Page 1183
-RESETX2         AXT,2                                           
-                                3                               
+RESETX2         AXT,2
+                                3
 
-360CHECK        SETPD           BPL                             
-                                0D                              
-                                INVRSEQN                        
-                SET                                             
-                                360SW                           
+360CHECK        SETPD           BPL
+                                0D
+                                INVRSEQN
+                SET
+                                360SW
 
-INVRSEQN        DLOAD           SQRT                            
-                                P                               
+INVRSEQN        DLOAD           SQRT
+                                P
                 PDDL            DMP                             # 0D=SQRT(P) (+2)               PL AT 2
-                                SNTH                            
-                                COGA                            
+                                SNTH
+                                COGA
                 SL1             PDDL                            # 2D=SNTH COGA (+5)             PL AT 4
-                                CSTH                            
-                SR4             DAD                             
-                                D1/32                           
+                                CSTH
+                SR4             DAD
+                                D1/32
                 DSU             DMP                             #                               PL AT 2,0
-                NORM            BDDV                            
-                                X1                              
-                                SNTH                            
+                NORM            BDDV
+                                X1
+                                SNTH
                 SLR*            ABS                             # NOTE: NEAR 360 CASE TREATED DIFFERENTLY
-                                0               -5,1            
+                                0               -5,1
                 PUSH            DSQ                             # 0D=1/W (-1)                   PL AT 2
-                STODL           34D                             
-                                D1/16                           
+                STODL           34D
+                                D1/16
 1/WLOOP         PUSH            DSQ                             # 2D=G (+4)                     PL AT 4
                 RTB             PDDL                            #                               PL AT 7
-                                TPMODE                          
-                                R1A                             
-                DMP             SR4                             
-                                34D                             
+                                TPMODE
+                                R1A
+                DMP             SR4
+                                34D
                 TAD                                             #                               PL AT 4
-                BMN             SQRT                            
-                                INFINITY                        
+                BMN             SQRT
+                                INFINITY
                 DAD                                             #                               PL AT 2
-                TIX,2           NORM                            
-                                1/WLOOP                         
-                                X1                              
-                BDDV                                            
+                TIX,2           NORM
+                                1/WLOOP
+                                X1
+                BDDV
                 SLR*            GOTO                            #                               PL AT 0
-                                0               -7,1            
-                                POLYCOEF                        
+                                0               -7,1
+                                POLYCOEF
 
-TRUE360X        DLOAD           BMN                             
-                                R1A                             
+TRUE360X        DLOAD           BMN
+                                R1A
 ## Page 1184
-                                INFINITY                        
-                SQRT            NORM                            
-                                X1                              
-                BDDV            SL*                             
-                                2PISC                           
-                                0               -3,1            
+                                INFINITY
+                SQRT            NORM
+                                X1
+                BDDV            SL*
+                                2PISC
+                                0               -3,1
                 DSU             PUSH                            # 0D=2PI/SQRT(R1A) -X           PL AT 0,2
-                GOTO                                            
-                                XCOMMON                         
+                GOTO
+                                XCOMMON
 INFINITY        SETPD           BOV                             # NO SOLUTION EXISTS SINCE CLOSURE THROUGH
                                 0                               # INFINITY IS REQUIRED
-                                OVFLCLR                         
-OVFLCLR         SET             RVQ                             
-                                INFINFLG                        
+                                OVFLCLR
+OVFLCLR         SET             RVQ
+                                INFINFLG
 
 ## Page 1185
-LAMBERT         STQ             SETPD                           
-                                RTNLAMB                         
-                                0D                              
-                BOV                                             
-                                +1                              
-                CLEAR           VLOAD*                          
-                                SOLNSW                          
-                                MUTABLE,1                       
-                STODL           1/MU                            
-                                TDESIRED                        
-                DMPR                                            
-                                BEE19                           
-                STORE           EPSILONL                        
-                SET             VLOAD                           
-                                SLOPESW                         
-                                R1VEC                           
+LAMBERT         STQ             SETPD
+                                RTNLAMB
+                                0D
+                BOV
+                                +1
+                CLEAR           VLOAD*
+                                SOLNSW
+                                MUTABLE,1
+                STODL           1/MU
+                                TDESIRED
+                DMPR
+                                BEE19
+                STORE           EPSILONL
+                SET             VLOAD
+                                SLOPESW
+                                R1VEC
                 PDVL            CALL                            # 0D=R1VEC (+29 OR +27)         PL AT 6
                                 R2VEC                           # MPAC=R2VEC (+29 OR +27)
-                                GEOM                            
+                                GEOM
                 STODL           SNTH                            # 0D=CSTH (+1)                  PL AT 2
-                                MAGVEC2                         
+                                MAGVEC2
                 NORM            PDDL                            #                               PL AT 4
-                                X1                              
-                                R1                              
+                                X1
+                                R1
                 SR1             DDV                             #                               PL AT 2
                 SL*             PDDL                            # DXCH WITH 0D, 0D=R1/R2 (+7)   PL AT 0,2
-                                0               -6,1            
-                STADR                                           
+                                0               -6,1
+                STADR
                 STORE           CSTH                            # CSTH (+1)
-                SR1             BDSU                            
-                                D1/4                            
+                SR1             BDSU
+                                D1/4
                 STORE           1-CSTH                          # 1-CSTH (+2)
 
-                ROUND           BZE                             
-                                360LAMB                         
+                ROUND           BZE
+                                360LAMB
                 NORM            PDDL                            #                               PL AT 4
-                                X1                              
-                                0D                              
+                                X1
+                                0D
                 SR1             DDV                             #                               PL AT 2
-                SL*             SQRT                            
-                                0               -3,1            
+                SL*             SQRT
+                                0               -3,1
                 PDDL            SR                              # 2D=SQRT(2R1/R2(1-CSTH)) (+5)  PL AT 4
-                                SNTH                            
-                                6                               
+                                SNTH
+                                6
                 DDV             DAD                             #                               PL AT 2
-                                1-CSTH                          
-                STADR                                           
-                STORE           COGAMAX                         
+                                1-CSTH
+                STADR
+                STORE           COGAMAX
                 BOV             BMN                             # IF OVFL, COGAMAX=COGUPLIM
                                 UPLIM                           # IF NEG, USE EVEN IF LT COGLOLIM, SINCE
 ## Page 1186
                                 MAXCOGA                         #   THIS WOULD BE RESET IN LAMBLOOP
                 DSU             BMN                             # IF COGAMAX GT COGUPLIM, COGAMAX=COGUPLIM
-                                COGUPLIM                        
+                                COGUPLIM
                                 MAXCOGA                         # OTHERWISE OK, SO GO TO MAXCOGA
-UPLIM           DLOAD                                           
+UPLIM           DLOAD
                                 COGUPLIM                        # COGUPLIM=.999511597 = MAX VALUE OF COGA
                 STORE           COGAMAX                         #   NOT CAUSING OVFL IN R1A CALCULATION
-MAXCOGA         DLOAD                                           
-                                CSTH                            
+MAXCOGA         DLOAD
+                                CSTH
                 SR              DSU                             #                               PL AT 0
-                                6                               
-                STADR                                           
-                STODL           CSTH-RHO                        
-                                GEOMSGN                         
-                BMN             DLOAD                           
-                                LOLIM                           
-                                CSTH-RHO                        
-                SL1             DDV                             
-                                SNTH                            
-                BOV                                             
-                                LOLIM                           
+                                6
+                STADR
+                STODL           CSTH-RHO
+                                GEOMSGN
+                BMN             DLOAD
+                                LOLIM
+                                CSTH-RHO
+                SL1             DDV
+                                SNTH
+                BOV
+                                LOLIM
 MINCOGA         STORE           COGAMIN                         # COGAMIN (+5)
-                BON             SSP                             
-                                GUESSW                          
-                                NOGUESS                         
-                                TWEEKIT                         
-                                00001                           
-                DLOAD                                           
-                                COGA                            
+                BON             SSP
+                                GUESSW
+                                NOGUESS
+                                TWEEKIT
+                                00001
+                DLOAD
+                                COGA
 
-LAMBLOOP        DMP                                             
-                                SNTH                            
-                SR1             DSU                             
-                                CSTH-RHO                        
+LAMBLOOP        DMP
+                                SNTH
+                SR1             DSU
+                                CSTH-RHO
                 NORM            PDDL                            # 0D=SNTH COGA-(CSTH-RHO) (+7+C(X1)) PL=2
-                                X1                              
-                                1-CSTH                          
+                                X1
+                                1-CSTH
                 SL*             DDV                             # 1-CSTH (+2)                   PL AT 0
-                                0               -9D,1           
-                BMN             BZE                             
-                                NEGP                            
-                                NEGP                            
+                                0               -9D,1
+                BMN             BZE
+                                NEGP
+                                NEGP
                 STODL           P                               # P=(1-CSTH)/(SNTH COGA-(CSTH-RHO)) (+4)
-                                COGA                            
-                DSQ             DAD                             
-                                D1/1024                         
-                NORM            DMP                             
-                                X1                              
-                                P                               
+                                COGA
+                DSQ             DAD
+                                D1/1024
+                NORM            DMP
+                                X1
+                                P
 ## Page 1187
-                SR*             BDSU                            
-                                0               -8D,1           
-                                D1/32                           
+                SR*             BDSU
+                                0               -8D,1
+                                D1/32
                 STODL           R1A                             # R1A=2-P(1+COGA COGA) (+6)
-                                P                               
-                BOV             CALL                            
-                                HIENERGY                        
-                                GETX                            
-                DLOAD                                           
-                                T                               
-                STODL           TPREV                           
-                                XI                              
-                BON             CALL                            
-                                INFINFLG                        
+                                P
+                BOV             CALL
+                                HIENERGY
+                                GETX
+                DLOAD
+                                T
+                STODL           TPREV
+                                XI
+                BON             CALL
+                                INFINFLG
                                 NEGP                            # HAVE EXCEEDED THEORETICAL BOUNDS
-                                DELTIME                         
-                BOV             BDSU                            
-                                BIGTIME                         
-                                TDESIRED                        
-                STORE           TERRLAMB                        
-                ABS             BDSU                            
-                                EPSILONL                        
-                BPL             RTB                             
-                                INITV                           
-                                CHECKCTR                        
-                BHIZ            BCN                            
-                                SUFFCHEK                        
+                                DELTIME
+                BOV             BDSU
+                                BIGTIME
+                                TDESIRED
+                STORE           TERRLAMB
+                ABS             BDSU
+                                EPSILONL
+                BPL             RTB
+                                INITV
+                                CHECKCTR
+                BHIZ            BON
+                                SUFFCHEK
                                 SLOPESW
-                                GOITER                     
-                DLOAD           DSU                             
+                                GOITER
+                DLOAD           DSU
                                 T
                                 TPREV
-                BZE                           
-                                SUFFCHEK 
+                BZE
+                                SUFFCHEK
 GOITER          CALL
                                 ITERATOR
                 DLOAD           BZE
                                 MPAC
-                                SUFFCHEK                       
-                DAD                                             
-                                COGA                            
-                STORE           COGA                            
-                GOTO                                            
-                                LAMBLOOP       
+                                SUFFCHEK
+                DAD
+                                COGA
+                STORE           COGA
+                GOTO
+                                LAMBLOOP
 
 
-NEGP		DLOAD		BPL				# IMPOSSIBLE TRAJECTORY DUE TO INACCURATE
-				DCOGA				# BOUND CALCULATION. TRY NEW COGA.
-				LOENERGY                 
+NEGP            DLOAD           BPL                             # IMPOSSIBLE TRAJECTORY DUE TO INACCURATE
+                                DCOGA                           # BOUND CALCULATION. TRY NEW COGA.
+                                LOENERGY
 
 ## Page 1188
 HIENERGY        SETPD           DLOAD                           # HIGH ENERGY TRAJECTORY RESULTED
-                                0                               
+                                0
                                 COGA                            # IN OVFL OF P OR R1A, OR XI EXCEEDING 50.
                 STORE           COGAMIN                         # THIS IS THE NEW BOUND.
-COMMONLM        DLOAD           SR1                             
-                                DCOGA                           
+COMMONLM        DLOAD           SR1
+                                DCOGA
 
                 STORE           DCOGA                           # USE DCOGA/2 AS DECREMENT
-                BZE             BDSU                            
-                                SUFFCHEK                        
-                                COGA                            
-                STORE           COGA                            
+                BZE             BDSU
+                                SUFFCHEK
+                                COGA
+                STORE           COGA
                 GOTO                                            # RESTART THIS LOOP
-                                LAMBLOOP                        
+                                LAMBLOOP
 
-BIGTIME         DLOAD                                           
-                                TPREV                           
-                STORE           T                               
+BIGTIME         DLOAD
+                                TPREV
+                STORE           T
 
 LOENERGY        SETPD           DLOAD                           # LOW ENERGY TRAJECTORY RESULTED
-                                0                               
+                                0
                                 COGA                            # IN OVERFLOW OF TIME.
                 STORE           COGAMAX                         # THIS IS THE NEW BOUND.
-                GOTO                                            
-                                COMMONLM                        
+                GOTO
+                                COMMONLM
 
-SUFFCHEK        DLOAD           ABS                             
-                                TERRLAMB                        
+SUFFCHEK        DLOAD           ABS
+                                TERRLAMB
                 PDDL            DMP                             #                               PL AT 2D
-                                TDESIRED                        
-                                BEE17                           
+                                TDESIRED
+                                BEE17
                 DAD             DSU                             #                               PL AT 0D
-                                ONEBIT                          
-                BPL             SETGO                           
-                                INITV                           
-                                SOLNSW                          
-                                INITV                           
+                                ONEBIT
+                BPL             SETGO
+                                INITV
+                                SOLNSW
+                                INITV
 360LAMB         SETPD           SETGO                           # LAMBERT CANNOT HANDLE CSTH=1
-                                0                               
-                                SOLNSW                          
-                                RTNLAMB                         
+                                0
+                                SOLNSW
+                                RTNLAMB
 
-NOGUESS         SSP             DLOAD                           
-                                TWEEKIT                         
-                                20000                           
-                                COGAMIN                         
+NOGUESS         SSP             DLOAD
+                                TWEEKIT
+                                20000
+                                COGAMIN
                 SR1             PDDL                            #                               PL AT 2
 ## Page 1189
-                                COGAMAX                         
-                SR1             DAD                             
+                                COGAMAX
+                SR1             DAD
                 STADR                                           #                               PL AT 0
-                STORE           COGA                            
-                STORE           DCOGA                           
-                GOTO                                            
-                                LAMBLOOP                        
+                STORE           COGA
+                STORE           DCOGA
+                GOTO
+                                LAMBLOOP
 
-LOLIM           DLOAD           GOTO                            
+LOLIM           DLOAD           GOTO
                                 COGLOLIM                        # COGLOLIM=-.999511597
-                                MINCOGA                         
+                                MINCOGA
 
-INITV           DLOAD           NORM                            
-                                R1                              
-                                X1                              
+INITV           DLOAD           NORM
+                                R1
+                                X1
                 PDDL            SR1                             #                               PL AT 2
-                                P                               
+                                P
                 DDV                                             #                               PL AT 0
-                SL*             SQRT                            
-                                0               -4,1            
-                DMP             SL1                             
-                                ROOTMU                          
+                SL*             SQRT
+                                0               -4,1
+                DMP             SL1
+                                ROOTMU
                 PUSH            DMP                             # 0D=VTAN (+7)                  PL AT 2
-                                COGA                            
-                SL              VXSC                            
-                                5                               
-                                UR1                             
+                                COGA
+                SL              VXSC
+                                5
+                                UR1
                 PDDL                                            # XCH WITH 0D                   PL AT 0,6
-                VXSC            VSL1                            
-                                UN                              
+                VXSC            VSL1
+                                UN
                 VXV             VAD                             #                               PL AT 0
-                                UR1                             
-                VSL1                                            
-                STORE           VVEC                            
-                SLOAD           BZE                             
-                                VTARGTAG                        
-                                TARGETV                         
-                GOTO                                            
-                                RTNLAMB                         
+                                UR1
+                VSL1
+                STORE           VVEC
+                SLOAD           BZE
+                                VTARGTAG
+                                TARGETV
+                GOTO
+                                RTNLAMB
 
-TARGETV         DLOAD           CALL                            
-                                MAGVEC2                         
-                                LAMENTER                        
-                STORE           VTARGET                         
-                GOTO                                            
-                                RTNLAMB                         
+TARGETV         DLOAD           CALL
+                                MAGVEC2
+                                LAMENTER
+                STORE           VTARGET
+                GOTO
+                                RTNLAMB
 
 ## Page 1190
 TIMERAD         STQ             SETPD                           #                               PL AT 0
-                                RTNTR                           
-                                0                               
-                BOV                                             
-                                +1                              
+                                RTNTR
+                                0
+                BOV
+                                +1
                 VLOAD           PDVL                            #                               PL AT 6
-                                RVEC                            
-                                VVEC                            
-                CALL                                            
-                                PARAM                           
+                                RVEC
+                                VVEC
+                CALL
+                                PARAM
                 BOV             DLOAD                           #                               PL AT 0
-                                COGAOVFL                        
-                                D1/32                           
-                DSU             DMP                             
-                                R1A                             
-                                P                               
-                SQRT            DMP                             
-                                COGA                            
-                SL4             VXSC                            
-                                U2                              
+                                COGAOVFL
+                                D1/32
+                DSU             DMP
+                                R1A
+                                P
+                SQRT            DMP
+                                COGA
+                SL4             VXSC
+                                U2
                 PDDL            DSU                             #                               PL AT 6
-                                D1/64                           
-                                R1A                             
+                                D1/64
+                                R1A
                 VXSC            VSU                             #                               PL AT 0
-                                UR1                             
-                VSL4            UNIT                            
-                BOV                                             
-                                CIRCULAR                        
+                                UR1
+                VSL4            UNIT
+                BOV
+                                CIRCULAR
                 PDDL            NORM                            # 0D=UNIT(ECC) (+3)             PL AT 6
                                 RDESIRED                        # 36D=ECC (+3)
-                                X1                              
+                                X1
                 PDDL            DMP                             #                               PL AT 8
-                                R1                              
-                                P                               
+                                R1
+                                P
                 SL*             DDV                             #                               PL AT 6
-                                0,1                             
-                DSU             DDV                             
-                                D1/16                           
+                                0,1
+                DSU             DDV
+                                D1/16
                                 36D                             # 36D=ECC (+3)
-                STORE           COSF                            
-                BOV             DSQ                             
-                                BADR2                           
-                BDSU            BMN                             
-                                D1/4                            
-                                BADR2                           
-                SQRT            SIGN                            
-                                SGNRDOT                         
-                CLEAR                                           
-                                APSESW                          
+                STORE           COSF
+                BOV             DSQ
+                                BADR2
+                BDSU            BMN
+                                D1/4
+                                BADR2
+                SQRT            SIGN
+                                SGNRDOT
+                CLEAR
+                                APSESW
 ## Page 1191
-TERMNVEC        VXSC            VSL1                            
-                                UN                              
+TERMNVEC        VXSC            VSL1
+                                UN
                 VXV             PDVL                            # VXCH WITH 0D                  PL AT 0,6
-                                0D                              
+                                0D
                 VXSC            VAD                             #                               PL AT 0
-                                COSF                            
+                                COSF
                 VSL1            PUSH                            # 0D=U2                         PL AT 6
 
                 DOT             DDV                             # LIMITS RESULT TO POSMAX OR NEGMAX
-                                UR1                             
-                                DP1/4                           
+                                UR1
+                                DP1/4
                 SR1             BOV                             # SCALE BACK DOWN TO NORMAL
                                 +1                              # CLEAR OVFIND IF SET
                 STOVL           CSTH                            # CSTH (+1)
-                                UR1                             
-                VXV             VSL1                            
-                DOT             SL1                             
-                                UN                              
+                                UR1
+                VXV             VSL1
+                DOT             SL1
+                                UN
                 STODL           SNTH                            # SNTH (+1)
-                                P                               
-                CALL                                            
-                                GETX                            
-                CLRGO                                           
-                                SOLNSW                          
-                                COMMNOUT                        
+                                P
+                CALL
+                                GETX
+                CLRGO
+                                SOLNSW
+                                COMMNOUT
 
-CIRCULAR        SETPD           SETGO                           
-                                0                               
-                                SOLNSW                          
-                                ABTCONIC                        
+CIRCULAR        SETPD           SETGO
+                                0
+                                SOLNSW
+                                ABTCONIC
 
-BADR2           DLOAD           SIGN                            
-                                LODPHALF                        
-                                COSF                            
-                STODL           COSF                            
-                                KEPZERO                         
-                SETGO                                           
-                                APSESW                          
-                                TERMNVEC                        
+BADR2           DLOAD           SIGN
+                                LODPHALF
+                                COSF
+                STODL           COSF
+                                KEPZERO
+                SETGO
+                                APSESW
+                                TERMNVEC
 
 ## Page 1192
 APSIDES         STQ             SETPD                           #                               PL AT 0
-                                RTNAPSE                         
-                                0D                              
-                BOV                                             
-                                +1                              
+                                RTNAPSE
+                                0D
+                BOV
+                                +1
                 VLOAD           PDVL                            #                               PL AT 6
-                                RVEC                            
-                                VVEC                            
-                CALL                                            
-                                PARAM                           
+                                RVEC
+                                VVEC
+                CALL
+                                PARAM
                 BOV                                             #                               PL AT 0
-                                GETECC                          
-GETECC          DMP             SL4                             
-                                R1A                             
-                BDSU            SQRT                            
-                                D1/64                           
-                STORE           ECC                             
+                                GETECC
+GETECC          DMP             SL4
+                                R1A
+                BDSU            SQRT
+                                D1/64
+                STORE           ECC
                 DAD             PDDL                            #                               PL AT 2
-                                D1/8                            
-                                R1                              
-                DMP             SL1                             
-                                P                               
+                                D1/8
+                                R1
+                DMP             SL1
+                                P
                 DDV                                             #                               PL AT 0
                 PDDL            NORM                            # 0D=RP (+29 OR +27)            PL AT 2
-                                R1A                             
-                                X1                              
+                                R1A
+                                X1
                 PDDL            SL*                             #                               PL AT 4
-                                R1                              
-                                0               -5,1            
+                                R1
+                                0               -5,1
                 DDV             DSU                             #                               PL AT 2,0
-                BOV             BMN                             
-                                INFINAPO                        
-                                INFINAPO                        
-                GOTO                                            
-                                RTNAPSE                         
+                BOV             BMN
+                                INFINAPO
+                                INFINAPO
+                GOTO
+                                RTNAPSE
 INFINAPO        DLOAD           GOTO                            # RETURNS WITH APOAPSIS IN MPAC, PERIAPSIS
-                                LDPOSMAX                        
+                                LDPOSMAX
                                 RTNAPSE                         # THAT PL IS AT 0.
 
 ## Page 1193
-ABTCONIC        EXIT                                            
-                TC              POODOO                          
-                OCT             20607                           
+ABTCONIC        EXIT
+                TC              POODOO
+                OCT             20607
 
 LDPOSMAX        EQUALS          LODPMAX                         # DPPOSMAX IN LOW MEMORY.
 
@@ -1745,9 +1747,9 @@ LDPOSMAX        EQUALS          LODPMAX                         # DPPOSMAX IN LO
 # XKEP     ERASE  +1
 # TC       ERASE  +1
 # XPREV    ERASE  +1
-1/MU            EQUALS          14D                             
-ROOTMU          EQUALS          16D                             
-1/ROOTMU        EQUALS          18D                             
+1/MU            EQUALS          14D
+ROOTMU          EQUALS          16D
+1/ROOTMU        EQUALS          18D
 
 #    OUTPUT -
 # RCV      ERASE  +5
@@ -1756,17 +1758,17 @@ ROOTMU          EQUALS          16D
 # XPREV    ERASE  +1
 
 # DEBRIS -
-ALPHA           EQUALS          8D                              
-XMAX            EQUALS          10D                             
-XMIN            EQUALS          12D                             
-X               EQUALS          20D                             
-XI              EQUALS          24D                             
-S(XI)           EQUALS          26D                             
-XSQC(XI)        EQUALS          28D                             
-T               EQUALS          30D                             
-R1              EQUALS          32D                             
-KEPC1           EQUALS          34D                             
-KEPC2           EQUALS          36D                             
+ALPHA           EQUALS          8D
+XMAX            EQUALS          10D
+XMIN            EQUALS          12D
+X               EQUALS          20D
+XI              EQUALS          24D
+S(XI)           EQUALS          26D
+XSQC(XI)        EQUALS          28D
+T               EQUALS          30D
+R1              EQUALS          32D
+KEPC1           EQUALS          34D
+KEPC2           EQUALS          36D
 # DELX     ERASE  +1
 # DELT     ERASE  +1
 # URRECT   ERASE  +5
@@ -1805,8 +1807,8 @@ KEPC2           EQUALS          36D
 # 1-CSTH   ERASE  +1
 # CSTH-RHO ERASE  +1
 COGAMAX         EQUALS          14D                             # CLOBBERS 1/MU
-COGAMIN         EQUALS          8D                              
-DCOGA           EQUALS          12D                             
+COGAMIN         EQUALS          8D
+DCOGA           EQUALS          12D
 # TWEEKIT  EQUALS 40D
 # P        ERASE  +1
 # COGA     ERASE  +1
@@ -1836,7 +1838,7 @@ DCOGA           EQUALS          12D
 # RTNTR    EQUALS RTNLAMB
 # RTNAPSE  EQUALS  RTNLAMB
 # R2       EQUALS MAGVEC2
-COSF            EQUALS          24D                             
+COSF            EQUALS          24D
 # RTNPRM   ERASE  +0
 # SGNRDOT  ERASE  +0
 # RDESIRED ERASE  +1
@@ -1844,16 +1846,16 @@ COSF            EQUALS          24D
 # ITERATOR SUBROUTINE
 # ORDERSW
 MAX             EQUALS          14D                             # CLOBBERS 1/MU
-MIN             EQUALS          8D                              
+MIN             EQUALS          8D
 
 # INDEP    ERASE  +1
-DELINDEP        EQUALS          12D                             
-ITERCTR         EQUALS          22D                             
-DEP             EQUALS          30D                             
+DELINDEP        EQUALS          12D
+ITERCTR         EQUALS          22D
+DEP             EQUALS          30D
 
 # DELDEP   ERASE  +1
 # DEPREV   ERASE  +1
-TWEEKIT         EQUALS          40D                             
+TWEEKIT         EQUALS          40D
 
 
 # MORE KEPLER

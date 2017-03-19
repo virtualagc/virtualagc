@@ -14,10 +14,11 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-01-22 MAS  Created from Luminary 99.
 ##              2017-03-11 HG   Transcribed
-##		2017-03-14 RSB	Proofed comment text via 3-way diff vs
-##				Luminary 99 and 131.
-##		2017-03-16 RSB	Comment-text fixes identified in 5-way
-##				side-by-side diff of Luminary 69/99/116/131/210.
+##              2017-03-14 RSB  Proofed comment text via 3-way diff vs
+##                              Luminary 99 and 131.
+##              2017-03-16 RSB  Comment-text fixes identified in 5-way
+##                              side-by-side diff of Luminary 69/99/116/131/210.
+##              2017-03-19 HG   Fix operator STODL --> STORE
 
 ## Page 919
 # PROGRAM NAME- PROG52                                                                   DATE- JAN 9, 1967
@@ -279,7 +280,7 @@ N89DISP         STQ
                                 ALT
                 STODL           LANDALT
                                 LAT
-                STODL           LANDLAT
+                STORE           LANDLAT
                 EXIT
 
 LSDISP          CAF             V06N89*                         # DISPLAY LAT,LONG/2,ALT
@@ -950,7 +951,7 @@ RDCDUS          INHINT                                          # READ CDUS
                 INDEX           FIXLOC
                 TS              3
                 RELINT
-                TC              DANZIG				#					+
+                TC              DANZIG                          #                                       +
                 COUNT*          $$/INFLT
 
 ## Page 942
