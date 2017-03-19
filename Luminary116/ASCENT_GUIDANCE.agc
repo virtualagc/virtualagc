@@ -278,9 +278,9 @@ CMPONENT        SETPD           BOFF
                                 00D
 
 ## Page 842
-                                P7071FLG                        # IF P7071FLG = 1 (I.E. P70 OR P71)
-                                +3                              #     COMPUTE NEW RP FOR NEXT CYCLE.
-                CALL
+                                P7071FLG                        
+                                +3                              # IF P7071FLG = 1 (I.E. P70 OR P71)
+                CALL                                            #     COMPUTE NEW RP FOR NEXT CYCLE.
                                 RPCOMP2
    +3           DLOAD           DMP
                                 100CS
