@@ -236,7 +236,7 @@ RATES           DLOAD           DSU
 CHKBMAG         SR4             DDV                             # B*2(4)
                                 TBUP                            # (B / TAU) * 2(21)
                 DSU             BPL
-                                PRLIMIT                         # ( B / TAU ) * 2(21) MAX.
+                                PRLIMIT                         # ( B/ TAU) * 2(21) MAX.
                                 PROK
                 DLOAD           DMP
                                 PRLIMIT
@@ -278,9 +278,9 @@ CMPONENT        SETPD           BOFF
                                 00D
 
 ## Page 842
-                                P7071FLG                        # IF P7071FLG = 1 (I.E. P70 OR P71)
-                                +3                              #     COMPUTE NEW RP FOR NEXT CYCLE
-                CALL
+                                P7071FLG                        
+                                +3                              # IF P7071FLG = 1 (I.E. P70 OR P71)
+                CALL                                            #     COMPUTE NEW RP FOR NEXT CYCLE.
                                 RPCOMP2
    +3           DLOAD           DMP
                                 100CS
@@ -298,12 +298,12 @@ CMPONENT        SETPD           BOFF
                 DDV             SL1
                                 TBUP
                 STORE           ATY                             # ATY*2(9)
-                VXSC            PDDL                            # ATY UY*2(8)                   (6)
+                VXSC            PDDL                            # ATY UY*2(8)                          (6)
                                 LAXIS
                                 ATR
-                VXSC            VAD                             #                               (0)
+                VXSC            VAD                             #                                      (0)
                                 UNIT/R/
-                VSL1            PUSH                            # AH*2(9) IN PDL(0)             (6)
+                VSL1            PUSH                            # AH*2(9) IN PDL(0)                    (6)
                 ABVAL           PDDL                            # AH(2) IN PDL(34)
                                 AT                              # AHMAG IN PDL(6)                      (8)
                 DSQ             DSU                             # (AT(2)-AH(2))*2(18)

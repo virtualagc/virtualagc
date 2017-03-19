@@ -14,10 +14,12 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-01-22 MAS  Created from Luminary 99.
 ##              2017-03-11 HG   Transcribed
-##		2017-03-14 RSB	Proofed comment text via 3-way diff vs
-##				Luminary 99 and 131.
-##		2017-03-16 RSB	Comment-text fixes identified in 5-way
-##				side-by-side diff of Luminary 69/99/116/131/210.
+##              2017-03-14 RSB  Proofed comment text via 3-way diff vs
+##                              Luminary 99 and 131.
+##              2017-03-16 RSB  Comment-text fixes identified in 5-way
+##                              side-by-side diff of Luminary 69/99/116/131/210.
+##              2017-03-19 HG   Fix label REREPCS -> REREPOS
+##                              Fix operand XCVINFLG --> XOVINFLG
 
 ## Page 852
                 BANK            37
@@ -746,7 +748,7 @@ MUNRETRN        EXIT
                 CCS             A
                 TCF             R12                             # ALTITUDE > 30KFT
                 TC              UPFLAG                          # ALTITUDE < 30KFT SET X-AXIS OVERRIDE
-                ADRES           XCVINFLG
+                ADRES           XOVINFLG
                 TC              UPFLAG
                 ADRES           XORFLG
 
@@ -1074,7 +1076,7 @@ POSUPDAT        CA              FIXLOC                          # SET PUSHLIST T
                                 V1S                             # SCALE V AT 2(5) M/CS
                 VAD             DOT
                                 DELVS                           # V RELATIVE TO SURFACE AT 2(5) M/CS
-## Note: START (see below)                                
+## Note: START (see below)
                                 0D                              # V ALONG HBEAM AT 2(7) M/CS
                 DMP             EXIT
                                 RADSKAL                         # SCALE TO RADAR COUNTS X 5
@@ -1094,7 +1096,7 @@ POSUPDAT        CA              FIXLOC                          # SET PUSHLIST T
                 DMP             VXSC                            # SLANT RANGE AT 2(21),PUSH UP FOR HBEAM
                                 HSCAL                           # SLANT RANGE VECTOR AT 2(23) M
                 DOT             DSU
-## Note: END (See below)                
+## Note: END (See below)
                                 UNIT/R/                         # ALTITUDE AT 2(24)M
                                 HCALC                           # DELTA H AT 2(24)M
 ## Note: To the right of the comments section two samll drwaing in black ink can be found between
@@ -1102,7 +1104,7 @@ POSUPDAT        CA              FIXLOC                          # SET PUSHLIST T
 ##       All drwaings are excuted in black ink.
 ##       The first drawing is a rectangle which is open at the bottom (big staple, upside down U.)
 ##       At the top, inside of the retangle, is a circle ("face") containing three small circles that are positioned on a
-##       horizontal line through the centers off all the circles. The two circles left and right ("eyes") of the center have 
+##       horizontal line through the centers off all the circles. The two circles left and right ("eyes") of the center have
 ##       a radius of about 1/3rd of the large containing circle while the smallest circle in the center ("nose") has again a radius of about
 ##       1/3rd of the two other circles. To the right and left of the large containing circle within in the surroundin rectangle
 ##       are two (one on each side) small rectangles ("ears") of about 3/4 of the diameter of the large circle's length giving in total
@@ -1111,7 +1113,7 @@ POSUPDAT        CA              FIXLOC                          # SET PUSHLIST T
 ##
 ##       Below this rectangle with circles described above is another small drawing is made up of a short rectangle with an open
 ##       bottom and and the upper side curved up giving it the appearance of a short "tombstone".
-##                                
+##
                 STORE           DELTAH
                 EXIT
 
@@ -1609,7 +1611,7 @@ RDGIMS          EXTEND
 #    RESPECT TO THE NB.  BIT10 OF LRSTAT IS CLEARED TO ALLOW LR
 #    MEASUREMENTS AND THE JOB TERMINATES.
 
-REREPCS         INHINT
+REREPOS         INHINT
                 CS              FLGWRD11
                 MASK            PRIO3
                 ADS             FLGWRD11
