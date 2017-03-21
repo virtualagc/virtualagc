@@ -17,6 +17,7 @@
 ##		2017-03-14 RSB	Comment-text fixes noted in proofing Luminary 116.
 ##		2017-03-16 RSB	Comment-text fixes identified in 5-way
 ##				side-by-side diff of Luminary 69/99/116/131/210.
+##		2017-03-21 RSB	Changed a couple of apostrophes to colons.
 
 ## Page 1062
 
@@ -101,7 +102,7 @@
 #
 #       *-THE TIME TAKEN BY WAITLIST ITSELF AND THE COUNTER TICKING DURING THIS WAITLIST TIME.
 #
-#            IN SHORT, THE ACTUAL TIME TO RETURN CONTROL TO A 2CADR IS AUGMENTED BY THE TIME TO SET UP THE TASK'S
+#            IN SHORT, THE ACTUAL TIME TO RETURN CONTROL TO A 2CADR IS AUGMENTED BY THE TIME TO SET UP THE TASK:S
 #       INTERRUPT, ALL COUNTERS TICKING, THE T3RUPT PROCESSING TIME, THE WAITLIST PROCESSING TIME AND THE POSSIBILITY
 #       OF OTHER TASKS INHIBITING THE INTERRUPT.
 
@@ -451,7 +452,7 @@ LONGCYCL        EXTEND                                          # CAN WE SUCCESF
 
 ## Page 1074                
 
-                NOOP                                            # CAN'T GET HERE **********
+                NOOP                                            # CAN:T GET HERE **********
                 TCF             +1                              
                 CCS             LONGTIME                        
                 TCF             MUCHTIME                        
