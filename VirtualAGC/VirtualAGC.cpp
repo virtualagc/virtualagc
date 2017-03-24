@@ -1,5 +1,5 @@
 /*
- * Copyright 2009,2010,2016 Ronald S. Burkey <info@sandroid.org>
+ * Copyright 2009,2010,2016,2017 Ronald S. Burkey <info@sandroid.org>
  *
  * This file is part of yaAGC.
  *
@@ -80,6 +80,11 @@
  *                              did one thing (namely, call EnforceConsistency()).
  *                              All lingering comments from wxGlade removed.
  *              2016-11-29 RSB  Fixed formation of 'simulate' script for Mac.
+ *              2017-03-24 RSB  Added a SUPERJOB mission type, and activated the
+ *                              Apollo 10 & 12 & 15-17 LM missions.  Also, now have
+ *                              DSKY configurations that I *hope* are tailored to the
+ *                              missions, as opposed to just being LM vs. CM.  This
+ *                              affects only Apollo 15-17 LM, and missions prior to Apollo 7.
  *
  * This file was originally generated using the wxGlade RAD program.
  * However, it is now maintained entirely manually, and cannot be managed
@@ -106,7 +111,9 @@
  * the ID_xxxx constants in VirtualAGC.h that are in the range
  * ID_FIRSTMISSION <= ID_xxxx < ID_AGCCUSTOMBUTTON.  It contains all of the
  * constant data (tooltips, url, etc.) differentiating the various AGC software
- * versions, although a handful of special behaviors may hardcoded separately.
+ * versions, although a handful of special behaviors may be hardcoded separately.
+ * Also, for newly-added missions, don't forget to add a consistency event for it
+ * in the event table near the end of this file.
  */
 static const missionAlloc_t missionConstants[ID_AGCCUSTOMBUTTON
     - ID_FIRSTMISSION] =
@@ -114,88 +121,92 @@ static const missionAlloc_t missionConstants[ID_AGCCUSTOMBUTTON
           //
             { "Apollo 1 Command Module", "",
                 "Click this to select the unflown Apollo 1 mission.", DISABLED,
-                CM, BLOCK1, NO_PERIPHERALS, "" },
+                CM, BLOCK1, NO_PERIPHERALS, "", "CM0.ini" },
             { "AS-202 (\"Apollo 3\") Command Module", "",
                 "Click this to select the AS-202 (\"Apollo 3\") unmanned CM mission.",
-                DISABLED, CM, BLOCK1, NO_PERIPHERALS, "" },
+                DISABLED, CM, BLOCK1, NO_PERIPHERALS, "", "CM0.ini" },
             { "Apollo 4 Command Module", "",
                 "Click this to select the unmanned Apollo 4 Block I CM mission.",
-                DISABLED, CM, BLOCK1, NO_PERIPHERALS, "" },
+                DISABLED, CM, BLOCK1, NO_PERIPHERALS, "", "CM0.ini" },
             { "Apollo 5 Lunar Module", "Sunburst120/MAIN.agc.html",
                 "Click this to select the unmanned Apollo 5 LM mission, running software SUNBURST 120.",
-                ENABLED, LM, BLOCK2, NO_PERIPHERALS, "Sunburst120" },
+                ENABLED, LM, BLOCK2, NO_PERIPHERALS, "Sunburst120", "LM0.ini" },
             { "Apollo 6 Command Module", "Solarium055/MAIN.agc.html",
                 "Click this to select the unmanned Apollo 6 Block 1 CM mission, running software SOLARIUM 55.",
-                ENABLED, CM, BLOCK1, NO_PERIPHERALS, "Solarium055" },
+                ENABLED, CM, BLOCK1, NO_PERIPHERALS, "Solarium055", "CM0.ini" },
             { "Apollo 7 Command Module", "",
                 "Click this to select the Apollo 7 mission.", DISABLED, CM,
-                BLOCK2, PERIPHERALS, "" },
+                BLOCK2, PERIPHERALS, "", "CM.ini" },
             { "Apollo 8 Command Module", "Colossus237/MAIN.agc.html",
                 "Click this to select the Apollo 8 mission, running software COLOSSUS 237.",
-                ENABLED, CM, BLOCK2, PERIPHERALS, "Colossus237" },
+                ENABLED, CM, BLOCK2, PERIPHERALS, "Colossus237", "CM.ini" },
             { "Apollo 9 Command Module", "Colossus249/MAIN.agc.html",
                 "Click this to select the CM for the Apollo 9 mission, running software COLOSSUS 249.",
-                ENABLED, CM, BLOCK2, PERIPHERALS, "Colossus249" },
+                ENABLED, CM, BLOCK2, PERIPHERALS, "Colossus249", "CM.ini" },
             { "Apollo 9 Lunar Module", "",
                 "Click this to select the LM for the Apollo 9 mission.",
-                DISABLED, LM, BLOCK2, PERIPHERALS, "" },
+                DISABLED, LM, BLOCK2, PERIPHERALS, "", "CM.ini"  /* Yes, the CM is intentional */},
             { "Apollo 10 Command Module", "",
                 "Click this to select the CM for the Apollo 10 mission.",
-                DISABLED, CM, BLOCK2, PERIPHERALS, "" },
-            { "Apollo 10 Lunar Module", "",
+                DISABLED, CM, BLOCK2, PERIPHERALS, "", "CM.ini" },
+            { "Apollo 10 Lunar Module", "Luminary069/MAIN.agc.html",
                 "Click this to select the LM for the Apollo 10 mission.",
-                DISABLED, LM, BLOCK2, PERIPHERALS, "" },
+                ENABLED, LM, BLOCK2, PERIPHERALS, "Luminary069", "CM.ini" /* Yes, the CM is intentional */ },
             { "Apollo 11 Command Module", "Comanche055/MAIN.agc.html",
                 "Click this to select the CM for the Apollo 11 mission, running software COMANCHE 55.",
-                ENABLED, CM, BLOCK2, PERIPHERALS, "Comanche055" },
+                ENABLED, CM, BLOCK2, PERIPHERALS, "Comanche055", "CM.ini" },
             { "Apollo 11 Lunar Module", "Luminary099/MAIN.agc.html",
                 "Click this to select the LM for the Apollo 11 mission, running software LUMINARY 99.",
-                ENABLED, LM, BLOCK2, PERIPHERALS, "Luminary099" },
+                ENABLED, LM, BLOCK2, PERIPHERALS, "Luminary099", "LM.ini" },
             { "Apollo 12 Command Module", "",
                 "Click this to select the CM for the Apollo 12 mission.",
-                DISABLED, CM, BLOCK2, PERIPHERALS, "" },
-            { "Apollo 12 Lunar Module", "",
+                DISABLED, CM, BLOCK2, PERIPHERALS, "", "CM.ini" },
+            { "Apollo 12 Lunar Module", "Luminary116/MAIN.agc.html",
                 "Click this to select the LM for the Apollo 12 mission.",
-                DISABLED, LM, BLOCK2, PERIPHERALS, "" },
+                ENABLED, LM, BLOCK2, PERIPHERALS, "Luminary116", "LM.ini" },
             { "Apollo 13 Command Module", "",
                 "Click this to select the CM for the Apollo 13 mission.",
-                DISABLED, CM, BLOCK2, PERIPHERALS, "" },
+                DISABLED, CM, BLOCK2, PERIPHERALS, "", "CM.ini" },
             { "Apollo 13 Lunar Module", "Luminary131/MAIN.agc.html",
                 "Click this to select the LM for the Apollo 13 mission, running software LUMINARY 131.",
-                ENABLED, LM, BLOCK2, PERIPHERALS, "Luminary131" },
+                ENABLED, LM, BLOCK2, PERIPHERALS, "Luminary131", "LM.ini" },
             { "Apollo 14 Command Module", "",
                 "Click this to select the CM for the Apollo 14 mission.",
-                DISABLED, CM, BLOCK2, PERIPHERALS, "" },
+                DISABLED, CM, BLOCK2, PERIPHERALS, "", "CM.ini" },
             { "Apollo 14 Lunar Module", "",
                 "Click this to select the LM for the Apollo 14 mission.",
-                DISABLED, LM, BLOCK2, PERIPHERALS, "" },
+                DISABLED, LM, BLOCK2, PERIPHERALS, "", "LM.ini" },
             { "Apollo 15-17 Command Module", "Artemis072/MAIN.agc.html",
                 "Click this to select the CM for the Apollo 15-17 mission, running software ARTEMIS 72.",
-                ENABLED, CM, BLOCK2, PERIPHERALS, "Artemis072" },
+                ENABLED, CM, BLOCK2, PERIPHERALS, "Artemis072", "CM.ini" },
             { "Apollo 15-17 Lunar Module", "Luminary210/MAIN.agc.html",
                 "Click this to select the LM for the Apollo 15-17 mission.",
-                DISABLED, LM, BLOCK2, PERIPHERALS, "Luminary210" },
+                ENABLED, LM, BLOCK2, PERIPHERALS, "Luminary210", "LM1.ini" },
             { "Apollo Skylab Command Module", "",
                 "Click this to select the Apollo-Soyuz mission.", DISABLED, CM,
-                BLOCK2, PERIPHERALS, "" },
+                BLOCK2, PERIPHERALS, "", "CM.ini" },
             { "Apollo Soyuz Command Module", "",
                 "Click this to select an Apollo-Skylab mission.", DISABLED, CM,
-                BLOCK2, PERIPHERALS, "" },
+                BLOCK2, PERIPHERALS, "", "CM.ini" },
             { "Validation Suite", "Validation/Validation.agc.html",
                 "Click this to select the AGC validation (non-mission) software.",
-                ENABLED, LM, BLOCK2, NO_PERIPHERALS, "Validation" },
+                ENABLED, LM, BLOCK2, NO_PERIPHERALS, "Validation", "LM.ini" },
             { "RETREAD 44 (LM)", "Retread44/MAIN.agc.html",
                 "Click this to select the RETREAD 44 (earliest non-mission LM) software.",
-                DISABLED, LM, BLOCK2, NO_PERIPHERALS, "Retread44" },
+                DISABLED, LM, BLOCK2, NO_PERIPHERALS, "Retread44", "LM0.ini" },
             { "AURORA 12 (LM)", "Aurora12/MAIN.agc.html",
                 "Click this to select the AURORA 12 (early non-mission LM) software.  This is the last AGC version with full testing capabilities.",
-                ENABLED, LM, BLOCK2, NO_PERIPHERALS, "Aurora12" },
+                ENABLED, LM, BLOCK2, NO_PERIPHERALS, "Aurora12", "LM0.ini" },
             { "SUNBURST 39 (LM)", "Sunburst39/MAIN.agc.html",
                 "Click this to select the SUNBURST 39 (early non-mission LM) software.",
-                DISABLED, LM, BLOCK2, NO_PERIPHERALS, "Sunburst39" },
+                DISABLED, LM, BLOCK2, NO_PERIPHERALS, "Sunburst39", "LM0.ini" },
             { "ZERLINA (LM)", "Zerlina/MAIN.agc.html",
                 "Click this to select ZERLINA (next-generation non-mission LM) software.",
-                DISABLED, LM, BLOCK2, PERIPHERALS, "Zerlina" } };
+                DISABLED, LM, BLOCK2, PERIPHERALS, "Zerlina", "LM.ini" },
+            { "SUPER JOB", "SuperJob/MAIN.agc.html",
+                "Click this to select SUPER JOB (Raytheon Auxiliary Memory test) software.  Note that to run meaningfully, a simulated Auxiliary Memory unit (not yet available!) needs to be run also.",
+                ENABLED, CM, BLOCK2, NO_PERIPHERALS, "SuperJob", "CM.ini" }
+      };
 
 // This is the array where shell commands for the Digital Uplink
 // are stored.
@@ -597,6 +608,7 @@ EVT_RADIOBUTTON(ID_RETREAD44BUTTON, VirtualAGC::ConsistencyEvent)
 EVT_RADIOBUTTON(ID_AURORA12BUTTON, VirtualAGC::ConsistencyEvent)
 EVT_RADIOBUTTON(ID_SUNBURST39BUTTON, VirtualAGC::ConsistencyEvent)
 EVT_RADIOBUTTON(ID_ZERLINABUTTON, VirtualAGC::ConsistencyEvent)
+EVT_RADIOBUTTON(ID_SUPERJOBBUTTON, VirtualAGC::ConsistencyEvent)
 EVT_RADIOBUTTON(ID_AGCCUSTOMBUTTON, VirtualAGC::ConsistencyEvent)
 END_EVENT_TABLE();
 
@@ -2454,6 +2466,7 @@ VirtualAGC::FormCommands(void)
     LM_Simulator = wxT("");
   wxString basename;
   int mission;
+  const char *dskyIni;
   for (mission = ID_FIRSTMISSION; mission < ID_AGCCUSTOMBUTTON; mission++)
     if (missionRadioButtons[mission - ID_FIRSTMISSION]->GetValue())
       {
@@ -2468,6 +2481,7 @@ VirtualAGC::FormCommands(void)
         CMorLM = wxString::FromUTF8(
             (missionConstants[mission - ID_FIRSTMISSION].lm == LM) ?
                 "LM" : "CM");
+        dskyIni = missionConstants[mission - ID_FIRSTMISSION].dsky;
         break;
       }
   if (mission >= ID_AGCCUSTOMBUTTON)
@@ -2519,7 +2533,7 @@ VirtualAGC::FormCommands(void)
         }
       else
         {
-          yaAGC += wxT(" --cfg=") + CMorLM + wxT(".ini");
+          yaAGC += wxT(" --cfg=") + wxString::FromUTF8(dskyIni) /*CMorLM + wxT(".ini")*/;
         }
       if (StartupResumeButton->GetValue()
           && wxFileExists(CMorLM + wxT(".core")))
@@ -2539,7 +2553,7 @@ VirtualAGC::FormCommands(void)
       if (block1)
         yaDSKY += wxT(" --port=") + Port;
       else
-        yaDSKY += wxT(" --cfg=") + CMorLM + wxT(".ini --port=") + Port;
+        yaDSKY += wxT(" --cfg=") + wxString::FromUTF8(dskyIni) /* CMorLM + wxT(".ini") */ + wxT(" --port=") + Port;
     }
   return (true);
 }

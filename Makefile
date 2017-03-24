@@ -167,7 +167,7 @@
 #	Use "make" for Linux.
 
 # NVER is the overall version code for the release.
-NVER:=\\\"2016-11-08-working\\\"
+NVER:=\\\"2017-03-24-working\\\"
 DATE:=`date +%Y%m%d`
 
 # DON'T CHANGE THE FOLLOWING SWITCH *********************************

@@ -1,5 +1,5 @@
 /*
- * Copyright 2009,2016 Ronald S. Burkey <info@sandroid.org>
+ * Copyright 2009,2016,2017 Ronald S. Burkey <info@sandroid.org>
  *
  * This file is part of yaAGC.
  *
@@ -43,6 +43,7 @@
  *	        2016-11-10 RSB  Refactored in terms of being a lot simpler to
  *	                        add or edit mission types.  Removed all of the
  *	                        lingering comments inserted by wxGlade.
+ *	        2017-03-24 RSB  Added a SUPERJOB mission type.
  *
  * This file was originally generated using the wxGlade RAD program.
  * However, it is now maintained entirely manually, and any ability to
@@ -138,6 +139,7 @@ enum
   ID_AURORA12BUTTON,
   ID_SUNBURST39BUTTON,
   ID_ZERLINABUTTON,
+  ID_SUPERJOBBUTTON,
   ID_AGCCUSTOMBUTTON,
   ID_AEASIMTYPEBOX = 200,
   ID_FLIGHTPROGRAM4BUTTON,
@@ -193,6 +195,7 @@ typedef struct
   int Block1; // Either BLOCK2 or BLOCK1.
   int noPeripherals; // Either PERIPHERALS or NO_PERIPHERALS (i.e., DSKY only)
   const char basename[32]; // Fragment of name for locating the rope file.
+  const char dsky[16]; // DSKY config file, usually LM.ini or CM.ini. Ignored for Block 1.
 } missionAlloc_t;
 
 class TimerClass : public wxTimer
