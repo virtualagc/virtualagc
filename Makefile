@@ -372,6 +372,7 @@ export MISSIONS
 # Missions needing code::blocks project files.
 cbMISSIONS = Validation Luminary131 Colossus249 Comanche055 
 cbMISSIONS += Luminary099 Artemis072 Colossus237 Aurora12 Sunburst120
+cbMISSIONS += Luminary069 LUM99R2 Luminary116 Luminary210 Retread44 Borealis SuperJob
 cbMISSIONS := $(patsubst %,%.cbp,$(cbMISSIONS))
 
 # The base set of targets to be built always.
@@ -574,6 +575,7 @@ Validation.cbp:
 	mv Validation/temp.txt Validation/$@
 
 %.cbp:
+	@echo Make CBP file $*/$@
 	sed "s/@name@/"$*"/" templateAGC-top.cbp >$*/temp.txt
 	cd $* ; \
 	for n in *.agc ; \
