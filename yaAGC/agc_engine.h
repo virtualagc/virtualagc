@@ -102,6 +102,7 @@
 		03/26/17 RSB	A couple of additional integer types faked up for
 				Win10+Msys specifically, but probably for some other
 				Windows configurations as well.  Thanks to Romain Lamour.
+		03/26/17 MAS	Added previously-static items from agc_engine.c to agc_t.
    
   For more insight, I'd highly recommend looking at the documents
   http://hrst.mit.edu/hrs/apollo/public/archive/1689.pdf and
@@ -360,8 +361,15 @@ typedef struct
   unsigned SbyStillPressed:1;   // Set upon entry to standby, until PRO is released
   unsigned ParityFail:1;        // Set when a parity failure is encountered accessing memory (in yaAGC, just hitting banks 44+)
   unsigned CheckParity:1;       // Enable parity checking for fixed memory.
+  unsigned RestartLight:1;      // The present state of the RESTART light
   uint64_t /*unsigned long long */ DownruptTime;	// Time when next DOWNRUPT occurs.
   int Downlink;
+  int NextZ;                    // Next value for the Z register
+  int ScalerCounter;            // Counter to keep track of scaler increment timing
+  int ChannelRoutineCount;      // Counter to keep track of channel interface routine timing
+  unsigned DskyTimer;           // Timer for DSKY-related timing
+  unsigned DskyFlash;           // DSKY flash counter (0 = flash occurring)
+  unsigned DskyChannel163;      // Copy of the fake DSKY channel 163
   // The following pointer is present for whatever use the Orbiter
   // integration squad wants.  The Virtual AGC code proper doesn't use it
   // in any way.
