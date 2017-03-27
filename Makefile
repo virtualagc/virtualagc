@@ -366,7 +366,7 @@ BUILD = $(MAKE) PREFIX=$(PREFIX) NVER=$(NVER) CFLAGS="$(CFLAGS)" CURSES="$(CURSE
 MISSIONS = Validation Luminary131 Colossus249 Comanche055 
 MISSIONS += Luminary099 Artemis072 Colossus237 Solarium055
 MISSIONS += Aurora12 Sunburst120 Luminary210 Retread44 Luminary069
-MISSIONS += SuperJob LUM99R2 Luminary116
+MISSIONS += SuperJob LUM99R2 Luminary116 Borealis
 export MISSIONS
 
 # Missions needing code::blocks project files.

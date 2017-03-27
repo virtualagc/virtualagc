@@ -85,6 +85,8 @@
  *                              DSKY configurations that I *hope* are tailored to the
  *                              missions, as opposed to just being LM vs. CM.  This
  *                              affects only Apollo 15-17 LM, and missions prior to Apollo 7.
+ *              2017-03-27 RSB  Added LUM99R2 and BOREALIS. Enabled Retread 44, which
+ *                              was disabled for some reason.
  *
  * This file was originally generated using the wxGlade RAD program.
  * However, it is now maintained entirely manually, and cannot be managed
@@ -113,7 +115,7 @@
  * constant data (tooltips, url, etc.) differentiating the various AGC software
  * versions, although a handful of special behaviors may be hardcoded separately.
  * Also, for newly-added missions, don't forget to add a consistency event for it
- * in the event table near the end of this file.
+ * in the event table appearing later in this file.
  */
 static const missionAlloc_t missionConstants[ID_AGCCUSTOMBUTTON
     - ID_FIRSTMISSION] =
@@ -155,9 +157,12 @@ static const missionAlloc_t missionConstants[ID_AGCCUSTOMBUTTON
             { "Apollo 11 Command Module", "Comanche055/MAIN.agc.html",
                 "Click this to select the CM for the Apollo 11 mission, running software COMANCHE 55.",
                 ENABLED, CM, BLOCK2, PERIPHERALS, "Comanche055", "CM.ini" },
-            { "Apollo 11 Lunar Module", "Luminary099/MAIN.agc.html",
-                "Click this to select the LM for the Apollo 11 mission, running software LUMINARY 99.",
+            { "Apollo 11 Lunar Module rev 1", "Luminary099/MAIN.agc.html",
+                "Click this to select the LM for the Apollo 11 mission, running software LUMINARY 99 Rev 1.",
                 ENABLED, LM, BLOCK2, PERIPHERALS, "Luminary099", "LM.ini" },
+            { "Apollo 11 Lunar Module rev 2", "LUM99R2/MAIN.agc.html",
+                "Click this to select the LM for the Apollo 11 mission, running reconstructed software LUMINARY 99 Rev 2.",
+                ENABLED, LM, BLOCK2, PERIPHERALS, "LUM99R2", "LM.ini" },
             { "Apollo 12 Command Module", "",
                 "Click this to select the CM for the Apollo 12 mission.",
                 DISABLED, CM, BLOCK2, PERIPHERALS, "", "CM.ini" },
@@ -193,9 +198,12 @@ static const missionAlloc_t missionConstants[ID_AGCCUSTOMBUTTON
                 ENABLED, LM, BLOCK2, NO_PERIPHERALS, "Validation", "LM.ini" },
             { "RETREAD 44 (LM)", "Retread44/MAIN.agc.html",
                 "Click this to select the RETREAD 44 (earliest non-mission LM) software.",
-                DISABLED, LM, BLOCK2, NO_PERIPHERALS, "Retread44", "LM0.ini" },
+                ENABLED, LM, BLOCK2, NO_PERIPHERALS, "Retread44", "LM0.ini" },
             { "AURORA 12 (LM)", "Aurora12/MAIN.agc.html",
                 "Click this to select the AURORA 12 (early non-mission LM) software.  This is the last AGC version with full testing capabilities.",
+                ENABLED, LM, BLOCK2, NO_PERIPHERALS, "Aurora12", "LM0.ini" },
+            { "BOREALIS (LM)", "Borealis/MAIN.agc.html",
+                "Click this to select the BOREALIS test-suite software.  BOREALIS is a modernized AGC self-test suite, based on AURORA.",
                 ENABLED, LM, BLOCK2, NO_PERIPHERALS, "Aurora12", "LM0.ini" },
             { "SUNBURST 39 (LM)", "Sunburst39/MAIN.agc.html",
                 "Click this to select the SUNBURST 39 (early non-mission LM) software.",
@@ -610,6 +618,8 @@ EVT_RADIOBUTTON(ID_SUNBURST39BUTTON, VirtualAGC::ConsistencyEvent)
 EVT_RADIOBUTTON(ID_ZERLINABUTTON, VirtualAGC::ConsistencyEvent)
 EVT_RADIOBUTTON(ID_SUPERJOBBUTTON, VirtualAGC::ConsistencyEvent)
 EVT_RADIOBUTTON(ID_AGCCUSTOMBUTTON, VirtualAGC::ConsistencyEvent)
+EVT_RADIOBUTTON(ID_LUM99R2BUTTON, VirtualAGC::ConsistencyEvent)
+EVT_RADIOBUTTON(ID_BOREALISBUTTON, VirtualAGC::ConsistencyEvent)
 END_EVENT_TABLE();
 
 #define TEMPTRACE(x) //wxMessageBox (wxT ("Trace"), wxT (x))
