@@ -86,7 +86,9 @@
  *                              missions, as opposed to just being LM vs. CM.  This
  *                              affects only Apollo 15-17 LM, and missions prior to Apollo 7.
  *              2017-03-27 RSB  Added LUM99R2 and BOREALIS. Enabled Retread 44, which
- *                              was disabled for some reason.
+ *                              was disabled for some reason.  Enabled Apollo 4, identifying
+ *                              it with Apollo 6, since Solarium 54 and 55 programs are
+ *                              believed to be identical.
  *
  * This file was originally generated using the wxGlade RAD program.
  * However, it is now maintained entirely manually, and cannot be managed
@@ -127,9 +129,10 @@ static const missionAlloc_t missionConstants[ID_AGCCUSTOMBUTTON
             { "AS-202 (\"Apollo 3\") Command Module", "",
                 "Click this to select the AS-202 (\"Apollo 3\") unmanned CM mission.",
                 DISABLED, CM, BLOCK1, NO_PERIPHERALS, "", "CM0.ini" },
-            { "Apollo 4 Command Module", "",
-                "Click this to select the unmanned Apollo 4 Block I CM mission.",
-                DISABLED, CM, BLOCK1, NO_PERIPHERALS, "", "CM0.ini" },
+            { "Apollo 4 Command Module", "Solarium055/MAIN.agc.html",
+                "Click this to select the unmanned Apollo 4 Block 1 CM mission, running software SOLARIUM 55, "
+                "which is believed to be identical to SOLARIUM 54.",
+                ENABLED, CM, BLOCK1, NO_PERIPHERALS, "Solarium055", "CM0.ini" },
             { "Apollo 5 Lunar Module", "Sunburst120/MAIN.agc.html",
                 "Click this to select the unmanned Apollo 5 LM mission, running software SUNBURST 120.",
                 ENABLED, LM, BLOCK2, NO_PERIPHERALS, "Sunburst120", "LM0.ini" },
