@@ -158,6 +158,7 @@
 #		2017-02-04 RSB	Added SuperJob to the mission list.
 #		2017-03-03 RSB	Added LUM99R2 to the list of missions.
 #		2017-03-18 RSB	Added Luminary116 to mission list.
+#		2017-03-27 RSB	Updated NVER for "releasing" a new installer and VM.
 #
 # The build box is always Linux for cross-compiles.  For native compiles:
 #	Use "make MACOSX=yes" for Mac OS X.
@@ -167,7 +168,7 @@
 #	Use "make" for Linux.
 
 # NVER is the overall version code for the release.
-NVER:=\\\"2017-03-24-working\\\"
+NVER:=\\\"2017-03-27\\\"
 DATE:=`date +%Y%m%d`
 
 # DON'T CHANGE THE FOLLOWING SWITCH *********************************
