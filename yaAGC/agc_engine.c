@@ -322,7 +322,10 @@
  *				of the agc_t state structure, which should
  *				make integration easier for simulator
  *				integrators.
- *		03/27/17 MAS	Fixed parity checking for superbanks.
+ *		03/27/17 MAS	Fixed parity checking for superbanks, and added
+ *				simulation of the Night Watchman's assertion of
+ *				its channel 77 bit for 1.28 seconds after each
+ *				triggering.
  *
  *
  * The technical documentation for the Apollo Guidance & Navigation (G&N) system,
@@ -504,7 +507,13 @@ WriteIO (agc_t * State, int Address, int Value)
   // Similarly, the CH77 Restart Monitor Alarm Box has latches for
   // alarm codes that are reset when CH77 is written to.
   if (Address == 077)
-    Value = 0;
+    {
+      Value = 0;
+      // If the Night Watchman was recently tripped, its CH77 bit
+      // is forcibly asserted (unlike all the others) for 1.28s
+      if (State->NightWatchmanTripped)
+        Value |= CH77_NIGHT_WATCHMAN;
+    }
 
   // The DSKY RESTART light is reset whenever CH11 bit 10 is written
   // with a 1. The controlling flip-flop in the AGC also has a hard
@@ -1840,7 +1849,12 @@ agc_engine (agc_t * State)
               // instructions writing to CH77 clear it. We'll broadcast changes to it in the
               // generic alarm handler a bit further down.
               State->InputChannel[077] |= CH77_NIGHT_WATCHMAN;
+              State->NightWatchmanTripped = 1;
             }
+          else
+            // If it's been 1.28s since a Night Watchman alarm happened, stop asserting its
+            // channel 77 bit
+            State->NightWatchmanTripped = 0;
         }
 
       // All the rest of this is switched off during standby.
