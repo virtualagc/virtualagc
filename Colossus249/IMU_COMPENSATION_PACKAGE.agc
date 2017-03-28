@@ -21,7 +21,9 @@
 ##				vs the already-proofed corresponding Colossus
 ##				237 and Comanche 55 source-code files
 ##				and corrected errors found.
-##
+##		2017-03-16 RSB	Comment-text fixes identified in 4-way side-by-side
+##				diff of Colossus237/249/Comanche55/Artemis72.
+
 ## The contents of the "Colossus249" files, in general, are transcribed 
 ## from a scanned copy of the program listing.  Notations on this
 ## document read, in part:
@@ -330,7 +332,7 @@ NBD3		EXTEND			# C(A) = DELTAT		(CS) X 2(+14)
 		
 		CAF	ZERO
 		TS	GCOMPSW		# INDICATE COMMANDS 2 PULSES OR LESS
-		TS	BUF		# PIPAX, PIPAY, PIPAZ.
+		TS	BUF		# PIPAX, PIPAY, PIPAZ
 		
 		CS	NBDX		# (GYRO PULSES)/(CS) X 2(-5)
 		TC	FBIASSUB	# -(NBDX)(DELTAT) 	(GYRO PULSES) X 2(+14)

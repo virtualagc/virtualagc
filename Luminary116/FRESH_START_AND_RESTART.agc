@@ -14,6 +14,13 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-01-22 MAS  Created from Luminary 99.
 ##              2017-02-19 HG   Transcribed and partially reconstructed
+##              2017-03-13 RSB  Proofed comment text via 3-way diff vs
+##                              Luminary 99 and 132.
+##              2017-03-15 RSB  Comment-text fixes identified in 5-way
+##                              side-by-side diff of Luminary 69/99/116/131/210.
+##              2017-03-19 HG   Fix mixed up operands -PHASE1 --> -PHASE5
+##                                                    -PHASE5 --> -PHASE1
+##                              Value for BOOLSTRT reconstructed from core/rope listing  OCT 21312 -> OCT 21322
 
 ## Page 212
                 BANK            10
@@ -175,13 +182,13 @@ POOKLEAN        EXTEND
                 DXCH            -PHASE4
 V37KLEAN        EXTEND
                 DCA             NEG0
-                DXCH            -PHASE1
+                DXCH            -PHASE5
 ABTKLEAN        EXTEND
                 DCA             NEG0
                 DXCH            -PHASE3
                 EXTEND
                 DCA             NEG0
-                DXCH            -PHASE5
+                DXCH            -PHASE1
                 EXTEND
                 DCA             NEG0
                 DXCH            -PHASE6
@@ -245,7 +252,7 @@ SETINFL         CS              INTFLBIT
                 TS              FLGWRD10
 
 ## Page 217
-## Note: Reconstructed from Luminary 099 p. 216/ Luminary 131 p. 218
+## <br>Note: Reconstructed from Luminary 099 p. 216 and Luminary 131 p. 218
                 CA              9,6,4                           # LEAVE PROG ALARM,GIMBAL LOCK, NO ATT
                 MASK            DSPTAB          +11D            # LAMPS INTACT ON HARDWARE RESTART
                 AD              BIT15
@@ -297,7 +304,7 @@ PCLOOP          TS              MPAC            +5
                 TCF             PTBAD
 
 ## Page 218
-## Note: Reconstructed from Luminary 099 p. 217/ Luminary 131 p. 219
+## <br>Note: Reconstructed from Luminary 099 p. 217 and Luminary 131 p. 219
                 CCS             MPAC            +5              # PROCESS ALL RESTART GROUPS.
                 TCF             PCLOOP
 
@@ -347,8 +354,10 @@ PTBAD           TC              ALARM                           # SET ALARM TO S
 
                 TCF             DOFSTRT1
 
+## <br>Note: Reconstructed from Luminary 099 p. 217 and Luminary 131 p. 219
+#******** ****** ******
 ## Page 219
-## Note: Reconstructed from Luminary 099 p. 217/ Luminary 131 p. 219
+
 # DO NOT USE GOPROG2 OR ENEMA WITHOUT CONSULTING POOH PEOPLE
 
 OCT10000        =               BIT13
@@ -357,11 +366,12 @@ OCT7777         OCT             7777
 STIKSTRT        DEC             0.825268                        # 20 D/S MAXIMUM COMPANDED RATE
 RATESTRT        DEC             -218
 RACTCADR        CADR            RESTARTS
-BOOLSTRT        OCT             21312
+BOOLSTRT        OCT             21322
+## Note: The value of "BOOLSTRT" has been reconstructed from the core listing.
 77001OCT        OCT             77001                           # .14 DEG SCALED AT 4.5 DEG
 60DEC           DEC             60
 RSFLGBTS        OCT             20100
-MAXDB           OCTAL           03434                           # 5 DEG ATTITUDE DEADBAND. SCALED AT 45.
+MAXDB           OCTAL           03434                           # 5 DEG ATTITUDE DEADBAND, SCALED AT 45.
 
 LIGHTSET        CAF             BIT5                            # CHECK FOR MARK REJECT AND ERROR RESET
                 EXTEND
@@ -382,7 +392,7 @@ NONAVKEY        TC              Q
                 TCF             DOFSTRT1                        # DO FRESH START BUT DON'T TOUCH ENGINE
 
 ## Page 220
-## Note: Reconstructed from Luminary 099 p. 218/ Luminary 131 p. 220
+## <br>Note: Reconstructed from Luminary 099 p. 218 and Luminary 131 p. 220
 #          INITIALIZATION COMMON TO BOTH FRESH START AND RESTART.
 
                 EBANK=          AOSQ
@@ -432,7 +442,7 @@ STARTSB2        CAF             OCT30001                        # DURING SOFTWAR
                 CS              READRBIT                        # CLEAR READRFLG FOR R29.
                 MASK            FLAGWRD3
                 TS              FLAGWRD3
-## Note: This is the end of the reconstructed pages 216-220.
+## Note: This is the end of the reconstructed pages 216-220.<br>
 
 ## Page 221
 
@@ -669,8 +679,8 @@ GOPOOFIX        TC              DOWNFLAG                        # ALLOW X-AXIS O
                 ADRES           ULLAGFLG
 
 ## Page 226
-## Note: Page 226 is missing from the original scan of Luminary131.
-##       This page is reconstructed using Luminary099 p. 225 / Lumiary 131 p. 225
+## <br>Note: Page 226 is missing from the original scan of Luminary131.
+## This page is reconstructed using Luminary 99 p. 225 and Luminary 131 p. 225
                 TC              CLEARMRK        +2              # RELEASE MARK DISPLAY SYSTEM.
                 CAF             V37N99
                 TC              BANKCALL
@@ -706,7 +716,7 @@ V37N99          VN              3799
 #            6. ALL RESTART GROUPS EXCEPT GROUP2 ARE CLEARED. CONTROL ISTRANSFERRED TO RESTART PROGRAM (GOPROG2)
 #               WHICH CAUSES ALL CURRENT ACTIVITY TO BE DISCONTINUED AND A 9 MINUTE INTEGRATION CYCLE TO BE
 #               INITIATED.
-#         B. PROGRAM SELECTES IS P20 OR P25.
+#         B. PROGRAM SELECTED IS P20 OR P25.
 #            1. IF THE CURRENT MAJOR MODE IS THE SAME AS THE SELECTED NEWPROGRAM, THE PROGRAM IS RE-INITIALIZED
 #               VIA V37XEQ, ALL RESTART GROUPS, EXCEPT GROUP 4 ARE CLEARED.
 #            2. IF THE CURRENT MAJOR MODE IS NOT EQUAL TO THE NEW REQUEST, A CHECK IS MADE TO SEE IF THE REQUEST-
@@ -726,7 +736,7 @@ V37N99          VN              3799
 
 #           CONTROL IS DIRECTED TO V37 BY THE VERBFAN ROUTINE.
 #              VERBFAN GOES TO C(VERBTAB+C(VERBREG)). VERB 37 = MMCHANG.
-#              MMCHANG EXECUTES A   TC POSTJUMP. CADR V37.
+#              MMCHANG EXECUTES A   TC POSTJUMP, CADR V37.
 
 #       B. ERASABLE INITIALIZATION      NONE
 
@@ -1077,8 +1087,8 @@ P70CADR         2CADR           P70
 #                                                  FCADR  PROG18          START OF P 18
 #                                                  FCADR  P01             START OF P 01
 
-# NOTE:         THE FIRST ENTRY MUST BE LABLED FCADRMM1.
-# -----
+# NOTE,         THE FIRST ENTRY MUST BE LABLED FCADRMM1.
+# ----
 
 FCADRMM1        FCADR           P76
                 FCADR           P75

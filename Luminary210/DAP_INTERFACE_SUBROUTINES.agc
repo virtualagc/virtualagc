@@ -16,6 +16,8 @@
 ##              2016-11-25 TB   Transcribed
 ##		2016-12-26 RSB	Comment-text proofed using ProoferComments
 ##				and corrected errors found.
+##		2017-03-15 RSB	Comment-text fixes identified in 5-way
+##				side-by-side diff of Luminary 69/99/116/131/210.
 
 ## Page 1403
                 BANK            20                              
@@ -136,7 +138,7 @@ STOPRATE        CAF             EBANK6
 
 # SUBROUTINE NAME:  ALLCOAST
 #
-# WILL BE CALLED BY FRESH STARTS AND ENGINE OFF ROUTINES.
+# WILL BE CALLED BY FRESH STARTS AND ENGINE OFF ROUTINES.	.
 #
 # CALLING SEQUENCE: (SAME AS ABOVE)
 #

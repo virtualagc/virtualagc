@@ -22,6 +22,8 @@
 ##              2016-12-12 hg   Fix operator BZMF -> BZF
 ##		2016-12-25 RSB	Comment-text proofed using ProoferComments
 ##				and corrected errors found.
+##		2017-03-16 RSB	Comment-text fixes identified in 5-way
+##				side-by-side diff of Luminary 69/99/116/131/210.
 
 ## Page 860
 		BANK	37
@@ -353,7 +355,7 @@ SERVOUT		RELINT
 		MASK	LOW9
 		TS	PUSHLOC
 		ZL
-		DXCH	FIXLOC		# FIXLOC AND DVFIND
+		DXCH	FIXLOC		# FIXLOC AND OVFIND
 
 		TC	QUIKFAZ5
 		CS	PIPTIME +1

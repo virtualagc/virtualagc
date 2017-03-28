@@ -21,6 +21,8 @@
 ##              2017-01-20 HG   Remove DECTWO
 ##		2017-01-28 RSB	Proofed comment text using octopus/prooferComments
 ##				and fixed errors found.
+##		2017-03-17 RSB	Comment-text fixes identified in diff'ing
+##				Luminary 99 vs Comanche 55.
 
 ## Page 731
 # STABLE ORBIT RENDEZVOUS PROGRAMS (P38 AND P78)
@@ -145,7 +147,7 @@ P78		TC	BANKCALL
 			TINT
 		STORE	TINTSOI		# STORE FOR SOR PHASE
 		CLRGO
-			OPTNSW		# OPTNSW: ON = SOI, OFF = SOR
+			OPTNSW		# OPTNSW; ON = SOI, OFF = SOR
 			JUNCTN1
 OPTN1		SET	CLEAR		# SOI
 			OPTNSW

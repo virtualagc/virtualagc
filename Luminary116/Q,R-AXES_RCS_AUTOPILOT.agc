@@ -14,6 +14,10 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-01-22 MAS  Created from Luminary 99.
 ##              2017-01-31 RRB  Updated for Luminary 116.
+##		2017-03-14 RSB	Proofed comment text via 3-way diff vs
+##				Luminary 99 and 131 ... no problems found.
+##		2017-03-16 RSB	Comment-text fixes identified in 5-way
+##				side-by-side diff of Luminary 69/99/116/131/210.
 
 ## Page 1432
                 BANK            17                              
@@ -250,7 +254,7 @@ CHEKSTIK        TS              INGTS                           # NOT IN GTS WHE
 1/10S           =               BIT1                            
 LINRAT          DEC             46                              
 
-# ===========================================================
+# ================================
 
 DAMPING         CA              ZERO                            
                 TS              SAVEHAND                        
@@ -717,7 +721,7 @@ TJLAWADR        GENADR          TJLAW           +3              # RETURN ADDRESS
 #       TIME6           TIME OF NEXT RUPT
 #       T6NEXT          DELTA TIME TO NEXT RUPT
 #       T6FURTHA        DELTA TIME FROM 2ND TO LAST RUPT
-#       NXT6ADR         AXIS INDEX       0 - P-AXIS
+#       NXT6ADR         AXIS INDEX       Q - P-AXIS
 #       T6NEXT +1       AXIS INDEX       4 - U-AXIS
 #       T6FURTHA +1     AXIS INDEX      13 - V-AXIS
 

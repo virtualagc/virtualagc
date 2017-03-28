@@ -17,6 +17,11 @@
 ##              2017-02-09 RSB  Comment-text fixes identified in proofing Artemis 72
 ##              2017-02-27 RSB  Corrected WAITP00H and LONGP00H to similar POOH names.
 ##              2017-03-10 HG   Transcribed
+##              2017-03-14 RSB  Proofed comment text via 3-way diff vs
+##                              Luminary 99 and 131.
+##              2017-03-16 RSB  Comment-text fixes identified in 5-way
+##                              side-by-side diff of Luminary 69/99/116/131/210.
+##              2017-03-19 HG   Fix value OCT 01204 -> OCT 21204
 
 ## Page 1109
 # PROGRAM DESCRIPTION                                                                     DATE - 10 OCTOBER 1966
@@ -104,8 +109,8 @@
 #         CONTROL WILL NOT BE RETURNED TO THE SPECIFIED ADDRESS (2CADR)   IN EXACTLY DELTA T CENTISECONDS.
 #    THE APPROXIMATE TIME MAY BE CALCULATED AS FOLLOWS
 
-#              LET T0 = THE TIME OF THE TC WAITLIST
-#              LET TS = T0 +147U + COUNTER INCREMENTS (SET UP TIME)
+#              LET TO = THE TIME OF THE TC WAITLIST
+#              LET TS = TO +147U + COUNTER INCREMENTS (SET UP TIME)
 #              LET X  = TS -(100TS)/100  (VARIANCE FROM COUNTERS)
 #              LET Y  = LENGTH OF TIME OF INHIBIT INTERRUPT AFTER T3RUPT
 #              LET Z  = LENGTH OF TIME TO PROCESS TASKS WHICH ARE DUE THIS T3RUPT BUT DISPATCHED EARLIER.
@@ -151,15 +156,16 @@ DLY2            CAF             WAITBB                          # ENTRY FROM FIX
 LVWTLIST        DXCH            WAITEXIT
                 AD              TWO
                 DTCB
-## Note: In the comment section of the above three statements a small drawing in blank pen can be found made of two horizontal lines
+## Note: In the comment section of the above three statements a small drawing in black pen can be found made of two horizontal lines
 ##       and a small circle. The lines are of similar length. The left line ends at the cicumference of the circle, the right line starts
 ##       at the center of the circle similar to
-##                                   _ _
+## <pre>                                   _ _
 ##                                 /    \
 ##                     __________ /   ___\_________
 ##                                \      /
 ##                                 \    /
 ##                                   --
+## </pre>
                 EBANK=          LST1
 WAITBB          BBCON           WAIT2
 
@@ -550,7 +556,7 @@ LONGCYCL        EXTEND                                          # CAN WE SUCCESF
                 TCF             MUCHTIME                        # INVOLVED, TAKING INTO ACCOUNT THAT THE
                                                                 # WORDS MAY NOT BE SIGNED CORRECTED (DP
                                                                 # BASIC INSTRUCTIONS
-                                                                # DO NOT SIGN CORRECT) AND THAT WE SUBTRAC-
+                                                                # DO NOT SIGN CORRECT) AND THAT WE SUBTRAC
                                                                 # TED BIT14 (1 OVER HALF THE POS. VALUE
                                                                 # REPRESENTIBLE IN SINGLE WORD)
                 NOOP                                            # CAN:T GET HERE    **********
@@ -589,4 +595,4 @@ LONGPOOH        DXCH            LONGEXIT
                 TCF             +2
 WAITPOOH        DXCH            WAITEXIT
  +2             TC              POODOO1
-                OCT             01204
+                OCT             21204

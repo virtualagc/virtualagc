@@ -21,6 +21,8 @@
 ##		2017-02-08 RSB	Comment-text fixes identified while proofing Artemis 72.
 ##		2017-03-03 RSB	Fixed comment-text errors identified while proofing
 ##				Luminary 116.
+##		2017-03-16 RSB	Comment-text fixes identified in 5-way
+##				side-by-side diff of Luminary 69/99/116/131/210.
 
 ## Page 165
                 BANK            12
@@ -1275,7 +1277,7 @@ TRKFLCDU        TC              SETTRKF                 # UPDATE TRACKER FAIL LA
 # ALARMS_
 # NONE
 
-# EXIT
+# EXIT_
 # NORRGMON
 
 RRGIMON         CAE             FLAGWRD5                # IS NO ANGLE MONITOR FLAG SET

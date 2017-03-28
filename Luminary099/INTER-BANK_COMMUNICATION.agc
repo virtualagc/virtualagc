@@ -14,6 +14,9 @@
 ##		2011-05-08 JL	Removed workaround.
 ##		2016-12-17 RSB	Proofed text comments with octopus/ProoferComments
 ##				and corrected the errors found.
+##		2017-03-13 RSB	Comment-text fixes noted in proofing Luminary 116.
+##		2017-03-17 RSB	Comment-text fixes identified in diff'ing
+##				Luminary 99 vs Comanche 55.
 
 ## This source code has been transcribed or otherwise adapted from
 ## digitized images of a hardcopy from the MIT Museum.  The digitization
@@ -144,7 +147,7 @@ USPRCADR	TS	LOC		# SAVE A
 #					PSEUDO-FIXED	  OCTAL PSEUDO
 # SUPERBANK	SETTING	S-REG. VALUE	BANK NUMBERS	  ADDRESSES
 # ----------	-------	------------	 ------------	   ------------
-# SUPERBANK 3	  OXX	 2000 - 3777	   30 - 37	 70000 - 107777		(WHERE XX CAN BE ANYTHING AND
+# SUPERBANK 3	  0XX	 2000 - 3777	   30 - 37	 70000 - 107777		(WHERE XX CAN BE ANYTHING AND
 #										WILL USUALLY BE SEEN AS 11)
 # SUPERBANK 4	  100	 2000 - 3777	   40 - 47	110000 - 127777		(AS FAR AS IT CAN BE SEEN,
 #										ONLY BANKS 40-43 WILL EVER BE
@@ -157,7 +160,7 @@ USPRCADR	TS	LOC		# SAVE A
 # SUPERBANK SHOULD USE SUPERSW. ***
 #
 # SUPERSW MAY BE CALLED IN THIS FASHION:
-#	CAF	ABBCON		WHERE      ABBCON   BBCON  SOMETHIN
+#	CAF	ABBCON		WHERE  --  ABBCON   BBCON  SOMETHIN -- 
 #	TCR	SUPERSW		(THE SUPERBNK BITS ARE IN THE BBCON)
 #	...	  ...
 #	 .	   .

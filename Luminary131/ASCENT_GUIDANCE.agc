@@ -19,6 +19,8 @@
 ##				numbers in 1701.pdf.
 ##		2017-02-26 RSB	Proofed comment text using octopus/ProoferComments.
 ##		2017-03-01 RSB	Fixed lingering typos.
+##		2017-03-14 RSB	Comment-text fixes identified in 5-way
+##				side-by-side diff of Luminary 69/99/116/131/210.
 
 ## Page 836
 		BANK	34
@@ -134,7 +136,7 @@ ASCENT		VLOAD	ABVAL
 			UNIT/R/
 		VAD	VSL1
 		STADR
-		STORE	VGVECT		# VG = (DRDOT)R + (DVDOT)L + (DZDOT)Z.
+		STORE	VGVECT		# VG = (DRDOT)R + (DYDOT)L + (DZDOT)Z.
 		DLOAD	DMP		# LOAD TGO
 			TGO		# TGO GEFF
 			GEFF
@@ -148,7 +150,7 @@ ASCENT		VLOAD	ABVAL
 		STOVL	VGBODY
 			VGVECT
 		ABVAL	BOFF		# MAGNITUDE OF VGVECT
-			FLRCS		# IF FLRCS=0,D0 NORMAL GUIDANCE
+			FLRCS		# IF FLRCS=0,DO NORMAL GUIDANCE
 			MAINENG
 		DDV			# USE TGO=VG/AT WITH RCS
 			AT/RCS
@@ -236,7 +238,7 @@ RATES		DLOAD	DSU
 CHKBMAG		SR4	DDV		# B*2(4)
 			TBUP		# (B / TAU) * 2(21)
 		DSU	BPL
-			PRLIMIT		# ( B / TAU ) = 2(21) MAX.
+			PRLIMIT		# ( B / TAU ) * 2(21) MAX.
 			PROK
 		DLOAD	DMP
 			PRLIMIT

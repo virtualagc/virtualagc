@@ -11,7 +11,8 @@
 ## Mod history:	2009-05-19 HG	Transcribed from page images.
 ##		2016-12-13 RSB	Proofed text comments with octopus/ProoferComments
 ##				and corrected the errors found.
-##
+##		2017-03-14 RSB	Comment-text fixes noted in proofing Luminary 116.
+
 ## This source code has been transcribed or otherwise adapted from
 ## digitized images of a hardcopy from the MIT Museum.  The digitization
 ## was performed by Paul Fjeld, and arranged for by Deborah Douglas of
@@ -90,7 +91,7 @@ RCSMON		CS	ZERO
 		MASK	LOW8			# KEEP JET-FAIL BITS ONLY.
 		TS	Q
 		
-		CS	PVALVEST		#       _   _
+		CS	PVALVEST		#       -   -
 		MASK	Q			# FORM PC + PC.
 		TS	L			# 	(P = PREVIOUS ISOLATION VALVE STATE,
 		CS	Q			#	 C = CURRENT VALVE STATE (CH32)).

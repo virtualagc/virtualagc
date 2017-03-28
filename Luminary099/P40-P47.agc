@@ -16,6 +16,8 @@
 ##		2016-12-15 RSB	Proofed text comments with octopus/ProoferComments
 ##				and corrected the errors found.
 ##		2017-03-10 RSB	Comment-text fixes noted in proofing Luminary 116.
+##		2017-03-16 RSB	Comment-text fixes identified in 5-way
+##				side-by-side diff of Luminary 69/99/116/131/210.
 
 ## This source code has been transcribed or otherwise adapted from
 ## digitized images of a hardcopy from the MIT Museum.  The digitization
@@ -894,7 +896,7 @@ FIXY		VLOAD	VXV		# IN THIS CASE,
 #
 # OUTPUT
 #	STEERSW		SEE INPUT
-#	INPULSW		1 = ENGINE OFF IN TGO CENTISECONDS; 0 = CONTINUE BURN
+#	IMPULSW		1 = ENGINE OFF IN TGO CENTISECONDS; 0 = CONTINUE BURN
 #	TGO		TIME TO CUT-OFF 2(28) CS
 # 	SEE FINDCDUW FOR STEERING OUTPUTS.
 #
@@ -1131,6 +1133,7 @@ APSTGO		DDV	SL2
 #				  METERS/CS AT +7.
 #			TIG     - TIME OF IGNITION IN CS AT +28.
 #			DLTARG  - COMPUTATION CYCLE INTERVAL = 200 CS AT +28.
+#			PIPTIME - TIME OF RN AND VN IN CS AT +28.
 #			GDT/2   - HALF OF VELOCITY GAINED IN DELTA T TIME DUE TO
 #				  ACCERERATION OF GRAVITY IN METERS/CS AT +7.
 #			DELVREF	- CHANGE IN VELOCITY DURING LAST 2 SEC IN

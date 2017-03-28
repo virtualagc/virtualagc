@@ -16,6 +16,8 @@
 ##		2017-01-19 MAS	Corrected some USER'S to USER:S
 ##		2017-03-03 RSB	Snapshot of Luminary 99 Rev 1. 
 ##		2017-03-07 RSB	Comment-text fixes noted in proofing Luminary 116.
+##		2017-03-15 RSB	Comment-text fixes identified in 5-way
+##				side-by-side diff of Luminary 69/99/116/131/210.
 
 ## Notations on the hardcopy document read, in part:
 ##
@@ -659,7 +661,7 @@ MXM3		SETPD	VLOAD*		# MXM3 MULTIPLIES 2 3X3 MATRICES
 			0,2
 		RVQ
 		
-# RETURN WITH MIXM2 IN PD LIST
+# RETURN WITH M1XM2 IN PD LIST
 
 TRANSPOS	SETPD	VLOAD*		# TRANSPOS TRANSPOSES A 3X3 MATRIX
 			0		# 	AND LEAVES RESULT IN PD LIST

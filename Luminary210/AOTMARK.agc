@@ -22,6 +22,8 @@
 ##              2016-12-11 HG   Fix operation CS NOMKCNT -> CA NOMKCNT
 ##		2016-12-23 RSB	Proofed comment text with octopus/ProoferComments
 ##				and fixed all errors found.
+##		2017-03-14 RSB	Comment-text fixes identified in 5-way
+##				side-by-side diff of Luminary 69/99/116/131/210.
 
 ## Page 255
                 SETLOC          AOTMARK1
@@ -125,7 +127,7 @@ CODE7           CAF             V06N87*                 # CODE 7, COAS SIGHTING,
                 TCF             +2                      # PROCEED
                 TCF             CODE7                   # ON ENTER, RECYCLE
                 EXTEND
-                DCA             AZ                      # PICK UP AZ AND EL IN SP 25 COMP
+                DCA             AZ                      # PICK UP AZ AND EL IN SP 2S COMP
                 INDEX           FIXLOC
                 DXCH            8D                      # STORE IN 8D AND 9D OF LOCAL VAC
                 CAF             ZERO                    # BACKUP SYSTEM TO BE USED

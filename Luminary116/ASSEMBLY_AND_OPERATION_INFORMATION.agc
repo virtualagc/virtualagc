@@ -18,6 +18,9 @@
 ##              2017-02-16 MAS  Completed updating.
 ##		2017-03-01 RSB	Proofed comment text by diff vs Luminary 131
 ##				but no errors found.
+##		2017-03-14 RSB	Comment-text fixes identified in 5-way
+##				side-by-side diff of Luminary 69/99/116/131/210.
+##		2017-03-15 RSB	More of the same.
 
 ## Page 1
 # THIS LGC PROGRAM IS INTENDED FOR USE IN THE LM DURING THE MANNED LUNAR LANDING MISSION OR ANY SUBSET THEREOF.
@@ -422,8 +425,8 @@
 #     TIME TO GO IN BRAKING PHASE                    XXBXX  MIN/SEC
 #     LR ALTITUDE - COMPUTED ALTITUDE                XXXXX. FEET
 # 69  LANDING SITE CORRECTION, Z-COMPONENT   3COMP   XXXXX. FEET                         DEC ONLY
-#     LANDING SITE CORRECTION, Y-COMPONENT   3COMP   XXXXX. FEET
-#     LANDING SITE CORRECTION, Z-COMPONENT   3COMP   XXXXX. FEET
+#     LANDING SITE CORRECTION, Y-COMPONENT   	     XXXXX. FEET
+#     LANDING SITE CORRECTION, X-COMPONENT           XXXXX. FEET
 # 70  AOT DETENT CODE/STAR CODE              3COMP   OCTAL ONLY FOR EACH
 # 71  AOT DETENT CODE/STAR CODE              3COMP   OCTAL ONLY FOR EACH
 # 72  RR  360 - TRUNNION ANGLE               2COMP   XXX.XX DEG
@@ -580,7 +583,7 @@
 # 60       1      VHORIZ          S
 ## Page 15
 #          2      HDOTDISP        S
-#          3      HCALC           RR
+#          3      HCALC1          RR
 # 61       1      TTFDISP         L
 #          2      TTOGO           L
 #          3      OUTOFPLN        QQ
@@ -630,7 +633,7 @@
 #          2      YDOT            S
 # 78       1      DNRRANGE        U
 ## Page 16
-#          2      DNRRDCT         V
+#          2      DNRRDOT         V
 #          3      TTOTIG          L
 # 79       1      CURSOR          D
 #          2      SPIRAL          D

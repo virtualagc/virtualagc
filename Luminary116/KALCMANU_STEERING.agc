@@ -17,6 +17,8 @@
 ##				3-way diff vs Luminary 99 and Luminary 131.
 ##				(Admittedly, the former is more for detecting errors
 ##				in Luminary 99 than the other way around.)
+##		2017-03-17 RSB	Comment-text fixes identified in diff'ing
+##				Luminary 99 vs Comanche 55.
 
 ## Page 366
 # GENERATION OF STEERING COMMANDS FOR DIGITAL AUTOPILOT FREE FALL MANEUVERS
@@ -120,10 +122,10 @@ MANUSTAT        EXIT                                            # INITIALIZATION
                 EXTEND                                          # FOR AUTOMATIC MANEUVERS
                 DCA             TIME2                           
 ## Page 368
-                DAS             TM                              # TM+TO         MANEUVER COMPLETION TIME
+                DAS             TM                              # TM+T0         MANEUVER COMPLETION TIME
                 EXTEND                                          
                 DCS             ONESEK                          
-                DAS             TM                              # (TM+TO)-1
+                DAS             TM                              # (TM+T0)-1
                 INHINT                                          
                 CAF             TWO                             
 RATEBIAS        TS              KSPNDX                          

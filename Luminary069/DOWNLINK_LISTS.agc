@@ -21,6 +21,8 @@
 ##				and fixed errors found.
 ##		2017-03-05 RSB	A few comment-text fixes identified while proofing
 ##				Luminary 116.
+##		2017-03-15 RSB	Comment-text fixes identified in 5-way
+##				side-by-side diff of Luminary 69/99/116/131/210.
 
 ## Page 208
                 BANK            22
@@ -30,9 +32,9 @@
                 EBANK=          DNTMBUFF
 
 # SPECIAL DOWNLINK OP CODES
-#       OP CODE ADDRESS (EXAMPLE) SENDS..     BIT 15  BITS 14-12 BITS 11
+#       OP CODE  ADDRESS(EXAMPLE) SENDS..     BIT 15  BITS 14-12 BITS 11
 #                                                                     -0
-#       ------  -----------     ----------    ------  ---------- -------
+#       ------  ----------      ----------    ------  ---------- -------
 #                                                                     --
 #       1DNADR  TIME2           (2 AGC WDS)     0         0      ECADR
 #       2DNADR  TEPHEM          (4 AGC WDS)     0         1      ECADR
@@ -151,7 +153,7 @@ LMORBM05        2DNADR          OMEGAP                  # OMEGAP,OMEGAQ,OMEGAR,G
 LMORBM06        1DNADR          PIPTIME1                # PIPTIME,+1               COMMON DATA
                 -3DNADR         DELV                    # DELV+0...+5
 
-#     -----------------------------------------------------------
+#     ---------------------------------------------------------
 
 ## Page 211
 # LM COAST AND ALIGNMENT DOWNLIST
@@ -186,7 +188,7 @@ LMCSTADL        EQUALS                                  # SEND ID BY SPECIAL COD
                 DNPTR           LMCSTA05                # COMMON DATA
                 -6DNADR         DSPTAB                  # DSPTAB+0...+11D TABLE
 
-#     -----------------  SUB-LISTS   --------------------------
+#     -----------------  SUB-LISTS   ----------------------------
 
 LMCSTA01        EQUALS          LMORBM01                # COMMON DOWNLIST DATA
 
@@ -342,7 +344,7 @@ LMDSAS08        6DNADR          DNTMBUFF                # SEND SNAPSHOT
 
 LMDSAS09        EQUALS          LMCSTA06                # COMMON DOWNLIST DATA
 
-#     -----------------------------------------------------------
+#     ---------------------------------------------------------
 
 ## Page 217
 # LM LUNAR SURFACE ALIGN DOWNLIST
@@ -396,7 +398,7 @@ LMLSAL08        EQUALS          LMCSTA06                # COMMON DOWNLIST DATA
 LMLSAL09        EQUALS          LMCSTA07                # COMMON DOWNLIST DATA
 
 ## Page 218
-#     -----------------------------------------------------------
+#     ---------------------------------------------------------
 
 ## Page 219
 # LM AGS INITIALIZATION AND UPDATE DOWNLIST
@@ -442,7 +444,7 @@ LMAGSI04        EQUALS          LMORBM04                # COMMON DOWNLIST DATA
 
 LMAGSI05        EQUALS          LMORBM05                # COMMON DOWNLIST DATA
 
-#     -----------------------------------------------------------
+#     ---------------------------------------------------------
 
 DNTABLE         GENADR          LMCSTADL                # LM COAST AND ALIGN DOWNLIST
                 GENADR          LMAGSIDL                # LM AGS INITIALIZATION/UPDATE DOWNLIST
@@ -453,6 +455,6 @@ DNTABLE         GENADR          LMCSTADL                # LM COAST AND ALIGN DOW
 ## Page 220
                 GENADR          LMLSALDL                # LM LUNAR SURFACE ALIGN DOWNLIST
 
-#     ------------------------------------------------------
+#     ---------------------------------------------------------------
 
 

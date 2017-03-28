@@ -15,6 +15,8 @@
 ##				and corrected the errors found.
 ##		2017-01-28 RSB	Comment-text fixes identified for Luminary 69.
 ##		2017-03-03 RSB	Snapshot of Luminary 99 Rev 1. 
+##		2017-03-15 RSB	5-way comment-text proofing using Luminary 
+##				69/99/116/131/210 ... no problems found.
 
 ## Page 1410
 # THE DAPIDLER PROGRAM IS STARTED BY FRESH START AND RESTART.  THE DAPIDLER PROGRAM IS DONE 10 TIMES

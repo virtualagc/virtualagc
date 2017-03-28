@@ -21,7 +21,8 @@
 ##              2016-12-12 MAS  Split up some Exx Bxx scalers.
 ##		2016-12-15 RSB	Proofed comment text with octopus/ProoferComments,
 ##				and corrected the errors found.
-
+##		2017-03-15 RSB	Comment-text fixes identified in 5-way
+##				side-by-side diff of Luminary 69/99/116/131/210.
 
 ## Page 39
 # DPS AND APS ENGINE PARAMETERS
@@ -237,7 +238,7 @@ FULLAPS         DEC             5050            B-16    # NOMINAL FULL ASCENT MA
 MINLMD          DEC             -4360           B-16    # MIN. UNSTAGED MASS (6560 KG) - MINMINLM
 							#   2(16) KG.
 MINMINLM        DEC             -2200           B-16    # MIN ASCENT STAGE MASS -- 2(16) KG.
-MINCSM          =               BIT11                   # MIN CSM MASS (OK FOR 1/AGCS) = 9050 LBS
+MINCSM          =               BIT11                   # MIN CSM MASS (OK FOR 1/ACCS) = 9050 LBS
 
                 SETLOC          DAPS3
                 BANK

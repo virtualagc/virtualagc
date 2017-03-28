@@ -11,7 +11,10 @@
 ## Mod history:	2009-05-27 OH	Transcribed from page images.
 ##		2016-12-18 RSB	Proofed text comments with octopus/ProoferComments
 ##				and corrected the errors found.
-##
+##		2017-03-14 RSB	Comment-text fixes noted in proofing Luminary 116.
+##		2017-03-16 RSB	Comment-text fixes identified in 5-way
+##				side-by-side diff of Luminary 69/99/116/131/210.
+
 ## This source code has been transcribed or otherwise adapted from
 ## digitized images of a hardcopy from the MIT Museum.  The digitization
 ## was performed by Paul Fjeld, and arranged for by Deborah Douglas of
@@ -88,7 +91,7 @@ ITSAWAIT	CA	WTLTCADR	# SET UP WAITLIST CALL
 		NDX	TEMP2G		# DIRECTLY STORED
 		CA	PHSPRDT1
 TIMETEST	CCS	A		# IS IT AN IMMEDIATE RESTART
-		INCR	A		# NO.
+		INCR	A		# NO,
 		TCF	FINDTIME	# FIND OUT WHEN IT SHOULD BEGIN
 
 		TCF	ITSINDIR	# STORED INDIRECTLY
@@ -160,7 +163,7 @@ CHKNOVAC	TS	GOLOC -1	# SAVE PRIO UNTIL WE SEE IF ITS
 		BZMF	ITSNOVAC
 
 		CAF	FVACCADR	# POSITIVE, SET UP FINDVAC CALL.
-		XCH	GOLOC -1	# PICK UP PRIO.
+		XCH	GOLOC -1	# PICK UP PRIO,
 		TC	GOLOC -1	# AND GO
 
 ITSNOVAC	CAF	NOVACADR	# NEGATIVE,

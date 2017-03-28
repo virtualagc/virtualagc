@@ -15,6 +15,7 @@
 ##		2016-12-18 RSB	Proofed text comments with octopus/ProoferComments
 ##				and corrected the errors found.
 ##		2017-03-03 RSB	Snapshot of Luminary 99 Rev 1. 
+##		2017-03-14 RSB	Comment-text fixes noted in proofing Luminary 116.
 
 ## Page 1472
 		BANK	21
@@ -108,7 +109,7 @@ ALGORTHM	EXTEND			# Q(R)DIFF IS THETA (ERROR) SCALED AT PI.
 		EXTEND			# LIMITING QUOTIENT TO AVOID OVERFLOW.
 		MP	BIT14		# -ALPHA/2 IN A, SCALED AT PI/4
 		EXTEND
-		MP	ACENTRAL	# -ALPHA(2)/2 IN A,L, SCALED AT PI(2)/16)
+		MP	ACENTRAL	# -ALPHA(2)/2 IN A,L, SCALED AT PI(2)/16
 		AD	KCENTRAL
 		EXTEND
 		BZMF	HUGEQUOT	# K-ALPHA(2)/2 SHOULD BE PNZ FO DIVISION

@@ -16,6 +16,8 @@
 ##              2016-12-12 HG   Transcribed
 ##		2016-12-26 RSB	Comment-text proofed using ProoferComments
 ##				and corrected errors found.
+##		2017-03-16 RSB	Comment-text fixes identified in 5-way
+##				side-by-side diff of Luminary 69/99/116/131/210.
 
 ## Page 1440
                 BANK            17
@@ -255,7 +257,7 @@ CHEKSTIK        TS              INGTS                   # NOT IN GTS WHEN IN ATT
 40CYCL          =               OCT50
 1/10S           =               BIT1
 LINRAT          DEC             46
-# ==================================
+# ================================
 DAMPING         CA              ZERO
                 TS              SAVEHAND
                 TS              SAVEHAND        +1

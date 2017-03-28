@@ -17,6 +17,8 @@
 ##				3-way diff vs Luminary 99 and Luminary 131.
 ##				(Admittedly, the former is more for detecting errors
 ##				in Luminary 99 than the other way around.)
+##		2017-03-15 RSB	Comment-text fixes identified in 5-way
+##				side-by-side diff of Luminary 69/99/116/131/210.
 
 ## Page 343
 # BLOCK 2 LGC ATTITUDE MANEUVER ROUTINE - KALCMANU
@@ -656,7 +658,7 @@ MXM3            SETPD           VLOAD*                          # MXM3 MULTIPLIE
                                 0,2                             
                 RVQ                                             
 
-# RETURN WITH MIXM2 IN PD LIST
+# RETURN WITH M1XM2 IN PD LIST
 
 TRANSPOS        SETPD           VLOAD*                          # TRANSPOS TRANSPOSES A 3X3 MATRIX
                                 0                               #       AND LEAVES RESULT IN PD LIST

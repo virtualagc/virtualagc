@@ -15,6 +15,9 @@
 ##		2011-05-08 JL	Removed workaround.
 ##		2016-12-18 RSB	Proofed text comments with octopus/ProoferComments
 ##				and corrected the errors found.
+##		2017-03-13 RSB	Comment-text fixes noted in proofing Luminary 116.
+##		2017-03-15 RSB	Comment-text fixes identified in 5-way
+##				side-by-side diff of Luminary 69/99/116/131/210.
 
 ## This source code has been transcribed or otherwise adapted from
 ## digitized images of a hardcopy from the MIT Museum.  The digitization
@@ -361,7 +364,7 @@
 ## Page 1351
 #
 # GENERAL INFORMATION
-# -------------------
+# ------- -----------
 #
 # ALARM OR ABORT EXIT MODES --
 #	PRIOBORT	TC	ABORT
@@ -395,7 +398,7 @@
 #	DSPTEM1 = R1 INFO FOR ASTRONAUT FROM PERFORM DISPLAYS (NORMAL)
 #
 # SUBROUTINES USED -- NVSUB, FLAGUP, FLAGDOWN, ENDOFJOB, BLANKSUB, ABORT, JOBWAKE, JOBSLEEP, FINDVAC, PRIOCHNG,
-#	JAMTERM, NVSUBUSY, FLASHON, ENDIDLE, CHANG1, BANKJUMP, MAKECADR, NOVAC.
+#	JAMTERM, NVSUBUSY, FLASHON, ENDIDLE, CHANG1, BANKJUMP, MAKECADR, NOVAC,
 #
 # DEBRIS -- (STORED INTO)
 #	TEMPORARY TEMPORARIES - A, Q, L, MPAC +2, MPAC +3, MPAC +4, MPAC +5, MPAC +6, RUPTREG2, RUPTREG3, CYL,
@@ -403,7 +406,7 @@
 #	ERASABES (SHARED AND USED WITH OTHER PROGRAMS) CADRSTOR, DSPLIST, LOC, DSPTEM1, OPTION1
 #	ERASABLES (USED ONLY BY DISPLAY ROUTINES) - NVWORD,+1,+2, DSPFLG,+1,+2, CADRFLSH,+1,+2, PRIOTIME, FLAGWRD4,
 ## Page 1352
-#		R1SAVE, MARK2PAC.
+#		R1SAVE, MARK2PAC,
 #
 # DEBRIS -- (USED BUT NOT STORED INTO) - NOUNREG, VERBREG, LOCCTR, MONSAVE1
 #
@@ -425,7 +428,7 @@
 #	    11	EBANK
 #	    12	-----			-----			V99PASTE
 #	    13	2ND PART OF PERFORM
-#	    14	REFLASH OR REDO		-----			REFLASH OR REDO
+#	    15	REFLASH OR REDO		-----			REFLASH OR REDO
 #	    15	-----			MARK REQUEST		-----
 #
 # RESTARTING DISPLAYS --

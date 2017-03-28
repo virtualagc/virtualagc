@@ -30,6 +30,16 @@
 ##				Comanche 55.
 ##		2017-03-08 RSB	Changed DSPOCTWO to DSPOCTWD.
 ##		2017-03-08 RSB	Comment-text fixes noted in proofing Luminary 116.
+##		2017-03-16 RSB	Comment-text fixes identified in 5-way
+##				side-by-side diff of Luminary 69/99/116/131/210.
+##		2017-03-17 RSB	Comment-text fixes identified by 4-way diff'ing
+##				of Colossus 237 & 249, Comanche 55, and Artemis 72.
+##				In several places, trailing periods that were missing
+##				or extremely faint in the printout were restored, 
+##				and marked with a ##-style comment.  This occurred
+##				if a period was present in _all_ other available 
+##				Colossus or Luminary version (8 in all) without there
+##				being any other different obvious in the line.
 
 ## Page 318
 
@@ -1622,7 +1632,7 @@ SEPMIN		XCH	Q		# FINDS WHOLE MINUTES IN BIT13
 		MP	BIT3		# LEAVES WHOLE HOURS IN MPAC.
 		EXTEND			# SR 12, THROW AWAY LP.
 		MP	BIT13		# SR 2, TAKE FROM LP. = SL 12.
-		LXCH	MPAC +1		# THIS FORCES BITS 12-1 TO 0 IF +.
+		LXCH	MPAC +1		# THIS FORCES BITS 12-1 TO 0 IF +,
 					# FORCES BITS 12-1 TO 1 IF -.
 		CA	HITEMOUT
 		TS	MPAC
@@ -1810,7 +1820,8 @@ LOADLV		CAF	ZERO
 		TS	DECBRNCH
 		CS	ZERO
 		TS	LOADSTAT
-		TC	RELDSP		# RELEASE FOR PRIORITY DISPLAY PROBLEM
+## Restored trailing period in the following line. &mdash; RSB 2017.
+		TC	RELDSP		# RELEASE FOR PRIORITY DISPLAY PROBLEM.
 		TC	-VD1SET
 		TC	POSTJUMP	# AFTER COMPLETED LOAD, GO TO RECALTST
 		CADR	RECALTST	# TO SEE IF THERE IS RECALL FROM ENDIDLE.
@@ -1900,7 +1911,8 @@ PUTCOM		TS	DECOUNT
 		TC	PUTCOM2		# NO DP
 					# TEST FOR DP SCALE FOR OCT LOAD. IF SO,
 					# +0 INTO MAJOR PART. SET NOUNADD FOR
-					# LOADING OCTAL WORD INTO MINOR PART
+## Restored trailing period in the following line. &mdash; RSB 2017.					
+					# LOADING OCTAL WORD INTO MINOR PART.
 PUTDPCOM	INCR	NOUNADD		# DP  (ESUBK)-K+1  OR  E+1
 		CA	NOUNADD		# NOUNADD NOW SET FOR MINOR PART
 		ADS	DECOUNT		# (ESUBK)+1  OR  E+1  INTO DECOUNT
@@ -1931,7 +1943,8 @@ PUTCOM2		XCH	MPAC
 		EBANK=	DSPCOUNT
 GTSFINLC	2CADR	GTSFIN
 
-CHANLOAD	CS	SEVEN		# DONT LOAD CHAN 7. (IT = SUPERBANK)
+## Restored trailing period in the following line. &mdash; RSB 2017.
+CHANLOAD	CS	SEVEN		# DONT LOAD CHAN 7. (IT = SUPERBANK).
 		AD	NOUNCADR
 		EXTEND
 		BZF	LOADLV
@@ -2121,8 +2134,9 @@ HMSIN		CS	DECBRNCH	# CHECK FOR ALL 3.COMPS DEC
 		TC	FORCEV25
 		TC	DMP		# XREG, XREGLP (=HOURS) WERE ALREADY PUT
 		ADRES	WHOLECON	# INTO MPAC, MPAC+1.
-		TC	RND/TST		# ROUND OFF TO WHOLE HRS IN MPAC+1
-		CAF	ZERO		# ALARM IF MPAC NON ZERO (G/ 16383)
+## Restored trailing period in the following two lines. &mdash; RSB 2017.
+		TC	RND/TST		# ROUND OFF TO WHOLE HRS IN MPAC+1.
+		CAF	ZERO		# ALARM IF MPAC NON ZERO (G/ 16383).
 		TS	MPAC +2
 		CAF	HRCON
 		TS	MPAC

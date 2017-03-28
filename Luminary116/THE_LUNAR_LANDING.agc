@@ -14,6 +14,11 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-01-22 MAS  Created from Luminary 99.
 ##              2017-03-10 HG   Transcribed
+##              2017-03-14 RSB  Proofed comment text via 3-way diff vs
+##                              Luminary 99 and 131.
+##              2017-03-16 RSB  Comment-text fixes identified in 5-way
+##                              side-by-side diff of Luminary 69/99/116/131/210.
+##              2017-03-19 HG   Fix SELOC operand  F2DPS*31 --> F2DPS*34
 
 ## Page 778
                 BANK            32
@@ -44,7 +49,7 @@ P63LM           TC              PHASCHNG
                 CAF             FOUR
                 TS              DVCNTR
 
-                CS              ONE                             # INITIALIZE WCHPHASE AND FLPASS0
+                CS              ONE                             # INITIALIZE WCHPHASE AND FLPASSO
                 TS              WCHPHASE
 
                 CA              ZERO
@@ -255,7 +260,7 @@ P63SPOT4        TC              BANKCALL                        # ENTER      INI
                 CADR            BURNBABY
 
 
-#               --------------------------------------------
+#               ---------------------------------------
 
 #                      CONSTANTS FOR P63LM AND IGNALG
 
@@ -273,7 +278,7 @@ GUIDDURN        2DEC            +66440                          #         GUIDDU
 DDUMCRIT        2DEC            +8              B-28            # CRITERION FOR IGNALG CONVERGENCE
 
 ## Page 783
-#               ---------------------------------------------
+#               ----------------------------------------
 
 ## Page 784
 #               ****************************************
@@ -281,7 +286,7 @@ DDUMCRIT        2DEC            +8              B-28            # CRITERION FOR 
 #               ****************************************
 
                 BANK            34
-                SETLOC          F2DPS*31
+                SETLOC          F2DPS*34
                 BANK
 
                 COUNT*          $$/P6567

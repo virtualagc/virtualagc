@@ -26,6 +26,20 @@
 ##				"+" (on p. 1438).  While I feel this is likely a problem 
 ##				with the printer used for the Artemis printout, I've 
 ##				nevertheless omitted the "." (or "0.") in those cases.
+##		2017-03-15 RSB	Comment-text fixes identified in 6-way
+##				side-by-side diff of Sunburst 120 and Luminary 
+##				69/99/116/131/210.
+##		2017-03-16 RSB	Comment-text fixes identified in 4-way side-by-side
+##				diff of Colossus237/249/Comanche55/Artemis72.  My
+##				position on missing trailing characters as described
+##				in the 2017-02-05 comment above has now been reversed, 
+##				and the missing characters have been restored. However, 
+##				the presence of the characters in Comanche 55 is not 
+##				enough ... the restoration is done only in
+##				those cases where the corresponding otherwise-identical
+##				line in _all_ other Colossus and Luminary versions has 
+##				those characters.  These instances are marked with a
+##				##-style comment indicating the restoration.
 
 ## Page 1417
 		SETLOC	FFTAG3
@@ -33,7 +47,7 @@
 
 		EBANK=	COMMAND
 
-# FIXED-FIXED ROUTINES
+# FIXED-FIXED ROUTINES.
 
 		COUNT*	$$/IMODE
 ZEROICDU	CAF	ZERO		# ZERO ICDU COUNTERS.
@@ -502,7 +516,8 @@ STRTGYRO	CS	GDESELCT	# DE-SELECT LAST GYRO.
 
 		TC	CAGETSTG
 
-STRTGYR2	CA	LGYRO		# JUMP ON PHASE COUNTER IN BITS 13-14
+## Trailing period restored. &mdash; RSB 2017.
+STRTGYR2	CA	LGYRO		# JUMP ON PHASE COUNTER IN BITS 13-14.
 		EXTEND
 		MP	BIT4
 		INDEX	A
@@ -525,7 +540,8 @@ NORESET		TCF	IMUFINED	# DO NOT RESET POWER SUPPLY
 
 ## Page 1430
 
- -2		CS	FOUR		# SPECIAL ENTRY TO REGRESS LGYRO FOR X
+## Trailing period restored. &mdash; RSB 2017.
+ -2		CS	FOUR		# SPECIAL ENTRY TO REGRESS LGYRO FOR X.
 		ADS	LGYRO
 
 GSELECT		INDEX	Q		# SELECT GYRO.
@@ -636,7 +652,8 @@ TWOPULSE	CS	BIT9
 		TCF	TASKOVER
 LONGGYRO	INDEX	ITEMP1
 		DXCH	1400		# INITIAL COMMAND OUT PLUS N AUGMENTS OF
-		CAF	BIT14		# 8192. INITIAL COMMAND IS AT LEAST 8192
+## Trailing period restored. &mdash; RSB 2017.
+		CAF	BIT14		# 8192. INITIAL COMMAND IS AT LEAST 8192.
 		AD	ITEMP2
 		TS	GYROCMD
 
@@ -733,7 +750,7 @@ CAGETSTQ	CS	IMODES30	# SKIP IF IMU NOT BEING CAGED.
 		MASK	IMUNITBT
 		TCF	INCRQCK
 CAGETSTJ	CS	IMODES30	# IF DURING MODE SWITCH INITIALIZATION
-		MASK	IMUNITBT	# IT IS FOUND THAT THE IMU IS BEING CAGED.
+		MASK	IMUNITBT	# IT IS FOUND THAT THE IMU IS BEING CAGED,
 		CCS	A		# SET IMUCADR TO -0 TO INDICATE OPERATION
 		TC	Q		# COMPLETE BUT FAILED. RETURN IMMEDIATELY
 
@@ -824,7 +841,8 @@ MODEGOOD	CCS	A		# MAKE SURE INITIAL STATE -1.
 		TCF	MODABORT
 
 		INCR	BUF2		# IF SO, INCREMENT RETURN ADDRESS AND
-		TCF	MG2		# RETURN IMMEDIATELY, SETTING CADR = +
+## Trailing "0." restored. &mdash; RSB 2017.
+		TCF	MG2		# RETURN IMMEDIATELY, SETTING CADR = +0.
 
 MODESLP		TC	MAKECADR	# CALL FROM SWITCHABLE FIXED ONLY.
 		TS	MODECADR
@@ -988,7 +1006,8 @@ SCALPREP	EXTEND
 		TC	FINETIME +1
 		RELINT
 		DXCH	MPAC
-		CA	BIT5		# ADD 5 MS TO THE SCALER READING
+## Trailing period restored. &mdash; RSB 2017.		
+		CA	BIT5		# ADD 5 MS TO THE SCALER READING.
 		TS	L
 		CA	ZERO
 		DAS	MPAC

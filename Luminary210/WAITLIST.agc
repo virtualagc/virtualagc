@@ -18,6 +18,9 @@
 ##		2016-12-26 RSB	Comment-text proofed using ProoferComments
 ##				and corrected errors found.
 ##		2017-01-28 RSB	WTIH -> WITH.
+##		2017-03-14 RSB	Comment-text fixes noted in proofing Luminary 116.
+##		2017-03-16 RSB	Comment-text fixes identified in 5-way
+##				side-by-side diff of Luminary 69/99/116/131/210.
 
 ## Page 1115
 # PROGRAM DESCRIPTION                                                                     DATE - 10 OCTOBER 1966
@@ -104,8 +107,8 @@
 #         CONTROL WILL NOT BE RETURNED TO THE SPECIFIED ADDRESS (2CADR)   IN EXACTLY DELTA T CENTISECONDS.
 #    THE APPROXIMATE TIME MAY BE CALCULATED AS FOLLOWS
 
-#              LET T0 = THE TIME OF THE TC WAITLIST
-#              LET TS = T0 +147U + COUNTER INCREMENTS (SET UP TIME)
+#              LET TO = THE TIME OF THE TC WAITLIST
+#              LET TS = TO +147U + COUNTER INCREMENTS (SET UP TIME)
 #              LET X  = TS -(100TS)/100  (VARIANCE FROM COUNTERS)
 #              LET Y  = LENGTH OF TIME OF INHIBIT INTERRUPT AFTER T3RUPT
 #              LET Z  = LENGTH OF TIME TO PROCESS TASKS WHICH ARE DUE THIS T3RUPT BUT DISPATCHED EARLIER.
@@ -470,7 +473,7 @@ NOQBRSM		DXCH	ARUPT
 
 # NORMAL EXIT MODE-
 #    1). TC    WAITLIST
-#    2). DTCB  (TC L+3 OF CALLING ROUTINE 1ST PASS THRU LONGCYCL)
+#    2). DTCB  (TO L+3 OF CALLING ROUTINE 1ST PASS THRU LONGCYCL)
 #    3). DTCB  (TO TASKOVER ON SUBSEQUENT PASSES THRU LONGCYCL)
 
 # ALARM OR ABORT EXIT MODE-

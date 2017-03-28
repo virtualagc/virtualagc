@@ -21,6 +21,8 @@
 ##		2017-03-01 RSB	Fixed lingering typos.
 ##		2017-03-10 RSB	Comment-text fixes noted while transcribing Luminary 116.
 ##				The label 1406P00 was replaced with 1406POO.
+##		2017-03-16 RSB	Comment-text fixes identified in 5-way
+##				side-by-side diff of Luminary 69/99/116/131/210.
 
 ## Page 793
 		EBANK=	E2DPS
@@ -91,9 +93,9 @@ WHATALM		TCF	1406ALM		# BRAKQUAD
 TARGTDEX	OCT	0		# BRAKQUAD
 		OCT	34		# APPRQUAD
 
-# ***************************************************************************************************************
+# ****************************************************************************************************************
 # ENTRY POINTS:  ?GUIDSUB FOR THE IGNITION ALGORITHM, LUNLAND FOR SERVOUT
-# ***************************************************************************************************************
+# ****************************************************************************************************************
 
 # IGNITION ALGORITHM ENTRY:  DELIVERS N PASSES OF QUADRATIC QUIDANCE
 
@@ -528,9 +530,9 @@ TTF/8CL		TC	INTPRETX
 
 # 		(CONTINUE TO QUADGUID)
 
-# ***************************************************************************************************************
+# ****************************************************************************************************************
 # MAIN GUIDANCE EQUATION
-# ***************************************************************************************************************
+# ****************************************************************************************************************
 #
 #	AS PUBLISHED:-
 #		              -     -        -     -
@@ -548,7 +550,7 @@ TTF/8CL		TC	INTPRETX
 QUADGUID	CS	TTF/8
 		AD	LEADTIME	# LEADTIME IS A NEGATIVE NUMBER
 		AD	POSMAX		# SAFEGUARD THE COMPUTATIONS THAT FOLLOW
-		TS	L		#	BY FORCING -TTF*LEADTIME > OR = ZERO
+		TS	L		#	BY FORCING -TTF+LEADTIME > OR = ZERO
 		CS	L
 		AD	L
 		ZL
@@ -636,9 +638,9 @@ AFCCLEND	EXIT
 BRSPOT4		INDEX	WCHPHASE
 		TCF	AFTRGUID
 
-# ***************************************************************************************************************
+# ****************************************************************************************************************
 # NEW PHASE NOW?
-# ***************************************************************************************************************
+# ****************************************************************************************************************
 
 EXTLOGIC	INDEX	WCHPHASE	# IS TTF NEARER ZERO THAN CRITERION?
 		CA	TENDBRAK

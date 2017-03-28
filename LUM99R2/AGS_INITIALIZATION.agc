@@ -12,6 +12,8 @@
 ##		2016-12-13 RSB	Proofed text comments with octopus/ProoferComments
 ##				and corrected the errors found.
 ##		2017-03-03 RSB	Snapshot of Luminary 99 Rev 1. 
+##		2017-03-14 RSB	Comment-text fixes identified in 5-way
+##				side-by-side diff of Luminary 69/99/116/131/210.
 
 ## Page 206
 
@@ -19,7 +21,7 @@
 #
 # WRITTEN BY:  RHODE/KILROY/FOLLETT
 #
-# MOD NO. .	0
+# MOD NO. :	0
 # DATE:		23 MARCH 1967
 # MOD BY:	KILROY
 #

@@ -315,6 +315,13 @@
  *				process improved DSKY light latency. Last,
  *				added a new channel 163 bit that indicates
  *				power for the DSKY EL panel is switched off.
+ *		03/11/17 MAS	Further improved DSKY light responsiveness,
+ *				and split the logic out to its own function
+ *				as a bit of housekeeping.
+ *		03/26/17 MAS	Made several previously-static things a part
+ *				of the agc_t state structure, which should
+ *				make integration easier for simulator
+ *				integrators.
  *
  *
  * The technical documentation for the Apollo Guidance & Navigation (G&N) system,
@@ -455,10 +462,6 @@ FILE *CduLog = NULL;
 // DSKY handling constants and variables.
 #define DSKY_OVERFLOW 81920
 #define DSKY_FLASH_PERIOD 4
-static unsigned DskyTimer = 0;
-static unsigned DskyFlash = 0;
-static unsigned RestartLight = 0;
-static unsigned DskyChannel163 = 0;
 
 //-----------------------------------------------------------------------------
 // Functions for reading or writing from/to i/o channels.  The reason we have
@@ -508,7 +511,7 @@ WriteIO (agc_t * State, int Address, int Value)
   // light is turned off without need for software intervention.
   if ((Address == 011 && (Value & 01000)) ||
       ((Address == 015 || Address == 016) && Value == 022))
-    RestartLight = 0;
+    State->RestartLight = 0;
 
   State->InputChannel[Address] = Value;
   if (Address == 010)
@@ -694,8 +697,6 @@ CollectCoverage (agc_t * State, int Address12, int Read, int Write, int Instruct
 // and an offset into that bank, while AssignFromPointer simply uses a pointer
 // directly to the simulated memory location.
 
-static int NextZ;
-
 static void
 Assign (agc_t * State, int Bank, int Offset, int Value)
 {
@@ -710,7 +711,7 @@ Assign (agc_t * State, int Bank, int Offset, int Value)
       switch (Offset)
 	{
 	case RegZ:
-	  NextZ = Value & 07777;
+	  State->NextZ = Value & 07777;
 	  break;
 	case RegCYR:
 	  Value &= 077777;
@@ -1554,6 +1555,55 @@ BurstOutput (agc_t *State, int DriveBitMask, int CounterRegister, int Channel)
   return (DriveCountSaved);
 }
 
+static void 
+UpdateDSKY(agc_t *State)
+{
+  unsigned LastChannel163 = State->DskyChannel163;
+
+  State->DskyChannel163 &= ~(DSKY_KEY_REL | DSKY_VN_FLASH | DSKY_OPER_ERR | DSKY_RESTART | DSKY_STBY);
+
+  if (State->InputChannel[013] & 01000)
+    // The light test is active. Light RESTART and STBY.
+    State->DskyChannel163 |= DSKY_RESTART | DSKY_STBY; // 
+
+  // If we're in standby, light the standby light
+  if (State->Standby)
+    State->DskyChannel163 |= DSKY_STBY;
+
+  // Make the RESTART light mirror State->RestartLight.
+  if (State->RestartLight)
+    State->DskyChannel163 |= DSKY_RESTART;
+
+  // Set KEY REL and OPER ERR according to channel 11
+  if (State->InputChannel[011] & DSKY_KEY_REL)
+    State->DskyChannel163 |= DSKY_KEY_REL;
+  if (State->InputChannel[011] & DSKY_OPER_ERR)
+    State->DskyChannel163 |= DSKY_OPER_ERR;
+
+  // Update the DSKY flash counter based on the DSKY timer
+  while (State->DskyTimer >= DSKY_OVERFLOW)
+    {
+      State->DskyTimer -= DSKY_OVERFLOW;
+      State->DskyFlash = (State->DskyFlash + 1) % DSKY_FLASH_PERIOD;
+    }
+
+  // Flashing lights on the DSKY have a period of 1.28s, and a 75% duty cycle
+  if (!State->Standby && State->DskyFlash == 0)
+    {
+      // If V/N FLASH is high, then the lights are turned off
+      if (State->InputChannel[011] & DSKY_VN_FLASH)
+        State->DskyChannel163 |= DSKY_VN_FLASH;
+
+      // Flash off the KEY REL and OPER ERR lamps
+      State->DskyChannel163 &= ~DSKY_KEY_REL;
+      State->DskyChannel163 &= ~DSKY_OPER_ERR;
+    }
+
+  // Send out updated display information, if something on the DSKY changed
+  if (State->DskyChannel163 != LastChannel163)
+    ChannelOutput(State, 0163, State->DskyChannel163);
+}
+
 //-----------------------------------------------------------------------------
 // Execute one machine-cycle of the simulation.  Use agc_engine_init prior to 
 // the first call of agc_engine, to initialize State, and then call agc_engine 
@@ -1575,7 +1625,6 @@ BurstOutput (agc_t *State, int DriveBitMask, int CounterRegister, int Channel)
 
 #define SCALER_OVERFLOW 80
 #define SCALER_DIVIDER 3
-static int ScalerCounter = 0;
 
 // Fine-alignment.
 // The gyro needs 3200 pulses per second, and therefore counts twice as
@@ -1598,7 +1647,6 @@ int
 agc_engine (agc_t * State)
 {
   int i, j;
-  static int Count = 0;
   uint16_t ProgramCounter, Instruction, /*OpCode,*/ QuarterCode, sExtraCode;
   int16_t *WhereWord;
   uint16_t Address12, Address10, Address9;
@@ -1625,7 +1673,7 @@ agc_engine (agc_t * State)
   // The first time through the loop, light up the DSKY RESTART light
   if (State->CycleCounter == 0)
     {
-      RestartLight = 1;
+      State->RestartLight = 1;
     }
 
   State->CycleCounter++;
@@ -1655,8 +1703,8 @@ agc_engine (agc_t * State)
   // 1/1600 is the basic timing used to drive timer registers.  1/1600
   // second happens to be 160/3 machine cycles.
 
-  ScalerCounter += SCALER_DIVIDER;
-  DskyTimer += SCALER_DIVIDER;
+  State->ScalerCounter += SCALER_DIVIDER;
+  State->DskyTimer += SCALER_DIVIDER;
 
   //-------------------------------------------------------------------------
 
@@ -1664,65 +1712,17 @@ agc_engine (agc_t * State)
   // communications.  Stuff like listening for clients we only do
   // every once and a while---nominally, every 100 ms.  Actually 
   // processing input data is done every cycle.
-  if (Count == 0)
+  if (State->ChannelRoutineCount == 0)
     ChannelRoutine (State);
-  Count = ((Count + 1) & 017777);
+  State->ChannelRoutineCount = ((State->ChannelRoutineCount + 1) & 017777);
+
+  // Update the various hardware-driven DSKY lights
+  UpdateDSKY(State);
 
   // Get data from input channels.  Return immediately if a unprogrammed 
   // counter-increment was performed.
   if (ChannelInput (State))
     return (0);
-
-  // Update DSKY lights before we potentially leave due to 
-  // --debug-dsky mode
-  unsigned LastChannel163 = DskyChannel163;
-
-  if (State->InputChannel[013] & 01000)
-    // The light test is active. Light RESTART and STBY.
-    DskyChannel163 |= DSKY_RESTART | DSKY_STBY; // 
-  else 
-    {
-      // Otherwise, if we're not in standby, clear the STBY light.
-      if (!State->Standby)
-        DskyChannel163 &= ~DSKY_STBY;
-
-      // Make the RESTART light mirror RestartLight.
-      if (RestartLight)
-        DskyChannel163 |= DSKY_RESTART;
-      else
-        DskyChannel163 &= ~DSKY_RESTART;
-    }
-
-  // Check for timing-related DSKY changes
-  while (DskyTimer >= DSKY_OVERFLOW)
-    {
-      DskyTimer -= DSKY_OVERFLOW;
-      DskyFlash = (DskyFlash + 1) % DSKY_FLASH_PERIOD;
-      DskyChannel163 &= ~(DSKY_KEY_REL | DSKY_VN_FLASH | DSKY_OPER_ERR);
-
-      // Flashing lights on the DSKY have a period of 1.28s, and a 75% duty cycle
-      if (!State->Standby)
-        {
-          if (DskyFlash == 0)
-            {
-              // If V/N FLASH is high, then the lights are turned off
-              if (State->InputChannel[011] & DSKY_VN_FLASH)
-                DskyChannel163 |= DSKY_VN_FLASH;
-            }
-            else
-            {
-              // If KEY REL or OPER ERR are high, those lights are turned on
-              if (State->InputChannel[011] & DSKY_KEY_REL)
-                DskyChannel163 |= DSKY_KEY_REL;
-              if (State->InputChannel[011] & DSKY_OPER_ERR)
-                DskyChannel163 |= DSKY_OPER_ERR;
-            }
-        }
-    }
-
-  // Send out updated display information, if something on the DSKY changed
-  if (DskyChannel163 != LastChannel163)
-    ChannelOutput(State, 0163, DskyChannel163);
 
   // If in --debug-dsky mode, don't want to take the chance of executing
   // any AGC code, since there isn't any loaded anyway.
@@ -1776,14 +1776,14 @@ agc_engine (agc_t * State)
   // takes 1 machine cycle.
 
   // This can only iterate once, but I use 'while' just in case.
-  while (ScalerCounter >= SCALER_OVERFLOW)
+  while (State->ScalerCounter >= SCALER_OVERFLOW)
     {
       int TriggeredAlarm = 0;
 
       // First, update SCALER1 and SCALER2. These are direct views into
       // the clock dividers in the Scaler module, and so don't take CPU
       // time to 'increment'
-      ScalerCounter -= SCALER_OVERFLOW;
+      State->ScalerCounter -= SCALER_OVERFLOW;
       State->InputChannel[ChanSCALER1]++;
       if (State->InputChannel[ChanSCALER1] == 040000)
         {
@@ -1817,8 +1817,8 @@ agc_engine (agc_t * State)
                   TriggeredAlarm = 1;
 
                   // Turn on the STBY light, and switch off the EL segments
-                  DskyChannel163 |= DSKY_STBY | DSKY_EL_OFF;
-                  ChannelOutput(State, 0163, DskyChannel163);
+                  State->DskyChannel163 |= DSKY_STBY | DSKY_EL_OFF;
+                  ChannelOutput(State, 0163, State->DskyChannel163);
                 }
               else if (!State->SbyStillPressed)
                 {
@@ -1826,8 +1826,8 @@ agc_engine (agc_t * State)
                   State->Standby = 0;
 
                   // Turn off the STBY light
-                  DskyChannel163 &= ~(DSKY_STBY | DSKY_EL_OFF);
-                  ChannelOutput(State, 0163, DskyChannel163);
+                  State->DskyChannel163 &= ~(DSKY_STBY | DSKY_EL_OFF);
+                  ChannelOutput(State, 0163, State->DskyChannel163);
                 }
             }
           if (!State->Standby && State->NightWatchman)
@@ -1941,7 +1941,7 @@ agc_engine (agc_t * State)
               // Light the RESTART light on the DSKY, if we're not going into standby
               if (!State->Standby)
                 {
-                  RestartLight = 1;
+                  State->RestartLight = 1;
                 }
 
             }
@@ -2154,7 +2154,7 @@ agc_engine (agc_t * State)
               State->InterruptRequests[i] = 0;
               State->InterruptRequests[0] = i;
 
-              NextZ = 04000 + 4 * i;
+              State->NextZ = 04000 + 4 * i;
 
               InterruptRequested = 1;
               break;
@@ -2165,7 +2165,7 @@ agc_engine (agc_t * State)
       // back to address 0 (A) as the interrupt vector
       if (!InterruptRequested && ExtendedOpcode == 0107)
         {
-          NextZ = 0;
+          State->NextZ = 0;
           InterruptRequested = 1;
         }
 
@@ -2228,12 +2228,12 @@ agc_engine (agc_t * State)
   // memory.)  As a first cut, therefore, I simply increment the thing without 
   // checking for a problem.  (The increment is by 2, since bit 0 is the
   // parity and the address only starts at bit 1.) 
-  NextZ = 1 + c(RegZ);
+  State->NextZ = 1 + c(RegZ);
   // I THINK that the Z register is updated before the instruction executes,
   // which is important if you have an instruction that directly accesses
   // the value in Z.  (I deduce this from descriptions of the TC register,
   // which imply that the contents of Z is directly transferred into Q.)
-  c (RegZ)= NextZ;
+  c (RegZ)= State->NextZ;
 
   // Parse the instruction.  Refer to p.34 of 1689.pdf for an easy 
   // picture of what follows.
@@ -2264,8 +2264,8 @@ agc_engine (agc_t * State)
 	{
 	  BacktraceAdd (State, 0);
 	  if (ValueK != RegQ)	// If not a RETURN instruction ...
-	    c (RegQ)= 0177777 & NextZ;
-	  NextZ = Address12;
+	    c (RegQ)= 0177777 & State->NextZ;
+	  State->NextZ = Address12;
           ExecutedTC = 1;
 	}
 
@@ -2299,16 +2299,16 @@ agc_engine (agc_t * State)
       // incremented.
       if (Address10 < REG16
 	  && ValueOverflowed (ValueK) == AGC_P1)
-      NextZ += 0;
+      State->NextZ += 0;
       else if (Address10 < REG16
 	  && ValueOverflowed (ValueK) == AGC_M1)
-      NextZ += 2;
+      State->NextZ += 2;
       else if (Operand16 == AGC_P0)
-      NextZ += 1;
+      State->NextZ += 1;
       else if (Operand16 == AGC_M0)
-      NextZ += 3;
+      State->NextZ += 3;
       else if (0 != (Operand16 & 040000))
-      NextZ += 2;
+      State->NextZ += 2;
       break;
       case 012:// TCF.
       case 013:
@@ -2318,7 +2318,7 @@ agc_engine (agc_t * State)
       case 017:
       BacktraceAdd (State, 0);
       // TCF instruction (1 MCT).
-      NextZ = Address12;
+      State->NextZ = Address12;
       // THAT was easy ... too easy ...
       ExecutedTC = 1;
       break;
@@ -2395,7 +2395,7 @@ agc_engine (agc_t * State)
 	  else
 	  c (Address10) = Operand16;
 	  if (Address10 == RegZ)
-	  NextZ = c (RegZ);
+	  State->NextZ = c (RegZ);
 	}
       else
 	{
@@ -2512,7 +2512,7 @@ agc_engine (agc_t * State)
 	  BacktraceAdd (State, 255);
 	  else
 	  BacktraceAdd (State, 0);
-	  NextZ = c (RegZRUPT) - 1;
+	  State->NextZ = c (RegZRUPT) - 1;
 	  State->InIsr = 0;
 	  State->SubstituteInstruction = 1;
 	}
@@ -2544,7 +2544,7 @@ agc_engine (agc_t * State)
 	  c (Address10) = c (RegL);
 	  c (RegL) = Operand16;
 	  if (Address10 == RegZ)
-	  NextZ = c (RegZ);
+	  State->NextZ = c (RegZ);
 	}
       else
 	{
@@ -2560,7 +2560,7 @@ agc_engine (agc_t * State)
 	  c (Address10 - 1) = c (RegA);
 	  c (RegA) = Operand16;
 	  if (Address10 == RegZ + 1)
-	  NextZ = c (RegZ);
+	  State->NextZ = c (RegZ);
 	}
       else
 	{
@@ -2575,11 +2575,11 @@ agc_engine (agc_t * State)
       if (IsA (Address10))// OVSK
 	{
 	  if (Overflow)
-	  NextZ += AGC_P1;
+	  State->NextZ += AGC_P1;
 	}
       else if (IsZ (Address10))	// TCAA
 	{
-	  NextZ = (077777 & Accumulator);
+	  State->NextZ = (077777 & Accumulator);
 	  if (Overflow)
 	  c (RegA) = SignExtend (ValueOverflowed (Accumulator));
 	}
@@ -2594,7 +2594,7 @@ agc_engine (agc_t * State)
 	  if (Overflow)
 	    {
 	      c (RegA) = SignExtend (ValueOverflowed (Accumulator));
-	      NextZ += AGC_P1;
+	      State->NextZ += AGC_P1;
 	    }
 	}
       break;
@@ -2607,7 +2607,7 @@ agc_engine (agc_t * State)
 	  c (RegA) = c (Address10);
 	  c (Address10) = Accumulator;
 	  if (Address10 == RegZ)
-	  NextZ = c (RegZ);
+	  State->NextZ = c (RegZ);
 	  break;
 	}
       WhereWord = FindMemoryWord (State, Address10);
@@ -2826,7 +2826,7 @@ agc_engine (agc_t * State)
       if (Accumulator == 0 || Accumulator == 0177777)
 	{
 	  BacktraceAdd (State, 0);
-	  NextZ = Address12;
+	  State->NextZ = Address12;
 	}
       break;
       case 0120:			// MSU
@@ -2876,7 +2876,7 @@ agc_engine (agc_t * State)
 	  c (RegQ) = c (Address10);
 	  c (Address10) = Operand16;
 	  if (Address10 == RegZ)
-	  NextZ = c (RegZ);
+	  State->NextZ = c (RegZ);
 	}
       else
 	{
@@ -3024,7 +3024,7 @@ agc_engine (agc_t * State)
       if (Accumulator == 0 || 0 != (Accumulator & 0100000))
 	{
 	  BacktraceAdd (State, 0);
-	  NextZ = Address12;
+	  State->NextZ = Address12;
 	}
       break;
       case 0170:			// MP
@@ -3090,7 +3090,7 @@ agc_engine (agc_t * State)
     {
       c (RegZERO)= AGC_P0;
       State->InputChannel[7] = State->OutputChannel7 &= 0160;
-      c (RegZ) = NextZ;
+      c (RegZ) = State->NextZ;
       if (!KeepExtraCode)
       State->ExtraCode = 0;
       // Values written to EB and FB are automatically mirrored to BB,

@@ -17,6 +17,9 @@
 ##			 	and made changes.
 ##		2017-02-05 RSB	Back-ported comment corrections 
 ##				identified while proofing Artemis 072.
+##		2017-03-13 RSB	Comment-text fixes noted in proofing Luminary 116.
+##		2017-03-15 RSB	Comment-text fixes identified in 5-way
+##				side-by-side diff of Luminary 69/99/116/131/210.
 
 ## This source code has been transcribed or otherwise adapted from
 ## digitized images of a hardcopy from the private collection of
@@ -891,7 +894,7 @@ SETOVF          TS              OVFIND                  # SET OVFIND IF SUCH OCC
 ## Page 61
 # ARITHMETIC SUBROUTINES REQUIRED IN FIXED-FIXED.
 
-#          1.  DMPSUB     DOUBLE PRECISION MULTIPLY, MULTIPLY THE CONTENTS OF MPAC,+1 BY THE DP WORD WHOSE ADDRESS
+#          1.  DMPSUB     DOUBLE PRECISION MULTIPLY. MULTIPLY THE CONTENTS OF MPAC,+1 BY THE DP WORD WHOSE ADDRESS
 #                         IS IN ADDRWD AND LEAVE A TRIPLE PRECISION RESULT IN MPAC.
 #          2.  ROUNDSUB   ROUND THE TRIPLE PRECISON CONTENTS OF MPAC TO DOUBLE PRECISION.
 #          3.  DOTSUB     TAKE THE DOT PRODUCT OF THE VECTOR IN MPAC AND THE VECTOR WHOSE ADDRESS IS IN ADDRWD
@@ -1121,7 +1124,7 @@ SHORTMP         TS              MPTEMP
                 TC              Q
 
 ## Page 67
-# MISCELLANEOUS VECTOR OPERATIONS. INCLUDED HERE ARE THE FOLLOWING.
+# MISCELLANEOUS VECTOR OPERATIONS. INCLUDED HERE ARE THE FOLLOWING:
 
 #          1.  DOT                DP VECTOR DOT PRODUCT.
 #          2.  VXV                DP VECTOR CROSS PRODUCT.
@@ -1914,7 +1917,7 @@ MPAC+           CS              MPAC                    # CHECK FOR DIVISION OVE
                 CS              MPAC                    # CHECK MAGNITUDE OF SIGN-CORRECTED
                 AD              BUF                     # OPERANDS.
                 CCS             A
-                TCF             DVNORM                  # DIVIDE OK - WILL NOT BECOME MAXOV CASE.
+                TCF             DVNORM                  # DIVIDE OK - WILL NOT BECOME MAXDV CASE.
 LBUF2           ADRES           BUF2
                 TCF             DVOVF                   # DIVISOR NOT LESS THAN DIVIDEND - OVF.
 
@@ -2489,7 +2492,7 @@ VSQSUB          EXTEND                                  # DOTS THE VECTOR IN MPA
 ## Page 108
 #          DOUBLE PRECISION SQUARE ROOT ROUTINE. TAKE THE SQUARE ROOT OF THE TRIPLE PRECISION (MPAC +2 USED ONLY
 # IN NORMALIZATION) CONTENTS OF MPAC AND LEAVE THE NORMALIZED RESULT IN MPAC (C(MPAC) GREATER THAN OR EQUAL TO
-# .5).  THE RIGHT SHIFT COUNT (TC UNNORMALIZE) IS LEFT IN MPTEMP.
+# .5).  THE RIGHT SHIFT COUNT (TO UNNORMALIZE) IS LEFT IN MPTEMP.
 
 
 

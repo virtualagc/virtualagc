@@ -11,6 +11,8 @@
 ## Mod history: 2011-04-13 JL	Adapted from corresponding Colossus 249 file.
 ##		2017-01-01 RSB	Proofed comment text using octopus/ProoferComments,
 ##				and fixed errors found.
+##		2017-03-16 RSB	Comment-text fixes identified in 5-way
+##				side-by-side diff of Luminary 69/99/116/131/210.
 
 ## Page 1210
 # ..... RP-TO-R SUBROUTINE .....
@@ -231,7 +233,7 @@ MOONMX		STQ	SETPD
 		STCALL	MMATRIX		# M0= -(AVECTR*COSF+DVECTR*SINF)  B-1
 			EARTHMXX
 # COMPUTE X=X0+(XDOT)(T+T0)
-# 8-9D= X0 (REVS B-0),PUSHLOC SET AT 12D
+# 8-9D= XO (REVS B-0),PUSHLOC SET AT 12D
 # 10-11D=XDOT (REVS/CSEC) SCALED B+23 FOR WEARTH,B+28 FOR NODDOT AND BDOT
 #                         AND B+27 FOR FDOT
 #  X1=DIFFERENCE IN 23 AND SCALING OF XDOT,=0 FOR WEARTH,5 FOR NODDOT AND
@@ -247,7 +249,7 @@ NEWANGLE	DLOAD	SR		# ENTER PD 12D
 		STODL	TIMSUBM		# T+T0 CSEC B-42
 			TIMSUBM +1
 		DMP			# PD 10D  MULT BY XDOT IN 10-11D
-		SL*	DAD		# PD 8D   ADD X0 IN 8-9D AFTER SHIFTING
+		SL*	DAD		# PD 8D   ADD XO IN 8-9D AFTER SHIFTING
 			5,1		#         SUCH THAT SCALING IS B-0
 		PUSH	SLOAD		# PD 10D SAVE PARTIAL (X0+XDOT*T) IN 8-9D
 			TIMSUBM

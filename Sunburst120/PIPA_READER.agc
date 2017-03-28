@@ -1,17 +1,18 @@
 ### FILE="Main.annotation"
-## Copyright:    Public domain.
-## Filename:     PIPA_READER.agc
-## Purpose:      A module for revision 0 of BURST120 (Sunburst). It 
-##               is part of the source code for the Lunar Module's
-##               (LM) Apollo Guidance Computer (AGC) for Apollo 5.
-## Assembler:    yaYUL
-## Contact:      Ron Burkey <info@sandroid.org>.
-## Website:      www.ibiblio.org/apollo/index.html
-## Mod history:  2016-09-30 RSB  Created draft version.
-##               2016-10-29 MAS  Adapted from Luminary 099.
-## 		 2016-10-31 RSB	 Typos.
-##		 2016-12-06 RSB	 Comment-proofing via octopus/ProoferComments;
-##				 changes were made.
+## Copyright:   Public domain.
+## Filename:    PIPA_READER.agc
+## Purpose:     A module for revision 0 of BURST120 (Sunburst). It 
+##              is part of the source code for the Lunar Module's
+##              (LM) Apollo Guidance Computer (AGC) for Apollo 5.
+## Assembler:   yaYUL
+## Contact:     Ron Burkey <info@sandroid.org>.
+## Website:     www.ibiblio.org/apollo/index.html
+## Mod history: 2016-09-30 RSB  Created draft version.
+##              2016-10-29 MAS  Adapted from Luminary 099.
+## 		2016-10-31 RSB	Typos.
+##		2016-12-06 RSB	Comment-proofing via octopus/ProoferComments;
+##				changes were made.
+##		2017-03-14 RSB	Comment-text fixes noted in proofing Luminary 116.
 
 ## Page 835
 # *****  PIPA READER *****
@@ -27,7 +28,7 @@
 
 #    AT THE END OF THE PIPA READER THE CDUS ARE READ AND STORED AS A
 # VECTOR IN CDUTEMP.  THE HIGH ORDER PART OF EACH COMPONENT CONTAINS
-# THE CDU READING IN 25 COMP IN THE ORDER CDUX,Y,Z.  THE THRUST
+# THE CDU READING IN 2S COMP IN THE ORDER CDUX,Y,Z.  THE THRUST
 # VECTOR ESTIMATOR IN FINDCDUD REQUIRES THE CDUS BE READ AT PIPTIME.
 
 # CALLING SEQUENCE AND EXIT

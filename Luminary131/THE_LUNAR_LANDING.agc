@@ -18,6 +18,9 @@
 ##				numbers in 1701.pdf.
 ##		2017-02-25 RSB	Proofed comment text using octopus/ProoferComments.
 ##		2017-03-01 RSB	Fixed lingering typos.
+##		2017-03-14 RSB	Comment-text fixes noted in proofing Luminary 116.
+##		2017-03-16 RSB	Comment-text fixes identified in 5-way
+##				side-by-side diff of Luminary 69/99/116/131/210.
 
 ## Page 780
 		BANK	32
@@ -46,7 +49,7 @@ P63LM		TC	PHASCHNG
 		CAF	FOUR
 		TS	DVCNTR
 
-		CS	ONE		# INITIALIZE WCHPHASE AND FLPASS0
+		CS	ONE		# INITIALIZE WCHPHASE AND FLPASSO
 		TS	WCHPHASE
 
 		CA	ZERO
@@ -124,7 +127,7 @@ IGNALOOP	DLOAD
 #                                                       2        0
 # THE NUMERATOR IS SCALED IN METERS AT 2(28).  THE DENOMINATOR IS A VELOCITY IN UNITS OF 2(10) M/CS.
 # THE QUOTIENT IS THUS A TIME IN UNITS OF 2(18) CENTISECONDS.  THE FINAL SHIFT RESCALES TO UNITS OF 2(28) CS.
-# THERE IS NO DAMPING FACTOR.  THE CONSTANTS KIGNX/B4, KIGNY/88 AND KIGNV/B4 ARE ALL NEGATIVE IN SIGN.
+# THERE IS NO DAMPING FACTOR.  THE CONSTANTS KIGNX/B4, KIGNY/B8 AND KIGNV/B4 ARE ALL NEGATIVE IN SIGN.
 
 DDUMCALC	TS	NIGNLOOP
 		TC	INTPRET
@@ -248,13 +251,13 @@ P63SPOT4	TC	BANKCALL	# ENTER		INITIALIZE LANDING RADAR
 		TC	POSTJUMP	# OFF TO SEE THE WIZARD ...
 		CADR	BURNBABY
 
-#	---------------------------------
+#       ----------------------------------------
 
 # CONSTANTS FOR P63LM AND IGNALG
 
 P63ADRES	GENADR	P63TABLE
 
-ASTNDEX		=	MD1		# OCT 25:  INDEX FOR CLOKTASK
+ASTNDEX		=	MD1		# OCT 25; INDEX FOR CLOKTASK
 
 CODE500		OCT	00500
 
@@ -264,7 +267,7 @@ GUIDDURN	2DEC	+66440		# GUIDDURN +6.64400314 E+2
 DDUMCRIT	2DEC	+8 B-28		# CRITERION FOR IGNALG CONVERGENCE
 
 ## Page 785
-#	--------------------------------
+#       ----------------------------------------
 
 ## Page 786
 #	****************************************

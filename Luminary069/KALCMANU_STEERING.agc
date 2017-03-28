@@ -22,6 +22,8 @@
 ##				and fixed errors found.
 ##		2017-03-07 RSB	Removed yaYUL workaround that no longer 
 ##				seems to be needed.
+##		2017-03-17 RSB	Comment-text fixes identified in diff'ing
+##				Luminary 99 vs Comanche 55.
 
 ## Page 378
 # GENERATION OF STEERING COMMANDS FOR DIGITAL AUTOPILOT FREE FALL MANEUVERS
@@ -125,10 +127,10 @@ MANUSTAT	EXIT			# INITIALIZATION ROUTINE
 		EXTEND			# FOR AUTOMATIC MANEUVERS
 		DCA	TIME2
 ## Page 380
-		DAS	TM		# TM+TO		MANEUVER COMPLETION TIME
+		DAS	TM		# TM+T0		MANEUVER COMPLETION TIME
 		EXTEND
 		DCS	ONESEK
-		DAS	TM		# (TM+TO)-1
+		DAS	TM		# (TM+T0)-1
 		INHINT
 		CAF	TWO
 RATEBIAS	TS	KSPNDX

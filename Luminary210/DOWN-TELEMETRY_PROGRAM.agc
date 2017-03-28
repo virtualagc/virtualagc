@@ -16,6 +16,8 @@
 ##		2016-12-07 JS   Compared to Luminary210 images. Updated where needed.
 ##		2016-12-26 RSB	Comment-text proofed using ProoferComments
 ##				and corrected errors found.
+##		2017-03-15 RSB	Comment-text fixes identified in 5-way
+##				side-by-side diff of Luminary 69/99/116/131/210.
 
 ## Page 986
 # PROGRAM NAME- DOWN TELEMETRY PROGRAM
@@ -166,7 +168,7 @@ DODOWNTM	TS	BANKRUPT
 DNPHASE1	CA	NEGONE		# INITIALIZE ALL CONTROL WORDS
 		TS	SUBLIST		# WORDS TO MINUS ONE
 		TS	DNECADR
-		CA	LDNPHAS2	# SET DNTMGOTO =0 ALL SUBSEQUENT DOWNRUPTS
+		CA	LDNPHAS2	# SET DNTMGOTO =O ALL SUBSEQUENT DOWNRUPTS
 
 ## Page 990
 		TS	DNTMGOTO	# GO TO DNPHASE2

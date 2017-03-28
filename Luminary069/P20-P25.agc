@@ -32,6 +32,9 @@
 ##		2017-01-27 RSB	Proofed comment text using octopus/prooferComments
 ##				and fixed errors found.
 ##		2017-01-28 RSB	WTIH -> WITH.
+##		2017-03-13 RSB	Comment-text fixes noted in proofing Luminary 116.
+##		2017-03-16 RSB	Comment-text fixes identified in 5-way
+##				side-by-side diff of Luminary 69/99/116/131/210.
 
 ##
 ## Page 504
@@ -459,7 +462,7 @@ UPPSV           STQ             CALL                    # UPDATES PERMANENT STAT
                 BOF             SET                     # IF W-MATRIX INVALID,DONT INTEGRATE IT
                                 RENDWFLG
                                 UPPSV1
-                                DIM0FLAG                # SET DIM0FLAG TO INTEGRATE W-MATRIX
+                                DIM0FLAG                # SET DIMOFLAG TO INTEGRATE W-MATRIX
                 BON             SET
                                 SURFFLAG                # IF ON LUNAR SURFACE W IS 6X6
                                 UPPSV5
@@ -2245,7 +2248,7 @@ STDESIG         CAF             BIT11
                 CCS             A                       # WITHIN LIMITS IF NOT). IF SO, EXIT AFTER
                 TCF             ENDRADAR                # CHECKING RR CDU FAIL.
 
-STDESIG1        CCS             DESCOUNT                # SEE IF THE TIME LIMIT HAS EXPIRED
+STDESIG1        CCS             DESCOUNT                # SEE IF THE TINE LIMIT HAS EXPIRED
                 TCF             MOREDES
 
                 CS              B14+B2                  # IF OUT OF TIME, REMOVE ECR ENABLE + TRKR
@@ -3817,7 +3820,7 @@ LSR22.4         CALL
                                 INTSTALL
                 DLOAD           BHIZ                    # IS THIS FIRST TIME THROUGH
                                 MARKCTR
-                                INITWMX6                # YES, INITIALIZE 6X6 W-MATRIX
+                                INITWMX6                # YES. INITIALIZE 6X6 W-MATRIX
                 CLEAR           SET
                                 D6OR9FLG
                                 DIM0FLAG

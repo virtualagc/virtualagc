@@ -19,6 +19,8 @@
 ##				3-way diff vs Luminary 99 and Luminary 131.
 ##				(Admittedly, the former is more for detecting errors
 ##				in Luminary 99 than the other way around.)
+##		2017-03-16 RSB	Comment-text fixes identified in 5-way
+##				side-by-side diff of Luminary 69/99/116/131/210.
 
 ## Page 658
 # TRANSFER PHASE INITIATION (TPI) PROGRAMS (P34 AND P74)
@@ -845,7 +847,7 @@ ALLSET          STOVL           TET
 #       GOFLASH
 #       GOTOPOOH
 #       S34/35.3
-#       S34.35.4
+#       S34/35.4
 #       VNPOOH
 
 S34/35.5        STQ             BON                             
@@ -1159,7 +1161,7 @@ INITVEL1        SSP             DLOAD                           # SET ITCTR TO -
                                 VINIT                           # MPAC EQ UNIT(RI) X VI (+8)
                 STOVL           UN                              
                                 RTARG1                          
-                UNIT            DOT                             # TEMP*URT.URI (+2)                 (PL 0D)
+                UNIT            DOT                             # TEMP=URT.URI (+2)                 (PL 0D)
                 DAD             CLEAR                           
                                 COZY4                           
                                 NORMSW                          

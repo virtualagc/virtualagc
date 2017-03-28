@@ -16,7 +16,11 @@
 ##		2016-12-14 RSB	Proofed text comments with octopus/ProoferComments
 ##				and corrected the errors found.
 ##		2017-02-08 RSB	Comment-text fixes discovered while proofing Artemis 72.
-##
+##		2017-03-16 RSB	Comment-text fixes identified in 5-way
+##				side-by-side diff of Luminary 69/99/116/131/210.
+##		2017-03-17 RSB	Comment-text fixes identified in diff'ing
+##				Luminary 99 vs Comanche 55.
+
 ## This source code has been transcribed or otherwise adapted from
 ## digitized images of a hardcopy from the MIT Museum.  The digitization
 ## was performed by Paul Fjeld, and arranged for by Deborah Douglas of
@@ -46,7 +50,7 @@
 # 1.	IF AVERAGE G IS OFF:
 #		FLASH DISPLAY V04N06.  R2 INDICATES WHICH SHIP'S STATE VECTOR IS
 #			TO BE UPDATED.  INITIAL CHOICE IS THIS SHIP (R2=1).  ASTRONAUT
-#			CAN CHANGE TO OTHER SHIP BY V22E XE. WHERE X NOT EQ 1.
+#			CAN CHANGE TO OTHER SHIP BY V22EXE, WHERE X NOT EQ 1.
 #		SELECTED STATE VECTOR UPDATED BY THISPREC (OTHPREC).
 #		CALLS SR30.1 (WHICH CALLS TFFCONMU + TFFRP/RA) TO CALCULATE
 #			RPER (PERIGEE RADIUS), RAPO (APOGEE RADIUS), HPER (PERIGEE
@@ -212,7 +216,7 @@ BOTHPAD		STCALL	RPADTEM
 		DLOAD	BZE		# SR30.1 SETS -TPER=0 IF HPER L/
 			-TPER		# HPERMIN (300 OR 35) KFT.
 			TICKTIFF	# (-TPER = 0)
-TICKTPER	DLOAD	DAD		# (-TPER NON ZERO) TFF WAS NOT COMPUTED.
+TICKTPER	DLOAD	DAD		# (-TPER NON ZERO) TFF WAS NOT COMPUTED,
 			-TPER		# BUT WAS SET TO 59M59S.  DONT TICK TFF, DO
 			TSTART82	# TICK -TPER.  DISPLAY BOTH.
 		STORE	-TPER		# -TPER CORRECTED FOR TIME SINCE V82GOFF1
@@ -455,9 +459,9 @@ SKIPTPER	STODL	-TPER
 		STCALL	TFF		# OTHERWISE COMPUTES TFF.	(GOTO)
 			S2
 
-MAXCHK		DSU	BPL		# IF C(MPAC) > 9999.9 NM. MPAC = 9999.9 NM
+MAXCHK		DSU	BPL		# IF C(MPAC) > 9999.9 NM, MPAC = 9999.9 NM
 			MAXNM
-			+3		# OTHERWISE C(MPAC) - B(MPAC).
+			+3		# OTHERWISE C(MPAC) = B(MPAC).
 		DAD	RVQ
 			MAXNM
  +3		DLOAD	RVQ		# (USED BY P30 - P37 ALSO)

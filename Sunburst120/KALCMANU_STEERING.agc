@@ -14,6 +14,8 @@
 ##		2016-12-06 RSB	Comments proofed using octopus/ProoferComments,
 ##				no changes made.
 ##		2017-01-28 RSB	WTIH -> WITH.
+##		2017-03-17 RSB	Comment-text fixes identified in diff'ing
+##				Luminary 99 vs Comanche 55.
 
 ## Page 668
 # GENERATION OF STEERING COMMANDS FOR DIGITAL AUTOPILOT FREE FALL MANEUVERS
@@ -100,10 +102,10 @@ DT/TAU          DEC             .1
 MANUSTAT        EXIT                                            # INITIALIZATION ROUTINE
                 EXTEND                                          # FOR AUTOMATIC MANEUVERS
                 DCA             TIME2                           
-                DAS             TM                              # TM+TO    MANEUVER COMPLETION TIME
+                DAS             TM                              # TM+T0    MANEUVER COMPLETION TIME
                 EXTEND                                          
                 DCS             ONESEK                          
-                DAS             TM                              # (TM+TO)-1
+                DAS             TM                              # (TM+T0)-1
                 INHINT                                          
                 CA              BRATE                           # X-AXIS MANEUVER RATE
                 TS              OMEGAPD

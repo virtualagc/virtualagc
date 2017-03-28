@@ -14,10 +14,12 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-01-22 MAS  Created from Luminary 99.
 ##              2017-02-20 RRB  Updated for Luminary 116.
+##		2017-03-13 RSB	Proofed comment text via 3-way diff vs
+##				Luminary 99 and 131.
+##		2017-03-16 RSB	Comment-text fixes identified in 5-way
+##				side-by-side diff of Luminary 69/99/116/131/210.
 
 ## Page 1218
-# ORBITAL INTEGRATION
-
 # DELETE
                 BANK            13                              
                 SETLOC          ORBITAL                         
@@ -61,7 +63,7 @@ KEPPREP         LXA,2           SETPD
                 DMP             SL*                             
                                 DP2/3                           
                                 0               -3,1            # 10L(1/R-ALPHA)(+13 +2(N1-N2))
-                XSU,1           DAD                             # 2(FS)SQ - ETCETERA       PL 8D
+                XSU,1           DAD                             # 2(FS)SQ - ETCETRA       	PL 8D
                                 S1                              # X1 = N2-N1
                 SL*             DSU                             # -FS+2(FS)SQ ETC (+6 +N1-N2)    PL 6D
                                 8D,1                            
@@ -218,9 +220,9 @@ GAMCOMP         VLOAD           VSR1
                 STODL           BETAV                           
                                 36D                             
                 STORE           BETAM                           
-                NORM            BDDV                            # FORM NORMALIZE QUOTIEN ALPHAM/BETAM
+                NORM            BDDV                            # FORM NORMALIZED QUOTIENT ALPHAM/BETAM
                                 33D                             
-                SR1R            PUSH                            # C(PDL+2) = ALMOST NORMALIZE RHO.
+                SR1R            PUSH                            # C(PDL+2) = ALMOST NORMALIZED RHO.
                 DLOAD*                                          
                                 ASCALE,1                        
                 STORE           S1                              
@@ -336,14 +338,14 @@ OBLATE          LXA,2           DLOAD
                                 ZUNIT                           
                 PUSH            CALL                            # ZUNIT B-1 IN PLANETARY COORDL AT 00D
                                 MATRIX                          
-                PDVL                                            # UZ    B-2 IN INTERT COORD     AT 06D
+                PDVL                                            # UZ    B-2 IN INERT COORD      AT 00D
                                 XUNIT                           
                 PUSH            CALL                            # XUNIT B-1 IN PLANETARY COORD. AT 06D
                                 MATRIX                          
                 VSL1                                            
-                STOVL           32D                             # UX    B-1 IN INTERT. COORD    AT 32D
+                STOVL           32D                             # UX    B-1 IN INERT. COORD     AT 32D
                 VSL1                                            
-COMTERM         STODL           UZ                              # UZ  B-1 IN INTERTIAL COORD        AT 20D
+COMTERM         STODL           UZ                              # UZ  B-1 IN INERTIAL COORD        AT 20D
                                 COSPHI/2                        #  '      Z-COMPONENT OF URPV
                 DMPR            PDDL                            # P   B-6   ,  3COSPHI/64           AT 00D
                                 3/32                            #  2
@@ -365,7 +367,7 @@ COMTERM         STODL           UZ                              # UZ  B-1 IN INT
                                 9/16                            
 ## Page 1226
                                 2D                              #  '                      '    '
-                DMPR            BDSU                            # P   B-10,(J/4)(9COSPHI P  -5P )
+                DMPR            BDSU                            # P   B-10,(1/4)(9COSPHI P  -5P )
                                 5/128                           #  5                      4    3
                 DMP*            DDV                             #                    '
                                 J4REQ/J3,2                      #    B- , (J RP/J R)P
@@ -377,9 +379,9 @@ COMTERM         STODL           UZ                              # UZ  B-1 IN INT
                                 ALPHAM                          #  -        2 '  2         '        '
                                 2D                              # (R/R)(J RP P /R + 2J RP P /  + J P )
                 VXSC                                            #        4    5       3    4  2   2 3
-                                ALPHAV                          #         4       2  '           _
+                                ALPHAV                          #         4       2  '           -
                 STODL           TVEC                            #   B-6,(SUM((J /R )P   (COSPHI))UR)
-                DMP*            SR1                             #         I=2        I+1
+                DMP*            SR1                             #         I=2  I     I+1
                                 J4REQ/J3,2                      #                 '
                 DDV             DAD                             #      (J RP/J R)P
                                 ALPHAM                          #        4    3   4
@@ -387,9 +389,9 @@ COMTERM         STODL           UZ                              # UZ  B-1 IN INT
                                 2J3RE/J2,2                      #    (2J RP /J R )P  +(2J RP/J R)P
                 DDV             DAD                             #       4     2    4     3    2   3
                                 ALPHAM                          
-                VXSC            VSL1                            #        4   '         -
-                                UZ                              #  B-6  SUM(P (COSPHI))UZ
-                BVSU                                            #      I=2  I
+                VXSC            VSL1                            #        4   '        -
+                                UZ                              #  B-6  SUM(P(COSPHI))UZ
+                BVSU                                            #       I=2  I
                                 TVEC                            #  4              I-2   '          -
                 STODL           TVEC                            # SUM((MU J (RP/R)   )(P   (COSPHI)UR -
                                 ALPHAM                          # I=2      I            I+2
@@ -413,7 +415,7 @@ COMTERM         STODL           UZ                              # UZ  B-1 IN INT
                                 GOBAQUE                         
                 STODL           FV                              # B+16 FOR EARTH , B+20 FOR MOON
                                 URPV                            # B-1  X-COMPONENT OF POSITION  IN
-                BOF             PUSH                            #           PLANETARY COORD.      AT 02D
+                BOF             PUSH                            #           PLANETORY COORD.      AT 02D
 ## Page 1227
                                 MOONFLAG                        
                                 NBRANCH                         #        2
@@ -421,12 +423,12 @@ COMTERM         STODL           UZ                              # UZ  B-1 IN INT
                                 URPV            +2              # B-1  Y-COMPONENT
                 DSQ             DSU                             
                 DMP             VXSC                            
-                                5/8                             #         2 2 -
-                                ALPHAV                          # B-6  5(Y X )UR    2  2 -
+                                5/8                             #         2  2 -
+                                ALPHAV                          # B-6  5(Y -X )UR   2  2 -
                 VSL3            PDDL                            # B-3            5(Y -X )UR        AT 02D
                 VXSC            VAD                             
                                 32D                             #       2  2 -   2          -
-                PDVL            VXV                             #   (5(Y.-X )UR/R ) +(2X/R)UX)     AT 02D
+                PDVL            VXV                             #   (5(Y.-X )UR/R ) +(2X/R)UX      AT 02D
                                 32D                             #    B-1   UX
                                 UZ                              #    B-2  -UY =(UX * UZ)
                 VSL1            VXSC                            #    B-3   -(2Y/R)UY
@@ -449,7 +451,7 @@ COMTERM         STODL           UZ                              # UZ  B-1 IN INT
                 DSU             VXSC                            
                                 D1/32                           
                                 32D                             
-                VSL1            VAD                             #                         2 -           2
+                VSL1            VAD                             #                         2 -           -
                 PDDL            DMP                             #    B-5  (5X/R)(1-7COSPHI )UR +(5COSPHI
                                 URPV                            #       -
                                 URPV            +4              #    -1)UX                         AT 08D
@@ -618,7 +620,7 @@ ORIGCHNG        STQ             CALL
                                 CLRMOON                         
                                 SETMOON                         
 ## Page 1231
-# THE RECTIFY SUBROUTINE IS CALLED BY THE INTEGRATION PROGRAM AND OCCIASIONALLY BY THE MEASUREMENT INCORPORATION
+# THE RECTIFY SUBROUTINE IS CALLED BY THE INTEGRATION PROGRAM AND OCCASIONALLY BY THE MEASUREMENT INCORPORATION
 # ROUTINES TO ESTABLISH A NEW CONIC.
 
                 BANK            13                              
@@ -746,7 +748,7 @@ ENDSTATE        BOV             VLOAD
                 TC              PHASCHNG                        
                 OCT             04022                           # PHASE 1
                 TC              UPFLAG                          # PHASE CHANGE HAS OCCURRED BETWEEN
-                ADRES           REINTFLG                        # INSTALL AND INTWAKE
+                ADRES           REINTFLG                        # INTSTALL AND INTWAKE
                 TC              INTPRET                         
                 SSP                                             
                                 QPRET                           
@@ -793,7 +795,7 @@ DIFEQCOM        DLOAD           DAD                             # INCREMENT H AN
                                 FBR3                            
 
 WMATEND         CLEAR           CLEAR                           
-                                DIM0FLAG                        # DON'T INTEGRATE W THIS TIME
+                                DIM0FLAG                        # DONT INTEGRATE W THIS TIME
                                 ORBWFLAG                        # INVALIDATE W
                 CLEAR                                           
                                 RENDWFLG                        
@@ -809,7 +811,7 @@ WMATEND         CLEAR           CLEAR
 ## Page 1236
 # ORBITAL ROUTINE FOR EXTRAPOLATION OF THE W MATRIX. IT COMPUTES THE SECOND DERIVATIVE OF EACH COLUMN POSITION
 # VECTOR OF THE MATRIX AND CALLS THE NYSTROM INTEGRATION ROUTINES TO SOLVE THE DIFFERENTIAL EQUATIONS. THE PROGRAM
-# USES A TABLE OF VEHICL POSITION VECTORS COMPUTED DURING THE INTEGRATION OF THE VEHICLE'S POSITION AND VELOCITY.
+# USES A TABLE OF VEHICLE POSITION VECTORS COMPUTED DURING THE INTEGRATION OF THE VEHICLES POSITION AND VELOCITY.
 
 DOW..           LXA,2           DLOAD*                          
                                 PBODY                           

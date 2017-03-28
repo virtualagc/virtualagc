@@ -14,7 +14,10 @@
 ##		2011-01-06 JL	Fixed pseudo-label indentation.
 ##		2016-12-17 RSB	Proofed text comments with octopus/ProoferComments
 ##				and corrected the errors found.
-##
+##		2017-03-14 RSB	Comment-text fixes noted in proofing Luminary 116.
+##		2017-03-16 RSB	Comment-text fixes identified in 5-way
+##				side-by-side diff of Luminary 69/99/116/131/210.
+
 ## This source code has been transcribed or otherwise adapted from
 ## digitized images of a hardcopy from the MIT Museum.  The digitization
 ## was performed by Paul Fjeld, and arranged for by Deborah Douglas of
@@ -101,11 +104,11 @@ TFFTEM		=	36D	#	TEMPORARY
 # FUNCTIONAL DESCRIPTION:  THIS SUBROUTINE IS CALLED TO COMPUTE THOSE CONIC PARAMETERS REQUIRED BY THE TFF
 #	SUBROUTINES AND TO ESTABLISH THEM IN THE PUSH LIST AREA.  THE PARAMETERS ARE LISTED UNDER OUTPUT.
 #	THE EQUATIONS ARE
-#		_   __ __
+#		-   -  -
 #		H = RN*VN			ANGULAR MOMENTUM
-#		      _ _
+#		      - -
 #		LCP = H.H / MU			SEMI LATUS RECTUM
-#		              __ __
+#		              -  - 
 #		ALFA = 2/RN - VN.VN / MU	RECIPROCAL SEMI MAJ AXIS, SIGNED
 #
 # 	AND ALFA IS POS FOR ELLIPTIC ORBITS
@@ -160,7 +163,7 @@ TFFTEM		=	36D	#	TEMPORARY
 #		VONE		E:(-7) M:(-5)	M/CS  STATE VECTOR	LEFT BY CALLER
 #		TFF/RTMU	E:(17) M:(14)	1/RT(CS SQ/M CUBE)	IF ENTER VIA TFFCONMU.
 #
-# DEBRIS:	QPRET.		PDL+0 ... PDL+3
+# DEBRIS:	QPRET,		PDL+0 ... PDL+3
 
 		BANK	33
 		SETLOC	TOF-FF
@@ -321,7 +324,7 @@ DUMPRPRA	RVQ
 #	THE EQUATIONS ARE
 #
 #		Q2 = -SQRT(RTERM (2-RTERM ALFA) - LCP)	(INBOUND SIDE))	LEQ +- LCE/SQRT(ALFA)
-#		     __ __
+#		     -  -
 #		Q1 = RN.VN / SQRT(MU)					LEQ +- LCE/SQRT(ALFA)
 #
 # 		Z = NUM / DEN						LEQ +- 1/SQRT(ALFA)
@@ -364,7 +367,7 @@ DUMPRPRA	RVQ
 #		   THE SPECIFIED ALTITUDE.  ALSO INDICATES OUTBOUND PARABOLA OR HYPERBOLA.
 #
 # OUTPUT:	C(MPAC)		(-28) CS	TIME OF FLIGHT, OR TIME TO PERIGEE
-#		TFFX		(0)		X.					LEFT FOR ENTRY DISPLAY TFF ROUTINES
+#		TFFX		(0)		X,					LEFT FOR ENTRY DISPLAY TFF ROUTINES
 #		NRTERM		E:(-29+NR) M	RTERM, WEIGHTED BY NR			LEFT FOR ENTRY DISPLAY TFF ROUTINES
 #				M:(-27+NR)
 #		TFFTEM		E:(-59+2NR)	LCP Z Z SGN(SDELF)			LEFT FOR ENTRY DISPLAY TFF ROUTINES

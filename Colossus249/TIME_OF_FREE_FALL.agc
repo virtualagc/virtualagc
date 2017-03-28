@@ -17,7 +17,8 @@
 ##				vs the already-proofed corresponding Colossus
 ##				237 and Comanche 55 source-code files
 ##				and corrected errors found.
-##
+##		2017-03-14 RSB	Comment-text fixes noted in proofing Luminary 116.
+
 ## The contents of the "Colossus249" files, in general, are transcribed 
 ## from a scanned copy of the program listing.  Notations on this
 ## document read, in part:
@@ -386,7 +387,7 @@ DUMPRPRA	RVQ
 #
 # ERASABLE INITIALIZATION REQUIRED:
 #		RONE		E:(-29) M:(-27)	M  STATE VECTOR				LEFT BY USER
-#		VONE'		E:(+10) M:(+9)	VN/SQRT(NU)				LEFT BY TFF/CONIC
+#		VONE'		E:(+10) M:(+9)	VN/SQRT(MU)				LEFT BY TFF/CONIC
 #		RMAG1		E:(-29) M:(-27)	PRESENT RADIUS, M			LEFT BY TFFCONIC
 #		C(MPAC)		E:(-29) M:(-27)	RTERM, TERMINAL RADIUS LENGTH, M	LEFT BY USER
 #

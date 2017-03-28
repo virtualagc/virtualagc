@@ -17,7 +17,11 @@
 ##				vs the already-proofed corresponding Colossus
 ##				237 and Comanche 55 source-code files
 ##				and corrected errors found.
-##
+##		2017-03-16 RSB	Comment-text fixes identified in 5-way
+##				side-by-side diff of Luminary 69/99/116/131/210.
+##		2017-03-16 RSB	Comment-text fixes identified in 4-way side-by-side
+##				diff of Colossus237/249/Comanche55/Artemis72.
+
 ## The contents of the "Colossus249" files, in general, are transcribed 
 ## from a scanned copy of the program listing.  Notations on this
 ## document read, in part:
@@ -42,8 +46,8 @@
 ## source file, and then is proofed to incorporate any changes.
 
 ## Page 1034
-# SUBROUTINE TO READ GYMBAL ANGLES AND FORM DIFFERENCES.  GIMBAL ANGLES ARE SAVED IN 2'S COMPLEMENT, BUT THE
-# DIFFERENECES ARE IN 1'S COMP.  ENTER AND READ ANGLES EACH .1 SEC.
+# SUBROUTINE TO READ GYMBAL ANGLES AND FORM DIFFERENCES.  GIMBAL ANGLES ARE SAVED IN 2S COMPLEMENT, BUT THE
+# DIFFERENCES ARE IN 1S COMP.  ENTER AND READ ANGLES EACH .1 SEC.
 #
 #	CM/DSTBY = 1 FOR DAP OPERATION
 #	CM/DSTBY = 0 TO TERMINATE DAP OPERATION.
@@ -366,7 +370,7 @@ BODYRATE	CA	AMG		# THESE ARE 2S COMPL NOS, BUT USE ANYWAY.
 		TC	RATEAVG
 		TS	RREL		# YAWDOT = R TCDU/180
 		
-# ROLLDOT:  P TCDU/180 = CDOT TCDU/180 + IDOT TCDU/180 SINM
+# ROLLDOT:  P TCDU/180 = ODOT TCDU/180 + IDOT TCDU/180 SINM
 
 		CA	AMG
 		TC	SPSIN
@@ -727,7 +731,7 @@ COSTRIM		DEC	.93969		# COS(-20)	(FOR NOMINAL L/D = .3)
 # USED DURING ATMOSPHERIC COORDINATION.  OUTSIDE ATMOSPHERE, NAV ERRORS WILL BE SLIGHT, BUT ALFA CAN DIFFER GREATLY
 # FROM TRIM, SO USE ON-BOARD ESTIMATES.
 
-# JET CODE TABLES FOLLOW
+# JET CODE TABLES FOLLOW_
 
 		OCTAL	00120		# POS Y
 YJETCODE	OCTAL	00000		# RCS JET BITS

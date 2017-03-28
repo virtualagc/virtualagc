@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Ronald S. Burkey <info@sandroid.org>
+ * Copyright 2016,2017 Ronald S. Burkey <info@sandroid.org>
  *
  * This file is part of yaAGC.
  *
@@ -34,6 +34,14 @@
  * Contact:     Ron Burkey <info@sandroid.org>
  * Reference:   http://www.ibiblio.org/apollo/index.html
  * Mods:        2016-09-04 RSB  Began.
+ *              2017-03-24 RSB  From the written descriptions of behavior,
+ *                              I originally thought that for the Block 1 DSKY,
+ *                              flashing VERB/NOUN meant flashing of the *labels*
+ *                              VERB and NOUN above the digit displays.  But
+ *                              no, I've now seen videos of a Block 1 DSKY being
+ *                              used, and it's really flashing of the verb and noun
+ *                              *digits* themselves, just as it is for Block 2.  So
+ *                              I've fixed that.
  */
 
 #include <sys/types.h>
@@ -90,6 +98,10 @@ MyFrame::setAllNumbers(wxBitmap& bitmap)
   digitNounRight->SetBitmap(bitmap);
   digitVerbLeft->SetBitmap(bitmap);
   digitVerbRight->SetBitmap(bitmap);
+  officialVerbLeft = bitmap;
+  officialVerbRight = bitmap;
+  officialNounLeft = bitmap;
+  officialNounRight = bitmap;
 }
 void
 MyFrame::setAllSigns(wxBitmap& bitmap)
@@ -284,13 +296,21 @@ TimerClass::Notify()
           frame->flashStateLit = !frame->flashStateLit;
           if (frame->flashStateLit)
             {
-              frame->labelVerb->SetBitmap(frame->imageVerbLabelOn);
-              frame->labelNoun->SetBitmap(frame->imageNounLabelOn);
+              //frame->labelVerb->SetBitmap(frame->imageVerbLabelOn);
+              //frame->labelNoun->SetBitmap(frame->imageNounLabelOn);
+              frame->digitVerbLeft->SetBitmap(frame->image7Seg0);
+              frame->digitVerbRight->SetBitmap(frame->image7Seg0);
+              frame->digitNounLeft->SetBitmap(frame->image7Seg0);
+              frame->digitNounRight->SetBitmap(frame->image7Seg0);
             }
           else
             {
-              frame->labelVerb->SetBitmap(frame->imageVerbLabelOff);
-              frame->labelNoun->SetBitmap(frame->imageNounLabelOff);
+              //frame->labelVerb->SetBitmap(frame->imageVerbLabelOff);
+              //frame->labelNoun->SetBitmap(frame->imageNounLabelOff);
+              frame->digitVerbLeft->SetBitmap(frame->officialVerbLeft);
+              frame->digitVerbRight->SetBitmap(frame->officialVerbRight);
+              frame->digitNounLeft->SetBitmap(frame->officialNounLeft);
+              frame->digitNounRight->SetBitmap(frame->officialNounRight);
             }
         }
     }
@@ -526,15 +546,17 @@ TimerClass::ActOnIncomingIO(unsigned char *Packet)
             frame->digitProgramRight->SetBitmap(rightDigit);
             break;
           case 10: // FLASH  VD1  VD2
-            frame->digitVerbLeft->SetBitmap(leftDigit);
-            frame->digitVerbRight->SetBitmap(rightDigit);
+            frame->officialVerbLeft = leftDigit;
+            frame->officialVerbRight = rightDigit;
+            frame->digitVerbLeft->SetBitmap(frame->officialVerbLeft);
+            frame->digitVerbRight->SetBitmap(frame->officialVerbRight);
             if (frame->flashing && bit11 == 0)
               {
                 printf("Turn flashing off.\n");
                 frame->flashing = false;
                 frame->flashStateLit = true;
-                frame->labelNoun->SetBitmap(frame->imageNounLabelOn);
-                frame->labelVerb->SetBitmap(frame->imageVerbLabelOn);
+                //frame->labelNoun->SetBitmap(frame->imageNounLabelOn);
+                //frame->labelVerb->SetBitmap(frame->imageVerbLabelOn);
                 frame->flashCounter = 0;
               }
             else if (!frame->flashing && bit11 != 0)
@@ -542,14 +564,16 @@ TimerClass::ActOnIncomingIO(unsigned char *Packet)
                 printf("Turn flashing on.\n");
                 frame->flashing = true;
                 frame->flashStateLit = false;
-                frame->labelNoun->SetBitmap(frame->imageNounLabelOff);
-                frame->labelVerb->SetBitmap(frame->imageVerbLabelOff);
+                //frame->labelNoun->SetBitmap(frame->imageNounLabelOff);
+                //frame->labelVerb->SetBitmap(frame->imageVerbLabelOff);
                 frame->flashCounter = 0;
               }
             break;
           case 9: //    n/a  ND1  ND2
-            frame->digitNounLeft->SetBitmap(leftDigit);
-            frame->digitNounRight->SetBitmap(rightDigit);
+            frame->officialNounLeft = leftDigit;
+            frame->officialNounRight = rightDigit;
+            frame->digitNounLeft->SetBitmap(frame->officialNounLeft);
+            frame->digitNounRight->SetBitmap(frame->officialNounRight);
             break;
           case 8: //  UPACT  n/a R1D1
             frame->indicatorUpTl->SetBitmap(

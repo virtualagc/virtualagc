@@ -15,6 +15,8 @@
 ##		2012-10-07 JL	Fixed typo in comment on p1201.
 ##		2017-02-04 RSB	Proofed comment text by diff'ing vs Comanche 55
 ##				and corrected errors found.
+##		2017-03-16 RSB	Comment-text fixes identified in 4-way side-by-side
+##				diff of Colossus237/249/Comanche55/Artemis72.
 
 ## Page 1200
 		SETLOC	FFTAG1
@@ -205,7 +207,12 @@ NEG30000	OCT	47777
 #		OCT	50037		T4RUPT	RELTAB +9D
 #		OCT	54000		T4RUPT	RELTAB +10D
 -BIT14		EQUALS	NEG1/2
-# RELTAB11	OCT	6000		T4RUPT
+## In the printout, the following line seemingly says "6000",
+## however I believe the trailing '0' in "60000" is simply too 
+## faint to see, and is present in the source code, since it 
+## is present in the 8 other presently-available version of 
+## Colossus and Luminary. &mdash; RSB 2017.
+# RELTAB11	OCT	60000		T4RUPT
 C3/2		DEC	-.3216147	#			(OCTAL 65552)
 13,14,15	OCT	70000
 -1/8		OCT	73777

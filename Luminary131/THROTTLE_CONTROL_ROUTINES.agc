@@ -17,6 +17,8 @@
 ##				original hardcopy, as opposed to the PDF page
 ##				numbers in 1701.pdf.
 ##		2017-02-25 RSB	Proofed comment text using octopus/ProoferComments.
+##		2017-03-16 RSB	Comment-text fixes identified in 5-way
+##				side-by-side diff of Luminary 69/99/116/131/210.
 
 ## Page 788
 		BANK	31
@@ -209,7 +211,7 @@ MASSMULT	EXTEND
 		TC	DMP
 		ADRES	MASS
 ## Page 792
-		TC	DMP		# LEAVES PROPERLY SCALED FORCE IN MPAC
+		TC	DMP		# LEAVES PROPERLY SCALED FORCE IM MPAC
 		ADRES	SCALEFAC
 		TC	TPAGREE
 		CA	MPAC

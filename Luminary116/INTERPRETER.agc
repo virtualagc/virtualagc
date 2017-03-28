@@ -17,6 +17,10 @@
 ##              2017-02-05 RSB  Back-ported comment corrections
 ##                              identified while proofing Artemis 072.
 ##              2017-03-10 HG   Transcribed
+##		2017-03-13 RSB	Proofed comment text via 3-way diff vs
+##				Luminary 99 and 131.
+##		2017-03-15 RSB	Comment-text fixes identified in 5-way
+##				side-by-side diff of Luminary 69/99/116/131/210.
 
 ## Page 994
 # SECTION 1  DISPATCHER
@@ -890,7 +894,7 @@ TAD             EXTEND
 ## Page 1023
 # ARITHMETIC SUBROUTINES REQUIRED IN FIXED-FIXED.
 
-#          1.  DMPSUB     DOUBLE PRECISION MULTIPLY, MULTIPLY THE CONTENTS OF MPAC,+1 BY THE DP WORD WHOSE ADDRESS
+#          1.  DMPSUB     DOUBLE PRECISION MULTIPLY. MULTIPLY THE CONTENTS OF MPAC,+1 BY THE DP WORD WHOSE ADDRESS
 #                         IS IN ADDRWD AND LEAVE A TRIPLE PRECISION RESULT IN MPAC.
 #          2.  ROUNDSUB   ROUND THE TRIPLE PRECISON CONTENTS OF MPAC TO DOUBLE PRECISION.
 #          3.  DOTSUB     TAKE THE DOT PRODUCT OF THE VECTOR IN MPAC AND THE VECTOR WHOSE ADDRESS IS IN ADDRWD
@@ -1132,7 +1136,7 @@ DMPNSUB         TS              DMPNTEMP
                 TC              Q
 
 ## Page 1030
-# MISCELLANEOUS VECTOR OPERATIONS. INCLUDED HERE ARE THE FOLLOWING.
+# MISCELLANEOUS VECTOR OPERATIONS. INCLUDED HERE ARE THE FOLLOWING:
 
 #          1. DOT                 DP VECTOR DOT PRODUCT.
 #          2. VXV                 DP VECTOR CROSS PRODUCT.
@@ -1178,7 +1182,7 @@ VXM/MXV         TS              DOTINC
                 ADS             ADDRWD                          # FORMS BASE ADDRESS OF NEXT COLUMN(ROW).
 
                 TC              DOTSUB
-                DXCH            VBUF                            # MORE GIVEN VECTOR BACK TO MPAC, SAVING Y
+                DXCH            VBUF                            # MOVE GIVEN VECTOR BACK TO MPAC, SAVING Y
                 DXCH            MPAC                            # COMPONENT OF ANSWER IN VBUF +2.
                 DXCH            VBUF            +2
                 DXCH            MPAC            +3
@@ -1890,7 +1894,7 @@ MPAC+           CS              MPAC                            # CHECK FOR DIVI
                 CS              MPAC                            # CHECK MAGNITUDE OF SIGN-CORRECTED
                 AD              BUF                             # OPERANDS.
                 CCS             A
-                TCF             DVNORM                          # DIVIDE OK - WILL NOT BECOME MAXOV CASE.
+                TCF             DVNORM                          # DIVIDE OK - WILL NOT BECOME MAXDV CASE.
 LBUF2           ADRES           BUF2
                 TCF             DVOVF                           # DIVISOR NOT LESS THAN DIVIDEND - OVF.
 
@@ -2065,7 +2069,7 @@ MAXDV           CS              MPAC                            # SEE IF MAXDV C
                 AD              BUF                             # NORMALIZATION.
                 EXTEND
                 BZF             +2
-                TCF             GENDDV                          # MPAC NOW LESS THAN BUF - DIVIDE AS USUAL.
+                TCF             GENDDV                          # MPAC NOW LESS THAN BUF - DIVIDE AS USUAL
 
  +2             CAF             POSMAX                          # SET MAJOR PART OF RESULT.
                 TS              MPAC
@@ -2380,7 +2384,7 @@ ABVAL           TC              VSQSUB                          # DOT MPAC WITH 
 # WARNING- THIS SUBROUTINE USES A TRIPLE PRECISION INPUT. THE PROGRAMMER MUST ASSURE THE CONTENTS OF MPAC+2
 #     ESPECIALLY IF THE CONTENTS OF MPAC IS SMALL OR ZERO.  FOR DETAILS SEE STG MEMO NO.949.
 # CALLING SEQUENCE- IN INTERPRETIVE MODE I.E., FOLLOWING TC  INTPRET,SQRT   NO ADDRESS IS ALLOWED
-# INPUT SCALING  THE BINARY POINT IS ASSUMED TO THE RIGHT OF BIT 15. THE  ANSWER IS RETURNED WITH THE SAME SCALING.
+# INPUT SCALING  THE BINARY POINT IS ASSUMED TO THE RIGHT OF BIT 15. THE  ANSWER IS RETURNED WITH THE SAME SCALING
 # SUBROUTINES- GENSCR,MPACSHR, SQRTSUB,ABORT
 # ABORT EXIT MODE- ABORTS ON NEGATIVE INPUT -1.2X10E-4 (77775  OCTAL)     OR LESS.
 #     DISPLAYS ERROR CODE 1302
@@ -2503,7 +2507,7 @@ VSQSUB          EXTEND                                          # DOTS THE VECTO
 ## Page 1071
 #          DOUBLE PRECISION SQUARE ROOT ROUTINE. TAKE THE SQUARE ROOT OF THE TRIPLE PRECISION (MPAC +2 USED ONLY
 # IN NORMALIZATION) CONTENTS OF MPAC AND LEAVE THE NORMALIZED RESULT IN MPAC (C(MPAC) GREATER THAN OR EQUAL TO
-# .5). THE RIGHT SHIFT COUNT (TC UNNORMALIZE) IS LEFT IN MPTEMP.
+# .5). THE RIGHT SHIFT COUNT (TO UNNORMALIZE) IS LEFT IN MPTEMP.
 
 
 SQRTSUB         CAF             ZERO                            # START BY ZEROING RIGHT SHIFT COUNT.
@@ -2525,7 +2529,7 @@ SQRTSUB         CAF             ZERO                            # START BY ZEROI
                 TCF             +2
                 TCF             ZEROANS                         # NEGATIVE BUT LESS THAN 10(-4) IN MAG.
 
-                XCH             MPAC            +1              # XERO - SHIFT LEFT 14 AGAIN.
+                XCH             MPAC            +1              # ZERO - SHIFT LEFT 14 AGAIN.
                 TS              MPAC
                 CAF             SEVEN                           # AUGMENT RIGHT SHIFT COUNTER.
                 ADS             MPTEMP

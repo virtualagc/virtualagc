@@ -15,6 +15,7 @@
 ##				and fixed errors found.
 ##		2017-01-20 RSB	Fixed comment-text errors noted while diff'ing
 ##				vs Colossus 249.
+##		2017-03-14 RSB	Comment-text fixes noted in proofing Luminary 116.
 
 ## Page 1337
 #          THE TFF SUBROUTINES MAY BE USED IN EITHER EARTH OR MOON CENTERED COORDINATES. THE TFF ROUTINES NEVER
@@ -350,7 +351,7 @@ DUMPRPRA	RVQ
 #          PUSHLOC AT PDL+0
 # ERASABLE INITIALIZATION REQUIRED:
 #          RONE   E:(-29)  M:(-27)  M    STATE VECTOR                     LEFT BY USER
-#          VONE'  E:(+10)  M:(+9)   VN/SQRT(NU)                           LEFT BY TFF/CONIC
+#          VONE'  E:(+10)  M:(+9)   VN/SQRT(MU)                           LEFT BY TFF/CONIC
 #          RMAG1  E:(-29)  M:(-27)  PRESENT RADIUS,  M                    LEFT BY TFFCONIC
 #          C(MPAC)E:(-29)  M:(-27)  RTERM, TERMINAL RADIUS LENGTH, M      LEFT BY USER
 

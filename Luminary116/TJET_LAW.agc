@@ -2,7 +2,7 @@
 ## Copyright:   Public domain.
 ## Filename:    TJET_LAW.agc
 ## Purpose:     A section of Luminary revision 116.
-##              It is part of the source code for the Lunar Module's (LM) 
+##              It is part of the source code for the Lunar Module's (LM)
 ##              Apollo Guidance Computer (AGC) for Apollo 12.
 ##              This file is intended to be a faithful transcription, except
 ##              that the code format has been changed to conform to the
@@ -14,6 +14,12 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-01-22 MAS  Created from Luminary 99.
 ##              2017-01-26 RRB  Updated for Luminary 116.
+##              2017-03-14 RSB  Proofed comment text via 3-way diff vs
+##                              Luminary 99 and 131.
+##              2017-03-16 RSB  Comment-text fixes identified in 5-way
+##                              side-by-side diff of Luminary 69/99/116/131/210.
+##              2017-03-19 HG   Fix statement AD -3DEG --> TCF +3
+##                              Add missing statement TCF +1
 
 ## Page 1450
 # PROGRAM DESCRIPTION
@@ -61,15 +67,15 @@
 
 # ALARM:  NONE
 
-                BANK            17                              
-                SETLOC          DAPS2                           
-                BANK                                            
-                EBANK=          TJP                             
+                BANK            17
+                SETLOC          DAPS2
+                BANK
+                EBANK=          TJP
 ## Page 1451
-                COUNT*          $$/DAPTJ                        
+                COUNT*          $$/DAPTJ
 
 TJETLAW         EXTEND                                          # SAVE Q FOR RETURN.
-                QXCH            HOLDQ                           
+                QXCH            HOLDQ
 
 # SET INDEXERS TO CORRESPOND TO THE AXIS AND TO THE SIGN OF EDOT
 
@@ -92,24 +98,24 @@ NEGEDOT         CS              E                               # IN ORDER FOR N
                 CAF             BIT1                            #      (REVERSED LATER IF NECESSARY).
                 ADS             ADRSDIF1                        #    3.INCREMENT INDEXERS BY ONE SO THAT
                 TS              ADRSDIF2                        #      THE PROPER PARAMETERS ARE ACCESSED.
-                CS              SENSOR                          
-SETSENSE        TS              ROTSENSE                        
+                CS              SENSOR
+SETSENSE        TS              ROTSENSE
 
 # TEST MAGNITUDE OF E (ATTITUDE ERROR, SINGLE-PRECISION, SCALED AT PI RADIANS):
 #          IF GREATER THAN (OR EQUAL TO) PI/16 RADIANS, GO TO THE SIMPLIFIED TJET ROUTINE.
 #          IF LESS THAN PI/16 RADIANS, RESCALE TO PI/4.
 
                 CAE             E                               # PICK UP ATTITUDE ERROR FOR THIS AXIS
-                EXTEND                                          
+                EXTEND
                 MP              BIT5                            # SHIFT RIGHT TEN BITS:  IF A-REGISTER IS
                 CCS             A                               #   ZERO, RESCALE AND TEST EDOT.
-                TCF             RUFLAW2                         
-                TCF             SCALEE                          
-                TCF             RUFLAW1                         
+                TCF             RUFLAW2
+                TCF             SCALEE
+                TCF             RUFLAW1
 SCALEE          CAF             BIT13                           # ERROR IS IN L SCALED AT PI/16.  RESCALE
                 EXTEND                                          #   IT TO PI/4 AND SAVE IT.
-                MP              L                               
-                TS              E                               
+                MP              L
+                TS              E
 
 # TEST MAGNITUDE OF EDOT (ERROR RATE SCALED AT PI/4 RADIANS/SECOND)
 #          IF GREATER THAN (OR EQUAL TO) PI/32 RADIANS/SECOND, GO TO THE SIMPLIFIED TJET ROUTINE.
@@ -120,33 +126,34 @@ SCALEE          CAF             BIT13                           # ERROR IS IN L 
                 EXTEND                                          # FOR THIS AXIS=
                 MP              BIT4                            # SHIFT RIGHT ELEVEN BITS, IF THE A-REG IS
                 EXTEND                                          # ZERO, THEN RESCALE AND USE FINELAW.
-                BZF             SCALEDOT                        
-                TCF             RUFLAW3                         
+                BZF             SCALEDOT
+                TCF             RUFLAW3
 
 # *** FINELAW STARTS HERE ***
 
 SCALEDOT        LXCH            EDOT                            # EDOT IS SCALED AT PI/32 RADIANS/SECOND.
 
                 CAE             EDOT                            # COMPUTE (EDOT)(EDOT)
-                EXTEND                                          
+                EXTEND
                 SQUARE                                          # PRODUCT SCALED AT PI(2)/2(10) RAD/SEC.
-                EXTEND                                          
+                EXTEND
                 MP              BIT13                           # SHIFT RIGHT TWO BITS TO RESCALE EDOTSQ
                 TS              EDOTSQ                          #   TO PI(2)/2(8) RAD(2)/SEC(2).
 
 ERRTEST         CCS             E                               # DOES BIG ERROR (THREE DEG BEYOND THE
-                AD              -3DEG                           # DEADBAND) REQUIRE MAXIMUM JETS?
-                TCF             +2                              
-                AD              -3DEG                           
-                EXTEND                                          
-                INDEX           ADRSDIF1                        
-                SU              FIREDB                          
-                EXTEND                                          
-                BZMF            SENSTEST                        # IF NOT: ARE UNBALANCED JETS PREFERRED?
+                TCF             +3                              # DEADBAND) REQUIRE MAXIMUM JETS?
+                TCF             +2
+                TCF             +1
+                AD              -3DEG
+                EXTEND
+                INDEX           ADRSDIF1
+                SU              FIREDB
+                EXTEND
+                BZMF            SENSTEST                        # IF NOT: ARE UNBALANCED JETS PREFERRED|
 MAXJETS         CAF             TWO                             # IF YES : INCREMENT ADDRESS LOCATOR AND
                 ADS             ADRSDIF2                        #   SET SWITCH FOR JET SELECT LOGIC TO 4.
                 CAF             FOUR                            #   (ALWAYS DO THIS FOR P-AXIS)
-                TCF             TJCALC                          
+                TCF             TJCALC
 SENSTEST        CCS             SENSETYP                        # DOES TRANSLATION PREFER MIN JETS.
                 TCF             TJCALC                          # YES.  USE MIN-JET PARAMETERS.
                 TCF             MAXJETS                         # NO.  GET MAX-JET PARAMETERS.
@@ -155,24 +162,24 @@ TJCALC          TS              NUMBERT                         # SET TO +0,1,4 
 # BEGINNING OF TJET CALCULATIONS:
 
                 CS              EDOTSQ                          # SCALED AT PI(2)/2(8).
-                EXTEND                                          
-                INDEX           ADRSDIF2                        
+                EXTEND
+                INDEX           ADRSDIF2
                 MP              1/ANET1                         # .5/ACC SCALED AT 2(6)/PI SEC(2)/RADIAN.
-                INDEX           ADRSDIF1                        
+                INDEX           ADRSDIF1
                 AD              FIREDB                          # DEADBAND SCALED AT PI/4 RADIAN.
-                EXTEND                                          
+                EXTEND
                 SU              E                               # ATTITUDE ERROR SCALED AT PI/4 RADIAN.
                 TS              FIREFCT                         # -E-.5(EDOTSQ)/ACC-DB AT PI/4 RADIAN.
-                EXTEND                                          
-                BZMF            ZON1,2,3                        
+                EXTEND
+                BZMF            ZON1,2,3
 
 ZONE4,5         INDEX           ADRSDIF1
-## Page 1452                        
+## Page 1452
                 CAE             1/ACOAST                        # .5/ACC SCALED AT 2(6)/PI WHERE
                 EXTEND                                          #    ACC = MAX(AMIN, AOS-).
                 MP              EDOTSQ                          # SCALED AT PI/2(8).
                 AD              E                               # SCALED AT PI/4
-                INDEX           ADRSDIF1                        
+                INDEX           ADRSDIF1
                 AD              COASTDB                         # SCALED AT PI/4 POS. FOR NEG. INTERCEPT.
                 EXTEND                                          # TEST E+.5(EDOTSQ)/ACC+DB AT PI/4 RADIAN.
                 BZMF            ZONE5                           # IF FUNCTION NEGATIVE, FIND TJET.
@@ -187,7 +194,7 @@ ZONE4           INDEX           AXISCTR                         # IS THE CURRENT
                 CS              TJETU                           #   WITH SENSE OPPOSITE TO EDOT,
                 EXTEND                                          #   (I.E., ARE JETS ON AND FIRING TOWARD
                 MP              ROTSENSE                        #   THE DESIRABLE STATE).
-                EXTEND                                          
+                EXTEND
                 BZMF            COASTTJ                         # NO.  COAST.
 
 JETSON          CCS             FLAT                            # YES.  IS THIS DRIFTING OR POWERED FLIGHT|
@@ -196,7 +203,7 @@ JETSON          CCS             FLAT                            # YES.  IS THIS 
                 CS              FIREFCT                         # POWERED (OR ULLAGE). CAN TARGET PARABOLA
                 INDEX           ADRSDIF1                        #   BE REACHED FROM THIS POINT IN THE
                 AD              AXISDIST                        #   PHASE PLANE|
-                EXTEND                                          
+                EXTEND
                 BZMF            COASTTJ                         # NO. SET TJET = 0.
                 TC              Z123COMP                        # YES. CALCULATE TJET AS THOUGH IN ZONE 1
                 CAE             FIREFCT                         #   AFTER COMPUTING THE REQUIRED
@@ -204,12 +211,12 @@ JETSON          CCS             FLAT                            # YES.  IS THIS 
 
 DRIFT/ON        INDEX           ADRSDIF1                        # CAN TARGET STRIP OF AXIS BE REACHED FROM
                 CS              FIREDB                          #   THIS POINT IN THE PHASE PLANE|
-                DOUBLE                                          
-                AD              FIREFCT                         
-                EXTEND                                          
-                BZMF            +3                              
+                DOUBLE
+                AD              FIREFCT
+                EXTEND
+                BZMF            +3
 COASTTJ         CAF             ZERO                            # NO.  SET TJET = 0.
-                TCF             RETURNTJ                        
+                TCF             RETURNTJ
 
                 TC              Z123COMP                        # YES. CALCULATE TJET AS THOUGH IN ZONE 2
                 TCF             ZONE2,3                         #   OR 3 AFTER COMPUTING REQUIRED VALUES.
@@ -219,40 +226,40 @@ ZONE5           TS              L                               # TEMPORARILY ST
                 TCF             +4                              # AND ACCFCTZ5, WHICH MUST BE PICKED UP
                 TC              CCSHOLE                         # FROM THE NEXT LOWER REGISTER IF THE
 ## Page 1454
-                CS              TWO                             # (ACTUAL) ERROR RATE IS NEGATIVE.		
-                ADS             ADRSDIF2                        
+                CS              TWO                             # (ACTUAL) ERROR RATE IS NEGATIVE.
+                ADS             ADRSDIF2
 
- +4             CAE             L                               
-                EXTEND                                          
+ +4             CAE             L
+                EXTEND
                 INDEX           ADRSDIF2                        # TTOAXIS AND HH ARE THE PARAMETERS UPON
                 MP              ACCFCTZ5                        #   WHICH THE APPROXIMATIONS TO TJET ARE
                 DDOUBL                                          #   BASED.
-                DDOUBL                                          
+                DDOUBL
                 DXCH            HH                              # DOUBLE PRECISION H SCALED AT 8 SEC(2).
-                INDEX           ADRSDIF2                        
+                INDEX           ADRSDIF2
                 CAE             1/ANET2                         # SCALED AT 2(7)/PI SEC(2)/RAD.
-                EXTEND                                          
+                EXTEND
                 MP              EDOT                            # SCALED AT PI/2(5)
                 TS              TTOAXIS                         # SCALED AT 4 SEC.
 
 # TEST WHETHER TJET GREATER THAN 50 MSEC.
 
-                EXTEND                                          
+                EXTEND
                 MP              -.05AT2                         # H - .05 TTOAXIS - .00125 G.T. ZERO
                 AD              HH                              #   (SCALED AT 8 SEC(2) ).
-                AD              NEG2                            
-                EXTEND                                          
-                BZMF            FORMULA1                        
+                AD              NEG2
+                EXTEND
+                BZMF            FORMULA1
 
 # TEST WHETHER TJET GREATER THAN 150 MSEC.
 
-                CAE             TTOAXIS                         
-                EXTEND                                          
+                CAE             TTOAXIS
+                EXTEND
                 MP              -.15AT2                         # H - .15 TTOAXIS - .01125 G.T. ZERO
                 AD              HH                              #   (SCALED AT 8 SEC(2) )
-                AD              -.0112A8                        
-                EXTEND                                          
-                BZMF            FORMULA2                        
+                AD              -.0112A8
+                EXTEND
+                BZMF            FORMULA2
 
 # IF TJET GREATER THAN 150 MSEC, ASSIGN IT VALUE OF 250 MSEC, SINCE THIS
 # IS ENOUGH TO ASSURE NO SKIP NEXT CSP (100 MSEC).
@@ -264,16 +271,16 @@ FULLTIME        CAF             BIT11                           # 250 MSEC SCALE
 RETURNTJ        EXTEND                                          # ALL BRANCHES TERMINATE HERE WITH TJET
                 MP              ROTSENSE                        #   (SCALED AT 4 SEC) IN THE ACCUMULATOR.
                 INDEX           AXISCTR                         # ROTSENSE APPLIES SIGN AND CHANGES SCALE.
-                TS              TJETU                           
-                EXTEND                                          
-                INDEX           AXISCTR                         
+                TS              TJETU
+                EXTEND
+                INDEX           AXISCTR
                 MP              ACCSWU                          # SET SWITCH FOR JET SELECT IF ROTATION IS
-                CAE             L                               
+                CAE             L
                 EXTEND                                          #   IN A SENSE FOR WHICH 1/ACCS HAS FORCED
                 BZMF            +3                              #   A MAX-JET CALCULATION.
 ## Page 1455
-                CAF             FOUR                            		
-                TS              NUMBERT                         
+                CAF             FOUR
+                TS              NUMBERT
                 TC              HOLDQ                           # RETURN VIA SAVED Q.
 
 # TJET = H/(.025 + TTOAXIS)     FOR TJET LESS THAN 50 MSEC.
@@ -283,13 +290,13 @@ FORMULA1        CS              -.025AT4                        # .025 SEC SCALE
                 DXCH            HH                              # STORE DENOMINATOR IN FIRST WORD OF H,
                 EXTEND                                          #   WHICH NEED NOT BE PRESERVED.  PICK UP
                 DV              HH                              #   DP H AND DIVIDE BY DENOMINATOR.
-                EXTEND                                          
+                EXTEND
                 MP              BIT14                           # RESCALE TJET FROM 2 TO USUAL 4 SEC.
                 TCF             CHKMINTJ                        # CHECK THAT TJET IS NOT LESS THAN MINIMUM
 
 # TJET = (H + .00375)/(0.1 + TTOAXIS)   FOR TJET GREATER THAN 50 MSEC.
 
-FORMULA2        EXTEND                                          
+FORMULA2        EXTEND
                 DCA             .00375A8                        # .00375 SEC(2) SCALED AT 8.
                 DAS             HH                              # STORE NUMERATOR IN DP H, WHICH NEED NOT
                                                                 #   BE PRESERVED.
@@ -298,7 +305,7 @@ FORMULA2        EXTEND
                 DXCH            HH                              # STORE DENOMINATOR IN FIRST WORD OF H,
                 EXTEND                                          #   WHICH NEED NOT BE PRESERVED.  PICK UP
                 DV              HH                              #   DP NUMERATOR AND DIVIDE BY DENOMINATOR
-                EXTEND                                          
+                EXTEND
                 MP              BIT14                           # RESCALE TJET FROM 2 TO USUAL 4 SEC.
                 TCF             RETURNTJ                        # END SUBROUTINE.
 
@@ -309,13 +316,13 @@ FORMULA2        EXTEND
 Z123COMP        CS              ROTSENSE                        # USED IN RETURNTJ SECTION TO RESCALE TJET
                 TS              ROTSENSE                        #   AS TIME6 AND GIVE IT PROPER SIGN.
                 CAE             EDOT                            # SCALED AT PI/2(5) RAD/SEC.
-                EXTEND                                          
-                INDEX           ADRSDIF2                        
+                EXTEND
+                INDEX           ADRSDIF2
                 MP              1/ANET1                         # SCALED AT 2(7)/PI SEC(2)/RAD.
                 TS              TTOAXIS                         # STORE TIME-TO-AXIS SCALED AT 4 SECONDS.
-                AD              -TJMAX                          
+                AD              -TJMAX
                 EXTEND                                          # IS TIME TO AXIS LESS THAN 150 MSEC.
-                BZMF            +2                              
+                BZMF            +2
                 TCF             FULLTIME                        # NO.  FIRE JETS, DO NOT CALCULATE TJET.
                 RETURN                                          # YES.  GO ON TO FIND TJET
 
@@ -327,8 +334,8 @@ ZON1,2,3        TC              Z123COMP                        # SUBROUTINIZED 
 # OR ULLAGE, FLAT = 0
 
                 CAE             FIREFCT                         # SCALED AT PI/4 RAD.
-                AD              FLAT                            
-                EXTEND                                          
+                AD              FLAT
+                EXTEND
                 BZMF            ZONE1                           # NOT IN SPECIAL ZONES.
 
 # FIRE FOR AXIS OR, IF CLOSE, FIRE MINIMUM IMPULSE.  IF ON AXIS, COAST.
@@ -336,23 +343,23 @@ ZON1,2,3        TC              Z123COMP                        # SUBROUTINIZED 
 ZONE2,3         CS              ZONE3LIM                        # HEIGHT OF MIN-IMPULSE ZONE SET BY 1/ACCS
                 AD              TTOAXIS                         #   35 MSEC IN DRIFTING FLIGHT
                 EXTEND                                          #   ZERO WHEN TRYING TO ENTER GTS CONTROL.
-                BZMF            ZONE3                           
+                BZMF            ZONE3
 ZONE2           CAE             TTOAXIS                         # FIRE TO AXIS.
-                TCF             RETURNTJ                        
+                TCF             RETURNTJ
 ZONE3           CCS             EDOT                            # CHECK IF EDOT IS ZERO.
                 CAF             BIT6                            # FIRE A ONE-JET MINIMUM IMPULSE.
                 TCF             RETURNTJ                        # TJET = +0.
                 TC              CCSHOLE                         # CANNOT BE BECAUSE NEG EDOT COMPLEMENTED.
                 TCF             RETURNTJ                        # TJET = +0.
 
-ZONE1           EXTEND                                          
-                INDEX           ADRSDIF1                        
+ZONE1           EXTEND
+                INDEX           ADRSDIF1
                 SU              AXISDIST                        # SCALED AT PI/4 RAD.
-                EXTEND                                          
-                INDEX           ADRSDIF2                        
+                EXTEND
+                INDEX           ADRSDIF2
                 MP              ACCFCTZ1                        # SCALED AT 2(7)/PI SEC(2)/RAD.
-                DDOUBL                                          
-                DDOUBL                                          
+                DDOUBL
+                DDOUBL
                 DXCH            HH                              # DOUBLE PRECISION H SCALED AT 8 SEC(2).
 
 # TEST WHETHER TOTAL TIME REQUIRED GREATER THAN 150 MSEC:
@@ -361,20 +368,20 @@ ZONE1           EXTEND
 
                 CAE             TTOAXIS                         # TTOAXIS SCALED AT 4 SECONDS.
                 AD              -TJMAX                          # -.150 SECOND SCALED AT 4.
-                EXTEND                                          
-                SQUARE                                          
-                EXTEND                                          
+                EXTEND
+                SQUARE
+                EXTEND
                 SU              HH                              # HIGH WORD OF H SCALED AT 8 SEC(2).
-                EXTEND                                          
+                EXTEND
                 BZMF            FULLTIME                        # YES.  NEED NOT CALCULATE TJET.
 
 # TEST WHETHER TIME BEYOND AXIS GREATER THAN 50 MSEC TO DETERMINE WHICH APPROXIMATION TO USE.
 
-                CAE             HH                              
-                AD              NEG2                            
+                CAE             HH
+                AD              NEG2
                 EXTEND
-## Page 1457                                          
-                BZMF            FORMULA3                        
+## Page 1457
+                BZMF            FORMULA3
 
 
 # TJET = H/0.1 + TTOAXIS + .0375        FOR APPROXIMATION OVER MORE THAN 50 MSEC.
@@ -387,7 +394,7 @@ ZONE1           EXTEND
                 AD              .0375AT4                        # .0375 SEC SCALED AT 4.
                 TCF             RETURNTJ                        # END COMPUTATION.
 
-# TJET - H/.O25 + TTOAXIS       FOR APPROXIMATION OVER LESS THAN 50 MSEC.
+# TJET = H/.O25 + TTOAXIS       FOR APPROXIMATION OVER LESS THAN 50 MSEC.
 
 FORMULA3        CS              -.025AT2                        # STORE +.025 SEC SCALED AT 2 FOR DIVISION
                 DXCH            HH                              # PICK UP DP H AT 8, WHICH NEED NOT BE
@@ -399,7 +406,7 @@ FORMULA3        CS              -.025AT2                        # STORE +.025 SE
 # MINIMUM IMPULSES REQUIRED IN ZONE 3 ARE NOT SUBJECT TO THIS CONSTRAINT, NATURALLY.
 
 CHKMINTJ        AD              -TJMIN                          # IS COMPUTED TIME LESS THAN THE MINIMUM.
-                EXTEND                                          
+                EXTEND
                 BZMF            COASTTJ                         # YES, SET TIME TO ZERO.
                 AD              TJMIN                           # NO, RESTORE COMPUTED TIME.
                 TCF             RETURNTJ                        # END COMPUTATION.
@@ -419,70 +426,70 @@ CHKMINTJ        AD              -TJMIN                          # IS COMPUTED TI
 
 RUFLAW1         CS              RUFRATE                         # DECREMENT EDOT BY .1444 RAD/SEC AT PI/4
                 ADS             EDOT                            #   WHICH IS THE TARGET RATE
-                EXTEND                                          
+                EXTEND
                 BZMF            SMALRATE                        # BRANCH IF RATE LESS THAN TARGET.
                 TC              RUFSETUP                        # REVERSE ROTSENSE AND INDICATE MAX JETS.
                 CAE             EDOT                            # PICK UP DESIRED RATE CHANGE.
 
 RUFLAW12        EXTEND                                          # COMPUTE TJET
                 INDEX           ADRSDIF2                        #   = (DESIRED RATE CHANGE)/(2-JET ACCEL.)
-                MP              1/ANET1         +2              
+                MP              1/ANET1         +2
                 AD              -1/8                            # IF TJET, SCALED AT 32 SEC, EXCEEDS
                 EXTEND                                          #   4 SECONDS, SET TJET TO TJMAX.
-                BZMF            +2                              
-                TCF             FULLTIME                        
-                EXTEND                                          
-                BZF             FULLTIME                        
+                BZMF            +2
+                TCF             FULLTIME
+                EXTEND
+                BZF             FULLTIME
                 AD              BIT12                           # RESTORE COMPUTED TJET TO ACCUMULATOR.
-                DAS             A                               
-                DAS             A                               
+                DAS             A
+                DAS             A
                 DAS             A                               # RESCALED TJET AT 4 SECONDS.
                 TCF             CHKMINTJ                        # RETURN AS FROM FINELAW.
 
 SMALRATE        TC              RUFSETUP        +2              # SET NUMBERT AND FIREFCT FOR MAXIMUM JETS
-                CCS             ROTSENSE                        
+                CCS             ROTSENSE
                 CAF             ONE                             # MODIFY INDEXER TO POINT TO 1/ANET
                 TCF             +2                              #   CORRESPONDING TO THE PROPER SENSE.
-                CAF             NEGONE                          
-                ADS             ADRSDIF2                        
+                CAF             NEGONE
+                ADS             ADRSDIF2
 
                 CS              EDOT                            # (.144 AT PI/4 - EDOT) = DESIRED RATE CHNG.
-                TCF             RUFLAW12                        
+                TCF             RUFLAW12
 
 RUFLAW2         TC              RUFSETUP                        # REVERSE ROTSENSE AND INDICATE MAX JETS.
-                CAF             RUFRATE                         
+                CAF             RUFRATE
                 AD              EDOT                            # (.144 AT PI/4 + EDOT) = DESIRED RATE CHNG.
                 TS              A                               # IF OVERFLOW SKIP, FIRE FOR FULL TIME.
                 TCF             RUFLAW12                        #   OTHERWISE, COMPUTE JET TIME.
-                TCF             FULLTIME                        
+                TCF             FULLTIME
 
 ## Page 1459
 RUFLAW3         TC              RUFSETUP                        # EXECUTE COMMON RUFLAW SUBROUTINE.
-                INDEX           ADRSDIF1                        
+                INDEX           ADRSDIF1
                 CS              FIREDB                          # CALCULATE DISTANCE FROM SWITCH CURVE
                 AD              E                               #      1/ANET1*EDOT*EDOT +E - FIREDB = 0
                 EXTEND                                          #           SCALED AT 4 PI RADIANS
-                MP              BIT11                           
-                XCH             EDOT                            
-                EXTEND                                          
-                SQUARE                                          
-                EXTEND                                          
-                INDEX           ADRSDIF1                        
-                MP              1/ANET1         +2              
-                AD              EDOT                            
-                EXTEND                                          
+                MP              BIT11
+                XCH             EDOT
+                EXTEND
+                SQUARE
+                EXTEND
+                INDEX           ADRSDIF1
+                MP              1/ANET1         +2
+                AD              EDOT
+                EXTEND
                 BZMF            COASTTJ                         # COAST IF BELOW IT.
                 TCF             FULLTIME                        # FIRE FOR FULL PERIOD IF ABOVE IT.
 
 # SUBROUTINE USED IN ALL ENTRIES TO ROUGHLAW.
 
 RUFSETUP        CS              ROTSENSE                        # REVERSE ROTSENSE WHEN ENTER HERE.
-                TS              ROTSENSE                        
+                TS              ROTSENSE
  +2             CAF             FOUR                            # REQUIRE MAXIMUM (2) JETS IN U,V-AXES.
-                TS              NUMBERT                         
+                TS              NUMBERT
                 CAF             NEGMAX                          # SUGGEST MAXIMUM (4) JETS IN P-AXIS.
-                TS              FIREFCT                         
-                TC              Q                               
+                TS              FIREFCT
+                TC              Q
 
 # CONSTANTS FOR TJETLAW
 
@@ -497,12 +504,12 @@ SENSOR          OCT             14400                           # RATIO OF TJET 
 .1AT2           DEC             .05                             # 0.1 SEC SCALED AT 2.
 .0375AT4        DEC             .00938                          # .0375 SEC SCALED AT 4.
 -.025AT2        DEC             -.0125                          # -.025 SEC SCALED AT 2.
--.025AT4        DEC             -.00625                         
--.05AT2         DEC             -.025                           
--.15AT2         DEC             -.075                           
-.00375A8        2DEC            .00375          B-3             
+-.025AT4        DEC             -.00625
+-.05AT2         DEC             -.025
+-.15AT2         DEC             -.075
+.00375A8        2DEC            .00375          B-3
 
 -TJMAX          DEC             -.0375                          # LARGEST CALCULATED TIME.  .150 SEC AT 4.
 TJMIN           DEC             .005                            # SMALLEST ALLOWABLE TIME.  .020 SEC AT 4.
--TJMIN          DEC             -.005                           
+-TJMIN          DEC             -.005
 RUFRATE         DEC             .1444                           # CORRESPONDS TO TARGET RATE OF 6.5 DEG/S.

@@ -81,6 +81,8 @@
                                 parity bits. If such a file is detected, parity
                                 bit checking is enabled.
 		03/09/17 MAS    Added initialization of SbyStillPressed.
+		03/26/17 MAS    Added initialization of previously-static things
+                                from agc_engine.c that are now in agc_t.
 */
 
 // For Orbiter.
@@ -271,9 +273,18 @@ agc_engine_init (agc_t * State, const char *RomImage, const char *CoreDump,
   State->NoTC = 0;
   State->ParityFail = 0;
 
+  State->RestartLight = 0;
   State->Standby = 0;
   State->SbyPressed = 0;
   State->SbyStillPressed = 0;
+
+  State->NextZ = 0;
+  State->ScalerCounter = 0;
+  State->ChannelRoutineCount = 0;
+
+  State->DskyTimer = 0;
+  State->DskyFlash = 0;
+  State->DskyChannel163 = 0;
 
   if (CoreDump != NULL)
     {

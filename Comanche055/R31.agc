@@ -15,7 +15,9 @@
 ##		2017-01-18 RSB	Fixed comment-text errors noted while diff'ing
 ##				vs Colossus 249.
 ##		2017-02-08 RSB	Comment-text fixes identified in proofing Artemis 72.
-##
+##		2017-03-17 RSB	Comment-text fixes identified by 4-way diff'ing
+##				of Colossus 237 & 249, Comanche 55, and Artemis 72.
+
 ## The contents of the "Comanche055" files, in general, are transcribed 
 ## from scanned documents. 
 ##
@@ -259,7 +261,7 @@ GETRVN5		CALL			# AV G ON
 GETRVN6		STCALL	TDEC1
 			LEMPREC
 		GOTO
-			COMPDISP	# COMPUTE R RDOT RTHEAT
+			COMPDISP	# COMPUTE R RDOT RTHETA
 GETRVN		STQ
 			0D
 		VLOAD	GOTO		# AV G ON, RONE = RN VONE = VN

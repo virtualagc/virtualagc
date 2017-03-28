@@ -20,7 +20,9 @@
 ##				and corrected errors found.
 ##		2017-02-05 RSB	Back-ported comment corrections 
 ##				identified while proofing Artemis 072.
-##
+##		2017-03-15 RSB	Comment-text fixes identified in 5-way
+##				side-by-side diff of Luminary 69/99/116/131/210.
+
 ## The contents of the "Colossus249" files, in general, are transcribed 
 ## from a scanned copy of the program listing.  Notations on this
 ## document read, in part:
@@ -1889,7 +1891,7 @@ MPAC+		CS	MPAC		# CHECK FOR DIVISION OVERFLOW.  IF THE
 		CS	MPAC		# CHECK MAGNITUDE OF SIGN-CORRECTED
 		AD	BUF		# OPERANDS.
 		CCS	A
-		TCF	DVNORM		# DIVIDE OK - WILL NOT BECOME MAXOV CASE.
+		TCF	DVNORM		# DIVIDE OK - WILL NOT BECOME MAXDV CASE.
 LBUF2		ADRES 	BUF2
 		TCF	DVOVF		# DIVISOR NOT LESS THAN DIVIDEND - OVF.
 

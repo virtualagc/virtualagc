@@ -14,7 +14,9 @@
 ##				and corrected the errors found.
 ##		2017-01-04 MAS	A few typos found during Luminary 69 transcription.
 ##		2017-01-25 RSB	Back-ported a typo-fix found while proofing Luminary 69.
-##
+##		2017-03-14 RSB	Comment-text fixes identified in 5-way
+##				side-by-side diff of Luminary 69/99/116/131/210.
+
 ## This source code has been transcribed or otherwise adapted from digitized
 ## images of a hardcopy from the MIT Museum.  The digitization was performed
 ## by Paul Fjeld, and arranged for by Deborah Douglas of the Museum.  Many
@@ -268,7 +270,7 @@
 # 93	ENABLE W MATRIX INITIALIZATION
 # 94
 # 95	NO UPDATE OF EITHER STATE VECTOR (P20 OR P22)
-# 96	INTERRUPT INTEGRATION AND GO TO P00
+# 96	INTERRUPT INTEGRATION AND GO TO POO
 # 97	PERFORM ENGINE FAIL PROCEDURE
 # 98
 # 99	PLEASE ENABLE ENGINE
@@ -361,7 +363,7 @@
 # 40	TIME FROM IGNITION/CUTOFF		3COMP	XXBXX  MIN/SEC				NO LOAD, DEC ONLY
 #	VG,						XXXX.X FT/SEC
 #	DELTA V (ACCUMULATED)				XXXX.X FT/SEC
-# 41	TARGET	AZIMUTH.			2COMP	XXX.XX DEG				(FOR SYSTEM TEST)
+# 41	TARGET	AZIMUTH,			2COMP	XXX.XX DEG				(FOR SYSTEM TEST)
 #		ELEVATION				XX.XXX DEG
 # 42	APOGEE,					3COMP	XXXX.X NAUT MI				DEC ONLY
 #	PERIGEE,					XXXX.X NAUT MI

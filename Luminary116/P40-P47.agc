@@ -17,6 +17,8 @@
 ##				3-way diff vs Luminary 99 and Luminary 131.
 ##				(Admittedly, the former is more for detecting errors
 ##				in Luminary 99 than the other way around.)
+##		2017-03-16 RSB	Comment-text fixes identified in 5-way
+##				side-by-side diff of Luminary 69/99/116/131/210.
 
 ## Page 745
 # PROGRAM DESCRIPTION  P40BOTH          DECEMBER 22, 1966
@@ -879,7 +881,7 @@ FIXY            VLOAD           VXV                             # IN THIS CASE,
 
 # OUTPUT
 #       STEERSW         SEE INPUT
-#       INPULSW         1 = ENGINE OFF IN TGO CENTISECONDS; 0 = CONTINUE BURN
+#       IMPULSW         1 = ENGINE OFF IN TGO CENTISECONDS; 0 = CONTINUE BURN
 #       TGO             TIME TO CUT-OFF 2(28) CS
 #       SEE FINDCDUW FOR STEERING OUTPUTS.
 

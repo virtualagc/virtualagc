@@ -17,6 +17,10 @@
 ##				and fixed errors found.
 ##		2017-01-07 RSB	Fixed comment errors detected in cross-diff vs
 ##				Colossus 249.
+##		2017-03-16 RSB	Comment-text fixes identified in 5-way
+##				side-by-side diff of Luminary 69/99/116/131/210.
+##		2017-03-16 RSB	Comment-text fixes identified in 4-way side-by-side
+##				diff of Colossus237/249/Comanche55/Artemis72.
 
 ## Page 1031
 # SUBROUTINE TO READ GYMBAL ANGLES AND FORM DIFFERENCES.   GIMBAL ANGLES ARE SAVED IN 2S COMPLEMENT, BUT THE
@@ -344,7 +348,7 @@ BODYRATE	CA	AMG		# THESE ARE 2S COMPL NOS, BUT USE ANYWAY.
 		TC	RATEAVG
 		TS	RREL		# YAWDOT = R TCDU/180
 
-# ROLLDOT:   P TCDU/180 = CDOT TCDU/180 + IDOT TCDU/180 SINM
+# ROLLDOT:   P TCDU/180 = ODOT TCDU/180 + IDOT TCDU/180 SINM
 
 		CA	AMG
 		TC	SPSIN

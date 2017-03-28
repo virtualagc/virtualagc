@@ -14,6 +14,10 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-01-22 MAS  Created from Luminary 99.
 ##              2017-03-06 RRB  Updated for Luminary 116.
+##		2017-03-14 RSB	Proofed comment text via 3-way diff vs
+##				Luminary 99 and 131.
+##		2017-03-16 RSB	Comment-text fixes identified in 5-way
+##				side-by-side diff of Luminary 69/99/116/131/210.
 
 ## Page 1293
                 BANK            01                              
@@ -148,7 +152,7 @@ CHKNOVAC        TS              GOLOC           -1              # SAVE PRIO UNTI
                 BZMF            ITSNOVAC                        
 
                 CAF             FVACCADR                        # POSITIVE, SET UP FINDVAC CALL.
-                XCH             GOLOC           -1              # PICK UP PRIO.
+                XCH             GOLOC           -1              # PICK UP PRIO,
                 TC              GOLOC           -1              # AND GO
 
 ITSNOVAC        CAF             NOVACADR                        # NEGATIVE,

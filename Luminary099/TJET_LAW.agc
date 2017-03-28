@@ -16,7 +16,10 @@
 ##		2011-01-06 JL	Fixed pseudo-label indentation.
 ##		2016-12-18 RSB	Proofed text comments with octopus/ProoferComments
 ##				and corrected the errors found.
-##
+##		2017-03-14 RSB	Comment-text fixes noted in proofing Luminary 116.
+##		2017-03-16 RSB	Comment-text fixes identified in 5-way
+##				side-by-side diff of Luminary 69/99/116/131/210.
+
 ## This source code has been transcribed or otherwise adapted from
 ## digitized images of a hardcopy from the MIT Museum.  The digitization
 ## was performed by Paul Fjeld, and arranged for by Deborah Douglas of
@@ -159,7 +162,7 @@ ERRTEST		CCS	E		# DOES BIG ERROR (THREE DEG BEYOND THE
 		INDEX	ADRSDIF1
 		SU	FIREDB
 		EXTEND
-		BZMF	SENSTEST	# IF NOT:  ARE UNBALANCED JETS PREFERRED?
+		BZMF	SENSTEST	# IF NOT:  ARE UNBALANCED JETS PREFERRED|
 MAXJETS		CAF	TWO		# IF YES:  INCREMENT ADDRESS LOCATOR AND
 		ADS	ADRSDIF2	#	   SET SWITCH FOR JET SELECT LOGIC TO 4.
 		CAF	FOUR		#	   (ALWAYS DO THIS FOR P-AXIS)
@@ -402,7 +405,7 @@ ZONE1		EXTEND
 		AD	.0375AT4	# .0375 SEC SCALED AT 4.
 		TCF	RETURNTJ	# END COMPUTATION.
 
-# TJET - H/.O25 + TTOAXIS 	FOR APPROXIMATION OVER LESS THAN 50 MSEC.
+# TJET = H/.O25 + TTOAXIS 	FOR APPROXIMATION OVER LESS THAN 50 MSEC.
 
 FORMULA3	CS	-.025AT2	# STORE +.025 SEC SCALED AT 2 FOR DIVISION
 		DXCH	HH		# PICK UP DP H AT 8, WHICH NEED NOT BE

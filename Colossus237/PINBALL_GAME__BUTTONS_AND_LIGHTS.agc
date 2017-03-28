@@ -17,6 +17,8 @@
 ##		2017-02-08 RSB	Comment-text fixes noted while proofing Artemis 72.
 ##		2017-03-08 RSB	Changed DSPOCTWO to DSPOCTWD.
 ##		2017-03-08 RSB	Comment-text fixes noted in proofing Luminary 116.
+##		2017-03-16 RSB	Comment-text fixes identified in 5-way
+##				side-by-side diff of Luminary 69/99/116/131/210.
 
 ## Page 300
 
@@ -1678,8 +1680,8 @@ SEPMIN		XCH	Q		# FINDS WHOLE MINUTES IN BIT13
 		MP	BIT3		# LEAVES WHOLE HOURS IN MPAC.
 		EXTEND			# SR 12, THROW AWAY LP.
 		MP	BIT13		# SR 2, TAKE FROM LP. = SL 12.
-		LXCH	MPAC 	+1	# THIS FORCES BITS 12-1 TO 0 IF +.
-#					  FORCES BITS 12-1 TO 1 IF -.
+		LXCH	MPAC 	+1	# THIS FORCES BITS 12-1 TO 0 IF +,
+					# FORCES BITS 12-1 TO 1 IF -.
 		CA	HITEMOUT
 		TS	MPAC
 		TC	DMP		# MULT BY 1/15

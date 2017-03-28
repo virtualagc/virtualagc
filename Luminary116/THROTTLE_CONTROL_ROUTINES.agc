@@ -14,6 +14,12 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-01-22 MAS  Created from Luminary 99.
 ##              2017-03-01 HG   Transcribed
+##		2017-03-14 RSB	Proofed comment text via 3-way diff vs
+##				Luminary 99 and 131. No problems were found,
+##				but a ##-comment that wouldn't have been 
+##				displayed properly was fixed.
+##		2017-03-16 RSB	Comment-text fixes identified in 5-way
+##				side-by-side diff of Luminary 69/99/116/131/210.
 
 ## Page 786
                 BANK            31
@@ -214,7 +220,7 @@ MASSMULT        EXTEND
                 DXCH            MPAC
                 TC              DMP
                 ADRES           MASS
-                TC              DMP                             # LEAVES PROPERLY SCALED FORCE IN MPAC
+                TC              DMP                             # LEAVES PROPERLY SCALED FORCE IM MPAC
                 ADRES           SCALEFAC
                 TC              TPAGREE
                 CA              MPAC
@@ -226,6 +232,7 @@ MASSMULT        EXTEND
                 TC              BUF
 ## Note: There is a small drawing in blue pen in the comment section of the above statements starting in the
 ##       line of statement CA  MPAC. The drawing resembles a linear step function.
+## <pre>
 ##
 ##                              |           |
 ##                              |       ----|
@@ -234,6 +241,7 @@ MASSMULT        EXTEND
 ##                              |----/      |
 ##                              |           |
 ##                              |           |
+## </pre>
 
 ## Page 790
 #     CONSTANTS:-

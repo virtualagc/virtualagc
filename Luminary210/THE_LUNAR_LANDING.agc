@@ -17,6 +17,7 @@
 ##              2016-12-07 HG   Fix P00 -> POO
 ##		2016-12-25 RSB	Comment-text proofed using ProoferComments
 ##				and corrected errors found.
+##		2017-03-13 RSB	Comment-text fixes noted in proofing Luminary 116.
 
 ## Page 781
                 BANK            32
@@ -253,13 +254,13 @@ P63SPOT4        CAF             TWO                     # ENTER      INITIALIZE 
                 TC              POSTJUMP                # OFF TO SEE THE WIZARD...
                 CADR            BURNBABY
 
-#       ------------------------------------------
+#       ----------------------------------------
 
 #             CONSTANTS FOR P63LM AND IGNALG
 
 P63ADRES        GENADR          P63TABLE
 
-ASTNDEX         =               MD1                     # OCT 25:  INDEX FOR CLOKTASK
+ASTNDEX         =               MD1                     # OCT 25; INDEX FOR CLOKTASK
 
 CODE500         OCT             00500
 
@@ -270,7 +271,7 @@ DDUMCRIT        2DEC            +8              B-28    # CRITERION FOR IGNALG C
 
 ## Page 786
 HLROFFF         DEC             15.24           B-10    # LOADED DP, BUT LOW ORDER DOESN'T MATTER
-#       --------------------------------
+#       ----------------------------------------
 
 ## Page 787
 #       ****************************************

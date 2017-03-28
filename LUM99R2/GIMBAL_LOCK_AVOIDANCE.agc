@@ -15,6 +15,9 @@
 ##		2016-12-14 RSB	Proofed text comments with octopus/ProoferComments
 ##				but no errors found.
 ##		2017-03-03 RSB	Snapshot of Luminary 99 Rev 1. 
+##		2017-03-15 RSB	Comment-text proofed using 5-way
+##				side-by-side diff of Luminary 69/99/116/131/210,
+##				but no errors (or any differences) found.
 
 ## Page 364
 		BANK	15

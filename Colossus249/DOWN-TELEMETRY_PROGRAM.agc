@@ -17,7 +17,9 @@
 ##				vs the already-proofed corresponding Colossus
 ##				237 and Comanche 55 source-code files
 ##				and corrected errors found.
-##
+##		2017-03-15 RSB	Comment-text fixes identified in 5-way
+##				side-by-side diff of Luminary 69/99/116/131/210.
+
 ## The contents of the "Colossus249" files, in general, are transcribed 
 ## from a scanned copy of the program listing.  Notations on this
 ## document read, in part:
@@ -192,7 +194,7 @@ DODOWNTM	TS	BANKRUPT
 DNPHASE1	CA	NEGONE		# INITIALIZE ALL CONTROL WORDS
 		TS	SUBLIST		# WORDS TO MINUS ONE
 		TS	DNECADR
-		CA	LDNPHAS2	# SET DNTMGOTO = 0 ALL SUBSEQUENT DOWNRUPTS
+		CA	LDNPHAS2	# SET DNTMGOTO =O ALL SUBSEQUENT DOWNRUPTS
 		TS	DNTMGOTO	# GO TO DNPHASE2
 		TCF	NEWLIST
 DNPHASE2	CCS	DNECADR		# SENDING OF DATA IN PROGRESS

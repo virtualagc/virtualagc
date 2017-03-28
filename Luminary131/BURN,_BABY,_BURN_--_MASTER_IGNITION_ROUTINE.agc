@@ -20,6 +20,8 @@
 ##				numbers in 1701.pdf.
 ##		2017-02-25 RSB	Proofed comment text using octopus/ProoferComments.
 ##		2017-03-09 RSB	Comment-text fixes noted in proofing Luminary 116.
+##		2017-03-16 RSB	Comment-text fixes identified in 5-way
+##				side-by-side diff of Luminary 69/99/116/131/210.
 
 ## Page 725
 		BANK	36
@@ -440,7 +442,7 @@ P63IGN		EXTEND			# (13)	INITIATE BURN DISPLAYS
 		DCA	TIME2
 		DXCH	TIG
 
-		CAF	ZERO		# INITIALIZE WCHPHASE AND FLPASS0
+		CAF	ZERO		# INITIALIZE WCHPHASE AND FLPASSO
 		TS	WCHPHASE
 		TS	WCHPHOLD	# ALSO WHCPHOLD
 		CA	TWO

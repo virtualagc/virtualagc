@@ -18,6 +18,10 @@
 ##				3-way diff vs Luminary 99 and Luminary 131.
 ##				(Admittedly, the former is more for detecting errors
 ##				in Luminary 99 than the other way around.)
+##		2017-03-16 RSB	Comment-text fixes identified in 5-way
+##				side-by-side diff of Luminary 69/99/116/131/210.
+##		2017-03-17 RSB	Comment-text fixes identified in diff'ing
+##				Luminary 99 vs Comanche 55.
 
 ## Page 712
 # SUBROUTINE NAME:  V82CALL
@@ -33,7 +37,7 @@
 # 1.    IF AVERAGE G IS OFF:
 #               FLASH DISPLAY V04N06.  R2 INDICATES WHICH SHIP'S STATE VECTOR IS
 #                       TO BE UPDATED.  INITIAL CHOICE IS THIS SHIP (R2=1).  ASTRONAUT
-#                       CAN CHANGE TO OTHER SHIP BY V22EXE. WHERE X NOT EQ 1.
+#                       CAN CHANGE TO OTHER SHIP BY V22EXE, WHERE X NOT EQ 1.
 #               SELECTED STATE VECTOR UPDATED BY THISPREC (OTHPREC).
 #               CALLS SR30.1 (WHICH CALLS TFFCONMU + TFFRP/RA) TO CALCULATE
 #                       RPER (PERIGEE RADIUS), RAPO (APOGEE RADIUS), HPER (PERIGEE
@@ -199,7 +203,7 @@ BOTHPAD         STCALL          RPADTEM
                 DLOAD           BZE                             # SR30.1 SETS -TPER=0 IF HPER L/
                                 -TPER                           # HPERMIN (300 OR 35) KFT.
                                 TICKTIFF                        # (-TPER = 0)
-TICKTPER        DLOAD           DAD                             # (-TPER NON ZERO) TFF WAS NOT COMPUTED.
+TICKTPER        DLOAD           DAD                             # (-TPER NON ZERO) TFF WAS NOT COMPUTED,
                                 -TPER                           # BUT WAS SET TO 59M59S.  DONT TICK TFF, DO
                                 TSTART82                        # TICK -TPER.  DISPLAY BOTH.
                 STORE           -TPER                           # -TPER CORRECTED FOR TIME SINCE V82GOFF1
@@ -442,9 +446,9 @@ SKIPTPER        STODL           -TPER
                 STCALL          TFF                             # OTHERWISE COMPUTES TFF.       (GOTO)
                                 S2                              
 
-MAXCHK          DSU             BPL                             # IF C(MPAC) > 9999.9 NM. MPAC = 9999.9 NM
+MAXCHK          DSU             BPL                             # IF C(MPAC) > 9999.9 NM, MPAC = 9999.9 NM
                                 MAXNM                           
-                                +3                              # OTHERWISE C(MPAC) - B(MPAC).
+                                +3                              # OTHERWISE C(MPAC) = B(MPAC).
                 DAD             RVQ                             
                                 MAXNM                           
  +3             DLOAD           RVQ                             # (USED BY P30 - P37 ALSO)

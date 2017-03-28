@@ -1,19 +1,21 @@
 ### FILE="Main.annotation"
-## Copyright:    Public domain.
-## Filename:     INTERPRETER.agc
-## Purpose:      A module for revision 0 of BURST120 (Sunburst). It 
-##               is part of the source code for the Lunar Module's
-##               (LM) Apollo Guidance Computer (AGC) for Apollo 5.
-## Assembler:    yaYUL
-## Contact:      Ron Burkey <info@sandroid.org>.
-## Website:      www.ibiblio.org/apollo/index.html
-## Mod history:  2016-09-30 RSB  Created draft version.
-##               2016-10-14 MAS  Began.
-##               2016-10-14 MAS  Completed transcription.
-##		 2016-10-31 RSB	 Typos.
-##		 2016-11-01 RSB	 More typos.
-##		 2016-12-06 RSB	 Comments proofed using octopus/ProoferComments,
-##				 changes made.
+## Copyright:   Public domain.
+## Filename:    INTERPRETER.agc
+## Purpose:     A module for revision 0 of BURST120 (Sunburst). It 
+##              is part of the source code for the Lunar Module's
+##              (LM) Apollo Guidance Computer (AGC) for Apollo 5.
+## Assembler:   yaYUL
+## Contact:     Ron Burkey <info@sandroid.org>.
+## Website:     www.ibiblio.org/apollo/index.html
+## Mod history: 2016-09-30 RSB  Created draft version.
+##              2016-10-14 MAS  Began.
+##              2016-10-14 MAS  Completed transcription.
+##		2016-10-31 RSB	Typos.
+##		2016-11-01 RSB	More typos.
+##		2016-12-06 RSB	Comments proofed using octopus/ProoferComments,
+##				changes made.
+##		2017-03-15 RSB	Comment-text fixes identified in 5-way
+##				side-by-side diff of Luminary 69/99/116/131/210.
 	
 ## Page 953
 # SECTION 1  DISPATCHER
@@ -2508,7 +2510,7 @@ VSQSUB          EXTEND                                          # DOTS THE VECTO
 ## Page 1029
 #          DOUBLE PRECISION SQUARE ROOT ROUTINE. TAKE THE SQUARE ROOT OF THE TRIPLE PRECISION (MPAC +2 USED ONLY
 # IN NORMALIZATION) CONTENTS OF MPAC AND LEAVE THE NORMALIZED RESULT IN MPAC (C(MPAC) GREATER THAN OR EQUAL TO
-# .5). THE RIGHT SHIFT COUNT (TC UNNORMALIZE) IS LEFT IN MPTEMP.
+# .5). THE RIGHT SHIFT COUNT (TO UNNORMALIZE) IS LEFT IN MPTEMP.
 
 
 SQRTSUB         CAF             ZERO                            # START BY ZEROING RIGHT SHIFT COUNT.

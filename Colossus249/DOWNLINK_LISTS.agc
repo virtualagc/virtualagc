@@ -18,7 +18,9 @@
 ##				and corrected errors found.
 ##		2017-01-21 RSB	Back-ported comment error fixes detected in diff'ing
 ##				Artemis 72 vs Comanche 55.
-##
+##		2017-03-16 RSB	Comment-text fixes identified in 4-way side-by-side
+##				diff of Colossus237/249/Comanche55/Artemis72.
+
 ## The contents of the "Colossus249" files, in general, are transcribed 
 ## from a scanned copy of the program listing.  Notations on this
 ## document read, in part:
@@ -354,8 +356,6 @@ CMENTR05	-1DNADR	DELV				# DELV,+1			SNAPSHOT DATA
 		1DNADR	VIO				# VIO,+1
 		1DNADR	VPRED				# VPRED,+1
 		-1DNADR	PIPTIME1			# PIPTIME1,+1
-
-CMENTR06	EQUALS	CMPOWE06			# COMMON DOWNLIST DATA
 
 CMENTR07	EQUALS	CMPOWE07			# COMMON DOWNLIST DATA
 

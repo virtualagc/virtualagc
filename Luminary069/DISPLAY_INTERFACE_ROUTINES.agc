@@ -20,6 +20,9 @@
 ##              2017-01-16 MAS  Updated for Luminary 69.
 ##		2017-01-28 RSB	Proofed comment text using octopus/prooferComments
 ##				but no errors found.
+##		2017-03-13 RSB	Comment-text fixes noted in proofing Luminary 116.
+##		2017-03-15 RSB	Comment-text fixes identified in 5-way
+##				side-by-side diff of Luminary 69/99/116/131/210.
 
 ## Page 1335
 # DISPLAYS CAN BE CLASSIFIED INTO THE FOLLOWING CATEGORIES-
@@ -494,7 +497,7 @@
 #      FLAGWRD4 = BIT INFO FOR CONTROL OF ALL DISPLAY ROUTINES
 #      DSPTEM1 = R1 INFO FOR ASTRONAUT FROM PERFORM DISPLAYS(NORMAL)
 # SUBROUTINES USED-- NVSUB, FLAGUP, FLAGDOWN, ENDOFJOB, BLANKSUB, ABORT, JOBWAKE, JOBSLEEP, FINDVAC, PRIOCHNG,
-# JAMTERM, NVSUBUSY, FLASHON, ENDIDLE, CHANG1, BANKJUMP, MAKECADR, NOVAC.
+# JAMTERM, NVSUBUSY, FLASHON, ENDIDLE, CHANG1, BANKJUMP, MAKECADR, NOVAC,
 # DEBRIS-- (STORED INTO)
 
 #      TEMPORARY TEMPORARIES- A, Q, L, MPAC +2, MPAC +3, MPAC +4, MPAC +5, MPAC +6, RUPTREG2, RUPTREG3, CYL,
@@ -525,7 +528,7 @@
 #     11 EBANK
 #     12 -----           -----       V99PASTE
 #     13 2ND PART OF PERFORM
-#     14 REFLASH OR REDO  -----           REFLASH OR REDO
+#     15 REFLASH OR REDO  -----           REFLASH OR REDO
 #     15 -----          MARK REQUEST          -----
 # RESTARTING DISPLAYS--
 

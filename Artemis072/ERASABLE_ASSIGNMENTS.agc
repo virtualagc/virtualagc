@@ -28,24 +28,14 @@
 ##				these program versions is not stellar (ha!), so 
 ##				you shouldn't have too much confidence that all
 ##				comment-text errors were found. 
-##				*** NOTE: There are several places in this 
-##				*** module where Comanche 55 comments clearly
-##				*** end with a very distinct period, whereas
-##				*** no period appears even in the original
-##				*** (highest-res) digital photography 
-##				*** available.  I think the period should be
-##				*** present, and is simply invisible due to 
-##				*** the combined (awful) quality of the print
-##				*** and photography.  However, my choice has
-##				*** been to omit the period where it is 
-##				*** completely invisible, and to include it
-##				*** if there is even the faintest smudge that
-##				*** _might_ be a period.  There are 4 instances
-##				*** of this on p. 40 (the worst case known to
-##				*** me at this moment) where I had to make 
-##				*** such a choice, even though in all other
-##				*** respect, the page appears 100% identical to
-##				*** the corresponding range of lines in Comanche 55.
+##		2017-03-16 RSB	Comment-text fixes identified in 4-way side-by-side
+##				diff of Colossus237/249/Comanche55/Artemis72.
+##				Note that there are several instances (marked by 
+##				##-style comments) in which I've added a trailing
+##				period not visible in the printout. In these instances
+##				I believe that the printout is simply too faint, but 
+##				that the periods are really present in the source code.
+##				Previously, I had intentionally omitted these periods.
 
 ## Page 38
 # CONVENTIONS AND NOTATIONS UTILIZED FOR ERASABLE ASSIGNMENTS.
@@ -124,7 +114,9 @@ LRUPT		EQUALS	11
 QRUPT		EQUALS	12
 SAMPTIME	EQUALS	13		# SAMPLED TIME 1 & 2.
 ZRUPT		EQUALS	15		# (13 AND 14 ARE SPARES.)
-BANKRUPT	EQUALS	16		# USUALLY HOLDS FBANK OR BBANK
+## The trailing period in the line below is not visible in the printout, 
+## but I believe it is simply too faint to see. &mdash; RSB 2017.
+BANKRUPT	EQUALS	16		# USUALLY HOLDS FBANK OR BBANK.
 BRUPT		EQUALS	17		# RESUME ADDRESS AS WELL.
 
 CYR		EQUALS	20
@@ -142,8 +134,10 @@ TIME6		EQUALS	31
 CDUX		EQUALS	32
 CDUY		EQUALS	33
 CDUZ		EQUALS	34
-CDUT		EQUALS	35		# OPTICS TRUNNION CDU (WAS OPTY)
-CDUS		EQUALS	36		# OPTICS SHAFT CDU (WAS OPTX)
+## The trailing period in the lines below is not visible in the printout, 
+## but I believe it is simply too faint to see. &mdash; RSB 2017.
+CDUT		EQUALS	35		# OPTICS TRUNNION CDU (WAS OPTY).
+CDUS		EQUALS	36		# OPTICS SHAFT CDU (WAS OPTX).
 PIPAX		EQUALS	37
 PIPAY		EQUALS	40
 PIPAZ		EQUALS	41
@@ -170,7 +164,9 @@ TVCPITCH	EQUALS	CDUSCMD		# SPS PITCH COMMAND IN TVC MODE.
 LVSQUARE	EQUALS	34D		# SQUARE OF VECTOR INPUT TO ABVAL AND UNIT
 LV		EQUALS	36D		# LENGTH OF VECTOR INPUT TO UNIT.
 X1		EQUALS	38D		# INTERPRETIVE SPECIAL REGISTERS RELATIVE
-X2		EQUALS	39D		# TO THE WORK AREA
+## The trailing period in the line below is not visible in the printout, 
+## but I believe it is simply too faint to see. &mdash; RSB 2017.
+X2		EQUALS	39D		# TO THE WORK AREA.
 S1		EQUALS	40D
 S2		EQUALS	41D
 QPRET		EQUALS	42D
@@ -1443,7 +1439,7 @@ S32.1F3B	=	168D		# (0,1) (I.E.BIT 13 RESET, BIT 12 SET)
 S3229T3B	=	BIT12		#      = FIRST NEWTON ITERATION BEING DONE
 					# (0,0)= FIRST PASS OF 2ND NEWTON ITER.
 					# (1,1)= 50 FPS STAGE OF 2ND NEWT ITER.
-					# (1,0)= REMAINDER OF 2ND NEWT ITER.
+					# (1,0)= REMAINDER OF 2ND NEWTON ITER.
 
 #			BIT 11 FLAG 11
 #		=	169D

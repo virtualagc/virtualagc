@@ -17,6 +17,8 @@
 ##				proofing corresponding Luminary 69 file.	
 ##		2017-03-05 RSB	Completed transcription, and then proofed 
 ##				comment text by diffing vs Luminary 131.
+##		2017-03-15 RSB	Comment-text fixes identified in 5-way
+##				side-by-side diff of Luminary 69/99/116/131/210.
 
 ## Page 194
                 BANK            22                              
@@ -145,7 +147,7 @@ LMORBM05        2DNADR          OMEGAP                          # OMEGAP,OMEGAQ,
 LMORBM06        1DNADR          PIPTIME1                        # PIPTIME,+1            COMMON DATA
                 -3DNADR         DELV                            # DELV+0...+5
 
-# -----------------------------------------------------------
+# ---------------------------------------------------------
 
 ## Page 197
 # LM COAST AND ALIGNMENT DOWNLIST
@@ -180,7 +182,7 @@ LMCSTADL        EQUALS                                          # SEND ID BY SPE
                 DNPTR           LMCSTA05                        # COMMON DATA
                 -6DNADR         DSPTAB                          # DSPTAB+0...+11D TABLE
 
-# -----------------  SUB-LISTS   --------------------------
+# -----------------  SUB-LISTS   ----------------------------
 
 LMCSTA01        EQUALS          LMORBM01                        # COMMON DOWNLIST DATA
 LMCSTA02        EQUALS          LMORBM02                        # COMMON DOWNLIST DATA
@@ -421,6 +423,6 @@ DNTABLE         GENADR          LMCSTADL                        # LM COAST AND A
 ## Page 206
                 GENADR          LMLSALDL                        # LM LUNAR SURFACE ALIGN DOWNLIST
 
-# ------------------------------------------------------
+# ---------------------------------------------------------------
 
 

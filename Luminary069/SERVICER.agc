@@ -22,6 +22,9 @@
 ##                                            CS  -> CA
 ##		2017-01-28 RSB	Proofed comment text using octopus/prooferComments
 ##				and fixed errors found.
+##		2017-03-14 RSB	Comment-text fixes noted in proofing Luminary 116.
+##		2017-03-16 RSB	Comment-text fixes identified in 5-way
+##				side-by-side diff of Luminary 69/99/116/131/210.
 
 ## Page 858
                 BANK            37
@@ -1323,7 +1326,7 @@ VUPDAT          CS              FLGWRD11
                 EXTEND
 
 ## Page 889
-                INDEX           VSELECT                 # WV(VMAZ - V)
+                INDEX           VSELECT                 # WV(VMAX - V)
                 MP              LRWVZ
                 EXTEND
                 DV              LRVMAX                  # WV(1 - V/VMAX)
@@ -1348,7 +1351,7 @@ VALTCHK         TC              QUIKFAZ5                # DO NOT REPEAT ABOVE
                 CAF             READVBIT                # TEST READVEL TO SEE IF VELOCITY READING
                 MASK            FLGWRD11                # IS DESIRED.
                 CCS             A
-                TCF             READV                   # YES - READ VELOCITY
+                TCF             READV                   # TES - READ VELOCITY
                 CS              ABVEL                   # NO - SEE IF VELOCITY < 2000 FT/SEC
                 AD              2KFT/SEC
                 EXTEND

@@ -28,7 +28,8 @@
 ##                              Fix value for GUIDDURN  +66440 -> +65164
 ##		2017-01-28 RSB	Proofed comment text using octopus/prooferComments
 ##				and fixed errors found.
-
+##		2017-03-16 RSB	Comment-text fixes identified in 5-way
+##				side-by-side diff of Luminary 69/99/116/131/210.
 
 ## Page 789
                 BANK    32
@@ -57,7 +58,7 @@ P63LM           TC      PHASCHNG
                 CAF     FOUR
                 TS      DVCNTR
 
-                CS      ONE             # INITIALIZE WCHPHASE AND FLPASS0
+                CS      ONE             # INITIALIZE WCHPHASE AND FLPASSO
                 ZL                      #   FOR IGNITION ALGORITHM
                 DXCH    WCHPHASE
 
@@ -258,7 +259,7 @@ P63SPOT4        TC      BANKCALL        # ENTER         INITIALIZE LANDING RADAR
                 TC      POSTJUMP        # OFF TO SEE THE WIZARD ...
                 CADR    BURNBABY
 
-#       ---------------------------------
+#       ----------------------------------------
 
 # CONSTANTS FOR P63LM AND IGNALG
 
@@ -274,7 +275,7 @@ GUIDDURN        2DEC    +65164
 DDUMCRIT        2DEC    +8 B-28         # CRITERION FOR IGNALG CONVERGENCE
 
 ## Page 794
-#       --------------------------------
+#       ----------------------------------------
 
 ## Page 795
 #       ****************************************

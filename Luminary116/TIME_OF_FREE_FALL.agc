@@ -14,6 +14,10 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-01-22 MAS  Created from Luminary 99.
 ##              2017-02-09 RRB  Updated for Luminary 116.
+##		2017-03-14 RSB	Proofed comment text via 3-way diff vs
+##				Luminary 99 and 131.
+##		2017-03-16 RSB	Comment-text fixes identified in 5-way
+##				side-by-side diff of Luminary 69/99/116/131/210.
 
 ## Page 1258
 #          THE TFF SUBROUTINES MAY BE USED IN EITHER EARTH OR MOON CENTERED COORDINATES. THE TFF ROUTINES NEVER
@@ -83,11 +87,11 @@ TFFTEM          =               36D                             # TEMPORARY
 # FUNCTIONAL DESCRIPTION:      THIS SUBROUTINE IS CALLED TO COMPUTE THOSE CONIC PARAMETERS REQUIRED BY THE TFF
 #          SUBROUTINES AND TO ESTABLISH THEM IN THE PUSH LIST AREA. THE PARAMETERS ARE LISTED UNDER OUTPUT.
 #          THE EQUATIONS ARE
-#                 _   _  _
+#                 -   -  -
 #                 H = RN*VN                                               ANGULAR MOMENTUM
-#                       _ _
+#                       - -
 #                 LCP = H.H / MU                                          SEMI LATUS RECTUM
-#                               _  _
+#                               -  -
 #                 ALFA = 2/RN - VN.VN / MU                                RECIPROCAL SEMI MAJ AXIS, SIGNED
 
 #          AND ALFA IS POS FOR ELLIPTIC ORBITS
@@ -332,7 +336,7 @@ DUMPRPRA        RVQ
 #                 C. TFF = POSMAX.  THIS INDICATES THAT THE CONIC FROM THE PRESENT POSITION WILL NOT RETURN TO
 #                    THE SPECIFIED ALTITUDE.  ALSO INDICATES OUTBOUND PARABOLA OR HYPERBOLA.
 # OUTPUT:  C(MPAC)  (-28)  CS    TIME OF FLIGHT, OR TIME TO PERIGEE
-#          TFFX    (0)           X.                                      LEFT FOR ENTRY DISPLAY TFF ROUTINES
+#          TFFX    (0)           X,                                      LEFT FOR ENTRY DISPLAY TFF ROUTINES
 #          NRTERM  E:(-29+NR)    M  RTERM, WEIGHTED BY NR                LEFT FOR ENTRY DISPLAY TFF ROUTINES
 #                  M:(-27+NR)
 #          TFFTEM  E:(-59+2NR)   LCP Z Z SGN(SDELF)                      LEFT FOR ENTRY DISPLAY TFF ROUTINES

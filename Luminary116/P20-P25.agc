@@ -15,6 +15,14 @@
 ## Mod history: 2017-01-22 MAS  Created from Luminary 99.
 ##              2017-01-28 RSB  WTIH -> WITH.
 ##              2017-03-09 HG   Transcribed
+##		2017-03-13 RSB	Proofed comment text via 3-way diff vs
+##				Luminary 99 and 131.
+##		2017-03-16 RSB	Comment-text fixes identified in 5-way
+##				side-by-side diff of Luminary 69/99/116/131/210.
+##              2017-03-19 HG   Fix operator CALL  --> VLOAD
+##                              Fix statement CA BIT1  --> CS BIT5
+##                              Fix operand   ENDRRD29 --> ENDR29RD
+
 
 ## Page 494
 # RENDEZVOUS NAVIGATION PROGRAM 20
@@ -435,7 +443,7 @@ UPPSV           STQ             CALL                            # UPDATES PERMAN
 ## Page 502
                                 RENDWFLG
                                 UPPSV1
-                                DIM0FLAG                        # SET DIM0FLAG TO INTEGRATE W-MATRIX
+                                DIM0FLAG                        # SET DIMOFLAG TO INTEGRATE W-MATRIX
                 BON             SET
                                 SURFFLAG                        # IF ON LUNAR SURFACE W IS 6X6
                                 UPPSV5
@@ -702,7 +710,7 @@ V34TON49        CS              TWO
                 TS              N49FLAG
                 TC              ENDOFJOB
 R22LEM7         EXIT
-                CA              N49FLAG                         # WAS ANSWERED TO DISPLAY PRO OR TERM
+                CA              N49FLAG                         # WAS ANSWER TO DISPLAY PRO OR TERM
                 AD              TWO
                 EXTEND
                 BZF             R22LEM                          # BRANCH - TERM - TAKE ANOTHER RR READING
@@ -1027,7 +1035,7 @@ OUTOFLIM        RELINT
                 CAF             OCT501PV
                 TC              BANKCALL                        # ISSUE ALARM - RR ANTENNA NOT WITHIN
                 CADR            PRIOLARM                        # LIMITS
-                TC              R23LEM2                         # TERMINATE - EXIT R23 TO R00 (GO TO P00H)
+                TC              R23LEM2                         # TERMINATE - EXIT R23 TO R00 (GO TO POOH)
                 TC              OUTOFLIM        +1              # PROCEED ILLEGAL
                 TC              R23LEM3                         # RECYCLE- DO ANOTHER MANUVER
                 TC              ENDOFJOB
@@ -1201,7 +1209,7 @@ R61C+L01        CAF             BIT4                            # BYPASS RADAR R
                 TC              BANKCALL                        # READ RR RANGE AND RDOT
                 CADR            RRRDOT                          #  EVERY R65 PASS (3 TIMES
                 TC              BANKCALL                        #  BEFORE FIRST MARK, ONCE
-                CADR            RADSTALL                        #  DURING ANY MARK PROCESSING
+                CADR            RADSTALL                        #  DURING ANY MARK PROCESSING,
                 NOOP
                 TC              BANKCALL
                 CADR            RRRANGE
@@ -1926,7 +1934,7 @@ RRSPGAIN        DEC             .59062                          # NULL .7 ERROR 
 
 # ERASABLE INITIALIZATION REQUIRED:
 # TANG, TANG +1 (DESIRED COMMANDS), LASTYCMD, LASTXCMD
-# (1ST PASS = 0), RR ERROR COUNTER ENAGLE SET (CHAN 12 BIT 2).
+# (1ST PASS = 0), RR ERROR COUNTER ENABLE SET (CHAN 12 BIT 2).
 
 # SUBROUTINES CALLED_
 # MAGSUB
@@ -2341,7 +2349,7 @@ STDESIG         CAF             REPOSBIT
                 CCS             A                               # WITHIN LIMITS IF NOT). IF SO, EXIT AFTER
                 TCF             ENDRADAR                        # CHECKING RR CDU FAIL.
 
-STDESIG1        CCS             DESCOUNT                        # SEE IF THE TIME LIMIT HAS EXPIRED
+STDESIG1        CCS             DESCOUNT                        # SEE IF THE TINE LIMIT HAS EXPIRED
                 TCF             MOREDES
 
                 CS              B14+B2                          # IF OUT OF TIME, REMOVE ECR ENABLE + TRKR
@@ -2967,7 +2975,7 @@ C13STAL1        TS              C13FSAV
 C13SLOOP        NOOP                                            # *** NECESSARY TO PREVENT A TC TRAP ***
                 EXTEND
                 READ            LOSCALAR
-                AD              RADTIME                         # COMPUTE DELTA T SINGLE LAST RADAR READ
+                AD              RADTIME                         # COMPUTE DELTA T SINCE LAST RADAR READ
                 AD              HALF
                 AD              HALF                            # CORRECT FOR TIME OVERFLOW
                 XCH             L
@@ -3438,7 +3446,6 @@ RRLOSVEC        EQUALS          RRTARGET
 # MOD. NO.: 1        BY: P VOLANTE  SDC           DATE   4-11-67
 
 # FUNCTIONAL DESCRIPTION-
-## Yes, I know point #1 is missing.  It is missing from the program listing &mdash; RSB 2003
 #    2)  CHECKS IF THE RR LOS (I.E. THE RADAR BORESIGHT VECTOR) IS WITHIN 30 DEGREES OF THE LM +Z AXIS
 
 
@@ -3824,7 +3831,7 @@ MXMYMZ          CAF             AIGBANK
                                 REFSMMAT
 SHAFTBQ         STCALL          MZ
                                 RADARANG
-                SSP             CALL                            # STORE SHAFT CODE (3) FOR R3 IN NOUN 49
+                SSP             VLOAD                           # STORE SHAFT CODE (3) FOR R3 IN NOUN 49
                                 WHCHREAD
                 DEC             3
                                 ULC
@@ -3982,7 +3989,7 @@ LSR22.4         CALL
                                 INTSTALL
                 DLOAD           BHIZ                            # IS THIS FIRST TIME THROUGH
                                 MARKCTR
-                                INITWMX6                        # YES, INITIALIZE 6X6 W-MATRIX
+                                INITWMX6                        # YES. INITIALIZE 6X6 W-MATRIX
                 CLEAR           SET
                                 D6OR9FLG
                                 DIM0FLAG
@@ -4493,7 +4500,7 @@ VB56CADR        2CADR           TRMTRACK
 
 # COMPONENT JOBS AND TASKS:
 
-# INITIALIZING, IF RR IS FOUND TO BE IN MODE 1:  JOB R29REMOJ AND TASK REMODE:  ALWAYS: TASK PREPOS29.
+# INITIALIZING, IF RR IS FOUND TO BE IN MODE 1:  JOB R29REMOJ AND TASK REMODE;  ALWAYS: TASK PREPOS29.
 # DESIGNATING:  TASK BEGDES29 & JOB R29DODES.
 # RADAR READING:  TASK R29READ AND JOB R29RDJOB.  ALL JOBS ARE NOVAC TYPE.
 
@@ -4910,7 +4917,7 @@ R29READ         CAF             PRIO26                          # CALLED BY WAIT
 R29RDJOB        CA              FLAGWRD3                        # CALLED VIA NOVAC.
                 MASK            NR29FBIT
                 CCS             A                               # TEST "NOR29FLG".
-                TCF             ENDRRD29                        # R29 OVER,EXIT WITH RR STILL LOCKED ON
+                TCF             ENDR29RD                        # R29 OVER,EXIT WITH RR STILL LOCKED ON
                 CA              RADMODES
                 MASK            AUTOMBIT
                 CCS             A                               # TEST RR-NOT-IN-AUTO-MODE BIT.
@@ -4967,8 +4974,8 @@ R29RRR?         CS              FLAGWRD5
                 ADRES           RNGSCFLG
                 TCF             R29RANGE                        # YES; CLEAR FLAG AND READ AGAIN.
 
-ENDRRD29        CS              BIT14                           # TROUBLE MADE US COME HERE TO LEAVE
-                EXTEND                                          # RR-READING MODE. DEICREDIT DOWNTEL
+ENDRRD29        CS              BIT14                           # TROUBLE MADE US COME HERE TO LEAVE THE
+                EXTEND                                          # RR-READING MODE. DISCREDIT DOWNTEL
                 WAND            CHAN12
 ENDR29RD        CA              ZERO
                 TS              TRKMKCNT
@@ -5150,7 +5157,7 @@ FT99999         2DEC            30479           B-19
 
                 EBANK=          LOSCOUNT
 
-RADLITES        CA              BIT1
+RADLITES        CS              BIT5
                 AD              ITEMP1
                 CCS             A
                 CS              ONE

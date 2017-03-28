@@ -23,6 +23,8 @@
 ##                              Fix interpretive operators VXSC BOV -> VXSC
 ##		2017-01-28 RSB	Proofed comment text using octopus/prooferComments
 ##				and fixed errors found.
+##		2017-03-17 RSB	Comment-text fixes identified in diff'ing
+##				Luminary 99 vs Comanche 55.
 
 ## Page 1223
 # DELETE
@@ -56,7 +58,7 @@ KEPPREP		LXA,2	SETPD
 			4D
 		DSQ	PDDL		# (FS)SQ (+12 +2(N1-N2))	8D	PL 10D
 			4D
-		DSQ	PDDL*		# SSQ/MU (-20R +2(N1-N2))	10D	PL 12D
+		DSQ	PDDL*		# SSQ/MU (-2 OR +2(N1-N2))	10D	PL 12D
 			MUEARTH,2
 		SR3	SR4
 		PDVL	VSQ		# PREALIGN MU (+43 OR +37) 	12D	PL 14D

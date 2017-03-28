@@ -25,6 +25,7 @@
 ##              2017-01-16 HG   uncomment LMPOS and LMVEL
 ##		2017-01-25 RSB	Proofed comment text using octopus/prooferComments
 ##				and fixed errors found.
+##		2017-03-11 MAS	Corrected errors found during transcription of Luminary 116.
 
 ## Page 106
 # CONVENTIONS AND NOTATIONS UTILIZED FOR ERASABLE ASSIGNMENTS.
@@ -530,7 +531,7 @@ CLPASS          ERASE                                   # PASS INDICATOR CLEAR
 NOUT            ERASE                                   # ACTIVITY COUNTER FOR DSPTAB
 NOUNCADR        ERASE                                   # MACHINE CADR FOR NOUN
 MONSAVE         ERASE                                   # N/V CODE FOR MONITOR. (= MONSAVE1-1)
-MONSAVE1        ERASE                                   # NOUNCADR FOR MONITOR(MATBS1 =MONSAVE +1
+MONSAVE1        ERASE                                   # NOUNCADR FOR MONITOR(MATBS) =MONSAVE +1
 MONSAVE2        ERASE                                   # NVMONOPT OPTIONS
 DSPTAB          ERASE           +11D                    # 0-10D, DISPLAY PANEL BUFF. 11D, C/S LTS.
 NVQTEM          ERASE                                   # NVSUB STORAGE FOR CALLING ADDRESS
@@ -706,7 +707,7 @@ T5ADR           ERASE           +1                      # GENADR OF NEXT LM DAP 
                                                         # BBCON  OF NEXT LM DAP T5RUPT.   2CADR
 
 
-#          RCS FAILURE MONITOR STORAGE.                                 (1)
+#          RCS FAILURE MONITOR STORAGE                                  (1)
 
 ## Page 122
 PVALVEST        ERASE                                   # B(1)PRM
@@ -1304,13 +1305,13 @@ FDAIX           ERASE                                   # I(1)
 FDAIY           ERASE                                   # I(1)
 FDAIZ           ERASE                                   # I(1)
 
-# *        P34-P35 STORAGE.  DOWNLINKED.
+#         P34-P35 STORAGE.  DOWNLINKED.
 
-# *(2D)
+# (2D)
 
 ## Page 135
 DELVTPF         ERASE           +1                      # I(2) DELTA V FOR TPF
-#*
+#
 #          SOME R04(V62)-R77 RADAR TEST STORAGE                         (6D)
 
 RTSTDEX         ERASE                                   # (1)
@@ -1322,14 +1323,14 @@ RSAMPDT         ERASE                                   # (1)
 RFAILCNT        ERASE                                   # (1)
 #
 
-#*         LPS20.1 STORAGE 
+#         LPS20.1 STORAGE 
 
-#*(12D)
+# (12D)
 
 
 LMPOS           EQUALS          RTSTDEX                 # I(6)TEMP.  STORAGE FOR LM POS. VECTOR.
 LMVEL           EQUALS          LMPOS           +6      # I(6)TEMP.  STORAGE FOR LM VEL. VECTOR.
-#*
+#
 
 END-E4          EQUALS                                  # FIRST UNUSED LOCATION IN E4
 

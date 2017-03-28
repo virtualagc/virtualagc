@@ -19,6 +19,8 @@
 ##              2016-12-18 MAS  Updated from comment-proofed Luminary 99 version.
 ##		2017-01-28 RSB	Proofed comment text using octopus/prooferComments
 ##				and fixed errors found.
+##		2017-03-15 RSB	Comment-text fixes identified in 5-way
+##				side-by-side diff of Luminary 69/99/116/131/210.
 
 ## Page 1128
 # SUBROUTINE TO CONVERT RAD VECTOR AT GIVEN TIME TO LAT,LONG AND ALT
@@ -91,7 +93,7 @@ CALLRTRP	CALL
 		STCALL	ALT		# EXIT WITH ALT METERS B-29
 			INCORPEX
 ## Page 1130
-# SUBROUTINE TO CONVERT LAT,LONG.ALT AT GIVEN TIME TO RADIUS VECTOR
+# SUBROUTINE TO CONVERT LAT,LONG,ALT AT GIVEN TIME TO RADIUS VECTOR
 #
 # CALLING SEQUENCE
 #	L-1	CALL
@@ -276,7 +278,7 @@ GAMRP		=	8D
 #
 # OUTPUT
 #	ERADM= 504RM FOR MOON (METERS B-29)
-#	ERADM= ERAD OR COMPUTED RE FOR EARTH (METERS B-29)
+#	ERADM= ERAD OR COMPUTED RF FOR EARTH (METERS B-29)
 
 SETRE		STQ	DLOAD
 			SETREX

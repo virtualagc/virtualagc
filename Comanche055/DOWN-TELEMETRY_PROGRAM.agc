@@ -18,7 +18,9 @@
 ##				and corrected the errors found.
 ##		2017-01-08 RSB	Fixed comment errors detected in cross-diff vs
 ##				Colossus 249.
-##
+##		2017-03-15 RSB	Comment-text fixes identified in 5-way
+##				side-by-side diff of Luminary 69/99/116/131/210.
+
 ## The contents of the "Comanche055" files, in general, are transcribed 
 ## from scanned documents. 
 ##
@@ -188,7 +190,7 @@ DODOWNTM	TS	BANKRUPT
 DNPHASE1	CA	NEGONE		# INITIALIZE ALL CONTROL WORDS
 		TS	SUBLIST		# WORDS TO MINUS ONE
 		TS	DNECADR
-		CA	LDNPHAS2	# SET DNTMGOTO = 0 ALL SUBSEQUENT DOWNRUPTS
+		CA	LDNPHAS2	# SET DNTMGOTO =O ALL SUBSEQUENT DOWNRUPTS
 		TS	DNTMGOTO	# GO TO DNPHASE2
 		TCF	NEWLIST
 DNPHASE2	CCS	DNECADR		# SENDING OF DATA IN PROGRESS
