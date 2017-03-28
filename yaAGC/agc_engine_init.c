@@ -83,6 +83,7 @@
 		03/09/17 MAS    Added initialization of SbyStillPressed.
 		03/26/17 MAS    Added initialization of previously-static things
                                 from agc_engine.c that are now in agc_t.
+		03/27/17 MAS    Fixed a parity-related program loading bug.
 */
 
 // For Orbiter.
@@ -156,7 +157,7 @@ agc_load_binfile(agc_t *State, const char *RomImage)
     {
       unsigned char In[2];
       uint8_t Parity;
-      int16_t RawValue;
+      uint16_t RawValue;
       m = fread (In, 1, 2, fp);
       if (m != 2){
 	RetVal = 5;

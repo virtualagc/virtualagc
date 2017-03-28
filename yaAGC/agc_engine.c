@@ -322,6 +322,7 @@
  *				of the agc_t state structure, which should
  *				make integration easier for simulator
  *				integrators.
+ *		03/27/17 MAS	Fixed parity checking for superbanks.
  *
  *
  * The technical documentation for the Apollo Guidance & Navigation (G&N) system,
@@ -603,7 +604,7 @@ FindMemoryWord (agc_t * State, int Address12)
   if (State->CheckParity)
     {
       // Check parity for fixed memory if such checking is enabled
-      int16_t LinearAddr = AdjustmentFB*02000 + (Address12 & 01777);
+      uint16_t LinearAddr = AdjustmentFB*02000 + (Address12 & 01777);
       int16_t ExpectedParity = (State->Parities[LinearAddr / 32] >> (LinearAddr % 32)) & 1;
       int16_t Word = ((*Addr) << 1) | ExpectedParity;
       Word ^= (Word >> 8);
