@@ -18,6 +18,11 @@
 ##                              and put in jumps to Retread instruction checks and back.
 ##              2017-01-15 MAS  Added transfers to and from the new extended tests.
 ##		2017-01-28 RSB	WTIH -> WITH.
+##		2017-03-27 MAS	A few corrections for the hardware alarm tests: counter
+##                              alarms are now filtered out because they can happen at
+##                              random during other restarts, if counter increments had
+##                              been requested. Also added testing of the Night Watchman's
+##                              stretching out of its monitor output for 1.28s.
 
 # PROGRAM DESCRIPTION                                                         DATE  14 FEBRUARY 1967
 # PROGRAM NAME - SELF-CHECK                                                   LOG SECTION AGC BLOCK TWO SELF-CHECK
@@ -160,8 +165,10 @@ PRITYBIT        EQUALS          SBIT1
 TCTRPBIT        EQUALS          SBIT3
 RPTLKBIT        EQUALS          SBIT4
 WATCHBIT        EQUALS          SBIT5
+CTRMASK         OCT             77677
 300MSEC         DEC             30
 2SEC            DEC             200
+0.64SEC         EQUALS          BIT7
 BNK34ADR        FCADR           BANK34                          # With superbank = 100, this becomes bank 44
 
 
@@ -1550,6 +1557,9 @@ NOTCFAIL        CA              S+ZERO                          # It's been too 
 
 TESTRBIT        EXTEND                                          # Read the restart cause from channel 77
                 RXOR            77
+                MASK            CTRMASK                         # Filter out counter alarms, which can be caused by
+                                                                # any other type of restart if a counter request
+                                                                # was interrupted.
                 TCF             +0CHK                           # Make sure only the correct bit was set.
 
 RSTRTRST        CAF             BIT10                           # Turn off the RESTART light
@@ -1644,16 +1654,40 @@ NORPCONT        TC              PHASCHNG
 WATCHCHK        TC              PHASCHNG
                 OCT             00502
 
+                CA              S+ZERO                          # Indicate to WTCHCONT that entry to it is permissible
+                TS              SKEEP5                          # once
+
                 CA              2SEC                            # Set up a 2 second BUSYLOOP
                 TS              SKEEP3
                 TC              BUSYLOOP                        # SKEEP2 still = 1
 
-WTCHCONT        TC              PHASCHNG
-                OCT             00002
+WTCHCONT        CA              SKEEP5                          # Ensure we only get one night wachman alarm.
+                TC              +0CHK                           # If this fails, the below logic caused a
+                CA              ONE                             # restart when it shouldn't have.
+                TS              SKEEP5
 
-                CAF             WATCHBIT
+                CAF             WATCHBIT                        # Check to make sure night watchman was triggered
                 TC              TESTRBIT
+
+                TC              RSTRTRST                        # Try to clear it
+                CAF             WATCHBIT                        # Check that we didn't successfully clear it -- it
+                TC              TESTRBIT                        # should be asserted for 1.28 seconds
+
+                RELINT
+                CA              0.64SEC                         # Wait for 0.64 seconds (which will get us into the
+                TS              SKEEP3                          # next night watchman window). Since we just aggravated
+                TC              BUSYLOOP                        # it, we shouldn't get any alarms doing this.
+
                 TC              RSTRTRST
+                CAF             WATCHBIT                        # Check again that resetting the ch77 bit fails
+                TC              TESTRBIT
+
+                CS              NEWJOB                          # Appease the night watchman for this new window, and
+                TC              BUSYLOOP                        # wait a further 0.64 seconds until the end of of it
+
+                TC              RSTRTRST
+                CAF             S+ZERO                          # Make sure we can actually clear it this time
+                TC              TESTRBIT
 
 # Check the parity alarm. There's a couple ways this can happen -- for example, if a scaler or prime
 # power failure generating a STRT2 signal were to happen in the middle of an erasable memory cycle,
@@ -1665,6 +1699,7 @@ WTCHCONT        TC              PHASCHNG
 PARFLCHK        TC              PHASCHNG
                 OCT             00602
 
+                CS              NEWJOB
                 CAF             SUPER100                        # Simply try to load data from the start of bank 44.
                 TS              L
                 CAF             BNK34ADR
@@ -1678,13 +1713,13 @@ PARCONT         TC              PHASCHNG
                 TC              RSTRTRST
 
 ALRMDONE        TC              TOSMODE                         # All done with the hardware alarm checks.
-                
+
 # BUSYLOOP provides a simple means of aggravating certain hardware alarms; it fails to check NEWJOB
 # and makes use of a TCF. Its inputs are:
 # SKEEP2 = Run context. If positive, subroutine mode is used and control is returned to Q.
 #                       If +0, waitlist task mode is used and exit is through TASKOVER. SKEEP1 is set to 0 on exit.
 # SKEEP3 = Loop duration in TIME1 counts (10ms).
-BUSYLOOP        CS              TIME1                           # Store the start time in SKEEP3
+BUSYLOOP        CS              TIME1                           # Store the start time in SKEEP4
                 TS              SKEEP4
 BUSYLOP1        CA              TIME1
                 AD              SKEEP4                          # Current time - start time
