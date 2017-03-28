@@ -22,7 +22,9 @@
 ##                              alarms are now filtered out because they can happen at
 ##                              random during other restarts, if counter increments had
 ##                              been requested. Also added testing of the Night Watchman's
-##                              stretching out of its monitor output for 1.28s.
+##                              stretching out of its monitor output for 1.28s. Also
+##                              adopted a bugfix from Sunburst 120 that stopped the AGC
+##                              from crashing when running a self-test after the DSKY test.
 
 # PROGRAM DESCRIPTION                                                         DATE  14 FEBRUARY 1967
 # PROGRAM NAME - SELF-CHECK                                                   LOG SECTION AGC BLOCK TWO SELF-CHECK
@@ -1421,7 +1423,7 @@ SOPTON12        TC              RSTRTCHK
                 CA              S+ZERO                          
                 TS              SMODE                           
 TOSMODE         TC              POSTJUMP                        
-                CADR            SMODECHK                        
+                CADR            SELFCHK
 
 # THE FOLLOWING CONSTANTS ARE USED BY DSKYCHK.
 DSKYCODE        OCTAL           05265                           # 00
