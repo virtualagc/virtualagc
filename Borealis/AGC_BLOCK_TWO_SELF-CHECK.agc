@@ -16,6 +16,7 @@
 ##              2017-01-04 MAS  Fleshed out the rest of the hardware alarm tests. Also
 ##                              pulled back all updates added by the time of Sunburst 120.
 ##                              and put in jumps to Retread instruction checks and back.
+##              2017-01-15 MAS  Added transfers to and from the new extended tests.
 ##		2017-01-28 RSB	WTIH -> WITH.
 
 # PROGRAM DESCRIPTION                                                         DATE  14 FEBRUARY 1967
@@ -746,13 +747,13 @@ INSTCHK         TC              CHECKNJ                         # CHECK FOR NEW 
                 TC              POSTJUMP
                 CADR            TCCHK
 
-# Retread tests are done, which means we're done with the overall control pulse tests.
-# There are more things that weren't tested here that should be. That list is currently as follows:
-# * EDRUPT
-# * BRUPT (changing out instruction to be executed on RESUME)
-# * Various corner cases checked by Ron Burkey's Validation
-# * More?
-INSTDONE        TC              SMODECHK                        
+# Retread tests are done. Go perform custom extended tests.
+INSTDONE        TC              CHECKNJ                        
+                TC              POSTJUMP
+                CADR            EXTTESTS
+
+# All done checking instructions out. Move on.
+EXTTDONE        TC              SMODECHK                        
 
 # IN-OUT1 CHECKS ALL PULSES OF WRITE AND READ
 IN-OUT1         CA              S-1                             

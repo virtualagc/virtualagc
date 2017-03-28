@@ -13,6 +13,7 @@
 ## Mod history: 2016-12-20 MAS  Created from Aurora 12 (with much DAP stuff removed).
 ##              2016-12-21 MAS  Pulled in erasables for Retread instruction checks.
 ##              2017-01-04 MAS  Added ERESTORE, used by Sunburst's erasable mem check.
+##              2017-01-15 MAS  Added T4TEMP and LASTIMER for use with timer/EDRUPT tests.
 
 A               EQUALS          0
 L               EQUALS          1                               # L AND Q ARE BOTH CHANNELS AND REGISTERS.
@@ -453,6 +454,9 @@ SKEEP6          =               1376
 SKEEP7          =               1377
 
 ERESTORE        ERASE
+LASTIMER        ERASE                                           # Stores the number of the last timer interrupt
+T4TEMP          ERASE                                           # Temporary storage of TIME4 setting for use with
+                                                                # accelerated TIME4 interrupts in self-check
 
 # ADDRESSES TO BE USED FOR INDEX INSTRUCTION WITHOUT EXTRACODES
 NDX+0		ERASE
