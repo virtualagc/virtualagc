@@ -85,6 +85,8 @@
                                 from agc_engine.c that are now in agc_t.
 		03/27/17 MAS    Fixed a parity-related program loading bug and
                                 added initialization of a new night watchman bit.
+ 		04/02/17 MAS	Added initialization of a couple of flags used
+ 				for simulation of the TC Trap hardware bug.
 */
 
 // For Orbiter.
@@ -288,6 +290,9 @@ agc_engine_init (agc_t * State, const char *RomImage, const char *CoreDump,
   State->DskyTimer = 0;
   State->DskyFlash = 0;
   State->DskyChannel163 = 0;
+
+  State->TookBZF = 0;
+  State->TookBZMF = 0;
 
   if (CoreDump != NULL)
     {

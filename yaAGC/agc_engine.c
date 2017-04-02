@@ -326,6 +326,10 @@
  *				simulation of the Night Watchman's assertion of
  *				its channel 77 bit for 1.28 seconds after each
  *				triggering.
+ *		04/02/17 MAS	Added simulation of a hardware bug in the
+ *				design of the "No TCs" part of the TC Trap.
+ *				Most causes of transients that can reset
+ *				the alarm are now accounted for.
  *
  *
  * The technical documentation for the Apollo Guidance & Navigation (G&N) system,
@@ -1669,6 +1673,8 @@ agc_engine (agc_t * State)
   //int OverflowQ, Qumulator;
   // Keep track of TC executions for the TC Trap alarm
   int ExecutedTC = 0;
+  int JustTookBZF = 0;
+  int JustTookBZMF = 0;
 
 
   sExtraCode = 0;
@@ -2250,6 +2256,10 @@ agc_engine (agc_t * State)
   // which imply that the contents of Z is directly transferred into Q.)
   c (RegZ)= State->NextZ;
 
+  // A BZF followed by an instruction other than EXTEND causes a TCF0 transient
+  if (State->TookBZF && !((ExtendedOpcode == 000) && (Address12 == 6)))
+    ExecutedTC = 1;
+
   // Parse the instruction.  Refer to p.34 of 1689.pdf for an easy 
   // picture of what follows.
   switch (ExtendedOpcode)
@@ -2265,9 +2275,21 @@ agc_engine (agc_t * State)
       // TC instruction (1 MCT).
       ValueK = Address12;// Convert AGC numerical format to native CPU format.
       if (ValueK == 3)		// RELINT instruction.
-	State->AllowInterrupt = 1;
+        {
+	  State->AllowInterrupt = 1;
+
+          if (State->TookBZF || State->TookBZMF)
+            // RELINT after a single-cycle instruction causes a TC0 transient
+            ExecutedTC = 1;
+        }
       else if (ValueK == 4)	// INHINT instruction.
-	State->AllowInterrupt = 0;
+        {
+	  State->AllowInterrupt = 0;
+
+          if (State->TookBZF || State->TookBZMF)
+            // INHINT after a single-cycle instruction causes a TC0 transient
+            ExecutedTC = 1;
+        }
       else if (ValueK == 6)	// EXTEND instruction.
 	{
 	  State->ExtraCode = 1;
@@ -2486,6 +2508,8 @@ agc_engine (agc_t * State)
       case 045:
       case 046:
       case 047:
+      ExecutedTC = 1; // CS causes transients on the TC0 line
+
       if (IsA (Address12))// COM
 	{
 	  c (RegA) = ~Accumulator;;
@@ -2545,6 +2569,8 @@ agc_engine (agc_t * State)
       break;
       case 052:			// DXCH
       case 053:
+      ExecutedTC = 1; // DXCH causes transients on the TCF0 line
+
       // Remember, in the following comparisons, that the address is pre-incremented.
       if (IsL (Address10))
 	{
@@ -2587,6 +2613,7 @@ agc_engine (agc_t * State)
       break;
       case 054:			// TS
       case 055:
+      ExecutedTC = 1; // TS causes transients on the TCF0 line
       if (IsA (Address10))// OVSK
 	{
 	  if (Overflow)
@@ -2615,6 +2642,7 @@ agc_engine (agc_t * State)
       break;
       case 056:			// XCH
       case 057:
+      ExecutedTC = 1; // XCH causes transients on the TCF0 line
       if (IsA (Address10))
       break;
       if (Address10 < REG16)
@@ -2842,6 +2870,7 @@ agc_engine (agc_t * State)
 	{
 	  BacktraceAdd (State, 0);
 	  State->NextZ = Address12;
+          JustTookBZF = 1;
 	}
       break;
       case 0120:			// MSU
@@ -3040,6 +3069,7 @@ agc_engine (agc_t * State)
 	{
 	  BacktraceAdd (State, 0);
 	  State->NextZ = Address12;
+          JustTookBZMF = 1;
 	}
       break;
       case 0170:			// MP
@@ -3131,6 +3161,9 @@ agc_engine (agc_t * State)
       // Update TC Trap flags according to the instruction we just executed
       if (ExecutedTC) State->NoTC = 0;
       else State->TCTrap = 0;
+
+      State->TookBZF = JustTookBZF;
+      State->TookBZMF = JustTookBZMF;
     }
   return (0);
 }

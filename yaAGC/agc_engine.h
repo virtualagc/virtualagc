@@ -106,6 +106,8 @@
 		03/27/17 MAS	Added a bit for Night Watchman's 1.28s-long assertion of
 				its channel 77 bit.
 		03/29/17 RSB    More integer types needed for Windows.
+ 		04/02/17 MAS	Added a couple of flags used for simulation of the 
+                		TC Trap hardware bug.
    
   For more insight, I'd highly recommend looking at the documents
   http://hrst.mit.edu/hrs/apollo/public/archive/1689.pdf and
@@ -367,6 +369,8 @@ typedef struct
   unsigned ParityFail:1;        // Set when a parity failure is encountered accessing memory (in yaAGC, just hitting banks 44+)
   unsigned CheckParity:1;       // Enable parity checking for fixed memory.
   unsigned RestartLight:1;      // The present state of the RESTART light
+  unsigned TookBZF:1;           // Flag for having just taken a BZF branch, used for simulation of a TC Trap hardware bug
+  unsigned TookBZMF:1;          // Flag for having just taken a BZMF branch, used for simulation of a TC Trap hardware bug
   uint64_t /*unsigned long long */ DownruptTime;	// Time when next DOWNRUPT occurs.
   int Downlink;
   int NextZ;                    // Next value for the Z register
