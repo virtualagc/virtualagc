@@ -36,7 +36,6 @@ Assembly Language_
 
 A simple analysis of instruction counts in the YUL sources gives us this:
 ```
-Instruction Frequencies:
 TS       3199
 NA       1961
 OCT      1682
@@ -107,11 +106,8 @@ CP       1
 DM       1
 ```
 
-Similarly, the following insructions and pseudoinstructions are not used at all
-in YUL:
-
+Similarly, the following insructions and pseudoinstructions are not used in YUL:
 ```
-Unused Instructions:
 CONTROL
 CSCON
 DD
