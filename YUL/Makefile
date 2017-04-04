@@ -24,5 +24,5 @@ instrcheck:
 	python $(H800)/tools/check-instructions.py -i $(SOURCE)
 
 instrcount:
-	python $(H800)/tools/check-instructions.py -c -u $(SOURCE)
+	python $(H800)/tools/check-instructions.py -c -s -u $(SOURCE)
 
