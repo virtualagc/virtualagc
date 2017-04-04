@@ -14,7 +14,11 @@ BASENAME=YUL
 H800=$(HOME)/agc/h800
 
 ALL_SOURCE:=$(wildcard *.argus)
-SOURCE:=DIGEST.argus OPGUIDE.argus YULPASS0.argus YULPASS1.argus YULPASS2.argus YULPASS3.argus YULMANUF.argus YULSIMUL.argus
+
+# Top-level modules, these include everything else.
+# Omit DIGEST.argus and OPGUIDE.argus, since they do not seem to be valid
+# sources, i.e. they are purely comment text, but not marked as remarks cards.
+SOURCE:=YULPASS0.argus YULPASS1.argus YULPASS2.argus YULPASS3.argus YULMANUF.argus YULSIMUL.argus
 
 check:
 	for toplevel in $(SOURCE) ; do \
