@@ -20,9 +20,16 @@ ALL_SOURCE:=$(wildcard *.argus)
 # sources, i.e. they are purely comment text, but not marked as remarks cards.
 SOURCE:=YULPASS0.argus YULPASS1.argus YULPASS2.argus YULPASS3.argus YULMANUF.argus YULSIMUL.argus
 
-check:
+instrcheck:
 	for toplevel in $(SOURCE) ; do \
 		echo $$toplevel ; \
 		python $(H800)/tools/check-instructions.py -i $$toplevel ; \
 	done
+
+instrcount:
+	for toplevel in $(SOURCE) ; do \
+		echo $$toplevel ; \
+		python $(H800)/tools/check-instructions.py -c $$toplevel ; \
+	done
+
 
