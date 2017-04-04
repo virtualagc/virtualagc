@@ -23,6 +23,9 @@ SOURCES:=YULPASS0.argus YULPASS1.argus YULPASS2.argus YULPASS3.argus YULMANUF.ar
 symcheck:
 	python $(H800)/tools/check-symbols.py -a $(SOURCES)
 
+listsyms:
+	python $(H800)/tools/list-symbols.py $(SOURCES)
+
 instrcheck:
 	python $(H800)/tools/check-instructions.py -i $(SOURCES)
 
