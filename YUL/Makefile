@@ -21,15 +21,8 @@ ALL_SOURCE:=$(wildcard *.argus)
 SOURCE:=YULPASS0.argus YULPASS1.argus YULPASS2.argus YULPASS3.argus YULMANUF.argus YULSIMUL.argus
 
 instrcheck:
-	for toplevel in $(SOURCE) ; do \
-		echo $$toplevel ; \
-		python $(H800)/tools/check-instructions.py -i $$toplevel ; \
-	done
+	python $(H800)/tools/check-instructions.py -i $(SOURCE)
 
 instrcount:
-	for toplevel in $(SOURCE) ; do \
-		echo $$toplevel ; \
-		python $(H800)/tools/check-instructions.py -c $$toplevel ; \
-	done
-
+	python $(H800)/tools/check-instructions.py -c $(SOURCE)
 
