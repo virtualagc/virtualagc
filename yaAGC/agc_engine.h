@@ -105,6 +105,7 @@
 		03/26/17 MAS	Added previously-static items from agc_engine.c to agc_t.
 		03/27/17 MAS	Added a bit for Night Watchman's 1.28s-long assertion of
 				its channel 77 bit.
+		03/29/17 RSB    More integer types needed for Windows.
    
   For more insight, I'd highly recommend looking at the documents
   http://hrst.mit.edu/hrs/apollo/public/archive/1689.pdf and
@@ -132,6 +133,7 @@ typedef short int16_t;
 typedef signed char int8_t;
 typedef unsigned char uint8_t; // 20170326
 typedef unsigned int uint32_t; // 20170326
+typedef unsigned short uint16_t; // 20170329
 #ifdef __MINGW32__
 typedef unsigned long long uint64_t;
 #else

@@ -684,3 +684,25 @@ else
 endif
 endif
 endif
+
+# The following target is used only on the build-system that creates the Linux
+# (presently Xubuntu 14.04 32-bit) installation tarball.  Its purpose is to look
+# into all of the executables being distributed, determine what system libraries
+# they use, and to pack all of those into a separate directory that can be 
+# included in the installation package.  The result, I hope, is to be able to 
+# run the software on any Linux system, 32-bit or 64-bit, newer than 4/2014, and
+# possibly on some older ones too.  To take advantage of these libraries
+# (as opposed to just being limited to whatever libraries are already installed
+# on the target Linux system), one needs to run VirtualAGC as
+#	cd Resources
+#	LD_LIBRARY_PATH=../lib ../bin/VirtualAGC
+# For 64-bit systems, it's additionally necessary to do
+#	sudo apt-get install gcc-multilib
+# on Debian or Ubuntu, and presumably the equivalent on Fedora, OpenSUSE, ....
+#
+# Although the libraries are put into a folder called lib/, I wouldn't recommend
+# copying them into system directories like /lib, /usr/lib, or /usr/local/lib.
+.PHONY: installationLibraries
+installationLibraries: install
+	mkdir ~/VirtualAGC/lib
+	cp `ldd ~/VirtualAGC/bin/* | grep '=>' | sed -e 's/.*=>[[:space:]]*//' -e 's/[[:space:]]*(.*//' | sort -u` ~/VirtualAGC/lib
