@@ -6,6 +6,9 @@ Jim Lawton, November 2016.
 
 More or less random notes accumulated from reading the YUL sources. 
 
+NOTE: There is a separate Github repository H=800 stuff, including
+documentation, and (eventually) tools. It's at
+https://github.com/jimlawton/h800.
 
 Endianess
 ---------
@@ -23,97 +26,153 @@ However, there is no sub-48-bit access to memory, so the issue of endianess does
 Instruction Set
 ---------------
 
-- BA    (Binary Add)
-- BD    (Fixed Binary Divide)
-- BM    (Binary Multiply)
-- BS    (Binary Subtract)
-- BT    (Binary Accumulate)
-- CC    (Compute Orthocount)
-- COREDUMP (?)
-- CP    (Check Parity)
-- CSCON (Cosequence Control)
-- DA    (Decimal Add)
-- DD    (Fixed Decimal Divide)
-- DM    (Decimal Multiply)
-- DOFF  (Demand Off)
-- DON   (Demand On)
-- DS    (Decimal Subtract)
-- DT    (Decimal Accumulate)
-- DUMP  (?)
-- EBA   (Extended Binary Add)
-- EBS   (Extended Binary Subtract)
-- EX    (Extract)
-- FBA   (Floating Binary Add)
-- FBAE  (Floating Binary Add, Extended Precision)
-- FBAU  (Floating Binary Add, Unnormalized)
-- FBD   (Floating Binary Divide)
-- FBM   (Floating Binary Multiply)
-- FBS   (Floating Binary Subtract)
-- FBSE  (Floating Binary Subtract, Extended Precision)
-- FBSU  (Floating Binary Subtract, Unnormalized)
-- FCON  (Conversion)
-- FDA   (Floating Decimal Add)
-- FDAU  (Floating Decimal Add, Unnormalized)
-- FDD   (Floating Decimal Divide)
-- FDM   (Floating Decimal Multiply)
-- FDS   (Floating Decimal Subtract)
-- FDSU  (Floating Decimal Subtract, Unnormalized)
-- FFN   (Fixed-to-Floating Normalize)
-- FLN   (Floating Less than, Normalized)
-- FNN   (Floating Not Equal, Normalized)
-- HA    (Half add)
-- IT    (Item Transfer)
-- LA    (Less than or equal, alphabetic)
-- LN    (Less than or equal, numeric)
-- MPC   (Multiprogram Control)
-- MT    (Multiple Transfer)
-- NA    (Not equal, alphabetic)
-- NN    (Not equal, numeric)
-- PR    (Proceed)
-- PRA   (Print Alphabetic)
-- PRD   (Print Decimal)
-- PRO   (Print Octal)
-- RB    (Read Backward)
-- RF    (Read Forward)
-- RT    (Record Transfer)
-- RW    (Rewind)
-- S     (Simulate)
-- SCON  (Sequence Control)
-- SIMULATE (?)
-- SM    (Superimpose)
-- SPCR  (Save Program Control Register) (?)
-- SPE   (Shift Preserving Sign and Extract)
-- SPS   (Shift Preserving Sign and Substitute)
-- SS    (Substitute)
-- SSL   (Shift and Select)
-- STOP  (Stop calling program)
-- SWE   (Shift Word and Extract)
-- SWS   (Shift Word and Substitute)
-- TN    (N-word Transfer)
-- TS    (Transfer A to B, go to C)
-- TX    (Transfer A to C)
-- ULD   (Multiple Unload)
-- WA    (Word Add)
-- WD    (Word Difference)
-- WF    (Write Forward)
+For details on the instruction set see the _H-1800 programmers reference
+Manual_
+(https://github.com/jimlawton/h800/blob/master/docs/prm/Honeywell-1800-PRM.md).
 
+Details on the ARGUS assembly syntax can be found in the _ARGUS Manual of
+Assembly Language_
+(https://github.com/jimlawton/h800/blob/master/docs/argus/ARGUS_Manual_of_Assembly_Language.md).
 
-Unknown ARGUS Opcodes
----------------------
+A simple analysis of instruction counts in the YUL sources gives us this:
+```
+Instruction Frequencies:
+ALF      1587
+ASSIGN   490
+BA       19
+BD       2
+BM       9
+BS       36
+BT       17
+CAC      150
+CC       17
+CONTROL  0
+COREDUMP 1
+CP       1
+CSCON    0
+DA       61
+DD       0
+DEC      288
+DM       1
+DOFF     0
+DON      0
+DS       20
+DT       5
+DUMP     1
+EBA      75
+EBC      0
+EBS      12
+END      5
+EQUALS   361
+EVEN     0
+EX       155
+FBA      0
+FBAE     0
+FBAU     0
+FBD      0
+FBM      0
+FBS      0
+FBSE     0
+FBSU     0
+FCON     0
+FDA      1
+FDAU     2
+FDD      0
+FDM      3
+FDS      1
+FDSU     0
+FFN      1
+FLBIN    0
+FLDEC    20
+FLN      0
+FNN      1
+FXBIN    63
+HA       132
+IT       4
+LA       1248
+LINK     0
+LN       57
+M        944
+MASKBASE 21
+MASKGRP  43
+MODLOC   4
+MPC      5
+MT       104
+NA       1961
+NN       6
+OCT      1682
+PR       14
+PRA      0
+PRD      0
+PRO      0
+RB       5
+RESERVE  363
+RF       64
+RT       7
+RW       41
+S        573
+SCON     0
+SEGNAME  0
+SETLOC   67
+SIMULATE 10
+SM       245
+SPCR     7
+SPE      9
+SPEC     291
+SPS      4
+SS       539
+SSL      211
+STOP     6
+SUBCALL  0
+SWE      567
+SWS      1271
+TAC      0
+TAS      0
+TN       391
+TS       3199
+TX       1606
+ULD      0
+WA       491
+WD       232
+WF       39
+```
 
-- SETLOC (syntax unspecified)
-- MODLOC (function unknown)
-- STOP (MPC variant; see p113)
-- ASSIGN
-- RESERVE
-- SPEC
--- Special register, 16-bit word (see p29); note: systems with greater that 32KW have 24-bit special registers)
-- CAC (function unknown)
--- I think this is for forming compressed address constants. Since H-x800 words are 48 bits wide, and addresses are only 16 bits, then 3 addresses can be packed into one memory word. I think this is what CAC does, and I hypothesise that it stands for "Condensed Address Constant". It seems to take from one to three arguments, I assume any unspecified argument is replaced by zero in the memory word formed, but that is a guess.
-- EQUALS
-- MASKGRP (function unknown - declaration of masks, fields?)
-- MASKBASE 
+Similarly, the following insructions and pseudoinstructions are not used at all
+in YUL:
 
+```
+Unused Instructions:
+CONTROL
+CSCON
+DD
+DOFF
+DON
+EBC
+EVEN
+FBA
+FBAE
+FBAU
+FBD
+FBM
+FBS
+FBSE
+FBSU
+FCON
+FDD
+FDSU
+FLBIN
+FLN
+LINK
+PRA
+PRD
+PRO
+SCON
+SEGNAME
+SUBCALL
+TAC
+TAS
+ULD
+```
 
 Constants
 ---------
@@ -211,36 +270,6 @@ gives:
     3:  B1      Bank number, i.e. 1.
 
 Q: Do bank numbers start at 0 or 1?
-
-
-MASKGRP
--------
-
-What does MASKGRP do?
-
-Examples:
-
-    0005              MASKGRP,1    S,0           F,0
-    0004              MASKGRP,1    S,0           F,0
-    0002              MASKGRP,6    S,0           F,0
-    0005              MASKGRP,1    S,0           F,0
-    0004  *           MASKGRP,3    S,1           F,1
-    01162             MASKGRP      S,0           F,0
-    0005              MASKGRP,1    S,0           F,0
-    00602             MASKGRP,3    S,1           F,1
-    00895             MASKGRP,1    S,0           F,0
-    0092              MASKGRP,3    S,1           F,1
-    014115            MASKGRP      S,0           F,0
-    0005  *           MASKGRP,1    S,1           F,1
-    01354             MASKGRP      S,0           F,0
-    0005              MASKGRP,1    S,0           F,0
-    00732             MASKGRP,3    S,1           F,1
-    0132              MASKGRP,1    S,0           F,0
-    0135              MASKGRP,3    S,1           F,1
-    018415            MASKGRP      S,0           F,0
-    0005              MASKGRP,1    S,0           F,0
-    0005              MASKGRP,1    S,0           F,0
-    0002              MASKGRP,6    S,0           F,0
 
 
 Tapes
