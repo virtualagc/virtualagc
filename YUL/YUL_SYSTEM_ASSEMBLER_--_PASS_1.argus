@@ -445,8 +445,8 @@ P0257   ALPHABETIC CONSTANTS -- FIRST OF TWO PAGES.
  0260              ALF,4
  0261              ALF,4
  0262   BLANKS     ALF
- # The following line makes a string of "blots", non-ASCII characters.
- # I have chosen to represent them as the ASCII "block" character, Unicode 9608.
+# The following line makes a string of "blots", non-ASCII characters.
+# I have chosen to represent them as the ASCII "block" character, Unicode 9608.
  0263   BLOTS      ALF          ████████
  0264   W INSERT   ALF           INSERT
  0265   AMPRSANS   ALF          &&&&&&&&
@@ -1147,30 +1147,30 @@ R089309 ENTIRE SYMBOL TABLE INTO THE SEGMENT ASSEMBLY.
 
  08933             TX           L COMP NAM    -             Z,X4
  089332            SWS,THREAD10 N,X4          12            Z,X4                POINT TO NAME OF THIS SEGMENT.
- # Annotation on listing.
- # Add 2 lines:
- #                 TX           Z,SC,1        -             -
- #                 SS           4,1           THREAD10      Z,X4
+# Annotation on listing.
+# Add 2 lines:
+#                 TX           Z,SC,1        -             -
+#                 SS           4,1           THREAD10      Z,X4
  089336            NA           Z,X4          L END THR     C,+3                BRANCH TO CONTINUE SEARCH FOR OWNER.
 
  08934  BAD SEGNO  SS           ZERO          BIT 7         SWITCH              ABANDON ATTEMPT AT SEGMENT ASSEMBLY.
  089344            TS, BIT 8    ONES          HEALTH        END SEGNO           CUSS AND DO IT AS PROGRAM ASSEMBLY.
 
- # Annotation on listing.
- # Card 089348 (following line) crossed out, and arrow pointing up to annotation before card 089336.
+# Annotation on listing.
+# Card 089348 (following line) crossed out, and arrow pointing up to annotation before card 089336.
  089348            SS           4,1           THREAD10      Z,X4                FOLLOW THREAD TO NEXT PROG OR SEG.
  089352            NA           N,X4          COMMON        BAD SEGNO -1        BRANCH IF DIDNT FIND NAME OF OWNER.
 
  089356            SWS, C7T8    4,1           24            HEALTH              FIRST ASSUME THAT OWNER HAS NO SUBROS.
  08936             SSL, ONE     4,1           23            C,+1           C    BRANCH TO GET REV NUMBER IF IT DOES.
  089364            SSL, ONE     4,1           12            C,+3
- # Annotation on listing.
- # Following line replaced with:
- #                 SM           L DIRECTY     HEALTH        Z,AU1
+# Annotation on listing.
+# Following line replaced with:
+#                 SM           L DIRECTY     HEALTH        Z,AU1
  089366            SS           HEALTH        THREAD 10     Z,X4           C
- # Annotation on listing.
- # Following line replaced with:
- #                 SWS. C7T8    N,AU1         36            HEALTH
+# Annotation on listing.
+# Following line replaced with:
+#                 SWS. C7T8    N,AU1         36            HEALTH
  089368            SWS, C7T8    N,X4          36            HEALTH         S    FETCH REV NO FROM 1ST SUB THREAD WORD.
  089372            TS           COMMON        SEG OWNER     C,+2                IF PROGRAM, IT'S A PROPER OWNER.
  089376            TS           -             -             BAD SEGNO           IF SUBROUTINE, IT AIN'T.
@@ -2531,7 +2531,7 @@ P2026
  2045              TS           AFIELD +1     ADR WD        N,X4                EXIT WHEN MAIN ADDRESS IS SYMBOLIC.
 
  2047   NO HEAD    SWS, ONES    AFIELD +1     A,1,L         AFIELD +1           BACKTRACK AFTER NO-HEAD FINDING.
- 2049              NA. CHAR8    AFIELD +1     BLANKS        BAD ADRES           ERROR IF SYMBOL IS TOO LONG.
+ 2049              NA, CHAR8    AFIELD +1     BLANKS        BAD ADRES           ERROR IF SYMBOL IS TOO LONG.
  2051              NA           AFIELD        BLANKS        BAD ADRES           ERROR IF SYMBOL IS TOO LONG.
 
  2053              SWS, CHAR8   AFIELD +2     A,1,L         AFIELD +1           FIONISH BACKTRACKING.
