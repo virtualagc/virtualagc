@@ -21,14 +21,18 @@ ALL_SOURCE:=$(wildcard *.argus)
 SOURCES:=YULPASS0.argus YULPASS1.argus YULPASS2.argus YULPASS3.argus YULMANUF.argus YULSIMUL.argus
 
 symcheck:
-	python $(H800)/tools/check-symbols.py -a $(SOURCES)
+	echo "Checking for bad symbols..."
+	python $(H800)/tools/check-symbols.py -b $(SOURCES)
 
 listsyms:
+	echo "Listing all symbols..."
 	python $(H800)/tools/list-symbols.py $(SOURCES)
 
 instrcheck:
+	echo "Checking instructions..."
 	python $(H800)/tools/check-instructions.py -i $(SOURCES)
 
 instrcount:
+	echo "Counting instructions..."
 	python $(H800)/tools/check-instructions.py -c -s -u $(SOURCES)
 
