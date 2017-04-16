@@ -328,7 +328,9 @@
  *				triggering.
  *		04/16/17 MAS	Added a simple linear model of the AGC warning
  *				filter, and added the AGC (CMC/LGC) warning
- *				light status to DSKY channel 163.
+ *				light status to DSKY channel 163. Also added
+ *				proper handling of the channel 33 inbit that
+ *				indicates such a warning occurred.
  *
  *
  * The technical documentation for the Apollo Guidance & Navigation (G&N) system,
@@ -510,7 +512,14 @@ WriteIO (agc_t * State, int Address, int Value)
   // the CPU writes to it from time to time, to "reset" bits 11-15 to 1.
   // Apparently, these are latched inputs, and this resets the latches.
   if (Address == 033)
-    Value = (State->InputChannel[Address] | 076000);
+    {
+      Value = (State->InputChannel[Address] | 076000);
+
+      // Don't allow the AGC warning input to be reset if the light
+      // is still on
+      if (State->WarningFilter > WARNING_FILTER_THRESHOLD)
+        State->InputChannel[033] &= 057777;
+    }
 
   // Similarly, the CH77 Restart Monitor Alarm Box has latches for
   // alarm codes that are reset when CH77 is written to.
@@ -1600,7 +1609,12 @@ UpdateDSKY(agc_t *State)
 
   // Turn on the AGC warning light if the warning filter is above its threshold
   if (State->WarningFilter > WARNING_FILTER_THRESHOLD)
-    State->DskyChannel163 |= DSKY_AGC_WARN;
+    {
+      State->DskyChannel163 |= DSKY_AGC_WARN;
+
+      // Set the AGC Warning input bit in channel 33
+      State->InputChannel[033] &= 057777;
+    }
 
   // Update the DSKY flash counter based on the DSKY timer
   while (State->DskyTimer >= DSKY_OVERFLOW)
