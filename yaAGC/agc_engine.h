@@ -106,6 +106,9 @@
 		03/27/17 MAS	Added a bit for Night Watchman's 1.28s-long assertion of
 				its channel 77 bit.
 		03/29/17 RSB    More integer types needed for Windows.
+		04/16/17 MAS    Added a voltage counter and input flag for the AGC
+				warning filter, as well as a channel 163 flag for
+				the AGC (CMC/LGC) warning light.
    
   For more insight, I'd highly recommend looking at the documents
   http://hrst.mit.edu/hrs/apollo/public/archive/1689.pdf and
@@ -252,6 +255,7 @@ extern long random (void);
 #define CH77_RUPT_LOCK      000010
 #define CH77_NIGHT_WATCHMAN 000020
 
+#define DSKY_AGC_WARN 000001
 #define DSKY_KEY_REL  000020
 #define DSKY_VN_FLASH 000040
 #define DSKY_OPER_ERR 000100
@@ -367,6 +371,8 @@ typedef struct
   unsigned ParityFail:1;        // Set when a parity failure is encountered accessing memory (in yaAGC, just hitting banks 44+)
   unsigned CheckParity:1;       // Enable parity checking for fixed memory.
   unsigned RestartLight:1;      // The present state of the RESTART light
+  unsigned GeneratedWarning:1;  // Whether there is a pending input to the warning filter
+  uint32_t WarningFilter;       // Current voltage of the AGC warning filter
   uint64_t /*unsigned long long */ DownruptTime;	// Time when next DOWNRUPT occurs.
   int Downlink;
   int NextZ;                    // Next value for the Z register
