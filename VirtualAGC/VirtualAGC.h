@@ -89,6 +89,7 @@ enum
   ID_AEAFILENAMELABEL,
   ID_AEACUSTOMFILENAME,
   ID_AEAFILENAMEBROWSE,
+  ID_AGCSOFTWAREDROPDOWNLIST,
   ID_DEVICEAGCCHECKBOX,
   ID_DEVICEDSKYCHECKBOX,
   ID_DEVICEACACHECKBOX,
@@ -284,7 +285,8 @@ public:
   void
   SetSize(void);
   int Points, StartingPoints;
-  int ReallySmall;
+  bool ReallySmall;
+  bool DropDown;
   wxString ResourceDirectory;		// Where the images, cfg files, etc. are stored.
   bool IsLM;
   bool CmSim, LmSim, AeaSim;
@@ -312,6 +314,7 @@ private:
   wxString HomeDirectory;
   // Command lines for other executables.
   wxString yaAGC, yaDSKY, yaACA, yaAGS, yaDEDA, LM_Simulator, yaTelemetry;
+  wxArrayString SoftwareVersionNames;
 
   void
   EnableLM(bool YesNo);		// Enables/disables LM-specific settings
@@ -333,6 +336,10 @@ private:
   ReadConfigurationFile(void);
   void
   WriteConfigurationFile(void);
+  void
+  ConvertDropDown(void);
+  void
+  ConvertRadio(void);
 
 protected:
   wxStaticBox* sizer_20_staticbox;
@@ -356,11 +363,13 @@ protected:
   wxStaticBitmap* Patch17Bitmap;
   wxStaticLine* TopLine;
   wxStaticText* SimTypeLabel;
+  wxStaticText* SimTypeLabel2;
   wxRadioButton* AgcCustomButton;
   wxTextCtrl* AgcCustomFilename;
   wxButton* AgcFilenameBrowse;
   wxStaticLine* static_line_2;
   wxStaticText* DeviceListLabel;
+  wxChoice *DeviceAGCversionDropDownList;
   wxCheckBox* DeviceAgcCheckbox;
   wxCheckBox* DeviceDskyCheckbox;
   wxCheckBox* DeviceAcaCheckbox;
