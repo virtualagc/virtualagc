@@ -89,7 +89,7 @@
  *                              was disabled for some reason.  Enabled Apollo 4, identifying
  *                              it with Apollo 6, since Solarium 54 and 55 programs are
  *                              believed to be identical.
- *              2017-05-17 RSB  Began adapting to use a drop-down list to choose the mission,
+ *              2017-04-17 RSB  Began adapting to use a drop-down list to choose the mission,
  *                              rather than a huge bunch of radio buttons.  This makes the
  *                              UI much smaller, and better for small displays.  It goes into
  *                              effect if the screen is smaller than 1280x1024.  Also, reading
@@ -97,6 +97,9 @@
  *                              correctly (it was always using Apollo 1), and somehow this
  *                              wasn't being noticed.  I don't see how that could be possible,
  *                              but that's what I was finding ....
+ *              2017-04-18 RSB  In trying to build this with wxWidgets 3.0 (rather than the
+ *                              recommended 2.8), the Run!, Default, and Exit buttons were too
+ *                              small, height-wise.  Fixed that.
  *
  * This file was originally generated using the wxGlade RAD program.
  * However, it is now maintained entirely manually, and cannot be managed
@@ -1798,11 +1801,11 @@ VirtualAGC::do_layout()
       0);
   sizer_3->Add(RunButton, 0,
       wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL, 0);
-  sizer_3->Add(40, 20, 0, wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL,
+  sizer_3->Add(40, 40, 0, wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL,
       0);
   sizer_3->Add(DefaultsButton, 0,
       wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL, 0);
-  sizer_3->Add(40, 20, 0, wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL,
+  sizer_3->Add(40, 40, 0, wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL,
       0);
   sizer_3->Add(ExitButton, 0,
       wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL, 0);
