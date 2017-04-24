@@ -361,6 +361,7 @@ main (int argc, char *argv[])
 #ifdef WIN32
       Sleep (UPDATE_INTERVAL);	    
 #else // WIN32
+#include <time.h>
       struct timespec req, rem;
       req.tv_sec = 0;
       req.tv_nsec = 1000000 * UPDATE_INTERVAL;
