@@ -326,6 +326,11 @@
  *				simulation of the Night Watchman's assertion of
  *				its channel 77 bit for 1.28 seconds after each
  *				triggering.
+ *		04/16/17 MAS	Added a simple linear model of the AGC warning
+ *				filter, and added the AGC (CMC/LGC) warning
+ *				light status to DSKY channel 163. Also added
+ *				proper handling of the channel 33 inbit that
+ *				indicates such a warning occurred.
  *		05/11/17 MAS	Moved special cases for writing to I/O channels
  *				from WriteIO into CpuWriteIO, allowing those
  *				channels to be safely written to via WriteIO
@@ -470,6 +475,11 @@ FILE *CduLog = NULL;
 // DSKY handling constants and variables.
 #define DSKY_OVERFLOW 81920
 #define DSKY_FLASH_PERIOD 4
+
+#define WARNING_FILTER_INCREMENT  15000
+#define WARNING_FILTER_DECREMENT     15
+#define WARNING_FILTER_MAX       140000
+#define WARNING_FILTER_THRESHOLD  20000
 
 //-----------------------------------------------------------------------------
 // Functions for reading or writing from/to i/o channels.  The reason we have
@@ -1591,7 +1601,7 @@ UpdateDSKY(agc_t *State)
 {
   unsigned LastChannel163 = State->DskyChannel163;
 
-  State->DskyChannel163 &= ~(DSKY_KEY_REL | DSKY_VN_FLASH | DSKY_OPER_ERR | DSKY_RESTART | DSKY_STBY);
+  State->DskyChannel163 &= ~(DSKY_KEY_REL | DSKY_VN_FLASH | DSKY_OPER_ERR | DSKY_RESTART | DSKY_STBY | DSKY_AGC_WARN);
 
   if (State->InputChannel[013] & 01000)
     // The light test is active. Light RESTART and STBY.
@@ -1610,6 +1620,15 @@ UpdateDSKY(agc_t *State)
     State->DskyChannel163 |= DSKY_KEY_REL;
   if (State->InputChannel[011] & DSKY_OPER_ERR)
     State->DskyChannel163 |= DSKY_OPER_ERR;
+
+  // Turn on the AGC warning light if the warning filter is above its threshold
+  if (State->WarningFilter > WARNING_FILTER_THRESHOLD)
+    {
+      State->DskyChannel163 |= DSKY_AGC_WARN;
+
+      // Set the AGC Warning input bit in channel 33
+      State->InputChannel[033] &= 057777;
+    }
 
   // Update the DSKY flash counter based on the DSKY timer
   while (State->DskyTimer >= DSKY_OVERFLOW)
@@ -1877,6 +1896,28 @@ agc_engine (agc_t * State)
             // channel 77 bit
             State->NightWatchmanTripped = 0;
         }
+      else if (00 == (07 & State->InputChannel[ChanSCALER1]))
+        {
+          // Update the warning filter. Once every 160ms, if an input to the filter has been
+          // generated (or if the light test is active), the filter is charged. Otherwise,
+          // it slowly discharges. This is being modeled as a simple linear function right now,
+          // and should be updated when we learn its real implementation details.
+          if ((0400 == (0777 & State->InputChannel[ChanSCALER1])) &&
+              (State->GeneratedWarning || (State->InputChannel[013] & 01000)))
+            {
+              State->GeneratedWarning = 0;
+              State->WarningFilter += WARNING_FILTER_INCREMENT;
+              if (State->WarningFilter > WARNING_FILTER_MAX)
+                State->WarningFilter = WARNING_FILTER_MAX;
+            }
+          else
+            {
+              if (State->WarningFilter >= WARNING_FILTER_DECREMENT)
+                State->WarningFilter -= WARNING_FILTER_DECREMENT;
+              else
+                State->WarningFilter = 0;
+            }
+        }
 
       // All the rest of this is switched off during standby.
       if (!State->Standby)
@@ -1978,6 +2019,7 @@ agc_engine (agc_t * State)
               if (!State->Standby)
                 {
                   State->RestartLight = 1;
+                  State->GeneratedWarning = 1;
                 }
 
             }
