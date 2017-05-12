@@ -545,6 +545,15 @@ CpuWriteIO (agc_t * State, int Address, int Value)
       // the CPU writes to it from time to time, to "reset" bits 11-15 to 1.
       // Apparently, these are latched inputs, and this resets the latches.
       State->InputChannel[Address] |= 076000;
+
+      // Don't allow the AGC warning input to be reset if the light
+      // is still on
+      if (State->WarningFilter > WARNING_FILTER_THRESHOLD)
+        State->InputChannel[Address] &= 057777;
+
+      // The actual value that was written now doesn't matter, so make sure
+      // no changes occur.
+      Value = State->InputChannel[Address];
     }
   else if (Address == 077)
     {
