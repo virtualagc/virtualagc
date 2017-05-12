@@ -326,6 +326,10 @@
  *				simulation of the Night Watchman's assertion of
  *				its channel 77 bit for 1.28 seconds after each
  *				triggering.
+ *		05/11/17 MAS	Moved special cases for writing to I/O channels
+ *				from WriteIO into CpuWriteIO, allowing those
+ *				channels to be safely written to via WriteIO
+ *				by external callers (e.g. SocketAPI and NASSP).
  *
  *
  * The technical documentation for the Apollo Guidance & Navigation (G&N) system,
@@ -497,47 +501,64 @@ WriteIO (agc_t * State, int Address, int Value)
   if (Address == RegL || Address == RegQ)
     State->Erasable[0][Address] = Value;
 
-  // 2005-07-04 RSB.  The necessity for this was pointed out by Mark 
-  // Grant via Markus Joachim.  Although channel 033 is an input channel,
-  // the CPU writes to it from time to time, to "reset" bits 11-15 to 1.
-  // Apparently, these are latched inputs, and this resets the latches.
-  if (Address == 033)
-    Value = (State->InputChannel[Address] | 076000);
-
-  // Similarly, the CH77 Restart Monitor Alarm Box has latches for
-  // alarm codes that are reset when CH77 is written to.
-  if (Address == 077)
-    {
-      Value = 0;
-      // If the Night Watchman was recently tripped, its CH77 bit
-      // is forcibly asserted (unlike all the others) for 1.28s
-      if (State->NightWatchmanTripped)
-        Value |= CH77_NIGHT_WATCHMAN;
-    }
-
-  // The DSKY RESTART light is reset whenever CH11 bit 10 is written
-  // with a 1. The controlling flip-flop in the AGC also has a hard
-  // line to the DSKY's RSET button, so on depression of RSET the
-  // light is turned off without need for software intervention.
-  if ((Address == 011 && (Value & 01000)) ||
-      ((Address == 015 || Address == 016) && Value == 022))
-    State->RestartLight = 0;
-
-  State->InputChannel[Address] = Value;
   if (Address == 010)
     {
       // Channel 10 is converted externally to the CPU into up to 16 ports,
       // by means of latching relays.  We need to capture this data.
       State->OutputChannel10[(Value >> 11) & 017] = Value;
     }
+  else if ((Address == 015 || Address == 016) && Value == 022)
+    {
+      // RSET being pressed on either DSKY clears the RESTART light
+      // flip-flop directly, without software intervention
+      State->RestartLight = 0;
+    }
+  else if (Address == 033)
+    {
+      // Channel 33 bits 11-15 are controlled internally, so don't let
+      // anybody write to them
+      Value = (State->InputChannel[Address] & 076000) | (Value & 001777);
+    }
+
+  State->InputChannel[Address] = Value;
 }
 
 void
 CpuWriteIO (agc_t * State, int Address, int Value)
 {
   //static int Downlink = 0;
+
+  if (Address == 033)
+    {
+      // 2005-07-04 RSB.  The necessity for this was pointed out by Mark 
+      // Grant via Markus Joachim.  Although channel 033 is an input channel,
+      // the CPU writes to it from time to time, to "reset" bits 11-15 to 1.
+      // Apparently, these are latched inputs, and this resets the latches.
+      State->InputChannel[Address] |= 076000;
+    }
+  else if (Address == 077)
+    {
+      // Similarly, the CH77 Restart Monitor Alarm Box has latches for
+      // alarm codes that are reset when CH77 is written to.
+      Value = 0;
+
+      // If the Night Watchman was recently tripped, its CH77 bit
+      // is forcibly asserted (unlike all the others) for 1.28s
+      if (State->NightWatchmanTripped)
+        Value |= CH77_NIGHT_WATCHMAN;
+    }
+  else if (Address == 011 && (Value & 01000))
+    {
+      // The DSKY RESTART light is reset whenever CH11 bit 10 is written
+      // with a 1. The controlling flip-flop in the AGC also has a hard
+      // line to the DSKY's RSET button, so on depression of RSET the
+      // light is turned off without need for software intervention.
+      State->RestartLight = 0;
+    }
+
   WriteIO (State, Address, Value);
   ChannelOutput (State, Address, Value & 077777);
+
   // 2005-06-25 RSB.  DOWNRUPT stuff.  I assume that the 20 ms. between
   // downlink transmissions is due to the time needed for transmitting,
   // so I don't interrupt at a regular rate,  Instead, I make sure that
