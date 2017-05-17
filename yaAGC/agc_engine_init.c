@@ -87,6 +87,8 @@
                                 added initialization of a new night watchman bit.
  		04/02/17 MAS	Added initialization of a couple of flags used
  				for simulation of the TC Trap hardware bug.
+		04/16/17 MAS    Added initialization of warning filter variables.
+		05/16/17 MAS    Enabled interrupts at startup.
 */
 
 // For Orbiter.
@@ -249,8 +251,7 @@ agc_engine_init (agc_t * State, const char *RomImage, const char *CoreDump,
   // Set up the CPU state variables that aren't part of normal memory.
   State->CycleCounter = 0;
   State->ExtraCode = 0;
-  // I've seen no indication so far of a reset value for interrupt-enable. 
-  State->AllowInterrupt = 0;
+  State->AllowInterrupt = 1; // The GOJAM sequence enables interrupts
   State->InterruptRequests[8] = 1;	// DOWNRUPT.
   //State->RegA16 = 0;
   State->PendFlag = 0;
@@ -277,6 +278,9 @@ agc_engine_init (agc_t * State, const char *RomImage, const char *CoreDump,
   State->TCTrap = 0;
   State->NoTC = 0;
   State->ParityFail = 0;
+
+  State->WarningFilter = 0;
+  State->GeneratedWarning = 0;
 
   State->RestartLight = 0;
   State->Standby = 0;

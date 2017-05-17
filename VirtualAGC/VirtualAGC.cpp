@@ -89,6 +89,17 @@
  *                              was disabled for some reason.  Enabled Apollo 4, identifying
  *                              it with Apollo 6, since Solarium 54 and 55 programs are
  *                              believed to be identical.
+ *              2017-04-17 RSB  Began adapting to use a drop-down list to choose the mission,
+ *                              rather than a huge bunch of radio buttons.  This makes the
+ *                              UI much smaller, and better for small displays.  It goes into
+ *                              effect if the screen is smaller than 1280x1024.  Also, reading
+ *                              the configuration file was not setting the AGC software version
+ *                              correctly (it was always using Apollo 1), and somehow this
+ *                              wasn't being noticed.  I don't see how that could be possible,
+ *                              but that's what I was finding ....
+ *              2017-04-18 RSB  In trying to build this with wxWidgets 3.0 (rather than the
+ *                              recommended 2.8), the Run!, Default, and Exit buttons were too
+ *                              small, height-wise.  Fixed that.
  *
  * This file was originally generated using the wxGlade RAD program.
  * However, it is now maintained entirely manually, and cannot be managed
@@ -126,7 +137,7 @@ static const missionAlloc_t missionConstants[ID_AGCCUSTOMBUTTON
             { "Apollo 1 Command Module", "",
                 "Click this to select the unflown Apollo 1 mission.", DISABLED,
                 CM, BLOCK1, NO_PERIPHERALS, "", "CM0.ini" },
-            { "AS-202 (\"Apollo 3\") Command Module", "",
+            { "AS-202 (\"Apollo 3\") CM", "",
                 "Click this to select the AS-202 (\"Apollo 3\") unmanned CM mission.",
                 DISABLED, CM, BLOCK1, NO_PERIPHERALS, "", "CM0.ini" },
             { "Apollo 4 Command Module", "Solarium055/MAIN.agc.html",
@@ -257,6 +268,7 @@ VirtualAGC::SetSize(void)
   wxSize Size;
   int Width, Height;
   SET_FONT(SimTypeLabel, 2);
+  SET_FONT(SimTypeLabel2, 2);
   //SET_FONT (AgcFilenameLabel, 0);
   SET_FONT(AgcCustomFilename, 0);
   SET_FONT(DeviceListLabel, 2);
@@ -333,17 +345,20 @@ VirtualAGC::VirtualAGC(wxWindow* parent, int id, const wxString& title,
   Points = StartingPoints;
   int x, y, height, width;
   wxClientDisplayRect(&x, &y, &width, &height);
-  ReallySmall = 0;
-  if (height < 768)
-    {
-      Points = StartingPoints - 4;
-      ReallySmall = 1;
-    }
-  else if (height < 1024)
+  DropDown = false;
+  ReallySmall = false;
+  if (height < 1024 || width < 1280)
     {
       Points = StartingPoints - 2;
-      ReallySmall = 1;
+      ReallySmall = true;
     }
+  else if (height < 768 || width < 1024)
+    {
+      Points = StartingPoints - 4;
+      ReallySmall = true;
+    }
+  if (ReallySmall)
+    DropDown = true;
   if (Points < 8)
     Points = 8;
   Font.SetPointSize(Points);
@@ -427,6 +442,8 @@ VirtualAGC::VirtualAGC(wxWindow* parent, int id, const wxString& title,
   TopLine = new wxStaticLine(this, wxID_ANY);
   SimTypeLabel = new wxStaticText(this, wxID_ANY, wxT("AGC Simulation Type"),
       wxDefaultPosition, wxDefaultSize, wxALIGN_CENTRE);
+  SimTypeLabel2 = new wxStaticText(this, wxID_ANY, wxT("AGC Simulation Type"),
+      wxDefaultPosition, wxDefaultSize, wxALIGN_CENTRE);
   for (int i = ID_FIRSTMISSION; i < ID_AGCCUSTOMBUTTON; i++)
     {
       if (i == ID_FIRSTMISSION)
@@ -442,6 +459,11 @@ VirtualAGC::VirtualAGC(wxWindow* parent, int id, const wxString& title,
   AgcFilenameBrowse = new wxButton(this, ID_AGCFILENAMEBROWSE, wxT("..."));
   static_line_2 = new wxStaticLine(this, wxID_ANY, wxDefaultPosition,
       wxDefaultSize, wxLI_VERTICAL);
+  for (int i = ID_FIRSTMISSION; i < ID_AGCCUSTOMBUTTON; i++)
+    if (missionConstants[i - ID_FIRSTMISSION].enabled)
+      SoftwareVersionNames.Add(wxString::FromUTF8(missionConstants[i - ID_FIRSTMISSION].name));
+  DeviceAGCversionDropDownList = new wxChoice(this, ID_AGCSOFTWAREDROPDOWNLIST,
+      wxDefaultPosition, wxDefaultSize, SoftwareVersionNames);
   DeviceListLabel = new wxStaticText(this, wxID_ANY, wxT("Interfaces"),
       wxDefaultPosition, wxDefaultSize, wxALIGN_CENTRE);
   DeviceAgcCheckbox = new wxCheckBox(this, ID_DEVICEAGCCHECKBOX,
@@ -559,6 +581,7 @@ EVT_BUTTON(ID_AEAFILENAMEBROWSE, VirtualAGC::AeaFilenameBrowseEvent)
 EVT_BUTTON(ID_RUNBUTTON, VirtualAGC::RunButtonEvent)
 EVT_BUTTON(ID_DEFAULTSBUTTON, VirtualAGC::DefaultsButtonEvent)
 EVT_BUTTON(ID_EXITBUTTON, VirtualAGC::ExitButtonEvent)
+EVT_CHOICE(ID_AGCSOFTWAREDROPDOWNLIST, VirtualAGC::ConsistencyEvent)
 EVT_CHECKBOX(ID_DEVICETELEMETRYCHECKBOX, VirtualAGC::ConsistencyEvent)
 EVT_CHECKBOX(ID_DEVICEAEACHECKBOX, VirtualAGC::ConsistencyEvent)
 EVT_CHECKBOX(ID_DEVICEDEDACHECKBOX, VirtualAGC::ConsistencyEvent)
@@ -1291,6 +1314,11 @@ VirtualAGC::set_properties()
   SimTypeLabel->SetToolTip(
       wxT(
           "In this area, you can select the Apollo mission and the spacecraft software version."));
+  SimTypeLabel2->SetBackgroundColour(wxColour(255, 255, 255));
+  SimTypeLabel2->SetFont(wxFont(12, wxDEFAULT, wxNORMAL, wxBOLD, 1, wxT("")));
+  SimTypeLabel2->SetToolTip(
+      wxT(
+          "In this area, you can select the Apollo mission and the spacecraft software version."));
 
   int mission;
   for (mission = ID_FIRSTMISSION; mission < ID_AGCCUSTOMBUTTON; mission++)
@@ -1629,11 +1657,27 @@ VirtualAGC::do_layout()
       0);
   sizer_4->Add(sizer_11, 1, wxEXPAND, 0);
   sizer_2->Add(sizer_4, 1, wxEXPAND, 0);
+
   sizer_6->Add(static_line_2, 0, wxEXPAND, 0);
   sizer_6->Add(20, 20, 0, wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL,
       0);
   sizer_7->Add(20, 10, 0, wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL,
       0);
+  if (DropDown)
+    {
+      sizer_2->Show(false);
+      sizer_7->Add(SimTypeLabel2, 0, wxALIGN_CENTER_HORIZONTAL, 0);
+      sizer_7->Add(20, 10, 0, wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL,
+          0);
+      sizer_7->Add(DeviceAGCversionDropDownList, 0, 0, 0);
+      sizer_7->Add(20, 10, 0, wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL,
+          0);
+    }
+  else
+    {
+      DeviceAGCversionDropDownList->Show(false);
+      SimTypeLabel2->Show(false);
+    }
   sizer_7->Add(DeviceListLabel, 0, wxALIGN_CENTER_HORIZONTAL, 0);
   sizer_7->Add(20, 10, 0, wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL,
       0);
@@ -1676,6 +1720,8 @@ VirtualAGC::do_layout()
   sizer_1_copy->Add(20, 20, 0, 0, 0);
   sizer_1_copy->Add(AeaSourceButton, 0, 0, 0);
   sizer_1_copy->Add(20, 20, 1, 0, 0);
+  if (DropDown)
+    sizer_1->Add(20,20,0,0,0);
   sizer_1->Add(sizer_1_copy, 1, wxEXPAND, 0);
   sizer_5->Add(sizer_1, 0, wxEXPAND, 0);
   sizer_5->Add(20, 10, 0, wxEXPAND, 0);
@@ -1755,11 +1801,11 @@ VirtualAGC::do_layout()
       0);
   sizer_3->Add(RunButton, 0,
       wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL, 0);
-  sizer_3->Add(40, 20, 0, wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL,
+  sizer_3->Add(40, 40, 0, wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL,
       0);
   sizer_3->Add(DefaultsButton, 0,
       wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL, 0);
-  sizer_3->Add(40, 20, 0, wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL,
+  sizer_3->Add(40, 40, 0, wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL,
       0);
   sizer_3->Add(ExitButton, 0,
       wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL, 0);
@@ -1804,6 +1850,43 @@ VirtualAGC::EnableRunButton(void)
   Show(true);
 }
 
+// Converts a drop-list representation of the selected mission to a radio-button representation.
+void
+VirtualAGC::ConvertDropDown(void)
+{
+  wxString selectedMission;
+  int mission;
+  selectedMission = DeviceAGCversionDropDownList->GetString(DeviceAGCversionDropDownList->GetSelection());
+  for (mission = ID_FIRSTMISSION; mission < ID_AGCCUSTOMBUTTON; mission++)
+    {
+      if (selectedMission == wxString::FromUTF8(missionConstants[mission - ID_FIRSTMISSION].name))
+        {
+          missionRadioButtons[mission - ID_FIRSTMISSION]->SetValue(true);
+          break;
+        }
+    }
+}
+
+// Converts a radio-button representation of the selected mission to a drop-list representation.
+void
+VirtualAGC::ConvertRadio(void)
+{
+  for (int mission = ID_FIRSTMISSION; mission < ID_AGCCUSTOMBUTTON; mission++)
+    if (missionRadioButtons[mission - ID_FIRSTMISSION]->GetValue())
+      {
+        wxString missionName = wxString::FromUTF8(missionConstants[mission - ID_FIRSTMISSION].name);
+        for (int drop = 0; drop < DeviceAGCversionDropDownList->GetCount(); drop++)
+          {
+            if (DeviceAGCversionDropDownList->GetString(drop) == missionName)
+              {
+                DeviceAGCversionDropDownList->SetSelection(drop);
+                break;
+              }
+          }
+        break;
+      }
+}
+
 // This function checks the enabling/disabling of all controls, and makes sure that
 // they are consistent among themselves.
 void
@@ -1816,6 +1899,8 @@ VirtualAGC::EnforceConsistency(void)
   block1 = false;
   IsLM = false;
   int mission;
+  if (DropDown)
+    ConvertDropDown();
   for (mission = ID_FIRSTMISSION; mission < ID_AGCCUSTOMBUTTON; mission++)
     if (missionRadioButtons[mission - ID_FIRSTMISSION]->GetValue())
       {
@@ -2046,6 +2131,7 @@ VirtualAGC::SetDefaultConfiguration(void)
 void
 VirtualAGC::ReadConfigurationFile(void)
 {
+  int mission = ID_FIRSTMISSION - 1;
   wxTextFile Fin;
   if (wxFileExists(wxT("VirtualAGC.cfg")))
     {
@@ -2059,16 +2145,12 @@ VirtualAGC::ReadConfigurationFile(void)
               Line = Fin.GetLine(i);
               Name = Line.BeforeFirst('=');
               Value = Line.AfterFirst('=');
+              if (Name.IsSameAs(wxT("missionRadioButtons[mission - ID_FIRSTMISSION]")))
+                mission++;
               CHECK_TEXT_SETTING(AgcCustomFilename);
               CHECK_TEXT_SETTING(AeaCustomFilename);
               CHECK_TEXT_SETTING(CoreFilename);
-              int mission;
-              for (mission = ID_FIRSTMISSION; mission < ID_AGCCUSTOMBUTTON;
-                  mission++)
-                {
-                  CHECK_TRUE_FALSE_SETTING(
-                      missionRadioButtons[mission - ID_FIRSTMISSION]);
-                }
+              CHECK_TRUE_FALSE_SETTING(missionRadioButtons[mission - ID_FIRSTMISSION]);
               CHECK_TRUE_FALSE_SETTING(AgcCustomButton);
               CHECK_TRUE_FALSE_SETTING(FlightProgram4Button);
               CHECK_TRUE_FALSE_SETTING(FlightProgram5Button);
@@ -2106,6 +2188,9 @@ VirtualAGC::ReadConfigurationFile(void)
               CHECK_TRUE_FALSE_SETTING(TelemetryRetro);
             }
           Fin.Close();
+          if (DropDown)
+            ConvertRadio();
+          EnforceConsistency();
         }
       else
         {
@@ -2143,6 +2228,8 @@ VirtualAGC::WriteConfigurationFile(void)
       WRITE_TEXT_SETTING(AeaCustomFilename);
       WRITE_TEXT_SETTING(CoreFilename);
       int mission;
+      if (DropDown)
+        ConvertDropDown();
       for (mission = ID_FIRSTMISSION; mission < ID_AGCCUSTOMBUTTON; mission++)
         {
           WRITE_TRUE_FALSE_SETTING(

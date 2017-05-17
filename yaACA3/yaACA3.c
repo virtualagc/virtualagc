@@ -61,7 +61,7 @@ static void ServiceJoystick_sdl (void);
 #define NUM_AXES 10
 
 // Time between joystick updates, in milliseconds.  Note that the AGC will process
-// hand-controller inputs at 100 ms. intervals, so the update interval should be 
+// hand-controller inputs at 100 ms. intervals, so the update interval should be
 // less than 100 ms.; also, the update interval should not be a simple fraction
 // (like 50 ms.) to avoid aliasing effects.
 #ifdef __APPLE__
@@ -361,6 +361,7 @@ main (int argc, char *argv[])
 #ifdef WIN32
       Sleep (UPDATE_INTERVAL);	    
 #else // WIN32
+#include <time.h>
       struct timespec req, rem;
       req.tv_sec = 0;
       req.tv_nsec = 1000000 * UPDATE_INTERVAL;

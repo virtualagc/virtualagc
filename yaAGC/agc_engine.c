@@ -335,6 +335,16 @@
  *				With the newly corrected timer phasings,
  *				Aurora/Sunburst's self-tests cannot pass
  *				without simulation of the TC Trap bug.
+ *		04/16/17 MAS	Added a simple linear model of the AGC warning
+ *				filter, and added the AGC (CMC/LGC) warning
+ *				light status to DSKY channel 163. Also added
+ *				proper handling of the channel 33 inbit that
+ *				indicates such a warning occurred.
+ *		05/11/17 MAS	Moved special cases for writing to I/O channels
+ *				from WriteIO into CpuWriteIO, allowing those
+ *				channels to be safely written to via WriteIO
+ *				by external callers (e.g. SocketAPI and NASSP).
+ *		05/16/17 MAS	Made alarm restarts enable interrupts.
  *
  *
  * The technical documentation for the Apollo Guidance & Navigation (G&N) system,
@@ -476,6 +486,11 @@ FILE *CduLog = NULL;
 #define DSKY_OVERFLOW 81920
 #define DSKY_FLASH_PERIOD 4
 
+#define WARNING_FILTER_INCREMENT  15000
+#define WARNING_FILTER_DECREMENT     15
+#define WARNING_FILTER_MAX       140000
+#define WARNING_FILTER_THRESHOLD  20000
+
 //-----------------------------------------------------------------------------
 // Functions for reading or writing from/to i/o channels.  The reason we have
 // to provide a function for this rather than accessing the i/o-channel buffer
@@ -506,47 +521,73 @@ WriteIO (agc_t * State, int Address, int Value)
   if (Address == RegL || Address == RegQ)
     State->Erasable[0][Address] = Value;
 
-  // 2005-07-04 RSB.  The necessity for this was pointed out by Mark 
-  // Grant via Markus Joachim.  Although channel 033 is an input channel,
-  // the CPU writes to it from time to time, to "reset" bits 11-15 to 1.
-  // Apparently, these are latched inputs, and this resets the latches.
-  if (Address == 033)
-    Value = (State->InputChannel[Address] | 076000);
-
-  // Similarly, the CH77 Restart Monitor Alarm Box has latches for
-  // alarm codes that are reset when CH77 is written to.
-  if (Address == 077)
-    {
-      Value = 0;
-      // If the Night Watchman was recently tripped, its CH77 bit
-      // is forcibly asserted (unlike all the others) for 1.28s
-      if (State->NightWatchmanTripped)
-        Value |= CH77_NIGHT_WATCHMAN;
-    }
-
-  // The DSKY RESTART light is reset whenever CH11 bit 10 is written
-  // with a 1. The controlling flip-flop in the AGC also has a hard
-  // line to the DSKY's RSET button, so on depression of RSET the
-  // light is turned off without need for software intervention.
-  if ((Address == 011 && (Value & 01000)) ||
-      ((Address == 015 || Address == 016) && Value == 022))
-    State->RestartLight = 0;
-
-  State->InputChannel[Address] = Value;
   if (Address == 010)
     {
       // Channel 10 is converted externally to the CPU into up to 16 ports,
       // by means of latching relays.  We need to capture this data.
       State->OutputChannel10[(Value >> 11) & 017] = Value;
     }
+  else if ((Address == 015 || Address == 016) && Value == 022)
+    {
+      // RSET being pressed on either DSKY clears the RESTART light
+      // flip-flop directly, without software intervention
+      State->RestartLight = 0;
+    }
+  else if (Address == 033)
+    {
+      // Channel 33 bits 11-15 are controlled internally, so don't let
+      // anybody write to them
+      Value = (State->InputChannel[Address] & 076000) | (Value & 001777);
+    }
+
+  State->InputChannel[Address] = Value;
 }
 
 void
 CpuWriteIO (agc_t * State, int Address, int Value)
 {
   //static int Downlink = 0;
+
+  if (Address == 033)
+    {
+      // 2005-07-04 RSB.  The necessity for this was pointed out by Mark 
+      // Grant via Markus Joachim.  Although channel 033 is an input channel,
+      // the CPU writes to it from time to time, to "reset" bits 11-15 to 1.
+      // Apparently, these are latched inputs, and this resets the latches.
+      State->InputChannel[Address] |= 076000;
+
+      // Don't allow the AGC warning input to be reset if the light
+      // is still on
+      if (State->WarningFilter > WARNING_FILTER_THRESHOLD)
+        State->InputChannel[Address] &= 057777;
+
+      // The actual value that was written now doesn't matter, so make sure
+      // no changes occur.
+      Value = State->InputChannel[Address];
+    }
+  else if (Address == 077)
+    {
+      // Similarly, the CH77 Restart Monitor Alarm Box has latches for
+      // alarm codes that are reset when CH77 is written to.
+      Value = 0;
+
+      // If the Night Watchman was recently tripped, its CH77 bit
+      // is forcibly asserted (unlike all the others) for 1.28s
+      if (State->NightWatchmanTripped)
+        Value |= CH77_NIGHT_WATCHMAN;
+    }
+  else if (Address == 011 && (Value & 01000))
+    {
+      // The DSKY RESTART light is reset whenever CH11 bit 10 is written
+      // with a 1. The controlling flip-flop in the AGC also has a hard
+      // line to the DSKY's RSET button, so on depression of RSET the
+      // light is turned off without need for software intervention.
+      State->RestartLight = 0;
+    }
+
   WriteIO (State, Address, Value);
   ChannelOutput (State, Address, Value & 077777);
+
   // 2005-06-25 RSB.  DOWNRUPT stuff.  I assume that the 20 ms. between
   // downlink transmissions is due to the time needed for transmitting,
   // so I don't interrupt at a regular rate,  Instead, I make sure that
@@ -1579,7 +1620,7 @@ UpdateDSKY(agc_t *State)
 {
   unsigned LastChannel163 = State->DskyChannel163;
 
-  State->DskyChannel163 &= ~(DSKY_KEY_REL | DSKY_VN_FLASH | DSKY_OPER_ERR | DSKY_RESTART | DSKY_STBY);
+  State->DskyChannel163 &= ~(DSKY_KEY_REL | DSKY_VN_FLASH | DSKY_OPER_ERR | DSKY_RESTART | DSKY_STBY | DSKY_AGC_WARN);
 
   if (State->InputChannel[013] & 01000)
     // The light test is active. Light RESTART and STBY.
@@ -1598,6 +1639,15 @@ UpdateDSKY(agc_t *State)
     State->DskyChannel163 |= DSKY_KEY_REL;
   if (State->InputChannel[011] & DSKY_OPER_ERR)
     State->DskyChannel163 |= DSKY_OPER_ERR;
+
+  // Turn on the AGC warning light if the warning filter is above its threshold
+  if (State->WarningFilter > WARNING_FILTER_THRESHOLD)
+    {
+      State->DskyChannel163 |= DSKY_AGC_WARN;
+
+      // Set the AGC Warning input bit in channel 33
+      State->InputChannel[033] &= 057777;
+    }
 
   // Update the DSKY flash counter based on the DSKY timer
   while (State->DskyTimer >= DSKY_OVERFLOW)
@@ -1870,6 +1920,28 @@ agc_engine (agc_t * State)
             // channel 77 bit
             State->NightWatchmanTripped = 0;
         }
+      else if (00 == (07 & State->InputChannel[ChanSCALER1]))
+        {
+          // Update the warning filter. Once every 160ms, if an input to the filter has been
+          // generated (or if the light test is active), the filter is charged. Otherwise,
+          // it slowly discharges. This is being modeled as a simple linear function right now,
+          // and should be updated when we learn its real implementation details.
+          if ((0400 == (0777 & State->InputChannel[ChanSCALER1])) &&
+              (State->GeneratedWarning || (State->InputChannel[013] & 01000)))
+            {
+              State->GeneratedWarning = 0;
+              State->WarningFilter += WARNING_FILTER_INCREMENT;
+              if (State->WarningFilter > WARNING_FILTER_MAX)
+                State->WarningFilter = WARNING_FILTER_MAX;
+            }
+          else
+            {
+              if (State->WarningFilter >= WARNING_FILTER_DECREMENT)
+                State->WarningFilter -= WARNING_FILTER_DECREMENT;
+              else
+                State->WarningFilter = 0;
+            }
+        }
 
       // All the rest of this is switched off during standby.
       if (!State->Standby)
@@ -1962,15 +2034,18 @@ agc_engine (agc_t * State)
               // Two single-MCT instruction sequences, GOJAM and TC 4000, are about to happen
               State->ExtraDelay += 2;
 
-              // The net result of those two is Z = 4000. Interrupt state is cleared.
+              // The net result of those two is Z = 4000. Interrupt state is cleared, and
+              // interrupts are enabled.
               c(RegZ) = 04000;
               State->InIsr = 0;
+              State->AllowInterrupt = 1;
               State->ParityFail = 0;
 
               // Light the RESTART light on the DSKY, if we're not going into standby
               if (!State->Standby)
                 {
                   State->RestartLight = 1;
+                  State->GeneratedWarning = 1;
                 }
 
             }
