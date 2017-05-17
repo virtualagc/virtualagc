@@ -326,6 +326,15 @@
  *				simulation of the Night Watchman's assertion of
  *				its channel 77 bit for 1.28 seconds after each
  *				triggering.
+ *		04/02/17 MAS	Added simulation of a hardware bug in the
+ *				design of the "No TCs" part of the TC Trap.
+ *				Most causes of transients that can reset
+ *				the alarm are now accounted for. Also
+ *				corrected the phasing of the standby circuit
+ *				and TIME1-TIME5 relative the to the scaler.
+ *				With the newly corrected timer phasings,
+ *				Aurora/Sunburst's self-tests cannot pass
+ *				without simulation of the TC Trap bug.
  *		04/16/17 MAS	Added a simple linear model of the AGC warning
  *				filter, and added the AGC (CMC/LGC) warning
  *				light status to DSKY channel 163. Also added
@@ -1719,6 +1728,8 @@ agc_engine (agc_t * State)
   //int OverflowQ, Qumulator;
   // Keep track of TC executions for the TC Trap alarm
   int ExecutedTC = 0;
+  int JustTookBZF = 0;
+  int JustTookBZMF = 0;
 
 
   sExtraCode = 0;
@@ -1854,17 +1865,12 @@ agc_engine (agc_t * State)
       // Check alarms first, since there's a chance we might go to standby
       if (04000 == (07777 & State->InputChannel[ChanSCALER1]))
         {
-          // The Night Watchman begins looking once every 1.28s...
+          // The Night Watchman begins looking once every 1.28s
           if (!State->Standby)
             State->NightWatchman = 1;
 
-          // Same with Standby
-          if (0 == (State->InputChannel[032] & 020000))
-            State->SbyPressed = 1;
-
-        }
-      else if (00000 == (07777 & State->InputChannel[ChanSCALER1]))
-        {
+          // The standby circuit finishes checking to see if we're going to standby now
+          // (it has the same period as but is 180 degrees out of phase with the Night Watchman)
           if (State->SbyPressed && State->InputChannel[013] & 002000)
             {
               if (!State->Standby)
@@ -1890,6 +1896,14 @@ agc_engine (agc_t * State)
                   ChannelOutput(State, 0163, State->DskyChannel163);
                 }
             }
+        }
+      else if (00000 == (07777 & State->InputChannel[ChanSCALER1]))
+        {
+          // The standby circuit checks the SBY/PRO button state every 1.28s
+          if (0 == (State->InputChannel[032] & 020000))
+            State->SbyPressed = 1;
+
+          // The Night Watchman finishes looking now
           if (!State->Standby && State->NightWatchman)
             {
               // NEWJOB wasn't checked before 0.64s elapsed. Sound the alarm!
@@ -1963,7 +1977,7 @@ agc_engine (agc_t * State)
             }
 
           // Now that that's taken care of...
-          // If so, the 10 ms. timers TIME1 and TIME3 are updated.
+          // Update the 10 ms. timers TIME1 and TIME3.
           // Recall that the registers are in AGC integer format,
           // and therefore are actually shifted left one space.
           // When taking a reset, the real AGC would skip unprogrammed
@@ -1971,7 +1985,7 @@ agc_engine (agc_t * State)
           // would be saved and the counts would happen immediately
           // after the first instruction at 4000, so doing them now
           // is not too inaccurate.
-          if (0 == (037 & State->InputChannel[ChanSCALER1]))
+          if (020 == (037 & State->InputChannel[ChanSCALER1]))
 	    {
 	      State->ExtraDelay++;
 	      if (CounterPINC (&c(RegTIME1)))
@@ -1984,14 +1998,14 @@ agc_engine (agc_t * State)
 	        State->InterruptRequests[3] = 1;
 	    }
           // TIME5 is the same as TIME3, but 5 ms. out of phase.
-          if (020 == (037 & State->InputChannel[ChanSCALER1]))
+          if (000 == (037 & State->InputChannel[ChanSCALER1]))
 	    {
 	      State->ExtraDelay++;
 	      if (CounterPINC (&c(RegTIME5)))
 	        State->InterruptRequests[2] = 1;
 	    }
           // TIME4 is the same as TIME3, but 7.5ms out of phase
-          if (030 == (037 & State->InputChannel[ChanSCALER1]))
+          if (010 == (037 & State->InputChannel[ChanSCALER1]))
 	    {
 	      State->ExtraDelay++;
 	      if (CounterPINC (&c(RegTIME4)))
@@ -2325,6 +2339,10 @@ agc_engine (agc_t * State)
   // which imply that the contents of Z is directly transferred into Q.)
   c (RegZ)= State->NextZ;
 
+  // A BZF followed by an instruction other than EXTEND causes a TCF0 transient
+  if (State->TookBZF && !((ExtendedOpcode == 000) && (Address12 == 6)))
+    ExecutedTC = 1;
+
   // Parse the instruction.  Refer to p.34 of 1689.pdf for an easy 
   // picture of what follows.
   switch (ExtendedOpcode)
@@ -2340,9 +2358,21 @@ agc_engine (agc_t * State)
       // TC instruction (1 MCT).
       ValueK = Address12;// Convert AGC numerical format to native CPU format.
       if (ValueK == 3)		// RELINT instruction.
-	State->AllowInterrupt = 1;
+        {
+	  State->AllowInterrupt = 1;
+
+          if (State->TookBZF || State->TookBZMF)
+            // RELINT after a single-cycle instruction causes a TC0 transient
+            ExecutedTC = 1;
+        }
       else if (ValueK == 4)	// INHINT instruction.
-	State->AllowInterrupt = 0;
+        {
+	  State->AllowInterrupt = 0;
+
+          if (State->TookBZF || State->TookBZMF)
+            // INHINT after a single-cycle instruction causes a TC0 transient
+            ExecutedTC = 1;
+        }
       else if (ValueK == 6)	// EXTEND instruction.
 	{
 	  State->ExtraCode = 1;
@@ -2561,6 +2591,8 @@ agc_engine (agc_t * State)
       case 045:
       case 046:
       case 047:
+      ExecutedTC = 1; // CS causes transients on the TC0 line
+
       if (IsA (Address12))// COM
 	{
 	  c (RegA) = ~Accumulator;;
@@ -2620,6 +2652,8 @@ agc_engine (agc_t * State)
       break;
       case 052:			// DXCH
       case 053:
+      ExecutedTC = 1; // DXCH causes transients on the TCF0 line
+
       // Remember, in the following comparisons, that the address is pre-incremented.
       if (IsL (Address10))
 	{
@@ -2662,6 +2696,7 @@ agc_engine (agc_t * State)
       break;
       case 054:			// TS
       case 055:
+      ExecutedTC = 1; // TS causes transients on the TCF0 line
       if (IsA (Address10))// OVSK
 	{
 	  if (Overflow)
@@ -2690,6 +2725,7 @@ agc_engine (agc_t * State)
       break;
       case 056:			// XCH
       case 057:
+      ExecutedTC = 1; // XCH causes transients on the TCF0 line
       if (IsA (Address10))
       break;
       if (Address10 < REG16)
@@ -2917,6 +2953,7 @@ agc_engine (agc_t * State)
 	{
 	  BacktraceAdd (State, 0);
 	  State->NextZ = Address12;
+          JustTookBZF = 1;
 	}
       break;
       case 0120:			// MSU
@@ -3115,6 +3152,7 @@ agc_engine (agc_t * State)
 	{
 	  BacktraceAdd (State, 0);
 	  State->NextZ = Address12;
+          JustTookBZMF = 1;
 	}
       break;
       case 0170:			// MP
@@ -3206,6 +3244,9 @@ agc_engine (agc_t * State)
       // Update TC Trap flags according to the instruction we just executed
       if (ExecutedTC) State->NoTC = 0;
       else State->TCTrap = 0;
+
+      State->TookBZF = JustTookBZF;
+      State->TookBZMF = JustTookBZMF;
     }
   return (0);
 }
