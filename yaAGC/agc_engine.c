@@ -335,6 +335,7 @@
  *				from WriteIO into CpuWriteIO, allowing those
  *				channels to be safely written to via WriteIO
  *				by external callers (e.g. SocketAPI and NASSP).
+ *		05/16/17 MAS	Made alarm restarts enable interrupts.
  *
  *
  * The technical documentation for the Apollo Guidance & Navigation (G&N) system,
@@ -2019,9 +2020,11 @@ agc_engine (agc_t * State)
               // Two single-MCT instruction sequences, GOJAM and TC 4000, are about to happen
               State->ExtraDelay += 2;
 
-              // The net result of those two is Z = 4000. Interrupt state is cleared.
+              // The net result of those two is Z = 4000. Interrupt state is cleared, and
+              // interrupts are enabled.
               c(RegZ) = 04000;
               State->InIsr = 0;
+              State->AllowInterrupt = 1;
               State->ParityFail = 0;
 
               // Light the RESTART light on the DSKY, if we're not going into standby
