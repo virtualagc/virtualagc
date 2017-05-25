@@ -1,23 +1,24 @@
 ### FILE="Main.annotation"
 ## Copyright:   Public domain.
 ## Filename:    WAITLIST.agc
-## Purpose:     A module for revision 0 of BURST120 (Sunburst). It 
-##              is part of the source code for the Lunar Module's
-##              (LM) Apollo Guidance Computer (AGC) for Apollo 5.
+## Purpose:     A section of Sunburst revision 37, or Shepatin revision 0.
+##              It is part of an early development version of the software
+##              for Apollo Guidance Computer (AGC) on the unmanned Lunar
+##              Module (LM) flight Apollo 5. Sunburst 37 was the program
+##              upon which Don Eyles's offline development program Shepatin
+##              was based; the listing herein transcribed was actually for
+##              the equivalent revision 0 of Shepatin.
+##              This file is intended to be a faithful transcription, except
+##              that the code format has been changed to conform to the
+##              requirements of the yaYUL assembler rather than the
+##              original YUL assembler.
+## Reference:   pp. 1001-1013
 ## Assembler:   yaYUL
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
-## Pages:       1062-1074
-## Mod history: 2016-09-30 RSB  Created draft version.
-##              2016-10-10 PDJ  Updated based on Sunburst120 scans. 
-##		2016-12-06 RSB	Comments proofed using octopus/ProoferComments,
-##				changes made.
-##		2017-01-28 RSB	WTIH -> WITH.
-##		2017-02-09 RSB	Comment-text fixes identified in proofing Artemis 72
-##		2017-03-14 RSB	Comment-text fixes noted in proofing Luminary 116.
-##		2017-03-16 RSB	Comment-text fixes identified in 5-way
-##				side-by-side diff of Luminary 69/99/116/131/210.
-##		2017-03-21 RSB	Changed a couple of apostrophes to colons.
+## Mod history: 2017-05-24 MAS  Created from Sunburst 120.
+
+## NOTE: Page numbers below have not yet been updated to reflect Sunburst 37.
 
 ## Page 1062
 

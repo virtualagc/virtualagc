@@ -1,16 +1,24 @@
 ### FILE="Main.annotation"
-## Copyright:    Public domain.
-## Filename:     AS206_MISSION_SCHEDULING_PACKAGE.agc
-## Purpose:      A module for revision 0 of BURST120 (Sunburst). It 
-##               is part of the source code for the Lunar Module's
-##               (LM) Apollo Guidance Computer (AGC) for Apollo 5.
-## Assembler:    yaYUL
-## Contact:      Ron Burkey <info@sandroid.org>.
-## Website:      www.ibiblio.org/apollo/index.html
-## Mod history:  2016-09-30 RSB  Created draft version.
-##               2016-10-29 MAS  Transcribed.
-##		 2016-12-06 RSB	 Comments proofed using octopus/ProoferComments,
-##				 changes made.
+## Copyright:   Public domain.
+## Filename:    AS206_MISSION_SCHEDULING_PACKAGE.agc
+## Purpose:     A section of Sunburst revision 37, or Shepatin revision 0.
+##              It is part of an early development version of the software
+##              for Apollo Guidance Computer (AGC) on the unmanned Lunar
+##              Module (LM) flight Apollo 5. Sunburst 37 was the program
+##              upon which Don Eyles's offline development program Shepatin
+##              was based; the listing herein transcribed was actually for
+##              the equivalent revision 0 of Shepatin.
+##              This file is intended to be a faithful transcription, except
+##              that the code format has been changed to conform to the
+##              requirements of the yaYUL assembler rather than the
+##              original YUL assembler.
+## Reference:   pp. 748-762
+## Assembler:   yaYUL
+## Contact:     Ron Burkey <info@sandroid.org>.
+## Website:     www.ibiblio.org/apollo/index.html
+## Mod history: 2017-05-24 MAS  Created from Sunburst 120.
+
+## NOTE: Page numbers below have not yet been updated to reflect Sunburst 37.
 
 ## Page 801
 #          THE FOLLOWING ROUTINES IMPLEMENT THE MISSION SCHEDULING LOGIC AS DESCRIBED IN CHAPTER 4 OF THE

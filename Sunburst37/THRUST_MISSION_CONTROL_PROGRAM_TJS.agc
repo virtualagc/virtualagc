@@ -1,20 +1,24 @@
 ### FILE="Main.annotation"
 ## Copyright:   Public domain.
-## Filename:    206_SERVICER_ROUTINES.agc
-## Purpose:     A module for revision 0 of BURST120 (Sunburst). It 
-##              is part of the source code for the Lunar Module's
-##              (LM) Apollo Guidance Computer (AGC) for Apollo 5.
+## Filename:    THRUST_MISSION_CONTROL_PROGRAM_TJS.agc
+## Purpose:     A section of Sunburst revision 37, or Shepatin revision 0.
+##              It is part of an early development version of the software
+##              for Apollo Guidance Computer (AGC) on the unmanned Lunar
+##              Module (LM) flight Apollo 5. Sunburst 37 was the program
+##              upon which Don Eyles's offline development program Shepatin
+##              was based; the listing herein transcribed was actually for
+##              the equivalent revision 0 of Shepatin.
+##              This file is intended to be a faithful transcription, except
+##              that the code format has been changed to conform to the
+##              requirements of the yaYUL assembler rather than the
+##              original YUL assembler.
+## Reference:   pp. 763-776
 ## Assembler:   yaYUL
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
-## Mod history: 2016-09-30 RSB  Created draft version.
-##              2016-10-16 MAS  Began transcription.
-##              2016-10-17 MAS  Completed transcribing/disassembling/reconstructing. There are gaps in
-##                              comments, but instruction-wise it should be pretty close.
-##		2016-12-06 RSB	Comments proofed using octopus/ProoferComments,
-##				changes made, though the general quality of the printout in this
-##				section makes this a less-convincing procedure than it would normally
-##				be.
+## Mod history: 2017-05-24 MAS  Created from Sunburst 120.
+
+## NOTE: Page numbers below have not yet been updated to reflect Sunburst 37.
 
 ## Page 815
 # **SERVICER ROUTINES**

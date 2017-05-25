@@ -1,26 +1,24 @@
 ### FILE="Main.annotation"
-## Copyright:	Public domain.
-## Filename:	AGC_BLOCK_TWO_SELF_CHECK.agc
-## Purpose:	A module for revision 0 of BURST120 (Sunburst). It 
-##		is part of the source code for the Lunar Module's
-##		(LM) Apollo Guidance Computer (AGC) for Apollo 5.
-## Assembler:	yaYUL
-## Contact:	Ron Burkey <info@sandroid.org>.
-## Website:	www.ibiblio.org/apollo/index.html
-## Mod history:	2016-09-30 RSB	Created draft version.
-##		2016-10-19 RSB	Transcribed.  This largely involved selecting 
-##				various bits and pieces from the Aurora 12 and
-##				Luminary 99 versions of this file, and then 
-##				merging them together, with corrections.  In 
-##				retrospect, I'd say this file is mostly taken
-##				from Aurora 12, but there is a significant
-##				mass of comments at the beginning of the file,
-##				as well as code for dealing with superbanks,
-##				which instead come from Luminary 99.
-##		2016-10-31 RSB	Typos.
-##		2016-12-06 RSB	Comments proofed using octopus/ProoferComments,
-##				changes made.
-##		2017-01-28 RSB	WTIH -> WITH.
+## Copyright:   Public domain.
+## Filename:    AGC_BLOCK_TWO_SELF-CHECK.agc
+## Purpose:     A section of Sunburst revision 37, or Shepatin revision 0.
+##              It is part of an early development version of the software
+##              for Apollo Guidance Computer (AGC) on the unmanned Lunar
+##              Module (LM) flight Apollo 5. Sunburst 37 was the program
+##              upon which Don Eyles's offline development program Shepatin
+##              was based; the listing herein transcribed was actually for
+##              the equivalent revision 0 of Shepatin.
+##              This file is intended to be a faithful transcription, except
+##              that the code format has been changed to conform to the
+##              requirements of the yaYUL assembler rather than the
+##              original YUL assembler.
+## Reference:   pp. 1014-1037
+## Assembler:   yaYUL
+## Contact:     Ron Burkey <info@sandroid.org>.
+## Website:     www.ibiblio.org/apollo/index.html
+## Mod history: 2017-05-24 MAS  Created from Sunburst 120.
+
+## NOTE: Page numbers below have not yet been updated to reflect Sunburst 37.
 
 ## Page 1075
 # PROGRAM DESCRIPTION                                                         DATE  14 FEBRUARY 1967

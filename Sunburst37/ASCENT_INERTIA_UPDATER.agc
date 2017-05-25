@@ -1,35 +1,24 @@
 ### FILE="Main.annotation"
-## Copyright:    Public domain.
-## Filename:     ASCENT_INERTIA_UPDATER.agc
-## Purpose:      Part of the source code for Aurora (revision 12).
-## Assembler:    yaYUL
-## Contact:      Ron Burkey <info@sandroid.org>.
-## Website:      https://www.ibiblio.org/apollo.
-## Pages:        639-641
-## Mod history:  2016-09-20 JL   Created.
-##               2016-09-21 MC   Filled out.
-##               2016-10-05 HG   Insert missed TC ASCENGON
-##               2016-10-16 HG   Fix operand 1/3JTS -> 1/2JTS
-##		 2016-12-08 RSB	 Proofed comments with octopus/ProoferComments
-##				 but no errors found.
+## Copyright:   Public domain.
+## Filename:    ASCENT_INERTIA_UPDATER.agc
+## Purpose:     A section of Sunburst revision 37, or Shepatin revision 0.
+##              It is part of an early development version of the software
+##              for Apollo Guidance Computer (AGC) on the unmanned Lunar
+##              Module (LM) flight Apollo 5. Sunburst 37 was the program
+##              upon which Don Eyles's offline development program Shepatin
+##              was based; the listing herein transcribed was actually for
+##              the equivalent revision 0 of Shepatin.
+##              This file is intended to be a faithful transcription, except
+##              that the code format has been changed to conform to the
+##              requirements of the yaYUL assembler rather than the
+##              original YUL assembler.
+## Reference:   pp. 538-540
+## Assembler:   yaYUL
+## Contact:     Ron Burkey <info@sandroid.org>.
+## Website:     www.ibiblio.org/apollo/index.html
+## Mod history: 2017-05-24 MAS  Created from Sunburst 120.
 
-## This source code has been transcribed or otherwise adapted from
-## digitized images of a hardcopy from the private collection of 
-## Don Eyles.  The digitization was performed by archive.org.
-
-## Notations on the hardcopy document read, in part:
-
-##       473423A YUL SYSTEM FOR BLK2: REVISION 12 of PROGRAM AURORA BY DAP GROUP
-##       NOV 10, 1966
-
-##       [Note that this is the date the hardcopy was made, not the
-##       date of the program revision or the assembly.]
-
-## The scan images (with suitable reduction in storage size and consequent 
-## reduction in image quality) are available online at 
-##       https://www.ibiblio.org/apollo.  
-## The original high-quality digital images are available at archive.org:
-##       https://archive.org/details/aurora00dapg
+## NOTE: Page numbers below have not yet been updated to reflect Sunburst 37.
 
 ## Page 639
 

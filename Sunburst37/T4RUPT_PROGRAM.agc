@@ -1,30 +1,24 @@
 ### FILE="Main.annotation"
-## Copyright:	Public domain.
-## Filename:	T4RUPT_PROGRAM.agc
-## Purpose:	A module for revision 0 of BURST120 (Sunburst). It 
-##		is part of the source code for the Lunar Module's
-##		(LM) Apollo Guidance Computer (AGC) for Apollo 5.
-## Assembler:	yaYUL
-## Contact:	Ron Burkey <info@sandroid.org>.
-## Website:	www.ibiblio.org/apollo/index.html
-## Mod history:	2016-09-30 RSB	Created draft version.
-##		2016-10-05 RSB	Finished transcribing.
-##		2016-10-30 MAS	Some spelling corrections, channel updates and a line correction.
-##		2016-10-31 RSB	Typo.
-##		2016-11-02 RSB	More typos.
-##		2016-12-03 RSB	Fixed a bunch of typos in the comments, using octopus/ProoferComments,
-##				but some of the pages still don't work well with octopus, so the 
-##				proofing process isn't complete yet.
-##		2016-12-04 RSB	I was a bit too aggressive yesterday in interpreting noise in the scans
-##				as colons, and have backed that off in 5 places.  Also, fixed a couple
-##				more typos.
-##		2016-12-05 RSB	Comment-proofing process with octopus/ProoferComments completed; 
-##				fixes made.
-##		2017-01-26 RSB	Back-ported a comment-text fix found while
-##				proofing corresponding Luminary 69 file.	
-##		2017-01-28 RSB	WTIH -> WITH.
-##		2017-03-03 RSB	Fixed comment-text errors identified while proofing
-##				Luminary 116.
+## Copyright:   Public domain.
+## Filename:    T4RUPT_PROGRAM.agc
+## Purpose:     A section of Sunburst revision 37, or Shepatin revision 0.
+##              It is part of an early development version of the software
+##              for Apollo Guidance Computer (AGC) on the unmanned Lunar
+##              Module (LM) flight Apollo 5. Sunburst 37 was the program
+##              upon which Don Eyles's offline development program Shepatin
+##              was based; the listing herein transcribed was actually for
+##              the equivalent revision 0 of Shepatin.
+##              This file is intended to be a faithful transcription, except
+##              that the code format has been changed to conform to the
+##              requirements of the yaYUL assembler rather than the
+##              original YUL assembler.
+## Reference:   pp. 90-123
+## Assembler:   yaYUL
+## Contact:     Ron Burkey <info@sandroid.org>.
+## Website:     www.ibiblio.org/apollo/index.html
+## Mod history: 2017-05-24 MAS  Created from Sunburst 120.
+
+## NOTE: Page numbers below have not yet been updated to reflect Sunburst 37.
 
 ## Page 104
 		BANK	12

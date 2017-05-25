@@ -1,22 +1,24 @@
 ### FILE="Main.annotation"
 ## Copyright:   Public domain.
 ## Filename:    FRESH_START_AND_RESTART.agc
-## Purpose:     A module for revision 0 of BURST120 (Sunburst). It 
-##              is part of the source code for the Lunar Module's
-##              (LM) Apollo Guidance Computer (AGC) for Apollo 5.
+## Purpose:     A section of Sunburst revision 37, or Shepatin revision 0.
+##              It is part of an early development version of the software
+##              for Apollo Guidance Computer (AGC) on the unmanned Lunar
+##              Module (LM) flight Apollo 5. Sunburst 37 was the program
+##              upon which Don Eyles's offline development program Shepatin
+##              was based; the listing herein transcribed was actually for
+##              the equivalent revision 0 of Shepatin.
+##              This file is intended to be a faithful transcription, except
+##              that the code format has been changed to conform to the
+##              requirements of the yaYUL assembler rather than the
+##              original YUL assembler.
+## Reference:   pp. 78-89
 ## Assembler:   yaYUL
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
-## Mod history: 2016-09-30 RSB  Created draft version.
-##              2016-10-05 RSB  Finished transcription.
-##              2016-10-30 MAS  A bunch of small corrections, and some missing lines.
-##		2016-11-01 RSB	More typos.
-##		2016-12-03 RSB	Fixed various typos using octopus/ProoferComments, but
-##				there are still a couple of pages that are problematic
-##				with respect to octopus, so the process isn't completed.
-##		2016-12-05 RSB	octopus/ProoferComments based comment-proofing completed;
-##				some corrections made.
-##		2017-03-13 RSB	Comment-text fixes noted in proofing Luminary 116.
+## Mod history: 2017-05-24 MAS  Created from Sunburst 120.
+
+## NOTE: Page numbers below have not yet been updated to reflect Sunburst 37.
 
 ## Page 88
                 BANK            01                              

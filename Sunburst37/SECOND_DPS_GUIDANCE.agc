@@ -1,24 +1,24 @@
 ### FILE="Main.annotation"
-## Copyright:    Public domain.
-## Filename:     SECOND_DPS_GUIDANCE.agc
-## Purpose:      A module for revision 0 of BURST120 (Sunburst). It 
-##               is part of the source code for the Lunar Module's
-##               (LM) Apollo Guidance Computer (AGC) for Apollo 5.
-## Assembler:    yaYUL
-## Contact:      Ron Burkey <info@sandroid.org>.
-## Website:      www.ibiblio.org/apollo/index.html
-## Mod history:  2016-09-30 RSB  Created draft version.
-##               2016-10-26 MAS  Began.
-##               2016-10-27 MAS  Completed transcription.
-##		 2016-10-31 RSB	 Typos.
-##		 2016-11-01 RSB	 In three places, OCT fractional numbers (such as "OCT .6"),
-##				 which are not supported by yaYUL, have been replaced by 
-##				 decimal equivalents ("DEC .75"), in lieu of modifying 
-##				 yaYUL at this time.  Appropriate comments were also added
-##				 at the points in the code where this happened.
-##		 2016-11-02 RSB	 More typos.
-##		 2016-12-06 RSB	 Comment proofing via octopus/ProoferComments
-##				 performed, and changes made.
+## Copyright:   Public domain.
+## Filename:    SECOND_DPS_GUIDANCE.agc
+## Purpose:     A section of Sunburst revision 37, or Shepatin revision 0.
+##              It is part of an early development version of the software
+##              for Apollo Guidance Computer (AGC) on the unmanned Lunar
+##              Module (LM) flight Apollo 5. Sunburst 37 was the program
+##              upon which Don Eyles's offline development program Shepatin
+##              was based; the listing herein transcribed was actually for
+##              the equivalent revision 0 of Shepatin.
+##              This file is intended to be a faithful transcription, except
+##              that the code format has been changed to conform to the
+##              requirements of the yaYUL assembler rather than the
+##              original YUL assembler.
+## Reference:   pp. 814-850
+## Assembler:   yaYUL
+## Contact:     Ron Burkey <info@sandroid.org>.
+## Website:     www.ibiblio.org/apollo/index.html
+## Mod history: 2017-05-24 MAS  Created from Sunburst 120.
+
+## NOTE: Page numbers below have not yet been updated to reflect Sunburst 37.
 
 ## Page 871
 
