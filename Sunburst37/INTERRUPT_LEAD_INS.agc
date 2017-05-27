@@ -20,91 +20,93 @@
 ##              2017-05-27 HG   Transcribed
 
 
-## Page 60
-                SETLOC          4000 
-                        
+## Page 54
+                SETLOC          4000
+
                 INHINT                                  # GO
-                CAF             GOBB    
-                XCH             BBANK   
-                TCF             GOPROG  
-                                
+                CAF             GOBB
+                XCH             BBANK
+                TCF             GOPROG
+
                 DXCH            ARUPT                   # T6RUPT
-                EXTEND          
-                DCA             T6ADR   
-                DTCB            
-                                
+                EXTEND
+                DCA             T6ADR
+                DTCB
+
                 DXCH            ARUPT                   # T5RUPT
-                EXTEND          
-                DCA             T5ADR   
-                DTCB            
-                                
+                EXTEND
+                DCA             T5ADR
+                DTCB
+
                 DXCH            ARUPT                   # T3RUPT
-                CAF             T3RPTBB 
-                XCH             BBANK   
-                TCF             T3RUPT  
-                                
+                CAF             T3RPTBB
+                XCH             BBANK
+                TCF             T3RUPT
+
                 DXCH            ARUPT                   # T4RUPT
-                CAF             T4RPTBB 
-                XCH             BBANK   
-                TCF             T4RUPT  
-                                
+                CAF             T4RPTBB
+                XCH             BBANK
+                TCF             T4RUPT
+
                 DXCH            ARUPT                   # KEYRUPT1
-                CAF             KEYRPTBB        
-                XCH             BBANK   
-                TCF             KEYRUPT1        
-                                
+                CAF             KEYRPTBB
+                XCH             BBANK
+                TCF             KEYRUPT1
+
                 DXCH            ARUPT                   # KEYRUPT2
-                CAF             MKRUPTBB        
-                XCH             BBANK   
-                TCF             MARKRUPT        
-                                
+                CAF             MKRUPTBB
+                XCH             BBANK
+                TCF             MARKRUPT
+
                 DXCH            ARUPT                   # UPRUPT
-                CAF             UPRPTBB 
-                XCH             BBANK   
-                TCF             UPRUPT  
-                                
+                CAF             UPRPTBB
+                XCH             BBANK
+                TCF             UPRUPT
+
                 DXCH            ARUPT                   # DOWNRUPT
-                CAF             DWNRPTBB        
-                XCH             BBANK   
-                TCF             DODOWNTM        
-                                
+                CAF             DWNRPTBB
+                XCH             BBANK
+                TCF             DODOWNTM
+
                 DXCH            ARUPT                   # RADAR RUPT
-                CAF             RDRPTBB 
-                XCH             BBANK   
-## Page 61              
+                CAF             RDRPTBB
+                XCH             BBANK
+
+
+## Page 55
                 TCF             NOQRSM          +1      # WAS TCF RADAREAD (NO RADAR IN 206).
-                
-# TRAPS 31B AND 32 SHOULD NEVER BE SET.  THEREFORE-
+
+# TRAPS 31B AND 32 SHOULD NEVER BE SET. THEREFORE-
 # RUPT 10 WILL ALWAYS REFER TO THE HAND CONTROLLER LPD OR MINIMUM IMPULSE
-# USE.  SEE GEORGE CHERRY FOR RATIONALE REGARDING THE AFORESAID.
-                
+# USE. SEE GEORGE CHERRY FOR RATIONALE REGARDING THE AFORESAID.
+
                 DXCH            ARUPT                   # RUPT10 USED FOR RHC MINIMP MODE ONLY.
-                CAF             TWO     
-                TS              DELAYCTR        
-                TCF             NOQBRSM 
-                
+                CAF             TWO
+                TS              DELAYCTR
+                TCF             NOQBRSM
+
                 EBANK=          LST1                    # RESTART USES E0, E3
-GOBB            BBCON           GOPROG  
-                
-                EBANK=          TIME1   
+GOBB            BBCON           GOPROG
+
+                EBANK=          TIME1
 T6RPTBB         BBCON           RESUME                  # ***FIX LATER***
-        
-                EBANK=          LST1            
+
+                EBANK=          LST1
 T3RPTBB         BBCON           T3RUPT
-        
+
                 EBANK=          KEYTEMP1
 KEYRPTBB        BBCON           KEYRUPT1
-        
+
                 EBANK=          AOTAZ
 MKRUPTBB        BBCON           MARKRUPT
-        
+
 UPRPTBB         =               KEYRPTBB
-        
+
                 EBANK=          DNTMBUFF
 DWNRPTBB        BBCON           DODOWNTM
-        
+
                 EBANK=          RADMODES
 RDRPTBB         BBCON           RADAREAD
-        
+
                 EBANK=          M11
 T4RPTBB         BBCON           T4RUPTA
