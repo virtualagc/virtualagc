@@ -135,7 +135,7 @@ The command-line parameters are:
 Here is a simple bash script that applies ProoferBox.py to a complete set of B&W octal 
 pages.  Now, if there are any completely empty memory pages (page = quarter of a bank), 
 there won't be a page in the assembly listing for them either, and hence won't be any image file
-for that page.  This is handles by having an array, BLANKS[], 
+for that page.  This is handled by having an array, BLANKS[], 
 whose entries are 0 for each page which isn't blank, and 1 for each page which is blank.  Typically,
 BLANKS[] would simply be an array of 144 entries all equal to 0, but not always; for
 RETREAD44, for example, that array looks like this:
@@ -144,9 +144,10 @@ RETREAD44, for example, that array looks like this:
 
 And then the actual script is:
 
+        SKIPUNTIL=$FIRSTOUTPUTPAGE; \
 	n=$FIRSTOUTPAGE; \
 	for i in `seq $((FIRSTOUTPAGE-STARTINGPAGEOFOCTALS)) $((LASTOUTPAGE-STARTINGPAGEOFOCTALS))`
-	do
+	do   
 	  bank=$(( i/4 ))
 	  if [[ $bank -lt 4 ]]
 	  then
@@ -155,8 +156,17 @@ And then the actual script is:
 	  pageInBank=$(( i%4 ))
 	  if [[ ${BLANKS[$i]} == 0 ]]
 	  then
-	    pageNum=`printf "%04d" $n`
-	    ./ProoferBox.py $BWIMAGEDIR/$pageNum.$EXT $OUTPUTDIR/$pageNum.jpg $bank $pageInBank $PATHTOBINSOURCEFILE
+	    if [[ $n -ge $SKIPUNTIL ]]
+	    then 
+	      pageNum=`printf "%04d" $n`
+	      ./ProoferBox.py $BWIMAGEDIR/$pageNum.$EXT $OUTPUTDIR/$pageNum.jpg $bank $pageInBank $PATHTOBINSOURCEFILE
+	    fi
 	    n=$((n+1))
 	  fi
 	done
+
+The script above has some problems if any of the entries in BLANKS[] are non-zero, and I've been too lazy
+to rewrite it more cleanly.  (The concept of BLANKS[] wasn't originally present, and so the way it's 
+implemented is kind of a kludge.)  The problem is that if any of the pages of the program listing are
+blank, then more "pages" have to be processed than the loop counter implies, so LASTOUTPUT pages must be
+manually incremented (by the number of blank pages) prior to running the script.
