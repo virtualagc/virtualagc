@@ -17,98 +17,96 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-05-24 MAS  Created from Sunburst 120.
+##              2017-05-27 HG   Transcribed
 
-## NOTE: Page numbers below have not yet been updated to reflect Sunburst 37.
 
-## Page 60
-		SETLOC	4000 
-## The following line was not present in the original code.
-		SBANK=
-		
-		INHINT			# GO
-		CAF	GOBB
-		XCH	BBANK
-		TCF	GOPROG
-		
-		DXCH	ARUPT		# T6RUPT
-		EXTEND
-		DCA	T6ADR
-		DTCB
-		
-		DXCH	ARUPT		# T5RUPT
-		EXTEND
-		DCA	T5ADR
-		DTCB
-		
-		DXCH	ARUPT		# T3RUPT
-		CAF	T3RPTBB
-		XCH	BBANK
-		TCF	T3RUPT
-		
-		DXCH	ARUPT		# T4RUPT
-		CAF	T4RPTBB
-		XCH	BBANK
-		TCF	T4RUPT
-		
-		DXCH	ARUPT		# KEYRUPT1
-		CAF	KEYRPTBB
-		XCH	BBANK
-		TCF	KEYRUPT1
-		
-		DXCH	ARUPT		# KEYRUPT2
-		CAF	MKRUPTBB
-		XCH	BBANK
-		TCF	MARKRUPT
-		
-		DXCH	ARUPT		# UPRUPT
-		CAF	UPRPTBB
-		XCH	BBANK
-		TCF	UPRUPT
-		
-		DXCH	ARUPT		# DOWNRUPT
-		CAF	DWNRPTBB
-		XCH	BBANK
-		TCF	DODOWNTM
-		
-		DXCH	ARUPT		# RADAR RUPT
-		CAF	RDRPTBB
-		XCH	BBANK
-## Page 61
-		TCF	NOQRSM 	+1	# WAS TCF RADAREAD (NO RADAR IN 206).
-		
-# TRAPS 31B AND 32 SHOULD NEVER BE SET.  THEREFORE-
+## Page 54
+                SETLOC          4000
+
+                INHINT                                  # GO
+                CAF             GOBB
+                XCH             BBANK
+                TCF             GOPROG
+
+                DXCH            ARUPT                   # T6RUPT
+                EXTEND
+                DCA             T6ADR
+                DTCB
+
+                DXCH            ARUPT                   # T5RUPT
+                EXTEND
+                DCA             T5ADR
+                DTCB
+
+                DXCH            ARUPT                   # T3RUPT
+                CAF             T3RPTBB
+                XCH             BBANK
+                TCF             T3RUPT
+
+                DXCH            ARUPT                   # T4RUPT
+                CAF             T4RPTBB
+                XCH             BBANK
+                TCF             T4RUPT
+
+                DXCH            ARUPT                   # KEYRUPT1
+                CAF             KEYRPTBB
+                XCH             BBANK
+                TCF             KEYRUPT1
+
+                DXCH            ARUPT                   # KEYRUPT2
+                CAF             MKRUPTBB
+                XCH             BBANK
+                TCF             MARKRUPT
+
+                DXCH            ARUPT                   # UPRUPT
+                CAF             UPRPTBB
+                XCH             BBANK
+                TCF             UPRUPT
+
+                DXCH            ARUPT                   # DOWNRUPT
+                CAF             DWNRPTBB
+                XCH             BBANK
+                TCF             DODOWNTM
+
+                DXCH            ARUPT                   # RADAR RUPT
+                CAF             RDRPTBB
+                XCH             BBANK
+
+
+## Page 55
+                TCF             NOQRSM          +1      # WAS TCF RADAREAD (NO RADAR IN 206).
+
+# TRAPS 31B AND 32 SHOULD NEVER BE SET. THEREFORE-
 # RUPT 10 WILL ALWAYS REFER TO THE HAND CONTROLLER LPD OR MINIMUM IMPULSE
-# USE.  SEE GEORGE CHERRY FOR RATIONALE REGARDING THE AFORESAID.
-		
-		DXCH	ARUPT		# RUPT10 USED FOR RHC MINIMP MODE ONLY.
-		CAF	TWO
-		TS	DELAYCTR
-		TCF	NOQBRSM
+# USE. SEE GEORGE CHERRY FOR RATIONALE REGARDING THE AFORESAID.
 
-		EBANK=	LST1		# RESTART USES E0, E3
-GOBB		BBCON	GOPROG
+                DXCH            ARUPT                   # RUPT10 USED FOR RHC MINIMP MODE ONLY.
+                CAF             TWO
+                TS              DELAYCTR
+                TCF             NOQBRSM
 
-		EBANK=	TIME1
-T6RPTBB		BBCON	RESUME		# ***FIX LATER***
+                EBANK=          LST1                    # RESTART USES E0, E3
+GOBB            BBCON           GOPROG
 
-		EBANK=	LST1		
-T3RPTBB		BBCON	T3RUPT
+                EBANK=          TIME1
+T6RPTBB         BBCON           RESUME                  # ***FIX LATER***
 
-		EBANK=	KEYTEMP1
-KEYRPTBB	BBCON	KEYRUPT1
+                EBANK=          LST1
+T3RPTBB         BBCON           T3RUPT
 
-		EBANK=	AOTAZ
-MKRUPTBB	BBCON	MARKRUPT
+                EBANK=          KEYTEMP1
+KEYRPTBB        BBCON           KEYRUPT1
 
-UPRPTBB		=	KEYRPTBB
+                EBANK=          AOTAZ
+MKRUPTBB        BBCON           MARKRUPT
 
-		EBANK=	DNTMBUFF
-DWNRPTBB	BBCON	DODOWNTM
+UPRPTBB         =               KEYRPTBB
 
-		EBANK=	RADMODES
-RDRPTBB		BBCON	RADAREAD
+                EBANK=          DNTMBUFF
+DWNRPTBB        BBCON           DODOWNTM
 
-		EBANK=	M11
-T4RPTBB		BBCON	T4RUPTA
+                EBANK=          RADMODES
+RDRPTBB         BBCON           RADAREAD
 
-				
+                EBANK=          M11
+T4RPTBB         BBCON           T4RUPTA
