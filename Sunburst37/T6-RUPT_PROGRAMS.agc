@@ -17,11 +17,10 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-05-24 MAS  Created from Sunburst 120.
+##              2017-05-30 HG   Transcribed
 
-## NOTE: Page numbers below have not yet been updated to reflect Sunburst 37.
-
-## Page 483
-# PROGRAM NAMES: (1) DOT6RUPT     MOD. NO. 4  DATE: FEBRUARY 9. 1967
+## Page 460
+# PROGRAM NAMES: (1) DOT6RUPT     MOD. NO. 2  DATE: NOVEMBER 15, 1966
 
 #                (2) T6JOBCHK
 
@@ -60,9 +59,10 @@
 # OUTPUT: (SAME AS INPUT.)
 
 # DEBRIS: DOT6RUPT: NONE.  T6JOBCHK: A,L
+
 # *** NOTE: AS OF MOD. NO. 2, T6NEXT AND T6NEXTJT LISTS ARE IN UNSWITCHED ERASABLE. ***
 
-## Page 484
+## Page 461
 
                 BLOCK           02
                 EBANK=          T6NEXT
@@ -83,7 +83,7 @@ DOT6RUPT        LXCH            BANKRUPT                # (INTERRUPT LEAD IN CON
 
 
 
-                BLOCK           03
+                BLOCK           02
                 EBANK=          T6NEXT
 
 T6JOBCHK        CCS             TIME6                   # CHECK TIME6 FOR WAITING T6RUPT:
@@ -93,13 +93,10 @@ T6JOBCHK        CCS             TIME6                   # CHECK TIME6 FOR WAITIN
 
 # CONTROL PASSES TO T6JOB ONLY WHEN C(TIME6) = -0 (I.E. WHEN A T6RUPT MUST BE PROCESSED).
 
-T6JOB           CAF             POSMAX                  # DISABLE CLOCK: NEEDED SINCE RUPT OCCURS
-                EXTEND                                  # 1 DINC AFTER T6 = 77777.  FOR 625 MUSECS
-                WAND            13                      # MUST NOT HAVE T6 = +0 WITH ENABLE SET.
-
-                CAF             ZERO                    # UPDATE ORDERED LIST OF T6NEXT REGISTERS
+T6JOB           CAF             ZERO                    # UPDATE ORDERED LIST OF TIME6 DT'S
                 XCH             T6NEXT          +1      # 1) PUSH FIRST ENTRY INTO TIME6.
                 XCH             T6NEXT                  # 2) PUSH SECOND ENTRY INTO FIRST PLACE.
+
                 TS              TIME6                   # 3) ZERO LAST (SECOND) DT IN LIST.
 
                 CCS             TIME6                   # TIME6 EITHER POSITIVE OR PLUS ZERO:
@@ -114,17 +111,19 @@ T6NZERO         CAF             BIT15                   # ENABLE TIME6 COUNTER T
 
                 CAF             ZERO                    # UPDATE ORDERED LIST OF JET POLICIES:
                 XCH             T6NEXTJT        +2      # 1) LEAVE JETS TO GO ON NOW IN A.
-
-## Page 485
                 XCH             T6NEXTJT        +1      # 2) CYCLE LIST UP TOWARD TOP.
                 XCH             T6NEXTJT                # 3) ZERO LAST ENTRY IN LIST.
 
-## Page 486
+                TCF             WRITEJTS                # TEMP. FIX UNTIL NEXT REV: JON A.
+
+## Page 462
 # THE FOLLOWING JET-ON LOGIC MAY BE USED AS A SUBROUTINE (3 ENTRY POINTS):
 
 # FIRST, LET SGN(A) DETERMINE THE JET CHANNEL:
 #          POSITIVE IMPLIES P-AXIS POLICY.
 #          NEGATIVE IMPLIES Q,R-AXES POLICY.
+
+                BLOCK           03
 
 WRITEJTS        EXTEND                                  # TEST FOR CHANNEL TO WRITE POLICY IN:
                 BZMF            WRITEQR                 # NEG: Q,R-AXES JETS IN CHANNEL 5
@@ -132,6 +131,7 @@ WRITEJTS        EXTEND                                  # TEST FOR CHANNEL TO WR
 # SECOND, FOR P-AXIS JET POLICIES:
 
 WRITEP          EXTEND                                  # POS: P-AXIS   JETS IN CHANNEL 6
+
                 WRITE           6
                 TC              Q                       # RETURN.
 
