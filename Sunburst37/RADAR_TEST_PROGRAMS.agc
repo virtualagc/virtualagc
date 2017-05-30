@@ -17,88 +17,86 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-05-24 MAS  Created from Sunburst 120.
+##              2017-05-30 HG   Trasncribed
 
-## NOTE: Page numbers below have not yet been updated to reflect Sunburst 37.
 
-## Page 198
-		BANK	10
-		EBANK=	RSTKLOC
-		
-# RADAR SAMPLING LOOP.
+## Page 185
+                BANK            10
+                EBANK=          RSTKLOC
 
-RADSAMP		CCS	RSAMPDT		# TIMES NORMAL ONCE-PER-SECOND SAMPLING.
-		TCF	+2
-		
-		TCF	TASKOVER	# +0 INSERTED MANUALLY TERMINATES TEST.
-		
-		TC	WAITLIST
-		EBANK=	RSTKLOC
-		2CADR	RADSAMP
-		
-		CAF	PRIO25
-		TC	NOVAC
-		EBANK=	RSTKLOC
-		2CADR	DORSAMP
-		
-		CAF	1/6		# FOR CYCLIC SAMPLING, RTSTDEX =
-		EXTEND			# RTSTLOC/6 + RTSTBASE.
-		MP	RTSTLOC
-		AD	RTSTBASE	# 0 FOR RR, 2 FOR LR.
-		TS	RTSTDEX
-		
-		TCF	TASKOVER
-		
-# DO THE ACTUAL RADAR SAMPLE.
+#          RADAR SAMPLING LOOP.
 
-DORSAMP		TC	VARADAR		# SELECTS VARIABLE RADAR CHANNEL.
-		TC	BANKCALL
-		CADR	RADSTALL
-		INCR	RFAILCNT	# ADVANCE FAIL COUNTER BUT ACCEPT BAD DATA
-		
-DORSAMP2	INHINT			# YES - UPDATE TM BUFFER.
-		DXCH	SAMPLSUM
-		INDEX	RTSTLOC
-		DXCH	RSTACK
-		
-		DXCH	OPTYHOLD
-		INDEX	RSTKLOC
-		DXCH	RSTACK	+2
-		
-		DXCH	TIMEHOLD
-		INDEX	RSTKLOC
-		DXCH	RSTACK	+4
-		
-		CS	RTSTLOC		# CYCLE RTSTLOC.
-		AD	RTSTMAX
-		EXTEND
-		
-## Page 199		
-		BZF	+3
-		CA	RTSTLOC
-		AD	SIX
-		TS	RTSTLOC
-		
-		CCS	RSAMPDT		# SEE IF TIME TO RE-SAMPLE.
-		TCF	ENDOFJOB	# NO - WAIT FOR T3 (REGULAR SAMPLING).
-		
-		TCF	ENDOFJOB	# TEST TERMINATED.
-		TCF	DORSAMP		# JUMP RIGHT BACK AND GET ANOTHER SAMPLE.
-		
-1/6		DEC	.17
-		
-# VARIABLE RADAR DATA CALLER FOR ONE MEASUREMENT ONLY.
+RADSAMP         CCS             RSAMPDT                 # TIMES NORMAL ONCE-PER-SECOND SAMPLING.
+                TCF             +2
 
-VARADAR		CAF	ONE		# WILL BE SENT TO RADAR ROUTINE IN A BY
-		TS	BUF2		# SWCALL.
-		INDEX	RTSTDEX
-		CAF	RDRLOCS
-		TCF	SWCALL		# NOT TOUCHING Q.
-		
-RDRLOCS		CADR	RRRANGE		# = 0
-		CADR	RRRDOT		# = 1
-		CADR	LRVELX		# = 2
-		CADR	LRVELY		# = 3
-		CADR	LRVELZ		# = 4
-		CADR	LRALT		# = 5
-		
 
+                TCF             TASKOVER                # +0 INSERTED MANUALLY TERMINATES TEST.
+
+                TC              WAITLIST
+                EBANK=          RSTKLOC
+                2CADR           RADSAMP
+                CAF             PRIO25
+                TC              NOVAC
+                EBANK=          RSTKLOC
+                2CADR           DORSAMP
+                CAF             1/6                     # FOR CYCLIC SAMPLING, RTSTDEX =
+                EXTEND                                  # RTSTLOC/6 + RTSTBASE.
+                MP              RTSTLOC
+                AD              RTSTBASE                # 0 FOR RR, 2 FOR LR.
+                TS              RTSTDEX
+
+                TCF             TASKOVER
+
+#          DO THE ACTUAL RADAR SAMPLE.
+
+DORSAMP         TC              VARADAR                 # SELECTS VARIABLE RADAR CHANNEL.
+                TC              BANKCALL
+
+                CADR            RADSTALL
+                INCR            RFAILCNT                # ADVANCE FAIL COUNTER BUT ACCEPT BAD DATA
+
+DORSAMP2        INHINT                                  # YES - UPDATE TM BUFFER.
+                DXCH            SAMPLSUM
+                INDEX           RTSTLOC
+                DXCH            RSTACK
+
+                DXCH            OPTYHOLD
+                INDEX           RSTKLOC
+                DXCH            RSTACK          +2
+
+                DXCH            TIMEHOLD
+                INDEX           RSTKLOC
+                DXCH            RSTACK          +4
+
+                CS              RTSTLOC                 # CYCLE RTSTLOC.
+                AD              RTSTMAX
+                EXTEND
+
+## Page 186
+                BZF             +3
+                CA              RTSTLOC
+                AD              SIX
+                TS              RTSTLOC
+
+                CCS             RSAMPDT                 # SEE IF TIME TO RE-SAMPLE.
+                TCF             ENDOFJOB                # NO - WAIT FOR T3 (REGULAR SAMPLING).
+
+                TCF             ENDOFJOB                # TEST TERMINATED.
+                TCF             DORSAMP                 # JUMP RIGHT BACK AND GET ANOTHER SAMPLE.
+
+1/6             DEC             .17
+
+#          VARIABLE RADAR DATA CALLER FOR ONE MEASUREMENT ONLY.
+
+VARADAR         CAF             ONE                     # WILL BE SENT TO RADAR ROUTINE IN A BY
+                TS              BUF2                    # SWCALL.
+                INDEX           RTSTDEX
+                CAF             RDRLOCS
+                TCF             SWCALL                  # NOT TOUCHING Q.
+
+RDRLOCS         CADR            RRRANGE                 # = 0
+                CADR            RRRDOT                  # = 1
+                CADR            LRVELX                  # = 2
+                CADR            LRVELY                  # = 3
+                CADR            LRVELZ                  # = 4
+                CADR            LRALT                   # = 5

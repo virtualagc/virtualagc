@@ -18,6 +18,7 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-05-24 MAS  Created from Sunburst 120.
 ##              2017-05-28 HG   Transcribed
+##              2017-05-30 HG   Add missing variable RUPTSTOR
 
 ## Page 10
 
@@ -111,6 +112,7 @@ WAITBANK        EQUALS          ITEMP2
 EXECTEM2        EQUALS          ITEMP2
 
 ITEMP3          ERASE
+RUPTSTOR        EQUALS          ITEMP3
 WAITADR         EQUALS          ITEMP3
 NEWPRIO         EQUALS          ITEMP3
 
