@@ -17,7 +17,7 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-05-24 MAS  Created from Sunburst 120.
-##              2017-05-30 HG   Trasncribed
+##              2017-05-30 HG   Transcribed
 
 
 ## Page 185
