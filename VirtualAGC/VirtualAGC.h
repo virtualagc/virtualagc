@@ -44,6 +44,7 @@
  *	                        add or edit mission types.  Removed all of the
  *	                        lingering comments inserted by wxGlade.
  *	        2017-03-24 RSB  Added a SUPERJOB mission type.
+ *          	2017-05-30 RSB	Changed bogus references to Sunburst 39 to Sunburst 37.
  *
  * This file was originally generated using the wxGlade RAD program.
  * However, it is now maintained entirely manually, and any ability to
@@ -140,7 +141,7 @@ enum
   ID_RETREAD44BUTTON,
   ID_AURORA12BUTTON,
   ID_BOREALISBUTTON,
-  ID_SUNBURST39BUTTON,
+  ID_SUNBURST37BUTTON,
   ID_ZERLINABUTTON,
   ID_SUPERJOBBUTTON,
   ID_AGCCUSTOMBUTTON,
