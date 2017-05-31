@@ -44,7 +44,7 @@ RCSMONIT        TCF             RESUME                  # *** TO STOP ENDLESS LO
                 DCA             MNTRCS
                 DTCB
                 EBANK=          DT
-MNCTRS          2CADR           RCSMNTR
+MNTRCS          2CADR           RCSMNTR
 ENDT4S          EQUALS
 
 
@@ -81,7 +81,7 @@ NXTRCSPR        INCR            FAILCTR
                 CCS             FAILTEMP
                 TCF             NXTRCSPR        -1      # FINISH EARLY, OR MORE TO DO
 
-                TCF             ENDRCFSL
+                TCF             ENDRCSFL
 RCSFJUMP        TCF             FM10/11
                 TCF             FM9/12
                 TCF             FM13/15
