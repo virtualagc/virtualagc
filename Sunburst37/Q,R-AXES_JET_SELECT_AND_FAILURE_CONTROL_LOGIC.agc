@@ -17,13 +17,12 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-05-24 MAS  Created from Sunburst 120.
+##              2017-05-30 HG   Transcribed
 
-## NOTE: Page numbers below have not yet been updated to reflect Sunburst 37.
+## Page 520
+# PROGRAM: POLTYPEP               MOD. NO. 1  DATE: NOVEMBER 14, 1966
 
-## Page 554
-# PROGRAM: POLTYPEP                MOD. NO. 1  DATE: NOVEMBER 14, 1966
-
-# AUTHOR:  JONATHAN D. ADDELSTON (ADAMS ASSOCIATES)
+# AUTHOR: JONATHAN D. ADDELSTON (ADAMS ASSOCIATES)
 
 # THIS PROGRAM IS DESIGNED TO SELECT A POLICY OF JETS (OF WHICH NONE HAVE FAILED) WHICH CAN BE USED TO CREATE THE
 # ROTATION AND/OR TRANSLATION WHICH IS REQUIRED BY THE LM DAP.  FROM THE INDEX "NETACNDX" (WHICH MUST BE SET WHEN
@@ -72,7 +71,7 @@
 
 # INITIALIZATION AT ROTATION REQUEST ENTRY POINT:
 
-## Page 555
+## Page 521
                 BANK            20
                 EBANK=          JTSONNOW
 
@@ -112,7 +111,7 @@ ULL/+X          CAF             BITS6&8                 # CHECK FOR ULLAGE OR AS
 
 # THIS BITS ARE PACKED THUSLY  0XYYY, WHERE X BECOMES C(LOOPCTR) AND YYY BECOMES C(POLRELOC). BITS8,9 ARE ZERO.
 
-NUMBALTS        TS              L                       # SAVE FULL WORD TO GET BITS 10-15, LATER.
+NUMBALTS        TS              L                       # SAVE FULL WORD TO GET BITS 10-12, LATER.
                 MASK            LOW7                    # MASK BITS GIVING INDEX VALUE FOR BEST
                 TS              POLRELOC                # POLICY (W.R.T. TOP OF POLTABLE).
 
@@ -121,7 +120,7 @@ NUMBALTS        TS              L                       # SAVE FULL WORD TO GET 
                 MP              L                       # TEST ALL THE FEASIBLE JET POLICIES FOR
 BESTPOLS        TS              LOOPCTR                 # THE GIVEN REQUEST.  (ALSO TOP 0F LOOP.)
 
-## Page 556
+## Page 522
 # LOOP TP SET UP "TRANSNOW" AND REJECT ALL FAILED POLICIES:
 
                 INDEX           POLRELOC                # PICK UP NEXT POLICY TO CHECK FOR FAILURE
@@ -136,6 +135,7 @@ CHKFAILS        TS              THISPOLY                # A FLAG IS SET TO DO SO
                 CCS             A                       # IF C(A) = +0, THEN THERE ARE NO FAILURES
                 TCF             +2                      # IN THIS POLICY AND THE LM DAP USES IT.
                 TCF             POLFOUND                # IF C(A) IS NOT +0, IT IS POSITIVE AND
+
                 EXTEND                                  # FIRST THE RELATIVE ADDRESS INDEXER IS
                 DIM             POLRELOC                # DECREMENTED BY ONE FOR THE NEXT POLICY,
                 CCS             LOOPCTR                 # THEN A CHECK IS MADE FOR ANY MORE USABLE
@@ -161,7 +161,7 @@ ABORTJET        CAF             ZERO                    # TURN OFF ALL JETS.
 
 # ***** END JET FAILURE ABORT SEQUENCE. *****
 
-## Page 557
+## Page 523
 # ENTER HERE AFTER ULLAGE/ASCENT DETECTION:
 
 +XSELECT        CS              DAPBOOLS                # CHECK FOR ULLAGE  BIT6/DAPBOOLS =1.
@@ -205,6 +205,7 @@ POLFOUND        CAE             THISPOLY                # GET POSITIVE-VALUED PO
                 MP              BIT4                    # (BIT15 OF L IS 0 DUE TO SIGN AGREEMENT.)
                 INDEX           A                       # GET NUMBER OF R-AXIS JETS FROM TORQUE
                 CAF             TORKTABL                # TABLE.  SAVE FOR TORQUE VECTOR RECON-
+
                 TS              NO.RJETS                # STRUCTION AND FOR GETTING 1/NETACC.
 
 # PICK OUT ROTATION JETS FROM TABLE ENTRY:
@@ -213,10 +214,10 @@ POLFOUND        CAE             THISPOLY                # GET POSITIVE-VALUED PO
                 MASK            LOW8                    # MOST EASILY BY THE MASKING OPERATION).
                 AD              BIT15                   # SET SIGN TO INDICATE Q,R-AXES JETS.
 
-## Page 558
+## Page 524
                 TS              JTSONNOW                # SET POLICY UP FOR IMMEDIATE USE.
 
-## Page 559
+## Page 525
 
 # ENTRY POINT FOR +X TRANS, OR -X TRANS. REQUEST ALONE:
 
@@ -226,6 +227,7 @@ POLFOUND        CAE             THISPOLY                # GET POSITIVE-VALUED PO
                 TS              LOOPCTR                 # TRANSLATION POLICIES, IF 4 JETS ASKED.
 
                 CCS             ANYTRANS                # TEST FOR TRANSLATION REQUESTS: -0 UNUSED
+
                 TCF             -XPOLICY                # POSMAX: -X TRANSLATION.
                 TCF             LATERJET                #  +ZERO: NO TRANSLATION.
 
@@ -249,6 +251,7 @@ POLFOUND        CAE             THISPOLY                # GET POSITIVE-VALUED PO
                 CS              DAPBOOLS                # TEST FOR 2/4-JET TRANSLATION MODE IN
                 MASK            ACC4OR2X                # BIT4/DAPBOOLS (ASTRONAUT DSKY INPUT)
                 CCS             A                       # 0: 2 JET MODE (SKIP OUT).
+
                 TCF             TRANCONT                # 1: 4 JET MODE (CONTINUE).
 
 # TEST TRANSLATION POLICIES FOR JET FAILURES:
@@ -269,7 +272,7 @@ TRANNEXT        INDEX           POLRELOC                # PICK UP POLICY FOR +/-
 
                 CCS             TRANONLY                # TEST FOR PURE TRANSLATION REQUEST
 
-## Page 560
+## Page 526
                 TCF             TRANOROT                # IF SO, GIVE TRANSLATION, NO ROTATION
 
 # SPECIAL TEST FOR GOOD 4-JET TRANSLATION:
@@ -308,6 +311,7 @@ TRANSTOR        CAE             THISPOLY                # SAVE THIS POLICY FOR L
 # COINCIDENT TRANSLATION FOUND, GO FIND PURE TRANSLATION POLICY (FOR USE AFTER ROTATION):
 
                 CAE             THISPOLY                # USE BOTH ROTATION AND TRANSLATION JETS
+
                 ADS             JTSONNOW                # AT JTSONNOW (BIT 15 IS ALREADY SET).
 
                 TCF             TRANSLAT                # GO TO START FINDING JTSATCHG POLICY.
@@ -321,7 +325,7 @@ TRANCNTD        CCS             TRANSAVE                # TEST FOR PREVIOUSLY SA
 
 TRANCONT        EXTEND                                  # CONTINUE THE TRANSLATION-FAIL LOOP
 
-## Page 561
+## Page 527
                 DIM             POLRELOC                # DECREMENT THE TRANSLATION POLICY INDEX
                 CCS             LOOPCTR                 # AND THEN TEST LOOPCTR FOR CONTINUATION
                 TCF             TRNRESET                # OF JET FAILURE TESTING.
@@ -338,7 +342,7 @@ TRANCONT        EXTEND                                  # CONTINUE THE TRANSLATI
 TRANSLAT        CAF             ZERO                    # SET VOLATILE FLAG TO INDICATE SEARCH IS
                 TS              TRANSNOW                # FOR JTSATCHG, AFTER TRANSNOW DONE.
 
-                TCF             +/-XTRAN                # FO TO RE-INITIALIZE LOOP FROM SCRATCH.
+                TCF             +/-XTRAN                # GO TO RE-INITIALIZE LOOP FROM SCRATCH.
 
 # "TOP OF LOOP" (FOR ALL BUT FIRST PASS):
 
@@ -365,6 +369,7 @@ LATERJET        AD              BIT15                   # SET BIT 15 TO INDICATE
                 CCS             NO.QJETS                # TRANSFORM INDEX TO APPROPRIATE VALUE FOR
                 TCF             +2                      # THE NUMBER OF JETS SELECTED.
                 TCF             ALLRJETS                # IF NO.QJETS ZERO, NO.RJETS IS NONZERO.
+
                 CCS             A                       # IF NO.QJETS +/-1, NO.RJETS IS +/-1 (BY
                 TCF             +2                      # DEFINITION)  SO SUBTRACT ONE FROM INDEX.
                 TCF             SMALAXIS                # GO TRANSFORM FOR 1 U,V-AXIS JET.
@@ -372,9 +377,10 @@ LATERJET        AD              BIT15                   # SET BIT 15 TO INDICATE
                 INCR            NETACNDX                # MUST HAVE BEEN +/-4, SO ADD ONE TO THE
                 TCF             NETACGET                # INDEX, OTHERWISE, NO CHANGE (2 JETS).
 
-## Page 562
+## Page 528
 SMALAXIS        EXTEND                                  # DECREMENT INDEX FOR 1 JET AROUND EITHER
                 DIM             NETACNDX                # THE U- OR V- AXIS.
+
                 TCF             NETACGET                # (GO PICK UP INVERSE OF NET ACCELERATION)
 
 ALLRJETS        CCS             NO.RJETS                # WHEN NO.QJETS ZERO, TEST NO.RJETS WHICH
@@ -403,7 +409,7 @@ BBANKSET        BBCON           QRAXIS                  # BBCON OF Q,R-AXES RCS 
 
 BITS6&8         OCTAL           00240                   # ULLAGE AND ASCENT BURN DAPBOOLS BITS.
 
-## Page 563
+## Page 529
 
 # TABLE OF Q,R-JET NUMBERS AND DIRECTIONS:
 
@@ -413,6 +419,7 @@ TORKTABL        DEC             0                       # FROM THE 3 PACKED BITS
                 DEC             +2                      # AS FOLLOWS:
                 DEC             -2                      # 000: NO JETS
                 DEC             +4                      # 001: +1 JET   011: +2 JETS  101: +4 JETS
+
                 DEC             -4                      # 010: -1 JET   100: -2 JETS  110: -4 JETS
 
 
@@ -421,6 +428,7 @@ TORKTABL        DEC             0                       # FROM THE 3 PACKED BITS
 #                       YYY IS THE RELATIVE ADDRESS IN POLTABLE OF THE "OPTIMAL" POLICY.
 
 # FORCE-COUPLE POLICIES:
+
                 OCTAL           03003                   # +2 Q-AXIS JETS
                 OCTAL           04004                   # +4 Q-AXIS JETS
                 OCTAL           03010                   # -2 Q-AXIS JETS
@@ -434,11 +442,12 @@ NORMLPOL        OCTAL           02026                   # +2 U-AXIS JETS
                 OCTAL           02031                   # -2 U-AXIS JETS
                 OCTAL           02031                   # -2 U-AXIS JEST
                 OCTAL           02034                   # +2 V-AXIS JETS
+
                 OCTAL           02034                   # +2 V-AXIS JETS
                 OCTAL           02037                   # -2 V-AXIS JETS
                 OCTAL           02037                   # -2 V-AXIS JETS
 
-## Page 564
+## Page 530
 
 # +X SENSE POLICIES:
 
@@ -450,12 +459,13 @@ NORMLPOL        OCTAL           02026                   # +2 U-AXIS JETS
                 OCTAL           04056                   # +4 R-AXIS JETS
                 OCTAL           03062                   # -2 R-AXIS JETS
                 OCTAL           04063                   # -4 R-AXIS JETS
-+SENSTAB        OCTAL           01025                   # +1 U-AXIS JETS
-                OCTAL           02026                   # +2 U-AXIS JETS
-                OCTAL           01030                   # -1 U-AXIS JETS
-                OCTAL           02031                   # -2 U-AXIS JETS
-                OCTAL           01033                   # +1 V-AXIS JETS
-                OCTAL           02034                   # +2 V-AXIS JETS
++SENSTAB        OCTAL           01024                   # +1 U-AXIS JETS
+                OCTAL           02025                   # +2 U-AXIS JETS
+                OCTAL           01027                   # -1 U-AXIS JETS
+                OCTAL           02030                   # -2 U-AXIS JETS
+
+                OCTAL           01032                   # +1 V-AXIS JETS
+                OCTAL           02033                   # +2 V-AXIS JETS
                 OCTAL           01036                   # -1 V-AXIS JETS
                 OCTAL           02037                   # -2 V-AXIS JETS
 
@@ -478,7 +488,7 @@ NORMLPOL        OCTAL           02026                   # +2 U-AXIS JETS
                 OCTAL           01122                   # -1 V-AXIS JETS
                 OCTAL           02123                   # -2 V AXIS JETS
 
-## Page 565
+## Page 531
 
 # X-AXIS TRANSLATION POLICIES:
 
@@ -490,7 +500,7 @@ TRANPOLY        OCTAL           +00042                  #  2 10       * +X TRANS
                 OCTAL           +00021                  #  1  9       *                         4
                 OCTAL           +00125                  #  1  5  9 13 *                         5
 
-## Page 566
+## Page 532
 
 # ROTATION JET POLICIES;
 
@@ -518,6 +528,7 @@ POLTABLE        OCTAL           +14025                  #  5  9       * +Q-AXIS 
                 OCTAL           +02013                  #  2  6       *                         20
                 OCTAL           +02103                  #  2 13       *                         21
                 OCTAL           +02031                  #  6  9       *                         22
+
                 OCTAL           +03133                  #  2  6  9 13 *                         23
 
 # FORCE COUPLE AND +X SENSE POLICIES:
@@ -538,7 +549,7 @@ POLTABLE        OCTAL           +14025                  #  5  9       * +Q-AXIS 
                 OCTAL           -05003                  #  2          *     AND +X SENSE        36
                 OCTAL           -16023                  #  2  9       *                         37
 
-## Page 567
+## Page 533
 
 # +X SENSE POLICIES:
 
@@ -566,7 +577,7 @@ POLTABLE        OCTAL           +14025                  #  5  9       * +Q-AXIS 
                 OCTAL           +02013                  #  2  6       *                         62
                 OCTAL           +03133                  #  2  6  9 13 *                         63
 
-## Page 568
+## Page 534
 
 # -X SENSE POLICIES:
 
