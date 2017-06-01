@@ -17,185 +17,131 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-05-24 MAS  Created from Sunburst 120.
+##              2017-05-31 HG   Transcribed
 
-## NOTE: Page numbers below have not yet been updated to reflect Sunburst 37.
+## Page 535
+# FAILURE MONITOR FOR LM RCS JETS (4 TIMES A SECOND).
 
-## Page 569
-# PROGRAM DESCRIPTION                                     DATE: 7 JAN 67 
+# *** FAILSW CAPABILITY FOR CHECKOUT ONLY ***
 
-#          AUTHOR:  J S MILLER    (MIT INSTRUMENTATION LAB)
-
-#          THIS ROUTINE IS ATTACHED TO T4RUPT, AND IS ENTERED EVERY 960 MS.  ITS FUNCTION IS TO EXAMINE THE STATE
-# OF THE LOW 8 BITS OF CHAN 32 TO SEE IF RCS-JET FAILURE BITS HAVE APPEARED OR DISAPPEARED.  WHEN A STATE CHANGE
-# IS DETECTED WHICH PERSISTS FOR 2 SAMPLES (TO FILTER OUT NOISY SIGNALS), AN LMP COMMAND IS SENT (BUT AT MOST ONE
-# SUCH COMMAND PER SAMPLE) TO ISOLATE THE APPROPRIATE JET PAIR IF THE FAILURE SIGNAL HAS JUST APPEARED.  IF, ON
-# THE OTHER HAND, THE DISAPPEARANCE OF A FAIL-BIT IS DETECTED, THE EVENT IS PRESUMED TO BE THE RESULT OF THE
-# GROUND HAVING SENT AN LMP COMMAND TO OPEN THE ISOLATION VALVE AND NO SUBSEQUENT FAILURE HAVING BEEN DETECTED BY
-# THE DETECTION CIRCUITRY.  IN EITHER CASE, THIS FAILURE-MONITOR PROGRAM RESPONDS BY UPDATING ITS RECORD OF THE
-# STATE OF THE ISOLATION VALVES, AND ALSO THE PAIR OF WORDS IT MAINTAINS FOR USE BY THE DAP IN THE JET-POLICY
-# SELECTION LOGIC.
-
-#          A FEW WORDS ABOUT LMP-RESET COMMANDS:  IN THE CYCLE IN WHICH A VALVE-CLOSURE COMMAND IS ISSUED, THE
-# CORRESPONDING RESET COMMAND IS STORED IN THE REGISTER "JETRESET".  THIS REGISTER IS EXAMINED AT THE BEGINNING OF
-# EACH RCSMONIT CYCLE, AND IF A COMMAND IS WAITING, IT IS SENT IMMEDIATELY.  THIS CAUSES RESET COMMANDS TO BE
-# ISSUED AT ABOUT 960 MS AFTER THE SET COMMANDS.  THIS TECHNIQUE ASSURES THAT NO MORE THAN ONE UN-RESET SET-
-# COMMAND IS ON AT ANY TIME (ALTHOUGH GROUND ACTIONS WILL BE SUPERIMPOSED ON THIS, HOWEVER).
-
-# CALLING SEQUENCE:
-
-#          TC     RCSMONIT        (IN INTERRUPT MODE, EVERY 960 MS.)
-# EXIT:
-
-#          TCF    RCSMONEX    (ALL PATHS EXIT VIA SUCH AN INSTRUCTION.  RCSMONEX IS PRESENTLY EQUATED TO RESUME.)
-
-# ERASABLE INITIALIZATION REQUIRED:
-
-#          VIA SLAP1:  JETRESET          = -0  (RESET-CMD BUFFER EMPTY)
-#                      THISCH32          = +0  (NO FAILURES SENSED YET)
-#                      CH5MASK, CH6MASK  = +0  (0'S IF JETS ARE OK)
-#                      LMPJFAIL          = +0  (ISOLATION VALVES ALL OPEN)
-
-# OUTPUT:
-
-#          CH5MASK & CH6MASK UPDATED  (1'S WHERE JETS NOT TO BE USED)
-#          THISCH32 SET TO INVERTED LOW 8 BITS OF CHAN 32 (HIGH 7 = 0)
-#          LMPJFAIL UPDATED  (1'S WHEN ISOLATION COMMANDS HAVE BEEN SENT)
-#          JETRESET CONTAINS RESET-COMMANDS TO BE SENT NEXT CYCLE THRU.
-
-# DEBRIS:
-
-#          A, L, Q, & RCSMONT1 - 4  (PRESENTLY EQUATED TO RUPTREG1 - 4)
-
-# SUBROUTINES CALLED:
-
-#          STORCOM  (PART OF 1LMP ROUTINE)
-
-## Page 570
+                EBANK=          DT
                 BANK            12
-                EBANK=          STATE                   # NO SWITCHED ERASABLE USED.
 
-RCSMONIT        CCS             JETRESET                # CHECK WHETHER A RESET IS WAITING.
-                TC              STORCOM         -1      # THERE IS A RESET TO SEND.  DO IT.
-                CS              ZERO
-                TS              JETRESET                # DEACTIVATE THE BUFFER.
+RCSMONIT        TCF             RESUME                  # *** TO STOP ENDLESS LOOPS. ***
 
-AFTRESET        CS              ZERO
-                EXTEND                                  # PICK UP & INVERT INVERTED CHANNEL 32.
+
+
+                TCF             ENDRCSFL                # DO NOTHING IF POITIVE
+
+                CA              LASTFAIL                # LAST FAILURE CHANNEL VALUE
+                EXTEND
                 RXOR            32
-                MASK            LOW8                    # KEEP JET-FAIL BITS ONLY.
-                XCH             THISCH32
-                TS              RCSMONT2                # HANG ON TO PREVIOUS CH32 STATE.
-
-                MASK            THISCH32                #        -   --
-                TS              L                       # FORM PTL + PTL.
-                CS              LMPJFAIL                #   (  P = PREVIOUS CH 32 STATE,
-                MASK            L                       #      T = THIS CH 32 STATE,
-                TS              RCSMONT3                #      L = LMP ISOLATION VALVE CMD STATE )
-                CS              RCSMONT2
-                TS              L
-                CS              THISCH32
-                MASK            L
-                MASK            LMPJFAIL
-                ADS             RCSMONT3                # BITS HERE NZ IF ACTION IS DUE NOW.
+                MASK            LOW8
+                EXTEND
+                BZF             NOSTCHG                 # NO STATUS VHANGE, FINISHED
 
                 EXTEND
-                BZF             RCSMONEX                # QUIT NOW IF NO ACTION REQUIRED.
-
-                EXTEND
-                DCA             RCSMONAD
+                DCA             MNTRCS
                 DTCB
+                EBANK=          DT
+MNTRCS          2CADR           RCSMNTR
+ENDT4S          EQUALS
 
 
-
-                EBANK=          STATE                   # NO SWITCHED ERASABLE USED.
-RCSMONAD        2CADR           RCSMON
-
-## Page 571
-                BANK            26
-
-RCSMON          CA              RCSMONT3
-                EXTEND
-                MP              BIT7                    # MOVE BITS 8 - 1 OF A TO 14 - 7 OF L.
-                XCH             L                       # ZERO TO L IN THE PROCESS.
-
- -3             INCR            L
-                DOUBLE                                  # BOUND TO GET AN OVERFLOW, SINCE WE
-                OVSK                                    # ASSURED INITIAL NZ IN A.
-                TCF             -3
-
-                CCS             L                       # PICK UP C(L)-1.
-                DOUBLE
-                TS              RCSMONT4                # STORE FOR LATER.
-
-                INDEX           L
-                CA              BIT8            -1
-                TS              RCSMONT3                # SAVE THE RELEVANT BIT (8 - 1)
-                MASK            LMPJFAIL
-                CCS             A
-                TCF             LMPBIT=1
-
-                EXTEND                                  # LMPBIT = 0.
-                INDEX           RCSMONT4
-                DCA             KILLPAIR                # COMMAND TO ISOLATE A PAIR, & ITS RESET.
-                LXCH            JETRESET                # PUT THE RESET COMMAND AWAY FOR NEXT TIME
-                TC              STORCOM                 # SEND THE ISOLATION COMMAND.
-
-                CA              RCSMONT3
-                ADS             LMPJFAIL                # SET THE BIT SHOWING COMMAND SENT.
-
-                CS              CH5MASK                 # SET THE JET-FAIL BITS IN CH5MASK &
-                INDEX           RCSMONT4                # CH6MASK.
-                MASK            FAILTABL
-                ADS             CH5MASK
-
-                CS              CH6MASK
-                INDEX           RCSMONT4
-                MASK            FAILTABL        +1
-                ADS             CH6MASK
-
-                TCF             RCSMONEX                # DONE.
-
-## Page 572
-LMPBIT=1        CS              RCSMONT3                # THE GROUND HAS RE-ENABLED A PAIR.
-                MASK            LMPJFAIL                # DON'T USE ADS BECAUSE OF THE -0 CASE.
-                TS              LMPJFAIL
-
-                INDEX           RCSMONT4                # TURN OFF THE JET-FAIL BITS IN CH5MASK &
-                CS              FAILTABL                # CH6MASK.
-                MASK            CH5MASK
+                BANK            20
+                EBANK=          DT
+RCSMNTR         CA              ZERO                    # THERE IS A DIFFERENCE, CLEAR MASKS
                 TS              CH5MASK
-
-                INDEX           RCSMONT4
-                CS              FAILTABL        +1
-                MASK            CH6MASK
                 TS              CH6MASK
-                TCF             RCSMONEX                # DONE.
 
+                EXTEND                                  # READ PRESENT FAILURES
+                READ            32
+                TS              LASTFAIL                # SAVE FOR NEXT PASS
 
+                COM                                     # FAILURES NOW ONES
+                EXTEND
+                MP              BIT7                    # SHIFT TO TEST LOW 8 BITS
+                CA              ZERO
 
-RCSMONEX        EQUALS          RESUME                  # CHANGE THIS TO ATTACH SOMETHING ON.
+                TS              FAILCTR                 # INITIALIZE COUNTER
+                CA              L
+                TCF             NXTRCSPR        +1
 
-## Page 573
-#          IN THE UPPER WORD OF EACH ENTRY OF THE KILLPAIR TABLE IS THE LMP COMMAND CODE TO ISOLATE A JET-PAIR.
-# BIT 15 = 1 TO ALLOW USE OF THE "STORCOM" LMP ROUTINE.  THE LOWER WORD OF EACH ENTRY CONTAINS THE RESET-COMMAND
-# CODE PLUS ONE, WHICH CORRESPONDS TO THE UPPER WORD.  (THE EXTRA +1 IS REMOVED BY THE CCS AT RCSMONIT.)
+ -1             AD              BIT1
+NXTRCSPR        INCR            FAILCTR
+ +1             DOUBLE
 
-KILLPAIR        2OCT            40250           00252   # 2A. JETS 10 & 11.  CMDS 168 & 169.
-                2OCT            40170           00172   # 2B. JETS  9 & 12.  CMDS 120 & 121.
-                2OCT            40134           00136   # 1A. JETS 13 & 15.  CMDS  92 &  93.
-                2OCT            40154           00156   # 1B. JETS 14 & 16.  CMDS 108 & 109.
-                2OCT            40156           00160   # 3B. JETS  6 &  7.  CMDS 110 & 111.
-                2OCT            40310           00312   # 4B. JETS  1 &  3.  CMDS 200 & 201.
-                2OCT            40136           00140   # 3A. JETS  5 &  8.  CMDS  94 &  95.
-                2OCT            40350           00352   # 4A. JETS  2 &  4.  CMDS 232 & 233.
+## Page 536
+                TS              FAILTEMP
+                TCF             NXTRCSPR
 
-#          FAILTABL ENTRIES CONTAIN THE BIT FOR CH5MASK IN THE UPPER WORD, AND THE BIT FOR CH6MASK IN THE LOWER.
+                INDEX           FAILCTR
+                TC              RCSFJUMP                # GO THROUGH JUMP TABLE
 
-FAILTABL        2OCT            00040           00010
-                2OCT            00020           00020
-                2OCT            00100           00004
-                2OCT            00200           00200
-                2OCT            00010           00001
-                2OCT            00001           00002
-                2OCT            00004           00040
-                2OCT            00002           00100
+                CCS             FAILTEMP
+                TCF             NXTRCSPR        -1      # FINISH EARLY, OR MORE TO DO
+
+                TCF             ENDRCSFL
+RCSFJUMP        TCF             FM10/11
+                TCF             FM9/12
+                TCF             FM13/15
+                TCF             FM14/16
+                TCF             FM6/7
+                TCF             FM1/3
+                TCF             FM5/8
+                TCF             FM2/4
+
+FM10/11         CA              BIT6
+                ADS             CH5MASK
+                CA              BIT4
+                ADS             CH6MASK
+                TC              Q
+
+FM9/12          CA              BIT5
+
+                ADS             CH5MASK
+                CA              BIT5
+                ADS             CH6MASK
+                TC              Q
+
+FM13/15         CA              BIT7
+                ADS             CH5MASK
+                CA              BIT3
+                ADS             CH6MASK
+                TC              Q
+
+FM14/16         CA              BIT8
+                ADS             CH5MASK
+                CA              BIT6
+                ADS             CH6MASK
+                TC              Q
+
+FM6/7           CA              BIT4
+                ADS             CH5MASK
+                CA              BIT1
+                ADS             CH6MASK
+                TC              Q
+
+FM1/3           CA              BIT1
+
+## Page 537
+                ADS             CH5MASK
+                CA              BIT2
+                ADS             CH6MASK
+                TC              Q
+
+FM5/8           CA              BIT3
+                ADS             CH5MASK
+                CA              BIT6
+
+                ADS             CH6MASK
+                TC              Q
+
+FM2/4           CA              BIT2
+                ADS             CH5MASK
+                CA              BIT7
+                ADS             CH6MASK
+                TC              Q
+
+ENDRCSFL        EQUALS          RESUME
+NOSTCHG         EQUALS          RESUME
