@@ -126,11 +126,11 @@ CHKVISFZ        TC              T6JOBCHK                # CHECK FOR T6 RUPT.
 
 ## Page 470
 
-                BZF             DETENTCHK               # BRANCH FOR RATE COMMAND
+                BZF             DETENTCK                # BRANCH FOR RATE COMMAND
 
                 CCS             DELAYCTR                # LOOK FOR JET TO TURN ON
 
-                TCF             WHICONE
+                TCF             WHICHONE
 
                 TCF             CHEKALL6
 
@@ -186,7 +186,7 @@ CHEKALL6        EXTEND
                 TS              DELAYCTR                # WILL CAUSE RUPT TO BE ENABLED NEXT TIME
                 TCF             JETSOFF
 
-DETNETCK        CA              BIT15
+DETENTCK        CA              BIT15
                 EXTEND
                 RAND            31                      # CHECK OUT-OF-DETENT BIT.INVERTED.
                 EXTEND
@@ -240,7 +240,7 @@ RHCMOVED        CAF             BIT1                    # CHECKING THE RATE COMM
 # READ,ZERO, AND ENABLE COUNTERS
 # SYSTEM HAS BEEN IN RATE COMMAND FOR AT LEAST THE TIME OF A CAP CHARGE
 
-                CAE             P_RHCCTR                # 1 BIT IN P-RHCCTR WORTH 0.6256 DEG/SEC
+                CAE             P-RHCCTR                # 1 BIT IN P-RHCCTR WORTH 0.6256 DEG/SEC
                 EXTEND
                 MP              BIT9
                 CA              L
@@ -257,7 +257,7 @@ RHCMOVED        CAF             BIT1                    # CHECKING THE RATE COMM
                 WOR             13
                 TCF             OBEYRATE
 #.................................................................................
-JJSTOUT         INCR            DAPBOOLS                # ALWAYS SET BIT1 ON RATE COMMAND BIT
+JUSTOUT         INCR            DAPBOOLS                # ALWAYS SET BIT1 ON RATE COMMAND BIT
                 CAF             BIT2
                 EXTEND
 
@@ -305,7 +305,7 @@ OBEYRAPE        CCS             PERROR                  # GET ABVAL OF RATE P-ER
                 TCF             +4
                 TCF             JETSOFF
                 TCF             +2
-                TCF             TJETSOFF
+                TCF             JETSOFF
                 AD              BIT1
                 TS              PRATEDIF                # ABVAL OF RATE ERROR SCALED AT PI/4
 
@@ -318,7 +318,7 @@ OBEYRAPE        CCS             PERROR                  # GET ABVAL OF RATE P-ER
 
                 CAE             PRATEDIF                # START TJET COMPUTATION
                 EXTEND
-                MP              1/JTSP                  # 1/2JTACC SCALED AT 2EXP(8)/PI
+                MP              1/2JTSP                 # 1/2JTACC SCALED AT 2EXP(8)/PI
                 EXTEND
 
                 MP              BIT3                    # ENOUGH FOR 4 JETS
@@ -695,7 +695,7 @@ PTJETLAW        TS              EDOT
                 AD              BIT11                   # 1SECOND SCALED AT 16 SECONDS
                 EXTEND
                 BZMF            MULTIJET
-                CS              1.5CSP
+                CS              +1.5CSP
                 AD              TERMA
                 EXTEND
                 BZMF            +3
@@ -720,7 +720,7 @@ MULTIJET        CAF             POSMAX
                 MP              .5ACCMIN
                 AD              E
                 AD              DB
-                AD              DBMNMPAX
+                AD              DBMINIMP
                 EXTEND
                 BZMF            +2
 
