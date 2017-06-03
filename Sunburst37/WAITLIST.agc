@@ -17,10 +17,9 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-05-24 MAS  Created from Sunburst 120.
+##		2017-06-03 TVB	Transcribed.
 
-## NOTE: Page numbers below have not yet been updated to reflect Sunburst 37.
-
-## Page 1062
+## Page 1001
 
 # PROGRAM DESCRIPTION                                                           DATE - 10 OCTOBER 1966
 # MOD NO - 2                                                                    LOG SECTION - WAITLIST
@@ -69,7 +68,7 @@
 
 # ALARM OR ABORT EXIT MODES-
 
-## Page 1063
+## Page 1002
 
 #       TC      ABORT
 #       OCT     1203    (WAITLIST OVERFLOW - TOO MANY TASKS)
@@ -98,8 +97,8 @@
 #               LET Y  = LENGTH OF TIME OF INHIBIT INTERRUPT AFTER T3RUPT
 #               LET Z  = LENGTH OF TIME TO PROCESS TASKS WHICH ARE DUE THIS T3RUPT BUT DISPATCHED EARLIER.
 #       (Z=0, USUALLY)
-#               LET DELTD  = THE ACTUAL TIME TAKEN TO GIVE CONTROL TO 2CADR
-#            THEN DELTD = TS+DELTA T -X +Y +Z +1.05MS* +COUNTERS*
+#               LET DELTD = THE ACTUAL TIME TAKEN TO GIVE CONTROL TO 2CADR
+#            THEN   DELTD = TS+DELTA T -X +Y +Z +1.05MS* +COUNTERS*
 #
 #       *-THE TIME TAKEN BY WAITLIST ITSELF AND THE COUNTER TICKING DURING THIS WAITLIST TIME.
 #
@@ -122,7 +121,7 @@ DLY2            CAF             WAITBB                          # ENTRY FROM FIX
 
 # RETURN TO CALLER AFTER TASK INSERTION:
 
-## Page 1064
+## Page 1003
 
 LVWTLIST        CA              WAITBANK                        
                 TS              BBANK                          
@@ -140,7 +139,7 @@ FIXDELAY        INDEX           Q                               # BOTH ROUTINES 
 
 # RETURN TO CALLER +1 AFTER WAITING THE DT AS ARRIVING IN A.
 
-VARDELAY        XCH             Q                               # DT TO Q.  TASK ADRES TO WAITADR.
+VARDELAY        XCH             Q                               # DT TO Q. TASK ADRES TO WAITADR.
                 TS              WAITADR                         
                 CA              BBANK                           # BBANK IS SAVED DURING DELAY.
                 TS              L                               
@@ -150,7 +149,7 @@ VARDELAY        XCH             Q                               # DT TO Q.  TASK
 
 DELAYEX         TCF             TASKOVER        -2              # RETURNS TO TASKOVER
 
-## Page 1065
+## Page 1004
 
 # ENDTASK MUST BE ENTERED IN FIXED-FIXED SO IT IS DISTINGUISHABLE BY ITS ADRES ALONE.
 
@@ -169,7 +168,7 @@ SVCT3           CCS             FLAGWRD2                        # DRIFT FLAG
 
                 TCF             TASKOVER                        
 
-## Page 1066
+## Page 1005
 
 # BEGIN TASK INSERTION.
 
@@ -211,7 +210,7 @@ WAIT2           TS              WAITBANK                        # BBANK OF CALLI
                 EXTEND                                          # ZERO INDEX Q.
                 QXCH            7                               # (ZQ)
 
-## Page 1067
+## Page 1006
 WTLST4          XCH             LST1                            
                 XCH             LST1            +1              
                 XCH             LST1            +2              
@@ -240,7 +239,7 @@ WTLST4          XCH             LST1
                 BZF             LVWTLIST                        # FIXED SO ITS ADRES ALONE DISTINGUISHES
                 TCF             WTABORT                         # IT.
 
-## Page 1068
+## Page 1007
 
 WTLST5          CCS             A                               # TEST TD - T2 + 1
                 AD              LST1            +1              
@@ -284,7 +283,7 @@ WTLST5          CCS             A                               # TEST TD - T2 +
                 TC              WTLST2                          
                 OCT             6                               
 
-## Page 1069
+## Page 1008
 
  +4             CCS             A                              
                 AD              LST1            +7              
@@ -303,7 +302,7 @@ WTABORT         TC              ABORT                           # NO ROOM IN THE
 
 OCT40201        OCT             40201                           
 
-## Page 1070
+## Page 1009
 
 # THE ENTRY TO WTLST2 JUST PRECEDING OCT N IS FOR T  LE TD LE T   -1.
 #                                                  N           N+1
@@ -330,7 +329,7 @@ WTLST2          TS              WAITTEMP                        # C(A) = -(TD - 
 
 #       C(TIME3)        =       1.0 - (T1 - T)
 
-#       C(LST1 )         =       - (T2 - T1) + 1
+#       C(LST1   )       =       - (T2 - T1) + 1
 #       C(LST1+1 )       =       - (T3 - T2) + 1
 #       C(LST1+2 )       =       - (T4 - T3) + 1
 #       C(LST1+3 )       =       - (T5 - T4) + 1
@@ -343,7 +342,7 @@ WTLST2          TS              WAITTEMP                        # C(A) = -(TD - 
 #       C(LST2+8 )       =       2CADR TASK5
 #       C(LST2+10)       =       2CADR TASK6
 
-## Page 1071
+## Page 1010
 
 # ENTERS HERE ON T3 RUPT TO DISPATCH WAITLISTED TASK.
 
@@ -380,7 +379,7 @@ T3RUPT2         CAF             NEG1/2                          # DISPATCH WAITL
 
                 DTCB                                            
 
-## Page 1072
+## Page 1011
 
 # RETURN, AFTER EXECUTION OF T3 OVERFLOW TASK:
 
@@ -397,7 +396,7 @@ NOQRSM          CA              BANKRUPT
 NOQBRSM         DXCH            ARUPT                           
                 RESUME                                          
 
-## Page 1073
+## Page 1012
 
 # LONGCALL
 
@@ -451,7 +450,7 @@ LONGCYCL        EXTEND                                          # CAN WE SUCCESF
                                                                 # TED BIT14 (1 OVER HALF THE POS. VALUE
                                                                 # REPRESENTABLE IN SINGLE WORD)
 
-## Page 1074                
+## Page 1013
 
                 NOOP                                            # CAN:T GET HERE **********
                 TCF             +1                              
@@ -462,7 +461,7 @@ DPBIT14         OCT             00000
 
                                                                 # LONGCALL
 
-LASTTIME        CA              BIT14                           # GET BACK THE CORRECT DELTA T FOR WAITLIST
+LASTTIME        CA              BIT14                           # GET BACK THE CORRECT DELTA TFOR WAITLIST
                 ADS             LONGTIME        +1              
                 TC              WAITLIST                        
                 EBANK=          LST1                            
