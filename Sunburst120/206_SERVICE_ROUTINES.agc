@@ -15,6 +15,7 @@
 ##				changes made, though the general quality of the printout in this
 ##				section makes this a less-convincing procedure than it would normally
 ##				be.
+##              2017-06-03 MAS  Pulled in corrections from the Shepatin 0 / Sunburst 37 transcription.
 
 ## Page 815
 # **SERVICER ROUTINES**
@@ -54,7 +55,7 @@
 
 #     THE NORMAL EXIT IS THRU AVEGEXIT, WHICH MUST HAVE BEEN SET BY THE USER. THE FINAL EXIT, SET INTO AVEGEXIT BY
 # READACCS WHEN IT  FINDS THE AVERAGE G FLAG DOWN, SETS UP FREE FALL GYRO COMPENSATION, SETS THE DRIFT FLAG ON,
-# PERFORMS AVETOMID ROUTINE, AND TRANSFERS CONTROL TO P00H, THUS CLEARING  ALL ACTIVITY UNTIL A NEW MISSION
+# PERFORMS AVETOMID ROUTINE, AND TRANSFERS CONTROL TO POOH, THUS CLEARING  ALL ACTIVITY UNTIL A NEW MISSION
 # PHASE IS DUE.
 
 # ***** WARNING TO USERS *****
@@ -62,7 +63,7 @@
 # THE USER MUST SET DVMNEXIT TO THE 2CADR OF A JOB TO BE PERFORMED WHEN ENGINE SHUTDOWN IS DETECTED BY SERVICER.
 # IN GENERAL, THE AVERAGE G FLAG WILL BE TURNED OFF BY THE USER AT THAT TIME, ALLOWING JUST ONE MORE PASS THROUGH
 # AVERAGE G.  ALL ACTIVITY OF THE USERS MISSION PHASE MUST HAVE BEEN COMPLETED BEFORE THIS LAST PASS THROUGH
-# AVERAGE G, DUE TO THE PERFORMANCE OF P00H AS DESCRIBED ABOVE.
+# AVERAGE G, DUE TO THE PERFORMANCE OF POOH AS DESCRIBED ABOVE.
 
 #     AVGEXIT MUST BE SET BY THE USER TO THE 2CADR OF THE JOB (E.G., STEERING) TO BE PERFORMED AFTER EACH PASS
 # THROUGH AVERAGE G.  IF NO OTHER JOB IS TO BE DONE, AVEGEXIT SHOULD BE SET TO SERVEXIT.
@@ -359,9 +360,8 @@ PLUSXDVD        DEC             45                      # 22.5 CM/SEC SQ = DESCE
 # **************************************************
 
 PGNCSMON        CAF             BIT2                    # CHECK CHANNEL 30 TO SEE IF STAGING HAS
-## The following line wasn't printed. It was disassembled from the octal listing. Presumably it continues
-## the comment on the above line with something like "OCCURRED" or "HAPPENED".
-                EXTEND
+## The following line wasn't printed. It has been taken from Sunburst 37/Shepatin 0.
+                EXTEND                                  # OCCURRED.  IF BIT2 IS ON WE ARE UNSTAGED
 
 ## There is a completely empty page in the listing here. Instructions continue on the next page, with no
 ## page break header from Yul.
@@ -373,8 +373,10 @@ PGNCSMON        CAF             BIT2                    # CHECK CHANNEL 30 TO SE
 ## been disassembled from the octal listing and symbol table. A few comment fragments made it through
 ## on the last garbled line. They read:
 ## " HRUS   IS  K   R S    H  DV M  I  R"
+## A single-word comment was pulled in from Sunburst 37/Shepatin 0. Given other context, the above
+## letters are likely part of something like "THRUST IS OK -- RESET <something> DV MONITOR"
                 CS              PLUSXDVA
-                AD              ABDELV
+                AD              ABDELV                  # ACCELERATION
                 EXTEND
                 BZMF            THRUSTLO
                 CA              SETDVCNT
@@ -524,13 +526,13 @@ AVGEND          CA              PIPTIME         +1      # FINAL AVERAGE G EXIT
                 DXCH            Z
 
                 TC              PHASCHNG
-                OCT             04025                   # P00H WILL TURN OFF PHASE5
+                OCT             04025                   # POOH WILL TURN OFF PHASE5
 
 ## The following line was not printed. It was instead disassembled from the octal listing.
                 CA              BIT6
                 MASK            FLAGWRD1                # FLAG IS UP BUT RATHER TO ENDOF JOB
                 EXTEND
-                BZF             P00H
+                BZF             POOH
                 TC              PHASCHNG                # MAKE GROUP 5 INACTIVE
                 OCT             5
 
@@ -553,20 +555,22 @@ NORMLIZE        INHINT
                 CAF             ELEVEN                  # INITIALIZE INDEX-DEC 11
                 TS              RUPTREG1
 ## The following six instructions were printed on two lines. They were instead disassembled from the octal listing
-## and symbol table. A single letter of a comment made it through: "       V       ".
+## and symbol table. A single letter of a comment made it through: "       V       ". They have since been
+## confirmed to match Shepatin 0 / Sunburst 37, and the comment has been restored.
                 INDEX           RUPTREG1
                 CA              RAVEGON
                 INDEX           RUPTREG1
-                TS              RN
+                TS              RN                      # STORE RN, VN
                 CCS             RUPTREG1
                 TCF             NORMLIZE        +2
 ## End of disassembled instructions.
 
                 EXTEND
-## The following five lines were all printed on one. They have been disassembled from the octal listing. Enough of
-## a comment made it through for me to be able to tell what line it was for (SAVE something TIME FOR DOWNLINK).
+## The following five lines were all printed on one. They have been disassembled from the octal listing. Part of
+## a comment made it through: "S A    IM  F R DWNLINK". The full comment has been restored from Shepatin 0 /
+## Sunburst 37.
                 DCA             TAVEGON
-                DXCH            STATIME                 # S A     IM  F R  DWNLINK
+                DXCH            STATIME                 # STATE TIME FOR DWNLINK
                 RELINT
                 TC              INTPRET
                 VLOAD           CALL
@@ -600,6 +604,8 @@ NORMLIZE        INHINT
 #    RN, VN, GDT/2, UNITR, RMAG
 
 # OUTPUT
+## The following line was not printed. It was pulled from Shepatin 0 / Sunburst 37.
+#    RIGNITION IN RN*2(+24)M
 #    VIGNITION IN VN*2(+7)M/CS
 #    GDT/2 AT IGNITION IN GDT/2*2(+7)M/CS
 #    UNIT RIGNITION IN UNITR *2(+1)M
