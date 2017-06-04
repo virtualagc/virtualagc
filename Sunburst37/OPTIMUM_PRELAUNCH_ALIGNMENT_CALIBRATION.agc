@@ -17,14 +17,13 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-05-24 MAS  Created from Sunburst 120.
+##              2017-06-03 HG   Transcribed
 
-## NOTE: Page numbers below have not yet been updated to reflect Sunburst 37.
-
-## Page 450
+## Page 430
 # PROGRAM NAME-OPTIMUM PRELAUNCH ALIGNMENT CALIBRATION
 # DATE- NOVEMBER 2  1966
 # BY- GEORGE SCHMIDT IL 7-146 EXT. 126
-# MOD NO 2
+# MOD NO 1
 # FUNCTIONAL DESCRIPTION
 
 # THIS LOG SECTION CONSISTS OF PRELAUNCH ALIGNMENT AND GYRO DRIFT TESTS
@@ -35,13 +34,14 @@
 # OPTIMUM STATISTICAL FILTER. FOR A DESCRIPTION SEE E-1973.BOTH OF THESE
 # ROUTINES USE STANDARD SYSTEM TEST LEADIN PROCEDURES. THE INITIALIZATION
 # PROCEDURE FOR THE DRIFT TESTS IS IN THE JDC S. THE INITIALIZATION METHOD
-# FOR GYROCOMPASS IS IN A STG MEMO FOR EACH ASSEMBLY.
+
+# FOR GYROCOMPASS IS IN A SOON TO COME SYSTEM TEST GROUP MEMO.
 # THIS LOG SECTION ALWAYS STARTS BY A CADR IN IMU PERF. TESTS 2 AND BEGINS
 # AT ESTIMS. THE PIPS ARE READ EVERY .5 SEC IN COMPASS AND 1 SEC IN DRIFT
 # TESTS. THEN IN BOTH CASES RELEVANT COMPUTATION IS DONE. THE KEY ERASABLE
 # IS GEOCOMPS- 0 WE ARE IN A DRIFT TEST -NONZERO WE ARE IN COMPASS.
 # THE GYROCOMPASS HAS THE CAPABILITY TO ALIGN TO ANY ORIENTATION,HAS THE
-# CAPABILITY TO BE COMPENSATED FOR
+# CAPABILITY TO CHANGE ORIENTATIONS WHILE RUNNING,IS COMPENSATED FOR
 # COMPONENT ERRORS,IS CAPABLE OF OPTICAL VERIFICATION( CSM ONLY).
 
 # SUBROUTINES CALLED
@@ -54,7 +54,7 @@
 # NORMAL EXIT
 
 # DRIFT TESTS- LENGTHOT GOES TO ZERO-RETURN TO IMU PERF TEST2 CONTROL
-# GYROCOMPASS-GRR RECEIVED OR G LEVEL EXCEEDS GLIFTOFF-START UP MP 2
+# GYROCOMPASS-RECEIVE GUIDANCE REFERENCE RELEASE SIGNAL-TC MP2JOB
 #                                                      206 IMPLEMENTATION
 
 # ALARMS
@@ -68,156 +68,151 @@
 # DRIFT TESTS- FLASHING DISPLAYS OF RESULTS-CONTROLLED IN IMU PERF TESTS 2
 # COMPASS-PROGRAM MODE LIGHTS TELL YOU WHAT PHASE OF PROGRAM YOU ARE IN
 #    01    INITIALIZING THE PLATFORM POSITION AND ERASABLE
+#    05    ERECTION     600 SECONDS SPENT ERECTING PLATFORM
 #    02    GYROCOMPASSING
 #    03    DOING OPTICAL VERIFICATION (CSM)
+
+## Page 431
 #    04    GRR SIGNAL RECEIVED FINISH UP TORQUE AND TC MP2JOB
-## Page 451
-#                                                      206 IMPLEMENTATION
+#                                                       206 IMPLEMENTATION
 
 # DEBRIS
 
-# ALL CENTRALS,ALL OF EBANK XSM,AND 78 DEC LOCATIONS  (SEE STOREDTA..
+# ALL CENTRALS -ALL OF EBANK 5 EBANK4 FROM JETSTEP TO JETSTEP +77D
 
-## Page 452
+## Page 432
                 BANK            35
                 EBANK=          XSM
+
+
 
 # G SCHMIDT SIMPLIFIED ESTIMATION PROGRAM FOR ALIGNMENT CALIBRATION. THE
 # PROGRAM IS COMPLETELY RESTART PROFED. DATA STORED IN BANK4.
 ESTIMS          TC              PHASCHNG
                 OCT             00075
-                CAF		BIT1
-                TC		SETRSTRT			# SET RESTART FLAG
-                
-RSTGTS1         INHINT                                          #  COMES HERE PHASE1 RESTART
+RSTGTS1         INHINT                                  #  COMES HERE PHASE1 RESTART
                 CA              TIME1
                 TS              GTSWTLST
-                CS             	ZERO 
-                TS              PIPAX                           
-                TS              PIPAY                           
-                TS              PIPAZ                           
+                CS              ZERO                    # ZERO THE PIPS
+                TS              PIPAX
+                TS              PIPAY
+                TS              PIPAZ
                 TS              DELVX           +1
                 TS              DELVY           +1
                 TS              DELVZ           +1
-                RELINT                                          
+                RELINT
                 TC              SETUPER
-                CA              77DECML                         
-                TS              ZERONDX                         
-                CA              ALXXXZ                          
+                CA              77DECML
+                TS              ZERONDX
+                CA              ALXXXZ
                 TC              BANKCALL
-                CADR            ZEROING                         
-                TC              INTPRET                         
-                VLOAD                                           
+                CADR            ZEROING
+
+                TC              INTPRET
+                VLOAD
                                 INTVAL          +2
                 STORE           ALX1S
                 EXIT
 
-                CCS             GEOCOMPS                        # GEOCOMPS IN NON ZERO IF COMPASS
+                CCS             GEOCOMPS                # GEOCOMPS IN NON ZERO IF COMPASS
                 TC              +2
-                TC              SLEEPIE         +1              
-                CA              LENGTHOT                        #   TIMES FIVE IS THE NUM OF SEC ERECTING
+                TC              SLEEPIE         +1
+                CA              LENGTHOT                #   TIMES FIVE IS THE NUM OF SEC ERECTING
                 TS              ERECTIME
-                
-                CA		ONE
-                TS		PHASENUM
+
+                CA              ONE
+                TS              PHASENUM
                 TC              NEWMODEX
-                OCT             02
+                OCT             05
                 TC              BANKCALL
-                CADR            GCOMPZER                        #   ZERO COMPENSATION PROGRAM REGISTERS
+                CADR            GCOMPZER                #   ZERO COMPENSATION PROGRAM REGISTERS
                 TC              ANNNNNN
 
-## Page 453
-ALLOOP          CA              TIME1
-                XCH             GTSWTLST                        # STORE TIME TO SET UP NEXT WAITLIST.
-                TS		OLDGT				# SAVE LAST READ TIME.
-                
+## Page 433
+ALLOOP          INHINT
+                CA              TIME1
+                XCH             GTSWTLST                # STORE TIME TO SET UP NEXT WAITLIST.
 ALLOOP3         CA              ALTIM
                 TS              GEOSAVED
                 TC              PHASCHNG
                 OCT             00115
-ALLOOP1         CA              GEOSAVED
+                TC              +2
+
+ALLOOP1         INHINT                                  # RESTARTS COME IN HERE
+                CA              GEOSAVED
                 TS              ALTIM
                 CCS             A
-                CA              A                               # SHOULD NEVER HIT THIS LOCATION
-                TS              ALTIMS                          
-                CS              A                               
-                TS              ALTIM                           
+                CA              A                       # SHOULD NEVER HIT THIS LOCATION
+                TS              ALTIMS
+                CS              A
+                TS              ALTIM
                 CA              PIPAX
                 TS              DELVX
                 CA              PIPAY
                 TS              DELVY
                 CA              PIPAZ
                 TS              DELVZ
-                CA		SCHOCT23
-                TC		NEWPHASE
-                OCT		00005         
-SPECSTS         CS              ZERO                            
-                TS              PIPAX                           
-                TS              PIPAY                           
-                TS              PIPAZ   
-                CAF		PRIO20
-                TC		FINDVAC
-                EBANK=		XSM
-                2CADR           ALFLT                           # START THE JOB
+                CA              OCT31
+                TC              NEWPHASE
+                OCT             00005
+PIPSTRTS        RELINT
+                CAF             ZERO
+                TS              PIPAX
+                TS              PIPAY
+                TS              PIPAZ
+                TC              PHASCHNG
 
-                TC              TASKOVER                        
+                OCT             00235
+                RELINT
+SPECSTS         CAF             PRIO20
+                TC              FINDVAC
+                EBANK=          XSM
+                2CADR           ALFLT                   # START THE JOB
 
-## Page 454
-ALFLT           TC              STOREDTA                        #  STORE DATA IN CASE OF RESTART IN JOB
-                TC              PHASCHNG                        # THIS IS THE JOB DONE EVERY ITERATION
+                TC              TASKOVER
+
+## Page 434
+ALFLT           TC              STOREDTA                #  STORE DATA IN CASE OF RESTART IN JOB
+                TC              PHASCHNG                # THIS IS THE JOB DONE EVERY ITERATION
                 OCT             00215
-                TCF		+2
-ALFLT1          TC              LOADSTDT                        # COMES HERE ON RESTART
-		CCS		GEOCOMPS
-		TC		+2
-		TC		NORMLOP
-		TC		CHKCOMED			#      SEE IF PRELAUNCH OVER
-		TC		BANKCALL			#  COMPENSATION IF IN COMPASS
-		CADR		1/PIPA
-		CS		GTSWTLST			# SEE IF MEASURED DELV LOOKS LIKE LIFTOFF
-		AD		OLDGT				# HAS OCCURRED.
-		EXTEND
-		BZMF		+3
-		AD		NEG1/2				# (IF TIME1 OVERFLOWED)
-		AD		NEG1/2
-		TS		MPAC		+3		# DT STORED NEGATIVELY
-		
-		TC		INTPRET
-		
-		SLOAD		SL4				# SCALE DT AT 2(+10) CS.
-				MPAC		+3
-		PDVL		ABVAL
-				DELV
-		DDV						# GET ACC (NEG) IN M/SEC SQ SCALED 2(4)
-		DAD		BMN				# (DV OVFLO GIVES DP POSMAX)
-				GLIFTOFF			# WHEN GLIFTOFF = DP POSMAX, THIS KIND OF
-				GRRNOW				# LIFTOFF DETECTION IS INHIBITED.
-		EXIT						# CONTINUE GYROCOMPASS IF NO LIFTOFF.
+                RELINT                                  # INHINT IN PHASCHNG
+                CCS             GEOCOMPS
+                TC              +2
+                TC              NORMLOP
+                TC              BANKCALL                #  COMPENSATION IF IN COMPASS
+                CADR            1/PIPA
+                TC              NORMLOP
 
-NORMLOP         EXTEND
-		DCA		INTVAL
-		INDEX		FIXLOC
-		DXCH		S1
-		CCS		GEOCOMPS
-		TC		PALFLT				# COMPASS
-		TC		INTPRET				# NO COMPZSS
-ALCGKK          SLOAD           BMN                             
-                                ALTIMS                                          
-                                ALFLT2                                          
-ALKCG           AXT,2           LXA,1                           # LOADS SLOPES AND TIME CONSTANTS AT RQST
-                                12D                                             
-                                ALX1S                                           
-ALKCG2          DLOAD*          INCR,1                          
-                                ALFDK           +144D,1                         
-                DEC             -2                              
-                STORE           ALDK            +10D,2          
-                TIX,2           SXA,1                           
-                                ALKCG2 
-## Page 455                                                                         
-                                ALX1S                                           
 
-		EXIT
-PALFLT		TC		INTPRET
+
+ALFLT1          TC              LOADSTDT                #  COMES HERE ON RESTART
+
+NORMLOP         TC              CHKCOMED                # SEE IF GYROCOMPASS OVER
+
+                TC              INTPRET
+                DLOAD
+                                INTVAL
+                STORE           S1                      #  STEP REGISTERS MAY HAVE BEEN WIPED OUT
+                SLOAD           BZE
+                                GEOCOMPS
+                                ALCGKK
+                GOTO
+                                ALFLT2
+ALCGKK          SLOAD           BMN
+                                ALTIMS
+                                ALFLT2
+ALKCG           AXT,2           LXA,1                   #  LOADS SLOPES AND TIME CONSTANTS AT RQST
+                                12D
+                                ALX1S
+ALKCG2          DLOAD*          INCR,1
+                                ALFDK           +144D,1
+                DEC             -2
+                STORE           ALDK            +10D,2
+                TIX,2           SXA,1
+                                ALKCG2
+
+                                ALX1S
+
 ALFLT2          VLOAD           VXM
                                 DELVX
                                 GEOMTRX
@@ -228,110 +223,123 @@ ALFLT2          VLOAD           VXM
                                 MPAC            +5
                 STORE           DPIPAZ
 
-                SETPD           AXT,1                           # MEASUREMENT INCORPORATION ROUTINES.
+## Page 435
+
+                SETPD           AXT,1                   # MEASUREMENT INCORPORATION ROUTINES.
                                 0
-                                8D                                              
-                SLOAD           DCOMP
+                                8D
+                SLOAD           BZE
                                 GEOCOMPS
-                BMN
-                                ALWAYSG                         # DO A QUICK COMPASS
-DELMLP          DLOAD*          DMP                             
-                                DPIPAY          +8D,1                           
-                                PIPASC                                          
-                SLR             DAD*                           
-                                9D                                              
-                                DELM            +8D,1                           
+                                DELMLP
+                GOTO
+                                ALWAYSG                 # DO A QUICK COMPASS
+DELMLP          DLOAD*          DMP
+                                DPIPAY          +8D,1
+                                PIPASC
+                SLR             DAD*
+                                9D
+                                DELM            +8D,1
                 DSU*            PDDL*
                                 INTY            +8D,1
                                 VLAUN           +8D,1
                 DSU*            DMP
                                 VLAUNS          +8D,1
+
                                 VELSC
-                SL2R                                            
-                DAD             STADR                           
-                STORE           DELM            +8D,1           
-                STORE           DELM            +10D,1   
-                DLOAD*       
+                SL2R
+                DAD             STADR
+                STORE           DELM            +8D,1
+                STORE           DELM            +10D,1
+                DLOAD*
                                 VLAUN           +8D,1
                 STORE           VLAUNS          +8D,1
                 DLOAD
                                 INTVAL          -2
                 STORE           INTY            +8D,1
-                TIX,1           AXT,2                           
-                                DELMLP                                          
-                                4                                               
-ALILP           DLOAD*          DMPR*                           
-                                ALK             +4,2                            
-                                ALDK            +4,2                            
-                STORE           ALK             +4,2  
-## Page 456          
-                TIX,2           AXT,2                           
-                                ALILP                                           
-                                8D                                              
-ALKLP           LXC,1           SXA,1                           
-                                CMPX1                                           
-                                CMPX1                                           
-                DLOAD*          DMPR*                           
-                                ALK             +1,1                            
-                                DELM            +8D,2                           
-                DAD*                                            
-                                INTY            +8D,2                           
-                STORE           INTY            +8D,2   
-                DLOAD*		DAD*        
+                TIX,1           AXT,2
+                                DELMLP
+                                4
+ALILP           DLOAD*          DMPR*
+                                ALK             +4,2
+                                ALDK            +4,2
+                STORE           ALK             +4,2
+                TIX,2           AXT,2
+                                ALILP
+                                8D
+ALKLP           LXC,1           SXA,1
+                                CMPX1
+
+                                CMPX1
+                DLOAD*          DMPR*
+                                ALK             +1,1
+                                DELM            +8D,2
+                DAD*
+                                INTY            +8D,2
+                STORE           INTY            +8D,2
+                DLOAD*          DAD*
+
+## Page 436
                                 ALK             +12D,2
                                 ALDK            +12D,2
-                STORE           ALK             +12D,2          
-                DMPR*           DAD*                            
-                                DELM            +8D,2                           
-                                INTY            +16D,2                          
-                STORE           INTY            +16D,2 
-                DLOAD*		DMP*         
+
+                STORE           ALK             +12D,2
+                DMPR*           DAD*
+                                DELM            +8D,2
+                                INTY            +16D,2
+                STORE           INTY            +16D,2
+                DLOAD*          DMP*
                                 ALSK            +1,1
-                                DELM		+8D,2
-                SL1R		DAD*
+                                DELM            +8D,2
+                SL1R            DAD*
                                 VLAUN           +8D,2
                 STORE           VLAUN           +8D,2
-                TIX,2           AXT,1                           
-                                ALKLP                                           
-                                8D                                              
+                TIX,2           AXT,1
+                                ALKLP
+                                8D
 
 
-LOOSE           DLOAD*          PDDL*                           
-                                ACCWD           +8D,1                           
-                                VLAUN           +8D,1                           
-                PDDL*           VDEF                            
-                                POSNV           +8D,1                           
-                MXV             VSL1                            
-                                TRANSM1                                         
-                DLOAD                                           
-                                MPAC                                            
+LOOSE           DLOAD*          PDDL*
+                                ACCWD           +8D,1
+                                VLAUN           +8D,1
+                PDDL*           VDEF
+                                POSNV           +8D,1
+                MXV             VSL1
+
+                                TRANSM1
+                DLOAD
+                                MPAC
                 STORE           POSNV           +8D,1
-                DLOAD           
+                DLOAD
                                 MPAC            +3
-                STORE           VLAUN           +8D,1  
-                DLOAD         
+                STORE           VLAUN           +8D,1
+                DLOAD
                                 MPAC            +5
-                STORE           ACCWD           +8D,1           
-                TIX,1                                           
-                                LOOSE                                           
-## Page 457
+                STORE           ACCWD           +8D,1
+                TIX,1
+                                LOOSE
 
-                AXT,2           AXT,1                           # EVALUATE SINES AND COSINES
-                                6                                               
-                                2                                               
-BOOP            DLOAD*          DMPR                            
-                                ANGX            +2,1                            
-                                GEORGEJ                                         
-                SR2R                                            
-                PUSH            SIN                             
-                SL1R            XAD,1                           
-                                X1                                              
+
+
+                AXT,2           AXT,1                   # EVALUATE SINES AND COSINES
+                                6
+                                2
+BOOP            DLOAD*          DMPR
+                                ANGX            +2,1
+                                GEORGEJ
+                SR2R
+                PUSH            SIN
+
+                SL1R            XAD,1
+                                X1
+
+## Page 437
                 STORE          16D,2
-                DLOAD                           
-                COS                                             
-                STORE           22D,2                           # COSINES
-                TIX,2           DLOAD                                          
-                                BOOP                                            
+                DLOAD
+                COS
+                STORE           22D,2                   # COSINES
+                TIX,2           DLOAD
+                                BOOP
+
 
 
                                 14D
@@ -357,6 +365,7 @@ BOOP            DLOAD*          DMPR
                                 WANGI
                 PDDL            DMPR
                                 18D
+
                                 20D
                 DMP             SL2R
                                 WANGO
@@ -365,7 +374,6 @@ BOOP            DLOAD*          DMPR
                 DSU             STADR
                 STODL           WPLATO
                                 16D
-## Page 458
                 DMPR            DMP
                                 20D
                                 WANGI
@@ -376,6 +384,8 @@ BOOP            DLOAD*          DMPR
                 DAD
                                 DRIFTI
                 DSU
+
+## Page 438
                 PDDL            DMPR
                                 WANGT
                                 WANGI
@@ -390,6 +400,7 @@ BOOP            DLOAD*          DMPR
                 DMP             SL1R
                                 14D
                 BDSU
+
                 DMPR
                                 WANGI
                 PDDL            DMPR
@@ -399,8 +410,8 @@ BOOP            DLOAD*          DMPR
                                 WANGO
                 BDSU
                                 DRIFTT
-                DAD                                             #  WPLATT NOW IN MPAC
-                PUSH                                            # PUSH IT DOWN-X IT BY SANG +2
+                DAD                                     #  WPLATT NOW IN MPAC
+                PUSH                                    # PUSH IT DOWN-X IT BY SANG +2
                 DMPR            SR1R
                                 12D
                 PDDL            DMPR
@@ -413,10 +424,10 @@ BOOP            DLOAD*          DMPR
                                 GEORGEK
                 SRR             DAD
                                 13D
+
                                 ANGX
                 STODL           ANGX
                 DMPR            DAD
-## Page 459                
                                 14D
                                 WPLATI
                 DMPR            SRR
@@ -426,7 +437,9 @@ BOOP            DLOAD*          DMPR
                                 ANGY
                 STODL           ANGY
                                 18D
-                DMP             SL1R                            # MULTIPLY X WPLATT -SL1- PUSH AND RELOAD
+                DMP             SL1R                    # MULTIPLY X WPLATT -SL1- PUSH AND RELOAD
+
+## Page 439
                 PDDL            DMPR
                                 12D
                                 WPLATO
@@ -443,8 +456,10 @@ BOOP            DLOAD*          DMPR
                 TC              SLEEPIE
                 TC              SETUPER1
 
-                
-ALWAYSG         DLOAD*          DSU*                            # COMPASS AND ERECT
+
+
+ALWAYSG         DLOAD*          DSU*                    # COMPASS AND ERECT
+
                                 DPIPAY          +8D,1
                                 FILDELV         +8D,1
                 DMPR            DAD*
@@ -463,22 +478,25 @@ ALWAYSG         DLOAD*          DSU*                            # COMPASS AND ER
                                 ALWAYSG
                                 ERECTIME
                 BZE             DLOAD
-                                COMPGS                          # COMPASS
+                                COMPGS                  # COMPASS
                                 THETAN          +2
                 DSU             STADR
-## Page 460                
                 STODL           THETAN          +2
                 BDSU
+
                                 THETAN          +4
                 STORE           THETAN          +4
                 GOTO
                                 ADDINDRF
-COMPGS          DLOAD           DAD                             # COMPASS
+COMPGS          DLOAD           DAD                     # COMPASS
                                 THETAN
                                 FILDELV
                 STODL           THETAN
+
+## Page 440
                                 FILDELV
                 DMPR            BDSU
+
                                 GEOCONS3
                                 THETAN          +4
                 STODL           THETAN          +4
@@ -493,151 +511,202 @@ COMPGS          DLOAD           DAD                             # COMPASS
                 STORE           THETAN          +2
 ADDINDRF        VLOAD
                                 THETAN
-                STORE		COMPTORK			# IN E7 FOR DOWNLINK.
+                STORE           COMPTORK                # IN E7 FOR DOWNLINK.
                 EXIT
 
-ENDGTSAL        CCS             LENGTHOT                        #  IS 5 SEC OVER-THE TIME TO TORQ PLATFORM
-                TC              SLEEPIE                         #  NO-SET UP NEXT WAITLIST CALL FOR .5 SEC
-                CCS             LGYRO                           #  YES BUT ARE GYROS BUSY
-                TCF             ANNNNNN         +2              #  BUSY-GET THEM .5 SECONDS FROM NOW
+ENDGTSAL        CCS             LENGTHOT                #  IS 5 SEC OVER-THE TIME TO TORQ PLATFORM
+                TC              SLEEPIE                 #  NO-SET UP NEXT WAITLIST CALL FOR .5 SEC
+                CCS             LGYRO                   #  YES BUT ARE GYROS BUSY
+                TCF             ANNNNNN         +2      #  BUSY-GET THEM .5 SECONDS FROM NOW
 
 
-		TC		CHKCOMED			# SEE IF LAST TIME FOR COMPASS
-		
-LASTGTS		TC		INTPRET
-		VLOAD
-				ERCOMP
-		STODL		THETAX
-				TMARK
-		STORE		ALK
-		EXIT						# PREVIOUS SECTION WAS FOR RESTARTS
-		
-RESTAIER	TC              PHASCHNG
 
-                OCT             00255
-                TC              INTPRET                         # ADD COMPASS COMMANDS INTO ERATE
-## Page 461
-		VLOAD		MXV
-				THETAN
-				GEOMTRX
-		VSL1		VAD
-				THETAX
-		STODL		ERCOMP
-				ALK
-		STORE		TMARK
-		EXIT
-                TC              BANKCALL
-                CADR            EARTHR                          # TORQUE IT ALL IN
-                CA		ERECTIME
-                TS		GEOSAVED
-RESTEST1        TCF		NOCHORLD
+                TC              CHKCOMED                # SEE IF LAST TIME FOR COMPASS
 
-REDO3.27	INHINT						# PRELAUNCH DONE
-		TC		CHECKMM
-		OCT		11				# SEE IF LIFTOFF IS DISPLAYED
-		TC		+2				# NO , DISPLAY MM 7.
-		TCF		ENDOFJOB			# LIFTOFF DISPLAYED - IGNORE MM 7.
-		
-		TC		NEWMODEX			# PRELAUNCH DONE
-		OCT		7				# DISPLAY MAJOR MODE 7
-		CAF		ZERO			
-		TC		NEWPHASE			# TURN OFF FINAL PRELAUNCH PROTECTION.
-		OCT		00003
-		
-		TCF 		ENDOFJOB			# TERMINATE PRELAUNCH
-		
-		
-SETUPER1	TC		INTPRET
-                DLOAD           PDDL                            # ANGLES FROM DRIFT TEST ONLY
-                                ANGZ                                            
-                                ANGY                                            
-                PDDL            VDEF                            
-                                ANGX                                            
-                VCOMP           VXSC                            
-                                GEORGEJ                                         
-                MXV             VSR1                            
+LASTGTS         TC              INTPRET
+                VLOAD
+                                ERCOMP
+                STODL           THETAX
+                                TMARK
+                STORE           ALK
+                EXIT                                    # PREVIOUS SECTION WAS FOR RESTARTS
+
+RESTAIER        TC              PHASCHNG
+
+                OCT             00275
+                RELINT
+                TC              INTPRET                 # ADD COMPASS COMMANDS INTO ERATE
+                VLOAD           MXV
+                                THETAN
                                 GEOMTRX
-                STORE           OGC                             
-                EXIT                                            
+                VSL1            VAD
+                                THETAX
+                STODL           ERCOMP
+                                ALK
+                STORE           TMARK
+
+                EXIT
+
+## Page 441
+                TC              BANKCALL
+                CADR            EARTHR                  # TORQUE IT ALL IN
+
+
+
+                TC              PHASCHNG
+                OCT             00155
+                RELINT
+
+RESTEST1        TC              CHECKMM                 # CHECK IF COMPASS OVER
+                OCT             04
+                TC              +2                      # NO, CONTINUE
+                TC              PRELTERN                # COMPASS OVER
+
+
+
+                INHINT
+                CA              PREMTRXC
+                EXTEND
+                BZMF            NOCHORLD                # +1 -CHANGE, 0 OR -1 NO LOAD OR LOADING
+                TC              LOADXSM                 # IF THERE WAS A CHANGE LOAD IT INTO XSM
+                TC              PHASCHNG
+                OCT             00255
+RESTEST3        CA              ZERO                    # RESET CHANGE INDEX TO ZERO
+                TS              PREMTRXC
+                RELINT
+
+## Page 442
+                TC              INTPRET                 # HERE TO CHANGE ORIENTATOON
+                AXT,1                                   # DESIRED IN XSM,PRESENT IN GEOMTRX
+                                18D
+                SSP
+                                S1
+                                6
+LOADM           VLOAD*          DOT
+                                XSM             +18D,1
+                                GEOMTRX         +12D
+                PDVL*           DOT
+                                XSM             +18D,1
+                                GEOMTRX         +6D
+                PDVL*           DOT
+                                XSM             +18D,1
+
+                                GEOMTRX
+                VDEF            UNIT
+                STORE           XDC             +18D,1
+                TIX,1           CALL
+                                LOADM
+                                CALCGTA
+                EXIT
+                TC              TORQINCH                # NECESSARY TORQUE NOW IN OGC
+
+
+
+SETUPER1        TC              INTPRET
+                DLOAD           PDDL                    # ANGLES FROM DRIFT TEST ONLY
+                                ANGZ
+                                ANGY
+                PDDL            VDEF
+                                ANGX
+                VCOMP           VXSC
+                                GEORGEJ
+                MXV             VSR1
+                                GEOMTRX
+                STORE           OGC
+                EXIT
+
 
 
 TORQINCH        TC              PHASCHNG
                 OCT             00175
-## Page 462                
+                RELINT                                  # INHINT IN PHASCHNG
                 CA              AINGYRO
                 TC              BANKCALL
                 CADR            IMUPULSE
                 TC              BANKCALL
                 CADR            IMUSTALL
-                TC              SOMERR2                         # BAD GYRO TORQUE-END OF TEST
-                
-## Page 463             
-GEOSTRT4        CCS             TORQNDX                         #  ONLY POSITIVE IF IN VERTICAL DRIFT TEST
-                TC              GEOBAVR                         # VERT DRIFT TEST OVER
-                TC              SETUPER                         #  SET UP ERATE FOR PIPTEST OR COMPASS
-                TC              BANKCALL                        # GO TO IMU2 FOR A PIPA TEST AND DISPLAY
+                TC              SOMERR2                 # BAD GYRO TORQUE-END OF TEST
+
+## Page 443
+GEOSTRT4        CCS             TORQNDX                 #  ONLY POSITIVE IF IN VERTICAL DRIFT TEST
+                TC              GEOBAVR                 # VERT DRIFT TEST OVER
+                TC              SETUPER                 #  SET UP ERATE FOR PIPTEST OR COMPASS
+                CCS             GEOCOMPS
+                TC              TQORESTM
+                TC              BANKCALL                # GO TO IMU2 FOR A PIPA TEST AND DISPLAY
                 CADR            TORQUE
 
 GEOBAVR         TC              BANKCALL
-                CADR            VALMIS                          #  DISPLAY VERTICAL DRIFT
+                CADR            VALMIS                  #  DISPLAY VERTICAL DRIFT
 
-
-## Page 464
+## Page 444
 # SET UP WAITLIST SECTION
-SLEEPIE         TS              LENGTHOT                        # TEST NOT OVER-DECREMENT LENGTHOT
-                TC              PHASCHNG                        #  CHANGE PHASE
-                OCT             00135
-                CCS             TORQNDX                         # ARE WE DOING VERTDRIFT
-                TC              EARTTPRQ                        # YES,DO HOR ERATE TORQ THEN SLEEP
-                TC              WTLISTNT                        # GO TO SET UP NEXT WAITLIST
-EARTTPRQ        TC              BANKCALL                        # IN VERTDRIFT,ADD HOR ERATE AND SLEEP
-                CADR            EARTHR
-WTLISTNT        TC		CHKCOMED			# SEE IF GYROCOMPASS OVER
+SLEEPIE         TS              LENGTHOT                # TEST NOT OVER-DECREMENT LENGTHOT
 
-		INHINT
+                TC              PHASCHNG                #  CHANGE PHASE
+                OCT             00135
+                RELINT                                  # INHINT IN PHASCHNG
+                CCS             TORQNDX                 # ARE WE DOING VERTDRIFT
+                TC              EARTTPRQ                # YES,DO HOR ERATE TORQ THEN SLEEP
+                TC              WTLISTNT                # GO TO SET UP NEXT WAITLIST
+EARTTPRQ        TC              BANKCALL                # IN VERTDRIFT,ADD HOR ERATE AND SLEEP
+                CADR            EARTHR
+WTLISTNT        TC              CHKCOMED                # SEE IF GYROCOMPASS OVER
+
+                INHINT
                 CS              TIME1
                 AD              GTSWTLST
                 EXTEND
                 BZMF            +2
                 AD              NEGMAX
-                AD              1SECXT                          # 1 SEC FOR CALIBRATION,.5 SEC IN COMPASS
+                AD              1SECXT                  # 1 SEC FOR CALIBRATION,.5 SEC IN COMPASS
                 EXTEND
                 BZMF            RIGHTGTS
 WTGTSMPL        TC              WAITLIST
-		EBANK=		XSM
+                EBANK=          XSM
                 2CADR           ALLOOP
 
                 RELINT
-                TC              ENDOFJOB                        
+                TC              ENDOFJOB
 RIGHTGTS        CAF             TWO
                 TC              WTGTSMPL
 
 
-SOMEERRR        TC              ALARM                           
-                OCT             1600                            
+
+SOMEERRR        TC              ALARM
+                OCT             1600
                 TC              +3
 SOMERR2         TC              ALARM
                 OCT             1601
                 TC              BANKCALL
                 CADR            ENDTEST
 
-## Page 465
-NOCHORLD        TC		PHASCHNG
-		OCT		00155
+## Page 445
+TQORESTM        TC              BANKCALL
+                CADR            LOADGTSM                # LOAD NEW XSM MATRIX INTO GEOMETRX
 
+NOCHORLD        RELINT                                  # AFTER CHANGEIN ORIEN OR NO CHANGE
                 TC              INTPRET
                 VLOAD
                                 SCHZEROS
                 STORE           THETAN
+
                 EXIT
-                CCS             GEOSAVED
-                TS              ERECTIME                        #        COUNTS DOWN FOR ERECTION
+                CCS             ERECTIME
+                TS              ERECTIME                #        COUNTS DOWN FOR ERECTION
 
 ANNNNNN         CAF             NINE
                 TS              LENGTHOT
+                CCS             ERECTIME
                 TC              SLEEPIE         +1
-                
-SETUPER         EXTEND                                          # SUBROUTINE CALLED IN 3 PLACES
+                TC              CHECKMM                 # IN COMPASS CHECK FOR VERIFICATION
+                OCT             03
+                TC              +2                      # NOT VERIFYING
+                TC              SLEEPIE         +1      # YES
+                TC              NEWMODEX
+                OCT             02
+                TC              SLEEPIE         +1      # COMPASS IS 02  -ERECTION 05
+SETUPER         EXTEND                                  # SUBROUTINE CALLED IN 3 PLACES
                 QXCH            QPLACES
                 TC              INTPRET
                 CALL
@@ -645,11 +714,12 @@ SETUPER         EXTEND                                          # SUBROUTINE CAL
                 EXIT
                 TC              BANKCALL
                 CADR            OGCZERO
+
                 TC              QPLACES
 
-## Page 466
-GEOBND          =		EBANK3
-GEOBND1         =		EBANK5
+## Page 446
+GEOBND          =               EBANK3
+GEOBND1         =               EBANK5
 STOREDTA        CAF             GEOBND
                 TS              L
                 CAF             77DECML
@@ -662,6 +732,7 @@ STOREDTA        CAF             GEOBND
                 TS              RESTRTCS
                 LXCH            EBANK
                 EBANK=          XSM
+
                 CCS             MPAC
                 TCF             +2
                 TC              Q
@@ -669,6 +740,7 @@ STOREDTA        CAF             GEOBND
                 CAF             GEOBND
                 TS              L
                 TCF             STOREDTA        +4
+
 
 
 LOADSTDT        CAF             77DECML
@@ -684,12 +756,13 @@ LOADSTDT        CAF             77DECML
                 INDEX           MPAC
                 TS              ALX1S
                 CCS             MPAC
+
                 TCF             +2
                 TC              Q
                 TS              MPAC
                 TCF             LOADSTDT        +2
 
-## Page 467
+## Page 447
 LOADXSM         EXTEND
                 QXCH            QPLACES
                 CAF             17DECML
@@ -701,20 +774,22 @@ LOADXSM         EXTEND
                 CCS             MPAC
                 TCF             LOADXSM         +3
                 TC              QPLACES
-ALFDK           DEC             -28                             # SLOPES AND TIME CONSTANTS FOR FIRST 30SC
+ALFDK           DEC             -28                     # SLOPES AND TIME CONSTANTS FOR FIRST 30SC
                 DEC             -1
-                2DEC            .91230833                       # TIME CONSTANTS-PIPA OUTPUTS
+                2DEC            .91230833               # TIME CONSTANTS-PIPA OUTPUTS
 
-                2DEC            .81193187                       # TIME CONSTANT-ERECTION ANGLES
+                2DEC            .81193187               # TIME CONSTANT-ERECTION ANGLES
 
-                2DEC            -.00035882                      # SLOPE-AZIMUTH ANGLE
-
-                2DEC            -.00000029                      # SLOPE-VERTICAL DRIFT
-
-                2DEC            .00013262                       # SLOPE-NORTH SOUTH DRIFT
+                2DEC            -.00035882              # SLOPE-AZIMUTH ANGLE
 
 
-                DEC             -58                             # 31-90 SEC
+                2DEC            -.00000029              # SLOPE-VERTICAL DRIFT
+
+                2DEC            .00013262               # SLOPE-NORTH SOUTH DRIFT
+
+
+
+                DEC             -58                     # 31-90 SEC
                 DEC             -1
                 2DEC            .99122133
 
@@ -727,9 +802,11 @@ ALFDK           DEC             -28                             # SLOPES AND TIM
                 2DEC            .00043154
 
 
-                DEC             -8                              # 91-100 SEC
+
+                DEC             -8                      # 91-100 SEC
                 DEC             -1
                 2DEC            .99971021
+
 
                 2DEC            .99852047
 
@@ -739,9 +816,10 @@ ALFDK           DEC             -28                             # SLOPES AND TIM
 
                 2DEC            .00011864
 
-## Page 468
-                DEC             -98                             # 101-200 SEC
+## Page 448
+                DEC             -98                     # 101-200 SEC
                 DEC             -1
+
                 2DEC            .99550063
 
                 2DEC            .98992124
@@ -753,7 +831,8 @@ ALFDK           DEC             -28                             # SLOPES AND TIM
                 2DEC            -.00021980
 
 
-                DEC             -248                            # 201-450 SEC
+
+                DEC             -248                    # 201-450 SEC
                 DEC             -1
                 2DEC            .99673264
 
@@ -766,7 +845,9 @@ ALFDK           DEC             -28                             # SLOPES AND TIM
                 2DEC            -.00003305
 
 
-                DEC             -338                            # 451-790 SEC
+
+
+                DEC             -338                    # 451-790 SEC
                 DEC             -1
                 2DEC            .99924362
 
@@ -779,22 +860,26 @@ ALFDK           DEC             -28                             # SLOPES AND TIM
                 2DEC            -.00000195
 
 
-                DEC             -408                            # 791-1200 SEC
+
+                DEC             -408                    # 791-1200 SEC
                 DEC             -1
                 2DEC            .99963845
 
                 2DEC            .99913162
 
+
                 2DEC            .00000090
 
-## Page 469
+## Page 449
                 2DEC            .00002927
 
                 2DEC            -.00000026
 
 
-                DEC             -498                            # 1201-1700 SEC
+
+                DEC             -498                    # 1201-1700 SEC
                 DEC             -1
+
                 2DEC            .99934865
 
                 2DEC            .99868793
@@ -806,7 +891,8 @@ ALFDK           DEC             -28                             # SLOPES AND TIM
                 2DEC            -.00000005
 
 
-                DEC             -398                            # 1701-2100 SEC
+
+                DEC             -398                    # 1701-2100 SEC
                 DEC             -1
                 2DEC            .99947099
 
@@ -819,7 +905,9 @@ ALFDK           DEC             -28                             # SLOPES AND TIM
                 2DEC            -.00000001
 
 
-                DEC             -598                            # 2101-2700 SEC
+
+
+                DEC             -598                    # 2101-2700 SEC
                 DEC             -1
                 2DEC            .99957801
 
@@ -832,9 +920,11 @@ ALFDK           DEC             -28                             # SLOPES AND TIM
                 2DEC            .00000000
 
 
-                DEC             -698                            # 2700-3400 SEC
+
+                DEC             -698                    # 2700-3400 SEC
                 DEC             -1
-## Page 470
+
+## Page 450
                 2DEC            .99966814
 
                 2DEC            .99933952
@@ -846,8 +936,10 @@ ALFDK           DEC             -28                             # SLOPES AND TIM
                 2DEC            .00000000
 
 
-                DEC             -598                            # 3401-4000 SEC
+
+                DEC             -598                    # 3401-4000 SEC
                 DEC             -1
+
                 2DEC            .99972716
 
                 2DEC            .99945654
@@ -859,39 +951,43 @@ ALFDK           DEC             -28                             # SLOPES AND TIM
                 2DEC            .00000000
 
 
-SCHZEROS        2DEC            .00000000                       
 
-                2DEC            .00000000                       
+SCHZEROS        2DEC            .00000000
 
-                2DEC            .00000000                       
+                2DEC            .00000000
 
-INTVAL          OCT             4                               
-                OCT             2                               
-                DEC             144                             
-                DEC             -1                              
-SOUPLY          2DEC            .93505870                       # INITIAL GAINS FOR PIP OUTPUTS
+                2DEC            .00000000
 
-                2DEC            .26266423                       # INITIAL GAINS/4 FOR ERECTION ANGLES
+INTVAL          OCT             4
+                OCT             2
+                DEC             144
+                DEC             -1
+SOUPLY          2DEC            .93505870               #  INITIAL GAINS FOR PIP OUTPUTS
 
 
-77DECML         DEC             77                              
-ALXXXZ          GENADR          ALX1S           -1              
+                2DEC            .26266423               #  INITIAL GAINS/4 FOR ERECTION ANGLES
+
+
+
+77DECML         DEC             77
+ALXXXZ          GENADR          ALX1S           -1
 AINGYRO         ECADR           OGC
-PIPASC          2DEC            .13055869                       
+PIPASC          2DEC            .13055869
 
-VELSC           2DEC            -.52223476                      # 512/980.402
+VELSC           2DEC            -.52223476              #  512/980.402
 
-ALSK            2DEC            .17329931                       # SSWAY VEL GAIN X 980.402/4096
+ALSK            2DEC            .17329931               # SSWAY VEL GAIN X 980.402/4096
 
-## Page 471
-                2DEC            -.00835370                      # SSWAY ACCEL GAIN X 980.402/4096
+## Page 451
+                2DEC            -.00835370
 
 
-GEORGEJ         2DEC            .63661977                       
 
-GEORGEK         2DEC            .59737013  
+GEORGEJ         2DEC            .63661977
 
-SCHOCT23	OCT		00023                     
+GEORGEK         2DEC            .59737013
+
+OCT31           OCT             00031
 GEOCONS1        2DEC            .1
 
 GEOCONS2        2DEC            .005
@@ -902,54 +998,49 @@ GEOCONS4        2DEC            .00003
 
 1/PIPAGT        OCT             06200
 17DECML         DEC             17
+
 19DECML         DEC             19
 1/2SECX         DEC             50
 
 
+
 GTSCPSS         CA              ONE
-                TS              GEOCOMPS                        # THIS IS THE LEAD IN FOR COMPASS
+                TS              GEOCOMPS                # THIS IS THE LEAD IN FOR COMPASS
                 TC              NEWMODEX
                 OCT             01
                 CA              1/PIPAGT
                 TS              1/PIPADT
-                CA		ELEVEN				# COMPASS IS POSITION 11
-                TS		POSITON
-                CA		BIT8				# 620 SECONDS ERECTING
-                TS		LENGTHOT
-                CAF             1/2SECX				# COMPASS IS A .5 SEC LOOP
+                CA              ZERO
+                TS              PREMTRXC
+                CAF             1/2SECX
                 TS              1SECXT
-                CAF		ZERO
-                TS		NBPOS
                 TC              BANKCALL
-                CADR            GEOIMUTT 
+                CADR            GEOIMUTT
 
 
-CHKCOMED	CA		FLAGWRD1			# CHECK FOR END OF COMPASS
-		MASK		BIT2				# TEST FOR GRR FLAG
-		CCS		A
-		TCF		PRELTERM			# YES  GRR HAS OCCURRED
-		TC		Q				# NO  CONTINUE
 
-## Page 472
-PRELTERM	TC		NEWMODEX
-		OCT		04				# 04 IS END OF COMPASS
-		TCF		LASTGTS				# GET LAST TORQUING
-		
-		
-GRRNOW		SET		VLOAD				# COME HERE WHEN DELV CHECK SHOWS LIFTOFF
-				GRRFLAG				# TO HAVE OCCURRED.
-				DELV
-		STORE		DELVBUF
-		SSP		EXIT
-				DT-LIFT				# START LIFTOFF 100 MS AFTER MP2TASK
-				10D
-				
-		INHINT
-		CAF		1SEC+1				# DELAY TILL PRELAUNCH IF FINISHED, BUT
-		TC		WAITLIST			# NOT SO LONG THAT READACCS HAPPENS FIRST.
-		EBANK=		GTSWTLST
-		2CADR		LIFTFIXT
-		
-		RELINT
-		TCF		PRELTERM
-		
+CHKCOMED        CA              FLAGWRD1                # CHECK FOR END OF COMPASS
+                MASK            BIT2                    # TEST FOR GRR FLAG
+                CCS             A
+
+                TCF             PRELTERM                # YES   GRR HAS OCCURRED
+                TC              Q                       # NO  CONTINUE
+
+
+PRELTERM        TC              NEWMODEX
+                OCT             04                      # 04 IS END OF COMPASS
+                TCF             LASTGTS                 # GET LAST TORQUING
+
+## Page 452
+
+PRELTERN        INHINT                                  # GET TIME OF PRELAUNCH TERMINATION
+                EXTEND
+
+                DCA             TMARK                   # TIME OF LAST EARTH RATE COMPENSATION.
+                DXCH            TEMTPREL                # INTO COMMON TEMP UNTIL MP2.
+                CAF             PRIO24
+                TC              FINDVAC                 # SET UP MISSION PHASE 2
+                EBANK=          TGRR
+                2CADR           MP2JOB
+
+                TCF             ENDOFJOB
