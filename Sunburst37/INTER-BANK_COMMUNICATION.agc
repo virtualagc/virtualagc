@@ -17,10 +17,9 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-05-24 MAS  Created from Sunburst 120.
+##              2017-06-03 TVB  Transcribed.
 
-## NOTE: Page numbers below have not yet been updated to reflect Sunburst 37.
-
-## Page 948
+## Page 888
 #          THE FOLLOWING ROUTINE CAN BE USED TO CALL A SUBROUTINE IN ANOTHER BANK. IN THE BANKCALL VERSION, THE
 # CADR OF THE SUBROUTINE IMMEDIATELY FOLLOWS THE  TC BANKCALL  INSTRUCTION, WITH C(A) AND C(L) PRESERVED.
 
@@ -60,7 +59,7 @@ BANKJUMP        TS              FBANK
 Q+10000         INDEX           Q                               # POSTJUMP.
 BNKJUP+4        TCF             10000                           
 
-## Page 949
+## Page 889
 #          THE FOLLOWING ROUTINE GETS THE RETURN CADR SAVED BY SWCALL OR BANKCALL AND LEAVES IT IN A.
 
 MAKECADR        CAF             LOW10                           
@@ -69,9 +68,9 @@ MAKECADR        CAF             LOW10
                 TC              Q                               
 
 
-#          THE FOLLOWING ROUTINE OBTAINS THE ONE WORD AT THE ADDRESS ARRIVING IN A, AND LEAVES IT IN A.  ENTER
-# WITH THE CADR IN A, AT DATACALL WITH JUNK IN L IF NOT SWITCHING SUPERBANKS, OTHERWISE AT SUPDACAL WITH SUPERBANK
-# BITS IN BITS 7-5 IN L (BITS 15-8 AND 4-1 MAY BE JUNK).  DEBRIS = MTEMP.  INHINTS FOR ABOUT 165 MUSEC.
+#          THE FOLLOWING ROUTINE OBTAINS THE TWO WORDS BEGINNING AT THE ADDRESS ARRIVING IN A, AND LEAVES THEM IN
+# A,L.  ENTER WITH THE CADR IN A, AT DATACALL WITH JUNK IN L IF NOT SWITCHING SUPERBANKS, OTHERWISE AT SUPDACAL WITH
+# SUPERBANK BITS IN BITS 7-5 IN L (BITS 15-8 AND 4-1 MAY BE JUNK).  DEBRIS = MTEMP.  INHINTS FOR ABOUT 165 MUSEC.
 
 DATACALL        TS              L                               # SAVE CADR (SOLE INPUT HERE).
                 EXTEND                                          
@@ -99,7 +98,7 @@ SUPDACAL        TS              MPTEMP
                 CA              MPTEMP                          # RECOVER FIRST WORD OF DATA.
                 RETURN                                          # 24 WDS. DATACALL 516 MU, SUPDACAL 432 MU
 
-## Page 950
+## Page 890
 #          THE FOLLOWING ROUTINES ARE IDENTICAL TO BANKCALL AND SWCALL EXCEPT THAT THEY ARE USED IN INTERRUPT.
 
 IBNKCALL        DXCH            RUPTREG3                        # USES RUPTREG3,4 FOR DP RETURN ADDRESS.
@@ -120,7 +119,7 @@ ISWRETRN        XCH             RUPTREG4
                 XCH             RUPTREG4                        
                 TC              RUPTREG3                        
 
-## Page 951
+## Page 891
 #          THE FOLLOWING SUBROUTINES PROVIDE TO THE BASIC PROGRAMMER ENTRY INTO AND RETURN FROM ANY INTERPRETIVE
 # CODING WHICH DOES NOT USE THE ENTERING CONTENTS OF Q AND WHICH RETURNS VIA DANZIG. C(A) AND C(L) ARE SAVED.
 
@@ -166,7 +165,7 @@ USPRCADR        TS              LOC                             # SAVE A
                 XCH             LOC                             # L+1 TO LOC, RETRIEVING ORIGINAL A
                 TCF             Q+10000                         
 
-## Page 952
+## Page 892
 # THERE ARE FOUR POSSIBLE SETTINGS FOR CHANNEL 07. (CHANNEL 07 CONTAINS THE SUPERBANK SETTING.)
 #                                           PSEUDO-FIXED     OCTAL PSEUDO
 # SUPERBANK     SETTING     S-REG. VALUE    BANK NUMBERS     ADDRESSES
@@ -206,4 +205,3 @@ SUPERSW         EXTEND
                                                                 # CHANNEL 07
                 TC              Q                               # TC TO INSTRUCTION FOLLOWING
                                                                 #   TC  SUPERSW
-

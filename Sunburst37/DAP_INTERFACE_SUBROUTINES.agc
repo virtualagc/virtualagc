@@ -17,163 +17,148 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-05-24 MAS  Created from Sunburst 120.
+##              2017-05-30 HG   Transcribed
 
-## NOTE: Page numbers below have not yet been updated to reflect Sunburst 37.
-
-## Page 473
-		BANK	20
-		EBANK=	DT
-
-# MOD 0		DATE	11/15/66	BY GEORGE W. CHERRY
+## Page 453
+                BANK            16
+                EBANK=          DT
+# MOD 0         DATE    11/15/66        BY GEORGE W. CHERRY
 
 # FUNCTIONAL DESCRIPTION
 
-#	   HEREIN ARE A COLLECTION OF SUBROUTINES WHICH ALLOW MISSION CONTROL PROGRAMS TO CONTROL THE MODE
-#	   AND INTERFACE WITH THE DAP.
+#          HEREIN ARE A COLLECTION OF SUBROUTINES WHICH ALLOW MISSION CONTROL PROGRAMS TO CONTROL THE MODE
+#          AND INTERFACE WITH THE DAP.
 
 # CALLING SEQUENCES
 
 # IN INTERRUPT OR WITH INTERRUPT INHIBITED
-#	   TC	  IBNKCALL
-#	   FCADR  ROUTINE
+#          TC     IBNKCALL
+#          FCADR  ROUTINE
 
 # IN A JOB WITHOUT INTERRUPT INHIBITED
-#	   INHINT
-#	   TC	  IBNKCALL
-#	   FCADR  ROUTINE
-#	   RELINT
+#          INHINT
+#          TC     IBNKCALL
+#          FCADR  ROUTINE
+#          RELINT
 
 # OUTPUT
-#	   SEE INDIVIDUAL ROUTINES BELOW
+#          SEE INDIVIDUAL ROUTINES BELOW
 
 # DEBRIS
-#	   A,L, AND SOMETIMES MDUETEMP
 
-## Page 474
+#          A,L, AND SOMETIMES MDUETEMP
+
+## Page 454
 # DAPBOOLS BITS AND NAMES
 
-OURRCBIT	EQUALS	BIT1		# INTERNAL DAP RATE COMMAND ACTIVITY FLAG
-TRYGIMBL	EQUALS	BIT2		# TRIM GIMBAL FLAG
-DATAGOOD	EQUALS	BIT3		# RECIPROCAL ACCELERATIONS OKAY FLAG
-ACC4OR2X	EQUALS	BIT4		# 2 OR 4 JET Z-TRANSLATION MODE FLAG
-AORBSYST	EQUALS	BIT5		# P-AXIS ROTATION JET SYSTEM (A OR B) FLAG
-ULLAGER		EQUALS	BIT6		# INTERNAL ULLAGE REQUEST FLAG
-DBSELECT	EQUALS	BIT7		# DAP DEADBAND SELECT FLAG
-APSGOING	EQUALS	BIT8		# ASCENT PROPULSION SYSTEM BURN FLAG
-VIZPHASE	EQUALS	BIT9		# DESCENT VISIBILITY PHASE FLAG
-PULSES		EQUALS	BIT10		# MINIMUM IMPULSE RHC MODE FLAG
-GODAPGO		EQUALS	BIT11		# DAP ENABLING FLAG
-MASSGOOD	EQUALS	BIT12		# MASS OKAY FLAG
+OURRCBIT        EQUALS          BIT1                    # INTERNAL DAP RATE COMMAND ACTIVITY FLAG
+TRYGIMBL        EQUALS          BIT2                    # TRIM GIMBAL FLAG
+
+# STILL AVAILABLE BIT3
+
+ACC4OR2X        EQUALS          BIT4                    # 2 OR 4 JET Z-TRANSLATION MODE FLAG
+AORBSYST        EQUALS          BIT5                    # P-AXIS ROTATION JET SYSTEM (A OR B) FLAG
+ULLAGER         EQUALS          BIT6                    # INTERNAL ULLAGE REQUEST FLAG
+DBSELECT        EQUALS          BIT7                    # DAP DEADBAND SELECT FLAG
+APSGOING        EQUALS          BIT8                    # ASCENT PROPULSION SYSTEM BURN FLAG
+VIZPHASE        EQUALS          BIT9                    # DESCENT VISIBILITY PHASE FLAG
+PULSES          EQUALS          BIT10                   # MINIMUM IMPULSE RHC MODE FLAG
+
+GODAPGO         EQUALS          BIT11                   # DAP ENABLING FLAG
+
+# STILL AVAILABLE BI12
 
 # STILL AVAILABLE BIT13
 
-AUTORHLD	EQUALS	BIT14		# AUTOMATIC MODE RATE HOLD FLAG
-SPSBACUP	EQUALS	BIT15		# SPS BACKUP DAP FLAG
+AUTORHLD        EQUALS          BIT14                   # AUTOMATIC MODE RATE HOLD FLAG
+SPSBACUP        EQUALS          BIT15                   # SPS BACKUP DAP FLAG
 
 
-USEQRJTS	EQUALS	TRYGIMBL	# ALTERNATE TRIM GIMBAL FLAG
 
-#              BIT     FLAGWORD   SWITCH   SWITCH    ON-STATE                      OFF-STATE
-# LOCATION    NUMBER    SYMBOL    NUMBER   SYMBOL    INDICATES                     INDICATES
-# --------   --------  --------   ------   ------    ---------                     ---------
+SETMINDB        CAF             EBANK6
+                TS              L
+                LXCH            EBANK
+                CAF             NARROWDB
+                TS              DB
+                CS              DBSELECT
+                MASK            DAPBOOLS
+                TS              DAPBOOLS
+                LXCH            EBANK
+                TC              Q
 
-# DAPBOOLS      1      OURRCBIT     59               INTERNAL RATE COMMAND         NO INTERNAL RATE COMMAND
-#							ACTIVITY		      ACTIVITY  (LOCKED ON 0)
-#               2      TRYGIMBL     58               TRIM GIMBAL CONTROL           TRIM GIMBAL CONTROL POSSIBLE
-#							IMPOSSIBLE
-#               3      DATAGOOD     57               RECIPROCAL ACCELERATION       RECIPROCAL ACCELERATION
-#							PROBABLY CORRECT              PROBABLY INCORRECT
-#               4      ACC4OR2X     56               P-AXIS 4 JET                  P-AXIS 2 JET
-#							X-TRANSLATION MODE	      X-TRANSLATION MODE
-#							(LOCKED ON 1)
-#		5      AORBSYST     55		     P-FORCE COUPLES 15, 7 AND     P-FORCE COUPLES 4, 12 AND 3, 11
-#							16, 8
-#		6      ULLAGER      54               INTERNAL ULLAGE REQUEST       NO INTERNAL ULLAGE REQUEST
-#		7      DBSELECT     53		     MAX DEADBAND SELECT	   MIN DEADBAND SELECT
-#               8      APSGOING     52         	     ASCENT PROPULSION SYSTEM      APS OFF
-#							BURN
-#     		9      VIZPHASE	    51		     DESCENT VISIBILITY PHASE	   NOT IN DESCENT VISIBILITY
-#							(LOCKED ON 1)		      PHASE
-#	       10      PULSES       50		     MINIMUM IMPULSE RHC MODE	   RATE COMMAND RHC MODE
-#										      (LOCKED ON 0)
-#	       11      GODAPGO      49               DAP ENABLED		   DAP IDLING
-#	       12      MASSGOOD     48		     VALUE OF MASS PROBABLY	   VALUE OF MASS PROBABLY
-#							CORRECT			      INCORRECT
-## Page 475
-#	       13                   47               NOT AVAILABLE - STATE
-#							IRRELEVANT
-#              14      AUTORHLD     46		     AUTOMATIC RATE HOLD MODE	   AUTOMATIC ATTITUDE HOLD
-#	       15      SPSBACUP     45		     NOT IN SPS BACK-UP DAP MODE   SPS BACK-UP DAP MODE
-#							(LOCKED ON 1)
+SETMAXDB        CAF             EBANK6
 
-SETMINDB	CAF	NARROWDB
-		TS	DB
-		CS	DBSELECT
-		MASK	DAPBOOLS
-		TS	DAPBOOLS
-		TC	Q
-		
-SETMAXDB	CAF	WIDEDB
-		TS	DB
-		CS	DAPBOOLS
-		MASK	DBSELECT
-		ADS	DAPBOOLS
-		TC	Q
-		
-ULLAGE		CS	DAPBOOLS
-		MASK	ULLAGER
-		ADS	DAPBOOLS
-		TC	Q
-		
-NOULLAGE	CS	ULLAGER
-		MASK	DAPBOOLS
-		TS	DAPBOOLS
-		TC	Q
-		
-HOLDRATE	TCF	COMNEXIT		# REPLACE BY  CS DAPBOOLS  FOR RATE HOLD.
-		MASK	AUTORHLD
-		ADS	DAPBOOLS
-		
-		CAF	EBANK6
-		XCH	EBANK
-		TS	OMEGARD
-		
-		EXTEND
-		DCA	OMEGAP
-		DXCH	OMEGAPD
-		CAE	OMEGAR
-		XCH	OMEGARD
-		
-		TS	EBANK
-		
-COMNEXIT	EXTEND
-		DCA	CDUY
-## Page 476
-		DXCH	CDUYD
-		CAE	CDUX
-		TS	CDUXD
-		
-		TC	Q
-		
-STOPRATE	CS	AUTORHLD
-		MASK	DAPBOOLS
-		TS	DAPBOOLS
-		
-		CAF	ZERO
-		TS	OMEGAPD
-		TS	OMEGAQD
-		TS	OMEGARD
-		TS	DELCDUX
-		TS	DELCDUY
-		TS	DELCDUZ
-		TCF	COMNEXIT
-		
-SETRATE		EQUALS	HOLDRATE
+                TS              L
+                LXCH            EBANK
+                CAF             WIDEDB
+                TS              DB
+                CS              DAPBOOLS
+                MASK            DBSELECT
+                ADS             DAPBOOLS
+                LXCH            EBANK
+                TC              Q
 
-## Page 477
+ULLAGE          CS              DAPBOOLS
+                MASK            ULLAGER
+                ADS             DAPBOOLS
+
+## Page 455
+                TC              Q
+
+NOULLAGE        CS              ULLAGER
+                MASK            DAPBOOLS
+                TS              DAPBOOLS
+                TC              Q
+
+HOLDRATE        CAF             EBANK6
+                XCH             EBANK
+                TS              MDUETEMP
+                CS              DAPBOOLS
+                MASK            AUTORHLD
+                ADS             DAPBOOLS
+
+                EXTEND
+                DCA             OMEGAP
+                DXCH            OMEGAPD
+                CAE             OMEGAR
+                XCH             OMEGARD
+
+COMNEXIT        EXTEND
+                DCA             CDUY
+                DXCH            CDUYD
+                CAE             CDUX
+                TS              CDUXD
+
+                CAE             MDUETEMP
+                TS              EBANK
+                TC              Q
+
+STOPRATE        CAF             EBANK6
+                XCH             EBANK
+                TS              MDUETEMP
+                CS              AUTORHLD
+                MASK            DAPBOOLS
+                TS              DAPBOOLS
+
+                CAF             ZERO
+                TS              OMEGAPD
+                TS              OMEGAQD
+                TS              OMEGARD
+                TS              DELCDUX
+                TS              DELCDUY
+
+                TS              DELCDUZ
+                TCF             COMNEXIT
+
+SETRATE         EQUALS          HOLDRATE
+NARROWDB        DEC             0.00167                 # 0.3 DEGREES SCALED AT PI RADIANS
+WIDEDB          DEC             0.02778                 # 5.0 DEGREES SCALED AT PI RADIANS
+
+## Page 456
 # SUBROUTINE NAME: 1. UPCOAST     MOD. NO. 1  DATE: DECEMBER 4, 1966
-#		   2. ALLCOAST
-#		   3. WCHANGE
+#                  2. ALLCOAST
+
+#                  3. WCHANGE
 
 # AUTHOR: JONATHAN D. ADDELSTON (ADAMS ASSOCIATES)
 
@@ -191,209 +176,134 @@ SETRATE		EQUALS	HOLDRATE
 
 # SUBROUTINES CALLED: NONE.
 
-# ZERO: AOSQ,AOSR,AOSU,AOSV,AOSQTERM,AOSRTERM,ALL NJS.
+# ZERO: AOSQ,AOSR,AOSU,AOSV,AOSQTERM,AOSRTERM,ALL NUS.
 
 # SET URGRATQ AND URGRATR TO POSMAX.
 
 # OUTPUT: WFORP   (1-K)    MINIMPDB  APSGOING/DAPBOOLS
-#          WFORQR  (1-K)/8  DBMINIMP  1/AMINQ  1/AMINR  1/AMINU  1/AMINV
+
+#         WFORQR  (1-K)/8  DBMINIMP
+
 # DEBRIS: A,L.
 
 # ***** WARNING. *****  EBANK MUST BE SET TO 6.
 
-		BANK	20
-		EBANK=	WFORP
-		
-ALLCOAST	CAF	EBANK6
-		XCH	EBANK
-		TS	ITEMP6
-		
-		CS	APSGOING
-		MASK	DAPBOOLS
-		TS	DAPBOOLS
-		
-		CAF	NEGONE		# MAKES SPECIAL DAP APS CODING INACTIVE
-		TS	AOSCOUNT
-		CAF	0.00444
-		TS	MINIMPDB	# IMPULSE DBS ARE SET TO 0.8 DEGREES.
-		TS	DBMNMPAX	# (AND P-AXIS VALUE)
-		TS	DBMINIMP
-		
-		CAF	POSMAX		# SET URGENCY FUNCTION CORRECTION RATIOS
-		TS	URGRATQ		# TO ALMOST 1 BEFORE BEING SET IN AOSJOB.
-		
-## Page 478
-		TS	URGRATR		# SCALED AT 1.
-		
-		CAF	ACCFIFTY	# INVERSE MINIMUM ACCELERATIONS ARE SET TO
-		TS	1/AMINQ		# 50 SECONDS(2)/RADIAN.  THESE VARIABLES
-		TS	1/AMINR		# ARE SET TO HALF THAT VALUE WITH THE
-		TS	1/AMINU		# SCALE FACTOR 2(+8)/PI.
-		TS	1/AMINV
+                BANK            20
+                EBANK=          WFORP
 
-		CAF	13DEC		# ZERO THE FOLLOWING DAP ERASABLES:
-CLEARASC	TS	KCOEFCTR	# AOSQ  AOSQTERM  NJ+Q  NJ+U
-		CAF	ZERO		# AOSR  AOSRTERM  NJ-Q  NJ-U
-		INDEX	KCOEFCTR	# AOSU		  NJ+R  NJ+V
-		TS	AOSQ		# AOSV            NJ-R  NJ-V
-		CCS	KCOEFCTR
-		TCF	CLEARASC
-		
-WCHANGE		CAF	0.3125		# K = 0.5
-		TS	WFORP		# WFORP = WFORQR = K/DT = K/.1 = 10K = 5
-		TS	WFORQR		# SCALED AT 16 PER SECOND.
-		
-		EXTEND			# K = 0.5 IMPLIES (1-K) = 0.5:
-		DCA	(1-K)S		# (1-K)   = 0.5    SINCE SCALED AT 1.
-		DXCH	(1-K)		# (1-K)/8 = 0.0625 SINCE SCALED AT 8.
-		
+DESCOAST        INHINT                                  # (MISSION ENTRY)
+
+ALLCOAST        CS              TRYGIMBL                # SINCE THE DESCENT ENGINE IS OFF, LM DAP
+                MASK            DAPBOOLS                # USE OF TRIM GIMBAL CONTROL SYSTEM IS
+                AD              TRYGIMBL                # CLEARLY IMPOSSIBLE.
+                TS              DAPBOOLS
+
+                CAF             0.3DEGDB                # SET BOTH MINIMUM IMPULSE DEADBANDS TO
+                TCF             MINIMSTO                # 0.3 DEGREES SCALED AT PI RADIANS
+
+UPCOAST         INHINT                                  # STOP INTERRUPTS FROM WREAKING HAVOC.
+
+                CS              APSGOING                # TURN OFF APS BURN BIT IN DAPBOOLS SINCE
+                MASK            DAPBOOLS                # LEM IS STAGED FOR ASCENT, BUT THE ASCENT
+
+                TS              DAPBOOLS                # IS NOT ON.
+
+## Page 457
+                CAF             0.00444                 # IN ASCENT COAST, SET BOTH MINIMUM
+MINIMSTO        TS              MINIMPDB                # IMPULSE DBS ARE SET TO 0.0 DEGREES.
+                TS              DBMINIMP                # SCALED AT PI RADIANS
+
+                CAF             POSMAX                  # SET URGENCY FUNCTION CORRECTION RATIOS
+                TS              URGRATQ                 # TO ALMOST 1 BEFORE BEING SET IN AOSJOB.
+                TS              URGRATR                 # SCALED AT 1.
+
+                CAF             13DEC                   # ZERO THE FOLLOWING DAP ERASABLES:
+CLEARASC        TS              KCOEFCTR                # AOSQ  AOSQTERM  NJ+Q  NJ+U
+                CAF             ZERO                    # AOSR  AOSRTERM  NJ-Q  NJ-U
+                INDEX           KCOEFCTR                # AOSU            NJ+R  NJ+V
+                TS              AOSQ                    # AOSV            NJ-R  NJ-V
+                CCS             KCOEFCTR
+                TCF             CLEARASC
+
+WCHANGE         CAF             0.3125                  # K = 0.5
+                TS              WFORP                   # WFORP = WFORQR = K/DT = K/.1 = 10K = 5
+                TS              WFORQR                  # SCALED AT 16 PER SECOND.
+
+                EXTEND                                  # K = 0.5 IMPLIES (1-K) = 0.5:
+                DCA             (1-K)S                  # (1-K)   = 0.5    SINCE SCALED AT 1.
+                DXCH            (1-K)                   # (1-K)/8 = 0.0625 SINCE SCALED AT 8.
+
 # *** NOTE THAT STARTDAP RESETS WFORP,WFORQR,(1-K),(1-K)/8. ***
 
-		CAE	ITEMP6
-		TS	EBANK
-		
-		TC	Q		# RETURN
-		
-		
-0.3DEGDB	DEC	0.00167
-13DEC		DEC	13
+                RELINT                                  # LET INTERRUPTS LOOSE.
 
-## Page 479
-# APS AND DPS ENGINE-ON ROUTINES (MUST BE CALLED WITH INTERRUPT INHIBIT)
-# THE NAMES ENGINEON, ENGINOFF, AND ENGINOF1 ARE PRESERVED TO KEEP CURRENT
-# SIMULATIONS AND EDITS OUT OF TROUBLE.
+                TC              Q                               # RETURN
 
-APSENGON	CAF	EBANK6
-		XCH	EBANK
-		TS	TEVENT	+1
-		
-		CS	ZERO		# DUMMYFIL WILL SET APSGOING BIT BECAUSE
-		TS	AOSCOUNT	# OF MINUS ZERO IN AOSCOUNT
-		CAF	PGNSCADR	# ACTIVATE PGNCS MONITOR
-		
-# START CODING FOR MODULE 3 REMAKE, AUGUST 1967***START CODING FOR MODULE 3 REMAKE, AUGUST 1967******************
-20INSRT		TCF	20INSRTA	# STORE TIME FOR ENGINOFF DELAY LOGIC.
-# **END CODING FOR MODULE 3 REMAKE, AUGUST 1967****END CODING FOR MODULE  3 REMAKE, AUGUST 1967******************
-		CS	DAPBOOLS	# TURN TRIM GIMBAL OFF IN CASE WE DID FITH
-		MASK	USEQRJTS
-		ADS	DAPBOOLS
-		
-		CS	INPARAB		# MODIFY THE TJETLAW FOR ASCENT BURNS:
-		TS	MINIMPDB	# (IN ONE EQUATION DELETE MINIMPDB AND
-		CAF	ZERO		# SHIFT THE SWITCHING CURVE TO THE ORIGIN)
-		TS	DBMINIMP	# MINIMPDB = -DB, DBMINIMP = 0
-		
-		EXTEND			# SET UP ASCENT URGENCY LIMITS SCALED AT
-		DCA	ASCURGLM	# 2(+9) SECONDS AND
-		DXCH	URGLMS		# 2(+4) SECONDS.
-		
-		EXTEND			# SET UP ASCENT RATE COMMAND VALUES:
-		DCA	ASCRATEC	# -2.0 DEGREES/SECOND SCALED AT PI/4 LIMIT
-		DXCH	-2JETLIM	# -1.0 DEGREES/SECOND SCALED AT PI/4 DB
-		
-		CAF	-.06ACC		# SET ACC. LIMIT FOR INVERSE CALCULATION
-		TS	-.06R/S2	# HERE FOR STAGING AT APS BURN.
-		TCF	ENGINEON	# BYPASS THE SPECIAL DPS MONITOR SETUP
-		
--.06ACC		DEC	-.03820		# -0.06 RADIANS/SECOND(2) AT PI/2
 
-INPARAB		DEC	+.00333		# NOTE FOR AS206 USE -.6DB NOT -DB
 
-DPSENGON	CA	EBANK		# SAVE CALLER'S EBANK
-		TS	TEVENT	+1	
-		CAF	GMBLMNAD	# GIMBLMON HANDLES THE TRIM GIMBAL ON/OFF
-					# LOGIC AND EXITS TO PGNCSMON
-					
-# START CODING FOR MODULE 3 REMAKE, AUGUST 1967***START CODING FOR MODULE 3 REMAKE, AUGUST 1967*******************
+0.3DEGDB        DEC             0.00167
+13DEC           DEC             13
 
-INSERT20	TCF	SETCNTR		# SET FLAGS FOR CRITICAL GTS ENTRIES.
+## Page 458
+ASCDAP          INHINT                                  # (MISSION ENTRY)
 
-# **END CODING FOR MODULE 3 REMAKE, AUGUST 1967*****END CODING FOR MODULE  3 REMAKE, AUGUST 1967*******************
+                CAF             APSGOING                # CHECK AOSTASK BIT OF DAPBOOLS
+                MASK            DAPBOOLS                # IF 0, SET BIT AND INITIATE WAITLIST TASK
+                CCS             A                       # IF 1, THEN TASK LOOP ALREADY BEGUN
+                TCF             ASCDAP1                 # END OF ASCEN DAP
+                CAF             APSGOING                # SET BIT TO INDICATE AOSTASK SET UP AND
+                ADS             DAPBOOLS                # ASCENT LOGIC.  BIT CLEARLY NOT SET YET.
 
-## Page 480
-		CS	BIT4		# CLEAR GIMBLMON INHIBIT FLAG JUST IN CASE
-		MASK	FLAGWRD2	# IT HAD NOT BEEN RESET BY THROTTLE CONTRO
-		TS	FLAGWRD2
-		
-ENGINEON	EXTEND			# THE ENGINE-ON COMMAND IS RECORDED
-		DCA	TIME2		# FOR THE DOWNLINK
-		DXCH	TEVENT
+                CS              DB                      # MODIFY THE TJETLAW FOR ASCENT:
+                TS              MINIMPDB                # (IN ONE EQUATION DELETE MINIMPDB AND
+                CAF             ZERO                    # SHIFT THE SWITCHING CURVE TO THE ORIGIN)
+                TS              DBMINIMP                # MINIMPDB = -DB, DMINIMP = 0
 
-		CA	STOPDVC
-		TS	SETDVCNT
-		CA	BURNDB		# SET ONE DEGREE DEADBAND FOR THE BURN
-		TS	DB
-		
-		CS	PRIO30		# TURN ON THE ENGINE - APS OR DPS
-		EXTEND			# DEPENDING ON THE ARM COMMAND
-		RAND	11
-		AD	BIT13
-		EXTEND
-		WRITE	11
-		
-		CS	FLAGWRD1	# SET ENGINBIT - THE BIT WILL BE CLEARED
-		MASK	ENGINBIT	# IN ENGINOFF AND THUS NODV CAN CHECK IT
-		ADS	FLAGWRD1	# TO ASCERTAIN NORMAL OR PREMATURE CUTOFF
-		
-		CA	EBANK5
-		TS	EBANK
-		EBANK=	DVCNTR
-		CA	STARTDVC	# SET UP THE DV MONITOR
-		TS	DVCNTR
-		LXCH	EBANK		# RESTORE CALLER:S EBANK
-		TC	Q		# RETURN TO CALLER
-		
-## Page 481
-# APS AND DPS ENGINE - OFF ROUTINE ( CALL WITH INTERRUPT INHIBITED )
+                TS              SUMRATEQ                # INITIALIZE SUMS OF JET RATES.
+                TS              SUMRATER
+                TS              KCOEFCTR                # INITIALIZE APS BURN TIMER.
 
-# START CODING FOR MODULE 3 REMAKE, AUGUST 1967***START CODING FOR MODULE 3 REMAKE, AUGUST 1967******************
-ENGINOFF	TCF	20INSRTB	# PROCEED TO ENGINOFF DELAY LOGIC.
+                CAE             OMEGAQ                  # CREATE OLD OMEGAQ
+                TS              OLDWFORQ
+                CAE             OMEGAR                  # CREATE OLD OMEGAR
+                TS              OLDWFORR
 
-# **END CODING FOR MODULE 3 REMAKE, AUGUST 1967****END CODING FOR MODULE  3 REMAKE, AUGUST 1967******************
-		TC	ALLCOAST	# DO DAP COASTING FLIGHT INITIALIZATION.
+# ***** EVENTUALLY, USE 2SECWLT4 FROM FIXED-FIXED AND NEW NAME. *****
 
-		EXTEND
-		DCA	TIME2		# THE ENGINE - OFF COMMAND IS RECORDED
-		DXCH	TEVENT		# FOR THE DOWNLINK
+                CAF             2SECSDAP                # SET UP AOSTASK TO BEGIN IN 2 SECONDS
+                TC              WAITLIST                # IT THEN SETS UP A LOOP ON WAITLIST FOR
+                EBANK=          AOSQ
+                2CADR           AOSTASK                 # 2 SECOND INTERVALS AND CHECKS FOR THE
+                                                        # SHUTDOWN CONDITION IN BIT8 OF DAPBOOLS
 
-# START CODING FOR MODULE 3 REMAKE, AUGUST 1967***START CODING FOR MODULE 3 REMAKE, AUGUST 1967******************
-		EXTEND			# RESTORE ORIGINAL Q SETTING.
-		QXCH	/TEMP1/
+# ***********************************************************************************************************
 
-# **END CODING FOR MODULE 3 REMAKE, AUGUST 1967****END CODING FOR MODULE  3 REMAKE, AUGUST 1967******************
-		CS	DAPBOOLS	# TURN TRIM GIMBAL OFF.
-		MASK	USEQRJTS
-		ADS	DAPBOOLS
-		CAF	PGNSCADR	# MAKE SURE GIMBLMON DOES NOT TURN GIMBAL
-		TS	DVSELECT	# BACK ON.
-		
-ENGINOF1	CS	PRIO30		# TURN OFF THE ENGINE
-		EXTEND
-		RAND	11
-		AD	BIT14
-		EXTEND
-		WRITE	11
-		
-		CS	ENGINBIT	# CLEAR ENGINBIT - THIS IS AN INDICATION
-		MASK	FLAGWRD1	# OF NORMAL SHUTDOWN
-		TS	FLAGWRD1
+# REMOVE THIS AND THE TASKS WHEN THE INERTIA ESTIMATOR WORKS.
 
-# START CODING FOR MODULE 3 REMAKE, AUGUST 1967***START CODING FOR MODULE 3 REMAKE, AUGUST 1967*******************
+                CAF             ONE                     # *** SPECIAL DAP CHECKOUT SEQUENCE ***
+                TC              WAITLIST                # THESE THREE CALLS TO WAITLIST BEGIN A
+                EBANK=          IXX
 
-INSRT20A	TCF	RESETCTR	# GO DEACTIVATE EXTRAORDINARY GTS FLAGS.
+                2CADR           IXXTASK                 # COMPLICATED PROCEDURE TO DECREMENT THE
+                CAF             ONE                     # INERTIA MATRIX DIAGONAL ELEMENTS (EACH
+                TC              WAITLIST                # SCALED AT 2(+18) SLUG FEET(2) ) BY ONE
+                EBANK=          IYY
+                2CADR           IYYTASK                 # BIT AS SOON AS APPROPRIATE BY A NOMINAL
+                CAF             ONE                     # LINEAR APPROXIMATION TO INERTIAL CHANGE.
+                TC              WAITLIST
+                EBANK=          IZZ
+                2CADR           IZZTASK                 # *** NOT TO BE USED IN MISSIONS ***
 
-					# THEN RETURN TO CALLER.
-# **END CODING FOR MODULE 3 REMAKE, AUGUST 1967*****END CODING FOR MODULE 3 REMAKE, AUGUST 1967*******************
+## Page 459
+# ***********************************************************************************************************
 
-ENGINBIT	EQUALS	BIT5
-ASCURGLM	DEC	-0.25	B-9	# -0.25 SECONDS SCALED AT 2(+9).
-		DEC	-0.25	B-4	# -0.25 SECONDS SCALED AT 2(+4).
-ASCRATEC	OCTAL	77001		# -1.4 DEG/SEC SCALED AT PI/4 RADIANS/SEC
-		OCTAL	77555		# -0.4 DEG/SEC SCALED AT PI/4 RADIANS/SEC
+DESDCAP         INHINT                                  # (MISSION ENTRY)
 
-1STENGOF	LXCH	Q		# COME HERE FROM FRESH START.
-		TC	ENGINOF1	# JUST TURN OFF ENGINE
-		LXCH	Q
-		
-## Page 482
-		TCF	ALLCOAST	# AND SET UP FOR COAST.
+                CAF             DBAUTO                  # SINCE ENGINE IS ON:
+                TS              DB                      # SET DEADBAND TO 1.0 DEGREES
+
+ASCDAP1         RELINT                                  # LET INTERRUPTS LOOSE.
+
+                TC              Q                       # RETURN.
+
+DBAUTO          DEC             0.00556                 # 1 DEGREE DEADBAND SCALED AT PI RADIANS
