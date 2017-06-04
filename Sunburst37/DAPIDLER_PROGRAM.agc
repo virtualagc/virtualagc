@@ -18,6 +18,7 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-05-24 MAS  Created from Sunburst 120.
 ##              2017-05-30 HG   Transcribed
+##              2017-06-03 HG   Add missing constant DGBF                
 
 ## Page 463
 # THE DAPIDLER PROGRAM IS STARTED BY FRESH START AND RESTART.             THE DAPIDLER PROGRAM IS DONE 10 TIMES
@@ -258,6 +259,7 @@ MS100           OCTAL           37766
 0.31250         DEC             0.31250
 
 DELTADOT        DEC             0.07111                 # 0.2 DEG/SEC SCALED AT PI/64
+DGBF            DEC             0.6
 .5ACCMIN        DEC             0.30680
 DBMNMP          DEC             0.00167                 # .3 DEGREES SCALED AT PI RADIANS
 # TORQUE AND WEIGHTING CONSTANTS:
