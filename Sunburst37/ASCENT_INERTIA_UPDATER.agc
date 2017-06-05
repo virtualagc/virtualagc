@@ -17,131 +17,146 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-05-24 MAS  Created from Sunburst 120.
+##              2017-06-05 HG   Trasncribed
 
-## NOTE: Page numbers below have not yet been updated to reflect Sunburst 37.
-
-## Page 639
-
-IXXTASK         TC              JACCESTP                        
-                TC              ASCENGON                        
-
-                EXTEND                                          
-                DIM             IXX                             
-                CAF             IXXTIME                         
-                TC              WAITLIST                        
-                2CADR           IXXTASK                         
-
-                TCF             TASKOVER                        
-
-IYYTASK         TC              JACCESTQ                        
-
-                TC              ASCENGON                        
-
-                EXTEND                                          
-                DIM             IYY                             
-                CAF             IYYTIME                         
-                TC              WAITLIST                        
-                2CADR           IYYTASK                         
-
-                TCF             TASKOVER                        
-
-IZZTASK         TC              JACCESTR    
+## Page 538
+                BANK            26
+                EBANK=          DT
+IXXTASK         TC              JACCESTP
 
                 TC              ASCENGON
 
-                EXTEND                                          
-                DIM             IZZ                             
-                CAF             IZZTIME                         
-                TC              WAITLIST                        
-                2CADR           IZZTASK                         
+                EXTEND
+                DIM             IXX
+                CAF             IXXTIME
+                TC              WAITLIST
+                EBANK=          DT
+                2CADR           IXXTASK
 
-                TCF             TASKOVER                        
+                TCF             TASKOVER
 
-IXXTIME         DEC             200                             
-IYYTIME         DEC             1300                            
-IZZTIME         DEC             180                             
+IYYTASK         TC              JACCESTQ
 
-ASCENGON        CAF             BIT8                            
-                MASK            DAPBOOLS                        
-                CCS             A                               
-                TC              Q                               
-                TCF             TASKOVER                        
+                TC              ASCENGON
 
-JACCESTP        CAE             IXX                             
-                ZL                                              
-                EXTEND                                          
-                DV              4JETTORK                        
+                EXTEND
+                DIM             IYY
+                CAF             IYYTIME
+                TC              WAITLIST
+                EBANK=          DT
+                2CADR           IYYTASK
 
-## Page 640
-                DOUBLE                                          
-                TS              1/2JTSP                         
+                TCF             TASKOVER
 
-                CAF             JETTORK                         
-                ZL                                              
-                EXTEND                                          
-                DV              IXX                             
-                TS              1JACC                           
+IZZTASK         TC              JACCESTR
 
-                TC              Q                               
+                TC              ASCENGON
 
-JACCESTQ        CAE             IYY                             
-                ZL                                              
-                EXTEND                                          
-                DV              JETTORK4                        
-                TS              1/NJTSQ                         
+                EXTEND
+                DIM             IZZ
+                CAF             IZZTIME
+                TC              WAITLIST
+                EBANK=          DT
+                2CADR           IZZTASK
 
-                DOUBLE                                          
-                TS              1/2JTSQ                         
 
-                CAF             JETTORK1                        
-                ZL                                              
-                EXTEND                                          
-                DV              IYY                             
-                TS              1JACCQ                          
+                TCF             TASKOVER
 
-                TC              Q                               
-JACCESTR        CAE             IZZ                             
-                ZL                                              
-                EXTEND                                          
-                DV              JETTORK4                        
-                TS              1/NJTSR                         
+IXXTIME         DEC             200
+IYYTIME         DEC             1300
+IZZTIME         DEC             180
 
-                DOUBLE                                          
-                TS              1/2JTSR                         
+ASCENGON        CAF             BIT8
+                MASK            DAPBOOLS
+                CCS             A
+                TC              Q
+                TCF             TASKOVER
 
-                CAF             JETTORK1                        
-                ZL                                              
-                EXTEND                                          
-                DV              IZZ                             
-                TS              1JACCR                          
+## Page 539
+JACCESTP        CAE             IXX
+                ZL
+                EXTEND
+                DV              4JETTORK
+                DOUBLE
+                TS              1/2JTSP
 
-COMMONQR        CAE             1/2JTSQ                         
-                AD              1/2JTSR                         
-                EXTEND                                          
-                MP              .707WL                          
+                CAF             JETTORK
+                ZL
+                EXTEND
+                DV              IXX
+                TS              1JACC
+
+                TC              Q
+
+JACCESTQ        CAE             IYY
+                ZL
+                EXTEND
+                DV              JETTORK4
+                EXTEND                                  # INCLUDE INVISIBLE FACTOR (1/2).
+
+                MP              BIT14
+                TS              1/NET+4Q
+                TS              1/NET-4Q
+
+
+                DOUBLE
+                TS              1/NET+2Q
+                TS              1/NET-2Q
+
+                CAF             JETTORK1
+                ZL
+                EXTEND
+                DV              IYY
+                TS              1JACCQ
+
+                TC              Q
+JACCESTR        CAE             IZZ
+                ZL
+                EXTEND
+                DV              JETTORK4
+                EXTEND                                  # INCLUDE INVISIBLE FACTOR OF (1/2).
+                MP              BIT14
+                TS              1/NET+4R
+                TS              1/NET-4R
+
+                DOUBLE
+                TS              1/NET+2R
+                TS              1/NET-2R
+
+                CAF             JETTORK1
+                ZL
+
+## Page 540
+                EXTEND
+                DV              IZZ
+
+                TS              1JACCR
+
+COMMONQR        CAE             1/2JTSQ
+                AD              1/2JTSR
+                EXTEND
+                MP              .707BK26
                 TS              1/2JETSU                        # TEMP
 
-                CAE             1/2JTSQ                         
-                EXTEND                                          
-
-## Page 641
-
-                MP              1/2JTSR                         
-                EXTEND                                          
+                CAE             1/2JTSQ
+                EXTEND
+                MP              1/2JTSR
+                EXTEND
                 DV              1/2JETSU                        # TEMP
-                TS              1/2JETSU                        
-                TS              1/2JETSV                        
+                TS              1/NET+2U
+                TS              1/NET-2U
+                TS              1/NET+2V
+                TS              1/NET-2V
 
-                CAE             1JACCQ                          
-                AD              1JACCR                          
-                EXTEND                                          
-                MP              0.35356                         
-                TS              1JACCU                          
-                TS              1JACCV                          
+                DOUBLE
+                TS              1/NET+1U
+                TS              1/NET-1U
+                TS              1/NET+1V
+                TS              1/NET-1V
 
-                TC              Q                               
+                TC              Q
 
+.707BK26        DEC             0.70711
 JETTORK         DEC             0.00243                         # 500 FT LBS. SCALED AT PI*2(+16)
 JETTORK1        DEC             0.00267                         # 550 FT LBS. SCALED AT PI*2(+16)
-0.35356         DEC             0.35356                         
-ENDDAP25        EQUALS                                          
+0.35356         DEC             0.35356
