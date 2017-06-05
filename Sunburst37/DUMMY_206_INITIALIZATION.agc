@@ -17,12 +17,12 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-05-24 MAS  Created from Sunburst 120.
+##              2017-06-06 HG   Transcribed
 
-## NOTE: Page numbers below have not yet been updated to reflect Sunburst 37.
-
-## Page 869
+## Page 812
 # PROGRAM NAME - BEGIN206
 # MOD. NO. 3
+
 # MOD BY - D. LICKLY AND J. SAMPSON
 # DATE - NOV. 22, 1966
 # LOG SECTION - DUMMY 206 INITIALIZATION
@@ -32,10 +32,10 @@
 
 # FIXED INITIALIZATION REQUIRED - PATCH STARTDT1 AND STARTDT2 TO REPRESENT THE TIME2,TIME1 VALUE AT THE TIME AT
 #                                   WHICH THE JOBS OR TASKS ARE TO BEGIN
-#				  PATCH CADR1 AND CADR2 IF SOME OTHER TASKS THAN TASK1 AND TASK2 ARE TO BE USED
-#				  PATCH CADR3 AND CADR4 TO THE 2CADR OF THE JOBS TO BE STARTED
-#				  PATCH 206BEGIN TO TC ENDOFJOB IF ONLY ONLY ONE TASK OR JOB IS TO BE STARTED
-#				  PATCH TASK1 AND TASK2 WITH DIFFERENT PRIORITIES IF DESIRED
+#                                 PATCH CADR1 AND CADR2 IF SOME OTHER TASKS THAN TASK1 AND TASK2 ARE TO BE USED
+#                                 PATCH CADR3 AND CADR4 TO THE 2CADR OF THE JOBS TO BE STARTED
+#                                 PATCH 206BEGIN TO TC ENDOFJOB IF ONLY ONLY ONE TASK OR JOB IS TO BE STARTED
+#                                 PATCH TASK1 AND TASK2 WITH DIFFERENT PRIORITIES IF DESIRED
 # SUBROUTINES CALLED - FINDVAC, WAITLIST
 
 # NORMAL EXIT MODES - ENDOFJOB, TASKOVER
@@ -52,49 +52,49 @@
 #   REQUIRED TASKS AND JOBS WILL BE CALLED WITHIN 163.84 SECONDS
 
 
-		BANK	35
-		
-BEGIN206	INHINT
+                BANK            35
 
-		CS	TIME1		# PATCH SLAP1 TO COME HERE TO START UP TWO
-		AD	STARTDT1 +1	#   DELAYED TASKS OR JOBS FOR SIMULATIONS
-		AD	BIT14
-		AD	BIT14
-		XCH	ITEMP1
-		
-		CA	ITEMP1
-		TC	WAITLIST
-		EBANK=	ITEMP1
-CADR1		2CADR	TASK1		# MAY BE PATCHED FOR ANOTHER TASK
+BEGIN206        INHINT
 
-206BEGIN	CS	TIME1		# PATCH TO TC ENDOFJOB TO START 1 TASK
-		AD	STARTDT2 +1
-		AD	BIT14
-## Page 870
-		AD	BIT14
-		XCH	ITEMP1
-		
-		CA	ITEMP1
-		TC	WAITLIST
-		EBANK=	ITEMP1
-CADR2		2CADR	TASK2		# COULD BE PATCHED
+                CS              TIME1                   # PATCH SLAP1 TO COME HERE TO START UP TWO
+                AD              STARTDT1        +1      #   DELAYED TASKS OR JOBS FOR SIMULATIONS
+                AD              BIT14
+                AD              BIT14
+                XCH             ITEMP1
 
-		TC	ENDOFJOB
-		
-		
-STARTDT1	2DEC	600		# PATCH
+                CA              ITEMP1
+                TC              WAITLIST
+                EBANK=          ITEMP1
+CADR1           2CADR           TASK1                   # MAY BE PATCHED FOR ANOTHER TASK
 
-STARTDT2	2DEC	200		# PATCH
+206BEGIN        CS              TIME1                   # PATCH TO TC ENDOFJOB TO START 1 TASK
+                AD              STARTDT2        +1
+                AD              BIT14
 
-TASK1		CAF	PRIO15		# ..OR YOUR OWN PRIORITY..
-		TC	FINDVAC
-CADR3		OCT	77777		# BETTER PATCH A 2CADR HERE
-		OCT	77777
-		TC	TASKOVER
-		
-TASK2		CAF	PRIO20
-		TC	FINDVAC
-CADR4		OCT	77777		# ..HERE ALSO..
-		OCT	77777
-		TC	TASKOVER
-	
+## Page 813
+                AD              BIT14
+                XCH             ITEMP1
+
+                CA              ITEMP1
+                TC              WAITLIST
+                EBANK=          ITEMP1
+CADR2           2CADR           TASK2                   # COULD BE PATCHED
+
+                TC              ENDOFJOB
+
+
+STARTDT1        2DEC            600                     # PATCH
+
+STARTDT2        2DEC            200                     # PATCH
+
+TASK1           CAF             PRIO15                  # ..OR YOUR OWN PRIORITY..
+                TC              FINDVAC
+CADR3           OCT             77777                   # BETTER PATCH A 2CADR HERE
+                OCT             77777
+                TC              TASKOVER
+
+TASK2           CAF             PRIO20
+                TC              FINDVAC
+CADR4           OCT             77777                   # ..HERE ALSO..
+                OCT             77777
+                TC              TASKOVER
