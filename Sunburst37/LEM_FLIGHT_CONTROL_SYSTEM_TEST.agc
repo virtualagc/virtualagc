@@ -17,12 +17,13 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-05-24 MAS  Created from Sunburst 120.
+##              2017-06-05 MAS  Transcribed.
 
-## NOTE: Page numbers below have not yet been updated to reflect Sunburst 37.
-
-## Page 367
+## Page 348
                 BANK            6
                 EBANK=          JETSTEP
+
+
 
 # LEM FCS TEST  ENTRY AND INITIALIZATION JOB.
 
@@ -35,6 +36,7 @@
 #            (5) INTERFACE CHANNEL LOOK TASK
 
 
+
 FCSSTART        TC              GRABWAIT                        # SO NOTHING DISRUPTS THE LOAD.
                 CAF             JSTEPADR                        # THE START OF THE LIST.
 FCS3            CCS             A
@@ -43,7 +45,8 @@ FCS2            CAF             V04N01K                         # DISPLAY PRESEN
                 TC              NVSBWAIT
                 INCR            MPAC            +2
                 CAF             V21N02K
-                TC              NVSBWAIT                        # IN CASE IT'S BUSY BUT IT SHOULDN'T BE.
+
+                TC              NVSBWAIT                        # IN CASE IT,S BUSY BUT IT SHOULDN,T BE.
                 TC              ENDIDLE                         # WHILE LOADING.
                 TC              +3                              # V34E. TERMINATE LOAD OF THIS LIST
                                                                 # SECTION, GO TO NEW SECTION OR TO TEST.
@@ -66,9 +69,10 @@ FCSTEST         INHINT
                 2CADR           JETSTART
 
                 CAF             BIT1                            # 10MS.
+
                 TC              WAITLIST
                 EBANK=          JETSTEP
-## Page 368
+## Page 349
                 2CADR           ENGSTART
 
                 CAF             THREE                           # 30MS.
@@ -77,6 +81,7 @@ FCSTEST         INHINT
                 2CADR           TRIMTOP
 
                 CAF             FOUR                            # 40MS.
+
                 TC              WAITLIST
                 EBANK=          JETSTEP
                 2CADR           THRSTART
@@ -94,7 +99,7 @@ V21N30K         OCT             02130
 V04N01K         OCT             00401
 V47K            OCT             04700
 
-## Page 369
+## Page 350
 # LEM FCS TEST   RCS JETSET TASK
 #     THIS JOB ISSUES A PROFILE OF  JET ON-OFF SIGNALS AS DETERMINED BY THE CONSTANTS IN A SET OF SIX REGISTERS.
 # THE SIX REGISTERS ARE, (1) NTIMES, THE NUMBER OF TIMES A PARTICULAR STEP WILL BE PERFORMED. (2) NEXTTIME, THE
@@ -107,7 +112,9 @@ V47K            OCT             04700
 #     THIS JOB WILL BE ENTERED BUT IMMEDIATELY ENDED IF THE INITIAL VALUES OF JETSTEP AND NTIMES ARE +0.
 
 
+
 NEXTSET         CCS             JETSTEP                         # IT MAY BE ZERO.
+
                 TC              +2                              # NOPE
                 TC              TASKOVER                        # IT IS SO WE ARE DONE WITH THIS TASK.
                 TS              JETSTEP
@@ -131,6 +138,7 @@ JETOFF          CAF             ZERO
                 EXTEND
                 WRITE           6
                 NDX             JETSTEP
+
                 CCS             NTIMES
                 NDX             JETSTEP
                 TS              NTIMES                          # ONE LESS TIME.
@@ -144,7 +152,7 @@ JTOP            NDX             JETSTEP
                 EBANK=          JETSTEP
                 2CADR           JETON
 
-## Page 370
+## Page 351
                 TC              TASKOVER
 
 JETON           NDX             JETSTEP
@@ -164,6 +172,7 @@ JF3             TS              FCNTR
                 MASK            BIT8
                 CCS             A
                 TC              JFAIL
+
 JFAIL1          CCS             FCNTR
                 TC              JF3
                 CAE             XJBUF
@@ -187,14 +196,16 @@ JFAIL           NDX             FCNTR
                 NDX             FCNTR
                 CS              YZJETMSK
                 MASK            YZJBUF
+
                 TS              YZJBUF
                 TC              ALARM
                 OCT             01410                           # TEMPORARY JET FAIL ALARM CODE.
                 TC              JFAIL1
 
-## Page 371
+## Page 352
 YZJETMSK        OCT             00010                           # JET 11
                 OCT             00020                           # JET 12
+
                 OCT             00004                           # JET 15
                 OCT             00200                           # JET 16
                 OCT             00001                           # JET 7
@@ -211,18 +222,20 @@ XJETMASK        OCT             00040                           # JET 10
                 OCT             00004                           # JET 5
                 OCT             00002                           # JET 2
 
-## Page 372
+## Page 353
 # LEM FCS TEST  ENGINE ON - OFF TASK
 # THIS TASK TURNS THE LEM ASCENT OR DESCENT ENGINE ON AND OFF ACCORDING TOTHE CONSTANTS STORED IN THE FIVE SETS OF
 # REGISTERS, (1) CYLTIMES, WHICH CONTAINS THE NUMBER OF TIMES A PARTICULARSTEP WILL BE REPEATED, (2) NEXTCYLT,
 #  WHICH CONTAINS THE TIME BETWEEN STEPS SCALED FOR T3, (3) ONTIME, WHICH CONTAINS THE TIME TO TURN THE ENGINE ON
-# WHICH ALSO DETERMINES THE LENGTH OF TIME THE ENGINE WILL BE OFF WITHIN A SERIES OF ON:OFF CYCLES, (4) OFFTIME,
+# WHICH ALSO DETERMINES THE LENGTH OF TIME THE ENGIME WILL BE OFF WITHIN A SERIES OF ON:OFF CYCLES, (4) OFFTIME,
 #  WHICH CONTAINS THE NUMBER OF 2 MINUTES BEFORE THE ENGINE WILL BE TURNED OFF, AND (5) OFFTIMER, WHICH
 # CONTAINS THE RESIDUAL TIME BEFORE THE ENGINE WILL BE TURNED OFF.  OFFTIME AND OFFTIMER DETERMINE THE LENGTH
 # OF TIME THE ENGINE WILL BE ON IN ANY ONE CYCLE. THERE ARE THREE SETS OF THESE REGISTERS.
+
 #     THE ENGSTEP REGISTER IS USED AS AN INDEX TO PICK UP A PARTICULAR SET  OF THE ABOVE 5 REGISTERS.  THIS TASK
 # WILL BE ENTERED BUT IMMEDIATELY ENDED IF ENGSTEP AND CYLTIMES = +0.     THE ALLOWABLE VALUES OF ENGSTEP ARE +0,
 # 1 AND 2.
+
 
 
 NXTONOFF        CCS             ENGSTEP
@@ -261,7 +274,7 @@ ENGONTM         NDX             ENGSTEP
                 CAE             OFFTIME
                 TS              OFFTMBUF
                 NDX             ENGSTEP
-## Page 373
+## Page 354
                 CAE             ONTIME
                 TC              WAITLIST
                 EBANK=          ENGSTEP
@@ -276,6 +289,7 @@ ENGSET          CS              PRIO30
                 EXTEND
                 WRITE           11                              # ENG ON = 1, ENG OFF = 0.
 ENGRST          CCS             OFFTMBUF
+
                 TC              LTIMEON                         # AT LEAST 2MIN. BEFORE ENGINE OFF.
                 NDX             ENGSTEP
                 CAE             OFFTIMER                        # LESS THAN 2MIN. TO ENGINE OFF.
@@ -298,7 +312,7 @@ LTIMEON         CCS             OFFTMBUF                        # IS THERE ANY M
 
 2MIN            DEC             12000
 
-## Page 374
+## Page 355
 # LEM FCS TEST  TRIM TASK
 # THIS PROGRAM ISSUES A PROFILE OF PITCH AND ROLL TRIM COMMANDS TO THE LEM DESCENT ENGINE GIMBAL IN ACCORDANCEWITH
 # THE VALUE S IN THE TRIMSTEP REGISTER AND THE 12 SETS OF 5 REGISTERS CALLED NUMTIMES, STEPDLYT, TRIMONT, TRIMOFFT
@@ -317,7 +331,9 @@ LTIMEON         CCS             OFFTMBUF                        # IS THERE ANY M
 #    THIS TASK WILL BE ENTERED BUT IMMEDIATELY ENDED IF TRIMSTEP AND NUMTIMES = +0.
 
 
+
 NEXTTRIM        CCS             TRIMSTEP
+
                 TC              +2
                 TC              TASKOVER                        # EXIT HERE.
                 TS              TRIMSTEP                        # LESS ONE.
@@ -341,6 +357,7 @@ NUMSTEP         NDX             TRIMSTEP
                 CCS             NUMTIMES
                 CCS             A
                 TC              +2
+
                 TC              NEXTTRIM                        # WAS ONE.
                 AD              ONE
                 NDX             TRIMSTEP
@@ -348,9 +365,10 @@ NUMSTEP         NDX             TRIMSTEP
 TRIMSET         NDX             TRIMSTEP
                 CAE             TRIMONT
                 TC              WAITLIST
-## Page 375
+## Page 356
                 EBANK=          TRIMSTEP
                 2CADR           TRIMON
+
 
                 TC              TASKOVER
 
@@ -374,6 +392,7 @@ TRIMON1         NDX             TRIMSTEP
                 WOR             12                              # TRIM STARTS.
                 NDX             TRIMSTEP
                 CAE             TRIMOFFT
+
                 TC              WAITLIST
                 EBANK=          TRIMSTEP
                 2CADR           TRIMOFF
@@ -394,11 +413,12 @@ PERFORM         TC              GRABWAIT                        # KEY RELEASE MA
                 INHINT                                          # ENTER. THE FAIL HAS BEEN RESET.
                 CAF             BIT2                            # 20MS.
                 TC              WAITLIST
-                2CADR           TRIMON                          # CHECK AGAIN TO BE SURE, THEN PROCEED..
+                2CADR           TRIMON                          # CHECK AGAIN TO BE SURE. THEN PROCEED..
+
 
                 TC              EJFREE
 
-## Page 376
+## Page 357
 TR1             INHINT                                          # PROCEED WITH THE FAIL.
                 CAF             BIT2                            # 20MS.
                 TC              WAITLIST
@@ -413,7 +433,7 @@ TRIMMASK        OCT             07400
 V01N25K         OCT             00125
 V50K            OCT             05000
 
-## Page 377
+## Page 358
 # LEM FCS TEST  THROTTLE TASK
 #    THIS PROGRAM ISSUES A PROFILE OF THROTTLE COMMANDS TO THE LEM DESCENT ENGINE.  THE PROFILE IS DETERMINED BY
 # THE VALUES IN THE THRTSTEP REGISTER AND THE 6  SETS OF REGISTERS, 5 PER SET, CALLED  DOTIMES, DELAY, THR1TIME,
@@ -428,8 +448,10 @@ V50K            OCT             05000
 # THCOMM1.  IT MUST BE FORMATTED FOR T3.
 #     (4) THCOMM1 AND (5) THCOMM2 DETERMINE THE NUMBER OF THRUST INCREASE  OR DECREASE PULSES TOBE ISSUED AT A
 # 3.2KPPS RATE.  THE RANGE OF POSSIBLE VALUES OF EITHER IS FROM POSMAX (OCT 37777) TO NEGMAX (OCT 40000) ALTHOUGH
+
 # THE ACTUAL THROTTLE RANGE IS FROM OCT 6116 TO OCT 71661 (+,- 3150 DEC).
 #    THIS TASK WILL BE ENTERED BUT IMMEDIATELY ENDED IF THE INITIAL VALUES OF THRTSTEP AND DOTIMES ARE +0.
+
 
 
 NEXTTHRT        CCS             THRTSTEP
@@ -463,7 +485,7 @@ THR2COMM        NDX             THRTSTEP
 CKDOTIME        NDX             THRTSTEP
                 CCS             DOTIMES
                 CCS             A
-## Page 378
+## Page 359
                 TC              +2
                 TC              NEXTTHRT                        # WAS ONE.
                 AD              ONE
@@ -483,6 +505,7 @@ THR1COMM        NDX             THRTSTEP
                 AD              250MS                           # SO ACE CAN SAMPLE.
                 TC              WAITLIST
                 EBANK=          THRTSTEP
+
                 2CADR           THR2COMM
 
                 TC              TASKOVER
@@ -503,7 +526,7 @@ THROTON         TS              THRUST                          # THROTTLE OUTPU
 
 250MS           OCT             00031
 
-## Page 379
+## Page 360
 # LEM FCS TEST  INTERFACE LOOK TASK.
 
 #     THIS PROGRAM KEEPS A RUNNING HISTORY OF THE STATE OF ALL THE BITS IN INPUT CHANNELS 30, 31, 32 AND 33.
@@ -517,6 +540,7 @@ THROTON         TS              THRUST                          # THROTTLE OUTPU
 # IS RUNNING THE OPERATOR CAN STOP IT BY SETTING C(QUITLOOK) = +0.
 #     NO DISPLAYS OF EITHER THE BUFFER REGISTERS OR CHANNELS ARE INCORPORATED INTO THIS PROGRAM.  THIS WAS DONE TO
 # ALLOW THE TEST OPERATOR MONITORING FLEXIBILITY.  FOR REAL TIME MONITORING IT IS SUGGESTED THAT THE BUFFER
+
 # REGISTERS BE DISPLAYED WITH THE MONITOR VERBS (11 THROUGH 15).  ON THE OTHER HAND, THE OPERATOR MAY ELECT TO
 # PERFORM NO REAL TIME MONITORING UNTIL THE TEST IS COMPLETED, WHEN THE BUFFER REGISTERS WOULD BE CALLED FOR
 # DISPLAY (VERB 01) AND RECORDED.
@@ -529,6 +553,7 @@ LOOKTOP         CCS             QUITLOOK                        # IS THIS TASK W
                 CAF             THREE                           # START SCAN OF CHANNELS.
 LOOKLOOP        TS              CHCNTR                          # 3, 2, 1, 0.
                 NDX             CHCNTR
+
                 CAE             30BUF1
                 EXTEND
                 NDX             CHCNTR
