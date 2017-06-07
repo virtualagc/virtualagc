@@ -17,10 +17,9 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-05-24 MAS  Created from Sunburst 120.
+##              2017-06-07 HG   Transcribed
 
-## NOTE: Page numbers below have not yet been updated to reflect Sunburst 37.
-
-## Page 591
+## Page 554
                 BANK            21
                 EBANK=          DT
 # CONTROL REACHES THIS POINT UNDER EITHER OF THE FOLLOWING TWO CONDITIONS ONCE THE DESCENT ENGINE AND THE DIGITAL
@@ -33,512 +32,633 @@
 # THE FOLLOWING T5RUPT ENTRY BEGINS THE TRIM GIMBAL CONTROL LAW.  SINCE IT IS ASSUMED THAT THE LEM WILL REMAIN
 # UNDER TRIM GIMBAL CONTROL, A KALMAN FILTER RUPT IS SET UP TO BEGIN 30 MS FROM THE TRIM GIMBAL RUPT.
 
-GTS             CAF             MS30F                           # RESET TIMER IMMEDIATELY: DT = 30 MS
-                TS              TIME5                           
+GTS             CAF             MS30F                   # RESET TIMER IMMEDIATELY: DT = 30 MS
+                TS              TIME5
 
-                LXCH            BANKRUPT                        # INTERRUPT LEAD IN (CONTINUED)
-                EXTEND                                          
-                QXCH            QRUPT                           
+                LXCH            BANKRUPT                # INTERRUPT LEAD IN (CONTINUED)
+                EXTEND
+                QXCH            QRUPT
 
-                EXTEND                                          
-                DCA             POSTPFIL                        
-                DXCH            T5ADR                           
+                EXTEND
+                DCA             POSTPFIL
+                DXCH            T5ADR
 
-                TCF             GTSTEST                         # SKIP OVER XFORMS UNTIL REORGANIZATION
+                TCF             GTSTEST                 # SKIP OVER XFORMS UNTIL REORGANIZATION
 
-GIMBAL          EXTEND                                          # GET D.P. FILTERED CDUY VALUE (ONES COMP)
-                DCA             CDUYFIL                         # SCALED AT 2PI RADIANS
-                TC              ONETOTWO                        # FORM S.P. VALUE IN TWOS COMPLEMENT AT PI
-                EXTEND                                          
-                MSU             CDUYD                           # FORM Y-AXIS ERROR IN ONES COMPLEMENT
-                TS              QDIFF                           # (SAVE IN Q-AXIS ERROR LOC: EFFICIENCY)
+GIMBAL          EXTEND                                  # GET D.P. FILTERED CDUY VALUE (ONES COMP)
+                DCA             CDUYFIL                 # SCALED AT 2PI RADIANS
+                TC              ONETOTWO                # FORM S.P. VALUE IN TWOS COMPLEMENT AT PI
+                EXTEND
+                MSU             CDUYD                   # FORM Y-AXIS ERROR IN ONES COMPLEMENT
+                TS              QDIFF                   # (SAVE IN Q-AXIS ERROR LOC: EFFICIENCY)
 
-                EXTEND                                          # GET D.P. FILTERED CDUZ VALUE (ONES COMP)
-                DCA             CDUZFIL                         # SCALED AT 2PI RADIANS
-                TC              ONETOTWO                        # FORM S.P. VALUE IN TWOS COMPLEMENT AT PI
-                EXTEND                                          
-                MSU             CDUZD                           # FORM Z-AXIS ERROR IN ONES COMPLEMENT
-                TS              RDIFF                           # (SAVE IN R-AXIS ERROR LOC: EFFICIENCY)
+                EXTEND                                  # GET D.P. FILTERED CDUZ VALUE (ONES COMP)
+                DCA             CDUZFIL                 # SCALED AT 2PI RADIANS
+                TC              ONETOTWO                # FORM S.P. VALUE IN TWOS COMPLEMENT AT PI
+                EXTEND
+                MSU             CDUZD                   # FORM Z-AXIS ERROR IN ONES COMPLEMENT
+                TS              RDIFF                   # (SAVE IN R-AXIS ERROR LOC: EFFICIENCY)
 
 # TRANSFORM Y,Z CDU ERRORS TO THE Q,R-AXES.
 
-                EXTEND                                          # GET BOTH Y AND Z CDU ERRORS AT PI RAD
-                DCA             QDIFF                           
-                TC              QTRANSF                         # FORM Q-ERROR IN A (SCALED AT PI RAD)
-                DXCH            QDIFF                           # STORE Q-ERROR, GET BOTH Y,Z CDU ERRORS
-                TC              RTRANSF                         # FORM R-ERROR IN A (SCALED AT PI RAD)
-                XCH             RDIFF                           # STORE R-ERROR
+                EXTEND                                  # GET BOTH Y AND Z CDU ERRORS AT PI RAD
+                DCA             QDIFF
+                TC              QTRANSF                 # FORM Q-ERROR IN A (SCALED AT PI RAD)
+                DXCH            QDIFF                   # STORE Q-ERROR, GET BOTH Y,Z CDU ERRORS
+                TC              RTRANSF                 # FORM R-ERROR IN A (SCALED AT PI RAD)
+                XCH             RDIFF                   # STORE R-ERROR
 
 # TRANSFORM THE FILTERED Y,Z RATES TO THE Q,R-AXES.
 # (THESE MAY BE NEEDED FOR THE RATE DERIVATION FOR THE JETS IF THEY MUST BE USED.)
 
-## Page 592
-                CAE             DCDUZFIL                        # GET FILTERED Y,Z RATES
-                TS              L                               # SCALED AT PI/4 RADIANS/SECOND
-                CAE             DCDUYFIL                        
-                TC              QTRANSF                         # FOR Q-AXIS RATE
-                TS              OMEGAQ                          # STORED SCALED AT PI/4 RADIANS/SECOND
+## Page 555
+                CAE             DCDUZFIL                # GET FILTERED Y,Z RATES
+                TS              L                       # SCALED AT PI/4 RADIANS/SECOND
+                CAE             DCDUYFIL
+                TC              QTRANSF                 # FOR Q-AXIS RATE
+                TS              OMEGAQ                  # STORED SCALED AT PI/4 RADIANS/SECOND
 
-                CAE             DCDUZFIL                        # GET FILTERED Y,Z RATES
-                TS              L                               # SCALED AT PI/4 RADIANS/SECOND
-                CAE             DCDUYFIL                        
-                TC              RTRANSF                         # FOR R-AXIS RATE
-                TS              OMEGAR                          # STORED SCALED AT PI/4 RADIANS/SECOND
+                CAE             DCDUZFIL                # GET FILTERED Y,Z RATES
+                TS              L                       # SCALED AT PI/4 RADIANS/SECOND
+                CAE             DCDUYFIL
+                TC              RTRANSF                 # FOR R-AXIS RATE
+                TS              OMEGAR                  # STORED SCALED AT PI/4 RADIANS/SECOND
 
 # TRANSFORM THE FILTERED Y,Z ACCELERATIONS TO THE Q,R-AXES.
 # (THESE MAY BE NEEDED TO CALCULATE TRIM GIMBAL OFF-TIMES IF ATTITUDE ERROR HAS GONE BEYOND TRIM GIMBAL CONTROL.)
 
-                CAE             D2CDUZFL                        # GET FILTERED Y,Z ACCELERATIONS
-                TS              L                               # SCALED AT PI/8 RADIANS/SECOND(2)
-                CAE             D2CDUYFL                        
-                TC              QTRANSF                         # FORM Q-AXIS ACCELERATION
-                TS              ALPHAQ                          # STORE AT PI/8 RADIANS/SECOND(2)
+                CAE             D2CDUZFL                # GET FILTERED Y,Z ACCELERATIONS
+                TS              L                       # SCALED AT PI/8 RADIANS/SECOND(2)
+                CAE             D2CDUYFL
+                TC              QTRANSF                 # FORM Q-AXIS ACCELERATION
 
-                CAE             D2CDUZFL                        # GET FILTERED Y,Z ACCELERATIONS
-                TS              L                               # SCALED AT PI/8 RADIANS/SECOND(2)
-                CAE             D2CDUYFL                        
-                TC              RTRANSF                         # FORM R-AXIS ACCELERATION
-                TS              ALPHAR                          # STORE AT PI/8 RADIANS/SECOND(2)
+                TS              ALPHAQ                  # STORE AT PI/8 RADIANS/SECOND(2)
 
-# EXTRAPOLATE THETA AND OMEGA OVER 100 MS PLUS THE 20 MS DELAY BETWEEN THE KALMAN FILTER AND TRIM GIMBAL 
-#  CONTROL, REFLECTING MECHANICAL LAG.
+                CAE             D2CDUZFL                # GET FILTERED Y,Z ACCELERATIONS
+                TS              L                       # SCALED AT PI/8 RADIANS/SECOND(2)
+                CAE             D2CDUYFL
+                TC              RTRANSF                 # FORM R-AXIS ACCELERATION
+                TS              ALPHAR                  # STORE AT PI/8 RADIANS/SECOND(2)
 
-                CAE             OMEGAQ                          
-                EXTEND                                          
-                MP              DTW                             
-                ADS             QDIFF                           
+# EXTRAPOLATE THETA AND OMEGA OVER THE 20 MS DELAY BETWEEN THE KALMAN FILTER AND TRIM GIMBAL CONTROL.
 
-                CAE             OMEGAR                          
-                EXTEND                                          
-                MP              DTW                             
-                ADS             RDIFF                           
+                CAE             OMEGAQ
+                EXTEND
+                MP              DTW
+                ADS             QDIFF
 
-                CAE             ALPHAQ                          
-                EXTEND                                          
-                MP              DTA                             
-                ADS             OMEGAQ                          
+                CAE             OMEGAR
+                EXTEND
+                MP              DTW
+                ADS             RDIFF
 
-                CAE             ALPHAR                          
-                EXTEND                                          
-                MP              DTA                             
-                ADS             OMEGAR                          
+                CAE             ALPHAQ
+                EXTEND
+                MP              DTA
 
-## Page 593
-                TCF             RESUME                          
+                ADS             OMEGAQ
 
-DTW             OCT             00754                           # 120 MS SCALED AT 4
-DTA             OCT             01727                           # 120 MS SCALED AT 2
+                CAE             ALPHAR
+                EXTEND
+                MP              DTA
+                ADS             OMEGAR
+
+                TCF             RESUME
+
+## Page 556
+
+DTW             DEC             .005
+DTA             DEC             .0025
+
 # TEST TO SEE IF TRIM GIMBAL CONTROL LAW HAS KEPT BOTH ATTITUDE ERRORS BELOW THE 1 DEGREE BOUNDARY WITH THE REGION
 # OF RCS CONTROL LAW DOMINANCE OR IS STILL REDUCING THE ERROR.
 
-GTSTEST         CAF             TRYGIMBL                        # VERIFY THAT GTS IS STILL OPERATIVE.
-                MASK            DAPBOOLS                        
-                CCS             A                               
-                TCF             RCSCNTRL                        # GTS NOT OPERATIVE
-# START CODING FOR MODULE 3 REMAKE, AUGUST 1967***START CODING FOR MODULE 3 REMAKE, AUGUST 1967*******************
+GTSTEST         CAF             TRYGIMBL                # VERIFY THAT GTS IS STILL OPERATIVE.
+                MASK            DAPBOOLS
+                CCS             A
+                TCF             RCSCNTRL                # GTS NOT OPERATIVE
+                CAF             BIT1
+LOOPTEST        TS              QRCNTR
+                INDEX           QRCNTR
+                CCS             QDIFF                   # SCALED AT PI.
+                AD              -TGBND+1                # -2 DEG SCALED AT PI, + 1 BIT.
+                TCF             +2
+                AD              -TGBND+1
+                EXTEND
+                BZMF            +2                      # IS ERROR MAG LESS,EQUAL 2 DEG.
+                TCF             RCSCNTRL                # NO.   GO TO JETS.
+                CA              QRCNTR                  # YES.  TRY RATE MAGNITUDE.
+                DOUBLE
+                INDEX           A
+                CCS             OMEGAQ                  # SCALED AT PI/4.
+                AD              -RATBD+1                # -.65 DEC/SEC SCALED AT PI/4  + 1 BIT
+                TCF             +2
 
-INSERT21        TCF             CHKCNTR                         # GO CHECK TRIMCNTR (AT END OF BANK 21).
-
-# **END CODING FOR MODULE 3 REMAKE, AUGUST 1967*****END CODING FOR MODULE 3 REMAKE, AUGUST 1967*******************
-
-LOOPTEST        TS              QRCNTR                          
-                INDEX           QRCNTR                          
-                CCS             QDIFF                           # SCALED AT PI.
-                AD              -TGBND+1                        # -2 DEG SCALED AT PI, + 1 BIT.
-                TCF             +2                              
-                AD              -TGBND+1                        
-                EXTEND                                          
-                BZMF            +2                              # IS ERROR MAG LESS,EQUAL 2 DEG.
-                TCF             TESTPCTR                        # NO.  MAY CONTINUE,THOUGH.
-                CA              QRCNTR                          # YES.  TRY RATE MAGNITUDE.
-                DOUBLE                                          
-                INDEX           A                               
-
-# THIS TEST BYPASSES THE TEST IN WSFTEST.  CHECK WSFTEST IF BOUND CHANGES.
-
-                CCS             OMEGAQ                          # SCALED AT PI/4.
-                AD              -RATBD+1                        # -.65 DEC/SEC SCALED AT PI/4  + 1 BIT
-                TCF             +2                              
-                AD              -RATBD+1                        
-                EXTEND                                          
-                BZMF            +2                              # IS RATE MAG LESS,EQUAL .65 DEG/SEC.
-                TCF             TESTPCTR                        # NO.  MAY CONTINUE,THOUGH.
-                CCS             QRCNTR                          # YES.  THIS AXIS IS FINE. ARE BOTH DONE.
-                TCF             LOOPTEST                        # TRY THE Q AXIS NOW.
-                TCF             GTSRAXIS                        # USE TRIM GIMBAL CONTROL.
--TGBND+1        OCT             77512                           # -2 DEG SCALED AT PI, + 1 BIT.
--RATBD+1        OCT             77423                           # -.65 DEG/SEC SCALED AT PI/4  + 1 BIT
+                AD              -RATBD+1
+                EXTEND
+                BZMF            +2                      # IS RATE MAG LESS,EQUAL .65 DEG/SEC.
+                TCF             RCSCNTRL                # NO.    GO TO JETS.
+                CCS             QRCNTR                  # YES.  THIS AXIS IS FINE. ARE BOTH DONE.
+                TCF             LOOPTEST                # TRY THE Q AXIS NOW.
+                TCF             GTSRAXIS                # USE TRIM GIMBAL CONTROL.
+-TGBND+1        OCT             77512                   # -2 DEG SCALED AT PI, + 1 BIT.
+-RATBD+1        OCT             77423                   # -.65 DEG/SEC SCALED AT PI/4  + 1 BIT
 # ATTITUDE ERROR IS BEYOND TRIM GIMBAL CONTROL LAW RANGE.  SET UP FOR RCS CONTROL LAW (Q,R-AXIS) AND CALCULATE
 # TIMES TO TURN OFF THE GIMBAL DRIVES.
 
-RCSCNTRL        EXTEND                                          # CHANGE LOCATION OF NEXT T5RUPT FROM FIL-
-                DCA             POSTQRFL                        # TER TO FILDUMMY.  AHEM, DON'T FORGET
-                DXCH            T5ADR                           # THAT FILDUMMY MOVED TO BANK20, DICK GOSS
+RCSCNTRL        CAF             POSTQRFL                # CHANGE LOCATION OF NEXT T5RUPT FROM
+                TS              T5ADR                   # FILTER TO FILDUMMY
 
-## Page 594
-                EXTEND                                          # SET UP POST P-AXIS T5RUPT TO GO TO
-                DCA             QRJPFILT                        # DUMMYFIL INSTEAD OF FILTER.  USE 2CADR
-                DXCH            PFILTADR                        # BECAUSE DUMMYFIL NOW IN BANK 16.
+                EXTEND                                  # SET UP POST P-AXIS T5RUPT TO GO TO
+                DCA             QRJPFILT                # DUMMYFIL INSTEAD OF FILTER.  USE 2CADR
+                DXCH            PFILTADR                # BECAUSE DUMMYFIL NOW IN BANK 16.
 
-                EXTEND                                          # PREPARE FOR SEQUENCED RESUMPTION OF
-                DCA             CDUY                            # Q,R-AXIS RCS CONTROL RATE DERIVATION
-                DXCH            OLDYFORQ                        # BY PROVIDING OLD CDU READINGS
+                EXTEND                                  # PREPARE FOR SEQUENCED RESUMPTION OF
+                DCA             CDUY                    # Q,R-AXIS RCS CONTROL RATE DERIVATION
+                DXCH            OLDYFORQ                # BY PROVIDING OLD CDU READINGS
 
-                EXTEND                                          # MOVE FILTERED AND TRANSFORMED ATTITUDE
-                DCA             QDIFF                           # ERRORS INTO ERASABLE FOR Q,R-AXIS RCS
-                XCH             ER                              # CONTROL URGENCY CALCULATIONS.
-                LXCH            E                               
+                EXTEND                                  # MOVE FILTERED AND TRANSFORMED ATTITUDE
 
-                CAF             ONE                             
-                TC              WAITLIST                        
+## Page 557
+                DCA             QDIFF                   # ERRORS INTO ERASABLE FOR Q,R-AXIS RCS
+                XCH             RERROR                  # CONTROL; NOTR THAT THE AXES SEEM TO BE
+                LXCH            QERROR                  # INTERCHANGED BUT ARE NOT CONFUSED
+
+                CAF             ONE
+                TC              WAITLIST
                 EBANK=          DT
-                2CADR           CHEKDRIV                        # DO TGOFF CALCULATION IN WAITLIST TASK
+                2CADR           CHEKDRIV                # DO TGOFF CALCULATION IN WAITLIST TASK
 
-                EXTEND                                          # GO TO Q,R-AXES CONTROL IMMEDIATELY
-                DCA             TGENTRY                         
-                DTCB                                            
+                EXTEND                                  # GO TO Q,R-AXES CONTROL IMMEDIATELY
+                DCA             TGENTRY
+                DTCB
 
-                EBANK=          JTSONNOW                        # NO, SURELY YOU JEST, NOT EBANK 6, AGAIN?
-POSTQRFL        2CADR           FILDUMMY                        # WATCH OUT FOR BANK SWITCHING D. GOSS
-
+POSTQRFL        GENADR          FILDUMMY
                 EBANK=          AOSQTERM
-QRJPFILT        2CADR           DUMMYFIL                        # NECESSARY BECAUSE DUMMYFIL IN BANK 16.
+QRJPFILT        2CADR           DUMMYFIL                # NECESSARY BECAUSE DUMMYFIL IN BANK 16.
 
                 EBANK=          DT
-TGENTRY         2CADR           STILLRCS                        
+TGENTRY         2CADR           STILLRCS
 
 
-# START CODING FOR MODULE 3 REMAKE, AUGUST 1967***START CODING FOR MODULE 3 REMAKE, AUGUST 1967*******************
+CHEKDRIV        CAF             ZERO                    # CALCULATE Q-AXIS GIMBAL DRIVE SHUTDOWN
+                TC              TGOFFCAL
+                TC              WAITLIST
+                EBANK=          DT
+                2CADR           OFFGIMQ
 
-CHEKDRIV        CCS             PASSCTR                         # ENOUGH FILTER PASSES FOR DRIVE DONE?
-                TCF             COLDFILT                        #   NO.  JUST STOP DRIVES.
-                TCF             WARMFILT                        #   YES.  CALCULATE TIMES (END OF BANK).
+                CAF             TWO                     # CALCULTAE R-AXIS GIMBAL DRIVE SHUTDOWN
+                TC              TGOFFCAL
+                TC              WAITLIST
 
-COLDFILT        CAF             ZERO                            # FILTER NOT WARM YET. TURN OFF DRIVES.
-                TS              NEGUQ
-                TS              NEGUR
-                TS              QACCDOT
-                TS              RACCDOT
-                TC              WRCHN12
-                TCF             TASKOVER                        
+                EBANK=          DT
+                2CADR           OFFGIMR
 
-                TC              CCSHOLE                         # FILLER (TO PRESERVE ADDRESSES)
-                TC              CCSHOLE                         # FILLER (TO PRESERVE ADDRESSES)
-# **END CODING FOR MODULE 3 REMAKE, AUGUST 1967*****END CODING FOR MODULE 3 REMAKE, AUGUST 1967*******************
+                TC              WRCHN12                 # SET UP DRIVES AS OF NOW
 
-## Page 595
+                TCF             TASKOVER
+
+## Page 558
+
 # THE DRIVE SETTING ALGORITHM
 # DEL = SGN(OMEGA.K + SGN(ALPHA)ALPHA(2)/2)    ONLY +1/-1
 
-# NEGUSUM = ERROR.K(2) + DEL(OMEGA.K.DEL + ALPHA(2)/2)(3/2) + ALPHA(OMEGA.K.DEL + ALPHA(2)/3)
+# NEGUSUM = ERROR.K(2) + DEL((OMEGA.K.DEL + ALPHA(2)/2)(3/2) + ALPHA(OMEGA.K.DEL + ALPHA(2)/3)
 
 # DRIVE = -SGN(NEGUSUM)
 
--.04266         DEC             -.04266                         
-GTSRAXIS        CAF             TWO                             # SET INDEXER FOR R-AXIS CALCULATIONS
-                TS              QRCNTR                          
-                TCF             USUALXIT                        
+-.04266         DEC             -.04266
+GTSRAXIS        CAF             TWO                     # SET INDEXER FOR R-AXIS CALCULATIONS
+                TS              QRCNTR
+                TCF             GTSQAXIS
 
-GOQTRIMG        CAF             ZERO                            # SET INDEXER FOR Q-AXIS CALCULATIONS
-                TS              QRCNTR                          
+GOQTRIMG        CAF             ZERO                    # SET INDEXER FOR Q-AXIS CALCULATIONS
+                TS              QRCNTR
 
-GTSQAXIS        EXTEND                                          
-                INDEX           QRCNTR                          # PICK UP K AND K(2) FOR THIS AXIS
-                DCA             KQ                              
-                DXCH            KCENTRAL                        
+GTSQAXIS        EXTEND
+                INDEX           QRCNTR                  # PICK UP K AND K(2) FOR THIS AXIS
+                DCA             KQ
+                DXCH            KCENTRAL
 
-                EXTEND                                          
-                INDEX           QRCNTR                          # PICK UP OMEGA AND ALPHA FOR THIS AXIS
-                DCA             OMEGAQ                          
-                DXCH            WCENTRAL                        
-
-                CCS             QRCNTR                          # RDIFF IS STORED IMMEDIATELY FOLLOWING
-                INDEX           A                               # QDIFF, WITH NO SEPARATING CELL.
-                CAE             QDIFF                           
-
-# QDIFF IS LESS,EQUAL 2 DEG. AND IS SCALED AT 180 DEG.  RESCALE AT 180/64 DEG. = 2 + 13/16 DEG. = PI/64 RADIANS.
-
-                EXTEND                                          # RESCALE DIFFERENCE BY MULTIPLYING BY
-                MP              BIT7                            # 2(6)
-                LXCH            ETHETA                          
-
-                CAE             KCENTRAL                        # TEST ON MAGNITUDE OF ACCDOT
-                AD              -.04266                         
-                EXTEND                                          
-                BZMF            ACCDOTSM                        # BRANCH IF ACCDOT IS SMALL
-
-ACCDOTLG        CAF             BIT14                           # ACCDOT IS COMPARITIVELY LARGE
-                TS              SF1                             # SET UP SCALE FACTORS
-                CAF             BIT12                           
-WSFTEST         TS              SF2                             
-
-# LOOPTEST CODING BYPASSES THE OMEGA MAGNITUDE TEST, BUT A CHANGE IN THE TEST BOUNDS COULD REQUIRE ITS USE AGAIN.
-
-#                 CCS             WCENTRAL                      TEST ON MAGNITUDE OF OMEGA
-#                 AD              -.04438                         
-#                 TCF             +2                              
-## Page 596
-#                 AD              -.04438                         
-#                 EXTEND                                          
-#                 BZMF            ASFTEST                       IF SMALL, GO TO ALPHA TEST
-#                 TCF             WLARGE                          
-                TCF             ASFTEST                         # OMEGA IS ALWAYS BOUNDED BY .65 DEG/SEC.
-ACCDOTSM        CAE             KCENTRAL                        # RESCALE IF ACCDOT IS SMALL
-                EXTEND                                          
-                MP              BIT5                            # RESCALE K BY MULTIPLYING BY 2(4)
-                LXCH            KCENTRAL                        
-                CAE             KCENTRAL                        
-                EXTEND                                          
-                SQUARE                                          
-                TS              K2CNTRAL                        
-                CAF             BIT10                           # SET UP VARIABLE SCALE FACTORS
-                TS              SF1                             
-                CAF             BIT4                            
-                TCF             WSFTEST                         # GO TEST ON MAGNITUDE OF OMEGA
-
-ASFTEST         CCS             ACENTRAL                        # TEST ON MAGNITUDE OF ALPHA
-                AD              -.08882                         
-                TCF             +2                              
-                AD              -.08882                         
-                EXTEND                                          
-                BZMF            WARESCAL                        # IF SMALL, GO TO W,A RESCALING
-                TCF             WLARGE                          # IF LARGE, DO SAME AS IF W LARGE
-
-# -.04438         DEC             -.04438                         
--.08882         DEC             -.08882                         
-
-WARESCAL        CAE             WCENTRAL                        # RESCALE OMEGA BY MULTIPLYING BY 2(4)
-                EXTEND                                          
-                MP              BIT5                            
-                LXCH            WCENTRAL                        
-
-                CAE             ACENTRAL                        # RESCALE ALPHA BY MULTIPLYING BY 2(3)
-                EXTEND                                          
-                MP              BIT4                            
-                LXCH            ACENTRAL                        
-
-                TCF             ALGORTHM                        
-
-WLARGE          CAE             SF1                             # RESCALE VARIABLE SCALE FACTORS
-                EXTEND                                          
-                MP              BIT13                           # SF1 = SF1*2(-2)
-                TS              SF1                             
-                CAE             SF2                             
-                EXTEND                                          
-                MP              BIT6                            # SF2 = SF2*2(-9)
-                TS              SF2                             
-
-## Page 597
-ALGORTHM        CAE             ETHETA                          # GET RESCALED ERROR THETA
-                EXTEND                                          
-                MP              K2CNTRAL                        # FORM K(2)*THETA IN D.P.
                 EXTEND
-                MP              SF2                             # CALCULATE AND STORE
-                TS              K2THETA                         # K(2)*THETA*SF2 IN K2THETA
+                INDEX           QRCNTR                  # PICK UP OMEGA AND ALPHA FOR THIS AXIS
+                DCA             OMEGAQ
+                DXCH            WCENTRAL
 
-                CA              WCENTRAL                        # CALCULATE AND STORE
-                EXTEND                                          # K*OMEGA*SF1 IN OMEGA.K
-                MP              KCENTRAL
+                CAE             QRCNTR
                 EXTEND
-                MP              SF1                             
-                TS              OMEGA.K                         
-
-                CA              ACENTRAL
-                EXTEND                                          # BY REDESIGNATION OF THE SCALE FACTOR,
-                MP              A                               # THIS PRODUCT BECOMES ALPHA(2)/2
-                TS              A2CNTRAL                        # INSTEAD OF  ALPHA(2)
-
-                CCS             ACENTRAL
-                CA              A2CNTRAL
+                BZF             +3
+                CAE             RDIFF
                 TCF             +2
-                CS              A2CNTRAL                        # NOW THE A REGISTER CONTAINS
-                AD              OMEGA.K                         # K*OMEGA + ALPHA*ABS(ALPHA)/2
+                CAE             QDIFF
 
-                CCS             A
-                CA              BIT1                            # DEL = SIGNUM(A) , (ZERO WHEN A IS ZERO),
-                TCF             +2                              # PLUS ONE OR MINUS ONE OTHERWISE.
-                CS              BIT1
+                EXTEND                                  # RESCALE DIFFERENCE BY MULTIPLYING BY
+                MP              BIT7                    # 2(6)
+                LXCH            ETHETA
+
+                CAE             KCENTRAL                # TEST ON MAGNITUDE OF ACCDOT
+                AD              -.04266
+
+                EXTEND
+                BZMF            ACCDOTSM                # BRANCH IF ACCDOT IS SMALL
+
+ACCDOTLG        CAF             BIT14                   # ACCDOT IS COMPARITIVELY LARGE
+                TS              SF1                     # SET UP SCALE FACTORS
+                CAF             BIT12
+WSFTEST         TS              SF2
+
+                CCS             WCENTRAL                # TEST ON MAGNITUDE OF OMEGA
+                AD              -.04438
+                TCF             +2
+                AD              -.04438
+
+## Page 559
+                EXTEND
+                BZMF            ASFTEST                 # IF SMALL, GO TO ALPHA TEST
+
+                TCF             WLARGE
+
+ACCDOTSM        CAE             KCENTRAL                # RESCALE IF ACCDOT IS SMALL
+                EXTEND
+                MP              BIT5                    # RESCALE K BY MULTIPLYING BY 2(4)
+                LXCH            KCENTRAL
+                CAE             KCENTRAL
+                EXTEND
+                SQUARE
+                TS              K2CNTRAL
+                CAF             BIT10                   # SET UP VARIABLE SCALE FACTORS
+                TS              SF1
+                CAF             BIT4
+                TCF             WSFTEST                 # GO TEST ON MAGNITUDE OF OMEGA
+
+ASFTEST         CCS             ACENTRAL                # TEST ON MAGNITUDE OF ALPHA
+
+                AD              -.08882
+                TCF             +2
+                AD              -.08882
+                EXTEND
+                BZMF            WARESCAL                # IF SMALL, GO TO W,A RESCALING
+                TCF             WLARGE                  # IF LARGE, DO SAME AS IF W LARGE
+
+-.04438         DEC             -.04438
+-.08882         DEC             -.08882
+
+WARESCAL        CAE             WCENTRAL                # RESCALE OMEGA BY MULTIPLYING BY 2(4)
+                EXTEND
+                MP              BIT5
+                LXCH            WCENTRAL
+
+                CAE             ACENTRAL                # RESCALE ALPHA BY MULTIPLYING BY 2(3)
+                EXTEND
+                MP              BIT4
+                LXCH            ACENTRAL
+
+                TCF             ALGORTHM
+
+WLARGE          CAE             SF1                     # RESCALE VARIABLE SCALE FACTORS
+
+                EXTEND
+                MP              BIT13                   # SF1 = SF1*2(-2)
+                TS              SF1
+                CAE             SF2
+                EXTEND
+                MP              BIT6                    # SF2 = SF2*2(-9)
+                TS              SF2
+
+## Page 560
+ALGORTHM        CAE             ETHETA                  # GET RESCALED ERROR THETA
+                EXTEND
+
+                MP              K2CNTRAL                # FORM K(2)*THETA IN D.P.
+                LXCH            K2THETA
+                EXTEND                                  # FORM K(2)*THETA*SF2 IN D.P.
+                MP              SF2
+                DXCH            K2THETA
+                EXTEND
+                MP              SF2
+                ADS             K2THETA         +1
+
+                CA              WCENTRAL                # GET OMEGA
+                EXTEND
+                MP              KCENTRAL                # FORM K*OMEGA IN D.P.
+                LXCH            OMEGA.K
+                EXTEND                                  # FORM OMEGA*K*SF1 IN D.P.
+                MP              SF1
+                DXCH            OMEGA.K
+                EXTEND
+                MP              SF1
+                ADS             OMEGA.K         +1
+
+                CA              ACENTRAL                # FORM ALPHA(2) IN D.P.
+                EXTEND
+                SQUARE
+
+                DXCH            A2CNTRAL
+
+                CAE             ACENTRAL                # GET SGN(ALPHA)
+                EXTEND
+                BZMF            +4
+                EXTEND
+                DCA             A2CNTRAL
+                TCF             +3
+                EXTEND
+                DCS             A2CNTRAL
+                DXCH            FUNCTION                # SAVE AS SGN(ALPHA)ALPHA(2)
+                EXTEND
+                DCA             OMEGA.K
+                DAS             FUNCTION                # FORM FUNCT1
+
+                CCS             FUNCTION                # DEL = SGN(FUNCT1)
+                TCF             POSFNCT1
+                TCF             +2
+                TCF             NEGFNCT1
+
+                CCS             FUNCTION        +1      # USE LOW ORDER WORD DINCE HIGH IS ZERO
+POSFNCT1        CAF             TWO
+                TCF             +2
+
+NEGFNCT1        CAF             ZERO
+                AD              NEG1
+
+## Page 561
                 TS              DEL
 
-                CCS             DEL
-                CA              OMEGA.K
-                TCF             +2
-                CS              OMEGA.K                         # DEL*OMEGA.K REPLACES OMEGA.K
-                TS              OMEGA.K
-
-                AD              A2CNTRAL                        # DEL*OMEGA.K + ALPHA(2)/2
-                XCH             FUNCTION                        # STORED IN FUNCTION
-
-                CA              A2CNTRAL
-                EXTEND                                          # CALCULATE ALPHA(2)/3
-                MP              .66667                          
-                AD              OMEGA.K
+                CCS             DEL                     # MAKE OMEGA*K REALLY DEL*OMEGA*K
+                TCF             FUNCT2                  # (NOTHING NEED BE DONE)
+.66667          DEC             .66667
                 EXTEND
-                MP              ACENTRAL                        # K(2)*THETA+ALPHA*(DEL*OMEG.K+ALPHA(2)/3)
-                ADS             K2THETA                         # FIRST AND SECOND TERMS SUMMED HERE.
+                DCS             OMEGA.K
+                DXCH            OMEGA.K                 # CHANGE SIGN OF OMEGA.K
+
+FUNCT2          EXTEND
+                DCA             OMEGA.K
+                DXCH            FUNCTION                # DEL*OMEGA*K
+                EXTEND
+                DCA             ACENTRAL
+                DAS             FUNCTION                # DEL*OMEGA*K + SGN(ALPHA)ALPHA(2)
+
+FUNCT3          CAE             A2CNTRAL                # CALCULATE (2/3)SGN(ALPHA)ALPHA(2)
+                EXTEND
+                MP              .66667
+                DXCH            A2CNTRAL
+                XCH             L
+                EXTEND
+                MP              .66667
+                ADS             A2CNTRAL        +1
+                TS              L
+                TCF             +2
+                AD              A2CNTRAL
+
+                DXCH            OMEGA.K                 # DEL*OMEGA*K+
+                DAS             A2CNTRAL                # (2/3)SGN(ALPHAALPHA(2)=G
+
+                CAE             A2CNTRAL                # G*ALPHA IN D.P.
+
+                EXTEND
+                MP              ACENTRAL
+                DXCH            A2CNTRAL
+                XCH             L
+                EXTEND
+                MP              ACENTRAL
+                ADS             A2CNTRAL        +1
+                TS              L
+                TCF             +2
+                ADS             A2CNTRAL
+
+                DXCH            A2CNTRAL                # FIRST AND THIRD TERMS
+                DAS             K2THETA                 # SUMMED IN D.P.
 
 # THE FOLLOWING SECTION CALCULATES .707*DEL*FUNCTION(3/2) AND ADDS IT TO THE OTHER TWO TERMS OF NEGUSUM.
 
-## Page 598
-                CA              SR                              # CALL SEQUENCE FOR SPROOT REQUIRES THAT
-                AD              A                               # SR BE PRESERVED BY THE CALLER.
-                XCH             STORCDUY                        # THE KALMAN FILTER STORES INTO THE CELL
-                CA              FUNCTION                        # STORCDUY BEFORE USING IT OTHERWISE.
-                TC              SPROOT
-                LXCH            STORCDUY
-                LXCH            SR
+                CCS             FUNCTION                # TEST FOR HIHJ ORDER WORD NON-ZERO
+                TCF             FMAGTEST                # YES, SEE IF RESCALING IS NECESSARY
 
+## Page 562
+                TCF             +2                      # NO, USE LOW ORDER WORD ONLY
+.707GTS         DEC             .70711                  # (CCS HOLE USED FOR DATA)
+                TC              T6JOBCHK
+
+                CAE             FUNCTION        +1      # USE LOW ORDER WORD ONLY
+                TC              SPROOT                  # SQUARE ROOT SUBROUTINE CALL
+                EXTEND                                  #         3/2
+                MP              FUNCTION        +1      # FUNCTION
+                EXTEND                                  # (NEEDS TO BE SHIFTED RIGHT 21 PLACES)
+                MP              BIT8
+                XCH             L
+                CAF             ZERO                    #              3/2
+                DXCH            FUNCTION                # SAVE FUNCTION    IN FUNCTION LOCATION
+                TCF             DELTEST
+
+SQRESCAL        CAE             FUNCTION                # HIGH ORDER WORD OF FUNCTION NEEDS TO BE
+                EXTEND                                  # RESCALED FOR ACCURACY, SO MUTLIPLY D.P.
+                MP              BIT7                    # VALUE BY 2(6)
+                LXCH            FUNCTION
+                CAF             ZERO
+                XCH             FUNCTION        +1
                 EXTEND
-                MP              FUNCTION
-                XCH             STORCDUY
-                CCS             DEL
-                CA              .707GTS                         # THIS CELL CONTAINS SQUARE ROOT OF 1/2
-                TCF             +2                              
-                CS              .707GTS                         
-                EXTEND
-                MP              STORCDUY
-                AD              K2THETA                         # NEGUSUM IS COMPLETE.
+                MP              BIT7
+                DAS             FUNCTION
 
-                CCS             A                               # SIGNUM(NEGUSUM) IS NEGATIVE OF THE SIGN
-                CA              BIT1                            # WHICH WILL BE ATTACHED TO THE NEW VALUE
-                TCF             POSDRIVE                        # OF Q(R)ACCDOT.
-                CS              BIT1
+                CAF             ZERO                    # SET FLAG TO GO TO RESCALE, AND GO TO DO
+                TS              MULTFLAG                # SQUARE ROOT AND FUNTION(3/2)
+                TCF             DOSPROOT
 
-POSDRIVE        INDEX           QRCNTR                          # SIGN OF NEW Q(R)ACCDOT OPPOSES THIS SIGN
+DELTEST         CS              POSMAX                  # SET FLAG TO GO TO NEGUSUM
+                TS              MULTFLAG
+                CCS             DEL                     # GET DEL*.707
+                CAF             .707GTS
+                TCF             +2
+                CS              .707GTS
+                TCF             SPDMULT                 # GO TO MULTIPLY ROUTINE
+
+RESHIFT         CAF             POSMAX                  # SET FLAG TO GO TO DELTEST
+
+                TS              MULTFLAG
+                CAF             BIT6
+                TCF             SPDMULT                 # GOTO MULTIPLY ROUTINR
+
+FMAGTEST        AD              63/64+1                 # IF MAGNITUDE OF HIGH ORDER WORD IS LESS
+                OVSK                                    # THAN 1/64 RESCALE WHOLE D.P. WORD
+                TCF             SQRESCAL
+
+                CAF             POSMAX
+                TS              MULTFLAG
+
+DOSPROOT        CAE             FUNCTION                # USE HIGH ORDER WORD ONLY
+
+## Page 563
+                TC              SPROOT                  # SQUARE ROOT SUBROUTINE CALL
+
+SPDMULT         XCH             FUNCTION                # THIS IS AN OPEN SUBROUTINE WHICH USES
+                EXTEND                                  # MULTFLAG AS A RETURN SWITCH.
+                MP              FUNCTION                # IT MULTIPLIES FUNCTION (D.P.) BY C(A)
+                DXCH            FUNCTION                # AND LEAVES THE RESULT IN FUNCTION (D.P.)
+                EXTEND                                  # IT IS USED FOR-
+                MP              L                       # 1) F(1/2)*F
+                ADS             FUNCTION        +1      # 2) (.707*DEL)*F
+                TS              L                       # 3) 2(-9)*F
+                TCF             +2
+                ADS             FUNCTION
+
+                CCS             MULTFLAG                # POSMAX MEANS GO TO DELTEST
+                TCF             DELTEST                 # ZERO   MEANS GO TO RESHIFT
+                TCF             RESHIFT                 # NEGMAX MEANS GO TO NEGUSUM
+
+NEGUSUM         EXTEND                                  # FORM FINAL SUM FOR NEGUSUM
+                DCA             FUNCTION
+
+                DAS             K2THETA
+
+                CCS             K2THETA                 # TEST FOR ZERO HIGH ORDER PART
+                TCF             NEGDRIVE
+                TCF             +2
+                TCF             POSDRIVE
+
+                CCS             K2THETA         +1      # SIGN TEST ON LOW ORDER PART
+NEGDRIVE        CAF             TWO
+                TCF             +2
+POSDRIVE        CAF             ZERO
+                AD              NEG1
+                INDEX           ITEMP6                  # SET NEGUQ,R TO NEG DRIVE
                 TS              NEGUQ
 
-                COM                                             
-                EXTEND                                          # SEND BACK JERK TERM
-                INDEX           ITEMP6                          
-                MP              ACCDOTQ                         
-                INDEX           ITEMP6                          
-                LXCH            QACDOTMP                        # STORE FOR 100 MS, THEN RELEASE TO FILTER
-                CCS             QRCNTR                          # LOOP COUNTER
-                TC              SLECTLAW                        # 2ND PASS.  (FOR Q-AXIS)
+                COM
+                EXTEND                                  # SEND BACK JERK TERM
+                INDEX           ITEMP6
+                MP              ACCDOTQ
+                INDEX           ITEMP6
+                LXCH            QACCDOT
+
+                CCS             QRCNTR                  # LOOP COUNTER
+
+                TCF             GOQTRIMG
+
 # TRANSFORM JERKS BACK TO GIMBAL AXES.
 
-                CS              QACCDOT                         # SCALED AT PI/2(7), AND COMPLEMENTED.
-                EXTEND                                          
-                MP              MR12                            # SCALED AT 2
-                TS              Y3DOT                           
-                CS              RACCDOT                         # SCALED AT PI/2(7), AND COMPLEMENTED.
-                EXTEND                                          
-                MP              MR13                            # SCALED AT 2
-                ADS             Y3DOT                           
-                ADS             Y3DOT                           # SCALED AT PI/2(7)
+                CAE             QACCDOT                 # SCALED AT PI/2(7)
+                EXTEND
+                MP              MR12                    # SCALED AT 2
+                TS              Y3DOT
 
-                CS              QACCDOT                         # SCALED AT PI/2(7), AND COMPLEMENTED.
-                EXTEND                                          
-                MP              MR22                            # SCALED AT 1
-## Page 599
-                TS              Z3DOT                           
-                CS              RACCDOT                         # SCALED AT PI/2(7), AND COMPLEMENTED.
-                EXTEND                                          
-                MP              MR23                            # SCALED AT 1
-                ADS             Z3DOT                           # SCALED AT PI/2(7)
+## Page 564
+                CS              RACCDOT                 # SCALED AT PI/2(7)
+                EXTEND
 
-                TC              WRCHN12                         # SEND GIMBAL DRIVES TO SERVOS
-                TCF             RESUME                          # WAIT UNTIL NEXT TRIM GIMBAL RUPT
+                MP              MR13                    # SCALED AT 2
+                ADS             Y3DOT
+                ADS             Y3DOT                   # SCALED AT PI/2(7)
+
+                CAE             QACCDOT                 # SCALED AT PI/2(7)
+                EXTEND
+                MP              MR22                    # SCALED AT 1
+                TS              Z3DOT
+                CAE             RACCDOT                 # SCALED AT PI/2(7)
+                EXTEND
+                MP              MR23                    # SCALED AT 1
+                ADS             Z3DOT                   # SCALED AT PI/2(7)
+
+                TC              WRCHN12                 # SEND GIMBAL DRIVES TO SERVOS
+                TCF             RESUME                  # WAIT UNTIL NEXT TRIM GIMBAL RUPT
 
 # WAITLIST TASKS TO SET TRIM GIMBAL TURN OFF BITS.
 
-OFFGIMQ         CAF             ZERO                            # SET Q-AXIS FLAG TO ZERO
-                TS              NEGUQ                           
-                TCF             +3                              
-OFFGIMR         CAF             ZERO                            # SET R-AXIS FLAG TO ZERO
-                TS              NEGUR                           
-                TC              WRCHN12                         # FLAGS TO CHANNEL BITS
-                TCF             TASKOVER                        
+OFFGIMQ         CAF             ZERO                    # SET Q-AXIS FLAG TO ZERO
+                TS              NEGUQ
+                TCF             +3
+OFFGIMR         CAF             ZERO                    # SET R-AXIS FLAG TO ZERO
+                TS              NEGUR
+
+                TC              WRCHN12                 # FLAGS TO CHANNEL BITS
+                TCF             TASKOVER
 
 # THE WRCHN12 SUBROUTINE SETS BITS 9,10,11,12 OF CHANNEL 12 ON THE BASIS OF THE CONTENTS OF NEGUQ,NEGUR WHICH ARE
 # THE NEGATIVES OF THE TRIM GIMBAL DESIRED DRIVES.
 
-BGIM            OCTAL           07400                           
-CHNL12          EQUALS          ITEMP6                          
+BGIM            OCTAL           07400
+CHNL12          EQUALS          ITEMP6
 
-WRCHN12         CCS             NEGUQ                           
-                CAF             BIT10                           
-                TCF             +2                              
-                CAF             BIT9                            
-                TS              CHNL12                          
-
-                CCS             NEGUR                           
-                CAF             BIT12                           
-                TCF             +2                              
-                CAF             BIT11                           
-                ADS             CHNL12                          # (STORED RESULT NOT USED AT PRESENT)
-
-                CS              BGIM
+WRCHN12         CS              BGIM                    # SAVE THE REST OF CHANNEL 12 DURING TESTS
                 EXTEND
-                WAND            12
-                CA              CHNL12
-                EXTEND
-                WOR             12
+                RAND            12
+                TS              CHNL12                  # (TEMPORARY STORAGE)
 
-                TC              Q                               # SIMPLE RETURN ALWAYS
+                CCS             NEGUQ
+                CAF             BIT9
+                TCF             +2
+                CAF             BIT10
+                ADS             CHNL12
+
+                CCS             NEGUR
+                CAF             BIT11
+                TCF             +2
+
+                CAF             BIT12
+                ADS             CHNL12                  # (STORED RESULT NOT USED AT PRESENT)
+
+## Page 565
+                EXTEND
+                WRITE           12
+
+                TC              Q                       # SIMPLE RETURN ALWAYS
 
 # Q,R-TRANSF TRANSFORMS A Y,Z GIMBAL COORDINATE VARIABLE PAIR (IN A,L) TO PILOT COORDINATES (Q/R), RETURNED IN A.
 # (THE MATRIX M FROM GIMBAL TO PILOT AXES IS ASSUMED TO BE DONE BY T4RUPT AND SCALED AT +1.)
 
-QRERAS          EQUALS          ITEMP6                          
+QRERAS          EQUALS          ITEMP6
 
-## Page 600
-QTRANSF         LXCH            QRERAS                          # SAVE Z-AXIS VARIABLE
-                EXTEND                                          
-                MP              M21                             # (Y-AXIS)*M21
-                XCH             QRERAS                          # SAVE, GET Z-AXIS VARIABLE
-                EXTEND                                          
-                MP              M22                             # (Z-AXIS)*M22
-                AD              QRERAS                          # SUM = (Y-AXIS)*M21 + (Z-AXIS)*M22
-                TC              Q                               # RETURN WITH SUM IN A
+QTRANSF         LXCH            QRERAS                  # SAVE Z-AXIS VARIABLE
+                EXTEND
+                MP              M21                     # (Y-AXIS)*M21
+                XCH             QRERAS                  # SAVE, GET Z-AXIS VARIABLE
+                EXTEND
+                MP              M22                     # (Z-AXIS)*M22
+                AD              QRERAS                  # SUM = (Y-AXIS)*M21 + (Z-AXIS)*M22
+                TC              Q                       # RETURN WITH SUM IN A
 
-RTRANSF         LXCH            QRERAS                          # SAVE Z-AXIS VARIABLE
-                EXTEND                                          
-                MP              M31                             # (Y-AXIS)*M31
-                XCH             QRERAS                          # SAVE, GET Z-AXIS VARIABLE
-                EXTEND                                          
-                MP              M32                             # (Z-AXIS)*M32
-                AD              QRERAS                          # SUM = (Y-AXIS)*M31 + (Z-AXIS)*M32
-                TC              Q                               # RETURN WITH SUM IN A
+RTRANSF         LXCH            QRERAS                  # SAVE Z-AXIS VARIABLE
+                EXTEND
+                MP              M31                     # (Y-AXIS)*M31
+                XCH             QRERAS                  # SAVE, GET Z-AXIS VARIABLE
+                EXTEND
+                MP              M32                     # (Z-AXIS)*M32
+                AD              QRERAS                  # SUM = (Y-AXIS)*M31 + (Z-AXIS)*M32
+                TC              Q                       # RETURN WITH SUM IN A
 
-.66667          DEC             .66667
-.707GTS         DEC             0.70711
-(2/3)           DEC             0.66667                         
+(2/3)           DEC             0.66667
 
-## Page 601
+## Page 566
 # SUBROUTINE: TGOFFCAL            MOD. NO. 1  DATE: AUGUST 22, 1966
-
-# START CODING FOR MODULE 3 REMAKE, AUGUST 1967***START CODING FOR MODULE 3 REMAKE, AUGUST 1967*******************
 
 # PROGRAM DESIGN BY: RICHARD D. GOSS (MIT/IL)
 
 # PROGRAM IMPLEMENTATION BY: JONATHAN D. ADDELSTON (ADAMS ASSOCIATES)
 
 # MODIFIED 30 NOV 66, TO USE ACCDOTQ AND ACCDOTR.              CRAIG WORK
-# MODIFIED AUGUST '67 TO CHANGE CALLING SEQUENCE AND MAKE MAXTIME ERASABLE          PETER WEISSMAN
-
 # THIS SUBROUTINE CALCULATES THE TRIM GIMBAL SHUTDOWN TIME FOR EITHER THE Q OR THE R AXIS (DEPENDING ON THE
 # CALLING SEQUENCE).  THIS TIME IS SCALED FOR IMMEDIATE USE BY A WAITLIST CALL AS SHOWN IN THE CALLING SEQUENCES.
-# IF THE TIME-TO-GO IS MORE THAN 'DRIVELIM', IT IS LIMITED TO 'MAXTIME'. IF
+# IF THE TIME-TO-GO IS MORE THAN TWO MINUTES, IT IS LIMITED TO TWO MINUTES DUE TO THE WAITLIST SPECIFICATION.  IF
 # THE TIME-TO-GO IS LESS THAN TEN MILLISECONDS, THE SHUTDOWN IS PERFORMED IMMEDIATELY AND THE WAITLIST CALL IS
 # BY-PASSED.
 
 # THESE TIME-TO-GO CALCULATIONS ARE DESIGNED TO DRIVE THE TRIM GIMBAL TO A POSITION WHERE THE DESCENT ENGINE WILL
+
 # CAUSE NO ANGULAR ACCELERATION.  THIS SUBROUTINE IS CALLED ONLY FROM THE WAITLIST TASK CHEKDRIV WHICH IS
 # INITIATED ONLY WHEN THE TRIM GIMBAL CONTROL LAW HAS LOST CONTROL OF THE LEM VEHICLE ATTITUDE AND MUST RETURN TO
 # THE USE OF REACTION CONTROL SYSTEM JETS.
 
 # CALLING SEQUENCES:
 
-#                                                  CAF     ZERO           INDEX FOR Q-AXIS.
-#                                                  TC      TGOFFCAL
-#                                                  CAF     NEGMAX         RETURN HERE FOR NO Q DRIVE.
-#                                                  TS      (QTIME)        RETURN HERE WITH TIME IN A (DECASECONDS)
+#                     26,1000  3 7657 1            CAF    ZERO            Q-AXIS INDEXER
+#                     26,1001  0 $$$$ $            TC     TGOFFCAL        CALL TGOFFCAL (*** REPLACE $$ ***)
+#                     26,1002  0 4511 0            TC     WAITLIST        CALL WAITLIST WITH CALCULATED TIME
+#                     26,1003   0$$$$ $            2CADR  OFFGIMQ         2CADR OF Q-AXIS SHUTDOWN PROGRAM
+#                     26,1004   54006 1
 
-#                                                  CAF     TWO            INDEX FOR R-AXIS.
-#                                                  TC      TGOFFCAL
-#                                                  CAF     NEGMAX         RETURN HERE FOR NO R DRIVE.
-#                                                  TS      (RTIME)        RETURN HERE WITH TIME IN A (DECASECONDS)
+#                     26,1005  3 7657 1            CAF     TWO            R-AXIS INDEXER
+#                     26,1006  0 $$$$ $            TC      TGOFFCAL       CALL TGOFFCAL (*** REPLACE $$ ***)
+#                     26,1007  0 4511 0            TC      WAITLIST       CALL WAITLIST WITH CALCULATED TIME
+#                     26,1010   0$$$$ $            2CADR   OFFGIMR        2CADR OF R-AXIS SHUTDOWN PROGRAM
+#                     26,10022  54006 1
 
 # SUBROUTINES CALLED: NONE, BUT WRCHNL12 IS CALLED AFTER BOTH TGOFFCALL CALLS.
 
@@ -555,10 +675,11 @@ RTRANSF         LXCH            QRERAS                          # SAVE Z-AXIS VA
 # OUTPUT 5. THE NEGATIVE GIMBAL DRIVE FLAG (NEGUQ AND NEGUR) WHERE A +1 BIT REQUESTS POSITIVE GIMBAL DRIVE
 #           (ANGULAR ACCELERATION DECREASING), A -1 BIT REQUESTS NEGATIVE GIMBAL DRIVE (ANG. ACC. INCREASING).
 #           A ZERO INDICATES NO DRIVE.
-#        6. TIME REQUIRED TO ZERO OFFSET, SCALED FOR Q(R)GIMTIMR.
+#        6. TIME REQUIRED TO ZERO ACCELERATION, SCALED FOR WAITLIST
 
-## Page 602
 # ERASABLE STORAGE CONFIGURATION (NEEDED BY THE INDEXING METHODS):
+
+## Page 567
 
 #                                         NEGUQ    ERASE   +2             NEGATIVE OF Q-AXIS GIMBAL DRIVE
 #                                         (SPWORD) EQUALS NEGUQ +1        ANY S.P. ERASABLE NUMBER, NOW THRSTCMD
@@ -576,97 +697,77 @@ RTRANSF         LXCH            QRERAS                          # SAVE Z-AXIS VA
 # DEBRIS: L, Q, ITEMP1, ITEMP2, ITEMP6
 
 
-TGOFFCAL        TS              QRNDXER                         # Q OR R AXIS INDEXER
-                INDEX           QRNDXER                         # GET JERK TERM MAGNITUDE SCALED AT
-                CAE             ACCDOTQ                         #      PI/2(7) IN RADIANS/SEC(3).
-                EXTEND                                          # UNLESS THETA TRIPLE-DOT MAGNITUDE IS NON
-                BZMF            TGOFFNOW                        #      -ZERO, SET DRIVE TO ZERO NOW.
-                TS              NZACCDOT                        # SAVE NON-ZERO DENOMINATOR.
-                INDEX           QRNDXER                         # INITIALIZE THE AOSTERM WHICH WILL BE UP-
-                CAE             ALPHAQ                          # DATED IN THE DUMMYFIL CALCULATION FOR
-                EXTEND                                          # USE IN THE QRAXIS RATE DERIVATION.  SET
-                MP              .1-.05K)                        # AOSTERM TO ALPHA*CSP*(1-.5*K), WHERE CSP
-                XCH             L                               # IS .1 SEC, K IS .5   THEN AOSTERM IS SET
-                CCS             QRNDXER                         # TO .075*ALPHA, SCALED AT PI/4,WHILE
-                INDEX           A                               # ALPHA IS SCALED AT PI/8( THE CONSTANT IS
-                LXCH            AOSQTERM                        # SCALED AT 2.
-                INDEX           QRNDXER                         # GET ACCELERATION SCALED AT PI/8
-                CAE             ALPHAQ                          #      RAD/SEC(2).
-                EXTEND                                          # IF ACCELERATION IS ALREADY ZERO, EXIT.
-                BZF             TGOFFNOW                        # OTHERWISE, PROCEED WITH NON-ZERO ALPHA.
-                EXTEND                                          # SET NEGUQ TO THE SIGN OF ALPHA. THEN USE
-                BZMF            NEGALPH                         #   THE MAGNITUDE OF ALPHA TO COMPUTE TIME
+TGOFFCAL        TS              QRNDXER                 # Q OR R AXIS INDEXER
+                INDEX           QRNDXER                 # GET JERK TERM MAGNITUDE SCALED AT
+
+                CAE             ACCDOTQ                 #      PI/2(7) IN RADIANS/SEC(3).
+                EXTEND                                  # UNLESS THETA TRIPLE-DOT MAGNITUDE IS NON
+                BZMF            TGOFFNOW                #      -ZERO, SET DRIVE TO ZERO NOW.
+                TS              NZACCDOT                # SAVE NON-ZERO DENOMINATOR.
+                INDEX           QRNDXER                 # INITIALIZE THE AOSTERM WHICH WILL BE UP-
+                CAE             ALPHAQ                  # DATED IN THE DUMMYFIL CALCULATION FOR
+                EXTEND                                  # USE IN THE QRAXIS RATE DERIVATION.  SET
+                MP              .1-.05K)                # AOSTERM TO ALPHA*CSP*(1-.5*K), WHERE CSP
+                XCH             L                       # IS .1 SEC, K IS .5   THEN AOSTERM IS SET
+                CCS             QRNDXER                 # TO .075*ALPHA, SCALED AT PI/4,WHILE
+                INDEX           A                       # ALPHA IS SCALED AT PI/8( THE CONSTANT IS
+                LXCH            AOSQTERM                # SCALED AT 2.
+                INDEX           QRNDXER                 # GET ACCELERATION SCALED AT PI/8
+                CAE             ALPHAQ                  #      RAD/SEC(2).
+                EXTEND                                  # IF ACCELERATION IS ALREADY ZERO, EXIT.
+                BZF             TGOFFNOW                # OTHERWISE, PROCEED WITH NON-ZERO ALPHA.
+                EXTEND                                  # SET NEGUQ TO THE SIGN OF ALPHA. THEN USE
+                BZMF            NEGALPH                 #   THE MAGNITUDE OF ALPHA TO COMPUTE TIME
                 TS              ITEMP6
                 CAF             BIT1
                 TCF             +4
 NEGALPH         CS              A
                 TS              ITEMP6
+
                 CS              BIT1
-                INDEX           QRNDXER                         # STORE THE DRIVE DIRECTION FLAG
-                TS              NEGUQ                           # TIME = MAGNITUDE OF (ALPHA/ACCDOT),
-                                                                # MINUS THE SIGN OF Q(R)ACCDOT LEFT IN A.
-                EXTEND                                          # STORE ACCDOT TO REFLECT THE CHANGE IN
-                INDEX           QRNDXER                         # GIMBAL DRIVE DIRECTION (POSSIBLE).  THIS
-## Page 603
-                MP              ACCDOTQ                         # CAN BE ESSENTIAL FOR DUMMYFIL, IN CASE
-                INDEX           QRNDXER                         # Q(R)ACCDOT IS NOT INITIALIZED BEFORE
-                LXCH            QACCDOT                         # EXECUTING DUMMYFIL.
-                CAE             NZACCDOT                        # WILL ALPHA/ACCDOT EXCEED MAX DRIVE TIME?
-                EXTEND
-                MP              DRIVELIM                        # MAX DRIVE TIME AT 16 SEC (ERASABLE LOAD)
-                EXTEND
-                SU              ITEMP6                          # 15*ACCDOT - ABS(ALPHA) AT PI/8
-                EXTEND
-                BZMF            USEMAX                          # LARGE T.  USE MAX DRIVE TIME INSTEAD.
+                INDEX           QRNDXER                 # STORE THE DRIVE DIRECTION FLAG
+                TS              NEGUQ                   # TIME = MAGNITUDE OF (ALPHA/ACCDOT),
+                COM                                     # LEAVES THE SIGN OF Q(R)ACCDOT IN A.
+                EXTEND                                  # STORE ACCDOT TO REFLECT THE CHANGE IN
+                INDEX           QRNDXER                 # GIMBAL DRIVE DIRECTION (POSSIBLE).  THIS
+                MP              ACCDOTQ                 # CAN BE ESSENTIAL FOR DUMMYFIL, IN CASE
+                INDEX           QRNDXER                 # Q(R)ACCDOT IS NOT INITIALIZED BEFORE
 
-                CAE             ITEMP6                          # DRIVE  IME = ABS(ALPHA/ACCDOT)
-                EXTEND                                          # RESCALE QUOTIENT TO TIMER(ERASABLE LOAD)
-                INDEX           QRNDXER
-                MP              DRIVFACQ                        # (10 SCALED AT 2(10)) X (DAMPING FACTOR)
-                EXTEND
-                DV              NZACCDOT
+## Page 568
+                LXCH            QACCDOT                 # EXECUTING DUMMYFIL.
+                CAE             ITEMP6
 
-ZEROTEST        EXTEND                                          # BE SURE WAITLIST TIME IS GREATER THAN 0.
-                BZMF            TGOFFNOW
+                EXTEND                                  # MULTIPLY BY 1/16
+                MP              BIT11                   # TO CHANGE SCALING TO 2PI RAD/SEC(2)
+                EXTEND                                  # ACCDOT SCALED AT PI/2(7) IN DENOMINATOR
+                DV              NZACCDOT                # YIELDS TIME SCALED AT 256 SECONDS
+                AD              -2MIN256                # COMPARE WITH MAXIMUM 2 MINUTE DELAY OF
+                CCS             A                       # WAITLIST ACTION (TIMES AT 256 SECONDS)
+                CS              -2MINWL                 # MORE THAN TWO MINUTES, USE 2MINUTES
+                TC              Q                       # RETURN WL CALL WITH 2 MIN AT 1BIT=10MS
 
-                TCF             +2                              # IT IS, RETURN.
+                AD              ONE                     # (CORRECT FOR CCS BIT)
+                EXTEND                                  # CALCULATE DT = ABS(T-2MIN)
+                MP              128/164                 # AND RESCALE DT TO WAITLIST SCALING
+                DDOUBL
+                AD              -2MINWL                 # -T = DT + 2MIN (IN WAITLIST SCALING)
+                COM                                     # MAKE T POSITIVE FOR WAITLIST
+                EXTEND                                  # MAKE FINAL CHECK TO INSURE T .G. 10 MS
+                BZMF            TGOFFNOW                # DO SHUTDOWN NOW (COULD USE BZF)
+                TC              Q                       # RETURN TO WAITLIST CALL WITH WL TIME
 
-USEMAX          CAE             MAXTIME                         # USE MAXIMUM DRIVE TIME.
- +2             INDEX           Q                               # RETURN TO Q+1 WITH TIME IN A.
-                TC              1
+TGOFFNOW        CAF             ZERO                    # MAKE SURE PLUS ZERO FOR DRIVE FLAG
+                INDEX           QRNDXER                 # TURN OFF DRIVE FLAG NOW
+                TS              NEGUQ
+                TC              Q
 
-TGOFFNOW        CAF             ZERO                            # MAKE SURE PLUS ZERO FOR DRIVE FLAG
-                INDEX           QRNDXER                         # TURN OFF DRIVE FLAG NOW
-                TS              NEGUQ                           
-                TC              Q                               # RETURN TO Q ( WITHOUT A DRIVE TIME).
+                TC              3                       # SKIP WAITLIST CALL AND 2CADR
 
-                TC              CCSHOLE                         #   (FILLER)
 
-# **END CODING FOR MODULE 3 REMAKE, AUGUST 1967*****END CODING FOR MODULE 3 REMAKE, AUGUST 1967*******************
 
-QRNDXER         EQUALS          ITEMP1                          # INDEXER FOR Q OR R AXIS
-NZACCDOT        EQUALS          ITEMP2                          # TEMPORARY STORAGE FOR NON-ZERO ACCDOT
--2MINWL         DEC             -12000                          # - 2 MINUTES SCALED FOR WAITLIST
--2MIN256        DEC             -.46875                         # - 2 MINUTES SCALED AT 256
-128/164         OCTAL           31000                           # 128/163.84 CONVERTING 256 TO WAITLIST/2
-.1-.05K)        OCTAL           01146                           # .0375=.075 SCALED AT 2
-# START CODING FOR MODULE 3 REMAKE, AUGUST 1967***START CODING FOR MODULE 3 REMAKE, AUGUST 1967*******************
-
-TESTCNTR        CCS             SIMPCNTR                        # USE BIGBOX FOR PASSCTR INITIALIZATION
-                TCF             BIGLOAD                         # UNTIL SIMPCNTR IS +0. THEN USE COUNTBOX.
-
-                CAE             COUNTBOX
-                TCF             LOADCNTR
-## Page 604
-BIGLOAD         CAE             BIGBOX
-                TCF             LOADCNTR
-
-# **END CODING FOR MODULE 3 REMAKE, AUGUST 1967*****END CODING FOR MODULE 3 REMAKE, AUGUST 1967*******************
-
-# THE NEXT FIVE CELLS ARE LEFT IN FOR SPACING.
-
-                ADS             FUNCTION        +1              # MULTIPLIER AS C(A).  MULTIPLY THESE AND
-                TS              L                               # USE ONLY HIGH ORDER PART OF PRODUCT.
-                TCF             +2                              # ADD S.P. LOW PRODUCT TO LOW PART OF HIGH
-                ADS             FUNCTION                        # PRODUCT.  CHECK OVERFLOW, CARRY, AND
-                TC              Q                               # RETURN.
+QRNDXER         EQUALS          ITEMP1                  # INDEXER FOR Q OR R AXIS
+NZACCDOT        EQUALS          ITEMP2                  # TEMPORARY STORAGE FOR NON-ZERO ACCDOT
+-2MINWL         DEC             -12000                  # - 2 MINUTES SCALED FOR WAITLIST
+-2MIN256        DEC             -.46875                 # - 2 MINUTES SCALED AT 256
+128/164         OCTAL           31000                   # 128/163.84 CONVERTING 256 TO WAITLIST/2
+.1-.05K)        OCTAL           01146                   # .0375=.075 SCALED AT 2
