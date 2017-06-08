@@ -7,6 +7,4 @@
 
 BASENAME=Sunburst37
 
-NO_BINSOURCE=yes
-
 include ../Makefile.inc
