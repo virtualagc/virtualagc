@@ -18,7 +18,8 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-05-24 MAS  Created from Sunburst 120.
 ##              2017-06-03 MAS  Transcribed.
-
+##              2017-06-08 HG   Fix operand SETDVCNT -> DVSELECT
+##                              Remove non existent section
 ## Page 763
 # **SERVICER ROUTINES**
 
@@ -441,7 +442,7 @@ ENGINEON        EXTEND
                 DXCH            TEVENT
 
                 CA              PGNSCADR                # SET DVMONITOR TO EXPECT THRUST
-                TS              SETDVCNT
+                TS              DVSELECT
 
                 CS              PRIO30                  # ENGINE ON BIT13.  ENGINE OFF BIT14
                 EXTEND                                  # DEPENDING ON THE ARM COMMAND
@@ -451,20 +452,9 @@ ENGINEON        EXTEND
                 WRITE           11
                 TC              Q
                 
-                CS              FLAGWRD1                # SET ENGINBIT - THE BIT WILL BE CLEARED
-                MASK            ENGINBIT                # IN ENGINOFF AND THUS NODV CAN CHECK IT
-                ADS             FLAGWRD1                # TO ASCERTAIN NORMAL OR PREMATURE CUTOFF
-                
-                CA              EBANK5
-                TS              EBANK
-                EBANK=          DVCNTR
-                CA              STARTDVC                # SET UP THE DV MONITOR
-                TS              DVCNTR
-                LXCH            EBANK                   # RESTORE CALLER:S EBANK
-                TC              Q                       # RETURN TO CALLER
-                
 
-
+                
+                
 PGNSCADR        GENADR          PGNCSMON
 
 ENGINOFF        EXTEND
