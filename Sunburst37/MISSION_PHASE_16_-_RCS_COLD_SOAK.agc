@@ -17,10 +17,9 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-05-24 MAS  Created from Sunburst 120.
+##              2017-06-08 HG   Transcribed
 
-## NOTE: Page numbers below have not yet been updated to reflect Sunburst 37.
-
-## Page 764
+## Page 711
                 BANK            27
                 EBANK=          EDOT
 # PROGRAM DESCRIPTION
@@ -58,69 +57,69 @@
 
 # START MISSION PHASE 16 WHEN MP TIMER 4 COUNTS TO ZERO
 
-MP16JOB         TC              NEWMODEX                        # UPDATE PROGRAM NUMBER
-                OCT             16                              # ON DSKY
+MP16JOB         TC              NEWMODEX                # UPDATE PROGRAM NUMBER
+                OCT             16                      # ON DSKY
 
-                TC              COLDSOAK                        # CALCULATE CDU ANGLES REQUIRED
-                CAF             PRIOKM                          # SCHEDULE KALCMANU
+                TC              COLDSOAK                # CALCULATE CDU ANGLES REQUIRED
+                CAF             PRIOKM                  # SCHEDULE KALCMANU
                 INHINT
                 TC              FINDVAC
                 EBANK=          EDOT
                 2CADR           KALCMAN3
 
                 RELINT
-                CCS             NEWJOB                          # FORCE KALCMANU JOB ON
+                CCS             NEWJOB                  # FORCE KALCMANU JOB ON
                 TC              CHANG1
 
-## Page 765
-                TC              BANKCALL                        # PUT JOB TO SLEEP TILL
-                CADR            ATTSTALL                        # MANEUVER COMPLETED
-                NOOP                                            # TC   BADATT-SICK RETURN- ***FIX THIS***
+## Page 712
+                TC              BANKCALL                # PUT JOB TO SLEEP TILL
+                CADR            ATTSTALL                # MANEUVER COMPLETED
+                NOOP                                    # TC   BADATT-SICK RETURN- ***FIX THIS***
 
-                CAF             DEC1000                         # GOOD RETURN--MAN. COMPLETED
+                CAF             DEC1000                 # GOOD RETURN--MAN. COMPLETED
                 INHINT
-                TC              WAITLIST                        # WAIT 10 SECONDS
+                TC              WAITLIST                # WAIT 10 SECONDS
                 EBANK=          EDOT
                 2CADR           PHAS16A
 
                 RELINT
-                CAF             P16WAKE                         # PUT THIS JOB
-                TC              JOBSLEEP                        # TO SLEEP
+                CAF             P16WAKE                 # PUT THIS JOB
+                TC              JOBSLEEP                # TO SLEEP
 P16WAKE         CADR            PHAS16B
 DEC1000         DEC             1000
-PHAS16A         CAF             P16WAKE                         # REACTIVATE THE JOB
-                TC              JOBWAKE                         # THAT WAS PUT TO SLEEP
-                TC              IBNKCALL                        # DO DFI T/M CALIBRATION ROUTINE
+PHAS16A         CAF             P16WAKE                 # REACTIVATE THE JOB
+                TC              JOBWAKE                 # THAT WAS PUT TO SLEEP
+                TC              IBNKCALL                # DO DFI T/M CALIBRATION ROUTINE
                 CADR            DFITMCAL
 
                 TC              TASKOVER
 
 #                                         WAIT FOR COMPLETION OF CALIBRATION + 1 SECOND
 
-PHAS16B         CAF             DEC1300                         # 13 SECONDS
+PHAS16B         CAF             DEC1300                 # 13 SECONDS
                 INHINT
+
                 TC              WAITLIST
                 EBANK=          EDOT
                 2CADR           P16MXDB
 
                 TC              ENDOFJOB
-P16MXDB         CAF             BIT13                           # SELECT MAX DEADBAND FOR DAP-
-                ADS             DAPBOOLS                        # SET BIT 13 OF DAPBOOLS =1
-                TC              1LMP                            # THRUSTER ISOL VALVES PR 3A CLOSE
+P16MXDB         CAF             BIT13                   # SELECT MAX DEADBAND FOR DAP-
+                ADS             DAPBOOLS                # SET BIT 13 OF DAPBOOLS =1
+                TC              1LMP                    # THRUSTER ISOL VALVES PR 3A CLOSE
                 DEC             94
-                TC              1LMP                            # THRUSTER ISOL VALVES 3B CLOSE
+                TC              1LMP                    # THRUSTER ISOL VALVES 3B CLOSE
                 DEC             110
-                CAF             DEC200                          # WAIT 2 SECS
+                CAF             DEC200                  # WAIT 2 SECS
                 TC              WAITLIST
                 EBANK=          EDOT
                 2CADR           P16CLS
 
                 TC              TASKOVER
 DEC200          DEC             200
-P16CLS          TC              1LMP                            # THRUSTER ISOL VALVES PR 3A-
-                DEC             95                              # CLOSE RESET
-                TC              1LMP                            # THRUSTER ISOL VALVES PR 3B-
-                DEC             111                             # CLOSE RESET
+P16CLS          TC              1LMP                    # THRUSTER ISOL VALVES PR 3A-
+                DEC             95                      # CLOSE RESET
+                TC              1LMP                    # THRUSTER ISOL VALVES PR 3B-
+                DEC             111                     # CLOSE RESET
                 TC              TASKOVER
 DEC1300         DEC             1300
-

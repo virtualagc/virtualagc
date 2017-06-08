@@ -19,6 +19,7 @@
 ## Mod history: 2017-05-24 MAS  Created from Sunburst 120.
 ##              2017-05-28 HG   Transcribed
 ##              2017-05-30 HG   Add missing variable RUPTSTOR
+##              2017-06-08 HG   Fix label NEWTIME -> NEWMTIME
 
 ## Page 10
 
@@ -624,7 +625,7 @@ MPHASE1         ERASE
 MTIMER4T        ERASE           +3                      # RESTART STORAGE AREAS FOR THE ABOVE.
 MPHASE4T        ERASE           +3
 MDUETEMP        ERASE
-NEWTIME         ERASE                                   # T1 AT MAINTENANCE TASK AFTER NEXT.
+NEWMTIME        ERASE                                   # T1 AT MAINTENANCE TASK AFTER NEXT.
 NEWTIMET        ERASE                                   # RESTART STORAGE FOR THE ABOVE.
 MINH            ERASE
 STATECTR        ERASE                                   # TIMER FOR INTERNAL STATE VECTOR UPDATES.
