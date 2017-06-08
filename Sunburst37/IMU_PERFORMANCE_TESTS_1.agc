@@ -17,10 +17,9 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-05-24 MAS  Created from Sunburst 120.
+##		2017-06-08 RSB	Transcribed.
 
-## NOTE: Page numbers below have not yet been updated to reflect Sunburst 37.
-
-## Page 380
+## Page 361
                 BANK            14
                 EBANK=          XSM
 
@@ -41,8 +40,8 @@ AOTNBIMU        CAF             ONE                     # AOT-NB-IMU FINE ALIGNM
                                 ERTHRVSE                # TO CALCULATE EARTH RATE VECTOR
                 EXIT
 
-POSLOAD         CAF             V24N30E                 # R1  0000X ENTER     POSITION 1,2, OR 3
-                TC              NVSBWAIT                # R2  00000 ENTER     00001 FOR LAB OPTION
+POSLOAD         CAF             V24N30E                 # R1  0000X ENTER    POSITION 1,2, OR 3
+                TC              NVSBWAIT                # R2  00000 ENTER    00001 FOR LAB OPTION
                 TC              ENDIDLE
                 TCF             ENDTEST
                 TCF             -4
@@ -71,7 +70,7 @@ POSLOAD         CAF             V24N30E                 # R1  0000X ENTER     PO
                 CADR            IMUFINE                 # FINE ALIGN MODE
                 TC              BANKCALL
                 CADR            IMUSTALL
-## Page 381
+## Page 362
                 TCF             ENDTEST
 
                 TC              FINDNAVB                # FINE ALIGN MARKS
@@ -86,11 +85,14 @@ ERFINAL         TC              BANKCALL                # LAST EARTH RATE SHOT
                 TCF             MONSTART                #     CHANGE BY V21 N02 E XXXXX E 00000 E
                 TCF             ERFINAL
                 TCF             ENDTEST
+                
                 TS              EROPTN
                 INHINT
                 CAF             PRIO21                  # PRIORITY 1 HIGHER THAN SXTNBIMU
                 TC              FINDVAC
+                EBANK=		XSM
                 2CADR           RDR37511
+                
                 RELINT
                 TC              ERFINAL
 
@@ -107,6 +109,7 @@ MONSTART        TC              FINETIME                # TIME AT INITIAL MISALI
 
                 INHINT
                 CAF             60SEC                   # INSURE PIPAI VARIES IN ONE DIRECTION
+                
                 TC              WAITLIST
                 EBANK=		XSM
                 2CADR           PIP1
@@ -120,17 +123,17 @@ PIP1            CAF             PIP2ADR
 
 PIP2            CAE             PIPNDX
                 TS              PIPINDEX                # POS1 PIPAY     POS2 PIPAX     POS3 PIPAX
-## Page 382
+## Page 363
                 TC              BANKCALL
-                CADR            DOCHECKG                # SYNC ON PIPA PULSE
+                CADR            CHECKG                	# SYNC ON PIPA PULSE
 
                 RELINT
-                TC              STORRSLT                # STORE TIME ANP PIPAI
+                TC              STORRSLT                # STORE TIME AND PIPAI
 
                 CAE             PIPNDX          +1
-                TS              PIPINDEX                # POS1 PIPAZ    POS2 PIPAY    POS3 PIPAZ
+                TS              PIPINDEX                # POS1 PIPAZ     POS2 PIPAY     POS3 PIPAZ
                 TC              BANKCALL
-                CADR            DOCHECKG                # SYNC ON PIPA PULSE
+                CADR            CHECKG                	# SYNC ON PIPA PULSE
 
                 RELINT
                 TC              STORRSLT                # STORE TIME AND PIPAI
@@ -145,7 +148,7 @@ PIP2            CAE             PIPNDX
                 TC              JOBSLEEP
 PIP2ADR         CADR            PIP2
 
-## Page 383
+## Page 364
 FINDNAVB        EXTEND                                  # MARKS * CALC NB OR SM WRT EARTH REF
                 QXCH            QPLACE
 
@@ -172,6 +175,7 @@ FINDNAVB        EXTEND                                  # MARKS * CALC NB OR SM 
                 TC              INTPRET
                 LXC,1           CALL
                                 MARKSTAT                # BASE ADDRESS VAC AREA FOR AOTNB
+                                
                                 AOTNB                   # OPTICS TO NAV BASE COORDINATE FRAME
                 BON             CALL
                                 COAROFIN                # COARSE MARKS = 0    FINE MARKS = 1
@@ -196,7 +200,7 @@ FINDNAVB        EXTEND                                  # MARKS * CALC NB OR SM 
                 CCS             A
                 TCF             EARRTCOM        +5      # IF COARSE ALIGN MARKS
 
-## Page 384
+## Page 365
 EARRTCOM        TC              BANKCALL                # EARTH RATE COMPENSATION BETWEEN MARKS
                 CADR            EARTHR
                 CCS             OPTCADR                 # +0 IF MARK BUTTON NOT DEPRESSED
@@ -205,6 +209,7 @@ EARRTCOM        TC              BANKCALL                # EARTH RATE COMPENSATIO
                 TCF             +1
                 TC              BANKCALL
                 CADR            OPTSTALL                # INSURE SUCCESSFUL MARK
+                
                 TCF             ENDTEST
 
                 TC              GIMANGS1
@@ -235,7 +240,7 @@ GIMANGS1        CAF             TWO                     # BASE ADDRESS GIMBAL AN
                 TS              S1
                 TC              Q
 
-## Page 385
+## Page 366
 PUTPOSX         EXTEND                                  # COARSE ALIGNS STABLE MEMBER
                 QXCH            QPLACE
 
@@ -286,7 +291,7 @@ SMDCALC         EXTEND                                  # FINE ALIGNS STABLE MEM
 
                 AXT,1           RTB
 
-## Page 386
+## Page 367
                 ECADR           OGC                     # X1 = BASE ADDRESS OF TORQUING ANGLES
                                 PULSEIMU                # TO PUT OUT GYRO TORQUING PULSES
                 EXIT
@@ -296,7 +301,7 @@ SMDCALC         EXTEND                                  # FINE ALIGNS STABLE MEM
                 TCF             ENDTEST
                 TC              QPLACE
 
-## Page 387
+## Page 368
 MAKEXSMD        EXIT                                    # XSM V   YSM SW   ZSM SE
 
                 CAF             17DEC                   # ZERO XSM, YSM, AND ZSM
@@ -321,7 +326,7 @@ MAKEXSMD        EXIT                                    # XSM V   YSM SW   ZSM S
 
 
 
-TAR/EREF        AXT,1           AXT,2                   #               TARGET VECTOR
+TAR/EREF        AXT,1           AXT,2                   #              TARGET VECTOR
                                 2                       # SIN(EL)  -COS(AZ)COS(EL)  SIN(AZ)COS(EL)
                                 12D
                 SSP
@@ -347,7 +352,7 @@ TAR1            SLOAD*          SR2                     # X1=2  X2=12  S2=6 . X1
                 DLOAD
                                 2
                 COS             DMP
-## Page 388
+## Page 369
                 SL1             DCOMP
                 STORE           20D,2                   # PD08  ***   -COS(AZ)COS(EL)    ***  PD14
 
@@ -356,9 +361,9 @@ TAR1            SLOAD*          SR2                     # X1=2  X2=12  S2=6 . X1
                                 TAR1
                 RVQ
 
-## Page 389
+## Page 370
 ERTHRVSE        DLOAD           PDDL
-                                ZERODP                  # PD24 = (SIN -COS  0)(OMEG/MS)
+                                ZERODP                  # PD24 = (SIN  -COS  0)(OMEG/MS)
                                 LATITUDE
                 COS             DCOMP
                 PDDL            SIN
@@ -376,57 +381,35 @@ ERTHRVSE        DLOAD           PDDL
 
 EARTHR          TC              MAKECADR                # CALCULATES AND COMPENSATES EARTH RATE
                 TS              QPLACES
-
-		TC		CHECKMM			# TEST FOR MAJOR MODE 4
-		OCT		4			# IS PRELAUNCH OVER ?
-		TCF		GETPLTIM		# NO
-		INHINT					# YES,
-		CA		BIT1			# SET UP MP2TASK NOW
-		TC		WAITLIST
-		EBANK=		TGRR
-		2CADR		MP2TASK
-		
-		CA		3.27CADR		# SET UP RETURN TO BYPASS PRELAUNCH
-		TS		QPLACES
-		
-GETPLTIM	EXTEND					# GET CURRENT TIME
-		DCA		TIME2
-		DXCH		MPAC
-		EXTEND
-		DCA		MPAC
-		DXCH		TEMPTIME		# STORE IN TEMPTIME BEFORE RELINT
-		RELINT
-		
-		CAF		ZERO			# DECLARE DP MODE.
-		TS		MODE
-                TC              INTPRET
-                DSU             SL
-                                TMARK                   # T(PRES) - T(PREV) = DT    SCALED 10 MSEC
-                                9D                      # 2 TO 21ST POWER = 1 REVOLUTION
-                VXSC            MXV
-                                ERVECTOR                # VT = (SIN  -COS  0)(OMEG/MS)(DT)
-## Page 390
-                                XSM                     # (XSM)(VT) = EARTH RATE COMPENSATION
+                
+                TC		INTPRET
+                RTB
+                		LOADTIME		# T(PRESENT)
+                STORE		TEMPTIME
+                DSU		SL
+                		TMARK			# T(PRES) - T(PREV) = DT    SCALED 10 MSEC
+                		9D			# 2 TO 21ST POWER = 1 REVOLUTION
+                VXSC		MXV
+                		ERVECTOR		# VT = (SIN  -COS  0)(OMEG/MS)(DT)
+                		XSM			# (XSM)(VT) = EARTH RATE COMPENSATION
                 VAD
-                                ERCOMP
-                STODL           ERCOMP
-                                TEMPTIME
-                STORE           TMARK                   # T(PREVIOUS)
-
-                AXT,1           RTB
-                ECADR           ERCOMP
-                                PULSEIMU                # TO PUT OUT GYRO TORQUING PULSES
+                		ERCOMP
+                STODL		ERCOMP
+                		TEMPTIME
+                STORE		TMARK			# T(PREVIOUS)
+                
+                AXT,1		RTB
+                ECADR		ERCOMP
+                		PULSEIMU		# TO PUT OUT GYRO TORQUING PULSES
                 EXIT
-
-                TC              BANKCALL
-                CADR            IMUSTALL                # WAIT FOR PULSES TO GET OUT
-                TCF             ENDTEST
-                CAE             QPLACES
-                TCF             BANKJUMP
-
-3.27CADR	CADR		REDO3.27
-
-
+                
+                TC		BANKCALL
+                CADR		IMUSTALL		# WAIT FOR PULSES TO GET OUT
+                TCF		ENDTEST
+                CAE		QPLACES
+                TCF		BANKJUMP
+                
+## Page 371
 STORRSLT        EXTEND
                 QXCH            QPLACE
 
@@ -446,6 +429,7 @@ STORRSLT        EXTEND
                 CS              NDXCTR
                 AD              72DEC
                 EXTEND
+                
                 BZMF            MISALIGN                # TO CALCULATE MISALIGNMENT
                 CAF             THREE
                 ADS             NDXCTR
@@ -455,7 +439,6 @@ OPTDATA         EXTEND                                  # CALLS FOR AZIMUTH AND 
                 QXCH            QPLACE                  #    TARGET 1, THEN TARGET 2
 
                 CAF             BIT1                    # AZIMUTH CLOCKWISE FROM NORTH TO TARGET
-## Page 391
                 ZL                                      # ELEVATION MEASURED FROM HORIZONTAL
                 LXCH            RUN
                 TS              DSPTEM1         +2
@@ -469,9 +452,10 @@ OPTDATA         EXTEND                                  # CALLS FOR AZIMUTH AND 
                 OCT             00661                   # R2  +- XX.XXX    ELEVATION IN DEGREES
                 TCF             ENDTEST                 # R3      0000X    TARGET NUMBER 1 OR 2
 
-                DXCH            DSPTEM1                 # TAZEL1        TARGET 1 AZIMUTH
+                DXCH            DSPTEM1                 # TAZEL1       TARGET 1 AZIMUTH
+                
                 INDEX           RUN
-                DXCH            TAZEL1                  # TAZEL1 +2     TARGET 2 AZIMUTH
+                DXCH            TAZEL1                  # TAZEL1 +2    TARGET 2 AZIMUTH
                 CCS             RUN
                 TCF             +4
 OPTRDRIN        CAF             TWO                     # SPECIAL ENTRY FOR RDR37511
@@ -479,16 +463,17 @@ OPTRDRIN        CAF             TWO                     # SPECIAL ENTRY FOR RDR3
                 TCF             OPTDATA         +4      # MPAC    1ST PASS = 0    2ND PASS = 2
                 TC              QPLACE
 
-## Page 392
+## Page 372
 LATAZCHK        DLOAD           SL2                     # CALLS FOR AZIMUTH (SM) AND LATITUDE
                                 LATITUDE
+                                
                 STODL           DSPTEM1         +1
                                 AZIMUTH                 # ...NOT REALLY...
 
                 RTB             EXIT
                                 1STO2S                  # FRACTION OF REVOLUTION TO 2S COMPLEMENT
 
-                XCH             MPAC                    # AZIMUTH MUST BE 135 DEGREES R1 = .13500
+                XCH             MPAC                    # AZIMUTH MUST BE 135 DEGREES R1 = +13500
                 TS              DSPTEM1                 #    FOR SXT-NB-IMU FINE ALIGNMENT TEST
                 TC              CHECKLD                 # R1  +- XXX.XX    AZIMUTH IN DEGREES (SM)
                 OCT             00661                   # R2  +- XX.XXX    LATITUDE IN DEGREES
@@ -529,7 +514,7 @@ CHECKLD1        CAF             CHECKLD2
                 TC              NVSUBUSY
 CHECKLD2        CADR            CHECKLD         +2
 
-## Page 393
+## Page 373
 POSNJUMP        EXTEND                                  # POSITIONS FOR SXTNBIMU
                 QXCH            QPLACE
 
@@ -538,21 +523,22 @@ POSNJUMP        EXTEND                                  # POSITIONS FOR SXTNBIMU
                 TCF             ENDTEST
                 TCF             POS1
                 TCF             POS2
+                
                 TCF             POS3
                 TCF             POS4
                 TCF             POS5
 
 
 
-POS1            CAF             ONE                     # XSM = V    YSM = SW    ZSM = SE
+POS1            CAF             ONE                     # XSM = V     YSM = SW    ZSM = SE
                 TS              PIPNDX
                 CAF             TWO
-                TS              PIPNDX          +1      # MONITOR PIPAY AND PIPAZ
+                TS              PIPNDX          +1      # MONITOR PIPAY AND PIPAZ 
                 TC              QPLACE
 
 
 
-POS2            TC              INTPRET                 # XSM = SE   YSM = SW    ZSM = -V
+POS2            TC              INTPRET                 # XSM = SE    YSM = SW    ZSM = -V
                 VLOAD           VCOMP
                                 XSM
                 PDVL
@@ -561,6 +547,7 @@ POS2            TC              INTPRET                 # XSM = SE   YSM = SW   
                 STADR
                 STORE           ZSM
                 EXIT
+                
                 CAF             ZERO
                 TS              PIPNDX
                 CAF             ONE
@@ -569,7 +556,7 @@ POS2            TC              INTPRET                 # XSM = SE   YSM = SW   
 
 
 
-POS3            TC              INTPRET                 # XSM = SE    YSM = V    ZSM = SW
+POS3            TC              INTPRET                 # XSM = SE    YSM = V     ZSM = SW
                 VLOAD           PDVL
                                 XSM
                                 YSM
@@ -580,7 +567,7 @@ POS3            TC              INTPRET                 # XSM = SE    YSM = V   
                 STADR
                 STOVL           ZSM
 
-## Page 394
+## Page 374
                 STADR
                 STORE           YSM
                 EXIT
@@ -595,6 +582,7 @@ POS3            TC              INTPRET                 # XSM = SE    YSM = V   
 POS4            CAF             BIT5                    # OPTION TO ALIGN SM TO SPECIFIED ANGLES
                 AD              FIXLOC
                 INDEX           FIXLOC
+                
                 TS              S1                      # BASE ADDRESS GIMBAL ANGLES
                 CAF             V25N22E                 # R1  +- XXX.XX   OUTER GIMBAL ANGLE
                 TC              NVSBWAIT                # R2  +- XXX.XX   INNER GIMBAL ANGLE
@@ -618,9 +606,10 @@ POS4            CAF             BIT5                    # OPTION TO ALIGN SM TO 
                 RTB
                                 TRANSPSE                # BACK TO NAV BASE WRT TO EARTH REF
                 EXIT
+                
                 TC              QPLACE
 
-## Page 395
+## Page 375
 POS5            CA              QPLACE                  # OPTION TO ALIGN SM TO ANY ORIENTATION
                 TS              STOREPL                 #   WRT EARTH REFERENCE FRAME
 
@@ -641,7 +630,7 @@ POS5            CA              QPLACE                  # OPTION TO ALIGN SM TO 
                 EXIT
 
                 TC              STOREPL
-## Page 396
+## Page 376
 OGCZERO         EXTEND                                  # ZERO EARTH RATE TORQUING ANGLES
                 QXCH            QPLACE
 
@@ -664,6 +653,7 @@ GMLCKCHK        CAF             BIT6                    # CHECK FOR GIMBAL LOCK 
 
 
 ENDTEST         CA              IMUSEFLG                # BIT8
+
                 AD              RRUSEFLG                # BIT7
                 CS              A
                 INHINT
@@ -677,7 +667,7 @@ ENDTEST         CA              IMUSEFLG                # BIT8
                 CADR            MKRELEAS                # RELEASE MARK SYSTEM
                 TC              EJFREE
 
-## Page 397
+## Page 377
 LEMLAB          TC              INTPRET
                 VLOAD           VCOMP
                                 YUNIT
@@ -728,7 +718,7 @@ LEMLAB1         TC              BANKCALL
                 CADR            IMUSTALL
                 TCF             ENDTEST
 
-## Page 398
+## Page 378
                 CA              CDUX
                 INDEX           FIXLOC
                 TS              24
@@ -762,7 +752,7 @@ LEMLAB1         TC              BANKCALL
                 TC              BANKCALL
                 CADR            SAMODRTN                # RETURN TO SEMI-AUTOMATIC MODING TEST
 
-## Page 399
+## Page 379
 RDR37511        CAF             RDRRETN                 # RENDEZVOUS RADAR AND ANTENNA TRACKING
                 TS              QPLACE                  # TO RETURN FROM OPTDATA
 
@@ -809,9 +799,10 @@ RDRINIT         CS              ZERO
                 TS              EROPTN
                 TCF             AOTNBIMU        +2
 
-## Page 400
+## Page 380
 MISALIGN        TC              GRABWAIT                # DISPLAY SYSTEM WAS FREED
                 CAF             ZERO
+                
                 TS              NDXCTR
 BBBB            INDEX           NDXCTR
                 CS              GENPL           +68D
@@ -835,6 +826,7 @@ CCCC            TC              INTPRET
                                 GENPL
                 STORE           GENPL           +72D,1
                 EXIT
+                
                 CS              NDXCTR
                 AD              69DEC
                 CCS             A
@@ -858,10 +850,11 @@ DDDD            TC              INTPRET
                 EXIT
 
 DDDD1           TC              INTPRET
+
                 LXA,1           DLOAD*
                                 NDXCTR
 
-## Page 401
+## Page 381
                                 GENPL           +72D,1
                 DSU*            PUSH
                                 GENPL           +66D,1
@@ -870,6 +863,7 @@ DDDD1           TC              INTPRET
                 STORE           GENPL           +72D,1
 
                 SL2             DAD
+                
                                 24D
                 STODL*          24D
                                 GENPL           +72D,1
@@ -893,6 +887,7 @@ DDDD1           TC              INTPRET
 
 EEEE            TC              INTPRET
                 LXC,1           SLOAD*
+                
                                 NDXCTR
                                 GENPL           +11D,1
                 STORE           34D
@@ -913,7 +908,7 @@ EEEE            TC              INTPRET
                                 30D
                 STORE           30D
 
-## Page 402
+## Page 382
                 EXIT
                 CS              NDXCTR
                 AD              60DEC
@@ -928,6 +923,7 @@ EEEE            TC              INTPRET
                 TC              INTPRET
                 DLOAD           DMP
                                 24D
+                                
                                 30D
                 PDDL            DMP
                                 26D
@@ -951,6 +947,7 @@ EEEE            TC              INTPRET
                 TS              DSPTEM2         +2
 
                 CAF             V06N66E
+                
                 TC              NVSBWAIT
                 TC              FLASHON
                 TC              ENDIDLE
@@ -960,7 +957,7 @@ EEEE            TC              INTPRET
                 CAF             ZERO
                 TCF             DDDD            -1
 
-## Page 403
+## Page 383
 # THIS REVISION REFLECTS CHANGES AS OF
 #  1/31/66
 # ENGINE ON/OFF NOW IN CHANNEL ELEVEN.  THE BITS FOR EACH CHANNEL GET TURNED ON ALL AT ONCE.  THEY STAY ON UNTIL
@@ -1004,6 +1001,7 @@ SAUTLOCS        CADR            CHAN5D
 THROTADD        CADR            PTDTRDE         +5
 METERADD        CADR            ALTMET          +3
 MRATEADD        CADR            ALTRMET         +3
+
 CHAN5D          CA              FIVE
                 TS              DSPTEM1
 2ENTRY          CA              LOW8                    # CHANNEL 6 RETURNS HERE
@@ -1012,9 +1010,10 @@ CHAN5D          CA              FIVE
                 INDEX           TEMP
                 WRITE           5
 
-## Page 404
+## Page 384
 3ENTRY          CA              V04N30D                 # CH11,12 RETURN HERE TO USE THE DISPLAY
                 TC              NVSBWAIT
+                
 4ENTRY          CAF             WAITER                  # WAITER IS 03300
                 TC              NVSBWAIT
                 TC              ENDIDLE
@@ -1038,6 +1037,7 @@ CHAN11D         CA              OCT11
                 WRITE           6
                 TC              3ENTRY
 CHAN12D         CA              OCT12
+
                 TS              DSPTEM1
                 CS              BIT13-14
                 EXTEND
@@ -1063,9 +1063,8 @@ PIT             INHINT
 
                 RELINT
                 CA              WAITER
-## Page 405
+## Page 385
                 TC              NVSBWAIT
-
                 TC              ENDIDLE
                 TC              ENDTEST
                 CA              ZERO
@@ -1073,6 +1072,7 @@ PIT             INHINT
                 TC              BACK1
 
 PTDTRDE         CA              ZERO
+
                 TS              THRUST
                 CA              THROTADD
                 TS              TEMPADD
@@ -1096,7 +1096,9 @@ ALWAYS          TS              THRUST
                 EXTEND                                  # A SMERZH FIX.
                 WOR             14
                 CA              BIT6                    # 320 MS.DELAY
+                
                 TC              WAITLIST
+                EBANK=		XSM
                 2CADR           THROTASK
                 
                 TC              TASKOVER
@@ -1114,7 +1116,7 @@ ALTASK          CCS             NOBITS                  # IS TASK STILL REQ
                 EXTEND
                 WOR             14
                 CA              BIT6                    # 320 MS. DELAY
-## Page 406
+## Page 386
                 TC              WAITLIST
                 EBANK=		XSM
                 2CADR           ALTASK
@@ -1129,6 +1131,7 @@ ALTMET          CA              METERADD
                 EXTEND
                 WAND            14
                 INHINT
+                
                 CA              ONE
                 TC              WAITLIST
                 EBANK=		XSM
@@ -1152,10 +1155,11 @@ ALTRMET         CA              MRATEADD
                 CA              BIT2
                 EXTEND
                 WOR             14
+                
                 TC              ALTMET          +8D
 
-## Page 407
-#      THE AOT ANGLE CHECKING PROGRAM PROVIDES A SIMPLE VERIFICATION OF THE ACCURACY OF THE AOT,  THE IDEA IS TO
+## Page 387
+#      THE AOT ANGLE CHECKING PROGRAM PROVIDES A SIMPLE VERIFICATION OF THE ACCURACY OF THE AOT.  THE IDEA IS TO
 # COMPUTE THE ANGLE BETWEEN TWO LINES OF SIGHT AS INDICATED BY THE AOT, WHICH IS WHAT THIS PROGRAM DOES.
 # INDEPENDENT KNOWLEDGE OF THE INCLUDED ANGLE PROVIDES A COMPARISON AND THUS A MEASURE OF THE AOT ACCURACY.
 #       THE ISS NEED NOT BE ON TO RUN THIS PROGRAM.
@@ -1187,9 +1191,10 @@ AOTANGCK        TC              INTPRET
                 TC              NVSBWAIT
                 TCF             ENDTEST
 
-## Page 408
+## Page 388
                 EBANK=          1400
 ZEROERAS        INHINT                                  # PROGRAM BY MUNTZ TO ZERO ERASEABLE
+
                 CAF             ZERO
                 TS              TIME3
                 CAF             OCT27
@@ -1214,7 +1219,7 @@ ZEROLP1         RELINT
                 TCF             ZEROLP
 OCT27           OCT             27
 
-## Page 409
+## Page 389
                 EBANK=          OGC
 V04N30D         OCT             00430
 ALBITS          OCT             52525
@@ -1223,6 +1228,7 @@ OCT12           =               TEN
 OCT11           =               NINE
 CH12BITS        OCT             37400
 V01N30D         OCT             00130
+
 WAITER          OCT             03300
 
 
@@ -1256,7 +1262,7 @@ SCALFTR         2DEC            .64                     # FOR STORRSLT
 
 OMEG/MS         2DEC            .24339048               # GYRO PULSES / 10 MSEC
 
-## Page 410
+## Page 390
 #          THE FOLLOWING ROUTINE READS THE CLOCK AND SCALAR (CHANNELS 3 AND 4) INTO A AND L, INSURING THAT THE
 # DATA WAS NOT IN TRANSITION WHEN IT WAS READ.
 
@@ -1295,6 +1301,7 @@ REDYTORK        TC              BANKCALL
                 CALL
                                 ERTHRVSE                # SETS UP EARTHRATE ANGLES AND TIME
                 EXIT
+                
                 CA              OPTNREG                 # INITIALIZE CDUNDX FOR PULSE CATCHING
                 AD              NEG2                    # C(K) WAS 4 2 1 NOW C(A) IS 2 0 -1
                 TS              GYTOBETQ                # C(K) = 2,0,-1 FOR  X,Y,Z.
@@ -1306,4 +1313,3 @@ REDYTORK        TC              BANKCALL
                 TS              CDUNDX                  # C(K) = 1 FOR Y, 2 FOR Z CDU SELECT
                 TC              BANKCALL
                 CADR            ENABLE
-CHKSUM14	OCT		37777
