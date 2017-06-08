@@ -21,6 +21,8 @@
 ##		2016-11-02 RSB	More typos.
 ##		2016-12-05 RSB	Comment-proofing with octopus/ProoferComments
 ##				completed, changes made.
+##		2017-06-08 RSB	Fixes (comments) identified while transcribing
+##				SUNBURST 37.
 
 ## Page 411
                 BANK            24
@@ -88,7 +90,7 @@ GUESS           TC              INTPRET                 # CALCULATE -COS LATITUD
                 STODL           WANGI
                                 LATITUDE
                 SIN             SL1
-                STOVL           WANGO                   # LOAD TRANSITION MATRIX INTO ERASABLE
+                STOVL           WANGO                   #  LOAD TRANSITION MATRIX INTO ERASABLE
                                 GEORGED
                 STOVL           TRANSM1
                                 GEORGEC
@@ -97,11 +99,11 @@ GUESS           TC              INTPRET                 # CALCULATE -COS LATITUD
                 STORE           TRANSM1         +12D
                 EXIT
                 TC		+2
-JUMPLOAD        TC		FREEDSP			# FREE DISPLAY IF IN GYROCOMPASS
+JUMPLOAD        TC		FREEDSP			#  FREE DISPLAY IF IN GYROCOMPASS
 		TC              LOADGTSM
                 TC              BANKCALL
                 CADR            ESTIMS
-TORQUE          TC              PHASCHNG                # FILTER RETURNS AFTER TORQUE AND ER SET
+TORQUE          TC              PHASCHNG                #  FILTER RETURNS AFTER TORQUE AND ER SET
                 OCT             00005
                 CA              ZERO
                 TS              DSPTEM2
@@ -546,7 +548,7 @@ CALCSFE         CA              SAVE                    # GYROCTR AT TEST START
                 EXTEND                                  # THIS ROUTINE TESTS SAVE-(SAVE+1) TO SEE
                 BZF             NEGSFE                  # IF THE RESULT IS WITHIN PERMISSIBLE SIZE
                 CS              SAVE            +2      # AND DETERMINES POLARITY OF SFE USING THE
-                MASK            SIZCHK                  # PRESENCE OD ABSENCE OF BITS 12,13,14.
+                MASK            SIZCHK                  # PRESENCE OR ABSENCE OF BITS 12,13,14.
                 EXTEND                                  # IF BITS ARE PRESENT IN POSITIVE SAVE +2
                 BZF             POSSFE                  # THEN THE SFE MUST BE POS. IF DIFFERENCE
                 TC              STOPTEST                # IS GREATER THAN 2047 PULSES FROM THE
