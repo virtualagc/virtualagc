@@ -20,6 +20,7 @@
 ##              2017-05-28 HG   Transcribed
 ##              2017-05-30 HG   Add missing variable RUPTSTOR
 ##              2017-06-08 HG   Fix label NEWTIME -> NEWMTIME
+##                                        ABDCONV -> ABDVCONV
 
 ## Page 10
 
@@ -1083,7 +1084,7 @@ URCO            EQUALS          AMEMORY         +106D   # VECTOR
 
 1/DV1           EQUALS          AMEMORY         +112D   # DP
 1/DV2           EQUALS          AMEMORY         +114D   # DP
-ABDCONV         EQUALS          AMEMORY         +116D   # DP
+ABDVCONV        EQUALS          AMEMORY         +116D   # DP
 TFL             EQUALS          AMEMORY         +118D   # DP
 
 
