@@ -17,11 +17,11 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-05-24 MAS  Created from Sunburst 120.
+##              2017-06-08 HG   Transcribed
 
-## NOTE: Page numbers below have not yet been updated to reflect Sunburst 37.
-
-## Page 799
+## Page 746
 #          THE FOLLOWING SUBROUTINES ALLOW MISSION PROGRAMS TO REQUEST LMP (LEM MISSION PROGRAMMER) OUTPUTS.
+
 # THE PROPER DECIMAL CODE IS ENTERED INTO A TABLE AND FROM THENCE TO CHANNEL 10 VIA T4RUPT AND ARE INCLUDED IN
 # THE DOWNLINK.
 
@@ -44,6 +44,7 @@
 #                                                  DEC    DT
 
 # WARNING  ***** PROGRAMS UNDER EXEC WHICH CALL 1LMP + 2LMP MUST FIRST
+
 #                INHIBIT INTERRUPT....RETURNS STILL INHIBITED.
 
 
@@ -56,6 +57,7 @@
 
 LMPGROUP        EQUALS          2
 LMPTBASE        EQUALS          TBASE2
+
 LMPPHASE        EQUALS          PHASE2
 
                 TC              STORCOM         -1      # TO STORE IN BUFFER AND UPDATE POINTER
@@ -66,12 +68,13 @@ LMPPHASE        EQUALS          PHASE2
                 CA              0                       # GET LMP CODE
                 INCR            Q                       # SET RETURN.
                 AD              BIT15                   # SET SIGN TO SHOW NEW COMMAND IN BUFFER
+
 STORCOM         INDEX           LMPIN
                 TS              LMPCMD                  # INSERT IN NEXT SLOT IN BUFFER
 
 UPLMPIN         CCS             LMPIN                   # UPDATE POINTER
 
-## Page 800
+## Page 747
                 TCF             +2
                 CAF             SEVEN
                 TS              LMPIN
@@ -87,7 +90,7 @@ UPLMPIN         CCS             LMPIN                   # UPDATE POINTER
                 TCF             +2
 
 1LMP+DT         EXTEND                                  # SAVE RETURN FOR RESTARTS
-                QXCH            LMPRET			# IS LXCH IF FROM ABOVE
+                QXCH            LMPRET                  # IS LXCH IF FROM ABOVE
                 CA              BBANK
                 TS              LMPBBANK
 
