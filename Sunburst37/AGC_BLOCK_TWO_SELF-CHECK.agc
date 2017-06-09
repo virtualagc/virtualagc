@@ -18,6 +18,7 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-05-24 MAS  Created from Sunburst 120.
 ##              2017-06-04 MAS  Transcribed.
+##              2017-06-08 HG   Add missing EXTEND iinstruction
 
 ## Page 1014
                 BANK            37                              
@@ -892,7 +893,8 @@ ERASLOOP        INHINT
                 NDX             SKEEP7                          
                 AD              0001                            # AD X+1
 
-                TC              -1CHK                           
+                TC              -1CHK  
+                EXTEND
                 DCA             SKEEP5                          
                 NDX             SKEEP7                          
                 DXCH            0000                            # PUT B(X) AND B(X+1) BACK INTO X AND X+1

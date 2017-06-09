@@ -18,6 +18,7 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-05-24 MAS  Created from Sunburst 120.
 ##              2017-06-05 HG   Transcribed
+##              2017-06-07 HG   Remove illegal EXTEND
 
 ## Page 541
 # THE FOLLOWING T5RUPT ENTRY BEGINS THE PROGRAM WHICH INITIALIZES THE KALMAN FILTER AND SETS UP A P-AXIS RUPT TO
@@ -543,7 +544,6 @@ FULLCSP         COM
                 TS              ITEMP2
                 CA              CSPAT1
                 TS              TQR
-                EXTEND
                 TC              JETTSUB
                 CAE             ITEMP2
                 TS              TQR
