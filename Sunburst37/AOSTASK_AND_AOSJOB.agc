@@ -17,10 +17,9 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-05-24 MAS  Created from Sunburst 120.
+##		2017-06-09 RSB	Transcribed.
 
-## NOTE: Page numbers below have not yet been updated to reflect Sunburst 37.
-
-## Page 605
+## Page 569
 # PROGRAM NAME: AOSTASK           MOD. NO. 1  DATE: NOVEMBER 20, 1966
 
 # AUTHOR: JONATHAN D. ADDELSTON (ADAMS ASSOCIATES)
@@ -47,7 +46,7 @@
 #        SUMRATEQ,SUMRATER
 #        OMEGAQ,OMEGAR
 
-# OUTPUT AOSQ,AOSR,AOSJ,AOSV
+# OUTPUT AOSQ,AOSR,AOSU,AOSV
 #        AOSQTERM,AOSRTERM
 #        SUMRATEQ,SUMRATER
 #        KCOEFCTR
@@ -71,12 +70,12 @@
 #                                         NJ+R     EQUALS NJ+Q +2         AN AXIS IS SO HIGH THAT 2 JETS COULD NOT
 #                                         NJ-R     EQUALS NJ+Q +3         CONTROL ATTITUDE SUCCESSFULLY, THEN NJ
 #                                         NJ+U     EQUALS NJ+Q +4         FOR THAT AXIS (IN THE DIRECTION OPPOSING
-## Page 606
+## Page 570
 #                                         NJ-U     EQUALS NJ+Q +5         AOS) IS SET TO 1.  OTHERWISE, THE VALUE
 #                                         NJ+V     EQUALS NJ+Q +6         IS ZERO.  THESE FLAGS PREVENT TWO JETS
 #                                         NJ-V     EQUALS NJ+Q +7         FROM BEING REQUESTED TO FIGHT THE AOS.
 
-## Page 607
+## Page 571
 
 # AOSTASK IS EXECUTED ONLY DURING POWERED ASCENT.  IF NO LONGER IN POWERED ASCENT, STOP THE CYCLING OF AOSTASK AND
 # SET UP VARIABLES FOR COASTING ASCENT.
@@ -84,14 +83,20 @@
                 BANK            20                              
                 EBANK=          AOSQ                            
 
+AOSTASK		CAF		APSGOING			# TEST POWERED ASCENT FLAG:
+		MASK		DAPBOOLS			# 0: NOT POWERED ASCENT (ASCENT COAST)
+		EXTEND						# 1: POWERED ASCENT
+		BZF		COASTASC			# (END CYCLE OF TASKS DURING ASCENT COAST)
+
 # KEEP TRACK OF LENGTH OF BURN FOR DETERMINATION OF WEIGHTING FACTOR K:
 
-AOSTASK         CAE             KCOEFCTR                        # TEST KCOEFCTR FOR INITIAL PASS
+	        CAE             KCOEFCTR                        # TEST KCOEFCTR FOR INITIAL PASS.
                 EXTEND                                          
                 BZF             ZEROCOEF                        # GO TO DISCONTINUITY SECTION FOR COEFFA.
 
                 AD              DEC-399                         # TEST KCOEFCTR FOR CONSTANT RANGE WHICH
                 EXTEND                                          # OCCURS WHEN DURATION OF BURN IS EQUAL TO
+                
                 BZMF            +2                              # OR GREATER THAN 400 SECONDS.  (SINCE
                 TCF             KONENOW                         # KCOEFCTR IS EVEN, 399 IS THE BREAK PT.)
 
@@ -123,12 +128,12 @@ COEFFAST        TS              COEFFA                          # (VOLATILE STOR
                 CAE             K                               # WFORP = WFORQR = K/DT = K/.1 = 10K
                 EXTEND                                          # SCALED AT 16/SECOND.
                 MP              0.625                           # (CHANGES SCALE FACTOR FROM 1 TO 16/SEC.)
+## Page 572
                 TS              WFORP                           # WFORP IS IDENTICAL WFORQR EXCEPT FOR THE
                 TS              WFORQR                          # INITIALIZATION IN STARTDAP OF DAPIDLER.
 
                 CS              K                               # FORM (.1-.05K) FROM K SCALED AT 1 FOR
                 EXTEND                                          # THE TORQUE VECTOR RECONSTRUCTION AND
-## Page 608
                 MP              0.05                            # ALSO FORM (.1-.05K) SCALED AT 1/2 FOR
                 AD              0.1                             # THE OFFSET ACCELERATION TERM IN THE RATE
                 DOUBLE                                          # EBANK6 FOR USE IN T5RUPT WHILE THE
@@ -150,6 +155,7 @@ COEFFA1         CAE             COEFFA                          # FORM COEFFA(AO
                 EXTEND                                          # COEFFA SCALED AT 1.  COEFFA IS NOW THE
                 MP              BIT13                           # SAME AS 2(COEFFA) SCALED AT 2, SO MUST
                 AD              BIT13                           # MULTIPLY BY 1/4 TO GET .5(COEFFA). THEN,
+                
                 TS              .5-.5COF                        # ADD 1/4 AS 1/2 SCALED AT 2 FOR RESULT.
 
 # FINISH OFFSET ACCELERATION ESTIMATES:
@@ -173,13 +179,14 @@ COEFFA1         CAE             COEFFA                          # FORM COEFFA(AO
                 AD              OMEGAR                          # SCALED AT PI/4 RADIANS/SECOND.
                 EXTEND                                          
                 MP              .5-.5COF                        # AOSR = COEFFA(AOSR)+.5(1-COEFFA)(SUMR)
+                
                 ADS             AOSR                            # SCALED AT PI/2 RADIANS/SECOND(2).
 
+## Page 573
 # CALCULATE THE OFFSET ACCELERATIONS FOR THE U,V-AXES:
 
                 CAE             AOSQ                            # FIRST, CALCULATE AOSU:
                 AD              AOSR                            
-## Page 609
                 EXTEND                                          
                 MP              0.70711                          
                 TS              AOSU                            # SCALED AT PI/2 RADIANS/SECOND(2).
@@ -201,17 +208,30 @@ COEFFA1         CAE             COEFFA                          # FORM COEFFA(AO
                 EXTEND                                          
                 MP              AOSR                            # AOSRTERM = (.1-.05K)AOSR
                 TS              AOSRTERM                        # SCALED AT PI/4 RADIANS/SECOND.
+                
+# SET UP AOS JOB FOR THE NEWEST OFFSET ACCELERATION ESTIMATES:
+
+		CAF		PRIO24				# *** VERIFY PRIORITY. ***
+		TC		NOVAC				# SET UP AOSJOB.
+		EBANK=		AOSQ
+		2CADR		AOSJOB                
 
 # SET ERASABLES FOR NEXT 2 SECOND INTERVAL:
 
                 CAF             TWO                             # INCREMENT BURN DURATION TIMER BY 2 SECS.
                 ADS             KCOEFCTR                        
 
-                EXTEND                                          # SET UP SUMRATES
-                DCS             SAVRATEQ                        
-                DXCH            SUMRATEQ                        
+                CAF		ZERO				# INITIALIZE SUMS OF JETRATES.
+                TS		SUMRATEQ
+                TS		SUMRATER   
 
-                TCF             NOQRSM                          
+# SET UP NEXT WAITLIST AOSTASK FOR 2 SECONDS FROM NOW:
+
+		CAF		2SECSDAP
+		TC		VARDELAY			# (STORAGE-SAVING WAITLIST CALL.)
+		TCF		AOSTASK				# RETURNS HERE IN TWO SECONDS.
+		
+## Page 574                            
 # SPECIAL DISCONTINUITY SECTION FOR COEFFA ON FIRST PASS:
 
 ZEROCOEF        CAF             TWO                             # INITIALIZE BURN DURATION TIMER TO TWO
@@ -230,8 +250,8 @@ KONENOW         EXTEND                                          # K=1, SO 1-K AT
                 TS              WFORP                           # SCALED AT 16/SECOND.
                 TS              WFORQR                          
 
-## Page 610
-                CAF             0.1                             # (.1-.05K) = 0.05 SINCE K = 1.
+                CAF             0.05				# (.1-.05K) = 0.05
+                DOUBLE						# (DOUBLING SAVES CONSTANT STORAGE.)
                 TS              .1-.05K                         # SCALED AT 1/2. (VOLATILE STORAGE.)
 
                 CAF             BIT13-14                        # COEFFA = 0.75
@@ -239,9 +259,18 @@ KONENOW         EXTEND                                          # K=1, SO 1-K AT
 
                 TCF             COEFFA1                         # GO BEGIN OFFSET ACCELERATION ESTIMATE.
 
+# SHUT-DOWN PROCEDURE AFTER ASCENT COAST DETECTION:
+
+COASTASC	CAF		PRIO24				# *** VERIFY PRIORITY. ***
+		TC		NOVAC				# SET UP FINAL AOSJOB FOR THIS APS BURN.
+		EBANK=		AOSQ
+		2CADR		AOSJOB
+		
+		TCF		TASKOVER			# END AOSTASK CYCLING FOR THIS APS BURN.
+
+## Page 575
 # CONSTANTS FOR AOSTASK:
 
-                OCT             0                               # TO PRESERVE LOCATION OF 1/ACCS.
 0.00125         DEC             0.00125                         
 0.0014          DEC             0.0014                          
 0.00444         DEC             0.00444                         
@@ -258,8 +287,10 @@ DPZEROX         2DEC            0
 (1-K)S          DEC             0.5                             
                 DEC             0.0625                          
 
-## Page 611
+## Page 576
 # PROGRAM NAME: WCHANGER          MOD. NO. 0  DATE: DECEMBER 9, 1966
+
+		TCF		TASKOVER
 
 # THIS PROGRAM IS A WAITLIST TASK WHICH IS INITIATED FROM THE STARTDAP SECTION OF DAPIDLER.  IT IS EXECUTED
 # BETWEEN THE FIRST Q,R-AXES T5RUPT AND THE SECOND P-AXIS T5RUPT (I.E. 180 MS AFTER STARTDAP).  THE PURPOSE OF
@@ -283,19 +314,20 @@ DPZEROX         2DEC            0
 
 WCHANGER        TC              IBNKCALL                        # (WAITLIST TASK IS IN T3RUPT.)
                 FCADR           WCHANGE                         # SUBROUTINE DOES SETTING TO SAVE SPACE.
-# WE RETURN FROM WCHANGE WITH RANDOM EBANK, BUT WHO CARES.
+
                 TCF             TASKOVER                        # END THIS TASK.
 
-## Page 612
-# INERPOLY COMPUTES IXX, IYY, IZZ, AND IN DESCENT, L,PVT-CG, ACCDOTQ, ACCDOTR,KQ,KQ2, KRDAP, KR2..
+## Page 577
+# INERPOLY COMPUTES IXX, IYY, IZZ, AND, IN DESCENT, L,PVT-CG.
 # AFTER THE INERTIAS ARE COMPUTED, THEY ARE USED TO COMPUTE NEW VALUES OF
 # 1JACC, 1JACCQ, 1JACCR, 1JACCU, 1JACCV AND 1/2JTSP.
 # INERPOLY EXITS BY .... TCF ENDOFJOB
 
 
-                BANK            26                              
+                BANK            26     
+                                         
                 EBANK=          IXX                             
-1/ACCS          CA              BIT2                            
+INERPOLY        CA              BIT2                            
                 EXTEND                                          
                 RAND            30                              
                 CCS             A                               # CHOOSES ASCENT OR DESCENT COEF
@@ -309,14 +341,15 @@ STCTR           TS              INERCTR                         # J=2,1,0 FOR IZ
                 EXTEND                                          
                 DIM             INERCTRX                        # JX=5,4,3 OR 2,1,0 FOR Z,Y,X COEF
 
-STCTR1          CA              MASS                            # IN KGS (+15)
+	        CA              MASS                            # IN KGS (+15)
                 EXTEND                                          
                 INDEX           INERCTRX                        
                 MP              INERCONC                        
                 INDEX           INERCTRX                        
                 AD              INERCONB                        
                 EXTEND                                          
-                MP              MASS                            
+                MP              MASS 
+                                           
                 INDEX           INERCTRX                        
                 AD              INERCONA                        
                 INDEX           INERCTR                         
@@ -337,7 +370,7 @@ COMMEQS         EXTEND
                 EXTEND                                          
                 DCA             TORKJET1                        # 550 FT-LBS. (+16) PI
 
-## Page 613
+## Page 578
                 EXTEND                                          
                 DV              IYY                             
                 TS              1JACCQ                          # SCALED BY PI/4
@@ -352,14 +385,14 @@ COMMEQS         EXTEND
                 EXTEND                                          
                 MP              0.35356                         # .70711 SCALED BY (+1)
                 TS              1JACCU                          
+                
                 TS              1JACCV                          # SCALED BY PI/4
 
                 CAF             4JTORK                          
-                TS              TEMPINER                        
+                TS              1/2JTSP                        
                 CAE             IXX                             
-                ZL                                              
                 EXTEND                                          
-                DV              TEMPINER                        
+                DV              1/2JTSP                        
                 DOUBLE                                          
                 TS              1/2JTSP                         # SCALED BY 1/PI (+8)
 
@@ -368,185 +401,89 @@ COMMEQS         EXTEND
                 RAND            30                              
                 CCS             A                               # COMPUTE L,PVT-CG IF IN DESCENT
                 TCF             DES                             
-                TCF             CONT1/AC                        
+                TCF             ENDOFJOB      
+                                  
 DES             CS              ONE                             
                 TS              INERCTR                         
                 TS              INERCTRX                        
                 TCF             STCTR1                          
 
-LRESC           CA              TEMPINER                        # SCALED AT (+6)
-                EXTEND                                          
-                MP              BIT4                            
-                LXCH            L,PVT-CG                        # SCALED AT 2(+3)
+LRESC 		CA		L,PVT-CG			# SCALED BY (+6)
 
-                CA              GFACT                           
-                TS              MPAC                            # FOR DIVISION LATER
-
-# THIS SECTION COMPUTES THE RATE OF CHANGE OF ACCELERATION DUE TO THE ROTATION OF THE GIMBALS.  THE EQUATION IMPLE
-# MENTED IN BOTH THE Y-X PLANE AND THE Z-X PLANE IS --  D(ALPHA)/DT = TL/I*D(DELTA)/DT , WHERE
-#      T = ENGINE THRUST FORCE
-#      L = PIVOT TO CG DISTANCE OF ENGINE
-#      I = MOMENT OF INERTIA
-
-## Page 614
-                EBANK=          ABDELV                          
-                CA              EBANK5                          # CHANGE EBANK TO GET ABDELV
-                LXCH            A                               # THIS IS NECESSARY TO PRESERVE A WHILE
-                LXCH            EBANK                           # SWITCHING EBANKS
-
-                CAE             ABDELV                          # SCALED AT 2(13) CM/SEC(2)
-                LXCH            EBANK                           # RESTORE EBANK LEAVING A UNHARMED
-
-                EBANK=          IXX                             
-
-                EXTEND                                          
-                MP              MASS                            # SCALED AT 2(15) KG.
-                EXTEND                                          
-                DV              MPAC                            # CONTAINS GFACT
-# MASS IS DIVIDED BY ACCELERATION OF GRAVITY IN ORDER TO MATCH THE UNITS OF IXX,IYY,IZZ, WHICH ARE SLUG-FT(2).
-# THE RATIO OF ACCELERATION FROM PIPAS TO ACCELERATION OF GRAVITY IS THE SAME IN METRIC OR ENGINEERING UNITS, SO
-# THAT IS UNCONVERTED.  2.20462 CONVERTS KG. TO LB.  NOW T IS IN A SCALED AT 2(14).
-
-                EXTEND                                          
-                MP              DELDOT26                        # .2 DEG/SEC AT PI/64 RADIANS/SECOND
-                EXTEND                                          
-                MP              L,PVT-CG                        # SCALED AT 8 FEET.
-                INHINT                                          
-                DXCH            MPAC                            # SINCE THIS IS A JOB, MPAC IS AVAILABLE
-                EXTEND                                          
-                DCA             MPAC                            
-                EXTEND                                          
-                DV              IZZ                             # SCALED AT 2(18) SLUG-FT(2)
-                TS              ACCDOTR                         # SCALED AT PI/2(7)
-                EXTEND                                          
-                DCA             MPAC                            
-                EXTEND                                          
-                DV              IYY                             # SCALED AT 2(18) SLUG-FT(2)
-                TS              ACCDOTQ                         # SCALED AT PI/2(7)
-                EXTEND                                          
-                MP              DGBF                            # .3ACCDOTQ SCALED AT PI/2(8)
-                TS              KQ                              
-                EXTEND                                          
-                SQUARE                                          
-                TS              KQ2                             # KQ(2)
-
-                CAE             ACCDOTR                         # .3ACCDOTR AT PI/2(8)
-                EXTEND                                          
-                MP              DGBF                            
-                TS              KRDAP                           
-                EXTEND                                          
-                SQUARE                                          
-                TS              KR2                             
-
-                EXTEND                                          # NOW COMPUTE QACCDOT, RACCDOT, THE SIGNED
-## Page 615
-                READ            12                              # JERK TERMS.  STORE CHANNEL 12, WITH GIM
-                TS              MPAC            +1              # BAL DRIVE BITS 9 THROUGH 12.  SET LOOP
-                CAF             BIT2                            # INDEX TO COMPUTE RACCDOT, THEN QACCDOT.
-                TCF             LOOP3                           
-                CAF             ZERO                            # ACCDOTQ AND ACCDOTR ARE NOT NEGATIVE,
-LOOP3           TS              MPAC                            # BECAUSE THEY ARE MAGNITUDES
-                CA              MPAC            +1              
-                INDEX           MPAC                            # MASK CHANNEL IMAGE FOR ANY GIMBAL MOTION
-                MASK            GIMBLBTS                        
-                EXTEND                                          
-                BZF             ZACCDOT                         # IF NONE, Q(R)ACCDOT IS ZERO.
-                CA              MPAC            +1              
-                INDEX           MPAC                            # GIMBAL IS MOVING.  IS ROTATION POSITIVE.
-                MASK            GIMBLBTS        +1              
-                EXTEND                                          
-                BZF             FRSTZERO                        # IF NOT POSITIVE, BRANCH
-                INDEX           MPAC                            # POSITIVE ROTATION, NEGATIVE Q(R)ACCDOT.
-                CS              ACCDOTQ                         
-                TCF             STACCDOT                        
-FRSTZERO        INDEX           MPAC                            # NEGATIVE ROTATION, POSITIVE Q(R)ACCDOT.
-                CA              ACCDOTQ                         
-                TCF             STACCDOT                        
-ZACCDOT         CAF             ZERO                            
-STACCDOT        INDEX           MPAC                            
-                TS              QACCDOT                         # STORE Q(R)ACCDOT, COMPLEMENTED.
-                CCS             MPAC                            
-                TCF             LOOP3           -1              # NOW DO QACCDOT.
-                TCF             +5                              # LOOP COMPLETED.  RELINT IS SAFE NOW.
-GIMBLBTS        OCTAL           01400                           
-                OCTAL           00400                           # BECAUSE OF TRIM GIMBAL POLARITY CHANGE,
-                OCTAL           06000                           # THESE BIT VALUES CAUSE Q(R)ACCDOT TO BE
-                OCTAL           02000                           # GENERATED WITH INVERTED SIGN.
-
-                RELINT                                          
-
-CONT1/AC        EXTEND                                          
-                DCA             CONTCADR                        
-                DTCF                                            
-                DEC             0.99191                         
-INERCONC        DEC             -.00071                         
-                DEC             -.78952                         
-                DEC             -.79009                         
-                DEC             0.00249                         
-                DEC             -.61154                         
-                DEC             -.60892                         
-                DEC             -.79812                         
-INERCONB        DEC             0.17497                         
-                DEC             0.69605                         
-                DEC             0.65726                         
-                DEC             0.18347                         
-## Page 616
-                DEC             0.15660                         
-                DEC             0.33662                         
-                DEC             0.20239                         
-INERCONA        DEC             0.00064                         
-                DEC             -.06778                         
-                DEC             -.04904                         
-                DEC             -.00192                         
-                DEC             0.00211                         
-                DEC             -.01324                         
+		DOUBLE
+		DOUBLE
+		DOUBLE
+		TS		L,PVT-CG			# SCALED BY (+3)
+		TCF		ENDOFJOB
+		
+		
+		DEC		0.75524				# L
+INERCONC	DEC		0.01432				# XD
+		DEC		-0.66136			# YD
+		DEC		-0.68173			# ZD
+		DEC		0.05092				# XA
+## Page 579
+                DEC             -0.65325			# YA                       
+                DEC             -0.59815			# ZA                       
+                DEC             -0.67640			# L
+INERCONB        DEC             0.17030				# XD
+                DEC             0.65955				# YD                       
+                DEC             0.63041				# ZD                      
+                DEC             0.18033				# XA                        
+                DEC             0.20478				# YA                         
+                DEC             0.36855				# ZA                        
+                DEC             0.20044				# L                         
+INERCONA        DEC             0.00676				# XD                        
+                DEC             -0.06090			# YD                       
+                DEC             -0.04403			# ZD                         
+                DEC             -0.00435			# XA                        
+                DEC             -0.00170			# YA                        
+                DEC             -0.02132			# ZA
+                                        
 TORKJET         2DEC            0.002428512                     
 
 TORKJET1        2DEC            0.002671365                     
 
-4JTORK          DEC             .62170                          
-DGBF            DEC             0.6                             # .3 SCALED AT 1/2
-0.35356         DEC             0.35356                         # 0.70711 SCALED AT +1
+4JTORK          DEC             .62170  
 
-
-
-CONTCADR        2FCADR          1/ACCONT                        
-
-GFACT           OCTAL           00674                           # 979.24/2.20462 SCALED AT 2(14)
-DELDOT26        DEC             .07111                          # 0.2 DEG/SEC SCALED AT PI/64 RAD/SEC
-
-## Page 617
-# PROGRAM NAME: 1/ACCONT          MOD. NO. 2  DATE: JANUARY 9, 1967
+# Page 580                        
+# PROGRAM NAME: AOSJOB            MOD. NO. 0   DATE: DECEMBER 2, 1966
 # PROGRAM DESIGN BY: RICHARD D. GOSS (MIT/IL)
 
 # IMPLEMENTATION BY: JONATHAN D. ADDELSTON (ADAMS ASSOCIATES)
 
-# LAST MODIFICATION BY: JONATHAN D. ADDELSTON
-# THIS PROGRAM IS PART OF AN EXECUTIVE JOB AND CALCULATES:
-
+# THE PROGRAM IS AN EXECUTIVE JOB WHICH CALCULATES THE FOLLOWING QUANTITIES FOR THE LM DAP T5RUPT PROGRAMS:
 #          1. THE INVERSES OF THE NET ACCELERATIONS ABOUT ALL AXES (Q,R,U,V), IN ALL DIRECTIONS (+/-), AND ALL
 #             COMBINATIONS OF JETS (2/4 FOR Q,R AND 1/2 FOR U,V).
 #          2. THE INVERSES OF THE MINIMUM ACCELERATIONS FOR THE URGENCY AND TJETLAW COMPUTATION, DURING APS BURNS.
 #          3. THE INITIAL INVERSE NET ACCELERATIONS USED FOR THE URGENCY COMPUTATION, DURING APS BURNS.
 #          4. THE NJ FLAGS TO REQUIRE MANDATORY JET ACCELERATION DURING APS BURNS.
 
-# SUBROUTINES CALLED: INVACC.
+# CALLING SEQUENCE:               SUBROUTINES CALLED: INVACC.
 
-# CALLING SEQUENCE: CONTROL IS TRANSFERRED HERE FROM 1/ACCS SECTION.
+#					  L -1     CAF    PRIO24
+#					  L	   TC	  NOVAC
+#					  	   EBANK= AOSQ
+#					  L +1     2CADR  AOSJOB
+#					  L +2	  (BBCON)
+#					  L +3    (RETURN)
 
 # NORMAL EXIT: ENDOFJOB.          ALARM/ABORT EXITS: NONE.
 
-# INPUT: AOSQ,AOSR,AOSJ,AOSV,1JACCQ,1JACCR,1JACCU,1JACCV,APSGOING/DAPBOOLS.
+# INPUT: AOSQ,AOSR,AOSU,AOSV,1JACCQ,1JACCR,1JACCU,1JACCV,APSGOING/DAPBOOLS.
 
 # DEBRIS: NONE.
 
-## Page 618
+## Page 581
                 BANK            20                              
-                EBANK=          AOSQ                            
+                EBANK=          AOSQ   
+                
+-.02R/S2	DEC		-.12732				# -.02 RADIANS/SECOND(2) SCALED AT PI/2
+ACCFIFTY	DEC		0.30679				# .5(50) SEC(2)/RAD SCALED AT 2(+8)/PI.                         
 
 # SET UP LOOP FOR FOUR AXES (IN THE ORDER: V,U,R,Q):
 
-1/ACCONT        CAF             THREE                           # JOBAXES IS USED TO PICK UP ONE OF FOUR.
+AOSJOB          CAF             FOUR                            # "JOBAXES" IS USED TO PICK UP ONE OF FOUR
 INVLOOP         TS              JOBAXES                         # ADJACENT REGISTERS, ALSO TO COUNT LOOP.
 
 # SET UP "TABPLACE" TO STORE 1/NETACC TABLE:
@@ -558,9 +495,9 @@ INVLOOP         TS              JOBAXES                         # ADJACENT REGIS
 #                                                      2
 #            2(1JACC   ) + AOS    - 0.02 RADIANS/SECOND  GREATER THAN ZERO
 #                   Q,R       Q,R
-#        OR                                            2
-#              1JACC     + AOS    - 0.02 RADIANS/SECOND  GREATER THAN ZERO
-#                   U,V       U,V
+#         OR                                           2
+#               1JACC    + AOS    - 0.02 RADIANS/SECOND  GREATER THAN ZERO
+#                    U,V      U,V
 
                 INDEX           JOBAXES                         # THE INDEXED PICK-UP OF JET ACCELERATIONS
                 CAE             1JACCQ                          # USES THE FOLLOWING HAPPY COINCIDENCE:
@@ -569,7 +506,8 @@ INVLOOP         TS              JOBAXES                         # ADJACENT REGIS
                 AD              AOSQ                            # ARE SCALED AT PI/4 AND THEREFORE ARE
                 TS              TEMPNET                         # EQUIVALENT TO 2(1JACCQ) AND 2(1JACCR)
                 AD              -.02R/S2                        # SCALED AT PI/2, AS ARE AOSQ AND AOSR.
-                EXTEND                                          
+                EXTEND                                         	# -.02R/S2 IS -0.02 RADIANS/SECOND(2),PI/2 
+                
                 BZMF            FIFTY1                          # (BRANCH FOR CONSTANT VALUE OF INVERSE.)
 
 #            1/NET+2    = 1/( 2(1JACC   ) + AOS   )
@@ -589,27 +527,27 @@ FIFTY1R         INDEX           TABPLACE
 #              1JACC     - AOS    - 0.02 RADIANS/SECOND  GREATER THAN ZERO
 #                   U,V       U,V
 
+## Page 582
                 INDEX           JOBAXES                         # THIS SECTION USES THE INDEXING TRICKS OF
                 CS              AOSQ                            # THE FIRST PART (ABOVE), BUT USES THE
-## Page 619
                 TS              TEMPAOS                         # TEMPORARY LOCATIONS AS FOLLOWS:
                 AD              TEMPACC                         # "TEMPAOS" SAVES -AOS FOR THIS AXIS.
                 TS              TEMPNET                         # "TEMPACC" HAS THE JET ACCELERATION.
-                AD              -.02R/S2                        # C(TEMPNET) ARE (JETACC-AOS) FOR DENOM.
-                EXTEND                                          
+                AD              -.02R/S2                        # "TEMPNET" SAVES (JETACC-AOS) FOR DENOM.
+                EXTEND                                          # -.02R/S2 IS -0.02 RADIANS/SECOND(2),PI/2
                 BZMF            FIFTY2                          # (BRANCH FOR CONSTANT VALUE OF INVERSE.)
 
-#            1/NET-2    = 1/( 2(1JACC   ) - AOS   )
-#                   Q,R              Q,R       Q,R
+#            1/NET-2    = 1/( 2(1JACC  ) - AOS   )
+#                   Q,R             Q,R       Q,R
 #        OR
-#            1/NET-1    = 1/(   1JACC      - AOS   )
-#                   U,V              U,V        U,V
+#            1/NET-1    = 1/( 1JACC    - AOS   )
+#                   U,V            U,V      U,V
 
                 TC              INVACC                          
 FIFTY2R         INDEX           TABPLACE                        
                 TS              1/NET-2Q                        # SCALED AT 2(+8)/PI SECONDS(2)/RADIAN.
 
-#            1/NET-4    = 1/( 4(1JACC   ) - AOS   )
+#            1/NET-4    = 1/( 4(1ACC    - AOS   )
 #                   Q,R              Q,R       Q,R
 #        OR
 #            1/NET-2    = 1/( 2(1JACC   ) - AOS   )
@@ -625,7 +563,8 @@ FIFTY2R         INDEX           TABPLACE
                 INDEX           TABPLACE                        
                 TS              1/NET-4Q                        # SCALED AT 2(+8)/PI SECONDS(2)/RADIAN.
 
-#            1/NET+4    = 1/( 4(1JACC   ) + AOS   )
+## Page 583
+#            1/NET+4    = 1/( 4(1ACC    + AOS   )
 #                   Q,R              Q,R       Q,R
 #        OR
 #            1/NET+2    = 1/( 2(1JACC   ) + AOS   )
@@ -642,7 +581,6 @@ FIFTY2R         INDEX           TABPLACE
 # TEST FOR END OF LOOP:
 
                 CCS             JOBAXES                         # IF "JOBAXES" PNZ, CONTINUE.
-## Page 620
                 TCF             INVLOOP                         # IF "JOBAXES" ZERO, STOP.
 
 # TEST FOR ASCENT PROPULSION SYSTEM BURN:
@@ -657,26 +595,21 @@ FIFTY2R         INDEX           TABPLACE
                 CAE             1/NET+2Q                        # FOR Q-AXIS URGENCY.
                 TS              1/ACCQ                          
                 CAE             1/NET+2R                        # FOR R-AXIS URGENCY.
-                TS              1/ACCR                          
+                TS              1/ACCR             
+                
+                TCF		ENDOFJOB			# END THIS ITERATION OF AOSJOB.             
 
-                INHINT                                          
-POPNONJ         CS              DAPBOOLS                        # SET BIT TO INDICATE DATA GOOD.
-                MASK            DATAGOOD                        
-                ADS             DAPBOOLS                        
-                TCF             ENDOFJOB                        # END THIS ITERATION OF AOSJOB.
-
-## Page 621
+## Page 584
 # IN ASCENT BURN, SO SET UP Q,R-AXES LOOP:
 
-ASCJOB          CAF             THREE                           # SET UP THE TABLE INDICES:
+ASCJOB          CAF             ONE                             # SET UP THE TABLE INDICES:
 QRJOB           TS              JOBAXES                         
                 DOUBLE                                          # AOS TABLE USES "JOBAXES"  (ADJACENT).
                 TS              NJPLACE                         # NJ  TABLE USES "NJPLACE"  (ONE APART).
                 DOUBLE                                          # NET TABLE USES "TABPLACE" (THREE APART).
                 TS              TABPLACE                        
 
-#                                         2
-# TEST ABVAL(AOS   ) - 0.02 RADIANS/SECOND  GREATER THAN ZERO:
+# TEST ABVAL(AOS   ) - 0.02 RADIANS/SECOND(2) GREATER THAN ZERO:
 #               Q,R
 
                 INDEX           JOBAXES                         # FORM ABVAL(AOS   ) AND SAVE FOR INVACC.
@@ -693,29 +626,22 @@ QRJOB           TS              JOBAXES
 #                 Q,R              Q,R
 
                 TC              INVACC                          # (USE SUBROUTINE FOR INVERSE.)
+                
 FIFTY3R         INDEX           JOBAXES                         
                 TS              1/AMINQ                         # SAVE FOR USE BY URGENCY CALCULATIONS.
 
-                CS              JOBAXES                         # 2 - C(JOBAXES) CAUSES A BRANCH ONLY WHEN
-                AD              TWO                             # C(JOBAXES) = 3 OR 2, I.E. WHEN DOING
-                EXTEND                                          # U- OR V-AXIS PASS OF LOOP ONLY SET UP
-                BZMF            UVNEXT                          # 1/AMINU OR 1/AMINV, RESPECTIVELY.
-
-#                                                       2
-# TEST 2(1JACC   ) - ABVAL(AOS   ) - 0.06 RADIANS/SECOND  GREATER THAN ZERO:
+# TEST 2(1JACC   ) - ABVAL(AOS   ) - 0.02 RADIANS/SECOND(2) GREATER THAN ZERO:
 #             Q,R             Q,R
 
                 CS              TEMPNET                         # "TEMPNET" IS ABVAL(AOSQ,R).
-                INDEX           JOBAXES                         # SAVE -ABVAL(AOSQ,R) FOR USE IN THE
-                TS              ABVLAOSQ                        # U,V-AXIS NJ COMPUTATION BELOW.
-                AD              -.06R/S2                        # -0.06 RADIANS/SECOND(2) SCALED AT PI/2.
+                AD              -.02R/S2                        # -0.02 RADIANS/SECOND(2).
                 INDEX           JOBAXES                         
                 AD              1JACCQ                          # "1JACCQ,R" SCALED AT PI/4 RAD/SEC(2) ARE
                 EXTEND                                          # 2(1JACCQ,R) SCALED AT PI/2 RAD/SEC(2).
                 BZMF            OVERRIDE                        
 
 # SET FLAG NOT TO REQUEST MANDATORY FOUR JET OPERATION FOR +Q,+R ROTATION DURING THIS APS BURN (FOR NOW):
-## Page 622
+
                 CAF             ZERO                            # NJ = 0 ALLOWS THE URGENCY FUNCTIONS TO
                 INDEX           NJPLACE                         # ACTUALLY SELECT 2 JET ROTATION AS THE
                 TS              NJ+Q                            # OPTIMAL POLICY.
@@ -724,7 +650,9 @@ FIFTY3R         INDEX           JOBAXES
 #              Q,R
 
                 INDEX           JOBAXES                         # THE SIGN OF AOSQ,R DETERMINES THE RATIO
+                
                 CAE             AOSQ                            # TO BE COMPUTED AS THE CORRECTION FACTOR
+## Page 585
                 EXTEND                                          # IN THE URGENCY FUNCTION CALCULATION AND
                 BZMF            URGRAT2                         # ALSO SPECIFIES THE CURRECT NJ VALUES.
 
@@ -732,10 +660,10 @@ FIFTY3R         INDEX           JOBAXES
 
 URGRAT1         INDEX           TABPLACE                        # CHOOSE THE -2 JET NET ACCELERATION
                 CAE             1/NET-2Q                        # INVERSE FOR USE IN URGENCY COMPUTATION.
-                INDEX           JOBAXES                         
+                INDEX           JOBAXES           
+                              
                 TS              1/ACCQ                          
 
-                ZL                                              # PREVENT OVERFLOW FOR SMALL AOSQS
                 INDEX           TABPLACE                        
                 CAE             1/NET+2Q                        #         1/NET+2Q,R
                 EXTEND                                          # RATIO = ----------
@@ -750,7 +678,6 @@ URGRAT1         INDEX           TABPLACE                        # CHOOSE THE -2 
 
 URGRAT2         INDEX           TABPLACE                        # CHOOSE THE +2 JET NET ACCELERATION
                 CAE             1/NET+2Q                        # INVERSE FOR USE IN URGENCY COMPUTATION.
-                ZL                                              # PREVENT OVERFLOW ON ZERO BZMF BRANCH.
                 INDEX           JOBAXES                         
                 TS              1/ACCQ                          
 
@@ -758,6 +685,7 @@ URGRAT2         INDEX           TABPLACE                        # CHOOSE THE +2 
                 CAE             1/NET-2Q                        #         1/NET-2Q,R
                 EXTEND                                          # RATIO = ----------
                 INDEX           TABPLACE                        #         1/NET+2Q,R
+                
                 DV              1/NET+2Q                        
                 INDEX           JOBAXES                         
                 TS              URGRATQ                         
@@ -765,19 +693,19 @@ URGRAT2         INDEX           TABPLACE                        # CHOOSE THE +2 
                 TCF             NXTNJZER                        # GO TO SET NJS.
 
 # SET FLAG TO INDICATE MANDATORY USE OF FOUR JETS TO FIGHT THE OFFSET ACCELERATION:
-## Page 623
-OVERRIDE        CAF             ONE                             # (THIS SHOULD BE DONE BEFORE THE INHINT.)
 
-                INHINT                                          # PREVENT POSSIBLY EPHEMERAL MANDATORY NJ
+OVERRIDE        INHINT                                          # PREVENT POSSIBLY EPHEMERAL MANDATORY NJ
                                                                 # SETTING FROM AFFECTING JET SELECTION.
-                INDEX           NJPLACE                         # NJ = 1 FORCES THE URGENCY FUNCTIONS TO
-                TS              NJ+Q                            # ACTUALLY SELECT 4 JET ROTATION AS THE
-                                                                # OPTIMAL POLICY (TO FIGHT THE AOS).
-
+                                                                
+                CAF		ONE				# NJ = 1 FORCES THE URGENCY FUNCTIONS TO
+                INDEX           NJPLACE                         # ACTUALLY SELECT 4 JET ROTATION AS THE
+                TS              NJ+Q                            # OPTIMAL POLICY (TO FIGHT THE AOS).
+                                                                
 # TEST SIGN(AOS   ):
 #              Q,R
 
                 INDEX           JOBAXES                         # THE SIGN OF AOSQ,R DETERMINES THE RATIO
+## Page 586
                 CAE             AOSQ                            # TO BE COMPUTED AS THE CORRECTION FACTOR
                 EXTEND                                          # IN THE URGENCY FUNCTION CALCULATION AND
                 BZMF            URGRAT4                         # ALSO SPECIFIES THE CORRECT NJ VALUES.
@@ -789,10 +717,10 @@ URGRAT3         INDEX           TABPLACE                        # CHOOSE THE -4 
                 INDEX           JOBAXES                         
                 TS              1/ACCQ                          
 
-                ZL                                              
                 INDEX           TABPLACE                        
                 CAE             1/NET+2Q                        #         1/NET+2Q,R
                 EXTEND                                          # RATIO = ----------
+                
                 INDEX           TABPLACE                        #         1/NET-4Q,R
                 DV              1/NET-4Q                        
                 INDEX           JOBAXES                         
@@ -808,7 +736,7 @@ SWITNJS         CAF             ZERO                            # SET NJ      = 
 
                 RELINT                                          # SINCE NJS NOW VALID, ALLOW INTERRUPTS.
 
-                TCF             UVNEXT                          # GO TEST FOR ENTRY TO U,V-AXES LOGIC.
+                TCF             UVJOB				# GO PROCESS U- AND V-AXIS.
 
 # FOURTH CASE FOR URGENCY RATIO:
 
@@ -816,9 +744,8 @@ URGRAT4         RELINT                                          # SINCE ALL NJS 
                                                                 # TO BE VALID, ALLOW INTERRUPTS.
 
                 INDEX           TABPLACE                        # CHOOSE THE +4 JET NET ACCELERATION
-## Page 624
+                
                 CAE             1/NET+4Q                        # INVERSE FOR USE IN URGENCY COMPUTATION.
-                ZL                                              # -------------------------------------
                 INDEX           JOBAXES                         
                 TS              1/ACCQ                          
 
@@ -832,74 +759,101 @@ URGRAT4         RELINT                                          # SINCE ALL NJS 
 
 # SET NJ FOR NEGATIVE ROTATIONS:
 
+## Page 587
 NXTNJZER        CAF             ZERO                            # SET NJ      = 0  TO LET THE URGENCY
                 INDEX           NJPLACE                         #       -Q,-R      FUNCTIONS SELECT 2 JET
                 TS              NJ-Q                            #                  -Q,-R ROTATION
 
 # TEST FOR END OF Q,R-AXES LOOP:
 
-UVNEXT          CCS             JOBAXES                         # JOBAXES = 1 MEANS GO DO Q-AXIS.
+	        CCS             JOBAXES                         # JOBAXES = 1 MEANS GO DO Q-AXIS.
                 TCF             QRJOB                           # JOBAXES = 0 MEANS GO DO U,V-AXES.
 
-## Page 625
+## Page 588
 # AFTER Q,R-AXES COMPLETE, DO U,V-AXES LOGIC:
-UVJOB           INHINT                                          # PREVENT POSSIBLY EPHEMERAL OPTIONAL NJ
-                                                                # SETTING FROM AFFECTING JET SELECTION.
-                TS              NJ+U                            # FIRST, ARBITRARILY SET THE U,V-AXIS NJS
-                TS              NJ-U                            # TO THE ZERO (OPTIONAL) VALUE UNTIL THE
-                TS              NJ+V                            # TESTS ON AOS ARE MADE BELOW.  (ZERO IS
-                TS              NJ-V                            # IN A FROM THE PRECEDING  "CCS JOBAXES".)
 
-#                                                2
-# TEST 1JACCQ - ABVAL(AOSQ) - 0.06 RADIANS/SECOND  GREATER THAN ZERO:
+UVJOB           CAF		ONE				# SET UP THE TABLE INDICES:
+UJOB		TS		JOBAXES
+		DOUBLE						# AOS TABLE USES "JOBAXES" (ADJACENT).
+		TS		NJPLACE				# NJ  TABLE USES "NJPLACE" (ONE APART).
 
-                CAE             1JACCQ                          # 1JACCQ SCALED AT PI/4 RADIANS/SECOND(2)
-                EXTEND                                          # MULTIPLYING BY ONE-HALF CHANGES SCALING
-                MP              BIT14                           # TO PI/2 RADIANS/SECOND(2) AS AOSQ.
-                AD              -.06R/S2                        # -0.06 RADIANS/SECOND(2) SCALED AT PI/2.
-                AD              ABVLAOSQ                        # ABVLAOSQ IS -ABVAL(AOSQ) AT PI/2.
-                EXTEND                                          
-                BZMF            POPNJ1                          # (BRANCH TO TEST ON SIGN(AOSQ).)
+# TEST ON ABVAL(AOS   ) - 0.02 RADIANS/SECOND(2) GREATER THAN ZERO:
+#		   U,V
 
-#                                                2
-# TEST 1JACCR - ABVAL(AOSR) - 0.06 RADIANS/SECOND  GREATER THAN ZERO:
+#              U,V            U,V
 
-POPNJ4          CAE             1JACCR                          # 1JACCR SCALED AT PI/4 RADIANS/SECOND(2).
-                EXTEND                                          # MULTIPLYING BY ONE-HALF CHANGES SCALING
-                MP              BIT14                           # TO PI02 RADIANS/SECOND(2) AS AOSR.
-                AD              -.06R/S2                        # -0.06 RADIANS/SECOND(2) AT PI/2.
-                AD              ABVLAOSR                        # ABVLAOSR IS -BAVAL(AOSR) AT PI/2.
-                EXTEND                                          
-                BZMF            POPNJ2                          # (BRANCH TO TEST ON SIGN(AOSR).)
+		INDEX		JOBAXES				# CALCULATE ABVAL(AOS   ) SCALED AT PI/2.
+		CCS		AOSU				#                    U,V
+		AD		ONE
+		TCF		+2
+		AD		ONE
+		TS		TEMPNET				# SVAE ABVAL(AOSU,V) FOR USE BY INVACC.
+		AD		-.02R/S2			# -0.02 RADIANS/SECOND(2) SCALED AT PI/2
+		EXTEND
+		BZMF		FIFTY4				# (BRANCH FOR CONSTANT VALUE OF INVERSE.)
+		
+		TC		INVACC
+FIFTY4R		INDEX		JOBAXES
+		TS		1/AMINU				# SCALED AT 2(+8)/PI SECONDS(2)/RADIAN.
+		
+# TEST ON IJACC    - ABVAL(AOS   ) - 0.02 RADIANS/SECOND(2) GREATER THAN ZERO:
+#	       U,V            U,V
 
-                TCF             POPNONJ                         # GO SET DATA GOOD BIT.
+		CS		TEMPNET				# -ABVAL(AOSU,V) SCALED AT PI/2 RAD/SEC(2)
+		AD		-.02R/S2			# -0.02 RADIANS/SECOND(2) SCALED AT PI/2.
+		INDEX		JOBAXES
+		AD		1JACCU				# 1 JET U,V-AXIS ACCELERATION AT PI/2.
+		EXTEND
+		BZMF		RIDEOVER
+		
+# SET NJ      = 0.
+#       +U,+V
 
+		CAF		ZERO				# ALLOW URGENCY FUNCTIONS TO ACTUALLY
+		TCF		+3				# SELECT 2 JET OPTIONAL ROTATION.
+		
+# SET NJ      = 1.
+#       +U,+V
 
+RIDEOVER	INHINT						# PREVENT POSSIBLE EPHEMERAL MANDATORY NJ
+								# SETTING FROM AFFECTING JET SELECTION.
+								
+		CAF		ONE				# NJ = 1 FORCES THE URGENCY FUNCTIONS TO
+		INDEX		NJPLACE				# ACTUALLY SELECT 2 JET MANDATORY ROTATION	
+## Page 589
+		TS		NJ+U				# AS OPTIMAL POLICY (TO FIGHT HIGH AOS).
 
-POPNJ1          CCS             AOSQ                            # SINCE MAGNITUDE OF AOSQ LARGE, NONZERO.
-                TCF             POPNJ3                          
-                TC              CCSHOLE                         
-                TS              NJ+U                            # SET NJS FOR LARGE NEGATIVE AOSQ.
-                TS              NJ-V                            
-                TCF             POPNJ4                          # GO CHECK MAGNITUDE OF AOSR.
+# TEST SIGN(AOS   ):
+#	       U,V
 
-POPNJ3          TS              NJ-U                            # SET NJS FOR LARGE POSITIVE AOSQ.
-                TS              NJ+V                            
-                TCF             POPNJ4                          # GO CHECK MAGNITUDE OF AOSR.
+		INDEX		JOBAXES				# IF GREATER THAN ZERO, SWITCH NJS.
+		CAE		AOSU
+		EXTEND						# IF LESS THAN ZERO, SET NJ      = 0.
+		
+		BZMF		ZERNJNXT			#                          -U,-V
+		
+		CAF		ZERO				# SET NJ      = NJ      (FROM ABOVE)
+		INDEX		NJPLACE				#       -U,-V     +U,+V
+		XCH		NJ+U				# AND
+		INDEX		NJPLACE				#     NJ      = 0.
+		TS		NJ-U				#       +U,+V
+		
+		RELINT						# ALLOW INTERRUPTS AS SOON AS NJS STABLE.
+		
+		TCF		VJOBTEST			# GO TO TEST FOR END OF LOOP.
+		
+ZERNJNXT	RELINT						# ALLOW INTERRUPTS SINCE SETTINGS VALID.
 
-POPNJ2          CCS             AOSR                            # SINCE MAGNITUDE OF AOSR LARGE, NONZERO.
-                TCF             POPNJ5                          
-ACCFIFTY        DEC             0.30679                         # .5(50) SEC(2)/RAD SCALED AT 2(+8)/PI.
-## Page 626
-                TS              NJ+U                            # SET NJS FOR LARGE NEGATIVE AOSR.
-                TS              NJ+V                            
-                TCF             POPNONJ                         # END NICELY.
+		CAF		ZERO				# SET NJ     = 0.
+		INDEX		NJPLACE				#       -U,-V
+		TS		NJ-U
+		
+# TEST FOR END OF UV-AXES LOOP:
 
-POPNJ5          TS              NJ-U                            # SET NJS FOR LARGE POSITIVE AOSR.
-                TS              NJ-V                            
-                TCF             POPNONJ                         # END NICELY.
-
--.02R/S2        DEC             -.01273                         # -0.02 RADIANS/SECOND(2) AT PI/2
+VJOBTEST	CCS		JOBAXES				# JOBAXES = 1 MEANS GO DO U-AXIS.
+		TCF		UJOB				# JOBAXES = 0 MEANS QUIT
+		TCF		ENDOFJOB
+		
 
 # THE FOLLOWING BRANCHES SUPPLY CONSTANT VALUES:
 
@@ -912,16 +866,18 @@ FIFTY2          CAF             ACCFIFTY
 FIFTY3          CAF             ACCFIFTY                        
                 TCF             FIFTY3R                          
 
-## Page 627
+FIFTY4		CAF		ACCFIFTY
+		TCF		FIFTY4R
+## Page 590
 # SUBROUTINE NAME: INVACC         MOD. NO. 0  DATE: DECEMBER 3, 1966
 
 # AUTHOR: JONATHAN D. ADDELSTON (ADAMS ASSOCIATES)
 
 # THIS SUBROUTINE IS CALLED BY AOSJOB TO CALCULATE:
 
-#                0.5       WHERE TEMPNET IS SCALED AT PI/2 RADIANS/SECOND(2)
+#                0.5    WHERE TEMPNET IS SCALED AT PI/2 RADIANS/SECOND(2)
 #     C(A) =   -------
-#              TEMPNET     AND THE FRACTION IS SCALED AT 2(+8)/PI SEC(2)/RAD.
+#              		AND THE FRACTION IS SCALED AT 2(+8)/PI SEC(2)/RAD.S(2)/RADIAN.
 
 # THIS SIMPLE COMPUTATION WAS SUBROUTINIZED DUE TO ITS FREQUENT USE.
 
@@ -942,19 +898,3 @@ INVACC          CAF             BIT7                            # BIT7 IS USED A
                 EXTEND                                          # "TEMPNET" IS SCALED AT PI/2 AND THE
                 DV              TEMPNET                         
                 TC              Q                               # INVERSE IS SCALED AT 2(+8)/PI.
-
-## Page 628
-# START CODING FOR MODULE 3 REMAKE, AUGUST 1967***START CODING FOR MODULE 3 REMAKE, AUGUST 1967*******************
-
-# FROM DPSENGON: SET FLAGS FOR CRITICAL GTS ENTRIES.
-
-SETCNTR         TS              DVSELECT                        # SET SWITCH TO GO TO GIMBLMON
-
-                EXTEND                                          
-                DCA             GETADR                          # SPACE FOR NEW CODING IN BANK 17
-                DXCH            Z                               
-
-                EBANK=          TRIMCNTR                        
-GETADR          2CADR           GETCNTR                         
-
-# **END CODING FOR MODULE 3 REMAKE, AUGUST 1967*****END CODING FOR MODULE 3 REMAKE, AUGUST 1967*******************

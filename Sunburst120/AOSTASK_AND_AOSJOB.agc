@@ -12,6 +12,8 @@
 ## 		2016-10-30 RSB	Typos.
 ##		2016-12-06 RSB	Comment-proofing with octopus/ProoferComments,
 ##				changes made.
+##		2017-06-09 RSB	Made corrections identified while transcribing
+##				SUNBURST 37.
 
 ## Page 605
 # PROGRAM NAME: AOSTASK           MOD. NO. 1  DATE: NOVEMBER 20, 1966
@@ -40,7 +42,12 @@
 #        SUMRATEQ,SUMRATER
 #        OMEGAQ,OMEGAR
 
-# OUTPUT AOSQ,AOSR,AOSJ,AOSV
+## In the following line, the printout appears to say AOSJ rather
+## than AOSU, however I think it is clear from comparison with the 
+## printout of SUNBURST 37, and from the fact that AOSJ is not 
+## actually a symbol appearing elsewhere in the program, that 
+## it is a smudged form of AOSU. &mdash; RSB
+# OUTPUT AOSQ,AOSR,AOSU,AOSV
 #        AOSQTERM,AOSRTERM
 #        SUMRATEQ,SUMRATER
 #        KCOEFCTR
@@ -529,7 +536,7 @@ DELDOT26        DEC             .07111                          # 0.2 DEG/SEC SC
 
 # NORMAL EXIT: ENDOFJOB.          ALARM/ABORT EXITS: NONE.
 
-# INPUT: AOSQ,AOSR,AOSJ,AOSV,1JACCQ,1JACCR,1JACCU,1JACCV,APSGOING/DAPBOOLS.
+# INPUT: AOSQ,AOSR,AOSU,AOSV,1JACCQ,1JACCR,1JACCU,1JACCV,APSGOING/DAPBOOLS.
 
 # DEBRIS: NONE.
 
