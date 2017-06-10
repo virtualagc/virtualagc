@@ -26,7 +26,12 @@ symcheck:
 
 listsyms:
 	echo "Listing all symbols..."
-	python $(H800)/tools/list-symbols.py $(SOURCES)
+	python $(H800)/tools/list-symbols.py YULPASS0.argus >YULPASS0.symtab
+	python $(H800)/tools/list-symbols.py YULPASS1.argus >YULPASS1.symtab
+	python $(H800)/tools/list-symbols.py YULPASS2.argus >YULPASS2.symtab
+	python $(H800)/tools/list-symbols.py YULPASS3.argus >YULPASS3.symtab
+	python $(H800)/tools/list-symbols.py YULMANUF.argus >YULMANUF.symtab
+	python $(H800)/tools/list-symbols.py YULSIMUL.argus >YULSIMUL.symtab
 
 instrcheck:
 	echo "Checking instructions..."
