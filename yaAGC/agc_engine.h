@@ -1,5 +1,5 @@
 /*
-  Copyright 2003-2006,2009 Ronald S. Burkey <info@sandroid.org>
+  Copyright 2003-2006,2009,2017 Ronald S. Burkey <info@sandroid.org>
   
   This file is part of yaAGC.
 
@@ -106,9 +106,12 @@
 		03/27/17 MAS	Added a bit for Night Watchman's 1.28s-long assertion of
 				its channel 77 bit.
 		03/29/17 RSB    More integer types needed for Windows.
+ 		04/02/17 MAS	Added a couple of flags used for simulation of the 
+                		TC Trap hardware bug.
 		04/16/17 MAS    Added a voltage counter and input flag for the AGC
 				warning filter, as well as a channel 163 flag for
 				the AGC (CMC/LGC) warning light.
+		05/30/17 RSB	Added initializeSunburst37.
    
   For more insight, I'd highly recommend looking at the documents
   http://hrst.mit.edu/hrs/apollo/public/archive/1689.pdf and
@@ -371,6 +374,8 @@ typedef struct
   unsigned ParityFail:1;        // Set when a parity failure is encountered accessing memory (in yaAGC, just hitting banks 44+)
   unsigned CheckParity:1;       // Enable parity checking for fixed memory.
   unsigned RestartLight:1;      // The present state of the RESTART light
+  unsigned TookBZF:1;           // Flag for having just taken a BZF branch, used for simulation of a TC Trap hardware bug
+  unsigned TookBZMF:1;          // Flag for having just taken a BZMF branch, used for simulation of a TC Trap hardware bug
   unsigned GeneratedWarning:1;  // Whether there is a pending input to the warning filter
   uint32_t WarningFilter;       // Current voltage of the AGC warning filter
   uint64_t /*unsigned long long */ DownruptTime;	// Time when next DOWNRUPT occurs.
@@ -406,6 +411,7 @@ extern int DebugDsky;
 extern int InhibitAlarms;
 extern int NumDebugRules;
 extern DebugRule_t DebugRules[MAX_DEBUG_RULES];
+extern int initializeSunburst37;
 #endif
 
 // Stuff for --debug mode.

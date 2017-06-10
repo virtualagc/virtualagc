@@ -17,6 +17,7 @@
 ##		2016-12-05 RSB	octopus/ProoferComments based comment-proofing completed;
 ##				some corrections made.
 ##		2017-03-13 RSB	Comment-text fixes noted in proofing Luminary 116.
+##		2017-06-03 MAS	Replaced some instances of P00H with POOH.
 
 ## Page 88
                 BANK            01                              
@@ -156,7 +157,7 @@ INITSW          TS              L
                 TC              IBNKCALL                        
                 CADR            1STENGOF                        
 
-P00H3           CA              ZERO                            
+POOH3           CA              ZERO                            
                 TS              MODREG                          
                 TS              PHASENUM                        
 
@@ -330,7 +331,7 @@ PINACT          CCS             MPAC            +5              # PROCESS ALL RE
                 CS              FLAGWRD1                        # WAS THE RESTARTABILITY FLAG SET?
                 MASK            BIT12                           
                 CCS             A                               
-                TCF             P00H2                           # NO.
+                TCF             POOH2                           # NO.
                 TS              MODREG                          # YES.  SET MAJOR MODE TO 00.
                 TCF             ENDRSTRT                        
 
@@ -540,12 +541,12 @@ SETADR          2CADR           SETIDLE
 
                 BLOCK           2                               
 
-P00H            TC              POSTJUMP                        
-                CADR            P00H2                           # DO A PARTIAL FRESH START.
+POOH            TC              POSTJUMP                        
+                CADR            POOH2                           # DO A PARTIAL FRESH START.
 
 
                 BANK            01                              
-P00H2           INHINT                                          
+POOH2           INHINT                                          
                 TC              STARTSB2                        
 
                 TC              IBNKCALL                        
@@ -563,12 +564,12 @@ P00H2           INHINT
                 INHINT                                          
                 TC              MR.CLEAN                        # DEACTIVATE ALL RESTART GROUPS.
 
-                CA              LP00H3                          # PICK UP RETURN FOR MSTART.
+                CA              LPOOH3                          # PICK UP RETURN FOR MSTART.
                 TC              MSTART          -1              # START MISSION TIMERS COUNTING.
                                                                 # WE GET A RELINT AT MSTART.
 
 
-LP00H3          ADRES           P00H3                           
+LPOOH3          ADRES           POOH3                           
 
 ## Page 101
 # FAKESTRT IS ENTERED FROM GOPROG WHEN A RESTART OCCURS AND THE RESTARTABILITY FLAG IS OFF.

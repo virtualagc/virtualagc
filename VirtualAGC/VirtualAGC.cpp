@@ -100,6 +100,7 @@
  *              2017-04-18 RSB  In trying to build this with wxWidgets 3.0 (rather than the
  *                              recommended 2.8), the Run!, Default, and Exit buttons were too
  *                              small, height-wise.  Fixed that.
+ *          	2017-05-30 RSB	Changed bogus references to Sunburst 39 to Sunburst 37.
  *
  * This file was originally generated using the wxGlade RAD program.
  * However, it is now maintained entirely manually, and cannot be managed
@@ -219,9 +220,9 @@ static const missionAlloc_t missionConstants[ID_AGCCUSTOMBUTTON
             { "BOREALIS (LM)", "Borealis/MAIN.agc.html",
                 "Click this to select the BOREALIS test-suite software.  BOREALIS is a modernized AGC self-test suite, based on AURORA.",
                 ENABLED, LM, BLOCK2, NO_PERIPHERALS, "Aurora12", "LM0.ini" },
-            { "SUNBURST 39 (LM)", "Sunburst39/MAIN.agc.html",
-                "Click this to select the SUNBURST 39 (early non-mission LM) software.",
-                DISABLED, LM, BLOCK2, NO_PERIPHERALS, "Sunburst39", "LM0.ini" },
+            { "SUNBURST 37 (LM)", "Sunburst37/MAIN.agc.html",
+                "Click this to select the SUNBURST 37 (early non-mission LM) software.",
+                DISABLED, LM, BLOCK2, NO_PERIPHERALS, "Sunburst37", "LM0.ini" },
             { "ZERLINA (LM)", "Zerlina/MAIN.agc.html",
                 "Click this to select ZERLINA (next-generation non-mission LM) software.",
                 DISABLED, LM, BLOCK2, PERIPHERALS, "Zerlina", "LM.ini" },
@@ -640,7 +641,7 @@ EVT_RADIOBUTTON(ID_SOYUZCMBUTTON, VirtualAGC::ConsistencyEvent)
 EVT_RADIOBUTTON(ID_VALIDATIONBUTTON, VirtualAGC::ConsistencyEvent)
 EVT_RADIOBUTTON(ID_RETREAD44BUTTON, VirtualAGC::ConsistencyEvent)
 EVT_RADIOBUTTON(ID_AURORA12BUTTON, VirtualAGC::ConsistencyEvent)
-EVT_RADIOBUTTON(ID_SUNBURST39BUTTON, VirtualAGC::ConsistencyEvent)
+EVT_RADIOBUTTON(ID_SUNBURST37BUTTON, VirtualAGC::ConsistencyEvent)
 EVT_RADIOBUTTON(ID_ZERLINABUTTON, VirtualAGC::ConsistencyEvent)
 EVT_RADIOBUTTON(ID_SUPERJOBBUTTON, VirtualAGC::ConsistencyEvent)
 EVT_RADIOBUTTON(ID_AGCCUSTOMBUTTON, VirtualAGC::ConsistencyEvent)
@@ -2609,6 +2610,10 @@ VirtualAGC::FormCommands(void)
       CoreLst = wxT("source/") + basename + wxT("/") + basename + wxT(".lst");
       if (DebugMode)
         DirCmd += wxT("source/" + basename);
+    }
+  if (mission == ID_SUNBURST37BUTTON)
+    {
+      yaAGC += wxT(" --initialize-sunburst-37");
     }
   if (CMorLM.IsSameAs(wxT("CM")))
     {

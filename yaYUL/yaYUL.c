@@ -95,6 +95,8 @@
  *                              bits from being generated for unused words. Also added a
  *                              --parity flag which generates parity but does *not* swap
  *                              the bank order.
+ *              2017-06-04 MAS  Repositioned the parity bit from bit 1 to bit 15 for
+ *                              --hardware, based on new information from ND-1021042.
  */
 
 #include "yaYUL.h"
@@ -513,9 +515,15 @@ main(int argc, char *argv[])
             {
               Value = ObjectCode[Bank][Offset] << 1;
 
-              // Add in the parity bits if requested (or if building for a hardware target)
-              if (Parity || Hardware)
+              // Add in the parity bits if requested
+              if (Parity)
+                // yaAGC uses bit position 1 for parity
                 Value |= Parities[Bank][Offset];
+              else if (Hardware)
+                // The AGC hardware used bit 15 for parity
+                Value = (Value & 0100000)  |
+                        (Parities[Bank][Offset] << 14) |
+                        ((Value & 077776) >> 1);
 
               fputc(Value >> 8, OutputFile);
               fputc(Value, OutputFile);

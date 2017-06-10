@@ -11,6 +11,8 @@
 ##               2016-10-28 MAS  Transcribed.
 ##		 2016-12-06 RSB	 Comments proofed using octopus/ProoferComments,
 ##				 changes made.
+##		 2017-06-03 MAS	Replaced some instances of P00H with POOH.
+
 
 ## Page 720
                 BANK            27
@@ -69,7 +71,7 @@
 #          FINDVAC, ENDOFJOB
 #          WAITLIST, TASKOVER
 #          NEWMODEX, MPENTRY, PHASCHNG, 2PHSCHNG
-#          INTPRET, BANKCALL, IBNKCALL, ATTSTALL, CURTAINS, P00H
+#          INTPRET, BANKCALL, IBNKCALL, ATTSTALL, CURTAINS, POOH
 #          FLAG1DWN, FLAG2DWN, SETMINDB, SETMAXDB
 #          KALCMAN3, DCMTOCDU, V1STO2S
 #          1LMP, 1LMP+DT, 2LMP+DT
@@ -177,7 +179,7 @@ MP9CALL         CA              FLAGWRD2                        # CHECK IF MANEU
                 DEC             9                               # MP=9
                 ADRES           MP8TO9                          # DT = 2H 59M 14S
 
-                TC              P00H                            # END OF MISSION PHASE 8
+                TC              POOH                            # END OF MISSION PHASE 8
 
 ## Page 724
 #          CALCULATE CDU ANGLES FOR REQUIRED

@@ -326,11 +326,25 @@
  *				simulation of the Night Watchman's assertion of
  *				its channel 77 bit for 1.28 seconds after each
  *				triggering.
+ *		04/02/17 MAS	Added simulation of a hardware bug in the
+ *				design of the "No TCs" part of the TC Trap.
+ *				Most causes of transients that can reset
+ *				the alarm are now accounted for. Also
+ *				corrected the phasing of the standby circuit
+ *				and TIME1-TIME5 relative the to the scaler.
+ *				With the newly corrected timer phasings,
+ *				Aurora/Sunburst's self-tests cannot pass
+ *				without simulation of the TC Trap bug.
  *		04/16/17 MAS	Added a simple linear model of the AGC warning
  *				filter, and added the AGC (CMC/LGC) warning
  *				light status to DSKY channel 163. Also added
  *				proper handling of the channel 33 inbit that
  *				indicates such a warning occurred.
+ *		05/11/17 MAS	Moved special cases for writing to I/O channels
+ *				from WriteIO into CpuWriteIO, allowing those
+ *				channels to be safely written to via WriteIO
+ *				by external callers (e.g. SocketAPI and NASSP).
+ *		05/16/17 MAS	Made alarm restarts enable interrupts.
  *
  *
  * The technical documentation for the Apollo Guidance & Navigation (G&N) system,
@@ -507,54 +521,73 @@ WriteIO (agc_t * State, int Address, int Value)
   if (Address == RegL || Address == RegQ)
     State->Erasable[0][Address] = Value;
 
-  // 2005-07-04 RSB.  The necessity for this was pointed out by Mark 
-  // Grant via Markus Joachim.  Although channel 033 is an input channel,
-  // the CPU writes to it from time to time, to "reset" bits 11-15 to 1.
-  // Apparently, these are latched inputs, and this resets the latches.
-  if (Address == 033)
-    {
-      Value = (State->InputChannel[Address] | 076000);
-
-      // Don't allow the AGC warning input to be reset if the light
-      // is still on
-      if (State->WarningFilter > WARNING_FILTER_THRESHOLD)
-        State->InputChannel[033] &= 057777;
-    }
-
-  // Similarly, the CH77 Restart Monitor Alarm Box has latches for
-  // alarm codes that are reset when CH77 is written to.
-  if (Address == 077)
-    {
-      Value = 0;
-      // If the Night Watchman was recently tripped, its CH77 bit
-      // is forcibly asserted (unlike all the others) for 1.28s
-      if (State->NightWatchmanTripped)
-        Value |= CH77_NIGHT_WATCHMAN;
-    }
-
-  // The DSKY RESTART light is reset whenever CH11 bit 10 is written
-  // with a 1. The controlling flip-flop in the AGC also has a hard
-  // line to the DSKY's RSET button, so on depression of RSET the
-  // light is turned off without need for software intervention.
-  if ((Address == 011 && (Value & 01000)) ||
-      ((Address == 015 || Address == 016) && Value == 022))
-    State->RestartLight = 0;
-
-  State->InputChannel[Address] = Value;
   if (Address == 010)
     {
       // Channel 10 is converted externally to the CPU into up to 16 ports,
       // by means of latching relays.  We need to capture this data.
       State->OutputChannel10[(Value >> 11) & 017] = Value;
     }
+  else if ((Address == 015 || Address == 016) && Value == 022)
+    {
+      // RSET being pressed on either DSKY clears the RESTART light
+      // flip-flop directly, without software intervention
+      State->RestartLight = 0;
+    }
+  else if (Address == 033)
+    {
+      // Channel 33 bits 11-15 are controlled internally, so don't let
+      // anybody write to them
+      Value = (State->InputChannel[Address] & 076000) | (Value & 001777);
+    }
+
+  State->InputChannel[Address] = Value;
 }
 
 void
 CpuWriteIO (agc_t * State, int Address, int Value)
 {
   //static int Downlink = 0;
+
+  if (Address == 033)
+    {
+      // 2005-07-04 RSB.  The necessity for this was pointed out by Mark 
+      // Grant via Markus Joachim.  Although channel 033 is an input channel,
+      // the CPU writes to it from time to time, to "reset" bits 11-15 to 1.
+      // Apparently, these are latched inputs, and this resets the latches.
+      State->InputChannel[Address] |= 076000;
+
+      // Don't allow the AGC warning input to be reset if the light
+      // is still on
+      if (State->WarningFilter > WARNING_FILTER_THRESHOLD)
+        State->InputChannel[Address] &= 057777;
+
+      // The actual value that was written now doesn't matter, so make sure
+      // no changes occur.
+      Value = State->InputChannel[Address];
+    }
+  else if (Address == 077)
+    {
+      // Similarly, the CH77 Restart Monitor Alarm Box has latches for
+      // alarm codes that are reset when CH77 is written to.
+      Value = 0;
+
+      // If the Night Watchman was recently tripped, its CH77 bit
+      // is forcibly asserted (unlike all the others) for 1.28s
+      if (State->NightWatchmanTripped)
+        Value |= CH77_NIGHT_WATCHMAN;
+    }
+  else if (Address == 011 && (Value & 01000))
+    {
+      // The DSKY RESTART light is reset whenever CH11 bit 10 is written
+      // with a 1. The controlling flip-flop in the AGC also has a hard
+      // line to the DSKY's RSET button, so on depression of RSET the
+      // light is turned off without need for software intervention.
+      State->RestartLight = 0;
+    }
+
   WriteIO (State, Address, Value);
   ChannelOutput (State, Address, Value & 077777);
+
   // 2005-06-25 RSB.  DOWNRUPT stuff.  I assume that the 20 ms. between
   // downlink transmissions is due to the time needed for transmitting,
   // so I don't interrupt at a regular rate,  Instead, I make sure that
@@ -1695,6 +1728,8 @@ agc_engine (agc_t * State)
   //int OverflowQ, Qumulator;
   // Keep track of TC executions for the TC Trap alarm
   int ExecutedTC = 0;
+  int JustTookBZF = 0;
+  int JustTookBZMF = 0;
 
 
   sExtraCode = 0;
@@ -1830,17 +1865,12 @@ agc_engine (agc_t * State)
       // Check alarms first, since there's a chance we might go to standby
       if (04000 == (07777 & State->InputChannel[ChanSCALER1]))
         {
-          // The Night Watchman begins looking once every 1.28s...
+          // The Night Watchman begins looking once every 1.28s
           if (!State->Standby)
             State->NightWatchman = 1;
 
-          // Same with Standby
-          if (0 == (State->InputChannel[032] & 020000))
-            State->SbyPressed = 1;
-
-        }
-      else if (00000 == (07777 & State->InputChannel[ChanSCALER1]))
-        {
+          // The standby circuit finishes checking to see if we're going to standby now
+          // (it has the same period as but is 180 degrees out of phase with the Night Watchman)
           if (State->SbyPressed && State->InputChannel[013] & 002000)
             {
               if (!State->Standby)
@@ -1866,6 +1896,14 @@ agc_engine (agc_t * State)
                   ChannelOutput(State, 0163, State->DskyChannel163);
                 }
             }
+        }
+      else if (00000 == (07777 & State->InputChannel[ChanSCALER1]))
+        {
+          // The standby circuit checks the SBY/PRO button state every 1.28s
+          if (0 == (State->InputChannel[032] & 020000))
+            State->SbyPressed = 1;
+
+          // The Night Watchman finishes looking now
           if (!State->Standby && State->NightWatchman)
             {
               // NEWJOB wasn't checked before 0.64s elapsed. Sound the alarm!
@@ -1939,7 +1977,7 @@ agc_engine (agc_t * State)
             }
 
           // Now that that's taken care of...
-          // If so, the 10 ms. timers TIME1 and TIME3 are updated.
+          // Update the 10 ms. timers TIME1 and TIME3.
           // Recall that the registers are in AGC integer format,
           // and therefore are actually shifted left one space.
           // When taking a reset, the real AGC would skip unprogrammed
@@ -1947,7 +1985,7 @@ agc_engine (agc_t * State)
           // would be saved and the counts would happen immediately
           // after the first instruction at 4000, so doing them now
           // is not too inaccurate.
-          if (0 == (037 & State->InputChannel[ChanSCALER1]))
+          if (020 == (037 & State->InputChannel[ChanSCALER1]))
 	    {
 	      State->ExtraDelay++;
 	      if (CounterPINC (&c(RegTIME1)))
@@ -1960,14 +1998,14 @@ agc_engine (agc_t * State)
 	        State->InterruptRequests[3] = 1;
 	    }
           // TIME5 is the same as TIME3, but 5 ms. out of phase.
-          if (020 == (037 & State->InputChannel[ChanSCALER1]))
+          if (000 == (037 & State->InputChannel[ChanSCALER1]))
 	    {
 	      State->ExtraDelay++;
 	      if (CounterPINC (&c(RegTIME5)))
 	        State->InterruptRequests[2] = 1;
 	    }
           // TIME4 is the same as TIME3, but 7.5ms out of phase
-          if (030 == (037 & State->InputChannel[ChanSCALER1]))
+          if (010 == (037 & State->InputChannel[ChanSCALER1]))
 	    {
 	      State->ExtraDelay++;
 	      if (CounterPINC (&c(RegTIME4)))
@@ -1996,9 +2034,11 @@ agc_engine (agc_t * State)
               // Two single-MCT instruction sequences, GOJAM and TC 4000, are about to happen
               State->ExtraDelay += 2;
 
-              // The net result of those two is Z = 4000. Interrupt state is cleared.
+              // The net result of those two is Z = 4000. Interrupt state is cleared, and
+              // interrupts are enabled.
               c(RegZ) = 04000;
               State->InIsr = 0;
+              State->AllowInterrupt = 1;
               State->ParityFail = 0;
 
               // Light the RESTART light on the DSKY, if we're not going into standby
@@ -2299,6 +2339,10 @@ agc_engine (agc_t * State)
   // which imply that the contents of Z is directly transferred into Q.)
   c (RegZ)= State->NextZ;
 
+  // A BZF followed by an instruction other than EXTEND causes a TCF0 transient
+  if (State->TookBZF && !((ExtendedOpcode == 000) && (Address12 == 6)))
+    ExecutedTC = 1;
+
   // Parse the instruction.  Refer to p.34 of 1689.pdf for an easy 
   // picture of what follows.
   switch (ExtendedOpcode)
@@ -2314,9 +2358,21 @@ agc_engine (agc_t * State)
       // TC instruction (1 MCT).
       ValueK = Address12;// Convert AGC numerical format to native CPU format.
       if (ValueK == 3)		// RELINT instruction.
-	State->AllowInterrupt = 1;
+        {
+	  State->AllowInterrupt = 1;
+
+          if (State->TookBZF || State->TookBZMF)
+            // RELINT after a single-cycle instruction causes a TC0 transient
+            ExecutedTC = 1;
+        }
       else if (ValueK == 4)	// INHINT instruction.
-	State->AllowInterrupt = 0;
+        {
+	  State->AllowInterrupt = 0;
+
+          if (State->TookBZF || State->TookBZMF)
+            // INHINT after a single-cycle instruction causes a TC0 transient
+            ExecutedTC = 1;
+        }
       else if (ValueK == 6)	// EXTEND instruction.
 	{
 	  State->ExtraCode = 1;
@@ -2535,6 +2591,8 @@ agc_engine (agc_t * State)
       case 045:
       case 046:
       case 047:
+      ExecutedTC = 1; // CS causes transients on the TC0 line
+
       if (IsA (Address12))// COM
 	{
 	  c (RegA) = ~Accumulator;;
@@ -2594,6 +2652,8 @@ agc_engine (agc_t * State)
       break;
       case 052:			// DXCH
       case 053:
+      ExecutedTC = 1; // DXCH causes transients on the TCF0 line
+
       // Remember, in the following comparisons, that the address is pre-incremented.
       if (IsL (Address10))
 	{
@@ -2636,6 +2696,7 @@ agc_engine (agc_t * State)
       break;
       case 054:			// TS
       case 055:
+      ExecutedTC = 1; // TS causes transients on the TCF0 line
       if (IsA (Address10))// OVSK
 	{
 	  if (Overflow)
@@ -2664,6 +2725,7 @@ agc_engine (agc_t * State)
       break;
       case 056:			// XCH
       case 057:
+      ExecutedTC = 1; // XCH causes transients on the TCF0 line
       if (IsA (Address10))
       break;
       if (Address10 < REG16)
@@ -2891,6 +2953,7 @@ agc_engine (agc_t * State)
 	{
 	  BacktraceAdd (State, 0);
 	  State->NextZ = Address12;
+          JustTookBZF = 1;
 	}
       break;
       case 0120:			// MSU
@@ -3089,6 +3152,7 @@ agc_engine (agc_t * State)
 	{
 	  BacktraceAdd (State, 0);
 	  State->NextZ = Address12;
+          JustTookBZMF = 1;
 	}
       break;
       case 0170:			// MP
@@ -3180,6 +3244,9 @@ agc_engine (agc_t * State)
       // Update TC Trap flags according to the instruction we just executed
       if (ExecutedTC) State->NoTC = 0;
       else State->TCTrap = 0;
+
+      State->TookBZF = JustTookBZF;
+      State->TookBZMF = JustTookBZMF;
     }
   return (0);
 }

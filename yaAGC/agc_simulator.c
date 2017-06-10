@@ -147,7 +147,7 @@ int SimInitialize(Options_t* Options)
 	DebugDeda = Options->debug_deda;
 	DedaQuiet = Options->deda_quiet;
 	InhibitAlarms = Options->inhibit_alarms;
-
+	initializeSunburst37 = Options->initializeSunburst37;
 
 	//Simulator.DumpInterval = Simulator.DumpInterval;
 	SocketInterlaceReload = Options->interlace;

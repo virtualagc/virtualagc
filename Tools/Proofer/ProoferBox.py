@@ -78,7 +78,7 @@ file.close()
 # Read in the binsource file.
 file = open (binsourceFilename, 'r')
 lines = []
-octalPattern = re.compile(r"[0-7]{6}( [0-7]{6}){7}.*")
+octalPattern = re.compile(r"([0-7]{6}|@)([ \t]([0-7]{6}|@)){7}.*")
 for line in file:
 	if octalPattern.match(line):
 		lines.append(line)
@@ -170,27 +170,28 @@ for index in range(startIndex, endIndex):
 		boxWidth = boxRight + 1 - boxLeft
 		boxHeight = boxBottom + 1 - boxTop
 		
-		digitIndex = int(characters[characterIndex])
-		if boxOctal == digitIndex and not (characters[characterIndex] in blatant) and not (boxFields[0] in blatant):
-			digit = images[digitIndex].clone()
-		else:
-			digit = imagesColored[digitIndex].clone()
-		operator = 'darken'
-		fontWidth = digit.width
-		fontHeight = digit.height
-		minFontHeight = 0.9*fontHeight
-		maxFontHeight = 1.2*fontHeight
-		minFontWidth = 0.9*fontWidth
-		maxFontWidth = 1.2*fontWidth
-		if boxHeight > minFontHeight and boxHeight < maxFontHeight and \
-		   boxWidth > minFontWidth and boxWidth < maxFontWidth:
-			digit.resize(boxWidth, boxHeight, 'cubic')
-			draw.composite(operator=operator, left=boxLeft, top=boxTop, width=boxWidth, height=boxHeight, image=digit)
-		else:
-			digit.resize(int(round(fontWidth)), int(round(fontHeight)), 'cubic')
-			draw.composite(operator=operator, left=round((boxLeft+boxRight-fontWidth)/2.0), 
-				       top=round((boxTop+boxBottom-fontHeight)/2.0), width=fontWidth, 
-				       height=fontHeight, image=digit)
+		if characters[characterIndex] != '@':
+			digitIndex = int(characters[characterIndex])
+			if boxOctal == digitIndex and not (characters[characterIndex] in blatant) and not (boxFields[0] in blatant):
+				digit = images[digitIndex].clone()
+			else:
+				digit = imagesColored[digitIndex].clone()
+			operator = 'darken'
+			fontWidth = digit.width
+			fontHeight = digit.height
+			minFontHeight = 0.9*fontHeight
+			maxFontHeight = 1.2*fontHeight
+			minFontWidth = 0.9*fontWidth
+			maxFontWidth = 1.2*fontWidth
+			if boxHeight > minFontHeight and boxHeight < maxFontHeight and \
+			   boxWidth > minFontWidth and boxWidth < maxFontWidth:
+				digit.resize(boxWidth, boxHeight, 'cubic')
+				draw.composite(operator=operator, left=boxLeft, top=boxTop, width=boxWidth, height=boxHeight, image=digit)
+			else:
+				digit.resize(int(round(fontWidth)), int(round(fontHeight)), 'cubic')
+				draw.composite(operator=operator, left=round((boxLeft+boxRight-fontWidth)/2.0), 
+					       top=round((boxTop+boxBottom-fontHeight)/2.0), width=fontWidth, 
+					       height=fontHeight, image=digit)
 
 		
 		characterIndex += 1

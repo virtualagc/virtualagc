@@ -1,92 +1,96 @@
 /*
-  Copyright 2003-2006,2009 Ronald S. Burkey <info@sandroid.org>
-
-  This file is part of yaAGC.
-
-  yaAGC is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 2 of the License, or
-  (at your option) any later version.
-
-  yaAGC is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with yaAGC; if not, write to the Free Software
-  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-
-  In addition, as a special exception, Ronald S. Burkey gives permission to
-  link the code of this program with the Orbiter SDK library (or with 
-  modified versions of the Orbiter SDK library that use the same license as 
-  the Orbiter SDK library), and distribute linked combinations including 
-  the two. You must obey the GNU General Public License in all respects for 
-  all of the code used other than the Orbiter SDK library. If you modify 
-  this file, you may extend this exception to your version of the file, 
-  but you are not obligated to do so. If you do not wish to do so, delete 
-  this exception statement from your version. 
- 
-  Filename:	agc_engine_init.c
-  Purpose:	This is the function which initializes the AGC simulation,
-  		from a file representing the binary image of core memory.
-  Compiler:	GNU gcc.
-  Contact:	Ron Burkey <info@sandroid.org>
-  Reference:	http://www.ibiblio.org/apollo/index.html
-  Mods:		04/05/03 RSB.	Began.
-  		09/07/03 RSB.	Fixed data ordering in the core-rope image
-				file (to both endian CPU types to work).
-		11/26/03 RSB.	Up to now, a pseudo-linear space was used to
-				model internal AGC memory.  This was simply too
-				tricky to work with, because it was too hard to
-				understand the address conversions that were
-				taking place.  I now use a banked model much
-				closer to the true AGC memory map.
-		11/29/03 RSB.	Added the core-dump save/load.
-		05/06/04 RSB	Now use rfopen in looking for the binary.
-		07/12/04 RSB	Q is now 16 bits.
-		07/15/04 RSB	AGC data now aligned at bit 0 rathern then 1.
-		07/17/04 RSB	I/O channels 030-033 now default to 077777
-				instead of 00000, since the signals are 
-				supposed to be inverted.
-		02/27/05 RSB	Added the license exception, as required by
-				the GPL, for linking to Orbiter SDK libraries.
-		05/14/05 RSB	Corrected website references.
-	 	07/05/05 RSB	Added AllOrErasable.
-		07/07/05 RSB	On a resume, now restores 010 on up (rather
-				than 020 on up), on Hugh's advice.
-		02/26/06 RSB	Various changes requested by Mark Grant
-				to make it easier to integrate with Orbiter.
-				The main change is the addition of an
-				agc_load_binfile function.  Shouldn't affect
-				non-orbiter builds.
-		02/28/09 RSB	Fixed some compiler warnings for 64-bit machines.
-		03/18/09 RSB	Eliminated periodic messages about 
-				core-dump creation when the DebugMode
-				flag is set.
-		03/27/09 RSB	I've noticed that about half the time, using
-				--resume causes the DSKY to become non-responsive.
-				I wonder if somehow not all the state variables
-				are being saved, and in particular not the 
-				state related to interrupt.  (I haven't checked
-				this!)  Anyhow, there are extra state variables
-				in the agc_t structure which aren't being 
-				saved or restored, so I'm adding all of these.
-		03/30/09 RSB	Added the Downlink variable to the core dumps.
-		08/14/16 OH	Issue #29 fix return value of agc_engine_init.
-		09/30/16 MAS    Added initialization of NightWatchman.
-		01/04/17 MAS    Added initialization of ParityFail.
-		01/30/17 MAS    Added support for heuristic loading of ROM files
-                		produced with --hardware, by looking for any set
-                                parity bits. If such a file is detected, parity
-                                bit checking is enabled.
-		03/09/17 MAS    Added initialization of SbyStillPressed.
-		03/26/17 MAS    Added initialization of previously-static things
-                                from agc_engine.c that are now in agc_t.
-		03/27/17 MAS    Fixed a parity-related program loading bug and
-                                added initialization of a new night watchman bit.
-		04/16/17 MAS    Added initialization of warning filter variables.
-*/
+ * Copyright 2003-2006,2009,2017 Ronald S. Burkey <info@sandroid.org>
+ *
+ * This file is part of yaAGC.
+ *
+ * yaAGC is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * yaAGC is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with yaAGC; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * In addition, as a special exception, Ronald S. Burkey gives permission to
+ * link the code of this program with the Orbiter SDK library (or with
+ * modified versions of the Orbiter SDK library that use the same license as
+ * the Orbiter SDK library), and distribute linked combinations including
+ * the two. You must obey the GNU General Public License in all respects for
+ * all of the code used other than the Orbiter SDK library. If you modify
+ * this file, you may extend this exception to your version of the file,
+ * but you are not obligated to do so. If you do not wish to do so, delete
+ * this exception statement from your version.
+ *
+ * Filename:	agc_engine_init.c
+ * Purpose:	This is the function which initializes the AGC simulation,
+ * 		from a file representing the binary image of core memory.
+ * Compiler:	GNU gcc.
+ * Contact:	Ron Burkey <info@sandroid.org>
+ * Reference:	http://www.ibiblio.org/apollo/index.html
+ * Mods:	04/05/03 RSB.	Began.
+ *  		09/07/03 RSB.	Fixed data ordering in the core-rope image
+ * 				file (to both endian CPU types to work).
+ * 		11/26/03 RSB.	Up to now, a pseudo-linear space was used to
+ * 				model internal AGC memory.  This was simply too
+ * 				tricky to work with, because it was too hard to
+ * 				understand the address conversions that were
+ * 				taking place.  I now use a banked model much
+ * 				closer to the true AGC memory map.
+ * 		11/29/03 RSB.	Added the core-dump save/load.
+ * 		05/06/04 RSB	Now use rfopen in looking for the binary.
+ * 		07/12/04 RSB	Q is now 16 bits.
+ * 		07/15/04 RSB	AGC data now aligned at bit 0 rathern then 1.
+ * 		07/17/04 RSB	I/O channels 030-033 now default to 077777
+ * 				instead of 00000, since the signals are
+ * 				supposed to be inverted.
+ * 		02/27/05 RSB	Added the license exception, as required by
+ * 				the GPL, for linking to Orbiter SDK libraries.
+ * 		05/14/05 RSB	Corrected website references.
+ * 	 	07/05/05 RSB	Added AllOrErasable.
+ * 		07/07/05 RSB	On a resume, now restores 010 on up (rather
+ * 				than 020 on up), on Hugh's advice.
+ * 		02/26/06 RSB	Various changes requested by Mark Grant
+ * 				to make it easier to integrate with Orbiter.
+ * 				The main change is the addition of an
+ * 				agc_load_binfile function.  Shouldn't affect
+ * 				non-orbiter builds.
+ * 		02/28/09 RSB	Fixed some compiler warnings for 64-bit machines.
+ * 		03/18/09 RSB	Eliminated periodic messages about
+ * 				core-dump creation when the DebugMode
+ * 				flag is set.
+ * 		03/27/09 RSB	I've noticed that about half the time, using
+ * 				--resume causes the DSKY to become non-responsive.
+ * 				I wonder if somehow not all the state variables
+ * 				are being saved, and in particular not the
+ * 				state related to interrupt.  (I haven't checked
+ * 				this!)  Anyhow, there are extra state variables
+ * 				in the agc_t structure which aren't being
+ * 				saved or restored, so I'm adding all of these.
+ * 		03/30/09 RSB	Added the Downlink variable to the core dumps.
+ * 		08/14/16 OH	Issue #29 fix return value of agc_engine_init.
+ * 		09/30/16 MAS    Added initialization of NightWatchman.
+ * 		01/04/17 MAS    Added initialization of ParityFail.
+ * 		01/30/17 MAS    Added support for heuristic loading of ROM files
+ *                 		produced with --hardware, by looking for any set
+ *                              parity bits. If such a file is detected, parity
+ *                              bit checking is enabled.
+ * 		03/09/17 MAS    Added initialization of SbyStillPressed.
+ * 		03/26/17 MAS    Added initialization of previously-static things
+ *                              from agc_engine.c that are now in agc_t.
+ * 		03/27/17 MAS    Fixed a parity-related program loading bug and
+ *                              added initialization of a new night watchman bit.
+ *  		04/02/17 MAS	Added initialization of a couple of flags used
+ *  				for simulation of the TC Trap hardware bug.
+ * 		04/16/17 MAS    Added initialization of warning filter variables.
+ * 		05/16/17 MAS    Enabled interrupts at startup.
+ * 		05/31/17 RSB	Added --initialize-sunburst-37.
+ */
 
 // For Orbiter.
 #ifndef AGC_SOCKET_ENABLED
@@ -95,7 +99,11 @@
 #include <string.h>
 #include "yaAGC.h"
 #include "agc_engine.h"
-FILE *rfopen (const char *Filename, const char *mode);
+
+int initializeSunburst37 = 0;
+
+FILE *
+rfopen (const char *Filename, const char *mode);
 
 //---------------------------------------------------------------------------
 // Returns:
@@ -114,7 +122,7 @@ FILE *rfopen (const char *Filename, const char *mode);
 // core-dump file.
 
 int
-agc_load_binfile(agc_t *State, const char *RomImage)
+agc_load_binfile (agc_t *State, const char *RomImage)
 
 {
   FILE *fp = NULL;
@@ -125,34 +133,37 @@ agc_load_binfile(agc_t *State, const char *RomImage)
   // The following sequence of steps loads the ROM image into the simulated
   // core memory, in what I think is a pretty obvious way.
 
-
   fp = rfopen (RomImage, "rb");
-  if (fp == NULL){
-    RetVal = 1;
-    goto Done;
-  }
+  if (fp == NULL)
+    {
+      RetVal = 1;
+      goto Done;
+    }
 
   fseek (fp, 0, SEEK_END);
   n = ftell (fp);
-  if (0 != (n & 1)){		// Must be an integral number of words.
-    RetVal = 3;
-    goto Done;
-  }
-  
+  if (0 != (n & 1))
+    {		// Must be an integral number of words.
+      RetVal = 3;
+      goto Done;
+    }
+
   n /= 2;			// Convert byte-count to word-count.
-  if (n > 36 * 02000){
-    RetVal = 2;
-    goto Done;
-  }
- 
+  if (n > 36 * 02000)
+    {
+      RetVal = 2;
+      goto Done;
+    }
+
   fseek (fp, 0, SEEK_SET);
-  if (State == NULL){
-    RetVal = 4;
-    goto Done;
-  }
+  if (State == NULL)
+    {
+      RetVal = 4;
+      goto Done;
+    }
 
   State->CheckParity = 0;
-  memset(&State->Parities, 0, sizeof(State->Parities));
+  memset (&State->Parities, 0, sizeof(State->Parities));
 
   Bank = 2;
   for (Bank = 2, j = 0, i = 0; i < n; i++)
@@ -161,10 +172,11 @@ agc_load_binfile(agc_t *State, const char *RomImage)
       uint8_t Parity;
       uint16_t RawValue;
       m = fread (In, 1, 2, fp);
-      if (m != 2){
-	RetVal = 5;
-	goto Done;
-      }
+      if (m != 2)
+	{
+	  RetVal = 5;
+	  goto Done;
+	}
       // Within the input file, the fixed-memory banks are arranged in the order
       // 2, 3, 0, 1, 4, 5, 6, 7, ..., 35.  Therefore, we have to take a little care
       // reordering the banks.
@@ -176,14 +188,14 @@ agc_load_binfile(agc_t *State, const char *RomImage)
       RawValue = (In[0] * 256 + In[1]);
       Parity = RawValue & 1;
 
-      State->Fixed[Bank][j] =  RawValue >> 1;
-      State->Parities[(Bank*02000 + j) / 32] |= Parity << (j % 32);
+      State->Fixed[Bank][j] = RawValue >> 1;
+      State->Parities[(Bank * 02000 + j) / 32] |= Parity << (j % 32);
       j++;
 
       // If any of the parity bits are actually set, this must be a ROM built with
       // --hardware. Enable parity checking.
       if (Parity)
-        State->CheckParity = 1;
+	State->CheckParity = 1;
 
       if (j == 02000)
 	{
@@ -202,8 +214,8 @@ agc_load_binfile(agc_t *State, const char *RomImage)
 	}
     }
 
-Done:
-  if (fp != NULL) fclose (fp);
+  Done: if (fp != NULL)
+    fclose (fp);
   return (RetVal);
 }
 
@@ -226,11 +238,13 @@ agc_engine_init (agc_t * State, const char *RomImage, const char *CoreDump,
 #endif
 
   // Fix for Issue #29 Return the values as the API documents
-  if (RomImage){
-	  RetVal = agc_load_binfile(State, RomImage);
-	  if (RetVal > 0) goto Done;
-  }
- 
+  if (RomImage)
+    {
+      RetVal = agc_load_binfile (State, RomImage);
+      if (RetVal > 0)
+	goto Done;
+    }
+
   // Clear i/o channels.
   for (i = 0; i < NUM_CHANNELS; i++)
     State->InputChannel[i] = 0;
@@ -248,15 +262,14 @@ agc_engine_init (agc_t * State, const char *RomImage, const char *CoreDump,
   // Set up the CPU state variables that aren't part of normal memory.
   State->CycleCounter = 0;
   State->ExtraCode = 0;
-  // I've seen no indication so far of a reset value for interrupt-enable. 
-  State->AllowInterrupt = 0;
+  State->AllowInterrupt = 1; // The GOJAM sequence enables interrupts
   State->InterruptRequests[8] = 1;	// DOWNRUPT.
   //State->RegA16 = 0;
   State->PendFlag = 0;
   State->PendDelay = 0;
   State->ExtraDelay = 0;
   //State->RegQ16 = 0;
-  
+
   State->OutputChannel7 = 0;
   for (j = 0; j < 16; j++)
     State->OutputChannel10[j] = 0;
@@ -293,11 +306,22 @@ agc_engine_init (agc_t * State, const char *RomImage, const char *CoreDump,
   State->DskyFlash = 0;
   State->DskyChannel163 = 0;
 
+  State->TookBZF = 0;
+  State->TookBZMF = 0;
+
+  if (initializeSunburst37)
+    {
+      State->Erasable[0][0067] = 077777;
+      State->Erasable[0][0157] = 077777;
+      State->Erasable[0][0375] = 005605;
+      State->Erasable[0][0376] = 004003;
+    }
+
   if (CoreDump != NULL)
     {
       cd = fopen (CoreDump, "r");
       if (cd == NULL)
-        {
+	{
 	  if (AllOrErasable)
 	    RetVal = 6;
 	  else
@@ -313,7 +337,7 @@ agc_engine_init (agc_t * State, const char *RomImage, const char *CoreDump,
 	      if (1 != fscanf (cd, "%o", &j))
 		goto Done;
 	      if (AllOrErasable)
-	        State->InputChannel[i] = j;
+		State->InputChannel[i] = j;
 	    }
 
 	  // Load up erasable memory.
@@ -326,7 +350,7 @@ agc_engine_init (agc_t * State, const char *RomImage, const char *CoreDump,
 		  State->Erasable[Bank][j] = i;
 	      }
 
-          if (AllOrErasable)
+	  if (AllOrErasable)
 	    {
 	      // Set up the CPU state variables that aren't part of normal memory.
 	      if (1 != fscanf (cd, "%o", &i))
@@ -358,7 +382,7 @@ agc_engine_init (agc_t * State, const char *RomImage, const char *CoreDump,
 		goto Done;
 	      State->OutputChannel7 = i;
 	      for (j = 0; j < 16; j++)
-	        {
+		{
 		  if (1 != fscanf (cd, "%o", &i))
 		    goto Done;
 		  State->OutputChannel10[j] = i;
@@ -367,7 +391,7 @@ agc_engine_init (agc_t * State, const char *RomImage, const char *CoreDump,
 		goto Done;
 	      State->IndexValue = i;
 	      for (j = 0; j < 1 + NUM_INTERRUPT_TYPES; j++)
-	        {
+		{
 		  if (1 != fscanf (cd, "%o", &i))
 		    goto Done;
 		  State->InterruptRequests[j] = i;
@@ -395,8 +419,7 @@ agc_engine_init (agc_t * State, const char *RomImage, const char *CoreDump,
 	}
     }
 
-Done:
-  if (cd != NULL)
+  Done: if (cd != NULL)
     fclose (cd);
   return (RetVal);
 }

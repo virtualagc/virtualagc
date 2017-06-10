@@ -1,3 +1,7 @@
+----
+ We are currently in the process of transcribing Sunburst 37/Shepatin 0 (an early development version of the Apollo 5 software), and are looking for volunteers to help out. If you're interested, **[click here!](https://github.com/virtualagc/virtualagc/wiki/Sunburst-37-Transcription)**
+ ----
+
 Virtual Apollo Guidance Computer
 ================================
 

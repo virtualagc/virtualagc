@@ -14,6 +14,8 @@
 ##		2016-10-31 RSB	Typos.
 ##		2016-12-05 RSB	Comment-proofing with octopus/ProoferComments
 ##				completed, changes made.
+##		2017-06-08 RSB	Some corrections (mostly comments, mostly whitespace)
+##				discovered while transcribing SUNBURST 37.
  
 ## Page 380
                 BANK            14
@@ -36,8 +38,8 @@ AOTNBIMU        CAF             ONE                     # AOT-NB-IMU FINE ALIGNM
                                 ERTHRVSE                # TO CALCULATE EARTH RATE VECTOR
                 EXIT
 
-POSLOAD         CAF             V24N30E                 # R1  0000X ENTER     POSITION 1,2, OR 3
-                TC              NVSBWAIT                # R2  00000 ENTER     00001 FOR LAB OPTION
+POSLOAD         CAF             V24N30E                 # R1  0000X ENTER    POSITION 1,2, OR 3
+                TC              NVSBWAIT                # R2  00000 ENTER    00001 FOR LAB OPTION
                 TC              ENDIDLE
                 TCF             ENDTEST
                 TCF             -4
@@ -85,7 +87,9 @@ ERFINAL         TC              BANKCALL                # LAST EARTH RATE SHOT
                 INHINT
                 CAF             PRIO21                  # PRIORITY 1 HIGHER THAN SXTNBIMU
                 TC              FINDVAC
+                EBANK=		XSM
                 2CADR           RDR37511
+                
                 RELINT
                 TC              ERFINAL
 
@@ -120,10 +124,10 @@ PIP2            CAE             PIPNDX
                 CADR            DOCHECKG                # SYNC ON PIPA PULSE
 
                 RELINT
-                TC              STORRSLT                # STORE TIME ANP PIPAI
+                TC              STORRSLT                # STORE TIME AND PIPAI
 
                 CAE             PIPNDX          +1
-                TS              PIPINDEX                # POS1 PIPAZ    POS2 PIPAY    POS3 PIPAZ
+                TS              PIPINDEX                # POS1 PIPAZ     POS2 PIPAY     POS3 PIPAZ
                 TC              BANKCALL
                 CADR            DOCHECKG                # SYNC ON PIPA PULSE
 
@@ -316,7 +320,7 @@ MAKEXSMD        EXIT                                    # XSM V   YSM SW   ZSM S
 
 
 
-TAR/EREF        AXT,1           AXT,2                   #               TARGET VECTOR
+TAR/EREF        AXT,1           AXT,2                   #              TARGET VECTOR
                                 2                       # SIN(EL)  -COS(AZ)COS(EL)  SIN(AZ)COS(EL)
                                 12D
                 SSP
@@ -353,7 +357,7 @@ TAR1            SLOAD*          SR2                     # X1=2  X2=12  S2=6 . X1
 
 ## Page 389
 ERTHRVSE        DLOAD           PDDL
-                                ZERODP                  # PD24 = (SIN -COS  0)(OMEG/MS)
+                                ZERODP                  # PD24 = (SIN  -COS  0)(OMEG/MS)
                                 LATITUDE
                 COS             DCOMP
                 PDDL            SIN
@@ -464,9 +468,9 @@ OPTDATA         EXTEND                                  # CALLS FOR AZIMUTH AND 
                 OCT             00661                   # R2  +- XX.XXX    ELEVATION IN DEGREES
                 TCF             ENDTEST                 # R3      0000X    TARGET NUMBER 1 OR 2
 
-                DXCH            DSPTEM1                 # TAZEL1        TARGET 1 AZIMUTH
+                DXCH            DSPTEM1                 # TAZEL1       TARGET 1 AZIMUTH
                 INDEX           RUN
-                DXCH            TAZEL1                  # TAZEL1 +2     TARGET 2 AZIMUTH
+                DXCH            TAZEL1                  # TAZEL1 +2    TARGET 2 AZIMUTH
                 CCS             RUN
                 TCF             +4
 OPTRDRIN        CAF             TWO                     # SPECIAL ENTRY FOR RDR37511
@@ -483,7 +487,7 @@ LATAZCHK        DLOAD           SL2                     # CALLS FOR AZIMUTH (SM)
                 RTB             EXIT
                                 1STO2S                  # FRACTION OF REVOLUTION TO 2S COMPLEMENT
 
-                XCH             MPAC                    # AZIMUTH MUST BE 135 DEGREES R1 = .13500
+                XCH             MPAC                    # AZIMUTH MUST BE 135 DEGREES R1 = +13500
                 TS              DSPTEM1                 #    FOR SXT-NB-IMU FINE ALIGNMENT TEST
                 TC              CHECKLD                 # R1  +- XXX.XX    AZIMUTH IN DEGREES (SM)
                 OCT             00661                   # R2  +- XX.XXX    LATITUDE IN DEGREES
@@ -539,7 +543,7 @@ POSNJUMP        EXTEND                                  # POSITIONS FOR SXTNBIMU
 
 
 
-POS1            CAF             ONE                     # XSM = V    YSM = SW    ZSM = SE
+POS1            CAF             ONE                     # XSM = V     YSM = SW    ZSM = SE
                 TS              PIPNDX
                 CAF             TWO
                 TS              PIPNDX          +1      # MONITOR PIPAY AND PIPAZ
@@ -547,7 +551,7 @@ POS1            CAF             ONE                     # XSM = V    YSM = SW   
 
 
 
-POS2            TC              INTPRET                 # XSM = SE   YSM = SW    ZSM = -V
+POS2            TC              INTPRET                 # XSM = SE    YSM = SW    ZSM = -V
                 VLOAD           VCOMP
                                 XSM
                 PDVL
@@ -564,7 +568,7 @@ POS2            TC              INTPRET                 # XSM = SE   YSM = SW   
 
 
 
-POS3            TC              INTPRET                 # XSM = SE    YSM = V    ZSM = SW
+POS3            TC              INTPRET                 # XSM = SE    YSM = V     ZSM = SW
                 VLOAD           PDVL
                                 XSM
                                 YSM
@@ -1092,6 +1096,7 @@ ALWAYS          TS              THRUST
                 WOR             14
                 CA              BIT6                    # 320 MS.DELAY
                 TC              WAITLIST
+                EBANK=		XSM
                 2CADR           THROTASK
                 
                 TC              TASKOVER
@@ -1150,7 +1155,7 @@ ALTRMET         CA              MRATEADD
                 TC              ALTMET          +8D
 
 ## Page 407
-#      THE AOT ANGLE CHECKING PROGRAM PROVIDES A SIMPLE VERIFICATION OF THE ACCURACY OF THE AOT,  THE IDEA IS TO
+#      THE AOT ANGLE CHECKING PROGRAM PROVIDES A SIMPLE VERIFICATION OF THE ACCURACY OF THE AOT.  THE IDEA IS TO
 # COMPUTE THE ANGLE BETWEEN TWO LINES OF SIGHT AS INDICATED BY THE AOT, WHICH IS WHAT THIS PROGRAM DOES.
 # INDEPENDENT KNOWLEDGE OF THE INCLUDED ANGLE PROVIDES A COMPARISON AND THUS A MEASURE OF THE AOT ACCURACY.
 #       THE ISS NEED NOT BE ON TO RUN THIS PROGRAM.

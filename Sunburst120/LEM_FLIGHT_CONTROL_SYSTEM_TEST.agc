@@ -13,6 +13,8 @@
 ##				a handful of comments and EBANK= placements.
 ##		2016-12-05 RSB	Comment-proofing with octopus/ProoferComments
 ##				completed, changes made.
+##		2017-06-05 MAS	Made comment corrections found during Sunburst 37
+##				transcription.
 
 ## Page 367
                 BANK            6
@@ -37,7 +39,7 @@ FCS2            CAF             V04N01K                         # DISPLAY PRESEN
                 TC              NVSBWAIT
                 INCR            MPAC            +2
                 CAF             V21N02K
-                TC              NVSBWAIT                        # IN CASE IT'S BUSY BUT IT SHOULDN'T BE.
+                TC              NVSBWAIT                        # IN CASE IT,S BUSY BUT IT SHOULDN,T BE.
                 TC              ENDIDLE                         # WHILE LOADING.
                 TC              +3                              # V34E. TERMINATE LOAD OF THIS LIST
                                                                 # SECTION, GO TO NEW SECTION OR TO TEST.
@@ -210,7 +212,7 @@ XJETMASK        OCT             00040                           # JET 10
 # THIS TASK TURNS THE LEM ASCENT OR DESCENT ENGINE ON AND OFF ACCORDING TOTHE CONSTANTS STORED IN THE FIVE SETS OF
 # REGISTERS, (1) CYLTIMES, WHICH CONTAINS THE NUMBER OF TIMES A PARTICULARSTEP WILL BE REPEATED, (2) NEXTCYLT,
 #  WHICH CONTAINS THE TIME BETWEEN STEPS SCALED FOR T3, (3) ONTIME, WHICH CONTAINS THE TIME TO TURN THE ENGINE ON
-# WHICH ALSO DETERMINES THE LENGTH OF TIME THE ENGINE WILL BE OFF WITHIN A SERIES OF ON:OFF CYCLES, (4) OFFTIME,
+# WHICH ALSO DETERMINES THE LENGTH OF TIME THE ENGIME WILL BE OFF WITHIN A SERIES OF ON:OFF CYCLES, (4) OFFTIME,
 #  WHICH CONTAINS THE NUMBER OF 2 MINUTES BEFORE THE ENGINE WILL BE TURNED OFF, AND (5) OFFTIMER, WHICH
 # CONTAINS THE RESIDUAL TIME BEFORE THE ENGINE WILL BE TURNED OFF.  OFFTIME AND OFFTIMER DETERMINE THE LENGTH
 # OF TIME THE ENGINE WILL BE ON IN ANY ONE CYCLE. THERE ARE THREE SETS OF THESE REGISTERS.
@@ -388,7 +390,7 @@ PERFORM         TC              GRABWAIT                        # KEY RELEASE MA
                 INHINT                                          # ENTER. THE FAIL HAS BEEN RESET.
                 CAF             BIT2                            # 20MS.
                 TC              WAITLIST
-                2CADR           TRIMON                          # CHECK AGAIN TO BE SURE, THEN PROCEED..
+                2CADR           TRIMON                          # CHECK AGAIN TO BE SURE. THEN PROCEED..
 
                 TC              EJFREE
 
