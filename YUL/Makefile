@@ -7,8 +7,8 @@
 
 BASENAME=YUL
 
-# This is highly optimistic, as we will need a Burroughs B800/B1800
-# cross-assembler, and a B800/B1800 simulator in order to run YUL
+# This is highly optimistic, as we will need a Honeywell H800/H1800
+# cross-assembler, and a H800/H1800 simulator in order to run YUL
 # (assuming we get it transcribed correctly)...
 
 H800=$(HOME)/agc/h800
