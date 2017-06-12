@@ -17,12 +17,12 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-05-24 MAS  Created from Sunburst 120.
+##              2017-06-10 MAS  Updated for Sunburst 37.
 
-## NOTE: Page numbers below have not yet been updated to reflect Sunburst 37.
-
-## Page 436
+## Page 416
 		BANK	23
                 EBANK=	XSM
+
 
 
 SILVER          EXTEND
@@ -46,6 +46,7 @@ TORK            CAF     POSMAX
 SELECTX         CAF     TORKX           # BBITS 7AND 10 IN CHANNEL 14 WILL
                 EXTEND                  #  SELECT X GYRO AND TURN ON BCSW 1/3200
                 WOR     14C             # SSEC LATER BY CHANNEL OUTPUT DESIGN.....
+
                 TC      QPLACE
                 
 SELECTY         CAF     TORKY           # BBITS 8 AND 10 TO TORQ Y GYRO
@@ -61,8 +62,7 @@ TORKX           OCT     01100
 TORKY           OCT     01200
 TORKZ           OCT     01300
 
-## Page 437
-
+## Page 417
 SAMODCHK        CAF     ZERO
                 TS      TESTNO
                 TS      RUN
@@ -114,8 +114,7 @@ CHK2            TS      CDUNDX
                 CAF     170ANG
                 INDEX   CDUNDX
                 
-## Page 438
-
+## Page 418
                 TS      THETAD
                 
                 TC      BANKCALL
@@ -130,6 +129,7 @@ CHK2            TS      CDUNDX
                 TC      CALCRATE
                 
                 TC      BANKCALL
+
                 CADR    IMUSTALL
                 TCF     ENDTST03
                 
@@ -166,7 +166,7 @@ CHK5            CS      4+6BITS
                 CAF     FOUR
                 TC      WAITLIST
                 EBANK=	XSM
-## Page 439                
+## Page 419                
                 2CADR   ECE1
                 
                 CAF     ECE2CADR
@@ -186,6 +186,7 @@ ECE2            CS      SIX
                 CAF     ERCTRANG
                 TS      THETAD
                 TS      THETAD +1
+
                 TS      THETAD +2
                 
                 CAF     BIT6
@@ -209,6 +210,7 @@ ECE2            CS      SIX
 CHKX            TC      COARZERO
 
                 CAF     ZERO
+
                 TS      TESTNO
                 
                 TC      BANKCALL
@@ -217,15 +219,17 @@ CHKX            TC      COARZERO
                 CADR    RADSTALL
                 TCF     ENDTST03
 
-## Page 440
+## Page 420
 CHK6            INDEX   TESTNO
                 CAF     RADECNTR
+
                 TS      TANG +1
                 TS      TANG
-                
-		TC	BANKCALL
-		CADR	RRDESNB
 
+                TC      INTPRET
+                CALL
+                        RRDESNB
+                
                 TC      BANKCALL
                 CADR    RADSTALL
                 TCF     ENDTST03
@@ -242,6 +246,7 @@ CHK6            INDEX   TESTNO
                 CAF     ZERO
                 TS      TESTNO
                 TS      ALTRATE
+
                 TS      ALT
                 TS      ALT +1
                 
@@ -266,7 +271,7 @@ CHK7            INDEX   TESTNO
 ENDTST03        TC      BANKCALL
                 CADR    ENDTEST
                 
-## Page 441
+## Page 421
 ERCTRANG        OCT     03013
                 OCT     02660
                 OCT     01042
@@ -276,12 +281,18 @@ ERCTRANG        OCT     03013
                 OCT     74765
     
                 
+
+
+
 RADECNTR        OCT     01463
                 OCT     01042
                 OCT     00000
                 OCT     76736
                 OCT     76315
                 
+
+
+
                 
 RRRATFPS        OCT     00000
                 OCT     00001
@@ -293,13 +304,14 @@ RRRATFPS        OCT     00000
                 OCT     00100
                 OCT     00200
                 OCT     00237
+
                 OCT     00400
                 OCT     00545
                 OCT     00544
                 OCT     77540
                 OCT     77232
                 
-## Page 442
+## Page 422
 CDURATE         EXTEND
                 QXCH    QPLACE
                 
@@ -326,8 +338,10 @@ CDURATE         EXTEND
                 RELINT
                 TC      QPLACE
                 
+
                 
                              
+
 CALCRATE        EXTEND
                 QXCH    QPLACE
                 
@@ -349,7 +363,7 @@ CALCRATE        EXTEND
                         SGNAGREE
                 STORE   DSPTEM2
                 
-## Page 443
+## Page 423
                 EXIT
                 
 RATEDSP         CAF     V06N66X
@@ -363,9 +377,10 @@ RATEDSP         CAF     V06N66X
                 INCR    RUN
                 TC      QPLACE
                 
-## Page 444
+## Page 424
 THETADLD        TS      THETAD
                 TS      THETAD +1
+
                 TS      THETAD +2
                 
                 EXTEND
@@ -387,6 +402,8 @@ THLD1           TS      STOREPL
                 
                 TC      QPLACE
                 
+
+
                 
                 
 FINEALGN        EXTEND
@@ -400,7 +417,7 @@ FINEALGN        EXTEND
                 
                 TC      QPLACE
                 
-## Page 445
+## Page 425
 CH30DSPY        EXTEND
                 QXCH    QPLACE
                 
@@ -409,6 +426,7 @@ CH30DSPY        EXTEND
                 CAF     V01N10X
                 TC      NVSBWAIT
                 TC      FLASHON
+
                 TC      ENDIDLE
                 TCF     ENDTST03
                 TCF     +2
@@ -420,6 +438,8 @@ CH30DSPY        EXTEND
                 
                 
                 
+
+
 ZEROMODE        EXTEND
                 QXCH    QPLACE
                 
@@ -431,6 +451,8 @@ ZEROMODE        EXTEND
                 
                 TC      QPLACE
                 
+
+
                 
                 
 ZEROMAIN        CS      4+6BITS
@@ -443,7 +465,7 @@ ZEROMAIN        CS      4+6BITS
                 
                 TC      Q
                 
-## Page 446
+## Page 426
 RROPRDLY        EXTEND
                 QXCH    QPLAC
                 
@@ -452,6 +474,9 @@ RROPRDLY        EXTEND
                 CAF     V06N40X
                 TCF     OPRTRDLY +4
                 
+
+
+
                 
 OPRTRDLY        EXTEND
                 QXCH    QPLAC
@@ -491,7 +516,7 @@ FINEZERO        EXTEND
                 TS      STATE
                 RELINT
                 
- # Page 447
+ # Page 427
                 TC      BANKCALL
                 CADR    LEMLAB
                 
@@ -518,6 +543,7 @@ DSPYCH30        TC      CH30DSPY
                 TC      QPLAC
                 
                 
+
 COARZERO        CAF     ZERO
                 TS      THETAD
                 TS      THETAD +1
@@ -534,7 +560,7 @@ COARZERO        CAF     ZERO
                 
                 TC      QPLACE
                 
-## Page 448
+## Page 428
 FNZEROFN        EXTEND
                 QXCH    QPLAC
                 
@@ -561,6 +587,7 @@ FZF2            CAE     CDUREADF
                 
                 CAE     CDULIMIT
                 EXTEND
+
                 MSU     CDUZ
                 TS      DSPTEM1 +2
                 
@@ -575,7 +602,7 @@ FZFDSP          CAF     V05N30X
                 INCR    RUN
                 TC      QPLAC
                 
-## Page 449
+## Page 429
 1ANG            OCT     00133
 33.75ANG        OCT     06000
 45ANG           OCT     10000
@@ -584,6 +611,7 @@ FZFDSP          CAF     V05N30X
 135ANG          OCT     30000
 10ANG           OCT     01616
 160ANG          OCT     34344
+
 180ANG          OCT     40000
 225ANG          OCT     50000
 170ANG          OCT     36162
