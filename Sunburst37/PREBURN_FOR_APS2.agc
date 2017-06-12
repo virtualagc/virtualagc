@@ -17,16 +17,16 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-05-24 MAS  Created from Sunburst 120.
+##              2017-06-11 HG   Transcribed
 
-## NOTE: Page numbers below have not yet been updated to reflect Sunburst 37.
-
-## Page 911
-#      PREAPS2 IS A PROGRAM WHICH INITIALIZED **ASCENT** FOR THE 2ND APS
+## Page 851
+#      PREAPS2 IS A PROGRAM WHICH INITIALIZES **ASCENT** FOR THE 2ND APS
 # BURN. IT USES RN AND VN(TIG), PROVIDED BY MIDTOAVE THROUGH MP13, TO COM-
 # PUTE THE P, Q, AND S AXES FOR TRANSFORMATIONS, SETS 3 SWITCHES FOR PRO-
 # PER MODING OF ASCENT, AND TRANSFERS DATA FROM FIXED TO ERASABLE FOR USE
 # AS NOMINALS AT TIG.
 #      IT CALLS ASCENT ONCE TO PROVIDE UT AT IGNITION, AND THEN RESETS THE
+
 # EXIT FROM ASCENT TO GO TO FINDCDUD ON SUBSEQUENT ASCENT ENTRIES.
 
                 BANK            32
@@ -39,6 +39,7 @@ PREAPS2         DXCH            RRETURN
                                 VPATCHER
                 VLOAD
                                 RN                      # LOAD RN*2(N-29)
+
                 VXV             UNIT                    # RN X VN*2(N-36)
                                 VN                      # SAXIS*2(-1)
                 STORE           SAXIS                   # STORE SAXIS
@@ -49,68 +50,64 @@ PREAPS2         DXCH            RRETURN
                                 UNITR                   # LOAD UR*2(-1)
                 VXSC            BVSU                    # UR SIN27*2(-1)
                                 SIN27                   # Q1 COS27-UR SIN27 = Q
+
                 STADR                                   #                                          0
                 STORE           QAXIS                   # STORE QAXIS
                 VXV             VSL1                    # Q X S*2(-2) = P*2(-2)
                                 SAXIS                   # P*2(-1)
                 STOVL           PAXIS1                  # STORE PAXIS
-                                ENGNOM                  # LOAD NOMINAL AT,VE,TBUP
+                                ENGNOM                  # LOAD NOMINAL AT, 1/VE, TBUP
                 STOVL           AT                      # STORE IN ERASE
-                                PREIGN                  # LOAD NOM, 1/DV1, 1/DV2, 1/DV3.
+                                PREIGN                  # LOAD NOM, 1/DV2,1/DV1,KR
                 STODL           ATMEAS                  # STORE IN ERASE
-                                DP.5
-                STODL           KR                      # LOAD PITCH LIMITING PARAMETER
                                 DP0                     # LOAD 0
                 STOVL           KR1                     # STORE IN KR1
                                 VCONOM                  # LOAD NOM. RDOTD,YDOTD,ZDOTD
-                STODL           RDOTD
-                                VTO-APS
-                STORE           VTO
-                SSP             DLOAD
+
+                STODL           RDOTD                   # STORE IN ERASE
+                SSP
                                 ASCRET
                                 PRAPS                   # LOAD RETURN ADD. FROM ASCENT
-                                TGONOM
-                STORE           TGO                     # TGO$2(-17)
-
-## Page 912
-                SR              DAD
-                                11D                     # TGO$2(-28)
-                                TIGNTION
-                STORE           TCO                     # TCO$2(-28)
                 SET             CLEAR
                                 DIRECT                  # DIRECT=1
-                                BAKTO4                  # BAKTO4 = 0
-                SET                                     # TO AVOID CLOBBERING TCO DURING PREBURN
-                                PASS
+                                PASS                    # PASS=0
                 CLEAR           SET                     # CLEAR GUESSW FOR NO COGAVAIL
                                 GUESSW
                                 DONESW                  # TO START LAMBERT
+
+## Page 852
                 CLEAR           GOTO
                                 HC                      # HC=0
+
                                 ASCENT                  # GO TO ASCENT EQUATIONS
 PRAPS           VLOAD           SET
-                                AXISD
+                                UT                      # LOAD DES. THRUST VECTOR
                                 GUESSW                  # SET GUESSW FOR COGAVAIL
                 STOVL           POINTVSM                # STORE FOR CALCMANU
                                 BODYVECT                # LOAD UNIT X-AXIS
                 STORE           SCAXIS                  # STORE FOR CALCMANU
-                SET             CLEAR
-                                DONESW
-                                ENGOFFSW
                 EXIT
                 CA              CDUFAD                  # SET UP FOR NORMAL EXIT FROM ASCENT TO
                 TS              ASCRET                  # FINDCDUD
+
                 CA              PRIO17                  # GIVE LAMBERT A LOWER PRIORITY
                 TS              LAMPRIO
                 EXTEND
                 DCA             RRETURN                 # GO BACK TO MP13
                 DXCH            Z
-ENGNOM          2DEC            .00033086       B9      # AT*2(9)
-                2DEC            30.3030B-7              # VE*2(-7)
-                2DEC            91587.6B-17             # TBUP*2(-17)
-PREIGN          2DEC            15.187B-7               # 1/DV1
-                2DEC            15.157B-7               # 1/DV2
-                2DEC            15.127B-7               # 1/DV3
+COS27           2DEC            .89100652
+SIN27           2DEC            .45399050
+ENGNOM          2DEC            3.20928237      E-4B9   # AT*2(9)
+                2DEC            .0330009301     B4      # (1/VE)*2(4)
+
+                2DEC            94420.4114      B-17    # TBUP*2(-17)
+PREIGN          2DEC            0                       # NOMINAL (1/DV2)*2( )
+                2DEC            0                       # NOMINAL (1/DV1)*2( )
+                2DEC            .5                      # KR*2(-1) FOR APS2
+VCONOM          2DEC            0                       # RDOTD*2(-7)
+
+                2DEC            73.9            B-7
+                2DEC            20              B-7
 DP.5            =               BODYVECT
 DP0             =               BODYVECT        +2
                 EBANK=          PAXIS1
