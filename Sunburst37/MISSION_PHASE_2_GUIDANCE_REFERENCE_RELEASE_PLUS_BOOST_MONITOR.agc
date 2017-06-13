@@ -17,10 +17,9 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-05-24 MAS  Created from Sunburst 120.
+##		2017-06-13 RSB	Transcribed.
 
-## NOTE: Page numbers below have not yet been updated to reflect Sunburst 37.
-
-## Page 673
+## Page 632
 # PROGRAM NAME - MISSION PHASE 2 GUIDANCE REFERENCE RELEASE + BOOST MONITOR.
 
 # MODIFICATION NUMBER - 1         DATE - NOVEMBER 22, 1966                MODIFICATION BY - COVELLI
@@ -70,7 +69,7 @@
 
 
 # NORMAL EXIT MODES :
-## Page 674
+## Page 633
 #    EXIT TO MISSION PHASE 6 AT SIVB SHUTDOWN.
 
 
@@ -79,6 +78,7 @@
 
 #    TO MISSION PHASE 3 IF SUBORBITAL ABORT COMMAND RECEIVED VIA UPLINK.
 #    TO MISSION PHASE 4 IF CONTINGENCY ORBIT INSERTION COMMAND RECEIVED VIA UPLINK.
+
 #    TO CHARALRM IF EITHER OF THE ABOVE ABORT COMMANDS RECEIVED WHILE ABORT COMMAND MONITOR NOT ENABLED.
 
 
@@ -90,13 +90,14 @@
 #          TLIFTOFF      TIME OF LIFTOFF AND LGC CLOCK ZEROING
 #          GRR FLAG      BIT2 FLAGWRD1 SET TO INDICATE GRR SIGNAL RECEIVED
 #          SERVICER IS GOING AT END OF MISSION PHASE 2
+## In the printout, the next two lines, "R000052" and "R000053" are overprinted and not 
+## entirely legible.  The text of the following line has thus been taken from the 
+## corresponding line in SUNBURST 120. &mdash; RSB
 #          MAJOR MODE DISPLAYS
-
-
-
 # ERASABLE INITIALIZATION :
 
-#          DT-LIFT       DELTA TIME FROM GRR TO LIFTOFF, SINGLE PRECISION SCALED AT 2(+14) CS.
+#	   DT-DFITM	 DELTA TIME FROM GRR TO DFI T/M CALIBRATION, SINGLE PRECISION SCALED AT 2(+14) CS.
+#          DT-LIFT       DELTA TIME FROM GRR TO LIFTOFF, DOUBLE PRECISION SCALED AT 2(+28) CS.
 #          DT-LETJT      DELTA TIME FROM LIFTOFF TO POST LET JETTISON, DOUBLE PRECISION SCALED AT 2(+28) CS.
 #          RAVEGON       POSITION AT GRR IN SM CO-ORDINATES, VECTOR SCALED AT 2(+24) M.
 #          VAVEGON       VELOCITY AT GRR IN SM CO-ORDINATES, VECTOR SCALED AT 2(+7) M/CS.
@@ -116,82 +117,89 @@
 
 
 
-GRRPLACE        TC              FLAG1UP
-                OCT             2
-                TC              ENDOFJOB
-MP2TASK         CA              PRIO15
-                TC              FINDVAC
-## Page 675
-                EBANK=          TGRR
-                2CADR           MP2JOB
+GRRPLACE        CAF		THREE			# COME HERE ON VERB 65 - GRR
+		TC		NEWPHASE
+		OCT		00002
+## Page 634
+		INHINT
+		CA		MP2BBSET		# SET BBCON FOR MP2
+		TS		BBANK
+		
+		EXTEND
+		DCA		TIME2
+		DXCH		TGRR			# SAVE TIME OF GUIDANCE REFERENCE RELEASE
+		
+		CS		FLAGWRD1
+		MASK		BIT2
+		ADS		FLAGWRD1		# GET GRR FLAG  BIT2  FLAGWRD1
+		
+		CA		DT-DFITM
+		TC		WAITLIST		# SET UP DFI T/M CALIBRATION ROUTINE
+		EBANK=		TGRR
+		2CADR		PREDFITM
+		
+		EXTEND
+		DCA		DT-LIFT
+		TC		LONGCALL		# SET UP CALL TO LIFTOFF PROGRAM
+		EBANK=		TGRR
+MP2BBS-1	2CADR		LIFTOFF
 
-                CA              DT-LIFT
-                TC              WAITLIST                        # SET UP CALL TO LIFTOFF PROGRAM
-                EBANK=          TGRR
-                2CADR           LIFTOFF
-
-                TC              2PHSCHNG
-                OCT             00375                           # 5.37 SPOT FOR MP2TASK.
-                OCT             00273                           # 3.27 SPOT TO FINISH PRELAUNCH.
-
-                TC              2PHSCHNG
-                OCT             40132                           # 2.13 SPOT FOR LIFTOFF.
-                OCT             00074                           # 4.7 SPOT FOR MP2JOB.
-
-                CAF             BIT2
-                TC              SETRSTRT                        # SET RESTART FLAG
-
-SETPIPDT        CAF             PRIO31                          # TWO SECONDS SCALED AT (CS) X 2(+8)
-                TS              1/PIPADT
-
-                CA              AVEGADRS
-                TS              DVSELECT
-
-                EXTEND
-                DCA             SVEXADRS
-                DXCH            AVGEXIT
-
-                EXTEND
-                DCA             SVEXADRS
-                DXCH            DVMNEXIT
-
-                CA              EBANK5
-                TS              EBANK
-                CA              EBANK4
-                TS              Q
-                EBANK=          TEMPTIME
-                EXTEND                                          # GET TEMPTIME
-                DCA             TEMPTIME
-                DXCH            TPRELTER
-                EXTEND
-                DCA             TPRELTER
-                EXTEND
-                QXCH            EBANK
-                EBANK=          TAVEGON
-                DXCH            TAVEGON                         # STORE IN TAVEGON
-
-                EBANK=          TGRR
-## Page 676
-                EXTEND
-                DCA             BBBBBBBB
-                DTCB
-                EBANK=          DVCNTR
-BBBBBBBB        2CADR           BIBIBIAS
+		CA		AVEGADRS
+		TS		DVSELECT
+		
+		EXTEND
+		DCA		SVEXADRS
+		DXCH		AVGEXIT
+		
+		EXTEND
+		DCA		SVEXADRS
+		DXCH		DVMNEXIT
+		
+		CA		ONE
+		TC		WAITLIST
+		EBANK=		DVTOTAL
+		2CADR		BIBIBIAS		# START SERVICER WITH NO LAST BIAS
+		
+		CAF		ZERO
+		TC		NEWPHASE
+		OCT		00002
+		CAF		EBANK4
+		TS		Q			# E4 IN Q
+		EXTEND
+		DCA		TGRR			# IN A,L
+		EXTEND
+		DXCH		EBANK			# SWITCH EBANK, SAVE OLD IN Q
+		EBANK=		TEVENT
+		DXCH		TEVENT			# SET TGRR IN TEVENT
+## Page 635		
+		EBANK=		TGRR
+		EXTEND
+		QXCH		EBANK			# RESTORE EBANK
+		
+		TCF		ENDOFJOB
+		
+MP2BBSET	EQUALS		MP2BBS-1	+1	# BBCON FOR MP2
 
 
+MP2JOB		TC		PHASCHNG
+		OCT		01022			# PICK UP HERE ON RESTART
+		
+		CAF		TWO			# SET 2 IN MISSION PHASE REGISTER
+		TS		PHASENUM
+		
+		EXTEND
+		DCA		TEMTPREL		# SAVE TIME OF PRELAUNCH TERMINATION
+		DXCH		TPRELTER
+		
+SHOW7		TC		NEWMODEX		# DISPLAY 7 IN MAJOR MODE
+		OCT		00007
+		
+# GO TO MATRXJOB TO COPUTE REFSMMAT				
 
-MP2JOB          TC              INTPRET
-                SSP             DLOAD
-                                PHASENUM
-                                2
-                                TPRELTER
-                STORE           TGRR
-                STORE           TEVENT                          # FOR DOWNLINK.
-
-## Page 677
-# PROGRAM DESCRIPTION- MATRXJOB                                           DATE: 18 JAN 1967
-# MOD NO: 2                                                               LOG SECTION- MP 2 GRR + BOOST MONITOR
-# MOD BY: MILLER, LICKLY, KERNAN                                          ASSEMBLY: SUNBURST REVISION 79
+## Page 636
+# PROGRAM DESCRIPTION- MATRXJOB                                           DATE- 18 NOV 1966
+# MOD NO- 1                                                               LOG SECTION- MP 2 GRR + BOOST MONITOR
+# MOD BY- LICKLY, KERNAN                                              	  ASSEMBLY- SUNBURST REVISION 8
 
 # FUNCTIONAL DESCRIPTION
 
@@ -213,14 +221,14 @@ MP2JOB          TC              INTPRET
 
 # LOCAL VERTICAL(IR) = COS(LAT)COS(AZGR), COS(LAT)SIN(AZGR), SIN(LAT)  IN INERTIAL REFERENCE
 
-# LOCAL EAST(IR) = UNIT(NXV) = -SIN(AZGR), COS(AZGR), 0  IN INERTIAL REFERENCE
+# LOCAL EAST(IR) = NXV = -COS(LAT)SIN(AZGR), COS(LAT)COS(AZGR), 0  IN INERTIAL REFERENCE
 
 # LOCAL SOUTH(IR) = E(IR) X V(IR)
 
-#          THE RELATIONSHIP OF THE STABLE MEMBER AXES TO THE V. S, F AXES IS GIVEN BY ZSMAZ, THE ANGLE FROM NORTH
+#          THE RELATIONSHIP OF THE STABLE MEMBER AXES TO THE V, S, E AXES IS GIVEN BY ZSMAZ, THE ANGLE FROM NORTH
 # TO ZSM, AND TILT, THE ANGLE ABOUT ZSM FROM VERTICAL TO XSM.
 
-# ZSM(IR) = EAST(IR)SIN(ZSMAZ) - SOUTH(IR)COS(ZSMAZ)
+# ZSM(IR) = EAST(IR)COS(ZSMAZ - 90) + SOUTH(IR)SIN(ZSMAZ - 90)
 
 # YSM(IR) = (ZSM(IR) X V(IR))COS(TILT) - V(IR)SIN(TILT)
 
@@ -239,7 +247,7 @@ MP2JOB          TC              INTPRET
 
 # 2) TILT         THE ROTATION OF XSM ABOUT ZSM (RIGHT HAND RULE) FROM VERTICAL IN REVOLUTIONS.
 
-## Page 678
+## Page 637
 # 3) ZSMAZ        THE ANGLE FROM NORTH TO ZSM IN REVOLUTIONS.
 
 # THE OUTPUTS OF THIS PROGRAM ARE:
@@ -255,7 +263,8 @@ MP2JOB          TC              INTPRET
 
 # DEBRIS-  SPECIALS, CENTRALS AND EXECUTIVE WORK AREA.
 
-MATRXJOB        DLOAD           SR
+MATRXJOB        TC		INTPRET
+		DLOAD           SR
                                 TPRELTER                        # MAKE ALIGN STOP TIME TP.
                                 14D
                 TAD             RTB
@@ -282,44 +291,40 @@ MATRXJOB        DLOAD           SR
                 STORE           AZGR                            # VERT. AZ. AT RELEASE WRT X-Z INERTIAL.
 
                 SIN
-                STODL           REFSMMAT        +6              # SIN(AZGR).
-                                AZGR
-                COS
-                STODL           MPAC            +3              # Y OF EAST IN INERTIAL = COS(AZGR).
-                                P37BLAT                         # LOCAL VERTICAL Z IN EARTH REF. SIN(L).
-                SIN
+                PDDL		COS
+                		AZGR
+                PDDL		SIN
+                		P37BLAT				# LOCAL VERTICAL Z IN EARTH REF. SIN(L).
                 STODL           REFSMMAT        +4              # ALSO LOCAL VERT Z IN REF. INERTIAL.
                                 P37BLAT
-
-## Page 679
                 COS             SL1                             # SAVES 2 SL'S LATER.
+## Page 638
                 STORE           20D                             # LOCAL VER. X IN EARTH REF.  COS(L).
-                DMP
-                                MPAC            +3
-                STODL           REFSMMAT                        # X OF VERT IN INERTIAL = COS(L)COS(AZGR).
-                                REFSMMAT        +6              # SIN(AZGR).
+                DMP		STADR
+                STORE		REFSMMAT			# LOCAL VERT X IN INERTIAL = COS(L)COS(AZ)
+                STODL		MPAC            +3		# ALSO Y OF EAST IN INERTIAL.
+                		DPZRO
+                STODL           MPAC		+5		# Z OF EAST IN INERTIAL = 0.
                 DMP
                                 20D
-                STODL           REFSMMAT        +2              # Y OF VERT IN INERTIAL = COS(L)SIN(AZGR).
-                                DPZRO
-                STODL           MPAC            +5              # Z OF EAST IN INERTIAL = 0.
-                                REFSMMAT        +6              # SIN(AZGR).
+                STORE           REFSMMAT        +2              # LOCAL VERT Y IN INERTIAL=COS(L)SIN(AZ).
                 DCOMP           RTB                             # ALSO -X OF EAST IN INERTIAL.
                                 VECMODE                         # SET STORE MODE TO VECTOR.
-                PUSH            VXV                             # INERTIAL EAST INTO PD.
+                PUSH            VXV                             # EAST INTO PD.
                                 REFSMMAT
-                UNIT                                            # INERTIAL SOUTH = UNIT(EXV).
-                STODL           REFSMMAT        +12D            # INTO REF +12D  (TEMP).
+                UNIT                                            
+                STODL           REFSMMAT        +12D            # UNIT SOUTH IN INERTIAL INTO REF +12TEMP
                                 ZSMAZ                           # ZSM WRT NORTH.
-                COS             VXSC
-                                REFSMMAT        +12D            # SOUTH(IR)COS(ZSMAZ).
-                STODL           REFSMMAT        +12D            # INTO REF +12D  (TEMP).
-                                ZSMAZ
-                SIN             VXSC                            # EAST(IR)SIN(ZSMAZ).
-                VSU             UNIT
-                                REFSMMAT        +12D            # UNIT(ZSM) IN INERTIAL =
-                STORE           REFSMMAT        +12D            # EAST(IR)SIN(ZSMAZ) - SOUTH(IR)COS(ZSMAZ)
-
+                DSU		PUSH				# AZ - 90 = ANG INTO PD.
+                		90DEG
+                SIN             VXSC
+                                REFSMMAT        +12D            # (STH)SIN(ANG) INTO R +12D (TEMP).
+                STODL		REFSMMAT	+12D		# ANG FROM PD.
+                COS		VXSC				# EAST FROM PD.
+                VAD		UNIT
+                		REFSMMAT	+12D
+                STORE		REFSSMAT	+12D		# ZREFSM = (E)COS(ANG) + (STH)SIN(ANG).
+                                
                 VXV             UNIT
                                 REFSMMAT                        # YREFSM(UNTILTED)= Z CROSS VERT = Y1.
                 PDDL            COS                             # INTO PD.
@@ -338,11 +343,18 @@ MATRXJOB        DLOAD           SR
                 EXIT
 
                 TC              PHASCHNG
-                OCT             00004                           # DEACTIVATE GROUP 4
-
+                OCT             00072                           # RESTART PREDFITM
                 TC              ENDOFJOB
 
-## Page 680
+PREDFITM	TC		PHASCHNG
+		OCT		40042				# PROTECT WAITLIST CALL TO PROG11
+
+## Page 639
+DFITMTSK	TC		IBNKCALL
+		CADR		DFITMCAL
+		
+		TCF		TASKOVER
+
 DFITMCAL        TC              1LMP                            # MUST BE CALLED BY IBNKCALL (OR ISWCALL)
                 DEC             236                             #   IN INTERRUPT OR INHIBITED
                 CA              12SEC
@@ -355,131 +367,159 @@ DFITMCAL        TC              1LMP                            # MUST BE CALLED
 DFITMCL1        TC              2LMP
                 DEC             237                             # DFI T/M CALIBRATE OFF
                 DEC             198                             # MASTER C+W ALARM RESET - COMMAND
-                TC              FIXDELAY
-                DEC             200                             # DELAY 2 SECONDS
+                TC              PHASCHNG
+                OCT		40113                           # PROTECT DFITMCL2
+
+		CA		200CS
+		TC		WAITLIST			# CALL DFITMCL2 IN 2 SECONDS
+		EBANK=		TGRR
+		2CADR		DFITMCL2
+		
+		TCF		TASKOVER
 
 DFITMCL2        TC              1LMP
                 DEC             199                             # MASTER C+W ALARM RESET - COMMAND RESET
+                CA		ZERO
+                TC		NEWPHASE
+                OCT		00003				# GROUP 3 INACTIVE
                 TCF             TASKOVER
 
-LIFTOFF         TC              NEWMODEX                        # DISPLAY MAJOR MODE 11
-                OCT             11
+LIFTOFF		EXTEND
+		DCA		TIME2
+		DXCH		TLIFTOFF			# SAVE TIME OF LIFTOFF
+		
+		TC		PHASCHNG
+		OCT		01013				# PICK UP HERE ON RESTART
+		
+		CA		ZERO
+		TS		L
+		DXCH		TIME2				# ZERO TIME2, TIME1
+		
+		TC		PHASCHNG
+		OCT		40062				# PROTECT RCSPURGE AND SHOW11
+		
+		CA		105SEC
 
-                CA              61OCT
-                TC              NEWPHASE                        # IMMEDIATE RESTART HERE
-                OCT             2
+## Page 640
+		TC		WAITLIST			# CALL RCSPURGE IN 105 SECONDS
+		EBANK=		TGRR
+		
+		2CADR		RCSPURGE
+		
+		EXTEND
+		DCA		DT-LETJT
+		TC		LONGCALL
+		EBANK=		TGRR
+		2CADR		POSTLET
+		
+		CA		PRIO20
+		TC		NOVAC
+		EBANK=		TGRR
+		2CADR		SHOW11
+		
+		CAF		EBANK4
+		TS		Q				# E4 IN Q
+		EXTEND
+		DCA		TLIFTOFF			# IN A,L
+		EXTEND
+		QXCH		EBANK				# SWITCH EBANK, SAVE OLD IN Q
+		EBANK=		TEVENT
+		DXCH		TEVENT				# SET TLIFTOFF IN TEVENT
+		EBANK=		TGRR
+		EXTEND
+		QXCH		EBANK				# RESTORE EBANK
+		
+		TCF		TASKOVER
+		
+SHOW11		TC		NEWMODEX
+		OCT		00011				# DISPLAY 11 IN MAJOR MODE
+		
+		TC		PHASCHNG
+		OCT		00132				# PROTECT RCSPURGE
+		TCF		ENDOFJOB
 
-REDO2.61        ZL                                              # THIS SECTION OF CODING ZEROES THE LGC
-                CS              HALF                            # CLOCK AND MAKES THE CORRESPONDING
-                DOUBLE                                          # CORRECTION TO TBASE5 , SO THAT READACCS
-                AD              TIME1                           # IS NOT CALLED TOO SOON. THE NEW TBASE5
-                ADS             TBASE5                          # IS OVERFLOW CORRECTED.
-
-                CA              ZERO
-                DXCH            TIME2
-                DXCH            TLIFTOFF                        # SAVE TIME OF LIFTOFF
-
-                CA              63OCT
-                TC              NEWPHASE                        # DO NOT REPEAT THE ABOVE
-                OCT             2
-
-REDO2.63        EXTEND
-                DCA             DT-LETJT
-                TC              LONGCALL
-                EBANK=          TGRR
-                2CADR           POSTLET
-
-                TC              2PHSCHNG
-                OCT             00073                           # RESTART POSTLET LONGCALL GROUP 3
-                OCT             25012                           # AND CONTINUE LIFTOFF (SET LONGBASE HERE)
-                OCT             77777
-
-## Page 681
-                TC              2PHSCHNG
-                OCT             2
-                OCT             47016                           # PROTECT RCSPURGE.
-                DEC             10500
-                EBANK=          TGRR
-                2CADR           RCSPURGE
-
-                TC              FIXDELAY
-                DEC             10500
 RCSPURGE        CA              +XJETSON
                 EXTEND
                 WRITE           5                               # TURN ON +X TRANSLATION
 
+		CA		75SEC
+		TC		WAITLIST			# CALL +X TRANSLATION OFF IN 75 SECONDS
+		EBANK=		TGRR
+		2CADR		PURGEOFF
+
                 TCF             TASKOVER
 
 
-POSTLET         CS              FLAGWRD2                        # ENABLE ABORT COMMAND MONITOR
+POSTLET         CA		BOOSTADR			# MONITOR DELV FOR BOOSTER SHUTDOWN
+		TS		DVSELECT	
+## Page 641		
+
+		CS              FLAGWRD2                        # ENABLE ABORT COMMAND MONITOR
                 MASK            BIT9                            # BIT 9  FLAGWORD 2
                 ADS             FLAGWRD2
-
-                TC              NEWMODEX
-                OCT             12                              # MAJOR MODE 12
 
                 CA              BIT1
                 TC              WAITLIST                        # ENABLE TUMBLE MONITOR
                 EBANK=          OMEGA
                 2CADR           TUMTASK
 
-                TC              2PHSCHNG
-                OCT             00053                           # RESTART TUMTASK GR 3
-                OCT             47012
-                DEC             1000
-                EBANK=          TGRR
-                2CADR           MONBOOST
+		
+		CA		PRIO20
+		TC		NOVAC
+		EBANK=		TGRR
+		2CADR		SHOW12
+		
+		TCF		TASKOVER
+		
+SHOW12		TC		NEWMODEX
+		OCT		00012				DISPLAY 12 IN MAJOR MODE
+		TCF		ENDOFJOB		
 
-                TC              FIXDELAY
-                DEC             1000                            # WAIT 10 SECONDS FOR STAGING + SIVB IGN.
-
-MONBOOST        CA              BOOSTADR                        # MONITOR DELV FOR BOOSTER SHUTDOWN
-                TS              DVSELECT
-
-                TC              PHASCHNG
-                OCT             47012
-                DEC             2100
-                EBANK=          TGRR
-                2CADR           PURGEOFF
-
-                TC              FIXDELAY
-                DEC             2100                            # WAIT 21 SECONDS
-
-## Page 682
 PURGEOFF        CA              ZERO
-                TC              NEWPHASE
-                OCT             6
-
-                CA              ZERO
-                EXTEND
-                WRITE           6
                 EXTEND
                 WRITE           5                               # TURN OFF RCS JETS
 
-                TC              1LMP+DT
+                TC              1LMP
                 DEC             186                             # ECS PRIMARY WATER VALVE OPEN
 
-                DEC             200                             # WAIT 2 SECONDS
+		TC		PHASCHNG
+		OCT		40172				# PROTECT WATEROFF
+		
+		CA		200CS
+		TC		WAITLIST			# CALL WATEROFF IN 2 SECONDS
+		EBANK=		TGRR
+		2CADR		WATEROFF
+		
+		TCF		TASKOVER
 
 WATEROFF        TC              1LMP
                 DEC             187                             # ECS PRIMARY WATER VALVE - OPEN RESET
-                
                 TC              PHASCHNG
-                OCT             00002                           # DEACTIVATE GROUP 2
+                OCT             00002                           # GROUP 2 INACTIVE
 
                 TCF             TASKOVER                        # END OF MISSION PHASE 2
-
 
                 
                                                                 # DELTA T S AND OTHER CONSTANTS FOR MP2
 AVEGADRS        GENADR          AVERAGEG
 BOOSTADR        GENADR          BOOSTMON
+## Page 642
 SVEXADRS        EQUALS          SVEXITAD
+200CS		DEC		200
 12SEC           DEC             1200
+75SEC		DEC		7500
+105SEC		DEC		10500
 WEARTH          2DEC            31.1539787      B-5             # REVOLUTIONS PER 2(28) CENTISECONDS.
 
-+XJETSON        OCT             00252                           # BITS FOR +X TRANSLATION JETS
+AZ0		2DEC		0				# TEMP
 
+P37BLONG	2DEC		.77620852			# 80 DEG 33 MIN 53.76306 SEC WEST
+
+P37BLAT		2DEC		.079252160			# 28 DEG 31 MIN 50.79945 SEC NORTH
+
+90DEG		2DEC		.25
+
++XJETSON        OCT             00252                           # BITS FOR +X TRANSLATION JETS
 
 
                                                                 # ABORT COMMAND MONITOR - DETECTS
@@ -493,67 +533,42 @@ SUBABORT        INHINT                                          # SUBORBITAL ABO
 CONORBIT        INHINT                                          # CONTINGENCY ORBIT INSERTION - ABORTNDX
                 CAF             TWO                             # SET TO 2 TO SET UP MISSION PHASE 4
                 TS              L                               # SAVE IN L
-                CS              FLAGWRD2                        # CHECK ABORT RECEIVED FLAG TO INSURE THAT
-
-                MASK            BIT10                           # MULTIBLE TRANSMISSIONS DON'T START
-## Page 683
-                EXTEND                                          # MULTIBLE JOBS.  SINCE MULTIBLE XMISSIONS
-                BZF             ENDOFJOB                        # ARE THE RULE, LEAVE WITH NO ALARM.
-                CS              FLAGWRD2                        # IS ABORT COMMAND MONITOR ENABLED
-
-                MASK            BIT9
+                CAF		BIT9				# CHECK WHETHER ABORT COMMAND MONITOR IS
+                MASK		FLAGWRD2			# ENABLED
                 EXTEND
-                BZF             SETABORT                        # YES.
-
-                TC              ALARM                           # ABORT NOT ENABLED, SET ALARM AND EXIT.
-                OCT             00300
-                TC              ENDOFJOB
-
-SETABORT        INHINT
-                CA              EBANK3
-                TS              EBANK
-                LXCH            ABORTNDX                        # STORE ABORTNDX
-                CAF             AVEGADRS
-                TS              DVSELECT                        # TURN OFF BOOSTMON
-                TC              2PHSCHNG
-                OCT             00004
-                OCT             00006
-                TC              2PHSCHNG
-                OCT             00003
-                OCT             07022
-                OCT             21000
-                EBANK=          ABORTNDX
-                2CADR           TUMBL3/4
-
-                TC              FLAG2UP
-                OCT             01000                           # ABORT RECEIVED FLAG
-                TC              POSTJUMP
-                CADR            ENEMA                           # WIPE EVERYTHING OUT
-
-
-
-TUMBL3/4        INHINT
-                CA              BIT1
-                TC              WAITLIST                        # RE-ESTABLISH TUMBLE MONITOR
-                EBANK=          OMEGA
-                2CADR           TUMTASK
-
-                TC              2PHSCHNG
-                OCT             00053                           # 3.5 SPOT FOR TUMTASK
-                OCT             04022                           # GR 2 FOR ABORT3/4
-
-ABORT3/4        INHINT
-                CAF             PRIO27
-                TS              NEWPRIO                         # SET UP MP3 OR MP4 VIA SPVAC
-
+                BZF		BADCHAR				# IF NOT, GO TO BADCHAR
+                CAF		EBANK3				# SET EBANK
+                TS		EBANK
+                LXCH		ABORTNDX			# STORE ABORTNDX
+                CAF		AVEGADRS
+                
+                TS		DVSELECT			# TURN OFF BOOSTMON
                 EXTEND
-## Page 684
+                DCA		ABORTRET			# SET UP TO RETURN TO ABORTRTN
+                DXCH		FLUSHREG
+                TC		POSTJUMP
+                CADR		ENEMA				# WIPE EVERYTHING OUT
+                
+                
+ABORTRTN	INHINT
+		EXTEND
+		DCA		ENDJOBC2			# CLEAR FLUSHREG
+## Page 643		
+    		DXCH		FLUSHREG
+    		
+    		CAF		BIT1
+    		TC		WAITLIST			# RE-ESTABLISH TUMBLE MONITOR
+    		EBANK=		OMEGA
+    		2CADR		TUMTASK
+    		
+    		CAF		PRIO27
+    		TS		NEWPRIO				# SET UP MP3 OR MP4 VIA SPVAC
+                
+                EXTEND
                 INDEX           ABORTNDX                        # GET RIGHT 2CADR
                 DCA             MP3-4ADR
-                TC              SPVAC                           # SET UP ABORT JOB.
-
+                TC              SPVAC                           # SET UP JOB
                 TCF             ENDOFJOB
-
 
 
                 EBANK=          TDEC
@@ -562,6 +577,10 @@ MP3-4ADR        2CADR           MP03JOB                         # DO NOT CHANGE 
                 EBANK=          TDEC
                 2CADR           MP4JOB                          # THEY ARE IN AN INDEXED TABLE
 
+BADCHAR		RELINT
+		TC		POSTJUMP			# ILLEGAL CHARACTER    BACK TO PINBALL
+		CADR		CHARALRM
+
                 EBANK=          TDEC                            # LEFT-OVERS FROM DELETED MISSION PHASE 18
 MIDAVEAD        2CADR           MIDTOAVE
 
@@ -569,51 +588,8 @@ MIDAVEAD        2CADR           MIDTOAVE
 SVEXITAD        2CADR           SERVEXIT
 
 
+		EBANK=		ABORTNDX
+ABORTRET	2CADR		ABORTRTN
 
-61OCT           OCT             61
-63OCT           OCT             63
-
-## Page 685
-# SET UP & EXECUTE JOB TO ADD VELOCITY CORRECTION TO VN:
-
-                EBANK=          GTSWTLST
-
-LIFTFIXT        CA              PRIO17                          # LESS THAN PRELAUNCH OR NORMLIZE
-                TC              FINDVAC
-                EBANK=          OLDGT
-                2CADR           LIFTFIX
-
-                TC              TASKOVER
-
-
-
-LIFTFIX         CS              PIPTIME         +1              # PRELAUNCH BY NOW HAS FOUND THE GRR FLAG
-                AD              OLDGT                           # & SUBSEQUENTLY BEEN THRU PREREAD, VIA
-                EXTEND                                          # MP2TASK.
-                BZMF            +3
-                AD              NEG1/2                          # (IF TIME1 OVERFLOWED)
-                AD              NEG1/2
-                TS              MPAC            +3
-
-                TC              INTPRET
-
-                SLOAD           DDV
-                                MPAC            +3
-                                -1SEC214                        # MAKE THE TIME-RATIO POSITIVE.
-                VXSC            PDVL
-                                GDT/2
-                                DELV
-                VAD             VSL1
-                                DELVBUF
-                VXSC            VAD
-                                KPIP1
-                VAD
-                                VN
-                STORE           VN
-
-                EXIT
-                TC              ENDOFJOB
-
-
-
--1SEC214        2DEC            -100            B-14
+		EBANK=		ABORTNDX
+ENDJOBC2	2CADR		ENDOFJOB

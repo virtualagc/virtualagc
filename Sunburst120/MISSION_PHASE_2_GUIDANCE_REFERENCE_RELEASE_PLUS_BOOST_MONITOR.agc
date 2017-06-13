@@ -12,6 +12,7 @@
 ##		2016-10-32 RSB	Typos.
 ##		2016-12-06 RSB	Comments proofed using octopus/ProoferComments,
 ##				changes made.
+##		2017-06-13 RSB	Fixes identified whilst transcribing SUNBURST 37.
 
 ## Page 673
 # PROGRAM NAME - MISSION PHASE 2 GUIDANCE REFERENCE RELEASE + BOOST MONITOR.
@@ -210,7 +211,11 @@ MP2JOB          TC              INTPRET
 
 # LOCAL SOUTH(IR) = E(IR) X V(IR)
 
-#          THE RELATIONSHIP OF THE STABLE MEMBER AXES TO THE V. S, F AXES IS GIVEN BY ZSMAZ, THE ANGLE FROM NORTH
+## In the following line, the printout reads "... V. S, F AXES ..."; however,
+## the corresponding line in SUNBURST 37 is "... V, S, E AXES ...", which is 
+## clearly correct in terms of content.  My assumption is that the SUNBURST 120
+## printout is faulty and that SUNBURST 37 is correct. &mdash; RSB
+#          THE RELATIONSHIP OF THE STABLE MEMBER AXES TO THE V, S, E AXES IS GIVEN BY ZSMAZ, THE ANGLE FROM NORTH
 # TO ZSM, AND TILT, THE ANGLE ABOUT ZSM FROM VERTICAL TO XSM.
 
 # ZSM(IR) = EAST(IR)SIN(ZSMAZ) - SOUTH(IR)COS(ZSMAZ)
