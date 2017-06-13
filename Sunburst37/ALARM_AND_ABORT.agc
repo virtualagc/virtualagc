@@ -19,7 +19,7 @@
 ## Mod history: 2017-05-24 MAS  Created from Sunburst 120.
 ##              2017-06-01 TVB  Transcribed
 ##              2017-06-13 HG   Fix operator TCF -> TC
-                                Remove tabs
+##                              Remove tabs
 
 ## Page 300
 
