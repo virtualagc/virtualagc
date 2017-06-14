@@ -18,6 +18,9 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-05-24 MAS  Created from Sunburst 120.
 ##		2017-06-13 RSB	Transcribed.
+##              2017-06-13 HG   Fix operator DXCH ->QXCH
+##                              Fix operator REFSSMAT -> REFSMMAT
+##                              Fix comment (missing #) near label SHOW12
 
 ## Page 632
 # PROGRAM NAME - MISSION PHASE 2 GUIDANCE REFERENCE RELEASE + BOOST MONITOR.
@@ -168,7 +171,7 @@ MP2BBS-1	2CADR		LIFTOFF
 		EXTEND
 		DCA		TGRR			# IN A,L
 		EXTEND
-		DXCH		EBANK			# SWITCH EBANK, SAVE OLD IN Q
+		QXCH		EBANK			# SWITCH EBANK, SAVE OLD IN Q
 		EBANK=		TEVENT
 		DXCH		TEVENT			# SET TGRR IN TEVENT
 ## Page 635		
@@ -323,7 +326,7 @@ MATRXJOB        TC		INTPRET
                 COS		VXSC				# EAST FROM PD.
                 VAD		UNIT
                 		REFSMMAT	+12D
-                STORE		REFSSMAT	+12D		# ZREFSM = (E)COS(ANG) + (STH)SIN(ANG).
+                STORE		REFSMMAT	+12D		# ZREFSM = (E)COS(ANG) + (STH)SIN(ANG).
                                 
                 VXV             UNIT
                                 REFSMMAT                        # YREFSM(UNTILTED)= Z CROSS VERT = Y1.
@@ -472,7 +475,7 @@ POSTLET         CA		BOOSTADR			# MONITOR DELV FOR BOOSTER SHUTDOWN
 		TCF		TASKOVER
 		
 SHOW12		TC		NEWMODEX
-		OCT		00012				DISPLAY 12 IN MAJOR MODE
+		OCT		00012				# DISPLAY 12 IN MAJOR MODE
 		TCF		ENDOFJOB		
 
 PURGEOFF        CA              ZERO
