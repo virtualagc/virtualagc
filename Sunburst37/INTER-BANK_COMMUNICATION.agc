@@ -18,6 +18,8 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-05-24 MAS  Created from Sunburst 120.
 ##              2017-06-03 TVB  Transcribed.
+##              2017-06-14 HG   Fix opcode CA -> DCA
+##                              Add missing EXTEND
 
 ## Page 888
 #          THE FOLLOWING ROUTINE CAN BE USED TO CALL A SUBROUTINE IN ANOTHER BANK. IN THE BANKCALL VERSION, THE
@@ -87,8 +89,9 @@ SUPDACAL        TS              MPTEMP
                 INHINT                                          # BECAUSE RUPT DOES NOT SAVE SUPERBANK.
                 EXTEND                                          
                 WRITE           SUPERBNK                        # SET SUPERBANK FOR DATA.
+                EXTEND
                 INDEX           L                               
-                CA              10000                           
+                DCA             10000                           
 
                 XCH             MPTEMP                          # SAVE 1ST WD, FETCH OLD FBANK AND SBANK.
                 EXTEND                                          
