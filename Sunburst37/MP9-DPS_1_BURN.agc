@@ -18,6 +18,8 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-05-24 MAS  Created from Sunburst 120.
 ##		2017-06-14 RSB	Transcribe
+##              2017-06-14 HG   Fix operand THRUSTCMD -> THRSTCMD
+#3                                          AVEXIT    -> AVGEXIT
 
 ## Page 684
 # MISSION PHASE 9
@@ -307,7 +309,7 @@ MAXTHR9		CAF		POSMAX				# CALL FOR 92.5 PERCENT THRUST
 		DTCB
 		
 		CAF		92PERTHR			# REPORT THRUST TO DAP
-		TS		THRUSTCMD
+		TS		THRSTCMD
 		TCF		TASKOVER			# END TIG9-0 TASK
 		
 		EBANK=		TDEC				# DECLARE EBANK=4
@@ -355,7 +357,7 @@ CUTOFF		TC		ENGINOFF			# ENGINE OFF
 
 MP9TERM1	EXTEND
 		DCA		EXITADR
-		DXCH		AVEXIT
+		DXCH		AVGEXIT
 
 	        INHINT
                 CAF             5SECS9
