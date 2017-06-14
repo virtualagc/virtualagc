@@ -18,6 +18,7 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-05-24 MAS  Created from Sunburst 120.
 ##		2017-06-14 RSB	Transcribed.
+##              2017-06-14 HG   Fix operand EBANK -> EBANK4
 
 ## Page 669
                 BANK            25
@@ -256,7 +257,7 @@ SIVB3           TC              1LMP+DT
 		TS		DELAREA		+1
 		
 		EBANK=		TDEC
-		CAF		EBANK
+		CAF		EBANK4
 		TS		EBANK
 
                 TC              FIXDELAY                        # WAIT 900 MILLISECONDS

@@ -18,6 +18,7 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-05-24 MAS  Created from Sunburst 120.
 ##		2017-06-09 RSB	Transcribed.
+##              2017-06-14 HG   Add missing label STCTR1
 
 ## Page 569
 # PROGRAM NAME: AOSTASK           MOD. NO. 1  DATE: NOVEMBER 20, 1966
@@ -341,7 +342,7 @@ STCTR           TS              INERCTR                         # J=2,1,0 FOR IZ
                 EXTEND                                          
                 DIM             INERCTRX                        # JX=5,4,3 OR 2,1,0 FOR Z,Y,X COEF
 
-	        CA              MASS                            # IN KGS (+15)
+STCTR1	        CA              MASS                            # IN KGS (+15)
                 EXTEND                                          
                 INDEX           INERCTRX                        
                 MP              INERCONC                        

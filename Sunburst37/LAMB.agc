@@ -18,6 +18,7 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-05-24 MAS  Created from Sunburst 120.
 ##              2017-06-10 MAS  Updated for Sunburst 37.
+##              2017-06-14 HG   Fix interpretive operand COGAMIN -> COGAMN
 
 ## Page 865
 		BANK	36
@@ -243,7 +244,7 @@ ABSMIN		SETPD	DLOAD		#                              PL AT 0D
 ## Page 870
 			+5
 
-			COGAMIN		# COGAVAIL IS A BAD GUESS, SO PUT
+			COGAMN		# COGAVAIL IS A BAD GUESS, SO PUT
 		STORE	COGAVAIL	# COGAMN IN COGAVAIL
 		GOTO
 			LOOP
