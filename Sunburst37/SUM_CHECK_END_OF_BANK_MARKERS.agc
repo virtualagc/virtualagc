@@ -17,75 +17,81 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-05-24 MAS  Created from Sunburst 120.
+##              2017-06-14 HG   Transcribed
 
-## NOTE: Page numbers below have not yet been updated to reflect Sunburst 37.
+## Page 885
+                BNKSUM          00
 
-## Page 946
-		BNKSUM		00
+                BNKSUM          01
 
-		BNKSUM		01
+                BNKSUM          02
 
-		BNKSUM		02
+                BNKSUM          03
 
-		BNKSUM		03
 
-		BNKSUM		04
+                BNKSUM          04
 
-		BNKSUM		05
+                BNKSUM          05
 
-		BNKSUM		06
+                BNKSUM          06
 
-		BNKSUM		07
+                BNKSUM          07
 
-		BNKSUM		10
+                BNKSUM          10
 
-		BNKSUM		11
 
-		BNKSUM		12
+                BNKSUM          11
 
-		BNKSUM		13
+                BNKSUM          12
 
-		BNKSUM		14
+                BNKSUM          13
 
-		BNKSUM		15
+                BNKSUM          14
 
-		BNKSUM		16
+                BNKSUM          15
 
-		BNKSUM		17
+                BNKSUM          16
 
-		BNKSUM		20
 
-		BNKSUM		21
+                BNKSUM          17
 
-		BNKSUM		22
+                BNKSUM          20
 
-		BNKSUM		23
+                BNKSUM          21
 
-		BNKSUM		24
+                BNKSUM          22
 
-		BNKSUM		25
+                BNKSUM          23
 
-		BNKSUM		26
 
-		BNKSUM		27
+                BNKSUM          24
 
-		BNKSUM		30
-## Page 947
-		BNKSUM		31
+                BNKSUM          25
 
-		BNKSUM		32
+                BNKSUM          26
 
-		BNKSUM		33
+                BNKSUM          27
 
-		BNKSUM		34
+                BNKSUM          30
 
-		BNKSUM		35
+## Page 886
+                BNKSUM          31
 
-		BNKSUM		36
 
-		BNKSUM		37
+                BNKSUM          32
 
-		BNKSUM		40
-		BNKSUM		41
-		BNKSUM		42
-		BNKSUM		43
+                BNKSUM          33
+
+                BNKSUM          34
+
+                BNKSUM          35
+
+                BNKSUM          36
+
+                BNKSUM          37
+
+
+                BNKSUM          40
+                BNKSUM          41
+                BNKSUM          42
+                BNKSUM          43
