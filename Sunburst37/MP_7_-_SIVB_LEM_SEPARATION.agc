@@ -17,10 +17,9 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-05-24 MAS  Created from Sunburst 120.
+##		2017-06-14 RSB	Transcribed.
 
-## NOTE: Page numbers below have not yet been updated to reflect Sunburst 37.
-
-## Page 712
+## Page 669
                 BANK            25
                 EBANK=          TDEC
 
@@ -29,6 +28,7 @@
 # MOD BY- GILBERT                                                         ASSEMBLY- SUNBURST REVISION 12
 
 # FUNCTIONAL DESCRIPTION
+
 #           SIVB/LEM SEPARATION IS STARTED 39 MIN. 56 SEC. AFTER SIVB SHUTDOWN IS DETECTED. AT 00/11/04, ONE
 # MINUTE AFTER BOOST SHUTDOWN IS DETECTED, MISSION TIMER NO. 1 IS SET TO 38M 56S AND MISSION PHASE REGISTER NO. 1
 # TO MP 7. MISSION PHASE 7 STARTS AT 00/50/00. THIS PROGRAM COMMANDS A SEQUENCE OF EVENTS INCLUDING RCS COLD
@@ -69,39 +69,8 @@
 #     CENTRALS - A,L,Q
 #     OTHER    - ERASABLES IN SUBROUTINES USED
 
-## Page 713
-MP07JOB         TC              2PHSCHNG
-                OCT             00006
-                OCT             05022
-                OCT             20000
-
-                TC              2PHSCHNG
-                OCT             00003
-                OCT             00004
-
-                CAF             BIT7
-                TC              SETRSTRT                        # SET RESTART FLAG
-
-                TC              PHASCHNG
-                OCT             47013
-                DEC             4000
-                EBANK=          TDEC
-                2CADR           SIVBSEP
-
-                TC              PHASCHNG
-                OCT             06022
-                EBANK=          TDEC
-                2CADR           DOOI
-
-                INHINT
-                CA              40SEC
-                TC              WAITLIST
-                EBANK=          TDEC
-                2CADR           SIVBSEP
-
-                RELINT
-
-DOOI            EXTEND
+## Page 670
+MP07JOB		EXTEND
                 DCA             TIME2                           # SET UP TIME FOR MIDTOAVE
                 DXCH            TDEC
                 EXTEND
@@ -120,8 +89,9 @@ DOOI            EXTEND
                 DXCH            Z
 
                 TC              PHASCHNG
-## Page 714
-                OCT             04022
+                OCT		05022
+                OCT		20000
+                
                 CAF             AVRAGEG7                        # SERVICER CALLS AVERAGEG
                 TS              DVSELECT
 
@@ -133,23 +103,35 @@ DOOI            EXTEND
                 EXTEND
                 WRITE           5
 
-                TC              ENDOFJOB                        # AND RELINT
-
-SIVBSEP         TC              2PHSCHNG
-                OCT             00003
-                OCT             05012
-                OCT             77777
-
-                CAF             ZERO                            # TERMINATE RCS COLD FIRE PURGE
-                EXTEND
-                WRITE           5
-
                 TC              PHASCHNG
                 OCT             47012
-                DEC             400
+                DEC             4000
                 EBANK=          TDEC
-                2CADR           SIVB1
-
+                2CADR           SIVBSEP
+                
+                
+                INHINT
+                CAF		40SEC
+                TC		WAITLIST
+                EBANK=		TDEC
+                2CADR		SIVBSEP
+                
+                TC		ENDOFJOB			# AND RELINT
+                
+SIVBSEP		TC		PHASCHNG
+		OCT		05012
+		OCT		77777
+## Page 671		
+		CAF		ZERO				# TERMINATE RCS COLD FIRE PURGE
+		EXTEND
+		WRITE 		5
+		
+		TC		PHASCHNG
+		OCT		47012
+		DEC		400
+		EBANK=		TDEC
+		2CADR		SIVB1
+		
                 TC              FIXDELAY                        # WAIT 4 SECONDS
                 DEC             400
 
@@ -159,6 +141,7 @@ SIVB1           TC              2LMP+DT
                 DEC             100                             # WAIT 1 SECOND
 
                 TC              1LMP+DT
+                
                 DEC             4                               # ED BATTERY ACTIVATION - ON
                 DEC             100                             # WAIT 1 SECOND
 
@@ -171,7 +154,6 @@ SIVB1           TC              2LMP+DT
                 DEC             6                               # RCS PRESSURIZE - FIRE **
                 DEC             200                             # WAIT 2 SECONDS
 
-## Page 715
                 TC              1LMP+DT
                 DEC             7                               # RESET **
                 DEC             2800                            # WAIT 28 SECONDS
@@ -183,6 +165,7 @@ SIVB1           TC              2LMP+DT
                 EXTEND
                 DCA             TIMEHOLD
                 DXCH            DT2TEMPD
+                
                 EXTEND
                 DCS             TIME2                           # TIG - 28 SEC.  =  TDEC + 2 SEC.
                 DAS             DT2TEMPD
@@ -191,8 +174,10 @@ SIVB1           TC              2LMP+DT
                 OCT             05012
                 OCT             77777
 
+## Page 672
                 EXTEND
                 DCA             DT2TEMPD
+                
                 DXCH            TIMEHOLD
                 CCS             TIMEHOLD        +1              # INSURE WAITLIST TIME POSITIVE
                 AD              ONE
@@ -223,7 +208,6 @@ SIVB2           TC              IBNKCALL                        # DEADBAND SELEC
                 TC              IBNKCALL
                 CADR            ULLAGE
 
-## Page 716
                 TC              PHASCHNG
                 OCT             47012
                 DEC             100
@@ -242,43 +226,43 @@ SIVB3           TC              1LMP+DT
                 DEC             50                              # WAIT 500 MILLISECONDS
 
                 CS              DAPBOOLS                        # ENABLE DAP
+## Page 673
                 MASK            GODAPGO
                 ADS             DAPBOOLS
-
-                TC              PHASCHNG
-                OCT             47012
-                DEC             50
-                EBANK=          TDEC
-                2CADR           SIVB3A
 
                 TC              FIXDELAY                        # WAIT 500 MILLISECONDS
                 DEC             50
 
-SIVB3A          TC              IBNKCALL
+                TC              IBNKCALL			# GET VEHICLE RATE
                 CADR            SETRATE                         # HOLD VEHICLE ATTITUDE RATE
 
-                TC              1LMP+DT
+                TC              1LMP+DT				
                 DEC             90                              # LEM/SIVB SEPARATE - COMMAND **
                 DEC             10                              # WAIT 100 MILLISECONDS
 
                 TC              IBNKCALL                        # DEADBAND SELECT - MIN
                 CADR            SETMINDB
 
-                CS              FLAGWRD1                        # SETS SIVBGONE TO 1
-                MASK            BIT4
-                ADS             FLAGWRD1
+		EBANK=		LEMMASS1
+		CAF		EBANK5
+		TS		EBANK
+		
+		EXTEND
+		DCA		LEMMASS1
+		DXCH		MASS
+		
+		CAF		ZERO
+		TS		DELAREA
+		TS		DELAREA		+1
+		
+		EBANK=		TDEC
+		CAF		EBANK
+		TS		EBANK
 
-                TC              PHASCHNG
-                OCT             47012
-                DEC             90
-                EBANK=          TDEC
-                2CADR           SIVB3B
-
-## Page 717
                 TC              FIXDELAY                        # WAIT 900 MILLISECONDS
                 DEC             90
 
-SIVB3B          TC              1LMP+DT
+                TC              1LMP+DT
                 DEC             59                              # LEM/SIVB SEPARATE ARM - OFF *
                 DEC             100                             # WAIT 1 SECOND
 
@@ -293,6 +277,7 @@ SIVB3B          TC              1LMP+DT
                 OCT             47012
                 DEC             500
                 EBANK=          TDEC
+## Page 674            
                 2CADR           SIVB4
 
                 TC              FIXDELAY                        # WAIT 5 SECONDS
@@ -325,17 +310,17 @@ SIVB5           TC              IBNKCALL                        # COMMAND +X TRA
                 TC              2PHSCHNG
                 OCT             00002
                 OCT             05013
-## Page 718
                 OCT             77777
 
                 TC              MPENTRY                         # SCHEDULE DPS COLD SOAK
                 DEC             4                               # TIMER NO. 4
                 DEC             8                               # MISSION PHASE 8
+                
                 ADRES           MPDTO8
 
                 TCF             TASKOVER
 
-## Page 719
+## Page 675
 2SEC            DEC             200
 40SEC           DEC             4000
 MP07DELT        2DEC            20500
@@ -351,15 +336,16 @@ AVRAGEG7        GENADR          AVERAGEG
 
 
 
-
-
-TIG-30          TC              2PHSCHNG
-                OCT             00004
-                OCT             00335                           # 5.33 SPOT FOR PREREAD
-
-                CAF             BIT1
-                TC              WAITLIST
-                EBANK=          DVTOTAL
-                2CADR           PREREAD
+TIG-30          CAF		BIT1				# PREREAD CALLS READACCS IN 2 SECONDS
+		TC		WAITLIST
+		EBANK=		DVTOTAL
+		
+		2CADR		PREREAD
+		
+		TC		PHASCHNG
+		OCT		40045
+		
+TASK4OUT	TC		PHASCHNG
+		OCT		00004		
 
                 TCF             TASKOVER
