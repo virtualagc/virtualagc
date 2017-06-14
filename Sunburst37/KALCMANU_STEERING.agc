@@ -17,10 +17,9 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-05-24 MAS  Created from Sunburst 120.
+##		2017-06-13 RSB	Transcribed
 
-## NOTE: Page numbers below have not yet been updated to reflect Sunburst 37.
-
-## Page 668
+## Page 627
 # GENERATION OF STEERING COMMANDS FOR DIGITAL AUTOPILOT FREE FALL MANEUVERS
 
 # NEW COMMANDS WILL BE GENERATED EVERY ONE SECOND DURING THE MANEUVER
@@ -39,7 +38,8 @@ NEWDELHI        TC              INTPRET
                 STOVL           MIS             +6D             
                 STADR                                           
                 STORE           MIS                             
-                AXC,1           CALL                            
+                AXC,1           CALL      
+                                      
                                 MIS                             
                                 DCMTOCDU                        # PICK UP THE NEW CDU ANGLES FROM MATRIX
                 RTB                                             
@@ -63,6 +63,7 @@ INCRDCDU        TS              SPNDX
                 COM                                             
                 INDEX           SPNDX                           
                 TS              DELDCDU                         # ANGLE INCREMENTS TO BE ADDED TO
+                
                 INDEX           SPNDX                           # CDUXD, CDUYD, CDUZD EVERY TENTH SECOND
                 CA              NCDU                            # BY LEM DAP
                 INDEX           SPNDX                           
@@ -72,7 +73,7 @@ INCRDCDU        TS              SPNDX
                 CCS             SPNDX                           
                 TCF             INCRDCDU                        # LOOP FOR THREE AXES
 
-## Page 669
+## Page 628
 # COMPARE PRESENT TIME WITH TIME TO TERMINATE MANEUVER
 
 TMANUCHK        EXTEND                                          
@@ -109,23 +110,12 @@ MANUSTAT        EXIT                                            # INITIALIZATION
                 EXTEND                                          
                 DCS             ONESEK                          
                 DAS             TM                              # (TM+T0)-1
-                INHINT                                          
                 CA              BRATE                           # X-AXIS MANEUVER RATE
                 TS              OMEGAPD
                 CA              BRATE           +2              # Y-AXIS MANEUVER RATE
                 TS              OMEGAQD
                 CA              BRATE           +4              # Z-AXIS MANEUVER RATE
                 TS              OMEGARD
-
-                EXTEND
-                DCA             CDUY
-                DXCH            CDUYD
-                CAE             CDUX
-                TS              CDUXD
-                TC              IBNKCALL
-## Page 670
-                FCADR           SETMINDB
-                RELINT
                 CA              TIME1
                 AD              ONESEK          +1
                 XCH             NEXTIME
@@ -133,7 +123,8 @@ MANUSTAT        EXIT                                            # INITIALIZATION
                 OCT             2000                            # TO SIGNAL KALCMANU IN PROCESS
                 TCF             INCRDCDU        -1
 
-ONESEK          DEC             0                               
+ONESEK          DEC             0   
+## Page 629                            
                 DEC             100                             
 
 OVERMANU        CAF             ONE                             # SAFETY PLAY
@@ -141,7 +132,8 @@ OVERMANU        CAF             ONE                             # SAFETY PLAY
 
 CONTMANU        CS              TIME1                           # RESET FOR NEXT DCDU UPDATE
                 AD              NEXTIME                         
-                CCS             A                               
+                CCS             A   
+                                            
                 AD              ONE                             
                 TCF             MANUCALL                        
                 AD              NEGMAX                          
@@ -165,7 +157,7 @@ UPDTCALL        CAF             PRIO34                          # SATELLITE PROG
 
                 TC              TASKOVER                        
 
-## Page 671
+## Page 630
 # ROUTINE FOR TERMINATING AUTOMATIC MANEUVERS
 
 MANUSTOP        CAF             ZERO                            # ZERO MANEUVER RATES
@@ -180,6 +172,7 @@ MANUSTOP        CAF             ZERO                            # ZERO MANEUVER 
                 CA              STATE           +2              # CHECK TO SEE IF A FINAL YAW NECESSARY
                 MASK            BIT14
                 EXTEND
+                
                 BZF             KALCROLL
 ENDROLL         CA              CPHI                            # NO FINAL YAW
                 TS              CDUXD                           
@@ -188,42 +181,10 @@ ENDROLL         CA              CPHI                            # NO FINAL YAW
                 TS              DELDCDU                         # GIMBAL LOCK ORIGINALLY
 GOODMANU        TC              FLAG2DWN                        # RESET BIT 11 OF FLAGWRD2 TO SIGNAL END
                 OCT             2000                            # OF KALCMANU
+                CAF		THREE
                 TC              POSTJUMP                        # RETURN UNDER WAITLIST VIA GOODEND
-                CADR            CHKAKS
+                CADR            GOODEND				# AND WAKE UP USER
 
-                BANK            35
-                EBANK=          TTEMP
-CHKAKS          CAF             TWO
-AKLOOP          TS              SPNDX                           # CHECK THE MAGNITUDE OF THE ATTITUDE
-                INDEX           A                               # ERROR ON COMPLETION OF A KALCMANU
-                CA              CDUXD                           # SUPERVISED MANEUVER
-                EXTEND
-                INDEX           SPNDX                           # I.E.   CDUD - CDU
-                MSU             CDUX
-                CCS             A                               # IF THE MAGNITUDE OF THE ERROR EXCEEDS
-                AD              =-5DEG                          # 5 DEGREES ON ANY AXIS DISPLAY AN ALARM
-                TCF             CHECKASG                        # INDICATING THAT SPACECRAFT MAY NOT HAVE
-                AD              =-5DEG                          # ACHIEVED THE DESIRED ATTITUDE.
-CHECKASG        EXTEND
-                BZMF            AKOK
-                TC              ALARM
-                OCT             01412
-                TCF             ENDKMANU
-
-AKOK            CCS             SPNDX
-                TCF             AKLOOP
-
-ENDKMANU        CAF             THREE                           # TERMINATE KALCMANU VIA GOODEND
-                TC              POSTJUMP
-                CADR            GOODEND
-
-## Page 672
-=-5DEG          DEC             -455                            # =-5 DEGREES SCALED 180 DEG
-
-
-
-                BANK            34
-                EBANK=          TTEMP
 KALCROLL        CA              STATE           +2              # STATE SWITCH NO. 33
                 MASK            BIT12                           # 0(OFF) = PERFORM A FINAL YAW
                 EXTEND                                          #          IF NECESSARY
@@ -235,6 +196,7 @@ DOROLL          CA              CPHI
                 EXTEND
                 BZMF            FROLLNEG
 FROLLPOS        TS              L
+
                 CA              ROLLRATE
                 TS              OMEGAPD
                 CS              DELFROLL
@@ -248,6 +210,7 @@ FROLLNEG        COM
                 CA              DELFROLL
                 TS              DELDCDU
 ROLLSTAL        CA              L                               # ABS(CPHI-CDUXD)
+## Page 631
                 EXTEND
                 MP              INVRATE
                 EXTEND

@@ -19,6 +19,8 @@
 ##		2017-03-15 RSB	Comment-text fixes identified in 6-way
 ##				side-by-side diff of Sunburst 120 and 
 ##				Luminary 69/99/116/131/210.
+##		2017-06-13 RSB	Some white-space corrections identified while
+##				transcribing Sunburst 37.
 
 ## Page 636
 # BLOCK 2 LGC ATTITUDE MANEUVER ROUTINE-KALCMANU
@@ -379,7 +381,7 @@
 ## Page 643
 #            (B )                     (A )
 #            ( X)                     ( X)
-#            (  )              *      (  )
+#            (  )            *        (  )
 #            (B )      =    DEL       (A )
 #            ( Y)                     ( Y)
 #            (  )                     (  )
@@ -403,7 +405,7 @@
 
 
 
-#      SIGNMPAC
+#     SIGNMPAC
 #      --------
 
 #      THIS IS A BASIC LANGUAGE SUBROUTINE WHICH LIMITS THE MAGNITUDE OF D(MPAC) TO + OR - DPOSMAX ON OVERFLOW.
@@ -427,7 +429,7 @@
 
 
 
-# SUMMARY OF STATE SWITCHES AND FLAGWORDS USED BY KALCMANU.
+#      SUMMARY OF STATE SWITCHES AND FLAGWORDS USED BY KALCMANU.
 ## Page 644
 # STATE                FLAGWRD 2      SETTING             MEANING
 # SWITCH NO.            BIT NO.
@@ -516,7 +518,7 @@ PICKAXIS        VLOAD           DOT                             # IF VF X VI = 0
                 BMN             TLOAD                           # IF ANTIPARALLEL
                                 ROT180
                                 BCDU
-                STCALL          CPHI                            # IF VF + VI
+                STCALL          CPHI                            # IF VF = VI
                                 KALCMAN3        +1
 
 ROT180          VLOAD           VXV                             # 180 DEG ROTATION IS REQUIRED
@@ -685,7 +687,7 @@ ALTCALC         VLOAD           VAD                             # IF AM GREATER 
                 UNIT                                            
                 STORE           COF                             
 
-# DETERMINE LARGEST COF AND ADJUST ACCORDINGLY
+# DETERMINE  LARGEST COF AND ADJUST ACCORDINGLY
 
 COFMAXGO        DLOAD           DSU                             
                                 COF                             
@@ -866,7 +868,7 @@ LOCKANGL        2DEC            .3333333333                     # $60DEGG
 
                 BANK            35
                 EBANK=          MIS
-# ROUTINE FOR LIMITING THE SIZE OF MPAC ON OVERFLOW TO OP POSMAX OR DP NEGMAX
+# ROUTINE FOR LIMITING THE SIZE OF MPAC ON OVERFLOW TO DP POSMAX OR DP NEGMAX
 
 SIGNMPAC        EXTEND
                 DCA             DPOSMAX

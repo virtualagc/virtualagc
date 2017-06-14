@@ -17,10 +17,9 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-05-24 MAS  Created from Sunburst 120.
+##              2017-06-13 HG   Transcribed
 
-## NOTE: Page numbers below have not yet been updated to reflect Sunburst 37.
-
-## Page 709
+## Page 666
 # PROGRAM DESCRIPTION
 #    COAST SIVB ATTACHED
 
@@ -64,54 +63,70 @@
                 BANK            27
                 EBANK=          MP6TO7
 
-MP6JOB          TC              NEWMODEX                        # UPDATE MODREG
+MP6JOB          TC              NEWMODEX                # UPDATE MODREG
                 OCT             13
-                
+
                 CAF             SIX
                 TS              PHASENUM
 
                 TC              PHASCHNG
-## Page 710
+## Page 667
                 OCT             47012
                 DEC             6000
                 EBANK=          MP6TO7
                 2CADR           MP6A
 
-                CAF             BIT6
-                TC              SETRSTRT                        # SET RESTART FLAG
-
-                CAF             DEC6000                         # INITIALIZE 1 MIN DELAY
+                CAF             DEC6000                 # INITIALIZE 1 MIN DELAY
                 INHINT
                 TC              WAITLIST
                 EBANK=          MP6TO7
                 2CADR           MP6A
 
+                RELINT
                 TCF             ENDOFJOB
 DEC6000         DEC             6000
 
-MP6A            TC              FLAG2DWN                        # TERMINATE ABORT COMMAND MONITOR
-                OCT             00400                           # BIT 9
+MP6A            TC              PHASCHNG
+                OCT             47012
+                DEC             12000
+                EBANK=          MP6TO7
+                2CADR           MP6B
 
-#                                   TERMINATE TUMBLE MONITOR
+
+                CAF             DEC12000                # INITIALIZE 2 MIN WAIT
+                TC              WAITLIST
+                EBANK=          MP6TO7
+                2CADR           MP6B
+#                                         TERMINATE ABORT COMMAND MONITOR
+
+                TC              FLAG2DWN
+                OCT             00400                   # BIT 9
+
+#                                         TERMINATE TUMBLE MONITOR
 
                 TC              FLAG1DWN
-                OCT             20000                           # BIT14
+                OCT             20000                   # BIT14
+                TCF             TASKOVER
+DEC12000        DEC             12000
+
 MP6B            TC              PHASCHNG
                 OCT             27042
-               -GENADR          656SEC
+               -GENADR          536SEC
                 EBANK=          MP6TO7
                 2CADR           CBXPNDR
-# REF   1       27,2536   56063 1  CALL C-BAND TRANSPONDER-ON*
+# REF   1       27,2527   56063 1  CALL C-BAND TRANSPONDER-ON*
 
                 EXTEND
-                DCA             656SEC                          # LONGCALL 10 M 56 S
-                TC              LONGCALL                        # FOR C-BAND TRANSPONDER-ON*
+                DCA             536SEC                  # SET LONGCALL= T+8M 56S
+                TC              LONGCALL                # FOR C-BAND TRANSPONDER-ON*
                 EBANK=          MP6TO7
                 2CADR           CBXPNDR
 
+## Page 668
                 TCF             TASKOVER
-656SEC          2DEC            65600
-#  		27,2546   00100 0  C-BAND TRANSPONDER-ON*
+536SEC          2DEC            53600
+
+#               27,2537   10540 1  C-BAND TRANSPONDER-ON*
 
 CBXPNDR         TC              1LMP
                 DEC             106
@@ -123,17 +138,16 @@ CBXPNDR         TC              1LMP
 
 #                                   CALL SCHEDULE ENTRY ROUTINE
 
-## Page 711
                 TC              MPENTRY
-                DEC             1                               # J=1
-                DEC             7                               # MP=7
-                ADRES           MP6TO7                          # DT = 28 MIN
+                DEC             1                       # J=1
+                DEC             7                       # MP=7
+                ADRES           MP6TO7                  # DT = 28 MIN
 
 #                                   TERMINATE READING OF PIPAS.
 #                                   THRUST DUE TO VENTING AFTER SIVB
 #                                   SHUTDOWN HAS BECOME NEGLIGIBLE.
 
-                TC              FLAG1DWN                        # TERMINATE SERVICER
+                TC              FLAG1DWN                # TERMINATE DV MONITOR
                 OCT             1
                 TCF             TASKOVER
 

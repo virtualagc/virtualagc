@@ -13,6 +13,8 @@
 ##		2016-11-01 RSB	More typos.
 ##		2016-12-06 RSB	Comments proofed using octopus/ProoferComments,
 ##				changes made.
+##		2017-06-13 RSB	Corrected typos discovered while transcribing
+##				Sunburst 37.
 
 ## Page 661
 # DETECTING GIMBAL LOCK
@@ -45,7 +47,7 @@ LOCSKIRT        DLOAD           ABS
                 STORE           IG                              # IG = MIS                              $2
                 MXV             VSL1                            #         3
                                 K1                              #                    -   -   -   -
-                STODL           P21                             # (P21, D21, G21) = (V1, V2, V3) TG     $2
+                STODL           P21                             # (P21, D21, G21) = (V1, V2, V3) IG     $2
                                 G21
                 DSQ             PDDL
                                 D21

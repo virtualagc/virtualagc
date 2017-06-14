@@ -17,10 +17,9 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-05-24 MAS  Created from Sunburst 120.
+##              2017-06-13 HG   Transcribed
 
-## NOTE: Page numbers below have not yet been updated to reflect Sunburst 37.
-
-## Page 871
+## Page 814
 
 # PROGRAM NAME - SECOND DPS GUIDANCE
 
@@ -34,6 +33,7 @@
 # SEQUENCE 2DPS IS OPERATED IN THE PRE-IGNITION MODE FOR THE PURPOSE OF PROVIDING, FOR THE IGNITION
 # SEQUENCE, THE TIME OF INITIATION AND THE DIRECTION OF THRUST.  IMMEDIATELY AFTER THE IGNITION SEQUENCE
 # IS COMPLETED, INCLUDING THE COMMAND OF MAXIMUM THRUST, 2DPS IS ENGAGED IN THE THRUSTING MODE FOR THE
+
 # PURPOSE OF PROVIDING THRUST ACCELERATION MAGNITUDE AND DIRECTION COMMANDS NECESSARY TO CONDUCT THE
 # SIMULATED POWERED LANDING MANEUVER.
 
@@ -43,6 +43,7 @@
 # PRE-LAUNCH LOAD OR IMPLIED BY THE UPLINK DATA, WHICHEVER IS EARLIER.  A DESCRIPTION OF THE METHOD OF
 # UPDATING TIGNOM IS IN THE PROVINCE OF THE MISSION CONTROL PROGRAM (MCP) MISSION PHASE 11 -
 # DPS2/FITH/APS1.  THE TARGETING IS CONTROLLED BY THE SEMI-UNIT VECTOR CPT6/2 AS DESCRIBED IN THE 206 GSOP.
+
 
 #      AT APPROXIMATELY 180 SECONDS PRIOR TO TIGNOM, THE MCP ENGAGES 2DPS IN THE PRE-IGNITION MODE BY
 # PROVIDING AN EXTRAPOLATED TIME AND STATE IN THE REGISTERS TET, RIGNTION, VIGNTION, AND TRANSFERRING
@@ -56,6 +57,7 @@
 # LEAVING THIS CONSISTENT SET IN PIPTIME, RN, VN, WHERE TULLG IS THE PRECISE TIME FOR ULLAGE TO BE INITIATED
 # AND IS LEFT IN THE REGISTER OF THAT NAME.  2DPS LEAVES A SEMI-UNIT VECTOR IN THE DIRECTION IN WHICH
 # THRUST IS TO BE COMMANDED DURING THE IGNITION SEQUENCE IN THE REGISTER POINTVSM AND BRANCHES TO
+
 # LOCATION RETPREB IN THE MISSION CONTROL PROGRAM.
 
 #      USING THE DATA LEFT BY THE PRE-IGNITION MODE OF 2DPS, THE MCP ENGAGES KALCMANU TO PROPERLY
@@ -66,18 +68,21 @@
 # SERVICER, PGNCSMON LOOP IMMEDIATELY FOLLOWING CALCRVG.
 
 #      WHEN CONTROL IS GIVEN TO 2DPS WITH THE 2BCADR OF BURN IN AVGEXIT, 2DPS OPERATES IN THE THRUSTING
+
 # MODE.  IT GENERATES THE SEQUENCING REQUIRED TO CONDUCT THE SIMULATED POWERED LANDING MANEUVER AND ISSUES
 # THE THRUST ACCELERATION MAGNITUDE AND DIRECTION COMMANDS.
 
 #      2DPS GENERATES THE SEQUENCING BY INCREMENTING THE HIGH ORDER PART OF AVGEXIT, BY AN APPROPRIATE
 # INTEGER, TO ACCOMPLISH EACH CHANGE OF 2DPS PHASE.  THE INCREMENTING OF AVGEXIT CAUSES, ON THE SUBSEQUENT
-## Page 872
+
+## Page 815
 # PASS THROUGH 2DPS, CONTROL TO BEGIN AT A NEW POINT IN THE SECOND DPS FLITE SEQUENCE TABLE, AND
 # CONSEQUENTLY THE CORRESPONDING 2DPS MODING TO BE ESTABLISHED.
 
 #      2DPS GENERATES THE THRUST ACCELERATION MAGNITUDE AND DIRECTION COMMANDS ON THE BASIS OF THE
 # CONTENTS OF PIPTIME, RN, VN, AT THE BEGINNING OF THE PASS.  TO ISSUE THE THRUST ACCELERATION DIRECTION
 # COMMAND, 2DPS PLACES A SEMI-UNIT VECTOR IN THE REQUIRED DIRECTION IN THE REGISTER AXISD AND CALLS
+
 # FINDCDUD AS A SUBROUTINE.  TO ISSUE THE MAGNITUDE COMMAND, 2DPS PLACES THE REQUIRED MAGNITUDE IN THE
 # REGISTER /ACF/ AND CALLS THROTCON AS A SUBROUTINE.
 
@@ -90,8 +95,9 @@
 # RANDOM THROTTLING.  THE MCP DOES NOT CHANGE THE CONTENTS OF AXISD SUPPLIED BY 2DPS.  CONSEQUENTLY THE
 # THRUST ACCELERATION DURING RANDOM THROTTLING IS NORMAL TO THE ORBITAL PLANE.
 
-## Page 873
+## Page 816
 # INTERFACE SPECIFICATIONS -
+
 # SPECIFICATION           PRE-IGNITION MODE          THRUSTING MODE
 
 # CALLING SEQUENCE -      DTCB TO PREBURN            DTCB TO BURN
@@ -102,32 +108,20 @@
 #                         EMP11JOB) IN MISSION
 #                         CONTROL PROGRAM.           LAST PASS -
 #                                                    DTCB TO LOCATION
+
 #                                                    RETBURN (EBANK=
 #                                                    EMP11JOB) IN MISSION
 #                                                    CONTROL PROGRAM
 
-# ABORT EXITS -           NONE                       NONE
+# ALARM OR ABORT EXITS -  NONE                       NONE
 
-# ALARMS -                ON OVERFLOW PRIOR TO OR    SAME
-#                         DURING COMPUTATION OF
-#                         ACS OR AFCS,               IN ADDITION, IF OVERFLOW
-#                         SET ALARM 00410            OCCURS AFTER COMPUTATION
-#                         AND RETAIN THE VARIABLES   OF THE AFOREMENTIONED
-#                         COMPUTED ON THE PREVIOUS   VARIABLES,
-#                         PASS.                      SET ALARM 00412
-#                                                    AND SKIP ISSUANCE OF
-#                         ON OVERFLOW DURING         ATTITUDE AND THROTTLE
-#                         COMPUTATION OF AFCS ,      COMMANDS.
-#                                            1
-#                         (YIELDS POSMAX),
-#                         RETAIN POSMAX AND
-#                         SET ALARM 00411.
-
-# ERAS INITIALIZATION -   CPT6/2 (IMU COORDS)        2BCADR OF BURN
-#                         OTHER INITIALIZATION       (EBANK= E2DPS) MUST
+# ERASABLE                CPT6/2 (IMU COORDS)        2BCADR OF BURN
+#    INITIALIZATION -     OTHER INITIALIZATION       (EBANK= E2DPS) MUST
 #                         DONE INTERNALLY            BE IN AVGEXIT.  OTHER
 #                                                    INITIALIZATION DONE IN
-#                                                    PRE-IGNITION MODE.
+#                                                                         N PRE-
+
+#                                                    IGNITION MODE.
 
 # INPUTS -                TET                        PIPTIME
 #                         RIGNTION                   RN
@@ -137,296 +131,287 @@
 #                         RN                         /ACF/
 #                         VN
 #                         TULLG
+
 #                         POINTVSM
 
 # ERASABLES -             AMEMORY THROUGH            SAME
-## Page 874
-#                         AMEMORY +215 OCT
-#                         PLUS CPT6/2 IN
-#                         NON SHARABLE E4LOAD
+#                         AMEMORY +217 OCT
+#                         PLUS 6 FOR CPT6/2 (NOT
+#                         YET ASSIGNED)
 
 # SUBROUTINES CALLED -    ROOTPSRS                   ROOTPSRS
 #                         VPATCHER                   FINDCDUD
 #                         CALCRVG                    THROTCON
 
-## Page 875
-                BANK            22                              
-                EBANK=          E2DPS                           
+## Page 817
+                BANK            22
+                EBANK=          E2DPS
 # ************************************************************************
 # INITIALIZATION OF SECOND DPS GUIDANCE - PREBURN
 # ************************************************************************
 
-PREBURN         =               INIT2DPS                        
-INIT2DPS        TC              PRETINIT                        # INITIALIZES INTERPRETER
+PREBURN         =               INIT2DPS
+INIT2DPS        TC              PRETINIT                # INITIALIZES INTERPRETER
+
 
 # CLEAR ORBITAL INTEGRATION VARIABLES FROM REGISTERS IN COMMON WITH 2DPS
 
-                TC              INTPRET                         
-                DLOAD                                           
-                                TET                             # EXTRAPOLATED TIME FROM ORBITAL INTEGRATN
-                STCALL          PIPTIME                         # TIME REGISTER OF PIPASR
-                                VPATCHER                        # TRANSFERS RIGNTION, VIGNTION TO RN, VN,
-                EXIT                                            # AND DUPLICATES FUNCTIONS OF NORMLIZE
-                TC              PHASCHNG                        # PRE-IGNITION MODE: START 2DPS PROTECTN,
- +502           OCT             05022                           # ESTABLISHING PRIORITY.
-                OCT             20000                           # PREVENT REREADING ORBITAL INTEGRATION
-                                                                # VARIABLES AFTER WRITING OVER THEM.
+                TC              INTPRET
+                DLOAD
+                                TET                     # EXTRAPOLATED TIME FROM ORBITAL INTEGRATN
+                STCALL          PIPTIME                 # TIME REGISTER OF PIPASR
+                                VPATCHER                # TRANSFERS RIGNTION, VIGNTION TO RN, VN,
+                EXIT                                    # AND DUPLICATES FUNCTIONS OF NORMLIZE
+                TC              PHASCHNG                # PREVENTS REREADING ORBITAL INTEGRATION
+
+ +402           OCT             04022                   # VARIABLES AFTER WRITING OVER THEM
 
 # COMMON REGISTERS ARE CLEARED
 
-                TC              INTPRET                         
-                DLOAD                                           
-                                IGNALGL                         
-                STOVL           AVGEXIT                         # SET UP RETURN ADDRESS IN AVGEXIT
-                                ZEROPOS                         
-                STORE           GDOTM1                          # DERIVATIVE OF G FOR USE BY IGNITN1
-                STODL           UNAFC/2                         
-                                ZEROPOS                         
-                STORE           TTF/4TMP                        # ZERO AS IF COMING FROM PREVIOUS PHASE
-                EXIT                                            
-                CA              ZEROPOS                         
-                TS              FLPASS0                         # SHOWS THIS IS INITIAL PASS THIS PHASE
-                TC              XTRTPIP                         # SETS TPIP EXTRAPOLATED
-                CA              POSMAX                          
-                TS              /AFC/                           # FORCES INITIALIZATION OF COUNTFC
-                TS              /AFC/           +1              # ONLY REASON: TO ASSURE GOOD PARITY
-                TS              COUNTFCT                        # ONLY REASON: TO ASSURE GOOD PARITY
-                TC              AVGEXIT                         # RETURNS TO APPROPRIATE LOCATION IN 2DPS
+                TC              INTPRET
+                DLOAD
+                                IGNALGL
+                STOVL           AVGEXIT                 # SET UP RETURN ADDRESS IN AVGEXIT
+                                ZEROPOS
+                STORE           GDOTM1                  # DERIVATIVE OF G FOR USE BY IGNITN1
+                STODL           UNAFC/2
+                                ZEROPOS
 
-## Page 876
+                STORE           TTF/4TMP                # ZERO AS IF COMING FROM PREVIOUS PHASE
+                EXIT
+                CA              ZEROPOS
+                TS              FLPASS0                 # SHOWS THIS IS INITIAL PASS THIS PHASE
+                TC              XTRTPIP                 # SETS TPIP EXTRAPOLATED
+                CA              POSMAX
+                TS              /AFC/                   # FORCES INITIALIZATION OF COUNTFC
+                TS              /AFC/           +1      # ONLY REASON: TO ASSURE GOOD PARITY
+                TS              COUNTFCT                # ONLY REASON: TO ASSURE GOOD PARITY
+                TC              AVGEXIT                 # RETURNS TO APPROPRIATE LOCATION IN 2DPS
+
+## Page 818
 # ************************************************************************
 # SECOND DPS FLITE SEQUENCE TABLE
 # ************************************************************************
 
 # INDIRECT ADDRESSES
 
-BURN            =               QUAD0X                          
-BRTTFNU         =               1                               
-PARL            =               2                               
-TBRL            =               3                               
-MOD2DPS         =               4                               
-TTF/4CR         =               5                               
-BRXEND          =               6                               
+BURN            =               QUAD0X
+BRTTFNU         =               1
+PARL            =               2
+TBRL            =               3
+TTF/4CR         =               4
+BRXEND          =               5
 
-IGNALG          TCF             TTFINCR                         
-                TCF             ADTTFNU                         # AS IF COMING FROM PREVIOUS PHASE
-                OCT             00000                           
-                ADRES           TBRIGAL                         
-                OCT             00032                           
-                DEC             -1.5            E2      B-15    # -1.5 SECONDS, TTF UNITS, COMPARES TTF/4
-                TCF             EXIGEND                         
+IGNALG          TCF             TTFINCR
+                TCF             ADTTFNU                 # AS IF COMING FROM PREVIOUS PHASE
+                OCT             00000
+                ADRES           TBRIGAL
+                DEC             -1.5            E2 B-15 # -1.5 SECONDS, TTF UNITS, COMPARES TTF/4
+                TCF             EXIGEND
 
-QUAD0X          TCF             TTFINCR                         
-                TCF             RETTTFNU                        # AS IF CONTINUING PREBURN PHASE
-                OCT             00000                           
-                ADRES           TBRQUAD                         
-                OCT             00042                           
-                DEC             -045            E2      B-15    # -045 SECONDS, TTF UNITS, COMPARES TTF/4
-                TCF             EXQDLIN                         
+QUAD0X          TCF             TTFINCR
+                TCF             RETTTFNU                # AS IF CONTINUING PREBURN PHASE
+                OCT             00000
 
-QUAD0F          TCF             TTFINCR                         
-                TCF             ADTTFNU                         
-                OCT             00027                           
-                ADRES           TBRQUAD                         
-                OCT             00042                           
-                DEC             -3.0            E2      B-15    # -3.0 SECONDS, TTF UNITS, COMPARES TTF/4
-                TCF             EXQDLIN                         
+                ADRES           TBRQUAD
+                DEC             -045            E2 B-15 # -045 SECONDS, TTF UNITS, COMPARES TTF/4
+                TCF             EXQDLIN
 
-LING0F          TCF             LSETEVN                         
-                TCF             RETTTFNU                        
-                OCT             00027                           
-                ADRES           TBRLING                         
-                OCT             00042                           
-                DEC             -.50            E2      B-15    # -.50 SECONDS, TTF UNITS, COMPARES TTF/4
-                TCF             EXQDLIN                         
+QUAD0F          TCF             TTFINCR
+                TCF             ADTTFNU
+                OCT             00027
+                ADRES           TBRQUAD
+                DEC             -3.0            E2 B-15 # -3.0 SECONDS, TTF UNITS, COMPARES TTF/4
+                TCF             EXQDLIN
 
-## Page 877
-LING1F          TCF             LSETODD                         
-                TCF             ADTTFNU                         
-                OCT             00056                           
-                ADRES           TBRLING                         
-                OCT             00042                           
-                DEC             -.50            E2      B-15    # -.50 SECONDS, TTF UNITS, COMPARES TTF/4
-                TCF             EXQDLIN                         
+LING0F          TCF             LSETEVN
 
-QUAD2F          TCF             TTFINCR                         
-                TCF             ADTTFNU                         
-                OCT             00065                           
-                ADRES           TBRQUAD                         
-                OCT             00043                           
-                DEC             -3.0            E2      B-15    # -3.0 SECONDS, TTF UNITS, COMPARES TTF/4
-                TCF             EXQDLIN                         
+                TCF             RETTTFNU
+                OCT             00027
+                ADRES           TBRLING
+                DEC             -.50            E2 B-15 # -.50 SECONDS, TTF UNITS, COMPARES TTF/4
+                TCF             EXQDLIN
 
-LING2F          TCF             LSETEVN                         
-                TCF             RETTTFNU                        
-                OCT             00065                           
-                ADRES           TBRLING                         
-                OCT             00043                           
-                DEC             -.50            E2      B-15    # -.50 SECONDS, TTF UNITS, COMPARES TTF/4
-                TCF             EXQDLIN                         
+LING1F          TCF             LSETODD
+                TCF             ADTTFNU
+                OCT             00056
+                ADRES           TBRLING
 
-LING3F          TCF             LSETODD                         
-                TCF             ADTTFNU                         
-                OCT             00114                           
-                ADRES           TBRLING  
-                OCT             00043                           
+                DEC             -.50            E2 B-15 # -.50 SECONDS, TTF UNITS, COMPARES TTF/4
+                TCF             EXQDLIN
+
+QUAD2F          TCF             TTFINCR
+                TCF             ADTTFNU
+
+## Page 819
+                OCT             00065
+                ADRES           TBRQUAD
+                DEC             -3.0            E2 B-15 # -3.0 SECONDS, TTF UNITS, COMPARES TTF/4
+                TCF             EXQDLIN
+
+LING2F          TCF             LSETEVN
+
+                TCF             RETTTFNU
+                OCT             00065
+                ADRES           TBRLING
+                DEC             -.50            E2 B-15 # -.50 SECONDS, TTF UNITS, COMPARES TTF/4
+                TCF             EXQDLIN
+
+LING3F          TCF             LSETODD
+                TCF             ADTTFNU
+                OCT             00114
+                ADRES           TBRLING
 ## The following line is supposed to read "DEC -.25 E2 B-15", which is supposed to
 ## assemble to the octal 77763 ... but actually assembles to 77762.  For the present,
-## it is being hard-coded as "OCT 77763" as a workaround.                    
-                OCT		77763  				# -.25 SECONDS, TTF UNITS, COMPARES TTF/4
-                TCF             EXFINAL                         
+## it is being hard-coded as "OCT 77763" as a workaround.
+                OCT             77763                   # -.25 SECONDS, TTF UNITS, COMPRES TTF/4
+                TCF             EXFINAL
 
-## Page 878
+
+
+
 # ************************************************************************
 # SECOND DPS ROAD MAPS (BRANCH TABLES)
 # ************************************************************************
 
 # INDIRECT ADDRESSES
 
-BRIGN1          =               0                               
-BRLING          =               1                               
-BRIGN2          =               2                               
-BRXMID          =               3                               
+BRIGN1          =               0
 
-TBRIGAL         TCF             IGNITN1                         
-                TCF             TTF/4CL                         
-                TCF             IGNITN2                         
-                TCF             EXIGMID                         
+BRLING          =               1
+BRIGN2          =               2
+BRXMID          =               3
 
-TBRQUAD         TCF             RETIGN1                         
-                TCF             TTF/4CL                         
-                TCF             RETIGN2                         
-                TCF             EXQDLIN                         
+TBRIGAL         TCF             IGNITN1
+                TCF             TTF/4CL
+                TCF             IGNITN2
+                TCF             EXIGMID
 
-TBRLING         TCF             RETIGN1                         
-                TCF             LINGUID                         
-                TCF             RETIGN2                         
-                TCF             EXQDLIN                         
+TBRQUAD         TCF             RETIGN1
+                TCF             TTF/4CL
+                TCF             RETIGN2
 
-## Page 879
+                TCF             EXQDLIN
+
+TBRLING         TCF             RETIGN1
+                TCF             LINGUID
+                TCF             RETIGN2
+                TCF             EXQDLIN
+
+## Page 820
 # ************************************************************************
 # INITIALIZATION FOR EACH PASS
 # ************************************************************************
 
 # NTLZPASS SETS INDICES, FILLS TPIPOLD, TPIP, R, V EVERY PASS; BRANCHES TO IGNITN1, ADTTFNU WHEN APPROPRIATE.
 
-NTLZPASS        EXTEND                                          
-                QXCH            RETNTLZ                         # SAVE RETURN ADDRESS
+NTLZPASS        EXTEND
+                QXCH            RETNTLZ
 
-                CS              AVGEXIT                         
-                AD              IGNALGL                         
-                EXTEND                                          
-                BZF             NTLZPSS1                        # BRANCH IF AND ONLY IF PRE-IGNITION MODE
+                TC              PRETINIT                # INITIALIZES INTERPRETER
 
-                TC              2PHSCHNG                        # THRUSTING MODE, FIRST PHASCHNG IN 2DPS:
-                OCT             00035                           # IN GROUP 5, RETAIN ONLY PIPA TASK.
- +502           OCT             05022                           # IN GROUP 2 START 2DPS PROTECTION
-                OCT             20000                           # WITH PRIORITY 20.
 
-NTLZPSS1        TC              PRETINIT                        # INITIALIZES INTERPRETER
-
-# SET MODE
-
-                INDEX           AVGEXIT                         
-                CA              MOD2DPS                         
-                TC              NEWMODEA                        
-
-# SET INDICES
-
-                EXTEND                                          
-                INDEX           AVGEXIT                         
-                DCA             PARL                            
-                DXCH            NDX2DPS                         
-                EXTEND                                          
-                DCS             NDX2DPS                         
-                INDEX           FIXLOC                          
-                DXCH            X1                              # LOADS BOTH INTRP NDX REGS, NEEDED OR NOT
+                EXTEND
+                INDEX           AVGEXIT
+                DCA             PARL                    # LOADS ADRESES OF PARMTR AND BRANCH TABLS
+                DXCH            NDX2DPS
+                EXTEND
+                DCS             NDX2DPS
+                INDEX           FIXLOC
+                DXCH            X1                      # LOADS BOTH INTRP NDX REGS, NEEDED OR NOT
 
 # FILL TPIPOLD AND TPIP
 
-                EXTEND                                          
-                DCA             TPIP                            
-                DXCH            TPIPOLD                         
-                TC              PHASCHNG                        # PROTECT TPIPOLD AND
- +402           OCT             04022                           # PREVENT RETURNING TO PREVIOUS PROGRAM
-                EXTEND                                          
-                DCA             PIPTIME                         
-                DXCH            TPIP                            
+                EXTEND
+                DCA             TPIP
+
+                DXCH            TPIPOLD
+                TC              PHASCHNG                # PROTECT TPIPOLD AND
+ +402           OCT             04022                   # PREVENT RETURNING TO PREVIOUS PROGRAM
+                EXTEND
+                DCA             PIPTIME
+                DXCH            TPIP
 
 # FILL R AND V
 
-## Page 880
-                TC              INTPRET                         
-                VLOAD                                           
-                                RN                              
-                STOVL           R                               # RN TO R WITHOUT RESCALING
-                                VN                              
-                VSR2                                            
-                STORE           V                               # VN TO V WITH SCALING ADJUSTMENT
-                EXIT                                            
+                TC              INTPRET
+
+                VLOAD
+                                RN
+                STOVL           R                       # RN TO R WITHOUT RESCALING
+                                VN
+                VSR2
+                STORE           V                       # VN TO V WITH SCALING ADJUSTMENT
+                EXIT
 
 # IGNITN1 AND ADTTFNU BRANCH DECISIONS
 
-                INDEX           NDXBR                           
-                TCF             BRIGN1                          # TO IGNITN1 WHEN APPROPRIATE
+                INDEX           NDXBR
+                TCF             BRIGN1                  # TO IGNITN1 WHEN APPROPRIATE
 
-RETIGN1         TC              PHASCHNG                        # RETURN HERE WHETHER OR NOT DO IGNITN1.
- +402           OCT             04022                           # PROTECT TTF/4TMP AS USED BY IGNITN1 FROM
-                                                                # WIPEOUT BY ADTTFNU AND TTFINCR. ALSO
-                                                                # PROTECT RTEMP, VTEMP, GDOTM1T FROM
-                                                                # RS, VS, ASPRT, (TIME SHARED)
+RETIGN1         TC              PHASCHNG                # RETURN HERE WHETHER OR NOT DO IGNITN1.
+ +402           OCT             04022                   # PROTECT TTF/4TMP AS USED BY IGNITN1 FROM
 
-                CCS             FLPASS0                         
-                TCF             TTFINCR         +1              # ON OTHER THAN FIRST PASS IN ANY PHASE.
-                INDEX           AVGEXIT                         
-                TCF             BRTTFNU                         # TO ADTTFNU WHEN APPROPRIATE
+ ## Page 821
+                                                        # WIPEOUT BY ADTTFNU AND TTFINCR. ALSO
+                                                        # PROTECT RTEMP, VTEMP FROM RS, VS (SHRE)
+
+                CCS             FLPASS0
+                TCF             TTFINCR         +1      # ON OTHER THAN FIRST PASS IN ANY PHASE.
+                INDEX           AVGEXIT
+                TCF             BRTTFNU                 # TO ADTTFNU WHEN APPROPRIATE
+
 
 # ADD TTF/4NU TO TTF/4 FROM LAST PASS
 
-ADTTFNU         EXTEND                                          
-                DCA             TTF/4                           
-                DXCH            TTF/4TMP                        
-                INDEX           NDX2DPS                         
-                CA              TTF/4NU                         
-                ADS             TTF/4TMP                        
-                TC              PHASCHNG                        # PROTECT TTF/4
- +402           OCT             04022                           
-                EXTEND                                          
-                DCA             TTF/4TMP                        
-                DXCH            TTF/4                           # RENEWED TTF/4
+ADTTFNU         EXTEND
+                DCA             TTF/4
+                DXCH            TTF/4TMP
+                INDEX           NDX2DPS
+                CA              TTF/4NU
+                ADS             TTF/4TMP
+                TC              PHASCHNG                # PROTECT TTF/4
+ +402           OCT             04022
 
-                TC              PHASCHNG                        # PROTECT TTF/4TMP FROM WIPEOUT BY TTFINCR
- +402           OCT             04022                           
-RETTTFNU        TC              RETNTLZ                         
+                EXTEND
+                DCA             TTF/4TMP
+                DXCH            TTF/4                   # RENEWED TTF/4
 
+                TC              PHASCHNG                # PROTECT TTF/4TMP FROM WIPEOUT BY TTFINCR
+ +402           OCT             04022
+RETTTFNU        TC              RETNTLZ
 
 
 
 # ************************************************************************
 # INCREMENT TTF/4
+
 # ************************************************************************
 
-TTFINCR         TC              NTLZPASS                        
-## Page 881
- +1             EXTEND                                          
-                DCS             TPIPOLD                         
-                DXCH            MPAC                            
-                EXTEND                                          
-                DCA             TPIP                            
-                DAS             MPAC                            
-                CA              TSCALE                          
-                TC              DMPNSUB                         # (TPIP-TPIPOLD)/4 TO MPAC, TTF UNITS
+TTFINCR         TC              NTLZPASS
+ +1             EXTEND
+                DCS             TPIPOLD
+                DXCH            MPAC
+                EXTEND
+                DCA             TPIP
+                DAS             MPAC
+                CA              TSCALE
 
-                EXTEND                                          
-                DCA             TTF/4                           
-                DAS             MPAC                            # YIELDS INCREMENTED TTF/4 IN MPAC
-                DXCH            MPAC                            
-                DXCH            TTF/4TMP                        
-                TC              PHASCHNG                        # PROTECT TTF/4
- +402           OCT             04022                           
-                EXTEND                                          
-                DCA             TTF/4TMP                        
-                DXCH            TTF/4                           # INCREMENTED TTF/4
+                TC              DMPNSUB                 # (TPIP-TPIPOLD)/4 TO MPAC, TTF UNITS
+
+                EXTEND
+                DCA             TTF/4
+                DAS             MPAC                    # YIELDS INCREMENTED TTF/4 IN MPAC
+                DXCH            MPAC
+                DXCH            TTF/4TMP
+                TC              PHASCHNG                # PROTECT TTF/4
+ +402           OCT             04022
+                EXTEND
+
+## Page 822
+                DCA             TTF/4TMP
+
+                DXCH            TTF/4                   # INCREMENTED TTF/4
 
 
 
@@ -434,189 +419,207 @@ TTFINCR         TC              NTLZPASS
 # SET UP STATE IN LOCAL, PLANE, SPHERICAL COORDINATES
 # ************************************************************************
 
-STUP2DPS        CA              POSMAX                          
-                TS              CRS2                            # SET CRS2 TO MAXIMUM. RESET LATER ONLY IF
-                TS              CRS2            +1              # RC/RS0 DOES NOT PRODUCE OVERFLOW
+STUP2DPS        TC              INTPRET
+                VLOAD           UNIT
+                                R
+                STOVL           CLT/2                   # DEFINITION OF MATRIX CLT/2
 
-                TC              INTPRET                         
-                VLOAD           UNIT                            
-                                R                               
-                STOVL           CLT/2                           # DEFINITION OF MATRIX CLT/2
-                                CPT6/2                          
-                VXV             UNIT                            
-                                CLT/2                           
-                STOVL           CLT/2           +6              
-                                CLT/2                           
-                VXV             VSL1                            
-                                CLT/2           +6              
-                STOVL           CLT/2           +14             
-                                V                               
-                MXV             VSL1                            
-                                CLT/2                           # -      *     -
-                STOVL           VL                              # VL = 2 CLT/2 V
-                                R                               
-                DOT             SL1                             
-                                CPT6/2                          #       - -
-                STORE           RP2                             # RP2 = R.CPT6
+                                CPT6/2
+                VXV             UNIT
+                                CLT/2
+                STOVL           CLT/2           +6
+                                CLT/2
+                VXV             VSL1
+                                CLT/2           +6
+                STOVL           CLT/2           +14
+                                V
+                MXV             VSL1
 
-## Page 882
-                DSQ             PDVL                            # PUSH DOWN RP2 SQUARED
-                                R                               
-                VXV             DOT                             
-                                V                               
-                                CPT6/2                          
-                SL1                                             #          - - -
-                STOVL           MAP2                            # MAP2 = 2 R*V.CPT6/2
-                                R                               
-                ABVAL                                           #             -
-                STORE           RS                              # RS0 = ABVAL(R)
-                DSQ             DSU                             # PUSHING UP RP2 SQUARED
-                SQRT                                            #              2    2
-                STORE           RC                              # RC = SQRT(RS0 -RP2 )
-                DSU             BPL                             # BRANCH IF RC/RS0 WOULD OVERFLOW
-                                RS                              
-                                SRS2COMP                        
-                DLOAD           DDV                             
-                                RC                              
-                                RS                              
-                STORE           CRS2                            # COSINE(RS2) = RC/RS0
-SRS2COMP        DLOAD           DDV                             
-                                RP2                             
-                                RS                              
-                STORE           SRS2                            # SINE(RS2) = RP2/RS0
-                SR1R            ARCSIN                          
-                DMP             SL3                             
-                                PI/4                            
-                STODL           RS              +4              # RS2 = ARCSIN(RP2/RS0)
-                                RP2                             
-                DDV                                             
-                                RC                              
-                STODL           TRS2                            # TANGENT (RS2) = RP2/RC
-                                VL              +4              
-                DDV             PDDL                            # THIS PUSH DOWN IS FOR 3RD COMP OF VS.
-                                RS                              
-                                VL              +2              
-                DDV             PDDL                            # THIS PUSH DOWN IS FOR 2ND COMP OF VS.
-                                RC                              
-                                VL                              
-                VDEF                                            # DEFINITION OF SPHERICAL VELOCITY VECTOR
-                STODL           VS                              
-                                VS              +2              
-                DSQ                                             
-                DMP             DMP                             
-                                SRS2                            
-                                CRS2                            
-                PDDL            DMP                             
-                                VS              +4              
-                                VS                              
-                DDV             SL1                             
-## Page 883
-                                RS                              
-                DAD             DCOMP                           
-                PDDL            DMP                             # THIS PUSH DOWN IS FOR 3RD COMP OF ASPRT.
-                                VS              +2              
-                                VS                              
-                DDV                                             
-                                RS                              
-                PDDL            DMP                             
-                                TRS2                            
-                                VS              +4              
-                DMP                                             
-                                VS              +2              
-                DSU             SL1                             
+                                CLT/2                   # -      *     -
+                STOVL           VL                      # VL = 2 CLT/2 V
+                                R
+                DOT             SL1
+                                CPT6/2                  #       - -
+                STOVL           RP2                     # RP2 = R.CPT6
+                                R
+                VXV             DOT
+                                V
+                                CPT6/2
+                SL1                                     #          - - -
+                STOVL           MAP2                    # MAP2 = 2 R*V.CPT6/2
 
-                RTB                                             # PREVENT OVERFLOW IN LINSET WHEN
-                                SGNAGREE                        # AFCS +2 =-POSMAX SGN( ASPRT +2)
+                                R
+                ABVAL                                   #                 -
+                STODL           RLENGTH                 # RLENGTH = ABVAL(R)
+                                RP2
+                DSQ             PDDL
+                                RLENGTH
+                DSQ             DSU
+                SQRT                                    #                  2    2
+                STODL           RC                      # RC = SQRT(RLENGTH -RP2 )
+                                RLENGTH                 #               -
 
-                PDDL            DSQ                             # THIS PUSH DOWN IS FOR 2ND COMP OF ASPRT.
-                                RS                              
-                BDDV                                            
-                                MUEARTH                         
-                PDDL            DSQ                             
-                                VS              +4              
-                DMP                                             #                    -
-                                RS                              #       THIS MONSTER ASPRT REPRESENTS
-                PDDL            DSQ                             #       INCIDENTAL ACCELERATIONS; DUE
-                                CRS2                            #       TO GRAVITY, CORIOLIS FORCES,
-                PDDL            DSQ                             #       AND SO FORTH.
-                                VS              +2              
-                DMP             DMP                             
-                                RS                              
-                DAD             DSU                             
-                VDEF                                            # DEFINITION OF ASPRT
-                STORE           ASPRT                           
-                EXIT                                            
-                CA              ZERO                            #       SECOND COMPONENTS
-                TS              RS              +2              #       OF RS AND VS ARE
-                TS              RS              +3              #       ZEROED HERE TO PREVENT
-                TS              VS              +2              #       OVERFLOW TROUBLE IN
-                TS              VS              +3              #       THE ACS EQUATION.
-                TC              PHASCHNG                        # TIME ONLY?
- +402           OCT             04022                           
-                INDEX           NDXBR                           
-                TCF             BRLING                          # POSSIBLE BRANCH TO LINEAR GUIDANCE
+                STODL           RS                      # DEFINITION OF RS, FIRST COMPONENT
+                                RC
+                DDV
+                                RLENGTH
+                STODL           CRS2                    # COSINE (RS2) = RC/RLENGTH
 
-## Page 884
+## Page 823
+                                RP2
+                DDV
+                                RLENGTH
+                STODL           SRS2                    # SINE (RS2) = RP2/RLENGTH
+                                RP2
+                DDV
+
+                                RC
+                STODL           TRS2                    # TNEGENT (RS2) = RP2/RC
+                                SRS2
+                SR1             ARCSIN
+                DMP             SL3
+                                PI/4                    #               -
+                STODL           RS              +4      # DEFINITION OF RS, THIRD COMPONENT
+                                VL              +4
+                DDV             PDDL                    # THIS PUSH DOWN IS FOR 3RD COMP OF VS.
+                                RLENGTH
+                                VL              +2
+                DDV             PDDL                    # THIS PUSH DOWN IS FOR 2ND COMP OF VS.
+
+                                RC
+                                VL
+                VDEF                                    # DEFINITION OF SPHERICAL VELOCITY VECTOR
+                STODL           VS
+                                VS              +2
+                DSQ
+                DMP             DMP
+                                SRS2
+                                CRS2
+                PDDL            DMP
+
+                                VS              +4
+                                VS
+                DDV             SL1
+                                RLENGTH
+                DAD             DCOMP
+                PDDL            DMP                     # THIS PUSH DOWN IS FOR 3RD COMP OF ASPRT.
+                                VS              +2
+                                VS
+                DDV
+                                RLENGTH
+                PDDL            DMP
+                                TRS2
+
+                                VS              +4
+                DMP
+                                VS              +2
+                DSU             SL1
+                PDDL            DSQ                     # THIS PUSH DOWN IS FOR 2ND COMP OF ASPRT.
+                                RLENGTH
+                BDDV
+                                MUEARTH
+                PDDL            DSQ
+                                VS              +4
+
+## Page 824
+                DMP                                     #                    -
+                                RLENGTH                 #       THIS MONSTER ASPRT REPRESENTS
+
+                PDDL            DSQ                     #       INCIDENTAL ACCELERATIONS; DUE
+                                CRS2                    #       TO GRAVITY, CORIOLIS FORCES,
+                PDDL            DSQ                     #       AND SO FORTH.
+                                VS              +2
+                DMP             DMP
+                                RLENGTH
+                DAD             DSU
+                VDEF                                    # DEFINITION OF ASPRT
+                STORE           ASPRT
+                EXIT
+
+                CA              ZERO                    #       SECOND COMPONENTS
+                TS              RS              +2      #       OF RS AND VS ARE
+                TS              RS              +3      #       ZEROED HERE TO PREVENT
+                TS              VS              +2      #       OVERFLOW TROUBLE IN
+                TS              VS              +3      #       THE ACS EQUATION.
+                TC              PHASCHNG                # TIME ONLY?
+ +402           OCT             04022
+                INDEX           NDXBR
+                TCF             BRLING                  # POSSIBLE BRANCH TO LINEAR GUIDANCE
+
+## Page 825
 # ************************************************************************
 # TTF/4 COMPUTATION
 # ************************************************************************
 
-TTF/4CL         EXTEND                                          
-                INDEX           NDX2DPS                         
-                DCA             JDS2                            
-                DXCH            TABLTTF         +6              # A(3) = JDS2 TO TABLTTF
-                EXTEND                                          
-                INDEX           NDX2DPS                         
-                DCA             ADS             +4              
-                DDOUBL                                          
-                DXCH            MPAC                            
-                CA              SP3/4                           
-                TC              SHORTMP                         # LEAVING  A(2) IN MPAC
-                DXCH            MPAC                            
-                DXCH            TABLTTF         +4              # A(2) = (6 ADS2)/4 TO TABLTTF
-                CA              BIT8                            
-                TS              TABLTTF         +10             # FRACTIONAL PRECISION FOR TTF TO TABLE
-                EXTEND                                          
-                DCA             VS              +4              
-                DXCH            MPAC                            
-                CA              SP3/8                           
-                TC              SHORTMP                         # YIELDS 6/16 VS2 IN MPAC
-                EXTEND                                          
-                INDEX           NDX2DPS                         
-                DCA             VDS             +4              
-                DDOUBL                                          
-                DXCH            MPAC                            
-                DXCH            TABLTTF         +2              # STORE 6/16 VS2 IN TABLTTF
-                CA              SP9/16                          
-                TC              SHORTMP                         # YIELDS 18/16 VDS2 IN MPAC
-                EXTEND                                          
-                DCS             RS              +4              
-                DXCH            MPAC                            # -RS2 TO MPAC, FETCHING 18/16 VDS2
-                DAS             TABLTTF         +2              # A(1) = (6 VS2+18 VDS2)/16
+TTF/4CL         EXTEND
+                INDEX           NDX2DPS
+                DCA             JDS2
+                DXCH            TABLTTF         +6      # A(3) = JDS2 TO TABLTTF
 
-                EXTEND                                          
-                INDEX           NDX2DPS                         
-                DCA             RDS             +4              
-                DAS             MPAC                            # YIELDS -RS2+RDS2 IN MPAC
-                CA              SP3/8                           
-                TC              SHORTMP                         
-                EXTEND                                          
-                DCA             MPAC                            
-                DXCH            TABLTTF                         # A(0)  =-24(RS2-RDS2)/64
+                EXTEND
+                INDEX           NDX2DPS
+                DCA             ADS             +4
+                DDOUBL
+                DXCH            MPAC
+                CA              SP3/4
+                TC              SHORTMP                 # LEAVING  A(2) IN MPAC
+                DXCH            MPAC
+                DXCH            TABLTTF         +4      # A(2) = (6 ADS2)/4 TO TABLTTF
+                CA              BIT8
 
-                EXTEND                                          
-                DCA             TTF/4                           
-                DXCH            MPAC                            # LOADS TTF/4 (INITIAL GUESS) INTO MPAC
-## Page 885
-                EXTEND                                          
-                DCA             TABLTTFL                        # LOADS A,L WITH TABLTTFL,2
-                TC              ROOTPSRS                        # YIELDS TTF/4 IN MPAC
-                EXTEND                                          
-                DCA             MPAC                            # FETCH TTF/4 KEEPING IT IN MPAC
-                DXCH            TTF/4                           # CORRECTED TTF/4
+                TS              TABLTTF         +10     # FRACTIONAL PRECISION FOR TTF TO TABLE
+                EXTEND
+                DCA             VS              +4
+                DXCH            MPAC
+                CA              SP3/8
+                TC              SHORTMP                 # YIELDS 6/16 VS2 IN MPAC
+                EXTEND
+                INDEX           NDX2DPS
+                DCA             VDS             +4
+                DDOUBL
+                DXCH            MPAC
+                DXCH            TABLTTF         +2      # STORE 6/16 VS2 IN TABLTTF
 
-                TC              PHASCHNG                        # TIME ONLY?
- +402           OCT             04022                           
+                CA              SP9/16
+                TC              SHORTMP                 # YIELDS 18/16 VDS2 IN MPAC
+                EXTEND
+                DCS             RS              +4
+                DXCH            MPAC                    # -RS2 TO MPAC, FETCHING 18/16 VDS2
+                DAS             TABLTTF         +2      # A(1) = (6 VS2+18 VDS2)/16
+
+                EXTEND
+                INDEX           NDX2DPS
+                DCA             RDS             +4
+
+                DAS             MPAC                    # YIELDS -RS2+RDS2 IN MPAC
+                CA              SP3/8
+                TC              SHORTMP
+                EXTEND
+                DCA             MPAC
+                DXCH            TABLTTF                 # A(0)  =-24(RS2-RDS2)/64
+
+                INHINT                                  # SET INHIBITED LOOP TO STORE FOR DWNLINK
+                CAF             ELEVEN                  # INITIALIZE INDEX TO DEC 11
+RVSTOR          TS              RUPTREG1
+
+## Page 826
+                INDEX           RUPTREG1
+
+                CA              RN1
+                INDEX           RUPTREG1
+                TS              RN                      # STORE UPDATED RN, VN
+                CCS             RUPTREG1
+                TCF             RVSTOR
+                EXTEND
+                DCA             PIPTIMET
+                DXCH            PIPTIME                 # UPDATED PIPTIME
+                EXTEND
+                DCA             PIPTIME
+                DXCH            STATIME                 # STATE TIME FOR DWNLINK
+                RELINT
+
+                TC              PHASCHNG                # TIME ONLY?
+ +402           OCT             04022
 
 
 
@@ -624,54 +627,48 @@ TTF/4CL         EXTEND
 # QUADRATIC GUIDANCE - SPHERICAL ACCELERATION AS QUADRATIC TIME FUNCTION
 # ************************************************************************
 
-                                                                #  -
-                                                                #  ACS EQUATION IS PROGRAMMED LIKE THIS:
-                                                                #                        -  -
-                                                                #          -  -      1/2(RS-RDS)
-                                                                #         (VS+VDS) - -----------
-                                                                #   -                   TTF/4      -
-                                                                #   ACS = ---------------------- + ADS
-                                                                #               2/3(TTF/4)
+                                                        #  -
+                                                        #  ACS EQUATION IS PROGRAMMED LIKE THIS:
+                                                        #                        -  -
+                                                        #          -  -      1/2(RS-RDS)
+                                                        #         (VS+VDS) - -----------
+                                                        #   -                   TTF/4      -
+                                                        #   ACS = ---------------------- + ADS
+                                                        #               2/3(TTF/4)
 
-                TC              INTPRET                         
-                DLOAD           DMP                             
-                                TTF/4                           
-                                2DPS2/3                         
-                PDVL            VSU*                            
-                                RS                              
-                                RDS,1                           
-                VSR1            V/SC                            
-                                TTF/4                           
-                PDVL            VAD*                            
-                                VS                              
-                                VDS,1                           
-                VSU             V/SC                            
-                VAD*            BOVB                            # BRANCH, SET ALARM, RETAIN GOOD ACS
-                                ADS,1                           
-                                OVF2DPS1                        
+                TC              INTPRET
+                DLOAD           DMP
+                                TTF/4
+                                2DPS2/3
 
-                PUSH            VSU                             # PUSH ACS UNTIL SEEN IF AFCS OVERFLOWS
-                                ASPRT                           
-                BOV                                             # BRANCH, SET ALARM, RETAIN GOOD AFCS
-                                OVF2DPS2                        
-                                                                # -      -   -
-                STOVL           AFCS                            # AFCS = ACS-ASPRT
-                STADR                                           
-                STORE           ACS                             # BEHOLD, UNWORTHY MORTAL
+                PDVL            VSU*
+                                RS
+                                RDS,1
+                VSR1            V/SC
+                                TTF/4
+                PDVL            VAD*
+                                VS
+                                VDS,1
+                VSU             V/SC
+                VAD*
+                                ADS,1
+                STORE           ACS                     # BEHOLD, UNWORTHY MORTAL
+                VSU
+                                ASPRT                   # -      -     -
+                STODL           AFCS                    # AFCS = ACS - ASPRT
 
-## Page 886
-RETOVF12        DLOAD           DSQ                             
-                                RC                              
-                DMP             PDDL                            
-                                TTF/4                           
-                                MAP2                            
-                DSU             SR2R                            
-                                MADP2                           
-                DDV             STADR                           #                        2
-                STORE           AFCS            +2              # AFCS  = (MAP -MADP )/RC  TTF
-                                                                #     1       2     2
-                BOVB                                            # RETAIN POSMAX ON OVERFLOW, BUT
-                                OVF2DPS3                        # BRANCH, SET ALARM, RETURN TO AFCCALC
+## Page 827
+                                RC
+                DSQ             DMP
+                                TTF/4
+                PDDL            DSU
+                                MAP2
+                                MADP2
+
+                SR2
+                DDV             STADR                   #                           2
+                STODL           AFCS            +2      # AFCS  = 1/4(MAP -MADP )/RC (TTF/4)
+                                AFCS            +4      #     1          2     2
 
 
 
@@ -679,30 +676,34 @@ RETOVF12        DLOAD           DSQ
 # THRUST ACCEL POINTING AND MAGNITUDE COMMANDS - DUE TO QUAD OR LINR GUID
 # ************************************************************************
 
-AFCCALC         DLOAD           DMP                             # COME HERE FROM LINGUID
-                                AFCS            +4              
-                                RS                              
-                PDDL            DMP                             # PUSH AFCL
-                                AFCS            +2              #          2
-                                RC                              
-                PDDL            VDEF                            # PUSH AFCL , FORM VECTOR AFCL
-                                AFCS                            #          1
-                VXM             VSL1                            
-                                CLT/2                           # -                                 *
-                STORE           AFC                             # AFC = (AFCS , RC AFCS , RS  AFCS )CLT
-                UNIT                                            #            0         1    0     2
-                STODL           UNAFC/2                         
-                                36D                             # MAGNITUDE OF AFC, /AFC/
-                STORE           /AFC/                           # FOR IGNITION ALGORITHM
-                EXIT                                            
-                INDEX           NDXBR                           
-                TCF             BRIGN2                          
+AFCCALC         DMP             PDDL                    # COMES HERE FROM LINGUID.
 
- -3             TS              OVFIND                          # RETURN FROM TTF/4 OVERFLOW
- -2             CA              FIVE                            # RETURN RESETTING COUNTFC
- -1             TS              COUNTFCT                        # RETURN DECREMENTING COUNTFC
-RETIGN2         TC              PHASCHNG                        # RETURN (NORMAL) FROM IGNITN2
- +402           OCT             04022                           # PREVENT GOING FAR BACK IN 2DPS AFTR EXIT
+                                RLENGTH
+                                AFCS            +2
+                DMP             PDDL
+                                RC
+                                AFCS
+                VDEF            VXM
+                                CLT/2
+                VSL1                                    # -                                     *
+                STORE           AFC                     # AFC = 2(AFCS , RC AFCS ,RLENGTH AFCS )CLT/2
+                UNIT                                    #             0         1             2
+
+                STODL           UNAFC/2
+                                36D                     # MAGNITUDE OF AFC, /AFC/
+                STORE           /AFC/                   # FOR IGNITION ALGORITHM
+                SR1R                                    # CONVERTS /AFC/ TO THROTCON UNITS, /ACF/
+                STORE           /AFC/                   # FOR THROTTLE CONTROL SUBR THROTCON
+                EXIT
+                INDEX           NDXBR
+                TCF             BRIGN2
+
+ -3             TS              OVFIND                  # RETURN FROM TTF/4 OVERFLOW
+ -2             CA              FIVE                    # RETURN RESETTING COUNTFC
+ -1             TS              COUNTFCT                # RETURN DECREMENTING COUNTFC
+
+RETIGN2         TC              PHASCHNG                # RETURN (NORMAL) FROM IGNITN2
+ +402           OCT             04022                   # PREVENT GOING FAR BACK IN 2DPS AFTR EXIT
 
 
 
@@ -710,75 +711,31 @@ RETIGN2         TC              PHASCHNG                        # RETURN (NORMAL
 # PREPARE TO EXIT
 # ************************************************************************
 
-## Page 887
-# DOWNLINK ENTRIES
+                INCR            FLPASS0                 # INCR FIRST PASS FLAG. REPEATS ARE OK.
 
-                EXTEND                                          
-                DCS             TTF/4                           
-## The following line has a short line drawn next to it, marking it for something.
-                DXCH            MPAC                            
-                CA              TSCALINV                        
-                TC              SHORTMP                         
-                INHINT                                          
-                DXCH            MPAC                            
-## The "TTGO" in the following line is circled, with a line leading to the comment column on the right.
-## At the end of the line is written "TTF".
-                DXCH            TTGO                            
-                CA              TPIP            +1              
-                TS              DOWN2DPS                        
-                CA              AVGEXIT                         
-                TS              DOWN2DPS        +1              
-                CA              EBANK7                          # MAKE UP A WORD WHICH MAY BE USED TO
-                XCH             EBANK                           # FIND OUT WHERE THE DOWNLIST POINTER IS
-                TS              Q                               # AT THE MOMENT.
+## Page 828
+                INDEX           AVGEXIT
+                CS              TTF/4CR
 
-                EBANK=          TMINDEX                         
+                AD              TTF/4
+                EXTEND
+                INDEX           NDXBR
+                BZMF            BRXMID                  # CONTINUE PRESENT PHASE
 
-                CA              TMINDEX                         
-                EXTEND                                          
-                MP              BIT9                            # PUT LOW 6 BITS OF TMINDEX INTO BITS
-                CA              DNTMGOTO                        #  14 - 9 OF L.
-                MASK            LOW8                            
-                ADS             L                               # ADD LOW 8 BITS OF DNTMGOTO.
-                EXTEND                                          
-                QXCH            EBANK                           
+                CA              AVGEXIT                 # PREPARE FOR NEW PHASE
+                TS              AVGXTEMP                # TEMPORARY PROTECTION FOR AVGEXIT
+                TC              PHASCHNG                # PROTECT AVGEXIT
+ +402           OCT             04022
+                CA              AVGXTEMP
 
-                EBANK=          E2DPS                           
+                AD              SIX
+                TS              AVGEXIT
+                CA              ZERO
+                TS              FLPASS0                 # RESET FLAG INDICATING PASS ZERO (FIRST)
+                INDEX           AVGXTEMP
+                TCF             BRXEND
 
-                CA              MASS                            
-                DXCH            DOWN2DPS        +2              
-                TC              INTPRET                         
-                DLOAD                                           
-                                /AFC/                           
-## "DOWN2DPS  +4" in the following line is circled.
-                STOVL           DOWN2DPS        +4              
-                                UNAFC/2                         
-                STORE           DOWN2DPS        +6              
-                EXIT                                            
-                RELINT                                          
-
-                INCR            FLPASS0                         # INCR FIRST PASS FLAG. REPEATS ARE OK.
-                INDEX           AVGEXIT                         
-                CS              TTF/4CR                         
-                AD              TTF/4                           
-                EXTEND                                          
-                INDEX           NDXBR                           
-                BZMF            BRXMID                          # CONTINUE PRESENT PHASE
-
-## Page 888
-                CA              AVGEXIT                         # PREPARE FOR NEW PHASE
-                TS              AVGXTEMP                        # TEMPORARY PROTECTION FOR AVGEXIT
-                TC              PHASCHNG                        # PROTECT AVGEXIT
- +402           OCT             04022                           
-                CA              AVGXTEMP                        
-                AD              SEVEN                           
-                TS              AVGEXIT                         
-                CA              ZERO                            
-                TS              FLPASS0                         # RESET FLAG INDICATING PASS ZERO (FIRST)
-                INDEX           AVGXTEMP                        
-                TCF             BRXEND                          
-
-## Page 889
+## Page 829
 # ************************************************************************
 # ROUTINES FOR EXITING FROM SECOND DPS GUIDANCE. THESE ARE:
 # ************************************************************************
@@ -787,216 +744,177 @@ RETIGN2         TC              PHASCHNG                        # RETURN (NORMAL
 #          THE PREBURN PHASE. UPON RETURN EXIGMID RESTARTS 2DPS.
 
 # 2.       EXIGEND IS USED ON THE LAST PASS DURING PREBURN. IT SETS UP FOR KALCMANU, FOR THE SUBSEQUENT 2DPS
+
 #          BURN, AND EXITS TO THE MISSION CONTROL PROGRAM.
 
 # 3.       EXQDLIN IS USED TO TERMINATE EACH PASS UP UNTIL BUT NOT INCLUDING THE LAST PASS ON ALL 2DPS BURN
 #          PHASES. EXQDLIN OBTAINS ATTITUDE AND THROTTLE CONTROL AND TERMINATES THE JOB.
 
-# 4.       EXFINAL IS THE FINAL 2DPS EXIT. IT SETS UP AND ISSUES THE ATTITUDE COMMAND FOR RANDOM THROTTLING
-#          AND EXITS TO THE MISSION CONTROL PROGRAM.
+# 4.       EXFINAL IS THE FINAL 2DPS EXIT. IT SETS UP AND ISSUES THE ATTITUDE COMMAND FOR RANDOM THROTTLING, OBTAINS
+#          ATTITUDE AND THROTTLE CONTROL, AND EXITS TO THE MISSION CONTROL PROGRAM.
 
 
 
 # EXIGMID SETS UP FOR CALCRVG TO MOVE STATE FORWARD A SPECIFIED TIME, INITIALIZES THE INTERPRETER, CALLS CALCRVG
 # AS AN INTERPRETIVE SUBROUTINE, AND UPON RETURN SETS UP FOR IGNALG AND BRANCHES INDIRECTLY THERETO.
 
-EXIGMID         TC              PRETINIT                        # INITIALIZES INTERPRETER FOR CALCRVG
-                                                                # SUCCEEDING CODING MUST NOT UNDO
+EXIGMID         TC              PRETINIT                # INITIALIZES INTERPRETER FOR CALCRVG
+                                                        # SUCCEEDING CODING MUST NOT UNDO
 
-                TC              INTPRET                         
-                DLOAD           DAD                             
-                                PIGNALG                         
-                                PIPTIME                         
-                STOVL           PIPTIMET                        # UPDATED PIPTIME TEMPORARY STORAGE
-                                ZEROPOS                         
-                STCALL          DELV                            # DELV = 0
-                                CALCRVG                         # STEPS FORWARD IN TIME LEAVING RN1, VN1
-                EXIT                                            
+                TC              INTPRET
+                DLOAD           DAD
+                                PIGNALG
+                                PIPTIME
+                STOVL           PIPTIMET                # UPDATED PIPTIME TEMPORARY STORAGE
+                                ZEROPOS
+                STCALL          DELV                    # DELV = 0
 
-                CA              E2DPSL                          # ASSURE CORRECT EBANK BEFORE
-                TS              EBANK                           # DOING PHASCHNG
-                TC              PHASCHNG                        # PROTECT PIPTIME. PREVENT REDOING CALCRVG
- +402           OCT             04022                           
-RNVNSTOR        INHINT                                          # SET INHIBITED LOOP TO STORE FOR DWNLINK
-                CA              NSCALR-1                        
-RVSTOR          TS              RUPTREG1                        
-                INDEX           RUPTREG1                        
-                CA              RN1                             
-                INDEX           RUPTREG1                        
-                TS              RN                              # STORE UPDATED RN, VN
-                CCS             RUPTREG1                         
-                TCF             RVSTOR                          
-                EXTEND                                          
-                DCA             PIPTIMET                        
-                DXCH            PIPTIME                         # UPDATED PIPTIME
+                                CALCRVG                 # STEPS FORWARD IN TIME LEAVING RN1, VN1
+                EXIT
 
-## Page 890
-                EXTEND                                          
-                DCA             PIPTIME                         
-                DXCH            STATIME                         # TIME FOR DWNLINK
-                RELINT                                          
-                TC              AVGEXIT                         # RETURNS TO APPROPRIATE LOCATION IN 2DPS
+                CA              E2DPSL                  # ASSURE CORRECT EBANK BEFORE
+                TS              EBANK                   # DOING PHASCHNG
+                TC              PHASCHNG                # PROTECT PIPTIME. PREVENT REDOING CALCRVG
+ +402           OCT             04022
+                TC              INTPRET
+                DLOAD
+                                PIPTIMET
+
+                STOVL           PIPTIME                 # UPDATED PIPTIME
+                                RN1
+                STOVL           RN                      # UPDATED POSITION
+                                VN1
+                STORE           VN                      # UPDATED VELOCITY
+                EXIT
+                TC              AVGEXIT                 # RETURNS TO APPROPRIATE LOCATION IN 2DPS
+
+## Page 830
 
 # EXIGEND EXTRAPOLATES UNAFC/2 TO TTF/4 = 0, SETS UP FOR MISSION CONTROL PROGRAM, SETS UP FOR THE SUCCEEDING
+
 # BRAKING PHASE, AND EXITS TO THE MISSION CONTROL PROGRAM.
 
 # EXTRAPOLATE UNAFC/2
 
 # UNAFC/2 = UNAFC/2+(UNAFC/2-UNAFC/2O)(TTF)/(TPIPOLD-TPIP)
 
-EXIGEND         EXTEND                                          
-                DCA             TPIPOLD                         
-                DXCH            MPAC                            
-                EXTEND                                          
-                DCS             TPIP                            
-                DAS             MPAC                            
-                CA              TSCALE                          
-                EXTEND                                          
-                MP              BIT3                            # MULTIPLIES BY N = 4 LEAVING RESULT IN L
-                CA              L                               # ASSUMES N(TPIPOLD-TPIP)/4>TTF/4 IN MAGN.
-                TC              DMPNSUB                         # N(TPIPOLD-TPIP)/4 TO MPAC, TTF UNITS
-                EXTEND                                          
-                DCA             TTF/4                           
-                DXCH            MPAC                            # DIVIDEND TO MPAC
-                DXCH            BUF                             # DIVISOR TO BUF
-                TC              USPRCADR                        
-                CADR            DDV/BDDV                        # (TTF/4)/(N(TPIPOLD-TPIP)/4) TO MPAC
+EXIGEND         EXTEND
+                DCA             TPIPOLD
+                DXCH            MPAC
+                EXTEND
+                DCS             TPIP
+                DAS             MPAC
 
-                CA              ZERO                            
-                TS              MODE                            # TO INDICATE DP IN MPAC
+                CA              TSCALE
+                EXTEND
+                MP              BIT3                    # MULTIPLIES BY N = 4 LEAVING RESULT IN L
+                CA              L                       # ASSUMES N(TPIPOLD-TPIP)/4>TTF/4 IN MAGN.
+                TC              DMPNSUB                 # N(TPIPOLD-TPIP)/4 TO MPAC, TTF UNITS
+                EXTEND
+                DCA             TTF/4
+                DXCH            MPAC                    # DIVIDEND TO MPAC
+                DXCH            BUF                     # DIVISOR TO BUF
+                TC              USPRCADR
 
-                TC              INTPRET                         
-                PDVL            VSU                             
-                                UNAFC/2                         
-                                UNAFC/20                        
-                VSL2            VXSC                            # VSL2 UNDOES MP BIT3 PRECEDING
-                VAD                                             
-                                UNAFC/2                         # YIELDS EXTRAPOLATED UNAFC/2
+                CADR            DDV/BDDV                # (TTF/4)/(N(TPIPOLD-TPIP)/4) TO MPAC
+
+                CA              ZERO
+                TS              MODE                    # TO INDICATE DP IN MPAC
+
+                TC              INTPRET
+                PDVL            VSU
+                                UNAFC/2
+                                UNAFC/20
+                VSL2            VXSC                    # VSL2 UNDOES MP BIT3 PRECEDING
+                                UNAFC/2
+                VAD
+
+                                UNAFC/2                 # YIELDS EXTRAPOLATED UNAFC/2
 
 # SET UP FOR MISSION CONTROL PROGRAM
 
-                STODL           POINTVSM                        # STORE FOR KALCMANU
-                                TTF/4                           
-                DCOMP           DMP                             
-                                TSCALINV                        
-                DAD                                             
-                                PIPTIME                         
+                STODL           POINTVSM                # STORE FOR KALCMANU
+                                TTF/4
+                DCOMP           DMP
+                                TSCALINV
+                DAD
+                                PIPTIME
 
-## Page 891
-                STORE           TULLG                           # TIME AT WHICH ULLAGE IS TO START
-
-                DAD                                             
-                                PULLGCS                         
-                STORE           TIGN                            # DISPLAY TIGN FOR DOWNLINK.
+                STORE           TULLG                   # TIME AT WHICH ULLAGE IS TO START
 
 # SET UP FOR BRAKING PHASE
 
-                EXIT                                            
-                TC              PHASCHNG                        # PROTECT TTF/4 AND PREVENT REREADING REG-
- +402           OCT             04022                           # ISTERS REWRITTEN BY MISN CONT PROGRAM
-                EXTEND                                          
-                DCA             TTF/4TMP                        
-                DXCH            TTF/4                           
+                EXIT
+
+## Page 831
+                TC              PHASCHNG                # PROTECT TTF/4 AND PREVENT REREADING REG-
+ +402           OCT             04022                   # ISTERS REWRITTEN BY MISN CONT PROGRAM
+                EXTEND
+                DCA             TTF/4TMP
+                DXCH            TTF/4
 
 # RETURN TO MISSION CONTROL PROGRAM
 
-                TC              PRETINIT                        # INITIALIZES INTERPRETER
-                EXTEND                                          
-                DCA             RETPREBL                        
-                DTCB                                            
+                TC              PRETINIT                # INITIALIZES INTERPRETER
+                EXTEND
+                DCA             RETPREBL
+                DTCB
 
-## Page 892
+## Page 832
 # EXQDLIN STORES THE SEMI-UNIT VECTOR DEFINING THE DIRECTION OF COMMANDED THRUST ACCELERATION (UNAFC/2) IN THE
 # APPROPRIATE REGISTERS OF FINDCDUD (AXISD) AND CALLS FINDCDUD AND THROTCON AS SUBROUTINES.
+
+# THEN EXQDLIN TRANSFERS THE COMMANDED THRUST ACCELERATION MAGNITUDE (/AFC/) TO THE APPROPRIATE RESGISTERS OF
+# THROTCON, (/ACF/), CHANGING SCALING, AND CALLS THROTCON AS A SUBROUTINE.
 # FINALLY EXQDLIN TERMINATES THE JOB.
 
-EXQDLIN         CCS             OVFIND                          # IF OVF AFTER COMPUTING AFCS1, ALARM, AND
-                TCF             OVF2DPS4                        # DO NOT ISSUE ATTITUDE OR THROTTLE CMDS.
-                TCF             +2                              
-                TCF             OVF2DPS4                        # IN CASE OVFIND =-1
+EXQDLIN         TC              INTPRET
+                VLOAD
+                                UNAFC/2
+                STCALL          AXISD
+                                FINDCDUD                # ATTITUDE CONTROL
+                EXIT
 
-                TC              INTPRET                         
-                VLOAD                                           
-                                UNAFC/2                         
-                STCALL          AXISD                           
-                                FINDCDUD                        # ATTITUDE CONTROL
 
-                DLOAD           SR1R                            # LOAD GOOD /AFC/.
-                                /AFC/                           # SCALE TO THROTCON UNITS.
-                STORE           /ACF/                           # STORE IN THROTCON ACCEL CMD REGISTERS
-                EXIT                                            
-                EXTEND                                          
-                DCA             THROTCOL                        
-                DTCB                                            # THROTTLE CONTROL
-
-EXOVFLOW        TC              2PHSCHNG                        # PREVENT RECALLING THROTCON AND FINDCDUD
-                OCT             00034                           # 4.3SPOT FOR ACCLJOB
- +002           OCT             00002                           # INACTIVATE GROUP 2
-
-                TC              ENDOFJOB                        # TERMINATES THE JOB PERIODICALLY STARTED
-                                                                # BY A WAITLIST CALL FROM READACCS
+                EXTEND
+                DCA             THROTCOL
+                DTCB                                    # THROTTLE CONTROL
+                TC              ENDOFJOB                # TERMINATES THE JOB PERIODICALLY STARTED
+                                                        # BY A WAITLIST CALL FROM READACCS
 
 
 
 # EXFINAL IS THE FINAL EXIT FROM 2DPS. FIRST EXFINAL PLACES THE SEMI-UNIT NORMAL TO THE ORBITAL PLANE (CPT6/2)
 # IN AXISD AND CALLS FINDCDUD AS A SUBROUTINE. THIS CAUSES FURTHER THRUSTING TO BE NORMAL TO THE ORBITAL PLANE.
+# THEN EXFINAL TRANSFERS TEH COMMANDED THRUST ACCELERATION MAGNITUDE (/AFC/) TO THE APPROPRIATE REGISTERS OF
+
+# THROTCON, (ACF/), CHANGING SCALING, AND CALLS THROTCON AS A SUBROUTINE.
 # FINALLY EXFINAL RETURNS TO THE MISSION CONTROL PROGRAM WHICH EXECUTES THE RANDOM THROTTLING.
 
-EXFINAL         TC              INTPRET                         
-                VLOAD                                           
-                                CPT6/2                          
-                STCALL          AXISD                           
-                                FINDCDUD                        # ATTITUDE CONTROL
-                EXIT                                            
+EXFINAL         TC              INTPRET
+                VLOAD
+                                CPT6/2
+                STCALL          AXISD
+                                FINDCDUD                # ATTITUDE CONTROL
+                EXIT
 
-                TC              PHASCHNG                        # PREVENT RECALLING FINDCDUD
- +402           OCT             04022                           
+                EXTEND
+                DCA             THROTCOL
+                DTCB                                    # THROTTLE CONTROL
+                TC              PRETINIT                # INITIALIZE INTERPRETER
+                EXTEND
+                DCA             RETBURNL
+                DTCB
 
-                TC              PRETINIT                        # INITIALIZES INTERPRETER
-                EXTEND                                          
-                DCA             RETBURNL                        
-                DTCB                                            
-
-## Page 893
+## Page 833
 # ************************************************************************
 # SPECIAL PURPOSE SUBROUTINES OF SECOND DPS GUIDANCE
 # ************************************************************************
 
 # ************************************************************************
-# OVERFLOW ACTIONS
-# ************************************************************************
-
-OVF2DPS2        VLOAD                                           # FROM PUSH LIST, PURPOSE: RESET POINTER
-                EXIT                                            
-
-OVF2DPS1        TC              ALARM                           # OVERFLOW PRIOR TO (PRESUMABLY DURING)
-                OCT             00410                           # COMPUTATION OF ACS OR AFCS
-
-                TC              INTPRET                         # OVFIND RESET BY BOVB OR BOV, NO REPEAT
-                GOTO                                            
-                                RETOVF12                        
-
-
-
-OVF2DPS3        TC              ALARM                           # DIVIDE OVERFLOW DURING COMPUTATION OF
-                OCT             00411                           # AFCS . BOVB RESETS OVFIND.
-                                                                #     1
-                TC              INTPRET                         # SET ALARM AND RETURN
-                GOTO                                            
-                                AFCCALC                         
-
-
-
-OVF2DPS4        TS              OVFIND                          # OVERFLOW AFTER COMPUTATION OF ACS, AFCS,
-                TC              ALARM                           # AND AFCS . RESET OVFIND, SET ALARM, AND
-                OCT             00412                           #         1
-                                                                # RETURN SKIPPING CALLS OF FINDCDUD AND
-                TCF             EXOVFLOW                        # THROTCON.
-
-## Page 894
-# ************************************************************************
 # IGNITION ALGORITHM
 # ************************************************************************
+
 
 # IGNITN1 EXTRAPOLATES THE GIVEN STATE FORWARD THROUGH THE TIME INTERVAL REQUIRED TO ACCOMPLISH ULLAGE AND TO
 # LITE AT LOW THRUST AND TRIM THE ENGINE. THE EXTRAPOLATION ENDS AT THE TIME MAXIMUM THRUST WOULD BE COMMANDED
@@ -1008,6 +926,7 @@ OVF2DPS4        TS              OVFIND                          # OVERFLOW AFTER
 # DIRECTION (UNAFC/2) AND THE THRUST ACCELERATION MAGNITUDE COMMAND (/AFC/).
 
 # IGNITN2 THEN RECEIVES THIS OUTPUT DATA FROM THE GUIDANCE EQUATIONS AND DETERMINES WHETHER THE THRUST
+
 # ACCELERATION MAGNITUDE COMMAND IS MONOTONICALLY INCREASING. WHEN IT IS, IGNITN2 USES THE PRESENT AND PREVIOUS
 # VALUES TO COMPUTE ONE QUARTER OF THE PRESENT TIME (TTF/4) RELATIVE TO THE TIME AT WHICH THE THRUST
 # ACCELERATION MAGNITUDE COMMAND WILL REACH THE CRITERION VALUE (/AFC/CR) WHICH CORRESPONDS TO MAXIMUM THROTTLE.
@@ -1021,151 +940,164 @@ OVF2DPS4        TS              OVFIND                          # OVERFLOW AFTER
 
 # DO TEMPORARY STORAGE
 
-IGNITN1         TC              INTPRET                         
-                DLOAD                                           
-                                /AFC/                           
-                STOVL           /AFC/OLD                        # OLD VALUE OF /AFC/ FOR USE BY IGNITN2
+IGNITN1         TC              INTPRET
+                DLOAD
+                                /AFC/
+                STOVL           /AFC/OLD                # OLD VALUE OF /AFC/ FOR USE BY IGNITN2
 
-                                UNAFC/2                         
-                STOVL           UNAFC/20                        # OLD VALUE OF UNAFC/2
+                                UNAFC/2
+                STOVL           UNAFC/20                # OLD VALUE OF UNAFC/2
 
 # EXTRAPOLATE STATE
 
-                                R                               
-                STOVL           RDUM                            
-                                V                               
-                STOVL           VDUM                            
-                                GDOTM1                          
-                STODL           JDUM                            
-                                PFCULLG                         # ULLAGE PERIOD
-                STODL           PDUM                            # DUMMY PERIOD
-                                AFULLG                          # LEAVE AFULLG IN MPAC
-                CALL                                            # EXTRAPOLATES DUMMY STATE AND
-                                XTRIGN1                         # LEAVES INITIAL GRAVITY IN GDUM
 
-                VLOAD                                           
-## Page 895
-                                GDUM                            
-                STODL           GDUMPRES                        # SAVE INITL GRAVITY FOR COMPUTING GDOTM1
+                                R
+                STOVL           RDUM
+                                V
+                STOVL           VDUM
+                                GDOTM1
+                STODL           JDUM
+                                PFCULLG                 # ULLAGE PERIOD
+                STODL           PDUM                    # DUMMY PERIOD
+                                AFULLG                  # LEAVE AFULLG IN MPAC
 
-                                PFCLITE                         # LITEUP PERIOD
-                STODL           PDUM                            
-                                AFLITE                          # LEAVE AFLITE IN MPAC
-                CALL                                            
-                                XTRIGN1                         # EXTRAPOLATE
+## Page 834
+                CALL                                    # EXTRAPOLATES DUMMY STATE AND
 
-                DLOAD                                           
-                                PFCTRIM                         # TRIM PERIOD
-                STODL           PDUM                            
-                                AFTRIM                          # LEAVE AFTRIM IN MPAC
-                CALL                                            
-                                XTRIGN1                         # YIELDS FINAL EXTRAPOLATED STATE
+                                XTRIGN1                 # LEAVES INITIAL GRAVITY IN GDUM
 
-                VLOAD                                           
-                                RDUM                            
-                STOVL           RTEMP                           # RESTART PROTECTION FOR EXTRAPOLATED R
-                                VDUM                            
-                STCALL          VTEMP                           # RESTART PROTECTION FOR EXTRAPOLATED V
+                VLOAD
+                                GDUM
+                STODL           GDUMPRES                # SAVE INITL GRAVITY FOR COMPUTING GDOTM1
+
+                                PFCLITE                 # LITEUP PERIOD
+                STODL           PDUM
+                                AFLITE                  # LEAVE AFLITE IN MPAC
+                CALL
+                                XTRIGN1                 # EXTRAPOLATE
+
+
+                DLOAD
+                                PFCTRIM                 # TRIM PERIOD
+                STODL           PDUM
+                                AFTRIM                  # LEAVE AFTRIM IN MPAC
+                CALL
+                                XTRIGN1                 # YIELDS FINAL EXTRAPOLATED STATE
+
+                VLOAD
+                                RDUM
+                STOVL           RTEMP                   # RESTART PROTECTION FOR EXTRAPOLATED R
+
+                                VDUM
+                STCALL          VTEMP                   # RESTART PROTECTION FOR EXTRAPOLATED V
 
 # COMPUTE DERIVATIVE OF GRAVITY
 
-                                GDUMCL                          # YIELDS FINAL GRAVITY IN MPAC AND GDUM
-                VSU             V/SC                            
-                                GDUMPRES                        
-                                PPHM1                           # COMPLETES COMPUTATION OF DERIV OF G
-                STORE           GDOTM1T                         # FOR USE NEXT PASS. RESTART PROTECTED.
-                EXIT                                            
+                                GDUMCL                  # YIELDS FINAL GRAVITY IN MPAC AND GDUM
+                VSU             V/SC
+                                GDUMPRES
+                                PPHM1                   # COMPLETES COMPUTATION OF DERIV OF G
+                STORE           GDOTM1                  # FOR USE NEXT PASS. PROTECTION NOT RQD.
+                EXIT
+
 
 # GENERATION OF EXTRAPOLATED DATA COMPLETE. PROTECT AND TRANSFER TO STORAGE.
 
-                TC              PHASCHNG                        # PROTECT R, V
- +402           OCT             04022                           
-                TC              INTPRET                         
-                DLOAD                                           
-                                TTF/4TMP                        
-                STOVL           TTF/4                           # RESTORES TTF/4 TO LAST VALUE BY GUIDANCE
-                                RTEMP                           
-                STOVL           R                               # EXTRAPOLATED R
-                                VTEMP                           
-                STOVL           V                               # EXTRAPOLATED V
-                                GDOTM1T                         
-                STORE           GDOTM1                          # DERIVATIVE OF G
-                EXIT                                            
-                CA              COUNTFCT                        
-                TS              COUNTFC                         # FOR IGNITN2
-                TC              XTRTPIP                         # YIELDS TPIP EXTRAPOLATED
-                TCF             RETIGN1                         
+                TC              PHASCHNG                # PROTECT R, V
+ +402           OCT             04022
+                TC              INTPRET
+                DLOAD
+                                TTF/4TMP
+                STOVL           TTF/4                   # RESTORES TTF/4 TO LAST VALUE BY GUIDANCE
+                                RTEMP
+                STOVL           R                       # EXTRAPOLATED R
 
-## Page 896
+                                VTEMP
+                STORE           V                       # EXTRAPOLATED V
+                EXIT
+                CA              COUNTFCT
+                TS              COUNTFC                 # FOR IGNITN2
+
+## Page 835
+                TC              XTRTPIP                 # YIELDS TPIP EXTRAPOLATED
+                TCF             RETIGN1
+
+
+
 # IGNITION ALGORITHM PART 2
+
 # ************************************************************************
 
-IGNITN2         EXTEND                                          
-                DCA             TTF/4                           
-                DXCH            TTF/4TMP                        # SAVE TTF/4 FOR NEXT PASS
-                TC              PHASCHNG                        # PROTECT TTF/4
- +402           OCT             04022                           
-                CS              POSMAX                          
-                TS              TTF/4                           # PREVENT PREMATURE TERMINATION OF PREBURN
+IGNITN2         EXTEND
+                DCA             TTF/4
+                DXCH            TTF/4TMP                # SAVE TTF/4 FOR NEXT PASS
+                TC              PHASCHNG                # PROTECT TTF/4
+ +402           OCT             04022
+                CS              POSMAX
+                TS              TTF/4                   # PREVENT PREMATURE TERMINATION OF PREBURN
 
 # TEST WHETHER /AFC/ > /AFC/OLD, IF SO TEST WHETHER COUNTFC = 0.
 
-                EXTEND                                          
-                DCA             /AFC/                           
-                DXCH            MPAC                            
-                EXTEND                                          
-                DCS             /AFC/OLD                        
-                DAS             MPAC                            # /AFC/-/AFC/OLD IN MPAC
+                EXTEND
+                DCA             /AFC/
+                DXCH            MPAC
+                EXTEND
+                DCS             /AFC/OLD
+                DAS             MPAC                    # /AFC/-/AFC/OLD IN MPAC
 
-                CCS             MPAC                            # TEST HI ORDER
-                TCF             TCOUNTFC                        
-                TCF             TSTLOAFC                        
-                TCF             RETIGN2         -2              # RESET COUNTFC
-TSTLOAFC        CA              MPAC            +1              # TEST LO ORDER
-                EXTEND                                          
-                BZMF            RETIGN2         -2              # RESET COUNTFC
-TCOUNTFC        CCS             COUNTFC                         
-                TCF             RETIGN2         -1              # DECREMENT COUNTFC
+                CCS             MPAC                    # TEST HI ORDER
+                TCF             TCOUNTFC
+                TCF             TSTLOAFC
+
+                TCF             RETIGN2         -2      # RESET COUNTFC
+TSTLOAFC        CA              MPAC            +1      # TEST LO ORDER
+                EXTEND
+                BZMF            RETIGN2         -2      # RESET COUNTFC
+TCOUNTFC        CCS             COUNTFC
+                TCF             RETIGN2         -1      # DECREMENT COUNTFC
 
 # RESET TTF/4 BY EXTRAPOLATING /AFC/
 
 # TTF/4 = (1/4)(TPIPOLD-TPIP)(/AFC/-/AFC/CR)/(/AFC/OLD-/AFC/)
 
-                EXTEND                                          
-                DCA             TPIPOLD                         
-                DXCH            MPAC                            
-                EXTEND                                          
-                DCS             TPIP                            
-                DAS             MPAC                            
-                CA              TSCALE                          
-                TC              DMPNSUB                         # (1/4)(TPIPOLD-TPIP) TO MPAC, TTF UNITS
+                EXTEND
 
-                EXTEND                                          
-                DCA             /AFC/                           
-                DXCH            MPAC            +3              
-                EXTEND                                          
-                DCS             /AFC/CR                         
-                DAS             MPAC            +3              
-                TC              DMP                             
+                DCA             TPIPOLD
+                DXCH            MPAC
+                EXTEND
+                DCS             TPIP
+                DAS             MPAC
+                CA              TSCALE
+                TC              DMPNSUB                 # (1/4)(TPIPOLD-TPIP) TO MPAC, TTF UNITS
 
-## Page 897
-                GENADR          MPAC            +3              
+                EXTEND
+                DCA             /AFC/
 
-                EXTEND                                          
-                DCA             /AFC/OLD                        
-                DXCH            BUF                             
-                EXTEND                                          
-                DCS             /AFC/                           
-                DAS             BUF                             
-                TC              USPRCADR                        
-                CADR            DDV/BDDV                        # YIELDS TTF/4 IN MPAC
+## Page 836
+                DXCH            MPAC            +3
+                EXTEND
 
-                CCS             OVFIND                          
-                TCF             RETIGN2         -3              # IF TTF/4 OVFL. RESETS OVFIND, COUNTFC.
+                DCS             /AFC/CR
+                DAS             MPAC            +3
+                TC              DMP
+                GENADR          MPAC            +3
 
-                DXCH            MPAC                            
-                DXCH            TTF/4                           
-                TCF             RETIGN2                         
+                EXTEND
+                DCA             /AFC/OLD
+                DXCH            BUF
+                EXTEND
+                DCS             /AFC/
+
+                DAS             BUF
+                TC              USPRCADR
+                CADR            DDV/BDDV                # YIELDS TTF/4 IN MPAC
+
+                CCS             OVFIND
+                TCF             RETIGN2         -3      # IF TTF/4 OVFL. RESETS OVFIND, COUNTFC.
+
+                DXCH            MPAC
+                DXCH            TTF/4
+                TCF             RETIGN2
 
 
 
@@ -1180,20 +1112,20 @@ TCOUNTFC        CCS             COUNTFC
 
 # PRESENTLY THE DUM REGISTERS OCCUPY LOCATIONS FIXLOC +6 THRU FIXLOC +45 OCTAL.
 
-XTRIGN1         STQ                                             
-                                RETXIGN1                        # SAVE QPRET
-                SL1             VXSC                            
-                                UNAFC/2                         
-                PUSH            CALL                            # PUSHES AF UNAFC
-                                GDUMCL                          # YIELDS GRAVITY IN MPAC AND GDUM
-                VAD             STADR                           
-                STORE           ADUM                            # ADUM = AF UNAFC+G
-                CALL                                            
-                                XTRDUMST                        # EXTRAPOLATES RDUM, VDUM
-                GOTO                                            
-                                RETXIGN1                        
+XTRIGN1         STQ
+                                RETXIGN1                # SAVE QPRET
+                SL1             VXSC
+                                UNAFC/2
+                PUSH            CALL                    # PUSHES AF UNAFC
+                                GDUMCL                  # YIELDS GRAVITY IN MPAC AND GDUM
+                VAD             STADR
+                STORE           ADUM                    # ADUM = AF UNAFC+G
+                CALL
+                                XTRDUMST                # EXTRAPOLATES RDUM, VDUM
+                GOTO
+                                RETXIGN1
 
-## Page 898
+## Page 837
 # ************************************************************************
 # LINEAR GUIDANCE - SPHERICAL ACCELERATION AS LINEAR TIME FUNCTION
 # ************************************************************************
@@ -1201,63 +1133,60 @@ XTRIGN1         STQ
 # SET LINEAR GUIDANCE COEFFICIENTS IN EVEN NUMBERED PHASES
 # ************************************************************************
 
-LSETEVN         TC              NTLZPASS                        
-                TC              INTPRET                         
-                VLOAD*                                          
-                                ADS,1                           # -        -
-                STODL           ADLINS                          # ADLINS = ADS, ADLINS  = ASPRT  SUCH THAT
-                                ASPRT           +2              #                     1        1
-                STORE           ADLINS          +2              # THE TARGET IS ZERO ANGULAR MOMNTUM RATE
-                DAD             BOV                             
-                                AFCS            +2              
-                                LSEOVF                          
-LSENOVF         STOVL           ACS             +2              # ACS  = ASPRT  +AFCS
-                                ADLINS                          #    1        1      1
-                GOTO                                            
-                                LINSET                          
+LSETEVN         TC              NTLZPASS
 
-LSEOVF          RTB             GOTO                            # PLACE SIGNED POSMAX INTO MPAC & RETURN.
-                                SIGNMPAC                        
-                                LSENOVF                         
+                TC              INTPRET
+                VLOAD*
+                                ADS,1                   # -       -
+                STODL           ALINS                   # ALINS = ADS
+                                AFCS            +2
+                DAD
+                                ASPRT           +2
+                STORE           ACS             +2
+                STOVL           ALINS           +2      # ALINS  = ACS  = AFCS  + ASPRT
+                                ALINS                   #      2      2       2        2
+                GOTO
+                                LINSET
 
 # SET LINEAR GUIDANCE COEFFICIENTS IN ODD NUMBERED PHASES
 # ************************************************************************
 
-LSETODD         TC              NTLZPASS                        
-                TC              INTPRET                         
-                VLOAD*                                          
-                                ADS,1                           # -        -
-                STORE           ADLINS                          # ADLINS = ADS
+LSETODD         TC              NTLZPASS
+                TC              INTPRET
+                VLOAD*
+                                ADS,1                   # -       -
+                STORE           ALINS                   # ADINS = ADS
+
 
 # COMMON PARTS OF LSETEVN AND LSETODD
 # ************************************************************************
 
-LINSET          BVSU                                            
-                                ACS                             # -          -   -
-                STODL           ADELLINS                        # ADELLINS = ACS-ADLINS
-                                TTF/4                           
-                STORE           TTFLIN/4                        
-                EXIT                                            
-                TCF             TTFINCR         +1              
+LINSET          BVSU
+                                ACS
+                VSR2            V/SC
+                                TTF/4                   # -            -     -
+                STORE           JLINS                   # JLINS = 1/4 (ACS - ALINS)/(TTF/4)
+                EXIT
+                TCF             TTFINCR         +1
 
 # LINEAR GUIDANCE EQUATIONS
 # ************************************************************************
 
-LINGUID         TC              INTPRET                         
+LINGUID         TC              INTPRET
+                VLOAD           VXSC
+                                JLINS
+                                TTF/4
+                VSL2
+                VAD             VSU
 
-## Page 899
-                DLOAD           DDV                             
-                                TTF/4                           
-                                TTFLIN/4                        
-                VXSC            VAD                             
-                                ADELLINS                        
-                                ADLINS                          
-                STORE           ACS                             # FOR USE BY LINSET FOR FAZES 6 AND 9
-                VSU                                             
-                                ASPRT                           # -          -               -      -
-                STORE           AFCS                            # AFCS = TTF ADELLINS/TTFLIN+ADLINS-ASPRT
-                GOTO                                            
-                                AFCCALC                         
+## Page 838
+                                ALINS
+
+                                ASPRT                   # -        -               -       -
+                STODL           AFCS                    # AFCS = 4 JLINS/(TTF/4) + ALINS - ASPRT
+                                AFCS            +4
+                GOTO
+                                AFCCALC
 
 
 
@@ -1265,15 +1194,15 @@ LINGUID         TC              INTPRET
 # SUBROUTINE TO SET TPIP EXTRAPOLATED
 # ************************************************************************
 
-XTRTPIP         EXTEND                                          
-                DCA             PIPTIME                         
-                DXCH            TPIP                            
-                EXTEND                                          
-                DCA             PPHM1CS                         
-                DAS             TPIP                            
-                TC              Q                               
+XTRTPIP         EXTEND
+                DCA             PIPTIME
+                DXCH            TPIP
+                EXTEND
+                DCA             PPHM1CS
+                DAS             TPIP
+                TC              Q
 
-## Page 900
+## Page 839
 # ************************************************************************
 # GENERAL PURPOSE SUBROUTINES CONTRIBUTED BY SECOND DPS GUIDANCE
 # ************************************************************************
@@ -1302,6 +1231,7 @@ XTRTPIP         EXTEND
 
 #          PRECAUTION: ROOTPSRS MAKES NO CHECKS FOR OVERFLOW OR FOR IMPROPER USAGE. IMPROPER USAGE COULD
 # PRECLUDE CONVERGENCE OR REQUIRE EXCESSIVE ITERATIONS. AS A SPECIFIC EXAMPLE, ROOTPSRS FORMS A DERIVATIVE
+
 # COEFFICIENT TABLE BY MULTIPLYING EACH A(I) BY I, WHERE I RANGES FROM 1 TO N. IF AN ELEMENT OF THE DERIVATIVE
 # COEFFICIENT TABLE = 1 OR > 1 IN MAGNITUDE, ONLY THE EXCESS IS RETAINED. ROOTPSRS MAY CONVERGE ON THE CORRECT
 # ROOT NONETHELESS, BUT IT MAY TAKE AN EXCESSIVE NUMBER OF ITERATIONS. THEREFORE THE USER SHOULD RECOGNIZE:
@@ -1317,109 +1247,119 @@ XTRTPIP         EXTEND
 
 # 4. THE ITERATION COUNT RETURNED IN MPAC+2 MAY BE USED TO DETECT ABNORMAL PERFORMANCE.
 
-                                                                # STORE ENTERING DATA, INITLIZE ERASABLES
+                                                        # STORE ENTERING DATA, INITLIZE ERASABLES
 
-ROOTPSRS        EXTEND                                          
-                QXCH            RETROOT                         # RETURN ADRES
-                TS              PWRPTR                          # PWR TABL POINTER
-                DXCH            MPAC            +3              # PWR TABL ADRES, N-1
-                CA              DERTABLL                        
-## Page 901
-                TS              DERPTR                          # DER TABL POINTER
-                TS              MPAC            +5              # DER TABL ADRES
-                CCS             MPAC            +4              # NO POWER SERIES OF DEGREE 1 OR LESS
-                TS              MPAC            +6              # N-2
-                CA              ZERO                            # MODE USED AS ITERATION COUNTER. MODE
-                TS              MODE                            # MUST BE POS SO ABS WON'T COMP MPAC+3 ETC
+ROOTPSRS        EXTEND
+                QXCH            RETROOT                 # RETURN ADRES
+                TS              PWRPTR                  # PWR TABL POINTER
+                DXCH            MPAC            +3      # PWR TABL ADRES, N-1
+                CA              DERTABLL
 
-                                                                # COMPUTE CRITERION TO STOP ITERATING
+## Page 840
+                TS              DERPTR                  # DER TABL POINTER
+                TS              MPAC            +5      # DER TABL ADRES
 
-                EXTEND                                          
-                DCA             MPAC                            # FETCH ROOT GUESS, KEEPING IT IN MPAC
-                DXCH            ROOTPS                          # AND IN ROOTPS
-                INDEX           MPAC            +3              # PWR TABL ADRES
-                CA              5                               # PRECROOT TO A
-                TC              SHORTMP                         # YIELDS DP PRODUCT IN MPAC
-                TC              USPRCADR                        
-                CADR            ABS                             # YIELDS ABVAL OF CRITERION ON DX IN MPAC
-                DXCH            MPAC                            
-                DXCH            DXCRIT                          # CRITERION
+                CCS             MPAC            +4      # NO POWER SERIES OF DEGREE 1 OR LESS
+                TS              MPAC            +6      # N-2
+                CA              ZERO                    # MODE USED AS ITERATION COUNTER. MODE
+                TS              MODE                    # MUST BE POS SO ABS WON'T COMP MPAC+3 ETC
 
-                                                                # SET UP DER COF TABL
+                                                        # COMPUTE CRITERION TO STOP ITERATING
 
-                EXTEND                                          
-                INDEX           PWRPTR                          
-                DCA             3                               
-                DXCH            MPAC                            # A(N) TO MPAC
+                EXTEND
+                DCA             MPAC                    # FETCH ROOT GUESS, KEEPING IT IN MPAC
+                DXCH            ROOTPS                  # AND IN ROOTPS
 
-                CA              MPAC            +4              # N-1 TO A
+                INDEX           MPAC            +3      # PWR TABL ADRES
+                CA              5                       # PRECROOT TO A
+                TC              SHORTMP                 # YIELDS DP PRODUCT IN MPAC
+                TC              USPRCADR
+                CADR            ABS                     # YIELDS ABVAL OF CRITERION ON DX IN MPAC
+                DXCH            MPAC
+                DXCH            DXCRIT                  # CRITERION
 
-DERCLOOP        TS              PWRCNT                          # LOOP COUNTER
-                AD              ONE                             
-                TC              DMPNSUB                         # YIELDS DERCOF = I X A(I) IN MPAC
-                EXTEND                                          
-                INDEX           PWRPTR                          
-                DCA             1                               
-                DXCH            MPAC                            # A(I-1) TO MPAC, FETCHING DERCOF
-                INDEX           DERPTR                          
-                DXCH            3                               # DERCOF TO DER TABL
-                CS              TWO                             
-                ADS             PWRPTR                          # DECREMENT PWR POINTER
-                CS              TWO                             
-                ADS             DERPTR                          # DECREMENT DER POINTER
-                CCS             PWRCNT                          
-                TCF             DERCLOOP                        
+                                                        # SET UP DER COF TABL
 
-                                                                # CONVERGE ON ROOT
+                EXTEND
+                INDEX           PWRPTR
 
-ROOTLOOP        EXTEND                                          
-                DCA             ROOTPS                          # FETCH CURRENT ROOT
-                DXCH            MPAC                            # LEAVE IN MPAC
-## Page 902
-                EXTEND                                          
-                DCA             MPAC            +5              # LOAD A, L WITH DER TABL ADRES, N-2
-                TC              POWRSERS                        # YIELDS DERIVATIVE IN MPAC
+                DCA             3
+                DXCH            MPAC                    # A(N) TO MPAC
 
-                EXTEND                                          
-                DCA             ROOTPS                          
-                DXCH            MPAC                            # CURRENT ROOT TO MPAC, FETCHING DERIVTIVE
-                DXCH            BUF                             # LEAVE DERIVATIVE IN BUF AS DIVISOR
-                EXTEND                                          
-                DCA             MPAC            +3              # LOAD A, L WITH PWR TABL ADRES, N-1
-                TC              POWRSERS                        # YIELDS RESIDUAL IN MPAC
+                CA              MPAC            +4      # N-1 TO A
 
-                TC              USPRCADR                        
-                CADR            DDV/BDDV                        # YIELDS -DX IN MPAC
+DERCLOOP        TS              PWRCNT                  # LOOP COUNTER
+                AD              ONE
+                TC              DMPNSUB                 # YIELDS DERCOF = I X A(I) IN MPAC
+                EXTEND
+                INDEX           PWRPTR
 
-                EXTEND                                          
-                DCS             MPAC                            # FETCH DX, LEAVING -DX IN MPAC
-                DAS             ROOTPS                          # CORRECTED ROOT NOW IN ROOTPS
+                DCA             1
+                DXCH            MPAC                    # A(I-1) TO MPAC, FETCHING DERCOF
+                INDEX           DERPTR
+                DXCH            3                       # DERCOF TO DER TABL
+                CS              TWO
+                ADS             PWRPTR                  # DECREMENT PWR POINTER
+                CS              TWO
+                ADS             DERPTR                  # DECREMENT DER POINTER
+                CCS             PWRCNT
+                TCF             DERCLOOP
 
-                TC              USPRCADR                        
-                CADR            ABS                             # YIELDS ABS(DX) IN MPAC
-                EXTEND                                          
-                DCS             DXCRIT                          
-                DAS             MPAC                            # ABS(DX)-ABS(DXCRIT) IN MPAC
+                                                        # CONVERGE ON ROOT
 
-                INCR            MODE                            # INCREMENT ITERATION COUNTER
 
-                CCS             MPAC                            # TEST HI ORDER DX
-                TCF             ROOTLOOP                        
-                TCF             TESTLODX                        
-                TCF             ROOTSTOR                        
-TESTLODX        CCS             MPAC            +1              # TEST LO ORDER DX
-                TCF             ROOTLOOP                        
-                TCF             ROOTSTOR                        
-                TCF             ROOTSTOR                        
-ROOTSTOR        DXCH            ROOTPS                          
-                DXCH            MPAC                            # STORE DP ROOT IN MPAC, MPAC+1
-                CA              MODE                            
-                TS              MPAC            +2              # STORE SP ITERATION COUNT IN MPAC+2
-                TC              RETROOT                         
+ROOTLOOP        EXTEND
+                DCA             ROOTPS                  # FETCH CURRENT ROOT
+                DXCH            MPAC                    # LEAVE IN MPAC
 
-DERTABLL        ADRES           DERCOFN         -3              
+## Page 841
+                EXTEND
+                DCA             MPAC            +5      # LOAD A, L WITH DER TABL ADRES, N-2
+                TC              POWRSERS                # YIELDS DERIVATIVE IN MPAC
 
-## Page 903
+                EXTEND
+                DCA             ROOTPS
+                DXCH            MPAC                    # CURRENT ROOT TO MPAC, FETCHING DERIVTIVE
+                DXCH            BUF                     # LEAVE DERIVATIVE IN BUF AS DIVISOR
+
+                EXTEND
+                DCA             MPAC            +3      # LOAD A, L WITH PWR TABL ADRES, N-1
+                TC              POWRSERS                # YIELDS RESIDUAL IN MPAC
+
+                TC              USPRCADR
+                CADR            DDV/BDDV                # YIELDS -DX IN MPAC
+
+                EXTEND
+                DCS             MPAC                    # FETCH DX, LEAVING -DX IN MPAC
+                DAS             ROOTPS                  # CORRECTED ROOT NOW IN ROOTPS
+
+
+                TC              USPRCADR
+                CADR            ABS                     # YIELDS ABS(DX) IN MPAC
+                EXTEND
+                DCS             DXCRIT
+                DAS             MPAC                    # ABS(DX)-ABS(DXCRIT) IN MPAC
+
+                INCR            MODE                    # INCREMENT ITERATION COUNTER
+
+                CCS             MPAC                    # TEST HI ORDER DX
+                TCF             ROOTLOOP
+                TCF             TESTLODX
+
+                TCF             ROOTSTOR
+TESTLODX        CCS             MPAC            +1      # TEST LO ORDER DX
+                TCF             ROOTLOOP
+                TCF             ROOTSTOR
+                TCF             ROOTSTOR
+ROOTSTOR        DXCH            ROOTPS
+                DXCH            MPAC                    # STORE DP ROOT IN MPAC, MPAC+1
+                CA              MODE
+                TS              MPAC            +2      # STORE SP ITERATION COUNT IN MPAC+2
+                TC              RETROOT
+
+DERTABLL        ADRES           DERCOFN         -3
+
+## Page 842
 # ************************************************************************
 # GENERAL PURPOSE SUBROUTINE FOR EXTRAPOLATING DUMMY STATE RDUM, VDUM
 # ************************************************************************
@@ -1434,6 +1374,7 @@ DERTABLL        ADRES           DERCOFN         -3
 
 #                                             2            3
 # THE EQNS ARE RDUM = RDUM+VDUM PDUM+ADUM PDUM /2+JDUM PDUM /6,
+
 #                                             2
 #              VDUM = VDUM+ADUM PDUM+JDUM PDUM /2.
 
@@ -1444,6 +1385,7 @@ DERTABLL        ADRES           DERCOFN         -3
 XTRDUMST        DLOAD
                                 PDUM
                 DMP             VXSC
+
                                 1/3DP
                                 JDUM
                 VAD             VXSC
@@ -1454,7 +1396,8 @@ XTRDUMST        DLOAD
                 VXSC            VAD
                                 PDUM
                                 RDUM
-                STODL           RDUM                            # EXTRAPOLATED RDUM. NO RESTART PROTECTION
+                STODL           RDUM                    # EXTRAPOLATED RDUM. NO RESTART PROTECTION
+
 
                                 PDUM
                 SR1R            VXSC
@@ -1464,10 +1407,10 @@ XTRDUMST        DLOAD
                                 PDUM
                 VAD
                                 VDUM
-                STORE           VDUM                            # EXTRAPOLATED VDUM. NO RESTART PROTECTION
+                STORE           VDUM                    # EXTRAPOLATED VDUM. NO RESTART PROTECTION
                 RVQ
 
-## Page 904
+## Page 843
 # ************************************************************************
 # DUMMY GRAVITY SUBROUTINE
 # ************************************************************************
@@ -1481,7 +1424,7 @@ GDUMCL          VLOAD           VCOMP
                                 RDUM
                 UNIT            VXSC
                                 MUEARTH
-                V/SC            VSL1                            # SHIFT COMPENSATES FOR SEMI-UNIT
+                V/SC            VSL1                    # SHIFT COMPENSATES FOR SEMI-UNIT
                                 42
                 STORE           GDUM
                 RVQ
@@ -1498,9 +1441,10 @@ PRETINIT        CA              FIXLOC
                 TS              OVFIND
                 TC              Q
 
-## Page 905
+## Page 844
 # ************************************************************************
 # SECOND DPS TARGET PARAMETERS
+
 # ************************************************************************
 
 # PARAMETER TABLE INDIRECT ADDRESSES
@@ -1512,6 +1456,7 @@ VDS             =               V0XS
 JDS2            =               J0XS2
 MADP2           =               MA0XP2
 
+#
 # A CONSISTENT SET OF UNITS IS USED THRUOUT THE SECOND DPS GUIDANCE. THESE UNITS ARE:
 # TIME 2(  15)CS; LENGTH 2(  24)M; ANGLE 2(   0)RAD.
 
@@ -1522,136 +1467,142 @@ PPHM1           2DEC*           +3.350000000    E+3  B-15*
 
 PPHM1CS         2DEC*           +3.350000000    E+3  B-28*
 
-/AFC/CR         2DEC*           +3.159982925    E-4  B+6*
+/AFC/CR         2DEC*           +2.965861098    E-4  B+6*
+
 
 PFCULLG         2DEC*           +7.500000000    E+2  B-15*
 
-PULLGCS         2DEC*           +7.500000000    E+2  B-28*
-
-AFULLG          2DEC*           +1.276510908    E-5  B+6*
+AFULLG          2DEC*           +6.074952094    E-6  B+6*
 
 PFCLITE         2DEC*           +3.000000000    E+2  B-15*
 
-AFLITE          2DEC*           +3.781860583    E-5  B+6*
+AFLITE          2DEC*           +3.198162867    E-5  B+6*
 
 PFCTRIM         2DEC*           +2.300000000    E+3  B-15*
 
-AFTRIM          2DEC*           +3.788401593    E-5  B+6*
 
-## Page 906
+AFTRIM          2DEC*           +3.202931538    E-5  B+6*
+
+## Page 845
 # PARAMETER TABLE FOR BURN PHASES
 # ************************************************************************
 
-TTF/4N0X        DEC*            -8.383250000    E+3  B-15*
+TTF/4N0X        DEC*            -1.125000000    E+4  B-15*
 
-A0XS            2DEC*           -1.994161737    E-5  B+6*
-
-                2DEC            0
-
-                2DEC*           +7.216471076    E-11 B+30*
-
-R0XS            2DEC*           +6.689950238    E+6  B-24*
+A0XS            2DEC*           -8.572092116    E-5  B+6*
 
                 2DEC            0
 
-                2DEC*           +1.646802361    E-2  B-0*
 
-V0XS            2DEC*           -2.825570521    E-1  B-9*
+                2DEC*           +7.269884947    E-11 B+30*
 
-                2DEC            0
-
-                2DEC*           -1.095743551    E-6  B+15*
-
-J0XS2           2DEC*           +1.463228058    E-15 B+45*
-
-MA0XP2          2DEC*           +5.167109434    E+8  B-33*
-
-## Page 907
-TTF/4N0F        DEC*            -3.000000000    E+3  B-15*
-
-A0FS            2DEC*           +6.921710813    E-6  B+6*
+R0XS            2DEC*           +6.713370537    E+6  B-24*
 
                 2DEC            0
 
-                2DEC*           +4.422776218    E-11 B+30*
+                2DEC*           +1.056080555    E-2  B-0*
 
-R0FS            2DEC*           +6.686947349    E+6  B-24*
+V0XS            2DEC*           -1.071382748    E+0  B-9*
+
 
                 2DEC            0
 
-                2DEC*           +5.797001734    E-3  B-0*
+                2DEC*           -9.160545259    E-7  B+15*
 
-V0FS            2DEC*           -2.133175242    E-1  B-9*
+J0XS2           2DEC*           +1.194804087    E-15 B+45*
 
-                2DEC            0
+MA0XP2          2DEC*           +5.156859816    E+8  B-33*
 
-                2DEC*           -6.533226733    E-7  B+15*
-
-J0FS2           2DEC*           +1.226559287    E-15 B+45*
-
-MA0FP2          2DEC*           +5.167109434    E+8  B-33*
+## Page 846
+TTF/4N0F        DEC*            -2.500000000    E+3  B-15*
 
 
-
-TTF/4NU1        DEC*            -2.500000000    E+2  B-15*
-
-A1FS            2DEC*           +1.236735582    E-5  B+6*
-
-                2DEC*           +6.312364424    E-13 B+30*
-
-                2DEC*           +4.336466703    E-11 B+30*
-
-## Page 908
-TTF/4NU2        DEC*            -4.700000000    E+3  B-15*
-
-A2FS            2DEC*           +4.231238847    E-6  B+6*
+A0FS            2DEC*           -5.038447857    E-5  B+6*
 
                 2DEC            0
 
-                2DEC*           +1.930634433    E-11 B+30*
+                2DEC*           +4.273045103    E-11 B+30*
 
-R2FS            2DEC*           +6.684376002    E+6  B-24*
-
-                2DEC            0
-
-                2DEC*           +6.577892482    E-6  B-0*
-
-V2FS            2DEC*           -7.313936765    E-2  B-9*
+R0FS            2DEC*           +6.700335070    E+6  B-24*
 
                 2DEC            0
 
-                2DEC*           -1.469364771    E-8  B+15*
+                2DEC*           +3.369214099    E-3  B-0*
 
-J2FS2           2DEC*           -1.376890825    E-15 B+45*
 
-MA2FP2          2DEC*           +5.167109434    E+8  B-33*
+V0FS            2DEC*           -1.545589897    E+0  B-9*
+
+                2DEC            0
+
+                2DEC*           -5.138853270    E-7  B+15*
+
+J0FS2           2DEC*           +5.027062289    E-16 B+45*
+
+MA0FP2          2DEC*           +5.156859816    E+8  B-33*
+
+
+
+TTF/4NU1        DEC*            -1.000000000    E+2  B-15*
+
+A1FS            2DEC*           +5.044035031    E-5  B+6*
+
+                2DEC*           0
+
+                2DEC*           +4.277783493    E-11 B+30*
+
+## Page 847
+TTF/4NU2        DEC*            -3.375000000    E+3  B-15*
+
+A2FS            2DEC*           +1.331951587    E-4  B+6*
+
+                2DEC            0
+
+
+                2DEC*           +1.991810043    E-11 B+30*
+
+R2FS            2DEC*           +6.687217073    E+6  B-24*
+
+                2DEC            0
+
+                2DEC*           +1.144811884    E-5  B-0*
+
+V2FS            2DEC*           -1.198407174    E-1  B-9*
+
+                2DEC            0
+
+                2DEC*           -2.215170344    E-8  B+15*
+
+J2FS2           2DEC*           -3.386627333    E-15 B+45*
+
+MA2FP2          2DEC*           +5.156859816    E+8  B-33*
 
 
 
 TTF/4NU3        DEC*            -2.500000000    E+2  B-15*
 
-A3FS            2DEC*           +9.104196458    E-6  B+6*
+A3FS            2DEC*           +1.536879692    E-13 B+6*
 
-                2DEC*           +2.300091883    E-13 B+30*
+                2DEC*           0
 
-                2DEC*           +1.008094512    E-11 B+30*
+                2DEC*           +2.438530673    E-11 B+30*
 
-## Page 909
+## Page 848
 # ************************************************************************
 # SECOND DPS CONSTANTS
+
 # ************************************************************************
 
 # ADDRESS CONSTANTS
 
-E2DPSL          ECADR           E2DPS                           # FOR ACCESSING EBANK OF 2DPS
+E2DPSL          ECADR           E2DPS                   # FOR ACCESSING EBANK OF 2DPS
                 EBANK=          E2DPS
 IGNALGL         2BCADR          IGNALG
 
 
-                                                                # THE NEXT TWO CONSTANTS MUST BE KEPT
-                                                                # IN ORDER AND ADJACENT
-TABLTTFL        ADRES           TABLTTF         +3              # ADRES TO REF TTF TABL
-DEGTTF-1        OCT             2                               # DEGREE-1 OF TTF POWER SERIES
+                                                        # THE NEXT TWO CONSTANTS MUST BE KEPT
+                                                        # IN ORDER AND ADJACENT
+TABLTTFL        ADRES           TABLTTF         +3      # ADRES TO REF TTF TABL
+DEGTTF-1        OCT             2                       # DEGREE-1 OF TTF POWER SERIES
 
                 EBANK=          EMP11JOB
 RETPREBL        2BCADR          RETPREB
@@ -1662,39 +1613,127 @@ RETBURNL        2BCADR          RETBURN
                 EBANK=          ETHROT
 THROTCOL        2BCADR          THROTCON
 
+
 # ARITHMETIC FRACTIONS AND INTEGERS
 
 TSCALE          =               BIT12
 
 TSCALINV        OCT             00010
-ZEROPOS         OCT             00000                           # LO ORDER PART OF TSCALINV, AND
-                OCT             00000                           # FIRST COMPONENT OF ZERO VECTOR
+ZEROPOS         OCT             00000                   # LO ORDER PART OF TSCALINV, AND
+                OCT             00000                   # FIRST COMPONENT OF ZERO VECTOR
 ZERONEG         OCT             77777
+
                 OCT             77777
-                OCT             00000                           # LAST COMPONENT OF ZERO VECTOR, AND
-PIGNALG         OCT             00000                           # HI ORDER PART OF PIGNALG, TPIP UNITS
-                DEC             +2              E+2 B-14        # LO ORDER PART OF PIGNALG, TPIP UNITS
+                OCT             00000                   # LAST COMPONENT OF ZERO VECTOR, AND
+PIGNALG         OCT             00000                   # HI ORDER PART OF PIGNALG, TPIP UNITS
+                DEC             +2              E+2B-14 # LO ORDER PART OF PIGNALG, TPIP UNITS
 
 1/3DP           2DEC            .3333333333
 
 ## The following line is "SP3/8 OCT .3 B14" in the original program listing, but the yaYUL
-## assembler does not syntactically support this syntax for OCT, so it has been replaced 
-## by a numerical equivalent that the assembler does support. 
+## assembler does not syntactically support this syntax for OCT, so it has been replaced
+## by a numerical equivalent that the assembler does support.
 SP3/8           DEC             .375            B14
 ## The following line is "SP9/16 OCT .44 B14" in the original program listing, but the yaYUL
-## assembler does not syntactically support this syntax for OCT, so it has been replaced 
-## by a numerical equivalent that the assembler does support. 
+## assembler does not syntactically support this syntax for OCT, so it has been replaced
+## by a numerical equivalent that the assembler does support.
 SP9/16          DEC             .5625           B14
 2/3DP           2DEC            .6666666667
 
 2DPS2/3         =               2/3DP
 ## The following line is "SP3/4 OCT .6 B14" in the original program listing, but the yaYUL
-## assembler does not syntactically support this syntax for OCT, so it has been replaced 
-## by a numerical equivalent that the assembler does support. 
+## assembler does not syntactically support this syntax for OCT, so it has been replaced
+## by a numerical equivalent that the assembler does support.
 SP3/4           DEC             .75             B14
 PI/4            2DEC            +3.14159265     B-2
 
-NSCALR-1        OCT             00021                           # 6 X 3 - 1 TO XPR 3 VCTRS, RN, VN, GDT/2
 
-## Page 910
-## This page is empty except for a single "remark" line, which is also empty.
+## Page 849
+
+# ************************************************************************
+# VARIOUS TEMPORARY TEST ROUTINES FOR SUBROUTINES CONTRIBUTED BY 2DPS
+# ************************************************************************
+
+# TEST ROOTPSRS ON 5TH DEGREE POWER SERIES
+
+RUTTEST         EXTEND
+                DCA             RUTINIT
+
+                DXCH            MPAC
+
+                EXTEND
+                DCA             RUTTABLL
+                TC              ROOTPSRS
+
+# TEST POLY ON SIN 30 DEGREES
+
+POLYTEST        TC              INTPRET
+                DLOAD           SIN
+
+                                QTSTPOLY
+
+# TEST USEPRET ON V/SC
+
+                STOVL           RC
+                                A2FS
+                STORE           RS
+                EXIT
+                CA              OCT1/2L
+                TS              ADDRWD
+                TC              USEPRET
+                TC              V/SC
+
+                TC              INTPRET
+                STORE           VS
+                EXIT
+END2DPST        CA              ONE
+
+# TEMP CONSTANTS FOR TESTS
+## The following line is "RTUNIT OCT .6 B14" in the original program listing, but the yaYUL
+## assembler does not syntactically support this syntax for OCT, so it has been replaced
+## by a numerical equivalent that the assembler does support.
+RUTINIT         DEC             .75              B14
+                OCT             0
+
+                OCT             0
+                OCT             0
+
+## The following line is "OCT +.001 B14" in the original program listing, but the yaYUL
+## assembler does not syntactically support this syntax for OCT, so it has been replaced
+## by a numerical equivalent that the assembler does support.
+                DEC             1.953125        E-3 B14
+                OCT             0
+
+                OCT             0
+                OCT             0
+
+## The following line is "OCT -.024 B14" in the original program listing, but the yaYUL
+## assembler does not syntactically support this syntax for OCT, so it has been replaced
+## by a numerical equivalent that the assembler does support.
+                DEC             -3.90625        E-2 B14
+
+## Page 850
+                OCT             0
+
+                OCT             0
+                OCT             0
+
+## The following line is "RUTTABL OCT +.100 B14" in the original program listing, but the yaYUL
+## assembler does not syntactically support this syntax for OCT, so it has been replaced
+## by a numerical equivalent that the assembler does support.
+RUTTABL         DEC             +.125           B14
+                OCT             0
+
+RUTPREC         OCT             1
+
+RUTTABLL        ADRES           RUTTABL         -3
+                OCT             4
+
+QTSTPOLY        2DEC            .083333333
+
+## The following line is "OCT1/2 OCT .4 B14" in the original program listing, but the yaYUL
+## assembler does not syntactically support this syntax for OCT, so it has been replaced
+## by a numerical equivalent that the assembler does support.
+OCT1/2          DEC             .5              B14
+                OCT             0
+OCT1/2L         ADRES           OCT1/2
