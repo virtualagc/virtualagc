@@ -18,6 +18,11 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-05-24 MAS  Created from Sunburst 120.
 ##		2017-06-14 RSB	Transcribed.
+##              2017-06-14 HG   Fix operand WACHTHTD -> WACTTHTD
+##                                          TDECTEMP -> TDEC
+##                                          RUPREG3  -> RUPTREG3
+##                                          RUPREG1  -> RUPTREG1
+##                              Remove constant 004CEK
 
 ## Page 654
                 BANK            33
@@ -51,7 +56,7 @@
 # DEBRIS- SAME AS FOR KALCMANU
 
 MP4JOB          EXTEND
-		DCA		WACHTHTD			# TO ENABLE A RESTART
+		DCA		WACTTHTD			# TO ENABLE A RESTART
 		DXCH		FLUSHREG
 
                 TC              NEWMODEX                        # START CONTINGENCY ORBIT INSERTION
@@ -133,7 +138,7 @@ TIG4-51         EXTEND
                 CAF             021CEK                          # UPDATE STATE TO TIG4-30
                 TS              L
                 CAF             ZERO
-                DAS             TDECTEMP
+                DAS             TDEC
 
 # BEGIN ABORT LEM/S4B SEPARATION PROCEDURE
 
@@ -477,8 +482,6 @@ TCO+15          TC              2LMP+DT
 
 003CEK          DEC             300
 
-004CEK          DEC             400
-
 005CEK          DEC             500
 
 007CEK          DEC             700
@@ -584,10 +587,10 @@ TASKSETR        INHINT
                 DCA             TDEC
                 DAS             MPAC
                 TC              TPAGREE
-                CA              RUPREG3
+                CA              RUPTREG3
 ## Page 665                
                 TS              MPAC            +2
-                DXCH            RUPREG1
+                DXCH            RUPTREG1
                 DXCH            MPAC
                 EXTEND
                 BZF             +3
