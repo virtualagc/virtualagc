@@ -13,6 +13,8 @@
 ## 		2010-02-01 JL	White-space fixes. Added missing line.
 ##		2010-02-20 RSB	Un-##'d this header.
 ##		2017-02-08 RSB	Proofed comment text by diff'ing vs Comanche 55.
+##		2017-03-17 RSB	Comment-text fixes identified by 4-way diff'ing
+##				of Colossus 237 & 249, Comanche 55, and Artemis 72.
 
 ## Page 792
 
@@ -1044,7 +1046,7 @@ DUMPTRIG	SIGN	RVQ
 		COUNT*	$$/S61.1
 					#			16W	15MS
 					
-DISPTARG	STQ			# C(MPAC = TRGO ESTIMATE
+DISPTARG	STQ			# C(MPAC) = TRGO ESTIMATE
 			60GENRET
 		DMP	DAD		# (TTE1 IS POSITIVE)
 			KTETA1

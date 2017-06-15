@@ -25,13 +25,15 @@
 # likely need to be modified for use with other scripts.
 
 import os.path
+from os import environ
 import numpy as np
 import cv2
 import sys
 import math
 import argparse
 import functools
-import PIL
+from PIL import Image
+import traceback
 from pytesseract import image_to_string
 
 parser = argparse.ArgumentParser(description='Prepare octal pages of AGC program listings for OCR')
@@ -71,6 +73,10 @@ args = parser.parse_args()
 if not os.path.isfile(args.input_file):
 	print("Cannot open file", args.input_file)
 	sys.exit(1)
+
+octcrop = ""
+if 'OCTCROP' in environ:
+	octcrop = environ['OCTCROP']
 
 img = cv2.imread(args.input_file)
 
@@ -210,6 +216,9 @@ elif args.yul10:
 else:
     raise RuntimeError("Unknown program type selected")
 
+if octcrop != "":
+    exec(octcrop)
+
 # Eliminate random flecks. We do this by finding all the contours in the image
 # and taking a look at their relative locations and size. We'll be building up
 # a mask that will be subtracted from our thresholded image.
@@ -321,6 +330,7 @@ if args.comments:
         # Locate the header in the boxes. It'll be towards the front (hopefully exactly the front), and
         # pretty wide
         header_box = None
+        header_start = 0
         for i,c in enumerate(contours):
             box = cv2.boundingRect(c)
             if (box[2] > 700):
@@ -339,6 +349,9 @@ if args.comments:
                 header_box[1] = min(box[1], header_box[1])
                 header_box[2] = rightmost-header_box[0]
                 header_box[3] = bottommost-header_box[0]
+
+        if header_box is None:
+            raise RuntimeError('Unable to find any sort of header')
 
         # Merge the bounding box we found with the rest on the line (needed for YUL listings since the
         # dilation above doesn't quite bleed everything together)
@@ -403,7 +416,7 @@ if args.comments:
                     # the second word of a multi-word pseudo op (2DEC, 2CADR, etc.). Try to determine whether or not
                     # we've got such a line.
                     if line_num > 2:
-                        pil_img = PIL.Image.fromarray(target_image[y-1:y+h+1, x-5:x+column_width*6])
+                        pil_img = Image.fromarray(target_image[y-1:y+h+1, x-5:x+column_width*6])
                         txt = image_to_string(pil_img, config='-l eng -psm 6 -c tessedit_char_whitelist=CARP01234567')
                         if txt and (txt[0] == 'C' or txt[0] == '0'):
                             const_second_word = True
@@ -463,7 +476,9 @@ if args.comments:
         # else:
         #     final_image = inside_header
         final_image = inside_header
-    except:
+    except Exception as e:
+        print('Encountered an unexpected error, falling back on --no-crop')
+        traceback.print_exc()
         final_image = result
 
 

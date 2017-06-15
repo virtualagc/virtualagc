@@ -2,7 +2,7 @@
 ## Copyright:   Public domain.
 ## Filename:    IMU_MODE_SWITCHING_ROUTINES.agc
 ## Purpose:     A section of Luminary revision 116.
-##              It is part of the source code for the Lunar Module's (LM) 
+##              It is part of the source code for the Lunar Module's (LM)
 ##              Apollo Guidance Computer (AGC) for Apollo 12.
 ##              This file is intended to be a faithful transcription, except
 ##              that the code format has been changed to conform to the
@@ -15,314 +15,320 @@
 ## Mod history: 2017-01-22 MAS  Created from Luminary 99.
 ##              2017-01-28 RSB Comment-text fixes identified for Luminary 69.
 ##              2017-02-07 RRB  Updated for Luminary 116.
+##              2017-03-13 RSB  Proofed comment text via 3-way diff vs
+##                              Luminary 99 and 131.
+##              2017-03-15 RSB  Comment-text fixes identified in 6-way
+##                              side-by-side diff of Sunburst 120 and Luminary
+##                              69/99/116/131/210.
+##              2017-03-19 HG   Fix value  OCT 1210 --> OCT 31210
 
 ## Page 1299
-                BLOCK           02                              
-                SETLOC          FFTAG3                          
-                BANK                                            
+                BLOCK           02
+                SETLOC          FFTAG3
+                BANK
 
-                EBANK=          COMMAND                         
+                EBANK=          COMMAND
 
 # FIXED-FIXED ROUTINES.
 
-                COUNT*          $$/IMODE                        
+                COUNT*          $$/IMODE
 ZEROICDU        CAF             ZERO                            # ZERO ICDU COUNTERS.
-                TS              CDUX                            
-                TS              CDUY                            
-                TS              CDUZ                            
-                TC              Q                               
+                TS              CDUX
+                TS              CDUY
+                TS              CDUZ
+                TC              Q
 
-SPSCODE         =               BIT9                            
+SPSCODE         =               BIT9
 
 ## Page 1300
 # IMU ZEROING ROUTINE.
 
-                BANK            11                              
-                SETLOC          MODESW                          
-                BANK                                            
+                BANK            11
+                SETLOC          MODESW
+                BANK
 
-                COUNT*          $$/IMODE                        
+                COUNT*          $$/IMODE
 IMUZERO         INHINT                                          # ROUTINE TO ZERO ICDUS.
                 CS              DSPTAB          +11D            # DONT ZERO CDUS IF IMU IN GIMBAL LOCK AND
                 MASK            BITS4&6                         # COARSE ALIGN (GIMBAL RUNAWAY PROTECTION)
-                CCS             A                               
-                TCF             IMUZEROA                        
+                CCS             A
+                TCF             IMUZEROA
 
                 TC              ALARM                           # IF SO.
-                OCT             00206                           
+                OCT             00206
 
                 TCF             CAGETSTJ        +4              # IMMEDIATE FAILURE.
 
-IMUZEROA        TC              CAGETSTJ                        
+IMUZEROA        TC              CAGETSTJ
 # DELETE
                 CS              IMODES33                        # DISABLE DAP AUTO AND HOLD MODES
                 MASK            SUPER011                        #     BIT5 FOR GROUND
-                ADS             IMODES33                        
+                ADS             IMODES33
 
                 CS              IMODES30                        # INHIBIT ICDUFAIL AND IMUFAIL (IN CASE WE
                 MASK            BITS3&4                         # JUST CAME OUT OF COARSE ALIGN).
-                ADS             IMODES30                        
+                ADS             IMODES30
 
                 CS              BITS4&6                         # SEND ZERO ENCODE WITH COARSE AND ERROR
                 EXTEND                                          # COUNTER DISABLED.
-                WAND            CHAN12                          
+                WAND            CHAN12
 
                 TC              NOATTOFF                        # TURN OFF NO ATT LAMP.
 
-                CAF             BIT5                            
-                EXTEND                                          
-                WOR             CHAN12                          
+                CAF             BIT5
+                EXTEND
+                WOR             CHAN12
 
-                TC              ZEROICDU                        
+                TC              ZEROICDU
                 CAF             BIT6                            # WAIT 320 MS TO GIVE AGS ADEQUATE TIME TO
                 TC              WAITLIST                        # RECEIVE ITS PULSE TRAIN.
-                EBANK=          CDUIND                          
-                2CADR           IMUZERO2                        
+                EBANK=          CDUIND
+                2CADR           IMUZERO2
 
                 CS              IMODES30                        # SEE IF IMU OPERATING AND ALARM IF NOT.
-                MASK            BIT9                            
-                CCS             A                               
-                TCF             MODEEXIT                        
+                MASK            BIT9
+                CCS             A
+                TCF             MODEEXIT
 ## Page 1301
-                TC              ALARM                           
-                OCT             210                             
+                TC              ALARM
+                OCT             210
 
 MODEEXIT        RELINT                                          # GENERAL MODE-SWITCHING EXIT.
-                TCF             SWRETURN                        
+                TCF             SWRETURN
 
-IMUZERO2        TC              CAGETEST                        
+IMUZERO2        TC              CAGETEST
                 TC              ZEROICDU                        # ZERO CDUX, CDUY, CDUZ
 
                 CS              BIT5                            # REMOVE ZERO DISCRETE.
-                EXTEND                                          
-                WAND            CHAN12                          
+                EXTEND
+                WAND            CHAN12
 
                 CAF             BIT11                           # WAIT 10 SECS FOR CTRS TO FIND GIMBALS
-                TC              VARDELAY                        
+                TC              VARDELAY
 
-IMUZERO3        TC              CAGETEST                        
+IMUZERO3        TC              CAGETEST
                 CS              BITS3&4                         # REMOVE IMUFAIL AND ICDUFAIL INHIBIT.
-                MASK            IMODES30                        
-                TS              IMODES30                        
+                MASK            IMODES30
+                TS              IMODES30
 
                 CS              SUPER011                        # ENABLE DAP AUTO AND HOLD MODES
                 MASK            IMODES33                        #     BIT5 FOR GROUND
-                TS              IMODES33                        
+                TS              IMODES33
 
                 TC              IBNKCALL                        # SET ISS WARNING IF EITHER OF ABOVE ARE
                 CADR            SETISSW                         # PRESENT.
 
-                TCF             ENDIMU                          
+                TCF             ENDIMU
 
 ## Page 1302
 # IMU COARSE ALIGN MODE.
 
-IMUCOARS        INHINT                                          
-                TC              CAGETSTJ                        
-                TC              SETCOARS                        
+IMUCOARS        INHINT
+                TC              CAGETSTJ
+                TC              SETCOARS
 
-                CAF             SIX                             
-                TC              WAITLIST                        
-                EBANK=          CDUIND                          
-                2CADR           COARS                           
+                CAF             SIX
+                TC              WAITLIST
+                EBANK=          CDUIND
+                2CADR           COARS
 
-                TCF             MODEEXIT                        
+                TCF             MODEEXIT
 
-COARS           TC              CAGETEST                        
+COARS           TC              CAGETEST
                 CAF             BIT6                            # ENABLE ALL THREE ISS CDU ERROR COUNTERS
-                EXTEND                                          
-                WOR             CHAN12                          
+                EXTEND
+                WOR             CHAN12
 
                 CAF             TWO                             # SET CDU INDICATOR
-COARS1          TS              CDUIND                          
+COARS1          TS              CDUIND
 
                 INDEX           CDUIND                          # COMPUTE THETAD - THETAA IN 1:S
                 CA              THETAD                          #   COMPLEMENT FORM
-                EXTEND                                          
-                INDEX           CDUIND                          
-                MSU             CDUX                            
-                EXTEND                                          
+                EXTEND
+                INDEX           CDUIND
+                MSU             CDUX
+                EXTEND
                 MP              BIT13                           # SHIFT RIGHT 2
                 XCH             L                               # ROUND
-                DOUBLE                                          
-                TS              ITEMP1                          
-                TCF             +2                              
-                ADS             L                               
+                DOUBLE
+                TS              ITEMP1
+                TCF             +2
+                ADS             L
 
                 INDEX           CDUIND                          # DIFFERENCE TO BE COMPUTED
-                LXCH            COMMAND                         
-                CCS             CDUIND                          
-                TC              COARS1                          
+                LXCH            COMMAND
+                CCS             CDUIND
+                TC              COARS1
 
                 CAF             TWO                             # MINIMUM OF 4 MS WAIT
-                TC              VARDELAY                        
+                TC              VARDELAY
 
 ## Page 1303
 COARS2          TC              CAGETEST                        # DONT CONTINUE IF CAGED.
                 TS              ITEMP1                          # SETS TO +0.
                 CAF             TWO                             # SET CDU INDICATOR
- +3             TS              CDUIND                          
+ +3             TS              CDUIND
 
-                INDEX           CDUIND                          
+                INDEX           CDUIND
                 CCS             COMMAND                         # NUMBER OF PULSES REQUIRED
                 TC              COMPOS                          # GREATER THAN MAX ALLOWED
-                TC              NEXTCDU         +1              
-                TC              COMNEG                          
-                TC              NEXTCDU         +1              
+                TC              NEXTCDU         +1
+                TC              COMNEG
+                TC              NEXTCDU         +1
 
 COMPOS          AD              -COMMAX                         # COMMAX = MAX NUMBER OF PULSES ALLOWED
                 EXTEND                                          #   MINUS ONE
-                BZMF            COMZERO                         
-                INDEX           CDUIND                          
+                BZMF            COMZERO
+                INDEX           CDUIND
                 TS              COMMAND                         # REDUCE COMMAND BY MAX NUMBER OF PULSES
                 CS              -COMMAX-                        #   ALLOWED
 
-NEXTCDU         INCR            ITEMP1                          
-                AD              NEG0                            
-                INDEX           CDUIND                          
+NEXTCDU         INCR            ITEMP1
+                AD              NEG0
+                INDEX           CDUIND
                 TS              CDUXCMD                         # SET UP COMMAND REGISTER.
 
-                CCS             CDUIND                          
-                TC              COARS2          +3              
+                CCS             CDUIND
+                TC              COARS2          +3
 
                 CCS             ITEMP1                          # SEE IF ANY PULSES TO GO OUT.
-                TCF             SENDPULS                        
+                TCF             SENDPULS
 
                 TC              FIXDELAY                        # WAIT FOR GIMBALS TO SETTLE.
-                DEC             150                             
+                DEC             150
 
                 CAF             TWO                             # AT END OF COMMAND, CHECK TO SEE THAT
 CHKCORS         TS              ITEMP1                          # GIMBALS ARE WITHIN 2 DEGREES OF THETAD.
-                INDEX           A                               
-                CA              CDUX                            
-                EXTEND                                          
-                INDEX           ITEMP1                          
-                MSU             THETAD                          
-                CCS             A                               
-                TCF             COARSERR                        
-                TCF             CORSCHK2                        
-                TCF             COARSERR                        
+                INDEX           A
+                CA              CDUX
+                EXTEND
+                INDEX           ITEMP1
+                MSU             THETAD
+                CCS             A
+                TCF             COARSERR
+                TCF             CORSCHK2
+                TCF             COARSERR
 
 ## Page 1304
-CORSCHK2        CCS             ITEMP1                          
-                TCF             CHKCORS                         
+CORSCHK2        CCS             ITEMP1
+                TCF             CHKCORS
                 TCF             ENDIMU                          # END OF COARSE ALIGNMENT.
 
 COARSERR        AD              COARSTOL                        # 2 DEGREES.
-                EXTEND                                          
-                BZMF            CORSCHK2                        
+                EXTEND
+                BZMF            CORSCHK2
 
                 TC              ALARM                           # COARSE ALIGN ERROR.
-                OCT             211                             
+                OCT             211
 
-                TCF             IMUBAD                          
+                TCF             IMUBAD
 
 COARSTOL        DEC             -.01111                         # 2 DEGREES SCALED AT HALF-REVOLUTIONS
 
-COMNEG          AD              -COMMAX                         
-                EXTEND                                          
-                BZMF            COMZERO                         
-                COM                                             
-                INDEX           CDUIND                          
-                TS              COMMAND                         
-                CA              -COMMAX-                        
-                TC              NEXTCDU                         
+COMNEG          AD              -COMMAX
+                EXTEND
+                BZMF            COMZERO
+                COM
+                INDEX           CDUIND
+                TS              COMMAND
+                CA              -COMMAX-
+                TC              NEXTCDU
 
-COMZERO         CAF             ZERO                            
-                INDEX           CDUIND                          
-                XCH             COMMAND                         
-                TC              NEXTCDU                         
+COMZERO         CAF             ZERO
+                INDEX           CDUIND
+                XCH             COMMAND
+                TC              NEXTCDU
 
-SENDPULS        CAF             13,14,15                        
-                EXTEND                                          
-                WOR             CHAN14                          
-                CAF             600MS                           
+SENDPULS        CAF             13,14,15
+                EXTEND
+                WOR             CHAN14
+                CAF             600MS
                 TCF             COARS2          -1              # THEN TO VARDELAY
 
 CA+ECE          CAF             BIT6                            # ENABLE ALL THREE ISS CDU ERROR COUNTERS
-                EXTEND                                          
-                WOR             CHAN12                          
-                TC              TASKOVER                        
+                EXTEND
+                WOR             CHAN12
+                TC              TASKOVER
 
 ## Page 1305
 SETCOARS        CAF             BIT4                            # BYPASS IF ALREADY IN COARSE ALIGN
-                EXTEND                                          
-                RAND            CHAN12                          
-                CCS             A                               
-                TC              Q                               
+                EXTEND
+                RAND            CHAN12
+                CCS             A
+                TC              Q
 
                 CS              BIT6                            # CLEAR ISS ERROR COUNTERS
-                EXTEND                                          
-                WAND            CHAN12                          
+                EXTEND
+                WAND            CHAN12
 
                 CS              BIT10                           # KNOCK DOWN GYRO ACTIVITY
-                EXTEND                                          
-                WAND            CHAN14                          
-                CS              ZERO                            
-                TS              GYROCMD                         
+                EXTEND
+                WAND            CHAN14
+                CS              ZERO
+                TS              GYROCMD
 
                 CAF             BIT4                            # PUT ISS IN COARSE ALIGN
-                EXTEND                                          
-                WOR             CHAN12                          
+                EXTEND
+                WOR             CHAN12
 
                 CS              DSPTAB          +11D            # TURN ON NO ATT LAMP
-                MASK            OCT40010                        
-                ADS             DSPTAB          +11D            
+                MASK            OCT40010
+                ADS             DSPTAB          +11D
 
                 CS              IMODES33                        # DISABLE DAP AUTO AND HOLD MODES
-                MASK            BIT6                            
-                ADS             IMODES33                        
+                MASK            BIT6
+                ADS             IMODES33
 
                 CS              IMODES30                        # DISABLE IMUFAIL
-                MASK            BIT4                            
-                ADS             IMODES30                        
+                MASK            BIT4
+                ADS             IMODES30
 
 RNDREFDR        CS              TRACKBIT                        # CLEAR TRACK FLAG
-                MASK            FLAGWRD1                        
-                TS              FLAGWRD1                        
+                MASK            FLAGWRD1
+                TS              FLAGWRD1
 
                 CS              DRFTBIT                         # CLEAR DRIFT FLAG
-                MASK            FLAGWRD2                        
-                TS              FLAGWRD2                        
+                MASK            FLAGWRD2
+                TS              FLAGWRD2
 
                 CS              REFSMBIT                        # CLEAR REFSMMAT FLAG
-                MASK            FLAGWRD3                        
-                TS              FLAGWRD3                        
+                MASK            FLAGWRD3
+                TS              FLAGWRD3
 
-                TC              Q                               
+                TC              Q
 
-OCT40010        OCT             40010                           
+OCT40010        OCT             40010
 
 ## Page 1306
 # IMU FINE ALIGN MODE SWITCH.
 
-IMUFINE         INHINT                                          
+IMUFINE         INHINT
                 TC              CAGETSTJ                        # SEE IF IMU BEING CAGED.
 
                 CS              BITS4-5                         # RESET ZERO AND COARSE
-                EXTEND                                          
-                WAND            CHAN12                          
+                EXTEND
+                WAND            CHAN12
 
                 CS              BIT6                            # INSURE DAP AUTO AND HOLD MODES ENABLED
-                MASK            IMODES33                        
-                TS              IMODES33                        
+                MASK            IMODES33
+                TS              IMODES33
 
-                TC              NOATTOFF                        
+                TC              NOATTOFF
 
                 CAF             BIT10                           # IMU FAIL WAS INHIBITED DURING THE
                 TC              WAITLIST                        # PRESUMABLY PRECEDING COARSE ALIGN.  LEAVE
-                EBANK=          CDUIND                          
+                EBANK=          CDUIND
                 2CADR           IFAILOK                         # IT ON FOR THE FIRST 5 SECS OF FINE ALIGN
 
-                CAF             2SECS                           
-                TC              WAITLIST                        
-                EBANK=          CDUIND                          
-                2CADR           IMUFINED                        
+                CAF             2SECS
+                TC              WAITLIST
+                EBANK=          CDUIND
+                2CADR           IMUFINED
 
-                TCF             MODEEXIT                        
+                TCF             MODEEXIT
 
 IMUFINED        TC              CAGETEST                        # SEE THAT NO ONE HAS CAGED THE IMU.
-                TCF             ENDIMU                          
+                TCF             ENDIMU
 
 ## Page 1307
 IFAILOK         TC              CAGETSTQ                        # ENABLE IMU FIAL UNLESS IMU BEING CAGED.
@@ -330,76 +336,76 @@ IFAILOK         TC              CAGETSTQ                        # ENABLE IMU FIA
 
                 CAF             BIT4                            # DONT RESET IMU FAIL INHIBIT IF SOMEONE
                 EXTEND                                          # HAS GONE INTO COARSE ALIGN.
-                RAND            CHAN12                          
-                CCS             A                               
-                TCF             TASKOVER                        
+                RAND            CHAN12
+                CCS             A
+                TCF             TASKOVER
 
                 CS              IMODES30                        # RESET IMUFAIL.
-                MASK            BIT13                           
-                ADS             IMODES30                        
-                CS              BIT4                            
-PFAILOK2        MASK            IMODES30                        
-                TS              IMODES30                        
+                MASK            BIT13
+                ADS             IMODES30
+                CS              BIT4
+PFAILOK2        MASK            IMODES30
+                TS              IMODES30
                 TC              IBNKCALL                        # THE ISS WARNING LIGHT MAY COME ON NOW
-                CADR            SETISSW                         # THAT THE INHIBIT WAS BEEN REMOVED.
-                TCF             TASKOVER                        
+                CADR            SETISSW                         # THAT THE INHIBIT HAS BEEN REMOVED.
+                TCF             TASKOVER
 
 PFAILOK         TC              CAGETSTQ                        # ENABLE PIP FAIL PROG ALARM.
-                TCF             TASKOVER                        
+                TCF             TASKOVER
 
                 CS              IMODES30                        # RESET IMU AND PIPA FAIL BITS.
-                MASK            BIT10                           
-                ADS             IMODES30                        
+                MASK            BIT10
+                ADS             IMODES30
 
-                CS              IMODES33                        
-                MASK            BIT13                           
-                ADS             IMODES33                        
+                CS              IMODES33
+                MASK            BIT13
+                ADS             IMODES33
 
-                CS              BIT5                            
-                TCF             PFAILOK2                        
+                CS              BIT5
+                TCF             PFAILOK2
 
 NOATTOFF        CS              OCT40010                        # SUBROUTINE TO TURN OFF NO ATT LAMP.
-                MASK            DSPTAB          +11D            
-                AD              BIT15                           
-                TS              DSPTAB          +11D            
-                TC              Q                               
+                MASK            DSPTAB          +11D
+                AD              BIT15
+                TS              DSPTAB          +11D
+                TC              Q
 
 ## Page 1308
 # ROUITNES TO INITIATE AND TERMINATE PROGRAM USE OF THE PIPAS. NO IMUSTALL REQUIRED IN EITHER CASE.
 
-PIPUSE          CS              ZERO                            
-                TS              PIPAX                           
-                TS              PIPAY                           
-                TS              PIPAZ                           
+PIPUSE          CS              ZERO
+                TS              PIPAX
+                TS              PIPAY
+                TS              PIPAZ
 
 PIPUSE1         TC              CAGETSTQ                        # DO NOT ENABLE PIPA FAIL IF IMU IS CAGED
-                TCF             SWRETURN                        
+                TCF             SWRETURN
 
-                INHINT                                          
+                INHINT
                 CS              BIT1                            # IF PIPA FAILS FROM NOW ON (UNTIL
                 MASK            IMODES30                        # PIPFREE), LIGHT ISS WARNING.
-                TS              IMODES30                        
+                TS              IMODES30
 
 PIPFREE2        TC              IBNKCALL                        # ISS WARNING MIGHT COME ON NOW.
                 CADR            SETISSW                         # (OR GO OFF ON PIPFREE).
 
-                TCF             MODEEXIT                        
+                TCF             MODEEXIT
 
 PIPFREE         INHINT                                          # PROGRAM DONE WITH PIPAS.  DONT LIGHT
                 CS              IMODES30                        # ISS WARNING.
-                MASK            BIT1                            
-                ADS             IMODES30                        
+                MASK            BIT1
+                ADS             IMODES30
 
                 MASK            BIT10                           # IF PIP FAIL ON, DO PROG ALSRM AND RESET
                 CCS             A                               # ISS WARNING.
-                TCF             MODEEXIT                        
+                TCF             MODEEXIT
 
-                TC              ALARM                           
-                OCT             212                             
+                TC              ALARM
+                OCT             212
 
-                INHINT                                          
+                INHINT
 
-                TCF             PIPFREE2                        
+                TCF             PIPFREE2
 
 ## Page 1309
 #          THE FOLLOWING ROUTINE TORQUES THE IRIGS ACCORDING TO DOUBLE PRECISION INPUTS IN THE SIX REGISTERS
@@ -414,140 +420,140 @@ IMUPULSE        TS              MPAC            +5              # SAVE ARRIVING 
                 CCS             LGYRO                           # SEE IF GYROS BUSY.
                 TC              GYROBUSY                        # SLEEP.
 
-                TS              MPAC            +2              
+                TS              MPAC            +2
                 CAF             BIT6                            # ENABLE THE POWER SUPPLY.
-                EXTEND                                          
-                WOR             CHAN14                          
+                EXTEND
+                WOR             CHAN14
 
-                CAF             FOUR                            
+                CAF             FOUR
 GWAKE2          TC              WAITLIST                        # (IF A JOB WAS PUT TO SLEEP, THE POWER
                 EBANK=          CDUIND                          # SUPPLY IS LEFT ON BY THE WAKING JOB).
-                2CADR           STRTGYRO                        
+                2CADR           STRTGYRO
 
                 CA              MPAC            +5              # SET UP EBANK, SAVING CALLER'S EBANK FOR
                 XCH             EBANK                           # RESTORATION ON RETURN.
-                XCH             MPAC            +5              
+                XCH             MPAC            +5
                 TS              LGYRO                           # RESERVES GYROS.
-                MASK            LOW8                            
-                TS              ITEMP1                          
+                MASK            LOW8
+                TS              ITEMP1
 
                 CAF             TWO                             # FORCE SIGN AGREEMENT ON INPUTS.
-GYROAGRE        TS              MPAC            +3              
-                DOUBLE                                          
-                AD              ITEMP1                          
-                TS              MPAC            +4              
-                EXTEND                                          
-                INDEX           A                               
-                DCA             1400                            
-                DXCH            MPAC                            
-                TC              TPAGREE                         
-                DXCH            MPAC                            
-                INDEX           MPAC            +4              
-                DXCH            1400                            
+GYROAGRE        TS              MPAC            +3
+                DOUBLE
+                AD              ITEMP1
+                TS              MPAC            +4
+                EXTEND
+                INDEX           A
+                DCA             1400
+                DXCH            MPAC
+                TC              TPAGREE
+                DXCH            MPAC
+                INDEX           MPAC            +4
+                DXCH            1400
 
-                CCS             MPAC            +3              
-                TCF             GYROAGRE                        
+                CCS             MPAC            +3
+                TCF             GYROAGRE
 
                 CA              MPAC            +5              # RESTORE CALLER'S EBANK.
-                TS              EBANK                           
-                TCF             MODEEXIT                        
+                TS              EBANK
+                TCF             MODEEXIT
 
 ## Page 1310
 # ROUTINES TO ALLOW TORQUING BY ONLY ONE JOB AT A TIME.
 
 GYROBUSY        EXTEND                                          # SAVE RETURN 2FCADR.
-                DCA             BUF2                            
-                DXCH            MPAC                            
-REGSLEEP        CAF             LGWAKE                          
-                TCF             JOBSLEEP                        
+                DCA             BUF2
+                DXCH            MPAC
+REGSLEEP        CAF             LGWAKE
+                TCF             JOBSLEEP
 
 GWAKE           CCS             LGYRO                           # WHEN AWAKENED, SEE IF GYROS STILL BUSY.
                 TCF             REGSLEEP                        # IF SO, SLEEP SOME MORE.
 
-                TS              MPAC            +2              
-                EXTEND                                          
-                DCA             MPAC                            
+                TS              MPAC            +2
+                EXTEND
+                DCA             MPAC
                 DXCH            BUF2                            # RESTORE SWRETURN INFO.
-                CAF             ONE                             
-                TCF             GWAKE2                          
+                CAF             ONE
+                TCF             GWAKE2
 
-LGWAKE          CADR            GWAKE                           
+LGWAKE          CADR            GWAKE
 
 ## Page 1311
 # GYRO-TORQUING WAITLIST TASKS.
 
 STRTGYRO        CS              GDESELCT                        # DE-SELECT LAST GYRO.
-                EXTEND                                          
-                WAND            CHAN14                          
+                EXTEND
+                WAND            CHAN14
 
-                TC              CAGETEST                        
+                TC              CAGETEST
 
 STRTGYR2        CA              LGYRO                           # JUMP ON PHASE COUNTER IN BITS 13-14.
-                EXTEND                                          
-                MP              BIT4                            
-                INDEX           A                               
-                TCF             +1                              
+                EXTEND
+                MP              BIT4
+                INDEX           A
+                TCF             +1
                 TC              GSELECT                         # =0.  DO Y GYRO.
-                OCT             00202                           
+                OCT             00202
 
                 TC              GSELECT                         # =1.  DO Z GYRO.
-                OCT             00302                           
+                OCT             00302
 
                 TC              GSELECT         -2              # =2.  DO X GYRO.
-                OCT             00100                           
+                OCT             00100
 
                 CAF             ZERO                            # =3.  DONE
-                TS              LGYRO                           
+                TS              LGYRO
                 CAF             LGWAKE                          # WAKE A POSSIBLE SLEEPING JOB.
-                TC              JOBWAKE                         
+                TC              JOBWAKE
 
 NORESET         TCF             IMUFINED                        # DO NOT RESET POWER SUPPLY
 ## Page 1312
  -2             CS              FOUR                            # SPECIAL ENTRY TO REGRESS LGYRO FOR X.
-                ADS             LGYRO                           
+                ADS             LGYRO
 
 GSELECT         INDEX           Q                               # SELECT GYRO.
                 CAF             0                               # PACKED WORD CONTAINS GYRO SELECT BITS
                 TS              ITEMP4                          # AND INCREMENT TO LGYRO.
-                MASK            SEVEN                           
-                AD              BIT13                           
-                ADS             LGYRO                           
-                TS              EBANK                           
-                MASK            LOW8                            
-                TS              ITEMP1                          
+                MASK            SEVEN
+                AD              BIT13
+                ADS             LGYRO
+                TS              EBANK
+                MASK            LOW8
+                TS              ITEMP1
 
-                CS              SEVEN                           
-                MASK            ITEMP4                          
-                TS              ITEMP4                          
+                CS              SEVEN
+                MASK            ITEMP4
+                TS              ITEMP4
 
                 EXTEND                                          # MOVE DP COMMAND TO RUPTREGS FOR TESTING.
-                INDEX           ITEMP1                          
-                DCA             1400                            
-                DXCH            RUPTREG1                        
+                INDEX           ITEMP1
+                DCA             1400
+                DXCH            RUPTREG1
 
-                CCS             RUPTREG1                        
-                TCF             MAJ+                            
-                TCF             +2                              
-                TCF             MAJ-                            
+                CCS             RUPTREG1
+                TCF             MAJ+
+                TCF             +2
+                TCF             MAJ-
 
-                CCS             RUPTREG2                        
-                TCF             MIN+                            
-                TCF             STRTGYR2                        
-                TCF             MIN-                            
-                TCF             STRTGYR2                        
+                CCS             RUPTREG2
+                TCF             MIN+
+                TCF             STRTGYR2
+                TCF             MIN-
+                TCF             STRTGYR2
 
 ## Page 1313
 MIN+            AD              -GYROMIN                        # SMALL POSITIVE COMMAND.  SEE IF AT LEAST
                 EXTEND                                          # 16 GYRO PULSES.
-                BZMF            STRTGYR2                        
+                BZMF            STRTGYR2
 
 MAJ+            EXTEND                                          # DEFINITE POSITIVE OUTPUT.
-                DCA             GYROFRAC                        
-                DAS             RUPTREG1                        
+                DCA             GYROFRAC
+                DAS             RUPTREG1
 
                 CA              ITEMP4                          # SELECT POSITIVE TORQUING FOR THIS GYRO.
-                EXTEND                                          
-                WOR             CHAN14                          
+                EXTEND
+                WOR             CHAN14
 
                 CAF             LOW7                            # LEAVE NUMBER OF POSSIBLE 8192 AUGMENTS
                 MASK            RUPTREG2                        # TO INITIAL COMMAND IN MAJOR PART OF LONG
@@ -555,147 +561,147 @@ MAJ+            EXTEND                                          # DEFINITE POSIT
 GMERGE          EXTEND                                          # IN MINOR PART. THE MAJOR PART WILL BE
                 MP              BIT8                            # COUNTED DOWN TO ZERO IN THE COURSE OF
                 TS              ITEMP2                          # PUTTING OUT THE ENTIRE COMMAND.
-                CA              RUPTREG1                        
-                EXTEND                                          
-                MP              BIT9                            
-                TS              RUPTREG1                        
-                CA              L                               
-                EXTEND                                          
-                MP              BIT14                           
+                CA              RUPTREG1
+                EXTEND
+                MP              BIT9
+                TS              RUPTREG1
+                CA              L
+                EXTEND
+                MP              BIT14
                 ADS             ITEMP2                          # INITIAL COMMAND.
 
                 EXTEND                                          # SEE IF MORE THAN ONE PULSE TRAIN NEEDED
                 DCA             RUPTREG1                        # (MORE THAN 16383 PULSES).
-                AD              MINUS1                          
-                CCS             A                               
-                TCF             LONGGYRO                        
+                AD              MINUS1
+                CCS             A
+                TCF             LONGGYRO
 -GYROMIN        OCT             -176                            # MAY BE ADJUSTED TO SPECIFY MINIMUM CMD
-                TCF             +4                              
+                TCF             +4
 
-                CAF             BIT14                           
-                ADS             ITEMP2                          
-                CAF             ZERO                            
+                CAF             BIT14
+                ADS             ITEMP2
+                CAF             ZERO
 
- +4             INDEX           ITEMP1                          
-                DXCH            1400                            
+ +4             INDEX           ITEMP1
+                DXCH            1400
 ## Page 1314
                 CA              ITEMP2                          # ENTIRE COMMAND.
-LASTSEG         TS              GYROCMD                         
-                EXTEND                                          
+LASTSEG         TS              GYROCMD
+                EXTEND
                 MP              BIT10                           # WAITLIST DT
                 AD              THREE                           # TRUNCATION AND PHASE UNCERTAINTIES.
-                TC              WAITLIST                        
-                EBANK=          CDUIND                          
-                2CADR           STRTGYRO                        
+                TC              WAITLIST
+                EBANK=          CDUIND
+                2CADR           STRTGYRO
 
-GYROEXIT        CAF             BIT10                           
-                EXTEND                                          
-                WOR             CHAN14                          
-                TCF             TASKOVER                        
+GYROEXIT        CAF             BIT10
+                EXTEND
+                WOR             CHAN14
+                TCF             TASKOVER
 
-LONGGYRO        INDEX           ITEMP1                          
+LONGGYRO        INDEX           ITEMP1
                 DXCH            1400                            # INITIAL COMMAND OUT PLUS N AUGMENTS OF
                 CAF             BIT14                           # 8192. INITIAL COMMAND IS AT LEAST 8192.
-                AD              ITEMP2                          
-                TS              GYROCMD                         
+                AD              ITEMP2
+                TS              GYROCMD
 
 AUG3            EXTEND                                          # GET WAITLIST DT TO TIME WHEN TRAIN IS
                 MP              BIT10                           # ALMOST OUT.
-                AD              NEG3                            
-                TC              WAITLIST                        
-                EBANK=          CDUIND                          
-                2CADR           8192AUG                         
+                AD              NEG3
+                TC              WAITLIST
+                EBANK=          CDUIND
+                2CADR           8192AUG
 
-                TCF             GYROEXIT                        
+                TCF             GYROEXIT
 
-8192AUG         TC              CAGETEST                        
+8192AUG         TC              CAGETEST
 
-                CAF             BIT4                            
-                EXTEND                                          
-                RAND            CHAN12                          
-                CCS             A                               
-                TCF             IMUBAD                          
+                CAF             BIT4
+                EXTEND
+                RAND            CHAN12
+                CCS             A
+                TCF             IMUBAD
                 CA              LGYRO                           # ADD 8192 PULSES TO GYROCMD
-                TS              EBANK                           
-                MASK            LOW8                            
-                TS              ITEMP1                          
+                TS              EBANK
+                MASK            LOW8
+                TS              ITEMP1
 
                 INDEX           ITEMP1                          # SEE IF THIS IS THE LAST AUG.
-                CCS             1400                            
+                CCS             1400
                 TCF             AUG2                            # MORE TO COME.
 
-                CAF             BIT14                           
-                ADS             GYROCMD                         
-                TCF             LASTSEG         +1              
+                CAF             BIT14
+                ADS             GYROCMD
+                TCF             LASTSEG         +1
 
 ## Page 1315
-AUG2            INDEX           ITEMP1                          
-                TS              1400                            
-                CAF             BIT14                           
-                ADS             GYROCMD                         
+AUG2            INDEX           ITEMP1
+                TS              1400
+                CAF             BIT14
+                ADS             GYROCMD
                 TCF             AUG3                            # COMPUTE DT.
 
 ## Page 1316
 MIN-            AD              -GYROMIN                        # POSSIBLE NEGATIVE OUTPUT.
-                EXTEND                                          
-                BZMF            STRTGYR2                        
+                EXTEND
+                BZMF            STRTGYR2
 
 MAJ-            EXTEND                                          # DEFINITE NEGATIVE OUTPUT.
-                DCS             GYROFRAC                        
-                DAS             RUPTREG1                        
+                DCS             GYROFRAC
+                DAS             RUPTREG1
 
                 CA              ITEMP4                          # SELECT NEGATIVE TORQUING FOR THIS GYRO.
-                AD              BIT9                            
-                EXTEND                                          
-                WOR             CHAN14                          
+                AD              BIT9
+                EXTEND
+                WOR             CHAN14
 
                 CS              RUPTREG1                        # SET UP RUPTREGS TO FALL INTO GMERGE.
                 TS              RUPTREG1                        # ALL NUMBERS PUT INTO GYROCMD ARE
                 CS              RUPTREG2                        # POSITIVE - BIT9 OF CHAN 14 DETERMINES
                 MASK            LOW7                            # THE SIGN OF THE COMMAND.
-                COM                                             
-                XCH             RUPTREG2                        
-                COM                                             
-                TCF             GMERGE                          
+                COM
+                XCH             RUPTREG2
+                COM
+                TCF             GMERGE
 
 GDESELCT        OCT             1700                            # TURN OFF SELECT AND ACTIVITY BITS.
 
-GYROFRAC        2DEC            .215            B-21            
+GYROFRAC        2DEC            .215            B-21
 
 ## Page 1317
 # IMU MODE SWITCHING ROUTINES COME HERE WHEN ACTION COMPLETE.
 
 ENDIMU          EXTEND                                          # MODE IS BAD IF CAGE HAS OCCURED OR IF
                 READ            DSALMOUT                        # ISS WARNING IS ON.
-                MASK            BIT1                            
-                CCS             A                               
-                TCF             IMUBAD                          
+                MASK            BIT1
+                CCS             A
+                TCF             IMUBAD
 
 IMUGOOD         TCF             GOODEND                         # WITH C(A) = 0.
 
-IMUBAD          CAF             ZERO                            
-                TCF             BADEND                          
+IMUBAD          CAF             ZERO
+                TCF             BADEND
 
 CAGETEST        CAF             BIT6                            # SUBROUTINE TO TERMINATE IMU MODE
                 MASK            IMODES30                        # SWITCH IF IMU HAS BEEN CAGED.
-                CCS             A                               
+                CCS             A
                 TCF             IMUBAD                          # DIRECTLY.
                 TC              Q                               # WITH C(A) = +0.
 
 CAGETSTQ        CS              IMODES30                        # SKIP IF IMU NOT BEING CAGED.
-                MASK            BIT6                            
-                CCS             A                               
-                INCR            Q                               
-                TC              Q                               
+                MASK            BIT6
+                CCS             A
+                INCR            Q
+                TC              Q
 
 CAGETSTJ        CS              IMODES30                        # IF DURING MODE SWITCH INITIALIZATION
-                MASK            BIT6                            # IT IS FOUND THAT THE IMU IS BEING CAGED.
+                MASK            BIT6                            # IT IS FOUND THAT THE IMU IS BEING CAGED,
                 CCS             A                               # SET IMUCADR TO -0 TO INDICATE OPERATION
                 TC              Q                               # COMPLETE BUT FAILED.  RETURN IMMEDIATELY
 
                 CS              ZERO                            # TO SWRETURN.
-                TS              IMUCADR                         
-                TCF             MODEEXIT                        
+                TS              IMUCADR
+                TCF             MODEEXIT
 
 ## Page 1318
 #          GENERALIZED MODE SWITCHING TERMINATION. ENTER AT GOODEND FOR SUCCESSFUL COMPLETION OF AN I/O OPERATION
@@ -703,35 +709,35 @@ CAGETSTJ        CS              IMODES30                        # IF DURING MODE
 
 BADEND          TS              RUPTREG2                        # DEVICE INDEX.
                 CS              ZERO                            # FOR FAILURE.
-                TCF             GOODEND         +2              
+                TCF             GOODEND         +2
 
-GOODEND         TS              RUPTREG2                        
+GOODEND         TS              RUPTREG2
                 CS              ONE                             # FOR SUCCESS.
 
-                TS              RUPTREG3                        
+                TS              RUPTREG3
                 INDEX           RUPTREG2                        # SEE IF USING PROGRAM ASLEEP.
-                CCS             MODECADR                        
+                CCS             MODECADR
                 TCF             +4                              # YES - WAKE IT UP.
                 TCF             ENDMODE                         # IF 0, PROGRAM NOT IN YET.
 
-                EXTEND                                          
+                EXTEND
                 BZF             ENDMODE         +1              # BZF = TCF IF MODECADR = -0.
 
                 CAF             ZERO                            # WAKE SLEEPING PROGRAM.
-                INDEX           RUPTREG2                        
-                XCH             MODECADR                        
-                TC              JOBWAKE                         
+                INDEX           RUPTREG2
+                XCH             MODECADR
+                TC              JOBWAKE
 
                 CS              RUPTREG3                        # ADVANCE LOC IF SUCCESSFUL.
-                INDEX           LOCCTR                          
-                ADS             LOC                             
+                INDEX           LOCCTR
+                ADS             LOC
 
-                TCF             TASKOVER                        
+                TCF             TASKOVER
 
 ENDMODE         CA              RUPTREG3                        # -0 INDICATES OPERATION COMPLETE BUT
  +1             INDEX           RUPTREG2                        # UNSUCCESSFUL: -1 INDICATES COMPLETE AND
                 TS              MODECADR                        # SUCCESSFUL.
-                TCF             TASKOVER                        
+                TCF             TASKOVER
 
 ## Page 1319
 #          GENERAL STALLING ROUTINE.  USING PROGRAMS COME HERE TO WAIT FOR I/O COMPLETION.
@@ -780,78 +786,78 @@ ENDMODE         CA              RUPTREG3                        # -0 INDICATES O
 #   RUPTREG2 AND CALLING ROUTINE MODECADR.
 
 ## [yaYUL WORKAROUND] OH 2009 - kept by RRB for Luminary 116 - 2017
-                SBANK=          LOWSUPER                        
+                SBANK=          LOWSUPER
 
 AOTSTALL        CAF             ONE                             # AOT.
-                TC              STALL                           
+                TC              STALL
 
-RADSTALL        CAF             TWO                             
-                TCF             STALL                           
+RADSTALL        CAF             TWO
+                TCF             STALL
 
 ## Page 1320
-OPTSTALL        EQUALS          AOTSTALL                        
+OPTSTALL        EQUALS          AOTSTALL
 
 IMUSTALL        CAF             ZERO                            # IMU.
 
-STALL           INHINT                                          
+STALL           INHINT
                 TS              RUPTREG2                        # SAVE DEVICE INDEX.
                 INDEX           A                               # SEE IF OPERATION COMPLETE.
-                CCS             MODECADR                        
+                CCS             MODECADR
                 TCF             MODABORT                        # ALLOWABLE STATES ARE +0, -1, AND -0.
                 TCF             MODESLP                         # OPERATION INCOMPLETE.
                 TCF             MODEGOOD                        # COMPLETE AND GOOD IF = -1.
 
 MG2             INDEX           RUPTREG2                        # COMPLETE AND FAILED IF -0. RESET TO +0.
                 TS              MODECADR                        # RETURN TO CALLER.
-                TCF             MODEEXIT                        
+                TCF             MODEEXIT
 
 MODEGOOD        CCS             A                               # MAKE SURE INITIAL STATE -1.
-                TCF             MODABORT                        
+                TCF             MODABORT
 
                 INCR            BUF2                            # IF SO, INCREMENT RETURN ADDRESS AND
                 TCF             MG2                             # RETURN IMMEDIATELY, SETTING CADR = +0.
 
 MODESLP         TC              MAKECADR                        # CALL FROM SWITCHABLE FIXED ONLY.
-                INDEX           RUPTREG2                        
-                TS              MODECADR                        
-                TCF             JOBSLEEP                        
+                INDEX           RUPTREG2
+                TS              MODECADR
+                TCF             JOBSLEEP
 
-MODABORT        DXCH            BUF2                            
+MODABORT        DXCH            BUF2
                 TC              BAILOUT1                        # TWO PROGRAMS USING THE SAME DEVICE.
-                OCT             1210                            
+                OCT             31210
 
 ## Page 1321
 # CONSTANTS FOR MODE SWITCHING ROUTINES
 
-BITS3&4         =               OCT14                           
-BITS4&6         =               OCT50                           
-BITS4-5         OCT             00030                           
+BITS3&4         =               OCT14
+BITS4&6         =               OCT50
+BITS4-5         OCT             00030
 IMUSEFLG        EQUALS          BIT8                            # INTERPRETER SWITCH 7.
--COMMAX         DEC             -191                            
--COMMAX-        DEC             -192                            
-600MS           DEC             60                              
-IMUFIN20        =               IMUFINE                         
+-COMMAX         DEC             -191
+-COMMAX-        DEC             -192
+600MS           DEC             60
+IMUFIN20        =               IMUFINE
 GOMANUR         CA              ATTCADR                         # IS KALCMANU FREE
-                EXTEND                                          
+                EXTEND
                 BZF             +2
-                TC              MODABORT                              
- +2             EXTEND                                          
-                DCA             BUF2                            
+                TC              MODABORT
+ +2             EXTEND
+                DCA             BUF2
                 DXCH            ATTCADR                         # SAVE FINAL RETURN FOR KALCMAN3
 
-                CA              BBANK                           
-                MASK            SEVEN                           
-                ADS             ATTCADR         +1              
+                CA              BBANK
+                MASK            SEVEN
+                ADS             ATTCADR         +1
 
-                CA              PRIORITY                        
-                MASK            PRIO37                          
+                CA              PRIORITY
+                MASK            PRIO37
                 TS              ATTPRIO                         # SAVE USERS PRIO
 
                 CAF             KALEBCON                        # SET EBANK FOR KALCMAN3
-                TS              EBANK                           
-                TC              POSTJUMP                        
-                CADR            KALCMAN3                        
-KALEBCON        ECADR           BCDU                            
+                TS              EBANK
+                TC              POSTJUMP
+                CADR            KALCMAN3
+KALEBCON        ECADR           BCDU
 
 ## Page 1322
 # PROGRAM DESCRIPTION
@@ -884,31 +890,31 @@ KALEBCON        ECADR           BCDU
 # DEBRIS
 # CENTRALS-A,Q,L
 
-                BANK            34                              
-                SETLOC          R02                             
-                BANK                                            
-                COUNT*          $$/R02                          
-DEC51           DEC             51                              
-R02BOTH         CAF             REFSMBIT                        
-                MASK            FLAGWRD3                        
-                CCS             A                               
+                BANK            34
+                SETLOC          R02
+                BANK
+                COUNT*          $$/R02
+DEC51           DEC             51
+R02BOTH         CAF             REFSMBIT
+                MASK            FLAGWRD3
+                CCS             A
                 TC              R02ZERO                         # ZERO IMUS
 
-                CA              IMODES30                        
+                CA              IMODES30
                 MASK            BIT9                            # IS ISS INITIALIZED
-                EXTEND                                          
-                BZF             +2                              
+                EXTEND
+                BZF             +2
                 CS              BIT4                            # SEND IMU ALARM CODE 210
                 AD              OCT220                          # SEND REFSMM ALARM
-                TC              VARALARM                        
+                TC              VARALARM
 
-                TC              GOTOPOOH                        
+                TC              GOTOPOOH
 
-R02ZERO         TC              UPFLAG                          
+R02ZERO         TC              UPFLAG
 ## Page 1323
-                ADRES           IMUSE                           
-                TCF             SWRETURN                        
-OCT220          OCT             220                             
+                ADRES           IMUSE
+                TCF             SWRETURN
+OCT220          OCT             220
 
 ## Page 1324
 # PROGRAM DESCRIPTION   P06   10 FEB 67
@@ -929,51 +935,51 @@ OCT220          OCT             220
 
 ## Page 1325
 # PRESTAND PREPARES FOR STANDBY BY SNAPSHOTTING THE SCALER AND TIME1 TIME2
-# THE LOW 5 BITS OF THE SCALER ARE INSPECTED TO INSURE COMPATIBILITY
+# THE LOW 5 BITS OF THE SCALER ARE INSPECTED TO INSURE COMPATABILITY
 # BETWEEN THE SCALER READING AND THE TIME1 TIME2 READING.
 
-                SETLOC          P05P06                          
-                BANK                                            
+                SETLOC          P05P06
+                BANK
 
-                EBANK=          TIME2SAV                        
-                COUNT*          $$/P06                          
+                EBANK=          TIME2SAV
+                COUNT*          $$/P06
 
 P06             TC              UPFLAG                          # SET NODOV37 BIT
-                ADRES           NODOFLAG                        
+                ADRES           NODOFLAG
 
-PRESTAND        INHINT                                          
-                EXTEND                                          
+PRESTAND        INHINT
+                EXTEND
                 DCA             TIME2                           # SNAPSHOT TIME1 TIME2
-                DXCH            TIME2SAV                        
-                TC              SCALPREP                        
+                DXCH            TIME2SAV
+                TC              SCALPREP
                 TC              PRESTAND                        # T1,T2,SCALER NOT COMPATIBLE
                 DXCH            MPAC                            # T1,T2 AND SCALER OK
                 DXCH            SCALSAVE                        # STORE SCALER
-                INHINT                                          
-                TC              BANKCALL                        
+                INHINT
+                TC              BANKCALL
                 CADR            RNDREFDR                        # REFSMM, DRIFT, TRACK FLAGS DOWN
 
-                TC              DOWNFLAG                        
+                TC              DOWNFLAG
                 ADRES           IMUSE                           # IMUSE DOWN
-                TC              DOWNFLAG                        
+                TC              DOWNFLAG
                 ADRES           RNDVZFLG                        # RNDVZFLG DOWN
 
-                CAF             BIT11                           
-                EXTEND                                          
+                CAF             BIT11
+                EXTEND
                 WOR             CHAN13                          # SET STANDBY ENABLE BIT
 
                 TC              PHASCHNG                        # SET RESTART TO POSTAND WHEN STANDBY
                 OCT             07024                           #   RECOVERS
-                OCT             20000                           
-                EBANK=          SCALSAVE                        
-                2CADR           POSTAND                         
+                OCT             20000
+                EBANK=          SCALSAVE
+                2CADR           POSTAND
 
-                CAF             OCT62                           
-                TC              BANKCALL                        
-                CADR            GOPERF1                         
-                TCF             -3                              
-                TCF             -4                              
-                TCF             -5                              
+                CAF             OCT62
+                TC              BANKCALL
+                CADR            GOPERF1
+                TCF             -3
+                TCF             -4
+                TCF             -5
 
 OCT62           EQUALS          .5SEC                           # DEC 50 = OCT 62
 
@@ -989,18 +995,18 @@ OCT62           EQUALS          .5SEC                           # DEC 50 = OCT 6
 # BITS OF THE SCALER READING ARE THEN SET TO ZERO, TO TRUNCATE THE SCALER
 # DATA TO 10 MS. RESULTS ARE STORED IN MPAC, +1.
 
-SCALPREP        EXTEND                                          
-                QXCH            MPAC            +2              
-                TC              FINETIME        +1              
-                RELINT                                          
-                DXCH            MPAC                            
+SCALPREP        EXTEND
+                QXCH            MPAC            +2
+                TC              FINETIME        +1
+                RELINT
+                DXCH            MPAC
                 CA              BIT5                            # ADD 5 MS TO THE SCALER READING.
-                TS              L                               
-                CA              ZERO                            
-                DAS             MPAC                            
+                TS              L
+                CA              ZERO
+                DAS             MPAC
                 CS              LOW5                            # SET LOW 5 BITS OF (SCALER+5MS) TO ZERO
                 MASK            MPAC            +1              # AND STORE RESULTS IN MPAC,+1.
-                XCH             MPAC            +1              
+                XCH             MPAC            +1
                 MASK            LOW5                            # TEST LOW 5 BITS OF SCALER FOR THE FIRST
                                                                 # INTERVAL AFTER THE T1 INCREMENT
                                                                 # (NOW = 00000, SINCE BIT 5 ADDED).
@@ -1015,40 +1021,40 @@ SCALPREP        EXTEND
 # VALUES (IN DP) AND ADDS THIS TO THE PREVIOUSLY SNAPSHOTTED VALUES OF
 # TIME1 TIME2 AND PLACES THIS NEW TIME INTO THE TIME1 TIME2 COUNTER.
 
-                COUNT*          $$/P05                          
+                COUNT*          $$/P05
 
 POSTAND         CS              BIT11                           # RECOVER TIME AFTER STANDBY.
-                EXTEND                                          
+                EXTEND
                 WAND            CHAN13                          # CLEAR STANDBY ENABLE BIT
-                INHINT                                          
-                CA              ZERO                            
-                TS              L                               
+                INHINT
+                CA              ZERO
+                TS              L
                 DXCH            TIME2                           # CLEAR TIME1TIME2
                 TC              SCALPREP                        # STORE SCALER IN MPAC, MPAC+1
                 TC              POSTAND         +3              # T1,T2,SCALER NOT COMPATIBLE
                 EXTEND                                          # T1,T2 AND SCALER OK
-                DCS             SCALSAVE                        
+                DCS             SCALSAVE
                 DAS             MPAC                            # FORM DP DIFFERENCE OF POSTSTANDBY SCALER
 ## Page 1327
                 CAF             BIT10                           # MINUS PRESTANDBY SCALER AND SHIFT RIGHT
                 TC              SHORTMP                         # 5 TO ALIGN BITS WITH TIME1 TIME2.
-                CAF             ZERO                            
+                CAF             ZERO
                 TS              MPAC            +2              # NEEDED FOR TP AGREE
                 TC              TPAGREE                         # MAKE DP DIFF AGREE
-                CCS             MPAC                            
+                CCS             MPAC
                 TC              POSTCOM                         # IF DP DIFF NET +, NO SCALER OVERFLOW
                 TC              POSTCOM                         # BETWEEN PRE AND POST STANDBY.
                 TC              +1                              # IF DP DIFF NET -, SCALER OVERFLOWED.  ADD
                 CAF             BIT10                           # BIT 10 TO HIGH DIFF TO CORRECT.
-                ADS             MPAC                            
+                ADS             MPAC
 POSTCOM         EXTEND                                          # C(MPAC,+1) IS MAGNITUDE OF DELTA SCALER.
                 DCA             TIME2SAV                        # PRESTANDBY TIME1TIME2
-                DAS             MPAC                            
+                DAS             MPAC
                 TC              TPAGREE                         # FORCE SIGN AGREEMENT
                 DXCH            MPAC                            # UPDATED VALUE FOR T1,T2.
                 DAS             TIME2                           # LOAD UPDATED VALUE INTO T1,T2, WITH
                 TC              DOWNFLAG                        # CLEAR NODOFLAG
-                ADRES           NODOFLAG                        
+                ADRES           NODOFLAG
 
-                TC              GOTOPOOH                        
+                TC              GOTOPOOH
 

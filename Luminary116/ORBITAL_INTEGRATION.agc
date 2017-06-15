@@ -13,10 +13,13 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-01-22 MAS  Created from Luminary 99.
+##              2017-02-20 RRB  Updated for Luminary 116.
+##		2017-03-13 RSB	Proofed comment text via 3-way diff vs
+##				Luminary 99 and 131.
+##		2017-03-16 RSB	Comment-text fixes identified in 5-way
+##				side-by-side diff of Luminary 69/99/116/131/210.
 
-## NOTE: Page numbers below have not yet been updated to reflect Luminary 116.
-
-## Page 1227
+## Page 1218
 # DELETE
                 BANK            13                              
                 SETLOC          ORBITAL                         
@@ -27,15 +30,15 @@
 KEPPREP         LXA,2           SETPD                           
                                 PBODY                           
                                 0                               
-                DLOAD*          SQRT                            # SQRT(MU) (+18 OR +15)         0D      PL 2D
+                DLOAD*          SQRT                            # SQRT(MU) (+18 OR +15)  0D        PL 2D
                                 MUEARTH,2                       
-                PDVL            UNIT                            #                                       PL 8D
+                PDVL            UNIT                            #                                  PL 8D
                                 RCV                             
-                PDDL            NORM                            # NORM R (+29 OR +27 - N1)      2D      PL 4D
+                PDDL            NORM                            # NORM R (+29 OR +27 - N1) 2D      PL 4D
                                 36D                             
                                 X1                              
                 PDVL                                            
-                DOT             PDDL                            # F*SQRT(MU) (+7 OR +5)         4D      PL 6D
+                DOT             PDDL                            # F*SQRT(MU)(+7 OR +5) 4D        PL 6D
                                 VCV                             
                                 TAU.                            # (+28)
                 DSU             NORM                            
@@ -44,34 +47,34 @@ KEPPREP         LXA,2           SETPD
                 SR1                                             
                 DDV             PDDL                            
                                 2D                              
-                DMP             PUSH                            # FS (+6 +N1-N2)                6D      PL 8D
+                DMP             PUSH                            # FS(+6 +N1-N2) 6D               PL 8D
                                 4D                              
-                DSQ             PDDL                            # (FS)SQ (+12 +2(N1-N2))        8D      PL 10D
+                DSQ             PDDL                            # (FS)SQ(+12 +2(N1-N2)) 8D       PL 10D
                                 4D                              
-                DSQ             PDDL*                           # SSQ/MU (-20R +2(N1-N2))       10D     PL 12D
+                DSQ             PDDL*                           # SSQ/MU(-20R +2(N1-N2)) 10D       PL 12D
                                 MUEARTH,2                       
                 SR3             SR4                             
-                PDVL            VSQ                             # PREALIGN MU (+43 OR +37)      12D     PL 14D
+                PDVL            VSQ                             # PREALIGN MU (+43 OR +37) 12D   PL 14D
                                 VCV                             
-                DMP             BDSU                            #                                       PL 12D
+                DMP             BDSU                            #                                PL 12D
                                 36D                             
-                DDV             DMP                             #                                       PL 10D
-                                2D                              # -(1/R-ALPHA) (+12 +3N1-2N2)
+                DDV             DMP                             #                                PL 10D
+                                2D                              # -(1/R-ALPHA)(+12 +3N1-2N2)
                 DMP             SL*                             
                                 DP2/3                           
-                                0               -3,1            # 10L(1/R-ALPHA) (+13 +2(N1-N2))
-                XSU,1           DAD                             # 2(FS)SQ - ETCETRA                     PL 8D
+                                0               -3,1            # 10L(1/R-ALPHA)(+13 +2(N1-N2))
+                XSU,1           DAD                             # 2(FS)SQ - ETCETRA       	PL 8D
                                 S1                              # X1 = N2-N1
-                SL*             DSU                             # -FS+2(FS)SQ ETC (+6 +N1-N2)           PL 6D
+                SL*             DSU                             # -FS+2(FS)SQ ETC (+6 +N1-N2)    PL 6D
                                 8D,1                            
                 DMP             DMP                             
                                 0D                              
                                 4D                              
                 SL*             SL*                             
-## Page 1228
+## Page 1219
                                 8D,1                            
-                                0,1                             # S(-FS(1-2FS)-1/6...) (+17 OR +16)
-                DAD             PDDL                            #                                       PL 6D
+                                0,1                             # S(-FS(1-2FS)-1/6...)(+17 OR +16)
+                DAD             PDDL                            #                                PL 6D
                                 XKEP                            
                 DMP             SL*                             # S(+17 OR +16)
                                 0D                              
@@ -90,7 +93,7 @@ KEPPREP         LXA,2           SETPD
                 GOTO                                            
                                 KEPLERN                         
 
-## Page 1229
+## Page 1220
 FBR3            LXA,1           SSP                             
                                 DIFEQCNT                        
                                 S1                              
@@ -108,7 +111,7 @@ FBR3            LXA,1           SSP
                 STCALL          TET                             
                                 KEPPREP                         
 
-## Page 1230
+## Page 1221
 # AGC ROUTINE TO COMPUTE ACCELERATION COMPONENTS.
 
 ACCOMP          LXA,1           LXA,2                           
@@ -133,8 +136,7 @@ ACCOMP          LXA,1           LXA,2
                                 ALPHAV                          
                 STODL           ALPHAV                          
                                 36D                             
-                STORE           ALPHAM                          
-                CALL                                            
+                STCALL          ALPHAM                          
                                 GAMCOMP                         
                 VLOAD           SXA,1                           
                                 BETAV                           
@@ -158,8 +160,8 @@ ACCOMP          LXA,1           LXA,2
                                 0                               
                 STORE           BETAV                           
                 STOVL           RPQV                            
-## Page 1231
                                 2D                              
+## Page 1222
                 STORE           RPSV                            
                 SLOAD           DSU                             
                                 MODREG                          
@@ -209,8 +211,8 @@ GAMCOMP         VLOAD           VSR1
                 NORM            ROUND                           
                                 31D                             
                 PDDL            NORM                            # NORMED B SQUARED TO PD LIST
-## Page 1232		
                                 ALPHAM                          # NORMALIZE (LESS ONE) LENGTH OF ALPHA
+## Page 1223
                                 32D                             # SAVING NORM SCALE FACTOR IN X1
                 SR1             PDVL                            
                                 BETAV                           # C(PDL+2) = ALMOST NORMED ALPHA
@@ -248,7 +250,7 @@ GAMCOMP         VLOAD           VSR1
                                 10D                             
                 SL1             DAD                             
                                 DQUARTER                        
-                PDDL            DAD                             # (1/4)+2((Q+1)/4)      TO PD+14D
+                PDDL            DAD                             # (1/4)+2((Q+1)/4)    TO PD+14D
                                 10D                             
                                 HALFDP                          
                 DMPR            SL1                             
@@ -260,8 +262,8 @@ GAMCOMP         VLOAD           VSR1
                                 6                               
                                 BETAV                           #               -
                 PDVL            VSR3                            # (G/2)(C(PD+4))B/2 TO PD+16D
-## Page 1233
                                 ALPHAV                          
+## Page 1224
                 VAD             PUSH                            # A12 + C(PD+16D) TO PD+16D
                 DLOAD           DMP                             
                                 0                               
@@ -278,12 +280,11 @@ GAMCOMP         VLOAD           VSR1
                 XSU,2           XSU,2                           
                                 30D                             
                                 31D                             
-                BOV                                             # CLEAR OVIND
-                                +1                              
-                VSR*            XCHX,2                          
+                BOVB            VSR*                            
+                                TCDANZIG                        
                                 0               -1,2            
+                XCHX,2          VAD                             
                                 S1                              
-                VAD                                             
                                 FV                              
                 STORE           FV                              
                 BOV             RVQ                             # RETURN IF NO OVERFLOW
@@ -310,11 +311,11 @@ GOBAQUE         VLOAD           ABVAL
 
 INT-ABRT        EXIT                                            
                 TC              POODOO                          
-                OCT             00430                           
+                OCT             20430                           
 
-## Page 1234
-# THE OBLATE ROUTINE COMPUTES THE ACCELERATION DUE TO OBLATENESS.  IT USES THE UNIT OF THE VEHICLE
-# POSITION VECTOR FOUND IN ALPHAV AND THE DISTANCE TO THE CENTER IN ALPHAM.  THIS IS ADDED TO THE SUM OF THE
+## Page 1225
+# THE OBLATE ROUTINE COMPUTES THE ACCELERATION DUE TO OBLATENESS. IT USES THE UNIT OF THE VEHICLE
+# POSITION VECTOR FOUND IN ALPHAV AND THE DISTANCE TO THE CENTER IN ALPHAM. THIS IS ADDED TO THE SUM OF THE
 # DISTURBING ACCELERATIONS IN FV AND THE PROPER DIFEQ STAGE IS CALLED VIA X1.
 
 OBLATE          LXA,2           DLOAD                           
@@ -333,74 +334,76 @@ OBLATE          LXA,2           DLOAD
                 PDDL            CALL                            
                                 3/5                             
                                 R-TO-RP                         
-                STORE           URPV                            
-                VLOAD           VXV                             
-                                504LM                           
+                STOVL           URPV                            # RP/R  B-1 IN PLANETARY COORDINATES
                                 ZUNIT                           
-                VAD             VXM                             
-                                ZUNIT                           
-                                MMATRIX                         
-                UNIT                                            # POSSIBLY UNNECESSARY
-COMTERM         STORE           UZ                              
-                DLOAD           DMPR                            
+                PUSH            CALL                            # ZUNIT B-1 IN PLANETARY COORDL AT 00D
+                                MATRIX                          
+                PDVL                                            # UZ    B-2 IN INERT COORD      AT 00D
+                                XUNIT                           
+                PUSH            CALL                            # XUNIT B-1 IN PLANETARY COORD. AT 06D
+                                MATRIX                          
+                VSL1                                            
+                STOVL           32D                             # UX    B-1 IN INERT. COORD     AT 32D
+                VSL1                                            
+COMTERM         STODL           UZ                              # UZ  B-1 IN INERTIAL COORD        AT 20D
+                                COSPHI/2                        #  '      Z-COMPONENT OF URPV
+                DMPR            PDDL                            # P   B-6   ,  3COSPHI/64           AT 00D
+                                3/32                            #  2
                                 COSPHI/2                        
-                                3/32                            
-                PDDL            DSQ                             # P2/64 TO PD0
+                DSQ             DMPR                            
+                                15/16                           #  '                       2
+                DSU             PUSH                            # P   B-5   ,(1/2)(15COSPHI -3)     AT 02D
+                                3/64                            #  3
+                DMPR            DMP                             
                                 COSPHI/2                        
-                DMPR            DSU                             
-                                15/16                           
-                                3/64                            
-                PUSH            DMPR                            # P3/32 TO PD2
-                                COSPHI/2                        
-                DMP             SL1R                            
                                 7/12                            
-                PDDL            DMPR                            
-                                0                               
-                                2/3                             
-                BDSU            PUSH                            # P4/128 TO PD4
-                DMPR            DMPR                            
-                                COSPHI/2                        # BEGIN COMPUTING P5/1024
+                SL1R            PDDL                            
+                                0D                              
+                DMPR            BDSU                            
+                                2/3                             #  '                     '   '
+                PUSH            DMPR                            # P   B-7,(1/3)(7COSPHI P -4P )     AT 04D
+                                COSPHI/2                        #  4                     3   2
+                DMPR            PDDL                            
                                 9/16                            
-                PDDL            DMPR                            
-                                2                               
-                                5/128                           
-## Page 1235
-                BDSU                                            
-                DMP*                                            
-                                J4REQ/J3,2                      
-                DDV             DAD                             #              -3
-                                ALPHAM                          # (((P5/256)B 2  /R+P4/32)  /R+P3/8)ALPHAV
-                                4                               #            4             3
-                DMPR*           DDV                             
-                                2J3RE/J2,2                      
+## Page 1226
+                                2D                              #  '                      '    '
+                DMPR            BDSU                            # P   B-10,(1/4)(9COSPHI P  -5P )
+                                5/128                           #  5                      4    3
+                DMP*            DDV                             #                    '
+                                J4REQ/J3,2                      #    B- , (J RP/J R)P
+                                ALPHAM                          #           4    3   5
+                DAD             DMPR*                           
+                                4D                              #             2     2  '              '
+                                2J3RE/J2,2                      #   B , (2J RP /J2 R )P  +(2J RP/J2R)P
+                DDV             DAD                             #        4           5     3        4
+                                ALPHAM                          #  -        2 '  2         '        '
+                                2D                              # (R/R)(J RP P /R + 2J RP P /  + J P )
+                VXSC                                            #        4    5       3    4  2   2 3
+                                ALPHAV                          #         4       2  '           -
+                STODL           TVEC                            #   B-6,(SUM((J /R )P   (COSPHI))UR)
+                DMP*            SR1                             #         I=2  I     I+1
+                                J4REQ/J3,2                      #                 '
+                DDV             DAD                             #      (J RP/J R)P
+                                ALPHAM                          #        4    3   4
+                DMPR*           SR3                             #          2    2  '              '
+                                2J3RE/J2,2                      #    (2J RP /J R )P  +(2J RP/J R)P
+                DDV             DAD                             #       4     2    4     3    2   3
                                 ALPHAM                          
-                DAD             VXSC                            
-                                2                               
-                                ALPHAV                          
-                STODL           TVEC                            
-                DMP*            SR1                             
-                                J4REQ/J3,2                      
-                DDV             DAD                             
-                                ALPHAM                          #               -3
-                DMPR*           SR3                             
-                                2J3RE/J2,2                      #    3        4
-                DDV             DAD                             
-                                ALPHAM                          
-                VXSC            VSL1                            
-                                UZ                              
-                BVSU                                            
-                                TVEC                            
-                STODL           TVEC                            
-                                ALPHAM                          
-                NORM            DSQ                             
-                                X1                              
+                VXSC            VSL1                            #        4   '        -
+                                UZ                              #  B-6  SUM(P(COSPHI))UZ
+                BVSU                                            #       I=2  I
+                                TVEC                            #  4              I-2   '          -
+                STODL           TVEC                            # SUM((MU J (RP/R)   )(P   (COSPHI)UR -
+                                ALPHAM                          # I=2      I            I+2
+                NORM            DSQ                             #             P (COSPHI)UZ))  B-6 AT 20D
+                                X1                              #              I
                 DSQ             NORM                            
-                                S1                              #         4
-                PUSH            BDDV*                           # NORMED R  TO 0D
+                                S1                              #              4
+                PUSH            BDDV*                           # NORMALIZED  R                   AT 00D
                                 J2REQSQ,2                       
                 VXSC            BOV                             
                                 TVEC                            
-                                +1                              # (RESET OVERFLOW INDICATOR)
+                                +1                              # B+38 FOR EARTH , B+42 FOR MOON
                 XAD,1           XAD,1                           
                                 X1                              
                                 X1                              
@@ -410,64 +413,73 @@ COMTERM         STORE           UZ
                 VAD             BOV                             
                                 FV                              
                                 GOBAQUE                         
-                STCALL          FV                              
-                                QUALITY1                        
-
-QUALITY3        DSQ                                             # J22 TERM X R**4 IN 2D, SCALED B61
-                                                                # AS VECTOR.
-## Page 1236
-                PUSH            DMP                             # STORE COSPHI**2 SCALED B2 IN 8D
-                                5/8                             # 5 SCALED B3
-                PDDL            SR2                             # PUT 5 COSPHI**2, D5, IN 8D.  GET
-                                                                # COSPHI**2 D2 FROM 8D
-                DAD             BDSU                            # END UP WITH (1-7 COSPHI**2), B5
-                                8D                              # ADDING COSPHI**2 B4 SAME AS COSPHI**2
-                                                                # X 2 D5
-                                D1/32                           # 1 SCALED B5
-                DMP             DMP                             
-                                URPV                            # X COMPONENT
-                                5/8                             # 5 SCALED B3
-                VXSC            VSL5                            # AFTER SHIFT, SCALED B5
-                                URPV                            # VECTOR, B1.
-                PDDL                                            # VECTOR INTO 8D, 10D, 12D, SCALED B5.
-                                                                # GET 5 COSPHI**2 OUT OF 8D
-                DSU             DAD                             
-                                D1/32                           # 1 B5
-                                8D                              # X COMPONENT (SAME AS MULTIPLYING
-                                                                # BY UNITX)
-                STODL           8D                              
-                                URPV                            # X COMPONENT
-                DMP             DMP                             
-                                URPV            +4              # Z COMPONENT
-                                5/8                             # 5 B3 ANSWER B5
-                SL1             DAD                             # FROM 12D FOR Z COMPONENT (SL1 GIVES 10
-                                                                # INSTEAD OF 5 FOR COEFFICIENT)
-                PDDL            NORM                            # BACK INTO 12D FOR Z COMPONENT.
-                                ALPHAM                          # SCALED B27 FOR MOON
-                                X2                              
-                PUSH            SLOAD                           # STORE IN 14D, DESTROYING URPV
-                                                                # X COMPONENT
+                STODL           FV                              # B+16 FOR EARTH , B+20 FOR MOON
+                                URPV                            # B-1  X-COMPONENT OF POSITION  IN
+                BOF             PUSH                            #           PLANETORY COORD.      AT 02D
+## Page 1227
+                                MOONFLAG                        
+                                NBRANCH                         #        2
+                DSQ             PDDL                            # B-2   X                          AT 04D
+                                URPV            +2              # B-1  Y-COMPONENT
+                DSQ             DSU                             
+                DMP             VXSC                            
+                                5/8                             #         2  2 -
+                                ALPHAV                          # B-6  5(Y -X )UR   2  2 -
+                VSL3            PDDL                            # B-3            5(Y -X )UR        AT 02D
+                VXSC            VAD                             
+                                32D                             #       2  2 -   2          -
+                PDVL            VXV                             #   (5(Y.-X )UR/R ) +(2X/R)UX      AT 02D
+                                32D                             #    B-1   UX
+                                UZ                              #    B-2  -UY =(UX * UZ)
+                VSL1            VXSC                            #    B-3   -(2Y/R)UY
+                                URPV            +2              #             2  2 -   2        -
+                VAD             PUSH                            #    B-3  (5(X -Y )UR/R )+(2X/R)UX -(
+                DLOAD                                           #              -
+                                COSPHI/2                        #         2Y/R)UY                  AT 02D
+                DSQ             PUSH                            #    B-2  (Z.COMPONENT)            AT 08D
+                DMP             PDDL                            #             2
+                                5/8                             #    B-5  5COSPHI /2               AT 08D
+                SR2             DAD                             
+                                08D                             
+                BDSU            DMP                             #                     2
+                                D1/32                           #    B-5  (1 - 7COSPHI )
+                                URPV                            
+                DMP             VXSC                            
+                                5/8                             
+                                ALPHAV                          #                         2 -
+                VSL5            PDDL                            #    B-5  (5X/R)(1-7COSPHI )UR     AT 08D
+                DSU             VXSC                            
+                                D1/32                           
+                                32D                             
+                VSL1            VAD                             #                         2 -           -
+                PDDL            DMP                             #    B-5  (5X/R)(1-7COSPHI )UR +(5COSPHI
+                                URPV                            #       -
+                                URPV            +4              #    -1)UX                         AT 08D
+                DMP             VXSC                            
+                                5/8                             #    B-5  5X Y
+                                UZ                              #            M M
+                VSL2            VAD                             #                         2 -           2
+                PDDL            NORM                            #    B-5  (5X/R)(1-7COSPHI )UR +(5COSPHI
+                                ALPHAM                          #       -          2 -
+                                X2                              #    -1)UX +(10XZ/R )UZ            AT 08D
+## In original, the SLOAD and E32C31RM of the below two lines were cirlced in red. - 2017 RRB
+                PUSH            SLOAD                           
                                 E32C31RM                        
-                DDV             VXSC                            # IF X2 = 0, DIVISION GIVES B53, VXSC
-                                                                # OUT OF 8D B5 GIVES B58
-                VSL*            VAD                             # SHIFT MAKES B61, FOR ADDITION OF 
-                                                                # VECTOR IN 2D
+                DDV             VXSC                            
+                VSL*            PDVL                            
                                 0               -3,2            
-                VSL*            V/SC                            # OPERAND FROM 0D.  B108 FOR X1 = 0
-                                0               -27D,1          # FOR X1 = 0, MAKES B88, GIVING B-20
-                                                                # FOR RESULT.
-                PDDL            PDDL                            
-                                TET                             
-                                5/8                             # ANY NON-ZERO CONSTANT
-                LXA,2           CALL                            # POSITION IN 0D, TIME IN 6D.  X2 LEFT
-                                                                # ALONE.
-                                PBODY                           
-                                RP-TO-R                         
-                VAD             BOV                             # OVERFLOW INDICATOR RESET IN "RP-TO-R"
+## Page 1228
+                PUSH            SLOAD                           
+                                E3J22R2M                        
+                VXSC            VAD                             
+                VSL*            V/SC                            
+                                0               -27D,1          # B+16 OR B+20 (J  + C  )
+                VAD             BOV                             #                22   31
                                 FV                              
                                 GOBAQUE                         
-## Page 1237			
                 STORE           FV                              
+                LXA,2                                           
+                                PBODY                           
 NBRANCH         SLOAD           LXA,1                           
                                 DIFEQCNT                        
                                 MPAC                            
@@ -481,6 +493,11 @@ COSPHIE         DLOAD
                                 ZUNIT                           
                 GOTO                                            
                                 COMTERM                         
+MATRIX          VXV             VCOMP                           
+                                504LM                           # ROUTINE TRANSLATES FROM PLANETARY
+                VAD                                             # TO INERTIAL COORDINATES
+                VXM             RVQ                             
+                                MMATRIX                         
 DIFEQTAB        CADR            DIFEQ+0                         
                 CADR            DIFEQ+1                         
                 CADR            DIFEQ+2                         
@@ -502,6 +519,7 @@ TIMESTEP        BOF             VLOAD
                                 TET                             
                                 LSPOS                           # RPQV IN MPAC
                 STORE           RPQV                            # RPQV
+## Page 1229
                 LXA,2                                           
                                 PBODY                           
 INLUNCHK        BVSU            ABVAL                           
@@ -513,14 +531,13 @@ RECTEST         VLOAD           ABVAL                           # RECTIFY IF
                                 TDELTAV                         
                 BOV                                             
                                 CALLRECT                        
-                DSU             BPL                             #       1) EITHER TDELTAV OR TNUV EQUALS OR
-                                3/4                             #          EXCEEDS 3/4 IN MAGNITUDE
+                DSU             BPL                             #      1) EITHER TDELTAV OR TNUV EQUALS OR
+                                3/4                             #         EXCEEDS 3/4 IN MAGNITUDE
                                 CALLRECT                        
-                DAD             SL*                             #                       OR
-## Page 1238
+                DAD             SL*                             #                   OR
                                 3/4                             
-                                0               -7,2            #       2) ABVAL(TDELTAV) EQUALS OR EXCEEDS
-                DDV             DSU                             #          .01(ABVAL(RCV))
+                                0               -7,2            #      2) ABVAL(TDELTAV) EQUALS OR EXCEEDS
+                DDV             DSU                             #         .01(ABVAL(RCV))
                                 10D                             
                                 RECRATIO                        
                 BPL             VLOAD                           
@@ -547,12 +564,13 @@ DIFEQ0          VLOAD           SSP
                                 0                               
                 STODL           ALPHAV                          
                                 DPZERO                          
-                STORE           H                               # START H AT ZERO.  GOES 0(DELT/2)DELT.
+                STORE           H                               # START H AT ZERO. GOES 0(DELT/2)DELT.
                 BON             GOTO                            
                                 JSWITCH                         
                                 DOW..                           
                                 ACCOMP                          
 EARSPH          VLOAD           GOTO                            
+## Page 1230
                                 RPQV                            
                                 INLUNCHK                        
 LUNSPH          DLOAD           SR2                             
@@ -568,7 +586,6 @@ LUNSPH          DLOAD           SR2
                                 LUNPOS                          
                 VCOMP                                           
                 STORE           RPQV                            
-## Page 1239		
 DOSWITCH        CALL                                            
                                 ORIGCHNG                        
                 GOTO                                            
@@ -583,10 +600,7 @@ ORIGCHNG        STQ             CALL
                                 RPQV                            
                                 2,2                             
                 STORE           RRECT                           
-                STODL           RCV                             
-                                TET                             
-                CALL                                            
-                                LUNVEL                          
+                STORE           RCV                             
                 BOF             VCOMP                           
                                 MOONFLAG                        
                                 +1                              
@@ -605,9 +619,13 @@ ORIGCHNG        STQ             CALL
                                 MOONFLAG                        
                                 CLRMOON                         
                                 SETMOON                         
-## Page 1240
+## Page 1231
 # THE RECTIFY SUBROUTINE IS CALLED BY THE INTEGRATION PROGRAM AND OCCASIONALLY BY THE MEASUREMENT INCORPORATION
 # ROUTINES TO ESTABLISH A NEW CONIC.
+
+                BANK            13                              
+                SETLOC          ORBITAL2                        
+                BANK                                            
 
 RECTIFY         LXA,2           VLOAD                           
                                 PBODY                           
@@ -631,9 +649,12 @@ MINIRECT        STORE           VRECT
                 STORE           XKEP                            
                 RVQ                                             
 
-## Page 1241
+                BANK            11                              
+                SETLOC          ORBITAL                         
+                BANK                                            
+## Page 1232
 # THE THREE DIFEQ ROUTINES - DIFEQ+0, DIFEQ+12, AND DIFEQ+24 - ARE ENTERED TO PROCESS THE CONTRIBUTIONS AT THE
-# BEGINNING, MIDDLE, AND END OF THE TIMESTEP, RESPECTIVELY.  THE UPDATING IS DONE BY THE NYSTROM METHOD.
+# BEGINNING, MIDDLE, AND END OF THE TIMESTEP, RESPECTIVELY. THE UPDATING IS DONE BY THE NYSTROM METHOD.
 
 DIFEQ+0         VLOAD           VSR3                            
                                 FV                              
@@ -683,7 +704,7 @@ DIFEQ+2         DLOAD           DMPR
 
                 CALL                                            
                                 GRP2PC                          
-## Page 1242
+## Page 1233
                 LXA,2           SSP                             
                                 COLREG                          
                                 S2                              
@@ -734,7 +755,7 @@ ENDSTATE        BOV             VLOAD
                                 AMOVED                          
                 BON             GOTO                            
                                 VINTFLAG                        
-## Page 1243
+## Page 1234
                                 ATOPCSM                         
                                 ATOPLEM                         
 AMOVED          SET             SSP                             
@@ -783,13 +804,13 @@ WMATEND         CLEAR           CLEAR
                 TC              ALARM                           
                 OCT             421                             
                 TC              INTPRET                         
-## Page 1244
+## Page 1235
                 GOTO                                            
                                 TESTLOOP                        # FINISH INTEGRATING STATE VECTOR
 
-## Page 1245
-# ORBITAL ROUTINE FOR EXTRAPOLATION OF THE W MATRIX.  IT COMPUTES THE SECOND DERIVATIVE OF EACH COLUMN POSITION
-# VECTOR OF THE MATRIX AND CALLS THE NYSTROM INTEGRATION ROUTINES TO SOLVE THE DIFFERENTIAL EQUATIONS.  THE PROGRAM
+## Page 1236
+# ORBITAL ROUTINE FOR EXTRAPOLATION OF THE W MATRIX. IT COMPUTES THE SECOND DERIVATIVE OF EACH COLUMN POSITION
+# VECTOR OF THE MATRIX AND CALLS THE NYSTROM INTEGRATION ROUTINES TO SOLVE THE DIFFERENTIAL EQUATIONS. THE PROGRAM
 # USES A TABLE OF VEHICLE POSITION VECTORS COMPUTED DURING THE INTEGRATION OF THE VEHICLES POSITION AND VELOCITY.
 
 DOW..           LXA,2           DLOAD*                          
@@ -839,57 +860,35 @@ DOW..1          VLOAD           VSR4
                                 S2                              
                                 34D                             
                 VSL*            RVQ                             
-## Page 1246
-                                0               -8D,2           
-
-# *****************************************************************************************************************
-# *****************************************************************************************************************
-SETITCTR        SSP             BOFF                            # SET ITERCTR FOR LAMBERT CALLS.  THIS
-                                ITERCTR                         # CODING BELONGS IN INITVEL AND IS HERE
-                                20D                             # FOR PURPOSES OF A ONE-MODULE
-                                AVEGFLAG                        # REMANUFACTURE ONLY.  CODING SHOULD
-                                LAMBERT                         # BE MOVED BACK TO INITVEL FOR LUMINARY 1B
-                SSP             GOTO                            
-                                ITERCTR                         
-                                5                               
-                                LAMBERT                         
-# *****************************************************************************************************************
-# *****************************************************************************************************************
+## Page 1237
+                                0               -8D,2           # ****************************************
 
                 SETLOC          ORBITAL1                        
                 BANK                                            
 
 3/5             2DEC            .6              B-2             
-
 THREE/8         2DEC            .375                            
-
 .3D             2DEC            .3              B-2             
-
 3/64            2DEC            3               B-6             
-
 DP1/4           2DEC            .25                             
-
 DQUARTER        EQUALS          DP1/4                           
 POS1/4          EQUALS          DP1/4                           
 3/32            2DEC            3               B-5             
-
 15/16           2DEC            15.             B-4             
 
+                BANK            05                              
+                SETLOC          ORBITAL3                        
+                BANK                                            
+
 3/4             2DEC            3.0             B-2             
-
 7/12            2DEC            .5833333333                     
-
 9/16            2DEC            9               B-4             
-
 5/128           2DEC            5               B-7             
-
 DPZERO          EQUALS          ZEROVEC                         
 DP2/3           2DEC            .6666666667                     
-
 2/3             EQUALS          DP2/3                           
 OCT27           OCT             27                              
 
-## Page 1247
                 BANK            13                              
                 SETLOC          ORBITAL2                        
                 BANK                                            
@@ -903,19 +902,15 @@ OCT27           OCT             27
                 DEC             0                               
                 DEC             -12                             
                 DEC             -9                              
+## Page 1238
                 DEC             -4                              
 ASCALE          DEC             -7                              
                 DEC             -6                              
 5/8             2DEC            5               B-3             
-
 -1/12           2DEC            -.1                             
-
 RECRATIO        2DEC            .01                             
-
 RSPHERE         2DEC            64373.76        E3      B-29    
-
 RDM             2DEC            16093.44        E3      B-27    
-
 RDE             2DEC            80467.20        E3      B-29    
 
 RATT            EQUALS          00                              
@@ -929,34 +924,4 @@ URPV            EQUALS          14D
 COSPHI/2        EQUALS          URPV            +4              
 UZ              EQUALS          20D                             
 TVEC            EQUALS          26D                             
-
-QUALITY1        BOF             DLOAD                           
-                                MOONFLAG                        
-                                NBRANCH                         
-                                URPV                            
-                DSQ                                             
-QUALITY2        PDDL            DSQ                             # SQUARE INTO 2D, B2
-                                URPV            +2              # Y COMPONENT, B1
-                DSU                                             
-                DMP             VXSC                            # 5(Y**2-X**2)UR
-                                5/8                             # CONSTANT, 5B3
-                                URPV                            # VECTOR.  RESULT MAXIMUM IS 5, SCALING
-## Page 1248
-                                                                # HERE B6
-                VSL3            PDDL                            # STORE SCALED B3 IN 2D, 4D, 6D FOR XYZ
-                                URPV                            # X COMPONENT, B1
-                SR1             DAD                             # 2 X X COMPONENT FOR B3 SCALING
-                                2D                              # ADD TO VECTOR X COMPONENT OF ANSWER,
-                                                                # SAME AS MULTIPLYING BY UNITX.  MAX IS 7.
-                STODL           2D                              
-                                URPV            +2              # Y COMPONENT, B1
-                SR1             BDSU                            # 2 X Y COMPONENT FOR B3 SCALING
-                                4D                              # SUBTRACT FROM VECTOR Y COMPONENT OF
-                                                                # ANSWER, SAME AS MULTIPLYING BY UNITY.
-                                                                # MAX IS 7.
-                STORE           4D                              # 2D HAS VECTOR, B3.
-                SLOAD           VXSC                            # MULTIPLY COEFFIECIENT TIMES VECTOR IN 2D
-                                E3J22R2M                        
-                PDDL            RVQ                             # J22 TERM X R**4 IN 2D, SCALED B61
-                                COSPHI/2                        # SAME AS URPV +4  Z COMPONENT
 

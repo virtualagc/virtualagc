@@ -12,7 +12,9 @@
 ##		2010-12-31 JL	Fixed page number comments.
 ##		2016-12-16 RSB	Proofed text comments with octopus/ProoferComments
 ##				and corrected the errors found.
-##
+##		2017-03-16 RSB	Comment-text fixes identified in 5-way
+##				side-by-side diff of Luminary 69/99/116/131/210.
+
 ## This source code has been transcribed or otherwise adapted from
 ## digitized images of a hardcopy from the MIT Museum.  The digitization
 ## was performed by Paul Fjeld, and arranged for by Deborah Douglas of
@@ -208,7 +210,7 @@ MASSMULT	EXTEND
 		DXCH	MPAC
 		TC	DMP
 		ADRES	MASS
-		TC	DMP		# LEAVES PROPERLY SCALED FORCE IN MPAC
+		TC	DMP		# LEAVES PROPERLY SCALED FORCE IM MPAC
 		ADRES	SCALEFAC
 		TC	TPAGREE
 		CA	MPAC

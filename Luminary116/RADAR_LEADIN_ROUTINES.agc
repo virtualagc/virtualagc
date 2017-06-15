@@ -14,6 +14,9 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-01-22 MAS  Created from Luminary 99.
 ##              2017-02-18 NV   Updated for Luminary 116.
+##              2017-02-19 HG   Fix opcode RXCR  ->  RXOR
+##		2017-03-01 RSB	Proofed comment text by diff vs Luminary 131
+##				but no errors found.
 
 ## Page 492
                 BANK            25                              
@@ -65,7 +68,7 @@ DORSAMP2        INHINT
 
                 CA              RADMODES                        
                 EXTEND                                          
-                RXCR            CHAN33                          
+                RXOR            CHAN33                          
 ## Page 493
                 MASK            BIT6                            
                 EXTEND                                          

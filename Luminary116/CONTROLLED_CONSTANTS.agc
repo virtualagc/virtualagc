@@ -13,8 +13,8 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-01-22 MAS  Created from Luminary 99.
-
-## NOTE: Page numbers below have not yet been updated to reflect Luminary 116.
+##		2017-03-02 RSB	Completed transcription, and then proofed 
+##				comment text by diffing vs Luminary 131.
 
 ## Page 38
 # DPS AND APS ENGINE PARAMETERS
@@ -31,6 +31,10 @@ DTDECAY         2DEC            -38
 FAPS            2DEC            1.5569          B-7             # 3500 LBS FORCE IN NEWTONS
 MDOTAPS         2DEC            0.05135         B-3             # 11.32 LBS/SEC IN KGS/CS
 ATDECAY         2DEC            -10                             
+
+# ************************************************************************
+
+100PCTTO	2DEC		38 		B-17		# DPS TAILOFF TIME FROM 100 PERCENT THRUST		
 
 # ************************************************************************
 
@@ -52,12 +56,14 @@ K3VAL           2DEC            1.5569          B-10            # FAPS (3500 LBS
 S40.136         2DEC            .4671           B-9             # .4671 M NEWTONS (DPS)
 S40.136_        2DEC            .4671           B+1             # S40.136 SHIFTED LEFT 10.
 
-                SETLOC          ASENT1                          
+                SETLOC          ASENT1      
+                
+## Page 39 
+                    
                 BANK                                            
                 COUNT*          $$/P70                          
 
 (1/DV)A         2DEC            15.20           B-7             # 2 SECONDS WORTH OF INITIAL ASCENT
-## Page 39
                                                                 # STAGE ACCELERATION -- INVERTED (M/CS)
                                                                 # 1) PREDICATED ON A LIFTOFF MASS OF
                                                                 #    4869.9 KG (SNA-8-D-027 7/11/68)
@@ -86,7 +92,7 @@ AT/RCS          2DEC            .0000785        B+10            # 4 JETS IN A DR
 # *** THE ORDER OF THE FOLLOWING TWO CONSTANTS MUST NOT BE CHANGED *******
 
 APSVEX          DEC             -3030           E-2     B-5     # 9942 FT/SEC IN M/CS.
-DPSVEX          DEC*            -2.95588868     E+1     B-05*   # VE (DPS) +2.95588868E+ 3
+DPSVEX          DEC*            -2.95588868     E+1     B-05*   # VE (DPS)   +2.95588868E+ 3
 
 # ************************************************************************
 
@@ -94,7 +100,7 @@ DPSVEX          DEC*            -2.95588868     E+1     B-05*   # VE (DPS) +2.95
                 BANK                                            
                 COUNT*          $$/F2DPS                        
 
-TRIMACCL        2DEC*           +3.50132708     E-5     B+08*   # A (T) +3.50132708E- 1
+TRIMACCL        2DEC*           +3.50132708     E-5     B+08*   # A (T)      +3.50132708E- 1
 
 ## Page 40
 # THROTTLING AND THRUST DETECTION PARAMETERS
@@ -117,12 +123,24 @@ THRESH2         DEC             308
                 BANK                                            
                 COUNT*          $$/THROT                        
 
-FMAXODD         DEC             +3841                           # FSAT          +4.81454413 E+4
-FMAXPOS         DEC             +3467                           # FMAX          +4.34546769 E+4
-THROTLAG        DEC             +20                             # TAU (TH)      +1.99999999 E-1
-SCALEFAC        2DEC*           +7.97959872     E+2     B-16*   # BITPERF       +7.97959872 E-2
+## In Don Eyles's copy of the printout, there are penciled-in notations causing the 
+## next two lines (including the octal to which they assemble) to actually appear as:
+## <pre>
+## 07401 0     <u>FMAXODD</u>     DEC     +3841     # FSAT     +4.8145|4413E +4
+##         						       4.4482     10500
+## 0<u>6613 0</u>     <u>FMAXPOS</u>     DEC     +3467     # FMAX     +4.3454|6769E+ 4          
+## </pre>
+FMAXODD         DEC             +3841                           # FSAT          +4.81454413E +4
+FMAXPOS         DEC             +3467                           # FMAX          +4.34546769E +4
+THROTLAG        DEC             +20                             # TAU (TH)      +1.99999999E -1
+SCALEFAC        2DEC*           +7.97959872     E+2     B-16*   # BITPERF       +7.97959872E -2
 
-                SETLOC          F2DPS*32                        
+                SETLOC          F2DPS*32   
+## In Don Eyles's copy of the printout, there is a penciled-in note in the comment field 
+## reading "100", in which the final zero seems to have been incompletely erased:
+## <pre>
+##           BANK                            # 10<span style="color:gray">0</span>
+## <pre>                 
                 BANK                                            
                 COUNT*          $$/F2DPS                        
 
@@ -207,7 +225,7 @@ MINCSM          =               BIT11                           # MIN CSM MASS (
 
                 SETLOC          DAPS3                           
                 BANK                                            
-                COUNT*          $$/DAPAD                        
+                COUNT*          $$/DAPAO                        
 
 LOASCENT        DEC             2200            B-16            # MIN ASCENT LEM MASS -- 2(16) KG.
 HIDESCNT        DEC             15300           B-16            # MAX DESCENT LEM MASS -- 2(16) KG.
@@ -244,7 +262,7 @@ EARTHMU         2DEC*           -3.986032       E10     B-36*   # M(3)/CS(2)
                 COUNT*          $$/P12                          
 
 MUM(-37)        2DEC*           4.9027780       E8      B-37*   
-MOONRATE        2DEC*           .26616994890062991E-7     B+19*   # RAD/CS.
+MOONRATE        2DEC*           .26616994890062991 E-7     B+19*   # RAD/CS.
 
                 SETLOC          SERVICES                        
                 BANK                                            
@@ -537,14 +555,14 @@ VAL67           2DEC*           .01726666666    B+1*            # AMOD
                 BANK                                            
                 COUNT*          $$/LUROT                        
 
-COSI            2DEC            .99964173       B-1             # COS (5521.5 SEC) B-1
-SINI            2DEC            .02676579       B-1             # SIN (5521.5 SEC) B-1
-NODDOT          2DEC            -.457335121     E-2             # REVS/CSEC B+28 = -1.07047011 E-8 RAD/SEC
-FDOT            2DEC            .570863327                      # REVS/CSEC B+27 =  2.67240410 E-6 RAD/SEC
+COSI            2DEC*           9.996417320 E-1 B-1*           	# COS (5521.5 SEC.)
+SINI            2DEC*           2.676579050 E-2 B-1*           	# SIN (5521.5 SEC.)
+NODDOT          2DEC*           -1.703706190 E-11 B28*         	# REV/CSEC
+FDOT            2DEC*           4.253263473 E-9 B27*           	# REV/CSEC
 ## Page 53
-BDOT            2DEC            -3.07500686     E-8             # REVS/CSEC B+28=-7.19757301 E-14 RAD/SEC
-NODIO           2DEC            .986209434                      # REVS B-D    = 6.19653663041 RAD
-FSUBO           2DEC            .829090536                      # REVS B-D    = 5.20932947829 RAD
-BSUBO           2DEC            .0651201393                     # REVS B-D    = 0.40916190299 RAD
-WEARTH          2DEC            .973561595                      # REVS/CSEC B+23= 7.29211494 E-5 RAD/SEC
+BDOT            2DEC*           -1.145529388 E-16 B28*		# REV/CSEC
+NODIO           2DEC*           9.862094363 E-1*		# REV
+FSUBO           2DEC*           8.290901511 E-1*		# REV
+BSUBO           2DEC            6.512013939 E-2                 # REVS
+WEARTH          2DEC*           1.160576171 E-7 B23*		# REV/CSEC
 

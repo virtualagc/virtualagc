@@ -13,6 +13,9 @@
 ## Mod history: 2016-12-20 MAS  Created from Aurora 12 (with much DAP stuff removed).
 ##		2017-02-05 RSB	Back-ported comment corrections 
 ##				identified while proofing Artemis 072.
+##		2017-03-13 RSB	Comment-text fixes noted in proofing Luminary 116.
+##		2017-03-15 RSB	Comment-text fixes identified in 5-way
+##				side-by-side diff of Luminary 69/99/116/131/210.
 
 # SECTION 1  DISPATCHER
 #
@@ -840,7 +843,7 @@ SETOVF          TS              OVFIND                  # SET OVFIND IF SUCH OCC
 
 # ARITHMETIC SUBROUTINES REQUIRED IN FIXED-FIXED.
 
-#          1.  DMPSUB     DOUBLE PRECISION MULTIPLY, MULTIPLY THE CONTENTS OF MPAC,+1 BY THE DP WORD WHOSE ADDRESS
+#          1.  DMPSUB     DOUBLE PRECISION MULTIPLY. MULTIPLY THE CONTENTS OF MPAC,+1 BY THE DP WORD WHOSE ADDRESS
 #                         IS IN ADDRWD AND LEAVE A TRIPLE PRECISION RESULT IN MPAC.
 #          2.  ROUNDSUB   ROUND THE TRIPLE PRECISON CONTENTS OF MPAC TO DOUBLE PRECISION.
 #          3.  DOTSUB     TAKE THE DOT PRODUCT OF THE VECTOR IN MPAC AND THE VECTOR WHOSE ADDRESS IS IN ADDRWD
@@ -1064,7 +1067,7 @@ SHORTMP         TS              MPTEMP
                 DAS             MPAC
                 TC              Q
 
-# MISCELLANEOUS VECTOR OPERATIONS. INCLUDED HERE ARE THE FOLLOWING.
+# MISCELLANEOUS VECTOR OPERATIONS. INCLUDED HERE ARE THE FOLLOWING:
 
 #          1.  DOT                DP VECTOR DOT PRODUCT.
 #          2.  VXV                DP VECTOR CROSS PRODUCT.
@@ -1108,7 +1111,7 @@ VXM/MXV         TS              DOTINC
                 ADS             ADDRWD                  # FORMS BASE ADDRESS OF NEXT COLUMN(ROW).
 
                 TC              DOTSUB
-                DXCH            VBUF                    # MORE GIVEN VECTOR BACK TO MPAC, SAVING Y
+                DXCH            VBUF                    # MOVE GIVEN VECTOR BACK TO MPAC, SAVING Y
                 DXCH            MPAC                    # COMPONENT OF ANSWER IN VBUF +2.
                 DXCH            VBUF            +2
                 DXCH            MPAC            +3
@@ -1657,7 +1660,7 @@ GENSHFT2        TS              MPTEMP                  # DECREMENTED SHIFT COUN
 
 #          GENERAL SHIFT RIGHT.
 
-RIGHT           CCS             MODE                    # SET IF VECTOR OR SCALAR.
+RIGHT           CCS             MODE                    # SEE IF VECTOR OR SCALAR.
                 TCF             GENSCR
                 TCF             GENSCR
 
@@ -1834,7 +1837,7 @@ MPAC+           CS              MPAC                    # CHECK FOR DIVISION OVE
                 CS              MPAC                    # CHECK MAGNITUDE OF SIGN-CORRECTED
                 AD              BUF                     # OPERANDS.
                 CCS             A
-                TCF             DVNORM                  # DIVIDE OK - WILL NOT BECOME MAXOV CASE.
+                TCF             DVNORM                  # DIVIDE OK - WILL NOT BECOME MAXDV CASE.
 LBUF2           ADRES           BUF2
                 TCF             DVOVF                   # DIVISOR NOT LESS THAN DIVIDEND - OVF.
 
@@ -2391,7 +2394,7 @@ VSQSUB          EXTEND                                  # DOTS THE VECTOR IN MPA
 
 #          DOUBLE PRECISION SQUARE ROOT ROUTINE. TAKE THE SQUARE ROOT OF THE TRIPLE PRECISION (MPAC +2 USED ONLY
 # IN NORMALIZATION) CONTENTS OF MPAC AND LEAVE THE NORMALIZED RESULT IN MPAC (C(MPAC) GREATER THAN OR EQUAL TO
-# .5).  THE RIGHT SHIFT COUNT (TC UNNORMALIZE) IS LEFT IN MPTEMP.
+# .5).  THE RIGHT SHIFT COUNT (TO UNNORMALIZE) IS LEFT IN MPTEMP.
 
 
 

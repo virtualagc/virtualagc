@@ -18,6 +18,7 @@
 ##		2017-01-14 RSB	Fixed comment-text errors discovered while proofing
 ##				Colossus 249 comment text.
 ##		2017-01-28 RSB	WTIH -> WITH.
+##		2017-03-13 RSB	GOP00FIX -> GOPOOFIX.
 ##
 ## The contents of the "Comanche055" files, in general, are transcribed
 ## from scanned documents.
@@ -714,14 +715,14 @@ GOTOPOOH	TC	PHASCHNG		# RESTART GOTOPOOH
 		OCT	14
 
 		TC	POSTJUMP
-		CADR	GOP00FIX
+		CADR	GOPOOFIX
 		BANK	10
 		SETLOC	VERB37
 		BANK
 
 		COUNT	04/P00
 
-GOP00FIX	TC	INITSUB
+GOPOOFIX	TC	INITSUB
 		TC	CLEARMRK +2
 		CAF	V37N99
 		TC	BANKCALL

@@ -18,6 +18,10 @@
 ##		2016-12-15 RSB	Proofed comment text with octopus/ProoferComments,
 ##				and corrected the errors found.
 ##		2017-01-25 RSB	Back-ported a typo-fix found while proofing Luminary 69.
+##		2017-02-18 MAS	Back-ported a typo-fix found while transcribing Luminary 116.
+##		2017-03-14 RSB	Comment-text fixes identified in 5-way
+##				side-by-side diff of Luminary 69/99/116/131/210.
+##		2017-03-15 RSB	More of the same.
 
 ## Page 2
 
@@ -145,7 +149,7 @@
 #                 TJET LAW
 #                 KALMAN FILTER
 #                 TRIM GIMBAL CONTROL SYSTEM
-#                 AOSTASK AND ACSJOB
+#                 AOSTASK AND AOSJOB
 #                 SPS BACK-UP RCS CONTROL
 ## To the right of the above log section names is written the number 19.
 ## Further to the right, near the comment column, written in larger digits and circled is the number 109.
@@ -364,7 +368,7 @@
 
 # 40  TIME FROM IGNITION/CUTOFF              3COMP   XXBXX  MIN/SEC                      NO LOAD, DEC ONLY
 #     VG,                                            XXXX.X FT/SEC
-#     DELTA V (ACCUMULATED)                          XXXX/X FT/SEC
+#     DELTA V (ACCUMULATED)                          XXXX.X FT/SEC
 # 41  TARGET  AZIMUTH,                       2COMP   XXX.XX DEG                          (FOR SYSTEM TEST)
 #             ELEVATION                              XX.XXX DEG
 # 42  APOGEE,                                3COMP   XXXX.X NAUT MI                      DEC ONLY
@@ -475,7 +479,7 @@
 #                      ELEVATION                     XXX.XX DEG
 # 88  HALF UNIT SUN OR PLANET VECTOR         3COMP   .XXXXX FOR EACH                     DEC ONLY
 # 89  LANDMARK LATITUDE                      3COMP   XX.XXX DEG                          DEC ONLY
-#              LONGITUDE/2                           XX.XXX DEG
+#              LONGITUDE/2                           XX.XXX DEC
 #              ALTITUDE                              XXX.XX NAUT MI
 # 90  Y                                      3COMP   XXX.XX NM                           DEC ONLY
 #     Y DOT                                          XXXX.X FPS
@@ -965,7 +969,7 @@
 # 00405    TWO STARS NOT AVAILABLE                   P52
 # 00421    W-MATRIX OVERFLOW                         INTEGRV
 # 00501  P RADAR ANTENNA OUT OF LIMITS               R23
-# 00502    BAD RADAR GIMBAL ANGLE INPUT              V4IN72
+# 00502    BAD RADAR GIMBAL ANGLE INPUT              V41N72
 # 00503  P RADAR ANTENNA DESIGNATE FAIL              R21, NON-P IN V41N72
 # 00510    RADAR AUTO DESCRETE NOT PRESENT           R25
 # 00511    LR ANTENNA MOVED AND NOT REPOSITIONED     SERVICER
@@ -1034,7 +1038,7 @@
 # 21204    WAITLIST, VARDELAY, FIXDELAY, OR LONGCALL   WAITLIST ROUTINES
 #            CALLED WITH ZERO OR NEGATIVE DELTA-TIME
 # 21302    SQRT CALLED WITH NEGATIVE ARGUMENT        INTERPRETER
-# 21406    BAD RETURN FROM ROOTRSRS                  IGNITION ALGORITHMN
+# 21406    BAD RETURN FROM ROOTPSRS                  IGNITION ALGORITHMN
 # 21501    KEYBOARD AND DISPLAY ALARM DURING         PINBALL
 #            INTERNAL USE(NVSUB).ABORT
 # THE FOLLOWING CODES INDICATE A BAILOUT ABORT THAT RESULTS IN A SOFTWARE

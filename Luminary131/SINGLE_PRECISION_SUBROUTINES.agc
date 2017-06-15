@@ -16,6 +16,7 @@
 ##		2017-01-06 RSB	Page numbers now agree with those on the
 ##				original harcopy, as opposed to the PDF page
 ##				numbers in 1701.pdf.
+##		2017-02-27 RSB	Proofed comment text using octopus/ProoferComments.
 
 ## Page 1096
 		BLOCK	02
@@ -54,6 +55,6 @@ POLLEY		EXTEND
 		TC	Q
 ARG90		INDEX	A
 		CS	LIMITS
-		TC	Q		# RESULT SCALED AT 1.
+		TC	Q		# RESULT SCALED AT 1
 		
 

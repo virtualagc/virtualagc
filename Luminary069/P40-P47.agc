@@ -21,6 +21,8 @@
 ##              2017-01-23 HG   Fix operand FIRSTIME -> FIRSTTME
 ##		2017-01-28 RSB	Proofed comment text using octopus/prooferComments
 ##				and fixed errors found.
+##		2017-03-16 RSB	Comment-text fixes identified in 5-way
+##				side-by-side diff of Luminary 69/99/116/131/210.
 
 ## Page 759
 # PROGRAM DESCRIPTION  P40BOTH    DECEMBER 22, 1966
@@ -996,7 +998,7 @@ FOURSECS        2DEC            400                     # 400 CS SCALED AT 2(+28
 #                 MDOT RATE OF DECREASE OF VEHICLE MASS DURING ENGINE
 #                 BURN IN KILOGRAMS/CS  AT +3 . THIS SCALING MAY
 #                 REQUIRE MODIFICATION FOR SATURN BURNS.
-#          ENGIFLAG     SWITCH TO DECIDE WHETHER APS OR DPS ENGINE IS USED
+#          ENG1FLAG     SWITCH TO DECIDE WHETHER APS OR DPS ENGINE IS USED
 #                  =0   DPS
 #                  =1   APS
 # OUTPUT          IMPULSW  ZERO FOR STEERING

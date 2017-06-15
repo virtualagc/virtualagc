@@ -13,10 +13,14 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-01-22 MAS  Created from Luminary 99.
+##		2017-03-07 RSB	Transcribed, and then proofed comment-text using
+##				3-way diff vs Luminary 99 and Luminary 131.
+##				(Admittedly, the former is more for detecting errors
+##				in Luminary 99 than the other way around.)
+##		2017-03-17 RSB	Comment-text fixes identified in diff'ing
+##				Luminary 99 vs Comanche 55.
 
-## NOTE: Page numbers below have not yet been updated to reflect Luminary 116.
-
-## Page 365
+## Page 366
 # GENERATION OF STEERING COMMANDS FOR DIGITAL AUTOPILOT FREE FALL MANEUVERS
 
 # NEW COMMANDS WILL BE GENERATED EVERY ONE SECOND DURING THE MANEUVER
@@ -48,7 +52,7 @@ NEWANGL         TC              INTPRET
                 BONCLR          EXIT                            
                                 CALCMAN2                        
                                 MANUSTAT                        # TO START MANEUVER
-                CAF             TWO                             #       +0 OTHERWISE
+                CAF             TWO                             #          +0 OTHERWISE
 INCRDCDU        TS              SPNDX                           
                 INDEX           SPNDX                           
                 CA              BCDU                            # INITIAL CDU ANGLES
@@ -56,14 +60,8 @@ INCRDCDU        TS              SPNDX
                 INDEX           SPNDX                           
                 MSU             NCDU                            
                 EXTEND                                          
-
-## The following 2 lines seem to have no purpose at all.
-## I am removing them because they only serve to confuse
-## the assembler by getting in between EXTEND and MP.<br>&mdash;RSB 2009
-## <pre>
-##		SETLOC	KALCMON1
-##		BANK
-## </pre>		
+		SETLOC	KALCMON1
+		BANK
 
                 MP              DT/TAU                          
                 CCS             A                               # CONVERT TO 2S COMPLEMENT
@@ -73,7 +71,7 @@ INCRDCDU        TS              SPNDX
                 INDEX           SPNDX                           
                 TS              DELDCDU                         # ANGLE INCREMENTS TO BE ADDED TO
                 INDEX           SPNDX                           # CDUXD, CDUYD, CDUZD EVERY TENTH SECOND
-## Page 366
+## Page 367
                 CA              NCDU                            # BY LEM DAP
                 INDEX           SPNDX                           
                 XCH             BCDU                            
@@ -123,11 +121,11 @@ DT/TAU          DEC             .1
 MANUSTAT        EXIT                                            # INITIALIZATION ROUTINE
                 EXTEND                                          # FOR AUTOMATIC MANEUVERS
                 DCA             TIME2                           
-## Page 367
-                DAS             TM                              # TM+TO         MANEUVER COMPLETION TIME
+## Page 368
+                DAS             TM                              # TM+T0         MANEUVER COMPLETION TIME
                 EXTEND                                          
                 DCS             ONESEK                          
-                DAS             TM                              # (TM+TO)-1
+                DAS             TM                              # (TM+T0)-1
                 INHINT                                          
                 CAF             TWO                             
 RATEBIAS        TS              KSPNDX                          
@@ -174,7 +172,7 @@ MANUCALL        INHINT                                          # CALL FOR NEXT 
                 TC              WAITLIST                        
                 EBANK=          TTEMP                           
                 2CADR           UPDTCALL                        
-## Page 368
+## Page 369
                 CAF             ONESEK          +1              # INCREMENT TIME FOR NEXT UPDATE
                 ADS             NEXTIME                         
                 TCF             ENDOFJOB                        
@@ -186,7 +184,7 @@ UPDTCALL        CAF             PRIO26                          # SATELLITE PROG
 
                 TC              TASKOVER                        
 
-## Page 369
+## Page 370
 # ROUTINE FOR TERMINATING AUTOMATIC MANEUVERS
 
 MANUSTOP        CAF             ZERO                            # ZERO MANEUVER RATES

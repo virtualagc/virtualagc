@@ -19,6 +19,10 @@
 ##		2017-01-26 RSB	Back-ported comment-text fixes found while
 ##				proofing corresponding Luminary 69 file.	
 ##		2017-02-08 RSB	Comment-text fixes identified while proofing Artemis 72.
+##		2017-03-03 RSB	Fixed comment-text errors identified while proofing
+##				Luminary 116.
+##		2017-03-16 RSB	Comment-text fixes identified in 5-way
+##				side-by-side diff of Luminary 69/99/116/131/210.
 
 ## Page 165
                 BANK            12
@@ -88,7 +92,7 @@ CDRVE           CCS             DSPTAB          +11D
 
 DSPOUTSB        TS              NOUT
                 CS              ZERO
-                TS              DSRUPTEM                # SET TO -0 FOR 1ST PASS THRU OSPTAB
+                TS              DSRUPTEM                # SET TO -0 FOR 1ST PASS THRU DSPTAB
                 XCH             DSPCNT
                 AD              NEG0                    # TO PREVENT +0
                 TS              DSPCNT
@@ -258,7 +262,7 @@ QUIKOFF         EXTEND
 # SUBROUTINES CALLED:  TLIM, ITURNON, SETISSW, IMUCAGE, IMUOP.
 
 # ERASABLE INITIALIZATION:
-#           FRESH START OR RESTART WITH NO GROUPS ACTIVE: C((MODES30) = OCT 37411.
+#           FRESH START OR RESTART WITH NO GROUPS ACTIVE: C(IMODES30) = OCT 37411.
 #           RESTART WITH ACTIVE GROUPS: C(IMODES30) = (B(IMODES30)AND(OCT 00035)) PLUS OCT 37400.
 #                                       THIS LEAVES IMU FAIL BITS INTACT.
 
@@ -324,7 +328,7 @@ NXTIFAIL        CCS             RUPTREG2                # PROCESS ANY ADDITIONAL
 #          3)  RESTART WITH RESTARTABLE PROGRAM USING THE IMU:  IN THIS CASE, NO INITIALIZATION TAKES PLACE SINCE
 #          IT IS ASSUMED THAT THE USING PROGRAM DID THE INITIALIZATION AND THEREFORE T4RUPT SHOULD NOT INTERFERE.
 
-# IMODES30 BIT 7 IS SET = 1 BY THE FIRST BIT (CHANNEL 30 BIT 14 OR 9) WHICH ARRIVES.  FOLLOWING THIS, TNONTEST IS
+# IMODES30 BIT 7 IS SET = 1 BY THE FIRST BIT (CHANNEL 30 BIT 14 OR 9) WHICH ARRIVES.  FOLLOWING THIS. TNONTEST IS
 # ENTERED, FINDS BIT 7 = 1 BUT BIT 8 = 0, SO IT SETS BIT 8 = 1 AND EXITS.  THE NEXT TIME IT FINDS BIT 8 = 1 AND
 # PROCEEDS, SETTING BITS 8 AND 7 = 0.  AT PROCTNON, IF ISS TURN-ON REQUEST IS PRESENT, THE ISS IS CAGED (ZERO +
 # COARSE).  IF ISS OPERATE IS NOT PRESENT PROGRAM ALARM 00213 IS ISSUED.  AT THE END OF A 90 SECOND CAGE, BIT 2
@@ -1273,7 +1277,7 @@ TRKFLCDU        TC              SETTRKF                 # UPDATE TRACKER FAIL LA
 # ALARMS_
 # NONE
 
-# EXIT
+# EXIT_
 # NORRGMON
 
 RRGIMON         CAE             FLAGWRD5                # IS NO ANGLE MONITOR FLAG SET
@@ -1331,7 +1335,7 @@ OCT20002        OCT             20002
 OCT02100        OCT             02100                   # P20,P22 MASK BITS
 
 ## Page 199
-# PROGRAM NAME:  GPMATRIX (DAPT4S) MCD. NO. 2 DATE: OCTOBER 27, 1966
+# PROGRAM NAME:  GPMATRIX (DAPT4S) MOD. NO. 2 DATE: OCTOBER 27, 1966
 
 # AUTHOR:  JONATHAN D. ADDELSTON (ADAMS ASSOCIATES)
 

@@ -178,7 +178,7 @@ BOTHSHIP	VLOAD			# MOVE RESULTS INTO TFFCONIC STORAGE AREAS
 		DLOAD*
 			1/RTMUE,2	# X2 IS 0 FOR EARTH CENTERED STATE VEC
 ## HG remark: In Comanche055 scan this line (5324) looks pretty much like 1/RTMUF.2 can not decide, leave it 
-## as it is in start source
+## as it is in start source.
 		STORE	TFF/RTMU	# X2 IS 2 FOR MOON
 		DLOAD*			# AS LEFT BY THISPREC OR OTHPREC.
 			MINPERE,2

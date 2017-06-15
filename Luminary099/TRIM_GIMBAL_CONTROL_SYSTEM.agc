@@ -14,6 +14,7 @@
 ##		2011-01-06 JL	Fixed pseudo-label indentation.
 ##		2016-12-18 RSB	Proofed text comments with octopus/ProoferComments
 ##				and corrected the errors found.
+##		2017-03-14 RSB	Comment-text fixes noted in proofing Luminary 116.
 
 ## This source code has been transcribed or otherwise adapted from
 ## digitized images of a hardcopy from the MIT Museum.  The digitization
@@ -122,7 +123,7 @@ ALGORTHM	EXTEND			# Q(R)DIFF IS THETA (ERROR) SCALED AT PI.
 		EXTEND			# LIMITING QUOTIENT TO AVOID OVERFLOW.
 		MP	BIT14		# -ALPHA/2 IN A, SCALED AT PI/4
 		EXTEND
-		MP	ACENTRAL	# -ALPHA(2)/2 IN A,L, SCALED AT PI(2)/16)
+		MP	ACENTRAL	# -ALPHA(2)/2 IN A,L, SCALED AT PI(2)/16
 		AD	KCENTRAL
 		EXTEND
 		BZMF	HUGEQUOT	# K-ALPHA(2)/2 SHOULD BE PNZ FO DIVISION

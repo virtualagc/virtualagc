@@ -13,10 +13,14 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-01-22 MAS  Created from Luminary 99.
+##		2017-03-07 RSB	Transcribed, and then proofed comment-text using
+##				3-way diff vs Luminary 99 and Luminary 131.
+##				(Admittedly, the former is more for detecting errors
+##				in Luminary 99 than the other way around.)
+##		2017-03-15 RSB	Comment-text fixes identified in 5-way
+##				side-by-side diff of Luminary 69/99/116/131/210.
 
-## NOTE: Page numbers below have not yet been updated to reflect Luminary 116.
-
-## Page 342
+## Page 343
 # BLOCK 2 LGC ATTITUDE MANEUVER ROUTINE - KALCMANU
 
 # MOD 2         DATE 5/1/67     BY DON KEENE
@@ -66,7 +70,7 @@
 
 #      KALCMANU IS CALLED AS A HIGH PRIORITY JOB WITH ENTRY POINTS AT KALCMAN3 AND VECPOINT.  IT FIRST PICKS
 # UP THE CURRENT CDU ANGLES TO BE USED AS THE BASIS FOR ALL COMPUTATIONS INVOLVING THE INITIAL S/C ORIENTATION.
-## Page 343
+## Page 344
 # IT THEN DETERMINES THE DIRECTION COSINE MATRICES RELATING BOTH THE INITIAL AND FINAL S/C ORIENTATION TO STABLE
 #               *   *                                                                               *
 # MEMBER AXES (MIS,MFS).  IT ALSO COMPUTES THE MATRIX RELATING FINAL S/C AXES TO INITIAL S/C AXES (MFI).  THE
@@ -113,13 +117,14 @@
 # IF IT IS FOUND THAT THE MANEUVER IS TO TERMINATE BEFORE THE NEXT UPDATE A ROUTINE IS CALLED (AS A WAIT-
 # LIST TASK) TO STOP THE MANEUVER AT THE APPROPRIATE TIME AS EXPLAINED ABOVE.
 
-## Page 344
+## Page 345
 # CALLING SEQUENCE
 
 # IN ORDER TO PERFORM A KALCMANU SUPERVISED MANEUVER, THE COMMANDED GIMBAL ANGLES MUST BE PRECOMPUTED AND
 # STORED IN LOCATIONS CPHI, CTHETA, CPSI.  THE USER:S PROGRAM MUST THEN CLEAR STATE SWITCH NO 33 TO ALLOW THE 
 # ATTITUDE MANEUVER ROUTINE TO PERFORM ANY FINAL P-AXIS YAW INCURRED BY AVOIDING GIMBAL LOCK.  THE MANEUVER IS
 # THEN INITIATED BY ESTABLISHING THE FOLLOWING EXECUTIVE JOB
+
 #                      *
 #       CAF     PRIO XX
 #                    --
@@ -162,7 +167,7 @@
 #                       (  3     4     5 )
 #                       (                )
 #                       ( M     M     M  )
-## Page 345
+## Page 346
 #                       (  6     7     8 )
 #                                                                                  *
 # INDEX REGISTER X1 MUST BE LOADED WITH THE COMPLEMENT OF THE STARTING ADDRESS FOR M1, AND X2 MUST BE
@@ -179,7 +184,7 @@
 #       M       =       M1
 
 # INDEX REGISTER X1 MUST CONTAIN THE COMPLEMENT OF THE STARTING ADDRESS FOR M1.  PUSH UP FOR THE FIRST AND SUB-
-#                        *
+#                       *
 # SEQUENT COMPONENTS OF M.  THIS SUBROUTINE ALSO USES THE FIRST 20 LOCATIONS OF THE PUSH DOWN LIST.
 
 # CDU TO DCM
@@ -211,7 +216,7 @@
 #       
 #       M       =       SINY SINZ COSX + COSY SINX
 #        7
-## Page 346
+## Page 347
 #       M       =       -SINY SINZ SINX + COSY COSX
 #        8
 
@@ -260,7 +265,7 @@
 
 # IF M  IS NEGATIVE, Y IS REPLACED BY PI SGN Y - Y
 #     0
-## Page 347
+## Page 348
 #       X       =       ARCSIN (-M /COSZ)
 #                                 5
 
@@ -275,7 +280,7 @@
 # -------
 #                                                     *
 # THIS ROUTINE COMPUTES THE DIRECTION COSINE MATRIX (DEL) RELATING ON
-#                                                                           -
+#                                                                          -
 # IS ROTATED WITH RESPECT TO THE FIRST BY AN ANGLE, A, ABOUT A UNIT VECTOR, U.  THE FORMULA FOR THIS MATRIX IS
 
 #        *              *        - -T              *
@@ -308,7 +313,7 @@
 #                               ( -U             U               0  )
 #                               (   Y             X                 )
 
-## Page 348
+## Page 349
 #       -
 #       U       =       UNIT ROTATION VECTOR RESOLVED INTO S/C AXES
 #       A       =       ROTATION ANGLE
@@ -344,7 +349,7 @@
 # THIS BASIC LANGUAGE SUBROUTINE LOADS T(MPAC) WITH THE THREE CDU ANGLES.
 
 # SIGNMPAC
-# --------
+#  --------
 
 # THIS IS A BASIC LANGUAGE SUBROUTINE WHICH LIMITS THE MAGNITUDE OF D(MPAC) TO + OR - DPOSMAX ON OVERFLOW.
 
@@ -353,7 +358,7 @@
 #       1)      FIXED MEMORY            1059 WORDS
 #       2)      ERASABLE MEMORY           98
 #       3)      STATE SWITCHES             3
-## Page 349
+## Page 350
 #       4)      FLAGS                      1
 
 # JOB PRIORITIES
@@ -363,8 +368,8 @@
 
 # SUMMARY OF STATE SWITCHES AND FLAGWORDS USED BY KALCMANU.
 
-#       STATE           FLAGWRD 2       SETTING         MEANING
-#       SWITCH NO.      BIT NO.
+#       STATE        FLAGWRD 2        SETTING                    MEANING
+#       SWITCH NO.    BIT NO.
 
 #         *
 #       31              14              0               MANEUVER WENT THROUGH GIMBAL LOCK
@@ -398,13 +403,13 @@
 # THE FOLLOWING SUBROUTINES MAY BE PUT IN A DIFFERENT BANK
 
 #       MXM3
-## Page 350
-#       TRANSPGS
+## Page 351
+#       TRANSPOS
 #       SIGNMPAC
 #       READCDUK
 #       CDUTODCM
 
-## Page 351
+## Page 352
                 BANK            15                              
                 SETLOC          KALCMON1                        
                 BANK                                            
@@ -416,8 +421,8 @@
 
                 COUNT*          $$/KALC                         
 KALCMAN3        TC              INTPRET                         # PICK UP THE CURRENT CDU ANGLES AND
-                RTB                                             #       COMPUTE THE MATRIX FROM INITIAL S/C
-                                READCDUK                        #       AXES TO FINAL S/C AXES
+                RTB                                             #   COMPUTE THE MATRIX FROM INITIAL S/C
+                                READCDUK                        #   AXES TO FINAL S/C AXES
                 STORE           BCDU                            # STORE INITIAL S/C ANGLES
                 SLOAD           ABS                             # CHECK THE MAGNITUDE OF THE DESIRED
                                 CPSI                            # MIDDLE GIMBAL ANGLE
@@ -455,7 +460,7 @@ SECAD           AXC,1           CALL                            # MIS AND MFS AR
                 STADR                                           
                 STORE           MFI                             # MFI = TMIS MFS (SCALED BY 4)
                 SETPD           CALL                            # TRANSPOSE MFI IN PD LIST
-## Page 352
+## Page 353
                                 18D                             
                                 TRNSPSPD                        
                 VLOAD           STADR                           
@@ -506,7 +511,7 @@ CHECKMAX        DLOAD           DSU
                                 COFSKEW                         # COFSKEW
                 UNIT                                            
                 STORE           COF                             # COF IS THE MANEUVER AXIS
-## Page 353
+## Page 354
                 GOTO                                            # SEE IF MANEUVER GOES THRU GIMBAL LOCK
                                 LOCSKIRT                        
 ALTCALC         VLOAD           VAD                             # IF AM GREATER THAN 170 DEGREES
@@ -556,7 +561,7 @@ COFMAXGO        DLOAD           DSU
                                 COF                             
                                 COF             +2              
                 BMN             DLOAD                           # COFY G COFX
-## Page 354
+## Page 355
                                 COMP12                          
                                 COF                             
                 DSU             BMN                             
@@ -607,7 +612,7 @@ OKU12           DLOAD           BPL
                                 LOCSKIRT                        
                 DLOAD           DCOMP                           # SIGN OF UZ OPPOSITE TO UY
                                 COF             +4              
-## Page 355
+## Page 356
                 STORE           COF             +4              
                 GOTO                                            
                                 LOCSKIRT                        
@@ -631,7 +636,7 @@ OKU31           DLOAD           BPL
                 STORE           COF             +2              
                 GOTO                                            
                                 LOCSKIRT                        
-## Page 356
+## Page 357
 # MATRIX OPERATIONS
 
                 BANK            13                              
@@ -653,7 +658,7 @@ MXM3            SETPD           VLOAD*                          # MXM3 MULTIPLIE
                                 0,2                             
                 RVQ                                             
 
-# RETURN WITH MIXM2 IN PD LIST
+# RETURN WITH M1XM2 IN PD LIST
 
 TRANSPOS        SETPD           VLOAD*                          # TRANSPOS TRANSPOSES A 3X3 MATRIX
                                 0                               #       AND LEAVES RESULT IN PD LIST
@@ -681,7 +686,7 @@ TRNSPSPD        EXIT                                            # ENTER WITH MAT
                 DXCH            6                               
                 INDEX           FIXLOC                          
                 DXCH            2                               
-## Page 357
+## Page 358
                 TC              INTPRET                         
                 RVQ                                             
 
@@ -698,7 +703,7 @@ MAXANG          2DEC            0.472222222
 # GIMBAL LOCK CONSTANTS
 
 # D = MGA CORRESPONDING TO GIMBAL LOCK = 60 DEGREES
-#       NGL = BUFFER ANGLE (TO AVOID DIVISIONS BY ZERO) = 2 DEGREES
+#          NGL = BUFFER ANGLE (TO AVOID DIVISIONS BY ZERO) = 2 DEGREES
 
 SD              2DEC            .433015                         # = SIN(D)                      $2
 
@@ -713,7 +718,6 @@ SNGLCD          2DEC            .008725                         # = SIN(NGL)COS(
 CNGL            2DEC            .499695                         # COS(NGL)                      $2
 
 LOCKANGL        DEC             .388889                         # = 70 DEGREES
-
 # INTERPRETIVE SUBROUTINE TO READ THE CDU ANGLES
 
 READCDUK        CA              CDUZ                            # LOAD T(MPAC) WITH CDU ANGLES
@@ -732,13 +736,13 @@ CDUTODCM        AXT,1           SSP
 LOOPSIN         SLOAD*          RTB                             
                                 10D,1                           
                                 CDULOGIC                        
-## Page 358
+## Page 359
                 STORE           10D                             # LOAD PD WITH  0 SIN(PHI)
                 SIN             PDDL                            #               2 COS(PHI)
                                 10D                             #               4 SIN(THETA)
                 COS             PUSH                            #               6 COS(THETA)
                 TIX,1           DLOAD                           #               8 SIN(PSI)
-                                LOOPSIN                         #               10 COS(PSI)
+                                LOOPSIN                         #              10 COS(PSI)
                                 6                               
                 DMP             SL1                             
                                 10D                             
@@ -783,26 +787,26 @@ LOOPSIN         SLOAD*          RTB
                                 10D                             
                 DCOMP           SL1                             
                 STORE           12D,2                           # C6=-SIN(THETA)COS(PSI)
-## Page 359
+## Page 360
                 DLOAD                                           
-                DMP             SL1                             # (PUSH UP 7)
+                DMP             SL1                             #  (PUSH UP 7)
                                 8D                              
-                PDDL            DMP                             # (PD7 COS(PHI)SIN(THETA)SIN(PSI)) SCALE 4
+                PDDL            DMP                             #  (PD7 COS(PHI)SIN(THETA)SIN(PSI)) SCALE 4
                                 6                               
                                 0                               
-                DAD             SL1                             # (PUSH UP 7)
+                DAD             SL1                             #  (PUSH UP 7)
                 STADR                                           # C7=COS(PHI)SIN(THETA)SIN(PSI)
-                STORE           14D,2                           #       +COS(THETA)SIN(PHI)
+                STORE           14D,2                           #  +COS(THETA)SIN(PHI)
                 DLOAD                                           
-                DMP             SL1                             # (PUSH UP 6)
+                DMP             SL1                             #  (PUSH UP 6)
                                 8D                              
-                PDDL            DMP                             # (PD6 SIN(THETA)SIN(PHI)SIN(PSI)) SCALE 4
+                PDDL            DMP                             #  (PD6 SIN(THETA)SIN(PHI)SIN(PSI)) SCALE 4
                                 6                               
                                 2                               
-                DSU             SL1                             # (PUSH UP 6)
+                DSU             SL1                             #  (PUSH UP 6)
                 STADR                                           
                 STORE           16D,2                           # C8=-SIN(THETA)SIN(PHI)SIN(PSI)
-                RVQ                                             # +COS(THETA)COS(PHI)
+                RVQ                                             #  +COS(THETA)COS(PHI)
 
 # CALCULATION OF THE MATRIX DEL......
 
@@ -822,7 +826,7 @@ DELCOMP         SETPD           PUSH                            # MPAC CONTAINS 
                 BDSU            BOVB                            
                                 DPHALF                          
                                 SIGNMPAC                        
-                PDDL                                            # PDA = 1-COS(A)
+                PDDL                                            # PD4 = 1-COS(A)
 
 # COMPUTE THE DIAGONAL COMPONENTS OF DEL
 
@@ -833,7 +837,7 @@ DELCOMP         SETPD           PUSH                            # MPAC CONTAINS 
                                 2                               
                 BOVB                                            
                                 SIGNMPAC                        
-## Page 360
+## Page 361
                 STODL           KEL                             # UX UX(1-COS(A)) +COS(A)               $1
                                 COF             +2              
                 DSQ             DMP                             
@@ -884,7 +888,7 @@ DELCOMP         SETPD           PUSH                            # MPAC CONTAINS 
                 BOVB                                            
                                 SIGNMPAC                        
                 STODL           KEL             +4              # UX UZ (1-COS(A))+UY SIN(A)
-## Page 361
+## Page 362
                 BDSU            SL2                             
                 BOVB                                            
                                 SIGNMPAC                        
@@ -941,7 +945,7 @@ DELCOMP         SETPD           PUSH                            # MPAC CONTAINS 
 
 #       C  = -SIN(THETA) SIN(PSI) SIN(PHI) + CO (THETA)COS(PHI)
 #        8
-## Page 362
+## Page 363
 
 # WHERE PHI = OGA
 #       THETA = IGA
@@ -987,7 +991,7 @@ SUHALFAP        DSU             GOTO
                                 VECOFANG                        
 OKPHI           DLOAD                                           # PUSH UP PHI
 VECOFANG        VDEF            RVQ                             
-## Page 363
+## Page 364
 # ROUTINES FOR TERMINATING THE AUTOMATIC MANEUVER AND RETURNING TO USER
 
 TOOBADF         EXIT                                            

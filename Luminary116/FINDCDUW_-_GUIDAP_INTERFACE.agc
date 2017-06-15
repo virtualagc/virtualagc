@@ -13,10 +13,15 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-01-22 MAS  Created from Luminary 99.
+##		2017-03-10 RSB	Transcribed, and then proofed comment-text using
+##				3-way diff vs Luminary 99 and Luminary 131.
+##				(Admittedly, the former is more for detecting errors
+##				in Luminary 99 than the other way around.)
+##				The label 1406P00 was replaced with 1406POO.
+##		2017-03-15 RSB	Comment-text fixes identified in 5-way
+##				side-by-side diff of Luminary 69/99/116/131/210.
 
-## NOTE: Page numbers below have not yet been updated to reflect Luminary 116.
-
-## Page 908
+## Page 901
 # PROGRAM NAME:  FINDCDUW
 # MOD NUMBER:  1        68 07 15
 # MOD AUTHOR:  KLUMPP
@@ -43,10 +48,10 @@
 # ACCELERATIONS AVAILABLE).
 
 # FINDCDUW ALINES THE ESTIMATED THRUST VECTOR FROM THE THRUST DIRECTION
-# FILTER WITH THE THRUST COMMAND VECTOR, AND, WHEN XDVINHIB SET,
+# FILTER WITH THE THRUST COMMAND VECTOR, AND, WHEN XOVINHIB SET,
 # ALINES THE +Z HALF OF THE LM ZX PLANE WITH THE WINDOW COMMAND VECTOR.
 
-## Page 909
+## Page 902
 # SPECIFICATIONS:
 
 # INITIALIZATION:       A SINGLE INTERPRETIVE CALL TO INITCDUW IS REQUIRED
@@ -86,7 +91,7 @@
 #                       WRITING INTO THESE LOCATIONS THE SINES AND COSINES
 #                       OF THE CDUD'S IN PNGCS-AUTO, OF THE CDU'S OTHERWISE.
 
-## Page 910
+## Page 903
 # INITIALIZATION FOR FINDCDUW
 
                 BANK            30                              
@@ -127,9 +132,9 @@ FINDCDUW        BOV             SETPD                           # FINDCDUW: ENTR
                 TS              FLPAUTNO                        # SET TO POS-NON-ZERO FLAG PNGCS AUTO NOT
 
                 MASK            DAPBOOLS                        
-                TS              FLAGOODW                        # FLAG0ODW = ANY PNZ NUMBER IF XOV INHIBTD
+                TS              FLAGOODW                        # FLAGOODW = ANY PNZ NUMBER IF XOV INHIBTD
 
-## Page 911
+## Page 904
 # FETCH BASIC DATA
                 INHINT                                          # RELINT AT PAUTNO (TC INTPRET)
 
@@ -161,7 +166,7 @@ FINDCDUW        BOV             SETPD                           # FINDCDUW: ENTR
                 CA              CDUZD                           
                 TS              CDUSPOTZ                        
 
-## Page 912
+## Page 905
 # FETCH INPUTS
 PAUTNO          TC              INTPRET                         # ENTERING THRUST CMD STILL IN MPAC
                 RTB                                             
@@ -175,6 +180,9 @@ PAUTNO          TC              INTPRET                         # ENTERING THRUS
                                 DELV                            
                 BOVB            UNIT                            
                                 NOATTCNT                        # AT LEAST ONE ENTERING CMD VCT ZERO
+## A horizontal line is hand-drawn here in the printout, but from the
+## vertical positioning, it's unclear whether it is underlining the 
+## NOATTCNT above or if it is crossing out the CALL below.                                
                 BOV             CALL                            
                                 AFTRFLTR                        # IF UNIT DELV OVERFLOWS, SKIP FILTER
                                 *SMNB*                          # YIELDS UNIT(DELV) IN VEH COORDS FOR FLTR
@@ -195,7 +203,7 @@ PAUTNO          TC              INTPRET                         # ENTERING THRUS
 
                 TC              INTPRET                         # COMPLETES FILTER
 
-## Page 913
+## Page 906
 # FIND A SUITABLE WINDOW POINTING VECTOR
 
 AFTRFLTR        SLOAD           BHIZ                            # IF XOV NOT INHIBITED, GO FETCH ZNB
@@ -239,7 +247,7 @@ DCMCL           VLOAD           VXV
                 VSL1                                            
                 STORE           UNZ/2                           # UNZ/2
 
-## Page 914
+## Page 907
 # COMPUTE THE REQUIRED GIMBAL ANGLES
 
                 CALL                                            
@@ -288,7 +296,7 @@ DELGMBLP        TS              TEM2
                 CCS             TEM2                            
                 TCF             DELGMBLP                        
 
-## Page 915
+## Page 908
 # BRANCHES TO NOATTCNT
                 CCS             FLPAUTNO                        
                 TCF             NOATTCNT        +2              # NOT PNGCS AUTO
@@ -298,10 +306,10 @@ DELGMBLP        TS              TEM2
                 EXTEND                                          
                 BZF             NOATTCNT        +2              # ENGINE NOT ON
 
-## Page 916
+## Page 909
 # LIMIT THE ATTITUDE ANGLE CHANGES
 
-# THIS SECTION LIMITS THE ATTITUDE ANGLE CHANGES ABOUT A SET OF ORTHOGONAL VEHICLE AXES X,YPRIME,ZPRIME,
+# THIS SECTION LIMITS THE ATTITUDE ANGLE CHANGES ABOUT A SET OF ORTHOGONAL VEHICLE AXES X,YPRIME,ZPRIME.
 # THESE AXES COINCIDE WITH THE COMMANDED VEHICLE AXES IF AND ONLY IF CDUXD IS ZERO.  THE PRIME SYSTEM IS
 # THE COMMANDED VEHICLE SYSTEM ROTATED ABOUT THE X AXIS TO BRING THE Z AXIS INTO ALINEMENT WITH THE MIDDLE GIMBAL
 # AXIS.  ATTITUDE ANGLE CHANGES IN THE PRIME SYSTEM ARE RELATED TO SMALL GIMBAL ANGLE CHANGES BY:
@@ -333,7 +341,7 @@ DELGMBLP        TS              TEM2
                 MP              SINCDUZ                         
                 DDOUBL                                          
                 COM                                             
-                EXTEND                                          # YIELDS +DELATTX UNLIMITD, MAG < 180 DEG.
+                EXTEND                                          # YIELDS +DELATTX UNLIMITD, MAG < 180 DEG,
                 MSU             -DELGMB                         #       BASED ON UNLIMITED DELGMBY.
                 TS              L                               #       ONE BIT ERROR IF OPERANDS IN MSU
                 INDEX           NDXCDUW                         #       OF MIXED SIGNS.  WHO CARES?
@@ -350,7 +358,7 @@ DELGMBLP        TS              TEM2
                 ADS             -DELGMB                         # -DELGMBX.  NO OVERFLOW SINCE LIMITED TO
                                                                 # 20DEG(1+SIN(70DEG)/COS(70DEG)) < 180DEG
 
-## Page 917
+## Page 910
 # COMPUTE COMMANDED ATTITUDE RATES
 
 #       * OMEGAPD *   * -2         -4 SINCDUZ              +0    * * -DELGMBX *
@@ -400,7 +408,7 @@ DELGMBLP        TS              TEM2
                 ADS             OMEGARD                         
                 ADS             OMEGARD                         
 
-## Page 918
+## Page 911
 # FINAL TRANSFER
 
                 CA              TWO                             
@@ -424,7 +432,7 @@ CDUWXFR         TS              TEM2
                 EXTEND                                          
                 MP              BIT11                           # 1/16
                 EXTEND                                          
-                INDEX           TEM2                            #                  2
+                INDEX           TEM2                            #                   2
                 DV              1JACC                           # UNITS PI/4 RAD/SEC
                 TS              L                               
                 CA              DELERLIM                        
@@ -444,7 +452,7 @@ TCQCDUW         CA              ECDUWUSR
                                 0                               
                                 QCDUWUSR                        # NORMAL AND ABNORMAL RETURN TO USER
 
-## Page 919
+## Page 912
 # THRUST VECTOR FILTER SUBROUTINE
 
 FLTRSUB         EXTEND                                          
@@ -475,7 +483,7 @@ UNWCTEST        DOT             DSQ
                                 FLAGOODW                        #       ZEROING WINDOW GOOD FLAG
                                 0                               
 
-## Page 920
+## Page 913
 # NB2CDUSP RETURNS THE 2'S COMPLEMENT, PI, SP CDU ANGLES X,Y,Z IN MPAC,+1,+2 GIVEN THE MATRIX WHOSE ROW VECTORS
 # ARE THE SEMI-UNIT NAV BASE VECTORS X,Y,Z EXPRESSED IN STABLE MEMBER COORDINATES, LOCATED AT 0 IN THE PUSH LIST.
 # NB2CDUSP USES ARCTRGSP WHICH HAS A MAXIMUM ERROR OF +-4 BITS.
@@ -524,7 +532,7 @@ NB2CDUSP        DLOAD           DSQ
 
 16OCT           OCT             16                              
 
-## Page 921
+## Page 914
 # THE ELEMENTS OF THE NAV BASE MATRIX WHICH WE MUST DIVIDE BY COS(MGA)
 # ALREADY CONTAIN COS(MGA)/2 AS A FACTOR. THEREFORE THE QUOTIENT SHOULD
 # ORDINARILY NEVER EXCEED 1/2 IN MAGNITUDE.  BUT IF THE MGA IS NEAR PI/2
@@ -559,7 +567,7 @@ TSL&TCQ         TS              L
                 LXCH            TEM1                            
                 TC              Q                               
 
-## Page 922
+## Page 915
 # ARCTRGSP RETURNS THE 2'S COMPLEMENT, PI, SP ANGLE IN THE A REGISTER GIVEN ITS SINE IN A AND ITS COSINE IN L IN
 # UNITS OF 2.  THE RESULT IS AN UNAMBIGUOUS ANGLE ANYWHERE IN THE CIRCLE, WITH A MAXIMUM ERROR OF +-4 BITS.
 # THE ERROR IS PRODUCED BY THE SUBROUTINE SPARCSIN WHICH IS USED ONLY IN THE REGION +-45 DEGREES.
@@ -594,7 +602,7 @@ ARCTRGSP        EXTEND
                 TC              TEM4                            
 
 USECOS          CS              TEM3                            # COS IS SMALLER
-                TC              SPARCSIN        -1              # ANGLE = SIGN(SIN)(FI/2-ARCSIN(COS))
+                TC              SPARCSIN        -1              # ANGLE = SIGN(SIN)(PI/2-ARCSIN(COS))
                 AD              HALF                            
                 TS              TEM3                            # WE NO LONGER NEED COS
                 CCS             TEM2                            
@@ -609,7 +617,7 @@ SINZERO         CCS             L
                 CA              NEGMAX                          # PI, 2'S COMP
                 TC              Q                               
 
-## Page 923
+## Page 916
 # SPARCSIN TAKES AN ARGUMENT SCALED UNITY IN A AND RETURNS AN ANGLE SCALED
 # 180 DEGREES IN A.  IT HAS BEEN UNIT TESTED IN THE REGION +-.94 (+-70
 # DEGREES) AND THE MAXIMUM ERROR IS +-5 BITS WITH AN AVERAGE TIME OF
@@ -645,7 +653,7 @@ DPL5            DEC             7300
 DPL7            DEC             -11803                          
 DPL9            DEC             8397                            
 
-## Page 924
+## Page 917
 # LIMITSUB LIMITS THE MAGNITUDE OF THE POSITIVE OR NEGATIVE VARIABLE
 # ARRIVING IN L TO THE POSITIVE LIMIT ARRIVING IN A.
 # THE SIGNED LIMITED VARIABLE IS RETURNED IN A.
@@ -689,7 +697,7 @@ ALARMMGA        TC              ALARM
                 OCT             00401                           
                 TCF             MGARET                          
 
-## Page 925
+## Page 918
 #************************************************************************
 # CONSTANTS
 #************************************************************************
@@ -729,5 +737,5 @@ CDUZDLIM        DEC             .3888888888                     # 70 DEG LIMIT F
 DT/DELT         DEC             .05                             # .1 SEC/2 SEC WHICH IS THE AUTOPILOT
                                                                 # CONTROL SAMPLE PERIOD/COMPUTATION PERIOD
 
-DELERLIM        =               DAY/2MAX                        # 1D DEG LIMIT FOR LAG ANGLES, 1'S, PI
+DELERLIM        =               DAY/2MAX                        # 10 DEG LIMIT FOR LAG ANGLES, 1'S, PI
 

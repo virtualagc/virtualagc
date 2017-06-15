@@ -1,6 +1,6 @@
 ### FILE="Main.annotation"
 ## Copyright:   Public domain.
-## Filename:    AGC_BLOCK_TWO_SELF-CHECK.agc
+## Filename:    SUM_CHECK_END_OF_BANK_MARKERS.agc
 ## Purpose:     This program is designed to extensively test the Apollo Guidance Computer
 ##              (specifically the LM instantiation of it). It is built on top of a heavily
 ##              stripped-down Aurora 12, with all code ostensibly added by the DAP Group
@@ -14,12 +14,13 @@
 ##              2016-12-21 MAS  Updated for new end-of-bank locations for self-tests.
 ##              2017-01-04 MAS  Added minimal words to all unused banks, to get self-
 ##                              test to at least verify that all are accessible.
+##              2017-01-15 MAS  Updated for added tests. Bank 24 now occupied.
 
                 SETLOC  ENDRTRDF
                 TC
                 TC
                 
-                SETLOC  ENDINTF
+                SETLOC  ENDSLFS4
                 TC
                 TC
                 
@@ -95,12 +96,12 @@
                 TC
                 TC
 
-# The remaining banks are currently unused, but bank-end markers and banksums are put into
-# them to allow self-check to verify operation of every bank
-                BANK    24
+                SETLOC  ENDEXTST
                 TC
                 TC
 
+# The remaining banks are currently unused, but bank-end markers and banksums are put into
+# them to allow self-check to verify operation of every bank
                 BANK    25
                 TC
                 TC

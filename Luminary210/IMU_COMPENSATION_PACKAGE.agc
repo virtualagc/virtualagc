@@ -16,6 +16,10 @@
 ##              2016-11-24 HG   Transcribed
 ##		2016-12-23 RSB	Proofed comment text with octopus/ProoferComments
 ##				and fixed all errors found.
+##		2017-03-07 RSB	Comment-text fixes noted in proofing Luminary 116.
+##		2017-03-15 RSB	Comment-text fixes identified in 6-way
+##				side-by-side diff of Sunburst 120 and Luminary 
+##				69/99/116/131/210.
 
 ## Page 338
                 BANK            7
@@ -118,7 +122,7 @@ IRIGX           EXTEND
                 DCS             DELVY                   # (PIPA PULSES) X 2(+14)
                 DXCH            MPAC                    #
                 CS              ADSRAX                  # (GYRO PULSES)/(PIPA PULSE) X 2(-6)     *
-                TC              GCOMPSUB                # +(ADSRAX)(PIPAY)  (GYRO PULSES) X 2(+14)
+                TC              GCOMPSUB                # -(ADSRAX)(PIPAY)  (GYRO PULSES) X 2(+14)
 
 #               EXTEND                             ***
 #               DCS             DELVZ              ***    (PIPA PULSES) X 2(+14)
@@ -153,7 +157,7 @@ IRIGY           EXTEND
 IRIGZ           EXTEND
                 QXCH            MPAC            +2      # SAVE Q
                 EXTEND
-                DCS             DELVY                   # (PIPA PULSES) X 2(-14)
+                DCS             DELVY                   # (PIPA PULSES) X 2(+14)
                 DXCH            MPAC
                 CA              ADSRAZ                  # (GYRO PULSES)/(PIPA PULSE) X 2(-6)    *
 

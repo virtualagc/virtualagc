@@ -26,6 +26,7 @@
 ##		2016-12-04 RSB	Another typo discovered with an improved ProoferComments.py.
 ##		2016-12-05 RSB	Final few fixes with improved octopus/ProoferComments.  This
 ##				file is now completely proofed for textual content of comments.
+##		2017-06-03 MAS	Replaced an instance of P00H with POOH.
 
 ## Page 12
 
@@ -230,7 +231,7 @@ ENGOFFSW	EQUALS	71D
 #		 4		    26     SIVBGONE  SIVB JETTISONED		   SIVB ATTACHED
 #		 5	ENGINBIT    25		     TO DV MONITOR ENGINE SHOULD   TO DV MONITOR ENGINE SHOULD
 #							BE ON			      BE OFF
-#		 6		    24		     GO TO ENDOFJOB AT AVGEND	   GO TO P00H AT AVGEND
+#		 6		    24		     GO TO ENDOFJOB AT AVGEND	   GO TO POOH AT AVGEND
 #		 7 		    23		     AVAILABLE
 #		 8		    22		     FINE ALIGN INHIBITED DUE TO   FINE ALIGN ALLOWED
 #							GIMBAL LOCK

@@ -2,7 +2,7 @@
 ## Copyright:   Public domain.
 ## Filename:    P76.agc
 ## Purpose:     A section of Luminary revision 116.
-##              It is part of the source code for the Lunar Module's (LM) 
+##              It is part of the source code for the Lunar Module's (LM)
 ##              Apollo Guidance Computer (AGC) for Apollo 12.
 ##              This file is intended to be a faithful transcription, except
 ##              that the code format has been changed to conform to the
@@ -14,6 +14,9 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-01-22 MAS  Created from Luminary 99.
 ##              2017-02-10 RRB  Updated for Luminary 116.
+##              2017-03-01 RSB  Proofed comment text by diff vs Luminary 131
+##                              and fixed error found.
+##              2017-03-13 HG   Remove operand modifier CAF V06N84 +1 --> CAF V06N84
 
 ## Page 709
 # 1) PROGRAM NAME - TARGET DELTA V PROGRAM (P76).
@@ -36,119 +39,119 @@
 
 # 8) FLAG USE - MOONFLAG, CMOONFLAG, INTYPFLG, RASFLAG, AND MARKCTR.
 
-                BANK            30                              
-                SETLOC          P76LOC                          
-                BANK                                            
+                BANK            30
+                SETLOC          P76LOC
+                BANK
 
-                COUNT*          $$/P76                          
+                COUNT*          $$/P76
 
-                EBANK=          TIG                             
+                EBANK=          TIG
 
-P76             TC              UPFLAG                          
-                ADRES           TRACKFLG                        
+P76             TC              UPFLAG
+                ADRES           TRACKFLG
 
-                TC              INTPRET                         
-                VLOAD                                           
-                                DELVLVC                         
-                STORE           DELVOV                          
-                EXIT                                            
+                TC              INTPRET
+                VLOAD
+                                DELVLVC
+                STORE           DELVOV
+                EXIT
 
                 CAF             V06N84          +1              # FLASH VERB 06 NOUN 33, DISPLAY LAST TIG,
                 TC              BANKCALL                        # AND WAIT FOR KEYBOARD ACTION.
-                CADR            GOFLASH                         
-                TCF             ENDP76                          
+                CADR            GOFLASH
+                TCF             ENDP76
                 TC              +2                              # PROCEED
                 TC              -5                              # STORE DATA AND REPEAT FLASHING
-                CAF             V06N84          +1              # FLASH VERB 06 NOUN 33, DISPLAY LAST TIG,
+                CAF             V06N84                          # FLASH LAST DELTA V,
                 TC              BANKCALL                        # AND WAIT FOR KEYBOARD ACTION.
-                CADR            GOFLASH                         
-                TCF             ENDP76                          
-                TC              +2                              
-                TC              -5                              
+                CADR            GOFLASH
+                TCF             ENDP76
+                TC              +2
+                TC              -5
                 TC              INTPRET                         # RETURN TO INTERPRETIVE CODE
 ## Page 710
                 DLOAD                                           # SET D(MPAC)=TIG IN CSEC B28
-                                TIG                             
+                                TIG
                 STCALL          TDEC1                           # SET TDEC1=TIG FOR ORBITAL INTEGRATION
-                                OTHPREC                         
-COMPMAT         VLOAD           UNIT                            
-                                RATT                            
+                                OTHPREC
+COMPMAT         VLOAD           UNIT
+                                RATT
                 VCOMP                                           # U(-R)
                 STORE           24D                             # U(-R) TO 24D
                 VXV             UNIT                            # U(-R)XV = U(VXR)
-                                VATT                            
-                STORE           18D                             
+                                VATT
+                STORE           18D
                 VXV             UNIT                            # U(VXR)XU(-R) = U((RXV) XR)
-                                24D                             
-                STOVL           12D                             
-                                DELVOV                          
+                                24D
+                STOVL           12D
+                                DELVOV
                 VXM             VSL1                            # V(MPAC)=DELTA V IN REFCOSYS
-                                12D                             
-                VAD                                             
-                                VATT                            
+                                12D
+                VAD
+                                VATT
                 STORE           6                               # V(PD6)=VATT + DELTA V
                 CALL                                            # PREVENT WOULD-BE USER OF ORBITAL
                                 INTSTALL                        # INTEG FROM INTERFERING WITH UPDATING
-                CALL                                            
-                                P76SUB1                         
-                VLOAD           VSR*                            
-                                6                               
-                                0,2                             
-                STOVL           VCV                             
-                                RATT                            
-                VSR*                                            
-                                0,2                             
-                STODL           RCV                             
-                                TIG                             
-                STORE           TET                             
-                CLEAR           DLOAD                           
-                                INTYPFLG                        
-                                TETTHIS                         
-INTOTHIS        STCALL          TDEC1                           
-                                INTEGRVS                        
-                CALL                                            
-                                INTSTALL                        
-                VLOAD                                           
-                                RATT1                           
-                STORE           RRECT                           
-                STODL           RCV                             
-                                TAT                             
-                STOVL           TET                             
-                                VATT1                           
-                CALL                                            
-                                MINIRECT                        
+                CALL
+                                P76SUB1
+                VLOAD           VSR*
+                                6
+                                0,2
+                STOVL           VCV
+                                RATT
+                VSR*
+                                0,2
+                STODL           RCV
+                                TIG
+                STORE           TET
+                CLEAR           DLOAD
+                                INTYPFLG
+                                TETTHIS
+INTOTHIS        STCALL          TDEC1
+                                INTEGRVS
+                CALL
+                                INTSTALL
+                VLOAD
+                                RATT1
+                STORE           RRECT
+                STODL           RCV
+                                TAT
+                STOVL           TET
+                                VATT1
+                CALL
+                                MINIRECT
 ## Page 711
-                EXIT                                            
-                TC              PHASCHNG                        
-                OCT             04024                           
+                EXIT
+                TC              PHASCHNG
+                OCT             04024
 
-                TC              UPFLAG                          
-                ADRES           REINTFLG                        
+                TC              UPFLAG
+                ADRES           REINTFLG
 
-                TC              INTPRET                         
-                CALL                                            
-                                ATOPOTH                         
-                SSP             EXIT                            
-                                QPRET                           
-                                OUT                             
+                TC              INTPRET
+                CALL
+                                ATOPOTH
+                SSP             EXIT
+                                QPRET
+                                OUT
                 TC              BANKCALL                        # PERMIT USE OF ORBITAL INTEGRATION
-                CADR            INTWAKE1                        
-OUT             EXIT                                            
-ENDP76          CAF             ZERO                            
+                CADR            INTWAKE1
+OUT             EXIT
+ENDP76          CAF             ZERO
                 TS              MARKCTR                         # CLEAR RR TRACKING MARK COUNTER
-                TCF             GOTOPOOH                        
+                TCF             GOTOPOOH
 
-V06N84          NV              0684                            
-                NV              0633                            
-P76SUB1         AXT,2           SET                             
-                                2                               
+V06N84          NV              0684
+                NV              0633
+P76SUB1         AXT,2           SET
+                                2
                                 MOONFLAG                        # SET MEANS MOON IS SPHERE OF INFLUENCE.
-                BON             AXT,2                           
+                BON             AXT,2
                                 CMOONFLG                        # SET MEANS PERM CM STATE IN LUNAR SPHERE.
-                                QPRET                           
-                                0                               
-                CLEAR           RVQ                             
-                                MOONFLAG                        
+                                QPRET
+                                0
+                CLEAR           RVQ
+                                MOONFLAG
 
 
 

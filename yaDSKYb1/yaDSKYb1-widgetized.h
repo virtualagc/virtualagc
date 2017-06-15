@@ -73,6 +73,7 @@ class MyFrame: public wxFrame
       imageCounterFailOff, imageRuptLockOn, imageRuptLockOff, imageTcTrapOn, imageTcTrapOff,
       imageScalerFailOn, imageScalerFailOff, imageTmFailOn, imageTmFailOff, imageKeyRlseOn,
       imageKeyRlseOff, imageParityFailOn, imageParityFailOff, imageBlankOn, imageBlankOff;
+    wxBitmap officialVerbLeft, officialVerbRight, officialNounLeft, officialNounRight;
     void setAllNumbers(wxBitmap& bitmap);
     void setAllSigns(wxBitmap& bitmap);
     TimerClass *Timer;

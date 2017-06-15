@@ -13,8 +13,10 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-01-22 MAS  Created from Luminary 99.
-
-## NOTE: Page numbers below have not yet been updated to reflect Luminary 116.
+##		2017-03-09 RSB	Transcribed, and then proofed comment-text using
+##				3-way diff vs Luminary 99 and Luminary 131.
+##				(Admittedly, the former is more for detecting errors
+##				in Luminary 99 than the other way around.)
 
 ## Page 703
                 BANK            40                              
@@ -57,7 +59,7 @@ DISPN5X         CAF             V16N54
 V83CALL         CS              FLAGWRD7                        # TEST AVERAGE G FLAG
                 MASK            AVEGFBIT                        
                 EXTEND                                          
-                BZF             MUNG?                           # ON.  TEST MUNFLAG
+                BZF             MUNG?                           # ON - TEST MUNFLAG
 
                 CS              FLAGWRD8                        
                 MASK            SURFFBIT                        
@@ -254,5 +256,5 @@ ONEBASE         TC              INTPRET                         # GET CSM BASE V
 V16N54          VN              1654                            
 
 ## Page 708
-## This page is empty.
+## <br>This page is empty.
 

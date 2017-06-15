@@ -20,6 +20,8 @@
 ##              2017-01-21 HG   Fix label CHIPFLAG -> CPHIFLAG
 ##		2017-01-25 RSB	Proofed comment text using octopus/prooferComments
 ##				and fixed errors found.
+##		2017-03-15 RSB	Comment-text fixes identified in 5-way
+##				side-by-side diff of Luminary 69/99/116/131/210.
 
 ## Page 77
 #          FLAGWORDS 0-11  ARE DOWNLINKED AND CAN BE SET AND CLEARED BY UP-FLAG AND DOWN-FLAG INSTRUCTIONS IN THE
@@ -1426,7 +1428,7 @@ ULLAGER         =               BIT6                    # MISSION PROGRAM     RE
 
 # BIT 5 FLAG 13
 AORBSFLG        =               205D                    # P-AXIS COUPLES 7.15 P-AXIS COUPLES 4.12
-AORBSYST        =               BIT5                    # AND 8.16 PREFERRED  AND 3.11 PREFERRED
+AORBSYST        =               BIT5                    # AND 8,16 PREFERRED  AND 3,11 PREFERRED
 #
 
 # BIT 4 FLAG 13

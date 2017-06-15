@@ -32,6 +32,10 @@
 ##              2016-12-11 HG   Fix operand modification VVECT(X,Y,Z) + 1 -> VVECT(X,Y,Z)+ 2
 ##		2016-12-22 RSB	Proofed comment text with octopus/ProoferComments
 ##				and fixed all errors found.
+##		2017-03-11 MAS	Corrected errors found during transcription of Luminary 116.
+##		2017-03-13 RSB	Comment-text fixes noted in proofing Luminary 116.
+##		2017-03-15 RSB	Comment-text fixes identified in 5-way
+##				side-by-side diff of Luminary 69/99/116/131/210.
 
 ## Page 92
 # CONVENTIONS AND NOTATIONS UTILIZED FOR ERASABLE ASSIGNMENTS.
@@ -74,7 +78,7 @@
 #                 N INDICATES THE NATURE OF PERMANENCE OF THE CONTENTS.
 #                      PL  MEANS THAT THE CONTENTS ARE PAD LOADED.
 #                      DSP MEANS THAT THE REGISTER IS USED FOR A DISPLAY.
-#                      PRM MEANS THAT THE REGISTER IS PERMANENT. IE. IT
+#                      PRM MEANS THAT THE REGISTER IS PERMANENT, IE. IT
 #                          IS USED DURING THE ENTIRE MISSION FOR ONE
 #                          PURPOSE AND CANNOT BE SHARED.
 #                      TMP MEANS THAT THE REGISTER IS USED TEMPORARILY OR
@@ -353,7 +357,7 @@ TERM1TMP        EQUALS          MPAC            +3      # B(2)TMP
 DEXI            =               DEX1
 
 #          THE FOLLOWING 10 REGISTERS ARE USED FOR TEMPORARY STORAGE OF THE DERIVATIVE COEFFICIENT TABLE OF
-# SUBROUTINE ROOTPSRS.   THEY MUST REMAIN WITHOUT INTERFERENCE WITH ITS SUBROUTINES WHICH ARE POWRSERS (POLY).
+# SUBROUTINE ROOTPSRS.   THEY MUST REMAIN WITHOUT INTERFERENCE WITH ITS SUBROUTINES WHICH ARE POWRSERS (POLY),
 # DMPSUB, DMPNSUB, SHORTMP, DDV/BDDV, ABS, AND USPRCADR.
 
 DERCOF-8        =               MPAC            -12     # ROOTPSRS DER COF N-4 HI ORDER
@@ -564,7 +568,7 @@ NOUNCADR        ERASE                                   # MACHINE CADR FOR NOUN
 MONSAVE         ERASE                                   # N/V CODE FOR MONITOR. (= MONSAVE1-1)
 MONSAVE1        ERASE                                   # NOUNCADR FOR MONITOR(MATBS) =MONSAVE+1
 MONSAVE2        ERASE                                   # NVMONOPT OPTIONS
-DSPTAB          ERASE           +11D                    # 0-100, DISPLAY PANEL BUFF. 11D, C/S LTS.
+DSPTAB          ERASE           +11D                    # 0-10D, DISPLAY PANEL BUFF. 11D, C/S LTS.
 NVQTEM          ERASE                                   # NVSUB STORAGE FOR CALLING ADDRESS
                                                         # MUST = NVBNKTEM-1
 NVBNKTEM        ERASE                                   # NVSUB STORAGE FOR CALLING BANK
@@ -810,7 +814,7 @@ DELREROR        ERASE                                   # B(1)PRM
 #          MODE SWITCHING ERASABLE.                      (9D)
 
 ## Page 110
-#    RETAIN THE ORDER OF IMODES30 AND IMODES33 FOR DOWNLINK PURPOSES,
+#    RETAIN THE ORDER OF IMODES30 AND IMODES33 FOR DOWNLINK PURPOSES.
 IMODES30        ERASE                                   # B(1)
 IMODES33        ERASE
 MODECADR        ERASE           +2                      # B(3)PRM
@@ -1139,7 +1143,7 @@ TIMSUBO         EQUALS          TEPHEM                  # CSEC B-42 (TRIPLE PREC
 
 LS21X           ERASE                                   # I(1)
 LOSVEL          ERASE           +5                      # I(6)
-MLOSV           ERASE           +1                      # I(2) MAGNITUDE OF LOS. METERS B-29
+MLOSV           ERASE           +1                      # I(2) MAGNITUDE OF LOS, METERS B-29
 
 
 #      ***** P22  *****  (OVERLAYS LPS 20.1 STORAGE)     (6D)
@@ -1480,7 +1484,7 @@ ATY             EQUALS          YRATE           +2      # I(2)TMP  OUT-OF-PLANE 
 ATR             EQUALS          ATY             +2      # I(2)TMP  RADIAL THRUST COMP.* 2(9)
 ATP             EQUALS          ATR             +2      # I(2)TMP  DOWN-RANGE THRUST COMP
 YAW             EQUALS          ATP             +2      # I(2)TMP
-PITCH           EQUALS          YAW             +2      # I(2)TMP
+PITCH           EQUALS          YAW             +2      # I(2)RMP
 
 
 #          SERVICER FOR LUNAR ASCENT AND DESCENT         (14D)
@@ -1588,7 +1592,7 @@ SLOPE4          EQUALS          SLOPE3          +1      # B(1)
 ABVEL*          EQUALS          BUF                     # B(1)   LR TEMP
 VSELECT*        EQUALS          BUF             +1      # B(1)   LR TEMP
 
-RODSCALE        EQUALS          SLOPE4          +1      # I(1) CLICK SCALE FACTOR FOR R.O.D.
+RODSCALE        EQUALS          SLOPE4          +1      # I(2) CLICK SCALE FACTOR FOR R.O.D.
 TAUROD          EQUALS          RODSCALE        +1      # I(2) TIME CONSTANT FOR R.O.D.
 LAG/TAU         EQUALS          TAUROD          +2      # I(2) LAG TIME DIVIDED BY TAUROD (P66)
 MINFORCE        EQUALS          LAG/TAU         +2      # I(2) MINIMUM FORCE P66 WILL COMMAND.
@@ -2005,7 +2009,7 @@ K2CNTRAL        EQUALS          GTSTEMPS        +3      # D.P., GTS SCRATCH CELL
 WCENTRAL        EQUALS          GTSTEMPS        +4      # S.P., OMEGA, AT PI/4 RAD/SEC
 ACENTRAL        EQUALS          GTSTEMPS        +5      # S.P., ALPHA, AT PI/4 RAD/SEC(2)
 DEL             EQUALS          GTSTEMPS        +6      # S.P., SGN FUNCTION VALUE.
-A2CNTRAL        EQUALS          GTSTEMPS        +7      # D.P., GTS SCRATCH CECLS.
+A2CNTRAL        EQUALS          GTSTEMPS        +7      # D.P., GTS SCRATCH CELLS.
 QRCNTR          EQUALS          GTSTEMPS        +9D     # S.P.,INDEX FOR GTS LOOP THROUGH Q,R AXES
 FUNCTION        EQUALS          GTSTEMPS        +10D    # D.P.,ARGUMENT FOR GRSQRT,SCRATCH FOR GTS
 
@@ -2062,14 +2066,14 @@ L,PVT-CG        ERASE
 
 SKIPU           ERASE           +1
 SKIPV           =               SKIPU           +1
-# THE FOLLOWING LM DAP ERASABLES ARE ZEROED IN THE STARTDAP SECTION OF THE DAPIDLER PROGRAM AND THE CDASTASC
+# THE FOLLOWING LM DAP ERASABLES ARE ZEROED IN THE STARTDAP SECTION OF THE DAPIDLER PROGRAM AND THE COASTASC
 # SECTION OF THE AOSTASK.  THE ORDER MUST BE PRESERVED FOR THE INDEXING METHODS WHICH ARE EMPLOYED IN THOSE
 # SECTIONS AND ELSEWHERE.
 
 AOSQ            ERASE           +5                      # OFFSET ACC. ESTIMATES, UPDATED IN D.P.,
 AOSR            EQUALS          AOSQ            +2      # AND SCALED AT PI/2.
 AOSU            EQUALS          AOSQ            +4      # UV-AXES OFFSET ACC. FROMED BY VECTOR
-AOSV            EQUALS          AOSQ            +5      # ADDITION OF Q.R.  AT PI/2 RAD/SEC(2).
+AOSV            EQUALS          AOSQ            +5      # ADDITION OF Q,R.  AT PI/2 RAD/SEC(2).
 
 AOSQTERM        ERASE           +1                      # (.1-.05K)AOS
 AOSRTERM        EQUALS          AOSQTERM        +1      # SCALED AT PI/4 RADIANS/SECOND.
@@ -2403,7 +2407,7 @@ LOSCOUNT        ERASE                                   # B(1)
 
 #    RETAIN THE ORDER OF AIG TO TRKMKCNT FOR DOWNLINK PURPOSES.
 
-AIG             ERASE                                   # B(1)OUT  GIMBAL ANGLES
+AIG             ERASE                                   # B(1)OUT  GIMGAL ANGLES
 AMG             ERASE                                   # B(1)OUT  (MUST BE
 AOG             ERASE                                   # B(1)OUT   CONSECUTIVE)
 
@@ -2739,7 +2743,7 @@ SAVET-30        EQUALS          TTFDISP         +2      # B(2)TMP TIG-30 RESTART
 
 #          SERVICER STORAGE.                             (69D)
 
-VGBODY          EQUALS          SAVET-30        +2      # B(6)OUT SET,BY S41.1 VG LEM, SC.COORDS
+VGBODY          EQUALS          SAVET-30        +2      # B(6)OUT SET.BY S41.1 VG LEM, SC.COORDS
 DELVCTL         =               VGBODY
 DVTOTAL         EQUALS          VGBODY          +6      # B(2) DISPLAY NOUN
 GOBLTIME        EQUALS          DVTOTAL         +2      # B(2) NOMINAL TIG FOR CALC. OF GOBLATE.
@@ -2770,7 +2774,7 @@ V1S             EQUALS          R1S             +6      # I(6)
 TGO1            EQUALS          VGBODY                  # B(2)TMP
 
 
-#          ALIGNMENT/S40.2,3 COMMON STORAGE.             (18D)
+#          ALIGNMENT/S40.2.3 COMMON STORAGE.             (18D)
 
 XSMD            EQUALS          V1S             +6      # I(6)
 YSMD            EQUALS          XSMD            +6      # I(6)

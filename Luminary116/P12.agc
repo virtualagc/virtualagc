@@ -13,12 +13,13 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-01-22 MAS  Created from Luminary 99.
-##		2017-01-28 RSB	Proofed comment text using octopus/prooferComments
-##				and fixed errors found.
+##              2017-01-28 RSB  Proofed comment text using octopus/prooferComments
+##                              and fixed errors found.
+##              2017-03-09 HG   Transcribed
+##		2017-03-13 RSB	Proofed comment text via 3-way diff vs
+##				Luminary 99 and 131.
 
-## NOTE: Page numbers below have not yet been updated to reflect Luminary 116.
-
-## Page 838
+## Page 831
                 BANK            24                              
                 SETLOC          P12                             
                 BANK                                            
@@ -32,19 +33,7 @@ P12LM           TC              PHASCHNG
                 TC              BANKCALL                        
                 CADR            R02BOTH                         # CHECK THE STATUS OF THE IMU.
 
-                TC              UPFLAG                          
-                ADRES           MUNFLAG                         
-
-                TC              UPFLAG                          # INSURE 4-JET TRANSLATION CAPABILITY.
-                ADRES           ACC4-2FL                        
-
-                TC              UPFLAG                          # PREVENT R10 FROM ISSUING CROSS-POINTER
-                ADRES           R10FLAG                         # OUTPUTS.
-
                 TC              CLRADMOD                        # INITIALIZE RADMODES FOR R29.
-
-                TC              DOWNFLAG                        # CLEAR RENDEZVOUS FLAG  FOR P22
-                ADRES           RNDVZFLG                        
 
                 CAF             THRESH2                         # INITIALIZE DVMON
                 TS              DVTHRUSH                        
@@ -52,7 +41,8 @@ P12LM           TC              PHASCHNG
                 TS              DVCNTR                          
 
                 CA              ZERO                            
-                TS              TRKMKCNT                        # SHOW THAT R29 DOWNLINK DATA ISN'T READY.
+                TS              TRKMKCNT                        # SHOW THAT R29 DOWNLINK DATA IS NOT READY
+                
                 CAF             V06N33A                         
                 TC              BANKCALL                        # FLASH TIG
                 CADR            GOFLASH                         
@@ -64,15 +54,24 @@ P12LM           TC              PHASCHNG
                 OCT             04024                           
 
                 TC              INTPRET                         
+                SET             SET
+                                MUNFLAG
+                                ACC4-2FL
+                SET             CLEAR
+                                R10FLAG
+                                RNDVZFLG
+                SET             SET
+                                FLPI
+                                FLVR
                 CALL                                            # INITIALIZE WM AND /LAND/
                                 GUIDINIT                        
-                SET             CALL                            
-                                FLPI                            
+                CALL                            
                                 P12INIT                         
-## Page 839
 P12LMB          DLOAD                                           
                                 (TGO)A                          # SET TGO TO AN INITIAL NOMINAL VALUE.
                 STODL           TGO                             
+                
+## Page 832                
                                 TIG                             
                 STCALL          TDEC1                           
                                 LEMPREC                         # ROTATE THE STATE VECTORS TO THE
@@ -84,7 +83,7 @@ P12LMB          DLOAD
                                 RATT                            
                 MXV             VSL6                            
                                 REFSMMAT                        
-                STCALL          R                               # COMPUTE R = POS(TIG)*2(-24) M.
+                STCALL          R                               # COMPUTE R = POS(TIG)*2(-24)M.
                                 MUNGRAV                         # COMPUTE GDT1/2(TIG)*2(-7)M/CS.
                 VLOAD           UNIT                            
                                 R                               
@@ -120,10 +119,11 @@ NEWLOAD         CAF             V06N76                          # FLASH CROSS-RA
                                 XRANGE                          
                                 5D                              
                 DAD                                             
-## Page 840
                                 Y                               
                 STOVL           YCO                             
                                 UNIT/R/                         
+                                
+## Page 833                                
                 VXSC            VAD                             
                                 49FPS                           
                                 V1S                             
@@ -134,9 +134,7 @@ NEWLOAD         CAF             V06N76                          # FLASH CROSS-RA
                                 UNIT/R/                         
                 VXV             UNIT                            
                                 QAXIS                           
-                STORE           ZAXIS1                          
-                SETGO                                           
-                                FLVR                            
+                STCALL          ZAXIS1                          
                                 ASCENT                          
 P12RET          DLOAD                                           
                                 ATP                             # ATP(2)*2(18)
@@ -159,19 +157,16 @@ YAWDUN          STOVL           YAW
                 TC              PHASCHNG                        
                 OCT             04024                           
 
-                TC              DOWNFLAG                        
-                ADRES           FLPI                            
-
                 INHINT                                          
                 TC              IBNKCALL                        
                 CADR            PFLITEDB                        
-                RELINT                                          
+                TC              DOWNFLAG
+                ADRES           FLPI
 
                 TC              POSTJUMP                        
                 CADR            BURNBABY                        
 
-P12INIT         DLOAD                                           # INITIALIZE ENGINE DATA.  USED FOR P12 AND
-## Page 841
+P12INIT         DLOAD                                           # INITIALIZE ENGINE DATA. USED FOR P12 AND
                                 (1/DV)A                         # P71.
                 STORE           1/DV3                           
                 STORE           1/DV2                           
@@ -179,6 +174,8 @@ P12INIT         DLOAD                                           # INITIALIZE ENG
                                 (AT)A                           
                 STODL           AT                              
                                 (TBUP)A                         
+                                
+## Page 834                                
                 STODL           TBUP                            
                                 ATDECAY                         
                 DCOMP           SL                              
@@ -198,7 +195,6 @@ COMMINIT        DLOAD           DAD                             # INITIALIZE TAR
                                 HI6ZEROS                        
                 STORE           TXO                             
                 STORE           YCO                             
-                STORE           RDOTD                           
                 STOVL           YDOTD                           
                                 VRECTCSM                        
                 VXV             MXV                             
@@ -207,9 +203,10 @@ COMMINIT        DLOAD           DAD                             # INITIALIZE TAR
                 UNIT                                            
                 STORE           QAXIS                           
                 RVQ                                             
+                
 P12ADRES        REMADR          P12TABLE                        
 
-                SETLOC          P12A                            
+                SETLOC          ASENT8
                 BANK                                            
                 COUNT*          $$/P12                          
 
@@ -222,7 +219,6 @@ GUIDINIT        STQ             SETPD
                                 LOADTIME                        
                 CALL                                            
                                 RP-TO-R                         
-## Page 842
                 MXV             VXSC                            
                                 REFSMMAT                        
                                 MOONRATE                        
@@ -230,6 +226,8 @@ GUIDINIT        STQ             SETPD
                                 RLS                             
                 ABVAL           SL3                             
                 STCALL          /LAND/                          
+                
+## Page 835                
                                 TEMPR60                         
 
 49FPS           2DEC            .149352         B-6             # EXPECTED RDOT AT TIPOVER

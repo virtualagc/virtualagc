@@ -2,7 +2,7 @@
 ## Copyright:   Public domain.
 ## Filename:    RCS_FAILURE_MONITOR.agc
 ## Purpose:     A section of Luminary revision 116.
-##              It is part of the source code for the Lunar Module's (LM) 
+##              It is part of the source code for the Lunar Module's (LM)
 ##              Apollo Guidance Computer (AGC) for Apollo 12.
 ##              This file is intended to be a faithful transcription, except
 ##              that the code format has been changed to conform to the
@@ -13,17 +13,18 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-01-22 MAS  Created from Luminary 99.
+##              2017-03-12 HG   Transcribed
+##		2017-03-14 RSB	Proofed comment text via 3-way diff vs
+##				Luminary 99 and 131.
 
-## NOTE: Page numbers below have not yet been updated to reflect Luminary 116.
-
-## Page 190
+## Page 191
 # PROGRAM DESCRIPTION
 
-# AUTHOR: J S MILLER
+# AUTHOR:  J S MILLER
 
 # MODIFIED 6 MARCH 1968 BY P S WEISSMAN TO SET UP JOB FOR 1/ACCS WHEN THE MASKS ARE CHANGED.
 
-# THIS ROUTINE IS ATTACHED TO T4RUPT, AND IS ENTERED EVERY 480 MS.  ITS FUNCTION IS TO EXAMINE THE LOW 8 BITS
+#      THIS ROUTINE IS ATTACHED TO T4RUPT, AND IS ENTERED EVERY 480 MS.  ITS FUNCTION IS TO EXAMINE THE LOW 8 BITS
 # OF CHANNEL 32 TO SEE IF ANY ISOLATION-VALVE CLOSURE BITS HAVE APPEARED OR DISAPPEARED (THE CREW IS WARNED OF JET
 # FAILURES BY LAMPS LIT BY THE GRUMMAN FAILURE-DETECTION CIRCUITRY; THEY MAY RESPOND BY OPERATING SWITCHES WHICH
 # ISOLATE PAIRS OF JETS FROM THE PROPELLANT TANKS AND SET BITS IN CHANNEL 32).  IN THE EVENT THAT CHANNEL 32 BITS
@@ -32,7 +33,7 @@
 # ROUTINE, NO MORE THAN ONE CHANGE IS ACCEPTED PER ENTRY.  THE HIGHEST-NUMBERED BIT IN CHANNEL 32 WHICH REQUIRES
 # ACTION IS THE ONE PROCESSED.
 
-# THE CODING IN THE FAILURE MONITOR HAS BEEN WRITTEN SO AS TO HAVE ALMOST COMPLETE RESTART PROTECTION.  FOR
+#      THE CODING IN THE FAILURE MONITOR HAS BEEN WRITTEN SO AS TO HAVE ALMOST COMPLETE RESTART PROTECTION.  FOR
 # EXAMPLE, NO ASSUMPTION IS MADE WHEN SETTING A 'CH5MASK' BIT TO 1 THAT THE PREVIOUS STATE IS 0, ALTHOUGH IT OF
 # COURSE SHOULD BE.  ONE CASE WHICH MAY BE SEEN TO EVADE PROTECTION IS THE OCCURRENCE OF A RESTART AFTER UPDATING
 # ONE OR BOTH DAP MASK-WORDS BUT BEFORE UPDATING 'PVALVEST', COUPLED WITH A CHANGE IN THE VALVE-BIT BACK TO ITS
@@ -44,103 +45,103 @@
 
 # CALLING SEQUENCE:
 
-#       TCF     RCSMONIT                (IN INTERRUPT MODE, EVERY 480 MS.)
+#          TCF    RCSMONIT        (IN INTERRUPT MODE, EVERY 480 MS.)
 
-# EXIT: TCF RCSMONEX (ALL PATHS EXIT VIA SUCH AN INSTRUCTION)
-
-RCSMONEX        EQUALS          RESUME                          
+# EXIT:  TCF  RCSMONEX  (ALL PATHS EXIT VIA SUCH AN INSTRUCTION)
+RCSMONEX        EQUALS          RESUME
 
 # ERASABLE INITIALIZATION REQUIRED:
 
-#       VIA FRESH START:        PVALVEST        =       +0      (ALL JETS ENABLED)
-#                               CH5MASK,CH6MASK =       +0      (ALL JETS OK)
+#          VIA FRESH START:  PVALVEST          = +0  (ALL JETS ENABLED)
+#                            CH5MASK, CH6MASK  = +0  (ALL JETS OK)
 
-# OUTPUT:       CH5MASK & CH6MASK UPDATED (1'S WHERE JETS NOT TO BE USED, IN CHANNEL 5 & 6 FORMAT)
-#               PVALTEST UPDATED (1'S WHEN VALVE CLOSURES HAVE BEEN TRANSLATED INTO CH5MASK & CH6MASK; CHAN 32 FORMAT)
-#               JOB TO DO 1/ACCS.
+# OUTPUT:  CH5MASK & CH6MASK UPDATED  (1'S WHERE JETS NOT TO BE USED, IN CHANNEL 5 & 6 FORMAT)
+#          PVALTEST UPDATED  (1'S WHEN VALVE CLOSURES HAVE BEEN TRANSLATED INTO CH5MASK & CH6MASK; CHAN 32 FORMAT)
+#          JOB TO DO 1/ACCS.
 
 # DEBRIS:  A, L, Q AND DEBRIS OF NOVAC.
 
 # SUBROUTINE CALLED:  NOVAC.
 
-                EBANK=          CH5MASK                         
+                EBANK=          CH5MASK
 
-                BANK            23                              
-                SETLOC          RCSMONT                         
-                BANK                                            
-## Page 191
-                COUNT*          $$/T4RCS                        
+                BANK            23
+                SETLOC          RCSMONT
+                BANK
+## Page 192
+                COUNT*          $$/T4RCS
 
-RCSMONIT        EQUALS          RCSMON                          
+RCSMONIT        EQUALS          RCSMON
 
-RCSMON          CS              ZERO                            
-                EXTEND                                          
+RCSMON          CS              ZERO
+                EXTEND
                 RXOR            CHAN32                          # PICK UP + INVERT INVERTED CHANNEL 32.
                 MASK            LOW8                            # KEEP JET-FAIL BITS ONLY.
-                TS              Q                               
+                TS              Q
 
-                CS              PVALVEST                        #       _   _
+                CS              PVALVEST                        #       -   -
                 MASK            Q                               # FORM PC + PC.
-                TS              L                               #       (P = PREVIOUS ISOLATION VALVE STATE,
-                CS              Q                               #        C = CURRENT VALVE STATE (CH32)).
-                MASK            PVALVEST                        
+                TS              L                               #   (P = PREVIOUS ISOLATION VALVE STATE,
+                CS              Q                               #    C = CURRENT VALVE STATE (CH32)).
+                MASK            PVALVEST
                 ADS             L                               # RESULT NZ INDICATES ACTION REQUIRED.
 
-                EXTEND                                          
+                EXTEND
                 BZF             RCSMONEX                        # QUIT IF NO ACTION REQUIRED.
 
-                EXTEND                                          
-                MP              BIT7                            # MOVE BITS 8-1 OF A TO 14-7 OF L.
+                EXTEND
+                MP              BIT7                            # MOVE BITS 8 - 1 OF A TO 14 - 7 OF L.
                 XCH             L                               # ZERO TO L IN THE PROCESS.
 
- -3             INCR            L                               
+ -3             INCR            L
                 DOUBLE                                          # BOUND TO GET OVERFLOW IN THIS LOOP,
                 OVSK                                            # SINCE WE ASSURED INITIAL NZ IN A.
-                TCF             -3                              
+                TCF             -3
 
-                INDEX           L                               
-                CA              BIT8            -1              # SAVE THE RELEVANT BIT (8-1).
-                TS              Q                               
+                INDEX           L
+                CA              BIT8            -1              # SAVE THE RELEVANT BIT (8 - 1).
+                TS              Q
                 MASK            PVALVEST                        # LOOK AT PREVIOUS VALVE STATE BIT.
-                CCS             A                               
+                CCS             A
                 TCF             VOPENED                         # THE VALVE HAS JUST BEEN OPENED.
 
                 CS              CH5MASK                         # THE VALVE HAS JUST BEEN CLOSED.
-                INDEX           L                               
-                MASK            5FAILTAB                        
+                INDEX           L
+                MASK            5FAILTAB
                 ADS             CH5MASK                         # SET INHIBIT BIT FOR CHANNEL 5 JET.
 
-                CS              CH6MASK                         
-                INDEX           L                               
-                MASK            6FAILTAB                        
+                CS              CH6MASK
+                INDEX           L
+                MASK            6FAILTAB
                 ADS             CH6MASK                         # SET INGIBIT BIT FOR CHANNEL 6 JET.
 
-                CA              Q                               
+                CA              Q
                 ADS             PVALVEST                        # RECORD ACTION TAKEN.
 
                 TCF             1/ACCFIX                        # SET UP 1/ACCJOB AND EXIT.
 
-## Page 192
+## Page 193
 VOPENED         INDEX           L                               # A VALVE HAS JUST BEEN OPENED.
-                CS              5FAILTAB                        
-                MASK            CH5MASK                         
+                CS              5FAILTAB
+                MASK            CH5MASK
                 TS              CH5MASK                         # REMOVE INHIBIT BIT FOR CHANNEL 5 JET.
 
-                INDEX           L                               
-                CS              6FAILTAB                        
-                MASK            CH6MASK                         
+                INDEX           L
+                CS              6FAILTAB
+                MASK            CH6MASK
                 TS              CH6MASK                         # REMOVE INHIBIT BIT FOR CHANNEL 6 JET.
 
-                CS              Q                               
-                MASK            PVALVEST                        
+                CS              Q
+                MASK            PVALVEST
                 TS              PVALVEST                        # RECORD ACTION TAKEN.
 
 1/ACCFIX        CAF             PRIO27                          # SET UP 1/ACCS SO THAT THE SWITCH CURVES
-                TC              NOVAC                           #       FOR TJETLAW CAN BE MODIFIED IF CH5MASK
-                EBANK=          AOSQ                            #       HAS BEEN ALTERED.
-                2CADR           1/ACCJOB                        
+                TC              NOVAC                           #   FOR TJETLAW CAN BE MODIFIED IF CH5MASK
+                EBANK=          AOSQ                            #   HAS BEEN ALTERED.
+                2CADR           1/ACCJOB
 
                 TCF             RCSMONEX                        # EXIT.
+
 
 5FAILTAB        EQUALS          -1                              # CH 5 JET BIT CORRESPONDING TO CH 32 BIT:
                 OCT             00040                           # 8
@@ -161,5 +162,3 @@ VOPENED         INDEX           L                               # A VALVE HAS JU
                 OCT             00002                           # 3
                 OCT             00040                           # 2
                 OCT             00100                           # 1
-
-

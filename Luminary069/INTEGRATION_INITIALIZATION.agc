@@ -23,6 +23,9 @@
 ##                              Fix interpretive operator BOF -> BOFCLR
 ##		2017-01-28 RSB	Proofed comment text using octopus/prooferComments
 ##				but no errors found.
+##		2017-03-13 RSB	Comment-text fixes noted in proofing Luminary 116.
+##		2017-03-15 RSB	Comment-text fixes identified in 5-way
+##				side-by-side diff of Luminary 69/99/116/131/210.
 
 ## Page 1200
 # 1.0 INTRODUCTION
@@ -145,7 +148,7 @@
 #                     0 IF TCCSM(LEM) = 0
 #
 #    CMOONFLG       - PERMANENT FLAGS CORRESPONDING          0      0
-#    OMIDFLAG         TO MOONFLAG AND MIDFLAG                0,1    0,1
+#    CMIDFLAG         TO MOONFLAG AND MIDFLAG                0,1    0,1
 #    LMOONFLG         C = CSM, L = LM                        0      0
 #    LMIDFLG                                                 0,1    0,1
 #
@@ -1060,7 +1063,7 @@ INTWAKEU        RELINT
                         UPSVFLAG        # REQUEST. IF NOT GO TO INTWAKUP.
                         INTWAKUP
 
-                VLOAD                   # MOVE PRECT(6) AND VRECT(6) INTO
+                VLOAD                   # MOVE RRECT(6) AND VRECT(6) INTO
                         RRECT           #      RCV(6)   AND VCV(6)   RESPECTIVELY.
                 STOVL   RCV
                         VRECT           # NOW GO TO 'RECTIFY +13D' TO

@@ -15,7 +15,10 @@
 ##		2016-12-17 RSB	Proofed text comments with octopus/ProoferComments
 ##				and corrected the errors found.
 ##		2017-01-22 MAS	Fixed some lingering comment errors.
-##
+##		2017-03-13 RSB	Comment-text fixes noted in proofing Luminary 116.
+##		2017-03-15 RSB	Comment-text fixes identified in 5-way
+##				side-by-side diff of Luminary 69/99/116/131/210.
+
 ## This source code has been transcribed or otherwise adapted from
 ## digitized images of a hardcopy from the MIT Museum.  The digitization
 ## was performed by Paul Fjeld, and arranged for by Deborah Douglas of
@@ -152,7 +155,7 @@
 #				0 IF TCCSM(LEM) = 0
 #
 #	CMOONFLG	-	PERMANENT FLAGS CORRESPONDING			0	0
-#	OMIDFLAG		TO MOONFLAG AND MIDFLAG				0,1	0,1
+#	CMIDFLAG		TO MOONFLAG AND MIDFLAG				0,1	0,1
 #	LMOONFLG		C = CSM, L = LM					0	0
 #	LMIDFLG									0,1	0,1
 #
@@ -286,7 +289,7 @@ STATEINT	TC	PHASCHNG
 		TC	TASKOVER
 STATINT1	TC	INTPRET
 		BON	RTB
-			QUITFLAG	# KILL INTEGRATION UNTIL NEXT P00.
+			QUITFLAG	# KILL INTEGRATION UNTIL NEXT POO.
 			NOINT
 			LOADTIME
 		STORE	TDEC1
@@ -1049,7 +1052,7 @@ INTWAKEU	RELINT
 			UPSVFLAG	# REQUEST.  IF NOT GO TO INTWAKUP.
 			INTWAKUP
 
-		VLOAD			# MOVE PRECT(6) AND VRECT(6) INTO
+		VLOAD			# MOVE RRECT(6) AND VRECT(6) INTO
 			RRECT		#	RCV(6) AND VCV(6) RESPECTIVELY.
 		STOVL	RCV
 			VRECT		# NOW GO TO 'RECTIFY +13D' TO

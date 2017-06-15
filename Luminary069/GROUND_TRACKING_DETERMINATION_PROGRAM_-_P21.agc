@@ -20,6 +20,8 @@
 ##              2016-12-15 RRB  Updated for Luminary 69.
 ##		2017-01-28 RSB	Proofed comment text using octopus/prooferComments
 ##				but no errors found.
+##		2017-03-15 RSB	Comment-text fixes identified in 5-way
+##				side-by-side diff of Luminary 69/99/116/131/210.
 
 ## Page 664
 # GROUND TRACKING DETERMINATION PROGRAM P21
@@ -60,7 +62,7 @@
 #
 # ERASABLE INITIALIZATION REQUIRED
 #
-# AX0		2DEC	4.652459653 E-5 RADIANS		%68-69 CONSTANTS*
+# AX0		2DEC	4.652459653 E-5 RADIANS		%68-69 CONSTANTS"
 #
 # -AY0		2DEC	2.147535898 E-5 RADIANS
 #

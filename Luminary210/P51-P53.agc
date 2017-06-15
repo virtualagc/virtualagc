@@ -20,6 +20,8 @@
 ##                                           TC	 CHKOUT   -> TCF CHKOUT   
 ##		2016-12-26 RSB	Comment-text proofed using ProoferComments
 ##				and corrected errors found.
+##		2017-03-16 RSB	Comment-text fixes identified in 5-way
+##				side-by-side diff of Luminary 69/99/116/131/210.
 
 ## Page 923
 # PROGRAM NAME- PROG52                                                                   DATE- JAN 9, 1967
@@ -1598,7 +1600,7 @@ GVDETER		CAF	42DEG
 #                      X    UNIT G    
 #                  *   -               -
 #                  M=  Y =  UNITEZSM * X )
-#                      -               -
+#                      -         -     -
 #                      Z    UNIT(X   * Y )
 #  THEN   ROTATED  SM WRT  PRESENT IS
 ## Page 962

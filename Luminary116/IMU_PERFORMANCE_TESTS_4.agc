@@ -13,16 +13,18 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-01-22 MAS  Created from Luminary 99.
+##		2017-03-07 RSB	Transcribed, and then proofed comment-text using
+##				3-way diff vs Luminary 99 and Luminary 131.
+##				(Admittedly, the former is more for detecting errors
+##				in Luminary 99 than the other way around.)
 
-## NOTE: Page numbers below have not yet been updated to reflect Luminary 116.
-
-## Page 382
+## Page 383
 # PROGRAM -     IMU PERFORMANCE TESTS 4
 # DATE -        NOV 15, 1966
 # BY -          GEORGE SCHMIDT IL7-146 EXT 1126
 # MOD NO-ZERO
 
-# FUNCITONAL DESCRIPTION
+# FUNCTIONAL DESCRIPTION
 
 # THIS SECTION CONSISTS OF THE FILTER FOR THE GYRO DRIFT TESTS.  NO COMPASS
 # IS DONE IN LEM.  FOR A DESCRIPTION OF THE FILTER SEE E-1973.  THIS
@@ -38,7 +40,7 @@
 
 # 1600  OVERFLOW IN DRIFT TEST
 # 1601  BAD IMU MODING IN ANY ROUTINE THAT USES IMUSTALL
-#       OUTPUT
+# OUTPUT
 
 # FLASHING DISPLAY OF RESULTS - CONTROLLED IN IMU PERF TESTS 2
 
@@ -46,7 +48,7 @@
 
 # ALL CENTRALS - ALL OF EBANK XSM
 
-## Page 383
+## Page 384
                 BANK            33                              
                 SETLOC          IMU4                            
                 BANK                                            
@@ -86,7 +88,7 @@ ESTIMS          INHINT
 VERTSKIP        EXIT                                            
                 TC              SLEEPIE         +1              
 
-## Page 384
+## Page 385
 ALLOOP          CA              OVFLOWCK                        
                 EXTEND                                          
                 BZF             +2                              
@@ -123,7 +125,7 @@ SPECSTS         CAF             PRIO20
 
                 TC              TASKOVER                        
 
-## Page 385
+## Page 386
 ALFLT           CCS             GEOCOMPS                        
                 TC              +2                              
                 TC              NORMLOP                         
@@ -174,7 +176,7 @@ DELMLP          DLOAD*          DMP
                 STORE           INTY            +8D,1           
                 PDDL            DMP*                            
                                 VELSC                           
-## Page 386
+## Page 387
                                 VLAUN           +8D,1           
                 SL2R                                            
                 DSU             STADR                           
@@ -224,7 +226,7 @@ LOOSE           DLOAD*          PDDL*
                                 POSNV           +8D,1           
                 MXV             VSL1                            
                                 TRANSM1                         
-## Page 387
+## Page 388
                 DLOAD                                           
                                 MPAC                            
                 STORE           POSNV           +8D,1           
@@ -274,7 +276,7 @@ PERFERAS        EXIT
                 CA              CDUX                            
                 TS              LOSVEC          +1              # FOR TROUBLESHOOTING VD POSNS 2$4
 
-## Page 388
+## Page 389
 SETUPER1        TC              INTPRET                         
                 DLOAD           PDDL                            # ANGLES FROM DRIFT TEST ONLY
                                 ANGZ                            
@@ -321,7 +323,7 @@ SOMERR2         CAF             OCT1601
 OCT1601         OCT             01601                           
 DEC585          OCT             06200                           # 3200 B+14 ORDER IS IMPORTANT
 SCHZEROS        2DEC            .00000000                       
-## Page 389
+## Page 390
                 2DEC            .00000000                       
 
                 OCT             00000                           
@@ -340,7 +342,7 @@ SOUPLY          2DEC            .93505870                       # INITIAL GAINS 
 ALXXXZ          GENADR          ALX1S           -1              
 PIPASC          2DEC            .13055869                       
 
-VELSC           2DEC            -.52223476                      # 512/980.402
+VELSC           2DEC            -.52223476                      #  512/980.402
 
 ALSK            2DEC            .17329931                       # SSWAY VEL GAIN X 980.402/4096
 

@@ -27,6 +27,8 @@
 ##                                                              VN1
 ##		2017-01-28 RSB	Proofed comment text using octopus/prooferComments
 ##				and fixed errors found.
+##		2017-03-16 RSB	Comment-text fixes identified in 5-way
+##				side-by-side diff of Luminary 69/99/116/131/210.
 
 ## Page 829
 		BANK	21
@@ -487,7 +489,7 @@ TGOCOMP		RTB	DSU
 		STORE	TGO
 		RVQ
 
-#  ************************************************************************
+# ************************************************************************
 
 THROTUP		CAF	BIT13
 		TS	THRUST
@@ -496,7 +498,7 @@ THROTUP		CAF	BIT13
 		WOR	CHAN14
 		TC	Q
 
-# *************************************************************************
+# ************************************************************************
 
 DEC299		DEC	299
 

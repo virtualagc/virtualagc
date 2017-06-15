@@ -10,6 +10,9 @@
 ##               2016-09-27 MAS  Filled out.
 ##		 2016-12-08 RSB	 Proofed comments with octopus/ProoferComments
 ##				 and fixed the errors found.
+##		 2017-06-05 MAS	 Made comment corrections found during Sunburst 37
+##				 transcription.
+
 
 ## This source code has been transcribed or otherwise adapted from
 ## digitized images of a hardcopy from the private collection of 
@@ -52,7 +55,7 @@ FCS2            CAF             V04N01K                         # DISPLAY PRESEN
                 TC              NVSBWAIT
                 INCR            MPAC            +2
                 CAF             V21N02K
-                TC              NVSBWAIT                        # IN CASE IT'S BUSY BUT IT SHOULDN'T BE.
+                TC              NVSBWAIT                        # IN CASE IT,S BUSY BUT IT SHOULDN,T BE.
                 TC              ENDIDLE                         # WHILE LOADING.
                 TC              +3                              # V34E. TERMINATE LOAD OF THIS LIST
                                                                 # SECTION, GO TO NEW SECTION OR TO TEST.
@@ -402,7 +405,7 @@ PERFORM         TC              GRABWAIT                        # KEY RELEASE MA
                 INHINT                                          # ENTER. THE FAIL HAS BEEN RESET.
                 CAF             BIT2                            # 20MS.
                 TC              WAITLIST
-                2CADR           TRIMON                          # CHECK AGAIN TO BE SURE, THEN PROCEED..
+                2CADR           TRIMON                          # CHECK AGAIN TO BE SURE. THEN PROCEED..
 
                 TC              EJFREE
 

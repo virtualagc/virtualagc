@@ -16,6 +16,7 @@
 ##				vs the already-proofed corresponding Colossus
 ##				237 and Comanche 55 source-code files
 ##				and corrected errors found.
+##		2017-03-09 RSB	Fixed VNP00H to VNPOOH.
 ##
 ## The contents of the "Colossus249" files, in general, are transcribed 
 ## from a scanned copy of the program listing.  Notations on this
@@ -490,7 +491,7 @@ P17		TC	AVFLAGA			# AVFLAG = CSM, SET TRACK + UPDATE FLAGS
 P77		TC	AVFLAGP			# AVFLAG = LEM, SET TRACK + UPDATE FLAGS
 P17.1		TC	P20FLGON		#	SET UPDATE FLAG
 		CAF	V06N37			#	DISPLAY TTPI TIME
-		TC	VNP00H
+		TC	VNPOOH
 		TC	INTPRET
 		CLEAR	CALL
 			UPDATFLG

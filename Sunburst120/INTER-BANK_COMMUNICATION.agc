@@ -13,6 +13,8 @@
 ##		2016-11-01 RSB	More typos.
 ##		2016-12-06 RSB	Comments proofed using octopus/ProoferComments,
 ##				changes made.
+##		2017-03-17 RSB	Comment-text fixes identified in diff'ing
+##				Luminary 99 vs Comanche 55.
 
 ## Page 948
 #          THE FOLLOWING ROUTINE CAN BE USED TO CALL A SUBROUTINE IN ANOTHER BANK. IN THE BANKCALL VERSION, THE
@@ -166,7 +168,7 @@ USPRCADR        TS              LOC                             # SAVE A
 # SUPERBANK     SETTING     S-REG. VALUE    BANK NUMBERS     ADDRESSES
 # ---------     -------     ------------     ------------     ------------
 
-# SUPERBANK 3     OXX       2000 - 3777        30 - 37       70000 - 107777   (WHERE XX CAN BE ANYTHING AND
+# SUPERBANK 3     0XX       2000 - 3777        30 - 37       70000 - 107777   (WHERE XX CAN BE ANYTHING AND
 #                                                                             WILL USUALLY BE SEEN AS 11)
 # SUPERBANK 4     100       2000 - 3777        40 - 47       110000 - 127777  (AS FAR AS IT CAN BE SEEN,
 #                                                                             ONLY BANKS 40-43 WILL EVER BE

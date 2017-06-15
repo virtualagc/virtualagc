@@ -16,6 +16,8 @@
 ##              2016-11-24 HG   Transcribed
 ##		2016-12-23 RSB	Proofed comment text with octopus/ProoferComments
 ##				and fixed all errors found.
+##		2017-03-15 RSB	Comment-text fixes identified in 5-way
+##				side-by-side diff of Luminary 69/99/116/131/210.
 
 ## Page 354
 # BLOCK 2 LGC ATTITUDE MANEUVER ROUTINE-KALCMANU
@@ -40,9 +42,9 @@
 #  WITH THIS INFORMATION KALCMANU DETERMINES THE DIRECTION OF THE SINGLE EQUIVALENT ROTATION (COF ALSO U) AND THE
 # MAGNITUDE OF THE ROTATION (AM) TO BRING THE S/C FROM ITS INITIAL ORIENTATION TO ITS FINAL ORIENTATION.
 # THIS DIRECTION REMAINS FIXED BOTH IN INERTIAL COORDINATES AND IN COMMANDED S/C AXES THROUGHOUT THE
-#
+#                  -
 # MANEUVER.  ONCE COF AND AM HAVE BEEN DETERMINED, KALCMANU THEN EXAMINES THE MANEUVER TO SEE IF IT WILL BRING
-#
+#                                       -
 # THE S/C THROUGH GIMBAL LOCK.  IF SO, COF AND AM ARE READJUSTED SO THAT THE S/C WILL JUST SKIM THE GIMBAL
 # LOCK ZONE AND ALIGN THE X-AXIS.  IN GENERAL A FINAL YAW  ABOUT X WILL BE NECESSARY TO COMPLETE THE MANEUVER.
 # NEEDLESS TO SAY, NEITHER THE INITIAL NOR THE FINAL ORIENTATION CAN BE IN GIMBAL LOCK.
@@ -52,7 +54,7 @@
 # EVERY ONE SECOND DURING THE MANEUVER.  TO ACHIEVE A SMOOTHER SEQUENCE OF COMMANDS BETWEEN SUCCESSIVE UPDATES,
 # THE PROGRAM ALSO GENERATES A SET OF INCREMENTAL CDU ANGLES (DELDCDU) TO BE ADDED TO CDU DESIRED BY THE DIGITAL
 # AUTOPILOT.  KALCMANU ALSO CALCULATES THE COMPONENT MANEUVER RATES (OMEGAPD, OMEGAQD, OMEGARD), WHICH CAN
-#
+#                                      -
 # BE DETERMINED SIMPLY BY MULTIPLYING COF BY SOME SCALAR (ARATE) CORRESPONDING TO THE DESIRED ROTATIONAL RATE.
 #
 #      AUTOMATIC MANEUVERS ARE TIMED WITH THE HELP OF WAITLIST SO THAT AFTER A SPECIFIED INTERVAL THE Y AND Z
@@ -312,7 +314,7 @@
 #                      (                         )
 #                      (                      2  )
 #                      (U U       U U       U    )
-#                      ( Z X       X Y       Z   )
+#                      ( Z X       Z Y       Z   )
 
 
 #                      (0         -U        U  )
@@ -687,7 +689,7 @@ MXM3            SETPD           VLOAD*                  # MXM3 MULTIPLIES 2 3X3 
                 RVQ
 
 
-# RETURN WITH MIXM2 IN PD LIST
+# RETURN WITH M1XM2 IN PD LIST
 
 TRANSPOS        SETPD           VLOAD*                  # TRANSPOS TRANSPOSES A 3X3 MATRIX
                                 0                       #  AND LEAVES RESULT IN PD LIST
@@ -738,7 +740,7 @@ K3S1            2DEC            .86603                  # = SIN(D)              
 K4              2DEC            -.25                    # = -COS(D)                       $2
 K4SQ            2DEC            .125                    # = COS(D)COS(D)                  $2
 SNGLCD          2DEC            .008725                 # = SIN(NGL)COS(D)                $2
-CNGL            2DEC            .499695                 # = COS(NGL)                      $2
+CNGL            2DEC            .499695                 # COS(NGL)                        $2
 LOCKANGL        DEC             .388889                 # = 70 DEGREES
 # INTERPRETIVE SUBROUTINE TO READ THE CDU ANGLES
 

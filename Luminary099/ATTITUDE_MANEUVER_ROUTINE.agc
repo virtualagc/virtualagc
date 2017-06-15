@@ -14,7 +14,10 @@
 ##		2016-12-14 RSB	Proofed text comments with octopus/ProoferComments
 ##				and corrected the errors found.
 ##		2017-01-19 MAS	Corrected some USER'S to USER:S
-##
+##		2017-03-07 RSB	Comment-text fixes noted in proofing Luminary 116.
+##		2017-03-15 RSB	Comment-text fixes identified in 5-way
+##				side-by-side diff of Luminary 69/99/116/131/210.
+
 ## This source code has been transcribed or otherwise adapted from
 ## digitized images of a hardcopy from the MIT Museum.  The digitization
 ## was performed by Paul Fjeld, and arranged for by Deborah Douglas of
@@ -413,7 +416,7 @@
 #
 #	MXM3
 ## Page 350
-#	TRANSPGS
+#	TRANSPOS
 #	SIGNMPAC
 #	READCDUK
 #	CDUTODCM
@@ -667,7 +670,7 @@ MXM3		SETPD	VLOAD*		# MXM3 MULTIPLIES 2 3X3 MATRICES
 			0,2
 		RVQ
 		
-# RETURN WITH MIXM2 IN PD LIST
+# RETURN WITH M1XM2 IN PD LIST
 
 TRANSPOS	SETPD	VLOAD*		# TRANSPOS TRANSPOSES A 3X3 MATRIX
 			0		# 	AND LEAVES RESULT IN PD LIST
@@ -836,7 +839,7 @@ DELCOMP		SETPD	PUSH		# MPAC CONTAINS THE ANGLE A
 		BDSU	BOVB
 			DPHALF
 			SIGNMPAC
-		PDDL			# PDA = 1-COS(A)
+		PDDL			# PD4 = 1-COS(A)
 		
 # COMPUTE THE DIAGONAL COMPONENTS OF DEL
 

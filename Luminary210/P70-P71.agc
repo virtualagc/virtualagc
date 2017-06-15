@@ -18,6 +18,8 @@
 ##              2016-12-08 HG   Fix operand LANDISP -> LANADISP
 ##		2016-12-25 RSB	Comment-text proofed using ProoferComments
 ##				and corrected errors found.
+##		2017-03-16 RSB	Comment-text fixes identified in 5-way
+##				side-by-side diff of Luminary 69/99/116/131/210.
 
 ## Page 831
 		BANK	21
@@ -80,7 +82,7 @@ P71NOW?		CS	MODREG		# YES.  ARE WE IN P71 NOW?
 		TCF	LANADISP	# IGNORE CHAN BITS - ASSUME NO ABORT
 		
 		EXTEND			# NO. IS AN ABORT STAGE COMMANDED?
-		READ	CHAN30		# .
+		READ	CHAN30
 		COM
 		TS	L
 		MASK	BIT4
@@ -359,7 +361,7 @@ LEGAL?		CS	MMNUMBER	# IS THE DESIRED PGM ALREADY IN PROGRESS?
 		CCS	A
 		TCF	ABORTALM
 
-		CA	FLAGWRD7	# IS SERVICER ON THE A1R?
+		CA	FLAGWRD7	# IS SERVICER ON THE AIR?
 		MASK	AVEGFBIT
 		CCS	A
 		TC	Q		# YES.  ALL IS WELL.

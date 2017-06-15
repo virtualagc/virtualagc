@@ -16,7 +16,9 @@
 ##		2009-06-07 RSB	Corrected a typo.
 ##		2016-12-17 RSB	Proofed text comments with octopus/ProoferComments
 ##				and corrected the errors found.
-##
+##		2017-03-17 RSB	Comment-text fixes identified in diff'ing
+##				Luminary 99 vs Comanche 55.
+
 ## This source code has been transcribed or otherwise adapted from
 ## digitized images of a hardcopy from the MIT Museum.  The digitization
 ## was performed by Paul Fjeld, and arranged for by Deborah Douglas of
@@ -64,7 +66,7 @@ KEPPREP		LXA,2	SETPD
 			4D
 		DSQ	PDDL		# (FS)SQ (+12 +2(N1-N2))	8D	PL 10D
 			4D
-		DSQ	PDDL*		# SSQ/MU (-20R +2(N1-N2))	10D	PL 12D
+		DSQ	PDDL*		# SSQ/MU (-2 OR +2(N1-N2))	10D	PL 12D
 			MUEARTH,2
 		SR3	SR4
 		PDVL	VSQ		# PREALIGN MU (+43 OR +37) 	12D	PL 14D
@@ -469,7 +471,7 @@ QUALITY3	DSQ			# J22 TERM X R**4 IN 2D, SCALED B61
 		VSL*	VAD		# SHIFT MAKES B61, FOR ADDITION OF 
 					# VECTOR IN 2D
 			0	-3,2
-		VSL*	V/SC		# OPERAND FROM 0D.  B108 FOR X1 = 0
+		VSL*	V/SC		# OPERAND FROM 0D, B108 FOR X1 = 0
 			0	-27D,1	# FOR X1 = 0, MAKES B88, GIVING B-20
 					# FOR RESULT.
 		PDDL	PDDL

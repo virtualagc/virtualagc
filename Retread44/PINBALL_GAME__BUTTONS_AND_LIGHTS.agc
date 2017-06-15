@@ -18,6 +18,10 @@
 ##				and fixed errors found.
 ##		2017-01-28 RSB	WTIH -> WITH.
 ##		2017-02-08 RSB	Comment-text fixes noted while proofing Artemis 72.
+##		2017-03-08 RSB	Changed DSPOCTWO to DSPOCTWD.
+##		2017-03-08 RSB	Comment-text fixes noted in proofing Luminary 116.
+##		2017-03-17 RSB	Comment-text fixes identified in diff'ing
+##				Luminary 99 vs Comanche 55.
 
 ## Page 135
 ## The log section name, PINBALL GAME  BUTTONS AND LIGHTS, is circled in red.
@@ -413,7 +417,7 @@ DECON           2DEC            E-5 B14                 # 2EXP14/10EXP5 = .16384
 
 GETINREL        INDEX           DSPCOUNT
                 CAF             INRELTAB
-                TS              INREL                   # (A TEMP. REG)
+                TS              INREL                   # (A TEMP, REG)
                 TC              Q
 
 INRELTAB        OCT             4                       # R3D5 (DSPCOUNT = 0)
@@ -463,7 +467,7 @@ NEGSGN          TC              SIGNTEST
                 TC              -ON
                 CAF             TWO
 BOTHSGN         INDEX           INREL                   # SET DEC COMP BIT TO 1 (IN DECBRNCH)
-                AD              BIT7                    # BIT 5 FOR R1.  BIT 4 FOR R2.
+                AD              BIT7                    # BIT 5 FOR R1,  BIT 4 FOR R2,
                 ADS             DECBRNCH                # BIT 3 FOR R3.
 FIXCLPAS        CCS             CLPASS                  # IF CLPASS IS + OR +0, MAKE IT +0.
                 CAF             ZERO
@@ -600,7 +604,7 @@ CLEAR           CCS             DSPCOUNT
 CLPASHI         CCS             INREL
                 TS              INREL
                 TC              LEGALTST
-                CAF             DOUBLK          +2      # +3 TO - NUMBER, BACKS DATA REQUESTS.
+                CAF             DOUBLK          +2      # +3 TO - NUMBER. BACKS DATA REQUESTS.
                 ADS             REQRET
                 CA              INREL
                 TS              MIXTEMP                 # TEMP STORAGE FOR INREL
@@ -751,7 +755,7 @@ TESTNN          EXTEND                                  # VERB L/ 30
                 TC              GODSPALM                # NOT IN USE    IF +0
                 TC              REQADD                  # SPECIFY MACHINE CADR IF -
                 INCR            NOUNCADR                # AUGMENT MACHINE CADR IF -0
-                TC              SETNADD                 # ECADR FROM NOUNCADR, SETS EB, NOUNADD.
+                TC              SETNADD                 # ECADR FROM NOUNCADR. SETS EB, NOUNADD.
                 TC              INTMCTBS        +2
 REQADD          CAF             BIT15                   # SET CLPASS FOR PASS0 ONLY
                 TS              CLPASS
@@ -2127,7 +2131,7 @@ DSMSK           OCT             37
 
 
 
-DSPOCTIN        TC              DSPIN                   # SO DSPOCTWO DOESNT USE SWCALL
+DSPOCTIN        TC              DSPIN                   # SO DSPOCTWD DOESNT USE SWCALL
                 CAF             +2
                 TC              BANKJUMP
 ENDSPOCT        CADR            OCTBACK
@@ -2137,7 +2141,7 @@ ENDSPOCT        CADR            OCTBACK
 # DSPALARM FINDS TC NVSUBEND IN ENTRET FOR NVSUB INITIATED ROUTINES.
 # ABORT WITH 01501.
 # DSPALARM FINDS TC ENDOFJOB IN ENTRET FOR KEYBOARD INITIATED ROUTINES.
-# DC TC ENTRET.
+# DO TC ENTRET.
 
 CHARALRM        CAF             ENDINST                 # ALARMS WHICH MUST DO ENDOFJOBS COME
                 TS              ENTRET                  # HERE. ALLOWS ENTRET TO BE TEMP ERASABLE
@@ -2620,7 +2624,7 @@ DOPROC          CAF             ONE
 
 
 # LODNNTAB LOADS NNADTEM WITH THE NNADTAB ENTRY, NNTYPTEM WITH THE
-# NNTYPTAB ENTRY. IF THE NOUN IS MIXED, IDADITEM IS LOADED WITH THE FIRST
+# NNTYPTAB ENTRY. IF THE NOUN IS MIXED, IDAD1TEM IS LOADED WITH THE FIRST
 # IDADDTAB ENTRY, IDAD2TEM THE SECOND IDADDTAB ENTRY, IDAD3TEM THE THIRD
 # IDADDTAB ENTRY, RUTMXTEM WITH THE RUTMXTAB ENTRY. MIXBR IS SET FOR
 # MIXED OR NORMAL NOUN.

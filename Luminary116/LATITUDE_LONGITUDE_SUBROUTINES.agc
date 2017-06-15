@@ -14,6 +14,10 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-01-22 MAS  Created from Luminary 99.
 ##              2017-01-28 RRB  Updated for Luminary 116.
+##		2017-03-13 RSB	Proofed comment text via 3-way diff vs
+##				Luminary 99 and 131 ... no problems found.
+##		2017-03-15 RSB	Comment-text fixes identified in 5-way
+##				side-by-side diff of Luminary 69/99/116/131/210.
 
 ## Page 1125
 # SUBROUTINE TO CONVERT RAD VECTOR AT GIVEN TIME TO LAT,LONG AND ALT
@@ -24,7 +28,7 @@
 #   L             LAT-LONG
 # SUBROUTINES USED
 
-#  R-TO-RP,ARCTAN,SFTGAMMA,SETRE
+#  R-TO-RP,ARCTAN,SETGAMMA,SETRE
 # ERASABLE INIT. REQ.
 
 #   AXO,-AYO,AZO,TEPHEM (SET AT LAUNCH TIME)
@@ -87,7 +91,7 @@ CALLRTRP        CALL
                 STCALL          ALT                             # EXIT WITH ALT METERS B-29
                                 INCORPEX                        
 ## Page 1127
-# SUBROUTINE TO CONVERT LAT,LONG.ALT AT GIVEN TIME TO RADIUS VECTOR
+# SUBROUTINE TO CONVERT LAT,LONG,ALT AT GIVEN TIME TO RADIUS VECTOR
 
 # CALLING SEQUENCE
 
@@ -277,7 +281,7 @@ GAMRP           =               8D
 
 # OUTPUT
 #  ERADM= 504RM FOR MOON (METERS B-29)
-#  ERADM= ERAD OR COMPUTED RE FOR EARTH (METERS B-29)
+#  ERADM= ERAD OR COMPUTED RF FOR EARTH (METERS B-29)
 
 SETRE           STQ             DLOAD                           
                                 SETREX                          

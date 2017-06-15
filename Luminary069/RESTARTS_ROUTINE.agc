@@ -20,6 +20,9 @@
 ##		2017-01-10 RRB	Updated for Luminary 69.
 ##		2017-01-28 RSB	Proofed comment text using octopus/prooferComments
 ##				but no errors found.
+##		2017-03-14 RSB	Comment-text fixes noted in proofing Luminary 116.
+##		2017-03-16 RSB	Comment-text fixes identified in 5-way
+##				side-by-side diff of Luminary 69/99/116/131/210.
 
 ## Page 1297
 		BANK	01
@@ -82,7 +85,7 @@ ITSAWAIT	CA	WTLTCADR	# SET UP WAITLIST CALL
 		NDX	TEMP2G		# DIRECTLY STORED
 		CA	PHSPRDT1
 TIMETEST	CCS	A		# IS IT AN IMMEDIATE RESTART
-		INCR	A		# NO.
+		INCR	A		# NO,
 		TCF	FINDTIME	# FIND OUT WHEN IT SHOULD BEGIN
 
 		TCF	ITSINDIR	# STORED INDIRECTLY
@@ -154,7 +157,7 @@ CHKNOVAC	TS	GOLOC -1	# SAVE PRIO UNTIL WE SEE IF ITS
 		BZMF	ITSNOVAC
 
 		CAF	FVACCADR	# POSITIVE, SET UP FINDVAC CALL.
-		XCH	GOLOC -1	# PICK UP PRIO.
+		XCH	GOLOC -1	# PICK UP PRIO,
 		TC	GOLOC -1	# AND GO
 
 ITSNOVAC	CAF	NOVACADR	# NEGATIVE,

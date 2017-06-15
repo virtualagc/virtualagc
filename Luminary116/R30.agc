@@ -14,8 +14,14 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-01-22 MAS  Created from Luminary 99.
 ##		2017-02-08 RSB	Comment-text fixes discovered while proofing Artemis 72.
-
-## NOTE: Page numbers below have not yet been updated to reflect Luminary 116.
+##		2017-03-09 RSB	Transcribed, and then proofed comment-text using
+##				3-way diff vs Luminary 99 and Luminary 131.
+##				(Admittedly, the former is more for detecting errors
+##				in Luminary 99 than the other way around.)
+##		2017-03-16 RSB	Comment-text fixes identified in 5-way
+##				side-by-side diff of Luminary 69/99/116/131/210.
+##		2017-03-17 RSB	Comment-text fixes identified in diff'ing
+##				Luminary 99 vs Comanche 55.
 
 ## Page 712
 # SUBROUTINE NAME:  V82CALL
@@ -31,7 +37,7 @@
 # 1.    IF AVERAGE G IS OFF:
 #               FLASH DISPLAY V04N06.  R2 INDICATES WHICH SHIP'S STATE VECTOR IS
 #                       TO BE UPDATED.  INITIAL CHOICE IS THIS SHIP (R2=1).  ASTRONAUT
-#                       CAN CHANGE TO OTHER SHIP BY V22E XE. WHERE X NOT EQ 1.
+#                       CAN CHANGE TO OTHER SHIP BY V22EXE, WHERE X NOT EQ 1.
 #               SELECTED STATE VECTOR UPDATED BY THISPREC (OTHPREC).
 #               CALLS SR30.1 (WHICH CALLS TFFCONMU + TFFRP/RA) TO CALCULATE
 #                       RPER (PERIGEE RADIUS), RAPO (APOGEE RADIUS), HPER (PERIGEE
@@ -43,11 +49,11 @@
 #                       ASTRONAUT HAS OPTION TO MONITOR TPER BY KEYING IN N 32 E.
 #                       DISPLAY IS IN HMS, IS NEGATIVE (AS WAS TFF), AND INCREMENTS
 #                       ONCE PER SECOND ONLY IF TFF DISPLAY WAS -59M59S.
-#       2.      IF AVERAGE G IS ON:
-#                       CALLS SR30.1 APPROX EVERY TWO SECS.  STATE VECTOR IS ALWAYS
-#                               FOR THIS VEHICLE.  V82 DOES NOT DISTURB STATE VECTOR.  RESULTS
-#                               OF SR30.1 ARE RAPO, RPER, HAPO, HPER, TPER, TFF.
-#                       FLASH MONITOR V16N44 (HAPO, HPER, TFF).
+# 2. 	IF AVERAGE G IS ON:
+#               CALLS SR30.1 APPROX EVERY TWO SECS.  STATE VECTOR IS ALWAYS
+#                       FOR THIS VEHICLE.  V82 DOES NOT DISTURB STATE VECTOR.  RESULTS
+#                       OF SR30.1 ARE RAPO, RPER, HAPO, HPER, TPER, TFF.
+#               FLASH MONITOR V16N44 (HAPO, HPER, TFF).
 #       ADDENDUM:  HAPO AND HPER SHOULD BE CHANGED TO READ HAPOX AND HPERX IN THE
 #               ABOVE REMARKS.
 
@@ -197,7 +203,7 @@ BOTHPAD         STCALL          RPADTEM
                 DLOAD           BZE                             # SR30.1 SETS -TPER=0 IF HPER L/
                                 -TPER                           # HPERMIN (300 OR 35) KFT.
                                 TICKTIFF                        # (-TPER = 0)
-TICKTPER        DLOAD           DAD                             # (-TPER NON ZERO) TFF WAS NOT COMPUTED.
+TICKTPER        DLOAD           DAD                             # (-TPER NON ZERO) TFF WAS NOT COMPUTED,
                                 -TPER                           # BUT WAS SET TO 59M59S.  DONT TICK TFF, DO
                                 TSTART82                        # TICK -TPER.  DISPLAY BOTH.
                 STORE           -TPER                           # -TPER CORRECTED FOR TIME SINCE V82GOFF1
@@ -440,9 +446,9 @@ SKIPTPER        STODL           -TPER
                 STCALL          TFF                             # OTHERWISE COMPUTES TFF.       (GOTO)
                                 S2                              
 
-MAXCHK          DSU             BPL                             # IF C(MPAC) > 9999.9 NM. MPAC = 9999.9 NM
+MAXCHK          DSU             BPL                             # IF C(MPAC) > 9999.9 NM, MPAC = 9999.9 NM
                                 MAXNM                           
-                                +3                              # OTHERWISE C(MPAC) - B(MPAC).
+                                +3                              # OTHERWISE C(MPAC) = B(MPAC).
                 DAD             RVQ                             
                                 MAXNM                           
  +3             DLOAD           RVQ                             # (USED BY P30 - P37 ALSO)
@@ -451,5 +457,5 @@ MAXCHK          DSU             BPL                             # IF C(MPAC) > 9
 MAXNM           2OCT            0106505603                      
 
 ## Page 722
-## Empty page.
+## <br>Empty page.
 

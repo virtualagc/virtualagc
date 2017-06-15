@@ -20,7 +20,9 @@
 ##				237 and Comanche 55 source-code files
 ##				and corrected errors found.
 ##		2017-02-09 RSB	Comment-text fixes identified in proofing Artemis 72
-##
+##		2017-03-16 RSB	Comment-text fixes identified in 5-way
+##				side-by-side diff of Luminary 69/99/116/131/210.
+
 ## The contents of the "Colossus249" files, in general, are transcribed 
 ## from a scanned copy of the program listing.  Notations on this
 ## document read, in part:
@@ -119,8 +121,8 @@
 # DETAILED ANALYSIS OF TIMING -
 #	CONTROL WILL NOT BE RETURNED TO THE SPECIFIED ADDRESS (2CADR) IN EXACTLY DELTA T CENTISECONDS.
 #	THE APPROXIMATE TIME MAY BE CALCULATED AS FOLLOWS
-#		LET T0 = THE TIME OF THE TC WAITLIST
-#		LET TS = T0 +147U + COUNTER INCREMENTS (SET UP TIME)
+#		LET TO = THE TIME OF THE TC WAITLIST
+#		LET TS = TO +147U + COUNTER INCREMENTS (SET UP TIME)
 #		LET X  = TS -(100TS)/100  (VARIANCE FROM COUNTERS)
 #		LET Y  = LENGTH OF TIME OF INHIBIT INTERRUPT AFTER T3RUPT
 #		LET Z  = LENGTH OF TIME TO PROCESS TASKS WHICH ARE DUE THIS T3RUPT BUT DISPATCHED EARLIER.

@@ -14,6 +14,12 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-01-22 MAS  Created from Luminary 99.
 ##              2017-01-25 RRB  Updated for Luminary 116.
+##		2017-03-14 RSB	Proofed comment text via 3-way diff vs
+##				Luminary 99 and 131.
+##		2017-03-16 RSB	Comment-text fixes identified in 5-way
+##				side-by-side diff of Luminary 69/99/116/131/210.
+##		2017-03-17 RSB	Comment-text fixes identified in diff'ing
+##				Luminary 99 vs Comanche 55.
 
 ## Page 1259
                 BANK            14                              # SAME FBANK AS THE FINDCDUD SUB-PROGRAM
@@ -27,7 +33,7 @@
 # COSINES OF THREE 2'S COMPLEMENT ANGLES AND PLACE THE RESULT, DOUBLE
 # PRECISION, IN THE SAME ORDER AS THE INPUTS, AT SINCDU AND COSCDU.   AN
 # ADDITIONAL OUTPUT IS THE 1'S COMPLEMENT ANGLES AT CDUSPOT.   THESE
-# ROUTINES GO OUT OF THEIR WAY TO LEAVE THE MPAC AREA AS THEY FIND IT.
+# ROUTINES GO OUT OF THEIR WAY TO LEAVE THE MPAC AREA AS THEY FIND IT,
 # EXCEPT FOR THE GENERALLY UNIMPORTANT MPAC +2.   THEY DIFFER ONLY IN
 # WHERE THEY GET THE ANGLES, AND IN METHOD OF CALLING.
 
@@ -137,7 +143,7 @@ QUICTRIG        INHINT                                          # INHINT SINCE D
                 TC              A                               
 
 ## Page 1252
-#****************************************************************************************************************
+# ****************************************************************************************************************
 #      THESE INTERFACE ROUTINES MAKE IT POSSIBLE TO CALL AX*SR*T, ETC., IN
 # INTERPRETIVE.    LATER, WHERE POSSIBLE, THEY WILL BE ELIMINATED.
 
@@ -152,7 +158,7 @@ QUICTRIG        INHINT                                          # INHINT SINCE D
 # MATION;  TRG*SMNB, VICE VERSA.
 
 #     CDU*NBSM DOES ITS TRANSFORMATION USING THE PRESENT CONTENTS OF
-# THE CDL COUNTERS.   OTHERWISE IT IS LIKE TRG*NBSM.
+# THE CDU COUNTERS.   OTHERWISE IT IS LIKE TRG*NBSM.
 
 #     CDU*SMNB IS THE COMPLEMENT OF CDU*NBSM.
 

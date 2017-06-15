@@ -21,7 +21,10 @@
 ##				237 and Comanche 55 source-code files
 ##				and corrected errors found.
 ##		2017-01-28 RSB	WTIH -> WITH.
-##
+##		2017-03-13 RSB	GOP00FIX -> GOPOOFIX.
+##		2017-03-16 RSB	Comment-text fixes identified in 4-way side-by-side
+##				diff of Colossus237/249/Comanche55/Artemis72.
+
 ## The contents of the "Colossus249" files, in general, are transcribed 
 ## from a scanned copy of the program listing.  Notations on this
 ## document read, in part:
@@ -397,7 +400,7 @@ ENEMA		INHINT
 		BZMF	GOPROG3		# NO
 		
 		CAF	.5SEC		# YES, CALL TVCEXEC TASK WHICH WAS KILLED
-		TC	WAITLIST	# 	IN STARTSB2
+		TC	WAITLIST	# 	IN STARTSB2.
 		EBANK=	BZERO
 		2CADR	TVCEXEC
 		
@@ -508,7 +511,7 @@ STARTSB2	CAF	OCT77603	# TURN OFF UPLINK ACTY, TEMP CAUTION, KR,
 		EXTEND			# FLASH, OP. ERROR, LEAVE OTHERS UNCHANGED
 		WAND	DSALMOUT
 
-		CAF	OCT74777	# TURN OFF TEST ALARMS, STANDBY ENABLE
+		CAF	OCT74777	# TURN OFF TEST ALARMS, STANDBY ENABLE.
 		EXTEND
 		WAND	CHAN13
 		CS	BIT14		# CLEAR R21MARK
@@ -700,14 +703,14 @@ GOTOPOOH	TC	PHASCHNG		# RESTART GOTOPOOH
 		OCT	14
 		
 		TC	POSTJUMP
-		CADR	GOP00FIX
+		CADR	GOPOOFIX
 		BANK	10
 		SETLOC	VERB37
 		BANK
 		
 		COUNT	04/P00
 		
-GOP00FIX	TC	INITSUB
+GOPOOFIX	TC	INITSUB
 		CAF	V37N99
 		TC	BANKCALL
 		CADR	GOFLASH

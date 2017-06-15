@@ -14,6 +14,7 @@
 ##              2016-12-22 MAS  Added the hardware alarm test restart group.
 ##              2017-01-04 MAS  Added init/checking of ERESTORE for the updated
 ##                              erasable check from Sunburst.
+##              2017-01-27 MAS  Added an instruction I missed pulling from Sunburst.
 
                 BANK            12 
                 EBANK=          LST1
@@ -33,6 +34,7 @@ DOFSTART        CAF             ZERO                    # DO A FRESH START,
                 TS              MODREG
                 TS              AGSWORD                 # ALLOW AGS INITIALIZATION
                 TS              UPLOCK                  # FREE UPLINK INTERLOCK
+                TS              T4TEMP
 
                 TS              CDUX                    # ZERO CDUS SO MATRIX COMPUTATION IN T4
                 TS              CDUY                    # WONT OVERFLOW.
@@ -116,6 +118,7 @@ GOPROG          INCR            REDOCTR                 # ADVANCE RESTART COUNTE
                 CA              ERESTORE                # IF SELF-CHECK ERASABLE-MEMORY TEST WAS
                 EXTEND                                  # INTERRUPTED BY A RESTART, DOUBT ERASABLE
                 BZF             +2                      # AND DO A FRESH START.
+                TCF             DOFSTART
                 
                 CAF             BIT5
                 EXTEND

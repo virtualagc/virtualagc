@@ -11,6 +11,7 @@
 ## Mod history: 2011-04-17 JL	Adapted from corresponding Colossus 249 file.
 ##		2017-01-01 RSB	Proofed comment text using octopus/ProoferComments,
 ##				and fixed errors found.
+##		2017-03-14 RSB	Comment-text fixes noted in proofing Luminary 116.
 
 ## Page 1378
 		BANK	01
@@ -74,7 +75,7 @@ ITSAWAIT	CA	WTLTCADR	# SET UP WAITLIST CALL
 		NDX	TEMP2G		# DIRECTLY STORED
 		CA	PHSPRDT1
 TIMETEST	CCS	A		# IS IT AN IMMEDIATE RESTART
-		INCR	A		# NO.
+		INCR	A		# NO,
 		TCF	FINDTIME	# FIND OUT WHEN IT SHOULD BEGIN
 
 		TCF	ITSINDIR	# STORED INDIRECTLY

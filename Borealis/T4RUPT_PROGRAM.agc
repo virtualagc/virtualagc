@@ -12,10 +12,23 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2016-12-20 MAS  Created from Aurora 12 (with much DAP stuff removed).
 ##              2017-01-04 MAS  Pulled PROCEED key functionality back from Luminary 99.
+##              2017-01-15 MAS  Added acceleration of T4RUPT without interfering with
+##                              its usual purpose, as well as setting of LASTIMER.
 
                 SETLOC          ENDPHMNF
-T4RUPT          EXTEND                                  # ZERO OUT0 EVERY T4RUPT.
-                WRITE           OUT0                    # (COMES HERE WITH +0 IN A)
+T4RUPT          TS              LASTIMER                # (Comes here with +4 in A).
+
+                CA              T4TEMP                  # Check to see if T4TEMP is nonzero
+                EXTEND          
+                BZMF            T4RUPT2                 # If T4TEMP is nonzero, self-check has               
+                TS              TIME4                   # set up an accelerated T4RUPT. Reschedule
+                CA              ZERO                    # using T4TEMP and zero it out.
+                TS              T4TEMP
+                TCF             NOQBRSM                 # Bail out before doing anything else.
+
+T4RUPT2         CAF             ZERO
+                EXTEND                                  # ZERO OUT0 EVERY T4RUPT.
+                WRITE           OUT0
 
                 INDEX           T4LOC                   # NORMALLY TO NORMT4, BUT TO LMPRESET OR
                 TCF             0                       # DSKYRSET AFTER OUT0 COMMAND.

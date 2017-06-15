@@ -9,9 +9,10 @@
 ## Contact:	Jim Lawton <jim.lawton@gmail.com>
 ## Website:	www.ibiblio.org/apollo.
 ## Pages:	038-053
-## Mod history:	2009-05-16	JVL	Transcribed from page images.
+## Mod history:	2009-05-16 JVL	Transcribed from page images.
 ##		2016-12-13 RSB	Proofed text comments with octopus/ProoferComments
 ##				and corrected the errors found.
+##		2017-03-02 RSB	$$/DAPAD --> $$/DAPAO.
 ##
 ## This source code has been transcribed or otherwise adapted from digitized
 ## images of a hardcopy from the MIT Museum.  The digitization was performed
@@ -218,7 +219,7 @@ MINCSM		=	BIT11			# MIN CSM MASS (OK FOR 1/ACCS) = 9050 LBS
 
 		SETLOC	DAPS3
 		BANK
-		COUNT*	$$/DAPAD
+		COUNT*	$$/DAPAO
 		
 LOASCENT	DEC	2200 B-16		# MIN ASCENT LEM MASS -- 2(16) KG.
 HIDESCNT	DEC	15300 B-16		# MAX DESCENT LEM MASS -- 2(16) KG.

@@ -13,10 +13,14 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-01-22 MAS  Created from Luminary 99.
+##		2017-03-10 RSB	Transcribed, and then proofed comment-text using
+##				3-way diff vs Luminary 99 and Luminary 131.
+##				(Admittedly, the former is more for detecting errors
+##				in Luminary 99 than the other way around.)
+##		2017-03-16 RSB	Comment-text fixes identified in 5-way
+##				side-by-side diff of Luminary 69/99/116/131/210.
 
-## NOTE: Page numbers below have not yet been updated to reflect Luminary 116.
-
-## Page 752
+## Page 745
 # PROGRAM DESCRIPTION  P40BOTH          DECEMBER 22, 1966
 # MOD 03 BY PETER ADLER                 MARCH 3, 1967
 # CALLED VIA JOB FROM V37E
@@ -25,7 +29,6 @@
 
 #       1)      TO COMPUTE A PREFERRED IMU ORIENTATION AND A PREFERRED VEHICLE ATTITUDE FOR A LM DPS
 #               THRUSTING MANEUVER.
-## There is no item #2 in the original program listing &mdash; RSB 2009.
 #       3)      TO DO THE VEHICLE MANEUVER TO THE THRUSTING ATTITUDE.
 #       4)      TO CONTROL THE PGNCS DURING COUNTDOWN, IGNITION, THRUSTING, AND THRUST TERMINATION OF A
 #               PGNCS CONTROLLED DPS MANEUVER.
@@ -59,13 +62,13 @@
 #       V50N25  203 A/P TO PGNCS, AUTOTHROTTLE MODE, AUTO ATTITUDE CONTROL
 #       V06N40  TTI, VG, DELTAVM (DISPLAYED ONCE/SECOND BY CLOKTASK)
 #       V50N99  PLEASE PERFORM ENGINE ON ENABLE
-#       V06N40  TG (TIME TO GO TO CUTOFF), VG, DELTAV--- ONCE/SECOND
+#       V06N40  TG (TIME TO GO TO CUTOFF), VG, DELTAVM -- ONCE/SECOND
 #       V16N40  FINAL VALUES OF TG, VG, DELTAVM
 #       V16N85  COMP OF VG (BODY AXES) FOR POSS. RCS MANUAL MANEUVER
 #       V05N09  POSSIBLE ALARMS
 #       V50N07  PLEASE SELECT P00
 
-## Page 753
+## Page 746
 #       VIA R30
 
 #       V06N44  HAPO, PERI, TFF
@@ -117,7 +120,7 @@ P40LM           TC              PHASCHNG
                 TS              DVTHRUSH                        
                 CAF             FOUR                            
                 TS              DVCNTR                          
-## Page 754
+## Page 747
                 TC              INTPRET                         # LOAD CONSTANTS FOR DPS BURN
                 VLOAD           CLEAR                           # LOAD F, MDOT, TDECAY
                                 FDPS                            
@@ -138,11 +141,11 @@ P40IN           DCOMP           SR1
 
                 TC              P40SXT4                         
 
-#       ***********************
+#               ***********************
 
                 TCF             BURNBABY                        
 
-#       ***********************
+#               ***********************
 
 P40SXT4         EXTEND                                          
                 QXCH            P40/RET                         
@@ -167,7 +170,7 @@ POSTBURN        CA              Z
                 TC              TERM40                          
                 TCF             TIGNOW                          
                 TC              POSTBURN                        
-## Page 755
+## Page 748
 P40PHS1         TC              PHASCHNG                        
                 OCT             00014                           
                 TCF             ENDOFJOB                        
@@ -217,7 +220,7 @@ P41LM           CAF             P41ADRES                        # INITIALIZATION
 P41FJET         STCALL          F                               
                                 P41IN                           
 P41FJET1        DLOAD                                           
-## Page 756
+## Page 749
                                 FRCS2                           
                 STORE           F                               
 
@@ -255,11 +258,11 @@ P41NORM         CALL
                 OCT             00076                           # GROUP 6 RESTARTS AT REDO6.7
                 OCT             04024                           # GROUP 4 RESTARTS HERE
 
-#       ***********************
+#               ***********************
 
                 TCF             B*RNB*B*                        
 
-#       ***********************
+#               ***********************
 
 BLNKWAIT        CAF             1SEC                            
                 TC              BANKCALL                        
@@ -268,8 +271,8 @@ BLNKWAIT        CAF             1SEC
 REDO6.7         CA              DISPDEX                         # ON A RESTART, DO NOT PUT UP DISPLAY IF
                 AD              TWO                             # BLANKING (BETWEEN TIG-35 AND TIG-30)
 
-#       ***********************
-## Page 757
+#               ***********************
+## Page 750
 
                 EXTEND                                          
                 BZF             BLNKWAIT                        
@@ -320,7 +323,7 @@ P42LM           TC              PHASCHNG
                 CCS             A                               
                 TC              P40ALM                          
 P42STAGE        TC              BANKCALL                        
-## Page 758
+## Page 751
                 CADR            R02BOTH                         
                 CAF             THRESH2                         # INITIALIZE DVMON
                 TS              DVTHRUSH                        
@@ -371,7 +374,7 @@ CALCN83         TC              INTPRET
                                 DELVCTL                         
                                 DELVREF                         
                 STORE           DELVSIN                         # TEMP STORAGE FOR RESTARTS
-## Page 759
+## Page 752
                 CALL                                            
                                 S41.1                           
                 STORE           DELVIMU                         
@@ -422,7 +425,7 @@ IMPLBURN        CA              TGO             +1
 
                 TC              FIXDELAY                        # WAIT HALF A SECOND
                 DEC             50                              
-## Page 760
+## Page 753
                 TC              NOULLAGE                        # TURN OFF ULLAGE
 
                 TC              TASKOVER                        
@@ -472,7 +475,7 @@ ENGINOF3        CS              ENGONBIT                        # INSURE ENGONFL
                 WOR             CHAN14                          
 
                 TC              ISWRETRN                        
-## Page 761
+## Page 754
 COASTSET        TC              IBNKCALL                        # DO DAP COASTING INITIALIZATION
                 CADR            ALLCOAST                        
                 TC              TASKOVER                        
@@ -523,7 +526,7 @@ GETRANS         DLOAD           DSU
                 STCALL          DELLT4                          
                                 QTEMP1                          
 
-## Page 762
+## Page 755
 NO.9            TC              INTPRET                         
                 GOTO                                            
                                 QTEMP1                          
@@ -573,7 +576,7 @@ NSTEER          INHINT
                 TC              2PHSCHNG                        
                 OCT             40114                           # ENGOFTSK (ENGINOFF)
                 OCT             00035                           # SERVICER -- REREADAC
-## Page 763
+## Page 756
                 TCF             ENDOFJOB                        
 
 GETDT           CCS             A                               
@@ -608,7 +611,7 @@ ACADN85         =               P41TABLE        +2
 ACADN83         2CADR           CALCN83                         
 
 # *************************************************
-## Page 764
+## Page 757
 # PROGRAM DESCRIPTION S40.1             DATE 15NOV66
 # MOD N02                               LOG SECTION P40-P47
 # MOD BY ZELDIN AND ADAPTED BY TALAYCO
@@ -645,7 +648,7 @@ ACADN83         2CADR           CALCN83
 #       DELVSAB         MAG. OF DELVSIN                 DP B7 M/CS
 #       RTIG            POSITION AT TIME OF IGNITION    VECTOR B29 M
 #       VTIG            VELOCITY AT TIME OF IGNITION    VECTOR B7 M/CS
-#   IF AIMPT STEER:
+#   IF AIMPT STEER
 #       TIG             TIME OF IGNITION                DP B28 CS
 #       RTARG           POSITION TARGET TIME            VECTOR B29 M
 #       CSTEER          C FOR STEER LAW                 DP B2
@@ -668,7 +671,7 @@ ACADN83         2CADR           CALCN83
                 BANK            14                              
                 SETLOC          P40S1                           
                 BANK                                            
-## Page 765
+## Page 758
                 COUNT*          $$/S40.1                        
 S40.1           STQ             DLOAD                           
                                 QTEMP                           
@@ -719,7 +722,7 @@ CALCTHET        SETPD           VLOAD
                                 36D                             
                 VSL2            VAD                             
                 STADR                                           
-## Page 766
+## Page 759
                 STORE           VGTIG                           # VG IGNITION SCALED AT 2(+7) M/CS
 
                 UNIT                                            
@@ -771,12 +774,12 @@ SMALLEPS        PUSH            SXA,1
 
 EPS1            2DEC*           2.777777778     E-2*            # 10 DEGREES AT 1 REVOLUTION.
 
-## Page 767
+## Page 760
 EPS2            2DEC*           9.722222222     E-2*            # 35 DEGREES AT 1 REVOLUTION.
 
 THETACON        2DEC            .31830989       B-8             
 
-## Page 768
+## Page 761
 # SUBROUTINE NAME:  S40.2,3             MOD. NO. 3 DATE: APRIL 4, 1967
 # MODIFICATION BY:  JONATHAN D. ADDELSTON (ADAMS ASSOCIATES)
 # MOD. NO. 4:  JULY 18, 1967: PETER ADLER (MIT/IL)
@@ -806,15 +809,15 @@ THETACON        2DEC            .31830989       B-8
 #       3.      RTIG            POSITION AT TIG IN REFERENCE COORDINATES.
 
 # OUTPUT:
-#       1.      :XSCREF:        WINGS-LEVEL HEADS-UP LM ORIENTATION
-#               :YSCREF:        IN REFERENCE COORDINATES
-#               :ZSCREF:        (PREFERRED IMU ORIENTATION).
+#       1.      : XSCREF :      WINGS-LEVEL HEADS-UP LM ORIENTATION
+#               : YSCREF :      IN REFERENCE COORDINATES
+#               : ZSCREF :      (PREFERRED IMU ORIENTATION).
 #       2.      POINTVSM        DESIRED THRUST DIRECTION IN STABLE-MEMBER COORDINATES.
 #       3.      SCAXIS          HALF-UNIT OF AXIS TO ALIGN IN STABLE-MEMBER COORDINATES.
 #       4.      PFRATFLG        INTERPRETIVE FLAG.  ON: PREFERRED ORIENTATION COMPUTED; OFF: NOT COMPUTED.
 
 # DEBRIS:  NONE.
-## Page 769
+## Page 762
 
                 COUNT*          $$/S40.2                        
 S40.2,3         VLOAD                                           # UT:  DESIRED THRUST DIRECTION (HALF-UNIT)
@@ -847,7 +850,7 @@ FIXY            VLOAD           VXV                             # IN THIS CASE,
                 UNIT            PUSH                            
                 GOTO                                            
                                 STORY                           
-## Page 770
+## Page 763
 # SUBROUTINE S40.8
 # MODIFIED APRIL 3, 1968 BY PETER ADLER   MIT/IL
 
@@ -878,7 +881,7 @@ FIXY            VLOAD           VXV                             # IN THIS CASE,
 
 # OUTPUT
 #       STEERSW         SEE INPUT
-#       INPULSW         1 = ENGINE OFF IN TGO CENTISECONDS; 0 = CONTINUE BURN
+#       IMPULSW         1 = ENGINE OFF IN TGO CENTISECONDS; 0 = CONTINUE BURN
 #       TGO             TIME TO CUT-OFF 2(28) CS
 #       SEE FINDCDUW FOR STEERING OUTPUTS.
 
@@ -889,7 +892,7 @@ FIXY            VLOAD           VXV                             # IN THIS CASE,
 #       MPACS, PUSHLIST
 
                 COUNT*          $$/S40.8                        
-## Page 771
+## Page 764
 S40.8           BOF                                             # GENERATE VR IF NOT EXTERNAL DELTA-V BURN
                                 XDELVFLG                        
                                 RASTEER1                        
@@ -940,7 +943,7 @@ TGDCALC         SETPD           VLOAD
 
 ALARMIT         EXIT                                            
 
-## Page 772
+## Page 765
                 TC              ALARM                           
                 OCT             01407                           
                 TC              INTPRET                         
@@ -951,7 +954,7 @@ ALARMIT         EXIT
 FOURSECS        2DEC            400                             # 400 CS SCALED AT 2(+28) CS
 2VEXHUST        =               VEX                             
 
-## Page 773
+## Page 766
 # NAME                  S40.13 - TIMEBURN
 
 # FUNCTION              (1) DETERMINE WHETHER A GIVEN COMBINATION OF VELOCITY TO
@@ -1006,7 +1009,7 @@ S40.13          TC              INTPRET
                                 K1VAL                           # M.NEWTONS-CS AT +24
                                 WEIGHT/G                        
                 BDSU            BMN                             
-## Page 774
+## Page 767
                                 00D                             
                                 S40.131                         # TGO LESS THAN 100 CS
                 PDDL            DMP                             # 02D = TEMP1 AT +7
@@ -1057,7 +1060,7 @@ S40.13D         DLOAD           DMP                             # FOR DPS ENGINE
                                 S40.136                         
                                 NOTHROTL                        
                 BOV             PUSH                            
-## Page 775
+## Page 768
                                 S40.130V                        
 S40.127         DSU             BPL                             
                                 6SEC                            # 600.0 CS AT +14
@@ -1069,7 +1072,7 @@ S40.133         EXIT
 S40.134         TC              PHASCHNG                        
                 OCT             00003                           
                 TC              ENDOFJOB                        
-S40.130V        DLOAD           SR4                             # RECOMPUTE TGO IN TIMER UNITS
+S40.130V        DLOAD           SR4                             # RECOMPUTE TGO IN TIME2 UNITS
                 DDV                                             
                                 S40.136_                        # S40.136 SHIFTED LEFT 10
                 STORE           TGO                             
@@ -1110,11 +1113,12 @@ APSTGO          DDV             SL2
 
 # INPUT                 RN      - ACTIVE VEHICLE RADIUS VECTOR IN METERS AT +29.
 #                       VN      - ACTIVE VEHICLE VELOCITY VECTOR IN METERS/CS AT +7
-## Page 776
+## Page 769
 #                       VRPREV  - LAST COMPUTED VELOCITY REQUIRED VECTOR IN
 #                                 METERS/CS AT +7.
 #                       TIG     - TIME OF IGNITION IN CS AT +28.
 #                       DLTARG  - COMPUTATION CYCLE INTERVAL = 200 CS AT +28.
+#			PIPTIME - TIME OF RN AND VN IN CS AT +28.
 #                       GDT/2   - HALF OF VELOCITY GAINED IN DELTA T TIME DUE TO
 #                                 ACCERERATION OF GRAVITY IN METERS/CS AT +7.
 #                       DELVREF - CHANGE IN VELOCITY DURING LAST 2 SEC IN
@@ -1125,7 +1129,7 @@ APSTGO          DDV             SL2
 #                       VRPREV  - VELOCITY REQUIRED VECTOR IN METERS/CS AT +7.
 #                       BDT     - B VECTOR IN METERS/CS AT +7.
 
-# SUBROUTINES USED      INITVEL
+# SUBROUTINES USED - INITVEL
 
                 EBANK=          VGPREV                          
                 COUNT*          $$/S40.9                        
@@ -1162,7 +1166,7 @@ RASTEER1        VLOAD           ABVAL
                                 36D                             # C(36D) = ABVAL(C)
                 XAD,2           SL*                             
                                 X1                              
-## Page 777
+## Page 770
                                 0,2                             
                 STORE           30D                             
                 NORM            DMP                             
@@ -1173,7 +1177,7 @@ RASTEER1        VLOAD           ABVAL
                                 X1                              
                 SXA,2                                           
                                 MUSCALE                         
-                STODL           R1C                             #                       2(+56 -X)
+                STODL           R1C                             #                       2(+58 -X)
                                 30D                             
                 SR1             PDDL                            
                                 RMAG                            
@@ -1214,7 +1218,7 @@ RASTEER1        VLOAD           ABVAL
                                 X1                              
                 DDV             DMP                             
 
-## Page 778
+## Page 771
                                 R1C                             
                 XSU,2           SL*                             
                                 X1                              
@@ -1265,7 +1269,7 @@ RASTEER1        VLOAD           ABVAL
                                 IC                              
                 VAD             UNIT                            
                                 UNIT/R/                         
-## Page 779
+## Page 772
 GETVRVG1        VXSC            VAD                             
                                 32D                             
 GETVRVG2        LXC,2           VSR*                            
@@ -1316,7 +1320,7 @@ FIRSTTME        SLOAD           BZE
                                 RTX2                            
                                 GETGOBL                         
                 VLOAD           GOTO                            # NO OBLATENESS COMP IF IN MOON SPHERE
-## Page 780
+## Page 773
                                 DELVEET3                        
                                 NOGOBL                          
 GETGOBL         VLOAD           UNIT                            # CALCULATE OBLATENESS TERM.
@@ -1336,7 +1340,7 @@ NOGOBL          STORE           DELVEET3                        # VG = VR + GOBL
 
 2PI+3           2DEC            3.141592653     B-2             
 
-## Page 781
+## Page 774
 # TRIMGIMB      (FORMERLY S40.6)
 # MOD 0         24 FEB 67       PETER ADLER
 
@@ -1391,7 +1395,7 @@ ROLLOVER        CA              FLAGWRD6                        # IF HERE INLINE
                 CAF             PRIO10                          # RETURN TO R03
                 TC              NOVAC                           
                 EBANK=          WHOCARES                        
-## Page 782
+## Page 775
                 2CADR           TRIMDONE                        
 
                 TC              TASKOVER                        
@@ -1403,7 +1407,7 @@ PITCHOFF        CS              BIT10
                 ADRES           GMBDRVSW                        
                 TC              TASKOVER                        
 
-## Page 783
+## Page 776
 # SUBROUTINE NAME:  S41.1       MOD. NO. 0      DATE: FEBRUARY 28, 1967
 # MOD. NO. 1    DATE: JANUARY 23, 1968: BY PETER ADLER (MIT/IL)
 
@@ -1415,7 +1419,7 @@ PITCHOFF        CS              BIT10
 # LEAVES THE VECTOR IN MPAC, SCALED AT 2(+8) METERS/CENTISECOND.  THEN
 # THE SUBROUTINE CDUTRIG IS CALLED TO SET UP THE DOUBLE-PRECISION CDU VECTOR ALONG WITH ITS SINES AND COSINES.
 # THE VECTOR IS THEN TRANSFORMED FROM STABLE MEMBER COORDINATES TO SPACECRAFT (OR LM) COORDINATES BY THE
-# SUBROUTINE *SMNB*.  FINALLY, THE VECTOR IS RESCALED TO 2(+7) METERS/CENTISECOND, AND CONTROL IS RETURNED TO THE
+# SUBROUTINE *SMNB*.  FINALLY( THE VECTOR IS RESCALED TO 2(+7) METERS/CENTISECOND, AND CONTROL IS RETURNED TO THE
 # CALLER WITH C(MPAC) = VELOCITY(LM).
 
 # CALLING SEQUENCE:
@@ -1435,7 +1439,7 @@ PITCHOFF        CS              BIT10
 
 # RESTART PROTECTION:  NONE.
 
-## Page 784
+## Page 777
 # INPUT:
 #       1.      REFSMMAT.
 #       2.      CDUX, CDUY, CDUZ.

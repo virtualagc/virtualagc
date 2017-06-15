@@ -15,6 +15,8 @@
 ##		2010-02-20 RSB	Un-##'d this header.
 ##		2017-01-21 RSB	Proofed comment text by diff'ing vs Comanche 55
 ##				and corrected errors found.
+##		2017-03-16 RSB	Comment-text fixes identified in 4-way side-by-side
+##				diff of Colossus237/249/Comanche55/Artemis72.
 
 ## Page 890
 		SETLOC BODYATT
@@ -191,7 +193,7 @@ CMTR1		INDEX	FIXLOC
 				# INDICATOR.
 
 		CS	CM/FLAGS
-		MASK	GMDIFBIT	# GAMDIFSW = 94D BIT11	INITLY=0
+		MASK	GMDIFBIT	# GAMDIFSW = 94D BIT11 INITLY=
 		EXTEND			# DONT CALC GAMA DOT UNTIL HAVE FORMD
 					# ONE DIFFERENCE.
 		BZF	DOGAMDOT	# IS OK, GO ON.

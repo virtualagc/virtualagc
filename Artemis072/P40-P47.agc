@@ -20,6 +20,8 @@
 ##		2010-02-20 RSB	Un-##'d this header.
 ##		2017-02-08 RSB	Proofed comment text with octopus/ProoferComments
 ##				where the mismatch in the diff was too great.
+##		2017-03-17 RSB	Comment-text fixes identified by 4-way diff'ing
+##				of Colossus 237 & 249, Comanche 55, and Artemis 72.
 
 ## Page 691
 
@@ -1702,7 +1704,7 @@ VGCOMP		VLOAD
 #		DELLT4	- TRANSFER TIME FROM PIPTIME TO TARGET@+28"
 #		TNIT	- TIME OF RNIT AND VNIT IN CS AT +28
 #		GDT/2	- HALF OF VELOCITY GAINED IN DELTA T TIME DUE TO
-#			  ACCELERATION OF GRAVITY IN METERS/CS AT +7.
+#			  ACCERERATION OF GRAVITY IN METERS/CS AT +7.
 #		DELVREF	- CHANGE IN VELOCITY DURING LAST 2 SEC IN
 #			  METERS/CS AT +7.
 #		NORMSW	SET=CENTRAL ANGLE BETWEEN RTARG AND RTIG IS BETWEEN

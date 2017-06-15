@@ -20,6 +20,7 @@
 ##		2017-01-20 RRB	Updated for Luminary 69.
 ##		2017-01-27 RSB	Proofed comment text using octopus/prooferComments
 ##				and fixed errors found.
+##		2017-03-09 RSB	Comment text fixes noted in proofing Luminary 116.
 
 ## Page 485
 # MOD NO: 0				DATE: 1 MAY 1968
@@ -46,7 +47,7 @@
 #
 #	B.	TERMINATE - IF IN P00 GO TO STEP 5A. OTHERWISE CHECK IF R61 IS
 #		THE CALLING PROGRAM. IF IN R61 AN EXIT IS MADE TO GOTOV56.  IF
-#		NOT IN R61 AN EXIT IS DONE VIA GOTOPOOH.
+#		NOT IN R61 AN EXIT IS DONE VIA GOTOP00H.
 #
 #	C.	PROCEED - CONTINUE WITH PROGRAM AT STEP 6.
 #

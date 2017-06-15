@@ -14,8 +14,13 @@
 ## Mod history:	05/25/03 RSB.	Began transcribing.
 ##		05/14/05 RSB	Corrected website reference above.
 ##		2017-01-06 RSB	Page numbers now agree with those on the
-##				original harcopy, as opposed to the PDF page
+##				original hardcopy, as opposed to the PDF page
 ##				numbers in 1701.pdf.
+##		2017-02-25 RSB	Proofed comment text using octopus/ProoferComments.
+##		2017-03-01 RSB	Fixed lingering typos.
+##		2017-03-14 RSB	Comment-text fixes noted in proofing Luminary 116.
+##		2017-03-16 RSB	Comment-text fixes identified in 5-way
+##				side-by-side diff of Luminary 69/99/116/131/210.
 
 ## Page 780
 		BANK	32
@@ -24,9 +29,9 @@
 
 		EBANK=	E2DPS
 
-#	*************************************
+#	****************************************
 #	P63: THE LUNAR LANDING, BRAKING PHASE
-#	*************************************
+#	****************************************
 
 		COUNT*	$$/P63
 
@@ -44,7 +49,7 @@ P63LM		TC	PHASCHNG
 		CAF	FOUR
 		TS	DVCNTR
 
-		CS	ONE		# INITIALIZE WCHPHASE AND FLPASS0
+		CS	ONE		# INITIALIZE WCHPHASE AND FLPASSO
 		TS	WCHPHASE
 
 		CA	ZERO
@@ -63,11 +68,11 @@ FLAGORGY	TC	INTPRET		# DIONYSIAN FLAG WAVING
 			MUNFLAG
 		CLEAR	CLEAR
 			P25FLAG		# TERMINATE P25 IF IT IS RUNNING.
-			RNDVZFLG	# TERMINATE P20 IF IT IS RUNNING.
+			RNDVZFLG	# TERMINATE P20 IF IT IS RUNNING
 
-					# ********************************
+					# ****************************************
 
-IGNALG		SETPD	VLOAD		# FIRST SET UP INPUTS FOR RP-TO-R:
+IGNALG		SETPD	VLOAD		# FIRST SET UP INPUTS FOR RP-TO-R:-
 ## Page 781
 			0		# 	AT 0D LANDING SITE IN MOON FIXED FRAME
 			RLS		#	AT 6D ESTIMATED TIME OF LANDING
@@ -111,18 +116,18 @@ IGNALOOP	DLOAD
 		STCALL	GDT/2
 			?GUIDSUB	# WHICH DELIVERS N PASSES OF GUIDANCE
 
-# DDUMCALC IS PROGRAMMED AS FOLLOWS:
-#                                         2                                           ___
+# DDUMCALC IS PROGRAMMED AS FOLLOWS:-
+#                                         2                                           -
 #              (RIGNZ - RGU )/16 + 16(RGU  )KIGNY/B8 + (RGU - RIGNX)KIGNX/B4 + (ABVAL(VGU) - VIGN)KIGNV/B4
 #                          2             1                 0
 #	DDUM = -------------------------------------------------------------------------------------------
 #                                                10
 #                                               2   (VGU - 16 VGU KIGNX/B4)
-#                                                       2        0
 ## Page 782
+#                                                       2        0
 # THE NUMERATOR IS SCALED IN METERS AT 2(28).  THE DENOMINATOR IS A VELOCITY IN UNITS OF 2(10) M/CS.
 # THE QUOTIENT IS THUS A TIME IN UNITS OF 2(18) CENTISECONDS.  THE FINAL SHIFT RESCALES TO UNITS OF 2(28) CS.
-# THERE IS NO DAMPING FACTOR.  THE CONSTANTS KIGNX/B4, KIGNY/88 AND KIGNV/B4 ARE ALL NEGATIVE IN SIGN.
+# THERE IS NO DAMPING FACTOR.  THE CONSTANTS KIGNX/B4, KIGNY/B8 AND KIGNV/B4 ARE ALL NEGATIVE IN SIGN.
 
 DDUMCALC	TS	NIGNLOOP
 		TC	INTPRET
@@ -182,16 +187,16 @@ DDUMGOOD	SLOAD	SR
 		BDSU
 			TDEC1
 		STOVL	TIG		# COMPUTE DISTANCE LANDING SITE WILL BE
-			V		#	OUT OF LM'S ORBITAL PLANE AT IGNITION:
-		VXV	UNIT		#	SIGN IS + IF LANDING SITE IS TO THE
-			R		#	RIGHT, NORTH; IF TO THE LEFT, SOUTH.
+			V		#   OUT OF LM'S ORBITAL PLANE AT IGNITION:
+		VXV	UNIT		#   SIGN IS + IF LANDING SITE IS TO THE
+			R		#   RIGHT, NORTH; - IF TO THE LEFT, SOUTH.
 		DOT	SL1
 			LAND
 R60INIT		STOVL	OUTOFPLN	# INITIALIZATION FOR CALCMANU
 			UNFC/2
-		STORE	R60VSAVE		# STORE UNFC/2 TEMPORARILY IN R60SAVE
+		STORE	R60VSAVE	# STORE UNFC/2 TEMPORARILY IN R60SAVE
 		EXIT
-					# *******************************************
+					# ****************************************
 
 IGNALGRT	TC	PHASCHNG	# PREVENT REPEATING IGNALG
 		OCT	04024
@@ -225,7 +230,7 @@ P63SPOT2	VLOAD	UNIT		# INITIALIZE KALCMANU FOR BURN ATTITUDE
 		TC	BANKCALL
 		CADR	R60LEM
 
-		TC	PHASCHNG	# PREVENT RECALLINE R60
+		TC	PHASCHNG	# PREVENT RECALLING R60
 		OCT	04024
 
 P63SPOT3	CA	BIT6		# IS THE LR ANTENNA IN POSITION 1 YET
@@ -246,13 +251,13 @@ P63SPOT4	TC	BANKCALL	# ENTER		INITIALIZE LANDING RADAR
 		TC	POSTJUMP	# OFF TO SEE THE WIZARD ...
 		CADR	BURNBABY
 
-#	---------------------------------
+#       ----------------------------------------
 
 # CONSTANTS FOR P63LM AND IGNALG
 
 P63ADRES	GENADR	P63TABLE
 
-ASTNDEX		=	MD1		# OCT 25:  INDEX FOR CLOKTASK
+ASTNDEX		=	MD1		# OCT 25; INDEX FOR CLOKTASK
 
 CODE500		OCT	00500
 
@@ -262,12 +267,12 @@ GUIDDURN	2DEC	+66440		# GUIDDURN +6.64400314 E+2
 DDUMCRIT	2DEC	+8 B-28		# CRITERION FOR IGNALG CONVERGENCE
 
 ## Page 785
-#	--------------------------------
+#       ----------------------------------------
 
 ## Page 786
-#	*************************
+#	****************************************
 #	P68: LANDING CONFIRMATION
-#	*************************
+#	****************************************
 
 		BANK	34
 		SETLOC	F2DPS*34
@@ -282,8 +287,8 @@ LANDJUNK	TC	PHASCHNG
 		TC	BANKCALL	# ZERO ATTITUDE ERROR
 		CADR	ZATTEROR
 
-		TC	INTPRET		# TO INTERPRETATIVE AS TIME IS NOT CRITICAL
-		SET			# PREVENT RCS JET FIRINGS IF MOD CONT IS
+		TC	INTPRET		# TO INTERPRETIVE AS TIME IS NOT CRITICAL
+		SET			# PREVENT RCS JET FIRINGS IF MODE CONT IS
 			PULSEFLG	# IN ATT HOLD
 		SET	CLEAR
 			SURFFLAG
@@ -305,7 +310,7 @@ LANDJUNK	TC	PHASCHNG
 			R-TO-RP
 		STORE	RLS
 		EXIT
-		CAF	V06N43*		# ASTRONAUT:  NOW LOOK WHERE TO ENDED UP
+		CAF	V06N43*		# ASTRONAUT:  NOW LOOK WHERE YOU ENDED UP
 		TC	BANKCALL
 		CADR	GOFLASH
 		TCF	GOTOPOOH	# TERMINATE

@@ -20,6 +20,7 @@
 ##              2017-01-19 MAS  Updated for Luminary 69 -- just whitespace.
 ##		2017-01-27 RSB	Proofed comment text using octopus/prooferComments
 ##				and fixed errors found.
+##		2017-03-07 RSB	Comment-text fixes noted in proofing Luminary 116.
 
 ## Page 355
 # BLOCK 2 LGC ATTITUDE MANEUVER ROUTINE-KALCMANU
@@ -425,7 +426,7 @@
 
 #                      MXM3
 ## Page 363
-#                      TRANSPGS
+#                      TRANSPOS
 #                      SIGNMPAC
 #                      READCDUK
 #                      CDUTODCM
@@ -851,7 +852,7 @@ DELCOMP         SETPD   PUSH            # MPAC CONTAINS THE ANGLE A
                 BDSU    BOVB
                         DPHALF
                         SIGNMPAC
-                PDDL                    # PDA = 1-COS(A)
+                PDDL                    # PD4 = 1-COS(A)
                 
 # COMPUTE THE DIAGONAL COMPONENTS OF DEL
 

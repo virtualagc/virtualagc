@@ -134,6 +134,7 @@ SymbolLine_t* FindLastLineMain ( void )
 // used as follows:
 //	0	The backtrace point is in normal code.
 //	1-10	The backtrace point is an interrupt vector.
+//	11      The backtrace point is an EDRUPT vectored to A.
 //	255	The backtrace point is a RESUME after interrupt.
 // When Cause==255 is encountered, all backtrace points back to (and including)
 // the vector to the interrupt are removed.  The reason for this is that

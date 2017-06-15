@@ -18,6 +18,9 @@
 ##                              Change POO -> P00 in some comments
 ##		2016-12-23 RSB	Proofed comment text with octopus/ProoferComments
 ##				and fixed all errors found.
+##		2017-03-09 RSB	Comment text fixes noted in proofing Luminary 116.
+##		2017-03-16 RSB	Comment-text fixes identified in 5-way
+##				side-by-side diff of Luminary 69/99/116/131/210.
 
 ## Page 487
 # MOD NO: 0                             DATE: 1 MAY 1968
@@ -44,7 +47,7 @@
 #
 #     B. TERMINATE - IF IN P00 GO TO STEP 5A. OTHERWISE CHECK IF R61 IS
 #        THE CALLING PROGRAM. IF IN R61 AN EXIT IS MADE TO GOTOV56. IF
-#        NOT IN R61 AN EXIT IS DONE VIA GOTOPOOH.
+#        NOT IN R61 AN EXIT IS DONE VIA GOTOP00H.
 #
 #     C. PROCEED - CONTINUE WITH PROGRAM AT STEP 6.
 
@@ -79,7 +82,7 @@
 # ERASABLE INITIALIZATION REQUIRED : SCAXIS, POINTVSM (FOR VECPOINT)
 #                                    3AXISFLG.
 
-# SUBROUTINES CALLED: VECPOINT, BALLANGS, GOPERF2R, LINUS, GOdSPER,
+# SUBROUTINES CALLED: VECPOINT, BALLANGS, GOPERF2R, LINUS, GODSPER,
 #                    GOMANUR, DOWNFLAG, PHASCHNG, UPFLAG
 
 # NORMAL EXIT MODES: CAE TEMPR60   (CALLERS RETURN ADDRESS)
@@ -161,14 +164,14 @@ STARTMNV        TC              BANKCALL                # PERFORM MANEUVER VIA K
 ENDMANUV        TCF             TOBALLA                 # FINISHED MANEUVER.
 ENDMANU1        TC              DOWNFLAG                # RESET 3-AXIS FLAG
                 ADRES           3AXISFLG
-                CAE             TEMPR60
-                TC              BANKJUMP
+                CAE             TEMPR60			#					-
+                TC              BANKJUMP		#					-
 
 STARTMNAD       ADRES           STARTMNV
 
 CHKLINUS        CS              FLAGWRD5
                 MASK            PDSPFBIT                # IS PRIORITY DISPLAY FLAG SET?
-                CCS             A
+                CCS             A			#					-
                 TC              Q                       # NO - EXIT
                 TCF             Q+1                     # GO BACK AND SET UP CORRECT RESTART ADDR.
 
@@ -360,7 +363,7 @@ ENDBALL         CA              BALLEXIT
 # ANGLES (2S COMPLEMENT) CORESPONDING TO THE CROSS-PRODUCT ROTATION BETWE EN SCAXIS AND POINTVSM AND STORES THEM
 # IN T(MPAC) BEFORE RETURNING TO THE CALLER.
 #          THIS ROTATION, HOWEVER, MAY BRING THE S/C INTO GIMBAL LOCK.  WHEN POINTING A VECTOR IN THE Y-Z PLANE,
-# THE TRANSPONDER AXIS, OR THE AOT FOR THE LEM, THE PROGRAM WILL CORRECT THIS PROGLEM BY ROTATING THE CROSS-
+# THE TRANSPONDER AXIS, OR THE AOT FOR THE LEM, THE PROGRAM WILL CORRECT THIS PROBLEM BY ROTATING THE CROSS-
 # PRODUCT ATTITUDE ABOUT POINTVSM BY A FIXED AMOUNT SUFFICIENT TO ROTATE THE DESIRED S/C ATTITUDE OUT OF GIMBAL
 # LOCK.  IF THE AXIS TO BE POINTED IS MORE THAN 40.6 DEGREES BUT LESS THAN 60.5 DEG FROM THE +X (OR-X) AXIS,
 # THE ADDITIONAL ROTATION TO AVOID GIMAL LOCK IS 35 DEGREES.  IF THE AXIS IS MORE THAN 60.5 DEGEES FROM +X (OR -X)
@@ -472,7 +475,7 @@ COMPMATX        CALL                                    # NOW COMPUTE THE TRANSF
 IGSAMEX         VXV             BMN                     # FIND THE SHORTEST WAY OF ROTATING THE
                                 SCAXIS                  # S/C OUT OF GIMBAL LOCK BY A ROTATION
                                 U=SCAXIS                # ABOUT +- SCAXIS, I.E. IF  (IG (SGN MFS3)
-                                                        # X SCAXIS . XF) LESS THAN Q, U = SCAXIS
+                                                        # X SCAXIS . XF) LESS THAN 0, U = SCAXIS
                                                         # OTHERWISE U = -SCAXIS
 
                 VLOAD           VCOMP
@@ -513,7 +516,7 @@ FINDGIMB        AXC,1           CALL
                 GOTO
                                 VECQTEMP                # RETURN TO CALLER
 
-PICKAXIS        VLOAD           DOT                     # IF VF X VI = 0, FIND VF , VI
+PICKAXIS        VLOAD           DOT                     # IF VF X VI = 0, FIND VF . VI
                                 28D
                                 SCAXIS
                 BMN             TLOAD

@@ -15,10 +15,14 @@
 ## Mod history: 2017-01-22 MAS  Created from Luminary 99.
 ##		2017-02-07 RSB	Comment-text corrections identified while 
 ##				proofing Artemis 72.
+##		2017-03-09 RSB	Transcribed, and then proofed comment-text using
+##				3-way diff vs Luminary 99 and Luminary 131.
+##				(Admittedly, the former is more for detecting errors
+##				in Luminary 99 than the other way around.)
+##		2017-03-14 RSB	Proofed comment text via 3-way diff vs
+##				Luminary 99 and 131 ... no problems found.
 
-## NOTE: Page numbers below have not yet been updated to reflect Luminary 116.
-
-## Page 618
+## Page 621
 # COELLIPTIC SEQUENCE INITIATION (CSI) PROGRAMS (P32 AND P72)
 
 # MOD NO -1             LOG SECTION - P32-P35, P72-P75
@@ -69,7 +73,7 @@
 
 #       (7)     THE CSI AND CDH MANEUVERS ARE ORIGINALLY ASSUMED TO BE
 #               PARALLEL TO THE PLANE OF THE CSM ORBIT.  HOWEVER CREW
-## Page 619
+## Page 622
 #               MODIFICATION OF DELTA V (LV) COMPONENTS MAY RESULT IN AN
 #               OUT-OF-PLANE CSI MANEUVER.
 
@@ -121,7 +125,7 @@
 
 #       (1)     TCSI            TIME OF THE CSI MANEUVER
 
-## Page 620
+## Page 623
 #       (2)     NN              NUMBER OF APSIDAL CROSSINGS THRU WHICH THE ACTIVE
 #                               VEHICLE ORBIT CAN BE ADVANCED TO OBTAIN THE CDH
 #                               MANEUVER POINT
@@ -173,7 +177,7 @@
 #       BANKCALL
 #       GOFLASH
 #       GOTOPOOH
-## Page 621
+## Page 624
 #       VNPOOH
 #       GOFLASHR
 #       BLANKET
@@ -224,7 +228,7 @@ VN0611          CAF             V06N11                          # TCSI
                                 TCSI                            
                 BMN             DLOAD                           
                                 VN0655                          
-## Page 622
+## Page 625
                                 TETLEM                          
                 STCALL          TDEC1                           
                                 PRECSET                         
@@ -275,7 +279,7 @@ P32/P72B        CALL
                 CALL                                            
                                 PASSIVE                         
                 CALL                                            
-## Page 623
+## Page 626
                                 CSI/A                           
 P32/P72C        BON             SET                             
                                 FINALFLG                        
@@ -314,7 +318,7 @@ P32/P72F        STORE           T2TOT3
                 GOTO                                            
                                 P32/P72B                        
 
-## Page 624
+## Page 627
 # CONSTANT DELTA HEIGHT (CDH) PROGRAMS (P33 AND P73)
 # MOD NO -1                     LOG SECTION - P32-P35, P72-P75
 # MOD BY WHITE.P                DATE  1JUNE67
@@ -364,7 +368,7 @@ P32/P72F        STORE           T2TOT3
 
 #               (G)     THE CSI AND CDH MANEUVERS WERE ASSUMED TO BE PARALLEL TO
 #                       THE PLANE OF THE PASSIVE VEHICLE ORBIT.  HOWEVER, CREW
-## Page 625
+## Page 628
 #                       MODIFICATION OF DELTA V (LV) COMPONENTS MAY HAVE RESULTED
 #                       IN AN OUT-OF-PLANE MANEUVER.
 
@@ -406,7 +410,7 @@ P32/P72F        STORE           T2TOT3
 #       (7)     IT IS NORMALLY REQUIRED THAT THE ISS BE ON FOR 1 HOUR PRIOR TO
 #               A THRUSTING MANEUVER.
 
-#       (8)     THIS PROGRAM IS SELECTED BY THE ASTRONAUT BY DSKY ENTRY.
+#       (8)     THIS PROGRAM IS SELECTED BY THE ASTRONAUT BY DSKY ENTRY -
 
 #                       P33 IF THIS VEHICLE IS ACTIVE VEHICLE.
 
@@ -415,7 +419,7 @@ P32/P72F        STORE           T2TOT3
 # INPUT
 
 #       (1)     TTPI0   TIME OF THE TPI MANEUVER - SAVED FROM P32/P72
-## Page 626
+## Page 629
 #       (2)     ELEV    DESIRED LOS ANGLE AT TPI - SAVED FROM P32/P72
 #       (3)     TCDH    TIME OF THE CDH MANEUVER
 
@@ -467,7 +471,7 @@ P32/P72F        STORE           T2TOT3
 #       GOFLASH
 #       GOTOPOOH
 #       S32/33.1
-## Page 627
+## Page 630
 #       VN1645
 
                 COUNT*          $$/P3373                        
@@ -518,7 +522,7 @@ P33/P73B        CALL
                 CADR            GOFLASH                         
                 TC              GOTOPOOH                        
                 TC              +2                              
-## Page 628
+## Page 631
                 TC              P33/P73A                        
                 TC              INTPRET                         
                 DLOAD                                           
@@ -562,7 +566,7 @@ P33/P73F        ABS             DSU
                 GOTO                                            
                                 P33/P73B                        
 
-## Page 629
+## Page 632
 # ..... AVFLAGA/P .....
 
 # SUBROUTINES USED
@@ -588,7 +592,7 @@ P20FLGON        EXTEND
                 ADRES           TRACKFLG                        # SET TRACKFLG
                 TC              SUBEXIT                         
 
-## Page 630
+## Page 633
 # ..... DISDVLVC .....
 
 # SUBROUTINES USED
@@ -613,7 +617,7 @@ DISDVLVC        STORE           DELVLVC
                 GOTO                                            
                                 NORMEX                          
 
-## Page 631
+## Page 634
 # ..... CONSTANTS .....
 
 V06N11          VN              0611                            
@@ -635,7 +639,7 @@ ALARM/TB        OCT             00600                           # NO 1
                 OCT             00605                           #    6
                 OCT             00606                           #    7
 
-## Page 632
+## Page 635
 # ..... CSI/A .....
 
 # SUBROUTINES USED
@@ -686,7 +690,7 @@ TMIN            2DEC            60000                           # 10 MIN
 CSI/A           CLEAR           SET                             # INITIALIZE INDICATORS
                                 S32.1F1                         # DVT1 HAS EXCEEDED MAX INDICATOR
                                 S32.1F2                         # FIRST PASS FOR NEWTON ITERATION INDICATR
-## Page 633
+## Page 636
                 CLEAR           SET                             
                                 S32.1F3A                        # 00=1ST 2 PASSES 2ND CYCLE 01=FIRST CYCLE
                                 S32.1F3B                        # 10=2ND CYCLE 11=50FPS STAGE 2ND CYCLE
@@ -737,7 +741,7 @@ CSI/B1          DLOAD           DAD                             # IF LOOPCT = 16
                                 SCNDSOL                         
 CSI/B2          SETPD                                           
                                 0D                              
-## Page 634
+## Page 637
                 DLOAD           ABS                             
                                 DELVCSI                         
                 DSU             BMN                             
@@ -788,7 +792,7 @@ CSI/B23D        STCALL          VACT4
                                 CENTANG                         
                 BZE             GOTO                            
                                 +2                              
-## Page 635
+## Page 638
                                 CIRCL                           
                 DLOAD                                           
                                 ECC                             
@@ -839,7 +843,7 @@ CSI/B3          PDVL            DOT
                                 3,1                             
                 STODL           12D                             
                                 P30ZERO                         
-## Page 636
+## Page 639
                 STORE           16D                             
                 VLOAD           UNIT                            
                                 12D                             
@@ -890,7 +894,7 @@ NTP/2           DLOAD           DMP
                 STOVL           VACT2                           
                                 VPASS1                          
                 SETPD           PDVL                            
-## Page 637
+## Page 640
                                 0D                              
                                 RPASS1                          
                 CALL                                            
@@ -941,7 +945,7 @@ NTP/2           DLOAD           DMP
                 PUSH            DOT                             #                                          PL06D
                                 RACT3                           # (U . RA3) = TEMP1           B1 +B29 = B30
                 SL1             PUSH                            #                                      B29 PL08D
-## Page 638
+## Page 641
                 DSQ             TLOAD                           # TEMP1**2                             B58
                                 MPAC                            
                 PDVL            DOT                             #                                          PL11D
@@ -992,7 +996,7 @@ K2.             DLOAD
                                 RPASS3                          #                                          PL06D
                 PDVL            UNIT                            
                                 VPASS3                          #                                          PL12D
-## Page 639
+## Page 642
                 VXV             PDVL                            # UVP3 X URP3                              PL18D
                                 06D                             
                                 06D                             
@@ -1043,7 +1047,7 @@ FRSTPAS         DLOAD
                 DSU             CLEAR                           
                                 DELDV                           
                                 S32.1F2                         
-## Page 640
+## Page 643
                 STCALL          DELVCSI                         
                                 CSI/B1                          
 THRDCHK         BON             BON                             
@@ -1094,7 +1098,7 @@ CSISTEP         DLOAD           DSU
                                 DELVCSI                         
                                 DELDV                           
                 STCALL          DELVCSI                         
-## Page 641
+## Page 644
                                 CSI/B1                          
 CSI/SOL         DLOAD           AXT,2                           
                                 POSTCSI                         
@@ -1144,7 +1148,7 @@ SCNDSOL         BON             BOFF
                 STCALL          LOOPCT                          
                                 CSI/B                           
 
-## Page 642
+## Page 645
 # ..... ADVANCE .....
 
 # SUBROUTINES USED
@@ -1180,7 +1184,7 @@ ADVANCE         STQ             DLOAD
                 STCALL          VACT1                           
                                 SUBEXIT                         
 
-## Page 643
+## Page 646
 # ..... ROTATE .....
 
 ROTATE          PUSH            PUSH                            
@@ -1192,7 +1196,7 @@ ROTATE          PUSH            PUSH
                 ABVAL           VXSC                            
                 VSL1            RVQ                             
 
-## Page 644
+## Page 647
 # ..... INTINTNA .....
 
 INTINT2C        PDDL            PDDL                            
@@ -1210,7 +1214,7 @@ INTINT3P        PDDL            PDDL
                 GOTO                                            
                                 INTINT                          
 
-## Page 645
+## Page 648
 # ..... S32/33.1 .....
 
 # SUBROUTINES USED
@@ -1233,7 +1237,7 @@ S32/33.1        STQ             AXT,1
                 GOTO                                            
                                 SUBEXIT                         
 
-## Page 646
+## Page 649
 # ..... S32/33.X .....
 
 S32/33.X        SETPD           VLOAD                           
@@ -1248,7 +1252,7 @@ S32/33.X        SETPD           VLOAD
                 STORE           0D                              
                 RVQ                                             
 
-## Page 647
+## Page 650
 # ..... CDHMVR .....
 
 # SUBROUTINES USED
@@ -1298,7 +1302,7 @@ CDHMVR          STQ             VLOAD
                                 RACT2                           
                 ABVAL           PDDL                            # 2D = LENGTH OF R SUB A
                 DSU                                             
-## Page 648
+## Page 651
                                 02D                             
                 STODL           DIFFALT                         # DELTA H IN METERS             B+29
                                 R1A                             
@@ -1349,11 +1353,11 @@ CDHMVR          STQ             VLOAD
                 STORE           VACT3                           
                 VSU                                             
                                 VACT2                           
-## Page 649
+## Page 652
                 STCALL          DELVEET2                        # DELTA VCDH - REFERENCE COORDINATES
                                 SUBEXIT                         
 
-## Page 650
+## Page 653
 # ..... COMPTGO .....
 
 # SUBROUTINES USED

@@ -27,7 +27,9 @@
 ##                              Fix operand GOFLASH -> GOFLASHR
 ##		2017-01-28 RSB	Proofed comment text using octopus/prooferComments
 ##				and fixed errors found.
-
+##		2017-03-09 RSB	Comment-text fixes noted in proofing Luminary 116. 
+##		2017-03-16 RSB	Comment-text fixes identified in 5-way
+##				side-by-side diff of Luminary 69/99/116/131/210.
 
 ## Page 667
 # TRANSFER PHASE INITIATION (TPI) PROGRAMS (P34 AND P74)
@@ -844,7 +846,7 @@ ALLSET          STOVL   TET
 #       GOFLASH
 #       GOTOPOOH
 #       S34/35.3
-#       S34.35.4
+#       S34/35.4
 #       VNPOOH
 
 S34/35.5        STQ     BON
@@ -1157,7 +1159,7 @@ INITVEL1        SSP     DLOAD           # SET ITCTR TO -1,LOAD MPAC WITH E4 (PL 
                         VINIT           # MPAC EQ UNIT(RI) X VI   (+8)
                 STOVL   UN
                         RTARG1
-                UNIT    DOT             # TEMP*URT.URI (+2)                 (PL 0D)
+                UNIT    DOT             # TEMP=URT.URI (+2)                 (PL 0D)
                 DAD     CLEAR
                         COZY4
                         NORMSW
@@ -1388,7 +1390,7 @@ MIDGIM          BOFF
                         GET.LVC
 MIDGIM1         =       GET+MGA
 
-GET+MGA         VLOAD   UNIT            # (PL 0D) V (+7) TO MPAC. UNITIZE UV (+1)
+GET+MGA         VLOAD   UNIT            # (PL 0D) V (+7) TO MPAC, UNITIZE UV (+1)
                 UNIT
                 DOT     SL1             # DOT UV WITH Y(STABLE MEMBER) AND RESCALE
                         REFSMMAT +6     # FROM +2 TO +1 FOR ASIN ROUTINE
@@ -1400,7 +1402,7 @@ GET+MGA         VLOAD   UNIT            # (PL 0D) V (+7) TO MPAC. UNITIZE UV (+1
 SETMGA          STORE   +MGA
                 CLR     RVQ             # CLEAR MGLVFLAG TO INDICATE +MGA CALC
                         MGLVFLAG        # AND EXIT
-GET.LVC         VLOAD   UNIT            # (PL 6D) R (+29) IN MPAC. UNITIZE UR
+GET.LVC         VLOAD   UNIT            # (PL 6D) R (+29) IN MPAC, UNITIZE UR
                         RINIT
                 VCOMP                   # U(-R)
                 STORE   18D             # U(-R) TO 18D
@@ -1483,7 +1485,7 @@ RTRNMU          STORE   RTMU
 #       (1)     2D      APOCENTER RADIUS IN METERS
 #                       SCALE FACTOR - EARTH +29, MOON +27
 #       (2)     4D      APOCENTER ALTITUDE IN METERS
-#                       SCALE FACTOR - EARTH +29, MOON +27
+#                       SCALE FACTOR - EARTH +29, MOON P27
 #       (3)     6D      PERICENTER RADIUS IN METERS
 #                       SCALE FACTOR - EARTH +29, MOON +27
 #       (4)     8D      PERICENTER ALTITUDE IN METERS

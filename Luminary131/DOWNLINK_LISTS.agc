@@ -19,6 +19,11 @@
 ##		2017-01-26 RSB	Back-ported comment-text fixes found while
 ##				proofing corresponding Luminary 69 file.	
 ##		2017-02-16 RSB	Proofed comment text using octopus/ProoferComments.
+##		2017-02-28 RSB	Fixed lingering typos.
+##		2017-03-05 RSB	A few comment-text fixes identified while proofing
+##				Luminary 116.
+##		2017-03-15 RSB	Comment-text fixes identified in 5-way
+##				side-by-side diff of Luminary 69/99/116/131/210.
 
 ## Page 195
 		BANK	22
@@ -103,7 +108,7 @@ LMORBMDL	EQUALS					# SEND ID BY SPECIAL CODING
 		1DNADR	SPARE				# FORMERLY PIF
 		-1DNADR	TGO				# TGO,+1
 
-# -----------------  SUB-LISTS   -----------------------------
+# -----------------  SUB-LISTS   ----------------------------
 
 LMORBM01	-1DNADR	R-OTHER +2			# R-OTHER +2,+3		SNAPSHOT
 		1DNADR	R-OTHER +4			# R-OTHER +4,+5
@@ -147,12 +152,12 @@ LMORBM05	2DNADR	OMEGAP				# OMEGAP,OMEGAQ,OMEGAR,GARBAGE
 LMORBM06	1DNADR	PIPTIME1			# PIPTIME,+1		COMMON DATA
 		-3DNADR	DELV				# DELV +0...+5
 
-# --------------------------------------------------------------------
+# ---------------------------------------------------------
 
 ## Page 198
 # LM COAST AND ALIGNMENT DOWNLIST
 #
-# -----------------  CONTROL LIST   -------------------------
+# -----------------  CONTROL LIST   --------------------------
 
 LMCSTADL	EQUALS					# SEND ID BY SPECIAL CODING
 		DNPTR	LMCSTA01			# COLLECT SNAPSHOT
@@ -213,7 +218,7 @@ LMRENDDL	EQUALS					# SEND ID BY SPECIAL CODING
 		3DNADR	RTARG				# RTARG +0...+5
 		3DNADR	DELVSLV				# DELVSLV +0...+5
 		1DNADR	TCSI				# TCSI,+1
-		3DNADR	DELVEET1			# DELVEET +0...+5
+		3DNADR	DELVEET1			# DELVEET +0-..+5
 		1DNADR	SPARE
 		1DNADR	TPASS4				# TPASS4,+1
 		DNPTR	LMREND06			# COMMON DATA
@@ -258,7 +263,7 @@ LMREND07	-1DNADR	AIG				# AIG,AMG		SNAPSHOT
 		1DNADR	MKTIME				# MKTIME,+1
 		-1DNADR	RANGRDOT			# DNRRANGE,DNRRDOT
 
-# -----------------------------------------------------------
+# ---------------------------------------------------------
 
 ## Page 202
 # LM DESCENT AND ASCENT DOWNLIST
@@ -338,7 +343,7 @@ LMLSALDL	EQUALS					# SEND ID BY SPECIAL CODING
 		4DNADR	DNTMBUFF			# SEND SHAPSHOT
 		1DNADR	TALIGN				# TALIGN,+1
 		6DNADR	REFSMMAT			# REFSMMAT +0...+11D
-		6DNADR	YNBSAV				# YNBSAV +0...+5,SNBSAV +0...+5
+		6DNADR	YNBSAV				# YNBSAV +0...+5,ZNBSAV +0...+5
 		DNPTR	LMLSAL08			# COMMON DATA
 		DNPTR	LMLSAL02			# COMMON DATA
 		1DNADR	TIME2				# TIME/1
@@ -370,7 +375,7 @@ LMLSAL08	EQUALS	LMCSTA06			# COMMON DOWNLIST DATA
 LMLSAL09	EQUALS	LMCSTA07			# COMMON DOWNLIST DATA
 
 ## Page 205
-# --------------------------------------------------------
+# ---------------------------------------------------------
 
 ## Page 206
 # LM AGS INITIALIZATION AND UPDATE DOWNLIST
@@ -413,7 +418,7 @@ LMAGSI03	EQUALS	LMORBM03			# COMMON DOWNLIST DATA
 LMAGSI04	EQUALS	LMORBM04			# COMMON DOWNLIST DATA
 LMAGSI05	EQUALS	LMORBM05			# COMMON DOWNLIST DATA
 
-# ------------------------------------------------------
+# ---------------------------------------------------------
 
 DNTABLE		GENADR	LMCSTADL			# LM COAST AND ALIGN DOWNLIST
 		GENADR	LMAGSIDL			# LM AGS INITIALIZATION/UPDATE DOWNLIST
@@ -423,6 +428,6 @@ DNTABLE		GENADR	LMCSTADL			# LM COAST AND ALIGN DOWNLIST
 ## Page 207
 		GENADR	LMLSALDL			# LM LUNAR SURFACE ALIGN DOWNLIST
 
-# ------------------------------------------------------
+# ---------------------------------------------------------------
 
 

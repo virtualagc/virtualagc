@@ -13,9 +13,14 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-01-22 MAS  Created from Luminary 99.
-##              2017-02-03 RRB  Updated for Luminar 116.
+##              2017-02-03 RRB  Updated for Luminary 116.
+##              2017-03-01 HG   Fix Page number 
+##                              Fix operand      : -> L
+##                                  operator  LXCH -> TS
+##		2017-03-10 RSB	Proofed comment text via 3-way diff vs
+##				Luminary 99 and 132 ... no problems found.
 
-## Page 1381
+## Page 1371
 #          THE FOLLOWING SUBROUTINE MAY BE CALLED TO DISPLAY A NON-ABORTIVE ALARM CONDITION. IT MAY BE CALLED
 # EITHER IN INTERRUPT OR UNDER EXECUTIVE CONTROL.
 
@@ -31,7 +36,6 @@
                 EBANK=          FAILREG                         
 
                 COUNT*          $$/ALARM                        
-
 # ALARM TURNS ON THE PROGRAM ALARM LIGHT, BUT DOES NOT DISPLAY.
 
 ALARM           INHINT                                          
@@ -52,8 +56,8 @@ LARMENT         CA              Q                               # STORE RETURN F
 
 CHKFAIL1        CCS             FAILREG                         # IS ANYTHING IN FAILREG
                 TCF             CHKFAIL2                        # YES TRY NEXT REG
-                CA              :
-                LXCH            FAILREG                         
+                CA              L
+                TS              FAILREG                         
                 TCF             PROGLARM                        # TURN ALARM LIGHT ON FOR FIRST ALARM
 
 CHKFAIL2        CCS             FAILREG         +1              

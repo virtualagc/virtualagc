@@ -1,5 +1,5 @@
 /*
- * Copyright 2009,2010,2016 Ronald S. Burkey <info@sandroid.org>
+ * Copyright 2009,2010,2016,2017 Ronald S. Burkey <info@sandroid.org>
  *
  * This file is part of yaAGC.
  *
@@ -80,6 +80,27 @@
  *                              did one thing (namely, call EnforceConsistency()).
  *                              All lingering comments from wxGlade removed.
  *              2016-11-29 RSB  Fixed formation of 'simulate' script for Mac.
+ *              2017-03-24 RSB  Added a SUPERJOB mission type, and activated the
+ *                              Apollo 10 & 12 & 15-17 LM missions.  Also, now have
+ *                              DSKY configurations that I *hope* are tailored to the
+ *                              missions, as opposed to just being LM vs. CM.  This
+ *                              affects only Apollo 15-17 LM, and missions prior to Apollo 7.
+ *              2017-03-27 RSB  Added LUM99R2 and BOREALIS. Enabled Retread 44, which
+ *                              was disabled for some reason.  Enabled Apollo 4, identifying
+ *                              it with Apollo 6, since Solarium 54 and 55 programs are
+ *                              believed to be identical.
+ *              2017-04-17 RSB  Began adapting to use a drop-down list to choose the mission,
+ *                              rather than a huge bunch of radio buttons.  This makes the
+ *                              UI much smaller, and better for small displays.  It goes into
+ *                              effect if the screen is smaller than 1280x1024.  Also, reading
+ *                              the configuration file was not setting the AGC software version
+ *                              correctly (it was always using Apollo 1), and somehow this
+ *                              wasn't being noticed.  I don't see how that could be possible,
+ *                              but that's what I was finding ....
+ *              2017-04-18 RSB  In trying to build this with wxWidgets 3.0 (rather than the
+ *                              recommended 2.8), the Run!, Default, and Exit buttons were too
+ *                              small, height-wise.  Fixed that.
+ *          	2017-05-30 RSB	Changed bogus references to Sunburst 39 to Sunburst 37.
  *
  * This file was originally generated using the wxGlade RAD program.
  * However, it is now maintained entirely manually, and cannot be managed
@@ -106,7 +127,9 @@
  * the ID_xxxx constants in VirtualAGC.h that are in the range
  * ID_FIRSTMISSION <= ID_xxxx < ID_AGCCUSTOMBUTTON.  It contains all of the
  * constant data (tooltips, url, etc.) differentiating the various AGC software
- * versions, although a handful of special behaviors may hardcoded separately.
+ * versions, although a handful of special behaviors may be hardcoded separately.
+ * Also, for newly-added missions, don't forget to add a consistency event for it
+ * in the event table appearing later in this file.
  */
 static const missionAlloc_t missionConstants[ID_AGCCUSTOMBUTTON
     - ID_FIRSTMISSION] =
@@ -114,88 +137,99 @@ static const missionAlloc_t missionConstants[ID_AGCCUSTOMBUTTON
           //
             { "Apollo 1 Command Module", "",
                 "Click this to select the unflown Apollo 1 mission.", DISABLED,
-                CM, BLOCK1, NO_PERIPHERALS, "" },
-            { "AS-202 (\"Apollo 3\") Command Module", "",
+                CM, BLOCK1, NO_PERIPHERALS, "", "CM0.ini" },
+            { "AS-202 (\"Apollo 3\") CM", "",
                 "Click this to select the AS-202 (\"Apollo 3\") unmanned CM mission.",
-                DISABLED, CM, BLOCK1, NO_PERIPHERALS, "" },
-            { "Apollo 4 Command Module", "",
-                "Click this to select the unmanned Apollo 4 Block I CM mission.",
-                DISABLED, CM, BLOCK1, NO_PERIPHERALS, "" },
+                DISABLED, CM, BLOCK1, NO_PERIPHERALS, "", "CM0.ini" },
+            { "Apollo 4 Command Module", "Solarium055/MAIN.agc.html",
+                "Click this to select the unmanned Apollo 4 Block 1 CM mission, running software SOLARIUM 55, "
+                "which is believed to be identical to SOLARIUM 54.",
+                ENABLED, CM, BLOCK1, NO_PERIPHERALS, "Solarium055", "CM0.ini" },
             { "Apollo 5 Lunar Module", "Sunburst120/MAIN.agc.html",
                 "Click this to select the unmanned Apollo 5 LM mission, running software SUNBURST 120.",
-                ENABLED, LM, BLOCK2, NO_PERIPHERALS, "Sunburst120" },
+                ENABLED, LM, BLOCK2, NO_PERIPHERALS, "Sunburst120", "LM0.ini" },
             { "Apollo 6 Command Module", "Solarium055/MAIN.agc.html",
                 "Click this to select the unmanned Apollo 6 Block 1 CM mission, running software SOLARIUM 55.",
-                ENABLED, CM, BLOCK1, NO_PERIPHERALS, "Solarium055" },
+                ENABLED, CM, BLOCK1, NO_PERIPHERALS, "Solarium055", "CM0.ini" },
             { "Apollo 7 Command Module", "",
                 "Click this to select the Apollo 7 mission.", DISABLED, CM,
-                BLOCK2, PERIPHERALS, "" },
+                BLOCK2, PERIPHERALS, "", "CM.ini" },
             { "Apollo 8 Command Module", "Colossus237/MAIN.agc.html",
                 "Click this to select the Apollo 8 mission, running software COLOSSUS 237.",
-                ENABLED, CM, BLOCK2, PERIPHERALS, "Colossus237" },
+                ENABLED, CM, BLOCK2, PERIPHERALS, "Colossus237", "CM.ini" },
             { "Apollo 9 Command Module", "Colossus249/MAIN.agc.html",
                 "Click this to select the CM for the Apollo 9 mission, running software COLOSSUS 249.",
-                ENABLED, CM, BLOCK2, PERIPHERALS, "Colossus249" },
+                ENABLED, CM, BLOCK2, PERIPHERALS, "Colossus249", "CM.ini" },
             { "Apollo 9 Lunar Module", "",
                 "Click this to select the LM for the Apollo 9 mission.",
-                DISABLED, LM, BLOCK2, PERIPHERALS, "" },
+                DISABLED, LM, BLOCK2, PERIPHERALS, "", "CM.ini"  /* Yes, the CM is intentional */},
             { "Apollo 10 Command Module", "",
                 "Click this to select the CM for the Apollo 10 mission.",
-                DISABLED, CM, BLOCK2, PERIPHERALS, "" },
-            { "Apollo 10 Lunar Module", "",
+                DISABLED, CM, BLOCK2, PERIPHERALS, "", "CM.ini" },
+            { "Apollo 10 Lunar Module", "Luminary069/MAIN.agc.html",
                 "Click this to select the LM for the Apollo 10 mission.",
-                DISABLED, LM, BLOCK2, PERIPHERALS, "" },
+                ENABLED, LM, BLOCK2, PERIPHERALS, "Luminary069", "CM.ini" /* Yes, the CM is intentional */ },
             { "Apollo 11 Command Module", "Comanche055/MAIN.agc.html",
                 "Click this to select the CM for the Apollo 11 mission, running software COMANCHE 55.",
-                ENABLED, CM, BLOCK2, PERIPHERALS, "Comanche055" },
-            { "Apollo 11 Lunar Module", "Luminary099/MAIN.agc.html",
-                "Click this to select the LM for the Apollo 11 mission, running software LUMINARY 99.",
-                ENABLED, LM, BLOCK2, PERIPHERALS, "Luminary099" },
+                ENABLED, CM, BLOCK2, PERIPHERALS, "Comanche055", "CM.ini" },
+            { "Apollo 11 Lunar Module rev 1", "Luminary099/MAIN.agc.html",
+                "Click this to select the LM for the Apollo 11 mission, running software LUMINARY 99 Rev 1.",
+                ENABLED, LM, BLOCK2, PERIPHERALS, "Luminary099", "LM.ini" },
+            { "Apollo 11 Lunar Module rev 2", "LUM99R2/MAIN.agc.html",
+                "Click this to select the LM for the Apollo 11 mission, running reconstructed software LUMINARY 99 Rev 2.",
+                ENABLED, LM, BLOCK2, PERIPHERALS, "LUM99R2", "LM.ini" },
             { "Apollo 12 Command Module", "",
                 "Click this to select the CM for the Apollo 12 mission.",
-                DISABLED, CM, BLOCK2, PERIPHERALS, "" },
-            { "Apollo 12 Lunar Module", "",
+                DISABLED, CM, BLOCK2, PERIPHERALS, "", "CM.ini" },
+            { "Apollo 12 Lunar Module", "Luminary116/MAIN.agc.html",
                 "Click this to select the LM for the Apollo 12 mission.",
-                DISABLED, LM, BLOCK2, PERIPHERALS, "" },
+                ENABLED, LM, BLOCK2, PERIPHERALS, "Luminary116", "LM.ini" },
             { "Apollo 13 Command Module", "",
                 "Click this to select the CM for the Apollo 13 mission.",
-                DISABLED, CM, BLOCK2, PERIPHERALS, "" },
+                DISABLED, CM, BLOCK2, PERIPHERALS, "", "CM.ini" },
             { "Apollo 13 Lunar Module", "Luminary131/MAIN.agc.html",
                 "Click this to select the LM for the Apollo 13 mission, running software LUMINARY 131.",
-                ENABLED, LM, BLOCK2, PERIPHERALS, "Luminary131" },
+                ENABLED, LM, BLOCK2, PERIPHERALS, "Luminary131", "LM.ini" },
             { "Apollo 14 Command Module", "",
                 "Click this to select the CM for the Apollo 14 mission.",
-                DISABLED, CM, BLOCK2, PERIPHERALS, "" },
+                DISABLED, CM, BLOCK2, PERIPHERALS, "", "CM.ini" },
             { "Apollo 14 Lunar Module", "",
                 "Click this to select the LM for the Apollo 14 mission.",
-                DISABLED, LM, BLOCK2, PERIPHERALS, "" },
+                DISABLED, LM, BLOCK2, PERIPHERALS, "", "LM.ini" },
             { "Apollo 15-17 Command Module", "Artemis072/MAIN.agc.html",
                 "Click this to select the CM for the Apollo 15-17 mission, running software ARTEMIS 72.",
-                ENABLED, CM, BLOCK2, PERIPHERALS, "Artemis072" },
+                ENABLED, CM, BLOCK2, PERIPHERALS, "Artemis072", "CM.ini" },
             { "Apollo 15-17 Lunar Module", "Luminary210/MAIN.agc.html",
                 "Click this to select the LM for the Apollo 15-17 mission.",
-                DISABLED, LM, BLOCK2, PERIPHERALS, "Luminary210" },
+                ENABLED, LM, BLOCK2, PERIPHERALS, "Luminary210", "LM1.ini" },
             { "Apollo Skylab Command Module", "",
                 "Click this to select the Apollo-Soyuz mission.", DISABLED, CM,
-                BLOCK2, PERIPHERALS, "" },
+                BLOCK2, PERIPHERALS, "", "CM.ini" },
             { "Apollo Soyuz Command Module", "",
                 "Click this to select an Apollo-Skylab mission.", DISABLED, CM,
-                BLOCK2, PERIPHERALS, "" },
+                BLOCK2, PERIPHERALS, "", "CM.ini" },
             { "Validation Suite", "Validation/Validation.agc.html",
                 "Click this to select the AGC validation (non-mission) software.",
-                ENABLED, LM, BLOCK2, NO_PERIPHERALS, "Validation" },
+                ENABLED, LM, BLOCK2, NO_PERIPHERALS, "Validation", "LM.ini" },
             { "RETREAD 44 (LM)", "Retread44/MAIN.agc.html",
                 "Click this to select the RETREAD 44 (earliest non-mission LM) software.",
-                DISABLED, LM, BLOCK2, NO_PERIPHERALS, "Retread44" },
+                ENABLED, LM, BLOCK2, NO_PERIPHERALS, "Retread44", "LM0.ini" },
             { "AURORA 12 (LM)", "Aurora12/MAIN.agc.html",
                 "Click this to select the AURORA 12 (early non-mission LM) software.  This is the last AGC version with full testing capabilities.",
-                ENABLED, LM, BLOCK2, NO_PERIPHERALS, "Aurora12" },
-            { "SUNBURST 39 (LM)", "Sunburst39/MAIN.agc.html",
-                "Click this to select the SUNBURST 39 (early non-mission LM) software.",
-                DISABLED, LM, BLOCK2, NO_PERIPHERALS, "Sunburst39" },
+                ENABLED, LM, BLOCK2, NO_PERIPHERALS, "Aurora12", "LM0.ini" },
+            { "BOREALIS (LM)", "Borealis/MAIN.agc.html",
+                "Click this to select the BOREALIS test-suite software.  BOREALIS is a modernized AGC self-test suite, based on AURORA.",
+                ENABLED, LM, BLOCK2, NO_PERIPHERALS, "Aurora12", "LM0.ini" },
+            { "SUNBURST 37 (LM)", "Sunburst37/MAIN.agc.html",
+                "Click this to select the SUNBURST 37 (early non-mission LM) software.",
+                DISABLED, LM, BLOCK2, NO_PERIPHERALS, "Sunburst37", "LM0.ini" },
             { "ZERLINA (LM)", "Zerlina/MAIN.agc.html",
                 "Click this to select ZERLINA (next-generation non-mission LM) software.",
-                DISABLED, LM, BLOCK2, PERIPHERALS, "Zerlina" } };
+                DISABLED, LM, BLOCK2, PERIPHERALS, "Zerlina", "LM.ini" },
+            { "SUPER JOB", "SuperJob/MAIN.agc.html",
+                "Click this to select SUPER JOB (Raytheon Auxiliary Memory test) software.  Note that to run meaningfully, a simulated Auxiliary Memory unit (not yet available!) needs to be run also.",
+                ENABLED, CM, BLOCK2, NO_PERIPHERALS, "SuperJob", "CM.ini" }
+      };
 
 // This is the array where shell commands for the Digital Uplink
 // are stored.
@@ -235,6 +269,7 @@ VirtualAGC::SetSize(void)
   wxSize Size;
   int Width, Height;
   SET_FONT(SimTypeLabel, 2);
+  SET_FONT(SimTypeLabel2, 2);
   //SET_FONT (AgcFilenameLabel, 0);
   SET_FONT(AgcCustomFilename, 0);
   SET_FONT(DeviceListLabel, 2);
@@ -311,17 +346,20 @@ VirtualAGC::VirtualAGC(wxWindow* parent, int id, const wxString& title,
   Points = StartingPoints;
   int x, y, height, width;
   wxClientDisplayRect(&x, &y, &width, &height);
-  ReallySmall = 0;
-  if (height < 768)
-    {
-      Points = StartingPoints - 4;
-      ReallySmall = 1;
-    }
-  else if (height < 1024)
+  DropDown = false;
+  ReallySmall = false;
+  if (height < 1024 || width < 1280)
     {
       Points = StartingPoints - 2;
-      ReallySmall = 1;
+      ReallySmall = true;
     }
+  else if (height < 768 || width < 1024)
+    {
+      Points = StartingPoints - 4;
+      ReallySmall = true;
+    }
+  if (ReallySmall)
+    DropDown = true;
   if (Points < 8)
     Points = 8;
   Font.SetPointSize(Points);
@@ -405,6 +443,8 @@ VirtualAGC::VirtualAGC(wxWindow* parent, int id, const wxString& title,
   TopLine = new wxStaticLine(this, wxID_ANY);
   SimTypeLabel = new wxStaticText(this, wxID_ANY, wxT("AGC Simulation Type"),
       wxDefaultPosition, wxDefaultSize, wxALIGN_CENTRE);
+  SimTypeLabel2 = new wxStaticText(this, wxID_ANY, wxT("AGC Simulation Type"),
+      wxDefaultPosition, wxDefaultSize, wxALIGN_CENTRE);
   for (int i = ID_FIRSTMISSION; i < ID_AGCCUSTOMBUTTON; i++)
     {
       if (i == ID_FIRSTMISSION)
@@ -420,6 +460,11 @@ VirtualAGC::VirtualAGC(wxWindow* parent, int id, const wxString& title,
   AgcFilenameBrowse = new wxButton(this, ID_AGCFILENAMEBROWSE, wxT("..."));
   static_line_2 = new wxStaticLine(this, wxID_ANY, wxDefaultPosition,
       wxDefaultSize, wxLI_VERTICAL);
+  for (int i = ID_FIRSTMISSION; i < ID_AGCCUSTOMBUTTON; i++)
+    if (missionConstants[i - ID_FIRSTMISSION].enabled)
+      SoftwareVersionNames.Add(wxString::FromUTF8(missionConstants[i - ID_FIRSTMISSION].name));
+  DeviceAGCversionDropDownList = new wxChoice(this, ID_AGCSOFTWAREDROPDOWNLIST,
+      wxDefaultPosition, wxDefaultSize, SoftwareVersionNames);
   DeviceListLabel = new wxStaticText(this, wxID_ANY, wxT("Interfaces"),
       wxDefaultPosition, wxDefaultSize, wxALIGN_CENTRE);
   DeviceAgcCheckbox = new wxCheckBox(this, ID_DEVICEAGCCHECKBOX,
@@ -537,6 +582,7 @@ EVT_BUTTON(ID_AEAFILENAMEBROWSE, VirtualAGC::AeaFilenameBrowseEvent)
 EVT_BUTTON(ID_RUNBUTTON, VirtualAGC::RunButtonEvent)
 EVT_BUTTON(ID_DEFAULTSBUTTON, VirtualAGC::DefaultsButtonEvent)
 EVT_BUTTON(ID_EXITBUTTON, VirtualAGC::ExitButtonEvent)
+EVT_CHOICE(ID_AGCSOFTWAREDROPDOWNLIST, VirtualAGC::ConsistencyEvent)
 EVT_CHECKBOX(ID_DEVICETELEMETRYCHECKBOX, VirtualAGC::ConsistencyEvent)
 EVT_CHECKBOX(ID_DEVICEAEACHECKBOX, VirtualAGC::ConsistencyEvent)
 EVT_CHECKBOX(ID_DEVICEDEDACHECKBOX, VirtualAGC::ConsistencyEvent)
@@ -595,9 +641,12 @@ EVT_RADIOBUTTON(ID_SOYUZCMBUTTON, VirtualAGC::ConsistencyEvent)
 EVT_RADIOBUTTON(ID_VALIDATIONBUTTON, VirtualAGC::ConsistencyEvent)
 EVT_RADIOBUTTON(ID_RETREAD44BUTTON, VirtualAGC::ConsistencyEvent)
 EVT_RADIOBUTTON(ID_AURORA12BUTTON, VirtualAGC::ConsistencyEvent)
-EVT_RADIOBUTTON(ID_SUNBURST39BUTTON, VirtualAGC::ConsistencyEvent)
+EVT_RADIOBUTTON(ID_SUNBURST37BUTTON, VirtualAGC::ConsistencyEvent)
 EVT_RADIOBUTTON(ID_ZERLINABUTTON, VirtualAGC::ConsistencyEvent)
+EVT_RADIOBUTTON(ID_SUPERJOBBUTTON, VirtualAGC::ConsistencyEvent)
 EVT_RADIOBUTTON(ID_AGCCUSTOMBUTTON, VirtualAGC::ConsistencyEvent)
+EVT_RADIOBUTTON(ID_LUM99R2BUTTON, VirtualAGC::ConsistencyEvent)
+EVT_RADIOBUTTON(ID_BOREALISBUTTON, VirtualAGC::ConsistencyEvent)
 END_EVENT_TABLE();
 
 #define TEMPTRACE(x) //wxMessageBox (wxT ("Trace"), wxT (x))
@@ -1266,6 +1315,11 @@ VirtualAGC::set_properties()
   SimTypeLabel->SetToolTip(
       wxT(
           "In this area, you can select the Apollo mission and the spacecraft software version."));
+  SimTypeLabel2->SetBackgroundColour(wxColour(255, 255, 255));
+  SimTypeLabel2->SetFont(wxFont(12, wxDEFAULT, wxNORMAL, wxBOLD, 1, wxT("")));
+  SimTypeLabel2->SetToolTip(
+      wxT(
+          "In this area, you can select the Apollo mission and the spacecraft software version."));
 
   int mission;
   for (mission = ID_FIRSTMISSION; mission < ID_AGCCUSTOMBUTTON; mission++)
@@ -1604,11 +1658,27 @@ VirtualAGC::do_layout()
       0);
   sizer_4->Add(sizer_11, 1, wxEXPAND, 0);
   sizer_2->Add(sizer_4, 1, wxEXPAND, 0);
+
   sizer_6->Add(static_line_2, 0, wxEXPAND, 0);
   sizer_6->Add(20, 20, 0, wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL,
       0);
   sizer_7->Add(20, 10, 0, wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL,
       0);
+  if (DropDown)
+    {
+      sizer_2->Show(false);
+      sizer_7->Add(SimTypeLabel2, 0, wxALIGN_CENTER_HORIZONTAL, 0);
+      sizer_7->Add(20, 10, 0, wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL,
+          0);
+      sizer_7->Add(DeviceAGCversionDropDownList, 0, 0, 0);
+      sizer_7->Add(20, 10, 0, wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL,
+          0);
+    }
+  else
+    {
+      DeviceAGCversionDropDownList->Show(false);
+      SimTypeLabel2->Show(false);
+    }
   sizer_7->Add(DeviceListLabel, 0, wxALIGN_CENTER_HORIZONTAL, 0);
   sizer_7->Add(20, 10, 0, wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL,
       0);
@@ -1651,6 +1721,8 @@ VirtualAGC::do_layout()
   sizer_1_copy->Add(20, 20, 0, 0, 0);
   sizer_1_copy->Add(AeaSourceButton, 0, 0, 0);
   sizer_1_copy->Add(20, 20, 1, 0, 0);
+  if (DropDown)
+    sizer_1->Add(20,20,0,0,0);
   sizer_1->Add(sizer_1_copy, 1, wxEXPAND, 0);
   sizer_5->Add(sizer_1, 0, wxEXPAND, 0);
   sizer_5->Add(20, 10, 0, wxEXPAND, 0);
@@ -1730,11 +1802,11 @@ VirtualAGC::do_layout()
       0);
   sizer_3->Add(RunButton, 0,
       wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL, 0);
-  sizer_3->Add(40, 20, 0, wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL,
+  sizer_3->Add(40, 40, 0, wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL,
       0);
   sizer_3->Add(DefaultsButton, 0,
       wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL, 0);
-  sizer_3->Add(40, 20, 0, wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL,
+  sizer_3->Add(40, 40, 0, wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL,
       0);
   sizer_3->Add(ExitButton, 0,
       wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL, 0);
@@ -1779,6 +1851,43 @@ VirtualAGC::EnableRunButton(void)
   Show(true);
 }
 
+// Converts a drop-list representation of the selected mission to a radio-button representation.
+void
+VirtualAGC::ConvertDropDown(void)
+{
+  wxString selectedMission;
+  int mission;
+  selectedMission = DeviceAGCversionDropDownList->GetString(DeviceAGCversionDropDownList->GetSelection());
+  for (mission = ID_FIRSTMISSION; mission < ID_AGCCUSTOMBUTTON; mission++)
+    {
+      if (selectedMission == wxString::FromUTF8(missionConstants[mission - ID_FIRSTMISSION].name))
+        {
+          missionRadioButtons[mission - ID_FIRSTMISSION]->SetValue(true);
+          break;
+        }
+    }
+}
+
+// Converts a radio-button representation of the selected mission to a drop-list representation.
+void
+VirtualAGC::ConvertRadio(void)
+{
+  for (int mission = ID_FIRSTMISSION; mission < ID_AGCCUSTOMBUTTON; mission++)
+    if (missionRadioButtons[mission - ID_FIRSTMISSION]->GetValue())
+      {
+        wxString missionName = wxString::FromUTF8(missionConstants[mission - ID_FIRSTMISSION].name);
+        for (int drop = 0; drop < DeviceAGCversionDropDownList->GetCount(); drop++)
+          {
+            if (DeviceAGCversionDropDownList->GetString(drop) == missionName)
+              {
+                DeviceAGCversionDropDownList->SetSelection(drop);
+                break;
+              }
+          }
+        break;
+      }
+}
+
 // This function checks the enabling/disabling of all controls, and makes sure that
 // they are consistent among themselves.
 void
@@ -1791,6 +1900,8 @@ VirtualAGC::EnforceConsistency(void)
   block1 = false;
   IsLM = false;
   int mission;
+  if (DropDown)
+    ConvertDropDown();
   for (mission = ID_FIRSTMISSION; mission < ID_AGCCUSTOMBUTTON; mission++)
     if (missionRadioButtons[mission - ID_FIRSTMISSION]->GetValue())
       {
@@ -2021,6 +2132,7 @@ VirtualAGC::SetDefaultConfiguration(void)
 void
 VirtualAGC::ReadConfigurationFile(void)
 {
+  int mission = ID_FIRSTMISSION - 1;
   wxTextFile Fin;
   if (wxFileExists(wxT("VirtualAGC.cfg")))
     {
@@ -2034,16 +2146,12 @@ VirtualAGC::ReadConfigurationFile(void)
               Line = Fin.GetLine(i);
               Name = Line.BeforeFirst('=');
               Value = Line.AfterFirst('=');
+              if (Name.IsSameAs(wxT("missionRadioButtons[mission - ID_FIRSTMISSION]")))
+                mission++;
               CHECK_TEXT_SETTING(AgcCustomFilename);
               CHECK_TEXT_SETTING(AeaCustomFilename);
               CHECK_TEXT_SETTING(CoreFilename);
-              int mission;
-              for (mission = ID_FIRSTMISSION; mission < ID_AGCCUSTOMBUTTON;
-                  mission++)
-                {
-                  CHECK_TRUE_FALSE_SETTING(
-                      missionRadioButtons[mission - ID_FIRSTMISSION]);
-                }
+              CHECK_TRUE_FALSE_SETTING(missionRadioButtons[mission - ID_FIRSTMISSION]);
               CHECK_TRUE_FALSE_SETTING(AgcCustomButton);
               CHECK_TRUE_FALSE_SETTING(FlightProgram4Button);
               CHECK_TRUE_FALSE_SETTING(FlightProgram5Button);
@@ -2081,6 +2189,9 @@ VirtualAGC::ReadConfigurationFile(void)
               CHECK_TRUE_FALSE_SETTING(TelemetryRetro);
             }
           Fin.Close();
+          if (DropDown)
+            ConvertRadio();
+          EnforceConsistency();
         }
       else
         {
@@ -2118,6 +2229,8 @@ VirtualAGC::WriteConfigurationFile(void)
       WRITE_TEXT_SETTING(AeaCustomFilename);
       WRITE_TEXT_SETTING(CoreFilename);
       int mission;
+      if (DropDown)
+        ConvertDropDown();
       for (mission = ID_FIRSTMISSION; mission < ID_AGCCUSTOMBUTTON; mission++)
         {
           WRITE_TRUE_FALSE_SETTING(
@@ -2454,6 +2567,7 @@ VirtualAGC::FormCommands(void)
     LM_Simulator = wxT("");
   wxString basename;
   int mission;
+  const char *dskyIni;
   for (mission = ID_FIRSTMISSION; mission < ID_AGCCUSTOMBUTTON; mission++)
     if (missionRadioButtons[mission - ID_FIRSTMISSION]->GetValue())
       {
@@ -2468,6 +2582,7 @@ VirtualAGC::FormCommands(void)
         CMorLM = wxString::FromUTF8(
             (missionConstants[mission - ID_FIRSTMISSION].lm == LM) ?
                 "LM" : "CM");
+        dskyIni = missionConstants[mission - ID_FIRSTMISSION].dsky;
         break;
       }
   if (mission >= ID_AGCCUSTOMBUTTON)
@@ -2496,6 +2611,10 @@ VirtualAGC::FormCommands(void)
       if (DebugMode)
         DirCmd += wxT("source/" + basename);
     }
+  if (mission == ID_SUNBURST37BUTTON)
+    {
+      yaAGC += wxT(" --initialize-sunburst-37");
+    }
   if (CMorLM.IsSameAs(wxT("CM")))
     {
       CmSim = true;
@@ -2519,7 +2638,7 @@ VirtualAGC::FormCommands(void)
         }
       else
         {
-          yaAGC += wxT(" --cfg=") + CMorLM + wxT(".ini");
+          yaAGC += wxT(" --cfg=") + wxString::FromUTF8(dskyIni) /*CMorLM + wxT(".ini")*/;
         }
       if (StartupResumeButton->GetValue()
           && wxFileExists(CMorLM + wxT(".core")))
@@ -2539,7 +2658,7 @@ VirtualAGC::FormCommands(void)
       if (block1)
         yaDSKY += wxT(" --port=") + Port;
       else
-        yaDSKY += wxT(" --cfg=") + CMorLM + wxT(".ini --port=") + Port;
+        yaDSKY += wxT(" --cfg=") + wxString::FromUTF8(dskyIni) /* CMorLM + wxT(".ini") */ + wxT(" --port=") + Port;
     }
   return (true);
 }

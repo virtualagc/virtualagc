@@ -1,21 +1,23 @@
 ### FILE="Main.annotation"
-## Copyright:    Public domain.
-## Filename:     FRESH_START_AND_RESTART.agc
-## Purpose:      A module for revision 0 of BURST120 (Sunburst). It 
-##               is part of the source code for the Lunar Module's
-##               (LM) Apollo Guidance Computer (AGC) for Apollo 5.
-## Assembler:    yaYUL
-## Contact:      Ron Burkey <info@sandroid.org>.
-## Website:      www.ibiblio.org/apollo/index.html
-## Mod history:  2016-09-30 RSB  Created draft version.
-##               2016-10-05 RSB  Finished transcription.
-##               2016-10-30 MAS  A bunch of small corrections, and some missing lines.
-##		 2016-11-01 RSB	 More typos.
-##		 2016-12-03 RSB	 Fixed various typos using octopus/ProoferComments, but
-##				 there are still a couple of pages that are problematic
-##				 with respect to octopus, so the process isn't completed.
-##		 2016-12-05 RSB	 octopus/ProoferComments based comment-proofing completed;
-##				 some corrections made.
+## Copyright:   Public domain.
+## Filename:    FRESH_START_AND_RESTART.agc
+## Purpose:     A module for revision 0 of BURST120 (Sunburst). It 
+##              is part of the source code for the Lunar Module's
+##              (LM) Apollo Guidance Computer (AGC) for Apollo 5.
+## Assembler:   yaYUL
+## Contact:     Ron Burkey <info@sandroid.org>.
+## Website:     www.ibiblio.org/apollo/index.html
+## Mod history: 2016-09-30 RSB  Created draft version.
+##              2016-10-05 RSB  Finished transcription.
+##              2016-10-30 MAS  A bunch of small corrections, and some missing lines.
+##		2016-11-01 RSB	More typos.
+##		2016-12-03 RSB	Fixed various typos using octopus/ProoferComments, but
+##				there are still a couple of pages that are problematic
+##				with respect to octopus, so the process isn't completed.
+##		2016-12-05 RSB	octopus/ProoferComments based comment-proofing completed;
+##				some corrections made.
+##		2017-03-13 RSB	Comment-text fixes noted in proofing Luminary 116.
+##		2017-06-03 MAS	Replaced some instances of P00H with POOH.
 
 ## Page 88
                 BANK            01                              
@@ -155,7 +157,7 @@ INITSW          TS              L
                 TC              IBNKCALL                        
                 CADR            1STENGOF                        
 
-P00H3           CA              ZERO                            
+POOH3           CA              ZERO                            
                 TS              MODREG                          
                 TS              PHASENUM                        
 
@@ -184,7 +186,7 @@ MR.CLEAN        CAF             ELEVEN                          # INITIALIZE PHA
                 TC              Q                               
 
 ## Page 92
-# COMES HERE FROM LOCATION 4000, GOJAM, RESTART ANY PROGRAMS WHICH MAY HAVE BEEN RUNNING AT THE TIME.
+# COMES HERE FROM LOCATION 4000, GOJAM. RESTART ANY PROGRAMS WHICH MAY HAVE BEEN RUNNING AT THE TIME.
 
 GOPROG          INCR            REDOCTR                         # ANOTHER RESTART.
 
@@ -329,7 +331,7 @@ PINACT          CCS             MPAC            +5              # PROCESS ALL RE
                 CS              FLAGWRD1                        # WAS THE RESTARTABILITY FLAG SET?
                 MASK            BIT12                           
                 CCS             A                               
-                TCF             P00H2                           # NO.
+                TCF             POOH2                           # NO.
                 TS              MODREG                          # YES.  SET MAJOR MODE TO 00.
                 TCF             ENDRSTRT                        
 
@@ -539,12 +541,12 @@ SETADR          2CADR           SETIDLE
 
                 BLOCK           2                               
 
-P00H            TC              POSTJUMP                        
-                CADR            P00H2                           # DO A PARTIAL FRESH START.
+POOH            TC              POSTJUMP                        
+                CADR            POOH2                           # DO A PARTIAL FRESH START.
 
 
                 BANK            01                              
-P00H2           INHINT                                          
+POOH2           INHINT                                          
                 TC              STARTSB2                        
 
                 TC              IBNKCALL                        
@@ -562,12 +564,12 @@ P00H2           INHINT
                 INHINT                                          
                 TC              MR.CLEAN                        # DEACTIVATE ALL RESTART GROUPS.
 
-                CA              LP00H3                          # PICK UP RETURN FOR MSTART.
+                CA              LPOOH3                          # PICK UP RETURN FOR MSTART.
                 TC              MSTART          -1              # START MISSION TIMERS COUNTING.
                                                                 # WE GET A RELINT AT MSTART.
 
 
-LP00H3          ADRES           P00H3                           
+LPOOH3          ADRES           POOH3                           
 
 ## Page 101
 # FAKESTRT IS ENTERED FROM GOPROG WHEN A RESTART OCCURS AND THE RESTARTABILITY FLAG IS OFF.

@@ -1,5 +1,5 @@
 /*
- * Copyright 2009,2016 Ronald S. Burkey <info@sandroid.org>
+ * Copyright 2009,2016,2017 Ronald S. Burkey <info@sandroid.org>
  *
  * This file is part of yaAGC.
  *
@@ -43,6 +43,8 @@
  *	        2016-11-10 RSB  Refactored in terms of being a lot simpler to
  *	                        add or edit mission types.  Removed all of the
  *	                        lingering comments inserted by wxGlade.
+ *	        2017-03-24 RSB  Added a SUPERJOB mission type.
+ *          	2017-05-30 RSB	Changed bogus references to Sunburst 39 to Sunburst 37.
  *
  * This file was originally generated using the wxGlade RAD program.
  * However, it is now maintained entirely manually, and any ability to
@@ -88,6 +90,7 @@ enum
   ID_AEAFILENAMELABEL,
   ID_AEACUSTOMFILENAME,
   ID_AEAFILENAMEBROWSE,
+  ID_AGCSOFTWAREDROPDOWNLIST,
   ID_DEVICEAGCCHECKBOX,
   ID_DEVICEDSKYCHECKBOX,
   ID_DEVICEACACHECKBOX,
@@ -123,6 +126,7 @@ enum
   ID_APOLLO10LMBUTTON,
   ID_COMANCHE55BUTTON,
   ID_LUMINARY99BUTTON,
+  ID_LUM99R2BUTTON,
   ID_APOLLO12CMBUTTON,
   ID_APOLLO12LMBUTTON,
   ID_APOLLO13CMBUTTON,
@@ -136,8 +140,10 @@ enum
   ID_VALIDATIONBUTTON,
   ID_RETREAD44BUTTON,
   ID_AURORA12BUTTON,
-  ID_SUNBURST39BUTTON,
+  ID_BOREALISBUTTON,
+  ID_SUNBURST37BUTTON,
   ID_ZERLINABUTTON,
+  ID_SUPERJOBBUTTON,
   ID_AGCCUSTOMBUTTON,
   ID_AEASIMTYPEBOX = 200,
   ID_FLIGHTPROGRAM4BUTTON,
@@ -193,6 +199,7 @@ typedef struct
   int Block1; // Either BLOCK2 or BLOCK1.
   int noPeripherals; // Either PERIPHERALS or NO_PERIPHERALS (i.e., DSKY only)
   const char basename[32]; // Fragment of name for locating the rope file.
+  const char dsky[16]; // DSKY config file, usually LM.ini or CM.ini. Ignored for Block 1.
 } missionAlloc_t;
 
 class TimerClass : public wxTimer
@@ -279,7 +286,8 @@ public:
   void
   SetSize(void);
   int Points, StartingPoints;
-  int ReallySmall;
+  bool ReallySmall;
+  bool DropDown;
   wxString ResourceDirectory;		// Where the images, cfg files, etc. are stored.
   bool IsLM;
   bool CmSim, LmSim, AeaSim;
@@ -307,6 +315,7 @@ private:
   wxString HomeDirectory;
   // Command lines for other executables.
   wxString yaAGC, yaDSKY, yaACA, yaAGS, yaDEDA, LM_Simulator, yaTelemetry;
+  wxArrayString SoftwareVersionNames;
 
   void
   EnableLM(bool YesNo);		// Enables/disables LM-specific settings
@@ -328,6 +337,10 @@ private:
   ReadConfigurationFile(void);
   void
   WriteConfigurationFile(void);
+  void
+  ConvertDropDown(void);
+  void
+  ConvertRadio(void);
 
 protected:
   wxStaticBox* sizer_20_staticbox;
@@ -351,11 +364,13 @@ protected:
   wxStaticBitmap* Patch17Bitmap;
   wxStaticLine* TopLine;
   wxStaticText* SimTypeLabel;
+  wxStaticText* SimTypeLabel2;
   wxRadioButton* AgcCustomButton;
   wxTextCtrl* AgcCustomFilename;
   wxButton* AgcFilenameBrowse;
   wxStaticLine* static_line_2;
   wxStaticText* DeviceListLabel;
+  wxChoice *DeviceAGCversionDropDownList;
   wxCheckBox* DeviceAgcCheckbox;
   wxCheckBox* DeviceDskyCheckbox;
   wxCheckBox* DeviceAcaCheckbox;

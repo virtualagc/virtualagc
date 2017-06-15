@@ -15,6 +15,12 @@
 ##		2016-11-02 RSB	More typos.
 ##		2016-12-06 RSB	Comment-proofing with octopus/ProoferComments,
 ##				changes made.
+##		2017-03-07 RSB	Comment-text fixes noted in proofing Luminary 116.
+##		2017-03-15 RSB	Comment-text fixes identified in 6-way
+##				side-by-side diff of Sunburst 120 and 
+##				Luminary 69/99/116/131/210.
+##		2017-06-13 RSB	Some white-space corrections identified while
+##				transcribing Sunburst 37.
 
 ## Page 636
 # BLOCK 2 LGC ATTITUDE MANEUVER ROUTINE-KALCMANU
@@ -214,7 +220,7 @@
 #      INDEX REGISTER X1 MUST BE LOADED WITH THE COMPLEMENT OF THE STARTING ADDRESS FOR M1, AND X2 MUST BE
 #                                                        *
 # LOADED WITH THE COMPLEMENT OF THE STARTING ADDRESS FOR M2.   THE ROUTINE USES THE FIRST 20 LOCATIONS OF THE PUSH
-# DOWN LIST.  THE FIRST ELEMENT OF THE MATRIX APPEARS IN PD0.  PUSH UP FOR M .
+# DOWN LIST.  THE FIRST ELEMENT OF THE MATRIX APPEARS IN PDO.  PUSH UP FOR M .
 #                                                                           8
 
 #      TRANSPOS
@@ -375,7 +381,7 @@
 ## Page 643
 #            (B )                     (A )
 #            ( X)                     ( X)
-#            (  )              *      (  )
+#            (  )            *        (  )
 #            (B )      =    DEL       (A )
 #            ( Y)                     ( Y)
 #            (  )                     (  )
@@ -399,7 +405,7 @@
 
 
 
-#      SIGNMPAC
+#     SIGNMPAC
 #      --------
 
 #      THIS IS A BASIC LANGUAGE SUBROUTINE WHICH LIMITS THE MAGNITUDE OF D(MPAC) TO + OR - DPOSMAX ON OVERFLOW.
@@ -423,7 +429,7 @@
 
 
 
-# SUMMARY OF STATE SWITCHES AND FLAGWORDS USED BY KALCMANU.
+#      SUMMARY OF STATE SWITCHES AND FLAGWORDS USED BY KALCMANU.
 ## Page 644
 # STATE                FLAGWRD 2      SETTING             MEANING
 # SWITCH NO.            BIT NO.
@@ -512,7 +518,7 @@ PICKAXIS        VLOAD           DOT                             # IF VF X VI = 0
                 BMN             TLOAD                           # IF ANTIPARALLEL
                                 ROT180
                                 BCDU
-                STCALL          CPHI                            # IF VF + VI
+                STCALL          CPHI                            # IF VF = VI
                                 KALCMAN3        +1
 
 ROT180          VLOAD           VXV                             # 180 DEG ROTATION IS REQUIRED
@@ -681,7 +687,7 @@ ALTCALC         VLOAD           VAD                             # IF AM GREATER 
                 UNIT                                            
                 STORE           COF                             
 
-# DETERMINE LARGEST COF AND ADJUST ACCORDINGLY
+# DETERMINE  LARGEST COF AND ADJUST ACCORDINGLY
 
 COFMAXGO        DLOAD           DSU                             
                                 COF                             
@@ -792,7 +798,7 @@ MXM3            SETPD                                           # MXM3 MULTIPLIE
                                 0,1
                 GOTO
                                 TRNSPSPD                        # REVERSE ROWS AND COLS IN PD AND 
-#                                 RETURN WITH MIXM2 IN PD LIST
+#                                 RETURN WITH M1XM2 IN PD LIST
 
 TRANSPOS        SETPD           VLOAD*                          # TRANSPOS TRANSPOSES A 3X3 MATRIX
                                 0                               #  AND LEAVES RESULT IN PD LIST
@@ -862,7 +868,7 @@ LOCKANGL        2DEC            .3333333333                     # $60DEGG
 
                 BANK            35
                 EBANK=          MIS
-# ROUTINE FOR LIMITING THE SIZE OF MPAC ON OVERFLOW TO OP POSMAX OR DP NEGMAX
+# ROUTINE FOR LIMITING THE SIZE OF MPAC ON OVERFLOW TO DP POSMAX OR DP NEGMAX
 
 SIGNMPAC        EXTEND
                 DCA             DPOSMAX
@@ -990,7 +996,7 @@ DELCOMP         SETPD           PUSH                            # MPAC CONTAINS 
                 BDSU            BOVB                            
                                 HALFA                         
                                 SIGNMPAC                        
-                PDDL                                            # PDA = 1-COS(A)
+                PDDL                                            # PD4 = 1-COS(A)
 
 # COMPUTE THE DIAGONAL COMPONENTS OF DEL
 

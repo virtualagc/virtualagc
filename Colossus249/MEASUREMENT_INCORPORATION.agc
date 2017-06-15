@@ -19,7 +19,7 @@
 ##				and corrected errors found.  No comment-text
 ##				differences remained vs Comanche 55
 ##				at the end, but there were differences vs
-#				Colossus 237.
+##				Colossus 237.
 ##
 ## The contents of the "Colossus249" files, in general, are transcribed 
 ## from a scanned copy of the program listing.  Notations on this

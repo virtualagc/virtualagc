@@ -2,7 +2,7 @@
 ## Copyright:   Public domain.
 ## Filename:    SERVICE_ROUTINES.agc
 ## Purpose:     A section of Luminary revision 116.
-##              It is part of the source code for the Lunar Module's (LM) 
+##              It is part of the source code for the Lunar Module's (LM)
 ##              Apollo Guidance Computer (AGC) for Apollo 12.
 ##              This file is intended to be a faithful transcription, except
 ##              that the code format has been changed to conform to the
@@ -14,30 +14,37 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-01-22 MAS  Created from Luminary 99.
 ##              2017-02-03 RRB  Updated for Luminary 116.
+##              2017-03-09 HG   Add missing statement
+##                                  2SECDELY  CAF  2SECS
+##              2017-03-14 RSB  Proofed comment text via 3-way diff vs
+##                              Luminary 99 and 131.
+##              2017-03-16 RSB  Comment-text fixes identified in 5-way
+##                              side-by-side diff of Luminary 69/99/116/131/210.
+##              2017-03-19 HG   Fix value OCT 1104 -> OCT 31104
 
 ## Page 1364
-                BANK            10                              
-                SETLOC          DISPLAYS                        
-                BANK                                            
-                COUNT*          $$/DSPLA                        
+                BANK            10
+                SETLOC          DISPLAYS
+                BANK
+                COUNT*          $$/DSPLA
 
-UPENT2          INHINT                                          
-                MASK            OCT77770                        
-                TS              L                               
-                CS              FLAGWRD4                        
-                MASK            L                               
-                ADS             FLAGWRD4                        
-JOIN            RELINT                                          
-                TCF             Q+1                             
+UPENT2          INHINT
+                MASK            OCT77770
+                TS              L
+                CS              FLAGWRD4
+                MASK            L
+                ADS             FLAGWRD4
+JOIN            RELINT
+                TCF             Q+1
 
-DOWNENT2        INHINT                                          
-                MASK            OCT77770                        
-                COM                                             
-                MASK            FLAGWRD4                        
-                TS              FLAGWRD4                        
-                TCF             JOIN                            
+DOWNENT2        INHINT
+                MASK            OCT77770
+                COM
+                MASK            FLAGWRD4
+                TS              FLAGWRD4
+                TCF             JOIN
 
-OCT7            EQUALS          SEVEN                           
+OCT7            EQUALS          SEVEN
 
 ## Page 1365
 #     UPFLAG AND DOWNFLAG ARE ENTIRELY GENERAL FLAG SETTING AND CLEARING SUBROUTINES.  USING THEM, WHETHER OR
@@ -55,46 +62,46 @@ OCT7            EQUALS          SEVEN
 #     RETURN IS TO THE LOCATION FOLLOWING THE "ADRES" ABOUT .58 MS AFTER THE "TC".
 #     UPON RETURN A CONTAINS THE CURRENT FLAGWRD SETTING.
 
-                BLOCK           02                              
-                SETLOC          FFTAG1                          
-                BANK                                            
-                COUNT*          $$/FLAG                         
+                BLOCK           02
+                SETLOC          FFTAG1
+                BANK
+                COUNT*          $$/FLAG
 
-UPFLAG          CA              Q                               
-                TC              DEBIT                           
+UPFLAG          CA              Q
+                TC              DEBIT
                 COM                                             # +(15 - BIT)
-                EXTEND                                          
+                EXTEND
                 ROR             LCHAN                           # SET BIT
-COMFLAG         INDEX           ITEMP1                          
-                TS              FLAGWRD0                        
-                LXCH            ITEMP3                          
-                RELINT                                          
-                TC              L                               
+COMFLAG         INDEX           ITEMP1
+                TS              FLAGWRD0
+                LXCH            ITEMP3
+                RELINT
+                TC              L
 
-DOWNFLAG        CA              Q                               
-                TC              DEBIT                           
+DOWNFLAG        CA              Q
+                TC              DEBIT
                 MASK            L                               # RESET BIT
-                TCF             COMFLAG                         
+                TCF             COMFLAG
 
-DEBIT           AD              ONE                             # CET DE BITS
-                INHINT                                          
-                TS              ITEMP3                          
+DEBIT           AD              ONE                             # GET DE BITS
+                INHINT
+                TS              ITEMP3
                 CA              LOW4                            # DEC15
-                TS              ITEMP1                          
-                INDEX           ITEMP3                          
+                TS              ITEMP1
+                INDEX           ITEMP3
                 CA              0               -1              # ADRES
-                TS              L                               
-                CA              ZERO                            
+                TS              L
+                CA              ZERO
 ## Page 1366
-                EXTEND                                          
+                EXTEND
                 DV              ITEMP1                          # A = FLAGWRD, L = (15 - BIT)
-                DXCH            ITEMP1                          
-                INDEX           ITEMP1                          
-                CA              FLAGWRD0                        
+                DXCH            ITEMP1
+                INDEX           ITEMP1
+                CA              FLAGWRD0
                 TS              L                               # CURRENT STATE
-                INDEX           ITEMP2                          
+                INDEX           ITEMP2
                 CS              BIT15                           # -(15 - BIT)
-                TC              Q                               
+                TC              Q
 
 ## Page 1367
 # DELAYJOB- A GENERAL ROUTINE TO DELAY A JOB A SPECIFIC AMOUNT OF TIME BEFORE PICKING UP AGAIN.
@@ -104,57 +111,58 @@ DEBIT           AD              ONE                             # CET DE BITS
 #               TC      BANKCALL
 #               CADR    DELAYJOB
 
-                BANK            06                              
-                SETLOC          DLAYJOB                         
-                BANK                                            
+                BANK            06
+                SETLOC          DLAYJOB
+                BANK
 
 # THIS MUST REMAIN IN BANK 0 *****************************************
 
-                COUNT*          $$/DELAY                        
-DELAYJOB        INHINT                                          
+                COUNT*          $$/DELAY
+2SECDELY        CAF             2SECS
+DELAYJOB        INHINT
                 TS              Q                               # STORE DELAY DT IN Q FOR DLY -1 IN
 
                 CAF             DELAYNUM                        # WAITLIST
-DELLOOP         TS              RUPTREG1                        
-                INDEX           A                               
+DELLOOP         TS              RUPTREG1
+                INDEX           A
                 CA              DELAYLOC                        # IS THIS DELAYLOC AVAILABLE
-                EXTEND                                          
+                EXTEND
                 BZF             OK2DELAY                        # YES
 
                 CCS             RUPTREG1                        # NO, TRY NEXT DELAYLOC
-                TCF             DELLOOP                         
+                TCF             DELLOOP
 
-                DXCH            BUF2                            
+                DXCH            BUF2
                 TC              BAILOUT1                        # NO AVAILABLE LOCS.
-                OCT             1104                            
+                OCT             31104
 
 OK2DELAY        CA              TCSLEEP                         # SET WAITLIST IMMEDIATE RETURN
-                TS              WAITEXIT                        
+                TS              WAITEXIT
 
-                CA              FBANK                           
+                CA              FBANK
                 AD              RUPTREG1                        # STORE BBANK FOR TASK CALL
-                TS              L                               
+                TS              L
 
                 CAF             WAKECAD                         # STORE CADR FOR TASK CALL
                 TCF             DLY2            -1              # DLY IS IN WAITLIST ROUTINE
 
 TCGETCAD        TC              MAKECADR                        # GET CALLERS FCADR
 
-                INDEX           RUPTREG1                        
+                INDEX           RUPTREG1
                 TS              DELAYLOC                        # SAVE DELAY CADRS
 
-                TC              JOBSLEEP                        
+                TC              JOBSLEEP
 
-WAKER           CAF             ZERO                            
+WAKER           CAF             ZERO
                 INDEX           BBANK
-## Page 1368                           
+## Page 1368
                 XCH             DELAYLOC                        # MAKE DELAYLOC AVAILABLE
-                TC              JOBWAKE                         
+                TC              JOBWAKE
 
-                TC              TASKOVER                        
+                TC              TASKOVER
 
-TCSLEEP         GENADR          TCGETCAD        -2              
-WAKECAD         GENADR          WAKER                           
+TCSLEEP         GENADR          TCGETCAD        -2
+WAKECAD         GENADR          WAKER
 
 ## Page 1369
 # GENTRAN, A BLOCK TRANSFER ROUTINE.
@@ -178,28 +186,28 @@ WAKECAD         GENADR          WAKER
 
 # A, L AND ITEMP1 ARE NOT PRESERVED.
 
-                BLOCK           02                              
-                SETLOC          FFTAG4                          
-                BANK                                            
+                BLOCK           02
+                SETLOC          FFTAG4
+                BANK
 
-                EBANK=          ITEMP1                          
+                EBANK=          ITEMP1
 
-                COUNT*          $$/TRAN                         
+                COUNT*          $$/TRAN
 
-GENTRAN         INHINT                                          
+GENTRAN         INHINT
                 TS              ITEMP1                          # SAVE N-1.
                 INDEX           Q                               # C(Q) = ADRES L.
                 AD              0                               # ADRES (L + N - 1).
-                INDEX           A                               
+                INDEX           A
                 CA              0                               # C(ABOVE).
                 TS              L                               # SAVE DATA.
-                CA              ITEMP1                          
-                INDEX           Q                               
+                CA              ITEMP1
+                INDEX           Q
                 AD              1                               # ADRES (M + N - 1).
-                INDEX           A                               
+                INDEX           A
                 LXCH            0                               # STUFF IT.
                 CCS             ITEMP1                          # LOOP UNTIL N-1 = 0.
-                TCF             GENTRAN         +1              
+                TCF             GENTRAN         +1
                 TCF             Q+2                             # RETURN TO CALLER.
 
 ## Page 1370
@@ -207,12 +215,12 @@ GENTRAN         INHINT
 
 # MAY BE USED AS NEEDED BY ANY EXTENDED VERB WHICH HAS DONE TESTXACT
 
-                COUNT*          $$/EXTVB                        
+                COUNT*          $$/EXTVB
 
-B5OFF           CS              BIT5                            
-                MASK            EXTVBACT                        
-                TS              EXTVBACT                        
-                TC              ENDOFJOB                        
+B5OFF           CS              BIT5
+                MASK            EXTVBACT
+                TS              EXTVBACT
+                TC              ENDOFJOB
 
 
 

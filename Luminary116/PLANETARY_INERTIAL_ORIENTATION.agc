@@ -14,6 +14,10 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-01-22 MAS  Created from Luminary 99.
 ##              2017-01-25 RRB  Updated for Luminary 116.
+##		2017-03-14 RSB	Proofed comment text via 3-way diff vs
+##				Luminary 99 and 131.
+##		2017-03-16 RSB	Comment-text fixes identified in 5-way
+##				side-by-side diff of Luminary 69/99/116/131/210.
 
 ## Page 1132
 # ..... RP-TO-R SUBROUTINE .....
@@ -187,7 +191,7 @@ MOONMX          STQ             SETPD
                                 SOB                             
                 STODL           BVECTR          +4              # PD 8D
                 SIN             PUSH                            # PD 10D                 -SIN(NODI)   B-1
-                DCOMP           GOTO                            #          26-31D=BVECTR= COB*COS(NODI)
+                DCOMP           GOTO                            #          26-31D=BVECTR= COV*COS(NODI)
                                 MOONMXA
                 BANK            25
                 SETLOC          PLANTIN3
@@ -244,7 +248,7 @@ MOONMXA         STODL           BVECTR                          # PD 8D         
                                 EARTHMXX                        
 
 # COMPUTE X=X0+(XDOT)(T+T0)
-# 8-9D= X0 (REVS B-0),PUSHLOC SET AT 12D
+# 8-9D= XO (REVS B-0),PUSHLOC SET AT 12D
 # 10-11D=XDOT (REVS/CSEC) SCALED B+23 FOR WEARTH,B+28 FOR NODDOT AND BDOT
 #                         AND B+27 FOR FDOT
 #  X1=DIFFERENCE IN 23 AND SCALING OF XDOT,=0 FOR WEARTH, 5 FOR NODDOT AND
@@ -260,7 +264,7 @@ NEWANGLE        DLOAD           SR                              # ENTER PD 12D
                 STODL           TIMSUBM                         # T+T0 CSEC B-42
                                 TIMSUBM         +1              
                 DMP                                             # PD 10D  MULT BY XDOT IN 10-11D
-                SL*             DAD                             # PD 8D   ADD X0 IN 8-9D AFTER SHIFTING
+                SL*             DAD                             # PD 8D   ADD XO IN 8-9D AFTER SHIFTING
                                 5,1                             #         SUCH THAT SCALING IS B-0
                 PUSH            SLOAD                           # PD 10D SAVE PARTIAL (X0+XDOT*T) IN 8-9D
                                 TIMSUBM                         

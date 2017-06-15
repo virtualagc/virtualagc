@@ -17,7 +17,9 @@
 ##				and corrected the errors found.
 ##		2017-01-15 RSB	Fixed comment-text errors noted while diff'ing vs
 ##				Colossus 249.
-##
+##		2017-03-17 RSB	Comment-text fixes identified in diff'ing
+##				Luminary 99 vs Comanche 55.
+
 ## This source code has been transcribed or otherwise adapted from digitized
 ## images of a hardcopy from the MIT Museum.  The digitization was performed
 ## by Paul Fjeld, and arranged for by Deborah Douglas of the Museum.  Many
@@ -425,7 +427,7 @@ COMTERM		STORE	UZ
 			GOBAQUE
 		STCALL	FV
 			QUALITY1
-QUALITY3	DSQ			# J22 TERM X R**4 IN 2D.  SCALED B61
+QUALITY3	DSQ			# J22 TERM X R**4 IN 2D,  SCALED B61
 					# AS VECTOR.
 		PUSH	DMP		# STORE COSPHI**2 SCALED B2 IN 8D
 ## Page 1343		

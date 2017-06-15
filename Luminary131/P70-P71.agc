@@ -13,8 +13,11 @@
 ## Website:	www.ibiblio.org/apollo
 ## Mod history:	05/26/03 RSB.	Began transcribing.
 ##		2017-01-06 RSB	Page numbers now agree with those on the
-##				original harcopy, as opposed to the PDF page
+##				original hardcopy, as opposed to the PDF page
 ##				numbers in 1701.pdf.
+##		2017-02-26 RSB	Proofed comment text using octopus/ProoferComments.
+##		2017-03-01 RSB	Fixed lingering typos.
+##		2017-03-14 RSB	Comment-text fixes noted in proofing Luminary 116.
 
 ## Page 823
 		BANK	21
@@ -47,7 +50,7 @@ FLASHH?		MASK	FLGWRD11
 		TS	L
 		TC	FLIP		# FLIP H LITE
 
-FLASHV?		CA	VFLSHBIT	# VLASHBIT MUST BE BIT 2.
+FLASHV?		CA	VFLSHBIT	# VFLASHBIT MUST BE BIT 2.
 		MASK	FLGWRD11
 		EXTEND
 		BZF	10,11		# VFLASH OFF
@@ -132,7 +135,7 @@ ABRTJASK	CAF	OCTAL27
 		MASK	APSFLBIT
 		ADS	FLGWRD10
 		CS	DAPBITS		# DAPBITS = OCT 40640 = BITS 6,8,9,15
-		MASK	DAPBOOLS	# RESET ULLAGE,DRIVT,XOVR11MM, AND PULSES
+		MASK	DAPBOOLS	# RESET ULLAGE,DRIFT,XOVRIINH, AND PULSES
 		TS	DAPBOOLS
 
 		CAF	1DEGDB		# INSURE DAP DEADBAND IS SET TO 1 DEGREE
@@ -241,12 +244,12 @@ P70INIT		TC	INTPRET
 			COMMINIT
 INJTARG		DLOAD
 			ABTRDOT
-		STCALL	RDOTD		# INITIALZE ROOTD.
+		STCALL	RDOTD		# INITIALIZE RDOTD.
 			YCOMP		# COMPUTE Y
 		ABS	DSU
 			YLIM		# /Y/-DYMAX
 		BMN	SIGN		# IF <0, XR<.5DEG, LEAVE YCO AT 0
-			YOK		# IF >0, FIX SIGN OF DEFICIT.  THIS IS YCO.
+			YOK		# IF >0, FIX SIGN OF DEFICIT, THIS IS YCO.
 			Y
 		STORE	YCO
 YOK		DLOAD	DSU
@@ -314,7 +317,7 @@ P71RET		TC	DOWNFLAG
 			TGOCOMP		# IF FLAP=0, TGO=T-TIG
 		GOTO
 			INJTARG
-OLDTIME		DLOAD	SL1		# IF FLAP=1,GTO=2 TGO
+OLDTIME		DLOAD	SL1		# IF FLAP=1,TGO=2 TGO
 			TGO
 		STORE	TGO1
 		EXIT
@@ -330,7 +333,7 @@ OLDTIME		DLOAD	SL1		# IF FLAP=1,GTO=2 TGO
 
 TGO1		=	VGBODY
 
-# *************************************************************************
+# ************************************************************************
 
 		BANK	21
 		SETLOC	R11
@@ -347,7 +350,7 @@ LEGAL?		CS	MMNUMBER	# IS THE DESIRED PGM ALREADY IN PROGRESS?
 		CCS	A
 		TCF	ABORTALM
 
-		CA	FLAGWRD7	# IS SERVICER ON THE A1R7
+		CA	FLAGWRD7	# IS SERVICER ON THE AIR?
 		MASK	AVEGFBIT
 		CCS	A
 		TC	Q		# YES. ALL IS WELL.
@@ -362,7 +365,7 @@ ABORTALM	TC	FALTON
 
 		COUNT*	$$/P70
 
-# **********************************************************************
+# ************************************************************************
 
 TGOCOMP		RTB	DSU
 			LOADTIME

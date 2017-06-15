@@ -11,6 +11,7 @@
 ## Contact:     Mike Stewart <mastewar1@gmail.com>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2016-12-20 MAS  Created from Aurora 12 (with much DAP stuff removed).
+##              2017-01-15 MAS  Added setting of LASTIMER in T3RUPT.
 ##		2017-02-09 RSB	Comment-text fixes identified in proofing Artemis 72
 
 # GROUNDRULE....DELTA T SHOULD NOT EXCEED 12000 (= 2 MINUTES)
@@ -252,6 +253,9 @@ WTLST2          TS      WAITTEMP        #     C(A) = -(TD - T   + 1)
 T3RUPT          TS      BANKRUPT
                 EXTEND
                 QXCH    QRUPT
+
+                CAF     THREE
+                TS      LASTIMER
 
 T3RUPT2         CAF     NEG1/2          # DISPATCH WAITLIST TASK.
                 XCH     LST1    +7

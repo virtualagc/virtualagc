@@ -15,7 +15,9 @@
 ##		2016-12-13 RSB	GOTOP00H -> GOTOPOOH
 ##		2016-12-17 RSB	Proofed text comments with octopus/ProoferComments
 ##				and corrected the errors found.
-##
+##		2017-03-14 RSB	Comment-text fixes identified in 5-way
+##				side-by-side diff of Luminary 69/99/116/131/210.
+
 ## This source code has been transcribed or otherwise adapted from
 ## digitized images of a hardcopy from the MIT Museum.  The digitization
 ## was performed by Paul Fjeld, and arranged for by Deborah Douglas of
@@ -155,7 +157,7 @@ ASCENT		VLOAD	ABVAL
 		STOVL	VGBODY
 			VGVECT
 		ABVAL	BOFF		# MAGNITUDE OF VGVECT
-			FLRCS		# IF FLRCS=0,D0 NORMAL GUIDANCE
+			FLRCS		# IF FLRCS=0,DO NORMAL GUIDANCE
 			MAINENG
 		DDV			# USE TGO=VG/AT WITH RCS
 			AT/RCS
@@ -242,7 +244,7 @@ RATES		DLOAD	DSU
 CHKBMAG		SR4	DDV		# B*2(4)
 			TBUP		# (B / TAU) * 2(21)
 		DSU	BPL
-			PRLIMIT		# ( B / TAU ) = 2(21) MAX.
+			PRLIMIT		# ( B / TAU ) * 2(21) MAX.
 			PROK
 		DLOAD	DMP
 			PRLIMIT
@@ -301,8 +303,8 @@ CMPONENT	SETPD	DLOAD
 		STORE	ATY		# ATY*2(9)
 		VXSC	PDDL		# ATY UY*2(8)			(6)
 			LAXIS
-			ATR		#				(0)
-		VXSC	VAD
+			ATR
+		VXSC	VAD		#				(0)
 			UNIT/R/
 		VSL1	PUSH		# AH*2(9) IN PDL(0)		(6)
 		ABVAL	PDDL		# AH(2) IN PDL(34)

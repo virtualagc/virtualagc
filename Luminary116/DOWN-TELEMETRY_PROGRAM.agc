@@ -2,7 +2,7 @@
 ## Copyright:   Public domain.
 ## Filename:    DOWN-TELEMETRY_PROGRAM.agc
 ## Purpose:     A section of Luminary revision 116.
-##              It is part of the source code for the Lunar Module's (LM) 
+##              It is part of the source code for the Lunar Module's (LM)
 ##              Apollo Guidance Computer (AGC) for Apollo 12.
 ##              This file is intended to be a faithful transcription, except
 ##              that the code format has been changed to conform to the
@@ -14,6 +14,13 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-01-22 MAS  Created from Luminary 99.
 ##              2017-01-31 RRB  Updated for Luminary 116.
+##              2017-03-07 HG   Fix operand O13QSAV  --> C13QSAV
+##                                          C13QSAV  --> C13STALL
+##              2017-03-13 RSB  Proofed comment text via 3-way diff vs
+##                              Luminary 99 and 132.
+##              2017-03-15 RSB  Comment-text fixes identified in 5-way
+##                              side-by-side diff of Luminary 69/99/116/131/210.
+##              2017-03-19 HG   Fix operand DNTMGCTC --> DNTMGOTO
 
 ## Page 980
 # PROGRAM NAME- DOWN TELEMETRY PROGRAM
@@ -72,7 +79,7 @@
 #       LDATALST, DNTMBUFF TO DNTMBUFF +21D, TMINDEX, DNQ.
 
 ## Page 981
-## This page is empty
+## <br>This page is empty<br>
 
 ## Page 982
 # DODOWNTM IS ENTERED EVERY 20 MS BY AN INTERRUPT TRIGGERED BY THE
@@ -98,7 +105,7 @@
 #        SAME AS ECADR, BUT USED WHEN THE WORD ADDRESSED IS THE LEFT
 #        HALF OF A DOUBLE-PRECISION WORD FOR DOWN TELEMETRY.
 #    B. 2DNADR - 6DNADR     N-WORD DOWNLIST ADDRESS, N = 2 - 6.
-#        SAME AS 1DNADR, BUT WTIH THE 4 UNUSED BITS OF THE ECADR FORMAT
+#        SAME AS 1DNADR, BUT WITH THE 4 UNUSED BITS OF THE ECADR FORMAT
 #        FILLED IN WITH 0001-0101.  USED TO POINT TO A LIST OF N DOUBLE-
 #        PRECISION WORDS, STORED CONSECUTIVELY, FOR DOWN TELEMETRY.
 #    C. DNCHAN              DOWNLIST CHANNEL ADDRESS.
@@ -120,9 +127,9 @@
 #   (B) CAN CONTAIN ONLY 1DNADR'S
 
 # 2. ALL DOWNLINKED DATA(EXCEPT CHANNELS) IS PICKED UP BY A <DCA<SO DOWNLINK LISTS CANNOT CONTAIN THE
-#    EQUIVALENT OF THE FOLLOWING ECADRS(I.E. 1DNADRS): 377, 777, 1377, 1777, 2377, 27777, 3377, 3777.
+#    EQUIVALENT OF THE FOLLOWING ECADRS(I.E. IDNADRS): 377, 777, 1377, 1777, 2377, 27777, 3377, 3777.
 
-#    (NOTE: THE TERM EQUIVALENT ' MEANT THAT THE 1DNADR TO 6DNADR  WILL BE PROCESSED LIKE 1 TO 6 ECADRS)
+#    (NOTE: THE TERM EQUIVALENT ' MEANT THAT THE IDNADR TO 6DNADR  WILL BE PROCESSED LIKE 1 TO 6 ECADRS)
 
 # 3.  CONTROL LISTS AND SUBLISTS CANNOT HAVE ENTRIES = OCTAL 00000 OR OCTAL 77777
 ## Page 983
@@ -146,33 +153,33 @@
 #     2.   NEGONE INTO SUBLIST
 #     3.   NEGONE INTO DNECADR
 
-                BANK            22                              
-                SETLOC          DOWNTELM                        
-                BANK                                            
+                BANK            22
+                SETLOC          DOWNTELM
+                BANK
 
-                EBANK=          DNTMBUFF                        
+                EBANK=          DNTMBUFF
 
-                COUNT*          $$/DPROG                        
-DODOWNTM        TS              BANKRUPT                        
-                EXTEND                                          
+                COUNT*          $$/DPROG
+DODOWNTM        TS              BANKRUPT
+                EXTEND
                 QXCH            QRUPT                           # SAVE Q
                 CA              BIT7                            # AT THE BEGINNING OF THE LIST THE WORD
                 EXTEND                                          # ORDER BIT WILL BE SET BACK TO ZERO.
                 RAND            CHAN13
                 CCS             A
-                TC              DNTMGCTC
+                TC              DNTMGOTO
                 TC              C13STALL
-                CA              BIT7                        
+                CA              BIT7
                 EXTEND                                          # SET WORD ORDER BIT TO 1 ONLY IF IT
                 WOR             CHAN13                          # ALREADY ISN'T.
                 TC              DNTMGOTO                        # GOTO APPROPRIATE PHASE OF PROGRAM
 
 DNPHASE1        CA              NEGONE                          # INITIALIZE ALL CONTROL WORDS
                 TS              SUBLIST                         # WORDS TO MINUS ONE
-                TS              DNECADR                         
-                CA              LDNPHAS2                        # SET DNTMGOTO = 0 ALL SUBSEQUENT DOWNRUPTS
+                TS              DNECADR
+                CA              LDNPHAS2                        # SET DNTMGOTO =O ALL SUBSEQUENT DOWNRUPTS
                 TS              DNTMGOTO                        # GO TO DNPHASE2
-                TCF             NEWLIST                         
+                TCF             NEWLIST
 DNPHASE2        CCS             DNECADR                         # SENDING OF DATA IN PROGRESS
 ## Page 984
 DODNADR         TC              FETCH2WD                        # YES - THEN FETCH THE NEXT 2 SP WORDS
@@ -180,21 +187,21 @@ MINTIME2        -1DNADR         TIME2                           # NEGATIVE OF TI
                 TCF             +1                              # (ECADR OF 3776 + 74001 = 77777)
 
                 CCS             SUBLIST                         # IS THE SUBLIST IN CONTROL
-                TCF             NEXTINSL                        # YES		
+                TCF             NEXTINSL                        # YES
 DNADRDCR        OCT             74001                           # DNADR COUNT AND ECADR DECREMENTER
 
-CHKLIST         CA              CTLIST                          
-                EXTEND                                          
+CHKLIST         CA              CTLIST
+                EXTEND
                 BZMF            NEWLIST                         # IT WILL BE NEGATIVE AT END OF LIST
-                TCF             NEXTINCL                        
-NEWLIST         INDEX           DNLSTCOD                        
+                TCF             NEXTINCL
+NEWLIST         INDEX           DNLSTCOD
                 CA              DNTABLE                         # INITIALIZE CTLIST WITH
                 TS              CTLIST                          #   STARTING ADDRESS OF NEW LIST
-                CS              DNLSTCOD                        
-                TCF             SENDID          +3              
-NEXTINCL        INDEX           CTLIST                          
-                CA              0                               
-                CCS             A                               
+                CS              DNLSTCOD
+                TCF             SENDID          +3
+NEXTINCL        INDEX           CTLIST
+                CA              0
+                CCS             A
                 INCR            CTLIST                          # SET POINTER TO PICK UP NEXT CTLIST WORD
                 TCF             +4                              # ON NEXT ENTRY TO PROG. (A SHOULD NOT =0)
                 XCH             CTLIST                          # SET CTLIST TO NEGATIVE AND PLACE(CODING)
@@ -203,25 +210,25 @@ NEXTINCL        INDEX           CTLIST
  +4             INCR            A                               #                                 (CTLIST)
                 TS              DNECADR                         # SAVE DNADR
                 AD              MINTIME2                        # TEST FOR TIME2 (NEG. OF ECADR)
-                CCS             A                               
+                CCS             A
                 TCF             SETWO           +1              # DON'T SET WORD ORDER CODE
 MINB1314        OCT             47777                           # MINUS BIT 13 AND 14 (CAN'T GET HERE)
                 TCF             SETWO           +1              # DON'T SET WORD ORDER CODE
 SETWO           TC              WOZERO                          # GO SET WORD ORDER CODE TO ZERO.
  +1             CA              DNECADR                         # RELOAD A WITH THE DNADR.
  +2             AD              MINB1314                        # IS THIS A REGULAR DNADR?
-                EXTEND                                          
+                EXTEND
                 BZMF            FETCH2WD                        # YES. (A MUST NEVER BE ZERO)
                 AD              MINB12                          # NO- IS IT A POINTER (DNPTR) OR A
                 EXTEND                                          #     CHANNEL(DNCHAN)
                 BZMF            DODNPTR                         # IT'S A POINTER. (A MUST NEVER BE ZERO)
 
 DODNCHAN        TC              6                               # (EXECUTED AS EXTEND)  IT S A CHANNEL
-                INDEX           DNECADR                         
+                INDEX           DNECADR
                 INDEX           0               -4000           # (EXECUTED AS READ)
-                TS              L                               
+                TS              L
                 TC              6                               # (EXECUTED AS EXTEND)
-                INDEX           DNECADR                         
+                INDEX           DNECADR
                 INDEX           0               -4001           # (EXECUTED AS READ)
                 TS              DNECADR                         # SET DNECADR
                 CA              NEGONE                          #     TO MINUS
@@ -230,15 +237,15 @@ DODNCHAN        TC              6                               # (EXECUTED AS E
                 TCF             DNTMEXIT                        # GO SEND CHANNELS
 
 WOZERO          EXTEND
-                QXCH            O13QSAV
+                QXCH            C13QSAV
                 LXCH            RUPTREG1
-                TC              O13QSAV
+                TC              C13STALL
 
                 LXCH            RUPTREG1
                 CS              BIT7
-                EXTEND                
-                WAND            CHAN13                          # SET WORD ORDER CODE TO ZERO		
-                TC              O13QSAV
+                EXTEND
+                WAND            CHAN13                          # SET WORD ORDER CODE TO ZERO
+                TC              C13QSAV
 
 DODNPTR         INDEX           DNECADR                         # DNECADR CONTAINS ADRES OF SUBLIST
                 0               0                               # CLEAR AND ADD LIST ENTRY INTO A.
@@ -246,7 +253,7 @@ DODNPTR         INDEX           DNECADR                         # DNECADR CONTAI
                 CA              DNECADR                         # NO, IT IS A REGULAR SUBLIST.
                 TCF             DOSUBLST                        # A MUST NOT BE ZERO.
 
-                XCH             DNECADR                         # YES.  IT IS A SNAPSHOT SUBLIST.
+                XCH             DNECADR                         # YES, IT IS A SNAPSHOT SUBLIST.
                 TS              SUBLIST                         # C(DNECADR) INTO SUBLIST
                 CAF             ZERO                            #       A    INTO     A
                 XCH             TMINDEX                         # (NOTE..  TMINDEX = DNECADR)
@@ -261,58 +268,58 @@ DODNPTR         INDEX           DNECADR                         # DNECADR CONTAI
 
 SNAPLOOP        TS              EBANK                           # SET EBANK
                 MASK            LOW8                            # ISOLATE RELATIVE ADDRESS
-                EXTEND                                          
-                INDEX           A                               
-                EBANK=          1401                            
+                EXTEND
+                INDEX           A
+                EBANK=          1401
                 DCA             1401                            # PICK UP 2 SNAPSHOT WORDS.
-                EBANK=          DNTMBUFF                        
-                INDEX           TMINDEX                         
+                EBANK=          DNTMBUFF
+                INDEX           TMINDEX
                 DXCH            DNTMBUFF                        # STORE 2 SNAPSHOT WORDS IN BUFFER
                 INCR            TMINDEX                         # SET BUFFER INDEX FOR NEXT 2 WORDS.
-                INCR            TMINDEX                         
+                INCR            TMINDEX
 SNAPAGN         INCR            SUBLIST                         # SET POINTER TO NEXT 2 WORDS OF SNAPSHOT
-                INDEX           SUBLIST                         
+                INDEX           SUBLIST
                 0               0                               # = CA SSSS (SSSS = NEXT ENTRY IN SUBLIST)
                 CCS             A                               # TEST FOR LAST TWO WORDS OF SNAPSHOT.
 ## Page 986
                 TCF             SNAPLOOP                        # NOT LAST TWO.
-LDNPHAS2        GENADR          DNPHASE2                        
+LDNPHAS2        GENADR          DNPHASE2
                 TS              SUBLIST                         # YES, LAST.  SAVE A.
                 CA              NEGONE                          # SET DNECADR AND
                 TS              DNECADR                         #     SUBLIST POINTERS
                 XCH             SUBLIST                         #         TO NEGATIVE VALUES.
-                TS              EBANK                           
-                MASK            LOW8                            
-                EXTEND                                          
-                INDEX           A                               
-                EBANK=          1401                            
+                TS              EBANK
+                MASK            LOW8
+                EXTEND
+                INDEX           A
+                EBANK=          1401
                 DCA             1401                            # PICK UP FIRST 2 WORDS OF SNAPSHOT.
-                EBANK=          DNTMBUFF                        
+                EBANK=          DNTMBUFF
 SNAPEND         TCF             DNTMEXIT                        #    NOW GO SEND THEM.
 
-FETCH2WD        CA              DNECADR                         
+FETCH2WD        CA              DNECADR
                 TS              EBANK                           # SET EBANK
                 MASK            LOW8                            # ISOLATE RELATIVE ADDRESS
-                TS              L                               
+                TS              L
                 CA              DNADRDCR                        # DECREMENT COUNT AND ECADR
-                ADS             DNECADR                         
-                EXTEND                                          
-                INDEX           L                               
-                EBANK=          1400                            
+                ADS             DNECADR
+                EXTEND
+                INDEX           L
+                EBANK=          1400
                 DCA             1400                            # PICK UP 2 DATA WORDS
-                EBANK=          DNTMBUFF                        
+                EBANK=          DNTMBUFF
                 TCF             DNTMEXIT                        #    NOW GO SEND THEM.
 
 DOSUBLST        TS              SUBLIST                         # SET SUBLIST POINTER
-NEXTINSL        INDEX           SUBLIST                         
+NEXTINSL        INDEX           SUBLIST
                 0               0                               # = CA SSSS (SSSS = NEXT ENTRY IN SUBLIST)
                 CCS             A                               # IS IT THE END OF THE SUBLIST
                 INCR            SUBLIST                         # NO-
-                TCF             +4                              
+                TCF             +4
                 TS              SUBLIST                         # SAVE A.
                 CA              NEGONE                          # SET SUBLIST TO MINUS
                 XCH             SUBLIST                         # RETRIEVE A.
- +4             INCR            A                               
+ +4             INCR            A
                 TS              DNECADR                         # SAVE DNADR
                 TCF             SETWO           +2              # GO USE COMMON CODING (PROBLEMS WOULD
                                                                 # OCCUR IF THE PROGRAM ENCOUNTERED A
@@ -321,14 +328,14 @@ NEXTINSL        INDEX           SUBLIST
 DNTMEXIT        EXTEND                                          # DOWN-TELEMETRY EXIT
                 WRITE           DNTM1                           # TO SEND A + L TO CHANNELS 34 + 35
                 CA              L                               # RESPECTIVELY
-TMEXITL         EXTEND                                          
-                WRITE           DNTM2                           
+TMEXITL         EXTEND
+                WRITE           DNTM2
 TMRESUME        TCF             RESUME                          # EXIT TELEMETRY PROGRAM VIA RESUME.
 ## Page 987
-MINB12          EQUALS          -1/8                            
-DNECADR         EQUALS          TMINDEX                         
-CTLIST          EQUALS          LDATALST                        
-SUBLIST         EQUALS          DNQ                             
+MINB12          EQUALS          -1/8
+DNECADR         EQUALS          TMINDEX
+CTLIST          EQUALS          LDATALST
+SUBLIST         EQUALS          DNQ
 # MOD BY - DENSMORE - JUNE 1969 - ELIMINATE ERASABLE DUMP COUNT
 ## Page 988
 # SUBROUTINE NAME- DNDUMP
@@ -343,7 +350,7 @@ SUBLIST         EQUALS          DNQ
 #          ONCE INITIATED THE DOWNLINK ERASABLE DUMP CAN BE TERMINATED (AND INTERRUPTED DOWNLIST REINSTATED) ONLY
 #          BY THE FOLLOWING:
 #           1. A FRESH START
-#           2. COMPLETION OF BOTH DUMPS
+#           2. COMPLETION OF BOTH COMPLETE DUMPS
 #           3. AND INVOLUNTARILY BY A RESTART.
 # NORMAL EXIT MODE- TCF DNPHASE1
 # ALARM OR ABORT MODE- NONE
@@ -392,8 +399,8 @@ DNDUMPI         CA              ZERO                            # INITIALIZE DOW
                 CA              DUMPLOC                         # AND ECADR OF THIS EBANK INTO A
                 TCF             DNTMEXIT                        # SEND DUMPLOC AND TIME1
 
-LDNDUMP         ADRES           DNDUMP                          
-LDNDUMP1        ADRES           DNDUMP1                         
+LDNDUMP         ADRES           DNDUMP
+LDNDUMP1        ADRES           DNDUMP1
 
 DNDUMP          CA              TWO                             # INCREMENT ECADR IN DUMPLOC
                 ADS             DUMPLOC                         # TO NEXT DP WORD TO BE
@@ -408,26 +415,26 @@ DNDUMP          CA              TWO                             # INCREMENT ECAD
 DNDUMP1         CA              LDNDUMP                         # SET DNTMGOTO
                 TS              DNTMGOTO                        # FOR WORDS 3 TO 256D OF CURRENT EBANK
 
-DNDUMP2         CA              DUMPLOC                         
+DNDUMP2         CA              DUMPLOC
                 TS              EBANK                           # SET EBANK
                 MASK            LOW8                            # ISOLATE RELATIVE ADDRESS.
                 TS              Q                               # (NOTE: MASK INSTRUCTION IS USED TO PICK
                 CA              NEG0                            # UP ERASABLE REGISTERS SO THAT EDITING
                 TS              L                               # REGISTERS 20-23 WILL NOT BE ALTERED.)
-                INDEX           Q                               
+                INDEX           Q
                 EBANK=          1400                            # PICK UP LOW ORDER REGISTER OF PAIR
                 MASK            1401                            # OF ERASABLE REGISTERS.
-                XCH             L                               
+                XCH             L
                 INDEX           Q                               # PICK UP HIGH ORDER REGISTER OF PAIR
                 MASK            1400                            # OF ERASABLE REGISTERS.
-                EBANK=          DNTMBUFF                        
+                EBANK=          DNTMBUFF
                 TCF             DNTMEXIT                        # GO SEND THEM
 
 SENDID          EXTEND                                          # ** ENTRANCE USED BY ERASABLE DUMP PROG.**
                 QXCH            DNTMGOTO                        # SET DNTMGOTO SO NEXT TIME PROG WILL GO
                 CAF             ERASID                          # TO LOCATION FOLLOWING :TC SENDID:
 
-                TS              L                               # ** ENTRANCE USED BY REGULAR DOWNLINK PG **		
+                TS              L                               # ** ENTRANCE USED BY REGULAR DOWNLINK PG **
                 TC              WOZERO                          # GO SET WORD ORDER CODE TO ZERO
                 CAF             LOWIDCOD                        # PLACE SPECIAL ID CODE INTO L
                 XCH             L                               # AND ID BACK INTO A

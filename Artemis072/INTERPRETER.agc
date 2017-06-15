@@ -15,6 +15,8 @@
 ##		2011-05-07 JL	Removed workarounds.
 ##		2017-02-05 RSB	Proofed comment text by diff'ing vs Comanche 55
 ##				and corrected errors found.
+##		2017-03-15 RSB	Comment-text fixes identified in 5-way
+##				side-by-side diff of Luminary 69/99/116/131/210.
 
 ## Page 1108
 
@@ -1856,7 +1858,7 @@ MPAC+		CS	MPAC		# CHECK FOR DIVISION OVERFLOW. IF THE
 		CS	MPAC		# CHECK MAGNITUDE OF SIGN-CORRECTED
 		AD	BUF		# OPERANDS.
 		CCS	A
-		TCF	DVNORM		# DIVIDE OK - WILL NOT BECOME MAXOV CASE.
+		TCF	DVNORM		# DIVIDE OK - WILL NOT BECOME MAXDV CASE.
 LBUF2		ADRES 	BUF2
 		TCF	DVOVF		# DIVISOR NOT LESS THAN DIVIDEND - OVF.
 

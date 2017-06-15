@@ -14,6 +14,7 @@
 ##		2010-02-20 RSB	Un-##'d this header.
 ##		2017-02-08 RSB	Proofed comment text by diff'ing vs Comanche 55
 ##				and/or octopus/ProoferComments as most-appropriate.
+##		2017-03-14 RSB	Comment-text fixes noted in proofing Luminary 116.
 
 ## Page 1371
 
@@ -374,7 +375,7 @@ DUMPRPRA	RVQ
 #
 # ERASABLE INITIALIZATION REQUIRED:
 #		RONE		E:(-29) M:(-27)	M  STATE VECTOR				LEFT BY USER
-#		VONE'		E:(+10) M:(+9)	VN/SQRT(NU)				LEFT BY TFF/CONIC
+#		VONE'		E:(+10) M:(+9)	VN/SQRT(MU)				LEFT BY TFF/CONIC
 #		RMAG1		E:(-29) M:(-27)	PRESENT RADIUS, M			LEFT BY TFFCONIC
 #		C(MPAC)		E:(-29) M:(-27)	RTERM, TERMINAL RADIUS LENGTH, M	LEFT BY USER
 #

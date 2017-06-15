@@ -20,7 +20,7 @@
 #		2009-09-04 JL	Uncomment modules that are now available.
 #		2010-02-20 RSB	The effects of most of the ## in this header were
 #				horrible, so I removed them ... and in all of the
-#				other included source files as well.
+#				other included source files as well. 
 #		
 # MAIN.agc is a little different from the other Artemis072 files  
 # provided, in that it doesn't represent anything that appears 

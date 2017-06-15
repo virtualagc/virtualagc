@@ -8,7 +8,7 @@
 ## Reference:   pp. 1508-1516
 ## Contact:     Ron Burkey <info@sandroid.org>
 ## Website:     http://www.ibiblio.org/apollo.
-## Mod history: 2009-05-07 RSB	Adapted from Colossus249/RT8_OP_CODES.agc
+## Mod history: 2009-05-07 RSB	Adapted from Colossus249/RTB_OP_CODES.agc
 ##				and page images. 
 ##		2009-05-07 RSB	Oops! Left out the entire last page before.
 ##		2016-12-22 RSB	Proofed comment text using octopus/ProoferComments

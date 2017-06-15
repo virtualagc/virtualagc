@@ -17,6 +17,7 @@
 ##              2016-12-07 HG   Fix P00 -> POO
 ##		2016-12-25 RSB	Comment-text proofed using ProoferComments
 ##				and corrected errors found.
+##		2017-03-09 RSB	Comment-text fixes noted in proofing Luminary 116. 
 
 ## Page 661
 # TRANSFER PHASE INITIATION (TPI) PROGRAMS (P34 AND P74)
@@ -114,7 +115,7 @@
 
 #       (7) ONCE THE PARAMETWRS REQUIRED FOR COMPUTION OF THE MANEUVER
 #           HAVE BEEN COMPLETELY SPECIFIED, THE VALUE OF THE ACTIVE
-#           VEHICLE CENTRAL ANGLE OF TRANSFER IS COMPUTED AND STURED.
+#           VEHICLE CENTRAL ANGLE OF TRANSFER IS COMPUTED AND STORED.
 #           THIS NUMBER WILL BE AVAILABLE FOR DISPLAY TO THE ASTRONAUT
 #           THROUGH THE USE OF V06N52.
 #
@@ -1505,7 +1506,7 @@ RTRNMU          STORE           RTMU
 #       (1) 2D       APOCENTER RADIUS IN METERS
 #                    SCALE FACTOR - EARTH +29, MOON +27
 #       (2) 4D       APOCENTER ALTITUDE IN METERS
-#                    SCALE FACTOR - EARTH +29, MOON +27
+#                    SCALE FACTOR - EARTH +29, MOON P27
 #       (3) 6D       PERICENTER RADIUS IN METERS
 #                    SCALE FACTOR - EARTH +29, MOON +27
 #       (4) 8D       PERICENTER ALTITUDE IN METERS

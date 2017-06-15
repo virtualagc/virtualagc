@@ -17,6 +17,7 @@
 ##              2016-12-12 HG   Bumped a -1 into column 2 to fix a yaYUL warning.
 ##		2016-12-26 RSB	Comment-text proofed using ProoferComments
 ##				and corrected errors found.
+##		2017-03-10 RSB	Comment-text fixes noted in proofing Luminary 116.
 
 ## Page 1483
 # PROGRAM NAME: 1/ACCS
@@ -88,7 +89,7 @@
 1/ACCSET        CAF             ZERO                    # ENTRY FROM FRESH START/RESTART CODING.
                 TS              AOSQ                    #   NULL THE OFFSET ESTIMATES FOR 1/ACCS.
                 TS              AOSR
-                TS              ALPHAQ                  #   NULL THE OFFSET ESITMATES FOR DOWNLIST
+                TS              ALPHAQ                  #   NULL THE OFFSET ESTIMATES FOR DOWNLIST
                 TS              ALPHAR
 
 1/ACCJOB        TC              BANKCALL                # 1/ACCS ASSUMES ENTRY VIA BANKCALL.

@@ -13,11 +13,10 @@
 ##		2010-02-20 RSB	Un-##'d this header.
 ##		2017-02-05 RSB	Proofed comment text by diff'ing vs Comanche 55
 ##				and corrected errors found.
+##		2017-03-17 RSB	Comment-text fixes identified by 4-way diff'ing
+##				of Colossus 237 & 249, Comanche 55, and Artemis 72.
 
 ## Page 1333
-
-# ORBITAL INTEGRATION
-
 # DELETE
 		SETLOC	ORBITAL
 		BANK

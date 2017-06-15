@@ -14,8 +14,11 @@
 ## Mod history:	05/24/03 RSB.	Began transcribing.
 ##		05/14/05 RSB	Corrected website reference above.
 ##		2017-01-06 RSB	Page numbers now agree with those on the
-##				original harcopy, as opposed to the PDF page
+##				original hardcopy, as opposed to the PDF page
 ##				numbers in 1701.pdf.
+##		2017-02-25 RSB	Proofed comment text using octopus/ProoferComments.
+##		2017-03-16 RSB	Comment-text fixes identified in 5-way
+##				side-by-side diff of Luminary 69/99/116/131/210.
 
 ## Page 788
 		BANK	31
@@ -24,7 +27,7 @@
 		EBANK=	PIF
 		COUNT*	$$/THROT
 
-# * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+# * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 # HERE FC, DESIRED THRUST, AND FP, PRESENT THRUST, UNWEIGHTED, ARE COMPUTED.
 
 THROTTLE	CA	ABDELV		# COMPUTE PRESENT ACCELERATION IN UNITS OF
@@ -136,13 +139,13 @@ DOIT		CA	PIF
 		CA	TIME1
 		TS	TTHROT
 
-# SINCE /AF/ IS NOT AN INSTANTANEOUS ACELERATION, BUT RATHER AN "AVERAGE" OF THE ACCELERATION LEVELS DURING
+# SINCE /AF/ IS NOT AN INSTANTANEOUS ACCELERATION, BUT RATHER AN "AVERAGE" OF THE ACCELERATION LEVELS DURING
 # THE PRECEEDING PIPA INTERVAL, AND SINCE FP IS COMPUTED DIRECTLY FROM /AF/, FP IN ORDER TO CORRESPOND TO THE
 # ACTUAL THRUST LEVEL AT THE END OF THE INTERVAL MUST BE WEIGHTED BY
 # 	          PIF(PPROCESS + TL)     PIF /PIF/
 #	FWEIGHT = ------------------ + -------------
 #		       PGUID           2 PGUID FRATE
-# WHERE PROCESS IS THE TIME BETWEEN PIPA READING AND THE START OF THROTTLING, PGUID IS THE GUIDANCE PERIOD, AND
+# WHERE PPROCESS IS THE TIME BETWEEN PIPA READING AND THE START OF THROTTLING, PGUID IS THE GUIDANCE PERIOD, AND
 # FRATE IS THE THROTTLING RATE (32 UNITS PER CENTISECOND).  PGUID IS EITHER 1 OR 2 SECONDS.  THE "TL" IN THE
 # FIRST TERM REPRESENTS THE ENGINE'S RESPONSE LAG.  HERE FWEIGHT IS COMPUTED FOR USE NEXT PASS.
 
@@ -165,7 +168,7 @@ FWCOMP		CAF	2SECS
  		EXTEND
 		MP	BIT6
 		LXCH	BUF +1
-		CS	BUF		# TIME OF LAST PIPA READIN.
+		CS	BUF		# TIME OF LAST PIPA READING.
 		AD	TIME1
 		AD	THROTLAG	# COMPENSATE FOR ENGINE RESPONSE LAG
 		MASK	LOW8		# MAKE SURE SMALL AND POSITIVE
@@ -208,7 +211,7 @@ MASSMULT	EXTEND
 		TC	DMP
 		ADRES	MASS
 ## Page 792
-		TC	DMP		# LEAVES PROPERLY SCALED FORCE IN MPAC
+		TC	DMP		# LEAVES PROPERLY SCALED FORCE IM MPAC
 		ADRES	SCALEFAC
 		TC	TPAGREE
 		CA	MPAC
@@ -219,7 +222,7 @@ MASSMULT	EXTEND
 		DXCH	MPAC +1
 		TC	BUF
 
-# CONSTANTS --
+# CONSTANTS:-
 
 FEXTRA		=	BIT13		# FEXT +5.13309020 E+4
 
@@ -228,4 +231,4 @@ FEXTRA		=	BIT13		# FEXT +5.13309020 E+4
 OCT17777	OCT	17777
 4FMAXNOM	DEC	14908		# EQUIVALENT TO 10,500 LBS.
 
-# * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+# * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *

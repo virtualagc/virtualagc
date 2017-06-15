@@ -21,6 +21,8 @@
 ##		2017-01-25 RSB	Proofed comment text using octopus/prooferComments
 ##				and fixed the (single) error found.
 ##		2017-01-29 RSB	Some of my fixes disappeared, for some reason.
+##		2017-03-14 RSB	Comment-text fixes identified in 5-way
+##				side-by-side diff of Luminary 69/99/116/131/210.
 
 ## Page 1
 # THIS LGC PROGRAM IS INTENDED FOR USE IN THE LM DURING THE MANNED LUNAR LANDING MISSION OR ANY SUBSET THEREOF.
@@ -357,7 +359,7 @@
 # 40  TIME FROM IGNITION/CUTOFF              3COMP   XXBXX  MIN/SEC                      NO LOAD, DEC ONLY
 #     VG,                                            XXXX.X FT/SEC
 #     DELTA V (ACCUMULATED)                          XXXX.X FT/SEC
-# 41  TARGET  AZIMUTH.                       2COMP   XXX.XX DEG                          (FOR SYSTEM TEST)
+# 41  TARGET  AZIMUTH,                       2COMP   XXX.XX DEG                          (FOR SYSTEM TEST)
 #             ELEVATION                              XX.XXX DEG
 # 42  APOGEE,                                3COMP   XXXX.X NAUT MI                      DEC ONLY
 #     PERIGEE,                                       XXXX.X NAUT MI

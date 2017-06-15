@@ -20,6 +20,10 @@
 ##		2017-01-17 RRB	Updated for Luminary 69.
 ##		2017-01-27 RSB	Proofed comment text using octopus/prooferComments
 ##				and fixed errors found.
+##		2017-03-07 RSB	Removed yaYUL workaround that no longer 
+##				seems to be needed.
+##		2017-03-17 RSB	Comment-text fixes identified in diff'ing
+##				Luminary 99 vs Comanche 55.
 
 ## Page 378
 # GENERATION OF STEERING COMMANDS FOR DIGITAL AUTOPILOT FREE FALL MANEUVERS
@@ -61,14 +65,8 @@ INCRDCDU	TS	SPNDX
 		INDEX	SPNDX
 		MSU	NCDU
 		EXTEND
-		
-## The following 2 lines seem to have no purpose at all.
-## I am removing them because they only serve to confuse
-## the assembler by getting in between EXTEND and MP.<br>&mdash;RSB 2009
-## <pre>
-##		SETLOC	KALCMON1
-##		BANK
-## </pre>		
+		SETLOC	KALCMON1
+		BANK
 		
 		MP	DT/TAU
 		CCS	A		# CONVERT TO 2S COMPLEMENT
@@ -129,10 +127,10 @@ MANUSTAT	EXIT			# INITIALIZATION ROUTINE
 		EXTEND			# FOR AUTOMATIC MANEUVERS
 		DCA	TIME2
 ## Page 380
-		DAS	TM		# TM+TO		MANEUVER COMPLETION TIME
+		DAS	TM		# TM+T0		MANEUVER COMPLETION TIME
 		EXTEND
 		DCS	ONESEK
-		DAS	TM		# (TM+TO)-1
+		DAS	TM		# (TM+T0)-1
 		INHINT
 		CAF	TWO
 RATEBIAS	TS	KSPNDX

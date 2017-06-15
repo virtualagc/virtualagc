@@ -1,4 +1,4 @@
-# Copyright 2003-2007,2009-2010,2016 Ronald S. Burkey <info@sandroid.org>
+# Copyright 2003-2007,2009-2010,2016,2017 Ronald S. Burkey <info@sandroid.org>
 #
 # This file is part of yaAGC.
 #
@@ -156,6 +156,10 @@
 #		2016-11-18 RSB	Removed yaACA2 from FreeBSD build.
 #		2016-12-28 RSB	Added RETREAD44 to the mission list.
 #		2017-02-04 RSB	Added SuperJob to the mission list.
+#		2017-03-03 RSB	Added LUM99R2 to the list of missions.
+#		2017-03-18 RSB	Added Luminary116 to mission list.
+#		2017-03-27 RSB	Updated NVER for "releasing" a new installer and VM.
+#		2017-04-17 RSB	Updated NVER.
 #
 # The build box is always Linux for cross-compiles.  For native compiles:
 #	Use "make MACOSX=yes" for Mac OS X.
@@ -165,7 +169,7 @@
 #	Use "make" for Linux.
 
 # NVER is the overall version code for the release.
-NVER:=\\\"2016-11-08-working\\\"
+NVER:=\\\"2017-04-17\\\"
 DATE:=`date +%Y%m%d`
 
 # DON'T CHANGE THE FOLLOWING SWITCH *********************************
@@ -363,12 +367,13 @@ BUILD = $(MAKE) PREFIX=$(PREFIX) NVER=$(NVER) CFLAGS="$(CFLAGS)" CURSES="$(CURSE
 MISSIONS = Validation Luminary131 Colossus249 Comanche055 
 MISSIONS += Luminary099 Artemis072 Colossus237 Solarium055
 MISSIONS += Aurora12 Sunburst120 Luminary210 Retread44 Luminary069
-MISSIONS += SuperJob
+MISSIONS += SuperJob LUM99R2 Luminary116 Borealis
 export MISSIONS
 
 # Missions needing code::blocks project files.
 cbMISSIONS = Validation Luminary131 Colossus249 Comanche055 
 cbMISSIONS += Luminary099 Artemis072 Colossus237 Aurora12 Sunburst120
+cbMISSIONS += Luminary069 LUM99R2 Luminary116 Luminary210 Retread44 Borealis SuperJob
 cbMISSIONS := $(patsubst %,%.cbp,$(cbMISSIONS))
 
 # The base set of targets to be built always.
@@ -571,6 +576,7 @@ Validation.cbp:
 	mv Validation/temp.txt Validation/$@
 
 %.cbp:
+	@echo Make CBP file $*/$@
 	sed "s/@name@/"$*"/" templateAGC-top.cbp >$*/temp.txt
 	cd $* ; \
 	for n in *.agc ; \
@@ -679,3 +685,25 @@ else
 endif
 endif
 endif
+
+# The following target is used only on the build-system that creates the Linux
+# (presently Xubuntu 14.04 32-bit) installation tarball.  Its purpose is to look
+# into all of the executables being distributed, determine what system libraries
+# they use, and to pack all of those into a separate directory that can be 
+# included in the installation package.  The result, I hope, is to be able to 
+# run the software on any Linux system, 32-bit or 64-bit, newer than 4/2014, and
+# possibly on some older ones too.  To take advantage of these libraries
+# (as opposed to just being limited to whatever libraries are already installed
+# on the target Linux system), one needs to run VirtualAGC as
+#	cd Resources
+#	LD_LIBRARY_PATH=../lib ../bin/VirtualAGC
+# For 64-bit systems, it's additionally necessary to do
+#	sudo apt-get install gcc-multilib
+# on Debian or Ubuntu, and presumably the equivalent on Fedora, OpenSUSE, ....
+#
+# Although the libraries are put into a folder called lib/, I wouldn't recommend
+# copying them into system directories like /lib, /usr/lib, or /usr/local/lib.
+.PHONY: installationLibraries
+installationLibraries: install
+	mkdir ~/VirtualAGC/lib
+	cp `ldd ~/VirtualAGC/bin/* | grep '=>' | sed -e 's/.*=>[[:space:]]*//' -e 's/[[:space:]]*(.*//' | sort -u` ~/VirtualAGC/lib

@@ -14,9 +14,14 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-01-22 MAS  Created from Luminary 99.
 ##              2017-02-02 RRB  Updated for Luminary 116.
+##              2017-03-09 HG   Fix operand PBAILOUT  --> BAILOUT
+##		2017-03-13 RSB	Proofed comment text via 3-way diff vs
+##				Luminary 99 and 132.
+##		2017-03-15 RSB	Comment-text fixes identified in 5-way
+##				side-by-side diff of Luminary 69/99/116/131/210.
 
 ## Page 1331
-# DISPLAYS CAN BE CLASSIFIED INTO THE FOLLOWING CATEGORIES
+# DISPLAYS CAN BE CLASSIFIED INTO THE FOLLOWING CATEGORIES-
 
 #     1.  PRIORITY DISPLAYS- DISPLAYS WHICH TAKE PRIORITY OVER ALL OTHER DISPLAYS. USUALLY THESE DISPLAYS ARE SENT
 #         OUT UNDER CRITICAL ALARM CONDITIONS.
@@ -207,7 +212,7 @@
 #                               ...     ...             IMMEDIATE RETURN FROM GOPERF1R
 
 # GOPERF2R IS THE SAME AS GOPERF2 ONLY AN IMMEDIATE RETURN IS MADE TO USERS CALL CADR +4.
-## Page 1345
+## Page 1335
 # GOPERF2R DOES NOT BLANK ANY REGISTERS
 
 #                               CAF     VXXNYY          VARIABLE NOUN YY REQUESTED.  XX=00 OR 01
@@ -267,7 +272,7 @@
 
 #                               CAF     VXXNYY          VXXNYY CONTAINS VERB AND NOUN
 #                               TC      BANKCALL
-#                               CADR    GOMARK          OTHER EXTENDED VERBS USE CADR GOXDSP\
+#                               CADR    GOMARK          OTHER EXTENDED VERBS USE CADR GOXDSP
 
 #       GOMARKR IS THE SAME AS GOMARK ONLY RETURN IS TO THE USER.
 
@@ -377,7 +382,7 @@
 # HAVE BEEN CLEANED OUT.
 
 #                               TC      BANKCALL
-#                               CADR    KLEENEX\
+#                               CADR    KLEENEX
 
 #                               ...     ...             RETURN TO USER
 
@@ -432,10 +437,10 @@
 #                               TC      BANKCALL
 #                               CADR    CLEANDSP
 #                               ...     ...             RETURN TO USER
-## Page 1351
+## Page 1341
 
 # GENERAL INFORMATION
-# -------------------
+# ------- -----------
 
 # ALARM OR ABORT EXIT MODES --
 #       PRIOBORT        TC      ABORT
@@ -473,7 +478,7 @@
 #      FLAGWRD4 = BIT INFO FOR CONTROL OF ALL DISPLAY ROUTINES
 #      DSPTEM1 = R1 INFO FOR ASTRONAUT FROM PERFORM DISPLAYS (NORMAL)
 # SUBROUTINES USED-- NVSUB, FLAGUP, FLAGDOWN, ENDOFJOB, BLANKSUB, ABORT, JOBWAKE, JOBSLEEP, FINDVAC, PRIOCHNG,
-# JAMTERM, NVSUBUSY, FLASHON, ENDIDLE, CHANG1, BANKJUMP, MAKECADR, NOVAC.
+# JAMTERM, NVSUBUSY, FLASHON, ENDIDLE, CHANG1, BANKJUMP, MAKECADR, NOVAC,
 # DEBRIS-- (STORED INTO)
 
 #      TEMPORARY TEMPORARIES- A, Q, L, MPAC +2, MPAC +3, MPAC +4, MPAC +5, MPAC +6, RUPTREG2, RUPTREG3, CYL,
@@ -482,7 +487,7 @@
 
 #       ERASABLES (USED ONLY BY DISPLAY ROUTINES)- NVWORD,+1,+2, DSPFLG,+1,+2, CADRFLSH,+1,+2, PRIOTIME, FLAGWRD4,
 ## Page 1342
-#               R1SAVE, MARK2PAC.
+#               R1SAVE, MARK2PAC,
 
 # DEBRIS-- (USED BUT NOT STORED INTO)- NOUNREG, VERBREG, LOCCTR, MONSAVE1
 
@@ -854,7 +859,7 @@ IFLEGAL         CAF             TWO
                 EXTEND                                          
                 BZF             OKTOPLAY                        # NO
 
-PRIOBORT        TC              PBAILOUT                         
+PRIOBORT        TC              BAILOUT                         
                 OCT             31502                            
 
 OKTOPLAY        TC              COPIES2                         

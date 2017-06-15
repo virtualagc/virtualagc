@@ -20,6 +20,9 @@
 ##                                  operator TCF, BZF -> TC                                 
 ##		2016-12-25 RSB	Comment-text proofed using ProoferComments
 ##				and corrected errors found.
+##		2017-03-09 RSB	Comment-text fixes noted in proofing Luminary 116.
+##		2017-03-15 RSB	Comment-text proofing using 5-way side-by-side diff
+##				of Luminary 69/99/116/131/210.
 
 ## Page 726
 
@@ -355,7 +358,7 @@ TIG-5           EXTEND
                 TC              TWIDDLE
                 ADRES           TIG-0
 
-                TC              DOWNFLAG                # RESET IGNFLAG AND ASINFLAG
+                TC              DOWNFLAG                # RESET IGNFLAG AND ASTNFLAG
                 ADRES           IGNFLAG                 #   FOR LIGHT-UP LOGIC
                 TC              DOWNFLAG
                 ADRES           ASTNFLAG
@@ -457,7 +460,7 @@ P63IGN          EXTEND                                  # (13)  INITIATE BURN DI
                 DCA             TIME2
                 DXCH            TIG
 
-                CAF             ZERO                    # INITIALIZE WCHPHASE AND FLPASS0
+                CAF             ZERO                    # INITIALIZE WCHPHASE AND FLPASSO
                 TS              WCHPHASE
                 TS              WCHPHOLD                # ALSO WHCPHOLD
                 CA              TWO

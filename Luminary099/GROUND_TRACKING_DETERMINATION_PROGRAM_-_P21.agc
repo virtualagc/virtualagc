@@ -14,7 +14,9 @@
 ##		2016-12-13 RSB	GOTOP00H -> GOTOPOOH
 ##		2016-12-14 RSB	Proofed text comments with octopus/ProoferComments
 ##				but no errors found.
-##
+##		2017-03-15 RSB	Comment-text fixes identified in 5-way
+##				side-by-side diff of Luminary 69/99/116/131/210.
+
 ## This source code has been transcribed or otherwise adapted from
 ## digitized images of a hardcopy from the MIT Museum.  The digitization
 ## was performed by Paul Fjeld, and arranged for by Deborah Douglas of
@@ -66,7 +68,7 @@
 #	DECIMAL DISPLAY OF LAT,LONG,ALT
 #
 # ERASABLE INITIALIZATION REQUIRED
-#	AX0		2DEC	4.652459653 E-5 RADIANS		%68-69 CONSTANTS*
+#	AX0		2DEC	4.652459653 E-5 RADIANS		%68-69 CONSTANTS"
 #	-AY0		2DEC	2.147535898 E-5 RADIANS
 #	AZ0		2DEC	.7753206164	REVOLUTIONS
 # 	FOR LUNAR ORBITS 504LM VECTOR IS NEEDED

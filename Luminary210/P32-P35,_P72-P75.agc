@@ -1341,7 +1341,7 @@ CDHMVR          STQ             VLOAD
                 PDDL            DSQ                     #                                       10D
                                 08D
                 BDSU            SQRT
-                PDVL            VXV                     # SQRT(MU(2/R SUB 1-1/A SUB A)-VSUBA2)10D
+                PDVL            VXV                     # SQRT(MU(2/R SUB A-1/A SUB A)-VSUBA2)10D
                                 UP1
                                 UNVEC
                 UNIT            VXSC
