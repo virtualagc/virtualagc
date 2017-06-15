@@ -18,7 +18,13 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-05-24 MAS  Created from Sunburst 120.
 ##              2017-05-29 HG   Transcribed
-
+##              2017-06-15 HG   Fix operand  BIT14  -> BIT4
+##                              Fix operator TC     -> TS  
+##                                           TCF    -> TC 
+##                              Fix statements CS    LMPCMD --> MASK LMPCMD
+##                                             MASK  BIT15  --> AD   BIT15
+##                                             ADS   LMPCMD --> TS   LMPCMD
+##                              Fix value IM30INIR  OCT 37000 -> OCT 37400
 ## Page 78
                 BANK            01
                 EBANK=          LST1
@@ -180,7 +186,7 @@ GOPROG          TC              BANKCALL                # * * * SUBJECT TO A HUG
 
                 MASK            BIT6
                 CCS             A                       # IF GIMBAL LOCK LAMP WAS ON, LEAVE ISS IN
-                CAF             BIT14                   # COARSE ALIGN.
+                CAF             BIT4                    # COARSE ALIGN.
                 EXTEND
                 WOR             12
 
@@ -224,10 +230,10 @@ LIGHTSET        EXTEND                                  # DONT TRY TO RESTART IF
 
 LMPRUPT         CS              BIT15                   # CANT USE ADS HERE SINCE CODING MUST BE
                 INDEX           LMPOUT                  # REPEATABLE (RESTART DURING RESTART, ETC)
-                CS              LMPCMD
-                MASK            BIT15
+                MASK            LMPCMD
+                AD              BIT15
                 INDEX           LMPOUT
-                ADS             LMPCMD
+                TS              LMPCMD
 
 T4LOCRST        CAF             LNORMT4
                 TS              T4LOC
@@ -284,7 +290,7 @@ TSTMPAC6        CCS             MPAC            +6      # IF NO GROUPS ACTIVE TH
                 TCF             DOFSTART                # FRESH START
 
 PTBAD           CAF             OCT1107                 # SET ADDITIONAL FAILURE TO SHOW PHASE
-                TC              SFAIL                   # TABLE DISAGREEMENT (WILL BE DISPLAYED
+                TS              SFAIL                   # TABLE DISAGREEMENT (WILL BE DISPLAYED
                 TCF             DOFSTART                # IN R2).
 
 RACTCADR        CADR            RESTARTS
@@ -397,7 +403,7 @@ DSPOFF          TS              MPAC
                 INDEX           MPAC
                 TS              DSPTAB
                 CCS             MPAC
-                TCF             DSPOFF
+                TC              DSPOFF
 
                 TS              INLINK
                 TS              DSPCNT
@@ -471,7 +477,7 @@ NUMGRPS         EQUALS          FIVE                    # SIX GROUPS CURRENTLY.
 -ELR            OCT             -22                     # -ERROR LIGHT RESET KEY CODE.
 -MKREJ          OCT             -20                     # - MARK REJECT.
 IM30INIF        OCT             37411                   # INHIBITS IMU FAIL FOR 5 SEC AND PIP ISSW
-IM30INIR        OCT             37000                   # LEAVE FAIL INHIBITS ALONE.
+IM30INIR        OCT             37400                   # LEAVE FAIL INHIBITS ALONE.
 
 IM33INIT        OCT             16000                   # NO PIP OR TM FAIL SIGNALS.
 9,6             OCT             440                     # MASK FOR PROG ALARM AND GIMBAL LOCK.

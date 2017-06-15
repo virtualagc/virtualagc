@@ -18,6 +18,7 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-05-24 MAS  Created from Sunburst 120.
 ##		2017-06-03 TVB	Transcribed.
+##              2017-06-15 HG   Fix operator XCH -> TS
 
 ## Page 1001
 
@@ -392,7 +393,7 @@ TASKOVER        CCS             RUPTAGN                         # IF +1 RETURN T
 RESUME          EXTEND                                          
                 QXCH            QRUPT                           
 NOQRSM          CA              BANKRUPT                        
-                XCH             BBANK                           
+                TS              BBANK                           
 NOQBRSM         DXCH            ARUPT                           
                 RESUME                                          
 
