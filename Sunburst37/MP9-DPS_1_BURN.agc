@@ -19,7 +19,8 @@
 ## Mod history: 2017-05-24 MAS  Created from Sunburst 120.
 ##		2017-06-14 RSB	Transcribe
 ##              2017-06-14 HG   Fix operand THRUSTCMD -> THRSTCMD
-#3                                          AVEXIT    -> AVGEXIT
+##                                          AVEXIT    -> AVGEXIT
+##              2017-06-15 HG   Fix value DELTAT9    B-35 -> B-38 
 
 ## Page 684
 # MISSION PHASE 9
@@ -480,7 +481,7 @@ DPC             2DEC            2600.           B-28            # SCALED AT 2(+2
 
 VTAILOFF	2DEC		0				# ***** GET THE NUMBER
 
-DELTAT9         2DEC            200             E+4 B-35        # 2SEC/KPIP
+DELTAT9         2DEC            200             E+4 B-38        # 2SEC/KPIP
 
 2MUERTH9        2DEC*           3.98603223      E+10 B-37*
 

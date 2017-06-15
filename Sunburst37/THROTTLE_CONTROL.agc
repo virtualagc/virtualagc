@@ -18,6 +18,7 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-05-24 MAS  Created from Sunburst 120.
 ##              2017-06-09 HG   Transcribed
+##              2017-06-15 HG   Fix operator DXCH -> DAS
 
 
 ## Page 795
@@ -205,7 +206,7 @@ DOPIF           TC              PHASCHNG
                 EXTEND
                 DCA             FC
                 TS              FCOLD                   # HISTORY
-                DXCH            PIF                     # OKAY SINCE PIF PREVIOUSLY WAS ZEROOED
+                DAS             PIF                     # OKAY SINCE PIF PREVIOUSLY WAS ZEROOED
                 EXTEND
                 DCS             FOLD
                 DAS             PIF                     # PIF = FC - FOLD + PRESETTING (IF ANY)
