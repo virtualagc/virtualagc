@@ -18,6 +18,12 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-05-24 MAS  Created from Sunburst 120.
 ##              2017-06-01 HG   Transcribed
+##              2017-06-15 HG   Fix operator DXCH -> TS
+##                                           DAS  -> ADS
+##                                           DXCH -> XCH
+##                                           TC   -> TCF
+##                                           BZMF -> BZF
+##                              change value MCOMPTQR  DEC -16  -> OCTAL 77765
 
 ## Page 491
                 BANK            17
@@ -74,16 +80,16 @@ QRAXIS          CAF             MS30QR                  # RESET TIMER IMMEDIATEL
                 CAE             M31                     # MATRIX*VECTOR(WITH x COMPONENT ZERO)
                 EXTEND
                 MP              ITEMP1                  # M31 * ITEMP1 = M31 * DELTA CDUY
-                DXCH            ITEMP3
+                TS              ITEMP3
                 CAE             M32                     # M32 * ITEMP2 = M32 * DELTA CDUZ
                 EXTEND
                 MP              ITEMP2                  # DELTAR = M31*(DEL CDUY) + M32*(DEL CDUZ)
-                DAS             ITEMP3                  # R_BODY_ANGLE INCREMENT SCALED AT PI/2(6)
+                ADS             ITEMP3                  # R_BODY_ANGLE INCREMENT SCALED AT PI/2(6)
 
                 CAE             M21                     # MATRIX*VECTOR(WITH X COMPONENT ZERO)
                 EXTEND                                  # CLOBBERS ITEMP2=DEL CDUZ, FOR EFFICIENCY
                 MP              ITEMP1                  # M21 * ITEMP1 = M21 * DELTA CDUY
-                DXCH            ITEMP2                  # M22 * ITEMP2 = M22 * DELTA CDUZ
+                XCH             ITEMP2                  # M22 * ITEMP2 = M22 * DELTA CDUZ
                 EXTEND
                 MP              M22                     # DELTAQ = M21*(DEL CDUY) + M22*(DEL CDUZ)
                 ADS             ITEMP2                  # Q_BODY_ANGLE INCREMENT SCALED AT PI/2(6)
@@ -551,7 +557,7 @@ MS30QR          OCTAL           37775
 MS50QR          OCTAL           37773
 16/32400        DEC             0.00049
 BIT8,9          OCTAL           00600
-MCOMPTQR        DEC             -16                     # -10 MS COMPUTATION TIME
+MCOMPTQR        OCTAL           77765                   # -10 MS COMPUTATION TIME
 14-TQRMN        DEC             11
 
 MINTADR         GENADR          MINTJET
@@ -770,7 +776,7 @@ LOOPTOP         TS              QRCNTR
                 TCF             STILLRCS                # NO.      USE RCS CONTROL.
                 CCS             QRCNTR                  # THIS AXIS IS FINE.   ARE BOTH DONE.
                 TCF             LOOPTOP                 # NOW TRY THE Q AXIS
-                TC              GOTOGTS                 # TRANSFER TO TRIM GIMBAL CONTROL
+                TCF             GOTOGTS                 # TRANSFER TO TRIM GIMBAL CONTROL
 -RATLM+1        OCT             77512                   # -.5 DEG/SEC SCALED AT PI/4  + 1 BIT
 -XBND+1         OCT             77601                   # -1.4 DEG SCALED AT PI, + 1 BIT.
 # "STILLRCS" IS THE ENTRY POINT TO RCS ATTITUDE STERRING WHENEVER IT IS FOUND THAT THE TRIM GIMBAL CONTROL
@@ -990,7 +996,7 @@ URGFUDGE        CAE             AOSQ                    # TEST ON ASOQ(URGENCYQ)
 
 URGFUDG1        CAE             AOSR                    # TEST ON AOSR(URGENCYR) GREATER THAN ZERO
                 EXTEND
-                BZMF            URGPLANE                # (IF AOSR ZERO, DO NOT USE URGRATQ.)
+                BZF             URGPLANE                # (IF AOSR ZERO, DO NOT USE URGRATQ.)
                 EXTEND
                 MP              URGENCYR                # IF PRODUCT NEGATIVE, APPLY URGRATR.
                 EXTEND

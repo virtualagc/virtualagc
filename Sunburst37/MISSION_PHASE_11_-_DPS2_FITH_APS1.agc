@@ -18,6 +18,8 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-05-24 MAS  Created from Sunburst 120.
 ##              2017-06-06 HG   Transcribed
+##              2017-06-15 HG   Fix operator TCF -> TC
+##                                  operand  IBNKCALL -> BANKCALL
 
 ## Page 693
                 BANK            36
@@ -215,7 +217,7 @@ RETBURN         EXTEND                                  # RETURN FROM BURN GUIDA
                 EBANK=          TDEC
                 2CADR           PROG44
 
-                TCF             ENDOFJOB                # READACCS STILL ACTIVE.
+                TC              ENDOFJOB                # READACCS STILL ACTIVE.
 
 ## Page 697
 
@@ -343,7 +345,7 @@ FITHGCMD        TC              IBNKCALL
 
 
 
-DOCURTN         TC              IBNKCALL                #  GO SET UP CURTAIN JOB
+DOCURTN         TC              BANKCALL                #  GO SET UP CURTAIN JOB
                 CADR            CURTJOB
 
 MP11TERM        CAF             1SEC11                  # SET TO DO MP11 TERMINAL TASKS IN 1 SEC

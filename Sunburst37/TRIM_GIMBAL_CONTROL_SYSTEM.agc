@@ -18,6 +18,9 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-05-24 MAS  Created from Sunburst 120.
 ##              2017-06-07 HG   Transcribed
+##              2017-06-15 HG   Fix operand  ACENTRAL -> A2CNTRAL
+##                                  operator CS -> CAE
+##                                           TC -> INDEX
 
 ## Page 554
                 BANK            21
@@ -394,7 +397,7 @@ FUNCT2          EXTEND
                 DCA             OMEGA.K
                 DXCH            FUNCTION                # DEL*OMEGA*K
                 EXTEND
-                DCA             ACENTRAL
+                DCA             A2CNTRAL
                 DAS             FUNCTION                # DEL*OMEGA*K + SGN(ALPHA)ALPHA(2)
 
 FUNCT3          CAE             A2CNTRAL                # CALCULATE (2/3)SGN(ALPHA)ALPHA(2)
@@ -541,7 +544,7 @@ POSDRIVE        CAF             ZERO
                 TS              Y3DOT
 
 ## Page 564
-                CS              RACCDOT                 # SCALED AT PI/2(7)
+                CAE             RACCDOT                 # SCALED AT PI/2(7)
                 EXTEND
 
                 MP              MR13                    # SCALED AT 2
@@ -759,7 +762,7 @@ NEGALPH         CS              A
 TGOFFNOW        CAF             ZERO                    # MAKE SURE PLUS ZERO FOR DRIVE FLAG
                 INDEX           QRNDXER                 # TURN OFF DRIVE FLAG NOW
                 TS              NEGUQ
-                TC              Q
+                INDEX           Q
 
                 TC              3                       # SKIP WAITLIST CALL AND 2CADR
 

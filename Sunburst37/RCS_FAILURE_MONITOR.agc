@@ -18,6 +18,7 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-05-24 MAS  Created from Sunburst 120.
 ##              2017-05-31 HG   Transcribed
+##              2017-06-15 HG   Fix operand BIT6 -> BIT8
 
 ## Page 535
 # FAILURE MONITOR FOR LM RCS JETS (4 TIMES A SECOND).
@@ -112,7 +113,7 @@ FM13/15         CA              BIT7
 
 FM14/16         CA              BIT8
                 ADS             CH5MASK
-                CA              BIT6
+                CA              BIT8
                 ADS             CH6MASK
                 TC              Q
 

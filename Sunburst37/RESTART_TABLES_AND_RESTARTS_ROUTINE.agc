@@ -18,6 +18,7 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-05-24 MAS  Created from Sunburst 120.
 ##              2017-05-28 HG   Transcribed
+##              2017-06-15 HG   Fix operator CS  -> CA
 
 ## Page 56
 # RESTART TABLES
@@ -460,7 +461,7 @@ ITSLNGCL        CA              WTLTCADR                # ASSUME IT WILL GO TO W
                 TS              GOLOC           -1
 
                 NDX             TEMP2G
-                CS              PHSPRDT1                # GET THE DELTA T ADDRESS
+                CA              PHSPRDT1                # GET THE DELTA T ADDRESS
 
                 TCF             ITSLGCL1                # NOW GET THE DELTA TIME
 
