@@ -18,6 +18,7 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-05-24 MAS  Created from Sunburst 120.
 ##              2017-06-03 HG   Transcribed
+##              2017-06-15 HG   Fix operand EDOTP -> EDOT
 
 ## Page 468
                 BANK            16
@@ -595,14 +596,14 @@ PURGENCY        CA              CDUY                    # P-ERROR CALCULATION
 
                 EXTEND
                 MP              E
-                AD              EDOTP
+                AD              EDOT
                 EXTEND
                 BZMF            PLUSDP
 
                 CAF             NEGDP
 
 GCOMPER         TS              ITEMP3
-                CAE             EDOTP
+                CAE             EDOT
                 EXTEND
                 SQUARE
                 EXTEND
@@ -629,8 +630,8 @@ NEGPJET         CAF             NEGP
 
 PLUSDP          CS              E
                 XCH             E
-                CS              EDOTP
-                XCH             EDOTP
+                CS              EDOT
+                XCH             EDOT
                 CS              NEGDP
                 TCF             GCOMPER
 UCOAST          CAF             ZERO

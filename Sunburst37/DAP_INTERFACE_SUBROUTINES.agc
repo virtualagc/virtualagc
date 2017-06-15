@@ -18,6 +18,7 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-05-24 MAS  Created from Sunburst 120.
 ##              2017-05-30 HG   Transcribed
+##              2017-06-15 HG   Fix operand XCH  -> TS
 
 ## Page 453
                 BANK            16
@@ -121,7 +122,7 @@ HOLDRATE        CAF             EBANK6
                 DCA             OMEGAP
                 DXCH            OMEGAPD
                 CAE             OMEGAR
-                XCH             OMEGARD
+                TS              OMEGARD
 
 COMNEXIT        EXTEND
                 DCA             CDUY

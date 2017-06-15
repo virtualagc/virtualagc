@@ -18,6 +18,7 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-05-24 MAS  Created from Sunburst 120.
 ##              2017-06-14 HG   Transcribed
+##              2017-06-15 HG   Fix operand CA  -> CS
 
 ## Page 802
                 BANK            12
@@ -148,7 +149,7 @@
                 TS              VBUF                    # TEMPORARY - MINOR PARTS IRRELEVANT
 
                 INDEX           BUF             +2
-                CA              PIPABIAS                # (IPA PULSES)/(CS) X 2(-5)              *
+                CS              PIPABIAS                # (IPA PULSES)/(CS) X 2(-5)              *
                 EXTEND
                 MP              1/PIPADT                # (CS) X 2(+8)  NOW (PIPA PULSES) X 2(+3)*
                 EXTEND                                  #                                        *

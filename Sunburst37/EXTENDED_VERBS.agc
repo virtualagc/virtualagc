@@ -18,6 +18,7 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-05-24 MAS  Created from Sunburst 120.
 ##		2017-06-01 RSB	Transcribed.
+##              2017-06-15 HG   Fix operand BANKCALL -> INTPRET        
 
 ## Page 187
 		BANK	11
@@ -300,7 +301,7 @@ RRDESNBK	TC	TESTXACT
 VNLDRCDU	OCT	2441
 OPTCOARV	EQUALS	IMUCOARV		# DIFFERENT NOUNS.
 
-RRDESK2		TC	BANKCALL
+RRDESK2		TC	INTPRET
 
 		CALL	
 			RRDESNB			# RETURNS IN BASIC.

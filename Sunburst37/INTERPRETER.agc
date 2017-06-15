@@ -19,6 +19,7 @@
 ## Mod history: 2017-05-24 MAS  Created from Sunburst 120.
 ##              2017-06-12 MAS  Began updating for Sunburst 37.
 ##              2017-06-13 MAS  Completed updates for Sunburst 37.
+##              2017-06-15 HG   Fix opcode TC  -> TCF
 
 ## Page 893
 # SECTION 1  DISPATCHER
@@ -809,7 +810,7 @@ Q+2             =               NEG
 EXIT            CA              BANKSET                         # RESTORE USER'S BANK SETTING, AND LEAVE
                 TS              BBANK                           # INTERPRETIVE MODE.
                 INDEX           LOC                             
-                TC              1                               
+                TCF             1                               
 
 ## Page 917
 # SECTION 3 - ADD/SUBTRACT PACKAGE.

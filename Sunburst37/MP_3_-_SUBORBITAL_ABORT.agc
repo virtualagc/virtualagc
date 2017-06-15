@@ -21,6 +21,7 @@
 ##				mod no, mod by, assembly revision) identify this
 ##				code as being identical to that in Sunburst 120,
 ##				in reality it has many differences.
+##              2017-06-15 HG   Fix operand BIT2 -> BIT4
 
 ## Page 644
                 BANK            25
@@ -446,7 +447,7 @@ SBORB14         TC              1LMP+DT
                 TC              TASKOVER
 
 
-ABTSTGDM        CAF             BIT2                            # ABORT STAGE DISCRETE MONITOR
+ABTSTGDM        CAF             BIT4                            # ABORT STAGE DISCRETE MONITOR
                 EXTEND
                 RAND            30
 

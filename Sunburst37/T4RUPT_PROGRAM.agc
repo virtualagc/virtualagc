@@ -18,6 +18,8 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-05-24 MAS  Created from Sunburst 120.
 ##              2017-05-29 HG   Transcribed
+##              2017-06-15 HG   Fix operator TCF  -> TC
+##                                           CS   -> CAF
 
 ## Page 90
                 BANK            12
@@ -180,7 +182,7 @@ T4JUMP          INDEX           DSRUPTSW
 
                 TCF             IMUMON
                 TCF             DAPT4S
-                TCF             ALTROUT
+                TC              ALTROUT
                 TC              NORRGMON                # WAS TCF RRAUTCHK (NO RADAR IN 206).
                 TCF             IMUMON
                 TCF             DAPT4S
@@ -873,7 +875,7 @@ IMUCAGE         CCS             A                       # NO ACTION IF GOING OFF
 
                 TC              CAGESUB
 
-                CS              ZERO                    # ZERO COMMAND OUT-COUNTERS
+                CAF             ZERO                    # ZERO COMMAND OUT-COUNTERS
                 TS              CDUXCMD
                 TS              CDUYCMD
                 TS              CDUZCMD

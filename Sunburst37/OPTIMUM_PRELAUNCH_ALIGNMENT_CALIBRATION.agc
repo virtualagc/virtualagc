@@ -18,6 +18,8 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-05-24 MAS  Created from Sunburst 120.
 ##              2017-06-03 HG   Transcribed
+##              2017-06-15 HG   Fix operator CS  -> CAF
+##                                           XCH -> TS
 
 ## Page 430
 # PROGRAM NAME-OPTIMUM PRELAUNCH ALIGNMENT CALIBRATION
@@ -93,7 +95,7 @@ ESTIMS          TC              PHASCHNG
 RSTGTS1         INHINT                                  #  COMES HERE PHASE1 RESTART
                 CA              TIME1
                 TS              GTSWTLST
-                CS              ZERO                    # ZERO THE PIPS
+                CAF             ZERO                    # ZERO THE PIPS
                 TS              PIPAX
                 TS              PIPAY
                 TS              PIPAZ
@@ -131,7 +133,7 @@ RSTGTS1         INHINT                                  #  COMES HERE PHASE1 RES
 ## Page 433
 ALLOOP          INHINT
                 CA              TIME1
-                XCH             GTSWTLST                # STORE TIME TO SET UP NEXT WAITLIST.
+                TS              GTSWTLST                # STORE TIME TO SET UP NEXT WAITLIST.
 ALLOOP3         CA              ALTIM
                 TS              GEOSAVED
                 TC              PHASCHNG

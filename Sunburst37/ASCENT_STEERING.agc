@@ -18,6 +18,7 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-05-24 MAS  Created from Sunburst 120.
 ##              2017-06-11 HG   Transcribed
+##              2017-06-15 HG   Fix value T2 2DEC 200 B-17 -> 2DEC 200
 
 ## Page 853
 #    PROGRAM NAME--ASCENT        BY--BERMAN
@@ -476,7 +477,7 @@ DP2/3H          2DEC            .666666667
 
 DTASC           2DEC            200             B-17
 
-T2              2DEC            200             B-17
+T2              2DEC            200
 
 LAMBSET         TC              INTPRET                 # CALL FOR LAMBERT SUBR.
                 CALL

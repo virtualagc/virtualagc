@@ -18,6 +18,7 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-05-24 MAS  Created from Sunburst 120.
 ##              2017-06-13 HG   Transcribed
+##              2017-06-15 HG   Fix interpretive operand /AFC/ -> /ACF/
 
 ## Page 814
 
@@ -693,7 +694,7 @@ AFCCALC         DMP             PDDL                    # COMES HERE FROM LINGUI
                                 36D                     # MAGNITUDE OF AFC, /AFC/
                 STORE           /AFC/                   # FOR IGNITION ALGORITHM
                 SR1R                                    # CONVERTS /AFC/ TO THROTCON UNITS, /ACF/
-                STORE           /AFC/                   # FOR THROTTLE CONTROL SUBR THROTCON
+                STORE           /ACF/                   # FOR THROTTLE CONTROL SUBR THROTCON
                 EXIT
                 INDEX           NDXBR
                 TCF             BRIGN2
