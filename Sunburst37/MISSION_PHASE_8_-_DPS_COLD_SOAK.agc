@@ -18,6 +18,7 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-05-24 MAS  Created from Sunburst 120.
 ##		2017-06-14 RSB	Transcribed.
+##              2017-06-15 HG   Fix vlaue OCT  00054 -> OCT  00034 
 
 ## Page 676
                 BANK            27
@@ -136,7 +137,7 @@ M8RADON         CAF             PRIO10                          # SET UP JOB TO 
                 2CADR           COLDSOAK
 
                 TC              2PHSCHNG
-                OCT             00054
+                OCT             00034
                 OCT             05012
                 OCT             77777
 
