@@ -19,6 +19,7 @@
 ## Mod history: 2017-05-24 MAS  Created from Sunburst 120.
 ##              2017-06-03 HG   Transcribed
 ##              2017-06-15 HG   Fix operand EDOTP -> EDOT
+##              2017-06-15 MAS  Removed a stray 'A' from an EXTEND.
 
 ## Page 468
                 BANK            16
@@ -448,7 +449,7 @@ OBEYRAPE        CCS             PERROR                  # GET ABVAL OF RATE P-ER
 
 PJETSLEC        EXTEND                                  # BEGIN JET SELECT ROUTINE BY SEEING WHE-
                 READ            6                       # THER THE JETS ARE TURNED ON(CHANNEL 6
-                EXTEND          A                       # NON-ZERO)
+                EXTEND                                  # NON-ZERO)
                 BZF             +4                      # IF THE JETS AREN'T ON, GET MINIMP DELAY
 
                 CAF             MCOMPT                  # CONTAINS -TIME OF JET SELECTION
