@@ -19,7 +19,7 @@
 ## Mod history: 2017-05-24 MAS  Created from Sunburst 120.
 ##              2017-05-28 HG   Transcribed
 ##              2017-06-15 HG   Fix operator CS  -> CA
-
+##              2017-06-15 HG   Fix operator -2CADR -> 2CADR      
 ## Page 56
 # RESTART TABLES
 #  DO NOT REMOVE FROM THE BEGINNING OF THIS BANK
@@ -209,7 +209,7 @@ RTRNCADR        TC              SWRETURN
 
 5.27SPOT        OCT             20000
                 EBANK=          XSM
-               -2CADR           RESTAIER
+                2CADR           RESTAIER
 
 5.31SPOT        OCT             77777
                 EBANK=          XSM
