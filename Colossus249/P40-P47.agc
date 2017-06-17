@@ -21,6 +21,7 @@
 ##				vs the already-proofed corresponding Colossus
 ##				237 and Comanche 55 source-code files
 ##				and corrected errors found.
+##		2017-06-17 MAS	Globally removed all SBANK= workarounds.
 ##
 ## The contents of the "Colossus249" files, in general, are transcribed 
 ## from a scanned copy of the program listing.  Notations on this
@@ -2294,8 +2295,6 @@ NODAPUP		EXTEND			# T5 IDLE FOR NODAP (DONT WORRY ABOUT T)
 		TS	HOLDFLAG
 ENDFIG		TC	POSTJUMP	# CAME IN VIA V46, GO OUT VIA GOPIN
 		CADR	GOPIN
-## [WORKAROUND] RSB 2004
-		SBANK=	PINSUPER
 		EBANK=	PACTOFF
 T5IDLDAP	2CADR	T5IDLOC
 
@@ -2346,8 +2345,6 @@ CONTTWO		2DEC	.00118
 		BANK
 		
 POS-2.5		OCT	37405
-## [WORKAROUND] RSB 2004
-		SBANK=	PINSUPER
 		EBANK=	DAPDATR1
 RCSCADR		2CADR	RCSUP
 

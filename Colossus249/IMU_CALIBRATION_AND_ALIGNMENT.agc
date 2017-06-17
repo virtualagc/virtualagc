@@ -18,6 +18,7 @@
 ##				vs the already-proofed corresponding Colossus
 ##				237 and Comanche 55 source-code files
 ##				and corrected errors found.
+##		2017-06-17 MAS	Globally removed all SBANK= workarounds.
 ##
 ## The contents of the "Colossus249" files, in general, are transcribed 
 ## from a scanned copy of the program listing.  Notations on this
@@ -135,8 +136,6 @@ NBPOSPL		CA	DEC17
 		EXTEND
 		DCA	PERFDLAY
 		TC	LONGCALL
-## [WORKAROUND] RSB 2004
-		SBANK=	LOWSUPER
 		EBANK=	POSITON
 		2CADR	GOESTIMS
 		

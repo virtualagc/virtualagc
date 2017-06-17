@@ -24,6 +24,7 @@
 ##				Artemis 72.
 ##		2017-03-17 RSB	Comment-text fixes identified by 4-way diff'ing
 ##				of Colossus 237 & 249, Comanche 55, and Artemis 72.
+##		2017-06-17 MAS	Globally removed all SBANK= workarounds.
 
 ## The contents of the "Colossus249" files, in general, are transcribed 
 ## from a scanned copy of the program listing.  Notations on this
@@ -153,8 +154,6 @@ P20.3		CALL
 		EXIT
 		CAF	PRIO26
 		TC	FINDVAC
-## [WORKAROUND] RSB 2004
-		SBANK=	LOWSUPER
 		EBANK=	MRKBUF2
 		2CADR	R22
 		
@@ -1151,8 +1150,6 @@ RENDISP		EXIT
 		OCT	04022
 		CAF	PRIO27		# SET UP DISPLAY JOB WITH HIGHER PRIORITY
 		TC	NOVAC
-## [WORKAROUND] RSB 2004
-		SBANK=	LOWSUPER
 		EBANK=	MRKBUF1		# THAN PRESENT JOB
 		2CADR	RENDISP2
 		

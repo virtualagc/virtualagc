@@ -18,6 +18,7 @@
 ##				vs the already-proofed corresponding Colossus
 ##				237 and Comanche 55 source-code files
 ##				and corrected errors found.
+##		2017-06-17 MAS	Globally removed all SBANK= workarounds.
 ##
 ## The contents of the "Colossus249" files, in general, are transcribed 
 ## from a scanned copy of the program listing.  Notations on this
@@ -209,8 +210,6 @@ DSPMMJOB	EQUALS	DSPMMJB
 #	AD+3	OCT	18000		TO BE LOCATION AD+4, WITH A PRIORITY 18,
 #	AD+4				FOR GROUP 5 PHASE INFORMATION
 
-## [WORKAROUND] RSB 2004
-		SBANK=	PINSUPER
 		COUNT	02/PHASE
 		
 2PHSCHNG	INHINT			# THE ENTRY FOR A DOUBLE PHASE CHANGE
