@@ -24,6 +24,7 @@
 ##		2017-03-15 RSB	Comment-text fixes identified in 6-way
 ##				side-by-side diff of Sunburst 120 and Luminary 
 ##				69/99/116/131/210.
+##		2017-06-17 MAS	Globally removed all SBANK= workarounds.
 
 ## Page 1303
 		BLOCK	02
@@ -787,9 +788,6 @@ ENDMODE		CA	RUPTREG3	# -0 INDICATES OPERATION COMPLETE BUT
 #
 # DEBRIS-
 #   RUPTREG2 AND CALLING ROUTINE MODECADR.
-
-## [yaYUL WORKAROUND] OH 2009 - kept for Luminary 69 by RRB 2017
-		SBANK=	LOWSUPER
 
 AOTSTALL	CAF	ONE		# AOT.
 		TC	STALL
