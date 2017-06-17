@@ -16,6 +16,7 @@
 ##				and corrected errors found.
 ##		2017-01-18 RSB	Fixed comment-text errors noted while diff'ing
 ##				vs Colossus 249.
+##		2017-06-17 MAS	Globally removed all SBANK= workarounds.
 
 ## Page 637
 # PROGRAM DESCRIPTION **P40CSM**
@@ -2274,8 +2275,6 @@ CONTTWO		2DEC	.00118
 		BANK
 
 POS-2.5		OCT	37405
-## 2016-08-14 RSB  Added SBANK for addressing discrepancies.
-		SBANK=	PINSUPER
 		EBANK=	DAPDATR1
 RCSCADR		2CADR	RCSUP
 6SECT5		OCT	37704
@@ -2295,8 +2294,6 @@ RCSUP		LXCH	BANKRUPT
 
 		TCF	RESUME
 
-## 2016-08-14 RSB  Added SBANK for addressing discrepancies.
-		SBANK=	PINSUPER
 		EBANK=	DAPDATR1
 RCSADDR		2CADR	RCSATT
 

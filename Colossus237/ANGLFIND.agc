@@ -15,6 +15,7 @@
 ##		2016-08-14 RSB	Added SBANK for addressing discrepancies.
 ##		2016-12-30 RSB	Proofed comment text using octopus/ProoferComments,
 ##				and corrected errors found.
+##		2017-06-17 MAS	Globally removed all SBANK= workarounds.
 
 ## Page 390
 		BANK	15
@@ -608,7 +609,5 @@ NOGO		INHINT
 		CAF	TWO		# NOTE - ALL RETURNS ARE NOW MADE VIA
 		TC	WAITLIST	# GOODEND
 		EBANK=	BCDU
-## 2016-08-14 RSB  Added SBANK for addressing discrepancies.
-		SBANK=	PINSUPER
 		2CADR	ENDMANU
 		TCF	ENDOFJOB
