@@ -14,11 +14,10 @@
 ##		2016-11-03 RSB	Some SBANK= workarounds.
 ##		2016-12-03 RSB	Fixed 5 comment typos (out of 2 total pages)
 ##				using octopus/ProoferComments.
+##		2017-06-17 MAS	Globally removed all SBANK= workarounds.
 
 ## Page 60
 		SETLOC	4000 
-## The following line was not present in the original code.
-		SBANK=
 		
 		INHINT			# GO
 		CAF	GOBB
