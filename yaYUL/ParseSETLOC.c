@@ -25,6 +25,7 @@
                                 (eg. SETLOC +2)
                 01/27/17 MAS.   Added support for Raytheon-style
                                 absolute addresses (eg. FF024000)
+                06/17/17 MAS.   SETLOC has no effect on the SBank.
  */
 
 #include "yaYUL.h"
@@ -39,6 +40,7 @@ int ParseSETLOC(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
     Symbol_t *Symbol;
 
     OutRecord->ProgramCounter = InRecord->ProgramCounter;
+    OutRecord->SBank= InRecord->SBank;
 
     // Pass EXTEND through.
     OutRecord->Extend = InRecord->Extend;
@@ -109,13 +111,6 @@ int ParseSETLOC(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
             OutRecord->EBank.current = OutRecord->ProgramCounter;
             OutRecord->EBank.last = OutRecord->ProgramCounter;
             OutRecord->EBank.oneshotPending = 0;
-        }
-
-        if (OutRecord->ProgramCounter.Fixed) {
-            OutRecord->SBank.current = OutRecord->ProgramCounter;
-            OutRecord->SBank.current.Super = InRecord->SBank.current.Super;
-            OutRecord->SBank.last = OutRecord->ProgramCounter;
-            OutRecord->SBank.oneshotPending = 0;
         }
     }
 

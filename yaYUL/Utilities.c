@@ -27,74 +27,14 @@
  *                              at least it lets me assemble Sunburst 120
  *                              (and all prior AGC programs).
  *              2017-01-30 MAS  Added a function to calculate parity.
+ *              2017-06-17 MAS  Killed the FixSuperbankBits function and
+ *                              split up printing of SBanks and EBanks.
  */
 
 #include "yaYUL.h"
 #include <stdlib.h>
 #include <stdint.h>
 #include <string.h>
-
-//-------------------------------------------------------------------------
-// Adjust superbank bits in terms of SBANK= and so on.
-int isEstablishedSBANK = 0;
-void
-FixSuperbankBits(ParseInput_t *record, Address_t *address, int *outValue)
-{
-  int sbfix = 0060;
-  int tmpval = *outValue;
-
-  if (!isEstablishedSBANK)
-    {
-      sbfix = 0;
-      if (!blk2)
-        *outValue &= ~0160;
-    }
-  else if (address->Fixed)
-    {
-      if (address->Banked)
-        {
-          if (record->ProgramCounter.FB >= 030
-              && record->ProgramCounter.FB <= 033
-              && record->ProgramCounter.Super)
-            {
-              // Banks 0-27 and 40-43 are accessible, banks 30-37 are not.
-              if ((address->FB >= 030 && address->FB <= 033 && !address->Super)
-                  || (address->FB > 033 && address->FB <= 037))
-                ;
-              else
-                sbfix = 0100;
-            }
-          else
-            {
-              // Banks 0-37 are accessible, banks 40-43 are not.
-              // Don't know why it matters for low banks if the SB bit is set or not, but it does...
-              if ((address->FB >= 030 && address->FB <= 033 && address->Super)
-                  || (address->FB < 030 && record->SBank.current.Super))
-                sbfix = 0100;
-            }
-        }
-      else
-        {
-          // Banks 0-37 are accessible, banks 40-43 are not.
-          // Don't know why it matters for low banks if the SB bit is set or not, but it does...
-          if (address->FB < 030 && record->SBank.current.Super)
-            sbfix = 0100;
-        }
-    }
-
-  if (!blk2)
-    *outValue |= sbfix;
-
-  if (trace && thisIsTheLastPass)
-    {
-      printf(
-          "--- %s: PC=(FB=%03o,super=%d) SB.super=%d addr=(bank=%03o,super=%d,value=%06o,fixed=%d,banked=%d) "
-          "fix=%05o value=%06o\n",
-          __FUNCTION__, record->ProgramCounter.FB, record->ProgramCounter.Super,
-          record->SBank.current.Super, address->FB, address->Super, tmpval,
-          address->Fixed, address->Banked, sbfix, *outValue);
-    }
-}
 
 //-------------------------------------------------------------------------
 // Print an Address_t.
@@ -148,13 +88,21 @@ PrintAddress(const Address_t *address)
 }
 
 //-------------------------------------------------------------------------
-// Print a Bank_t.
+// Print an EBank_t.
 void
-PrintBank(const Bank_t *bank)
+PrintEBank(const EBank_t *bank)
 {
   printf("|%d", bank->oneshotPending);
   PrintAddress(&bank->current);
   PrintAddress(&bank->last);
+}
+
+//-------------------------------------------------------------------------
+// Print an SBank_t.
+void
+PrintSBank(const SBank_t *bank)
+{
+  printf("|%d|%u|%u|", bank->oneshotPending, bank->current, bank->last);
 }
 
 //-------------------------------------------------------------------------
@@ -164,9 +112,9 @@ PrintInputRecord(const ParseInput_t *record)
 {
   PrintAddress(&record->ProgramCounter);
   printf(" ");
-  PrintBank(&record->EBank);
+  PrintEBank(&record->EBank);
   printf(" ");
-  PrintBank(&record->SBank);
+  PrintSBank(&record->SBank);
 }
 
 //-------------------------------------------------------------------------
@@ -176,9 +124,9 @@ PrintOutputRecord(const ParseOutput_t *record)
 {
   PrintAddress(&record->ProgramCounter);
   printf(" ");
-  PrintBank(&record->EBank);
+  PrintEBank(&record->EBank);
   printf(" ");
-  PrintBank(&record->SBank);
+  PrintSBank(&record->SBank);
 }
 
 //-------------------------------------------------------------------------

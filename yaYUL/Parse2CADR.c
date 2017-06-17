@@ -22,6 +22,7 @@
   History:      07/09/04 RSB.   Adapted from 2FCADR.
                 2012-10-02 JL   Added note.
                 2012-10-04 JL   Move FixSuperbankBits to Utilities.c.
+                2017-06-17 MAS  Refactored superbank bit logic.
  */
 
 #include "yaYUL.h"
@@ -97,13 +98,40 @@ int Parse2CADR(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
                 OutRecord->Words[1] |= (Address.FB << 10);
             else
                 OutRecord->Words[1] |= ((Address.SReg / 02000) << 10);
-
-            // Superbank processing.
-            FixSuperbankBits(InRecord, &Address, &OutRecord->Words[1]);
         } else {
             strcpy(OutRecord->ErrorMessage, "Internal error implementing 2CADR.");
             OutRecord->Fatal = 1;
             return (0);
+        }
+
+        if (Address.FB >= 030 && Address.FB <= 037) {
+            // Determine the superbank needed for the target address
+            unsigned AddressSBank;
+            if (Address.Super)
+                AddressSBank = 4;
+            else
+                AddressSBank = 3;
+
+            OutRecord->Words[1] |= AddressSBank << 4;
+
+            // Generate a warning if we're implicitly referencing a different superbank.
+            // ... someday? It really looks like there are things that YUL would have cussed
+            // in, e.g., Luminary 210, but GAP does not appear to have done so. For now
+            // we will just let it slide...
+
+            //if (InRecord->ProgramCounter.FB >= 030 && InRecord->ProgramCounter.FB <= 037
+            //   && AddressSBank != InRecord->SBank.current) {
+            //    sprintf(OutRecord->ErrorMessage, 
+            //            "2CADR referencing unestablished superbank %u when in superbank %u", 
+            //            AddressSBank, InRecord->SBank.current);
+            //    OutRecord->Warning = 1;
+            //}
+
+        } else if (!EarlySBank) {
+            // If the target address is not in a superbank, then simply fill in the
+            // superbank bits with whatever the established superbank is...
+            // *unless* we're building with pre-1967 superbank behavior.
+            OutRecord->Words[1] |= InRecord->SBank.current << 4;
         }
     }
 

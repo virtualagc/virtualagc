@@ -29,6 +29,9 @@
  *                             no reason to have to do that, as far as I can see
  *                             from YUL's program comments, but I needed it as a
  *                             workaround for Sunburst 120.
+ *              2017-06-17 MAS Refactored the SBANK= logic. Once established,
+ *                             the SBank remains established. It is also now
+ *                             tracked simply as a superbank number, as in YUL.
  */
 
 #include "yaYUL.h"
@@ -49,7 +52,6 @@ int ParseSBANKEquals(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 
     if (!*InRecord->Operand)
       {
-        isEstablishedSBANK = 0;
         return (0);
       }
 
@@ -94,9 +96,23 @@ int ParseSBANKEquals(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
             return (0);
         }
 
-        isEstablishedSBANK = 1;
-        OutRecord->SBank.last = OutRecord->SBank.current;
-        OutRecord->SBank.current = Address;
+        if (Address.FB >= 030 && Address.FB <= 037) {
+            // Back up the current SBank in case of a oneshot.
+            OutRecord->SBank.last = OutRecord->SBank.current;
+
+            // Determine if the target address is in superbank 3 or 4.
+            if (Address.Super) {
+                OutRecord->SBank.current = 4;
+            } else {
+                OutRecord->SBank.current = 3;
+            }
+        } else {
+            strcpy(OutRecord->ErrorMessage, "Destination address not in superbank.");
+            OutRecord->SBank.current = 0;
+            OutRecord->Fatal = 1;
+            return (0);
+        }
+
         OutRecord->SBank.oneshotPending = 1;
         OutRecord->LabelValue = Address;
         OutRecord->LabelValueValid = 1;

@@ -97,6 +97,9 @@
  *                              the bank order.
  *              2017-06-04 MAS  Repositioned the parity bit from bit 1 to bit 15 for
  *                              --hardware, based on new information from ND-1021042.
+ *              2017-06-17 MAS  Added --early-sbank, which simulates the behavior of
+ *                              earlier (pre-1967) versions of YUL when it comes to
+ *                              superbank bits.
  */
 
 #include "yaYUL.h"
@@ -220,6 +223,10 @@ main(int argc, char *argv[])
         {
           Block1 = 1;
           assemblyTarget = "BLK1";
+        }
+      else if (!strcmp(argv[i], "--early-sbank"))
+        {
+          EarlySBank = 1;
         }
       else if (!strcmp(argv[i], "--raytheon"))
         {
@@ -580,11 +587,15 @@ main(int argc, char *argv[])
       printf(
           "                 in the AURORA program.  Not used for Block 2 in\n");
       printf(
+          "                 general, though, and not for any flown missions.\n");
+      printf(
           "                 The default (omitting both --block1 and --blk2)\n");
       printf(
           "                 is correct for almost all surviving AGC software.\n");
       printf(
-          "                 general, though, and not for any flown missions.\n");
+          "--early-sbank    Assembles the code using the original (pre-1967)\n");
+      printf(
+          "                 YUL superbank behavior.\n");
       printf(
           "--raytheon       Assembles Raytheon-style code.  The default is MIT.\n");
       printf("--no-checksums   Don't emit bank checksums. For use with Retread 44.\n");
