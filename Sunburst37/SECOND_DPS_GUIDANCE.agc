@@ -19,6 +19,8 @@
 ## Mod history: 2017-05-24 MAS  Created from Sunburst 120.
 ##              2017-06-13 HG   Transcribed
 ##              2017-06-15 HG   Fix interpretive operand /AFC/ -> /ACF/
+##              2017-06-17 MAS  Added a workaround for yaYUL calculating a
+##                              fractional number off by one.
 
 ## Page 814
 
@@ -1552,7 +1554,10 @@ A1FS            2DEC*           +5.044035031    E-5  B+6*
                 2DEC*           +4.277783493    E-11 B+30*
 
 ## Page 847
-TTF/4NU2        DEC*            -3.375000000    E+3  B-15*
+## Workaround: the following line has been changed to OCT because yaYUL produces
+##             slightly different numerical results. The original was as follows:
+## TTF/4NU2        DEC*            -3.375000000    E+3  B-15*
+TTF/4NU2        OCT             74550
 
 A2FS            2DEC*           +1.331951587    E-4  B+6*
 
