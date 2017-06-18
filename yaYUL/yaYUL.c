@@ -100,6 +100,7 @@
  *              2017-06-17 MAS  Added --early-sbank, which simulates the behavior of
  *                              earlier (pre-1967) versions of YUL when it comes to
  *                              superbank bits.
+ *              2017-06-18 MAS  Added --pos-checksums
  */
 
 #include "yaYUL.h"
@@ -124,8 +125,7 @@ FILE *OutputFile = NULL;
 static int NoChecksums = 0;
 static int Parity = 0;
 static int Hardware = 0;
-int flipBugger[044] =
-  { 0 };
+int posChecksums = 0;
 int asYUL = 0, trace = 0;
 
 static Address_t RegEB = REG(03);
@@ -205,8 +205,8 @@ main(int argc, char *argv[])
         goto Done;
       else if (1 == sscanf(argv[i], "--max-passes=%d", &j))
         MaxPasses = j;
-      else if (1 == sscanf(argv[i], "--flip=%o", &j) && j >= 0 && j < 044)
-        flipBugger[j] = 1;
+      else if (!strcmp(argv[i], "--pos-checksums"))
+        posChecksums = 1;
       else if (!strcmp(argv[i], "--force"))
         Force = 1;
       else if (!strcmp(argv[i], "--g"))
@@ -235,6 +235,7 @@ main(int argc, char *argv[])
       else if (!strcmp(argv[i], "--blk2"))
         {
           blk2 = 1;
+          posChecksums = 1;
           assemblyTarget = "BLK2";
         }
       else if (!strcmp(argv[i], "--no-checksums"))
@@ -499,14 +500,13 @@ main(int argc, char *argv[])
                     }
                   if (Value < 02000)
                     {
-                      int tryBank;
-                      for (Bugger = Offset = 0; Offset < Value; Offset++)
+                      for (Bugger = Offset = 0; Offset < Value; Offset++) {
                         Bugger = Add(Bugger, ObjectCode[Bank][Offset]);
-                      tryBank = 077777 & (flipBugger[Bank] ? ~Bank : Bank);
-                      if (0 == (040000 & Bugger))
-                        GuessBugger = Add(tryBank, 077777 & ~Bugger);
+                      }
+                      if ((0 == (040000 & Bugger)) || posChecksums)
+                        GuessBugger = Add(Bank, 077777 & ~Bugger);
                       else
-                        GuessBugger = Add(077777 & ~tryBank, 077777 & ~Bugger);
+                        GuessBugger = Add(077777 & ~Bank, 077777 & ~Bugger);
                       ObjectCode[Bank][Value] = GuessBugger;
                       Parities[Bank][Value] = CalculateParity(GuessBugger);
                       printf("Bugger word %05o at %02o,%04o.\n", GuessBugger, Bank,
@@ -593,6 +593,16 @@ main(int argc, char *argv[])
       printf(
           "                 is correct for almost all surviving AGC software.\n");
       printf(
+          "                 Implies --pos-checksums.\n");
+      printf(
+          "--pos-checksums  Calculate checksums using BLK2 style, in which all\n");
+      printf(
+          "                 checksums must be equal to the positive bank number.\n");
+      printf(
+          "                 This is implied by --blk2, but is also needed for\n");
+      printf(
+          "                 early AGC programs (Sunburst 116 and earlier).\n");
+      printf(
           "--early-sbank    Assembles the code using the original (pre-1967)\n");
       printf(
           "                 YUL superbank behavior.\n");
@@ -608,8 +618,6 @@ main(int argc, char *argv[])
           "--syntax         Perform syntax-checking only, no symbol resolution.\n");
       printf(
           "--max-passes     Set the max number of assembler passes (default: 10).\n");
-      printf(
-          "--flip=B         By default, whenever possible, yaYUL chooses \"bugger\n");
       printf(
           "                 words\" that lead to bank checksums equal to B (where B\n");
       printf(
