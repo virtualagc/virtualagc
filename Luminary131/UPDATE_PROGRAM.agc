@@ -24,6 +24,7 @@
 ##		2017-03-13 RSB	Comment-text fixes noted in proofing Luminary 116.
 ##		2017-03-16 RSB	Comment-text fixes identified in 5-way
 ##				side-by-side diff of Luminary 69/99/116/131/210.
+##		2017-06-17 MAS	Globally removed all SBANK= workarounds.
 
 ## Page 1378
 # PROGRAM NAME:		P27
@@ -132,9 +133,6 @@
 #		XXXXXEXXXXXE	ROW 3 COLUMN 2					2(-1)
 #		XXXXXEXXXXXE	ROW 3 COLUMN 3					2(-1)
 #		V33E		VERB 33 TO SIGNAL THAT REFSMMAT IS READY TO BE STORED.
-
-## [WORKAROUND] RSB 2004
-		SBANK=	PINSUPER
 
 		BANK	07
 		SETLOC	EXTVERBS

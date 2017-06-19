@@ -111,6 +111,10 @@
  *              2017-01-30 MAS  Added an array to store parity bites calculated on the fly,
  *                              for use with --hardware.
  *              2017-02-05 MAS  Added BBCON* handling to BLK2 as well.
+ *              2017-06-17 MAS  Refactored superbank handling. Now any operation which
+ *                              emits a word will update the current superbank. Also added
+ *                              --early-sbank, which makes yaYUL use pre-1967 YUL behavior
+ *                              when handling superbank bits.
  *
  * I don't really try to duplicate the formatting used by the original
  * assembly-language code, since that format was appropriate for
@@ -173,6 +177,7 @@ static int NumFields = 0;
 
 char *assemblyTarget = "AGC4";
 int Block1 = 0;
+int EarlySBank = 0;
 int Raytheon = 0;
 int blk2 = 0;
 int Html = 0;
@@ -1431,8 +1436,8 @@ static Address_t DefaultAddress = INVALID_ADDRESS;
     0,// Index
     0,// Extend
     0,// IndexValid
-    INVALID_BANK,// EBank
-    INVALID_BANK// SBank
+    INVALID_EBANK,// EBank
+    INVALID_SBANK// SBank
   };
 
 static ParseOutput_t ParseOutputRecord,
@@ -1449,8 +1454,8 @@ static ParseOutput_t ParseOutputRecord,
       0,                  // LabelValueValid
       0,                  // Extend
       0,                  // IndexValid
-      INVALID_BANK,       // EBank
-    INVALID_BANK,       // SBank
+      INVALID_EBANK,       // EBank
+    INVALID_SBANK,       // SBank
   0                   // Equals
     };
 
@@ -1478,7 +1483,6 @@ Pass(int WriteOutput, const char *InputFilename, FILE *OutputFile, int *Fatals,
     { "", "", "", "", "", "", "", "", "", "" };
 
   SaveUsedCounts();
-  isEstablishedSBANK = 1;
   thisIsTheLastPass = WriteOutput;
   numSymbolsReassigned = 0;
 
@@ -1537,25 +1541,15 @@ Pass(int WriteOutput, const char *InputFilename, FILE *OutputFile, int *Fatals,
 
   ParseOutputRecord.ProgramCounter = DefaultAddress;
 
-  ParseOutputRecord.EBank = (const Bank_t
+  ParseOutputRecord.EBank = (const EBank_t
         )
           { 0,     // oneshotPending
                 { 1 }, // current
                 { 1 }  // last
           };
 
-  // (JL, 2012-10-08)
-  // Initialise the superbank bit to 1. Looking at the sequence of 2CADR, BBCON and SBANK= directives
-  // in the flight code, the first SBANK= is always to LOWSUPER (i.e. SB=0). Assuming SB=1 initially
-  // generates the correct output words for 2CADR and BBCON when there are references to locations in
-  // the superbanks in the section before the first SBANK= directive.
-  ParseOutputRecord.SBank = (const Bank_t
-        )
-          { 0,     // oneshotPending
-              // Invalid, Constant, Address, SReg, Erasable, Fixed, Unbanked, Banked, EB, FB,  Super, Overflow, Value, Syllable.
-                { 0, 0, 1, 0, 0, 1, 0, 1, 0, 030, 1, 0, 0, 0 }, // current
-                { 0, 0, 1, 0, 0, 1, 0, 1, 0, 030, 1, 0, 0, 0 }  // last
-          };
+  // The SBank starts "unestablished", which = 0.
+  ParseOutputRecord.SBank = (const SBank_t) INVALID_SBANK;
 
   for (;;)
     {
@@ -2457,6 +2451,18 @@ Pass(int WriteOutput, const char *InputFilename, FILE *OutputFile, int *Fatals,
         }
 
       UpdateBankCounts(&ParseOutputRecord.ProgramCounter);
+
+      if (ParseOutputRecord.ProgramCounter.FB >= 030 && ParseOutputRecord.ProgramCounter.FB <= 037
+         && ParseOutputRecord.NumWords > 0)
+        {
+          // If (and only if) this operation emitted at least one word, update the current
+          // superbank to match whichever we're in.
+          if (ParseOutputRecord.ProgramCounter.Super)
+            ParseOutputRecord.SBank.current = 4;
+          else
+            ParseOutputRecord.SBank.current = 3;
+      }
+
 
       // If there is a label, and if this isn't `=' or `EQUALS', then
       // the value of the label is the current address.

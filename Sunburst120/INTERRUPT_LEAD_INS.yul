@@ -13,11 +13,10 @@
 ##                              ready to go.
 ##              2016-11-03 RSB  Some SBANK= workarounds.
 ##              2016-11-11 RSB  Converted to .yul format.
+##		2017-06-17 MAS	Globally removed all SBANK= workarounds.
 
 ## Page 60
  000001          SETLOC 4000 
-## The following line was not present in the original code.
- 000002          SBANK=
  000003         
  000004          INHINT                 GO
  000005          CAF    GOBB

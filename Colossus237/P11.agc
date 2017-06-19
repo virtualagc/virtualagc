@@ -14,6 +14,7 @@
 ##				and corrected errors found.
 ##		2017-01-15 RSB	Corrected comment-text errors observed while
 ##				diff'ing vs Colossus 249.
+##		2017-06-17 MAS	Globally removed all SBANK= workarounds.
 
 ## Page 522
 # EARTH ORBIT INSERTION MONITOR PROGRAM
@@ -844,10 +845,6 @@ SATRATE		DEC	0		# IN DETENT - ZERO RATE
 
 STIKBITS	OCT	00077
 100MST5		DEC	16374
-## 2016-08-14 RSB  Added SBANK for addressing discrepancies.
-		SBANK=	PINSUPER
 		EBANK=	BODY3
 2SATSTCK	2CADR	SATSTICK
-## 2016-08-14 RSB  Added SBANK for addressing discrepancies.
-		SBANK=	LOWSUPER
-		
+

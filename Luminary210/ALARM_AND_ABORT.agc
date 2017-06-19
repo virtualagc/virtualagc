@@ -19,6 +19,7 @@
 ##              2016-12-12 HG   add [WORKAROUND] using SBANK=
 ##		2016-12-26 RSB	Comment-text proofed using ProoferComments
 ##				and corrected errors found.
+##		2017-06-17 MAS	Globally removed all SBANK= workarounds.
 
 ## Page 1378
 # THE FOLLOWING SUBROUTINE MAY BE CALLED TO DISPLAY A NON-ABORTIVE ALARM CONDITION.  IT MAY BE CALLED
@@ -194,8 +195,6 @@ ALMNCADR        INHINT
 
 ADR77770        TCF             OCT77770                        
 ADR40400        TCF             OCT40400
-## [WORKAROUND] SBANK= not in original; for adjusting subsequent BBCON &mdash; HG
-                SBANK=          LOWSUPER 
 DOALARM         EQUALS          ENDOFJOB                        
                 EBANK=          DVCNTR                          
 BBSERVDL        BBCON           SERVIDLE                        

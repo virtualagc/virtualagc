@@ -19,6 +19,7 @@
 ##		2016-12-05 RSB	Fixed more comments with octopus/ProoferComments;
 ##				comment-proofing process complete.
 ##		2017-02-08 RSB	Comment-text fixes identified while proofing Artemis 72.
+##		2017-06-17 MAS	Globally removed all SBANK= workarounds.
 
 ## Page 62
 # RESTART TABLES
@@ -97,8 +98,6 @@ RTRNCADR	TC	SWRETURN
 		
 # ANY MORE GROUP 1.EVEN RESTART VALUES SHOULD GO HERE
 
-## The following line was not present in the original program.
-		SBANK=	LOWSUPER
 1.3SPOT		DEC	195
 		EBANK=	ETHROT
 	       -2CADR	PCNTOVER
@@ -129,8 +128,6 @@ RTRNCADR	TC	SWRETURN
 		EBANK=	LST1
 	       -2CADR	REDOMDUE
 
-## The following line was not present in the original code.
-		SBANK=
 2.5SPOT		DEC	5500
 		EBANK=	TDEC
 	       -2CADR	SIVB2
@@ -147,8 +144,6 @@ RTRNCADR	TC	SWRETURN
 		EBANK=	TGRR
 	       -2CADR   LIFTOFF
 	       
-## The following line was not present in the original code.
-		SBANK=	LOWSUPER
 2.15SPOT        DEC     700
                 EBANK=  TDEC
                -2CADR   TIG4-41
@@ -223,8 +218,6 @@ RTRNCADR	TC	SWRETURN
 		EBANK=	TDEC
 	       -2CADR	87LMP
 
-## The following line was not present in the original code.
-		SBANK=
 2.61SPOT	OCT	77777
 		EBANK=	TGRR
 	       -2CADR	REDO2.61
@@ -240,8 +233,6 @@ RTRNCADR	TC	SWRETURN
 
 # ANY MORE GROUP 3.EVEN RESTART VALUES SHOULD GO HERE
 
-## The following line was not present in the original code.
-		SBANK=	LOWSUPER
 3.3SPOT		DEC	50
 		EBANK=	TDEC
 	       -2CADR	ABMON
@@ -250,15 +241,11 @@ RTRNCADR	TC	SWRETURN
 		EBANK=	TDEC
 	       -2CADR	TUMTASK
 
-## The following line was not present in the original code.
-		SBANK=
 3.7SPOT		GENADR	DT-LETJT
 	       -GENADR	POSTLET	
 		EBANK=	TGRR
 	        BBCON	POSTLET
 
-## The following line was not present in the original code.
-		SBANK=	LOWSUPER
 3.11SPOT	OCT	77777
 		EBANK=	MTIMER4
 	       -2CADR	REDO3.11
@@ -292,8 +279,6 @@ RTRNCADR	TC	SWRETURN
 	       	2CADR	REDO3.27
 
 ## Page 67
-## The following line was not present in the original code.
-		SBANK=
 3.31SPOT	OCT	77777
 		EBANK=	TTGO
 	       -2CADR	DUMMY13
@@ -308,14 +293,10 @@ RTRNCADR	TC	SWRETURN
 
 # ANY MORE GROUP 4.EVEN RESTART VALUES SHOULD GO HERE
 
-## The following line was not present in the original code.
-		SBANK=	LOWSUPER
 4.3SPOT		OCT	30000	
 		EBANK=	ETHROT
 	        2CADR	ACCLJOB
 
-## The following line was not present in the original code.
-		SBANK=
 4.5SPOT		OCT	10000	
 		EBANK=	RATEINDX
 	        2CADR	COLDSOAK
@@ -324,8 +305,6 @@ RTRNCADR	TC	SWRETURN
 		EBANK=	TGRR
 	        2CADR	MP2JOB
 
-## The following line was not present in the original code.
-		SBANK=	LOWSUPER
 4.11SPOT	OCT	25000
 		EBANK=	ETHROT
 	        2CADR	PCNTJOB
@@ -358,14 +337,10 @@ RTRNCADR	TC	SWRETURN
 		EBANK=	BMEMORY
 	       -2CADR	PREREAD
 	       
-## The following line was not present in the original code.
-		SBANK=
 	        OCT	32000
 	        EBANK=	LST1
 	        2CADR	LASTBIAS
 
-## The following line was not present in the original code.
-		SBANK=	LOWSUPER
 5.6SPOT		DEC	200
 		EBANK=	DVCNTR
 	       -2CADR	REREADAC
@@ -433,8 +408,6 @@ RTRNCADR	TC	SWRETURN
 		EBANK=	DVTOTAL
 	       -2CADR	PREREAD
 
-## The following line was not present in the original code.
-		SBANK=
 5.37SPOT	OCT	77777
 		EBANK=	TGRR
 	       -2CADR	SETPIPDT
@@ -464,8 +437,6 @@ RTRNCADR	TC	SWRETURN
 		EBANK=	STBUFF
 	        2CADR	UPQUITRM
 
-## The following line was not present in the original code.
-		SBANK=	LOWSUPER
 6.11SPOT       -GENADR	DAPOFFDT
 		EBANK=	DNTMBUFF
 	       -2CADR	11DAPOFF
@@ -511,12 +482,8 @@ GETPART2	CCS	TEMPPHS		# IS IT AN X.1 RESTART
 
 		CA	PRIO14		# IT IS AN X.1 RESTART, THEREFORE START
 		TC	FINDVAC		# THE DISPLAY RESTART JOB
-## The following line was not present in the original code.
-		SBANK=
 		EBANK=	LST1
 		2CADR	INITDSP
-## The following line was not present in the original code.
-		SBANK=	LOWSUPER
 
 		TC	RTRNCADR	# FINISHED WITH THIS GROUP, GET NEXT ONE
 

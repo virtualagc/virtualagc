@@ -66,6 +66,9 @@
  *                               program or not.
  *                11/14/16 RSB   Added --to-yul.
  *                2017-01-05 RSB Added BBCON* as distinct from BBCON.
+ *                2017-06-17 MAS Added --early-sbank, for simulating early (pre-1967)
+ *                               YUL superbank behavior. Also lightly refactored
+ *                               superbank data storage.
  */
 
 #ifndef INCLUDED_YAYUL_H
@@ -164,7 +167,8 @@ enum OpType_t
 #define ENUMBER         0x20000
 
 #define INVALID_ADDRESS { 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }
-#define INVALID_BANK { 0, INVALID_ADDRESS, INVALID_ADDRESS }
+#define INVALID_EBANK { 0, INVALID_ADDRESS, INVALID_ADDRESS }
+#define INVALID_SBANK { 0, 0, 0 }
 
 //-------------------------------------------------------------------------
 // Data types.
@@ -329,13 +333,21 @@ SortLines(int Type);
 // JMS: End additions for output of symbol table
 //----------------------------------------------------------------------------
 
-// For EBANK= and SBANK= manipulations.
+// For EBANK= manipulations.
 typedef struct
 {
   int oneshotPending;              // Set while a one-shot is possible.
   Address_t current;               // Current setting.
   Address_t last;                  // Backup used during 1-shot.
-} Bank_t;
+} EBank_t;
+
+// For SBANK= manipulations.
+typedef struct
+{
+  int oneshotPending;              // Set while a one-shot is possible.
+  unsigned current;               // Current setting.
+  unsigned last;                  // Backup used during 1-shot.
+} SBank_t;
 
 // A string type guaranteed to contain in input line.
 typedef char Line_t[1 + MAX_LINE_LENGTH];
@@ -350,8 +362,8 @@ typedef struct
   int Index;
   unsigned Extend :2;
   unsigned IndexValid :1;
-  Bank_t EBank;
-  Bank_t SBank;
+  EBank_t EBank;
+  SBank_t SBank;
   // This isn't really column 8, but rather the column preceding the operator,
   // which in our syntax really forms the first character of the operator,
   // but needs to be removed before the operator is processed.  The only way
@@ -377,8 +389,8 @@ typedef struct
   unsigned LabelValueValid :1;           // Non-zero if LabelValue valid.
   unsigned Extend :2;
   unsigned IndexValid :1;
-  Bank_t EBank;                         // For EBANK= manipulations.
-  Bank_t SBank;                         // For SBANK= manipulations.
+  EBank_t EBank;                        // For EBANK= manipulations.
+  SBank_t SBank;                        // For SBANK= manipulations.
   int Equals;                           // Non-zero if = or EQUALS.
   char Column8;                         // Used only for Block1.
 } ParseOutput_t;
@@ -521,11 +533,11 @@ yul2agc (char *s);
 
 // From Utilities.c.
 void
-FixSuperbankBits(ParseInput_t *InRecord, Address_t *Address, int *OutValue);
-void
 PrintAddress(const Address_t *address);
 void
-PrintBank(const Bank_t *bank);
+PrintEBank(const EBank_t *bank);
+void
+PrintSBank(const SBank_t *bank);
 void
 PrintAddress(const Address_t *address);
 void
@@ -552,6 +564,7 @@ Parser_t ParseBLOCK, ParseEQUALS, ParseEqualsECADR, ParseCHECKequals, ParseBANK,
     ParseEqMinus, ParseXCADR, ParseSECSIZ;
 
 extern int Block1;
+extern int EarlySBank;
 extern int Raytheon;
 extern int blk2;
 extern char *assemblyTarget;
@@ -576,7 +589,6 @@ extern int trace;
 extern int asYUL;
 extern int numSymbolsReassigned;
 extern int thisIsTheLastPass;
-extern int isEstablishedSBANK;
 
 #endif // INCLUDED_YAYUL_H
 

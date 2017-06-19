@@ -21,6 +21,7 @@
 ##                              side-by-side diff of Sunburst 120 and Luminary
 ##                              69/99/116/131/210.
 ##              2017-03-19 HG   Fix value  OCT 1210 --> OCT 31210
+##		2017-06-17 MAS	Globally removed all SBANK= workarounds.
 
 ## Page 1299
                 BLOCK           02
@@ -784,9 +785,6 @@ ENDMODE         CA              RUPTREG3                        # -0 INDICATES O
 
 # DEBRIS-
 #   RUPTREG2 AND CALLING ROUTINE MODECADR.
-
-## [yaYUL WORKAROUND] OH 2009 - kept by RRB for Luminary 116 - 2017
-                SBANK=          LOWSUPER
 
 AOTSTALL        CAF             ONE                             # AOT.
                 TC              STALL

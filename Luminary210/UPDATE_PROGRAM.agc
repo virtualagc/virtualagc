@@ -21,6 +21,7 @@
 ##				and corrected errors found.
 ##		2017-01-28 RSB	Comment-text fixes identified for Luminary 69.
 ##		2017-02-09 RSB	Comment-text fixes identified for Artemis 72.
+##		2017-06-17 MAS	Globally removed all SBANK= workarounds.
 
 ## Page 1383
 # PROGRAM NAME:		P27
@@ -128,9 +129,6 @@
 # XXXXXEXXXXXE	ROW 3 COLUMN 2					2(-1)
 # XXXXXEXXXXXE	ROW 3 COLUMN 3					2(-1)
 # V33E		VERB 33 TO SIGNAL THAT REFSMMAT IS READY TO BE STORED.
-
-## [WORKAROUND] RSB 2004
-		SBANK=	PINSUPER
 
 		BANK	07
 		SETLOC	EXTVERBS

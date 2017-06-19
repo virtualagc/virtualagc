@@ -18,6 +18,7 @@
 ##				237 and Comanche 55 source-code files
 ##				and corrected errors found.  Matches Colossus 237
 ##				comment-text after corrections, but not Comanche 55.
+##		2017-06-17 MAS	Globally removed all SBANK= workarounds.
 ##
 ## The contents of the "Colossus249" files, in general, are transcribed 
 ## from a scanned copy of the program listing.  Notations on this
@@ -806,8 +807,6 @@ SATSTKON	EXTEND
 		RELINT
 		TC	GOPIN		# EXIT THUS BECAUSE WE CAME VIA V46
 		
-## [WORKAROUND] RSB 2004
-		SBANK=	PINSUPER
 		EBANK=	BODY3
 2REDOSAT	2CADR	REDOSAT
 
@@ -871,8 +870,6 @@ SATRATE		DEC	0		# IN DETENT - ZERO RATE
 		
 STIKBITS	OCT	00077
 100MST5		DEC	16374
-## [WORKAROUND] RSB 2004
-		SBANK=	PINSUPER
 		EBANK=	BODY3
 2SATSTCK	2CADR	SATSTICK
 
