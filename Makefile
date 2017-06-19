@@ -160,6 +160,7 @@
 #		2017-03-18 RSB	Added Luminary116 to mission list.
 #		2017-03-27 RSB	Updated NVER for "releasing" a new installer and VM.
 #		2017-04-17 RSB	Updated NVER.
+#		2017-06-19 RSB	Updated NVER and added Sunburst37 to the mission list.
 #
 # The build box is always Linux for cross-compiles.  For native compiles:
 #	Use "make MACOSX=yes" for Mac OS X.
@@ -169,7 +170,7 @@
 #	Use "make" for Linux.
 
 # NVER is the overall version code for the release.
-NVER:=\\\"2017-04-17\\\"
+NVER:=\\\"2017-06-19\\\"
 DATE:=`date +%Y%m%d`
 
 # DON'T CHANGE THE FOLLOWING SWITCH *********************************
@@ -367,7 +368,7 @@ BUILD = $(MAKE) PREFIX=$(PREFIX) NVER=$(NVER) CFLAGS="$(CFLAGS)" CURSES="$(CURSE
 MISSIONS = Validation Luminary131 Colossus249 Comanche055 
 MISSIONS += Luminary099 Artemis072 Colossus237 Solarium055
 MISSIONS += Aurora12 Sunburst120 Luminary210 Retread44 Luminary069
-MISSIONS += SuperJob LUM99R2 Luminary116 Borealis
+MISSIONS += SuperJob LUM99R2 Luminary116 Borealis Sunburst37
 export MISSIONS
 
 # Missions needing code::blocks project files.
