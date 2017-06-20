@@ -24,9 +24,8 @@
 EXTTESTS        CA              TIME3
                 TS              SKEEP1
 WAITT3          CS              TIME3                           # Wait for the next TIME3 increment.
-                AD              SKEEP1
-                NOOP                                            # This assembles to TCF +1, and is needed
-                EXTEND                                          # to keep TC Traps at bay
+                AD              SKEEP1                          # No TCs are needed due to a bug in
+                EXTEND                                          # the TC alarm hardware.
                 BZF             WAITT3
 
 # With phasing correct, inhibit interrupts and trigger all the timers.
@@ -49,8 +48,7 @@ SCHEDT3         CAF             ONE                             # Schedule a T3R
 # TIME4 needs a bit of special handling. It expects to execute periodically and naively forcing it to
 # happen sooner could throw off display handling or other things. Instead, we'll only accelerate it
 # if necessary, and if so make sure it doesn't do any actual work in the accelerated interrupt.
-SCHEDT4         CA              TIME4                           # Check to see if we need to force TIME4.
-                CCS             A
+SCHEDT4         CCS             TIME4                           # Check to see if we need to force TIME4.
                 TCF             +2                              # TIME4 positive, we may need to accelerate.
                 TCF             T6CHK                           # TIME4 is zero, so T4RUPT is already pending
                 AD              TWO                             # Calculate the new TIME4 value (+10ms from old)
@@ -81,7 +79,7 @@ T6BUSYWT        NOOP
                 CCS             A
                 TCF             T6BUSYWT
 
-                CAF             BIT15                           # T6 should nnow have switched itself off.
+                CAF             BIT15                           # T6 should now have switched itself off.
                 EXTEND
                 RAND            CHAN13
                 TC              +0CHK
