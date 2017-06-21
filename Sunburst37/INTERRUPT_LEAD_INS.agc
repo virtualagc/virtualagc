@@ -18,6 +18,7 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-05-24 MAS  Created from Sunburst 120.
 ##              2017-05-27 HG   Transcribed
+##		2017-06-21 RSB	Proofed using octopus/ProoferComments.
 
 
 ## Page 54

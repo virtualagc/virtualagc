@@ -20,6 +20,8 @@
 ##              2017-05-28 HG   Transcribed
 ##              2017-06-15 HG   Fix operator CS  -> CA
 ##              2017-06-15 HG   Fix operator -2CADR -> 2CADR      
+##		2017-06-21 RSB	Proofed using octopus/ProoferComments.
+
 ## Page 56
 # RESTART TABLES
 #  DO NOT REMOVE FROM THE BEGINNING OF THIS BANK
@@ -424,7 +426,7 @@ ITSLGCL1        LXCH            GOLOC           +1      # OBTAIN THE CORRECT E B
                 LXCH            BB                      # RESTORE THE TASKS E AND F BANKS
                 LXCH            GOLOC           +1      # AND PRESERVE OUR L
 
-                TCF             ITSLGCL2                # NOT LET:S PROCESS THIS LONGCALL
+                TCF             ITSLGCL2                # NOW LET:S PROCESS THIS LONGCALL
 
 # ***** YOUB MAY RETURN TO SWITCHED FIXED *****
 

@@ -25,6 +25,9 @@
 ##                                             MASK  BIT15  --> AD   BIT15
 ##                                             ADS   LMPCMD --> TS   LMPCMD
 ##                              Fix value IM30INIR  OCT 37000 -> OCT 37400
+##		2017-06-21 RSB	Various comment fixes found using 
+##				octopus/ProoferComments.
+
 ## Page 78
                 BANK            01
                 EBANK=          LST1
@@ -53,7 +56,7 @@ GOON            CAF             BIT15                   # TURN OFF ALL DSPTAB +1
                 DCA             ENJOBCAD
                 DXCH            FLUSHREG                # *** REMOVE IF FAKESTRT REMOVED
 
-DOFSTART        CS              ZERO                    # MAKE ALL MTIMER/MPHASE PAIRS AVAILABLE.
+DOFSTART        CS              ZERO                    # MAKE ALL MTIMER/PHASE PAIRS AVAILABLE.
                 TS              MTIMER4
                 TS              MTIMER3
                 TS              MTIMER2
@@ -64,7 +67,7 @@ DOFSTART        CS              ZERO                    # MAKE ALL MTIMER/MPHASE
                 TS              MPHASE2
                 TS              MPHASE1
 
-# INITIALIZE SWITCH REGISTER INCLUDING DAPBOOLS
+# INITIALIZE SWITCH REGISTERS INCLUDING DAPBOOLS
 
                 CS              ONE
                 TS              LMPOUTT
@@ -98,10 +101,10 @@ DOFSTART        CS              ZERO                    # MAKE ALL MTIMER/MPHASE
 POOH3           CAF             ZERO
                 TS              SMODE
                 TS              MODREG
-                TS              AGSWORD                 # ALLOW AGS INITIALIZATION
+                TS              AGSWORD                 # ALLOW AGS INITIALIZATION.
 
                 TS              PHASE6                  # INITIALIZE PHASE TABLES - NO MISSION
-                TS              PHASE1                  # PROGRAMS RUNNING
+                TS              PHASE1                  # PROGRAMS RUNNING.
                 TS              PHASE2
                 TS              PHASE3
                 TS              PHASE4
@@ -150,7 +153,7 @@ ENDRSTRT        CAF             BIT6                    # IF GIMBAL LOCK LAMP IS
 
 
 
-FLUSHLOC        EXTEND                                  # GO TO SPECIAL ENEMA LOC FRO ROM
+FLUSHLOC        EXTEND                                  # GO TO SPECIAL ENEMA LOC FOR ROM
                 DCA             FLUSHREG
                 DXCH            Z                       # USUALLY THIS WILL BE AN ENDOFJOB
 
@@ -159,6 +162,8 @@ OCT312          OCT             312
 ENJOBCAD        2CADR           ENDOFJOB
 
 ## Page 81
+#          COMES HERE FROM LOCATION 4000, GOJAM. RESTART ANY PROGRAMS WHICH MAY HAVE BEEN RUNNING AT THE TIME.
+
 GOPROG          TC              BANKCALL                # * * * SUBJECT TO A HUGE CHANGE * * *
                 CADR            FAKESTRT
                 INCR            REDOCTR
@@ -248,7 +253,7 @@ PCLOOP          TS              MPAC            +5
                 EXTEND
                 RXOR            L                       # RESULT MUST BE -0 FOR AGREEMENT.
                 CCS             A
-                TCF             PTBAD                   # RESTART FAILURE
+                TCF             PTBAD                   # RESTART FAILURE.
                 TCF             PTBAD
                 TCF             PTBAD
 
@@ -306,7 +311,7 @@ DORSTART        CAF             IFAILINH                # LEAVE IMU FAILURE INHI
 ## Page 84
 #          INITIALIZATION COMMON TO BOTH FRESH START AND RESTART.
                 EBANK=          DNTMGOTO                # DO PORTION OF FRESH START NOT DONE
-STARTSUB        CAF             LDNTMGO                 # BY POO
+STARTSUB        CAF             LDNTMGO                 # BY POO.
                 TS              EBANK                   # SET UP TM PROGRAM.
 
                 CAF             LDNPHAS1
@@ -513,9 +518,9 @@ POOH2           INHINT
                 TC              STARTSB2                # DOESN'T CLOBBER DOWNLINK.
 
                 TC              FLAG2DWN
-                OCT             20                      # TURN OFF MISSION TIMER FLAG.
+                OCT             20                      # TURN OFF MISSION TIMER FLAG
 
-#   ***** HERE WE SHOULD RESET STATE REGISTERS, DEAL WITH DAP, ETC. ***
+#   ***** HERE WE SHOULD RESET STATE REGISTERS, DEAL WITH DAP, ETC. *****
 
                 CA              LPOOH3                  # PICK UP RETURN FOR MSTART.
                 TC              MSTART          -1      # START MISSION TIMERS COUNTING.
@@ -547,7 +552,7 @@ ENEMA           INHINT
                 CAF             ZERO                    # MAKE INACTIVE ALL RESTART PHASES
                 TS              PHASE1                  # EXCEPT SERVICER
 
-# Page 89
+## Page 89
                 TS              PHASE2
                 TS              PHASE3
 
