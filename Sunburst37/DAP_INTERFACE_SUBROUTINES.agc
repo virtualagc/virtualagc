@@ -19,6 +19,8 @@
 ## Mod history: 2017-05-24 MAS  Created from Sunburst 120.
 ##              2017-05-30 HG   Transcribed
 ##              2017-06-15 HG   Fix operand XCH  -> TS
+##		2017-06-22 RSB	Proofed comment text with
+##				octopus/ProoferComments.
 
 ## Page 453
                 BANK            16
@@ -53,11 +55,11 @@
 # DAPBOOLS BITS AND NAMES
 
 OURRCBIT        EQUALS          BIT1                    # INTERNAL DAP RATE COMMAND ACTIVITY FLAG
-TRYGIMBL        EQUALS          BIT2                    # TRIM GIMBAL FLAG
+TRYGIMBL        EQUALS          BIT2                    # DESCENT TRIM GIMBAL CONTROL SYSTEM FLAG
 
 # STILL AVAILABLE BIT3
 
-ACC4OR2X        EQUALS          BIT4                    # 2 OR 4 JET Z-TRANSLATION MODE FLAG
+ACC4OR2X        EQUALS          BIT4                    # 2 OR 4 JET X-TRANSLATION MODE FLAG
 AORBSYST        EQUALS          BIT5                    # P-AXIS ROTATION JET SYSTEM (A OR B) FLAG
 ULLAGER         EQUALS          BIT6                    # INTERNAL ULLAGE REQUEST FLAG
 DBSELECT        EQUALS          BIT7                    # DAP DEADBAND SELECT FLAG
@@ -67,7 +69,7 @@ PULSES          EQUALS          BIT10                   # MINIMUM IMPULSE RHC MO
 
 GODAPGO         EQUALS          BIT11                   # DAP ENABLING FLAG
 
-# STILL AVAILABLE BI12
+# STILL AVAILABLE BIT12
 
 # STILL AVAILABLE BIT13
 
@@ -200,19 +202,19 @@ ALLCOAST        CS              TRYGIMBL                # SINCE THE DESCENT ENGI
                 TS              DAPBOOLS
 
                 CAF             0.3DEGDB                # SET BOTH MINIMUM IMPULSE DEADBANDS TO
-                TCF             MINIMSTO                # 0.3 DEGREES SCALED AT PI RADIANS
+                TCF             MINIMSTO                # 0.3 DEGREES SCALED AT PI RADIANS.
 
 UPCOAST         INHINT                                  # STOP INTERRUPTS FROM WREAKING HAVOC.
 
                 CS              APSGOING                # TURN OFF APS BURN BIT IN DAPBOOLS SINCE
                 MASK            DAPBOOLS                # LEM IS STAGED FOR ASCENT, BUT THE ASCENT
 
-                TS              DAPBOOLS                # IS NOT ON.
+                TS              DAPBOOLS                # ENGINE IS NOT ON.
 
 ## Page 457
                 CAF             0.00444                 # IN ASCENT COAST, SET BOTH MINIMUM
-MINIMSTO        TS              MINIMPDB                # IMPULSE DBS ARE SET TO 0.0 DEGREES.
-                TS              DBMINIMP                # SCALED AT PI RADIANS
+MINIMSTO        TS              MINIMPDB                # IMPULSE DEADBANDS TO 0.08 DEGREES
+                TS              DBMINIMP                # SCALED AT PI RADIANS.
 
                 CAF             POSMAX                  # SET URGENCY FUNCTION CORRECTION RATIOS
                 TS              URGRATQ                 # TO ALMOST 1 BEFORE BEING SET IN AOSJOB.
@@ -251,16 +253,16 @@ ASCDAP          INHINT                                  # (MISSION ENTRY)
                 CAF             APSGOING                # CHECK AOSTASK BIT OF DAPBOOLS
                 MASK            DAPBOOLS                # IF 0, SET BIT AND INITIATE WAITLIST TASK
                 CCS             A                       # IF 1, THEN TASK LOOP ALREADY BEGUN
-                TCF             ASCDAP1                 # END OF ASCEN DAP
+                TCF             ASCDAP1                 # END OF ASCENT DAP
                 CAF             APSGOING                # SET BIT TO INDICATE AOSTASK SET UP AND
                 ADS             DAPBOOLS                # ASCENT LOGIC.  BIT CLEARLY NOT SET YET.
 
                 CS              DB                      # MODIFY THE TJETLAW FOR ASCENT:
                 TS              MINIMPDB                # (IN ONE EQUATION DELETE MINIMPDB AND
                 CAF             ZERO                    # SHIFT THE SWITCHING CURVE TO THE ORIGIN)
-                TS              DBMINIMP                # MINIMPDB = -DB, DMINIMP = 0
+                TS              DBMINIMP                # MINIMPDB = -DB, DBMINIMP = 0
 
-                TS              SUMRATEQ                # INITIALIZE SUMS OF JET RATES.
+                TS              SUMRATEQ                # INITIALIZES SUMS OF JET RATES.
                 TS              SUMRATER
                 TS              KCOEFCTR                # INITIALIZE APS BURN TIMER.
 
@@ -269,15 +271,14 @@ ASCDAP          INHINT                                  # (MISSION ENTRY)
                 CAE             OMEGAR                  # CREATE OLD OMEGAR
                 TS              OLDWFORR
 
-# ***** EVENTUALLY, USE 2SECWLT4 FROM FIXED-FIXED AND NEW NAME. *****
+# ***** EVENTUALLY, USE 2SECWLT4 FROMM FIXED-FIXED AND NEW NAME. *****
 
                 CAF             2SECSDAP                # SET UP AOSTASK TO BEGIN IN 2 SECONDS
                 TC              WAITLIST                # IT THEN SETS UP A LOOP ON WAITLIST FOR
                 EBANK=          AOSQ
                 2CADR           AOSTASK                 # 2 SECOND INTERVALS AND CHECKS FOR THE
-                                                        # SHUTDOWN CONDITION IN BIT8 OF DAPBOOLS
-
-# ***********************************************************************************************************
+# REF   1              20,2145   40006 0                                  SHUTDOWN CONDITION IN BIT8 OF DAPBOOLS     
+# ****************************************************************************************************************
 
 # REMOVE THIS AND THE TASKS WHEN THE INERTIA ESTIMATOR WORKS.
 
@@ -296,7 +297,7 @@ ASCDAP          INHINT                                  # (MISSION ENTRY)
                 2CADR           IZZTASK                 # *** NOT TO BE USED IN MISSIONS ***
 
 ## Page 459
-# ***********************************************************************************************************
+# ****************************************************************************************************************
 
 DESDCAP         INHINT                                  # (MISSION ENTRY)
 

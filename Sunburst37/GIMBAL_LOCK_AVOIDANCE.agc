@@ -18,6 +18,8 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-05-24 MAS  Created from Sunburst 120.
 ##		2017-06-13 RSB	Transcribed.
+##		2017-06-22 RSB	Proofed comment text with
+##				octopus/ProoferComments.
 
 ## Page 620
 # DETECTING GIMBAL LOCK
@@ -348,8 +350,8 @@ WCALC           LXC,1           DLOAD*
                                 NEWDELHI        +1              # 1(ON) = START MANEUVER
 
 
-# THE FOUR SELECTABLE FREE FALL MANEUVER RATES SELECTED BY
-# LOADING RATEINDX WITH 0,2,4,6, RESPECTIVELY
+#          THE FOUR SELECTABLE FREE FALL MANEUVER RATES SELECTED BY
+#          LOADING RATEINDX WITH 0,2,4,6, RESPECTIVELY
 
 
 ARATE           2DEC            .0222222222                     # =.5 DEG/SEC        $ 22.5DEG/SEC
@@ -361,4 +363,4 @@ ARATE           2DEC            .0222222222                     # =.5 DEG/SEC   
                 2DEC            .4444444444                     # =10 DEG/SEC        $ 22.5DEG/SEC
 
 ANGLTIME        2DEC            .0001907349                     # = 100B-19     FUDGE FACTOR TO CONVERT
-                                                                # MANEUVER ANGLE TO MANEUVER TIME
+#                      34,3513   04000 0                                    MANEUVER ANGLE TO MANEUVER TIME

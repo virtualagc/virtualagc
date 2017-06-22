@@ -18,6 +18,8 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-05-24 MAS  Created from Sunburst 120.
 ##              2017-06-03 HG   Transribed
+##		2017-06-22 RSB	Proofed comment text with
+##				octopus/ProoferComments.
 
 ## Page 591
                 BANK            21
@@ -193,7 +195,7 @@ SLOPEMR         OCT             37777
 1/2AQ           DEC             0.217
 1/AQ            DEC             0.434
 
-1/AR            DEC             0.434
+1/AR            DEC             0.434			# DESCENT STAGE ACC CONST SCALED AT 16/PI
 NEGQT           OCT             00011
 POSQ            OCT             00006
 POSR            OCT             00201

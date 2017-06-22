@@ -22,6 +22,8 @@
 ##				code as being identical to that in Sunburst 120,
 ##				in reality it has many differences.
 ##              2017-06-15 HG   Fix operand BIT2 -> BIT4
+##		2017-06-22 RSB	Proofed comment text with
+##				octopus/ProoferComments.
 
 ## Page 644
                 BANK            25
@@ -325,7 +327,7 @@ SBORB7          TC              1LMP+DT
                 DEC             400
 
 SBORB8          TC              1LMP+DT
-                DEC             22                              # ABORT STAGE - COMMAND *
+                DEC             22                              # ABORT STAGE - ARM *
 ## Page 650
                 DEC             100                             # WAIT 1 SECOND
                 

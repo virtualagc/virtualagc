@@ -24,6 +24,8 @@
 ##                                           TC   -> TCF
 ##                                           BZMF -> BZF
 ##                              change value MCOMPTQR  DEC -16  -> OCTAL 77765
+##		2017-06-22 RSB	Proofed comment text with
+##				octopus/ProoferComments.
 
 ## Page 491
                 BANK            17
@@ -35,7 +37,7 @@
                 EBANK=          DT
 NULLFILT        2CADR           FILDUMMY
 
-QRAXIS          CAF             MS30QR                  # RESET TIMER IMMEDIATELY: DT = 30 MS
+QRAXIS          CAF             MS30QR                  # RESET TIME IMMEDIATELY: DT = 30 MS
                 TS              TIME5
 
                 LXCH            BANKRUPT                # INTERRUPT LEAD IN (CONTINUED)
@@ -77,7 +79,7 @@ QRAXIS          CAF             MS30QR                  # RESET TIMER IMMEDIATEL
 ## Page 492
 # SECOND, TRANSFORM CPU INCREMENTS TO BODY-ANGLE INCREMENTS:
 
-                CAE             M31                     # MATRIX*VECTOR(WITH x COMPONENT ZERO)
+                CAE             M31                     # MATRIX*VECTOR(WITH X COMPONENT ZERO)
                 EXTEND
                 MP              ITEMP1                  # M31 * ITEMP1 = M31 * DELTA CDUY
                 TS              ITEMP3
@@ -248,7 +250,7 @@ RHCACTIV        CAF             BIT1
                 MASK            DAPBOOLS
                 EXTEND
                 BZF             XTRANS                  # LET P AXIS SET THE RATE COMMAND BIT
-
+# COMPUTE RATE ERRORS
                 CAE             Q-RHCCTR
                 EXTEND
                 MP              BIT9
@@ -409,7 +411,7 @@ RTJETIME        CCS             RATEDIF                 # SCALED AT PI/4 RADIANS
 # CALLING SEQUENCE: NONE.         SUBROUTINES CALLED: +/-TRANS
 
 # NORMAL EXIT: 1. IF NO TRANSLATION: RESUME.
-#              2.IF SOME TRANSLATION: +/-TRANS
+#              2.IF SOME TRANSLATION: +/-TRANS.
 
 # ALARM/ABORT MODE: NONE.
 
@@ -418,7 +420,7 @@ RTJETIME        CCS             RATEDIF                 # SCALED AT PI/4 RADIANS
 # OUTPUT: C(ANYTRANS) = NEGMAX FOR +X TRANSLATION.
 #         C(ANYTRANS) = POSMAX FOR -X TRANSLATION.
 #         C(TRANSNOW) = C(TRANSAVE) = +0.
-#         C(TRANONLY) = PNZ
+#         C(TRANONLY) = PNZ.
 
 # DEBRIS: A,L,
 
@@ -474,8 +476,8 @@ XTRANS          CAF             ZERO                    # PICK UP ZERO AND INITI
 JTPOLADR        2CADR           +/-XTRAN                # TRANSLATION ONLY ENTRY TO JET POLICY
 
 ## Page 500
-# DO NECESSAY PARTS OF Q,R-AXES TORQUE VECTOR RECONSTRUCTION HERE AND NOW.  FOR OTHER PARTS WAIT UNTIL THE NEXT
-# P-AXIS RCS DAP T5RUPT
+# DO NECESSARY PARTS OF Q,R-AXES TORQUE VECTOR RECONSTRUCTION HERE AND NOW.  FOR OTHER PARTS WAIT UNTIL THE NEXT
+# P-AXIS RCS DAP T5RUPT.
 
 NORMRETN        TS              TQR
 
@@ -584,11 +586,11 @@ RTJETADR        GENADR          RTJETIME
 # (EXECUTED WHEN LGC IS IN AUTOMATIC SCSMODE OR IF SCSMODE IS ATTITUDE HOLD AND THE ROTATIONAL HAND CONTROLLER IS
 # NEITHER OUT OF DETENT NOR IS THE RATE COMMAND BIT SET IN DAPBOOLS)
 
-# IMMEDIATELY AFTER CALCULATING THE ATTITUDE ERRORS, THE FOLLOWING TESTS ARE MADE TO DETERMINE WETHER THE DESCENT
+# IMMEDIATELY AFTER CALCULATING THE ATTITUDE ERRORS, THE FOLLOWING TESTS ARE MADE TO DETERMINE WHETHER THE DESCENT
 # ENGINE TRIM GIMBAL SHOULD BE USED TO CONTROL THE LEM ATTITUDE RATHER THAN THE RCS JETS:
 
 #          1) IS THE TRIM GIMBAL FUNCTIONALLY OPERATIVE?
-#          2) ARE THE Q-R-AXES RCS JETS OFF?
+#          2) ARE THE Q,R-AXES RCS JETS OFF?
 #          3) ARE BOTH TRIM GIMBAL DRIVES OFF?
 #          4) IS THE LEM RATE LESS THAN .5 DEG/SEC ABOUT BOTH AXES?
 
@@ -614,28 +616,28 @@ INITFILT        GENADR          FILTINIT                # ADDRESS OF FILTER INIT
 # IN ORDER TO USE RATE HOLD, THE MISSION PROGRAMMER MUST SET BIT 14 OF
 # DAPBOOLS ON AND SET BIT 3 OF DAPBOOLS TO ZERO.  UPON RETURNING FROM THE
 # FIRST PASS AT LEAST THROUGH RATE HOLD, THE MISSION PROGRAMMER MUST RESET
-# BIT 3 TO ITS PREVIOUS VALUE IF THIS IS NOT 1, BECASUE SAVERATE SETS BIT3
+# BIT 3 TO ITS PREVIOUS VALUE IF THIS IS NOT 1, BECAUSE SAVERATE SETS BIT3
 # TO 1 FOR ALL PASSES AFTER THE FIRST IN ORDER NOT TO SAVE THE RATE AGAIN.
 
 
 # IN ADDITION TO NON-RATE HOLD MODE AND NON-FIRST PASS RATE HOLD MODE
-# EXITS RO QERRCALC, THE FIRST PASS EXITS TO RESUME, IE. OUT OF INTERRUPT
+# EXITS TO QERRCALC, THE FIRST PASS EXITS TO RESUME, IE. OUT OF INTERRUPT
 # AND BACK TO DAPIDLER TO AWAIT THE NEXT CALL TO DAP.
 
 # RATE HOLD PRODUCES THE FOLLOWING OUTPUT IN ERASABLE --
 
 #    CDUD - SCALED AT +/-PI, DESIRED GIMBAL ANGLE
 
-#    DELCDU - SCALED AT +/-PI, INCREMENT TO CDUD EVERY 100MS
+#    DELCDU - SCALED AT +/-PI, INCREMENT TO CDUD EVERY 100 MS.
 
 #    OMEGAPD, QD, RD - SCALED AT +/-PI/4, BODY AXIS RATES
 
 # ALL THESE ARE USED BY AUTOMATIC STEERING MODE EQUATIONS.
 
 ## Page 503
-# RATE HOLD REQUIRES OMEGAP, Q, R EVERY .25 SE, AND ALSO REQUIRES PILO-
+# RATE HOLD REQUIRES OMEGAP, Q, R EVERY .25 SEC, AND ALSO REQUIRES PILOT-
 # TO-GIMBAL AXIS MATRIX ELEMENTS, MR12, 22, 13, 23 TO BE LOCATED IN THAT
-# ORDER
+# ORDER.
 
 # FINALLY, RATE HOLD LEAVES DEBRIS IN --
 
@@ -645,10 +647,10 @@ INITFILT        GENADR          FILTINIT                # ADDRESS OF FILTER INIT
 
 
 
-ATTSTEER        CS              DAPBOOLS
-                MASK            BIT14
+ATTSTEER        CS              DAPBOOLS		# DOES BIT14 OF DAPBOOLS REQUEST RATE HOLD
+                MASK            BIT14			# (SIVB-LEM SEPARATION)
                 CCS             A
-                TCF             QERRCALC
+                TCF             QERRCALC		# NO, GO DIRECTLY TO AUTOMATIC STEERING
 
 # CHECK DAPBOOLS, BIT3, TO SEE IF DESIRED RATE HAS BEEN SAVED YET
 
@@ -663,7 +665,7 @@ ATTSTEER        CS              DAPBOOLS
 # ROLL DURING RATE HOLD MODE.  NOTE THAT DELCDUS ARE COMPUTED IN THE NEGA-
 # TIVE TO ALLOW 2S COMP. MOD. SUBTRACT LATER ON (CDU-(-DELCDU))
 
-                CAF             ONE                     # SET UP LOOP INDEX TO COMPUTE DELCDUS
+                CAF             ONE                     # SET UP LOOP INDEX TO COMPUTE DELCDUS.
 NEXDLCDU        TS              DLCDUIDX                # DLCDUIDX = C(A)
 
                 CS              OMEGAQD                 # DLCDUIDX = 1              DLCDUIDX = 0
@@ -672,7 +674,7 @@ NEXDLCDU        TS              DLCDUIDX                # DLCDUIDX = C(A)
                 MP              MR12                    # MR22 SCALED AT 1       MR12 SCALED AT 2
                 TS              ITEMP1                  #                     ITEMP1=-OMEGAQD.MR12
 
-                CS              OMEGARD                 # C(A)=ITEMP1 -OMEGARD.M23
+                CS              OMEGARD                 # C(A)=ITEMP1 -OMEGARD.MR23
                 EXTEND
                 INDEX           DLCDUIDX                #                C(A)=ITEMP1 -OMEGARD.MR13
                 MP              MR13                    # MR23 SCALED AT 1        MR13 SCALED AT 2
@@ -692,13 +694,13 @@ NEXDLCDU        TS              DLCDUIDX                # DLCDUIDX = C(A)
                 CCS             ITEMP1                  # CONVERT DELCDUS TO TWOS COMPLEMENT (SAME
                 AD              ONE                     # AS CDUS).  ADD ONE TO RESTORE PRE-CCS A
                 TCF             STODLCDU                # STORE DIRECT IF POSITIVE ZERO
-                COM                                     # COMPLEMENT IF NECGATIVE, CSS INCREMENTS
+                COM                                     # COMPLEMENT IF NEGATIVE, CCS INCREMENTS
 STODLCDU        INDEX           DLCDUIDX                # IF NEGATIVE ZERO, STORE POSITIVE ZERO
                 TS              DELCDUY                 # STORE FINAL DELCDUZ OR DELCDUY
 
                 CCS             DLCDUIDX                # TEST INDEX DLCDUIDX, EITHER 1 OR 0
                 TCF             NEXDLCDU                # IF 1, DO DELCDUY
-                TS              DELCDUX                 # DELDUZ,Y DONE, 0 TO DELCDUX-NO ROLL
+                TS              DELCDUX                 # DELCDUZ,Y DONE, 0 TO DELCDUX-NO ROLL
 
 QERRCALC        CAE             CDUY                    # Q-ERROR CALCULATION
                 EXTEND
@@ -775,7 +777,7 @@ LOOPTOP         TS              QRCNTR
 
                 TCF             STILLRCS                # NO.      USE RCS CONTROL.
                 CCS             QRCNTR                  # THIS AXIS IS FINE.   ARE BOTH DONE.
-                TCF             LOOPTOP                 # NOW TRY THE Q AXIS
+                TCF             LOOPTOP                 # NOW TRY THE Q AXIS.
                 TCF             GOTOGTS                 # TRANSFER TO TRIM GIMBAL CONTROL
 -RATLM+1        OCT             77512                   # -.5 DEG/SEC SCALED AT PI/4  + 1 BIT
 -XBND+1         OCT             77601                   # -1.4 DEG SCALED AT PI, + 1 BIT.
@@ -799,7 +801,7 @@ STILLRCS        CCS             DAPBOOLS
 # SET UP LOOP TO DO R-AXIS, THEN Q-AXIS:
 
                 CAF             ONE                     # 1: REFERS TO R-AXIS VARIABLES.
-                TS              AXISCNTR                # 0: REFERS TO Q-AXIS VARIABLES.
+                TS              AXISCNTR                # 2: REFERS TO Q-AXIS VARIABLES.
 
 # PICK UP EDOT AND RESCALE FROM PI/4 TO PI/16 RADIANS/SECOND:
 
@@ -834,7 +836,7 @@ EDOTSTOR        TS              EDOT                    # SAVE NON-ZERO EDOT SCA
                 EXTEND
 
                 INDEX           AXISCNTR
-                MP              1/AMINQ                 # .5(1/ACCMIN) AT 2(8)/PI SEC(2)/RAD.
+                MP              1/AMINQ                 # .5(1/ACCMIN) 2(8)/PI SEC(2)/RAD.
                 AD              DB                      # DEADBAND SCALED AT PI RADIANS.
                 TS              FPQRMIN                 # .5(1/ACCMIN)EDOT(2)+DB SCALED AT PI RAD.
 
@@ -981,7 +983,7 @@ URGSCALQ        CCS             URGENCYQ                # IF ABVAL(URGENCYQ) LES
 
 # USE URGENCY CORRECTION FACTOR RATIO WHEN NECESSARY:
 
-URGLIMS         CAF             URGLM1                  # SET URGENCY LIMIT FOR 2(+9) SCALING.
+URGLIMS         CAF             URGLM1                  # SET URGENCY LIMIT FOR 2(+9) SCALING
                 TS              URGLIMIT
 
 
@@ -1134,7 +1136,7 @@ PLUSV           CAE             1/AMINV
 
 BURGZERO        CAE             URGENCYR                # TEST FOR SECOND URGENCY ALSO ZERO
                 EXTEND
-                BZF             XTRANS                  # NO ROTATION NEEDED NOW.
+                BZF             XTRANS                  # NO ROTATION NEEDED NOW
 
                 EXTEND                                  # TIME SAVING A,B CALCULATION
                 MP              SIN22.5
@@ -1294,7 +1296,7 @@ UVEDOT1         TS              EDOT                    # RATE ERROR SCALED AT P
                 SQUARE
                 TS              EDOT(2)                 # SAVE RATE SQUARED SCALED AT PI(2)/2(8)
 
--1.6CSP         DEC             -.01000
+-1.6CSP         DEC             -.01000			# 160 MS SCALED AT 2(4) SECONDS
 +TJMINT6        DEC             +.00073
 -TJMIN16        DEC             -.00047
 -TJMINQR        EQUALS          -TJMIN16
@@ -1361,16 +1363,16 @@ TJETLAW         CS              EDOT                    # TEST ON EDOT SIGN:
                 DDOUBL                                  # SCALED AT 2(+4) SECONDS.
                 TS              TERMA
 
-                AD              -1.6CSP                 # (EDOT/NETACC)-1.5CSP SCALED AT 16 SECS.
+                AD              -1.6CSP                 # EDOT/NETACC-1.6CSP SCALED AT 16 SECONDS.
                 EXTEND
                 BZMF            +3
 
 MAXTJET         CAF             BIT14                   # (1/2) IS LIKE POSMAX AT THIS SCALING.
                 TCF             NORMRETN                # (OVERFLOW IS PREVENTED IN THIS WAY.)
 
-                CS              HDAP                    # DBMINIMP-E-(EDOT(2)/NETACC)+DB
+                CS              HDAP                    # DBMINIMP-E-EDOT(2)/NETACC+DB
                 AD              MINIMPDB                # SCALED AT PI RADIANS.
-                EXTEND                                  # (DURING APS BURNS, DBMINIMP=-DB.)
+                EXTEND                                  # (DURING APS BURNS DBMINIMP=-DB)
                 BZMF            MAINBRCH
 
                 CAE             TERMA                   # EDOT/NETACC-35MS SCALED AT 16 SECONDS.
@@ -1419,7 +1421,7 @@ NEGHDAP         CAE             EDOT(2)                 # RATE ERROR SQUARED SCA
  +2             CS              EDOT                    # RATE ERROR SCALED AT PI/16 RAD/SEC.
                 EXTEND                                  # (LIMITED TO +/< 11.25 DEG/SEC.)
                 MP              1/NETACC                # SCALED AT 2(+8)/PI SEC(2)/RAD; (ACC):-1)
-                DDOUBL                                  # SCALED AT 2(+4) SECONDS.
+                DDOUBL                                  # SCALED AT 2(34) SECONDS.
                 TS              TERMA
 
                 CS              HDAP                    # -E+.51EDOT(2)/NETACC+DB
@@ -1438,7 +1440,7 @@ MAINBRCH        TS              HDAP                    # -HDAP(ABOVE)+2E+DBMINI
                 EXTEND
                 BZMF            NOROOT
 ## Page 519
-                CAE             HDAP                    # +(HDAP)/(DENOM)(1)NETACC(2) AT 2(8)
+                CAE             HDAP                    # +(HDAP/DENOM)(1)NETACC)(2) AT 2(8) SELS.
                 EXTEND
                 DV              .5ACCMNE
                 EXTEND
@@ -1471,11 +1473,11 @@ TJSUM           AD              TERMA                   # TERMA+SQRT(-TERMB)
 
 TJETSCAL        DOUBLE                                  # NOW SCALED AT 2(+3) SECONDS.
                 EXTEND
-                MP              25/32QR                 # SCALED TO 16/25 2(+4) SECONDS AS TIME6.
+                MP              25/32QR                 # SCALED TO 16/25 2(+4) SECONDS.
                 TCF             NORMRETN
 
 NOROOT          CAF             MAXRATE
-                AD              .6DEG/SC                # MAXRATE+DEL SCALED AT PI/16 RAD/SEC
+                AD              .6DEG/SC                # MAXRATE+DEL SCALED AT PI/16 RAD/SEC.
                 EXTEND
                 MP              1/NETACC                # (MAXRATE+DEL)/NETACC
                 DDOUBL                                  # SCALED AT 2(+4) SECONDS

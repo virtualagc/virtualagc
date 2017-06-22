@@ -18,6 +18,8 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-05-24 MAS  Created from Sunburst 120.
 ##              2017-06-13 HG   Transcribed
+##		2017-06-22 RSB	Proofed comment text with
+##				octopus/ProoferComments.
 
 ## Page 666
 # PROGRAM DESCRIPTION
@@ -97,7 +99,7 @@ MP6A            TC              PHASCHNG
                 TC              WAITLIST
                 EBANK=          MP6TO7
                 2CADR           MP6B
-#                                         TERMINATE ABORT COMMAND MONITOR
+# REF   2 LAST 667     27,2514   56003 1  TERMINATE ABORT COMMAND MONITOR
 
                 TC              FLAG2DWN
                 OCT             00400                   # BIT 9
@@ -114,7 +116,7 @@ MP6B            TC              PHASCHNG
                -GENADR          536SEC
                 EBANK=          MP6TO7
                 2CADR           CBXPNDR
-# REF   1       27,2527   56063 1  CALL C-BAND TRANSPONDER-ON*
+# REF   1              27,2527   56003 1  CALL C-BAND TRANSPONDER-ON*
 
                 EXTEND
                 DCA             536SEC                  # SET LONGCALL= T+8M 56S
@@ -126,7 +128,7 @@ MP6B            TC              PHASCHNG
                 TCF             TASKOVER
 536SEC          2DEC            53600
 
-#               27,2537   10540 1  C-BAND TRANSPONDER-ON*
+#                      27,2537   10540 1  C-BAND TRANSPONDER-ON*
 
 CBXPNDR         TC              1LMP
                 DEC             106

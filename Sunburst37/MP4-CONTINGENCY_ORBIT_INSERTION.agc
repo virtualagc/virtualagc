@@ -23,6 +23,8 @@
 ##                                          RUPREG3  -> RUPTREG3
 ##                                          RUPREG1  -> RUPTREG1
 ##                              Remove constant 004CEK
+##		2017-06-22 RSB	Proofed comment text with
+##				octopus/ProoferComments.
 
 ## Page 654
                 BANK            33
@@ -375,7 +377,7 @@ TIG4-7.5        TC              IBNKCALL                        # +X TRANSLATION
 
                 TCF             TASKOVER
 
-IGNTEST         TC              BANKCALL                        # WAIT UNTIL MANEUVER IS FINISHED
+IGNTEST         TC              BANKCALL                        # WE WAIT UNTIL KALCMANU IS HAPPY
                 CADR            ATTSTALL
                 TC              CURTAINS
 
@@ -477,7 +479,7 @@ TCO+15          TC              2LMP+DT
 
 # ************************************************************************
 # TIME INCREMENTS FOR WAITLISTS IN MP4 - XXXXXCEK = DEC XXXXX00 CS
-# ************************************************************************	   4
+# ************************************************************************
 002CEK          DEC             200
 
 003CEK          DEC             300

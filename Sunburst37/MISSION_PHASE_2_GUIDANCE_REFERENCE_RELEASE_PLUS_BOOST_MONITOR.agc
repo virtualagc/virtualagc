@@ -21,6 +21,8 @@
 ##              2017-06-13 HG   Fix operator DXCH ->QXCH
 ##                              Fix operator REFSSMAT -> REFSMMAT
 ##                              Fix comment (missing #) near label SHOW12
+##		2017-06-22 RSB	Proofed comment text with
+##				octopus/ProoferComments.
 
 ## Page 632
 # PROGRAM NAME - MISSION PHASE 2 GUIDANCE REFERENCE RELEASE + BOOST MONITOR.
@@ -197,7 +199,7 @@ MP2JOB		TC		PHASCHNG
 SHOW7		TC		NEWMODEX		# DISPLAY 7 IN MAJOR MODE
 		OCT		00007
 		
-# GO TO MATRXJOB TO COPUTE REFSMMAT				
+# GO TO MATRXJOB TO COMPUTE REFSMMAT				
 
 ## Page 636
 # PROGRAM DESCRIPTION- MATRXJOB                                           DATE- 18 NOV 1966

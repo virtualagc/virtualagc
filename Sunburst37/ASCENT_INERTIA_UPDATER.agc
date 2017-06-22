@@ -17,7 +17,9 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-05-24 MAS  Created from Sunburst 120.
-##              2017-06-05 HG   Trasncribed
+##              2017-06-05 HG   Transcribed
+##		2017-06-22 RSB	Proofed comment text with
+##				octopus/ProoferComments.
 
 ## Page 538
                 BANK            26
@@ -92,7 +94,7 @@ JACCESTQ        CAE             IYY
                 ZL
                 EXTEND
                 DV              JETTORK4
-                EXTEND                                  # INCLUDE INVISIBLE FACTOR (1/2).
+                EXTEND                                  # INCLUDE INVISIBLE FACTOR OF (1/2).
 
                 MP              BIT14
                 TS              1/NET+4Q

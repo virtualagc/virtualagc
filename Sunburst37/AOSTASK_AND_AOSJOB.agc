@@ -19,6 +19,8 @@
 ## Mod history: 2017-05-24 MAS  Created from Sunburst 120.
 ##		2017-06-09 RSB	Transcribed.
 ##              2017-06-14 HG   Add missing label STCTR1
+##		2017-06-22 RSB	Proofed comment text with
+##				octopus/ProoferComments.
 
 ## Page 569
 # PROGRAM NAME: AOSTASK           MOD. NO. 1  DATE: NOVEMBER 20, 1966
@@ -447,7 +449,7 @@ TORKJET1        2DEC            0.002671365
 
 4JTORK          DEC             .62170  
 
-# Page 580                        
+## Page 580                        
 # PROGRAM NAME: AOSJOB            MOD. NO. 0   DATE: DECEMBER 2, 1966
 # PROGRAM DESIGN BY: RICHARD D. GOSS (MIT/IL)
 
@@ -506,7 +508,7 @@ INVLOOP         TS              JOBAXES                         # ADJACENT REGIS
                 INDEX           JOBAXES                         # ARE AOSU AND AOSV.  1JACCQ AND 1JACCR
                 AD              AOSQ                            # ARE SCALED AT PI/4 AND THEREFORE ARE
                 TS              TEMPNET                         # EQUIVALENT TO 2(1JACCQ) AND 2(1JACCR)
-                AD              -.02R/S2                        # SCALED AT PI/2, AS ARE AOSQ AND AOSR.
+                AD              -.02R/S2                        # SCALED AT PI/2 AS ARE AOSQ AND AOSR.
                 EXTEND                                         	# -.02R/S2 IS -0.02 RADIANS/SECOND(2),PI/2 
                 
                 BZMF            FIFTY1                          # (BRANCH FOR CONSTANT VALUE OF INVERSE.)
@@ -619,7 +621,7 @@ QRJOB           TS              JOBAXES
                 TCF             +2                              
                 AD              ONE                             
                 TS              TEMPNET                         
-                AD              -.02R/S2                        # -0.02 RADIANS/SECOND(2) AT PI/2
+                AD              -.02R/S2                        # -0.02 RADIANS/SECOND(2) AT PI/2.
                 EXTEND                                          
                 BZMF            FIFTY3                          # (BRANCH FOR CONSTANT VALUE OF INVERSE.)
 
@@ -700,7 +702,7 @@ OVERRIDE        INHINT                                          # PREVENT POSSIB
                                                                 
                 CAF		ONE				# NJ = 1 FORCES THE URGENCY FUNCTIONS TO
                 INDEX           NJPLACE                         # ACTUALLY SELECT 4 JET ROTATION AS THE
-                TS              NJ+Q                            # OPTIMAL POLICY (TO FIGHT THE AOS).
+                TS              NJ+Q                            # OPTIMAL POLICY (TO FIGHT HIS AOS).
                                                                 
 # TEST SIGN(AOS   ):
 #              Q,R
@@ -771,7 +773,7 @@ NXTNJZER        CAF             ZERO                            # SET NJ      = 
                 TCF             QRJOB                           # JOBAXES = 0 MEANS GO DO U,V-AXES.
 
 ## Page 588
-# AFTER Q,R-AXES COMPLETE, DO U,V-AXES LOGIC:
+# AFTER Q,R-AXES COMPLETE, DO U,V-AXES LOOP:
 
 UVJOB           CAF		ONE				# SET UP THE TABLE INDICES:
 UJOB		TS		JOBAXES

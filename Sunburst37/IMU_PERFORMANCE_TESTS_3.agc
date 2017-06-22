@@ -18,6 +18,8 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-05-24 MAS  Created from Sunburst 120.
 ##              2017-06-10 MAS  Updated for Sunburst 37.
+##		2017-06-22 RSB	Proofed comment text with
+##				octopus/ProoferComments.
 
 ## Page 416
 		BANK	23
@@ -516,7 +518,7 @@ FINEZERO        EXTEND
                 TS      STATE
                 RELINT
                 
- # Page 427
+## Page 427
                 TC      BANKCALL
                 CADR    LEMLAB
                 

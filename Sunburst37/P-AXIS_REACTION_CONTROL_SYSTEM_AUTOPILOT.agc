@@ -20,6 +20,8 @@
 ##              2017-06-03 HG   Transcribed
 ##              2017-06-15 HG   Fix operand EDOTP -> EDOT
 ##              2017-06-15 MAS  Removed a stray 'A' from an EXTEND.
+##		2017-06-22 RSB	Proofed comment text with
+##				octopus/ProoferComments.
 
 ## Page 468
                 BANK            16
@@ -89,7 +91,7 @@ SCALEDTP        TS              TP
                 LXCH            OLDXFORP
                 EXTEND
                 MP              BIT7
-                LXCH            DELTAP                  # SCALED AT PI/2(6)
+                LXCH            DELTAP                  # SCALE AT PI/2(6)
                 CA              CDUY
                 TS              L
                 EXTEND
@@ -99,7 +101,7 @@ SCALEDTP        TS              TP
                 MP              BIT7                    # INTO L SCALED AT PI/2(6)
                 CA              M11                     # M11 SCALED AT 1
                 EXTEND
-                MP              L                       # INTO A SCALED AT PI/2(6)
+                MP              L                       # INTO A SCALED AT PI/2(6).
                 AD              DELTAP
                 EXTEND
                 MP              WFORP                   # SCALED AT 2(4)=16, RESULT IN A AT PI/4.
@@ -130,15 +132,15 @@ CHKVISFZ        TC              T6JOBCHK                # CHECK FOR T6 RUPT.
 
                 BZF             DETENTCK                # BRANCH FOR RATE COMMAND
 
-                CCS             DELAYCTR                # LOOK FOR JET TO TURN ON
+                CCS             DELAYCTR                # DELAYCTR IS SET TO 3 BY RUPTIO
 
-                TCF             WHICHONE
+                TCF             WHICHONE		# LOOK FOR JET TO TURN ON
 
                 TCF             CHEKALL6
 
                 CAF             BIT12                   # PERMIT NEXT RUPT10.DELAYCTR IS NEG
                 EXTEND                                  # WHEN PREVIOUS READING OF 31 FOUND
-                WOR             13                      # ALL SWITCHES OPEN
+                WOR             13                      # ALL SWITCHES OPEN.
                 TCF             JETSOFF
 
 WHICHONE        TS              DELAYCTR                # DECREMENT DELAYCTR
@@ -192,20 +194,20 @@ DETENTCK        CA              BIT15
                 EXTEND
                 RAND            31                      # CHECK OUT-OF-DETENT BIT.INVERTED.
                 EXTEND
-                BZF             RHCMOVED                # BRANCH IF OUT OF DETENET
-#.................................................................................
+                BZF             RHCMOVED                # BRANCH IF OUT OF DETENT
+#........................................................................
                 CAF             BIT1                    # IN DETENT.CHECK THE RATE COMMAND BIT
                 MASK            DAPBOOLS                # BIT1 OF DAPBOOLS IS RATE COMMAND BIT
                 EXTEND
                 BZF             PURGENCY                # BRANCH IF NOT IN RATE COMMAND
-#.................................................................................
+#........................................................................
                 CAF             BIT13                   # CHECK ATTITUDE HOLD BIT
 
                 EXTEND
                 RAND            31
                 EXTEND
                 BZF             JOEY                    # BRANCH IF IN ATTITUDE HOLD
-#.................................................................................
+#........................................................................
                 CCS             OMEGAP                  # HERE IF IN X-AXIS OVER-RIDE
                 TCF             +4
                 TCF             RATEDONE
@@ -250,16 +252,16 @@ RHCMOVED        CAF             BIT1                    # CHECKING THE RATE COMM
                 MP              0.88975
                 TS              PRATECOM                # COMMANDED RATE SCALED AT PI/4
 
-                CAF             ZERO                    # ZERO COUNTS
+                CAF             ZERO                    # ZERO COUNTERS
                 TS              P-RHCCTR
                 TS              Q-RHCCTR
                 TS              R-RHCCTR
-                CA              BITS8,9                 # ENABLE COUNTERS, START READING
+                CA              BITS8,9                 # ENABALE COUNTERS, START READING
                 EXTEND
                 WOR             13
                 TCF             OBEYRATE
-#.................................................................................
-JUSTOUT         INCR            DAPBOOLS                # ALWAYS SET BIT1 ON RATE COMMAND BIT
+#........................................................................
+JUSTOUT         INCR            DAPBOOLS                # ALWAYS SETS BIT1 ON RATE COMMAND BIT
                 CAF             BIT2
                 EXTEND
 
@@ -285,7 +287,7 @@ JUSTOUT         INCR            DAPBOOLS                # ALWAYS SET BIT1 ON RAT
                 EXTEND
                 WOR             13
                 TCF             JETSOFF
-#.................................................................................
+#........................................................................
 
 JOEY            CAF             ZERO
 
@@ -297,7 +299,7 @@ JOEY            CAF             ZERO
 OBEYRATE        CS              OMEGAP
                 AD              PRATECOM
                 CCS             A                       # IF POSITIVE, NON-ZERO, STORE POSITIVE
-                CAF             BIT1                    # P-AXIS ROTATION.
+                CAF             BIT1                    # P-AXIS ROTATION
 
                 TCF             +2                      # WILL NOT COME HERE DIRECTLY
                 CS              BIT1                    # NEGATIVE, NON-ZERO, STORE NEGATIVE
@@ -347,13 +349,13 @@ OBEYRAPE        CCS             PERROR                  # GET ABVAL OF RATE P-ER
                 DOUBLE
                 TS              TP                      # AND GO CHECK MINIMUM IMPULSE
 
-#.................................................................................
+#........................................................................
 # CHECK RATE COMMAND ON TIME AGAINST MINIMUM IMPULSE
                 TS              TOFJTCHG
                 AD              -TJMINT6
                 EXTEND                                  #   AS TP. TEST JFT TIME. IS IT GREATER OR
                 BZMF            JETSOFF                 # LESS THAN A MINIMUM IMPULSE
-#.................................................................................
+#........................................................................
 
 ## Page 475
 # PROGRAM NAME: PJETSLEC                       DATE: DECEMBER 9, 1966
@@ -390,7 +392,7 @@ OBEYRAPE        CCS             PERROR                  # GET ABVAL OF RATE P-ER
 # TRIED.  IF NO GOOD POLICIES ARE FOUND, CONTROL GOES TO ABORTJET TO TURN OFF THE JETS AND THE DAP.
 
 #     WHEN A GOOD POLICY IS FOUND, WRITEP IS CALLED TO WRITE THE POLICY INTO CHANNEL 6, +/-2/4 IS STORED IN
-# NO.PJETS, AND BIT9 IS PUT INTO JTSATCHG TO CAUSE THE P-AXIS JETS TO BE TURND OFF ON THE NEXT T6RUPT. CONTROL
+# NO.PJETS, AND BIT9 IS PUT INTO JTSATCHG TO CAUSE THE P-AXIS JETS TO BE TURNED OFF ON THE NEXT T6RUPT. CONTROL
 # THEN TRANSFERS TO TORKVEC.
 
 # CALLING SEQUENCES: NONE                      SUBROUTINES CALLED:
@@ -402,7 +404,7 @@ OBEYRAPE        CCS             PERROR                  # GET ABVAL OF RATE P-ER
 
 # NORMAL EXIT MODES:                           ALARM OR ABORT EXIT MODES:
 
-#     TCF SKIPTEST                                      EXTEND
+#     TCF TORKVEC                                       EXTEND
 #                                                       DCA    ABORTADR
 #                                                       DTCB
 
@@ -430,7 +432,7 @@ OBEYRAPE        CCS             PERROR                  # GET ABVAL OF RATE P-ER
 #     NO.PJETS  - +/-2/4, SENSE OF P-AXIS ROTATION AND NUMBER OF JETS USED
 #                 BY POLICY ACTUALLY SELECTED(MAY NOT = 4 IF 4 JETS RE-
 #                 QUESTED BUT ONE OR MORE JETS FAILED)
-#     TOFJTCHG  - MODIFIED BY MCOMP OR -14TOMIN DEPENDING ON WETHER THE
+#     TOFJTCHG  - MODIFIED BY MCOMP OR -14TOMIN DEPENDING ON WHETHER THE
 #                 JETS WERE ON WHEN PJETSLEC WAS CALLED
 #     DAPBOOLS, BIT5(AORBSYST) = 1/0, IF THE INPUT VALUE WAS 0/1, UNLESS JETS WERE ON WHEN PJETSLEC STARTED.
 
@@ -530,7 +532,7 @@ WRITEPOL        INDEX           REL                     # A GOOD POLICY IS FOUND
                 CAF             BIT9                    # TURN OFF P-AXIS JETS AFTER T6RUPT
                 TS              JTSATCHG
 
-                TCF             TORKVEC                 # RECONSTRUCT P TORQUE VECTOR, THEN JTLST
+                TCF             TORKVEC                 # RECONSTRUCT P TORQUE VECTOR, THEN JTLST.
 
                 EBANK=          JTSONNOW                # WOULD YOU BELIEVE, EBANK = 6
 ABORTADR        2CADR           ABORTJET                # WHERE TO GO WHEN ALL JET POLICIES FAIL
@@ -872,7 +874,7 @@ TORKVEC         CS              TOFJTCHG
 
 #          5) THE T6 CLOCK WAS TURNED ON TO BEGIN COUNTING DOWN TIME 6
 
-#     AT THE QR AXES JET LIST COMPUTATION, THE T6 CLOCK AS BEEN REDUCED
+#     AT THE QR AXES JET LIST COMPUTATION, THE T6 CLOCK HAS BEEN REDUCED
 #     TO 70 MS (120-50) THEREFORE THE FOLLOWING OCCURS ....
 
 #          1) CHANNEL 5 IS LOADED WITH OCTAL 40022 TO TURN ON JETS 2 AND
@@ -1078,7 +1080,7 @@ JETLWADR        CADR            TJETLAW
 
 
 SETIDLE         LXCH            BANKRUPT                # FIRST T5RUPT AFTER FRESH START COMES
-                CAF             IDLERADR                # HERE, DAPIDLER IS STARTED IN 1 SECOND
+                CAF             IDLERADR                # HERE, DAPIDLER IS STARTED IN 1 SECOND.
                 TS              T5ADR
                 CAF             1SECRUPT
                 TS              TIME5
@@ -1090,7 +1092,7 @@ SETIDLE         LXCH            BANKRUPT                # FIRST T5RUPT AFTER FRE
 
 # DUMMY FILTER RUPT AFTER P-AXIS RUPT.
                 EBANK=          AOSQTERM
-DUMMYFIL        CAF             TWENTYMS                # RESET TIMER IMMEDIATELY.  DT=20 MS
+DUMMYFIL        CAF             TWENTYMS                # RESET TIMER IMEDIATELY.  DT=20 MS
                 TS              TIME5
                 LXCH            BANKRUPT                # INTERRUPT LEAD-IN (CONTINUED).
 
@@ -1132,7 +1134,7 @@ DLOOP           TS              ITEMP1
 
 # FORM ACCDOT*CSP(2)*(1-.5*K) SCALED AT PI/4.  THIS IS THE INCREMENT TO BE ADDED TO THE OFFSET ACCELERATION TERM.
 
-                CAE             (1-K)                   # (1-K) SCALED AT 1.  CS TO COMPENSATE FOR
+                CAE             (1-K)                   # (1-K)   IS SCALED AT 1.
                 EXTEND
                 MP              BIT9                    # .5*(1-K) , SCALED AT 2(5).
                 AD              BIT9                    # (1.-.5*K) SCALED AT 2(5).

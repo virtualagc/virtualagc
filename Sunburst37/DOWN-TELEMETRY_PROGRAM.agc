@@ -18,6 +18,8 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-05-24 MAS  Created from Sunburst 120.
 ##              2017-06-04 HG   Transcribed
+##		2017-06-22 RSB	Proofed comment text with
+##				octopus/ProoferComments.
 
 ## Page 311
 # PROGRAM NAME- DOWN TELEMETRY PROGRAM
@@ -73,13 +75,13 @@ LOWIDCOD        OCT             00437
 
 ## Page 312
 # SPECIAL DOWNLIST FOR AGS INITIALIZATION. AGSLIST MUST RESIDE IN
-#   LOCATION 2001 OF DOWNLOAD EBANK.
+#   LOCATION 2001 OF DOWNLINK EBANK.
 
 # AGSLIST IS NOT REQUIRED FOR AS206 BUT IS INSERTED IN SUNBURST TO
 #   RESERVE SPACE FOR IT IN 207/8 AND FUTURE MISSIONS.
 
 AGSLIST         EQUALS
-#                                         -------------DOUBLE PRECISION - ANY BANK  (GROUP 2)---------------------
+#                                         -------------DOUBLE PRECISION - ANY EBANK  (GROUP 2)---------------------
                 ECADR           DMYECADR
                 ECADR           DMYECADR
                 ECADR           DMYECADR
@@ -168,7 +170,7 @@ AGSLIST         EQUALS
                 ADRES           DMYADRES
                 ADRES           DMYADRES
 
-# SPECIAL DATA LIST FRO HIGH SPEED RADAR SAMPLING, NOT REQUIRED IN AS206.
+# SPECIAL DATA LIST FOR HIGH SPEED RADAR SAMPLING.
 UPDNLIST        EQUALS          AGSLIST
 
 ## Page 314
@@ -227,17 +229,16 @@ SENDID          CA              DNLSTADR                # INITIALIZE DOWNLIST AD
                 EXTEND                                  # FIXED BANK. RESULT = 0000 - 1777. NO
 
 ## Page 315
-                                                        # CONFLICT
-                WRITE           DNTM1
-                CS              BIT7
-                EXTEND
-                WAND            13                      # CHANNEL 13 TO 0
+                                                        # CONFLICT OF DUPLICATE ID WORDS CAN OCCUR
+                WRITE           DNTM1			# SEND FIRST ID WORD.
+                CS              BIT7			# SET WORD
+                EXTEND					# ORDER BIT 7 IN
+                WAND            13                      # CHANNEL 13 TO 0.
                 EXTEND                                  # SET UP DNTMGOTO SO NEXT ENTRY TO
                 QXCH            DNTMGOTO                # DODOWNTM WILL TRANSFER CONTROL TO
                                                         # THE INSTRUCTION AFTER TC SENDID.
-
-                CAF             LOWIDCOD                # PLACE SPECIAL ID CODE INTO L
-                TCF             TMEXITL
+                CAF             LOWIDCOD                # PLACE SPECIAL ID CODE IN A.
+                TCF             TMEXITL			# GO SEND SPECIAL ID CODE.
 
 
 #                                         ........................................................................
@@ -444,7 +445,7 @@ NOMDNLST        EQUALS
                 ECADR           VGVECT          +2      # M/CS X 2(-7). IN LOCAL VERTICAL (APS2)
                 ECADR           VGVECT                  # OR STABLE MEMBER (DPS1).
                 ECADR           TTGO                    # ESTIMATED TIME TO GO IN CS(APS2,DPS1,2).
-                ECADR           PHASENUM                # (PHASENUM,1/PIPADT)PRESENT MISSION PHASE
+                ECADR           PHASENUM                # (PHASENUM,GARBAGE)PRESENT MISSION PHASE
                 ECADR           MTIMER2                 # (MTIMER2,MTIMER1) REGISTERS CONTAINING
                 ECADR           MTIMER4                 # (MTIMER4,MTIMER3) DELTA T:S OF MP:S.
                 ECADR           MPHASE2                 # (MPHASE2,MPHASE1) REGISTERS CONTAINING
@@ -495,7 +496,7 @@ NOMDNLST        EQUALS
                 ECADR           CDUY                    # (CDUY,CDUZ) ACTUAL CDU:S
                 ECADR           CDUX            -1      # (GARBAGE,CDUX) ACTUAL CDU:S
                 ECADR           REDOCTR                 # (REDOCTR,SFAIL)RESTART CTR,SLFCK FAIL Q.
-                ECADR           TINT                    # PREDICTED ENGINE ON TIME(MP9,11,13)#
+                ECADR           TINT                    # PREDICTED ENGINE ON TIME(MP9,MP11,MP13)#
                 ECADR           AOSQ                    # (AOSQ,AOSR) MOMENT OFFSET(Q,R)
                 ECADR           FC                      # DPS2 FORCE COMMAND SCALE 3 LBS X 2(-14).
                 ECADR           TEVENT                  # TIME OF GRR / ENGINE ON / ENGINE OFF

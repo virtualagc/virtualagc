@@ -18,6 +18,8 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-05-24 MAS  Created from Sunburst 120.
 ##              2017-05-30 HG   Transcribed
+##		2017-06-22 RSB	Proofed comment text with
+##				octopus/ProoferComments.
 
 ## Page 460
 # PROGRAM NAMES: (1) DOT6RUPT     MOD. NO. 2  DATE: NOVEMBER 15, 1966
@@ -93,7 +95,7 @@ T6JOBCHK        CCS             TIME6                   # CHECK TIME6 FOR WAITIN
 
 # CONTROL PASSES TO T6JOB ONLY WHEN C(TIME6) = -0 (I.E. WHEN A T6RUPT MUST BE PROCESSED).
 
-T6JOB           CAF             ZERO                    # UPDATE ORDERED LIST OF TIME6 DT'S
+T6JOB           CAF             ZERO                    # UPDATE ORDERED LIST OF TIME6 DT'S:
                 XCH             T6NEXT          +1      # 1) PUSH FIRST ENTRY INTO TIME6.
                 XCH             T6NEXT                  # 2) PUSH SECOND ENTRY INTO FIRST PLACE.
 

@@ -20,6 +20,8 @@
 ##              2017-06-03 HG   Transcribed
 ##              2017-06-15 HG   Fix operator CS  -> CAF
 ##                                           XCH -> TS
+##		2017-06-22 RSB	Proofed comment text with
+##				octopus/ProoferComments.
 
 ## Page 430
 # PROGRAM NAME-OPTIMUM PRELAUNCH ALIGNMENT CALIBRATION
@@ -70,7 +72,7 @@
 # DRIFT TESTS- FLASHING DISPLAYS OF RESULTS-CONTROLLED IN IMU PERF TESTS 2
 # COMPASS-PROGRAM MODE LIGHTS TELL YOU WHAT PHASE OF PROGRAM YOU ARE IN
 #    01    INITIALIZING THE PLATFORM POSITION AND ERASABLE
-#    05    ERECTION     600 SECONDS SPENT ERECTING PLATFORM
+#    05    ERECTION     600 SECOND SPENT ERECTING PLATFORM
 #    02    GYROCOMPASSING
 #    03    DOING OPTICAL VERIFICATION (CSM)
 
@@ -95,7 +97,7 @@ ESTIMS          TC              PHASCHNG
 RSTGTS1         INHINT                                  #  COMES HERE PHASE1 RESTART
                 CA              TIME1
                 TS              GTSWTLST
-                CAF             ZERO                    # ZERO THE PIPS
+                CAF             ZERO                    # ZERO THE PIPAS
                 TS              PIPAX
                 TS              PIPAY
                 TS              PIPAZ
@@ -131,9 +133,9 @@ RSTGTS1         INHINT                                  #  COMES HERE PHASE1 RES
                 TC              ANNNNNN
 
 ## Page 433
-ALLOOP          INHINT
+ALLOOP          INHINT					#  TASK EVERY .5 OR 1 SEC (COMPASS-DRIFT)
                 CA              TIME1
-                TS              GTSWTLST                # STORE TIME TO SET UP NEXT WAITLIST.
+                TS              GTSWTLST                # STORE TIME TO SET UP NEXT WAITLIST
 ALLOOP3         CA              ALTIM
                 TS              GEOSAVED
                 TC              PHASCHNG
@@ -685,7 +687,7 @@ SOMERR2         TC              ALARM
 
 ## Page 445
 TQORESTM        TC              BANKCALL
-                CADR            LOADGTSM                # LOAD NEW XSM MATRIX INTO GEOMETRX
+                CADR            LOADGTSM                # LOAD NEW XSM MATRIX INTO GEOMTRX
 
 NOCHORLD        RELINT                                  # AFTER CHANGEIN ORIEN OR NO CHANGE
                 TC              INTPRET
@@ -981,7 +983,7 @@ VELSC           2DEC            -.52223476              #  512/980.402
 ALSK            2DEC            .17329931               # SSWAY VEL GAIN X 980.402/4096
 
 ## Page 451
-                2DEC            -.00835370
+                2DEC            -.00835370		# SSWAY ACCEL GAIN X 980.402/4096
 
 
 
@@ -1035,7 +1037,7 @@ PRELTERM        TC              NEWMODEX
 
 ## Page 452
 
-PRELTERN        INHINT                                  # GET TIME OF PRELAUNCH TERMINATION
+PRELTERN        INHINT                                  # GET TIME OF PRELAUNCH TERMINATION.
                 EXTEND
 
                 DCA             TMARK                   # TIME OF LAST EARTH RATE COMPENSATION.

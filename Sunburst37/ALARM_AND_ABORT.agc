@@ -20,6 +20,8 @@
 ##              2017-06-01 TVB  Transcribed
 ##              2017-06-13 HG   Fix operator TCF -> TC
 ##                              Remove tabs
+##		2017-06-22 RSB	Proofed comment text with
+##				octopus/ProoferComments.
 
 ## Page 300
 
