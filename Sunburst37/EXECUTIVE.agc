@@ -18,6 +18,8 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-05-24 MAS  Created from Sunburst 120.
 ##              2017-06-13 HG   Transcribed
+##		2017-06-23 RSB	Proofed comment text with
+##				octopus/ProoferComments.
 
 ## Page 988
                 BLOCK           02
@@ -306,7 +308,7 @@ JOBWAKE3        CAF             COREINC
                 CCS             EXECTEM2
 
                 TCF             JOBWAKE4
-                CS              ONE                     # EXIT IF SLEEPINg JOB NOT FOUND.
+                CS              ONE                     # EXIT IF SLEEPING JOB NOT FOUND.
                 TS              LOCCTR
                 TCF             ENDFIND
 

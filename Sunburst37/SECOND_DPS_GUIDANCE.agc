@@ -21,6 +21,8 @@
 ##              2017-06-15 HG   Fix interpretive operand /AFC/ -> /ACF/
 ##              2017-06-17 MAS  Added a workaround for yaYUL calculating a
 ##                              fractional number off by one.
+##		2017-06-23 RSB	Proofed comment text with
+##				octopus/ProoferComments.
 
 ## Page 814
 
@@ -118,8 +120,9 @@
 
 # ALARM OR ABORT EXITS -  NONE                       NONE
 
-# ERASABLE                CPT6/2 (IMU COORDS)        2BCADR OF BURN
-#    INITIALIZATION -     OTHER INITIALIZATION       (EBANK= E2DPS) MUST
+# ERASABLE                
+#    INITIALIZATION -     CPT6/2 (IMU COORDS)        2BCADR OF BURN
+#			  OTHER INITIALIZATION       (EBANK= E2DPS) MUST
 #                         DONE INTERNALLY            BE IN AVGEXIT.  OTHER
 #                                                    INITIALIZATION DONE IN
 #                                                                         N PRE-
@@ -267,7 +270,7 @@ LING3F          TCF             LSETODD
 ## The following line is supposed to read "DEC -.25 E2 B-15", which is supposed to
 ## assemble to the octal 77763 ... but actually assembles to 77762.  For the present,
 ## it is being hard-coded as "OCT 77763" as a workaround.
-                OCT             77763                   # -.25 SECONDS, TTF UNITS, COMPRES TTF/4
+                OCT             77763                   # -.25 SECONDS, TTF UNITS, COMPARES TTF/4
                 TCF             EXFINAL
 
 
@@ -312,7 +315,7 @@ NTLZPASS        EXTEND
                 QXCH            RETNTLZ
 
                 TC              PRETINIT                # INITIALIZES INTERPRETER
-
+# SET INDICES
 
                 EXTEND
                 INDEX           AVGEXIT
@@ -355,9 +358,9 @@ NTLZPASS        EXTEND
 RETIGN1         TC              PHASCHNG                # RETURN HERE WHETHER OR NOT DO IGNITN1.
  +402           OCT             04022                   # PROTECT TTF/4TMP AS USED BY IGNITN1 FROM
 
- ## Page 821
+## Page 821
                                                         # WIPEOUT BY ADTTFNU AND TTFINCR. ALSO
-                                                        # PROTECT RTEMP, VTEMP FROM RS, VS (SHRE)
+                                                        # PROTECT RTEMP, VTEMP FROM RS, VS (SHARE)
 
                 CCS             FLPASS0
                 TCF             TTFINCR         +1      # ON OTHER THAN FIRST PASS IN ANY PHASE.
@@ -442,8 +445,8 @@ STUP2DPS        TC              INTPRET
                 STOVL           VL                      # VL = 2 CLT/2 V
                                 R
                 DOT             SL1
-                                CPT6/2                  #       - -
-                STOVL           RP2                     # RP2 = R.CPT6
+                                CPT6/2                  #         - -
+                STOVL           RP2                     # RP2 = 2 R.CPT6/2
                                 R
                 VXV             DOT
                                 V
@@ -477,7 +480,7 @@ STUP2DPS        TC              INTPRET
                 DDV
 
                                 RC
-                STODL           TRS2                    # TNEGENT (RS2) = RP2/RC
+                STODL           TRS2                    # TANGENT (RS2) = RP2/RC
                                 SRS2
                 SR1             ARCSIN
                 DMP             SL3
@@ -753,7 +756,7 @@ RETIGN2         TC              PHASCHNG                # RETURN (NORMAL) FROM I
 # 3.       EXQDLIN IS USED TO TERMINATE EACH PASS UP UNTIL BUT NOT INCLUDING THE LAST PASS ON ALL 2DPS BURN
 #          PHASES. EXQDLIN OBTAINS ATTITUDE AND THROTTLE CONTROL AND TERMINATES THE JOB.
 
-# 4.       EXFINAL IS THE FINAL 2DPS EXIT. IT SETS UP AND ISSUES THE ATTITUDE COMMAND FOR RANDOM THROTTLING, OBTAINS
+# 4.       EXFINAL IS THE FINAL 2DPS EXIT. IT SETS UP THE ATTITUDE COMMAND FOR RANDOM THROTTLING, OBTAINS
 #          ATTITUDE AND THROTTLE CONTROL, AND EXITS TO THE MISSION CONTROL PROGRAM.
 
 
@@ -789,7 +792,7 @@ EXIGMID         TC              PRETINIT                # INITIALIZES INTERPRETE
                                 VN1
                 STORE           VN                      # UPDATED VELOCITY
                 EXIT
-                TC              AVGEXIT                 # RETURNS TO APPROPRIATE LOCATION IN 2DPS
+                TC              AVGEXIT                 # RETURNS TO APPROPRIATE LOCATION IN 2DPS.
 
 ## Page 830
 
@@ -865,9 +868,9 @@ EXIGEND         EXTEND
 
 ## Page 832
 # EXQDLIN STORES THE SEMI-UNIT VECTOR DEFINING THE DIRECTION OF COMMANDED THRUST ACCELERATION (UNAFC/2) IN THE
-# APPROPRIATE REGISTERS OF FINDCDUD (AXISD) AND CALLS FINDCDUD AND THROTCON AS SUBROUTINES.
+# APPROPRIATE REGISTERS OF FINDCDUD (AXISD) AND CALLS FINDCDUD AS A SUBROUTINE.
 
-# THEN EXQDLIN TRANSFERS THE COMMANDED THRUST ACCELERATION MAGNITUDE (/AFC/) TO THE APPROPRIATE RESGISTERS OF
+# THEN EXQDLIN TRANSFERS THE COMMANDED THRUST ACCELERATION MAGNITUDE (/AFC/) TO THE APPROPRIATE REGISTERS OF
 # THROTCON, (/ACF/), CHANGING SCALING, AND CALLS THROTCON AS A SUBROUTINE.
 # FINALLY EXQDLIN TERMINATES THE JOB.
 
@@ -889,9 +892,9 @@ EXQDLIN         TC              INTPRET
 
 # EXFINAL IS THE FINAL EXIT FROM 2DPS. FIRST EXFINAL PLACES THE SEMI-UNIT NORMAL TO THE ORBITAL PLANE (CPT6/2)
 # IN AXISD AND CALLS FINDCDUD AS A SUBROUTINE. THIS CAUSES FURTHER THRUSTING TO BE NORMAL TO THE ORBITAL PLANE.
-# THEN EXFINAL TRANSFERS TEH COMMANDED THRUST ACCELERATION MAGNITUDE (/AFC/) TO THE APPROPRIATE REGISTERS OF
+# THEN EXFINAL TRANSFERS THE COMMANDED THRUST ACCELERATION MAGNITUDE (/AFC/) TO THE APPROPRIATE REGISTERS OF
 
-# THROTCON, (ACF/), CHANGING SCALING, AND CALLS THROTCON AS A SUBROUTINE.
+# THROTCON, (/ACF/), CHANGING SCALING, AND CALLS THROTCON AS A SUBROUTINE.
 # FINALLY EXFINAL RETURNS TO THE MISSION CONTROL PROGRAM WHICH EXECUTES THE RANDOM THROTTLING.
 
 EXFINAL         TC              INTPRET
@@ -904,7 +907,7 @@ EXFINAL         TC              INTPRET
                 EXTEND
                 DCA             THROTCOL
                 DTCB                                    # THROTTLE CONTROL
-                TC              PRETINIT                # INITIALIZE INTERPRETER
+                TC              PRETINIT                # INITIALIZES INTERPRETER
                 EXTEND
                 DCA             RETBURNL
                 DTCB

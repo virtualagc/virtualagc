@@ -22,6 +22,8 @@
 ##              2017-06-15 HG   Fix page number 814 -> 762
 ##                              Add missing instruction TCF ENDUP
 ##                              remove operand modifier CHKUPDEX +1 -> CHKUPDEX
+##		2017-06-23 RSB	Proofed comment text with
+##				octopus/ProoferComments.
 
 ## Page 748
 #          THE FOLLOWING ROUTINES IMPLEMENT THE MISSION SCHEDULING LOGIC AS DESCRIBED IN CHAPTER 4 OF THE

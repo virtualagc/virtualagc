@@ -20,6 +20,8 @@
 ##              2017-06-11 HG   Transcribed
 ##              2017-06-15 HG   Fix interpretive operator STODL -> STORE
 ##              2017-06-17 MAS  Split up an "E-4B9".
+##		2017-06-23 RSB	Proofed comment text with
+##				octopus/ProoferComments.
 
 ## Page 851
 #      PREAPS2 IS A PROGRAM WHICH INITIALIZES **ASCENT** FOR THE 2ND APS

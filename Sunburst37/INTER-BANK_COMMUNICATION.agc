@@ -20,6 +20,8 @@
 ##              2017-06-03 TVB  Transcribed.
 ##              2017-06-14 HG   Fix opcode CA -> DCA
 ##                              Add missing EXTEND
+##		2017-06-23 RSB	Proofed comment text with
+##				octopus/ProoferComments.
 
 ## Page 888
 #          THE FOLLOWING ROUTINE CAN BE USED TO CALL A SUBROUTINE IN ANOTHER BANK. IN THE BANKCALL VERSION, THE
@@ -71,8 +73,8 @@ MAKECADR        CAF             LOW10
 
 
 #          THE FOLLOWING ROUTINE OBTAINS THE TWO WORDS BEGINNING AT THE ADDRESS ARRIVING IN A, AND LEAVES THEM IN
-# A,L.  ENTER WITH THE CADR IN A, AT DATACALL WITH JUNK IN L IF NOT SWITCHING SUPERBANKS, OTHERWISE AT SUPDACAL WITH
-# SUPERBANK BITS IN BITS 7-5 IN L (BITS 15-8 AND 4-1 MAY BE JUNK).  DEBRIS = MTEMP.  INHINTS FOR ABOUT 165 MUSEC.
+# A,L.  ENTER WITH A CADR IN A, AT DATACALL WITH JUNK IN L IF NOT SWITCHING SUPERBANKS, OTHERWISE AT SUPDACAL WITH
+# SUPERBANK BITS IN BITS 7-5 IN L (BITS 15-8 AND 4-1 MAY BE JUNK).  DEBRIS = MPTEMP.  INHINTS FOR 180 MUSEC.
 
 DATACALL        TS              L                               # SAVE CADR (SOLE INPUT HERE).
                 EXTEND                                          
@@ -91,7 +93,7 @@ SUPDACAL        TS              MPTEMP
                 WRITE           SUPERBNK                        # SET SUPERBANK FOR DATA.
                 EXTEND
                 INDEX           L                               
-                DCA             10000                           
+                DCA             10000                           # THIS IS SAFE EVEN IF CADR WAS END BANK.
 
                 XCH             MPTEMP                          # SAVE 1ST WD, FETCH OLD FBANK AND SBANK.
                 EXTEND                                          

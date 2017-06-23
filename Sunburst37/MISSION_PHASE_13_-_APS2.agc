@@ -18,6 +18,8 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-05-24 MAS  Created from Sunburst 120.
 ##              2017-06-14 HG   Transcribed
+##		2017-06-23 RSB	Proofed comment text with
+##				octopus/ProoferComments.
 
 ## Page 704
 # MISSION PHASE 13 EXERCISES THE ASCENT GUIDANCE EQUATIONS OF PROG 46
@@ -66,7 +68,7 @@ MP13JOB         EXTEND
                                 33D                     
                 EXIT                                    
                                                         
-                CAF             PRIO30                  # SET UP ATTITUDE MANEUVER JOB.
+                CAF             PRIO30                  # SET ATTITUDE MANEUVER JOB
                 INHINT                                  
                 TC              FINDVAC                 
                 EBANK=          MIS                     
@@ -131,13 +133,13 @@ TIG13           TC              ENGINEON                # FIRE UP APS ENGINE
                 CADR            NOULLAGE                # ULLAGE JETS OFF AT TIG + .5
                                                         
                 TC              FIXDELAY
-                DEC             50                      # DELAY .5 SECS AND START ASCENT GUIDANCE
+                DEC             50                      # DELAY .5 SEC AND START ASCENT GUIDANCE
                 EXTEND
                 DCA             ATMAGAD
                 DXCH            AVGEXIT                 # SET AVEG LOOP TO THRUST MAGNITUDE FILTER
 
                 TC              FIXDELAY
-                DEC             800                     # START 8 SECS AND DO FEED TEST
+                DEC             800                     # DELAY 8 SECS AND DO FEED TEST
                 TC              FEEDTEST                # START FEED TEST ROUTINE
 
                 EXTEND

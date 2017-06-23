@@ -20,6 +20,9 @@
 ##              2017-06-03 MAS  Transcribed.
 ##              2017-06-08 HG   Fix operand SETDVCNT -> DVSELECT
 ##                              Remove non existent section
+##		2017-06-23 RSB	Proofed comment text with
+##				octopus/ProoferComments.
+
 ## Page 763
 # **SERVICER ROUTINES**
 
@@ -29,7 +32,7 @@
 
 #   *FUNCTIONAL DESCRIPTION*
 
-#     THE THRUST MISSION CONGROL PROGRAM TJS IS USED BY ALL MISSION PHASES WHICH INCLUDE A BURN.
+#     THE THRUST MISSION CONTROL PROGRAM TJS IS USED BY ALL MISSION PHASES WHICH INCLUDE A BURN.
 
 #     THE NORMAL ENTRY TO THE THRUST MISSION CONTROL PROGRAM IS THROUGH PREREAD.  PREREAD SCHEDULES THE JOB
 # LASTBIAS.  BOOST PHASE ENTERS THE PREREAD ROUTINE AT BIBIBIAS, BYPASSING THE LASTBIAS JOB.  PIPS ARE CLEARED,
@@ -194,7 +197,7 @@ BIBIBIAS        EXTEND
 READACCS        EXTEND
                 DCA             PIP2CADR
                 DXCH            Z                       # CALL PIPASR
-                CCS             PHASE5                  # LAST PAST CHECK
+                CCS             PHASE5                  # LAST PASS CHECK
 
                 TCF             +2
                 TCF             TASKOVER
@@ -445,7 +448,7 @@ ENGINEON        EXTEND
                 TS              DVSELECT
 
                 CS              PRIO30                  # ENGINE ON BIT13.  ENGINE OFF BIT14
-                EXTEND                                  # DEPENDING ON THE ARM COMMAND
+                EXTEND                                 
                 RAND            11
                 AD              BIT13
                 EXTEND
@@ -461,7 +464,7 @@ ENGINOFF        EXTEND
                 DCA             TIME2                   # NOTE ENGINE OFF EVENT TO DOWNLINK
                 DXCH            TEVENT
 
-ENGINOF1        CS              PRIOR30                 # NO DOWNLINK HERE
+ENGINOF1        CS              PRIOR30                 # NO DWNLINK HERE
 ## Page 772
                 EXTEND
                 RAND            11
@@ -511,7 +514,7 @@ COPYCYCL        INHINT
                 DXCH            MASS
                 EXTEND
                 DCA             PIPTIME
-                DXCH            STATIME                 # STATE VECTOR TIME FOR DOWNLINK
+                DXCH            STATIME                 # STATE VECTOR TIME FOR DWNLINK
 
                 RELINT
 

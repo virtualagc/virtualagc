@@ -19,6 +19,8 @@
 ## Mod history: 2017-05-24 MAS  Created from Sunburst 120.
 ##              2017-06-14 HG   Transcribed
 ##              2017-06-15 HG   Fix operand CA  -> CS
+##		2017-06-23 RSB	Proofed comment text with
+##				octopus/ProoferComments.
 
 ## Page 802
                 BANK            12
@@ -108,7 +110,7 @@
 #       NBDX      X IRIG BIAS DRIFT
 #       NBDY      Y IRIG BIAS DRIFT
 
-#       NDBZ      Z IRIG BIAS DRIFT
+#       NBDZ      Z IRIG BIAS DRIFT
 #       ADIAX     IRIG ACCELERATION SENSITIVE DRIFT ALONG THE X INPUT AXIS
 #       ADIAY     IRIG ACCELERATION SENSITIVE DRIFT ALONG THE Y INPUT AXIS
 #       ADIAZ     IRIG ACCELERATION SENSITIVE DRIFT ALONG THE Z INPUT AXIS
@@ -149,7 +151,7 @@
                 TS              VBUF                    # TEMPORARY - MINOR PARTS IRRELEVANT
 
                 INDEX           BUF             +2
-                CS              PIPABIAS                # (IPA PULSES)/(CS) X 2(-5)              *
+                CS              PIPABIAS                # (PIPA PULSES)/(CS) X 2(-5)             *
                 EXTEND
                 MP              1/PIPADT                # (CS) X 2(+8)  NOW (PIPA PULSES) X 2(+3)*
                 EXTEND                                  #                                        *
@@ -175,7 +177,7 @@
                 DAS             VBUF                    # (PIPAI) - (NBD)(DELTAT) + (PIPAI)(SFE)
 
                 EXTEND
-                DCA             VBUF                    # RETORE COMPENSATED PIPA READING
+                DCA             VBUF                    # RESTORE COMPENSATED PIPA READING
                 INDEX           BUF             +2
                 DXCH            DELVX
 
@@ -458,7 +460,7 @@ LASTBIAS        CCS             GCOMPSW                 # BYPASS IF GCOMPSW NEGA
                 TCF             +2
                 TCF             ENDOFJOB
 
-                CAF             PRIO31                  # 2 SECONDS SCALED (CS) X 2(+8)
+                CAF             PRIO31                  # 2 SECONDS SCALED (CS) X 2(+14)
                 XCH             1/PIPADT
                 COM
                 AD              PIPTIME         +1      # TIME AT PIPAI = 0

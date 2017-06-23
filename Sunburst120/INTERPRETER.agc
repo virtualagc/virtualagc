@@ -16,6 +16,7 @@
 ##				changes made.
 ##		2017-03-15 RSB	Comment-text fixes identified in 5-way
 ##				side-by-side diff of Luminary 69/99/116/131/210.
+##		2017-06-23 RSB	Replaced an erroneous } with a correct ).
 	
 ## Page 953
 # SECTION 1  DISPATCHER
@@ -2010,7 +2011,7 @@ BIASHI          DEC             .4192           B-1             # SQRT CONSTANTS
 
 #          A + SB .      (R - QD)                                             A + SB
 #          ------ = Q + S(------) WHERE Q AND R ARE QUOTIENT AND REMAINDER OF ------ RESPECTIVELY.
-#          C + SD        (  C   }                                                C
+#          C + SD        (  C   )                                                C
 
 
 GENDDV          DXCH            MPAC                            # WE NEED A AND B ONLY FOR FIRST DV.

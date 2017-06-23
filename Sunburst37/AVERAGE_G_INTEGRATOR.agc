@@ -19,6 +19,8 @@
 ## Mod history: 2017-05-24 MAS  Created from Sunburst 120.
 ##              2017-06-13 MAS  Updated for Sunburst 37 (this includes 
 ##                              Sunburst 120's MASS CALCULATOR too).
+##		2017-06-23 RSB	Proofed comment text with
+##				octopus/ProoferComments.
 
 ## Page 788
 # *************************************************************************************************************
@@ -252,7 +254,7 @@ VEXLOOP         CA              FOUR
                 AD              CVEX1
                 EXTEND
                 MP              PREFORCE
-                DAS             AREARATE                        # NOW SCALED IN UNITS OF 2(-2) PERCENT/CS
+                DAS             AREARATE                        # SCALED IN UNITS OF 2(-4) PERCENT/CS
 
 
                 CA              AREARATE
@@ -296,7 +298,7 @@ NOMASS          STORE           MASSTEMP
 
 
 
-LOWFCRIT        DEC             .01336                          # MAXIMUM THRUSt OF THE RCS JETS
+LOWFCRIT        DEC             .01336                          # MAXIMUM THRUST OF THE RCS JETS
 
 MASSCRIT        DEC             .173031964                      # MASS OF LEM WITH DPS > MASSCRIT > MASS
                                                                 #   OF LEM WITHOUT DPS

@@ -21,6 +21,8 @@
 ##              2017-06-14 HG   Fix operand THRUSTCMD -> THRSTCMD
 ##                                          AVEXIT    -> AVGEXIT
 ##              2017-06-15 HG   Fix value DELTAT9    B-35 -> B-38 
+##		2017-06-23 RSB	Proofed comment text with
+##				octopus/ProoferComments.
 
 ## Page 684
 # MISSION PHASE 9
@@ -91,7 +93,7 @@ MP9JOB          TC              NEWMODEX                        # DISPLAY PROGRA
                 CALL
                                 VPATCHER                        # RESCALE AND LOAD TDI STATES IN RN AN VN
                 GOTO
-                                DPS1EQU1                        # COMPUTES VELOCITY TO BE GAINED.
+                                DPS1EQU1                        # COMPUTES VELOCITY TO BE GAINED
 
 DPS1EQU2        DLOAD                                           # COMPUTES MANEUVER THRUST TIME
                                 LV                              # ABVAL(VG)
@@ -201,11 +203,11 @@ GOODKALC	CAF		11SECS9
                 DEC             400
 
                 TC              1LMP
-                DEC             27                              # RADAR SELF TEST-OFF.
+                DEC             27                              # RADAR SELF TEST-OFF
 
                 TC              TASKOVER                        # END 182LMP TASK
 
-TIG9-36         TC              NEWMODEX                        # DISPLAY PROGRAM NUMBER ON DSKY
+TIG9-36         TC              NEWMODEX                        # DISPLAY PROGRAM NUMBER IN DSKY
                 OCT             41
 
                 TC              ENGINOF1			# MAKE SURE ENGINE OFF
@@ -448,7 +450,7 @@ DPS1EQU1        VLOAD           VXV
                 DEC             750
 
                 TC              IBNKCALL
-                CADR            ULLAGE                          # +X TRANSLATION ON.
+                CADR            ULLAGE                          # +X TRANSLATION- ON
                 TCF             TASKOVER                        # END 228LMP TASK
 
 #          ********************************

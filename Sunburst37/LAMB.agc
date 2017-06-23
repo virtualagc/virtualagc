@@ -19,6 +19,8 @@
 ## Mod history: 2017-05-24 MAS  Created from Sunburst 120.
 ##              2017-06-10 MAS  Updated for Sunburst 37.
 ##              2017-06-14 HG   Fix interpretive operand COGAMIN -> COGAMN
+##		2017-06-23 RSB	Proofed comment text with
+##				octopus/ProoferComments.
 
 ## Page 865
 		BANK	36

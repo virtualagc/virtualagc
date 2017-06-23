@@ -18,6 +18,8 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-05-24 MAS  Created from Sunburst 120.
 ##              2017-06-14 HG   Transcribed
+##		2017-06-23 RSB	Proofed comment text with
+##				octopus/ProoferComments.
 
 ## Page 780
 
@@ -59,14 +61,14 @@
 
 #    THE PIPA READINGS ARE OUTPUT THROUGH THE VECTOR DELV. DELTAT, SCALED AT 2(+28)CS, IS COMPUTED FOR AVERAGEG.
 
-# PIPTIME CONTAINS THE NEGATIVE OF THE CURRENT TIME
+# PIPTIME CONTAINS THE NEGATIVE OF THE CURRENT TIME.
 
 
 # DEBRIS (ERASABLE LOCATIONS DESTROYED BY PROGRAM)
 
 #    TEMX  TEMY  TEMZ  TEMXY  PIPAGE  PIPTIME  PIPAX  PIPAY  PIPAZ
 
-# (ARRIVE IN INTERRUPTED STATE OR INHIBITED AFTER RESTART.. EXIT
+# (ARRIVE IN INTERRUPTED STATE OR INHIBITED AFTER RESTART. EXIT
 # THRU ISWRETURN)
 
                 BANK            30
@@ -106,7 +108,7 @@ REPIP2          CS              PIPAY
 REPIP2B         TS              DELVY
                 TS              DELVY           +1
 
-REPIP3          CS              PIPAZ                   # REPEAT PROCESS FOR Z PIP
+REPIP3          CS              PIPAZ                   # REPEAT PROCESS FOR Z PIPA.
                 TS              TEMXY                   # SAVE NEG OF PIPA READ
 
                 XCH             TEMZ                    # SAVE HERE AS PICK UP NEGZERO
@@ -178,7 +180,7 @@ CHKDELVX        CCS             DELVX           +1      # HAS THIS CHANGED.
                 CS              TEMXY
                 TCF             REPIP2B
 
-CHKTEMX         CCS             TEMX                    # HAS THIS CHANGED
+CHKTEMX         CCS             TEMX                    # HAS THIS CHANGED.
 
                 TCF             +4                      # YES
                 TCF             +3                      # YES

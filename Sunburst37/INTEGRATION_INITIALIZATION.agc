@@ -18,6 +18,8 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-05-24 MAS  Created from Sunburst 120.
 ##              2017-06-13 HG   Transcribed
+##		2017-06-23 RSB	Proofed comment text with
+##				octopus/ProoferComments.
 
 ## Page 713
 # AVETOMID PERFORMS THE TRANSITION FROM A THRUSTING PHASE TO A COASTING PHASE.  THE ROUTINE INITIALIZES THE
@@ -192,7 +194,7 @@ MOVETEMP        CAF             FORTYTWO
                 INDEX           DIFEQCNT
                 TS              REFRRECT                # STORE IN REFRRECT TO REFRRECT +42 IN P-M
                 CCS             DIFEQCNT                # IS TRANSFER COMPLETE
-                TCF             MOVETEMP        +1      # NO-LOOP AGAIN.
+                TCF             MOVETEMP        +1      # NO-LOOP AGAIN
                 TC              Q                       # TRANSFER COMPLETE-RETURN
 
 # MOVEPERM TRANSFERS REFRRECT TO REFRRECT +42 FROM PMEMORY TO A-MEMORY
@@ -367,7 +369,7 @@ REFTOSM1        VLOAD*          VXSC*                   # TRANSFORM STATE AT TIG
                                 REFTOSM1
                 EXTEND                                  # PLAY SAFE WITH BASIC********************
                 DCA             TET                     # ****************************************
-                DXCH            TIGN                    # STATE TIME FOR DOWNLINK IN VPATCHER
+                DXCH            TIGN                    # STATE TIME FOR DWNLINK IN VPATCHER
                 DXCH            AVMIDRTN
                 DXCH            Z
 # THE COASTINT ROUTINE TERMINATES THE ORBITAL INTEGRATION JOB SET BY

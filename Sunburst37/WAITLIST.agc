@@ -19,6 +19,8 @@
 ## Mod history: 2017-05-24 MAS  Created from Sunburst 120.
 ##		2017-06-03 TVB	Transcribed.
 ##              2017-06-15 HG   Fix operator XCH -> TS
+##		2017-06-23 RSB	Proofed comment text with
+##				octopus/ProoferComments.
 
 ## Page 1001
 
@@ -449,7 +451,7 @@ LONGCYCL        EXTEND                                          # CAN WE SUCCESF
                                                                 # BASIC INSTRUCTIONS
                                                                 # DO NOT SIGN CORRECT) AND THAT WE SUBTRAC
                                                                 # TED BIT14 (1 OVER HALF THE POS. VALUE
-                                                                # REPRESENTABLE IN SINGLE WORD)
+                                                                # REPRESENTIBLE IN SINGLE WORD)
 
 ## Page 1013
 

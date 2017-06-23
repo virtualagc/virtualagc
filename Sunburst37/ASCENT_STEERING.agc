@@ -19,6 +19,8 @@
 ## Mod history: 2017-05-24 MAS  Created from Sunburst 120.
 ##              2017-06-11 HG   Transcribed
 ##              2017-06-15 HG   Fix value T2 2DEC 200 B-17 -> 2DEC 200
+##		2017-06-23 RSB	Proofed comment text with
+##				octopus/ProoferComments.
 
 ## Page 853
 #    PROGRAM NAME--ASCENT        BY--BERMAN
@@ -69,7 +71,7 @@ ASCENT          VLOAD           V/SC                    # FORM GRAVITY SCALED 2(
                 PDVL            VXV                     # STORE IN PDL(0)                        2
                                 UNITR                   # LOAD UNITR*2(-1)
                                 VN                      # UR*2(-1) X VN*2(-7)=H/R*2(-8)
-                PUSH            UNIT                    # STORE H/R IN PDI (2), GET UH*2(-1)     8
+                PUSH            UNIT                    # STORE H/R IN PDL (2), GET UH*2(-1)     8
                 STOVL           UNNORM                  # STORE UH IN UNNORM, LOAD H/R           2
                 VSQ             DDV                     # H(2)/R(2)*2(-16)
                                 RMAG                    # H(2)/R(3)*2(9)
@@ -113,9 +115,9 @@ ASCENT          VLOAD           V/SC                    # FORM GRAVITY SCALED 2(
                                 1/12TH                  # RZ(2)/12+3/8ORZ(4)                     8
                 DAD             DMP                     # 1/2+RZ(2)/12+3/8ORZ(4)
                                 DP.5                    # RZ(...)                                6
-                DMP             SL1                     # Z*2(-31)
+                DMP             SL1                     # ZX2(N-31)
 
-                                RCO                     # SHIFT TO Z*2(-28)
+                                RCO                     # SHIFT TO ZX2(N-30)
                 PDVL            DOT                     # STORE Z IN PDL(6)                      8
                                 UNITR                   # LOAD URX2(-1)
                                 QAXIS                   # URX2(-1).QX2(-1)=RYX2(-2)
@@ -158,7 +160,7 @@ HOLDR           BON             BON                     # IF DIRECT=1, GO TO LAM
                 STODL           ZDOTD                   # ZDOTD=VINJ
                                 DP0                     # CLEAR MPAC
                 STORE           RDOTD                   # RDOTD=0
-                GOTO                                    # GO TO GAIN WITH YDOD=0 IN MPAC
+                GOTO                                    # GO TO GAIN WITH YDOTD=0 IN MPAC
                                 GAIN
 LAMPREP         BOFF            DLOAD                   # IF LAMB NOT DONE, GO TO GAIN+1
                                 DONESW
@@ -207,7 +209,7 @@ LAMPREP         BOFF            DLOAD                   # IF LAMB NOT DONE, GO T
                 VXSC            VAD                     # QYCOX2(N-31)
                                 QAXIS                   # ADD PS TERMS,GET RCOX2(N-31)          10
                 VSL1                                    # SHIFT TO RCOV*2(N-30)
-                STORE           RCOV                    # STORE CUTOFF PSOTION
+                STORE           RCOV                    # STORE CUTOFF POSITION
                 UNIT                                    # GET URCO*2(-1)
                 STOVL           URCO                    # STORE URCO*2(-1)
                                 PAXIS1
@@ -241,7 +243,7 @@ LAMPREP         BOFF            DLOAD                   # IF LAMB NOT DONE, GO T
                 STOVL           RDOTD                   # STORE IN RDOTD
 
                                 00D                     # LOAD V1*2(-7)
-                DOT             SL1                     # V1.H1*2(-8)=ZDOT*2(-8)
+                DOT             SL1                     # V1.H1*2(-8)=ZDOTD*2(-8)
                                 H1                      # SHIFT TO 2(-7)
                 STOVL           ZDOTD                   # STORE IN ZDOTD,LOAD URCO*2(-1)
 
@@ -308,7 +310,7 @@ KEEPGOIN        BONCLR          RTB                     # DURING PRECOI, GO BACK
                                 TGO
                                 AIMER                   # IF T2-TGO POS,GO TO AIMER
 
-                DLOAD           DSU                     # LOAD TGO*2(-28)
+                DLOAD           DSU                     # LOAD T*2(-28)
                                 TIME                    # SUBTRACT 100 CS, 1/2DT
                                 100CS                   # (T-.5DT)*2(-28)
                 STODL           TREF                    # *2(-28)
@@ -354,7 +356,7 @@ RATER           DLOAD           DSU                     # TGO
                                 28D                     # LOAD DRDOT*2(-7)
                 DMP             SL*                     # DRDOT D21*2(-24)
                                 04D
-                                0               -6,1    # SHIFT TO S(N-30)
+                                0               -6,1    # SHIFT TO 2(N-30)
                 DSU             DDV                     # D21 DRDOT-DR
 
 ## Page 859
@@ -386,7 +388,7 @@ AIMER           SETPD
                 DLOAD           DSU
                                 TIME
                                 TREF                    # (T-TO)X2(-28)
-                DMP             SR*                     # B(T-TO)X2(-24)
+                DMP             SR*                     # B(T-TO)X2(N-24)
                                 PRATE
 
                                 0               -17D,1

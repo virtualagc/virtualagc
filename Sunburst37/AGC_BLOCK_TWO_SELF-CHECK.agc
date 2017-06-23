@@ -18,7 +18,9 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-05-24 MAS  Created from Sunburst 120.
 ##              2017-06-04 MAS  Transcribed.
-##              2017-06-08 HG   Add missing EXTEND iinstruction
+##              2017-06-08 HG   Add missing EXTEND instruction
+##		2017-06-23 RSB	Proofed comment text with
+##				octopus/ProoferComments.
 
 ## Page 1014
                 BANK            37                              
@@ -921,7 +923,7 @@ ERASLOOP        INHINT
 
                 AD              SBIT9                           
                 TS              EBANK                           
-                AD              ERASCON5                        # 76777, CHECK FOR BANK E3
+                AD              ERASCON5                        # 76777, CHECK FOR BANK E2
                 EXTEND                                          
                 BZF             2EBANK                          
                 CCS             EBANK                           
@@ -1038,7 +1040,7 @@ ADRSCHK         CCS             A
                 TC              CONTINU         +1              
                 CA              L
                 TC              ADSUM
-                TC              SOPTION                         # GO TO ROPEHCK SHOWUM OPTION
+                TC              SOPTION                         # GO TO ROPECHK SHOSUM OPTION
 CONTINU         CA              S+1                             # MAKE SURE TWO CONSECUTIVE TC SELF WORDS
                 TS              SKEEP5                          
                 CCS             SKEEP6                          # +1 IN SKEEP6, SHOWSUM VIA EXECUTIVE
@@ -1290,4 +1292,7 @@ LITESOUT        CS              S11CHAN
 
 ## Page 1037
 ## This page contains only output from YUL reading:
+## <pre>
 ## END OF REVISION 4 OF SUBROUTINE SELFCHEC BY REICHERT        LAST ASSEMBLED ON DEC 2, 1966
+## </pre>
+

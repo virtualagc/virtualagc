@@ -20,6 +20,8 @@
 ##              2017-06-12 MAS  Began updating for Sunburst 37.
 ##              2017-06-13 MAS  Completed updates for Sunburst 37.
 ##              2017-06-15 HG   Fix opcode TC  -> TCF
+##		2017-06-23 RSB	Proofed comment text with
+##				octopus/ProoferComments.
 
 ## Page 893
 # SECTION 1  DISPATCHER
@@ -1146,7 +1148,7 @@ POLY2           TC              DMPSUB                          # MULTIPLY BY X
 
 TPAGREE         EXTEND                                          # FORCE SIGN AGREEMENT AMONG THE TRIPLE-
                 QXCH            BUF                             # PRECISION CONTENTS OF MPAC, RETURNING
-                TC              BRANCH                          # WITH SIGNUM OF THE INPUT IN A.
+                TC              BRANCH                          # WITH THE SIGNUM OF THE INPUT IN A.
                 TCF             ARG+
                 TCF             ARGZERO                         
 
@@ -2157,7 +2159,7 @@ BIASHI          DEC             .4192           B-1             # SQRT CONSTANTS
 #          A + SB .      (R - QD)                                             A + SB
 
 #          ------ = Q + S(------) WHERE Q AND R ARE QUOTIENT AND REMAINDER OF ------ RESPECTIVELY.
-#          C + SD        (  C   }                                                C
+#          C + SD        (  C   )                                                C
 
 
 GENDDV          DXCH            MPAC                            # WE NEED A AND B ONLY FOR FIRST DV.
