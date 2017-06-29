@@ -16,7 +16,7 @@
 ##                              version of tests that had the same name in Aurora.
 
 
-                EBANK=          3
+                EBANK=          LST1
 
                 SETLOC          ENDSELFF
 # Constants for retread instruction check. Some are shared between both banks.

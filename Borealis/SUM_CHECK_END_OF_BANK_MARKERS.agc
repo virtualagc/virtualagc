@@ -15,149 +15,113 @@
 ##              2017-01-04 MAS  Added minimal words to all unused banks, to get self-
 ##                              test to at least verify that all are accessible.
 ##              2017-01-15 MAS  Updated for added tests. Bank 24 now occupied.
+##              2017-06-28 MAS  Switched to using BNKSUM as part of the conversion to
+##                              the AGC YUL target.
 
-                SETLOC  ENDRTRDF
-                TC
-                TC
-                
-                SETLOC  ENDSLFS4
-                TC
-                TC
-                
-                SETLOC  ENDINTS0
-                TC
-                TC
-                
-                SETLOC  ENDSLFS2
-                TC
-                TC
-                
-                SETLOC  ENDPINS1
-                TC
-                TC
-                
-                SETLOC  ENDPINS2
-                TC
-                TC
-                
-                BANK    06
-                TC
-                TC
-                
-                BANK    07
-                TC
-                TC
-                
-                SETLOC  ENDRTSTS
-                TC
-                TC
-                
-                SETLOC  ENDEXTVS
-                TC
-                TC
-                
-                BANK    12
-                TC
-                TC
-                
-                SETLOC  ENDAMODS
-                TC
-                TC
-                
-                SETLOC  ENDIMUS1
-                TC
-                TC
-                
-                SETLOC  ENDRTBSS
-                TC
-                TC
-                
-                SETLOC  ENDIMUS3
-                TC
-                TC
-                
-                SETLOC  ENDIMUS2
-                TC
-                TC
-                
-                SETLOC  ENDSLFS1
-                TC
-                TC
-                
-                SETLOC  ENDPREL1
-                TC
-                TC
+                BNKSUM          00
 
-                SETLOC  ENDINST1
-                TC
-                TC
+                BNKSUM          01
 
-                SETLOC  ENDINST2
-                TC
-                TC
+                BNKSUM          02
 
-                SETLOC  ENDEXTST
-                TC
-                TC
+                BNKSUM          03
+
+
+                BNKSUM          04
+
+                BNKSUM          05
+
+                BNKSUM          06
+
+                BNKSUM          07
+
+                BNKSUM          10
+
+
+                BNKSUM          11
+
+                BNKSUM          12
+
+                BNKSUM          13
+
+                BNKSUM          14
+
+                BNKSUM          15
+
+                BNKSUM          16
+
+
+                BNKSUM          17
+
+                BNKSUM          20
+
+                BNKSUM          21
+
+                BNKSUM          22
+
+                BNKSUM          23
+
+
+                BNKSUM          24
 
 # The remaining banks are currently unused, but bank-end markers and banksums are put into
 # them to allow self-check to verify operation of every bank
-                BANK    25
-                TC
-                TC
+                BANK            25
+                OCT             0
+                BNKSUM          25
 
-                BANK    26
-                TC
-                TC
+                BANK            26
+                OCT             0
+                BNKSUM          26
 
-                BANK    27
-                TC
-                TC
+                BANK            27
+                OCT             0
+                BNKSUM          27
 
-                BANK    30
-                TC
-                TC
+                BANK            30
+                OCT             0
+                BNKSUM          30
 
-                BANK    31
-                TC
-                TC
+                BANK            31
+                OCT             0
+                BNKSUM          31
 
-                BANK    32
-                TC
-                TC
+                BANK            32
+                OCT             0
+                BNKSUM          32
 
-                BANK    33
-                TC
-                TC
+                BANK            33
+                OCT             0
+                BNKSUM          33
 
-                BANK    34
-BANK34          TC
-                TC
+                BANK            34
+BANK34          OCT             0
+                BNKSUM          34
 
-                BANK    35
-                TC
-                TC
+                BANK            35
+                OCT             0
+                BNKSUM          35
 
-                BANK    36
-                TC
-                TC
+                BANK            36
+                OCT             0
+                BNKSUM          36
 
-                BANK    37
-                TC
-                TC
+                BANK            37
+                OCT             0
+                BNKSUM          37
 
-                BANK    40
-                TC
-                TC
+                BANK            40
+                OCT             0
+                BNKSUM          40
 
-                BANK    41
-                TC
-                TC
+                BANK            41
+                OCT             0
+                BNKSUM          41
 
-                BANK    42
-                TC
-                TC
+                BANK            42
+                OCT             0
+                BNKSUM          42
 
-                BANK    43
-LASTBANK        TC
-                TC
+                BANK            43
+LASTBANK        OCT             0
+                BNKSUM          43

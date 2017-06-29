@@ -194,6 +194,7 @@ INDEXLOC        EQUALS          BUF                             # CONTAINS ADDRE
 SWWORD          EQUALS          BUF                             # ADDRESS OF SWITCH WORD.
 SWBIT           EQUALS          BUF             +1              # SWITCH BIT WITHIN SWITCH WORD.
 MPTEMP          ERASE                                           # TEMPORARY USED IN MULTIPLY AND SHIFT.
+DMPNTEMP        =               MPTEMP                          # DMPNSUB TEMPORARY
 DOTINC          ERASE                                           # COMPONENT INCREMENT FOR DOT SUBROUTINE.
 DVSIGN          EQUALS          DOTINC                          # DETERMINES SIGN OF DDV RESULT.
 ESCAPE          EQUALS          DOTINC                          # USED IN ARCSIN/ARCCOS.

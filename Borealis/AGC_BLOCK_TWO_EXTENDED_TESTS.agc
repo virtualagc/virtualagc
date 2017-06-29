@@ -119,11 +119,9 @@ BRUPTCHK        CAF             FIVE                            # SKEEP1 = 5. Th
                 EXTEND                                          # Save our return address.
                 QXCH            SKEEP2
                 CAF             ARVECADR                        # Attempt to use EDRUPT to vector to ARUPTVEC.
-#+5             EXTEND                                          # If some other interrupt is taken, continue
-                OCT             6
+ +5             EXTEND                                          # If some other interrupt is taken, continue
                 INDEX           SKEEP1                          # at BRUPTCHK+5 (as calculated by the INDEX).
-#EDRPTWRD        EDRUPT          BRUPTCHK                        # This instruction should be replaced with
-EDRPTWRD        TC              BRUPTCHK                        # Workaround: the OCT 6 (EXTEND) makes this an EDRUPT
+EDRPTWRD        EDRUPT          BRUPTCHK                        # This instruction should be replaced with
 EDRPT+1         AD              NEG4                            # "CAF FIVE" upon resume. Make sure it did.
                 TC              +1CHK
                 TC              SKEEP2                          # EDRUPT-to-A and BRUPT look good. Carry on.
@@ -156,10 +154,8 @@ TRIGRUPT        XCH             L
                 CAF             ZERO                            # Zero LASTIMER so we don't get duped.
                 TS              LASTIMER
                 CA              NOPNDADR                        # EDRUPT will fall back on this vector if
-#                EXTEND                                          # no interrupts at all are pending.
-#                EDRUPT          TRPTCHK                         # Trigger an interrupt, then skip over TC ERRORS.
-                OCT             6
-                TC              TRPTCHK                         # Workaround: the OCT 6 (EXTEND) makes this an EDRUPT
+                EXTEND                                          # no interrupts at all are pending.
+                EDRUPT          TRPTCHK                         # Trigger an interrupt, then skip over TC ERRORS.
                 TC              ERRORS
 TRPTCHK         CS              LASTIMER                        # Check the timer that just got executed matches
                 AD              L                               # what was expected.

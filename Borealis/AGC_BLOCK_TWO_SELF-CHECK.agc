@@ -158,7 +158,7 @@ S-2             EQUALS          NEG2
 S-1             EQUALS          NEGONE                          
 S-ZERO          EQUALS          NEG0                            
 
-                EBANK=          3                               
+                EBANK=          LST1                            
 ADRS1           ADRES           SKEEP1                          
 
 SRADRS          ADRES           SR                              
