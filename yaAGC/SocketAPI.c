@@ -68,6 +68,9 @@
 		11/18/16 RSB	Worked around lack of MSG_NOSIGNAL in Solaris.
 		03/09/17 MAS	Moved SbyPressed logic into agc_engine.c, where
 				it makes more sense.
+		07/13/17 MAS	Removed the out-of-detent condition for HANDRUPT,
+				since that is not correct, and HANDRUPTs are now
+				correctly handled in agc_engine proper.
 */
 
 #include <errno.h>
@@ -254,18 +257,6 @@ ChannelInput (agc_t *State)
 			  {
 			    LastRhcRoll = Value;
 			    ChannelOutput (State, Channel, Value);	// echo
-			  }
-			else if (Channel == 031)
-			  {
-			    static int LastInDetent = 040000;
-			    int InDetent;
-			    ChannelOutput (State, Channel, Value);
-			    // If the RHC stick has moved out of detent,
-			    // generate a RUPT10 interrupt.
-			    InDetent = (040000 & Value);
-			    if (LastInDetent && !InDetent)
-			      State->InterruptRequests[10] = 1;
-			    LastInDetent = InDetent;
 			  }
 			//---------------------------------------------------------------
 			// For --debug-dsky mode.
