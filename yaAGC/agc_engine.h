@@ -112,6 +112,7 @@
 				warning filter, as well as a channel 163 flag for
 				the AGC (CMC/LGC) warning light.
 		05/30/17 RSB	Added initializeSunburst37.
+		07/13/17 MAS	Added flags for the three HANDRUPT traps.
    
   For more insight, I'd highly recommend looking at the documents
   http://hrst.mit.edu/hrs/apollo/public/archive/1689.pdf and
@@ -377,6 +378,9 @@ typedef struct
   unsigned TookBZF:1;           // Flag for having just taken a BZF branch, used for simulation of a TC Trap hardware bug
   unsigned TookBZMF:1;          // Flag for having just taken a BZMF branch, used for simulation of a TC Trap hardware bug
   unsigned GeneratedWarning:1;  // Whether there is a pending input to the warning filter
+  unsigned Trap31A:1;           // Enable flag for Trap 31A
+  unsigned Trap31B:1;           // Enable flag for Trap 31B
+  unsigned Trap32:1;            // Enable flag for Trap 32
   uint32_t WarningFilter;       // Current voltage of the AGC warning filter
   uint64_t /*unsigned long long */ DownruptTime;	// Time when next DOWNRUPT occurs.
   int Downlink;
