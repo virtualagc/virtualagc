@@ -1,0 +1,41 @@
+#!/bin/bash
+# This script tries to update to the latest version of VirtualAGC.
+echo ""
+echo ""
+
+NAME=`wget -O - https://www.ibiblio.org/apollo/Downloads 2>/dev/null | grep 'VirtualAGC[-]Ubuntu[-]14[.]04[-]32' | sed -e 's/.*href=\"//' -e 's/\".*//' | sort | tail -n 1`
+if [[ "$NAME" =~ VirtualAGC.*xz ]]
+then
+	echo "Download and install to $NAME?   "
+	echo "The $HOME/VirtualAGC folder will be completely replaced if so."
+	if read -p "Enter YES if you want to do this:   " && [[ "$REPLY" == "YES" ]]
+	then
+		echo "Killing running instances of VirtualAGC ..."
+		killall VirtualAGC
+		cd ~
+		echo "Removing old VirtualAGC installation ..."
+		rm VirtualAGC -rf
+		rm $NAME
+		echo "Downloading update ..."
+		if wget -O - "https://www.ibiblio.org/apollo/Downloads/$NAME" >$NAME
+		then
+			echo "Unpacking the update ..."
+			tar -xJf $NAME
+			echo "Sanity check of the new VirtualAGC folder ..."
+			if [[ ! -d VirtualAGC/bin || ! -d VirtualAGC/Resources ]]
+			then
+				echo "The new VirtualAGC folder doesn't seem to have the correct contents."
+				echo "There must have been an error of some kind."
+			fi
+		else
+			echo "Unable to download https://www.ibiblio.org/apollo/Downloads/$NAME"
+		fi
+	else
+		echo "Cancelled by user."
+	fi
+else
+	echo "No downloadable update found."
+fi
+read -p "Hit ENTER to close this window."
+
+
