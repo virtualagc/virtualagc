@@ -36,6 +36,11 @@ if 'BLATANT7' in environ:
 	blatant['7'] = 'yes'
 print blatant
 
+if 'ZERLINA' in environ:
+	bounds = (4, 20, 11, 30)
+else:
+	bounds = (8, 24, 16, 36)
+
 # Parse command-line arguments
 if len(sys.argv) != 6:
 	print 'Usage:'
@@ -69,7 +74,7 @@ for line in file:
 	boxWidth = boxRight + 1 - boxLeft
 	boxHeight = boxTop + 1 - boxBottom
 	#print boxChar, boxWidth, boxHeight
-	if boxWidth >= 8 and boxWidth <= 24 and boxHeight >= 16 and boxHeight <= 36:
+	if boxWidth >= bounds[0] and boxWidth <= bounds[1] and boxHeight >= bounds[2] and boxHeight <= bounds[3]:
 		boxes.append(line)
 	else:
 		rejectedBoxes.append(line)
@@ -78,7 +83,7 @@ file.close()
 # Read in the binsource file.
 file = open (binsourceFilename, 'r')
 lines = []
-octalPattern = re.compile(r"([0-7]{6}|@)([ \t]([0-7]{6}|@)){7}.*")
+octalPattern = re.compile(r"([0-7]{6}|@)([ \t]+([0-7]{6}|@)){7}.*")
 for line in file:
 	if octalPattern.match(line):
 		lines.append(line)
