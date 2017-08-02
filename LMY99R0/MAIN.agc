@@ -1,27 +1,33 @@
 ### FILE="Main.annotation"
 # Copyright:	Public domain.
 # Filename:	MAIN.agc
-# Purpose:	The main source file for Luminary 1A, revision 099.
-#		It is part of the source code for the Lunar Module's (LM)
-#		Apollo Guidance Computer (AGC) for Apollo 11.
+# Purpose:	Part of the reconstructed source code for LMY99 Rev 0,
+#		otherwise known as Luminary Rev 99, the second release
+#		of the Apollo Guidance Computer (AGC) software for Apollo 11.
+#		It differs from LMY99 Rev 1 (the flown version) only in the
+#		placement of a single label. The corrections shown here have
+#		been verified to have the same bank checksums as AGC developer
+#		Allan Klumpp's copy of Luminary Rev 99, and so are believed
+#		to be accurate.
 # Assembler:	yaYUL
 # Contact:	Ron Burkey <info@sandroid.org>.
 # Website:	www.ibiblio.org/apollo/index.html
 # Mod history:	2009-05-05 RSB	Adapted from Luminary131/MAIN.agc.
 #		2016-11-03 RSB	Removed duplicate page #1.
 #		2017-01-28 RSB	Renamed STABLE_ORBIT.agc.
+#		2017-08-01 MAS	Updated for LMY99R0.
 #
-# The contents of the "Luminary099" files, in general, are
-# transcribed from a digital images created from a hardcopy of the program
-# residing at the MIT Museum.  Many thanks to Debbie Douglas of the Museum,
-# and to Paul Fjeld (who made the images).
+# The contents of the "LMY99R0" files, in general, are transcribed
+# from a digital images created from a hardcopy of the program residing 
+# at the MIT Museum.  Many thanks to Debbie Douglas of the Museum, and
+# to Paul Fjeld (who made the images). They have been lightly modified
+# to be equivalent to LMY99 Rev 0, otherwise known as Luminary
+# Revision 99. The resulting bank checksums have been verified to match
+# AGC developer Allan Klumpp's listing of Luminary Rev 99.
 #
-# Notations on this document read, in part:
+# Notations on Allan Klumpp's document read, in part:
 #
-#	ASSEMBLE REVISION 001 OF AGC PROGRAM LMY99 BY NASA 2021112-061
-#	16:27 JULY 14,1969
-#	[Note that this is the date the hardcopy was made, not the
-#	date of the program revision or the assembly.]
+#	ASSEMBLE REVISION 099 OF AGC PROGRAM LUMINARY BY NASA 2021112-051
 #	...
 #	THIS LGC PROGRAM IS INTENDED FOR USE IN THE LM DURING THE MANNED
 #	LUNAR LANDING MISSION OR ANY SUBSET THEREOF.
@@ -33,7 +39,7 @@
 # quality digital images that Paul actually made, contact info@sandroi.org
 # directly.
 #
-# This file is a little different from the other Luminary099 files I'm providing, 
+# This file is a little different from the other LMY99R0 files I'm providing, 
 # in that it doesn't represent anything that appears directly in the original source.  
 # What I (RSB) have done for organizational purposes is to split the huge monolithic
 # source code into smaller, more manageable chunks--i.e., into individual source 

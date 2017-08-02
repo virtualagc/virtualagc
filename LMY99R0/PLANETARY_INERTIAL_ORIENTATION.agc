@@ -22,20 +22,27 @@
 ##				and corrected the errors found.
 ##		2017-03-16 RSB	Comment-text fixes identified in 5-way
 ##				side-by-side diff of Luminary 69/99/116/131/210.
+##		2017-08-01 MAS	Created from LMY99 Rev 1.
 
-## This source code has been transcribed or otherwise adapted from digitized
-## images of a hardcopy from the MIT Museum.  The digitization was performed
-## by Paul Fjeld, and arranged for by Deborah Douglas of the Museum.  Many
-## thanks to both.  The images (with suitable reduction in storage size and
-## consequent reduction in image quality as well) are available online at
-## www.ibiblio.org/apollo.  If for some reason you find that the images are
-## illegible, contact me at info@sandroid.org about getting access to the
-## (much) higher-quality images which Paul actually created.
+## This source code has been transcribed or otherwise adapted from
+## digitized images of a hardcopy from the MIT Museum.  The digitization
+## was performed by Paul Fjeld, and arranged for by Deborah Douglas of
+## the Museum.  Many thanks to both.  The images (with suitable reduction
+## in storage size and consequent reduction in image quality as well) are
+## available online at www.ibiblio.org/apollo.  If for some reason you
+## find that the images are illegible, contact me at info@sandroid.org
+## about getting access to the (much) higher-quality images which Paul
+## actually created.
 ##
-## Notations on the hardcopy document read, in part:
+## The code has been modified to match LMY99 Revision 0, otherwise
+## known as Luminary Revision 99, the Apollo 11 software release preceeding
+## the listing from which it was transcribed. It has been verified to
+## contain the same bank checksums as AGC developer Allan Klumpp's listing
+## of Luminary Revision 99 (for which we do not have scans).
 ##
-##    Assemble revision 001 of AGC program LMY99 by NASA 2021112-061
-##    16:27 JULY 14, 1969
+## Notations on Allan Klumpp's listing read, in part:
+##
+##	ASSEMBLE REVISION 099 OF AGC PROGRAM LUMINARY BY NASA 2021112-51
 
 ## Page 1140
 # ..... RP-TO-R SUBROUTINE .....
