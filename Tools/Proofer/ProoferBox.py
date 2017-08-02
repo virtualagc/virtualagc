@@ -36,7 +36,10 @@ if 'BLATANT7' in environ:
 	blatant['7'] = 'yes'
 print blatant
 
+minFontScale = 0.9
+maxFontScale = 1.2
 if 'ZERLINA' in environ:
+	minFontScale = 0.6
 	bounds = (4, 20, 11, 30)
 else:
 	bounds = (8, 24, 16, 36)
@@ -184,10 +187,10 @@ for index in range(startIndex, endIndex):
 			operator = 'darken'
 			fontWidth = digit.width
 			fontHeight = digit.height
-			minFontHeight = 0.9*fontHeight
-			maxFontHeight = 1.2*fontHeight
-			minFontWidth = 0.9*fontWidth
-			maxFontWidth = 1.2*fontWidth
+			minFontHeight = minFontScale*fontHeight
+			minFontWidth = minFontScale*fontWidth
+			maxFontHeight = maxFontScale*fontHeight
+			maxFontWidth = maxFontScale*fontWidth
 			if boxHeight > minFontHeight and boxHeight < maxFontHeight and \
 			   boxWidth > minFontWidth and boxWidth < maxFontWidth:
 				digit.resize(boxWidth, boxHeight, 'cubic')
