@@ -16,6 +16,8 @@
 ##		2017-01-25 RSB	Back-ported a typo-fix found while proofing Luminary 69.
 ##		2017-03-14 RSB	Comment-text fixes identified in 5-way
 ##				side-by-side diff of Luminary 69/99/116/131/210.
+##		2017-08-01 MAS	Removed an asterisk indicating a changed line that
+##				was incorrectly included as part of a comment.
 
 ## This source code has been transcribed or otherwise adapted from digitized
 ## images of a hardcopy from the MIT Museum.  The digitization was performed
@@ -59,7 +61,7 @@
 # TABLE OF SUBROUTINE LOG SECTIONS
 #	LUMERASE
 #		ERASABLE ASSIGNMENTS
-# *	LNYAIDE
+#  	LNYAIDE
 #		INTERRUPT LEAD INS
 #		T4RUPT PROGRAM
 #		RCS FAILURE MONITOR
