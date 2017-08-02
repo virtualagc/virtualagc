@@ -1,9 +1,9 @@
 ### FILE="Main.annotation"
 ## Copyright:	Public domain.
-## Filename:	LUNAR_AND_SOLAR_EPHEMERIDES_SUBROUTINES.agc
-## Purpose:     Part of the reconstructed source code for LMY99 Rev 0,
+## Filename:	ASSEMBLY_AND_OPERATION_INFORMATION.agc
+## Purpose:	Part of the reconstructed source code for LMY99 Rev 0,
 ##		otherwise known as Luminary Rev 99, the second release
-##              of the Apollo Guidance Computer (AGC) software for Apollo 11.
+##		of the Apollo Guidance Computer (AGC) software for Apollo 11.
 ##		It differs from LMY99 Rev 1 (the flown version) only in the
 ##		placement of a single label. The corrections shown here have
 ##		been verified to have the same bank checksums as AGC developer
