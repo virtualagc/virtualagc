@@ -38,8 +38,11 @@ print blatant
 
 minFontScale = 0.9
 maxFontScale = 1.2
+defaultScale = 1.0
 if 'ZERLINA' in environ:
-	minFontScale = 0.6
+	defaultFontScale = 0.75
+	minFontScale *= defaultFontScale
+	maxFontScale *= defaultFontScale
 	bounds = (4, 20, 11, 30)
 else:
 	bounds = (8, 24, 16, 36)
@@ -196,10 +199,10 @@ for index in range(startIndex, endIndex):
 				digit.resize(boxWidth, boxHeight, 'cubic')
 				draw.composite(operator=operator, left=boxLeft, top=boxTop, width=boxWidth, height=boxHeight, image=digit)
 			else:
-				digit.resize(int(round(fontWidth)), int(round(fontHeight)), 'cubic')
-				draw.composite(operator=operator, left=round((boxLeft+boxRight-fontWidth)/2.0), 
-					       top=round((boxTop+boxBottom-fontHeight)/2.0), width=fontWidth, 
-					       height=fontHeight, image=digit)
+				digit.resize(int(round(fontWidth*defaultFontScale)), int(round(fontHeight*defaultFontScale)), 'cubic')
+				draw.composite(operator=operator, left=round((boxLeft+boxRight-fontWidth*defaultFontScale)/2.0), 
+					       top=round((boxTop+boxBottom-fontHeight*defaultFontScale)/2.0), width=fontWidth*defaultFontScale, 
+					       height=fontHeight*defaultFontScale, image=digit)
 
 		
 		characterIndex += 1
