@@ -100,14 +100,24 @@ file.close()
 
 # Read in the octal-digit files.
 images = []
-images.append(Image(filename='0t.png'))
-images.append(Image(filename='1t.png'))
-images.append(Image(filename='2t.png'))
-images.append(Image(filename='3t.png'))
-images.append(Image(filename='4t.png'))
-images.append(Image(filename='5t.png'))
-images.append(Image(filename='6t.png'))
-images.append(Image(filename='7t.png'))
+if 'ZERLINA' in environ:
+	images.append(Image(filename='z0t.png'))
+	images.append(Image(filename='z1t.png'))
+	images.append(Image(filename='z2t.png'))
+	images.append(Image(filename='z3t.png'))
+	images.append(Image(filename='z4t.png'))
+	images.append(Image(filename='z5t.png'))
+	images.append(Image(filename='z6t.png'))
+	images.append(Image(filename='z7t.png'))
+else:
+	images.append(Image(filename='0t.png'))
+	images.append(Image(filename='1t.png'))
+	images.append(Image(filename='2t.png'))
+	images.append(Image(filename='3t.png'))
+	images.append(Image(filename='4t.png'))
+	images.append(Image(filename='5t.png'))
+	images.append(Image(filename='6t.png'))
+	images.append(Image(filename='7t.png'))
 imagesColored = []
 imagesColored.append(Image(filename='0m.png'))
 imagesColored.append(Image(filename='1m.png'))
