@@ -18,6 +18,8 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-05-24 MAS  Created from Sunburst 120.
 ##              2017-06-08 HG   Transcribed
+##		2017-06-23 RSB	Proofed comment text with
+##				octopus/ProoferComments.
 
 ## Page 862
 # PROGRAM NAME - ATMAG
@@ -68,10 +70,10 @@ ATMAG           TC              INTPRET
                 DXCH            MPAC                    # MPAC=1/DV0*2**-5
 
                 TC              INTPRET
-                PUSH            DSU                     # PUSH DOWN 1/DVO
+                PUSH            DSU                     # PUSH DOWN 1/DVO			2
 
                                 1/DV2                   # MPAC = (1/DV0-1/DV2)*2**-5
-                PUSH            SLR
+                PUSH            SLR			#					4
                                 8D                      # MPAC = (1/DV0-1/DV2)*2**3 = 1/VE*2**4
 
 ## Page 863

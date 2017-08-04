@@ -39,6 +39,7 @@
                                 targets for an INDEX and so don't actually extend.
                 2017-01-29 MAS  Added some special logic for handling Raython-
                                 style literal operands.
+                2017-06-28 MAS  Added BLK2's special  handling of EDRUPT.
  */
 
 #include "yaYUL.h"
@@ -351,7 +352,29 @@ int ParseDXCH(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 
 int ParseEDRUPT(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 {
-    return (ParseGeneral(InRecord, OutRecord, 000000, EXTENDED | PC7));
+    int result;
+
+    if (blk2)
+    {
+        // For BLK2, EDRUPT was implied-address and always assembled
+        // to 07000.
+        if (*InRecord->Operand != 0)
+        {
+            strcpy(OutRecord->ErrorMessage,
+                "Extra fields are present.");
+            OutRecord->Warning = 1;
+        }
+        InRecord->Operand = "0";
+    }
+
+    result = (ParseGeneral(InRecord, OutRecord, 000000, EXTENDED | PC7));
+
+    if (blk2)
+    {
+        InRecord->Operand = "";
+    }
+
+    return result;
 }
 
 int ParseLXCH(ParseInput_t *InRecord, ParseOutput_t *OutRecord)

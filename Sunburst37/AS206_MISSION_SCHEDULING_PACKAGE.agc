@@ -19,6 +19,11 @@
 ## Mod history: 2017-05-24 MAS  Created from Sunburst 120.
 ##              2017-06-07 MAS  Updated for Sunburst 37. There's a decent number
 ##                              of differences.
+##              2017-06-15 HG   Fix page number 814 -> 762
+##                              Add missing instruction TCF ENDUP
+##                              remove operand modifier CHKUPDEX +1 -> CHKUPDEX
+##		2017-06-23 RSB	Proofed comment text with
+##				octopus/ProoferComments.
 
 ## Page 748
 #          THE FOLLOWING ROUTINES IMPLEMENT THE MISSION SCHEDULING LOGIC AS DESCRIBED IN CHAPTER 4 OF THE
@@ -313,6 +318,7 @@ DOV70           TC              MTIMERUP                        # VERB 70
 
 DOV72           TC              MTIMERUP                        # VERB 72
 DOV71           TC              MPHASEUP                        # VERB 71
+                TCF             ENDUP
 
 #    *** C ODING  TO BE INSERTED HERE TO CLEAR OUT ALL TIMER/PHASE PAIRS
 #        W HICH H AVE BEEN SET BY LGC, SINCE GROUND REQUEST WILL SUPERSEDE
@@ -490,7 +496,7 @@ MGETUP          TC              INTPRET                         # MAKE SURE THIS
                 EXTEND
                 BZF             UPERROR
 
-                TC              CHKUPDEX        +1
+                TC              CHKUPDEX
                 CA              MPAC                            # CONTAINS DT IN SECONDS.
 
                 INDEX           RUPTREG1
@@ -565,7 +571,7 @@ MTABLE1         OCT             20010                           # MP7
 
 MTABLE          EQUALS          MTABLE1         -21D            # MP 1-6 NOT ACTUALLY INCLUDED IN TABLE.
 
-## Page 814
+## Page 762
 BADPHASE        TC              ALARM                           # ALARM WHEN MPHASE COMES DUE BUT MPHASE
 
                 OCT             00601                           # REGISTER IS ZERO (-0 MEANS INACTIVE).

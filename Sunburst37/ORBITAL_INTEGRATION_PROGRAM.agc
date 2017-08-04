@@ -17,10 +17,11 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-05-24 MAS  Created from Sunburst 120.
+##              2017-07-12 MAS  Updated for Sunburst 37.
+##		2017-06-23 RSB	Proofed comment text with
+##				octopus/ProoferComments.
 
-## NOTE: Page numbers below have not yet been updated to reflect Sunburst 37.
-
-## Page 776
+## Page 723
 # FBR3 SETS UP A TIMESTEP CALL TO KEPLER.
 
 
@@ -30,6 +31,7 @@ FBR3            DLOAD           SR3
                 SR3R            DAD
                                 TC
                 STODL           TAU
+
                                 EARTHTAB        +9D
                 DMP             SRR
                                 DT/2
@@ -38,9 +40,10 @@ FBR3            DLOAD           SR3
                                 TET
                 STORE           TET
 
-## Page 777
+## Page 724
 # THIS ORBITAL KEPLER SUBROUTINE FINDS THE POSITION AND VELOCITY OF THE VEHICLE AFTER TIME FOUND IN GIVENT
 # SINCE RECTIFICATION TO POSITION RRECT AND VELOCITY VRECT. THE RESULTING POSITION AND VELOCITY ARE LEFT IN
+
 # FOUNDR AND FOUNDV, RESPECTIVELY.
 
 
@@ -64,6 +67,7 @@ KEPLER          VLOAD           SETPD                   # UNIT OF RECTIFICATION 
                 PDVL            DOT                     # ALPHA TO REGISTER 10
                                 RRECT
                                 VRECT
+
                 ROUND           PDVL                    # A1 TO REGISTER 12
                                 RCV
                 UNIT            DOT
@@ -77,7 +81,7 @@ KEPLER          VLOAD           SETPD                   # UNIT OF RECTIFICATION 
                                 ALPHAM
                                 10D                     # MAX ITERATION COUNT IS 10
 
-## Page 778
+## Page 725
                 PDDL            DDV                     # Q IN 16
                                 DP1/4
                                 ALPHAM
@@ -86,6 +90,7 @@ KEPLER          VLOAD           SETPD                   # UNIT OF RECTIFICATION 
                                 16D                     # Q(  )
                 DMPR            DMPR
                                 16D                     # QQ(  )
+
                                 DP1/3
                 SL3             SL3
                 PDDL            DMPR
@@ -103,12 +108,12 @@ KEPLER          VLOAD           SETPD                   # UNIT OF RECTIFICATION 
                                 1
                 STORE           XKEP
 
-## Page 779
+## Page 726
 # ITERATING EQUATIONS - GIVEN X IN MPAC, FIND TIME OF FLIGHT.
 
 
 
-KTIMEN+1        DSQ             ROUND                   # FORM ALPHA X_SQUARED AND CALL S AND C
+KTIMEN+1        DSQ             ROUND                   # FORM ALPHA X-SQUARED AND CALL S AND C
                 DMP             SL2R
                                 10D
                 SETPD           CALL                    # SET PD INDICATOR TO 16
@@ -118,6 +123,7 @@ KTIMEN+1        DSQ             ROUND                   # FORM ALPHA X_SQUARED A
                                 XKEP
                 DMP             SL1
                                 XKEP
+
                 DMP             SL1R
                                 XKEP
                 STORE           23D                     # A3
@@ -142,7 +148,7 @@ KTIMEN+1        DSQ             ROUND                   # FORM ALPHA X_SQUARED A
                 STORE           16D                     # DIFFERENCE TO REGISTER 16
                 EXIT
 
-## Page 780
+## Page 727
 DUMPDUMP        TC              INTPRET                 # FOR DUMP ONLY *******
                 ABS             DSU
                                 KEPSILON                # SEE IF WITHIN EPSILON OF GIVEN TIME.
@@ -162,6 +168,7 @@ GETNEWX         DLOAD           DMP
                                 21D			# A2
                 DMP             SL1R
                                 8D                      # A4
+
                 DAD
                 DAD             PDDL
                                 6                       # R0
@@ -172,7 +179,7 @@ GETNEWX         DLOAD           DMP
                 STCALL          XKEP
                                 KTIMEN+1
 
-## Page 781
+## Page 728
 # SUBROUTINE FOR COMPUTING THE UNIVERSAL CONIC FUNCTIONS S(X) AND C(X). THE ACTUAL OUTPUT OF THIS ROUTINE
 # CONSISTS OF SCALED VERSIONS DEFINED AS FOLLOWS -
 
@@ -180,7 +187,7 @@ GETNEWX         DLOAD           DMP
 #            S                           S
 
 # IT IS ASSUMED THAT THE INPUT ARRIVES IN MPAC,MPAC+1 AND THAT IT LIES BETWEEN -30/64 AND 40/64. UPON EXIT,
-# S(X) WILL BE LEFT IN MPAC, MPAC+1 AND C(X) ON TOP OF THE PUSHDOWN LIST.
+# S(X) WILL BE LEFT IN MPAC,MPAC+1 AND C(X) ON TOP OF THE PUSHDOWN LIST.
 
 
 
@@ -199,6 +206,7 @@ S(X)C(X)        STORE           34D                     # X TO 34D
                                 34D
                                 B(X)
                 DSQ             ROUND
+
                 PDDL            DMPR                    # B SQUARED TO PD LIST
                                 34D
                                 36D
@@ -207,28 +215,40 @@ S(X)C(X)        STORE           34D                     # X TO 34D
                 DAD             ITCQ                    #         S
 -1/12           2DEC            -.1                     # DONT MOVE.
 
-## Page 782
+## Page 729
 # A AND B POLYNOMIALS WHOSE COEFFICIENTS WERE OBTAINED WITH THE *AUTOCURVEFIT* PROGRAM.
 A(X)            TC              POLY
                 DEC             4
                 2DEC             7.071067810    E-1
+
                 2DEC            -4.714045180    E-1
+
                 2DEC             9.42808914     E-2
+
                 2DEC            -8.9791893      E-3
+
                 2DEC             4.989987       E-4
+
                 2DEC            -1.79357        E-5
+
                 TC              DANZIG
 B(X)            TC              POLY
                 DEC             4
                 2DEC             8.164965793    E-1
+
                 2DEC            -3.265986572    E-1
+
                 2DEC             5.90988980     E-2
+
                 2DEC            -4.0085592      E-3
+
                 2DEC             2.781528       E-4
+
                 2DEC            -1.25610        E-5
+
                 TC              DANZIG
 
-## Page 783
+## Page 730
 # ROUTINE FOR OBTAINING R AND V, NOW THAT THE PROPER X HAS BEEN FOUND.
 
 
@@ -243,6 +263,7 @@ GETRANDV        DLOAD           SETPD
                                 23D                     # LAST VALUE OF A3
                 SL2             VXSC
                                 VRECT
+
                 VAD             VSL1                    # ADDITION MUST BE DONE IN THIS ORDER
                 PUSH            VAD
                                 RRECT
@@ -253,6 +274,7 @@ GETRANDV        DLOAD           SETPD
                                 10D                     # ALPHA
                 DMP             SL2R
                                 23D                     # A3
+
                 DSU             DDV
                                 XKEP
                                 16D                     # LENGTH OF FOUND POSITION
@@ -265,17 +287,19 @@ GETRANDV        DLOAD           SETPD
                                 16D
                 VXSC            VAD
                                 VRECT
+
                 VSL1
                 STCALL          FOUNDV                  # THIS COMPLETES THE CALCULATION
                                 HBRANCH
 
-## Page 784
+## Page 731
 # THE POSTRUE ROUTINES SET UP THE BETA VECTOR AND OTHER INITIAL CONDITIONS FOR THE NEXT ACCOMP.
 POSTRUE         SSP             VLOAD                   # TIME STEP CALLS TO KEPLER RETURN HERE
                                 SCALEA
                                 4
                                 ALPHAV
                 VSR             VAD
+
                                 10D
                                 RCV                     # POSITION OUTPUT OF KEPLER
                 LXA,2           BOF
@@ -288,9 +312,10 @@ NOSAVE1         SSP             SSP                     # SETS UP SCALE B AND GM
                                 14D
                                 GMODE
                                 2
+
                 STORE           BETAV
 
-## Page 785
+## Page 732
 # AGC ROUTINE TO COMPUTE ACCELERATION COMPONENTS.
 
 
@@ -327,6 +352,7 @@ ACCOMP2         VLOAD           VSR1
                                 X1
                                 SCALEB
                 INCR,2          SR*
+
                                 2
                                 0,2
                 PUSH            SR2R                    # RHO/4 PD+6
@@ -337,7 +363,7 @@ ACCOMP2         VLOAD           VSR1
                 PUSH            DMPR                    # TO PDL+6
                                 4
 
-## Page 786
+## Page 733
                 PUSH            DAD                     # Q/4 = RHO(C(PDL+4)) TO PD+8D
                                 DQUARTER                # (Q+1)/4 TO PD+10D
                 PUSH            SQRT                    #          3/2
@@ -346,6 +372,7 @@ ACCOMP2         VLOAD           VSR1
                 SL1             DAD
                                 DQUARTER                #                 3/2
                 PDDL            DAD                     # (1/4)+2((Q+1)/4)    TO PD+14D
+
                                 10D
                                 DP1/2
                 DMPR            SL1
@@ -369,6 +396,7 @@ ACCOMP2         VLOAD           VSR1
                                 X2                      # C(X2) = SCALE(RHO)
                 XAD,1           XAD,1
                                 S2                      # C(S2) = N((B.B/4)(....)3/2)
+
                                 S1                      # C(S1) = N(B.B/4)
                 XAD,1           XAD,1
                                 SCALEB
@@ -379,11 +407,13 @@ ACCOMP2         VLOAD           VSR1
                                 GMODE
                                 GTABLE
 GTABLE          CADR            GMODE10
+
                 CADR            GMODE11
                 CADR            GMODE12
 
-## Page 787
+## Page 734
 # THE GMODE12 ROUTINE SETS UP THE SECONDARY BODY DISTURBING ACCELERATION FOR ACCOMP.
+
 GMODE12         VSL*                                    # -SCALE(GAMMA)-1 IS LEFT IN X1.
                                 31D,1                   # ADJUST GAMMA TO SCALE OF -32
                 STOVL           FV
@@ -396,6 +426,7 @@ GMODE12         VSL*                                    # -SCALE(GAMMA)-1 IS LEF
                                 OBLATEST
                                 MOONPOS
                 STORE           BETAV                   # MOON(EARTH) POSITION WILL BE BETA NEXT
+
                 LXA,1           BOF
                                 DIFEQCNT                # SAVE R/QV IN VECTAB FOR W-MATRIX UPDATE
                                 WMATFLAG
@@ -408,13 +439,14 @@ NOSAVE2         AXT,2           XCHX,2                  # SETUP ALPHAM AND SCALE
                                 SCALEA
                                 ACCOMP2                 # ENTRY IF UNIT(ALPHAV) AVAILABLE
 
-## Page 788
+## Page 735
 # THE GMODE11 ROUTINE SETS UP THE SUNS DISTURBING ACCELERATION.
 
 
 
 GMODE11         LXC,2           CALL                    # SET X2 TO TABLE OF PROPER CONSTANTS
                                 PBODY
+
                                 ADDTOFV
                 CALL                                    # BARICENTER-TO-SUN POSITION VECTOR.
                                 SUNPOS                  # LEAVES VECTOR IN PDL
@@ -427,6 +459,7 @@ GMODE11         LXC,2           CALL                    # SET X2 TO TABLE OF PRO
                                 28D
                                 SCALEB                  # SET SCALEB AND RETURN TO ACCOMP
                 STCALL          BETAV
+
                                 ACCOMP2
 
 # THE GMODE10 ROUTINE ADDS IN THE SUNS PERTURBING ACCELERATION AND COMPUTES THE OBLATENESS CONTRIBUTION
@@ -437,11 +470,13 @@ GMODE10         LXC,2           INCR,2
                                 ADDTOFV
 OBLATEST        BON
                                 MOONFLAG
+
                                 NBRANCH
 
-## Page 789
+## Page 736
 # THE OBLATE ROUTINE COMPUTES THE ACCELERATION DUE TO THE EARTHS OBLATENESS. 2T USES THE UNIT OF THE VEHICLE
 # POSITION VECTOR FOUND IN ALPHAV AND THE DISTANCE TO THE CENTER IN ALPHAM. THIS IS ADDED TO THE SUM OF THE
+
 # DISTURBING ACCELERATIONS IN FV AND THE PROPER DIFEQ STAGE IS CALLED VIA X1.
 OBLATE          DLOAD
                                 ALPHAV          +4      # Z COMPONENT OF POSITION IS COS PHI
@@ -465,6 +500,7 @@ OBLATE          DLOAD
                                 ALPHAV          +4
                 DMPR            PDDL
                                 9/16
+
                                 2
                 DMPR            BDSU                    # FINISH P5:/128 AND TERM USING UNIT
                                 5/128                   # POSITION VECTOR AT ALPHA
@@ -475,13 +511,14 @@ OBLATE          DLOAD
                                 4
                 DMPR            DDV
                                 2J3RE/J2
+
                                 ALPHAM
                 DAD             VXSC
                                 2
                                 ALPHAV
                 STODL           ALPHAV
 
-## Page 790
+## Page 737
                 DMP             SL1                     # COMPUTE TERM USING IZ
                                 J4REQ/J3
                 DDV             DAD
@@ -490,6 +527,7 @@ OBLATE          DLOAD
                                 2J3RE/J2
                 DMPR
                 DDV             DAD
+
                                 ALPHAM
                 BDSU
                                 ALPHAV          +4
@@ -500,6 +538,7 @@ OBLATE          DLOAD
                                 X1
                                 J2REQSQ
                 VXSC            INCR,1
+
                                 ALPHAV
                                 4
                 VSL*            VAD                     # SHIFTS LEFT ON +, RIGHT ON -.
@@ -512,6 +551,7 @@ NBRANCH         SLOAD           LXA,1
                 DMP             CGOTO
                                 -1/12
                                 MPAC
+
                                 DIFEQTAB
 DIFEQTAB        CADR            DIFEQ+0
                 CADR            DIFEQ+1
@@ -522,6 +562,7 @@ ADDTOFV         DLOAD*                                  # SETS UP S1 AND S2 PER 
                                 22D
                 XAD,1           VXSC*
                                 S1
+
                                 1,2
                 VSL*            VAD
                                 31D,1
@@ -529,7 +570,7 @@ ADDTOFV         DLOAD*                                  # SETS UP S1 AND S2 PER 
                 STORE           FV
                 ITCQ
 
-## Page 791
+## Page 738
  # BEGIN INTEGRATION STEP WITH RECTIFICATION TEST.
 
 
@@ -544,6 +585,7 @@ TIMESTEP        VLOAD                                   # MOVE TEMPORARY DELTA A
                 BMN             CALL
                                 INTGRATE
                                 RECTIFY
+
 INTGRATE        SSP             SSP                     # INITIALIZE INDICES AND SWITCHES
                                 FBRANCH                 # EXIT FROM DIFEQCOM
                 CADR            FBR3
@@ -559,7 +601,7 @@ DIFEQ0          VLOAD                                   # POSITION DEVIATION INT
                 STCALL          DIFEQCNT                # ZERO DIFEQCNT AND REGISTER FOLLOWING.
                                 HBRANCH                 # GOES 0(-12D)(-24D).
 
-## Page 792
+## Page 739
 # THE RECTIFY SUBROUTINE IS CALLED BY THE INTEGRATION PROGRAM AND OCCASIONALLY BY THE MEASUREMENT INCORPORATION
 # ROUTINES TO ESTABLISH A NEW CONIC.
 
@@ -579,6 +621,7 @@ RECTIFY         VLOAD           VSR8                    # RECTIFY - FORM TOTAL P
                                 12D                     # ZERO DELTA, NU, AND TIME SINCE RECT.
                                 S1
                                 2
+
                 STODL           VCV
                                 DPZERO
                 STORE           TC
@@ -588,9 +631,10 @@ ZEROLOOP        STORE           YV              +12D,1  # INDICES CAUSE LOOP TO 
                 TIX,1           ITCQ                    # LOOP OR START INTEGRATION STEP IF DONE.
                                 ZEROLOOP
 
-## Page 793
+## Page 740
 # THE THREE DIFEQ ROUTINES - DIFEQ+0, DIFEQ+12, AND DIFEQ+24 - ARE ENTEREDTO PROCESS THE CONTRIBUTIONS AT THE
 # BEGINNING, MIDDLE, AND END OF THE TIMESTEP, RESPECTIVELY. THE UPDATING IS DONE BY THE NYSTROM METHOD.
+
 DIFEQ+0         VLOAD           VSR3
                                 FV
                 STCALL          PHIV
@@ -601,6 +645,7 @@ DIFEQ+1         VLOAD           VSR1
                                 PHIV
                 STOVL           PSIV
                 VSR1            VAD
+
                                 PHIV
                 STCALL          PHIV
                                 DIFEQCOM
@@ -613,6 +658,7 @@ DIFEQ+2         DLOAD           DMPR
                                 ZV
                 VXSC            VAD
                                 H
+
                                 YV
                 STOVL           YV
                                 FV
@@ -633,7 +679,7 @@ DIFEQ+2         DLOAD           DMPR
                                 NEXTCOL
                                 STEPEXIT
 
-## Page 794
+## Page 741
 NEXTCOL         VLOAD*                                  # SET UP NEXT COLUMNS OF W MATRIX
                                 W               +36D,2
                 STOVL*          YV
@@ -642,6 +688,7 @@ NEXTCOL         VLOAD*                                  # SET UP NEXT COLUMNS OF
                                 DIFEQ0
 ENDSTATE        STOVL           TNUV
                                 YV
+
                 STODL           TDELTAV
                                 H
                 SR4             SR2R
@@ -652,6 +699,7 @@ ENDSTATE        STOVL           TNUV
                                 WMATFLAG
                                 STEPEXIT
                                 36D
+
                 SSP             AXT,1
                                 S2
                                 6
@@ -665,7 +713,7 @@ ENDSTATE        STOVL           TNUV
                 GOTO
                                 NEXTCOL
 
-## Page 795
+## Page 742
 # COMES HERE TO FINISH FIRST TWO DIFEQ COMPUTATIONS.
 
 
@@ -680,6 +728,7 @@ DIFEQCOM        DLOAD           DAD                     # INCREMENT H AND DIFEQC
                 VXSC            VSR1
                                 FV
                 VAD             VXSC
+
                                 ZV
                                 H
                 VAD
@@ -687,13 +736,14 @@ DIFEQCOM        DLOAD           DAD                     # INCREMENT H AND DIFEQC
                 STCALL          ALPHAV
                                 FBRANCH
 
-## Page 796
-# ORBITAL ROUTINE FOR EXTRAPOLATION OF THE W MATRIX, IT COMPUTES THE SECOND DERIVATIVE OF EACH COLUMN POSITION
+## Page 743
+# ORBITAL ROUTINE FOR EXTRAPOLATION OF THE W MATRIX. IT COMPUTES THE SECOND DERIVATIVE OF EACH COLUMN POSITION
 # VECTOR OF THE MATRIX AND CALLS THE NYSTROM INTEGRATION ROUTINES TO SOLVETHE DIFFERENTIAL EQUATIONS. THE PROGRAM
 # USES A TABLE OF VEHICLE POSITION VECTORS COMPUTED DURING THE INTEGRATION OF THE VEHICLES POSITION AND VELOCITY.
 DOW..           VLOAD           VSR6
                                 ALPHAV
                 PDVL*           UNIT
+
                                 VECTAB,1
                 PDVL            VPROJ
                                 ALPHAV
@@ -706,7 +756,7 @@ DOW..           VLOAD           VSR6
                 STCALL          FV
                                 NBRANCH
 
-## Page 797
+## Page 744
 # CONSTANTS
 
 
@@ -714,27 +764,44 @@ DOW..           VLOAD           VSR6
 KEPSILON        OCT             00000
                 OCT             00002
 THREE/8         2DEC            .375
+
 3/16            2DEC            3               B -4
+
 DP1/4           2DEC            .25
+
 DP1/3           2DEC            .333333333
+
 DQUARTER        EQUALS          DP1/4
 POS1/16         2DEC            .0625
+
 POS1/4          EQUALS          DP1/4
 3/8             EQUALS          THREE/8
 15/16           2DEC            15.             B -4
+
 3/4             2DEC            3.0             B -2
+
 J2REQSQ         2DEC            .335914874              # SECOND HARMONIC TIMES SQUARE OF RADIUS.
+
 7/12            2DEC            .5833333333
+
+
 9/16            2DEC            9               B -4
+
 5/128           2DEC            5               B -7
+
 2J3RE/J2        2DEC            -.003309146
+
 J4REQ/J3        2DEC            .60932709
+
 DP1/2           2DEC            .5
+
 DPZERO          2DEC            0.0
+
 DP2/3           2DEC            .6666666667
+
 2/3             EQUALS          DP2/3
 
-## Page 798
+## Page 745
 # DUMMYMOON POSITION ROUTINE, SUN POSITION ROUTINE, AND PBODY TABLE FOR CHECKOUT OF EARTH-ORBITAL ONLY.
 MOONPOS         VLOAD           ITCQ                    # LOAD CONSTANT VECTOR INTO A AND EXIT.
                                 MOONVEC
@@ -745,12 +812,18 @@ SUNPOS          SETPD           VLOAD                   # RETURNS WITH VECTOR IN
                 ITCQ
 
 
+
 EARTHTAB        DEC             6
                 2DEC            0.0
+
                 DEC             10
                 2DEC            0.0
+
                 2DEC            0.0
+
+
                 DEC             -28                     #  28                        3/2
                 2DEC            .6335627                # 400/SQRT(MU)
+
 MOONVEC         EQUALS          EARTHTAB
 SUNVEC          EQUALS          EARTHTAB        +3      # ******

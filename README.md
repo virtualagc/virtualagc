@@ -1,6 +1,6 @@
 ----
- We are currently in the process of transcribing Sunburst 37/Shepatin 0 (an early development version of the Apollo 5 software), and are looking for volunteers to help out. If you're interested, **[click here!](https://github.com/virtualagc/virtualagc/wiki/Sunburst-37-Transcription)**
- ----
+We are currently in the process of transcribing Zerlina 56, an advanced off-line development program by Don Eyles, and are looking for volunteers to help out. If you're interested, **[click here!](https://github.com/virtualagc/virtualagc/wiki/Zerlina-56-Transcription)**
+----
 
 Virtual Apollo Guidance Computer
 ================================
@@ -46,7 +46,7 @@ Perhaps the most important part of the guidance system was the Inertial Measurem
 
 # What this project is for
 
-This repository is associated with [the website of the Virtual AGC project] (http://www.ibiblio.org/apollo), which 
+This repository is associated with [the website of the Virtual AGC project](http://www.ibiblio.org/apollo), which 
 provides a virtual machine which simulates the AGC, the DSKY, and some other portions of the guidance system.  In other words, if the virtual machine—which we call yaAGC—is given the same software which was originally run by the real AGCs, and is fed the same input signals encountered by the real AGCs during Apollo missions, then it will respond in the same way as the real AGCs did.  
 
 The Virtual AGC software is open source code so that it can be studied or modified.  The repository contains the actual assembly-language source code for the AGC, for as many missions as we've been able to acquire, along with software for processing that AGC code.  Principal tools are an assembler (to create executable code from the source code) and a CPU simulator (to run the executable code), as well as simulated peripherals (such as the DSKY).  Similar source code and tools are provided for the very-different abort computer that resided in the Lunar Module.  Finally, any supplemental software material we have been able to find or create for the Saturn rocket's LVDC computer or for the Gemini on-board computer (OBC) are provided, though these materials are minimal at present.

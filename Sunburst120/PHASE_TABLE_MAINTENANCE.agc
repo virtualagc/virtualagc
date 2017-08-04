@@ -17,6 +17,7 @@
 ##		2016-12-04 RSB	Another typo identified with ProoferComments.py.
 ##		2016-12-05 RSB	Comment-proofing with octopus/ProoferComments completed.
 ##		2017-03-14 RSB	Comment-text fixes noted in proofing Luminary 116.
+##		2017-06-17 MAS	Globally removed all SBANK= workarounds.
 
 ## Page 77
 # SUBROUTINE TO UPDATE THE PROGRAM NUMBER DISPLAY ON THE DSKY.
@@ -229,8 +230,6 @@ PHASCHNG	INHINT
 		DCA	ADRPCHN2	# OFF TO SWITCHED BANK
 		DTCB
 
-## The following line was not present in the original code.
-		SBANK=	LOWSUPER
 		EBANK=	LST1
 ADRPCHN2	2CADR	PHSCHNG2
 

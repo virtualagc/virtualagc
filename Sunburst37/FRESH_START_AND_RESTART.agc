@@ -18,6 +18,15 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-05-24 MAS  Created from Sunburst 120.
 ##              2017-05-29 HG   Transcribed
+##              2017-06-15 HG   Fix operand  BIT14  -> BIT4
+##                              Fix operator TC     -> TS  
+##                                           TCF    -> TC 
+##                              Fix statements CS    LMPCMD --> MASK LMPCMD
+##                                             MASK  BIT15  --> AD   BIT15
+##                                             ADS   LMPCMD --> TS   LMPCMD
+##                              Fix value IM30INIR  OCT 37000 -> OCT 37400
+##		2017-06-21 RSB	Various comment fixes found using 
+##				octopus/ProoferComments.
 
 ## Page 78
                 BANK            01
@@ -47,7 +56,7 @@ GOON            CAF             BIT15                   # TURN OFF ALL DSPTAB +1
                 DCA             ENJOBCAD
                 DXCH            FLUSHREG                # *** REMOVE IF FAKESTRT REMOVED
 
-DOFSTART        CS              ZERO                    # MAKE ALL MTIMER/MPHASE PAIRS AVAILABLE.
+DOFSTART        CS              ZERO                    # MAKE ALL MTIMER/PHASE PAIRS AVAILABLE.
                 TS              MTIMER4
                 TS              MTIMER3
                 TS              MTIMER2
@@ -58,7 +67,7 @@ DOFSTART        CS              ZERO                    # MAKE ALL MTIMER/MPHASE
                 TS              MPHASE2
                 TS              MPHASE1
 
-# INITIALIZE SWITCH REGISTER INCLUDING DAPBOOLS
+# INITIALIZE SWITCH REGISTERS INCLUDING DAPBOOLS
 
                 CS              ONE
                 TS              LMPOUTT
@@ -92,10 +101,10 @@ DOFSTART        CS              ZERO                    # MAKE ALL MTIMER/MPHASE
 POOH3           CAF             ZERO
                 TS              SMODE
                 TS              MODREG
-                TS              AGSWORD                 # ALLOW AGS INITIALIZATION
+                TS              AGSWORD                 # ALLOW AGS INITIALIZATION.
 
                 TS              PHASE6                  # INITIALIZE PHASE TABLES - NO MISSION
-                TS              PHASE1                  # PROGRAMS RUNNING
+                TS              PHASE1                  # PROGRAMS RUNNING.
                 TS              PHASE2
                 TS              PHASE3
                 TS              PHASE4
@@ -144,7 +153,7 @@ ENDRSTRT        CAF             BIT6                    # IF GIMBAL LOCK LAMP IS
 
 
 
-FLUSHLOC        EXTEND                                  # GO TO SPECIAL ENEMA LOC FRO ROM
+FLUSHLOC        EXTEND                                  # GO TO SPECIAL ENEMA LOC FOR ROM
                 DCA             FLUSHREG
                 DXCH            Z                       # USUALLY THIS WILL BE AN ENDOFJOB
 
@@ -153,6 +162,8 @@ OCT312          OCT             312
 ENJOBCAD        2CADR           ENDOFJOB
 
 ## Page 81
+#          COMES HERE FROM LOCATION 4000, GOJAM. RESTART ANY PROGRAMS WHICH MAY HAVE BEEN RUNNING AT THE TIME.
+
 GOPROG          TC              BANKCALL                # * * * SUBJECT TO A HUGE CHANGE * * *
                 CADR            FAKESTRT
                 INCR            REDOCTR
@@ -180,7 +191,7 @@ GOPROG          TC              BANKCALL                # * * * SUBJECT TO A HUG
 
                 MASK            BIT6
                 CCS             A                       # IF GIMBAL LOCK LAMP WAS ON, LEAVE ISS IN
-                CAF             BIT14                   # COARSE ALIGN.
+                CAF             BIT4                    # COARSE ALIGN.
                 EXTEND
                 WOR             12
 
@@ -224,10 +235,10 @@ LIGHTSET        EXTEND                                  # DONT TRY TO RESTART IF
 
 LMPRUPT         CS              BIT15                   # CANT USE ADS HERE SINCE CODING MUST BE
                 INDEX           LMPOUT                  # REPEATABLE (RESTART DURING RESTART, ETC)
-                CS              LMPCMD
-                MASK            BIT15
+                MASK            LMPCMD
+                AD              BIT15
                 INDEX           LMPOUT
-                ADS             LMPCMD
+                TS              LMPCMD
 
 T4LOCRST        CAF             LNORMT4
                 TS              T4LOC
@@ -242,7 +253,7 @@ PCLOOP          TS              MPAC            +5
                 EXTEND
                 RXOR            L                       # RESULT MUST BE -0 FOR AGREEMENT.
                 CCS             A
-                TCF             PTBAD                   # RESTART FAILURE
+                TCF             PTBAD                   # RESTART FAILURE.
                 TCF             PTBAD
                 TCF             PTBAD
 
@@ -284,7 +295,7 @@ TSTMPAC6        CCS             MPAC            +6      # IF NO GROUPS ACTIVE TH
                 TCF             DOFSTART                # FRESH START
 
 PTBAD           CAF             OCT1107                 # SET ADDITIONAL FAILURE TO SHOW PHASE
-                TC              SFAIL                   # TABLE DISAGREEMENT (WILL BE DISPLAYED
+                TS              SFAIL                   # TABLE DISAGREEMENT (WILL BE DISPLAYED
                 TCF             DOFSTART                # IN R2).
 
 RACTCADR        CADR            RESTARTS
@@ -300,7 +311,7 @@ DORSTART        CAF             IFAILINH                # LEAVE IMU FAILURE INHI
 ## Page 84
 #          INITIALIZATION COMMON TO BOTH FRESH START AND RESTART.
                 EBANK=          DNTMGOTO                # DO PORTION OF FRESH START NOT DONE
-STARTSUB        CAF             LDNTMGO                 # BY POO
+STARTSUB        CAF             LDNTMGO                 # BY POO.
                 TS              EBANK                   # SET UP TM PROGRAM.
 
                 CAF             LDNPHAS1
@@ -397,7 +408,7 @@ DSPOFF          TS              MPAC
                 INDEX           MPAC
                 TS              DSPTAB
                 CCS             MPAC
-                TCF             DSPOFF
+                TC              DSPOFF
 
                 TS              INLINK
                 TS              DSPCNT
@@ -471,7 +482,7 @@ NUMGRPS         EQUALS          FIVE                    # SIX GROUPS CURRENTLY.
 -ELR            OCT             -22                     # -ERROR LIGHT RESET KEY CODE.
 -MKREJ          OCT             -20                     # - MARK REJECT.
 IM30INIF        OCT             37411                   # INHIBITS IMU FAIL FOR 5 SEC AND PIP ISSW
-IM30INIR        OCT             37000                   # LEAVE FAIL INHIBITS ALONE.
+IM30INIR        OCT             37400                   # LEAVE FAIL INHIBITS ALONE.
 
 IM33INIT        OCT             16000                   # NO PIP OR TM FAIL SIGNALS.
 9,6             OCT             440                     # MASK FOR PROG ALARM AND GIMBAL LOCK.
@@ -507,9 +518,9 @@ POOH2           INHINT
                 TC              STARTSB2                # DOESN'T CLOBBER DOWNLINK.
 
                 TC              FLAG2DWN
-                OCT             20                      # TURN OFF MISSION TIMER FLAG.
+                OCT             20                      # TURN OFF MISSION TIMER FLAG
 
-#   ***** HERE WE SHOULD RESET STATE REGISTERS, DEAL WITH DAP, ETC. ***
+#   ***** HERE WE SHOULD RESET STATE REGISTERS, DEAL WITH DAP, ETC. *****
 
                 CA              LPOOH3                  # PICK UP RETURN FOR MSTART.
                 TC              MSTART          -1      # START MISSION TIMERS COUNTING.
@@ -541,7 +552,7 @@ ENEMA           INHINT
                 CAF             ZERO                    # MAKE INACTIVE ALL RESTART PHASES
                 TS              PHASE1                  # EXCEPT SERVICER
 
-# Page 89
+## Page 89
                 TS              PHASE2
                 TS              PHASE3
 

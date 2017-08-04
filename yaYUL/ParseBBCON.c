@@ -27,6 +27,7 @@
  *               11/03/16 RSB.  Permanently removed some code I had temporarily
  *                              commented out yesterday.
  *               2017-01-05 RSB Added BBCON* as distinct from BBCON.
+ *               2017-06-17 MAS Refactored superbank bit logic.
  */
 
 #include "yaYUL.h"
@@ -141,8 +142,36 @@ ParseBBCONraw(int star, ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 
         Address.Value = (Address.Value << 10) | ebank.EB;
 
-        // Superbank processing.
-        FixSuperbankBits(InRecord, &Address, &Address.Value);
+        if (Address.FB >= 030 && Address.FB <= 037) {
+            // Determine the superbank needed for the target address
+            unsigned AddressSBank;
+            if (Address.Super)
+                AddressSBank = 4;
+            else
+                AddressSBank = 3;
+
+            Address.Value |= AddressSBank << 4;
+
+            // Generate a warning if we're implicitly referencing a different superbank
+            // ... someday? It really looks like there are things that YUL would have cussed
+            // in, e.g., Luminary 210, but GAP does not appear to have done so. For now
+            // we will just let it slide...
+
+            //if (InRecord->ProgramCounter.FB >= 030 && InRecord->ProgramCounter.FB <= 037 
+            //   && AddressSBank != InRecord->SBank.current) {
+            //    sprintf(OutRecord->ErrorMessage, 
+            //            "BBCON referencing unestablished superbank %u when in superbank %u", 
+            //            AddressSBank, 
+            //            InRecord->SBank.current);
+            //    OutRecord->Warning = 1;
+            //}
+        } else if (!EarlySBank) {
+            // If the target address is not in a superbank, then simply fill in the
+            // superbank bits with whatever the established superbank is...
+            // *unless* we're building with pre-1967 superbank behavior.
+            Address.Value |= InRecord->SBank.current << 4;
+        }
+
         OutRecord->Words[0] = Address.Value;
     } else {
         // The operand is NOT a number.  Presumably, it's a symbol.

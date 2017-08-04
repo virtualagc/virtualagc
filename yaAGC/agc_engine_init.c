@@ -90,6 +90,7 @@
  * 		04/16/17 MAS    Added initialization of warning filter variables.
  * 		05/16/17 MAS    Enabled interrupts at startup.
  * 		05/31/17 RSB	Added --initialize-sunburst-37.
+ * 		07/13/17 MAS	Added initialization of the three HANDRUPT traps.
  */
 
 // For Orbiter.
@@ -308,6 +309,10 @@ agc_engine_init (agc_t * State, const char *RomImage, const char *CoreDump,
 
   State->TookBZF = 0;
   State->TookBZMF = 0;
+
+  State->Trap31A = 0;
+  State->Trap31B = 0;
+  State->Trap32 = 0;
 
   if (initializeSunburst37)
     {

@@ -144,7 +144,7 @@ RETREAD44, for example, that array looks like this:
 
 And then the actual script is:
 
-        SKIPUNTIL=$FIRSTOUTPUTPAGE; \
+        SKIPUNTIL=$FIRSTOUTPAGE; \
 	n=$FIRSTOUTPAGE; \
 	for i in `seq $((FIRSTOUTPAGE-STARTINGPAGEOFOCTALS)) $((LASTOUTPAGE-STARTINGPAGEOFOCTALS))`
 	do   

@@ -14,6 +14,7 @@
 ##				and fixed errors found.
 ##		2017-01-18 RSB	Fixed comment-text errors noted while diff'ing
 ##				vs Colossus 249.
+##		2017-06-17 MAS	Globally removed all SBANK= workarounds.
 
 ## Page 1368
 #          SUBROUTINE TO UPDATE THE PROGRAM NUMBER DISPLAY ON THE DSKY.
@@ -238,8 +239,6 @@ PHASCHNG	INHINT
 		DCA	ADRPCHN2	# OFF TO SWITCHED BANK
 		DTCB
 
-## 2016-08-14 RSB  Added SBANK for addressing discrepancies.
-		SBANK=	PINSUPER	
 		EBANK=	LST1
 ADRPCHN2	2CADR	PHSCHNG2
 

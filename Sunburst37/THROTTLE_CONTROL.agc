@@ -18,7 +18,9 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-05-24 MAS  Created from Sunburst 120.
 ##              2017-06-09 HG   Transcribed
-
+##              2017-06-15 HG   Fix operator DXCH -> DAS
+##		2017-06-23 RSB	Proofed comment text with
+##				octopus/ProoferComments.
 
 ## Page 795
                 BANK            30
@@ -28,7 +30,7 @@
 #   INPUTS TO THROTTLE CONTROL ARE /A/ AND /AFC/, ACCELERATIONS PRESENT
 
 # AND DESIRED, SCALED IN UNITS OF 2(-5) M/CS/CS, AND MASS IN UNITS OF
-# 2(15) KILOGRAMMS.
+# 2(15) KILOGRAMS.
 #   THIS PROGRAM CAUSES THE THROTTLE TO RESPOND TO ACCELERATION COMMANDS
 # IN THE MANNER DESCRIBED BY FIGURE 5.3-5 OF THE FLIGHT 206 GSOP.
 
@@ -138,8 +140,8 @@ FOLDCALC        EXTEND
                                                         # ENGINE PROVES TO BE OFF FCOLD IS SET TO
 
                                                         # 10 PERCENT FMAX, AND, SINCE /AF/ DOES
-                                                        # NOT REFLECT THE 10 PRECENT SETTING OF
-                                                        # THE HAND THROTTLE, -10 PRECENT FMAX
+                                                        # NOT REFLECT THE 10 PERCENT SETTING OF
+                                                        # THE HAND THROTTLE, -10 PERCENT FMAX
                                                         # IS ADDED INTO PIF.
 
 NEXTNEXT        CA              ZERO
@@ -168,20 +170,20 @@ WHERETO         CA              FC
 
                 AD              -.1FMAX
                 EXTEND
-                BZMF            TIPTOE                  # BRANCH IF FC < OR = 10 PRECENT MAX
+                BZMF            TIPTOE                  # BRANCH IF FC < OR = 10 PERCENT FMAX
                 CA              FC
                 AD              -.52FMAX
                 EXTEND
-                BZMF            DOPIF                   # BRANCH IF FC < 52 PRECENT
+                BZMF            DOPIF                   # BRANCH IF FC < 52 PERCENT
                 CS              FC
                 AD              .58FMAX
                 EXTEND
-                BZMF            FLATOUT                 # BRANCH IF FC > OR = 58 PRECENT FMAX,
+                BZMF            FLATOUT                 # BRANCH IF FC > OR = 58 PERCENT FMAX,
                 CA              FCOLD                   #   OTHERWISE, TEST FCOLD
 
                 AD              -FMAX
                 EXTEND
-                BZMF            DOPIF                   # BRANCH IF FCOLD < OR = 100 PRECENT FMAX,
+                BZMF            DOPIF                   # BRANCH IF FCOLD < OR = 100 PERCENT FMAX,
                                                         #  OTHERWISE (IN WHICH CASE FCOLD=HIGHT)
                                                         #  PROCEED TO FLATOUT
 
@@ -205,7 +207,7 @@ DOPIF           TC              PHASCHNG
                 EXTEND
                 DCA             FC
                 TS              FCOLD                   # HISTORY
-                DXCH            PIF                     # OKAY SINCE PIF PREVIOUSLY WAS ZEROOED
+                DAS             PIF                     # OKAY SINCE PIF PREVIOUSLY WAS ZEROED
                 EXTEND
                 DCS             FOLD
                 DAS             PIF                     # PIF = FC - FOLD + PRESETTING (IF ANY)

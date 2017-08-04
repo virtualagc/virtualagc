@@ -18,6 +18,9 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-05-24 MAS  Created from Sunburst 120.
 ##              2017-05-28 HG   Transcribed
+##              2017-06-15 HG   Fix operator CS  -> CA
+##              2017-06-15 HG   Fix operator -2CADR -> 2CADR      
+##		2017-06-21 RSB	Proofed using octopus/ProoferComments.
 
 ## Page 56
 # RESTART TABLES
@@ -208,7 +211,7 @@ RTRNCADR        TC              SWRETURN
 
 5.27SPOT        OCT             20000
                 EBANK=          XSM
-               -2CADR           RESTAIER
+                2CADR           RESTAIER
 
 5.31SPOT        OCT             77777
                 EBANK=          XSM
@@ -423,7 +426,7 @@ ITSLGCL1        LXCH            GOLOC           +1      # OBTAIN THE CORRECT E B
                 LXCH            BB                      # RESTORE THE TASKS E AND F BANKS
                 LXCH            GOLOC           +1      # AND PRESERVE OUR L
 
-                TCF             ITSLGCL2                # NOT LET:S PROCESS THIS LONGCALL
+                TCF             ITSLGCL2                # NOW LET:S PROCESS THIS LONGCALL
 
 # ***** YOUB MAY RETURN TO SWITCHED FIXED *****
 
@@ -460,7 +463,7 @@ ITSLNGCL        CA              WTLTCADR                # ASSUME IT WILL GO TO W
                 TS              GOLOC           -1
 
                 NDX             TEMP2G
-                CS              PHSPRDT1                # GET THE DELTA T ADDRESS
+                CA              PHSPRDT1                # GET THE DELTA T ADDRESS
 
                 TCF             ITSLGCL1                # NOW GET THE DELTA TIME
 

@@ -350,7 +350,7 @@ TESTCADR        CADR            ALM/END                 # 0  ILLEGAL
                 CADR            AOTNBIMU                # 3  IMU ALIGNMENT TEST
                 CADR            OPCHK                   # 4  IMU CHECK
                 CADR            GYRSFTST                # 5  GYRO TORQUING TEST
-                CADR                                    #  AVAILABLE
+                CADR            ALM/END                 # 6  AVAILABLE
                 CADR            GTSCPSS                 # 7. OPTIMUM COMPASS
                 CADR            SAMODCHK                # 10 SEMI-AUTOMATIC MODING CHECK
                 CADR            SAUTOIFS                # 11 SEMI-AUTOMATIC INTERFACE TEST

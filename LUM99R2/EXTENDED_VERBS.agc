@@ -30,6 +30,7 @@
 ##				side-by-side diff of Luminary 69/99/116/131/210.
 ##		2017-03-17 RSB	Comment-text fixes identified in diff'ing
 ##				Luminary 99 vs Comanche 55.
+##		2017-06-17 MAS	Globally removed all SBANK= workarounds.
 
 ## Page 262
 		BANK	7
@@ -517,8 +518,6 @@ GOLOADLV	TC	FLASHOFF
 V47TXACT	TC	TESTXACT	# NO OTHER EXTVERB.
 		CAF	PRIO4
 		TC	FINDVAC
-## [WORKAROUND] RSB 2009
-		SBANK=	LOWSUPER
 		EBANK=	AGSBUFF
 		2CADR	AGSINIT
 		
@@ -676,8 +675,6 @@ R04C		CAF	BIT14		# ENABLE RR AUTO TRACKER
 		TS	RTSTMAX		# FOR SEQUENTIAL STORAGE
 		
 		TC	WAITLIST
-## [WORKAROUND] RSB 2009
-		SBANK=	PINSUPER
 .		EBANK=	RSTACK
 		2CADR	RADSAMP
 		

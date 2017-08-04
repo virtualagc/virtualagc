@@ -158,7 +158,7 @@ S-2             EQUALS          NEG2
 S-1             EQUALS          NEGONE                          
 S-ZERO          EQUALS          NEG0                            
 
-                EBANK=          3                               
+                EBANK=          LST1                            
 ADRS1           ADRES           SKEEP1                          
 
 SRADRS          ADRES           SR                              
@@ -1156,10 +1156,8 @@ SOPTION         CA              SKEEP4
 SOPT            CCS             SKEEP6                          
                 TC              SDISPLAY                        
 VNCON           OCTAL           00501                           # USED IN SHOWSUM. DISPLAY 3 REGISTERS.
-# Banks 40-43 currently can't be coded for in yaYUL BLK2, so the expected result is hardcoded.
                 EBANK=          NEWJOB                          
-#LSTBNKCH        BBCON*
-LSTBNKCH        OCT             66100                           # * CONSTANT, LAST BANK.                
+LSTBNKCH        BBCON*                                          # * CONSTANT, LAST BANK.                
 
 # CHANGE TO 31777 IF BANK 23 IS LAST BANK USED
 BNKCHK          CCS             SKEEP1                          # WHEN C(SKEEP6) = -0

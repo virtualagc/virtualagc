@@ -18,6 +18,10 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-05-24 MAS  Created from Sunburst 120.
 ##              2017-06-06 HG   Transcribed
+##              2017-06-15 HG   Fix operator TCF -> TC
+##                                  operand  IBNKCALL -> BANKCALL
+##		2017-06-23 RSB	Proofed comment text with
+##				octopus/ProoferComments.
 
 ## Page 693
                 BANK            36
@@ -114,7 +118,7 @@ RETPREB         INHINT
 
                 EXIT
 
-                CAF             PRIO30                  # DO ATTITUDE MANEUVER JOB.
+                CAF             PRIO30                  # DO ATTITUDE MANEUVER JOB
                 INHINT
                 TC              FINDVAC
                 EBANK=          MIS
@@ -215,7 +219,7 @@ RETBURN         EXTEND                                  # RETURN FROM BURN GUIDA
                 EBANK=          TDEC
                 2CADR           PROG44
 
-                TCF             ENDOFJOB                # READACCS STILL ACTIVE.
+                TC              ENDOFJOB                # READACCS STILL ACTIVE
 
 ## Page 697
 
@@ -238,7 +242,7 @@ PROG44          TC              NEWMODEX
                 2CADR           ASWTVLON                # COOLANT VALVE CALL
 
 INDPCT          CAF             FOUR
-                TS              MPRETRN                 # INDEX.
+                TS              MPRETRN                 # INDEX
 
                 INDEX           A                       # OFFSET POINTER
                 CAF             20PCTHR                 # AMOUNT OF THROTTLE
@@ -267,7 +271,7 @@ INDPCT          CAF             FOUR
 
                 TC              TASKOVER
 
-# FITH/APS1 PROGRAM 74
+# FITH/APS1 BURN PROGRAM 74
 
 ## Page 698
 # WITH DETECTION OF THE ABORT STAGE DISCRETE BY THE ABORT STAGE MONITOR
@@ -293,7 +297,7 @@ INDPCT          CAF             FOUR
 # T+5.0 ASCENT ENGINE-OFF (PROGRAMMED)
 
 FITHCMD         TC              1LMP+DT                 # THRUST AT MAX FOR 1 MORE SEC AND ABORT
-                DEC             22                      # ABORT SATGE ARM
+                DEC             22                      # ABORT STAGE ARM
                 DEC             100                     # DELAY 1.0 SEC.
 
                 TC              1LMP                    # INITIATE ABORT STAGE COMMAND
@@ -343,7 +347,7 @@ FITHGCMD        TC              IBNKCALL
 
 
 
-DOCURTN         TC              IBNKCALL                #  GO SET UP CURTAIN JOB
+DOCURTN         TC              BANKCALL                #  GO SET UP CURTAIN JOB
                 CADR            CURTJOB
 
 MP11TERM        CAF             1SEC11                  # SET TO DO MP11 TERMINAL TASKS IN 1 SEC
@@ -449,7 +453,7 @@ PREAVEG         CAF             BIT1                    # SET UP PREREAD FOR RIG
                 CAF             AVEG11AD                # GENADR OF AVERAGE G
                 TS              DVSELECT
 
-                EXTEND                                  # SET SRVICER EXIT
+                EXTEND                                  # SET SERVICER EXIT
                 DCA             ADROFSER
                 DXCH            AVGEXIT
 

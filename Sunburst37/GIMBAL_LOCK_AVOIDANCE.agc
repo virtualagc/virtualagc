@@ -17,10 +17,11 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-05-24 MAS  Created from Sunburst 120.
+##		2017-06-13 RSB	Transcribed.
+##		2017-06-22 RSB	Proofed comment text with
+##				octopus/ProoferComments.
 
-## NOTE: Page numbers below have not yet been updated to reflect Sunburst 37.
-
-## Page 661
+## Page 620
 # DETECTING GIMBAL LOCK
 LOCSKIRT        DLOAD           ABS
                                 COF
@@ -32,6 +33,7 @@ LOCSKIRT        DLOAD           ABS
                                 COF             +4
                 SL1             PDDL
                                 COF
+                                
                 DMP             SL1
                                 COF             +2
                 PDDL            DSQ
@@ -44,6 +46,7 @@ LOCSKIRT        DLOAD           ABS
                                 COF             +2              #            0      1     2
                 DCOMP           PDDL
                                 COF             +4
+                                
                 PDDL            VDEF                            # -
                                 NIL                             # V3 = (0, COF , -COF )
                 STOVL           K3                              #             2      1
@@ -51,7 +54,7 @@ LOCSKIRT        DLOAD           ABS
                 STORE           IG                              # IG = MIS                              $2
                 MXV             VSL1                            #         3
                                 K1                              #                    -   -   -   -
-                STODL           P21                             # (P21, D21, G21) = (V1, V2, V3) TG     $2
+                STODL           P21                             # (P21, D21, G21) = (V1, V2, V3) IG     $2
                                 G21
                 DSQ             PDDL
                                 D21
@@ -71,7 +74,7 @@ LOCSKIRT        DLOAD           ABS
                 DCOMP
                 STORE           RAD
 
-## Page 662
+## Page 621
 OKG21           DLOAD           DAD                             # IF G21 IS POS....
                                 P21
                                 RAD                             #    IF (ABS(P21+RAD)-SD) NEG, GO NOGIMLOC
@@ -80,6 +83,7 @@ OKG21           DLOAD           DAD                             # IF G21 IS POS.
                 DSU             BMN                             #    CBM = D21/RAD                      $2
                                 SD
                                 NOGIMLOC
+                                
 CBMCALC         DLOAD           SR1
                                 D21
                 DDV             BDSU
@@ -103,6 +107,7 @@ CBMCALC         DLOAD           SR1
                 UNIT
                 STOVL           E1                              # E1 = UNIT(OGI X OGF)
                                 OGF
+                                
                 VAD             UNIT
                                 HALFA
                 GOTO
@@ -123,7 +128,7 @@ STOREE1         STORE           E1
                                 E1
                 VAD             UNIT                            # E2 = UNIT(E1 X OGI + OGF X E1)
 
-## Page 663
+## Page 622
 STORE2          STADR                                           # -         -     -
                 STORE           E2                              # E2 = UNIT(OGI + OGF)                  $2
                 SETPD           DOT
@@ -138,6 +143,7 @@ STORE2          STADR                                           # -         -   
                 DSQ             SL1
                 PDDL            DSU                             # PD6 (K1 K1)                           $2
                                 K4SQ                            # = COS(D)COS(D)                        $2
+                                
                                 6
                 PUSH            DSQ                             # PD8 D1                                $2
                 PDDL            DMP                             # PD10 (D1 D1)                          $4
@@ -161,6 +167,7 @@ STORE2          STADR                                           # -         -   
                                 4                               # B1 K1                                 $4
                 SL1             PUSH                            # PD18 B1 K1                            $2
                 DSQ             PDDL                            # PD22 B1 B1 K1 K1                      $4
+                
                                 8D
                 DMP             PUSH                            # PD22 D1 D2                            $4
                                 12D
@@ -174,7 +181,7 @@ STORE2          STADR                                           # -         -   
                 PDDL            SL1                             # PD26 (D2 D2)                          $8
                                 20D                             # 4(B1 B1 K1 K1)                        $8
                 DAD                                             # PUSH UP FOR (D2 D2)                   $8
-## Page 664
+## Page 623
                 PDDL            SR1                             # PD26 DENOMR (D2 D2)
                                 22D
                 BDSU            PUSH                            # PD28 NUM
@@ -194,6 +201,7 @@ STORE2          STADR                                           # -         -   
                 STORE           C2SQM                           #                                       $4
                 SQRT
                 STODL           C2MP                            #                                       $2
+                
                                 QUARTA                          # 1                                     $4
                 DSU             SQRT
                                 C2SQP
@@ -217,6 +225,7 @@ NORM            SETPD           DLOAD
                 SL2             BDSU
                                 QUARTA
                 SQRT            DMP
+                
                                 K4                              # PD20 = -R                             $4
                 PDDL            DMP*
                                 4                               # K1                                    $2
@@ -225,9 +234,10 @@ NORM            SETPD           DLOAD
                                 18D                             # -Q
                 DAD             DCOMP
                                 20D                             # -R
-## Page 665
+## Page 624
                 PDDL            DSU                             # PD24 ANSW1 = Q + R                    $4
                                 18D                             # -Q
+                                
                                 20D                             # +R
                 DCOMP           PUSH                            # PD26 ANSW2 = Q - R                    $4
                 ABS             DSU
@@ -275,8 +285,9 @@ OUTCYCLE        SETPD           VLOAD
                 PDDL            DMP                             # PD4 U2 C2(0)
                                 C1PP
                                 0                               # U1 C1(0)
+                                
                 DAD             ABS
-## Page 666
+## Page 625
                 PDDL            DMP                             # PD4 ABS(U1 C1(0) + U2 C2(0))
                                 2
                                 C2MP
@@ -285,6 +296,7 @@ OUTCYCLE        SETPD           VLOAD
                                 C1MP                            # PUSH UP U2 C2(1)
                 DAD             ABS                             # ABS(U1 C1(1) + U2 C2(1))
                 DSU                                             # PUSH UP 4
+                
                 BMN             AXC,1
                                 JZERO
                                 2
@@ -308,6 +320,7 @@ JZERO           DLOAD*          VXSC
                                 QUARTA                          # (1 - K5 )                             $4
                 SR1             SQRT
                 ARCSIN          SL1
+                
                 STORE           AM
                 CLRGO                                           # STATE SWITCH NO. 31
                                 31D                             # 0(OFF) = MANEUVER WENT THRU GIMBAL LOCK
@@ -327,7 +340,7 @@ WCALC           LXC,1           DLOAD*
                                 AM                              
                 DMP             DDV*                            
                                 ANGLTIME                        
-## Page 667
+## Page 626
                                 ARATE,1                         
                 SR                                              
                                 5                               
@@ -337,8 +350,8 @@ WCALC           LXC,1           DLOAD*
                                 NEWDELHI        +1              # 1(ON) = START MANEUVER
 
 
-# THE FOUR SELECTABLE FREE FALL MANEUVER RATES SELECTED BY
-# LOADING RATEINDX WITH 0,2,4,6, RESPECTIVELY
+#          THE FOUR SELECTABLE FREE FALL MANEUVER RATES SELECTED BY
+#          LOADING RATEINDX WITH 0,2,4,6, RESPECTIVELY
 
 
 ARATE           2DEC            .0222222222                     # =.5 DEG/SEC        $ 22.5DEG/SEC
@@ -350,4 +363,4 @@ ARATE           2DEC            .0222222222                     # =.5 DEG/SEC   
                 2DEC            .4444444444                     # =10 DEG/SEC        $ 22.5DEG/SEC
 
 ANGLTIME        2DEC            .0001907349                     # = 100B-19     FUDGE FACTOR TO CONVERT
-                                                                # MANEUVER ANGLE TO MANEUVER TIME
+#                      34,3513   04000 0                                    MANEUVER ANGLE TO MANEUVER TIME

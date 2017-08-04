@@ -17,20 +17,17 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-05-24 MAS  Created from Sunburst 120.
+##              2017-06-14 HG   Transcribed
+##		2017-06-23 RSB	Proofed comment text with
+##				octopus/ProoferComments.
 
-## NOTE: Page numbers below have not yet been updated to reflect Sunburst 37.
-
-## Page 835
-# *****  PIPA READER *****
-
-#                 MOD NO. 00  BY D. LICKLY  DEC.9 1966
-
-# FUNCTIONAL DESCRIPTION
+## Page 780
 
 #    SUBROUTINE TO READ PIPA COUNTERS, TRYING TO BE VERY CAREFUL SO THAT IT WILL BE RESTARTABLE.
 #    PIPA READINGS ARE STORED IN THE VECTOR DELV. THE HIGH ORDER PART OF EACH COMPONENT CONTAINS THE PIPA READING,
-#    RESTARTS BEGIN AT REREADAC.
 
+# AND THE LOW ORDER PART HAS -0 AFTER THE PIPAS HAVE BEEN READ. RESTARTS BEGIN AT REPIPASR.
+#
 
 #    AT THE END OF THE PIPA READER THE CDUS ARE READ AND STORED AS A
 # VECTOR IN CDUTEMP.  THE HIGH ORDER PART OF EACH COMPONENT CONTAINS
@@ -39,113 +36,158 @@
 
 # CALLING SEQUENCE AND EXIT
 
-#    CALL VIA TC, ISWCALL, ETC.
+#    THE CALLING SEQUENCE TO PIPASR IS
 
-#    EXIT IS VIA Q.
+#                                                  EXTEND
+#                                                  DCA    PIP2CADR
+#                                                  DXCH   Z
 
+# THE RETURN ADDRESS,WHICH IS STORED IN (A,L),IS SAVED IN PIPRETRN. THE RETURN FROM PIPASR IS
+#
+#                                                  EXTEND
+#                                                  DCA    PIPRETRN
+#                                                  DXCH   Z
+
+# WHICH RETURNS TO THE LOCATION AFTER THE CALL. ON A RESTART,PIPASR IS CALLED BY REPIPASR.
+
+#
 
 # INPUT
 
 #    INPUT IS THROUGH THE COUNTERS PIPAX, PIPAY, PIPAZ, AND TIME2.
 
+
 # OUTPUT
 
-#    HIGH ORDER COMPONENTS OF THE VECTOR DELV CONTAIN THE PIPA READINGS.
-#    PIPTIME CONTAINS TIME OF PIPA READING.
+#    THE PIPA READINGS ARE OUTPUT THROUGH THE VECTOR DELV. DELTAT, SCALED AT 2(+28)CS, IS COMPUTED FOR AVERAGEG.
+
+# PIPTIME CONTAINS THE NEGATIVE OF THE CURRENT TIME.
 
 
 # DEBRIS (ERASABLE LOCATIONS DESTROYED BY PROGRAM)
 
-#          TEMX   TEMY   TEMZ   PIPAGE
+#    TEMX  TEMY  TEMZ  TEMXY  PIPAGE  PIPTIME  PIPAX  PIPAY  PIPAZ
+
+# (ARRIVE IN INTERRUPTED STATE OR INHIBITED AFTER RESTART. EXIT
+# THRU ISWRETURN)
+
+                BANK            30
+
+PIPASR          DXCH            PIPRETRN
+                CS              ZERO                    # PUT THESE INTO THE IMPOSSIBLE STATE
+                TS              TEMX                    # FOR THEIR INITIAL VALUES.
+
+## Page 781
+                TS              TEMY
+                TS              TEMZ
+                CA              ZERO
+                TS              DELVX           +1
+                TS              DELVY           +1      # PIP COUNTERS MAY NOT HAVE POS ZERO IN
+                TS              DELVZ           +1
+                TS              PIPAGE                  # ZERO THIS TO INDICATE IN PIPA READING.
 
 
-                BANK            30                              
-PIPASR          EXTEND                                          
-                DCA             TIME2                           
-                DXCH            PIPTIME                         # CURRENT TIME  POSITIVE VALUE.
+# COMPUTE DELTAT FOR AVERAGEG, SAVING -(CURRENT TIME) IN PIPTIME.
 
-                CS              ZERO                            # INITIALIZE THESE AT NEG ZERO.
-                TS              TEMX                            
-                TS              TEMY                            
-                TS              TEMZ                            
+REPIP1          EXTEND
+                DCA             TIME2                   # CURRENT TIME
+                DXCH            PIPTIME
 
-## Page 836
-                CA              ZERO                            
-                TS              DELVZ                           # OTHER DELVS OK INCLUDING LOW ORDER
-                TS              DELVY                           
+                CS              PIPAX
+                TS              TEMXY
+                XCH             TEMX                    # PUT NEGZERO INTO PIPACTRS AS READ
+                XCH             PIPAX
 
-                TS              CDUTEMP         +1              # INITIALIZE THESE FOR FINDCDUD
+REPIP1B         TS              DELVX
+                TS              DELVX           +1      # DOUBLE SAVE
+
+REPIP2          CS              PIPAY
+                TS              TEMXY
+                XCH             TEMY
+                XCH             PIPAY
+REPIP2B         TS              DELVY
+                TS              DELVY           +1
+
+REPIP3          CS              PIPAZ                   # REPEAT PROCESS FOR Z PIPA.
+                TS              TEMXY                   # SAVE NEG OF PIPA READ
+
+                XCH             TEMZ                    # SAVE HERE AS PICK UP NEGZERO
+                XCH             PIPAZ                   # RESETTING PIPA AS READ OUT
+REPIP3B         TS              DELVZ                   # AND STORE IN Z.
+                TS              DELVZ           +1      # SHOWS THAT IT REALLY MADE IT.
+
+REPIP4          CS              ZERO
+                TS              DELVX           +1      # LEAVE THESE AT NEGZERO
+                TS              DELVY           +1
+                TS              DELVZ           +1
+                CA              CDUX                    # READ CDUS INTO CDUTEMP AS A VECTOR
+
+                TS              CDUTEMP
+                CA              CDUY                    # THE THRUST ESTIMATION FILTER IN FINDCDUD
+                TS              CDUTEMP         +2      # REQUIRES THAT THE CDUS BE READ AT THE
+                CA              CDUZ                    # TIME THE PIPAS ARE READ
+                TS              CDUTEMP         +4
+                CAF             ZERO
+                TS              CDUTEMP         +1
                 TS              CDUTEMP         +3
                 TS              CDUTEMP         +5
 
-                TS              PIPAGE                          # SHOW PIPA READING IN PROGRESS
+## Page 782
+                EXTEND
 
-REPIP1          EXTEND                                          
-                DCS             PIPAX                           # X AND Y PIPS READ
-                DXCH            TEMX                            
-                DXCH            PIPAX                           # PIPAS SET TO NEG ZERO AS READ.
-                TS              DELVX                           
-                LXCH            DELVY                           
+                DCA             PIPRETRN                # RETURN TO LOCATION AFTER CALL
+                DXCH            Z
 
-REPIP3          CS              PIPAZ                           # REPEAT PROCESS FOR Z PIP
-                XCH             TEMZ                            
-                XCH             PIPAZ                           
-DODELVZ         TS              DELVZ                           
+## Page 783
 
-REPIP4          CA              CDUX                            # READ CDUS INTO HIGH ORDER CDUTEMPS
-                TS              CDUTEMP                        
-                CA              CDUY                            
-                TS              CDUTEMP         +2
-                CA              CDUZ                            
-                TS              CDUTEMP         +4
+REREADAC        EXTEND
+                DCA             DONECAD
+                DXCH            PIPRETRN
 
-                TC              Q                               
+REPIPASR        CCS             PIPAGE                  # WAS I READING PIPS.
 
+                TCF             PIPASR          +1
+                CCS             DELVZ           +1      # PIPAGE = 0  (I WAS READING PIPS.)
+                TCF             REPIP4                  # Z WAS READ OK
+                TCF             +3                      # Z NOT DONE, CHECK Y.
+                TCF             REPIP4
+                TCF             REPIP4
 
+                CCS             DELVY           +1      # HAS IT CHANGED FROM ITS +ZERO INIT VALU
+                TCF             +3                      # YES, Y DONE.  TRY TO REDO Z.
+                TCF             CHKDELVX                # NO, GO LOOK AT X.
+                TCF             +1                      # YES
 
-REREADAC        CCS             PHASE5                          # COMES HERE ON RESARTS.   IS PHASE 5 ON?
-                TCF             +2                              # YES..  GO ON.
-                TCF             TASKOVER                        # NO.. HAVE BEEN TO AVGEND SINCE GOJAM.
+                CCS             TEMZ                    # DOES TEMZ STILL = -0.
+                TCF             +4                      # NO-TRY TO RESTORE
+                TCF             +3
+                TCF             +2
+                TCF             REPIP3                  # YES, GO BACK AND READ Z AGAIN.
 
-                CCS             PIPAGE                          # WAS 1 READING THE PIPS WHEN GOJAM OCCURD
-                TCF             PIPREAD                         # PIP READING NOT STARTED. GO TO BEGINNING
-                CAF             DONEADR                         # SET UP RETURN FROM PIPASR
-                TS              Q                               
+                CS              TEMXY                   # MUCH MORE LOGIC COULD BE INCORPORATED
+                TCF             REPIP3B                 # TO CHECK PIPA CTR FOR SIZE
 
-                CCS             DELVZ                           
-                TCF             REPIP4                          # Z DONE, GO DO CDUS
-                TCF             +3                              # Z NOT DONE, CHECK Y.
-                TCF             REPIP4                          
-                TCF             REPIP4                          
+CHKDELVX        CCS             DELVX           +1      # HAS THIS CHANGED.
 
-                ZL                                              
-                CCS             DELVY                           
-## Page 837
-                TCF             +3                              
-                TCF             CHKTEMX                         # Y NOT DONE, CHECK X.
-                TCF             +1                              
-                LXCH            PIPAZ                           # Y DONE, ZERO Z PIP.
+                TCF             +3                      # YES
+                TCF             CHKTEMX                 # NO
+                TCF             +1                      # YES
+                CCS             TEMY
+                TCF             +4
+                TCF             +3
+                TCF             +2
+                TCF             REPIP2
+                CS              TEMXY
+                TCF             REPIP2B
 
-                CCS             TEMZ                            
-                CS              TEMZ                            # TEMZ NOT = -0, CONTAINS -PIPAZ VALUE.
-                TCF             DODELVZ                         
-                TCF             -2                              
-                LXCH            DELVZ                           # TEMZ = -0, L HAS ZPIP VALUE.
-                TCF             REPIP4                          
+CHKTEMX         CCS             TEMX                    # HAS THIS CHANGED.
 
-CHKTEMX         CCS             TEMX                            # HAS THIS CHANGED
-                CS              TEMX                            # YES
-                TCF             +3                              # YES
-                TCF             -2                              # YES
-                TCF             REPIP1                          # NO
-                TS              DELVX                           
+                TCF             +4                      # YES
+                TCF             +3                      # YES
+                TCF             +2                      # YES
+                TCF             REPIP1                  # NO
+                CS              TEMXY
+                TCF             REPIP1B
 
-                CS              TEMY                            
-                TS              DELVY                           
-
-                CS              ZERO                            # ZERO X AND Y PIPS
-                DXCH            PIPAX                           # L STILL ZERO FROM ABOVE
-
-                TCF             REPIP3                          
-
-DONEADR         GENADR          PIPSDONE                        
+                EBANK=          DVCNTR
+DONECAD         2CADR           PIPSDONE

@@ -36,6 +36,17 @@ if 'BLATANT7' in environ:
 	blatant['7'] = 'yes'
 print blatant
 
+minFontScale = 0.9
+maxFontScale = 1.2
+defaultScale = 1.0
+if 'ZERLINA' in environ:
+	defaultFontScale = 0.75
+	minFontScale *= defaultFontScale
+	maxFontScale *= defaultFontScale
+	bounds = (4, 20, 11, 30)
+else:
+	bounds = (8, 24, 16, 36)
+
 # Parse command-line arguments
 if len(sys.argv) != 6:
 	print 'Usage:'
@@ -69,7 +80,7 @@ for line in file:
 	boxWidth = boxRight + 1 - boxLeft
 	boxHeight = boxTop + 1 - boxBottom
 	#print boxChar, boxWidth, boxHeight
-	if boxWidth >= 8 and boxWidth <= 24 and boxHeight >= 16 and boxHeight <= 36:
+	if boxWidth >= bounds[0] and boxWidth <= bounds[1] and boxHeight >= bounds[2] and boxHeight <= bounds[3]:
 		boxes.append(line)
 	else:
 		rejectedBoxes.append(line)
@@ -78,7 +89,7 @@ file.close()
 # Read in the binsource file.
 file = open (binsourceFilename, 'r')
 lines = []
-octalPattern = re.compile(r"([0-7]{6}|@)([ \t]([0-7]{6}|@)){7}.*")
+octalPattern = re.compile(r"([0-7]{6}|@)([ \t]+([0-7]{6}|@)){7}.*")
 for line in file:
 	if octalPattern.match(line):
 		lines.append(line)
@@ -89,14 +100,24 @@ file.close()
 
 # Read in the octal-digit files.
 images = []
-images.append(Image(filename='0t.png'))
-images.append(Image(filename='1t.png'))
-images.append(Image(filename='2t.png'))
-images.append(Image(filename='3t.png'))
-images.append(Image(filename='4t.png'))
-images.append(Image(filename='5t.png'))
-images.append(Image(filename='6t.png'))
-images.append(Image(filename='7t.png'))
+if 'ZERLINA' in environ:
+	images.append(Image(filename='z0t.png'))
+	images.append(Image(filename='z1t.png'))
+	images.append(Image(filename='z2t.png'))
+	images.append(Image(filename='z3t.png'))
+	images.append(Image(filename='z4t.png'))
+	images.append(Image(filename='z5t.png'))
+	images.append(Image(filename='z6t.png'))
+	images.append(Image(filename='z7t.png'))
+else:
+	images.append(Image(filename='0t.png'))
+	images.append(Image(filename='1t.png'))
+	images.append(Image(filename='2t.png'))
+	images.append(Image(filename='3t.png'))
+	images.append(Image(filename='4t.png'))
+	images.append(Image(filename='5t.png'))
+	images.append(Image(filename='6t.png'))
+	images.append(Image(filename='7t.png'))
 imagesColored = []
 imagesColored.append(Image(filename='0m.png'))
 imagesColored.append(Image(filename='1m.png'))
@@ -179,19 +200,19 @@ for index in range(startIndex, endIndex):
 			operator = 'darken'
 			fontWidth = digit.width
 			fontHeight = digit.height
-			minFontHeight = 0.9*fontHeight
-			maxFontHeight = 1.2*fontHeight
-			minFontWidth = 0.9*fontWidth
-			maxFontWidth = 1.2*fontWidth
+			minFontHeight = minFontScale*fontHeight
+			minFontWidth = minFontScale*fontWidth
+			maxFontHeight = maxFontScale*fontHeight
+			maxFontWidth = maxFontScale*fontWidth
 			if boxHeight > minFontHeight and boxHeight < maxFontHeight and \
 			   boxWidth > minFontWidth and boxWidth < maxFontWidth:
 				digit.resize(boxWidth, boxHeight, 'cubic')
 				draw.composite(operator=operator, left=boxLeft, top=boxTop, width=boxWidth, height=boxHeight, image=digit)
 			else:
-				digit.resize(int(round(fontWidth)), int(round(fontHeight)), 'cubic')
-				draw.composite(operator=operator, left=round((boxLeft+boxRight-fontWidth)/2.0), 
-					       top=round((boxTop+boxBottom-fontHeight)/2.0), width=fontWidth, 
-					       height=fontHeight, image=digit)
+				digit.resize(int(round(fontWidth*defaultFontScale)), int(round(fontHeight*defaultFontScale)), 'cubic')
+				draw.composite(operator=operator, left=round((boxLeft+boxRight-fontWidth*defaultFontScale)/2.0), 
+					       top=round((boxTop+boxBottom-fontHeight*defaultFontScale)/2.0), width=fontWidth*defaultFontScale, 
+					       height=fontHeight*defaultFontScale, image=digit)
 
 		
 		characterIndex += 1

@@ -18,6 +18,10 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-05-24 MAS  Created from Sunburst 120.
 ##              2017-06-11 HG   Transcribed
+##              2017-06-15 HG   Fix interpretive operator STODL -> STORE
+##              2017-06-17 MAS  Split up an "E-4B9".
+##		2017-06-23 RSB	Proofed comment text with
+##				octopus/ProoferComments.
 
 ## Page 851
 #      PREAPS2 IS A PROGRAM WHICH INITIALIZES **ASCENT** FOR THE 2ND APS
@@ -64,7 +68,7 @@ PREAPS2         DXCH            RRETURN
                 STOVL           KR1                     # STORE IN KR1
                                 VCONOM                  # LOAD NOM. RDOTD,YDOTD,ZDOTD
 
-                STODL           RDOTD                   # STORE IN ERASE
+                STORE           RDOTD                   # STORE IN ERASE
                 SSP
                                 ASCRET
                                 PRAPS                   # LOAD RETURN ADD. FROM ASCENT
@@ -97,7 +101,7 @@ PRAPS           VLOAD           SET
                 DXCH            Z
 COS27           2DEC            .89100652
 SIN27           2DEC            .45399050
-ENGNOM          2DEC            3.20928237      E-4B9   # AT*2(9)
+ENGNOM          2DEC            3.20928237      E-4 B9  # AT*2(9)
                 2DEC            .0330009301     B4      # (1/VE)*2(4)
 
                 2DEC            94420.4114      B-17    # TBUP*2(-17)

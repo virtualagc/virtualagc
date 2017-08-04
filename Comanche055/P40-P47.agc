@@ -23,6 +23,7 @@
 ##				and fixed the errors found.
 ##		2017-01-18 RSB	Fixed comment-text errors noted while diff'ing
 ##				vs Colossus 249.
+##		2017-06-17 MAS	Globally removed all SBANK= workarounds.
 ##
 ## This source code has been transcribed or otherwise adapted from digitized
 ## images of a hardcopy from the MIT Museum.  The digitization was performed
@@ -2335,8 +2336,6 @@ NODAPUP		EXTEND			# T5 IDLE FOR NODAP (DONT WORRY ABOUT T)
 		TS	HOLDFLAG
 ENDFIG		TC	POSTJUMP	# CAME IN VIA V46, GO OUT VIA GOPIN
 		CADR	GOPIN
-## Added by RSB 2009
-		SBANK=	PINSUPER	
 		EBANK=	PACTOFF
 T5IDLDAP	2CADR	T5IDLOC
 

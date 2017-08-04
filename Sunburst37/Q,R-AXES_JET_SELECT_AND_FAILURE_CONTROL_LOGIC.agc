@@ -18,6 +18,8 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-05-24 MAS  Created from Sunburst 120.
 ##              2017-05-30 HG   Transcribed
+##		2017-06-22 RSB	Proofed comment text with
+##				octopus/ProoferComments.
 
 ## Page 520
 # PROGRAM: POLTYPEP               MOD. NO. 1  DATE: NOVEMBER 14, 1966
@@ -440,7 +442,7 @@ TORKTABL        DEC             0                       # FROM THE 3 PACKED BITS
 NORMLPOL        OCTAL           02026                   # +2 U-AXIS JETS
                 OCTAL           02026                   # +2 U-AXIS JETS
                 OCTAL           02031                   # -2 U-AXIS JETS
-                OCTAL           02031                   # -2 U-AXIS JEST
+                OCTAL           02031                   # -2 U-AXIS JETS
                 OCTAL           02034                   # +2 V-AXIS JETS
 
                 OCTAL           02034                   # +2 V-AXIS JETS

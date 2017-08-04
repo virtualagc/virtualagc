@@ -21,6 +21,8 @@
 ##              2017-05-30 HG   Add missing variable RUPTSTOR
 ##              2017-06-08 HG   Fix label NEWTIME -> NEWMTIME
 ##                                        ABDCONV -> ABDVCONV
+##		2017-06-21 RSB	A few comments corrected using 
+##				octopus/ProoferComments.
 
 ## Page 10
 
@@ -179,8 +181,8 @@ SMANGLSW        EQUALS          MOONSW                  # VARIABLE SCALING SWITC
 #                                                  ---    -------------   -----
 
 #                                         FLAGWRD1  1                 29  AVERAGE G FLAG
-#                                                   2                 28  GUIDANCE REFERENCE RELEASE
-#                                                 3 - 7          27 - 33  NOT USED AT PRESENT
+#                                                   2                 28  GUIDANCE REFERENCE RELEASE FLAG
+#                                                 3 - 7          27 - 23  NOT USED AT PRESENT
 #                                                   8                 22  GIMBAL LOCK FLAG
 #                                                 9 - 12         21 - 18  NOT USED AT PRESENT
 #                                                  13                 17  EXCESSIVE TUMBLE FLAG
@@ -196,7 +198,7 @@ SMANGLSW        EQUALS          MOONSW                  # VARIABLE SCALING SWITC
 #                                                     5                 40  TIMERS ENABLED FLAG
 #                                                     6                 39  V33 TERMINATION OF UPDATE PROGRAM FLAG
 #                                                     7                 38  ORBITAL INTEGRATION INTEGRATING FLAG
-#                                                     8                 37  ASC FEED TEST FLAG
+#                                                     8                 37  ACS FEED TEST FLAG
 #                                                     9                 36  ABORT COMMAND MONITOR ENABLED FLAG
 #                                                    10                 35  ABORT STAGE FLAG
 #                                                    11                 34  KALCMANU ATTITUDE COMPLETE FLAG
@@ -858,7 +860,7 @@ ZSMAZ           ERASE           +1                      #  Z FROM NORTH IN REVS.
 
 ## Page 29
 TEPHEM          ERASE           +2                      # TP CS FROM 00:00:00 JULY 1 TO 00:00:00
-                                                        # OF LAUNCH DAY
+                                                        # OF LAUNCH DAY.
 MP6TO7          ERASE                                   # ERASABLE FOR MP6
 MP8TO9          ERASE                                   # ERASABLE FOR MISSION PHASE 8
 
@@ -1156,7 +1158,7 @@ VGVECT          ERASE           +5                      # VELOCITY TO BE GAINED
 RD              ERASE           +5                      # POSITION DESIRED
 TTGO            ERASE           +1                      # TIME TO GO IN CENTISECONDS.
 
-TGO             EQUALS          TTGO                    # TEMPORARY DEFINITION, TO BE MOVED
+TGO             EQUALS          TTGO                    # TEMPORY DEFINITION, TO BE MOVED.
 
 # EBANK 4 NON SHARABLE ERASABLE LOAD STORAGE
 
@@ -1177,14 +1179,14 @@ R1VEC           EQUALS          E4LOAD          +13     # VECTOR TARGET PARAMETE
 
 TINT            EQUALS          E4LOAD          +21     # DP TARGET PARAMETER FOR APS2 BURN
 
-RCO             EQUALS          E4LOAD          +23     # DP TARGET PARAMETER FOR APS2 TURN
+RCO             EQUALS          E4LOAD          +23     # DP TARGET PARAMETER FOR APS2 BURN
 
 #                                        E4LOAD +25 THRU E4LOAD +27 ARE STILL AVAILABLE
 
 ## Page 38
 # ERASABLES FOR MASS UPDATE (A PART OF AVERAGE G) AND THROTTLE CONTROL
 
-# INITIAL VALUES FOR MASS: THESE ERASABLES ARE SACROSANCT.
+# INITIAL VALUES FOR MASS
 
 MASSES          =               SAVERASE        +26D
 LEMMASS1        =               MASSES                  # MASS OF LEM JUST AFTER SIVB SEPARATION
@@ -1202,7 +1204,7 @@ NEGVEX          =               EVEX            +11
 DAREATMP        =               EVEX            +13
 MASSTEMP        =               EVEX            +15
 
-# ERASABLE FOR THROTTLE CONTROL
+# ERASABLES FOR THROTTLE CONTROL
 
 ETHROT          =               SAVERASE        +41D
 FOLD            =               ETHROT
@@ -1484,7 +1486,7 @@ SWITCH          EQUALS          SAVERASE        +24D
 NEGXDV          EQUALS          SAVERASE        +25D
 
 ## Page 45
-# DIGITAL AUTOPILOT ERASABLE TAKES UP BANK 6:
+# DIGITAL AUTOPILOT ERASABLE TAKES UP EBANK 6:
 
 # THESE TWO ARE GOING TO MOVE WHEN KALCMANU COMES INTO SUNBURST:
 

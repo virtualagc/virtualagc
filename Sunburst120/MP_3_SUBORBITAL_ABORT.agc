@@ -12,13 +12,17 @@
 ##		2016-10-31 RSB	Typos.
 ##		2016-12-06 RSB	Comments proofed using octopus/ProoferComments,
 ##				changes made.
+##		2017-06-14 RSB	Added a ##-comment about the difference between
+##				this code and SUNBURST 37.
 
 ## Page 686
                 BANK            25
                 EBANK=          TDEC
 
 
-
+## Note that while the following comments identify this code as being precisely identical
+## to the corresponding code in SUNBURST 37, there are in fact significant non-trivial
+## changes between the two revisions. &mdash; RSB
 # PROGRAM DESCRIPTION- MISSION PHASE 3 - SUBORBITAL ABORT                 DATE- 28 OCT 66
 # MOD NO- 0                                                               LOG SECTION- MP 3 - SUBORBITAL ABORT
 # MOD BY- GILBERT                                                         ASSEMBLY- SUNBURST REVISION 17

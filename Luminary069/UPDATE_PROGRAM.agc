@@ -26,6 +26,7 @@
 ##		2017-01-28 RSB	Proofed comment text using octopus/prooferComments
 ##				and fixed errors found.
 ##		2017-02-09 RSB	Comment-text fixes identified for Artemis 72.
+##		2017-06-17 MAS	Globally removed all SBANK= workarounds.
 
 ## Page 1379
 # PROGRAM NAME:   P27
@@ -197,9 +198,6 @@ UPPART2         EQUALS                  # UPDATE PROGRAM - PART 2
                 TC      PHASCHNG        # SET RESTART GROUP 6 TO RESTORE OLD MODE
                 OCT     07026           # AND DOWNLIST AND EXIT IF RESTART OCCURS.
                 OCT     30000           # PRIORITY SAME AS CHRPRIO
-## [WORKAROUND] HG
-                SBANK=  PINSUPER
-## [WORKAROUND] HG
                 EBANK=  UPBUFF
                 2CADR   UPOUT +1
 

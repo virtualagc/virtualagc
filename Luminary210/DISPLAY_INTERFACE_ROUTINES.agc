@@ -23,6 +23,7 @@
 ##		2017-03-13 RSB	Comment-text fixes noted in proofing Luminary 116.
 ##		2017-03-15 RSB	Comment-text fixes identified in 5-way
 ##				side-by-side diff of Luminary 69/99/116/131/210.
+##		2017-06-17 MAS	Globally removed all SBANK= workarounds.
 
 ## Page 1338
 # DISPLAYS CAN BE CLASSIFIED INTO THE FOLLOWING CATEGORIES-
@@ -868,8 +869,6 @@ GODSPRS1	INHINT			# IMMEDIATE RETURN IS CALL CADR +4
 		TCF	VACDSP		# YES, MAKE DSPLAY JOB A VAC
 		CA	NEWPRIO		# NO, MAKE DSPLAY JOB A NOVAC
 		TC	NOVAC
-## [WORKAROUND] Not in original; to adjust subsequent 2CADR.             
-                SBANK=  LOWSUPER 
 		EBANK=	WHOCARES
 		2CADR	MAKEPLAY
 

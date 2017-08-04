@@ -17,10 +17,14 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-05-24 MAS  Created from Sunburst 120.
+##		2017-06-14 RSB	Transcribe
+##              2017-06-14 HG   Fix operand THRUSTCMD -> THRSTCMD
+##                                          AVEXIT    -> AVGEXIT
+##              2017-06-15 HG   Fix value DELTAT9    B-35 -> B-38 
+##		2017-06-23 RSB	Proofed comment text with
+##				octopus/ProoferComments.
 
-## NOTE: Page numbers below have not yet been updated to reflect Sunburst 37.
-
-## Page 728
+## Page 684
 # MISSION PHASE 9
                 
                 BANK            33
@@ -51,7 +55,7 @@
 
 # SUBROUTINES CALLED- FIXDELAY, 1LMP, 2LMP, EXECUTIVE, MIDTOAVE, BANKCALL, IBNKCALL, WAITLIST, KALCMANU,
 # UL4JETON, UL4JETOFF, ENGINEON, ENGINOFF, NEWMODEX, DFITCAL, RVUPDADR, TPAGREE, TASKOVER, ENDOFJOB, ENGOF1
-
+#
 
 # INPUT- RN, VN, RP, MUEARTH, TDI
 
@@ -61,44 +65,35 @@
 
 # DEBRIS- TDEC
 
-MP9JOB          CAF             BIT9
-                TC              SETRSTRT                        # SET RESTART FLAG
-
-                TC              NEWMODEX                        # DISPLAY PROG. NO.
+MP9JOB          TC              NEWMODEX                        # DISPLAY PROGRAM NUMBER IN DSKY
                 OCTAL           31
 
                 EBANK=          TDEC
                 EXTEND
                 DCA             TIME2                           # PICK UP CURRENT TIME
                 DXCH            TDI
-
-## Page 729
                 EXTEND
                 DCA             5M15S
                 DAS             TDI                             # SET TDI=TIME2+5M15S
 
+## Page 685
+
                 CAF             EQU2ADR                         # SET COMPUTATIINAL STEPS
                 TS              SHJUMP1
-
-                TC              PHASCHNG
-                OCT             05022
-                OCT             20000
 
                 EXTEND
                 DCA             TDI
                 DXCH            TDEC
                 EXTEND
                 DCA             RVUPDADR                        # STATE VECTOR UPDATE FOR PRE-DPS1 BURN
+                
                 DXCH            Z
-
-                TC              PHASCHNG
-                OCT             04022
 
                 TC              INTPRET
                 CALL
                                 VPATCHER                        # RESCALE AND LOAD TDI STATES IN RN AN VN
                 GOTO
-                                DPS1EQU1        +1              # COMPUTES VELOCITY TO BE GAINED.
+                                DPS1EQU1                        # COMPUTES VELOCITY TO BE GAINED
 
 DPS1EQU2        DLOAD                                           # COMPUTES MANEUVER THRUST TIME
                                 LV                              # ABVAL(VG)
@@ -115,16 +110,11 @@ DPS1EQU2        DLOAD                                           # COMPUTES MANEU
                 STORE           SCAXIS                          # KALCMANU INPUT VECTOR
                 SET             SSP
                                 33D
+                                
                                 RATEINDX
                                 4                               # SET KALCMANU FOR ANGULAR RATE OF 5DEG/S
                 EXIT
 
-                TC              PHASCHNG
-                OCT             04022
-
-                INHINT
-
-## Page 730
                 EXTEND
                 DCS             TTHRUST                         # COMPUTES TIGN
                 DXCH            TIGN
@@ -135,16 +125,13 @@ DPS1EQU2        DLOAD                                           # COMPUTES MANEU
                 CAF             EQU3ADR
                 TS              SHJUMP1
 
-                CAF             70SECS9                         # CALL POSTKALC 70 SECS LATER
+		INHINT
+                CAF             90SECS9                         # CALL POSTKALC 90 SECS LATER
                 TC              WAITLIST
                 EBANK=          TDEC
                 2CADR           POSTKALC
-
-                TC              PHASCHNG
-                OCT             40042
-
-CALLKALC        INHINT
-                CAF             PRIO16                          # CALL KALCMANU JOB.
+## Page 686
+                CAF             PRIO30                          # CALL KALCMANU JOB- START INDICATOR UP*
                 TC              FINDVAC
                 EBANK=          MIS
                 2CADR           VECPOINT
@@ -153,14 +140,17 @@ CALLKALC        INHINT
                 CADR            ATTSTALL                        # SEE IF KALCMANU FINISHED
 CURT9           TC              CURTAINS                        # UNFINISHED MANEUVER
 
-                TC              PHASCHNG
-                OCT             00432                           # 2.43 FOR POSTKALC.  DON'T RESET TBASE.
-
                 TCF             ENDOFJOB                        # GOOD RETURN- END MP9JOB
 
-POSTKALC        CS              FLAGWRD2                        # CHECK WHETHER KALCMANU IS FINISHED.
-                MASK            BIT11
-                CCS             A
+POSTKALC	CAF		10SECS9				# CALL DFITMTSK 10SECS LATER
+		TC		WAITLIST
+		EBANK=		TGRR
+		
+		2CADR		DFITMTSK			# DFI T/M CALIBRATION ROUTINE
+		
+		CS		FLAGWRD2			# CHECK KALCMANU BIT
+		MASK		BIT11
+		CCS		A
 
                 TC              GOODKALC                        # GOOD RETURN
 
@@ -171,50 +161,29 @@ POSTKALC        CS              FLAGWRD2                        # CHECK WHETHER 
 
                 TC              TASKOVER                        # END POSTKALC TASK
 
-GOODKALC        TC              1LMP+DT
-                DEC             236                             # DFI T/M CALIBRATE - ON *
-                DEC             1200
-
-## Page 731
-                TC              2LMP+DT
-                DEC             237                             # DFI T/M CALIBRATE - OFF *
-                DEC             198                             # MASTER C&W ALARM RESET - COMMAND **
-                DEC             200
-
-                TC              1LMP+DT
-                DEC             199                             # MASTER C&W ALARM RESET - COMMAND RESET
-                DEC             1
-
+GOODKALC	CAF		11SECS9
+		TC		WAITLIST
+		EBANK=		TDEC
+		2CADR		182LMP
+		
                 EXTEND                                          # CALL DPS1 BURN PROG. AT TIGN-36SECS.
                 DCS             TIME2
                 DXCH            ITEMP1
+                
                 EXTEND
                 DCA             TIGN
                 DAS             ITEMP1
                 EXTEND
-                DCS             66SECSD9
+                DCS             36SECSD9
                 DAS             ITEMP1
-                EXTEND
-                DCA             ITEMP1
-                DXCH            TDECTEMP                        # FOR RESTARTS.
                 DXCH            ITEMP1
 
                 TC              LONGCALL
                 EBANK=          TDEC
-                2CADR           TIG9-66
-
-                TC              PHASCHNG
-                OCT             20134                           # 4.13 FOR TIG9-66 LONGCALL.
-
-                CAF             11SECS9
-                TC              WAITLIST
-                EBANK=          TDEC
-                2CADR           182LMP
-
-                TC              PHASCHNG
-                OCT             40452                           # 2.45 FOR 182LMP TASK.
+                2CADR           TIG9-36
 
                 TCF             TASKOVER                        # END GOODKALC TASK
+## Page 687
 
 182LMP          TC              2LMP+DT
                 DEC             182                             # LANDING RADAR POWER ON
@@ -226,7 +195,6 @@ GOODKALC        TC              1LMP+DT
                 DEC             500
 
                 TC              1LMP+DT
-## Page 732
                 DEC             8                               # LANDING GEAR DEPLOY -FIRE
                 DEC             200
 
@@ -235,24 +203,20 @@ GOODKALC        TC              1LMP+DT
                 DEC             400
 
                 TC              1LMP
-                DEC             27                              # RADAR SELF-TEST - OFF.
-
-                TC              PHASCHNG
-                OCT             00002                           # GROUP 2 OFF.
+                DEC             27                              # RADAR SELF TEST-OFF
 
                 TC              TASKOVER                        # END 182LMP TASK
 
-TIG9-66         TC              NEWMODEX                        # DISPLAY PROGRAM NUMBER ON DSKY
+TIG9-36         TC              NEWMODEX                        # DISPLAY PROGRAM NUMBER IN DSKY
                 OCT             41
 
-                TC              IBNKCALL
-                CADR            ENGINOF1
+                TC              ENGINOF1			# MAKE SURE ENGINE OFF
 
                 TC              2LMP
                 DEC             150                             # ENGINE SELECT DESC ARM
                 DEC             86                              # MANUAL THROTTLE ON (10PERCENT)
 
-                CAF             50SECS9
+                CA              20SECS9
                 TC              WAITLIST
                 EBANK=          TDEC
                 2CADR           228LMP
@@ -262,11 +226,7 @@ TIG9-66         TC              NEWMODEX                        # DISPLAY PROGRA
                 EBANK=          TDEC
                 2CADR           ORBINTJB
 
-                TC              2PHSCHNG
-                OCT             40472                           # 2.47 FOR 228LMP TASK.
-                OCT             00154                           # 4.15 FOR ORBINTJB JOB.
-
-                TCF             TASKOVER                        # END TIG9-66 TASK
+                TCF             TASKOVER                        # END TIG9-36 TASK
 
 ORBINTJB        EXTEND
                 DCA             TIGN
@@ -276,14 +236,11 @@ ORBINTJB        EXTEND
                 CS              ZERO
                 DAS             TDEC                            # TDEC NOW CONTAINS TIGN-30 SECS.
 
+## Page 688
                 EXTEND
-## Page 733
                 DCA             ORBINTAD
+                
                 DXCH            Z
-
-                TC              PHASCHNG
-                OCT             05024
-                OCT             27000
 
 # RN AND VN IN STABLE MEMBER COORDINATES. SCALING IS AS IN AVEG.
 
@@ -299,73 +256,67 @@ ORBINTJB        EXTEND
                 DCA             MP9TM1AD
                 DXCH            DVMNEXIT                        # SET MONITOR EXIT
 
-                INHINT
                 CS              30SECS9                         # CALL PREREAD AT TIGN-30SECS.
                 TC              TASKSETR
-                TS              RSDTTEMP                        # FOR RESTARTS.
+                
+                INHINT
                 TC              WAITLIST
                 EBANK=          DVTOTAL
                 2CADR           PREREAD
 
-                TC              2PHSCHNG
-                OCT             40355                           # 5.35 FOR PREREAD.
-                OCT             04024
-
-                INHINT
-                CS              ZERO                            # CALL TVC FOR DPS1 AT IGNITION TIME
+                CS              4SECS9                          # CALL TVC FOR DPS1 AT TIG-4SECS
                 TC              TASKSETR
-                TS              TDECTEMP        +1              # FOR RESTARTS.
+                INHINT
                 TC              WAITLIST
                 EBANK=          AVGEXIT
-                2CADR           TIG9-0
-
-                TC              PHASCHNG
-                OCT             40174                           # 4.17 FOR TIG9-0.
+                2CADR           TIG9-4
 
                 TCF             ENDOFJOB                        # END ORBITAL INTEGRATION JOB
 
-TIG9-0          EXTEND
-                DCA             EQU1ADR
-                DXCH            AVGEXIT                         # AVG ROUTINE GOES TO VG COMPUTATION
+TIG9-4		CAF		4SECS9				# DO ENGINE ON AT TIG-0 SEC
+		TC		WAITLIST
+		EBANK=		THRSTCMD
+		2CADR		TIG9-0
+		
+		EXTEND
+		DCA		EQU1ADR
+		DXCH		AVGEXIT				# AVG ROUTINE GOES TO VG COMPUTATION
+		
+		TCF		TASKOVER			# END TIG9-4 TASK
 
-## Page 734
+TIG9-0		TC		ENGINEON			# COMMAND ENGINE ON
+
+		TC		FIXDELAY
+		DEC		50
+## Page 689
+
                 TC              IBNKCALL
-                CADR            DPSENGON
-## The above line has a green arrow pointing to it.
+                CADR            NOULLAGE			# +X TRANSLATION-  OFF
 
-                TC              2PHSCHNG
-                OCT             00004
-                OCT             40512                           # 2.51 FOR 9ULLOFF TASK.
-
-                TC              FIXDELAY
-                DEC             50
-
-9ULLOFF         TC              IBNKCALL
-                CADR            NOULLAGE                        # +X TRANSLATION-  OFF
-
-                TC              PHASCHNG
-                OCT             40532                           # 2.53 FOR 9EDBATT.
-
-                TC              FIXDELAY
-                DEC             250
-
-9EDBATT         TC              1LMP+DT
-                DEC             5                               # ED BATTERY ACTIVATION-SAFE
-                DEC             2300
-
-                TC              2PHSCHNG
-                OCT             2
-                OCT             05014                           # THROTTLE PROGRAM TAKES OVER GP 4.
-                OCT             77777
-
-                CAF             POSMAX                          # CALL FOR MAXIMUM THRUST.
-                TS              PCNTF
-                EXTEND
-                DCA             PCNTFMAD
-                DTCB
-
-                TCF             TASKOVER                        # END TIG9-0 TASK
-
+		EBANK=		THRSTCMD			# DECLARE EBANK=6
+		CAF		10PERTHR			# REPORT 10 PERCENT THRUST TO DAP
+		TS		THRSTCMD
+		
+		TC		FIXDELAY
+		
+		DEC		250
+		
+		TC		1LMP+DT
+		DEC		5				# ED BATTERY ACTIVATION-SAFE
+		DEC		2300
+		
+MAXTHR9		CAF		POSMAX				# CALL FOR 92.5 PERCENT THRUST
+		TS		PCNTF
+		EXTEND
+		DCA		PCNTFMAD
+		DTCB
+		
+		CAF		92PERTHR			# REPORT THRUST TO DAP
+		TS		THRSTCMD
+		TCF		TASKOVER			# END TIG9-0 TASK
+		
+		EBANK=		TDEC				# DECLARE EBANK=4
+		
 DPS1EQU3        CALL
                                 CALCTGO
                 VLOAD
@@ -374,78 +325,50 @@ DPS1EQU3        CALL
                 CALL
                                 FINDCDUD
 
-                EXIT
-                TC              POSTJUMP
-                CADR            SERVEXIT
+                TCF		ENDOFJOB			# END DPS1EQU3 JOB DURING BURN ONLY
 
 CALCTGO         DLOAD           DSU
                                 LV                              # ABVAL(VG)
-## Page 735
                                 VTAILOFF
                 DMP             DDV
                                 DELTAT9
                                 ABDELV
                 STORE           TTGO                            # FOR DWLK ONLY
 
-                RTB             BDSU
-                                LOADTIME
-                                PIPTIME
-                DAD             RTB
-                                TTGO
-                                SGNAGREE
                 STORE           TGO
 
                 DSU             BPL
                                 4SECSD9
                                 QPRET
                 EXIT
+## Page 690
 
-                INHINT
-                CAE             TGO             +1
-                EXTEND
-                BZMF            CUTOFF2                         # CUT OFF ENGINE IMMEDIATELY IF TGO NEG
-CUTOFF1         TS              TDECTEMP                        # FOR RESTARTS.
+                INHINT						# CUTOFF SIGNAL COUNTER SET
+                CA              TGO             +1
                 TC              WAITLIST
                 EBANK=          CDUXD
                 2CADR           CUTOFF
 
-                EXTEND                                          # STOPS GUIDANCE EQUATION LOOP
-                DCA             EXITADR
-                DXCH            AVGEXIT
-
-                TC              2PHSCHNG
-                OCT             40552                           # 2.55 FOR CUTOFF TASK.
-                OCT             00035                           # 5.3 FOR SERVICER.
-
                 TCF             ENDOFJOB                        # END DPS1 BURN EQUATION JOB
 
-CUTOFF          TC              IBNKCALL
-                CADR            ENGINOFF
+CUTOFF		TC		ENGINOFF			# ENGINE OFF
 
                 TC              IBNKCALL
                 CADR            STOPRATE                        # HOLD VEHICLE ATTITUDE
 
-                TC              PHASCHNG
-                OCT             2                               # 2 OFF.  SERVICER TO RETURN TO MP9TERM1.
-
                 TCF             TASKOVER                        # END CUTOFF TASK
 
-CUTOFF2         CAF             BIT1
+MP9TERM1	EXTEND
+		DCA		EXITADR
+		DXCH		AVGEXIT
 
-## Page 736
-                TCF             CUTOFF1
-
-MP9TERM1        INHINT
+	        INHINT
                 CAF             5SECS9
                 TC              WAITLIST
                 EBANK=          TDEC
                 2CADR           87LMP
 
-                TC              PHASCHNG
-                OCT             40572                           # 2.57 FOR 87LMP TASK.
-
-                TC              POSTJUMP
-                CADR            SERVEXIT
+                TCF		ENDOFJOB			# END MP9TERM1 JOB
 
 87LMP           TC              2LMP+DT
                 DEC             87                              # MANUAL THROTTLE - RESET (30 PERCENT.)
@@ -458,6 +381,7 @@ MP9TERM1        INHINT
                 DEC             100
 
                 TC              2LMP+DT
+                
                 DEC             229                             # DPS PQGS ARM NO1 DISABLE
                 DEC             197                             # DPS PQGS ARM NO2 DISABLE
                 DEC             1400
@@ -465,9 +389,12 @@ MP9TERM1        INHINT
                 TC              IBNKCALL
                 CADR            SETMAXDB
 
-                TC              1LMP+DT
+                TC              1LMP
                 DEC             26                              # RADAR SELF TEST ON
+                
+                TC		FIXDELAY
                 DEC             6000
+## Page 691
 
                 TC              2LMP
                 DEC             27                              # RADAR SELF TEST POWER - OFF
@@ -481,14 +408,9 @@ MP9TERM1        INHINT
                 TC              FLAG1DWN                        # KNOCK DOWN AVERAGEG FLAG
                 OCT             00001
 
-                TC              PHASCHNG
-                OCT             2
-
-## Page 737
                 TCF             TASKOVER                        # MISSION PHASE 9 COMPLETE
 
-DPS1EQU1        TC              INTPRET
- +1             VLOAD           VXV
+DPS1EQU1        VLOAD           VXV
                                 VN                              # VN SCALED AT 2(+7)M/CS
                                 UNITR                           # UNITR IS UNIT VECTOR ALONG RN
                 UNIT            PDVL
@@ -524,19 +446,15 @@ DPS1EQU1        TC              INTPRET
                 TC              2LMP+DT
                 DEC             244                             # DPS PQGS NO1 - ON
                 DEC             212                             # DPS PQGS NO2 - ON
+## Page 692
                 DEC             750
 
                 TC              IBNKCALL
-                CADR            ULLAGE                          # +X TRANSLATION ON.
-
-                TC              PHASCHNG
-                OCT             2
-
+                CADR            ULLAGE                          # +X TRANSLATION- ON
                 TCF             TASKOVER                        # END 228LMP TASK
 
 #          ********************************
 
-## Page 738
 EQU2ADR         CADR            DPS1EQU2
 
 EQU3ADR         CADR            DPS1EQU3
@@ -552,9 +470,10 @@ RVUPDADR        2CADR           RVUPDATE
 
 4SECSD9         2DEC            400
 
-66SECSD9        2DEC            6600
+36SECSD9        2DEC            3600
 
 5M15S           2DEC            31500
+
 
 DPA             2DEC            .09449          B-17            # SCALED AT 2(+17)M/CS
 
@@ -562,13 +481,19 @@ DPB             2DEC            .0002874        B+11            # SCALED AT 2(-1
 
 DPC             2DEC            2600.           B-28            # SCALED AT 2(+28)CS
 
-DELTAT9         2DEC            200             E+4 B-35        # 2SEC/KPIP
+VTAILOFF	2DEC		0				# ***** GET THE NUMBER
+
+DELTAT9         2DEC            200             E+4 B-38        # 2SEC/KPIP
 
 2MUERTH9        2DEC*           3.98603223      E+10 B-37*
 
+1SEC9		DEC		100
+4SECS9		DEC		400
 5SECS9          DEC             500
-50SECS9         DEC             5000
-30SECS9         DEC             3000
-11SECS9         DEC             1100
-70SECS9         DEC             7000
+10SECS9		DEC		1000
+11SECS9		DEC		1100
+20SECS9		DEC		2000
+30SECS9		DEC		3000
+90SECS9		DEC		9000
+120SECS9	DEC		12000
 #          ********************************

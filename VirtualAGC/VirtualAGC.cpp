@@ -101,6 +101,7 @@
  *                              recommended 2.8), the Run!, Default, and Exit buttons were too
  *                              small, height-wise.  Fixed that.
  *          	2017-05-30 RSB	Changed bogus references to Sunburst 39 to Sunburst 37.
+ *          	2017-06-19 RSB	Enabled Sunburst 37.
  *
  * This file was originally generated using the wxGlade RAD program.
  * However, it is now maintained entirely manually, and cannot be managed
@@ -222,7 +223,7 @@ static const missionAlloc_t missionConstants[ID_AGCCUSTOMBUTTON
                 ENABLED, LM, BLOCK2, NO_PERIPHERALS, "Aurora12", "LM0.ini" },
             { "SUNBURST 37 (LM)", "Sunburst37/MAIN.agc.html",
                 "Click this to select the SUNBURST 37 (early non-mission LM) software.",
-                DISABLED, LM, BLOCK2, NO_PERIPHERALS, "Sunburst37", "LM0.ini" },
+                ENABLED, LM, BLOCK2, NO_PERIPHERALS, "Sunburst37", "LM0.ini" },
             { "ZERLINA (LM)", "Zerlina/MAIN.agc.html",
                 "Click this to select ZERLINA (next-generation non-mission LM) software.",
                 DISABLED, LM, BLOCK2, PERIPHERALS, "Zerlina", "LM.ini" },

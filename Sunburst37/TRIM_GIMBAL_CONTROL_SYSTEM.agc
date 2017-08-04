@@ -18,6 +18,11 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-05-24 MAS  Created from Sunburst 120.
 ##              2017-06-07 HG   Transcribed
+##              2017-06-15 HG   Fix operand  ACENTRAL -> A2CNTRAL
+##                                  operator CS -> CAE
+##                                           TC -> INDEX
+##		2017-06-22 RSB	Proofed comment text with
+##				octopus/ProoferComments.
 
 ## Page 554
                 BANK            21
@@ -100,7 +105,7 @@ GIMBAL          EXTEND                                  # GET D.P. FILTERED CDUY
                 TC              RTRANSF                 # FORM R-AXIS ACCELERATION
                 TS              ALPHAR                  # STORE AT PI/8 RADIANS/SECOND(2)
 
-# EXTRAPOLATE THETA AND OMEGA OVER THE 20 MS DELAY BETWEEN THE KALMAN FILTER AND TRIM GIMBAL CONTROL.
+# EXTRAPOLATE THETA AND OMEGA OVER THE 20 MS DELAY BETWEEN THE KALMAN FILTER AND THE TRIM GIMBAL CONTROL.
 
                 CAE             OMEGAQ
                 EXTEND
@@ -181,7 +186,7 @@ RCSCNTRL        CAF             POSTQRFL                # CHANGE LOCATION OF NEX
 
 ## Page 557
                 DCA             QDIFF                   # ERRORS INTO ERASABLE FOR Q,R-AXIS RCS
-                XCH             RERROR                  # CONTROL; NOTR THAT THE AXES SEEM TO BE
+                XCH             RERROR                  # CONTROL; NOTE THAT THE AXES SEEM TO BE
                 LXCH            QERROR                  # INTERCHANGED BUT ARE NOT CONFUSED
 
                 CAF             ONE
@@ -201,20 +206,20 @@ QRJPFILT        2CADR           DUMMYFIL                # NECESSARY BECAUSE DUMM
 TGENTRY         2CADR           STILLRCS
 
 
-CHEKDRIV        CAF             ZERO                    # CALCULATE Q-AXIS GIMBAL DRIVE SHUTDOWN
+CHEKDRIV        CAF             ZERO                    # CALCULATE Q-AXIS GIMBAL DRIVE SHUTDOWN T
                 TC              TGOFFCAL
                 TC              WAITLIST
                 EBANK=          DT
                 2CADR           OFFGIMQ
 
-                CAF             TWO                     # CALCULTAE R-AXIS GIMBAL DRIVE SHUTDOWN
+                CAF             TWO                     # CALCULATE R-AXIS GIMBAL DRIVE SHUTDOWN T
                 TC              TGOFFCAL
                 TC              WAITLIST
 
                 EBANK=          DT
                 2CADR           OFFGIMR
 
-                TC              WRCHN12                 # SET UP DRIVES AS OF NOW
+                TC              WRCHN12                 # SET UP NEW DRIVES AS OF NOW
 
                 TCF             TASKOVER
 
@@ -223,7 +228,7 @@ CHEKDRIV        CAF             ZERO                    # CALCULATE Q-AXIS GIMBA
 # THE DRIVE SETTING ALGORITHM
 # DEL = SGN(OMEGA.K + SGN(ALPHA)ALPHA(2)/2)    ONLY +1/-1
 
-# NEGUSUM = ERROR.K(2) + DEL((OMEGA.K.DEL + ALPHA(2)/2)(3/2) + ALPHA(OMEGA.K.DEL + ALPHA(2)/3)
+# NEGUSUM = ERROR.K(2) + DEL((OMEGA.K.DEL + ALPHA(2)/2)(3/2) + (OMEGA.K.DEL + ALPHA(2)/3)ALPHA
 
 # DRIVE = -SGN(NEGUSUM)
 
@@ -373,7 +378,7 @@ ALGORTHM        CAE             ETHETA                  # GET RESCALED ERROR THE
                 TCF             +2
                 TCF             NEGFNCT1
 
-                CCS             FUNCTION        +1      # USE LOW ORDER WORD DINCE HIGH IS ZERO
+                CCS             FUNCTION        +1      # USE LOW ORDER WORD SINCE HIGH IS ZERO
 POSFNCT1        CAF             TWO
                 TCF             +2
 
@@ -394,7 +399,7 @@ FUNCT2          EXTEND
                 DCA             OMEGA.K
                 DXCH            FUNCTION                # DEL*OMEGA*K
                 EXTEND
-                DCA             ACENTRAL
+                DCA             A2CNTRAL
                 DAS             FUNCTION                # DEL*OMEGA*K + SGN(ALPHA)ALPHA(2)
 
 FUNCT3          CAE             A2CNTRAL                # CALCULATE (2/3)SGN(ALPHA)ALPHA(2)
@@ -410,7 +415,7 @@ FUNCT3          CAE             A2CNTRAL                # CALCULATE (2/3)SGN(ALP
                 AD              A2CNTRAL
 
                 DXCH            OMEGA.K                 # DEL*OMEGA*K+
-                DAS             A2CNTRAL                # (2/3)SGN(ALPHAALPHA(2)=G
+                DAS             A2CNTRAL                # (2/3)SGN(ALPHA)ALPHA(2)=G
 
                 CAE             A2CNTRAL                # G*ALPHA IN D.P.
 
@@ -430,7 +435,7 @@ FUNCT3          CAE             A2CNTRAL                # CALCULATE (2/3)SGN(ALP
 
 # THE FOLLOWING SECTION CALCULATES .707*DEL*FUNCTION(3/2) AND ADDS IT TO THE OTHER TWO TERMS OF NEGUSUM.
 
-                CCS             FUNCTION                # TEST FOR HIHJ ORDER WORD NON-ZERO
+                CCS             FUNCTION                # TEST FOR HIGH ORDER WORD NON-ZERO
                 TCF             FMAGTEST                # YES, SEE IF RESCALING IS NECESSARY
 
 ## Page 562
@@ -450,7 +455,7 @@ FUNCT3          CAE             A2CNTRAL                # CALCULATE (2/3)SGN(ALP
                 TCF             DELTEST
 
 SQRESCAL        CAE             FUNCTION                # HIGH ORDER WORD OF FUNCTION NEEDS TO BE
-                EXTEND                                  # RESCALED FOR ACCURACY, SO MUTLIPLY D.P.
+                EXTEND                                  # RESCALED FOR ACCURACY, SO MULTIPLY D.P.
                 MP              BIT7                    # VALUE BY 2(6)
                 LXCH            FUNCTION
                 CAF             ZERO
@@ -460,8 +465,8 @@ SQRESCAL        CAE             FUNCTION                # HIGH ORDER WORD OF FUN
                 DAS             FUNCTION
 
                 CAF             ZERO                    # SET FLAG TO GO TO RESCALE, AND GO TO DO
-                TS              MULTFLAG                # SQUARE ROOT AND FUNTION(3/2)
-                TCF             DOSPROOT
+                TS              MULTFLAG                # SQUARE ROOT AND FUNCTION(3/2)
+                TCF             DOSPROOT		# CALCULATION
 
 DELTEST         CS              POSMAX                  # SET FLAG TO GO TO NEGUSUM
                 TS              MULTFLAG
@@ -475,7 +480,7 @@ RESHIFT         CAF             POSMAX                  # SET FLAG TO GO TO DELT
 
                 TS              MULTFLAG
                 CAF             BIT6
-                TCF             SPDMULT                 # GOTO MULTIPLY ROUTINR
+                TCF             SPDMULT                 # GOTO MULTIPLY ROUTINE
 
 FMAGTEST        AD              63/64+1                 # IF MAGNITUDE OF HIGH ORDER WORD IS LESS
                 OVSK                                    # THAN 1/64 RESCALE WHOLE D.P. WORD
@@ -541,7 +546,7 @@ POSDRIVE        CAF             ZERO
                 TS              Y3DOT
 
 ## Page 564
-                CS              RACCDOT                 # SCALED AT PI/2(7)
+                CAE             RACCDOT                 # SCALED AT PI/2(7)
                 EXTEND
 
                 MP              MR13                    # SCALED AT 2
@@ -658,7 +663,7 @@ RTRANSF         LXCH            QRERAS                  # SAVE Z-AXIS VARIABLE
 #                     26,1006  0 $$$$ $            TC      TGOFFCAL       CALL TGOFFCAL (*** REPLACE $$ ***)
 #                     26,1007  0 4511 0            TC      WAITLIST       CALL WAITLIST WITH CALCULATED TIME
 #                     26,1010   0$$$$ $            2CADR   OFFGIMR        2CADR OF R-AXIS SHUTDOWN PROGRAM
-#                     26,10022  54006 1
+#                     26,1011   54006 1
 
 # SUBROUTINES CALLED: NONE, BUT WRCHNL12 IS CALLED AFTER BOTH TGOFFCALL CALLS.
 
@@ -675,7 +680,7 @@ RTRANSF         LXCH            QRERAS                  # SAVE Z-AXIS VARIABLE
 # OUTPUT 5. THE NEGATIVE GIMBAL DRIVE FLAG (NEGUQ AND NEGUR) WHERE A +1 BIT REQUESTS POSITIVE GIMBAL DRIVE
 #           (ANGULAR ACCELERATION DECREASING), A -1 BIT REQUESTS NEGATIVE GIMBAL DRIVE (ANG. ACC. INCREASING).
 #           A ZERO INDICATES NO DRIVE.
-#        6. TIME REQUIRED TO ZERO ACCELERATION, SCALED FOR WAITLIST
+#        6. TIME REQUIRED TO ZERO ACCELERATION, SCALED FOR WAITLIST.
 
 # ERASABLE STORAGE CONFIGURATION (NEEDED BY THE INDEXING METHODS):
 
@@ -759,7 +764,7 @@ NEGALPH         CS              A
 TGOFFNOW        CAF             ZERO                    # MAKE SURE PLUS ZERO FOR DRIVE FLAG
                 INDEX           QRNDXER                 # TURN OFF DRIVE FLAG NOW
                 TS              NEGUQ
-                TC              Q
+                INDEX           Q
 
                 TC              3                       # SKIP WAITLIST CALL AND 2CADR
 

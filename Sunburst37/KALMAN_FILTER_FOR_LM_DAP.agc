@@ -19,6 +19,8 @@
 ## Mod history: 2017-05-24 MAS  Created from Sunburst 120.
 ##              2017-06-05 HG   Transcribed
 ##              2017-06-07 HG   Remove illegal EXTEND
+##		2017-06-22 RSB	Proofed comment text with
+##				octopus/ProoferComments.
 
 ## Page 541
 # THE FOLLOWING T5RUPT ENTRY BEGINS THE PROGRAM WHICH INITIALIZES THE KALMAN FILTER AND SETS UP A P-AXIS RUPT TO
@@ -39,7 +41,7 @@ FILTINIT        CAF             MS20F                   # RESET TIMER IMMEDIATEL
                 DXCH            T5ADR
 
                 CAF             FIRSTADR                # SET UP TO AVOID DT CALCULATION DURING
-                TS              STEERADR                # KALMAN FILTER INITIALIZATION PASS.
+                TS              STEERADR                # KALMAN FILTER INITIALIZATION PASS
 
                 TCF             FILSTART
 
@@ -105,7 +107,7 @@ DTCALC          CS              L
                 CS              .64
                 EXTEND                                  # THEN RESCALE TO 5.12/(64*.64) OR
                 MP              L                       # 5.12/40.96 WHICH IS THE SAME AS
-                TS              DT                      # DT SCALED AT 1/8.
+                TS              DT                      # DT SCALED AT 1/8
 
 # SET UP FILTER WEIGHTING VECTOR FOR THIS FILTER PASS.
 
@@ -385,9 +387,9 @@ POSTPFIL        2CADR           FILTER
 #          W1 : SCALED AT 32
 #          W2 : SCALED AT  8
 
-WVECTOR         DEC             0.18608                 # W0 AT RELATIVE TIME : 1.5 SECS. OR MORE
-                DEC             0.02696                 # W1 AT RELATIVE TIME : 1.5 SECS. OR MORE
-                DEC             0.17105                 # W2 AT RELATIVE TIME : 1.5 SECS. OR MORE
+WVECTOR         DEC             0.18608                 # W0 FROM RELATIVE TIME 1.5 SECS OR MORE
+                DEC             0.02696                 # W1 FROM RELATIVE TIME 1.5 SECS OR MORE
+                DEC             0.17105                 # W2 FROM RELATIVE TIME 1.5 SECS OR MORE
                 DEC             0.14358                 # W0 AT RELATIVE TIME : 1.45 SECONDS
                 DEC             0.02890                 # W1 AT RELATIVE TIME : 1.45 SECONDS
                 DEC             0.17727                 # W2 AT RELATIVE TIME : 1.45 SECONDS
@@ -496,7 +498,7 @@ DGTS            CAF             MS30F                   # RESET TIMER IMMEDIATEL
                 EXTEND
                 QXCH            QRUPT
 
-                TC              DISPDRIV                # DRIVE ICDU IF NECESSARY.
+                TC              DISPDRIV                # DRIVE ICDU BITS IF NECESSARY.
 
                 TCF             RESUME
 

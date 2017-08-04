@@ -20,6 +20,7 @@
 ##		2017-03-14 RSB	Comment-text fixes noted in proofing Luminary 116.
 ##		2017-03-16 RSB	Comment-text fixes identified in 5-way
 ##				side-by-side diff of Luminary 69/99/116/131/210.
+##		2017-06-17 MAS	Globally removed all SBANK= workarounds.
 
 ## This source code has been transcribed or otherwise adapted from
 ## digitized images of a hardcopy from the MIT Museum.  The digitization
@@ -200,9 +201,6 @@ DSPMMJOB	EQUALS	DSPMMJB
 #	AD+2	OCT	05025		THIS IS OF TYPE C, SET THE JOB TO BE
 #	AD+3	OCT	18000		TO BE LOCATION AD+4, WITH A PRIORITY 18,
 #	AD+4				FOR GROUP 5 PHASE INFORMATION
-
-## [yaYUL WORKAROUND] RSB 2004
-		SBANK=	PINSUPER
 
 		COUNT*	$$/PHASE
 2PHSCHNG	INHINT			# THE ENTRY FOR A DOUBLE PHASE CHANGE

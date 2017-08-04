@@ -26,6 +26,7 @@
 ##                              Fix values OCT 33113 --> OCT 33133 (DSPLYMSK)
 ##                                         OCT 13113 --> OCT 13133 (BOOLSMSK)
 ##                              Fix operator TC --> TCF
+##		2017-06-17 MAS	Globally removed all SBANK= workarounds.
 
 ## Page 262
                 BANK            7
@@ -550,8 +551,6 @@ GOLOADLV        TC              FLASHOFF
 V47TXACT        TC              TESTXACT                        # NO OTHER EXTVERB.
                 CAF             PRIO4
                 TC              FINDVAC
-## [WORKAROUND] RSB 2009
-                SBANK=          LOWSUPER
                 EBANK=          AGSBUFF
                 2CADR           AGSINIT
 
@@ -708,8 +707,6 @@ R04C            CAF             BIT14                           # ENABLE RR AUTO
                 TS              RTSTMAX                         # FOR SEQUENTIAL STORAGE
 
                 TC              WAITLIST
-## [WORKAROUND] RSB 2009
-                SBANK=          PINSUPER
                 EBANK=          RSTACK
                 2CADR           RADSAMP
 

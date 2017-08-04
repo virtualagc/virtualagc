@@ -15,6 +15,18 @@
 ;				checksums.
 ;		2017-05-27 RSB	Proofed using ProoferBox.py.  All checksums are now
 ;				correct.
+;		2017-06-15 RSB	Corrected a typo (which had been pointed out to me)
+;				in BANK=1, in which 34263 was mistakenly used in 
+;				place of 34265.  This is a lovely example of an error
+;				in a *single* word which *doesn't* cause a checksum
+;				error, and therefore cannot be detected by the self
+;				test.  (Also, '3' is similar in appearance to '5', and
+;				thus is harder to detect with ProoferBox.py than some
+;				other types of errors are.)  The reason that this 
+;				doesn't trigger a checksum error is that checksums
+;				of both 1 and -1 are valid for bank 1, and thus an
+;				an off-by-2 error might flip the checksum from 1 to -1
+;				(or vice-versa).
 ;
 ; As usual, pages marked V or A have been proofed visually or aurally without 
 ; errors found, while V(n) or A(n) have been proofed with n errors found.
@@ -546,7 +558,7 @@ BANK=1
 020630	160030	000061	000150	625251	000061	122101	122161	
 377510	000061	020161	625261	000061	120211	403461	625210	
 000061	122300	111440	677551	551431	477550	551440	122360	
-477371	511430	711321	677370	511430	551321	342631	543461	
+477371	511430	711321	677370	511430	551321	342651	543461	
 
 377601	541510	600001	000061	500001	311001	000061	060010	
 100000	123100	123100	123100	101510	122410	541520	022670	

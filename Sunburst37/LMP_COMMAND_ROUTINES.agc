@@ -18,6 +18,8 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-05-24 MAS  Created from Sunburst 120.
 ##              2017-06-08 HG   Transcribed
+##		2017-06-23 RSB	Proofed comment text with
+##				octopus/ProoferComments.
 
 ## Page 746
 #          THE FOLLOWING SUBROUTINES ALLOW MISSION PROGRAMS TO REQUEST LMP (LEM MISSION PROGRAMMER) OUTPUTS.
@@ -62,7 +64,7 @@ LMPPHASE        EQUALS          PHASE2
 
                 TC              STORCOM         -1      # TO STORE IN BUFFER AND UPDATE POINTER
 
-                LXCH            Q                       # RETRIEVE 2ND CODE ADDRESS FROM L.
+                LXCH            Q                       # RETREIVE 2ND CODE ADDRESS FROM L.
 
 1LMP            INDEX           Q
                 CA              0                       # GET LMP CODE

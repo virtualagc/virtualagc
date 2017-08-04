@@ -18,6 +18,9 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-05-24 MAS  Created from Sunburst 120.
 ##              2017-05-31 HG   Transcribed
+##              2017-06-15 HG   Fix operand BIT6 -> BIT8
+##		2017-06-22 RSB	Proofed comment text with
+##				octopus/ProoferComments.
 
 ## Page 535
 # FAILURE MONITOR FOR LM RCS JETS (4 TIMES A SECOND).
@@ -31,14 +34,14 @@ RCSMONIT        TCF             RESUME                  # *** TO STOP ENDLESS LO
 
 
 
-                TCF             ENDRCSFL                # DO NOTHING IF POITIVE
+                TCF             ENDRCSFL                # DO NOTHING IF POSITIVE
 
                 CA              LASTFAIL                # LAST FAILURE CHANNEL VALUE
                 EXTEND
                 RXOR            32
                 MASK            LOW8
                 EXTEND
-                BZF             NOSTCHG                 # NO STATUS VHANGE, FINISHED
+                BZF             NOSTCHG                 # NO STATUS CHANGE, FINISHED
 
                 EXTEND
                 DCA             MNTRCS
@@ -72,7 +75,7 @@ NXTRCSPR        INCR            FAILCTR
  +1             DOUBLE
 
 ## Page 536
-                TS              FAILTEMP
+                TS              FAILTEMP		# OVERFLOW CHECK
                 TCF             NXTRCSPR
 
                 INDEX           FAILCTR
@@ -112,7 +115,7 @@ FM13/15         CA              BIT7
 
 FM14/16         CA              BIT8
                 ADS             CH5MASK
-                CA              BIT6
+                CA              BIT8
                 ADS             CH6MASK
                 TC              Q
 

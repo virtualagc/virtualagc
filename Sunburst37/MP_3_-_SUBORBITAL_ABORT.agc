@@ -17,10 +17,15 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-05-24 MAS  Created from Sunburst 120.
+##		2017-06-14 RSB	Transcribed.  Note that while the comments (date, 
+##				mod no, mod by, assembly revision) identify this
+##				code as being identical to that in Sunburst 120,
+##				in reality it has many differences.
+##              2017-06-15 HG   Fix operand BIT2 -> BIT4
+##		2017-06-22 RSB	Proofed comment text with
+##				octopus/ProoferComments.
 
-## NOTE: Page numbers below have not yet been updated to reflect Sunburst 37.
-
-## Page 686
+## Page 644
                 BANK            25
                 EBANK=          TDEC
 
@@ -66,21 +71,15 @@
 #     CENTRALS - A,L,Q
 #     OTHER    - ERASABLES IN SUBROUTINES USED
 
-## Page 687
+## Page 645
 MP03JOB         TC              NEWMODEX                        # DISPLAY MAJOR MODE 71
                 OCT             71
-
-                CAF             THREE
-                TS              PHASENUM
 
                 TC              PHASCHNG
                 OCT             47012
                 DEC             1
                 EBANK=          TDEC
                 2CADR           SBORB1
-
-                CAF             BIT3
-                TC              SETRSTRT                        # SET RESTART FLAG
 
                 INHINT
                 CAF             ONE                             # 10 MS. - CONTINUE UNDER WAITLIST CONTROL
@@ -90,9 +89,11 @@ MP03JOB         TC              NEWMODEX                        # DISPLAY MAJOR 
 
                 TCF             ENDOFJOB                        # AND RELINT
 
-SBORB1          CAF             ZERO                            # INSURE RCS JETS OFF
-                EXTEND
-                WRITE           6
+SBORB1          TC		PHASCHNG
+		OCT		05012
+		OCT		77777
+
+		CAF             ZERO                            # INSURE RCS JETS OFF
                 EXTEND
                 WRITE           5
 
@@ -117,11 +118,11 @@ SBORB2          TC              2LMP+DT
                 TC              2LMP+DT
                 DEC             189                             # RESET **
                 DEC             191                             # RESET **
-## Page 688
                 DEC             100                             # WAIT 1 SECOND
 
                 TC              1LMP+DT
                 DEC             6                               # RCS PRESSURIZE - FIRE **
+## Page 646
                 DEC             100                             # WAIT 1 SECOND
 
                 TC              1LMP+DT
@@ -149,6 +150,9 @@ TUMB1           TC              PHASCHNG
                 TC              FLAG1DWN                        # TERMINATE TUMBLE MONITOR
                 OCT             20000
 
+		TC		FLAG2DWN			# TERMINATE ABORT COMMAND MONITOR
+		OCT		00400
+
                 CAF             JETS+X                          # COMMAND +X TRANSLATION - ON (4 JET)
                 EXTEND
                 WRITE           5
@@ -157,6 +161,7 @@ TUMB1           TC              PHASCHNG
 
                 TC              1LMP+DT
                 DEC             58                              # LEM/S4B SEPARATE ARM - ON *
+                
                 DEC             50                              # WAIT 500 MILLISECONDS
 
                 CS              DAPBOOLS                        # ENABLE DAP
@@ -166,17 +171,11 @@ TUMB1           TC              PHASCHNG
                 TC              IBNKCALL                        # DEADBAND SELECT - MAX
                 CADR            SETMAXDB
 
-                TC              PHASCHNG
-                OCT             47012
-## Page 689
-                DEC             50
-                EBANK=          TDEC
-                2CADR           TUMB2
-
                 TC              FIXDELAY                        # WAIT 500 MILLISECONDS
                 DEC             50
+## Page 647
 
-TUMB2           TC              IBNKCALL
+	        TC              IBNKCALL			# GET VEHICLE RATE
                 CADR            SETRATE                         # HOLD VEHICLE ATTITUDE RATE
 
                 TC              2LMP+DT
@@ -187,21 +186,26 @@ TUMB2           TC              IBNKCALL
                 TC              IBNKCALL                        # DEADBAND SELECT - MIN
                 CADR            SETMINDB
 
-                CS              FLAGWRD1                        # SETS SIVBGONE TO 1
-                MASK            BIT4
-                ADS             FLAGWRD1
-
-                TC              PHASCHNG
-                OCT             47012
-                DEC             90
-                EBANK=          TDEC
-                2CADR           TUMB3
+		EBANK=		LEMMASS1
+		CAF		EBANK5
+		TS		EBANK
+		
+		EXTEND
+		DCA		LEMMASS1
+		DXCH		MASS
+		
+		CAF		ZERO
+		TS		DELAREA
+		TS		DELAREA		+1
+		
+		EBANK=		TDEC
+		CAF		EBANK4
+		TS		EBANK
 
                 TC              FIXDELAY                        # WAIT 900 MILLISECONDS
                 DEC             90
 
-TUMB3           TC              IBNKCALL
-                CADR            ENGINOF1
+                TC		ENGINOF1			# INSURE THAT ENGINE IS OFF
 
                 TC              2LMP+DT
                 DEC             59                              # LEM/S4B SEPARATE ARM - OFF *
@@ -215,13 +219,14 @@ TUMB3           TC              IBNKCALL
 
                 TC              2PHSCHNG
                 OCT             40072
-                OCT             47016
+                
+                OCT             47014
                 DEC             512
                 EBANK=          TDEC
                 2CADR           ABTSTGDM
 
-## Page 690
 SBORBA          TC              IBNKCALL                        # DEADBAND SELECT - MIN
+## Page 648
                 CADR            SETMINDB
 
                 TC              1LMP+DT
@@ -237,29 +242,22 @@ SBORBA          TC              IBNKCALL                        # DEADBAND SELEC
                 TC              PHASCHNG
                 OCT             47012
                 DEC             400
-                EBANK=          DVCNTR
+                EBANK=          TDEC
                 2CADR           SBORB3
 
                 TC              FIXDELAY                        # WAIT 4 SECONDS
                 DEC             400
 
-                EBANK=          DVCNTR
-
-SBORB3          CA              EBANK5
-                TS              EBANK
-
-                TC              1LMP+DT
+SBORB3          TC              1LMP+DT
                 DEC             8                               # LANDING GEAR DEPLOY - FIRE **
                 DEC             100                             # WAIT 1 SECOND
 
-                TC              IBNKCALL
-                CADR            DPSENGON
-## DPSENGON in the above line has a green arrow pointing to it.
+                TC              ENGINEON			# COMMAND ENGINE - ON
 
                 TC              PHASCHNG
                 OCT             47012
                 DEC             100
-                EBANK=          DVCNTR
+                EBANK=          TDEC
                 2CADR           SBORB4
 
                 TC              FIXDELAY                        # WAIT 1 SECOND
@@ -270,33 +268,24 @@ SBORB4          TC              2LMP+DT
                 DEC             9                               # RESET **
                 DEC             400                             # WAIT 4 SECONDS
 
-                CA              ZERO                            # WE WANT TO DETECT ENGINOFF QUICKLY SO IT
-                TS              SETDVCNT                        # WON'T INTERFERE WITH NEXT ENG ON.
-
-## Page 691
-                CA              ONE                             # DITTO.
-                TS              DVCNTR
-
-                TC              IBNKCALL
-                CADR            ENGINOFF
+                TC            	ENGINOFF			# COMMAND ENGINE - OFF
 
                 TC              PHASCHNG
                 OCT             47012
                 DEC             500
-                EBANK=          DVCNTR
+                EBANK=          TDEC
                 2CADR           SBORB5
 
                 TC              FIXDELAY                        # WAIT 5 SECONDS
+## Page 649
                 DEC             500
 
-SBORB5          TC              IBNKCALL
-                CADR            DPSENGON                        # DPSENGON WILL REFRESH SETDVCNT
-## DPSENGON in the above line has a green arrow pointing to it.
+SBORB5          TC              ENGINEON			# COMMAND ENGINE - ON
 
                 TC              PHASCHNG
                 OCT             47012
                 DEC             200
-                EBANK=          DVCNTR
+                EBANK=          TDEC
                 2CADR           SBORB6
 
                 TC              FIXDELAY                        # WAIT 2 SECONDS
@@ -308,7 +297,7 @@ SBORB6          TC              IBNKCALL                        # COMMAND +X TRA
                 TC              PHASCHNG
                 OCT             47012
                 DEC             1900
-                EBANK=          DVCNTR
+                EBANK=          TDEC
                 2CADR           SBORB7
 
                 TC              FIXDELAY                        # WAIT 19 SECONDS
@@ -325,12 +314,11 @@ SBORB7          TC              1LMP+DT
                 CAF             PRIO30                          # THRUST REQUEST DURING JOB
                 TC              FINDVAC
                 EBANK=          ETHROT
-## Page 692
                 2CADR           TRST90PC
 
                 TC              2PHSCHNG
                 OCT             40112
-                OCT             07024
+                OCT             07023
                 OCT             30000
                 EBANK=          ETHROT
                 2CADR           TRST90PC
@@ -339,12 +327,13 @@ SBORB7          TC              1LMP+DT
                 DEC             400
 
 SBORB8          TC              1LMP+DT
-                DEC             38                              # ABORT STAGE - ARM *
+                DEC             22                              # ABORT STAGE - ARM *
+## Page 650
                 DEC             100                             # WAIT 1 SECOND
-
-                TC              1LMP+DT
-                DEC             22                              # ABORT STAGE - COMMAND *
-                DEC             1                               # WAIT 10 MS
+                
+                TC		1LMP+DT
+                DEC		38				# ABORT STAGE - COMMAND *
+                DEC		1				# WAIT 10 MS
 
                 TC              PHASCHNG
                 OCT             00002
@@ -352,51 +341,49 @@ SBORB8          TC              1LMP+DT
                 TCF             TASKOVER                        # ABORT STAGE DISCRETE MONITOR RUNNING
 
 
-
-                EBANK=          LEMMASS2
-SBORBB          CAF             EBANK7
-                TS              EBANK
-
-                EXTEND
-                DCA             LEMMASS2
-                DXCH            MASS
-
-                TC              IBNKCALL                        # SET UP DAP FOR APS BURN
-                CADR            APSENGON
-
-                EBANK=          TDEC
-                CAF             EBANK4
-                TS              EBANK
+SBORBB		EXTEND
+		DCA		ENDJOB2C
+		DXCH		FLUSHREG
 
                 TC              PHASCHNG
                 OCT             47012
                 DEC             100
                 EBANK=          TDEC
                 2CADR           SBORB9
+                
+                EBANK=		LEMMASS2
+                CAF		EBANK5
+                TS		EBANK
+                
+                EXTEND
+                DCA		LEMMASS2
+                DXCH		MASS
+                
+                EBANK=		TDEC
+                CAF		EBANK4
+                TS		EBANK
 
                 TC              FIXDELAY                        # WAIT 1 SECOND
                 DEC             100
 
-## Page 693
 SBORB9          TC              1LMP+DT
                 DEC             151                             # ENGINE SELECT - DESC ARM OFF *
                 DEC             400                             # WAIT 4 SECONDS
 
-                TC              IBNKCALL
-                CADR            ENGINOFF
+                TC              ENGINOFF			# COMMAND ENGINE - OFF
 
                 TC              PHASCHNG
                 OCT             47012
                 DEC             100
                 EBANK=          TDEC
                 2CADR           SBORB10
+## Page 651
 
                 TC              FIXDELAY                        # WAIT 1 SECOND
                 DEC             100
 
-SBORB10         TC              2LMP+DT
+SBORB10         TC              1LMP+DT
                 DEC             39                              # ABORT STAGE - COMMAND RESET *
-                DEC             134                             # ENGINE SELECT - ASC ARM *
                 DEC             2700                            # WAIT 27 SECONDS
 
                 TC              IBNKCALL                        # COMMAND +X TRANSLATION - ON (4 JET)
@@ -411,8 +398,7 @@ SBORB10         TC              2LMP+DT
                 TC              FIXDELAY                        # WAIT 2 SECONDS
                 DEC             200
 
-SBORB11         TC              IBNKCALL
-                CADR            APSENGON
+SBORB11         TC              ENGINEON			# COMMAND ENGINE - ON
 
                 TC              PHASCHNG
                 OCT             47012
@@ -428,7 +414,6 @@ SBORB12         TC              IBNKCALL                        # COMMAND +X TRA
 
                 TC              PHASCHNG
                 OCT             47012
-## Page 694
                 DEC             5800
                 EBANK=          TDEC
                 2CADR           SBORB13
@@ -436,14 +421,14 @@ SBORB12         TC              IBNKCALL                        # COMMAND +X TRA
                 TC              FIXDELAY                        # WAIT 58 SECONDS
                 DEC             5800
 
-SBORB13         TC              IBNKCALL
-                CADR            ENGINOFF
+SBORB13         TC              ENGINOFF			# COMMAND ENGINE - OFF
 
                 TC              PHASCHNG
                 OCT             47012
                 DEC             100
                 EBANK=          TDEC
                 2CADR           SBORB14
+## Page 652
 
                 TC              FIXDELAY                        # WAIT 1 SECOND
                 DEC             100
@@ -464,8 +449,7 @@ SBORB14         TC              1LMP+DT
                 TC              TASKOVER
 
 
-
-ABTSTGDM        CAF             BIT2                            # ABORT STAGE DISCRETE MONITOR
+ABTSTGDM        CAF             BIT4                            # ABORT STAGE DISCRETE MONITOR
                 EXTEND
                 RAND            30
 
@@ -479,24 +463,23 @@ ABTSTGDM        CAF             BIT2                            # ABORT STAGE DI
 
 ABTSTG1         TC              2PHSCHNG
                 OCT             00004
-## Page 695
                 OCT             47012
                 OCT             77777
                 EBANK=          TDEC
                 2CADR           SBORBB
 
-                TC              2PHSCHNG
-                OCT             00006
-                OCT             00003
+                EXTEND
+                DCA		SBORBB2C
+                DXCH		FLUSHREG
 
                 CAF             PRIO37                          # GENERATE RESTART IMMEDIATELY
                 TC              NOVAC
-                EBANK=          LST1
+                EBANK=          TDEC
                 2CADR           ENEMA
 
                 TCF             TASKOVER
 
-
+## Page 653
 
 
 
@@ -506,11 +489,26 @@ TRST90PC        CAF             POSMAX                          # INCREASE THROT
                 DCA             THRSTLOC
                 DXCH            Z
 
+		TC		PHASCHNG
+		OCT		00003
+
                 TCF             ENDOFJOB
 
 
+SBORBBJB	INHINT
+		CAF		BIT1
+		TC		WAITLIST
+		EBANK=		TDEC
+		2CADR		SBORBB
+		
+		TCF		ENDOFJOB
+		
+		
+		EBANK=		LST1
+ENDJOB2C	2CADR		ENDOFJOB
 
-
+		EBANK=		TDEC
+SBORBB2C	2CADR		SBORBBJB
 
                 EBANK=          ETHROT
 THRSTLOC        2CADR           PCNTFMAX

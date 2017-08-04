@@ -17,12 +17,15 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-05-24 MAS  Created from Sunburst 120.
+##		2017-06-14 RSB	Transcribed.
+##              2017-06-15 HG   Fix vlaue OCT  00054 -> OCT  00034 
+##		2017-06-22 RSB	Proofed comment text with
+##				octopus/ProoferComments.
 
-## NOTE: Page numbers below have not yet been updated to reflect Sunburst 37.
-
-## Page 720
+## Page 676
                 BANK            27
                 EBANK=          RATEINDX
+                
 # PROGRAM DESCRIPTION-            DATE- 07 DEC 66
 
 # MOD NO- 4                       LOG SECTION-
@@ -70,14 +73,15 @@
 #          CALL SCHEDULE ENTRY ROUTINE FOR DPS 1 WITH
 #                 J=2
 #                 MP=9
+
 #                 DT= 2H 59M 14S
 
-## Page 721
+## Page 677
 # SUBROUTINES CALLED-
 #          FINDVAC, ENDOFJOB
 #          WAITLIST, TASKOVER
 #          NEWMODEX, MPENTRY, PHASCHNG, 2PHSCHNG
-#          INTPRET, BANKCALL, IBNKCALL, ATTSTALL, CURTAINS, P00H
+#          INTPRET, BANKCALL, IBNKCALL, ATTSTALL, CURTAINS, POOH
 #          FLAG1DWN, FLAG2DWN, SETMINDB, SETMAXDB
 #          KALCMAN3, DCMTOCDU, V1STO2S
 #          1LMP, 1LMP+DT, 2LMP+DT
@@ -97,11 +101,14 @@ PRIOKM          EQUALS          PRIO20                          # PRIORITY FOR K
 MP8JOB          TC              NEWMODEX                        # UPDATE PROGRAM NUMBER
                 OCT             15                              # ON DSKY
 
-                TC              PHASCHNG
-                OCT             05022
-                OCT             20000
-                CAF             BIT8
-                TC              SETRSTRT                        # SET RESTART FLAG
+		CAF		8BOOLS				# ASSURE PROPER
+		TS		DAPBOOLS			# INITIALIZATION
+		TC		BANKCALL			# OF LM DAP
+		FCADR		SETMINDB			# FOR MP8
+		
+		TC		PHASCHNG
+		OCT		05012
+		OCT		77777
 
                 CAF             ONE                             # ESTABLISH TASK TO
                 INHINT                                          # PERFORM DFI T/M CAL.
@@ -109,6 +116,7 @@ MP8JOB          TC              NEWMODEX                        # UPDATE PROGRAM
                 EBANK=          RATEINDX
                 2CADR           MP8TASK
 
+		RELINT
                 TC              ENDOFJOB
 
 MP8TASK         TC              1LMP+DT                         # LMP COMMAND
@@ -119,19 +127,19 @@ MP8TASK         TC              1LMP+DT                         # LMP COMMAND
                 DEC             237                             # DFI T/M CALIBRATE OFF*
                 DEC             198                             # MASTER C+W ALARM RESET**  COMMAND
                 DEC             200                             # 2 SECONDS DELAY
+## Page 678
 
                 TC              1LMP+DT                         # LMP COMMAND
                 DEC             199                             # MASTER C+W ALARM RESET- COMMAND RESET
                 DEC             100                             # 1 SECOND
 
-## Page 722
 M8RADON         CAF             PRIO10                          # SET UP JOB TO CALCULATE
                 TC              FINDVAC                         # REQ CDU ANGLES
                 EBANK=          RATEINDX
                 2CADR           COLDSOAK
 
                 TC              2PHSCHNG
-                OCT             00054
+                OCT             00034
                 OCT             05012
                 OCT             77777
 
@@ -159,52 +167,39 @@ MP9CALL         CA              FLAGWRD2                        # CHECK IF MANEU
                 EXTEND
                 BZF             +2
                 TC              CURTAINS                        # MANEUVER NOT COMPLETED
+                
                 TC              BANKCALL
                 CADR            ATTSTALL
                 TC              CURTAINS                        # SICK RETURN
 
 #                                         SET LM-DAP DEADBAND TO MAX-
 
-                TC              PHASCHNG
-                OCT             00002                           # DEACTIVATE GR 2
-
-                TC              2PHSCHNG
-                OCT             00004
-                OCT             05023
-                OCT             30000
-
-                INHINT
                 TC              BANKCALL
-## Page 723
                 CADR            SETMAXDB
 
 #                                         CALL MISSION PHASE 9
 
                 TC              MPENTRY                         # MANEUVER SUCCESSFUL
+## Page 679
                 DEC             2                               # J=2
                 DEC             9                               # MP=9
                 ADRES           MP8TO9                          # DT = 2H 59M 14S
+                TC              POOH                            # END OF MISSION PHASE 8
 
-                TC              P00H                            # END OF MISSION PHASE 8
-
-## Page 724
+## Page 680
 #          CALCULATE CDU ANGLES FOR REQUIRED
 #          COLDSOAK ATTITUDE - LEM X-AXIS NORMAL TO THE
-#          ECLIPTIC AND BISECTOR OF -Y/+Z AXES TOWARD THE SUN.
-COLDSOAK        EXTEND
-                DCA             TIME2
-                DXCH            MPAC
-                EXTEND
-                DCA             TLIFTOFF
-                DAS             MPAC                            # ADD TIME CLOCK ZEROED TO TIME2
 
-                CA              ZERO
-                TS              MODE
-                TC              INTPRET
+#          ECLIPTIC AND BISECTOR OF -Y/+Z AXES TOWARD THE SUN.
+CSRET		EQUALS		MPAC
+COLDSOAK        TC              INTPRET
+		SETPD
+				0
 # CALCULATE TRANSFORMATION MATRIX FROM RCS COLD SOAK ATTITUDE
-# TO STABLE MEMBER COORDINATES.   CONVERT TO CDU ANGLES.
-                SETPD           SR
-                                0
+# TO STABLE MEMBER COORDINATES.  CONVERT TO CDU ANGLES.
+
+		DLOAD		SR
+				TIME2
                                 14D
                 TAD             DDV
                                 TEPHEM                          # TIME IN CENTISEC SINCE PRECEDING JUNE 30
@@ -218,6 +213,7 @@ ALTA            DSU             BPL                             # DIMINISH T/2**
                                 ONEYR                           # UNTIL A NEGATIVE RESULT OCCURS.
                                 ALTA
                 DAD             DDV                             # ADD BACK 365.25/2**9 ONCE.
+                
                                 ONEYR                           # LET Y=RESULT
                                 ONEYR                           # Y/365.25 IS LESS THAN ONE AND POSITIVE.
                 PUSH            SIN                             # .5*SIN(2*PI*Y/365.25)
@@ -238,12 +234,13 @@ ALTA            DSU             BPL                             # DIMINISH T/2**
                 DSU                                             # (LOSR*T-C0Y*SIN-C1Y*COS)/4
                 DAD             DAD
                                 LOS0                            # LOS/4= (LOS0+LOSR*T-C0Y*SIN-C1Y*COS)/4
-## Page 725
                                 EGHTH                           # (1/8 +LOS)/4  ,  1/8 REV = 45 DEG
 
 ALTB            DSU             BPL                             # DIMINISH (1/8 +LOS)/4 REVS BY (1REV)/4
+
                                 ONEREV                          # UNTIL A NEGATIVE RESULT OCCURS.
                                 ALTB
+## Page 681
                 DAD             SL2                             # ADD BACK (1REV)/4 .
                                 ONEREV                          # AND MULTIPLY BY FOUR.
                 PUSH                                            # (1/8 +LOS) POSITIVE AND LESS THAN ONE.
@@ -252,6 +249,7 @@ ALTB            DSU             BPL                             # DIMINISH (1/8 
 #                                         TO EARTH REFERENCE COORDINATES.  MATRIX IS SCALED BY -1 .
 #                                         MATRIX TRANSPOSE IS STORED STARTING IN FIRST LOCATION OF PUSHDOWN LIST.
 #                                         OBL= OBLIQUITY= ANGLE BETWEEN ECLIPTIC AND EQUATORIAL PLANES.
+
 #                                         DEFINE LOSR= 2*PI*LOS
 
                 COS             DCOMP
@@ -275,12 +273,13 @@ ALTB            DSU             BPL                             # DIMINISH (1/8 
                 SR1
                 STODL           4                               #  .5*COS(OBL)
                                 SINOBL
+                                
                 SR1             DCOMP
                 STODL           2                               # -.5*SIN(OBL)
                                 DPZRO
                 STORE           0                               #  0
 
-#                                         PERFORM THE MATRIX MULTIPLICATION (REFSMMAT)X(RCS TO REF MATRIX)/2
+#                                         PERFORM THE MATRIX MULTIPLICATION (REFSMMAT)X(RCS TO REF MATRIX)
                 VLOAD           MXV
                                 0
                                 REFSMMAT
@@ -289,12 +288,11 @@ ALTB            DSU             BPL                             # DIMINISH (1/8 
                                 6
                 MXV             VSL1
                                 REFSMMAT
-
-## Page 726
                 STOVL           6
                                 12D
                 MXV             VSL1
                                 REFSMMAT
+## Page 682
                 STORE           12D
                 EXIT
 
@@ -309,6 +307,7 @@ ALTB            DSU             BPL                             # DIMINISH (1/8 
                 INDEX           FIXLOC
                 DXCH            4
                 INDEX           FIXLOC
+                
                 DXCH            12D
                 INDEX           FIXLOC
                 DXCH            4
@@ -332,6 +331,7 @@ ALTB            DSU             BPL                             # DIMINISH (1/8 
                 
                 SSP             RTB
                                 RATEINDX
+                                
                                 4                               # CODE FOUR = MANEUVER RATE OF 5 DEG/SEC.
                                 V1STO2S                         #     STORE CDU ANGLES IN CONSECUTIVE
                 STORE           CPHI                            #     LOCATIONS  CPHI,CTHETA,CPSI.
@@ -339,38 +339,33 @@ ALTB            DSU             BPL                             # DIMINISH (1/8 
 
 #                                         SET UP PARAMETERS FOR KALCMANU MANEUVER ROUTINE
 
-                TC              FLAG2DWN                        # RESET STATE SWITCH 33 (BIT 12)
-                OCT             04000                           # FOR FINAL ROLL , IF ANY.
-
-## Page 727
+                TC              FLAG2DWN                        #     RESET STATE SWITCH 33 (BIT 12)
+                OCT             04000                           #     FOR FINAL ROLL , IF ANY.
                 TC              FLAG2UP                         # SET BIT FOR KALCMANU
+                
                 OCT             02000                           # BIT 11
-
-                TC              PHASCHNG
-                OCT             05024
-                OCT             20000
-
 COLDSK1         CAF             PRIOKM                          # SCHEDULE KALCMANU
                 INHINT
+## Page 683
                 TC              FINDVAC
                 EBANK=          RATEINDX
                 2CADR           KALCMAN3
 
                 TC              ENDOFJOB
-
 LOS0            2DEC            .273926331      B-2             # 1966-67,IN REVOLUTIONS
 
-LOSR            2DEC            .0027377992                     # 1966-67,IN REVOLUTIONS
+LOSR            2DEC            .0027378507                     # 1966-67,IN REVOLUTIONS
 
-C0Y             2DEC            .005306583      B-1             # 1966-67,IN REVOLUTIONS
+C0Y             2DEC            .304044828      B-1             # 1966-67,IN REVOLUTIONS
 
-C1Y             2DEC            -.000402139     B-1             # 1966-67,IN REVOLUTIONS
+C1Y             2DEC            -.023040861     B-1             # 1966-67,IN REVOLUTIONS
 
 SINOBL          2DEC            .397845753                      # 1966-67
 
 COSOBL          2DEC            .917452318                      # 1966-67
 
 TANOBL          2DEC            .433641885                      # 1966-67
+
 
 DPZRO           2DEC            0
 
@@ -382,4 +377,5 @@ ONEYR           2DEC            365.25          B-9
 
 CSPERDAY        2DEC            8640000         B-33            # CENTISEC PER DAY
 
+8BOOLS		OCT		42032				# COURTESY G. C. 11/16/66
 # END OF MISSION PHASE 8
