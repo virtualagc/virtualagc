@@ -41,3 +41,12 @@ instrcount:
 	echo "Counting instructions..."
 	python $(H800)/tools/check-instructions.py -c -s -u $(SOURCES)
 
+parse:
+	echo "Parsing..."
+	python $(H800)/tools/parse.py YULPASS0.argus
+	#python $(H800)/tools/list-symbols.py YULPASS2.argus >YULPASS1.symtab
+	#python $(H800)/tools/list-symbols.py YULPASS2.argus >YULPASS2.symtab
+	#python $(H800)/tools/list-symbols.py YULPASS3.argus >YULPASS3.symtab
+	#python $(H800)/tools/list-symbols.py YULMANUF.argus >YULMANUF.symtab
+	#python $(H800)/tools/list-symbols.py YULSIMUL.argus >YULSIMUL.symtab
+
