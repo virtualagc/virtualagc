@@ -40,17 +40,24 @@ minFontScale = 0.9
 maxFontScale = 1.2
 defaultScale = 1.0
 if 'ZERLINA' in environ:
+	scanColor="#000000"
+	matchColor="#00C000"
 	defaultFontScale = 0.75
 	minFontScale *= defaultFontScale
 	maxFontScale *= defaultFontScale
 	bounds = (4, 20, 11, 30)
 else:
+	scanColor="#000000"
+	matchColor="#006C00"
 	bounds = (8, 24, 16, 36)
+
+# Don't use SWAPCOLORS: it's enormously, mind-bogglingly slow.
+swapColors = ('SWAPCOLORS' in environ)	
 
 # Parse command-line arguments
 if len(sys.argv) != 6:
 	print 'Usage:'
-	print '\t./ProoferBox.py BWINPUTIMAGE OUTPUTIMAGE BANK PAGEINBANK BINSOURCE'
+	print '\t[ZERLINA=yes] ./ProoferBox.py BWINPUTIMAGE OUTPUTIMAGE BANK PAGEINBANK BINSOURCE'
 	sys.exit()
 
 backgroundImage = sys.argv[1]
@@ -100,6 +107,17 @@ file.close()
 
 # Read in the octal-digit files.
 images = []
+		
+def replaceColorsInImage(img, color1, color2):
+	ldraw = Drawing()
+	ldraw.fill_color = color2
+	width, height = img.size
+	for x in range(0, width):
+		for y in range(0, height):
+			if img[x,y] == color1:
+				ldraw.color(x, y, 'replace')
+	ldraw(img)
+
 if 'ZERLINA' in environ:
 	images.append(Image(filename='z0t.png'))
 	images.append(Image(filename='z1t.png'))
@@ -118,6 +136,7 @@ else:
 	images.append(Image(filename='5t.png'))
 	images.append(Image(filename='6t.png'))
 	images.append(Image(filename='7t.png'))
+	
 imagesColored = []
 imagesColored.append(Image(filename='0m.png'))
 imagesColored.append(Image(filename='1m.png'))
@@ -132,6 +151,12 @@ imagesColored.append(Image(filename='7m.png'))
 img = Image(filename=backgroundImage)
 backgroundWidth = img.width
 backgroundHeight = img.height
+
+if swapColors:
+	print 'Swapping colors'
+	for i in range(0, 8):
+		replaceColorsInImage(images[i], Color(matchColor), Color(scanColor))
+	replaceColorsInImage(img, Color(scanColor), Color(matchColor))
 
 # Make certain conversions on the background image.
 img.type = 'truecolor'
