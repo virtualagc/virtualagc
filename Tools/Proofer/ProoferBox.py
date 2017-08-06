@@ -54,6 +54,8 @@ else:
 # Don't use SWAPCOLORS: it's enormously, mind-bogglingly slow.
 swapColors = ('SWAPCOLORS' in environ)	
 
+specialOne = ('SPECIALONE' in environ)
+
 # Parse command-line arguments
 if len(sys.argv) != 6:
 	print 'Usage:'
@@ -127,6 +129,7 @@ if 'ZERLINA' in environ:
 	images.append(Image(filename='z5t.png'))
 	images.append(Image(filename='z6t.png'))
 	images.append(Image(filename='z7t.png'))
+	oneOnSeven = Image(filename='z1tb.png')
 else:
 	images.append(Image(filename='0t.png'))
 	images.append(Image(filename='1t.png'))
@@ -136,6 +139,7 @@ else:
 	images.append(Image(filename='5t.png'))
 	images.append(Image(filename='6t.png'))
 	images.append(Image(filename='7t.png'))
+	oneOnSeven = Image(filename='1tb.png')
 	
 imagesColored = []
 imagesColored.append(Image(filename='0m.png'))
@@ -218,11 +222,17 @@ for index in range(startIndex, endIndex):
 		
 		if characters[characterIndex] != '@':
 			digitIndex = int(characters[characterIndex])
-			if boxOctal == digitIndex and not (characters[characterIndex] in blatant) and not (boxFields[0] in blatant):
+			#print boxFields[0], ' ', characters[characterIndex]
+			if specialOne and characters[characterIndex] == '1':
+				#print "here"
+				digit = oneOnSeven.clone() 
+				operator = 'lighten'
+			elif boxOctal == digitIndex and not (characters[characterIndex] in blatant) and not (boxFields[0] in blatant):
 				digit = images[digitIndex].clone()
+				operator = 'darken'
 			else:
 				digit = imagesColored[digitIndex].clone()
-			operator = 'darken'
+				operator = 'darken'
 			fontWidth = digit.width
 			fontHeight = digit.height
 			minFontHeight = minFontScale*fontHeight
