@@ -20,6 +20,8 @@
 ##              2017-08-05 MAS  Transcribed for Zerlina 56. This section was
 ##                              largely rewritten to support P66 LPD and the
 ##                              variable servicer.
+##              2017-08-06 MAS  Fixed a comment transcription error (MODULE
+##                              where MODULO should have been).
 
 ## Page 784
 # ****************************************************************************************************************
@@ -1276,7 +1278,7 @@ HZTIME?         CA              HZCOUNT                 # DOES HZCOUNT = 0 MODUL
                 EXTEND
                 BZF             P66HZ                   # YES:  DO HORIZONTAL CONTROL EQUATION
 
-                MASK            THREE                   # NO:   DOES HZCOUNT = 2 MODULE 4?
+                MASK            THREE                   # NO:   DOES HZCOUNT = 2 MODULO 4?
                 AD              NEG2
                 EXTEND
                 BZF             P66DISPS                # YES:  GO COMPUTE DISPLAYS
