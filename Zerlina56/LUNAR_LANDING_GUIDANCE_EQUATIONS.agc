@@ -17,33 +17,38 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-07-28 MAS  Created from Luminary 210.
+##              2017-08-05 MAS  Transcribed for Zerlina 56. This section was
+##                              largely rewritten to support P66 LPD and the
+##                              variable servicer.
 
-## NOTE: Page numbers below have not yet been updated to reflect Zerlina 56.
+## Page 784
+# ****************************************************************************************************************
+# GUIDANCE FOR LANDING ON THE MOON                                    BY EYLES EXCEPT P66HZ AND ROOTPSRS BY KLUMPP
+# ****************************************************************************************************************
 
-## Page 794
-                EBANK=          E2DPS
+                EBANK=          E2DPS  
 
                 COUNT*          $$/F2DPS
 
-# ===================================================================================================================
+# ****************************************************************************************************************
 # LUNAR LANDING FLIGHT SEQUENCE TABLES
-# ===================================================================================================================
+# ****************************************************************************************************************
 
 # FLIGHT SEQUENCE TABLES ARE ARRANGED BY FUNCTION.   THEY ARE REFERENCED USING AS AN INDEX THE REGISTER WCHPHASE:
 
-#                                                     WCHPHASE  =  -1  --->  IGNALG
-#                                                     WCHPHASE  =   0  --->  BRAKQUAD
-#                                                     WCHPHASE  =   1  --->  APPRQUAD
-#                                                     WCHPHASE  =   2  --->  VERTICAL
+#                                                  WCHPHASE  =  -1  --->  IGNALG
+#                                                  WCHPHASE  =   0  --->  BRAKQUAD
+#                                                  WCHPHASE  =   1  --->  APPRQUAD
+#                                                  WCHPHASE  =   2  --->  VERTICAL
 
-#====================================================================================================================
+# ****************************************************************************************************************
 
 # ROUTINES FOR STARTING NEW GUIDANCE PHASES:
 
                 TCF             TTFINCR                 # IGNALG
 NEWPHASE        TCF             TTFINCR                 # BRAKQUAD
                 TCF             STARTP64                # APPRQUAD
-                TCF             STARTP66                # VERTICAL
+                TCF             ENDLLJOB                # VERTICAL  (A BRANCH RARELY IF EVER USED)
 #
 
 # PRE-GUIDANCE COMPUTATIONS:
@@ -56,7 +61,7 @@ PREGUIDE        TCF             RGVGCALC                # BRAKQUAD
 # GUIDANCE EQUATIONS:
 
                 TCF             TTF/8CL                 # IGNALG
-WHATGUID        TCF             TTF/8CL                 # BRAKQUAD   **** HOBSON'S CHOICE? ****
+WHATGUID        TCF             TTF/8CL                 # BRAKQUAD
                 TCF             TTF/8CL                 # APPRQUAD
 #
 
@@ -66,7 +71,7 @@ WHATGUID        TCF             TTF/8CL                 # BRAKQUAD   **** HOBSON
 AFTRGUID        TCF             EXTLOGIC                # BRAKQUAD
                 TCF             EXTLOGIC                # APPRQUAD
 
-## Page 795
+## Page 785
 # WINDOW VECTOR COMPUTATIONS:
 
                 TCF             EXGSUB                  # IGNALG
@@ -78,7 +83,6 @@ WHATEXIT        TCF             EXBRAK                  # BRAKQUAD
 
 WHATDISP        TCF             P63DISPS                # BRAKQUAD
                 TCF             P64DISPS                # APPRQUAD
-                TCF             VERTDISP                # VERTICAL
 #
 
 # ALARM ROUTINE FOR TTF COMPUTATION:
@@ -94,140 +98,34 @@ WHATALM         TCF             1406ALM                 # BRAKQUAD
 TARGTDEX        OCT             0                       # BRAKQUAD
                 OCT             2                       # APPRQUAD
 
-## Page 796
-
-## The suffixed ':' at the end of the third line below is '=' in the original
-## printout.  It is a workaround for our proof-reading system.
-# ================================================================================================================
-# ENTRY POINTS:  ?GUIDSUB FOR THE IGNITION ALGORITHM, LUNLAND FOR SERVOUT
-# ===============================================================================================================:
+# ****************************************************************************************************************
+# ENTRY POINTS:   ?GUIDSUB FOR THE IGNITION ALGORITHM, LUNLAND FOR SERVOUT
+# ****************************************************************************************************************
 
 # IGNITION ALGORITHM ENTRY:  DELIVERS N PASSES OF QUADRATIC QUIDANCE
 
 ?GUIDSUB        EXIT
                 CAF             TWO                     # N = 3
                 TS              NGUIDSUB
-                TCF             GUILDRET
+                TCF             PASSINIT
 
 GUIDSUB         TS              NGUIDSUB                # ON SUCEEDING PASSES SKIP TTFINCR
                 TCF             CALCRGVG
 
 # NORMAL ENTRY:  CONTROL COMES HERE FROM SERVOUT
 
-LUNLAND         TC              PHASCHNG
-                OCT             00035                   # GROUP 5:  RETAIN ONLY PIPA TASK
+LUNLAND         TC              SERVCHNG
                 CA              FLAGWRD5                # HAS THROTTLE-UP COME YET?
                 MASK            ZOOMBIT
                 EXTEND
-                BZF             DISPEXIT        +3      # NO:   DO DISPLAYS ONLY
+                BZF             DISPEXIT        +3      # NO:   DO P63 DISPLAYS BUT NO GUIDANCE
 
-                TC              PHASCHNG                # YES:  DO GUIDANCE
-                OCT             05023
-                OCT             20000
-
-## Page 797
-# ================================================================================================================
-# GUILDENSTERN (AUTO-MODES MONITOR - R13)
-# SELECT P66 WHEN THE ROD SWITCH HAS BEEN MANIPULATED IN THE ATTITUDE HOLD MODE
-# ================================================================================================================
-
-                COUNT*          $$/R13
-
-GUILDEN         CS              MODREG                  # ARE WE ALREADY IN P66?
-  STERN         AD              DEC66
-                EXTEND
-                BZF             RE-IN66?                # Y: GO SEE IF WE SHOULD RE-INITIALIZE P66
-
-                CAF             BIT13                   # N: ATTITUDE HOLD?
-                EXTEND
-                RAND            CHAN31
-                CCS             A
-                TCF             GUILDRET                # N: CONTINUE P63 OR P64
-
-                CA              RODCOUNT                # Y: ANY ROD COMMANDS?
-                EXTEND
-                BZF             GUILDRET                # N: CONTINUE P63 OR P64
-
-# INITIALIZE P66
-
-STARTP66        TC              FASTCHNG                # Y: START P66
-                TC              NEWMODEX
-DEC66           DEC             66
-
-                EXTEND
-                DCA             HDOTDISP                # SET DESIRED ALTITUDE RATE TO THE
-                DXCH            VDGVERT                 #     CURRENTLY DISPLAYED ALTITUDE RATE
-
-                TC              UPFLAG                  # SET FLAG TO CONTINUE P66 HORIZONTAL
-                ADRES           P66PROFL                #    UNTIL 'PROCEED' AFTER TOUCHDOWN
-
-                CS              TOOFEW                  # INITIALIZE CNTTHROT TO -TOOFEW
-                TS              CNTTHROT
-
-# P66 RE-INITIALIZATION WHEN RODFLAG RESET - P66 INITIALIZATION CONTINUED
-
-RE-IN66         TC              INTPRET
-                VLOAD           VXV                     # COMPUTE HORIZONTAL VELOCITY COMMAND
-                                WM                      # MOON'S ANGULAR RATE IN 2(-17)RAD/CS
-                                R                       # LM POSITION IN 2(24)M
-                STORE           VHZC
-                TLOAD           DCOMP
-                                TEMX
-                STOVL           OLDPIPAX                # NOTE: VECTOR INIT OF SP OLDPIPA'S OVER-
-                                ZEROVECS                #    LAPS ADJACENT DELVROD.  THUS INIT
-                STODL           DELVROD                 #    DELVROD AFTER OLDPIPA'S
-
-## Page 798
-                                RODSCALE
-                STODL           RODSCAL1
-
-                                PIPTIME                 # SHOW THAT LAST P66 WAS, IN EFFECT,
-                STORE           LASTTPIP                #    PERFORMED AT PIPTIME
-
-                EXIT
-
-                TC              BANKCALL                # REFER CURRENT PIPAX READING TO THE CM:
-                FCADR           DEIMUBOB                #    ALAS, OMEGAQ AT PIPTIME NOT AVAILABLE
-
-                CAF             ZERO
-                TS              FCOLD
-                TS              FWEIGHT
-                TS              FWEIGHT         +1
-
-                CAF             TWO                     # WCHPHOLD=2 --> VERTICAL  PHASE
-                TS              WCHPHOLD
-
-                TS              WCHPHASE                # ***DOES ANYONE SEE ANY NEED FOR THIS?***
-
-                TC              DOWNFLAG                # PERMIT X-AXIS OVERRIDE
-                ADRES           XOVINFLG                # SHOULD DO INTERPRETIVELY TO SAVE A WORD
-
-                TC              UPFLAG                  # TERMINATE TERRAIN MODEL
-                ADRES           NOTERFLG                # SHOULD DO INTERPRETIVELY TO SAVE A WORD
-
-                TC              UPFLAG                  # P66 INITIALIZATION COMPLETE
-                ADRES           RODFLAG
-
-                TCF             P66
-
-RE-IN66?        CA              FLAGWRD1                # RE-INITIALIZE P66?
-                MASK            RODFLBIT
-                EXTEND
-                BZF             RE-IN66                 # Y
-                                                        # N
-                TCF             P66
-
-## Page 799
-# ===============================================================================================================
+# ****************************************************************************************************************
+## Page 786
 # INITIALIZATION FOR THIS PASS
-# ===============================================================================================================
+# ****************************************************************************************************************
 
-                COUNT*          $$/F2DPS
-
-GUILDRET        CAF             ZERO
-                TS              RODCOUNT
-
-                EXTEND
+PASSINIT        EXTEND
                 DCA             TPIP
                 DXCH            TPIPOLD
 
@@ -255,36 +153,41 @@ STARTP64        TC              NEWMODEX
                 DEC             64
                 CA              DELTTFAP                # AUGMENT TTF/8
                 ADS             TTF/8TMP
+                INHINT
+                TC              C13STALL
+                CA              BIT12                   # ENABLE RUPT10
+                EXTEND
+                WOR             CHAN13
                 CAF             P64DB
                 TS              DB
+                CA              LRWH1
+                TS              LRWH
+
                 TC              DOWNFLAG                # INITIALIZE REDESIGNATION FLAG
                 ADRES           REDFLAG
 
-                CA              LRWH1                   # PUT P64 LR WEIGHTING FUNCTION INTO
-                TS              LRWH                    # LRWH SO LR UPDATES ARE DONE PROPERLY
-#               (CONTINUE TO TTFINCR)
+#                                             (CONTINUE TO TTFINCR)
 
 # ****************************************************************************************************************
 # INCREMENT TTF/8, UPDATE LAND FOR LUNAR ROTATION, DO OTHER USEFUL THINGS
 # ****************************************************************************************************************
 
-## Page 800
-#
-#          TTFINCR COMPUTATIONS ARE AS FOLLOWS:-
+## Page 787
+#            TTFINCR COMPUTATIONS ARE AS FOLLOWS:-
 
-#                    TTF/8 UPDATED FOR TIME SINCE LAST PASS:
+#                      TTF/8 UPDATED FOR TIME SINCE LAST PASS:
 
-#                               TTF/8 = TTF/8 + (TPIP - TPIPOLD)/8
+#                                 TTF/8 = TTF/8 + (TPIP - TPIPOLD)/8
 
-#                    LANDING SITE VECTOR UPDATED FOR LUNAR ROTATION:
+#                      LANDING SITE VECTOR UPDATED FOR LUNAR ROTATION:
 
-#                               -                  -      -                      -
-#                               LAND = /LAND/ UNIT(LAND - LAND(TPIP - TPIPOLD) * WM)
+#                                 -                  -      -                      -
+#                                 LAND = /LAND/ UNIT(LAND - LAND(TPIP - TPIPOLD) * WM)
 
-#                    SLANT RANGE TO LANDING SITE, FOR DISPLAY:
+#                      SLANT RANGE TO LANDING SITE, FOR DISPLAY:
 
-#                                                -      -
-#                               RANGEDSP = ABVAL(LAND - R)
+#                                                  -      -
+#                                 RANGEDSP = ABVAL(LAND - R)
 
 TTFINCR         TC              INTPRET
                 DLOAD           DSU
@@ -320,8 +223,7 @@ TTFINCR         TC              INTPRET
                 TC              INTPRET
                 VLOAD           VAD                     # ADD IN CORRECTION FROM NOUN 69
                                 LANDTEMP
-
-## Page 801
+## Page 788
                                 DLAND
                 STORE           LAND
                 ABVAL                                   # RECOMPUTE /LAND/
@@ -364,19 +266,30 @@ REDESIG         CA              FLAGWRD6                # IS REDFLAG SET?
                 BZF             RGVGCALC                # YES:  SKIP REDESIGNATION LOGIC
 
                 INHINT
-                CA              ELINCR1
-                TS              ELINCR
-                CA              AZINCR1
-                TS              AZINCR
+                CA              ELCOUNT1
+                TS              ELCOUNT
+                CA              AZCOUNT1
+                TS              AZCOUNT
                 TC              FASTCHNG
 
                 CA              ZERO
-                TS              ELINCR1
+                TS              ELCOUNT1
+## Page 789
+                TS              AZCOUNT1
 
-## Page 802
-                TS              AZINCR1
-                TS              ELINCR          +1
-                TS              AZINCR          +1
+                CA              ELCOUNT                 # COMPUTE ELEVATION INCREMENT IN RADIANS
+                EXTEND
+                MP              ELEACH
+                XCH             L                       # SHIFT LEFT 14, A BEING ZERO AFTER THE MP
+                INDEX           FIXLOC
+                DXCH            12D
+
+                CA              AZCOUNT                 # COMPUTE AZIMUTH INCREMENT IN RADIANS
+                EXTEND
+                MP              AZEACH
+                XCH             L                       # SHIFT LEFT 14, A BEING ZERO AFTER THE MP
+                INDEX           FIXLOC
+                DXCH            14D
 
                 CA              FIXLOC                  # SET PD TO 0
                 TS              PUSHLOC
@@ -390,8 +303,8 @@ REDESIG         CA              FLAGWRD6                # IS REDFLAG SET?
                 VXV             VSL1
                                 YNBPIP                  #                    -          -      -
                 VXSC            PDDL                    # PUSH DOWN - ELINCR(YNB * UNIT(LAND - R))
-                                ELINCR
-                                AZINCR
+                                12D
+                                14D
                 VXSC            VSU
                                 YNBPIP
                 VAD             PUSH                    # RESULTING VECTOR IS 1/2 REAL SIZE
@@ -412,6 +325,7 @@ REDES1          DLOAD           DSU
                                 R
                 VXSC            VSL1
                                 /LAND/
+## Page 790
                 STORE           LANDTEMP
                 EXIT                                    # LOOKANGL WILL BE COMPUTED AT RGVGCALC
 
@@ -424,8 +338,6 @@ REDES1          DLOAD           DSU
                 DCA             LANDTEMP        +2
                 DXCH            LAND            +2
                 EXTEND
-
-## Page 803
                 DCA             LANDTEMP        +4
                 DXCH            LAND            +4
 
@@ -464,6 +376,7 @@ CALCRGVG        TC              INTPRET                 # IN IGNALG, COMPUTE V F
                 STORE           V
                 EXIT
 
+## Page 791
 RGVGCALC        TC              INTPRET                 # ENTER HERE TO RECOMPUTE RG AND VG
                 VLOAD           VXV
                                 R
@@ -476,8 +389,6 @@ RGVGCALC        TC              INTPRET                 # ENTER HERE TO RECOMPUT
                 STOVL           VGU
                                 R                       #           -   -
                 VSU             PUSH                    # PUSH DOWN R - LAND
-
-## Page 804
                                 LAND
                 MXV             VSL1
                                 CG
@@ -492,15 +403,8 @@ RGVGCALC        TC              INTPRET                 # ENTER HERE TO RECOMPUT
                 CA              FIXLOC                  # RESET PUSH DOWN POINTER
                 TS              PUSHLOC
 
-                CA              MPAC                    # COMPUTE LOOKANGL ITSELF
-                DOUBLE
-                TC              BANKCALL
-                CADR            SPARCSIN        -1
-                AD              1/2DEG
-                AD              ELBIAS                  # BIAS LPD ANGLE FOR WINDOW BENDING
-                EXTEND
-                MP              180DEGS
-                TS              LOOKANGL                # LOOKANGL FOR DISPLAY DURING P64
+                TC              BANKCALL                # CALL LPDFVSUB TO PREPARE R1 DISPLAY
+                CADR            LPDFVSUB
 
 BRSPOT3         INDEX           WCHPHASE
                 TCF             WHATGUID
@@ -509,8 +413,7 @@ BRSPOT3         INDEX           WCHPHASE
 # TTF/8 COMPUTATION
 # ****************************************************************************************************************
 
-TTF/8CL         CA              WCHPHASE
-                TC              INTPRETX
+TTF/8CL         TC              INTPRETX
                 DLOAD*
                                 JDG2TTF,1
                 STODL*          TABLTTF         +6      # A(3) = 8 JDG  TO TABLTTF
@@ -524,11 +427,10 @@ TTF/8CL         CA              WCHPHASE
                                 RDG +4,1                #              2         2
                 DSU             DMP
                                 RGU             +4
+## Page 792
                                 3/8DP
-                STORE           TABLTTF                 # A(0) = -24 (RGU  - RDG )/64 TO TABLTTF
-                EXIT                                    #                2      2
-
-## Page 805
+                STORE           TABLTTF                 # A(0) = -24(RGU  - RDG )/64 TO TABLTTF
+                EXIT                                    #               2      2
 
                 CA              BIT8
                 TS              TABLTTF         +10     # FRACTIONAL PRECISION FOR TTF TO TABLE
@@ -549,7 +451,8 @@ TTF/8CL         CA              WCHPHASE
 
                 TC              TDISPSET
 
-#               (CONTINUE TO QUADGUID)
+#                                              (CONTINUE TO QUADGUID)
+
 
 # ****************************************************************************************************************
 # MAIN GUIDANCE EQUATION
@@ -560,7 +463,7 @@ TTF/8CL         CA              WCHPHASE
 #                                               -     -        -     -
 #                                 -     -     6(VDG + VG)   12(RDG - RG)
 #                                 ACG = ADG + ----------- + ------------
-#                                                 TTF        (TTF)(TTF)
+#                                                 TTF         (TTF)(TTF)
 
 #                      AS HERE PROGRAMMED:-
 
@@ -575,12 +478,11 @@ QUADGUID        CS              TTF/8
                 AD              LEADTIME                # LEADTIME IS A NEGATIVE NUMBER
                 AD              POSMAX                  # SAFEGUARD THE COMPUTATIONS THAT FOLLOW
                 TS              L                       #   BY FORCING -TTF+LEADTIME > OR = ZERO
+## Page 793
                 CS              L
                 AD              L
                 ZL
                 EXTEND
-
-## Page 806
                 DV              TTF/8
                 TS              BUF                     # - RATIO OF LAG-DIMINISHED TTF TO TTF
                 EXTEND
@@ -606,7 +508,6 @@ QUADGUID        CS              TTF/8
                 CAF             ZERO
                 TS              MODE
 
-                CA              WCHPHASE
                 TC              INTPRETX
                 VXSC            PDDL
                                 VGU
@@ -628,16 +529,14 @@ QUADGUID        CS              TTF/8
                                 3/4DP
                 PDDL            VXSC*
                                 30D
+## Page 794
                                 ADG,1
                 RTB             VAD
                                 ZEROMID
-
-## Page 807
 AFCCALC1        VXM             VSL1                    # VERTGUID COMES HERE
                                 CG
-                PDVL            V/SC
-                                GDT/2
-                                GSCALE
+                PDVL            VSR2                    # RESCALE G TO UNITS OF 2(-4) M/CS/CS
+                                G
                 BVSU            STADR
                 STORE           UNFC/2                  # UNFC/2 NEED NOT BE UNITIZED
                 ABVAL
@@ -648,9 +547,9 @@ AFCCALC2        STODL           /AFC/                   # MAGNITUDE OF AFC FOR T
                 DSQ             PDDL
                                 HIGHESTF
                 DDV             DSQ
-                                MASS                    #                        2    2     2
-                DSU             DSU                     # AMAXHORIZ = SQRT(ATOTAL - A  -  A  )
-                BPL             DLOAD                   #                            1     0
+                                MASS                    #                        2     2      2
+                DSU             DSU                     # AMAXHORIZ = SQRT(ATOTAL  - A   -  A  )
+                BPL             DLOAD                   #                             1      0
                                 AFCCALC3
                                 ZEROVECS
 AFCCALC3        SQRT            DAD
@@ -681,34 +580,39 @@ EXTLOGIC        INDEX           WCHPHASE                # IS TTF NEARER ZERO THA
 
                 TC              FASTCHNG                # YES:  INCREMENT WCHPHASE, ZERO FLPASS0
 
+## Page 795
                 CA              WCHPHOLD
                 AD              ONE
-
-## Page 808
                 TS              WCHPHASE
                 CAF             ZERO
                 TS              FLPASS0
 
-#               (CONTINUE TO CGCALC)
+#                                             (CONTINUE TO CGCALC)
 
 # ***************************************************************************************************************
 # ERECT GUIDANCE-STABLE MEMBER TRANSFORMATION MATRIX
 # ***************************************************************************************************************
 
-CGCALC          CA              WCHPHOLD
-                TC              INTPRETX
-                DLOAD*          EXIT
-                                TCGFBRAK,1
-                CA              TTF/8
-                TS              L
-                DAS             MPAC
-                CCS             MPAC            +1
-                CCS             MPAC
+CGCALC          CAF             EBANK5
+                TS              EBANK
+                EBANK=          TCGIBRAK
+                EXTEND
+                INDEX           WCHPHASE
+                INDEX           TARGTDEX
+                DCA             TCGFBRAK
+                INCR            BBANK
+                INCR            BBANK
+                EBANK=          TTF/8
+                AD              TTF/8
+                XCH             L
+                AD              TTF/8
+                CCS             A
+                CCS             L
                 TCF             EXITSPOT
                 TCF             EXITSPOT
                 NOOP
 
-                TC              INTPRET
+                TC              INTPRETX
                 VLOAD           UNIT
                                 LAND
                 STODL           CG
@@ -727,6 +631,7 @@ CGCALC          CA              WCHPHOLD
                 STOVL           CG              +6      # SECOND ROW
                                 CG
                 VXV             VSL1
+## Page 796
                                 CG              +6
                 STORE           CG              +14
                 EXIT
@@ -735,16 +640,14 @@ EXITSPOT        INDEX           WCHPHOLD
                 TCF             WHATEXIT
 
 # ****************************************************************************************************************
-
-## Page 809
 # ROUTINES FOR EXITING FROM LANDING GUIDANCE
 # ****************************************************************************************************************
 
-# 1.        EXGSUB IS THE RETURN WHEN GUIDSUB IS CALLED BY THE IGNITION ALGORITHM.
+# 1.       EXGSUB IS THE RETURN WHEN GUIDSUB IS CALLED BY THE IGNITION ALGORITHM.
 
-# 2.        EXBRAK IN THE EXIT USED DURING THE BRAKING PHASE.  IN THIS CASE UNIT(R) IS THE WINDOW POINTING VECTOR.
+# 2.       EXBRAK IN THE EXIT USED DURING THE BRAKING PHASE.   IN THIS CASE UNIT(R) IS THE WINDOW POINTING VECTOR.
 
-# 3.        EXNORM IS THE EXIT USED AT OTHER TIMES DURING THE BURN.
+# 3.       EXNORM IS THE EXIT USED AT OTHER TIMES DURING THE BURN.
 
 #          (EXOVFLOW IS A SUBROUTINE OF EXBRAK AND EXNORM CALLED WHEN OVERFLOW OCCURRED ANYWHERE IN GUIDANCE.)
 
@@ -779,6 +682,7 @@ EXNORM          TC              INTPRET
                 VLOAD           VSU
                                 LAND
                                 R
+## Page 797
                 RTB
                                 NORMUNIT
                 STORE           UNWC/2                  # UNIT(LAND - R) IS TENTATIVE CHOICE
@@ -786,8 +690,6 @@ EXNORM          TC              INTPRET
                                 XNBPIP
                                 CG              +6
                 EXIT                                    # WITH PROJ IN MPAC 1/8 REAL SIZE
-
-## Page 810
 
                 CS              MPAC                    # GET COEFFICIENT FOR CG +14
                 AD              PROJMAX
@@ -831,72 +733,87 @@ UNWCLOOP        MASK            SIX
                 EBANK=          PIF
 
 STEER?          CA              OVFIND                  # OVERFLOW?
+## Page 798
                 EXTEND
-                BZF             STEERSW?                # N: CHECK STEERSW
+                BZF             STEERSW?                # NO:   CHECK STEERSW
 
-                TC              OVFDESC                 # Y: REMEDIAL ACTION AND
-                TCF             DISPEXIT                #    SKIP ISSUANCE OF CMDS. NO STEERSW CHK
+                TC              OVFDESC                 # YES:  ISSUE ALARM AND SKIP COMMANDS
+                TCF             DISPEXIT
 
 STEERSW?        CS              FLAGWRD2                # IS STEERSW UP?
                 MASK            STEERBIT
-
-## Page 811
                 EXTEND
-                BZF             THRTCALL                # Y: ISSUE GUIDANCE CMDS
+                BZF             THRTCALL                # YES:  ISSUE GUIDANCE COMMANDS
 
-RATESTOP        INHINT                                  # N: REMEDIAL ACTION
-                TC              IBNKCALL                #    AND
-                FCADR           STOPRATE                #    SKIP ISSUANCE OF CMDS
+RATESTOP        INHINT                                  # NO
+                TC              IBNKCALL
+                FCADR           STOPRATE
                 RELINT
                 TCF             DISPEXIT
 
 GDUMP1          =               THRTCALL
-THRTCALL        TC              THROTTLE
+
+THRTCALL        TC              CHECKMM                 # HAS MODE CHANGED TO 66 SINCE CONTROL WAS
+                DEC             66                      #   TRANSFERRED TO LUNLAND FROM SERVICER?
+                TCF             +2
+                TCF             DISPEXIT                # YES:  SKIP COMMANDS
+
+                TC              THROTTLE                # NO
                 TC              FASTCHNG
+
+                CA              FCODD
+                TS              FCOLD
+
+                EXTEND
+                DCA             FWEIGHT1
+                DXCH            FWEIGHT
+
                 TC              INTPRET
                 CALL
                                 FINDCDUW        -2
                 EXIT
 
-#               (CONTINUE TO DISPEXIT)
+#                                             (CONTINUE TO DISPEXIT)
+
 
 # ****************************************************************************************************************
 # GUIDANCE LOOP DISPLAYS
 # ****************************************************************************************************************
 
-DISPEXIT        EXTEND                                  # KILL GROUP 3:   DISPLAYS WILL BE
-                DCA             NEG0                    #   RESTORED BY NEXT GUIDANCE CYCLE
-                DXCH            -PHASE3
-
-ENDLLJOB        =               DISPEXIT        +3
-
-DISPEX66        =               DISPEXIT        +3
- +3             CS              FLAGWRD8                # IF FLUNDISP IS SET, NO DISPLAY THIS PASS
+DISPEXIT        CS              FLAGWRD8                # NO DISPLAYS THIS PASS IF FLUNDISP IS SET
                 MASK            FLUNDBIT
                 EXTEND
-                BZF             ENDOFJOB
+## Page 799
+                BZF             ENDLLJOB
+
+                CAF             PRIO23                  # RAISE PRIORITY TEMPORARILY SO DISPLAY
+                TC              PRIOCHNG                #   RESPONSES WILL NOT WAIT FOR SERVICER
 
                 INDEX           WCHPHOLD
                 TCF             WHATDISP
 
-P63DISPS        TC              VACRLEAS
-                CS              FLGWRD11                # HAVE LR UPDATES BEEN PERMITTED?
+P63DISPS        CS              FLGWRD11                # HAVE LR UPDATES BEEN PERMITTED?
                 MASK            LRINHBIT
                 EXTEND
-                BZF             N63STAT                 # YES: DO STATIC DISPLAY
+                BZF             N63STAT                 # YES:  DO STATIC DISPLAY
 
                 CAF             V06N63                  # NO:   FLASH NOUN 63, CORRECT RESPONSE IS
                 TC              BANKCALL                #         V57E WHICH STOPS THE FLASHING
-                CADR            REFLASH
+                CADR            REFLASHR
                 TC              ENDOFJOB                # TERMINATE  IGNORE AND KEEP FLASHING
-
-## Page 812
                 TC              ENDOFJOB                # PROCEED    IGNORE AND KEEP FLASHING
                 TC              ENDOFJOB                # ENTER      IGNORE AND KEEP FLASHING
 
+                TCF             LOWRPRIO
+
 N63STAT         CAF             V06N63
 DISPCOMN        TC              BANKCALL
-                CADR            REGODSP
+                CADR            REGODSPR
+
+LOWRPRIO        CAF             PRIO20
+                TC              PRIOCHNG
+ENDLLJOB        TC              POSTJUMP                # RETURN CONTROL TO THE START OF SERVICER
+                CADR            PIPCYCLE
 
 P64DISPS        CA              TREDES                  # HAS TREDES REACHED ZERO?
                 EXTEND
@@ -907,23 +824,19 @@ P64DISPS        CA              TREDES                  # HAS TREDES REACHED ZER
                 EXTEND
                 BZF             REDES-OK                # YES:  DO STATIC DISPLAY
 
-                TC              VACRLEAS
-                CAF             V06N64                  # OTHERWISE USE FLASHING DISPLAY
+                CAF             V06N64                  # NO:   USE FLASHING DISPLAY
                 TC              BANKCALL
-                CADR            REFLASH
-                TCF             GOTOPOOH                # TERMINATE
-                TCF             P64CEED                 # PROCEED     PERMIT REDESIGNATIONS
-                TCF             P64DISPS                # RECYCLE
+                CADR            REFLASHR
+                TC              ENDOFJOB                # TERMINATE  IGNORE AND KEEP FLASHING
+                TCF             P64CEED                 # PROCEED    PERMIT REDESIGNATIONS
+                TCF             ENDOFJOB                # ENTER      IGNORE AND KEEP FLASHING
+
+                TCF             LOWRPRIO
 
 P64CEED         CAF             ZERO
-                TS              ELINCR1
-                TS              AZINCR1
-
-                INHINT                                  # ENABLE RUPT 10 FOR REDESIGNATIONS
-                TC              C13STALL
-                CAF             BIT12
-                EXTEND
-                WOR             CHAN13
+## Page 800
+                TS              ELCOUNT1
+                TS              AZCOUNT1
 
                 TC              UPFLAG                  # ENABLE REDESIGNATION LOGIC
                 ADRES           REDFLAG
@@ -932,413 +845,626 @@ P64CEED         CAF             ZERO
 
 RED-OVER        TC              DOWNFLAG
                 ADRES           REDFLAG
-REDES-OK        TC              VACRLEAS
-                CAF             V06N64
+REDES-OK        CAF             V06N64
                 TCF             DISPCOMN
 
+
+# ****************************************************************************************************************
+# VERTICAL AND HORIZONTAL GUIDANCE FOR P66
+# ****************************************************************************************************************
+
+                SETLOC          P66LOC
+                BANK
+                EBANK=          TAURODL
+                COUNT*          $$/F2DPS
+
+# ********************************
+# DATA TRANSFER AND PIPA READING
+# ********************************
+
+#     FIRST, PAD-LOADS FROM THE W-MATRIX AREA ARE MOVED INTO TEMPORARIES FOR USE WHENE BANK IS SET TO 7.
+# THESE TRANSFERS ARE AS FOLLOWS:
+
+#                                 VERCRIT        --->  VBUF     +1
+#                                 TAURODL        --->  VBUF     +2
+#                                 TAURODB        --->  VBUF     +3
+#                                 MINFORCE       --->  VBUF     +4
+#                                 MAXFORCE       --->  VBUF     +5
+#                                 RODSCALE       --->  MPAC     +5
+#                                 ROHZSCAL       --->  MPAC     +6
+
+P66JOB          CA              VERCRIT                 # VERCRIT
+                TS              VBUF            +1
+                EXTEND
+                DCA             TAURODL                 # TAURODL AND TAURODB
+                DXCH            VBUF            +2
+                EXTEND
+                DCA             MINFORCE                # MINFORCE AND MAXFORCE
+                DXCH            VBUF            +4
+                EXTEND
+                DCA             RODSCALE                # RODSCALE AND ROHZSCAL
+                DXCH            MPAC            +5
+
+## Page 801
+#     ONE OTHER CHORE CAN BE DONE NOW TO MINIMIZE THE TIME BETWEEN READING PIPAX AND PUTTING OUT A THROTTLE
+# COMMAND:  THE COMPUTATION OF THE PRODUCT OF COS(AIG) AND COS(AMG).
+
+P66INH          INHINT                                  # INHINT LASTS TILL AFTER THROTTLE COMMAND
+
+                CA              CDUY
+                TC              SPCOS
+                TS              VBUF
+                CA              CDUZ
+                TC              SPCOS
+                EXTEND
+                MP              VBUF
+                TS              MPAC            +4      # PRODUCT OF COSINES SCALED FULL-SIZE
+
+                INCR            BBANK                   # START P66JOB IN E5, SWITCH NOW TO E6
+                EBANK=          END-E6
+
+#     THE FOLLOWING CODING REFERS THE X-PIPA READING TO THE CENTER OF MASS OF THE SPACECRAFT BY SUBTRACTING
+# THOSE PIPA COUNTS PRODUCED BY VERTICAL IMU MOTION RELATIVE TO THE CENTER-OF-MASS.  THE SPACECRAFT X-AXIS IS
+# ASSUMED TO BE APPROXIMATELY VERTICAL (PARALLEL TO THE SM X-AXIS).  THE EQUATION IS:
+
+#                                 P66PIPX = PIPAX - OMEGAQ RIMUZ
+
+# WHERE OMEGAQ IS THE ATTITUDE-RATE ABOUT THE Q (Y) AXIS AND RIMUZ IS THE Z-COORDINATE OF THE IMU.
+
+                CS              OMEGAQ
+                
+                INCR            BBANK                   # SWITCH FINALLY INTO E7
+                EBANK=          END-E7
+
+                EXTEND
+                MP              RIMUZ
+                XCH             L                       # ROUND BEFORE ADDING TO PIPAX
+                DOUBLE
+                TS              Q                       # SKIP ON OVERFLOW WITH C(A) = +1 OR -1
+                CAF             ZERO                    #   DEPENDING ON THE SIGN OF THE OVERFLOW
+                AD              L
+
+                AD              PIPAX
+                TS              P66PIPX
+
+                EXTEND                                  # READ FINE-SCALED TIME FOR FP COMPUTATION
+                READ            LOSCALAR
+                TS              P66TPIP                 # TIME IN UNITS OF 2(9) M/CS
+
+                EXTEND                                  # SET GTCTIME AS TIME-TAG FOR FC
+                DCA             TIME2
+                DXCH            GTCTIME                 # TIME IN UNITS OF 2(28) CS
+
+# ********************************
+## Page 802
+# PROGRAM INITIALIZATION
+# ********************************
+
+#     THE FIRST TIME P66JOB IS EXECUTED P66 HAS NOT YET BEEN INITIALIZED.   THIS IS INDICATED BY THE FACT THAT
+# MODREG CONTAINS SOMETHING OTHER THAN 66.  IN THIS CASE P66JOB BEGINS BY INITIALIZING ITSELF.
+
+                CS              MODREG                  # HAS P66 BEEN INITIALIZED YET?
+                AD              MM66
+                EXTEND
+                BZF             P66MAIN                 # YES
+
+                TC              P66CHNG                 # NO:   THEN INITIALIZE IT
+
+                TC              NEWMODEX                # SWITCH MODE LIGHTS TO 66
+MM66            DEC             66
+
+                CS              ZERO                    # CANCEL LEFT OVER P64 THROTTLE COMMAND
+                TS              THRUST                  #   (DON'T EVER LOAD THRUST WITH +0)
+
+                CAF             THREE                   # SET HZCOUNT FOR P66DISPS IN 3/4
+                TS              HZCOUNT                 #   SECOND AND P66HZ IN 1 1/4 SECOND
+
+                TC              ZEROVHZC                # SET VHZC TO ZERO, RETURN WITH C(A) = +0
+
+                TS              FWEIGHT                 # ZERO FWEIGHT LEFT OVER FROM P64
+                TS              FWEIGHT         +1
+
+                TCF             ENDROD                  # WAIT BEFORE EXECUTING P66ROD
+
+# ********************************
+# VERTICAL (ROD) CONTROL EQUATION
+# ********************************
+
+#     HERE VVECTX IS RECOMPUTED TO MINIMIZE THE GUIDANCE LAG BETWEEN THE SAMPLING OF PIPA DATA AND THE
+# OUTPUT OF COMMANDS.  THIS LEAVES THE VECTOR VVECT NON-HOMOGENEOUS, BUT THIS IS UNIMPORTANT SINCE THE VERTICAL
+# AND HORIZONTAL CHANNELS ARE SEPARATE.
+
+P66MAIN         EXTEND
+                DCS             VSURFACE
+                DXCH            VVECTX
+                EXTEND
+                DCA             V
+                DDOUBL
+                DDOUBL
+                DAS             VVECTX
+
+                CS              PIPTIME         +1
+                AD              GTCTIME         +1
+                AD              HALF
+                AD              HALF
+## Page 803
+                XCH             DT
+
+                CS              PIPAXOLD
+                AD              P66PIPX
+                TC              BANKCALL
+                CADR            NORMPIP
+                EXTEND
+                MP              P66KPIP
+                DAS             VVECTX
+
+                CS              BIASACCX
+                AD              GRAVACCX
+                EXTEND
+                MP              DT
+                DAS             VVECTX                  # VVECTX IN UNITS OF 2(5) M/CS
+
+# UPDATE VDGVERT ACCORDING TO ROD CLICKS.
+
+                CAF             ZERO
+                XCH             RODCOUNT                # RESTART BETWEEN NOW AND THE UPDATE OF
+                EXTEND                                  #   VDGVERT COULD CAUSE LOSS OF ROD CLICKS
+                MP              MPAC            +5
+                CA              L
+                EXTEND
+                MP              BIT7
+                DAS             VDGVERT                 # VDGVERT IN UNITS OF 2(5) M/CS
+
+MANTHRT?        CAF             BIT5                    # ARE WE IN AUTO THROTTLE?
+                EXTEND
+                RAND            CHAN30
+                EXTEND
+                BZF             ERRCOMP                 # YES
+
+                EXTEND                                  # NO:   RESET VDGVERT TO CURRENT VVECTX
+                DCA             VVECTX
+                DXCH            VDGVERT
+                TCF             ENDROD
+
+#     THE DECISION WHETHER TO EXECUTE THE P66ROD EQUATION IS MADE EVERY 1/4 SECOND ON THE FOLLOWING BASIS:  IF
+# VELOCITY ERROR ALONG THE SM X-AXIS EXCEEDS VERCRIT IN MAGNITUDE, DO P66ROD.  OTHERWISE, DO P66ROD EVERY TAU
+# (SPECIFICALLY TAUROD ROUNDED TO THE NEAREST 1/4 SECOND).
+
+ERRCOMP         EXTEND                                  # COMPUTE VERTICAL (SM X-AXIS) VEL ERROR
+                DCS             VVECTX
+                DXCH            MPAC
+                EXTEND
+                DCA             VDGVERT
+                DAS             MPAC                    # VDGVERT - VVECTX IN UNITS OF 2(5) M/CS
+
+                TC              TPAGREE                 # SIGN-AGREE MPAC (ABSOLUTELY NECESSARY)
+
+## Page 804
+                CS              OP66TPIP                # COMPUTE TIME SINCE LAST RODCOMP
+                AD              P66TPIP
+                AD              HALF
+                AD              HALF
+                AD              MPAC            +3      # TIME SINCE LAST P66ROD, UNITS OF 2(9) CS
+
+                CS              P66PMIN                 # HAS IT BEEN LESS THAN P66PMIN?
+                AD              MPAC            +3
+                EXTEND
+                BZMF            MOREP66?                # YES:  NO P66ROD THIS PASS
+
+                LXCH            MPAC                    # NO:   LIMIT ERROR TO ABOUT 9.57 M/S
+                CAF             DEC48
+                TC              BANKCALL
+                CADR            LIMITSUB
+                TS              MPAC                    # PUT IT BACK IN MPAC
+
+                EXTEND                                  # IS |VDGVERT - VVECTX| < VERCRIT?
+                DCA             MPAC
+                EXTEND
+                DV              VBUF            +1
+                EXTEND
+                BZF             ERRFAIL
+
+                CA              VBUF            +2      # NO:   DO ROD COMPUTATION USING TAURODL
+                TCF             P66ROD
+
+ERRFAIL         CA              MPAC            +3      # YES:  HAS IT BEEN ABOUT OLDTAU
+                EXTEND                                  #         SINCE THE LAST P66ROD?
+                MP              BIT10
+                AD              TWELVE
+                AD              -OLDTAU
+                EXTEND
+                BZMF            MOREP66?                # NO:   NO P66ROD THIS PASS
+
+                CA              VBUF            +3      # YES:  DO ROD COMPUTATION USING TAURODB
+
+P66ROD          TS              TAU
+                DXCH            MPAC
+                EXTEND
+                DV              TAU                     # TOTAL A DESIRED, UNITS OF 2(-9) M/CS/CS
+
+                EXTEND                                  # SUBTRACT AWAY GRAVITY
+                SU              GRAVACCX
+                EXTEND                                  # RESCALE TO UNITS OF 2(-4) M/CS/CS
+                MP              BIT10
+                TC              BANKCALL
+                CADR            MASSMULT
+                EXTEND                                  # DIVIDE BY COS(AIG) COS(AMG)
+                DV              MPAC            +4
+
+## Page 805
+                EXTEND                                  # APPLY LOWER LIMIT OF MINFORCE (VBUF +4)
+                SU              VBUF            +4
+                AD              POSMAX
+                TS              L
+                CS              L
+                AD              L
+                AD              VBUF            +4
+
+                TS              L                       # APPLY UPPER LIMIT OF MAXFORCE (VBUF +5)
+                CA              VBUF            +5
+                TC              BANKCALL
+                CADR            LIMITSUB
+                TS              FC                      # THRUST DESIRED
+
+                CS              P66PIPX                 # COMPUTE MINUS PRESENT THRUST LEVEL
+                AD              OP66PIPX
+                TC              BANKCALL
+                CADR            NORMPIP
+                EXTEND                                  # RESCALE TO UNITS OF 1 M/CS
+                MP              P66KPIPB
+                DDOUBL
+                EXTEND                                  # DIVIDE BY TIME IN UNITS OF 2(9) CS TO
+                DV              MPAC            +3      #   GET ACC IN UNITS OF 2(-9) M/CS/CS
+                AD              BIASACCX                # ADD IN PIPA BIAS PSEUDO-ACCELERATION
+
+                EXTEND                                  # RESCALE TO UNITS OF 2(-4) M/CS/CS
+                MP              BIT10
+                TC              BANKCALL
+                CADR            MASSMULT
+                TS              FP
+
+                EXTEND
+                DCS             FWEIGHT
+                EXTEND
+                DV              MPAC            +3
+                ADS             FP                      # MINUS THRUST ALONG THE SM X-AXIS
+
+                ZL
+                EXTEND                                  # DIVIDE BY COS(AIG) COS(AMG)
+                DV              MPAC            +4
+
+                TS              FP                      # MINUS PRESENT THRUST
+
+                AD              FC
+                TS              L                       # LIMIT PIF TO WHAT CAN BE READ OUT
+                CAF             P66PMIN                 #   (LOSCALAR AND THRUST BOTH 3200 PPS)
+                TC              BANKCALL
+                CADR            LIMITSUB
+
+                TC              BANKCALL                # GO TO THROTTLE WITH PIF IN A
+## Page 806
+                CADR            P66THROT
+
+P66REL          RELINT
+
+                DXCH            FWEIGHT1                # SCALE FWEIGHT FOR USE NEXT PASS
+                DXCH            MPAC
+                CA              MPAC            +4      # FIRST TAKE OUT THE ATTITUDE EFFECT
+                TC              SHORTMP
+                CAF             2SECS(9)
+                TC              SHORTMP
+                DXCH            MPAC
+                DXCH            FWEIGHT1                # TRANSFERRED TO FWEIGHT LATER
+
+#     UPDATE VHZC (Y AND Z COMPONENTS) ACCORDING TO HAND CONTROLLER DEFLECTIONS.  IT IS ASSUMED THAT THE PLANE OF
+# THE SM Y AND Z AXES IS PARALLEL TO THE LOCAL SURFACE, AS IT WILL BE IN P66 FOR THE NORMAL "LANDING ALIGNMENT".
+
+                CAF             ZERO
+                XCH             AZCOUNT1                # RESTART BETWEEN NOW AND THE UPDATE OF
+                EXTEND                                  #   VHZC COULD CAUSE LOSS OF ROHZ CLICKS
+                MP              MPAC            +6
+                LXCH            BUF                     # AZCOUNT1.ROHZCAL IN UNITS OF 2(-3) M/CS
+
+                CAF             ZERO
+                XCH             ELCOUNT1                # RESTART BETWEEN NOW AND THE UPDATE OF
+                EXTEND                                  #   VHZC COULD CAUSE LOSS OF ROHZ CLICKS
+                MP              MPAC            +6
+                LXCH            BUF             +1      # ELCOUNT1.ROHZSCAL IN UNITS OF 2(-3) M/CS
+
+                CAF             EBANK6
+                TS              EBANK
+                EBANK=          END-E6
+
+                CA              BUF
+                EXTEND
+                MP              M32                     # COS(AOG)
+                TS              Q
+                CS              BUF             +1
+                EXTEND
+                MP              M22                     # SIN(AOG)
+                AD              Q
+                EXTEND
+                MP              BIT7
+                DXCH            MPAC                    # INCREMENT FOR VHZCY, UNITS OF 2(5) M/CS
+
+                CA              BUF
+                EXTEND
+                MP              M22                     # SIN(AOG)
+                XCH             BUF             +1
+                EXTEND
+                MP              M32                     # COS(AOG)
+## Page 807
+                AD              BUF             +1
+                EXTEND
+                MP              BIT7                    # INCREMENT FOR VHZCZ, UNITS OF 2(5) M/CS
+
+                INCR            BBANK
+                EBANK=          END-E7
+
+                DAS             VHZC            +4      # UPDATE VHZCZ
+                DXCH            MPAC
+                DAS             VHZC            +2      # UPDATE VHZCY
+
+                TC              P66CHNG
+
+                EXTEND                                  # STORE FWEIGHT FOR USE NEXT PASS
+                DCA             FWEIGHT1
+                DXCH            FWEIGHT
+
+                CS              TAU                     # STORE MINUS TAU FOR TEST NEXT PASS
+                TS              -OLDTAU
+
+ENDROD          TC              P66CHNG
+
+                EXTEND                                  # STORE TIME AND PIPX FOR NEXT PASS
+                DCA             P66TPIP
+                DXCH            OP66TPIP
+
+# ********************************
+# ANY MORE WORK THIS PASS?
+# ********************************
+
+MOREP66?        EXTEND                                  # TERMINATE P66JOB RESTART PROTECTION
+                DCA             NEG0
+                DXCH            -PHASE3
+
+#     NOTE:  A RESTART BETWEEN NOW AND THE END OF THE JOB WILL CAUSE THE LOSS OF THE REMAINDER OF THE JOB.  BUT
+# THIS DOES NOT MATTER.  SINCE HZCOUNT IS NOT INCREMENTED UNTIL THE END OF THE JOB, THE FIRST P66JOB AFTER THE
+# RESTART WILL REPEAT AND COMPLETE THE COMPUTATIONS STARTED HERE.
+
+                CAF             PRIO22
+                TC              PRIOCHNG
+
+                CAF             PRIO23
+                TC              PRIOCHNG
+
+#     THE DESISION WHETHER TO EXECUTE THE P66 HORIZONTAL CONTROL EQUATION IS MADE EVERY 1/4 SECOND ON THE
+# FOLLOWING BASIS:  IF MODE HAS BEEN SWITCHED FROM ATTITUDE-HOLD TO AUTO BETWEEN THE MOST RECENT FINDCDUW AND
+# NOW, DO P66HZ IMMEDIATELY.  OTHERWISE, DO P66HZ EVERY TWO SECONDS (WHICH COULD BE CHANGED TO ONE SECOND), AND
+# DO P65DISPS EVERY ONE SECOND, STAGGERED FROM P66HZ.
+
+                CA              FIXLOC                  # ZERO PUSHDOWN POINTER
+## Page 808
+                TS              PUSHLOC
+
+                CAF             EBANK6                  # SWITCH TO E6 FOR FLPAUTNO
+                TS              EBANK
+                EBANK=          END-E6
+
+                CAF             BIT14                   # IS MODE IN AUTO?
+                EXTEND
+                RAND            CHAN31
+                EXTEND
+                BZF             CHKFPAUT                # YES:  GO CHECK FLPAUTNO
+
+                TS              FLPAUTNO                # NO:   SET FLPAUTNO TO INDICATE ATT-HOLD,
+                INCR            BBANK                   #         RETURN TO E7, AND ZERO VHZC
+                TC              ZEROVHZC
+                TCF             HZTIME?
+
+CHKFPAUT        CA              FLPAUTNO                # WAS MODE IN AUTO LAST FINDCDUW?
+                INCR            BBANK
+                EBANK=          END-E7
+                EXTEND
+                BZF             HZTIME?                 # YES
+
+                TC              ZEROVHZC                # NO:   MODE JUST SWITCHED SO ZERO VHZC
+                TS              HZCOUNT                 #         AND HZCOUNT FOR IMMEDIATE P66HZ
+
+HZTIME?         CA              HZCOUNT                 # DOES HZCOUNT = 0 MODULO 8?
+                MASK            SEVEN
+                EXTEND
+                BZF             P66HZ                   # YES:  DO HORIZONTAL CONTROL EQUATION
+
+                MASK            THREE                   # NO:   DOES HZCOUNT = 2 MODULE 4?
+                AD              NEG2
+                EXTEND
+                BZF             P66DISPS                # YES:  GO COMPUTE DISPLAYS
+
+ENDP66JOB       INCR            HZCOUNT                 # NO:   INCREMENT HZCOUNT, TERMINATE JOB:
+                TC              ENDOFJOB                #         P66HZ COMES HERE TOO
+
+# ********************************
+# HORIZONTAL CONTROL EQUATION
+# ********************************
+
+P66HZ           TC              INTPRET
+                DLOAD           PDVL
+                                AHZLIM
+                                UNFC/2
+                VXSC            PDVL
+                                QHZ
+                                VVECTX
+## Page 809
+                BVSU
+                                VHZC
+                V/SC            VSU
+                                TAUHZ
+                RTB             RTB                     # ZERO X-COMPONENT AND UNITIZE
+                                ZEROMPAC
+                                NORMUNX1
+                PDDL            SL*                     # CORRECT MAGNITUDE FOR NORMUNX1 SHIFT
+                                36D
+                                0,1
+                RTB             VXSC                    # LIMIT MAGNITUDE TO AHZLIM
+                                MPACLIM
+                EXIT
+
+                CA              GHZ                     # X-COMPONENT = GRAVITY
+                TS              MPAC
+
+                CA              OVFIND                  # ANY INTERPRETIVE OVERFLOW?
+                EXTEND
+                BZF             ENGARM?                 # NO:   CONTINUE CHECKING
+
+                TC              BANKCALL                # YES:  ISSUE ALARM BUT NO COMMANDS
+                FCADR           OVFDESC
+                TCF             ENDP66JOB
+
+ENGARM?         CAF             BIT3                    # IS ENGINE-ARM SWITCH ON?
+                EXTEND
+                RAND            CHAN30
+                EXTEND
+                BZF             CDUWHZ                  # YES:  LIMIT AND ISSUE COMMANDS
+
+                CA              FLAGWRD0                # NO:   HAS ASTRONAUT RESPONDED TO P06N60?
+                MASK            P66PROBT
+                EXTEND
+                BZF             CDUWHZ                  # NO:   LIMIT AND ISSUE COMMANDS
+
+                CA              IDLADR                  # YES:  PREVENT RCS JET FIRINGS
+                TS              T5ADR
+                TCF             END66JOB
+
+CDUWHZ          TC              INTPRET
+                STCALL          UNFC/2                  # MUST STORE FOR SUCCEEDING PASS
+                                FINDCDUW
+                EXIT
+
+                TCF             END66JOB
+
+# ********************************
+# P66 DISPLAY COMPUTATIONS
+# ********************************
+## Page 810
+P66DISPS        TC              INTPRET
+                DLOAD           DMP                     # AHZLIM.TAUHZ TO PD 0 FOR MPACLIM BELOW
+                                AHZLIM
+                                TAUHZ
+                PDVL            RTB
+                                VVECTX
+                                ZEROMPAC
+                RTB             PDDL
+                                NORMUNX1
+                                36D
+                SL*             PUSH
+                                0,1
+                STORE           36D
+                RTB             DSQ
+                                MPACLIM
+                SL1             PDDL
+                DSQ             DAD
+                DDV             PDDL
+                                AHZLIM
+## TEXTRA in the following line is cicled
+                                TEXTRA
+                DMP             DAD
+                                36D
+                DCOMP           VXSC
+                DLOAD           PDDL                    # PUSH DOWN Z AND Y COMPS FOR VDEF BELOW
+                                MPAC            +5
+                                MPAC            +3
+                PDDL            DAD                     # COMPUTE X-COMP AS ALTITUDE CORRECTED
+                                ALTITUDE
+                                DALTEYE
+                VDEF            UNIT                    # FORM UNIT VECTOR FROM SITE TO EYE IN SM
+                RTB             CALL                    #   COORDINATES AND CONVERT TO NB
+                                QTPROLOG
+                                *SMNB*
+                VSR1            EXIT                    # EXIT WITH SINE(LOOKANGL)/4 IN MPAC
+
+                TC              BANKCALL                # LPDFVSUB TAKES IT FROM THERE
+                CADR            LPDFVSUB
+
+UNDISP?         INCR            HZCOUNT
+                CS              FLAGWRD8                # NO DISPLAYS THIS PASS IF FLUNDISP SET
+                MASK            FLUNDBIT
+                EXTEND
+## The following line is circled, with "ENDOFJOB" written next to END66JOB in the circle.
+                BZF             END66JOB
 
 VERTDISP        TC              VACRLEAS
                 CAF             V06N60
                 TC              BANKCALL
                 CADR            REFLASH
-
-## Page 813
-                TCF             GOTOPOOH                # TERMINATE
-                TCF             STOPFIRE                # PROCEED
-                TCF             STOPFIRE                # V32E
-
-STOPFIRE        TC              DOWNFLAG
-                ADRES           P66PROFL		# FLAG TO STOP P66 HORIZONTAL
+                TC              ENDOFJOB                # TERMINATE  IGNORE AND KEEP FLASHING
+                TCF             STOPFIRE                # PROCEED    GO TERMINATE P66HZ OUTPUTS
+## Page 811
+STOPFIRE        TC              DOWNFLAG                # ENTER      TERMINATE P66HZ OUTPUTS
+                ADRES           P66PROFL
                 TCF             ENDOFJOB
 
-THROT66         TC              THROTTLE        +3
-                INCR            CNTTHROT                # COUNT ONE THROTTLE COMPLETION
+# ********************************
+# P66JOB SUBROUTINES
+# ********************************
 
-                TCF             DISPEX66
-
-## Page 814
-## The ':' suffixed in the 2nd dividing line below is an '=' in the original printout.  
-## The change is a workaround for our proof-reading system.
-# ================================================================================================================
-# GUIDANCE FOR P66
-# ===============================================================================================================:
-
-#          THE P66 HORIZONTAL (HZ) EQUATION IS:
-
-#                 UNFC/2X = GHZ
-
-#                 UNFC/2Y = (LIMIT AHZLIM)(-QHZ UNFC/2Y   -(VY-VHZCY)/TAUHZ)
-#                                                      I-1
-
-#                 UNFC/2Z = (LIMIT AHZLIM)(-QHZ UNFC/2Z   -(VZ-VHZCZ)/TAUHZ)
-#                                                      I-1
-
-#          WHERE  GHZ IS LUNAR GRAVITY
-#                 QHZ AND 1/TAUHZ ARE GAIN CONSTANTS
-#                 VHZCY AND VHZCZ ARE THE Y AND Z COMPONENTS OF COMMANDED
-#                    VELOCITY, PLATFORM COORDINATES. THESE ARE INITIALIZED
-#                    TO MOONRATE
-#                 (LIMIT AHZLIM) INDICATES THE CONTENT OF THE SUBSEQUENT
-#                    PARENTHESES IS MAGNITUDE LIMITED TO AHZLIM
-
-P66             TC              PHASCHNG                # TERMINATE GROUP 3
-                OCT             00003
-
-                TC              INTPRET
-                RTB             DSU                     # IS THERE TIME FOR P66?
-                                LOADTIME
-                                PIPTIME
-                BDSU            BPL
-                                2LATE466
-                                P66HZ                   # Y: DOIT
-                CLEAR           EXIT                    # N: OMIT
-                                RODFLAG
-
-                CS              TOOFEW                  # INITIALIZE CNTTHROT TO TOOFEW AND LOAD
-                XCH             CNTTHROT                # ACCUMULATOR WITH ITS PREVIOUS CONTENTS
-                EXTEND                                  # TOO FEW THROTTLINGS SINCE LAST OMISSION?
-                BZMF            OMITWALM
-
-                TCF             DISPEX66                # N: PERMIT OMISSION SANS ALARM
-
-OMITWALM        INHINT
-                TC              BANKCALL
-                CADR            STOPRATE
-                TC              ALARM                   # Y: PERMIT OMISSION WITH ALARM
-                OCT             01466
-
-                TCF             DISPEX66
-
-## Page 815
-# ======================================================================================================
-# P66 HORIZONTAL CHANNELS
-# ======================================================================================================
-
-                SETLOC          P66LOC
-                BANK
-                COUNT*          $$/F2DPS
-
-P66HZ           VLOAD           VXSC
-                                UNFC/2                  # P63, P64, & P66 UNITS 2(-4)M/CS/CS
-                                QHZ
-                PDVL            VSU
-                                VHZC                    # IN 2(7)M/CS
-                                V                       # IN 2(7)M/CS
-                V/SC            VSU                     # YIELDS UNLIM HZ ACCEL CMD, 2(-4)M/CS/CS
-                                TAUHZ                   # IN 2(1))CS
-                EXIT
-
-                CA              PRIO21                  # ASSURE THIS SERVICER JOB ENDS
-                TC              PRIOCHNG                # BEFORE NEXT SERVICER JOB BEGINS
-
-                CA              GHZ
-                TS              MPAC                    # X COMPONENT = G
-
-                CA              EBANK5
-                TS              EBANK
-                EBANK=          END-E5
-
-                LXCH            MPAC            +3
-                CA              AHZLIM
-                TC              BANKCALL
-                FCADR           LIMITSUB
-                TS              MPAC            +3      # Y COMPONENT LIMITED TO AHZLIM
-
-                LXCH            MPAC            +5
-                CA              AHZLIM
-                TC              BANKCALL
-                FCADR           LIMITSUB
-                TS              MPAC            +5      # Z COMPONENT LIMITED TO AHZLIM
-
-                CA              EBANK7
-                TS              EBANK
-                EBANK=          END-E7
-
-                CA              OVFIND                  # OVERFLOW?
-                EXTEND
-                BZF             ENGARM?                 # N: KEEP CHECKING
-                TC              BANKCALL                # Y: TAKE REMEDIAL ACTION
-                FCADR           OVFDESC                 #    AND
-                TCF             P66VERT                 #    SKIP ISSUANCE OF HZ CMDS
-
-## Page 816
-ENGARM?         CA              BIT3                    # IS ENGINE ARM SWITCH STILL ON?
-                EXTEND
-                RAND            CHAN30
-                EXTEND
-                BZF             CDUWHZ                  # Y: ISSUE HZ CMDS
-
-                CA              FLAGWRD0                # N: HAVE WE PROCEEDED AFTER TOUCHDOWN?
-                MASK            P66PROBT
-                EXTEND
-                BZF             ASTROPRO                # Y: PREVENT RCS FIRINGS
-CDUWHZ          TC              INTPRET                 # N: ISSUE HZ CMDS
-                STORE           UNFC/2                  # MUST STORE FOR SUCCEEDING PASS
-                CALL
-                                FINDCDUW
-                EXIT
-
-                TCF             P66VERT
-
-ASTROPRO        CA              IDLADR                  # Y: PREVENT RCS JET FIRINGS
-                TS              T5ADR                   #    AND
-                TCF             P66VERT                 #    SKIP HZ CMDS, BUT CONTINUE DISPLAYS
-
-# ================================================================================================================
-# P66 VERTICAL CHANNEL
-# ================================================================================================================
-
-RODTASK         CA              PRIO22                  # BUMPS ALL OF SERVICER JOB EXCEPT RODCOMP
-                TC              FINDVAC
-                EBANK=          DVCNTR
-                2CADR           RODCOMP
-                TCF             TASKOVER
-
-P66VERT         CA              1SEC
-                TC              TWIDDLE
-                ADRES           RODTASK
-
-RODCOMP         CA              PRIO23                  # LET ONLY ONE JOB THRU RODCOMP AT A TIME
-                TC              PRIOCHNG
-
-                INHINT
-
-                CAF             ZERO
-                XCH             RODCOUNT
-                EXTEND
-                MP              RODSCAL1
-                DAS             VDGVERT                 # UPDATE DESTRED ALTITUDE RATE.
-
-MANTHRT?        CAF             BIT4
-                MASK            CHANBKUP
-
-## Page 817
-                CCS             A
-                TCF             RODCOMPA                # IGNORE CHAN 30 BIT 5. ASSUME AUTO THROT
-
-                CAF             BIT5                    # ARE WE IN AUTO THROTTLE?
-                EXTEND
-                RAND            CHAN30
-                EXTEND
-                BZF             RODCOMPA                # Y: CONTINUE ROD
-
-                EXTEND                                  # N: RESET VDGVERT TO CURRENT HDOT
-                DCA             HDOTDISP
-                DXCH            VDGVERT
-
-# READ THE PIPAS FOR P66
-
-RODCOMPA        EXTEND
-                DCA             PIPAX
-                DXCH            OLDPIPAX                # CURRENT PIPA READINGS INTO OLDPIPAX,Y,Z
-                DXCH            RUPTREG1                # SAVE PRIOR READINGS IN RUPTREG1,2,3
-                CA              PIPAZ
-                XCH             OLDPIPAZ
-                XCH             RUPTREG3
-
-                EXTEND                                  # SNAPSHOT TIME OF PIPA READING.
-                DCA             TIME2
-                DXCH            THISTPIP
-
-                TC              DEIMUBOB                # REFER CURRENT PIPAX READING TO THE CM
-
-# COMPUTE DELV SINCE PIPTIME. RETURN FROM DEIMUBOB WITH CORRECTED OLDPIPAX IN A
-                                                        # CURRENT P66 PIPA
-                AD              PIPATMPX                # + PIPA BY PIPASR IF B4 COPYCYCL, 0 AFTER
-                TS              MPAC                    # = DELV SINCE VALIDITY OF V, 2(14)CM/SEC
-                CA              OLDPIPAY
-                AD              PIPATMPY
-                TS              MPAC            +3
-                CA              OLDPIPAZ
-                AD              PIPATMPZ
-                TS              MPAC            +5
-
-# COMPUTE DELV SINCE THE LAST P66 PASS
-
-                CS              OLDPIPAX                # - CURRENT P66 PIPA
-                AD              TEMX                    # - PIPA BY PIPASR IF INTERVENING, ELSE 0
-                AD              RUPTREG1                # + PIPA BY P66 ON THE LAST P66 PASS
-                TS              DELVROD                 # = -DELV SINCE LAST P66 PASS, 2(14)CM/SEC
-                CS              OLDPIPAY
-                AD              TEMY
-                AD              RUPTREG2
-
-## Page 818
-                TS              DELVROD         +2
-                CS              OLDPIPAZ
-                AD              TEMZ
-                AD              RUPTREG3
-                TS              DELVROD         +4
-
-# PRE-INTERPRETIVE HOUSEKEEPING AND RESETTING PIPASR'S TEMS FOR NEXT P66
-
-                CAF             ZERO
-                TS              MPAC            +1      # ZERO LO-ORDER MPAC COMPONENTS
-                TS              MPAC            +4
-                TS              MPAC            +6
-                TS              TEMX                    # ZERO TEMX, TEMY, AND TEMZ SO WE WILL
-                TS              TEMY                    #       KNOW WHEN READACCS CHANGES THEM.
-                TS              TEMZ
-                CS              ONE
-                TS              MODE                    # INDICATE VECTOR IN MPAC
-
-# COMPUTE THE CURRENT P66 VELOCITY AND CERTAIN DISPLAYS
-
-                TC              INTPRET
-ITRPNT1         VXSC            PDDL                    # PUSH DELV SINCE LAST P66 IN 2(7)M/CS (6)
-                                KPIP1                   # 1/10,000 IN 2(-7)
-                                THISTPIP
-                DSU
-                                PIPTIME
-                STORE           30D                     # TTPIP = T-TPIP IN 2(28)CS
-                DDV             PDVL                    # QUOTIENT = TTPIP/(1SEC) IN 2(2)      (8)
-                                4SEC(28)
-                                GDT/2                   # GDT/2 = VEL IN 100 CS IN 2(7)M/CS
-                VSU             VXSC                    # (TTPIP/1SEC)(GDT/2-VBIAS),2(9)M/CS   (6)
-                                VBIAS			# IN 2(7)M/CS
-                VSL2            VAD			# SHIFT YIELDS 2(7)M/CS
-                                V                   	# IN 2(7)M/CS
-                VAD             STADR                   #                                      (0)
-                STOVL           24D                     # STORE P66 VELOCITY IN 2(7)M/CS
-                                R
-                UNIT
-                STORE           14D                     # UNIT(R)
-                DOT             SL1
-                                24D                     # P66 VELOCITY IN 2(7)M/CS
-                STODL           HDOTDISP                # HDOT FOR NOUN 60 IN 2(7)M/CS
-                                30D                     # TTPIP IN 2(28)CS
-                SL              DMP                     # DELTAH IN 2(24)M =
-                                11D                     # 2(11) TTPIP IN 2(28)CS HDOT IN 2(7)M/CS
-                                HDOTDISP
-                DAD             DSU                     # DELTAH + |R| - |LAND|
-                                36D                     # |R| FROM PRECEDING UNIT OPERATION
-                                /LAND/
-                STODL           HCALC1                  # ALTITUDE FOR N 60 IN 2(24)M
-
-## Page 819
-# COMPUTE UNCORRECTED COMMANDED THRUST ACCELERATION
-
-                                HDOTDISP                # IN 2(7)M/CS
-                BDSU            DDV
-                                VDGVERT                 # IN 2(7)M/CS
-                                TAUROD                  # TAU IN 2(9)CS
-                PDVL            ABVAL                   # PUSH (VDG-HDOT)/TAU IN 2(-2)M/CS/CS  (2)
-                                GDT/2                   # GDT/2 = VEL IN 100CS IN 2(7)M/CS
-                DDV             SR2                     # DDV YIELDS G IN 2(-4)M/CS/CS
-                                GSCALE                  # 100 CS IN 2(11)M/CS
-                STORE           20D                     # |G| IN 2(-2)M/CS/CS
-                RTB             DAD                     # UP (VDG-HDOT)/TAU                    (0)
-                                QTPROLOG                # QUICTRIG PRESERVES MPAC
-                PDVL            CALL                    # (VDG-HDOT)/TAU+|G| IN 2(-2)M/CS/CS   (2)
-                                UNITX                   # X AXIS IN NB COORDS
-                                *NBSM*                  # TRANSFORMS TO SM COORDS
-                DOT                                     # YIELDS COS/4 OF ANGLE OF X WRT VERT
-                                14D                     # UNIT(R)
-                STORE           22D                     # COS/4
-                BDDV            STADR                   # YIELDS ((VDG-HDOT)/TAU+|G|)/COS =    (0)
-                STOVL           /AFC/                   # |AFC| RAW IN 2(-4)M/CS/CS
-
-# COMPUTE MEASURED THRUST ACCELERATION
-
-                                DELVROD                 # -DELV SINCE LAST P66 IN 2(14)CM/SEC
-                VXSC            VAD                     # ADD SINCE DELV IS REVERSE SIGN
-                                KPIP1                   # 1/10,000 IN 2(-7)
-                                VBIAS                   # IN 2(7)M/CS
-                ABVAL           PDDL                    # PUSH DE-BIASED |DELV| IN 2(7)M/CS    (2)
-                                THISTPIP
-                DSU             PDDL                    # PUSH PERP66 IN 2(28)CS               (4)
-                                LASTTPIP
-                                THISTPIP
-                STODL           LASTTPIP                # REPLACE LASTTPIP LOADING PERP66       (2)
-                DDV             BDDV                    #                                       (0)
-                                SHFTFACT                # SCALES PERP66 TO 2(11)CS
-                PDDL            DMP                     # PUSH |AF| IN 2(-4)M/CS/CS             (2)
-
-# ADD VELOCITY EXTRAPOLATION CORRECTION TO YIELD UNLIMITED COMMANDED THRUST ACCELERATION
-
-                                FWEIGHT                 # FW IN 2(14)BITS
-                                BIT1H                   # SCALES FW TO 2(28)BITS
-                DDV             DDV                     # THINK OF DIVIDES BEING REVERSED IN ORDER
-                                MASS                    # IN 2(16)KG
-                                SCALEFAC                # SF RESCALES FW TO 10,000 2(12)NEWTON
-                DAD             PDDL                    # PUSH FW/SF/MASS+|AF| IN 2(-4)M/CS/CS  (4)
-                                0D                      # |AF|
-                                20D                     # |G|
-                DDV             DSU                     # |G|/COS-FW/SF/MASS-|AF|,2(-4)M/CS/CS  (2)
-                                22D                     # COS/4
-
-## Page 820
-                DMP             DAD                     # (L/T)(|G|/COS-FW/SF/MASS-|AF|)+|AFC|
-                                LAG/TAU                 # (L/T) DIMENSIONLESS
-                                /AFC/
-                PDDL            DDV                     #  PUSH |AFC| UNLIMITED IN 2(-4)M/CS/CS (4)
-
-# LIMIT MINFORCE/MASS <= |AFC| <= MAXFORCE/MASS
-
-                                MAXFORCE
-                                MASS
-                PDDL            DDV                     #                                       (6)
-                                MINFORCE
-                                MASS
-                PUSH            BDSU                    #                                       (8)
-                                2D
-                BMN             DLOAD                   #                                       (6)
-                                AFCSPOT
-                DLOAD           PUSH                    #                                       (6)
-                BDSU            BPL
-                                2D
-                                AFCSPOT
-                DLOAD                                   #                                       (4)
-AFCSPOT         DLOAD                                   #                            (2),(4),OR (6)
-                SETPD                                   #                                       (2)
-                                2D
-                STODL           /AFC/                   # CORRECTED AND LIMITED |AFC|           (0)
-ITRPNT2         EXIT
-                DXCH            MPAC                    # FETCH MEASURED THRUST ACCEL FOR THROTTLE
-                TC              POSTJUMP
-                FCADR           THROT66
-
-# THE FOLLOWING SUBROUTINE REFERS THE X PIPA READING TO THE CENTER OF MASS
-# BY SUBTRACTING THOSE PIPA COUNTS PRODUCED BY VERTICAL IMU MOTION
-# RELATIVE TO THE CENTER OF MASS.  THE SPACECRAFT X AXIS IS ASSUMED
-# APPROXIMATELY VERTICAL.  THE EQUATION IS:
-
-#          OLDPIPAX = OLDPIPAX - OMEGAQ RIMUZ
-
-# WHERE OLDPIPAX IS THE CURRENT P66 PIPA READING, OMEGAQ IS THE ATTITUDE
-# RATE ABOUT THE Q (Y) AXIS, AND RIMUZ IS THE Z COORDINATE OF THE IMU.
-
-DEIMUBOB        CA              EBANK6
-                TS              EBANK
-                EBANK=          END-E6
-                CS              OMEGAQ                  # PITCH RATE IN UNITS 45 DEG/SEC
-                INCR            BBANK
-                EBANK=          END-E7
-                EXTEND
-                MP              RIMUZ                   # IMU Z IN UNITS (180/PI 45) 2(14) CM
-                ADS             OLDPIPAX                # CURRENT P66 PIPA X IN UNITS 2(14) CM/SEC
+ZEROVHZC        CAF             ZERO                    # THE X-COMPONENT OF VHZC NEVER MATTERS,
+                TS              VHZC            +2      #   AND BESIDES IT OVERLAPS VDGVERT
+                TS              VHZC            +3
+                TS              VHZC            +4
+                TS              VHZC            +5
                 TC              Q
 
-## Page 821
-# CONSTANTS FOR P66
+## In the margine on the right, a note is written in:
+## <pre>
+## make it a
+## REFLASHR
+## and -increment HZ-
+## go to END66JOB on
+## the R ----?
+## </pre>
+## "increment HZ" is scratched out.
+
+                EBANK=          PHSNAME3
+P66CHNG         CAF             EBANK3
+                XCH             EBANK
+                DXCH            L
+                TS              PHSNAME3
+                LXCH            EBANK
+                TC              A
+
+                EBANK=          ELVIRA
+
+# ********************************
+# P66JOB CONSTANTS
+# ********************************
 
 IDLADR          GENADR          DAPIDLER
-GHZ             DEC             1.62292         E-4 B+4 # GRAVITY IN 2(-4)M/CS/CS
 
-BIT1H           OCT             00001                   # MUST PRECEDE A ZERO
-SHFTFACT        2DEC            1               B-17    # SCALES P66 PERIOD TO 2(1))CS
+P66KPIP         DEC             .0512                   # SCALES PIPAS TO UNITS OF 2(5) M/CS
+
+P66KPIPB        DEC             .8192
+
 RIMUZ           DEC             99.486          B-14    # 1.2667 M IN UNITS (180/PI 45) 2(14) CM
 
-## Page 822
-## The suffixed ':' in the second divider below was '=' in the original printout.
-## The change is a workaround for our proof-reading system.
-# ================================================================================================================
-# REDESIGNATOR TRAP
-# ===============================================================================================================:
+GHZ             DEC             +1.62292        E-4 B+4 #           LUNAR GRAVITY
 
-# END INSERT
-                BANK            11
-                SETLOC          F2DPS*11
+P66PMIN         DEC             37.5            B-9
+
+DALTEYE         2DEC            5               B-15    # ROUGH DISTANCE FROM EYE TO LR ANTENNA
+
+## Page 812
+V06N60          VN              0660
+
+DEC48           =               SUPER011
+
+2SECS(9)        DEC             200             B-9
+
+# ****************************************************************************************************************
+# REDESIGNATOR TRAP
+# ****************************************************************************************************************
+
+                SETLOC          RODTRAP
                 BANK
 
                 COUNT*          $$/F2DPS
@@ -1347,11 +1473,14 @@ PITFALL         XCH             BANKRUPT
                 EXTEND
                 QXCH            QRUPT
 
-                TC              CHECKMM                 # IF NOT IN P64, NO REASON TO CONTINUE
-                DEC             64
-                TCF             RESUME
+                CS              BIT7                    # ARE WE IN P64 OR P66?
+                AD              MODREG
+                CCS             A
+                MASK            OCT37776
+                CCS             A
+                TC              RESUME                  # NO:   RESUME IMMEDIATELY
 
-                EXTEND
+                EXTEND                                  # YES
                 READ            CHAN31
                 COM
                 MASK            ALL4BITS
@@ -1359,21 +1488,29 @@ PITFALL         XCH             BANKRUPT
                 CAF             TWO
                 TS              ZERLINA
                 CAF             FIVE
-                TC              TWIDDLE
-                ADRES           REDESMON
+                TC              WAITLIST
+                EBANK=          ZERLINA
+                2CADR           REDESMON
+
                 TCF             RESUME
 
 
-# REDESIGNATION MONITOR (INITIATED BY PITFALL)
+ALL4BITS        OCT             00063
 
+
+# REDESIGNATION MONITOR  (INITIATED BY PITFALL)
+## Page 813
+                SETLOC          F2DPS*11
+                BANK
+                COUNT*          $$/F2DPS
 
 PREMON1         TS              ZERLINA
 PREMON2         CAF             SEVEN
                 TC              VARDELAY
 REDESMON        EXTEND
-                READ            CHAN31
+                READ            31
                 COM
-                MASK            ALL4BITS
+                MASK            OCT00053
                 XCH             ELVIRA
                 TS              L
                 CCS             ELVIRA                  # DO ANY BITS APPEAR THIS PASS?
@@ -1382,8 +1519,6 @@ REDESMON        EXTEND
                 CCS             L                       #   N: ANY LAST PASS?
                 TCF             COUNT'EM                #      Y: COUNT 'EM, RESET RUPT, TERMINATE
                 CCS             ZERLINA                 #      N: HAS ZERLINA REACHED ZERO YET?
-
-## Page 823
                 TCF             PREMON1                 #      N: DIMINISH ZERLINA, CONTINUE
 RESETRPT        TC              C13STALL                #      Y: RESET RUPT, TERMINATE
                 CAF             BIT12
@@ -1395,31 +1530,39 @@ COUNT'EM        CAF             BIT13                   # ARE WE IN ATTITUDE-HOL
                 EXTEND
                 RAND            CHAN31
                 EXTEND
-                BZF             RESETRPT                # YES: SKIP REDESIGNATION LOGIC.
+                BZF             RESETRPT
+
+                CAF             BIT10                   # NO:   DOES AGS HAVE CONTROL?
+                EXTEND
+                RAND            CHAN30
+                CCS             A
+                TCF             RESETRPT
 
                 CA              L                       # NO
                 MASK            -AZBIT
                 CCS             A
--AZ             CS              AZEACH
-                ADS             AZINCR1
+-AZ             CS              ONE
+                ADS             AZCOUNT1
                 CA              L
                 MASK            +AZBIT
                 CCS             A
-+AZ             CA              AZEACH
-                ADS             AZINCR1
++AZ             CA              ONE
+                ADS             AZCOUNT1
                 CA              L
                 MASK            -ELBIT
+## Page 814
                 CCS             A
--EL             CS              ELEACH
-                ADS             ELINCR1
+-EL             CS              ONE
+                ADS             ELCOUNT1
                 CA              L
                 MASK            +ELBIT
                 CCS             A
-+EL             CA              ELEACH
-                ADS             ELINCR1
++EL             CA              ONE
+                ADS             ELCOUNT1
                 TCF             RESETRPT
 
 # THESE EQUIVALENCIES ARE BASED ON GSOP CHAPTER 4, REVISION 16 OF P64LM
+
 
 +ELBIT          =               BIT2                    # -PITCH
 
@@ -1432,23 +1575,33 @@ COUNT'EM        CAF             BIT13                   # ARE WE IN ATTITUDE-HOL
 
 -AZBIT          =               BIT6
 
-## Page 824
 
-ALL4BITS        OCT             00063
-
-
-AZEACH          DEC             .01746                  # ONE DEGREE
+OCT00063        OCT             00063
 
 
-ELEACH          =               AZEACH                  # ONE DEGREE
+# ****************************************************************************************************************
+# R.O.D. TRAP
+# ****************************************************************************************************************
+
+                SETLOC          RODTRAP
+                BANK
+                COUNT*          $$/F2DPS
+
+DESCBITS        MASK            BIT7                    # COME HERE FROM MARKRUPT CODING WITH BIT
+                CCS             A                       #   7 OR 6 OF CHANNEL 16 IN A: BIT 7 MEANS
+                CS              TWO                     #   - RATE INCREMENT, BIT 6 + INCREMENT
+                AD              ONE
+                ADS             RODCOUNT
+                TCF             RESUME                  # TRAP IS RESET WHEN SWITCH IS RELEASED
 
 
-                BANK    31
-                SETLOC  F2DPS*31
+                BANK            31
+                SETLOC          F2DPS*31
                 BANK
 
-                COUNT*  $$/F2DPS
+                COUNT*          $$/F2DPS
 
+## Page 815
 # ****************************************************************************************************************
 # DOUBLE PRECISION ROOT FINDER SUBROUTINE (BY ALLAN KLUMPP)
 # ****************************************************************************************************************
@@ -1457,16 +1610,16 @@ ELEACH          =               AZEACH                  # ONE DEGREE
 #          ROOTPSRS FINDS ONE ROOT OF THE POWER SERIES A X  + A   X    + ... + A X + A
 #                                                       N      N-1              1     0
 
-# USING NEWTON'S METHOD STARTING WITH AN INITIAL GUESS FOR THE ROOT.  THE ENTERING DATA MUST BE AS FOLLOWS:
+# USING NEWTON'S METHOD STARTING WITH AN INITIAL GUESS FOR THE ROOT. THE ENTERING DATA MUST BE AS FOLLOWS:
 
-#                                         A        SP     LOC-3            ADRES FOR REFERENCING PWR COF TABL
-#                                         L        SP     N-1              N IS THE DEGREE OF THE POWER SERIES
-#                                         MPAC     DP     X                INITIAL GUESS FOR ROOT
+#                                         A        SP     LOC-3           ADRES FOR REFERENCING PWR COF TABL
+#                                         L        SP     N-1             N IS THE DEGREE OF THE POWER SERIES
+#                                         MPAC     DP     X               INITIAL GUESS FOR ROOT
 
 #                                         LOC-2N   DP     A(0)
 #                                                  ...
 #                                         LOC      DP     A(N)
-#                                         LOC+2    SP     PRECROOT         PREC RQD OF ROOT (AS FRACT OF 1ST GUESS)
+#                                         LOC+2    SP     PRECROOT        PREC RQD OF ROOT (AS FRACT OF 1ST GUESS)
 
 # THE DP RESULT IS LEFT IN MPAC UPON EXIT, AND A SP COUNT OF THE ITERATIONS TO CONVERGENCE IS LEFT IN MPAC+2.
 # RETURN IS NORMALLY TO LOC(TC ROOTPSRS)+3.   IF ROOTPSRS FAILS TO CONVERGE IN 8 PASSES, RETURN IS TO LOC+1 AND
@@ -1484,8 +1637,7 @@ ELEACH          =               AZEACH                  # ONE DEGREE
 #    POWER SERIES.   THIS OVERFLOW WOULD BE PRODUCED BY SUBROUTINE POWRSERS, CALLED BY ROOTPSRS, AND MIGHT NOT
 #    PRECLUDE EVENTUAL CONVERGENCE.
 
-## Page 825
-# 3. AT PRESENT, ERASABLE LOCATIONS ARE RESERVED ONLY FOR N UP TO 5.  AN N IN EXCESS OF 5 WILL PRODUCE CHAOS.
+# 3. AT PRESENT, ERASABLE LOCATIONS ARE RESERVED ONLY FOR N UP TO 5.   AN N IN EXCESS OF 5 WILL PRODUCE CHAOS.
 #    ALL ERASABLES USED BY ROOTPSRS ARE UNSWITCHED LOCATED IN THE REGION FROM MPAC-33 OCT TO MPAC+7.
 
 # 4. THE ITERATION COUNT RETURNED IN MPAC+2 MAY BE USED TO DETECT ABNORMAL PERFORMANCE.
@@ -1500,6 +1652,7 @@ ROOTPSRS        EXTEND
                 TS              DERPTR                  # DER TABL POINTER
                 TS              MPAC            +5      # DER TABL ADRES
                 CCS             MPAC            +4      # NO POWER SERIES OF DEGREE 1 OR LESS
+## Page 816
                 TS              MPAC            +6      # N-2
                 CA              ZERO                    # MODE USED AS ITERATION COUNTER. MODE
                 TS              MODE                    # MUST BE POS SO ABS WON'T COMP MPAC+3 ETC
@@ -1535,8 +1688,6 @@ DERCLOOP        TS              PWRCNT                  # LOOP COUNTER
                 DXCH            MPAC                    # A(I-1) TO MPAC, FETCHING DERCOF
                 INDEX           DERPTR
                 DXCH            3                       # DERCOF TO DER TABL
-
-## Page 826
                 CS              TWO
                 ADS             PWRPTR                  # DECREMENT PWR POINTER
                 CS              TWO
@@ -1553,6 +1704,7 @@ ROOTLOOP        EXTEND
                 DCA             MPAC            +5      # LOAD A, L WITH DER TABL ADRES, N-2
                 TC              POWRSERS                # YIELDS DERIVATIVE IN MPAC
 
+## Page 817
                 EXTEND
                 DCA             ROOTPS
                 DXCH            MPAC                    # CURRENT ROOT TO MPAC, FETCHING DERIVTIVE
@@ -1587,8 +1739,6 @@ BADROOT         TC              RETROOT
 TESTLODX        CCS             MPAC            +1      # TEST LO ORDER DX
                 TCF             ROOTLOOP
                 TCF             ROOTSTOR
-
-## Page 827
                 TCF             ROOTSTOR
 ROOTSTOR        DXCH            ROOTPS
                 DXCH            MPAC
@@ -1604,46 +1754,96 @@ DERTABLL        ADRES           DERCOFN         -3
 # TRASHY LITTLE SUBROUTINES
 # ****************************************************************************************************************
 
+ZEROMPAC        CAF             ZERO                    # ROUTINE TO ZERO THE FIRST COMPONENT
+## Page 818
+                TS              MPAC                    #   OF A VECTOR IN MPAC.   "TCF DANZIG"
+                TS              MPAC            +1      #   COULD BE A "TC Q" AT THE EXPENSE OF
+                TCF             DANZIG                  #   A TINY AMOUNT OF TIME.
+
 ZEROMID         CAF             ZERO                    # ROUTINE TO ZERO THE MIDDLE COMPONENT
                 TS              MPAC            +3      #   OF A VECTOR IN MPAC.   "TCF DANZIG"
                 TS              MPAC            +4      #   COULD BE A "TC Q" AT THE EXPENSE OF
                 TCF             DANZIG                  #   A TINY AMOUNT OF TIME.
 
 
-INTPRETX        INDEX           A                       # SET X1 ON THE WAY TO THE INTERPRETER
+MPACLIM         LXCH            MPAC                    # THIS SUBROUTINE LIMITS THE CONTENTS OF
+                INDEX           FIXLOC                  #   MPAC TO THE SP CONTENTS OF PD 0
+                CA              0
+                TC              BANKCALL
+                CADR            LIMITSUB
+                TS              MPAC
+                TCF             DANZIG
+
+INTPRETX        INDEX           WCHPHASE                # SET X1 ON THE WAY TO THE INTERPRETER
                 CS              TARGTDEX
                 INDEX           FIXLOC
                 TS              X1
                 TCF             INTPRET
+
 
 TDISPSET        CA              TTF/8
                 EXTEND
                 MP              TSCALINV
                 DXCH            TTFDISP
 
-                CA              EBANK5                  # TREDES BECOMES ZERO TWO PASSES
-                TS              EBANK                   #   BEFORE TCGFAPPR IS REACHED
-                EBANK=          TCGFAPPR
-                CA              TCGFAPPR
-                INCR            BBANK
-                INCR            BBANK
-                EBANK=          TTF/8
-                AD              TTF/8
-                EXTEND
-                MP              TREDESCL
-                AD              -DEC103
-                AD              NEGMAX
-                TS              L
-                CS              L
-                AD              L
-                AD              +DEC99
-                AD              POSMAX
-
-## Page 828
-                TS              TREDES
-                CS              TREDES
-                ADS             TREDES
                 TC              Q
+
+LPDFVSUB        TC              MAKECADR
+                TS              MPAC            +5
+
+                DXCH            MPAC
+                DDOUBL
+                TC              BANKCALL
+                CADR            SPARCSIN        -1
+                AD              1/2DEG
+                AD              FLBIAS
+                EXTEND
+                MP              180DEGS
+                TS              LOOKANGL
+
+                EXTEND                                  # HERE IF LOOKANGL IS NOT BETWEEN ZERO AND
+                BZMF            +5                      #   75 IT IS SET TO 99 FOR DISPLAY
+                CS              DEC75
+                AD              LOOKANGL
+                EXTEND
+## Page 819
+                BZMF            +3
+ +5             CAF             DEC99
+                TS              LOOKANGL
+
+ +3             EXTEND                                  # RESCALE FORVEL TO 1 F/S/BIT
+                DCA             FORVEL
+                DXCH            MPAC
+                CAF             FVSCALE
+                TC              SHORTMP
+                CA              MPAC            +1      # ROUND TO NEAREST F/S
+                DOUBLE
+                TS              Q
+                CAF             ZERO
+                ADS             MPAC
+
+                LXCH            MPAC                    # TRUNCATE AT 99 F/S
+                CAF             DEC99
+                TC              BANKCALL
+                CADR            LIMITSUB
+                TS              FORVDSKY
+
+                CA              MPAC            +5
+                TC              BANKJUMP
+
+DEC75           DEC             75
+
+
+DEC99           DEC             99
+
+
+180DEGS         DEC             180
+
+
+1/2DEG          DEC             .00278
+
+
+FVSCALE         DEC             328.084         B-9     # SCALES 2(5) M/CS TO 1 F/S/BIT
 
 
 1406POO         TC              POODOO
@@ -1652,13 +1852,13 @@ TDISPSET        CA              TTF/8
                 OCT             01406
                 TCF             RATESTOP
 
-# DESCENT OVERFLOW SUBROUTINE
 OVFDESC         EXTEND
                 QXCH            OVFRET
 
                 TC              ALARM
                 OCT             01410
 
+## Page 820
                 INHINT                                  # MUST USE INHINT, IBNKCALL, RELINT
                 TC              IBNKCALL                # BECAUSE DAP COULD INTERRUPT STOPRATE AND
                 FCADR           STOPRATE                # BECAUSE WE COME FROM P66HZ VIA BANKCALL
@@ -1669,20 +1869,11 @@ OVFDESC         EXTEND
 
                 TC              OVFRET
 
-## Page 829
-
 # ****************************************************************************************************************
 # SPECIALIZED "PHASCHNG" SUBROUTINE
 # ****************************************************************************************************************
 
-                EBANK=          PHSNAME2
-FASTCHNG        CA              EBANK3                  # SPECIALIZED 'PHASCHNG' ROUTINE
-                XCH             EBANK
-                DXCH            L
-                TS              PHSNAME3
-                LXCH            EBANK
-                EBANK=          E2DPS
-                TC              A
+FASTCHNG        =               SERVCHNG
 
 # ****************************************************************************************************************
 # PARAMETER TABLE INDIRECT ADDRESSES
@@ -1719,12 +1910,11 @@ P64DB           OCT             00155                   # 0.3 DEGREES SCALED AT 
 
 TREDESCL        DEC             -.08
 
-## Page 830
-180DEGS         DEC             +180
+## Page 821
+ELEACH          DEC             .01746                  # ONE DEGREE
 
 
-1/2DEG          DEC             +.00278
-
+AZEACH          =               ELEACH                  # ONE DEGREE
 
 PROJMAX         DEC             .42262          B-3     # SIN(25')/8 TO COMPARE WITH PROJ
 
@@ -1736,18 +1926,22 @@ V06N63          VN              0663                    # P63
 
 V06N64          VN              0664                    # P64
 
-V06N60          VN              0660                    # P65, P66, P67
-
-
                 BANK            22
                 SETLOC          LANDCNST
                 BANK
                 COUNT*          $$/F2DPS
 
 HIGHESTF        2DEC            4.34546769      B-12
+
 GSCALE          2DEC            100             B-11
+
+2/3DP           2DEC            .333333333
+
 3/8DP           2DEC            .375
+
 3/4DP           2DEC            .750
+
 DEPRCRIT        2DEC            -.02 B-1
+
 # ****************************************************************************************************************
 # ****************************************************************************************************************
