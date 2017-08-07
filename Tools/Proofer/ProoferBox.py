@@ -36,6 +36,9 @@ if 'BLATANT7' in environ:
 	blatant['7'] = 'yes'
 print blatant
 
+specialOne = ('SPECIALONE' in environ)
+specialThree = ('SPECIALTHREE' in environ)
+
 minFontScale = 0.9
 maxFontScale = 1.2
 defaultScale = 1.0
@@ -46,6 +49,8 @@ if 'ZERLINA' in environ:
 	minFontScale *= defaultFontScale
 	maxFontScale *= defaultFontScale
 	bounds = (4, 20, 11, 30)
+	specialOne = 1
+	specialThree = 1
 else:
 	scanColor="#000000"
 	matchColor="#006C00"
@@ -53,8 +58,6 @@ else:
 
 # Don't use SWAPCOLORS: it's enormously, mind-bogglingly slow.
 swapColors = ('SWAPCOLORS' in environ)	
-
-specialOne = ('SPECIALONE' in environ)
 
 # Parse command-line arguments
 if len(sys.argv) != 6:
@@ -129,7 +132,8 @@ if 'ZERLINA' in environ:
 	images.append(Image(filename='z5t.png'))
 	images.append(Image(filename='z6t.png'))
 	images.append(Image(filename='z7t.png'))
-	oneOnSeven = Image(filename='z1tb.png')
+	oneSpecialDigit = Image(filename='z1tb.png')
+	threeSpecialDigit = Image(filename='z3tb.png')
 else:
 	images.append(Image(filename='0t.png'))
 	images.append(Image(filename='1t.png'))
@@ -139,7 +143,8 @@ else:
 	images.append(Image(filename='5t.png'))
 	images.append(Image(filename='6t.png'))
 	images.append(Image(filename='7t.png'))
-	oneOnSeven = Image(filename='1tb.png')
+	oneSpecialDigit = Image(filename='1tb.png')
+	threeSpecialDigit = Image(filename='3tb.png')
 	
 imagesColored = []
 imagesColored.append(Image(filename='0m.png'))
@@ -225,8 +230,12 @@ for index in range(startIndex, endIndex):
 			#print boxFields[0], ' ', characters[characterIndex]
 			if specialOne and characters[characterIndex] == '1':
 				#print "here"
-				digit = oneOnSeven.clone() 
+				digit = oneSpecialDigit.clone() 
 				operator = 'lighten'
+			elif specialThree and characters[characterIndex] == '3':
+				#print "here"
+				digit = threeSpecialDigit.clone() 
+				operator = 'multiply'
 			elif boxOctal == digitIndex and not (characters[characterIndex] in blatant) and not (boxFields[0] in blatant):
 				digit = images[digitIndex].clone()
 				operator = 'darken'
