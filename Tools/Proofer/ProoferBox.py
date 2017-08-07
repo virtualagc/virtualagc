@@ -38,6 +38,7 @@ print blatant
 
 specialOne = ('SPECIALONE' in environ)
 specialThree = ('SPECIALTHREE' in environ)
+specialFive = ('SPECIALFIVE' in environ)
 
 minFontScale = 0.9
 maxFontScale = 1.2
@@ -51,6 +52,7 @@ if 'ZERLINA' in environ:
 	bounds = (4, 20, 11, 30)
 	specialOne = 1
 	specialThree = 1
+	specialFive = 1
 else:
 	scanColor="#000000"
 	matchColor="#006C00"
@@ -134,6 +136,7 @@ if 'ZERLINA' in environ:
 	images.append(Image(filename='z7t.png'))
 	oneSpecialDigit = Image(filename='z1tb.png')
 	threeSpecialDigit = Image(filename='z3tb.png')
+	fiveSpecialDigit = Image(filename='z5tb.png')
 else:
 	images.append(Image(filename='0t.png'))
 	images.append(Image(filename='1t.png'))
@@ -145,6 +148,7 @@ else:
 	images.append(Image(filename='7t.png'))
 	oneSpecialDigit = Image(filename='1tb.png')
 	threeSpecialDigit = Image(filename='3tb.png')
+	fiveSpecialDigit = Image(filename='5tb.png')
 	
 imagesColored = []
 imagesColored.append(Image(filename='0m.png'))
@@ -231,11 +235,14 @@ for index in range(startIndex, endIndex):
 			if specialOne and characters[characterIndex] == '1':
 				#print "here"
 				digit = oneSpecialDigit.clone() 
-				operator = 'lighten'
+				operator = 'difference'
 			elif specialThree and characters[characterIndex] == '3':
 				#print "here"
 				digit = threeSpecialDigit.clone() 
 				operator = 'multiply'
+			elif specialFive and characters[characterIndex] == '5':
+				digit = fiveSpecialDigit.clone()
+				operator = 'difference'
 			elif boxOctal == digitIndex and not (characters[characterIndex] in blatant) and not (boxFields[0] in blatant):
 				digit = images[digitIndex].clone()
 				operator = 'darken'
