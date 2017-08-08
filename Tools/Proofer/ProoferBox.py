@@ -39,6 +39,7 @@ print blatant
 specialOne = ('SPECIALONE' in environ)
 specialThree = ('SPECIALTHREE' in environ)
 specialFive = ('SPECIALFIVE' in environ)
+invert = ("INVERT" in environ)
 
 minFontScale = 0.9
 maxFontScale = 1.2
@@ -50,9 +51,10 @@ if 'ZERLINA' in environ:
 	minFontScale *= defaultFontScale
 	maxFontScale *= defaultFontScale
 	bounds = (4, 20, 11, 30)
-	specialOne = 1
-	specialThree = 1
-	specialFive = 1
+	if not invert:
+		specialOne = 1
+		specialThree = 1
+		specialFive = 1
 else:
 	scanColor="#000000"
 	matchColor="#006C00"
@@ -162,6 +164,8 @@ imagesColored.append(Image(filename='7m.png'))
 
 # Read in the input image ... i.e., the B&W octal page.
 img = Image(filename=backgroundImage)
+if invert:
+	img.negate()
 backgroundWidth = img.width
 backgroundHeight = img.height
 
