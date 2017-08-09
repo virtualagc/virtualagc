@@ -1,6 +1,6 @@
 ### FILE="Main.annotation"
 ## Copyright:	Public domain.
-## Filename:	ASSEMBLY_AND_OPERATION_INFORMATION.agc
+## Filename:	TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc
 ## Purpose:	Part of the reconstructed source code for LMY99 Rev 0,
 ##		otherwise known as Luminary Rev 99, the second release
 ##		of the Apollo Guidance Computer (AGC) software for Apollo 11.
