@@ -17,7 +17,12 @@ bin=$HOME/git/virtualagc/Tools/ProoferComments
 # Where the image files are.
 images=$HOME/Desktop/Proofing/ProoferComments
 # Where the AGC source files are.
-source=$HOME/git/virtualagc/$AGC
+if [[ "$AGCOVERRIDE" != "" ]]
+then
+	source=$HOME/git/virtualagc/$AGCOVERRIDE
+else
+	source=$HOME/git/virtualagc/$AGC
+fi
 
 # Switch into a temporary working directory
 mkdir /tmp/ProoferComments$$
