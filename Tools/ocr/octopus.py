@@ -69,6 +69,8 @@ group.add_argument('--yul10', help="Perform processing for YUL pages 672-730", a
 group.add_argument('--luminary131', help="Perform LUMINARY 131 (Eyles) processing", action="store_true")
 group.add_argument('--luminary131A', help="Perform LUMINARY 131 (Eyles, lighter) processing", action="store_true")
 group.add_argument('--sunburst37', help="Perform SUNBURST 37 processing", action="store_true")
+group.add_argument('--zerlina56', help="Perform Zerlina 56 processing", action="store_true")
+group.add_argument('--ap11rope', help="Perform AP11ROPE processing", action="store_true")
 
 args = parser.parse_args()
 if not os.path.isfile(args.input_file):
@@ -223,6 +225,31 @@ elif args.yul9:
     print('--yul9 not yet supported')
 elif args.yul10:
     print('--yul10 not yet supported')
+elif args.zerlina56:
+    _,g_channel,r_channel = cv2.split(img)
+    blurred = cv2.GaussianBlur(g_channel, (5,5), 0)
+    # Isolate the lines by eroding very strongly horizontally
+    lines_only = cv2.erode(~blurred, np.ones((1,11), np.uint8), iterations=1)
+    # Beef them up a bit by vertically dilating
+    thickend_lines = cv2.dilate(lines_only, np.ones((3,1), np.uint8), iterations=1)
+    # Difference the original L channel with the thickened lines (which is inverted)
+    diff = blurred + thickend_lines
+    thresh = ~cv2.inRange(diff, 30, 230) # Reject pixels too black or too white
+    thresh = thresh[100:-100,80:-80]
+    # blurred = cv2.GaussianBlur(g_channel, (1,5), 0)
+    # #thresh = cv2.adaptiveThreshold(blurred, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, 211, 11)
+    # _,thresh = cv2.threshold(blurred, 210, 255, cv2.THRESH_BINARY)
+    sys.exit(0)
+elif args.ap11rope:
+    blurred = cv2.GaussianBlur(l_channel, (5,5), 0)
+    # Isolate the lines by eroding very strongly horizontally
+    lines_only = cv2.erode(~blurred, np.ones((1,21), np.uint8), iterations=1)
+    # Beef them up a bit by vertically dilating
+    thickend_lines = cv2.dilate(lines_only, np.ones((3,1), np.uint8), iterations=1)
+    # Difference the original L channel with the thickened lines (which is inverted)
+    diff = blurred + thickend_lines
+    thresh = ~cv2.inRange(diff, 30, 240) # Reject pixels too black or too white
+    thresh = thresh[0:-100,80:-80]
 else:
     raise RuntimeError("Unknown program type selected")
 
