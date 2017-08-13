@@ -18,6 +18,8 @@
 ##		2017-03-13 RSB	Comment-text fixes noted in proofing Luminary 116.
 ##		2017-03-15 RSB	Comment-text fixes identified in 5-way
 ##				side-by-side diff of Luminary 69/99/116/131/210.
+##		2017-08-11 RSB	Comment-text fixes identified in octopus/ProoferComments
+##				based comparison with AP11ROPE scan.
 
 ## This source code has been transcribed or otherwise adapted from
 ## digitized images of a hardcopy from the MIT Museum.  The digitization
@@ -693,16 +695,15 @@ RCSFLAGS	ERASE			# AUTOPILOT FLAG WORD
 T5ADR		ERASE	+1		# GENADR OF NEXT LM DAP T5RUPT. * 2CADR *
 					# BBCON  OF NEXT LM DAP T5RUPT.   2CADR
 
-# *      ERASABLES FOR P64:  OVERLAY OF DTHETASM, WHICH IS UNUSED	(4D)
+# ERASABLES FOR P64:  OVERLAY OF DTHETASM, WHICH IS UNUSED	(4D)
 ZERLINA		EQUALS	DTHETASM	# B(1)	P64
 
 ## Page 106
 ELVIRA		EQUALS	ZERLINA +1	# B(1)	P64
 AZINCR1		EQUALS	ELVIRA  +1	# B(1)	P64
 ELINCR1		EQUALS	AZINCR1 +1	# B(1)	P64
-					# *
 
-# RCS FAILURE MONITOR STORAGE 		(1)
+# RCS FAILURE MONITOR STORAGE. 		(1)
 
 PVALVEST	ERASE			# B(1)PRM
 

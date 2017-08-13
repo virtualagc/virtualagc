@@ -43,22 +43,25 @@ invert = ("INVERT" in environ)
 
 minFontScale = 0.9
 maxFontScale = 1.2
-defaultScale = 1.0
+defaultFontScale = 1.0
 if 'ZERLINA' in environ:
 	scanColor="#000000"
 	matchColor="#00C000"
 	defaultFontScale = 0.75
-	minFontScale *= defaultFontScale
-	maxFontScale *= defaultFontScale
 	bounds = (4, 20, 11, 30)
 	if not invert:
 		specialOne = 1
 		specialThree = 1
 		specialFive = 1
+elif 'AP11ROPE' in environ:
+	defaultFontScale = 1.25
+	bounds = (8, 28, 16, 36)
 else:
 	scanColor="#000000"
 	matchColor="#006C00"
 	bounds = (8, 24, 16, 36)
+minFontScale *= defaultFontScale
+maxFontScale *= defaultFontScale
 
 # Don't use SWAPCOLORS: it's enormously, mind-bogglingly slow.
 swapColors = ('SWAPCOLORS' in environ)	
@@ -66,7 +69,7 @@ swapColors = ('SWAPCOLORS' in environ)
 # Parse command-line arguments
 if len(sys.argv) != 6:
 	print 'Usage:'
-	print '\t[ZERLINA=yes] ./ProoferBox.py BWINPUTIMAGE OUTPUTIMAGE BANK PAGEINBANK BINSOURCE'
+	print '\t[ZERLINA=yes] [AP11ROPE=yes] ./ProoferBox.py BWINPUTIMAGE OUTPUTIMAGE BANK PAGEINBANK BINSOURCE'
 	sys.exit()
 
 backgroundImage = sys.argv[1]
@@ -100,12 +103,13 @@ for line in file:
 		boxes.append(line)
 	else:
 		rejectedBoxes.append(line)
+		print "Out of bounds ", line
 file.close()
 
 # Read in the binsource file.
 file = open (binsourceFilename, 'r')
 lines = []
-octalPattern = re.compile(r"([0-7]{6}|@)([ \t]+([0-7]{6}|@)){7}.*")
+octalPattern = re.compile(r"([0-7]{6}|[ \t]*@)([ \t]+([0-7]{6}|@)){7}.*")
 for line in file:
 	if octalPattern.match(line):
 		lines.append(line)

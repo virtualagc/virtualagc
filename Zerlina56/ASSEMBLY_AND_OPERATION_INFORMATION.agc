@@ -17,11 +17,9 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-07-28 MAS  Created from Luminary 210.
-
-## NOTE: Page numbers below have not yet been updated to reflect Zerlina 56.
+##              2017-08-12 MAS  Updated for Zerlina 56
 
 ## Page 2
-
 # THIS LGC PROGRAM IS INTENDED FOR USE IN THE LM DURING THE MANNED LUNAR LANDING MISSION OR ANY SUBSET THEREOF.
 # THE DETAILS OF IMPLEMENTATION ARE SPECIFIED IN REPORT R-567, AS AMENDED.
 
@@ -31,12 +29,13 @@
 #                                 USING PROGRAM LUMINARY
 
 
-# *THIS PROGRAM AND R-567 HAVE BEEN PREPARED BY THE CHARLES STARK DRAPER LABORATORY, MASSACHUSETTS INSTITUTE
-# *OF TECHNOLOGY  75 CAMBRIDGE PARKWAY, CAMBRIDGE, MASSACHUSETTS UNDER PROJECT 55-238-90, SPONSORED BY THE
-# *MANNED SPACECRAFT CENTER OF THE NATIONAL AERONAUTICS AND SPACE ADMINISTRATION, CONTRACT NAS 9-4065.
+# THIS PROGRAM AND R-567 HAVE BEEN PREPARED BY THE INSTRUMENTATION LABORATORY, MASSACHUSETTS INSTITUTE OF
+# TECHNOLOGY  75 CAMBRIDGE PARKWAY, CAMBRIDGE, MASSACHUSETTS UNDER PROJECT55-238-70, SPONSORED BY THE MANNED
+# SPACECRAFT CENTER OF THE NATIONAL AERONAUTICS AND SPACE ADMINISTRATION, CONTRACT NAS 9-4065.
 
 
-# *                 THIS PROGRAM IS REFERRED TO AS LUMINARY 1E
+# THIS PROGRAM IS A VERSION OF LUMINARY FOR DEVELOPING A NEW VARIABLE GUIDANCE PERIOD SERVICER.
+
 # TABLE OF LOG CARDS
 
 # ABSOLUTE ADDRESSES FOR UPDATE PROGRAM
@@ -46,15 +45,12 @@
 # INPUT/OUTPUT CHANNEL BIT DESCRIPTIONS
 # FLAGWORD ASSIGNMENTS
 # SUBROUTINE CALLS
-## The card numbers of the above block of comments have a bracket drawn around them.
 
 
 # TABLE OF SUBROUTINE LOG SECTIONS
-#          LUMERASE
+#          ZERASE  
 #                 ERASABLE ASSIGNMENTS
-#                 CHECK EQUALS LIST
-## A vertical line is drawn to the right of the above two lines, marking them.
-#          LEMONAID
+#          ZERLAID 
 #                 INTERRUPT LEAD INS
 #                 T4RUPT PROGRAM
 #                 RCS FAILURE MONITOR
@@ -74,13 +70,11 @@
 #                 SYSTEM TEST STANDARD LEAD INS
 #                 IMU PERFORMANCE TESTS 2
 #                 IMU PERFORMANCE TESTS 4
-## In the space between the card numbers and log section names in the preceding lines, the number 30
-## is written in.
 ## Page 3
 #                 PINBALL GAMES BUTTONS AND LIGHTS
 #                 R60,R62
 #                 S-BAND ANTENNA FOR LM
-#          LEMP20S
+#          ZLEMP20S
 #                 RADAR LEADIN ROUTINES
 #                 P20-P25
 #          LEMP30S
@@ -92,7 +86,7 @@
 #                 R31
 #                 P76
 #                 R30
-#          FLY
+#          ZFLY
 #                 BURN, BABY, BURN -- MASTER IGNITION ROUTINE
 #                 P40-P47
 #                 THE LUNAR LANDING
@@ -107,7 +101,6 @@
 #          LEMP50S
 #                 P51-P53
 #                 LUNAR AND SOLAR EPHEMERIDES SUBROUTINES
-## In the margin on the right, the number 50 is written.
 #          SKIPPER
 #                 DOWN-TELEMETRY PROGRAM
 #                 INTER-BANK COMMUNICATION
@@ -137,7 +130,7 @@
 #                 ALARM AND ABORT
 #                 UPDATE PROGRAM
 #                 RTB OP CODES
-#          LMDAP
+#          ZLMDAP1
 #                 T6-RUPT PROGRAMS
 #                 DAP INTERFACE SUBROUTINES
 #                 DAPIDLER PROGRAM
@@ -148,23 +141,18 @@
 #                 TRIM GIMBAL CONTROL SYSTEM
 #                 AOSTASK AND AOSJOB
 #                 SPS BACK-UP RCS CONTROL
-## To the right of the above log section names is written the number 19.
-## Further to the right, near the comment column, written in larger digits and circled is the number 109.
 
 
 #          SYMBOL TABLE LISTING
 #          UNREFERENCED SYMBOL LISTING
 #          ERASABLE & EQUALS CROSS-REFERENCE TABLE
-## A small line is drawn beneath the first E in ERASABLE above.
 #          SUMMARY OF SYMBOL TABLE LISTINGS
 #          MEMORY TYPE & AVAILABLITY DISPLAY
 #          COUNT TABLE
-## A small line is drawn under the C in COUNT above.
 #          PARAGRAPHS GENERATED FOR THIS ASSEMBLY
 #          OCTAL LISTING
 #          OCCUPIED LOCATIONS TABLE
 #          SUBROS CALLED & PROGRAM STATUS
-## To the right of the above log section names is written the number 10.
 
 ## Page 5
 #          VERB LIST FOR LUMINARY
@@ -246,7 +234,7 @@
 # 68 DISABLE TERRAIN MODEL
 # 69 CAUSE RESTART
 # 70 UPDATE LIFTOFF TIME
-# 71 UNIVERSAL UPDATE-BLOCK ADR
+# 71 UNIVERSAL UPDATE-BLOCK  ADR
 # 72 UNIVERSAL UPDATE-SINGLE ADR
 # 73 UPDATE AGC TIME (OCTAL)
 # 74 INITIALIZE ERASABLE DUMP VIA DOWNLINK
@@ -380,13 +368,12 @@
 # 45  MARKS,                                 3COMP   XXXXX.                              NO LOAD, DEC ONLY
 #     TFI OF NEXT BURN                               XXBXX  MIN/SEC
 #     MGA                                            XXX.XX DEG
-# 46  AUTOPILOT CONFIGURATION                2COMP   OCTAL ONLY
-#     CHANNEL BIT FAILURE PROTECTION WORD            OCTAL ONLY
+# 46  AUTOPILOT CONFIGURATION                1COMP   OCTAL ONLY
 # 47  LEM WEIGHT,                            2COMP   XXXXX. LBS                          DEC ONLY
 #     CSM WEIGHT                                     XXXXX. LBS
 # 48  GIMBAL PITCH TRIM,                     2COMP   XXX.XX DEG                          DEC ONLY
 #     GIMBAL ROLL TRIM                               XXX.XX DEG
-# 49  DELTA R,                               3COMP   XXX.XX NAUT MI                      DEC ONLY
+# 49  DELTA R,                               3COMP   XXXX.X NAUT MI                      DEC ONLY
 #     DELTA V,                                       XXXX.X FT/SEC
 #     RADAR DATA SOURCE CODE                         XXXXX.
 # 50  SPARE
@@ -407,17 +394,17 @@
 #     DELTA V TPI                                    XXXX.X FT/SEC
 #     DELTA V TPF                                    XXXX.X FT/SEC
 # 59  DELTA VELOCITY LOS                     3COMP   XXXX.X FT/SEC FOR EA.               DEC ONLY
-# 60  FORWARD VELOCITY                       3COMP  XXXX.X FT/SEC                        DEC ONLY
+# 60  FORWARD VELOCITY - LPD ANGLE           3COMP   XXBXX                                       NO LOAD, DEC ONLY
 #     ALTITUDE RATE                                  XXXX.X FT/SEC
 #     COMPUTED ALTITUDE                              XXXXX. FEET
-# 61  TIME TO GO IN BRAKING PHASE            3COMP   XXBXX MIN/SEC                       NO LOAD, DEC ONLY
-## Page 11
+# 61  TIME TO GO IN BRAKING PHASE            3COMP   XXBXX  MIN/SEC                      NO LOAD, DEC ONLY
 #     TIME FROM IGNITION                             XXBXX  MIN/SEC
+## Page 11
 #     CROSS RANGE DISTANCE                           XXXX.X NAUT MI
 # 62  ABSOLUTE VALUE OF VELOCITY             3COMP   XXXX.X FT/SEC                       NO LOAD, DEC ONLY
 #     TIME FROM IGNITION                             XXBXX  MIN/SEC
 #     DELTA V (ACCUMULATED)                          XXXX.X FT/SEC
-# 63  LR ALTITUDE MINUS COMPUTED ALTITUDE    3COMP   XXXXX. FEET                         DEC ONLY
+# 63  ABSOLUTE VALUE OF VELOCITY             3COMP   XXXX.X FT/SEC                       DEC ONLY
 #     ALTITUDE RATE                                  XXXX.X FT/SEC
 #     COMPUTED ALTITUDE                              XXXXX. FEET
 # 64  TIME LEFT FOR REDESIGNATION- LPD ANGLE 3COMP   XXBXX                               NO LOAD, DEC ONLY
@@ -431,9 +418,9 @@
 # 67  LRVX                                   3COMP   XXXXX. FT/SEC
 #     LRVY                                           XXXXX. FT/SEC
 #     LRVZ                                           XXXXX. FT/SEC
-# 68  SM Z-AXIS RANGE TO LANDING SITE        3COMP   XXXX.X N AUT MI                     NO LOAD, DEC ONLY
+# 68  SLANT RANGE TO LANDING SITE            3COMP   XXXX.X NAUT MI                      NO LOAD, DEC ONLY
 #     TIME TO GO IN BRAKING PHASE                    XXBXX  MIN/SEC
-#     ABSOLUTE VALUE OF VELOCITY                     XXXX.X FT/SEC
+#     LR ALTITUDE - COMPUTED ALTITUDE                XXXXX. FEET
 # 69  LANDING SITE CORRECTION, Z-COMPONENT   3COMP   XXXXX. FEET                         DEC ONLY
 #     LANDING SITE CORRECTION, Y-COMPONENT           XXXXX. FEET
 #     LANDING SITE CORRECTION, X-COMPONENT           XXXXX. FEET
@@ -452,9 +439,8 @@
 # 76  DESIRED HORIZONTAL VELOCITY            3COMP   XXXX.X FT/SEC                       DEC ONLY
 #     DESIRED RADIAL VELOCITY                        XXXX.X FT/SEC
 #     CROSS-RANGE DISTANCE                           XXXX.X NAUT MI
-# 77  TIME TO ENGINE CUTOFF                  3COMP   XXBXX  MIN/SEC                      NO LOAD, DEC ONLY
-#     VGY (BODY)                                     XXXX.X FT/SEC
-#     ABSOLUTE VALUE OF VELOCITY                     XXXX.X FT/SEC 
+# 77  TIME TO ENGINE CUTOFF                  2COMP   XXBXX  MIN/SEC                      NO LOAD, DEC ONLY
+#     VELOCITY NORMAL TO CSM PLANE                   XXXX.X FT/SEC 
 # 78  RR RANGE                               3COMP   XXX.XX NAUT MI                      NO LOAD, DEC ONLY
 #        RANGE RATE                                  XXXX.X FT/SEC
 #     TIME FROM  IGNITION                            XXBXX  MIN/SEC
@@ -462,11 +448,9 @@
 #     SPIRAL ANGLE                                   XXX.XX DEG
 #     POSITION CODE                                  XXXXX.
 # 80  DATA INDICATOR,                        2COMP   XXXXX.
-## Page 12
 #     OMEGA                                          XXX.XX DEG
 # 81  DELTA V (LV)                           3COMP   XXXX.X FT/SEC FOR EACH              DEC ONLY
-
-## Page 13
+## Page 12
 # 82  DELTA V (LV)                           3COMP   XXXX.X FT/SEC FOR EACH              DEC ONLY
 # 83  DELTA V (BODY)                         3COMP   XXXX.X FT/SEC FOR EACH              DEC ONLY
 # 84  DELTA V (OTHER VEHICLE)                3COMP   XXXX.X FT/SEC FOR EACH              DEC ONLY
@@ -488,9 +472,7 @@
 #     ALTITUDE RATE                                  XXXX.X FT/SEC
 #     COMPUTED ALTITUDE                              XXXXX.FEET
 # 93  DELTA GYRO ANGLES                      3COMP   XX.XXX DEG FOR EACH
-# 94  VGX (BODY)                             3COMP   XXXX.X FT/SEC                       NO LOAD, DEC ONLY
-#     ALTITUDE RATE                                  XXXX.X FT/SEC
-#     COMPUTED ALTITUDE                              XXXXX. FEET
+# 94  SPARE
 # 95  SPARE
 # 96  SPARE
 # 97  SYSTEM TEST INPUTS                     3COMP   XXXXX. FOR EACH
@@ -501,7 +483,7 @@
 #     RMS IN VELOCITY                                XXXX.X FT/SEC
 #     RMS IN BIAS                                    XX.XXX RADIANS
 
-## Page 14
+## Page 13
 # REGISTERS AND SCALING  FOR NORMAL NOUNS
 
 # NOUN            REGISTER        SCALE TYPE
@@ -547,7 +529,7 @@
 # 38              TET             K
 # 39       SPARE
 
-## Page 15
+## Page 14
 # REGISTERS AND SCALING FOR MIXED NOUNS
 
 # NOUN     COMP   REGISTER        SCALE TYPE
@@ -570,12 +552,11 @@
 #          2      TTOGO           L
 #          3      +MGA            H
 # 46       1      DAPDATR1        A
-#          2      CHANBKUP        A
 # 47       1      LEMMASS         KK
 #          2      CSMMASS         KK
 # 48       1      PITTIME         NN
 #          2      ROLLTIME        NN
-# 49       1      R22DISP         JJ
+# 49       1      R22DISP         Q
 #          2      R22DISP +2      S
 #          3      WHCHREAD        C
 # 50       SPARE
@@ -598,18 +579,17 @@
 # 59       1      DVLOS           S
 #          2      DVLOS +2        S
 #          3      DVLOS +4        S
-
-## Page 16
 # 60       1      FORVEL          ZZ
+## Page 15
 #          2      HDOTDISP        S
-#          3      HCALC1          RR
+#          3      ALTITUDE        BBB
 # 61       1      TTFDISP         L
 #          2      TTOGO           L
 #          3      OUTOFPLN        QQ
 # 62       1      ABVEL           S
 #          2      TTOGO           L
 #          3      DVTOTAL         S
-# 63       1      DELTAH          RR
+# 63       1      ABVEL           S
 #          2      HDOTDISP        S
 #          3      HCALC1          RR
 # 64       1      FUNNYDSP        PP
@@ -625,7 +605,7 @@
 #          3      RSTACK +4       Z
 # 68       1      RANGEDSP        QQ
 #          2      TTFDISP         L
-#          3      ABVEL           S
+#          3      DELTAH          RR
 # 69       1      DLANDZ          RR
 #          2      DLANDY          RR
 #          3      DLANDX          RR
@@ -649,10 +629,9 @@
 #          2      RDOTD           S
 #          3      XRANGE          Q
 # 77       1      TTOGO           L
-#          2      VGBODY +2       S
-## Page 17
-#          3      ABVEL           S
+#          2      YDOT            S
 # 78       1      DNRRANGE        U
+## Page 16
 #          2      DNRRDOT         V
 #          3      TTOTIG          L
 # 79       1      CURSOR          D
@@ -698,14 +677,12 @@
 # 93       1      OGC             G
 #          2      OGC +2          G
 #          3      OGC +4          G
-# 94       1      VGBODY          S
-#          2      HDOTDISP        S
-#          3      HCALC           RR
-## Page 18
+# 94       SPARE
 # 95       SPARE
 # 96       SPARE
 # 97       1      DSPTEM1         C
 #          2      DSPTEM1 +1      C
+## Page 17
 #          3      DSPTEM1 +2      C
 # 98       1      DSPTEM2         C
 #          2      DSPTEM2 +1      B
@@ -714,7 +691,7 @@
 #          2      WWVEL           YY
 #          3      WWBIAS          AAA
 
-## Page 19
+## Page 18
 # NOUN SCALES AND FORMATS
 
 # -SCALE TYPE-                        PRECISION
@@ -755,7 +732,7 @@
 #                                                    28
 #                      (MAX 359.99)             360/2   DEGREES
 
-## Page 20
+## Page 19
 # -K-
 # TIME (HR, MIN, SEC)  00XXX. HR             DP BIT 1 OF LOW REGISTER =
 #                      000XX. MIN                 -2
@@ -807,7 +784,7 @@
 #                                                -7
 #                                               2   METERS/CENTI-SEC
 
-## Page 21
+## Page 20
 # -T-                                                     -2
 # G                    XXX.XX G              SP BIT 1 = 10   G
 #                      (MAX 163.83)
@@ -858,7 +835,7 @@
 # VELOCITY             (MAX 09126.)             FEET/SEC
 
 # -DD-
-## Page 22
+## Page 21
 # ROTATIONAL HAND      XXXXX. DEG/SEC        SP FRACTIONAL PART OF PI RAD
 # CONTROLLER ANGULAR   (MAX 00044.)                                4  SEC
 # RATES
@@ -910,7 +887,7 @@
 #                      LOADED.)
 
 # -WW-								    15
-## Page 23 
+## Page 22
 # 360-CDU DEGREES      XXX.XX DEGREES        SP BIT 1 = 360 - (360/2  )
 #                      (MAX 359.99)             DEGREES
 #                                               (USES 15 BITS FOR MAGNI-
@@ -935,19 +912,24 @@
 #                      (MAX 31.999)              -9
 #                                               2   RADIANS
 
+# -BBB-
+# COMPUTED ALTITUDE 2  XXXXX. FEET           DP BIT 1 OF HIGH REGISTER =
+#                                               2 METERS
 
 # THAT-S ALL ON THE NOUNS.
 
-## Page 24
+## Page 23
 #          ALARM CODES FOR LUMINARY
 
 # *9       *18                                       *60   COLUMN
 
 # CODE   * TYPE                                      SET BY
 
+# 00107    MORE THAN 5 MARK PAIRS                    AOTMARK
 # 00111    MARK MISSING                              AOTMARK
 # 00112    MARK OR MARK REJECT NOT BEING ACCEPTED    AOTMARK
 # 00113    NO INBITS                                 AOTMARK
+# 00114    MARK MADE BUT NOT DESIRED                 AOTMARK
 # 00115    NO MARKS IN LAST PAIR TO REJECT           AOTMARK
 # 00206    ZERO ENCODE NOT ALLOWED WITH COARSE ALIGN IMU MODE SWITCHING
 # 00206     + GIMBAL LOCK.
@@ -982,14 +964,15 @@
 #          OR VEHICLE MANEUVER REQUIRED              R24 (20)
 # 00530  P LOS NOT IN MODE2 COVERAGE                 R21
 #          ON LUNAR SURFACE AFTER 600 SECS.
+# 00555    SERVICER LOOP EXCEEDED 4 SECONDS          SERVICER
 # 00600    IMAGINARY ROOTS ON FIRST ITERATION        P32, P72
 # 00601    PERIGEE ALTITUDE CSI LT PMIN1             P32,P72,
 # 00602    PERIGEE ALTITUDE CDH LT PMIN2             P32,P72,
 # 00603    CSI TO CDH TIME LT TMIN12                 P32,P72,P33,P73
+## Page 24
 # 00604    CDH TO TPI TIME LT TMIN23                 P32,P72,
 # OR COMPUTED CDH TIME GREATER THAN INPUT TP1 TIME
 # 00605    NUMBER OF ITERATIONS EXCEEDS LOOP MAXIMUM P32, P72
-## Page 25
 # 00606    DV EXCEEDS MAXIMUM                        P32,P72,
 # 00611    NO TIG FOR GIVEN ELEV ANGLE               P34,P74
 # 00701    ILLEGAL OPTION CODE SELECTED              P57
@@ -1006,7 +989,6 @@
 #          VECTOR.)                                  S40.8
 # 01410    UNINTENTIONAL OVERFLOW IN GUIDANCE        DESCENT GUIDANCE EQS.
 # 01412    DESCENT IGNALG NOT CONVERGING             P63
-# 01466    INSUF. THROTTLINGS BETWEEN SKIPPED THROTS P66
 # 01520    V37 REQUEST NOT PERMITTED AT THIS TIME    V37
 # 01600    OVERFLOW IN DRIFT TEST                    IMU 4
 # 01601    BAD IMU TORQUE                            OPT PRE ALIGN CALIB
@@ -1038,9 +1020,9 @@
 # 21406    BAD RETURN FROM ROOTPSRS                  IGNITION ALGORITHMN
 # 21501    KEYBOARD AND DISPLAY ALARM DURING         PINBALL
 #            INTERNAL USE(NVSUB).ABORT
+## Page 25
 # THE FOLLOWING CODES INDICATE A BAILOUT ABORT THAT RESULTS IN A SOFTWARE
 # RESTART
-## Page 26
 # 31104    DELAY ROUTINE BUSY                        EXEC
 # 31201    EXECUTIVE OVERFLOW-NO VAC AREAS           EXEC
 # 31202    EXECUTIVE OVERFLOW-NO CORE SETS           EXEC
@@ -1053,7 +1035,7 @@
 # 31502    TWO PRIO DISPLAYS WAITING                 DSP INTRFCE
 # 32000    DAP STILL IN PROGRESS AT NEXT TIME5 RUPT  DAP
 
-## Page 27
+## Page 26
 #          CHECKLIST CODES FOR LUMINARY
 
 # *9      *17      *26                                                    *9   COLUMN
@@ -1063,8 +1045,7 @@
 # 00013   KEY IN   NORMAL OR GYRO TORQUE COARSE ALIGN                     P52
 # 00014   PROCEED  DO IMU FINE ALIGN ROUTINE                              P51,P63,P57
 # 00014   ENTER    DO LANDING SITE  DETERMINATION(N89DISP)                P57OPTION2
-# 00015   PERFORM  CELESTIAL BODY ACQUISITION
-# 00016   PROCEED  DO IMU ALIGN WITH NON-REJECTED DATA        R53         R51,P51
+# 00015   PERFORM  CELESTIAL BODY ACQUISITION                             R51,P51
 # 00062   SWITCH   AGC POWER DOWN                                         P06
 # 00201   SWITCH   RR MODE TO AUTOMATIC                                   P20,P22,R04
 # 00203    SWITCH  GUID CONTROL TO GNC, MODE TO AUTO...                   P12,P42,P71
@@ -1076,7 +1057,7 @@
 #                    PERFORM DENOTES START OR END OF A TASK
 #                    KEY IN DENOTES KEY IN OF DATA THRU THE DSKY
 
-## Page 28
+## Page 27
 #         OPTION CODES FOR LUMINARY
 
 # THE SPECIFIED OPTION CODES WILL BE FLASHED IN COMPONENT R1 IN

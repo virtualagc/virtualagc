@@ -26,6 +26,7 @@
 ##		2017-01-25 RSB	Proofed comment text using octopus/prooferComments
 ##				and fixed errors found.
 ##		2017-03-11 MAS	Corrected errors found during transcription of Luminary 116.
+##		2017-08-11 RSB	Comment-text fixes identified from AP11ROPE.
 
 ## Page 106
 # CONVENTIONS AND NOTATIONS UTILIZED FOR ERASABLE ASSIGNMENTS.
@@ -707,7 +708,7 @@ T5ADR           ERASE           +1                      # GENADR OF NEXT LM DAP 
                                                         # BBCON  OF NEXT LM DAP T5RUPT.   2CADR
 
 
-#          RCS FAILURE MONITOR STORAGE                                  (1)
+#          RCS FAILURE MONITOR STORAGE.                                  (1)
 
 ## Page 122
 PVALVEST        ERASE                                   # B(1)PRM

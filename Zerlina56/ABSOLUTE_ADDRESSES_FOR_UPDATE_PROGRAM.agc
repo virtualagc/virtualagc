@@ -17,12 +17,12 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-07-28 MAS  Created from Luminary 210.
-
-## NOTE: Page numbers below have not yet been updated to reflect Zerlina 56.
+##              2017-08-12 MAS  Updated for Zerlina 56 (there were no changes).
 
 ## Page 1
 # ECADR			MNEMONIC
 # -----			--------
+
 		=ECADR	UPSVFLAG
 		
 		=ECADR	XSMD
