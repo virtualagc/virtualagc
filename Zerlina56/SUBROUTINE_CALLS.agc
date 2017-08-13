@@ -17,19 +17,16 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-07-28 MAS  Created from Luminary 210.
+##              2017-08-12 MAS  Updated for Zerlina 56.
 
-## NOTE: Page numbers below have not yet been updated to reflect Zerlina 56.
-
-## Page 91
-# SUBROUTINE_CALLS
-
-                SUBRO           LUMERASE        176
-                SUBRO           LEMONAID        156
-                SUBRO           LEMP20S         168
-                SUBRO           LEMP30S         105
-                SUBRO           KISSING         067
-                SUBRO           FLY             197
-                SUBRO           LEMP50S         130
-                SUBRO           SKIPPER         131
-                SUBRO           LMDAP           032
+## Page 90
+                SUBRO           ZERASE
+                SUBRO           ZERLAID
+                SUBRO           ZLEMP20S
+                SUBRO           LEMP30S
+                SUBRO           KISSING
+                SUBRO           ZFLY
+                SUBRO           LEMP50S
+                SUBRO           SKIPPER
+                SUBRO           ZLMDAP
 
