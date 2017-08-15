@@ -18,6 +18,8 @@
 ##		2017-02-28 RSB	Lingering typos repaired.
 ##		2017-03-02 RSB	Fixes some comment-text errors noted whilst proofing
 ##				Luminary 116.
+##		2017-08-12 MAS	Fixed a comment text error found while transcribing
+##				Zerlina 56.
 
 ## Page 38
 # DPS AND APS ENGINE PARAMETERS
@@ -37,7 +39,7 @@ ATDECAY		2DEC	-18			# 618 LB-SEC TAILOFF FOR APS
 
 # ************************************************************************
 
-100PCTTO	2DEC	24 B-17			# 100 PERCENT FTP-OPS TAILOFF FOR P70
+100PCTTO	2DEC	24 B-17			# 100 PERCENT FTP-DPS TAILOFF FOR P70
 
 # ************************************************************************
 

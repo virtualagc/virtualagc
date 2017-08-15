@@ -23,6 +23,8 @@
 ##				and corrected the errors found.
 ##		2017-03-15 RSB	Comment-text fixes identified in 5-way
 ##				side-by-side diff of Luminary 69/99/116/131/210.
+##              2017-08-12 MAS  Fixed a comment text error found while transcribing
+##                              Zerlina 56.
 
 ## Page 39
 # DPS AND APS ENGINE PARAMETERS
@@ -42,7 +44,7 @@ ATDECAY         2DEC            -18                     # 618 LB-SEC TAILOFF FOR
 
 # ************************************************************************
 
-100PCTTO        2DEC            24              B-17    # 100 PERCENT FTP-OPS TAILOFF FOR P70
+100PCTTO        2DEC            24              B-17    # 100 PERCENT FTP-DPS TAILOFF FOR P70
 
 # ************************************************************************
 
