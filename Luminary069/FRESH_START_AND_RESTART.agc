@@ -21,6 +21,7 @@
 ##				and fixed errors found.
 ##		2017-03-15 RSB	Comment-text fixes identified in 5-way
 ##				side-by-side diff of Luminary 69/99/116/131/210.
+##		2017-08-15 RSB	Comment-text fixes identified in proofing vs AP11ROPE.
 
 ## Page 226
                 BANK            10
@@ -354,7 +355,7 @@ OCT10000        =               BIT13
 ## Page 233
 OCT30000        =               PRIO30
 OCT7777         OCT             7777
-STIKSTRT        DEC             0.825268                # 20 D/S MAXIMUM COMPANDED RATE
+STIKSTRT        DEC             0.825268                # 20 D/S MAXIMUM COMMANDED RATE
 RATESTRT        DEC             -218
 RACTCADR        CADR            RESTARTS
 BOOLSTRT        OCT             21312

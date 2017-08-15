@@ -21,6 +21,7 @@
 ##              2017-03-19 HG   Fix mixed up operands -PHASE1 --> -PHASE5
 ##                                                    -PHASE5 --> -PHASE1
 ##                              Value for BOOLSTRT reconstructed from core/rope listing  OCT 21312 -> OCT 21322
+##		2017-08-15 RSB	Comment-text fixes identified in proofing vs AP11ROPE.
 
 ## Page 212
                 BANK            10
@@ -363,7 +364,7 @@ PTBAD           TC              ALARM                           # SET ALARM TO S
 OCT10000        =               BIT13
 OCT30000        =               PRIO30
 OCT7777         OCT             7777
-STIKSTRT        DEC             0.825268                        # 20 D/S MAXIMUM COMPANDED RATE
+STIKSTRT        DEC             0.825268                        # 20 D/S MAXIMUM COMMANDED RATE
 RATESTRT        DEC             -218
 RACTCADR        CADR            RESTARTS
 BOOLSTRT        OCT             21322
