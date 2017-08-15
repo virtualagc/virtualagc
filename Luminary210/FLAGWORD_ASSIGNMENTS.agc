@@ -19,7 +19,8 @@
 ##				and corrected the errors found.
 ##		2017-03-02 RSB	Fixed comment-text errors noticed while proofing
 ##				Luminary 116.
-
+##		2017-08-13 MAS	Fixed comment text and label errors found while
+##				transcribing Zerlina 56.
 ## Page 63
 #         FLAGWORDS 0-11 ARE DOWNLINKED AND CAN BE SET AND CLEARED BY UP-FLAG AND DOWN-FLAG INSTRUCTIONS IN THE
 #                        INTERPRETER. THESE WERE PREVIOUSLY LISTED UNDER "INTERPRETIVE SWITCH BIT ASSIGNMENTS" IN
@@ -146,7 +147,7 @@
 # NEWIFLG       122             BIT 13 FLAG 8           NEWIBIT
 # NJETSFLG      015             BIT 15 FLAG 1           NJETSBIT
 # NODOFLAG      044             BIT 1  FLAG 2           NODOBIT
-# NODOPC7       049             BIT 11 FLAG 3           NOPO7BIT
+# NODOP07       049             BIT 11 FLAG 3           NOP07BIT
 # NOLRREAD      170             BIT 10 FLAG 11          NOLRRBIT
 # NORMSW        110             BIT 10 FLAG 7           NORMSBIT
 # NORRMON       086             BIT 4  FLAG 5           NORRMBIT
@@ -193,7 +194,7 @@
 # RNGEDATA      176             BIT 4  FLAG 11          RNGEDBIT
 # RNGSCFLG      080             BIT 10 FLAG 5           RNGSCBIT
 # RODFLAG       018             BIT 12 FLAG 1           RODFLBIT
-# ROTFLAG       144             BIT 6  FLAG 9           ROTFLBIT
+# ROTFLAG       144             BIT  6 FLAG 9           ROTFLBIT
 # RPQFLAG       120             BIT 15 FLAG 8           RPQFLBIT
 # RRDATAFL      191             BIT 4  FLAG 12          RRDATABT
 # RRNBSW        009             BIT 6 FLAG 0            RRNBBIT
@@ -522,7 +523,7 @@ LUNABIT         =               BIT12
 #
 
 # BIT 11 FLAG 3 (L)
-NODOPO7        =               049D                    #       SYSTEM TESTS             SYSTEM TESTS
+NODOP07        =               049D                    #       SYSTEM TESTS             SYSTEM TESTS
 NOP07BIT       =               BIT11                   #       NOT ALLOWED              ALLOWED
 
 # BIT 10 FLAG 3 (S)
@@ -844,7 +845,7 @@ FLAGWRD7        =               STATE           +7      #       (105-119)
                                                         #       (SET)                   (RESET)
 
 # BIT 15 FLAG 7 (S)
-ITSWICH         =               105D                    #       R34;TPI TIME TO BE      TPI HAS BEEN
+ITSWICH         =               105D                    #       P34;TPI TIME TO BE      TPI HAS BEEN
 ITSWBIT         =               BIT15                   #       COMPUTED                COMPUTED
 #
 
@@ -1084,7 +1085,7 @@ MIDAVBIT        =               BIT2                    #       PORTALS         
 
 # BIT 1 FLAG 9  (S)
 AVEMIDSW        =               149D                    #       AVETOMID CALLING        NO AVETOMID W INTEGR
-                                                        #       FOR W.MATRIX INTEGR     ALLOW SET UP RM, VN,
+                                                        #       FOR W.MATRIX INTEGR     ALLOW SET UP RN,VN,
 AVEMDBIT        =               BIT1                    #       DONT WRITE OVER RN,     PIPTIME
                                                         #       VN,PIPTIME
 

@@ -22,6 +22,7 @@
 ##				and fixed errors found.
 ##		2017-03-15 RSB	Comment-text fixes identified in 5-way
 ##				side-by-side diff of Luminary 69/99/116/131/210.
+##		2017-08-14 MAS	Fixed a typo found while transcribing Zerlina 56.
 
 ## Page 77
 #          FLAGWORDS 0-11  ARE DOWNLINKED AND CAN BE SET AND CLEARED BY UP-FLAG AND DOWN-FLAG INSTRUCTIONS IN THE
@@ -860,7 +861,7 @@ FLAGWRD7        =               STATE           +7      # (105-119)
                                                         # (SET)               (RESET)
 
 # BIT 15 FLAG 7 (S)
-ITSWICH         =               105D                    # R34;TPI TIME TO BE  TPI HAS BEEN
+ITSWICH         =               105D                    # P34;TPI TIME TO BE  TPI HAS BEEN
 ITSWBIT         =               BIT15                   # COMPUTED            COMPUTED
 #
 
