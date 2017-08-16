@@ -15,6 +15,7 @@
 ##				and corrected the errors found.
 ##		2017-03-03 RSB	Snapshot of Luminary 99 Rev 1. 
 ##		2017-03-14 RSB	Comment-text fixes noted in proofing Luminary 116.
+##		2017-08-16 RSB	Comment typo identified in AP11ROPE scans.
 
 ## Page 829
 		BANK	21
@@ -43,7 +44,7 @@ R10,R11A	CS	IMODES33	# IF LAMP TEST, DO NOT CHANGE LR LITES.
 		EXTEND
 		BZF	10,11
 
-FLASHH?		MASK	FLGWRD11	# C(A) = 1 - HFLASH BIT
+FLASHH?		MASK	FLGWRD11	# C(A) = 1 = HFLASH BIT
 		EXTEND
 		BZF	FLASHV?		# H FLASH OFF, SO LEAVE ALONE
 

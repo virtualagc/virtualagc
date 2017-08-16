@@ -24,6 +24,7 @@
 ##				and corrected the errors found.
 ##		2017-03-14 RSB	Comment-text fixes noted in proofing Luminary 116.
 ##		2017-08-01 MAS	Created from LMY99 Rev 1.
+##		2017-08-16 RSB	Comment typo identified in AP11ROPE scans.
 
 ## This source code has been transcribed or otherwise adapted from
 ## digitized images of a hardcopy from the MIT Museum.  The digitization
@@ -72,7 +73,7 @@ R10,R11A	CS	IMODES33	# IF LAMP TEST, DO NOT CHANGE LR LITES.
 		EXTEND
 		BZF	10,11
 
-FLASHH?		MASK	FLGWRD11	# C(A) = 1 - HFLASH BIT
+FLASHH?		MASK	FLGWRD11	# C(A) = 1 = HFLASH BIT
 		EXTEND
 		BZF	FLASHV?		# H FLASH OFF, SO LEAVE ALONE
 
