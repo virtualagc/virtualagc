@@ -17,6 +17,7 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-07-28 MAS  Created from Luminary 210.
+##		2017-08-16 RSB	Fixed comment typo identified in AP11ROPE.
 
 ## NOTE: Page numbers below have not yet been updated to reflect Zerlina 56.
 
@@ -230,7 +231,7 @@ P41LM		CAF	P41ADRES	# INITIALIZATION FOR BURNBABY
 		OCT	04024		# GROUP 4 RESTART HERE, PRIO 13
 		
 		TC	INTPRET		# BOTH LM
-		BON	DLOAD		# IF NJETSFLAG IS SET, LOAD Z JET F
+		BON	DLOAD		# IF NJETSFLAG IS SET, LOAD 2 JET F
 			NJETSFLG
 			P41FJET1
 			FRCS4		# IF NJETSFLAG IS CLEAR, LOAD 4 JET F

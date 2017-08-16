@@ -23,6 +23,7 @@
 ##				and fixed errors found.
 ##		2017-03-16 RSB	Comment-text fixes identified in 5-way
 ##				side-by-side diff of Luminary 69/99/116/131/210.
+##		2017-08-16 RSB	Fixed comment typo identified in AP11ROPE.
 
 ## Page 759
 # PROGRAM DESCRIPTION  P40BOTH    DECEMBER 22, 1966
@@ -222,7 +223,7 @@ P41LM           CAF             P41ADRES                # INITIALIZATION FOR BUR
                 CADR            R02BOTH
 
                 TC              INTPRET                 # BOTH LM
-                BON             DLOAD                   # IF NJETSFLAG IS SET, LOAD Z JET F
+                BON             DLOAD                   # IF NJETSFLAG IS SET, LOAD 2 JET F
                                 NJETSFLG
                                 P41FJET1
                                 FRCS4                   # IF NJETSFLAG IS CLEAR, LOAD 4 JET F
