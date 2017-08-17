@@ -17,10 +17,9 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-07-28 MAS  Created from Luminary 210.
+##              2017-08-17 MAS  Updated for Zerlina 56 (no changes).
 
-## NOTE: Page numbers below have not yet been updated to reflect Zerlina 56.
-
-## Page 163
+## Page 159
                 SETLOC          4000
 
                 COUNT*          $$/RUPTS                # FIX-FIX LEAD INS
@@ -71,7 +70,7 @@
 
                 DXCH            ARUPT                   # RADAR RUPT
                 CAF             RDRPTBB
-## Page 164
+## Page 160
                 XCH             BBANK
                 TCF             RADAREAD
 
@@ -80,11 +79,13 @@
                 XCH             BBANK
                 TCF             PITFALL
 
-                EBANK=          LST1                    # RESTART USES E0,E3
+
+                EBANK=          LST1                    # RESTART USES E0, E3
 GOBB            BBCON           GOPROG
 
                 EBANK=          PERROR
 T6ADR           2CADR           DOT6RUPT
+
 
                 EBANK=          LST1
 T3RPTBB         BBCON           T3RUPT
@@ -108,4 +109,3 @@ T4RPTBB         BBCON           T4RUPT
 
                 EBANK=          ELVIRA
 RUPT10BB        BBCON           PITFALL
-

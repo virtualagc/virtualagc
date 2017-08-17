@@ -17,10 +17,9 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-07-28 MAS  Created from Luminary 210.
+##              2017-08-17 MAS  Updated for Zerlina 56.
 
-## NOTE: Page numbers below have not yet been updated to reflect Zerlina 56.
-
-## Page 161
+## Page 157
 # THIS LIST IS MAINTAINED TO ENSURE THAT CERTAIN ERASABLE LOCATIONS
 # ARE LOCATED AT A SPECIFIED DISTANCE FROM ANOTHER ERASABLE LOCATION
 # AS REQUIRED BY THE STRUCTURE OF THE DOWNLINK LISTS:
@@ -39,7 +38,7 @@
 # THIS LIST SHOULD BE UPDATED FOR ANY CHANGES TO THE DOWNLINK LISTS.
 
 # THIS LIST IS MAINTAINED BY  SUMNER ROSENBERG
-#
+
 
 TIME1           CHECK=          TIME2           +1
 CDUY            CHECK=          CDUX            +1
@@ -51,7 +50,7 @@ PIPAZ           CHECK=          PIPAY           +1
 DAPBOOLS        CHECK=          RADMODES        +1
 LASTXCMD        CHECK=          LASTYCMD        +1
 THETAD          CHECK=          REDOCTR         +1
-FAILREG         CHECK=          CHANBKUP        +1
+FAILREG         CHECK=          CADRFLSH        +3
 UPOLDMOD        CHECK=          COMPNUMB        +1
 UPVERB          CHECK=          UPOLDMOD        +1
 UPCOUNT         CHECK=          UPVERB          +1
@@ -71,8 +70,7 @@ BESTJ           CHECK=          BESTI           +1
 OMEGAQ          CHECK=          OMEGAP          +1
 OMEGAR          CHECK=          OMEGAQ          +1
 ALPHAR          CHECK=          ALPHAQ          +1
-
-## Page 162
+## Page 158
 NEGTORKP        CHECK=          POSTORKP        +1
 NEGTORKU        CHECK=          POSTORKU        +1
 POSTORKV        CHECK=          NEGTORKU        +1
@@ -107,4 +105,3 @@ DCDU            CHECK=          CDUXD
 DELVLVC         CHECK=          DELVSLV
 MARKCTR         CHECK=          TRKMKCNT
 VGPREV          CHECK=          VGTIG
-CH6MASK         CHECK=          CH5MASK         +1
