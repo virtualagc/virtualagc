@@ -22,7 +22,7 @@
 ##				and fixed all errors found.
 ##		2017-01-26 RSB	Back-ported comment-text fixes found while
 ##				proofing corresponding Luminary 69 file.	
-
+##		2017-08-18 RSB	Fixed comment-text error identified in ZERLINA 56.
 ## Page 204
                 BANK            22
                 SETLOC          DOWNTELM
@@ -580,7 +580,7 @@ AGSI/UPD        EQUALS                                  # SEND IO BY SPECIAL COD
                 6DNADR          DNTMBUFF                # SEND SNAPSHOT
                 DNPTR           LMAGSI04                # COMMON DATA
                 2DNADR          POSTORKU                # POSTORKU,NEGTORKU,POSTORKV,NEGTORKV
-                1DNADR          SERVDURN                # SERVDURN.DUMLOOPS
+                1DNADR          SERVDURN                # SERVDURN,DUMLOOPS
                 1DNADR          ALMCADR                 # ALMCADR,+1
                 1DNADR          AGSK                    # AGSK,+1
                 6DNADR          UPBUFF                  # UPBUFF+0...+11D
