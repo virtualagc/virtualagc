@@ -16,6 +16,7 @@
 ##              2016-11-21 HG   Transcribed
 ##		2016-12-23 RSB	Proofed comment text with octopus/ProoferComments
 ##				and fixed all errors found.
+##		2017-08-18 RSB	Comment-text bug identified in ZERLINA 56.
 
 ## Page 201
 # PROGRAM DESCRIPTION
@@ -56,7 +57,7 @@ RCSMONEX        EQUALS          RESUME
 #                            CH5MASK,CH6MASK   = +0  (ALL JETS OK)
 
 # OUTPUT:  CH5MASK & CH6MASK UPDATED  (1'S WHERE JETS NOT TO BE USED, IN CHANNEL 5 & 6 FORMAT)
-#          PVALTEST UPDATED  (1'S WHEN VALVE CLOSURES HAVE BEEN TRANSLATED INTO CH5MASK & CH6MASK; CHAN 32 FORMAT)
+#          PVALTEST UPDATED  (1,S WHEN VALVE CLOSURES HAVE BEEN TRANSLATED INTO CH5MASK & CH6MASK; CHAN 32 FORMAT)
 #          JOB TO DO 1/ACCS.
 
 # DEBRIS:  A, L, Q AND DEBRIS OF NOVAC.

@@ -10,6 +10,12 @@
 # Mod history:	2009-05-05 RSB	Adapted from Luminary131/MAIN.agc.
 #		2016-11-03 RSB	Removed duplicate page #1.
 #		2017-01-28 RSB	Renamed STABLE_ORBIT.agc.
+#		2017-08-17 RSB	The entire Luminary099 source code has
+#				now had its comment-text proofed vs scans
+#				of AP11ROPE.  Unlike my usual behavior,
+#				I haven't made any notation of this fact in
+#				individual source files, except for the handful
+#				of files in which corrections were made. 
 #
 # The contents of the "Luminary099" files, in general, are
 # transcribed from a digital images created from a hardcopy of the program

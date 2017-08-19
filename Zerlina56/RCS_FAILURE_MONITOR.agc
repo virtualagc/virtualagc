@@ -17,10 +17,9 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-07-28 MAS  Created from Luminary 210.
+##		2017-08-18 RSB	Transcribed.
 
-## NOTE: Page numbers below have not yet been updated to reflect Zerlina 56.
-
-## Page 201
+## Page 196
 # PROGRAM DESCRIPTION
 
 # AUTHOR: J S MILLER
@@ -56,10 +55,10 @@ RCSMONEX        EQUALS          RESUME
 # ERASABLE INITIALIZATION REQUIRED:
 
 #          VIA FRESH START:  PVALVEST          = +0  (ALL JETS ENABLED)
-#                            CH5MASK,CH6MASK   = +0  (ALL JETS OK)
+#                            CH5MASK, CH6MASK  = +0  (ALL JETS OK)
 
 # OUTPUT:  CH5MASK & CH6MASK UPDATED  (1'S WHERE JETS NOT TO BE USED, IN CHANNEL 5 & 6 FORMAT)
-#          PVALTEST UPDATED  (1'S WHEN VALVE CLOSURES HAVE BEEN TRANSLATED INTO CH5MASK & CH6MASK; CHAN 32 FORMAT)
+#          PVALTEST UPDATED  (1,S WHEN VALVE CLOSURES HAVE BEEN TRANSLATED INTO CH5MASK & CH6MASK; CHAN 32 FORMAT)
 #          JOB TO DO 1/ACCS.
 
 # DEBRIS:  A, L, Q AND DEBRIS OF NOVAC.
@@ -72,7 +71,7 @@ RCSMONEX        EQUALS          RESUME
                 SETLOC          RCSMONT
                 BANK
 
-## Page 202
+## Page 197
                 COUNT*          $$/T4RCS
 
 RCSMONIT        EQUALS          RCSMON
@@ -124,7 +123,7 @@ RCSMON          CS              ZERO
 
                 TCF             1/ACCFIX                # SET UP 1/ACCJOB AND EXIT.
 
-## Page 203
+## Page 198
 VOPENED         INDEX           L                       # A VALVE HAS JUST BEEN OPENED.
                 CS              5FAILTAB
                 MASK            CH5MASK

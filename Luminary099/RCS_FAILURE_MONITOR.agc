@@ -12,6 +12,7 @@
 ##		2016-12-13 RSB	Proofed text comments with octopus/ProoferComments
 ##				and corrected the errors found.
 ##		2017-03-14 RSB	Comment-text fixes noted in proofing Luminary 116.
+##		2017-08-18 RSB	Comment-text bug identified in ZERLINA 56.
 
 ## This source code has been transcribed or otherwise adapted from
 ## digitized images of a hardcopy from the MIT Museum.  The digitization
@@ -68,7 +69,7 @@ RCSMONEX	EQUALS	RESUME
 #				CH5MASK,CH6MASK	=	+0	(ALL JETS OK)
 #
 # OUTPUT:	CH5MASK & CH6MASK UPDATED (1'S WHERE JETS NOT TO BE USED, IN CHANNEL 5 & 6 FORMAT)
-#		PVALTEST UPDATED (1'S WHEN VALVE CLOSURES HAVE BEEN TRANSLATED INTO CH5MASK & CH6MASK; CHAN 32 FORMAT)
+#		PVALTEST UPDATED (1,S WHEN VALVE CLOSURES HAVE BEEN TRANSLATED INTO CH5MASK & CH6MASK; CHAN 32 FORMAT)
 #		JOB TO DO 1/ACCS.
 #
 # DEBRIS:  A, L, Q AND DEBRIS OF NOVAC.
