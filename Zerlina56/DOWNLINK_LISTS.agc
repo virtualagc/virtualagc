@@ -18,6 +18,7 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-07-28 MAS  Created from Luminary 210.
 ## 		2017-08-18 RSB	Transcribed.
+## 		2017-08-19 MAS	Fixed an incorrect operator.
 
 ## Page 199
                 BANK            22
@@ -234,7 +235,7 @@ LMCSTA03        EQUALS          LMORBM03                # COMMON DOWNLIST DATA
 
 LMCSTA04        EQUALS          LMORBM04                # COMMON DOWNLIST DATA
 
-LMCSTA05        2DNADR          LMORBM05		# COMMON DOWNLIST DATA
+LMCSTA05        EQUALS          LMORBM05		# COMMON DOWNLIST DATA
 
 LMCSTA06        2DNADR          X789                    # X789+0...+3              COMMON DATA
                 -1DNADR         LASTYCMD                # LASTYCMD,LASTXCMD
