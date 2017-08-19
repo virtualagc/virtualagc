@@ -2,9 +2,9 @@
 ## Copyright:   Public domain.
 ## Filename:    AOTMARK.agc
 ## Purpose:     A log section of Zerlina 56, the final revision of
-##              Don Eyles's offline development program for the variable 
-##              guidance period servicer. It also includes a new P66 with LPD 
-##              (Landing Point Designator) capability, based on an idea of John 
+##              Don Eyles's offline development program for the variable
+##              guidance period servicer. It also includes a new P66 with LPD
+##              (Landing Point Designator) capability, based on an idea of John
 ##              Young's. Neither of these advanced features were actually flown,
 ##              but Zerlina was also the birthplace of other big improvements to
 ##              Luminary including the terrain model and new (Luminary 1E)
@@ -17,10 +17,10 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-07-28 MAS  Created from Luminary 210.
+##              2017-08-19 MAS  Updated for Zerlina 56.
 
-## NOTE: Page numbers below have not yet been updated to reflect Zerlina 56.
-
-## Page 255
+## Page 251
+                BANK            12
                 SETLOC          AOTMARK1
                 BANK
 
@@ -28,10 +28,16 @@
                 COUNT*          $$/MARK
 
 AOTMARK         INHINT
-                CAF             SIX                     # SEE IF EXT. VERB WORKING
+                CCS             MARKSTAT                # SEE IF AOTMARK BUSY
+                TC              +2                      # MARK SYSTEM BUSY-DO ALARM
+                TC              EXTVBCHK
+                TC              POODOO
+                OCT             20105
+
+EXTVBCHK        CAF             SIX                     # SEE IF EXT. VERB WORKING
                 MASK            EXTVBACT
                 CCS             A
-                TCF             MKABORT                 # YES - ABORT
+                TCF             MKABORT                 # YES-ABORT
 
                 CAF             BIT2                    # NO-DISALLOW SOME EXTENDED VERB ACTION
                 ADS             EXTVBACT                # BIT2 RESET IN ENDMARK
@@ -50,7 +56,7 @@ MKVAC           CCS             VAC1USE                 # LOOK FOR A VAC AREA-DO
                 OCT             31207
 
 MKVACFND        AD              TWO
-                TS              MARKSTAT                # STORE VAC ADR INLOW 9 OF MARKSTAT
+                TS              MARKSTAT                # STORE VAC ADR IN LOW 9 OF MARKSTAT
 
                 CAF             ZERO
                 INDEX           MARKSTAT
@@ -61,17 +67,17 @@ MKVACFND        AD              TWO
                 EBANK=          XYMARK
                 2CADR           GETDAT
 
+
                 RELINT
                 TCF             SWRETURN
 
+## Page 252
 MKABORT         DXCH            BUF2
                 TC              BAILOUT1                # CONFLICT WITH EXTENDED VERB
                 OCT             31211
 
 MKRELEAS        CAF             ZERO
                 XCH             MARKSTAT                # SET MARKSTAT TO ZERO
-
-## Page 256
                 MASK            LOW9                    # PICK UP VAC AREA ADR
                 CCS             A
                 INDEX           A
@@ -80,18 +86,15 @@ MKRELEAS        CAF             ZERO
                 TC              IBNKCALL
                 CADR            GOODEND                 # GO WAKE UP CALLING JOB
 
+## Page 253
 KILLAOT         CAF             ZERO
                 TS              EXTVBACT                # TERMINATE AOTMARK-ALLOW EXT VERB
                 TC              GOTOPOOH
-
-## Page 257
-# GETDAT ROUTINE
-
 GETDAT          CS              MARKSTAT                # SET BIT12 TO DISCOURAGE MARKRUPT
                 MASK            BIT12                   #   BIT12 RESET AT GETMARK
                 ADS             MARKSTAT
 
-N71DISP         CAF             V01N71                  # DISPLAY DETENT AND STAR CODE
+                CAF             V01N71                  # DISPLAY DETENT AND STAR CODE
                 TC              BANKCALL
                 CADR            GOMARKF
 
@@ -134,9 +137,8 @@ CODE1TO6        INDEX           XYMARK                  # INDEX AOT POSITION BY 
                 TS              9D                      # STORE ELEVATION IN VAC+9D
 
                 INDEX           XYMARK                  # INDEX DET CODE 1,2 OR 3
+## Page 254
                 CA              AOTAZ           -1
-
-## Page 258
                 INDEX           FIXLOC
                 TS              8D                      # STORE AZIMUTH IN VAC +8D
 
@@ -149,16 +151,17 @@ COASCODE        INDEX           FIXLOC
 
                 TC              INTPRET                 # COMPUTE X AND Y PLANE VECTORS
 
-                CLEAR           GOTO
-                                XDSPFLAG
-                                OPTAXIS
-
-## Page 259
+## Page 255
 # THE OPTAXIS SUBROUTINE COMPUTES THE X AND Y MARK PLANE VECS AND
 # AND ROTATES THEM THRU THE APPARENT FIELD OF VIEW ROTATION UNIQUE TO AOT
 # OPTAXIS USES OANB TO COMPUTE THE OPTIC AXIS
-                SETLOC          P50S1
-                BANK
+#  INPUT-AZIMUTH ANGLE IN SINGLE PREC AT CDU SCALE IN 8D OF JOB VAC
+#        ELEVATION ANGLE IN SINGLE PREC AT CDU SCALE IN 9D OF JOB VAC
+#        ROTATION ANGLE IN SINGLE PREC 1S COMP SCALED BY PI IN 10D OF VAC
+#  OUTPUT-OPTIC AXIS VEC IN NB COORDS IN SCAXIS
+#         X-MARK PLANE 1/4VEC IN NB COORDS AT 18D OF JOB VAC
+#         Y-MARK PLANE 1/4VEC IN NB COORDS AT 12D OF JOB VAC
+
 
 OPTAXIS         CALL                                    # GO COMPUTE OA AND X AND Y PLANE VECS
                                 OANB
@@ -172,36 +175,28 @@ OPTAXIS         CALL                                    # GO COMPUTE OA AND X AN
                                 0
                                 24D                     # 1/4SIN(ROT)UXP
                 BVSU            STADR                   # UP 4-9
-                STODL           YPLANE                  # YPNB=1/4(COS(ROT)UYP-SIN(ROT)UXP)
-                VXSC            PDDL                    # UP 2-3 UP 0-1   FOR EXCHANGE
+                STODL           12D                     # YPNB=1/4(COS(ROT)UYP-SIN(ROT)UXP)
+                VXSC            PDDL                    # UP 2-3  UP 0-1  FOR EXCHANGE
                                 24D                     # 1/4COS(ROT)UXP  PUSH 0-5
                 VXSC            VAD                     # 1/4SIN(ROT)UYP
                                 18D                     # UP 0-5
                 STADR
-                STOVL           XPLANE
+                STOVL           18D                     # XPNB=1/4(COS(ROT)UXP+SIN(ROT)UYP)
                                 LO6ZEROS                # INITIALIZE AVE STAR VEC ACCUMULATOR
-                STORE           STARSAV2
-                BOFF            EXIT                    # IF INFLIGHT &KM MARKING GET SIGHTING
-                                FLT59FLG                # BODY VECTOR FOR THET EST IN ITERATION
-                                ENDAXIS                 # LOOP
-                EBANK=          XSM
-                CA              EBANK5
-                TS              EBANK                   # PLANET ROUTINE USES EBANK5
-                TC              INTPRET
-                RTB             CALL
-                                LOADTIME
-                                PLANET
-                STORE           BODY
-ENDAXIS         EXIT
-                EBANK=          XYMARK
-                CA              EBANK7                  # RESTORE EBANK IN CASE OF PLANET BRANCH
-                TS              EBANK
-                TC              BANKCALL
-                CADR            GETMKS
+                STORE           STARAD          +6
+                EXIT
+                TCF             GETMKS
 
-## Page 260
-# THE OANB ROUTINE COMPUTES THE OPTIC AXIS OF THE SIGHTING INSTRUMENT
+## Page 256
+# THE OANB SUBROUTINE COMPUTES THE OPTIC AXIS OF THE SIGHTING INSTRUMENT
 # FROM AZIMUTH AND ELEVATION INPUT FROM THE ASTRONAUT.
+#    INPUT- AZIMUTH ANGLE IN SINGLE PREC 2S COMP IN 8D OF JOB VAC
+#           ELEVATION ANGLE IN SINGLE PREC 2S COMP IN 9D OF VAC
+#    OUTPUT-OPTIC AXIS IN NB COORDS. IN SCAXIS
+#           X-PLANE 1/2VEC IN NB COORDS AT 24D OF VAC
+#           Y-PLANE 1/2VEC IN NB COORDS AT 18D OF VAC
+
+                BANK            05
                 SETLOC          AOTMARK2
                 BANK
 
@@ -214,7 +209,7 @@ OANB            SETPD           STQ
                                 9D                      # PICK UP SP ELV
                                 CDULOGIC
                 PUSH            COS
-                PDDL            SIN                     # 1/2COS(ELV)   PD 0-1
+                PDDL            SIN                     # 1/2COS(ELV)  PD 0-1
                 STADR
                 STODL           SCAXIS                  # OAX=1/2SIN(ELV)
                                 8D                      # PICK UP AZ SP
@@ -240,233 +235,93 @@ OANB            SETPD           STQ
                 GOTO
                                 GCTR
 
-## Page 261
+## Page 257
 #    SURFSTAR COMPUTES A STAR VECTOR IN SM COORDINATES FOR LUNAR
 #    SURFACE ALIGNMENT AND EXITS TO AVEIT TO AVERAGE STAR VECTORS.
+#    GIVEN X-MARK PLANE 1/4 VEC IN NB AT 18D OF LOCAL VAC
+#          Y-MARK PLANE 1/4 VEC IN NB AT 12D OF LOCAL VAC
+#          CURSOR SP 2COMP AT POSITION 1 OF INDEXED MARKVAC
+#          SPIRAL SP 2COMP AT POSITION 3 OF INDEXED MARKVAC
+#          CDUY,Z,X AT POSITIONS 0,2,4 OF INDEXED MARKVAC
+                BANK            15
                 SETLOC          P50S
                 BANK
                 COUNT*          $$/R59
 
-SURFSTAR        SSP             AXT,2                   # INITIALIZE LOOP COUNTER (X1)
-                                S2
-                                1
-                                28D
-                CLEAR           DLOAD
-                                FREEFLAG
-                                ONEDEG
-                STOVL*          DELTHET
-                                0,1                     # PICK UP CURSOR MARK CDUS
-                STODL*          CDUSPOT
-                                7,1                     # PICK UP SPIRAL FROM MK VAC
-                RTB
+SURFSTAR        VLOAD*
+                                0,1                     # PUT X-MARK CDUS IN CDUSPOT FOR TRG*NBSM
+                STORE           CDUSPOT
+                SLOAD*          RTB
+                                1,1                     # PICK UP YROT
                                 CDULOGIC
-                STCALL          8D                      # SPIRAL IN REVS
-                                ROTCOMP
-                STODL*          POINTVSM                # YPRIME VEC FOR SROT MEAS. COORDS.
-                                6,1                     # PICK UP CURSOR
-                RTB
+                STORE           24D                     # STORE CURSOR FOR SPIRAL COMP (REVS)
+                BZE
+                                YZCHK                   # IF YROT ZERO-SEE IF SROT ZERO
+JUSTZY          PUSH            COS
+                PDDL            SIN                     # 1/2COS(YROT) 0-1
+                VXSC            PDDL                    # UP 0-1  1/8SIN(YROT)UXP  0-5
+                                18D
+                VXSC            VSU                     # UP   0-5
+                                12D                     # UYP
+                UNIT            VXV
+                                SCAXIS
+                UNIT            PUSH
+                SLOAD*          RTB
+                                3,1                     # PICK UP SPIRAL
                                 CDULOGIC
-                STCALL          10D                     # CURSOR IN REVS
-                                ROTCOMP                 # COMPUTE YP VEC(NB)
-                CALL
-                                TRG*NBSM                # TRANSFORM YP VEC TO SM AT YROT MARK
-                STOVL*          STARAD          +6
-                                1,1                     # PICK UP SPIRAL CDUS
-                STCALL          CDUSPOT                 # GET SINES AND COSINES OF CDUS
-                                CD*TR*G
-                BON             DLOAD
-                                FLT59FLG
-                                FLTTHET
-                                8D                      # COMPUTE INITIAL THETA EST
+                STORE           26D                     # STORE SPIRAL (REVS)
                 DSU             DAD
-                                10D
+                                24D
                                 ABOUTONE
-THETRET         STORE           THETEST                 # INITIAL THET EST MUST BE BETWEEN
-                DSU             BPL                     # 24 AND 342 DEGREES
-                                DEG342
-                                COOLIT
-                DLOAD           DSU
-                                THETEST
-                                DEG24
-                BMN             CALL
-                                COOLIT
-                                SNBCOMP                 # POMPUTE 2ST EST OF STAR(SM)
-
-## Page 262
-                DOT             SL1
-                                STARAD          +6
-SNBTEST         STORE           ESTER1                  # SEE IF STAR IN YROT PLANE
-                ABS             DSU
-                                COS.01
-                BMN             DLOAD
-                                AVEIT                   # LESS THAN EPSILON, GOT STAR(SM) IN 24D
-                                DELTHET
-                DAD
-                                THETEST                 # INCREMENT THETA EST BY 1 DEG
-                STCALL          THETEST
-                                SNBCOMP                 # COMPUTE 2ND EST OF STAR VEC
-                DOT             SL1
-                                STARAD          +6
-                STORE           ESTER2                  # SEE IF SOLUTION BETWEEN ESTER1, ESTER2
-                BMN             DLOAD
-                                NEGEST2
-                                ESTER1
-                BPL             GOTO
-                                WHICHWAY                # NO SOLU, ARE WE GOING IN RIGHT DIRECTION
-                                HOMEIN                  # SOLUTION BRACKETED, GET FINE CORRECTION
-NEGEST2         DLOAD           BMN
-                                ESTER1
-                                WHICHWAY
-HOMEIN          DSU             PDDL
-                                ESTER2
-                                ESTER2
-                DDV
                 DMP
-                                DELTHET
-                STCALL          DELTHET                 # FINE SOLUTION, THIS SHOULD GET SNB
-                                NEXTIT
-
-WHICHWAY        ABS             PDDL                    # ABS(ESTER1) 0-1
-                                ESTER2
-                ABS             BDSU                    # ABS(ESTER1)-ABS(ESTER2)
-                BPL             BONSET
-                                NEXTIT
-                                FREEFLAG
-                                COOLIT
-                DLOAD           DCOMP                   # REVERSE DIRECTION OF ESTIMATION
-                                DELTHET
-                STORE           DELTHET
-NEXTIT          DLOAD           TIX,2                   # SEE IF 10 ITERATIONS HAVE BEEN MADE
-                                ESTER2
-                                SNBTEST
-COOLIT          EXIT
-                INCR            NOMKCNT
-                TC              BANKCALL
-                CADR            COOLOUT
-
-## Page 263
-ROTCOMP         PUSH            COS                     # COS(ROT) 0-1
-                PDDL            SIN                     # 1/8SIN(ROT)XP 0-5  1/2COS(ROT)  MPAC
-                VXSC            PDDL
-                                XPLANE
-                VXSC            VSU
-                                YPLANE
-                UNIT            RVQ                     # 1/2UNIT(VEC) IN MPAC
-
-DEG342          2DEC            .94999999
-DEG24           2DEC            .06666666
-COS.01          2DEC            .0001745
-ABOUTONE        2DEC            .99999999
-ONEDEG          2DEC            .00277777
-
-
-                SETLOC          AOTMARK3
-                BANK
-
-FLTTHET         VLOAD           MXV
-                                BODY
-                                REFSMMAT                # FOR INFLIGHT P57 MARKING COMPUTE INITIAL
-                UNIT            CALL                    # THET EST BY 12(STAR X OPTAXIS)
-                                *SMNB*
-                DOT             SL1
-                                SCAXIS
-                ARCCOS          DMP
-                                3/4                     # 12 SCALED BY 16
-                SL4             GOTO
-                                THETRET
-
-## Page 264
-# SUBROUTINE TO COMPUTE STAR VEC IN NB COORDINATES
-                SETLOC          P50S1
-                BANK
-
-SNBCOMP         STQ
-                                QMIN
-                DLOAD           DMP
-                                THETEST
                                 DP1/12
-                PUSH            COS                     # COS(T/12) 0-1
-                PDDL            SIN
-                PDDL            PUSH                    # SIN(T/12) 2-3
-                                THETEST
-                SIN             PDDL                    # SIN(T) 4-5
-                COS             DMP
-                                2                       # COS(T)SIN(T/12) 6-7
-                PDVL            VXV
-                                POINTVSM
+                STORE           26D                     # SEP=(360 + SPIRAL - CURSOR)/12
+                SIN             VXSC                    # UP  0-5
+                VSL1            PDDL                    # 1/2SIN(SEP)(UPP X OA)  0-5
+                                26D
+                COS             VXSC
                                 SCAXIS
-                VSL1            VXSC                    # UP 6-7
-                STADR
-                STODL           24D                     # COS(T)SIN(T/12)(YP X OA)
-                DMP					# UP 4-5  UP 2-3
-                VXSC            BVSU
-                                POINTVSM                # SIN(T)SIN(T/12)YP
-                                24D
-                STODL           24D
-                VXSC            VSR1                    # UP 0-1
-                                SCAXIS
-                VAD             UNIT
-                                24D
-                STCALL          24D                     # STAR(NB)
-                                *NBSM*
-                STORE           24D                     # STAR(SM)
-                GOTO
-                                QMIN
+                VSL1            VAD                     # UP  0-5
+JUSTOA          UNIT            CALL
+                                TRG*NBSM
+                STCALL          24D                     # STAR VEC IN SM
+                                AVEIT                   # GO AVERAGE
 
-DP1/12          2DEC            .083333333
+## Page 258
+ABOUTONE        2DEC            .99999999
 
-## Page 265
-# GETMKS ROUTINE
+DP1/12          EQUALS          DEG30                   # .08333333
+                BANK            7
                 SETLOC          AOTMARK1
                 BANK
                 COUNT*          $$/MARK
+YZCHK           SLOAD*          BZE                     # YROT ZERO AND IF SROT ZERO FORCE STAR
+                                3,1                     # ALONG OPTIC AXIS
+                                YSZERO
+                DLOAD           GOTO
+                                24D
+                                JUSTZY                  # SROT NOT ZERO-CONTINUE NORMALLY
+YSZERO          VLOAD           GOTO
+                                SCAXIS
+                                JUSTOA
+
+## Page 259
+# THE GETMKS ROUTINE INITIALIZES THE SIGHTING MARK PROCEDURE
 
 GETMKS          CAF             ZERO                    # INITIALIZE MARK ID REGISTER AND MARK CNT
-                TS              NOMKCNT
-                TS              XCOUNT
-                TS              YCOUNT
                 TS              XYMARK
-                TS              XMKCNTR
-                TS              YMKCNTR
-                CS              FLAGWRD8
-                MASK            BIT8
-                EXTEND
-                BZF             SETSURF                 # SURFFLAG FLAG SET, JAM ONE IN WHATMARK
-                CA              FLAGWRD9
-                MASK            BIT4                    # SEE IF CURSOR-SPIRAL MARKING
-                CCS             A
-SETSURF         CA              ONE
-                TS              WHATMARK
-
-PASTIT          CAF             LOW9                    # FREE UP MARKRUPT RETAINING MKVAC ADR
+                TS              MARKCNTR
+                CAF             LOW9                    # ZERO BITS10 TO 15 RETAINING MKVAC ADR
                 MASK            MARKSTAT
                 TS              MARKSTAT
-                INDEX           WHATMARK
-                CAF             MKVB54                  # DISPLAY MARK REQUEST
-                TC              BANKCALL
-                CADR            GOMARK2
+                CAF             MKVB54*                 # DISPLAY VB54 INITIALLY
+PASTIT          TC              BANKCALL
+                CADR            GOMARK4
 
                 TCF             KILLAOT                 # V34-DOES GOTOPOOH
                 TCF             MARKCHEX                # VB33-PROCEED, GOT MARKS, COMPUTE LOS
-                CS              BIT6
-                MASK            MPAC
-                EXTEND
-                BZF             GETDAT                  # VB32 RECYCLE TO V01N71
-                CS              WHATMARK                # ENTER-REVERSE CURSOR OR SPIRAL REQUEST
-                TS              WHATMARK
-                CCS             XYMARK
-                TCF             +2                      # IF ONE, SET ZERO
-                CAF             ONE                     # IF ZERO, SET ONE
-                TS              XYMARK
-PREPAST         EXTEND
-                DCA             XMKCNTR
-                DXCH            XCOUNT                  # UPDATE DISPLAY COUNTERS
-                CAF             BIT13
-                INDEX           XYMARK
-                ADS             XCOUNT
-                TCF             PASTIT
+                TCF             GETDAT                  # ENTER-RECYCLE TO V01N71
 
-## Page 266
 MARKCHEX        CS              MARKSTAT                # SET BIT12 TO DISCOURAGE MARKRUPT
                 MASK            BIT12
                 ADS             MARKSTAT
@@ -474,24 +329,24 @@ MARKCHEX        CS              MARKSTAT                # SET BIT12 TO DISCOURAG
                 TS              XYMARK                  # JAM MARK VAC ADR IN XYMARK FOR AVESTAR
                 CAF             ZERO
                 TS              MKDEX                   # SET MKDEX ZERO FOR LOS VEC CNTR
-                CCS             XMKCNTR
-                TCF             +2
-                TCF             MKALARM
-                TS              XMKCNTR
-                CCS             YMKCNTR
-                TCF             +2
-                TCF             MKALARM
-                TS              YMKCNTR
-                COM
-                AD              XMKCNTR
+                CA              MARKSTAT
+                MASK            PRIO3                   # SEE IF LAST MK PARI COMPLETE
+                TS              L
+                CAF             PRIO3                   # BITS10 AND 11
                 EXTEND
-                BZMF            AVESTAR
-                CA              YMKCNTR
-                TS              XMKCNTR
+                RXOR            LCHAN
+                EXTEND
+                BZF             AVESTAR                 # LAST PAIR COMPLETE-GO COMPUTE LOS
+CNTCHK          CCS             MARKCNTR                # NO PAIR SHOWING-SEE IF PAIR IN HOLD
+                TCF             +2                      # PAIR BURIED-DECREMENT COUNTER
+                TCF             MKALARM                 # NO PAIR-ALARM
+                TS              MARKCNTR                # STORE DECREMENTED COUNTER
 
-AVESTAR         CS              XMKCNTR
+AVESTAR         CAF             BIT12                   # INITIALIZE MKDEX FOR STAR LOS COUNTER
+                ADS             MKDEX                   # MKDEX WAS INITIALIZED ZERO IN MARKCHEX
+                CS              MARKCNTR
                 EXTEND
-                MP              EIGHT                   # GET C(L)=-8 MARKCNTR
+                MP              SIX                     # GET C(L) = -6 MARKCNTR
                 CS              XYMARK
                 AD              L                       # ADD - MARK VAC ADR SET IN MARKCHEX
                 INDEX           FIXLOC
@@ -501,34 +356,26 @@ AVESTAR         CS              XMKCNTR
                 TS              PUSHLOC
 
                 TC              INTPRET
-                BON             BON
-                                SURFFLAG
+## Page 260
+                BON             VLOAD*
+                                SURFFLAG                # IF ON SURFACE COMPUTE VEC AT SURFSTAR
                                 SURFSTAR
-                                FLT59FLG
-                                SURFSTAR
-                VLOAD*
-                                1,1
+                                1,1                     # PUT Y-MARK CDUS IN CDUSPOT FOR TRG*NBSM
                 STOVL           CDUSPOT
-                                YPLANE
+                                12D                     # LOAD Y-PLANE VECTOR IN NB
                 CALL
                                 TRG*NBSM                # CONVERT IT TO STABLE MEMBER
                 PUSH            VLOAD*
                                 0,1                     # PUT X-MARK CDUS IN CDUSPOT FOR TRG*NBSM
                 STOVL           CDUSPOT
-                                XPLANE
+                                18D                     # LOAD X-PLANE VECTOR IN NB
                 CALL
-
-## Page 267
                                 TRG*NBSM                # CONVERT IT TO STABLE-MEMBER
                 VXV             UNIT                    # UNIT(XPSM * YPSM)
                 STADR
                 STORE           24D
 
-AVEIT           EXIT
-                CAF             BIT12                   # INCREMENT STAR VEC COUNTER
-                ADS             MKDEX                   # MKDEX WAS INITIALIZED ZERO IN MARKCHEX
-                TC              INTPRET
-                SLOAD           PDVL
+AVEIT           SLOAD           PDVL                    # N(NUMBER OF VECS) IN 0-1
                                 MKDEX
                                 24D                     # LOAD CURRENT VECTOR
                 VSR3            V/SC
@@ -538,47 +385,30 @@ AVEIT           EXIT
                 DSU             DDV
                                 DP1/8                   # (N-1)/N
                 VXSC            VAD
-                                STARSAV2                # ADD VEC TO PREVIOUSLY AVERAGED VEC
+                                STARAD          +6      # ADD VEC TO PREVIOUSLY AVERAGED VECTOR
                                 24D                     # (N-1)/N AVESTVEC + VEC/N
-                UNIT
+                STORE           STARAD          +6      # AVERAGE STAR VECTOR
                 STORE           STARSAV2
                 EXIT
-COOLOUT         CCS             XMKCNTR                 # SEE IF MARK PAIR IN MKVAC
+                CCS             MARKCNTR                # SEE IF ANOTHER MARK PAIR IN MKVAC
                 TCF             AVESTAR         -1      # THERE IS-GO GET IT-DECREMENT COUNTER
-                CCS             NOMKCNT                 # IF ANY MKS NOT USED DISPLAY V50N25
-                TCF             ASKASTR                 # AND THE NUMBER MKS NOT USED
-ENDMARKS        CAF             FIVE
+ENDMARKS        CAF             FIVE                    # NO MORE MARKS-TERMINATE AOTMARK
+                INHINT
                 TC              WAITLIST
                 EBANK=          XYMARK
                 2CADR           MKRELEAS
+
+
                 TC              ENDMARK
 
 MKALARM         TC              ALARM                   # NOT A PAIR TO PROCESS-DO GETMKS
                 OCT             111
                 TCF             GETMKS
 
-ASKASTR         CAF             OCT16
-                TS              DSPTEM1
-                CA              NOMKCNT
-                TS              DSPTEM1         +1
-                CAF             V50N25
-                TC              BANKCALL
-                CADR            GOMARK2R
-
-                TCF             KILLAOT                 # V34 TERMINATE
-                TCF             ENDMARKS                # PRO - PROCEED ANYWAY
-
-## Page 268
-                TCF             GETDAT
-                CAF             BIT3
-                TC              BLANKET
-                TC              ENDOFJOB
-
-V50N25          VN              5025
 V01N71          VN              171
 V06N87*         VN              687
 
-## Page 269
+## Page 261
 # MARKRUPT IS ENTERED FROM INTERUPT LEAD-INS AND PROCESSES CHANNEL 16
 # CAUSED BY X,Y MARK OR MARK REJECT OR BY THE RATE OF DESCENT SWITCH
 
@@ -595,189 +425,258 @@ MARKRUPT        TS              BANKRUPT
                 XCH             Q
                 TS              QRUPT
 
-                CAF             OCT140                  # SEE IF ROD INPUT
+                CAF             OCT140                  # SEE IF ROD INPUT HAS BEEN MADE
                 EXTEND
                 RAND            NAVKEYIN
                 EXTEND
-                BZMF            FINDKEY
+                BZMF            MARKEY?                 # NO, MUST BE A MARKRUPT
 
-                TC              DESCBITS                # ROD INPUT
-FINDKEY         TC              VALIDCHK                # NO ROD INPUT-SEE IF VALID MARKRUPT
-                CAF             BIT5                    # GOOD RUPT-SEE IF MARK REJECT
+                TC              POSTJUMP                # DESCENT BITS
+                CADR            DESCBITS                # DOESN'NT COME BACK
 
+MARKEY?         CAF             BIT12                   # ARE WE ASKING FOR MARK?
+                MASK            MARKSTAT
+                CCS             A
+                TC              RESUME                  # DONT WANT MARK OR MKREJECT-DO NOTHING
+
+                CCS             MARKSTAT                # ARE MARKS BEING ACCEPTED
+                TCF             FINDKEY                 # THEY ARE-WHICH ONE IS IT
+                TC              ALARM                   # MARKS NOT BEING ACCEPTED-DO ALARM
+                OCT             112
+                TC              RESUME
+
+FINDKEY         CAF             BIT5                    # SEE IF MARK REJECT
                 EXTEND
                 RAND            NAVKEYIN
                 CCS             A
                 TCF             MKREJ                   # ITS A MARK REJECT
 
-CHKWHAT         CCS             WHATMARK
-                TCF             XMKRUPT                 # +1 FOR CURSOR MARK
-                TCF             FINDMARK                # 0  FOR INFLIGHT MARK
-                TCF             YMKRUPT                 # -1 FOR SPIRAL
-
-FINDMARK        CAF             BIT4                    # SEE IF Y MARK
+                CAF             BIT4                    # SEE IF Y MARK
                 EXTEND
                 RAND            NAVKEYIN
                 CCS             A
 
-                TCF             YMKRUPT                 # ITS Y MARK OR SPIRAL MARK
+                TCF             YMKRUPT                 # ITS A Y MARK
+
                 CAF             BIT3                    # SEE IF X MARK
+## Page 262
                 EXTEND
                 RAND            NAVKEYIN
                 CCS             A
                 TCF             XMKRUPT                 # ITS A X MARK
 
-113ALRM         TC              ALARM                   # NO INBITS IN CHANNEL 16
+                TC              ALARM                   # NO INBITS IN CHANNEL 16
                 OCT             113
 
-## Page 270
                 TC              RESUME
 
 XMKRUPT         CAF             ZERO
-                TCF             +2                      # SET STORE INDEX ZERO
+                TS              RUPTREG1                # SET X MARK STORE INDEX TO ZERO
+                CAF             BIT10
+                TCF             +4
 YMKRUPT         CAF             ONE
-                TS              XYMARK                  # SET MARK ID REG
-                INDEX           A
-                CS              XMKCNTR
-                AD              FIVE
+                TS              RUPTREG1                # SET Y MARK STORE INDEX TO ONE
+                CAF             BIT11
+                TS              XYMARK                  # SET MARK IDENTIFIATION
+
+                TC              MARKTYPE                # SEE IF SURFACE MARK
+                TCF             SURFSTOR                # SURFACE MARK-JUST STORE CDUS
+
+                CAF             BIT14                   # GOT A MARK-SEE IF MARK PAIR MADE
+                MASK            MARKSTAT
                 EXTEND
-                BZMF            VACSTOR                 # IF 7TH MARK. STORE DATA AS 6TH MARK
-                INDEX           XYMARK
-                INCR            XMKCNTR
-                TCF             VACSTOR
+                BZF             VERIFYMK                # NOT A PAIR, NORMAL PROCEDURE
+                CS              MARKCNTR                # GOT A PAIR, SEE IF ANOTHER CAN BE MADE
+                AD              FOUR                    # IF SO, INCREMENT POINTER,CLEAR BITS10,11
+                EXTEND
+                BZMF            5MKALARM                # HAVE FIVE MARK PAIRS-DONT ALLOW MARK
+                INCR            MARKCNTR                # OK FOR ANOTHER PAIR, INCR POINTER
+                CS              PRIO23                  # CLEAR BITS10,11,14 FOR NEXT PAIR
+                MASK            MARKSTAT
+                TS              MARKSTAT
 
-DESCBITS        MASK            BIT7
-                TS              L
-
-                CAF             AVEGFBIT
-                MASK            FLAGWRD7
+VERIFYMK        CA              XYMARK
+                MASK            MARKSTAT
                 CCS             A
-                TCF             RODIN
-                TC              VALIDCHK
-                TCF             CHKWHAT                 # THIS IS BACK UP MARK
+                TCF             +2                      # THIS MARK NOT DESIRED
+                TCF             VACSTOR                 # MARK DESIRED - STORE CDUS
+                TC              ALARM
+                OCT             114
+                TC              RESUME                  # RESUME-DISPLAY UNCHANGED-WAIT FOR ACTION
 
-VALIDCHK        CCS             MARKSTAT
-                TCF             CHK12
+5MKALARM        TC              ALARM                   # ATTEMPTING TO MAKE MORE THAN 5 MK PAIRS
+                OCT             107
+                TC              MARKTYPE                # SEE IF SURFACE MARK
+                TCF             DSPV6N79                # IT IS
+                TC              RESUME                  # DONT CHANGE DISPLAY-DO NOTHING
 
-ALM112          TC              ALARM                   # MARKRUPT NOT ALLOWED
-                OCT             112
+## Page 263
+MKREJ           TC              MARKTYPE                # SEE IF SURFACE
+                TCF             SURFREJ                 # SURFACE-JUST CHECK MARK COUNTER
+
+                CAF             PRIO3                   # INFLIGHT-SEE IF MARKS MADE
+                MASK            MARKSTAT
+                CCS             A
+                TCF             REJECT                  # MARKS MADE-REJECT ONE
+REJALM          TC              ALARM                   # NO MARK TO REJECT-BAD PROCEDURE-ALARM
+                OCT             115
+                TC              RESUME                  # DESIRED ACTION DISPLAYED
+
+REJECT          CS              PRIO30                  # ZERO BIT14,SHOW REJ.,SEE IF MARK SINCE
+                MASK            MARKSTAT                # LAST REJECT
+                AD              BIT13
+                XCH             MARKSTAT
+                MASK            BIT13
+                CCS             A
+                TCF             REJECT2                 # ANOTHER REJECT SET BIT 10+11 TO ZERO
+
+                CS              XYMARK                  # MARK MADE SINCE REJECT-REJECT MARK IN 1D
+RENEWMK         MASK            MARKSTAT
+                TS              MARKSTAT
+                TCF             REMARK                  # GO REQUEST NEW MARK ACTION
+
+REJECT2         CS              PRIO3                   # ON SECOND REJECT-DISPLAY VB53 AGAIN
+                TCF             RENEWMK
+
+SURFREJ         CCS             MARKCNTR                # IF MARK DECREMENT COUNTER
+                TCF             +2
+                TCF             REJALM                  # NO MARKS TO REJECT-ALARM
+                TS              MARKCNTR
                 TC              RESUME
 
-CHK12           MASK            BIT12
+## Page 264
+#
+
+# MARKTYPE TESTS TO SEE IF LEM ON LUNAR SURFACE. IF IT IS RETURN TO LOC+1
+
+MARKTYPE        CS              FLAGWRD8                # SURFFLAG*******TEMPORARY*****
+                MASK            BIT8
                 CCS             A
-                TCF             ALM112
-                TC              Q
+                INCR            Q                       # IF SURFACE MARK REUTNR TO LOC +1
+                TC              Q                       # IF INFLIGHT MARK RETURN TO LOC +2
 
-RODIN           CCS             L
-                CS              TWO
-                AD              ONE
-                ADS             RODCOUNT
-                TC              RESUME
+SURFSTOR        CAF             ZERO                    # FOR SURFACE MARK ZERO MARK KIND INDEX
+                TS              RUPTREG1
 
-## Page 271
-# DATA STORE ROUTINE
+                CS              MARKSTAT                # SET BITS10,11 TO SHOW SURFACE MARK
+                MASK            PRIO3                   # FOR MARKCHEX
+                ADS             MARKSTAT
 
-VACSTOR         EXTEND
-                DCA             ITEMP1                  # STORE MARK TIME FOR DOWNLINK
-                DXCH            TSIGHT
-
-                CAF             LOW9
-                MASK            MARKSTAT                # GRAB MARK VAC ADR
-                TS              MKDEX
-                INDEX           XYMARK
-                CCS             XMKCNTR                 # DECREMENT COUNTER TO START STORE AT ZERO
+VACSTOR         CAF             LOW9
+                MASK            MARKSTAT                # STORE MARK VAC ADR IN RUPTREG2
+                TS              RUPTREG2
                 EXTEND
-                MP              EIGHT
-                XCH             L
-                AD              XYMARK
-                ADS             MKDEX                   # MK VAC ADR + 8(CNTR-1) + MARK ID
+                DCA             ITEMP1                  # PICK UP MARKTIME
+                DXCH            TSIGHT                  # STORE LAST MARK TIME
+                CA              MARKCNTR                # 6 X MARKCNTR FOR STORE INDEX
+                EXTEND
+                MP              SIX
+                XCH             L                       # GET INDEX FROM LOW ORDER PART
+                AD              RUPTREG2                # SET CDU STORE INDEX TO MARKVAC
+                ADS             RUPTREG1                # INCREMENT VAC PICKUP BY MARK FOR FLIGHT
+                TS              MKDEX                   # STORE HERE IN CASE OF SURFACE MARK
                 CA              ITEMP3
-                INDEX           MKDEX
+                INDEX           RUPTREG1
                 TS              0                       # STORE CDUY
                 CA              ITEMP4
-                INDEX           MKDEX
+                INDEX           RUPTREG1
                 TS              2                       # STORE CDUZ
                 CA              ITEMP5
-                INDEX           MKDEX
+                INDEX           RUPTREG1
                 TS              4                       # STORE CDUX
-ENDSTOR         TCF             REMARK
+                TC              MARKTYPE                # IF SURFACE MARK-JUST DO SURFJOB
+                TCF             SURFJOB
 
-## Page 272
-# REMARK AND CURSOR-SPIRAL KEYIN ROUTINE
+                CAF             BIT13                   # CLEAR BIT13 TO SHOW MARK MADE
+                AD              XYMARK                  # SET MARK ID IN MARKSTAT
+                COM
+                MASK            MARKSTAT
+                AD              XYMARK
+                TS              MARKSTAT
+                MASK            PRIO3                   # SEE IF X, Y MARK MADE
+                TS              L
 
-REMARK          CAF             PRIO15                  # ENTER JOB TO CHANGE DISPLAY
-                TC              NOVAC
-                EBANK=          XYMARK
+## Page 265
+                CA              PRIO3
+                EXTEND
+                RXOR            LCHAN
+                CCS             A
+                TCF             REMARK                  # NOT PAIR YET, DISPLAY MARK ACTION
+                CS              MARKSTAT                # MARK PAIR COMPLETE-SET BIT14
+                MASK            BIT14
+                ADS             MARKSTAT
+                TCF             REMARK                  # GO DISPLAY V54
+
+## Page 266
+REMARK          CAF             PRIO3                   # BITS 10 AND 11
+                MASK            MARKSTAT
+                EXTEND
+                MP              BIT6                    # SHIFT MARK IDS TO BE 0 TO 3 FOR INDEX
+                TS              MKDEX                   # STORE VERB INDEX
+SURFJOB         CAF             PRIO15
+                TC              NOVAC                   # ENTER JOB TO CHANGE DISPLAY TO
+                EBANK=          XYMARK                  # REQUEST NEXT ACTION
                 2CADR           CHANGEVB
 
 
                 TC              RESUME
 
-CHANGEVB        CA              WHATMARK
-                EXTEND
-                BZF             PREPAST                 # RE-DISPLAY VERB54 FOR INFLIGHT MARK
-                CS              MARKSTAT                # SET BIT12 TO DISCOURAGE MARK
-                MASK            BIT12
-                ADS             MARKSTAT
+CHANGEVB        TC              MARKTYPE
+                TCF             DSPV6N79                # SURFACE-DISPLAY V 06 N 79
+                INDEX           MKDEX                   # INFLIGHT-PICK UP MARK VB INDEX
+                CAF             MKVB54
+                TC              PASTIT                  # PASTE UP NEXT MK VERB DISPLAY
 
-                INDEX           WHATMARK
-                CAF             V06N79*                 # EITHER V21N79 OR V 22N79 LOAD VERB
-                TC              BANKCALL
-                CADR            GOMARKFR
+# THE FOUR MKVBS ARE INDEXED-THEIR ORDER CANNOT BE CHANGED
 
-                TCF             KILLAOT                 # VB34-TERMINATE
-                TCF             N79DISP
-                TCF             N79DISP
-
-                CAF             SEVEN
-                TC              BLANKET
-                TC              ENDOFJOB
-
-N79DISP         CAF             V06N79*                 # ENTER-DISPLAY V06N79 FOR VERIFY
-                TC              BANKCALL
-                CADR            GOMARKFR
-
-                TC              KILLAOT
-                TCF             SURFAGAN
-                TCF             N79DISP
-
-                CS              XYMARK
-                AD              SIX
-                TC              BLANKET
-                TC              ENDOFJOB
-
-SURFAGAN        INDEX           XYMARK
-                CA              CURSOR
-                INDEX           MKDEX
-                TS              6
-                TCF             PREPAST
-
-V22N79          VN              2279                    # SPIRAL LOAD DISPLAY
-
-## Page 273
-V06N79*         VN              679
-V21N79          VN              2179                    # CURSOR LOAD DISPLAY
-
-MKVB53          VN              5371                    # SPIRAL MARK REQUEST
-MKVB54          VN              5471                    # X OR Y MARK
-MKVB52          VN              5271                    # CURSOR MARK REQUEST
+MKVB54          VN              5471                    # MAKE X OR Y MARK
+MKVB53          VN              5371                    # MAKE Y MARK
+MKVB52          VN              5271                    # MAKE X MARK
+MKVB54*         VN              5471                    # MAKE X OR Y MARK
 DP1/8           2DEC            .125
 
-## Page 274
-# MARK REJECT ROUTINE
-MKREJ           INDEX           XYMARK
-                CCS             XMKCNTR
-                TCF             REJMK			# REJECT MARK
+OCT34           OCT             34
+V06N71          VN              671
+V06N79*         VN              679
 
-                TC              ALARM
-                OCT             115			# NO MARK OF THIS KIND TO REJECT
-                TC              RESUME
+## Page 267
+# ROUTINE TO REQUEST CURSOR AND SPIRAL MEASUREMENTS
+                COUNT*          $$/R59
 
-REJMK           INDEX           XYMARK
-                TS              XMKCNTR			# STORE DECREMENTED MARK COUNTER
+DSPV6N79        CAF             V06N79*                 # CURSOR-SPIRAL DISPLAY
+                TC              BANKCALL
+                CADR            GOMARKF
 
-                CAF             PRIO15			# ENTER JOB TO RE-DISPLAY MARK REQUEST
-                TC              NOVAC
-                EBANK=          XYMARK
-                2CADR           PREPAST
-                TC              RESUME
+                TCF             KILLAOT                 # V34-DOES GOTOPOOH
+                TCF             SURFEND                 # V33-PROCEED, END MARKING
+                CAF             BIT6                    # IF V32(OCT40) IN MPAC DO RECYCLE
+                MASK            MPAC                    # OTHERWISE IT IS LOAD VB ENTER SO
+                CCS             A                       # RE-DISPLAY V06N79
+                TCF             SURFAGAN                # VB32-RECYCLE
+                TCF             DSPV6N79                # ENTER
+
+SURFEND         CS              BIT14                   # SET BIT14 TO SHOW MARK END
+                MASK            MARKSTAT
+                AD              BIT14
+                TS              MARKSTAT
+
+SURFAGAN        CA              CURSOR
+                INDEX           MKDEX                   # HOLDS VAC AREA POINTER FOR SURF MARKING
+                TS              1                       # STORE CURSOR SP 2COMP
+                CA              SPIRAL
+                INDEX           MKDEX
+                TS              3                       # STORE SPIRAL
+
+                CS              MARKSTAT                # IF BIT 14 SET-END MARKING
+                MASK            BIT14
+                EXTEND
+                BZF             MARKCHEX
+                CA              MARKCNTR                # THIS IS RECYCLE-SEE IF 5 MARKS ALREADY
+                AD              ONE
+                COM
+                AD              FIVE
+                EXTEND
+                BZMF            5MKALARM                # CANT RECYCLE-TO MANY MARKS-ALARM
+                INCR            MARKCNTR                # OF FOR RECYCLE-INCR COUNTER
+                TCF             GETMKS          +3      # GO DISPLAY MARK VB
+
