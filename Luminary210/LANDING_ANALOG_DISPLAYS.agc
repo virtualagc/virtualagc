@@ -17,6 +17,7 @@
 ##              2016-12-12 HG   Fix operannd modifier none -> +4
 ##		2016-12-25 RSB	Comment-text proofed using ProoferComments
 ##				and corrected errors found.
+##		2017-08-19 MAS	Fixed a typo found while transcribing Zerlina 56.
 
 ## Page 895
                 BANK            21
@@ -486,7 +487,7 @@ DISPRSET        TC              CROSCOMP                # FIRST COMPUTE BUT NOT 
 ## Page 904
 # LANAKPIP        DEC             .0512                 SCALES PIPAS TO UNITS OF 2(5) M/CS
 
-# MAXVEL          OCT             00466                 A98.645 F/S IN UNITS OF 2(5) M/CS
+# MAXVEL          OCT             00466                 198.645 F/S IN UNITS OF 2(5) M/CS
 
 # MAXDBITS        OCT             01034                 ABOUT 300 F/S
 
