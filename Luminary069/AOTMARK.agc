@@ -19,6 +19,7 @@
 ##              2017-01-10 HG   Transcribed
 ##		2017-01-25 RSB	Proofed comment text using octopus/prooferComments
 ##				and fixed errors found.
+##		2017-08-19 MAS	Fixed a typo found while transcribing Zerlina 56.
 
 ## Page 259
                 BANK            12
@@ -162,7 +163,7 @@ CODE5           INDEX           FIXLOC
 #  INPUT-AZIMUTH ANGLE IN SINGLE PREC AT CDU SCALE IN 8D OF JOB VAC
 #        ELEVATION ANGLE IN SINGLE PREC AT CDU SCALE IN 9D OF JOB VAC
 #        ROTATION ANGLE IN SINGLE PREC 1S COMP SCALED BY PI IN 10D OF VAC
-#  OUTPUT-OPTIC AXIS VEC IN NG COORDS IN SCAXIS
+#  OUTPUT-OPTIC AXIS VEC IN NB COORDS IN SCAXIS
 #         X-MARK PLANE 1/4VEC IN NB COORDS AT 18D OF JOB VAC
 #         Y-MARK PLANE 1/4VEC IN NB COORDS AT 12D OF JOB VAC
 

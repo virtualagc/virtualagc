@@ -19,6 +19,7 @@
 ##				in Luminary 99 than the other way around.)
 ##		2017-03-14 RSB	Comment-text fixes identified in 5-way
 ##				side-by-side diff of Luminary 69/99/116/131/210.
+##		2017-08-19 MAS	Fixed a typo found while transcribing Zerlina 56.
 
 ## Page 244
                 BANK            12                              
@@ -157,7 +158,7 @@ COASCODE        INDEX           FIXLOC
 #  INPUT-AZIMUTH ANGLE IN SINGLE PREC AT CDU SCALE IN 8D OF JOB VAC
 #        ELEVATION ANGLE IN SINGLE PREC AT CDU SCALE IN 9D OF JOB VAC
 #        ROTATION ANGLE IN SINGLE PREC 1S COMP SCALED BY PI IN 10D OF VAC
-#  OUTPUT-OPTIC AXIS VEC IN NG COORDS IN SCAXIS
+#  OUTPUT-OPTIC AXIS VEC IN NB COORDS IN SCAXIS
 #         X-MARK PLANE 1/4VEC IN NB COORDS AT 18D OF JOB VAC
 #         Y-MARK PLANE 1/4VEC IN NB COORDS AT 12D OF JOB VAC
 
