@@ -17,60 +17,60 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-07-28 MAS  Created from Luminary 210.
+##              2017-08-20 MAS  Updated for Zerlina 56.
 
-## NOTE: Page numbers below have not yet been updated to reflect Zerlina 56.
-
-## Page 1291
+## Page 1283
 #          SUBROUTINE TO UPDATE THE PROGRAM NUMBER DISPLAY ON THE DSKY.
 
-		COUNT*	$$/PHASE
-		BLOCK	02
-		SETLOC	FFTAG1
-		BANK
+                COUNT*  $$/PHASE
+                BLOCK   02
+                SETLOC  FFTAG1
+                BANK
 
-NEWMODEX	INDEX	Q		# UPDATE MODREG. ENTRY FOR MODE IN FIXED.
-		CAF	0
-		INCR	Q
+NEWMODEX        INDEX   Q               # UPDATE MODREG. ENTRY FOR MODE IN FIXED.
+                CAF     0
+                INCR    Q
 
-NEWMODEA	TS	MODREG		# ENTRY FOR MODE IN A.
-MMDSPLAY	CAF	+3		# DISPLAY MAJOR MODE.
-PREBJUMP	LXCH	BBANK		# PUTS BBANK IN L
-		TCF	BANKJUMP	# PUTS Q INTO A
-		CADR	SETUPDSP
+NEWMODEA        TS      MODREG          # ENTRY FOR MODE IN A.
+MMDSPLAY        CAF     +3              # DISPLAY MAJOR MODE.
+PREBJUMP        LXCH    BBANK           # PUTS BBANK IN L
+                TCF     BANKJUMP        # PUTS Q INTO A
+                CADR    SETUPDSP
 
 #          RETURN TO CALLER +3 IF MODE = THAT AT CALLER +1. OTHERWISE RETURN TO CALLER +2.
 
-CHECKMM		INDEX	Q
-		CS	0
-		AD	MODREG
-		EXTEND
-		BZF	Q+2
-		TCF	Q+1		# NO MATCH
+CHECKMM         INDEX   Q
+                CS      0
+                AD      MODREG
+                EXTEND
+                BZF     Q+2
+                TCF     Q+1             # NO MATCH
 
-TCQ		=	Q+2 +1
+TCQ             =       Q+2 +1
 
-		SETLOC	PHASTAB1
-		BANK
+                BANK    14
+                SETLOC  PHASETAB
+                BANK
 
-		COUNT*	$$/PHASE
-SETUPDSP	INHINT
-		DXCH	RUPTREG1	# SAVE CALLER-S RETURN 2CADR
-		CAF	PRIO30		#   EITHER A TASK OR JOB CAN COME TO
-		TC	NOVAC		#   NEWMODE X
-		EBANK=	MODREG
-		2CADR	DSPMMJOB
+                COUNT*  $$/PHASE
+SETUPDSP        INHINT
+                DXCH    RUPTREG1        # SAVE CALLER-S RETURN 2CADR
+                CAF     PRIO30          #   EITHER A TASK OR JOB CAN COME TO
+                TC      NOVAC           #   NEWMODE X
+                EBANK=  MODREG
+                2CADR   DSPMMJOB
 
-		DXCH	RUPTREG1
-		RELINT
-		DXCH	Z		# RETURN
+                DXCH    RUPTREG1
+                RELINT
+                DXCH    Z               # RETURN
 
-DSPMMJOB	EQUALS	DSPMMJB
+DSPMMJOB        EQUALS  DSPMMJB
 
 
-		BLOCK	02
-		SETLOC	FFTAG1
-		BANK
-## Page 1292
+                BLOCK   02
+                SETLOC  FFTAG1
+                BANK
+## Page 1284
 # PHASCHNG IS THE MAIN WAY OF MAKING PHASE CHANGES FOR RESTARTS.  THERE ARE THREE FORMS OF PHASCHNG, KNOWN AS TYPE
 # A, TYPE B, AND TYPE C. THEY ARE ALL CALLED AS FOLLOWS, WHERE OCT XXXXX   CONTAINS THE PHASE INFORMATION,
 
@@ -112,7 +112,7 @@ DSPMMJOB	EQUALS	DSPMMJB
 #                                                  TC     PHASCHNG        SINCE BOTH TBASE4 AND LONGBASE ARE SET,
 #                                                  OCT    60124           4.12 SHOULD CONTAIN BOTH A TASK AND A
 #                                                                         LONGCALL TO BE RESTARTED
-#
+
 # TYPE C PHASCHNG CONTAINS THE VARIABLE TYPE OF PHASCHNG INFORMATION. INSTEAD OF THE INFORMATION BEING IN A
 # PERMANENT FORM, ONE STORES THE DESIRED RESTART INFORMATION IN A VARIABKE LOCATION. THE BITS ARE AS FOLLOWS,
 
@@ -121,7 +121,7 @@ DSPMMJOB	EQUALS	DSPMMJB
 # WHERE EACH LETTER OR NUMBER STANDS FOR A BIT.  THE G:S STAND FOR THE GROUP, OCTAL 1 - 7.  IF THE RESTART IS TO
 # BE BY WAITLIST, W IS SET TO 1, IF IT IS A JOB, J IS SET TO 1, IF IT IS A LONGCALL, C IS SET TO 1. ONLY ONE OF
 # THESE THREE BIT S MAY BE SET.  X:S ARE IGNORED  1 MUST BE 1, AND 0 MUST  BE 0.  AGAIN T STANDS FOR THE TBASE,
-## Page 1293
+## Page 1285
 # AND L FOR LONGBASE.  THE BITS A AND D ARE CONCERNED WITH THE VARIABLE INFORMATION. IF D IS SET TO 1, A PRIORITY
 # OR DELTA TIME WILL BE READ FROM THE NEXT LOCATION AFTER THE OCTAL INFORMATION, IF THIS IS TO BE INDIRECT, THAT
 # IS, THE NAME OF A LOCATION COMT+INING THE INFORMATION (DELTA TIME ONLY), THEN THIS IS GIVEN AS THE -GENADR OF
@@ -143,11 +143,11 @@ DSPMMJOB	EQUALS	DSPMMJB
 #                                         AD+4                            BBCON OF THE 2CADR SHOULD CONTAIN THE E
 #                                         AD+5                            BANK OF DELTIME. PHASCHNG RETURNS TO
 #                                                                         LOCATION AD+5
-#
+
 # NOTE THAT IF A VARIABLE PRIORITY IS GIVEN FOR A JOB, THE JOB WILL BE RESTARTED AS A NOVAC IF THE PRIORITY IS
 # NEGATIVE, AS A FINDVAC IF THE PRIORITY IS POSITIVE.
 
-#
+
 # TYPE B PHASCHNG IS A COMBINATION OF VARIABLE AND FIXED PHASE CHANGES. IT WILL START UP A JOB AS INDICATED
 # BELOW AND ALSO START UP ONE FIXED RESTART, THAT IS EITHER AN G.1 OR  A G.ODD OR THE FIRST ENTRY OF G.EVEN
 # DOUBLE ENTRY.  THE BIT INFORMATION IS AS FOLLOWS,
@@ -172,8 +172,9 @@ DSPMMJOB	EQUALS	DSPMMJB
 #                                         AD+2                            STORED PRIORITY WOULD BE BEGUN AT AD+2
 #                                                                         BY MEANS OF GROUP 5
 
-## Page 1294
+## Page 1286
 # THE NOVAC-FINDVAC CHOICE FOR JOBS HOLDS HERE ALSO - NEGATIVE PRIORITY CAUSES A NOVAC CALL, POSITIVE A FINDVAC.
+
 
 # SUMMARY OF BITS
 
@@ -183,7 +184,7 @@ DSPMMJOB	EQUALS	DSPMMJB
 
 # TYPE C          TL0 1AD XXX CJW GGG
 
-## Page 1295
+## Page 1287
 # 2PHSCHNG IS USED WHEN ONE WISHES TO START UP A GROUP OR CHANGE A GROUP WHILE UNDER THE CONTROL OF A DIFFERENT
 # GROUP. FOR EXAMPLE, CHANGE THE PHASE OF GROUP 3 WHILE THE PORTION OF THE PROGRAM IS UNDER GROUP 5. ALL 2PHSCHNG
 # CALLS ARE MADE IN THE FOLLOWING MANNER,
@@ -202,215 +203,215 @@ DSPMMJOB	EQUALS	DSPMMJB
 #                                         AD+3     OCT    18000           TO BE LOCATION AD+4, WITH A PRIORITY 18,
 #                                         AD+4                            FOR GROUP 5 PHASE INFORMATION
 
-		COUNT*	$$/PHASE
-2PHSCHNG	INHINT			# THE ENTRY FOR A DOUBLE PHASE CHANGE
-		NDX	Q
-		CA	0
-		INCR	Q
-		TS	TEMPP2
+                COUNT*  $$/PHASE
+2PHSCHNG        INHINT                  # THE ENTRY FOR A DOUBLE PHASE CHANGE
+                NDX     Q
+                CA      0
+                INCR    Q
+                TS      TEMPP2
 
-		MASK	OCT7
-		DOUBLE
-		TS	TEMPG2
+                MASK    OCT7
+                DOUBLE
+                TS      TEMPG2
 
-		CA	TEMPP2
-		MASK	OCT17770	# NEED ONLY 1770, BUT WHY GET A NEW CONST.
-		EXTEND
-		MP	BIT12
-		XCH	TEMPP2
+                CA      TEMPP2
+                MASK    OCT17770        # NEED ONLY 1770, BUT WHY GET A NEW CONST.
+                EXTEND
+                MP      BIT12
+                XCH     TEMPP2
 
-		MASK	BIT15
-		TS	TEMPSW2		# INDICATES WHETHER TO SET TBASE OR NOT
+                MASK    BIT15
+                TS      TEMPSW2         # INDICATES WHETHER TO SET TBASE OR NOT
 
-		INDEX	Q
-		CA	0
-		INCR	Q
-		TS	TEMPSW
+                INDEX   Q
+                CA      0
+                INCR    Q
+                TS      TEMPSW
 
-		TCF	PHASJUMP
+                TCF     PHASJUMP
 
-PHASCHNG	INHINT			# NORMAL PHASCHNG ENTRY POINT.
-		INDEX	Q
-		CA	0
-		INCR	Q
-PHSCHNGA	INHINT			# FIRST OCTAL PARAMETER IN A.
-## Page 1296
-		TS	TEMPSW
-		CA	ONE
-		TS	TEMPSW2
-PHASJUMP	EXTEND
-		DCA	ADRPCHN2	# OFF TO SWITCHED BANK
-		DTCB
+PHASCHNG        INHINT                  # NORMAL PHASCHNG ENTRY POINT.
+                INDEX   Q
+                CA      0
+                INCR    Q
+PHSCHNGA        INHINT                  # FIRST OCTAL PARAMETER IN A.
+## Page 1288
+                TS      TEMPSW
+                CA      ONE
+                TS      TEMPSW2
+PHASJUMP        EXTEND
+                DCA     ADRPCHN2        # OFF TO SWITCHED BANK
+                DTCB
 
-		EBANK=	LST1
-ADRPCHN2	2CADR	PHSCHNG2
-
-
-
-ONEORTWO	LXCH	TEMPBBCN
-		LXCH	BBANK
-		LXCH	TEMPBBCN
-
-		MASK	OCT14000	# SEE WHAT KIND OF PHASE CHANGE IT IS
-		CCS	A
-		TCF	CHECKB		#  IT IS OF TYPE :B:
-
-		CA	TEMPP
-		MASK	BIT7
-		CCS	A		#  SHALL WE USE THE OLD PRIORITY
-		TCF	GETPRIO		#  NO GET A NEW PRIORITY (OR DELTA T)
-
-OLDPRIO		NDX	TEMPG		#  USE THE OLD PRIORITY (OR DELTA T)
-		CA	PHSPRDT1 -2
-		TS	TEMPPR
-
-CON1		CA	TEMPP		# SEE IF A 2CADR IS GIVEN
-		MASK 	BIT8
-		CCS	A
-		TCF	GETNEWNM
-
-		CA	Q
-		TS	TEMPNM
-		CA	BB
-		EXTEND			# PICK UP USERS SUPERBANK
-		ROR	SUPERBNK
-		TS	TEMPBB
-
-TOCON2		CA	CON2ADR		# BACK TO SWITCHED BANK
-		LXCH	TEMPBBCN
-		DTCB
-
-CON2ADR		GENADR	CON2
-
-GETPRIO		NDX	Q		# DON:T CARE IF DIRECT OR INDIRECT
-		CA	0		# LEAVE THAT DECISION TO RESTARTS
-		INCR	Q		# OBTAIN RETURN ADDRESS
-## Page 1297
-		TCF	CON1 -1
-
-GETNEWNM	EXTEND
-		INDEX	Q
-		DCA	0
-		DXCH	TEMPNM
-		CA	TWO
-		ADS	Q		# OBTAIN RETURN ADDRESS
-
-		TCF	TOCON2
-
-OCT14000	EQUALS	PRIO14
-TEMPG		EQUALS	ITEMP1
-TEMPP		EQUALS	ITEMP2
-TEMPNM		EQUALS	ITEMP3
-TEMPBB		EQUALS	ITEMP4
-TEMPSW		EQUALS	ITEMP5
-TEMPSW2		EQUALS	ITEMP6
-TEMPPR		EQUALS	RUPTREG1
-TEMPG2		EQUALS	RUPTREG2
-TEMPP2		EQUALS	RUPTREG3
-
-TEMPBBCN	EQUALS	RUPTREG4
-BB		EQUALS	BBANK
+                EBANK=  LST1
+ADRPCHN2        2CADR   PHSCHNG2
 
 
-		BANK	14
-		SETLOC	PHASETAB
-		BANK
 
-		EBANK=	PHSNAME1
-		COUNT*	$$/PHASE
-PHSCHNG2	LXCH	TEMPBBCN
-		CA	TEMPSW
-		MASK	OCT7
-		DOUBLE
-		TS	TEMPG
+ONEORTWO        LXCH    TEMPBBCN
+                LXCH    BBANK
+                LXCH    TEMPBBCN
 
-		CA	TEMPSW
-		MASK	OCT17770
-		EXTEND
-		MP	BIT12
-		TS	TEMPP
+                MASK    OCT14000        # SEE WHAT KIND OF PHASE CHANGE IT IS
+                CCS     A
+                TCF     CHECKB          #  IT IS OF TYPE :B:
 
-		CA	TEMPSW
-		MASK	OCT60000
-		XCH	TEMPSW
-		MASK	OCT14000
-		CCS	A
-## Page 1298
-		TCF	ONEORTWO
+                CA      TEMPP
+                MASK    BIT7
+                CCS     A               #  SHALL WE USE THE OLD PRIORITY
+                TCF     GETPRIO         #  NO GET A NEW PRIORITY (OR DELTA T)
 
-		CA	TEMPP		# START STORING THE PHASE INFORMATION
-		NDX	TEMPG
-		TS	PHASE1 -2
+OLDPRIO         NDX     TEMPG           #  USE THE OLD PRIORITY (OR DELTA T)
+                CA      PHSPRDT1 -2
+                TS      TEMPPR
 
-BELOW1		CCS	TEMPSW2		# IS IT A PHASCHNG OR A 2PHSCHNG
-		TCF	BELOW2		# IT:S A PHASCHNG
+CON1            CA      TEMPP           # SEE IF A 2CADR IS GIVEN
+                MASK    BIT8
+                CCS     A
+                TCF     GETNEWNM
 
-		TCF	+1		# IT:S A 2PHSCHNG
-		CS	TEMPP2
-		LXCH	TEMPP2
-		NDX	TEMPG2
-		DXCH	-PHASE1 -2
+                CA      Q
+                TS      TEMPNM
+                CA      BB
+                EXTEND                  # PICK UP USERS SUPERBANK
+                ROR     SUPERBNK
+                TS      TEMPBB
 
-		CCS	TEMPSW2
-		NOOP			# CAN:T GET HERE
-		TCF	BELOW2
+TOCON2          CA      CON2ADR         # BACK TO SWITCHED BANK
+                LXCH    TEMPBBCN
+                DTCB
 
-		CS	TIME1
-		NDX	TEMPG2
-		TS	TBASE1 -2
+CON2ADR         GENADR  CON2
 
-BELOW2		CCS	TEMPSW		# SEE IF WE SHOULD SET TBASE OR LONGBASE
-		TCF	BELOW3		# SET LONGBASE ONLY
-		TCF	BELOW4		# SET NEITHER
+GETPRIO         NDX     Q               # DON:T CARE IF DIRECT OR INDIRECT
+                CA      0               # LEAVE THAT DECISION TO RESTARTS
+                INCR    Q               # OBTAIN RETURN ADDRESS
+## Page 1289
+                TCF     CON1 -1
 
-		CS	TIME1		# SET TBASE TO BEGIN WITH
-		NDX	TEMPG
-		TS	TBASE1 -2
+GETNEWNM        EXTEND
+                INDEX   Q
+                DCA     0
+                DXCH    TEMPNM
+                CA      TWO
+                ADS     Q               # OBTAIN RETURN ADDRESS
 
-		CA	TEMPSW		#  SHALL WE NOW SET LONGBASE
-		AD	BIT14COM
-		CCS	A
-		NOOP			# ***** CANT GET HERE *****
-BIT14COM	OCT	17777		# ***** CANT GET HERE *****
-		TCF	BELOW4		# NO WE NEED ONLY SET TBASE
+                TCF     TOCON2
 
-BELOW3		EXTEND			# SET LONGBASE
-		DCA	TIME2
-		DXCH	LONGBASE
+OCT14000        EQUALS  PRIO14
+TEMPG           EQUALS  ITEMP1
+TEMPP           EQUALS  ITEMP2
+TEMPNM          EQUALS  ITEMP3
+TEMPBB          EQUALS  ITEMP4
+TEMPSW          EQUALS  ITEMP5
+TEMPSW2         EQUALS  ITEMP6
+TEMPPR          EQUALS  RUPTREG1
+TEMPG2          EQUALS  RUPTREG2
+TEMPP2          EQUALS  RUPTREG3
 
-BELOW4		CS	TEMPP		# AND STORE THE FINAL PART OF THE PHASE
-		NDX	TEMPG
-		TS	-PHASE1 -2
+TEMPBBCN        EQUALS  RUPTREG4
+BB              EQUALS  BBANK
 
-		CA	Q
-		LXCH	TEMPBBCN
-		RELINT
-		DTCB
-## Page 1299
-CON2		LXCH	TEMPBBCN
 
-		CA	TEMPP
-		NDX	TEMPG
-		TS	PHASE1 -2
+                BANK    14
+                SETLOC  PHASETAB
+                BANK
 
-		CA	TEMPPR
-		NDX	TEMPG
-		TS	PHSPRDT1 -2
+                EBANK=  PHSNAME1
+                COUNT*  $$/PHASE
+PHSCHNG2        LXCH    TEMPBBCN
+                CA      TEMPSW
+                MASK    OCT7
+                DOUBLE
+                TS      TEMPG
 
-		EXTEND
-		DCA	TEMPNM
-		NDX	TEMPG
-		DXCH	PHSNAME1 -2
+                CA      TEMPSW
+                MASK    OCT17770
+                EXTEND
+                MP      BIT12
+                TS      TEMPP
 
-		TCF	BELOW1
+                CA      TEMPSW
+                MASK    OCT60000
+                XCH     TEMPSW
+                MASK    OCT14000
+                CCS     A
+## Page 1290
+                TCF     ONEORTWO
 
-		BLOCK	03
-		SETLOC	FFTAG6
-		BANK
+                CA      TEMPP           # START STORING THE PHASE INFORMATION
+                NDX     TEMPG
+                TS      PHASE1 -2
 
-		COUNT*	$$/PHASE
-CHECKB		MASK	BIT12		# SINCE THIS IS OF TYPE B, THIS BIT SHOULD
-		CCS	A		#  BE HERE IF WE ARE TO GET A NEW PRIORITY
-		TCF	GETPRIO		# IT IS, SO GET NEW PRIORITY
+BELOW1          CCS     TEMPSW2         # IS IT A PHASCHNG OR A 2PHSCHNG
+                TCF     BELOW2          # IT:S A PHASCHNG
 
-		TCF	OLDPRIO		# IT ISN:T, USE THE OLD PRIORITY
+                TCF     +1              # IT:S A 2PHSCHNG
+                CS      TEMPP2
+                LXCH    TEMPP2
+                NDX     TEMPG2
+                DXCH    -PHASE1 -2
+
+                CCS     TEMPSW2
+                NOOP                    # CAN:T GET HERE
+                TCF     BELOW2
+
+                CS      TIME1
+                NDX     TEMPG2
+                TS      TBASE1 -2
+
+BELOW2          CCS     TEMPSW          # SEE IF WE SHOULD SET TBASE OR LONGBASE
+                TCF     BELOW3          # SET LONGBASE ONLY
+                TCF     BELOW4          # SET NEITHER
+
+                CS      TIME1           # SET TBASE TO BEGIN WITH
+                NDX     TEMPG
+                TS      TBASE1 -2
+
+                CA      TEMPSW          #  SHALL WE NOW SET LONGBASE
+                AD      BIT14COM
+                CCS     A
+                NOOP                    # ***** CANT GET HERE *****
+BIT14COM        OCT     17777           # ***** CANT GET HERE *****
+                TCF     BELOW4          # NO WE NEED ONLY SET TBASE
+
+BELOW3          EXTEND                  # SET LONGBASE
+                DCA     TIME2
+                DXCH    LONGBASE
+
+BELOW4          CS      TEMPP           # AND STORE THE FINAL PART OF THE PHASE
+                NDX     TEMPG
+                TS      -PHASE1 -2
+
+                CA      Q
+                LXCH    TEMPBBCN
+                RELINT
+                DTCB
+## Page 1291
+CON2            LXCH    TEMPBBCN
+
+                CA      TEMPP
+                NDX     TEMPG
+                TS      PHASE1 -2
+
+                CA      TEMPPR
+                NDX     TEMPG
+                TS      PHSPRDT1 -2
+
+                EXTEND
+                DCA     TEMPNM
+                NDX     TEMPG
+                DXCH    PHSNAME1 -2
+
+                TCF     BELOW1
+
+                BLOCK   03
+                SETLOC  FFTAG6
+                BANK
+
+                COUNT*  $$/PHASE
+CHECKB          MASK    BIT12           # SINCE THIS IS OF TYPE B, THIS BIT SHOULD
+                CCS     A               #  BE HERE IF WE ARE TO GET A NEW PRIORITY
+                TCF     GETPRIO         # IT IS, SO GET NEW PRIORITY
+
+                TCF     OLDPRIO         # IT ISN:T, USE THE OLD PRIORITY
