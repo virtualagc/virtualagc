@@ -27,6 +27,7 @@
 ##		2017-03-13 RSB	Comment-text fixes noted in proofing Luminary 116.
 ##		2017-03-15 RSB	Comment-text fixes identified in 5-way
 ##				side-by-side diff of Luminary 69/99/116/131/210.
+##		2017-08-19 MAS	Fixed a label error found transcribing Zerlina 56.
 
 ## Page 222
                 BANK            10
@@ -959,7 +960,7 @@ SEUDOPOO        TS              DNLSTCOD                # SET UP APPROPRIATE DOW
                 CADR            V37KLEAN
 
                 CCS             MMNUMBER                # IS IT POOH
-                TCF             RENDV00                 # NO
+                TCF             RENDVOO                 # NO
 GOMOD           TC              IBNKCALL                # REDUNDANT EXCEPT FOR GROUP 4
                 CADR            POOKLEAN
 
@@ -969,7 +970,7 @@ GOMOD           TC              IBNKCALL                # REDUNDANT EXCEPT FOR G
 GOGOPROG        TC              POSTJUMP
                 CADR            GOPROG2
 
-RENDV00         CS              MODREG                  # IS CURRENT PROGRAM 22
+RENDVOO         CS              MODREG                  # IS CURRENT PROGRAM 22
                 AD              OCT26
                 EXTEND
                 BZF             RESET22                 # YES - CLEAR RENDEZVOUS FLAG

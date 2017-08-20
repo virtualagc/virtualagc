@@ -24,6 +24,7 @@
 ##		2017-03-13 RSB	GOP00FIX -> GOPOOFIX.
 ##		2017-03-16 RSB	Comment-text fixes identified in 4-way side-by-side
 ##				diff of Colossus237/249/Comanche55/Artemis72.
+##		2017-08-19 MAS	Fixed label errors found transcribing Zerlina 56.
 
 ## The contents of the "Colossus249" files, in general, are transcribed 
 ## from a scanned copy of the program listing.  Notations on this
@@ -958,7 +959,7 @@ GROUPKIL	TC	IBNKCALL		# KILL GROUPS 3(5,6
 		CADR	V37KLEAN
 
 		CCS	MMNUMBER		# IS IT POOH
-		TCF	RENDV00			# NO
+		TCF	RENDVOO			# NO
 		TC	IBNKCALL
 		CADR	P00KLEAN		# REDUNDANT EXCEPT FOR GROUP 4.
 		
@@ -968,13 +969,13 @@ GOMOD		CA	MMNUMBER
 GOGOPROG	TC	POSTJUMP
 		CADR	GOPROG2
 		
-RENDV00		CS	MMNUMBER		# IS NEW PROG = 20
+RENDVOO		CS	MMNUMBER		# IS NEW PROG = 20
 		AD	OCT24			# 20
 		EXTEND
-		BZF	RENDN00			# YES
+		BZF	RENDNOO			# YES
 		TCF	P00FIZZ
 ## Page 197
-RENDN00		CS	MMNUMBER
+RENDNOO		CS	MMNUMBER
 		AD	MODREG
 		EXTEND
 		BZF	KILL20	
