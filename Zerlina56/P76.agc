@@ -17,13 +17,12 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-07-28 MAS  Created from Luminary 210.
+##              2017-08-19 MAS  Updated for Zerlina 56.
 
-## NOTE: Page numbers below have not yet been updated to reflect Zerlina 56.
-
-## Page 711
+## Page 703
 # 1) PROGRAM NAME - TARGET DELTA V PROGRAM (P76).
 # 2) FUNCTIONAL DESCRIPTION - UPON ENTRY BY ASTRONAUT ACTION, P76 FLASHES DSKY REQUESTS TO THE ASTRONAUT
-#    	   TO PROVIDE VIA DSKY (1) THE DELTA V TO BE APPLIED TO THE OTHER VEHICLE STATE VECTOR AND (2) THE
+#          TO PROVIDE VIA DSKY (1) THE DELTA V TO BE APPLIED TO THE OTHER VEHICLE STATE VECTOR AND (2) THE
 #          TIME (TIG) AT WHICH THE OTHER VEHICLE VELOCITY WAS CHANGED BY  EXECUTION OF A THRUSTING MANEUVER. THE
 #          OTHER VEHICLE STATE VECTOR IS INTEGRATED TO TIG AND UPDATED BY THE ADDITION OF DELTA V (DELTA V HAVING
 #          BEEN TRANSFORMED FROM LV TO REF COSYS).  USING INTEGRVS, THE   PROGRAM THEN INTEGRATES THE OTHER
@@ -41,140 +40,114 @@
 
 # 8) FLAG USE - MOONFLAG,CMOONFLAG,INTYPFLG,RASFLAG, AND MARKCTR.
 
-		BANK	30
-		SETLOC	P76LOC
-		BANK
+                BANK    30
+                SETLOC  P76LOC
+                BANK
 
-		COUNT*	$$/P76
+                COUNT*  $$/P76
 
-		EBANK=	TIG
+                EBANK=  TIG
 
-P76ER77		CA	MODREG
-		MASK	BIT1
-		TS	OPTFLAG		# OPTFLAG = 0  CM (P76)
-		TC	UPFLAG		#         = 1  LM (P77)
-		ADRES	TRACKFLG
+P76             TC      UPFLAG
+                ADRES   TRACKFLG
 
-		TC	INTPRET
-		VLOAD
-			DELVLVC
-		STORE	DELVOV
-		EXIT
+                TC      INTPRET
+                VLOAD
+                        DELVLVC
+                STORE   DELVOV
+                EXIT
 
-		CAF	V06N3376
-		TC	BANKCALL	# AND WAIT FOR KEYBOARD ACTION.
-		CADR	GOFLASH
-		TCF	ENDP76
-		TC	+2		# PROCEED
-		TC	-5		# STORE DATA AND REPEAT FLASHING
-		TC	PHASCHNG
-		OCT	04024
-		INDEX	OPTFLAG
-		CAF	V06N84		# FLASH V06 N84 (OR N81), LAST DELTV,
-## Page 712		
-		TC	BANKCALL	# AND WAIT FOR KEYBOARD ACTION.
-		CADR	GOFLASH
-		TCF	ENDP76
-		TC	+2
-		TC	-6		# STORE DATA & REPEAT FLASHING DSP
-		TC	INTPRET		# RETURN TO INTERPRETIVE CODE
-		DLOAD	SET
-			TIG
-			NODOFLAG
-		STORE	TDEC1
-		CCALL
-			OPTFLAG
-			INTADR
-COMPMAT		VLOAD	UNIT
-			RATT
-		VCOMP			# U(-R)
-		STORE	24D		# U(-R) TO 24D
-		VXV	UNIT		# U(-R) X V = U(V X R)
-			VATT
-		STORE	18D
-		VXV	UNIT		# U(V X R) X U(-R) = U((R X V) X R)
-			24D
-		STORE	12D
-		SLOAD	BHIZ
-			OPTFLAG
-			+4
-		VLOAD
-			DELVLVC		# FROM CM
-		STORE	DELVOV
-		VLOAD
-			DELVOV		# FROM LM
-DVTRANS		VXM	VSL1		# V(MPAC)=DELTA V IN REFCOSYS
-			12D
-		VAD
-			VATT
-		STORE	6		# V(PD6)=VATT + DELTA V
-		CALL			# PREVENT WOULD-BE USER OF ORBITAL
-			INTSTALL	# INTEG FROM INTERFERING WITH UPDATING
-		CALL
-			P76SUB1
-		VLOAD	VSR*
-			6
-			0,2
-		STOVL	VCV
-			RATT
-		VSR*
-			0,2
-		STODL	RCV
-			TIG
-		STORE	TET
-## Page 713
-		CLEAR	DLOAD
-			INTYPFLG
-			TETTHIS
-INTOTHIS	STCALL	TDEC1
-			INTEGRVS
-		CALL
-			INTSTALL
-		VLOAD
-			RATT1
-		STORE	RRECT
-		STODL	RCV
-			TAT
-		STOVL	TET
-			VATT1
-		CALL
-			MINIRECT
-		EXIT
-		TC	PHASCHNG
-		OCT	04024
+                CAF     V06N84 +1       # FLASH VERB 06 NOUN 33, DISPLAY LAST TIG,
+                TC      BANKCALL        # AND WAIT FOR KEYBOARD ACTION.
+                CADR    GOFLASH
+                TCF     ENDP76
+                TC      +2              # PROCEED
+                TC      -5              # STORE DATA AND REPEAT FLASHING
+                CAF     V06N84          # FLASH LAST DELTA V,
+                TC      BANKCALL        # AND WAIT FOR KEYBOARD ACTION.
+                CADR    GOFLASH
+                TCF     ENDP76
+                TC      +2
+                TC      -5
+                TC      INTPRET         # RETURN TO INTERPRETIVE CODE
+## Page 704
+                DLOAD   SET
+                        TIG
+                        NODOFLAG
+                STCALL  TDEC1           # SET TDEC1=TIG FOR ORBITAL INTEGRATION
+                        OTHPREC
+COMPMAT         VLOAD   UNIT
+                        RATT
+                VCOMP                   # U(-R)
+                STORE   24D             # U(-R) TO 24D
+                VXV     UNIT            # U(-R)XV = U(VXR)
+                        VATT
+                STORE   18D
+                VXV     UNIT            # U(VXR)XU(-R) = U((RXV)XR)
+                        24D
+                STOVL   12D
+                        DELVOV
+                VXM     VSL1            # V(MPAC)=DELTA V IN REFCOSYS
+                        12D
+                VAD
+                        VATT
+                STORE   6               # V(PD6)=VATT + DELTA V
+                CALL                    # PREVENT WOULD-BE USER OF ORBITAL
+                        INTSTALL        # INTEG FROM INTERFERING WITH UPDATING
+                CALL
+                        P76SUB1
+                VLOAD   VSR*
+                        6
+                        0,2
+                STOVL   VCV
+                        RATT
+                VSR*
+                        0,2
+                STODL   RCV
+                        TIG
+                STORE   TET
+                CLEAR   DLOAD
+                        INTYPFLG
+                        TETTHIS
+INTOTHIS        STCALL  TDEC1
+                        INTEGRVS
+                CALL
+                        INTSTALL
+                VLOAD
+                        RATT1
+                STORE   RRECT
+                STODL   RCV
+                        TAT
+                STOVL   TET
+                        VATT1
+                CALL
+## Page 705
+                        MINIRECT
+                EXIT
+                TC      PHASCHNG
+                OCT     04024
 
-		TC	INTPRET
-		SET	CCALL
-			REINTFLG
-			OPTFLAG
-			UPDATADR
-		CALL
-			INTWAKE0
-OUT		CLEAR	EXIT		# ALLOW V37.  NO NEED TO CLEAR NODOFLAG AT
-			NODOFLAG	#  ENDP76 SINCE FLAG NOT SET WHEN DISPLAY
-					#  RESPONSES TRANSFER THERE FROM P76+.
-ENDP76		CAF	ZERO
-		TS	MARKCTR		# CLEAR RR TRACKING MARK COUNTER
-		TCF	GOTOPOOH
+                TC      INTPRET
+                SET     CALL
+                        REINTFLG
+                        ATOPOTH
+                CALL
+                        INTWAKE0
+OUT             CLEAR   EXIT            # ALLOW V37.  NO NEED TO CLEAR NODOFLAG AT
+                        NODOFLAG        #  ENDP76 SINCE FLAG NOT SET WHEN DISPLAY
+                                        #  RESPONSES TRANSFER THERE FROM P76+.
+ENDP76          CAF     ZERO
+                TS      MARKCTR         # CLEAR RR TRACKING MARK COUNTER
+                TCF     GOTOPOOH
 
-V06N84		NV	0684
-		NV	0681
-V06N3376	NV	0633
-INTADR          CADR    OTHPREC
-                CADR    THISPREC
-UPDATADR        CADR    ATOPOTH
-                CADR    ATOPTHIS
-P76SUB1		AXT,2	SET
-			2
-			MOONFLAG	# SET MEANS MOON IS SPHERE OF INFLUENCE.
-		BON	AXT,2
-			CMOONFLG	# SET MEANS PERM CM STATE IN LUNAR SPHERE.
-			QPRET
-			0
-		CLEAR	RVQ
-			MOONFLAG
-
-## Page 714
-## This page is completely blank in the original assembly-listing hardcopy.
-
-
+V06N84          NV      0684
+                NV      0633
+P76SUB1         AXT,2   SET
+                        2
+                        MOONFLAG        # SET MEANS MOON IS SPHERE OF INFLUENCE.
+                BON     AXT,2
+                        CMOONFLG        # SET MEANS PERM CM STATE IN LUNAR SPHERE.
+                        QPRET
+                        0
+                CLEAR   RVQ
+                        MOONFLAG
