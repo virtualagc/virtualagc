@@ -17,10 +17,9 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-07-28 MAS  Created from Luminary 210.
+##              2017-08-20 MAS  Updated for Zerlina 56.
 
-## NOTE: Page numbers below have not yet been updated to reflect Zerlina 56.
-
-## Page 501
+## Page 494
 # SUBROUTINE NAME: R05 - S-BAND ANTENNA FOR LM
 
 # MOD0 BY T. JAMES
@@ -71,8 +70,7 @@
                 EBANK=          WHOCARES
                 COUNT*          $$/R05
 SBANDANT        TC              INTPRET
-
-## Page 502
+## Page 495
                 SETPD           RTB
                                 0D
                                 LOADTIME                # PICK UP CURRENT TIME
@@ -101,7 +99,7 @@ CONV5           SETPD           UNIT                    # UE = -UNIT((REM)(UEM) 
                 VCOMP           CALL
                                 CDUTRIG                 # COMPUTE SINES AND COSINES OF CDU ANGLES
                 MXV             VSL1                    # TRANSFORM REF. COORDINATE SYSTEM TO
-                                REFSMMAT                # STABLE MEMBER B-1 X B-1 X B+1 = B-1
+                                REFSMMAT                # STABLE MEMBER  B-1 X B-1 X B+1 = B-1
                 PUSH            DLOAD                   # 8D
                                 HI6ZEROS
                 STORE           PITCHANG
@@ -123,8 +121,7 @@ CONV5           SETPD           UNIT                    # UE = -UNIT((REM)(UEM) 
                 UNIT            PDVL
                                 RLM
                 VPROJ           VSL2                    # PROJECTION OF R ONTO LM XZ PLANE
-
-## Page 503
+## Page 496
                                 HIUNITY
                 BVSU            BOV                     # CLEAR OVERFLOW INDICATOR IF ON
                                 RLM
@@ -176,7 +173,7 @@ SBANDEX         EXIT
                 TC              PRIOCHNG
                 CAF             V06N51                  # DISPLAY ANGLES
 
-## Page 504
+## Page 497
                 TC              BANKCALL
                 CADR            GOMARKFR
                 TC              B5OFF                   # TERMINATE
@@ -188,10 +185,6 @@ SBANDEX         EXIT
                 TC              PRIOCHNG
                 TC              SBANDANT                # YES, CONTINUE DISPLAYING ANGLES.
 V06N51          VN              0651
-
-                SETLOC          SBAND40
-                BANK
-
 1OVSQRT2        2DEC            .7071067815             # 1/SQRT(2)
 
 UR              EQUALS          0D
