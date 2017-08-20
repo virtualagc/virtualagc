@@ -22,6 +22,7 @@
 ##                              variable servicer.
 ##              2017-08-06 MAS  Fixed a comment transcription error (MODULE
 ##                              where MODULO should have been).
+##              2017-08-19 MAS  Corrected a transcription error.
 
 ## Page 784
 # ****************************************************************************************************************
@@ -1283,7 +1284,7 @@ HZTIME?         CA              HZCOUNT                 # DOES HZCOUNT = 0 MODUL
                 EXTEND
                 BZF             P66DISPS                # YES:  GO COMPUTE DISPLAYS
 
-ENDP66JOB       INCR            HZCOUNT                 # NO:   INCREMENT HZCOUNT, TERMINATE JOB:
+END66JOB        INCR            HZCOUNT                 # NO:   INCREMENT HZCOUNT, TERMINATE JOB:
                 TC              ENDOFJOB                #         P66HZ COMES HERE TOO
 
 # ********************************

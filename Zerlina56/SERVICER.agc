@@ -332,7 +332,7 @@ MOONSPOT        CA      KPIP1           # TP MPAC = ABDELV AT 2(14) CM/SEC
 ## Page 856
 ## The following 5 lines are marked as having changed between ZFLY.048 and ZFLY.049
                 EXTEND
-                DVA     DVTOTAL
+                DCA     DVTOTAL
                 DAS     MPAC
                 DXCH    MPAC
                 DXCH    DVTEMP          # PRELIMINARY DVTOTAL, UNITS OF 2(7) M/CS
@@ -1701,6 +1701,10 @@ PGMAX           DEC     500
 
 
 4SEC(18)        2DEC    400 B-28
+
+
+
+DP1/20          2DEC    0.05
 
 
 
