@@ -22,7 +22,7 @@
 ##                              variable servicer.
 ##              2017-08-06 MAS  Fixed a comment transcription error (MODULE
 ##                              where MODULO should have been).
-##              2017-08-19 MAS  Corrected a transcription error.
+##              2017-08-19 MAS  Corrected a few transcription errors.
 
 ## Page 784
 # ****************************************************************************************************************
@@ -1513,7 +1513,7 @@ PREMON2         CAF             SEVEN
 REDESMON        EXTEND
                 READ            31
                 COM
-                MASK            OCT00053
+                MASK            OCT00063
                 XCH             ELVIRA
                 TS              L
                 CCS             ELVIRA                  # DO ANY BITS APPEAR THIS PASS?
@@ -1799,7 +1799,7 @@ LPDFVSUB        TC              MAKECADR
                 TC              BANKCALL
                 CADR            SPARCSIN        -1
                 AD              1/2DEG
-                AD              FLBIAS
+                AD              ELBIAS
                 EXTEND
                 MP              180DEGS
                 TS              LOOKANGL

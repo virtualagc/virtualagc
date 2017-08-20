@@ -1967,7 +1967,7 @@ STARTP66        EXTEND                  # YES:  INITIALIZE DESIRED ALTITUDE-RATE
 
 ## Page 888
                 TC      DOWNFLAG        # PERMIT X-AXIS OVERRIDE DESPITE THE
-                ADRES   XDVINFLG        #   POSSIBILITY OF PITCH-ROLL CROSS-FEED
+                ADRES   XOVINFLG        #   POSSIBILITY OF PITCH-ROLL CROSS-FEED
 
                 TC      UPFLAG          # TERMINATE TERRAIN MODEL
                 ADRES   NOTERFLG
