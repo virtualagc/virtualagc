@@ -1322,7 +1322,7 @@ P66HZ           TC              INTPRET
 
                 TC              BANKCALL                # YES:  ISSUE ALARM BUT NO COMMANDS
                 FCADR           OVFDESC
-                TCF             ENDP66JOB
+                TCF             END66JOB
 
 ENGARM?         CAF             BIT3                    # IS ENGINE-ARM SWITCH ON?
                 EXTEND
