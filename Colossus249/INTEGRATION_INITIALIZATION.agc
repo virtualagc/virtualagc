@@ -17,6 +17,7 @@
 ##				vs the already-proofed corresponding Colossus
 ##				237 and Comanche 55 source-code files
 ##				and corrected errors found.
+##		2017-08-19 MAS	Fixed comment errors found transcribing Zerlina 56.
 ##
 ## The contents of the "Colossus249" files, in general, are transcribed 
 ## from a scanned copy of the program listing.  Notations on this
@@ -221,7 +222,7 @@
 #	   OUTPUT
 #		THE DATA LISTED IN SECTION 3.0 PLUS
 #		RQVV	POSITION VECTOR OF VEHICLE WITH RESPECT TO SECONDARY
-#		BODY... METERS B-29 ONLY IF MIDFLAG = DIM0FLAG = 1
+#		BODY... METERS B-29 ONLY IF MIDFLAG = DIMOFLAG = 1
 #	B) CONIC INTEGRATION.  CSMCONIC, LEMCONIC ENTRANCES
 #		L-X	STORE TIME IN PUSH LIST (TDEC1)
 #		L	CALL
@@ -265,7 +266,7 @@
 #		L-5			VINTFLAG	1=CSM, 0=LM
 #		L-4			INTYPFLAG	1=CONIC, 0=PRECISION
 #		L-3	SET(CLEAR)	SET(CLEAR)
-#		L-2			DIM0FLAG	1=W-MATRIX, 0=NO W-MATRIX
+#		L-2			DIMOFLAG	1=W-MATRIX, 0=NO W-MATRIX
 #		L-1			D6OR9FLG	1=9X9, 0=6X6
 #		L	SET		DLOAD
 #		L+1			STATEFLG	DESIRE PERMANENT UPDATE
@@ -273,7 +274,7 @@
 #		L+3	STCALL		RFINAL
 #		L+4			INTEGRV
 #		L	CALL				NORMAL USE -- WILL UPDATE STATE
-#		L+1			INTEGRV		VECTOR IF DIM0FLAG=1. (STATEFLG IS
+#		L+1			INTEGRV		VECTOR IF DIMOFLAG=1. (STATEFLG IS
 #		L+2	RETURN				ALWAYS RESET IN INTEGRATION AFTER
 #							IT IS USED.)
 #	  INPUT

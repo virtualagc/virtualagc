@@ -17,10 +17,9 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-07-28 MAS  Created from Luminary 210.
+##              2017-08-20 MAS  Updated for Zerlina 56.
 
-## NOTE: Page numbers below have not yet been updated to reflect Zerlina 56.
-
-## Page 1202
+## Page 1195
 # 1.0 INTRODUCTION
 # ----------------
 #
@@ -72,7 +71,7 @@
 # THE PERMANENT STATE VECTORS WILL ALSO BE UPDATED WHENEVER THE W-MATRIX IS INTEGRATED OR WHEN A CALLER OF INTEGRV
 # SETS STATEFLG (THE NAVIGATION PROGRAMS P20, P22.)
 
-## Page 1203
+## Page 1196
 # APPENDIX B OF THE USERS GUIDE LISTS THE STATE VECTOR QUANTITIES.
 #
 # 2.1 RESTARTS
@@ -121,8 +120,8 @@
 #                                                             3      -1
 #    NUVCSM(LEM)    - VELOCITY DEVIATION             M/CSEC  2      2
 #                     0 IF TCCSM(LEM) = 0
-
-## Page 1204
+#
+## Page 1197
 #                                                             29     27
 #    RCVCSM(LEM)    - CONIC POSITION                 METERS  2      2
 #                     EQUALS RRECTCSM(LEM) IF
@@ -173,8 +172,7 @@
 #    X2           COORDINT
 #    X2           COORDINATE SYSTEM ORIGEN                   0      2
 #                 (THIS, NOT MOONFLAG, SHOULD BE
-
-## Page 1205
+## Page 1198
 #                 USED TO DETERMINE ORIGIN.)
 #
 # IN ADDITION TO THE ABOVE, THE PERMANENT STATE VECTOR IS UPDATED WHENEVER
@@ -225,8 +223,7 @@
 #          RCV    POSITION VECTOR                  METERS
 #          VCV    VELOCITY VECTOR                  M/CSEC
 #          TET    TIME OF STATE VECTOR(MAY = 0)    CSEC B-28
-
-## Page 1206
+## Page 1199
 #          TDEC1  TIME TO INTEGRATE TO             CSEC B-28 (PD 32D)
 #                 (MAY BE INCREMENT IF TET=0)
 #       OUTPUT
@@ -252,7 +249,7 @@
 #          L+2    RETURN                ALWAYS RESET IN INTEGRATION AFTER
 #                                       IT IS USED.)
 #       INPUT
-#          TDEC1 (PD 32D) TIME TO INTEGRATE TO     CSEC B-28
+#          TDEC1 (PD 32D) TIME TO INTEGRATE TO    CSEC B-28
 #       OUTPUT
 #          SAME AS FOR PRECISION OR CONIC INTEGRATION
 #       THE PROGRAM WILL SET MOONFLAG, MIDFLAG DEPENDING ON
@@ -269,6 +266,7 @@ STATEINT        TC              PHASCHNG
                 TC              FINDVAC
                 EBANK=          RRECTCSM
                 2CADR           STATINT1
+
                 TC              TASKOVER
 STATINT1        TC              INTPRET
                 BON             RTB
@@ -277,7 +275,7 @@ STATINT1        TC              INTPRET
                                 LOADTIME
                 STORE           TDEC1
 
-## Page 1207
+## Page 1200
                 CALL
                                 INTSTALL
                 SET             CALL
@@ -297,6 +295,7 @@ ENDINT          CLEAR           EXIT
                 TC              LONGCALL
                 EBANK=          RRECTHIS
                 2CADR           STATEINT
+
                 TC              ENDOFJOB
 SETIFLGS        SET             CLEAR
                                 STATEFLG
@@ -328,7 +327,7 @@ ATOPCSM         STQ             RTB
                                 CMOONFLG
                                 SVDWN1
 
-## Page 1208
+## Page 1201
                 BON             CLRGO
                                 MOONFLAG
                                 S2
@@ -380,7 +379,7 @@ MOVEPCSM        TC              SETBANK
 
 # ATOPLEM  TRANSFERS RRECT TO RRECT +41 TO RRECTLEM TO RRECTLEM +41
 
-## Page 1209
+## Page 1202
 ATOPLEM         STQ             RTB
                                 S2
                                 MOVEALEM
@@ -432,7 +431,7 @@ USEPIOS         SETPD           VLOAD
                 STODL           TET
                                 5/8
 
-## Page 1210
+## Page 1203
                 CALL
                                 RP-TO-R
                 STOVL           RCV
@@ -463,7 +462,7 @@ SETBANK         CAF             INTBANK
 INTBANK         BBCON           INTEGRV
 
 
-# SPECIAL PURPOSE ENTRIES TO ORBITAL INTEGRATION.  THESE ROUTINES PROVIDE ENTRANCES TO INTEGRATION WITH
+# SPECIAL PURPOSE ENTRIES TO ORBITAL INTEGRATION. THESE ROUTINES PROVIDE ENTRANCES TO INTEGRATION WITH
 # APPROPRIATE SWITCHES SET OR CLEARED FOR THE DESIRED INTEGRATION.
 
 # CSMPREC AND LEMPREC PERFORM ORBIT INTEGRATION BY THE ENCKE METHOD TO THE TIME INDICATED IN TDEC1
@@ -483,8 +482,7 @@ INTBANK         BBCON           INTEGRV
 
 # CALLING SEQUENCE
 #    L-X  STORE TDEC1
-
-## Page 1211
+## Page 1204
 #    L    CALL       (STCALL TDEC1)
 #    L+1         CSMPREC (CSMCONIC, LEMPREC, LEMCONIC)
 #
@@ -535,8 +533,7 @@ LEMCONIC        STQ             CALL
                                 X1
                                 INTSTALL
                 SXA,1           CLRGO
-
-## Page 1212
+## Page 1205
                                 IRETURN
                                 VINTFLAG
                                 IFLAGC
@@ -587,8 +584,7 @@ INTEGRVS        SET             SSP
 #   STORE TIME TO INTEGRATE TO IN TDEC1
 # OUTPUT
 #   RATT   AS
-
-## Page 1213
+## Page 1206
 #   VATT       DEFINED
 #   TAT                BEFORE
 
@@ -639,8 +635,7 @@ RECTOUT         SETPD           CALL
                                 VRECT
                                 0,2
                 PDDL            PDVL                    # VATT TO PD6    TAT TO PD12
-
-## Page 1214
+## Page 1207
                                 TET
                                 RRECT
                 PDVL            PDDL*
@@ -682,7 +677,7 @@ RVCON           DLOAD           DSU
                 STCALL          TET
                                 RECTOUT
 
-## Page 1215
+## Page 1208
 # TESTLOOP
 
 TESTLOOP        BOF             CLRGO
@@ -733,8 +728,7 @@ DT/2COMP        DLOAD           DSU
 USEMAXDT        DLOAD           SIGN
                                 12D
                                 DT/2
-
-## Page 1216
+## Page 1209
                 STCALL          DT/2
                                 P00HCHK
 MAXDT           DLOAD           PDDL                    # EXCHANGE DT/2MAX WITH COMPUTED MAX.
@@ -774,6 +768,7 @@ P00HCHK         DLOAD           ABS
                                 INTEXIT
                                 TIMESTEP
 DT/2MIN         2DEC            3               B-20
+
 DT/2MAX         2DEC            4000            E2 B-20
 
 INTSTALL        EXIT
@@ -784,8 +779,7 @@ INTSTALL        EXIT
                 CAF             WAKESTAL
                 TC              JOBSLEEP
 INTWAKE0        EXIT
-
-## Page 1217
+## Page 1210
                 TCF             INTWAKE1
 
 INTWAKE         CS              RASFLAG                 # IS THIS INTSTALLED ROUTINE TO BE
@@ -828,14 +822,14 @@ GOBAC           TC              INTPRET
 WAKESTAL        CADR            INTSTALL        +1
 INTBITAB        OCT             20100
 
-## Page 1218
+## Page 1211
 # AVETOMID
 
 # THIS ROUTINE PERFORMS THE TRANSITION FROM A THRUSTING PHASE TO THE COAST
 # PHASE BY INITIALIZING THIS VEHICLES PERMANENT STATE VECTOR WITH THE
 # VALUES LEFT BY THE AVERAGEG ROUTINE IN RN,VN,PIPTIME.
 
-# BEFORE THIS IS DONE THE W-MATRIX, IF ITS VALID (ORWFLAG OR RENDWFLG IS
+# BEFORE THIS IS DONE THE W-MATRIX, IF ITS  VALID (ORWFLAG OR RENDWFLG IS
 # SET) IS INTEGRATED FORWARD TO PIPTIME WITH THE PRE-THRUST STATE VECTOR.
 
 # IN ADDITION, THE OTHER VEHICLE IS INTEGRATED (PERMANENT) TO PIPTIME.
@@ -879,8 +873,7 @@ OTHERS          DLOAD           CALL                    # GET SET FOR OTHER VEHI
                                 PIPTIME
                 STOVL           TET
                                 VN
-
-## Page 1219
+## Page 1212
                 VSR*            CALL
                                 0,2
                                 MINIRECT                # FINISH SETTING UP STATE VECTOR
@@ -905,7 +898,7 @@ INT/W           DLOAD           CALL
                 GOTO
                                 OTHERS                  # NOW GO DO THE OTHER VEHICLE
 
-## Page 1220
+## Page 1213
 # MIDTOAV1
 
 # THIS ROUTINE INTEGRATES (PRECISION) TO THE TIME SPECIFIED IN TDEC1.
@@ -930,24 +923,16 @@ INT/W           DLOAD           CALL
 # NO INPUTS ARE REQUIRED OF THE CALLER. RETURN IS IN BASIC TO THE RETURN
 # ADDRESS WITH THE ABOVE TRANSFERS TO R,VN1-PIPTIME1-AND MPAC DONE
 
-                SETLOC          ORBITAL5
-                BANK
-                COUNT*          $$/INTIN
-
                 EBANK=          IRETURN1
 MIDTOAV2        STQ             CLRGO                   # INTEGRATE TO PRESENT TIME PLUS TIMEDELT
                                 IRETURN1
                                 MID1FLAG
                                 ENTMID2
 
-                SETLOC          INTINIT
-                BANK
-                COUNT*          $$/INTIN
-
 MIDTOAV1        STQ             SET                     #  INTEGRATE TO TDEC1
                                 IRETURN1
                                 MID1FLAG
-                RTB             DAD                     # INITIAL CHECK , IS TDEC1 IN THE FUTURE
+                RTB             DAD                     # INITIAL CHECK, IS TDEC1 IN THE FUTURE
                                 LOADTIME
                                 TIMEDELT
                 BDSU            BPL
@@ -955,8 +940,6 @@ MIDTOAV1        STQ             SET                     #  INTEGRATE TO TDEC1
                                 ENTMID1                 #  Y5S
                 CALL
                                 NOTIME                  # NO, SET ALARM, SWITCH TO MIDTOAV2
-
-## Page 1221
 
 ENTMID2         RTB             DAD
                                 LOADTIME
@@ -966,6 +949,7 @@ ENTMID2         RTB             DAD
 ENTMID1         CALL
                                 INTSTALL
                 CLEAR           CALL
+## Page 1214
                                 DIM0FLAG                # NO W-MATRIX
                                 THISVINT
                 CLEAR           SET
@@ -1008,8 +992,6 @@ CKMID2          BOF             RTB
 TIMEINC         RTB             DAD
                                 LOADTIME
                                 TIMEDELT
-
-## Page 1222
                 STCALL          TDEC
                                 TESTLOOP
 
@@ -1018,25 +1000,26 @@ MID2            DLOAD           DSU
                                 TET
                 ABS             DSU
                                 3CSECS
+## Page 1215
                 BMN             GOTO
                                 A-PCHK
                                 TIMEINC
 
 NOTIME          CLEAR           EXIT                    # TOO LATE
                                 MID1FLAG
-                INCR            IRETURN1                # SET ERROR EXIT (CALLOC +2)
+                INCR            IRETURN1                # SET ERROR EXIT  (CALLOC +2)
                 TC              ALARM                   # INSUFFICIENT TIME FOR INTEGRATION --
                 OCT             1703                    #    TIG WILL BE SLIPPED...
                 TC              INTPRET
                 RVQ
 
-                SETLOC          UPDATE2
-                BANK
-                COUNT*          $$/INTIN
-
 3CSECS          2DEC            3
+
 TIMEDELT        2DEC            2000
 
+                BANK            27
+                SETLOC          UPDATE2
+                BANK
                 EBANK=          TEPHEM
                 COUNT*          $$/INTIN
 
@@ -1059,17 +1042,16 @@ INTWAKEU        TC              INTPRET
                                 INTWAKEM                # SPHERE OF INFLUENCE.........
                 AXT,2           CLRGO                   # EARTH SPHERE OF INFLUENCE.
                 DEC             0
-
-## Page 1223
                                 MOONFLAG
                                 INTWAKEC
 INTWAKEM        AXT,2           SET                     # LUNAR SPHERE OF INFLUENCE.
                 DEC             2
                                 MOONFLAG
 INTWAKEC        SLOAD           BMN                     # COMMON CODING AFTER X2 INITIALIZED AND
-                                                        # MOONFLAG SET (OR CLEARED).
+                                                        # MOONFLAG SET(OR CLEARED).
                                 UPSVFLAG                # IS THIS A REQUEST FOR A LEM OR CSM
                                 INTWAKLM                #  STATE VECTOR UPDATE......
+## Page 1216
                 CALL                                    # UPDATE CSM STATE VECTOR
                                 ATOPCSM
 
@@ -1091,7 +1073,7 @@ INTWAKEX        CLEAR           EXIT
 
                 TC              INTPRET
 INTWAKUP        CALL
-                                INTWAKE0                # RELEASE  :GRAB: OF ORBIT INTEG
+                                INTWAKE0                # RELEASE :GRAB: OF ORBIT INTEG
                 EXIT
 
                 TC              PHASCHNG
@@ -1101,15 +1083,11 @@ INTWAKUP        CALL
 UPMNSVCD        OCT             2
                 OCT             0
 
-                SETLOC          ORBITAL4
-                BANK
-                COUNT*          $$/INTIN
 
 GRP2PC          STQ             EXIT
                                 GRP2SVQ
                 TC              PHASCHNG
                 OCT             04022
                 TC              INTPRET
-## Page 1224
                 GOTO
                                 GRP2SVQ
