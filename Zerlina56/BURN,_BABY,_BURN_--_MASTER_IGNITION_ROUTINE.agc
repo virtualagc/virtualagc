@@ -17,11 +17,9 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-07-28 MAS  Created from Luminary 210.
+##              2017-08-20 MAS  Updated for Zerlina 56.
 
-## NOTE: Page numbers below have not yet been updated to reflect Zerlina 56.
-
-## Page 726
-
+## Page 717
                 BANK            36
                 SETLOC          P40S
                 BANK
@@ -63,7 +61,7 @@ P12TABLE        VN              0674                    # (0)
                 TCF             DISPCHNG                # (11)
                 TCF             WAITABIT                # (12)
                 TCF             P12IGN                  # (13)
-
+#
 
 
 P40TABLE        VN              0640                    # (0)
@@ -72,16 +70,16 @@ P40TABLE        VN              0640                    # (0)
                 TCF             GOPOST                  # (3)
                 TCF             TASKOVER                # (4)
                 TCF             P40SPOT                 # (5)
-
-## Page 727
+## Page 718
                 DEC             2240                    # (6)
                 EBANK=          OMEGAQ
                 2CADR           STEERING                # (7)
+
                 TCF             P40SJUNK                # (11)
                 TCF             WAITABIT                # (12)
                 TCF             P40IGN                  # (13)
                 TCF             REP40ALM                # (14)
-
+#
 
 
 P41TABLE        TCF             P41SPOT                 # (5)
@@ -91,7 +89,7 @@ P41TABLE        TCF             P41SPOT                 # (5)
 
                 TCF             COMMON                  # (11)
                 TCF             TIGTASK                 # (12)
-
+#
 
 
 P42TABLE        VN              0640                    # (0)
@@ -103,11 +101,12 @@ P42TABLE        VN              0640                    # (0)
                 DEC             2390                    # (6) ULLAGE ON AT TIG-6 SECS.
                 EBANK=          OMEGAQ
                 2CADR           STEERING                # (7)
+
                 TCF             P40SJUNK                # (11)
                 TCF             WAITABIT                # (12)
                 TCF             P42IGN                  # (13)
                 TCF             P42STAGE                # (14)
-
+#
 
 
 P63TABLE        VN              0662                    # (0)
@@ -119,12 +118,12 @@ P63TABLE        VN              0662                    # (0)
                 DEC             2240                    # (6)
                 EBANK=          WHICH
                 2CADR           SERVEXIT                # (7)
+
                 TCF             DISPCHNG                # (11)
                 TCF             WAITABIT                # (12)
-
-## Page 728
+## Page 719
                 TCF             P63IGN                  # (13)
-
+#
 
 
 ABRTABLE        VN              0663                    # (0)
@@ -139,12 +138,12 @@ ABRTABLE        VN              0663                    # (0)
                 TCF             DISPCHNG                # (11)
                 TCF             WAITABIT                # (12)
                 TCF             ABRTIGN                 # (13)
+#
 
 
-
-#               ****************************************
-#               GENERAL PURPOSE IGNITION ROUTINES
-#               ****************************************
+#                                 ****************************************
+#                                 GENERAL PURPOSE IGNITION ROUTINES
+#                                 ****************************************
 
 BURNBABY        TC              PHASCHNG                # GROUP 4 RESTARTS HERE
                 OCT             04024
@@ -173,9 +172,8 @@ P12SPOT         =               P40SPOT                 # (5)
 P63SPOT         =               P41SPOT                 # (5)      IN P63 CLOKTASK ALREADY GOING
 P40SPOT         CS              CNTDNDEX                # (5)
                 TC              BANKCALL                # MUST BE BANKCALLED FOR GENERALIZED
-
-## Page 729
-                CADR            STCLOK2                 # RETURN
+## Page 720
+                CADR            STCLOK2                 #        RETURN
 P41SPOT         TC              INTPRET                 # (5)
                 DLOAD           DSU
                                 TIG
@@ -220,11 +218,12 @@ CALLT-35        DXCH            MPAC
                 TC              LONGCALL
                 EBANK=          TTOGO
                 2CADR           TIG-35
+
                 TC              PHASCHNG
                 OCT             20254                   # 4.25SPOT FOR TIG-35 RESTART.
-                TC              CHECKMM
 
-## Page 730
+                TC              CHECKMM
+## Page 721
                 DEC             63
                 TCF             ENDOFJOB                # NOT P63
                 CS              CNTDNDEX                # P63 CAN START DISPLAYING NOW.
@@ -236,7 +235,7 @@ CALLT-35        DXCH            MPAC
                 EXIT
                 TCF             ENDOFJOB
 
-#       ****************************************
+#                                 ****************************************
 
 TIG-35          CAF             5SEC
                 TC              TWIDDLE
@@ -274,12 +273,12 @@ TIG-30.1        CAF             PRIO17                  # SET UP JOB TO RESTORE 
 
                 TCF             TASKOVER
 
-## Page 731
+## Page 722
 TIG-30A         CAF             V16N85B
                 TC              BANKCALL                # RESTORE DISPLAY.
                 CADR            REGODSP                 # REGODSP DOES A TCF ENDOFJOB
 
-#       *****************************************
+#                                 *****************************************
 
 TIG-30          CAF             S24.9SEC
                 TC              TWIDDLE
@@ -324,8 +323,7 @@ ULLGNOT         EXTEND                                  # (1)
                 TS              TBASE4                  # SET TBASE4 FOR TIG-5 RESTART
 
 REDO2.17        EXTEND
-
-## Page 732
+## Page 723
                 DCA             NEG0                    # CLEAR OUT GROUP 2 SO LAMBERT CAN START
                 DXCH            -PHASE2                 #       IF NEEDED.
 
@@ -336,7 +334,7 @@ REDO4.2         CCS             PHASE5                  # IS SERVICER GOING?
                 CADR            PREREAD                 # PREREAD ENDS THIS TASK
 
 
-#       ****************************************
+#                                 ****************************************
 
 ULLGTASK        TC              ONULLAGE                # THIS COMES AT TIG-7.5 OR TIG-3.5
                 TC              PHASCHNG
@@ -344,7 +342,7 @@ ULLGTASK        TC              ONULLAGE                # THIS COMES AT TIG-7.5 
                 TCF             TASKOVER
 
 
-#       ****************************************
+#                                 ****************************************
 
 TIG-5           EXTEND
                 DCA             NEG0                    # INSURE THAT GROUP 3 IS INACTIVE.
@@ -372,10 +370,12 @@ P40SJUNK        CCS             PHASE3                  # (11) P40 AND P42.  S40
                 EBANK=          TTOGO
                 2CADR           S40.13
 
+
+
                 TC              PHASCHNG                # 3.5SPOT FOR S40.13
                 OCT             00053
 
-## Page 733
+## Page 724
 DISPCHNG        CS              VB99DEX                 # (11)
                 TS              DISPDEX
 COMMON          TC              PHASCHNG                # RESTART TIG-0 (4.7SPOT)
@@ -383,7 +383,7 @@ COMMON          TC              PHASCHNG                # RESTART TIG-0 (4.7SPOT
                 TCF             TASKOVER
 
 
-#       ****************************************
+#                                 ****************************************
 
 TIG-0           CS              FLAGWRD7                # SET IGNFLAG SINCE TIG HAS ARRIVED
                 MASK            IGNFLBIT
@@ -396,6 +396,7 @@ TIG-0           CS              FLAGWRD7                # SET IGNFLAG SINCE TIG 
                 TC              WAITLIST
                 EBANK=          DVCNTR
                 2CADR           ZOOM
+
                 TC              2PHSCHNG
                 OCT             40033
 
@@ -426,7 +427,7 @@ IGNITION        CS              FLAGWRD5                # INSURE ENGONFLG IS SET
                 MASK            DAPBOOLS                # IMPULSE MODE IN P12,P40,P42,AND P63
                 TS              DAPBOOLS
 
-## Page 734
+## Page 725
                 EXTEND                                  # UPDATE TIG USING TGO FROM S40.13
                 DCA             TGO
                 DXCH            TIG
@@ -441,7 +442,7 @@ IGNITION        CS              FLAGWRD5                # INSURE ENGONFLG IS SET
                 INDEX           WHICH
                 TC              13
 
-P63IGN          EXTEND                                  # (13)  INITIATE BURN DISPLAYS
+P63IGN          EXTEND                                  # (13)      INITIATE BURN DISPLAYS
                 DCA             LUNLANAD
                 DXCH            AVGEXIT
 
@@ -471,13 +472,13 @@ P40IGN          CS              FLAGWRD5                # (13)
                 TC              WAITLIST
                 EBANK=          DVCNTR
                 2CADR           ZOOM
+
 P63IGN1         TC              2PHSCHNG
                 OCT             40033                   # 3.3SPOT FOR ZOOM RESTART.
-                OCT             05014                   # TYPE C RESTARTS HERE IMMEDIATELY
+                OCT             05014                   # TYPE C   RESTARTS HERE IMMEDIATELY
                 OCT             77777
 
-## Page 735
-
+## Page 726
                 TCF             P42IGN
 P12IGN          CAF             EBANK6
                 TS              EBANK
@@ -502,8 +503,6 @@ ABRTIGN         CA              Z                       # (13) KILL CLOKTASK
 P42IGN          CS              DRIFTBIT                # ENSURE THAT POWERED-FLIGHT SWITCHING
                 MASK            DAPBOOLS                #   CURVES ARE USED.
                 TS              DAPBOOLS
-## Note: The three statements above from CS DRIFTBIT to TS DAPBOOLS are marked and pu into
-##       blue pen braces
                 CAF             IMPULBIT                # EXAMINE IMPULSE SWITCH
                 MASK            FLAGWRD2
                 CCS             A
@@ -530,11 +529,11 @@ WAITABIT        EXTEND                                  # KILL GROUP 4
 
                 TCF             TASKOVER
 
-## Page 736
+## Page 727
 TIGTASK         TC              POSTJUMP                # (12)
                 CADR            TIGTASK1
 
-#       ****************************************
+#                                 ****************************************
 
                 BANK            31
                 SETLOC          P40S3
@@ -555,7 +554,7 @@ TIGTASK1        CAF             PRIO16
                 TCF             TASKOVER
 
 
-#       ****************************************
+#                                 ****************************************
 
 ZOOM            TC              CHECKMM                 # P40 OR P63?
                 DEC             63
@@ -581,13 +580,12 @@ P40ZOOMA        TC              PHASCHNG
 
 
                 BANK            36
-
-## Page 737
+## Page 728
                 SETLOC          P40S
                 BANK
                 COUNT*          $$/P40
 
-#       ****************************************
+#                                 ****************************************
 
 COMFAIL         TC              UPFLAG                  # (15)
                 ADRES           IDLEFLAG
@@ -620,6 +618,7 @@ COMFAIL4        CS              CNTDNDEX
                 ADRES           FLUNDISP
                 TCF             ENDOFJOB
 
+
 COMFAIL2        TC              PHASCHNG                # KILL ZOOM RESTART PROTECTION
                 OCT             00003
 
@@ -630,11 +629,9 @@ COMFAIL2        TC              PHASCHNG                # KILL ZOOM RESTART PROT
                 CADR            ENGINOF4
                 TC              UPFLAG                  # SET THE DRIFT BIT FOR THE DAP.
                 ADRES           DRIFTDFL
-## Note: Above two instructions and operands TC ... and ADRES ... are encircled with a blue pen
                 TC              INVFLAG                 # USE OTHER RCS SYSTEM
                 ADRES           AORBTFLG
-
-## Page 738
+## Page 729
                 TC              UPFLAG                  # TURN ON ULLAGE
                 ADRES           ULLAGFLG
                 CAF             BIT1
@@ -644,9 +641,9 @@ COMFAIL2        TC              PHASCHNG                # KILL ZOOM RESTART PROT
                 TCF             ENDOFJOB
 
 
-#       ****************************************
-#       SUBROUTINES OF THE IGNITION ROUTINE
-#       ****************************************
+#                                 ****************************************
+#                                 SUBROUTINES OF THE IGNITION ROUTINE
+#                                 ****************************************
 
 INVFLAG         CA              Q
                 TC              DEBIT
@@ -656,7 +653,7 @@ INVFLAG         CA              Q
                 TCF             COMFLAG
 
 
-#       ****************************************
+#                                 ****************************************
 
 NOULLAGE        CS              ULLAGER                 # MUST BE CALLED IN A TASK OR UNDER INHINT
                 MASK            DAPBOOLS
@@ -664,7 +661,7 @@ NOULLAGE        CS              ULLAGER                 # MUST BE CALLED IN A TA
                 TC              Q
 
 
-#       ****************************************
+#                                 ****************************************
 
 ONULLAGE        CS              DAPBOOLS                # TURN ON ULLAGE.  MUST BE CALLED IN
                 MASK            ULLAGER                 # A TASK OR WHILE INHINTED.
@@ -672,10 +669,10 @@ ONULLAGE        CS              DAPBOOLS                # TURN ON ULLAGE.  MUST 
                 TC              Q
 
 
-#       ****************************************
+#                                 ****************************************
 
 STCLOK1         CA              ZERO                    # THIS ROUTINE STARTS THE COUNT-DOWN
-STCLOK2         TS              DISPDEX                 # (CLOKTASK AND CLOKJOB).     SETTING
+STCLOK2         TS              DISPDEX                 #   (CLOKTASK AND CLOKJOB).   SETTING
 STCLOK3         TC              MAKECADR                # SETTING DISPDEX POSITIVE KILLS IT.
                 TS              TBASE4                  # RETURN SAVE (NOT FOR RESTARTS)
                 EXTEND
@@ -685,8 +682,7 @@ STCLOK3         TC              MAKECADR                # SETTING DISPDEX POSITI
                 DCS             TIME2
                 DAS             MPAC                    # HAVE TIG - TIME2, UNDOUBTEDLY A + NUMBER
                 TC              TPAGREE                 # POSITIVE, SINCE WE PASSED THE
-
-## Page 739
+## Page 730
                 CAF             1SEC                    #   45 SECOND CHECK
                 TS              Q
                 DXCH            MPAC
@@ -706,6 +702,7 @@ STCLOK3         TC              MAKECADR                # SETTING DISPDEX POSITI
                 CA              TBASE4
                 TC              BANKJUMP
 
+
 CLOKTASK        CS              TIME1                   # SET TBASE6 FOR GROUP 6 RESTART
                 TS              TBASE6
 
@@ -716,6 +713,7 @@ CLOKTASK        CS              TIME1                   # SET TBASE6 FOR GROUP 6
                 TC              NOVAC
                 EBANK=          TTOGO
                 2CADR           CLOKJOB
+
 
 
                 TC              FIXDELAY                # WAIT A SECOND BEFORE STARTING OVER
@@ -735,16 +733,15 @@ CLOKJOB         EXTEND
                 EXTEND
                 DCA             TIME2
                 DAS             TTOGO
-
-## Page 740
+## Page 731
                 INHINT
                 CCS             DISPDEX                 # IF DISPDEX HAS BEEN SET POSITIVE BY A
                 TCF             ENDOFJOB                # TASK OR A HIGHER PRIORITY JOB SINCE THE
                 TCF             ENDOFJOB                # LAST CLOKTASK, AVOID USING IT AS AN
                 COM                                     # INDEX.
-                RELINT                                  # ***** DISPDEX MUST NEVER BE -0 *****
+                RELINT                                  # *****  DISPDEX MUST NEVER BE -0  *****
                 INDEX           A
-                TCF             DISPNOT         -1      # (-1 DUE TO EFFECT OF CCS)
+                TCF             DISPNOT         -1      # ( -1 DUE TO EFFECT OF CCS )
 
 VB97DEX         =               OCT35                   # NEGATIVE OF THIS IS PROPER FOR DISPDEX
 
@@ -788,8 +785,7 @@ V99RECYC        EQUALS
 
 BLANKDEX        =               TWO                     # NEGATIVE OF THIS IS PROPER FOR DISPDEX
 
-## Page 741
-
+## Page 732
  -2             TC              BANKCALL                # BLANK DSKY.  THE DSKY IS BLANKED FOR
                 CADR            CLEANDSP                # 5 SECONDS AT TIG-35 TO INDICATE THAT
 DISPNOT         TCF             ENDOFJOB                # AVERAGE G IS STARTING.
@@ -802,9 +798,9 @@ NULLCLOK        INHINT
                 EXTEND
                 QXCH            P40/RET
                 TC              NOULLAGE                # TURN OFF ULLAGE...
-                TC              KILLTASK                #      DON'T LET IT COME ON, EITHER...
+                TC              KILLTASK                #    DON'T LET IT COME ON, EITHER...
                 CADR            ULLGTASK
-                TC              PHASCHNG                #            NOT EVEN IF THERE'S A RESTART.
+                TC              PHASCHNG                #          NOT EVEN IF THERE'S A RESTART.
                 OCT             1
                 CA              Z                       # KILL CLOKTASK
                 TS              DISPDEX
@@ -833,14 +829,13 @@ ASTNRETN        TC              PHASCHNG
                 INDEX           WHICH
                 TC              3
 
-GOPOST          CAF             PRIO12                  # (3) MUST BE LOWER PRIORITY THAN CLOKJOB
+GOPOST          CAF             PRIO12                  # (3)  MUST BE LOWER PRIORITY THAN CLOKJOB
                 TC              FINDVAC
                 EBANK=          TTOGO
                 2CADR           POSTBURN
                 INHINT                                  # SET UP THE DAP FOR COASTING FLIGHT.
                 TC              IBNKCALL
-
-## Page 742
+## Page 733
                 CADR            ALLCOAST
                 TC              NULLCLOK
                 TC              PHASCHNG                # 4.13 RESTART FOR POSTBURN
@@ -889,10 +884,9 @@ IGNITE1         CS              CNTDNDEX                # RESTORE OLD DISPLAY.
 
                 TCF             ENDOFJOB
 
-#       ****************************************
+#                                 ****************************************
 
-## Page 743
-
+## Page 734
 P40ALM          TC              ALARM                   # PROGRAM SELECTION NOT CONSISTENT WITH
                 OCT             1706                    # VEHICLE CONFIGURATION
 
@@ -907,7 +901,7 @@ REP40ALM        CAF             V05N09                  # (14)
                 INDEX           WHICH                   # FOR P42, ALLOW CREW TO PROCEED EVEN
                 TC              14                      # THOUGH VEHICLE IS UNSTAGED.
 
-#       ****************************************
+#                                 ****************************************
 
 
                 BANK            31
@@ -920,43 +914,38 @@ P40AUTO         TC              MAKECADR                # HELLO THERE.
                 TS              TEMPR60                 # FOR GENERALIZED RETURN TO OTHER BANKS.
 P40A/P          TC              BANKCALL                # SUBROUTINE TO CHECK PGNCS CONTROL
                 CADR            G+N,AUTO                # AND AUTO STABILIZATION MODES
-                CCS             A                       # +0 INDICATES IN PGNCS, IN AUTO
+                CCS             A                       # +0  INDICATES IN PGNCS, IN AUTO
                 TCF             TURNITON                # + INDICATES NOT IN PGNCS AND/OR AUTO
                 CAF             APSFLBIT                # ARE WE ON THE DESCENT STAGE?
                 MASK            FLGWRD10
                 CCS             A
                 TCF             GOBACK                  # RETURN
-                CAF             BIT4
-                MASK            CHANBKUP
-                CCS             A
-                TCF             GOBACK                  # IGN6RE CHAN 30 BIT 5.  ASSUME AUTO THROT
-
                 CAF             BIT5                    # YES, CHECK FOR AUTOTHROTTLE MODE
                 EXTEND
                 RAND            CHAN30
                 EXTEND
                 BZF             GOBACK                  # IN AUTOTHROTTLE MODE -- RETURN
 TURNITON        CAF             P40A/PMD                # DISPLAY V50N25 R1=203  PLEASE PERFORM
-                TC              BANKCALL                # CHECKLIST 203 TURN ON PGNCS ETC.
+                TC              BANKCALL                # CHECKLIST  203 TURN ON PGNCS ETC.
                 CADR            GOPERF1
-                TCF             GOTOPOOH                # V34E TERMINATE
+                TCF             GOTOPOOH                # V34E  TERMINATE
                 TCF             P40A/P                  # RECYCLE
 GOBACK          CA              TEMPR60
                 TC              BANKJUMP                # GOODBYE.  COME AGAIN SOON.
 
-## Page 744
 
 P40A/PMD        OCT             00203
 
                 BANK            36
+## Page 735
                 SETLOC          P40S
                 BANK
 
                 COUNT*          $$/P40
 
-#       ****************************************
-#       CONSTANTS FOR THE IGNITION ROUTINE
-#       ****************************************
+#                                 ****************************************
+#                                 CONSTANTS FOR THE IGNITION ROUTINE
+#                                 ****************************************
 
 SERVCADR        =               P63TABLE        +7
 
@@ -978,7 +967,10 @@ ATMAGADR        2CADR           ATMAG
 
 D29.9SEC        2DEC            2990
 
+
+
 S24.9SEC        DEC             2490
+
 
 4.9SEC          DEC             490
 
@@ -986,10 +978,11 @@ OCT20           =               BIT5
 
 V06N61          VN              0661
 
-## Page 745
+## Page 736
 #          KILLTASK
 # MOD NO: NEW PROGRAM
 # MOD BY: COVELLI
+
 
 # FUNCTIONAL DESCRIPTION:
 
@@ -999,16 +992,17 @@ V06N61          VN              0661
 # LEAVES INTERRUPTS INHIBITED SO CALLER MUST RELINT
 
 # CALLING SEQUENCE:
-#                                         L         TC     KILLTASK       IN FIXED-FIXED
-#                                         L+1       CADR   ????????       CADR (NOT 2CADR) OF TASK TO BE REMOVED.
-#                                         L+2       (RELINT)              RETURN
+
+#                                         L        TC     KILLTASK        IN FIXED-FIXED
+#                                         L+1      CADR   ????????        CADR (NOT 2CADR) OF TASK TO BE REMOVED.
+#                                         L+2     (RELINT)                RETURN
 
 # EXIT MODE:  AT L+2 OF CALLING SEQUENCE.
 
 # ERASABLE INITIALIZATION=  NONE.
-#
+
 # OUTPUT:  2CADR OF NULLTASK IN LST2
-#
+
 # DEBRIS:  ITEMP1 - ITEMP4, A,L,Q.
 
                 EBANK=          LST2
@@ -1027,6 +1021,7 @@ KILLTASK        CA              KILLBB
                 EBANK=          LST2
 KILLBB          BBCON           KILLTSK2
 
+
                 BANK            27
 
                 SETLOC          P40S1
@@ -1034,8 +1029,7 @@ KILLBB          BBCON           KILLTSK2
                 COUNT*          $$/KILL
 
 KILLTSK2        LXCH            ITEMP2                  # SAVE CALLER'S BBANK
-
-## Page 746
+## Page 737
                 INCR            Q
                 EXTEND
                 QXCH            ITEMP1                  # RETURN 2CADR IN ITEMP1,ITEMP2
