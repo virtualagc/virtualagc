@@ -17,10 +17,9 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-07-28 MAS  Created from Luminary 210.
+##		2017-08-21 RSB	Transcribed.
 
-## NOTE: Page numbers below have not yet been updated to reflect Zerlina 56.
-
-## Page 338
+## Page 331
                 BANK            7
                 SETLOC          IMUCOMP
                 BANK
@@ -64,7 +63,7 @@
                 EXTEND
                 MP              1/PIPADT                # (CS) X 2(+8) NOW (PIPA PULSES) X 2(+5)*
                 EXTEND
-                MP              BIT6                    # SCALE 2(+9) SHIFT RIGHT 9             *
+                MP              BIT8                    # SCALE 2(+9)   SHIFT RIGHT 7
                 INDEX           BUF             +2
                 DAS             DELVX                   # (PIPAI) + (PIPAI)(SFE) - (BIAS)(DELTAT)
 
@@ -72,10 +71,10 @@
                 AD              NEG1
                 TCF             1/PIPA1         +1
 
-## Page 339
+## Page 332
                 NOOP                                    # LESS THAN ZERO IMPOSSIBLE
 
-## Page 340
+## Page 333
 IRIGCOMP        TS              GCOMPSW                 # INDICATE COMMANDS 2 PULSES OR LESS.
                 TS              BUF                     # INDEX COUNTER . IRIGX, IRIGY, IRIGZ.
 
@@ -108,7 +107,7 @@ IRIG1           CA              MODE                    # RESTORE CALLERS EBANK
                 TS              EBANK
                 TCF             SWRETURN
 
-## Page 341
+## Page 334
 IRIGX           EXTEND
                 QXCH            MPAC            +2      # SAVE Q
                 EXTEND
@@ -160,7 +159,7 @@ IRIGZ           EXTEND
                 DXCH            MPAC
                 CA              ADSRAZ                  # (GYRO PULSES)/(PIPA PULSE) X 2(-6)    *
 
-## Page 342
+## Page 335
                 TC              GCOMPSUB                # -(ADSRAZ)(PIPAY)  (GYRO PULSES) X 2(+14)
 
                 EXTEND
@@ -177,7 +176,7 @@ IRIGZ           EXTEND
 
                 TC              MPAC            +2
 
-## Page 343
+## Page 336
 GCOMPSUB        XCH             MPAC                    # ADIA OR ADSRA COEFFICIENT ARRIVES IN A
                 EXTEND                                  # C(MPAC) = (PIPA PULSES) X 2(+14)
                 MP              MPAC                    # (GYRO PULSES)/(PIPA PULSE) X 2(-6)      *
@@ -206,7 +205,7 @@ GCOMPSUB        XCH             MPAC                    # ADIA OR ADSRA COEFFICI
 
                 TC              Q
 
-## Page 344
+## Page 337
 DRIFTSUB        EXTEND
                 QXCH            BUF             +1
 
@@ -214,13 +213,13 @@ DRIFTSUB        EXTEND
                 MP              1/PIPADT                # (CS) X 2(+8)   NOW (GYRO PULSES) X 2(+3)
                 LXCH            MPAC            +1      # SAVE FOR FRACTIONAL COMPENSATION
                 EXTEND
-                MP              BIT4                    # SCALE 2(+11)     SHIFT RIGHT 11
+                MP              BIT6                    # SCALE 2(+11)   SHIFT RIGHT 9
                 INDEX           BUF
                 DAS             GCOMP                   # HI(NBD)(DELTAT)   (GYRO PULSES) X 2(+14)
 
                 CA              MPAC            +1      # NOW MINOR PART
                 EXTEND
-                MP              BIT4                    # SCALE 2(+11)     SHIFT RIGHT 11
+                MP              BIT6                    # SCALE 2(+11)   SHIFT RIGHT 9
                 TS              L
                 CAF             ZERO
                 INDEX           BUF                     # ADD IN FRACTIONAL COMPENSATION
@@ -239,7 +238,7 @@ DRFTSUB2        CAF             TWO                     # PIPAX, PIPAY, PIPAZ
                 TS              GCOMPSW                 # YES - SET GCOMPSW POSITIVE
                 TC              BUF             +1      # NO
 
-## Page 345
+## Page 338
 1/GYRO          CAF             FOUR                    # PIPAZ, PIPAY, PIPAX
                 TS              BUF
 
@@ -268,7 +267,7 @@ LGCOMP          ECADR           GCOMP                   # LESS THAN ZERO IMPOSSI
                 CADR            IMUPULSE                # CALL GYRO TORQUING ROUTINE
                 TC              BANKCALL
                 CADR            IMUSTALL                # WAIT FOR PULSES TO GET OUT
-                TCF             +1
+                TCF             ENDOFJOB		# TEMPORARY
 
 GCOMP1          CAF             FOUR                    # PIPAZ, PIPAY, PIPAX
                 TS              BUF
@@ -286,7 +285,7 @@ GCOMP1          CAF             FOUR                    # PIPAZ, PIPAY, PIPAX
 COMPCHK         DEC             -1                      # LESS THAN ZERO IMPOSSIBLE
                 TCF             ENDOFJOB
 
-## Page 346
+## Page 339
 NBDONLY         CCS             GCOMPSW                 # BYPASS IF GCOMPSW NEGATIVE
                 TCF             +3
                 TCF             +2
@@ -338,7 +337,7 @@ NBD3            EXTEND                                  # C(A) = DELTAT    (CS) 
                 CCS             TEM1                    # IF SURFACE FLAG IS SET,
                 TC              IRIGY                   # COMPENSATE ACCELERATION TERMS.
 
-## Page 347
+## Page 340
                 EXTEND
                 DCS             VBUF            +2
                 DXCH            MPAC                    # DELTAT SCALED (CS) X 2(+19)
@@ -358,7 +357,7 @@ NBD3            EXTEND                                  # C(A) = DELTAT    (CS) 
                 TCF             1/GYRO                  # YES
                 TCF             ENDOFJOB                # NO
 
-## Page 348
+## Page 341
 FBIASSUB        XCH             Q
                 TS              BUF             +1
 
@@ -374,7 +373,7 @@ FBIASSUB        XCH             Q
                 TS              L
                 CAF             ZERO
                 INDEX           BUF
-                DAS             GCOMP                   # (NBD)(DELTAT)      (GYRO PULSES) X 2(+14)
+                DAS             GCOMP                   # (NBD)(DELTAT)     (GYRO PULSES) X 2(+14)
 
                 TCF             DRFTSUB2                # CHECK MAGNITUDE OF COMPENSATION
 
@@ -408,7 +407,7 @@ GCOMPZER        CAF             LGCOMP                  # ROUTINE TO ZERO GCOMP 
                 TS              GCOMP           +3
                 TS              GCOMP           +4
 
-## Page 349
+## Page 342
                 TS              GCOMP           +5
 
                 TCF             IRIG1                   # RESTORE EBANK AND RETURN
