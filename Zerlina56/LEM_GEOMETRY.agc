@@ -17,8 +17,7 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-07-28 MAS  Created from Luminary 210.
-
-## NOTE: Page numbers below have not yet been updated to reflect Zerlina 56.
+##		2017-08-21 RSB	Transcribed.
 
 ## Page 332
                 BANK            23
@@ -68,7 +67,7 @@ SVDWN2          BOF             RVQ                     # SW=1=AVETOMID DOING W-
                 STORE           PIPTIME
                 RVQ
 
-## Page 333
+## Page 326
 SVDWN1          VLOAD           VSL*
                                 TDELTAV
                                 0 -7,2
@@ -85,7 +84,7 @@ SVDWN1          VLOAD           VSL*
                 STORE           V-OTHER
                 RVQ
 
-## Page 334
+## Page 327
 #          THE FOLLOWING ROUTINE TAKES A HALF UNIT TARGET VECTOR REFERRED TO NAV BASE COORDINATES AND FINDS BOTH
 # GIMBAL ORIENTATIONS AT WHICH THE RR MIGHT SIGHT THE TARGET. THE GIMBAL ANGLES CORRESPONDING TO THE PRESENT MODE
 # ARE LEFT IN MODEA AND THOSE WHICH WOULD BE USED AFTER A REMODE IN MODEB. THIS ROUTINE ASSUMES MODE 1 IS TRUNNION
@@ -123,7 +122,7 @@ RRANGLES        STORE           32D
                 STCALL          COSTH
                                 ARCTRIG
 
-## Page 335
+## Page 328
                 PUSH            DAD                     # MODE 1 SHAFT TO 2.
                                 LODPHALF
                 STOVL           6
@@ -150,8 +149,8 @@ RRANGLES        STORE           32D
                 GOTO
                                 S2
 
-## Page 336
-# GIVEN RR TRUNNION AND SHAFT (T,S) IN TANGNB,+1, FIND THE ASSOCIATED
+## Page 329
+# GIVEN RR TRUNNION AND SHAFT (T,S) IN TANGNB,+1,FIND THE ASSOCIATED
 # LINE OF SIGHT IN NAV BASE AXES.  THE HALF UNIT VECTOR, .5(SIN(S)COS(T),
 # -SIN(T),COS(S)COS(T)) IS LEFT IN MPAC AND 32D.
 
@@ -200,5 +199,5 @@ RRNBMPAC        STODL           20D                     # SAVE SHAFT CDU IN 21.
                                 CDULOGIC
                 GOTO
                                 RRNB1
-## Page 337
-## Note: This page is empty
+## Page 330
+## Note: This page is empty in the printout of the assembly listing.
