@@ -30,6 +30,7 @@
 ##				side-by-side diff of Luminary 69/99/116/131/210.
 ##		2017-03-17 RSB	Comment-text fixes identified in diff'ing
 ##				Luminary 99 vs Comanche 55.
+##		2017-08-21 RSB	Fixed a comment typo identified in ZERLINA 56.
 
 ## Page 275
                 BANK    7
@@ -118,7 +119,7 @@ TESTXACT        CCS     EXTVBACT        # ARE EXTENDED VERBS BUSY
                 CCS     A
                 TC      ALM/END         # YES
                 CAF     OCT25           # SET BITS 1, 3, AND 5
-SETXTACT        TS      EXTVBACT        # NO.  SETFLAG TO SHOW EXT VERB DISPLAY
+SETXTACT        TS      EXTVBACT        # NO. SET FLAG TO SHOW EXT VERB DISPLAY
                                         # SYSTEM BUSY
 
                 CA      Q
