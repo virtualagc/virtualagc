@@ -4,6 +4,11 @@
 # Reference:	http://www.ibiblio.org/apollo/Pultorak.html
 # Mod history:	2016-09-03 RSB	Began
 #		2016-11-18 RSB	Explicitly include socket library in Solaris.
+#		2017-08-22 RSB	Correct path to yaYUL, which apparently reflected
+#				my original setup, in which yaAGCb1 was separate
+#				from virtualagc, rather than appearing under it.
+#				The path worked okay, but only as long as the
+#				top-level directory was named "virtualagc".
 
 TARGETS:=yaAGCb1 test.agc.bin
 SOURCE:=$(wildcard *.c)
@@ -27,7 +32,7 @@ yaAGCb1: $(SOURCE) $(HEADERS) Makefile
 	${cc} ${CFLAGS0} -O0 -g -o $@ $(SOURCE) -lpthread $(LIBS)
 
 test.agc.bin: test.agc
-	../../virtualagc/yaYUL/yaYUL --block1 $^ >test.agc.lst
+	../yaYUL/yaYUL --block1 $^ >test.agc.lst
 	touch test.agc.pad
 
 clean:
