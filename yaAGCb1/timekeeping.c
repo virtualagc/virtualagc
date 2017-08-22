@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Ronald S. Burkey <info@sandroid.org>
+ * Copyright 2016,2017 Ronald S. Burkey <info@sandroid.org>
  *
  * This file is part of yaAGC.
  *
@@ -40,6 +40,8 @@
  * 				http://stackoverflow.com/questions/5167269/clock-gettime-alternative-in-mac-os-x
  * 		2016-11-19 RSB	And a Windows workaround too:
  * 				http://stackoverflow.com/questions/5404277/porting-clock-gettime-to-windows
+ * 		2017-08-22 RSB	Some versions of Mac OS X apparently now do have clock_gettime(),
+ * 				so added a workaround to account for those versions.
  */
 
 #include <time.h>
@@ -48,11 +50,12 @@
 #include <string.h>
 #include "yaAGCb1.h"
 
-// OS X does not have clock_gettime.
+// OS X (in some versions) does not have clock_gettime.
 #ifdef __MACH__
 #include <mach/clock.h>
 #include <mach/mach.h>
 #include <mach/mach_time.h>
+#ifndef CLOCK_REALTIME
 #define CLOCK_REALTIME 0
 int clock_gettime (int clock_id, struct timespec *timeSpec)
 {
@@ -64,6 +67,7 @@ int clock_gettime (int clock_id, struct timespec *timeSpec)
   timeSpec->tv_sec = mts.tv_sec;
   timeSpec->tv_nsec = mts.tv_nsec;
 }
+#endif
 #endif
 
 // Win32 doesn't have clock_gettime.
