@@ -6,6 +6,10 @@
 #               2012-09-16 JL   Added binsource2bin.
 #               2012-09-17 JL   Renamed binsource2bin to listing2binsource.
 #		2016-12-12 RSB	Added boxAGC
+#		2017-08-22 RSB	Commented out boxAGC, since it's just
+#				something I was experimenting with anyway,
+#				isn't needed, and apparently caused problems
+#				on some platforms.
 
 ifndef PREFIX
 PREFIX=/usr/local
@@ -14,7 +18,7 @@ endif
 TARGETS=listing2binsource oct2bin bdiffhead checkdec webb2burkey-rope split-interp
 
 default: ${TARGETS}
-	$(MAKE) -C boxAGC
+	# $(MAKE) -C boxAGC
 
 listing2binsource: listing2binsource.c utils.c
 	${cc} ${CFLAGS} -DNVER=${NVER} -DINSTALLDIR=${PREFIX}/bin -DMAIN_PROGRAM -o $@ $^ -lm
