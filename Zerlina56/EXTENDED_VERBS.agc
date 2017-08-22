@@ -18,6 +18,7 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-07-28 MAS  Created from Luminary 210.
 ##		2017-08-21 RSB	Transcribed.
+##		2017-08-21 MAS	Fixed a missed VxxNxx label/value change.
 
 ## Page 268
                 BANK    7
@@ -1355,7 +1356,7 @@ DPDAT1          INHINT                  # INHINT FOR SETTING OF FLAG BITS AND MA
                 TC      POSTJUMP
                 CADR    STIKLOAD
 
-V04N46          VN      0446
+V01N46          VN      0146
 DSPLYMSK        OCT     33133
 BOOLSMSK        OCT     13133
                 BANK    01
