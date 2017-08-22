@@ -17,13 +17,12 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-07-28 MAS  Created from Luminary 210.
+##		2017-08-22 RSB	Transcribed.
 
-## NOTE: Page numbers below have not yet been updated to reflect Zerlina 56.
-
-## Page 385
+## Page 378
 # NAME- IMU PERFORMANCE TESTS 2
 
-# DATE- MARCH 20, 1967
+# DATE- MARCH 20,1967
 
 # BY- SYSTEM TEST GROUP 864-6900 EXT. 1274
 
@@ -33,7 +32,7 @@
 
 # POSITIONING ROUTINES FOR THE IMU PERFORMANCE TESTS AS WELL AS SOME OF
 # THE TESTS THEMSELVES.  FOR A DESCRIPTION OF THESE SUBROUTINES AND THE
-# OPERATING PROCEDURES (TYPICALLY) SEE STG MEMO 685.  THEORETICAL REF.E-1973
+# OPERATING PROCEDURES (TYPICALLY) SEE STG MEMO 685.THEORETICAL REF.E-1973
 
                 BANK            33
                 SETLOC          IMU2
@@ -72,7 +71,7 @@ LATAZCHK        DLOAD           SL2
                 TC              +2
                 TC              -5
                 
-## Page 386     
+## Page 379     
                 TC              INTPRET
                 SLOAD           RTB
                                 DSPTEM1
@@ -124,7 +123,7 @@ GOESTIMS        CA              ESTICADR
 ESTICADR        CADR            ESTIMS
 TORQUE          CA              ZERO
 
-## Page 387
+## Page 380
                 TS              DSPTEM2
                 CA              DRIFTI
                 TS              DSPTEM2         +1
@@ -167,13 +166,14 @@ STARTPIP        CAF             PRIO20
                 TC              FINDVAC
                 EBANK=          XSM
                 2CADR           PIPJOBB
+                
                 TC              TASKOVER
                         
 PIPJOBB         INDEX           NDXCTR
                 TC              +1
                 TC              EARTHR*
                 CA              LENGTHOT
-## Page 388
+## Page 381
                 EXTEND
                 BZMF            +2
                 TC              ENDOFJOB
@@ -225,7 +225,7 @@ PON4            CS              BIT5
                 ADS             ERCOMP  
 PON             TC              EARTHR* 
 
-## Page 389             
+## Page 382             
                 CA              ZERO                    # ALLOW ONLY SOUTH GYRO EARTH RATE COMPENS
                 TS              ERVECTOR        
                 TS              ERVECTOR        +1     
@@ -247,7 +247,7 @@ ENDTEST1        TC              DOWNFLAG
                 TC              NEWMODEA        
                 TC              ENDEXT  
                                 
-## Page 390             
+## Page 383             
 OVERFFIX        DAD             DAD     
                                 DPPOSMAX        
                                 ONEDPP  
@@ -298,7 +298,7 @@ CHECKG1         RELINT
                 TS              ZERONDX 
                 INHINT          
                 
-## Page 391             
+## Page 384             
                 INDEX           PIPINDEX        
                 CA              PIPAX   
                 AD              ZERONDX 
@@ -328,7 +328,7 @@ ZEROING1        TS              ZERONDX
                 TCF             ZEROING1        
                 TC              Q       
                 
-## Page 392             
+## Page 385             
 ERTHRVSE        DLOAD           PDDL    
                                 SCHZEROS                # PD24 = (SIN           -COS      0)(OMEG/MS)
                                 LATITUDE        
@@ -380,7 +380,7 @@ EARTHR*         EXTEND
                                 
 SHOW            EXTEND          
 
-## Page 393             
+## Page 386             
                 QXCH            QPLACE  
 SHOW1           CA              POSITON 
                 TS              DSPTEM2         +2      
