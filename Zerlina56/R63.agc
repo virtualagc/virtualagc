@@ -17,13 +17,12 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-07-28 MAS  Created from Luminary 210.
+##		2017-08-22 RSB	Transcribed.
 
-## NOTE: Page numbers below have not yet been updated to reflect Zerlina 56.
-
-## Page 350
+## Page 343
 # SUBROUTINE NAME:    V89CALL
-# MOD NO:  0                       DATE: 9 JAN 1968
-# MOD BY:  DIGITAL DEVEL GROUP     LOG SECTION: R63
+# MOD NO:  0                      DATE: 9 JAN 1968
+# MOD BY:  DIGITAL DEVEL GROUP    LOG SECTION: R63
 
 # FUNCTIONAL DESCRIPTION:
 
@@ -72,7 +71,7 @@
 
 # DEBRIS:  OPTION1, +1, TDEC1, POINTVSM, SCAXIS, CPHI, CTHETA, CPSI,
 
-## Page 351
+## Page 344
 #          3AXISFLG.
 
                 EBANK=          RONE
@@ -123,7 +122,7 @@ ALINEX          TC              INTPRET                 # X AXIS ALIGNMENT
                 VLOAD
                                 UNITX                   # READ (.5, 0, 0)
 
-## Page 352
+## Page 345
 V89CALL1        STCALL          SCAXIS                  # STORE SELECTED ALIGNMENT AXIS
                                 VECPOINT                # PUTS DESIRED GIM ANG (OG,IG,MG) IN TMPAC
                 STORE           CPHI                    # STORE GIMBAL ANGLES FOR BALLANGS CALL.
@@ -152,5 +151,5 @@ ALINEZ          TC              INTPRET                 # Z AXIS ALIGNMENT
 VB04N12         VN              412
 VB06N18         VN              0618
 
-## Page 353
+## Page 346
 DP1MIN          2DEC            6000
