@@ -17,10 +17,9 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-07-28 MAS  Created from Luminary 210.
+##		2017-08-22 RSB	Transcribed.
 
-## NOTE: Page numbers below have not yet been updated to reflect Zerlina 56.
-
-## Page 376
+## Page 369
                 BANK            15
 
                 SETLOC          KALCMON1
@@ -50,7 +49,7 @@ WCALC           LXC,1           DLOAD*
                                 5
                 STORE           TM                      # MANEUVER EXECUTION TIME SCALED AS T2
                 SETGO
-                                CALCMAN2                # D(OFF) = CONTINUE MANEUVER
+                                CALCMAN2                # 0(OFF) = CONTINUE MANEUVER
                                 NEWANGL         +1      # 1(ON) = START MANEUVER
 #          THE FOUR SELECTABLE FREE FALL MANEUVER RATES SELECTED BY
 #          LOADING RATEINDX WITH 0,2,4,6, RESPECTIVELY

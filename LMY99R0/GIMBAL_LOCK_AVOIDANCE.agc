@@ -24,6 +24,7 @@
 ##		2016-12-14 RSB	Proofed text comments with octopus/ProoferComments
 ##				but no errors found.
 ##		2017-08-01 MAS	Created from LMY99 Rev 1.
+##		2017-08-22 RSB	Fixed comment-text typo identified in ZERLINA 56.
 
 ## This source code has been transcribed or otherwise adapted from
 ## digitized images of a hardcopy from the MIT Museum.  The digitization
@@ -74,7 +75,7 @@ WCALC		LXC,1	DLOAD*
 			5
 		STORE	TM		# MANEUVER EXECUTION TIME SCALED AS T2
 		SETGO	
-			CALCMAN2	# D(OFF) = CONTINUE MANEUVER
+			CALCMAN2	# 0(OFF) = CONTINUE MANEUVER
 			NEWANGL +1	# 1(ON) = START MANEUVER
 			
 # THE FOUR SELECTABLE FREE FALL MANEUVER RATES SELECTED BY

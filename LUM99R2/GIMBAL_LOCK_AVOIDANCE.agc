@@ -18,6 +18,7 @@
 ##		2017-03-15 RSB	Comment-text proofed using 5-way
 ##				side-by-side diff of Luminary 69/99/116/131/210,
 ##				but no errors (or any differences) found.
+##		2017-08-22 RSB	Fixed comment-text typo identified in ZERLINA 56.
 
 ## Page 364
 		BANK	15
@@ -48,7 +49,7 @@ WCALC		LXC,1	DLOAD*
 			5
 		STORE	TM		# MANEUVER EXECUTION TIME SCALED AS T2
 		SETGO	
-			CALCMAN2	# D(OFF) = CONTINUE MANEUVER
+			CALCMAN2	# 0(OFF) = CONTINUE MANEUVER
 			NEWANGL +1	# 1(ON) = START MANEUVER
 			
 # THE FOUR SELECTABLE FREE FALL MANEUVER RATES SELECTED BY

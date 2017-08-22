@@ -17,6 +17,7 @@
 ##				original harcopy, as opposed to the PDF page
 ##				numbers in 1701.pdf.
 ##		2017-02-23 RSB	Proofed comment text using octopus/ProoferComments.
+##		2017-08-22 RSB	Fixed comment-text typo identified in ZERLINA 56.
 
 ## Page 366
 		BANK	15
@@ -47,7 +48,7 @@ WCALC		LXC,1	DLOAD*
 			5
 		STORE	TM		# MANEUVER EXECUTION TIME SCALED AS T2
 		SETGO	
-			CALCMAN2	# D(OFF) = CONTINUE MANEUVER
+			CALCMAN2	# 0(OFF) = CONTINUE MANEUVER
 			NEWANGL +1	# 1(ON) = START MANEUVER
 			
 # THE FOUR SELECTABLE FREE FALL MANEUVER RATES SELECTED BY
