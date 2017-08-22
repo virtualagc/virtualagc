@@ -1,44 +1,44 @@
 /*
-  Copyright 2005,2009,2016 Ronald S. Burkey <info@sandroid.org>
-  
-  This file is part of yaAGC.
+ Copyright 2005,2009,2016 Ronald S. Burkey <info@sandroid.org>
 
-  yaAGC is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 2 of the License, or
-  (at your option) any later version.
+ This file is part of yaAGC.
 
-  yaAGC is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
+ yaAGC is free software; you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation; either version 2 of the License, or
+ (at your option) any later version.
 
-  You should have received a copy of the GNU General Public License
-  along with yaAGC; if not, write to the Free Software
-  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ yaAGC is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
 
-  Filename:	DebuggerHookAGS.c
-  Purpose:	This function is called by aea_engine() in order to 
-  		implement the interactive debugger.
-  Compiler:	GNU gcc.
-  Contact:	Ron Burkey <info@sandroid.org>
-  Reference:	http://www.ibiblio.org/apollo/yaAGS.html
-  Mode:		2005-06-05 RSB	This is an improved version of the 
-  				yaAGC debugger, in that it is built into
-				aea_engine rather than into the main
-				program.
-		2005-06-09 RSB	Fixed a bunch of stuff related to i/o
-				addresses.
-		2005-06-11 RSB	Added the DISASSEMBLE command.
-		2005-06-14 RSB	Added "EDIT PC".
-		2005-06-18 RSB	Windows-dependent stuff added.
-		2005-07-13 RSB	Fixed a possible issue of using too much CPU time
-				in Win32.
-		2009-02-28 RSB	Bypass some compiler warnings on 64-bit
-				machines.
-		2016-08-20 RSB  Replaced a couple of bogus uses of strcpy with
-		                memmove.
-*/
+ You should have received a copy of the GNU General Public License
+ along with yaAGC; if not, write to the Free Software
+ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+
+ Filename:	DebuggerHookAGS.c
+ Purpose:	This function is called by aea_engine() in order to
+ implement the interactive debugger.
+ Compiler:	GNU gcc.
+ Contact:	Ron Burkey <info@sandroid.org>
+ Reference:	http://www.ibiblio.org/apollo/yaAGS.html
+ Mode:		2005-06-05 RSB	This is an improved version of the
+ yaAGC debugger, in that it is built into
+ aea_engine rather than into the main
+ program.
+ 2005-06-09 RSB	Fixed a bunch of stuff related to i/o
+ addresses.
+ 2005-06-11 RSB	Added the DISASSEMBLE command.
+ 2005-06-14 RSB	Added "EDIT PC".
+ 2005-06-18 RSB	Windows-dependent stuff added.
+ 2005-07-13 RSB	Fixed a possible issue of using too much CPU time
+ in Win32.
+ 2009-02-28 RSB	Bypass some compiler warnings on 64-bit
+ machines.
+ 2016-08-20 RSB  Replaced a couple of bogus uses of strcpy with
+ memmove.
+ */
 
 #include "yaAEA.h"
 #include "aea_engine.h"
@@ -58,12 +58,13 @@
 #endif
 
 #ifdef WIN32
-struct tms {
-  clock_t tms_utime;  /* user time */
-  clock_t tms_stime;  /* system time */
-  clock_t tms_cutime; /* user time of children */
-  clock_t tms_cstime; /* system time of children */
-};
+struct tms
+  {
+    clock_t tms_utime; /* user time */
+    clock_t tms_stime; /* system time */
+    clock_t tms_cutime; /* user time of children */
+    clock_t tms_cstime; /* system time of children */
+  };
 extern clock_t times (struct tms *p);
 #define _SC_CLK_TCK (1000)
 #define sysconf(x) (x)
@@ -72,7 +73,8 @@ extern clock_t times (struct tms *p);
 static int DebugStopCounter = -1;
 
 #define MAX_BREAKPOINTS_AGS 64
-typedef struct {
+typedef struct
+{
   // Type is
   //	0	for breakpoints.
   //	1	for memory watchpoints (change)
@@ -93,16 +95,11 @@ static Breakpoint_t Breakpoints[MAX_BREAKPOINTS_AGS];
 static int NumBreakpointsAGS = 0;
 static char BreakCause[128];
 
-static const char *Opcodes[32] = {
-  "???", "???", "DVP", "MPY", 
-  "STO", "STQ", "LDQ", "???", 
-  "CLA", "ADD", "SUB", "MPR",
-  "CLZ", "ADZ", "SUZ", "MPZ",
-  "TRA", "TIX", "TOV", "TMI",
-  "AXT", "LLS", "LRS", "ALS",
-  "COM", "ABS", "INP", "OUT",
-  "DLY", "TSQ", "???", "???"
-};
+static const char *Opcodes[32] =
+  { "???", "???", "DVP", "MPY", "STO", "STQ", "LDQ", "???", "CLA", "ADD", "SUB",
+      "MPR", "CLZ", "ADZ", "SUZ", "MPZ", "TRA", "TIX", "TOV", "TMI", "AXT",
+      "LLS", "LRS", "ALS", "COM", "ABS", "INP", "OUT", "DLY", "TSQ", "???",
+      "???" };
 
 // Buffer for keyboard input.
 static char s[257], sraw[257];
@@ -115,9 +112,8 @@ extern char SymbolFileAGS[MAX_FILE_LENGTH + 1];
 // Returns -1 on error, or the constant's value otherwise.  We use the special
 // (otherwise unused) i/o address for the fictitious discrete-output register
 // we use internally in aea_engine.
-static const int PowersOfTwo[8] = {
-  01, 02, 04, 010, 020, 040, 0100, 0200
-};
+static const int PowersOfTwo[8] =
+  { 01, 02, 04, 010, 020, 040, 0100, 0200 };
 static int
 TranslateIoAddress (int RawAddress)
 {
@@ -156,8 +152,8 @@ rfgetsAGS (ags_t *State, char *Buffer, int MaxSize, FILE * fp)
     {
       // While waiting for character input, continue to look for client connects
       // and disconnects.
-      while ((fp != stdin && EOF == (c = fgetc (fp))) ||
-            (fp == stdin && Buffer != (s = nbfgets (Buffer, MaxSize))))
+      while ((fp != stdin && EOF == (c = fgetc (fp)))
+	  || (fp == stdin && Buffer != (s = nbfgets (Buffer, MaxSize))))
 	{
 	  // If we have redirected console input, and the file of source data is
 	  // exhausted, then reattach the console.
@@ -180,19 +176,19 @@ rfgetsAGS (ags_t *State, char *Buffer, int MaxSize, FILE * fp)
 	      req.tv_nsec = 10000000;
 	      nanosleep (&req, &rem);
 #endif // WIN32
-	    }  
+	    }
 	  //if (FirstTime)
 	  //  {
 	  //    FirstTime = 0;
 	  //    printf ("Non-blocking getchar.\n");
 	  //  }
-          ChannelRoutineGeneric (State, UpdateAeaPeripheralConnect);
+	  ChannelRoutineGeneric (State, UpdateAeaPeripheralConnect);
 	}
       if (fp == stdin && s != NULL)
-        return;
+	return;
       Buffer[Count] = c;
       if (c == '\n' || Count >= MaxSize)
-        {
+	{
 	  Buffer[Count] = 0;
 	  return;
 	}
@@ -204,11 +200,13 @@ rfgetsAGS (ags_t *State, char *Buffer, int MaxSize, FILE * fp)
 // Adds a breakpoint or a watchpoint.
 
 void
-AddBreakWatch (int Type, int Address, int Value, Symbol_t *Symbol, SymbolLine_t *Line)
+AddBreakWatch (int Type, int Address, int Value, Symbol_t *Symbol,
+	       SymbolLine_t *Line)
 {
   if (NumBreakpointsAGS >= MAX_BREAKPOINTS_AGS)
     {
-      printf ("Max break/watch points (%d) defined already.\n", MAX_BREAKPOINTS_AGS);
+      printf ("Max break/watch points (%d) defined already.\n",
+	      MAX_BREAKPOINTS_AGS);
       return;
     }
   Breakpoints[NumBreakpointsAGS].Type = Type;
@@ -216,7 +214,7 @@ AddBreakWatch (int Type, int Address, int Value, Symbol_t *Symbol, SymbolLine_t 
   Breakpoints[NumBreakpointsAGS].Value = Value;
   Breakpoints[NumBreakpointsAGS].Symbol = Symbol;
   Breakpoints[NumBreakpointsAGS].Line = Line;
-  NumBreakpointsAGS++;    
+  NumBreakpointsAGS++;
 }
 
 // Deletes a breakpoint or watchpoint
@@ -228,12 +226,12 @@ DeleteBreakWatch (int Type, int Address)
   for (i = 0; i < NumBreakpointsAGS; i++)
     if (Breakpoints[i].Type == Type && Breakpoints[i].Address == Address)
       {
-        printf ("Breakpoint and/or watchpoint(s) deleted\n");
-        for (NumBreakpointsAGS--; i < NumBreakpointsAGS; i++)
+	printf ("Breakpoint and/or watchpoint(s) deleted\n");
+	for (NumBreakpointsAGS--; i < NumBreakpointsAGS; i++)
 	  Breakpoints[i] = Breakpoints[i + 1];
 	return;
       }
-   //printf ("Breakpoint or watchpoint not found.\n");
+  //printf ("Breakpoint or watchpoint not found.\n");
 }
 
 // Dump memory or i/o space.
@@ -250,7 +248,7 @@ DumpAGS (ags_t *State)
   for (i = 0; i < LastN; i++)
     {
       if (CountOnLine == 0)
-        {
+	{
 	  if (LastType == 2)
 	    printf ("I");
 	  else if (LastType == 3)
@@ -258,14 +256,14 @@ DumpAGS (ags_t *State)
 	  printf ("0%04o:", Address);
 	}
       if (LastType == 1)
-        printf ("\t0%06o", State->Memory[Address++]);
+	printf ("\t0%06o", State->Memory[Address++]);
       else if (LastType == 2)
-        printf ("\t0%06o", State->InputPorts[Address++]);
+	printf ("\t0%06o", State->InputPorts[Address++]);
       else if (LastType == 3)
-        printf ("\t0%06o", State->OutputPorts[Address++]);
+	printf ("\t0%06o", State->OutputPorts[Address++]);
       CountOnLine++;
       if (CountOnLine >= 8 || 0 == (Address & 7))
-        {
+	{
 	  printf ("\n");
 	  CountOnLine = 0;
 	}
@@ -287,7 +285,7 @@ DisassembleAGS (ags_t *State, int Address, int Count)
     {
       j = Address + k;
       if (j < 0 || j > 07777)
-        continue;
+	continue;
       printf ("0%04o  0%06o\t", j, State->Memory[j]);
       i = ((State->Memory[j] >> 13) & 037);	// Opcode
       printf ("%s", Opcodes[i]);
@@ -362,18 +360,20 @@ HelpAGS (char *s)
     }
   else if (!strcmp (s, "HELP BREAK"))
     {
-      printf ("\n"
-	      "break A\n"
-	      "\tSet a breakpoint at A, where A is:\n"
-	      "\t  LABEL:    set a breakpoint at the label\n"
-	      "\t  LINE:     set a breakpoint in the current file at a line number\n"
-	      "\t  *ADDRESS: set a breakpoint at address A.\n" "\n");
+      printf (
+	  "\n"
+	  "break A\n"
+	  "\tSet a breakpoint at A, where A is:\n"
+	  "\t  LABEL:    set a breakpoint at the label\n"
+	  "\t  LINE:     set a breakpoint in the current file at a line number\n"
+	  "\t  *ADDRESS: set a breakpoint at address A.\n" "\n");
     }
   else if (!strcmp (s, "HELP BREAKPOINTS"))
     {
-      printf ("\n"
-	      "breakpoints\n"
-	      "\tList the defined breakpoints, watchpoints, and patterns.\n" "\n");
+      printf (
+	  "\n"
+	  "breakpoints\n"
+	  "\tList the defined breakpoints, watchpoints, and patterns.\n" "\n");
     }
   else if (!strcmp (s, "HELP CONT"))
     {
@@ -386,10 +386,11 @@ HelpAGS (char *s)
     }
   else if (!strcmp (s, "HELP CONT-TIL-NEW"))
     {
-      printf ("\n"
-	      "cont-til-new\n"
-	      "\tContinue execution until a new type of instruction is reached.\n"
-	      "\n");
+      printf (
+	  "\n"
+	  "cont-til-new\n"
+	  "\tContinue execution until a new type of instruction is reached.\n"
+	  "\n");
     }
   else if (!strcmp (s, "HELP DELETE"))
     {
@@ -434,29 +435,31 @@ HelpAGS (char *s)
     }
   else if (!strcmp (s, "HELP FILES"))
     {
-      printf ("\n"
-	      "files RegularExpression\n"
-	      "\tDumps all of the source files whose names match the specified\n"
-	      "\tregular expression.  For example,\n"
-	      "\t\tfiles not           All files containing NOT.\n"
-	      "\t\tfiles ^not          All files beginning with NOT.\n"
-	      "\t\tfiles not$          All files ending with NOT.\n"
-	      "\t\tfiles (^not)|(not$) Beginning or ending with NOT.\n"
-	      "\tThe list is arbitrarily truncated after %d files.\n",
-	      MAX_FILE_DUMP);
+      printf (
+	  "\n"
+	  "files RegularExpression\n"
+	  "\tDumps all of the source files whose names match the specified\n"
+	  "\tregular expression.  For example,\n"
+	  "\t\tfiles not           All files containing NOT.\n"
+	  "\t\tfiles ^not          All files beginning with NOT.\n"
+	  "\t\tfiles not$          All files ending with NOT.\n"
+	  "\t\tfiles (^not)|(not$) Beginning or ending with NOT.\n"
+	  "\tThe list is arbitrarily truncated after %d files.\n",
+	  MAX_FILE_DUMP);
     }
   else if (!strcmp (s, "HELP LIST"))
     {
-      printf ("\n"
-	      "list\n"
-	      "\tList displays lines in a source file. There are several\n"
-	      "\tvariants of this command\n"
-	      "\t  list FILENAME:LINENO, to list around a line number in a file\n"
-	      "\t  list LABEL, to list beginning at a label\n"
-	      "\t  list LINENO, to list around a line in the current file\n"
-	      "\t  list FROM,TO, to list a range of lines\n"
-	      "\t  list -, to list lines previous to the current listing\n"
-	      "\t  list, to list the next set of lines\n" "\n"); 
+      printf (
+	  "\n"
+	  "list\n"
+	  "\tList displays lines in a source file. There are several\n"
+	  "\tvariants of this command\n"
+	  "\t  list FILENAME:LINENO, to list around a line number in a file\n"
+	  "\t  list LABEL, to list beginning at a label\n"
+	  "\t  list LINENO, to list around a line in the current file\n"
+	  "\t  list FROM,TO, to list a range of lines\n"
+	  "\t  list -, to list lines previous to the current listing\n"
+	  "\t  list, to list the next set of lines\n" "\n");
     }
   else if (!strcmp (s, "HELP PATTERN"))
     {
@@ -484,7 +487,7 @@ HelpAGS (char *s)
 	      "\tEnd the program.\n" "\n");
     }
   else if (!strcmp (s, "HELP STEP"))
-    { 
+    {
       printf ("\n"
 	      "step [N] (or next [N])\n"
 	      "\tStep through N instructions.  If omitted, N defaults to 1.\n"
@@ -511,15 +514,16 @@ HelpAGS (char *s)
     }
   else if (!strcmp (s, "HELP WATCH"))
     {
-      printf ("\n"
-	      "watch A\n"
-	      "\tHalt execution when a value is written to the address A.\n"
-	      "\tThe break occurs AFTER the value is changed, but the\n"
-	      "\t\"before\" and \"after\" values stored at the address\n"
-	      "\tare displayed after execution stops.  The address\n"
-	      "\tobviously has to be in erasable memory or i/o-channel memory.\n"
-	      "\tNote that the value stored at the address has to CHANGE to\n"
-	      "\ttrigger the break.\n" "\n");
+      printf (
+	  "\n"
+	  "watch A\n"
+	  "\tHalt execution when a value is written to the address A.\n"
+	  "\tThe break occurs AFTER the value is changed, but the\n"
+	  "\t\"before\" and \"after\" values stored at the address\n"
+	  "\tare displayed after execution stops.  The address\n"
+	  "\tobviously has to be in erasable memory or i/o-channel memory.\n"
+	  "\tNote that the value stored at the address has to CHANGE to\n"
+	  "\ttrigger the break.\n" "\n");
     }
   else if (!strcmp (s, "HELP WHATIS"))
     {
@@ -531,7 +535,8 @@ HelpAGS (char *s)
 
 //----------------------------------------------------------------------------
 
-static unsigned long InstructionCounts[0100] = { 0 };
+static unsigned long InstructionCounts[0100] =
+  { 0 };
 
 void
 DebuggerHookAGS (ags_t *State)
@@ -547,7 +552,7 @@ DebuggerHookAGS (ags_t *State)
   Symbol_t *Symbol;
   SymbolLine_t *Line;
   char Garbage[81];
-  
+
   if (!DebugModeAGS)		// If not in debugging mode, just return.
     return;
   // Collect instruction-type counts.
@@ -560,7 +565,7 @@ DebuggerHookAGS (ags_t *State)
       StopForNewInstructionType = 0;
       Stop = 1;
       strcpy (BreakCause, "previously-unused instruction type.");
-    }  
+    }
   // Check the various possible conditions for halting execution.  
   if (DebugModeAGS == 2)	// Halt immediately on startup?
     {
@@ -576,7 +581,7 @@ DebuggerHookAGS (ags_t *State)
       if (RealTimeAGS >= NextKeycheckAGS)
 	{
 	  NextKeycheckAGS = RealTimeAGS + KEYSTROKE_CHECK_AGS;
-	  while (s == nbfgets (s, sizeof (s)))
+	  while (s == nbfgets (s, sizeof(s)))
 	    {
 	      Stop = 1;
 	      strcpy (BreakCause, "keypress.");
@@ -593,7 +598,7 @@ DebuggerHookAGS (ags_t *State)
     switch (Breakpoints[i].Type)
       {
       case 0:		// Breakpoint.
-        Stop |= (State->ProgramCounter == Breakpoints[i].Address);
+	Stop |= (State->ProgramCounter == Breakpoints[i].Address);
 
 	// If we have symbol for the breakpoint, then print is
 	if (Breakpoints[i].Symbol)
@@ -602,45 +607,51 @@ DebuggerHookAGS (ags_t *State)
 	  strcpy (BreakCause, "breakpoint.");
 	break;
       case 1:		// Memory watchpoint (change)
-        Stop |= (State->Memory[Breakpoints[i].Address] != Breakpoints[i].Value);
-	sprintf (BreakCause, "watched memory location 0%o changed from 0%o to 0%o.",
-	         Breakpoints[i].Address, Breakpoints[i].Value, 
+	Stop |= (State->Memory[Breakpoints[i].Address] != Breakpoints[i].Value);
+	sprintf (BreakCause,
+		 "watched memory location 0%o changed from 0%o to 0%o.",
+		 Breakpoints[i].Address, Breakpoints[i].Value,
 		 State->Memory[Breakpoints[i].Address]);
 	Breakpoints[i].Value = State->Memory[Breakpoints[i].Address];
 	break;
       case 2:		// Input-port watchpoint (change)
-        Stop |= (State->InputPorts[Breakpoints[i].Address] != Breakpoints[i].Value);
+	Stop |= (State->InputPorts[Breakpoints[i].Address]
+	    != Breakpoints[i].Value);
 	sprintf (BreakCause, "watched input port 0%o changed from 0%o to 0%o.",
-	         Breakpoints[i].Address, Breakpoints[i].Value, 
+		 Breakpoints[i].Address, Breakpoints[i].Value,
 		 State->InputPorts[Breakpoints[i].Address]);
 	Breakpoints[i].Value = State->InputPorts[Breakpoints[i].Address];
 	break;
       case 3:		// Output-port watchpoint (change)
-        Stop |= (State->OutputPorts[Breakpoints[i].Address] != Breakpoints[i].Value);
+	Stop |= (State->OutputPorts[Breakpoints[i].Address]
+	    != Breakpoints[i].Value);
 	sprintf (BreakCause, "watched output port 0%o changed from 0%o to 0%o.",
-	         Breakpoints[i].Address, Breakpoints[i].Value, 
+		 Breakpoints[i].Address, Breakpoints[i].Value,
 		 State->OutputPorts[Breakpoints[i].Address]);
 	Breakpoints[i].Value = State->OutputPorts[Breakpoints[i].Address];
 	break;
       case 4:		// Pattern.
-        // Note that Breakpoints[i].Value is the mask and Breakpoints[i].Address is the 
+	// Note that Breakpoints[i].Value is the mask and Breakpoints[i].Address is the
 	// pattern we're looking for.
-        Stop |= (0 == (Breakpoints[i].Value & (Breakpoints[i].Address ^ State->Memory[State->ProgramCounter])));
+	Stop |=
+	    (0
+		== (Breakpoints[i].Value
+		    & (Breakpoints[i].Address
+			^ State->Memory[State->ProgramCounter])));
 	break;
-      }	
+      }
   // If none of the stop-conditions held, then return.
   if (!Stop)
     return;
-    
-Redraw:
-  printf ("\n");
+
+  Redraw: printf ("\n");
   printf ("Stopped because %s\n", BreakCause);
   // Print registers.
   printf ("A=0%06o\tQ=0%06o\tOverflow=%d\tIndex=%03o\tHalted=%d\nIcount=%lu\tCycles=" FORMAT_64U "\n",
-	  State->Accumulator, State->Quotient, State->Overflow, State->Index,
-	  State->Halt, 
-	  InstructionCounts[077 & (State->Memory[State->ProgramCounter] >> 12)],
-	  State->CycleCounter);
+      State->Accumulator, State->Quotient, State->Overflow, State->Index,
+      State->Halt,
+      InstructionCounts[077 & (State->Memory[State->ProgramCounter] >> 12)],
+      State->CycleCounter);
 
   // If we have the symbol table, then print out the actual source,
   // rather than just a disassembly
@@ -649,12 +660,13 @@ Redraw:
       // Resolve the current program counter into an entry into
       // the program line table.
       SymbolLine_t *Line = ResolveLineAGS (State->ProgramCounter);
-      
+
       // There are several ways this can fail, and if either does we
       // just want to disasemble: if we didn't find the line in the
       // table or if ListSource() fails.
-      if (Line == NULL || ListSourceLine (Line->FileName, Line->LineNumber,
-					  ShowAddressContentsAGS (State)))
+      if (Line == NULL
+	  || ListSourceLine (Line->FileName, Line->LineNumber,
+			     ShowAddressContentsAGS (State)))
 	DisassembleAGS (State, State->ProgramCounter, 1);
     }
   else
@@ -662,7 +674,7 @@ Redraw:
       // Print disassembly of the instruction.
       DisassembleAGS (State, State->ProgramCounter, 1);
     }
-  
+
   // Now do our interactive thing.
   while (1)
     {
@@ -675,17 +687,17 @@ Redraw:
 
       // Get input from the user or a macro-file.
       StoppedAt = times (&TimeStruct);
-      rfgetsAGS (State, s, sizeof (s) - 1, stdin);
+      rfgetsAGS (State, s, sizeof(s) - 1, stdin);
       RealTimeOffsetAGS += times (&TimeStruct) - StoppedAt;
       while (isspace (s[0]))	// Get rid of leading spaces.
-        memmove (&s[0], &s[1], strlen(s));
+	memmove (&s[0], &s[1], strlen (s));
       strcpy (sraw, s);
       for (ss = s; *ss; ss++)
-        {
+	{
 	  // Turn to upper case, get rid of multiple spaces and
 	  // end-of-line linefeed.
 	  while (isspace (*ss) && isspace (ss[1]))
-	    memmove (ss, ss + 1, strlen(ss));
+	    memmove (ss, ss + 1, strlen (ss));
 	  *ss = toupper (*ss);
 	  if (*ss == '\n')
 	    *ss = 0;
@@ -693,7 +705,7 @@ Redraw:
       //printf ("\"%s\"\n", s);
       // Parse the input and do stuff with it.
       if (*s == '#')
-        continue;
+	continue;
       else if (!strncmp (s, "HELP", 4))
 	{
 	  HelpAGS (s);
@@ -707,45 +719,46 @@ Redraw:
 	    printf ("The step-count must be 1 or greater.\n");
 	  break;
 	}
-      else if (!strcmp (s, "STEP") || !strcmp (s, "NEXT") ||
-	       !strcmp (s, "S") || !strcmp (s, "N"))
+      else if (!strcmp (s, "STEP") || !strcmp (s, "NEXT") || !strcmp (s, "S")
+	  || !strcmp (s, "N"))
 	{
 	  DebugStopCounter = 1;
 	  break;
 	}
       else if (!strcmp (s, "QUIT") || !strcmp (s, "EXIT"))
 	exit (0);
-      else if (HaveSymbolsAGS && (1 == sscanf (s, "BREAK %d%s", &LineNumber, Garbage)) &&
-	       (Line = ResolveLineNumber (LineNumber)))
+      else if (HaveSymbolsAGS
+	  && (1 == sscanf (s, "BREAK %d%s", &LineNumber, Garbage)) && (Line =
+	      ResolveLineNumber (LineNumber)))
 	AddBreakWatch (0, Line->CodeAddress.SReg & 07777, 0, NULL, Line);
-      else if (HaveSymbolsAGS && (1 == sscanf (s, "BREAK %s", SymbolName)) &&
-	       (Symbol = ResolveSymbol (SymbolName, SYMBOL_LABEL)))
+      else if (HaveSymbolsAGS && (1 == sscanf (s, "BREAK %s", SymbolName))
+	  && (Symbol = ResolveSymbol (SymbolName, SYMBOL_LABEL)))
 	AddBreakWatch (0, Symbol->Value.SReg & 07777, 0, Symbol, NULL);
       else if (1 == sscanf (s, "BREAK *%o", &i))
-        AddBreakWatch (0, i, 0, NULL, NULL);
-      else if (1 == sscanf (s, "WATCH %s", SymbolName) &&
-	       (Symbol = ResolveSymbol(SymbolName, SYMBOL_VARIABLE | SYMBOL_REGISTER)))
+	AddBreakWatch (0, i, 0, NULL, NULL);
+      else if (1 == sscanf (s, "WATCH %s", SymbolName) && (Symbol =
+	  ResolveSymbol (SymbolName, SYMBOL_VARIABLE | SYMBOL_REGISTER)))
 	AddBreakWatch (0, Symbol->Value.SReg & 07777, 0, Symbol, NULL);
       else if (1 == sscanf (s, "WATCH%o", &i))
-        AddBreakWatch (1, i, State->Memory[i], NULL, NULL);
+	AddBreakWatch (1, i, State->Memory[i], NULL, NULL);
       else if (1 == sscanf (s, "WATCH I%o", &i))
-        {
+	{
 	  j = TranslateIoAddress (i);
 	  if (j == -1)
 	    printf ("0%o is not a supported i/o address.\n", i);
-	  else   
-            AddBreakWatch (2, j, State->InputPorts[j], NULL, NULL);
+	  else
+	    AddBreakWatch (2, j, State->InputPorts[j], NULL, NULL);
 	}
       else if (1 == sscanf (s, "WATCH O%o", &i))
-        {
+	{
 	  j = TranslateIoAddress (i);
 	  if (j == -1)
 	    printf ("0%o is not a supported i/o address.\n", i);
-	  else   
-            AddBreakWatch (3, j, State->OutputPorts[j], NULL, NULL);
+	  else
+	    AddBreakWatch (3, j, State->OutputPorts[j], NULL, NULL);
 	}
       else if (2 == sscanf (s, "PATTERN %o %o", &i, &j))
-        AddBreakWatch (4, i, j, NULL, NULL);
+	AddBreakWatch (4, i, j, NULL, NULL);
       else if (!strcmp (s, "CONT"))
 	{
 #ifdef USE_READLINE
@@ -757,29 +770,29 @@ Redraw:
 	  break;
 	}
       else if (!strcmp (s, "CONT-TIL-NEW"))
-        {
+	{
 	  StopForNewInstructionType = 1;
-          break;
+	  break;
 	}
       else if (1 == sscanf (s, "DELETE%o", &i))
-        {
-          DeleteBreakWatch (0, i);
+	{
+	  DeleteBreakWatch (0, i);
 	  DeleteBreakWatch (1, i);
 	}
       else if (1 == sscanf (s, "DELETE I%o", &i))
-        DeleteBreakWatch (2, TranslateIoAddress (i));
+	DeleteBreakWatch (2, TranslateIoAddress (i));
       else if (1 == sscanf (s, "DELETE O%o", &i))
-        DeleteBreakWatch (3, TranslateIoAddress (i));
+	DeleteBreakWatch (3, TranslateIoAddress (i));
       else if (!strcmp (s, "DELETE"))
-        NumBreakpointsAGS = 0;
+	NumBreakpointsAGS = 0;
       else if (!strcmp (s, "BREAKPOINTS"))
-        {
+	{
 	  if (NumBreakpointsAGS == 0)
 	    printf ("No breakpoints or watchpoints are defined.\n");
 	  else
 	    {
 	      for (i = 0; i < NumBreakpointsAGS; i++)
-	        {
+		{
 		  //printf ("%2d: ", i);
 		  switch (Breakpoints[i].Type)
 		    {
@@ -788,7 +801,7 @@ Redraw:
 
 		      // If we have a symbol, then print it
 		      if (Breakpoints[i].Symbol)
-			printf(" (%s)", Breakpoints[i].Symbol->Name);
+			printf (" (%s)", Breakpoints[i].Symbol->Name);
 
 		      j = Breakpoints[i].Address;
 		      printf (" at address 0%04o", j);
@@ -799,8 +812,7 @@ Redraw:
 				Breakpoints[i].Symbol->FileName,
 				Breakpoints[i].Symbol->LineNumber);
 		      else if (Breakpoints[i].Line != NULL)
-			printf (" in file %s:%d",
-				Breakpoints[i].Line->FileName,
+			printf (" in file %s:%d", Breakpoints[i].Line->FileName,
 				Breakpoints[i].Line->LineNumber);
 		      printf ("\n");
 		      break;
@@ -810,7 +822,7 @@ Redraw:
 
 		      // If there is a symbol, the print it
 		      if (Breakpoints[i].Symbol)
-			printf(" (%s)", Breakpoints[i].Symbol->Name);
+			printf (" (%s)", Breakpoints[i].Symbol->Name);
 
 		      printf (" at address 0%04o.\n", j);
 		      break;
@@ -818,53 +830,52 @@ Redraw:
 		      printf ("Input watchpoint");
 		      j = Breakpoints[i].Address;
 		      if (j >= IO_2001 && j <= IO_2200)
-		        j = 02000 + (1 << (j - IO_2001));
+			j = 02000 + (1 << (j - IO_2001));
 		      else if (j >= IO_6001 && j <= IO_6200)
-		        j = 06000 + (1 << (j - IO_6001));
+			j = 06000 + (1 << (j - IO_6001));
 		      else
-		        j = -1;
+			j = -1;
 		      printf (" at address 0%04o.\n", j);
 		      break;
 		    case 3:
 		      printf ("Output watchpoint");
 		      j = Breakpoints[i].Address;
 		      if (j == IO_ODISCRETES)
-		        j = 0;
+			j = 0;
 		      else if (j >= IO_2001 && j <= IO_2200)
-		        j = 02000 + (1 << (j - IO_2001));
+			j = 02000 + (1 << (j - IO_2001));
 		      else if (j >= IO_6001 && j <= IO_6200)
-		        j = 06000 + (1 << (j - IO_6001));
+			j = 06000 + (1 << (j - IO_6001));
 		      else
-		        j = -1;
+			j = -1;
 		      printf (" at address 0%04o.\n", j);
 		      break;
 		    case 4:
 		      printf ("Pattern 0%011o with mask 0%011o.\n",
-		      	      Breakpoints[i].Address,
-			      Breakpoints[i].Value);
+			      Breakpoints[i].Address, Breakpoints[i].Value);
 		      break;
 		    }
 		}
 	    }
 	}
       else if (!strcmp (s, "DUMP"))
-        DumpAGS (State);
+	DumpAGS (State);
       else if (2 == sscanf (s, "DUMP%o%o", &i, &j))
-        {
+	{
 	  LastType = 1;
 	  LastN = i;
 	  LastAddress = j;
 	  DumpAGS (State);
 	}
       else if (1 == sscanf (s, "DUMP%o", &j))
-        {
+	{
 	  LastType = 1;
 	  LastN = 1;
 	  LastAddress = j;
 	  DumpAGS (State);
 	}
       else if (1 == sscanf (s, "DUMP I%o", &j))
-        {
+	{
 	  i = TranslateIoAddress (j);
 	  if (i == -1)
 	    printf ("0%o is not a supported i/o address.\n", j);
@@ -877,7 +888,7 @@ Redraw:
 	    }
 	}
       else if (1 == sscanf (s, "DUMP O%o", &j))
-        {
+	{
 	  i = TranslateIoAddress (j);
 	  if (i == -1)
 	    printf ("0%o is not a supported i/o address.\n", j);
@@ -890,14 +901,14 @@ Redraw:
 	    }
 	}
       else if (2 == sscanf (s, "EDIT%o%o", &i, &j))
-        {
+	{
 	  if (i < 0 || i > 07777)
 	    printf ("Address o%o out of range.\n", i);
 	  else
 	    State->Memory[i] = (j & 0777777);
 	}
       else if (2 == sscanf (s, "EDIT I%o %o", &i, &j))
-        {
+	{
 	  k = TranslateIoAddress (i);
 	  if (k == -1)
 	    printf ("I/O address o%o is not supported.\n", i);
@@ -905,93 +916,95 @@ Redraw:
 	    State->InputPorts[k] = (j & 0777777);
 	}
       else if (2 == sscanf (s, "EDIT O%o %o", &i, &j))
-        {
-	  extern void Output (ags_t *State, int AddressField, int Value);
- 	  if (i == 0)
+	{
+	  extern void
+	  Output (ags_t *State, int AddressField, int Value);
+	  if (i == 0)
 	    {
 	      State->OutputPorts[IO_ODISCRETES] = (j & 0777777);
-              ChannelOutputAGS (040, j & 0777777);
+	      ChannelOutputAGS (040, j & 0777777);
 	    }
 	  else
 	    Output (State, i, j);
 	}
       else if (1 == sscanf (s, "EDIT A %o", &j))
-        {
+	{
 	  if (j < 0 || j > 0777777)
 	    printf ("Value out of range.\n");
-	  else 
+	  else
 	    State->Accumulator = j;
-	    goto Redraw;
+	  goto Redraw;
 	}
       else if (1 == sscanf (s, "EDIT Q %o", &j))
-        {
+	{
 	  if (j < 0 || j > 0777777)
 	    printf ("Value out of range.\n");
-	  else 
+	  else
 	    State->Quotient = j;
-	    goto Redraw;
+	  goto Redraw;
 	}
       else if (1 == sscanf (s, "EDIT OVERFLOW %o", &j))
-        {
+	{
 	  if (j < 0 || j > 1)
 	    printf ("Value out of range.\n");
-	  else 
+	  else
 	    State->Overflow = j;
-	    goto Redraw;
+	  goto Redraw;
 	}
       else if (1 == sscanf (s, "EDIT INDEX %o", &j))
-        {
+	{
 	  if (j < 0 || j > 7)
 	    printf ("Value out of range.\n");
-	  else 
+	  else
 	    State->Index = j;
-	    goto Redraw;
+	  goto Redraw;
 	}
       else if (1 == sscanf (s, "EDIT HALT %o", &j))
-        {
+	{
 	  if (j < 0 || j > 1)
 	    printf ("Value out of range.\n");
-	  else 
+	  else
 	    State->Halt = j;
-	    goto Redraw;
+	  goto Redraw;
 	}
       else if (1 == sscanf (s, "EDIT PC %o", &j))
-        {
+	{
 	  if (j < 0 || j > 07777)
 	    printf ("Value out of range.\n");
-	  else 
+	  else
 	    State->ProgramCounter = j;
-	    goto Redraw;
+	  goto Redraw;
 	}
       else if (!strcmp (s, "BACKTRACES"))
 	ListBacktracesAGS ();
       else if (1 == sscanf (s, "BACKTRACE%d", &i))
-        {
+	{
 	  RegressToBacktraceAGS (State, i);
 	  goto Redraw;
 	}
       else if (2 == sscanf (s, "DISASSEMBLE%o%o", &i, &j))
-        {
+	{
 	  DisassembleCount = i;
 	  DisassembleAGS (State, j, DisassembleCount);
 	}
       else if (1 == sscanf (s, "DISASSEMBLE%o", &j))
-        DisassembleAGS (State, j, DisassembleCount);
+	DisassembleAGS (State, j, DisassembleCount);
       else if (!strcmp (s, "DISASSEMBLE"))
-        DisassembleAGS (State, State->ProgramCounter, DisassembleCount);	
+	DisassembleAGS (State, State->ProgramCounter, DisassembleCount);
       else if (!strcmp (s, "COUNTS"))
-        {
+	{
 	  for (i = 0; i < 32; i++)
-	    printf ("%02o:\t%s\t%lu\t\t%02o:\t%s,1\t%lu\n",
-	              2 * i, Opcodes[i], InstructionCounts[2 * i], 
-		      2 * i + 1, Opcodes[i], InstructionCounts[2 * i + 1]);
+	    printf ("%02o:\t%s\t%lu\t\t%02o:\t%s,1\t%lu\n", 2 * i, Opcodes[i],
+		    InstructionCounts[2 * i], 2 * i + 1, Opcodes[i],
+		    InstructionCounts[2 * i + 1]);
 	}
       else if (1 == sscanf (s, "PRINT %s", SymbolName))
 	{
 	  // Attempt to resolve the symbol and pretend it is
 	  // a DUMP command
-	  if (HaveSymbolsAGS &&
-	      (Symbol = ResolveSymbol(SymbolName, SYMBOL_VARIABLE | SYMBOL_REGISTER)))
+	  if (HaveSymbolsAGS
+	      && (Symbol = ResolveSymbol (SymbolName,
+					  SYMBOL_VARIABLE | SYMBOL_REGISTER)))
 	    {
 	      LastType = 1;
 	      LastN = 1;
@@ -1025,31 +1038,31 @@ Redraw:
       else if (1 == sscanf (s, "LIST %s", Dummy))
 	{
 	  char *Ptr, *TmpName;
-	  
+
 	  // The case where we want to list a file number from a
 	  // given file. We actually need to take the file name
 	  // from the raw string to keep the case. I can't seem
 	  // to figure out how to get sscanf() to recognize the
 	  // colon so I need to do this painfully.
 	  sscanf (sraw, "%s %s", Dummy, FileName);
-	  TmpName = strtok(FileName, ":");
-	  
+	  TmpName = strtok (FileName, ":");
+
 	  // If there is no ":" then we will assume we want to
 	  // list a symbol (function), otherwise, we assume the
 	  // debug command is of the form FILE:LINENUM.
-	  if ((Ptr = strtok(NULL, ":")) != NULL)
+	  if ((Ptr = strtok (NULL, ":")) != NULL)
 	    {
-	      LineNumber = atoi(Ptr);
+	      LineNumber = atoi (Ptr);
 	      ListSource (TmpName, LineNumber);
 	    }
 	  else
 	    {
 	      // Try to resolve the symbol and then list the
 	      // source for that symbol
-	      if ((Symbol = ResolveSymbol(TmpName, SYMBOL_LABEL)) != NULL)
+	      if ((Symbol = ResolveSymbol (TmpName, SYMBOL_LABEL)) != NULL)
 		ListSource (Symbol->FileName, Symbol->LineNumber);
 	      else
-		printf("Invalid symbol name.\n");
+		printf ("Invalid symbol name.\n");
 	    }
 	}
       else if (!strcmp (s, "LIST"))
@@ -1061,13 +1074,13 @@ Redraw:
       else if (!strncmp (s, "SYMBOL-FILE", 11))
 	{
 	  char Dummy[12];
-	  
+
 	  // We need to use the raw formatted string because
 	  // we need to preserve case for the file name
 	  if (2 == sscanf (sraw, "%s %s", Dummy, SymbolFileAGS))
 	    {
 	      ResetSymbolTable ();
-	      if (!ReadSymbolTable(SymbolFileAGS))
+	      if (!ReadSymbolTable (SymbolFileAGS))
 		HaveSymbolsAGS = 1;
 	      else
 		HaveSymbolsAGS = 0;
@@ -1090,7 +1103,7 @@ Redraw:
 	    printf ("No symbol table loaded.\n");
 	}
       else
-        printf ("Unrecognized command \"%s\".\n", s);
-  }
+	printf ("Unrecognized command \"%s\".\n", s);
+    }
 }
 
