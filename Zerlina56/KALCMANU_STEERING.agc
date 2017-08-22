@@ -17,10 +17,9 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-07-28 MAS  Created from Luminary 210.
+##		2017-08-22 RSB	Transcribed.
 
-## NOTE: Page numbers below have not yet been updated to reflect Zerlina 56.
-
-## Page 377
+## Page 370
 # GENERATION OF STEERING COMMANDS FOR DIGITAL AUTOPILOT FREE FALL MANEUVERS
 
 # NEW COMMANDS WILL BE GENERATED EVERY ONE SECOND DURING THE MANEUVER
@@ -72,7 +71,7 @@ INCRDCDU        TS              SPNDX
                 TS              DELDCDU                 # ANGLE INCREMENTS TO BE ADDED TO
                 INDEX           SPNDX                   # CDUXD, CDUYD, CDUZD EVERY TENTH SECOND
 
-## Page 378
+## Page 371
                 CA              NCDU                    # BY LEM DAP
                 INDEX           SPNDX
                 XCH             BCDU
@@ -122,8 +121,8 @@ DT/TAU          DEC             .1
 MANUSTAT        EXIT                                    # INITIALIZATION ROUTINE
                 EXTEND                                  # FOR AUTOMATIC MANEUVERS
                 DCA             TIME2
-## Page 379
-                DAS             TM                      # TM+T0   MANEUVER COMPLETION TIME
+## Page 372
+                DAS             TM                      # TM+T0    MANEUVER COMPLETION TIME
                 EXTEND
                 DCS             ONESEK
                 DAS             TM                      # (TM+T0)-1
@@ -146,9 +145,9 @@ RATEBIAS        TS              KSPNDX
                 MP              BRATE
                 EXTEND
                 INDEX           KSPNDX
-                DV              1JACC                   # =AJX   $ 90 DEG/SEC-SEC
+                DV              1JACC                   # =AJX  $ 90 DEG/SEC-SEC
                 INDEX           KSPNDX
-                TS              DELPEROR                #      $ 180 DEG
+                TS              DELPEROR                #     $ 180 DEG
                 CCS             KSPNDX
                 TCF             RATEBIAS
 
@@ -174,7 +173,7 @@ MANUCALL        INHINT                                  # CALL FOR NEXT UPDATE V
                 EBANK=          TTEMP
                 2CADR           UPDTCALL
 
-## Page 380
+## Page 373
                 CAF             ONESEK          +1      # INCREMENT TIME FOR NEXT UPDATE
                 ADS             NEXTIME
                 TCF             ENDOFJOB
@@ -187,7 +186,7 @@ UPDTCALL        CAF             PRIO26                  # SATELLITE PROGRAM TO C
 
                 TC              TASKOVER
 
-## Page 381
+## Page 374
 # ROUTINE FOR TERMINATING AUTOMATIC MANEUVERS
 
 MANUSTOP        CAF             ZERO                    # ZERO MANEUVER RATES
