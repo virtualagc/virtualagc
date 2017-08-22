@@ -17,10 +17,9 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-07-28 MAS  Created from Luminary 210.
+##		2017-08-22 RSB	Transcribed.
 
-## NOTE: Page numbers below have not yet been updated to reflect Zerlina 56.
-
-## Page 382
+## Page 375
                 EBANK=          XSM
 
                 BANK            33
@@ -67,15 +66,15 @@ E/BKCALL        DXCH            BUF2                    # SAVE A,L AND GET DP RE
 E/SWITCH        DXCH            EBUF2
                 DTCB
 
-## Page 383
+## Page 376
 # E/CALL          FOR CALLING A FIXED MEMORY INTERPRETIVE SUBROUTINE FROM ERASABLE AND RETURNING TO ERASABLE.
 
 #          THE CALLING SEQUENCE IS...
 #
 #                                                  RTB
 #                                                         E/CALL
-#                                                  CADR   ROUTINE            THE INTERPRETIVE SUBROUTINE YOU WANT.
-#                                                                            RETURNS HERE IN INTERPRETIVE.
+#                                                  CADR   ROUTINE         THE INTERPRETIVE SUBROUTINE YOU WANT.
+#                                                                         RETURNS HERE IN INTERPRETIVE.
 
 E/CALL          LXCH            LOC                     # ADRES -1 OF CADR.
                 INDEX           L
@@ -90,29 +89,29 @@ E/CALL          LXCH            LOC                     # ADRES -1 OF CADR.
                 LXCH            EBUF2           +1      # PICK UP RETURN.
                 TCF             INTPRET         +2      # SET LOC AND RETURN TO CALLER.
 
-## Page 384
+## Page 377
 # E/JOBWAK        FOR WAKING UP ERASABLE MEMORY JOBS.
 
 #          THIS ROUTINE MUST BE CALLED IN INTERRUPT OR WITH INTERRUPTS INHIBITED.
 
 #          THE CALLING SEQUENCE IS:
 #
-#                                                     INHINT
-#                                                       .
-#                                                       .
-#                                                     CA      WAKEADR         ADDRESS OF SLEEPING JOB
-#                                                     TC      IBNKCALL
-#                                                     CADR    E/JOBWAK
-#                                                       .                     RETURNS HERE
-#                                                       .
-#                                                       .
-#                                                     RELINT                  IF YOU DID AN INHINT.
+#                                                  INHINT
+#                                                    .
+#                                                    .
+#                                                  CA     WAKEADR         ADDRESS OF SLEEPING JOB
+#                                                  TC     IBNKCALL
+#                                                  CADR   E/JOBWAK
+#                                                    .                    RETURNS HERE
+#                                                    .
+#                                                    .
+#                                                  RELINT                 IF YOU DID AN INHINT.
 
                 BANK            33
                 SETLOC          E/PROG
                 BANK
 
-                COUNT*           $$/P07
+                COUNT*          $$/P07
 
 E/JOBWAK        TC              JOBWAKE                 # ARRIVE IWTH ADRES IN A.
                 CS              BIT11
