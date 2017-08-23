@@ -17,12 +17,11 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-07-28 MAS  Created from Luminary 210.
+##		2018-08-23 RSB	Transcribed.
 
-## NOTE: Page numbers below have not yet been updated to reflect Zerlina 56.
-
-## Page 394
-# PROGRAM- IMU PERFORMANCE TESTS 4
-# DATE- NOV 15, 1966
+## Page 387
+# PROGRAM-IMU PERFORMANCE TESTS 4
+# DATE-NOV 15,1966
 # BY- GEORGE SCHMIDT IL7-146 EXT 1126
 # MOD NO-ZERO
 
@@ -30,7 +29,7 @@
 # FUNCTIONAL DESCRIPTION
 
 # THIS SECTION CONSISTS OF THE FILTER FOR THE GYRO DRIFT TESTS. NO COMPASS
-# IS DONE IN LEM. FOR A DESCRIPTION OF THE FILTER SEE E-1973.  THIS
+# IS DONE IN LEM. FOR A DESCRIPTION OF THE FILTER SEE E-1973. THIS
 # SECTION IS ENTERED FROM IMU 2. IT RETURNS THERE AT END OF TEST.
 
 # EARTHR,OGC ZERO,ERTHRVSE
@@ -41,8 +40,8 @@
 
 # ALARMS
 
-# 1600  OVERFLOW IN DRIFT TEST
-# 1601     BAD IMU MODING IN ANY ROUTINE THAT USES IMUSTALL
+# 1600 OVERFLOW IN DRIFT TEST
+# 1601    BAD IMU MODING IN ANY ROUTINE THAT USES IMUSTALL
 # OUTPUT
 
 # FLASHING DISPLAY OF RESULTS-CONTROLLED IN IMU PERF TESTS 2
@@ -51,7 +50,7 @@
 
 # ALL CENTRALS-ALL OF EBANK XSM
 
-## Page 395
+## Page 388
                 BANK            33
                 SETLOC          IMU4
                 BANK
@@ -92,7 +91,7 @@ ESTIMS          INHINT
 VERTSKIP        EXIT
                 TC              SLEEPIE         +1
 
-## Page 396
+## Page 389
 ALLOOP          CA              OVFLOWCK
                 EXTEND
                 BZF             +2
@@ -126,9 +125,10 @@ SPECSTS         CAF             PRIO20
                 TC              FINDVAC
                 EBANK=          XSM
                 2CADR           ALFLT                   # START THE JOB
+                
                 TC              TASKOVER
 
-## Page 397
+## Page 390
 ALFLT           CCS             GEOCOMPS
                 TC              +2
                 TC              NORMLOP
@@ -180,7 +180,7 @@ DELMLP          DLOAD*          DMP
                 PDDL            DMP*
                                 VELSC
 
-## Page 398
+## Page 391
                                 VLAUN           +8D,1
                 SL2R
                 DSU             STADR
@@ -231,7 +231,7 @@ LOOSE           DLOAD*          PDDL*
                                 POSNV           +8D,1
                 MXV             VSL1
                                 TRANSM1
-## Page 399
+## Page 392
                 DLOAD
                                 MPAC
                 STORE           POSNV           +8D,1
@@ -282,7 +282,7 @@ PERFERAS        EXIT
                 CA              CDUX
                 TS              LOSVEC          +1      # FOR TROUBLESHOOTING VD POSNS 2$4
 
-## Page 400
+## Page 393
 SETUPER1        TC              INTPRET
                 DLOAD           PDDL                    # ANGLES FROM DRIFT TEST ONLY
                                 ANGZ
@@ -330,10 +330,10 @@ SOMERR2         CAF             OCT1601
                 TC              ENDOFJOB
 
 OCT1601         OCT             01601
-DEC585          OCT             06200                   # 3200 B+14 ORDER IS IMPORTANT
+DEC585          OCT             06200                   # 3200 B+14   ORDER IS IMPORTANT
 SCHZEROS        2DEC            .00000000
 
-## Page 401
+## Page 394
                 2DEC            .00000000
                 OCT             00000
 ONEDPP          OCT             00000                   # ORDER IS IMPORTANT
