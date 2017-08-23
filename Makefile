@@ -162,6 +162,10 @@
 #		2017-04-17 RSB	Updated NVER.
 #		2017-06-19 RSB	Updated NVER and added Sunburst37 to the mission list.
 #		2017-08-01 MAS	Added LMY99R0 to the list of missions.
+#		2017-08-23 RSB	Since Solarium doesn't presently assemble correctly in
+#				Mac OS X, it is now only conditionally added to the 
+#				mission list for non-Mac build systems.  Hopefully that's
+#				temporary.
 #
 # The build box is always Linux for cross-compiles.  For native compiles:
 #	Use "make MACOSX=yes" for Mac OS X.
@@ -367,9 +371,12 @@ BUILD = $(MAKE) PREFIX=$(PREFIX) NVER=$(NVER) CFLAGS="$(CFLAGS)" CURSES="$(CURSE
 
 # List of mission software directories to be built.
 MISSIONS = Validation Luminary131 Colossus249 Comanche055 
-MISSIONS += Luminary099 Artemis072 Colossus237 Solarium055
+MISSIONS += Luminary099 Artemis072 Colossus237
 MISSIONS += Aurora12 Sunburst120 Luminary210 Retread44 Luminary069
 MISSIONS += SuperJob LUM99R2 Luminary116 Borealis Sunburst37 LMY99R0
+ifndef MACOSX
+MISSIONS += Solarium055
+endif
 export MISSIONS
 
 # Missions needing code::blocks project files.
