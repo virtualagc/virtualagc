@@ -17,10 +17,9 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-07-28 MAS  Created from Luminary 210.
+##		2018-08-23 RSB	Transcribed.
 
-## NOTE: Page numbers below have not yet been updated to reflect Zerlina 56.
-
-## Page 505
+## Page 498
                 BANK            15
                 SETLOC          RRLEADIN
                 BANK
@@ -71,7 +70,7 @@ DORSAMP2        INHINT
                 INDEX           RTSTLOC
                 DXCH            RSTACK
 
-## Page 506
+## Page 499
                 CA              RADMODES
                 EXTEND
                 RXOR            CHAN33
