@@ -17,14 +17,13 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-07-28 MAS  Created from Luminary 210.
+##              2017-08-22 MAS  Updated for Zerlina 56.
 
-## NOTE: Page numbers below have not yet been updated to reflect Zerlina 56.
-
-## Page 661
+## Page 653
 # TRANSFER PHASE INITIATION (TPI) PROGRAMS (P34 AND P74)
 
 # MOD NO -1       LOG SECTION - P32-P35, P72-P75
-# MOD BY WHITE.P  DATE  1JUNE67
+# MOD BY WHITE.P  DATE 1JUNE67
 
 # PURPOSE
 
@@ -70,8 +69,7 @@
 #           (D) THE PERICENTER ALTITUDES OF ORBITS FOLLOWING CSI AND
 
 #               CDH WERE COMPUTED TO BE GREATER THAN 35,000 FT FOR LUNAR
-
-## Page 662
+## Page 654
 #               ORBIT OR 85 NM FOR EARTH ORBIT.
 
 #           (E) THE CSI AND CDH MANEUVERS WERE ASSUMED TO BE PARALLEL TO
@@ -122,8 +120,7 @@
 #
 #           THE ASTRONAUT WILL CALL THIS DISPLAY TO VERIFY THAT THE
 #           CENTRAL ANGLE OF TRANSFER OF THE ACTIVE VEHICLE IS NOT WITHIN
-
-## Page 663
+## Page 655
 #           170 TO 190 DEGREES.  IF THE ANGLE IS WITHIN THIS ZONE THE
 #           ASTRONAUT SHOULD REASSESS THE INPUT TARGETING PARAMETERS BASED
 #           UPON DELTA V AND EXPECTED MANEUVER TIME.
@@ -174,8 +171,7 @@
 # SUBROUTINES USED
 
 #       AVFLAGA
-
-## Page 664
+## Page 656
 #       AVFLAGP
 #       VNPOOH
 #       DISPLAYE
@@ -227,7 +223,7 @@ P34/P74A        TC              P20FLGON                # SET UPDATFLG, TRACKFLG
                                 P34/P74B
                                 ETPIFLAG
 
-## Page 665
+## Page 657
 P34/P74B        CALL
                                 SELECTMU
 DELELO          EQUALS          26D
@@ -278,8 +274,7 @@ P34/P74E        TC              INTPRET
                 STODL           CSTH
                 SIN
                 STOVL           SNTH
-
-## Page 666
+## Page 658
                                 RPASS3
                 VSR*
                                 0,2
@@ -324,8 +319,9 @@ P34/P74E        TC              INTPRET
                 GOTO
                                 P34/P74C
 
-## Page 667
+## Page 659
 # RENDEZVOUS MID-COURSE MANEUVER PROGRAMS (P35 AND P75)
+
 # MOD NO -1       LOG SECTION - P32-P35, P72-P75
 # MOD BY WHITE.P  DATE  1JUNE67
 
@@ -375,7 +371,7 @@ P34/P74E        TC              INTPRET
 #           COMPLETION OF THE TRANSFER PHASE INITIATION (TPI) PROGRAM
 #           (P34/P74) AND IS PRESENTLY AVAILABLE IN STORAGE.
 
-## Page 668
+## Page 660
 #       (6) ONCE THE PARAMETERS REQUIRED FOR COMPUTION OF THE MANEUVER
 #           HAVE BEEN COMPLETELY SPECIFIED, THE VALUE OF THE ACTIVE
 #           VEHICLE CENTRAL ANGLE OF TRANSFER IS COMPUTED AND STORED.
@@ -426,8 +422,7 @@ P34/P74E        TC              INTPRET
 #       PRECSET
 #       S34/35.1
 #       S34/35.2
-
-## Page 669
+## Page 661
 #       S34/35.5
 #       VN1645
 
@@ -466,7 +461,7 @@ P35/P75B        RTB
                 GOTO
                                 P35/P75B
 
-## Page 670
+## Page 662
 # ..... S33/34.1  .....
 
 S33/34.1        STQ             SSP
@@ -517,7 +512,7 @@ TESTY           BOFF            DLOAD
                 STORE           DELEL
                 ABS             DSU
                                 ELEPS
-## Page 671
+## Page 663
                 BMN
                                 TIMEX                   # COMMERCIALS EVERYWHERE
 FIGTIME         SLOAD           SR1
@@ -568,8 +563,7 @@ FIGTIME         SLOAD           SR1
                 DOT             DMP
                                 VPASS3
                                 14D
-
-## Page 672
+## Page 664
                 BDSU
                 NORM            PDVL                    # NORMALIZED WA - WP 12D
                                 X1
@@ -582,7 +576,7 @@ FIGTIME         SLOAD           SR1
                                 6D
                 SL1             ACOS
                 SIGN
-                DSU             DAD                     #   ALPHA PI
+                DSU             DAD                     #   ALPHA   PI
                                 DPHALF
                                 ELEV
                 PDDL            ACOS
@@ -620,8 +614,7 @@ REPETE          DLOAD           DMP
                 DMP
                                 THIRD
                 STODL           SECMAX
-
-## Page 673
+## Page 665
                 ABS             SR1                     # CROSSED OVER SOLUTION
                 DCOMP           GOTO                    # DT=(-SIGN(DTO)//DT//)/2
                                 RESIGN
@@ -672,17 +665,15 @@ ELEX            DLOAD           DAD
                                 TIMEX
                 STORE           ELEV
 TIMEX           DLOAD           GOTO
-
-## Page 674
+## Page 666
                                 ZEROVECS
                                 NORMEX
 
-## Page 675
+## Page 667
 # ..... S34/35.1  .....
 
 # COMPUTE UNIT NORMAL AND LINE OF SIGHT VECTORS GIVEN THE ACTIVE AND
 # PASSIVE POS AND VEL AT TIME T3
-
 S34/35.1        VLOAD           VSU
                                 RPASS3
                                 RACT3
@@ -694,7 +685,7 @@ S34/35.1        VLOAD           VSU
                 STORE           UNRM
                 RVQ
 
-## Page 676
+## Page 668
 # ..... S34/35.2  .....
 
 # ADVANCE PASSIVE VEH TO RENDEZVOUS TIME AND GET REQ VEL FROM LAMBERT
@@ -745,8 +736,7 @@ NOPIE           STODL           ACTCENT
                                 EPSFOUR
                                 RACT3
                 STOVL           RINIT
-
-## Page 677
+## Page 669
                                 VACT3
                 STCALL          VINIT
                                 INITVEL
@@ -759,7 +749,7 @@ NOPIE           STODL           ACTCENT
                 STCALL          DELVLVC
                                 SUBEXIT
 
-## Page 678
+## Page 670
 # ..... S34/35.3  .....
 
 S34/35.3        STQ             CALL
@@ -798,7 +788,7 @@ NOVRWRT         VLOAD           PUSH
                 STCALL          DVLOS
                                 NORMEX
 
-## Page 679
+## Page 671
 # ..... S34/35.4  .....
 
 S34/35.4        STQ             SETPD                   # NO ASTRONAUT OVERWRITE
@@ -807,8 +797,8 @@ S34/35.4        STQ             SETPD                   # NO ASTRONAUT OVERWRITE
                 GOTO
                                 NOVRWRT
 
-## Page 680
-# ..... LOMAT    .....
+## Page 672
+# ..... LOMAT     .....
 
 LOMAT           VLOAD           VCOMP
                                 UNRM
@@ -822,9 +812,9 @@ LOMAT           VLOAD           VCOMP
                 SETPD           RVQ
                                 18D
 GOINT           PDDL            PDDL                    # DO
-                                ZEROVECS                #  NOT
+                                ZEROVECS                #   NOT
                                 NOMTPI                  #
-                PUSH            PUSH                    #              ORDER OR INSERT BEFORE INTINT
+                PUSH            PUSH                    #            ORDER OR INSERT BEFORE INTINT
 INTINT          STQ             CALL
                                 RTRN
                                 INTSTALL
@@ -854,7 +844,7 @@ ALLSET          STOVL           TET
                                 RATT
                                 RTRN
 
-## Page 681
+## Page 673
 # ..... S34/35.5  .....
 # SUBROUTINES USED
 
@@ -869,11 +859,13 @@ S34/35.5        STQ             BON
                                 SUBEXIT
                                 FINALFLG
                                 FLAGON
-                SET
+                SET             GOTO
                                 UPDATFLG
+                                FLAGOFF
 FLAGON          CLEAR           VLOAD
                                 NTARGFLG
                                 DELVLVC
+## The following line is marked as having been changed between KISSING.063 and KISSING.064.
                 STORE           TMPDV                   # SAVE DV BEFORE DISPLAY
                 EXIT
  +5             CAF             V06N81
@@ -891,6 +883,7 @@ NTARGCHK        TS              Q
                 INDEX           Q
                 CS              DELVLVC
                 INDEX           Q
+## The following line is marked as having been changed between KISSING.063 and KISSING.064.
                 AD              TMPDV
                 ADS             L
                 CCS             Q
@@ -904,19 +897,22 @@ NTARGCHK        TS              Q
                 TC              INTPRET
                 BOFF            CALL
                                 NTARGFLG
+## Page 674
                                 NOCHG
-
-## Page 682
                                 S34/35.3
 NOCHG           VLOAD
                                 DELVEET3
                 STORE           DELVSIN
 FLAGOFF         CALL
                                 S34/35.4
+                EXIT
+                CAF             V06N59
+                TC              VNPOOH
+                TC              INTPRET
                 GOTO
                                 SUBEXIT
 
-## Page 683
+## Page 675
 # ..... VN1645    .....
 
 # SUBROUTINES USED
@@ -967,8 +963,7 @@ GET45           EXIT
                 TC              CLUPDATE                # RECYCLE - RETURN FOR INITIAL COMPUTATION
 KILCLOCK        CA              Z
                 TS              DISPDEX
-
-## Page 684
+## Page 676
                 TC              GOTOPOOH
 N45PROC         CS              FLAGWRD2
                 MASK            BIT6
@@ -987,8 +982,8 @@ CLUPDATE        CA              Z
                                 UPDATFLG
                                 QSAVED
 
-## Page 685
-# ..... DISPLAYE   .....
+## Page 677
+# ..... DISPLAYE  .....
 
 # SUBROUTINES USED
 
@@ -1007,7 +1002,7 @@ DISPLAYE        EXTEND
                 TC              NORMEX
                 TCF             -5
 
-## Page 686
+## Page 678
 # ..... P3XORP7X  .....
 
 P3XORP7X        CAF             HIGH9
@@ -1017,7 +1012,7 @@ P3XORP7X        CAF             HIGH9
                 INCR            Q
                 RETURN
 
-# ..... VNPOOH     .....
+# ..... VNPOOH    .....
 
 # SUBROUTINES USED
 
@@ -1035,7 +1030,7 @@ VNPOOH          EXTEND
                 TC              RTRN
                 TCF             -5
 
-## Page 687
+## Page 679
 # ..... CONSTANTS .....
 
 V06N37          VN              0637
@@ -1045,18 +1040,23 @@ V06N59          VN              0659
 V06N81          VN              0681
 V16N45          VN              1645
 TWOPI           2DEC            6.283185307     B-4
+
 MAX250          2DEC            25              E3
+
 THIRD           2DEC            .333333333
+
 ELEPS           2DEC            .27777777       E-3
+
 DP-.01          OCT             77777                   # CONSTANTS
-                OCT             61337                   # ADJACENT      -.01 FOR MGA DSP
+                OCT             61337                   # ADJACENT       -.01 FOR MGA DSP
 EPSFOUR         2DEC            .0416666666
+
 130DEG          2DEC            .3611111111
 
-## Page 688
+## Page 680
 # ..... INITVEL .....
-# MOD NO -1        LOG SECTION - P34-P35, P74-P75
-# MOD BY WHITE.P   DATE  21NOV67
+# MOD NO -1       LOG SECTION - P34-P35, P74-P75
+# MOD BY WHITE.P  DATE  21NOV67
 
 # FUNCTIONAL DESCRIPTION
 
@@ -1103,7 +1103,7 @@ EPSFOUR         2DEC            .0416666666
 #       (9) RTX2     COORDINATE SYSTEM ORIGIN - 0 FOR EARTH, 2 FOR LUNAR
 #       PUSHLOC SET AT 4D
 
-## Page 689
+## Page 681
 # OUTPUT
 
 #       (1) RTARG    OFFSET TARGET POSITION VECTOR
@@ -1143,19 +1143,18 @@ HAVEGUES        VLOAD           STQ
                 STORE           RTARG1
                 ABVAL
                 STORE           RTMAG
-#       INITIALIZATION
+#      INITIALIZATION
 
-INITVEL1        SSP             DLOAD                   # SET ITCTR TO -1,LOAD MPAC WITH E4 (PL 2D)
+INITVEL1        SSP             DLOAD                   # SET ITCTR TO -1,LOAD MPAC WITH E4(PL 2D)
                                 ITCTR
                                 0               -1
-                COSINE          SR1                     # CALCULATE COSINE (E4) (+2)
-                STODL           COZY4                   # SET COZY4 TO COSINE (E4)          (PL 0D)
+                COSINE          SR1                     # CALCULATE COSINE (E4)  (+2)
+                STODL           COZY4                   # SET COZY4 TO COSINE(E4)          (PL 0D)
                 LXA,2           SXA,2
                                 MPAC
                                 VTARGTAG                # SET VTARGTAG TO 0D (SP)
                 VLOAD
-
-## Page 690
+## Page 682
                                 RINIT
                 STOVL           R1VEC                   # R1VEC EQ RINIT
                                 RTARG1
@@ -1167,10 +1166,10 @@ INITVEL1        SSP             DLOAD                   # SET ITCTR TO -1,LOAD M
                                 RINIT                   # MPAC EQ RINIT (+29)
                 UNIT            PUSH                    # UNIT(RI)  (+1)                   (PL 6D)
                 VXV             UNIT
-                                VINIT                   # MPAC EQ UNIT(RI) X VI  (+8)
+                                VINIT                   # MPAC EQ UNIT(RI) X VI   (+8)
                 STOVL           UN
                                 RTARG1
-                UNIT            DOT                     # TEMP=URT.URI (+2)                (PL 0D)
+                UNIT            DOT                     # TEMP=URT.URI  (+2)               (PL 0D)
                 DAD             CLEAR
                                 COZY4
                                 NORMSW
@@ -1178,7 +1177,7 @@ INITVEL1        SSP             DLOAD                   # SET ITCTR TO -1,LOAD M
 INITVEL2        BPL             SET
                                 INITVEL3                # UN CALCULATED IN LAMBERT
                                 NORMSW
-#       ROTATE RC INTO YC PLANE - SET UNIT NORMAL TO YC
+#    ROTATE RC INTO YC PLANE - SET UNIT NORMAL TO YC
 
                 VLOAD           PUSH                    #                                  (PL 6D)
                                 R2VEC                   # RC TO 6D  (+29)
@@ -1206,8 +1205,7 @@ INITVEL3        DLOAD           PDVL                    #                       
                                 2D
                 PUSH                                    #                                  (PL20D)
                 LXA,1           DLOAD
-
-## Page 691
+## Page 683
                                 RTX1
                                 18D
                 BMN             INCR,1
@@ -1216,25 +1214,24 @@ INITVEL3        DLOAD           PDVL                    #                       
                 INCR,1          SLOAD
                                 10D
                                 X1
-                BHIZ            VLOAD                   #                                       (PL14D)
+                BHIZ            VLOAD                   #                                  (PL14D)
                                 +2
-                VCOMP           PUSH                    #                                       (PL20D)
-                VLOAD                                   #                                       (PL14D)
-                VXV             DOT                     #                                       (PL 2D)
-                BPL             DLOAD                   #                                       (PL 0D)
+                VCOMP           PUSH                    #                                  (PL20D)
+                VLOAD                                   #                                  (PL14D)
+                VXV             DOT                     #                                  (PL 2D)
+                BPL             DLOAD                   #                                  (PL 0D)
                                 INITVEL4
-                DCOMP           PUSH                    #                                       (PL 2D)
+                DCOMP           PUSH                    #                                  (PL 2D)
 INITVEL4        LXA,2           SXA,2
                                 0D
                                 GEOMSGN
-
-# SET INPUTS UP FOR LAMBERT
+#   SET INPUTS UP FOR LAMBERT
 
                 LXA,1           SSP
                                 RTX1
                                 ITERCTR
                                 20D
-#  OPERATE THE LAMBERT CONIC ROUTINE (COASTFLT SUBROUTINE)
+#    OPERATE THE LAMBERT CONIC ROUTINE (COASTFLT SUBROUTINE)
 
                 CALL
                                 LAMBERT
@@ -1259,8 +1256,7 @@ INITVEL4        LXA,2           SXA,2
                                 RTX2
                                 MOONFLAG
                 BHIZ            SET
-
-## Page 692
+## Page 684
                                 INITVEL5
                                 MOONFLAG
 INITVEL5        VLOAD
@@ -1292,8 +1288,8 @@ INITVEL5        VLOAD
                 SLOAD           BHIZ                    # IF SP(MPAC) EQ 0, CONTINUE AT INITVELC
                                 X2
                                 INITVEL6
-
-# OFFSET CONIC TARGET VECTOR
+#
+#   OFFSET CONIC TARGET VECTOR
 
                 VLOAD           VSU
                                 RTARG1
@@ -1304,7 +1300,6 @@ INITVEL5        VLOAD
                                 COZY4
                 GOTO
                                 INITVEL2                # CONTINUE ITERATING AT INITVEL2
-
 # COMPUTE THE DELTA VELOCITY
 
 INITVEL6        VLOAD
@@ -1313,8 +1308,8 @@ INITVEL6        VLOAD
 INITVEL7        VLOAD           VSU
                                 VIPRIME
                                 VINIT
-## Page 693
-                STOVL           DELVEET3                # DELVEET3 = VIPRIME-VINIT (+7)
+## Page 685
+                STOVL           DELVEET3                # DELVEET3 = VIPRIME-VINIT  (+7)
                                 VTARGET
                 STORE           VTPRIME
                 SLOAD           BHIZ
@@ -1353,7 +1348,7 @@ INITVELX        LXA,1           DLOAD*
 
 # ..... END OF INITVEL ROUTINE .....
 
-## Page 694
+## Page 686
 # ..... MIDGIM .....
 
 # MOD NO. 0, BY WILLMAN, SUBROUTINE RENDGUID, LOG P34-P35, P74-P75
@@ -1367,25 +1362,25 @@ INITVELX        LXA,1           DLOAD*
 
 #   .. INPUTS ..
 
-#      NAME      MEANING                              UNITS/SCALING/MODE
+#     NAME        MEANING                              UNITS/SCALING/MODE
 
 #    AVFLAG  INT FLAG - 0 IS CSM ACTIVE, 1 IS LEM ACTIVE             BIT
 #    RINIT   ACTIVE VEHICLE RADIUS VECTOR            METERS/CSEC (+7) VT
 #    VINIT   ACTIVE VEHICLE VELOCITY VECTOR          METERS/CSEC (+7) VT
-#    0D(PL)  ACTIVE VEHICLE DELTA VELOCITY VECTOR    METERS/CSEC (+7) VT
+#    0D (PL) ACTIVE VEHICLE DELTA VELOCITY VECTOR    METERS/CSEC (+7) VT
 
-#  .. OUTPUTS ..
+#   .. OUTPUTS ..
 
-#    NAME        MEANING                                UNITS/SCALING/MODE
+#     NAME        MEANING                              UNITS/SCALING/MODE
 
-#     +MGA  + MIDDLE GIMBAL ANGLE                   REVOLUTIONS (+0) DP
-#   DELVLVC DELTA VELOCITY VECTOR IN LV COORD.      METERS/CSEC (+7) VT
-#  MGLVFLAG INT FLAG - 0 IS +MGA COMPUTED, 1 IS DELVLVC COMP.   -   BIT
+#      +MGA  + MIDDLE GIMBAL ANGLE                  REVOLUTIONS (+0) DP
+#    DELVLVC DELTA VELOCITY VECTOR IN LV COORD.     METERS/CSEC (+7) VT
+#   MGLVFLAG INT FLAG - 0 IS +MGA COMPUTED, 1 IS DELVLVC COMP.  -   BIT
 
 #  .. CALLING SEQUENCE ..
 
 # L       CALL
-# L+1             MIDGIM
+# L+1            MIDGIM
 # L+2     (RETURN - ALWAYS)
 
 #   .. NO SUBROUTINES CALLED ..
@@ -1396,7 +1391,7 @@ INITVELX        LXA,1           DLOAD*
 
 #   .. ALARMS - NONE ..
 
-## Page 695
+## Page 687
 # MIDDLE GIMBAL ANGLE COMPUTATION.
 
                 SETLOC          MIDDGIM
@@ -1405,9 +1400,6 @@ INITVELX        LXA,1           DLOAD*
                 COUNT*          $$/MIDG
 
 HALFREV         2DEC            1               B-1
-                SETLOC          MIDDGIM1
-                BANK
-                COUNT*          $$/MIDG
 
 GET+MGA         VLOAD           UNIT                    # (PL 0D) V (+7) TO MPAC, UNITIZE  UV (+1)
                 UNIT
@@ -1437,9 +1429,9 @@ GET.LVC         VLOAD           UNIT                    # (PL 6D)   R (+29) IN M
                 STORE           DELVLVC                 # STORE IN DELVLVC (+7)
                 SET             RVQ                     # SET MGLVFLAG TO INDICATE LVC CALC
                                 MGLVFLAG                #     AND EXIT
-#       ..... END OF MIDGIM ROUTINE .....
+#    ..... END OF MIDGIM ROUTINE .....
 
-## Page 696
+## Page 688
                 BANK            10
                 SETLOC          SLCTMU
                 BANK
@@ -1470,11 +1462,11 @@ RTRNMU          STORE           RTMU
                 GOTO
                                 VN1645
 
-## Page 697
+## Page 689
 # ..... PERIAPO .....
 
 # MOD NO -1       LOG SECTION - P34-P35, P74-P75
-# MOD BY WHITE.P  DATE 18JAN68
+# MOD BY WHITE.P  DATE  18JAN68
 
 # FUNCTIONAL DESCRIPTION
 
@@ -1521,8 +1513,7 @@ RTRNMU          STORE           RTMU
 # SUBROUTINES USED
 
 #       SETRAD
-
-## Page 698
+## Page 690
 #       APSIDES
 
                 SETLOC          APOPERI
@@ -1531,6 +1522,7 @@ RTRNMU          STORE           RTMU
                 COUNT*          $$/PERAP
 
 RPAD            2DEC            6373338         B-29    # STANDARD RADIUS  OF PAD 37-B.
+
                                                         # = 20 909 901.57 FT
 
 PERIAPO1        LXA,2           VSR*
@@ -1556,9 +1548,8 @@ PERIAPO         STQ             CALL
                 PUSH            GOTO                    # 8D = PERIGEE ALTITUDE   B29 OR B27
                                 NORMEX
 
-## Page 699
+## Page 691
 # SETRAD
-
 SETRAD          DLOAD           PUSH
                                 RPAD
                 SXA,1           INCR,2
@@ -1572,9 +1563,8 @@ SETRAD          DLOAD           PUSH
                 PDDL
 SETRADX         DLOAD           RVQ
 
-## Page 700
+## Page 692
 # PRECSET
-
 PRECSET         STQ
                                 NORMEX
                 STCALL          TDEC2
@@ -1606,9 +1596,8 @@ PASSIVE         STOVL           RPASS3
                 STORE           VPASS3
                 RVQ
 
-## Page 701
+## Page 693
 # VECSHIFT
-
 VECSHIFT        LXA,2           VSR*
                                 RTX2
                                 0,2
@@ -1618,19 +1607,18 @@ VECSHIFT        LXA,2           VSR*
                                 0,2
                 RVQ
 
-## Page 702
+## Page 694
 # SHIFTR1
-
 SHIFTR1         LXA,2           SL*
                                 RTX2
                                 0,2
                 RVQ
 
-## Page 703
+## Page 695
 # PROGRAM DESCRIPTION
-# SUBROUTINE NAME        R36     OUT-OF-PLANE RENDEZVOUS ROUTINE
-# MOD NO.  0                          DATE      22 DECEMBER 67
-# MOD BY   N.M.NEVILLE                LOG SECTION  EXTENDED VERBS
+# SUBROUTINE NAME       R36  OUT-OF-PLANE RENDEZVOUS ROUTINE
+# MOD NO.  0                      DATE      22 DECEMBER 67
+# MOD BY   N.M.NEVILLE            LOG SECTION  EXTENDED VERBS
 # FUNCTIONAL DESCRIPTION
 
 # TO DISPLAY AT ASTRONAUT REQUEST LGC CALCULATED RENDEZVOUS
@@ -1665,6 +1653,7 @@ SHIFTR1         LXA,2           SL*
 # REGISTERS RANGE , RRATE AND RTHETA RESPECTIVELY.
 
 # ERASABLE INITIALIZATION REQUIRED
+
 # CSM AND LEM STATE VECTORS
 
 # DEBRIS
@@ -1677,7 +1666,7 @@ SHIFTR1         LXA,2           SL*
                 SETLOC          R36LM
                 BANK
 
-## Page 704
+## Page 696
                 EBANK=          TIG
                 COUNT*          $$/R36
 
@@ -1711,25 +1700,24 @@ R36INT          STCALL          TDEC1
                                 VATT                    # VELOCITY VECTOR  V               00D
                                 RATT                    #                   A
                 PUSH            PUSH                    # POSITION VECTOR  R   IN  06D AND 12D
-                BVSU            PDVL                    #                   A   -   -
-                                RPASS36                 # LINE OF SIGHT VECTOR  R - R      12D
+                BVSU            PDVL                    #                   A  -   -
+                                RPASS36                 # LINE OF SIGHT VECTOR R - R       12D
                 DOT             SL1                     #                        P   A
-                                UNP36                   #     -   -
-                STOVL           YLEM                    #
-                                00D                     #          A
+                                UNP36                   #     -  -
+                STOVL           YLEM
+                                00D                     #         A
                 DOT             SL1
-                                UNP36                   # .   -   -
+                                UNP36                   # .   -  -
                 STOVL           YDOTLEM                 #
-                                06D                     # -      A   -
-                UNIT            PUSH                    # U  = UNIT( R  )                  18D
+                                06D                     # -       A   -
+                UNIT            PUSH                    # U   = UNIT( R )                  18D
                 VXV             VXV                     #  RA          A
-                                00D                     #  -    -     -    -
-                                18D                     # (U  X V ) X U   =U
-                VSL2            UNIT                    #   RA   A     RA    A
+                                00D                     #  -   -   -     -
+                                18D                     # (U  XV )XU    =U
+                VSL2            UNIT                    #   RA  A   RA    A
                 UNIT
                 STOVL           00D                     # UNIT HORIZONTAL IN FORWARD DIR.  00D
-
-## Page 705
+## Page 697
                                 18D
                 DOT             VXSC                    # -
                                 12D                     # U
@@ -1738,9 +1726,9 @@ R36INT          STCALL          TDEC1
                 UNIT
                 PUSH            DOT                     # LOS PROJECTED INTO HORIZONTAL    12D
                                 00D                     # PLANE
-                SL1             ARCCOS                  #              -   -
+                SL1             ARCCOS                  #             -  -
                 STOVL           PHILEM                  #
-                VXV             DOT                     #               A   L
+                VXV             DOT                     #              A  L
                                 00D
                 BPL             DLOAD
                                 R36TAG2
