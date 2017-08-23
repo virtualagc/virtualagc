@@ -17,11 +17,10 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-07-28 MAS  Created from Luminary 210.
+##		2017-08-23 RSB	Transcribed.
 
-## NOTE: Page numbers below have not yet been updated to reflect Zerlina 56.
-
-## Page 620
-# PROGRAM DESCRIPTION P30       DATE 3-6-67
+## Page 612
+# PROGRAM DESCRIPTION  P30    DATE 3-6-67
 
 # MOD.1  BY RAMA AIYAWAR
 # FUNCTIONAL DESCRIPTION
@@ -72,7 +71,7 @@ P30N33          CAF             V06N33                  # T OF IGN
                 EXIT
 PARAM30         CAF             V06N42                  # DISPLAY APOGEE,PERIGEE ,DELTA V
 
-## Page 621
+## Page 613
                 TC              VNPOOH
 
                 TC              INTPRET
@@ -86,10 +85,10 @@ REVN1645        CALL
 V06N33          VN              0633
 V06N42          VN              0642
 
-## Page 622
-# PROGRAM DESCRIPTION S30.1       DATE 9NOV66
+## Page 614
+# PROGRAM DESCRIPTION S30.1      DATE 9NOV66
 
-# MOD NO 1        LOG SECTION   P30,P37
+# MOD NO 1        LOG SECTION  P30,P37
 # MOD  BY  RAMA AIYAWAR **
 # FUNCTIONAL DESCRIPTION
 #          BASED ON STORED TARGET PARAMETERS(R OF IGNITION(RTIG),V OF
@@ -97,7 +96,7 @@ V06N42          VN              0642
 #          APOGEE ALTITUDE AND DELTAV REQUIRED(DELVSIN).
 # CALLING SEQUENCE
 #     L    CALL
-#     L+1  S30.1
+#     L+1         S30.1
 # NORMAL EXIT MODE
 #     AT L+2 OR CALLING SEQUENCE (GOTO L+2)
 # SUBROUTINES CALLED
@@ -138,7 +137,7 @@ S30.1           STQ             DLOAD
 
                 VLOAD           SXA,2
 
-## Page 623
+## Page 615
                                 RATT
                                 RTX2
                 STORE           RTIG                    # RADIUS VECTOR AT IGNITION TIME
@@ -151,7 +150,7 @@ S30.1           STQ             DLOAD
                 SETPD           SXA,1
                                 0
                                 RTX1
-                PUSH            VXV                     # YRF/LV PDL 0   SCALED AT 2
+                PUSH            VXV                     # YRF/LV PDL 0  SCALED AT 2
                                 DELVSIN
                 VSL1            PDVL
                 PDVL            PDVL                    # YRF/LV PDL 6   SCALED AT 2
@@ -178,5 +177,5 @@ S30.1           STQ             DLOAD
                                 SHIFTR1                 # RESCALE IF NEEDED
                 CALL                                    # LIMIT DISPLAY TO 9999.9 N. MI.
                                 MAXCHK
-                STCALL          HAPO                    # APOGEE ALT 2(29) METERS, FOR DISPLAY
+                STCALL          HAPO                    # APOGEE  ALT 2(29) METERS, FOR DISPLAY
                                 QTEMP
