@@ -17,12 +17,12 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-07-28 MAS  Created from Luminary 210.
+##              2017-08-22 MAS  Updated for Zerlina 56.
 
-## NOTE: Page numbers below have not yet been updated to reflect Zerlina 56.
+## Page 480
+# MOD NO: 0                        DATE: 1 MAY 1968
 
-## Page 487
-# MOD NO: 0                             DATE: 1 MAY 1968
-# MOD BY: DIGITAL DEVEL GROUP           LOG SECTION R60,R62
+# MOD BY: DIGITAL DEVEL GROUP      LOG SECTION R60,R62
 
 # FUNCTIONAL DESCRIPTION:
 
@@ -70,8 +70,7 @@
 #          IF SATISFACTORY MANEUVER STEP 5A EXITS R60.
 #          FOR FURTHER ADJUSTMENT OF THE VEHICLE ATTITUDE ABOUT THE
 #          DESIRED VECTOR, THE ROUTINE MAY BE PERFORMED AGAIN STARTING AT
-
-## Page 488
+## Page 481
 #          STEP 5C.
 
 # CALLING SEQUENCE:  TC BANKCALL
@@ -121,18 +120,12 @@ TOBALL          TC              UPFLAG                  # INSURE THAT TOTAL ATTI
                 CADR            BALLANGS                # TO CONVERT ANGLES TO FDAI
 TOBALLA         CAF             V06N18
                 TC              BANKCALL
-
-## Page 489
+## Page 482
                 CADR            GOPERF2R                # DISPLAY PLEASE PERFORM AUTO MANEUVER
                 TC              R61TEST
                 TC              REDOMANC                # PROCEED
                 TC              ENDMANU1                # ENTER I.E. FINISHED WITH R60
                 TC              CHKLINUS                # TO CHECK FOR PRIORITY DISPLAYS
-                TC              ENDOFJOB
-
-                CS              THREE                   # SET UP RESTART POINT AT BEGINNING OF
-                AD              BUF2                    #   DISPLAY IF PRIORITY DISP FLAG SET
-                TC              CHKLINS1
                 TC              ENDOFJOB
 
 REDOMANC        CAF             3AXISBIT
@@ -151,10 +144,10 @@ TOBALLC         TC              BANKCALL
                 CCS             A
                 TCF             TOBALLA                 # NOT AUTO, GO REREQUEST AUTO MANEUVER.
 
-AUTOMANV        TC              CHKLINUS
-                TCF             STARTMNV
-                CAF             STARTMNAD               # RESTART AT STARTMNV IF PRIORITY
-                TS              TBASE2                  #    DISPLAY FLAG SET
+AUTOMANV        CAF             V06N18                  # STATIC DISPLAY DURING AUTO MANEUVER
+                TC              BANKCALL                #                                      -
+                CADR            GODSPR                  #                                      -
+                TC              CHKLINUS                # TO CHECK FOR PRIORITY DISPLAYS
 
 STARTMNV        TC              BANKCALL                # PERFORM MANEUVER VIA KALCMANU
                 CADR            GOMANUR
@@ -162,27 +155,25 @@ STARTMNV        TC              BANKCALL                # PERFORM MANEUVER VIA K
 ENDMANUV        TCF             TOBALLA                 # FINISHED MANEUVER.
 ENDMANU1        TC              DOWNFLAG                # RESET 3-AXIS FLAG
                 ADRES           3AXISFLG
-                CAE             TEMPR60			#					-
-                TC              BANKJUMP		#					-
+                CAE             TEMPR60                 #                                      -
+                TC              BANKJUMP                #                                      -
 
-STARTMNAD       ADRES           STARTMNV
-
-CHKLINUS        CS              FLAGWRD5
+CHKLINUS        CS              FLAGWRD4
                 MASK            PDSPFBIT                # IS PRIORITY DISPLAY FLAG SET?
-                CCS             A			#					-
+                CCS             A                       #                                      -
                 TC              Q                       # NO - EXIT
-                TCF             Q+1                     # GO BACK AND SET UP CORRECT RESTART ADDR.
-
-## Page 490
-CHKLINS1        TS              TBASE2
                 CA              Q
-                TS              MPAC +2
+                TS              MPAC +2                 # SAVE RETURN
+                CS              THREE                   # OBTAIN LOCATION FOR RESTART
+                AD              BUF2                    # HOLDS Q OF LAST DISPLAY
+                TS              TBASE2
 
                 TC              PHASCHNG
                 OCT             00132
 
+## Page 483
                 CAF             BIT7
-                TC              LINUS                   # GO SET BITS FOR PRIORITY DISPLAY    -
+                TC              LINUS                   # GO SET BITS FOR PRIORITY DISPLAY     -
                 TC              MPAC +2
 
 RELINUS         CAF             PRIO26                  # RESTORE ORIGINAL PRIORITY
@@ -216,16 +207,14 @@ R61TEST         CA              MODREG                  # IF WE ARE IN P00 IT MU
                 EXTEND
                 BZF             ENDMANU1                # THUS WE GO TO ENDEXT VIA USER
 
-                CA              FLAGWRD5
+                CA              FLAGWRD4                # ARE WE IN R61  (P20 OR P25)
                 MASK            PDSPFBIT
                 EXTEND
                 BZF             GOTOPOOH                # NO
                 TC              GOTOV56                 # YES
 
-BIT14+7         OCT             20100			#					-
+BIT14+7         OCT             20100                   #                                      -
 OCT203          OCT             203
-
-## Page 491
 V06N18          VN              0618
 #          SUBROUTINE TO CHECK FOR G+N CONTROL, AUTO STABILIZATION
 
@@ -233,6 +222,7 @@ V06N18          VN              0618
 #          RETURNS WITH C(A) = +0 IF SWITCHES ARE SET
 
 G+N,AUTO        EXTEND
+## Page 484
                 READ            CHAN30
                 MASK            BIT10
                 CCS             A
@@ -242,9 +232,9 @@ ISITAUTO        EXTEND                                  # CHECK FOR AUTO MODE
                 MASK            BIT14
                 TC              Q                       # (+) = NOT IN AUTO, (+0) = AOK
 
-## Page 492
+## Page 485
 # PROGRAM DESCRIPTION BALLANGS
-# MOD NO.         LOG SECTION R60,R62
+# MOD NO.         LOG SECTION  R60,R62
 
 # WRITTEN BY RAMA M.AIYAWAR
 # FUNCTIONAL DESCRIPTION
@@ -252,19 +242,19 @@ ISITAUTO        EXTEND                                  # CHECK FOR AUTO MODE
 # COMPUTES LM FDAI BALL DISPLAY ANGLES
 # CALLING SEQUENCE
 
-#          TC      BALLANGS
+#          TC     BALLANGS
 # NORMAL EXIT MODE
 
-#          TC      BALLEXIT        (SAVED Q)
+#          TC     BALLEXIT        (SAVED Q)
 
-# ALARM OR EXIT MODE   NIL
+# ALARM OR EXIT MODE  NIL
 # SUBROUTINES CALLED
 #          CD*TR*G
 #          ARCTAN
 
 # INPUT
 
-# CPHI,CTHETA,CPSI  ARE  THE ANGLES CORRESPONDING TO AOG,AIG,AMG.  THEY ARE
+# CPHI,CTHETA,CPSI  ARE  THE ANGLES CORRESPONDING TO AOG,AIG,AMG. THEY ARE
 # SP,2S COMPLIMENT SCALED TO HALF REVOLUTION.
 # OUTPUT
 
@@ -292,8 +282,7 @@ ISITAUTO        EXTEND                                  # CHECK FOR AUTO MODE
 BALLANGS        TC              MAKECADR
                 TS              BALLEXIT
                 CA              CPHI
-
-## Page 493
+## Page 486
                 TS              CDUSPOT         +4
                 CA              CTHETA
                 TS              CDUSPOT
@@ -344,11 +333,10 @@ BALLANGS        TC              MAKECADR
                 EXIT
 
 ENDBALL         CA              BALLEXIT
-
-## Page 494
+## Page 487
                 TC              BANKJUMP
 
-## Page 495
+## Page 488
 # PROGRAM DESCRIPTION - VECPOINT
 
 
@@ -375,7 +363,7 @@ ENDBALL         CA              BALLEXIT
 #          CALLING SEQUENCE -
 #              1) LOAD SCAXIS, POINTVSM
 #              2) CALL
-#                       VECPOINT
+#                      VECPOINT
 
 #          RETURNS WITH
 
@@ -398,8 +386,7 @@ ENDBALL         CA              BALLEXIT
 
                 SETLOC          VECPT
                 BANK
-
-## Page 496
+## Page 489
                 COUNT*          $$/VECPT
 
                 EBANK=          BCDU
@@ -420,7 +407,7 @@ STORANG         STCALL          25D
                                 CDUTODCM                # S/C AXES TO STABLE MEMBER AXES (MIS)
                 VLOAD           VXM
                                 POINTVSM                # RESOLVE THE POINTING DIRECTION VF INTO
-                                MIS                     # INITIAL S/C AXES (VF = POINTVSM)
+                                MIS                     # INITIAL S/C AXES ( VF = POINTVSM)
                 UNIT
                 STORE           28D
                                                         # PD 28 29 30 31 32 33
@@ -438,7 +425,7 @@ STORANG         STCALL          25D
                                 28D
                 SL1             ARCCOS
 COMPMATX        CALL                                    # NOW COMPUTE THE TRANSFORMATION FROM
-                                DELCOMP                 # FINAL S/C AXES TO INITIAL S/C AXES MFI
+                                DELCOMP                 # FINAL S/C AXES TO INITIAL S/C AXES  MFI
                 AXC,1           AXC,2
                                 MIS                     # COMPUTE THE TRANSFORMATION FROM FINAL
                                 KEL                     # S/C AXES TO STABLE MEMBER AXES
@@ -450,8 +437,7 @@ COMPMATX        CALL                                    # NOW COMPUTE THE TRANSF
                 DSU             BMN
                                 SINGIMLC                # = SIN(59 DEGS)                      $2
                                 FINDGIMB                # /CPSI/ LESS THAN 59 DEGS
-
-## Page 497
+## Page 490
                                                         # I.E. DESIRED ATTITUDE NOT IN GIMBAL LOCK
 
                 DLOAD           ABS                     # CHECK TO SEE IF WE ARE POINTING
@@ -491,7 +477,7 @@ CHEKAXIS        DLOAD           ABS
                 DLOAD           GOTO                    # IF NOT, MUST BE POINTING THE TRANSPONDER
                                 VECANG2                 # OR SOME VECTOR IN THE Y, OR Z PLANE
                                 COMPMFSN                # IN THIS CASE ROTATE 35 DEGS TO GET OUT
-                                                        # OF GIMBAL LOCK (VECANG2 $360)
+                                                        # OF GIMBAL LOCK (VECANG2  $360)
 PICKANG1        DLOAD
                                 VECANG1                 # = 50 DEGS                          $ 360
 COMPMFSN        CALL
@@ -502,8 +488,7 @@ COMPMFSN        CALL
                 CALL                                    # COMPUTE THE NEW TRANSFORMATION FROM
                                 MXM3                    # DESIRED S/C AXES TO STABLE MEMBER AXES
                                                         # WHICH WILL ALIGN VI WITH VF AND AVOID
-
-## Page 498
+## Page 491
                                                         # GIMBAL LOCK
 FINDGIMB        AXC,1           CALL
                                 0                       # EXTRACT THE COMMANDED CDU ANGLES FROM
@@ -514,7 +499,7 @@ FINDGIMB        AXC,1           CALL
                 GOTO
                                 VECQTEMP                # RETURN TO CALLER
 
-PICKAXIS        VLOAD           DOT                     # IF VF X VI = 0, FIND VF . VI
+PICKAXIS        VLOAD           DOT                     # IF VF X VI = 0,  FIND VF . VI
                                 28D
                                 SCAXIS
                 BMN             TLOAD
@@ -548,17 +533,21 @@ PICKX           VLOAD           GOTO                    # PICK THE XAXIS IN THIS
                                 HIDPHALF
                                 XROT
 SINGIMLC        2DEC            .4285836003             # =SIN(59)                $2
+
 SINVEC1         2DEC            .3796356537             # =SIN(49.4)              $2
+
 SINVEC2         2DEC            .2462117800             # =SIN(29.5)              $2
+
 VECANG1         2DEC            .1388888889             # = 50 DEGREES                       $360
 
-## Page 499
+## Page 492
 VECANG2         2DEC            .09722222222            # = 35 DEGREES                       $360
+
 1BITDP          OCT             0                       # KEEP THIS BEFORE DPB(-14)     *********
 DPB-14          OCT             00001
                 OCT             00000
 
-## Page 500
+## Page 493
 # ROUTINE FOR INITIATING AUTOMATIC MANEUVER VIA KEYBOARD (V49)
 
 
