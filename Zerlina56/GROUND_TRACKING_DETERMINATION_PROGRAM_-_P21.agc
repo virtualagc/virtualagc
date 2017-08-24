@@ -17,61 +17,64 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-07-28 MAS  Created from Luminary 210.
+##              2017-08-24 MAS  Updated for Zerlina 56.
 
-## NOTE: Page numbers below have not yet been updated to reflect Zerlina 56.
-
-## Page 657
+## Page 649
 # GROUND TRACKING DETERMINATION PROGRAM P21
-#
 # PROGRAM DESCRIPTION
-#       MOD NO - 1
-#       MOD BY - N. M. NEVILLE
-# FUNCTIONAL DECRIPTION -
+# MOD NO - 1
+# MOD BY - N.M.NEVILLE
+# FUNCTIONAL DECRIPTION-
 #
-#       TO PROVIDE THE ASTRONAUT DETAILS OF THE LM OR CSM GROUND TRACK WITHOUT
-#       THE NEED FOR GROUND COMMUNICATION (REQUESTED BY DSKY).
+# TO PROVIDE THE ASTRONAUT DETAILS OF THE LM OR CSM GROUND TRACK WITHOUT
+# THE NEED FOR GROUND COMMUNICATION (REQUESTED BY DSKY).
 # CALLING SEQUENCE -
 #
-#       ASTRONAUT REQUEST THROUGH DSKY V37E21E
-# SUBROUTINES CALLED -
-#       GOPERF4
-#       GOFLASH
-#       THISPREC
-#       OTHPREC
-#       LAT-LONG
-# NORMAL EXIT MODES -
+# ASTRONAUT REQUEST THROUGH DSKY V37E21E
+# SUBROUTINES CALLED-
 #
-#       ASTRONAUT REQUEST TROUGH DSKY TO TERMINATE PROGRAM V34E
-# ALARM OR ABORT EXIT MODES -
+# GOPERF4
+# GOFLASH
+# THISPREC
+# OTHPREC
+# LAT-LONG
+# NORMAL EXIT MODES-
 #
-#       NONE
+# ASTRONAUT REQUEST TROUGH DSKY TO TERMINATE PROGRAM V34E
+# ALARM OR ABORT EXIT MODES-
+#
+# NONE
 # OUTPUT -
 #
-#       OCTAL DISPLAY OF OPTION CODE AND VEHICLE WHOSE GROUND TRACK IS TO BE
-#       COMPUTED
-#               OPTION CODE     00002
-#               THIS            00001
-#               OTHER           00002
-#       DECIMAL DISPLAY OF TIME TO BE INTEGRATED TO HOURS, MINUTES, SECONDS
-#       DECIMAL DISPLAY OF LAT,LONG,ALT
-#       ERASABLE INITIALIZATION REQUIRED
-#       AX0      2DEC   4.652459653 E-5 RADIANS         %68-69 CONSTANTS"
-#       -AY0     2DEC   2.147535898 E-5 RADIANS
-#       AZ0      2DEC   .7753206164     REVOLUTIONS
-#       FOR LUNAR ORBITS 504LM VECTOR IS NEEDED
-#       504LM    2DEC   -2.700340600 E-5 RADIANS
-## Should _2 and _4 be +2 and +4?  Value has _ instead of -, I think this is a typo &mdash; RRB
-#       504LM _2 2DEC   -7.514128400 E-4 RADIANS     
-#       504LM _4 2DEC   _2.553198641 E-4 RADIANS     
+# OCTAL DISPLAY OF OPTION CODE AND VEHICLE WHOSE GROUND TRACK IS TO BE
+# COMPUTED
+#          OPTION CODE  00002
+#          THIS         00001
+#          OTHER        00002
+# DECIMAL DISPLAY OF TIME TO BE INTEGRATED TO HOURS , MINUTES , SECONDS
+# DECIMAL DISPLAY OF LAT,LONG,ALT
+# ERASABLE INITIALIZATION REQUIRED
+#
+# AX0      2DEC   4.652459653 E-5   RADIANS       %68-69 CONSTANTS"
+#
+# -AY0     2DEC   2.147535898 E-5   RADIANS
+#
+# AZ0      2DEC   .7753206164       REVOLUTIONS
+# FOR LUNAR ORBITS 504LM VECTOR IS NEEDED
+#
+# 504LM    2DEC   -2.700340600 E-5  RADIANS
+#
+# 504LM _2 2DEC   -7.514128400 E-4  RADIANS     
+#
+# 504LM _4 2DEC   _2.553198641 E-4  RADIANS     
 #
 # NONE
 # DEBRIS
-## Page 658
+## Page 650
 #
-#       CENTRALS-A,Q,L
-#       OTHER-THOSE USED BY THE ABOVE LISTED SUBROUTINES
-#       SEE LEMPREC,LAT-LONG
-
+# CENTRALS-A,Q,L
+# OTHER-THOSE USED BY THE ABOVE LISTED SUBROUTINES
+# SEE LEMPREC,LAT-LONG
                 SBANK=  LOWSUPER        # FOR LOW 2CADR'S.
 
                 BANK    33
@@ -81,8 +84,8 @@
                 EBANK=  P21TIME
                 COUNT*  $$/P21
 PROG21          CAF     ONE
-                TS      OPTION2         # ASSUMED VEHICLE IS LM, R2 = 00001
-                CAF     BIT2            # OPTION 2
+                TS      OPTION2         # ASSUMED VEHICLE IS LM , R2 = 00001
+                CAF     BIT2            #  OPTION 2
                 TC      BANKCALL
                 CADR    GOPERF4
                 TC      GOTOPOOH        # TERMINATE
@@ -110,18 +113,18 @@ P21PROG2        STCALL  TDEC1           # INTEG TO TIME SPECIFIED IN TDEC1
                 SLOAD   SR1
                         OPTION2
                 BHIZ    SET
-                        +2              # ZERO--THIS VEHICLE (LM)
-                        VINTFLAG        # ONE--OTHER VEHICLE (CM)
+                        +2              # ZERO--THIS VEHICLE(LM)
+                        VINTFLAG        # ONE--OTHER VEHICLE(CM)
                 CLEAR   CLEAR
                         DIM0FLAG
                         INTYPFLG        # PRECISION
                 CALL
                         INTEGRV         # CALCULATE
                 GOTO                    # -AND
-## Page 659
+## Page 651
                         P21VSAVE        # -SAVE BASE VECTOR
 P21CONT         VLOAD
-                        P21BASER        # RECYCLE -- INTEG FROM BASE VECTOR
+                        P21BASER        # RECYCLE--INTEG FROM BASE VECTOR
                 STOVL   RCV             # --POS
                         P21BASEV
                 STODL   VCV             # --VEL
@@ -135,8 +138,7 @@ P21CONT         VLOAD
                         +3              # ZERO=EARTH
                 SET                     # ---2=MOON
                         MOONFLAG
- +3             CLEAR   CALL
-                        INTYPFLG
+ +3             CALL
                         INTEGRVS
 P21VSAVE        DLOAD                   # SAVE CURRENT BASE VECTOR
                         TAT
@@ -150,12 +152,12 @@ P21VSAVE        DLOAD                   # SAVE CURRENT BASE VECTOR
                 STOVL   P21VEL          # VEL/ FOR N91 DISP
                         RATT
                 UNIT    DOT
-                        VATT            # U(R).V
+                        VATT            #  U(R).V
                 DDV     ASIN            # U(R).U(V)
                         P21VEL
                 STORE   P21GAM          # SIN-1 U(R).U(V) , -90 TO &90
                 SXA,2   SLOAD
-                        P21ORIG         # 0 = EARTH
+                        P21ORIG         # 0=EARTH
                         OPTION2
                 SR1     BHIZ
                         +3
@@ -169,9 +171,9 @@ P21VSAVE        DLOAD                   # SAVE CURRENT BASE VECTOR
 P21DSP          CLEAR   SLOAD           # GENERATE DISPLAY DATA
                         LUNAFLAG
                         X2
-## Page 660
+## Page 652
                 BZE     SET
-                        +2              # 0 = EARTH
+                        +2              # 0=EARTH
                         LUNAFLAG
                 VLOAD
                         RATT
@@ -180,13 +182,13 @@ P21DSP          CLEAR   SLOAD           # GENERATE DISPLAY DATA
                 CLEAR   CALL
                         ERADFLAG
                         LAT-LONG
-                DMP                     # MPAC = ALT, METERS B-29
+                DMP                     # MPAC = ALT,METERS B-29
                         K.01
                 STORE   P21ALT          # ALT/100 FOR N91 DISP
                 EXIT
-                CAF     V06N43          # DISPLAY LAT, LONG, ALT
-                TC      BANKCALL        # LAT, LONG = 1/2 REVS B0
-                CADR    GOFLASH         # ALT = KM B14
+                CAF     V06N43          # DISPLAY LAT,LONG,ALT
+                TC      BANKCALL        # LAT,LONG = 1/2 REVS B0
+                CADR    GOFLASH         # ALT = KM  B14
                 TC      GOTOPOOH        # TERM
                 TC      GOTOPOOH
                 TC      INTPRET         # V32E RECYCLE
