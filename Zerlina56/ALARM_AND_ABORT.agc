@@ -17,17 +17,17 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-07-28 MAS  Created from Luminary 210.
+##              2017-08-23 MAS  Updated for Zerlina 56.
 
-## NOTE: Page numbers below have not yet been updated to reflect Zerlina 56.
-
-## Page 1378
-# THE FOLLOWING SUBROUTINE MAY BE CALLED TO DISPLAY A NON-ABORTIVE ALARM CONDITION.  IT MAY BE CALLED
+## Page 1369
+#          THE FOLLOWING SUBROUTINE MAY BE CALLED TO DISPLAY A NON-ABORTIVE ALARM CONDITION. IT MAY BE CALLED
 # EITHER IN INTERRUPT OR UNDER EXECUTIVE CONTROL.
 
-# CALLING SEQUENCE IS AS FOLLOWS:
-#               TC      ALARM
-#               OCT     AAANN           ALARM NO. NN IN GENERAL AREA AAA.
-#                                       (RETURNS HERE)
+#          CALLING SEQUENCE IS AS FOLLOWS:
+
+#          TC     ALARM
+#          OCT    AAANN           ALARM NO. NN IN GENERAL AREA AAA.
+#                                 (RETURNS HERE)
 
                 BLOCK           02                              
                 SETLOC          FFTAG7                          
@@ -71,22 +71,23 @@ PROGLARM        LXCH            FAILREG         +2              # STORE AS "MOST
                 MASK            OCT40400                        
                 ADS             DSPTAB          +11D            
 
-## Page 1379
+## Page 1370
 MULTEXIT        XCH             ITEMP1                          # OBTAIN RETURN ADDRESS IN A
                 RELINT                                          
                 INDEX           A                               
                 TC              1                               
 
 # PRIOLARM DISPLAYS V05N09 VIA PRIODSPR WITH 3 RETURNS TO THE USER FROM THE ASTRONAUT AT CALL LOC +1,+2,+3 AND
-# AN IMMEDIATE RETURN TO THE USER AT CALL LOC +4.  EXAMPLE FOLLOWS,
-#               CAF     OCTXX           ALARM CODE
-#               TC      BANKCALL
-#               CADR    PRIOLARM
-#               ...     ...
-#               ...     ...
-#               ...     ...             ASTRONAUT RETURN
-#               TC      PHASCHNG        IMMEDIATE RETURN TO USER. RESTART
-#               OCT     X.1             PHASE CHANGE FOR PRIO DISPLAY
+# AN IMMEDIATE RETURN TO THE USER AT CALL LOC +4. EXAMPLE FOLLOWS,
+#                                                  CAF    OCTXX           ALARM CODE
+#                                                  TC     BANKCALL
+#                                                  CADR   PRIOLARM
+
+#                                                  ...    ...
+#                                                  ...    ...
+#                                                  ...    ...             ASTRONAUT RETURN
+#                                                  TC     PHASCHNG        IMMEDIATE RETURN TO USER. RESTART
+#                                                  OCT    X.1             PHASE CHANGE FOR PRIO DISPLAY
 
                 BANK            10                              
                 SETLOC          DISPLAYS                        
@@ -121,7 +122,7 @@ OCT40400        OCT             40400
                 INHINT                                          
 WHIMPER         CA              TWO                             
                 AD              Z                               
-## Page 1380
+## Page 1371
                 TS              BRUPT                           
                 RESUME                                          
                 TC              POSTJUMP                        # RESUME SENDS CONTROL HERE
@@ -134,16 +135,12 @@ ABORT2          TS              ALMCADR
                 TC              BORTENT                         
 OCT77770        OCT             77770                           # DON'T MOVE
 
-                CCS             EXTVBACT                        # DO BAILOUT NOT POODOO IF EXT. VB. ACTIVE
-                TCF             WHIMPER         -1
-
                 CAF             OCT35                           # 4.35SPOT FOR GOPOODOO
                 TS              L                               
                 COM                                             
                 DXCH            -PHASE4                         
 GOPOODOO        INHINT                                          
                 TC              BANKCALL                        # RESET STATEFLG, REINTFLG, AND NODOFLAG.
-                                                                #   ALSO RNDVZFLG, P25FLAG AND TRACKFLG
                 CADR            FLAGS                           
                 CA              FLAGWRD7                        # IS SERVICER CURRENTLY IN OPERATION?
                 MASK            V37FLBIT                        
@@ -172,13 +169,12 @@ BAILOUT1        INHINT
                 DXCH            ALMCADR                         
                 CAF             ADR40400                        
 BOTHABRT        TS              ITEMP1                          
-
-## Page 1381
                 INDEX           Q                               
                 CAF             0                               
                 TS              L                               
                 TCF             CHKFAIL1                        
 
+## Page 1372
 POODOO1         INHINT                                          
                 DXCH            ALMCADR                         
                 CAF             ADR77770                        
@@ -197,13 +193,12 @@ ADR40400        TCF             OCT40400
 DOALARM         EQUALS          ENDOFJOB                        
                 EBANK=          DVCNTR                          
 BBSERVDL        BBCON           SERVIDLE                        
-
 # CALLING SEQUENCE FOR VARALARM
-#               CAF     (ALARM)
-#               TC      VARALARM
+
+#                                                  CAF    (ALARM)
+#                                                  TC     VARALARM
 
 # VARALARM TURNS ON PROGRAM ALARM LIGHT BUT DOES NOT DISPLAY
-
 VARALARM        INHINT                                          
 
                 TS              L                               # SAVE USERS ALARM CODE
@@ -217,6 +212,7 @@ OCT14           OCT             14                              # DONT MOVE
                 TC              ALMCADR                         # RETURN TO USER
 
 ABORT           EQUALS          WHIMPER                                                     
+                BANK            13
                 SETLOC          ABTFLGS                         
                 BANK                                            
                 COUNT*          $$/ALARM                        
@@ -226,20 +222,10 @@ FLAGS           CS              STATEBIT
                 TS              FLAGWRD3                        
                 CS              REINTBIT 
                 MASK            FLGWRD10
-
-## Page 1382
                 TS              FLGWRD10                        
                 CS              NODOBIT                         
                 MASK            FLAGWRD2                        
+## Page 1373
                 TS              FLAGWRD2                        
                 CS              BITS9+7
-FLAGREF1        EQUALS          RNDVZFLG
-FLAGREF2        EQUALS          P25FLAG
-                MASK            FLAGWRD0
-                TS              FLAGWRD0
-                CS              TRACKFLG
-                MASK            FLAGWRD1
-                TS              FLAGWRD1
                 TC              Q                               
-
-
