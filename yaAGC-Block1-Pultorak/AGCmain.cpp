@@ -112,6 +112,7 @@
  *                      the CCS was finished.  Added a primitive logging function
  *                      to trace the AGC program's execution, so as to compare on
  *                      a cycle-by-cycle basis against yaAGCb1.
+ * 2017-08-24 RSB	Got rid of some clang warnings.
  */
 
 // NCURSES vs PTHREADS.  As John originally designed this program, it
@@ -610,7 +611,7 @@ examineMemory()
       printw("Unrecognized address.\n");
       return;
     }
-  if (address < 0 || address >= ROPE_SIZE)
+  if (/* address < 0 || */ address >= ROPE_SIZE)
     {
       printw("Address is out of range.\n");
     }
@@ -618,7 +619,7 @@ examineMemory()
   if (s != NULL)
     {
       unsigned Value;
-      if (1 == sscanf(s, "=%o", &Value) && Value >= 0 && Value <= 0177777)
+      if (1 == sscanf(s, "=%o", &Value) && /* Value >= 0 && */ Value <= 0177777)
         {
           // I haven't caught all the special cases here, but right now I'm only interested
           // in address range 04-14.

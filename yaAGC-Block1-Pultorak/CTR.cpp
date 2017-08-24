@@ -7,6 +7,8 @@
  *
  * NOTES: see header file.
  *
+ * 2018-08-24 RSB	Added some default switch conditions, to avoid
+ * 			compiler warnings with clang.
  *****************************************************************************
  */
 #include "CTR.h"
@@ -124,6 +126,8 @@ CTR::execWP_WOVR()
     break;
   case NEG_OVF:
     break; // no actions for negative counter overflow
+  case NO_OVF:
+    break;
     }
 }
 void
@@ -137,6 +141,8 @@ CTR::execWP_WOVC()
   case NEG_OVF:
     CTR::pcDn[OVCTR] = 1;
     break; // decr OVCTR (034)
+  case NO_OVF:
+    break;
     }
 }
 // register_PCELL: Overflow from the selected counter appears

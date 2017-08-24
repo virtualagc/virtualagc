@@ -1,4 +1,4 @@
-# Copyright 2009,2016 Ronald S. Burkey <info@sandroid.org>
+# Copyright 2009,2016,2017 Ronald S. Burkey <info@sandroid.org>
 # 
 # This file is part of yaAGC.
 #
@@ -42,6 +42,7 @@
 #				else's builds. 
 #				Also:  Eliminated some compiler warnings solely
 #				related internally to wxWidgets 2.8.12.
+#		2017-08-24 RSB	Added wxFLAGS.
 
 APP=jWiz
 
@@ -89,7 +90,8 @@ all-archs: default ${APP}.exe ${APP}-macosx
 clean:
 	-rm -f ${APP} *.exe *-macosx* *.o *~ *.bak
 
-SOURCES:=${APP}.cpp \
+SOURCES:=${APP}.cpp
+SOURCESc:=\
 	../yaAGC/agc_utilities.c \
 	../yaAGC/DecodeDigitalDownlink.c \
 	../yaAGC/agc_engine.c \
@@ -99,27 +101,27 @@ SOURCES:=${APP}.cpp \
 
 HEADERS:=${APP}.h
 
-${APP}: ${SOURCES} ${HEADERS}
+${APP}: ${SOURCES} ${SOURCESc} ${HEADERS}
 	${CC} -DNVER=${NVER} ${MACFLAG} \
-		`wx-config --cxxflags` \
-		-o $@ ${SOURCES} \
+		`wx-config --cxxflags` ${wxFLAGS} \
+		-o $@ ${SOURCES} -x c ${SOURCESc} \
 		`wx-config --libs` \
 		${LIBS2}
 	strip $@${EXT}
 
-${APP}.exe: ${SOURCES} ${HEADERS}
+${APP}.exe: ${SOURCES} ${SOURCESc} ${HEADERS}
 	${PREFIX_WIN}-${CC} \
 		`${BIN_WIN}/wx-config ${WXSTATIC} --cxxflags` \
-		-o $@ ${SOURCES} \
+		-o $@ ${SOURCES} -x c ${SOURCESc} \
 		`${BIN_WIN}/wx-config ${WXSTATIC} --libs` \
 		${EXTRA_WIN_LIBS}		
 	${PREFIX_WIN}-strip $@
 
-${APP}-macosx: ${SOURCES} ${HEADERS}
+${APP}-macosx: ${SOURCES} ${SOURCESc} ${HEADERS}
 	powerpc-apple-darwin9-${CC} \
 		-arch ppc -arch i386 -I${INC_MAC} -isysroot ${SDK_MAC} \
 		`${BIN_MAC}/wx-config ${WXSTATIC} --cxxflags` \
-		-o $@ ${SOURCES} \
+		-o $@ ${SOURCES} -x c ${SOURCESc} \
 		`${BIN_MAC}/wx-config ${WXSTATIC} --libs`
 	${PREFIX_MAC}-strip $@
 
@@ -131,13 +133,13 @@ ${APP}-macosx: ${SOURCES} ${HEADERS}
 # directories in which they're located.  I am completely confused by the 
 # maneuvers I had to go through here, and I don't remember gaving these 
 # problems before.
-ignore-${APP}-macosx: ${SOURCES} ${HEADERS}
+ignore-${APP}-macosx: ${SOURCES} ${SOURCESc} ${HEADERS}
 	powerpc-apple-darwin9-${CC} \
 		-arch ppc -I${INC_MAC} -isysroot ${SDK_MAC} \
 		-I${SDK_MAC}/usr/include/c++/4.0.0 \
 		-I${SDK_MAC}/usr/include/c++/4.0.0/powerpc-apple-darwin9 \
 		`${BIN_MAC}/wx-config ${WXSTATIC} --cxxflags` \
-		-o $@-ppc ${SOURCES} \
+		-o $@-ppc ${SOURCES} -x c ${SOURCESc} \
 		`${BIN_MAC}/wx-config ${WXSTATIC} --libs`
 	powerpc-apple-darwin9-lipo \
 		$@-ppc \
@@ -148,7 +150,7 @@ ignore-${APP}-macosx: ${SOURCES} ${HEADERS}
 		-I${SDK_MAC}/usr/include/c++/4.0.0 \
 		-I${SDK_MAC}/usr/include/c++/4.0.0/i686-apple-darwin9 \
 		`${BIN_MAC}/wx-config ${WXSTATIC} --cxxflags` \
-		-o $@-i386 ${SOURCES} \
+		-o $@-i386 ${SOURCES} -x c ${SOURCESc} \
 		`${BIN_MAC}/wx-config ${WXSTATIC} --libs`
 	i686-apple-darwin9-lipo \
 		$@-i386 \

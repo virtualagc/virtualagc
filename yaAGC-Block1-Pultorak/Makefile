@@ -5,6 +5,7 @@
 # Mod history:	2016-08-29 RSB	Began
 #		2016-09-03 RSB	Replaced ncurses by a pthreads-based
 #				approach.
+#		2018-08-24 RSB	Added -lstdc++ for clang.
 
 TARGETS:=yaAGC-Block1
 SOURCE:=$(wildcard *.cpp)
@@ -27,7 +28,7 @@ all default: yaAGC-Block1
 # needed, depending on whether or not the constant USE_NCURSES
 # is #defined.
 yaAGC-Block1: $(SOURCE) $(HEADERS) Makefile
-	${CC} -O0 -g -o $@ $(SOURCE) $(LIBS)
+	${CC} -O0 -g -o $@ $(SOURCE) $(LIBS) -lstdc++
 
 clean:
 	-rm $(TARGETS)

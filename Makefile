@@ -166,7 +166,7 @@
 #				Mac OS X, it is now only conditionally added to the 
 #				mission list for non-Mac build systems.  Hopefully that's
 #				temporary.
-#		2017-08-24 RSB	Added FORCE_cc and FORCE_CC options.
+#		2017-08-24 RSB	Added FORCE_clang, FORCE_cc and FORCE_CC options.
 #
 # The build box is always Linux for cross-compiles.  For native compiles:
 #	Use "make MACOSX=yes" for Mac OS X.
@@ -181,7 +181,8 @@
 # full pathnames. For example:
 #	make MACOSX=yes FORCE_cc=/path/to/gcc FORCE_CC=/path/to/g++
 # I have no systems myself on which this is an issue, so that's a feature I've never
-# tested in any meaningful way.
+# tested in any meaningful way.  Another available switch is FORCE_clang=yes, which makes
+# certain changes that *may* allow building with clang rather than gcc.
 
 # NVER is the overall version code for the release.
 NVER:=\\\"2017-06-19\\\"
@@ -341,6 +342,13 @@ ifdef SOLARIS
 yaACA=-
 endif
 
+LIBS2=
+ifdef FORCE_clang
+wxFLAGS=-Wno-potentially-evaluated-expression
+export wxFLAGS
+LIBS2=-lstdc++
+endif
+
 # Note:  The CURSES variable is misnamed.  It really is just any special libraries
 # for yaAGC, yaAGS, or yaACA3 that depend on Win32 vs. non-Win32 native builds.
 ifdef WIN32
@@ -390,7 +398,8 @@ ifndef PREFIX
 PREFIX=/usr/local
 endif
 
-BUILD = $(MAKE) PREFIX=$(PREFIX) NVER=$(NVER) CFLAGS="$(CFLAGS)" CURSES="$(CURSES)" LIBS2="$(LIBS)" NOREADLINE=$(NOREADLINE) ReadlineForWin32=$(ReadlineForWin32) $(ARCHS) EXT=$(EXT)
+LIBS2+=$(LIBS)
+BUILD = $(MAKE) PREFIX=$(PREFIX) NVER=$(NVER) CFLAGS="$(CFLAGS)" CURSES="$(CURSES)" LIBS2="$(LIBS2)" NOREADLINE=$(NOREADLINE) ReadlineForWin32=$(ReadlineForWin32) $(ARCHS) EXT=$(EXT)
 
 # List of mission software directories to be built.
 MISSIONS = Validation Luminary131 Colossus249 Comanche055 

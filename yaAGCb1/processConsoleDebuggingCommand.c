@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Ronald S. Burkey <info@sandroid.org>
+ * Copyright 2016,2017 Ronald S. Burkey <info@sandroid.org>
  *
  * This file is part of yaAGC.
  *
@@ -33,6 +33,7 @@
  * Contact:     Ron Burkey <info@sandroid.org>
  * Reference:   http://www.ibiblio.org/apollo/index.html
  * Mods:        2016-09-03 RSB  Wrote.
+ * 		2017-08-24 RSB	Got rid of some clang warnings.
  */
 
 #include <stdlib.h>
@@ -194,7 +195,7 @@ processConsoleDebuggingCommand(char *command)
                   s = strstr(command, "=");
                   if (s != NULL)
                     {
-                      if (1 == sscanf(s, "=%o", &Value) && Value >= 0
+                      if (1 == sscanf(s, "=%o", &Value) /* && Value >= 0 */
                           && Value <= 0177777)
                         agc.memory[flatAddress] = Value;
                       goto reStatus;
