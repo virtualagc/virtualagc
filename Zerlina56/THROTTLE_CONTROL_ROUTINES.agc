@@ -18,6 +18,7 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-07-28 MAS  Created from Luminary 210.
 ##              2017-08-19 MAS  Updated for Zerlina 56.
+##              2017-08-24 MAS  Removed an extraneous TS PIF.
 
 ## Page 779
 # T  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  E
@@ -199,7 +200,6 @@ FLATOUT         CAF     BIT13           # 4096 PULSES
 WHATOUT         TS      PIFPSET         # USE PIFPSET SO FWEIGHT WILL BE ZERO
                 CS      ZERO
                 TS      FCOLD
-                TS      PIF
                 EXTEND
                 QXCH    RTNHOLD
                 TCF     DOIT

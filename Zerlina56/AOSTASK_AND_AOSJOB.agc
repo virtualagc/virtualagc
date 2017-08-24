@@ -17,6 +17,7 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-07-28 MAS  Created from Luminary 210.
+##              2017-08-23 MAS  Updated for Zerlina 56.
 
 ## Page 1473
 # PROGRAM NAME: 1/ACCS
