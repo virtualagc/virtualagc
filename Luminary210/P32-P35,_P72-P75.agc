@@ -19,6 +19,7 @@
 ##				and corrected errors found.
 ##		2017-02-07 RSB	Comment-text corrections identified while 
 ##				proofing Artemis 72.
+##		2017-08-25 RSB	Corrected a misprint (00 -> 0D) identified in ZERLINA 56.
 
 ## Page 624
 # COELLIPTIC SEQUENCE INITIATION (CSI) PROGRAMS (P32 AND P72)
@@ -265,7 +266,7 @@ VN0655          EXIT
 P32/P72B        CALL
                                 ADVANCE
                 SETPD           VLOAD
-                                00
+                                0D
                                 VPASS1
                 PDVL            PDDL
                                 RPASS1

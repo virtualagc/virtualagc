@@ -17,10 +17,9 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-07-28 MAS  Created from Luminary 210.
+##		2017-08-25 RSB	Transcribed.
 
-## NOTE: Page numbers below have not yet been updated to reflect Zerlina 56.
-
-## Page 624
+## Page 616
 # COELLIPTIC SEQUENCE INITIATION (CSI) PROGRAMS (P32 AND P72)
 
 # MOD NO -1       LOG SECTION - P32-P35, P72-P75
@@ -71,8 +70,7 @@
 
 #       (7) THE CSI AND CDH MANEUVERS ARE ORIGINALLY ASSUMED TO BE
 #           PARALLEL TO THE PLANE OF THE CSM ORBIT.  HOWEVER CREW
-
-## Page 625
+## Page 617
 #           MODIFICATION OF DELTA V (LV) COMPONENTS MAY RESULT IN AN
 #           OUT-OF-PLANE CSI MANEUVER.
 
@@ -124,7 +122,7 @@
 
 #       (1) TCSI     TIME OF THE CSI MANEUVER
 
-## Page 626
+## Page 618
 #       (2) NN       NUMBER OF APSIDAL CROSSINGS THRU WHICH THE ACTIVE
 #                    VEHICLE ORBIT CAN BE ADVANCED TO OBTAIN THE CDH
 #                    MANEUVER POINT
@@ -175,8 +173,7 @@
 #       BANKCALL
 #       GOFLASH
 #       GOTOPOOH
-
-## Page 627
+## Page 619
 #       VNPOOH
 #       GOFLASHR
 #       BLANKET
@@ -227,7 +224,7 @@ VN0611          CAF             V06N11                  # TCSI
                                 TCSI
                 BMN             DLOAD
                                 VN0655
-## Page 628
+## Page 620
                                 TETLEM
                 STCALL          TDEC1
                                 PRECSET
@@ -265,7 +262,7 @@ VN0655          EXIT
 P32/P72B        CALL
                                 ADVANCE
                 SETPD           VLOAD
-                                00
+                                0D
                                 VPASS1
                 PDVL            PDDL
                                 RPASS1
@@ -279,7 +276,7 @@ P32/P72B        CALL
                                 PASSIVE
                 CALL
 
-## Page 629
+## Page 621
                                 CSI/A
 P32/P72C        BON             SET
                                 FINALFLG
@@ -318,7 +315,7 @@ P32/P72F        STORE           T2TOT3
                 GOTO
                                 P32/P72B
 
-## Page 630
+## Page 622
 # CONSTANT DELTA HEIGHT (CDH) PROGRAMS (P33 AND P73)
 
 # MOD NO -1       LOG SECTION - P32-P35, P72-P75
@@ -370,7 +367,7 @@ P32/P72F        STORE           T2TOT3
 #           (G) THE CSI AND CDH MANEUVERS WERE ASSUMED TO BE PARALLEL TO
 #               THE PLANE OF THE PASSIVE VEHICLE ORBIT.  HOWEVER, CREW
 
-## Page 631
+## Page 623
 #               MODIFICATION OF DELTA V (LV) COMPONENTS MAY HAVE RESULTED
 #               IN AN OUT-OF-PLANE MANEUVER.
 
@@ -420,40 +417,40 @@ P32/P72F        STORE           T2TOT3
 
 # INPUT
 
-#       (1) TTPI0     TIME OF THE TPI MANEUVER - SAVED FROM P32/P72
+#       (1) TTPI0    TIME OF THE TPI MANEUVER - SAVED FROM P32/P72
 
-## Page 632
-#       (2) ELEV      DESIRED LOS ANGLE AT TPI - SAVED FROM P32/P72
-#       (3) TCDH      TIME OF THE CDH MANEUVER
+## Page 624
+#       (2) ELEV     DESIRED LOS ANGLE AT TPI - SAVED FROM P32/P72
+#       (3) TCDH     TIME OF THE CDH MANEUVER
 
 # OUTPUT
 
-#       (1) TRKMKCNT  NUMBER OF MARKS
-#       (2) TTOGO     TIME TO GO
-#       (3) +MGA      MIDDLE GIMBAL ANGLE
-#       (4) DIFFALT   DELTA ALTITUDE AT CDH
-#       (5) T2TOT3    DELTA TIME FROM CDH TO COMPUTED TPI
-#       (6) NOMTPI    DELTA TIME FROM NOMINAL TPI TO COMPUTED TPI
-#       (7) DELVLVC   DELTA VELOCITY AT CDH - LOCAL VERTICAL COORDINATES
+#       (1) TRKMKCNT NUMBER OF MARKS
+#       (2) TTOGO    TIME TO GO
+#       (3) +MGA     MIDDLE GIMBAL ANGLE
+#       (4) DIFFALT  DELTA ALTITUDE AT CDH
+#       (5) T2TOT3   DELTA TIME FROM CDH TO COMPUTED TPI
+#       (6) NOMTPI   DELTA TIME FROM NOMINAL TPI TO COMPUTED TPI
+#       (7) DELVLVC  DELTA VELOCITY AT CDH - LOCAL VERTICAL COORDINATES
 
 # DOWNLINK
 
-#       (1) TCDH      TIME OF THE CDH MANEUVER
-#       (2) TTPI      TIME OF THE TPI MANEUVER
-#       (3) TIG       TIME OF THE CDH MANEUVER
-#       (4) DELVEET2  DELTA VELOCITY AT CDH - REFERENCE COORDINATES
-#       (5) DIFFALT   DELTA ALTITUDE AT CDH
-#       (6) ELEV      DESIRED LOS ANGLE AT TPI
+#       (1) TCDH     TIME OF THE CDH MANEUVER
+#       (2) TTPI     TIME OF THE TPI MANEUVER
+#       (3) TIG      TIME OF THE CDH MANEUVER
+#       (4) DELVEET2 DELTA VELOCITY AT CDH - REFERENCE COORDINATES
+#       (5) DIFFALT  DELTA ALTITUDE AT CDH
+#       (6) ELEV     DESIRED LOS ANGLE AT TPI
 # COMMUNICATION TO THRUSTING PROGRAMS
 
-#       (1) TIG       TIME OF THE CDH MANEUVER
-#       (2) RTIG      POSITION OF ACTIVE VEHICLE AT CDH - BEFORE ROTATION
-#                     INTO PLANE OF PASSIVE VEHICLE
-#       (3) VTIG      VELOCITY OF ACTIVE VEHICLE AT CDH - BEFORE ROTATION
-#                     INTO PLANE OF PASSIVE VEHICLE
-#       (4) DELVSIN   DELTA VELOCITY AT CDH - REFERENCE COORDINATES
-#       (5) DELVSAB   MAGNITUDE OF DELTA VELOCITY AT CDH
-#       (6) XDELVFLG  SET TO INDICATE EXTERNAL DELTA V VG COMPUTATION
+#       (1) TIG      TIME OF THE CDH MANEUVER
+#       (2) RTIG     POSITION OF ACTIVE VEHICLE AT CDH - BEFORE ROTATION
+#                    INTO PLANE OF PASSIVE VEHICLE
+#       (3) VTIG     VELOCITY OF ACTIVE VEHICLE AT CDH - BEFORE ROTATION
+#                    INTO PLANE OF PASSIVE VEHICLE
+#       (4) DELVSIN  DELTA VELOCITY AT CDH - REFERENCE COORDINATES
+#       (5) DELVSAB  MAGNITUDE OF DELTA VELOCITY AT CDH
+#       (6) XDELVFLG SET TO INDICATE EXTERNAL DELTA V VG COMPUTATION
 
 # SUBROUTINES USED
 
@@ -473,8 +470,7 @@ P32/P72F        STORE           T2TOT3
 #       GOFLASH
 #       GOTOPOOH
 #       S32/33.1
-
-## Page 633
+## Page 625
 #       VN1645
 
                 COUNT*          $$/P3373
@@ -526,7 +522,7 @@ P33/P73B        CALL
                 TC              GOTOPOOH
                 TC              +2
 
-## Page 634
+## Page 626
                 TC              P33/P73A
                 TC              INTPRET
                 DLOAD
@@ -570,7 +566,7 @@ P33/P73F        ABS             DSU
                 GOTO
                                 P33/P73B
 
-## Page 635
+## Page 627
 # ..... AVFLAGA/P .....
 
 # SUBROUTINES USED
@@ -596,8 +592,8 @@ P20FLGON        EXTEND
                 ADRES           TRACKFLG                # SET TRACKFLG
                 TC              SUBEXIT
 
-## Page 636
-# ..... DISDVLVC .....
+## Page 628
+# ..... DISDVLVC  .....
 
 # SUBROUTINES USED
 
@@ -621,7 +617,7 @@ DISDVLVC        STORE           DELVLVC
                 GOTO
                                 NORMEX
 
-## Page 637
+## Page 629
 # ..... CONSTANTS .....
 
 V06N11          VN              0611
@@ -640,7 +636,7 @@ ALARM/TB        OCT             00600                   # NO 1
                 OCT             00605                   #    6
                 OCT             00606                   #    7
 
-## Page 638
+## Page 630
 # ..... CSI/A     .....
 
 # SUBROUTINES USED
@@ -661,15 +657,15 @@ ALARM/TB        OCT             00600                   # NO 1
                 EBANK=          SUBEXIT
                 COUNT*          $$/CSI
 LOOPMX          2DEC            16
-INITST          2DEC            .03048          B-7     #     INITIAL DELDV = 10 FPS
-DVMAX1          2DEC            3.0480          B-7     #     MAXIMUM DV1 = 1000 FPS
-DVMAX2          2DEC            3.014472        B-7     #                    989 FPS
+INITST          2DEC            .03048          B-7     #      INITIAL DELDV = 10 FPS
+DVMAX1          2DEC            3.0480          B-7     #      MAXIMUM DV1 = 1000 FPS
+DVMAX2          2DEC            3.014472        B-7     #                     989 FPS
 1DPB2           2DEC            1.0             B-2
 1DPB28          2DEC            1
 PMINE           2DEC            157420          B-29    # 85 NM    - MUST BE 8 WORDS BEFORE PMINM
 EPSILN1         2DEC            .0003048        B-7     #      .1 FPS
 NICKELDP        2DEC            .021336         B-7     # 7 FPS (CHANGED FROM .05 FPS)
-FIFPSDP         2DEC            -.152400        B-7     #      50 FPS
+FIFPSDP         2DEC            -.152400        B-7     #      50  FPS
 PMINM           2DEC            10668           B-29    # 35000 FT - MUST BE 8 WORDS AFTER PMINE
 DELMAX1         2DEC            .6096000        B-7     #      200 FPS
 ONETHTH         2DEC            .0001           B-3
@@ -679,7 +675,7 @@ CSI/A           CLEAR           SET                     # INITIALIZE INDICATORS
                                 S32.1F1                 # DVT1 HAS EXCEEDED MAX INDICATOR
                                 S32.1F2                 # FIRST PASS FOR NEWTON ITERATION INDICATR
 
-## Page 639
+## Page 631
                 CLEAR           SET
                                 S32.1F3A                # 00=1ST 2 PASSES 2ND CYCLE 01=FIRST CYCLE
                                 S32.1F3B                # 10=2ND CYCLE 11=50FPS STAGE 2ND CYCLE
@@ -731,7 +727,7 @@ CSI/B1          DLOAD           DAD                     # IF LOOPCT = 16
 CSI/B2          SETPD
                                 0D
 
-## Page 640
+## Page 632
                 DLOAD           ABS
                                 DELVCSI
                 DSU             BMN
@@ -783,7 +779,7 @@ CSI/B23D        STCALL          VACT4
                 BZE             GOTO
                                 +2
 
-## Page 641
+## Page 633
                                 CIRCL
                 DLOAD
                                 ECC
@@ -835,7 +831,7 @@ CSI/B3          PDVL            DOT
                 STODL           12D
                                 P30ZERO
 
-## Page 642
+## Page 634
                 STORE           16D
                 VLOAD           UNIT
                                 12D
@@ -887,7 +883,7 @@ NTP/2           DLOAD           DMP
                                 VPASS1
                 SETPD           PDVL
 
-## Page 643
+## Page 635
                                 0D
                                 RPASS1
                 CALL
@@ -939,7 +935,7 @@ NTP/2           DLOAD           DMP
                                 RACT3                   # (U . RA3) = TEMP1     B1 +B29 = B30
                 SL1             PUSH                    #                                 B29 PL08D
 
-## Page 644
+## Page 636
                 DSQ             TLOAD                   # TEMP1**2                        B58
                                 MPAC
                 PDVL            DOT                     #                                     PL11D
@@ -991,7 +987,7 @@ K2.             DLOAD
                 PDVL            UNIT
                                 VPASS3                  #                                      PL12D
 
-## Page 645
+## Page 637
                 VXV             PDVL                    # UVP3 X URP3                          PL18D
                                 06D
                                 06D
@@ -1043,7 +1039,7 @@ FRSTPAS         DLOAD
                                 DELDV
                                 S32.1F2
 
-## Page 646
+## Page 638
                 STCALL          DELVCSI
                                 CSI/B1
 THRDCHK         BON             BON
@@ -1095,7 +1091,7 @@ CSISTEP         DLOAD           DSU
                                 DELDV
                 STCALL          DELVCSI
 
-## Page 647
+## Page 639
                                 CSI/B1
 CSI/SOL         DLOAD           AXT,2
                                 POSTCSI
@@ -1145,7 +1141,7 @@ SCNDSOL         BON             BOFF
                 STCALL          LOOPCT
                                 CSI/B
 
-## Page 648
+## Page 640
 # ..... ADVANCE    .....
 
 # SUBROUTINES USED
@@ -1182,7 +1178,7 @@ ADVANCE         STQ             DLOAD
                 STCALL          VACT1
                                 SUBEXIT
 
-## Page 649
+## Page 641
 # ..... ROTATE     .....
 
 ROTATE          PUSH            PUSH
@@ -1194,7 +1190,7 @@ ROTATE          PUSH            PUSH
                 ABVAL           VXSC
                 VSL1            RVQ
 
-## Page 650
+## Page 642
 # ..... INTINTNA   .....
 
 INTINT2C        PDDL            PDDL
@@ -1212,7 +1208,7 @@ INTINT3P        PDDL            PDDL
                 GOTO
                                 INTINT
 
-## Page 651
+## Page 643
 # ..... S32/33.1  .....
 
 # SUBROUTINES USED
@@ -1236,7 +1232,7 @@ S32/33.1        STQ             AXT,1
                 GOTO
                                 SUBEXIT
 
-## Page 652
+## Page 644
 # ..... S32/33.X  .....
 
 S32/33.X        SETPD           VLOAD
@@ -1251,7 +1247,7 @@ S32/33.X        SETPD           VLOAD
                 STORE           0D
                 RVQ
 
-## Page 653
+## Page 645
 # ..... CDHMVR     .....
 
 # SUBROUTINES USED
@@ -1303,7 +1299,7 @@ CDHMVR          STQ             VLOAD
                 ABVAL           PDDL                    # 2D = LENGTH OF R SUB A
                 DSU
 
-## Page 654
+## Page 646
                                 02D
                 STODL           DIFFALT                 # DELTA H IN METERS             B+29
                                 R1A
@@ -1354,11 +1350,11 @@ CDHMVR          STQ             VLOAD
                 STORE           VACT3
                 VSU
                                 VACT2
-## Page 655
+## Page 647
                 STCALL          DELVEET2                # DELTA VCDH - REFERENCE COORDINATES
                                 SUBEXIT
 
-## Page 656
+## Page 648
 # ..... COMPTGO   .....
 
 # SUBROUTINES USED
