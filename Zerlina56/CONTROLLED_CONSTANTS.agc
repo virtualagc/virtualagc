@@ -18,6 +18,7 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-07-28 MAS  Created from Luminary 210.
 ##              2017-08-12 MAS  Updated for Zerlina 56.
+##              2017-08-12 MAS  Corrected LODESCNT value and removed a stray B+1.
 
 ## Page 38
 # DPS AND APS ENGINE PARAMETERS
@@ -308,7 +309,7 @@ MINCSM          =               BIT11                   # MIN CSM MASS (OK FOR 1
 LOASCENT        DEC             2200            B-16    # MIN ASCENT LEM MASS -- 2(16) KG.
 
 HIDESCNT        DEC             16700           B-16    # MAX DESCENT LEM MASS -- 2(16) KG.
-LODESCNT        DEC             2542            B-16    # MIN DESCENT STAGE (ALONE) -- 2(16) KG
+LODESCNT        DEC             1750            B-16    # MIN DESCENT STAGE (ALONE) -- 2(16) KG
 
 ## Page 45
 # PHYSICAL CONSTANTS ( TIME - INVARIANT )
@@ -744,7 +745,7 @@ VAL67           2DEC*           .017531111      B+1*    # AMOD
 
                 2DEC            .058226609              # BARG
 
-                2DEC            .031250000      B+1     # 1/32
+                2DEC            .031250000              # 1/32
 
                 2DEC*           .005329930      B+1*    # CMOD
 

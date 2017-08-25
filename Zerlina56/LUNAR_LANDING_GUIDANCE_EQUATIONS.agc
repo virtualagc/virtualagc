@@ -23,6 +23,8 @@
 ##              2017-08-06 MAS  Fixed a comment transcription error (MODULE
 ##                              where MODULO should have been).
 ##              2017-08-19 MAS  Corrected a few transcription errors.
+##              2017-08-24 MAS  Fixed a branch target and a few incorrect
+##                              instructions.
 
 ## Page 784
 # ****************************************************************************************************************
@@ -121,7 +123,7 @@ LUNLAND         TC              SERVCHNG
                 CA              FLAGWRD5                # HAS THROTTLE-UP COME YET?
                 MASK            ZOOMBIT
                 EXTEND
-                BZF             DISPEXIT        +3      # NO:   DO P63 DISPLAYS BUT NO GUIDANCE
+                BZF             DISPEXIT                # NO:   DO P63 DISPLAYS BUT NO GUIDANCE
 
 # ****************************************************************************************************************
 ## Page 786
@@ -832,7 +834,7 @@ P64DISPS        CA              TREDES                  # HAS TREDES REACHED ZER
                 CADR            REFLASHR
                 TC              ENDOFJOB                # TERMINATE  IGNORE AND KEEP FLASHING
                 TCF             P64CEED                 # PROCEED    PERMIT REDESIGNATIONS
-                TCF             ENDOFJOB                # ENTER      IGNORE AND KEEP FLASHING
+                TC              ENDOFJOB                # ENTER      IGNORE AND KEEP FLASHING
 
                 TCF             LOWRPRIO
 
@@ -1047,7 +1049,7 @@ ERRCOMP         EXTEND                                  # COMPUTE VERTICAL (SM X
                 AD              P66TPIP
                 AD              HALF
                 AD              HALF
-                AD              MPAC            +3      # TIME SINCE LAST P66ROD, UNITS OF 2(9) CS
+                XCH             MPAC            +3      # TIME SINCE LAST P66ROD, UNITS OF 2(9) CS
 
                 CS              P66PMIN                 # HAS IT BEEN LESS THAN P66PMIN?
                 AD              MPAC            +3
@@ -1330,7 +1332,7 @@ ENGARM?         CAF             BIT3                    # IS ENGINE-ARM SWITCH O
                 EXTEND
                 BZF             CDUWHZ                  # YES:  LIMIT AND ISSUE COMMANDS
 
-                CA              FLAGWRD0                # NO:   HAS ASTRONAUT RESPONDED TO P06N60?
+                CS              FLAGWRD0                # NO:   HAS ASTRONAUT RESPONDED TO P06N60?
                 MASK            P66PROBT
                 EXTEND
                 BZF             CDUWHZ                  # NO:   LIMIT AND ISSUE COMMANDS

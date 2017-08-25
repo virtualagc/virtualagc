@@ -19,6 +19,7 @@
 ## Mod history: 2017-07-28 MAS  Created from Luminary 210.
 ##              2017-08-17 MAS  Began updates for Zerlina 56.
 ##              2017-08-19 MAS  Completed updating for Zerlina 56.
+##              2017-08-24 MAS  Replaced an incorrect VXM with VXV.
 
 ## Page 850
 # ****************************************************************************************************************
@@ -1004,7 +1005,7 @@ COPYCYC1        TC      SERVCHNG
                 STORE   HDOTDISP        # HDOT IN UNITS OF 2(7) M/CS
                 SL2     PDVL            # STORE HDOTLAD AT PD 4
                         WM
-                VXM     VSL2
+                VXV     VSL2
                         R1S
                 STOVL   VSURFACE        # SURFACE VELOCITY IN UNITS OF 2(5) M/CS
                         R1S             #   (NO NEED TO LOAD VSURFACE UNDER INHINT

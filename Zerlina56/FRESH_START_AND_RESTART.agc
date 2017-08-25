@@ -18,6 +18,7 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-07-28 MAS  Created from Luminary 210.
 ##              2017-08-19 MAS  Updated for Zerlina 56.
+##              2017-08-24 MAS  Replaced an incorrect CS with a CA.
 
 ## Page 218
                 BANK            10
@@ -119,7 +120,7 @@ DOFSTRT1        CAF             FOUR
                 TS              -RATEDB
                 CAF             FULLAPS                 # INITIALIZE MAXIMUM ASCENT MASS FOR USE
                 TS              HIASCENT                #   BY 1/ACCS UNTIL THE PAD LOAD IS DONE.
-                CS              77001OCT                #    LOAD DAP FILTER GAINS PAD LOAD
+                CA              77001OCT                #    LOAD DAP FILTER GAINS PAD LOAD
 ## Page 220
                 TS              DKTRAP                  #    TO BEST PRESENT ESTIMATE OF GOODIES
                 TS              LMTRAP                  # .14 DEG

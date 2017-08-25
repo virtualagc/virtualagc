@@ -19,6 +19,9 @@
 ## Mod history: 2017-07-28 MAS  Created from Luminary 210.
 ##              2017-08-13 MAS  Began transcribing for Zerlina 56.
 ##              2017-08-14 MAS  Finished updates for Zerlina 56.
+##              2017-08-24 MAS  Fixed a transcription error in R10FLAG that might
+##                              actually be a bug, resulting in that flag conflicting
+##                              with NEEDLFLG.
 
 ## Page 62
 #         FLAGWORDS 0-11 ARE DOWNLINKED AND CAN BE SET AND CLEARED BY UP-FLAG AND DOWN-FLAG INSTRUCTIONS IN THE
@@ -317,7 +320,12 @@ FREEFBIT        =               BIT3
 #
 
 #                               BIT 2 FLAG 0
-R10FLAG         =               013D                    # LATVEL DISPLAYED    LATVEL AND FORVEL
+## The following line is missing the "D" of the expected "013D", resulting in R10FLAG evaluating
+## to the same thing as NEEDLFLG (11D). This might potentially cause the flags to conflict with
+## each other. The D may have been accidentally dropped, since the comments for R10FLAG below
+## were rewritten to better describe its purpose in Zerlina (which would have necessitated
+## entirely new cards being punched).
+R10FLAG         =               013                     # LATVEL DISPLAYED    LATVEL AND FORVEL
 R10FLBIT        =               BIT2                    # IN INERTIAL AXES.   DISPLAYED IN LM
                                                         # FORVEL ZERO.        BODY AXES (ROUGHLY).
 #

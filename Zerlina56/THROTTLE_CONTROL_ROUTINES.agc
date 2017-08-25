@@ -18,7 +18,7 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-07-28 MAS  Created from Luminary 210.
 ##              2017-08-19 MAS  Updated for Zerlina 56.
-##              2017-08-24 MAS  Removed an extraneous TS PIF.
+##              2017-08-24 MAS  Corrected some instructions related to storing to PIF.
 
 ## Page 779
 # T  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  *  E
@@ -129,7 +129,7 @@ DOPIF           CS      FP              # COMPUTE PIF AND LIMIT IT TO 4096 BITS
                 TC      BANKCALL
                 CADR    LIMITSUB
 
-DOIT            CA      PIF
+DOIT            TS      PIF
                 AD      PIFPSET         # ADD IN PIFPSET, WITHOUT CHANGING PIF
 DOITP66         XCH     PIFPSET         # STASH IT IN PIFPSET FOR A MOMENT
                 CAF     BIT10           # DOES PGNCS HAVE CONTROL?

@@ -18,6 +18,7 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-07-28 MAS  Created from Luminary 210.
 ##              2017-08-23 MAS  Updated for Zerlina 56.
+##              2017-08-24 MAS  Removed an extra CS BITS9+7 instruction.
 
 ## Page 1369
 #          THE FOLLOWING SUBROUTINE MAY BE CALLED TO DISPLAY A NON-ABORTIVE ALARM CONDITION. IT MAY BE CALLED
@@ -227,5 +228,4 @@ FLAGS           CS              STATEBIT
                 MASK            FLAGWRD2                        
 ## Page 1373
                 TS              FLAGWRD2                        
-                CS              BITS9+7
                 TC              Q                               

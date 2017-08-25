@@ -18,6 +18,7 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-07-28 MAS  Created from Luminary 210.
 ##              2017-08-23 MAS  Updated for Zerlina 56.
+##              2017-08-24 MAS  Replaced an incorrect ADS with a TS.
 
 ## Page 1330
 # DISPLAYS CAN BE CLASSIFIED INTO THE FOLLOWING CATEGORIES-
@@ -1150,7 +1151,7 @@ NVDSP           TC      COPYPACS
 
                 CA      TEMPOR2         # SET UP BLANK BITS FOR NVMONOPT IN CASE
                 MASK    SEVEN           # USER REQUESTS BLANKING MONITOR
-                ADS     L
+                TS      L
 
                 CS      BIT13
                 INDEX   COPINDEX

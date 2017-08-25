@@ -19,6 +19,7 @@
 ## Mod history: 2017-07-28 MAS  Created from Luminary 210.
 ##              2017-08-14 MAS  Began updates for Zerlina 56.
 ##              2017-08-16 MAS  Complated updating for Zerlia 56.
+##              2017-08-24 MAS  Fixed an incorrect offset in lunar landing erasables.
 
 ## Page 91
 # CONVENTIONS AND NOTATIONS UTILIZED FOR ERASABLE ASSIGNMENTS.
@@ -2834,7 +2835,7 @@ P21ALT          EQUALS          P21GAM          +2      # I(2)TMP  *** NOUN 91 *
 OURTEMPS        =               RN1                     # OVERLAY LAST PART OF SERVICER
 LANDTEMP        =               OURTEMPS                # B(6)     GUIDANCE
 TTF/8TMP        =               LANDTEMP        +6      # B(2)    GUIDANCE
-ELCOUNT         =               TTF/8TMP        +6      # B(1)    REDESIGNATOR AND P66HZ
+ELCOUNT         =               TTF/8TMP        +2      # B(1)    REDESIGNATOR AND P66HZ
 AZCOUNT         =               ELCOUNT         +1      # B(1)    REDESIGNATOR AND P66HZ
 TPIPOLD         =               AZCOUNT         +1      # B(2)    GUIDANCE
 KEEP-2          =               TPIPOLD         +2      #  (2)    TO PREVENT PIPTIME1 OVERLAY
