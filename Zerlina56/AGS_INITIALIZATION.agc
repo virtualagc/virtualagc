@@ -18,8 +18,6 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-07-28 MAS  Created from Luminary 210.
 
-## NOTE: Page numbers below have not yet been updated to reflect Zerlina 56.
-
 ## Page 213
 
 # PROGRAM NAME:   AGS INITIALIZATION (R47)
