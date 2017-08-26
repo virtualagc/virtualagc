@@ -13,6 +13,8 @@
 ##		2016-12-17 RSB	Proofed text comments with octopus/ProoferComments
 ##				and corrected the errors found.
 ##		2017-01-28 RSB	Back-ported a comment fix from Luminary 69.
+##		2017-08-26 MAS	Fixed a comment-text error found while transcribing
+##				Zerlina 56.
 ##
 ## This source code has been transcribed or otherwise adapted from
 ## digitized images of a hardcopy from the MIT Museum.  The digitization
@@ -141,7 +143,7 @@ NEWLOAD		CAF	V06N76		# FLASH CROSS-RANGE AND APOLUNE VALUES.
 		STORE	V		# V(TIPOVER) = V(IGN) + 57FPS (UNIT/R/)
 		DOT	SL1
 			UNIT/R/
-		STOVL	RDOT		# RDOT = 2(-7)
+		STOVL	RDOT		# RDOT * 2(-7)
 			UNIT/R/
 		VXV	UNIT
 			QAXIS

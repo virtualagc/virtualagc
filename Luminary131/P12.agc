@@ -20,6 +20,8 @@
 ##				and fixed errors found.
 ##		2017-02-26 RSB	Proofed comment text using octopus/ProoferComments.
 ##		2017-03-13 RSB	Comment-text fixes noted in proofing Luminary 116.
+##		2017-08-26 MAS	Fixed a comment-text error found while transcribing
+##				Zerlina 56.
 
 ## Page 831
 		BANK	24
@@ -128,7 +130,7 @@ NEWLOAD		CAF	V06N76		# FLASH CROSS-RANGE AND APOLUNE VALUES.
 		STORE	V		# V(TIPOVER) = V(IGN) + 57FPS (UNIT/R/)
 		DOT	SL1
 			UNIT/R/
-		STOVL	RDOT		# RDOT = 2(-7)
+		STOVL	RDOT		# RDOT * 2(-7)
 			UNIT/R/
 		VXV	UNIT
 			QAXIS

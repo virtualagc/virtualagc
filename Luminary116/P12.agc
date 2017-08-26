@@ -18,6 +18,8 @@
 ##              2017-03-09 HG   Transcribed
 ##		2017-03-13 RSB	Proofed comment text via 3-way diff vs
 ##				Luminary 99 and 131.
+##		2017-08-26 MAS	Fixed a comment-text error found while transcribing
+##				Zerlina 56.
 
 ## Page 831
                 BANK            24                              
@@ -130,7 +132,7 @@ NEWLOAD         CAF             V06N76                          # FLASH CROSS-RA
                 STORE           V                               # V(TIPOVER) = V(IGN) + 57FPS (UNIT/R/)
                 DOT             SL1                             
                                 UNIT/R/                         
-                STOVL           RDOT                            # RDOT = 2(-7)
+                STOVL           RDOT                            # RDOT * 2(-7)
                                 UNIT/R/                         
                 VXV             UNIT                            
                                 QAXIS                           

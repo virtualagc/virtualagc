@@ -165,6 +165,8 @@ FINDCDUW        BOV             SETPD                   # FINDCDUW: ENTRY WHEN U
                 CCS             A
                 TCF             PAUTNO                  # NOT AUTO (BITS INVERTED)
 
+                TS              FLPAUTNO                # RESET FLAG PNGCS AUTO NOT
+
                 CA              CDUXD                   # PNGCS AUTO: FETCH CDUXD,CDUYD,CDUZD
                 TS              CDUSPOTX
                 CA              CDUYD
@@ -710,7 +712,6 @@ ALARMMGA        TC              ALARM
                 TCF             MGARET
 
 ## Page 917
-  SEMBLE REVISION 56 OF AGC PROGRAM ZERLINA BY ZOROASTER
 # ************************************************************************
 # CONSTANTS
 # ************************************************************************

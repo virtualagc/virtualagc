@@ -14,6 +14,8 @@
 ##				and corrected the errors found.
 ##		2017-01-28 RSB	Back-ported a comment fix from Luminary 69.
 ##		2017-03-03 RSB	Snapshot of Luminary 99 Rev 1. 
+##		2017-08-26 MAS	Fixed a comment-text error found while transcribing
+##				Zerlina 56.
 
 ## Page 838
 		BANK	24
@@ -127,7 +129,7 @@ NEWLOAD		CAF	V06N76		# FLASH CROSS-RANGE AND APOLUNE VALUES.
 		STORE	V		# V(TIPOVER) = V(IGN) + 57FPS (UNIT/R/)
 		DOT	SL1
 			UNIT/R/
-		STOVL	RDOT		# RDOT = 2(-7)
+		STOVL	RDOT		# RDOT * 2(-7)
 			UNIT/R/
 		VXV	UNIT
 			QAXIS

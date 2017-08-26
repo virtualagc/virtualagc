@@ -20,6 +20,8 @@
 ##				and corrected errors found.
 ##		2017-01-28 RSB	Proofed comment text using octopus/prooferComments
 ##				and fixed errors found.
+##		2017-08-26 MAS	Fixed a comment-text error found while transcribing
+##				Zerlina 56.
 
 ## Page 839
 		BANK	24
@@ -126,7 +128,7 @@ NEWLOAD		CAF	V06N76		# FLASH CROSS-RANGE AND APOLUNE VALUES.
 ## Page 841
 		DOT	SL1
 			UNIT/R/
-		STCALL	RDOT		# RDOT = 2(-7)
+		STCALL	RDOT		# RDOT * 2(-7)
 			ASCENT
 P12RET		DLOAD
 			ATP		# ATP(2)*2(18)
