@@ -20,6 +20,8 @@
 ##		2017-03-16 RSB	Comment-text fixes identified in 5-way
 ##				side-by-side diff of Luminary 69/99/116/131/210.
 ##		2017-08-16 RSB	Fixed comment typo identified in AP11ROPE.
+##		2017-08-26 MAS  Fixed an incorrect label found while transcribing
+##                              Zerlina 56 (it was unreferenced so caused no errors).
 
 ## Page 745
 # PROGRAM DESCRIPTION  P40BOTH          DECEMBER 22, 1966
@@ -1063,7 +1065,7 @@ S40.13D         DLOAD           DMP                             # FOR DPS ENGINE
                 BOV             PUSH                            
 ## Page 768
                                 S40.130V                        
-S40.127         DSU             BPL                             
+S40.137         DSU             BPL                             
                                 6SEC                            # 600.0 CS AT +14
                                 S40.138                         
                 DAD             GOTO                            
