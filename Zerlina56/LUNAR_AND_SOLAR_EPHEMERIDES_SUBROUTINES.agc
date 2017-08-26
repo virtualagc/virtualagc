@@ -17,23 +17,22 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-07-28 MAS  Created from Luminary 210.
+##              2017-08-26 MAS  Updated for Zerlina 56.
 
-## NOTE: Page numbers below have not yet been updated to reflect Zerlina 56.
-
-## Page 982
-# NAME - LSPOS  - LOCATE SUN AND MOON                   DATE - 25 OCT 67
-# MOD NO.2  (DATE OCT 70)
-# MOD BY NEVILLE                                        ASSEMBLY SUNDANCE
+## Page 975
+# NAME - LSPOS  - LOCATE SUN AND MOON                                                      DATE - 25 OCT 67
+# MOD NO.1
+# MOD BY NEVILLE                                                                           ASSEMBLY SUNDANCE
 
 # FUNCTIONAL DESCRIPTION
 
 #        COMPUTES UNIT POSITION VECTOR OF THE SUN AND MOON IN THE BASIC REFERENCE SYSTEM. THE SUN VECTOR S IS
-# LOCATED VIA TWO ANGLES. THE FIRST ANGLE(OBLIQUITY) IS THE ANGLE BETWEEN THE EARTH EQUATOR AND THE ECLIPTIC.  THE
+# LOCATED VIA TWO ANGLES. THE FIRST ANGLE(OBLIQUITY) IS THE ANGLE BETWEEN THE EARTH EQUATOR AND THE ECLIPTIC. THE
 # SECOND ANGLE IS THE LONGITUDE OF THE SUN MEASURED IN THE ECLIPTIC.
 # THE POSITION VECTOR OF THE SUN IS
 #        -
 #        S=(COS(LOS), COS(OBL)*SIN(LOS), SIN(OBL)*SIN(LOS)), WHERE
-#
+
 #      LOS=LOS +LOS *T-(C *SIN(2PI*T)/365.24 +C *COS(2PI*T)/365.24)
 #             0    R     0                     1
 #      LOS  (RAD) IS THE LONGITUDE OF THE SUN FOR MIDNIGHT JUNE 30TH OF THE PARTICULAR YEAR.
@@ -43,13 +42,13 @@
 # LOS  AND LOS  ARE STORED AS LOSC AND LOSR IN RATESP.
 #    0        R
 # COS(OBL) AND SIN(OBL) ARE STORED IN THE MATRIX KONMAT.
-# T, TIME MEASURED IN DAYS (24 HOURS), IS STORED IN TIMEP.
-# C  AND C  ARE FUDGE FACTORS TO MINIMIZE THE DEVIATION.  THEY ARE STORED AS ONE CONSTANT(CMOD), SINCE
+# T, TIME MEASURED IN DAYS(24 HOURS), IS STORED IN TIMEP.
+# C  AND C  ARE FUDGE FACTORS TO MINIMIZE THE DEVIATION. THEY ARE STORED AS ONE CONSTANT(CMOD), SINCE
 #  0      1                               2  2 1/2
 # C *SIN(X)+C *COS(X) CAN BE WRITTEN AS (C +C )   *SIN(X+PHI), WHERE PHI=ARCTAN(C /C ).
 #  0         1                            0  1                                   1  0
 
-# THE MOON IS LOCATED VIA FOUR ANGLES, THE FIRST IS THE OBLIQUITY. THE SECOND IS THE MEAN LONGITUDE OF THE MOON,
+# THE MOON IS LOCATED VIA FOUR ANGLES. THE FIRST IS THE OBLIQUITY. THE SECOND IS THE MEAN LONGITUDE OF THE MOON,
 # MEASURED IN THE ECLIPTIC FROM THE MEAN EQUINOX TO THE MEAN ASCENDING NODE OF THE LUNAR ORBIT, AND THEN ALONG THE
 # ORBIT. THE THIRD ANGLE IS THE ANGLE BETWEEN THE ECLIPTIC AND THE LUNAR ORBIT. THE FOURTH ANGLE IS THE LONGITUDE
 # OF THE NODE OF THE MOON, MEASURED IN THE LUNAR ORBIT. LET THESE ANGLES BE OBL,LOM,IM, AND LON RESPECTIVELY.
@@ -66,12 +65,11 @@
 # A , A , B  AND B  ARE STORED AS AMOD AND BMOD (SEE DESCRIPTION OF CMOD, ABOVE).  COS(OBL), SIN(OBL)*SIN(IM),
 #  0   1   0      1
 # SIN(OBL), AND COS(OBL)*SIN(IM) ARE STORED IN KONMAT AS K1, K2, K3 AND K4, RESPECTIVELY. LOM , LOM , LON , LON
-# ARE STORED AS LOM0, LOMR, LON0, AND LONR IN RATESP.                                        0     R     0     R
+# ARE STORED AS LOMO, LOMR, LONO, AND LONR IN RATESP.                                        0     R     0     R
 # THE THREE PHIS ARE STORED AS AARG, BARG, AND CARG(SUN).  ALL CONSTANTS ARE UPDATED BY YEAR.
 
 # CALLING SEQUENCE
-
-## Page 983
+## Page 976
 #   CALL LSPOS.  RETURN IS VIA CPRET.
 #
 # ALARMS OR ABORTS
@@ -95,7 +93,7 @@
 
 # DEBRIS
 
-#   CURRENT CORE SET, WORK AREA AND FREEFLAG
+#   CURRENT CORE SET,WORK AREA AND FREEFLAG
                 BANK            04
                 SETLOC          EPHEM
                 BANK
@@ -109,7 +107,7 @@ LSPOS           SETPD           SR
                                 14D                     # TP
                 TAD             DDV
                                 TEPHEM                  # TIME OF LAUNCH
-                                CSTODAY                 # 24 HOURS-8640000 CENTI-SECS/DAY B-32
+                                CSTODAY                 # 24 HOURS-8640000 CENTI-SECS/DAY B-33
                 STORE           TIMEP                   # T IN DAYS
                 AXT,1           AXT,2
                                 0
@@ -122,16 +120,16 @@ POSITA          DLOAD
 POSITB          DLOAD           DMP*
                                 TIMEP                   # T
                                 VAL67           +4,1    # 1/27 OR 1/32 OR 1/365
-## Page 984
+## Page 977
                 SL              DAD*
-                                9D
+                                8D
                                 VAL67           +2,1    # AARG
                 SIN             DMP*                    # SIN(T/27+PHI) OR T/32 OR T/365
-                                VAL67,1                 # (A0**2+A1**2)**1/2 SIN(X+PHIA)
+                                VAL67,1                 # (A0**2+A1**2)**1/2SIN(X+PHIA)
                 DAD             INCR,1                  # PLUS
-                                GTMP                    # (B0**2+B1**2)**1/2 SIN(X+PHIB)
+                                GTMP                    # (B0**2+B1**2)**1/2SIN(X+PHIB)
                 DEC             -6
-                STORE           GTMP                    # OR (C0**2+C1**2)**1/2 SIN(X+PHIC)
+                STORE           GTMP                    # OR (C0**2+C1**2)**1/2SIN(X+PHIC)
                 BOFSET
                                 FREEFLAG
                                 POSITB
@@ -139,7 +137,7 @@ POSITD          DLOAD           DMP*
                                 TIMEP                   # T
                                 RATESP,2                # LOMR,LOSR,LONR
                 SL              DAD*
-                                6D
+                                5D
                                 RATESP          +6,2    # LOMO,LOSO,LONO
                 DSU
                                 GTMP
@@ -174,7 +172,7 @@ POSITF          DLOAD           DSU                     # 3RD
                 STORE           VSUN
                 RVQ
 
-## Page 985
+## Page 978
 POSITE          DLOAD
                                 KONMAT          +2      # ZEROS
                 STORE           GTMP
