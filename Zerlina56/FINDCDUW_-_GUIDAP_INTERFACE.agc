@@ -17,10 +17,9 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-07-28 MAS  Created from Luminary 210.
+##              2017-08-26 MAS  Updated for Zerlina 56.
 
-## NOTE: Page numbers below have not yet been updated to reflect Zerlina 56.
-
-## Page 905
+## Page 899
 # PROGRAM NAME:   FINDCDUW
 
 # MOD NUMBER:     1         68 07 15
@@ -38,14 +37,6 @@
 #                           1) NOT IN PNGCS-AUTO, OR
 #                           2) ENGINE IS OFF.
 
-# MOD NUMBER:     2         10 DECEMBER 1970
-
-# MOD AUTHOR:     P. S. WEISSMAN
-
-# OBJECTIVE OF MOD:  TO ISSUE STEERING COMMANDS TO THE DAP EVEN WHEN AGS IS INDICATED (IN CASE THE INDICA-
-#                    TION IS FALSE).
-#
-
 # FUNCTIONAL DESCRIPTION:
 
 # FINDCDUW PROVIDES THE INTERFACES BETWEEN THE VARIOUS POWERED FLITE GUIDANCE PROGRAMS
@@ -60,7 +51,7 @@
 # FILTER WITH THE THRUST COMMAND VECTOR, AND, WHEN  XOVINHIB  SET,
 # ALINES THE +Z HALF OF THE LM ZX PLANE WITH THE WINDOW COMMAND VECTOR.
 
-## Page 906
+## Page 900
 # SPECIFICATIONS:
 
 # INITIALIZATION: A SINGLE INTERPRETIVE CALL TO  INITCDUW  IS REQUIRED
@@ -92,6 +83,7 @@
 #                 OGABIAS  POSSIBLE BIAS FOR OUTER GIMBAL ANGLE (ZEROED IN INITCDUW), UNITS OF PI.
 #                 XOVINHIB FLAG DENOTING X AXIS OVERRIDE INHIBITED.
 #                 CSMDOCKD FLAG DENOTING CSM DOCKED.
+#                 STEERSW  FLAG DENOTING INSUFF THRUST FOR THRUST DIR FLTR.
 
 # OUTPUTS:        DELCDUX,Y,Z
 #                 OMEGAPD,+1,+2
@@ -102,7 +94,7 @@
 #                 WRITING INTO THESE LOCATIONS THE SINES AND COSINES
 #                 OF THE CDUD'S IN PNGCS-AUTO, OF THE CDU'S OTHERWISE.
 
-## Page 907
+## Page 901
 # INITIALIZATION FOR FINDCDUW
 
                 BANK            30
@@ -144,10 +136,12 @@ FINDCDUW        BOV             SETPD                   # FINDCDUW: ENTRY WHEN U
                 TS              NDXCDUW
 
                 CA              XOVINHIB                # XOVINHIB MUST NOT BE BIT15
+                TS              FLPAUTNO                # SET TO POS-NON-ZERO FLAG PNGCS AUTO NOT
+
                 MASK            DAPBOOLS
                 TS              FLAGOODW                # FLAGOODW = ANY PNZ NUMBER IF XOV INHIBTD
 
-## Page 908
+## Page 902
 # FETCH BASIC DATA
 
                 INHINT                                  # RELINT AT PAUTNO (TC INTPRET)
@@ -178,8 +172,9 @@ FINDCDUW        BOV             SETPD                   # FINDCDUW: ENTRY WHEN U
                 CA              CDUZD
                 TS              CDUSPOTZ
 
-## Page 909
+## Page 903
 # FETCH INPUTS
+
 PAUTNO          TC              INTPRET                 # ENTERING THRUST CMD STILL IN MPAC
                 RTB
                                 NORMUNIT
@@ -212,7 +207,7 @@ PAUTNO          TC              INTPRET                 # ENTERING THRUST CMD ST
 
                 TC              INTPRET                 # COMPLETES FILTER
 
-## Page 910
+## Page 904
 # FIND A SUITABLE WINDOW POINTING VECTOR
 
 AFTRFLTR        SLOAD           BHIZ                    # IF XOV NOT INHIBITED, GO FETCH ZNB
@@ -256,13 +251,13 @@ DCMCL           VLOAD           VXV
                 VSL1
                 STORE           UNZ/2                   # UNZ/2
 
+## Page 905
 # COMPUTE THE REQUIRED GIMBAL ANGLES
 
                 CALL
                                 NB2CDUSP                # YIELDS THE RQD GIMBAL ANGLES, 2'S, PI
                 EXIT
 
-## Page 911
 # BIAS OUTER GIMBAL ANGLE
 
                 CA              OGABIAS
@@ -307,24 +302,22 @@ DELGMBLP        TS              TEM2
                 INDEX           TEM2
                 TS              -DELGMB                 # -UNLIMITED GIMBAL ANGLE CHGS, 1'S, PI
                 TS              L                       # FOR PRECEDING TEST ON NEXT LOOP PASS
+## Page 906
                 CCS             TEM2
                 TCF             DELGMBLP
 
-## Page 912
+## Page 907
 # BRANCHES TO NOATTCNT
 
-                CA              BIT14                   # AUTO MODE BIT
-                EXTEND
-                RAND            CHAN31
-                CCS             A
-                TCF             NOATTCNT        +2      # NOT AUTO
+                CCS             FLPAUTNO
+                TCF             NOATTCNT        +2      # NOT PNGCS AUTO
 
                 CA              FLAGWRD5
                 MASK            ENGONBIT
                 EXTEND
                 BZF             NOATTCNT        +2      # ENGINE NOT ON
 
-## Page 913
+## Page 908
 # LIMIT THE ATTITUDE ANGLE CHANGES
 
 # THIS SECTION LIMITS THE ATTITUDE ANGLE CHANGES ABOUT A SET OF ORTHOGONAL VEHICLE AXES X,YPRIME,ZPRIME.
@@ -376,7 +369,7 @@ DELGMBLP        TS              TEM2
                 ADS             -DELGMB                 # -DELGMBX.  NO OVERFLOW SINCE LIMITED TO
                                                         # 20DEG(1+SIN(70DEG)/COS(70DEG)) < 180DEG
 
-## Page 914
+## Page 909
 # COMPUTE COMMANDED ATTITUDE RATES
 
 # * OMEGAPD *   * -2  -4 SINCDUZ          +0         * * -DELGMBX *
@@ -426,7 +419,7 @@ DELGMBLP        TS              TEM2
                 ADS             OMEGARD
                 ADS             OMEGARD
 
-## Page 915
+## Page 910
 # FINAL TRANSFER
 
                 CA              TWO
@@ -470,7 +463,7 @@ TCQCDUW         CA              ECDUWUSR
                                 0
                                 QCDUWUSR                # NORMAL AND ABNORMAL RETURN TO USER
 
-## Page 916
+## Page 911
 # THRUST VECTOR FILTER SUBROUTINE
 
 FLTRSUB         EXTEND
@@ -501,7 +494,7 @@ UNWCTEST        DOT             DSQ
                                 FLAGOODW                #      ZEROING WINDOW GOOD FLAG
                                 0
 
-## Page 917
+## Page 912
 # NB2CDUSP RETURNS THE 2'S COMPLEMENT, PI, SP CDU ANGLES X,Y,Z IN MPAC,+1,+2 GIVEN THE MATRIX WHOSE ROW VECTORS
 # ARE THE SEMI-UNIT NAV BASE VECTORS X,Y,Z EXPRESSED IN STABLE MEMBER COORDINATES, LOCATED AT 0 IN THE PUSH LIST.
 
@@ -551,7 +544,7 @@ NB2CDUSP        DLOAD           DSQ
 
 16OCT           OCT             16
 
-## Page 918
+## Page 913
 # THE ELEMENTS OF THE NAV BASE MATRIX WHICH WE MUST DIVIDE BY COS(MGA)
 # ALREADY CONTAIN COS(MGA)/2 AS A FACTOR.  THEREFORE THE QUOTIENT SHOULD
 # ORDINARILY NEVER EXCEED 1/2 IN MAGNITUDE.  BUT IF THE MGA IS NEAR PI/2
@@ -586,7 +579,7 @@ TSL&TCQ         TS              L
                 LXCH            TEM1
                 TC              Q
 
-## Page 919
+## Page 914
 # ARCTRGSP RETURNS THE 2'S COMPLEMENT, PI, SP ANGLE IN THE A REGISTER GIVEN ITS SINE IN A AND ITS COSINE IN L IN
 # UNITS OF 2.  THE RESULT IS AN UNAMBIGUOUS ANGLE ANYWHERE IN THE CIRCLE, WITH A MAXIMUM ERROR OF +-4 BITS.
 # THE ERROR IS PRODUCED BY THE SUBROUTINE SPARCSIN WHICH IS USED ONLY IN THE REGION +-45 DEGREES.
@@ -636,7 +629,7 @@ SINZERO         CCS             L
                 CA              NEGMAX                  # PI, 2'S COMP
                 TC              Q
 
-## Page 920
+## Page 915
 # SPARCSIN TAKES AN ARGUMENT SCALED UNITY IN A AND RETURNS AN ANGLE SCALED
 # 180 DEGREES IN A.  IT HAS BEEN UNIT TESTED IN THE REGION +-.94 (+- 70
 # DEGREES) AND THE MAXIMUM ERROR IS +-5 BITS WITH AN AVERAGE TIME OF
@@ -672,7 +665,7 @@ DPL5            DEC             7300
 DPL7            DEC             -11803
 DPL9            DEC             8397
 
-## Page 921
+## Page 916
 # LIMITSUB LIMITS THE MAGNITUDE OF THE POSITIVE OR NEGATIVE VARIABLE
 # ARRIVING IN L TO THE POSITIVE LIMIT ARRIVING IN A.
 # THE SIGNED LIMITED VARIABLE IS RETURNED IN A.
@@ -716,12 +709,11 @@ ALARMMGA        TC              ALARM
                 OCT             00401
                 TCF             MGARET
 
-## Page 922
-## The ':' at the end of the 2nd divider below is a workaround for our proof-reading system, 
-## but was simply another '=' in the original printout.
-#================================================================================================================
+## Page 917
+  SEMBLE REVISION 56 OF AGC PROGRAM ZERLINA BY ZOROASTER
+# ************************************************************************
 # CONSTANTS
-#===============================================================================================================:
+# ************************************************************************
 
 # ADDRESS CONSTANTS
 
@@ -760,4 +752,3 @@ DT/DELT         DEC             .05                     # .1 SEC/2 SEC WHICH IS 
 
 DELERLIM        =               DAY/2MAX                # 10 DEG LIMIT FOR LAG ANGLES, 1'S, PI
 #
-
