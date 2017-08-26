@@ -18,9 +18,7 @@
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-07-28 MAS  Created from Luminary 210.
 
-## NOTE: Page numbers below have not yet been updated to reflect Zerlina 56.
-
-## Page 218
+## Page 213
 
 # PROGRAM NAME:   AGS INITIALIZATION (R47)
 
@@ -72,9 +70,7 @@ AGSINIT         CAF             REFSMBIT
                 MASK            FLAGWRD3                # CHECK REFSMFLG.
                 CCS             A
                 TC              REDSPTEM                # REFSMMAT IS OK
-
-## Page 219
-
+## Page 214
                 TC              ALARM                   # REFSMMAT IS BAD
                 OCT             220
                 TC              ENDEXT
@@ -102,7 +98,9 @@ AGSDISPK        CAF             V06N16
                                                         # DISPLAY THE NEW K
 
 AGSVCALC        TC              INTPRET
-                SET             EXIT
+                SET             
+				NODOFLAG		# DONT ALLOW V37
+		SET		EXIT
                                 XDSPFLAG
 
                 CAF             V06N16
@@ -123,10 +121,10 @@ AGSVCALC        TC              INTPRET
                 CALL
                                 SCALEVEC
                 STODL   AGSBUFF +6
+## Page 215
                         TAT
                 DSU     DDV                             # CALCULATE AND STORE THE TIME
 
-## Page 220
                                 AGSK
                                 TSCALE
                 STORE           AGSBUFF         +12D
@@ -159,7 +157,9 @@ CKSTALL         CCS             IMUCADR                 # CHECK FOR IMU USAGE WH
                 TC              BANKCALL                # WAIT 3 SEC FOR COUNTERS TO INCREMENT
                 CADR            IMUSTALL
                 TC              AGSEND
-AGSEND          CAF             V50N16
+AGSEND          TC		DOWNFLAG		# ALLOW V37
+		ADRES		NODOFLAG
+		CAF             V50N16
                 TC              BANKCALL
                 CADR            GOMARK3
                 TCF             ENDEXT
@@ -172,13 +172,12 @@ SCALEVEC        VLOAD           MXV
                 VXSC            VSL2
                                 VSCALE
                 VAD             VAD                     # THIS SECTION ROUNDS THE VECTOR, AND
+## Page 216
                                 AGSRND1                 # CORRECTS FOR THE FACT THAT THE AGS
                                 AGSRND2                 # IS A 2 S COMPLIMENT MACHINE WHILE THE
                 RTB                                     # LGC IS A 1 S COMPLIMENT MACHINE.
                                 VECSGNAG
                 STOVL           VATT1
-
-## Page 221
                                 RATT1
                 MXV             VXSC
                                 REFSMMAT
@@ -216,4 +215,5 @@ AGSRND1         2OCT            0000060000
 AGSRND2         2OCT            0000037777
                 2OCT            0000037777
                 2OCT            0000037777
+## Page 217
                 SBANK=          LOWSUPER                # FOR SUBSEQUENT LOW 2CADRS.
