@@ -17,9 +17,9 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-07-28 MAS  Created from Luminary 210.
+##              2017-08-26 TVB  Updated for Zerlina 56.
 
 ## Page 213
-
 # PROGRAM NAME:   AGS INITIALIZATION (R47)
 
 # WRITTEN BY  :   RHODE/KILROY/FOLLETT
@@ -99,8 +99,8 @@ AGSDISPK        CAF             V06N16
 
 AGSVCALC        TC              INTPRET
                 SET             
-				NODOFLAG		# DONT ALLOW V37
-		SET		EXIT
+                                NODOFLAG                # DONT ALLOW V37
+                SET             EXIT
                                 XDSPFLAG
 
                 CAF             V06N16
@@ -120,10 +120,10 @@ AGSVCALC        TC              INTPRET
                                 CSMPREC                 # CALCULATE CSM STATE VECTOR FOR SAME TIME
                 CALL
                                 SCALEVEC
-                STODL   AGSBUFF +6
+                STODL           AGSBUFF         +6
 ## Page 215
-                        TAT
-                DSU     DDV                             # CALCULATE AND STORE THE TIME
+                                TAT
+                DSU             DDV                     # CALCULATE AND STORE THE TIME
 
                                 AGSK
                                 TSCALE
@@ -157,9 +157,9 @@ CKSTALL         CCS             IMUCADR                 # CHECK FOR IMU USAGE WH
                 TC              BANKCALL                # WAIT 3 SEC FOR COUNTERS TO INCREMENT
                 CADR            IMUSTALL
                 TC              AGSEND
-AGSEND          TC		DOWNFLAG		# ALLOW V37
-		ADRES		NODOFLAG
-		CAF             V50N16
+AGSEND          TC              DOWNFLAG                # ALLOW V37
+                ADRES           NODOFLAG
+                CAF             V50N16
                 TC              BANKCALL
                 CADR            GOMARK3
                 TCF             ENDEXT
