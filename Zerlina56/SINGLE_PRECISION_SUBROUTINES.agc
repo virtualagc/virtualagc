@@ -17,12 +17,10 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-07-28 MAS  Created from Luminary 210.
+##              2017-08-28 MAS  Updated for Zerlina 56.
 
-## NOTE: Page numbers below have not yet been updated to reflect Zerlina 56.
-
-## Page 1100
+## Page 1093
 		BLOCK	02
-
 # SINGLE PRECISION SINE AND COSINE
 
 		COUNT*	$$/INTER
@@ -58,5 +56,3 @@ POLLEY		EXTEND
 ARG90		INDEX	A
 		CS	LIMITS
 		TC	Q		# RESULT SCALED AT 1
-		
-

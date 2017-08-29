@@ -17,7 +17,7 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-07-28 MAS  Created from Luminary 210.
-##		2018-08-23 RSB	Transcribed.
+##		2017-08-23 RSB	Transcribed.
 
 ## Page 387
 # PROGRAM-IMU PERFORMANCE TESTS 4
