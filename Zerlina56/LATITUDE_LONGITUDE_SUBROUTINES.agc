@@ -17,10 +17,9 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-07-28 MAS  Created from Luminary 210.
+##              2017-08-28 MAS  Updated for Zerlina 56.
 
-## NOTE: Page numbers below have not yet been updated to reflect Zerlina 56.
-
-## Page 1131
+## Page 1124
 # SUBROUTINE TO CONVERT RAD VECTOR AT GIVEN TIME TO LAT,LONG AND ALT
 
 # CALLING SEQUENCE
@@ -71,7 +70,7 @@ CALLRTRP	CALL
 		PDDL	DSQ
 			ALPHAV +2
 		DAD	SQRT
-## Page 1132
+## Page 1125
 		DMP	SL1R
 			GAMRP
 		STODL	COSTH		# COS(LAT) B-1
@@ -90,7 +89,8 @@ CALLRTRP	CALL
 			ERADM
 		STCALL	ALT		# EXIT WITH ALT METERS B-29
 			INCORPEX
-## Page 1133
+
+## Page 1126
 # SUBROUTINE TO CONVERT LAT,LONG,ALT AT GIVEN TIME TO RADIUS VECTOR
 # CALLING SEQUENCE
 
@@ -141,7 +141,7 @@ CALLRPRT	CALL
 			RP-TO-R		# EXIT WITH UNIT R VECTOR IN MPAC
 		STODL	ALPHAV
 			ERADM
-## Page 1134
+## Page 1127
 		DAD	VXSC		# (RE + ALT)(UNIT R) METERS B-30
 			ALT
 			ALPHAV
@@ -182,7 +182,7 @@ B2/A2		2DEC	.9933064884 B-1	# GAMMA= B**2/A**2 B-1
 
 EE		2DEC	6.6935116 E-3	# (1-B**2/A**2) B-0
 
-## Page 1135
+## Page 1128
 # ARCTAN SUBROUTINE
 
 
@@ -232,7 +232,7 @@ ATAN=90		DLOAD	SIGN
 
 2DZERO		=	DPZERO
 
-## Page 1136
+## Page 1129
 # ..... SETGAMMA SUBROUTINE .....
 # SUBROUTINE TO SET GAMMA FOR THE LAT-LONG AND LALOTORV SUBROUTINES
 
@@ -259,7 +259,7 @@ SETGMEX		STORE	GAMRP
 		RVQ
 GAMRP		=	8D
 
-## Page 1137
+## Page 1130
 # .....SETRE SUBROUTINE .....
 # SUBROUTINE TO SET RE (EARTH OR MOON RADIUS)
 
