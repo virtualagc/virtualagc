@@ -102,6 +102,7 @@
  *                              small, height-wise.  Fixed that.
  *          	2017-05-30 RSB	Changed bogus references to Sunburst 39 to Sunburst 37.
  *          	2017-06-19 RSB	Enabled Sunburst 37.
+ *          	2017-08-29 RSB	Enabled Zerlina 56.
  *
  * This file was originally generated using the wxGlade RAD program.
  * However, it is now maintained entirely manually, and cannot be managed
@@ -224,9 +225,9 @@ static const missionAlloc_t missionConstants[ID_AGCCUSTOMBUTTON
             { "SUNBURST 37 (LM)", "Sunburst37/MAIN.agc.html",
                 "Click this to select the SUNBURST 37 (early non-mission LM) software.",
                 ENABLED, LM, BLOCK2, NO_PERIPHERALS, "Sunburst37", "LM0.ini" },
-            { "ZERLINA (LM)", "Zerlina/MAIN.agc.html",
-                "Click this to select ZERLINA (next-generation non-mission LM) software.",
-                DISABLED, LM, BLOCK2, PERIPHERALS, "Zerlina", "LM.ini" },
+            { "ZERLINA 56 (LM)", "Zerlina56/MAIN.agc.html",
+                "Click this to select ZERLINA 56 (next-generation non-mission LM) software.",
+                ENABLED, LM, BLOCK2, PERIPHERALS, "Zerlina56", "LM1.ini" },
             { "SUPER JOB", "SuperJob/MAIN.agc.html",
                 "Click this to select SUPER JOB (Raytheon Auxiliary Memory test) software.  Note that to run meaningfully, a simulated Auxiliary Memory unit (not yet available!) needs to be run also.",
                 ENABLED, CM, BLOCK2, NO_PERIPHERALS, "SuperJob", "CM.ini" }
@@ -643,7 +644,7 @@ EVT_RADIOBUTTON(ID_VALIDATIONBUTTON, VirtualAGC::ConsistencyEvent)
 EVT_RADIOBUTTON(ID_RETREAD44BUTTON, VirtualAGC::ConsistencyEvent)
 EVT_RADIOBUTTON(ID_AURORA12BUTTON, VirtualAGC::ConsistencyEvent)
 EVT_RADIOBUTTON(ID_SUNBURST37BUTTON, VirtualAGC::ConsistencyEvent)
-EVT_RADIOBUTTON(ID_ZERLINABUTTON, VirtualAGC::ConsistencyEvent)
+EVT_RADIOBUTTON(ID_ZERLINA56BUTTON, VirtualAGC::ConsistencyEvent)
 EVT_RADIOBUTTON(ID_SUPERJOBBUTTON, VirtualAGC::ConsistencyEvent)
 EVT_RADIOBUTTON(ID_AGCCUSTOMBUTTON, VirtualAGC::ConsistencyEvent)
 EVT_RADIOBUTTON(ID_LUM99R2BUTTON, VirtualAGC::ConsistencyEvent)
