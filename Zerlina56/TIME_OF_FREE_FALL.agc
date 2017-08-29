@@ -17,10 +17,9 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-07-28 MAS  Created from Luminary 210.
+## 		2017-08-29 RSB	Transcribed.
 
-## NOTE: Page numbers below have not yet been updated to reflect Zerlina 56.
-
-## Page 1265
+## Page 1257
 #          THE TFF SUBROUTINES MAY BE USED IN EITHER EARTH OR MOON CENTERED COORDINATES. THE TFF ROUTINES NEVER
 # KNOW WHICH ORIGIN APPLIES. IT IS THE USER WHO KNOWS, AND WHO SUPPLIES  RONE, VONE AND 1/SQRT(MU)  AT THE
 # APPROPRIATE SCALE LEVEL FOR THE PROPER PRIMARY BODY.
@@ -71,7 +70,7 @@ NRMAG		=	32D	#            PRESENT RADIUS  M  E: (-29+NR)
 TFFX		=	34D 
 TFFTEM		=	36D	#            TEMPORARY
 
-## Page 1266
+## Page 1258
 #                                          REGISTERS S1, S2 ARE UNTOUCHED BY ANY TFF SUBROUTINE
 #                                          INDEX REGISTERS X1, X2 ARE USED BY ALL TFF SUBROUTINES. THEY ARE ESTAB-
 #                                          LISHED IN TFF/CONIC AND MUST BE PRESERVED BETWEEN CALLS TO SUBSEQUENT
@@ -79,7 +78,7 @@ TFFTEM		=	36D	#            TEMPORARY
 #                                          -NR                             C(X1) = NORM COUNT OF RMAG
 #                                          -NA                             C(X2)= NORM COUNT OF SQRT(ABS(ALFA))
 
-## Page 1267
+## Page 1259
 #
 
 # SUBROUTINE NAME:     TFFCONIC                                           DATE:    01.29.67
@@ -130,7 +129,7 @@ TFFTEM		=	36D	#            TEMPORARY
 #                   M: (24-NR)
 #          TFFRTALF  E: (10+NA)   SQRT(ALFA), NORMALIZED
 #                    M: (9+NA)
-## Page 1268
+## Page 1260
 #          X2                     -NA, NORM COUNT
 #          TFF1/ALF  E: (-22-2NA) SIGNED SEMI MAJ AXIS, WEIGHTED BY NA
 #                    M: (-20-2NA)
@@ -180,7 +179,7 @@ TFFCONMU	VLOAD	UNIT		# COME HERE WITH TFFRTMU LOADED.
 		STORE	TFFVSQ		# -(V SQ/MU)   E:(20)   M:(18)
 					# SAVE FOR VGAMCALC
 		SR*	DAD
-## Page 1269
+## Page 1261
 			0 -6,1		# GET -VSQ/MU   E:(26-NR)   M:(24-NR)
 		STADR
 					# 2/RMAG   FROM PDL+2
@@ -201,7 +200,7 @@ DUMPCNIC	RVQ
 
 					#                         39 W
 
-## Page 1270
+## Page 1262
 # SUBROUTINE NAME:     TFFRP/RA                                           DATE:  01.17.67
 # MOD NO:  0                                                              LOG SECTION:    TIME OF FREE FALL
 # MOD BY:  RR BAIRNSFATHER
@@ -242,7 +241,7 @@ DUMPCNIC	RVQ
 #          X2                     -NA, NORM COUNT OF ALFA                 LEFT BY TFFCONIC
 # DEBRIS:  QPRET,    PDL+0 ... PDL+1
 
-## Page 1271
+## Page 1263
 RAPO		=	16D		# APOGEE RADIUS  M  E:(-29)  M:(-27)
 RPER		=	14D		# PERIGEE RADIUS  M  E:(-29)  M:(-27)
 
@@ -281,7 +280,7 @@ DUMPRPRA	RVQ
 
 					#                         30 W
 
-## Page 1272
+## Page 1264
 # SUBROUTINE NAME:     CALCTPER  /  CALCTFF                               DATE:    01.29.67
 # MOD NO:  0                                                              LOG SECTION:    TIME OF FREE FALL
 # MOD BY:  RR BAIRNSFATHER
@@ -333,7 +332,7 @@ DUMPRPRA	RVQ
 #          FOR EITHER,   E: (-29)    M: (-27)
 #          FOR EITHER, PUSHLOC = PDL+0, ARBITRARY IF LEQ 8D.
 
-## Page 1273
+## Page 1265
 # SUBROUTINES CALLED:  T(X),  VIA RTB
 # NORMAL EXIT MODE:  RVQ
 #          HOWEVER, PROGRAM EXITS WITH ONE OF THE FOLLOWING VALUES FOR TFF (-28) CS  IN MPAC. USER MUST STORE.
@@ -373,11 +372,11 @@ DUMPRPRA	RVQ
 #          TFF1/ALF  E: (-22-2NA)  SIGNED SEMIMAJ AXIS, WEIGHTED BY NA    LEFT BY TFFCONIC
 #                    M: (-20-2NA)
 # DEBRIS:  QPRET,   PDL+0 ... PDL+3
-#          RTERM  E:(-29)  M:(-27)   RTERM, TERMINAL RADIUS LENGTH
-#          RAPO   E:(-29)  M:(-27)   PDL 16D  (=NRTERM)
-#          RPER   E:(-29)  M:(-27)   PDL 14D   (=TFFQ1)
+#          RTERM  E:(-29)  M:(-27)  RTERM, TERMINAL RADIUS LENGTH
+#          RAPO   E:(-29)  M:(-27)  PDL 16D  (=NRTERM)
+#          RPER   E:(-29)  M:(-27)  PDL 14D   (=TFFQ1)
 
-## Page 1274
+## Page 1266
 CALCTPER	SETGO			# ENTER WITH RPER  IN MPAC
 			TFFSW
 			+3
@@ -427,7 +426,7 @@ CALCTFF		CLEAR			# ENTER WITH RTERM IN MPAC
 		STODL	TFFX		# NUM=Q2-Q1  E: (-16)  M: (-15)
 			TFFALFA		# ALFA  E: (26-NR)  M: (24-NR)
 		DMP	BDSU
-## Page 1275
+## Page 1267
 			NRMAG		# RMAG  E: (-29+NR)  M: (-27+NR)
 					# (2-RTERM ALFA)  (-3) FROM PDL+0
 SAVEDEN		PUSH	ABS		# DEN TO PDL+0  E: (-3) OR (-16)
@@ -478,7 +477,7 @@ TFFXTEST	DAD	PDDL		#  (ABS(DEN) TO PDL+2))  E: (-3) OR (-16)
 					# DEN FROM PDL+0   E: (-3) OR (-16)
 					#                  M: (-3) OR (-15)
 		STORE	TFFTEM		# Z  SAVE FOR SIGN OF SDELF.
-## Page 1276
+## Page 1268
 					# E: (-13)  M: (-12)
 		PUSH	DSQ		# Z TO PDL+0
 		PUSH	DMP		# Z SQ TO PDL+2  E: (-26)  M: (-24)
@@ -530,7 +529,7 @@ ENDTFF		DMP	BOV		# TFF SQRT(MU) IN MPAC     E:(-45) M:(-42)
 
 DUMPTFF2	RVQ			# RETURN  TFF   (-28) CS IN MPAC.
 
-## Page 1277
+## Page 1269
 NEGTFF		DLOAD
 					# TFF SQRT(MU)  FROM PDL+0, NEGATIVE.
 		GOTO
@@ -581,7 +580,7 @@ TFFEL1		DLOAD	DSU		# (ENTER WITH D/N=0 IN PDL+0)
 		STODL	TFFTEM		# (Q1+R 1/Z)  =SGN OF SDELF E:(-16) M:(-15
 			TFFNP		# LC P E: (-38+2NR) M: (-36+2NR)
 		DMP	SL*		# CALC FOR ARG FOR TFF/TRIG.
-## Page 1278
+## Page 1270
 			TFF1/ALF	# 1/ALFA   E:(-22-2NA)  M:(-20-2NA)
 			1,2		# X2=-NA
 		SIGN	SL*
@@ -605,7 +604,7 @@ TFFEL1		DLOAD	DSU		# (ENTER WITH D/N=0 IN PDL+0)
 			0 -4,2
 			ENDTFF		# TFF SQRT(MU) IN MPAC E:(-45) M:(-42)
 
-## Page 1279
+## Page 1271
 # PROGRAM NAME:      T(X)                                                 DATE:    01.17.67
 # MOD NO:  0                                                              LOG SECTION:    TIME OF FREE FALL
 # MOD BY:  RR BAIRNSFATHER
@@ -615,7 +614,7 @@ TFFEL1		DLOAD	DSU		# (ENTER WITH D/N=0 IN PDL+0)
 #                 1/3 -X/5 +X /7 -X /9 ...
 
 #          WHERE  X = ALFA Z Z       IF ALFA Z Z  LEQ 1
-#                 X = 1/(ALFA Z Z)   IF ALFA Z Z   G  1
+#                 X = 1/(ALFA Z Z )  IF ALFA Z Z   G  1
 
 #          ALSO   X IS NEG FOR HYPERBOLIC ORBITS
 #                 X = 0 FOR PARABOLIC ORBITS
@@ -653,7 +652,7 @@ ENDT(X)		TC	DANZIG
 
 TCDANZIG	=	ENDT(X)
 
-## Page 1280
+## Page 1272
 # TFF CONSTANTS
 
 		BANK	32
@@ -681,7 +680,7 @@ DP2(-3)		2DEC	1 B-3
 
 DP2(-4)		2DEC	1 B-4		# 1/16
 
-# RPAD1      2DEC    6373338 B-29    M  (-29)   =20 909 901.57 FT
+#RPAD1          2DEC    6373338 B-29      M  (-29)   =20 909 901.57 FT
 
 RPAD1		=	RPAD
 
