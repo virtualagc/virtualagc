@@ -227,7 +227,7 @@ static const missionAlloc_t missionConstants[ID_AGCCUSTOMBUTTON
                 ENABLED, LM, BLOCK2, NO_PERIPHERALS, "Sunburst37", "LM0.ini" },
             { "ZERLINA 56 (LM)", "Zerlina56/MAIN.agc.html",
                 "Click this to select ZERLINA 56 (next-generation non-mission LM) software.",
-                ENABLED, LM, BLOCK2, PERIPHERALS, "Zerlina56", "LM1.ini" },
+                ENABLED, LM, BLOCK2, PERIPHERALS, "Zerlina56", "LM.ini" },
             { "SUPER JOB", "SuperJob/MAIN.agc.html",
                 "Click this to select SUPER JOB (Raytheon Auxiliary Memory test) software.  Note that to run meaningfully, a simulated Auxiliary Memory unit (not yet available!) needs to be run also.",
                 ENABLED, CM, BLOCK2, NO_PERIPHERALS, "SuperJob", "CM.ini" }
