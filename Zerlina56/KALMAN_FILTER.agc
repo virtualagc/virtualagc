@@ -17,10 +17,9 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-07-28 MAS  Created from Luminary 210.
+##		2017-08-29 RSB	Transcribed.
 
-## NOTE: Page numbers below have not yet been updated to reflect Zerlina 56.
-
-## Page 1468
+## Page 1458
                 EBANK=                  NO.UJETS
                 BANK                    16
                 SETLOC	                DAPS1
@@ -62,7 +61,7 @@ LOOPRATE	EXTEND
 		EXTEND
                 BZMF                    NEGTORK
 STORTORK        INDEX                   Q               # INCREMENT DOWNLIST REGISTER.
-                ADS                     DOWNTORK        #  NOTE:  NOT INITIALIZED; OVERFLOWS.
+                ADS                     DOWNTORK        #   NOTE: NOT INITIALIZED; OVERFLOWS.
 
                 CCS                     DAPTEMP6
                 TCF                     RATELOOP +1
@@ -71,7 +70,7 @@ SMALLTJU        CA                      ZERO
                 INDEX                   DAPTEMP6
                 XCH                     TJP
                 EXTEND
-## Page 1469
+## Page 1459
                 MP                      ELEVEN          # 10.24 PLUS
                 CA                      L
                 TCF                     LOOPRATE
