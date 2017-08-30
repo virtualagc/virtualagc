@@ -17,10 +17,9 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-07-28 MAS  Created from Luminary 210.
+##              2017-08-29 MAS  Updated for Zerlina 56.
 
-## NOTE: Page numbers below have not yet been updated to reflect Zerlina 56.
-
-## Page 1371
+## Page 1362
                 BANK            10                              
                 SETLOC          DISPLAYS                        
                 BANK                                            
@@ -44,22 +43,23 @@ DOWNENT2        INHINT
 
 OCT7            EQUALS          SEVEN                           
 
-## Page 1372
-# UPFLAG AND DOWNFLAG ARE ENTIRELY GENERAL FLAG SETTING AND CLEARING SUBROUTINES.  USING THEM, WHETHER OR
+## Page 1363
+#     UPFLAG AND DOWNFLAG ARE ENTIRELY GENERAL FLAG SETTING AND CLEARING SUBROUTINES.   USING THEM, WHETHER OR
 # NOT IN INTERRUPT, ONE MAY SET OR CLEAR ANY SINGLE, NAMED BIT IN ANY ERASABLE REGISTER, SUBJECT OF COURSE TO
-# EBANK SETTING.  A "NAMED" BIT, AS THE WORD IS USED HERE, IS ANY BIT WITH A NAME FORMALLY ASSIGNED BY THE YUL
+# EBANK SETTING.   A "NAMED" BIT, AS THE WORD IS USED HERE, IS ANY BIT WITH A NAME FORMALLY ASSIGNED BY THE YUL
 # ASSEMBLER.
 
-# AT PRESENT THE ONLY NAMED BITS ARE THOSE IN THE FLAGWORDS.  ASSEMBLER CHANGES WILL MAKE IT POSSIBLE TO
+#     AT PRESENT THE ONLY NAMED BITS ARE THOSE IN THE FLAGWORDS.   ASSEMBLER CHANGES WILL MAKE IT POSSIBLE TO
 # NAME ANY BIT IN ERASABLE MEMORY.
 
-# CALLING SEQUENCES ARE AS FOLLOWS:-
-#               TC      UPFLAG                  TC      DOWNFLAG
-#               ADRES   NAME OF FLAG            ADRES   NAME OF FLAG
+#     CALLING SEQUENCES ARE AS FOLLOWS:-
 
-# RETURN IS TO THE LOCATION FOLLOWING THE "ADRES" ABOUT .58 MS AFTER THE "TC".
-#
-# UPON RETURN A CONTAINS THE CURRENT FLAGWRD SETTING.
+#                     TC     UPFLAG                    TC     DOWNFLAG
+#                     ADRES  NAME OF FLAG              ADRES  NAME OF FLAG
+
+#     RETURN IS TO THE LOCATION FOLLOWING THE "ADRES" ABOUT .58 MS AFTER THE "TC".
+
+#     UPON RETURN A CONTAINS THE CURRENT FLAGWRD SETTING.
 
                 BLOCK           02                              
                 SETLOC          FFTAG1                          
@@ -77,10 +77,12 @@ COMFLAG         INDEX           ITEMP1
                 RELINT                                          
                 TC              L                               
 
+
 DOWNFLAG        CA              Q                               
                 TC              DEBIT                           
                 MASK            L                               # RESET BIT
                 TCF             COMFLAG                         
+
 
 DEBIT           AD              ONE                             # GET DE BITS
                 INHINT                                          
@@ -91,8 +93,7 @@ DEBIT           AD              ONE                             # GET DE BITS
                 CA              0               -1              # ADRES
                 TS              L                               
                 CA              ZERO                            
-
-## Page 1373
+## Page 1364
                 EXTEND                                          
                 DV              ITEMP1                          # A = FLAGWRD, L = (15 - BIT)
                 DXCH            ITEMP1                          
@@ -103,20 +104,19 @@ DEBIT           AD              ONE                             # GET DE BITS
                 CS              BIT15                           # -(15 - BIT)
                 TC              Q                               
 
-## Page 1374
+## Page 1365
 # DELAYJOB- A GENERAL ROUTINE TO DELAY A JOB A SPECIFIC AMOUNT OF TIME BEFORE PICKING UP AGAIN.
 
 # ENTRANCE REQUIREMENTS...
-#               CAF     DT              DELAY JOB FOR DT CENTISECS
-#               TC      BANKCALL
-#               CADR    DELAYJOB
+#                                                  CAF    DT              DELAY JOB FOR DT CENTISECS
+#                                                  TC     BANKCALL
+#                                                  CADR   DELAYJOB
 
                 BANK            06                              
                 SETLOC          DLAYJOB                         
                 BANK                                            
 
 # THIS MUST REMAIN IN BANK 0 *****************************************
-
                 COUNT*          $$/DELAY                        
 2SECDELY        CAF             2SECS                           
 DELAYJOB        INHINT                                          
@@ -156,7 +156,7 @@ TCGETCAD        TC              MAKECADR                        # GET CALLERS FC
 WAKER           CAF             ZERO                            
                 INDEX           BBANK                           
 
-## Page 1375
+## Page 1366
                 XCH             DELAYLOC                        # MAKE DELAYLOC AVAILABLE
                 TC              JOBWAKE                         
 
@@ -165,24 +165,28 @@ WAKER           CAF             ZERO
 TCSLEEP         GENADR          TCGETCAD        -2              
 WAKECAD         GENADR          WAKER                           
 
-## Page 1376
+## Page 1367
 # GENTRAN, A BLOCK TRANSFER ROUTINE.
-# WRITTEN BY D. EYLES
-# MOD 1 BY KERNAN                               UTILITYM REV 17 11/18/67
-# MOD 2 BY SCHULENBERG (REMOVE RELINT)  SKIPPER REV 4 2/28/68
 
-# THIS ROUTINE IS USEFULL FOR TRANSFERING N CONSECUTIVE ERASABLE OR FIXED QUANTITIES TO SOME OTHER N
+# WRITTEN BY D. EYLES
+# MOD 1 BY KERNAN                                                         UTILITYM REV 17 11/18/67
+
+# MOD 2 BY SCHULENBERG  (REMOVE RELINT)   SKIPPER REV 4 2/28/68
+
+#          THIS ROUTINE IS USEFULL FOR TRANSFERING N CONSECUTIVE ERASABLE OR FIXED QUANTITIES TO SOME OTHER N
 # CONSECUTIVE ERASABLE LOCATIONS.  IF BOTH BLOCKS OF DATA ARE IN SWITCHABLE EBANKS, THEY MUST BE IN THE SAME ONE.
 
-# GENTRAN IS CALLABLE IN A JOB AS WELL AS A RUPT.  THE CALLING SEQUENCE IS:
-#       I       CA      N-1             # OF QUANTITIES MINUS ONE.
-#       I +1    TC      GENTRAN         IN FIXED-FIXED.
-#       I +2    ADRES   L               STARTING ADRES OF DATA TO BE MOVED.
-#       I +3    ADRES   M               STARTING ADRES OF DUPLICATION BLOCK.
-#       I +4                            RETURNS HERE.
+#          GENTRAN IS CALLABLE IN A JOB AS WELL AS A RUPT.  THE CALLING SEQUENCE IS:
 
-# GENTRAN TAKES 25 MCT'S (300 MICROSECONDS) PER ITEM + 5 MCT'S (60 MICS) FOR ENTERING AND EXITING.
-# A, L AND ITEMP1 ARE NOT PRESERVED.
+#                                         I        CA     N-1             # OF QUANTITIES MINUS ONE.
+#                                         I +1     TC     GENTRAN         IN FIXED-FIXED.
+#                                         I +2     ADRES  L               STARTING ADRES OF DATA TO BE MOVED.
+#                                         I +3     ADRES  M               STARTING ADRES OF DUPLICATION BLOCK.
+#                                         I +4                            RETURNS HERE.
+
+#          GENTRAN TAKES 25 MCT'S (300 MICROSECONDS) PER ITEM + 5 MCT'S (60 MICS) FOR ENTERING AND EXITING.
+
+#          A, L AND ITEMP1 ARE NOT PRESERVED.
 
                 BLOCK           02                              
                 SETLOC          FFTAG4                          
@@ -208,9 +212,10 @@ GENTRAN         INHINT
                 TCF             GENTRAN         +1              
                 TCF             Q+2                             # RETURN TO CALLER.
 
-## Page 1377
-# B5OFF         ZERO BIT 5 OF EXTVBACT, WHICH IS SET BY TESTXACT.
-# MAY BE USED AS NEEDED BY ANY EXTENDED VERB WHICH HAS DONE TESTXACT
+## Page 1368
+# B5OFF   ZERO BIT 5 OF EXTVBACT, WHICH IS SET BY TESTXACT.
+
+#          MAY BE USED AS NEEDED BY ANY EXTENDED VERB WHICH HAS DONE TESTXACT
 
                 COUNT*          $$/EXTVB                        
 
@@ -218,6 +223,3 @@ B5OFF           CS              BIT5
                 MASK            EXTVBACT                        
                 TS              EXTVBACT                        
                 TC              ENDOFJOB                        
-
-
-
