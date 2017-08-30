@@ -17,10 +17,9 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-07-28 MAS  Created from Luminary 210.
+##              2017-08-29 MAS  Updated for Zerlina 56.
 
-## NOTE: Page numbers below have not yet been updated to reflect Zerlina 56.
-
-## Page 1403
+## Page 1394
                 BANK            20                              
                 SETLOC          DAPS3                           
                 BANK                                            
@@ -28,49 +27,56 @@
                 EBANK=          CDUXD                           
                 COUNT*          $$/DAPIF                        
 
-# MOD 0         DATE    11/15/66        BY GEORGE W. CHERRY
-# MOD 1                 1/23/67         MODIFICATION BY PETER ADLER
+# MOD 0              DATE  11/15/66          BY  GEORGE W. CHERRY
+
+# MOD 1                     1/23/67          MODIFICATION BY PETER ADLER
 
 # FUNCTIONAL DESCRIPTION
-#       HEREIN ARE A COLLECTION OF SUBROUTINES WHICH ALLOW MISSION CONTROL PROGRAMS TO CONTROL THE MODE
-#       AND INTERFACE WITH THE DAP.
+
+#          HEREIN ARE A COLLECTION OF SUBROUTINES WHICH ALLOW MISSION CONTROL PROGRAMS TO CONTROL THE MODE
+#          AND INTERFACE WITH THE DAP.
 
 # CALLING SEQUENCES
-#       IN INTERRUPT OR WITH INTERRUPT INHIBITED
-#               TC      IBNKCALL
-#               FCADR   ROUTINE
-#       IN A JOB WITHOUT INTERRUPT INHIBITED
-#               INHINT
-#               TC      IBNKCALL
-#               FCADR   ROUTINE
-#               RELINT
+
+# IN INTERRUPT OR WITH INTERRUPT INHIBITED
+#          TC     IBNKCALL
+#          FCADR  ROUTINE
+
+# IN A JOB WITHOUT INTERRUPT INHIBITED
+#          INHINT
+#          TC     IBNKCALL
+#          FCADR  ROUTINE
+#          RELINT
 
 # OUTPUT
-#       SEE INDIVIDUAL ROUTINES BELOW
+
+#          SEE INDIVIDUAL ROUTINES BELOW
 
 # DEBRIS
-#       A,L, AND SOMETIMES MDUETEMP                             ODE NOT IN PULSES MODE
 
-## Page 1404
+#          A,L, AND SOMETIMES MDUETEMP                                    ODE      NOT IN PULSES MODE
+
+## Page 1395
 # SUBROUTINE NAMES:
-#       SETMAXDB, SETMINDB, RESTORDB, PFLITEDB
-# MODIFIED:     30 JANUARY 1968 BY P S WEISSMAN TO CREATE RESTORDB.
-# MODIFIED:     1 MARCH 1968 BY P S WEISSMAN TO SAVE EBANK AND CREATE PFLITEDB
+#          SETMAXDB, SETMINDB, RESTORDB, PFLITEDB
+
+# MODIFIED: 30 JANUARY 1968 BY P S WEISSMAN TO CREATE RESTORDB.
+
+# MODIFIED: 1 MARCH 1968 BY P S WEISSMAN TO SAVE EBANK AND CREATE PFLITEDB
 
 # FUNCTIONAL DESCRIPTION:
-#       SETMAXDB - SET DEADBAND TO 5.0 DEGREES
-#       SETMINDB - SET DEADBAND TO 0.3 DEGREE
-#       RESTORDB - SET DEADBAND TO .3,1, OR 5 ACCORDING TO BITS 4 AND 5 OF DAPBOOLS
-#       PFLITEDB - SET DEADBAND TO 1.0 DEGREE AND ZERO THE COMMANDED ATTITUDE CHANGE AND COMMANDED RATE
-#       ALL ENTRIES SET UP A NOVAC JOB TO DO 1/ACCS SO THAT THE TJETLAW SWITCH CURVES ARE POSITIONED TO
-#       REFLECT THE NEW DEADBAND.  IT SHOULD BE NOTED THAT THE DEADBAND REFERS TO THE ATTITUDE IN THE P-,U-,AND V-AXES.
+#          SETMAXDB - SET DEADBAND TO 5.0 DEGREES
+#          SETMINDB - SET DEADBAND TO 0.3 DEGREE
+#          RESTORDB - SET DEADBAND TO .3,1, OR 5 ACCORDING TO BITS 4 AND 5 OF DAPBOOLS
+#          PFLITEDB - SET DEADBAND TO 1.0 DEGREE AND ZERO THE COMMANDED ATTITUDE CHANGE AND COMMANDED RATE
+#          ALL ENTRIES SET UP A NOVAC JOB TO DO 1/ACCS SO THAT THE TJETLAW SWITCH CURVES ARE POSITIONED TO
+# REFLECT THE NEW DEADBAND.  IT SHOULD BE NOTED THAT THE DEADBAND REFERS TO THE ATTITUDE IN THE P-,U-,AND V-AXES.
 
-# SUBROUTINE CALLED:    NOVAC
+# SUBROUTINE CALLED:  NOVAC
 
-# CALLING SEQUENCE:     SAME AS ABOVE
-#                       OR      TC RESTORDB +1    FROM ALLCOAST
-
-# DEBRIS:               A, L, Q, RUPTREG1, (ITEMPS IN NOVAC)
+# CALLING SEQUENCE: SAME AS ABOVE
+#                                         OR       TC     RESTORDB +1     FROM ALLCOAST
+# DEBRIS:  A, L, Q, RUPTREG1, (ITEMPS IN NOVAC)
 
 RESTORDB        CAE             DAPBOOLS                        # DETERMINE CREW-SELECTED DEADBAND.
                 MASK            DBSLECT2                        # CHECK FOR MAX DB (5 DEG)
@@ -94,12 +100,13 @@ CALLACCS        CAF             PRIO27
                 EBANK=          AOSQ                            
                 2CADR           1/ACCJOB                        
 
+
                 TC              RUPTREG1                        # RETURN TO CALLER.
 
 SETMINDB        CAF             NARROWDB                        # SET 0.3 DEGREE DEADBAND.
                 TCF             SETMAXDB        +1              
 
-## Page 1405
+## Page 1396
 PFLITEDB        EXTEND                                          # THE RETURN FROM CALLACCS IS TO RUPTREG1.
                 QXCH            RUPTREG1                        
                 TC              ZATTEROR                        # ZERO THE ERRORS AND COMMANDED RATES.
@@ -109,6 +116,7 @@ PFLITEDB        EXTEND                                          # THE RETURN FRO
 NARROWDB        OCTAL           00155                           # 0.3 DEGREE SCALED AT 45.
 WIDEDB          OCTAL           03434                           # 5.0 DEGREES SCALED AT 45.
 POWERDB         DEC             .02222                          # 1.0 DEGREE SCALED AT 45.
+
 
 ZATTEROR        CAF             EBANK6                          
                 XCH             EBANK                           
@@ -120,6 +128,7 @@ ZATTEROR        CAF             EBANK6
                 CAE             CDUZ                            
                 TS              CDUZD                           
                 TCF             STOPRATE        +3              
+
 
 STOPRATE        CAF             EBANK6                          
                 XCH             EBANK                           
@@ -138,20 +147,20 @@ STOPRATE        CAF             EBANK6
                 TC              Q                               
 
 # SUBROUTINE NAME:  ALLCOAST
-#
-# WILL BE CALLED BY FRESH STARTS AND ENGINE OFF ROUTINES.	.
-#
+
+# WILL BE CALLED BY FRESH STARTS AND ENGINE OFF ROUTINES.                 .
+
 # CALLING SEQUENCE: (SAME AS ABOVE)
-#
+
 # EXIT:  RETURN TO Q.
-#
+
 # SUBROUTINES CALLED:  STOPRATE, RESTORDB, NOVAC
-#
+
 # ZERO:  (FOR ALL AXES) AOS, ALPHA, AOSTERM, OMEGAD, DELCDU, DELEROR
 
-## Page 1406
+## Page 1397
 # OUTPUT:  DRIFTBIT/DAPBOOLS, DB, JOB TO DO 1/ACCS
-#
+
 # DEBRIS:  A, L, Q, RUPTREG1, RUPTREG2, (ITEMPS IN NOVAC)
 
 ALLCOAST        EXTEND                                          # SAVE Q FOR RETURN
@@ -174,6 +183,3 @@ ALLCOAST        EXTEND                                          # SAVE Q FOR RET
                 TC              RESTORDB        +1              # RESTORE DEADBANK TO CREW-SELECTED VALUE.
 
                 TC              RUPTREG2                        # RETURN.
-
-
-
