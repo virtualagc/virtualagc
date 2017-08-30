@@ -23,6 +23,8 @@
 ##		2016-12-18 RSB	Proofed text comments with octopus/ProoferComments
 ##				and corrected the errors found.
 ##		2017-08-01 MAS	Created from LMY99 Rev 1.
+##              2017-08-29 MAS  Fixed a comment-text error found while transcribing
+##				Zerlina 56.
 
 ## This source code has been transcribed or otherwise adapted from
 ## digitized images of a hardcopy from the MIT Museum.  The digitization
@@ -65,7 +67,7 @@
 #				A.	A T6RUPT IS ABOUT TO OCCUR AT THE NEXT DINC, OR
 #				B.	A T6RUPT IS WAITING IN THE PRIORITY CHAIN, OR
 #				C.	A T6RUPT IS IN PROCESS NOW.
-#	4.	ALL PROGRAMS WHICH OPERATE IN EITHER INTERRUPT MODE OR WITH INTERRUPT INHIBITED MUST CALL T6JOBCHK
+#	4)	ALL PROGRAMS WHICH OPERATE IN EITHER INTERRUPT MODE OR WITH INTERRUPT INHIBITED MUST CALL T6JOBCHK
 #		EVERY 5 MILLISECONDS TO PROCESS A POSSIBLE WAITING T6RUPT BEFORE IT CAN BE HONORED BY THE HARDWARE.
 #      (5.	PROGRAM JTLST, IN Q,R-AXES, HANDLES THE INPUT LIST.)
 #

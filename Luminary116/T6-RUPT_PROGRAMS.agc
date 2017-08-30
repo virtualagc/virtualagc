@@ -16,6 +16,8 @@
 ##              2017-02-07 NV   Updated for Luminary 116.
 ##		2017-03-14 RSB	Proofed comment text via 3-way diff vs
 ##				Luminary 99 and 131 ... no problems found.
+##              2017-08-29 MAS  Fixed a comment-text error found while transcribing
+##				Zerlina 56.
 
 ## Page 1393
 # PROGRAM NAMES:        (1) T6JOBCHK    MOD. NO. 5      OCTOBER 2, 1967
@@ -38,7 +40,7 @@
 #                               A.      A T6RUPT IS ABOUT TO OCCUR AT THE NEXT DINC, OR
 #                               B.      A T6RUPT IS WAITING IN THE PRIORITY CHAIN, OR
 #                               C.      A T6RUPT IS IN PROCESS NOW.
-#       4.      ALL PROGRAMS WHICH OPERATE IN EITHER INTERRUPT MODE OR WITH INTERRUPT INHIBITED MUST CALL T6JOBCHK
+#       4)      ALL PROGRAMS WHICH OPERATE IN EITHER INTERRUPT MODE OR WITH INTERRUPT INHIBITED MUST CALL T6JOBCHK
 #               EVERY 5 MILLISECONDS TO PROCESS A POSSIBLE WAITING T6RUPT BEFORE IT CAN BE HONORED BY THE HARDWARE.
 #      (5.      PROGRAM JTLST, IN Q,R-AXES, HANDLES THE INPUT LIST.)
 
