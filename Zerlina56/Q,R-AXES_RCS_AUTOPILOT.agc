@@ -17,10 +17,9 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-07-28 MAS  Created from Luminary 210.
+##              2017-08-29 MAS  Updated for Zerlina 56.
 
-## NOTE: Page numbers below have not yet been updated to reflect Zerlina 56.
-
-## Page 1440
+## Page 1430
                 BANK            17
                 SETLOC          DAPS2
                 BANK
@@ -29,6 +28,7 @@
 
                 COUNT*          $$/DAPQR
 
+#
 CALLQERR        CA              BIT13                   # CALCULATE Q,R ERRORS UNLESS THESE AXES
                 EXTEND                                  # ARE IN MANUAL RATE COMMAND.
                 RAND            CHAN31
@@ -40,10 +40,11 @@ CALLQERR        CA              BIT13                   # CALCULATE Q,R ERRORS U
                 BZF             Q,RORGTS                # IF SO BYPASS CALCULATION OF ERRORS.
                 TC              QERRCALC
 
+#
 Q,RORGTS        CCS             COTROLER                # CHOOSE CONTROL SYSTEM FOR THIS DAP PASS:
-                TCF             GOTOGTS                 #       GTS (ALTERNATES WITH RCS WHEN DOCKED)
-                TCF             TRYGTS                  #       GTS IF ALLOWED, OTHERWISE RCS
-RCS             CAF             ZERO                    #       RCS (TRYGTS MAY BRANCH TO HERE)
+                TCF             GOTOGTS                 #   GTS (ALTERNATES WITH RCS WHEN DOCKED)
+                TCF             TRYGTS                  #   GTS IF ALLOWED, OTHERWISE RCS
+RCS             CAF             ZERO                    #   RCS (TRYGTS MAY BRANCH TO HERE)
                 TS              COTROLER
 
                 DXCH            EDOTQ
@@ -67,9 +68,9 @@ SENSEGET        CA              BIT7                    # INPUT BITS OVERRIDE TH
                 EXTEND                                  # SENSETYP WILL NOT OPPOSE ANYTRANS
                 RAND            CHAN31
                 EXTEND
-                BZF             +X0RULGE
+                BZF             +XORULGE
 
-## Page 1441
+## Page 1431
                 CA              BIT8
                 EXTEND
                 RAND            CHAN31
@@ -79,13 +80,12 @@ SENSEGET        CA              BIT7                    # INPUT BITS OVERRIDE TH
                 CA              ULLAGER
                 MASK            DAPBOOLS
                 CCS             A
-                TCF             +X0RULGE
+                TCF             +XORULGE
 
                 TS              NEXTU                   # STORE NULL TRANSLATION POLICIES
                 TS              NEXTV
                 CS              DAPBOOLS                # BURNING OR DRIFTING?
                 MASK            DRIFTBIT
-## Note: There is a short blue horizontal marker line right to the right of the opernad DRIFTBIT
                 EXTEND
                 BZF             TSENSE
                 CA              FLGWRD10                # DPS (INCLUDING DOCKED) OR APS?
@@ -95,7 +95,7 @@ SENSEGET        CA              BIT7                    # INPUT BITS OVERRIDE TH
 TSENSE          TS              SENSETYP
                 TCF             QRCONTRL
 
-+X0RULGE        CAF             ONE
++XORULGE        CAF             ONE
 -XTRANS         AD              FOUR
                 TS              ROTINDEX
                 AD              NEG3
@@ -121,19 +121,18 @@ TSNUMBRT        TS              NUMBERT
                 CA              00314OCT
                 MASK            POLYTEMP
 TSNEXTS         TS              NEXTU
-
-## Page 1442
+## Page 1432
                 CS              00314OCT
                 MASK            POLYTEMP
                 TS              NEXTV
 
-#                                              Q,R-AXES RCS CONTROL MODE SELECTION
+#                                         Q,R-AXES RCS CONTROL MODE SELECTION
 
-#                                                SWITCHES                INDICATION WHEN SET
+#                                           SWITCHES                INDICATION WHEN SET
 
-#                                                BIT13/CHAN31            AUTO, GO TO ATTSTEER
-#                                                PULSES                  MINIMUM IMPULSE MODE
-#                                                (OTHERWISE)             RATE COMMAND/ATTITUDE HOLD MODE
+#                                           BIT13/CHAN31            AUTO, GO TO ATTSTEER
+#                                           PULSES                  MINIMUM IMPULSE MODE
+#                                           (OTHERWISE)             RATE COMMAND/ATTITUDE HOLD MODE
 
 QRCONTRL        CA              BIT13                   # CHECK MODE SELECT SWITCH.
                 EXTEND
@@ -173,8 +172,7 @@ FIREQR          CA              TEMP31
 
                 CA              TEMP31
                 MASK            BIT5
-
-## Page 1443
+## Page 1433
                 EXTEND
                 BZF             +RMIN
 
@@ -225,7 +223,7 @@ MIMRET          CA              DAPBOOLS
                 CA              ONE
                 AD              TWO
                 TS              NUMBERT
-## Page 1444
+## Page 1434
                 TCF             AFTERTJ
 
 60MS            =               OCT140
@@ -236,9 +234,9 @@ OCT63           OCT             63
 TRANS4          CA              FOUR
                 TCF             TSNUMBRT
 
-#                                              RATE COMMAND MODE:
+#                                         RATE COMMAND MODE:
 
-#                                              DESCRIPTION (SAME AS P-AXIS)
+#                                         DESCRIPTION (SAME AS P-AXIS)
 
 CHEKSTIK        TS              INGTS                   # NOT IN GTS WHEN IN ATT HOLD
                 CS              ONE                     # 1/ACCS WILL DO THE NULLING DRIVES
@@ -276,8 +274,7 @@ RHCACTIV        CCS             SAVEHAND                # *******************
                 MP              STIKSENS
                 XCH             QLAST                   # COMMAND Q RATE     SCALED 45 DEG/SEC
                 COM
-
-## Page 1445
+## Page 1435
                 AD              QLAST
                 TS              DAPTEMP3
                 CCS             SAVEHAND        +1
@@ -328,8 +325,7 @@ ENTERQR         DXCH            QRATEDIF                # TRANSFORM RATES FROM Q
                 CA              RCSFLAGS                # BREAKOUT LEVEL NOT EXCEEDED.  CHECK FOR
                 MASK            QRBIT                   # DIRECT RATE CONTROL LAST TIME.
                 EXTEND
-
-## Page 1446
+## Page 1436
                 BZF             +2
                 TCF             ENTERUV                 # CONTINUE DIRECT RATE CONTROL.
                 TCF             STILLRCS                # PSEUDO-AUTO CONTROL.
@@ -380,8 +376,7 @@ TOPSEUDO        CS              QRBIT
                 CA              HANDADR
                 TS              RETJADR
                 CA              ONE
-
-## Page 1447
+## Page 1437
 BACKHAND        TS              AXISCTR
 
                 CA              FOUR
@@ -407,7 +402,7 @@ BACKHAND        TS              AXISCTR
                 CS              1/ANET2         +1
                 EXTEND
                 INDEX           AXISCTR                 # URATEDIF IS SCALED AT PI/4 RAD/SEC
-                MP              URATEDIF                #  JET TIME IN A       SCALED 32 SEC
+                MP              URATEDIF                #  JET TIME IN A      SCALED 32 SEC
                 TS              Q
                 DAS             A
                 AD              Q
@@ -423,17 +418,16 @@ ZEROTJ          CA              ZERO
 
 HANDADR         GENADR          BACKHAND
 
-#                                              GTS WILL BE TRIED IF
-#                                                 1. USEQRJTS= 0,
-#                                                 2. ALLOWGTS POS,
-#                                                 3. JETS ARE OFF (Q,R-AXES)
+#                                         GTS WILL BE TRIED IF
+#                                            1. USEQRJTS= 0,
+#                                            2. ALLOWGTS POS,
+#                                            3. JETS ARE OFF(Q,R-AXES)
 TRYGTS          CAF             USEQRJTS                # IS JET USE MANDATORY.        (AS LONG AS
                 MASK            DAPBOOLS                # USEQRJTS BIT IS NOT BIT 15, CCS IS SAFE)
                 CCS             A
                 TCF             RCS
                 CCS             ALLOWGTS                # NO.  DOES AOSTASK OK CONTROL FOR GTS?
-
-## Page 1448
+## Page 1438
                 TCF             +2
                 TCF             RCS
                 EXTEND
@@ -458,7 +452,8 @@ CHKINGTS        CCS             INGTS                   # WAS THE TRIM GIMBAL CO
                 EBANK=          CDUXD
 GTSCADR         2CADR           GTS
 
-## Page 1449
+
+## Page 1439
 # SUBROUTINE TO COMPUTE Q,R-AXES ATTITUDE ERRORS FOR USE IN THE RCS AND GTS CONTROL LAWS AND THE DISPLAYS.
 
 QERRCALC        CAE             CDUY                    # Q-ERROR CALCULATION
@@ -490,7 +485,7 @@ RERRCALC        CAE             DAPTEMP1                # R-ERROR CALCULATION:
                 XCH             RERROR                  # SAVE R-ERROR FOR EIGHT-BALL DISPLAY.
                 TC              Q
 
-## Page 1450
+## Page 1440
 # "ATTSTEER" IS THE ENTRY POINT FOR Q,R-AXES (U,V-AXES) ATTITUDE CONTROL USING THE REACTION CONTROL SYSTEM
 
 ATTSTEER        EQUALS          STILLRCS                # "STILLRCS" IS THE RCS EXIT FROM TRYGTS.
@@ -501,8 +496,8 @@ STILLRCS        CA              RERROR
                 TC              ROT-TOUV
                 DXCH            UERROR
 
-#                                              PREPARES CALL TO TJETLAW (OR SPSRCS(DOCKED))
-#                                              PREFORMS SKIP LOGIC ON U OR Y AXIS IF NEEDED.
+#                                         PREPARES CALL TO TJETLAW (OR SPSRCS(DOCKED))
+#                                         PREFORMS SKIP LOGIC ON U OR Y AXIS IF NEEDED.
 TJLAW           CA              TJLAWADR
                 TS              RETJADR
                 CA              ONE
@@ -537,27 +532,26 @@ TJLAW           CA              TJLAWADR
                 CAF             FOUR                    # ALWAYS CALL FOR 2-JET CONTROL ABOUT U,V.
                 TS              NUMBERT                 # FALL THROUGH TO JET SELECTION, ETC.
 
-#                                              Q,R-JET-SELECTION-LOGIC
+#                                         Q,R-JET-SELECTION-LOGIC
 
-#                                              INPUT: AXISCTR        0,1 FOR U,V
-#                                                     SNUFFBIT       ZERO TJETU,V AND TRANS. ONLY IF SET IN A DPS BURN
+#                                         INPUT: AXISCTR        0,1 FOR  U,V
+#                                                SNUFFBIT       ZERO TJETU,V AND TRANS. ONLY IF SET IN A DPS BURN
+## Page 1441
+#                                                TJU,TJV        JET TIME SCALED 10.24 SEC.
+#                                                NUMBERT        INDICATES NUMBER OF JETS AND TYPE OF POLICY
+#                                                RETJADR        WHERE TO RETURN TO
 
-## Page 1451
-#                                                     TJU,TJV        JET TIME SCALED 10.24 SEC.
-#                                                     NUMBERT        INDICATES NUMBER OF JETS AND TYPE OF POLICY
-#                                                     RETJADR        WHERE TO RETURN TO
+#                                         OUTPUT:  NO.U(V)JETS  RATE DERIVATION FEEDBACK
+#                                                  CHANNEL 5
+#                                                  SKIPU,SKIRV FOR LESS THAN 150MS FIRING
 
-#                                              OUTPUT:  NO.U(V)JETS  RATE DERIVATION FEEDBACK
-#                                                       CHANNEL 5
-#                                                       SKIPU,SKIPV FOR LESS THAN 150MS FIRING
+#                                         NOTES:  IN CASE OF FAILURE IN DESIRED ROTATION POLICY,"ALL" UNFAILED
+#                                                 JETS OF THE DESIRED POLICY ARE SELECTED. SINCE THERE ARE ONLY
+#                                                 TWO JETS, THIS MEANS THE OTHER ONE OR NONE. THE ALARM IS SENT
+#                                                 IF NONE CAN BE FOUND.
 
-#                                              NOTES:  IN CASE OF FAILURE IN DESIRED ROTATION POLICY,"ALL" UNFAILED
-#                                                      JETS OF THE DESIRED POLICY ARE SELECTED. SINCE THERE ARE ONLY
-#                                                      TWO JETS, THIS MEANS THE OTHER ONE OR NONE. THE ALARM IS SENT
-#                                                      IF NONE CAN BE FOUND.
-
-#                                                      TIMES LESS THAN 14 MSEC ARE TAKEN TO CALL FOR A SINGLE-JET
-#                                                      MINIMUM IMPULSE, WITH THE JET CHOSEN SEMI-RANDOMLY.
+#                                                 TIMES LESS THAN 14 MSEC ARE TAKEN TO CALL FOR A SINGLE-JET
+#                                                 MINIMUM IMPULSE, WITH THE JET CHOSEN SEMI-RANDOMLY.
 
 AFTERTJ         CA              FLAGWRD5                # IF SNUFFBIT SET DURING A DPS BURN GO TO
                 MASK            SNUFFBIT                #   XTRANS; THAT IS, INHIBIT CONTROL.
@@ -569,7 +563,6 @@ AFTERTJ         CA              FLAGWRD5                # IF SNUFFBIT SET DURING
                 BZF             DOROTAT
                 CA              DAPBOOLS
                 MASK            DRIFTBIT
-## Note: There is a short blue horizontal marker line right to the rigth of the operand DRIFTBIT
                 EXTEND
                 BZF             XTRANS
 
@@ -593,8 +586,7 @@ DOROTAT         CAF             TWO
                 AD              -150MS
                 EXTEND
                 BZMF            DOSKIP
-
-## Page 1452
+## Page 1442
                 TC              SELCTSUB
 
                 INDEX           AXISCTR
@@ -646,7 +638,7 @@ NOTMIN          TC              SELCTSUB
                 CA              INDEXES
                 INHINT
 
-## Page 1453
+## Page 1443
                 TS              T6FURTHA        +1
                 CA              POLYTEMP
                 INDEX           T6FURTHA        +1
@@ -697,42 +689,41 @@ XTRANS          CA              ZERO
 INDEXES         DEC             4
                 DEC             13
 +TJMINT6        DEC             22
-
-## Page 1454
+## Page 1444
 -150MS          DEC             -240
 BIT8,9          OCT             00600
 SCLNORM         OCT             266
 TJLAWADR        GENADR          TJLAW           +3      # RETURN ADDRESS FOR RCS ATTITUDE CONTROL
 
-#                                              THE JET LIST:
-#                                              THIS IS A WAITLIST FOR T6RUPTS.
+#                                         THE JET LIST:
+#                                         THIS IS A WAITLIST FOR T6RUPTS.
 
-#                                              CALLED BY:
-#                                                       CA  TJ            TIME WHEN NEXT JETS WILL BE WRITTEN
-#                                                       TS  T6FURTHA
-#                                                       CA  INDEX         AXIS TO BE WIRTTEN AT TJ (FROM NOW)
-#                                                       TS  T6FURTHA +1
-#                                                       TC  JTLST
+#                                         CALLED BY:
+#                                                  CA  TJ            TIME WHEN NEXT JETS WILL BE WRITTEN
+#                                                  TS  T6FURTHA
+#                                                  CA  INDEX         AXIS TO BE WIRTTEN AT TJ (FROM NOW)
+#                                                  TS  T6FURTHA +1
+#                                                  TC  JTLST
 #
-#                                              EXAMPLE-  U-AXIS AUTOPILOT WILL WRITE ITS ROTATION CODE OF
-#                                              JETS INTO CHANNEL 5 .  IF IT DESIRES TO TURN OFF THIS POLICY WITHIN
-#                                              150MS AND THEN FIRE NEXTU, A CALL TO JTLST IS MADE WITH T6FURTHA
-#                                              CONTAINING THE TIME TO TURN OFF THE POLICY, T6FURTHA +1 THE INDEX
-#                                              OF THE U-AXIS(4), AND NEXTU WILL CONTAIN THE "U-TRANS" POLICY OR ZERO.
+#                                         EXAMPLE-  U-AXIS AUTOPILOT WILL WRITE ITS ROTATION CODE OF
+#                                         JETS INTO CHANNEL 5.   IF IT DESIRES TO TURN OFF THIS POLICY WITHIN
+#                                         150MS AND THEN FIRE NEXTU, A CALL TO JTLST IS MADE WITH T6FURTHA
+#                                         CONTAINING THE TIME TO TURN OFF THE POLICY, T6FURTHA +1 THE INDEX
+#                                         OF THE U-AXIS(4), AND NEXTU WILL CONTAIN THE "U-TRANS" POLICY OR ZERO.
 
-#                                              THE LIST IS EXACTLY 3 LONG.(THIS LEADS TO SKIP LOGIC AND 150MS LIMIT)
-#                                               THE INPUT IS THE LAST MEMBER OF THE LIST
+#                                         THE LIST IS EXACTLY 3 LONG.(THIS LEADS TO SKIP LOGIC AND 150MS LIMIT)
+#                                          THE INPUT IS THE LAST MEMBER OF THE LIST
 
-#                                              RETURNS BY:
-#                                                    +  TC  Q
+#                                         RETURNS BY:
+#                                               +  TC  Q
 #
-#                                              DEFINITIONS:(OUTPUT)
-#                                              TIME6             TIME OF NEXT RUPT
-#                                              T6NEXT            DELTA TIME TO NEXT RUPT
-#                                              T6FURTHA          DELTA TIME FROM 2ND TO LAST RUPT
-#                                              NXT6ADR           AXIS INDEX       Q - P-AXIS
-#                                              T6NEXT +1         AXIS INDEX       4 - U-AXIS
-#                                              T6FURTHA +1       AXIS INDEX      13 - V-AXIS
+#                                         DEFINITIONS:(OUTPUT)
+#                                         TIME6             TIME OF NEXT RUPT
+#                                         T6NEXT            DELTA TIME TO NEXT RUPT
+#                                         T6FURTHA          DELTA TIME FROM 2ND TO LAST RUPT
+#                                         NXT6ADR           AXIS INDEX       Q - P-AXIS
+#                                         T6NEXT +1         AXIS INDEX       4 - U-AXIS
+#                                         T6FURTHA +1       AXIS INDEX      13 - V-AXIS
 JTLST           CS              T6FURTHA
                 AD              TIME6
                 EXTEND
@@ -749,8 +740,7 @@ TURNON          EXTEND
                 TC              C13STALL
 
                 CA              BIT15
-
-## Page 1455
+## Page 1445
                 EXTEND
                 WOR             CHAN13
                 TC              C13QSAV
@@ -772,6 +762,7 @@ LASTCHG         CS              A
                 TS              T6FURTHA
 
                 TC              Q
+
 
 #   ROT-TOUV IS ENTERED WITH THE Q-COMPONENT OF THE QUANTITY TO BE TRANSFORMED IN A AND THE R-COMPONENT IN L.
 # ROT-TOUV TRANSFORMS THE QUANTITY INTO THE NON-ORTHOGONAL U-V AXIS SYSTEM. IN THE U-V SYSTEM NO CROSS-COUPLING IS
@@ -800,8 +791,7 @@ ROT-TOUV        LXCH            ROTEMP2                 # (R) IS PUT INTO ROTEMP
                 LXCH            ROTEMP1                 # COEFFQ.(Q) + COEFFR.(R) IS PUT INTO L
                 TC              Q
 SELCTSUB        INDEX           ROTINDEX
-
-## Page 1456
+## Page 1446
                 CA              ALLJETS
                 INDEX           NUMBERT
                 MASK            TYPEPOLY
@@ -830,18 +820,18 @@ FAILOOP         TS              NUMBERT
                 TC              ALARM
                 OCT             02004
                 TCF             NOROTAT
-ALLJETS         OCT             00110                   # -U      6  13
-                OCT             00022                   # -V      2   9
-                OCT             00204                   # +U      5  14
+ALLJETS         OCT             00110                   # -U       6 13
+                OCT             00022                   # -V       2  9
+                OCT             00204                   # +U       5 14
 
-                OCT             00041                   # +V      1  10
+                OCT             00041                   # +V       1 10
 TYPEPOLY        OCT             00125                   # -X  1 5 9  13
                 OCT             00252                   # +X 2 6 10 14
                 OCT             00146                   # A   2 5 10 13
                 OCT             00231                   # B   1 6 9 14
                 OCT             00377                   # ALL 1 2 5 6 9 10 13 14
 
-# THE FOLLOWING SETS THE INTERRUPT FLIP-FLOP AS SOON AS POSSIBLE, WHICH PERMITS A RETURN TO THE INTERRUPTED JOB.
+#  THE FOLLOWING SETS THE INTERRUPT FLIP-FLOP AS SOON AS POSSIBLE, WHICH PERMITS A RETURN TO THE INTERRUPTED JOB.
 
 CLOSEOUT        CA              ADRRUPT
                 TC              MAKERUPT
@@ -852,8 +842,7 @@ ENDJASK         DXCH            DAPARUPT
                 DXCH            ARUPT
                 DXCH            DAPBQRPT
                 XCH             BRUPT
-
-## Page 1457
+## Page 1447
                 LXCH            Q
                 CAF             NEGMAX                  # NEGATIVE DAPZRUPT SIGNALS JASK IS OVER.
                 DXCH            DAPZRUPT

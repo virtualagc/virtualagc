@@ -26,6 +26,8 @@
 ##				and fixed errors found.
 ##		2017-03-16 RSB	Comment-text fixes identified in 5-way
 ##				side-by-side diff of Luminary 69/99/116/131/210.
+##		2017-08-29 MAS	Fixed a comment-text error found while transcribing
+##				Zerlina 56.
 
 ## Page 1436
                 BANK    17
@@ -531,7 +533,7 @@ TJLAW           CA      TJLAWADR
 ## Page 1447
 # OUTPUT:       NO.U(V)JETS     RATE DERIVATION FEEDBACK
 #               CHANNEL 5
-#               SKIPU,SKIPV     FOR LESS THAN 150MS FIRING
+#               SKIPU,SKIRV     FOR LESS THAN 150MS FIRING
 #
 # NOTES:        IN CASE OF FAILURE IN DESIRED ROTATION POLICY, "ALL" UNFAILED
 #               JETS OF THE DESIRED POLICY ARE SELECTED. SINCE THERE ARE ONLY
