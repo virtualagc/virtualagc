@@ -17,10 +17,9 @@
 ## Contact:     Ron Burkey <info@sandroid.org>.
 ## Website:     www.ibiblio.org/apollo/index.html
 ## Mod history: 2017-07-28 MAS  Created from Luminary 210.
+##              2017-08-29 MAS  Updated for Zerlina 56.
 
-## NOTE: Page numbers below have not yet been updated to reflect Zerlina 56.
-
-## Page 1470
+## Page 1460
                 BANK            21
                 EBANK=          QDIFF
                 SETLOC          DAPS4
@@ -72,7 +71,7 @@ GOQTRIMG        CAF             ZERO                    # SET INDEXER FOR Q-AXIS
                 EXTEND
                 MP              BIT2                    # RESCALE AOS TO PI/4
 
-## Page 1471
+## Page 1461
                 EXTEND
                 BZF             GTSQAXIS        -3      # USE FULL SCALE FOR LARGER AOS ESTIMATES.
 
@@ -123,8 +122,7 @@ ALGORTHM        EXTEND                                  # Q(R)DIFF IS THETA (ERR
                 CA              L                       # SHIFT UP THE REMAINDER.
                 LXCH            7                       # ZERO LOW-ORDER DIVIDEND.
                 EXTEND
-
-## Page 1472
+## Page 1462
                 DV              KCENTRAL
                 XCH             A2CNTRAL        +1      # QUOTIENT STORED AT 16*PI, D.P.
                 TCF             HAVEQUOT
@@ -175,7 +173,7 @@ DEFUNCT         TS              K2CNTRAL
                 TS              K2CNTRAL        +1
                 TCF             FUNCT2
 
-## Page 1473
+## Page 1463
 NEG1/3          DEC             -.33333
 
 NEGFNCT2        EXTEND
@@ -184,7 +182,7 @@ NEGFNCT2        EXTEND
 
 FUNCT2          EXTEND
                 DCA             A2CNTRAL
-                DAS             K2CNTRAL                # DEL*OMEGA + ALPHA(2)/(2*K) AT 16*PI, D.P.
+                DAS             K2CNTRAL                # DEL*OMEGA + ALPHA(2)/(2*K) AT 16*PI,D.P.
 
 FUNCT3          CA              A2CNTRAL
                 EXTEND
@@ -225,7 +223,7 @@ GETROOT         CA              K2CNTRAL                # K*(DEL*OMEGA + ALPHA(2
                 TS              L
                 TCF             +2
                 ADS             FUNCTION                # DESIRED TERM IN FUNCTION, AT PI(2)/16
-## Page 1474
+## Page 1464
                 CCS             DEL
                 TCF             RSTOFGTS
                 TCF             NEGUSUM
@@ -244,7 +242,7 @@ NEGATE          EXTEND
 
 # THE WRCHN12 SUBROUTINE SETS BITS 9,10,11,12 OF CHANNEL 12 ON THE BASIS OF THE CONTENTS OF NEGUQ,NEGUR WHICH ARE
 # THE NEGATIVES OF THE DESIRED ACCELERATION CHANGES.  ACDT+C12 SETS Q(R)ACCDOT TO REFLECT THE NEW DRIVES.
-#
+
 # WARNING:  ACDT+C12 AND WRCHN12 MUST BE CALLED WITH INTERRUPT INHIBITED.
 
 BGIM            OCTAL           07400
@@ -277,7 +275,7 @@ ACDT+C12        CS              NEGUQ
                 EXTEND
                 WRITE           CHAN12
 
-## Page 1475
+## Page 1465
                 CS              CALLGMBL                # TURN OFF REQUEST FOR ACDT+C12 EXECUTION.
                 MASK            RCSFLAGS
                 TS              RCSFLAGS
@@ -289,7 +287,7 @@ ACDT+C12        CS              NEGUQ
                 SETLOC          DAPS4
                 BANK
 
-## Page 1476
+## Page 1466
 # SUBROUTINE TIMEGMBL:  MOD 0,  OCTOBER 1967, CRAIG WORK
 
 # TIMEGMBL COMPUTES THE DRIVE TIME NEEDED FOR THE TRIM GIMBAL TO POSITION THE DESCENT ENGINE NOZZLE SO AS TO NULL
@@ -339,8 +337,7 @@ TIMEGMBL        CAF             ONE                     # INITIALIZE ALLOWGTS.
                 CAF             TWO                     # SET UP LOOP FOR R AXIS.
                 LXCH            Q                       # SAVE RETURN ADDRESS.
                 LXCH            RUPTREG2
-
-## Page 1477
+## Page 1467
                 TCF             +2
 TIMQGMBL        CAF             ZERO                    # NOW DO THE Q-AXIS
                 TS              QRNDXER
@@ -355,7 +352,7 @@ ALPHATRY        INDEX           QRNDXER
                 EXTEND
                 BZF             TGOFFNOW                # IS ALPHA ZERO?
 
-                TS              Q                       # SAVE A COPY OF -AOS.
+                TS              Q                       # SAVE A COPY OF  -AOS.
                 EXTEND                                  # NO.  RESCALE FOR TIMEGMBL USE.
                 MP              OCT23146                # OCTAL 23146 IS DECIMAL .6
                 AD              Q                       # -1.6*AOS AT PI/2 = -.4*AOS AT PI/8.
@@ -391,7 +388,7 @@ POSALPH         TS              ITEMP2                  # STORE  -ABS(.4*AOS) SC
                 EXTEND                                  # QUOTIENT IS DRIVE TIME AT WAITLIST.
                 DV              NZACCDOT                # ABS(ALPHA)/ACCDOT AT 2(14)/100
 
-## Page 1478
+## Page 1468
                 EXTEND
                 BZF             TGOFFNOW                # DRIVE TIME MUST BE GREATER THAN ZERO.
 
@@ -430,7 +427,7 @@ DONEYET         CCS             QRNDXER
 
 OCT00240        OCTAL           00240                   # DECIMAL 10/1024
 
-## Page 1479
+## Page 1469
 # THE FOLLOWING SECTION IS A CONTINUATION OF THE TRIM GIMBAL CONTROL FROM THE LAST GTS ENTRY. THE QUANTITY NEGUSUM
 # IS COMPUTED FOR EACH AXIS (Q,R), .707*DEL*FUNCTION(3/2) + K2THETA = NEGUSUM.  NEW DRIVES ARE ENTERED TO CH 12.
 
@@ -482,7 +479,7 @@ SCALLOOP        CS              FUNCTION
                 BZMF            MULBUSH                 # IF ARG IS NOT LESS THAN REFERENCE, GO
                                                         # AROUND THE MULBERRY BUSH ONCE MORE.
 
-## Page 1480
+## Page 1470
                 INDEX           ININDEX
                 CA              BIT15                   # THIS IS THE SCALE MAGNITUDE
                 XCH             HALFARG                 # 2**(-ININDEX) IS THE SHIFT DIVISOR.
@@ -520,7 +517,7 @@ PRODUCT         XCH             K2CNTRAL
                 EXTEND                                  #             THE PRODUCT OF
                 MP              L                       #  1/2                   2       1/2
                 ADS             K2CNTRAL        +1      # K   *(DEL*OMEGA + ALPHA /(2*K))
-                TS              L                       #                  AND
+                TS              L                       #                 AND
                 TCF             +2                      #                        2
                 ADS             K2CNTRAL                #  DEL*(DEL*OMEGA + ALPHA /(2*K)) NOW IN
                                                         # K2CNTRAL
@@ -533,8 +530,7 @@ DOSHIFT         CA              ININDEX
                 BZF             ADDITIN
                 INDEX           SHFTFLAG
                 CA              BIT15
-
-## Page 1481
+## Page 1471
                 XCH             K2CNTRAL
                 EXTEND
                 MP              K2CNTRAL
@@ -586,7 +582,7 @@ ZEROLOUP        CS              RCSFLAGS                # SET UP REQUEST FOR ACD
                 MASK            CALLGMBL
                 ADS             RCSFLAGS
 
-## Page 1482
+## Page 1472
 LOUPE           CCS             QRCNTR                  # HAVE BOTH AXES BEEN PROCESSED?
                 TCF             GOQTRIMG                # NO.  DO Q AXIS NEXT.
 
