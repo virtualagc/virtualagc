@@ -163,8 +163,8 @@ ParseInterpretiveOperand (ParseInput_t *InRecord, ParseOutput_t *OutRecord)
       i = nnnnFields[RawNumInterpretiveOperands - NumInterpretiveOperands];
       if (0 != (debugLevel & DEBUG_SOLARIUM))
 	{
-	  char s[32];
-	  sprintf (s, "a,i=%d,K=%d", i, K.Value);
+	  char s[64];
+	  sprintf (s, "a,i=%d,K=%d,nnnnFields=[%d,%d,%d,%d]", i, K.Value, nnnnFields[0], nnnnFields[1], nnnnFields[2], nnnnFields[3]);
 	  debugPrint (s);
 	  debugFinal = 1;
 	}
