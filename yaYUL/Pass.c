@@ -115,6 +115,11 @@
  *                              emits a word will update the current superbank. Also added
  *                              --early-sbank, which makes yaYUL use pre-1967 YUL behavior
  *                              when handling superbank bits.
+ *             	2017-08-31 RSB	It seems as though for --block1, the variable NumInterpretiveOperands
+ *             			was used without regard to the fact that it was sometimes used in
+ *             			conjunction with RawNumInterpretiveOperands (which wasn't changed).
+ *             			The result is that --block1 assembly was working essentially by
+ *             			accident, and similarly was failing by accident in Mac OS X.
  *
  * I don't really try to duplicate the formatting used by the original
  * assembly-language code, since that format was appropriate for
@@ -1887,6 +1892,7 @@ Pass(int WriteOutput, const char *InputFilename, FILE *OutputFile, int *Fatals,
                     {
                       iMatch = 0;
                       ParseInputRecord.Operator = "";
+                      RawNumInterpretiveOperands = 1;
                       NumInterpretiveOperands = 1;
                     }
                 }
