@@ -33,22 +33,23 @@
 //------------------------------------------------------------------------
 
 int
-ParseInterpretiveOperand(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
+ParseInterpretiveOperand (ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 {
   int Value, i;
   Address_t K, KMod;
+  int debugFinal = 0;
 
   // A debugging statement.
   //if (InRecord->ProgramCounter.FB==026 && (01777 & InRecord->ProgramCounter.SReg) == 00323) {
   //    i = 12;
   //}
 
-  ArgType = ParseComma(InRecord);
-  IncPc(&InRecord->ProgramCounter, 1, &OutRecord->ProgramCounter);
+  ArgType = ParseComma (InRecord);
+  IncPc (&InRecord->ProgramCounter, 1, &OutRecord->ProgramCounter);
 
   if (!OutRecord->ProgramCounter.Invalid && OutRecord->ProgramCounter.Overflow)
     {
-      strcpy(OutRecord->ErrorMessage, "Next code may overflow storage.");
+      strcpy (OutRecord->ErrorMessage, "Next code may overflow storage.");
       OutRecord->Warning = 1;
     }
 
@@ -62,20 +63,20 @@ ParseInterpretiveOperand(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
   // Do some sanity checking.
   if (InRecord->Extend && !InRecord->IndexValid)
     {
-      strcpy(OutRecord->ErrorMessage, "Illegally preceded by EXTEND.");
+      strcpy (OutRecord->ErrorMessage, "Illegally preceded by EXTEND.");
       OutRecord->Fatal = 1;
       OutRecord->Extend = 0;
     }
 
   if (InRecord->IndexValid)
     {
-      strcpy(OutRecord->ErrorMessage, "Illegally preceded by INDEX.");
+      strcpy (OutRecord->ErrorMessage, "Illegally preceded by INDEX.");
       OutRecord->Fatal = 1;
       OutRecord->IndexValid = 0;
     }
 
   // Parse the operand field.
-  if (Block1 && !strcmp(InRecord->Operand, "-"))
+  if (Block1 && !strcmp (InRecord->Operand, "-"))
     {
       OutRecord->Words[0] = 077777;
       OutRecord->NumWords = 1;
@@ -83,42 +84,42 @@ ParseInterpretiveOperand(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
     }
   else
     {
-      i = GetOctOrDec(InRecord->Operand, &Value);
+      i = GetOctOrDec (InRecord->Operand, &Value);
       if (!i)
-        {
-          if (*InRecord->Operand == '+'
-              || (!Block1 && *InRecord->Operand == '-'))
-            {
-              IncPc(&InRecord->ProgramCounter, Value, &K);
-            }
-          else
-            {
-              K = (const Address_t
-                    )
-                      { 0 };
-              K.Constant = 1;
-              K.Value = Value;
-            }
-        }
+	{
+	  if (*InRecord->Operand == '+'
+	      || (!Block1 && *InRecord->Operand == '-'))
+	    {
+	      IncPc (&InRecord->ProgramCounter, Value, &K);
+	    }
+	  else
+	    {
+	      K = (const Address_t
+		    )
+		      { 0 };
+	      K.Constant = 1;
+	      K.Value = Value;
+	    }
+	}
       else
-        {
-          i = FetchSymbolPlusOffset(&InRecord->ProgramCounter,
-              InRecord->Operand, "", &K);
-        }
+	{
+	  i = FetchSymbolPlusOffset (&InRecord->ProgramCounter,
+				     InRecord->Operand, "", &K);
+	}
     }
 
   if (i || K.Invalid)
     {
-      sprintf(OutRecord->ErrorMessage, "Operand \"%s\" not resolved.",
-          InRecord->Operand);
+      sprintf (OutRecord->ErrorMessage, "Operand \"%s\" not resolved.",
+	       InRecord->Operand);
       OutRecord->Fatal = 1;
       return (0);
     }
 
   // Parse the modifier field.
   KMod = (const Address_t
-        )
-          { 0 };
+	)
+	  { 0 };
   KMod.Constant = 1;
   KMod.Value = 0;
 
@@ -127,26 +128,26 @@ ParseInterpretiveOperand(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
       char args[32];
 
       args[0] = '\0';
-      strcpy(args, InRecord->Mod1);
+      strcpy (args, InRecord->Mod1);
 
       // Handle arguments like "DUMMYJOB + 2", i.e. Mod1=+, Mod2=2.
       if (*InRecord->Mod2)
-        {
-          strcat(args, InRecord->Mod2);
-        }
+	{
+	  strcat (args, InRecord->Mod2);
+	}
 
-      i = GetOctOrDec(args, &Value);
+      i = GetOctOrDec (args, &Value);
       if (!i)
-        {
-          KMod.Value = Value;
-        }
+	{
+	  KMod.Value = Value;
+	}
       else
-        {
-          sprintf(OutRecord->ErrorMessage, "Modifier \"%s\" not resolved.",
-              InRecord->Mod1);
-          OutRecord->Fatal = 1;
-          return (0);
-        }
+	{
+	  sprintf (OutRecord->ErrorMessage, "Modifier \"%s\" not resolved.",
+		   InRecord->Mod1);
+	  OutRecord->Fatal = 1;
+	  return (0);
+	}
     }
 
   // Combine the operand and the modifier.
@@ -163,92 +164,93 @@ ParseInterpretiveOperand(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 	{
 	  char s[32];
 	  sprintf (s, "K=%d", K.Value);
-	  debugPrint(s);
+	  debugPrint (s);
+	  debugFinal = 1;
 	}
       i = nnnnFields[RawNumInterpretiveOperands - NumInterpretiveOperands];
       if ((i & 3) == 1)
-        {
-          // Switch instruction.
-          // Use the encoding 00WWWWWWNNNNBBBB, where WWWWWW and BBBB
-          // are the quotient and remainder when dividing the constant
-          // by 15.  NNNN derives from the opcode.
-          OutRecord->Words[0] = (((K.Value / 15) & 077) << 8) | (K.Value % 15);
-          OutRecord->Words[0] |= (0360 & i);
-        }
+	{
+	  // Switch instruction.
+	  // Use the encoding 00WWWWWWNNNNBBBB, where WWWWWW and BBBB
+	  // are the quotient and remainder when dividing the constant
+	  // by 15.  NNNN derives from the opcode.
+	  OutRecord->Words[0] = (((K.Value / 15) & 077) << 8) | (K.Value % 15);
+	  OutRecord->Words[0] |= (0360 & i);
+	}
       else if ((i & 3) == 2)
-        {
-          // Shift instruction.
-          OutRecord->Words[0] = K.Value;
-          OutRecord->Words[0] |= (i & ~3);
-        }
+	{
+	  // Shift instruction.
+	  OutRecord->Words[0] = K.Value;
+	  OutRecord->Words[0] |= (i & ~3);
+	}
       else
-        {
-          // Not a switch or shift instruction.
-          i = K.Value + OpcodeOffset;
-          if (i < 0)
-            {
-              i--;
-              if (Block1 && K.Value >= 0)
-                InRecord->InversionPending = 1;
-            }
-          else if (Block1 && InRecord->InversionPending)
-            {
-              i -= 2;
-            }
-          i &= 077777;
-          OpcodeOffset = 0;
+	{
+	  // Not a switch or shift instruction.
+	  i = K.Value + OpcodeOffset;
+	  if (i < 0)
+	    {
+	      i--;
+	      if (Block1 && K.Value >= 0)
+		InRecord->InversionPending = 1;
+	    }
+	  else if (Block1 && InRecord->InversionPending)
+	    {
+	      i -= 2;
+	    }
+	  i &= 077777;
+	  OpcodeOffset = 0;
 
-          if (040000 & i)
-            {
-              OutRecord->Words[0] = i;
-            }
-          else
-            {
-              PseudoToStruct(i, &K);
-              if (K.Invalid || !K.Address)
-                goto BadOp;
-              goto RetryMem;
-            }
-        }
+	  if (040000 & i)
+	    {
+	      OutRecord->Words[0] = i;
+	    }
+	  else
+	    {
+	      PseudoToStruct (i, &K);
+	      if (K.Invalid || !K.Address)
+		goto BadOp;
+	      goto RetryMem;
+	    }
+	}
     }
   else if (K.Address && K.Erasable)
     {
       if (Block1)
-        OutRecord->Words[0] = K.SReg + 1;
+	OutRecord->Words[0] = K.SReg + 1;
       else if (!K.Banked || blk2)
-        OutRecord->Words[0] = K.SReg;
+	OutRecord->Words[0] = K.SReg;
       else
-        OutRecord->Words[0] = 0400 * K.EB + (K.SReg - 01400);
+	OutRecord->Words[0] = 0400 * K.EB + (K.SReg - 01400);
     }
   else if (K.Address && K.Fixed)
     {
       if (Block1)
-        {
-          if (K.FB >= 021)
-            {
-              OutRecord->Words[0] = 02000 + (K.FB - 021) * 02000
-                  + (K.SReg & 01777) + 1;
-            }
-          else
-            {
-              OutRecord->Words[0] = 0;
-              sprintf(OutRecord->ErrorMessage,
-                  "Interpretive operand out of range.");
-              OutRecord->Fatal = 1;
-              return (0);
-            }
-        }
+	{
+	  if (K.FB >= 021)
+	    {
+	      OutRecord->Words[0] = 02000 + (K.FB - 021) * 02000
+		  + (K.SReg & 01777) + 1;
+	    }
+	  else
+	    {
+	      OutRecord->Words[0] = 0;
+	      sprintf (OutRecord->ErrorMessage,
+		       "Interpretive operand out of range.");
+	      OutRecord->Fatal = 1;
+	      return (0);
+	    }
+	}
       else
-        {
-          if (!K.Banked)
-            OutRecord->Words[0] = K.SReg;
-          else
-            OutRecord->Words[0] = 02000 * K.FB + (K.SReg - 02000);
-        }
+	{
+	  if (!K.Banked)
+	    OutRecord->Words[0] = K.SReg;
+	  else
+	    OutRecord->Words[0] = 02000 * K.FB + (K.SReg - 02000);
+	}
     }
   else
     {
-      BadOp: strcpy(OutRecord->ErrorMessage, "Incorrect operand type.");
+      BadOp: strcpy (OutRecord->ErrorMessage, "Incorrect operand type.");
       OutRecord->Fatal = 1;
     }
 
@@ -256,30 +258,36 @@ ParseInterpretiveOperand(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
   if (Block1)
     {
       if (ArgType != 0)
-        OutRecord->Words[0] += OutRecord->Words[0] + ArgType - 2;
+	OutRecord->Words[0] += OutRecord->Words[0] + ArgType - 2;
       OpcodeOffset = 0;
       if (K.Constant)
-        {
-          if (InRecord->InversionPending)
-            {
-              OutRecord->Words[0] = 077777 & (~OutRecord->Words[0] + 1);
-              InRecord->InversionPending = 0;
-            }
-          else
-            OutRecord->Words[0]++;
-        }
+	{
+	  if (InRecord->InversionPending)
+	    {
+	      OutRecord->Words[0] = 077777 & (~OutRecord->Words[0] + 1);
+	      InRecord->InversionPending = 0;
+	    }
+	  else
+	    OutRecord->Words[0]++;
+	}
     }
   else
     {
       if (SwitchIncrement[RawNumInterpretiveOperands - NumInterpretiveOperands])
-        {
-          OutRecord->Words[0]++;
-          OutRecord->Words[0] &= 037777;
-          if (ArgType == 2)
-            OutRecord->Words[0] = 077777 & ~OutRecord->Words[0];
-        }
+	{
+	  OutRecord->Words[0]++;
+	  OutRecord->Words[0] &= 037777;
+	  if (ArgType == 2)
+	    OutRecord->Words[0] = 077777 & ~OutRecord->Words[0];
+	}
     }
 
+  if (debugFinal)
+    {
+      char s[32];
+      sprintf (s, "rope=%05o", OutRecord->Words[0]);
+      debugPrint (s);
+    }
   return (0);
 }
 
