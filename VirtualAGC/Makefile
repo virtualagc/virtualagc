@@ -206,7 +206,7 @@ ${APP}: ${SOURCES} ${SOURCESc} ${HEADERS}
 	${CC} -DONNO_STYLE ${PLATFORM} \
 		${YADSKY2} ${YADEDA2} \
 		`wx-config --cxxflags` ${wxFLAGS} \
-		-o $@ ${SOURCES} -x c ${SOURCESc} \
+		-o $@ ${SOURCES} ${DASHX} ${SOURCESc} \
 		`wx-config --libs` \
 		${LIBS2}
 	strip $@${EXT}
@@ -215,7 +215,7 @@ ${APP}.exe: ${SOURCES} ${SOURCESc} ${HEADERS}
 	${PREFIX_WIN}-${CC} -DONNO_STYLE \
 		${YADSKY2} ${YADEDA2} \
 		`${BIN_WIN}/wx-config ${WXSTATIC} --cxxflags` \
-		-o $@ ${SOURCES} -x c ${SOURCESc} \
+		-o $@ ${SOURCES} ${DASHX} ${SOURCESc} \
 		`${BIN_WIN}/wx-config ${WXSTATIC} --libs` \
 		${EXTRA_WIN_LIBS}
 	${PREFIX_WIN}-strip $@
@@ -225,7 +225,7 @@ ${APP}-macosx: ${SOURCES} ${SOURCESc} ${HEADERS}
 		${YADSKY2} ${YADEDA2} \
 		-arch ppc -arch i386 -I${INC_MAC} -isysroot ${SDK_MAC} \
 		`${BIN_MAC}/wx-config ${WXSTATIC} --cxxflags` \
-		-o $@ ${SOURCES} -x c ${SOURCESc} \
+		-o $@ ${SOURCES} ${DASHX} ${SOURCESc} \
 		`${BIN_MAC}/wx-config ${WXSTATIC} --libs`
 	${PREFIX_MAC}-strip $@
 

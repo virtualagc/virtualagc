@@ -271,8 +271,12 @@ NOREADLINE=yes
 
 SNAP_PREFIX = /usr/local/yaAGC
 
+# Does the compiler accept the -x switch?
+DASHX=-x c
+
 # Some adjustments for building in Solaris
 ifdef SOLARIS
+DASHX=
 #NOREADLINE=yes
 LIBS+=-L/usr/local/lib
 LIBS+=-lsocket
@@ -310,6 +314,8 @@ endif
 ifndef GROUP
 GROUP = users
 endif
+
+export DASHX
 
 # Note:  The default build uses no CFLAGS; this makes it easier for a user in
 # the field to build it, since unexpected problems won't throw them for a loop.

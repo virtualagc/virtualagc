@@ -102,7 +102,7 @@ HEADERS:=${APPNAME}.h
 ${APPNAME}: ${SOURCES} ${SOURCESc} ${HEADERS}
 	${CC} \
 		`wx-config --cxxflags` ${wxFLAGS} \
-		-o $@ ${SOURCES} -x c ${SOURCESc} \
+		-o $@ ${SOURCES} ${DASHX} ${SOURCESc} \
 		`wx-config --libs` \
 		${LIBS2}
 	strip $@${EXT}
@@ -110,7 +110,7 @@ ${APPNAME}: ${SOURCES} ${SOURCESc} ${HEADERS}
 ${APPNAME}.exe: ${SOURCES} ${SOURCESc} ${HEADERS}
 	${PREFIX_WIN}-${CC} \
 		`${BIN_WIN}wx-config ${WXSTATIC} --cxxflags` \
-		-o $@ ${SOURCES} -x c ${SOURCESc} \
+		-o $@ ${SOURCES} ${DASHX} ${SOURCESc} \
 		`${BIN_WIN}wx-config ${WXSTATIC} --libs` \
 		${EXTRA_WIN_LIBS}
 	${PREFIX_WIN}-strip $@
@@ -119,7 +119,7 @@ ${APPNAME}-macosx: ${SOURCES} ${SOURCESc} ${HEADERS}
 	powerpc-apple-darwin9-${CC} \
 		-arch ppc -arch i386 -I${INC_MAC} -isysroot ${SDK_MAC} \
 		`${BIN_MAC}wx-config ${WXSTATIC} --cxxflags` \
-		-o $@ ${SOURCES} -x c ${SOURCESc} \
+		-o $@ ${SOURCES} ${DASHX} ${SOURCESc} \
 		`${BIN_MAC}wx-config ${WXSTATIC} --libs`
 	${PREFIX_MAC}-strip $@
 
@@ -129,7 +129,7 @@ ignore-${APPNAME}-macosx: ${SOURCES} ${SOURCESc} ${HEADERS}
 		-I${SDK_MAC}/usr/include/c++/4.0.0 \
 		-I${SDK_MAC}/usr/include/c++/4.0.0/powerpc-apple-darwin9 \
 		`${BIN_MAC}wx-config ${WXSTATIC} --cxxflags` \
-		-o $@-ppc ${SOURCES} -x c ${SOURCESc} \
+		-o $@-ppc ${SOURCES} ${DASHX} ${SOURCESc} \
 		`${BIN_MAC}wx-config ${WXSTATIC} --libs`
 	powerpc-apple-darwin9-lipo \
 		$@-ppc \
@@ -140,7 +140,7 @@ ignore-${APPNAME}-macosx: ${SOURCES} ${SOURCESc} ${HEADERS}
 		-I${SDK_MAC}/usr/include/c++/4.0.0 \
 		-I${SDK_MAC}/usr/include/c++/4.0.0/i686-apple-darwin9 \
 		`${BIN_MAC}wx-config ${WXSTATIC} --cxxflags` \
-		-o $@-i386 ${SOURCES} -x c ${SOURCESc} \
+		-o $@-i386 ${SOURCES} ${DASHX} ${SOURCESc} \
 		`${BIN_MAC}wx-config ${WXSTATIC} --libs`
 	i686-apple-darwin9-lipo \
 		$@-i386 \
