@@ -168,6 +168,9 @@
 #				temporary.
 #		2017-08-24 RSB	Added FORCE_clang, FORCE_cc and FORCE_CC options.
 #		2017-08-29 RSB	Added ZERLINA56 to mission list.
+#		2017-08-31 RSB	Unconditionally returned Solarium to the mission list, since 
+#				the yaYUL bug related to it that was expressing itself in 
+#				Mac OS X has been fixed.
 #
 # The build box is always Linux for cross-compiles.  For native compiles:
 #	Use "make MACOSX=yes" for Mac OS X.
@@ -407,9 +410,9 @@ MISSIONS = Validation Zerlina56 Luminary131 Colossus249 Comanche055
 MISSIONS += Luminary099 Artemis072 Colossus237
 MISSIONS += Aurora12 Sunburst120 Luminary210 Retread44 Luminary069
 MISSIONS += SuperJob LUM99R2 Luminary116 Borealis Sunburst37 LMY99R0
-ifndef MACOSX
+# ifndef MACOSX
 MISSIONS += Solarium055
-endif
+# endif
 export MISSIONS
 
 # Missions needing code::blocks project files.
