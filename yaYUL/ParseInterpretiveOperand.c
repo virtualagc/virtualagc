@@ -160,14 +160,14 @@ ParseInterpretiveOperand (ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 
   RetryMem: if (K.Constant)
     {
+      i = nnnnFields[RawNumInterpretiveOperands - NumInterpretiveOperands];
       if (0 != (debugLevel & DEBUG_SOLARIUM))
 	{
 	  char s[32];
-	  sprintf (s, "a, K=%d", K.Value);
+	  sprintf (s, "a,i=%d,K=%d", i, K.Value);
 	  debugPrint (s);
 	  debugFinal = 1;
 	}
-      i = nnnnFields[RawNumInterpretiveOperands - NumInterpretiveOperands];
       if ((i & 3) == 1)
 	{
 	  // Switch instruction.
