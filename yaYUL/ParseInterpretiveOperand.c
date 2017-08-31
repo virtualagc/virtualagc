@@ -163,7 +163,7 @@ ParseInterpretiveOperand (ParseInput_t *InRecord, ParseOutput_t *OutRecord)
       if (0 != (debugLevel & DEBUG_SOLARIUM))
 	{
 	  char s[32];
-	  sprintf (s, "K=%d", K.Value);
+	  sprintf (s, "a, K=%d", K.Value);
 	  debugPrint (s);
 	  debugFinal = 1;
 	}
@@ -209,8 +209,20 @@ ParseInterpretiveOperand (ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 	      PseudoToStruct (i, &K);
 	      if (K.Invalid || !K.Address)
 		goto BadOp;
+	      if (0 != (debugLevel & DEBUG_SOLARIUM))
+		{
+		  char s[64];
+		  sprintf (s, "b,i=%d,K=%d", i, K.Value);
+		  debugPrint (s);
+		}
 	      goto RetryMem;
 	    }
+	}
+      if (0 != (debugLevel & DEBUG_SOLARIUM))
+	{
+	  char s[32];
+	  sprintf (s, "c,i=%d,rope=%05o", i, OutRecord->Words[0]);
+	  debugPrint (s);
 	}
     }
   else if (K.Address && K.Erasable)
@@ -285,7 +297,7 @@ ParseInterpretiveOperand (ParseInput_t *InRecord, ParseOutput_t *OutRecord)
   if (debugFinal)
     {
       char s[32];
-      sprintf (s, "rope=%05o", OutRecord->Words[0]);
+      sprintf (s, "z,rope=%05o", OutRecord->Words[0]);
       debugPrint (s);
     }
   return (0);
