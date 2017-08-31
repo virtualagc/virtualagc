@@ -1482,6 +1482,8 @@ Pass(int WriteOutput, const char *InputFilename, FILE *OutputFile, int *Fatals,
   static char lastLines[10][sizeof(s)] =
     { "", "", "", "", "", "", "", "", "", "" };
 
+  debugLineString = s;
+  debugLine = 1;
   SaveUsedCounts();
   thisIsTheLastPass = WriteOutput;
   numSymbolsReassigned = 0;
@@ -1620,6 +1622,7 @@ Pass(int WriteOutput, const char *InputFilename, FILE *OutputFile, int *Fatals,
           CurrentLineAll++;
           CurrentLineInFile++;
         }
+      debugLine = CurrentLineAll;
 
       // Analyze the input line.
 
@@ -1636,7 +1639,9 @@ Pass(int WriteOutput, const char *InputFilename, FILE *OutputFile, int *Fatals,
             }
         }
       else if (s[0] == '#' && s[1] == '#' && 1 != sscanf(s, "## Page%d", &k)) // is a ## line
-        ;
+        {
+	  // Intentionally empty.
+        }
       else if (inHeader)
         {
           inHeader = 0;

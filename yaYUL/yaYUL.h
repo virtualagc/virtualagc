@@ -69,6 +69,7 @@
  *                2017-06-17 MAS Added --early-sbank, for simulating early (pre-1967)
  *                               YUL superbank behavior. Also lightly refactored
  *                               superbank data storage.
+ *             	  2017-08-31 RSB Added stuff associated with --debug.
  */
 
 #ifndef INCLUDED_YAYUL_H
@@ -589,6 +590,13 @@ extern int trace;
 extern int asYUL;
 extern int numSymbolsReassigned;
 extern int thisIsTheLastPass;
+
+extern int debugLevel;
+#define DEBUG_SOLARIUM 0x8000
+extern int debugPass;
+extern int debugLine;
+extern char *debugLineString;
+void debugPrint(char *msg);
 
 #endif // INCLUDED_YAYUL_H
 

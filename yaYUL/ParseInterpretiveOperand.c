@@ -159,6 +159,12 @@ ParseInterpretiveOperand(ParseInput_t *InRecord, ParseOutput_t *OutRecord)
 
   RetryMem: if (K.Constant)
     {
+      if (0 != (debugLevel & DEBUG_SOLARIUM))
+	{
+	  char s[32];
+	  sprintf (s, "K=%d", K.Value);
+	  debugPrint(s);
+	}
       i = nnnnFields[RawNumInterpretiveOperands - NumInterpretiveOperands];
       if ((i & 3) == 1)
         {

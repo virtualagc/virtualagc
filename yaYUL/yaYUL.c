@@ -1,5 +1,5 @@
 /*
- * Copyright 2003-2005,2009-2010,2016 Ronald S. Burkey <info@sandroid.org>
+ * Copyright 2003-2005,2009-2010,2016,2017 Ronald S. Burkey <info@sandroid.org>
  *
  * This file is part of yaAGC.
  *
@@ -101,6 +101,7 @@
  *                              earlier (pre-1967) versions of YUL when it comes to
  *                              superbank bits.
  *              2017-06-18 MAS  Added --pos-checksums
+ *              2017-08-31 RSB	Added stuff associated with --debug.
  */
 
 #include "yaYUL.h"
@@ -113,6 +114,16 @@
 
 //-------------------------------------------------------------------------
 // Some global data.
+
+int debugLevel = 0;
+int debugPass = 0;
+int debugLine = 0;
+char *debugLineString = "";
+void
+debugPrint(char *msg)
+{
+  printf("Debug (%d,%d) %s: %s\n", debugPass, debugLine, msg, debugLineString);
+}
 
 int formatOnly = 0;
 int toYulOnly = 0, toYulOnlySequenceNumber;
@@ -203,6 +214,8 @@ main(int argc, char *argv[])
     {
       if (!strcmp(argv[i], "--help") || !strcmp(argv[i], "/?"))
         goto Done;
+      else if (1 == sscanf(argv[i], "--debug=%d", &j))
+	debugLevel = j;
       else if (1 == sscanf(argv[i], "--max-passes=%d", &j))
         MaxPasses = j;
       else if (!strcmp(argv[i], "--pos-checksums"))
@@ -303,7 +316,7 @@ main(int argc, char *argv[])
 
   printf("Apollo Guidance Computer (AGC) assembler, version " NVER
   ", built " __DATE__ ", target %s\n", assemblyTarget);
-  printf("(c)2003-2005,2009-2010,2016 Ronald S. Burkey\n");
+  printf("(c)2003-2005,2009-2010,2016,2017 Ronald S. Burkey\n");
   printf(
       "Refer to http://www.ibiblio.org/apollo/index.html for more information.\n");
 
@@ -383,6 +396,7 @@ main(int argc, char *argv[])
 
   for (i = 1; i <= MaxPasses; i++)
     {
+      debugPass = i;
       printf("Pass #%d\n", i);
       j = Pass(0, InputFilename, OutputFile, &Fatals, &Warnings);
       k = UnresolvedSymbols();
@@ -393,6 +407,7 @@ main(int argc, char *argv[])
         }
       if ((k == 0 || k >= LastUnresolved) && numSymbolsReassigned == 0)
         {
+	  debugPass++;
           printf("Pass #%d\n", i + 1);
           Pass(1, InputFilename, OutputFile, &Fatals, &Warnings);
           break;
