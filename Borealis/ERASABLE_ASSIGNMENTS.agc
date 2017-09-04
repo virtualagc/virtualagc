@@ -14,6 +14,7 @@
 ##              2016-12-21 MAS  Pulled in erasables for Retread instruction checks.
 ##              2017-01-04 MAS  Added ERESTORE, used by Sunburst's erasable mem check.
 ##              2017-01-15 MAS  Added T4TEMP and LASTIMER for use with timer/EDRUPT tests.
+##              2017-09-03 MAS  Pulled in RSBBQ from Luminary, since it is quite useful.
 
 A               EQUALS          0
 L               EQUALS          1                               # L AND Q ARE BOTH CHANNELS AND REGISTERS.
@@ -474,6 +475,10 @@ NDXSELF2	ERASE
 
 LST1            ERASE           +7                              # DELTA T'S.
 LST2            ERASE           +17D                            # 2CADR TASK ADDRESSES.
+
+#          RESTART STORAGE.                              (2D)
+
+RSBBQ           ERASE           +1                      # B(2)PRM SAVE BB AND Q FOR RESTARTS.
 
 # IMU COMPENSATION PARAMETERS:
 

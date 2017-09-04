@@ -13,6 +13,9 @@
 ## Mod history: 2017-01-15 MAS  Created to hold new extended tests, starting off with
 ##                              checking out all the timers, EDRUPT, BRUPT substitution,
 ##                              and interrupts following an INDEX.
+##              2017-09-03 MAS  Added in some tests for proper handling of Z and ZRUPT.
+##                              The ZRUPT test makes use of EDRUPT again, so that gets
+##                              more thoroughly tested too.
 
                 BANK            24
 # The extended tests check out functionalities not exercised by the Aurora or Retread tests. First up
@@ -97,34 +100,28 @@ PRIOCHK         CAF             SIX
                 CAF             FOUR
                 TC              TRIGRUPT
 
-# Timers and their interrupts are healthy. It's finally safe to release interrupts. The
-# next test must take place entirely in the 7xxx address range.
+# Timers and their interrupts are healthy. It's finally safe to release interrupts.
                 RELINT
+
+# Check that bits set in the upper 4 bits of Z disappear between instructions, and that
+# storing directly to Z behaves as expected.
+ZCHK            CA              ZSKIPADR                        # Check proper operation of Z. Z should
+                AD              SBIT13                          # generally shed anything in its upper
+                TS              Z                               # 4 bits.
+                TC              ERRORS                          # Storing to Z should take immediate effect.
+
+ZSKIP           CS              Z                               # Make sure bit 13 disappeared.
+                AD              ZSKIPADR
+                TC              -1CHK
+
+# Head to bank 3, where all EDRUPT tests must take place.
                 TC              BRUPTCHK
 
 # Extended tests are complete. Head back to self-check proper.
                 TC              POSTJUMP
                 CADR            EXTTDONE
 
-# Do-nothing waitlist task, used as a dummy when generating a fast T3RUPT.
-NOTHING         TC              TASKOVER
-
-ENDEXTST        EQUALS
-
-                SETLOC          ENDINTF
-# Check EDRUPT's ability to vector to A with no pending interrupts, the correct
-# behavior of BRUPT for interrupts following an INDEX, and BRUPT substitution.
-BRUPTCHK        CAF             FIVE                            # SKEEP1 = 5. This will be used for indexing.
-                TS              SKEEP1
-                EXTEND                                          # Save our return address.
-                QXCH            SKEEP2
-                CAF             ARVECADR                        # Attempt to use EDRUPT to vector to ARUPTVEC.
- +5             EXTEND                                          # If some other interrupt is taken, continue
-                INDEX           SKEEP1                          # at BRUPTCHK+5 (as calculated by the INDEX).
-EDRPTWRD        EDRUPT          BRUPTCHK                        # This instruction should be replaced with
-EDRPT+1         AD              NEG4                            # "CAF FIVE" upon resume. Make sure it did.
-                TC              +1CHK
-                TC              SKEEP2                          # EDRUPT-to-A and BRUPT look good. Carry on.
+ZSKIPADR        ADRES           ZSKIP
 
 # Interrupt routine used in BRUPTCHK.
 ARUPTVEC        DXCH            ARUPT                           # Although Q is also destroyed, we happen to know
@@ -145,6 +142,46 @@ ARUPTVEC        DXCH            ARUPT                           # Although Q is 
 
 ARVECADR        ADRES           ARUPTVEC
 EDRP+1AD        ADRES           EDRPT+1
+
+# Interrupt routine used in ZCHK
+ZRUPTVEC        CA              SBIT13                          # Set bit 13 of ZRUPT. This should make it to Z
+                ADS             ZRUPT                           # unimpeded.
+                CA              ZSKIP                           # Replace the "EDRUPT ZEDRUPT" that is in BRUPT
+                TS              BRUPT                           # with "CS Z". This should move the - full Z value
+                RESUME                                          # we've just made into A for examination.
+
+ZRPTZADR        ADRES           ZRUPTZ
+ZRVECADR        ADRES           ZRUPTVEC
+
+
+# Do-nothing waitlist task, used as a dummy when generating a fast T3RUPT.
+NOTHING         TC              TASKOVER
+
+ENDEXTST        EQUALS
+
+                SETLOC          ENDINTF
+# Check EDRUPT's ability to vector to A with no pending interrupts, the correct
+# behavior of BRUPT for interrupts following an INDEX, and BRUPT substitution.
+BRUPTCHK        CAF             FIVE                            # SKEEP1 = 5. This will be used for indexing.
+                TS              SKEEP1
+                EXTEND                                          # Save our return address.
+                QXCH            SKEEP2
+                CAF             ARVECADR                        # Attempt to use EDRUPT to vector to ARUPTVEC.
+ +5             EXTEND                                          # If some other interrupt is taken, continue
+                INDEX           SKEEP1                          # at BRUPTCHK+5 (as calculated by the INDEX).
+EDRPTWRD        EDRUPT          BRUPTCHK                        # This instruction should be replaced with
+EDRPT+1         AD              NEG4                            # "CAF FIVE" upon resume. Make sure it did.
+                TC              +1CHK
+
+# EDRUPT-to-A and BRUPT look good. Check out ZRUPT.
+                CA              ZRVECADR                        # Any instruction immediately following a RESUME
+ZEDRUPT         EXTEND                                          # (i.e., the instruction in BRUPT) should be able
+                EDRUPT          ZEDRUPT                         # to see high-order bits in Z set via ZRUPT.
+ZRUPTZ          AD              SBIT13
+                AD              ZRPTZADR
+                TC              -0CHK                           # ZRUPT should have been ZRUPTZ + SBIT13
+
+                TC              SKEEP2                          # All done here. Head back to SELF-CHECK proper.
 
 # Routine to trigger a pending timer interrupt and verify that the timer whose number is
 # specified in A was the one that got serviced.

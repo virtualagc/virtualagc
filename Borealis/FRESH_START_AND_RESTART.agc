@@ -15,6 +15,7 @@
 ##              2017-01-04 MAS  Added init/checking of ERESTORE for the updated
 ##                              erasable check from Sunburst.
 ##              2017-01-27 MAS  Added an instruction I missed pulling from Sunburst.
+##              2017-09-03 MAS  Pulled in RSBBQ from Luminary, since it is quite useful.
 
                 BANK            12 
                 EBANK=          LST1
@@ -91,6 +92,11 @@ STARTSIM        CAF             BIT14
 #          COMES HERE FROM LOCATION 4000, GOJAM. RESTART ANY PROGRAMS WHICH MAY HAVE BEEN RUNNING AT THE TIME.
 
 GOPROG          INCR            REDOCTR                 # ADVANCE RESTART COUNTER.
+
+                LXCH            Q
+                EXTEND
+                ROR             SUPERBNK
+                DXCH            RSBBQ
 
                 TC              STARTSUB                # COMMON INITIALIZATION ROUTINE.
                 

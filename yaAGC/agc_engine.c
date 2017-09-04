@@ -353,6 +353,12 @@
  *				input bit. Not doing so was preventing the DSKY
  *				RESTART light from working in Colossus 249 and
  *				all later CMC versions.
+ *		09/03/17 MAS	Slightly tweaked handling of Z, so (as before)
+ *				higher order bits typically disappear, but
+ *				(newly) are visible if you're clever with
+ *				use of ZRUPT. Also, made GOJAMs transfer the
+ *				Z register value to Q on restart, which makes
+ *				the RSBBQ erasables in Colossus/Luminary work.
  *
  *
  * The technical documentation for the Apollo Guidance & Navigation (G&N) system,
@@ -793,7 +799,7 @@ Assign (agc_t * State, int Bank, int Offset, int Value)
       switch (Offset)
 	{
 	case RegZ:
-	  State->NextZ = Value & 07777;
+	  State->NextZ = Value;
 	  break;
 	case RegCYR:
 	  Value &= 077777;
@@ -2079,7 +2085,9 @@ agc_engine (agc_t * State)
               State->ExtraDelay += 2;
 
               // The net result of those two is Z = 4000. Interrupt state is cleared, and
-              // interrupts are enabled.
+              // interrupts are enabled. The TC 4000 has the beneficial side-effect of
+              // storing the current Z in Q, where it can helpfully be recovered.
+              c(RegQ) = c(RegZ);
               c(RegZ) = 04000;
               State->InIsr = 0;
               State->AllowInterrupt = 1;
@@ -2275,10 +2283,10 @@ agc_engine (agc_t * State)
   //OverflowQ = (ValueOverflowed (Qumulator) != AGC_P0);
 
   // After each instruction is executed, the AGC's Z register is updated to 
-  // indicate the next instruction to be executed.  
-  ProgramCounter = c(RegZ);
-  // However, since the Z register contains only 12 bits, the address has to
-  // be massaged to get a 16-bit address.
+  // indicate the next instruction to be executed. The Z register is 16
+  // bits long, but its value is transferred to the 12-bit S regsiter for
+  // addressing, so the upper bits are lost.
+  ProgramCounter = c(RegZ) & 07777;
   WhereWord = FindMemoryWord (State, ProgramCounter);
 
   // Fetch the instruction itself.
@@ -2391,22 +2399,15 @@ agc_engine (agc_t * State)
   // And similarly for the substitute instruction from a RESUME.
   State->SubstituteInstruction = 0;
 
-  // Compute the next value of the instruction pointer.  I haven't found
-  // any explanation so far as to what happens if the pointer is already at
-  // the end of a memory block, so I don't know if it's supposed to roll to 
-  // the next pseudo-address, or wrap to the beginning of the bank, or what.
-  // My assumption is that the programmer (or assembler, perhaps) simply
-  // wasn't supposed to allow this to happen.  (In fixed memory, this is 
-  // literally true, since the bank terminates with a bugger word rather than
-  // with an instruction, so the issue is only what happens in erasable
-  // memory.)  As a first cut, therefore, I simply increment the thing without 
-  // checking for a problem.  (The increment is by 2, since bit 0 is the
-  // parity and the address only starts at bit 1.) 
+  // Compute the next value of the instruction pointer. The Z register is
+  // 16 bits long, even though in almost all cases only the lower 12 bits
+  // are used. When the Z register is incremented between each instruction,
+  // only the lower 12 bits are read into the adder, so if something sets
+  // any of the 4 most significant bits of Z, they will be lost before
+  // the next instruction sees them.
   State->NextZ = 1 + c(RegZ);
-  // I THINK that the Z register is updated before the instruction executes,
-  // which is important if you have an instruction that directly accesses
-  // the value in Z.  (I deduce this from descriptions of the TC register,
-  // which imply that the contents of Z is directly transferred into Q.)
+  // The contents of the Z register are updated before an instruction is
+  // executed (really, it happens at the end of the previous instruction).
   c (RegZ)= State->NextZ;
 
   // A BZF followed by an instruction other than EXTEND causes a TCF0 transient
@@ -3289,6 +3290,10 @@ agc_engine (agc_t * State)
       c (RegZERO)= AGC_P0;
       State->InputChannel[7] = State->OutputChannel7 &= 0160;
       c (RegZ) = State->NextZ;
+      // In all cases except for RESUME, Z will be truncated to
+      // 12 bits between instructions
+      if (!State->SubstituteInstruction)
+        c (RegZ) = c(RegZ) & 07777;
       if (!KeepExtraCode)
       State->ExtraCode = 0;
       // Values written to EB and FB are automatically mirrored to BB,
