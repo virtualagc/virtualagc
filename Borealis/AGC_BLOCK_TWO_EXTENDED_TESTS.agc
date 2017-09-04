@@ -16,6 +16,9 @@
 ##              2017-09-03 MAS  Added in some tests for proper handling of Z and ZRUPT.
 ##                              The ZRUPT test makes use of EDRUPT again, so that gets
 ##                              more thoroughly tested too.
+##              2017-09-04 MAS  Rewrote the new ZRUPT test to simply RESUME outside of an
+##                              interrupt instead of using EDRUPT. This saves a few words,
+##                              and exercises RESUME's ability to work whenever.
 
                 BANK            24
 # The extended tests check out functionalities not exercised by the Aurora or Retread tests. First up
@@ -114,6 +117,22 @@ ZSKIP           CS              Z                               # Make sure bit 
                 AD              ZSKIPADR
                 TC              -1CHK
 
+# The only exception to the above is RESUME. A RESUME moves the full contents of ZRUPT into Z, without
+# truncating to the lower 12 bits. The next instruction executed after the RESUME (i.e., the one in
+# BRUPT) can therefore see these upper bits of Z. This is the only time these bits' existence are
+# detectable (outside of one particular DV case, which we will exercise shortly).
+ZRUPTCHK        CA              ZRELADR                         # Piece together a value for ZRUPT with a
+                AD              SBIT13                          # high-order bit set.
+                INHINT                                          # Inhibit interrupts so we can safely
+                TS              ZRUPT                           # touch ZRUPT and BRUPT.
+                CA              ZSKIP                           # Replace BRUPT with "CS Z", which we will
+                TS              BRUPT                           # use to sense the upper Z bits.
+                RESUME                                          # RESUME, so BRUPT is executed and Z = ZRUPT
+ZREL            RELINT                                          # Interrupts are safe now.
+                AD              SBIT13
+                AD              ZRELADR
+                TC              -0CHK                           # ZRUPT should have been ZREL + SBIT13
+
 # Head to bank 3, where all EDRUPT tests must take place.
                 TC              BRUPTCHK
 
@@ -122,6 +141,7 @@ ZSKIP           CS              Z                               # Make sure bit 
                 CADR            EXTTDONE
 
 ZSKIPADR        ADRES           ZSKIP
+ZRELADR         ADRES           ZREL
 
 # Interrupt routine used in BRUPTCHK.
 ARUPTVEC        DXCH            ARUPT                           # Although Q is also destroyed, we happen to know
@@ -143,17 +163,6 @@ ARUPTVEC        DXCH            ARUPT                           # Although Q is 
 ARVECADR        ADRES           ARUPTVEC
 EDRP+1AD        ADRES           EDRPT+1
 
-# Interrupt routine used in ZCHK
-ZRUPTVEC        CA              SBIT13                          # Set bit 13 of ZRUPT. This should make it to Z
-                ADS             ZRUPT                           # unimpeded.
-                CA              ZSKIP                           # Replace the "EDRUPT ZEDRUPT" that is in BRUPT
-                TS              BRUPT                           # with "CS Z". This should move the - full Z value
-                RESUME                                          # we've just made into A for examination.
-
-ZRPTZADR        ADRES           ZRUPTZ
-ZRVECADR        ADRES           ZRUPTVEC
-
-
 # Do-nothing waitlist task, used as a dummy when generating a fast T3RUPT.
 NOTHING         TC              TASKOVER
 
@@ -172,14 +181,6 @@ BRUPTCHK        CAF             FIVE                            # SKEEP1 = 5. Th
 EDRPTWRD        EDRUPT          BRUPTCHK                        # This instruction should be replaced with
 EDRPT+1         AD              NEG4                            # "CAF FIVE" upon resume. Make sure it did.
                 TC              +1CHK
-
-# EDRUPT-to-A and BRUPT look good. Check out ZRUPT.
-                CA              ZRVECADR                        # Any instruction immediately following a RESUME
-ZEDRUPT         EXTEND                                          # (i.e., the instruction in BRUPT) should be able
-                EDRUPT          ZEDRUPT                         # to see high-order bits in Z set via ZRUPT.
-ZRUPTZ          AD              SBIT13
-                AD              ZRPTZADR
-                TC              -0CHK                           # ZRUPT should have been ZRUPTZ + SBIT13
 
                 TC              SKEEP2                          # All done here. Head back to SELF-CHECK proper.
 
