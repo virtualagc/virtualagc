@@ -1,7 +1,3 @@
-----
-We are currently in the process of transcribing Zerlina 56, an advanced off-line development program by Don Eyles, and are looking for volunteers to help out. If you're interested, **[click here!](https://github.com/virtualagc/virtualagc/wiki/Zerlina-56-Transcription)**
-----
-
 Virtual Apollo Guidance Computer
 ================================
 
