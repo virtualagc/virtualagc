@@ -359,6 +359,11 @@
  *				use of ZRUPT. Also, made GOJAMs transfer the
  *				Z register value to Q on restart, which makes
  *				the RSBBQ erasables in Colossus/Luminary work.
+ *		09/04/17 MAS	Extended emulation of DV to properly handle all
+ *				off-nominal situations, including overflow in
+ *				the divisor as well as all situations that create
+ *				"total nonsense" as described by Savage&Drake
+ *				(we previously simply returned random values).
  *
  *
  * The technical documentation for the Apollo Guidance & Navigation (G&N) system,
@@ -1701,6 +1706,87 @@ UpdateDSKY(agc_t *State)
     ChannelOutput(State, 0163, State->DskyChannel163);
 }
 
+//----------------------------------------------------------------------------
+// This function implements a model of what happens in the actual AGC hardware
+// during a divide -- but made a bit more readable / software-centric than the 
+// actual register transfer level stuff. It should nevertheless give accurate
+// results in all cases, including those that result in "total nonsense".
+// If A, L, or Z are the divisor, it assumes that the unexpected transformations
+// have already been applied to the "divisor" argument.
+static void
+SimulateDV(agc_t *State, uint16_t divisor)
+{
+    uint16_t dividend_sign = 0;
+    uint16_t divisor_sign = 0;
+    uint16_t remainder;
+    uint16_t remainder_sign = 0;
+    uint16_t quotient_sign = 0;
+    uint16_t quotient = 0;
+    uint16_t sum = 0;
+    uint16_t a = c(RegA);
+    uint16_t l = c(RegL);
+    int i;
+
+    // Assume A contains the sign of the dividend
+    dividend_sign = a & 0100000;
+
+    // Negate A if it was positive
+    if (!dividend_sign)
+      a = ~a;
+    // If A is now -0, take the dividend sign from L
+    if (a == 0177777)
+      dividend_sign = l & 0100000;
+    // Negate L if the dividend is negative.
+    if (dividend_sign)
+      l = ~l;
+
+    // Add 40000 to L
+    l = AddSP16(l, 040000);
+    // If this caused did not cause positive overflow, add one to A
+    if (ValueOverflowed(l) != AGC_P1)
+      a = AddSP16(a, 1);
+    // Initialize the remainder with the current value of A
+    remainder = a;
+
+    // Record the sign of the divisor, and then take its absolute value
+    divisor_sign = divisor & 0100000;
+    if (divisor_sign)
+      divisor = ~divisor;
+    // Initialize the quotient via a WYD on L (L's sign is placed in bits
+    // 16 and 1, and L bits 14-1 are placed in bits 15-2).
+    quotient_sign = l & 0100000;
+    quotient = quotient_sign | ((l & 037777) << 1) | (quotient_sign >> 15);
+
+    for (i = 0; i < 14; i++)
+    {
+        // Shift up the quotient
+        quotient <<= 1;
+        // Perform a WYD on the remainder
+        remainder_sign = remainder & 0100000;
+        remainder = remainder_sign | ((remainder & 037777) << 1);
+        // The sign is only placed in bit 1 if the quotient's new bit 16 is 1
+        if ((quotient & 0100000) == 0)
+          remainder |= (remainder_sign >> 15);
+        // Add the divisor to the remainder
+        sum = AddSP16(remainder, divisor);
+        if (sum & 0100000)
+          {
+            // If the resulting sum has its bit 16 set, OR a 1 onto the
+            // quotient and take the sum as the new remainder
+            quotient |= 1;
+            remainder = sum;
+          }
+    }
+    // Restore the proper quotient sign
+    a = quotient_sign | (quotient & 077777);
+
+    // The final value for A is negated if the dividend sign and the
+    // divisor sign did not match
+    c(RegA) = (dividend_sign != divisor_sign) ? ~a : a;
+    // The final value for L is negated if the dividend was negative
+    c(RegL) = (dividend_sign) ? remainder : ~remainder;
+}
+
 //-----------------------------------------------------------------------------
 // Execute one machine-cycle of the simulation.  Use agc_engine_init prior to 
 // the first call of agc_engine, to initialize State, and then call agc_engine 
@@ -2921,19 +3007,7 @@ agc_engine (agc_t * State)
 	{
 	  int16_t AccPair[2], AbsA, AbsL, AbsK, Div16;
 	  int Dividend, Divisor, Quotient, Remainder;
-	  if (IsA (Address10))
-	    {
-	      Div16 = OverflowCorrected (Accumulator);
-	      WhereWord = &Div16;
-	    }
-	  else if (Address10 < REG16)
-	    {
-	      Div16 = OverflowCorrected (c (Address10));
-	      WhereWord = &Div16;
-	    }
-	  else
-	  WhereWord = FindMemoryWord (State, Address10);
-	  // Fetch the values;
+
 	  AccPair[0] = OverflowCorrected (Accumulator);
 	  AccPair[1] = c (RegL);
 	  Dividend = SpToDecent (&AccPair[1]);
@@ -2941,23 +3015,55 @@ agc_engine (agc_t * State)
 	  // Check boundary conditions.
 	  AbsA = AbsSP (AccPair[0]);
 	  AbsL = AbsSP (AccPair[1]);
-	  AbsK = AbsSP (*WhereWord);
-	  if (AbsA > AbsK || (AbsA == AbsK && AbsL != AGC_P0))
+
+	  if (IsA (Address10))
 	    {
-	      long random (void);
-	      //printf ("Acc=%06o L=%06o\n", Accumulator, c(RegL));
-	      //printf ("A,K,L=%06o,%06o,%06o abs=%06o,%06o,%06o\n",
-	      //  AccPair[0],*WhereWord,AccPair[1],AbsA,AbsK,AbsL);
-	      // The divisor is smaller than the dividend.  In this case,
-	      // we return "total nonsense".
-	      c (RegL) = (0777777 & random ());
-	      c (RegA) = (0177777 & random ());
+	      // DV modifies A before reading the divisor, so in this
+	      // case the divisor is -|A|.
+              Div16 = c(RegA);
+	      if ((c(RegA) & 0100000) == 0)
+	        Div16 = 0177777 & ~Div16;
+	    }
+          else if (IsL (Address10))
+	    {
+	      // DV modifies L before reading the divisor. L is first
+	      // negated if the quotient A,L is negative according to
+	      // DV sign rules. Then, 40000 is added to it.
+	      Div16 = c(RegL);
+              if (((AbsA == 0) && (0100000 & c(RegL))) || ((AbsA != 0) && (0100000 & c(RegA))))
+	        Div16 = 0177777 & ~Div16;
+              // Make sure to account for L's built-in overflow correction
+              Div16 = SignExtend(OverflowCorrected(AddSP16((uint16_t)Div16, 040000)));
+	    }
+          else if (IsZ (Address10))
+	    {
+	      // DV modifies Z before reading the divisor. If the
+	      // quotient A,L is negative according to DV sign rules,
+	      // Z16 is set.
+	      Div16 = c(RegZ);
+              if (((AbsA == 0) && (0100000 & c(RegL))) || ((AbsA != 0) && (0100000 & c(RegA))))
+	        Div16 |= 0100000;
+	    }
+	  else if (Address10 < REG16)
+	    Div16 = c(Address10);
+	  else
+            Div16 = SignExtend(*FindMemoryWord(State, Address10));
+
+	  // Fetch the values;
+	  AbsK = AbsSP(OverflowCorrected(Div16));
+	  if (AbsA > AbsK || (AbsA == AbsK && AbsL != AGC_P0) || ValueOverflowed(Div16) != AGC_P0)
+	    {
+	      // The divisor is smaller than the dividend, or the divisor has
+	      // overflow. In both cases, we fall back on a slower simulation
+	      // of the hardware registers, which will produce "total nonsense"
+	      // (that nonetheless will match what the actual AGC would have gotten).
+              SimulateDV(State, Div16);
 	    }
 	  else if (AbsA == 0 && AbsL == 0)
 	    {
 	      // The dividend is 0 but the divisor is not. The standard DV sign
 	      // convention applies to A, and L remains unchanged.
-	      if ((040000 & c (RegL)) == (040000 & *WhereWord))
+	      if ((040000 & c (RegL)) == (040000 & OverflowCorrected(Div16)))
                 {
                   if (AbsK == 0) Operand16 = 037777;	// Max positive value.
                   else Operand16 = AGC_P0;
@@ -2973,7 +3079,7 @@ agc_engine (agc_t * State)
 	  else if (AbsA == AbsK && AbsL == AGC_P0)
 	    {
 	      // The divisor is equal to the dividend.
-	      if (AccPair[0] == *WhereWord)// Signs agree?
+	      if (AccPair[0] == OverflowCorrected(Div16))// Signs agree?
 		{
 		  Operand16 = 037777;	// Max positive value.
 		}
@@ -2994,7 +3100,7 @@ agc_engine (agc_t * State)
 	      // aren't dividing by zero, since we know that the divisor is
 	      // greater (in magnitude) than the dividend.
 	      Dividend = agc2cpu2 (Dividend);
-	      Divisor = agc2cpu (*WhereWord);
+	      Divisor = agc2cpu (OverflowCorrected(Div16));
 	      Quotient = Dividend / Divisor;
 	      Remainder = Dividend % Divisor;
 	      c (RegA) = SignExtend (cpu2agc (Quotient));
