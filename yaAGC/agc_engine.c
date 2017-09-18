@@ -1742,7 +1742,7 @@ SimulateDV(agc_t *State, uint16_t divisor)
 
     // Add 40000 to L
     l = AddSP16(l, 040000);
-    // If this caused did not cause positive overflow, add one to A
+    // If this did not cause positive overflow, add one to A
     if (ValueOverflowed(l) != AGC_P1)
       a = AddSP16(a, 1);
     // Initialize the remainder with the current value of A

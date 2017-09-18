@@ -19,6 +19,11 @@
 ##              2017-09-04 MAS  Rewrote the new ZRUPT test to simply RESUME outside of an
 ##                              interrupt instead of using EDRUPT. This saves a few words,
 ##                              and exercises RESUME's ability to work whenever.
+##              2017-09-17 MAS  Added a new table-driven extended test for DV, which checks
+##                              out "nonsense" (as described by E-2052), overflow cases, and
+##                              and division by A and L. The L cases are not yet written,
+##                              and I intend to add a separate case for DV Z when I figure
+##                              out the best way to do it.
 
                 BANK            24
 # The extended tests check out functionalities not exercised by the Aurora or Retread tests. First up
@@ -133,8 +138,85 @@ ZREL            RELINT                                          # Interrupts are
                 AD              ZRELADR
                 TC              -0CHK                           # ZRUPT should have been ZREL + SBIT13
 
+EXDVTSTS        CAF             DVTBLADR
+                TS              SKEEP4
+
+# Determine the register to use for the divisor
+EXDVLOOP        INDEX           SKEEP4
+                CAF             DIVISOR
+                TS              Q
+                CCS             Q
+                TCF             QDIV
+                TCF             ADIV
+                TCF             QDIV
+LDIV            CAF             ONE
+                TCF             ADIV
+QDIV            CAF             TWO
+ADIV            TS              SKEEP5
+
+# Determine if the dividend will have overflow in A
+                CAF             DVDNDOVF
+                INDEX           SKEEP4
+                MASK            OVFFLAGS 
+                EXTEND
+                BZF             STOROVF
+                INDEX           SKEEP4
+                CAF             DIVIDEND
+                CCS             A
+                CAF             HALF
+                TCF             STOROVF
+                CS              HALF
+STOROVF         TS              SKEEP6
+                
+# Inject overflow into the divisor if desired
+                CAF             DIVSROVF
+                INDEX           SKEEP4
+                MASK            OVFFLAGS
+                EXTEND
+                BZF             MKOVFLOW 
+                CCS             Q
+                CAF             HALF
+                TCF             MKOVFLOW
+                CS              HALF
+MKOVFLOW        INHINT
+                XCH             Q
+                AD              Q
+                AD              Q
+                XCH             Q
+                
+# Load the dividend
+                EXTEND
+                INDEX           SKEEP4
+                DCA             DIVIDEND
+
+# Inject overflow into the divisor if necessary
+                AD              SKEEP6
+                AD              SKEEP6
+
+# Perform the division
+                EXTEND
+                INDEX           SKEEP5
+                DV              0
+                RELINT
+
+# Check the results
+                COM
+                INDEX           SKEEP4
+                AD              QUOTIENT
+                TC              -0CHK
+                CS              L
+                INDEX           SKEEP4
+                AD              REMAINDR
+                TC              -0CHK
+
+                CAF             SIX
+                ADS             SKEEP4
+                AD              -DVENDAD
+                EXTEND
+                BZMF            EXDVLOOP
+
 # Head to bank 3, where all EDRUPT tests must take place.
-                TC              BRUPTCHK
+DVSKIP          TC              BRUPTCHK
 
 # Extended tests are complete. Head back to self-check proper.
                 TC              POSTJUMP
@@ -142,6 +224,185 @@ ZREL            RELINT                                          # Interrupts are
 
 ZSKIPADR        ADRES           ZSKIP
 ZRELADR         ADRES           ZREL
+
+DIVIDEND        =               0
+DIVISOR         =               2
+QUOTIENT        =               3
+REMAINDR        =               4
+OVFFLAGS        =               5
+
+DVDNDOVF        EQUALS          ONE
+DIVSROVF        EQUALS          TWO
+
+DVTBLADR        GENADR          DVTBL
+-DVENDAD        -GENADR         DVTBLEND
+# Regular division with + dividend and + divisor
+DVTBL           2OCT            1010414241                      # Dividend
+                OCT             25274                           # Divisor
+                OCT             14134                           # Quotient
+                OCT             16421                           # Remainder
+                OCT             0                               # No overflow
+
+# Regular division with + dividend and - divisor
+                2OCT            0124577243                      # Dividend
+                OCT             60012                           # Divisor
+                OCT             75264                           # Quotient
+                OCT             14335                           # Remainder
+                OCT             0                               # No overflow
+
+# Regular division with - dividend and + divisor
+                2OCT            5027751551                      # Dividend
+                OCT             33174                           # Divisor
+                OCT             44176                           # Quotient
+                OCT             65745                           # Remainder
+                OCT             0                               # No overflow
+
+# Regular division with - dividend and - divisor
+                2OCT            7331624300                      # Dividend
+                OCT             51027                           # Divisor
+                OCT             06317                           # Quotient
+                OCT             63527                           # Remainder
+                OCT             0                               # No overflow
+
+# Quotient with + overflow (result not affected)
+                2OCT            1454232017                      # Dividend
+                OCT             37722                           # Divisor
+                OCT             14565                           # Quotient
+                OCT             03425                           # Remainder
+                OCT             1                               # Dividend +overflow
+
+# Quotient with - overflow (result not affected)
+                2OCT            6677143023                      # Dividend
+                OCT             22326                           # Divisor
+                OCT             60255                           # Quotient
+                OCT             76237                           # Remainder
+                OCT             1                               # Dividend -overflow
+
+# Divisor with + overflow
+                2OCT            0712355512                      # Dividend
+                OCT             20440                           # Divisor
+                OCT             04010                           # Quotient
+                OCT             11113                           # Remainder
+                OCT             2                               # Divisor +overflow
+
+# Divisor with - overflow
+                2OCT            2727730174                      # Dividend
+                OCT             47022                           # Divisor
+                OCT             73777                           # Quotient
+                OCT             04174                           # Remainder
+                OCT             2                               # Divisor -overflow
+
+# Nonsense division with + dividend and + divisor
+                2OCT            3204407613                      # Dividend
+                OCT             13370                           # Divisor
+                OCT             34037                           # Quotient
+                OCT             03603                           # Remainder
+                OCT             0                               # No overflow
+
+# Nonsense division with + dividend and - divisor
+                2OCT            1403261245                      # Dividend
+                OCT             70651                           # Divisor
+                OCT             40415                           # Quotient
+                OCT             00532                           # Remainder
+                OCT             0                               # No overflow
+
+# Nonsense division with - dividend and + divisor
+                2OCT            5761364412                      # Dividend
+                OCT             10201                           # Divisor
+                OCT             40061                           # Quotient
+                OCT             67730                           # Remainder
+                OCT             0                               # No overflow
+
+# Nonsense division with - dividend and - divisor
+                2OCT            4675533326                      # Dividend
+                OCT             17647                           # Divisor
+                OCT             55570                           # Quotient
+                OCT             61746                           # Remainder
+                OCT             0                               # No overflow
+
+# Nonsense division with overflow in quotient (no effect)
+                2OCT            3051240771                      # Dividend
+                OCT             20015                           # Divisor
+                OCT             21204                           # Quotient
+                OCT             00506                           # Remainder
+                OCT             1                               # Dividend +overflow
+
+# Nonsense division with + overflow in divisor
+                2OCT            2227227222                      # Dividend
+                OCT             14443                           # Divisor
+                OCT             00200                           # Quotient
+                OCT             16422                           # Remainder
+                OCT             2                               # Divisor +overflow
+
+# Nonsense division with - overflow in divisor
+                2OCT            3456765432                      # Dividend
+                OCT             66543                           # Divisor
+                OCT             57777                           # Quotient
+                OCT             25433                           # Remainder
+                OCT             2                               # Divisor -overflow
+
+# Nonsense division with - overflow in divisor
+                2OCT            3456765432                      # Dividend
+                OCT             66543                           # Divisor
+                OCT             57777                           # Quotient
+                OCT             25433                           # Remainder
+                OCT             2                               # Divisor -overflow
+
+# Regular division with positive A as divisor (actually -|A|)
+                2OCT            2137600000                      # Dividend
+                OCT             00000                           # Divisor = A
+                OCT             40000                           # Quotient
+                OCT             21376                           # Remainder
+                OCT             0                               # No overflow
+
+# Regular division with negative A as divisor (no effect)
+                2OCT            5442300000                      # Dividend
+                OCT             00000                           # Divisor = A
+                OCT             37777                           # Quotient
+                OCT             54423                           # Remainder
+                OCT             0                               # No overflow
+
+# Nonsense division with positive A as divisor (actually -|A|)
+                2OCT            2740131027                      # Dividend
+                OCT             00000                           # Divisor = A
+                OCT             40001                           # Quotient
+                OCT             10031                           # Remainder
+                OCT             0                               # No overflow
+
+# Nonsense division with negative A as divisor (no effect)
+                2OCT            7654263257                      # Dividend
+                OCT             00000                           # Divisor = A
+                OCT             37777                           # Quotient
+                OCT             62022                           # Remainder
+                OCT             0                               # No overflow
+
+# Regular division with + overflow A as divisor
+                2OCT            1333700000                      # Dividend
+                OCT             00000                           # Divisor = A
+                OCT             67772                           # Quotient
+                OCT             16645                           # Remainder
+                OCT             1                               # A +overflow
+
+# Regular division with - overflow A as divisor
+                2OCT            6626200000                      # Dividend
+                OCT             00000                           # Divisor = A
+                OCT             01211                           # Quotient
+                OCT             67064                           # Remainder
+                OCT             1                               # A -overflow
+
+# Nonsense division with + overflow A as divisor
+                2OCT            3545321212                      # Dividend
+                OCT             00000                           # Divisor = A
+                OCT             77777                           # Quotient
+                OCT             61212                           # Remainder
+                OCT             1                               # A +overflow
+
+# Nonsense division with - overflow A as divisor
+                2OCT            5212366411                      # Dividend
+                OCT             00000                           # Divisor = A
+                OCT             01010                           # Quotient
+                OCT             61151                           # Remainder (actually 121151 but L is overflow corrected)
+DVTBLEND        OCT             1                               # A -overflow
 
 # Interrupt routine used in BRUPTCHK.
 ARUPTVEC        DXCH            ARUPT                           # Although Q is also destroyed, we happen to know
