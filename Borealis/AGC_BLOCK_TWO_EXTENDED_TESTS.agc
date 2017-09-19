@@ -24,6 +24,11 @@
 ##                              and division by A and L. The L cases are not yet written,
 ##                              and I intend to add a separate case for DV Z when I figure
 ##                              out the best way to do it.
+##              2017-09-18 MAS  Filled out DV L entries in the division table. The only
+##                              remaining cases I want to cover are DV Z, which need some
+##                              tweaks to divisor determination, and will require moving
+##                              the division to a fixed location (probably the start of
+##                              this bank).
 
                 BANK            24
 # The extended tests check out functionalities not exercised by the Aurora or Retread tests. First up
@@ -394,7 +399,7 @@ DVTBL           2OCT            1010414241                      # Dividend
                 2OCT            3545321212                      # Dividend
                 OCT             00000                           # Divisor = A
                 OCT             77777                           # Quotient
-                OCT             61212                           # Remainder
+                OCT             21212                           # Remainder (actually 061212 but L is overflow corrected)
                 OCT             1                               # A +overflow
 
 # Nonsense division with - overflow A as divisor
@@ -402,7 +407,63 @@ DVTBL           2OCT            1010414241                      # Dividend
                 OCT             00000                           # Divisor = A
                 OCT             01010                           # Quotient
                 OCT             61151                           # Remainder (actually 121151 but L is overflow corrected)
-DVTBLEND        OCT             1                               # A -overflow
+                OCT             1                               # A -overflow
+
+# Regular division with positive dividend and positive L as divisor (L gets + overflow)
+                2OCT            1743131231                      # Dividend
+                OCT             77777                           # Divisor = L
+                OCT             23526                           # Quotient
+                OCT             22063                           # Remainder
+                OCT             0                               # No overflow
+
+# Regular division with positive dividend and negative L as divisor (L = L + 40000)
+                2OCT            2540047102                      # Dividend
+                OCT             77777                           # Divisor = L
+                OCT             30531                           # Quotient
+                OCT             02770                           # Remainder
+                OCT             0                               # No overflow
+
+# Regular division with negative dividend and positive L as divisor (L = -L + 40000)
+                2OCT            7651711246                      # Dividend
+                OCT             77777                           # Divisor = L
+                OCT             76065                           # Quotient
+                OCT             64651                           # Remainder
+                OCT             0                               # No overflow
+
+# Regular division with negative dividend and negative L as divisor (L = -L with + overflow)
+                2OCT            5077544044                      # Dividend
+                OCT             77777                           # Divisor = L
+                OCT             45507                           # Quotient
+                OCT             64614                           # Remainder
+                OCT             0                               # No overflow
+
+# Nonsense division with positive dividend and positive L as divisor (L gets + overflow)
+                2OCT            3133204417                      # Dividend
+                OCT             77777                           # Divisor = L
+                OCT             37212                           # Quotient
+                OCT             02371                           # Remainder
+                OCT             0                               # No overflow
+
+# Nonsense division with positive dividend and negative L as divisor (L = L + 40000)
+                2OCT            2467267371                      # Dividend
+                OCT             77777                           # Divisor = L
+                OCT             34330                           # Quotient
+                OCT             16012                           # Remainder
+                OCT             0                               # No overflow
+
+# Nonsense division with negative dividend and positive L as divisor (L = -L + 40000)
+                2OCT            5510506670                      # Dividend
+                OCT             77777                           # Divisor = L
+                OCT             47773                           # Quotient
+                OCT             53327                           # Remainder
+                OCT             0                               # No overflow
+
+# Nonsense division with negative dividend and negative L as divisor (L = -L with + overflow)
+                2OCT            4222461674                      # Dividend
+                OCT             77777                           # Divisor = L
+                OCT             40750                           # Quotient
+                OCT             63701                           # Remainder
+DVTBLEND        OCT             0                               # No overflow
 
 # Interrupt routine used in BRUPTCHK.
 ARUPTVEC        DXCH            ARUPT                           # Although Q is also destroyed, we happen to know
