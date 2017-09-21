@@ -29,8 +29,18 @@
 ##                              tweaks to divisor determination, and will require moving
 ##                              the division to a fixed location (probably the start of
 ##                              this bank).
+##              2017-09-20 MAS  Completed DV tests, for now. DV Z is handled by the table,
+##                              and I made division by 0 testable (and added cases for it).
+##                              So, all interesting situations should be able to be entered
+##                              in the table, in case anything has been missed.
 
                 BANK            24
+# The following instructions should be at the start of the bank they are in.
+DODV            EXTEND
+                INDEX           SKEEP5                          # Adjust target register of DV.
+                DV              0                               # Z at time of DV = 02003
+                TCF             DVDONE
+
 # The extended tests check out functionalities not exercised by the Aurora or Retread tests. First up
 # is testing of the interrupt priority chain (insofar as it can be deterministically and automatically
 # checked) by queuing up all four timer interrupts, and then executing them one at a time using EDRUPT.
@@ -143,104 +153,215 @@ ZREL            RELINT                                          # Interrupts are
                 AD              ZRELADR
                 TC              -0CHK                           # ZRUPT should have been ZREL + SBIT13
 
-EXDVTSTS        CAF             DVTBLADR
+# Next, perform some extra tests on the DV instruction. DV has a lot of cases that give strange results.
+# All of the tests performed so far only test the "nominal" case of divisor >= dividend, and no overflow.
+# The documentation available simply says that the divisor < dividend case results in "nonsense". Nothing
+# is said about overflow (which is catastrophic in the divisor) or special register cases, all of which
+# can give very different results. These tests are provided in an attempt to ensure that DV operates
+# correctly in *all* cases.
+# The extended DV test is table-driven; each table entry contians a dividend, divisor, expected quotient
+# and remainder, and overflow flags.
+# The following SKEEP registers are used:
+# SKEEP4 - contains the address of the DV table entry being tested. This can be examined on test failure.
+# SKEEP5 - contains the address of the register used as the divisor (A, L, Q, or Z).
+# SKEEP6 - contains 0, HALF, or -HALF, which is added twice to the dividend to generate overflow.
+
+EXDVTSTS        CAF             DVTBLADR                        # Load the start of the DV table
                 TS              SKEEP4
 
-# Determine the register to use for the divisor
-EXDVLOOP        INDEX           SKEEP4
-                CAF             DIVISOR
+EXDVLOOP        INDEX           SKEEP4                          # Load the divisor, which will normally be
+                CAF             DIVISOR                         # stored in the Q register.
                 TS              Q
-                CCS             Q
-                TCF             QDIV
+# Some values of the divisor (+1, +2, +3) indicate that A, L, or Z respectively should be used instead 
+# of Q. The final division is performed by INDEXing DV 0, so we can tweak the targeted register to match
+# what the table is requested.
+                EXTEND                                          # If the divisor is negative or zero, we
+                BZMF            QDIV                            # can safely assume we're dividing by Q.
+                MASK            NEG3
+                CCS             A                               # Are any bits above bit 2 set?
+                TCF             QDIV                            # Yes: the divisor is not 1, 2, or 3    
+                INDEX           Q                               # No: the divisor is 1, 2, or 3. Determine
+DIVSRTAB        TCF             DIVSRTAB                        # which register is selected.
+                TCF             ADIV                            # A is 0 from the CCS here
+                TCF             LDIV
+
+ZDIV            CAF             FIVE                            # Divisor = Z
                 TCF             ADIV
-                TCF             QDIV
-LDIV            CAF             ONE
+
+LDIV            CAF             ONE                             # Divisor = L
                 TCF             ADIV
-QDIV            CAF             TWO
+
+QDIV            CAF             TWO                             # Divisor = Q
 ADIV            TS              SKEEP5
 
-# Determine if the dividend will have overflow in A
-                CAF             DVDNDOVF
+# Next, determine if the dividend will have overflow. We do this before checking if the divisor gets
+# overflow, since that may potentially end up with overflow in Q, and thus must be INHINTed.
+                CAF             DVDNDOVF                        # Load the dividend overflow bit.
                 INDEX           SKEEP4
                 MASK            OVFFLAGS 
-                EXTEND
-                BZF             STOROVF
-                INDEX           SKEEP4
-                CAF             DIVIDEND
+                EXTEND                                          # If no overflow is requested, go store the
+                BZF             STOROVF                         # resluting 0 in SKEEP6 (A + 0 + 0 = A).
+                INDEX           SKEEP4                          # Overflow requested. Check if the dividend's
+                CAF             DIVIDEND                        # A is positive or negative.
                 CCS             A
-                CAF             HALF
-                TCF             STOROVF
+                TCF             DVDNDPOV                        # A = positive or +0. Go load HALF (20000)
+                TCF             DVDNDPOV
+
+                NOOP                                            # A = negative or -0. Load -HALF (57777).
                 CS              HALF
-STOROVF         TS              SKEEP6
+                TCF             STOROVF
+
+DVDNDPOV        CA              HALF
+STOROVF         TS              SKEEP6                          # Whatever the result, store it in SKEEP6
                 
-# Inject overflow into the divisor if desired
-                CAF             DIVSROVF
+# Dividend overflow is taken care of, for now. Now check to see if we need overflow in the divisor.
+                CAF             DIVSROVF                        # Load the divisor overflow bit.
                 INDEX           SKEEP4
                 MASK            OVFFLAGS
-                EXTEND
-                BZF             MKOVFLOW 
+                EXTEND                                          # If no overflow is requested, we can skip
+                BZF             DVDNDLOD                        # fiddling with Q.
                 CCS             Q
-                CAF             HALF
+                TCF             DIVSRPOV                        # Q is positive or +0. Go load +HALF and
+                TCF             DIVSRPOV                        # for creating positive overflow.
+
+                NOOP                                            # Q is negative or -0. Go load -HALF
+                CS              HALF                            # for creating negative overflow.
                 TCF             MKOVFLOW
-                CS              HALF
+
+DIVSRPOV        CA              HALF
 MKOVFLOW        INHINT
                 XCH             Q
-                AD              Q
-                AD              Q
-                XCH             Q
+                AD              Q                               # Add +HALF or -HALF to Q twice to get
+                AD              Q                               # overflow.
+                XCH             Q                               # Restore the divisor back to Q.
                 
-# Load the dividend
-                EXTEND
+# We can finally load the dividend and apply the requested overflow to it.
+DVDNDLOD        EXTEND
                 INDEX           SKEEP4
                 DCA             DIVIDEND
 
-# Inject overflow into the divisor if necessary
-                AD              SKEEP6
+                AD              SKEEP6                          # Inject overflow (maybe) into A.
                 AD              SKEEP6
 
-# Perform the division
-                EXTEND
-                INDEX           SKEEP5
-                DV              0
-                RELINT
+# All of the setup is done. Go perform the division! The code to do so is at the begninning of the bank,
+# to provide a predictable location for DV Z cases.
+                TCF             DODV
+DVDONE          RELINT                                          # Division returns here. It is now safe to RELINT.
 
-# Check the results
-                COM
+                COM                                             # Check the quotient.
                 INDEX           SKEEP4
                 AD              QUOTIENT
                 TC              -0CHK
-                CS              L
+                CS              L                               # Check the remainder.
                 INDEX           SKEEP4
                 AD              REMAINDR
                 TC              -0CHK
 
-                CAF             SIX
+                CAF             SIX                             # Move on to the next table entry.
                 ADS             SKEEP4
                 AD              -DVENDAD
-                EXTEND
-                BZMF            EXDVLOOP
+                EXTEND                                          # When we run off the end of the table, we are
+                BZMF            EXDVLOOP                        # done dividing things.
 
 # Head to bank 3, where all EDRUPT tests must take place.
-DVSKIP          TC              BRUPTCHK
+                TC              BRUPTCHK
 
 # Extended tests are complete. Head back to self-check proper.
                 TC              POSTJUMP
                 CADR            EXTTDONE
 
+# Interrupt routine used in BRUPTCHK.
+ARUPTVEC        DXCH            ARUPT                           # Although Q is also destroyed, we happen to know
+                                                                # that the "interrupted" program doesn't need it.
+
+                CS              BRUPT                           # Check that BRUPT was correctly calculated as 
+                AD              EDRPTWRD                        # "EDRUPT BRUPTCHK +5".
+                AD              FIVE
+                TC              -0CHK
+
+                CS              ZRUPT                           # ZRUPT should be pointing at the address
+                AD              EDRP+1AD                        # immediately following the EDRUPT.
+                TC              -0CHK
+
+                CAF             BRUPTCHK                        # Break out of the EDRUPT loop by replacing
+                TS              BRUPT                           # BRUPT with "CAF FIVE".
+                TC              NOQBRSM
+
 ZSKIPADR        ADRES           ZSKIP
 ZRELADR         ADRES           ZREL
 
+ARVECADR        ADRES           ARUPTVEC
+EDRP+1AD        ADRES           EDRPT+1
+
+# Do-nothing waitlist task, used as a dummy when generating a fast T3RUPT.
+NOTHING         TC              TASKOVER
+
+ENDEXTST        EQUALS
+
+                SETLOC          ENDINTF
+# Check EDRUPT's ability to vector to A with no pending interrupts, the correct
+# behavior of BRUPT for interrupts following an INDEX, and BRUPT substitution.
+BRUPTCHK        CAF             FIVE                            # SKEEP1 = 5. This will be used for indexing.
+                TS              SKEEP1
+                EXTEND                                          # Save our return address.
+                QXCH            SKEEP2
+                CAF             ARVECADR                        # Attempt to use EDRUPT to vector to ARUPTVEC.
+ +5             EXTEND                                          # If some other interrupt is taken, continue
+                INDEX           SKEEP1                          # at BRUPTCHK+5 (as calculated by the INDEX).
+EDRPTWRD        EDRUPT          BRUPTCHK                        # This instruction should be replaced with
+EDRPT+1         AD              NEG4                            # "CAF FIVE" upon resume. Make sure it did.
+                TC              +1CHK
+
+                TC              SKEEP2                          # All done here. Head back to SELF-CHECK proper.
+
+# Routine to trigger a pending timer interrupt and verify that the timer whose number is
+# specified in A was the one that got serviced.
+TRIGRUPT        XCH             L
+                EXTEND
+                QXCH            SKEEP1
+                CAF             ZERO                            # Zero LASTIMER so we don't get duped.
+                TS              LASTIMER
+                CA              NOPNDADR                        # EDRUPT will fall back on this vector if
+                EXTEND                                          # no interrupts at all are pending.
+                EDRUPT          TRPTCHK                         # Trigger an interrupt, then skip over TC ERRORS.
+                TC              ERRORS
+TRPTCHK         CS              LASTIMER                        # Check the timer that just got executed matches
+                AD              L                               # what was expected.
+                TC              -0CHK
+                TC              SKEEP1
+
+NOPNDING        TC              ERRORS
+NOPNDADR        ADRES           NOPNDING
+
+# T5 and T6 interrupt routines. Both currently only set LASTIMER for use with the extended self-tests.
+T5RUPT          TS              BANKRUPT
+                CAF             FIVE
+                TS              LASTIMER
+                TCF             NOQRSM
+
+T6RUPT          TS              BANKRUPT
+                CAF             SIX
+                TS              LASTIMER
+                TCF             NOQRSM
+
+ENDSLFS4        EQUALS
+
+# --------------- Extended DV table ------------------
+# Table entry offsets for convenient use
 DIVIDEND        =               0
 DIVISOR         =               2
 QUOTIENT        =               3
 REMAINDR        =               4
 OVFFLAGS        =               5
 
-DVDNDOVF        EQUALS          ONE
-DIVSROVF        EQUALS          TWO
+# Overflow flags
+DVDNDOVF        EQUALS          ONE                             # Dividend overflow
+DIVSROVF        EQUALS          TWO                             # Divisor overflow
 
-DVTBLADR        GENADR          DVTBL
+                SETLOC          ENDEXTST
+DVTBLADR        GENADR          DVTBL                           # Table start+end addresses
 -DVENDAD        -GENADR         DVTBLEND
+
 # Regular division with + dividend and + divisor
 DVTBL           2OCT            1010414241                      # Dividend
                 OCT             25274                           # Divisor
@@ -325,6 +446,20 @@ DVTBL           2OCT            1010414241                      # Dividend
                 OCT             61746                           # Remainder
                 OCT             0                               # No overflow
 
+# Division by +0
+                2OCT            1234567654                      # Dividend
+                OCT             00000                           # Divisor
+                OCT             37777                           # Quotient
+                OCT             27655                           # Remainder
+                OCT             0                               # No overflow
+
+# Division by -0
+                2OCT            3412517762                      # Dividend
+                OCT             77777                           # Divisor
+                OCT             40000                           # Quotient
+                OCT             17762                           # Remainder (actually 057762 but L is overflow corrected)
+                OCT             0                               # No overflow
+
 # Nonsense division with overflow in quotient (no effect)
                 2OCT            3051240771                      # Dividend
                 OCT             20015                           # Divisor
@@ -355,185 +490,142 @@ DVTBL           2OCT            1010414241                      # Dividend
 
 # Regular division with positive A as divisor (actually -|A|)
                 2OCT            2137600000                      # Dividend
-                OCT             00000                           # Divisor = A
+                OCT             1                               # Divisor = A
                 OCT             40000                           # Quotient
                 OCT             21376                           # Remainder
                 OCT             0                               # No overflow
 
 # Regular division with negative A as divisor (no effect)
                 2OCT            5442300000                      # Dividend
-                OCT             00000                           # Divisor = A
+                OCT             1                               # Divisor = A
                 OCT             37777                           # Quotient
                 OCT             54423                           # Remainder
                 OCT             0                               # No overflow
 
 # Nonsense division with positive A as divisor (actually -|A|)
                 2OCT            2740131027                      # Dividend
-                OCT             00000                           # Divisor = A
+                OCT             1                               # Divisor = A
                 OCT             40001                           # Quotient
                 OCT             10031                           # Remainder
                 OCT             0                               # No overflow
 
 # Nonsense division with negative A as divisor (no effect)
                 2OCT            7654263257                      # Dividend
-                OCT             00000                           # Divisor = A
+                OCT             1                               # Divisor = A
                 OCT             37777                           # Quotient
                 OCT             62022                           # Remainder
                 OCT             0                               # No overflow
 
 # Regular division with + overflow A as divisor
                 2OCT            1333700000                      # Dividend
-                OCT             00000                           # Divisor = A
+                OCT             1                               # Divisor = A
                 OCT             67772                           # Quotient
                 OCT             16645                           # Remainder
                 OCT             1                               # A +overflow
 
 # Regular division with - overflow A as divisor
                 2OCT            6626200000                      # Dividend
-                OCT             00000                           # Divisor = A
+                OCT             1                               # Divisor = A
                 OCT             01211                           # Quotient
                 OCT             67064                           # Remainder
                 OCT             1                               # A -overflow
 
 # Nonsense division with + overflow A as divisor
                 2OCT            3545321212                      # Dividend
-                OCT             00000                           # Divisor = A
+                OCT             1                               # Divisor = A
                 OCT             77777                           # Quotient
                 OCT             21212                           # Remainder (actually 061212 but L is overflow corrected)
                 OCT             1                               # A +overflow
 
 # Nonsense division with - overflow A as divisor
                 2OCT            5212366411                      # Dividend
-                OCT             00000                           # Divisor = A
+                OCT             1                               # Divisor = A
                 OCT             01010                           # Quotient
                 OCT             61151                           # Remainder (actually 121151 but L is overflow corrected)
                 OCT             1                               # A -overflow
 
 # Regular division with positive dividend and positive L as divisor (L gets + overflow)
                 2OCT            1743131231                      # Dividend
-                OCT             77777                           # Divisor = L
+                OCT             2                               # Divisor = L
                 OCT             23526                           # Quotient
                 OCT             22063                           # Remainder
                 OCT             0                               # No overflow
 
 # Regular division with positive dividend and negative L as divisor (L = L + 40000)
                 2OCT            2540047102                      # Dividend
-                OCT             77777                           # Divisor = L
+                OCT             2                               # Divisor = L
                 OCT             30531                           # Quotient
                 OCT             02770                           # Remainder
                 OCT             0                               # No overflow
 
 # Regular division with negative dividend and positive L as divisor (L = -L + 40000)
                 2OCT            7651711246                      # Dividend
-                OCT             77777                           # Divisor = L
+                OCT             2                               # Divisor = L
                 OCT             76065                           # Quotient
                 OCT             64651                           # Remainder
                 OCT             0                               # No overflow
 
 # Regular division with negative dividend and negative L as divisor (L = -L with + overflow)
                 2OCT            5077544044                      # Dividend
-                OCT             77777                           # Divisor = L
+                OCT             2                               # Divisor = L
                 OCT             45507                           # Quotient
                 OCT             64614                           # Remainder
                 OCT             0                               # No overflow
 
 # Nonsense division with positive dividend and positive L as divisor (L gets + overflow)
                 2OCT            3133204417                      # Dividend
-                OCT             77777                           # Divisor = L
+                OCT             2                               # Divisor = L
                 OCT             37212                           # Quotient
                 OCT             02371                           # Remainder
                 OCT             0                               # No overflow
 
 # Nonsense division with positive dividend and negative L as divisor (L = L + 40000)
                 2OCT            2467267371                      # Dividend
-                OCT             77777                           # Divisor = L
+                OCT             2                               # Divisor = L
                 OCT             34330                           # Quotient
                 OCT             16012                           # Remainder
                 OCT             0                               # No overflow
 
 # Nonsense division with negative dividend and positive L as divisor (L = -L + 40000)
                 2OCT            5510506670                      # Dividend
-                OCT             77777                           # Divisor = L
+                OCT             2                               # Divisor = L
                 OCT             47773                           # Quotient
                 OCT             53327                           # Remainder
                 OCT             0                               # No overflow
 
 # Nonsense division with negative dividend and negative L as divisor (L = -L with + overflow)
                 2OCT            4222461674                      # Dividend
-                OCT             77777                           # Divisor = L
+                OCT             2                               # Divisor = L
                 OCT             40750                           # Quotient
                 OCT             63701                           # Remainder
+                OCT             0                               # No overflow
+
+# Regular division with positive dividend and Z as divisor (no effect)
+                2OCT            0142300467                      # Dividend
+                OCT             3                               # Divisor = Z
+                OCT             30413                           # Quotient
+                OCT             01026                           # Remainder
+                OCT             0                               # No overflow
+
+# Regular division with negative dividend and Z as divisor (Z gets negative overflow)
+                2OCT            7733342477                      # Dividend
+                OCT             3                               # Divisor = Z
+                OCT             00000                           # Quotient
+                OCT             42477                           # Remainder
+                OCT             0                               # No overflow
+
+# Nonsense division with positive dividend and Z as divisor (no effect)
+                2OCT            2677610452                      # Dividend
+                OCT             3                               # Divisor = Z
+                OCT             37664                           # Quotient
+                OCT             01016                           # Remainder
+                OCT             0                               # No overflow
+
+# Nonsense division with negative dividend and Z as divisor (Z gets negative overflow)
+                2OCT            4032141623                      # Dividend
+                OCT             3                               # Divisor = Z
+                OCT             20000                           # Quotient
+                OCT             41623                           # Remainder
 DVTBLEND        OCT             0                               # No overflow
 
-# Interrupt routine used in BRUPTCHK.
-ARUPTVEC        DXCH            ARUPT                           # Although Q is also destroyed, we happen to know
-                                                                # that the "interrupted" program doesn't need it.
-
-                CS              BRUPT                           # Check that BRUPT was correctly calculated as 
-                AD              EDRPTWRD                        # "EDRUPT BRUPTCHK +5".
-                AD              FIVE
-                TC              -0CHK
-
-                CS              ZRUPT                           # ZRUPT should be pointing at the address
-                AD              EDRP+1AD                        # immediately following the EDRUPT.
-                TC              -0CHK
-
-                CAF             BRUPTCHK                        # Break out of the EDRUPT loop by replacing
-                TS              BRUPT                           # BRUPT with "CAF FIVE".
-                TC              NOQBRSM
-
-ARVECADR        ADRES           ARUPTVEC
-EDRP+1AD        ADRES           EDRPT+1
-
-# Do-nothing waitlist task, used as a dummy when generating a fast T3RUPT.
-NOTHING         TC              TASKOVER
-
-ENDEXTST        EQUALS
-
-                SETLOC          ENDINTF
-# Check EDRUPT's ability to vector to A with no pending interrupts, the correct
-# behavior of BRUPT for interrupts following an INDEX, and BRUPT substitution.
-BRUPTCHK        CAF             FIVE                            # SKEEP1 = 5. This will be used for indexing.
-                TS              SKEEP1
-                EXTEND                                          # Save our return address.
-                QXCH            SKEEP2
-                CAF             ARVECADR                        # Attempt to use EDRUPT to vector to ARUPTVEC.
- +5             EXTEND                                          # If some other interrupt is taken, continue
-                INDEX           SKEEP1                          # at BRUPTCHK+5 (as calculated by the INDEX).
-EDRPTWRD        EDRUPT          BRUPTCHK                        # This instruction should be replaced with
-EDRPT+1         AD              NEG4                            # "CAF FIVE" upon resume. Make sure it did.
-                TC              +1CHK
-
-                TC              SKEEP2                          # All done here. Head back to SELF-CHECK proper.
-
-# Routine to trigger a pending timer interrupt and verify that the timer whose number is
-# specified in A was the one that got serviced.
-TRIGRUPT        XCH             L
-                EXTEND
-                QXCH            SKEEP1
-                CAF             ZERO                            # Zero LASTIMER so we don't get duped.
-                TS              LASTIMER
-                CA              NOPNDADR                        # EDRUPT will fall back on this vector if
-                EXTEND                                          # no interrupts at all are pending.
-                EDRUPT          TRPTCHK                         # Trigger an interrupt, then skip over TC ERRORS.
-                TC              ERRORS
-TRPTCHK         CS              LASTIMER                        # Check the timer that just got executed matches
-                AD              L                               # what was expected.
-                TC              -0CHK
-                TC              SKEEP1
-
-NOPNDING        TC              ERRORS
-NOPNDADR        ADRES           NOPNDING
-
-# T5 and T6 interrupt routines. Both currently only set LASTIMER for use with the extended self-tests.
-T5RUPT          TS              BANKRUPT
-                CAF             FIVE
-                TS              LASTIMER
-                TCF             NOQRSM
-
-T6RUPT          TS              BANKRUPT
-                CAF             SIX
-                TS              LASTIMER
-                TCF             NOQRSM
-
-ENDSLFS4        EQUALS
+ENDDVTAB        EQUALS
