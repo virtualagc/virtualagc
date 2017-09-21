@@ -102,6 +102,9 @@
  *                              superbank bits.
  *              2017-06-18 MAS  Added --pos-checksums
  *              2017-08-31 RSB	Added stuff associated with --debug.
+ *              2017-09-20 RSB	Gave --hardware type parity priority over --parity (since
+ *                            	builds with "--hardware --parity" was giving hardware-
+ *                            	incompatible binaries).
  */
 
 #include "yaYUL.h"
@@ -538,14 +541,14 @@ main(int argc, char *argv[])
               Value = ObjectCode[Bank][Offset] << 1;
 
               // Add in the parity bits if requested
-              if (Parity)
-                // yaAGC uses bit position 1 for parity
-                Value |= Parities[Bank][Offset];
-              else if (Hardware)
+              if (Hardware)
                 // The AGC hardware used bit 15 for parity
                 Value = (Value & 0100000)  |
                         (Parities[Bank][Offset] << 14) |
                         ((Value & 077776) >> 1);
+              else if (Parity)
+                // yaAGC uses bit position 1 for parity
+                Value |= Parities[Bank][Offset];
 
               fputc(Value >> 8, OutputFile);
               fputc(Value, OutputFile);
