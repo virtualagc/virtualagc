@@ -364,6 +364,11 @@
  *				the divisor as well as all situations that create
  *				"total nonsense" as described by Savage&Drake
  *				(we previously simply returned random values).
+ *		09/27/17 MAS	Fixed standby, which was broken by the GOJAM
+ *				update. All I/O channels are held in their reset
+ *				state via an ever-present GOJAM during standby,
+ *				but the standby enabled bit (CH13 bit 11) is not
+ *				required to be set to exit standby, only to enter.
  *
  *
  * The technical documentation for the Apollo Guidance & Navigation (G&N) system,
@@ -1985,7 +1990,7 @@ agc_engine (agc_t * State)
 
           // The standby circuit finishes checking to see if we're going to standby now
           // (it has the same period as but is 180 degrees out of phase with the Night Watchman)
-          if (State->SbyPressed && State->InputChannel[013] & 002000)
+          if (State->SbyPressed && ((State->InputChannel[013] & 002000) || State->Standby))
             {
               if (!State->Standby)
                 {
