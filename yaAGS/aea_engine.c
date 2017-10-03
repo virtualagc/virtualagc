@@ -59,7 +59,7 @@
   source code.  The document specifically of interest is the AEA Programming
   Reference by Stiverson.
   
-  What THIS file contains is basicly a pure simulation of the CPU, without any
+  What THIS file contains is basically a pure simulation of the CPU, without any
   input and output as such.  (I/O, to the DEDA or to LM hardware 
   simulations occurs through the mechanism of sockets, and hence the DEDA 
   front-end and hardware back-end simulations may be implemented as complete 
