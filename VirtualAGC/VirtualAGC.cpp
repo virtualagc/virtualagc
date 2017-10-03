@@ -103,6 +103,9 @@
  *          	2017-05-30 RSB	Changed bogus references to Sunburst 39 to Sunburst 37.
  *          	2017-06-19 RSB	Enabled Sunburst 37.
  *          	2017-08-29 RSB	Enabled Zerlina 56.
+ *          	2017-10-03 RSB	Changed definition of a "small" display to be anything less
+ *          			than 1200 (as opposed to less than 1080), due to this issue:
+ *          			https://github.com/virtualagc/virtualagc/issues/1051.
  *
  * This file was originally generated using the wxGlade RAD program.
  * However, it is now maintained entirely manually, and cannot be managed
@@ -353,7 +356,7 @@ VirtualAGC::VirtualAGC(wxWindow* parent, int id, const wxString& title,
   wxClientDisplayRect(&x, &y, &width, &height);
   DropDown = false;
   ReallySmall = false;
-  if (height < 1024 || width < 1280)
+  if (height < 1200 || width < 1280)
     {
       Points = StartingPoints - 2;
       ReallySmall = true;
