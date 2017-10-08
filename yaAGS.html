@@ -37,6 +37,10 @@
       <li><a href="#Utility_Programs">Utility Programs</a></li>
       <li><big><a href="#AGS_Flight_Software"><small><small><big><small><big>AGS
 
+
+
+
+
                       Flight Software</big></small></big></small></small></a></big></li>
       <ul>
         <li><big><a href="#Availability_"><small><small><big><small><big>Availability</big></small></big></small></small></a></big></li>
@@ -54,7 +58,7 @@
     <a href="FlightControlSubsystem.jpg"><img style="border: 2px solid ;
         width: 459px; height: 406px;" alt="LM's Integrated Flight
         Control subsystem" src="FlightControlSubsystemSmall.jpg"
-        align="right" height="406" hspace="12" width="459"></a>The AGS
+        width="459" hspace="12" height="406" align="right"></a>The AGS
     was a computer system used in the LM.&nbsp; It was a completely
     separate computer system from the LM's AGC, with a different
     architecture, different instruction-set, and different runtime
@@ -90,6 +94,10 @@
     nicely where it was "supposed" to be with no inputs from
     Stafford.&nbsp; (See the <a class="moz-txt-link-freetext"
       href="http://history.nasa.gov/alsj/a410/A10_MissionReport.pdf">mission
+
+
+
+
 
       report</a>.)&nbsp; So it all turned out okay.<br>
     <br>
@@ -139,68 +147,23 @@
     lot of the verbiage as well.)
     <h2><a name="AGS_Documentation" id="AGS_Documentation"></a>AGS
       Documentation</h2>
-    The following documentation is not available (as far as I know)
-    anywhere else.&nbsp; It was digitized by John Pultorak (thanks,
+    A lot of this documentation was digitized by John Pultorak (thanks,
     John!) from physical documents preserved and donated by Davis
     Peticolas (thanks, Davis!).<br>
+    <h3>General<br>
+    </h3>
     <ul>
-      <li><a
-href="Pultorak_files/AEA_block_diagram.jpg">
-          A block diagram of the AEA</a>, taken from&nbsp; document
-        69N33430 (LM/AGS Design Survey), 3.5M bytes.&nbsp;&nbsp;
-        (Actually, John had to outlay money for this, as it's not one of
-        Davis's docs, so we have additional cause to thank him.&nbsp; He
-        also tells us it's the best AEA architecture diagram he has
-        seen.)&nbsp; The complete LM/AGS Design Survey document is now <a
-href="http://klabs.org/history/ntrs_docs/manned/apollo/1969024052.pdf">
-          available at klabs.org</a>.</li>
-      <li>
-        <div> <span style="color: rgb(0, 0, 0);">Flight Program 8 -- LM
-            AGS FP8</span> S03 4039, LM Abort Electronics Assembly,
-          12/18/70, 6325 lines. Complete assembly language
-          listing.&nbsp;<br>
-        </div>
-      </li>
-      <ul>
-        <li><a style="color: rgb(255, 0, 0);"
-            href="Pultorak_files/FP8Listing.pdf">
-            Scanned assembly listing of AGS Flight Program 8</a>, 185
-          pages, 28.6M bytes.<br>
-        </li>
-        <li><a style="color: rgb(255, 0, 0);"
-            href="listings/FP8/FP8.aea.html">Hyperlinked, colorized HTML
-            assembly listing of AGS Flight Program 8</a>, created by
-          assembling the source code with <span style="font-weight:
-            bold;">yaLEMAP</span>, 1.8M bytes.&nbsp; (Same thing as the
-          scanned assembly listing, but much smaller and nicer!)</li>
-        <li><a
-href="Documents/17618-H110-RO-00%20LM%20AGS%20Operating%20Manual%20Flight%20Program%208.pdf">LM/AGS
-            Operating Manual, Flight Program 8</a>, 17618-H110-RO-00,
-          TRW, March 1971, 233 pages, 10.5M bytes.<br>
-        </li>
-      </ul>
-      <li><a
-href="Pultorak_files/FP6_OperatingManual.pdf">
-          LM/AGS Operating Manual, Flight Program 6</a>,
-        11176-6033-T000, Revision 1, TRW, July 1969, 194 pages, 36.1M
-        bytes.<br>
-      </li>
-      <li><a
-href="Pultorak_files/FP6ComputerProgramSpecification.pdf">
-          LM AGS Computer Program Specification</a><a
-href="Pultorak_files/FP6ComputerProgramSpecification.pdf">,
-          Flight Program 6</a>, 11176-6042-T000, TRW, March 1969, 90
-        pages, 14M bytes.</li>
-      <li>Memo: <a
-          href="Pultorak_files/FP8Flowcharts.pdf">
-          Tables and Flow Charts for Preliminary Release of FP8</a>, C.
-        G. Gibson, TRW, 5 January 1971, 2.1M bytes.</li>
-      <li><a
-href="Pultorak_files/AEAProgrammingReference.pdf">
-          Abort Electronic Assembly Programming Reference</a>, H. L.
-        Stiverson, 7322.3-17, April 1966, 77 pages, 14.6M bytes.&nbsp;
-        This document is the principle (and almost complete) reference
-        for understanding the operation of the AEA CPU <span
+      <li><a href="Documents/AgsDesignSurvey.pdf">Lunar Module/Abort
+          Guidance System (LM/AGS) Design Survey</a>, TRW, September
+        1968.&nbsp; <a href="Pultorak_files/AEA_block_diagram.jpg">Just
+          the block diagram of the AEA</a>, (p. 65, a separate scan that
+        John had made; he&nbsp; tells us it's the best AEA architecture
+        diagram he has seen).</li>
+      <li><a href="Pultorak_files/AEAProgrammingReference.pdf"> Abort
+          Electronic Assembly Programming Reference</a>, H. L.
+        Stiverson, 7322.3-17, April 1966, 77 pages.&nbsp; This document
+        is the principle (and almost complete) reference for
+        understanding the operation of the AEA CPU <span
           style="font-style: italic;">per se</span>, the AEA assembly
         language and assembler, and the operation of the CPU's i/o
         ports.&nbsp; There are, however, some confusing aspects to the
@@ -225,72 +188,307 @@ href="Pultorak_files/AEAProgrammingReference.pdf">
           explanation) I've never figured out satisfactorily how it is
           supposed to work</li>
       </ul>
-      <li><a
-href="Documents/LM%20PGNS-AGS%20Training%20Card.pdf">LM
+      <li><a href="Documents/LM%20PGNS-AGS%20Training%20Card.pdf">LM
           PGNS/AGS Training Card</a>, 70:7252.3-63, TRW, October 22,
-        1970, 10 pages, 1.1MB.<br>
-      </li>
+        1970, 10 pages.</li>
+      <li><a href="Pultorak_files/AGSFlightEquations.pdf"> LM AGS Flight
+          Equations</a>, 05952-6076-T000, T. S. Bettwy, TRW, 25 January,
+        1967, 117 pages.</li>
+      <li><a href="Pultorak_files/AGS_PandI_Spec.pdf">LM/Abort Guidance
+          System, Performance and Interface Specifications Document</a>,
+        Preliminary, July 1, 1966, 345 pages (not numbered).</li>
+      <li><a href="Pultorak_files/AGSSimulatorUsersGuide.pdf"> User's
+          Guide for AGS Bit-by-Bit Simulator</a>, Bulletin
+        672-21-EAS-208, K. B. Robertson, Lockheed, Houston TX, August
+        1968, 67 pages.</li>
+      <li><a href="Pultorak_files/LEM_CESandAGS_Grumman.pdf"> LEM CES
+          and AGS</a>, Grumman, September 1966, 32 pages.</li>
+      <li><a href="Pultorak_files/AEA_registers.pdf"> Notes on AEA
+          registers</a>, John Pultorak, January 2005, 3 pages.</li>
+      <li>LTV, "<a
+          href="Documents/LEM%20Emergency%20Abort%20Guidance%20System%20Study.pdf">LEM
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+          Emergency Abort Guidance System Study</a>", May 10, 1963</li>
+      <li>Grumman, LED-540-3, "<a
+href="Documents/Grumman%20LED-540-3%20Back-up%20Guidance%20Requirements.pdf">Back-up
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+          Guidance Requirements</a>", July 9, 1963</li>
+      <li>Grumman, LED-500-4, "<a
+href="Documents/Grumman%20LEM-500-4%20Abort%20Guidance%20System%20Redefinition%20Studies.pdf">Abort
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+          Guidance System Redefinition Studies</a>", March 31, 1965</li>
+      <li>Grumman, LSP-300-3B, "<a
+          href="Documents/Specification,%20Abort%20Guidance%20Section.pdf">Design
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+          Control Specification for Abort Guidance Section, Guidance,
+          Navigation and Control Subsystem</a>", December 2, 1966</li>
+    </ul>
+    <h3>Specific to Flight Program 6<br>
+    </h3>
+    <ul>
       <ul>
       </ul>
       <li>LM AGS, Programmed Equations Document, Flight Program 6,
         11176-6041-T0-00, TRW, 1969 April.&nbsp; Because of the size, we
         provide this in 2 chunks:</li>
       <ul>
-        <li><a
-href="Pultorak_files/FP6_AGS_ProgrammedEquations.pdf">
+        <li><a href="Pultorak_files/FP6_AGS_ProgrammedEquations.pdf">
             Body of LM AGS FP6 Programmed Equations document</a>, 220
-          pages, 46M bytes.<br>
+          pages.<br>
         </li>
-        <li>Appendix A, <a style="color: rgb(255, 0, 0);"
-href="Pultorak_files/FP6_AGS_AssemblyListing.pdf">
-            scanned assembly listing of AGS Flight Program 6</a>, 182
-          pages, 25.2M bytes.</li>
-        <li><a style="color: rgb(255, 0, 0);"
-            href="listings/FP6/FP6.aea.html">Hyperlinked, colorized HTML
-            assembly listing of AGS Flight Program 6</a>, created by
-          assembling the source code with <span style="font-weight:
-            bold;">yaLEMAP</span>, 1.6M bytes.&nbsp; (Same thing as the
-          scanned assembly listing, but much smaller and nicer!)</li>
+        <li>Appendix A, <a
+            href="Pultorak_files/FP6_AGS_AssemblyListing.pdf"> scanned
+            assembly listing of AGS Flight Program 6</a>, 182 pages.</li>
       </ul>
+      <li><a href="listings/FP6/FP6.aea.html">Hyperlinked, colorized
+          HTML assembly listing of AGS Flight Program 6</a>, created by
+        assembling the source code with <span style="font-weight:
+          bold;">yaLEMAP</span>.&nbsp; (Same thing as the scanned
+        assembly listing, but much smaller and nicer!)</li>
+      <li><a href="Pultorak_files/FP6_OperatingManual.pdf"> LM/AGS
+          Operating Manual, Flight Program 6</a>, 11176-6033-T000,
+        Revision 1, TRW, July 1969, 194 pages.<br>
+      </li>
+      <li><a href="Pultorak_files/FP6ComputerProgramSpecification.pdf">
+          LM AGS Computer Program Specification</a><a
+href="file:///home/rburkey/Desktop/sandroid.org/public_html/apollo/Pultorak_files/FP6ComputerProgramSpecification.pdf">,
+          Flight Program 6</a>, 11176-6042-T000, TRW, March 1969, 90
+        pages.</li>
       <li><a
-href="Pultorak_files/FP6_ProgramVerificationTestResults.pdf">
+          href="Pultorak_files/FP6_ProgramVerificationTestResults.pdf">
           Program Verification Test Results, LM/AGS Flight Program No. 6</a>,
         11176-6050-T000, E. V. Avery, TRW, Redondo Beach CA, May 1969,
-        49 pages, 13.8M bytes.</li>
-      <li><a
-href="Pultorak_files/FP6FinalDesignReport.pdf">
-          LM AGS Guidance Software, Final Design Report, Flight Program
-          6</a>, 11176-6052-T0-00, TRW, Redondo Beach CA, April 1969, 10
-        pages, 1.3M bytes.</li>
-      <li><a
-href="Pultorak_files/AGSFlightEquations.pdf">
-          LM AGS Flight Equations</a>, 05952-6076-T000, T. S. Bettwy,
-        TRW, 25 January, 1967, 117 pages, 20M bytes.</li>
-      <li><a
-href="Pultorak_files/FP6MissionConstants.pdf">
-          LM/AGS Flight Program 6, LM 5 Mission Constants</a>,
+        49 pages.</li>
+      <li><a href="Pultorak_files/FP6FinalDesignReport.pdf"> LM AGS
+          Guidance Software, Final Design Report, Flight Program 6</a>,
+        11176-6052-T0-00, TRW, Redondo Beach CA, April 1969, 10 pages.</li>
+      <li><a href="Pultorak_files/FP6MissionConstants.pdf"> LM/AGS
+          Flight Program 6, LM 5 Mission Constants</a>,
         11176-6055-R0-00, C. J. Mabee, TRW, Redondo Beach CA, June 1969,
-        25 pages, 3.2M bytes.</li>
+        25 pages.</li>
+    </ul>
+    <h3>Specific to Flight Program 8<br>
+    </h3>
+    <ul>
+      <li><span>LM AGS FP8</span> S03 4039, LM Abort Electronics
+        Assembly, 12/18/70, 185 pages. (<a
+          href="Pultorak_files/FP8Listing.pdf">Scanned assembly listing
+          of AGS Flight Program 8</a>, 6325 lines.)</li>
+      <li><a href="listings/FP8/FP8.aea.html">Hyperlinked, colorized
+          HTML assembly listing of AGS Flight Program 8</a>, created by
+        assembling the source code with <span style="font-weight:
+          bold;">yaLEMAP</span>.&nbsp; (Same thing as the scanned
+        assembly listing, but much smaller and nicer!)</li>
       <li><a
-          href="Pultorak_files/AGS_PandI_Spec.pdf">
-          LM/Abort Guidance System, Performance and Interface
-          Specifications Document</a>, Preliminary, July 1, 1966, 345
-        pages (not numbered), 46.2M bytes.</li>
-      <li><a
-href="Pultorak_files/AGSSimulatorUsersGuide.pdf">
-          User's Guide for AGS Bit-by-Bit Simulator</a>, Bulletin
-        672-21-EAS-208, K. B. Robertson, Lockheed, Houston TX, August
-        1968, 67 pages, 12M bytes.</li>
-      <li><a
-href="Pultorak_files/LEM_CESandAGS_Grumman.pdf">
-          LEM CES and AGS</a>, Grumman, September 1966, 32 pages, 800K
-        bytes.&nbsp; (I think this is available elsewhere on the web,
-        but it's a different scan.)</li>
-      <li><a
-          href="Pultorak_files/AEA_registers.pdf">
-          Notes on AEA registers</a>, John Pultorak, January 2005, 3
-        pages, 1.5Mbytes.<br>
+href="Documents/17618-H110-RO-00%20LM%20AGS%20Operating%20Manual%20Flight%20Program%208.pdf">LM/AGS
+
+
+
+
+          Operating Manual, Flight Program 8</a>, 17618-H110-RO-00, TRW,
+        March 1971, 233 pages.<br>
       </li>
+      <li>Memo: <a href="Pultorak_files/FP8Flowcharts.pdf"> Tables and
+          Flow Charts for Preliminary Release of FP8</a>, C. G. Gibson,
+        TRW, 5 January 1971.</li>
+      <ul>
+      </ul>
     </ul>
     <h2><a name="Evolution_of_the_Flight_Software"
         id="Evolution_of_the_Flight_Software"></a>Evolution of the
@@ -300,8 +498,8 @@ href="Pultorak_files/LEM_CESandAGS_Grumman.pdf">
     as authoritative.<br>
     <br>
     <table summary="" style="width: 75%; text-align: left; margin-left:
-      auto; margin-right: auto;" border="1" cellpadding="2"
-      cellspacing="2">
+      auto; margin-right: auto;" cellspacing="2" cellpadding="2"
+      border="1">
       <tbody>
         <tr>
           <td style="vertical-align: top; font-weight: bold;">Program
@@ -411,12 +609,12 @@ href="Pultorak_files/LEM_CESandAGS_Grumman.pdf">
         href="AbortGuidanceSectionBlockDiagram.jpg"><img style="border:
           2px solid ; width: 556px; height: 432px;" alt="LM Abort
           Guidance Section block diagram"
-          src="AbortGuidanceSectionBlockDiagramSmall.jpg" height="432"
-          vspace="8" width="556"></a><br>
+          src="AbortGuidanceSectionBlockDiagramSmall.jpg" width="556"
+          vspace="8" height="432"></a><br>
     </div>
     <table summary="" style="width: 80%; text-align: left; margin-left:
-      auto; margin-right: auto;" border="0" cellpadding="2"
-      cellspacing="2">
+      auto; margin-right: auto;" cellspacing="2" cellpadding="2"
+      border="0">
       <tbody>
         <tr>
           <td style="vertical-align: top;">
@@ -477,8 +675,8 @@ href="Pultorak_files/LEM_CESandAGS_Grumman.pdf">
       <dt><a href="SimplifiedComputerBlockDiagram.jpg"><img
             style="border: 2px solid ; width: 408px; height: 553px;"
             alt="AGS block diagram"
-            src="SimplifiedComputerBlockDiagramSmall.jpg" align="right"
-            height="553" hspace="12" width="408"></a>The AEA (the
+            src="SimplifiedComputerBlockDiagramSmall.jpg" width="408"
+            hspace="12" height="553" align="right"></a>The AEA (the
         computer) had the following characteristics:<br>
       </dt>
     </dl>
@@ -514,8 +712,8 @@ href="Pultorak_files/LEM_CESandAGS_Grumman.pdf">
     </ul>
     <div style="text-align: center;">
       <table summary="" style="width: 50%; text-align: left;
-        margin-left: auto; margin-right: auto;" border="1"
-        cellpadding="2" cellspacing="2">
+        margin-left: auto; margin-right: auto;" cellspacing="2"
+        cellpadding="2" border="1">
         <tbody>
           <tr>
             <td style="vertical-align: top; font-weight: bold;">
@@ -579,8 +777,8 @@ href="Pultorak_files/LEM_CESandAGS_Grumman.pdf">
           face="Geneva">and indeed, almost everything you'd want to know
           architecturally</font>—<font face="Geneva">may be found by
           consulting the <a
-href="Pultorak_files/AEAProgrammingReference.pdf">
-            Abort Electronic Assembly Programming Reference</a>.<br>
+            href="Pultorak_files/AEAProgrammingReference.pdf"> Abort
+            Electronic Assembly Programming Reference</a>.<br>
         </font></dt>
     </dl>
     <h2><a name="yaAGS_the_AGS_CPU_Emulation"
@@ -654,20 +852,20 @@ href="Pultorak_files/AEAProgrammingReference.pdf">
         id="yaDEDA_the_AGS_User-Interface"></a>yaDEDA, the AGS
       User-Interface Simulation</h2>
     <br>
-    <table summary="" style="text-align: left; width: 100%;" border="0"
-      cellpadding="2" cellspacing="2">
+    <table summary="" style="text-align: left; width: 100%;"
+      cellspacing="2" cellpadding="2" border="0">
       <tbody>
         <tr>
           <td style="text-align: center; vertical-align: middle;"> <a
               href="DEDADrawing.jpg"><img style="border: 2px solid ;
                 width: 503px; height: 290px;" alt="Line drawing of a
-                DEDA" src="DEDADrawingSmall.jpg" align="middle"
-                height="290" width="503"></a></td>
+                DEDA" src="DEDADrawingSmall.jpg" width="503"
+                height="290" align="middle"></a></td>
           <td style="vertical-align: top; text-align: center;"> <a
               href="DEDABlockDiagram.jpg"><img style="border: 2px solid
                 ; width: 560px; height: 464px;" alt="DEDA block diagram"
-                src="DEDABlockDiagramSmall.jpg" align="middle"
-                height="464" width="560"></a></td>
+                src="DEDABlockDiagramSmall.jpg" width="560" height="464"
+                align="middle"></a></td>
         </tr>
       </tbody>
     </table>
@@ -676,19 +874,24 @@ href="Pultorak_files/AEAProgrammingReference.pdf">
       <div style="text-align: left;"> <a href="yaDEDAscreenshot.jpg"><img
             style="border: 2px solid ; width: 200px; height: 227px;"
             alt="Click for a larger screenshot of yaDEDA"
-            src="yaDEDAscreenshot-thumb.jpg" align="right" height="230"
-            width="203"></a>The term <span style="font-style: italic;">DEDA</span>
-        refers to the Data Entry and Display Assembly, which is the
-        assembly used by the astronauts to enter data into the AGS, or
-        to see data displayed by the AGS.&nbsp; The DEDA was mounted in
-        the lower-right portion of the LM's control panel, just in front
-        of the LMP (Lunar Module Pilot).&nbsp; Recall that in the
-        somewhat odd terminology employed in the Apollo program, the LMP
-        did not actually pilot the LM.&nbsp; Rather, the commander
-        piloted the LM from the left-hand position.<br>
+            src="yaDEDAscreenshot-thumb.jpg" width="203" height="230"
+            align="right"></a>The term <span style="font-style:
+          italic;">DEDA</span> refers to the Data Entry and Display
+        Assembly, which is the assembly used by the astronauts to enter
+        data into the AGS, or to see data displayed by the AGS.&nbsp;
+        The DEDA was mounted in the lower-right portion of the LM's
+        control panel, just in front of the LMP (Lunar Module
+        Pilot).&nbsp; Recall that in the somewhat odd terminology
+        employed in the Apollo program, the LMP did not actually pilot
+        the LM.&nbsp; Rather, the commander piloted the LM from the
+        left-hand position.<br>
         <br>
         <span style="font-weight: bold;">yaDEDA</span> is an emulation
         of the DEDA for use with <span style="font-weight: bold;">yaAGS</span>.&nbsp;
+
+
+
+
         However, it is certainly possible for the developer of a LM
         simulation to develop his or her own emulation of the
         DEDA.&nbsp; Indeed, the program <span style="font-weight:
@@ -711,6 +914,10 @@ href="Pultorak_files/AEAProgrammingReference.pdf">
         of the DEDA user-interface is built into the DEDA, and so <span
           style="font-weight: bold;">yaDEDA</span> can be operated even
         without the presence of <span style="font-weight: bold;">yaAGS</span>.&nbsp;
+
+
+
+
         Notice that the DEDA has two displays:&nbsp; a three-digit
         display which is an octal "address", and a 5-digit display (plus
         sign) of "data".&nbsp; Quite a lot of the operation of the DEDA
@@ -845,6 +1052,10 @@ href="Pultorak_files/AEAProgrammingReference.pdf">
             <div style="margin-left: 40px;"> (Final version of <span
                 style="font-weight: bold;">yaDEDA</span> only; not
               available on <span style="font-weight: bold;">yaDEDA2</span>.)&nbsp;
+
+
+
+
               Alters the locations of graphics files used by the <span
                 style="font-weight: bold;">yaDEDA</span> program to the
               ./pixmaps/yaDEDA/ folder rather than the default system
@@ -863,6 +1074,10 @@ href="Pultorak_files/AEAProgrammingReference.pdf">
       Cross-Assembler</h2>
     The original cross-assembler for AGS assembly language was known as
     the "LEM Assembly Program", or <span style="font-weight: bold;">LEMAP</span>.&nbsp;
+
+
+
+
     You can read all about it in the document by H. L. Stiverson (see
     above).&nbsp; We don't have the code for the original
     cross-assembler, nor (if we did) do most of you have access to the
@@ -887,6 +1102,10 @@ href="Pultorak_files/AEAProgrammingReference.pdf">
       load the binary file called <span style="font-style: italic;">Filename</span>,
       and to compare the binary output produced by assembly of the
       source code to the contents of <span style="font-style: italic;">Filename</span>.&nbsp;
+
+
+
+
       Presumably, <span style="font-style: italic;">Filename</span> was
       produced by an earlier run of <span style="font-weight: bold;">yaLEMAP</span>
       or <span style="font-weight: bold;">binLEMAP</span> (see
@@ -894,6 +1113,10 @@ href="Pultorak_files/AEAProgrammingReference.pdf">
       regression testing of the assembler itself, and (indeed) such
       regression testing is performed during a normal build.&nbsp; This
       switch also causes a change in <span style="font-weight: bold;">yaLEMAP</span>'s
+
+
+
+
       return codes, which are normally based on the presence of errors
       and warnings.&nbsp; (In other words, a non-zero return code
       normally occurs in case there are errors during assembly.)&nbsp;
@@ -960,8 +1183,8 @@ href="Pultorak_files/AEAProgrammingReference.pdf">
     The syntax of the source code for <span style="font-weight: bold;">yaLEMAP</span>
     similarly isn't identical to that accepted by <span
       style="font-weight: bold;">LEMAP</span> as outlined in the <a
-href="Pultorak_files/AEAProgrammingReference.pdf">
-      AGS programmer's manual</a>, but it's pretty close.&nbsp; The
+      href="Pultorak_files/AEAProgrammingReference.pdf"> AGS
+      programmer's manual</a>, but it's pretty close.&nbsp; The
     principal differences are:<br>
     <ul>
       <li><span style="font-weight: bold;">yaLEMAP</span> is not
@@ -1037,6 +1260,10 @@ href="Pultorak_files/AEAProgrammingReference.pdf">
       </div>
     </div>
     <h2><a name="AGS_Flight_Software" id="AGS_Flight_Software"></a><small><big>AGS
+
+
+
+
           Flight Software</big></small></h2>
     <h3><a name="Availability_" id="Availability_"></a>Availability<br>
     </h3>
@@ -1146,8 +1373,8 @@ href="Pultorak_files/AEAProgrammingReference.pdf">
     via snail-mail, and I'll scan them and return them.)<br>
     <h2><a name="Debug" id="Debug"></a>yaAGS Debugging Mode (--debug)</h2>
     <table summary="" style="text-align: left; width: 60%; margin-left:
-      auto; margin-right: auto;" border="1" cellpadding="2"
-      cellspacing="2">
+      auto; margin-right: auto;" cellspacing="2" cellpadding="2"
+      border="1">
       <tbody>
         <tr>
           <td style="text-align: center; vertical-align: top;"> <big><span
@@ -1193,6 +1420,10 @@ href="Pultorak_files/AEAProgrammingReference.pdf">
         monospace;">Stopped because program loaded.</span><br
         style="font-family: monospace;">
       <span style="font-family: monospace;">A=000000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+
+
+
 
         Q=000000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
         Overflow=0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
@@ -1304,6 +1535,10 @@ href="Pultorak_files/AEAProgrammingReference.pdf">
         be prefixed with 'I' or 'O' for i/o channel addresses.</li>
       <li>DUMP—without arguments (i.e, no <span style="font-style:
           italic;">N</span> and no <span style="font-style: italic;">A</span>),
+
+
+
+
         a dump is performed using the last <span style="font-style:
           italic;">N</span> and <span style="font-style: italic;">A</span>
         previously used.</li>
@@ -1363,6 +1598,10 @@ href="Pultorak_files/AEAProgrammingReference.pdf">
           <li>BACKTRACES—displays the most recent (50) backtrace points
             (i.e., points at which the program branched).</li>
           <li>BACKTRACE <span style="font-style: italic;">N</span>—restores
+
+
+
+
             the state of the system (CPU, memory, i/o channels) to
             backtrace point #<span style="font-style: italic;">N</span>
             (from the list displayed by the BACKTRACES command).</li>
@@ -1405,14 +1644,18 @@ href="Pultorak_files/AEAProgrammingReference.pdf">
         255);"> This page is available under the <a
           href="https://creativecommons.org/publicdomain/zero/1.0/">Creative
 
+
+
+
+
           Commons No Rights Reserved License</a></span><br>
       <i><font size="-1">Last modified by <a
             href="mailto:info@sandroid.org">Ronald Burkey</a> on
-          2017-01-15.<br>
+          2017-10-08.<br>
           <br>
           <a href="http://www.ibiblio.org"><img style="border: 0px solid
               ; width: 300px; height: 100px;" alt="Virtual AGC is hosted
-              by ibiblio.org" src="hosted.png" height="100" width="300"></a><br>
+              by ibiblio.org" src="hosted.png" width="300" height="100"></a><br>
         </font></i> </center>
     <br>
   </body>
