@@ -52,6 +52,9 @@
 				(finally) with what I think is a correct 
 				implementation.
 		2005-08-22 RSB	"unsigned long long" replaced by uint64_t.
+		2017-10-11 MAS	Changed a "1" to "1LL" in LLS mask calculations.
+				This fixes overflow being incorrectly set for
+				certain cases of LLS.
   
   The scans of the original AGS/AEA technical documentation can be found
   at the website listed above.  Also at that site you can find the source code
@@ -977,7 +980,7 @@ aea_engine (ags_t * State)
       // will be the picked-off bits.
       if (i)
         {
-	  llk = (0177777777777LL & ~((1 << (34 - i)) - 1));
+	  llk = (0177777777777LL & ~((1LL << (34 - i)) - 1));
 	  llj = (lli & llk);
 	  if ((0 == (State->Accumulator & 0400000) && llj != 0) ||
 	      (0 != (State->Accumulator & 0400000) && llj != llk))
