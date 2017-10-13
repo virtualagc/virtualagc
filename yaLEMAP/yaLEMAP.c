@@ -64,6 +64,8 @@
  * 		2016-11-18 RSB	Fixed up a function protype.
  * 		2017-10-11 MAS	Added handling/printing of asterisks preceding
  * 		                operators and junk after the variable field.
+ * 		2017-10-12 MAS	Cleaned up HTML and .lst formatting. The .lst
+ * 		                files still don't show page numbers, though.
  *
  * Note that we use yaYUL's symbol-table machinery for handling the
  * symbol table.
@@ -86,7 +88,7 @@ static int Lines;
 static FILE *Lst;
 FILE *HtmlOut = NULL;
 int Html = 0;
-int inHeader = 0;
+int inHeader = 1;
 
 #define MAX_CHECKSUM_REGIONS 16
 typedef struct
@@ -250,9 +252,9 @@ PrintComments (int i)
       else
 	i = 1;
       if (PrintJunk)
-        fprintf (Lst, "%*s%-*s # %s", i, "", JunkSize, sd, Comment);
+        fprintf (Lst, "%*s%-*s #%s", i, "", JunkSize, sd, Comment);
       else
-        fprintf (Lst, "%*s# %s", i, "", Comment);
+        fprintf (Lst, "%*s#%s", i, "", Comment);
       if (HtmlOut != NULL)
 	{
 	  for (; i > 0; i--)
@@ -261,11 +263,11 @@ PrintComments (int i)
             {
               fprintf (HtmlOut, COLOR_COMMENT "%-*s",
                       JunkSize, NormalizeString(sd));
-              fprintf (HtmlOut, "   # %s</span>",
+              fprintf (HtmlOut, "   #%s</span>",
                       NormalizeString (Comment));
             }
           else
-            fprintf (HtmlOut, "  " COLOR_COMMENT "# %s</span>",
+            fprintf (HtmlOut, "  " COLOR_COMMENT "#%s</span>",
                     NormalizeString (Comment));
 	}
     }
@@ -605,6 +607,20 @@ PassLemap (FILE *fp, int Action)
     {
       Lines++;
 
+      if (Action == 1)
+        {
+          // If it is not a ## line and not completely blank, then we are no longer
+          // in the file header.
+          for (ss = s; *ss && isspace(*ss); ss++)
+              ;
+          if (*ss == 0 || s[0] == '#' && s[1] == '#' && 1 != sscanf(s, "## Page%d", &i)) // is a ## line
+            {
+              // Intentionally empty.
+            }
+          else
+            inHeader = 0;
+        }
+
       // Is it an HTML insert?  If so, transparently process and discard.
       if (HtmlCheck ((Action == 1), fp, s, sizeof(s), FileSelected, &Lines,
 		     &Dummy))
@@ -625,13 +641,11 @@ PassLemap (FILE *fp, int Action)
 	else if (Comment == NULL)
 	  *ss = toupper (*ss);
 
-      // Eliminate comments.
+      // Null-terminate comments.
       if (Comment != NULL)
 	{
 	  *Comment = 0;
-	  Comment++;
-	  if (*Comment == ' ')
-	    Comment++;
+          Comment++;
 	}
 
       // Parse the line into fields.
@@ -868,17 +882,17 @@ PassLemap (FILE *fp, int Action)
 	    }
 	  else
 	    {
-	      fprintf (Lst, "%04o:                             \t# %s\n", Lines,
+	      fprintf (Lst, "%04o:                             \t#%s\n", Lines,
 		       Comment);
 	      if (HtmlOut != NULL)
 		{
 		  fprintf (HtmlOut, "%04o:%s", Lines,
 			   NormalizeStringN ("", 37));
-		  fprintf (HtmlOut, COLOR_COMMENT "# %s</span>\n",
+		  fprintf (HtmlOut, COLOR_COMMENT "#%s</span>\n",
 			   NormalizeString (Comment));
 		}
 	      if (SingAlong != NULL && !strncmp (Comment, "PAGE ", 5))
-		fprintf (SingAlong, "\n# %s ---------------------\n", Comment);
+		fprintf (SingAlong, "\n#%s ---------------------\n", Comment);
 	    }
 	}
       else if (!strcmp (Operator, "EQU") || !strcmp (Operator, "SYN")
