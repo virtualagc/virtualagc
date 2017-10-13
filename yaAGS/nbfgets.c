@@ -48,6 +48,9 @@
 				from readline(), which could be NULL.
                 11/22/10 RSB    Eliminated a compiler warning I encountered
                                 in Ubuntu 10.04.
+                10/12/17 MAS    Re-enabled a pthread_cond_broadcast when
+                                readline is not used (as was done in yaAGC),
+                                which fixes the yaAGS debugger.
 */
 
 #include <pthread.h>
@@ -238,8 +241,10 @@ nbfgets (char *Buffer, int Length)
   strncpy (Buffer, nbfgetsBuffer, Length);
   Buffer[Length] = 0;		// Make sure nul-terminated.
   nbfgetsReady = 0;
+#ifndef USE_READLINE  
   // Tell the other thread to wake up and get another string.
-  //pthread_cond_broadcast (&nbfgetsCond);
+  pthread_cond_broadcast (&nbfgetsCond);
+#endif  
   return (Buffer);
 }
 
