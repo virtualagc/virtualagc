@@ -49,24 +49,32 @@ endif	# MSYSTEM
 .PHONY:	default
 default: binLEMAP SampleCodeAGS.lst \
 	../FP8/FP8.lst ../FP8/FP8.bin ../FP8/FP8.symtab \
-	../FP6/FP6.lst ../FP6/FP6.bin ../FP6/FP6.symtab
+	../FP6/FP6.lst ../FP6/FP6.bin ../FP6/FP6.symtab \
+	../FP8/FP8.aea.html ../FP6/FP6.aea.html
 
 .PHONY: all-archs
 all-archs: default binLEMAP.exe binLEMAP-macosx yaLEMAP.exe yaLEMAP-macosx
 
 ../FP8/FP8.lst ../FP8/FP8.bin ../FP8/FP8.symtab: yaLEMAP ../FP8/FP8.aea
-	cp ../FP8/Apollo32.png ../FP8/Main.annotation ../FP8/Default.style .
-	./yaLEMAP --html ../FP8/FP8.aea
+	./yaLEMAP --unpound-page ../FP8/FP8.aea
 	mv yaLEMAP.bin ../FP8/FP8.bin
 	mv yaLEMAP.symtab ../FP8/FP8.symtab
 	mv yaLEMAP.lst ../FP8/FP8.lst
 
+../FP8/FP8.aea.html: yaLEMAP ../FP8/FP8.aea
+	cp ../FP8/Apollo32.png ../FP8/Main.annotation ../FP8/Default.style .
+	./yaLEMAP --html ../FP8/FP8.aea
+
 ../FP6/FP6.lst ../FP6/FP6.bin ../FP6/FP6.symtab: yaLEMAP ../FP6/FP6.aea
 	cp ../FP6/Apollo32.png ../FP6/Main.annotation ../FP6/Default.style .
-	./yaLEMAP --html ../FP6/FP6.aea
+	./yaLEMAP --unpound-page ../FP6/FP6.aea
 	mv yaLEMAP.bin ../FP6/FP6.bin
 	mv yaLEMAP.symtab ../FP6/FP6.symtab
 	mv yaLEMAP.lst ../FP6/FP6.lst
+
+../FP6/FP6.aea.html: yaLEMAP ../FP6/FP6.aea
+	cp ../FP8/Apollo32.png ../FP6/Main.annotation ../FP6/Default.style .
+	./yaLEMAP --html ../FP6/FP6.aea
 
 SampleCodeAGS.lst: yaLEMAP SampleCodeAGS.aea
 	@echo "=============================================================================="
@@ -102,6 +110,7 @@ clean:
 		binLEMAP.bin SampleCodeAGS.bin SampleCodeAGS.lst \
 		../FP8/FP8.bin ../FP8/FP8.lst ../FP8/*.symtab \
 		../FP6/FP6.bin ../FP6/FP6.lst ../FP6/*.symtab \
+		../FP8/FP8.aea.html ../FP6/FP6.aea.html \
 		Apollo32.png Main.annotation Default.style
 
 .PHONY:	install

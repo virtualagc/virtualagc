@@ -64,8 +64,8 @@
  * 		2016-11-18 RSB	Fixed up a function protype.
  * 		2017-10-11 MAS	Added handling/printing of asterisks preceding
  * 		                operators and junk after the variable field.
- * 		2017-10-12 MAS	Cleaned up HTML and .lst formatting. The .lst
- * 		                files still don't show page numbers, though.
+ * 		2017-10-12 MAS	Cleaned up HTML and .lst formatting. Pulled
+ * 		                --unpound-page over from yaYUL.
  *
  * Note that we use yaYUL's symbol-table machinery for handling the
  * symbol table.
@@ -89,6 +89,7 @@ static FILE *Lst;
 FILE *HtmlOut = NULL;
 int Html = 0;
 int inHeader = 1;
+extern int UnpoundPage;
 
 #define MAX_CHECKSUM_REGIONS 16
 typedef struct
@@ -1313,6 +1314,8 @@ main (int argc, char *argv[])
 	Compare = &argv[i][10];
       else if (!strcmp (argv[i], "--html"))
 	Html = 1;
+      else if (!strcmp(argv[i], "--unpound-page"))
+        UnpoundPage = 1;
       else if (!strcmp (argv[i], "--help"))
 	{
 	  printf ("Usage:\n");
@@ -1321,26 +1324,27 @@ main (int argc, char *argv[])
 	  printf ("file yaLEMAP.bin.  The assembly listing is\n");
 	  printf ("written to the file yaLEMAP.lst.\n");
 	  printf ("The available OPTIONs are:\n");
-	  printf ("--compare=F   Compare the binary output to the file F.\n");
+	  printf ("--compare=F     Compare the binary output to the file F.\n");
 	  printf (
-	      "              Note that using this switch causes yaLEMAP\'s\n");
-	  printf ("              return code to be totally dependent on the\n");
+	      "                Note that using this switch causes yaLEMAP\'s\n");
+	  printf ("                return code to be totally dependent on the\n");
 	  printf (
-	      "              result of the file comparison rather than on\n");
+	      "                result of the file comparison rather than on\n");
 	  printf (
-	      "              fatal errors and warnings.  This allows (for\n");
+	      "                fatal errors and warnings.  This allows (for\n");
 	  printf (
-	      "              example) for a file comparison to be the basis\n");
-	  printf ("              of a regression test run from a makefile.\n");
+	      "                example) for a file comparison to be the basis\n");
+	  printf ("                of a regression test run from a makefile.\n");
 	  printf (
-	      "--html        Causes an HTML file to be created, which is \n"
-	      "              the same as the output listing except that it\n"
-	      "              if a lot more convenient to use. It has syntax\n"
-	      "              highlighting and hyperlinks from where each\n"
-	      "              symbol is used back to where it was defined.\n"
-	      "              The top-level HTML file produced is named the\n"
-	      "              same as the input source file, except with .html\n"
-	      "              replacing .s (if applicable).\n");
+	      "--html          Causes an HTML file to be created, which is \n"
+	      "                the same as the output listing except that it\n"
+	      "                if a lot more convenient to use. It has syntax\n"
+	      "                highlighting and hyperlinks from where each\n"
+	      "                symbol is used back to where it was defined.\n"
+	      "                The top-level HTML file produced is named the\n"
+	      "                same as the input source file, except with .html\n"
+	      "                replacing .s (if applicable).\n");
+          printf("--unpound-page  Bypass --html processing for \"## Page\".\n");
 	  RetVal++;
 	}
       else if (argv[i][0] == '-' || FileSelected != NULL)
