@@ -33,6 +33,12 @@
 				character 'p' (which is sometimes
 				added to fool iMac's text-to-speech
 				into saying the numbers correctly).
+  		2017-10-12 MAS	binLEMAP now can calculate up to 10
+  		              	checksums per binsource instead of
+  		              	only one. To make use of this, place
+  		              	"CKSM 207-1004" (for example) on the
+  		              	line preceding the embedded checksum
+  		              	in the binsource.
 
   The format of the input file is as follows:
   
@@ -48,9 +54,6 @@
   logical-ORring the 3 numbers as if the first number is an
   opcode, the second is an index bit, and the third is an
   address.
-  
-  Note that the checksum, if known, should be placed at
-  address 07777.
   
   The output file simply contains the binary values, 32
   bits for each location from 0 to 07777, in little-endian
@@ -70,12 +73,15 @@
 #define MEMSIZE 010000
 static int Memory[MEMSIZE], Valid[MEMSIZE];
 static char s[1000], sd[1000];
+static int CheckStarts[10];
+static int CheckEnds[10];
+static int CheckLocs[10];
 
 int
 main (void)
 {
-  int i, i1, i2, i3, RetVal = 0, Lines = 0;
-  int Location = 0, Checksum;
+  int i, j, i1, i2, i3, RetVal = 0, Lines = 0;
+  int Location = 0, Checksum = 0, NumChecksums = 0;
   char *ss;
   FILE *fp;
 
@@ -104,6 +110,13 @@ main (void)
 
       if (1 == sscanf (s, "ORG%o%s", &i, sd))
 	Location = i;
+      else if (2 == sscanf (s, "CKSM %o-%o%s", &i1, &i2, sd))
+        {
+          CheckStarts[NumChecksums] = i1;
+          CheckEnds[NumChecksums] = i2;
+          CheckLocs[NumChecksums] = Location;
+          NumChecksums++;
+        }
       else
 	{
 	  i = sscanf (s, "%o%o%o%s", &i1, &i2, &i3, sd);
@@ -175,20 +188,16 @@ main (void)
 	}
     }
 
-  // Compute Checksum, and store at the last address in memory.
-  // (Or compare it to the value that is already there.
-  for (i = 04000, Checksum = 0; i < MEMSIZE - 1; Checksum += Memory[i++]);
-  Checksum = (0777777 & -Checksum);
-  if (Valid[MEMSIZE - 1] && Memory[MEMSIZE - 1] != Checksum)
+  for (i = 0; i < NumChecksums; i++)
     {
-      RetVal++;
-      fprintf (stderr, "Checksum mismatch, computed=%o, embedded=%o.\n",
-	       Checksum, Memory[MEMSIZE - 1]);
-    }
-  else
-    {
-      Memory[MEMSIZE - 1] = Checksum;
-      Valid[MEMSIZE - 1] = 1;
+      for (j = CheckStarts[i], Checksum = 0; j <= CheckEnds[i]; Checksum += Memory[j++]);
+      Checksum = (0777777 & -Checksum);
+      if (!Valid[CheckLocs[i]] || Checksum != Memory[CheckLocs[i]])
+        {
+            RetVal++;
+            fprintf (stderr, "Checksum mismatch, computed=%o, embedded=%o.\n",
+                     Checksum, Memory[CheckLocs[i]]);
+        }
     }
 
   // Output the binary
