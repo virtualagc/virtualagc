@@ -36,6 +36,8 @@
 #		2016-08-28 RSB	For the targets that build the html
 #				listings, the annotation files weren't
 #				accessible.
+#		2017-10-17 MAS	Added checking of the FP6 binsource
+#				against the FP6 assembly.
 
 ifndef PREFIX
 ifdef MSYSTEM
@@ -68,6 +70,8 @@ all-archs: default binLEMAP.exe binLEMAP-macosx yaLEMAP.exe yaLEMAP-macosx
 ../FP6/FP6.lst ../FP6/FP6.bin ../FP6/FP6.symtab: yaLEMAP ../FP6/FP6.aea
 	cp ../FP6/Apollo32.png ../FP6/Main.annotation ../FP6/Default.style .
 	./yaLEMAP --unpound-page ../FP6/FP6.aea
+	./binLEMAP <../FP6/FP6.binsource
+	diff -s yaLEMAP.bin binLEMAP.bin
 	mv yaLEMAP.bin ../FP6/FP6.bin
 	mv yaLEMAP.symtab ../FP6/FP6.symtab
 	mv yaLEMAP.lst ../FP6/FP6.lst

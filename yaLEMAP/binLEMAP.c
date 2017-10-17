@@ -39,6 +39,14 @@
   		              	"CKSM 207-1004" (for example) on the
   		              	line preceding the embedded checksum
   		              	in the binsource.
+  		2017-10-17 MAS	Added support for what I am calling
+  		              	the "total" checksum of the listing,
+  		              	which appears to be the 36-bit sum
+  		              	of all words appearing in the listing,
+  		              	but with the two 18-bit words making
+  		              	up that sum swapped. The "total"
+  		              	checksum is typically printed at the
+  		              	very end of an AGS listing.
 
   The format of the input file is as follows:
   
@@ -82,6 +90,7 @@ main (void)
 {
   int i, j, i1, i2, i3, RetVal = 0, Lines = 0;
   int Location = 0, Checksum = 0, NumChecksums = 0;
+  long long l1 = 0, TotalChecksum = 0, TotalSum = 0;
   char *ss;
   FILE *fp;
 
@@ -116,6 +125,10 @@ main (void)
           CheckEnds[NumChecksums] = i2;
           CheckLocs[NumChecksums] = Location;
           NumChecksums++;
+        }
+      else if (1 == sscanf (s, "TOTAL %llo%s", &l1, sd))
+        {
+          TotalChecksum = l1;
         }
       else
 	{
@@ -197,6 +210,21 @@ main (void)
             RetVal++;
             fprintf (stderr, "Checksum mismatch, computed=%o, embedded=%o.\n",
                      Checksum, Memory[CheckLocs[i]]);
+        }
+    }
+
+  if (TotalChecksum != 0)
+    {
+      // Calculate the overall checksum for the entire program. This
+      // is the sum of all the words, which is then word-swapped.
+      for (i = 0; i < MEMSIZE; i++)
+        TotalSum += Memory[i];
+      TotalSum = (TotalSum >> 18) | ((TotalSum & 0777777) << 18);
+      if (TotalSum != TotalChecksum)
+        {
+          RetVal++;
+          fprintf (stderr, "Total checksum mismatch, computed=%llo, provided=%llo\n",
+                   TotalSum, TotalChecksum);
         }
     }
 
