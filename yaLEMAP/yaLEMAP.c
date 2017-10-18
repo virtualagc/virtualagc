@@ -62,6 +62,10 @@
  * 		2016-08-23 RSB  An allocation of Block1, simply to avoid
  * 		                a linker error for the updated SymbolTable.c.
  * 		2016-11-18 RSB	Fixed up a function protype.
+ * 		2017-10-11 MAS	Added handling/printing of asterisks preceding
+ * 		                operators and junk after the variable field.
+ * 		2017-10-12 MAS	Cleaned up HTML and .lst formatting. Pulled
+ * 		                --unpound-page over from yaYUL.
  *
  * Note that we use yaYUL's symbol-table machinery for handling the
  * symbol table.
@@ -78,13 +82,14 @@
 static int Memory[MEMSIZE], Valid[MEMSIZE];
 static char s[1000], sd[1000];
 static int ErrCount, WarnCount;
-static char *Comment, Label[1000], Operator[1000], Variables[1000];
+static char *Comment, Label[1000], OperatorField[1000], Variables[1000];
 static char *FileSelected = NULL;
 static int Lines;
 static FILE *Lst;
 FILE *HtmlOut = NULL;
 int Html = 0;
-int inHeader = 0;
+int inHeader = 1;
+extern int UnpoundPage;
 
 #define MAX_CHECKSUM_REGIONS 16
 typedef struct
@@ -222,19 +227,49 @@ PrintSymbolsToFileL (FILE *fp)
 static void
 PrintComments (int i)
 {
+  int PrintJunk = 0, JunkSize = 0, j = 0;
   if (Comment != NULL && Comment[0] != 0)
     {
-      if (i < 16)
+      if (i <= 6 && sd[0] != 0)
+        {
+          // There was some pre-comment junk on the line. Make some room for it.
+          if (strlen(sd) > 5)
+            {
+              // The junk is particularly large, so shove it towards the variable
+              // column a bit and hope it doesn't push the comment too far out
+              i = 7 - i;
+              JunkSize = 8;
+            }
+          else
+            {
+              // "Regular" (as per FP6/FP8)-sized junk
+              i = 10 - i;
+              JunkSize = 5;
+            }
+          PrintJunk = 1;
+        }
+      else if (i < 16)
 	i = 16 - i;
       else
 	i = 1;
-      fprintf (Lst, "%*s# %s", i, "", Comment);
+      if (PrintJunk)
+        fprintf (Lst, "%*s%-*s #%s", i, "", JunkSize, sd, Comment);
+      else
+        fprintf (Lst, "%*s#%s", i, "", Comment);
       if (HtmlOut != NULL)
 	{
 	  for (; i > 0; i--)
 	    fprintf (HtmlOut, " ");
-	  fprintf (HtmlOut, "  " COLOR_COMMENT "# %s</span>",
-		   NormalizeString (Comment));
+          if (PrintJunk)
+            {
+              fprintf (HtmlOut, COLOR_COMMENT "%-*s",
+                      JunkSize, NormalizeString(sd));
+              fprintf (HtmlOut, "   #%s</span>",
+                      NormalizeString (Comment));
+            }
+          else
+            fprintf (HtmlOut, "  " COLOR_COMMENT "#%s</span>",
+                    NormalizeString (Comment));
 	}
     }
   fprintf (Lst, "\n");
@@ -306,16 +341,16 @@ static void
 HtmlLabel (char *Label)
 {
   if (Label[0])
-    fprintf (HtmlOut, "<a name=\"%s\"></a>" COLOR_SYMBOL "%s</span>  ",
+    fprintf (HtmlOut, "<a name=\"%s\"></a>" COLOR_SYMBOL "%s</span> ",
 	     NormalizeAnchor (Label), NormalizeStringN (Label, 6));
   else
-    fprintf (HtmlOut, "%s", NormalizeStringN (Label, 8));
+    fprintf (HtmlOut, "%s", NormalizeStringN (Label, 7));
 }
 
 static void
-HtmlOperator (char *Color, char *Operator)
+HtmlOperator (char *Color, char *Operator, char Asterisk)
 {
-  fprintf (HtmlOut, "%s%s</span>", Color, NormalizeStringN (Operator, 8));
+  fprintf (HtmlOut, "%c%s%s</span>", Asterisk, Color, NormalizeStringN (Operator, 8));
 }
 
 //------------------------------------------------------------------
@@ -555,7 +590,7 @@ static int
 PassLemap (FILE *fp, int Action)
 {
   int Location = 0, i, j, /*Extra, Missing,*/Dummy = 0;
-  char *ss;
+  char *ss, *Operator, Asterisk;
   Address_t Address =
     { 0 }, LineAddress =
     { 0 };
@@ -573,10 +608,26 @@ PassLemap (FILE *fp, int Action)
     {
       Lines++;
 
+      if (Action == 1)
+        {
+          // If it is not a ## line and not completely blank, then we are no longer
+          // in the file header.
+          for (ss = s; *ss && isspace(*ss); ss++)
+              ;
+          if (*ss == 0 || s[0] == '#' && s[1] == '#' && 1 != sscanf(s, "## Page%d", &i)) // is a ## line
+            {
+              // Intentionally empty.
+            }
+          else
+            inHeader = 0;
+        }
+
       // Is it an HTML insert?  If so, transparently process and discard.
       if (HtmlCheck ((Action == 1), fp, s, sizeof(s), FileSelected, &Lines,
 		     &Dummy))
+      {
 	continue;
+      }
 
       // Eliminate the newline.
       Comment = NULL;
@@ -591,41 +642,39 @@ PassLemap (FILE *fp, int Action)
 	else if (Comment == NULL)
 	  *ss = toupper (*ss);
 
-      // Eliminate comments.
+      // Null-terminate comments.
       if (Comment != NULL)
 	{
 	  *Comment = 0;
-	  Comment++;
-	  if (*Comment == ' ')
-	    Comment++;
+          Comment++;
 	}
 
       // Parse the line into fields.
-      Label[0] = Operator[0] = Variables[0] = 0;
+      Label[0] = OperatorField[0] = Variables[0] = sd[0] = 0;
       //Extra = Missing = 0;
       if (!s[0])
         {
         }
       else if (!isspace(s[0]))
 	{
-	  i = sscanf (s, "%s%s%s%s", Label, Operator, Variables, sd);
+	  i = sscanf (s, "%s%s%s%s", Label, OperatorField, Variables, sd);
 	  if (i == 4)
 	    {
 	      //Extra = 1;
 	    }
-	  else if (i == 2 && strcmp (Operator, "END"))
+	  else if (i == 2 && strcmp (OperatorField, "END"))
 	    {
 	      //Missing = 1;
 	    }
 	}
       else
 	{
-	  i = sscanf (s, "%s%s%s", Operator, Variables, sd);
+	  i = sscanf (s, "%s%s%s", OperatorField, Variables, sd);
 	  if (i == 3)
 	    {
 	      //Extra = 1;
 	    }
-	  else if (i == 1 && strcmp (Operator, "END"))
+	  else if (i == 1 && strcmp (OperatorField, "END"))
 	    {
 	      //Missing = 1;
 	    }
@@ -638,6 +687,17 @@ PassLemap (FILE *fp, int Action)
 	    AddSymbol (Label);
 	  continue;
 	}
+
+      // Some lines may be prefixed by an asterisk. This doesn't affect
+      // the assembly, but seems to have been used as some form of comment, so
+      // we faithfully pass it through.
+      Operator = OperatorField;
+      Asterisk = ' ';
+      if (OperatorField[0] == '*')
+      {
+          Operator++;
+          Asterisk = '*';
+      }
 
       // In the mid pass (0) all we are trying to do is to resolve
       // label values.  All legal instructions (and unknown 
@@ -775,7 +835,7 @@ PassLemap (FILE *fp, int Action)
 	{
 	  fprintf (
 	      Lst,
-	      "%04o: %04o                        \t%-6s\tCHECKSUM RANGE %04o-%04o\n",
+	      "%04o: %04o                        \t%-6s  CHECKSUM RANGE %04o-%04o\n",
 	      Lines, Location, Label, i, j);
 	  if (HtmlOut != NULL)
 	    {
@@ -801,14 +861,14 @@ PassLemap (FILE *fp, int Action)
 	}
       else if (!strcmp (Operator, "END"))
 	{
-	  fprintf (Lst, "%04o: %04o                        \t%-6s\t%-8s", Lines,
+	  fprintf (Lst, "%04o: %04o                        \t%-6s  %-8s", Lines,
 		   Location, Label, Operator);
 	  if (HtmlOut != NULL)
 	    {
 	      fprintf (HtmlOut, "%04o: %04o%s", Lines, Location,
 		       NormalizeStringN ("", 31));
 	      HtmlLabel (Label);
-	      HtmlOperator (COLOR_PSEUDO, Operator);
+	      HtmlOperator (COLOR_PSEUDO, Operator, Asterisk);
 	    }
 	  PrintComments (24);
 	  break;
@@ -823,17 +883,17 @@ PassLemap (FILE *fp, int Action)
 	    }
 	  else
 	    {
-	      fprintf (Lst, "%04o:                             \t# %s\n", Lines,
+	      fprintf (Lst, "%04o:                             \t#%s\n", Lines,
 		       Comment);
 	      if (HtmlOut != NULL)
 		{
 		  fprintf (HtmlOut, "%04o:%s", Lines,
 			   NormalizeStringN ("", 37));
-		  fprintf (HtmlOut, COLOR_COMMENT "# %s</span>\n",
+		  fprintf (HtmlOut, COLOR_COMMENT "#%s</span>\n",
 			   NormalizeString (Comment));
 		}
 	      if (SingAlong != NULL && !strncmp (Comment, "PAGE ", 5))
-		fprintf (SingAlong, "\n# %s ---------------------\n", Comment);
+		fprintf (SingAlong, "\n#%s ---------------------\n", Comment);
 	    }
 	}
       else if (!strcmp (Operator, "EQU") || !strcmp (Operator, "SYN")
@@ -844,33 +904,33 @@ PassLemap (FILE *fp, int Action)
 	  if (Symbol == NULL)
 	    {
 	      ErrorMsg ("Label not found.");
-	      fprintf (Lst, "%04o:                             \t%-6s\t%-8s",
-		       Lines, Label, Operator);
+	      fprintf (Lst, "%04o:                             \t%-6s %c%-8s",
+		       Lines, Label, Asterisk, Operator);
 	      if (HtmlOut != NULL)
 		{
 		  fprintf (HtmlOut, "%04o:%s", Lines,
 			   NormalizeStringN ("", 32));
 		  HtmlLabel (Label);
-		  HtmlOperator (COLOR_PSEUDO, Operator);
+		  HtmlOperator (COLOR_PSEUDO, Operator, Asterisk);
 		}
 	    }
 	  else if (Symbol->Value.Invalid)
 	    {
 	      ErrorMsg ("Label not resolved.");
-	      fprintf (Lst, "%04o:                             \t%-6s\t%-8s",
-		       Lines, Label, Operator);
+	      fprintf (Lst, "%04o:                             \t%-6s %c%-8s",
+		       Lines, Label, Asterisk, Operator);
 	      if (HtmlOut != NULL)
 		{
 		  fprintf (HtmlOut, "%04o:%s", Lines,
 			   NormalizeStringN ("", 32));
 		  HtmlLabel (Label);
-		  HtmlOperator (COLOR_PSEUDO, Operator);
+		  HtmlOperator (COLOR_PSEUDO, Operator, Asterisk);
 		}
 	    }
 	  else if (Symbol->Value.Address)
 	    {
-	      fprintf (Lst, "%04o:                         %04o\t%-6s\t%-8s",
-		       Lines, Symbol->Value.SReg, Label, Operator);
+	      fprintf (Lst, "%04o:                         %04o\t%-6s %c%-8s",
+		       Lines, Symbol->Value.SReg, Label, Asterisk, Operator);
 	      if (HtmlOut)
 		{
 		  fprintf (HtmlOut, "%04o:%s", Lines,
@@ -878,13 +938,13 @@ PassLemap (FILE *fp, int Action)
 		  fprintf (HtmlOut, "%04o%s", Symbol->Value.SReg,
 			   NormalizeStringN ("", 8));
 		  HtmlLabel (Label);
-		  HtmlOperator (COLOR_PSEUDO, Operator);
+		  HtmlOperator (COLOR_PSEUDO, Operator, Asterisk);
 		}
 	    }
 	  else if (Symbol->Value.Constant)
 	    {
-	      fprintf (Lst, "%04o:                         %04o\t%-6s\t%-8s",
-		       Lines, Symbol->Value.Value, Label, Operator);
+	      fprintf (Lst, "%04o:                         %04o\t%-6s %c%-8s",
+		       Lines, Symbol->Value.Value, Label, Asterisk, Operator);
 	      if (HtmlOut)
 		{
 		  fprintf (HtmlOut, "%04o:%s", Lines,
@@ -892,7 +952,7 @@ PassLemap (FILE *fp, int Action)
 		  fprintf (HtmlOut, "%04o%s", Symbol->Value.Value,
 			   NormalizeStringN ("", 8));
 		  HtmlLabel (Label);
-		  HtmlOperator (COLOR_PSEUDO, Operator);
+		  HtmlOperator (COLOR_PSEUDO, Operator, Asterisk);
 		}
 	    }
 	  else
@@ -901,8 +961,8 @@ PassLemap (FILE *fp, int Action)
 		{
 		  WarningMsg ("Symbol value out of range.");
 		  fprintf (Lst,
-			   "%04o:                         %04o\t%-6s\t%-8s",
-			   Lines, 07777 & Symbol->Value.Value, Label, Operator);
+			   "%04o:                         %04o\t%-6s %c%-8s",
+			   Lines, 07777 & Symbol->Value.Value, Label, Asterisk, Operator);
 		  if (HtmlOut)
 		    {
 		      fprintf (HtmlOut, "%04o:%s", Lines,
@@ -910,7 +970,7 @@ PassLemap (FILE *fp, int Action)
 		      fprintf (HtmlOut, "%04o%s", 07777 & Symbol->Value.Value,
 			       NormalizeStringN ("", 8));
 		      HtmlLabel (Label);
-		      HtmlOperator (COLOR_PSEUDO, Operator);
+		      HtmlOperator (COLOR_PSEUDO, Operator, Asterisk);
 		    }
 		}
 	    }
@@ -946,8 +1006,8 @@ PassLemap (FILE *fp, int Action)
 		Memory[Location] &= 0777777;
 	      if (ss == Variables)
 		{
-		  fprintf (Lst, "%04o: %04o           %06o       \t%-6s\t%-8s",
-			   Lines, Location, Memory[Location], Label, Operator);
+		  fprintf (Lst, "%04o: %04o           %06o       \t%-6s %c%-8s",
+			   Lines, Location, Memory[Location], Label, Asterisk, Operator);
 		  if (HtmlOut != NULL)
 		    {
 		      fprintf (HtmlOut, "%04o: %04o%s", Lines, Location,
@@ -955,7 +1015,7 @@ PassLemap (FILE *fp, int Action)
 		      fprintf (HtmlOut, "%06o%s", Memory[Location],
 			       NormalizeStringN ("", 15));
 		      HtmlLabel (Label);
-		      HtmlOperator (COLOR_PSEUDO, Operator);
+		      HtmlOperator (COLOR_PSEUDO, Operator, Asterisk);
 		    }
 		  PrintVariablesAndComments ();
 		}
@@ -993,14 +1053,14 @@ PassLemap (FILE *fp, int Action)
 	      WarningMsg ("Address out of range.");
 	      Location &= 07777;
 	    }
-	  fprintf (Lst, "%04o: %04o                        \t%-6s\t%-8s", Lines,
+	  fprintf (Lst, "%04o: %04o                        \t%-6s  %-8s", Lines,
 		   Location, Label, Operator);
 	  if (HtmlOut != NULL)
 	    {
 	      fprintf (HtmlOut, "%04o: %04o%s", Lines, Location,
 		       NormalizeStringN ("", 32));
 	      HtmlLabel (Label);
-	      HtmlOperator (COLOR_PSEUDO, Operator);
+	      HtmlOperator (COLOR_PSEUDO, Operator, Asterisk);
 	    }
 	  PrintVariablesAndComments ();
 	  if (SingAlong != NULL)
@@ -1028,27 +1088,27 @@ PassLemap (FILE *fp, int Action)
 	      if (SingAlong != NULL)
 		fprintf (SingAlong, "0p");
 	    }
-	  fprintf (Lst, "%04o: %04o                        \t%-6s\t%-8s", Lines,
+	  fprintf (Lst, "%04o: %04o                        \t%-6s  %-8s", Lines,
 		   Location, Label, Operator);
 	  if (HtmlOut != NULL)
 	    {
 	      fprintf (HtmlOut, "%04o: %04o%s", Lines, Location,
 		       NormalizeStringN ("", 31));
 	      HtmlLabel (Label);
-	      HtmlOperator (COLOR_PSEUDO, Operator);
+	      HtmlOperator (COLOR_PSEUDO, Operator, Asterisk);
 	    }
 	  PrintVariablesAndComments ();
 	}
       else if (!strcmp (Operator, "BSS"))
 	{
-	  fprintf (Lst, "%04o: %04o                        \t%-6s\t%-8s", Lines,
+	  fprintf (Lst, "%04o: %04o                        \t%-6s  %-8s", Lines,
 		   Location, Label, Operator);
 	  if (HtmlOut != NULL)
 	    {
 	      fprintf (HtmlOut, "%04o: %04o%s", Lines, Location,
 		       NormalizeStringN ("", 31));
 	      HtmlLabel (Label);
-	      HtmlOperator (COLOR_PSEUDO, Operator);
+	      HtmlOperator (COLOR_PSEUDO, Operator, Asterisk);
 	    }
 	  PrintVariablesAndComments ();
 	  EvaluateExpression (Variables, &Address, Location, 0);
@@ -1187,14 +1247,14 @@ PassLemap (FILE *fp, int Action)
 	  if (Valid[Location])
 	    ErrorMsg ("Overwriting memory.");
 	  Valid[Location] = 1;
-	  fprintf (Lst, "%04o: %04o %02o %01o %04o              \t%-6s\t%-8s",
-		   Lines, Location, Opcode, Tag, Addr, Label, Operator);
+	  fprintf (Lst, "%04o: %04o %02o %01o %04o              \t%-6s %c%-8s",
+		   Lines, Location, Opcode, Tag, Addr, Label, Asterisk, Operator);
 	  if (HtmlOut != NULL)
 	    {
 	      fprintf (HtmlOut, "%04o: %04o %02o %01o %04o%s", Lines, Location,
 		       Opcode, Tag, Addr, NormalizeStringN ("", 22));
 	      HtmlLabel (Label);
-	      HtmlOperator (COLOR_BASIC, Operator);
+	      HtmlOperator (COLOR_BASIC, Operator, Asterisk);
 	    }
 	  PrintVariablesAndComments ();
 	  if (SingAlong != NULL)
@@ -1254,6 +1314,8 @@ main (int argc, char *argv[])
 	Compare = &argv[i][10];
       else if (!strcmp (argv[i], "--html"))
 	Html = 1;
+      else if (!strcmp(argv[i], "--unpound-page"))
+        UnpoundPage = 1;
       else if (!strcmp (argv[i], "--help"))
 	{
 	  printf ("Usage:\n");
@@ -1262,26 +1324,27 @@ main (int argc, char *argv[])
 	  printf ("file yaLEMAP.bin.  The assembly listing is\n");
 	  printf ("written to the file yaLEMAP.lst.\n");
 	  printf ("The available OPTIONs are:\n");
-	  printf ("--compare=F   Compare the binary output to the file F.\n");
+	  printf ("--compare=F     Compare the binary output to the file F.\n");
 	  printf (
-	      "              Note that using this switch causes yaLEMAP\'s\n");
-	  printf ("              return code to be totally dependent on the\n");
+	      "                Note that using this switch causes yaLEMAP\'s\n");
+	  printf ("                return code to be totally dependent on the\n");
 	  printf (
-	      "              result of the file comparison rather than on\n");
+	      "                result of the file comparison rather than on\n");
 	  printf (
-	      "              fatal errors and warnings.  This allows (for\n");
+	      "                fatal errors and warnings.  This allows (for\n");
 	  printf (
-	      "              example) for a file comparison to be the basis\n");
-	  printf ("              of a regression test run from a makefile.\n");
+	      "                example) for a file comparison to be the basis\n");
+	  printf ("                of a regression test run from a makefile.\n");
 	  printf (
-	      "--html        Causes an HTML file to be created, which is \n"
-	      "              the same as the output listing except that it\n"
-	      "              if a lot more convenient to use. It has syntax\n"
-	      "              highlighting and hyperlinks from where each\n"
-	      "              symbol is used back to where it was defined.\n"
-	      "              The top-level HTML file produced is named the\n"
-	      "              same as the input source file, except with .html\n"
-	      "              replacing .s (if applicable).\n");
+	      "--html          Causes an HTML file to be created, which is \n"
+	      "                the same as the output listing except that it\n"
+	      "                if a lot more convenient to use. It has syntax\n"
+	      "                highlighting and hyperlinks from where each\n"
+	      "                symbol is used back to where it was defined.\n"
+	      "                The top-level HTML file produced is named the\n"
+	      "                same as the input source file, except with .html\n"
+	      "                replacing .s (if applicable).\n");
+          printf("--unpound-page  Bypass --html processing for \"## Page\".\n");
 	  RetVal++;
 	}
       else if (argv[i][0] == '-' || FileSelected != NULL)
