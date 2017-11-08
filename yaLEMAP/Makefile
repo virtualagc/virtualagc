@@ -38,6 +38,8 @@
 #				accessible.
 #		2017-10-17 MAS	Added checking of the FP6 binsource
 #				against the FP6 assembly.
+#		2017-11-08 MAS	Added checking of the FP8 binsource
+#				against the FP6 assembly.
 
 ifndef PREFIX
 ifdef MSYSTEM
@@ -59,6 +61,8 @@ all-archs: default binLEMAP.exe binLEMAP-macosx yaLEMAP.exe yaLEMAP-macosx
 
 ../FP8/FP8.lst ../FP8/FP8.bin ../FP8/FP8.symtab: yaLEMAP ../FP8/FP8.aea
 	./yaLEMAP --unpound-page ../FP8/FP8.aea
+	./binLEMAP <../FP8/FP8.binsource
+	diff -s yaLEMAP.bin binLEMAP.bin
 	mv yaLEMAP.bin ../FP8/FP8.bin
 	mv yaLEMAP.symtab ../FP8/FP8.symtab
 	mv yaLEMAP.lst ../FP8/FP8.lst
@@ -68,7 +72,6 @@ all-archs: default binLEMAP.exe binLEMAP-macosx yaLEMAP.exe yaLEMAP-macosx
 	./yaLEMAP --html ../FP8/FP8.aea
 
 ../FP6/FP6.lst ../FP6/FP6.bin ../FP6/FP6.symtab: yaLEMAP ../FP6/FP6.aea
-	cp ../FP6/Apollo32.png ../FP6/Main.annotation ../FP6/Default.style .
 	./yaLEMAP --unpound-page ../FP6/FP6.aea
 	./binLEMAP <../FP6/FP6.binsource
 	diff -s yaLEMAP.bin binLEMAP.bin
