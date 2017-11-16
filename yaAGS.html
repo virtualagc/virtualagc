@@ -17,6 +17,8 @@
   </script>
     <h2>Contents</h2>
     <ul>
+      <li><a href="#A_Taste_of_Whats_Below">A Taste of What's Below</a><br>
+      </li>
       <li><a href="#What_is_the_Abort_Guidance_System_AGS_">What is the
           Abort Guidance System (AGS) or Abort Electronics Assembly
           (AEA)?</a></li>
@@ -41,6 +43,8 @@
 
 
 
+
+
                       Flight Software</big></small></big></small></small></a></big></li>
       <ul>
         <li><big><a href="#Availability_"><small><small><big><small><big>Availability</big></small></big></small></small></a></big></li>
@@ -51,6 +55,66 @@
       <li><a href="#Debug"><span style="font-weight: bold;">yaAGS</span>
           Debugging Mode (--debug)</a></li>
     </ul>
+    <h2><a name="A_Taste_of_Whats_Below"></a>A Taste of What's Below</h2>
+    <p>If you don't already know that the Abort Guidance System is,
+      perhaps you'll want to continue on to <a
+        href="#What_is_the_Abort_Guidance_System_AGS_">the next section</a>
+      before before reading this section.&nbsp; But if you do already
+      know everything there is to know about the AGS, and simply want to
+      know what <i>we</i> are providing, I'll tell you that we provide
+      a simulation of the AGS computer (the AEA), a simulation of the
+      display/keyboard unit for it (the DEDA), <i>and</i> the original
+      Apollo-era software which can be run on the AEA ... or at least, a
+      couple of versions of the software.&nbsp; As with the Apollo
+      Guidance Computer (AGC) proper, you can either run this simulated
+      AGS in a standalone way, <i>or</i> you can take advantage of the
+      fact our AGS simulation has been built into the Orbiter spacecraft
+      simulator via <a href="https://sourceforge.net/projects/nassp/">the
+
+        NASSP project</a>, and in so doing you can fly simulated aborts
+      of lunar landings or ascents in a much-more realistic way.<br>
+    </p>
+    <p>Ryan Callaway has made a couple of videos of hypothetical Apollo
+      12 aborts using the simulated AGS incorporated into NASSP, and
+      posted them on YouTube.&nbsp; Unfortunately, we only have a couple
+      of different versions of the original AGS software, known as
+      "Flight Program 6" (FP6) and "Flight Program 8", and aren't
+      entirely sure what versions were used for which missions.&nbsp;
+      However, we believe that something very close to FP6 was used for
+      Apollo 12, and that's what Ryan uses as well.<br>
+    </p>
+    <p>The first video illustrates an abort during the lunar descent,
+      close to the surface; the abort process detaches LM ascent stage
+      from the LM descent stage, and puts it into lunar orbit in which
+      the Command Module can later rendezvous with it and dock.&nbsp; Of
+      course, the computer system is just a black box hidden away
+      somewhere in the Lunar Module, and isn't visible in these videos,
+      and the visible representative of the AGS is the display and
+      keyboard, the DEDA.&nbsp; The DEDA, which is at the lower
+      right-hand corner of the instrument panel, doesn't appear until
+      about a minute into the video.&nbsp; The Apollo Guidance
+      Computer's display/keyboard (the "DSKY") also appears, in the
+      bottom center of the instrument panel.&nbsp; You'll see that the
+      abort is a relatively hands-off affair once it gets started, and
+      it's largely a matter of the DEDA and DSKY both displaying the
+      "velocity to be gained", with the AGS turning off the engines when
+      that gets close enough to zero!<br>
+    </p>
+    <center><iframe src="https://www.youtube.com/embed/YelwfOFSYTk"
+        gesture="media" allowfullscreen="" frameborder="0" height="720"
+        width="1280">&lt;br&gt; </iframe></center>
+    <div align="left"><br>
+      This second video is similar, except that the abort takes place on
+      the lunar surface itself, so I guess you could say it's not even
+      really an "abort" at all ... it's just using the AGS to control
+      the ascent rather than using the AGC to do so:<br>
+      <br>
+    </div>
+    <center><iframe src="https://www.youtube.com/embed/KJiWwAMuPvE"
+        gesture="media" allowfullscreen="" frameborder="0" height="720"
+        width="1280">&lt;br&gt; </iframe></center>
+    <ul>
+    </ul>
     <h2><a name="What_is_the_Abort_Guidance_System_AGS_"
         id="What_is_the_Abort_Guidance_System_AGS_"></a>What is the
       Abort Guidance System (AGS) or Abort Electronics Assembly (AEA)?<br>
@@ -58,16 +122,17 @@
     <a href="FlightControlSubsystem.jpg"><img style="border: 2px solid ;
         width: 459px; height: 406px;" alt="LM's Integrated Flight
         Control subsystem" src="FlightControlSubsystemSmall.jpg"
-        width="459" hspace="12" height="406" align="right"></a>The AGS
+        align="right" height="406" hspace="12" width="459"></a>The AGS
     was a computer system used in the LM.&nbsp; It was a completely
     separate computer system from the LM's AGC, with a different
     architecture, different instruction-set, and different runtime
     software.&nbsp; It was in the LM as a kind of backup for the AGC,
     but was only supposed to be used (as the name implies) in case of an
-    aborted landing.&nbsp; The AGS doesn't have as commanding a role in
-    the history of lunar explanation as does the AGC, because no aborts
-    were ever needed in actual missions.&nbsp; However, when the AGS
-    made its few appearances in history it did so dramatically.<br>
+    aborted lunar descent or ascent.&nbsp; The AGS doesn't have as
+    commanding a role in the history of lunar explanation as does the
+    AGC, because no aborts were ever needed in actual missions.&nbsp;
+    However, when the AGS made its few appearances in history it did so
+    dramatically.<br>
     <br>
     For example, the AGS was involved in a near-disaster during the
     Apollo 10, at the closest approach of the LM to the moon.&nbsp; This
@@ -94,6 +159,8 @@
     nicely where it was "supposed" to be with no inputs from
     Stafford.&nbsp; (See the <a class="moz-txt-link-freetext"
       href="http://history.nasa.gov/alsj/a410/A10_MissionReport.pdf">mission
+
+
 
 
 
@@ -257,9 +324,13 @@
 
 
 
+
+
           Emergency Abort Guidance System Study</a>", May 10, 1963</li>
       <li>Grumman, LED-540-3, "<a
 href="Documents/Grumman%20LED-540-3%20Back-up%20Guidance%20Requirements.pdf">Back-up
+
+
 
 
 
@@ -363,9 +434,13 @@ href="Documents/Grumman%20LEM-500-4%20Abort%20Guidance%20System%20Redefinition%2
 
 
 
+
+
           Guidance System Redefinition Studies</a>", March 31, 1965</li>
       <li>Grumman, LSP-300-3B, "<a
           href="Documents/Specification,%20Abort%20Guidance%20Section.pdf">Design
+
+
 
 
 
@@ -481,6 +556,8 @@ href="Documents/17618-H110-RO-00%20LM%20AGS%20Operating%20Manual%20Flight%20Prog
 
 
 
+
+
           Operating Manual, Flight Program 8</a>, 17618-H110-RO-00, TRW,
         March 1971, 233 pages.<br>
       </li>
@@ -498,7 +575,7 @@ href="Documents/17618-H110-RO-00%20LM%20AGS%20Operating%20Manual%20Flight%20Prog
     as authoritative.<br>
     <br>
     <table summary="" style="width: 75%; text-align: left; margin-left:
-      auto; margin-right: auto;" cellspacing="2" cellpadding="2"
+      auto; margin-right: auto;" cellpadding="2" cellspacing="2"
       border="1">
       <tbody>
         <tr>
@@ -609,11 +686,11 @@ href="Documents/17618-H110-RO-00%20LM%20AGS%20Operating%20Manual%20Flight%20Prog
         href="AbortGuidanceSectionBlockDiagram.jpg"><img style="border:
           2px solid ; width: 556px; height: 432px;" alt="LM Abort
           Guidance Section block diagram"
-          src="AbortGuidanceSectionBlockDiagramSmall.jpg" width="556"
-          vspace="8" height="432"></a><br>
+          src="AbortGuidanceSectionBlockDiagramSmall.jpg" height="432"
+          vspace="8" width="556"></a><br>
     </div>
     <table summary="" style="width: 80%; text-align: left; margin-left:
-      auto; margin-right: auto;" cellspacing="2" cellpadding="2"
+      auto; margin-right: auto;" cellpadding="2" cellspacing="2"
       border="0">
       <tbody>
         <tr>
@@ -675,8 +752,8 @@ href="Documents/17618-H110-RO-00%20LM%20AGS%20Operating%20Manual%20Flight%20Prog
       <dt><a href="SimplifiedComputerBlockDiagram.jpg"><img
             style="border: 2px solid ; width: 408px; height: 553px;"
             alt="AGS block diagram"
-            src="SimplifiedComputerBlockDiagramSmall.jpg" width="408"
-            hspace="12" height="553" align="right"></a>The AEA (the
+            src="SimplifiedComputerBlockDiagramSmall.jpg" align="right"
+            height="553" hspace="12" width="408"></a>The AEA (the
         computer) had the following characteristics:<br>
       </dt>
     </dl>
@@ -712,8 +789,8 @@ href="Documents/17618-H110-RO-00%20LM%20AGS%20Operating%20Manual%20Flight%20Prog
     </ul>
     <div style="text-align: center;">
       <table summary="" style="width: 50%; text-align: left;
-        margin-left: auto; margin-right: auto;" cellspacing="2"
-        cellpadding="2" border="1">
+        margin-left: auto; margin-right: auto;" cellpadding="2"
+        cellspacing="2" border="1">
         <tbody>
           <tr>
             <td style="vertical-align: top; font-weight: bold;">
@@ -853,19 +930,19 @@ href="Documents/17618-H110-RO-00%20LM%20AGS%20Operating%20Manual%20Flight%20Prog
       User-Interface Simulation</h2>
     <br>
     <table summary="" style="text-align: left; width: 100%;"
-      cellspacing="2" cellpadding="2" border="0">
+      cellpadding="2" cellspacing="2" border="0">
       <tbody>
         <tr>
           <td style="text-align: center; vertical-align: middle;"> <a
               href="DEDADrawing.jpg"><img style="border: 2px solid ;
                 width: 503px; height: 290px;" alt="Line drawing of a
-                DEDA" src="DEDADrawingSmall.jpg" width="503"
-                height="290" align="middle"></a></td>
+                DEDA" src="DEDADrawingSmall.jpg" align="middle"
+                height="290" width="503"></a></td>
           <td style="vertical-align: top; text-align: center;"> <a
               href="DEDABlockDiagram.jpg"><img style="border: 2px solid
                 ; width: 560px; height: 464px;" alt="DEDA block diagram"
-                src="DEDABlockDiagramSmall.jpg" width="560" height="464"
-                align="middle"></a></td>
+                src="DEDABlockDiagramSmall.jpg" align="middle"
+                height="464" width="560"></a></td>
         </tr>
       </tbody>
     </table>
@@ -874,20 +951,21 @@ href="Documents/17618-H110-RO-00%20LM%20AGS%20Operating%20Manual%20Flight%20Prog
       <div style="text-align: left;"> <a href="yaDEDAscreenshot.jpg"><img
             style="border: 2px solid ; width: 200px; height: 227px;"
             alt="Click for a larger screenshot of yaDEDA"
-            src="yaDEDAscreenshot-thumb.jpg" width="203" height="230"
-            align="right"></a>The term <span style="font-style:
-          italic;">DEDA</span> refers to the Data Entry and Display
-        Assembly, which is the assembly used by the astronauts to enter
-        data into the AGS, or to see data displayed by the AGS.&nbsp;
-        The DEDA was mounted in the lower-right portion of the LM's
-        control panel, just in front of the LMP (Lunar Module
-        Pilot).&nbsp; Recall that in the somewhat odd terminology
-        employed in the Apollo program, the LMP did not actually pilot
-        the LM.&nbsp; Rather, the commander piloted the LM from the
-        left-hand position.<br>
+            src="yaDEDAscreenshot-thumb.jpg" align="right" height="230"
+            width="203"></a>The term <span style="font-style: italic;">DEDA</span>
+        refers to the Data Entry and Display Assembly, which is the
+        assembly used by the astronauts to enter data into the AGS, or
+        to see data displayed by the AGS.&nbsp; The DEDA was mounted in
+        the lower-right portion of the LM's control panel, just in front
+        of the LMP (Lunar Module Pilot).&nbsp; Recall that in the
+        somewhat odd terminology employed in the Apollo program, the LMP
+        did not actually pilot the LM.&nbsp; Rather, the commander
+        piloted the LM from the left-hand position.<br>
         <br>
         <span style="font-weight: bold;">yaDEDA</span> is an emulation
         of the DEDA for use with <span style="font-weight: bold;">yaAGS</span>.&nbsp;
+
+
 
 
 
@@ -914,6 +992,8 @@ href="Documents/17618-H110-RO-00%20LM%20AGS%20Operating%20Manual%20Flight%20Prog
         of the DEDA user-interface is built into the DEDA, and so <span
           style="font-weight: bold;">yaDEDA</span> can be operated even
         without the presence of <span style="font-weight: bold;">yaAGS</span>.&nbsp;
+
+
 
 
 
@@ -1056,6 +1136,8 @@ href="Documents/17618-H110-RO-00%20LM%20AGS%20Operating%20Manual%20Flight%20Prog
 
 
 
+
+
               Alters the locations of graphics files used by the <span
                 style="font-weight: bold;">yaDEDA</span> program to the
               ./pixmaps/yaDEDA/ folder rather than the default system
@@ -1074,6 +1156,8 @@ href="Documents/17618-H110-RO-00%20LM%20AGS%20Operating%20Manual%20Flight%20Prog
       Cross-Assembler</h2>
     The original cross-assembler for AGS assembly language was known as
     the "LEM Assembly Program", or <span style="font-weight: bold;">LEMAP</span>.&nbsp;
+
+
 
 
 
@@ -1106,6 +1190,8 @@ href="Documents/17618-H110-RO-00%20LM%20AGS%20Operating%20Manual%20Flight%20Prog
 
 
 
+
+
       Presumably, <span style="font-style: italic;">Filename</span> was
       produced by an earlier run of <span style="font-weight: bold;">yaLEMAP</span>
       or <span style="font-weight: bold;">binLEMAP</span> (see
@@ -1113,6 +1199,8 @@ href="Documents/17618-H110-RO-00%20LM%20AGS%20Operating%20Manual%20Flight%20Prog
       regression testing of the assembler itself, and (indeed) such
       regression testing is performed during a normal build.&nbsp; This
       switch also causes a change in <span style="font-weight: bold;">yaLEMAP</span>'s
+
+
 
 
 
@@ -1264,6 +1352,8 @@ href="Documents/17618-H110-RO-00%20LM%20AGS%20Operating%20Manual%20Flight%20Prog
 
 
 
+
+
           Flight Software</big></small></h2>
     <h3><a name="Availability_" id="Availability_"></a>Availability<br>
     </h3>
@@ -1373,7 +1463,7 @@ href="Documents/17618-H110-RO-00%20LM%20AGS%20Operating%20Manual%20Flight%20Prog
     via snail-mail, and I'll scan them and return them.)<br>
     <h2><a name="Debug" id="Debug"></a>yaAGS Debugging Mode (--debug)</h2>
     <table summary="" style="text-align: left; width: 60%; margin-left:
-      auto; margin-right: auto;" cellspacing="2" cellpadding="2"
+      auto; margin-right: auto;" cellpadding="2" cellspacing="2"
       border="1">
       <tbody>
         <tr>
@@ -1420,6 +1510,8 @@ href="Documents/17618-H110-RO-00%20LM%20AGS%20Operating%20Manual%20Flight%20Prog
         monospace;">Stopped because program loaded.</span><br
         style="font-family: monospace;">
       <span style="font-family: monospace;">A=000000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+
 
 
 
@@ -1539,6 +1631,8 @@ href="Documents/17618-H110-RO-00%20LM%20AGS%20Operating%20Manual%20Flight%20Prog
 
 
 
+
+
         a dump is performed using the last <span style="font-style:
           italic;">N</span> and <span style="font-style: italic;">A</span>
         previously used.</li>
@@ -1602,6 +1696,8 @@ href="Documents/17618-H110-RO-00%20LM%20AGS%20Operating%20Manual%20Flight%20Prog
 
 
 
+
+
             the state of the system (CPU, memory, i/o channels) to
             backtrace point #<span style="font-style: italic;">N</span>
             (from the list displayed by the BACKTRACES command).</li>
@@ -1648,14 +1744,16 @@ href="Documents/17618-H110-RO-00%20LM%20AGS%20Operating%20Manual%20Flight%20Prog
 
 
 
+
+
           Commons No Rights Reserved License</a></span><br>
       <i><font size="-1">Last modified by <a
             href="mailto:info@sandroid.org">Ronald Burkey</a> on
-          2017-10-08.<br>
+          2017-11-16.<br>
           <br>
           <a href="http://www.ibiblio.org"><img style="border: 0px solid
               ; width: 300px; height: 100px;" alt="Virtual AGC is hosted
-              by ibiblio.org" src="hosted.png" width="300" height="100"></a><br>
+              by ibiblio.org" src="hosted.png" height="100" width="300"></a><br>
         </font></i> </center>
     <br>
   </body>
