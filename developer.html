@@ -20,6 +20,8 @@
       <li><a href="#Contributing_Changes_Back_to_the_Virtual">Contributing
 
 
+
+
           Changes Back to the Virtual AGC Project</a><br>
       </li>
       <li><a href="#Interfacing_yaAGC_to_yaDSKY_or_Other">Interfacing
@@ -51,6 +53,9 @@
         <li><a href="#Table_of_IO_Channels">Table of yaAGC I/O channels</a><br>
         </li>
       </ul>
+      <li><a href="#A_Template_Program_for_Creating_Simple">A Template
+          Program for Creating Simple yaAGC Peripherals</a><br>
+      </li>
       <li><a href="#Internals_of_the_yaDSKY_Program">Internals of the
           yaDSKY/yaDSKY2 Program<br>
         </a></li>
@@ -66,6 +71,8 @@
         <li><a href="#Useful_AGC_Datatypes_and_Constants">Useful
             Datatypes and Constants</a></li>
         <li><a href="#AGC_CPU-to-Peripheral_Interconnections">CPU-to-Peripheral
+
+
 
 
             Interconnections API</a></li>
@@ -126,6 +133,8 @@
     different computers. This promotes the possibility of changing or
     even completely replacing <span style="font-weight: bold;">yaDSKY</span>—or
 
+
+
     of introducing new stand-alone programs for simulating other Apollo
     hardware—without changing <span style="font-weight: bold;">yaAGC</span>
     itself.&nbsp; In fact, this has already been done with such
@@ -137,6 +146,8 @@
       bold;">yaDEDA</span> and <span style="font-weight: bold;">yaDEDA2</span>,
     and "yaACA" to refer interchangeably to <span style="font-weight:
       bold;">yaACA</span> and <span style="font-weight: bold;">yaACA2</span>.&nbsp;
+
+
 
     As far as interoperability requirements are concerned, these
     alternatives are drop-in replacements for each other.<br>
@@ -332,6 +343,8 @@
     described below to eliminate the socket-based interface.<br>
     <h3><a name="yaAGC_vs._yaAGS_Packets" id="yaAGC_vs._yaAGS_Packets"></a>yaAGC
 
+
+
       vs. yaAGS Packets</h3>
     The <span style="font-weight: bold;">yaAGC</span> and <span
       style="font-weight: bold;">yaAGS</span> programs each use a system
@@ -356,7 +369,26 @@
     <br>
     Obviously there is some room here for defining additional types of
     packets in the future, just by insuring that the 00 signature byte
-    always comes first, and rearranging the other three signature bytes.<br>
+    always comes first, and rearranging the other three signature
+    bytes.&nbsp; Note also that in order to determine whether connected
+    peripheral clients (such as the DSKY) have disconnected, <b>yaAGC</b>/<b>yaAGS</b>
+    occasionally "ping" all of the connected clients, using abnormal
+    packets of the form<br>
+    <br>
+    <div align="center"><tt>11111111 11111111 11111111 11111111</tt> (or
+      just a single <tt>11111111</tt> for older versions)<br>
+      <div align="left"><br>
+        It's occasionally useful in program develop to capture the data
+        streams.&nbsp; I'm sure there are many tools for doing so.&nbsp;
+        On Linux, I find the <b>socat</b> and <b>hexdump</b> tools to
+        be useful.&nbsp; For example, to capture the datastream being
+        emitted from <b>yaAGC</b> as configured with the ports usually
+        used for the LM, I find the following command helpful:<br>
+      </div>
+      <br>
+    </div>
+    <div align="center"><tt>socat TCP:127.0.0.1:19799 | hexdump -C</tt><br>
+    </div>
     <br>
     <span style="font-weight: bold;">yaAGS</span> packets and <span
       style="font-weight: bold;">yaAGC</span> packets are further
@@ -380,8 +412,8 @@
     Specifically, the <span style="font-family: monospace;">tttttt</span>
     field is interpreted as follows (all numbers in octal):<br>
     <br>
-    <table summary="" style="text-align: left;" cellpadding="2"
-      cellspacing="2" border="1">
+    <table summary="" style="text-align: left;" cellspacing="2"
+      cellpadding="2" border="1">
       <tbody>
         <tr>
           <td style="font-weight: bold; vertical-align: middle;"> <span
@@ -472,7 +504,7 @@
             The mask bits are active when 1 and inactive when 0.<br>
             <br>
             <table summary="" style="text-align: left; margin-left:
-              auto; margin-right: auto;" cellpadding="2" cellspacing="2"
+              auto; margin-right: auto;" cellspacing="2" cellpadding="2"
               border="1">
               <tbody>
                 <tr>
@@ -606,7 +638,7 @@
             The mask bits are active when 1 and inactive when 0.<br>
             <br>
             <table summary="" style="text-align: left; margin-left:
-              auto; margin-right: auto;" cellpadding="2" cellspacing="2"
+              auto; margin-right: auto;" cellspacing="2" cellpadding="2"
               border="1">
               <tbody>
                 <tr>
@@ -1044,7 +1076,7 @@
             are 0 when active and 1 when inactive.<br>
             <br>
             <table summary="" style="text-align: left; margin-left:
-              auto; margin-right: auto;" cellpadding="2" cellspacing="2"
+              auto; margin-right: auto;" cellspacing="2" cellpadding="2"
               border="1">
               <tbody>
                 <tr>
@@ -1211,7 +1243,7 @@
     be zeroed or can count up or down (by one).<br>
     <br>
     <div style="margin-left: 40px;">
-      <table summary="" cellpadding="2" cellspacing="2" border="1">
+      <table summary="" cellspacing="2" cellpadding="2" border="1">
         <tbody>
           <tr>
             <td>0</td>
@@ -1237,6 +1269,8 @@
     at the least-significant bit of the counter or integrator register,
     regardless of how many bits of precision the register has.<br>
     <h3><a name="Working_with_the_DEDA" id="Working_with_the_DEDA"></a>Working
+
+
 
       with the DEDA</h3>
     Working with the DEDA is somewhat trickier from a developer's
@@ -1401,12 +1435,14 @@
       href="assembly_language_manual.html#CPU_Architecture_Registers">CPU
 
 
+
+
       Architecture section of the assembly-language manual</a>.&nbsp;
     Numerically, unprogrammed sequences are represented as follows:<br>
     <br>
     <div style="text-align: center;">
       <table summary="" style="text-align: left; margin-left: auto;
-        margin-right: auto;" cellpadding="2" cellspacing="2" border="1">
+        margin-right: auto;" cellspacing="2" cellpadding="2" border="1">
         <tbody>
           <tr>
             <td style="font-weight: bold; text-align: center;
@@ -1650,6 +1686,8 @@
     discarded.<br>
     <h3><a name="Input-Channel_Bitmasks" id="Input-Channel_Bitmasks"></a>yaAGC
 
+
+
       Input-Channel Bitmasks</h3>
     The bit <span style="font-family: monospace;">u</span> in the <span
       style="font-family: monospace;">send/recv</span> protocol doesn't
@@ -1721,6 +1759,8 @@
     which bits of the output channels are applicable.<br>
     <h3><a name="Fictitious_IO_Channels" id="Fictitious_IO_Channels"></a>Fictitious
 
+
+
       I/O Channels</h3>
     For the purpose of communicating various types of information
     to/from <span style="font-weight: bold;">yaAGC</span> which do not
@@ -1731,7 +1771,7 @@
     listed in the table below.<br>
     <br>
     <table summary="" style="text-align: left; width: 100%;"
-      cellpadding="2" cellspacing="2" border="1">
+      cellspacing="2" cellpadding="2" border="1">
       <tbody>
         <tr>
           <td style="font-weight: bold; text-align: center;
@@ -1979,6 +2019,8 @@
     <br>
     <h2><a name="IO_Channel_Specifics" id="IO_Channel_Specifics"></a>yaAGC
 
+
+
       I/O Channel Specifics</h2>
     The real AGC CPU interfaced with peripheral hardware by means of
     instructions that access "i/o channels" rather than main memory.<br>
@@ -2012,6 +2054,8 @@
     </div>
     <h3><a name="Table_of_IO_Channels" id="Table_of_IO_Channels"></a>Table
 
+
+
       of I/O Channels</h3>
     Output Channel 10 (octal)<br>
     <div style="margin-left: 40px;"> Used for driving the DSKY's
@@ -2023,8 +2067,8 @@
       <br>
       <div style="text-align: center;"> <img
           src="yaAGC-7segpositions.jpg" title="" alt="Output-code
-          positions." style="width: 202px; height: 339px;" height="339"
-          width="202"><br>
+          positions." style="width: 202px; height: 339px;" width="202"
+          height="339"><br>
       </div>
     </div>
     <br>
@@ -2049,8 +2093,8 @@
       or if both 1+ and 1- flags are set, the '-' sign is displayed.)<br>
       <br>
       <table summary="" style="width: 90%; text-align: left;
-        margin-left: auto; margin-right: auto;" cellpadding="2"
-        cellspacing="2" border="1">
+        margin-left: auto; margin-right: auto;" cellspacing="2"
+        cellpadding="2" border="1">
         <tbody>
           <tr>
             <th style="text-align: center; vertical-align: middle;"> <span
@@ -2224,8 +2268,8 @@
       </table>
       <br>
       <table summary="" style="width: 50%; text-align: left;
-        margin-left: auto; margin-right: auto;" cellpadding="2"
-        cellspacing="2" border="1">
+        margin-left: auto; margin-right: auto;" cellspacing="2"
+        cellpadding="2" border="1">
         <tbody>
           <tr>
             <th style="text-align: center; vertical-align: middle;">
@@ -2337,14 +2381,16 @@
       five 7-segment displays per grouping, you might think it would be
       possible to spell out the wordlet <br>
       <br>
-      <div align="center"><img alt="" src="APOLO.png" height="90"
-          width="322"><br>
+      <div align="center"><img alt="" src="APOLO.png" width="322"
+          height="90"><br>
       </div>
       <br>
       Hugh Blair-Smith actually made this amusing suggestion.&nbsp; But,
       alas, it is not possible. The page of the DSKY's electrical
       schematics that defines what patterns can be displayed is <a
 href="https://archive.org/stream/acelectroniclmma00acel_0#page/n358/mode/1up">found
+
+
 
         here</a>, (look at relays K5, K4, ..., K1 in the
       schematic).&nbsp; All 32 of the possible patterns implied by that
@@ -2358,9 +2404,9 @@ href="https://archive.org/stream/acelectroniclmma00acel_0#page/n358/mode/1up">fo
       agreement.<br>
       <br>
       <div align="center"><a href="traceDSKY.png"><img title="Click to
-            enlarge" alt="" src="traceDSKY-small.png" border="2"
-            height="269" width="383"></a> &nbsp; &nbsp; <img alt=""
-          src="traceDSKYA.jpg" height="269" width="646"><br>
+            enlarge" alt="" src="traceDSKY-small.png" width="383"
+            height="269" border="2"></a> &nbsp; &nbsp; <img alt=""
+          src="traceDSKYA.jpg" width="646" height="269"><br>
       </div>
       <br>
     </div>
@@ -2372,8 +2418,8 @@ href="https://archive.org/stream/acelectroniclmma00acel_0#page/n358/mode/1up">fo
       software are:<br>
       <br>
       <table summary="" style="width: 60%; text-align: left;
-        margin-left: auto; margin-right: auto;" cellpadding="2"
-        cellspacing="2" border="1">
+        margin-left: auto; margin-right: auto;" cellspacing="2"
+        cellpadding="2" border="1">
         <tbody>
           <tr>
             <th style="text-align: center; vertical-align: middle;">
@@ -2443,8 +2489,8 @@ href="https://archive.org/stream/acelectroniclmma00acel_0#page/n358/mode/1up">fo
     Output Channel 12 (octal)<br>
     <div style="margin-left: 40px;">
       <table summary="" style="width: 60%; text-align: left;
-        margin-left: auto; margin-right: auto;" cellpadding="2"
-        cellspacing="2" border="1">
+        margin-left: auto; margin-right: auto;" cellspacing="2"
+        cellpadding="2" border="1">
         <tbody>
           <tr>
             <th style="text-align: center; vertical-align: middle;">
@@ -2577,8 +2623,8 @@ href="https://archive.org/stream/acelectroniclmma00acel_0#page/n358/mode/1up">fo
     Output Channel 13 (octal)<br>
     <div style="margin-left: 40px;">
       <table summary="" style="width: 60%; text-align: left;
-        margin-left: auto; margin-right: auto;" cellpadding="2"
-        cellspacing="2" border="1">
+        margin-left: auto; margin-right: auto;" cellspacing="2"
+        cellpadding="2" border="1">
         <tbody>
           <tr>
             <th style="text-align: center; vertical-align: middle;">
@@ -2616,8 +2662,8 @@ href="https://archive.org/stream/acelectroniclmma00acel_0#page/n358/mode/1up">fo
     <div style="margin-left: 40px;"> This channel contains the following
       bits:<br>
       <table summary="" style="width: 60%; text-align: left;
-        margin-left: auto; margin-right: auto;" cellpadding="2"
-        cellspacing="2" border="1">
+        margin-left: auto; margin-right: auto;" cellspacing="2"
+        cellpadding="2" border="1">
         <tbody>
           <tr>
             <td style="vertical-align: top; font-weight: bold;
@@ -2862,8 +2908,8 @@ href="https://archive.org/stream/acelectroniclmma00acel_0#page/n358/mode/1up">fo
       prove that at the moment.<br>
       <br>
       <table summary="" style="width: 50%; text-align: left;
-        margin-left: auto; margin-right: auto;" cellpadding="2"
-        cellspacing="2" border="1">
+        margin-left: auto; margin-right: auto;" cellspacing="2"
+        cellpadding="2" border="1">
         <tbody>
           <tr>
             <th style="text-align: center; vertical-align: middle;"> Key<br>
@@ -3025,6 +3071,65 @@ href="https://archive.org/stream/acelectroniclmma00acel_0#page/n358/mode/1up">fo
       be described here since Virtual AGC presently includes no engine
       simulations.<br>
     </div>
+    <h2><a name="A_Template_Program_for_Creating_Simple"></a>A Template
+      Program for Creating Simple yaAGC Peripherals</h2>
+    <p><a href="#Internals_of_the_yaDSKY_Program">The <i>next</i>
+        section</a> discusses some design details of a fairly
+      substantial simulated peripheral device, the DSKY.&nbsp; However,
+      the learning curve is somewhat steep, and sometimes one simply
+      wants to throw something together quickly without the burden of
+      dealing with cross-platform graphical toolsets, C++, and so on.<br>
+    </p>
+    <p>There is a very bare-bones Python 3 program, <a
+href="https://github.com/virtualagc/virtualagc/blob/master/piPeripheral/piPeripheral.py">piPeripheral.py</a>,
+      which can be adapted to create simple peripheral devices that
+      don't need to be high-performance.&nbsp; What this program does is
+      connect to a running instance of <b>yaAGC</b> — which it
+      hardcodes as host "localhost" at port 19798, though you can change
+      that if necessary — and handles all of the network packets
+      associated with the AGC's i/o channels.&nbsp; Whenever the AGC
+      writes to an output channel, it calls a function<br>
+    </p>
+    <div align="center"><tt>outputFromAGC(channel, value)</tt><br>
+    </div>
+    <p>which you are free to handle however you like.&nbsp; Conversely,
+      from time to time it calls the function<br>
+    </p>
+    <div align="center"><tt>inputsForAGC()</tt><br>
+    </div>
+    <p>Again, you are free to fill up <tt>inputsForAGC()</tt> with any
+      content you like, and the program will automatically send that
+      content from <tt>inputsForAGC()</tt> to the AGC, to appear in its
+      input channels.&nbsp; Specifically, <tt>inputsForAGC()</tt> must
+      return a Python "list" which contains Python "3-tuples" describing
+      the data for whatever input channels you want to change:<br>
+    </p>
+    <p align="center"><tt>[ (<i>CHANNEL0</i>,<i>VALUE0</i>,<i>MASK0</i>),
+
+        (<i>CHANNEL1</i>,<i>VALUE1</i>,<i>MASK1</i>), ...]</tt><br>
+    </p>
+    <p>where the "channels" are the input-channel numbers, the "values"
+      are the values to write into those input channels, and the "masks"
+      are bit-masks determining which of the bits in the values are
+      valied. The output list may be empty, in which case there is
+      currently no new data to write to the AGC.&nbsp; For example, <tt>[(0o15,0o31,0o37)]</tt>
+      would indicated that the lowest 5 bits of channel 15 (octal) were
+      valid, and that the value of those bits were 11001 (binary), which
+      collectively indicate that the KEY REL key on a DSKY was
+      pressed.&nbsp; (In Python 3, octal constants are prefixed by
+      "0o".)<br>
+    </p>
+    <p>There is a second Python 3 program, <a
+href="https://github.com/virtualagc/virtualagc/blob/master/piPeripheral/piDSKY.py">piDSKY.py</a>,
+      which fleshes out the <tt>outputFromAGC()</tt> and <tt>inputsForAGC()</tt>
+      functions in piPeripheral.py, illustrating how to use
+      piPeripheral.py to create a simple DSKY.&nbsp; The actual
+      operation of piDSKY.py is very simple, in that it simply accepts
+      keyboard commands in place of a DSKY keypad (namely the keys
+      0123456789+-VNCPKR and Enter) and displays incoming DSKY
+      output-channel writes from the AGC as simple text messages on
+      stdout.<br>
+    </p>
     <h2><a name="Internals_of_the_yaDSKY_Program"
         id="Internals_of_the_yaDSKY_Program"></a>Internals of the
       yaDSKY/yaDSKY2 Program</h2>
@@ -3035,12 +3140,16 @@ href="https://archive.org/stream/acelectroniclmma00acel_0#page/n358/mode/1up">fo
     internal details of <span style="font-weight: bold;">yaDSKY</span>.&nbsp;
 
 
+
+
     <span style="font-weight: bold;">yaDSKY</span> is actually an
     extremely simple program to understand and to modify. Though
     targeted for a UNIX-type operating environment (such as Linux), all
     design tradeoffs have been made in favor of simplicity and
     portability, as opposed to performance or aesthetics.<br>
     <h3><a name="Interface_to_yaAGC" id="Interface_to_yaAGC"></a>Interface
+
+
 
       to yaAGC</h3>
     As mentioned earlier, the AGC interacted with hardware such as the
@@ -3065,6 +3174,8 @@ href="https://archive.org/stream/acelectroniclmma00acel_0#page/n358/mode/1up">fo
     of the same kind can connect. For example, two or more DSKY
     simulations can be run at the same time from one AGC simulation.<br>
     <h3><a name="Software_Architecture" id="Software_Architecture"></a>Software
+
+
 
       Architecture</h3>
     The <span style="font-weight: bold;">yaDSKY</span> program is
@@ -3149,7 +3260,7 @@ href="https://archive.org/stream/acelectroniclmma00acel_0#page/n358/mode/1up">fo
     </h3>
     <div style="text-align: center;"> <img src="yaAGC-indpositions.jpg"
         title="" alt="Indicator positions." style="width: 195px; height:
-        329px;" height="329" width="195"><br>
+        329px;" width="195" height="329"><br>
       <br>
     </div>
     The indicator legends in the upper-left quadrant of the <span
@@ -3280,6 +3391,8 @@ href="https://archive.org/stream/acelectroniclmma00acel_0#page/n358/mode/1up">fo
       value of an AGC single-precision integer is 2<sup>14</sup>-1=16383.&nbsp;
 
 
+
+
       Therefore, the operation of 16383+1 will overflow.&nbsp; In terms
       of bits, this operation results in 01 000000 000000.&nbsp; The
       mismatch between the most significant bits is an indication of
@@ -3293,6 +3406,8 @@ href="https://archive.org/stream/acelectroniclmma00acel_0#page/n358/mode/1up">fo
       scope here.</span>
     <h3><a name="AGC_CPU-to-Peripheral_Interconnections"
         id="AGC_CPU-to-Peripheral_Interconnections"></a>CPU-to-Peripheral
+
+
 
 
       Interconnections API</h3>
@@ -3320,6 +3435,8 @@ href="https://archive.org/stream/acelectroniclmma00acel_0#page/n358/mode/1up">fo
     you like!&nbsp;&nbsp; Then rebuild <span style="font-weight: bold;">yaAGC</span>
     and <span style="font-weight: bold;">yaDSKY</span> using these new
     functions.&nbsp; <span style="font-style: italic;">Voila</span>!&nbsp;
+
+
 
     New <span style="font-weight: bold;">yaAGC</span>-to-<span
       style="font-weight: bold;">yaDSKY</span> interface with no code
@@ -3433,8 +3550,8 @@ href="https://archive.org/stream/acelectroniclmma00acel_0#page/n358/mode/1up">fo
     returned, then the variable <span style="font-family: monospace;">ErrorCodes</span>
     will contain one of the following:<br>
     <div style="margin-left: 40px;">
-      <table summary="" style="text-align: left;" cellpadding="2"
-        cellspacing="2" border="1">
+      <table summary="" style="text-align: left;" cellspacing="2"
+        cellpadding="2" border="1">
         <tbody>
           <tr>
             <td style="vertical-align: top;">0x301<br>
@@ -3714,6 +3831,8 @@ href="https://archive.org/stream/acelectroniclmma00acel_0#page/n358/mode/1up">fo
       style="font-family: monospace;">ChannelOutput</span> that
     physically outputs the data.&nbsp; <span style="font-weight: bold;">Note:</span>&nbsp;
 
+
+
     It's important to use this function rather than reading the mirror
     array directly, since the function accounts for the fact that the L
     and Q registers appear in both i/o space and erasable-memory
@@ -3736,8 +3855,8 @@ href="https://archive.org/stream/acelectroniclmma00acel_0#page/n358/mode/1up">fo
       style="font-family: monospace;">Cause</span> parameter is used as
     follows:<br>
     <div style="margin-left: 40px;">
-      <table summary="" style="text-align: left;" cellpadding="2"
-        cellspacing="2" border="1">
+      <table summary="" style="text-align: left;" cellspacing="2"
+        cellpadding="2" border="1">
         <tbody>
           <tr>
             <td style="vertical-align: top;">0<br>
@@ -3787,6 +3906,8 @@ href="https://archive.org/stream/acelectroniclmma00acel_0#page/n358/mode/1up">fo
     only)<br>
     <br>
     Displays (i.e., <span style="font-family: monospace;">printf</span>s)
+
+
 
     the contents of the backtrace circular buffer.&nbsp; The main use of
     this is to allow the user to select the <span style="font-family:
@@ -4084,6 +4205,8 @@ href="https://archive.org/stream/acelectroniclmma00acel_0#page/n358/mode/1up">fo
         (1);&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
 
+
+
         // No command-line arguments!</span><br>
       <span style="font-family: monospace;">&nbsp; ReturnValue =
         agc_engine_init (&amp;State, argv[1], NULL);</span><br>
@@ -4309,14 +4432,16 @@ href="https://archive.org/stream/acelectroniclmma00acel_0#page/n358/mode/1up">fo
           href="https://creativecommons.org/publicdomain/zero/1.0/">Creative
 
 
+
+
           Commons No Rights Reserved License</a></span><br>
       <i><font size="-1">Last modified by <a
             href="mailto:info@sandroid.org">Ronald Burkey</a> on
-          2017-08-25.<br>
+          2017-11-18.<br>
           <br>
           <a href="http://www.ibiblio.org"><img style="border: 0px solid
               ; width: 300px; height: 100px;" alt="Virtual AGC is hosted
-              by ibiblio.org" src="hosted.png" height="100" width="300"></a><br>
+              by ibiblio.org" src="hosted.png" width="300" height="100"></a><br>
         </font></i> </center>
     <br>
     <br>
