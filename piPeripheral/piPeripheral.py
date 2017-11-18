@@ -3,43 +3,19 @@
 # Filename: 	piPeripheral.py
 # Purpose:	This is the skeleton of a program that can be used for creating
 #		a Python-language based peripheral for the AGC simulator program,
-#		yaAGC.  It is intended to be the basic for a DSKY simulation 
-#		running on a Raspberry Pi, in which physical DSKY-like hardware is
-#		controlled directly through the Pi's GPIO pins.  However, the 
-#		skeleton itself has nothing to do with the Pi, and can be used on
-#		any platform having Python, nor does it have anything to do with 
-#		the DSKY per se, and merely handles TCP socket interactions with 
-#		the yaAGC program.  It has been placed in the public domain to 
-#		make it give it a wider scope in which it can be applied.
+#		yaAGC.  You can see an example of how to use it in piDSKY.py.  
 # Reference:	http://www.ibiblio.org/apollo/developer.html
 # Mod history:	2017-11-17 RSB	Began.
 #
-# Note that certain functionality might not work under Windows, but everything should
-# presumably work in Linux, Raspbian, Mac OS X, etc.
-#
-# In this skeleton form, the script acts as kind of a console-based DSKY, in which
-# you can use keyboard keys (0 1 2 3 4 5 6 7 8 9 + - V N C P K R Enter) as surrogates
-# for DSKY pushbuttons, and all DSKY-related outputs from yaAGC are simply parsed and
-# displayed in textual form, though the idea is that in general, you'd rip out all of 
-# that DSKY-specific stuff and replace it with whatever you wanted.
-#
 # The parts which need to be modified to be target-system specific are the 
-# outputFromAGC() and inputsForAGC() functions, which are in the section *after* the following
-# section.  The immediately following section, on the other hand, has some utility functions I use
-# for the default outputFromAGC() and inputsForAGC() functions I provide, and
-# can be deleted if they're not useful for the specific implementation desired.
+# outputFromAGC() and inputsForAGC() functions.
 #
-# To run the program in its present form, you have to use yaAGC, and optionally
-# yaDSKY2 (if you want to see the graphical DSKY and piPeripheral.py working in
-# parallel).  To do that, assuming you had a directory setup in which all of the
-# appropriate files could be found, you could run (presumably from different consoles)
+# To run the program in its present form, assuming you had a directory setup in 
+# which all of the appropriate files could be found, you could run (presumably 
+# from different consoles)
 #
-#	yaDSKY2 --cfg=LM.ini --port=19797
 #	yaAGC --core=Luminary099.bin --port=19797 --cfg=LM.ini
 #	piPeripheral.py
-#
-# If you didn't want to use yaDSKY2, then this stuff could all be run in a pure
-# command-line environment without a GUI desktop.
 
 
 # Hardcoded characteristics of the host and port being used.  Change these as
@@ -49,277 +25,25 @@ TCP_IP = 'localhost'
 TCP_PORT = 19798
 
 ###################################################################################
-# Some utilities I happen to use in my sample hardware abstraction functions, but
-# not of value outside of that, unless you happen to be implementing DSKY functionality
-# in a similar way.
-
-# This particular function parses various keystrokes, like '0' or 'V' and creates
-# packets as if they were DSKY keypresses.  It should be called occasionally as
-# parseDskyKey(0) if there are no keystrokes, in order to make sure that the PRO
-# key gets released.  
-
-# The return value of this function is
-# a list ([...]), of which each element is a 3-tuple consisting of an AGC channel
-# number, a value for that channel, and a bitmask that tells which bit-positions
-# of the value are valid.  The returned list can be empty.  For example, a
-# return value of 
-#	[ ( 0o15, 0o31, 0o37 ) ]
-# would indicate that the lowest 5 bits of channel 15 (octal) were valid, and that
-# the value of those bits were 11001 (binary), which collectively indicate that
-# the KEY REL key on a DSKY is pressed.
-proceedPressed = False
-def parseDskyKey(ch):
-	global proceedPressed
-	returnValue = []
-	if ch == '0':
-		returnValue.append( (0o15, 0o20, 0o37) )
-	elif ch == '1':
-		returnValue.append( (0o15, 0o1, 0o37) )
-	elif ch == '2':
-    		returnValue.append( (0o15, 0o2, 0o37) )
-	elif ch == '3':
-    		returnValue.append( (0o15, 0o3, 0o37) )
-	elif ch == '4':
-    		returnValue.append( (0o15, 0o4, 0o37) )
-	elif ch == '5':
-    		returnValue.append( (0o15, 0o5, 0o37) )
-	elif ch == '6':
-    		returnValue.append( (0o15, 0o6, 0o37) )
-	elif ch == '7':
-    		returnValue.append( (0o15, 0o7, 0o37) )
-	elif ch == '8':
-    		returnValue.append( (0o15, 0o10, 0o37) )
-	elif ch == '9':
-    		returnValue.append( (0o15, 0o11, 0o37) )
-	elif ch == '+':
-    		returnValue.append( (0o15, 0o32, 0o37) )
-	elif ch == '-':
-    		returnValue.append( (0o15, 0o33, 0o37) )
-	elif ch == 'V':
-    		returnValue.append( (0o15, 0o21, 0o37) )
-	elif ch == 'N':
-    		returnValue.append( (0o15, 0o31, 0o37) )
-	elif ch == 'R':
-    		returnValue.append( (0o15, 0o22, 0o37) )
-	elif ch == 'C':
-    		returnValue.append( (0o15, 0o36, 0o37) )
-	elif ch == 'P':
-    		returnValue.append( (0o32, 0o00000, 0o20000) )
-    		proceedPressed = True
-	elif ch == 'K':
-    		returnValue.append( (0o15, 0o31, 0o37) )
-	elif ch == '\n':
-		returnValue.append( (0o15, 0o34, 0o37) )
-	elif proceedPressed and len(returnValue) == 0:
-		# Note that the PRO key is supposed to indicate both presses and
-		# releases to yaAGC.  We can't do that from this keyboard interface,
-		# but we can return a PRO-key release shortly after a press.	
-		returnValue.append( (0o32, 0o20000, 0o20000) )
-		proceedPressed = False
-	return returnValue	
-
-# This function turns keyboard echo on or off.
-import sys
-import termios
-import atexit
-def echoOn(control):
-	fd = sys.stdin.fileno()
-	new = termios.tcgetattr(fd)
-	if control:
-		print("Keyboard echo on")
-		new[3] |= termios.ECHO
-	else:
-		print("Keyboard echo off")
-		new[3] &= ~termios.ECHO
-	termios.tcsetattr(fd, termios.TCSANOW, new)
-echoOn(False)
-atexit.register(echoOn, True)
-
-# This function is a non-blocking read of a single character from the
-# keyboard.  Returns either the key value (such as '0' or 'V'), or else
-# the value "" if no key was pressed.
-def get_char_keyboard_nonblock():
-	import fcntl, os
-	fd = sys.stdin.fileno()
-	oldterm = termios.tcgetattr(fd)
-	newattr = termios.tcgetattr(fd)
-	newattr[3] = newattr[3] & ~termios.ICANON & ~termios.ECHO
-	termios.tcsetattr(fd, termios.TCSANOW, newattr)
-	oldflags = fcntl.fcntl(fd, fcntl.F_GETFL)
-	fcntl.fcntl(fd, fcntl.F_SETFL, oldflags | os.O_NONBLOCK)
-	c = ""
-	try:
-    		c = sys.stdin.read(1)
-	except IOError: pass
-	termios.tcsetattr(fd, termios.TCSAFLUSH, oldterm)
-	fcntl.fcntl(fd, fcntl.F_SETFL, oldflags)
-	return c
-
-###################################################################################
 # Hardware abstraction / User-defined functions.  Also, any other platform-specific
-# initialization.
+# initialization.  This is the section to customize for specific applications.
 
 # This function is automatically called periodically by the event loop to check for 
 # conditions that will result in sending messages to yaAGC that are interpreted
-# as changes to bits on its input channels.  For test purposes, it simply polls the
-# keyboard, and interprets various keystrokes as DSKY keys if present.  The return
+# as changes to bits on its input channels.  The return
 # value is supposed to be a list of 3-tuples of the form
 #	[ (channel0,value0,mask0), (channel1,value1,mask1), ...]
-# and may be en empty list.
+# and may be an empty list.  The "values" are written to the AGC's input "channels",
+# while the "masks" tell which bits of the "values" are valid.  (The AGC will ignore
+# the invalid bits.)
 def inputsForAGC():
-	ch = get_char_keyboard_nonblock()
-	ch = ch.upper()
-	if ch == "":
-		returnValue = []
-	elif ch == "X":
-		print("Exiting ...")
-		sys.exit()
-	else:
-		returnValue = parseDskyKey(ch)
-	if len(returnValue) > 0:
-        	print("Sending to yaAGC: " + oct(returnValue[0][1]) + "(mask " + oct(returnValue[0][2]) + ") -> channel " + oct(returnValue[0][0]))
-	return returnValue
-
-# Converts a 5-bit code in channel 010 to " ", "0", ..., "9".
-def codeToString(code):
-	if code == 0:
-		return " "
-	elif code == 21:
-		return "0"
-	elif code == 3:
-		return "1"
-	elif code == 25:
-		return "2"
-	elif code == 27:
-		return "3"
-	elif code == 15:
-		return "4"
-	elif code == 30:
-		return "5"
-	elif code == 28:
-		return "6"
-	elif code == 19:
-		return "7"
-	elif code == 29:
-		return "8"
-	elif code == 31:
-		return "9"
-	return "?"
+	return []
 
 # This function is called by the event loop only when yaAGC has written
 # to an output channel.  The function should do whatever it is that needs to be done
 # with this output data, which is not processed additionally in any way by the 
-# generic portion of the program. As a test, I simply display the outputs for 
-# those channels relevant to the DSKY.
-last10 = 1234567
-last11 = 1234567
-last13 = 1234567
+# generic portion of the program.
 def outputFromAGC(channel, value):
-	# These lastNN values are just used to cut down on the number of messages printed,
-	# when the same value is output over and over again to the same channel, because
-	# that makes debugging harder.
-	global last10, last11, last13
-	if (channel == 0o13):
-		value &= 0o3000
-	if (channel == 0o10 and value != last10) or (channel == 0o11 and value != last11) or (channel == 0o13 and value != last13):
-		if channel == 0o10:
-			last10 = value
-			aaaa = (value >> 11) & 0x0F
-			b = (value >> 10) & 0x01
-			ccccc = (value >> 5) & 0x1F
-			ddddd = value & 0x1F
-			if aaaa == 11:
-				print(codeToString(ccccc) + " -> M1   " + codeToString(ddddd) + " -> M2")
-			elif aaaa == 10:
-				print(codeToString(ccccc) + " -> V1   " + codeToString(ddddd) + " -> V2")
-			elif aaaa == 9:
-				print(codeToString(ccccc) + " -> N1   " + codeToString(ddddd) + " -> N2")
-			elif aaaa == 8:
-				print("          " + codeToString(ddddd) + " -> 11")
-			elif aaaa == 7:
-				plusMinus = "  "
-				if b != 0:
-					plusMinus = "1+"
-				print(codeToString(ccccc) + " -> 12   " + codeToString(ddddd) + " -> 13   " + plusMinus)
-			elif aaaa == 6:
-				plusMinus = "  "
-				if b != 0:
-					plusMinus = "1-"
-				print(codeToString(ccccc) + " -> 14   " + codeToString(ddddd) + " -> 15   " + plusMinus)
-			elif aaaa == 5:
-				plusMinus = "  "
-				if b != 0:
-					plusMinus = "2+"
-				print(codeToString(ccccc) + " -> 21   " + codeToString(ddddd) + " -> 22   " + plusMinus)
-			elif aaaa == 4:
-				plusMinus = "  "
-				if b != 0:
-					plusMinus = "2-"
-				print(codeToString(ccccc) + " -> 23   " + codeToString(ddddd) + " -> 24   " + plusMinus)
-			elif aaaa == 3:
-				print(codeToString(ccccc) + " -> 25   " + codeToString(ddddd) + " -> 31")
-			elif aaaa == 2:
-				plusMinus = "  "
-				if b != 0:
-					plusMinus = "3+"
-				print(codeToString(ccccc) + " -> 32   " + codeToString(ddddd) + " -> 33   " + plusMinus)
-			elif aaaa == 1:
-				plusMinus = "  "
-				if b != 0:
-					plusMinus = "3-"
-				print(codeToString(ccccc) + " -> 34   " + codeToString(ddddd) + " -> 35   " + plusMinus)
-			elif aaaa == 12:
-				vel = "VEL OFF         "
-				if (value & 0x04) != 0:
-					vel = "VEL ON          "
-				noAtt = "NO ATT OFF      "
-				if (value & 0x08) != 0:
-					noAtt = "NO ATT ON       "
-				alt = "ALT OFF         "
-				if (value & 0x10) != 0:
-					alt = "ALT ON          "
-				gimbalLock = "GIMBAL LOCK OFF "
-				if (value & 0x20) != 0:
-					gimbalLock = "GIMBAL LOCK ON  "
-				tracker = "TRACKER OFF     "
-				if (value & 0x80) != 0:
-					tracker = "TRACKER ON      "
-				prog = "PROG OFF        "
-				if (value & 0x100) != 0:
-					prog = "PROG ON         "
-				print(vel + "   " + noAtt + "   " + alt + "   " + gimbalLock + "   " + tracker + "   " + prog)
-		elif channel == 0o11:
-			last11 = value
-			compActy = "COMP ACTY OFF   "
-			if (value & 0x02) != 0:
-				compActy = "COMP ACTY ON    "
-			uplinkActy = "UPLINK ACTY OFF "
-			if (value & 0x04) != 0:
-				uplinkActy = "UPLINK ACTY ON  "
-			temp = "TEMP OFF        "
-			if (value & 0x80) != 0:
-				temp = "TEMP ON         "
-			keyRel = "KEY REL OFF     "
-			if (value & 0x10) != 0:
-				keyRel = "KEY REL ON      "
-			flashing = "V/N NO FLASH    "
-			if (value & 0x20) != 0:
-				flashing = "V/N FLASH       "
-			oprErr = "OPR ERR OFF     "
-			if (value & 0x40) != 0:
-				oprErr = "OPR ERR FLASH   "
-			print(compActy + "   " + uplinkActy + "   " + temp + "   " + keyRel + "   " + flashing + "   " + oprErr)
-		elif channel == 0o13:
-			last13 = value
-			test = "DSKY TEST       "
-			if (value & 0x200) == 0:
-				test = "DSKY NO TEST    "
-			standby = "DSKY STANDBY OFF"
-			if (value & 0x400) != 0:
-				standby = "DSKY STANDBY ON "
-			print(test + "   " + standby)
-		else:
-			print("Received from yaAGC: " + oct(value) + " -> channel " + oct(channel))
 	return
 
 ###################################################################################
@@ -341,13 +65,6 @@ def connectToAGC():
 		except socket.error as msg:
 			print("Could not connect to yaAGC (" + TCP_IP + ":" + str(TCP_PORT) + "), exiting: " + str(msg))
 			time.sleep(1)
-			# The following provides a clean exit from the program by simply 
-			# hitting any key.  However if get_char_keyboard_nonblock isn't
-			# defined, just delete the next 4 lines and use Ctrl-C to exit instead.
-			ch = get_char_keyboard_nonblock()
-			if ch != "":
-				print("Exiting ...")
-				sys.exit()
 
 connectToAGC()
 
