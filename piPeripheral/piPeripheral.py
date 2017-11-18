@@ -118,16 +118,26 @@ def parseDskyKey(ch):
 		proceedPressed = False
 	return returnValue	
 
-# This function is a non-blocking read of a single character from the
-# keyboard.  Returns either the key value (such as '0' or 'V'), or else
-# the value None if no key was pressed.
+# This function turns keyboard echo on or off.
 import sys
 import termios
-# Turn off keyboard echo.
-fd = sys.stdin.fileno()
-new = termios.tcgetattr(fd)
-new[3] &= ~termios.ECHO
-termios.tcsetattr(fd, termios.TCSANOW, new)
+import atexit
+def echoOn(control):
+	fd = sys.stdin.fileno()
+	new = termios.tcgetattr(fd)
+	if control:
+		print("Keyboard echo on")
+		new[3] |= termios.ECHO
+	else:
+		print("Keyboard echo off")
+		new[3] &= ~termios.ECHO
+	termios.tcsetattr(fd, termios.TCSANOW, new)
+echoOn(False)
+atexit.register(echoOn, True)
+
+# This function is a non-blocking read of a single character from the
+# keyboard.  Returns either the key value (such as '0' or 'V'), or else
+# the value "" if no key was pressed.
 def get_char_keyboard_nonblock():
 	import fcntl, os
 	fd = sys.stdin.fileno()
@@ -137,7 +147,7 @@ def get_char_keyboard_nonblock():
 	termios.tcsetattr(fd, termios.TCSANOW, newattr)
 	oldflags = fcntl.fcntl(fd, fcntl.F_GETFL)
 	fcntl.fcntl(fd, fcntl.F_SETFL, oldflags | os.O_NONBLOCK)
-	c = None
+	c = ""
 	try:
     		c = sys.stdin.read(1)
 	except IOError: pass
@@ -158,8 +168,12 @@ def get_char_keyboard_nonblock():
 # and may be en empty list.
 def inputsForAGC():
 	ch = get_char_keyboard_nonblock()
-	if ch == None:
+	ch = ch.upper()
+	if ch == "":
 		returnValue = []
+	elif ch == "X":
+		print("Exiting ...")
+		sys.exit()
 	else:
 		returnValue = parseDskyKey(ch)
 	if len(returnValue) > 0:
@@ -327,6 +341,13 @@ def connectToAGC():
 		except socket.error as msg:
 			print("Could not connect to yaAGC (" + TCP_IP + ":" + str(TCP_PORT) + "), exiting: " + str(msg))
 			time.sleep(1)
+			# The following provides a clean exit from the program by simply 
+			# hitting any key.  However if get_char_keyboard_nonblock isn't
+			# defined, just delete the next 4 lines and use Ctrl-C to exit instead.
+			ch = get_char_keyboard_nonblock()
+			if ch != "":
+				print("Exiting ...")
+				sys.exit()
 
 connectToAGC()
 
