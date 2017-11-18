@@ -1,5 +1,5 @@
 /*
- * Copyright 2005,2009,2016 Ronald S. Burkey <info@sandroid.org>
+ * Copyright 2005,2009,2016,2017 Ronald S. Burkey <info@sandroid.org>
  * This file is part of yaAGC.
  *
  * yaAGC is free software; you can redistribute it and/or modify
@@ -66,6 +66,7 @@
  * 		                operators and junk after the variable field.
  * 		2017-10-12 MAS	Cleaned up HTML and .lst formatting. Pulled
  * 		                --unpound-page over from yaYUL.
+ * 		2017-11-18 RSB	Some compiler warnings fixed.
  *
  * Note that we use yaYUL's symbol-table machinery for handling the
  * symbol table.
@@ -227,7 +228,7 @@ PrintSymbolsToFileL (FILE *fp)
 static void
 PrintComments (int i)
 {
-  int PrintJunk = 0, JunkSize = 0, j = 0;
+  int PrintJunk = 0, JunkSize = 0;
   if (Comment != NULL && Comment[0] != 0)
     {
       if (i <= 6 && sd[0] != 0)
@@ -614,7 +615,7 @@ PassLemap (FILE *fp, int Action)
           // in the file header.
           for (ss = s; *ss && isspace(*ss); ss++)
               ;
-          if (*ss == 0 || s[0] == '#' && s[1] == '#' && 1 != sscanf(s, "## Page%d", &i)) // is a ## line
+          if (*ss == 0 || (s[0] == '#' && s[1] == '#' && 1 != sscanf(s, "## Page%d", &i))) // is a ## line
             {
               // Intentionally empty.
             }
