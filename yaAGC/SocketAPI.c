@@ -1,5 +1,5 @@
 /*
-  Copyright 2003-2005,2009,2016 Ronald S. Burkey <info@sandroid.org>
+  Copyright 2003-2005,2009,2016,2017 Ronald S. Burkey <info@sandroid.org>
 
   This file is part of yaAGC.
 
@@ -71,6 +71,12 @@
 		07/13/17 MAS	Removed the out-of-detent condition for HANDRUPT,
 				since that is not correct, and HANDRUPTs are now
 				correctly handled in agc_engine proper.
+		11/18/17 RSB	The periodic check which is done to detect clients
+				that have gone offline has been changed from 1
+				byte to 4 bytes, so that the test packet is the
+				same size as data packets.  Otherwise, it makes
+				low-level debugging of the streaming data hard,
+				because the packet alignment changes over time.
 */
 
 #include <errno.h>
@@ -436,11 +442,11 @@ ChannelRoutineGeneric (void *State, void (*UpdatePeripherals) (void *, Client_t 
   TimeoutCount++;
   if (0 == (017 & TimeoutCount))
     {
-      unsigned char c = 0377;
+      unsigned char dummyPacket[4] = { 0xff, 0xff, 0xff, 0xff };
       for (i = 0, Client = Clients; i < MAX_CLIENTS; i++, Client++)
 	if (Clients[i].Socket != -1)
 	  {
-	    j = send (Client->Socket, (const char *) &c, 1, MSG_NOSIGNAL);
+	    j = send (Client->Socket, (const char *) dummyPacket, 4, MSG_NOSIGNAL);
 	    if (j == SOCKET_ERROR && SOCKET_BROKEN)
 	      {
 	        if (!DebugMode)
