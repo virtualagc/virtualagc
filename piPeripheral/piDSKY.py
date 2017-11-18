@@ -162,6 +162,10 @@ def get_char_keyboard_nonblock():
 def inputsForAGC():
 	ch = get_char_keyboard_nonblock()
 	ch = ch.upper()
+	if ch == '_':
+		ch = '-'
+	elif ch == '=':
+		ch = '+'
 	if ch == "":
 		returnValue = []
 	elif ch == "X":
