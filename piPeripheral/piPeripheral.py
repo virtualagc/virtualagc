@@ -415,15 +415,24 @@ while True:
 				ok = 0
 			# Packet has the various signatures we expect.
 			if ok == 0:
-				#print("Illegal packet: " + hex(inputBuffer[0]) + " " + hex(inputBuffer[1]) + " " + hex(inputBuffer[2]) + " " + hex(inputBuffer[3]))
-				for i in range(1,packetSize):
-					if (inputBuffer[i] & 0xF0) == 0:
-						j = 0
-						for k in range(i,4):
-							inputBuffer[j] = inputBuffer[k]
-							j += 1
-						view = view[j:]
-						leftToRead = packetSize - j
+				# Note that, depending on the yaAGC version, it occasionally
+				# sends either a 1-byte packet (just 0xFF, older versions)
+				# or a 4-byte packet (0xFF 0xFF 0xFF 0xFF, newer versions)
+				# just for pinging the client.  These packets hold no
+				# data and need to be ignored, but for other corrupted packets
+				# we print a message. And try to realign past the corrupted
+				# bytes.
+				if inputBuffer[0] != 0xff or inputBuffer[1] != 0xff or inputBuffer[2] != 0xff or inputBuffer[2] != 0xff:
+					if inputBuffer[0] != 0xff:
+						print("Illegal packet: " + hex(inputBuffer[0]) + " " + hex(inputBuffer[1]) + " " + hex(inputBuffer[2]) + " " + hex(inputBuffer[3]))
+					for i in range(1,packetSize):
+						if (inputBuffer[i] & 0xF0) == 0:
+							j = 0
+							for k in range(i,4):
+								inputBuffer[j] = inputBuffer[k]
+								j += 1
+							view = view[j:]
+							leftToRead = packetSize - j
 			else:
 				channel = (inputBuffer[0] & 0x0F) << 3
 				channel |= (inputBuffer[1] & 0x38) >> 3
