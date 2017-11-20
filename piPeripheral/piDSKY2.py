@@ -302,6 +302,7 @@ def inputsForAGC():
 		returnValue = []
 	elif ch == "X":
 		print("Exiting ...")
+		root.quit()
 		sys.exit()
 	else:
 		returnValue = parseDskyKey(ch)
