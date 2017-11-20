@@ -172,6 +172,22 @@ displayGraphic(colD5, topR3, imageDigitBlank)
 # not of value outside of that, unless you happen to be implementing DSKY functionality
 # in a similar way.
 
+# Given a 3-tuple (channel,value,mask), creates packet data and sends it to yaAGC.
+def packetize(tuple):
+	outputBuffer = bytearray(4)
+	# First, create and output the mask command.
+	outputBuffer[0] = 0x20 | ((tuple[0] >> 3) & 0x0F)
+	outputBuffer[1] = 0x40 | ((tuple[0] << 3) & 0x38) | ((tuple[2] >> 12) & 0x07)
+	outputBuffer[2] = 0x80 | ((tuple[2] >> 6) & 0x3F)
+	outputBuffer[3] = 0xC0 | (tuple[2] & 0x3F)
+	s.send(outputBuffer)
+	# Now, the actual data for the channel.
+	outputBuffer[0] = 0x00 | ((tuple[0] >> 3) & 0x0F)
+	outputBuffer[1] = 0x40 | ((tuple[0] << 3) & 0x38) | ((tuple[1] >> 12) & 0x07)
+	outputBuffer[2] = 0x80 | ((tuple[1] >> 6) & 0x3F)
+	outputBuffer[3] = 0xC0 | (tuple[1] & 0x3F)
+	s.send(outputBuffer)
+
 # This particular function parses various keystrokes, like '0' or 'V' and creates
 # packets as if they were DSKY keypresses.  It should be called occasionally as
 # parseDskyKey(0) if there are no keystrokes, in order to make sure that the PRO
@@ -186,7 +202,12 @@ displayGraphic(colD5, topR3, imageDigitBlank)
 # would indicate that the lowest 5 bits of channel 15 (octal) were valid, and that
 # the value of those bits were 11001 (binary), which collectively indicate that
 # the KEY REL key on a DSKY is pressed.
-proceedPressed = False
+proceedPressed = ""
+def releasePRO():
+	# Note that the PRO key is supposed to indicate both presses and
+	# releases to yaAGC.  We can't do that from this keyboard interface,
+	# but we can return a PRO-key release shortly after a press.	
+	packetize( (0o32, 0o20000, 0o20000) )
 def parseDskyKey(ch):
 	global proceedPressed
 	returnValue = []
@@ -217,24 +238,19 @@ def parseDskyKey(ch):
 	elif ch == 'V':
     		returnValue.append( (0o15, 0o21, 0o37) )
 	elif ch == 'N':
-    		returnValue.append( (0o15, 0o31, 0o37) )
+    		returnValue.append( (0o15, 0o37, 0o37) )
 	elif ch == 'R':
     		returnValue.append( (0o15, 0o22, 0o37) )
 	elif ch == 'C':
     		returnValue.append( (0o15, 0o36, 0o37) )
 	elif ch == 'P':
     		returnValue.append( (0o32, 0o00000, 0o20000) )
-    		proceedPressed = True
+    		proceedPressed = threading.Timer(0.25, releasePRO)
+    		proceedPressed.start()
 	elif ch == 'K':
     		returnValue.append( (0o15, 0o31, 0o37) )
 	elif ch == '\n':
 		returnValue.append( (0o15, 0o34, 0o37) )
-	elif proceedPressed and len(returnValue) == 0:
-		# Note that the PRO key is supposed to indicate both presses and
-		# releases to yaAGC.  We can't do that from this keyboard interface,
-		# but we can return a PRO-key release shortly after a press.	
-		returnValue.append( (0o32, 0o20000, 0o20000) )
-		proceedPressed = False
 	return returnValue	
 
 # This function turns keyboard echo on or off.
@@ -298,9 +314,7 @@ def inputsForAGC():
 		ch = '-'
 	elif ch == '=':
 		ch = '+'
-	if ch == "":
-		returnValue = []
-	elif ch == "X":
+	if ch == "X":
 		print("Exiting ...")
 		root.quit()
 		sys.exit()
@@ -311,10 +325,16 @@ def inputsForAGC():
 	return returnValue
 
 # Capture any keypress events from the LCD window.
+debugKey = ""
 def guiKeypress(event):
-	global guiKey
-	if str(event.keysym) == "Return":
+	global guiKey, debugKey
+	debugKey = event.keysym
+	if event.keysym == "Return":
 		guiKey = "\n"
+	elif event.keysym == "equal" or event.keysym == "plus":
+		guiKey = "+"
+	elif event.keysym == "minus" or event.keysym == "underscore":
+		guiKey = "-"
 	else:
 		guiKey = event.keysym
 root.bind_all('<Key>', guiKeypress)
@@ -397,9 +417,9 @@ atexit.register(vnFlashingStop)
 last10 = 1234567
 last11 = 1234567
 last13 = 1234567
-plusMinusState1 = 3
-plusMinusState2 = 3
-plusMinusState3 = 3
+plusMinusState1 = 0
+plusMinusState2 = 0
+plusMinusState3 = 0
 def outputFromAGC(channel, value):
 	# These lastNN values are just used to cut down on the number of messages printed,
 	# when the same value is output over and over again to the same channel, because
@@ -608,23 +628,8 @@ connectToAGC()
 # But this section has no target-specific code, and shouldn't need to be modified
 # unless there are bugs.
 
-# Given a 3-tuple (channel,value,mask), creates packet data and sends it to yaAGC.
-def packetize(tuple):
-	outputBuffer = bytearray(4)
-	# First, create and output the mask command.
-	outputBuffer[0] = 0x20 | ((tuple[0] >> 3) & 0x0F)
-	outputBuffer[1] = 0x40 | ((tuple[0] << 3) & 0x38) | ((tuple[2] >> 12) & 0x07)
-	outputBuffer[2] = 0x80 | ((tuple[2] >> 6) & 0x3F)
-	outputBuffer[3] = 0xC0 | (tuple[2] & 0x3F)
-	s.send(outputBuffer)
-	# Now, the actual data for the channel.
-	outputBuffer[0] = 0x00 | ((tuple[0] >> 3) & 0x0F)
-	outputBuffer[1] = 0x40 | ((tuple[0] << 3) & 0x38) | ((tuple[1] >> 12) & 0x07)
-	outputBuffer[2] = 0x80 | ((tuple[1] >> 6) & 0x3F)
-	outputBuffer[3] = 0xC0 | (tuple[1] & 0x3F)
-	s.send(outputBuffer)
-
 def eventLoop():
+	global debugKey
 	# Buffer for a packet received from yaAGC.
 	packetSize = 4
 	inputBuffer = bytearray(packetSize)
@@ -701,6 +706,9 @@ def eventLoop():
 		for i in range(0, len(externalData)):
 			packetize(externalData[i])
 			didSomething = True
+		if debugKey != "":
+			print("GUI key = " + debugKey)
+			debugKey = ""
 
 eventLoopThread = threading.Thread(target=eventLoop)
 eventLoopThread.start()
