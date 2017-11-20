@@ -87,5 +87,5 @@ echo "Running $CORE $CFG"
 # Run it!
 rm LM.core CM.core
 ./yaAGC --core=$CORE.bin --port=19697 --cfg=$CFG.ini &
-./piDSKY2.py --port=19697 --window=1
+./piDSKY2.py --port=19697
 killall yaAGC
