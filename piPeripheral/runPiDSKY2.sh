@@ -4,6 +4,10 @@
 # and that we are in the piPeripheral subdirectory of that clone.
 # Assumes the Pi executable for yaAGC is in the PATH.
 
+# Usage:
+#	cd piPeripheral
+#	./runPiDSKY2.sh [--window=1]
+
 SOURCEDIR="`pwd`/.."
 
 killall yaAGC
@@ -87,5 +91,5 @@ echo "Running $CORE $CFG"
 # Run it!
 rm LM.core CM.core
 ./yaAGC --core=$CORE.bin --port=19697 --cfg=$CFG.ini &
-./piDSKY2.py --port=19697
+./piDSKY2.py --port=19697 $1
 killall yaAGC
