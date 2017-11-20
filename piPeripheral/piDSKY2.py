@@ -24,6 +24,12 @@
 #		is not really applicable for any other purpose.
 # Reference:	http://www.ibiblio.org/apollo/developer.html
 # Mod history:	2017-11-19 RSB	Began adapting from piDSKY.py.
+#		2017-11-20 RSB	Added command-line arguments of various
+#				kinds and fixed the keyboard binding
+#				in the tkinter window.  Systematized
+#				the widget positioning to just a few
+#				variables rather than hardcoding them
+#				lots of places.
 #
 # In this hardware model:
 #
@@ -61,16 +67,34 @@
 # piDSKY.py does, piDSKY2.py instead either turns indicator lights on/off
 # or else displays graphics on the LCD screen in response to these messages. 
 
+# Parse command-line arguments.
+import argparse
+cli = argparse.ArgumentParser()
+cli.add_argument("--host", help="Host address of yaAGC, defaulting to localhost.")
+cli.add_argument("--port", help="Port for yaAGC, defaulting to 19798.", type=int)
+cli.add_argument("--window", help="Use window rather than full screen for LCD.")
+args = cli.parse_args()
+
 # Hardcoded characteristics of the host and port being used.  
-TCP_IP = 'localhost'
-TCP_PORT = 19798
+if args.host:
+	TCP_IP = args.host
+else:
+	TCP_IP = 'localhost'
+if args.port:
+	TCP_PORT = args.port
+else:
+	TCP_PORT = 19798
 
 import threading
 from tkinter import Tk, Label, PhotoImage
 
 # Set up root viewport for tkinter graphics
 root = Tk()
-root.attributes('-fullscreen', True)
+if args.window:
+	root.geometry('272x480')
+	root.title("piDSKY2")
+else:
+	root.attributes('-fullscreen', True)
 root.configure(background='black')
 # Preload images to make it go faster later.
 imageDigitBlank = PhotoImage(file="piDSKY2-images/7Seg-0.gif")
@@ -97,37 +121,51 @@ imageSeparatorOn = PhotoImage(file="piDSKY2-images/SeparatorOn.gif")
 def displayGraphic(x, y, img):
 	dummy = Label(root, image=img)
 	dummy.place(x=x, y=y)
+topProg = 36
+topVN = 149
+topR1 = 238
+topR2 = 328
+topR3 = 418
+signWidth = 22
+digitWidth = 50
+colSign = 0
+colPN = 172
+colD1 = colSign + signWidth
+colD2 = colD1 + digitWidth
+colD3 = colD2 + digitWidth
+colD4 = colD3 + digitWidth
+colD5 = colD4 + digitWidth
 displayGraphic(0, 0, imageCompActyOff)
-displayGraphic(180, 0, imageProgOn)
-displayGraphic(188, 36, imageDigitBlank)
-displayGraphic(238, 36, imageDigitBlank)
-displayGraphic(0, 115, imageVerbOn)
-displayGraphic(180, 115, imageNounOn)
-displayGraphic(8, 151, imageDigitBlank)
-displayGraphic(58, 151, imageDigitBlank)
-displayGraphic(188, 151, imageDigitBlank)
-displayGraphic(238, 151, imageDigitBlank)
-displayGraphic(8, 222, imageSeparatorOn)
-displayGraphic(8, 240, imagePlusMinusOff)
-displayGraphic(30, 240, imageDigitBlank)
-displayGraphic(80, 240, imageDigitBlank)
-displayGraphic(130, 240, imageDigitBlank)
-displayGraphic(180, 240, imageDigitBlank)
-displayGraphic(230, 240, imageDigitBlank)
-displayGraphic(8, 312, imageSeparatorOn)
-displayGraphic(8, 330, imagePlusMinusOff)
-displayGraphic(30, 330, imageDigitBlank)
-displayGraphic(80, 330, imageDigitBlank)
-displayGraphic(130, 330, imageDigitBlank)
-displayGraphic(180, 330, imageDigitBlank)
-displayGraphic(230, 330, imageDigitBlank)
-displayGraphic(8, 402, imageSeparatorOn)
-displayGraphic(8, 420, imagePlusMinusOff)
-displayGraphic(30, 420, imageDigitBlank)
-displayGraphic(80, 420, imageDigitBlank)
-displayGraphic(130, 420, imageDigitBlank)
-displayGraphic(180, 420, imageDigitBlank)
-displayGraphic(230, 420, imageDigitBlank)
+displayGraphic(colPN, 0, imageProgOn)
+displayGraphic(colPN, topProg, imageDigitBlank)
+displayGraphic(colPN + digitWidth, topProg, imageDigitBlank)
+displayGraphic(0, 113, imageVerbOn)
+displayGraphic(colPN, 113, imageNounOn)
+displayGraphic(0, topVN, imageDigitBlank)
+displayGraphic(digitWidth, topVN, imageDigitBlank)
+displayGraphic(colPN, topVN, imageDigitBlank)
+displayGraphic(colPN + digitWidth, topVN, imageDigitBlank)
+displayGraphic(0, 220, imageSeparatorOn)
+displayGraphic(colSign, topR1, imagePlusMinusOff)
+displayGraphic(colD1, topR1, imageDigitBlank)
+displayGraphic(colD2, topR1, imageDigitBlank)
+displayGraphic(colD3, topR1, imageDigitBlank)
+displayGraphic(colD4, topR1, imageDigitBlank)
+displayGraphic(colD5, topR1, imageDigitBlank)
+displayGraphic(0, 310, imageSeparatorOn)
+displayGraphic(colSign, topR2, imagePlusMinusOff)
+displayGraphic(colD1, topR2, imageDigitBlank)
+displayGraphic(colD2, topR2, imageDigitBlank)
+displayGraphic(colD3, topR2, imageDigitBlank)
+displayGraphic(colD4, topR2, imageDigitBlank)
+displayGraphic(colD5, topR2, imageDigitBlank)
+displayGraphic(0, 400, imageSeparatorOn)
+displayGraphic(colSign, topR3, imagePlusMinusOff)
+displayGraphic(colD1, topR3, imageDigitBlank)
+displayGraphic(colD2, topR3, imageDigitBlank)
+displayGraphic(colD3, topR3, imageDigitBlank)
+displayGraphic(colD4, topR3, imageDigitBlank)
+displayGraphic(colD5, topR3, imageDigitBlank)
 
 ###################################################################################
 # Some utilities I happen to use in my sample hardware abstraction functions, but
@@ -247,8 +285,14 @@ def get_char_keyboard_nonblock():
 # value is supposed to be a list of 3-tuples of the form
 #	[ (channel0,value0,mask0), (channel1,value1,mask1), ...]
 # and may be en empty list.
+guiKey = ""
 def inputsForAGC():
-	ch = get_char_keyboard_nonblock()
+	global guiKey
+	if guiKey == "":
+		ch = get_char_keyboard_nonblock()
+	else:
+		ch = guiKey
+		guiKey = ""
 	ch = ch.upper()
 	if ch == '_':
 		ch = '-'
@@ -264,6 +308,15 @@ def inputsForAGC():
 	if len(returnValue) > 0:
         	print("Sending to yaAGC: " + oct(returnValue[0][1]) + "(mask " + oct(returnValue[0][2]) + ") -> channel " + oct(returnValue[0][0]))
 	return returnValue
+
+# Capture any keypress events from the LCD window.
+def guiKeypress(event):
+	global guiKey
+	if str(event.keysym) == "Return":
+		guiKey = "\n"
+	else:
+		guiKey = event.keysym
+root.bind_all('<Key>', guiKeypress)
 
 # Converts a 5-bit code in channel 010 to " ", "0", ..., "9".
 def codeToString(code):
@@ -312,15 +365,15 @@ def vnFlashingHandler():
 	if vnFlashing:
 		vnCurrentlyOn = not vnCurrentlyOn
 		if vnCurrentlyOn:
-			displayGraphic(8, 151, vnImage1)
-			displayGraphic(58, 151, vnImage2)
-			displayGraphic(188, 151, vnImage3)
-			displayGraphic(238, 151, vnImage4)
+			displayGraphic(0, topVN, vnImage1)
+			displayGraphic(digitWidth, topVN, vnImage2)
+			displayGraphic(colPN, topVN, vnImage3)
+			displayGraphic(colPN + digitWidth, topVN, vnImage4)
 		else:
-			displayGraphic(8, 151, imageDigitBlank)
-			displayGraphic(58, 151, imageDigitBlank)
-			displayGraphic(188, 151, imageDigitBlank)
-			displayGraphic(238, 151, imageDigitBlank)
+			displayGraphic(0, topVN, imageDigitBlank)
+			displayGraphic(digitWidth, topVN, imageDigitBlank)
+			displayGraphic(colPN, topVN, imageDigitBlank)
+			displayGraphic(colPN + digitWidth, topVN, imageDigitBlank)
 		vnTimer = threading.Timer(0.75, vnFlashingHandler)
 		vnTimer.start()
 
@@ -328,10 +381,10 @@ def vnFlashingStop():
 	global vnFlashing, vnTimer, vnCurrentlyOn, vnImage1, vnImage2, vnImage3, vnImage4
 	if vnFlashing:
 		vnTimer.cancel()
-		displayGraphic(8, 151, vnImage1)
-		displayGraphic(58, 151, vnImage2)
-		displayGraphic(188, 151, vnImage3)
-		displayGraphic(238, 151, vnImage4)
+		displayGraphic(0, topVN, vnImage1)
+		displayGraphic(digitWidth, topVN, vnImage2)
+		displayGraphic(colPN, topVN, vnImage3)
+		displayGraphic(colPN + digitWidth, topVN, vnImage4)
 		vnFlashing = False
 atexit.register(vnFlashingStop)
 
@@ -366,23 +419,23 @@ def outputFromAGC(channel, value):
 				sd,id = codeToString(ddddd)
 			if aaaa == 11:
 				print(sc + " -> M1   " + sd + " -> M2")
-				displayGraphic(188, 36, ic)
-				displayGraphic(238, 36, id)
+				displayGraphic(colPN, topProg, ic)
+				displayGraphic(colPN + digitWidth, topProg, id)
 			elif aaaa == 10:
 				print(sc + " -> V1   " + sd + " -> V2")
 				vnImage1 = ic
 				vnImage2 = id
-				displayGraphic(8, 151, ic)
-				displayGraphic(58, 151, id)
+				displayGraphic(0, topVN, ic)
+				displayGraphic(digitWidth, topVN, id)
 			elif aaaa == 9:
 				print(sc + " -> N1   " + sd + " -> N2")
 				vnImage3 = ic
 				vnImage4 = id
-				displayGraphic(188, 151, ic)
-				displayGraphic(238, 151, id)
+				displayGraphic(colPN, topVN, ic)
+				displayGraphic(colPN + digitWidth, topVN, id)
 			elif aaaa == 8:
 				print("          " + sd + " -> 11")
-				displayGraphic(30, 240, id)
+				displayGraphic(colD1, topR1, id)
 			elif aaaa == 7:
 				plusMinus = "  "
 				if b != 0:
@@ -390,10 +443,10 @@ def outputFromAGC(channel, value):
 					plusMinusState1 |= 1
 				else:
 					plusMinusState1 &= ~1
-				displaySign(8, 240, plusMinusState1)
+				displaySign(colSign, topR1, plusMinusState1)
 				print(sc + " -> 12   " + sd + " -> 13   " + plusMinus)
-				displayGraphic(80, 240, ic)
-				displayGraphic(130, 240, id)
+				displayGraphic(colD2, topR1, ic)
+				displayGraphic(colD3, topR1, id)
 			elif aaaa == 6:
 				plusMinus = "  "
 				if b != 0:
@@ -401,10 +454,10 @@ def outputFromAGC(channel, value):
 					plusMinusState1 |= 2
 				else:
 					plusMinusState1 &= ~2
-				displaySign(8, 240, plusMinusState1)
+				displaySign(colSign, topR1, plusMinusState1)
 				print(sc + " -> 14   " + sd + " -> 15   " + plusMinus)
-				displayGraphic(180, 240, ic)
-				displayGraphic(230, 240, id)
+				displayGraphic(colD4, topR1, ic)
+				displayGraphic(colD5, topR1, id)
 			elif aaaa == 5:
 				plusMinus = "  "
 				if b != 0:
@@ -412,10 +465,10 @@ def outputFromAGC(channel, value):
 					plusMinusState2 |= 1
 				else:
 					plusMinusState2 &= ~1
-				displaySign(8, 330, plusMinusState2)
+				displaySign(colSign, topR2, plusMinusState2)
 				print(sc + " -> 21   " + sd + " -> 22   " + plusMinus)
-				displayGraphic(30, 330, ic)
-				displayGraphic(80, 330, id)
+				displayGraphic(colD1, topR2, ic)
+				displayGraphic(colD2, topR2, id)
 			elif aaaa == 4:
 				plusMinus = "  "
 				if b != 0:
@@ -423,14 +476,14 @@ def outputFromAGC(channel, value):
 					plusMinusState2 |= 2
 				else:
 					plusMinusState2 &= ~2
-				displaySign(8, 330, plusMinusState2)
+				displaySign(colSign, topR2, plusMinusState2)
 				print(sc + " -> 23   " + sd + " -> 24   " + plusMinus)
-				displayGraphic(130, 330, ic)
-				displayGraphic(180, 330, id)
+				displayGraphic(colD3, topR2, ic)
+				displayGraphic(colD4, topR2, id)
 			elif aaaa == 3:
 				print(sc + " -> 25   " + sd + " -> 31")
-				displayGraphic(230, 330, ic)
-				displayGraphic(30, 420, id)
+				displayGraphic(colD5, topR2, ic)
+				displayGraphic(colD1, topR3, id)
 			elif aaaa == 2:
 				plusMinus = "  "
 				if b != 0:
@@ -438,10 +491,10 @@ def outputFromAGC(channel, value):
 					plusMinusState3 |= 1
 				else:
 					plusMinusState3 &= ~1
-				displaySign(8, 420, plusMinusState3)
+				displaySign(colSign, topR3, plusMinusState3)
 				print(sc + " -> 32   " + sd + " -> 33   " + plusMinus)
-				displayGraphic(80, 420, ic)
-				displayGraphic(130, 420, id)
+				displayGraphic(colD2, topR3, ic)
+				displayGraphic(colD3, topR3, id)
 			elif aaaa == 1:
 				plusMinus = "  "
 				if b != 0:
@@ -449,10 +502,10 @@ def outputFromAGC(channel, value):
 					plusMinusState3 |= 2
 				else:
 					plusMinusState3 &= ~2
-				displaySign(8, 420, plusMinusState3)
+				displaySign(colSign, topR3, plusMinusState3)
 				print(sc + " -> 34   " + sd + " -> 35   " + plusMinus)
-				displayGraphic(180, 420, ic)
-				displayGraphic(230, 420, id)
+				displayGraphic(colD4, topR3, ic)
+				displayGraphic(colD5, topR3, id)
 			elif aaaa == 12:
 				vel = "VEL OFF         "
 				if (value & 0x04) != 0:
@@ -478,6 +531,9 @@ def outputFromAGC(channel, value):
 			compActy = "COMP ACTY OFF   "
 			if (value & 0x02) != 0:
 				compActy = "COMP ACTY ON    "
+				displayGraphic(0, 0, imageCompActyOn)
+			else:
+				displayGraphic(0, 0, imageCompActyOff)
 			uplinkActy = "UPLINK ACTY OFF "
 			if (value & 0x04) != 0:
 				uplinkActy = "UPLINK ACTY ON  "
