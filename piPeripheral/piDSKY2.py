@@ -30,6 +30,7 @@
 #				the widget positioning to just a few
 #				variables rather than hardcoding them
 #				lots of places.
+#		2017-11-21 RSB	Changed PRO timeout from 0.25 to 0.5.
 #
 # In this hardware model:
 #
@@ -119,7 +120,7 @@ imageNounOn = PhotoImage(file="piDSKY2-images/NounOn.gif")
 imageSeparatorOn = PhotoImage(file="piDSKY2-images/SeparatorOn.gif")
 # Initial placement of all graphical objects on LCD panel.
 def displayGraphic(x, y, img):
-	dummy = Label(root, image=img)
+	dummy = Label(root, image=img, borderwidth=0, highlightthickness=0)
 	dummy.place(x=x, y=y)
 topProg = 36
 topVN = 149
@@ -145,21 +146,21 @@ displayGraphic(0, topVN, imageDigitBlank)
 displayGraphic(digitWidth, topVN, imageDigitBlank)
 displayGraphic(colPN, topVN, imageDigitBlank)
 displayGraphic(colPN + digitWidth, topVN, imageDigitBlank)
-displayGraphic(0, 220, imageSeparatorOn)
+displayGraphic(0, 212, imageSeparatorOn)
 displayGraphic(colSign, topR1, imagePlusMinusOff)
 displayGraphic(colD1, topR1, imageDigitBlank)
 displayGraphic(colD2, topR1, imageDigitBlank)
 displayGraphic(colD3, topR1, imageDigitBlank)
 displayGraphic(colD4, topR1, imageDigitBlank)
 displayGraphic(colD5, topR1, imageDigitBlank)
-displayGraphic(0, 310, imageSeparatorOn)
+displayGraphic(0, 302, imageSeparatorOn)
 displayGraphic(colSign, topR2, imagePlusMinusOff)
 displayGraphic(colD1, topR2, imageDigitBlank)
 displayGraphic(colD2, topR2, imageDigitBlank)
 displayGraphic(colD3, topR2, imageDigitBlank)
 displayGraphic(colD4, topR2, imageDigitBlank)
 displayGraphic(colD5, topR2, imageDigitBlank)
-displayGraphic(0, 400, imageSeparatorOn)
+displayGraphic(0, 392, imageSeparatorOn)
 displayGraphic(colSign, topR3, imagePlusMinusOff)
 displayGraphic(colD1, topR3, imageDigitBlank)
 displayGraphic(colD2, topR3, imageDigitBlank)
@@ -245,7 +246,7 @@ def parseDskyKey(ch):
     		returnValue.append( (0o15, 0o36, 0o37) )
 	elif ch == 'P':
     		returnValue.append( (0o32, 0o00000, 0o20000) )
-    		proceedPressed = threading.Timer(0.25, releasePRO)
+    		proceedPressed = threading.Timer(0.5, releasePRO)
     		proceedPressed.start()
 	elif ch == 'K':
     		returnValue.append( (0o15, 0o31, 0o37) )
