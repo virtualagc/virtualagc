@@ -5,6 +5,8 @@
 #		piPeripheral.py to create a simple simulated DSKY.
 # Reference:	http://www.ibiblio.org/apollo/developer.html
 # Mod history:	2017-11-17 RSB	Began.
+#               2017-11-21 RSB	Updated with some fixes to the PRO and NOUN
+#				keys that had been identified for piDSKY2.py.
 #
 # Note that certain functionality (I think the code for get_char_keyboard_nonblock)
 # might not work under Windows, but everything should
@@ -60,7 +62,12 @@ TCP_PORT = 19798
 # would indicate that the lowest 5 bits of channel 15 (octal) were valid, and that
 # the value of those bits were 11001 (binary), which collectively indicate that
 # the KEY REL key on a DSKY is pressed.
-proceedPressed = False
+proceedPressed = ""
+def releasePRO():
+	# Note that the PRO key is supposed to indicate both presses and
+	# releases to yaAGC.  We can't do that from this keyboard interface,
+	# but we can return a PRO-key release shortly after a press.	
+	packetize( (0o32, 0o20000, 0o20000) )
 def parseDskyKey(ch):
 	global proceedPressed
 	returnValue = []
@@ -91,24 +98,19 @@ def parseDskyKey(ch):
 	elif ch == 'V':
     		returnValue.append( (0o15, 0o21, 0o37) )
 	elif ch == 'N':
-    		returnValue.append( (0o15, 0o31, 0o37) )
+    		returnValue.append( (0o15, 0o37, 0o37) )
 	elif ch == 'R':
     		returnValue.append( (0o15, 0o22, 0o37) )
 	elif ch == 'C':
     		returnValue.append( (0o15, 0o36, 0o37) )
 	elif ch == 'P':
     		returnValue.append( (0o32, 0o00000, 0o20000) )
-    		proceedPressed = True
+    		proceedPressed = threading.Timer(0.5, releasePRO)
+    		proceedPressed.start()
 	elif ch == 'K':
     		returnValue.append( (0o15, 0o31, 0o37) )
 	elif ch == '\n':
 		returnValue.append( (0o15, 0o34, 0o37) )
-	elif proceedPressed and len(returnValue) == 0:
-		# Note that the PRO key is supposed to indicate both presses and
-		# releases to yaAGC.  We can't do that from this keyboard interface,
-		# but we can return a PRO-key release shortly after a press.	
-		returnValue.append( (0o32, 0o20000, 0o20000) )
-		proceedPressed = False
 	return returnValue	
 
 # This function turns keyboard echo on or off.
