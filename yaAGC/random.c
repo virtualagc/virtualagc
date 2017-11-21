@@ -54,8 +54,8 @@ control over the state of the random number generator.
 
 // 08/24/04 Ron Burkey: Changed function prototypes to modern style to avoid choking by SDCC compiler.
 // Added a default value for EINVAL for similar reasons.
-// 11/20/17 Ron Burkey: Got rid of a compiler warning by explicitly adding the L suffix to some
-// constants.
+// 11/20/17 Ron Burkey: Got rid of a compiler warning by explicitly casting some
+// constants as signed.
 
 #include <errno.h>
 #ifndef EINVAL
@@ -183,14 +183,14 @@ static int seps[MAX_TYPES] = { SEP_0, SEP_1, SEP_2, SEP_3, SEP_4 };
 
 static long int randtbl[DEG_3 + 1] =
   { TYPE_3,
-      0x9a319039L, 0x32d9c024L, 0x9b663182L, 0x5da1f342L,
-      0xde3b81e0L, 0xdf0a6fb5L, 0xf103bc02L, 0x48f340fbL,
-      0x7449e56bL, 0xbeb1dbb0L, 0xab5c5918L, 0x946554fdL,
-      0x8c2e680fL, 0xeb3d799fL, 0xb11ee0b7L, 0x2d436b86L,
-      0xda672e2aL, 0x1588ca88L, 0xe369735dL, 0x904f35f7L,
-      0xd7158fd6L, 0x6fa6f051L, 0x616e6b96L, 0xac94efdcL,
-      0x36413f93L, 0xc622c298L, 0xf5a42ab8L, 0x8a88d77bL,
-      0xf5ad9d0eL, 0x8999220bL, 0x27fb47b9L
+      (long) 0x9a319039, (long) 0x32d9c024, (long) 0x9b663182, (long) 0x5da1f342,
+      (long) 0xde3b81e0, (long) 0xdf0a6fb5, (long) 0xf103bc02, (long) 0x48f340fb,
+      (long) 0x7449e56b, (long) 0xbeb1dbb0, (long) 0xab5c5918, (long) 0x946554fd,
+      (long) 0x8c2e680f, (long) 0xeb3d799f, (long) 0xb11ee0b7, (long) 0x2d436b86,
+      (long) 0xda672e2a, (long) 0x1588ca88, (long) 0xe369735d, (long) 0x904f35f7,
+      (long) 0xd7158fd6, (long) 0x6fa6f051, (long) 0x616e6b96, (long) 0xac94efdc,
+      (long) 0x36413f93, (long) 0xc622c298, (long) 0xf5a42ab8, (long) 0x8a88d77b,
+      (long) 0xf5ad9d0e, (long) 0x8999220b, (long) 0x27fb47b9
     };
 
 /* FPTR and RPTR are two pointers into the state info, a front and a rear
