@@ -10,9 +10,9 @@
 
 SOURCEDIR="`pwd`/.."
 
-killall yaAGC
-killall yaDSKY2
-killall piDSKY2.py
+killall yaAGC &>/dev/null
+killall yaDSKY2 &>/dev/null
+killall piDSKY2.py &>/dev/null
 
 # First, prepare to use the RAM disk.
 RAMDISK=/run/user/1000
@@ -22,14 +22,14 @@ then
 	exit 1
 fi
 RAMDISK=$RAMDISK/piDSKY2
-rm $RAMDISK -rf
-mkdir $RAMDISK
-cp -a piDSKY2* $RAMDISK
+rm $RAMDISK -rf &>/dev/null
+mkdir $RAMDISK &>/dev/null
+cp -a piDSKY2* $RAMDISK &>/dev/null
 cd $RAMDISK
-find "$SOURCEDIR" -name "*.bin" -exec cp {} . \;
-find "$SOURCEDIR" -name "*.ini" -exec cp {} . \;
-cp -a "$SOURCEDIR/yaAGC/yaAGC" .
-cp -a "$SOURCEDIR/yaDSKY2/yaDSKY2" .
+find "$SOURCEDIR" -name "*.bin" -exec cp {} . \; &>/dev/null
+find "$SOURCEDIR" -name "*.ini" -exec cp {} . \; &>/dev/null
+cp -a "$SOURCEDIR/yaAGC/yaAGC" . &>/dev/null
+cp -a "$SOURCEDIR/yaDSKY2/yaDSKY2" . &>/dev/null
 
 while true
 do
