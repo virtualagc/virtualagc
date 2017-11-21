@@ -209,8 +209,18 @@ def releasePRO():
 	# releases to yaAGC.  We can't do that from this keyboard interface,
 	# but we can return a PRO-key release shortly after a press.	
 	packetize( (0o32, 0o20000, 0o20000) )
+resetCount = 0
 def parseDskyKey(ch):
+	global resetCount
 	global proceedPressed
+	if ch == 'R':
+		resetCount += 1
+		if resetCount >= 5:
+			print("Exiting ...")
+			root.quit()
+			sys.exit()
+	elif ch != "":
+		resetCount = 0
 	returnValue = []
 	if ch == '0':
 		returnValue.append( (0o15, 0o20, 0o37) )
