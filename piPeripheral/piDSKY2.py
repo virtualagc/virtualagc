@@ -95,7 +95,7 @@ from tkinter import Tk, Label, PhotoImage
 # Set up root viewport for tkinter graphics
 root = Tk()
 if args.window:
-	root.geometry('272x480')
+	root.geometry('272x480+0+0')
 	root.title("piDSKY2")
 else:
 	root.attributes('-fullscreen', True)
