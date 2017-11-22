@@ -99,6 +99,7 @@ if args.window:
 	root.title("piDSKY2")
 else:
 	root.attributes('-fullscreen', True)
+	root.config(cursor="none")
 root.configure(background='black')
 # Preload images to make it go faster later.
 imageDigitBlank = PhotoImage(file="piDSKY2-images/7Seg-0.gif")
