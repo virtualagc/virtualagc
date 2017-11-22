@@ -35,16 +35,16 @@ do
 	# Choose a mission.
 	clear
 	echo "Available missions:"
-	echo "   0 - Apollo 5 LM"
-	echo "   1 - Apollo 8 CM"
-	echo "   2 - Apollo 9 CM"
-	echo "   3 - Apollo 10 LM"
-	echo "   4 - Apollo 11 CM"
-	echo "   5 - Apollo 11 LM (default)"
-	echo "   6 - Apollo 12 LM"
-	echo "   7 - Apollo 13 LM"
-	echo "   8 - Apollo 15-17 CM"
-	echo "   9 - Apollo 15-17 LM"
+	echo "0 - Apollo 5 LM"
+	echo "1 - Apollo 8 CM"
+	echo "2 - Apollo 9 CM"
+	echo "3 - Apollo 10 LM"
+	echo "4 - Apollo 11 CM"
+	echo "5 - Apollo 11 LM (default)"
+	echo "6 - Apollo 12 LM"
+	echo "7 - Apollo 13 LM"
+	echo "8 - Apollo 15-17 CM"
+	echo "9 - Apollo 15-17 LM"
 	read -p "Choose a number: " -t 15 -n 1
 	if [[ "$REPLY" == "0" ]]
 	then
@@ -82,6 +82,21 @@ do
 	then
 		CORE=Luminary210
 		CFG=LM1
+	elif [[ "$REPLY" == "R" || "$REPLY" == "r" ]]
+	then
+		echo ""
+		read -s -p "Password: " -t 30
+		if [[ "$REPLY" == "19697R" || "$REPLY" == "19697r" ]]
+		then
+			echo ""
+			echo "Exiting ..."
+			exit
+		else
+			echo ""
+			echo "Permission denied."
+			sleep 2
+			continue
+		fi
 	else # $REPLY == 5
 		CORE=Luminary099
 		CFG=LM
