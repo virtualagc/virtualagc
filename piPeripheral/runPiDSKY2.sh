@@ -6,7 +6,7 @@
 
 # Usage:
 #	cd piPeripheral
-#	./runPiDSKY2.sh [--window=1 [--yaDSKY2]]
+#	./runPiDSKY2.sh [--window=1 [--yaDSKY2 [IMAGE_DIRECTORY]]
 
 cd ..
 SOURCEDIR="`pwd`"
@@ -27,7 +27,12 @@ RAMDISK=$RAMDISK/piDSKY2
 rm $RAMDISK -rf &>/dev/null
 mkdir $RAMDISK &>/dev/null
 cd $RAMDISK
-cp -a "$SOURCEDIR/piPeripheral/piDSKY2-images" $RAMDISK
+if [[ "$3" != "" ]]
+then
+	cp -a "$3" $RAMDISK/piDSKY2-images
+else
+	cp -a "$SOURCEDIR/piPeripheral/piDSKY2-images" $RAMDISK
+fi
 cp -a "$SOURCEDIR/yaDSKY2"/*.{png,jpg} $RAMDISK
 
 while true
