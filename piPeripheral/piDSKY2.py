@@ -296,9 +296,11 @@ def echoOn(control):
 echoOn(False)
 atexit.register(echoOn, True)
 
-# For the following, the following one-time setup is needed.
+# For the following, the following one-time setup is needed on Raspbian.
 #	sudo apt-get install python3-pip imagemagick
 #	sudo pip3 install pyscreenshot
+#	sudo apt-get install python-imaging python-imaging-tk
+#	sudo pip3 install pillow
 def screenshot():
 	global args
 	from pyscreenshot import grab
