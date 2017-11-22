@@ -95,7 +95,7 @@ do
 	YAGC_PID=$!
 	if [[ "$2" == "--yaDSKY2" ]]
 	then
-		"$SOURCEDIR/yaDSKY2/yaDSKY2" --cfg="$SOURCEDIR/yaDSKY/src/$CFG.ini" --port=19698 &
+		"$SOURCEDIR/yaDSKY2/yaDSKY2" --cfg="$SOURCEDIR/yaDSKY/src/$CFG.ini" --port=19698 &>/dev/null &
 		YADSKY2_PID=$!
 	fi
 	"$SOURCEDIR/piPeripheral/piDSKY2.py" --port=19697 $1 &>/dev/null
