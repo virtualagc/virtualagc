@@ -118,6 +118,8 @@ do
 		"$SOURCEDIR/yaDSKY2/yaDSKY2" --cfg="$SOURCEDIR/yaDSKY/src/$CFG.ini" --port=19698 &>/dev/null &
 		YADSKY2_PID=$!
 	fi
+	clear
+	"$SOURCEDIR/piPeripheral/piSplash.py" $1 &>/dev/null
 	"$SOURCEDIR/piPeripheral/piDSKY2.py" --port=19697 $1 &>/dev/null
 	echo "Cleaning up ..."
 	kill $YAGC_PID $YADSKY2_PID
