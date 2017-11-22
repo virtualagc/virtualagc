@@ -71,6 +71,7 @@
 # piDSKY.py does, piDSKY2.py instead either turns indicator lights on/off
 # or else displays graphics on the LCD screen in response to these messages. 
 
+import time
 import os
 HOME = os.path.expanduser("~")
 
@@ -634,7 +635,6 @@ def outputFromAGC(channel, value):
 # Generic initialization (TCP socket setup).  Has no target-specific code, and 
 # shouldn't need to be modified unless there are bugs.
 
-import time
 import socket
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
