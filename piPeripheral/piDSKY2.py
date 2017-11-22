@@ -71,6 +71,9 @@
 # piDSKY.py does, piDSKY2.py instead either turns indicator lights on/off
 # or else displays graphics on the LCD screen in response to these messages. 
 
+import os
+HOME = os.path.expanduser("~")
+
 # Parse command-line arguments.
 import argparse
 cli = argparse.ArgumentParser()
@@ -293,11 +296,21 @@ def echoOn(control):
 echoOn(False)
 atexit.register(echoOn, True)
 
+# For the following, the following one-time setup is needed.
+#	sudo apt-get install python3-pip imagemagick
+#	sudo pip3 install pyscreenshot
+def screenshot():
+	global args
+	from pyscreenshot import grab
+	img = grab(bbox=(0, 0, 272, 480))
+	img.save("lastscrn.gif")
+atexit.register(screenshot)
+
 # This function is a non-blocking read of a single character from the
 # keyboard.  Returns either the key value (such as '0' or 'V'), or else
 # the value "" if no key was pressed.
 def get_char_keyboard_nonblock():
-	import fcntl, os
+	import fcntl
 	fd = sys.stdin.fileno()
 	oldterm = termios.tcgetattr(fd)
 	newattr = termios.tcgetattr(fd)
