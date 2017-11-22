@@ -6,30 +6,29 @@
 
 # Usage:
 #	cd piPeripheral
-#	./runPiDSKY2.sh [--window=1]
+#	./runPiDSKY2.sh [--window=1 [--yaDSKY2]]
 
-SOURCEDIR="`pwd`/.."
+cd ..
+SOURCEDIR="`pwd`"
+cd -
 
 killall yaAGC &>/dev/null
 killall yaDSKY2 &>/dev/null
 killall piDSKY2.py &>/dev/null
 
 # First, prepare to use the RAM disk.
-RAMDISK=/run/user/1000
+RAMDISK=/run/user/$UID
 if [[ ! -d $RAMDISK ]]
 then
-	echo "RAM disk $RAMDISK does not exist."
-	exit 1
+	echo "RAM disk $RAMDISK does not exist ... using $HOME"
+	RAMDISK=$HOME
 fi
 RAMDISK=$RAMDISK/piDSKY2
 rm $RAMDISK -rf &>/dev/null
 mkdir $RAMDISK &>/dev/null
-cp -a piDSKY2* $RAMDISK &>/dev/null
 cd $RAMDISK
-find "$SOURCEDIR" -name "*.bin" -exec cp {} . \; &>/dev/null
-find "$SOURCEDIR" -name "*.ini" -exec cp {} . \; &>/dev/null
-cp -a "$SOURCEDIR/yaAGC/yaAGC" . &>/dev/null
-cp -a "$SOURCEDIR/yaDSKY2/yaDSKY2" . &>/dev/null
+cp -a "$SOURCEDIR/piPeripheral/piDSKY2-images" $RAMDISK
+cp -a "$SOURCEDIR/yaDSKY2"/*.{png,jpg} $RAMDISK
 
 while true
 do
@@ -92,10 +91,15 @@ do
 	
 	# Run it!
 	rm LM.core CM.core &>/dev/null
-	./yaAGC --core=$CORE.bin --port=19697 --cfg=$CFG.ini &>/dev/null &
+	"$SOURCEDIR/yaAGC/yaAGC" --core="$SOURCEDIR/$CORE/$CORE.bin" --port=19697 --cfg="$SOURCEDIR/yaDSKY/src/$CFG.ini" &>/dev/null &
 	YAGC_PID=$!
-	./piDSKY2.py --port=19697 $1 &>/dev/null
+	if [[ "$2" == "--yaDSKY2" ]]
+	then
+		"$SOURCEDIR/yaDSKY2/yaDSKY2" --cfg="$SOURCEDIR/yaDSKY/src/$CFG.ini" --port=19698 &
+		YADSKY2_PID=$!
+	fi
+	"$SOURCEDIR/piPeripheral/piDSKY2.py" --port=19697 $1 &>/dev/null
 	echo "Cleaning up ..."
-	kill $YAGC_PID
-	wait $YAGC_PID &>/dev/null
+	kill $YAGC_PID $YADSKY2_PID
+	wait $YAGC_PID $YADSKY2_PID &>/dev/null
 done
