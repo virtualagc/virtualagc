@@ -34,6 +34,7 @@
 #		2017-11-22 RSB	Graphical rendering of widgets now made
 #				lazy, so that they're not drawn at all
 #				if they haven't changed.
+#		2017-11-24 RSB	Added suggested stuff for numeric keypad.
 #
 # In this hardware model:
 #
@@ -364,19 +365,59 @@ def inputsForAGC():
 	return returnValue
 
 # Capture any keypress events from the LCD window.
+# Many need to be translated for shifting, or due to being
+# from the numeric keypad.
+guiKeyTranslations = []
+guiKeyTranslations.append(("Return", "\n"))
+guiKeyTranslations.append(("KP_Enter", "\n"))
+guiKeyTranslations.append(("equal", "+"))
+guiKeyTranslations.append(("plus", "+"))
+guiKeyTranslations.append(("KP_Add", "+"))
+guiKeyTranslations.append(("minus", "-"))
+guiKeyTranslations.append(("underscore", "-"))
+guiKeyTranslations.append(("KP_Subtract", "-"))
+guiKeyTranslations.append(("slash", "V"))
+guiKeyTranslations.append(("KP_Divide", "V"))
+guiKeyTranslations.append(("asterisk", "N"))
+guiKeyTranslations.append(("KP_Multiply", "N"))
+guiKeyTranslations.append(("Delete", "C"))
+guiKeyTranslations.append(("Backspace", "K"))
+guiKeyTranslations.append(("KP_0", "0"))
+guiKeyTranslations.append(("KP_Insert", "0"))
+guiKeyTranslations.append(("KP_1", "1"))
+guiKeyTranslations.append(("KP_End", "1"))
+guiKeyTranslations.append(("KP_2", "2"))
+guiKeyTranslations.append(("KP_Down", "2"))
+guiKeyTranslations.append(("KP_3", "3"))
+guiKeyTranslations.append(("KP_Next", "3"))
+guiKeyTranslations.append(("KP_4", "4"))
+guiKeyTranslations.append(("KP_Left", "4"))
+guiKeyTranslations.append(("KP_5", "5"))
+guiKeyTranslations.append(("KP_Begin", "5"))
+guiKeyTranslations.append(("KP_6", "6"))
+guiKeyTranslations.append(("KP_Right", "6"))
+guiKeyTranslations.append(("KP_7", "7"))
+guiKeyTranslations.append(("KP_Home", "7"))
+guiKeyTranslations.append(("KP_8", "8"))
+guiKeyTranslations.append(("KP_Up", "8"))
+guiKeyTranslations.append(("KP_9", "9"))
+guiKeyTranslations.append(("KP_Prio", "9"))
 debugKey = ""
 def guiKeypress(event):
-	global guiKey, debugKey
+	global guiKey, debugKey, guiKeyTranslations
 	debugKey = event.keysym
-	if event.keysym == "Return":
-		guiKey = "\n"
-	elif event.keysym == "equal" or event.keysym == "plus":
-		guiKey = "+"
-	elif event.keysym == "minus" or event.keysym == "underscore":
-		guiKey = "-"
-	else:
-		guiKey = event.keysym
+	guiKey = debugKey
+	for i in range(0, len(guiKeyTranslations)):
+		if debugKey == guiKeyTranslations[i][0]:
+			guiKey = guiKeyTranslations[i][1]
+			return
 root.bind_all('<Key>', guiKeypress)
+# The tab key isn't captured by the stuff above.
+def tabKeypress(event):
+	global guiKey, debugKey
+	debugKey = "Tab"
+	guiKey = "P"
+root.bind_all('<Tab>', tabKeypress)
 
 # Converts a 5-bit code in channel 010 to " ", "0", ..., "9".
 def codeToString(code):
