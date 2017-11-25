@@ -35,6 +35,15 @@
 #				lazy, so that they're not drawn at all
 #				if they haven't changed.
 #		2017-11-24 RSB	Added suggested stuff for numeric keypad.
+#		2017-11-25 RSB	Added indicator-lamp controls based on
+#				the external program 'led-panel', and 
+#				duplicated (I hope) Mike Stewart's fixes
+#				to yaDSKY2 a year or so ago, for the
+#				RESTART, STANDBY, OPR ERR, and KEY REL
+#				lamps.  For the STANDBY behavior to 
+#				work properly, also changed the PRO
+#				timeout to 0.75.  (Needed to be in the
+#				range 0.64 to 1.92.)
 #
 # In this hardware model:
 #
@@ -273,7 +282,7 @@ def parseDskyKey(ch):
     		returnValue.append( (0o15, 0o36, 0o37) )
 	elif ch == 'P':
     		returnValue.append( (0o32, 0o00000, 0o20000) )
-    		proceedPressed = threading.Timer(0.5, releasePRO)
+    		proceedPressed = threading.Timer(0.75, releasePRO)
     		proceedPressed.start()
 	elif ch == 'K':
     		returnValue.append( (0o15, 0o31, 0o37) )
@@ -530,18 +539,21 @@ def updateLamps():
 last10 = 1234567
 last11 = 1234567
 last13 = 1234567
+last163 = 1234567
 plusMinusState1 = 0
 plusMinusState2 = 0
 plusMinusState3 = 0
+lastKeyRel = ""
 def outputFromAGC(channel, value):
 	# These lastNN values are just used to cut down on the number of messages printed,
 	# when the same value is output over and over again to the same channel, because
 	# that makes debugging harder.
-	global last10, last11, last13, plusMinusState1, plusMinusState2, plusMinusState3
+	global last10, last11, last13, last163, plusMinusState1, plusMinusState2, plusMinusState3
 	global vnFlashing, vnTimer, vnCurrentlyOn, vnImage1, vnImage2, vnImage3, vnImage4, vnTestOverride
+	global lastKeyRel
 	if (channel == 0o13):
 		value &= 0o3000
-	if (channel == 0o10 and value != last10) or (channel == 0o11 and value != last11) or (channel == 0o13 and value != last13):
+	if (channel == 0o10 and value != last10) or (channel == 0o11 and value != last11) or (channel == 0o13 and value != last13) or (channel == 0o163 and value != last163):
 		if channel == 0o10:
 			last10 = value
 			aaaa = (value >> 11) & 0x0F
@@ -699,12 +711,6 @@ def outputFromAGC(channel, value):
 				updateLampStatuses("TEMP", True)
 			else:
 				updateLampStatuses("TEMP", False)
-			keyRel = "KEY REL OFF     "
-			if (value & 0x10) != 0:
-				keyRel = "KEY REL ON      "
-				updateLampStatuses("KEY REL", True)
-			else:
-				updateLampStatuses("KEY REL", False)
 			flashing = "V/N NO FLASH    "
 			if (value & 0x20) != 0:
 				if not vnFlashing:
@@ -716,27 +722,42 @@ def outputFromAGC(channel, value):
 			else:
 				if vnFlashing != False:
 					vnFlashingStop()
-			oprErr = "OPR ERR OFF     "
-			if (value & 0x40) != 0:
-				oprErr = "OPR ERR FLASH   "
-				updateLampStatuses("OPR ERR", True)
-			else:
-				updateLampStatuses("OPR ERR", False)
-			print(compActy + "   " + uplinkActy + "   " + temp + "   " + keyRel + "   " + flashing + "   " + oprErr)
+			print(compActy + "   " + uplinkActy + "   " + temp + "   " + "   " + flashing)
 			updateLamps()
 		elif channel == 0o13:
 			last13 = value
 			test = "DSKY TEST       "
 			if (value & 0x200) == 0:
 				test = "DSKY NO TEST    "
-			standby = "DSKY STANDBY OFF"
-			if (value & 0x400) != 0:
+			print(test)
+			updateLamps()
+		elif channel == 0o163:
+			last163 = value
+			if (value & 0o400) != 0:
 				standby = "DSKY STANDBY ON "
 				updateLampStatuses("DSKY STANDBY", True)
 			else:
+				standby = "DSKY STANDBY OFF"
 				updateLampStatuses("DSKY STANDBY", False)
-			print(test + "   " + standby)
-			updateLamps()
+			if (value & 0o20) != 0:
+				keyRel = "KEY REL ON      "
+				updateLampStatuses("KEY REL", True)
+			else:
+				keyRel = "KEY REL OFF     "
+				updateLampStatuses("KEY REL", False)
+			if (value & 0o100) != 0:
+				oprErr = "OPR ERR FLASH   "
+				updateLampStatuses("OPR ERR", True)
+			else:
+				oprErr = "OPR ERR OFF     "
+				updateLampStatuses("OPR ERR", False)
+			if (value & 0o200) != 0:
+				restart = "RESTART ON    "
+				updateLampStatuses("RESTART", True)
+			else:
+				restart = "RESTART OFF     "
+				updateLampStatuses("RESTART", False)
+			print(standby + "   " + keyRel + "   " + oprErr + "   " + restart)
 		else:
 			print("Received from yaAGC: " + oct(value) + " -> channel " + oct(channel))
 	return
