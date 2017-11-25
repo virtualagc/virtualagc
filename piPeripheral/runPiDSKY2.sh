@@ -4,13 +4,52 @@
 # and that we are in the piPeripheral subdirectory of that clone.
 # Assumes the Pi executable for yaAGC is in the PATH.
 
-# Usage:
-#	cd piPeripheral
-#	./runPiDSKY2.sh [--window=1 [--yaDSKY2 [IMAGE_DIRECTORY]]
-
 cd ..
 SOURCEDIR="`pwd`"
 cd -
+
+# Parse the command-line arguments.
+LEDPATH="$SOURCEDIR/piPeripheral/led-panel"
+for i in "$@"
+do
+	case $i in
+		--debug)
+			DEBUG=yes
+			;;
+		--window*)
+			WINDOW="--window=1"
+			;;
+		--yaDSKY2|--yadsky2)
+			YADSKY=yes
+			;;
+		--image-dir=*)
+			IMGDIR="`echo $i | sed 's/[^=]*=//'`"
+			;;
+		--led-panel=*)
+			LEDPATH="`echo $i | sed 's/[^=]*=//'`"
+			;;
+		*)
+			echo "Usage:"
+			echo "	cd piPeripheral"
+			echo "	./runPiDSKY2.sh [OPTIONS]"
+			echo "The allowed options are:"
+			echo "	--window		Display DSKY registers as a 272x480 window"
+			echo "				rather than full screen."
+			echo "	--yaDSKY2		Run yaDSKY2 in addition to (in parallel with)"
+			echo "				the DSKY-register display.  Most useful if"
+			echo "				--window is also used."
+			echo "	--image-dir=PATH	Specify directory for alternate widget graphics."
+			echo "				The default is simply the piDSKY2-images"
+			echo "				subdirectory of the current directory."
+			echo "	--led-panel=PATH	Specify a path to the 'led-panel' program."
+			echo "				Defaults to simply 'led-panel' (in the current"
+			echo "				directory)."
+			echo "  --debug			Display extra messages useful in debugging."
+			exit
+			;;
+	esac
+	shift
+done
 
 killall yaAGC &>/dev/null
 killall yaDSKY2 &>/dev/null
@@ -27,13 +66,14 @@ RAMDISK=$RAMDISK/piDSKY2
 rm $RAMDISK -rf &>/dev/null
 mkdir $RAMDISK &>/dev/null
 cd $RAMDISK
-if [[ "$3" != "" ]]
+if [[ "$IMGDIR" != "" ]]
 then
-	cp -a "$3" $RAMDISK/piDSKY2-images
+	cp -a "$IMGDIR" $RAMDISK/piDSKY2-images
 else
 	cp -a "$SOURCEDIR/piPeripheral/piDSKY2-images" $RAMDISK
 fi
 cp -a "$SOURCEDIR/yaDSKY2"/*.{png,jpg} $RAMDISK
+cp -a "$LEDPATH" $RAMDISK/led-panel
 
 while true
 do
@@ -111,16 +151,27 @@ do
 	
 	# Run it!
 	rm LM.core CM.core &>/dev/null
-	"$SOURCEDIR/yaAGC/yaAGC" --core="$SOURCEDIR/$CORE/$CORE.bin" --port=19697 --cfg="$SOURCEDIR/yaDSKY/src/$CFG.ini" &>/dev/null &
+	if [[ "$DEBUG" == "" ]]
+	then
+		"$SOURCEDIR/yaAGC/yaAGC" --core="$SOURCEDIR/$CORE/$CORE.bin" --port=19697 --cfg="$SOURCEDIR/yaDSKY/src/$CFG.ini" >/dev/null &
+	else
+		"$SOURCEDIR/yaAGC/yaAGC" --core="$SOURCEDIR/$CORE/$CORE.bin" --port=19697 --cfg="$SOURCEDIR/yaDSKY/src/$CFG.ini" &
+	fi
 	YAGC_PID=$!
-	if [[ "$2" == "--yaDSKY2" ]]
+	if [[ "$YADSKY" != "" ]]
 	then
 		"$SOURCEDIR/yaDSKY2/yaDSKY2" --cfg="$SOURCEDIR/yaDSKY/src/$CFG.ini" --port=19698 &>/dev/null &
 		YADSKY2_PID=$!
 	fi
 	clear
-	"$SOURCEDIR/piPeripheral/piSplash.py" $1 &>/dev/null
-	"$SOURCEDIR/piPeripheral/piDSKY2.py" --port=19697 $1 &>/dev/null
+	"$SOURCEDIR/piPeripheral/piSplash.py" $WINDOW &>/dev/null
+	if [[ "$DEBUG" == "" ]]
+	then
+		"$SOURCEDIR/piPeripheral/piDSKY2.py" --port=19697 $WINDOW >/dev/null
+	else
+		"$SOURCEDIR/piPeripheral/piDSKY2.py" --port=19697 $WINDOW 
+		read -p "Hit Enter to continue ..."
+	fi
 	echo "Cleaning up ..."
 	kill $YAGC_PID $YADSKY2_PID
 	wait $YAGC_PID $YADSKY2_PID &>/dev/null

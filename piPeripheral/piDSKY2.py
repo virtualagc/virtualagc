@@ -491,6 +491,37 @@ def vnFlashingStop():
 		vnFlashing = False
 atexit.register(vnFlashingStop)
 
+lampStatuses = {
+	"UPDATE ACTY" : { "isLit" : False, "cliParameter" : "3" },
+	"TEMP" : { "isLit" : False, "cliParameter" : "2" },
+	"NO ATT" : { "isLit" : False, "cliParameter" : "5" },
+	"GIMBAL LOCK" : { "isLit" : False, "cliParameter" : "4" },
+	"DSKY STANDBY" : { "isLit" : False, "cliParameter" : "7" },
+	"PROG" : { "isLit" : False, "cliParameter" : "6" },
+	"OPR ERR" : { "isLit" : False, "cliParameter" : "9" },
+	"RESTART" : { "isLit" : False, "cliParameter" : "8" },
+	"KEY REL" : { "isLit" : False, "cliParameter" : "B" },
+	"TRACKER" : { "isLit" : False, "cliParameter" : "A" },
+	"ALT" : { "isLit" : False, "cliParameter" : "C" },
+	"VEL" : { "isLit" : False, "cliParameter" : "V" }
+}
+lampCliStringDefault = "FIJKLMNOPQRSTUVWXd"
+lastLampCliString = ""
+def updateLampStatuses(key, value):
+	global lampStatuses
+	if key in lampStatuses:
+		lampStatuses[key]["isLit"] = value
+def updateLamps():
+	global lastLampCliString
+	lampCliString = ""
+	for key in lampStatuses:
+		if lampStatuses[key]["isLit"]:
+			lampCliString += lampStatuses[key]["cliParameter"]
+	lampCliString += lampCliStringDefault
+	if lampCliString != lastLampCliString:
+		lastLampCliString = lampCliString
+		os.system("sudo ./led-panel " + lampCliString + " &")
+
 # This function is called by the event loop only when yaAGC has written
 # to an output channel.  The function should do whatever it is that needs to be done
 # with this output data, which is not processed additionally in any way by the 
@@ -613,22 +644,41 @@ def outputFromAGC(channel, value):
 				vel = "VEL OFF         "
 				if (value & 0x04) != 0:
 					vel = "VEL ON          "
+					updateLampStatuses("VEL", True)
+				else:
+					updateLampStatuses("VEL", False)
 				noAtt = "NO ATT OFF      "
 				if (value & 0x08) != 0:
 					noAtt = "NO ATT ON       "
+					updateLampStatuses("NO ATT", True)
+				else:
+					updateLampStatuses("NO ATT", False)
 				alt = "ALT OFF         "
 				if (value & 0x10) != 0:
 					alt = "ALT ON          "
+					updateLampStatuses("ALT", True)
+				else:
+					updateLampStatuses("ALT", False)
 				gimbalLock = "GIMBAL LOCK OFF "
 				if (value & 0x20) != 0:
 					gimbalLock = "GIMBAL LOCK ON  "
+					updateLampStatuses("GIMBAL LOCK", True)
+				else:
+					updateLampStatuses("GIMBAL LOCK", False)
 				tracker = "TRACKER OFF     "
 				if (value & 0x80) != 0:
 					tracker = "TRACKER ON      "
+					updateLampStatuses("TRACKER", True)
+				else:
+					updateLampStatuses("TRACKER", False)
 				prog = "PROG OFF        "
 				if (value & 0x100) != 0:
 					prog = "PROG ON         "
+					updateLampStatuses("PROG", True)
+				else:
+					updateLampStatuses("PROG", False)
 				print(vel + "   " + noAtt + "   " + alt + "   " + gimbalLock + "   " + tracker + "   " + prog)
+				updateLamps()
 		elif channel == 0o11:
 			last11 = value
 			compActy = "COMP ACTY OFF   "
@@ -640,12 +690,21 @@ def outputFromAGC(channel, value):
 			uplinkActy = "UPLINK ACTY OFF "
 			if (value & 0x04) != 0:
 				uplinkActy = "UPLINK ACTY ON  "
+				updateLampStatuses("UPLINK ACTY", True)
+			else:
+				updateLampStatuses("UPLINK ACTY", False)
 			temp = "TEMP OFF        "
 			if (value & 0x80) != 0:
 				temp = "TEMP ON         "
+				updateLampStatuses("TEMP", True)
+			else:
+				updateLampStatuses("TEMP", False)
 			keyRel = "KEY REL OFF     "
 			if (value & 0x10) != 0:
 				keyRel = "KEY REL ON      "
+				updateLampStatuses("KEY REL", True)
+			else:
+				updateLampStatuses("KEY REL", False)
 			flashing = "V/N NO FLASH    "
 			if (value & 0x20) != 0:
 				if not vnFlashing:
@@ -660,7 +719,11 @@ def outputFromAGC(channel, value):
 			oprErr = "OPR ERR OFF     "
 			if (value & 0x40) != 0:
 				oprErr = "OPR ERR FLASH   "
+				updateLampStatuses("OPR ERR", True)
+			else:
+				updateLampStatuses("OPR ERR", False)
 			print(compActy + "   " + uplinkActy + "   " + temp + "   " + keyRel + "   " + flashing + "   " + oprErr)
+			updateLamps()
 		elif channel == 0o13:
 			last13 = value
 			test = "DSKY TEST       "
@@ -669,7 +732,11 @@ def outputFromAGC(channel, value):
 			standby = "DSKY STANDBY OFF"
 			if (value & 0x400) != 0:
 				standby = "DSKY STANDBY ON "
+				updateLampStatuses("DSKY STANDBY", True)
+			else:
+				updateLampStatuses("DSKY STANDBY", False)
 			print(test + "   " + standby)
+			updateLamps()
 		else:
 			print("Received from yaAGC: " + oct(value) + " -> channel " + oct(channel))
 	return
