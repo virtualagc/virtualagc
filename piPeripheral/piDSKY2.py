@@ -51,6 +51,8 @@
 #				take around a second to run, and to include
 #				a high-resolution time in its display message.
 #				Fixed dumb bugs in TEMP, VEL, and UPLINK lamps.
+#				Now expects key-repeat to be off, and detects
+#				release of the PRO key directly.
 #
 # In this hardware model:
 #
@@ -246,10 +248,10 @@ def packetize(tuple):
 # the value of those bits were 11001 (binary), which collectively indicate that
 # the KEY REL key on a DSKY is pressed.
 proceedPressed = ""
-def releasePRO():
-	# Note that the PRO key is supposed to indicate both presses and
-	# releases to yaAGC.  We can't do that from this keyboard interface,
-	# but we can return a PRO-key release shortly after a press.	
+def releaseTAB():
+	# Note that the TAB key (which theoretically can be used as the DSKY
+	# PRO key) has no release event that we can detect.
+	print("Releasing tab (PRO) key.")	
 	packetize( (0o32, 0o20000, 0o20000) )
 resetCount = 0
 def parseDskyKey(ch):
@@ -298,8 +300,8 @@ def parseDskyKey(ch):
     		returnValue.append( (0o15, 0o36, 0o37) )
 	elif ch == 'P':
     		returnValue.append( (0o32, 0o00000, 0o20000) )
-    		proceedPressed = threading.Timer(0.75, releasePRO)
-    		proceedPressed.start()
+	elif ch == 'p':
+    		returnValue.append( (0o32, 0o20000, 0o20000) )
 	elif ch == 'K':
     		returnValue.append( (0o15, 0o31, 0o37) )
 	elif ch == '\n':
@@ -367,10 +369,19 @@ def get_char_keyboard_nonblock():
 #	[ (channel0,value0,mask0), (channel1,value1,mask1), ...]
 # and may be en empty list.
 guiKey = ""
+proKeyReleased = False
 def inputsForAGC():
-	global guiKey
+	global guiKey, proKeyReleased
 	if guiKey == "":
-		ch = get_char_keyboard_nonblock()
+		if proKeyReleased:
+			proKeyReleased = False
+			returnValue = parseDskyKey('p')
+			print("Released PRO key")
+			if len(returnValue) > 0:
+		        	print("Sending to yaAGC: " + oct(returnValue[0][1]) + "(mask " + oct(returnValue[0][2]) + ") -> channel " + oct(returnValue[0][0]))
+			return returnValue
+		else:
+			ch = get_char_keyboard_nonblock()
 	else:
 		ch = guiKey
 		guiKey = ""
@@ -438,12 +449,19 @@ def guiKeypress(event):
 		if debugKey == guiKeyTranslations[i][0]:
 			guiKey = guiKeyTranslations[i][1]
 			return
-root.bind_all('<Key>', guiKeypress)
+def guiKeyrelease(event):
+	global proKeyReleased
+	if event.keysym == 'p' or event.keysym == 'P':
+		proKeyReleased = True
+root.bind_all('<KeyPress>', guiKeypress)
+root.bind_all('<KeyRelease>', guiKeyrelease)
 # The tab key isn't captured by the stuff above.
 def tabKeypress(event):
 	global guiKey, debugKey
 	debugKey = "Tab"
 	guiKey = "P"
+	tabReleasetimer = threading.Timer (0.75, releaseTAB);
+	tabReleasetimer.start()
 root.bind_all('<Tab>', tabKeypress)
 
 # Converts a 5-bit code in channel 010 to " ", "0", ..., "9".

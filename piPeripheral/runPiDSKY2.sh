@@ -168,6 +168,7 @@ do
 	fi
 	clear
 	"$SOURCEDIR/piPeripheral/piSplash.py" $WINDOW &>/dev/null
+	xset r off
 	if [[ "$DEBUG" == "" ]]
 	then
 		"$SOURCEDIR/piPeripheral/piDSKY2.py" --port=19697 $WINDOW $SLOW >/dev/null
@@ -175,6 +176,7 @@ do
 		"$SOURCEDIR/piPeripheral/piDSKY2.py" --port=19697 $WINDOW $SLOW 
 		read -p "Hit Enter to continue ..."
 	fi
+	xset r on
 	echo "Cleaning up ..."
 	kill $YAGC_PID $YADSKY2_PID
 	wait $YAGC_PID $YADSKY2_PID &>/dev/null
