@@ -1,3 +1,6 @@
 #!/bin/bash
 # Just echoes the command line to stderr.
->&2 echo led-panel $@
+DATE="`date +%s.%N`"
+>&2 echo $DATE: led-panel $@
+sleep 1
+

@@ -44,6 +44,12 @@
 #				work properly, also changed the PRO
 #				timeout to 0.75.  (Needed to be in the
 #				range 0.64 to 1.92.)
+#		2017-11-26 RSB	Added timing filters to prevent the led-panel
+#				from being run when it is already running.
+#				My dummy version of led-panel has been 
+#				modified (to test this feature) to always
+#				take around a second to run, and to include
+#				a high-resolution time in its display message.
 #
 # In this hardware model:
 #
@@ -520,7 +526,7 @@ def updateLampStatuses(key, value):
 	global lampStatuses
 	if key in lampStatuses:
 		lampStatuses[key]["isLit"] = value
-def updateLamps():
+def flushLampUpdates():
 	global lastLampCliString
 	lampCliString = ""
 	for key in lampStatuses:
@@ -530,6 +536,29 @@ def updateLamps():
 	if lampCliString != lastLampCliString:
 		lastLampCliString = lampCliString
 		os.system("sudo ./led-panel " + lampCliString + " &")
+import psutil
+lampExecCheckCount = 0
+lampDeadtime = 0.1
+lampUpdateTimer = threading.Timer(lampDeadtime, flushLampUpdates)
+lampUpdateTimer.start()
+def updateLamps():
+	global lampUpdateTimer, lampExecCheckCount
+	lampExecCheckCount += 1
+	lampUpdateTimer.cancel()
+	for proc in psutil.process_iter():
+		info = proc.as_dict(attrs=['name'])
+		if "led-panel" in info['name']:
+			print("Delaying lamp flush to avoid overlap ...")
+			lampExecCheckCount = 0
+			lampUpdateTimer = threading.Timer(lampDeadtime, updateLamps)
+			lampUpdateTimer.start()
+			return
+	if lampExecCheckCount < 2:
+			lampUpdateTimer = threading.Timer(lampDeadtime, updateLamps)
+			lampUpdateTimer.start()
+			return
+	lampExecCheckCount = 0
+	flushLampUpdates()
 
 # This function is called by the event loop only when yaAGC has written
 # to an output channel.  The function should do whatever it is that needs to be done
