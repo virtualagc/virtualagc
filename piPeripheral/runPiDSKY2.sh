@@ -28,6 +28,9 @@ do
 		--led-panel=*)
 			LEDPATH="`echo $i | sed 's/[^=]*=//'`"
 			;;
+		--slow)
+			SLOW="--slow=1"
+			;;
 		*)
 			echo "Usage:"
 			echo "	cd piPeripheral"
@@ -167,9 +170,9 @@ do
 	"$SOURCEDIR/piPeripheral/piSplash.py" $WINDOW &>/dev/null
 	if [[ "$DEBUG" == "" ]]
 	then
-		"$SOURCEDIR/piPeripheral/piDSKY2.py" --port=19697 $WINDOW >/dev/null
+		"$SOURCEDIR/piPeripheral/piDSKY2.py" --port=19697 $WINDOW $SLOW >/dev/null
 	else
-		"$SOURCEDIR/piPeripheral/piDSKY2.py" --port=19697 $WINDOW 
+		"$SOURCEDIR/piPeripheral/piDSKY2.py" --port=19697 $WINDOW $SLOW 
 		read -p "Hit Enter to continue ..."
 	fi
 	echo "Cleaning up ..."

@@ -97,7 +97,16 @@ cli = argparse.ArgumentParser()
 cli.add_argument("--host", help="Host address of yaAGC, defaulting to localhost.")
 cli.add_argument("--port", help="Port for yaAGC, defaulting to 19798.", type=int)
 cli.add_argument("--window", help="Use window rather than full screen for LCD.")
+cli.add_argument("--slow", help="For use on really slow host systems.")
 args = cli.parse_args()
+
+# Responsiveness timing.
+if args.slow:
+	PULSE = 0.25
+	lampDeadtime = 0.25
+else:
+	PULSE = 0.05
+	lampDeadtime = 0.1
 
 # Hardcoded characteristics of the host and port being used.  
 if args.host:
@@ -532,7 +541,6 @@ def flushLampUpdates(lampCliString):
 	os.system("sudo ./led-panel " + lampCliString + " &")
 import psutil
 lampExecCheckCount = 0
-lampDeadtime = 0.1
 lampUpdateTimer = threading.Timer(lampDeadtime, flushLampUpdates)
 def updateLamps():
 	global lampUpdateTimer, lampExecCheckCount
@@ -839,7 +847,7 @@ def eventLoop():
 	didSomething = False
 	while True:
 		if not didSomething:
-			time.sleep(0.05)
+			time.sleep(PULSE)
 		didSomething = False
 		
 		# Check for packet data received from yaAGC and process it.
