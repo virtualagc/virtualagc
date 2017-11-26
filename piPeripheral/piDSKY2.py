@@ -50,6 +50,7 @@
 #				modified (to test this feature) to always
 #				take around a second to run, and to include
 #				a high-resolution time in its display message.
+#				Fixed dumb bugs in TEMP, VEL, and UPLINK lamps.
 #
 # In this hardware model:
 #
@@ -516,7 +517,7 @@ def vnFlashingStop():
 atexit.register(vnFlashingStop)
 
 lampStatuses = {
-	"UPDATE ACTY" : { "isLit" : False, "cliParameter" : "3" },
+	"UPLINK ACTY" : { "isLit" : False, "cliParameter" : "3" },
 	"TEMP" : { "isLit" : False, "cliParameter" : "2" },
 	"NO ATT" : { "isLit" : False, "cliParameter" : "5" },
 	"GIMBAL LOCK" : { "isLit" : False, "cliParameter" : "4" },
@@ -527,7 +528,9 @@ lampStatuses = {
 	"KEY REL" : { "isLit" : False, "cliParameter" : "B" },
 	"TRACKER" : { "isLit" : False, "cliParameter" : "A" },
 	"ALT" : { "isLit" : False, "cliParameter" : "C" },
-	"VEL" : { "isLit" : False, "cliParameter" : "V" }
+	"VEL" : { "isLit" : False, "cliParameter" : "E" },
+	"PRIO DSP" : { "isLit" : False, "cliParameter" : "D" },
+	"NO DAP" : { "isLit" : False, "cliParameter" : "F" }
 }
 lampCliStringDefault = "FIJKLMNOPQRSTUVWXd"
 lastLampCliString = ""
@@ -745,7 +748,7 @@ def outputFromAGC(channel, value):
 			else:
 				updateLampStatuses("UPLINK ACTY", False)
 			temp = "TEMP OFF        "
-			if (value & 0x80) != 0:
+			if (value & 0x08) != 0:
 				temp = "TEMP ON         "
 				updateLampStatuses("TEMP", True)
 			else:
