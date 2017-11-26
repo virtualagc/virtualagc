@@ -526,23 +526,24 @@ def updateLampStatuses(key, value):
 	global lampStatuses
 	if key in lampStatuses:
 		lampStatuses[key]["isLit"] = value
-def flushLampUpdates():
+def flushLampUpdates(lampCliString):
+	global lastLampCliString
+	lastLampCliString = lampCliString
+	os.system("sudo ./led-panel " + lampCliString + " &")
+import psutil
+lampExecCheckCount = 0
+lampDeadtime = 0.1
+lampUpdateTimer = threading.Timer(lampDeadtime, flushLampUpdates)
+def updateLamps():
+	global lampUpdateTimer, lampExecCheckCount
 	global lastLampCliString
 	lampCliString = ""
 	for key in lampStatuses:
 		if lampStatuses[key]["isLit"]:
 			lampCliString += lampStatuses[key]["cliParameter"]
 	lampCliString += lampCliStringDefault
-	if lampCliString != lastLampCliString:
-		lastLampCliString = lampCliString
-		os.system("sudo ./led-panel " + lampCliString + " &")
-import psutil
-lampExecCheckCount = 0
-lampDeadtime = 0.1
-lampUpdateTimer = threading.Timer(lampDeadtime, flushLampUpdates)
-lampUpdateTimer.start()
-def updateLamps():
-	global lampUpdateTimer, lampExecCheckCount
+	if lampCliString == lastLampCliString:
+		return
 	lampExecCheckCount += 1
 	lampUpdateTimer.cancel()
 	for proc in psutil.process_iter():
@@ -558,7 +559,8 @@ def updateLamps():
 			lampUpdateTimer.start()
 			return
 	lampExecCheckCount = 0
-	flushLampUpdates()
+	flushLampUpdates(lampCliString)
+updateLamps()
 
 # This function is called by the event loop only when yaAGC has written
 # to an output channel.  The function should do whatever it is that needs to be done
