@@ -16,6 +16,9 @@ do
 		--debug)
 			DEBUG=yes
 			;;
+		--agc-debug)
+			AGCDEBUG=yes
+			;;
 		--window*)
 			WINDOW="--window=1"
 			;;
@@ -30,6 +33,9 @@ do
 			;;
 		--slow)
 			SLOW="--slow=1"
+			;;
+		--monitor)
+			MONITOR=yes
 			;;
 		*)
 			echo "Usage:"
@@ -47,7 +53,9 @@ do
 			echo "	--led-panel=PATH	Specify a path to the 'led-panel' program."
 			echo "				Defaults to simply 'led-panel' (in the current"
 			echo "				directory)."
-			echo "  --debug			Display extra messages useful in debugging."
+			echo "  --debug			Display extra messages useful in debugging piDSKY2."
+			echo "  --agc-debug             Display extra messages useful in debugging yaAGC."
+			echo "  --monitor            	Monitor load, temperature, CPU clock."
 			exit
 			;;
 	esac
@@ -154,7 +162,7 @@ do
 	
 	# Run it!
 	rm LM.core CM.core &>/dev/null
-	if [[ "$DEBUG" == "" ]]
+	if [[ "$AGCDEBUG" == "" ]]
 	then
 		"$SOURCEDIR/yaAGC/yaAGC" --core="$SOURCEDIR/$CORE/$CORE.bin" --port=19697 --cfg="$SOURCEDIR/yaDSKY/src/$CFG.ini" >/dev/null &
 	else
@@ -168,13 +176,16 @@ do
 	fi
 	clear
 	"$SOURCEDIR/piPeripheral/piSplash.py" $WINDOW &>/dev/null
+	if [[ "$MONITOR" != "" ]]
+	then
+		xterm -e "$SOURCEDIR/piPeripheral/backgroundStatus.sh" &
+		STATUS_PID=$!
+	fi
 	xset r off
 	if [[ "$DEBUG" == "" ]]
 	then
 		"$SOURCEDIR/piPeripheral/piDSKY2.py" --port=19697 $WINDOW $SLOW >/dev/null
 	else
-		xterm -e "$SOURCEDIR/piPeripheral/backgroundStatus.sh" &
-		STATUS_PID=$!
 		"$SOURCEDIR/piPeripheral/piDSKY2.py" --port=19697 $WINDOW $SLOW 
 		read -p "Hit Enter to continue ..."
 	fi

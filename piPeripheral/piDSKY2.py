@@ -56,7 +56,13 @@
 #		2017-11-27 RSB	At Sam's request, emptied out the default 
 #				command-string for led-panel (to eliminate,
 #				apparently, the backlights for the keypad).
-#				Added vncserverui detection.
+#				Added vncserverui detection.  Swapped the
+#				BackSpace and Tab aliases (now for PRO and
+#				KEY REL), so as to be able to implement a
+#				key-release for the PRO alias.  The 
+#				RRRRR exit had ceased working and, as far
+#				as I can tell, should never have worked in
+#				the first place.
 #
 # In this hardware model:
 #
@@ -96,6 +102,7 @@
 
 import time
 import os
+import signal
 HOME = os.path.expanduser("~")
 
 # Parse command-line arguments.
@@ -165,7 +172,7 @@ def displayGraphic(x, y, img):
 	key = str(x) + "," + str(y)
 	if key in widgetStates:
 		if widgetStates[key] is img:
-			print("skipping " + key)
+			#print("skipping " + key)
 			return
 	widgetStates[key] = img
 	dummy = Label(root, image=img, borderwidth=0, highlightthickness=0)
@@ -265,8 +272,7 @@ def parseDskyKey(ch):
 		resetCount += 1
 		if resetCount >= 5:
 			print("Exiting ...")
-			root.quit()
-			sys.exit()
+			return ""
 	elif ch != "":
 		resetCount = 0
 	returnValue = []
@@ -327,7 +333,6 @@ def echoOn(control):
 		new[3] &= ~termios.ECHO
 	termios.tcsetattr(fd, termios.TCSANOW, new)
 echoOn(False)
-atexit.register(echoOn, True)
 
 # For the following, the following one-time setup is needed on Raspbian.
 #	sudo apt-get install python3-pip imagemagick
@@ -337,9 +342,10 @@ atexit.register(echoOn, True)
 def screenshot():
 	global args
 	from pyscreenshot import grab
+	print("Creating screenshot ...")
 	img = grab(bbox=(0, 0, 272, 480))
 	img.save("lastscrn.gif")
-atexit.register(screenshot)
+	print("Screenshot saved as lastscrn.gif");
 
 # This function is a non-blocking read of a single character from the
 # keyboard.  Returns either the key value (such as '0' or 'V'), or else
@@ -394,10 +400,6 @@ def inputsForAGC():
 		ch = '-'
 	elif ch == '=':
 		ch = '+'
-	if ch == "X":
-		print("Exiting ...")
-		root.quit()
-		sys.exit()
 	else:
 		returnValue = parseDskyKey(ch)
 	if len(returnValue) > 0:
@@ -423,7 +425,7 @@ guiKeyTranslations.append(("KP_Multiply", "N"))
 guiKeyTranslations.append(("Delete", "C"))
 guiKeyTranslations.append(("KP_Decimal", "C"))
 guiKeyTranslations.append(("KP_Delete", "C"))
-guiKeyTranslations.append(("Backspace", "K"))
+guiKeyTranslations.append(("BackSpace", "P"))
 guiKeyTranslations.append(("KP_0", "0"))
 guiKeyTranslations.append(("KP_Insert", "0"))
 guiKeyTranslations.append(("KP_1", "1"))
@@ -455,7 +457,7 @@ def guiKeypress(event):
 			return
 def guiKeyrelease(event):
 	global proKeyReleased
-	if event.keysym == 'p' or event.keysym == 'P':
+	if event.keysym == 'p' or event.keysym == 'P' or event.keysym == "BackSpace":
 		proKeyReleased = True
 root.bind_all('<KeyPress>', guiKeypress)
 root.bind_all('<KeyRelease>', guiKeyrelease)
@@ -463,9 +465,7 @@ root.bind_all('<KeyRelease>', guiKeyrelease)
 def tabKeypress(event):
 	global guiKey, debugKey
 	debugKey = "Tab"
-	guiKey = "P"
-	tabReleasetimer = threading.Timer (0.75, releaseTAB);
-	tabReleasetimer.start()
+	guiKey = "K"
 root.bind_all('<Tab>', tabKeypress)
 
 # Converts a 5-bit code in channel 010 to " ", "0", ..., "9".
@@ -536,7 +536,6 @@ def vnFlashingStop():
 		displayGraphic(colPN, topVN, vnImage3)
 		displayGraphic(colPN + digitWidth, topVN, vnImage4)
 		vnFlashing = False
-atexit.register(vnFlashingStop)
 
 lampStatuses = {
 	"UPLINK ACTY" : { "isLit" : False, "cliParameter" : "3" },
@@ -565,7 +564,7 @@ def updateLampStatuses(key, value):
 def flushLampUpdates(lampCliString):
 	global lastLampCliString
 	lastLampCliString = lampCliString
-	os.system("sudo ./led-panel " + lampCliString + " &")
+	os.system("sudo ./led-panel '" + lampCliString + "' &")
 import psutil
 lampExecCheckCount = 0
 lampUpdateTimer = threading.Timer(lampDeadtime, flushLampUpdates)
@@ -598,6 +597,7 @@ def updateLamps():
 updateLamps()
 
 # This checks to see if vncserverui is running, and turns on a lamp if so.
+vncCheckTimer = ""
 def checkForVncserver():
 	global vncCheckTimer
 	vncserveruiFound = False
@@ -611,6 +611,16 @@ def checkForVncserver():
 	vncCheckTimer = threading.Timer(10, checkForVncserver)
 	vncCheckTimer.start()
 checkForVncserver()
+
+def timersStop():
+	global vnTimer, lampUpdateTimer, vncCheckTimer
+	print("Canceling all timers ...")
+	if vnTimer != "":
+		vnTimer.cancel()
+	if lampUpdateTimer != "":
+		lampUpdateTimer.cancel()
+	if vncCheckTimer != "":
+		vncCheckTimer.cancel()
 
 # This function is called by the event loop only when yaAGC has written
 # to an output channel.  The function should do whatever it is that needs to be done
@@ -953,6 +963,12 @@ def eventLoop():
 		# any number of channel operations, but in practice (at least for something
 		# like a DSKY implementation) it will actually contain only 0 or 1 operations.
 		externalData = inputsForAGC()
+		if externalData == "":
+			timersStop()
+			screenshot()
+			root.destroy()
+			echoOn(True)
+			return
 		for i in range(0, len(externalData)):
 			packetize(externalData[i])
 			didSomething = True
@@ -964,4 +980,9 @@ eventLoopThread = threading.Thread(target=eventLoop)
 eventLoopThread.start()
 
 root.mainloop()
+print(threading.enumerate())
+#sys.exit()
+os._exit(0)
+
+
 
