@@ -2,7 +2,10 @@
 # Simulates V35E being pressed repeatedly, every 10 seconds, indefinitely, until stopped.
 
 # Must do "sudo modprobe uinput" before running this program.  There's also
-# a one-time setup of "sudo pip3 install python-uinput".
+# a one-time setup of "sudo pip3 install python-uinput".  This program itself 
+# must be run as "sudo ./automateV35.py".  "V35E" goes into whatever window
+# has the focus, so you have to move the cursor into the 272x480 DSKY display
+# and focus it before you'll see anything happen.
 import uinput
 import time
 
