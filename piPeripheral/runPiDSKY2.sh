@@ -173,11 +173,13 @@ do
 	then
 		"$SOURCEDIR/piPeripheral/piDSKY2.py" --port=19697 $WINDOW $SLOW >/dev/null
 	else
+		xterm -e "$SOURCEDIR/piPeripheral/backgroundStatus.sh" &
+		STATUS_PID=$!
 		"$SOURCEDIR/piPeripheral/piDSKY2.py" --port=19697 $WINDOW $SLOW 
 		read -p "Hit Enter to continue ..."
 	fi
 	xset r on
 	echo "Cleaning up ..."
-	kill $YAGC_PID $YADSKY2_PID
-	wait $YAGC_PID $YADSKY2_PID &>/dev/null
+	kill $YAGC_PID $YADSKY2_PID $STATUS_PID
+	wait $YAGC_PID $YADSKY2_PID $STATUS_PID &>/dev/null
 done

@@ -53,6 +53,9 @@
 #				Fixed dumb bugs in TEMP, VEL, and UPLINK lamps.
 #				Now expects key-repeat to be off, and detects
 #				release of the PRO key directly.
+#		2017-11-27 RSB	At Sam's request, emptied out the default 
+#				command-string for led-panel (to eliminate,
+#				apparently, the backlights for the keypad).
 #
 # In this hardware model:
 #
@@ -550,7 +553,8 @@ lampStatuses = {
 	"PRIO DSP" : { "isLit" : False, "cliParameter" : "D" },
 	"NO DAP" : { "isLit" : False, "cliParameter" : "F" }
 }
-lampCliStringDefault = "FIJKLMNOPQRSTUVWXd"
+#lampCliStringDefault = "FIJKLMNOPQRSTUVWXd"
+lampCliStringDefault = ""
 lastLampCliString = ""
 def updateLampStatuses(key, value):
 	global lampStatuses
