@@ -56,6 +56,7 @@
 #		2017-11-27 RSB	At Sam's request, emptied out the default 
 #				command-string for led-panel (to eliminate,
 #				apparently, the backlights for the keypad).
+#				Added vncserverui detection.
 #
 # In this hardware model:
 #
@@ -551,7 +552,8 @@ lampStatuses = {
 	"ALT" : { "isLit" : False, "cliParameter" : "C" },
 	"VEL" : { "isLit" : False, "cliParameter" : "E" },
 	"PRIO DSP" : { "isLit" : False, "cliParameter" : "D" },
-	"NO DAP" : { "isLit" : False, "cliParameter" : "F" }
+	"NO DAP" : { "isLit" : False, "cliParameter" : "F" },
+	"VNCSERVERUI" : { "isLit" : False, "cliParameter" : "G" }
 }
 #lampCliStringDefault = "FIJKLMNOPQRSTUVWXd"
 lampCliStringDefault = ""
@@ -594,6 +596,21 @@ def updateLamps():
 	lampExecCheckCount = 0
 	flushLampUpdates(lampCliString)
 updateLamps()
+
+# This checks to see if vncserverui is running, and turns on a lamp if so.
+def checkForVncserver():
+	global vncCheckTimer
+	vncserveruiFound = False
+	for proc in psutil.process_iter():
+		info = proc.as_dict(attrs=['name'])
+		if "vncserverui" in info['name']:
+			vncserveruiFound = True
+			break
+	updateLampStatuses("VNCSERVERUI", vncserveruiFound)
+	updateLamps()
+	vncCheckTimer = threading.Timer(10, checkForVncserver)
+	vncCheckTimer.start()
+checkForVncserver()
 
 # This function is called by the event loop only when yaAGC has written
 # to an output channel.  The function should do whatever it is that needs to be done
