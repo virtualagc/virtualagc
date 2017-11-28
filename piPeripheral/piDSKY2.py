@@ -604,7 +604,7 @@ def updateLamps():
 			if "led-panel" in info['name']:
 				ledPanelRunning = True
 				break
-		except:
+		except psutil.NoSuchProcess:
 			pass
 	if ledPanelRunning:
 		print("Delaying lamp flush to avoid overlap ...")
@@ -631,7 +631,7 @@ def checkForVncserver():
 			if "vncserverui" in info['name']:
 				vncserveruiFound = True
 				break
-		except:
+		except psutil.NoSuchProcess:
 			pass
 	updateLampStatuses("VNCSERVERUI", vncserveruiFound)
 	updateLamps()
