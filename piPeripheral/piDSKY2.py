@@ -63,15 +63,17 @@
 #				RRRRR exit had ceased working and, as far
 #				as I can tell, should never have worked in
 #				the first place.
-#		2017-11-28 RSB	Added a mutex when psutil features are used.
-#				Replaced the single-character global buffers
+#		2017-11-28 RSB	Replaced the single-character global buffers
 #				I was using for buffering GUI keypresses
 #				and releases with a proper queue that insures
 #				no presses or releases are lost and that they
 #				are all processed in the correct order.
 #				Added some instrumentation that keeps a count
 #				of all uses of V35E and prints them out on
-#				stderr. 
+#				stderr. Added code to catch exceptions in use
+#				of psutil (that I think can happen when trying
+#				to get the attributes of a process which has
+#				just disappeared).
 #
 # In this hardware model:
 #
@@ -143,8 +145,6 @@ else:
 
 import threading
 from tkinter import Tk, Label, PhotoImage
-
-mutexForPsutil = threading.Lock()
 
 # Set up root viewport for tkinter graphics
 root = Tk()
@@ -598,14 +598,14 @@ def updateLamps():
 	lampExecCheckCount += 1
 	lampUpdateTimer.cancel()
 	ledPanelRunning = False
-	mutexForPsutil.acquire()
-	procList = psutil.process_iter()
-	mutexForPsutil.release()
-	for proc in procList:
-		info = proc.as_dict(attrs=['name'])
-		if "led-panel" in info['name']:
-			ledPanelRunning = True
-			break
+	for proc in psutil.process_iter():
+		try:
+			info = proc.as_dict(attrs=['name'])
+			if "led-panel" in info['name']:
+				ledPanelRunning = True
+				break
+		except:
+			pass
 	if ledPanelRunning:
 		print("Delaying lamp flush to avoid overlap ...")
 		lampExecCheckCount = 0
@@ -625,14 +625,14 @@ vncCheckTimer = ""
 def checkForVncserver():
 	global vncCheckTimer
 	vncserveruiFound = False
-	mutexForPsutil.acquire()
-	procList = psutil.process_iter()
-	mutexForPsutil.release()
-	for proc in procList:
-		info = proc.as_dict(attrs=['name'])
-		if "vncserverui" in info['name']:
-			vncserveruiFound = True
-			break
+	for proc in psutil.process_iter():
+		try:
+			info = proc.as_dict(attrs=['name'])
+			if "vncserverui" in info['name']:
+				vncserveruiFound = True
+				break
+		except:
+			pass
 	updateLampStatuses("VNCSERVERUI", vncserveruiFound)
 	updateLamps()
 	vncCheckTimer = threading.Timer(10, checkForVncserver)
