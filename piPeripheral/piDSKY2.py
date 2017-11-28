@@ -178,16 +178,19 @@ imageNounOn = PhotoImage(file="piDSKY2-images/NounOn.gif")
 imageSeparatorOn = PhotoImage(file="piDSKY2-images/SeparatorOn.gif")
 # Initial placement of all graphical objects on LCD panel.
 widgetStates = {}
+widgetLabels = {}
 def displayGraphic(x, y, img):
-	global widgetStates
+	global widgetStates, widgetLabels
 	key = str(x) + "," + str(y)
 	if key in widgetStates:
 		if widgetStates[key] is img:
 			#print("skipping " + key)
 			return
 	widgetStates[key] = img
-	dummy = Label(root, image=img, borderwidth=0, highlightthickness=0)
-	dummy.place(x=x, y=y)
+	if key in widgetLabels:
+		widgetLabels[key].destroy()
+	widgetLabels[key] = Label(root, image=img, borderwidth=0, highlightthickness=0)
+	widgetLabels[key].place(x=x, y=y)
 topProg = 36
 topVN = 149
 topR1 = 238
