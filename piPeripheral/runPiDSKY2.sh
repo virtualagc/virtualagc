@@ -8,6 +8,8 @@ cd ..
 SOURCEDIR="`pwd`"
 cd -
 
+sudo modprobe uinit
+
 # Parse the command-line arguments.
 LEDPATH="$SOURCEDIR/piPeripheral/led-panel"
 for i in "$@"

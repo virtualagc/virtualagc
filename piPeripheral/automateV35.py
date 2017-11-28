@@ -16,17 +16,19 @@ device = uinput.Device([
 	uinput.KEY_ENTER
 ])
 
+interKeyDelay = 0.1
+interCmdDelay = 8
 time.sleep(1)
 count = 0
 while True:
 	print("V35 count " + str(count))
 	count += 1
 	device.emit_click(uinput.KEY_V)
-	time.sleep(0.25)
+	time.sleep(interKeyDelay)
 	device.emit_click(uinput.KEY_3)
-	time.sleep(0.25)
+	time.sleep(interKeyDelay)
 	device.emit_click(uinput.KEY_5)
-	time.sleep(0.25)
+	time.sleep(interKeyDelay)
 	device.emit_click(uinput.KEY_ENTER)
-	time.sleep(10)
+	time.sleep(interCmdDelay)
 	

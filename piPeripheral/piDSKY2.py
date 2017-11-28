@@ -63,6 +63,15 @@
 #				RRRRR exit had ceased working and, as far
 #				as I can tell, should never have worked in
 #				the first place.
+#		2017-11-28 RSB	Added a mutex when psutil features are used.
+#				Replaced the single-character global buffers
+#				I was using for buffering GUI keypresses
+#				and releases with a proper queue that insures
+#				no presses or releases are lost and that they
+#				are all processed in the correct order.
+#				Added some instrumentation that keeps a count
+#				of all uses of V35E and prints them out on
+#				stderr. 
 #
 # In this hardware model:
 #
@@ -134,6 +143,8 @@ else:
 
 import threading
 from tkinter import Tk, Label, PhotoImage
+
+mutexForPsutil = threading.Lock()
 
 # Set up root viewport for tkinter graphics
 root = Tk()
@@ -258,16 +269,14 @@ def packetize(tuple):
 # would indicate that the lowest 5 bits of channel 15 (octal) were valid, and that
 # the value of those bits were 11001 (binary), which collectively indicate that
 # the KEY REL key on a DSKY is pressed.
-proceedPressed = ""
-def releaseTAB():
-	# Note that the TAB key (which theoretically can be used as the DSKY
-	# PRO key) has no release event that we can detect.
-	print("Releasing tab (PRO) key.")	
-	packetize( (0o32, 0o20000, 0o20000) )
 resetCount = 0
+# stateV35E and countV35E are some instrumentation for printing out a count of how
+# many times V35E has been used.  It is solely for debugging.
+stateV35E = 0
+countV35E = 0
 def parseDskyKey(ch):
 	global resetCount
-	global proceedPressed
+	global stateV35E, countV35E
 	if ch == 'R':
 		resetCount += 1
 		if resetCount >= 5:
@@ -276,6 +285,7 @@ def parseDskyKey(ch):
 	elif ch != "":
 		resetCount = 0
 	returnValue = []
+	relatedToV35E = False
 	if ch == '0':
 		returnValue.append( (0o15, 0o20, 0o37) )
 	elif ch == '1':
@@ -284,10 +294,16 @@ def parseDskyKey(ch):
     		returnValue.append( (0o15, 0o2, 0o37) )
 	elif ch == '3':
     		returnValue.append( (0o15, 0o3, 0o37) )
+    		if stateV35E == 1:
+    			relatedToV35E = True
+    			stateV35E = 2
 	elif ch == '4':
     		returnValue.append( (0o15, 0o4, 0o37) )
 	elif ch == '5':
     		returnValue.append( (0o15, 0o5, 0o37) )
+    		if stateV35E == 2:
+    			relatedToV35E = True
+    			stateV35E = 3
 	elif ch == '6':
     		returnValue.append( (0o15, 0o6, 0o37) )
 	elif ch == '7':
@@ -302,6 +318,8 @@ def parseDskyKey(ch):
     		returnValue.append( (0o15, 0o33, 0o37) )
 	elif ch == 'V':
     		returnValue.append( (0o15, 0o21, 0o37) )
+    		relatedToV35E = True
+    		stateV35E = 1
 	elif ch == 'N':
     		returnValue.append( (0o15, 0o37, 0o37) )
 	elif ch == 'R':
@@ -310,12 +328,19 @@ def parseDskyKey(ch):
     		returnValue.append( (0o15, 0o36, 0o37) )
 	elif ch == 'P':
     		returnValue.append( (0o32, 0o00000, 0o20000) )
-	elif ch == 'p':
+	elif ch == 'p' or ch == 'PR':
     		returnValue.append( (0o32, 0o20000, 0o20000) )
 	elif ch == 'K':
     		returnValue.append( (0o15, 0o31, 0o37) )
 	elif ch == '\n':
 		returnValue.append( (0o15, 0o34, 0o37) )
+		if stateV35E == 3:
+			countV35E += 1
+			sys.stderr.write("V35E count = " + str(countV35E) + "\n")
+	else:
+		relatedToV35E = True
+	if not relatedToV35E:
+		stateV35E = 0
 	return returnValue	
 
 # This function turns keyboard echo on or off.
@@ -377,24 +402,16 @@ def get_char_keyboard_nonblock():
 # keyboard, and interprets various keystrokes as DSKY keys if present.  The return
 # value is supposed to be a list of 3-tuples of the form
 #	[ (channel0,value0,mask0), (channel1,value1,mask1), ...]
-# and may be en empty list.
-guiKey = ""
-proKeyReleased = False
+# and may be en empty list.  The list guiKey is used to queue up keypresses (or
+# relevant key releases) from the graphics window, so that they can be properly
+# merged in with keystrokes from the console, without losing any of them.
+guiKey = []
 def inputsForAGC():
-	global guiKey, proKeyReleased
-	if guiKey == "":
-		if proKeyReleased:
-			proKeyReleased = False
-			returnValue = parseDskyKey('p')
-			print("Released PRO key")
-			if len(returnValue) > 0:
-		        	print("Sending to yaAGC: " + oct(returnValue[0][1]) + "(mask " + oct(returnValue[0][2]) + ") -> channel " + oct(returnValue[0][0]))
-			return returnValue
-		else:
-			ch = get_char_keyboard_nonblock()
+	global guiKey
+	if len(guiKey) == 0:
+		ch = get_char_keyboard_nonblock()
 	else:
-		ch = guiKey
-		guiKey = ""
+		ch = guiKey.pop(0)
 	ch = ch.upper()
 	if ch == '_':
 		ch = '-'
@@ -450,22 +467,22 @@ debugKey = ""
 def guiKeypress(event):
 	global guiKey, debugKey, guiKeyTranslations
 	debugKey = event.keysym
-	guiKey = debugKey
 	for i in range(0, len(guiKeyTranslations)):
 		if debugKey == guiKeyTranslations[i][0]:
-			guiKey = guiKeyTranslations[i][1]
+			guiKey.append(guiKeyTranslations[i][1])
 			return
+	guiKey.append(debugKey)
 def guiKeyrelease(event):
-	global proKeyReleased
+	global guiKey
 	if event.keysym == 'p' or event.keysym == 'P' or event.keysym == "BackSpace":
-		proKeyReleased = True
+		guiKey.append("PR")
 root.bind_all('<KeyPress>', guiKeypress)
 root.bind_all('<KeyRelease>', guiKeyrelease)
 # The tab key isn't captured by the stuff above.
 def tabKeypress(event):
 	global guiKey, debugKey
 	debugKey = "Tab"
-	guiKey = "K"
+	guiKey.append("K")
 root.bind_all('<Tab>', tabKeypress)
 
 # Converts a 5-bit code in channel 010 to " ", "0", ..., "9".
@@ -580,14 +597,20 @@ def updateLamps():
 		return
 	lampExecCheckCount += 1
 	lampUpdateTimer.cancel()
+	ledPanelRunning = False
+	mutexForPsutil.acquire()
 	for proc in psutil.process_iter():
 		info = proc.as_dict(attrs=['name'])
 		if "led-panel" in info['name']:
-			print("Delaying lamp flush to avoid overlap ...")
-			lampExecCheckCount = 0
-			lampUpdateTimer = threading.Timer(lampDeadtime, updateLamps)
-			lampUpdateTimer.start()
-			return
+			ledPanelRunning = True
+			break
+	mutexForPsutil.release()
+	if ledPanelRunning:
+		print("Delaying lamp flush to avoid overlap ...")
+		lampExecCheckCount = 0
+		lampUpdateTimer = threading.Timer(lampDeadtime, updateLamps)
+		lampUpdateTimer.start()
+		return
 	if lampExecCheckCount < 2:
 			lampUpdateTimer = threading.Timer(lampDeadtime, updateLamps)
 			lampUpdateTimer.start()
@@ -601,11 +624,13 @@ vncCheckTimer = ""
 def checkForVncserver():
 	global vncCheckTimer
 	vncserveruiFound = False
+	mutexForPsutil.acquire()
 	for proc in psutil.process_iter():
 		info = proc.as_dict(attrs=['name'])
 		if "vncserverui" in info['name']:
 			vncserveruiFound = True
 			break
+	mutexForPsutil.release()
 	updateLampStatuses("VNCSERVERUI", vncserveruiFound)
 	updateLamps()
 	vncCheckTimer = threading.Timer(10, checkForVncserver)
