@@ -27,7 +27,7 @@ device = uinput.Device([
 	uinput.KEY_ENTER
 ])
 
-interKeyDelay = 0.1
+interKeyDelay = 0.25
 time.sleep(5)
 count = 0
 while True:
