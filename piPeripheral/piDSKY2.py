@@ -599,12 +599,13 @@ def updateLamps():
 	lampUpdateTimer.cancel()
 	ledPanelRunning = False
 	mutexForPsutil.acquire()
-	for proc in psutil.process_iter():
+	procList = psutil.process_iter()
+	mutexForPsutil.release()
+	for proc in procList:
 		info = proc.as_dict(attrs=['name'])
 		if "led-panel" in info['name']:
 			ledPanelRunning = True
 			break
-	mutexForPsutil.release()
 	if ledPanelRunning:
 		print("Delaying lamp flush to avoid overlap ...")
 		lampExecCheckCount = 0
@@ -625,12 +626,13 @@ def checkForVncserver():
 	global vncCheckTimer
 	vncserveruiFound = False
 	mutexForPsutil.acquire()
-	for proc in psutil.process_iter():
+	procList = psutil.process_iter()
+	mutexForPsutil.release()
+	for proc in procList:
 		info = proc.as_dict(attrs=['name'])
 		if "vncserverui" in info['name']:
 			vncserveruiFound = True
 			break
-	mutexForPsutil.release()
 	updateLampStatuses("VNCSERVERUI", vncserveruiFound)
 	updateLamps()
 	vncCheckTimer = threading.Timer(10, checkForVncserver)
