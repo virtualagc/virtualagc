@@ -636,21 +636,21 @@ def vnFlashingStop():
 # Which of the two sets of parameters ends up being used is dependendent on the 
 # --pigpio command-line parameter. 
 lampStatuses = {
-	"UPLINK ACTY" : { "isLit" : False, "cliParameter" : "3", "spiParameters" : [ { "register":1, "mask":0xf0 } ] },
-	"TEMP" : { "isLit" : False, "cliParameter" : "2", "spiParameters" : [ { "register":1, "mask":0x0f } ] },
-	"NO ATT" : { "isLit" : False, "cliParameter" : "5", "spiParameters" : [ { "register":2, "mask":0xf0 } ] },
-	"GIMBAL LOCK" : { "isLit" : False, "cliParameter" : "4", "spiParameters" : [ { "register":2, "mask":0x0f } ] },
-	"DSKY STANDBY" : { "isLit" : False, "cliParameter" : "7", "spiParameters" : [ { "register":3, "mask":0xf0 } ] },
-	"PROG" : { "isLit" : False, "cliParameter" : "6", "spiParameters" : [ { "register":3, "mask":0x0f } ] },
-	"OPR ERR" : { "isLit" : False, "cliParameter" : "9", "spiParameters" : [ { "register":4, "mask":0xf0 } ] },
-	"RESTART" : { "isLit" : False, "cliParameter" : "8", "spiParameters" : [ { "register":4, "mask":0x0f } ] },
-	"KEY REL" : { "isLit" : False, "cliParameter" : "B", "spiParameters" : [ { "register":5, "mask":0xf0 } ] },
-	"TRACKER" : { "isLit" : False, "cliParameter" : "A", "spiParameters" : [ { "register":5, "mask":0x0f } ] },
-	"ALT" : { "isLit" : False, "cliParameter" : "C", "spiParameters" : [ { "register":6, "mask":0xf0 } ] },
-	"VEL" : { "isLit" : False, "cliParameter" : "E", "spiParameters" : [ { "register":6, "mask":0x0f } ] },
-	"PRIO DSP" : { "isLit" : False, "cliParameter" : "D", "spiParameters" : [ { "register":7, "mask":0xf0 } ] },
-	"NO DAP" : { "isLit" : False, "cliParameter" : "F", "spiParameters" : [ { "register":7, "mask":0x0f } ] },
-	"VNCSERVERUI" : { "isLit" : False, "cliParameter" : "G", "spiParameters" : [ { "register":8, "mask":0xff } ] }
+	"UPLINK ACTY" : { "isLit" : False, "cliParameter" : "3", "spiParameters" : [ { "register":1, "mask":0x70 } ] },
+	"TEMP" : { "isLit" : False, "cliParameter" : "2", "spiParameters" : [ { "register":1, "mask":0x07 } ] },
+	"NO ATT" : { "isLit" : False, "cliParameter" : "5", "spiParameters" : [ { "register":2, "mask":0x70 } ] },
+	"GIMBAL LOCK" : { "isLit" : False, "cliParameter" : "4", "spiParameters" : [ { "register":2, "mask":0x07 } ] },
+	"DSKY STANDBY" : { "isLit" : False, "cliParameter" : "7", "spiParameters" : [ { "register":3, "mask":0x70 } ] },
+	"PROG" : { "isLit" : False, "cliParameter" : "6", "spiParameters" : [ { "register":3, "mask":0x07 } ] },
+	"KEY REL" : { "isLit" : False, "cliParameter" : "B", "spiParameters" : [ { "register":4, "mask":0x70 } ] },
+	"RESTART" : { "isLit" : False, "cliParameter" : "8", "spiParameters" : [ { "register":4, "mask":0x07 } ] },
+	"OPR ERR" : { "isLit" : False, "cliParameter" : "9", "spiParameters" : [ { "register":5, "mask":0x70 } ] },
+	"TRACKER" : { "isLit" : False, "cliParameter" : "A", "spiParameters" : [ { "register":5, "mask":0x07 } ] },
+	"PRIO DSP" : { "isLit" : False, "cliParameter" : "D", "spiParameters" : [ { "register":6, "mask":0x70 } ] },
+	"ALT" : { "isLit" : False, "cliParameter" : "C", "spiParameters" : [ { "register":6, "mask":0x07 } ] },
+	"NO DAP" : { "isLit" : False, "cliParameter" : "F", "spiParameters" : [ { "register":7, "mask":0x70 } ] },
+	"VEL" : { "isLit" : False, "cliParameter" : "E", "spiParameters" : [ { "register":7, "mask":0x07 } ] },
+	"VNCSERVERUI" : { "isLit" : False, "cliParameter" : "G", "spiParameters" : [ { "register":7, "mask":0x80 } ] }
 }
 #lampCliStringDefault = "FIJKLMNOPQRSTUVWXd"
 lampCliStringDefault = ""
