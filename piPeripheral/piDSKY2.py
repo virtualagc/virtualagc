@@ -681,7 +681,7 @@ def updateLamps():
 				parameters = lampStatuses[key]["spiParameters"]
 				for i in range(0, len(parameters)):
 					# Note that all the address fields should be 1..8.
-					ledArray[parameters[i].register] |= parameters[i].mask
+					ledArray[parameters[i]["register"]] |= parameters[i]["mask"]
 		
 		# Write out the registers that have changed.
 		for i in range(0,8):
