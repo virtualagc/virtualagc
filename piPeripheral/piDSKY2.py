@@ -74,6 +74,21 @@
 #				of psutil (that I think can happen when trying
 #				to get the attributes of a process which has
 #				just disappeared).
+#		2017-11-29 RSB	Initial attempt at coding up a PIGPIO-based
+#				solution for running the indicator lamps,
+#				vs using the external program 'led-panel'.
+#				The logic is "complete", but I don't have any
+#				of the technical documentation for the LED
+#				board and don't recall the part number of the
+#				driver chip :-), so it's pretty much guaranteed
+#				not to work as-is.  Nevertheless, stuff like
+#				the SPI API can be checked out to a certain
+#				degree.
+#
+# About the design of this program ... yes, a real Python developer would 
+# objectify it and have lots and lots of individual models defining the objects.
+# However, I'm not a real Python developer, and this is simply one stand-alone
+# file comprising all of the functionality.
 #
 # In this hardware model:
 #
@@ -85,12 +100,16 @@
 #	(0 1 2 3 4 5 6 7 8 9 + - V N C P K R Enter) when the physical DSKY's
 #	buttons are pressed.
 #    4. The DSKY's discrete indicator lamps (i.e., the upper left section
-#	of the DSKY's front panel) are accessed by TBD.
+#	of the DSKY's front panel) are accessed either by shelling out to the
+#	'led-panel' program for each interaction, or else by using the PIGPIO
+#	module to directly control the Pi's SPI bus on the GPIO.  The former
+#	is by default, and the latter is done if there is a command-line
+#	parameter --pigpio=1.
 #    5. The DSKY's upper right portion of the front panel (i.e., the 
 #	numeric registers, COMP ACTY indicator, etc.) consists of an LCD
 #	panel attached to the Pi via HDMI, composite video, or some other
 #	means.  I.e., it is the display which Raspian uses for its GUI
-#	desktop.
+#	desktop.  It is accessed using the tkinter module.
 #
 # May require "sudo apt-get install python3-tk".
 #
@@ -114,6 +133,7 @@
 import time
 import os
 import signal
+import sys
 HOME = os.path.expanduser("~")
 
 # Parse command-line arguments.
@@ -123,6 +143,7 @@ cli.add_argument("--host", help="Host address of yaAGC, defaulting to localhost.
 cli.add_argument("--port", help="Port for yaAGC, defaulting to 19798.", type=int)
 cli.add_argument("--window", help="Use window rather than full screen for LCD.")
 cli.add_argument("--slow", help="For use on really slow host systems.")
+cli.add_argument("--pigpio", help="Use PIGPIO rather than led-panel for lamp control. The value is a brightness-intensity setting, 0-15.")
 args = cli.parse_args()
 
 # Responsiveness timing.
@@ -238,6 +259,56 @@ displayGraphic(colD4, topR3, imageDigitBlank)
 displayGraphic(colD5, topR3, imageDigitBlank)
 
 ###################################################################################
+# Stuff related to control of the lamp board via PIGPIO and SPI on the Pi's GPIO.
+
+# Initialize the PIGPIO API.  Note that LED-driver chip we're going to 
+# interface to has a 10 Mbaud SPI bus, and the PIGPIO docs indicate that
+# the SPI bus probably won't work above 30 Mbaud, so 10 Mbaud is probably
+# okay.  I arbitrarily cut this down to 100K.
+gpio = ""
+spiHandle = -1
+spiChannel = 0
+spiBaud = 100000
+spiErrorMessageWaitTime = 3
+
+# Writes to a register of the LED driver chip via the SPI bus.  The
+# register address is 0..15, and the value is 0..255.
+def writeSpi(address, value):
+	global gpio, spiHandle
+	gpio.spi_write(spiHandle, [ address, value ])
+
+if args.pigpio:
+	import pigpio
+	gpio = pigpio.pi()
+	if not gpio.connected:
+		sys.stderr.write("Cannot connect to PIGPIO server.\n")
+		time.sleep(spiErrorMessageWaitTime)
+		os.exit(1)
+	spiHandle = spi_open(spiChannel, spiBaud, 0x0000) # CE0, main SPI device, mode 0.
+	if spiHandle < 0:
+		sys.stderr.write("Cannot open SPI channel.\n")
+		time.sleep(spiErrorMessageWaitTime)
+		os.exit(1)
+	
+	# Set up the LED-driver chip.
+	for i in range(1, 9):
+		writeSpi(i, 0) # The initial settings of the "digits".
+	writeSpi(9, 0) # No BCD decoding.
+	writeSpi(10, args.pigpio) # Brightness-PWM setting, 0..15.
+	writeSpi(11, 7) # All 8 digits are controlled.
+	writeSpi(12, 0) # Not in shut-down mode.
+	
+	# Simply a test of the display and the code above, 
+	# using the chip's display-test function.
+	print("SPI test ...")
+	for i in range(0, 10):
+		writeSpi(15, 1)
+		time.sleep(1)
+		writeSpi(15, 0)
+		time.sleep(1)
+	print("SPI test completed.")
+
+###################################################################################
 # Some utilities I happen to use in my sample hardware abstraction functions, but
 # not of value outside of that, unless you happen to be implementing DSKY functionality
 # in a similar way.
@@ -347,9 +418,7 @@ def parseDskyKey(ch):
 	return returnValue	
 
 # This function turns keyboard echo on or off.
-import sys
 import termios
-import atexit
 def echoOn(control):
 	fd = sys.stdin.fileno()
 	new = termios.tcgetattr(fd)
@@ -557,22 +626,29 @@ def vnFlashingStop():
 		displayGraphic(colPN + digitWidth, topVN, vnImage4)
 		vnFlashing = False
 
+# The following dictionary gives, for each indicator lamp:
+#	Whether or not it is currently lit.
+#	Command-line parameters for the shell function 'led-panel' to turn on that lamp.
+#	A list of registers and bit-masks (for the registers) for an LED-driver chip
+#		connected to the Pi via the SPI bus for turning that lamp.
+# Which of the two sets of parameters ends up being used is dependendent on the 
+# --pigpio command-line parameter. 
 lampStatuses = {
-	"UPLINK ACTY" : { "isLit" : False, "cliParameter" : "3" },
-	"TEMP" : { "isLit" : False, "cliParameter" : "2" },
-	"NO ATT" : { "isLit" : False, "cliParameter" : "5" },
-	"GIMBAL LOCK" : { "isLit" : False, "cliParameter" : "4" },
-	"DSKY STANDBY" : { "isLit" : False, "cliParameter" : "7" },
-	"PROG" : { "isLit" : False, "cliParameter" : "6" },
-	"OPR ERR" : { "isLit" : False, "cliParameter" : "9" },
-	"RESTART" : { "isLit" : False, "cliParameter" : "8" },
-	"KEY REL" : { "isLit" : False, "cliParameter" : "B" },
-	"TRACKER" : { "isLit" : False, "cliParameter" : "A" },
-	"ALT" : { "isLit" : False, "cliParameter" : "C" },
-	"VEL" : { "isLit" : False, "cliParameter" : "E" },
-	"PRIO DSP" : { "isLit" : False, "cliParameter" : "D" },
-	"NO DAP" : { "isLit" : False, "cliParameter" : "F" },
-	"VNCSERVERUI" : { "isLit" : False, "cliParameter" : "G" }
+	"UPLINK ACTY" : { "isLit" : False, "cliParameter" : "3", "spiParameters" : [ { register:1, mask:0xf0 } ] },
+	"TEMP" : { "isLit" : False, "cliParameter" : "2", "spiParameters" : [ { register:1, mask:0x0f } ] },
+	"NO ATT" : { "isLit" : False, "cliParameter" : "5", "spiParameters" : [ { register:2, mask:0xf0 } ] },
+	"GIMBAL LOCK" : { "isLit" : False, "cliParameter" : "4", "spiParameters" : [ { register:2, mask:0x0f } ] },
+	"DSKY STANDBY" : { "isLit" : False, "cliParameter" : "7", "spiParameters" : [ { register:3, mask:0xf0 } ] },
+	"PROG" : { "isLit" : False, "cliParameter" : "6", "spiParameters" : [ { register:3, mask:0x0f } ] },
+	"OPR ERR" : { "isLit" : False, "cliParameter" : "9", "spiParameters" : [ { register:4, mask:0xf0 } ] },
+	"RESTART" : { "isLit" : False, "cliParameter" : "8", "spiParameters" : [ { register:4, mask:0x0f } ] },
+	"KEY REL" : { "isLit" : False, "cliParameter" : "B", "spiParameters" : [ { register:5, mask:0xf0 } ] },
+	"TRACKER" : { "isLit" : False, "cliParameter" : "A", "spiParameters" : [ { register:5, mask:0x0f } ] },
+	"ALT" : { "isLit" : False, "cliParameter" : "C", "spiParameters" : [ { register:6, mask:0xf0 } ] },
+	"VEL" : { "isLit" : False, "cliParameter" : "E", "spiParameters" : [ { register:6, mask:0x0f } ] },
+	"PRIO DSP" : { "isLit" : False, "cliParameter" : "D", "spiParameters" : [ { register:7, mask:0xf0 } ] },
+	"NO DAP" : { "isLit" : False, "cliParameter" : "F", "spiParameters" : [ { register:7, mask:0x0f } ] },
+	"VNCSERVERUI" : { "isLit" : False, "cliParameter" : "G", "spiParameters" : [ { register:8, mask:0xff } ] }
 }
 #lampCliStringDefault = "FIJKLMNOPQRSTUVWXd"
 lampCliStringDefault = ""
@@ -588,39 +664,73 @@ def flushLampUpdates(lampCliString):
 import psutil
 lampExecCheckCount = 0
 lampUpdateTimer = threading.Timer(lampDeadtime, flushLampUpdates)
+lastLedArray = [ 0, 0, 0, 0, 0, 0, 0, 0 ]
 def updateLamps():
-	global lampUpdateTimer, lampExecCheckCount
-	global lastLampCliString
-	lampCliString = ""
-	for key in lampStatuses:
-		if lampStatuses[key]["isLit"]:
-			lampCliString += lampStatuses[key]["cliParameter"]
-	lampCliString += lampCliStringDefault
-	if lampCliString == lastLampCliString:
-		return
-	lampExecCheckCount += 1
-	lampUpdateTimer.cancel()
-	ledPanelRunning = False
-	for proc in psutil.process_iter():
-		try:
-			info = proc.as_dict(attrs=['name'])
-			if "led-panel" in info['name']:
-				ledPanelRunning = True
-				break
-		except psutil.NoSuchProcess:
-			pass
-	if ledPanelRunning:
-		print("Delaying lamp flush to avoid overlap ...")
-		lampExecCheckCount = 0
-		lampUpdateTimer = threading.Timer(lampDeadtime, updateLamps)
-		lampUpdateTimer.start()
-		return
-	if lampExecCheckCount < 2:
+	global lastLedArray
+	if args.pigpio:
+		# For directly accessing LED-controller chip via
+		# SPI bus using PIGPIO library.
+		
+		# First step, determine what all bits need to be set in the chip's
+		# digit registers.
+		ledArray = [ 0, 0, 0, 0, 0, 0, 0, 0 ]
+		for key in lampStatuses:
+			if lampStatuses[key]["isLit"]:
+				parameters = lampStatuses[key]["spiParameters"]
+				for i in range(0, len(parameters)):
+					# Note that all the address fields should be 1..8.
+					ledArray[parameters[i].register] |= parameters[i].mask
+		
+		# Write out the registers that have changed.
+		for i in range(0,8):
+			if ledArray[i] != lastLedArray[i]:
+				print("write SPI " + str(1 + i) + " <- " + hex(ledArray[i]))
+				writeSpi(1 + i, ledArray[i])
+				lastLedArray[i] = ledArray[i]
+	else:
+		# For shelling out to 'led-panel' program.
+		
+		global lampUpdateTimer, lampExecCheckCount
+		global lastLampCliString
+		
+		# First step, determine what led-panel's CLI parameter string will be.
+		lampCliString = ""
+		for key in lampStatuses:
+			if lampStatuses[key]["isLit"]:
+				lampCliString += lampStatuses[key]["cliParameter"]
+		lampCliString += lampCliStringDefault
+		
+		# If unchanged, do nothing.
+		if lampCliString == lastLampCliString:
+			return
+		
+		# Have to determine if led-panel is still running from before, in
+		# which case we can't start it again and have to retry later.			
+		lampExecCheckCount += 1
+		lampUpdateTimer.cancel()
+		ledPanelRunning = False
+		for proc in psutil.process_iter():
+			try:
+				info = proc.as_dict(attrs=['name'])
+				if "led-panel" in info['name']:
+					ledPanelRunning = True
+					break
+			except psutil.NoSuchProcess:
+				pass
+		if ledPanelRunning:
+			print("Delaying lamp flush to avoid overlap ...")
+			lampExecCheckCount = 0
 			lampUpdateTimer = threading.Timer(lampDeadtime, updateLamps)
 			lampUpdateTimer.start()
 			return
-	lampExecCheckCount = 0
-	flushLampUpdates(lampCliString)
+		if lampExecCheckCount < 2:
+				lampUpdateTimer = threading.Timer(lampDeadtime, updateLamps)
+				lampUpdateTimer.start()
+				return
+		lampExecCheckCount = 0
+		
+		# Everything is swell, so run 'led-panel'.
+		flushLampUpdates(lampCliString)
 updateLamps()
 
 # This checks to see if vncserverui is running, and turns on a lamp if so.
@@ -998,6 +1108,10 @@ def eventLoop():
 			screenshot()
 			root.destroy()
 			echoOn(True)
+			if spiHandle >= 0:
+				gpio.spi_close(spiHandle)
+			if gpio != "":
+				gpio.stop()
 			return
 		for i in range(0, len(externalData)):
 			packetize(externalData[i])
@@ -1010,8 +1124,7 @@ eventLoopThread = threading.Thread(target=eventLoop)
 eventLoopThread.start()
 
 root.mainloop()
-print(threading.enumerate())
-#sys.exit()
+
 os._exit(0)
 
 

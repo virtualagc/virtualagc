@@ -4,11 +4,20 @@
 # and that we are in the piPeripheral subdirectory of that clone.
 # Assumes the Pi executable for yaAGC is in the PATH.
 
+# Turn off keyboard repeat, but make sure it gets restored on exit.
+function cleanup {
+	echo -e "\nRestoring keyboard repeat ..."
+	xset r on
+}
+trap cleanup EXIT
+xset r off
+
+# For use with automateV35.py.
+sudo modprobe uinput
+
 cd ..
 SOURCEDIR="`pwd`"
 cd -
-
-sudo modprobe uinit
 
 # Parse the command-line arguments.
 LEDPATH="$SOURCEDIR/piPeripheral/led-panel"
@@ -39,30 +48,57 @@ do
 		--monitor)
 			MONITOR=yes
 			;;
+		--non-native)
+			NON_NATIVE=yes
+			;;
+		--pigpio=*)
+			PIGPIO="$i"
+			;;
 		*)
 			echo "Usage:"
-			echo "	cd piPeripheral"
-			echo "	./runPiDSKY2.sh [OPTIONS]"
+			echo "  cd piPeripheral"
+			echo "  ./runPiDSKY2.sh [OPTIONS]"
 			echo "The allowed options are:"
-			echo "	--window		Display DSKY registers as a 272x480 window"
-			echo "				rather than full screen."
-			echo "	--yaDSKY2		Run yaDSKY2 in addition to (in parallel with)"
-			echo "				the DSKY-register display.  Most useful if"
-			echo "				--window is also used."
-			echo "	--image-dir=PATH	Specify directory for alternate widget graphics."
-			echo "				The default is simply the piDSKY2-images"
-			echo "				subdirectory of the current directory."
-			echo "	--led-panel=PATH	Specify a path to the 'led-panel' program."
-			echo "				Defaults to simply 'led-panel' (in the current"
-			echo "				directory)."
-			echo "  --debug			Display extra messages useful in debugging piDSKY2."
+			echo "	--window                Display DSKY registers as a 272x480 window"
+			echo "                          rather than full screen."
+			echo "	--yaDSKY2               Run yaDSKY2 in addition to (in parallel with)"
+			echo "                          the DSKY-register display.  Most useful if"
+			echo "                          --window is also used."
+			echo "	--image-dir=PATH        Specify directory for alternate widget graphics."
+			echo "                          The default is simply the piDSKY2-images"
+			echo "                          subdirectory of the current directory."
+			echo "	--led-panel=PATH        Specify a path to the 'led-panel' program."
+			echo "                          Defaults to simply 'led-panel' (in the current"
+			echo "                          directory)."
+			echo "  --debug                 Display extra messages useful in debugging piDSKY2."
 			echo "  --agc-debug             Display extra messages useful in debugging yaAGC."
-			echo "  --monitor            	Monitor load, temperature, CPU clock."
+			echo "  --monitor               Monitor load, temperature, CPU clock."
+			echo "  --non-native            Running on a non-Pi computer."  
+			echo "  --pigpio=N              Use pigpio interface to control lamps.  Otherwise,"
+			echo "                          Shell out to 'led-panel' to control lamps.  Not"
+			echo "                          useful with --non-native, since pigpio is a native"
+			echo "                          Pi library.  The value of the parameter, N, is"
+			echo "                          a brightness intensity, varying from 0 (the least)"
+			echo "                          to 15 (the maximum)."         
 			exit
 			;;
 	esac
 	shift
 done
+if [[ "$NON_NATIVE" == "" && "$PIGPIO" != "" ]]
+then
+	# Start pigpiod.
+	# Note that there is a one-time setup for PIGPIO,
+	#	sudo apt-get install pigpio python3-pigpio
+	# The SPI device is not enabled in raspbian by default,
+	# so it's also necessary to do
+	#	sudo raspi-config
+	# and then use the Interfacing / SPI option to enable it.
+	# Note also that if pigpiod is already started, this
+	# won't start a second instance, but will merely show
+	# and error message (which we discard).
+	sudo pigpiod &>/dev/null
+fi
 
 killall yaAGC &>/dev/null
 killall yaDSKY2 &>/dev/null
@@ -87,6 +123,7 @@ else
 fi
 cp -a "$SOURCEDIR/yaDSKY2"/*.{png,jpg} $RAMDISK
 cp -a "$LEDPATH" $RAMDISK/led-panel
+
 
 while true
 do
@@ -177,21 +214,22 @@ do
 		YADSKY2_PID=$!
 	fi
 	clear
-	"$SOURCEDIR/piPeripheral/piSplash.py" $WINDOW &>/dev/null
+	if [[ "$DEBUG" == "" ]]
+	then
+		"$SOURCEDIR/piPeripheral/piSplash.py" $WINDOW &>/dev/null
+	fi
 	if [[ "$MONITOR" != "" ]]
 	then
 		xterm -e "$SOURCEDIR/piPeripheral/backgroundStatus.sh" &
 		STATUS_PID=$!
 	fi
-	xset r off
 	if [[ "$DEBUG" == "" ]]
 	then
-		"$SOURCEDIR/piPeripheral/piDSKY2.py" --port=19697 $WINDOW $SLOW >/dev/null
+		"$SOURCEDIR/piPeripheral/piDSKY2.py" --port=19697 $WINDOW $SLOW $PIGPIO >/dev/null
 	else
-		"$SOURCEDIR/piPeripheral/piDSKY2.py" --port=19697 $WINDOW $SLOW 
+		"$SOURCEDIR/piPeripheral/piDSKY2.py" --port=19697 $WINDOW $SLOW $PIGPIO
 		read -p "Hit Enter to continue ..."
 	fi
-	xset r on
 	echo "Cleaning up ..."
 	kill $YAGC_PID $YADSKY2_PID $STATUS_PID
 	wait $YAGC_PID $YADSKY2_PID $STATUS_PID &>/dev/null
