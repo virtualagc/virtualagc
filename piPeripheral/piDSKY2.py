@@ -294,7 +294,7 @@ if args.pigpio:
 	for i in range(1, 9):
 		writeSpi(i, 0) # The initial settings of the "digits".
 	writeSpi(9, 0) # No BCD decoding.
-	writeSpi(10, args.pigpio) # Brightness-PWM setting, 0..15.
+	writeSpi(10, int(args.pigpio)) # Brightness-PWM setting, 0..15.
 	writeSpi(11, 7) # All 8 digits are controlled.
 	writeSpi(12, 0) # Not in shut-down mode.
 	
