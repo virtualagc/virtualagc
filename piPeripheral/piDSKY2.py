@@ -284,7 +284,7 @@ if args.pigpio:
 		sys.stderr.write("Cannot connect to PIGPIO server.\n")
 		time.sleep(spiErrorMessageWaitTime)
 		os.exit(1)
-	spiHandle = spi_open(spiChannel, spiBaud, 0x0000) # CE0, main SPI device, mode 0.
+	spiHandle = gpio.spi_open(spiChannel, spiBaud, 0x0000) # CE0, main SPI device, mode 0.
 	if spiHandle < 0:
 		sys.stderr.write("Cannot open SPI channel.\n")
 		time.sleep(spiErrorMessageWaitTime)
