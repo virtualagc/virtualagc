@@ -1,8 +1,8 @@
 #!/bin/bash
 # Runs yaAGC and piDSKY2.py on a Raspberry Pi.
 # Assumes that the github repo for virtualagc has been cloned,
+# and the software has been built from source,
 # and that we are in the piPeripheral subdirectory of that clone.
-# Assumes the Pi executable for yaAGC is in the PATH.
 
 # Turn off keyboard repeat, but make sure it gets restored on exit.
 function cleanup {
@@ -87,16 +87,9 @@ do
 done
 if [[ "$NON_NATIVE" == "" && "$PIGPIO" != "" ]]
 then
-	# Start pigpiod.
-	# Note that there is a one-time setup for PIGPIO,
-	#	sudo apt-get install pigpio python3-pigpio
-	# The SPI device is not enabled in raspbian by default,
-	# so it's also necessary to do
-	#	sudo raspi-config
-	# and then use the Interfacing / SPI option to enable it.
-	# Note also that if pigpiod is already started, this
+	# Start pigpiod.  Note that if pigpiod is already started, this
 	# won't start a second instance, but will merely show
-	# and error message (which we discard).
+	# an error message (which we discard).
 	sudo pigpiod &>/dev/null
 fi
 

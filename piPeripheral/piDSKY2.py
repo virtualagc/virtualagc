@@ -88,7 +88,9 @@
 # About the design of this program ... yes, a real Python developer would 
 # objectify it and have lots and lots of individual models defining the objects.
 # However, I'm not a real Python developer, and this is simply one stand-alone
-# file comprising all of the functionality.
+# file comprising all of the functionality.  In other words, I don't see that
+# any of this code is particularly reusable, so I haven't bothered to attempt to
+# encapsulate it into reusable modules.
 #
 # In this hardware model:
 #
@@ -98,46 +100,65 @@
 #    3. The physical DSKY's keyboard is accessed as a normal keyboard (as
 #	far as Raspbian is concerned) that provides the usual keycodes
 #	(0 1 2 3 4 5 6 7 8 9 + - V N C P K R Enter) when the physical DSKY's
-#	buttons are pressed.
+#	buttons are pressed.  Additionally, there are some keycode aliases
+#	for the keycodes just mentioned, which can be used if alternate physical
+#	keypads are used.
 #    4. The DSKY's discrete indicator lamps (i.e., the upper left section
 #	of the DSKY's front panel) are accessed either by shelling out to the
 #	'led-panel' program for each interaction, or else by using the PIGPIO
 #	module to directly control the Pi's SPI bus on the GPIO.  The former
 #	is by default, and the latter is done if there is a command-line
-#	parameter --pigpio=1.
+#	parameter --pigpio=N (where N is a brightness level from 0 to 15).
 #    5. The DSKY's upper right portion of the front panel (i.e., the 
 #	numeric registers, COMP ACTY indicator, etc.) consists of an LCD
 #	panel attached to the Pi via HDMI, composite video, or some other
 #	means.  I.e., it is the display which Raspian uses for its GUI
 #	desktop.  It is accessed using the tkinter module.
 #
-# May require "sudo apt-get install python3-tk".
+# One-time setups needed:
 #
-# Additionally, Raspbian's RAM disk (/run/user/1000/) is used for all files
+#	sudo apt-get install python3-tk python3-pip imagemagick \
+#		python-imaging python-imaging-tk python3-psutil xterm
+#	sudo pip3 install pyscreenshot pillow
+#
+# For using the --pigpio feature (on a Pi), the following setups are also needed:
+# 
+#	sudo apt-get install pigpio python3-pigpio
+#
+# Moreover, hardware SPI is not enabled in raspbian by default, so for --pigpio on a Pi:
+#
+#	sudo raspi-config
+#
+# and then use the Interfacing / SPI option to enable the hardware SPI device.
+#
+# On a Pi, the entire software stack, including yaAGC, is probably best run by 
+# using the script
+#
+#		xterm [-fullscreen] -e runPiDSKY2.sh [OPTIONS]
+#
+# In terms of the software model, you basically have two threads, the tkinter module's
+# "root" thread (which is used for drawing the graphics mentioned in item #5 on the
+# list above, either full-screen or in a 272x480 window), and the "eventLoop" thread,
+# which handles all communication with yaAGC, receives keyboard inputs, and performs
+# all non-graphical processing, but decides which graphical widgets are supposed to 
+# be drawn.  All of the other code is just callbacks or auxiliary functions used by the
+# eventLoop thread. Additionally, Raspbian's RAM disk (/run/user/$UID/) is used for all files
 # created by the program, including any temporary files.
-#
-# The entire software stack, including yaAGC, is run by using the script
-#
-#		runPiDSKY2.sh
-#
-# The software model actually differs slightly from that of piPeripheral.py
-# and piDSKY.py, in that the event loop corresponding to those programs
-# is in fact running in its own thread.  The main thread is instead running
-# a separate event loop (namely that of the tkinter module) that is responsible
-# for handling graphics for the LCD. *HOWEVER*, the basic idea of piDSKY2.py
-# and piDSKY.py are very similar ... the principal difference is simply that
-# rather than printing text messages about incoming packets from the AGC as
-# piDSKY.py does, piDSKY2.py instead either turns indicator lights on/off
-# or else displays graphics on the LCD screen in response to these messages. 
 
 import time
 import os
 import signal
 import sys
-HOME = os.path.expanduser("~")
+import argparse
+import threading
+from tkinter import Tk, Label, PhotoImage
+import termios
+import fcntl
+from pyscreenshot import grab
+import psutil
+import socket
 
 # Parse command-line arguments.
-import argparse
 cli = argparse.ArgumentParser()
 cli.add_argument("--host", help="Host address of yaAGC, defaulting to localhost.")
 cli.add_argument("--port", help="Port for yaAGC, defaulting to 19798.", type=int)
@@ -146,7 +167,7 @@ cli.add_argument("--slow", help="For use on really slow host systems.")
 cli.add_argument("--pigpio", help="Use PIGPIO rather than led-panel for lamp control. The value is a brightness-intensity setting, 0-15.")
 args = cli.parse_args()
 
-# Responsiveness timing.
+# Responsiveness settings.
 if args.slow:
 	PULSE = 0.25
 	lampDeadtime = 0.25
@@ -154,7 +175,7 @@ else:
 	PULSE = 0.05
 	lampDeadtime = 0.1
 
-# Hardcoded characteristics of the host and port being used.  
+# Characteristics of the host and port being used for yaAGC communications.  
 if args.host:
 	TCP_IP = args.host
 else:
@@ -163,9 +184,6 @@ if args.port:
 	TCP_PORT = args.port
 else:
 	TCP_PORT = 19798
-
-import threading
-from tkinter import Tk, Label, PhotoImage
 
 # Set up root viewport for tkinter graphics
 root = Tk()
@@ -264,7 +282,8 @@ displayGraphic(colD5, topR3, imageDigitBlank)
 # Initialize the PIGPIO API.  Note that LED-driver chip we're going to 
 # interface to has a 10 Mbaud SPI bus, and the PIGPIO docs indicate that
 # the SPI bus probably won't work above 30 Mbaud, so 10 Mbaud is probably
-# okay.  I arbitrarily cut this down to 100K.
+# okay.  I arbitrarily cut this down to 100K, but an optimal setting should 
+# perhaps be determined empirically.
 gpio = ""
 spiHandle = -1
 spiChannel = 0
@@ -420,7 +439,6 @@ def parseDskyKey(ch):
 	return returnValue	
 
 # This function turns keyboard echo on or off.
-import termios
 def echoOn(control):
 	fd = sys.stdin.fileno()
 	new = termios.tcgetattr(fd)
@@ -433,14 +451,9 @@ def echoOn(control):
 	termios.tcsetattr(fd, termios.TCSANOW, new)
 echoOn(False)
 
-# For the following, the following one-time setup is needed on Raspbian.
-#	sudo apt-get install python3-pip imagemagick
-#	sudo pip3 install pyscreenshot
-#	sudo apt-get install python-imaging python-imaging-tk
-#	sudo pip3 install pillow
+# Get a screenshot.
 def screenshot():
 	global args
-	from pyscreenshot import grab
 	print("Creating screenshot ...")
 	img = grab(bbox=(0, 0, 272, 480))
 	img.save("lastscrn.gif")
@@ -450,7 +463,6 @@ def screenshot():
 # keyboard.  Returns either the key value (such as '0' or 'V'), or else
 # the value "" if no key was pressed.
 def get_char_keyboard_nonblock():
-	import fcntl
 	fd = sys.stdin.fileno()
 	oldterm = termios.tcgetattr(fd)
 	newattr = termios.tcgetattr(fd)
@@ -650,7 +662,7 @@ lampStatuses = {
 	"ALT" : { "isLit" : False, "cliParameter" : "C", "spiParameters" : [ { "register":6, "mask":0x07 } ] },
 	"NO DAP" : { "isLit" : False, "cliParameter" : "F", "spiParameters" : [ { "register":7, "mask":0x70 } ] },
 	"VEL" : { "isLit" : False, "cliParameter" : "E", "spiParameters" : [ { "register":7, "mask":0x07 } ] },
-	"VNCSERVERUI" : { "isLit" : False, "cliParameter" : "G", "spiParameters" : [ { "register":7, "mask":0x80 } ] }
+	"VNCSERVERUI" : { "isLit" : False, "cliParameter" : "G", "spiParameters" : [ { "register":1, "mask":0x80 } ] }
 }
 #lampCliStringDefault = "FIJKLMNOPQRSTUVWXd"
 lampCliStringDefault = ""
@@ -663,7 +675,6 @@ def flushLampUpdates(lampCliString):
 	global lastLampCliString
 	lastLampCliString = lampCliString
 	os.system("sudo ./led-panel '" + lampCliString + "' &")
-import psutil
 lampExecCheckCount = 0
 lampUpdateTimer = threading.Timer(lampDeadtime, flushLampUpdates)
 lastLedArray = [ 0, 0, 0, 0, 0, 0, 0, 0 ]
@@ -998,8 +1009,6 @@ def outputFromAGC(channel, value):
 ###################################################################################
 # Generic initialization (TCP socket setup).  Has no target-specific code, and 
 # shouldn't need to be modified unless there are bugs.
-
-import socket
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 s.setblocking(0)
