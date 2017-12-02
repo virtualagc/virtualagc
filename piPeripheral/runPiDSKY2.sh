@@ -12,9 +12,6 @@ function cleanup {
 trap cleanup EXIT
 xset r off
 
-# For use with automateV35.py.
-sudo modprobe uinput
-
 cd ..
 SOURCEDIR="`pwd`"
 cd -
@@ -54,6 +51,9 @@ do
 		--pigpio=*)
 			PIGPIO="$i"
 			;;
+		--piDSKY)
+			PIDSKY=yes
+			;;
 		*)
 			echo "Usage:"
 			echo "  cd piPeripheral"
@@ -79,12 +79,18 @@ do
 			echo "                          useful with --non-native, since pigpio is a native"
 			echo "                          Pi library.  The value of the parameter, N, is"
 			echo "                          a brightness intensity, varying from 0 (the least)"
-			echo "                          to 15 (the maximum)."         
+			echo "                          to 15 (the maximum)." 
+			echo "  --piDSKY                Run piDSKY.py rather than piDSKY2.py."        
 			exit
 			;;
 	esac
 	shift
 done
+if [[ "$PIDSKY" == "" ]]
+then
+	# For use with automateV35.py.
+	sudo modprobe uinput
+fi
 if [[ "$NON_NATIVE" == "" && "$PIGPIO" != "" ]]
 then
 	# Start pigpiod.  Note that if pigpiod is already started, this
@@ -207,16 +213,23 @@ do
 		YADSKY2_PID=$!
 	fi
 	clear
-	if [[ "$DEBUG" == "" ]]
+	if [[ "$DEBUG" == "" && "$PIDSKY" == "" ]]
 	then
 		"$SOURCEDIR/piPeripheral/piSplash.py" $WINDOW &>/dev/null
 	fi
-	if [[ "$MONITOR" != "" ]]
+	if [[ "$MONITOR" != "" && "$PIDSKY" == "" ]]
 	then
 		xterm -e "$SOURCEDIR/piPeripheral/backgroundStatus.sh" &
 		STATUS_PID=$!
 	fi
-	if [[ "$DEBUG" == "" ]]
+	if [[ "$PIDSKY" != "" ]]
+	then
+		"$SOURCEDIR/piPeripheral/piDSKY.py" --port=19697
+		if [[ "$DEBUG" != "" ]]
+		then
+			read -p "Hit Enter to continue ..."
+		fi
+	elif [[ "$DEBUG" == "" ]]
 	then
 		"$SOURCEDIR/piPeripheral/piDSKY2.py" --port=19697 $WINDOW $SLOW $PIGPIO >/dev/null
 	else
