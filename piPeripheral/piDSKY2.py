@@ -164,7 +164,7 @@ cli.add_argument("--host", help="Host address of yaAGC, defaulting to localhost.
 cli.add_argument("--port", help="Port for yaAGC, defaulting to 19798.", type=int)
 cli.add_argument("--window", help="Use window rather than full screen for LCD.")
 cli.add_argument("--slow", help="For use on really slow host systems.")
-cli.add_argument("--pigpio", help="Use PIGPIO rather than led-panel for lamp control. The value is a brightness-intensity setting, 0-15.")
+cli.add_argument("--pigpio", help="Use PIGPIO rather than led-panel for lamp control. The value is a brightness-intensity setting, 0-15.", type=int)
 args = cli.parse_args()
 
 # Responsiveness settings.
