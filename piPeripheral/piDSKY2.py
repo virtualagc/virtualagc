@@ -84,6 +84,7 @@
 #				not to work as-is.  Nevertheless, stuff like
 #				the SPI API can be checked out to a certain
 #				degree.
+#		2017-12-04 RSB	Fixed PIGPIO control of lamps, I think.
 #
 # About the design of this program ... yes, a real Python developer would 
 # objectify it and have lots and lots of individual models defining the objects.
