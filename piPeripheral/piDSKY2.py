@@ -315,19 +315,20 @@ if args.pigpio:
 	writeSpi(9, 0) # No BCD decoding.
 	writeSpi(10, int(args.pigpio)) # Brightness-PWM setting, 0..15.
 	writeSpi(11, 7) # All 8 digits are controlled.
-	writeSpi(12, 0) # Not in shut-down mode.
+	writeSpi(12, 1) # Not in shut-down mode.
 	
 	# Simply a test of the display and the code above, 
 	# using the chip's display-test function.
-	print("SPI test ...")
-	for i in range(0, 10):
-		print("On " + str(i))
-		writeSpi(15, 1)
-		time.sleep(1)
-		print("Off " + str(i))
-		writeSpi(15, 0)
-		time.sleep(1)
-	print("SPI test completed.")
+	if False:
+		print("SPI test ...")
+		for i in range(0, 10):
+			print("On " + str(i))
+			writeSpi(15, 1)
+			time.sleep(1)
+			print("Off " + str(i))
+			writeSpi(15, 0)
+			time.sleep(1)
+		print("SPI test completed.")
 
 ###################################################################################
 # Some utilities I happen to use in my sample hardware abstraction functions, but
