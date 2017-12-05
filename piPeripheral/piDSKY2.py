@@ -699,7 +699,7 @@ def updateLamps():
 		for i in range(0,8):
 			if ledArray[i] != lastLedArray[i]:
 				print("write SPI " + str(1 + i) + " <- " + hex(ledArray[i]))
-				writeSpi(1 + i, ledArray[i])
+				writeSpi(i, ledArray[i])
 				lastLedArray[i] = ledArray[i]
 	else:
 		# For shelling out to 'led-panel' program.
