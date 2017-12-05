@@ -991,7 +991,7 @@ def outputFromAGC(channel, value):
 				keyRel = "KEY REL OFF     "
 				updateLampStatuses("KEY REL", False)
 			if (value & 0o100) != 0:
-				oprErr = "OPR ERR FLASH   "
+				oprErr = "OPR ERR ON      "
 				updateLampStatuses("OPR ERR", True)
 			else:
 				oprErr = "OPR ERR OFF     "
@@ -1003,6 +1003,7 @@ def outputFromAGC(channel, value):
 				restart = "RESTART OFF     "
 				updateLampStatuses("RESTART", False)
 			print(standby + "   " + keyRel + "   " + oprErr + "   " + restart)
+			updateLamps()
 		else:
 			print("Received from yaAGC: " + oct(value) + " -> channel " + oct(channel))
 	return
