@@ -554,6 +554,10 @@ guiKeyTranslations.append(("KP_Prio", "9"))
 debugKey = ""
 def guiKeypress(event):
 	global guiKey, debugKey, guiKeyTranslations
+	if event.keysym == "Num_Lock":
+		# Pressing the NUM LOCK key turns key-repeat back on.
+		# So let's undo that.
+		os.system("xset r off &")
 	debugKey = event.keysym
 	for i in range(0, len(guiKeyTranslations)):
 		if debugKey == guiKeyTranslations[i][0]:
@@ -572,6 +576,7 @@ def tabKeypress(event):
 	debugKey = "Tab"
 	guiKey.append("K")
 root.bind_all('<Tab>', tabKeypress)
+os.system("xset r off &")
 
 # Converts a 5-bit code in channel 010 to " ", "0", ..., "9".
 def codeToString(code):
@@ -1126,6 +1131,7 @@ def eventLoop():
 				gpio.spi_close(spiHandle)
 			if gpio != "":
 				gpio.stop()
+			os.system("xset r on &")
 			return
 		for i in range(0, len(externalData)):
 			packetize(externalData[i])

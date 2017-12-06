@@ -10,7 +10,6 @@ function cleanup {
 	xset r on
 }
 trap cleanup EXIT
-xset r off
 
 cd ..
 SOURCEDIR="`pwd`"
@@ -127,6 +126,7 @@ cp -a "$LEDPATH" $RAMDISK/led-panel
 while true
 do
 	# Choose a mission.
+	xset r off
 	clear
 	echo "Available missions:"
 	echo "0 - Apollo 5 LM"
@@ -182,9 +182,67 @@ do
 		read -s -p "Password: " -t 30
 		if [[ "$REPLY" == "19697R" || "$REPLY" == "19697r" ]]
 		then
+			clear
+			echo "Maintenance menu:"
+			echo "1 - Reboot"
+			echo "2 - Shutdown"
+			echo "3 - Command line"
+			echo "4 - Desktop"
+			echo "5 - Missions (default)"
+			read -p "Choose a number: " -t 15 -n 1
 			echo ""
-			echo "Exiting ..."
-			exit
+			if [[ "$REPLY" == "1" ]]
+			then
+				echo "1 - Confirm reboot"
+				echo "2 - Don't reboot"
+				read -p "? " -n 1
+				echo ""
+				if [[ "$REPLY" == "1" ]]
+				then
+					sudo reboot
+				else
+					continue
+				fi
+			elif [[ "$REPLY" == "2" ]]
+			then
+				echo "1 - Confirm shutdown"
+				echo "2 - Don't shut down"
+				read -p "? " -n 1
+				echo ""
+				if [[ "$REPLY" == "1" ]]
+				then
+					sudo poweroff
+				else
+					continue
+				fi
+			elif [[ "$REPLY" == "3" ]]
+			then
+				echo "1 - Confirm exit to console"
+				echo "2 - Don't exit"
+				read -p "? " -n 1
+				echo ""
+				if [[ "$REPLY" == "1" ]]
+				then
+					exit
+				else
+					continue
+				fi
+			elif [[ "$REPLY" == "4" ]]
+			then
+				echo "1 - Confirm exit to desktop"
+				echo "2 - Don't exit"
+				read -p "? " -n 1
+				echo ""
+				if [[ "$REPLY" == "1" ]]
+				then
+					sudo killall xterm
+					exit
+				else
+					continue
+				fi
+			else
+				continue
+			fi
 		else
 			echo ""
 			echo "Permission denied."
