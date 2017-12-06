@@ -85,6 +85,7 @@
 #				the SPI API can be checked out to a certain
 #				degree.
 #		2017-12-04 RSB	Fixed PIGPIO control of lamps, I think.
+#		2017-12-06 RSB	Added 3 dots.
 #
 # About the design of this program ... yes, a real Python developer would 
 # objectify it and have lots and lots of individual models defining the objects.
@@ -216,6 +217,7 @@ imageProgOn = PhotoImage(file="piDSKY2-images/ProgOn.gif")
 imageVerbOn = PhotoImage(file="piDSKY2-images/VerbOn.gif")
 imageNounOn = PhotoImage(file="piDSKY2-images/NounOn.gif")
 imageSeparatorOn = PhotoImage(file="piDSKY2-images/SeparatorOn.gif")
+imageDot = PhotoImage(file="piDSKY2-images/Dot.gif")
 # Initial placement of all graphical objects on LCD panel.
 widgetStates = {}
 widgetLabels = {}
@@ -231,6 +233,8 @@ def displayGraphic(x, y, img):
 		widgetLabels[key].destroy()
 	widgetLabels[key] = Label(root, image=img, borderwidth=0, highlightthickness=0)
 	widgetLabels[key].place(x=x, y=y)
+topDot = 15
+dotSpacing = 92
 topProg = 36
 topVN = 149
 topR1 = 238
@@ -239,12 +243,16 @@ topR3 = 418
 signWidth = 22
 digitWidth = 50
 colSign = 0
+colDot = 133
 colPN = 172
 colD1 = colSign + signWidth
 colD2 = colD1 + digitWidth
 colD3 = colD2 + digitWidth
 colD4 = colD3 + digitWidth
 colD5 = colD4 + digitWidth
+displayGraphic(colDot, topDot, imageDot)
+displayGraphic(colDot, topDot + dotSpacing, imageDot)
+displayGraphic(colDot, topDot + 2 * dotSpacing, imageDot)
 displayGraphic(0, 0, imageCompActyOff)
 displayGraphic(colPN, 0, imageProgOn)
 displayGraphic(colPN, topProg, imageDigitBlank)
