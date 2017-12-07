@@ -160,6 +160,9 @@ from pyscreenshot import grab
 import psutil
 import socket
 
+homeDir = os.path.expanduser("~")
+print("Home = " + homeDir)
+
 # Parse command-line arguments.
 cli = argparse.ArgumentParser()
 cli.add_argument("--host", help="Host address of yaAGC, defaulting to localhost.")
@@ -466,7 +469,7 @@ def screenshot():
 	global args
 	print("Creating screenshot ...")
 	img = grab(bbox=(0, 0, 272, 480))
-	img.save("lastscrn.gif")
+	img.save(homeDir + "/lastscrn.gif")
 	print("Screenshot saved as lastscrn.gif");
 
 # This function is a non-blocking read of a single character from the
