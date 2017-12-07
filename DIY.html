@@ -86,6 +86,7 @@
     functional AGC+DSKY replica, such as <a
 href="https://www.ebay.com/itm/DSKY-with-Integrated-AGC-runs-NASA-MIT-Code/263190750503?hash=item3d47642527:g:IwoAAOSw35lZePeX">one
 
+
       of those sold on eBay</a> by Sam Ammons.&nbsp; It's all very well
     that you now have a working AGC plus DSKY-lookalike that can run
     (say) the Apollo 11 LM AGC software, but you don't have a LM, do
@@ -149,7 +150,7 @@ href="https://www.ebay.com/itm/DSKY-with-Integrated-AGC-runs-NASA-MIT-Code/26319
       </li>
     </ol>
     <p>Actually, I lied in the title of this page and in item #7 of the
-      list above.&nbsp; There's no profit, unless you're own personal
+      list above.&nbsp; There's no profit, unless your own personal
       enjoyment and sense of accomplishment counts as profit.&nbsp;
       (Prove me wrong!)&nbsp; But the other topics, #1-5, are discussed
       further throughout the remainder of this page.</p>
@@ -223,6 +224,7 @@ href="https://www.ebay.com/itm/DSKY-with-Integrated-AGC-runs-NASA-MIT-Code/26319
     As for the peripheral template program, though, it is called
     piPeripheral.py and <a
 href="https://github.com/virtualagc/virtualagc/blob/master/piPeripheral/piPeripheral.py">you
+
 
       can find it in our GitHub repository</a>.&nbsp; As the name
     implies, piPeripheral.py is written in <a
@@ -314,6 +316,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/piPeripheral/piPeriph
     to the "Block 2" AGC.&nbsp; This is covered in more detail than many
     mortals would like on our <a href="assembly_language_manual.html">Block
 
+
       2 AGC Language page</a>, so to start out, you'll either want to
     look that over, or at least to look over the concise "<a
       href="http://www.ibiblio.org/apollo/hrst/archive/1689.pdf">AGC4
@@ -336,6 +339,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/piPeripheral/piPeriph
     But that's a bit of an over-simplification.&nbsp; The actual
     significance of address 04000 is that it's the start of an <a
       href="https://en.wikipedia.org/wiki/Interrupt_vector_table">interrupt-vector
+
 
       table</a> — i.e., of code which is instantly automatically
     executed whenever certain exceptional conditions occurs.&nbsp; For
@@ -467,6 +471,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/piPeripheral/piPeriph
     device.&nbsp; This is known as a GOJAM.&nbsp; I'm not totally sure
     what all of these conditions are, but <a
       href="https://www.ibiblio.org/apollo/Documents/LUM225-PV_text.pdf">LUMINARY
+
 
       Memo #225</a> contains a handy list of 8 of them.&nbsp; The ones
     that are relevant to software that you yourself write are these:<br>
@@ -644,6 +649,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/piPeripheral/piPeriph
           interrupt in 40 ms.<br>
           &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
+
           TS&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; TIME3<br>
         </tt></p>
       <p><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; #
@@ -676,11 +682,14 @@ href="https://github.com/virtualagc/virtualagc/blob/master/piPeripheral/piPeriph
           Q, and exit the interrupt<br>
           &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
+
           EXTEND<br>
           &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
+
           QXCH&nbsp;&nbsp;&nbsp; QRUPT<br>
           &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
 
           RESUME&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; </tt><br>
       </p>
@@ -716,6 +725,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/piPeripheral/piPeriph
       like?&nbsp; Note that <a
         href="developer.html#Table_of_IO_Channels">info about the i/o
         channels pertaining to the DSKY are on the developer page</a>.&nbsp;
+
 
       Well, perhaps you'd use the KEYRUPT1 interrupt-service routine to
       read the input channel containing the DSKY keycode, and then store
@@ -783,11 +793,14 @@ href="https://github.com/virtualagc/virtualagc/blob/master/piPeripheral/piPeriph
           L, and Q, and exit the interrupt<br>
           &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
+
           EXTEND<br>
           &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
+
           QXCH&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; QRUPT<br>
           &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
 
           RESUME&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; </tt></p>
       <p><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; .<br>
@@ -883,6 +896,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/piPeripheral/piPeriph
     <p>A slightly sleeker form of this code called <a
 href="https://github.com/virtualagc/virtualagc/blob/master/piPeripheral/piPeripheral.agc">piPeripheral.agc,
 
+
         which can be assembled with yaYUL and actually works if it is
         run, can be found in our GitHub repository</a>.<br>
     </p>
@@ -954,6 +968,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/piPeripheral/piPeriph
     The existing AGC code which seems to fit the bill is <a
       href="https://github.com/virtualagc/virtualagc/tree/master/Retread44">RETREAD
 
+
       44</a>, which does not even use a third of the fixed program
     memory.<br>
     <br>
@@ -971,6 +986,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/piPeripheral/piPeriph
         inline !important; float: none; background-color: rgb(255, 255,
         255);"> This page is available under the <a
           href="https://creativecommons.org/publicdomain/zero/1.0/">Creative
+
 
 
 
