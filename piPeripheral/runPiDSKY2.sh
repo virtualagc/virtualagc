@@ -139,6 +139,7 @@ do
 	echo "7 - Apollo 13 LM"
 	echo "8 - Apollo 15-17 CM"
 	echo "9 - Apollo 15-17 LM"
+	#echo "V - Bare-metal"
 	read -p "Choose a number: " -t 15 -n 1
 	if [[ "$REPLY" == "0" ]]
 	then
@@ -176,6 +177,10 @@ do
 	then
 		CORE=Luminary210
 		CFG=LM1
+	#elif [[ "$REPLY" == "V" || "$REPLY" == "v" ]]
+	#then
+	#	CORE=piPeripheral
+	#	CFG=LM
 	elif [[ "$REPLY" == "R" || "$REPLY" == "r" ]]
 	then
 		echo ""
