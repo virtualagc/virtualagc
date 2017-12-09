@@ -87,7 +87,11 @@
 #		2017-12-04 RSB	Fixed PIGPIO control of lamps, I think.
 #		2017-12-06 RSB	Added 3 dots.
 #		2017-12-09 RSB	Added --record and --playback, though only 
-#				--record is implemented so far.
+#				--record is implemented so far.  Cleaned up
+#				the record-keeping about the last values of
+#				the input channels a lot, so that a lot of
+#				unnecessary duplication of operations is 
+#				presumably prevented.
 #
 # About the design of this program ... yes, a real Python developer would 
 # objectify it and have lots and lots of individual models defining the objects.
@@ -806,241 +810,270 @@ def timersStop():
 # with this output data, which is not processed additionally in any way by the 
 # generic portion of the program. As a test, I simply display the outputs for 
 # those channels relevant to the DSKY.
-last10 = 1234567
-last11 = 1234567
-last13 = 1234567
-last163 = 1234567
+lastInputChannels = {
+	"0o10-1" : 1234567,
+	"0o10-2" : 1234567,
+	"0o10-3" : 1234567,
+	"0o10-4" : 1234567,
+	"0o10-5" : 1234567,
+	"0o10-6" : 1234567,
+	"0o10-7" : 1234567,
+	"0o10-8" : 1234567,
+	"0o10-9" : 1234567,
+	"0o10-10" : 1234567,
+	"0o10-11" : 1234567,
+	"0o10-12" : 1234567,
+	"0o11" : 1234567,
+	"0o13" : 1234567,
+	"0o163" : 1234567
+}
 plusMinusState1 = 0
 plusMinusState2 = 0
 plusMinusState3 = 0
 lastKeyRel = ""
 def outputFromAGC(channel, value):
-	# These lastNN values are just used to cut down on the number of messages printed,
-	# when the same value is output over and over again to the same channel, because
-	# that makes debugging harder.
-	global last10, last11, last13, last163, plusMinusState1, plusMinusState2, plusMinusState3
+	# These lastInputChannels[] values are just used to avoid time-consuming redoing
+	# of operations which aren't actual changes; cuts down on debugging messages
+	# as well
+	global lastInputChannels, plusMinusState1, plusMinusState2, plusMinusState3
 	global vnFlashing, vnTimer, vnCurrentlyOn, vnImage1, vnImage2, vnImage3, vnImage4, vnTestOverride
 	global lastKeyRel
-	if (channel == 0o13):
-		value &= 0o3000
-	if (channel == 0o10 and value != last10) or (channel == 0o11 and value != last11) or (channel == 0o13 and value != last13) or (channel == 0o163 and value != last163):
-		if args.record:
-			global lastRecordedTime
-			currentTime = time.time()
-			if lastRecordedTime < 0:
-				lastRecordedTime = currentTime
-			try:
-				recordingFile.write(str(round(1000 * (currentTime - lastRecordedTime))) + " " + ("%o" % channel) + " " + ("%o" % value) + "\n")
-			except:
-				pass
+	rawChannelValue = value
+	if channel == 0o10:
+		relay = (value >> 11) & 0o17
+		channelName = "0o10-" + str(relay)
+		value &= 0o3777
+		if relay < 1 or relay > 12:
+			return 
+	elif channel == 0o11:
+		channelName = "0o11"
+		value &= 0x2E
+	elif channel == 0o13:
+		channelName = "0o13"
+		value &= 0x200
+	elif channel == 0o163:
+		channelName = "0o163"
+		value &= 0o720
+	else:
+		return
+	if (channelName in lastInputChannels) and lastInputChannels[channelName] == value:
+		return
+	lastInputChannels[channelName] = value
+	value = rawChannelValue
+	if args.record:
+		global lastRecordedTime
+		currentTime = time.time()
+		if lastRecordedTime < 0:
 			lastRecordedTime = currentTime
-		if channel == 0o10:
-			last10 = value
-			aaaa = (value >> 11) & 0x0F
-			b = (value >> 10) & 0x01
-			ccccc = (value >> 5) & 0x1F
-			ddddd = value & 0x1F
-			if aaaa != 12:
-				sc,ic = codeToString(ccccc)
-				sd,id = codeToString(ddddd)
-			if aaaa == 11:
-				print(sc + " -> M1   " + sd + " -> M2")
-				displayGraphic(colPN, topProg, ic)
-				displayGraphic(colPN + digitWidth, topProg, id)
-			elif aaaa == 10:
-				print(sc + " -> V1   " + sd + " -> V2")
-				vnImage1 = ic
-				vnImage2 = id
-				displayGraphic(0, topVN, ic)
-				displayGraphic(digitWidth, topVN, id)
-			elif aaaa == 9:
-				print(sc + " -> N1   " + sd + " -> N2")
-				vnImage3 = ic
-				vnImage4 = id
-				displayGraphic(colPN, topVN, ic)
-				displayGraphic(colPN + digitWidth, topVN, id)
-			elif aaaa == 8:
-				print("          " + sd + " -> 11")
-				displayGraphic(colD1, topR1, id)
-			elif aaaa == 7:
-				plusMinus = "  "
-				if b != 0:
-					plusMinus = "1+"
-					plusMinusState1 |= 1
-				else:
-					plusMinusState1 &= ~1
-				displaySign(colSign, topR1, plusMinusState1)
-				print(sc + " -> 12   " + sd + " -> 13   " + plusMinus)
-				displayGraphic(colD2, topR1, ic)
-				displayGraphic(colD3, topR1, id)
-			elif aaaa == 6:
-				plusMinus = "  "
-				if b != 0:
-					plusMinus = "1-"
-					plusMinusState1 |= 2
-				else:
-					plusMinusState1 &= ~2
-				displaySign(colSign, topR1, plusMinusState1)
-				print(sc + " -> 14   " + sd + " -> 15   " + plusMinus)
-				displayGraphic(colD4, topR1, ic)
-				displayGraphic(colD5, topR1, id)
-			elif aaaa == 5:
-				plusMinus = "  "
-				if b != 0:
-					plusMinus = "2+"
-					plusMinusState2 |= 1
-				else:
-					plusMinusState2 &= ~1
-				displaySign(colSign, topR2, plusMinusState2)
-				print(sc + " -> 21   " + sd + " -> 22   " + plusMinus)
-				displayGraphic(colD1, topR2, ic)
-				displayGraphic(colD2, topR2, id)
-			elif aaaa == 4:
-				plusMinus = "  "
-				if b != 0:
-					plusMinus = "2-"
-					plusMinusState2 |= 2
-				else:
-					plusMinusState2 &= ~2
-				displaySign(colSign, topR2, plusMinusState2)
-				print(sc + " -> 23   " + sd + " -> 24   " + plusMinus)
-				displayGraphic(colD3, topR2, ic)
-				displayGraphic(colD4, topR2, id)
-			elif aaaa == 3:
-				print(sc + " -> 25   " + sd + " -> 31")
-				displayGraphic(colD5, topR2, ic)
-				displayGraphic(colD1, topR3, id)
-			elif aaaa == 2:
-				plusMinus = "  "
-				if b != 0:
-					plusMinus = "3+"
-					plusMinusState3 |= 1
-				else:
-					plusMinusState3 &= ~1
-				displaySign(colSign, topR3, plusMinusState3)
-				print(sc + " -> 32   " + sd + " -> 33   " + plusMinus)
-				displayGraphic(colD2, topR3, ic)
-				displayGraphic(colD3, topR3, id)
-			elif aaaa == 1:
-				plusMinus = "  "
-				if b != 0:
-					plusMinus = "3-"
-					plusMinusState3 |= 2
-				else:
-					plusMinusState3 &= ~2
-				displaySign(colSign, topR3, plusMinusState3)
-				print(sc + " -> 34   " + sd + " -> 35   " + plusMinus)
-				displayGraphic(colD4, topR3, ic)
-				displayGraphic(colD5, topR3, id)
-			elif aaaa == 12:
-				vel = "VEL OFF         "
-				if (value & 0x04) != 0:
-					vel = "VEL ON          "
-					updateLampStatuses("VEL", True)
-				else:
-					updateLampStatuses("VEL", False)
-				noAtt = "NO ATT OFF      "
-				if (value & 0x08) != 0:
-					noAtt = "NO ATT ON       "
-					updateLampStatuses("NO ATT", True)
-				else:
-					updateLampStatuses("NO ATT", False)
-				alt = "ALT OFF         "
-				if (value & 0x10) != 0:
-					alt = "ALT ON          "
-					updateLampStatuses("ALT", True)
-				else:
-					updateLampStatuses("ALT", False)
-				gimbalLock = "GIMBAL LOCK OFF "
-				if (value & 0x20) != 0:
-					gimbalLock = "GIMBAL LOCK ON  "
-					updateLampStatuses("GIMBAL LOCK", True)
-				else:
-					updateLampStatuses("GIMBAL LOCK", False)
-				tracker = "TRACKER OFF     "
-				if (value & 0x80) != 0:
-					tracker = "TRACKER ON      "
-					updateLampStatuses("TRACKER", True)
-				else:
-					updateLampStatuses("TRACKER", False)
-				prog = "PROG OFF        "
-				if (value & 0x100) != 0:
-					prog = "PROG ON         "
-					updateLampStatuses("PROG", True)
-				else:
-					updateLampStatuses("PROG", False)
-				print(vel + "   " + noAtt + "   " + alt + "   " + gimbalLock + "   " + tracker + "   " + prog)
-				updateLamps()
-		elif channel == 0o11:
-			last11 = value
-			compActy = "COMP ACTY OFF   "
-			if (value & 0x02) != 0:
-				compActy = "COMP ACTY ON    "
-				displayGraphic(0, 0, imageCompActyOn)
+		try:
+			#recordingFile.write("lastInputChannels[\"" + channelName + "\"] = " + oct(lastInputChannels[channelName]) + "\n") 
+			recordingFile.write(str(round(1000 * (currentTime - lastRecordedTime))) + " " + ("%o" % channel) + " " + ("%o" % value) + "\n")
+		except:
+			pass
+		lastRecordedTime = currentTime
+	if channel == 0o10:
+		aaaa = relay
+		b = (value >> 10) & 0x01
+		ccccc = (value >> 5) & 0x1F
+		ddddd = value & 0x1F
+		if aaaa != 12:
+			sc,ic = codeToString(ccccc)
+			sd,id = codeToString(ddddd)
+		if aaaa == 11:
+			print(sc + " -> M1   " + sd + " -> M2")
+			displayGraphic(colPN, topProg, ic)
+			displayGraphic(colPN + digitWidth, topProg, id)
+		elif aaaa == 10:
+			print(sc + " -> V1   " + sd + " -> V2")
+			vnImage1 = ic
+			vnImage2 = id
+			displayGraphic(0, topVN, ic)
+			displayGraphic(digitWidth, topVN, id)
+		elif aaaa == 9:
+			print(sc + " -> N1   " + sd + " -> N2")
+			vnImage3 = ic
+			vnImage4 = id
+			displayGraphic(colPN, topVN, ic)
+			displayGraphic(colPN + digitWidth, topVN, id)
+		elif aaaa == 8:
+			print("          " + sd + " -> 11")
+			displayGraphic(colD1, topR1, id)
+		elif aaaa == 7:
+			plusMinus = "  "
+			if b != 0:
+				plusMinus = "1+"
+				plusMinusState1 |= 1
 			else:
-				displayGraphic(0, 0, imageCompActyOff)
-			uplinkActy = "UPLINK ACTY OFF "
+				plusMinusState1 &= ~1
+			displaySign(colSign, topR1, plusMinusState1)
+			print(sc + " -> 12   " + sd + " -> 13   " + plusMinus)
+			displayGraphic(colD2, topR1, ic)
+			displayGraphic(colD3, topR1, id)
+		elif aaaa == 6:
+			plusMinus = "  "
+			if b != 0:
+				plusMinus = "1-"
+				plusMinusState1 |= 2
+			else:
+				plusMinusState1 &= ~2
+			displaySign(colSign, topR1, plusMinusState1)
+			print(sc + " -> 14   " + sd + " -> 15   " + plusMinus)
+			displayGraphic(colD4, topR1, ic)
+			displayGraphic(colD5, topR1, id)
+		elif aaaa == 5:
+			plusMinus = "  "
+			if b != 0:
+				plusMinus = "2+"
+				plusMinusState2 |= 1
+			else:
+				plusMinusState2 &= ~1
+			displaySign(colSign, topR2, plusMinusState2)
+			print(sc + " -> 21   " + sd + " -> 22   " + plusMinus)
+			displayGraphic(colD1, topR2, ic)
+			displayGraphic(colD2, topR2, id)
+		elif aaaa == 4:
+			plusMinus = "  "
+			if b != 0:
+				plusMinus = "2-"
+				plusMinusState2 |= 2
+			else:
+				plusMinusState2 &= ~2
+			displaySign(colSign, topR2, plusMinusState2)
+			print(sc + " -> 23   " + sd + " -> 24   " + plusMinus)
+			displayGraphic(colD3, topR2, ic)
+			displayGraphic(colD4, topR2, id)
+		elif aaaa == 3:
+			print(sc + " -> 25   " + sd + " -> 31")
+			displayGraphic(colD5, topR2, ic)
+			displayGraphic(colD1, topR3, id)
+		elif aaaa == 2:
+			plusMinus = "  "
+			if b != 0:
+				plusMinus = "3+"
+				plusMinusState3 |= 1
+			else:
+				plusMinusState3 &= ~1
+			displaySign(colSign, topR3, plusMinusState3)
+			print(sc + " -> 32   " + sd + " -> 33   " + plusMinus)
+			displayGraphic(colD2, topR3, ic)
+			displayGraphic(colD3, topR3, id)
+		elif aaaa == 1:
+			plusMinus = "  "
+			if b != 0:
+				plusMinus = "3-"
+				plusMinusState3 |= 2
+			else:
+				plusMinusState3 &= ~2
+			displaySign(colSign, topR3, plusMinusState3)
+			print(sc + " -> 34   " + sd + " -> 35   " + plusMinus)
+			displayGraphic(colD4, topR3, ic)
+			displayGraphic(colD5, topR3, id)
+		elif aaaa == 12:
+			vel = "VEL OFF         "
 			if (value & 0x04) != 0:
-				uplinkActy = "UPLINK ACTY ON  "
-				updateLampStatuses("UPLINK ACTY", True)
+				vel = "VEL ON          "
+				updateLampStatuses("VEL", True)
 			else:
-				updateLampStatuses("UPLINK ACTY", False)
-			temp = "TEMP OFF        "
+				updateLampStatuses("VEL", False)
+			noAtt = "NO ATT OFF      "
 			if (value & 0x08) != 0:
-				temp = "TEMP ON         "
-				updateLampStatuses("TEMP", True)
+				noAtt = "NO ATT ON       "
+				updateLampStatuses("NO ATT", True)
 			else:
-				updateLampStatuses("TEMP", False)
-			flashing = "V/N NO FLASH    "
+				updateLampStatuses("NO ATT", False)
+			alt = "ALT OFF         "
+			if (value & 0x10) != 0:
+				alt = "ALT ON          "
+				updateLampStatuses("ALT", True)
+			else:
+				updateLampStatuses("ALT", False)
+			gimbalLock = "GIMBAL LOCK OFF "
 			if (value & 0x20) != 0:
-				if not vnFlashing:
-					vnFlashing = True
-					vnCurrentlyOn = True
-					vnTimer = threading.Timer(0.75, vnFlashingHandler)
-					vnTimer.start()
-				flashing = "V/N FLASH       "
+				gimbalLock = "GIMBAL LOCK ON  "
+				updateLampStatuses("GIMBAL LOCK", True)
 			else:
-				if vnFlashing != False:
-					vnFlashingStop()
-			print(compActy + "   " + uplinkActy + "   " + temp + "   " + "   " + flashing)
+				updateLampStatuses("GIMBAL LOCK", False)
+			tracker = "TRACKER OFF     "
+			if (value & 0x80) != 0:
+				tracker = "TRACKER ON      "
+				updateLampStatuses("TRACKER", True)
+			else:
+				updateLampStatuses("TRACKER", False)
+			prog = "PROG OFF        "
+			if (value & 0x100) != 0:
+				prog = "PROG ON         "
+				updateLampStatuses("PROG", True)
+			else:
+				updateLampStatuses("PROG", False)
+			print(vel + "   " + noAtt + "   " + alt + "   " + gimbalLock + "   " + tracker + "   " + prog)
 			updateLamps()
-		elif channel == 0o13:
-			last13 = value
-			test = "DSKY TEST       "
-			if (value & 0x200) == 0:
-				test = "DSKY NO TEST    "
-			print(test)
-			updateLamps()
-		elif channel == 0o163:
-			last163 = value
-			if (value & 0o400) != 0:
-				standby = "DSKY STANDBY ON "
-				updateLampStatuses("DSKY STANDBY", True)
-			else:
-				standby = "DSKY STANDBY OFF"
-				updateLampStatuses("DSKY STANDBY", False)
-			if (value & 0o20) != 0:
-				keyRel = "KEY REL ON      "
-				updateLampStatuses("KEY REL", True)
-			else:
-				keyRel = "KEY REL OFF     "
-				updateLampStatuses("KEY REL", False)
-			if (value & 0o100) != 0:
-				oprErr = "OPR ERR ON      "
-				updateLampStatuses("OPR ERR", True)
-			else:
-				oprErr = "OPR ERR OFF     "
-				updateLampStatuses("OPR ERR", False)
-			if (value & 0o200) != 0:
-				restart = "RESTART ON    "
-				updateLampStatuses("RESTART", True)
-			else:
-				restart = "RESTART OFF     "
-				updateLampStatuses("RESTART", False)
-			print(standby + "   " + keyRel + "   " + oprErr + "   " + restart)
-			updateLamps()
+	elif channel == 0o11:
+		compActy = "COMP ACTY OFF   "
+		if (value & 0x02) != 0:
+			compActy = "COMP ACTY ON    "
+			displayGraphic(0, 0, imageCompActyOn)
 		else:
-			print("Received from yaAGC: " + oct(value) + " -> channel " + oct(channel))
+			displayGraphic(0, 0, imageCompActyOff)
+		uplinkActy = "UPLINK ACTY OFF "
+		if (value & 0x04) != 0:
+			uplinkActy = "UPLINK ACTY ON  "
+			updateLampStatuses("UPLINK ACTY", True)
+		else:
+			updateLampStatuses("UPLINK ACTY", False)
+		temp = "TEMP OFF        "
+		if (value & 0x08) != 0:
+			temp = "TEMP ON         "
+			updateLampStatuses("TEMP", True)
+		else:
+			updateLampStatuses("TEMP", False)
+		flashing = "V/N NO FLASH    "
+		if (value & 0x20) != 0:
+			if not vnFlashing:
+				vnFlashing = True
+				vnCurrentlyOn = True
+				vnTimer = threading.Timer(0.75, vnFlashingHandler)
+				vnTimer.start()
+			flashing = "V/N FLASH       "
+		else:
+			if vnFlashing != False:
+				vnFlashingStop()
+		print(compActy + "   " + uplinkActy + "   " + temp + "   " + "   " + flashing)
+		updateLamps()
+	elif channel == 0o13:
+		test = "DSKY TEST       "
+		if (value & 0x200) == 0:
+			test = "DSKY NO TEST    "
+		print(test)
+		updateLamps()
+	elif channel == 0o163:
+		if (value & 0o400) != 0:
+			standby = "DSKY STANDBY ON "
+			updateLampStatuses("DSKY STANDBY", True)
+		else:
+			standby = "DSKY STANDBY OFF"
+			updateLampStatuses("DSKY STANDBY", False)
+		if (value & 0o20) != 0:
+			keyRel = "KEY REL ON      "
+			updateLampStatuses("KEY REL", True)
+		else:
+			keyRel = "KEY REL OFF     "
+			updateLampStatuses("KEY REL", False)
+		if (value & 0o100) != 0:
+			oprErr = "OPR ERR ON      "
+			updateLampStatuses("OPR ERR", True)
+		else:
+			oprErr = "OPR ERR OFF     "
+			updateLampStatuses("OPR ERR", False)
+		if (value & 0o200) != 0:
+			restart = "RESTART ON    "
+			updateLampStatuses("RESTART", True)
+		else:
+			restart = "RESTART OFF     "
+			updateLampStatuses("RESTART", False)
+		print(standby + "   " + keyRel + "   " + oprErr + "   " + restart)
+		updateLamps()
+	else:
+		print("Received from yaAGC: " + oct(value) + " -> channel " + oct(channel))
 	return
 
 ###################################################################################
