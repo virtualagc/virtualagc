@@ -56,6 +56,9 @@ do
 		--custom-bare)
 			CUSTOM_BARE=yes
 			;;
+		--record)
+			RECORD="--record=1"
+			;;
 		*)
 			echo "Usage:"
 			echo "  cd piPeripheral"
@@ -85,6 +88,7 @@ do
 			echo "  --piDSKY                Run piDSKY.py rather than piDSKY2.py."
 			echo "  --custom-bare           Allows an extra mission menu item, V, for running"
 			echo "                          a custom bare-metal AGC program, piPeripheral.agc." 
+			echo "  --record                Record incoming output-channel changes to a file."
 			exit
 			;;
 	esac
@@ -315,9 +319,9 @@ do
 		fi
 	elif [[ "$DEBUG" == "" ]]
 	then
-		"$SOURCEDIR/piPeripheral/piDSKY2.py" --port=19697 $WINDOW $SLOW $PIGPIO >/dev/null
+		"$SOURCEDIR/piPeripheral/piDSKY2.py" --port=19697 $WINDOW $SLOW $PIGPIO $RECORD >/dev/null
 	else
-		"$SOURCEDIR/piPeripheral/piDSKY2.py" --port=19697 $WINDOW $SLOW $PIGPIO
+		"$SOURCEDIR/piPeripheral/piDSKY2.py" --port=19697 $WINDOW $SLOW $PIGPIO $RECORD
 		read -p "Hit Enter to continue ..."
 	fi
 	echo "Cleaning up ..."

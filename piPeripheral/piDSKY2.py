@@ -86,6 +86,8 @@
 #				degree.
 #		2017-12-04 RSB	Fixed PIGPIO control of lamps, I think.
 #		2017-12-06 RSB	Added 3 dots.
+#		2017-12-09 RSB	Added --record and --playback, though only 
+#				--record is implemented so far.
 #
 # About the design of this program ... yes, a real Python developer would 
 # objectify it and have lots and lots of individual models defining the objects.
@@ -170,6 +172,8 @@ cli.add_argument("--port", help="Port for yaAGC, defaulting to 19798.", type=int
 cli.add_argument("--window", help="Use window rather than full screen for LCD.")
 cli.add_argument("--slow", help="For use on really slow host systems.")
 cli.add_argument("--pigpio", help="Use PIGPIO rather than led-panel for lamp control. The value is a brightness-intensity setting, 0-15.", type=int)
+cli.add_argument("--record", help="Record all incoming i/o-channel data for later playback.")
+cli.add_argument("--playback", help="Play back recorded i/o-channel data from selected filename.")
 args = cli.parse_args()
 
 # Responsiveness settings.
@@ -189,6 +193,10 @@ if args.port:
 	TCP_PORT = args.port
 else:
 	TCP_PORT = 19798
+
+if args.record:
+	lastRecordedTime = -1
+	recordingFile = open(homeDir + "/Desktop/piDSKY2-recorded.txt", "w", 1)
 
 # Set up root viewport for tkinter graphics
 root = Tk()
@@ -816,6 +824,16 @@ def outputFromAGC(channel, value):
 	if (channel == 0o13):
 		value &= 0o3000
 	if (channel == 0o10 and value != last10) or (channel == 0o11 and value != last11) or (channel == 0o13 and value != last13) or (channel == 0o163 and value != last163):
+		if args.record:
+			global lastRecordedTime
+			currentTime = time.time()
+			if lastRecordedTime < 0:
+				lastRecordedTime = currentTime
+			try:
+				recordingFile.write(str(round(1000 * (currentTime - lastRecordedTime))) + " " + ("%o" % channel) + " " + ("%o" % value) + "\n")
+			except:
+				pass
+			lastRecordedTime = currentTime
 		if channel == 0o10:
 			last10 = value
 			aaaa = (value >> 11) & 0x0F
