@@ -16,7 +16,7 @@
   document.write(headerTemplate.replace("@TITLE@","Do It Yourself").replace("@SUBTITLE@","Writing AGC Software For Fun and Profit"))
   </script> <br>
     <div align="center">
-      <table cellpadding="2" cellspacing="2" border="2">
+      <table cellspacing="2" cellpadding="2" border="2">
         <tbody>
           <tr>
             <td valign="top"><big><b><i>This page is new and is under
@@ -65,9 +65,10 @@
     the simulation.<br>
     <br>
     But what if you simply want to do something fun, but different, with
-    the AGC+DSKY, perhaps outside the bounds of the original
-    devices?&nbsp; For example, to display the current temperature, or
-    GPS data, or as I already said, to make a calculator program?<br>
+    the AGC+DSKY, perhaps outside the context of simulation within a
+    spacecraft environment?&nbsp; For example, to display the current
+    temperature, or GPS data, or as I already said, to make a calculator
+    program?<br>
     <br>
     Well, there's a variety of ways to go about doing such stuff.&nbsp;
     For example, maybe you just want to display this stuff on the DSKY
@@ -78,29 +79,32 @@
     simulated AGC display whatever you need on the DSKY.&nbsp; :-)&nbsp;
     That way, you not only end up with a clock or a calculator or a game
     or whatever, but you've also learned something about what it was
-    like as an AGC programmer from the Apollo era and have developed
-    some AGC-programmer creds.&nbsp; Now, <i>that's</i> a hobbyist
-    project!<br>
+    like as an AGC programmer from the Apollo era, <i>and</i> have
+    developed some AGC-programmer street-creds (as if there were such a
+    thing).&nbsp; Now, <i>that's</i> a hobbyist project!<br>
     <br>
     This is a particularly apropos topic for anybody who has purchased a
     functional AGC+DSKY replica, such as <a
 href="https://www.ebay.com/itm/DSKY-with-Integrated-AGC-runs-NASA-MIT-Code/263190750503?hash=item3d47642527:g:IwoAAOSw35lZePeX">one
 
 
+
       of those sold on eBay</a> by Sam Ammons.&nbsp; It's all very well
     that you now have a working AGC plus DSKY-lookalike that can run
-    (say) the Apollo 11 LM AGC software, but you don't have a LM, do
-    you, so what good does it do you (other than being immensely
-    cool)?&nbsp; So you want to justify your purchase by making it do
-    something <i>else</i> too!&nbsp; Well, making your own custom AGC
+    (say) the Apollo 11 LM AGC software, but you don't have a LM flying
+    in space, do you?&nbsp; So what good does it do you (other than
+    being immensely cool)?&nbsp; Naturally, you want to justify your
+    purchase by making it do something <i>else</i> too, and to amaze
+    your geekish friends!&nbsp; Well, making your own custom AGC
     software is a way to do that.&nbsp;&nbsp; Since the particular
-    device mentioned happens to contain a Raspberry Pi running our
-    very-own Virtual AGC software, we're actually in a good position to
-    understand how to adapt custom AGC software to it, though you don't
-    need one to take advantage of the info provided on this
-    page.&nbsp;&nbsp;&nbsp; (Disclaimer:&nbsp; I did lend my sage advice
-    and some software to the manufacturer of this device, which is why I
-    know about it, but I derive no financial benefit from it.) <br>
+    3D-printed DSKY mentioned happens to contain a Raspberry Pi running
+    our very-own Virtual AGC software, we're actually in a good position
+    to understand how to adapt custom AGC software to it, though you
+    don't need that specific gadget to take advantage of the info
+    provided on this page.&nbsp;&nbsp;&nbsp; (Disclaimer:&nbsp; I did
+    lend my sage advice and some software to the manufacturer of that
+    device, which is why I know about it, but I derive no financial
+    benefit from it.) <br>
     <br>
     <hr style="width: 100%; height: 2px;">
     <h2><a name="Basic_Facts"></a>Basic Facts</h2>
@@ -143,8 +147,8 @@ href="https://www.ebay.com/itm/DSKY-with-Integrated-AGC-runs-NASA-MIT-Code/26319
         channels you've defined, and/or on pre-existing channels like
         those for the DSKY.</li>
       <li>Assemble your new AGC software using the yaYUL assembler.</li>
-      <li>Run yaAGC plus a DSKY-simulation program plus your new
-        special-purpose perfipheral device.</li>
+      <li>Simultaneously run yaAGC plus a DSKY-simulation program plus
+        your new special-purpose peripheral device.</li>
       <li>...</li>
       <li>Profit!<br>
       </li>
@@ -155,8 +159,8 @@ href="https://www.ebay.com/itm/DSKY-with-Integrated-AGC-runs-NASA-MIT-Code/26319
       (Prove me wrong!)&nbsp; But the other topics, #1-5, are discussed
       further throughout the remainder of this page.</p>
     <p>An important thing to know about "embedded programming", of which
-      this kind of activity is an example, is that there are two basic
-      varieties:<br>
+      AGC software is an example, is that there are two basic varieties
+      of embedded programming and embedded programmers:<br>
     </p>
     <ul>
       <li>"Bare-metal" programming — This is where you start from
@@ -178,15 +182,17 @@ href="https://www.ebay.com/itm/DSKY-with-Integrated-AGC-runs-NASA-MIT-Code/26319
         system is already running software that provides a lot of useful
         services (such a time-keeping functions, file-systems,
         networking, and so on), and you are merely providing one small
-        piece of the system's existing software puzzle.&nbsp; This has
-        the advantage, of course, that you don't have to figure out for
-        yourself how to do some of these very hard things.&nbsp; This is
-        generally the approach taken in a system like a <a
-          href="https://www.raspberrypi.org/">Raspberry Pi</a>, which is
-        very fast and has lots of memory and peripheral devices.&nbsp;
-        In fact, programming for these devices is hardly "embedded"
-        programming at all, since it's really just like programming a
-        desktop computer that has been put into a very small, cheap box.</li>
+        piece of the system's existing software puzzle and relying on
+        the operating system for a lot of stuff that would otherwise be
+        troublesome.&nbsp; This has the advantage, of course, that you
+        don't have to figure out for yourself how to do some of these
+        very hard things.&nbsp; This is generally the approach taken in
+        a system like a <a href="https://www.raspberrypi.org/">Raspberry
+          Pi</a>, which is very fast and has lots of memory and
+        peripheral devices.&nbsp; In fact, programming for these devices
+        is hardly "embedded" programming at all, since it's really just
+        like programming a desktop computer that has been put into a
+        very small, cheap box.</li>
     </ul>
     <p>The AGC is an odd case, because while it has very, very small
       resources (tiny memory, terribly slow), it nevertheless has a
@@ -215,15 +221,16 @@ href="https://www.ebay.com/itm/DSKY-with-Integrated-AGC-runs-NASA-MIT-Code/26319
     Okay, that was a mouthful, and sounds very complex ... but isn't
     really, because you don't really need to know about it if you use
     the handy-dandy template for creating AGC peripheral devices we
-    provide.&nbsp; But it was useful background information if you're to
-    stinkin' proud to use our template, so we had to tell you all about
-    it anyway, and you can find more information about it on our <a
-      href="developer.html#sendrecv_Protocol">developer page</a> if you
+    provide.&nbsp; But it was useful background information if you're
+    too stinkin' proud to use our template, so we had to tell you all
+    about it anyway.&nbsp; You can find more information about it on our
+    <a href="developer.html#sendrecv_Protocol">developer page</a> if you
     need to!&nbsp; <br>
     <br>
     As for the peripheral template program, though, it is called
     piPeripheral.py and <a
 href="https://github.com/virtualagc/virtualagc/blob/master/piPeripheral/piPeripheral.py">you
+
 
 
       can find it in our GitHub repository</a>.&nbsp; As the name
@@ -234,11 +241,11 @@ href="https://github.com/virtualagc/virtualagc/blob/master/piPeripheral/piPeriph
     immediately.&nbsp; It's available, or already automatically
     installed, on Windows, Mac OS X, Linux, and so on.<br>
     <br>
-    The piPeripheral.py program is only a couple of hundred lines long,
-    but still looks a bit complex if you don't know what you're looking
-    at.&nbsp; Again, that complexity is an illusion, and there are only
-    a couple of things you need to know to immediately begin working
-    with it, if you're lucky enough to already be familiar with
+    The piPeripheral.py program is a couple of hundred lines long, and
+    undoubtedly looks a bit complex if you don't know what you're
+    looking at.&nbsp; Again, that complexity is an illusion, and there
+    are only a couple of things you need to know to immediately begin
+    working with it, if you're lucky enough to already be familiar with
     Python.&nbsp; In fact, you only need to look at or modify two of the
     program's functions, <tt>inputsForAGx</tt> and <tt>outputFromAGx</tt>:<br>
     <ul>
@@ -247,11 +254,11 @@ href="https://github.com/virtualagc/virtualagc/blob/master/piPeripheral/piPeriph
         AGC has changed.&nbsp; The <tt>channel</tt> parameter is the
         address of the output channel, in the range 0-127 (0-0177
         octal), while <tt>value</tt> is the new value of that channel,
-        in the range 0-32767.&nbsp; Your software can do anything at all
-        with this that you want.&nbsp; Most channels you will likely
-        ignore.&nbsp; For example, there's little need to do anything
-        with data in DSKY channels like 010 (octal), 011, or 013, since
-        the DSKY peripheral will handle those.</li>
+        in the range 0-32767 (0-077777 octal).&nbsp; Your software can
+        do anything you like with this data.&nbsp; Most channels you
+        will likely ignore.&nbsp; For example, there's little need to do
+        anything with data in DSKY channels like 010 (octal), 011, or
+        013, since the DSKY peripheral will handle those.</li>
       <li><tt>inputsForAGx()</tt> — This is a function which is
         automatically called periodically (nominally every 50 ms), which
         allows you to specify zero or more AGC input channels and values
@@ -287,9 +294,10 @@ href="https://github.com/virtualagc/virtualagc/blob/master/piPeripheral/piPeriph
     <br>
     For example, in a given periodic call to <tt>inputsForAGx()</tt>,
     you might decide that the lower 3 bits of your custom input channel
-    045 (octal) need to be changed to 05 (octal), while the entire value
-    of your custom channel 046 needs to be changed to 012345.&nbsp; The
-    list returned by <tt>inputsForAGx()</tt> would then be<br>
+    045 (octal) need to be changed to 05 (octal), and perhaps that the
+    entire value of your custom channel 046 needs to be changed to
+    012345.&nbsp; The list returned by <tt>inputsForAGx()</tt> would
+    then be<br>
     <blockquote><tt>[ ( 0o45, 0o5, 0o00007), (0o46, 0o12345, 0o77777) ]</tt><br>
     </blockquote>
     Note that in Python 3, octal constants are prefixed by "0o".<br>
@@ -300,25 +308,68 @@ href="https://github.com/virtualagc/virtualagc/blob/master/piPeripheral/piPeriph
     software.&nbsp; While I'm not aware of any comprehensive list,
     addresses 0o0-0035 and 0o76-0o77 should be regarded as already
     allocated by the AGC hardware.&nbsp; In addition to those, the <i>simulated</i>
-    AGC hardware, yaAGC, has defined various "fictitious i/o ports"
-    working downward from address 0o177 for its own purposes.&nbsp; So
+    AGC hardware, yaAGC, has defined various "fictitious i/o ports",
+    working downward from address 0o177, for its own purposes.&nbsp; So
     to summarize all of that, my advice would be to confine any custom
     i/o channels you want to assign to the following ranges:<br>
     <ul>
       <li>0o40 - 0o67</li>
-      <li>0o100-0o147<br>
-      </li>
+      <li>0o100-0o147</li>
+    </ul>
+    <p>As it happens, the sample peripheral program piPeripheral.py in
+      our GitHub repository has been pepped up slightly from just a bare
+      template.&nbsp; Additionally, it defines and processes several new
+      i/o channels just to give examples of how to do so.&nbsp; This
+      extra stuff is active only when the command-line switch <tt>--time=1</tt>
+      (or actually, <tt>--time=<i>anything</i></tt>) is used, so you
+      can easily eliminate it if you choose to build your own peripheral
+      device starting from piPeripheral.py.&nbsp; Here's a list of these
+      newly-assigned channels:</p>
+    <ul>
+      <li>AGC input channel 0o40 — Packed minutes and seconds of the
+        current time, with seconds in the least-significant 6 bits and
+        minutes in the next higher 6 bits.</li>
+      <li>AGC input channel 0o41 — Packed month, day, and hours of the
+        current date and time, with hours being the least-significant 5
+        bits, day the next higher 5 bits, and month the next higher 4
+        bits.</li>
+      <li>AGC input channel 0o42 — The current year.</li>
+      <li>AGC output channel 0o43 — The current year.</li>
+      <li>AGC output channel 0o44 — The current month.</li>
+      <li>AGC output channel 0o44 — The current day</li>
+      <li>AGC output channel 0o44 — The current hour</li>
+      <li>AGC output channel 0o44 — The current minute</li>
+      <li>AGC output channel 0o44 — The current second</li>
+    </ul>
+    <p>The input channels are actively generated by piPeripheral.py,
+      while the output channels merely have their contents printed
+      out.&nbsp; The AGC program processing the input channels (in which
+      the date and time is packed in a non-human-friendly way) <i>might</i>
+      use the output channels for reporting human-friendly unpacked date
+      &amp; time data.&nbsp; Of course, the AGC program might choose to
+      do something else altogether or even nothing at all with these
+      extra channels.<br>
+    </p>
+    <p>And of course, the main idea behind providing the current time
+      and date in this way in the first place, is that it might serve as
+      the basis for using the AGC+DSKY as a clock widget on a computer
+      desktop.&nbsp; That's because we really <i>mean</i> the current
+      time, and we don't mean something like "time since powerup", which
+      is otherwise all that the AGC knows about on its own.&nbsp; This
+      idea of a clock app is continued in the next section.<br>
+    </p>
+    <ul>
     </ul>
     <hr style="width: 100%; height: 2px;">
     <h2><a name="Bare-Metal_Programming"></a>Bare-Metal Programming</h2>
-    Programming the AGC is ultimately an exercise in assembly-language
-    programming, and specifically in the assembly language that's unique
-    to the "Block 2" AGC.&nbsp; This is covered in more detail than many
-    mortals would like on our <a href="assembly_language_manual.html">Block
-
-
-      2 AGC Language page</a>, so to start out, you'll either want to
-    look that over, or at least to look over the concise "<a
+    Alas! there's nothing akin to a higher-level language such a C or
+    Python for the AGC.&nbsp; Thus, programming the AGC is ultimately an
+    exercise in <i>assembly-language</i> programming, and specifically
+    in the assembly language that's unique to the "Block 2" AGC.&nbsp;
+    This is covered in more detail than many mortals would like on our <a
+      href="assembly_language_manual.html">Block 2 AGC Language page</a>,
+    so to start out, you'll either want to look that over, or at least
+    to look over the concise "<a
       href="http://www.ibiblio.org/apollo/hrst/archive/1689.pdf">AGC4
       Memo #9</a>" from which a lot of the information on that page
     comes.&nbsp; If you're not already somewhat-familiar with
@@ -327,7 +378,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/piPeripheral/piPeriph
     previous familiarity with assembly language, all you'll really need
     to worry about is internalizing the AGC's unique non-contiguous
     memory map and register set, and getting an overview of the
-    instruction set.<br>
+    instruction set. <br>
     <br>
     Other than what I mentioned just now, the first important thing to
     know is that your AGC program will begin executing at address 04000
@@ -339,6 +390,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/piPeripheral/piPeriph
     But that's a bit of an over-simplification.&nbsp; The actual
     significance of address 04000 is that it's the start of an <a
       href="https://en.wikipedia.org/wiki/Interrupt_vector_table">interrupt-vector
+
 
 
       table</a> — i.e., of code which is instantly automatically
@@ -466,11 +518,13 @@ href="https://github.com/virtualagc/virtualagc/blob/master/piPeripheral/piPeriph
     to determine if the computer has somehow frozen up, and of course,
     yaAGC tries to perform whichever of those checks are appropriate as
     well.&nbsp; If it detects any of these conditions, it performs a
-    jump to address 04000, just as if a power-up had occurred, and
-    that's one of the features that lends reliability to the
-    device.&nbsp; This is known as a GOJAM.&nbsp; I'm not totally sure
-    what all of these conditions are, but <a
+    jump to address 04000, just as if a power-up had occurred.&nbsp;
+    That's one of the features that lends reliability to the
+    device.&nbsp; This restart is known as a GOJAM.&nbsp; I'm not
+    totally sure what all of the conditions that could trigger a GOJAM
+    are, but <a
       href="https://www.ibiblio.org/apollo/Documents/LUM225-PV_text.pdf">LUMINARY
+
 
 
       Memo #225</a> contains a handy list of 8 of them.&nbsp; The ones
@@ -497,27 +551,20 @@ href="https://github.com/virtualagc/virtualagc/blob/master/piPeripheral/piPeriph
         best to end it up with something more complex than an
         instruction to just keep looping at the same address.</li>
     </ul>
-    <p>So, taking all of that into consideration, here's a minimal
-      framework you might use to start building your bare-metal AGC
-      program:<br>
+    <p>Taking all of that into consideration, here's a minimal framework
+      you might use to start building your bare-metal AGC program:<br>
     </p>
     <blockquote>
       <p><tt># Definitions of various registers.<br>
-          &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
-          SETLOC&nbsp;&nbsp;&nbsp; 10<br>
-          ARUPT&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ERASE<br>
-          &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
-          SETLOC&nbsp;&nbsp;&nbsp; 12<br>
-          QRUPT&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ERASE<br>
-          &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
-          SETLOC&nbsp;&nbsp;&nbsp; 26<br>
-          TIME3&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; ERASE<br>
-          &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
-          SETLOC&nbsp;&nbsp;&nbsp; 67<br>
-          NEWJOB&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ERASE&nbsp;&nbsp;&nbsp;
-          &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;
-          # Allocate a variable at the location checked by the Night
-          Watchman.<br>
+          ARUPT&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+          EQUALS&nbsp;&nbsp;&nbsp; 10<br>
+          QRUPT&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+          EQUALS&nbsp;&nbsp;&nbsp; 12<br>
+          TIME3&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; EQUALS&nbsp;&nbsp;&nbsp;
+          26<br>
+          NEWJOB&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; EQUALS&nbsp;&nbsp;&nbsp;
+          67 &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp; # Location
+          checked by the Night Watchman.<br>
         </tt></p>
       <p><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
           SETLOC&nbsp;&nbsp;&nbsp; 4000&nbsp;&nbsp;&nbsp;
@@ -650,6 +697,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/piPeripheral/piPeriph
           &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
 
+
           TS&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; TIME3<br>
         </tt></p>
       <p><tt>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; #
@@ -683,12 +731,15 @@ href="https://github.com/virtualagc/virtualagc/blob/master/piPeripheral/piPeriph
           &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
 
+
           EXTEND<br>
           &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
 
+
           QXCH&nbsp;&nbsp;&nbsp; QRUPT<br>
           &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
 
 
           RESUME&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; </tt><br>
@@ -725,11 +776,9 @@ href="https://github.com/virtualagc/virtualagc/blob/master/piPeripheral/piPeriph
       like?&nbsp; Note that <a
         href="developer.html#Table_of_IO_Channels">info about the i/o
         channels pertaining to the DSKY are on the developer page</a>.&nbsp;
-
-
-      Well, perhaps you'd use the KEYRUPT1 interrupt-service routine to
-      read the input channel containing the DSKY keycode, and then store
-      that keycode in a variable.&nbsp; Your main program loop might
+      Perhaps you'd use the KEYRUPT1 interrupt-service routine to read
+      the input channel containing the DSKY keycode, and then store that
+      keycode in a variable.&nbsp; Your main program loop might
       periodically check that variable to see it it contains anything,
       and then might output something to the DSKY so you'd know it had
       been detected.&nbsp; For example, it might toggle the DSKY's COMP
@@ -794,12 +843,15 @@ href="https://github.com/virtualagc/virtualagc/blob/master/piPeripheral/piPeriph
           &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
 
+
           EXTEND<br>
           &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
 
+
           QXCH&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; QRUPT<br>
           &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
 
 
           RESUME&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; </tt></p>
@@ -893,34 +945,119 @@ href="https://github.com/virtualagc/virtualagc/blob/master/piPeripheral/piPeriph
           OCT&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 40<br>
         </tt></p>
     </blockquote>
-    <p>A slightly sleeker form of this code called <a
+    <p><img src="piPeripheral.jpg" alt="" width="290" height="336"
+        align="right">With this, you actually have an AGC program that
+      does something, and does it both visibly and testably ... if not
+      very excitingly.<br>
+    </p>
+    <p>A slightly sleeker form of this code, called <a
 href="https://github.com/virtualagc/virtualagc/blob/master/piPeripheral/piPeripheral.agc">piPeripheral.agc,
 
 
+
         which can be assembled with yaYUL and actually works if it is
-        run, can be found in our GitHub repository</a>.<br>
+        run in the AGC simulator, can be found in our GitHub repository</a>.&nbsp;
+      Actually, the code in GitHub is not <i>merely</i> a cleaned-up
+      form of the code above, but in fact implements processing of the
+      current-timestamp information the sample peripheral program
+      piPeripheral.py provides in the newly-minted AGC input channels
+      040-042.&nbsp; (See the end of the preceding section.)&nbsp; What
+      piPeripheral.agc does with that information (which is a packed
+      form of the date and time) is to:<br>
     </p>
-    <p>Assuming one has written such a custom AGC program, a necessary
-      step before being able to run it in the AGC simulator is to
-      assemble it with the yaYUL assembler.&nbsp; Exactly how to find
-      the assembler depends on the particular setup being used, but
+    <ul>
+      <li>Unpack the data into separate year, month, day, hour, minute,
+        and second fields.</li>
+      <li> Output the unpacked data fields in the newly-allocated AGC
+        output channels 043-050.</li>
+      <li>Display the data on the DSKY.</li>
+    </ul>
+    <p>You can actually see what this looks like on a simulated DSKY in
+      the picture to right.&nbsp; What you see there is:<br>
+    </p>
+    <ul>
+      <li>The year (2017) in DSKY register R3 (the bottom 5-digit area).</li>
+      <li>The month (12) and the day (09) in DSKY register R2.</li>
+      <li>The hour (06) and minute (19) in DSKY register R1.</li>
+      <li>The seconds (10) in the NOUN area.</li>
+    </ul>
+    <p>The piPeripheral.py program will have generated this data
+      according to the preference settings on the compuer on which
+      you're running it, which in my case is the U.S. CST time-zone ...
+      so yes, I was doing this at around 6 in the morning, local time,
+      on a Saturday.&nbsp; Yawn!&nbsp; I should be paid more (than the
+      $0 I currently get) for doing this lousy job.&nbsp; :-)<br>
+    </p>
+    <p>At any rate, assuming one has written such a custom AGC program,
+      a necessary step before being able to run it in the AGC simulator
+      is to assemble it with the yaYUL assembler.&nbsp; Exactly how to
+      find the assembler depends on the particular setup being used, but
       assuming you can find it (or better yet, have it in the "PATH"),
-      assembly is a snap.&nbsp; If your AGC program is called, say,
-      MyAGC.agc, then you just 'cd' (from a command line prompt) into
-      the directory containing it and run<br>
+      assembly is a snap.&nbsp; But suppose, for example, that you
+      simply want to assemble piPeripheral.agc; assuming you've retained
+      the same directory setup as in GitHub, and have built the normal
+      Virtual AGC software too, you could do something like the
+      following without having to worry about path settings:<br>
     </p>
-    <blockquote><tt>yaYUL MyAGC.agc</tt><br>
+    <blockquote>
+      <p><tt>cd virtualagc/piPeripheral</tt><tt><br>
+        </tt><tt>../yaYUL/yaYUL piPeripheral.agc</tt><br>
+      </p>
     </blockquote>
-    <p>with the result (if there were no errors) being the executable
-      file MyAGC.agc.bin.&nbsp; If there were assembly errors such as
-      syntax problems or unallocated variables, of course, then you have
-      to fix them ... a topic on which it's difficult to offer any
-      general advice other than to start with a small program that
-      assembles perfectly and slowly work towards having a larger
-      program.&nbsp; <br>
+    The result (if there were no errors, and hopefully there wouldn't be
+    for an unmodified piPeripheral.agc) would be the executable file
+    piPeripheral.agc.bin.&nbsp; If there were assembly errors such as
+    syntax problems or unallocated variables, of course, then you have
+    to fix them ... a topic on which it's difficult to offer any general
+    advice other than to start with a small program that assembles
+    perfectly and slowly work towards having a larger program.&nbsp; <br>
+    <p>Once the program is assembled, it can be run in the AGC
+      simulator.&nbsp; This is again a tricky topic, since there are a
+      variety of ways in which it can be done, and a variety of possible
+      system configurations.&nbsp; What you would do on a desktop PC is
+      undoubtedly not the same thing you'd do on the 3D-printed DSKY
+      mentioned earlier.&nbsp; However, to just do it from a command
+      line within our software tree as downloaded from GitHub and
+      successfully built from source, in Linux you could do the
+      following.<br>
     </p>
-    <p>Once the program is assembled, it can be run in the simulator by
-      ... TBD<br>
+    <blockquote>
+      <p><tt># Start up the AGC simulator with the custom AGC program,
+          in the background, and discard all messages from it.<br>
+          cd virtualagc/yaAGC</tt><tt><br>
+        </tt><tt>./yaAGC --core="../piPeripheral/piPeripheral.agc.bin"
+          --port=19697 --cfg="../yaDSKY/src/LM.ini" &amp;&gt;/dev/null
+          &amp;<br>
+          # Start up the DSKY simulator in the background and discard
+          all messages from it.<br>
+          cd ../yaDSKY2</tt><tt><br>
+        </tt><tt>./yaDSKY2 --cfg="../yaDSKY/src/LM.ini" --port=19698
+          &amp;&gt;/dev/null &amp;<br>
+          # Start up the custom peripheral device, in the foreground,
+          and don't discard its messages.&nbsp; You might need<br>
+          # to install some extra Python modules, such as "sudo pip3
+          install argparse", if this fails. <br>
+          cd ../piPeripheral</tt><tt><br>
+        </tt><tt>./piPeripheral.py --port=19699 --time=1<br>
+          # Now that the custom peripheral has been terminated, clean up
+          the other programs we've started.<br>
+          killall yaAGC yaDSKY2<br>
+        </tt></p>
+    </blockquote>
+    <p>On Mac OS, I think it would be a bit trickier than what I'm
+      written, since I don't think that yaDSKY2 as started this way
+      would actually accept any keypress events; I'm not sure quite how
+      to do it properly, though.&nbsp; On Windows, you would have to use
+      backslashes ('\') in places of the forward slashes if used here
+      ('/'); also, I don't know that using '&amp;' to put the programs
+      into the background would work, or that "killall" would be
+      available for killing those programs afterward, so you might want
+      to run the various programs all in the foreground, in separate
+      command-line consoles.&nbsp; But obviously, there's a way to do
+      it, even if I'm too personally lazy to figure it out just
+      yet.&nbsp; If anyone just wants to inform me of the correct
+      detailed way of doing things on Mac OS X or Windows, I'd be happy
+      to include that info here.<br>
     </p>
     <blockquote>
       <p><tt> </tt></p>
@@ -969,11 +1106,16 @@ href="https://github.com/virtualagc/virtualagc/blob/master/piPeripheral/piPeriph
       href="https://github.com/virtualagc/virtualagc/tree/master/Retread44">RETREAD
 
 
+
       44</a>, which does not even use a third of the fixed program
     memory.<br>
     <br>
     As for how to write your program in such a way as to take advantage
     of the operating system ... TBD<br>
+    <br>
+    Assembling and running the code is the same as the steps provided at
+    the end of the preceding section on bare-metal programming, though
+    obviously the name and storage location of the AGC code changes.<br>
     <br>
     <hr style="width: 100%; height: 2px;">
     <center> <br>
@@ -994,14 +1136,15 @@ href="https://github.com/virtualagc/virtualagc/blob/master/piPeripheral/piPeriph
 
 
 
+
           Commons No Rights Reserved License</a></span><br>
       <i><font size="-1">Last modified by <a
             href="mailto:info@sandroid.org">Ronald Burkey</a> on
-          2017-12-07.<br>
+          2017-12-09.<br>
           <br>
           <a href="http://www.ibiblio.org"><img style="border: 0px solid
               ; width: 300px; height: 100px;" alt="Virtual AGC is hosted
-              by ibiblio.org" src="hosted.png" height="100" width="300"></a><br>
+              by ibiblio.org" src="hosted.png" width="300" height="100"></a><br>
         </font></i> </center>
     <br>
     <br>
