@@ -187,6 +187,9 @@ do
 		CFG=LM1
 	elif [[ "$CUSTOM_BARE" != "" && ( "$REPLY" == "V" || "$REPLY" == "v" ) ]]
 	then
+		cd "$SOURCEDIR/piPeripheral"
+		../yaYUL/yaYUL piPeripheral.agc &>/dev/null
+		cd "$RAMDISK"
 		CORE=piPeripheral.agc
 		DIR=piPeripheral
 		CFG=LM
