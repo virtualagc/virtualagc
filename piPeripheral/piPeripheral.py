@@ -7,6 +7,9 @@
 # Reference:	http://www.ibiblio.org/apollo/developer.html
 # Mod history:	2017-11-17 RSB	Began.
 #		2017-12-02 RSB	Added --ags.
+#		2017-12-08 RSB	Added --time.  Changed the default port from 19[67]98 to 
+#				19[67]99, so as not to collide with the default port
+#				piDSKY2.py uses.
 #
 # The parts which need to be modified to be target-system specific are the 
 # outputFromAGx() and inputsForAGx() functions.
@@ -20,11 +23,13 @@
 
 
 # Parse command-line arguments.
+import argparse
 cli = argparse.ArgumentParser()
 cli.add_argument("--host", help="Host address of yaAGC/yaAGS, defaulting to localhost.")
-cli.add_argument("--port", help="Port for yaAGC/yaAGS, defaulting to 19798 for AGC or 19898 for AGS.", type=int)
+cli.add_argument("--port", help="Port for yaAGC/yaAGS, defaulting to 19799 for AGC or 19899 for AGS.", type=int)
 cli.add_argument("--slow", help="For use on really slow host systems.")
 cli.add_argument("--ags", help="For use with yaAGS (defaults to yaAGC).")
+cli.add_argument("--time", help="Demo current date/time on AGC input channels 040-042.")
 args = cli.parse_args()
 
 if args.ags:
@@ -46,9 +51,13 @@ else:
 if args.port:
 	TCP_PORT = args.port
 elif args.ags:
-	TCP_PORT = 19898
+	TCP_PORT = 19699
 else:
-	TCP_PORT = 19798
+	TCP_PORT = 19799
+
+if args.time:
+	import datetime
+	lastTime = datetime.datetime.now()
 
 ###################################################################################
 # Hardware abstraction / User-defined functions.  Also, any other platform-specific
@@ -65,13 +74,55 @@ else:
 # while the "masks" tell which bits of the "values" are valid.  (The AGC will ignore
 # the invalid bits.  We don't need such masks for AGS.)
 def inputsForAGx():
-	return []
+	returnValue = []
+
+	# Just a demo ... supplies current date/time to AGC on input channels 040-042.
+	# Delete everything associated with args.time (here and above) if you don't
+	# like it.  It's not necessary for the functioning of this program.
+	if args.time:
+		global lastTime
+		now = datetime.datetime.now()
+		if now.second != lastTime.second:
+			lastTime = now
+			# Pack the values for transmission.
+			minutesSeconds = (now.minute << 6) | (now.second)
+			monthsDaysHours = (now.month << 10) | (now.day << 5) | (now.hour)
+			# The values are all positive, so the 1's complement
+			# and 2's complement representations are the same.
+			# The AGC should poll these until channel 040 changes,
+			# and then should immediately read the other ports
+			# (which are guaranteed not to change for at least a minute
+			# after 040 does).
+			returnValue.append( ( 0o42, now.year, 0o77777) )
+			returnValue.append( ( 0o41, monthsDaysHours, 0o77777) )
+			returnValue.append( ( 0o40, minutesSeconds, 0o77777) )
+
+	return returnValue
 
 # This function is called by the event loop only when yaAGC has written
 # to an output channel.  The function should do whatever it is that needs to be done
 # with this output data, which is not processed additionally in any way by the 
 # generic portion of the program.
 def outputFromAGx(channel, value):
+
+	# Just a demo:  prints some stuff output on channels 043-050. Remove at will!
+	if args.time: 
+		# We happen to know (from having written the AGC code!) that
+		# channel 043 is changed first, so we can confidently insert a
+		# newline there to make the printout prettier.
+		if channel == 0o43:
+			print("\nYear = " + str(value))
+		elif channel == 0o44:
+			print("Month = " + str(value))
+		elif channel == 0o45:
+			print("Day = " + str(value))
+		elif channel == 0o46:
+			print("Hour = " + str(value))
+		elif channel == 0o47:
+			print("Minute = " + str(value))
+		elif channel == 0o50:
+			print("Second = " + str(value))
+	
 	return
 
 ###################################################################################

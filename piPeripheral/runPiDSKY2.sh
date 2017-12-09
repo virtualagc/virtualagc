@@ -53,6 +53,9 @@ do
 		--piDSKY)
 			PIDSKY=yes
 			;;
+		--custom-bare)
+			CUSTOM_BARE=yes
+			;;
 		*)
 			echo "Usage:"
 			echo "  cd piPeripheral"
@@ -79,7 +82,9 @@ do
 			echo "                          Pi library.  The value of the parameter, N, is"
 			echo "                          a brightness intensity, varying from 0 (the least)"
 			echo "                          to 15 (the maximum)." 
-			echo "  --piDSKY                Run piDSKY.py rather than piDSKY2.py."        
+			echo "  --piDSKY                Run piDSKY.py rather than piDSKY2.py."
+			echo "  --custom-bare           Allows an extra mission menu item, V, for running"
+			echo "                          a custom bare-metal AGC program, piPeripheral.agc." 
 			exit
 			;;
 	esac
@@ -139,7 +144,10 @@ do
 	echo "7 - Apollo 13 LM"
 	echo "8 - Apollo 15-17 CM"
 	echo "9 - Apollo 15-17 LM"
-	#echo "V - Bare-metal"
+	if [[ "$CUSTOM_BARE" != "" ]]
+	then
+		echo "V - Custom program #1"
+	fi
 	read -p "Choose a number: " -t 15 -n 1
 	if [[ "$REPLY" == "0" ]]
 	then
@@ -177,10 +185,11 @@ do
 	then
 		CORE=Luminary210
 		CFG=LM1
-	#elif [[ "$REPLY" == "V" || "$REPLY" == "v" ]]
-	#then
-	#	CORE=piPeripheral
-	#	CFG=LM
+	elif [[ "$CUSTOM_BARE" != "" && ( "$REPLY" == "V" || "$REPLY" == "v" ) ]]
+	then
+		CORE=piPeripheral.agc
+		DIR=piPeripheral
+		CFG=LM
 	elif [[ "$REPLY" == "R" || "$REPLY" == "r" ]]
 	then
 		echo ""
@@ -258,6 +267,10 @@ do
 		CORE=Luminary099
 		CFG=LM
 	fi
+	if [[ "$DIR" == "" ]]
+	then
+		DIR=$CORE
+	fi
 	echo ""
 	echo "Starting AGC program $CORE ..."
 	
@@ -265,9 +278,9 @@ do
 	rm LM.core CM.core &>/dev/null
 	if [[ "$AGCDEBUG" == "" ]]
 	then
-		"$SOURCEDIR/yaAGC/yaAGC" --core="$SOURCEDIR/$CORE/$CORE.bin" --port=19697 --cfg="$SOURCEDIR/yaDSKY/src/$CFG.ini" >/dev/null &
+		"$SOURCEDIR/yaAGC/yaAGC" --core="$SOURCEDIR/$DIR/$CORE.bin" --port=19697 --cfg="$SOURCEDIR/yaDSKY/src/$CFG.ini" >/dev/null &
 	else
-		"$SOURCEDIR/yaAGC/yaAGC" --core="$SOURCEDIR/$CORE/$CORE.bin" --port=19697 --cfg="$SOURCEDIR/yaDSKY/src/$CFG.ini" &
+		"$SOURCEDIR/yaAGC/yaAGC" --core="$SOURCEDIR/$DIR/$CORE.bin" --port=19697 --cfg="$SOURCEDIR/yaDSKY/src/$CFG.ini" &
 	fi
 	YAGC_PID=$!
 	if [[ "$YADSKY" != "" ]]
@@ -285,6 +298,11 @@ do
 		xterm -e "$SOURCEDIR/piPeripheral/backgroundStatus.sh" &
 		STATUS_PID=$!
 	fi
+	if [[ "$CUSTOM_BARE" != "" ]]
+	then
+		xterm -hold -e "$SOURCEDIR/piPeripheral/piPeripheral.py --port=19699 --time=1" &
+		STATUS_BARE=$!
+	fi
 	if [[ "$PIDSKY" != "" ]]
 	then
 		"$SOURCEDIR/piPeripheral/piDSKY.py" --port=19697
@@ -300,6 +318,6 @@ do
 		read -p "Hit Enter to continue ..."
 	fi
 	echo "Cleaning up ..."
-	kill $YAGC_PID $YADSKY2_PID $STATUS_PID
-	wait $YAGC_PID $YADSKY2_PID $STATUS_PID &>/dev/null
+	kill $YAGC_PID $YADSKY2_PID $STATUS_PID $STATUS_BARE
+	wait $YAGC_PID $YADSKY2_PID $STATUS_PID $STATUS_BARE &>/dev/null
 done
