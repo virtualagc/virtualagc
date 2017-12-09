@@ -59,6 +59,9 @@ do
 		--record)
 			RECORD="--record=1"
 			;;
+		--playback)
+			PLAYBACK_OPTION=yes
+			;;
 		*)
 			echo "Usage:"
 			echo "  cd piPeripheral"
@@ -89,6 +92,7 @@ do
 			echo "  --custom-bare           Allows an extra mission menu item, V, for running"
 			echo "                          a custom bare-metal AGC program, piPeripheral.agc." 
 			echo "  --record                Record incoming output-channel changes to a file."
+			echo "  --playback              Add playback option to mission menu."
 			exit
 			;;
 	esac
@@ -138,20 +142,27 @@ do
 	xset r off
 	clear
 	echo "Available missions:"
-	echo "0 - Apollo 5 LM"
-	echo "1 - Apollo 8 CM"
-	echo "2 - Apollo 9 CM"
-	echo "3 - Apollo 10 LM"
-	echo "4 - Apollo 11 CM"
-	echo "5 - Apollo 11 LM (default)"
-	echo "6 - Apollo 12 LM"
-	echo "7 - Apollo 13 LM"
-	echo "8 - Apollo 15-17 CM"
-	echo "9 - Apollo 15-17 LM"
+	echo ""
+	echo "    0 - Apollo 5 LM"
+	echo "    1 - Apollo 8 CM"
+	echo "    2 - Apollo 9 CM"
+	echo "    3 - Apollo 10 LM"
+	echo "    4 - Apollo 11 CM"
+	echo "    5 - Apollo 11 LM (default)"
+	echo "    6 - Apollo 12 LM"
+	echo "    7 - Apollo 13 LM"
+	echo "    8 - Apollo 15-17 CM"
+	echo "    9 - Apollo 15-17 LM"
+	unset PLAYBACK
+	if [[ "$PLAYBACK_OPTION" != "" ]]
+	then
+		echo " PROG - Play back" 
+	fi
 	if [[ "$CUSTOM_BARE" != "" ]]
 	then
-		echo "V - Custom program #1"
+		echo " VERB - Custom program #1"
 	fi
+	echo ""
 	read -p "Choose a number: " -t 15 -n 1
 	if [[ "$REPLY" == "0" ]]
 	then
@@ -197,6 +208,9 @@ do
 		CORE=piPeripheral.agc
 		DIR=piPeripheral
 		CFG=LM
+	elif [[ "$PLAYBACK_OPTION" != "" && ( "$REPLY" == "P" || "$REPLY" == "p" ) ]]
+	then
+		PLAYBACK="--playback=$HOME/Desktop/piDSKY2-recorded.txt"
 	elif [[ "$REPLY" == "R" || "$REPLY" == "r" ]]
 	then
 		echo ""
@@ -279,51 +293,66 @@ do
 		DIR=$CORE
 	fi
 	echo ""
-	echo "Starting AGC program $CORE ..."
 	
-	# Run it!
-	rm LM.core CM.core &>/dev/null
-	if [[ "$AGCDEBUG" == "" ]]
+	optionsPiDSKY2="--port=19697 $WINDOW $SLOW $PIGPIO"
+	if [[ "$PLAYBACK" == "" ]]
 	then
-		"$SOURCEDIR/yaAGC/yaAGC" --core="$SOURCEDIR/$DIR/$CORE.bin" --port=19697 --cfg="$SOURCEDIR/yaDSKY/src/$CFG.ini" >/dev/null &
-	else
-		"$SOURCEDIR/yaAGC/yaAGC" --core="$SOURCEDIR/$DIR/$CORE.bin" --port=19697 --cfg="$SOURCEDIR/yaDSKY/src/$CFG.ini" &
-	fi
-	YAGC_PID=$!
-	if [[ "$YADSKY" != "" ]]
-	then
-		"$SOURCEDIR/yaDSKY2/yaDSKY2" --cfg="$SOURCEDIR/yaDSKY/src/$CFG.ini" --port=19698 &>/dev/null &
-		YADSKY2_PID=$!
-	fi
-	clear
-	if [[ "$DEBUG" == "" && "$PIDSKY" == "" ]]
-	then
-		"$SOURCEDIR/piPeripheral/piSplash.py" $WINDOW &>/dev/null
-	fi
-	if [[ "$MONITOR" != "" && "$PIDSKY" == "" ]]
-	then
-		xterm -e "$SOURCEDIR/piPeripheral/backgroundStatus.sh" &
-		STATUS_PID=$!
-	fi
-	if [[ "$CUSTOM_BARE" != "" ]]
-	then
-		xterm -hold -e "$SOURCEDIR/piPeripheral/piPeripheral.py --port=19699 --time=1" &
-		STATUS_BARE=$!
-	fi
-	if [[ "$PIDSKY" != "" ]]
-	then
-		"$SOURCEDIR/piPeripheral/piDSKY.py" --port=19697
-		if [[ "$DEBUG" != "" ]]
+		optionsPiDSKY2="$optionsPiDSKY2 $RECORD"
+	
+		echo "Starting AGC program $CORE ..."
+		# Run it!
+		rm LM.core CM.core &>/dev/null
+		if [[ "$AGCDEBUG" == "" ]]
 		then
+			"$SOURCEDIR/yaAGC/yaAGC" --core="$SOURCEDIR/$DIR/$CORE.bin" --port=19697 --cfg="$SOURCEDIR/yaDSKY/src/$CFG.ini" >/dev/null &
+		else
+			"$SOURCEDIR/yaAGC/yaAGC" --core="$SOURCEDIR/$DIR/$CORE.bin" --port=19697 --cfg="$SOURCEDIR/yaDSKY/src/$CFG.ini" &
+		fi
+		YAGC_PID=$!
+		if [[ "$YADSKY" != "" ]]
+		then
+			"$SOURCEDIR/yaDSKY2/yaDSKY2" --cfg="$SOURCEDIR/yaDSKY/src/$CFG.ini" --port=19698 &>/dev/null &
+			YADSKY2_PID=$!
+		fi
+		clear
+		if [[ "$DEBUG" == "" && "$PIDSKY" == "" ]]
+		then
+			"$SOURCEDIR/piPeripheral/piSplash.py" $WINDOW &>/dev/null
+		fi
+		if [[ "$MONITOR" != "" && "$PIDSKY" == "" ]]
+		then
+			xterm -e "$SOURCEDIR/piPeripheral/backgroundStatus.sh" &
+			STATUS_PID=$!
+		fi
+		if [[ "$CUSTOM_BARE" != "" ]]
+		then
+			xterm -hold -e "$SOURCEDIR/piPeripheral/piPeripheral.py --port=19699 --time=1" &
+			STATUS_BARE=$!
+		fi
+	
+		if [[ "$PIDSKY" != "" ]]
+		then
+			"$SOURCEDIR/piPeripheral/piDSKY.py" --port=19697
+			if [[ "$DEBUG" != "" ]]
+			then
+				read -p "Hit Enter to continue ..."
+			fi
+		fi
+	else
+		optionsPiDSKY2="$optionsPiDSKY2 $PLAYBACK"
+	fi
+	
+	if [[ "$PIDSKY" == "" ]]
+	then
+		if [[ "$DEBUG" == "" ]]
+		then
+			"$SOURCEDIR/piPeripheral/piDSKY2.py" $optionsPiDSKY2 >/dev/null
+		else
+			"$SOURCEDIR/piPeripheral/piDSKY2.py" $optionsPiDSKY2
 			read -p "Hit Enter to continue ..."
 		fi
-	elif [[ "$DEBUG" == "" ]]
-	then
-		"$SOURCEDIR/piPeripheral/piDSKY2.py" --port=19697 $WINDOW $SLOW $PIGPIO $RECORD >/dev/null
-	else
-		"$SOURCEDIR/piPeripheral/piDSKY2.py" --port=19697 $WINDOW $SLOW $PIGPIO $RECORD
-		read -p "Hit Enter to continue ..."
 	fi
+	
 	echo "Cleaning up ..."
 	kill $YAGC_PID $YADSKY2_PID $STATUS_PID $STATUS_BARE
 	wait $YAGC_PID $YADSKY2_PID $STATUS_PID $STATUS_BARE &>/dev/null

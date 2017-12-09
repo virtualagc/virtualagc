@@ -86,8 +86,7 @@
 #				degree.
 #		2017-12-04 RSB	Fixed PIGPIO control of lamps, I think.
 #		2017-12-06 RSB	Added 3 dots.
-#		2017-12-09 RSB	Added --record and --playback, though only 
-#				--record is implemented so far.  Cleaned up
+#		2017-12-09 RSB	Added --record and --playback.  Cleaned up
 #				the record-keeping about the last values of
 #				the input channels a lot, so that a lot of
 #				unnecessary duplication of operations is 
@@ -201,6 +200,21 @@ else:
 if args.record:
 	lastRecordedTime = -1
 	recordingFile = open(homeDir + "/Desktop/piDSKY2-recorded.txt", "w", 1)
+
+if args.playback:
+	lastPlaybackTime = time.time()
+	playbackEvents = []
+	currentPlaybackIndex = 0
+	try:
+		playbackFile = open(args.playback, "r")
+		playbackGenerator = (line.strip().split() for line in playbackFile)
+		for line in playbackGenerator:
+			playbackEvents.append( ( int(line[0]), int(line[1], 8), int(line[2], 8)  ) )
+			#print(str(playbackEvents[len(playbackEvents)-1]))
+	except:
+		print("Problem with playback file: " + args.playback)
+		time.sleep(2)
+		os._exit(1)
 
 # Set up root viewport for tkinter graphics
 root = Tk()
@@ -361,6 +375,8 @@ if args.pigpio:
 
 # Given a 3-tuple (channel,value,mask), creates packet data and sends it to yaAGC.
 def packetize(tuple):
+	if args.playback:
+		return
 	outputBuffer = bytearray(4)
 	# First, create and output the mask command.
 	outputBuffer[0] = 0x20 | ((tuple[0] >> 3) & 0x0F)
@@ -1100,7 +1116,10 @@ def connectToAGC():
 				print("Exiting ...")
 				sys.exit()
 
-connectToAGC()
+if args.playback:
+	pass
+else:	
+	connectToAGC()
 
 ###################################################################################
 # Event loop.  Just check periodically for output from yaAGC (in which case the
@@ -1127,57 +1146,72 @@ def eventLoop():
 		# While these packets are always exactly 4
 		# bytes long, since the socket is non-blocking, any individual read
 		# operation may yield less bytes than that, so the buffer may accumulate data
-		# over time until it fills.	
-		try:
-			numNewBytes = s.recv_into(view, leftToRead)
-		except:
-			numNewBytes = 0
-		if numNewBytes > 0:
-			view = view[numNewBytes:]
-			leftToRead -= numNewBytes
-			if leftToRead == 0:
-				# Prepare for next read attempt.
-				view = memoryview(inputBuffer)
-				leftToRead = packetSize
-				# Parse the packet just read, and call outputFromAGC().
-				# Start with a sanity check.
-				ok = 1
-				if (inputBuffer[0] & 0xF0) != 0x00:
-					ok = 0
-				elif (inputBuffer[1] & 0xC0) != 0x40:
-					ok = 0
-				elif (inputBuffer[2] & 0xC0) != 0x80:
-					ok = 0
-				elif (inputBuffer[3] & 0xC0) != 0xC0:
-					ok = 0
-				# Packet has the various signatures we expect.
-				if ok == 0:
-					# Note that, depending on the yaAGC version, it occasionally
-					# sends either a 1-byte packet (just 0xFF, older versions)
-					# or a 4-byte packet (0xFF 0xFF 0xFF 0xFF, newer versions)
-					# just for pinging the client.  These packets hold no
-					# data and need to be ignored, but for other corrupted packets
-					# we print a message. And try to realign past the corrupted
-					# bytes.
-					if inputBuffer[0] != 0xff or inputBuffer[1] != 0xff or inputBuffer[2] != 0xff or inputBuffer[2] != 0xff:
-						if inputBuffer[0] != 0xff:
-							print("Illegal packet: " + hex(inputBuffer[0]) + " " + hex(inputBuffer[1]) + " " + hex(inputBuffer[2]) + " " + hex(inputBuffer[3]))
-						for i in range(1,packetSize):
-							if (inputBuffer[i] & 0xF0) == 0:
-								j = 0
-								for k in range(i,4):
-									inputBuffer[j] = inputBuffer[k]
-									j += 1
-								view = view[j:]
-								leftToRead = packetSize - j
-				else:
-					channel = (inputBuffer[0] & 0x0F) << 3
-					channel |= (inputBuffer[1] & 0x38) >> 3
-					value = (inputBuffer[1] & 0x07) << 12
-					value |= (inputBuffer[2] & 0x3F) << 6
-					value |= (inputBuffer[3] & 0x3F)
-					outputFromAGC(channel, value)
-				didSomething = True
+		# over time until it fills.
+		if args.playback:
+			global currentPlaybackIndex, playbackEvents, lastPlaybackTime
+			# Get data from playback file.
+			if currentPlaybackIndex < len(playbackEvents):
+				#print(currentPlaybackIndex)
+				timeNow = time.time()
+				desiredTime = lastPlaybackTime + playbackEvents[currentPlaybackIndex][0] / 1000.0
+				if timeNow >= desiredTime:
+					lastPlaybackTime = desiredTime
+					outputFromAGC(playbackEvents[currentPlaybackIndex][1],
+						      playbackEvents[currentPlaybackIndex][2])
+					currentPlaybackIndex += 1
+					didSomething = True
+		else:
+			# Get input from socket to AGC.
+			try:
+				numNewBytes = s.recv_into(view, leftToRead)
+			except:
+				numNewBytes = 0
+			if numNewBytes > 0:
+				view = view[numNewBytes:]
+				leftToRead -= numNewBytes
+				if leftToRead == 0:
+					# Prepare for next read attempt.
+					view = memoryview(inputBuffer)
+					leftToRead = packetSize
+					# Parse the packet just read, and call outputFromAGC().
+					# Start with a sanity check.
+					ok = 1
+					if (inputBuffer[0] & 0xF0) != 0x00:
+						ok = 0
+					elif (inputBuffer[1] & 0xC0) != 0x40:
+						ok = 0
+					elif (inputBuffer[2] & 0xC0) != 0x80:
+						ok = 0
+					elif (inputBuffer[3] & 0xC0) != 0xC0:
+						ok = 0
+					# Packet has the various signatures we expect.
+					if ok == 0:
+						# Note that, depending on the yaAGC version, it occasionally
+						# sends either a 1-byte packet (just 0xFF, older versions)
+						# or a 4-byte packet (0xFF 0xFF 0xFF 0xFF, newer versions)
+						# just for pinging the client.  These packets hold no
+						# data and need to be ignored, but for other corrupted packets
+						# we print a message. And try to realign past the corrupted
+						# bytes.
+						if inputBuffer[0] != 0xff or inputBuffer[1] != 0xff or inputBuffer[2] != 0xff or inputBuffer[2] != 0xff:
+							if inputBuffer[0] != 0xff:
+								print("Illegal packet: " + hex(inputBuffer[0]) + " " + hex(inputBuffer[1]) + " " + hex(inputBuffer[2]) + " " + hex(inputBuffer[3]))
+							for i in range(1,packetSize):
+								if (inputBuffer[i] & 0xF0) == 0:
+									j = 0
+									for k in range(i,4):
+										inputBuffer[j] = inputBuffer[k]
+										j += 1
+									view = view[j:]
+									leftToRead = packetSize - j
+					else:
+						channel = (inputBuffer[0] & 0x0F) << 3
+						channel |= (inputBuffer[1] & 0x38) >> 3
+						value = (inputBuffer[1] & 0x07) << 12
+						value |= (inputBuffer[2] & 0x3F) << 6
+						value |= (inputBuffer[3] & 0x3F)
+						outputFromAGC(channel, value)
+					didSomething = True
 		
 		# Check for locally-generated data for which we must generate messages
 		# to yaAGC over the socket.  In theory, the externalData list could contain
