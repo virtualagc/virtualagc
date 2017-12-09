@@ -227,8 +227,9 @@ ENDKYCK                         NOOP
                                                                 # Division is tricky.  The dividend is double precision (2 words)
                                                                 # and the divisor is single-precision (1 word).  Put the MSW 
                                                                 # of the dividend (in our case always 0) in A and the LSW
-                                                                # into L.  The divisor must be in the address range 
-                                                                # 0-07777.
+                                                                # into L.  Moreover, the divisor must be in erasable memory
+                                                                # (and not just that, but the 10 address-bit subset of erasable
+                                                                # memory).  
                                 CA              THIS040         
                                 TS              LAST040
 				TS		L		# Minutes,seconds are quotient,remainder of (channel 040)/64.
