@@ -3,6 +3,10 @@
 # Purpose:      Code for the short tutorial on AGC bare-metal programming
 #               from http://www.ibiblio.org/apollo/DIY.html.
 # Mod History:  2017-12-07 RSB  Wrote.
+#		2017-12-09 RSB	Added displaying the current time and date
+#				from input channels 040-042 supplied by the
+#				template peripheral program (piPeriperal.py)
+#				when it's used with its --time=1 cli switch.
 #
 # It extends the simple template program described in the tutorial (which
 # only toggles COMP ACTY whenever a DSKY keycode is detected) by 
@@ -17,6 +21,13 @@
 #	Month		Next higher 4 bits of channel 041
 #			(Most-significant bit of channel 041 unused)
 #	Year		Channel 042.
+# On the DSKY, this ends up being displayed as:
+#	PROG		blank
+#	VERB		blank
+#	NOUN		seconds
+#	R1		hour, minute, separated by a blank
+#	R2		month, day, separated by a blank
+#	R3		year, prefixed by a blank
 # The output channels used are:
 #	Year		Channel 043
 #	Month		Channel 044
@@ -74,10 +85,10 @@ DIGIT2				ERASE
 DIGIT3				ERASE
 DIGIT4				ERASE
 DIGIT5				ERASE   
-DUMMY				ERASE				# Dummy value for computations.
 DSPR				ERASE				# Return address for DSPxxxx functions.
 DIGIT25				ERASE
 DIGIT31				ERASE
+DIVISOR				ERASE				# A dummy variable used to store divisors.
 
                                 SETLOC          4000            # The interrupt-vector table.
 
@@ -216,16 +227,16 @@ ENDKYCK                         NOOP
                                                                 # Division is tricky.  The dividend is double precision (2 words)
                                                                 # and the divisor is single-precision (1 word).  Put the MSW 
                                                                 # of the dividend (in our case always 0) in A and the LSW
-                                                                # into L.  The divisor must be in the 12-bit address space, so
-                                                                # it has to be in erasable memory.
+                                                                # into L.  The divisor must be in the address range 
+                                                                # 0-07777.
                                 CA              THIS040         
                                 TS              LAST040
 				TS		L		# Minutes,seconds are quotient,remainder of (channel 040)/64.
 				CA		D64
-				TS		DUMMY
+				TS		DIVISOR
 				CA		ZERO
 				EXTEND
-				DV		DUMMY
+				DV		DIVISOR
 				TS		MINUTE
 				CA		L
 				TS		SECOND      
@@ -233,16 +244,16 @@ ENDKYCK                         NOOP
                                 READ            41              # Get months,days,hours from (channel 041).
                                 TS		L
                                 CA		D1024
-                                TS		DUMMY
+                                TS		DIVISOR
                                 CA		ZERO
                                 EXTEND
-                                DV		DUMMY		# A is now months and L is days,hours
+                                DV		DIVISOR		# A is now months and L is days,hours
                                 TS		MONTH
                                 CA		D32
-                                TS		DUMMY
+                                TS		DIVISOR
                                 CA		ZERO
                                 EXTEND
-                                DV		DUMMY
+                                DV		DIVISOR
                                 TS		DAY
                                 CA		L
                                 TS		HOUR
@@ -256,23 +267,21 @@ ENDKYCK                         NOOP
 				CA		YEAR
 				EXTEND		
 				WRITE		43
-				TCR		DSPR3		# Display those digits.
+				TCR		DSPR3Y		# Display digits for year.
 				CA		MONTH
 				EXTEND
 				WRITE		44
-				TCR		DSPR2
 				CA		DAY
 				EXTEND
 				WRITE		45
-				TCR		DSPR1
+				TCR		DSPR2MD		# Display digits for month, day.
 				CA		HOUR
 				EXTEND
 				WRITE		46
-				TCR		DSPPROG
 				CA		MINUTE
 				EXTEND
 				WRITE		47
-				TCR		DSPVERB
+				TCR		DSPR1HM		# Display digits for hour, minute
 				CA		SECOND
 				EXTEND
 				WRITE		50
@@ -293,31 +302,31 @@ CONV10				TS		L		# Save the argument
 				BZMF		CONV10M		# Argument is negative, we'll need to invert
 CONV10Z				CA		ZERO		# Record the sign as positive (0 -> SIGN).
 				TS		SIGN
-CONV10P				CA		TEN		# Prepare for lots of dividing by 10.	
-				TS		DUMMY		# The remainders will be the DIGITx.
+CONV10P				CA		TEN
+				TS		DIVISOR
 				CA		ZERO		# Note that L still contains the original argument.
 				EXTEND	
-				DV		DUMMY
+				DV		DIVISOR
 				LXCH		A		# Save remainder as digit 5 and put quotient into L.
 				TS		DIGIT5
 				CA		ZERO
 				EXTEND	
-				DV		DUMMY
+				DV		DIVISOR
 				LXCH		A
 				TS		DIGIT4
 				CA		ZERO
 				EXTEND	
-				DV		DUMMY
+				DV		DIVISOR
 				LXCH		A
 				TS		DIGIT3
 				CA		ZERO
 				EXTEND	
-				DV		DUMMY
+				DV		DIVISOR
 				LXCH		A
 				TS		DIGIT2
 				CA		ZERO
 				EXTEND	
-				DV		DUMMY
+				DV		DIVISOR
 				LXCH		A
 				TS		DIGIT1
 				RETURN
@@ -332,19 +341,16 @@ CONV10M				CA		ONE		# Record the sign as negative (1 -> SIGN).
 # Packs two digits previously formed by CONV10 into a suitable
 # form for output.  The channel 10 opcode has to be added in afterward.
 # Suitable for PROG, VERB, and NOUN areas.  Result returned in A.
-PACK2DIG			CA		DIGIT4
-				INDEX		A
-				CA		DIGPATTS
-				TS		DIGIT4
-				CA		DIGIT5
+PACK2DIG			CA		DIGIT5
 				INDEX		A
 				CA		DIGPATTS
 				TS		DIGIT5
-				CA		D32		# Prepare for shifting by 5 places.
-				TS		DUMMY
 				CA		DIGIT4
+				INDEX		A
+				CA		DIGPATTS
+				TS		DIGIT4
 				EXTEND
-				MP		DUMMY
+				MP		D32		# Shift by 5 places.
 				CA		DIGIT5
 				AD		L
 				RETURN				
@@ -408,34 +414,44 @@ DSPNOUN				EXTEND
 				QXCH		DSPR
 				RETURN
 
-# Display the number in the accumulator as decimal in DSKY R1.  Ignore SIGN for now.
+# Display the number in the accumulator as decimal in DSKY R1.
 DSPR1				EXTEND
 				QXCH		DSPR
 				TCR		CONV10
 				TCR		PATT5DIG
-				#CA		DIGIT1		# First write DIGIT1
-				CA		ZERO		# blank
+				CA		DIGIT1		# First write DIGIT1
 				AD		OPCODR11
 				EXTEND
 				WRITE		10
-				CA		D32
-				TS		DUMMY
-				#CA		DIGIT2		# Next, DIGIT2 and DIGIT3
-				CA		ZERO		# blank
+				CA		DIGIT2		# Next, DIGIT2 and DIGIT3
 				EXTEND
-				MP		DUMMY
-				#CA		DIGIT3
-				CA		ZERO		# blank
-				AD		L
-				AD		OPCDR123
+				MP		D32
+				CA		DIGIT3
+				ADS		L
+				CA		OPCDR123
+				ADS		L
+				CA		SIGN
+				EXTEND
+				BZF		DSPR1POS
+				TCF		DSPR1NPS
+DSPR1POS			CA		SIGNBIT
+				ADS		L
+DSPR1NPS			CA		L
 				EXTEND
 				WRITE		10
 				CA		DIGIT4		# And finally, DIGIT4 and DIGIT5
 				EXTEND
-				MP		DUMMY
+				MP		D32
 				CA		DIGIT5
-				AD		L
-				AD		OPCDR145
+				ADS		L
+				CA		OPCDR145
+				ADS		L
+				CA		SIGN
+				EXTEND
+				BZF		DSPR1NNG
+				CA		SIGNBIT
+				ADS		L
+DSPR1NNG			CA		L
 				EXTEND
 				WRITE		10
 				EXTEND
@@ -449,32 +465,41 @@ DSPR2				EXTEND
 				TCR		PATT5DIG
 				CA		DIGIT5		# Save DIGIT5 for DSPR3 routine.
 				TS		DIGIT25
-				CA		D32
-				TS		DUMMY
-				#CA		DIGIT1		# First, DIGIT1 and DIGIT2
-				CA		ZERO		# blank
+				CA		DIGIT1		# First, DIGIT1 and DIGIT2
 				EXTEND
-				MP		DUMMY
-				#CA		DIGIT2
-				CA		ZERO		# blank
-				AD		L
-				AD		OPCDR212
+				MP		D32
+				CA		DIGIT2
+				ADS		L
+				CA		OPCDR212
+				ADS		L
+				CA		SIGN
+				EXTEND
+				BZF		DSPR2POS
+				TCF		DSPR2NPS
+DSPR2POS			CA		SIGNBIT
+				ADS		L
+DSPR2NPS			CA		L
 				EXTEND
 				WRITE		10
-				#CA		DIGIT3		# Next, DIGIT3 and DIGIT4
-				CA		ZERO		# blank
+				CA		DIGIT3		# Next, DIGIT3 and DIGIT4
 				EXTEND
-				MP		DUMMY
+				MP		D32
 				CA		DIGIT4
-				AD		L
-				AD		OPCDR234
+				ADS		L
+				CA		OPCDR234
+				ADS		L
+				CA		SIGN
+				EXTEND
+				BZF		DSPR2NNG
+				CA		SIGNBIT
+				ADS		L
+DSPR2NNG			CA		L
 				EXTEND
 				WRITE		10
 				CA		DIGIT5		# Finally, DIGIT5 (and R3 DIGIT1)
 				EXTEND
-				MP		DUMMY
-				#CA		DIGIT31
-				CA		ZERO		# blank
+				MP		D32
+				CA		DIGIT31
 				AD		L
 				AD		OPR25R31
 				EXTEND
@@ -490,33 +515,158 @@ DSPR3				EXTEND
 				TCR		PATT5DIG
 				CA		DIGIT1		# Save DIGIT1 for DSPR2 routine.
 				TS		DIGIT31
-				CA		D32
-				TS		DUMMY
 				CA		DIGIT25		# First, (R2 DIGIT5 and) DIGIT1
 				EXTEND
-				MP		DUMMY
-				#CA		DIGIT1
-				CA		ZERO		# Blank
+				MP		D32
+				CA		DIGIT1
 				AD		L
 				AD		OPR25R31
 				EXTEND
 				WRITE		10
 				CA		DIGIT2		# Next, DIGIT2 and DIGIT3
 				EXTEND
-				MP		DUMMY
+				MP		D32
+				CA		DIGIT3
+				ADS		L
+				CA		OPCDR323
+				ADS		L
+				CA		SIGN
+				EXTEND	
+				BZF		DSPR3POS
+				TCF		DSPR3NPS
+DSPR3POS			CA		SIGNBIT
+				ADS		L
+DSPR3NPS			CA		L					
+				EXTEND
+				WRITE		10
+				CA		DIGIT4		# And finally, DIGIT4 and DIGIT5
+				EXTEND
+				MP		D32
+				CA		DIGIT5
+				ADS		L
+				CA		OPCDR345
+				ADS		L
+				CA		SIGN
+				EXTEND
+				BZF		DSPR3NNG
+				CA		SIGNBIT
+				ADS		L
+DSPR3NNG			CA		L
+				EXTEND
+				WRITE		10
+				EXTEND
+				QXCH		DSPR
+				RETURN
+
+# Display the number in YEAR as a year in DSKY R3.  (Similar to 
+# DSPR3, except no sign bit, and first digit is blank.)
+DSPR3Y				EXTEND
+				QXCH		DSPR
+				CA		YEAR
+				TCR		CONV10
+				TCR		PATT5DIG
+				CA		ZERO		# Save first digit (a blank) for DSPR2 routine.
+				TS		DIGIT31
+				
+				CA		DIGIT25		# First, (R2 DIGIT5 and) DIGIT1 (blank)
+				EXTEND
+				MP		D32
+				CA		ZERO
+				AD		L
+				AD		OPR25R31
+				EXTEND
+				WRITE		10
+				CA		DIGIT2		# Next, DIGIT2 and DIGIT3
+				EXTEND
+				MP		D32
 				CA		DIGIT3
 				AD		L
 				AD		OPCDR323
 				EXTEND
 				WRITE		10
+				
 				CA		DIGIT4		# And finally, DIGIT4 and DIGIT5
 				EXTEND
-				MP		DUMMY
+				MP		D32
 				CA		DIGIT5
 				AD		L
 				AD		OPCDR345
 				EXTEND
 				WRITE		10
+				
+				EXTEND
+				QXCH		DSPR
+				RETURN
+
+# Display the numbers in MONTH and DAY as two 2-digit fields in DSKY R2.
+DSPR2MD				EXTEND
+				QXCH		DSPR
+				
+				CA		MONTH
+				TCR		CONV10
+				TCR		PACK2DIG
+				AD		OPCDR212
+				EXTEND 
+				WRITE		10
+				
+				CA		DAY
+				TCR		CONV10
+				CA		DIGIT5
+				INDEX		A
+				CA		DIGPATTS
+				TS		DIGIT5
+				CA		DIGIT4
+				INDEX		A
+				CA		DIGPATTS
+				AD		OPCDR234
+				EXTEND
+				WRITE		10
+				
+				CA		DIGIT5
+				TS		DIGIT25
+				EXTEND
+				MP		D32
+				CA		L
+				AD		DIGIT31
+				AD		OPR25R31
+				EXTEND
+				WRITE		10
+				
+				EXTEND
+				QXCH		DSPR
+				RETURN
+
+# Display the numbers in HOUR and MINUTE as two 2-digit fields in DSKY R1.
+DSPR1HM				EXTEND
+				QXCH		DSPR
+				
+				CA		HOUR
+				TCR		CONV10
+				
+				CA		DIGIT4
+				INDEX		A
+				CA		DIGPATTS
+				AD		OPCODR11
+				EXTEND
+				WRITE		10
+				
+				CA		DIGIT5
+				INDEX		A
+				CA		DIGPATTS
+				EXTEND
+				MP		D32
+				CA		L
+				AD		OPCDR123
+				EXTEND 
+				WRITE		10
+				
+				CA		MINUTE
+				TCR		CONV10
+				TCR		PACK2DIG
+				AD		OPCDR145
+				EXTEND
+				WRITE		10
+				
 				EXTEND
 				QXCH		DSPR
 				RETURN
@@ -544,7 +694,8 @@ OPCDR212			DEC		5 B11
 OPCDR234			DEC		4 B11
 OPR25R31			DEC		3 B11
 OPCDR323			DEC		2 B11
-OPCDR345			DEC		1 B11		
+OPCDR345			DEC		1 B11	
+SIGNBIT				DEC		1 B10	
 # DSKY digit patterns for the digit 0-9.
 DIGPATTS			DEC		21
 				DEC		3
