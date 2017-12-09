@@ -156,7 +156,7 @@ do
 	unset PLAYBACK
 	if [[ "$PLAYBACK_OPTION" != "" ]]
 	then
-		echo " PROG - Play back" 
+		echo "  PRO - Play back" 
 	fi
 	if [[ "$CUSTOM_BARE" != "" ]]
 	then
