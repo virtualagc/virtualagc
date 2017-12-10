@@ -326,7 +326,12 @@ do
 		fi
 		if [[ "$CUSTOM_BARE" != "" ]]
 		then
-			xterm -hold -e "$SOURCEDIR/piPeripheral/piPeripheral.py --port=19699 --time=1" &
+			if [[ "$DEBUG" == "" ]]
+			then
+				"$SOURCEDIR/piPeripheral/piPeripheral.py" --port=19699 --time=1 &>/dev/null &
+			else
+				xterm -hold -e "$SOURCEDIR/piPeripheral/piPeripheral.py --port=19699 --time=1" &
+			fi
 			STATUS_BARE=$!
 		fi
 	
