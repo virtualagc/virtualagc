@@ -91,6 +91,8 @@
 #				the input channels a lot, so that a lot of
 #				unnecessary duplication of operations is 
 #				presumably prevented.
+#		2017-12-11 RSB	Now accepts floats as timestamps in playback
+#				files, though hopefully that will never occur.
 #
 # About the design of this program ... yes, a real Python developer would 
 # objectify it and have lots and lots of individual models defining the objects.
@@ -209,7 +211,7 @@ if args.playback:
 		playbackFile = open(args.playback, "r")
 		playbackGenerator = (line.strip().split() for line in playbackFile)
 		for line in playbackGenerator:
-			playbackEvents.append( ( int(line[0]), int(line[1], 8), int(line[2], 8)  ) )
+			playbackEvents.append( ( float(line[0]), int(line[1], 8), int(line[2], 8)  ) )
 			#print(str(playbackEvents[len(playbackEvents)-1]))
 	except:
 		print("Problem with playback file: " + args.playback)
