@@ -42,8 +42,12 @@ if len(sys.argv) < 12:
 	print("This program filters and reformats a NASSP log of AGC i/o-channel")
 	print("activity, producing a playback script for the piDSKY2 program.")
 	print("Usage:")
-	print("\tconvertNasspLog.py value11 value13 value163 prog verb noun r1 r2 r3 relay12 channel1 channel2 channel3 ...  <nasspLog >playbackScript")
-	print("The AGC channel numbers are in octal.  The various items preceding")
+	print("\tconvertNasspLog.py value11 value13 value163 prog verb noun r1 r2 r3 \\")
+	print("\t                   relay12 channel1 channel2 channel3 ... \\")
+	print("\t                   <nasspLogFile >playbackScriptFile")
+	print("The AGC channel numbers are in octal, although the you can also use the")
+	print("words 'dsky' or 'all' as aliases for just the DSKY channels (10, 11, 13,")
+	print("and 163) or to accept all of the channels.  The various items preceding")
 	print("the channel numbers are what should initially be displayed on the DSKY")
 	print("at the start of the playback, just in case the playback script doesn't")
 	print("instantly set everything the way one might want.  The value11, value13,")
@@ -87,7 +91,16 @@ if not test6(r3):
 relay12 = int(sys.argv[10], 8)
 channels = []
 for i in range(11, len(sys.argv)):
-	channels.append(int(sys.argv[i], 8))
+	if sys.argv[i] == "dsky":
+		for c in [ 0o10, 0o11, 0o13, 0o163 ]:
+			if not (c in channels):
+				channels.append(c)
+	elif sys.argv[i] == "all":
+		for c in range(0o0, 0o177):
+			if not (c in channels):
+				channels.append(c)
+	else:
+		channels.append(int(sys.argv[i], 8))
 
 # Display initial conditions on DSKY.
 numberPatterns = {
