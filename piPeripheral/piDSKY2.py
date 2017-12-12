@@ -93,6 +93,14 @@
 #				presumably prevented.
 #		2017-12-11 RSB	Now accepts floats as timestamps in playback
 #				files, though hopefully that will never occur.
+#		2017-12-12 RSB	Added AGC input channels (i.e., keystrokes) to
+#				the --record and --playback features.  What I
+#				intend to do with them in playback is to flash
+#				the backlight on the associated keys momentarily,
+#				but I don't have enough technical information to
+#				do so, nor is it wired up on the DSKY I have yet,
+#				so at the moment it does nothing in playback other
+#				than hook it.
 #
 # About the design of this program ... yes, a real Python developer would 
 # objectify it and have lots and lots of individual models defining the objects.
@@ -201,7 +209,7 @@ else:
 
 if args.record:
 	lastRecordedTime = -1
-	recordingFile = open(homeDir + "/Desktop/piDSKY2-recorded.txt", "w", 1)
+	recordingFile = open(homeDir + "/Desktop/piDSKY2-recorded.canned", "w", 1)
 
 if args.playback:
 	lastPlaybackTime = time.time()
@@ -392,6 +400,21 @@ def packetize(tuple):
 	outputBuffer[2] = 0x80 | ((tuple[1] >> 6) & 0x3F)
 	outputBuffer[3] = 0xC0 | (tuple[1] & 0x3F)
 	s.send(outputBuffer)
+	if args.record:
+		global lastRecordedTime, recordingFile, lastInputChannels
+		currentTime = time.time()
+		if lastRecordedTime < 0:
+			lastRecordedTime = currentTime
+		try:
+			channelName = oct(tuple[0])
+			if not (channelName in lastInputChannels) or lastInputChannels[channelName] != tuple[1]:
+				lastInputChannels[channelName] = tuple[1]
+				recordingFile.write(str(round(1000 * (currentTime - lastRecordedTime))) 
+					+ " " + ("%o" % tuple[0]) + " " + ("%o" % tuple[1]) + "\n")
+				lastRecordedTime = currentTime
+		except:
+			pass
+		lastRecordedTime = currentTime
 
 # This particular function parses various keystrokes, like '0' or 'V' and creates
 # packets as if they were DSKY keypresses.  It should be called occasionally as
@@ -470,7 +493,7 @@ def parseDskyKey(ch):
     		returnValue.append( (0o32, 0o20000, 0o20000) )
 	elif ch == 'K':
     		returnValue.append( (0o15, 0o31, 0o37) )
-	elif ch == '\n':
+	elif ch == '\n' or ch == 'E':
 		returnValue.append( (0o15, 0o34, 0o37) )
 		if stateV35E == 3:
 			countV35E += 1
@@ -843,7 +866,9 @@ lastInputChannels = {
 	"0o10-12" : 1234567,
 	"0o11" : 1234567,
 	"0o13" : 1234567,
-	"0o163" : 1234567
+	"0o163" : 1234567,
+	"0o15" : 1234567,
+	"0o32" : 1234567
 }
 plusMinusState1 = 0
 plusMinusState2 = 0
@@ -1158,8 +1183,19 @@ def eventLoop():
 				desiredTime = lastPlaybackTime + playbackEvents[currentPlaybackIndex][0] / 1000.0
 				if timeNow >= desiredTime:
 					lastPlaybackTime = desiredTime
-					outputFromAGC(playbackEvents[currentPlaybackIndex][1],
-						      playbackEvents[currentPlaybackIndex][2])
+					if playbackEvents[currentPlaybackIndex][1] in [ 0o15, 0o32 ]:
+						# These are actually AGC input channels (hence are
+						# outputs from the DSKY rather than inputs to it).
+						# They indicate keypresses.  We won't do anything with
+						# them other than possibly to flash backlights on the
+						# associated keys, but that's not implemented at the 
+						# moment.
+						print("Playback keystroke event " + oct(playbackEvents[currentPlaybackIndex][1])
+							+ " " + oct(playbackEvents[currentPlaybackIndex][2]))
+						pass
+					else:
+						outputFromAGC(playbackEvents[currentPlaybackIndex][1],
+							      playbackEvents[currentPlaybackIndex][2])
 					currentPlaybackIndex += 1
 					didSomething = True
 		else:

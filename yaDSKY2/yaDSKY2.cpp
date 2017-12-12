@@ -75,6 +75,11 @@
  *              2017-08-24 RSB	Eliminated a clang warning.
  *		2017-12-11 RSB	Added ability to click PROG indicator
  *				(for playback of pre-canned scripts).
+ *		2017-12-12 RSB	Prevented from returning keystrokes to
+ *				AGC during script playback.  Added keypad
+ *				indications for logged keystrokes during
+ *				playback.  Added ability to record, from
+ *				TRACKER.
  *
  * The yaDSKY2 program is intended to be a completely identical drop-in
  * replacement for the yaDSKY program as it exists at 2009-03-06.
@@ -99,6 +104,7 @@
 using namespace std;
 
 #include "wx/filefn.h"
+#include <wx/stdpaths.h>
 
 #include "../yaAGC/yaAGC.h"
 #include "../yaAGC/agc_engine.h"
@@ -330,45 +336,44 @@ MainFrame::MainFrame (wxWindow* parent, int id, const wxString& title,
       wxBitmap (wxT ("FrameHorizontal.jpg"), wxBITMAP_TYPE_ANY));
   bitmap_5_copy_2 = new wxStaticBitmap (
       this, wxID_ANY, wxBitmap (wxT ("FrameVertical.jpg"), wxBITMAP_TYPE_ANY));
-  VerbButton = new wxBitmapButton (
-      this, ID_VERBBUTTON, wxBitmap (wxT ("VerbUp.jpg"), wxBITMAP_TYPE_ANY));
-  NounButton = new wxBitmapButton (
-      this, ID_NOUNBUTTON, wxBitmap (wxT ("NounUp.jpg"), wxBITMAP_TYPE_ANY));
-  PlusButton = new wxBitmapButton (
-      this, ID_PLUSBUTTON, wxBitmap (wxT ("PlusUp.jpg"), wxBITMAP_TYPE_ANY));
-  MinusButton = new wxBitmapButton (
-      this, ID_MINUSBUTTON, wxBitmap (wxT ("MinusUp.jpg"), wxBITMAP_TYPE_ANY));
-  ZeroButton = new wxBitmapButton (
-      this, ID_ZEROBUTTON, wxBitmap (wxT ("0Up.jpg"), wxBITMAP_TYPE_ANY));
-  SevenButton = new wxBitmapButton (
-      this, ID_SEVENBUTTON, wxBitmap (wxT ("7Up.jpg"), wxBITMAP_TYPE_ANY));
-  FourButton = new wxBitmapButton (
-      this, ID_FOURBUTTON, wxBitmap (wxT ("4Up.jpg"), wxBITMAP_TYPE_ANY));
-  OneButton = new wxBitmapButton (
-      this, ID_ONEBUTTON, wxBitmap (wxT ("1Up.jpg"), wxBITMAP_TYPE_ANY));
-  EightButton = new wxBitmapButton (
-      this, ID_EIGHTBUTTON, wxBitmap (wxT ("8Up.jpg"), wxBITMAP_TYPE_ANY));
-  FiveButton = new wxBitmapButton (
-      this, ID_FIVEBUTTON, wxBitmap (wxT ("5Up.jpg"), wxBITMAP_TYPE_ANY));
-  TwoButton = new wxBitmapButton (
-      this, ID_TWOBUTTON, wxBitmap (wxT ("2Up.jpg"), wxBITMAP_TYPE_ANY));
-  NineButton = new wxBitmapButton (
-      this, ID_NINEBUTTON, wxBitmap (wxT ("9Up.jpg"), wxBITMAP_TYPE_ANY));
-  SixButton = new wxBitmapButton (
-      this, ID_SIXBUTTON, wxBitmap (wxT ("6Up.jpg"), wxBITMAP_TYPE_ANY));
-  ThreeButton = new wxBitmapButton (
-      this, ID_THREEBUTTON, wxBitmap (wxT ("3Up.jpg"), wxBITMAP_TYPE_ANY));
-  ClrButton = new wxBitmapButton (
-      this, ID_CLRBUTTON, wxBitmap (wxT ("ClrUp.jpg"), wxBITMAP_TYPE_ANY));
-  ProButton = new wxBitmapButton (
-      this, ID_PROBUTTON, wxBitmap (wxT ("ProUp.jpg"), wxBITMAP_TYPE_ANY));
-  KeyRelButton = new wxBitmapButton (
-      this, ID_KEYRELBUTTON,
-      wxBitmap (wxT ("KeyRelUp.jpg"), wxBITMAP_TYPE_ANY));
-  EntrButton = new wxBitmapButton (
-      this, ID_ENTRBUTTON, wxBitmap (wxT ("EntrUp.jpg"), wxBITMAP_TYPE_ANY));
-  RsetButton = new wxBitmapButton (
-      this, ID_RSETBUTTON, wxBitmap (wxT ("RsetUp.jpg"), wxBITMAP_TYPE_ANY));
+  VerbBitmap = wxBitmap (wxT ("VerbUp.jpg"), wxBITMAP_TYPE_ANY);
+  NounBitmap = wxBitmap (wxT ("NounUp.jpg"), wxBITMAP_TYPE_ANY);
+  PlusBitmap = wxBitmap (wxT ("PlusUp.jpg"), wxBITMAP_TYPE_ANY);
+  MinusBitmap = wxBitmap (wxT ("MinusUp.jpg"), wxBITMAP_TYPE_ANY);
+  ZeroBitmap = wxBitmap (wxT ("0Up.jpg"), wxBITMAP_TYPE_ANY);
+  SevenBitmap = wxBitmap (wxT ("7Up.jpg"), wxBITMAP_TYPE_ANY);
+  FourBitmap = wxBitmap (wxT ("4Up.jpg"), wxBITMAP_TYPE_ANY);
+  OneBitmap = wxBitmap (wxT ("1Up.jpg"), wxBITMAP_TYPE_ANY);
+  EightBitmap = wxBitmap (wxT ("8Up.jpg"), wxBITMAP_TYPE_ANY);
+  FiveBitmap = wxBitmap (wxT ("5Up.jpg"), wxBITMAP_TYPE_ANY);
+  TwoBitmap = wxBitmap (wxT ("2Up.jpg"), wxBITMAP_TYPE_ANY);
+  NineBitmap = wxBitmap (wxT ("9Up.jpg"), wxBITMAP_TYPE_ANY);
+  SixBitmap = wxBitmap (wxT ("6Up.jpg"), wxBITMAP_TYPE_ANY);
+  ThreeBitmap = wxBitmap (wxT ("3Up.jpg"), wxBITMAP_TYPE_ANY);
+  ClrBitmap = wxBitmap (wxT ("ClrUp.jpg"), wxBITMAP_TYPE_ANY);
+  ProBitmap = wxBitmap (wxT ("ProUp.jpg"), wxBITMAP_TYPE_ANY);
+  KeyRelBitmap = wxBitmap (wxT ("KeyRelUp.jpg"), wxBITMAP_TYPE_ANY);
+  EntrBitmap = wxBitmap (wxT ("EntrUp.jpg"), wxBITMAP_TYPE_ANY);
+  RsetBitmap = wxBitmap (wxT ("RsetUp.jpg"), wxBITMAP_TYPE_ANY);
+  VerbButton = new wxBitmapButton (this, ID_VERBBUTTON, VerbBitmap);
+  NounButton = new wxBitmapButton (this, ID_NOUNBUTTON, NounBitmap);
+  PlusButton = new wxBitmapButton (this, ID_PLUSBUTTON, PlusBitmap);
+  MinusButton = new wxBitmapButton (this, ID_MINUSBUTTON, MinusBitmap);
+  ZeroButton = new wxBitmapButton (this, ID_ZEROBUTTON, ZeroBitmap);
+  SevenButton = new wxBitmapButton (this, ID_SEVENBUTTON, SevenBitmap);
+  FourButton = new wxBitmapButton (this, ID_FOURBUTTON, FourBitmap);
+  OneButton = new wxBitmapButton (this, ID_ONEBUTTON, OneBitmap);
+  EightButton = new wxBitmapButton (this, ID_EIGHTBUTTON, EightBitmap);
+  FiveButton = new wxBitmapButton (this, ID_FIVEBUTTON, FiveBitmap);
+  TwoButton = new wxBitmapButton (this, ID_TWOBUTTON, TwoBitmap);
+  NineButton = new wxBitmapButton (this, ID_NINEBUTTON, NineBitmap);
+  SixButton = new wxBitmapButton (this, ID_SIXBUTTON, SixBitmap);
+  ThreeButton = new wxBitmapButton (this, ID_THREEBUTTON, ThreeBitmap);
+  ClrButton = new wxBitmapButton (this, ID_CLRBUTTON, ClrBitmap);
+  ProButton = new wxBitmapButton (this, ID_PROBUTTON, ProBitmap);
+  KeyRelButton = new wxBitmapButton (this, ID_KEYRELBUTTON, KeyRelBitmap);
+  EntrButton = new wxBitmapButton (this, ID_ENTRBUTTON, EntrBitmap);
+  RsetButton = new wxBitmapButton (this, ID_RSETBUTTON, RsetBitmap);
 
   ProButton->Connect (wxEVT_LEFT_DOWN,
 		      wxMouseEventHandler (MainFrame::on_ProButton_pressed),
@@ -377,7 +382,11 @@ MainFrame::MainFrame (wxWindow* parent, int id, const wxString& title,
   Annunciator23->Connect (
       wxEVT_LEFT_DOWN,
       wxMouseEventHandler (MainFrame::on_Annunciator23_clicked), NULL, this);
+  Annunciator25->Connect (
+      wxEVT_LEFT_DOWN,
+      wxMouseEventHandler (MainFrame::on_Annunciator25_clicked), NULL, this);
   scriptFileOpen = false;
+  numScriptKeysPressed = 0;
   last11 = last13 = last163 = 0;
   for (int i = 0; i < 16; last10[i++] = 0)
     ;
@@ -798,12 +807,38 @@ MainFrame::restoreToPrescript (void)
       scriptFileChannelValue = (i << 11) + last10[i];
       Timer->ActOnIncomingIO ((unsigned char *) NULL);
     }
+  numScriptKeysPressed = 0;
+  // Note that when the script indicates a keypress, we Disable() that
+  // key briefly and then reenable it.  This is done solely because it
+  // was the only relatively-efficient way I could think to make a
+  // visual indication of the button press ... yes, not very good in
+  // terms of understandability, I know.  At any rate, we have to
+  // make sure that the keys all get enabled at the end of the script.
+  ProButton->Enable ();
+  VerbButton->Enable ();
+  NounButton->Enable ();
+  ZeroButton->Enable ();
+  OneButton->Enable ();
+  TwoButton->Enable ();
+  ThreeButton->Enable ();
+  FourButton->Enable ();
+  FiveButton->Enable ();
+  SixButton->Enable ();
+  SevenButton->Enable ();
+  EightButton->Enable ();
+  NineButton->Enable ();
+  PlusButton->Enable ();
+  MinusButton->Enable ();
+  EntrButton->Enable ();
+  ClrButton->Enable ();
+  RsetButton->Enable ();
+  KeyRelButton->Enable ();
 }
 
 void
 MainFrame::on_Annunciator23_clicked (wxMouseEvent &event)
 {
-  // When you click on the this lamp (first column, last row), we want to:
+  // When you click on the PROG lamp, we want to:
   //	Save the current display settings (they're always already saved).
   //	Show a file-dialog to select a pre-canned script of i/o channel changes.
   //	Start playback of the pre-canned script, ignoring AGC commands
@@ -812,6 +847,8 @@ MainFrame::on_Annunciator23_clicked (wxMouseEvent &event)
   //		Restore the original display settings
   //		Quickly run through all of the pending commands from AGC.
   //		Start taking commands from the AGC again.
+  if (recordingFileOpen)
+    return;
   if (scriptFileOpen)
     {
       wxMessageBox (wxT ("Script aborted by user."));
@@ -840,6 +877,37 @@ MainFrame::on_Annunciator23_clicked (wxMouseEvent &event)
     }
   // Clean up after ourselves
   OpenDialog->Destroy ();
+  event.ResumePropagation (INT_MAX);
+  event.Skip ();
+}
+
+void
+MainFrame::on_Annunciator25_clicked (wxMouseEvent &event)
+{
+  // When you first click on the TRACKER, we want to:
+  //	Show a message box to say we're starting to record a canned script of i/o channel changes.
+  //	Start recording.
+  // When you subsequently click TRACKER, we want to:
+  //	Stop recording
+  if (scriptFileOpen)
+    return;
+  if (recordingFileOpen)
+    {
+      recordingFile.Write();
+      recordingFile.Close ();
+      recordingFileOpen = false;
+      wxMessageBox (wxT ("Recording completed by user."));
+    }
+  else
+    {
+      wxMessageBox (wxT ("Recording will commence when this box is closed."));
+
+      wxString documents = wxStandardPaths::Get().GetDocumentsDir();
+      recordingFile.Create (documents + wxT("/yaDSKY2-recorded.canned"));
+      recordingFileOpen = true;
+      scriptFileStopWatch.Start ();
+      recordingLastTime = 0;
+    }
   event.ResumePropagation (INT_MAX);
   event.Skip ();
 }
@@ -1392,6 +1460,9 @@ TimerClass::Notify ()
   static int PacketSize = 0;
   int i;
   unsigned char c;
+  static unsigned long pulseCount = 0;
+
+  pulseCount++;
 
 #if 0 
   // Just a preliminary debugging thing, to check out how well bitmap
@@ -1417,6 +1488,26 @@ TimerClass::Notify ()
   // Process canned script, if any, rather than actual packets from yaAGC.
   if (MainWindow->scriptFileOpen)
     {
+      int i, j;
+      // If any buttons that have been pressed (and hence are Disabled) have
+      // timed out (and hence need to be Enabled), then fix them.
+      for (j = 0; j < MainWindow->numScriptKeysPressed; j++)
+	if (pulseCount >= MainWindow->scriptKeysPressed[j].whenPressed + 4)
+	  MainWindow->scriptKeysPressed[j].button->Enable ();
+	else
+	  break;
+      if (j > 0)
+	{
+	  MainWindow->numScriptKeysPressed -= j;
+	  for (i = 0; i < MainWindow->numScriptKeysPressed; i++, j++)
+	    {
+	      MainWindow->scriptKeysPressed[i].whenPressed =
+		  MainWindow->scriptKeysPressed[j].whenPressed;
+	      MainWindow->scriptKeysPressed[i].button =
+		  MainWindow->scriptKeysPressed[j].button;
+	    }
+	}
+      // Now check the script for new records.
       while (true)
 	{
 	  if (MainWindow->scriptFileCurrentLine >= MainWindow->scriptFileCount)
@@ -1438,7 +1529,111 @@ TimerClass::Notify ()
 
 	      MainWindow->scriptFileCurrentLine++;
 	      MainWindow->scriptFileProcessLine ();
-	      ActOnIncomingIO ((unsigned char *) NULL);
+	      if (MainWindow->scriptFileChannelNumber == 015)
+		{
+		  // These are actually AGC input ports, and hence are
+		  // outputs from the DSKY rather than inputs.  The
+		  // only thing we do with this info is to temporarily
+		  // Disable() the key widget, so as to give it a slightly
+		  // different appearance.
+		  int keycode = MainWindow->scriptFileChannelValue & 0x1F;
+		  int i;
+		  wxBitmapButton *button;
+		  switch (keycode)
+		    {
+		    case 16:
+		      button = MainWindow->ZeroButton;
+		      break;
+		    case 1:
+		      button = MainWindow->OneButton;
+		      break;
+		    case 2:
+		      button = MainWindow->TwoButton;
+		      break;
+		    case 3:
+		      button = MainWindow->ThreeButton;
+		      break;
+		    case 4:
+		      button = MainWindow->FourButton;
+		      break;
+		    case 5:
+		      button = MainWindow->FiveButton;
+		      break;
+		    case 6:
+		      button = MainWindow->SixButton;
+		      break;
+		    case 7:
+		      button = MainWindow->SevenButton;
+		      break;
+		    case 8:
+		      button = MainWindow->EightButton;
+		      break;
+		    case 9:
+		      button = MainWindow->NineButton;
+		      break;
+		    case 17:
+		      button = MainWindow->VerbButton;
+		      break;
+		    case 18:
+		      button = MainWindow->RsetButton;
+		      break;
+		    case 25:
+		      button = MainWindow->KeyRelButton;
+		      break;
+		    case 26:
+		      button = MainWindow->PlusButton;
+		      break;
+		    case 27:
+		      button = MainWindow->MinusButton;
+		      break;
+		    case 28:
+		      button = MainWindow->EntrButton;
+		      break;
+		    case 30:
+		      button = MainWindow->ClrButton;
+		      break;
+		    case 31:
+		      button = MainWindow->NounButton;
+		      break;
+		    default:
+		      button = NULL;
+		      break;
+		    }
+		  if (button != NULL)
+		    {
+		      for (i = 0; i < MainWindow->numScriptKeysPressed; i++)
+			if (MainWindow->scriptKeysPressed[i].button == button)
+			  break;
+		      if (i < MainWindow->numScriptKeysPressed)
+			{
+			  // Already on the list, so remove it.
+			  MainWindow->numScriptKeysPressed--;
+			  for (int j = i; j < MainWindow->numScriptKeysPressed;
+			      j++)
+			    {
+			      MainWindow->scriptKeysPressed[j].whenPressed =
+				  MainWindow->scriptKeysPressed[j + 1].whenPressed;
+			      MainWindow->scriptKeysPressed[j].button =
+				  MainWindow->scriptKeysPressed[j + 1].button;
+			    }
+			}
+		      MainWindow->scriptKeysPressed[MainWindow->numScriptKeysPressed].whenPressed =
+			  pulseCount;
+		      MainWindow->scriptKeysPressed[MainWindow->numScriptKeysPressed].button =
+			  button;
+		      MainWindow->numScriptKeysPressed++;
+		      button->Disable ();
+		    }
+		}
+	      else if (MainWindow->scriptFileChannelNumber == 032)
+		{
+		  if ((MainWindow->scriptFileChannelValue & 020000) != 0)
+		    MainWindow->ProButton->Enable ();
+		  else
+		    MainWindow->ProButton->Disable ();
+		}
+	      else
+		ActOnIncomingIO ((unsigned char *) NULL);
 	      MainWindow->scriptFileWaitUntil +=
 		  MainWindow->scriptFileDifferentialTime;
 	    }
@@ -1596,20 +1791,37 @@ TimerClass::ActOnIncomingIO (unsigned char *Packet)
 	      int relay, relayValue;
 	      relay = (Value >> 11) & 0x0F;
 	      relayValue = Value & 03777;
-	      MainWindow->last10[relay] = relayValue;
+	      if (MainWindow->last10[relay] != relayValue)
+		{
+		  MainWindow->last10[relay] = relayValue;
+		  MainWindow->record (Channel, Value);
+		}
 	      break;
 	    case 011:
-	      MainWindow->last11 = Value;
+	      if (MainWindow->last11 != Value)
+		{
+		  MainWindow->last11 = Value;
+		  MainWindow->record (Channel, Value);
+		}
 	      break;
 	    case 013:
-	      MainWindow->last13 = Value;
+	      if (MainWindow->last13 != Value)
+		{
+		  MainWindow->last13 = Value;
+		  MainWindow->record (Channel, Value);
+		}
 	      break;
 	    case 0163:
-	      MainWindow->last163 = Value;
+	      if (MainWindow->last163 != Value)
+		{
+		  MainWindow->last163 = Value;
+		  MainWindow->record (Channel, Value);
+		}
 	      break;
 	    default:
 	      break;
 	    }
+
 	}
 
     }
@@ -1828,6 +2040,9 @@ MainFrame::OutputKeycode (int Keycode)
 {
   unsigned char Packet[4];
   int j;
+  if (scriptFileOpen)
+    return;
+  record (015, Keycode);
   if (ServerSocket != -1)
     {
       if (TestUplink)
@@ -1849,6 +2064,21 @@ MainFrame::OutputKeycode (int Keycode)
     }
 }
 
+void
+MainFrame::record (int channel, int value)
+{
+  if (recordingFileOpen)
+    {
+      long now = scriptFileStopWatch.Time ();
+      recordingFile.AddLine (
+	  wxString::Format (wxT ("%ld %o %o"), now - recordingLastTime,
+			    channel, value));
+      recordingFile.Write();
+      recordingLastTime = now;
+    }
+
+}
+
 //--------------------------------------------------------------------------------
 // ... and a similar function for outputting the PRO-key status to yaAGC.
 
@@ -1857,6 +2087,9 @@ MainFrame::OutputPro (int OffOn)
 {
   unsigned char Packet[8];
   int j;
+  if (scriptFileOpen)
+    return;
+  record (032, OffOn ? 020000 : 0);
   if (ServerSocket != -1)
     {
       // First, create the mask which will tell the CPU to only pay attention to

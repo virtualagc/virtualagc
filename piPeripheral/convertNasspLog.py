@@ -46,7 +46,7 @@ if len(sys.argv) < 12:
 	print("\t                   relay12 channel1 channel2 channel3 ... \\")
 	print("\t                   <nasspLogFile >playbackScriptFile")
 	print("The AGC channel numbers are in octal, although the you can also use the")
-	print("words 'dsky' or 'all' as aliases for just the DSKY channels (10, 11, 13,")
+	print("words 'dsky' or 'all' as aliases for just the DSKY channels (10, 11, 13, 15, 32")
 	print("and 163) or to accept all of the channels.  The various items preceding")
 	print("the channel numbers are what should initially be displayed on the DSKY")
 	print("at the start of the playback, just in case the playback script doesn't")
@@ -92,7 +92,7 @@ relay12 = int(sys.argv[10], 8)
 channels = []
 for i in range(11, len(sys.argv)):
 	if sys.argv[i] == "dsky":
-		for c in [ 0o10, 0o11, 0o13, 0o163 ]:
+		for c in [ 0o10, 0o11, 0o13, 0o15, 0o32, 0o163 ]:
 			if not (c in channels):
 				channels.append(c)
 	elif sys.argv[i] == "all":
@@ -176,12 +176,15 @@ for line in inputLines:
 	if not (channel in channels):
 		continue
 	# Eliminate repetitions.
-	if channel != 0o10:
-		channelName = str(channel)
-		channelValue = value
-	else:
+	if channel == 0o10:
 		channelName = str(channel) + "-" + str(value >> 11)
 		channelValue = value & 0o3777
+	elif channel == 0o32:
+		channelName = str(channel)
+		channelValue = value & 0o20000
+	else:
+		channelName = str(channel)
+		channelValue = value
 	if (channelName in lastValues) and (lastValues[channelName] == channelValue):
 		continue
 	lastValues[channelName] = channelValue

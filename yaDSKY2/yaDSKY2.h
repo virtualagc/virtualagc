@@ -128,6 +128,15 @@ public:
     wxStopWatch scriptFileStopWatch;
     int last10[16], last11, last13, last163;
     void restoreToPrescript(void);
+    struct {
+      int whenPressed;
+      wxBitmapButton *button;
+    } scriptKeysPressed[19];
+    int numScriptKeysPressed;
+    bool recordingFileOpen;
+    wxTextFile recordingFile;
+    long recordingLastTime;
+    void record(int channel, int value);
 
 private:
     // begin wxGlade: MainFrame::methods
@@ -197,6 +206,25 @@ public:
     wxPanel* panel_1;
     wxStaticBitmap* bitmap_6_copy_copy_copy;
     wxStaticBitmap* bitmap_5_copy_2;
+    wxBitmap VerbBitmap;
+    wxBitmap NounBitmap;
+    wxBitmap PlusBitmap;
+    wxBitmap MinusBitmap;
+    wxBitmap ZeroBitmap;
+    wxBitmap SevenBitmap;
+    wxBitmap FourBitmap;
+    wxBitmap OneBitmap;
+    wxBitmap EightBitmap;
+    wxBitmap FiveBitmap;
+    wxBitmap TwoBitmap;
+    wxBitmap NineBitmap;
+    wxBitmap SixBitmap;
+    wxBitmap ThreeBitmap;
+    wxBitmap ClrBitmap;
+    wxBitmap ProBitmap;
+    wxBitmap KeyRelBitmap;
+    wxBitmap EntrBitmap;
+    wxBitmap RsetBitmap;
     wxBitmapButton* VerbButton;
     wxBitmapButton* NounButton;
     wxBitmapButton* PlusButton;
@@ -237,6 +265,7 @@ public:
     virtual void on_ClrButton_pressed(wxCommandEvent &event); // wxGlade: <event_handler>
     virtual void on_ProButton_pressed(wxMouseEvent &event); // wxGlade: <event_handler>
     virtual void on_Annunciator23_clicked(wxMouseEvent &event); // wxGlade: <event_handler>
+    virtual void on_Annunciator25_clicked(wxMouseEvent &event); // wxGlade: <event_handler>
     virtual void on_KeyRelButton_pressed(wxCommandEvent &event); // wxGlade: <event_handler>
     virtual void on_EntrButton_pressed(wxCommandEvent &event); // wxGlade: <event_handler>
     virtual void on_RsetButton_pressed(wxCommandEvent &event); // wxGlade: <event_handler>
