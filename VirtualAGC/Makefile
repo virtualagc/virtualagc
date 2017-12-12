@@ -90,6 +90,7 @@
 #				related to debugging on Code::blocks. 
 #		2016-11-29 RSB	Fixed formation of .app sub-directories for Mac.
 #		2017-08-24 RSB	Added wxFLAGS.
+#		2017-12-11 RSB	Added yaDSKY2/*.canned files.
 
 APP=VirtualAGC
 ifndef MISSIONS
@@ -248,6 +249,7 @@ ifeq "${YADSKY_SUFFIX}" ""
 	${CP} ../yaDSKY/pixmaps $@/pixmaps/yaDSKY
 else
 	${CP} ../yaDSKY2/*.jpg $@
+	${CP} ../yaDSKY2/*.canned $@
 endif	
 	-rm -rf $@/pixmaps/yaDSKY/CVS $@/pixmaps/yaDSKY/.xvpics
 ifeq "${YADEDA_SUFFIX}" ""	

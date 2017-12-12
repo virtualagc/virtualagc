@@ -73,6 +73,8 @@
  *              2017-01-15 MAS  Set sane defaults for the indicators when
  *                              no config is present.
  *              2017-08-24 RSB	Eliminated a clang warning.
+ *		2017-12-11 RSB	Added ability to click PROG indicator
+ *				(for playback of pre-canned scripts).
  *
  * The yaDSKY2 program is intended to be a completely identical drop-in
  * replacement for the yaDSKY program as it exists at 2009-03-06.
@@ -83,7 +85,6 @@
  * Win32/Mac support.  So in other words, yaDSKY2 is a wxWidgets port
  * of the GTK+ based yaDSKY program.
  */
-
 
 #include "yaDSKY2.h"
 
@@ -97,7 +98,6 @@
 
 using namespace std;
 
-#include "wx/textfile.h"
 #include "wx/filefn.h"
 
 #include "../yaAGC/yaAGC.h"
@@ -105,7 +105,8 @@ using namespace std;
 #ifdef __clang__
 extern "C" FILE *rfopen (const char *Filename, const char *mode);
 #else
-FILE *rfopen (const char *Filename, const char *mode);
+FILE *
+rfopen (const char *Filename, const char *mode);
 #endif
 
 static MainFrame* MainWindow;
@@ -133,109 +134,53 @@ static const char SevenSeg0[] = "7Seg-0.jpg";
 // In cases where we don't know that channel/bit corresponds to the lamp, we use 
 // channel -1.
 
-static const char 
-  UplinkActyOnJpeg[] ="UplinkActyOn.jpg",
-  UplinkActyOffJpeg[] = "UplinkActyOff.jpg",
-  NoAttOnJpeg[] = "NoAttOn.jpg",
-  NoAttOffJpeg[] = "NoAttOff.jpg",
-  StbyOnJpeg[] = "StbyOn.jpg",
-  StbyOffJpeg[] = "StbyOff.jpg",
-  KeyRelOnJpeg[] = "KeyRelOn.jpg",
-  KeyRelOffJpeg[] = "KeyRelOff.jpg",
-  OprErrOnJpeg[] = "OprErrOn.jpg",
-  OprErrOffJpeg[] = "OprErrOff.jpg",
-  PrioDispOnJpeg[] = "PrioDispOn.jpg",
-  PrioDispOffJpeg[] = "PrioDispOff.jpg",
-  NoDapOnJpeg[] = "NoDapOn.jpg",
-  NoDapOffJpeg[] = "NoDapOff.jpg",
-  TempOnJpeg[] = "TempOn.jpg",
-  TempOffJpeg[] = "TempOff.jpg",
-  GimbalLockOnJpeg[] = "GimbalLockOn.jpg",
-  GimbalLockOffJpeg[] = "GimbalLockOff.jpg",
-  ProgOnJpeg[] = "ProgOn.jpg",
-  ProgOffJpeg[] = "ProgOff.jpg",
-  RestartOnJpeg[] = "RestartOn.jpg",
-  RestartOffJpeg[] = "RestartOff.jpg",
-  TrackerOnJpeg[] = "TrackerOn.jpg",
-  TrackerOffJpeg[] = "TrackerOff.jpg",
-  AltOnJpeg[] = "AltOn.jpg",
-  AltOffJpeg[] = "AltOff.jpg",
-  VelOnJpeg[] = "VelOn.jpg",
-  VelOffJpeg[] = "VelOff.jpg";
+static const char UplinkActyOnJpeg[] = "UplinkActyOn.jpg", UplinkActyOffJpeg[] =
+    "UplinkActyOff.jpg", NoAttOnJpeg[] = "NoAttOn.jpg", NoAttOffJpeg[] =
+    "NoAttOff.jpg", StbyOnJpeg[] = "StbyOn.jpg", StbyOffJpeg[] = "StbyOff.jpg",
+    KeyRelOnJpeg[] = "KeyRelOn.jpg", KeyRelOffJpeg[] = "KeyRelOff.jpg",
+    OprErrOnJpeg[] = "OprErrOn.jpg", OprErrOffJpeg[] = "OprErrOff.jpg",
+    PrioDispOnJpeg[] = "PrioDispOn.jpg", PrioDispOffJpeg[] = "PrioDispOff.jpg",
+    NoDapOnJpeg[] = "NoDapOn.jpg", NoDapOffJpeg[] = "NoDapOff.jpg",
+    TempOnJpeg[] = "TempOn.jpg", TempOffJpeg[] = "TempOff.jpg",
+    GimbalLockOnJpeg[] = "GimbalLockOn.jpg", GimbalLockOffJpeg[] =
+	"GimbalLockOff.jpg", ProgOnJpeg[] = "ProgOn.jpg", ProgOffJpeg[] =
+	"ProgOff.jpg", RestartOnJpeg[] = "RestartOn.jpg", RestartOffJpeg[] =
+	"RestartOff.jpg", TrackerOnJpeg[] = "TrackerOn.jpg", TrackerOffJpeg[] =
+	"TrackerOff.jpg", AltOnJpeg[] = "AltOn.jpg",
+    AltOffJpeg[] = "AltOff.jpg", VelOnJpeg[] = "VelOn.jpg", VelOffJpeg[] =
+	"VelOff.jpg";
 
-
-static Ind_t Inds[14] = {
-  {				// 11
-    UplinkActyOnJpeg,
-    UplinkActyOffJpeg,
-    011, 04, 0, 0, 0, 0, 0, 0
-  },
-  {				// 12
-    NoAttOnJpeg,
-    NoAttOffJpeg,
-    010, 010, 0, 0, 0, 1, 074000, 060000
-  },
-  {				// 13
-    StbyOnJpeg,
-    StbyOffJpeg,
-    0163, 0400, 0, 0, 0, 0, 0, 0 
-  },
-  {				// 14
-    KeyRelOnJpeg,
-    KeyRelOffJpeg,
-    0163, 020, 0, 0, 0, 0, 0, 0
-  },
-  {				// 15
-    OprErrOnJpeg,
-    OprErrOffJpeg,
-    0163, 0100, 0, 0, 0, 0, 0, 0
-  },
-  {				// 16
-    PrioDispOnJpeg,
-    PrioDispOffJpeg,
-    010, 01, 0, 0, 0, 1, 074000, 060000
-  },
-  {				// 17
-    NoDapOnJpeg,
-    NoDapOffJpeg,
-    010, 02, 0, 0, 0, 1, 074000, 060000
-  },
-  {				// 21
-    TempOnJpeg,
-    TempOffJpeg,
-    011, 010, 0, 0, 0, 0, 0, 0
-  },
-  {				// 22
-    GimbalLockOnJpeg,
-    GimbalLockOffJpeg,
-    010, 040, 0, 0, 0, 1, 074000, 060000
-  },
-  {				// 23
-    ProgOnJpeg,
-    ProgOffJpeg,
-    010, 0400, 0, 0, 0, 1, 074000, 060000
-  },
-  {				// 24
-    RestartOnJpeg,
-    RestartOffJpeg,
-    0163, 0200, 0, 0, 0, 0, 0, 0
-  },
-  {				// 25
-    TrackerOnJpeg,
-    TrackerOffJpeg,
-    010, 0200, 0, 0, 0, 1, 074000, 060000
-  },
-  {				// 26
-    AltOnJpeg,
-    AltOffJpeg,
-    010, 020, 0, 0, 0, 1, 074000, 060000
-  },
-  {				// 27
-    VelOnJpeg,
-    VelOffJpeg,
-    010, 04, 0, 0, 0, 1, 074000, 060000
-  }
-};
+static Ind_t Inds[14] =
+      {
+	{				// 11
+	  UplinkActyOnJpeg, UplinkActyOffJpeg, 011, 04, 0, 0, 0, 0, 0, 0 },
+	  {				// 12
+	  NoAttOnJpeg, NoAttOffJpeg, 010, 010, 0, 0, 0, 1, 074000, 060000 },
+	  {				// 13
+	  StbyOnJpeg, StbyOffJpeg, 0163, 0400, 0, 0, 0, 0, 0, 0 },
+	  {				// 14
+	  KeyRelOnJpeg, KeyRelOffJpeg, 0163, 020, 0, 0, 0, 0, 0, 0 },
+	  {				// 15
+	  OprErrOnJpeg, OprErrOffJpeg, 0163, 0100, 0, 0, 0, 0, 0, 0 },
+	  {				// 16
+	  PrioDispOnJpeg, PrioDispOffJpeg, 010, 01, 0, 0, 0, 1, 074000, 060000 },
+	  {				// 17
+	  NoDapOnJpeg, NoDapOffJpeg, 010, 02, 0, 0, 0, 1, 074000, 060000 },
+	  {				// 21
+	  TempOnJpeg, TempOffJpeg, 011, 010, 0, 0, 0, 0, 0, 0 },
+	  {				// 22
+	  GimbalLockOnJpeg, GimbalLockOffJpeg, 010, 040, 0, 0, 0, 1, 074000,
+	      060000 },
+	  {				// 23
+	  ProgOnJpeg, ProgOffJpeg, 010, 0400, 0, 0, 0, 1, 074000, 060000 },
+	  {				// 24
+	  RestartOnJpeg, RestartOffJpeg, 0163, 0200, 0, 0, 0, 0, 0, 0 },
+	  {				// 25
+	  TrackerOnJpeg, TrackerOffJpeg, 010, 0200, 0, 0, 0, 1, 074000, 060000 },
+	  {				// 26
+	  AltOnJpeg, AltOffJpeg, 010, 020, 0, 0, 0, 1, 074000, 060000 },
+	  {				// 27
+	  VelOnJpeg, VelOffJpeg, 010, 04, 0, 0, 0, 1, 074000, 060000 } };
 
 #define DEBUG(x) 
 
@@ -252,131 +197,222 @@ static Ind_t Inds[14] = {
 // followed by whitespace, followed by any string until the end-of-line is
 // reached. 
 #define MAX_MATCHES 100
-typedef struct {
+typedef struct
+{
   wxString *Pattern;
   wxString *Command;
 } Match_t;
 static wxString Match = wxT (" ");
-static Match_t Matches[MAX_MATCHES] = { NULL };
+static Match_t Matches[MAX_MATCHES] =
+  { NULL };
 static int NumMatches = 0;
 
 // begin wxGlade: ::extracode
 // end wxGlade
 
-
-
-MainFrame::MainFrame(wxWindow* parent, int id, const wxString& title, const wxPoint& pos, const wxSize& size, long style):
-    wxFrame(parent, id, title, pos, size, wxCLOSE_BOX | wxMINIMIZE_BOX | wxCAPTION | wxSYSTEM_MENU)
+MainFrame::MainFrame (wxWindow* parent, int id, const wxString& title,
+		      const wxPoint& pos, const wxSize& size, long style) :
+    wxFrame (parent, id, title, pos, size,
+	     wxCLOSE_BOX | wxMINIMIZE_BOX | wxCAPTION | wxSYSTEM_MENU)
 {
-    // begin wxGlade: MainFrame::MainFrame
-    panel_1 = new wxPanel(this, wxID_ANY);
-    bitmap_5 = new wxStaticBitmap(this, wxID_ANY, wxBitmap(wxT("FrameVertical.jpg"), wxBITMAP_TYPE_ANY));
-    bitmap_6_copy = new wxStaticBitmap(this, wxID_ANY, wxBitmap(wxT("FrameHorizontal.jpg"), wxBITMAP_TYPE_ANY));
-    Annunciator11 = new wxStaticBitmap(this, wxID_ANY, wxBitmap(wxT("UplinkActyOff.jpg"), wxBITMAP_TYPE_ANY));
-    Annunciator21 = new wxStaticBitmap(this, wxID_ANY, wxBitmap(wxT("UplinkActyOff.jpg"), wxBITMAP_TYPE_ANY));
-    Annunciator12 = new wxStaticBitmap(this, wxID_ANY, wxBitmap(wxT("UplinkActyOff.jpg"), wxBITMAP_TYPE_ANY));
-    Annunciator22 = new wxStaticBitmap(this, wxID_ANY, wxBitmap(wxT("UplinkActyOff.jpg"), wxBITMAP_TYPE_ANY));
-    Annunciator13 = new wxStaticBitmap(this, wxID_ANY, wxBitmap(wxT("UplinkActyOff.jpg"), wxBITMAP_TYPE_ANY));
-    Annunciator23 = new wxStaticBitmap(this, wxID_ANY, wxBitmap(wxT("UplinkActyOff.jpg"), wxBITMAP_TYPE_ANY));
-    Annunciator14 = new wxStaticBitmap(this, wxID_ANY, wxBitmap(wxT("UplinkActyOff.jpg"), wxBITMAP_TYPE_ANY));
-    Annunciator24 = new wxStaticBitmap(this, wxID_ANY, wxBitmap(wxT("UplinkActyOff.jpg"), wxBITMAP_TYPE_ANY));
-    Annunciator15 = new wxStaticBitmap(this, wxID_ANY, wxBitmap(wxT("UplinkActyOff.jpg"), wxBITMAP_TYPE_ANY));
-    Annunciator25 = new wxStaticBitmap(this, wxID_ANY, wxBitmap(wxT("UplinkActyOff.jpg"), wxBITMAP_TYPE_ANY));
-    Annunciator16 = new wxStaticBitmap(this, wxID_ANY, wxBitmap(wxT("UplinkActyOff.jpg"), wxBITMAP_TYPE_ANY));
-    Annunciator26 = new wxStaticBitmap(this, wxID_ANY, wxBitmap(wxT("UplinkActyOff.jpg"), wxBITMAP_TYPE_ANY));
-    Annunciator17 = new wxStaticBitmap(this, wxID_ANY, wxBitmap(wxT("UplinkActyOff.jpg"), wxBITMAP_TYPE_ANY));
-    Annunciator27 = new wxStaticBitmap(this, wxID_ANY, wxBitmap(wxT("UplinkActyOff.jpg"), wxBITMAP_TYPE_ANY));
-    bitmap_6 = new wxStaticBitmap(this, wxID_ANY, wxBitmap(wxT("FrameHorizontal.jpg"), wxBITMAP_TYPE_ANY));
-    bitmap_5_copy = new wxStaticBitmap(this, wxID_ANY, wxBitmap(wxT("FrameVertical.jpg"), wxBITMAP_TYPE_ANY));
-    bitmap_5_copy_1 = new wxStaticBitmap(this, wxID_ANY, wxBitmap(wxT("FrameVertical.jpg"), wxBITMAP_TYPE_ANY));
-    bitmap_6_copy_copy = new wxStaticBitmap(this, wxID_ANY, wxBitmap(wxT("FrameHorizontal.jpg"), wxBITMAP_TYPE_ANY));
-    CompActyAnnunciator = new wxStaticBitmap(panel_1, wxID_ANY, wxBitmap(wxT("CompActyOff.jpg"), wxBITMAP_TYPE_ANY));
-    ModeAnnunciator = new wxStaticBitmap(panel_1, wxID_ANY, wxBitmap(wxT("rProgOn.jpg"), wxBITMAP_TYPE_ANY));
-    MD1Digit = new wxStaticBitmap(panel_1, wxID_ANY, wxBitmap(wxT("7Seg-0.jpg"), wxBITMAP_TYPE_ANY));
-    MD2Digit = new wxStaticBitmap(panel_1, wxID_ANY, wxBitmap(wxT("7Seg-0.jpg"), wxBITMAP_TYPE_ANY));
-    VerbAnnunciator = new wxStaticBitmap(panel_1, wxID_ANY, wxBitmap(wxT("VerbOn.jpg"), wxBITMAP_TYPE_ANY));
-    VD1Digit = new wxStaticBitmap(panel_1, wxID_ANY, wxBitmap(wxT("7Seg-0.jpg"), wxBITMAP_TYPE_ANY));
-    VD2Digit = new wxStaticBitmap(panel_1, wxID_ANY, wxBitmap(wxT("7Seg-0.jpg"), wxBITMAP_TYPE_ANY));
-    NounAnnunciator = new wxStaticBitmap(panel_1, wxID_ANY, wxBitmap(wxT("NounOn.jpg"), wxBITMAP_TYPE_ANY));
-    ND1Digit = new wxStaticBitmap(panel_1, wxID_ANY, wxBitmap(wxT("7Seg-0.jpg"), wxBITMAP_TYPE_ANY));
-    ND2Digit = new wxStaticBitmap(panel_1, wxID_ANY, wxBitmap(wxT("7Seg-0.jpg"), wxBITMAP_TYPE_ANY));
-    bitmap_2_copy_1 = new wxStaticBitmap(panel_1, wxID_ANY, wxBitmap(wxT("SeparatorOn.jpg"), wxBITMAP_TYPE_ANY));
-    R1PlusMinus = new wxStaticBitmap(panel_1, wxID_ANY, wxBitmap(wxT("PlusMinusOff.jpg"), wxBITMAP_TYPE_ANY));
-    R1D1Digit = new wxStaticBitmap(panel_1, wxID_ANY, wxBitmap(wxT("7Seg-0.jpg"), wxBITMAP_TYPE_ANY));
-    R1D2Digit = new wxStaticBitmap(panel_1, wxID_ANY, wxBitmap(wxT("7Seg-0.jpg"), wxBITMAP_TYPE_ANY));
-    R1D3Digit = new wxStaticBitmap(panel_1, wxID_ANY, wxBitmap(wxT("7Seg-0.jpg"), wxBITMAP_TYPE_ANY));
-    R1D4Digit = new wxStaticBitmap(panel_1, wxID_ANY, wxBitmap(wxT("7Seg-0.jpg"), wxBITMAP_TYPE_ANY));
-    R1D5Digit = new wxStaticBitmap(panel_1, wxID_ANY, wxBitmap(wxT("7Seg-0.jpg"), wxBITMAP_TYPE_ANY));
-    bitmap_2_copy = new wxStaticBitmap(panel_1, wxID_ANY, wxBitmap(wxT("SeparatorOn.jpg"), wxBITMAP_TYPE_ANY));
-    R2PlusMinus = new wxStaticBitmap(panel_1, wxID_ANY, wxBitmap(wxT("PlusMinusOff.jpg"), wxBITMAP_TYPE_ANY));
-    R2D1Digit = new wxStaticBitmap(panel_1, wxID_ANY, wxBitmap(wxT("7Seg-0.jpg"), wxBITMAP_TYPE_ANY));
-    R2D2Digit = new wxStaticBitmap(panel_1, wxID_ANY, wxBitmap(wxT("7Seg-0.jpg"), wxBITMAP_TYPE_ANY));
-    R2D3Digit = new wxStaticBitmap(panel_1, wxID_ANY, wxBitmap(wxT("7Seg-0.jpg"), wxBITMAP_TYPE_ANY));
-    R2D4Digit = new wxStaticBitmap(panel_1, wxID_ANY, wxBitmap(wxT("7Seg-0.jpg"), wxBITMAP_TYPE_ANY));
-    R2D5Digit = new wxStaticBitmap(panel_1, wxID_ANY, wxBitmap(wxT("7Seg-0.jpg"), wxBITMAP_TYPE_ANY));
-    bitmap_2 = new wxStaticBitmap(panel_1, wxID_ANY, wxBitmap(wxT("SeparatorOn.jpg"), wxBITMAP_TYPE_ANY));
-    R3PlusMinus = new wxStaticBitmap(panel_1, wxID_ANY, wxBitmap(wxT("PlusMinusOff.jpg"), wxBITMAP_TYPE_ANY));
-    R3D1Digit = new wxStaticBitmap(panel_1, wxID_ANY, wxBitmap(wxT("7Seg-0.jpg"), wxBITMAP_TYPE_ANY));
-    R3D2Digit = new wxStaticBitmap(panel_1, wxID_ANY, wxBitmap(wxT("7Seg-0.jpg"), wxBITMAP_TYPE_ANY));
-    R3D3Digit = new wxStaticBitmap(panel_1, wxID_ANY, wxBitmap(wxT("7Seg-0.jpg"), wxBITMAP_TYPE_ANY));
-    R3D4Digit = new wxStaticBitmap(panel_1, wxID_ANY, wxBitmap(wxT("7Seg-0.jpg"), wxBITMAP_TYPE_ANY));
-    R3D5Digit = new wxStaticBitmap(panel_1, wxID_ANY, wxBitmap(wxT("7Seg-0.jpg"), wxBITMAP_TYPE_ANY));
-    bitmap_6_copy_copy_copy = new wxStaticBitmap(this, wxID_ANY, wxBitmap(wxT("FrameHorizontal.jpg"), wxBITMAP_TYPE_ANY));
-    bitmap_5_copy_2 = new wxStaticBitmap(this, wxID_ANY, wxBitmap(wxT("FrameVertical.jpg"), wxBITMAP_TYPE_ANY));
-    VerbButton = new wxBitmapButton(this, ID_VERBBUTTON, wxBitmap(wxT("VerbUp.jpg"), wxBITMAP_TYPE_ANY));
-    NounButton = new wxBitmapButton(this, ID_NOUNBUTTON, wxBitmap(wxT("NounUp.jpg"), wxBITMAP_TYPE_ANY));
-    PlusButton = new wxBitmapButton(this, ID_PLUSBUTTON, wxBitmap(wxT("PlusUp.jpg"), wxBITMAP_TYPE_ANY));
-    MinusButton = new wxBitmapButton(this, ID_MINUSBUTTON, wxBitmap(wxT("MinusUp.jpg"), wxBITMAP_TYPE_ANY));
-    ZeroButton = new wxBitmapButton(this, ID_ZEROBUTTON, wxBitmap(wxT("0Up.jpg"), wxBITMAP_TYPE_ANY));
-    SevenButton = new wxBitmapButton(this, ID_SEVENBUTTON, wxBitmap(wxT("7Up.jpg"), wxBITMAP_TYPE_ANY));
-    FourButton = new wxBitmapButton(this, ID_FOURBUTTON, wxBitmap(wxT("4Up.jpg"), wxBITMAP_TYPE_ANY));
-    OneButton = new wxBitmapButton(this, ID_ONEBUTTON, wxBitmap(wxT("1Up.jpg"), wxBITMAP_TYPE_ANY));
-    EightButton = new wxBitmapButton(this, ID_EIGHTBUTTON, wxBitmap(wxT("8Up.jpg"), wxBITMAP_TYPE_ANY));
-    FiveButton = new wxBitmapButton(this, ID_FIVEBUTTON, wxBitmap(wxT("5Up.jpg"), wxBITMAP_TYPE_ANY));
-    TwoButton = new wxBitmapButton(this, ID_TWOBUTTON, wxBitmap(wxT("2Up.jpg"), wxBITMAP_TYPE_ANY));
-    NineButton = new wxBitmapButton(this, ID_NINEBUTTON, wxBitmap(wxT("9Up.jpg"), wxBITMAP_TYPE_ANY));
-    SixButton = new wxBitmapButton(this, ID_SIXBUTTON, wxBitmap(wxT("6Up.jpg"), wxBITMAP_TYPE_ANY));
-    ThreeButton = new wxBitmapButton(this, ID_THREEBUTTON, wxBitmap(wxT("3Up.jpg"), wxBITMAP_TYPE_ANY));
-    ClrButton = new wxBitmapButton(this, ID_CLRBUTTON, wxBitmap(wxT("ClrUp.jpg"), wxBITMAP_TYPE_ANY));
-    ProButton = new wxBitmapButton(this, ID_PROBUTTON, wxBitmap(wxT("ProUp.jpg"), wxBITMAP_TYPE_ANY));
-    KeyRelButton = new wxBitmapButton(this, ID_KEYRELBUTTON, wxBitmap(wxT("KeyRelUp.jpg"), wxBITMAP_TYPE_ANY));
-    EntrButton = new wxBitmapButton(this, ID_ENTRBUTTON, wxBitmap(wxT("EntrUp.jpg"), wxBITMAP_TYPE_ANY));
-    RsetButton = new wxBitmapButton(this, ID_RSETBUTTON, wxBitmap(wxT("RsetUp.jpg"), wxBITMAP_TYPE_ANY));
+  // begin wxGlade: MainFrame::MainFrame
+  panel_1 = new wxPanel (this, wxID_ANY);
+  bitmap_5 = new wxStaticBitmap (
+      this, wxID_ANY, wxBitmap (wxT ("FrameVertical.jpg"), wxBITMAP_TYPE_ANY));
+  bitmap_6_copy = new wxStaticBitmap (
+      this, wxID_ANY,
+      wxBitmap (wxT ("FrameHorizontal.jpg"), wxBITMAP_TYPE_ANY));
+  Annunciator11 = new wxStaticBitmap (
+      this, wxID_ANY, wxBitmap (wxT ("UplinkActyOff.jpg"), wxBITMAP_TYPE_ANY));
+  Annunciator21 = new wxStaticBitmap (
+      this, wxID_ANY, wxBitmap (wxT ("UplinkActyOff.jpg"), wxBITMAP_TYPE_ANY));
+  Annunciator12 = new wxStaticBitmap (
+      this, wxID_ANY, wxBitmap (wxT ("UplinkActyOff.jpg"), wxBITMAP_TYPE_ANY));
+  Annunciator22 = new wxStaticBitmap (
+      this, wxID_ANY, wxBitmap (wxT ("UplinkActyOff.jpg"), wxBITMAP_TYPE_ANY));
+  Annunciator13 = new wxStaticBitmap (
+      this, wxID_ANY, wxBitmap (wxT ("UplinkActyOff.jpg"), wxBITMAP_TYPE_ANY));
+  Annunciator23 = new wxStaticBitmap (
+      this, wxID_ANY, wxBitmap (wxT ("UplinkActyOff.jpg"), wxBITMAP_TYPE_ANY));
+  Annunciator14 = new wxStaticBitmap (
+      this, wxID_ANY, wxBitmap (wxT ("UplinkActyOff.jpg"), wxBITMAP_TYPE_ANY));
+  Annunciator24 = new wxStaticBitmap (
+      this, wxID_ANY, wxBitmap (wxT ("UplinkActyOff.jpg"), wxBITMAP_TYPE_ANY));
+  Annunciator15 = new wxStaticBitmap (
+      this, wxID_ANY, wxBitmap (wxT ("UplinkActyOff.jpg"), wxBITMAP_TYPE_ANY));
+  Annunciator25 = new wxStaticBitmap (
+      this, wxID_ANY, wxBitmap (wxT ("UplinkActyOff.jpg"), wxBITMAP_TYPE_ANY));
+  Annunciator16 = new wxStaticBitmap (
+      this, wxID_ANY, wxBitmap (wxT ("UplinkActyOff.jpg"), wxBITMAP_TYPE_ANY));
+  Annunciator26 = new wxStaticBitmap (
+      this, wxID_ANY, wxBitmap (wxT ("UplinkActyOff.jpg"), wxBITMAP_TYPE_ANY));
+  Annunciator17 = new wxStaticBitmap (
+      this, wxID_ANY, wxBitmap (wxT ("UplinkActyOff.jpg"), wxBITMAP_TYPE_ANY));
+  Annunciator27 = new wxStaticBitmap (
+      this, wxID_ANY, wxBitmap (wxT ("UplinkActyOff.jpg"), wxBITMAP_TYPE_ANY));
+  bitmap_6 = new wxStaticBitmap (
+      this, wxID_ANY,
+      wxBitmap (wxT ("FrameHorizontal.jpg"), wxBITMAP_TYPE_ANY));
+  bitmap_5_copy = new wxStaticBitmap (
+      this, wxID_ANY, wxBitmap (wxT ("FrameVertical.jpg"), wxBITMAP_TYPE_ANY));
+  bitmap_5_copy_1 = new wxStaticBitmap (
+      this, wxID_ANY, wxBitmap (wxT ("FrameVertical.jpg"), wxBITMAP_TYPE_ANY));
+  bitmap_6_copy_copy = new wxStaticBitmap (
+      this, wxID_ANY,
+      wxBitmap (wxT ("FrameHorizontal.jpg"), wxBITMAP_TYPE_ANY));
+  CompActyAnnunciator = new wxStaticBitmap (
+      panel_1, wxID_ANY, wxBitmap (wxT ("CompActyOff.jpg"), wxBITMAP_TYPE_ANY));
+  ModeAnnunciator = new wxStaticBitmap (
+      panel_1, wxID_ANY, wxBitmap (wxT ("rProgOn.jpg"), wxBITMAP_TYPE_ANY));
+  MD1Digit = new wxStaticBitmap (
+      panel_1, wxID_ANY, wxBitmap (wxT ("7Seg-0.jpg"), wxBITMAP_TYPE_ANY));
+  MD2Digit = new wxStaticBitmap (
+      panel_1, wxID_ANY, wxBitmap (wxT ("7Seg-0.jpg"), wxBITMAP_TYPE_ANY));
+  VerbAnnunciator = new wxStaticBitmap (
+      panel_1, wxID_ANY, wxBitmap (wxT ("VerbOn.jpg"), wxBITMAP_TYPE_ANY));
+  VD1Digit = new wxStaticBitmap (
+      panel_1, wxID_ANY, wxBitmap (wxT ("7Seg-0.jpg"), wxBITMAP_TYPE_ANY));
+  VD2Digit = new wxStaticBitmap (
+      panel_1, wxID_ANY, wxBitmap (wxT ("7Seg-0.jpg"), wxBITMAP_TYPE_ANY));
+  NounAnnunciator = new wxStaticBitmap (
+      panel_1, wxID_ANY, wxBitmap (wxT ("NounOn.jpg"), wxBITMAP_TYPE_ANY));
+  ND1Digit = new wxStaticBitmap (
+      panel_1, wxID_ANY, wxBitmap (wxT ("7Seg-0.jpg"), wxBITMAP_TYPE_ANY));
+  ND2Digit = new wxStaticBitmap (
+      panel_1, wxID_ANY, wxBitmap (wxT ("7Seg-0.jpg"), wxBITMAP_TYPE_ANY));
+  bitmap_2_copy_1 = new wxStaticBitmap (
+      panel_1, wxID_ANY, wxBitmap (wxT ("SeparatorOn.jpg"), wxBITMAP_TYPE_ANY));
+  R1PlusMinus = new wxStaticBitmap (
+      panel_1, wxID_ANY,
+      wxBitmap (wxT ("PlusMinusOff.jpg"), wxBITMAP_TYPE_ANY));
+  R1D1Digit = new wxStaticBitmap (
+      panel_1, wxID_ANY, wxBitmap (wxT ("7Seg-0.jpg"), wxBITMAP_TYPE_ANY));
+  R1D2Digit = new wxStaticBitmap (
+      panel_1, wxID_ANY, wxBitmap (wxT ("7Seg-0.jpg"), wxBITMAP_TYPE_ANY));
+  R1D3Digit = new wxStaticBitmap (
+      panel_1, wxID_ANY, wxBitmap (wxT ("7Seg-0.jpg"), wxBITMAP_TYPE_ANY));
+  R1D4Digit = new wxStaticBitmap (
+      panel_1, wxID_ANY, wxBitmap (wxT ("7Seg-0.jpg"), wxBITMAP_TYPE_ANY));
+  R1D5Digit = new wxStaticBitmap (
+      panel_1, wxID_ANY, wxBitmap (wxT ("7Seg-0.jpg"), wxBITMAP_TYPE_ANY));
+  bitmap_2_copy = new wxStaticBitmap (
+      panel_1, wxID_ANY, wxBitmap (wxT ("SeparatorOn.jpg"), wxBITMAP_TYPE_ANY));
+  R2PlusMinus = new wxStaticBitmap (
+      panel_1, wxID_ANY,
+      wxBitmap (wxT ("PlusMinusOff.jpg"), wxBITMAP_TYPE_ANY));
+  R2D1Digit = new wxStaticBitmap (
+      panel_1, wxID_ANY, wxBitmap (wxT ("7Seg-0.jpg"), wxBITMAP_TYPE_ANY));
+  R2D2Digit = new wxStaticBitmap (
+      panel_1, wxID_ANY, wxBitmap (wxT ("7Seg-0.jpg"), wxBITMAP_TYPE_ANY));
+  R2D3Digit = new wxStaticBitmap (
+      panel_1, wxID_ANY, wxBitmap (wxT ("7Seg-0.jpg"), wxBITMAP_TYPE_ANY));
+  R2D4Digit = new wxStaticBitmap (
+      panel_1, wxID_ANY, wxBitmap (wxT ("7Seg-0.jpg"), wxBITMAP_TYPE_ANY));
+  R2D5Digit = new wxStaticBitmap (
+      panel_1, wxID_ANY, wxBitmap (wxT ("7Seg-0.jpg"), wxBITMAP_TYPE_ANY));
+  bitmap_2 = new wxStaticBitmap (
+      panel_1, wxID_ANY, wxBitmap (wxT ("SeparatorOn.jpg"), wxBITMAP_TYPE_ANY));
+  R3PlusMinus = new wxStaticBitmap (
+      panel_1, wxID_ANY,
+      wxBitmap (wxT ("PlusMinusOff.jpg"), wxBITMAP_TYPE_ANY));
+  R3D1Digit = new wxStaticBitmap (
+      panel_1, wxID_ANY, wxBitmap (wxT ("7Seg-0.jpg"), wxBITMAP_TYPE_ANY));
+  R3D2Digit = new wxStaticBitmap (
+      panel_1, wxID_ANY, wxBitmap (wxT ("7Seg-0.jpg"), wxBITMAP_TYPE_ANY));
+  R3D3Digit = new wxStaticBitmap (
+      panel_1, wxID_ANY, wxBitmap (wxT ("7Seg-0.jpg"), wxBITMAP_TYPE_ANY));
+  R3D4Digit = new wxStaticBitmap (
+      panel_1, wxID_ANY, wxBitmap (wxT ("7Seg-0.jpg"), wxBITMAP_TYPE_ANY));
+  R3D5Digit = new wxStaticBitmap (
+      panel_1, wxID_ANY, wxBitmap (wxT ("7Seg-0.jpg"), wxBITMAP_TYPE_ANY));
+  bitmap_6_copy_copy_copy = new wxStaticBitmap (
+      this, wxID_ANY,
+      wxBitmap (wxT ("FrameHorizontal.jpg"), wxBITMAP_TYPE_ANY));
+  bitmap_5_copy_2 = new wxStaticBitmap (
+      this, wxID_ANY, wxBitmap (wxT ("FrameVertical.jpg"), wxBITMAP_TYPE_ANY));
+  VerbButton = new wxBitmapButton (
+      this, ID_VERBBUTTON, wxBitmap (wxT ("VerbUp.jpg"), wxBITMAP_TYPE_ANY));
+  NounButton = new wxBitmapButton (
+      this, ID_NOUNBUTTON, wxBitmap (wxT ("NounUp.jpg"), wxBITMAP_TYPE_ANY));
+  PlusButton = new wxBitmapButton (
+      this, ID_PLUSBUTTON, wxBitmap (wxT ("PlusUp.jpg"), wxBITMAP_TYPE_ANY));
+  MinusButton = new wxBitmapButton (
+      this, ID_MINUSBUTTON, wxBitmap (wxT ("MinusUp.jpg"), wxBITMAP_TYPE_ANY));
+  ZeroButton = new wxBitmapButton (
+      this, ID_ZEROBUTTON, wxBitmap (wxT ("0Up.jpg"), wxBITMAP_TYPE_ANY));
+  SevenButton = new wxBitmapButton (
+      this, ID_SEVENBUTTON, wxBitmap (wxT ("7Up.jpg"), wxBITMAP_TYPE_ANY));
+  FourButton = new wxBitmapButton (
+      this, ID_FOURBUTTON, wxBitmap (wxT ("4Up.jpg"), wxBITMAP_TYPE_ANY));
+  OneButton = new wxBitmapButton (
+      this, ID_ONEBUTTON, wxBitmap (wxT ("1Up.jpg"), wxBITMAP_TYPE_ANY));
+  EightButton = new wxBitmapButton (
+      this, ID_EIGHTBUTTON, wxBitmap (wxT ("8Up.jpg"), wxBITMAP_TYPE_ANY));
+  FiveButton = new wxBitmapButton (
+      this, ID_FIVEBUTTON, wxBitmap (wxT ("5Up.jpg"), wxBITMAP_TYPE_ANY));
+  TwoButton = new wxBitmapButton (
+      this, ID_TWOBUTTON, wxBitmap (wxT ("2Up.jpg"), wxBITMAP_TYPE_ANY));
+  NineButton = new wxBitmapButton (
+      this, ID_NINEBUTTON, wxBitmap (wxT ("9Up.jpg"), wxBITMAP_TYPE_ANY));
+  SixButton = new wxBitmapButton (
+      this, ID_SIXBUTTON, wxBitmap (wxT ("6Up.jpg"), wxBITMAP_TYPE_ANY));
+  ThreeButton = new wxBitmapButton (
+      this, ID_THREEBUTTON, wxBitmap (wxT ("3Up.jpg"), wxBITMAP_TYPE_ANY));
+  ClrButton = new wxBitmapButton (
+      this, ID_CLRBUTTON, wxBitmap (wxT ("ClrUp.jpg"), wxBITMAP_TYPE_ANY));
+  ProButton = new wxBitmapButton (
+      this, ID_PROBUTTON, wxBitmap (wxT ("ProUp.jpg"), wxBITMAP_TYPE_ANY));
+  KeyRelButton = new wxBitmapButton (
+      this, ID_KEYRELBUTTON,
+      wxBitmap (wxT ("KeyRelUp.jpg"), wxBITMAP_TYPE_ANY));
+  EntrButton = new wxBitmapButton (
+      this, ID_ENTRBUTTON, wxBitmap (wxT ("EntrUp.jpg"), wxBITMAP_TYPE_ANY));
+  RsetButton = new wxBitmapButton (
+      this, ID_RSETBUTTON, wxBitmap (wxT ("RsetUp.jpg"), wxBITMAP_TYPE_ANY));
 
-    ProButton->Connect(wxEVT_LEFT_DOWN, wxMouseEventHandler(MainFrame::on_ProButton_pressed), NULL, this);
+  ProButton->Connect (wxEVT_LEFT_DOWN,
+		      wxMouseEventHandler (MainFrame::on_ProButton_pressed),
+		      NULL,
+		      this);
+  Annunciator23->Connect (
+      wxEVT_LEFT_DOWN,
+      wxMouseEventHandler (MainFrame::on_Annunciator23_clicked), NULL, this);
+  scriptFileOpen = false;
+  last11 = last13 = last163 = 0;
+  for (int i = 0; i < 16; last10[i++] = 0)
+    ;
 
-    set_properties();
-    do_layout();
-    // end wxGlade
+  set_properties ();
+  do_layout ();
+  // end wxGlade
 }
 
-
 BEGIN_EVENT_TABLE(MainFrame, wxFrame)
-    // begin wxGlade: MainFrame::event_table
-    EVT_BUTTON(ID_VERBBUTTON, MainFrame::on_VerbButton_pressed)
-    EVT_BUTTON(ID_NOUNBUTTON, MainFrame::on_NounButton_pressed)
-    EVT_BUTTON(ID_PLUSBUTTON, MainFrame::on_PlusButton_pressed)
-    EVT_BUTTON(ID_MINUSBUTTON, MainFrame::on_MinusButton_pressed)
-    EVT_BUTTON(ID_ZEROBUTTON, MainFrame::on_ZeroButton_pressed)
-    EVT_BUTTON(ID_SEVENBUTTON, MainFrame::on_SevenButton_pressed)
-    EVT_BUTTON(ID_FOURBUTTON, MainFrame::on_FourButton_pressed)
-    EVT_BUTTON(ID_ONEBUTTON, MainFrame::on_OneButton_pressed)
-    EVT_BUTTON(ID_EIGHTBUTTON, MainFrame::on_EightButton_pressed)
-    EVT_BUTTON(ID_FIVEBUTTON, MainFrame::on_FiveButton_pressed)
-    EVT_BUTTON(ID_TWOBUTTON, MainFrame::on_TwoButton_pressed)
-    EVT_BUTTON(ID_NINEBUTTON, MainFrame::on_NineButton_pressed)
-    EVT_BUTTON(ID_SIXBUTTON, MainFrame::on_SixButton_pressed)
-    EVT_BUTTON(ID_THREEBUTTON, MainFrame::on_ThreeButton_pressed)
-    EVT_BUTTON(ID_CLRBUTTON, MainFrame::on_ClrButton_pressed)
-    EVT_BUTTON(ID_KEYRELBUTTON, MainFrame::on_KeyRelButton_pressed)
-    EVT_BUTTON(ID_ENTRBUTTON, MainFrame::on_EntrButton_pressed)
-    EVT_BUTTON(ID_RSETBUTTON, MainFrame::on_RsetButton_pressed)
-    EVT_BUTTON(ID_PROBUTTON, MainFrame::on_ProButton_released)
-    // end wxGlade
-    EVT_CHAR_HOOK(MainFrame::HotkeyEvent)
+// begin wxGlade: MainFrame::event_table
+EVT_BUTTON(ID_VERBBUTTON, MainFrame::on_VerbButton_pressed)
+EVT_BUTTON(ID_NOUNBUTTON, MainFrame::on_NounButton_pressed)
+EVT_BUTTON(ID_PLUSBUTTON, MainFrame::on_PlusButton_pressed)
+EVT_BUTTON(ID_MINUSBUTTON, MainFrame::on_MinusButton_pressed)
+EVT_BUTTON(ID_ZEROBUTTON, MainFrame::on_ZeroButton_pressed)
+EVT_BUTTON(ID_SEVENBUTTON, MainFrame::on_SevenButton_pressed)
+EVT_BUTTON(ID_FOURBUTTON, MainFrame::on_FourButton_pressed)
+EVT_BUTTON(ID_ONEBUTTON, MainFrame::on_OneButton_pressed)
+EVT_BUTTON(ID_EIGHTBUTTON, MainFrame::on_EightButton_pressed)
+EVT_BUTTON(ID_FIVEBUTTON, MainFrame::on_FiveButton_pressed)
+EVT_BUTTON(ID_TWOBUTTON, MainFrame::on_TwoButton_pressed)
+EVT_BUTTON(ID_NINEBUTTON, MainFrame::on_NineButton_pressed)
+EVT_BUTTON(ID_SIXBUTTON, MainFrame::on_SixButton_pressed)
+EVT_BUTTON(ID_THREEBUTTON, MainFrame::on_ThreeButton_pressed)
+EVT_BUTTON(ID_CLRBUTTON, MainFrame::on_ClrButton_pressed)
+EVT_BUTTON(ID_KEYRELBUTTON, MainFrame::on_KeyRelButton_pressed)
+EVT_BUTTON(ID_ENTRBUTTON, MainFrame::on_EntrButton_pressed)
+EVT_BUTTON(ID_RSETBUTTON, MainFrame::on_RsetButton_pressed)
+EVT_BUTTON(ID_PROBUTTON, MainFrame::on_ProButton_released)
+// end wxGlade
+EVT_CHAR_HOOK(MainFrame::HotkeyEvent)
 END_EVENT_TABLE();
 
-void 
+void
 MainFrame::HotkeyEvent (wxKeyEvent &KeyEvent)
 {
   wxCommandEvent event;
@@ -384,32 +420,62 @@ MainFrame::HotkeyEvent (wxKeyEvent &KeyEvent)
   //wxMessageBox ((char) k, wxT ("Info"));
   switch (k)
     {
-    case '0': on_ZeroButton_pressed (event); break;
-    case '1': on_OneButton_pressed (event); break;
-    case '2': on_TwoButton_pressed (event); break;
-    case '3': on_ThreeButton_pressed (event); break;
-    case '4': on_FourButton_pressed (event); break;
-    case '5': on_FiveButton_pressed (event); break;
-    case '6': on_SixButton_pressed (event); break;
-    case '7': on_SevenButton_pressed (event); break;
-    case '8': on_EightButton_pressed (event); break;
-    case '9': on_NineButton_pressed (event); break;
-    case '+': on_PlusButton_pressed (event); break;
-    case '-': on_MinusButton_pressed (event); break;
+    case '0':
+      on_ZeroButton_pressed (event);
+      break;
+    case '1':
+      on_OneButton_pressed (event);
+      break;
+    case '2':
+      on_TwoButton_pressed (event);
+      break;
+    case '3':
+      on_ThreeButton_pressed (event);
+      break;
+    case '4':
+      on_FourButton_pressed (event);
+      break;
+    case '5':
+      on_FiveButton_pressed (event);
+      break;
+    case '6':
+      on_SixButton_pressed (event);
+      break;
+    case '7':
+      on_SevenButton_pressed (event);
+      break;
+    case '8':
+      on_EightButton_pressed (event);
+      break;
+    case '9':
+      on_NineButton_pressed (event);
+      break;
+    case '+':
+      on_PlusButton_pressed (event);
+      break;
+    case '-':
+      on_MinusButton_pressed (event);
+      break;
     case 'v':
-    case 'V': on_VerbButton_pressed (event); break;
+    case 'V':
+      on_VerbButton_pressed (event);
+      break;
     case 'n':
-    case 'N': on_NounButton_pressed (event); break;
+    case 'N':
+      on_NounButton_pressed (event);
+      break;
     case 'e':
-    case 'E': on_EntrButton_pressed (event); break;
+    case 'E':
+      on_EntrButton_pressed (event);
+      break;
     default:
       event.Skip ();
       break;
     }
 }
 
-
-void MainFrame::on_VerbButton_pressed(wxCommandEvent &event)
+void
+MainFrame::on_VerbButton_pressed (wxCommandEvent &event)
 {
   if (DebugCounterMode)
     {
@@ -425,8 +491,8 @@ void MainFrame::on_VerbButton_pressed(wxCommandEvent &event)
     }
 }
 
-
-void MainFrame::on_NounButton_pressed(wxCommandEvent &event)
+void
+MainFrame::on_NounButton_pressed (wxCommandEvent &event)
 {
   if (DebugCounterMode)
     {
@@ -442,8 +508,8 @@ void MainFrame::on_NounButton_pressed(wxCommandEvent &event)
     }
 }
 
-
-void MainFrame::on_PlusButton_pressed(wxCommandEvent &event)
+void
+MainFrame::on_PlusButton_pressed (wxCommandEvent &event)
 {
   OutputKeycode (26);
   if (NumMatches)
@@ -453,8 +519,8 @@ void MainFrame::on_PlusButton_pressed(wxCommandEvent &event)
     }
 }
 
-
-void MainFrame::on_MinusButton_pressed(wxCommandEvent &event)
+void
+MainFrame::on_MinusButton_pressed (wxCommandEvent &event)
 {
   OutputKeycode (27);
   if (NumMatches)
@@ -464,15 +530,15 @@ void MainFrame::on_MinusButton_pressed(wxCommandEvent &event)
     }
 }
 
-
-void MainFrame::on_ZeroButton_pressed(wxCommandEvent &event)
+void
+MainFrame::on_ZeroButton_pressed (wxCommandEvent &event)
 {
   if (DebugCounterMode)
     {
       if (DebugCounterWhich)
-        DebugCounterInc = 0;
+	DebugCounterInc = 0;
       else
-        DebugCounterReg = (DebugCounterReg * 8) + 0;
+	DebugCounterReg = (DebugCounterReg * 8) + 0;
     }
   else
     OutputKeycode (16);
@@ -483,15 +549,15 @@ void MainFrame::on_ZeroButton_pressed(wxCommandEvent &event)
     }
 }
 
-
-void MainFrame::on_SevenButton_pressed(wxCommandEvent &event)
+void
+MainFrame::on_SevenButton_pressed (wxCommandEvent &event)
 {
   if (DebugCounterMode)
     {
       if (DebugCounterWhich)
-        DebugCounterInc = 7;
+	DebugCounterInc = 7;
       else
-        DebugCounterReg = (DebugCounterReg * 8) + 7;
+	DebugCounterReg = (DebugCounterReg * 8) + 7;
     }
   else
     OutputKeycode (7);
@@ -502,15 +568,15 @@ void MainFrame::on_SevenButton_pressed(wxCommandEvent &event)
     }
 }
 
-
-void MainFrame::on_FourButton_pressed(wxCommandEvent &event)
+void
+MainFrame::on_FourButton_pressed (wxCommandEvent &event)
 {
   if (DebugCounterMode)
     {
       if (DebugCounterWhich)
-        DebugCounterInc = 4;
+	DebugCounterInc = 4;
       else
-        DebugCounterReg = (DebugCounterReg * 8) + 4;
+	DebugCounterReg = (DebugCounterReg * 8) + 4;
     }
   else
     OutputKeycode (4);
@@ -521,15 +587,15 @@ void MainFrame::on_FourButton_pressed(wxCommandEvent &event)
     }
 }
 
-
-void MainFrame::on_OneButton_pressed(wxCommandEvent &event)
+void
+MainFrame::on_OneButton_pressed (wxCommandEvent &event)
 {
   if (DebugCounterMode)
     {
       if (DebugCounterWhich)
-        DebugCounterInc = 1;
+	DebugCounterInc = 1;
       else
-        DebugCounterReg = (DebugCounterReg * 8) + 1;
+	DebugCounterReg = (DebugCounterReg * 8) + 1;
     }
   else
     OutputKeycode (1);
@@ -540,8 +606,8 @@ void MainFrame::on_OneButton_pressed(wxCommandEvent &event)
     }
 }
 
-
-void MainFrame::on_EightButton_pressed(wxCommandEvent &event)
+void
+MainFrame::on_EightButton_pressed (wxCommandEvent &event)
 {
   OutputKeycode (8);
   if (NumMatches)
@@ -551,15 +617,15 @@ void MainFrame::on_EightButton_pressed(wxCommandEvent &event)
     }
 }
 
-
-void MainFrame::on_FiveButton_pressed(wxCommandEvent &event)
+void
+MainFrame::on_FiveButton_pressed (wxCommandEvent &event)
 {
   if (DebugCounterMode)
     {
       if (DebugCounterWhich)
-        DebugCounterInc = 5;
+	DebugCounterInc = 5;
       else
-        DebugCounterReg = (DebugCounterReg * 8) + 5;
+	DebugCounterReg = (DebugCounterReg * 8) + 5;
     }
   else
     OutputKeycode (5);
@@ -570,15 +636,15 @@ void MainFrame::on_FiveButton_pressed(wxCommandEvent &event)
     }
 }
 
-
-void MainFrame::on_ThreeButton_pressed (wxCommandEvent &event)
+void
+MainFrame::on_ThreeButton_pressed (wxCommandEvent &event)
 {
   if (DebugCounterMode)
     {
       if (DebugCounterWhich)
-        DebugCounterInc = 3;
+	DebugCounterInc = 3;
       else
-        DebugCounterReg = (DebugCounterReg * 8) + 3;
+	DebugCounterReg = (DebugCounterReg * 8) + 3;
     }
   else
     OutputKeycode (3);
@@ -589,14 +655,15 @@ void MainFrame::on_ThreeButton_pressed (wxCommandEvent &event)
     }
 }
 
-void MainFrame::on_TwoButton_pressed(wxCommandEvent &event)
+void
+MainFrame::on_TwoButton_pressed (wxCommandEvent &event)
 {
   if (DebugCounterMode)
     {
       if (DebugCounterWhich)
-        DebugCounterInc = 2;
+	DebugCounterInc = 2;
       else
-        DebugCounterReg = (DebugCounterReg * 8) + 2;
+	DebugCounterReg = (DebugCounterReg * 8) + 2;
     }
   else
     OutputKeycode (2);
@@ -607,8 +674,8 @@ void MainFrame::on_TwoButton_pressed(wxCommandEvent &event)
     }
 }
 
-
-void MainFrame::on_NineButton_pressed(wxCommandEvent &event)
+void
+MainFrame::on_NineButton_pressed (wxCommandEvent &event)
 {
   OutputKeycode (9);
   if (NumMatches)
@@ -618,15 +685,15 @@ void MainFrame::on_NineButton_pressed(wxCommandEvent &event)
     }
 }
 
-
-void MainFrame::on_SixButton_pressed(wxCommandEvent &event)
+void
+MainFrame::on_SixButton_pressed (wxCommandEvent &event)
 {
   if (DebugCounterMode)
     {
       if (DebugCounterWhich)
-        DebugCounterInc = 6;
+	DebugCounterInc = 6;
       else
-        DebugCounterReg = (DebugCounterReg * 8) + 6;
+	DebugCounterReg = (DebugCounterReg * 8) + 6;
     }
   else
     OutputKeycode (6);
@@ -637,8 +704,8 @@ void MainFrame::on_SixButton_pressed(wxCommandEvent &event)
     }
 }
 
-
-void MainFrame::on_ClrButton_pressed(wxCommandEvent &event)
+void
+MainFrame::on_ClrButton_pressed (wxCommandEvent &event)
 {
   OutputKeycode (30);
   if (NumMatches)
@@ -648,8 +715,8 @@ void MainFrame::on_ClrButton_pressed(wxCommandEvent &event)
     }
 }
 
-
-void MainFrame::on_ProButton_pressed(wxMouseEvent &event)
+void
+MainFrame::on_ProButton_pressed (wxMouseEvent &event)
 {
   if (DebugCounterMode)
     {
@@ -672,7 +739,7 @@ void MainFrame::on_ProButton_pressed(wxMouseEvent &event)
 	  if (j == SOCKET_ERROR && SOCKET_BROKEN)
 	    {
 	      if (!DebugMode)
-	        printf ("Removing socket %d\n", ServerSocket);
+		printf ("Removing socket %d\n", ServerSocket);
 #ifdef unix
 	      close (ServerSocket);
 #else
@@ -693,12 +760,92 @@ void MainFrame::on_ProButton_pressed(wxMouseEvent &event)
       Match += wxT ("P");
       MatchCheck ();
     }
-  event.ResumePropagation(INT_MAX);
-  event.Skip();
+  event.ResumePropagation (INT_MAX);
+  event.Skip ();
 }
 
+void
+MainFrame::scriptFileProcessLine (void)
+{
+  if (scriptFileCurrentLine >= scriptFileCount)
+    return;
+  wxString line = scriptFile.GetLine (scriptFileCurrentLine);
+  if (3
+      != wxSscanf (line, wxT ("%lf %o %o"), &scriptFileDifferentialTime,
+		   &scriptFileChannelNumber, &scriptFileChannelValue))
+    {
+      scriptFileDifferentialTime = 0;
+      scriptFileChannelNumber = 0;
+      scriptFileChannelValue = 0;
+    }
+}
 
-void MainFrame::on_KeyRelButton_pressed(wxCommandEvent &event)
+void
+MainFrame::restoreToPrescript (void)
+{
+  scriptFileChannelNumber = 011;
+  scriptFileChannelValue = last11;
+  Timer->ActOnIncomingIO ((unsigned char *) NULL);
+  scriptFileChannelNumber = 013;
+  scriptFileChannelValue = last13;
+  Timer->ActOnIncomingIO ((unsigned char *) NULL);
+  scriptFileChannelNumber = 0163;
+  scriptFileChannelValue = last163;
+  Timer->ActOnIncomingIO ((unsigned char *) NULL);
+  scriptFileChannelNumber = 010;
+  for (int i = 1; i < 13; i++)
+    {
+      scriptFileChannelValue = (i << 11) + last10[i];
+      Timer->ActOnIncomingIO ((unsigned char *) NULL);
+    }
+}
+
+void
+MainFrame::on_Annunciator23_clicked (wxMouseEvent &event)
+{
+  // When you click on the this lamp (first column, last row), we want to:
+  //	Save the current display settings (they're always already saved).
+  //	Show a file-dialog to select a pre-canned script of i/o channel changes.
+  //	Start playback of the pre-canned script, ignoring AGC commands
+  //	After completion of playback,
+  //		Show a message box.
+  //		Restore the original display settings
+  //		Quickly run through all of the pending commands from AGC.
+  //		Start taking commands from the AGC again.
+  if (scriptFileOpen)
+    {
+      wxMessageBox (wxT ("Script aborted by user."));
+      scriptFile.Close ();
+      scriptFileOpen = false;
+      restoreToPrescript ();
+      return;
+    }
+  wxFileDialog* OpenDialog = new wxFileDialog (
+      this, wxT ("Choose a pre-recorded i/o-channel script"), wxT ("."),
+      wxEmptyString, wxT ("Scripts (*.canned)|*.canned"), wxFD_OPEN,
+      wxDefaultPosition);
+  if (OpenDialog->ShowModal () == wxID_OK) // if the user click "Open" instead of "Cancel"
+    {
+      wxString scriptPath = OpenDialog->GetPath ();
+      scriptFile.Open (scriptPath);
+      scriptFileCount = scriptFile.GetLineCount ();
+      scriptFileCurrentLine = 0;
+      scriptFileProcessLine ();
+      scriptFileWaitUntil = scriptFileDifferentialTime;
+      wxMessageBox (
+	  wxT ("Script (") + wxString::Format (wxT ("%i"), scriptFileCount)
+	      + wxT (" records) will start when this box closes."));
+      scriptFileStopWatch.Start ();
+      scriptFileOpen = true;
+    }
+  // Clean up after ourselves
+  OpenDialog->Destroy ();
+  event.ResumePropagation (INT_MAX);
+  event.Skip ();
+}
+
+void
+MainFrame::on_KeyRelButton_pressed (wxCommandEvent &event)
 {
   OutputKeycode (25);
   if (NumMatches)
@@ -708,8 +855,8 @@ void MainFrame::on_KeyRelButton_pressed(wxCommandEvent &event)
     }
 }
 
-
-void MainFrame::on_EntrButton_pressed(wxCommandEvent &event)
+void
+MainFrame::on_EntrButton_pressed (wxCommandEvent &event)
 {
   OutputKeycode (28);
   if (NumMatches)
@@ -719,8 +866,8 @@ void MainFrame::on_EntrButton_pressed(wxCommandEvent &event)
     }
 }
 
-
-void MainFrame::on_RsetButton_pressed(wxCommandEvent &event)
+void
+MainFrame::on_RsetButton_pressed (wxCommandEvent &event)
 {
   OutputKeycode (18);
   if (NumMatches)
@@ -730,271 +877,283 @@ void MainFrame::on_RsetButton_pressed(wxCommandEvent &event)
     }
 }
 
-
 // wxGlade: add MainFrame event handlers
 
-void MainFrame::on_ProButton_released(wxCommandEvent &event)
+void
+MainFrame::on_ProButton_released (wxCommandEvent &event)
 {
-    if (ProceedPressed)
+  if (ProceedPressed)
     {
-        OutputPro(1);
-        ProceedPressed = false;
+      OutputPro (1);
+      ProceedPressed = false;
     }
 }
 
-
-void MainFrame::set_properties()
+void
+MainFrame::set_properties ()
 {
-    // begin wxGlade: MainFrame::set_properties
-    SetTitle(wxT("yaDSKY2 by Ron Burkey"));
-    wxIcon _icon;
-    _icon.CopyFromBitmap(wxBitmap(wxT("ApolloPatch2.png"), wxBITMAP_TYPE_ANY));
-    SetIcon(_icon);
-    panel_1->SetBackgroundColour(wxColour(160, 160, 160));
-    VerbButton->SetMinSize(wxSize(75, 75));
-    NounButton->SetMinSize(wxSize(75, 75));
-    PlusButton->SetMinSize(wxSize(75, 75));
-    MinusButton->SetMinSize(wxSize(75, 75));
-    ZeroButton->SetMinSize(wxSize(75, 75));
-    SevenButton->SetMinSize(wxSize(75, 75));
-    FourButton->SetMinSize(wxSize(75, 75));
-    OneButton->SetMinSize(wxSize(75, 75));
-    EightButton->SetMinSize(wxSize(75, 75));
-    FiveButton->SetMinSize(wxSize(75, 75));
-    TwoButton->SetMinSize(wxSize(75, 75));
-    NineButton->SetMinSize(wxSize(75, 75));
-    SixButton->SetMinSize(wxSize(75, 75));
-    ThreeButton->SetMinSize(wxSize(75, 75));
-    ClrButton->SetMinSize(wxSize(75, 75));
-    ProButton->SetMinSize(wxSize(75, 75));
-    KeyRelButton->SetMinSize(wxSize(75, 75));
-    EntrButton->SetMinSize(wxSize(75, 75));
-    RsetButton->SetMinSize(wxSize(75, 75));
-    // end wxGlade
+  // begin wxGlade: MainFrame::set_properties
+  SetTitle (wxT ("yaDSKY2 by Ron Burkey"));
+  wxIcon _icon;
+  _icon.CopyFromBitmap (wxBitmap (wxT ("ApolloPatch2.png"), wxBITMAP_TYPE_ANY));
+  SetIcon (_icon);
+  panel_1->SetBackgroundColour (wxColour (160, 160, 160));
+  VerbButton->SetMinSize (wxSize (75, 75));
+  NounButton->SetMinSize (wxSize (75, 75));
+  PlusButton->SetMinSize (wxSize (75, 75));
+  MinusButton->SetMinSize (wxSize (75, 75));
+  ZeroButton->SetMinSize (wxSize (75, 75));
+  SevenButton->SetMinSize (wxSize (75, 75));
+  FourButton->SetMinSize (wxSize (75, 75));
+  OneButton->SetMinSize (wxSize (75, 75));
+  EightButton->SetMinSize (wxSize (75, 75));
+  FiveButton->SetMinSize (wxSize (75, 75));
+  TwoButton->SetMinSize (wxSize (75, 75));
+  NineButton->SetMinSize (wxSize (75, 75));
+  SixButton->SetMinSize (wxSize (75, 75));
+  ThreeButton->SetMinSize (wxSize (75, 75));
+  ClrButton->SetMinSize (wxSize (75, 75));
+  ProButton->SetMinSize (wxSize (75, 75));
+  KeyRelButton->SetMinSize (wxSize (75, 75));
+  EntrButton->SetMinSize (wxSize (75, 75));
+  RsetButton->SetMinSize (wxSize (75, 75));
+  // end wxGlade
 }
 
-
-void MainFrame::do_layout()
+void
+MainFrame::do_layout ()
 {
-    // begin wxGlade: MainFrame::do_layout
-    wxBoxSizer* sizer_1 = new wxBoxSizer(wxVERTICAL);
-    wxBoxSizer* sizer_3 = new wxBoxSizer(wxHORIZONTAL);
-    wxBoxSizer* sizer_4_copy = new wxBoxSizer(wxVERTICAL);
-    wxBoxSizer* sizer_5_copy_3 = new wxBoxSizer(wxVERTICAL);
-    wxBoxSizer* sizer_5_copy_2 = new wxBoxSizer(wxVERTICAL);
-    wxBoxSizer* sizer_5_copy_1 = new wxBoxSizer(wxVERTICAL);
-    wxBoxSizer* sizer_5_copy = new wxBoxSizer(wxVERTICAL);
-    wxBoxSizer* sizer_5 = new wxBoxSizer(wxVERTICAL);
-    wxBoxSizer* sizer_4 = new wxBoxSizer(wxVERTICAL);
-    wxBoxSizer* sizer_2 = new wxBoxSizer(wxHORIZONTAL);
-    wxBoxSizer* sizer_14 = new wxBoxSizer(wxHORIZONTAL);
-    wxBoxSizer* sizer_15 = new wxBoxSizer(wxVERTICAL);
-    wxBoxSizer* sizer_6 = new wxBoxSizer(wxVERTICAL);
-    wxBoxSizer* sizer_7 = new wxBoxSizer(wxHORIZONTAL);
-    wxBoxSizer* sizer_7_copy = new wxBoxSizer(wxHORIZONTAL);
-    wxBoxSizer* sizer_7_copy_1 = new wxBoxSizer(wxHORIZONTAL);
-    wxBoxSizer* sizer_8 = new wxBoxSizer(wxHORIZONTAL);
-    wxBoxSizer* sizer_10_copy_1 = new wxBoxSizer(wxVERTICAL);
-    wxBoxSizer* sizer_11_copy_1 = new wxBoxSizer(wxHORIZONTAL);
-    wxBoxSizer* sizer_10_copy = new wxBoxSizer(wxVERTICAL);
-    wxBoxSizer* sizer_11_copy = new wxBoxSizer(wxHORIZONTAL);
-    wxBoxSizer* sizer_9 = new wxBoxSizer(wxHORIZONTAL);
-    wxBoxSizer* sizer_10 = new wxBoxSizer(wxVERTICAL);
-    wxBoxSizer* sizer_11 = new wxBoxSizer(wxHORIZONTAL);
-    wxBoxSizer* sizer_12 = new wxBoxSizer(wxHORIZONTAL);
-    wxBoxSizer* sizer_13 = new wxBoxSizer(wxVERTICAL);
-    wxGridSizer* grid_sizer_1_copy = new wxGridSizer(7, 2, 9, 10);
-    sizer_1->Add(20, 15, 0, 0, 0);
-    sizer_2->Add(20, 20, 2, wxEXPAND, 0);
-    sizer_12->Add(bitmap_5, 0, 0, 0);
-    sizer_13->Add(bitmap_6_copy, 0, 0, 0);
-    sizer_13->Add(20, 5, 0, 0, 0);
-    grid_sizer_1_copy->Add(Annunciator11, 0, wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 0);
-    grid_sizer_1_copy->Add(Annunciator21, 0, wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 0);
-    grid_sizer_1_copy->Add(Annunciator12, 0, wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 0);
-    grid_sizer_1_copy->Add(Annunciator22, 0, 0, 0);
-    grid_sizer_1_copy->Add(Annunciator13, 0, 0, 0);
-    grid_sizer_1_copy->Add(Annunciator23, 0, 0, 0);
-    grid_sizer_1_copy->Add(Annunciator14, 0, 0, 0);
-    grid_sizer_1_copy->Add(Annunciator24, 0, 0, 0);
-    grid_sizer_1_copy->Add(Annunciator15, 0, 0, 0);
-    grid_sizer_1_copy->Add(Annunciator25, 0, 0, 0);
-    grid_sizer_1_copy->Add(Annunciator16, 0, 0, 0);
-    grid_sizer_1_copy->Add(Annunciator26, 0, 0, 0);
-    grid_sizer_1_copy->Add(Annunciator17, 0, 0, 0);
-    grid_sizer_1_copy->Add(Annunciator27, 0, 0, 0);
-    sizer_13->Add(grid_sizer_1_copy, 0, wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 0);
-    sizer_13->Add(20, 5, 0, 0, 0);
-    sizer_13->Add(bitmap_6, 0, 0, 0);
-    sizer_12->Add(sizer_13, 0, 0, 0);
-    sizer_12->Add(bitmap_5_copy, 0, 0, 0);
-    sizer_2->Add(sizer_12, 0, 0, 0);
-    sizer_2->Add(20, 20, 3, wxEXPAND, 0);
-    sizer_14->Add(bitmap_5_copy_1, 0, 0, 0);
-    sizer_15->Add(bitmap_6_copy_copy, 0, 0, 0);
-    sizer_9->Add(CompActyAnnunciator, 0, wxALIGN_CENTER_VERTICAL, 0);
-    sizer_9->Add(20, 20, 1, 0, 0);
-    sizer_10->Add(ModeAnnunciator, 0, 0, 0);
-    sizer_11->Add(MD1Digit, 0, 0, 0);
-    sizer_11->Add(MD2Digit, 0, 0, 0);
-    sizer_10->Add(sizer_11, 1, wxEXPAND, 0);
-    sizer_9->Add(sizer_10, 1, wxEXPAND, 0);
-    sizer_6->Add(sizer_9, 0, wxEXPAND, 0);
-    sizer_6->Add(20, 14, 0, 0, 0);
-    sizer_10_copy->Add(VerbAnnunciator, 0, 0, 0);
-    sizer_11_copy->Add(VD1Digit, 0, 0, 0);
-    sizer_11_copy->Add(VD2Digit, 0, 0, 0);
-    sizer_10_copy->Add(sizer_11_copy, 0, wxEXPAND, 0);
-    sizer_8->Add(sizer_10_copy, 1, wxEXPAND, 0);
-    sizer_8->Add(20, 20, 1, 0, 0);
-    sizer_10_copy_1->Add(NounAnnunciator, 0, 0, 0);
-    sizer_11_copy_1->Add(ND1Digit, 0, 0, 0);
-    sizer_11_copy_1->Add(ND2Digit, 0, 0, 0);
-    sizer_10_copy_1->Add(sizer_11_copy_1, 1, wxEXPAND, 0);
-    sizer_8->Add(sizer_10_copy_1, 1, wxEXPAND, 0);
-    sizer_6->Add(sizer_8, 1, wxEXPAND, 0);
-    sizer_6->Add(bitmap_2_copy_1, 0, wxALIGN_CENTER_HORIZONTAL, 0);
-    sizer_7_copy_1->Add(R1PlusMinus, 0, 0, 0);
-    sizer_7_copy_1->Add(R1D1Digit, 0, 0, 0);
-    sizer_7_copy_1->Add(R1D2Digit, 0, 0, 0);
-    sizer_7_copy_1->Add(R1D3Digit, 0, 0, 0);
-    sizer_7_copy_1->Add(R1D4Digit, 0, 0, 0);
-    sizer_7_copy_1->Add(R1D5Digit, 0, 0, 0);
-    sizer_6->Add(sizer_7_copy_1, 0, wxEXPAND, 0);
-    sizer_6->Add(bitmap_2_copy, 0, wxALIGN_CENTER_HORIZONTAL, 0);
-    sizer_7_copy->Add(R2PlusMinus, 0, 0, 0);
-    sizer_7_copy->Add(R2D1Digit, 0, 0, 0);
-    sizer_7_copy->Add(R2D2Digit, 0, 0, 0);
-    sizer_7_copy->Add(R2D3Digit, 0, 0, 0);
-    sizer_7_copy->Add(R2D4Digit, 0, 0, 0);
-    sizer_7_copy->Add(R2D5Digit, 0, 0, 0);
-    sizer_6->Add(sizer_7_copy, 0, wxEXPAND, 0);
-    sizer_6->Add(bitmap_2, 0, wxALIGN_CENTER_HORIZONTAL, 0);
-    sizer_7->Add(R3PlusMinus, 0, 0, 0);
-    sizer_7->Add(R3D1Digit, 0, 0, 0);
-    sizer_7->Add(R3D2Digit, 0, 0, 0);
-    sizer_7->Add(R3D3Digit, 0, 0, 0);
-    sizer_7->Add(R3D4Digit, 0, 0, 0);
-    sizer_7->Add(R3D5Digit, 0, 0, 0);
-    sizer_6->Add(sizer_7, 0, wxEXPAND, 0);
-    panel_1->SetSizer(sizer_6);
-    sizer_15->Add(panel_1, 1, wxEXPAND, 0);
-    sizer_15->Add(bitmap_6_copy_copy_copy, 0, 0, 0);
-    sizer_14->Add(sizer_15, 0, 0, 0);
-    sizer_14->Add(bitmap_5_copy_2, 0, 0, 0);
-    sizer_2->Add(sizer_14, 0, 0, 0);
-    sizer_2->Add(20, 20, 2, wxEXPAND, 0);
-    sizer_1->Add(sizer_2, 0, wxEXPAND, 0);
-    sizer_1->Add(20, 15, 0, 0, 0);
-    sizer_3->Add(8, 20, 0, 0, 0);
-    sizer_4->Add(20, 20, 1, 0, 0);
-    sizer_4->Add(VerbButton, 0, 0, 0);
-    sizer_4->Add(20, 5, 0, 0, 0);
-    sizer_4->Add(NounButton, 0, 0, 0);
-    sizer_4->Add(20, 20, 1, 0, 0);
-    sizer_3->Add(sizer_4, 0, wxEXPAND, 0);
-    sizer_3->Add(8, 20, 0, 0, 0);
-    sizer_5->Add(PlusButton, 0, 0, 0);
-    sizer_5->Add(20, 5, 0, 0, 0);
-    sizer_5->Add(MinusButton, 0, 0, 0);
-    sizer_5->Add(20, 5, 0, 0, 0);
-    sizer_5->Add(ZeroButton, 0, 0, 0);
-    sizer_3->Add(sizer_5, 0, 0, 0);
-    sizer_3->Add(5, 20, 0, 0, 0);
-    sizer_5_copy->Add(SevenButton, 0, 0, 0);
-    sizer_5_copy->Add(20, 5, 0, 0, 0);
-    sizer_5_copy->Add(FourButton, 0, 0, 0);
-    sizer_5_copy->Add(20, 5, 0, 0, 0);
-    sizer_5_copy->Add(OneButton, 0, 0, 0);
-    sizer_3->Add(sizer_5_copy, 0, 0, 0);
-    sizer_3->Add(5, 20, 0, 0, 0);
-    sizer_5_copy_1->Add(EightButton, 0, 0, 0);
-    sizer_5_copy_1->Add(20, 5, 0, 0, 0);
-    sizer_5_copy_1->Add(FiveButton, 0, 0, 0);
-    sizer_5_copy_1->Add(20, 5, 0, 0, 0);
-    sizer_5_copy_1->Add(TwoButton, 0, 0, 0);
-    sizer_3->Add(sizer_5_copy_1, 0, 0, 0);
-    sizer_3->Add(5, 20, 0, 0, 0);
-    sizer_5_copy_2->Add(NineButton, 0, 0, 0);
-    sizer_5_copy_2->Add(20, 5, 0, 0, 0);
-    sizer_5_copy_2->Add(SixButton, 0, 0, 0);
-    sizer_5_copy_2->Add(20, 5, 0, 0, 0);
-    sizer_5_copy_2->Add(ThreeButton, 0, 0, 0);
-    sizer_3->Add(sizer_5_copy_2, 0, 0, 0);
-    sizer_3->Add(5, 20, 0, 0, 0);
-    sizer_5_copy_3->Add(ClrButton, 0, 0, 0);
-    sizer_5_copy_3->Add(20, 5, 0, 0, 0);
-    sizer_5_copy_3->Add(ProButton, 0, 0, 0);
-    sizer_5_copy_3->Add(20, 5, 0, 0, 0);
-    sizer_5_copy_3->Add(KeyRelButton, 0, 0, 0);
-    sizer_3->Add(sizer_5_copy_3, 0, 0, 0);
-    sizer_3->Add(5, 20, 0, 0, 0);
-    sizer_4_copy->Add(20, 20, 1, 0, 0);
-    sizer_4_copy->Add(EntrButton, 0, 0, 0);
-    sizer_4_copy->Add(20, 5, 0, 0, 0);
-    sizer_4_copy->Add(RsetButton, 0, 0, 0);
-    sizer_4_copy->Add(20, 20, 1, 0, 0);
-    sizer_3->Add(sizer_4_copy, 0, wxEXPAND, 0);
-    sizer_3->Add(5, 20, 0, 0, 0);
-    sizer_1->Add(sizer_3, 1, 0, 0);
-    sizer_1->Add(20, 15, 0, 0, 0);
-    SetSizer(sizer_1);
-    sizer_1->Fit(this);
-    Layout();
-    // end wxGlade
+  // begin wxGlade: MainFrame::do_layout
+  wxBoxSizer* sizer_1 = new wxBoxSizer (wxVERTICAL);
+  wxBoxSizer* sizer_3 = new wxBoxSizer (wxHORIZONTAL);
+  wxBoxSizer* sizer_4_copy = new wxBoxSizer (wxVERTICAL);
+  wxBoxSizer* sizer_5_copy_3 = new wxBoxSizer (wxVERTICAL);
+  wxBoxSizer* sizer_5_copy_2 = new wxBoxSizer (wxVERTICAL);
+  wxBoxSizer* sizer_5_copy_1 = new wxBoxSizer (wxVERTICAL);
+  wxBoxSizer* sizer_5_copy = new wxBoxSizer (wxVERTICAL);
+  wxBoxSizer* sizer_5 = new wxBoxSizer (wxVERTICAL);
+  wxBoxSizer* sizer_4 = new wxBoxSizer (wxVERTICAL);
+  wxBoxSizer* sizer_2 = new wxBoxSizer (wxHORIZONTAL);
+  wxBoxSizer* sizer_14 = new wxBoxSizer (wxHORIZONTAL);
+  wxBoxSizer* sizer_15 = new wxBoxSizer (wxVERTICAL);
+  wxBoxSizer* sizer_6 = new wxBoxSizer (wxVERTICAL);
+  wxBoxSizer* sizer_7 = new wxBoxSizer (wxHORIZONTAL);
+  wxBoxSizer* sizer_7_copy = new wxBoxSizer (wxHORIZONTAL);
+  wxBoxSizer* sizer_7_copy_1 = new wxBoxSizer (wxHORIZONTAL);
+  wxBoxSizer* sizer_8 = new wxBoxSizer (wxHORIZONTAL);
+  wxBoxSizer* sizer_10_copy_1 = new wxBoxSizer (wxVERTICAL);
+  wxBoxSizer* sizer_11_copy_1 = new wxBoxSizer (wxHORIZONTAL);
+  wxBoxSizer* sizer_10_copy = new wxBoxSizer (wxVERTICAL);
+  wxBoxSizer* sizer_11_copy = new wxBoxSizer (wxHORIZONTAL);
+  wxBoxSizer* sizer_9 = new wxBoxSizer (wxHORIZONTAL);
+  wxBoxSizer* sizer_10 = new wxBoxSizer (wxVERTICAL);
+  wxBoxSizer* sizer_11 = new wxBoxSizer (wxHORIZONTAL);
+  wxBoxSizer* sizer_12 = new wxBoxSizer (wxHORIZONTAL);
+  wxBoxSizer* sizer_13 = new wxBoxSizer (wxVERTICAL);
+  wxGridSizer* grid_sizer_1_copy = new wxGridSizer (7, 2, 9, 10);
+  sizer_1->Add (20, 15, 0, 0, 0);
+  sizer_2->Add (20, 20, 2, wxEXPAND, 0);
+  sizer_12->Add (bitmap_5, 0, 0, 0);
+  sizer_13->Add (bitmap_6_copy, 0, 0, 0);
+  sizer_13->Add (20, 5, 0, 0, 0);
+  grid_sizer_1_copy->Add (Annunciator11, 0,
+			  wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL,
+			  0);
+  grid_sizer_1_copy->Add (Annunciator21, 0,
+			  wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL,
+			  0);
+  grid_sizer_1_copy->Add (Annunciator12, 0,
+			  wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL,
+			  0);
+  grid_sizer_1_copy->Add (Annunciator22, 0, 0, 0);
+  grid_sizer_1_copy->Add (Annunciator13, 0, 0, 0);
+  grid_sizer_1_copy->Add (Annunciator23, 0, 0, 0);
+  grid_sizer_1_copy->Add (Annunciator14, 0, 0, 0);
+  grid_sizer_1_copy->Add (Annunciator24, 0, 0, 0);
+  grid_sizer_1_copy->Add (Annunciator15, 0, 0, 0);
+  grid_sizer_1_copy->Add (Annunciator25, 0, 0, 0);
+  grid_sizer_1_copy->Add (Annunciator16, 0, 0, 0);
+  grid_sizer_1_copy->Add (Annunciator26, 0, 0, 0);
+  grid_sizer_1_copy->Add (Annunciator17, 0, 0, 0);
+  grid_sizer_1_copy->Add (Annunciator27, 0, 0, 0);
+  sizer_13->Add (grid_sizer_1_copy, 0,
+		 wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL, 0);
+  sizer_13->Add (20, 5, 0, 0, 0);
+  sizer_13->Add (bitmap_6, 0, 0, 0);
+  sizer_12->Add (sizer_13, 0, 0, 0);
+  sizer_12->Add (bitmap_5_copy, 0, 0, 0);
+  sizer_2->Add (sizer_12, 0, 0, 0);
+  sizer_2->Add (20, 20, 3, wxEXPAND, 0);
+  sizer_14->Add (bitmap_5_copy_1, 0, 0, 0);
+  sizer_15->Add (bitmap_6_copy_copy, 0, 0, 0);
+  sizer_9->Add (CompActyAnnunciator, 0, wxALIGN_CENTER_VERTICAL, 0);
+  sizer_9->Add (20, 20, 1, 0, 0);
+  sizer_10->Add (ModeAnnunciator, 0, 0, 0);
+  sizer_11->Add (MD1Digit, 0, 0, 0);
+  sizer_11->Add (MD2Digit, 0, 0, 0);
+  sizer_10->Add (sizer_11, 1, wxEXPAND, 0);
+  sizer_9->Add (sizer_10, 1, wxEXPAND, 0);
+  sizer_6->Add (sizer_9, 0, wxEXPAND, 0);
+  sizer_6->Add (20, 14, 0, 0, 0);
+  sizer_10_copy->Add (VerbAnnunciator, 0, 0, 0);
+  sizer_11_copy->Add (VD1Digit, 0, 0, 0);
+  sizer_11_copy->Add (VD2Digit, 0, 0, 0);
+  sizer_10_copy->Add (sizer_11_copy, 0, wxEXPAND, 0);
+  sizer_8->Add (sizer_10_copy, 1, wxEXPAND, 0);
+  sizer_8->Add (20, 20, 1, 0, 0);
+  sizer_10_copy_1->Add (NounAnnunciator, 0, 0, 0);
+  sizer_11_copy_1->Add (ND1Digit, 0, 0, 0);
+  sizer_11_copy_1->Add (ND2Digit, 0, 0, 0);
+  sizer_10_copy_1->Add (sizer_11_copy_1, 1, wxEXPAND, 0);
+  sizer_8->Add (sizer_10_copy_1, 1, wxEXPAND, 0);
+  sizer_6->Add (sizer_8, 1, wxEXPAND, 0);
+  sizer_6->Add (bitmap_2_copy_1, 0, wxALIGN_CENTER_HORIZONTAL, 0);
+  sizer_7_copy_1->Add (R1PlusMinus, 0, 0, 0);
+  sizer_7_copy_1->Add (R1D1Digit, 0, 0, 0);
+  sizer_7_copy_1->Add (R1D2Digit, 0, 0, 0);
+  sizer_7_copy_1->Add (R1D3Digit, 0, 0, 0);
+  sizer_7_copy_1->Add (R1D4Digit, 0, 0, 0);
+  sizer_7_copy_1->Add (R1D5Digit, 0, 0, 0);
+  sizer_6->Add (sizer_7_copy_1, 0, wxEXPAND, 0);
+  sizer_6->Add (bitmap_2_copy, 0, wxALIGN_CENTER_HORIZONTAL, 0);
+  sizer_7_copy->Add (R2PlusMinus, 0, 0, 0);
+  sizer_7_copy->Add (R2D1Digit, 0, 0, 0);
+  sizer_7_copy->Add (R2D2Digit, 0, 0, 0);
+  sizer_7_copy->Add (R2D3Digit, 0, 0, 0);
+  sizer_7_copy->Add (R2D4Digit, 0, 0, 0);
+  sizer_7_copy->Add (R2D5Digit, 0, 0, 0);
+  sizer_6->Add (sizer_7_copy, 0, wxEXPAND, 0);
+  sizer_6->Add (bitmap_2, 0, wxALIGN_CENTER_HORIZONTAL, 0);
+  sizer_7->Add (R3PlusMinus, 0, 0, 0);
+  sizer_7->Add (R3D1Digit, 0, 0, 0);
+  sizer_7->Add (R3D2Digit, 0, 0, 0);
+  sizer_7->Add (R3D3Digit, 0, 0, 0);
+  sizer_7->Add (R3D4Digit, 0, 0, 0);
+  sizer_7->Add (R3D5Digit, 0, 0, 0);
+  sizer_6->Add (sizer_7, 0, wxEXPAND, 0);
+  panel_1->SetSizer (sizer_6);
+  sizer_15->Add (panel_1, 1, wxEXPAND, 0);
+  sizer_15->Add (bitmap_6_copy_copy_copy, 0, 0, 0);
+  sizer_14->Add (sizer_15, 0, 0, 0);
+  sizer_14->Add (bitmap_5_copy_2, 0, 0, 0);
+  sizer_2->Add (sizer_14, 0, 0, 0);
+  sizer_2->Add (20, 20, 2, wxEXPAND, 0);
+  sizer_1->Add (sizer_2, 0, wxEXPAND, 0);
+  sizer_1->Add (20, 15, 0, 0, 0);
+  sizer_3->Add (8, 20, 0, 0, 0);
+  sizer_4->Add (20, 20, 1, 0, 0);
+  sizer_4->Add (VerbButton, 0, 0, 0);
+  sizer_4->Add (20, 5, 0, 0, 0);
+  sizer_4->Add (NounButton, 0, 0, 0);
+  sizer_4->Add (20, 20, 1, 0, 0);
+  sizer_3->Add (sizer_4, 0, wxEXPAND, 0);
+  sizer_3->Add (8, 20, 0, 0, 0);
+  sizer_5->Add (PlusButton, 0, 0, 0);
+  sizer_5->Add (20, 5, 0, 0, 0);
+  sizer_5->Add (MinusButton, 0, 0, 0);
+  sizer_5->Add (20, 5, 0, 0, 0);
+  sizer_5->Add (ZeroButton, 0, 0, 0);
+  sizer_3->Add (sizer_5, 0, 0, 0);
+  sizer_3->Add (5, 20, 0, 0, 0);
+  sizer_5_copy->Add (SevenButton, 0, 0, 0);
+  sizer_5_copy->Add (20, 5, 0, 0, 0);
+  sizer_5_copy->Add (FourButton, 0, 0, 0);
+  sizer_5_copy->Add (20, 5, 0, 0, 0);
+  sizer_5_copy->Add (OneButton, 0, 0, 0);
+  sizer_3->Add (sizer_5_copy, 0, 0, 0);
+  sizer_3->Add (5, 20, 0, 0, 0);
+  sizer_5_copy_1->Add (EightButton, 0, 0, 0);
+  sizer_5_copy_1->Add (20, 5, 0, 0, 0);
+  sizer_5_copy_1->Add (FiveButton, 0, 0, 0);
+  sizer_5_copy_1->Add (20, 5, 0, 0, 0);
+  sizer_5_copy_1->Add (TwoButton, 0, 0, 0);
+  sizer_3->Add (sizer_5_copy_1, 0, 0, 0);
+  sizer_3->Add (5, 20, 0, 0, 0);
+  sizer_5_copy_2->Add (NineButton, 0, 0, 0);
+  sizer_5_copy_2->Add (20, 5, 0, 0, 0);
+  sizer_5_copy_2->Add (SixButton, 0, 0, 0);
+  sizer_5_copy_2->Add (20, 5, 0, 0, 0);
+  sizer_5_copy_2->Add (ThreeButton, 0, 0, 0);
+  sizer_3->Add (sizer_5_copy_2, 0, 0, 0);
+  sizer_3->Add (5, 20, 0, 0, 0);
+  sizer_5_copy_3->Add (ClrButton, 0, 0, 0);
+  sizer_5_copy_3->Add (20, 5, 0, 0, 0);
+  sizer_5_copy_3->Add (ProButton, 0, 0, 0);
+  sizer_5_copy_3->Add (20, 5, 0, 0, 0);
+  sizer_5_copy_3->Add (KeyRelButton, 0, 0, 0);
+  sizer_3->Add (sizer_5_copy_3, 0, 0, 0);
+  sizer_3->Add (5, 20, 0, 0, 0);
+  sizer_4_copy->Add (20, 20, 1, 0, 0);
+  sizer_4_copy->Add (EntrButton, 0, 0, 0);
+  sizer_4_copy->Add (20, 5, 0, 0, 0);
+  sizer_4_copy->Add (RsetButton, 0, 0, 0);
+  sizer_4_copy->Add (20, 20, 1, 0, 0);
+  sizer_3->Add (sizer_4_copy, 0, wxEXPAND, 0);
+  sizer_3->Add (5, 20, 0, 0, 0);
+  sizer_1->Add (sizer_3, 1, 0, 0);
+  sizer_1->Add (20, 15, 0, 0, 0);
+  SetSizer (sizer_1);
+  sizer_1->Fit (this);
+  Layout ();
+  // end wxGlade
 }
 
-
-
-class yaDskyApp: public wxApp {
+class yaDskyApp : public wxApp
+{
 public:
-    bool OnInit();
+  bool
+  OnInit ();
 };
 
-IMPLEMENT_APP(yaDskyApp)
+IMPLEMENT_APP (yaDskyApp)
 
-bool yaDskyApp::OnInit()
+bool
+yaDskyApp::OnInit ()
 {
 
   int i, j, UsedCfg = 0;
 
-    wxInitAllImageHandlers();
-    MainWindow = new MainFrame(NULL, wxID_ANY, wxEmptyString);
-    MainWindow->iLastButton = MainWindow->ProButton;
-    MainWindow->CurrentBlank = wxString::FromAscii (SevenSeg0); 
-    MainWindow->CurrentVD1 = wxString::FromAscii (SevenSeg0); 
-    MainWindow->CurrentVD2 = wxString::FromAscii (SevenSeg0); 
-    MainWindow->CurrentND1 = wxString::FromAscii (SevenSeg0); 
-    MainWindow->CurrentND2 = wxString::FromAscii (SevenSeg0);
-    SetTopWindow(MainWindow);
+  wxInitAllImageHandlers ();
+  MainWindow = new MainFrame (NULL, wxID_ANY, wxEmptyString);
+  MainWindow->iLastButton = MainWindow->ProButton;
+  MainWindow->CurrentBlank = wxString::FromAscii (SevenSeg0);
+  MainWindow->CurrentVD1 = wxString::FromAscii (SevenSeg0);
+  MainWindow->CurrentVD2 = wxString::FromAscii (SevenSeg0);
+  MainWindow->CurrentND1 = wxString::FromAscii (SevenSeg0);
+  MainWindow->CurrentND2 = wxString::FromAscii (SevenSeg0);
+  SetTopWindow (MainWindow);
 
-    // Put pointers to all of the indicator lamps into an array for 
-    // more-convenient access.
-    Inds[0].Widget = MainWindow->Annunciator11;
-    Inds[1].Widget = MainWindow->Annunciator12;
-    Inds[2].Widget = MainWindow->Annunciator13;
-    Inds[3].Widget = MainWindow->Annunciator14;
-    Inds[4].Widget = MainWindow->Annunciator15;
-    Inds[5].Widget = MainWindow->Annunciator16;
-    Inds[6].Widget = MainWindow->Annunciator17;
-    Inds[7].Widget = MainWindow->Annunciator21;
-    Inds[8].Widget = MainWindow->Annunciator22;
-    Inds[9].Widget = MainWindow->Annunciator23;
-    Inds[10].Widget = MainWindow->Annunciator24;
-    Inds[11].Widget = MainWindow->Annunciator25;
-    Inds[12].Widget = MainWindow->Annunciator26;
-    Inds[13].Widget = MainWindow->Annunciator27;
-   
+  // Put pointers to all of the indicator lamps into an array for
+  // more-convenient access.
+  Inds[0].Widget = MainWindow->Annunciator11;
+  Inds[1].Widget = MainWindow->Annunciator12;
+  Inds[2].Widget = MainWindow->Annunciator13;
+  Inds[3].Widget = MainWindow->Annunciator14;
+  Inds[4].Widget = MainWindow->Annunciator15;
+  Inds[5].Widget = MainWindow->Annunciator16;
+  Inds[6].Widget = MainWindow->Annunciator17;
+  Inds[7].Widget = MainWindow->Annunciator21;
+  Inds[8].Widget = MainWindow->Annunciator22;
+  Inds[9].Widget = MainWindow->Annunciator23;
+  Inds[10].Widget = MainWindow->Annunciator24;
+  Inds[11].Widget = MainWindow->Annunciator25;
+  Inds[12].Widget = MainWindow->Annunciator26;
+  Inds[13].Widget = MainWindow->Annunciator27;
+
 #ifdef ENABLE_NLS
   bindtextdomain (GETTEXT_PACKAGE, PACKAGE_LOCALE_DIR);
   bind_textdomain_codeset (GETTEXT_PACKAGE, "UTF-8");
   textdomain (GETTEXT_PACKAGE);
 #endif
 
-  cout << string ("yaDSKY2 Apollo DSKY simulation, ver " VER(NVER) ", built " __DATE__ " " __TIME__ "\n");
-  cout << string ("Copyright 2009 by Ronald S. Burkey\n");
-  cout << string ("Refer to http://www.ibiblio.org/apollo/index.html for more information.\n");
-	  
+  cout
+      << string (
+	  "yaDSKY2 Apollo DSKY simulation, ver " VER(NVER) ", built " __DATE__ " " __TIME__ "\n");
+  cout << string ("Copyright 2009,2017 by Ronald S. Burkey\n");
+  cout
+      << string (
+	  "Refer to http://www.ibiblio.org/apollo/index.html for more information.\n");
+
   DEBUG (-1);
 
   Portnum = 19697;
@@ -1003,22 +1162,22 @@ bool yaDskyApp::OnInit()
       wxString Arg = argv[i];
       wxString ArgStart = Arg.BeforeFirst ('=');
       wxString ArgEnd = Arg.AfterFirst ('=');
-      
+
       cout << string ("Arg ");
       cout << i;
       cout << string (" = \"");
-      cout << string(Arg.mb_str());
+      cout << string (Arg.mb_str ());
       cout << string ("\"\n");
 
       if (Arg.IsSameAs (wxT ("--relative-pixmaps")))
-        {
+	{
 	  // Does nothing.  Legacy from yaDSKY.
 	}
       else if (Arg.IsSameAs (wxT ("--test-uplink")))
-        TestUplink = 1;
+	TestUplink = 1;
       else if (Arg.IsSameAs (wxT ("--test-downlink")))
-        {
-          // Does nothing.  Legacy from yaDSKY.
+	{
+	  // Does nothing.  Legacy from yaDSKY.
 	}
       else if (ArgStart.IsSameAs (wxT ("--ip")))
 	{
@@ -1026,7 +1185,7 @@ bool yaDskyApp::OnInit()
 	  Hostname = NonDefaultHostname;
 	}
       else if (ArgStart.IsSameAs (wxT ("--port")))
-        {
+	{
 	  long lPortnum;
 	  ArgEnd.ToLong (&lPortnum);
 	  Portnum = lPortnum;
@@ -1037,7 +1196,7 @@ bool yaDskyApp::OnInit()
 	    }
 	}
       else if (ArgStart.IsSameAs (wxT ("--cfg")))
-        {
+	{
 	  if (MainWindow->ParseCfg (ArgEnd))
 	    {
 	      printf ("Aborting due to --cfg errors.\n");
@@ -1046,93 +1205,131 @@ bool yaDskyApp::OnInit()
 	  UsedCfg = 1;
 	}
       else if (Arg.IsSameAs (wxT ("--half-size")))
-        {
+	{
 	  if (UsedCfg)
 	    {
-	      printf ("The --half-size switch must precede the --cfg switch.\n");
+	      printf (
+		  "The --half-size switch must precede the --cfg switch.\n");
 	      goto Help;
 	    }
-          HalfSize = 1;
+	  HalfSize = 1;
 	  MainWindow->HalveTheWindow ();
 	}
       else if (ArgStart.IsSameAs (wxT ("--delay")))
-        {
+	{
 	  long lj;
 	  ArgEnd.ToLong (&lj);
-          StartupDelay = lj;
+	  StartupDelay = lj;
 	}
       else if (Arg.IsSameAs (wxT ("--debug-counter-mode")))
-        DebugCounterMode = 1;
+	DebugCounterMode = 1;
       else
-        {
-	Help:
-	  printf ("USAGE:\n");
+	{
+	  Help: printf ("USAGE:\n");
 	  printf ("\tyaDSKY2 [OPTIONS]\n");
 	  printf ("The available options are:\n");
 	  printf ("--ip=Hostname\n");
-	  printf ("\tThe yaDSKY2 program and the yaAGC Apollo Guidance Computer simulation\n");
-	  printf ("\texist in a \"client/server\" relationship, in which the yaDSKY2 program\n");
-	  printf ("\tneeds to be aware of the IP address or symbolic name of the host \n");
-	  printf ("\tcomputer running the yaAGC program.  By default, this is \"localhost\",\n");
-	  printf ("\tmeaning that both yaDSKY2 and yaAGC are running on the same computer.\n");
+	  printf (
+	      "\tThe yaDSKY2 program and the yaAGC Apollo Guidance Computer simulation\n");
+	  printf (
+	      "\texist in a \"client/server\" relationship, in which the yaDSKY2 program\n");
+	  printf (
+	      "\tneeds to be aware of the IP address or symbolic name of the host \n");
+	  printf (
+	      "\tcomputer running the yaAGC program.  By default, this is \"localhost\",\n");
+	  printf (
+	      "\tmeaning that both yaDSKY2 and yaAGC are running on the same computer.\n");
 	  printf ("--port=Portnumber\n");
-	  printf ("\tBy default, yaDSKY2 attempts to connect to the yaAGC program using port\n");
-	  printf ("\tnumber %d.  However, if more than one instance of yaDSKY2 is being\n",
-	          Portnum);
-	  printf ("\trun, or if yaAGC has been configured to listen on different ports, then\n");
-	  printf ("\tdifferent port settings for yaDSKY2 are needed.  Note that by default,\n");
+	  printf (
+	      "\tBy default, yaDSKY2 attempts to connect to the yaAGC program using port\n");
+	  printf (
+	      "\tnumber %d.  However, if more than one instance of yaDSKY2 is being\n",
+	      Portnum);
+	  printf (
+	      "\trun, or if yaAGC has been configured to listen on different ports, then\n");
+	  printf (
+	      "\tdifferent port settings for yaDSKY2 are needed.  Note that by default,\n");
 	  printf ("\tyaAGC listens for new connections on ports %d-%d.\n",
-	          Portnum, Portnum + 10 - 1);
+		  Portnum, Portnum + 10 - 1);
 	  printf ("--cfg=ConfigFilename\n");
-	  printf ("\tSelects a configuration file to be used, to allow different yaDSKY\n");
-	  printf ("\tsettings for LM vs. CM, or for different Apollo missions.  The \n");
-	  printf ("\tconfiguration files presently known are LM0.ini, LM.ini, LM1.ini, and CM.ini. \n");
-	  printf ("\tBy default (no --cfg switch) LM settings are used, but not the LM.ini\n");
+	  printf (
+	      "\tSelects a configuration file to be used, to allow different yaDSKY\n");
+	  printf (
+	      "\tsettings for LM vs. CM, or for different Apollo missions.  The \n");
+	  printf (
+	      "\tconfiguration files presently known are LM0.ini, LM.ini, LM1.ini, and CM.ini. \n");
+	  printf (
+	      "\tBy default (no --cfg switch) LM settings are used, but not the LM.ini\n");
 	  printf ("\tfile itself.\n");
 	  printf ("--half-size\n");
-	  printf ("\tUses a half-size version of yaDSKY2, suitable for smaller graphical\n");
+	  printf (
+	      "\tUses a half-size version of yaDSKY2, suitable for smaller graphical\n");
 	  printf ("\tdisplays.  If present, must precede --cfg.\n");
 	  printf ("--delay=N\n");
-	  printf ("\t\"Start-up delay\", in ms.  Defaults to %d.  What the start-up\n", StartupDelay);
-	  printf ("\tdelay does is to prevent yaDSKY2 from attempting to communicate with\n");
-	  printf ("\tyaAGC for a brief time after power-up.  This option is really only\n");
-	  printf ("\tuseful in Win32, to work around a problem with race-conditions in\n");
-	  printf ("\tthe start-up scripts like SimLuminary131.  When the race problem is\n");
-	  printf ("\tfixed correctly, this option will probably no longer be useful.\n");
+	  printf (
+	      "\t\"Start-up delay\", in ms.  Defaults to %d.  What the start-up\n",
+	      StartupDelay);
+	  printf (
+	      "\tdelay does is to prevent yaDSKY2 from attempting to communicate with\n");
+	  printf (
+	      "\tyaAGC for a brief time after power-up.  This option is really only\n");
+	  printf (
+	      "\tuseful in Win32, to work around a problem with race-conditions in\n");
+	  printf (
+	      "\tthe start-up scripts like SimLuminary131.  When the race problem is\n");
+	  printf (
+	      "\tfixed correctly, this option will probably no longer be useful.\n");
 	  printf ("--debug-counter-mode\n");
-	  printf ("\tThis is present only for debugging yaAGC\'s \"unprogrammed\"\n");
-	  printf ("\tcounter-increments, and has no useful purpose otherwise.  In this\n");
-	  printf ("\tthe simulated DSKY\'s do not have their normal interpretations and\n");
-	  printf ("\tcannot be used to affect the AGC CPU in any normal way.  Instead,\n");
-	  printf ("\tthe combination NOUN-digit-digit is used to specify an (octal)\n");
-	  printf ("\tCPU register number, and the combination VERB-digit is used\n");
-	  printf ("\tto select a counter-increment type as defined on the Virtual AGC\n");
-	  printf ("\twebsite\'s developer page.  The PRO key is used to send the selected\n");
-	  printf ("\tcounter-increment command to the AGC.  Note that there are no\n");
-	  printf ("\tvisual displays associated with this, since the AGC is still\n");
-	  printf ("\tcommanding the DSKY visual display in its usual way.  This mode\n");
-	  printf ("\tis terminated only by restarting yaDSKY2.  Only counter registers\n");
-	  printf ("\tin the range 32-60 (octal, default 32) are accepted, and only \n");
-	  printf ("\tincrement-types in the range 0-6 (default 1) are accepted.\n");
+	  printf (
+	      "\tThis is present only for debugging yaAGC\'s \"unprogrammed\"\n");
+	  printf (
+	      "\tcounter-increments, and has no useful purpose otherwise.  In this\n");
+	  printf (
+	      "\tthe simulated DSKY\'s do not have their normal interpretations and\n");
+	  printf (
+	      "\tcannot be used to affect the AGC CPU in any normal way.  Instead,\n");
+	  printf (
+	      "\tthe combination NOUN-digit-digit is used to specify an (octal)\n");
+	  printf (
+	      "\tCPU register number, and the combination VERB-digit is used\n");
+	  printf (
+	      "\tto select a counter-increment type as defined on the Virtual AGC\n");
+	  printf (
+	      "\twebsite\'s developer page.  The PRO key is used to send the selected\n");
+	  printf (
+	      "\tcounter-increment command to the AGC.  Note that there are no\n");
+	  printf (
+	      "\tvisual displays associated with this, since the AGC is still\n");
+	  printf (
+	      "\tcommanding the DSKY visual display in its usual way.  This mode\n");
+	  printf (
+	      "\tis terminated only by restarting yaDSKY2.  Only counter registers\n");
+	  printf (
+	      "\tin the range 32-60 (octal, default 32) are accepted, and only \n");
+	  printf (
+	      "\tincrement-types in the range 0-6 (default 1) are accepted.\n");
 	  printf ("--test-uplink\n");
-	  printf ("\tIf this switch is used, keypresses are communicated to yaAGC\n");
+	  printf (
+	      "\tIf this switch is used, keypresses are communicated to yaAGC\n");
 	  printf ("\tas digital-uplink date instead of regular DSKY data.\n");
 	  printf ("--test-downlink\n");
-	  printf ("\tDoes nothing. This switch is accepted only for backward compatibility.\n");
-	  printf ("\tIts former functionality has been replaced with the yaTelemetry program.\n");
+	  printf (
+	      "\tDoes nothing. This switch is accepted only for backward compatibility.\n");
+	  printf (
+	      "\tIts former functionality has been replaced with the yaTelemetry program.\n");
 	  printf ("--relative-pixmaps\n");
-	  printf ("\tDoes nothing. This switch is accepted only for backward compatibility.\n");
+	  printf (
+	      "\tDoes nothing. This switch is accepted only for backward compatibility.\n");
 	  exit (1);
-	}	
-    }
-  DEBUG (0);
+	}
+    }DEBUG (0);
 
   cout << string ("Hostname=");
   cout << string (Hostname);
   cout << string (", port=");
   cout << Portnum;
   cout << string ("\n");
-  	
+
   // The following is sort of an abbreviated form of some stuff that 
   // ParseCfg does, and is called in case --cfg didn't appear on the 
   // command-line.
@@ -1141,42 +1338,46 @@ bool yaDskyApp::OnInit()
       Ind_t *Indptr;
       // Update all of the indicator legends.  
       for (Indptr = Inds, i = 0; i < 14; Indptr++, i++)
-        MainWindow->ImageSet (Indptr->Widget, Indptr->GraphicOff);
+	MainWindow->ImageSet (Indptr->Widget, Indptr->GraphicOff);
       MainWindow->ImageSet (MainWindow->iLastButton, "ProUp.jpg");
       MainWindow->KeyRelAnnunciator = Inds[3].Widget;
-      MainWindow->CurrentKeyRel = MainWindow->BlankKeyRel = wxString::FromAscii (Inds[3].GraphicOff);
-      MainWindow->ImageSet (MainWindow->KeyRelAnnunciator, MainWindow->CurrentKeyRel);
+      MainWindow->CurrentKeyRel = MainWindow->BlankKeyRel =
+	  wxString::FromAscii (Inds[3].GraphicOff);
+      MainWindow->ImageSet (MainWindow->KeyRelAnnunciator,
+			    MainWindow->CurrentKeyRel);
       MainWindow->OprErrAnnunciator = Inds[4].Widget;
-      MainWindow->CurrentOprErr = MainWindow->BlankOprErr = wxString::FromAscii (Inds[4].GraphicOff);
-      MainWindow->ImageSet (MainWindow->OprErrAnnunciator, MainWindow->CurrentOprErr);
+      MainWindow->CurrentOprErr = MainWindow->BlankOprErr =
+	  wxString::FromAscii (Inds[4].GraphicOff);
+      MainWindow->ImageSet (MainWindow->OprErrAnnunciator,
+			    MainWindow->CurrentOprErr);
     }
-    
-    // Read the optional DSKY2.matches file.
-    wxTextFile Fin;
-    if (wxFileExists (wxT ("DSKY2.matches")))
-      {
-	if (Fin.Open (wxT ("DSKY2.matches")))
-	  {
-	    int i;
-	    NumMatches = Fin.GetLineCount ();
-	    for (i = 0; i < NumMatches; i++)
-	      {
-		wxString Line;
-		Line = Fin.GetLine (i);
-		Matches[i].Pattern = new wxString (Line.BeforeFirst (' '));
-		Matches[i].Command = new wxString (Line.AfterFirst (' '));
-		if (Matches[i].Pattern->IsSameAs (wxT("startup")))
-		  wxExecute (*Matches[i].Command, wxEXEC_ASYNC);
-	      }
-	    Fin.Close ();
-	  }
-      }
-    
-    MainWindow->Timer = new TimerClass ();
-    MainWindow->Timer->Start (PULSE_INTERVAL);
 
-    MainWindow->Show();
-    return true;
+  // Read the optional DSKY2.matches file.
+  wxTextFile Fin;
+  if (wxFileExists (wxT ("DSKY2.matches")))
+    {
+      if (Fin.Open (wxT ("DSKY2.matches")))
+	{
+	  int i;
+	  NumMatches = Fin.GetLineCount ();
+	  for (i = 0; i < NumMatches; i++)
+	    {
+	      wxString Line;
+	      Line = Fin.GetLine (i);
+	      Matches[i].Pattern = new wxString (Line.BeforeFirst (' '));
+	      Matches[i].Command = new wxString (Line.AfterFirst (' '));
+	      if (Matches[i].Pattern->IsSameAs (wxT ("startup")))
+		wxExecute (*Matches[i].Command, wxEXEC_ASYNC);
+	    }
+	  Fin.Close ();
+	}
+    }
+
+  MainWindow->Timer = new TimerClass ();
+  MainWindow->Timer->Start (PULSE_INTERVAL);
+
+  MainWindow->Show ();
+  return true;
 }
 
 //-------------------------------------------------------------------------
@@ -1191,7 +1392,7 @@ TimerClass::Notify ()
   static int PacketSize = 0;
   int i;
   unsigned char c;
-  
+
 #if 0 
   // Just a preliminary debugging thing, to check out how well bitmap
   // replacement works. 
@@ -1202,28 +1403,60 @@ TimerClass::Notify ()
       k = 0;
       j = !j;
       if (j)
-        MainWindow->ImageSet (MainWindow->Annunciator11, "OprErrOnO.jpg");
+      MainWindow->ImageSet (MainWindow->Annunciator11, "OprErrOnO.jpg");
       else
-        MainWindow->ImageSet (MainWindow->Annunciator11, "OprErrOff.jpg"); 
+      MainWindow->ImageSet (MainWindow->Annunciator11, "OprErrOff.jpg");
     }
 #endif
-    
+
   if (StartupDelay > 0)
     {
       StartupDelay -= PULSE_INTERVAL;
       return;
+    }
+  // Process canned script, if any, rather than actual packets from yaAGC.
+  if (MainWindow->scriptFileOpen)
+    {
+      while (true)
+	{
+	  if (MainWindow->scriptFileCurrentLine >= MainWindow->scriptFileCount)
+	    {
+	      MainWindow->scriptFile.Close ();
+	      MainWindow->scriptFileOpen = false;
+	      wxMessageBox (
+		  wxT ("Script completed, time ")
+		      + wxString::Format (
+			  "%.2f",
+			  MainWindow->scriptFileStopWatch.Time () / 1000.0)
+		      + wxT (" seconds."));
+	      MainWindow->restoreToPrescript ();
+	      break;
+	    }
+	  else if (MainWindow->scriptFileStopWatch.Time ()
+	      >= MainWindow->scriptFileWaitUntil)
+	    {
+
+	      MainWindow->scriptFileCurrentLine++;
+	      MainWindow->scriptFileProcessLine ();
+	      ActOnIncomingIO ((unsigned char *) NULL);
+	      MainWindow->scriptFileWaitUntil +=
+		  MainWindow->scriptFileDifferentialTime;
+	    }
+	  else
+	    return;
+	}
     }
   // Try to connect to the server (yaAGC) if not already connected.
   if (ServerSocket == -1)
     {
       ServerSocket = CallSocket (Hostname, Portnum);
       if (ServerSocket != -1)
-        printf ("yaDSKY is connected.\n");
+	printf ("yaDSKY is connected.\n");
     }
   if (ServerSocket != -1)
     {
       for (;;)
-        {
+	{
 	  i = recv (ServerSocket, (char *) &c, 1, MSG_NOSIGNAL);
 	  if (i == -1)
 	    {
@@ -1232,14 +1465,14 @@ TimerClass::Notify ()
 	      // empirically I find that ignoring them makes no difference
 	      // to the operation of the program.
 	      if (errno == EAGAIN || errno == 0 || errno == 9)
-	        i = 0;
+		i = 0;
 	      else
-	        {	
+		{
 		  printf ("yaDSKY reports server error %d\n", errno);
 		  close (ServerSocket);
 		  ServerSocket = -1;
 		  break;
-	        }
+		}
 	    }
 	  if (i == 0)
 	    break;
@@ -1247,24 +1480,23 @@ TimerClass::Notify ()
 	  // 00 XX XX XX.
 	  if (0 == (0xc0 & c))
 	    PacketSize = 0;
-	  if (PacketSize != 0 || (0xc0 & c) == 0)	      
-	    { 
+	  if (PacketSize != 0 || (0xc0 & c) == 0)
+	    {
 	      Packet[PacketSize++] = c;
 	      if (PacketSize >= 4)
 		{
 		  ActOnIncomingIO (Packet);
-		  PacketSize = 0;   
-		}  
+		  PacketSize = 0;
+		}
 	    }
 	}
     }
 }
 
-
 // A function to overwrite one of the static bitmaps in the display, such as an 
 // annunciator, with a replacement from a file.
 
-void 
+void
 MainFrame::ImageSet (wxStaticBitmap *StaticBitmap, wxString &Filename)
 {
   wxString Dummy;
@@ -1277,7 +1509,7 @@ MainFrame::ImageSet (wxStaticBitmap *StaticBitmap, wxString &Filename)
   Bitmap.LoadFile (Dummy, wxBITMAP_TYPE_JPEG);
   StaticBitmap->SetBitmap (Bitmap);
 }
-void 
+void
 MainFrame::ImageSet (wxStaticBitmap *StaticBitmap, char *Filename)
 {
   wxString Dummy;
@@ -1289,7 +1521,7 @@ MainFrame::ImageSet (wxStaticBitmap *StaticBitmap, const char *Filename)
 {
   ImageSet (StaticBitmap, (char *) Filename);
 }
-void 
+void
 MainFrame::ImageSet (wxBitmapButton *BitmapButton, wxString &Filename)
 {
   wxString Dummy;
@@ -1302,7 +1534,7 @@ MainFrame::ImageSet (wxBitmapButton *BitmapButton, wxString &Filename)
   Bitmap.LoadFile (Dummy, wxBITMAP_TYPE_JPEG);
   BitmapButton->SetBitmapLabel (Bitmap);
 }
-void 
+void
 MainFrame::ImageSet (wxBitmapButton *BitmapButton, char *Filename)
 {
   wxString Dummy;
@@ -1315,7 +1547,6 @@ MainFrame::ImageSet (wxBitmapButton *BitmapButton, const char *Filename)
   ImageSet (BitmapButton, (char *) Filename);
 }
 
-
 //--------------------------------------------------------------------------------
 // Function for acting on incoming channel i/o from yaAGC, and change any affected
 // DSKY annunciators or 7-segment displays.  The Packet parameter
@@ -1324,25 +1555,16 @@ MainFrame::ImageSet (wxBitmapButton *BitmapButton, const char *Filename)
 // Details" chapter.  (The widget parameter can be ANY widget.)
 
 // Matches image widget filenames to channel 010 CCCCC and DDDDD fields.
-static const char *SevenSegmentFilenames[32] = {
-  "7Seg-0.jpg",
-  NULL, NULL,
-  "7Seg-3.jpg",
+static const char *SevenSegmentFilenames[32] =
+  { "7Seg-0.jpg",
+  NULL, NULL, "7Seg-3.jpg",
   NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-  "7Seg-15.jpg",
-  NULL, NULL, NULL,
-  "7Seg-19.jpg",
-  NULL,
-  "7Seg-21.jpg",
-  NULL, NULL, NULL,
-  "7Seg-25.jpg",
-  NULL,
-  "7Seg-27.jpg",
-  "7Seg-28.jpg",
-  "7Seg-29.jpg",
-  "7Seg-30.jpg",
-  "7Seg-31.jpg"
-};
+      "7Seg-15.jpg",
+      NULL, NULL, NULL, "7Seg-19.jpg",
+      NULL, "7Seg-21.jpg",
+      NULL, NULL, NULL, "7Seg-25.jpg",
+      NULL, "7Seg-27.jpg", "7Seg-28.jpg", "7Seg-29.jpg", "7Seg-30.jpg",
+      "7Seg-31.jpg" };
 
 static int IoErrorCount = 0, Last11 = 0;
 static int R1Sign = 0, R2Sign = 0, R3Sign = 0;
@@ -1352,40 +1574,78 @@ TimerClass::ActOnIncomingIO (unsigned char *Packet)
 {
   Ind_t *Indptr;
   int Channel, Value, uBit, i;
-  // Check to see if the message has a yaAGC signature.  If not,
-  // ignore it.  The yaAGC signature is 00 01 10 11 in the 
-  // 2 most-significant bits of the packet's bytes.  We are 
-  // guaranteed that the first byte is signed 00, so we don't 
-  // need to check it.
-  if (0x40 != (Packet[1] & 0xc0) ||
-      0x80 != (Packet[2] & 0xc0) ||
-      0xc0 != (Packet[3] & 0xc0))
-    return;
-  if (ParseIoPacket (Packet, &Channel, &Value, &uBit))
-    goto Error;
+  if (Packet != NULL)
+    {
+      // Check to see if the message has a yaAGC signature.  If not,
+      // ignore it.  The yaAGC signature is 00 01 10 11 in the
+      // 2 most-significant bits of the packet's bytes.  We are
+      // guaranteed that the first byte is signed 00, so we don't
+      // need to check it.
+      if (0x40 != (Packet[1] & 0xc0) || 0x80 != (Packet[2] & 0xc0)
+	  || 0xc0 != (Packet[3] & 0xc0))
+	return;
+      if (ParseIoPacket (Packet, &Channel, &Value, &uBit))
+	goto Error;
+      // Save, in case we need to run a canned script and
+      // restore the values afterward.
+      if (uBit == 0)
+	{
+	  switch (Channel)
+	    {
+	    case 010:
+	      int relay, relayValue;
+	      relay = (Value >> 11) & 0x0F;
+	      relayValue = Value & 03777;
+	      MainWindow->last10[relay] = relayValue;
+	      break;
+	    case 011:
+	      MainWindow->last11 = Value;
+	      break;
+	    case 013:
+	      MainWindow->last13 = Value;
+	      break;
+	    case 0163:
+	      MainWindow->last163 = Value;
+	      break;
+	    default:
+	      break;
+	    }
+	}
+
+    }
+  else
+    {
+      Channel = MainWindow->scriptFileChannelNumber;
+      Value = MainWindow->scriptFileChannelValue;
+      uBit = 0;
+    }
   // Take care of all of the indicator lights.
   for (Indptr = Inds, i = 0; i < 14; Indptr++, i++)
-    if (Indptr->Channel == Channel &&
-        (!Indptr->Latched || ((Value & Indptr->RowMask) == Indptr->Row)) &&
-        Indptr->State != (Indptr->Bitmask & (Value ^ Indptr->Polarity)))
+    if (Indptr->Channel == Channel
+	&& (!Indptr->Latched || ((Value & Indptr->RowMask) == Indptr->Row))
+	&& Indptr->State != (Indptr->Bitmask & (Value ^ Indptr->Polarity)))
       {
-        Indptr->State = (Indptr->Bitmask & (Value ^ Indptr->Polarity));
+	Indptr->State = (Indptr->Bitmask & (Value ^ Indptr->Polarity));
 	if (Indptr->State == 0)
 	  {
 	    MainWindow->ImageSet (Indptr->Widget, Indptr->GraphicOff);
 	    if (Indptr->Widget == MainWindow->OprErrAnnunciator)
-	      MainWindow->CurrentOprErr = wxString::FromAscii (Indptr->GraphicOff);
+	      MainWindow->CurrentOprErr = wxString::FromAscii (
+		  Indptr->GraphicOff);
 	    if (Indptr->Widget == MainWindow->KeyRelAnnunciator)
-	      MainWindow->CurrentKeyRel = wxString::FromAscii (Indptr->GraphicOff);
+	      MainWindow->CurrentKeyRel = wxString::FromAscii (
+		  Indptr->GraphicOff);
 	  }
 	else
 	  {
 	    MainWindow->ImageSet (Indptr->Widget, Indptr->GraphicOn);
 	    if (Indptr->Widget == MainWindow->OprErrAnnunciator)
-	      MainWindow->CurrentOprErr = wxString::FromAscii (Indptr->GraphicOn);
+	      MainWindow->CurrentOprErr = wxString::FromAscii (
+		  Indptr->GraphicOn);
 	    if (Indptr->Widget == MainWindow->KeyRelAnnunciator)
-	      MainWindow->CurrentKeyRel = wxString::FromAscii (Indptr->GraphicOn);
-	  }  
+	      MainWindow->CurrentKeyRel = wxString::FromAscii (
+		  Indptr->GraphicOn);
+	  }
       }
   // Now take care of everything that's left.  Only a few channels are of interest to the
   // DSKY as far as input is concerned.
@@ -1396,7 +1656,7 @@ TimerClass::ActOnIncomingIO (unsigned char *Packet)
       int RSign = 0;
       // Set up the pointers to the widgets associated with this channel.
       switch (Value & 0x7800)
-        {
+	{
 	case 0x5800:	// AAAA=11D
 	  Left = MainWindow->MD1Digit;
 	  Right = MainWindow->MD2Digit;
@@ -1417,8 +1677,8 @@ TimerClass::ActOnIncomingIO (unsigned char *Packet)
 	  if (0 != (Value & 0x0400))
 	    R1Sign |= 2;
 	  else
-	    R1Sign &= ~2;  
-	  RSign = R1Sign;  
+	    R1Sign &= ~2;
+	  RSign = R1Sign;
 	  Left = MainWindow->R1D2Digit;
 	  Right = MainWindow->R1D3Digit;
 	  break;
@@ -1428,7 +1688,7 @@ TimerClass::ActOnIncomingIO (unsigned char *Packet)
 	    R1Sign |= 1;
 	  else
 	    R1Sign &= ~1;
-	  RSign = R1Sign;    
+	  RSign = R1Sign;
 	  Left = MainWindow->R1D4Digit;
 	  Right = MainWindow->R1D5Digit;
 	  break;
@@ -1437,8 +1697,8 @@ TimerClass::ActOnIncomingIO (unsigned char *Packet)
 	  if (0 != (Value & 0x0400))
 	    R2Sign |= 2;
 	  else
-	    R2Sign &= ~2; 
-	  RSign = R2Sign;   
+	    R2Sign &= ~2;
+	  RSign = R2Sign;
 	  Left = MainWindow->R2D1Digit;
 	  Right = MainWindow->R2D2Digit;
 	  break;
@@ -1448,7 +1708,7 @@ TimerClass::ActOnIncomingIO (unsigned char *Packet)
 	    R2Sign |= 1;
 	  else
 	    R2Sign &= ~1;
-	  RSign = R2Sign;    
+	  RSign = R2Sign;
 	  Left = MainWindow->R2D3Digit;
 	  Right = MainWindow->R2D4Digit;
 	  break;
@@ -1462,7 +1722,7 @@ TimerClass::ActOnIncomingIO (unsigned char *Packet)
 	    R3Sign |= 2;
 	  else
 	    R3Sign &= ~2;
-	  RSign = R3Sign;    
+	  RSign = R3Sign;
 	  Left = MainWindow->R3D2Digit;
 	  Right = MainWindow->R3D3Digit;
 	  break;
@@ -1472,49 +1732,53 @@ TimerClass::ActOnIncomingIO (unsigned char *Packet)
 	    R3Sign |= 1;
 	  else
 	    R3Sign &= ~1;
-	  RSign = R3Sign;    
+	  RSign = R3Sign;
 	  Left = MainWindow->R3D4Digit;
 	  Right = MainWindow->R3D5Digit;
 	  break;
 	default:
-	  goto Error;                  
+	  goto Error;
 	}
       // Write the sign.
       if (Sign != NULL)
-        {
+	{
 	  // + has priority if both are set
 	  if (0 != (RSign & 2))
 	    MainWindow->ImageSet (Sign, "PlusOn.jpg");
-	  else if (0 != (RSign & 1))	
+	  else if (0 != (RSign & 1))
 	    MainWindow->ImageSet (Sign, "MinusOn.jpg");
-	  else				 
+	  else
 	    MainWindow->ImageSet (Sign, "PlusMinusOff.jpg");
 	}
       // Write the left digit.
       if (Left != NULL)
-        {
+	{
 	  int i;
 	  i = (Value >> 5) & 0x1F;
 	  if (SevenSegmentFilenames[i] == NULL)
 	    goto Error;
 	  if (Left == MainWindow->VD1Digit)
-	    MainWindow->CurrentVD1 = wxString::FromAscii (SevenSegmentFilenames[i]);
+	    MainWindow->CurrentVD1 = wxString::FromAscii (
+		SevenSegmentFilenames[i]);
 	  else if (Left == MainWindow->ND1Digit)
-	    MainWindow->CurrentND1 = wxString::FromAscii (SevenSegmentFilenames[i]);
-	  MainWindow->ImageSet (Left, SevenSegmentFilenames[i]);  
+	    MainWindow->CurrentND1 = wxString::FromAscii (
+		SevenSegmentFilenames[i]);
+	  MainWindow->ImageSet (Left, SevenSegmentFilenames[i]);
 	}
       // Write the right digit.
       if (Right != NULL)
-        {
+	{
 	  int i;
 	  i = Value & 0x1F;
 	  if (SevenSegmentFilenames[i] == NULL)
 	    goto Error;
 	  if (Right == MainWindow->VD2Digit)
-	    MainWindow->CurrentVD2 = wxString::FromAscii (SevenSegmentFilenames[i]);
+	    MainWindow->CurrentVD2 = wxString::FromAscii (
+		SevenSegmentFilenames[i]);
 	  else if (Right == MainWindow->ND2Digit)
-	    MainWindow->CurrentND2 = wxString::FromAscii (SevenSegmentFilenames[i]);
-	  MainWindow->ImageSet (Right, SevenSegmentFilenames[i]);  
+	    MainWindow->CurrentND2 = wxString::FromAscii (
+		SevenSegmentFilenames[i]);
+	  MainWindow->ImageSet (Right, SevenSegmentFilenames[i]);
 	}
     }
   else if (Channel == 011)
@@ -1523,38 +1787,38 @@ TimerClass::ActOnIncomingIO (unsigned char *Packet)
       // Here are appropriate Luminary 131 actions for various discrete
       // annunciations.
       if ((Value & 2) != (Last11 & 2))
-        {
+	{
 	  if (0 == (Value & 2))
-	    MainWindow->ImageSet (MainWindow->CompActyAnnunciator, "CompActyOff.jpg");
+	    MainWindow->ImageSet (MainWindow->CompActyAnnunciator,
+				  "CompActyOff.jpg");
 	  else
-	    MainWindow->ImageSet (MainWindow->CompActyAnnunciator, "CompActyOn.jpg");
+	    MainWindow->ImageSet (MainWindow->CompActyAnnunciator,
+				  "CompActyOn.jpg");
 	}
 
-      Last11 = Value;	
+      Last11 = Value;
     }
-    else if (Channel == 0163)
+  else if (Channel == 0163)
     {
-        // Handle Verb/Noun flashing via the fake V/N flash channel 163
-        if (Value & DSKY_VN_FLASH)
-        {
-            MainWindow->ImageSet (MainWindow->VD1Digit, MainWindow->CurrentBlank);
-            MainWindow->ImageSet (MainWindow->VD2Digit, MainWindow->CurrentBlank);
-            MainWindow->ImageSet (MainWindow->ND1Digit, MainWindow->CurrentBlank);
-            MainWindow->ImageSet (MainWindow->ND2Digit, MainWindow->CurrentBlank);
-        }
-        else
-        {
-            MainWindow->ImageSet (MainWindow->VD1Digit, MainWindow->CurrentVD1);
-            MainWindow->ImageSet (MainWindow->VD2Digit, MainWindow->CurrentVD2);
-            MainWindow->ImageSet (MainWindow->ND1Digit, MainWindow->CurrentND1);
-            MainWindow->ImageSet (MainWindow->ND2Digit, MainWindow->CurrentND2);
-        }
+      // Handle Verb/Noun flashing via the fake V/N flash channel 163
+      if (Value & DSKY_VN_FLASH)
+	{
+	  MainWindow->ImageSet (MainWindow->VD1Digit, MainWindow->CurrentBlank);
+	  MainWindow->ImageSet (MainWindow->VD2Digit, MainWindow->CurrentBlank);
+	  MainWindow->ImageSet (MainWindow->ND1Digit, MainWindow->CurrentBlank);
+	  MainWindow->ImageSet (MainWindow->ND2Digit, MainWindow->CurrentBlank);
+	}
+      else
+	{
+	  MainWindow->ImageSet (MainWindow->VD1Digit, MainWindow->CurrentVD1);
+	  MainWindow->ImageSet (MainWindow->VD2Digit, MainWindow->CurrentVD2);
+	  MainWindow->ImageSet (MainWindow->ND1Digit, MainWindow->CurrentND1);
+	  MainWindow->ImageSet (MainWindow->ND2Digit, MainWindow->CurrentND2);
+	}
     }
-    return;
-Error:
-  IoErrorCount++;
+  return;
+  Error: IoErrorCount++;
 }
-
 
 //--------------------------------------------------------------------------------
 // A nice little function to output a keycode (except PRO) to yaAGC.
@@ -1567,18 +1831,18 @@ MainFrame::OutputKeycode (int Keycode)
   if (ServerSocket != -1)
     {
       if (TestUplink)
-        {
+	{
 	  // In this case, we communicate keycodes to the AGC via the digital
 	  // uplink rather than through the normal DSKY input channel.
 	  Keycode &= 037;
 	  Keycode |= ((Keycode << 10) | ((Keycode ^ 037) << 5));
 	  FormIoPacket (0173, Keycode, Packet);
 	}
-      else	
-        FormIoPacket (015, Keycode, Packet);
+      else
+	FormIoPacket (015, Keycode, Packet);
       j = send (ServerSocket, (const char *) Packet, 4, MSG_NOSIGNAL);
       if (j == SOCKET_ERROR && SOCKET_BROKEN)
-        {
+	{
 	  close (ServerSocket);
 	  ServerSocket = -1;
 	}
@@ -1600,12 +1864,12 @@ MainFrame::OutputPro (int OffOn)
       FormIoPacket (0432, 020000, Packet);
       // Next, generate the data itself.
       if (OffOn)
-        OffOn = 020000;
+	OffOn = 020000;
       FormIoPacket (032, OffOn, &Packet[4]);
       // And, send it all.
       j = send (ServerSocket, (const char *) Packet, 8, MSG_NOSIGNAL);
       if (j == SOCKET_ERROR && SOCKET_BROKEN)
-        {
+	{
 	  close (ServerSocket);
 	  ServerSocket = -1;
 	}
@@ -1627,7 +1891,7 @@ xpm2jpg (char *s)
     }
 }
 
-int 
+int
 MainFrame::ParseCfg (wxString &Filename)
 {
   Ind_t *Indptr;
@@ -1641,39 +1905,38 @@ MainFrame::ParseCfg (wxString &Filename)
       printf ("The specified --cfg file does not exist.\n");
       goto Error;
     }
-  s[sizeof (s) - 1] = 0;  
-  while (NULL != fgets (s, sizeof (s) - 1, Cfg))
+  s[sizeof(s) - 1] = 0;
+  while (NULL != fgets (s, sizeof(s) - 1, Cfg))
     {
       // Trim off the trailing \n to make it easier to print error messages.
       for (ss = s; *ss; ss++)
-        if (*ss == '\n' || *ss == '\r')
+	if (*ss == '\n' || *ss == '\r')
 	  {
 	    *ss = 0;
 	    break;
 	  }
       if (!strncmp (s, "DEBUG ", 6))
-        continue;
+	continue;
       if (!strcmp (s, "LMSIM"))
-        {
-          CmOrLm = 0;
+	{
+	  CmOrLm = 0;
 	  continue;
 	}
       if (!strcmp (s, "CMSIM"))
-        {
-          CmOrLm = 1;
+	{
+	  CmOrLm = 1;
 	  continue;
 	}
       if (1 == sscanf (s, "PROKEY %s", s2))
-        {
+	{
 	  xpm2jpg (s2);
 	  // Look up the widget for the PRO key, and change its graphic.
-	  sprintf (s1, "%s%s",
-	  	   "", s2);
-          ImageSet (iLastButton, s1);
+	  sprintf (s1, "%s%s", "", s2);
+	  ImageSet (iLastButton, s1);
 	  continue;
-	}  
+	}
       if (3 == sscanf (s, "IND %o %s %s", &IndNum, s2, s3))
-        {
+	{
 	  xpm2jpg (s2);
 	  xpm2jpg (s3);
 	  if (IndNum >= 011 && IndNum <= 017)
@@ -1686,8 +1949,7 @@ MainFrame::ParseCfg (wxString &Filename)
 	      goto Error;
 	    }
 	  // Need a better way (or SOME way) to check here for string overflow.
-	  sprintf (s1, "%s%s",
-	  	   "", s2);
+	  sprintf (s1, "%s%s", "", s2);
 	  Inds[IndNum].GraphicOn = (char *) malloc (strlen (s1) + 1);
 	  if (Inds[IndNum].GraphicOn == NULL)
 	    {
@@ -1695,8 +1957,7 @@ MainFrame::ParseCfg (wxString &Filename)
 	      goto Error;
 	    }
 	  strcpy ((char *) Inds[IndNum].GraphicOn, s1);
-	  sprintf (s1, "%s%s",
-	  	   "", s3);
+	  sprintf (s1, "%s%s", "", s3);
 	  Inds[IndNum].GraphicOff = (char *) malloc (strlen (s1) + 1);
 	  if (Inds[IndNum].GraphicOff == NULL)
 	    {
@@ -1707,18 +1968,21 @@ MainFrame::ParseCfg (wxString &Filename)
 	  if (NULL != strstr (s2, "KeyRel") || NULL != strstr (s3, "KeyRel"))
 	    {
 	      KeyRelAnnunciator = Inds[IndNum].Widget;
-	      CurrentKeyRel = BlankKeyRel = wxString::FromAscii (Inds[IndNum].GraphicOff);
+	      CurrentKeyRel = BlankKeyRel = wxString::FromAscii (
+		  Inds[IndNum].GraphicOff);
 	    }
 	  if (NULL != strstr (s2, "OprErr") || NULL != strstr (s3, "OprErr"))
 	    {
 	      OprErrAnnunciator = Inds[IndNum].Widget;
-	      CurrentOprErr = BlankOprErr = wxString::FromAscii (Inds[IndNum].GraphicOff);
+	      CurrentOprErr = BlankOprErr = wxString::FromAscii (
+		  Inds[IndNum].GraphicOff);
 	    }
 	  continue;
 	}
-      i = sscanf (s, "CHAN %o %o %d %d %o %o", &IndNum, &Channel, &BitNum, &Polarity, &RowMask, &Row);	
+      i = sscanf (s, "CHAN %o %o %d %d %o %o", &IndNum, &Channel, &BitNum,
+		  &Polarity, &RowMask, &Row);
       if (i == 4 || i == 6)
-        {
+	{
 	  if (i == 4)
 	    Latched = Row = RowMask = 0;
 	  else
@@ -1734,20 +1998,23 @@ MainFrame::ParseCfg (wxString &Filename)
 	    }
 	  if (Channel < 0 || Channel > 255)
 	    {
-	      printf ("The channel-number must be in the range 0-255 in \"%s\".\n", s);
+	      printf (
+		  "The channel-number must be in the range 0-255 in \"%s\".\n",
+		  s);
 	      goto Error;
 	    }
 	  if (BitNum < 1 || BitNum > 15)
 	    {
-	      printf ("The bit-number must be in the range 1-15 in \"%s\".\n", s);
+	      printf ("The bit-number must be in the range 1-15 in \"%s\".\n",
+		      s);
 	      goto Error;
 	    }
 	  if (Polarity != 0 && Polarity != 1)
 	    {
 	      printf ("Polarity must be 0 or 1 in \"%s\".\n", s);
 	      goto Error;
-	    }   
-	  BitNum--;  
+	    }
+	  BitNum--;
 	  Inds[IndNum].Channel = Channel;
 	  Inds[IndNum].Bitmask = (1 << BitNum);
 	  Inds[IndNum].Polarity = (Polarity << BitNum);
@@ -1756,20 +2023,20 @@ MainFrame::ParseCfg (wxString &Filename)
 	  Inds[IndNum].Row = Row;
 	  continue;
 	}
-      for (ss = s; isspace (*ss); ss++);
+      for (ss = s; isspace (*ss); ss++)
+	;
       if (*ss != 0 && *ss != '#')
-        {
+	{
 	  printf ("Input line not recognized: \"%s\".\n", s);
 	  goto Error;
 	}
-    } 
+    }
   // Update all of the indicator legends.  
   for (Indptr = Inds, i = 0; i < 14; Indptr++, i++)
     ImageSet (Indptr->Widget, Indptr->GraphicOff);
-  RetVal = 0;  
-Error:
-  if (Cfg != NULL)
-    fclose (Cfg);    
+  RetVal = 0;
+  Error: if (Cfg != NULL)
+    fclose (Cfg);
   return (RetVal);
 }
 
@@ -1779,103 +2046,103 @@ Error:
 void
 MainFrame::HalveTheWindow (void)
 {
-    int ButtonSize;
-    if (HalfSize)
-      ButtonSize = 40;
-    else
-      ButtonSize = 75;
-    ImageSet (bitmap_5, "FrameVerticalL.jpg");
-    ImageSet (bitmap_6_copy, "FrameHorizontal.jpg");
-    ImageSet (Annunciator11, "UplinkActyOff.jpg");
-    ImageSet (Annunciator21, "UplinkActyOff.jpg");
-    ImageSet (Annunciator12, "UplinkActyOff.jpg");
-    ImageSet (Annunciator22, "UplinkActyOff.jpg");
-    ImageSet (Annunciator13, "UplinkActyOff.jpg");
-    ImageSet (Annunciator23, "UplinkActyOff.jpg");
-    ImageSet (Annunciator14, "UplinkActyOff.jpg");
-    ImageSet (Annunciator24, "UplinkActyOff.jpg");
-    ImageSet (Annunciator15, "UplinkActyOff.jpg");
-    ImageSet (Annunciator25, "UplinkActyOff.jpg");
-    ImageSet (Annunciator16, "UplinkActyOff.jpg");
-    ImageSet (Annunciator26, "UplinkActyOff.jpg");
-    ImageSet (Annunciator17, "UplinkActyOff.jpg");
-    ImageSet (Annunciator27, "UplinkActyOff.jpg");
-    ImageSet (bitmap_6, "FrameHorizontal.jpg");
-    ImageSet (bitmap_5_copy, "FrameVerticalL.jpg");
-    ImageSet (bitmap_5_copy_1, "FrameVerticalR.jpg");
-    ImageSet (bitmap_6_copy_copy, "FrameHorizontal.jpg");
-    ImageSet (CompActyAnnunciator, "CompActyOff.jpg");
-    ImageSet (ModeAnnunciator, "rProgOn.jpg");
-    ImageSet (MD1Digit, "7Seg-0.jpg");
-    ImageSet (MD2Digit, "7Seg-0.jpg");
-    ImageSet (VerbAnnunciator, "VerbOn.jpg");
-    ImageSet (VD1Digit, "7Seg-0.jpg");
-    ImageSet (VD2Digit, "7Seg-0.jpg");
-    ImageSet (NounAnnunciator, "NounOn.jpg");
-    ImageSet (ND1Digit, "7Seg-0.jpg");
-    ImageSet (ND2Digit, "7Seg-0.jpg");
-    ImageSet (bitmap_2_copy_1, "SeparatorOn.jpg");
-    ImageSet (R1PlusMinus, "PlusMinusOff.jpg");
-    ImageSet (R1D1Digit, "7Seg-0.jpg");
-    ImageSet (R1D2Digit, "7Seg-0.jpg");
-    ImageSet (R1D3Digit, "7Seg-0.jpg");
-    ImageSet (R1D4Digit, "7Seg-0.jpg");
-    ImageSet (R1D5Digit, "7Seg-0.jpg");
-    ImageSet (bitmap_2_copy, "SeparatorOn.jpg");
-    ImageSet (R2PlusMinus, "PlusMinusOff.jpg");
-    ImageSet (R2D1Digit, "7Seg-0.jpg");
-    ImageSet (R2D2Digit, "7Seg-0.jpg");
-    ImageSet (R2D3Digit, "7Seg-0.jpg");
-    ImageSet (R2D4Digit, "7Seg-0.jpg");
-    ImageSet (R2D5Digit, "7Seg-0.jpg");
-    ImageSet (bitmap_2, "SeparatorOn.jpg");
-    ImageSet (R3PlusMinus, "PlusMinusOff.jpg");
-    ImageSet (R3D1Digit, "7Seg-0.jpg");
-    ImageSet (R3D2Digit, "7Seg-0.jpg");
-    ImageSet (R3D3Digit, "7Seg-0.jpg");
-    ImageSet (R3D4Digit, "7Seg-0.jpg");
-    ImageSet (R3D5Digit, "7Seg-0.jpg");
-    ImageSet (bitmap_6_copy_copy_copy, "FrameHorizontal.jpg");
-    ImageSet (bitmap_5_copy_2, "FrameVerticalR.jpg");
-    ImageSet (VerbButton, "VerbUp.jpg");
-    ImageSet (NounButton, "NounUp.jpg");
-    ImageSet (PlusButton, "PlusUp.jpg");
-    ImageSet (MinusButton, "MinusUp.jpg");
-    ImageSet (ZeroButton, "0Up.jpg");
-    ImageSet (SevenButton, "7Up.jpg");
-    ImageSet (FourButton, "4Up.jpg");
-    ImageSet (OneButton, "1Up.jpg");
-    ImageSet (EightButton, "8Up.jpg");
-    ImageSet (FiveButton, "5Up.jpg");
-    ImageSet (TwoButton, "2Up.jpg");
-    ImageSet (NineButton, "9Up.jpg");
-    ImageSet (SixButton, "6Up.jpg");
-    ImageSet (ThreeButton, "3Up.jpg");
-    ImageSet (ClrButton, "ClrUp.jpg");
-    ImageSet (ProButton, "ProUp.jpg");
-    ImageSet (KeyRelButton, "KeyRelUp.jpg");
-    ImageSet (EntrButton, "EntrUp.jpg");
-    ImageSet (RsetButton, "RsetUp.jpg");
-    VerbButton->SetMinSize(wxSize(ButtonSize, ButtonSize));
-    NounButton->SetMinSize(wxSize(ButtonSize, ButtonSize));
-    PlusButton->SetMinSize(wxSize(ButtonSize, ButtonSize));
-    MinusButton->SetMinSize(wxSize(ButtonSize, ButtonSize));
-    ZeroButton->SetMinSize(wxSize(ButtonSize, ButtonSize));
-    SevenButton->SetMinSize(wxSize(ButtonSize, ButtonSize));
-    FourButton->SetMinSize(wxSize(ButtonSize, ButtonSize));
-    OneButton->SetMinSize(wxSize(ButtonSize, ButtonSize));
-    EightButton->SetMinSize(wxSize(ButtonSize, ButtonSize));
-    FiveButton->SetMinSize(wxSize(ButtonSize, ButtonSize));
-    TwoButton->SetMinSize(wxSize(ButtonSize, ButtonSize));
-    NineButton->SetMinSize(wxSize(ButtonSize, ButtonSize));
-    SixButton->SetMinSize(wxSize(ButtonSize, ButtonSize));
-    ThreeButton->SetMinSize(wxSize(ButtonSize, ButtonSize));
-    ClrButton->SetMinSize(wxSize(ButtonSize, ButtonSize));
-    ProButton->SetMinSize(wxSize(ButtonSize, ButtonSize));
-    KeyRelButton->SetMinSize(wxSize(ButtonSize, ButtonSize));
-    EntrButton->SetMinSize(wxSize(ButtonSize, ButtonSize));
-    RsetButton->SetMinSize(wxSize(ButtonSize, ButtonSize));
-    Fit ();
+  int ButtonSize;
+  if (HalfSize)
+    ButtonSize = 40;
+  else
+    ButtonSize = 75;
+  ImageSet (bitmap_5, "FrameVerticalL.jpg");
+  ImageSet (bitmap_6_copy, "FrameHorizontal.jpg");
+  ImageSet (Annunciator11, "UplinkActyOff.jpg");
+  ImageSet (Annunciator21, "UplinkActyOff.jpg");
+  ImageSet (Annunciator12, "UplinkActyOff.jpg");
+  ImageSet (Annunciator22, "UplinkActyOff.jpg");
+  ImageSet (Annunciator13, "UplinkActyOff.jpg");
+  ImageSet (Annunciator23, "UplinkActyOff.jpg");
+  ImageSet (Annunciator14, "UplinkActyOff.jpg");
+  ImageSet (Annunciator24, "UplinkActyOff.jpg");
+  ImageSet (Annunciator15, "UplinkActyOff.jpg");
+  ImageSet (Annunciator25, "UplinkActyOff.jpg");
+  ImageSet (Annunciator16, "UplinkActyOff.jpg");
+  ImageSet (Annunciator26, "UplinkActyOff.jpg");
+  ImageSet (Annunciator17, "UplinkActyOff.jpg");
+  ImageSet (Annunciator27, "UplinkActyOff.jpg");
+  ImageSet (bitmap_6, "FrameHorizontal.jpg");
+  ImageSet (bitmap_5_copy, "FrameVerticalL.jpg");
+  ImageSet (bitmap_5_copy_1, "FrameVerticalR.jpg");
+  ImageSet (bitmap_6_copy_copy, "FrameHorizontal.jpg");
+  ImageSet (CompActyAnnunciator, "CompActyOff.jpg");
+  ImageSet (ModeAnnunciator, "rProgOn.jpg");
+  ImageSet (MD1Digit, "7Seg-0.jpg");
+  ImageSet (MD2Digit, "7Seg-0.jpg");
+  ImageSet (VerbAnnunciator, "VerbOn.jpg");
+  ImageSet (VD1Digit, "7Seg-0.jpg");
+  ImageSet (VD2Digit, "7Seg-0.jpg");
+  ImageSet (NounAnnunciator, "NounOn.jpg");
+  ImageSet (ND1Digit, "7Seg-0.jpg");
+  ImageSet (ND2Digit, "7Seg-0.jpg");
+  ImageSet (bitmap_2_copy_1, "SeparatorOn.jpg");
+  ImageSet (R1PlusMinus, "PlusMinusOff.jpg");
+  ImageSet (R1D1Digit, "7Seg-0.jpg");
+  ImageSet (R1D2Digit, "7Seg-0.jpg");
+  ImageSet (R1D3Digit, "7Seg-0.jpg");
+  ImageSet (R1D4Digit, "7Seg-0.jpg");
+  ImageSet (R1D5Digit, "7Seg-0.jpg");
+  ImageSet (bitmap_2_copy, "SeparatorOn.jpg");
+  ImageSet (R2PlusMinus, "PlusMinusOff.jpg");
+  ImageSet (R2D1Digit, "7Seg-0.jpg");
+  ImageSet (R2D2Digit, "7Seg-0.jpg");
+  ImageSet (R2D3Digit, "7Seg-0.jpg");
+  ImageSet (R2D4Digit, "7Seg-0.jpg");
+  ImageSet (R2D5Digit, "7Seg-0.jpg");
+  ImageSet (bitmap_2, "SeparatorOn.jpg");
+  ImageSet (R3PlusMinus, "PlusMinusOff.jpg");
+  ImageSet (R3D1Digit, "7Seg-0.jpg");
+  ImageSet (R3D2Digit, "7Seg-0.jpg");
+  ImageSet (R3D3Digit, "7Seg-0.jpg");
+  ImageSet (R3D4Digit, "7Seg-0.jpg");
+  ImageSet (R3D5Digit, "7Seg-0.jpg");
+  ImageSet (bitmap_6_copy_copy_copy, "FrameHorizontal.jpg");
+  ImageSet (bitmap_5_copy_2, "FrameVerticalR.jpg");
+  ImageSet (VerbButton, "VerbUp.jpg");
+  ImageSet (NounButton, "NounUp.jpg");
+  ImageSet (PlusButton, "PlusUp.jpg");
+  ImageSet (MinusButton, "MinusUp.jpg");
+  ImageSet (ZeroButton, "0Up.jpg");
+  ImageSet (SevenButton, "7Up.jpg");
+  ImageSet (FourButton, "4Up.jpg");
+  ImageSet (OneButton, "1Up.jpg");
+  ImageSet (EightButton, "8Up.jpg");
+  ImageSet (FiveButton, "5Up.jpg");
+  ImageSet (TwoButton, "2Up.jpg");
+  ImageSet (NineButton, "9Up.jpg");
+  ImageSet (SixButton, "6Up.jpg");
+  ImageSet (ThreeButton, "3Up.jpg");
+  ImageSet (ClrButton, "ClrUp.jpg");
+  ImageSet (ProButton, "ProUp.jpg");
+  ImageSet (KeyRelButton, "KeyRelUp.jpg");
+  ImageSet (EntrButton, "EntrUp.jpg");
+  ImageSet (RsetButton, "RsetUp.jpg");
+  VerbButton->SetMinSize (wxSize (ButtonSize, ButtonSize));
+  NounButton->SetMinSize (wxSize (ButtonSize, ButtonSize));
+  PlusButton->SetMinSize (wxSize (ButtonSize, ButtonSize));
+  MinusButton->SetMinSize (wxSize (ButtonSize, ButtonSize));
+  ZeroButton->SetMinSize (wxSize (ButtonSize, ButtonSize));
+  SevenButton->SetMinSize (wxSize (ButtonSize, ButtonSize));
+  FourButton->SetMinSize (wxSize (ButtonSize, ButtonSize));
+  OneButton->SetMinSize (wxSize (ButtonSize, ButtonSize));
+  EightButton->SetMinSize (wxSize (ButtonSize, ButtonSize));
+  FiveButton->SetMinSize (wxSize (ButtonSize, ButtonSize));
+  TwoButton->SetMinSize (wxSize (ButtonSize, ButtonSize));
+  NineButton->SetMinSize (wxSize (ButtonSize, ButtonSize));
+  SixButton->SetMinSize (wxSize (ButtonSize, ButtonSize));
+  ThreeButton->SetMinSize (wxSize (ButtonSize, ButtonSize));
+  ClrButton->SetMinSize (wxSize (ButtonSize, ButtonSize));
+  ProButton->SetMinSize (wxSize (ButtonSize, ButtonSize));
+  KeyRelButton->SetMinSize (wxSize (ButtonSize, ButtonSize));
+  EntrButton->SetMinSize (wxSize (ButtonSize, ButtonSize));
+  RsetButton->SetMinSize (wxSize (ButtonSize, ButtonSize));
+  Fit ();
 }
 
 // this is for the "presentation" feature:  the function checks the buffer 
@@ -1890,16 +2157,4 @@ MainFrame::MatchCheck (void)
     if (Match.IsSameAs (*Matches[i].Pattern))
       wxExecute (*Matches[i].Command, wxEXEC_ASYNC);
 }
-
-
-
-
-
-
-
-
-
-
-
-
 

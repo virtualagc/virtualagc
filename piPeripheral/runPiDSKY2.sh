@@ -132,7 +132,7 @@ then
 else
 	cp -a "$SOURCEDIR/piPeripheral/piDSKY2-images" $RAMDISK
 fi
-cp -a "$SOURCEDIR/yaDSKY2"/*.{png,jpg} $RAMDISK
+cp -a "$SOURCEDIR/yaDSKY2"/*.{png,jpg,canned} $RAMDISK
 cp -a "$LEDPATH" $RAMDISK/led-panel
 
 
