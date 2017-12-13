@@ -143,27 +143,30 @@ do
 	clear
 	echo "Available missions:"
 	echo ""
-	echo "    0 - Apollo 5 LM"
-	echo "    1 - Apollo 8 CM"
-	echo "    2 - Apollo 9 CM"
-	echo "    3 - Apollo 10 LM"
-	echo "    4 - Apollo 11 CM"
-	echo "    5 - Apollo 11 LM (default)"
-	echo "    6 - Apollo 12 LM"
-	echo "    7 - Apollo 13 LM"
-	echo "    8 - Apollo 15-17 CM"
-	echo "    9 - Apollo 15-17 LM"
+	echo "    0   Run Apollo 5 LM"
+	echo "    1   Run Apollo 8 CM"
+	echo "    2   Run Apollo 9 CM"
+	echo "    3   Run Apollo 10 LM"
+	echo "    4   Run Apollo 11 CM"
+	echo "    5   Run Apollo 11 LM (default)"
+	echo "    6   Run Apollo 12 LM"
+	echo "    7   Run Apollo 13 LM"
+	echo "    8   Run Apollo 15-17 CM"
+	echo "    9   Run Apollo 15-17 LM"
+	echo "    +   Replay Apollo 8 launch"
+	echo "    -   Replay Apollo 11 landing"
 	unset PLAYBACK
 	if [[ "$PLAYBACK_OPTION" != "" ]]
 	then
-		echo "  PRO - Play back" 
+		echo "  PRO - Replay recording" 
 	fi
 	if [[ "$CUSTOM_BARE" != "" ]]
 	then
-		echo " VERB - Custom program #1"
+		echo " VERB - Run custom AGC program"
 	fi
 	echo ""
 	read -p "Choose a number: " -t 15 -n 1
+	echo ""
 	if [[ "$REPLY" == "0" ]]
 	then
 		CORE=Sunburst120
@@ -200,6 +203,20 @@ do
 	then
 		CORE=Luminary210
 		CFG=LM1
+	elif [[ "$REPLY" == "+" || "$REPLY" == "=" ]]
+	then
+		PLAYBACK="--playback=$SOURCEDIR/yaDSKY2/Apollo8-launch.canned"
+	elif [[ "$REPLY" == "-" || "$REPLY" == "_" ]]
+	then
+		FILENAME="$SOURCEDIR/yaDSKY2/Apollo11-landing.canned"
+		if [[ -f "$FILENAME" ]]
+		then
+			PLAYBACK="--playback=$FILENAME"
+		else
+			echo "Sorry, not yet available!"
+			sleep 2
+			continue
+		fi
 	elif [[ "$CUSTOM_BARE" != "" && ( "$REPLY" == "V" || "$REPLY" == "v" ) ]]
 	then
 		cd "$SOURCEDIR/piPeripheral"
