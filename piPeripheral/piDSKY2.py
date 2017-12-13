@@ -748,30 +748,30 @@ lampStatuses = {
 	"ALT" : { "isLit" : False, "cliParameter" : "C", "spiParameters" : [ { "register":6, "mask":0x07 } ] },
 	"NO DAP" : { "isLit" : False, "cliParameter" : "F", "spiParameters" : [ { "register":7, "mask":0x70 } ] },
 	"VEL" : { "isLit" : False, "cliParameter" : "E", "spiParameters" : [ { "register":7, "mask":0x07 } ] },
-	"VERB KEY" : { "isLit" : False, "cliParameter" : "G", "spiParameters" : [ { "register":1, "mask":0x08 } ] },
-	"NOUN KEY" : { "isLit" : False, "cliParameter" : "H", "spiParameters" : [ { "register":1, "mask":0x80 } ] },
-	"+ KEY" : { "isLit" : False, "cliParameter" : "I", "spiParameters" : [ { "register":2, "mask":0x08 } ] },
-	"- KEY" : { "isLit" : False, "cliParameter" : "J", "spiParameters" : [ { "register":2, "mask":0x80 } ] },
-	"0 KEY" : { "isLit" : False, "cliParameter" : "K", "spiParameters" : [ { "register":3, "mask":0x08 } ] },
-	"7 KEY" : { "isLit" : False, "cliParameter" : "L", "spiParameters" : [ { "register":3, "mask":0x80 } ] },
-	"4 KEY" : { "isLit" : False, "cliParameter" : "M", "spiParameters" : [ { "register":4, "mask":0x08 } ] },
-	"1 KEY" : { "isLit" : False, "cliParameter" : "N", "spiParameters" : [ { "register":4, "mask":0x80 } ] },
-	"8 KEY" : { "isLit" : False, "cliParameter" : "O", "spiParameters" : [ { "register":5, "mask":0x08 } ] },
-	"5 KEY" : { "isLit" : False, "cliParameter" : "P", "spiParameters" : [ { "register":5, "mask":0x80 } ] },
-	"2 KEY" : { "isLit" : False, "cliParameter" : "Q", "spiParameters" : [ { "register":6, "mask":0x08 } ] },
-	"9 KEY" : { "isLit" : False, "cliParameter" : "R", "spiParameters" : [ { "register":6, "mask":0x80 } ] },
-	"6 KEY" : { "isLit" : False, "cliParameter" : "S", "spiParameters" : [ { "register":7, "mask":0x08 } ] },
-	"3 KEY" : { "isLit" : False, "cliParameter" : "T", "spiParameters" : [ { "register":7, "mask":0x80 } ] },
-	"CLR KEY" : { "isLit" : False, "cliParameter" : "U", "spiParameters" : [ { "register":8, "mask":0x40 } ] },
-	"PRO KEY" : { "isLit" : False, "cliParameter" : "V", "spiParameters" : [ { "register":8, "mask":0x20 } ] },
-	"KEY REL KEY" : { "isLit" : False, "cliParameter" : "W", "spiParameters" : [ { "register":8, "mask":0x10 } ] },
-	"ENTR KEY" : { "isLit" : False, "cliParameter" : "X", "spiParameters" : [ { "register":8, "mask":0x08 } ] },
-	"RSET KEY" : { "isLit" : False, "cliParameter" : "Y", "spiParameters" : [ { "register":8, "mask":0x04 } ] },
+	"VERB KEY" : { "isLit" : True, "cliParameter" : "G", "spiParameters" : [ { "register":1, "mask":0x08 } ] },
+	"NOUN KEY" : { "isLit" : True, "cliParameter" : "H", "spiParameters" : [ { "register":1, "mask":0x80 } ] },
+	"+ KEY" : { "isLit" : True, "cliParameter" : "I", "spiParameters" : [ { "register":2, "mask":0x08 } ] },
+	"- KEY" : { "isLit" : True, "cliParameter" : "J", "spiParameters" : [ { "register":2, "mask":0x80 } ] },
+	"0 KEY" : { "isLit" : True, "cliParameter" : "K", "spiParameters" : [ { "register":3, "mask":0x08 } ] },
+	"7 KEY" : { "isLit" : True, "cliParameter" : "L", "spiParameters" : [ { "register":3, "mask":0x80 } ] },
+	"4 KEY" : { "isLit" : True, "cliParameter" : "M", "spiParameters" : [ { "register":4, "mask":0x08 } ] },
+	"1 KEY" : { "isLit" : True, "cliParameter" : "N", "spiParameters" : [ { "register":4, "mask":0x80 } ] },
+	"8 KEY" : { "isLit" : True, "cliParameter" : "O", "spiParameters" : [ { "register":5, "mask":0x08 } ] },
+	"5 KEY" : { "isLit" : True, "cliParameter" : "P", "spiParameters" : [ { "register":5, "mask":0x80 } ] },
+	"2 KEY" : { "isLit" : True, "cliParameter" : "Q", "spiParameters" : [ { "register":6, "mask":0x08 } ] },
+	"9 KEY" : { "isLit" : True, "cliParameter" : "R", "spiParameters" : [ { "register":6, "mask":0x80 } ] },
+	"6 KEY" : { "isLit" : True, "cliParameter" : "S", "spiParameters" : [ { "register":7, "mask":0x08 } ] },
+	"3 KEY" : { "isLit" : True, "cliParameter" : "T", "spiParameters" : [ { "register":7, "mask":0x80 } ] },
+	"CLR KEY" : { "isLit" : True, "cliParameter" : "U", "spiParameters" : [ { "register":8, "mask":0x40 } ] },
+	"PRO KEY" : { "isLit" : True, "cliParameter" : "V", "spiParameters" : [ { "register":8, "mask":0x20 } ] },
+	"KEY REL KEY" : { "isLit" : True, "cliParameter" : "W", "spiParameters" : [ { "register":8, "mask":0x10 } ] },
+	"ENTR KEY" : { "isLit" : True, "cliParameter" : "X", "spiParameters" : [ { "register":8, "mask":0x08 } ] },
+	"RSET KEY" : { "isLit" : True, "cliParameter" : "Y", "spiParameters" : [ { "register":8, "mask":0x04 } ] },
 	"VNCSERVERUI" : { "isLit" : False, "cliParameter" : "Z", "spiParameters" : [ { "register":8, "mask":0x02 } ] },
 	"TBD1" : { "isLit" : False, "cliParameter" : "a", "spiParameters" : [ { "register":8, "mask":0x01 } ] },
 	"TBD2" : { "isLit" : False, "cliParameter" : "b", "spiParameters" : [ { "register":8, "mask":0x80 } ] }
 }
-#lampCliStringDefault = "FIJKLMNOPQRSTUVWXd"
+#lampCliStringDefault = "GHIJKLMNOPQRSTUVWXY"
 lampCliStringDefault = ""
 lastLampCliString = ""
 def updateLampStatuses(key, value):
@@ -1242,14 +1242,14 @@ def eventLoop():
 					if channel == 0o15:
 						#print("Playback keystroke event " + oct(channel) + " " + oct(value))
 						name = keyNames[value & 0o37]
-						updateLampStatusesAndLamps(name, True)
-						t = threading.Timer(0.32, updateLampStatusesAndLamps, (name, False))
+						updateLampStatusesAndLamps(name, False)
+						t = threading.Timer(0.32, updateLampStatusesAndLamps, (name, True))
 						t.start()
 					elif channel == 0o32:
 						if (value & 0o20000) != 0:
-							updateLampStatusesAndLamps("PRO KEY", False)
-						else:
 							updateLampStatusesAndLamps("PRO KEY", True)
+						else:
+							updateLampStatusesAndLamps("PRO KEY", False)
 					else:
 						outputFromAGC(channel, value)
 					currentPlaybackIndex += 1
