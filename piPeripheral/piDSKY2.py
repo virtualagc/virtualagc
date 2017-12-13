@@ -102,7 +102,10 @@
 #				so at the moment it does nothing in playback other
 #				than hook it.
 #		2017-12-13 RSB	Added the key-backlight on playback feature I 
-#				simply hooked yesterday.
+#				simply hooked yesterday.  There was a bug in 
+#				keeping track of which lamps had changed, that
+#				became apparently only in adding an 8th digit
+#				for the LED controller.
 #
 # About the design of this program ... yes, a real Python developer would 
 # objectify it and have lots and lots of individual models defining the objects.
@@ -796,13 +799,13 @@ def updateLamps():
 				parameters = lampStatuses[key]["spiParameters"]
 				for i in range(0, len(parameters)):
 					# Note that all the address fields should be 1..8.
-					ledArray[parameters[i]["register"]] |= parameters[i]["mask"]
+					ledArray[parameters[i]["register"] - 1] |= parameters[i]["mask"]
 		
 		# Write out the registers that have changed.
 		for i in range(0,8):
 			if ledArray[i] != lastLedArray[i]:
 				print("write SPI " + str(1 + i) + " <- " + hex(ledArray[i]))
-				writeSpi(i, ledArray[i])
+				writeSpi(i + 1, ledArray[i])
 				lastLedArray[i] = ledArray[i]
 	else:
 		# For shelling out to 'led-panel' program.
