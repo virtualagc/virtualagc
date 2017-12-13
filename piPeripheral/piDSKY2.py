@@ -101,6 +101,8 @@
 #				do so, nor is it wired up on the DSKY I have yet,
 #				so at the moment it does nothing in playback other
 #				than hook it.
+#		2017-12-13 RSB	Added the key-backlight on playback feature I 
+#				simply hooked yesterday.
 #
 # About the design of this program ... yes, a real Python developer would 
 # objectify it and have lots and lots of individual models defining the objects.
@@ -711,13 +713,23 @@ def vnFlashingStop():
 		displayGraphic(colPN + digitWidth, topVN, vnImage4)
 		vnFlashing = False
 
-# The following dictionary gives, for each indicator lamp:
+# The following dictionary gives, for each controllable lighting element (indicator lamps
+# and key backlights mostly):
 #	Whether or not it is currently lit.
 #	Command-line parameters for the shell function 'led-panel' to turn on that lamp.
 #	A list of registers and bit-masks (for the registers) for an LED-driver chip
 #		connected to the Pi via the SPI bus for turning that lamp.
-# Which of the two sets of parameters ends up being used is dependendent on the 
-# --pigpio command-line parameter. 
+# The hardware assumption is that there is a MAX7219 7-segment LED controller chip,
+# which is a device that controls 8 7-segment(+decimal point) displays, thus 
+# controlling 64 individual LEDs.  These are arranged as "DIGIT0" through "DIGIT1",
+# controlled by chip registers 1 through 8.  Within an individual chip register, 
+# the display segments are (from MSB to LSB)
+#	DP a b c d e f g
+# Thus to indicate which LEDs a given lighting element is associated with, we only
+# have to list the chip registers and bit masks within the register those lighting
+# elements are associated with.  Both these chip parameters and command-line parameters
+# for the external program 'led-panel' are given.  Which of the two sets of parameters 
+# ends up being used is dependendent on the --pigpio command-line parameter. 
 lampStatuses = {
 	"UPLINK ACTY" : { "isLit" : False, "cliParameter" : "3", "spiParameters" : [ { "register":1, "mask":0x70 } ] },
 	"TEMP" : { "isLit" : False, "cliParameter" : "2", "spiParameters" : [ { "register":1, "mask":0x07 } ] },
@@ -733,7 +745,28 @@ lampStatuses = {
 	"ALT" : { "isLit" : False, "cliParameter" : "C", "spiParameters" : [ { "register":6, "mask":0x07 } ] },
 	"NO DAP" : { "isLit" : False, "cliParameter" : "F", "spiParameters" : [ { "register":7, "mask":0x70 } ] },
 	"VEL" : { "isLit" : False, "cliParameter" : "E", "spiParameters" : [ { "register":7, "mask":0x07 } ] },
-	"VNCSERVERUI" : { "isLit" : False, "cliParameter" : "G", "spiParameters" : [ { "register":1, "mask":0x80 } ] }
+	"VERB KEY" : { "isLit" : False, "cliParameter" : "G", "spiParameters" : [ { "register":1, "mask":0x08 } ] },
+	"NOUN KEY" : { "isLit" : False, "cliParameter" : "H", "spiParameters" : [ { "register":1, "mask":0x80 } ] },
+	"+ KEY" : { "isLit" : False, "cliParameter" : "I", "spiParameters" : [ { "register":2, "mask":0x08 } ] },
+	"- KEY" : { "isLit" : False, "cliParameter" : "J", "spiParameters" : [ { "register":2, "mask":0x80 } ] },
+	"0 KEY" : { "isLit" : False, "cliParameter" : "K", "spiParameters" : [ { "register":3, "mask":0x08 } ] },
+	"7 KEY" : { "isLit" : False, "cliParameter" : "L", "spiParameters" : [ { "register":3, "mask":0x80 } ] },
+	"4 KEY" : { "isLit" : False, "cliParameter" : "M", "spiParameters" : [ { "register":4, "mask":0x08 } ] },
+	"1 KEY" : { "isLit" : False, "cliParameter" : "N", "spiParameters" : [ { "register":4, "mask":0x80 } ] },
+	"8 KEY" : { "isLit" : False, "cliParameter" : "O", "spiParameters" : [ { "register":5, "mask":0x08 } ] },
+	"5 KEY" : { "isLit" : False, "cliParameter" : "P", "spiParameters" : [ { "register":5, "mask":0x80 } ] },
+	"2 KEY" : { "isLit" : False, "cliParameter" : "Q", "spiParameters" : [ { "register":6, "mask":0x08 } ] },
+	"9 KEY" : { "isLit" : False, "cliParameter" : "R", "spiParameters" : [ { "register":6, "mask":0x80 } ] },
+	"6 KEY" : { "isLit" : False, "cliParameter" : "S", "spiParameters" : [ { "register":7, "mask":0x08 } ] },
+	"3 KEY" : { "isLit" : False, "cliParameter" : "T", "spiParameters" : [ { "register":7, "mask":0x80 } ] },
+	"CLR KEY" : { "isLit" : False, "cliParameter" : "U", "spiParameters" : [ { "register":8, "mask":0x40 } ] },
+	"PRO KEY" : { "isLit" : False, "cliParameter" : "V", "spiParameters" : [ { "register":8, "mask":0x20 } ] },
+	"KEY REL KEY" : { "isLit" : False, "cliParameter" : "W", "spiParameters" : [ { "register":8, "mask":0x10 } ] },
+	"ENTR KEY" : { "isLit" : False, "cliParameter" : "X", "spiParameters" : [ { "register":8, "mask":0x08 } ] },
+	"RSET KEY" : { "isLit" : False, "cliParameter" : "Y", "spiParameters" : [ { "register":8, "mask":0x04 } ] },
+	"VNCSERVERUI" : { "isLit" : False, "cliParameter" : "Z", "spiParameters" : [ { "register":8, "mask":0x02 } ] },
+	"TBD1" : { "isLit" : False, "cliParameter" : "a", "spiParameters" : [ { "register":8, "mask":0x01 } ] },
+	"TBD2" : { "isLit" : False, "cliParameter" : "b", "spiParameters" : [ { "register":8, "mask":0x80 } ] }
 }
 #lampCliStringDefault = "FIJKLMNOPQRSTUVWXd"
 lampCliStringDefault = ""
@@ -815,6 +848,11 @@ def updateLamps():
 		
 		# Everything is swell, so run 'led-panel'.
 		flushLampUpdates(lampCliString)
+def updateLampStatusesAndLamps(key, value):
+	#sys.stderr.write("BL " + key + " " + oct(value) + "\n")
+	updateLampStatuses(key, value)
+	updateLamps()
+
 updateLamps()
 
 # This checks to see if vncserverui is running, and turns on a lamp if so.
@@ -1154,7 +1192,15 @@ else:
 # user-defined function inputsForAGC (in which case a message is sent to yaAGC).
 # But this section has no target-specific code, and shouldn't need to be modified
 # unless there are bugs.
-
+keyNames = [ 
+	"none", "1 KEY", "2 KEY", "3 KEY", "4 KEY", 
+	"5 KEY", "6 KEY", "7 KEY", "8 KEY", "9 KEY", 
+	"none", "none", "none", "none", "none", 
+	"none", "0 KEY", "VERB KEY", "RSET KEY", "none", 
+	"none", "none", "none", "none", "none", 
+	"KEY REL KEY", "+ KEY", "- KEY", "ENTR KEY", "none",
+	"CLR KEY", "NOUN KEY"
+]
 def eventLoop():
 	global debugKey
 	# Buffer for a packet received from yaAGC.
@@ -1183,19 +1229,26 @@ def eventLoop():
 				desiredTime = lastPlaybackTime + playbackEvents[currentPlaybackIndex][0] / 1000.0
 				if timeNow >= desiredTime:
 					lastPlaybackTime = desiredTime
-					if playbackEvents[currentPlaybackIndex][1] in [ 0o15, 0o32 ]:
-						# These are actually AGC input channels (hence are
-						# outputs from the DSKY rather than inputs to it).
-						# They indicate keypresses.  We won't do anything with
-						# them other than possibly to flash backlights on the
-						# associated keys, but that's not implemented at the 
-						# moment.
-						print("Playback keystroke event " + oct(playbackEvents[currentPlaybackIndex][1])
-							+ " " + oct(playbackEvents[currentPlaybackIndex][2]))
-						pass
+					# Channels 015 and 032 are AGC INPUT channels (hence
+					# are outputs from the DSKY rather than inputs to it).
+					# They indicate keypresses.  We won't do anything with
+					# them other than possibly to flash backlights on the
+					# associated keys.
+					channel = playbackEvents[currentPlaybackIndex][1]
+					value = playbackEvents[currentPlaybackIndex][2]
+					if channel == 0o15:
+						#print("Playback keystroke event " + oct(channel) + " " + oct(value))
+						name = keyNames[value & 0o37]
+						updateLampStatusesAndLamps(name, True)
+						t = threading.Timer(0.32, updateLampStatusesAndLamps, (name, False))
+						t.start()
+					elif channel == 0o32:
+						if (value & 0o20000) != 0:
+							updateLampStatusesAndLamps("PRO KEY", False)
+						else:
+							updateLampStatusesAndLamps("PRO KEY", True)
 					else:
-						outputFromAGC(playbackEvents[currentPlaybackIndex][1],
-							      playbackEvents[currentPlaybackIndex][2])
+						outputFromAGC(channel, value)
 					currentPlaybackIndex += 1
 					didSomething = True
 		else:
@@ -1257,10 +1310,10 @@ def eventLoop():
 		# like a DSKY implementation) it will actually contain only 0 or 1 operations.
 		externalData = inputsForAGC()
 		if externalData == "":
+			echoOn(True)
 			timersStop()
 			screenshot()
 			root.destroy()
-			echoOn(True)
 			if spiHandle >= 0:
 				gpio.spi_close(spiHandle)
 			if gpio != "":

@@ -210,7 +210,7 @@ do
 		CFG=LM
 	elif [[ "$PLAYBACK_OPTION" != "" && ( "$REPLY" == "P" || "$REPLY" == "p" ) ]]
 	then
-		PLAYBACK="--playback=$HOME/Desktop/piDSKY2-recorded.txt"
+		PLAYBACK="--playback=$HOME/Desktop/piDSKY2-recorded.canned"
 	elif [[ "$REPLY" == "R" || "$REPLY" == "r" ]]
 	then
 		echo ""
