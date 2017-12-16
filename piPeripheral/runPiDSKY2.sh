@@ -280,8 +280,6 @@ do
 				if [[ "$REPLY" == "1" ]]
 				then
 					sudo reboot
-				else
-					continue
 				fi
 			elif [[ "$REPLY" == "2" && "$NON_NATIVE" == "" ]]
 			then
@@ -292,8 +290,6 @@ do
 				if [[ "$REPLY" == "1" ]]
 				then
 					sudo poweroff
-				else
-					continue
 				fi
 			elif [[ "$REPLY" == "3" ]]
 			then
@@ -304,8 +300,6 @@ do
 				if [[ "$REPLY" == "1" ]]
 				then
 					exit
-				else
-					continue
 				fi
 			elif [[ "$REPLY" == "4" ]]
 			then
@@ -317,8 +311,6 @@ do
 				then
 					sudo killall xterm
 					exit
-				else
-					continue
 				fi
 			elif [[ "$REPLY" == "6" ]]
 			then
@@ -382,22 +374,19 @@ do
 					fi
 					saveConfiguration
 				fi
-				continue
 			elif [[ "$REPLY" == "7" && "$NON_NATIVE" == "" ]]
 			then
 				git -C "$SOURCEDIR" pull
 				echo "Some changes may not take effect"
 				echo "until after a reboot."
 				sleep 3
-			else # $REPLY==5 or illegal
-				continue
 			fi
 		else
 			echo ""
 			echo "Permission denied."
 			sleep 2
-			continue
 		fi
+		continue
 	else # $REPLY == 5
 		CORE=Luminary099
 		CFG=LM
