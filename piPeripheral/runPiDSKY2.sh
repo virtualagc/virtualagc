@@ -15,6 +15,20 @@ cd ..
 SOURCEDIR="`pwd`"
 cd -
 
+# Get the saved configuration, if any.
+if [[ -f "$HOME/runPiDSKY2.cfg" ]]
+then
+	source "$HOME/runPiDSKY2.cfg"
+fi
+function saveConfiguration() {
+	AGC_IP=$NEW_IP
+	AGC_PORT=$NEW_PORT
+	echo "Saving external AGC: $AGC_IP:$AGC_PORT ..."
+	sudo -u $USER echo "AGC_IP=$AGC_IP" >"$HOME"/runPiDSKY2.cfg
+	sudo -u $USER echo "AGC_PORT=$AGC_PORT" >>"$HOME"/runPiDSKY2.cfg
+	sleep 2
+}
+
 # Parse the command-line arguments.
 LEDPATH="$SOURCEDIR/piPeripheral/led-panel"
 for i in "$@"
@@ -98,9 +112,11 @@ do
 	esac
 	shift
 done
-if [[ "$PIDSKY" == "" ]]
+if [[ "$PIDSKY" == "" && "$NON_NATIVE" == "" ]]
 then
-	# For use with automateV35.py.
+	# For use with automateV35.py.  On my desktop
+	# this uinput is a built-in, so it's only useful
+	# on the Pi, I think.
 	sudo modprobe uinput
 fi
 if [[ "$NON_NATIVE" == "" && "$PIGPIO" != "" ]]
@@ -110,10 +126,6 @@ then
 	# an error message (which we discard).
 	sudo pigpiod &>/dev/null
 fi
-
-killall yaAGC &>/dev/null
-killall yaDSKY2 &>/dev/null
-killall piDSKY2.py &>/dev/null
 
 # First, prepare to use the RAM disk.
 RAMDISK=/run/user/$UID
@@ -138,6 +150,8 @@ cp -a "$LEDPATH" $RAMDISK/led-panel
 
 while true
 do
+	unset YAGC_PID YADSKY2_PID STATUS_PID STATUS_BARE PLAYBACK EXTERNAL_AGC
+	
 	# Choose a mission.
 	xset r off
 	clear
@@ -155,7 +169,10 @@ do
 	echo "    9   Run Apollo 15-17 LM"
 	echo "    +   Replay Apollo 8 launch"
 	echo "    -   Replay Apollo 11 landing"
-	unset PLAYBACK
+	if [[ "$AGC_IP" != "" && "$AGC_PORT" != "" ]]
+	then
+		echo "  CLR   Connect to external AGC"
+	fi
 	if [[ "$PLAYBACK_OPTION" != "" ]]
 	then
 		echo "  PRO - Replay recording" 
@@ -165,7 +182,7 @@ do
 		echo " VERB - Run custom AGC program"
 	fi
 	echo ""
-	read -p "Choose a number: " -t 15 -n 1
+	read -p "Choose an option: " -t 15 -n 1
 	echo ""
 	if [[ "$REPLY" == "0" ]]
 	then
@@ -203,6 +220,9 @@ do
 	then
 		CORE=Luminary210
 		CFG=LM1
+	elif [[ "$AGC_IP" != "" && "$AGC_PORT" != "" && ( "$REPLY" == "c" || "$REPLY" == "C" ) ]]
+	then
+		EXTERNAL_AGC=yes
 	elif [[ "$REPLY" == "+" || "$REPLY" == "=" ]]
 	then
 		PLAYBACK="--playback=$SOURCEDIR/yaDSKY2/Apollo8-launch.canned"
@@ -236,14 +256,22 @@ do
 		then
 			clear
 			echo "Maintenance menu:"
-			echo "1 - Reboot"
-			echo "2 - Shutdown"
+			if [[ "$NON_NATIVE" == "" ]]
+			then
+				echo "1 - Reboot"
+				echo "2 - Shutdown"
+			fi
 			echo "3 - Command line"
 			echo "4 - Desktop"
 			echo "5 - Missions (default)"
+			echo "6 - Configure external AGC"
+			if [[ "$NON_NATIVE" == "" ]]
+			then
+				echo "7 - Update VirtualAGC"
+			fi
 			read -p "Choose a number: " -t 15 -n 1
 			echo ""
-			if [[ "$REPLY" == "1" ]]
+			if [[ "$REPLY" == "1" && "$NON_NATIVE" == "" ]]
 			then
 				echo "1 - Confirm reboot"
 				echo "2 - Don't reboot"
@@ -255,7 +283,7 @@ do
 				else
 					continue
 				fi
-			elif [[ "$REPLY" == "2" ]]
+			elif [[ "$REPLY" == "2" && "$NON_NATIVE" == "" ]]
 			then
 				echo "1 - Confirm shutdown"
 				echo "2 - Don't shut down"
@@ -292,7 +320,76 @@ do
 				else
 					continue
 				fi
-			else
+			elif [[ "$REPLY" == "6" ]]
+			then
+				NEW_IP=$AGC_IP
+				NEW_PORT=$AGC_PORT
+				if [[ "$AGC_IP" != "" ]]
+				then
+					echo "Current IP address of external AGC"
+					echo "is $AGC_IP.  ENTR to accept or"
+					echo "else input new address, using CLR"
+					echo "as a decimal point."
+				else
+					echo "Input an IP address for the external"
+					echo "AGC, using CLR as a decimal point."
+				fi
+				read -p "> "
+				if [[ "$REPLY" != "" ]]
+				then
+					if echo "$REPLY" | \
+					   egrep -v "^[0-9]+[cC][0-9]+[cC][0-9]+[cC][0-9]+$" \
+					   &>/dev/null
+					then
+						continue
+					fi
+					NEW_IP=`echo $REPLY | sed 's/[cC]/./g'`
+				fi
+				if [[ "$AGC_PORT" != "" ]]
+				then
+					echo "Current external AGC port is $AGC_PORT."
+					echo "ENTR to accept or else input a new port"
+					echo "number."
+				else
+					echo "Input a port number for the external AGC."
+				fi
+				read -p "> "
+				if [[ "$REPLY" != "" ]]
+				then
+					if echo "$REPLY" | \
+					   egrep -v '^[0-9]{5}$' \
+					   &>/dev/null
+					then
+						continue
+					fi
+					NEW_PORT=$REPLY
+				fi
+				if [[ "$NEW_IP" != "$AGC_IP" || "$NEW_PORT" != "$AGC_PORT" ]]
+				then
+					if ! nmap -p$NEW_PORT $NEW_IP | grep "^$NEW_PORT/tcp open" &>/dev/null
+					then
+						echo "External AGC not found at $NEW_IP:$NEW_PORT."
+						echo "1 - Save configuration anyway"
+						echo "2 - Don't save (default)"
+						read -p "? " -n 1
+						echo ""
+						if [[ "$REPLY" != "1" ]]
+						then
+							continue
+						fi
+					else
+						echo "External AGC detectedq at $NEW_IP:$NEW_PORT."
+					fi
+					saveConfiguration
+				fi
+				continue
+			elif [[ "$REPLY" == "7" && "$NON_NATIVE" == "" ]]
+			then
+				git -C "$SOURCEDIR" pull
+				echo "Some changes may not take effect"
+				echo "until after a reboot."
+				sleep 3
+			else # $REPLY==5 or illegal
 				continue
 			fi
 		else
@@ -312,8 +409,17 @@ do
 	echo ""
 	
 	optionsPiDSKY2="--port=19697 $WINDOW $SLOW $PIGPIO"
-	if [[ "$PLAYBACK" == "" ]]
+	if [[ "$PLAYBACK" != "" ]]
 	then
+		optionsPiDSKY2="$optionsPiDSKY2 $PLAYBACK"
+	elif [[ "$EXTERNAL_AGC" != "" ]]
+	then
+		optionsPiDSKY2="$optionsPiDSKY2 --host=$AGC_IP --port=$AGC_PORT"
+	else
+		killall yaAGC &>/dev/null
+		killall yaDSKY2 &>/dev/null
+		killall piDSKY2.py &>/dev/null
+
 		optionsPiDSKY2="$optionsPiDSKY2 $RECORD"
 	
 		echo "Starting AGC program $CORE ..."
@@ -360,8 +466,6 @@ do
 				read -p "Hit Enter to continue ..."
 			fi
 		fi
-	else
-		optionsPiDSKY2="$optionsPiDSKY2 $PLAYBACK"
 	fi
 	
 	if [[ "$PIDSKY" == "" ]]
