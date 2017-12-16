@@ -106,6 +106,9 @@
 #				keeping track of which lamps had changed, that
 #				became apparently only in adding an 8th digit
 #				for the LED controller.
+#		2017-12-16 RSB	Now allow AGC-connect operation to timeout
+#				(currently 10 seconds).  Useful for connection
+#				to yaAGC external to Pi.
 #
 # About the design of this program ... yes, a real Python developer would 
 # objectify it and have lots and lots of individual models defining the objects.
@@ -229,6 +232,7 @@ if args.playback:
 	except:
 		print("Problem with playback file: " + args.playback)
 		time.sleep(2)
+		echoOn(True)
 		os._exit(1)
 
 # Set up root viewport for tkinter graphics
@@ -1168,21 +1172,30 @@ s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 s.setblocking(0)
 
 def connectToAGC():
+	count = 0
+	sys.stderr.write("Connecting to AGC " + TCP_IP + ":" + str(TCP_PORT) + "\n")
 	while True:
 		try:
 			s.connect((TCP_IP, TCP_PORT))
-			print("Connected to yaAGC (" + TCP_IP + ":" + str(TCP_PORT) + ")")
+			sys.stderr.write("Connected.\n")
 			break
 		except socket.error as msg:
-			print("Could not connect to yaAGC (" + TCP_IP + ":" + str(TCP_PORT) + "), exiting: " + str(msg))
+			sys.stderr.write(str(msg) + "\n")
+			count += 1
+			if count >= 10:
+				sys.stderr.write("Too many retries ...\n")
+				time.sleep(3)
+				echoOn(True)
+				os._exit(1)
 			time.sleep(1)
 			# The following provides a clean exit from the program by simply 
 			# hitting any key.  However if get_char_keyboard_nonblock isn't
 			# defined, just delete the next 4 lines and use Ctrl-C to exit instead.
 			ch = get_char_keyboard_nonblock()
 			if ch != "":
-				print("Exiting ...")
-				sys.exit()
+				sys.sderr.write("Exiting ...")
+				echoOn(True)
+				os._exit(1)
 
 if args.playback:
 	pass
