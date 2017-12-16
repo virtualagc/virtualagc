@@ -370,7 +370,7 @@ do
 							continue
 						fi
 					else
-						echo "External AGC detectedq at $NEW_IP:$NEW_PORT."
+						echo "AGC detected at $NEW_IP:$NEW_PORT."
 					fi
 					saveConfiguration
 				fi
