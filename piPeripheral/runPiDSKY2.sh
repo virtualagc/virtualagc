@@ -360,7 +360,7 @@ do
 				then
 					if ! nmap -p$NEW_PORT $NEW_IP | grep "^$NEW_PORT/tcp open" &>/dev/null
 					then
-						echo "External AGC not found at $NEW_IP:$NEW_PORT."
+						echo "AGC not found at $NEW_IP:$NEW_PORT."
 						echo "1 - Save configuration anyway"
 						echo "2 - Don't save (default)"
 						read -p "? " -n 1
