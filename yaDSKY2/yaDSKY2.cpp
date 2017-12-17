@@ -1517,7 +1517,7 @@ TimerClass::Notify ()
 	      wxMessageBox (
 		  wxT ("Script completed, time ")
 		      + wxString::Format (
-			  "%.2f",
+			  wxT("%.2f"),
 			  MainWindow->scriptFileStopWatch.Time () / 1000.0)
 		      + wxT (" seconds."));
 	      MainWindow->restoreToPrescript ();
