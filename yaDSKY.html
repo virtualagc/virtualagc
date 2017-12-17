@@ -58,6 +58,10 @@
           <td style="vertical-align: top;">
             <h2><a name="What_is_a_DSKY_" id="What_is_a_DSKY_"></a><small><big>What
 
+
+
+
+
                   is a DSKY?</big><br>
               </small></h2>
             The DSKY is the "display/keyboard" (DSKY) used by the Apollo
@@ -70,6 +74,10 @@
             The&nbsp; DSKY may seem somewhat familiar from, for example,
             the movie <span style="font-style: italic;">Apollo 13</span>.
             In the HBO mini-series, <span style="font-style: italic;">From
+
+
+
+
 
               the Earth to the Moon</span>, the DSKY appears so
             prominently that it almost becomes another character
@@ -338,6 +346,10 @@
       hit-and-miss.&nbsp; I assume this is a normal property of the
       uplink—rather than a bug in <span style="font-weight: bold;">yaAGC</span>—but
 
+
+
+
+
       I don't really know.&nbsp;<br>
       <br>
     </div>
@@ -394,38 +406,65 @@
       href="yaTelemetry.html#Scripted_operation_for_tutorials_museum">digital
 
 
+
+
+
+
       uplink facility</a> to automate various activities.<br>
     <h3><a name="Canned_Pre-recorded_Mission_Segments"></a> Canned,
       Pre-recorded Mission Segments</h3>
-    <p>(This section is applicable to <b>yaDSKY2</b> versions
-      2017-12-11 or later.)<br>
+    <p>(This section is applicable to software versions 2017-12-11 or
+      later.)<br>
     </p>
     <p>It is possible to record (or otherwise create) a script of AGC
       i/o-channel operations controlling the DSKY, and to conveniently
-      play back such canned scripts later.&nbsp; In doing this, <b>yaDSKY2</b>
-      basically disregards any new output-channel commands originating
-      from the AGC in real time, working only from the script it is
-      playing back.&nbsp; When the script has completed or perhaps has
-      been prematurely terminated by the user, it restores the DSKY's
-      numerical displays and indicator lamps to the configuration they
-      had prior to starting the playback, and resumes listening to the
-      AGC for new commands.&nbsp; Usually the AGC commands that were
-      ignored during script-playback will have been buffered and will
-      all be processed instantly, so that the DSKY will quickly assume
-      the appearance it would have had if it had been responding to the
-      AGC's commands all along.<br>
+      play back such canned scripts later.&nbsp; At present, there are
+      two versions of obtaining such canned scripts:<br>
+    </p>
+    <ul>
+      <li>"Record" them using <b>yaDSKY2</b> (or <a
+href="https://github.com/virtualagc/virtualagc/blob/master/piPeripheral/piDSKY2.py">piDSKY2.py</a>).&nbsp;
+
+
+        The recording process is described below.<br>
+      </li>
+      <li>Obtain a log of i/o-channel activity from a NASSP simulation,
+        and convert that log to DSKY format using the program <a
+href="https://github.com/virtualagc/virtualagc/blob/master/piPeripheral/convertNasspLog.py">convertNasspLog.py</a>.&nbsp;
+
+
+        The ability for NASSP to log this data is new, and presumably
+        neither documented nor widely available, so the details are TBD.<br>
+      </li>
+    </ul>
+    <p>In playback, <b>yaDSKY2</b> basically disregards any new
+      output-channel commands originating from the AGC in real time,
+      working only from the script it is playing back.&nbsp; When the
+      script has completed or perhaps has been prematurely terminated by
+      the user, it restores the DSKY's numerical displays and indicator
+      lamps to the configuration they had prior to starting the
+      playback, and resumes listening to the AGC for new commands.&nbsp;
+      Usually the AGC commands that were ignored during script-playback
+      will have been buffered and will all be processed instantly, so
+      that the DSKY will quickly assume the appearance it would have had
+      if it had been responding to the AGC's commands all along.<br>
     </p>
     <p>At the moment I'm writing this, we have precisely one
       pre-recorded script of any significance, an Apollo 8 launch
       sequence lasting about 15 minutes.<br>
     </p>
     <p>To select a script to play back, click the <b>yaDSKY2</b>'s PROG
-      indicator lamp with the mouse.&nbsp; This opens up a file-dialog
+      indicator lamp with the mouse.&nbsp; Of course, in a real DSKY,
+      the PROG indicator and all other indicators are simply lamps, and
+      <i>not</i> buttons, and it's only the simulated DSKY in which some
+      indicators have been subverted to have button-like
+      properties.&nbsp; At any rate, doing so opens up a file-dialog
       that allows you to select the canned script to be played
       back.&nbsp; Usually these will be in the directory the file dialog
       shows by default, though if you have created canned scripts of
       your own, they will be located elsewhere and you'll have to use
-      the file dialog to navigate to them.<br>
+      the file dialog to navigate to them.&nbsp; The files have the
+      extension ".canned".<br>
     </p>
     <p>Scripts will generally execute all the way to their ends,
       displaying a pop-up information box when complete, but you can
@@ -442,26 +481,40 @@
     </blockquote>
     The differential time (usually an integer, but can be floating-point
     decimal) is simply the time in milliseconds since the preceding line
-    of the file.&nbsp; DSKYs are always controlled by AGC "output
-    channels" 010, 011, 013, and 0163 as described on <a
-      href="developer.html">our developer page</a>.<br>
+    of the file.&nbsp; (NASSP i/o-channel logs have the same format,
+    except that the initial field is the absolute simulation time, in
+    seconds.)&nbsp; DSKYs are always controlled by AGC "output channels"
+    010, 011, 013, and 0163 as described on <a href="developer.html">our
+
+
+      developer page</a>; for informational purposes, <i>input</i>
+    channels that record keystrokes (outputs from the DSKY) are
+    generally included as well.<br>
     <br>
-    It would generally be more convenient, however, to use one of the
-    following two methods to obtain these scripts:<br>
+    To record a file from <b>yaDSKY2</b> (or piDSKY2.py) for later
+    playback, you'd do this:<br>
     <ul>
-      <li>Use the Python 3 language DSKY simulation, piDSKY2.py, with
-        its --record command-line switch.&nbsp; This is found in the
-        piPeripheral directory of the source tree.&nbsp; Unfortunately,
-        yaDSKY2 itself cannot yet record scripts itself, those this
-        capability may be added in the future.</li>
-      <li>Obtain logs from NASSP of the AGC's output-channel
-        activity.&nbsp; This approach is the best in general, if not
-        necessarily convenient for most users, since these are logs of
-        "real" missions.&nbsp; These logs are not in precisely the
-        format needs, and must first be converted with the <a
-href="https://github.com/virtualagc/virtualagc/blob/master/piPeripheral/convertNasspLog.py">convertNasspLog.py</a>
-        script from the piPeripheral directory of the source tree.<br>
+      <li>Using <b>yaDSKY2</b>.&nbsp; Left-click the TRACKER indicator
+        lamp with the mouse to start recording, and then click it again
+        to finish the recording.&nbsp; On Linux, the output file,
+        "yaDSKY2-recorded.canned" goes into the home directory.&nbsp;
+        I'm not sure where it goes on Windows or Mac (perhaps the
+        Documents directory).<br>
       </li>
+      <li>Using the Python 3 language DSKY simulation, piDSKY2.py, with
+        its --record command-line switch, everything is simply recorded
+        without additional user interaction, and the recording continues
+        until piDSKY2.py is terminated.&nbsp; The output file,
+        "piDSKY2-recorded.canned" goes onto the (Raspberry Pi) Desktop.</li>
+    </ul>
+    <p>Finally, it is sometimes useful to analyze these i/o-channel
+      script in order to understand or document what they're
+      doing.&nbsp; There's a program called <a
+href="https://github.com/virtualagc/virtualagc/blob/master/piPeripheral/humanizeScript.py">humanizeScript.py</a>
+      that produces a relatively human-friendly report from a playback
+      script.<br>
+    </p>
+    <ul>
     </ul>
     <h3><a name="Special_Effects"></a>"Special Effects"</h3>
     If you should find yourself in the position to give a presentation
@@ -1379,9 +1432,14 @@ href="https://github.com/virtualagc/virtualagc/blob/master/piPeripheral/convertN
           href="https://creativecommons.org/publicdomain/zero/1.0/">Creative
 
 
+
+
+
+
           Commons No Rights Reserved License</a></span><br>
       <i><font size="-1">Last modified by <a
-            href="mailto:info@sandroid.org">Ronald Burkey</a> on 2017-12-11.<br>
+            href="mailto:info@sandroid.org">Ronald Burkey</a> on
+          2017-12-17.<br>
           <br>
           <a href="http://www.ibiblio.org"><img style="border: 0px solid
               ; width: 300px; height: 100px;" alt="Virtual AGC is hosted
