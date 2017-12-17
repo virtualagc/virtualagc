@@ -22,6 +22,7 @@
 
 
 
+
           Changes Back to the Virtual AGC Project</a><br>
       </li>
       <li><a href="#Interfacing_yaAGC_to_yaDSKY_or_Other">Interfacing
@@ -71,6 +72,7 @@
         <li><a href="#Useful_AGC_Datatypes_and_Constants">Useful
             Datatypes and Constants</a></li>
         <li><a href="#AGC_CPU-to-Peripheral_Interconnections">CPU-to-Peripheral
+
 
 
 
@@ -135,6 +137,7 @@
 
 
 
+
     of introducing new stand-alone programs for simulating other Apollo
     hardware—without changing <span style="font-weight: bold;">yaAGC</span>
     itself.&nbsp; In fact, this has already been done with such
@@ -146,6 +149,7 @@
       bold;">yaDEDA</span> and <span style="font-weight: bold;">yaDEDA2</span>,
     and "yaACA" to refer interchangeably to <span style="font-weight:
       bold;">yaACA</span> and <span style="font-weight: bold;">yaACA2</span>.&nbsp;
+
 
 
 
@@ -342,6 +346,7 @@
       style="font-family: monospace;">ChannelRoutine</span> functions as
     described below to eliminate the socket-based interface.<br>
     <h3><a name="yaAGC_vs._yaAGS_Packets" id="yaAGC_vs._yaAGS_Packets"></a>yaAGC
+
 
 
 
@@ -1272,6 +1277,7 @@
 
 
 
+
       with the DEDA</h3>
     Working with the DEDA is somewhat trickier from a developer's
     standpoint than working with the DSKY.&nbsp; The DSKY is simply a
@@ -1433,6 +1439,7 @@
     counter registers and the list of available "unprogrammed
     sequences", refer to the <a
       href="assembly_language_manual.html#CPU_Architecture_Registers">CPU
+
 
 
 
@@ -1688,6 +1695,7 @@
 
 
 
+
       Input-Channel Bitmasks</h3>
     The bit <span style="font-family: monospace;">u</span> in the <span
       style="font-family: monospace;">send/recv</span> protocol doesn't
@@ -1761,6 +1769,7 @@
 
 
 
+
       I/O Channels</h3>
     For the purpose of communicating various types of information
     to/from <span style="font-weight: bold;">yaAGC</span> which do not
@@ -1820,7 +1829,7 @@
           </td>
           <td style="vertical-align: middle;">Output from CPU<br>
           </td>
-          <td style="vertical-align: middle;">Same, but for CDUZCMD
+          <td style="vertical-align: middle;">Same, but for CDUXCMD
             (050).<br>
           </td>
         </tr>
@@ -2021,6 +2030,7 @@
 
 
 
+
       I/O Channel Specifics</h2>
     The real AGC CPU interfaced with peripheral hardware by means of
     instructions that access "i/o channels" rather than main memory.<br>
@@ -2053,6 +2063,7 @@
       it yet.)<br>
     </div>
     <h3><a name="Table_of_IO_Channels" id="Table_of_IO_Channels"></a>Table
+
 
 
 
@@ -2389,6 +2400,7 @@
       alas, it is not possible. The page of the DSKY's electrical
       schematics that defines what patterns can be displayed is <a
 href="https://archive.org/stream/acelectroniclmma00acel_0#page/n358/mode/1up">found
+
 
 
 
@@ -3106,6 +3118,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/piPeripheral/piPeriph
     </p>
     <p align="center"><tt>[ (<i>CHANNEL0</i>,<i>VALUE0</i>,<i>MASK0</i>),
 
+
         (<i>CHANNEL1</i>,<i>VALUE1</i>,<i>MASK1</i>), ...]</tt><br>
     </p>
     <p>where the "channels" are the input-channel numbers, the "values"
@@ -3142,12 +3155,14 @@ href="https://github.com/virtualagc/virtualagc/blob/master/piPeripheral/piDSKY.p
 
 
 
+
     <span style="font-weight: bold;">yaDSKY</span> is actually an
     extremely simple program to understand and to modify. Though
     targeted for a UNIX-type operating environment (such as Linux), all
     design tradeoffs have been made in favor of simplicity and
     portability, as opposed to performance or aesthetics.<br>
     <h3><a name="Interface_to_yaAGC" id="Interface_to_yaAGC"></a>Interface
+
 
 
 
@@ -3174,6 +3189,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/piPeripheral/piDSKY.p
     of the same kind can connect. For example, two or more DSKY
     simulations can be run at the same time from one AGC simulation.<br>
     <h3><a name="Software_Architecture" id="Software_Architecture"></a>Software
+
 
 
 
@@ -3393,6 +3409,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/piPeripheral/piDSKY.p
 
 
 
+
       Therefore, the operation of 16383+1 will overflow.&nbsp; In terms
       of bits, this operation results in 01 000000 000000.&nbsp; The
       mismatch between the most significant bits is an indication of
@@ -3406,6 +3423,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/piPeripheral/piDSKY.p
       scope here.</span>
     <h3><a name="AGC_CPU-to-Peripheral_Interconnections"
         id="AGC_CPU-to-Peripheral_Interconnections"></a>CPU-to-Peripheral
+
 
 
 
@@ -3435,6 +3453,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/piPeripheral/piDSKY.p
     you like!&nbsp;&nbsp; Then rebuild <span style="font-weight: bold;">yaAGC</span>
     and <span style="font-weight: bold;">yaDSKY</span> using these new
     functions.&nbsp; <span style="font-style: italic;">Voila</span>!&nbsp;
+
 
 
 
@@ -3833,6 +3852,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/piPeripheral/piDSKY.p
 
 
 
+
     It's important to use this function rather than reading the mirror
     array directly, since the function accounts for the fact that the L
     and Q registers appear in both i/o space and erasable-memory
@@ -3906,6 +3926,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/piPeripheral/piDSKY.p
     only)<br>
     <br>
     Displays (i.e., <span style="font-family: monospace;">printf</span>s)
+
 
 
 
@@ -4207,6 +4228,7 @@ href="https://github.com/virtualagc/virtualagc/blob/master/piPeripheral/piDSKY.p
 
 
 
+
         // No command-line arguments!</span><br>
       <span style="font-family: monospace;">&nbsp; ReturnValue =
         agc_engine_init (&amp;State, argv[1], NULL);</span><br>
@@ -4434,10 +4456,11 @@ href="https://github.com/virtualagc/virtualagc/blob/master/piPeripheral/piDSKY.p
 
 
 
+
           Commons No Rights Reserved License</a></span><br>
       <i><font size="-1">Last modified by <a
             href="mailto:info@sandroid.org">Ronald Burkey</a> on
-          2017-11-18.<br>
+          2017-12-17.<br>
           <br>
           <a href="http://www.ibiblio.org"><img style="border: 0px solid
               ; width: 300px; height: 100px;" alt="Virtual AGC is hosted
