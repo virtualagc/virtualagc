@@ -35,27 +35,28 @@
 #				fleshed this program out with the input
 #				channels, as well as bunch of "fictitious"
 #				i/o channels I previously ignored.
-#
-# Where the function of a bit is different for CM vs LM, they're listed
-# as
-#		CM function / LM function
-#
-# although of one of those functions is none (spare, or reserved, or whatever)
-# it's simply omitted, and so you end up with just
-#
-#		CM function
-#		     or
-#		LM function
-#
-# as if it's the same for both, even though it really isn't.
-# Similarly, a function shows up even if some missions didn't have it.
-# So in other words, what's actually listed is every possible interpretation of
-# the signal, as opposed to just the description that's appropriate to the
-# specific mission that the playback script is for.  We don't actually
-# have enough documentation to separate it out well mission by mission, even
-# if I was so inclined to do that.
+#		2017-12-18 RSB	Decided I'd better make the messages 
+#				specific to LM vs CM rather than just
+#				making the user figure it out.  The
+#				messages may still not be mission-specific
+#				enough, but I don't really have good enough
+#				documentation to separate it out by mission.
 
 import sys
+
+# Interpret the command-line argument.
+lm = False
+cm = False
+if len(sys.argv) == 2:
+	if sys.argv[1].upper() == "LM":
+		lm = True
+	elif sys.argv[1].upper() == "CM":
+		cm = True
+if not (lm or cm):
+	sys.stderr.write("USAGE:\n")
+	sys.stderr.write("\thumanizeScript.py SPACECRAFT <DSKYSCRIPT >REPORT\n")
+	sys.stderr.write("where SPACECRAFT is either lm or cm.\n")
+	sys.exit(1)
 
 # Use this dictionary to keep track of the last values from the i/o channels
 # encountered in the input log/script, and use that info to eliminate repetitions.  
@@ -67,6 +68,9 @@ lastValues = {}
 # Use *this* dictionary to keep track of how the individual fields in i/o channels
 # change, so as to simplify the displayed reports to the extent possible.
 lastFields = {}
+
+###################################################################################
+# Generic functions, used for processing various categories of channels.
 
 # Handle a single channel as a blob
 def parseAndDisplayChannelGeneral(time, channel, value, name):
@@ -144,6 +148,476 @@ def displaySign(time, channel, value, signMask, positionName):
 	lastFields[fullPositionName] = signMask
 	print("Time %.3f: Channel 0%03o = 0%05o, %i -> sign %s" % (time, channel, value, signMask, positionName))
 
+def parseAndDisplayCDUx(time, channel, value, name):
+	if (value & 0o40000) == 0:
+		sign = "+"
+	else:
+		sign = "-"
+	print("Time %.3f: Channel 0%03o = 0%05o, %s pulses: %s%i" % (time, channel, value, name, sign, value & 0o37777))
+
+def parseAndDisplayUplink(time, channel, value):
+	field1 = (value >> 10) & 0o37
+	field2 = (value >> 5) & 0o37
+	field3 = value & 0o37
+	print("Time %.3f: Channel 0%03o = 0%05o, UPLINK: %02o %02o %02o" % (time, channel, value, field1, field2, field3))
+
+def parseAndDisplayDownlink(time, channel, value, name):
+	print("Time %.3f: Channel 0%03o = 0%05o, %s: 0%05o" % (time, channel, value, name, value))
+
+def parseAndDisplayOPTx(time, channel, value, name):
+	print("Time %.3f: Channel 0%03o = 0%05o, %s pulses: %i" % (time, channel, value, name, value))
+
+def parseAndDisplayRHCx(time, channel, value, name):
+	if (value & 0o40000) != 0:
+		value2 = -(value ^ 0o77777)
+	else:
+		value2 = value
+	print("Time %.3f: Channel 0%03o = 0%05o, %s pulses: %i" % (time, channel, value, name, value2))
+
+###################################################################################
+# Tables of names of bit-fields for various channels.  Most vary somewhat according to
+# LM vs CM, some do not.
+
+# LM-specific names ----------------------------
+if lm:
+	bitNames5 = [
+		"none",
+		"RCS B4U +V/-X", 
+		"RCS A4D -V/+X", 
+		"RCS A3U +U/-X", 
+		"RCS B3D -U/+X", 
+		"RCS B2U -V/-X", 
+		"RCS A2D +V/+X", 
+		"RCS A1U -U/-X", 
+		"RCS B1D +U/+X", 
+		"none", 
+		"none",
+		"none", 
+		"none", 
+		"none", 
+		"none", 
+		"none"
+	]
+	bitNames6 = [
+		"RCS B3A +P/+Z", 
+		"RCS B4F -P/-Z", 
+		"RCS A1F +P/-Z", 
+		"RCS A2A -P/+Z", 
+		"RCS B2L +P/+Y", 
+		"RCS A3R -P/-Y", 
+		"RCS A4R +P/-Y", 
+		"RCS B1L -P/+Y", 
+		"none", 
+		"none",
+		"none", 
+		"none", 
+		"none", 
+		"none", 
+		"none"
+	]
+	bitNames11 = [
+		"none",
+		"ISS WARNING", 
+		"LIGHT COMPUTER ACTIVITY LAMP", 
+		"LIGHT UPLINK ACTIVITY LAMP", 
+		"LIGHT TEMPERATURE CAUTION LAMP", 
+		"LIGHT KEYBOARD RELEASE LAMP", 
+		"FLASH VERB AND NOUN LAMPS", 
+		"LIGHT OPERATOR ERROR LAMP", 
+		"none", 
+		"TEST CONNECTOR OUTBIT", 
+		"CAUTION RESET",
+		"none", 
+		"none", 
+		"ENGINE ON", 
+		"ENGINE OFF", 
+		"none"
+	]
+	bitNames12 = [
+		"none",
+		"ZERO RR CDU'S", 
+		"ENABLE RENDEZVOUS RADAR ERROR COUNTERS", 
+		"none", 
+		"COARSE ALIGN ENABLE OF IMU", 
+		"ZERO IMU CDU'S", 
+		"ENABLE IMU ERROR COUNTER, CDU ERROR COUNTER", 
+		"none", 
+		"DISPLAY INERTIAL DATA", 
+		"-PITCH GIMBAL TRIM (BELL MOTION) DESCENT ENGINE", 
+		"+PITCH GIMBAL TRIM (BELL MOTION) DESCENT ENGINE",
+		"-ROLL GIMBAL TRIM (BELL MOTION) DESCENT ENGINE", 
+		"+ROLL GIMBAL TRIM (BELL MOTION) DESCENT ENGINE", 
+		"LR POSITION 2 COMMAND", 
+		"ENABLE RENDEZVOUS RADAR LOCK-ON; AUTO ANGLE TRACKING", 
+		"ISS TURN ON DELAY COMPLETE"
+	]
+	bitNames13 = [
+		"none",
+		"RADAR C", 
+		"RADAR B", 
+		"RADAR A", 
+		"RADAR ACTIVITY", 
+		"INHIBIT UPLINK, ENABLE CROSSLINK", 
+		"BLOCK INPUTS TO UPLINK CELL",
+		"DOWNLINK TELEMETRY WORD ORDER CODE BIT", 
+		"RHC COUNTER ENABLE", 
+		"START RHC READ INTO COUNTERS IF RHC COUNTER ENABLE", 
+		"TEST ALARMS, TEST DSKY LIGHTS", 
+		"ENABLE STANDBY",
+		"RESET TRAP 31-A", 
+		"RESET TRAP 31-B", 
+		"RESET TRAP 32", 
+		"ENABLE T6 RUPT" 
+	]
+	bitNames14 = [
+		"none",
+		"OUTLINK ACTIVITY", 
+		"ALTITUDE RATE OR ALTITUDE SELECTOR", 
+		"ALTITUDE METER ACTIVITY", 
+		"THRUST DRIVE ACTIVITY FOR DESCENT ENGINE", 
+		"none", 
+		"GYRO ENABLE POWER FOR PULSES", 
+		"GYRO SELECT B", 
+		"GYRO SELECT A", 
+		"GYRO TORQUING COMMAND IN NEGATIVE DIRECTION", 
+		"GYRO ACTIVITY",
+		"DRIVE CDU S", 
+		"DRIVE CDU T", 
+		"DRIVE CDU Z", 
+		"DRIVE CDU Y", 
+		"DRIVE CDU X"
+	]
+	bitNames16 = [
+		"none",
+		"none", 
+		"none", 
+		"OPTICS X-AXIS MARK SIGNAL FOR ALIGN OPTICAL TSCOPE", 
+		"OPTICS Y-AXIS MARK SIGNAL FOR AOT", 
+		"OPTICS MARK REJECT SIGNAL", 
+		"DESCENT+ ; CREW DESIRED SLOWING RATE OF DESCENT",
+		"DESCENT- ; CREW DESIRED SPEEDING UP RATE OF D'CENT", 
+		"none", 
+		"none", 
+		"none", 
+		"none",
+		"none", 
+		"none", 
+		"none", 
+		"none" 
+	]
+	bitNames30 = [
+		"none",
+		"ABORT WITH DESCENT STAGE", 
+		"DESCENT STAGE ATTACHED", 
+		"ENGINE ARMED SIGNAL", 
+		"ABORT WITH ASCENT ENGINE STAGE", 
+		"AUTO THROTTLE; COMPUTER CONTROL OF DESCENT ENGINE", 
+		"DISPLAY INERTIAL DATA", 
+		"RR CDU FAIL", 
+		"none", 
+		"IMU OPERATE WITH NO MALFUNCTION", 
+		"LM COMPUTER (NOT AGS) HAS CONTROL OF LM",
+		"IMU CAGE COMMAND TO DRIVE IMU GIMBAL ANGLES TO 0", 
+		"IMU CDU FAIL (MALFUNCTION OF IMU CDU,S)", 
+		"IMU FAIL (MALFUNCTION OF IMU STABILIZATION LOOPS)", 
+		"ISS TURN ON REQUESTED", 
+		"TEMPERATURE OF STABLE MEMBER WITHIN DESIGN LIMITS"
+	]
+	bitNames31 = [
+		"none",
+		"ROTATION (BY RHC) COMMANDED IN POSITIVE PITCH DIRECTION AND ELEVATION", 
+		"ROTATION (BY RHC) COMMANDED IN NEGATIVE PITCH DIRECTION AND ELEVATION", 
+		"ROTATION (BY RHC) COMMANDED IN POSITIVE YAW DIRECTION", 
+		"ROTATION (BY RHC) COMMANDED IN NEGATIVE YAW DIRECTION", 
+		"ROTATION (BY RHC) COMMANDED IN POSITIVE ROLL DIRECTION AND AZIMUTH", 
+		"ROTATION (BY RHC) COMMANDED IN NEGATIVE ROLL DIRECTION AND AZIMUTH", 
+		"TRANSLATION IN +X DIRECTION COMMANDED BY THC", 
+		"TRANSLATION IN -X DIRECTION COMMANDED BY THC", 
+		"TRANSLATION IN +Y DIRECTION COMMANDED BY THC", 
+		"TRANSLATION IN -Y DIRECTION COMMANDED BY THC",
+		"TRANSLATION IN +Z DIRECTION COMMANDED BY THC", 
+		"TRANSLATION IN -Z DIRECTION COMMANDED BY THC", 
+		"ATTITUDE HOLD MODE ON SCS MODE CONTROL SWITCH", 
+		"AUTO STABILIZATION OF ATTITUDE ON SCS MODE SWITCH", 
+		"ATTITUDE CONTROL OUT OF DETENT (RHC NOT IN NEUTRAL)"
+	]
+	bitNames32 = [
+		"none",
+		"THRUSTERS 2 & 4 DISABLED BY CREW", 
+		"THRUSTERS 5 & 8 DISABLED BY CREW", 
+		"THRUSTERS 1 & 3 DISABLED BY CREW", 
+		"THRUSTERS 6 & 7 DISABLED BY CREW", 
+		"THRUSTERS 14 & 16 DISABLED BY CREW", 
+		"THRUSTERS 13 & 15 DISABLED BY CREW", 
+		"THRUSTERS 9 & 12 DISABLED BY CREW", 
+		"THRUSTERS 10 & 11 DISABLED BY CREW", 
+		"DESCENT ENGINE GIMBALS DISABLED BY CREW", 
+		"APPARENT DESCENT ENGINE GIMBAL FAILURE",
+		"none", 
+		"none", 
+		"none", 
+		"PROCEED KEY IS DEPRESSED", 
+		"none"
+	]
+	bitNames33 = [
+		"none",
+		"none", 
+		"RR AUTO-POWER ON", 
+		"RR RANGE LOW SCALE", 
+		"RR DATA GOOD", 
+		"LR RANGE DATA GOOD", 
+		"LR POS1", 
+		"LR POS2", 
+		"LR VEL DATA GOOD", 
+		"LR RANGE LOW SCALE", 
+		"BLOCK UPLINK INPUT",
+		"UPLINK TOO FAST", 
+		"DOWNLINK TOO FAST", 
+		"PIPA FAIL", 
+		"WARNING OF REPEATED ALARMS: RESTART,COUNTER FAIL, VOLTAGE FAIL,AND SCALAR DOUBLE", 
+		"LGC OSCILLATOR STOPPED"
+	]
+# CM-specific names ----------------------------
+elif cm:
+	bitNames5 = [
+		"none",
+		"RCS C-3/1-3 +X/+P", 
+		"RCS C-4/2-4 -X/-P", 
+		"RCS A-3/2-3 -X/+P", 
+		"RCS A-4/1-4 +X/-P", 
+		"RCS D-3/2-5 +X/+Yw", 
+		"RCS D-4/1-6 -X/-Yw", 
+		"RCS B-3/1-5 -X/+Yw", 
+		"RCS B-4/2-6 +X/-Yw", 
+		"none", 
+		"none",
+		"none", 
+		"none", 
+		"none", 
+		"none", 
+		"none"
+	]
+	bitNames6 = [
+		"RCS B-1/1-1 +Z/+R", 
+		"RCS B-2/1-2 -Z/-R", 
+		"RCS D-1/2-1 -Z/+R", 
+		"RCS D-2/2-2 +Z/-R", 
+		"RCS A-1     +Y/+R", 
+		"RCS A-2     -Y/-R", 
+		"RCS C-1     -R/+R", 
+		"RCS C-2     +Y/-R", 
+		"none", 
+		"none",
+		"none", 
+		"none", 
+		"none", 
+		"none", 
+		"none"
+	]
+	bitNames11 = [
+		"none",
+		"ISS WARNING", 
+		"LIGHT COMPUTER ACTIVITY LAMP", 
+		"LIGHT UPLINK ACTIVITY LAMP", 
+		"LIGHT TEMPERATURE CAUTION LAMP", 
+		"LIGHT KEYBOARD RELEASE LAMP", 
+		"FLASH VERB AND NOUN LAMPS", 
+		"LIGHT OPERATOR ERROR LAMP", 
+		"none", 
+		"TEST CONNECTOR OUTBIT", 
+		"CAUTION RESET",
+		"none", 
+		"none", 
+		"ENGINE ON/OFF (1-ON, 0-OFF)", 
+		"none", 
+		"none"
+	]
+	bitNames12 = [
+		"none",
+		"ZERO OPTICS CDU'S", 
+		"ENABLE OPTICS CDU ERROR COUNTERS", 
+		"none", 
+		"COARSE ALIGN ENABLE OF IMU", 
+		"ZERO IMU CDU'S", 
+		"ENABLE IMU ERROR COUNTER, CDU ERROR COUNTER", 
+		"none", 
+		"TVC ENABLE", 
+		"ENABLE SIVB TAKEOVER", 
+		"ZERO OPTICS",
+		"DISENGAGE OPTICS DAC", 
+		"none", 
+		"SIVB INJECTION SEQUENCE START", 
+		"SIVB CUTOFF", 
+		"ISS TURN ON DELAY COMPLETE"
+	]
+	bitNames13 = [
+		"none",
+		"RANGE UNIT SELECT C", 
+		"RANGE UNIT SELECT B", 
+		"RANGE UNIT SELECT A", 
+		"RANGE UNIT ACTIVITY", 
+		"none", 
+		"BLOCK INPUTS TO UPLINK CELL",
+		"DOWNLINK TELEMETRY WORD ORDER CODE BIT", 
+		"none", 
+		"none", 
+		"TEST ALARMS, TEST DSKY LIGHTS", 
+		"ENABLE STANDBY",
+		"RESET TRAP 31-A", 
+		"RESET TRAP 31-B", 
+		"RESET TRAP 32", 
+		"ENABLE T6 RUPT" 
+	]
+	bitNames14 = [
+		"none",
+		"none", 
+		"none", 
+		"none", 
+		"none", 
+		"none", 
+		"GYRO ENABLE POWER FOR PULSES", 
+		"GYRO SELECT B", 
+		"GYRO SELECT A", 
+		"GYRO TORQUING COMMAND IN NEGATIVE DIRECTION", 
+		"GYRO ACTIVITY",
+		"DRIVE CDU S", 
+		"DRIVE CDU T", 
+		"DRIVE CDU Z", 
+		"DRIVE CDU Y", 
+		"DRIVE CDU X"
+	]
+	bitNames16 = [
+		"none",
+		"none", 
+		"none", 
+		"none", 
+		"none", 
+		"none", 
+		"MARK BUTTON",
+		"MARK REJECT BUTTON", 
+		"none", 
+		"none", 
+		"none", 
+		"none",
+		"none", 
+		"none", 
+		"none", 
+		"none" 
+	]
+	bitNames30 = [
+		"none",
+		"ULLAGE THRUST PRESENT", 
+		"CM/SM SEPARATE", 
+		"SPS READY", 
+		"SIVB SEPARATE ABORT", 
+		"LIFTOFF", 
+		"GUIDANCE REFERENCE RELEASE", 
+		"OPTICS CDU FAIL", 
+		"none", 
+		"IMU OPERATE WITH NO MALFUNCTION", 
+		"S/C CONTROL OF SATURN",
+		"IMU CAGE COMMAND TO DRIVE IMU GIMBAL ANGLES TO 0", 
+		"IMU CDU FAIL (MALFUNCTION OF IMU CDU'S)", 
+		"IMU FAIL (MALFUNCTION OF IMU STABILIZATION LOOPS)", 
+		"ISS TURN ON REQUESTED", 
+		"TEMPERATURE OF STABLE MEMBER WITHIN DESIGN LIMITS"
+	]
+	bitNames31 = [
+		"none",
+		"+PITCH MANUAL ROTATION", 
+		"-PITCH MANUAL ROTATION", 
+		"+YAW MANUAL ROTATION", 
+		"-YAW MANUAL ROTATION", 
+		"+ROLL MANUAL ROTATION", 
+		"-ROLL MANUAL ROTATION", 
+		"+X TRANSLATION", 
+		"-X TRANSLATION", 
+		"+Y TRANSLATION", 
+		"-Y TRANSLATION",
+		"+Z TRANSLATION", 
+		"-Z TRANSLATION", 
+		"HOLD FUNCTION", 
+		"FREE FUNCTION", 
+		"G&N AUTOPILOT CONTROL"
+	]
+	bitNames32 = [
+		"none",
+		"+PITCH MINIMUM IMPULSE", 
+		"-PITCH MINIMUM IMPULSE", 
+		"+YAW MINIMUM IMPULSE", 
+		"-YAW MINIMUM IMPULSE", 
+		"+ROLL MINIMUM IMPULSE", 
+		"-ROLL MINIMUM IMPULSE", 
+		"none", 
+		"none", 
+		"none", 
+		"none",
+		"LM ATTACHED", 
+		"none", 
+		"none", 
+		"PROCEED (STANDBY) KEY IS DEPRESSED", 
+		"none"
+	]
+	bitNames33 = [
+		"none",
+		"none", 
+		"RANGE UNIT DATA GOOD", 
+		"none", 
+		"ZERO OPTICS", 
+		"CMC CONTROL", 
+		"none", 
+		"none", 
+		"none", 
+		"none", 
+		"BLOCK UPLINK INPUT",
+		"UPLINK TOO FAST", 
+		"DOWNLINK TOO FAST", 
+		"PIPA FAIL", 
+		"AGC WARNING", 
+		"AGC OSCILLATOR ALARM"
+	]
+# Names good for both CM and LM ----------------------------
+bitNames77 = [
+	"none",
+	"PARITY FAIL (E or F)", 
+	"PARITY FAIL (E MEMORY)", 
+	"TC TRAP", 
+	"RUPT LOCK", 
+	"NIGHTWATCHMAN", 
+	"VOLTAGE FAIL", 
+	"COUNTER FAIL", 
+	"SCALER FAIL", 
+	"SCALER DOUBLE FREQUENCY ALARM", 
+	"none",
+	"none", 
+	"none", 
+	"none", 
+	"none", 
+	"none"
+]
+bitNames163 = [
+	"none",
+	"DSKY AGC WARNING THRESHOLD", 
+	"none", 
+	"none", 
+	"none", 
+	"DSKY KEY REL", 
+	"DSKY VN FLASH", 
+	"DSKY OPR ERR", 
+	"DSKY RESTART", 
+	"DSKY STBY",
+	"DSKY EL OFF", 
+	"none", 
+	"none", 
+	"none", 
+	"none",
+	"none"
+]
+
+###################################################################################
+# Functions specific to various channels that are more complex than just the
+# generic functions presented earlier allow.
+
 def parseAndDisplayChannel10(time, channel, value):
 	relay = (value >> 11) & 0o17
 	b = (value >> 10) & 0o1
@@ -210,132 +684,7 @@ def parseAndDisplayChannel10(time, channel, value):
 	else:
 		print("Time %.3f: Channel 0%03o = 0%05o" % (time, channel, value))
 
-def parseAndDisplayChannel5(time, channel, value):
-	bitNames = [
-		"none",
-		"RCS C-3/1-3 +X/+P  / B4U +V/-X", 
-		"RCS C-4/2-4 -X/-P  / A4D -V/+X", 
-		"RCS A-3/2-3 -X/+P  / A3U +U/-X", 
-		"RCS A-4/1-4 +X/-P  / B3D -U/+X", 
-		"RCS D-3/2-5 +X/+Yw / B2U -V/-X", 
-		"RCS D-4/1-6 -X/-Yw / A2D +V/+X", 
-		"RCS B-3/1-5 -X/+Yw / A1U -U/-X", 
-		"RCS B-4/2-6 +X/-Yw / B1D +U/+X", 
-		"none", 
-		"none",
-		"none", 
-		"none", 
-		"none", 
-		"none", 
-		"none"
-	]
-	parseAndDisplayBitFields(time, channel, value, bitNames, False)
-
-def parseAndDisplayChannel6(time, channel, value):
-	bitNames = [
-		"RCS B-1/1-1 +Z/+R / B3A +P/+Z", 
-		"RCS B-2/1-2 -Z/-R / B4F -P/-Z", 
-		"RCS D-1/2-1 -Z/+R / A1F +P/-Z", 
-		"RCS D-2/2-2 +Z/-R / A2A -P/+Z", 
-		"RCS A-1     +Y/+R / B2L +P/+Y", 
-		"RCS A-2     -Y/-R / A3R -P/-Y", 
-		"RCS C-1     -R/+R / A4R +P/-Y", 
-		"RCS C-2     +Y/-R / B1L -P/+Y", 
-		"none", 
-		"none",
-		"none", 
-		"none", 
-		"none", 
-		"none", 
-		"none"
-	]
-	parseAndDisplayBitFields(time, channel, value, bitNames, False)
-
-def parseAndDisplayChannel11(time, channel, value):
-	bitNames = [
-		"none",
-		"ISS WARNING", 
-		"LIGHT COMPUTER ACTIVITY LAMP", 
-		"LIGHT UPLINK ACTIVITY LAMP", 
-		"LIGHT TEMP CAUTION LAMP", 
-		"LIGHT KEYBOARD RELEASE LAMP", 
-		"FLASH VERB AND NOUN LAMPS", 
-		"LIGHT OPERATOR ERROR LAMP", 
-		"none", 
-		"TEST CONNECTOR OUTBIT", 
-		"CAUTION RESET",
-		"none", 
-		"none", 
-		"ENGINE ON", 
-		"ENGINE OFF", 
-		"none"
-	]
-	parseAndDisplayBitFields(time, channel, value, bitNames, False)
-
-def parseAndDisplayChannel12(time, channel, value):
-	bitNames = [
-		"none",
-		"ZERO RR CDU; CDU'S GIVE RRADAR INFORMATION FOR LM", 
-		"ENABLE CDU RADAR ERROR COUNTERS", 
-		"none", 
-		"COARSE ALIGN ENABLE OF IMU", 
-		"ZERO IMU CDU'S", 
-		"ENABLE IMU ERROR COUNTER, CDU ERROR COUNTER", 
-		"none", 
-		"TVC ENABLE / DISPLAY INERTIAL DATA", 
-		"ENABLE SIVB TAKEOVER / -PITCH GIMBAL TRIM (BELL MOTION) DESCENT ENGINE", 
-		"ZERO OPTICS / +PITCH GIMBAL TRIM (BELL MOTION) DESCENT ENGINE",
-		"DISENGAGE OPTICS DAC / -ROLL GIMBAL TRIM (BELL MOTION) DESCENT ENGINE", 
-		"+ROLL GIMBAL TRIM (BELL MOTION) DESCENT ENGINE", 
-		"SIVB INJECTION SEQUENCE START / LR POSITION 2 COMMAND", 
-		"SIVB CUTOFF / ENABLE RENDESVOUS RADAR LOCK-ON; AUTO ANGLE TRACK'G", 
-		"ISS TURN ON DELAY COMPLETE"
-	]
-	parseAndDisplayBitFields(time, channel, value, bitNames, False)
-
-def parseAndDisplayChannel13(time, channel, value):
-	bitNames = [
-		"none",
-		"RADAR C", 
-		"RADAR B", 
-		"RADAR A", 
-		"RADAR ACTIVITY", 
-		"INHIBIT UPLINK, ENABLE CROSSLINK", 
-		"BLOCK INPUTS TO UPLINK CELL",
-		"DOWNLINK TELEMETRY WORD ORDER CODE BIT", 
-		"RHC COUNTER ENABLE", 
-		"START RHC READ INTO COUNTERS IF RHC COUNTER ENABLE", 
-		"TEST ALARMS, TEST DSKY LIGHTS", 
-		"ENABLE STANDBY",
-		"RESET TRAP 31-A", 
-		"RESET TRAP 31-B", 
-		"RESET TRAP 32", 
-		"ENABLE T6 RUPT" 
-	]
-	parseAndDisplayBitFields(time, channel, value, bitNames, False)
-
-def parseAndDisplayChannel14(time, channel, value):
-	bitNames = [
-		"none",
-		"OUTLINK ACTIVITY", 
-		"ALTITUDE RATE OR ALTITUDE SELECTOR", 
-		"ALTITUDE METER ACTIVITY", 
-		"THRUST DRIVE ACTIVITY FOR DESCENT ENGINE", 
-		"none", 
-		"GYRO ENABLE POWER FOR PULSES", 
-		"GYRO SELECT B", 
-		"GYRO SELECT A", 
-		"GYRO TORQUING COMMAND IN NEGATIVE DIRECTION", 
-		"GYRO ACTIVITY",
-		"DRIVE CDU S", 
-		"DRIVE CDU T", 
-		"DRIVE CDU Z", 
-		"DRIVE CDU Y", 
-		"DRIVE CDU X"
-	]
-	parseAndDisplayBitFields(time, channel, value, bitNames, False)
-
-def parseAndDisplayChannel15(time, channel, value):
+def parseAndDisplayChannel15(time, channel, value, name):
 	# No need to check for repetitions on this one, I think.
 	keyNames = [ 
 		"none", "1", "2", "3", "4", 
@@ -346,170 +695,15 @@ def parseAndDisplayChannel15(time, channel, value):
 		"KEY REL", "+", "-", "ENTR", "none",
 		"CLR", "NOUN"
 	]
-	print("Time %.3f: Channel 0%03o = 0%05o, Main DSKY %s key pressed" % (time, channel, value, keyNames[value & 0o37]))
+	print("Time %.3f: Channel 0%03o = 0%05o, %s DSKY %s key pressed" % (time, channel, value, name, keyNames[value & 0o37]))
 
 def parseAndDisplayChannel16(time, channel, value):
-	bitNames = [
-		"none",
-		"none", 
-		"none", 
-		"OPTICS X-AXIS MARK SIGNAL FOR ALIGN OPTICAL TSCOPE", 
-		"OPTICS Y-AXIS MARK SIGNAL FOR AOT", 
-		"OPTICS MARK REJECT SIGNAL", 
-		"MARK BUTTON / DESCENT+ ; CREW DESIRED SLOWING RATE OF DESCENT",
-		"MARK REJECT BUTTON / DESCENT- ; CREW DESIRED SPEEDING UP RATE OF D'CENT", 
-		"none", 
-		"none", 
-		"none", 
-		"none",
-		"none", 
-		"none", 
-		"none", 
-		"none" 
-	]
-	parseAndDisplayBitFields(time, channel, value, bitNames, False)
-	keyNames = [ 
-		"none", "1", "2", "3", "4", 
-		"5", "6", "7", "8", "9", 
-		"none", "none", "none", "none", "none", 
-		"none", "0", "VERB", "RSET", "none", 
-		"none", "none", "none", "none", "none", 
-		"KEY REL", "+", "-", "ENTR", "none",
-		"CLR", "NOUN"
-	]
-	print("Time %.3f: Channel 0%03o = 0%05o, Nav DSKY %s key pressed" % (time, channel, value, keyNames[value & 0o37]))
-
-
-def parseAndDisplayChannel30(time, channel, value):
-	bitNames = [
-		"none",
-		"ULLAGE THRUST PRESENT / ABORT WITH DESCENT STAGE", 
-		"CM/SM SEPARATE / DESCENT STAGE ATTACHED", 
-		"SPS READY / ENGINE ARMED SIGNAL", 
-		"SIVB SEPARATE ABORT /ABORT WITH ASCENT ENGINE STAGE", 
-		"LIFTOFF / AUTO THROTTLE; COMPUTER CONTROL OF DESCENT ENGINE", 
-		"GUIDANCE REFERENCE RELEASE / DISPLAY INERTIAL DATA", 
-		"OPTICS CDU FAIL / RR CDU FAIL", 
-		"none", 
-		"IMU OPERATE WITH NO MALFUNCTION", 
-		"S/C CONTROL OF SATURN / LM COMPUTER (NOT AGS) HAS CONTROL OF LM",
-		"IMU CAGE COMMAND TO DRIVE IMU GIMBAL ANGLES TO 0", 
-		"IMU CDU FAIL (MALFUNCTION OF IMU CDU,S)", 
-		"IMU FAIL (MALFUNCTION OF IMU STABILIZATION LOOPS)", 
-		"ISS TURN ON REQUESTED", 
-		"TEMPERATURE OF STABLE MEMBER WITHIN DESIGN LIMITS"
-	]
-	parseAndDisplayBitFields(time, channel, value, bitNames, True)
-
-def parseAndDisplayChannel31(time, channel, value):
-	# Note that for conciseness, I've had to modify the descriptions of these 
-	# events somewhat in relation to the ones in the AGC code comments.
-	bitNames = [
-		"none",
-		"ROTATION (BY RHC) COMMANDED IN POSITIVE PITCH DIRECTION AND ELEVATION", 
-		"ROTATION (BY RHC) COMMANDED IN NEGATIVE PITCH DIRECTION AND ELEVATION", 
-		"ROTATION (BY RHC) COMMANDED IN POSITIVE YAW DIRECTION", 
-		"ROTATION (BY RHC) COMMANDED IN NEGATIVE YAW DIRECTION", 
-		"ROTATION (BY RHC) COMMANDED IN POSITIVE ROLL DIRECTION AND AZIMUTH", 
-		"ROTATION (BY RHC) COMMANDED IN NEGATIVE ROLL DIRECTION AND AZIMUTH", 
-		"TRANSLATION IN +X DIRECTION COMMANDED BY THC", 
-		"TRANSLATION IN -X DIRECTION COMMANDED BY THC", 
-		"TRANSLATION IN +Y DIRECTION COMMANDED BY THC", 
-		"TRANSLATION IN -Y DIRECTION COMMANDED BY THC",
-		"TRANSLATION IN +Z DIRECTION COMMANDED BY THC", 
-		"TRANSLATION IN -Z DIRECTION COMMANDED BY THC", 
-		"ATTITUDE HOLD MODE ON SCS MODE CONTROL SWITCH", 
-		"FREE FUNCTION / AUTO STABILIZATION OF ATTITUDE ON SCS MODE SWITCH", 
-		"G&N AUTOPILOT CONTROL / ATTITUDE CONTROL OUT OF DETENT (RHC NOT IN NEUTRAL)"
-	]
-	parseAndDisplayBitFields(time, channel, value, bitNames, True)
-
-def parseAndDisplayChannel32(time, channel, value):
-	bitNames = [
-		"none",
-		"+PITCH MINIMUM IMPULSE / THRUSTERS 2 & 4 DISABLED BY CREW", 
-		"-PITCH MINIMUM IMPULSE / THRUSTERS 5 & 8 DISABLED BY CREW", 
-		"+YAW MINIMUM IMPULSE / THRUSTERS 1 & 3 DISABLED BY CREW", 
-		"-YAW MINIMUM IMPULSE / -YAW MINIMUM IMPULSE / THRUSTERS 6 & 7 DISABLED BY CREW", 
-		"+ROLL MINIMUM IMPULSE / THRUSTERS 14 & 16 DISABLED BY CREW", 
-		"-ROLL MINIMUM IMPULSE / THRUSTERS 13 & 15 DISABLED BY CREW", 
-		"THRUSTERS 9 & 12 DISABLED BY CREW", 
-		"THRUSTERS 10 & 11 DISABLED BY CREW", 
-		"DESCENT ENGINE GIMBALS DISABLED BY CREW", 
-		"APPARENT DESCENT ENGINE GIMBAL FAILURE",
-		"LM ATTACHED", 
-		"none", 
-		"none", 
-		"PROCEED KEY IS DEPRESSED", 
-		"none"
-	]
-	parseAndDisplayBitFields(time, channel, value, bitNames, True)
-
-def parseAndDisplayChannel33(time, channel, value):
-	bitNames = [
-		"none",
-		"none", 
-		"RANGE UNIT DATA GOOD / RR AUTO-POWER ON", 
-		"RR RANGE LOW SCALE", 
-		"ZERO OPTICS / RR DATA GOOD", 
-		"CMC CONTROL / LR RANGE DATA GOOD", 
-		"LR POS1", 
-		"LR POS2", 
-		"LR VEL DATA GOOD", 
-		"LR RANGE LOW SCALE", 
-		"BLOCK UPLINK INPUT",
-		"UPLINK TOO FAST", 
-		"DOWNLINK TOO FAST", 
-		"PIPA FAIL", 
-		"AGC WARNING / WARNING OF REPEATED ALARMS: RESTART,COUNTER FAIL, VOLTAGE FAIL,AND SCALAR DOUBLE", 
-		"AGC OSCILLATOR ALARM / LGC OSCILLATOR STOPPED"
-	]
-	parseAndDisplayBitFields(time, channel, value, bitNames, True)
-
-def parseAndDisplayChannel77(time, channel, value):
-	bitNames = [
-		"none",
-		"PARITY FAIL (E or F)", 
-		"PARITY FAIL (E MEMORY)", 
-		"TC TRAP", 
-		"RUPT LOCK", 
-		"NIGHTWATCHMAN", 
-		"VOLTAGE FAIL", 
-		"COUNTER FAIL", 
-		"SCALAR FAIL", 
-		"SCALAR DOUBLE FREQUENCY ALARM", 
-		"none",
-		"none", 
-		"none", 
-		"none", 
-		"none", 
-		"none"
-	]
-	parseAndDisplayBitFields(time, channel, value, bitNames, False)
-
-def parseAndDisplayChannel163(time, channel, value):
-	bitNames = [
-		"none",
-		"DSKY AGC WARNING THRESHOLD", 
-		"none", 
-		"none", 
-		"none", 
-		"DSKY KEY REL", 
-		"DSKY VN FLASH", 
-		"DSKY OPR ERR", 
-		"DSKY RESTART", 
-		"DSKY STBY",
-		"DSKY EL OFF", 
-		"none", 
-		"none", 
-		"none", 
-		"none",
-		"none"
-	]
-	parseAndDisplayBitFields(time, channel, value, bitNames, True)
+	parseAndDisplayBitFields(time, channel, value, bitNames16, False)
+	if cm:
+		parseAndDisplayChannel15(time, channel, value, "Nav")
 
 def parseAndDisplayChannel177(time, channel, value):
-	bitNames = [
+	bitNames177 = [
 		"none",
 		"none", 
 		"none", 
@@ -527,70 +721,46 @@ def parseAndDisplayChannel177(time, channel, value):
 		"GYRO SELECT A", 
 		"GYRO TORQUING COMMAND IN NEGATIVE DIRECTION", 
 	]
-	parseAndDisplayBitFields(time, channel, value, bitNames, True)
+	parseAndDisplayBitFields(time, channel, value, bitNames177, True)
 	print("Time %.3f: Channel 0%03o = 0%05o, IMU fine alignment gyro pulses: %i" % (time, channel, value, value & 0o3777))
 
-def parseAndDisplayCDUx(time, channel, value, name):
-	if (value & 0o40000) == 0:
-		sign = "+"
-	else:
-		sign = "-"
-	print("Time %.3f: Channel 0%03o = 0%05o, %s pulses: %s%i" % (time, channel, value, name, sign, value & 0o37777))
+###################################################################################
+# Entry point for interpreting the various channels and farming out the
+# processing to the appropriate generic or channel-specific functions.
 
-def parseAndDisplayUplink(time, channel, value):
-	field1 = (value >> 10) & 0o37
-	field2 = (value >> 5) & 0o37
-	field3 = value & 0o37
-	print("Time %.3f: Channel 0%03o = 0%05o, UPLINK: %02o %02o %02o" % (time, channel, value, field1, field2, field3))
-
-def parseAndDisplayDownlink(time, channel, value, name):
-	print("Time %.3f: Channel 0%03o = 0%05o, %s: 0%05o" % (time, channel, value, name, value))
-
-def parseAndDisplayOPTx(time, channel, value, name):
-	print("Time %.3f: Channel 0%03o = 0%05o, %s pulses: %i" % (time, channel, value, name, value))
-
-def parseAndDisplayRHCx(time, channel, value, name):
-	if (value & 0o40000) != 0:
-		value2 = -(value ^ 0o77777)
-	else:
-		value2 = value
-	print("Time %.3f: Channel 0%03o = 0%05o, %s pulses: %i" % (time, channel, value, name, value2))
-
-# Entry point for the various parseAndDisplayChannelXX() functions specific
-# to particular i/o channels.
 def parseAndDisplayChannel(time, channel, value):
 	if channel == 0o5:
-		parseAndDisplayChannel5(time, channel, value)
+		parseAndDisplayBitFields(time, channel, value, bitNames5, False)
 	elif channel == 0o6:
-		parseAndDisplayChannel6(time, channel, value)
+		parseAndDisplayBitFields(time, channel, value, bitNames6, False)
 	elif channel == 0o10:
 		parseAndDisplayChannel10(time, channel, value)
 	elif channel == 0o11:
-		parseAndDisplayChannel11(time, channel, value)
+		parseAndDisplayBitFields(time, channel, value, bitNames11, False)
 	elif channel == 0o12:
-		parseAndDisplayChannel12(time, channel, value)
+		parseAndDisplayBitFields(time, channel, value, bitNames12, False)
 	elif channel == 0o13:
-		parseAndDisplayChannel13(time, channel, value)
+		parseAndDisplayBitFields(time, channel, value, bitNames13, False)
 	elif channel == 0o14:
-		parseAndDisplayChannel14(time, channel, value)
+		parseAndDisplayBitFields(time, channel, value, bitNames14, False)
 	elif channel == 0o15:
-		parseAndDisplayChannel15(time, channel, value)
+		parseAndDisplayChannel15(time, channel, value, "Main")
 	elif channel == 0o16:
 		parseAndDisplayChannel16(time, channel, value)
 	elif channel == 0o30:
-		parseAndDisplayChannel30(time, channel, value)
+		parseAndDisplayBitFields(time, channel, value, bitNames30, True)
 	elif channel == 0o31:
-		parseAndDisplayChannel31(time, channel, value)
+		parseAndDisplayBitFields(time, channel, value, bitNames31, True)
 	elif channel == 0o32:
-		parseAndDisplayChannel32(time, channel, value)
+		parseAndDisplayBitFields(time, channel, value, bitNames32, True)
 	elif channel == 0o33:
-		parseAndDisplayChannel33(time, channel, value)
+		parseAndDisplayBitFields(time, channel, value, bitNames33, True)
 	elif channel == 0o34:
 		parseAndDisplayDownlink(time, channel, value, "DOWNLINK 1")
 	elif channel == 0o35:
 		parseAndDisplayDownlink(time, channel, value, "DOWNLINK 2")
 	elif channel == 0o77:
-		parseAndDisplayChannel77(time, channel, value)
+		parseAndDisplayBitFields(time, channel, value, bitNames77, False)
 	elif channel == 0o177:
 		parseAndDisplayChannel177(time, channel, value)
 	elif channel == 0o176:
@@ -612,11 +782,13 @@ def parseAndDisplayChannel(time, channel, value):
 	elif channel == 0o166:
 		parseAndDisplayRHCx(time, channel, value, "RHC PITCH DISPLACEMENT")
 	elif channel == 0o163:
-		parseAndDisplayChannel163(time, channel, value)
+		parseAndDisplayBitFields(time, channel, value, bitNames163, False)
 	else:
 		parseAndDisplayChannelGeneralAlways(time, channel, value, "UNCATEGORIZED")
 
-# Process contents lines of stdin.
+###################################################################################
+# Main loop, to process the contents of lines input on stdin.
+
 firstPass = True
 currentTimeSeconds = 0.0
 inputLines = (line.strip().split() for line in sys.stdin)
