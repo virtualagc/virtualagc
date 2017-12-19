@@ -167,8 +167,9 @@ do
 	echo "    7   Run Apollo 13 LM"
 	echo "    8   Run Apollo 15-17 CM"
 	echo "    9   Run Apollo 15-17 LM"
-	echo "    +   Replay Apollo 8 launch"
+	echo "    +   Replay Apollo 11 launch"
 	echo "    -   Replay Apollo 11 landing"
+	echo " NOUN   Replay Apollo 8 launch"
 	if [[ "$AGC_IP" != "" && "$AGC_PORT" != "" ]]
 	then
 		echo "  CLR   Connect to external AGC"
@@ -223,9 +224,12 @@ do
 	elif [[ "$AGC_IP" != "" && "$AGC_PORT" != "" && ( "$REPLY" == "c" || "$REPLY" == "C" ) ]]
 	then
 		EXTERNAL_AGC=yes
-	elif [[ "$REPLY" == "+" || "$REPLY" == "=" ]]
+	elif [[ "$REPLY" == "n" || "$REPLY" == "N" ]]
 	then
 		PLAYBACK="--playback=$SOURCEDIR/yaDSKY2/Apollo8-launch.canned"
+	elif [[ "$REPLY" == "+" || "$REPLY" == "=" ]]
+	then
+		PLAYBACK="--playback=$SOURCEDIR/yaDSKY2/Apollo11-launch.canned"
 	elif [[ "$REPLY" == "-" || "$REPLY" == "_" ]]
 	then
 		FILENAME="$SOURCEDIR/yaDSKY2/Apollo11-landing.canned"
