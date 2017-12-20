@@ -282,6 +282,7 @@ do
 			then
 				echo "7 - Update VirtualAGC"
 			fi
+			echo "8 - Lamp test"
 			read -p "Choose a number: " -t 15 -n 1
 			echo ""
 			if [[ "$REPLY" == "1" && "$NON_NATIVE" == "" ]]
@@ -393,6 +394,12 @@ do
 				echo "Some changes may not take effect"
 				echo "until after a reboot."
 				sleep 3
+			elif [[ "$REPLY" == "8" ]]
+			then
+				optionsPiDSKY2="--port=19697 $WINDOW $SLOW $PIGPIO --lamptest=1" 
+				"$SOURCEDIR/piPeripheral/piDSKY2.py" $optionsPiDSKY2
+				sleep 1
+				read -p "Hit Enter to continue ..."
 			fi
 		else
 			echo ""

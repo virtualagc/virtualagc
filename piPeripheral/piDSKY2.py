@@ -195,6 +195,7 @@ cli.add_argument("--slow", help="For use on really slow host systems.")
 cli.add_argument("--pigpio", help="Use PIGPIO rather than led-panel for lamp control. The value is a brightness-intensity setting, 0-15.", type=int)
 cli.add_argument("--record", help="Record all incoming i/o-channel data for later playback.")
 cli.add_argument("--playback", help="Play back recorded i/o-channel data from selected filename.")
+cli.add_argument("--lamptest", help="Perform a lamp test and then exit.")
 args = cli.parse_args()
 
 # Responsiveness settings.
@@ -1163,6 +1164,27 @@ def outputFromAGC(channel, value):
 	else:
 		print("Received from yaAGC: " + oct(value) + " -> channel " + oct(channel))
 	return
+
+###################################################################################
+# Lamp test
+
+if args.lamptest:
+	for key in lampStatuses:
+		updateLampStatuses(key, True)
+	updateLamps()
+	time.sleep(10)
+	for key in lampStatuses:
+		updateLampStatuses(key, False)
+	updateLamps()
+	echoOn(True)
+	timersStop()
+	root.destroy()
+	if spiHandle >= 0:
+		gpio.spi_close(spiHandle)
+	if gpio != "":
+		gpio.stop()
+	os.system("xset r on &")
+	os._exit(0)
 
 ###################################################################################
 # Generic initialization (TCP socket setup).  Has no target-specific code, and 
