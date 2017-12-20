@@ -809,7 +809,7 @@ def updateLamps():
 		# Write out the registers that have changed.
 		for i in range(0,8):
 			if ledArray[i] != lastLedArray[i]:
-				print("write SPI " + str(1 + i) + " <- " + hex(ledArray[i]))
+				#print("write SPI " + str(1 + i) + " <- " + hex(ledArray[i]))
 				writeSpi(i + 1, ledArray[i])
 				lastLedArray[i] = ledArray[i]
 	else:
@@ -1169,13 +1169,17 @@ def outputFromAGC(channel, value):
 # Lamp test
 
 if args.lamptest:
+	print("Turning on all lamps ...")
 	for key in lampStatuses:
 		updateLampStatuses(key, True)
 	updateLamps()
+	print("Wait for 10 seconds ...")
 	time.sleep(10)
+	print("Turning off all lamps ...")
 	for key in lampStatuses:
 		updateLampStatuses(key, False)
 	updateLamps()
+	print("Exiting lamp test ...")
 	echoOn(True)
 	timersStop()
 	root.destroy()
