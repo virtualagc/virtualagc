@@ -390,10 +390,10 @@ do
 				fi
 			elif [[ "$REPLY" == "7" && "$NON_NATIVE" == "" ]]
 			then
-				git -C "$SOURCEDIR" pull
-				echo "Some changes may not take effect"
-				echo "until after a reboot."
-				sleep 3
+				git -C "$SOURCEDIR" fetch --all
+				git -C "$SOURCEDIR" reset --hard origin/master
+				exec bash "$SOURCEDIR/piPeripheral/runPiDSKY2.sh" $@
+				exit 0
 			elif [[ "$REPLY" == "8" ]]
 			then
 				optionsPiDSKY2="--port=19697 $WINDOW $SLOW $PIGPIO --lamptest=1" 
