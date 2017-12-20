@@ -167,16 +167,11 @@ do
 	echo "    7   Run Apollo 13 LM"
 	echo "    8   Run Apollo 15-17 CM"
 	echo "    9   Run Apollo 15-17 LM"
-	echo "    +   Replay Apollo 11 launch"
 	echo "    -   Replay Apollo 11 landing"
-	echo " NOUN   Replay Apollo 8 launch"
+	echo "    +   Replay other scenarios"
 	if [[ "$AGC_IP" != "" && "$AGC_PORT" != "" ]]
 	then
 		echo "  CLR   Connect to external AGC"
-	fi
-	if [[ "$PLAYBACK_OPTION" != "" ]]
-	then
-		echo "  PRO - Replay recording" 
 	fi
 	if [[ "$CUSTOM_BARE" != "" ]]
 	then
@@ -224,12 +219,6 @@ do
 	elif [[ "$AGC_IP" != "" && "$AGC_PORT" != "" && ( "$REPLY" == "c" || "$REPLY" == "C" ) ]]
 	then
 		EXTERNAL_AGC=yes
-	elif [[ "$REPLY" == "n" || "$REPLY" == "N" ]]
-	then
-		PLAYBACK="--playback=$SOURCEDIR/yaDSKY2/Apollo8-launch.canned"
-	elif [[ "$REPLY" == "+" || "$REPLY" == "=" ]]
-	then
-		PLAYBACK="--playback=$SOURCEDIR/yaDSKY2/Apollo11-launch.canned"
 	elif [[ "$REPLY" == "-" || "$REPLY" == "_" ]]
 	then
 		FILENAME="$SOURCEDIR/yaDSKY2/Apollo11-landing.canned"
@@ -241,6 +230,45 @@ do
 			sleep 2
 			continue
 		fi
+	elif [[ "$REPLY" == "+" || "$REPLY" == "=" ]]
+	then
+		clear
+		echo "Pre-recorded scenarios:"
+		echo ""
+		echo "    0   Replay Apollo 8 Launch"
+		echo "    1   Replay Apollo 11 Launch"
+		echo "    2   Replay Apollo 11 Landing"
+		if [[ "$PLAYBACK_OPTION" != "" ]]
+		then
+			echo "  CLR   Replay custom recording"
+		fi
+		echo " ENTR   Return to mission menu"
+		echo ""
+		read -p "Choose an option: " -n 1
+		echo ""
+		if [[ "$REPLY" == "0" ]]
+		then
+			PLAYBACK="--playback=$SOURCEDIR/yaDSKY2/Apollo8-launch.canned"
+		elif [[ "$REPLY" == "1" ]]
+		then
+			PLAYBACK="--playback=$SOURCEDIR/yaDSKY2/Apollo11-launch.canned"
+		elif [[ "$REPLY" == "2" ]]
+		then
+			FILENAME="$SOURCEDIR/yaDSKY2/Apollo11-landing.canned"
+			if [[ -f "$FILENAME" ]]
+			then
+				PLAYBACK="--playback=$FILENAME"
+			else
+				echo "Sorry, not yet available!"
+				sleep 2
+				continue
+			fi
+		elif [[ "$PLAYBACK_OPTION" != "" && ( "$REPLY" == "c" || "$REPLY" == "C" ) ]]
+		then
+			PLAYBACK="--playback=$HOME/Desktop/piDSKY2-recorded.canned"
+		else
+			continue
+		fi
 	elif [[ "$CUSTOM_BARE" != "" && ( "$REPLY" == "V" || "$REPLY" == "v" ) ]]
 	then
 		cd "$SOURCEDIR/piPeripheral"
@@ -249,9 +277,6 @@ do
 		CORE=piPeripheral.agc
 		DIR=piPeripheral
 		CFG=LM
-	elif [[ "$PLAYBACK_OPTION" != "" && ( "$REPLY" == "P" || "$REPLY" == "p" ) ]]
-	then
-		PLAYBACK="--playback=$HOME/Desktop/piDSKY2-recorded.canned"
 	elif [[ "$REPLY" == "R" || "$REPLY" == "r" ]]
 	then
 		echo ""
