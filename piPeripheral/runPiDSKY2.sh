@@ -221,15 +221,7 @@ do
 		EXTERNAL_AGC=yes
 	elif [[ "$REPLY" == "-" || "$REPLY" == "_" ]]
 	then
-		FILENAME="$SOURCEDIR/yaDSKY2/Apollo11-landing.canned"
-		if [[ -f "$FILENAME" ]]
-		then
-			PLAYBACK="--playback=$FILENAME"
-		else
-			echo "Sorry, not yet available!"
-			sleep 2
-			continue
-		fi
+		PLAYBACK="--playback=$SOURCEDIR/yaDSKY2/Apollo11-landing.canned"
 	elif [[ "$REPLY" == "+" || "$REPLY" == "=" ]]
 	then
 		clear
@@ -254,15 +246,7 @@ do
 			PLAYBACK="--playback=$SOURCEDIR/yaDSKY2/Apollo11-launch.canned"
 		elif [[ "$REPLY" == "2" ]]
 		then
-			FILENAME="$SOURCEDIR/yaDSKY2/Apollo11-landing.canned"
-			if [[ -f "$FILENAME" ]]
-			then
-				PLAYBACK="--playback=$FILENAME"
-			else
-				echo "Sorry, not yet available!"
-				sleep 2
-				continue
-			fi
+			PLAYBACK="--playback=$SOURCEDIR/yaDSKY2/Apollo11-landing.canned"
 		elif [[ "$PLAYBACK_OPTION" != "" && ( "$REPLY" == "c" || "$REPLY" == "C" ) ]]
 		then
 			PLAYBACK="--playback=$HOME/Desktop/piDSKY2-recorded.canned"
