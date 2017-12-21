@@ -1361,7 +1361,7 @@ if args.manual:
 					stateOFFSET += 1
 			elif stateAREA == 7: # Lamp area
 				lampNames = [ 	"UPLINK ACTY", "TEMP", "NO ATT", "GIMBAL LOCK",
-						"STBY", "PROG", "KEY REL", "RESTART",
+						"DSKY STANDBY", "PROG", "KEY REL", "RESTART",
 						"OPR ERR", "TRACKER", "PRIO DSP","ALT",
 						"NO DAP", "VEL"  ]
 				if ch == "E" or ch == "\n":
