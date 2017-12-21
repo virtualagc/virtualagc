@@ -268,6 +268,37 @@ do
 		if [[ "$REPLY" == "19697R" || "$REPLY" == "19697r" ]]
 		then
 			clear
+			date "+%F %T"
+			echo -n "up since "
+			uptime -s
+			if [[ "$NON_NATIVE" == "" ]]
+			then
+				vcgencmd measure_temp
+				for id in core sdram_c sdram_i sdram_p
+				do 
+					echo -n "$id: "
+					vcgencmd measure_volts $id
+				done
+			fi
+			for nic in eth0 wlan0
+			do
+				echo -n "$nic: "
+				if ifconfig $nic &>/dev/null && ifconfig $nic | grep 'inet addr' &>/dev/null
+				then
+					ifconfig $nic | grep 'inet addr' | sed -e 's/ B.*//' -e 's/.*://'
+				else
+					echo "not connected"
+				fi
+			done
+			echo -n "External AGC: "
+			if [[ "$AGC_IP" == "" ]]
+			then
+				echo "not configured"
+			else
+				echo "$AGC_IP:$AGC_PORT"
+			fi
+			git -C "$SOURCEDIR" show | grep Date | sed 's/Date: */version: /'
+			echo ""
 			echo "Maintenance menu:"
 			if [[ "$NON_NATIVE" == "" ]]
 			then

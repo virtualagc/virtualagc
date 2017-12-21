@@ -84,7 +84,9 @@ if args.gps or args.imu:
 	import time
 	import pigpio
 	import os
-	import LSM9DS0
+	from LSM9DS0 import *
+	G_GAIN = 0.070 # Scaler (convert gyro readings to deg/s)
+	print("CTRL_REG1_XM = " + str(CTRL_REG1_XM))
 	# Start the PIGPIO server.  If already running, this operation is harmless
 	# and will just fall through.
 	os.system("sudo pigpiod &") 
@@ -106,8 +108,10 @@ if args.imu:
 	LA_So = LA_FS * 1.0 / 0x8000 # G per step, since an int16 is read back.
 	g = 9806.65 # 1g in cm per second per second.
 	mssPerStep = LA_So * g # meters per second per second per step.
-	accelerometerAddress = 0x1E
-	gyroscopeAddress = 0x6A
+	# Magnetometer sensitivity.  Choices are 2, 4, 8, or 12 for +/-M_FS full
+	# scale.
+	M_FS = 2
+	M_GN = M_FS * 0.04 # mgauss per step.
 	pressureAddress = 0x77
 	i2cBusNumber = 1
 	oversampling = 3
@@ -153,37 +157,44 @@ if args.imu:
 			return False
 		return toInt12(array[0], array[1])
 	# Enable accelerometer: z,y,x enabled, block update, 100Hz data rate, +/- 16G full scale.
-	ctrReg2XmValue = 0b00000000
+	ctrlReg2XmValue = 0b00000000
 	if LA_FS == 2:
-		ctrReg2XmValue |= 0b000 << 3
+		ctrlReg2XmValue |= 0b000 << 3
 	elif LA_FS == 4:
-		ctrReg2XmValue |= 0b001 << 3
+		ctrlReg2XmValue |= 0b001 << 3
 	elif LA_FS == 6:
-		ctrReg2XmValue |= 0b010 << 3
+		ctrlReg2XmValue |= 0b010 << 3
 	elif LA_FS == 8:
-		ctrReg2XmValue |= 0b011 << 3
+		ctrlReg2XmValue |= 0b011 << 3
 	elif LA_FS == 16:
-		ctrReg2XmValue |= 0b100 << 3
-	if not writeRegByteI2c(accelerometerAddress, CTRL_REG1_XM, 0b01101111) or \
-	   not writeRegByteI2c(accelerometerAddress, CTRL_REG2_XM, ctrReg2XmValue): 
+		ctrlReg2XmValue |= 0b100 << 3
+	if not writeRegByteI2c(ACC_ADDRESS, CTRL_REG1_XM, 0b01101111) or \
+	   not writeRegByteI2c(ACC_ADDRESS, CTRL_REG2_XM, ctrlReg2XmValue): 
 		sys.stderr.write("Could not initialize accelerometer sensor.\n")
 		time.sleep(5)
 		os.exit(1)
-        # Enable the magnetometer: Temp enable, M data rate = 50Hz, +/-12gauss, Continuous-conversion mode
-	if not writeRegByteI2c(accelerometerAddress, CTRL_REG5_XM, 0b11110000) or \
-	   not writeRegByteI2c(accelerometerAddress, CTRL_REG6_XM, 0b01100000) or \
-	   not writeRegByteI2c(accelerometerAddress, CTRL_REG7_XM, 0b00000000): 
+	# Enable the magnetometer: Temp enable, M data rate = 50Hz, +/-12gauss, Continuous-conversion mode
+	ctrlReg6XmValue = 0b00000000
+	if M_FS == 2:
+		ctrlReg6XmValue |= 0b00 << 5
+	elif M_FS == 4:
+		ctrlReg6XmValue |= 0b01 << 5
+	elif M_FS == 8:
+		ctrlReg6XmValue |= 0b10 << 5
+	elif M_FS == 12:
+		ctrlReg6XmValue |= 0b11 << 5
+	if not writeRegByteI2c(MAG_ADDRESS, CTRL_REG5_XM, 0b11110000) or \
+	   not writeRegByteI2c(MAG_ADDRESS, CTRL_REG6_XM, ctrlReg6XmValue) or \
+	   not writeRegByteI2c(MAG_ADDRESS, CTRL_REG7_XM, 0b00000000): 
 		sys.stderr.write("Could not initialize magnetometer sensor.\n")
 		time.sleep(5)
 		os.exit(1)
 	# Enable Gyro: Normal power mode, all axes enabled, continuous update, 2000 dps full scale
-	if not writeRegByteI2c(gyroscopeAddress, CTRL_REG1_G, 0b00001111) or \
-	   not writeRegByteI2c(gyroscopeAddress, CTRL_REG4_G, 0b00110000): 
+	if not writeRegByteI2c(GYR_ADDRESS, CTRL_REG1_G, 0b00001111) or \
+	   not writeRegByteI2c(GYR_ADDRESS, CTRL_REG4_G, 0b00110000): 
 		sys.stderr.write("Could not initialize accelerometer sensor.\n")
 		time.sleep(5)
 		os.exit(1)
-	# Enable Pressure: 
-        # 	TBD
         
         # For BMP180, get calibration data.
 	# return two bytes from data as a signed 16-bit value
@@ -210,35 +221,44 @@ if args.imu:
 	
         # A test.
 	while True:
-		acc = readXYZ(accelerometerAddress, OUT_X_L_A)
+		# Get acc, mag, gyro, and temperature from LSM9DS0.
+		acc = readXYZ(ACC_ADDRESS, OUT_X_L_A)
 		acc["x"] *= mssPerStep
 		acc["y"] *= mssPerStep
 		acc["z"] *= mssPerStep
 		acc["total"] = math.sqrt(acc["x"]*acc["x"] + acc["y"]*acc["y"] + acc["z"]*acc["z"])
-		mag = readXYZ(accelerometerAddress, OUT_X_L_M)
-		gyro = readXYZ(gyroscopeAddress, OUT_X_L_G)
-		temperature = readLH12(accelerometerAddress, OUT_TEMP_L_XM) / 8.0
+		mag = readXYZ(MAG_ADDRESS, OUT_X_L_M)
+		mag["x"] *= M_GN
+		mag["y"] *= M_GN
+		mag["z"] *= M_GN
+		gyro = readXYZ(GYR_ADDRESS, OUT_X_L_G)
+		gyro["x"] *= G_GAIN
+		gyro["y"] *= G_GAIN
+		gyro["z"] *= G_GAIN
+		temperature = readLH12(MAG_ADDRESS, OUT_TEMP_L_XM) # temperature in unspecified units
 		
 		# Get temperature and pressure from BMP180.
 		writeRegByteI2c(pressureAddress, 0xF4, 0x2E)
 		time.sleep(0.005)
 		(msb, lsb) = readBlock(pressureAddress, 0xF6, 2)
 		ut = (msb << 8) + lsb
+		writeRegByteI2c(pressureAddress, 0xF4, 0x34 + (oversampling << 6))
+		time.sleep(0.05)
+		(msb, lsb, xsb) = readBlock(pressureAddress, 0xF6, 3)
+		up = ((msb << 16) + (lsb << 8) + xsb) >> (8 - oversampling)
+		
+		# Compute calibrated BMP180 temp and pressure from uncalibrated readings.
 		x1 = ((ut - ac6) * ac5) >> 15
 		x2 = round((mc << 11) / (x1 + md))
 		b5 = x1 + x2 
-		temperature2 = ((b5 + 8) >> 4) / 10.0
-		writeRegByteI2c(pressureAddress, 0xF4, 0x34 + (oversampling << 6))
-		time.sleep(0.04)
-		(msb, lsb, xsb) = readBlock(pressureAddress, 0xF6, 3)
-		up = ((msb << 16) + (lsb << 8) + xsb) >> (8 - oversampling)
+		temperature2 = ((b5 + 8) >> 4) / 10.0 # temperature in C
 		b6 = b5 - 4000
-		b62 = b6 * b6 >> 12
+		b62 = (b6 * b6) >> 12
 		x1 = (b2 * b62) >> 11
-		x2 = ac2 * b6 >> 11
+		x2 = (ac2 * b6) >> 11
 		x3 = x1 + x2
 		b3 = (((ac1 * 4 + x3) << oversampling) + 2) >> 2
-		x1 = ac3 * b6 >> 13
+		x1 = (ac3 * b6) >> 13
 		x2 = (b1 * b62) >> 16
 		x3 = ((x1 + x2) + 2) >> 2
 		b4 = (ac4 * (x3 + 32768)) >> 15
