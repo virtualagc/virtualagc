@@ -109,6 +109,8 @@
 #		2017-12-16 RSB	Now allow AGC-connect operation to timeout
 #				(currently 10 seconds).  Useful for connection
 #				to yaAGC external to Pi.
+#		2017-12-20 RSB	Added --lamptest.
+#		2017-12-21 RSB	Added --manual.
 #
 # About the design of this program ... yes, a real Python developer would 
 # objectify it and have lots and lots of individual models defining the objects.
@@ -184,7 +186,7 @@ import psutil
 import socket
 
 homeDir = os.path.expanduser("~")
-print("Home = " + homeDir)
+#print("Home = " + homeDir)
 
 # Parse command-line arguments.
 cli = argparse.ArgumentParser()
@@ -196,7 +198,31 @@ cli.add_argument("--pigpio", help="Use PIGPIO rather than led-panel for lamp con
 cli.add_argument("--record", help="Record all incoming i/o-channel data for later playback.")
 cli.add_argument("--playback", help="Play back recorded i/o-channel data from selected filename.")
 cli.add_argument("--lamptest", help="Perform a lamp test and then exit.")
+cli.add_argument("--manual", help="Manually control the display.")
 args = cli.parse_args()
+
+if args.manual:
+	print("Instructions:")
+	print("   RSET to exit.")
+	print("   PRO to select PROG area.")
+	print("   VERB to select VERB area.")
+	print("   NOUN to select NOUN area.")
+	print("   1/2/3 to select R1/R2/R3.")
+	print("   KEY REL to select lamps.")
+	print("   CLR to toggle COMP ACTY.")
+	print("During data entry for the")
+	print("numerical areas listed above,")
+	print("use these keys:")
+	print("   +-0123456789 as usual")
+	print("   CLR for blank spaces")
+	print("   KEY REL to backspace")
+	print("   ENTR to end the entry")
+	print("For lamp data entry, use:")
+	print("   - for OFF")
+	print("   + for ON")
+	print("   KEY REL to backspace")
+	print("   ENTR to end the entry")
+	input("Hit ENTR to start ... ")
 
 # Responsiveness settings.
 if args.slow:
@@ -302,37 +328,12 @@ colD5 = colD4 + digitWidth
 displayGraphic(colDot, topDot, imageDot)
 displayGraphic(colDot, topDot + dotSpacing, imageDot)
 displayGraphic(colDot, topDot + 2 * dotSpacing, imageDot)
-displayGraphic(0, 0, imageCompActyOff)
 displayGraphic(colPN, 0, imageProgOn)
-displayGraphic(colPN, topProg, imageDigitBlank)
-displayGraphic(colPN + digitWidth, topProg, imageDigitBlank)
 displayGraphic(0, 113, imageVerbOn)
 displayGraphic(colPN, 113, imageNounOn)
-displayGraphic(0, topVN, imageDigitBlank)
-displayGraphic(digitWidth, topVN, imageDigitBlank)
-displayGraphic(colPN, topVN, imageDigitBlank)
-displayGraphic(colPN + digitWidth, topVN, imageDigitBlank)
 displayGraphic(0, 212, imageSeparatorOn)
-displayGraphic(colSign, topR1, imagePlusMinusOff)
-displayGraphic(colD1, topR1, imageDigitBlank)
-displayGraphic(colD2, topR1, imageDigitBlank)
-displayGraphic(colD3, topR1, imageDigitBlank)
-displayGraphic(colD4, topR1, imageDigitBlank)
-displayGraphic(colD5, topR1, imageDigitBlank)
 displayGraphic(0, 302, imageSeparatorOn)
-displayGraphic(colSign, topR2, imagePlusMinusOff)
-displayGraphic(colD1, topR2, imageDigitBlank)
-displayGraphic(colD2, topR2, imageDigitBlank)
-displayGraphic(colD3, topR2, imageDigitBlank)
-displayGraphic(colD4, topR2, imageDigitBlank)
-displayGraphic(colD5, topR2, imageDigitBlank)
 displayGraphic(0, 392, imageSeparatorOn)
-displayGraphic(colSign, topR3, imagePlusMinusOff)
-displayGraphic(colD1, topR3, imageDigitBlank)
-displayGraphic(colD2, topR3, imageDigitBlank)
-displayGraphic(colD3, topR3, imageDigitBlank)
-displayGraphic(colD4, topR3, imageDigitBlank)
-displayGraphic(colD5, topR3, imageDigitBlank)
 
 ###################################################################################
 # Stuff related to control of the lamp board via PIGPIO and SPI on the Pi's GPIO.
@@ -568,7 +569,7 @@ def get_char_keyboard_nonblock():
 # relevant key releases) from the graphics window, so that they can be properly
 # merged in with keystrokes from the console, without losing any of them.
 guiKey = []
-def inputsForAGC():
+def getKey():
 	global guiKey
 	if len(guiKey) == 0:
 		ch = get_char_keyboard_nonblock()
@@ -579,8 +580,9 @@ def inputsForAGC():
 		ch = '-'
 	elif ch == '=':
 		ch = '+'
-	else:
-		returnValue = parseDskyKey(ch)
+	return ch
+def inputsForAGC():
+	returnValue = parseDskyKey(getKey())
 	if len(returnValue) > 0:
         	print("Sending to yaAGC: " + oct(returnValue[0][1]) + "(mask " + oct(returnValue[0][2]) + ") -> channel " + oct(returnValue[0][0]))
 	return returnValue
@@ -861,7 +863,37 @@ def updateLampStatusesAndLamps(key, value):
 	updateLampStatuses(key, value)
 	updateLamps()
 
-updateLamps()
+def everythingOff():
+	for key in lampStatuses:
+		updateLampStatuses(key, False)
+	updateLamps()
+	displayGraphic(0, 0, imageCompActyOff)
+	displayGraphic(colPN, topProg, imageDigitBlank)
+	displayGraphic(colPN + digitWidth, topProg, imageDigitBlank)
+	displayGraphic(0, topVN, imageDigitBlank)
+	displayGraphic(digitWidth, topVN, imageDigitBlank)
+	displayGraphic(colPN, topVN, imageDigitBlank)
+	displayGraphic(colPN + digitWidth, topVN, imageDigitBlank)
+	displayGraphic(colSign, topR1, imagePlusMinusOff)
+	displayGraphic(colD1, topR1, imageDigitBlank)
+	displayGraphic(colD2, topR1, imageDigitBlank)
+	displayGraphic(colD3, topR1, imageDigitBlank)
+	displayGraphic(colD4, topR1, imageDigitBlank)
+	displayGraphic(colD5, topR1, imageDigitBlank)
+	displayGraphic(colSign, topR2, imagePlusMinusOff)
+	displayGraphic(colD1, topR2, imageDigitBlank)
+	displayGraphic(colD2, topR2, imageDigitBlank)
+	displayGraphic(colD3, topR2, imageDigitBlank)
+	displayGraphic(colD4, topR2, imageDigitBlank)
+	displayGraphic(colD5, topR2, imageDigitBlank)
+	displayGraphic(colSign, topR3, imagePlusMinusOff)
+	displayGraphic(colD1, topR3, imageDigitBlank)
+	displayGraphic(colD2, topR3, imageDigitBlank)
+	displayGraphic(colD3, topR3, imageDigitBlank)
+	displayGraphic(colD4, topR3, imageDigitBlank)
+	displayGraphic(colD5, topR3, imageDigitBlank)
+
+everythingOff()
 
 # This checks to see if vncserverui is running, and turns on a lamp if so.
 vncCheckTimer = ""
@@ -1190,6 +1222,185 @@ if args.lamptest:
 	os.system("xset r on &")
 	os._exit(0)
 
+###################################################################################
+# Direct manual control of the lamps and numerical registers.
+
+if args.manual:
+	print("Direct manual control ...")
+	everythingOff()
+	
+	def manualControl():
+		# The state variable determines how an input key is interpreted.
+		# The state consists of two parts, AREA and OFFSET, where AREA is
+		#	0	No area selected
+		#	1	PROG area
+		#	2	VERB area
+		#	3	NOUN area
+		#	4	R1 area
+		#	5	R2 area
+		#	6	R3 area
+		#	7	Lamp area
+		# (COMP ACTY has no AREA associated with it.)
+		# The OFFSET is the position within the AREA, with 0 being
+		# the leftmost.  For the lamp area, 0 is the upper left,
+		# 1 the upper right, and so on, down to 13 for the lower right.
+		stateAREA = 0
+		stateOFFSET = 0
+		compActy = False
+		while True:
+			ch = getKey()
+			if ch == "":
+				continue
+			if stateAREA == 0:
+				stateOFFSET = 0
+				if ch == 'R':
+					break;
+				elif ch == 'P':
+					stateAREA = 1
+				elif ch == 'V':
+					stateAREA = 2
+				elif ch == 'N':
+					stateAREA = 3
+				elif ch == '1':
+					stateAREA = 4
+				elif ch == '2':
+					stateAREA = 5
+				elif ch == '3':
+					stateAREA = 6
+				elif ch == 'K':
+					stateAREA = 7
+				elif ch == 'C':
+					compActy = not compActy
+					if compActy:
+						displayGraphic(0, 0, imageCompActyOn)
+					else:
+						displayGraphic(0, 0, imageCompActyOff)
+			elif stateAREA >= 1 and stateAREA <= 6: # Numerical areas
+				if stateAREA == 1:
+					row = topProg
+					col = colPN + stateOFFSET * digitWidth
+					digits = 2	
+				elif stateAREA == 2:
+					row = topVN
+					col = stateOFFSET * digitWidth
+					digits = 2	
+				elif stateAREA == 3:
+					row = topVN
+					col = colPN + stateOFFSET * digitWidth
+					digits = 2	
+				elif stateAREA == 4 or stateAREA == 5 or stateAREA == 6:
+					if stateAREA == 4:
+						row = topR1
+					elif stateAREA == 5:
+						row = topR2
+					else:
+						row = topR3
+					if stateOFFSET == 0:
+						col = colSign
+					else:
+						col = colD1 + (stateOFFSET - 1) * digitWidth
+					digits = 6
+				if ch == "K":
+					if stateOFFSET > 0:
+						stateOFFSET -= 1
+				elif ch == "E" or ch == "\n":
+					stateAREA = 0
+				elif ch == "P":
+					stateAREA = 1
+					stateOFFSET = 0
+				elif ch == "V":
+					stateAREA = 2
+					stateOFFSET = 0
+				elif ch == "N":
+					stateAREA = 3
+					stateOFFSET = 0
+				elif stateOFFSET >= digits:
+					continue
+				elif stateOFFSET == 0 and digits == 6:
+					if ch == "C":
+						displayGraphic(col, row, imagePlusMinusOff)
+					elif ch == "+":
+						displayGraphic(col, row, imagePlusOn)
+					elif ch == "-":
+						displayGraphic(col, row, imageMinusOn)
+					else:
+						continue
+					stateOFFSET += 1
+				else:
+					if ch == "C":
+						displayGraphic(col, row, imageDigitBlank)
+					elif ch == "0":
+						displayGraphic(col, row, imageDigit0)
+					elif ch == "1":
+						displayGraphic(col, row, imageDigit1)
+					elif ch == "2":
+						displayGraphic(col, row, imageDigit2)
+					elif ch == "3":
+						displayGraphic(col, row, imageDigit3)
+					elif ch == "4":
+						displayGraphic(col, row, imageDigit4)
+					elif ch == "5":
+						displayGraphic(col, row, imageDigit5)
+					elif ch == "6":
+						displayGraphic(col, row, imageDigit6)
+					elif ch == "7":
+						displayGraphic(col, row, imageDigit7)
+					elif ch == "8":
+						displayGraphic(col, row, imageDigit8)
+					elif ch == "9":
+						displayGraphic(col, row, imageDigit9)
+					else:
+						continue
+					stateOFFSET += 1
+			elif stateAREA == 7: # Lamp area
+				lampNames = [ 	"UPLINK ACTY", "TEMP", "NO ATT", "GIMBAL LOCK",
+						"STBY", "PROG", "KEY REL", "RESTART",
+						"OPR ERR", "TRACKER", "PRIO DSP","ALT",
+						"NO DAP", "VEL"  ]
+				if ch == "E" or ch == "\n":
+					stateAREA = 0
+				elif ch == "P":
+					stateAREA = 1
+					stateOFFSET = 0
+				elif ch == "V":
+					stateAREA = 2
+					stateOFFSET = 0
+				elif ch == "N":
+					stateAREA = 3
+					stateOFFSET = 0
+				elif ch == "K":
+					if stateOFFSET > 0:
+						stateOFFSET -= 1
+				elif stateOFFSET >= 14:
+					continue
+				elif ch == "0":
+					updateLampStatuses(lampNames[stateOFFSET], False)
+					updateLamps()
+					stateOFFSET += 1
+				elif ch == "1":
+					updateLampStatuses(lampNames[stateOFFSET], True)
+					updateLamps()
+					stateOFFSET += 1
+			else:
+				stateAREA = 0
+		
+		print("Exiting manual control ...")
+		everythingOff()
+		echoOn(True)
+		timersStop()
+		root.destroy()
+		if spiHandle >= 0:
+			gpio.spi_close(spiHandle)
+		if gpio != "":
+			gpio.stop()
+		os.system("xset r on &")
+		os._exit(0)
+	
+	manualThread = threading.Thread(target=manualControl)
+	manualThread.start()
+	root.mainloop()
+	os._exit(0)
+	
 ###################################################################################
 # Generic initialization (TCP socket setup).  Has no target-specific code, and 
 # shouldn't need to be modified unless there are bugs.

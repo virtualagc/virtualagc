@@ -386,18 +386,19 @@ do
 			echo "Maintenance menu:"
 			if [[ "$NON_NATIVE" == "" ]]
 			then
-				menuItem 1 "Reboot" 5
-				menuItem 2 "Shutdown" 5
+				menuItem 1 "Reboot" RSET
+				menuItem 2 "Shutdown" RSET
 			fi
-			menuItem 3 "Command line" 5
-			menuItem 4 "Desktop" 5
-			menuItem 5 "Mission menu" 5
-			menuItem 6 "Configure external AGC" 5
+			menuItem 3 "Command line" RSET
+			menuItem 4 "Desktop" RSET
+			menuItem 5 "Manual DSKY" RSET
+			menuItem 6 "Configure external AGC" RSET
 			if [[ "$NON_NATIVE" == "" ]]
 			then
-				menuItem 7 "Update VirtualAGC" 5
+				menuItem 7 "Update VirtualAGC" RSET
 			fi
-			menuItem 8 "Lamp test" 5
+			menuItem 8 "Lamp test" RSET
+			menuItem RSET "Mission menu" RSET
 			read -p "Choose a number: " -t 15 -n 1
 			echo ""
 			if [[ "$REPLY" == "1" && "$NON_NATIVE" == "" ]]
@@ -441,6 +442,10 @@ do
 					sudo killall xterm
 					exit
 				fi
+			elif [[ "$REPLY" == "5" ]]
+			then
+				optionsPiDSKY2="--port=19697 $WINDOW $SLOW $PIGPIO --manual=1" 
+				"$SOURCEDIR/piPeripheral/piDSKY2.py" $optionsPiDSKY2
 			elif [[ "$REPLY" == "6" ]]
 			then
 				NEW_IP=$AGC_IP
