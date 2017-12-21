@@ -506,8 +506,8 @@ do
 				fi
 			elif [[ "$REPLY" == "7" && "$NON_NATIVE" == "" ]]
 			then
-				git -C "$SOURCEDIR" --quiet fetch --all
-				git -C "$SOURCEDIR" --quiet reset --hard origin/master
+				git -C "$SOURCEDIR" fetch --quiet --all
+				git -C "$SOURCEDIR" reset --quiet --hard origin/master
 				read -p "Hit ENTR to continue: "
 				cd "$SOURCEDIR"/piPeripheral
 				exec bash ./runPiDSKY2.sh $ARGLIST
