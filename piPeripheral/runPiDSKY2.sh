@@ -4,6 +4,8 @@
 # and the software has been built from source,
 # and that we are in the piPeripheral subdirectory of that clone.
 
+ARGLIST="$@"
+
 # Turn off keyboard repeat, but make sure it gets restored on exit.
 function cleanup {
 	echo -e "\nRestoring keyboard repeat ..."
@@ -504,10 +506,11 @@ do
 				fi
 			elif [[ "$REPLY" == "7" && "$NON_NATIVE" == "" ]]
 			then
-				git -C "$SOURCEDIR" fetch --all
-				git -C "$SOURCEDIR" reset --hard origin/master
+				git -C "$SOURCEDIR" --quiet fetch --all
+				git -C "$SOURCEDIR" --quiet reset --hard origin/master
+				read -p "Hit ENTR to continue: "
 				cd "$SOURCEDIR"/piPeripheral
-				exec bash ./runPiDSKY2.sh $@
+				exec bash ./runPiDSKY2.sh $ARGLIST
 				exit 0
 			elif [[ "$REPLY" == "8" ]]
 			then
