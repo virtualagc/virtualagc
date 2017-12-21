@@ -315,7 +315,8 @@ do
 		if [[ "$REPLY" == "" || "$REPLY" == "$REPLAY_DEFAULT" ]]
 		then
 			REPLY=$REPLAY_DEFAULT
-		else
+		elif [[ "$REPLY" != "r" && "$REPLY" != "R" ]]
+		then
 			keyToString "$REPLY"
 			REPLAY_DEFAULT="$keyString"
 			saveConfiguration
