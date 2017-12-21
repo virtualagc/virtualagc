@@ -506,7 +506,8 @@ do
 			then
 				git -C "$SOURCEDIR" fetch --all
 				git -C "$SOURCEDIR" reset --hard origin/master
-				exec bash "$SOURCEDIR/piPeripheral/runPiDSKY2.sh" $@
+				cd "$SOURCEDIR"/piPeripheral
+				exec bash ./runPiDSKY2.sh $@
 				exit 0
 			elif [[ "$REPLY" == "8" ]]
 			then
