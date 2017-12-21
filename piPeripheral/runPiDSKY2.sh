@@ -508,6 +508,7 @@ do
 			then
 				git -C "$SOURCEDIR" fetch --quiet --all
 				git -C "$SOURCEDIR" reset --quiet --hard origin/master
+				echo "Update operation finished."
 				read -p "Hit ENTR to continue: "
 				cd "$SOURCEDIR"/piPeripheral
 				exec bash ./runPiDSKY2.sh $ARGLIST
