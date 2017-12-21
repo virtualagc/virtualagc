@@ -228,6 +228,7 @@ if args.manual:
 	print("     ENTR to end the entry")
 	print("     PROG/VERB/NOUN switch areas")
 	print("")
+	print("")
 	input("Hit ENTR to start ... ")
 
 # Responsiveness settings.
