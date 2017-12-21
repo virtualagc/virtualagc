@@ -19,14 +19,17 @@ cd -
 if [[ -f "$HOME/runPiDSKY2.cfg" ]]
 then
 	source "$HOME/runPiDSKY2.cfg"
+else
+	MISSION_DEFAULT="5"
+	REPLAY_DEFAULT="2"
+	
 fi
 function saveConfiguration() {
-	AGC_IP=$NEW_IP
-	AGC_PORT=$NEW_PORT
-	echo "Saving external AGC: $AGC_IP:$AGC_PORT ..."
-	sudo -u $USER echo "AGC_IP=$AGC_IP" >"$HOME"/runPiDSKY2.cfg
-	sudo -u $USER echo "AGC_PORT=$AGC_PORT" >>"$HOME"/runPiDSKY2.cfg
-	sleep 2
+	#echo "Saving external AGC: $AGC_IP:$AGC_PORT ..."
+	sudo -u $USER echo -e \
+		"AGC_IP=$AGC_IP\nAGC_PORT=$AGC_PORT\nMISSION_DEFAULT=$MISSION_DEFAULT\nREPLAY_DEFAULT=$REPLAY_DEFAULT" \
+		>"$HOME"/runPiDSKY2.cfg
+	#sleep 2
 }
 
 # Parse the command-line arguments.
@@ -147,38 +150,104 @@ fi
 cp -a "$SOURCEDIR/yaDSKY2"/*.{png,jpg,canned} $RAMDISK
 cp -a "$LEDPATH" $RAMDISK/led-panel
 
+function menuItem() {
+	key="$1"
+	description="$2"
+	defaultKey="$3"
+	printf " %4s   %s" $key "$description"
+	if [[ "$key" == "$defaultKey" ]]
+	then
+		echo " (default)"
+	else
+		echo ""
+	fi
+}
+keyString=""
+function keyToString() {
+	key="$1"
+	if [[ "$key" == 'v' || "$key" == 'V' ]]
+	then
+		keyString="VERB"
+		return
+	fi
+	if [[ "$key" == 'n' || "$key" == 'N' ]]
+	then
+		keyString="NOUN"
+		return
+	fi
+	if [[ "$key" == 'c' || "$key" == 'C' ]]
+	then
+		keyString="CLR"
+		return
+	fi
+	if [[ "$key" == 'p' || "$key" == 'P' ]]
+	then
+		keyString="PRO"
+		return
+	fi
+	if [[ "$key" == 'k' || "$key" == 'K' ]]
+	then
+		keyString="KEY REL"
+		return
+	fi
+	if [[ "$key" == 'r' || "$key" == 'R' ]]
+	then
+		keyString="RSET"
+		return
+	fi
+	if [[ "$key" == '=' ]]
+	then
+		keyString="+"
+		return
+	fi
+	if [[ "$key" == '_' ]]
+	then
+		keyString="-"
+		return
+	fi
+	keyString="$key"
+}
 
 while true
 do
-	unset YAGC_PID YADSKY2_PID STATUS_PID STATUS_BARE PLAYBACK EXTERNAL_AGC
+	unset DIR CORE CFG YAGC_PID YADSKY2_PID STATUS_PID STATUS_BARE PLAYBACK EXTERNAL_AGC
 	
 	# Choose a mission.
 	xset r off
 	clear
 	echo "Available missions:"
 	echo ""
-	echo "    0   Run Apollo 5 LM"
-	echo "    1   Run Apollo 8 CM"
-	echo "    2   Run Apollo 9 CM"
-	echo "    3   Run Apollo 10 LM"
-	echo "    4   Run Apollo 11 CM"
-	echo "    5   Run Apollo 11 LM (default)"
-	echo "    6   Run Apollo 12 LM"
-	echo "    7   Run Apollo 13 LM"
-	echo "    8   Run Apollo 15-17 CM"
-	echo "    9   Run Apollo 15-17 LM"
-	echo "    -   Replay Apollo 11 landing"
-	echo "    +   Replay other scenarios"
+	menuItem 0 "Run Apollo 5 LM" $MISSION_DEFAULT
+	menuItem 1 "Run Apollo 8 CM" $MISSION_DEFAULT
+	menuItem 2 "Run Apollo 9 CM" $MISSION_DEFAULT
+	menuItem 3 "Run Apollo 10 LM" $MISSION_DEFAULT
+	menuItem 4 "Run Apollo 11 CM" $MISSION_DEFAULT
+	menuItem 5 "Run Apollo 11 LM"  $MISSION_DEFAULT
+	menuItem 6 "Run Apollo 12 LM" $MISSION_DEFAULT
+	menuItem 7 "Run Apollo 13 LM" $MISSION_DEFAULT
+	menuItem 8 "Run Apollo 15-17 CM" $MISSION_DEFAULT
+	menuItem 9 "Run Apollo 15-17 LM" $MISSION_DEFAULT
+	menuItem - "Apollo 11 landing" $MISSION_DEFAULT
+	menuItem + "Other scenarios" $MISSION_DEFAULT
 	if [[ "$AGC_IP" != "" && "$AGC_PORT" != "" ]]
 	then
-		echo "  CLR   Connect to external AGC"
+		menuItem CLR "External AGC" $MISSION_DEFAULT
 	fi
 	if [[ "$CUSTOM_BARE" != "" ]]
 	then
-		echo " VERB - Run custom AGC program"
+		menuItem VERB "Custom AGC program" $MISSION_DEFAULT
 	fi
 	echo ""
 	read -p "Choose an option: " -t 15 -n 1
+	if [[ "$REPLY" == "" || "$REPLY" == "$MISSION_DEFAULT" ]]
+	then
+		REPLY=$MISSION_DEFAULT
+	elif [[ "$REPLY" != "r" && "$REPLY" != "R" ]]
+	then
+		keyToString "$REPLY"
+		MISSION_DEFAULT="$keyString"
+		saveConfiguration
+	fi
 	echo ""
 	if [[ "$REPLY" == "0" ]]
 	then
@@ -200,6 +269,10 @@ do
 	then
 		CORE=Comanche055
 		CFG=CM
+	elif [[ "$REPLY" == "5" ]]
+	then
+		CORE=Luminary099
+		CFG=LM
 	elif [[ "$REPLY" == "6" ]]
 	then
 		CORE=Luminary116
@@ -227,16 +300,24 @@ do
 		clear
 		echo "Pre-recorded scenarios:"
 		echo ""
-		echo "    0   Replay Apollo 8 Launch"
-		echo "    1   Replay Apollo 11 Launch"
-		echo "    2   Replay Apollo 11 Landing"
+		menuItem 0 "Apollo 8 Launch" $REPLAY_DEFAULT
+		menuItem 1 "Apollo 11 Launch" $REPLAY_DEFAULT
+		menuItem 2 "Apollo 11 Landing" $REPLAY_DEFAULT
 		if [[ "$PLAYBACK_OPTION" != "" ]]
 		then
-			echo "  CLR   Replay custom recording"
+			menuItem CLR "Custom recording" $REPLAY_DEFAULT
 		fi
-		echo " ENTR   Return to mission menu"
+		menuItem RSET "Mission menu" $REPLAY_DEFAULT
 		echo ""
-		read -p "Choose an option: " -n 1
+		read -p "Choose an option: " -t 15 -n 1
+		if [[ "$REPLY" == "" || "$REPLY" == "$REPLAY_DEFAULT" ]]
+		then
+			REPLY=$REPLAY_DEFAULT
+		else
+			keyToString "$REPLY"
+			REPLAY_DEFAULT="$keyString"
+			saveConfiguration
+		fi
 		echo ""
 		if [[ "$REPLY" == "0" ]]
 		then
@@ -250,7 +331,7 @@ do
 		elif [[ "$PLAYBACK_OPTION" != "" && ( "$REPLY" == "c" || "$REPLY" == "C" ) ]]
 		then
 			PLAYBACK="--playback=$HOME/Desktop/piDSKY2-recorded.canned"
-		else
+		else # RSET ... but all other unallocated keys as well.
 			continue
 		fi
 	elif [[ "$CUSTOM_BARE" != "" && ( "$REPLY" == "V" || "$REPLY" == "v" ) ]]
@@ -297,30 +378,30 @@ do
 			else
 				echo "$AGC_IP:$AGC_PORT"
 			fi
-			git -C "$SOURCEDIR" show | grep Date | sed 's/Date: */version: /'
+			git -C "$SOURCEDIR" show | grep '^Date:' | sed 's/Date: */version: /'
 			echo ""
 			echo "Maintenance menu:"
 			if [[ "$NON_NATIVE" == "" ]]
 			then
-				echo "1 - Reboot"
-				echo "2 - Shutdown"
+				menuItem 1 "Reboot" 5
+				menuItem 2 "Shutdown" 5
 			fi
-			echo "3 - Command line"
-			echo "4 - Desktop"
-			echo "5 - Missions (default)"
-			echo "6 - Configure external AGC"
+			menuItem 3 "Command line" 5
+			menuItem 4 "Desktop" 5
+			menuItem 5 "Mission menu" 5
+			menuItem 6 "Configure external AGC" 5
 			if [[ "$NON_NATIVE" == "" ]]
 			then
-				echo "7 - Update VirtualAGC"
+				menuItem 7 "Update VirtualAGC" 5
 			fi
-			echo "8 - Lamp test"
+			menuItem 8 "Lamp test" 5
 			read -p "Choose a number: " -t 15 -n 1
 			echo ""
 			if [[ "$REPLY" == "1" && "$NON_NATIVE" == "" ]]
 			then
-				echo "1 - Confirm reboot"
-				echo "2 - Don't reboot"
-				read -p "? " -n 1
+				menuItem 1 "Confirm reboot" ""
+				menuItem 2 "Don't reboot" ""
+				read -p "Choose: " -n 1
 				echo ""
 				if [[ "$REPLY" == "1" ]]
 				then
@@ -328,9 +409,9 @@ do
 				fi
 			elif [[ "$REPLY" == "2" && "$NON_NATIVE" == "" ]]
 			then
-				echo "1 - Confirm shutdown"
-				echo "2 - Don't shut down"
-				read -p "? " -n 1
+				menuItem 1 "Confirm shutdown" ""
+				menuItem 2 "Don't shutdown" ""
+				read -p "Choose: " -n 1
 				echo ""
 				if [[ "$REPLY" == "1" ]]
 				then
@@ -338,9 +419,9 @@ do
 				fi
 			elif [[ "$REPLY" == "3" ]]
 			then
-				echo "1 - Confirm exit to console"
-				echo "2 - Don't exit"
-				read -p "? " -n 1
+				menuItem 1 "Confirm exit to console" ""
+				menuItem 2 "Don't exit" ""
+				read -p "Choose: " -n 1
 				echo ""
 				if [[ "$REPLY" == "1" ]]
 				then
@@ -348,9 +429,9 @@ do
 				fi
 			elif [[ "$REPLY" == "4" ]]
 			then
-				echo "1 - Confirm exit to desktop"
-				echo "2 - Don't exit"
-				read -p "? " -n 1
+				menuItem 1 "Confirm exit to desktop" ""
+				menuItem 2 "Don't exit" ""
+				read -p "Choose: " -n 1
 				echo ""
 				if [[ "$REPLY" == "1" ]]
 				then
@@ -406,9 +487,9 @@ do
 					if ! nmap -p$NEW_PORT $NEW_IP | grep "^$NEW_PORT/tcp open" &>/dev/null
 					then
 						echo "AGC not found at $NEW_IP:$NEW_PORT."
-						echo "1 - Save configuration anyway"
-						echo "2 - Don't save (default)"
-						read -p "? " -n 1
+						menuItem 1 "Save settings anyway" 2
+						menuItem 2 "Don't save" 2
+						read -p "Choose: " -n 1
 						echo ""
 						if [[ "$REPLY" != "1" ]]
 						then
@@ -417,6 +498,8 @@ do
 					else
 						echo "AGC detected at $NEW_IP:$NEW_PORT."
 					fi
+					AGC_IP=$NEW_IP
+					AGC_PORT=$NEW_PORT
 					saveConfiguration
 				fi
 			elif [[ "$REPLY" == "7" && "$NON_NATIVE" == "" ]]
@@ -438,9 +521,8 @@ do
 			sleep 2
 		fi
 		continue
-	else # $REPLY == 5
-		CORE=Luminary099
-		CFG=LM
+	else
+		continue
 	fi
 	if [[ "$DIR" == "" ]]
 	then
