@@ -65,6 +65,9 @@ do
 		--led-panel=*)
 			LEDPATH="`echo $i | sed 's/[^=]*=//'`"
 			;;
+		--language=*)
+			export LANGUAGE="`echo $i | sed 's/[^=]*=//'`"
+			;;
 		--slow)
 			SLOW="--slow=1"
 			;;
@@ -499,7 +502,7 @@ do
 					mkdir -p $HOME/locale/$lan/LC_MESSAGES
 					msgfmt -o $HOME/locale/$lan/LC_MESSAGES/runPiDSKY2.sh.mo $po
 				done
-				cd -
+				cd - &>/dev/null
 				echo $"Update operation finished""."
 				read -p $"Hit ENTR to continue"": "
 				cd "$SOURCEDIR"/piPeripheral
