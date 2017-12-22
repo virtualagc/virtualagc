@@ -1,0 +1,226 @@
+# This is the first set of translations for the runPiDSKY2.sh program
+# that I'm producing, other than the English "translation", 
+# and I'm doing it mainly as a proof of concept.  Individual
+# Italian translations simply came from Google Translate, and are
+# undoubtedly merda.  (See what I did there?)  In short, the translations
+# need to be fixed before the file is used for anything.
+
+# In general, though, in producing one of these files for other languages,
+# such as es.po for Spanish, de.po for German, fr.po for French, etc.,
+# all of the msgid strings need to be left exactly as-is, but the msgstr
+# strings need to be replaced with the proper translations.  Most of the
+# msgstr's are just direct translations of the associated msgid's.  However,
+# in some cases, such as msgid "MenuText", this is just shorthand for a very
+# long message that does not appear in this file in English.  In those cases,
+# you can refer to the en.po file to see what the full string is in English.
+# In a few cases, too, note that the string contain the %s pattern, which
+# is there to indicate a string replacement at runtime, and no %s should be
+# removed or modified.
+
+# After a .po file is ready, it needs to be processed into a .mo file and 
+# stored in the appropriate place, as so:
+#
+#	for LANGUAGE in en it
+#	do
+#		mkdir -p $HOME/locale/$LANGUAGE/LC_MESSAGES
+#		msgfmt -o $HOME/locale/$LANGUAGE/LC_MESSAGES/runPiDSKY2.sh.mo $LANGUAGE.po
+#	done
+#
+# Thus this is likely something that a virtualagc software update on a Pi
+# should do automatically.
+
+msgid "Restoring keyboard repeat ..."
+msgstr "Ripristino ripetizione della tastiera ..."
+
+msgid "MenuText"
+msgstr ""
+"Uso:\n"
+"  cd piPeripheral\n"
+"  ./runPiDSKY2.sh [OPZIONI]\n"
+"Le opzioni consentite sono:\n"
+"  --window                Visualizza i registri DSKY come una finestra\n"
+"                          272x480 piuttosto che un schermo intero.\n"
+"  --yaDSKY2               Esegui yaDSKY2 oltre a (in parallelo con) il\n"
+"                          display del registro DSKY. Molto utile se viene\n"
+"                          utilizzato anche --window.\n"
+"  --image-dir=PERCORSO    Specifica la directory per la grafica dei widget\n"
+"                          alternativi. L'impostazione predefinita è \n"
+"                          semplicemente la sottodirectory piDSKY2-images\n"
+"                          della directory corrente.\n"
+"  --led-panel=PERCORSO    Specificare un percorso per il programma 'led-panel'.\n"
+"                          Il valore predefinito è semplicemente 'led-panel'\n"
+"                          (nella directory corrente).\n"
+"  --debug                 Mostra messaggi extra utili nel debug di piDSKY2.\n"
+"  --agc-debug             Mostra messaggi extra utili nel debug di yaAGC.\n"
+"  --monitor               Monitora il carico, la temperatura, l'orologio\n"
+"                          della CPU.\n"
+"  --non-native            Funzionando su un computer non-Pi.\n"  
+"  --pigpio=N              Utilizzare l'interfaccia Pigpio per controllare\n"
+"                          le lampade. Altrimenti, sborsare verso il 'led-panel'\n"
+"                          per controllare le lampade. Non utile con --non-native,\n"
+"                          poiché pigpio è una libreria Pi nativa. Il valore del\n"
+"                          parametro, N, è un'intensità della luminosità, che\n"
+"                          varia da 0 (il minimo) a 15 (il massimo).\n" 
+"  --piDSKY                Esegui piDSKY.py piuttosto che piDSKY2.py.\n"
+"  --custom-bare           Consente una voce extra del menu missione, V, per\n"
+"                          l'esecuzione di un programma AGC bare metal\n"
+"                          personalizzato, piPeripheral.agc.\n" 
+"  --record                Registra le modifiche del canale di uscita in entrata\n"
+"                          in un file.\n"
+"  --playback              Aggiungi l'opzione di riproduzione al menu missione."
+
+msgid "RAM...HOME"
+msgstr "Il disco RAM %s non esiste ... usando %s"
+
+msgid "(default)"
+msgstr "(predefinito)"
+
+msgid "Available missions"
+msgstr "Missioni disponibili"
+
+msgid "Run"
+msgstr "Eseguire"
+
+msgid "landing"
+msgstr "atterraggio"
+
+msgid "Other scenarios"
+msgstr "Altri scenari"
+
+msgid "External AGC"
+msgstr "AGC esterno"
+
+msgid "Custom AGC program"
+msgstr "Programma AGC personalizzato"
+
+msgid "Choose an option"
+msgstr "Scegliere un'opzione"
+
+msgid "Pre-recorded scenarios"
+msgstr "Scenari preregistrati"
+
+msgid "launch"
+msgstr "lancia"
+
+msgid "Custom recording"
+msgstr "Registrazione personalizzata"
+
+msgid "Mission menu"
+msgstr "Menu di missione"
+
+msgid "Password"
+msgstr "Parola d'ordine"
+
+msgid "up since"
+msgstr "da allora"
+
+msgid "not connected"
+msgstr "non collegata"
+
+msgid "not configured"
+msgstr "non configurato"
+
+msgid "Maintenance menu"
+msgstr "Menu di manutenzione"
+
+msgid "Reboot"
+msgstr "Reboot"
+
+msgid "Shutdown"
+msgstr "Spegnimento"
+
+msgid "Command line"
+msgstr "Riga di comando"
+
+msgid "Desktop"
+msgstr "Desktop"
+
+msgid "Manual DSKY"
+msgstr "DSKY manuale"
+
+msgid "Configure external AGC"
+msgstr "Configura AGC esterno"
+
+msgid "Update"
+msgstr "Aggiornare"
+
+msgid "Lamp test"
+msgstr "Test della lampada"
+
+msgid "Choose a number"
+msgstr "Scegli un numero"
+
+msgid "Confirm reboot"
+msgstr "Conferma il riavvio"
+
+msgid "Don't reboot"
+msgstr "Non riavviare"
+
+msgid "Choose"
+msgstr "Scegliere"
+
+msgid "Confirm shutdown"
+msgstr "Confermare l'arresto"
+
+msgid "Don't shutdown"
+msgstr "Non spegnere"
+
+msgid "Confirm exit to console"
+msgstr "Conferma l'uscita alla console"
+
+msgid "Don't exit"
+msgstr "Non uscire"
+
+msgid "Confirm exit to desktop"
+msgstr "Conferma l'uscita sul desktop"
+
+msgid "Current IP address of external AGC is"
+msgstr "L'indirizzo IP corrente dell'AGC esterno è"
+
+msgid "ENTR...point"
+msgstr ""
+"ENTR per accettare o inserire un nuovo indirizzo,\n"
+"usando CLR come punto decimale."
+
+msgid "Input...point"
+msgstr ""
+"Immettere un indirizzo IP per l'AGC esterno,\n"
+"utilizzando CLR come punto decimale."
+
+msgid "Current...number"
+msgstr ""
+"La porta AGC esterna corrente è %s. ENTR per\n"
+"accettare o inserire un nuovo numero di porta."
+
+msgid "Input a port number for the external AGC."
+msgstr "Immettere un numero di porta per l'AGC esterno."
+
+msgid "AGC not found at"
+msgstr "AGC non trovato in %s:%s"
+
+msgid "Save settings anyway"
+msgstr "Non salvare"
+
+msgid "AGC detected at"
+msgstr "AGC rilevato a %s:%s"
+
+msgid "Update operation finished"
+msgstr "Operazione di aggiornamento terminata"
+
+msgid "Hit ENTR to continue"
+msgstr "Premi INVIO per continuare"
+
+msgid "Permission denied"
+msgstr "Permesso negato"
+
+msgid "Starting AGC program"
+msgstr "Avvio del programma AGC %s ..."
+
+msgid "Cleaning up ..."
+msgstr "Pulire ..."
+
+msgid "Fetching from VirtualAGC repository ..."
+msgstr "Recupero dal repository VirtualAGC ..."
+
+msgid "Generating new translations ..."
+msgstr "Generazione di nuove traduzioni ..."

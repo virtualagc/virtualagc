@@ -3,12 +3,20 @@
 # Assumes that the github repo for virtualagc has been cloned,
 # and the software has been built from source,
 # and that we are in the piPeripheral subdirectory of that clone.
+#
+# Strings referenced as $"...string..." rather than just 
+# "...string..." have been internationalized and are being looked
+# up with gettext, depending on how the environment variable
+# LANGUAGE has been set.  There are notes at the top of 
+# internationalization/it.po that tell how this works.
 
 ARGLIST="$@"
+export TEXTDOMAINDIR=$HOME/locale
 
 # Turn off keyboard repeat, but make sure it gets restored on exit.
 function cleanup {
-	echo -e "\nRestoring keyboard repeat ..."
+	echo ""
+	echo $"Restoring keyboard repeat ..."
 	xset r on
 }
 trap cleanup EXIT
@@ -82,36 +90,7 @@ do
 			PLAYBACK_OPTION=yes
 			;;
 		*)
-			echo "Usage:"
-			echo "  cd piPeripheral"
-			echo "  ./runPiDSKY2.sh [OPTIONS]"
-			echo "The allowed options are:"
-			echo "	--window                Display DSKY registers as a 272x480 window"
-			echo "                          rather than full screen."
-			echo "	--yaDSKY2               Run yaDSKY2 in addition to (in parallel with)"
-			echo "                          the DSKY-register display.  Most useful if"
-			echo "                          --window is also used."
-			echo "	--image-dir=PATH        Specify directory for alternate widget graphics."
-			echo "                          The default is simply the piDSKY2-images"
-			echo "                          subdirectory of the current directory."
-			echo "	--led-panel=PATH        Specify a path to the 'led-panel' program."
-			echo "                          Defaults to simply 'led-panel' (in the current"
-			echo "                          directory)."
-			echo "  --debug                 Display extra messages useful in debugging piDSKY2."
-			echo "  --agc-debug             Display extra messages useful in debugging yaAGC."
-			echo "  --monitor               Monitor load, temperature, CPU clock."
-			echo "  --non-native            Running on a non-Pi computer."  
-			echo "  --pigpio=N              Use pigpio interface to control lamps.  Otherwise,"
-			echo "                          Shell out to 'led-panel' to control lamps.  Not"
-			echo "                          useful with --non-native, since pigpio is a native"
-			echo "                          Pi library.  The value of the parameter, N, is"
-			echo "                          a brightness intensity, varying from 0 (the least)"
-			echo "                          to 15 (the maximum)." 
-			echo "  --piDSKY                Run piDSKY.py rather than piDSKY2.py."
-			echo "  --custom-bare           Allows an extra mission menu item, V, for running"
-			echo "                          a custom bare-metal AGC program, piPeripheral.agc." 
-			echo "  --record                Record incoming output-channel changes to a file."
-			echo "  --playback              Add playback option to mission menu."
+			echo -e $"MenuText"
 			exit
 			;;
 	esac
@@ -136,7 +115,7 @@ fi
 RAMDISK=/run/user/$UID
 if [[ ! -d $RAMDISK ]]
 then
-	echo "RAM disk $RAMDISK does not exist ... using $HOME"
+	printf $"RAM...HOME""\n" "$RAMDISK" "$HOME"
 	RAMDISK=$HOME
 fi
 RAMDISK=$RAMDISK/piDSKY2
@@ -159,7 +138,7 @@ function menuItem() {
 	printf " %4s   %s" $key "$description"
 	if [[ "$key" == "$defaultKey" ]]
 	then
-		echo " (default)"
+		echo " "$"(default)"
 	else
 		echo ""
 	fi
@@ -217,30 +196,30 @@ do
 	# Choose a mission.
 	xset r off
 	clear
-	echo "Available missions:"
+	echo $"Available missions":
 	echo ""
-	menuItem 0 "Run Apollo 5 LM" $MISSION_DEFAULT
-	menuItem 1 "Run Apollo 8 CM" $MISSION_DEFAULT
-	menuItem 2 "Run Apollo 9 CM" $MISSION_DEFAULT
-	menuItem 3 "Run Apollo 10 LM" $MISSION_DEFAULT
-	menuItem 4 "Run Apollo 11 CM" $MISSION_DEFAULT
-	menuItem 5 "Run Apollo 11 LM"  $MISSION_DEFAULT
-	menuItem 6 "Run Apollo 12 LM" $MISSION_DEFAULT
-	menuItem 7 "Run Apollo 13 LM" $MISSION_DEFAULT
-	menuItem 8 "Run Apollo 15-17 CM" $MISSION_DEFAULT
-	menuItem 9 "Run Apollo 15-17 LM" $MISSION_DEFAULT
-	menuItem - "Apollo 11 landing" $MISSION_DEFAULT
-	menuItem + "Other scenarios" $MISSION_DEFAULT
+	menuItem 0 $"Run"" Apollo 5 LM" $MISSION_DEFAULT
+	menuItem 1 $"Run"" Apollo 8 CM" $MISSION_DEFAULT
+	menuItem 2 $"Run"" Apollo 9 CM" $MISSION_DEFAULT
+	menuItem 3 $"Run"" Apollo 10 LM" $MISSION_DEFAULT
+	menuItem 4 $"Run"" Apollo 11 CM" $MISSION_DEFAULT
+	menuItem 5 $"Run"" Apollo 11 LM"  $MISSION_DEFAULT
+	menuItem 6 $"Run"" Apollo 12 LM" $MISSION_DEFAULT
+	menuItem 7 $"Run"" Apollo 13 LM" $MISSION_DEFAULT
+	menuItem 8 $"Run"" Apollo 15-17 CM" $MISSION_DEFAULT
+	menuItem 9 $"Run"" Apollo 15-17 LM" $MISSION_DEFAULT
+	menuItem - "Apollo 11 "$"landing" $MISSION_DEFAULT
+	menuItem + $"Other scenarios" $MISSION_DEFAULT
 	if [[ "$AGC_IP" != "" && "$AGC_PORT" != "" ]]
 	then
-		menuItem CLR "External AGC" $MISSION_DEFAULT
+		menuItem CLR $"External AGC" $MISSION_DEFAULT
 	fi
 	if [[ "$CUSTOM_BARE" != "" ]]
 	then
-		menuItem VERB "Custom AGC program" $MISSION_DEFAULT
+		menuItem VERB $"Custom AGC program" $MISSION_DEFAULT
 	fi
 	echo ""
-	read -p "Choose an option: " -t 15 -n 1
+	read -p $"Choose an option"": " -t 15 -n 1
 	if [[ "$REPLY" == "" || "$REPLY" == "$MISSION_DEFAULT" ]]
 	then
 		REPLY=$MISSION_DEFAULT
@@ -300,18 +279,18 @@ do
 	elif [[ "$REPLY" == "+" || "$REPLY" == "=" ]]
 	then
 		clear
-		echo "Pre-recorded scenarios:"
+		echo $"Pre-recorded scenarios":
 		echo ""
-		menuItem 0 "Apollo 8 Launch" $REPLAY_DEFAULT
-		menuItem 1 "Apollo 11 Launch" $REPLAY_DEFAULT
-		menuItem 2 "Apollo 11 Landing" $REPLAY_DEFAULT
+		menuItem 0 "Apollo 8 "$"launch" $REPLAY_DEFAULT
+		menuItem 1 "Apollo 11 "$"launch" $REPLAY_DEFAULT
+		menuItem 2 "Apollo 11 "$"landing" $REPLAY_DEFAULT
 		if [[ "$PLAYBACK_OPTION" != "" ]]
 		then
-			menuItem CLR "Custom recording" $REPLAY_DEFAULT
+			menuItem CLR $"Custom recording" $REPLAY_DEFAULT
 		fi
-		menuItem RSET "Mission menu" $REPLAY_DEFAULT
+		menuItem RSET $"Mission menu" $REPLAY_DEFAULT
 		echo ""
-		read -p "Choose an option: " -t 15 -n 1
+		read -p $"Choose an option"": " -t 15 -n 1
 		if [[ "$REPLY" == "" || "$REPLY" == "$REPLAY_DEFAULT" ]]
 		then
 			REPLY=$REPLAY_DEFAULT
@@ -348,12 +327,12 @@ do
 	elif [[ "$REPLY" == "R" || "$REPLY" == "r" ]]
 	then
 		echo ""
-		read -s -p "Password: " -t 30
+		read -s -p $"Password"": " -t 30
 		if [[ "$REPLY" == "19697R" || "$REPLY" == "19697r" ]]
 		then
 			clear
 			date "+%F %T"
-			echo -n "up since "
+			echo -n $"up since"" "
 			uptime -s
 			if [[ "$NON_NATIVE" == "" ]]
 			then
@@ -371,41 +350,41 @@ do
 				then
 					ifconfig $nic | grep 'inet addr' | sed -e 's/ B.*//' -e 's/.*://'
 				else
-					echo "not connected"
+					echo $"not connected"
 				fi
 			done
-			echo -n "External AGC: "
+			echo -n $"External AGC"": "
 			if [[ "$AGC_IP" == "" ]]
 			then
-				echo "not configured"
+				echo $"not configured"
 			else
 				echo "$AGC_IP:$AGC_PORT"
 			fi
 			git -C "$SOURCEDIR" show | grep '^Date:' | sed 's/Date: */version: /'
 			echo ""
-			echo "Maintenance menu:"
+			echo $"Maintenance menu":
 			if [[ "$NON_NATIVE" == "" ]]
 			then
-				menuItem 1 "Reboot" RSET
-				menuItem 2 "Shutdown" RSET
+				menuItem 1 $"Reboot" RSET
+				menuItem 2 $"Shutdown" RSET
 			fi
-			menuItem 3 "Command line" RSET
-			menuItem 4 "Desktop" RSET
-			menuItem 5 "Manual DSKY" RSET
-			menuItem 6 "Configure external AGC" RSET
+			menuItem 3 $"Command line" RSET
+			menuItem 4 $"Desktop" RSET
+			menuItem 5 $"Manual DSKY" RSET
+			menuItem 6 $"Configure external AGC" RSET
 			if [[ "$NON_NATIVE" == "" ]]
 			then
-				menuItem 7 "Update VirtualAGC" RSET
+				menuItem 7 $"Update"" VirtualAGC" RSET
 			fi
-			menuItem 8 "Lamp test" RSET
-			menuItem RSET "Mission menu" RSET
-			read -p "Choose a number: " -t 15 -n 1
+			menuItem 8 $"Lamp test" RSET
+			menuItem RSET $"Mission menu" RSET
+			read -p $"Choose a number"": " -t 15 -n 1
 			echo ""
 			if [[ "$REPLY" == "1" && "$NON_NATIVE" == "" ]]
 			then
-				menuItem 1 "Confirm reboot" ""
-				menuItem 2 "Don't reboot" ""
-				read -p "Choose: " -n 1
+				menuItem 1 $"Confirm reboot" ""
+				menuItem 2 $"Don't reboot" ""
+				read -p $"Choose"": " -n 1
 				echo ""
 				if [[ "$REPLY" == "1" ]]
 				then
@@ -413,9 +392,9 @@ do
 				fi
 			elif [[ "$REPLY" == "2" && "$NON_NATIVE" == "" ]]
 			then
-				menuItem 1 "Confirm shutdown" ""
-				menuItem 2 "Don't shutdown" ""
-				read -p "Choose: " -n 1
+				menuItem 1 $"Confirm shutdown" ""
+				menuItem 2 $"Don't shutdown" ""
+				read -p $"Choose"": " -n 1
 				echo ""
 				if [[ "$REPLY" == "1" ]]
 				then
@@ -423,9 +402,9 @@ do
 				fi
 			elif [[ "$REPLY" == "3" ]]
 			then
-				menuItem 1 "Confirm exit to console" ""
-				menuItem 2 "Don't exit" ""
-				read -p "Choose: " -n 1
+				menuItem 1 $"Confirm exit to console" ""
+				menuItem 2 $"Don't exit" ""
+				read -p $"Choose"": " -n 1
 				echo ""
 				if [[ "$REPLY" == "1" ]]
 				then
@@ -433,9 +412,9 @@ do
 				fi
 			elif [[ "$REPLY" == "4" ]]
 			then
-				menuItem 1 "Confirm exit to desktop" ""
-				menuItem 2 "Don't exit" ""
-				read -p "Choose: " -n 1
+				menuItem 1 $"Confirm exit to desktop" ""
+				menuItem 2 $"Don't exit" ""
+				read -p $"Choose"": " -n 1
 				echo ""
 				if [[ "$REPLY" == "1" ]]
 				then
@@ -452,13 +431,11 @@ do
 				NEW_PORT=$AGC_PORT
 				if [[ "$AGC_IP" != "" ]]
 				then
-					echo "Current IP address of external AGC"
-					echo "is $AGC_IP.  ENTR to accept or"
-					echo "else input new address, using CLR"
-					echo "as a decimal point."
+					echo $"Current IP address of external AGC is"
+					echo "\t$AGC_IP."
+					echo -e $"ENTR...point"
 				else
-					echo "Input an IP address for the external"
-					echo "AGC, using CLR as a decimal point."
+					echo -e $"Input...point"
 				fi
 				read -p "> "
 				if [[ "$REPLY" != "" ]]
@@ -473,11 +450,9 @@ do
 				fi
 				if [[ "$AGC_PORT" != "" ]]
 				then
-					echo "Current external AGC port is $AGC_PORT."
-					echo "ENTR to accept or else input a new port"
-					echo "number."
+					printf $"Current...number"".\n" $AGC_PORT
 				else
-					echo "Input a port number for the external AGC."
+					echo $"Input a port number for the external AGC."
 				fi
 				read -p "> "
 				if [[ "$REPLY" != "" ]]
@@ -494,17 +469,17 @@ do
 				then
 					if ! nmap -p$NEW_PORT $NEW_IP | grep "^$NEW_PORT/tcp open" &>/dev/null
 					then
-						echo "AGC not found at $NEW_IP:$NEW_PORT."
-						menuItem 1 "Save settings anyway" 2
-						menuItem 2 "Don't save" 2
-						read -p "Choose: " -n 1
+						printf $"AGC not found at"" %s:%s.\n" $NEW_IP $NEW_PORT
+						menuItem 1 $"Save settings anyway" 2
+						menuItem 2 $"Don't save" 2
+						read -p $"Choose"": " -n 1
 						echo ""
 						if [[ "$REPLY" != "1" ]]
 						then
 							continue
 						fi
 					else
-						echo "AGC detected at $NEW_IP:$NEW_PORT."
+						printf $"AGC detected at"" %s:%s.\n" $NEW_IP $NEW_PORT
 					fi
 					AGC_IP=$NEW_IP
 					AGC_PORT=$NEW_PORT
@@ -512,10 +487,21 @@ do
 				fi
 			elif [[ "$REPLY" == "7" && "$NON_NATIVE" == "" ]]
 			then
+				echo $"Fetching from VirtualAGC repository ..."
 				git -C "$SOURCEDIR" fetch --quiet --all
 				git -C "$SOURCEDIR" reset --quiet --hard origin/master
-				echo "Update operation finished."
-				read -p "Hit ENTR to continue: "
+				echo $"Generating new translations ..."
+				cd "$SOURCEDIR/piPeripheral/internationalization"
+				for po in *.po
+				do
+					lan="`echo $po | sed 's/[.]po$//'`"
+					echo -e "\n$lan"
+					mkdir -p $HOME/locale/$lan/LC_MESSAGES
+					msgfmt -o $HOME/locale/$lan/LC_MESSAGES/runPiDSKY2.sh.mo $po
+				done
+				cd -
+				echo $"Update operation finished""."
+				read -p $"Hit ENTR to continue"": "
 				cd "$SOURCEDIR"/piPeripheral
 				exec bash ./runPiDSKY2.sh $ARGLIST
 				exit 0
@@ -524,11 +510,11 @@ do
 				optionsPiDSKY2="--port=19697 $WINDOW $SLOW $PIGPIO --lamptest=1" 
 				"$SOURCEDIR/piPeripheral/piDSKY2.py" $optionsPiDSKY2
 				sleep 1
-				read -p "Hit Enter to continue ..."
+				read -p $"Hit ENTR to continue"" ..."
 			fi
 		else
 			echo ""
-			echo "Permission denied."
+			echo $"Permission denied"
 			sleep 2
 		fi
 		continue
@@ -555,7 +541,7 @@ do
 
 		optionsPiDSKY2="$optionsPiDSKY2 $RECORD"
 	
-		echo "Starting AGC program $CORE ..."
+		printf $"Starting AGC program""\n" $CORE
 		# Run it!
 		rm LM.core CM.core &>/dev/null
 		if [[ "$AGCDEBUG" == "" ]]
@@ -596,7 +582,7 @@ do
 			"$SOURCEDIR/piPeripheral/piDSKY.py" --port=19697
 			if [[ "$DEBUG" != "" ]]
 			then
-				read -p "Hit Enter to continue ..."
+				read -p $"Hit ENTR to continue"" ..."
 			fi
 		fi
 	fi
@@ -608,11 +594,11 @@ do
 			"$SOURCEDIR/piPeripheral/piDSKY2.py" $optionsPiDSKY2 >/dev/null
 		else
 			"$SOURCEDIR/piPeripheral/piDSKY2.py" $optionsPiDSKY2
-			read -p "Hit Enter to continue ..."
+			read -p "Hit ENTR to continue ..."
 		fi
 	fi
 	
-	echo "Cleaning up ..."
+	echo $"Cleaning up ..."
 	kill $YAGC_PID $YADSKY2_PID $STATUS_PID $STATUS_BARE
 	wait $YAGC_PID $YADSKY2_PID $STATUS_PID $STATUS_BARE &>/dev/null
 done
