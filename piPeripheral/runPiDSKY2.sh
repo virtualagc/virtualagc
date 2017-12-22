@@ -11,6 +11,10 @@
 # internationalization/it.po that tell how this works.
 
 ARGLIST="$@"
+if [[ "$LANGUAGE" == "" ]]
+then
+	export LANGUAGE=en
+fi
 export TEXTDOMAIN=runPiDSKY2.sh
 export TEXTDOMAINDIR=$HOME/locale
 
