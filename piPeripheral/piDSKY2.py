@@ -202,32 +202,41 @@ cli.add_argument("--manual", help="Manually control the display.")
 args = cli.parse_args()
 
 if args.manual:
+	os.system('clear')
+	print("Manual DSKY Instructions")
+	print("------------------------")
 	print("")
+	print("Area-selection mode:")
+	print("     RSET    to exit.")
+	print("     PRO     to select PROG area.")
+	print("     VERB    to select VERB area.")
+	print("     NOUN    to select NOUN area.")
+	print("     1/2/3   to select R1/R2/R3.")
+	print("     +       to select lamps.")
+	print("     -       to select key-backlights.")
+	print("     CLR     to toggle COMP ACTY.")
 	print("")
-	print("Manual DSKY Instructions:")
-	print("")
-	print("     RSET to exit.")
-	print("     PRO to select PROG area.")
-	print("     VERB to select VERB area.")
-	print("     NOUN to select NOUN area.")
-	print("     1/2/3 to select R1/R2/R3.")
-	print("     KEY REL to select lamps.")
-	print("     CLR to toggle COMP ACTY.")
-	print("During data entry for the")
-	print("numerical areas listed above,")
-	print("use these keys:")
-	print("     +-0123456789 as usual")
-	print("     CLR for blank spaces")
+	print("In numerical-entry mode (after choosing")
+	print("PRO, VERB, NOUN, 1, 2, or 3 in area-")
+	print("selection mode), use these keys:")
+	print("     +-0123456789 as usual for numbers")
+	print("     CLR     for blank spaces")
 	print("     KEY REL to backspace")
-	print("     ENTR to end the entry")
-	print("     PROG/VERB/NOUN switch areas")
-	print("For lamp data entry, use:")
-	print("     - for OFF")
-	print("     + for ON")
-	print("     KEY REL to backspace")
-	print("     ENTR to end the entry")
-	print("     PROG/VERB/NOUN switch areas")
+	print("     ENTR    returns to area selection")
+	print("     PROG/VERB/NOUN also switch areas")
 	print("")
+	print("For lamp-editing mode, the 14 lamps are")
+	print("ordered ROW-WISE starting from the")
+	print("upper left to the lower right.  For")
+	print("key-backlight mode, the keys are")
+	print("ordered COLUMN-WISE from upper left to")
+	print("lower right (19 total), plus 3 hidden")
+	print("lamps: VNC, TBD1, and TBD2.  In either")
+	print("case, use these keys in these modes:")
+	print("     +- for ON and OFF")
+	print("     KEY REL to backspace")
+	print("     ENTR    returns to area selection")
+	print("     PROG/VERB/NOUN also switch areas")
 	print("")
 	input("Hit ENTR to start ... ")
 
@@ -1247,10 +1256,13 @@ if args.manual:
 		#	5	R2 area
 		#	6	R3 area
 		#	7	Lamp area
+		#	8	Key-backlight area
 		# (COMP ACTY has no AREA associated with it.)
 		# The OFFSET is the position within the AREA, with 0 being
 		# the leftmost.  For the lamp area, 0 is the upper left,
 		# 1 the upper right, and so on, down to 13 for the lower right.
+		# For the key-backlight area, the order is from upper left
+		# downward, and then to the right:  VERB NOUN + - 0 7 4 1 .... 
 		stateAREA = 0
 		stateOFFSET = 0
 		compActy = False
@@ -1274,8 +1286,10 @@ if args.manual:
 					stateAREA = 5
 				elif ch == '3':
 					stateAREA = 6
-				elif ch == 'K':
+				elif ch == '+':
 					stateAREA = 7
+				elif ch == '-':
+					stateAREA = 8
 				elif ch == 'C':
 					compActy = not compActy
 					if compActy:
@@ -1363,7 +1377,7 @@ if args.manual:
 				lampNames = [ 	"UPLINK ACTY", "TEMP", "NO ATT", "GIMBAL LOCK",
 						"DSKY STANDBY", "PROG", "KEY REL", "RESTART",
 						"OPR ERR", "TRACKER", "PRIO DSP","ALT",
-						"NO DAP", "VEL"  ]
+						"NO DAP", "VEL" ]
 				if ch == "E" or ch == "\n":
 					stateAREA = 0
 				elif ch == "P":
@@ -1378,7 +1392,7 @@ if args.manual:
 				elif ch == "K":
 					if stateOFFSET > 0:
 						stateOFFSET -= 1
-				elif stateOFFSET >= 14:
+				elif stateOFFSET >= len(lampNames):
 					continue
 				elif ch == "0":
 					updateLampStatuses(lampNames[stateOFFSET], False)
@@ -1386,6 +1400,37 @@ if args.manual:
 					stateOFFSET += 1
 				elif ch == "1":
 					updateLampStatuses(lampNames[stateOFFSET], True)
+					updateLamps()
+					stateOFFSET += 1
+			elif stateAREA == 8: # Key-backlight area
+				keyNames = [ 	"VERB KEY", "NOUN KEY", 
+						"+ KEY", "- KEY", "0 KEY", "7 KEY",
+						"4 KEY", "1 KEY", "8 KEY", "5 KEY",
+						"2 KEY", "9 KEY", "6 KEY", "3 KEY",
+						"CLR KEY", "PRO KEY", "KEY REL KEY", "ENTR KEY",
+						"RSET KEY", "VNCSERVERUI", "TBD1", "TBD2"  ]
+				if ch == "E" or ch == "\n":
+					stateAREA = 0
+				elif ch == "P":
+					stateAREA = 1
+					stateOFFSET = 0
+				elif ch == "V":
+					stateAREA = 2
+					stateOFFSET = 0
+				elif ch == "N":
+					stateAREA = 3
+					stateOFFSET = 0
+				elif ch == "K":
+					if stateOFFSET > 0:
+						stateOFFSET -= 1
+				elif stateOFFSET >= len(keyNames):
+					continue
+				elif ch == "0":
+					updateLampStatuses(keyNames[stateOFFSET], False)
+					updateLamps()
+					stateOFFSET += 1
+				elif ch == "1":
+					updateLampStatuses(keyNames[stateOFFSET], True)
 					updateLamps()
 					stateOFFSET += 1
 			else:
