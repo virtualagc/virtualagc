@@ -223,7 +223,7 @@ if args.manual:
 	print("     CLR     for blank spaces")
 	print("     KEY REL to backspace")
 	print("     ENTR    returns to area selection")
-	print("     PROG/VERB/NOUN also switch areas")
+	print("     PRO/VERB/NOUN also switch areas")
 	print("")
 	print("For lamp-editing mode, the 14 lamps are")
 	print("ordered ROW-WISE starting from the")
@@ -236,7 +236,7 @@ if args.manual:
 	print("     +- for ON and OFF")
 	print("     KEY REL to backspace")
 	print("     ENTR    returns to area selection")
-	print("     PROG/VERB/NOUN also switch areas")
+	print("     PRO/VERB/NOUN also switch areas")
 	print("")
 	input("Hit ENTR to start ... ")
 
