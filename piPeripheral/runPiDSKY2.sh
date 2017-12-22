@@ -495,7 +495,7 @@ do
 				for po in *.po
 				do
 					lan="`echo $po | sed 's/[.]po$//'`"
-					echo -e "\n$lan"
+					echo -e "\t$lan"
 					mkdir -p $HOME/locale/$lan/LC_MESSAGES
 					msgfmt -o $HOME/locale/$lan/LC_MESSAGES/runPiDSKY2.sh.mo $po
 				done
