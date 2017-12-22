@@ -11,6 +11,7 @@
 # internationalization/it.po that tell how this works.
 
 ARGLIST="$@"
+export TEXTDOMAIN=runPiDSKY2.sh
 export TEXTDOMAINDIR=$HOME/locale
 
 # Turn off keyboard repeat, but make sure it gets restored on exit.
