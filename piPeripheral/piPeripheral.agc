@@ -10,9 +10,10 @@
 #
 # It extends the simple template program described in the tutorial (which
 # only toggles COMP ACTY whenever a DSKY keycode is detected) by 
-# additionally receiving current time&date data in input channels 040-042,
-# displaying that data on the DSKY, and spitting the unpacked data back
-# out on output channels 043-050.  The input data is:
+# additionally receiving current time&date data in various input channels,
+# displaying that data on the DSKY, and sometimes spitting the unpacked data
+# back out on output channels 043-050.  The input data supported is
+# 1's-complement:
 #	Second		Least-significant 6 bits of channel 040
 #	Minute		Next higher 6 bits of channel 040
 #			(Most-significant 3 bits of channel 040 unused)
@@ -21,13 +22,87 @@
 #	Month		Next higher 4 bits of channel 041
 #			(Most-significant bit of channel 041 unused)
 #	Year		Channel 042.
-# On the DSKY, this ends up being displayed as:
-#	PROG		blank
+#	X acceleration	Channel 051, mm/sec/sec
+#	Y acceleration	Channel 052, mm/sec/sec
+#	Z acceleration	Channel 053, mm/sec/sec
+#	X mag field	Channel 054, in units of 0.0001 gauss
+#	Y mag field	Channel 055, in units of 0.0001 gauss
+#	Z mag field	Channel 056, in units of 0.0001 gauss
+#	X gyro		Channel 057, in units of 0.1 dps
+#	Y gyro		Channel 060, in units of 0.1 dps
+#	Y gyro		Channel 061, in units of 0.1 dps
+#	baro pressure	Channel 062, in units of 0.1 hPa
+#	temperature	Channel 063, in units of 0.01 degrees C
+#	latitude	Channel 064, in units of 0.01 degrees
+#	longitude	Channel 065, in units of 0.01 degrees
+#	altitude	Channel 066, meters
+#	ground speed	Channel 067, kph
+#	bearing		Channel 070, 0.1 degrees from true North.
+# ... though actually, for channels 051-070, the values from the input
+# ports are simply displayed (after conversion to decimal) as-is, so
+# the their interpretations and units aren't enforced by the AGC. 
+# Note that the X, Y, and Z axes mentioned above are relative to
+# the sensor board, and I don't know how that relates to DSKY axes.
+# On the DSKY, what is displayed depends on the selected 
+# display-mode, which you can cycle through with the PRO key.  The
+# mode is always shown in the PROG area, and is:
+#	00		time-display mode
+#	01		acceleration-display mode
+#	02		magnetometer-display mode
+#	03		gyro-display mode
+#	04		weather-sensor-display mode
+#	05		GPS-location-display mode
+#	06		GPS-track-display mode
+# Specifically, here's what's shown on the display in the 
+# various display modes.  For the time-display mode:
+#	PROG		00
 #	VERB		blank
 #	NOUN		seconds
 #	R1		hour, minute, separated by a blank
 #	R2		month, day, separated by a blank
 #	R3		year, prefixed by a blank
+# For the acceleration-display mode:
+#	PROG		01
+#	VERB		blank
+#	NOUN		blank
+#	R1		X acceleration mm/sec/sec
+#	R2		Y acceleration mm/sec/sec
+#	R3		Z acceleration mm/sec/sec
+# For the magnetometer-display mode:
+#	PROG		02
+#	VERB		blank
+#	NOUN		blank
+#	R1		X magnetometer 0.0001 gauss
+#	R2		Y magnetometer 0.0001 gauss
+#	R3		Z magnetometer 0.0001 gauss
+# For the gyro-display mode:
+#	PROG		03
+#	VERB		blank
+#	NOUN		blank
+#	R1		X gyro 0.1 dps
+#	R2		Y gyro 0.1 dps
+#	R3		Z gyro 0.1 dps
+# For the weather-sensor-display mode:
+#	PROG		04
+#	VERB		blank
+#	NOUN		blank
+#	R1		pressure 0.1 hPa
+#	R2		temperature 0.01 degrees C
+#	R3		blank
+# For the GPS-location-display mode:
+#	PROG		05
+#	VERB		blank
+#	NOUN		blank
+#	R1		latitude, 0.01 degrees
+#	R2		longitude, 0.01 degrees
+#	R3		altitude, meters
+# For the GPS-track-display mode:
+#	PROG		06
+#	VERB		blank
+#	NOUN		blank
+#	R1		ground speed, kph
+#	R2		direction, 0.1 degrees from true North
+#	R3		blank
 # The output channels used are:
 #	Year		Channel 043
 #	Month		Channel 044
@@ -89,6 +164,8 @@ DSPR				ERASE				# Return address for DSPxxxx functions.
 DIGIT25				ERASE
 DIGIT31				ERASE
 DIVISOR				ERASE				# A dummy variable used to store divisors.
+DSPMODE				ERASE				# display-mode: 0 time, 1 acceleration, 2 magnetometer, etc.
+PROPRESS			ERASE				# 0 if PRO is not pressed, non-zero if it is.
 
                                 SETLOC          4000            # The interrupt-vector table.
 
@@ -182,15 +259,52 @@ STARTUP                         RELINT                          # Reenable inter
                                 CA              NOKEY           # Clear the keypad buffer variable
                                 TS              KEYBUF          # to initially hold an illegal keycode.
                                 CA              ZERO            
-                                TS              CASTATUS        
+                                TS              CASTATUS  
+                                TS		DSPMODE		# Display mode. 
+                                TS		PROPRESS	# PRO-key history.     
+
+				# Prepare the display in mode 0
+				TC		BLANKALL	# Completely blank the display
+				CA		DSPMODE		# Write the display mode to PROG.
+				TC		DSPPROG			
 
                                 EXTEND                          
                                 READ            40              
                                 TS              LAST040         
 MAINLOOP                        CS              NEWJOB          # Tickle the Night Watchman.
 
+								#----------------------------------------------------------------------
+								# Occasionally check to see if the PRO key is pressed, using the 
+								# PROPRESS variable to manage the history.  If it is pressed, we
+								# advance the display mode.  Recall that PRO is read on channel
+								# 32, and not on channel 15 (where the other key-codes appear).
+				CA		PROMASK
+				EXTEND
+				RAND		32		# Read channel 32 but mask off everything except the PRO flag
+				EXTEND
+				BZF		ISPRSSD		# PRO is indeed pressed.  Remember channel 32 has inverted polarity.
+				TS		PROPRESS	# Not pressed, so just fall through.
+				TCF		DONEPRO
+ISPRSSD				CA		PROPRESS	# PRO is pressed right now, but is this a change?
+				EXTEND
+				BZF		DONEPRO		# No, was already pressed, so just fall through!
+				CA		ZERO
+				TS		PROPRESS	# Mark PROPRESS variable to show that PRO was recently pressed.
+				CA		DSPMODE		# The pro KEY is newly pressed, so advance display mode.
+				AD		ONE
+				TS		DSPMODE	
+				AD		MINUSSIX	# But wait, the only display modes allowed are 0-6.  Did it go to 7?
+				EXTEND
+				BZMF		CHGMODE		# Fine, <=6, so okay as-is!
+				CA		ZERO		# No, the display mode should wrap to 0.
+				TS		DSPMODE
+CHGMODE				TC		BLANKALL	# Completely blank the display
+				CA		DSPMODE		# Write the display mode to PROG.
+				TC		DSPPROG			
+DONEPRO				NOOP
+								
                                                                 #----------------------------------------------------------------------
-                                                                # Occasionally check if there's a keycode ready, and toggle
+                                                                # Similarly, check if there's a keycode ready, and toggle
                                                                 # DSKY COMP ACTY if there is.
                                 CA              NOKEY           
                                 EXTEND                          
@@ -211,10 +325,25 @@ CATOGGLE                        TS              CASTATUS
                                 WRITE           11              # Write to the DSKY lamps
 ENDKYCK                         NOOP                            
 
+								#----------------------------------------------------------------------
+								# We've now handled the keystrokes, so we need to update the display.
+								# But exactly what we need to do along those lines depends on the 
+								# display mode, which we handle with a jump-table.
+				INDEX		DSPMODE		# JUMP!
+				TCF		MODETABL
+MODETABL			TCF		MODE0
+				TCF		MODE1
+				TCF		MODE2
+				TCF		MODE3
+				TCF		MODE4
+				TCF		MODE5
+				TCF		MODE6				
+								
                                                                 #----------------------------------------------------------------------
+                                                                # Display-mode 0.
                                                                 # Occasionally check input channel 040 to see if the time (presumably
                                                                 # being reported from time to time by piPeripheral.py) has changed.
-                                EXTEND                          
+MODE0                           EXTEND                          
                                 READ            40              # Get minutes/seconds
                                 TS              THIS040         
                                 EXTEND                          
@@ -291,8 +420,121 @@ ENDKYCK                         NOOP
 ENDTMCK                         NOOP                            
 
                                 TCF             MAINLOOP        
+
+                                                                #----------------------------------------------------------------------
+                                                                # Display-mode 1.
+MODE1 				EXTEND
+				READ		051
+				TC		DSPR1
+				EXTEND
+				READ		052
+				TC		DSPR2
+				EXTEND
+				READ		053
+				TC		DSPR3
+				TCF		MAINLOOP
+
+                                                                #----------------------------------------------------------------------
+                                                                # Display-mode 2.
+MODE2 				EXTEND
+				READ		054
+				TC		DSPR1
+				EXTEND
+				READ		055
+				TC		DSPR2
+				EXTEND
+				READ		056
+				TC		DSPR3
+				TCF		MAINLOOP
+
+                                                                #----------------------------------------------------------------------
+                                                                # Display-mode 3.
+MODE3 				EXTEND
+				READ		057
+				TC		DSPR1
+				EXTEND
+				READ		060
+				TC		DSPR2
+				EXTEND
+				READ		061
+				TC		DSPR3
+				TCF		MAINLOOP
+
+                                                                #----------------------------------------------------------------------
+                                                                # Display-mode 4.
+MODE4 				EXTEND
+				READ		062
+				TC		DSPR1
+				EXTEND
+				READ		063
+				TC		DSPR2
+				TCF		MAINLOOP
+
+                                                                #----------------------------------------------------------------------
+                                                                # Display-mode 5.
+MODE5 				EXTEND
+				READ		064
+				TC		DSPR1
+				EXTEND
+				READ		065
+				TC		DSPR2
+				EXTEND
+				READ		066
+				TC		DSPR3
+				TCF		MAINLOOP
+
+                                                                #----------------------------------------------------------------------
+                                                                # Display-mode 6.
+MODE6 				EXTEND
+				READ		067
+				TC		DSPR1
+				EXTEND
+				READ		070
+				TC		DSPR2
+				TCF		MAINLOOP
+
+#######################################################################################################################################
 # This ends the main loop, which continues forever, so we can put other functions
 # below this point.
+
+# Blank all of the numerical displays.
+BLANKALL 			CA		OPCODEP
+				EXTEND
+				WRITE		10
+				CA		OPCODEV
+				EXTEND
+				WRITE		10
+				CA		OPCODEN
+				EXTEND
+				WRITE		10
+				CA		OPCODR11
+				EXTEND
+				WRITE		10
+				CA		OPCDR123
+				EXTEND
+				WRITE		10
+				CA		OPCDR145
+				EXTEND
+				WRITE		10
+				CA		OPCDR212
+				EXTEND
+				WRITE		10
+				CA		OPCDR234
+				EXTEND
+				WRITE		10
+				CA		OPR25R31
+				EXTEND
+				WRITE		10
+				CA		OPCDR323
+				EXTEND
+				WRITE		10
+				CA		OPCDR345
+				EXTEND
+				WRITE		10
+				CA		ZERO
+				TS		DIGIT31
+				TS		DIGIT25
+				RETURN
 
 # Convert an integer in the accumulator to SIGN/DIGIT1/.../DIGIT5.  At the end, all 5 DIGITx
 # variables will have values from 0-9, and SIGN will be 0 for + or 1 for -.
@@ -677,7 +919,8 @@ O37774                          OCT             37774
 ZERO                            OCT             0  
 ONE				OCT		1             
 TWO                             OCT             2               
-FOUR                            OCT             4   
+FOUR                            OCT             4  
+MINUSSIX			OCT		-6 
 TEN				DEC		10            
 O37                             OCT             37              # Mask with lowest 5 bits set.
 O77                             OCT             77              # Mask with lowest 6 bits set.
@@ -697,6 +940,7 @@ OPR25R31			DEC		3 B11
 OPCDR323			DEC		2 B11
 OPCDR345			DEC		1 B11	
 SIGNBIT				DEC		1 B10	
+PROMASK				OCT		20000
 # DSKY digit patterns for the digit 0-9.
 DIGPATTS			DEC		21
 				DEC		3
