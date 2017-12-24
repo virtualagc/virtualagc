@@ -199,7 +199,7 @@ function keyToString() {
 
 while true
 do
-	unset DIR CORE CFG YAGC_PID YADSKY2_PID STATUS_PID STATUS_BARE PLAYBACK EXTERNAL_AGC
+	unset DIR CORE CFG YAGC_PID YADSKY2_PID STATUS_PID STATUS_BARE PLAYBACK EXTERNAL_AGC RUN_PIPERIPHERALPY
 	
 	# Choose a mission.
 	xset r off
@@ -332,6 +332,7 @@ do
 		CORE=piPeripheral.agc
 		DIR=piPeripheral
 		CFG=LM
+		RUN_PIPERIPHERALPY=yes
 	elif [[ "$REPLY" == "R" || "$REPLY" == "r" ]]
 	then
 		echo ""
@@ -574,7 +575,7 @@ do
 			xterm -e "$SOURCEDIR/piPeripheral/backgroundStatus.sh" &
 			STATUS_PID=$!
 		fi
-		if [[ "$CUSTOM_BARE" != "" ]]
+		if [[ "$CUSTOM_BARE" != "" && "$RUN_PIPERIPHERALPY" != "" ]]
 		then
 			if [[ "$NON_NATIVE" == "" ]]
 			then

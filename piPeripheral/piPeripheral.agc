@@ -7,6 +7,7 @@
 #				from input channels 040-042 supplied by the
 #				template peripheral program (piPeriperal.py)
 #				when it's used with its --time=1 cli switch.
+#		2017-12-24 RSB	Added the stuff for supporting --imu and --gps.
 #
 # It extends the simple template program described in the tutorial (which
 # only toggles COMP ACTY whenever a DSKY keycode is detected) by 

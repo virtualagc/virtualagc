@@ -12,6 +12,9 @@
 #				piDSKY2.py uses.
 #		2017-12-17 RSB	Began adding --gps and --imu features, but it doesn't
 #				do anything as of yet.
+#		2017-12-24 RSB	Finished up adding these features.  Most don't work very
+#				well, and some I'm not even in a position to try,
+#				but there you go!
 #
 # The parts which need to be modified to be target-system specific are the 
 # outputFromAGx() and inputsForAGx() functions.
@@ -84,7 +87,67 @@ if args.time:
 if args.gps:
 	from LSM9DS0 import *
 	import datetime
+	import serial
+	import threading
 	lastTimeGPS = datetime.datetime.now()
+	bearing = 0.0
+	groundspeed = 0.0
+	latitude = 0.0
+	longitude = 0.0
+	altitude = 0.0
+	gpsSerialPort = serial.Serial('/dev/ttyS0')
+	def dmmDPmToFloat(input):
+		try:
+			leftRight = input.split('.')
+		except:
+			leftRight = [input, '0']
+		if len(leftRight) == 0:
+			return 0.0
+		elif len(leftRight) == 1:
+			leftRight.append('0')
+		elif leftRight[1] == '':
+			leftRight[1] = '0' 
+		try:
+			degrees = int(leftRight[0][:-2])
+		except:
+			degrees = 0
+		try:
+			minutes = float(leftRight[0][-2:] + '.' + leftRight[1])
+		except:
+			minutes = 0.0
+		return degrees + minutes / 60.0
+	def checkGPS():
+		global gpsSerialPort, bearing, groundspeed
+		while True:
+			time.sleep(0.05)
+			line = gpsSerialPort.readline()
+			fields = line.decode('ascii').split(',')
+			if len(fields) >= 8 and fields[0] == '$GPVTG':
+				#print('$GPVTG: ' + str(fields))
+				try:
+					bearing = float(fields[1])
+					groundspeed = float(fields[7])
+				except:
+					bearing = 0.0
+					groundspeed = 0.0
+				#print("groundspeed=" + str(groundspeed) + " bearing=" + str(bearing))
+			elif len(fields) >= 10 and fields[0] == '$GPGGA':
+				#print('$GPGGA: ' + str(fields))
+				try:
+					latitude = dmmDPmToFloat(fields[2])
+					if fields[3] == 'S':
+						latitude = -latitude
+					longitude = dmmDPmToFloat(fields[4])
+					if fields[5] == 'W':
+						longitude = -longitude
+					altitude = float(fields[9])
+				except:
+					latitude = 0.0
+					longitude = 0.0
+					altitude = 0.0
+				#print("latitude=" + str(latitude) + " longitude=" + str(longitude) + " altitude=" + str(altitude))
+	gpsThread = threading.Thread(target=checkGPS)
+	gpsThread.start()
 
 if args.imu:
 	from BMP280 import *
@@ -168,8 +231,8 @@ def inputsForAGx():
 	#	061	z gyro in units of 0.1 degrees per second
 	#	062	Barometric pressure in units of 0.1 hPa
 	#	063	Temperature in units of 0.01 degrees C
-	#	064	Latitude in units of 0.01 degrees
-	#	065	Longitude in units of 0.01 degrees
+	#	064	Latitude in units of 0.1 degrees
+	#	065	Longitude in units of 0.1 degrees
 	#	066	Altitude in units of meters
 	#	067	Groundspeed in units of kph
 	#	070	Direction relative to true North, 0.1 degrees
@@ -216,8 +279,19 @@ def inputsForAGx():
 		now = datetime.datetime.now()
 		if now.second != lastTimeGPS.second:
 			lastTimeGPS = now
+			
+			lLatitude = round(latitude * 10)
+			lLongitude = round(longitude * 10)
+			lAltitude = round(altitude)
+			lGroundspeed = round(groundspeed)
+			lBearing = round(bearing * 10)
+			
 			# Pack the values for transmission.
-			# ... TBD ...
+			returnValue.append( ( 0o64, lLatitude, 0o77777) )
+			returnValue.append( ( 0o65, lLongitude, 0o77777) )
+			returnValue.append( ( 0o66, lAltitude, 0o77777) )
+			returnValue.append( ( 0o67, lGroundspeed, 0o77777) )
+			returnValue.append( ( 0o70, lBearing, 0o77777) )
 	
 	return returnValue
 
