@@ -205,7 +205,6 @@ if args.manual:
 	os.system('clear')
 	print("Manual DSKY Instructions")
 	print("------------------------")
-	print("")
 	print("Area-selection mode:")
 	print("     RSET    to exit.")
 	print("     PRO     to select PROG area.")
@@ -215,7 +214,6 @@ if args.manual:
 	print("     +       to select lamps.")
 	print("     -       to select key-backlights.")
 	print("     CLR     to toggle COMP ACTY.")
-	print("")
 	print("In numerical-entry mode (after choosing")
 	print("PRO, VERB, NOUN, 1, 2, or 3 in area-")
 	print("selection mode), use these keys:")
@@ -223,8 +221,8 @@ if args.manual:
 	print("     CLR     for blank spaces")
 	print("     KEY REL to backspace")
 	print("     ENTR    returns to area selection")
+	print("     RSET    screenshot")
 	print("     PRO/VERB/NOUN also switch areas")
-	print("")
 	print("For lamp-editing mode, the 14 lamps are")
 	print("ordered ROW-WISE starting from the")
 	print("upper left to the lower right.  For")
@@ -236,8 +234,8 @@ if args.manual:
 	print("     +- for ON and OFF")
 	print("     KEY REL to backspace")
 	print("     ENTR    returns to area selection")
+	print("     RSET    screenshot")
 	print("     PRO/VERB/NOUN also switch areas")
-	print("")
 	input("Hit ENTR to start ... ")
 
 # Responsiveness settings.
@@ -545,12 +543,12 @@ def echoOn(control):
 echoOn(False)
 
 # Get a screenshot.
-def screenshot():
+def screenshot(name):
 	global args
 	print("Creating screenshot ...")
 	img = grab(bbox=(0, 0, 272, 480))
-	img.save(homeDir + "/lastscrn.gif")
-	print("Screenshot saved as lastscrn.gif");
+	img.save(name)
+	print("Screenshot saved as " + name);
 
 # This function is a non-blocking read of a single character from the
 # keyboard.  Returns either the key value (such as '0' or 'V'), or else
@@ -1266,10 +1264,30 @@ if args.manual:
 		stateAREA = 0
 		stateOFFSET = 0
 		compActy = False
+		stateBuffer = [
+			[],
+			[ 'c', 'c' ],
+			[ 'c', 'c' ],
+			[ 'c', 'c' ],
+			[ 'c', 'c', 'c', 'c', 'c', 'c' ],
+			[ 'c', 'c', 'c', 'c', 'c', 'c' ],
+			[ 'c', 'c', 'c', 'c', 'c', 'c' ],
+			[ '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-' ],
+			[ '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-' ]
+		]
+		statePrefix = [ '', 'p', 'v', 'n', 'a', 'b', 'c', 'l', 'k' ]
 		while True:
 			ch = getKey()
 			if ch == "":
 				continue
+			if ch == 'R':
+				name = ''
+				for i in range(1, len(statePrefix)):
+					name += statePrefix[i]
+					for j in range(0, len(stateBuffer[i])):
+						name += stateBuffer[i][j]
+				name += ".png"
+				screenshot(homeDir + '/' + name)
 			if stateAREA == 0:
 				stateOFFSET = 0
 				if ch == 'R':
@@ -1346,6 +1364,7 @@ if args.manual:
 						displayGraphic(col, row, imageMinusOn)
 					else:
 						continue
+					stateBuffer[stateAREA][stateOFFSET] = ch
 					stateOFFSET += 1
 				else:
 					if ch == "C":
@@ -1372,6 +1391,7 @@ if args.manual:
 						displayGraphic(col, row, imageDigit9)
 					else:
 						continue
+					stateBuffer[stateAREA][stateOFFSET] = ch
 					stateOFFSET += 1
 			elif stateAREA == 7: # Lamp area
 				lampNames = [ 	"UPLINK ACTY", "TEMP", "NO ATT", "GIMBAL LOCK",
@@ -1397,10 +1417,12 @@ if args.manual:
 				elif ch == "0":
 					updateLampStatuses(lampNames[stateOFFSET], False)
 					updateLamps()
+					stateBuffer[stateAREA][stateOFFSET] = ch
 					stateOFFSET += 1
 				elif ch == "1":
 					updateLampStatuses(lampNames[stateOFFSET], True)
 					updateLamps()
+					stateBuffer[stateAREA][stateOFFSET] = ch
 					stateOFFSET += 1
 			elif stateAREA == 8: # Key-backlight area
 				keyNames = [ 	"VERB KEY", "NOUN KEY", 
@@ -1428,10 +1450,12 @@ if args.manual:
 				elif ch == "0":
 					updateLampStatuses(keyNames[stateOFFSET], False)
 					updateLamps()
+					stateBuffer[stateAREA][stateOFFSET] = ch
 					stateOFFSET += 1
 				elif ch == "1":
 					updateLampStatuses(keyNames[stateOFFSET], True)
 					updateLamps()
+					stateBuffer[stateAREA][stateOFFSET] = ch
 					stateOFFSET += 1
 			else:
 				stateAREA = 0
@@ -1617,7 +1641,7 @@ def eventLoop():
 		if externalData == "":
 			echoOn(True)
 			timersStop()
-			screenshot()
+			screenshot(homeDir + "/lastscrn.png")
 			root.destroy()
 			if spiHandle >= 0:
 				gpio.spi_close(spiHandle)
