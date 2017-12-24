@@ -576,11 +576,15 @@ do
 		fi
 		if [[ "$CUSTOM_BARE" != "" ]]
 		then
+			if [[ "$NON_NATIVE" == "" ]]
+			then
+				EXTRA_PERIPHERAL="--imu=1 --gps=1"
+			fi
 			if [[ "$DEBUG" == "" ]]
 			then
-				"$SOURCEDIR/piPeripheral/piPeripheral.py" --port=19699 --time=1 &>/dev/null &
+				"$SOURCEDIR/piPeripheral/piPeripheral.py" --port=19699 --time=1 $EXTRA_PERIPHERAL &>/dev/null &
 			else
-				xterm -hold -e "$SOURCEDIR/piPeripheral/piPeripheral.py --port=19699 --time=1" &
+				xterm -hold -e "$SOURCEDIR/piPeripheral/piPeripheral.py --port=19699 --time=1 $EXTRA_PERIPHERAL" &
 			fi
 			STATUS_BARE=$!
 		fi
