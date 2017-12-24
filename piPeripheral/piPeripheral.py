@@ -116,7 +116,7 @@ if args.imu:
 
 # Convert an integer to 15-bit 1's-complement.  If the value doesn't fit into 15
 # bits ... well, then, too bad!
-def to1sComplement(value):
+def toOnesComplement(value):
 	if value < 0:
 		value -= 1
 	return value & 0o77777
