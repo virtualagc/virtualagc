@@ -15,6 +15,10 @@
 #		2017-12-24 RSB	Finished up adding these features.  Most don't work very
 #				well, and some I'm not even in a position to try,
 #				but there you go!
+#		2017-12-25 RSB	Increased resolution of reported lat/lon, to a hundred-
+#				thousandth of a degree.  Protected GPS acquisition with
+#				mutex to make sure that lat and lon are consistent.
+#				Made the contents of channels 042-050 display-mode dependent.
 #
 # The parts which need to be modified to be target-system specific are the 
 # outputFromAGx() and inputsForAGx() functions.
@@ -52,9 +56,10 @@ cli.add_argument("--port", help="Port for yaAGC/yaAGS, defaulting to 19799 for A
 cli.add_argument("--slow", help="For use on really slow host systems.")
 cli.add_argument("--ags", help="For use with yaAGS (defaults to yaAGC).")
 cli.add_argument("--time", help="Demo current date/time on AGC input channels 040-042.")
-cli.add_argument("--gps", help="Demo current GPS data on AGC, using a BerryGPS or BerryGPS-IMU.")
-cli.add_argument("--imu", help="Demo current IMU data on AGC, using a BerryGPS-IMU.")
+cli.add_argument("--gps", help="Demo current GPS data on AGC, using a BerryGPS or BerryGPS-IMU. Requires --time.")
+cli.add_argument("--imu", help="Demo current IMU data on AGC, using a BerryGPS-IMU.  Requires --time.")
 cli.add_argument("--imudebug", help="Simply print out --imu reading, without using AGC.")
+cli.add_argument("--gpsdebug", help="Generate fake GPS data.")
 args = cli.parse_args()
 
 if args.ags:
@@ -82,14 +87,12 @@ else:
 
 if args.time:
 	import datetime
-	lastTimeTIME = datetime.datetime.now()
+	lastTime = datetime.datetime.now()
 
 if args.gps:
 	from LSM9DS0 import *
-	import datetime
 	import serial
 	import threading
-	lastTimeGPS = datetime.datetime.now()
 	bearing = 0.0
 	groundspeed = 0.0
 	latitude = 0.0
@@ -116,8 +119,11 @@ if args.gps:
 		except:
 			minutes = 0.0
 		return degrees + minutes / 60.0
+	mutex = threading.Lock()
+	fakeLatitude = 36.12345
+	fakeLongitude = -97.54321
 	def checkGPS():
-		global gpsSerialPort, bearing, groundspeed
+		global gpsSerialPort, bearing, groundspeed, latitude, longitude, mutex
 		while True:
 			time.sleep(0.05)
 			line = gpsSerialPort.readline()
@@ -133,6 +139,7 @@ if args.gps:
 				#print("groundspeed=" + str(groundspeed) + " bearing=" + str(bearing))
 			elif len(fields) >= 10 and fields[0] == '$GPGGA':
 				#print('$GPGGA: ' + str(fields))
+				mutex.acquire()
 				try:
 					latitude = dmmDPmToFloat(fields[2])
 					if fields[3] == 'S':
@@ -142,17 +149,23 @@ if args.gps:
 						longitude = -longitude
 					altitude = float(fields[9])
 				except:
-					latitude = 0.0
-					longitude = 0.0
+					if args.gpsdebug:
+						global fakeLatitude, fakeLongitude
+						latitude = fakeLatitude
+						fakeLatitude += 0.00001
+						longitude = fakeLongitude
+						fakeLongitude += 0.00001
+					else:
+						latitude = 0.0
+						longitude = 0.0
 					altitude = 0.0
+				mutex.release()
 				#print("latitude=" + str(latitude) + " longitude=" + str(longitude) + " altitude=" + str(altitude))
 	gpsThread = threading.Thread(target=checkGPS)
 	gpsThread.start()
 
 if args.imu:
 	from BMP280 import *
-	import datetime
-	lastTimeIMU = datetime.datetime.now()
 	
 	# A test.
 	if args.imudebug:
@@ -196,30 +209,15 @@ def toOnesComplement(value):
 # the invalid bits.  We don't need such masks for AGS.)
 def inputsForAGx():
 	returnValue = []
-
-	# Just a demo ... supplies current date/time to AGC on input channels 040-042.
-	# Delete everything associated with args.time (here and above) if you don't
-	# like --time.  It's not necessary for the generic functioning of this program.
-	if args.time:
-		global lastTimeTIME
-		now = datetime.datetime.now()
-		if now.second != lastTimeTIME.second:
-			lastTimeTIME = now
-			# Pack the values for transmission.
-			minutesSeconds = (now.minute << 6) | (now.second)
-			monthsDaysHours = (now.month << 10) | (now.day << 5) | (now.hour)
-			# The values are all positive, so the 1's complement
-			# and 2's complement representations are the same.
-			# The AGC should poll these until channel 040 changes,
-			# and then should immediately read the other ports
-			# (which are guaranteed not to change for at least a minute
-			# after 040 does).
-			returnValue.append( ( 0o42, now.year, 0o77777) )
-			returnValue.append( ( 0o41, monthsDaysHours, 0o77777) )
-			returnValue.append( ( 0o40, minutesSeconds, 0o77777) )
 	
-	# Just a demo ... supplies current BerryGPS-IMU data to AGC on input channels
-	# 051-066.  The values (all 1's-complement) supplied are:
+	global lastTime
+	now = datetime.datetime.now()
+	if now.second == lastTime.second:
+		return []
+	lastTime = now
+	
+	# Just a demo ... supplies current BerryGPS-IMU IMU data to AGC on input channels
+	# 051-063.  The values (all 1's-complement) supplied are:
 	#	051	x-acceleration in units of mm/sec/sec
 	#	052	y-acceleration in units of mm/sec/sec
 	#	053	z-acceleration in units of mm/sec/sec
@@ -231,67 +229,96 @@ def inputsForAGx():
 	#	061	z gyro in units of 0.1 degrees per second
 	#	062	Barometric pressure in units of 0.1 hPa
 	#	063	Temperature in units of 0.01 degrees C
-	#	064	Latitude in units of 0.1 degrees
-	#	065	Longitude in units of 0.1 degrees
-	#	066	Altitude in units of meters
-	#	067	Groundspeed in units of kph
-	#	070	Direction relative to true North, 0.1 degrees
 	# Delete everything associated with args.imu (here and above) if you don't
 	# like --imu.  It's not necessary for the generic functioning of this program.
 	if args.imu:
-		global lastTimeIMU
-		now = datetime.datetime.now()
-		if now.second != lastTimeIMU.second:
-			lastTimeIMU = now
-			
-			# Read stuff from LSM9DS0.
-			acc = readAccelerometer()
-			mag = readMagnetometer()
-			gyro = readGyro()
-			
-			# Read stuff from BMP180.
-			temperature, pressure = readTemperatureAndPressure()
-			
-			# Convert the stuff we just read to 1's-complement.
-			for i in ("x", "y", "z"):
-				acc[i] = toOnesComplement(round(1000*acc[i]))
-				mag[i] = toOnesComplement(round(10000*mag[i]))
-				gyro[i] = toOnesComplement(round(10*gyro[i]))
-			pressure = toOnesComplement(round(10*pressure))
-			temperature = toOnesComplement(round(100*temperature))
-			
-			# Pack the values for transmission.
-			returnValue.append( ( 0o51, acc["x"], 0o77777) )
-			returnValue.append( ( 0o52, acc["y"], 0o77777) )
-			returnValue.append( ( 0o53, acc["z"], 0o77777) )
-			returnValue.append( ( 0o54, mag["x"], 0o77777) )
-			returnValue.append( ( 0o55, mag["y"], 0o77777) )
-			returnValue.append( ( 0o56, mag["z"], 0o77777) )
-			returnValue.append( ( 0o57, gyro["x"], 0o77777) )
-			returnValue.append( ( 0o60, gyro["y"], 0o77777) )
-			returnValue.append( ( 0o61, gyro["z"], 0o77777) )
-			returnValue.append( ( 0o62, pressure, 0o77777) )
-			returnValue.append( ( 0o63, temperature, 0o77777) )
+		# Read stuff from LSM9DS0.
+		acc = readAccelerometer()
+		mag = readMagnetometer()
+		gyro = readGyro()
+		
+		# Read stuff from BMP180.
+		temperature, pressure = readTemperatureAndPressure()
+		
+		# Convert the stuff we just read to 1's-complement.
+		for i in ("x", "y", "z"):
+			acc[i] = toOnesComplement(round(1000*acc[i]))
+			mag[i] = toOnesComplement(round(10000*mag[i]))
+			gyro[i] = toOnesComplement(round(10*gyro[i]))
+		pressure = toOnesComplement(round(10*pressure))
+		temperature = toOnesComplement(round(100*temperature))
+		
+		# Pack the values for transmission.
+		returnValue.append( ( 0o51, acc["x"], 0o77777) )
+		returnValue.append( ( 0o52, acc["y"], 0o77777) )
+		returnValue.append( ( 0o53, acc["z"], 0o77777) )
+		returnValue.append( ( 0o54, mag["x"], 0o77777) )
+		returnValue.append( ( 0o55, mag["y"], 0o77777) )
+		returnValue.append( ( 0o56, mag["z"], 0o77777) )
+		returnValue.append( ( 0o57, gyro["x"], 0o77777) )
+		returnValue.append( ( 0o60, gyro["y"], 0o77777) )
+		returnValue.append( ( 0o61, gyro["z"], 0o77777) )
+		returnValue.append( ( 0o62, pressure, 0o77777) )
+		returnValue.append( ( 0o63, temperature, 0o77777) )
+	
+	# Just a demo ... supplies current BerryGPS-IMU GPS data to AGC on input channels
+	# 064-072.  The values (all 1's-complement) supplied are:
+	#	064	integral part of latitude*10
+	#	065	integral part of longitude*10
+	#	066	Altitude in units of meters
+	#	067	Groundspeed in units of kph
+	#	070	Direction relative to true North, 0.1 degrees
+	#	071	fractional part of latitude*10, times 10000, matches sign
+	#	072	fractional part of longitude*10, times 10000, matches sign
+	# In other words, the full lat and lon are given to a resolution of a hundred-thousandth
+	# of a degree, about 1 meter. For example, if the longitude were -41.623456, then
+	#	channel 065 would be -416
+	#	channel 072 would be 2345
 	# Delete everything associated with args.gps (here and above) if you don't
 	# like --gps.  It's not necessary for the generic functioning of this program.
 	if args.gps:
-		global lastTimeGPS
-		now = datetime.datetime.now()
-		if now.second != lastTimeGPS.second:
-			lastTimeGPS = now
-			
-			lLatitude = round(latitude * 10)
-			lLongitude = round(longitude * 10)
-			lAltitude = round(altitude)
-			lGroundspeed = round(groundspeed)
-			lBearing = round(bearing * 10)
-			
-			# Pack the values for transmission.
-			returnValue.append( ( 0o64, lLatitude, 0o77777) )
-			returnValue.append( ( 0o65, lLongitude, 0o77777) )
-			returnValue.append( ( 0o66, lAltitude, 0o77777) )
-			returnValue.append( ( 0o67, lGroundspeed, 0o77777) )
-			returnValue.append( ( 0o70, lBearing, 0o77777) )
+		global mutex
+		
+		def partitionLatLon10(x):
+			x10 = x * 10
+			integral = int(x10)
+			fractional = x10 - integral
+			fractional = int(10000*fractional)
+			return (integral, fractional)
+		
+		mutex.acquire()
+		integralLat10, fractionalLat10 = partitionLatLon10(latitude)
+		integralLon10, fractionalLon10 = partitionLatLon10(longitude)
+		lAltitude = int(altitude)
+		mutex.release()
+		lGroundspeed = round(groundspeed)
+		lBearing = round(bearing * 10)
+		
+		# Pack the values for transmission.
+		returnValue.append( ( 0o64, toOnesComplement(integralLat10), 0o77777) )
+		returnValue.append( ( 0o65, toOnesComplement(integralLon10), 0o77777) )
+		returnValue.append( ( 0o66, toOnesComplement(lAltitude), 0o77777) )
+		returnValue.append( ( 0o67, toOnesComplement(lGroundspeed), 0o77777) )
+		returnValue.append( ( 0o70, toOnesComplement(lBearing), 0o77777) )
+		returnValue.append( ( 0o71, toOnesComplement(fractionalLat10), 0o77777) )
+		returnValue.append( ( 0o72, toOnesComplement(fractionalLon10), 0o77777) )
+	
+	# Just a demo ... supplies current date/time to AGC on input channels 040-042.
+	# Delete everything associated with args.time (here and above) if you don't
+	# like --time.  It's not necessary for the generic functioning of this program.
+	if args.time:
+		# Pack the values for transmission.
+		minutesSeconds = (now.minute << 6) | (now.second)
+		monthsDaysHours = (now.month << 10) | (now.day << 5) | (now.hour)
+		# The values are all positive, so the 1's complement
+		# and 2's complement representations are the same.
+		# The AGC should poll these until channel 040 changes,
+		# and then should immediately read the other ports
+		# (which are guaranteed not to change for at least a minute
+		# after 040 does).
+		returnValue.append( ( 0o42, now.year, 0o77777) )
+		returnValue.append( ( 0o41, monthsDaysHours, 0o77777) )
+		returnValue.append( ( 0o40, minutesSeconds, 0o77777) )
 	
 	return returnValue
 
@@ -300,24 +327,16 @@ def inputsForAGx():
 # with this output data, which is not processed additionally in any way by the 
 # generic portion of the program.
 def outputFromAGx(channel, value):
-
+	
 	# Just a demo:  prints some stuff output on channels 043-050. Remove at will!
 	if args.time: 
 		# We happen to know (from having written the AGC code!) that
 		# channel 043 is changed first, so we can confidently insert a
 		# newline there to make the printout prettier.
-		if channel == 0o43:
-			print("\nYear = " + str(value))
-		elif channel == 0o44:
-			print("Month = " + str(value))
-		elif channel == 0o45:
-			print("Day = " + str(value))
-		elif channel == 0o46:
-			print("Hour = " + str(value))
-		elif channel == 0o47:
-			print("Minute = " + str(value))
-		elif channel == 0o50:
-			print("Second = " + str(value))
+		if channel >= 0o43 and channel <= 0o50:
+			if channel == 0o43:
+				print("")
+			print("Channel " + oct(channel) + " = " + str(value))
 	
 	return
 
@@ -332,13 +351,21 @@ s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 s.setblocking(0)
 
 def connectToAGC():
+	import sys
+	count = 0
+	sys.stderr.write("Connecting to AGC " + TCP_IP + ":" + str(TCP_PORT) + "\n")
 	while True:
 		try:
 			s.connect((TCP_IP, TCP_PORT))
-			print("Connected to ya" + host + " (" + TCP_IP + ":" + str(TCP_PORT) + ")")
+			sys.stderr.write("Connected.\n")
 			break
 		except socket.error as msg:
-			print("Could not connect to ya" + host + " (" + TCP_IP + ":" + str(TCP_PORT) + "), exiting: " + str(msg))
+			sys.stderr.write(str(msg) + "\n")
+			count += 1
+			if count >= 10:
+				sys.stderr.write("Too many retries ...\n")
+				time.sleep(3)
+				os._exit(1)
 			time.sleep(1)
 
 connectToAGC()

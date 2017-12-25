@@ -8,13 +8,19 @@
 #				template peripheral program (piPeriperal.py)
 #				when it's used with its --time=1 cli switch.
 #		2017-12-24 RSB	Added the stuff for supporting --imu and --gps.
+#		2017-12-25 RSB	Added higher-resolution lat,lon data.  Deleted
+#				the toggling of COMP ACTY on keystroke.  Replaced
+#				use of PRO key for cycling through modes with
+#				+ (for cycling forward) and - (for cycling 
+#				backward).
 #
-# It extends the simple template program described in the tutorial (which
-# only toggles COMP ACTY whenever a DSKY keycode is detected) by 
-# additionally receiving current time&date data in various input channels,
-# displaying that data on the DSKY, and sometimes spitting the unpacked data
-# back out on output channels 043-050.  The input data supported is
-# 1's-complement:
+# It extends the simple template program described in the tutorial by 
+# receiving and displaying various data on input channels for a fake
+# peripheral device defined by the program piPeripheral.py, and 
+# sometimes spitting the unpacked data back out on similarly-defined
+# output channels 043-050.  The input data supported is
+# 1's-complement.  Here are the channels, all inputs unless 
+# explicitly stated otherwise:
 #	Second		Least-significant 6 bits of channel 040
 #	Minute		Next higher 6 bits of channel 040
 #			(Most-significant 3 bits of channel 040 unused)
@@ -23,6 +29,18 @@
 #	Month		Next higher 4 bits of channel 041
 #			(Most-significant bit of channel 041 unused)
 #	Year		Channel 042.
+#	Mode or year	Output channel 043.  If the value is <100,
+#			it is the current display mode, otherwise the
+#			mode is 0 and it is the year.
+#	(TBD)		Output channels 044-050 contain data that's
+#			dependent on the display mode, but generally
+#			reflects what is actually being displayed
+#			on the DSKY.  At present, though, it always
+#			reflects mode 0 evem for other modes, namely,  
+#			044 is the month, 045 is the day, 046 is
+#			the hour, 047 is the minute, and 050 is the
+#			second.  In other modes, they will be something
+#			else. 
 #	X acceleration	Channel 051, mm/sec/sec
 #	Y acceleration	Channel 052, mm/sec/sec
 #	Z acceleration	Channel 053, mm/sec/sec
@@ -34,12 +52,14 @@
 #	Y gyro		Channel 061, in units of 0.1 dps
 #	baro pressure	Channel 062, in units of 0.1 hPa
 #	temperature	Channel 063, in units of 0.01 degrees C
-#	latitude	Channel 064, in units of 0.01 degrees
-#	longitude	Channel 065, in units of 0.01 degrees
+#	latitude10	Channel 064. int(latitude*10)
+#	longitude10	Channel 065. int(longitude*10)
 #	altitude	Channel 066, meters
 #	ground speed	Channel 067, kph
 #	bearing		Channel 070, 0.1 degrees from true North.
-# ... though actually, for channels 051-070, the values from the input
+#	latitudeFrac	Channel 071, int(10000*(fractional part of latitude*10))
+#	longitudeFrac	Channel 072, int(10000*(fractional part of longitude*10))
+# ... though actually, for channels 051-063 & 066-072, the values from the input
 # ports are simply displayed (after conversion to decimal) as-is, so
 # the their interpretations and units aren't enforced by the AGC. 
 # Note that the X, Y, and Z axes mentioned above are relative to
@@ -54,6 +74,8 @@
 #	04		weather-sensor-display mode
 #	05		GPS-location-display mode
 #	06		GPS-track-display mode
+#	07		High-res latitude display mode
+#	08		High-res longitude display mode
 # Specifically, here's what's shown on the display in the 
 # various display modes.  For the time-display mode:
 #	PROG		00
@@ -94,8 +116,8 @@
 #	PROG		05
 #	VERB		blank
 #	NOUN		blank
-#	R1		latitude, 0.01 degrees
-#	R2		longitude, 0.01 degrees
+#	R1		latitude, XX.XX
+#	R2		longitude, XXX.XX
 #	R3		altitude, meters
 # For the GPS-track-display mode:
 #	PROG		06
@@ -104,6 +126,20 @@
 #	R1		ground speed, kph
 #	R2		direction, 0.1 degrees from true North
 #	R3		blank
+# For the hi-res-latitude-display mode:
+#	PROG		07
+#	VERB		blank
+#	NOUN		blank
+#	R1		latitude, XX
+#	R2		latitude, .XXXXX
+#	R3		longitude, XXX.XX
+# For the hi-res-longitude-display mode:
+#	PROG		08
+#	VERB		blank
+#	NOUN		blank
+#	R1		latitude, XX.XXX
+#	R2		latitude, XXX
+#	R3		longitude, .XXXXX
 # The output channels used are:
 #	Year		Channel 043
 #	Month		Channel 044
@@ -146,9 +182,7 @@ NEWJOB                          ERASE                           # Allocate a var
 
 # More variables.
 KEYBUF                          ERASE                           # 040 when empty, 0-037 when holding a keycode
-CASTATUS                        ERASE                           # 0 if COMP ACTY off, 2 if on.
 LAST040                         ERASE                           # Most recent value from input channel 040.
-THIS040                         ERASE                           
 SECOND                          ERASE                           # Storage for components of time
 MINUTE                          ERASE                           
 HOUR                            ERASE                           
@@ -161,12 +195,20 @@ DIGIT2				ERASE
 DIGIT3				ERASE
 DIGIT4				ERASE
 DIGIT5				ERASE   
+SIGNA				ERASE				# For buffering sign+digits in conversion of integer to decimal string.
+DIGIT1A				ERASE
+DIGIT2A				ERASE
+DIGIT3A				ERASE
+DIGIT4A				ERASE
+DIGIT5A				ERASE   
 DSPR				ERASE				# Return address for DSPxxxx functions.
 DIGIT25				ERASE
 DIGIT31				ERASE
 DIVISOR				ERASE				# A dummy variable used to store divisors.
 DSPMODE				ERASE				# display-mode: 0 time, 1 acceleration, 2 magnetometer, etc.
-PROPRESS			ERASE				# 0 if PRO is not pressed, non-zero if it is.
+LLLOW				ERASE				# LS word of lat or lon
+LLHIGH				ERASE				# MS word of lat or lon.
+LLRET				ERASE				# Return address for LL2.
 
                                 SETLOC          4000            # The interrupt-vector table.
 
@@ -260,9 +302,7 @@ STARTUP                         RELINT                          # Reenable inter
                                 CA              NOKEY           # Clear the keypad buffer variable
                                 TS              KEYBUF          # to initially hold an illegal keycode.
                                 CA              ZERO            
-                                TS              CASTATUS  
                                 TS		DSPMODE		# Display mode. 
-                                TS		PROPRESS	# PRO-key history.     
 
 				# Prepare the display in mode 0
 				TC		BLANKALL	# Completely blank the display
@@ -274,62 +314,98 @@ STARTUP                         RELINT                          # Reenable inter
                                 TS              LAST040         
 MAINLOOP                        CS              NEWJOB          # Tickle the Night Watchman.
 
-								#----------------------------------------------------------------------
-								# Occasionally check to see if the PRO key is pressed, using the 
-								# PROPRESS variable to manage the history.  If it is pressed, we
-								# advance the display mode.  Recall that PRO is read on channel
-								# 32, and not on channel 15 (where the other key-codes appear).
-				CA		PROMASK
-				EXTEND
-				RAND		32		# Read channel 32 but mask off everything except the PRO flag
-				EXTEND
-				BZF		ISPRSSD		# PRO is indeed pressed.  Remember channel 32 has inverted polarity.
-				TS		PROPRESS	# Not pressed, so just fall through.
-				TCF		DONEPRO
-ISPRSSD				CA		PROPRESS	# PRO is pressed right now, but is this a change?
-				EXTEND
-				BZF		DONEPRO		# No, was already pressed, so just fall through!
-				CA		ZERO
-				TS		PROPRESS	# Mark PROPRESS variable to show that PRO was recently pressed.
-				CA		DSPMODE		# The pro KEY is newly pressed, so advance display mode.
-				AD		ONE
-				TS		DSPMODE	
-				AD		MINUSSIX	# But wait, the only display modes allowed are 0-6.  Did it go to 7?
-				EXTEND
-				BZMF		CHGMODE		# Fine, <=6, so okay as-is!
-				CA		ZERO		# No, the display mode should wrap to 0.
-				TS		DSPMODE
-CHGMODE				TC		BLANKALL	# Completely blank the display
-				CA		DSPMODE		# Write the display mode to PROG.
-				TC		DSPPROG			
-DONEPRO				NOOP
-								
                                                                 #----------------------------------------------------------------------
-                                                                # Similarly, check if there's a keycode ready, and toggle
-                                                                # DSKY COMP ACTY if there is.
+                                                                # Check if there's a keycode ready, and process the keycode
+                                                                # if there is.
                                 CA              NOKEY           
-                                EXTEND                          
-                                SU              KEYBUF          # Acc will now be zero if no key, non-zero otherwise
-                                EXTEND                          
-                                BZF             ENDKYCK   	# No key, so just jump ahead to the end of this code block.
-                                      
-                                CA              NOKEY           
-                                TS              KEYBUF          # Mark keycode buffer as empty.
-                                CA              CASTATUS        # Toggle COMP ACTY.
-                                EXTEND                          
-                                BZF             CAOFF           
-                                CA              ZERO            
-                                TCF             CATOGGLE        
-CAOFF                           CA              TWO             
-CATOGGLE                        TS              CASTATUS        
-                                EXTEND                          
-                                WRITE           11              # Write to the DSKY lamps
+                                XCH             KEYBUF          # Mark keycode buffer as empty and get keycode into A.
+                                INDEX		A
+                                TCF		KEYTABL
+KEYTABL				TCF		ENDKYCK		# unused
+				TCF		ENDKYCK		# 1
+				TCF		ENDKYCK		# 2
+				TCF		ENDKYCK		# 3
+				TCF		ENDKYCK		# 4
+				TCF		ENDKYCK		# 5
+				TCF		ENDKYCK		# 6
+				TCF		ENDKYCK		# 7
+				TCF		ENDKYCK		# 8
+				TCF		ENDKYCK		# 9
+                                TCF		ENDKYCK		# unused
+                                TCF		ENDKYCK		# unused
+                                TCF		ENDKYCK		# unused
+                                TCF		ENDKYCK		# unused
+                                TCF		ENDKYCK		# unused
+                                TCF		ENDKYCK		# unused
+                                TCF		ENDKYCK		# 0
+                                TCF		ENDKYCK		# VERB
+                                TCF		ENDKYCK		# RSET
+                                TCF		ENDKYCK		# unused
+                                TCF		ENDKYCK		# unused
+                                TCF		ENDKYCK		# unused
+                                TCF		ENDKYCK		# unused
+                                TCF		ENDKYCK		# unused
+                                TCF		ENDKYCK		# unused
+                                TCF		ENDKYCK		# KEY REL
+                                TCF		DSPMODE+	# +
+                                TCF		DSPMODE-	# -
+                                TCF		ENDKYCK		# ENTR
+                                TCF		ENDKYCK		# unused
+                                TCF		ENDKYCK		# CLR
+                                TCF		ENDKYCK		# NOUN
+                                TCF		ENDKYCK		# NOKEY
+                                
+DSPMODE+			CA		DSPMODE		# Increment display mode.
+				AD		ONE
+				TS		DSPMODE
+				AD		MINUS8		# Check for wraparound
+				EXTEND
+				BZMF		RETRIG		# No wraparound
+				CA		ZERO		# Wraparound to 0.
+				TS		DSPMODE  
+                                TCF		RETRIG
+                                
+DSPMODE-			CA		DSPMODE		# Decrement display mode.
+				EXTEND				# but pre-check for wraparound.
+				BZF		WILLWRAP
+				AD		MINUS1
+				TS		DSPMODE
+				TCF		RETRIG
+WILLWRAP			CA		EIGHT
+				TS		DSPMODE
+				TCF		RETRIG
+
+RETRIG				CA		MINUS1		# Trigger immediate redisplay. 
+				TS		LAST040   
+				TCR		BLANKALL
+				                                
 ENDKYCK                         NOOP                            
 
 								#----------------------------------------------------------------------
 								# We've now handled the keystrokes, so we need to update the display.
+								# However, we only do that when data is changed.  We are guaranteed
+								# by our bogus piPeripheral device that all of the input channels we're
+								# interested in just change once per second, and that the LAST channel
+								# written is 040.  So we only do something when we see that 040 has
+								# changed, and we know at that point that we have an entire second
+								# to handle our business.
+				CA		LAST040
+                                EXTEND                          
+                                RXOR            40              # XOR last reading of channel 040 with current value.
+                                EXTEND
+                                BZF		MAINLOOP	# Hasn't changed, so just keep looping.
+                                EXTEND
+                                READ		40
+                                TS		LAST040
+                                
+                                CA		DSPMODE
+                                TCR		DSPPROG
+								
+								# Okay, input-channel 040 has changed, so all other input channels
+								# are ripe for the plucking.  Proceed with displaying.
 								# But exactly what we need to do along those lines depends on the 
-								# display mode, which we handle with a jump-table.
+								# display mode, which we handle with a jump-table.  Note that 
+								# 0 <= DSPMODE <= 8.
 				INDEX		DSPMODE		# JUMP!
 				TCF		MODETABL
 MODETABL			TCF		MODE0
@@ -338,19 +414,12 @@ MODETABL			TCF		MODE0
 				TCF		MODE3
 				TCF		MODE4
 				TCF		MODE5
-				TCF		MODE6				
+				TCF		MODE6
+				TCF		MODE7
+				TCF		MODE8				
 								
                                                                 #----------------------------------------------------------------------
                                                                 # Display-mode 0.
-                                                                # Occasionally check input channel 040 to see if the time (presumably
-                                                                # being reported from time to time by piPeripheral.py) has changed.
-MODE0                           EXTEND                          
-                                READ            40              # Get minutes/seconds
-                                TS              THIS040         
-                                EXTEND                          
-                                SU              LAST040         # Acc will now be zero if time not changed, non-zero otherwise
-                                EXTEND                          
-                                BZF             ENDTMCK         # Unchanged, so just jump ahead to the end of this code block.
                                 
                                                                 # We now know that the time has changed.  Unpack the time
                                                                 # data to get and save year/month/day/hour/minute/second. 
@@ -360,8 +429,7 @@ MODE0                           EXTEND
                                                                 # into L.  Moreover, the divisor must be in erasable memory
                                                                 # (and not just that, but the 10 address-bit subset of erasable
                                                                 # memory).  
-                                CA              THIS040         
-                                TS              LAST040
+MODE0                           CA              LAST040         
 				TS		L		# Minutes,seconds are quotient,remainder of (channel 040)/64.
 				CA		D64
 				TS		DIVISOR
@@ -473,13 +541,26 @@ MODE4 				EXTEND
 
                                                                 #----------------------------------------------------------------------
                                                                 # Display-mode 5.
-MODE5 				EXTEND
+
+MODE5				EXTEND				# Process latitude.
 				READ		064
-				TC		DSPR1
+				TS		LLHIGH
 				EXTEND
+				READ		071
+				TS		LLLOW
+				TCR		LL2
+				TCR		DIG2R1		# Display in R1.
+				
+				EXTEND				# Process longitude.
 				READ		065
-				TC		DSPR2
+				TS		LLHIGH
 				EXTEND
+				READ		072
+				TS		LLLOW
+				TCR		LL2
+				TCR		DIG2R2		# Display in R2.
+				
+				EXTEND				# Process altitude
 				READ		066
 				TC		DSPR3
 				TCF		MAINLOOP
@@ -493,6 +574,57 @@ MODE6 				EXTEND
 				READ		070
 				TC		DSPR2
 				TCF		MAINLOOP
+
+                                                                #----------------------------------------------------------------------
+                                                                # Display-mode 7.
+MODE7				EXTEND				# Process latitude.
+				READ		064
+				TS		LLHIGH
+				EXTEND
+				READ		071
+				TS		LLLOW
+				TCR		LL5
+				TCR		DIG2R1		# Display in R1.
+				TCR		A2DIG
+				TCR		DIG2R2
+				
+				EXTEND				# Process longitude.
+				READ		065
+				TS		LLHIGH
+				EXTEND
+				READ		072
+				TS		LLLOW
+				TCR		LL2
+				TCR		DIG2R3		# Display in R2.
+				
+				TCF		MAINLOOP
+
+                                                                #----------------------------------------------------------------------
+                                                                # Display-mode 8.
+                                                                
+MODE8				EXTEND				# Process latitude.
+				READ		064
+				TS		LLHIGH
+				EXTEND
+				READ		071
+				TS		LLLOW
+				TCR		LL2
+				TCR		DIG2R1		# Display in R1.
+				
+				EXTEND				# Process longitude.
+				READ		065
+				TS		LLHIGH
+				EXTEND
+				READ		072
+				TS		LLLOW
+				TCR		LL5
+				TCR		DIG2R2		# Display in R2.
+				TCR		A2DIG
+				TCR		DIG2R3
+				
+				TCF		MAINLOOP
+
+
 
 #######################################################################################################################################
 # This ends the main loop, which continues forever, so we can put other functions
@@ -538,7 +670,8 @@ BLANKALL 			CA		OPCODEP
 				RETURN
 
 # Convert an integer in the accumulator to SIGN/DIGIT1/.../DIGIT5.  At the end, all 5 DIGITx
-# variables will have values from 0-9, and SIGN will be 0 for + or 1 for -.
+# variables will have values from 0-9, and SIGN will be 0 for + or 1 for -.  Note: calls no
+# other routines.
 CONV10				TS		L		# Save the argument
 				EXTEND
 				BZF		CONV10Z		# Argument is 0.
@@ -574,6 +707,86 @@ CONV10P				CA		TEN
 				LXCH		A
 				TS		DIGIT1
 				RETURN
+				
+# Lat an lon are each input on two input channels, a more-significant one containing the integer part of
+# the value times 10, and a less-significant on containing the fractional part of the value times 10, times
+# 10000.  The LL2 function assumes that those values have been stored in variables called LLHIGH and LLLOW,
+# respectively, and create SIGN, DIGIT1, ..., DIGIT5 containing the value in the form +/- XXX.XX.
+LL2 				EXTEND
+				QXCH		LLRET
+				CA		LLLOW		# Process LS word
+				TCR		CONV10		# Convert to (SIGN, DIGIT1, ..., DIGIT5)
+				TCR		PATT5DIG
+				TCR		DIG2A		# Move SIGN/DIGITx to SIGNA/DIGITxA
+				CA		LLHIGH		# Process MS word
+				TCR		CONV10		# Convert to SIGN/DIGITx
+				TCR		PATT5DIG
+				CA		DIGIT2		# Rearrange the DIGITx values somewhat. (Multiply by 10.)
+				TS		DIGIT1
+				CA		DIGIT3
+				TS		DIGIT2
+				CA		DIGIT4
+				TS		DIGIT3
+				CA		DIGIT5
+				TS		DIGIT4
+				CA		DIGIT2A
+				TS		DIGIT5
+				EXTEND	
+				QXCH		LLRET
+				RETURN
+# Similarly, the LL5 function puts the integral lat or lon in SIGN,DIGITx and 5 decimal places in SIGNA,DIGITxA.
+LL5 				EXTEND
+				QXCH		LLRET
+				CA		LLLOW		# Process LS word
+				TCR		CONV10		# Convert to (SIGN, DIGIT1, ..., DIGIT5)
+				TCR		PATT5DIG
+				TCR		DIG2A		# Move SIGN/DIGITx to SIGNA/DIGITxA
+				CA		LLHIGH		# Process MS word
+				TCR		CONV10		# Convert to SIGN/DIGITx
+				TCR		PATT5DIG
+				CA		DIGIT5		# Rearrange the DIGITx values somewhat. (Divide by 10.)
+				TS		DIGIT1A
+				CA		DIGIT4
+				TS		DIGIT5
+				CA		DIGIT3
+				TS		DIGIT4
+				CA		DIGIT2
+				TS		DIGIT3
+				CA		DIGIT1
+				TS		DIGIT2
+				EXTEND	
+				QXCH		LLRET
+				RETURN
+                                                                
+# Transfer set of SIGN/DIGITx to SIGNA/DIGITxA
+DIG2A				CA		SIGN
+				TS		SIGNA
+				CA		DIGIT1
+				TS		DIGIT1A
+				CA		DIGIT2
+				TS		DIGIT2A
+				CA		DIGIT3
+				TS		DIGIT3A
+				CA		DIGIT4
+				TS		DIGIT4A
+				CA		DIGIT5
+				TS		DIGIT5A
+				RETURN
+# ... and vice-versa.
+A2DIG				CA		SIGNA
+				TS		SIGN
+				CA		DIGIT1A
+				TS		DIGIT1
+				CA		DIGIT2A
+				TS		DIGIT2
+				CA		DIGIT3A
+				TS		DIGIT3
+				CA		DIGIT4A
+				TS		DIGIT4
+				CA		DIGIT5A
+				TS		DIGIT5
+				RETURN
+				
 # The argument was negative.  Must invert.
 CONV10M				CA		ONE		# Record the sign as negative (1 -> SIGN).
 				TS		SIGN
@@ -585,6 +798,7 @@ CONV10M				CA		ONE		# Record the sign as negative (1 -> SIGN).
 # Packs two digits previously formed by CONV10 into a suitable
 # form for output.  The channel 10 opcode has to be added in afterward.
 # Suitable for PROG, VERB, and NOUN areas.  Result returned in A.
+# Note: calls no other routines.
 PACK2DIG			CA		DIGIT5
 				INDEX		A
 				CA		DIGPATTS
@@ -599,7 +813,8 @@ PACK2DIG			CA		DIGIT5
 				AD		L
 				RETURN				
 
-# Convert DIGIT1 ... DIGIT5 to their DSKY patterns.
+# Convert DIGIT1 ... DIGIT5 to their DSKY patterns.  Note: calls no other
+# routines.
 PATT5DIG			CA		DIGIT1
 				INDEX		A
 				CA		DIGPATTS
@@ -663,6 +878,13 @@ DSPR1				EXTEND
 				QXCH		DSPR
 				TCR		CONV10
 				TCR		PATT5DIG
+				EXTEND
+				QXCH		DSPR
+				# Fall through to DIG2R1.
+
+# Display the number in SIGN/DIGITx in DSKY R1
+DIG2R1				EXTEND
+				QXCH		DSPR
 				CA		DIGIT1		# First write DIGIT1
 				AD		OPCODR11
 				EXTEND
@@ -707,6 +929,13 @@ DSPR2				EXTEND
 				QXCH		DSPR
 				TCR		CONV10
 				TCR		PATT5DIG
+				EXTEND
+				QXCH		DSPR
+				# Fall through to DIG2R2.
+
+# Display the number in SIGN/DIGITx in DSKY R2
+DIG2R2				EXTEND
+				QXCH		DSPR
 				CA		DIGIT5		# Save DIGIT5 for DSPR3 routine.
 				TS		DIGIT25
 				CA		DIGIT1		# First, DIGIT1 and DIGIT2
@@ -757,6 +986,13 @@ DSPR3				EXTEND
 				QXCH		DSPR
 				TCR		CONV10
 				TCR		PATT5DIG
+				EXTEND
+				QXCH		DSPR
+				# Fall through to DIG2R3.
+
+# Display the number in SIGN/DIGITx in DSKY R3
+DIG2R3				EXTEND
+				QXCH		DSPR
 				CA		DIGIT1		# Save DIGIT1 for DSPR2 routine.
 				TS		DIGIT31
 				CA		DIGIT25		# First, (R2 DIGIT5 and) DIGIT1
@@ -920,8 +1156,10 @@ O37774                          OCT             37774
 ZERO                            OCT             0  
 ONE				OCT		1             
 TWO                             OCT             2               
-FOUR                            OCT             4  
-MINUSSIX			OCT		-6 
+FOUR                            OCT             4 
+EIGHT				DEC		8
+MINUS1				DEC		-1 
+MINUS8				DEC		-8 
 TEN				DEC		10            
 O37                             OCT             37              # Mask with lowest 5 bits set.
 O77                             OCT             77              # Mask with lowest 6 bits set.
@@ -941,7 +1179,6 @@ OPR25R31			DEC		3 B11
 OPCDR323			DEC		2 B11
 OPCDR345			DEC		1 B11	
 SIGNBIT				DEC		1 B10	
-PROMASK				OCT		20000
 # DSKY digit patterns for the digit 0-9.
 DIGPATTS			DEC		21
 				DEC		3

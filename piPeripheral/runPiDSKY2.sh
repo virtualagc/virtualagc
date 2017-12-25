@@ -581,6 +581,7 @@ do
 			then
 				EXTRA_PERIPHERAL="--imu=1 --gps=1"
 			fi
+			#EXTRA_PERIPHERAL="--gpsdebug=1 $EXTRA_PERIPHERAL"
 			if [[ "$DEBUG" == "" ]]
 			then
 				"$SOURCEDIR/piPeripheral/piPeripheral.py" --port=19699 --time=1 $EXTRA_PERIPHERAL &>/dev/null &
