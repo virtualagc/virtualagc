@@ -499,6 +499,19 @@ do
 				echo $"Fetching from VirtualAGC repository ..."
 				git -C "$SOURCEDIR" fetch --quiet --all
 				git -C "$SOURCEDIR" reset --quiet --hard origin/master
+				echo -n -e "\t"
+				git -C "$SOURCEDIR" show | grep '^Date:' | sed 's/Date: */version: /'
+				echo "Rebuilding yaAGC and yaYUL ..."
+				cp -p "$SOURCEDIR"/yaAGC/yaAGC "$SOURCEDIR"/yaYUL/yaYUL .
+				if make -C "$SOURCEDIR" yaAGC yaYUL &>"$SOURCEDIR"/piPeripheral/rebuild.log
+				then
+					echo -e "\tError: Build failed!"
+					echo -e "\tRestoring prior builds.
+					cp -p yaAGC "$SOURCEDIR"/yaAGC
+					cp -p yaYUL "$SOURCEDIR"/yaYUL
+				else
+					echo -e "\tRebuild successful."
+				fi
 				echo $"Generating new translations ..."
 				cd "$SOURCEDIR/piPeripheral/internationalization"
 				for po in *.po
