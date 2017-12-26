@@ -436,6 +436,7 @@ do
 			elif [[ "$REPLY" == "5" ]]
 			then
 				optionsPiDSKY2="--port=19697 $WINDOW $SLOW $PIGPIO --manual=1" 
+				echo $optionsPiDSKY2
 				"$SOURCEDIR/piPeripheral/piDSKY2.py" $optionsPiDSKY2
 			elif [[ "$REPLY" == "6" ]]
 			then

@@ -1286,6 +1286,10 @@ if args.manual:
 					name += statePrefix[i]
 					for j in range(0, len(stateBuffer[i])):
 						name += stateBuffer[i][j]
+				if compActy:
+					name += "C"
+				else:
+					name += "c"
 				name += ".png"
 				screenshot(homeDir + '/' + name)
 			if stateAREA == 0:
