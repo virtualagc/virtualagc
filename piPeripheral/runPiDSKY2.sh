@@ -506,7 +506,7 @@ do
 				if make -C "$SOURCEDIR" yaAGC yaYUL &>"$SOURCEDIR"/piPeripheral/rebuild.log
 				then
 					echo -e "\tError: Build failed!"
-					echo -e "\tRestoring prior builds.
+					echo -e "\tRestoring prior builds."
 					cp -p yaAGC "$SOURCEDIR"/yaAGC
 					cp -p yaYUL "$SOURCEDIR"/yaYUL
 				else
