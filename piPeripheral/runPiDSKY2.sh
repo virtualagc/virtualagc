@@ -204,6 +204,8 @@ do
 	# Choose a mission.
 	xset r off
 	clear
+	git -C "$SOURCEDIR" show | grep '^Date:' | sed 's/Date: */'$"Version"': /'
+	echo ""
 	echo $"Available missions":
 	echo ""
 	menuItem 0 $"Run"" Apollo 5 LM" $MISSION_DEFAULT
@@ -369,7 +371,7 @@ do
 			else
 				echo "$AGC_IP:$AGC_PORT"
 			fi
-			git -C "$SOURCEDIR" show | grep '^Date:' | sed 's/Date: */version: /'
+			git -C "$SOURCEDIR" show | grep '^Date:' | sed 's/Date: */'$"Version"': /'
 			echo ""
 			echo $"Maintenance menu":
 			if [[ "$NON_NATIVE" == "" ]]
@@ -386,6 +388,7 @@ do
 				menuItem 7 $"Update"" VirtualAGC" RSET
 			fi
 			menuItem 8 $"Lamp test" RSET
+			menuItem 9 $"Reset settings" RSET
 			menuItem RSET $"Mission menu" RSET
 			read -p $"Choose a number"": " -t 15 -n 1
 			echo ""
@@ -499,20 +502,20 @@ do
 				echo $"Fetching from VirtualAGC repository ..."
 				git -C "$SOURCEDIR" fetch --quiet --all
 				git -C "$SOURCEDIR" reset --quiet --hard origin/master
-				echo -n -e "New "
-				git -C "$SOURCEDIR" show | grep '^Date:' | sed 's/Date: */version: /'
-				echo "Rebuilding yaAGC and yaYUL ..."
+				echo -n -e $"New "
+				git -C "$SOURCEDIR" show | grep '^Date:' | sed 's/Date: */'$"version"': /'
+				echo $"Rebuilding yaAGC and yaYUL ..."
 				cp -p "$SOURCEDIR"/yaAGC/yaAGC "$SOURCEDIR"/yaYUL/yaYUL .
 				make -C "$SOURCEDIR"/yaAGC clean &>/dev/null
 				make -C "$SOURCEDIR"/yaYUL clean &>/dev/null
 				make -C "$SOURCEDIR" yaAGC yaYUL &>"$SOURCEDIR"/piPeripheral/rebuild.log
 				if [[ $? -eq 0 ]]
 				then
-					echo -e "\tRebuild successful."
+					echo -e "\t"$"Rebuild successful."
 				else
-					echo -e "\tError: Build failed!"
-					echo -e "\tRestoring prior builds."
-					echo -e "\tSee rebuild.log."
+					echo -e "\t"$"Error: Build failed!"
+					echo -e "\t"$"Restoring prior builds."
+					echo -e "\t"$"See rebuild.log."
 					cp -p yaAGC "$SOURCEDIR"/yaAGC
 					cp -p yaYUL "$SOURCEDIR"/yaYUL
 				fi
@@ -537,6 +540,9 @@ do
 				"$SOURCEDIR/piPeripheral/piDSKY2.py" $optionsPiDSKY2
 				sleep 1
 				read -p $"Hit ENTR to continue"" ..."
+			elif [[ "$REPLY" == "9" ]]
+			then
+				rm $HOME/runPiDSKY2.cfg
 			fi
 		else
 			echo ""
