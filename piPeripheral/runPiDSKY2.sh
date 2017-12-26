@@ -505,15 +505,16 @@ do
 				cp -p "$SOURCEDIR"/yaAGC/yaAGC "$SOURCEDIR"/yaYUL/yaYUL .
 				make -C "$SOURCEDIR"/yaAGC clean &>/dev/null
 				make -C "$SOURCEDIR"/yaYUL clean &>/dev/null
-				if make -C "$SOURCEDIR" yaAGC yaYUL &>"$SOURCEDIR"/piPeripheral/rebuild.log
+				make -C "$SOURCEDIR" yaAGC yaYUL &>"$SOURCEDIR"/piPeripheral/rebuild.log
+				if [[ $? -eq 0 ]]
 				then
+					echo -e "\tRebuild successful."
+				else
 					echo -e "\tError: Build failed!"
 					echo -e "\tRestoring prior builds."
 					echo -e "\tSee rebuild.log."
 					cp -p yaAGC "$SOURCEDIR"/yaAGC
 					cp -p yaYUL "$SOURCEDIR"/yaYUL
-				else
-					echo -e "\tRebuild successful."
 				fi
 				echo $"Generating new translations ..."
 				cd "$SOURCEDIR/piPeripheral/internationalization"
