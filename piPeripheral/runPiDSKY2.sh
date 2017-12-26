@@ -499,10 +499,12 @@ do
 				echo $"Fetching from VirtualAGC repository ..."
 				git -C "$SOURCEDIR" fetch --quiet --all
 				git -C "$SOURCEDIR" reset --quiet --hard origin/master
-				echo -n -e "\t"
+				echo -n -e "New "
 				git -C "$SOURCEDIR" show | grep '^Date:' | sed 's/Date: */version: /'
 				echo "Rebuilding yaAGC and yaYUL ..."
 				cp -p "$SOURCEDIR"/yaAGC/yaAGC "$SOURCEDIR"/yaYUL/yaYUL .
+				make -C "$SOURCEDIR"/yaAGC clean
+				make -C "$SOURCEDIR"/yaYUL clean
 				if make -C "$SOURCEDIR" yaAGC yaYUL &>"$SOURCEDIR"/piPeripheral/rebuild.log
 				then
 					echo -e "\tError: Build failed!"
