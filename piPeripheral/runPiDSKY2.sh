@@ -503,12 +503,13 @@ do
 				git -C "$SOURCEDIR" show | grep '^Date:' | sed 's/Date: */version: /'
 				echo "Rebuilding yaAGC and yaYUL ..."
 				cp -p "$SOURCEDIR"/yaAGC/yaAGC "$SOURCEDIR"/yaYUL/yaYUL .
-				make -C "$SOURCEDIR"/yaAGC clean
-				make -C "$SOURCEDIR"/yaYUL clean
+				make -C "$SOURCEDIR"/yaAGC clean &>/dev/null
+				make -C "$SOURCEDIR"/yaYUL clean &>/dev/null
 				if make -C "$SOURCEDIR" yaAGC yaYUL &>"$SOURCEDIR"/piPeripheral/rebuild.log
 				then
 					echo -e "\tError: Build failed!"
 					echo -e "\tRestoring prior builds."
+					echo -e "\tSee rebuild.log."
 					cp -p yaAGC "$SOURCEDIR"/yaAGC
 					cp -p yaYUL "$SOURCEDIR"/yaYUL
 				else
