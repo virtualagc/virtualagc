@@ -29,6 +29,8 @@ fi
 export TEXTDOMAIN=runPiDSKY2.sh
 export TEXTDOMAINDIR=$HOME/locale
 
+playbackIteration=0
+
 # Turn off keyboard repeat, but make sure it gets restored on exit.
 function cleanup {
 	echo ""
@@ -574,6 +576,8 @@ do
 	if [[ "$PLAYBACK" != "" ]]
 	then
 		optionsPiDSKY2="$optionsPiDSKY2 $PLAYBACK"
+		playbackIteration=$((playbackIteration+1))
+		echo "Playback iteration #$playbackIteration"
 	elif [[ "$EXTERNAL_AGC" != "" ]]
 	then
 		optionsPiDSKY2="$optionsPiDSKY2 --host=$AGC_IP --port=$AGC_PORT"
@@ -647,6 +651,12 @@ do
 	fi
 	
 	echo $"Cleaning up ..."
-	kill $YAGC_PID $YADSKY2_PID $STATUS_PID $STATUS_BARE
+	kill $YAGC_PID $YADSKY2_PID $STATUS_PID $STATUS_BARE &>/dev/null
 	wait $YAGC_PID $YADSKY2_PID $STATUS_PID $STATUS_BARE &>/dev/null
+	
+	if [[ "$PLAYBACK" != "" ]]
+	then
+		echo "Playback iteration #$playbackIteration completed."
+		sleep 2
+	fi
 done
