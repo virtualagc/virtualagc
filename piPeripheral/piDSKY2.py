@@ -1418,12 +1418,12 @@ if args.manual:
 						stateOFFSET -= 1
 				elif stateOFFSET >= len(lampNames):
 					continue
-				elif ch == "0":
+				elif ch == "-":
 					updateLampStatuses(lampNames[stateOFFSET], False)
 					updateLamps()
 					stateBuffer[stateAREA][stateOFFSET] = ch
 					stateOFFSET += 1
-				elif ch == "1":
+				elif ch == "+":
 					updateLampStatuses(lampNames[stateOFFSET], True)
 					updateLamps()
 					stateBuffer[stateAREA][stateOFFSET] = ch
@@ -1451,12 +1451,12 @@ if args.manual:
 						stateOFFSET -= 1
 				elif stateOFFSET >= len(keyNames):
 					continue
-				elif ch == "0":
+				elif ch == "-":
 					updateLampStatuses(keyNames[stateOFFSET], False)
 					updateLamps()
 					stateBuffer[stateAREA][stateOFFSET] = ch
 					stateOFFSET += 1
-				elif ch == "1":
+				elif ch == "+":
 					updateLampStatuses(keyNames[stateOFFSET], True)
 					updateLamps()
 					stateBuffer[stateAREA][stateOFFSET] = ch
