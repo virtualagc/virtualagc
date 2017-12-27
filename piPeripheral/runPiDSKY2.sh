@@ -578,6 +578,8 @@ do
 		optionsPiDSKY2="$optionsPiDSKY2 $PLAYBACK"
 		playbackIteration=$((playbackIteration+1))
 		echo "Playback iteration #$playbackIteration"
+		d="`date`"
+		echo "$d: Playback iteration #$playbackIteration" >>playback.log
 	elif [[ "$EXTERNAL_AGC" != "" ]]
 	then
 		optionsPiDSKY2="$optionsPiDSKY2 --host=$AGC_IP --port=$AGC_PORT"
