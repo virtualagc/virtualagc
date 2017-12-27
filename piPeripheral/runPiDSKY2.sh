@@ -657,6 +657,8 @@ do
 	if [[ "$PLAYBACK" != "" ]]
 	then
 		echo "Playback iteration #$playbackIteration completed."
-		sleep 2
+	else
+		echo "Returning to mission menu in 2 seconds ..."
 	fi
+	sleep 2
 done
