@@ -10,12 +10,17 @@
 # LANGUAGE has been set.  There are notes at the top of 
 # internationalization/it.po that tell how this works.
 
-runcount="`ps aux | grep 'bash.*runPiDSKY2' | grep -c --invert-match grep`"
-if [[ $runcount -gt 1 ]]
+# For some reason, the following reports 1 outside of a script and 2 
+# within one.  I think it may have something to do with `` having to
+# start another copy of bash, but I haven't been able to pin it down
+# exactly.
+runcount=`ps aux | grep 'bash.*runPiDSKY2' | grep -c --invert-match grep`
+if [[ $runcount != 2 ]]
 then
-	# Already running.
+	#echo Already running, runcount=$runcount.
 	exit 1
 fi
+
 ARGLIST="$@"
 if [[ "$LANGUAGE" == "" ]]
 then
