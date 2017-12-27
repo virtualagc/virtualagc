@@ -10,6 +10,12 @@
 # LANGUAGE has been set.  There are notes at the top of 
 # internationalization/it.po that tell how this works.
 
+if ps aux | grep 'runPiDSKY2' | grep --invert-match grep
+then
+	# Already running.
+	exit 1
+fi
+
 ARGLIST="$@"
 if [[ "$LANGUAGE" == "" ]]
 then
