@@ -118,7 +118,7 @@
 #				I hope I tracked all those down and fixed them.
 #
 # About the design of this program ... yes, a real Python developer would 
-# objectify it and have lots and lots of individual models defining the objects.
+# objectify it and have lots and lots of individual modules defining the objects.
 # However, I'm not a real Python developer, and this is simply one stand-alone
 # file comprising all of the functionality.  In other words, I don't see that
 # any of this code is particularly reusable, so I haven't bothered to attempt to
