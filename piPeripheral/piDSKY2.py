@@ -1541,6 +1541,7 @@ def eventLoop():
 	inputBuffer = bytearray(packetSize)
 	leftToRead = packetSize
 	view = memoryview(inputBuffer)
+	cannedRsetCount = 0
 	
 	didSomething = False
 	while True:
@@ -1572,6 +1573,20 @@ def eventLoop():
 					if channel == 0o15:
 						#print("Playback keystroke event " + oct(channel) + " " + oct(value))
 						name = keyNames[value & 0o37]
+						if name == "RSET KEY":
+							cannedRsetCount += 1
+							if cannedRsetCount >= 5:
+								echoOn(True)
+								timersStop()
+								root.destroy()
+								if spiHandle >= 0:
+									gpio.spi_close(spiHandle)
+								if gpio != "":
+									gpio.stop()
+								os.system("xset r on &")
+								return	
+						else:
+							cannedRsetCount == 0
 						updateLampStatusesAndLamps(name, False)
 						t = threading.Timer(0.32, updateLampStatusesAndLamps, (name, True))
 						t.start()
