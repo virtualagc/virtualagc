@@ -111,6 +111,11 @@
 #				to yaAGC external to Pi.
 #		2017-12-20 RSB	Added --lamptest.
 #		2017-12-21 RSB	Added --manual.
+#		2017-12-27 RSB	The SPI handle wasn't getting released in under
+#				some circumstances when the program exited,
+#				causing re-runs to eventually fail when no
+#				more SPI handles were available in PIGPIOD.
+#				I hope I tracked all those down and fixed them.
 #
 # About the design of this program ... yes, a real Python developer would 
 # objectify it and have lots and lots of individual models defining the objects.
@@ -369,6 +374,16 @@ def writeSpi(address, value):
 	global gpio, spiHandle
 	gpio.spi_write(spiHandle, [ address, value ])
 
+def shutdownGPIO():
+	global spiHandle, gpio
+	if args.pigpio:
+		if spiHandle >= 0:
+			gpio.spi_close(spiHandle)
+			spiHandle = -1
+		if gpio != "":
+			gpio.stop()
+			gpio = ""
+
 if args.pigpio:
 	import pigpio
 	gpio = pigpio.pi()
@@ -380,8 +395,11 @@ if args.pigpio:
 	if spiHandle < 0:
 		sys.stderr.write("Cannot open SPI channel.\n")
 		time.sleep(spiErrorMessageWaitTime)
+		if gpio != "":
+			gpio.stop()
+			gpio = ""
 		os.exit(1)
-	
+
 	# Set up the LED-driver chip.
 	for i in range(1, 9):
 		writeSpi(i, 0) # The initial settings of the "digits".
@@ -1229,10 +1247,7 @@ if args.lamptest:
 	echoOn(True)
 	timersStop()
 	root.destroy()
-	if spiHandle >= 0:
-		gpio.spi_close(spiHandle)
-	if gpio != "":
-		gpio.stop()
+	shutdownGPIO()
 	os.system("xset r on &")
 	os._exit(0)
 
@@ -1469,10 +1484,7 @@ if args.manual:
 		echoOn(True)
 		timersStop()
 		root.destroy()
-		if spiHandle >= 0:
-			gpio.spi_close(spiHandle)
-		if gpio != "":
-			gpio.stop()
+		shutdownGPIO()
 		os.system("xset r on &")
 		os._exit(0)
 	
@@ -1512,6 +1524,7 @@ def connectToAGC():
 			if ch != "":
 				sys.sderr.write("Exiting ...")
 				echoOn(True)
+				shutdownGPIO()
 				os._exit(1)
 
 if args.playback:
@@ -1579,10 +1592,7 @@ def eventLoop():
 								echoOn(True)
 								timersStop()
 								root.destroy()
-								if spiHandle >= 0:
-									gpio.spi_close(spiHandle)
-								if gpio != "":
-									gpio.stop()
+								shutdownGPIO()
 								os.system("xset r on &")
 								return	
 						else:
@@ -1662,10 +1672,7 @@ def eventLoop():
 			timersStop()
 			screenshot(homeDir + "/lastscrn.png")
 			root.destroy()
-			if spiHandle >= 0:
-				gpio.spi_close(spiHandle)
-			if gpio != "":
-				gpio.stop()
+			shutdownGPIO()
 			os.system("xset r on &")
 			return
 		for i in range(0, len(externalData)):
@@ -1680,6 +1687,7 @@ eventLoopThread.start()
 
 root.mainloop()
 
+shutdownGPIO()
 os._exit(0)
 
 
