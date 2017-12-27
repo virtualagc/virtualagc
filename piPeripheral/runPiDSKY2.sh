@@ -576,10 +576,6 @@ do
 	if [[ "$PLAYBACK" != "" ]]
 	then
 		optionsPiDSKY2="$optionsPiDSKY2 $PLAYBACK"
-		playbackIteration=$((playbackIteration+1))
-		echo "Playback iteration #$playbackIteration"
-		d="`date`"
-		echo "$d: Playback iteration #$playbackIteration" >>playback.log
 	elif [[ "$EXTERNAL_AGC" != "" ]]
 	then
 		optionsPiDSKY2="$optionsPiDSKY2 --host=$AGC_IP --port=$AGC_PORT"
@@ -645,7 +641,20 @@ do
 	then
 		if [[ "$DEBUG" == "" ]]
 		then
+			if [[ "$PLAYBACK" != "" ]]
+			then
+				playbackIteration=$((playbackIteration+1))
+				echo "Starting playback iteration #$playbackIteration"
+				d="`date`"
+				echo "$d: Starting playback iteration #$playbackIteration" >>playback.log
+			fi
 			"$SOURCEDIR/piPeripheral/piDSKY2.py" $optionsPiDSKY2 >/dev/null
+			if [[ "$PLAYBACK" != "" ]]
+			then
+				echo "Finished playback iteration #$playbackIteration"
+				d="`date`"
+				echo "$d: Finished playback iteration #$playbackIteration" >>playback.log
+			fi
 		else
 			"$SOURCEDIR/piPeripheral/piDSKY2.py" $optionsPiDSKY2
 			read -p "Hit ENTR to continue ..."
@@ -656,11 +665,6 @@ do
 	kill $YAGC_PID $YADSKY2_PID $STATUS_PID $STATUS_BARE &>/dev/null
 	wait $YAGC_PID $YADSKY2_PID $STATUS_PID $STATUS_BARE &>/dev/null
 	
-	if [[ "$PLAYBACK" != "" ]]
-	then
-		echo "Playback iteration #$playbackIteration completed."
-	else
-		echo "Returning to mission menu in 2 seconds ..."
-	fi
+	echo "Returning to mission menu in 2 seconds ..."
 	sleep 2
 done
