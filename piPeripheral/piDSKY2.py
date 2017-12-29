@@ -116,6 +116,10 @@
 #				causing re-runs to eventually fail when no
 #				more SPI handles were available in PIGPIOD.
 #				I hope I tracked all those down and fixed them.
+#		2017-12-28 RSB	Added a little extra (probably unnecessary) code
+#				to insure shutdown of PIGPIO on termination.
+#				Tests of yesterday's SPI-shutdown code have been
+#				working fine, though.
 #
 # About the design of this program ... yes, a real Python developer would 
 # objectify it and have lots and lots of individual modules defining the objects.
@@ -375,14 +379,16 @@ def writeSpi(address, value):
 	gpio.spi_write(spiHandle, [ address, value ])
 
 def shutdownGPIO():
-	global spiHandle, gpio
 	if args.pigpio:
+		global spiHandle, gpio
 		if spiHandle >= 0:
 			gpio.spi_close(spiHandle)
 			spiHandle = -1
 		if gpio != "":
 			gpio.stop()
 			gpio = ""
+import atexit
+atexit.register(shutdownGPIO)
 
 if args.pigpio:
 	import pigpio

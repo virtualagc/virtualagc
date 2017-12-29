@@ -19,6 +19,8 @@
 #				thousandth of a degree.  Protected GPS acquisition with
 #				mutex to make sure that lat and lon are consistent.
 #				Made the contents of channels 042-050 display-mode dependent.
+#		2017-12-28 RSB	Added some code that hopefully enforces shutdown of 
+#				GPIO on exit.  Probably unnecessary.
 #
 # The parts which need to be modified to be target-system specific are the 
 # outputFromAGx() and inputsForAGx() functions.
@@ -61,6 +63,20 @@ cli.add_argument("--imu", help="Demo current IMU data on AGC, using a BerryGPS-I
 cli.add_argument("--imudebug", help="Simply print out --imu reading, without using AGC.")
 cli.add_argument("--gpsdebug", help="Generate fake GPS data.")
 args = cli.parse_args()
+
+gpio = ""
+spiHandle = -1
+def shutdownGPIO():
+	if args.imu or args.gps:
+		global spiHandle, gpio
+		if spiHandle >= 0:
+			gpio.spi_close(spiHandle)
+			spiHandle = -1
+		if gpio != "":
+			gpio.stop()
+			gpio = ""
+import atexit
+atexit.register(shutdownGPIO)
 
 if args.ags:
 	host="AGS"
@@ -364,8 +380,9 @@ def connectToAGC():
 			count += 1
 			if count >= 10:
 				sys.stderr.write("Too many retries ...\n")
+				shutdownGPIO()
 				time.sleep(3)
-				os._exit(1)
+				sys.exit(1)
 			time.sleep(1)
 
 connectToAGC()
