@@ -20,6 +20,21 @@
 ;				did 3 weeks ago.  These were pages 1590-1598 with
 ;				no errors found.
 ;		2017-02-01 MAS	Changed unused words to used @.
+;		2017-12-29 RSB	Adjusted on the assumption that yaYUL uses the
+;				command-line switch --bailout=BAILOUT1, which
+;				results in the address of the BAILOUT1 function
+;				(5716) being stored at address 7776.  This is
+;				outside the range of used fixed-memory, and 
+;				outside the range of the self-test.  The
+;				code is inserted for the purpose of using
+;				fictitious input-channel 0162 to trigger
+;				1201 or 1202 alarms on demand, which is useful
+;				for generating simulation data that corresponds
+;				closely with the original mission.  However,
+;				this extra word at 7776 was not present in the
+;				original rope, and can be removed (along with
+;				yuYUL's --bailout CLI switch) if simulation of
+;				such 1201/1202 alarms on demand is not needed.
 ;
 ; As usual, banks marked V or A have been proofed visually or aurally without 
 ; errors found, while V(n) or A(n) have been proofed with n errors found.
@@ -202,7 +217,7 @@ BANK=2
 ; p. 1594, 6000, A
 
 BANK=3
-
+CHECKWORDS=01776
 00464 34764 54001 40000 52761 04635 10024 00024 
 00031 46021 00004 70110 54110 44752 00006 03012 
 00002 41000 00006 36026 15165 03024 66107 36036 
@@ -367,7 +382,7 @@ BANK=3
 70000 73777 74000 74056 77700 77774 77775 77776 
 74740 10000 15423 15402 00006 07754 07756 07757 
 61751   @     @     @     @     @     @     @   
-  @     @     @     @     @     @     @     @   
+  @     @     @     @     @     @   05716   @   
 
 ; p. 1598, 00,2000, A
 

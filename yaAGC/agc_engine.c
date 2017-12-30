@@ -578,11 +578,11 @@ CpuWriteIO (agc_t * State, int Address, int Value)
       // settings cannot be read back out, so after setting the traps the
       // enable bits are masked out.
       if (Value & 004000)
-        State->Trap31A = 1;
+	State->Trap31A = 1;
       if (Value & 010000)
-        State->Trap31B = 1;
+	State->Trap31B = 1;
       if (Value & 020000)
-        State->Trap32 = 1;
+	State->Trap32 = 1;
 
       Value &= 043777;
     }
@@ -597,7 +597,7 @@ CpuWriteIO (agc_t * State, int Address, int Value)
       // Don't allow the AGC warning input to be reset if the light
       // is still on
       if (State->WarningFilter > WARNING_FILTER_THRESHOLD)
-        State->InputChannel[Address] &= 057777;
+	State->InputChannel[Address] &= 057777;
 
       // The actual value that was written now doesn't matter, so make sure
       // no changes occur.
@@ -612,7 +612,7 @@ CpuWriteIO (agc_t * State, int Address, int Value)
       // If the Night Watchman was recently tripped, its CH77 bit
       // is forcibly asserted (unlike all the others) for 1.28s
       if (State->NightWatchmanTripped)
-        Value |= CH77_NIGHT_WATCHMAN;
+	Value |= CH77_NIGHT_WATCHMAN;
     }
   else if (Address == 011 && (Value & 01000))
     {
@@ -664,10 +664,10 @@ FindMemoryWord (agc_t * State, int Address12)
 
   // Check to see if NEWJOB (67) has been accessed for Night Watchman
   if (Address12 == 067)
-  {
-    // Address 67 has been accessed in some way. Clear the Night Watchman.
-    State->NightWatchman = 0;
-  }
+    {
+      // Address 67 has been accessed in some way. Clear the Night Watchman.
+      State->NightWatchman = 0;
+    }
 
   // It should be noted as far as unswitched-erasable and common-fixed memory
   // is concerned, that the following rules actually do result in continuous
@@ -701,8 +701,9 @@ FindMemoryWord (agc_t * State, int Address12)
   if (State->CheckParity)
     {
       // Check parity for fixed memory if such checking is enabled
-      uint16_t LinearAddr = AdjustmentFB*02000 + (Address12 & 01777);
-      int16_t ExpectedParity = (State->Parities[LinearAddr / 32] >> (LinearAddr % 32)) & 1;
+      uint16_t LinearAddr = AdjustmentFB * 02000 + (Address12 & 01777);
+      int16_t ExpectedParity = (State->Parities[LinearAddr / 32]
+	  >> (LinearAddr % 32)) & 1;
       int16_t Word = ((*Addr) << 1) | ExpectedParity;
       Word ^= (Word >> 8);
       Word ^= (Word >> 4);
@@ -710,12 +711,12 @@ FindMemoryWord (agc_t * State, int Address12)
       Word ^= (Word >> 1);
       Word &= 1;
       if (Word != 1)
-        {
-          // The program is trying to access unused fixed memory, which
-          // will trigger a parity alarm.
-          State->ParityFail = 1;
-          State->InputChannel[077] |= CH77_PARITY_FAIL;
-        }
+	{
+	  // The program is trying to access unused fixed memory, which
+	  // will trigger a parity alarm.
+	  State->ParityFail = 1;
+	  State->InputChannel[077] |= CH77_PARITY_FAIL;
+	}
     }
   return Addr;
 }
@@ -724,67 +725,67 @@ FindMemoryWord (agc_t * State, int Address12)
 #if 0
 static void
 CollectCoverage (agc_t * State, int Address12, int Read, int Write, int Instruction)
-{
-  int AdjustmentEB, AdjustmentFB;
+  {
+    int AdjustmentEB, AdjustmentFB;
 
-  if (!CoverageCounts)
-  return;
+    if (!CoverageCounts)
+    return;
 
-  // Get rid of the parity bit.
-  Address12 = Address12;
+    // Get rid of the parity bit.
+    Address12 = Address12;
 
-  // Make sure the darn thing really is 12 bits.
-  Address12 &= 07777;
+    // Make sure the darn thing really is 12 bits.
+    Address12 &= 07777;
 
-  if (Address12 < 00400)// Unswitched-erasable.
-    {
-      AdjustmentEB = 0;
-      goto Erasable;
-    }
-  else if (Address12 < 01000)	// Unswitched-erasable (continued).
-    {
-      AdjustmentEB = 1;
-      goto Erasable;
-    }
-  else if (Address12 < 01400)	// Unswitched-erasable (continued).
-    {
-      AdjustmentEB = 2;
-      goto Erasable;
-    }
-  else if (Address12 < 02000)	// Switched-erasable.
-    {
-      // Recall that the parity bit is accounted for in the shift below.
-      AdjustmentEB = (7 & (c (RegEB) >> 8));
-      Erasable:
-      Address12 &= 00377;
-      if (Read)
-      ErasableReadCounts[AdjustmentEB][Address12]++;
-      if (Write)
-      ErasableWriteCounts[AdjustmentEB][Address12]++;
-      if (Instruction)
-      ErasableInstructionCounts[AdjustmentEB][Address12]++;
-    }
-  else if (Address12 < 04000)	// Fixed-switchable.
-    {
-      AdjustmentFB = (037 & (c (RegFB) >> 10));
-      // Account for the superbank bit. 
-      if (030 == (AdjustmentFB & 030) && (State->OutputChannel7 & 0100) != 0)
-      AdjustmentFB += 010;
-      Fixed:
-      FixedAccessCounts[AdjustmentFB][Address12 & 01777]++;
-    }
-  else if (Address12 < 06000)	// Fixed-fixed.
-    {
-      AdjustmentFB = 2;
-      goto Fixed;
-    }
-  else				// Fixed-fixed (continued).
-    {
-      AdjustmentFB = 3;
-      goto Fixed;
-    }
-  return;
-}
+    if (Address12 < 00400)// Unswitched-erasable.
+      {
+	AdjustmentEB = 0;
+	goto Erasable;
+      }
+    else if (Address12 < 01000)	// Unswitched-erasable (continued).
+      {
+	AdjustmentEB = 1;
+	goto Erasable;
+      }
+    else if (Address12 < 01400)	// Unswitched-erasable (continued).
+      {
+	AdjustmentEB = 2;
+	goto Erasable;
+      }
+    else if (Address12 < 02000)	// Switched-erasable.
+      {
+	// Recall that the parity bit is accounted for in the shift below.
+	AdjustmentEB = (7 & (c (RegEB) >> 8));
+	Erasable:
+	Address12 &= 00377;
+	if (Read)
+	ErasableReadCounts[AdjustmentEB][Address12]++;
+	if (Write)
+	ErasableWriteCounts[AdjustmentEB][Address12]++;
+	if (Instruction)
+	ErasableInstructionCounts[AdjustmentEB][Address12]++;
+      }
+    else if (Address12 < 04000)	// Fixed-switchable.
+      {
+	AdjustmentFB = (037 & (c (RegFB) >> 10));
+	// Account for the superbank bit.
+	if (030 == (AdjustmentFB & 030) && (State->OutputChannel7 & 0100) != 0)
+	AdjustmentFB += 010;
+	Fixed:
+	FixedAccessCounts[AdjustmentFB][Address12 & 01777]++;
+      }
+    else if (Address12 < 06000)	// Fixed-fixed.
+      {
+	AdjustmentFB = 2;
+	goto Fixed;
+      }
+    else				// Fixed-fixed (continued).
+      {
+	AdjustmentFB = 3;
+	goto Fixed;
+      }
+    return;
+  }
 #endif //0
 
 //-----------------------------------------------------------------------------
@@ -1258,7 +1259,7 @@ CounterDINC (agc_t *State, int CounterNum, int16_t * Counter)
     }
   else if (040000 & i)			// Negative?
     {
-      i = AddSP16(SignExtend(i), SignExtend(AGC_P1)) & 077777;
+      i = AddSP16 (SignExtend (i), SignExtend (AGC_P1)) & 077777;
 
       // Emit a MOUT.
       if (CounterNum != 0)
@@ -1266,7 +1267,7 @@ CounterDINC (agc_t *State, int CounterNum, int16_t * Counter)
     }
   else					// Positive?
     {
-      i = AddSP16(SignExtend(i), SignExtend(AGC_M1)) & 077777;
+      i = AddSP16 (SignExtend (i), SignExtend (AGC_M1)) & 077777;
 
       // Emit a POUT.
       if (CounterNum != 0)
@@ -1406,8 +1407,8 @@ PushCduFifo (agc_t *State, int Counter, int IncType)
       return;
     }
   if (CduLog != NULL)
-    fprintf (CduLog, "< " FORMAT_64U " %o %02o\n", State->CycleCounter, Counter,
-	     IncType);
+  fprintf (CduLog, "< " FORMAT_64U " %o %02o\n", State->CycleCounter, Counter,
+      IncType);
   CduFifo = &CduFifos[Counter - FIRST_CDU];
   // It's a little easier if the FIFO is completely empty.
   if (CduFifo->Size == 0)
@@ -1472,243 +1473,244 @@ ServiceCduFifo (agc_t *State)
       if (DownCount)
 	{
 	  CounterMCDU (Ch);
-	  if (CduLog != NULL)
-	    fprintf (CduLog, ">\t\t" FORMAT_64U " %o 03\n", State->CycleCounter,
-		     CduChecker + FIRST_CDU);
-	}
-      else
-	{
-	  CounterPCDU (Ch);
-	  if (CduLog != NULL)
-	    fprintf (CduLog, ">\t\t" FORMAT_64U " %o 01\n", State->CycleCounter,
-		     CduChecker + FIRST_CDU);
-	}
-      Count--;
-      // Update the FIFO.
-      if (0 != (Count & ~0xC0000000))
-	CduFifo->Counts[CduFifo->Ptr] = Count;
-      else
-	{
-	  // That FIFO entry is exhausted.  Remove it from the FIFO.
-	  CduFifo->Size--;
-	  CduFifo->Ptr++;
-	  if (CduFifo->Ptr >= MAX_CDU_FIFO_ENTRIES)
-	    CduFifo->Ptr = 0;
-	}
-      // And set next update time.
-      // Set up for next update time.  The intervals is are of the form
-      // x, x, y, depending on whether CduIntervalType is 0, 1, or 2.
-      // This is done because with a cycle type of 1024000/12 cycles per
-      // second, the exact CDU update times don't fit on exact cycle
-      // boundaries, but every 3rd CDU update does hit a cycle boundary.
-      if (CduFifo->NextUpdate == 0)
-	CduFifo->NextUpdate = State->CycleCounter;
-      if (CduFifo->IntervalType < 2)
-	{
-	  if (HighRate)
-	    CduFifo->NextUpdate += 13;
-	  else
-	    CduFifo->NextUpdate += 213;
-	  CduFifo->IntervalType++;
-	}
-      else
-	{
-	  if (HighRate)
-	    CduFifo->NextUpdate += 14;
-	  else
-	    CduFifo->NextUpdate += 214;
-	  CduFifo->IntervalType = 0;
-	}
-      // Return an indication that a counter was updated.
-      RetVal = 1;
+      if (CduLog != NULL)
+      fprintf (CduLog, ">\t\t" FORMAT_64U " %o 03\n", State->CycleCounter,
+	  CduChecker + FIRST_CDU);
     }
+  else
+    {
+      CounterPCDU (Ch);
+  if (CduLog != NULL)
+  fprintf (CduLog, ">\t\t" FORMAT_64U " %o 01\n", State->CycleCounter,
+      CduChecker + FIRST_CDU);
+}
+Count--;
+  // Update the FIFO.
+if (0 != (Count & ~0xC0000000))
+CduFifo->Counts[CduFifo->Ptr] = Count;
+else
+{
+  // That FIFO entry is exhausted.  Remove it from the FIFO.
+  CduFifo->Size--;
+  CduFifo->Ptr++;
+  if (CduFifo->Ptr >= MAX_CDU_FIFO_ENTRIES)
+    CduFifo->Ptr = 0;
+}
+  // And set next update time.
+  // Set up for next update time.  The intervals is are of the form
+  // x, x, y, depending on whether CduIntervalType is 0, 1, or 2.
+  // This is done because with a cycle type of 1024000/12 cycles per
+  // second, the exact CDU update times don't fit on exact cycle
+  // boundaries, but every 3rd CDU update does hit a cycle boundary.
+if (CduFifo->NextUpdate == 0)
+CduFifo->NextUpdate = State->CycleCounter;
+if (CduFifo->IntervalType < 2)
+{
+  if (HighRate)
+    CduFifo->NextUpdate += 13;
+  else
+    CduFifo->NextUpdate += 213;
+  CduFifo->IntervalType++;
+}
+else
+{
+  if (HighRate)
+    CduFifo->NextUpdate += 14;
+  else
+    CduFifo->NextUpdate += 214;
+  CduFifo->IntervalType = 0;
+}
+  // Return an indication that a counter was updated.
+RetVal = 1;
+}
 
-  CduChecker++;
-  if (CduChecker >= NUM_CDU_FIFOS)
-    CduChecker = 0;
+CduChecker++;
+if (CduChecker >= NUM_CDU_FIFOS)
+CduChecker = 0;
 
-  return (RetVal);
+return (RetVal);
 }
 
 //----------------------------------------------------------------------------
-// This function is used to update the counter registers on the basis of 
+// This function is used to update the counter registers on the basis of
 // commands received from the outside world.
 
 void
 UnprogrammedIncrement (agc_t *State, int Counter, int IncType)
 {
-  int16_t *Ch;
-  int Overflow = 0;
-  Counter &= 0x7f;
-  Ch = &State->Erasable[0][Counter];
-  if (CoverageCounts)
-    ErasableWriteCounts[0][Counter]++;
-  switch (IncType)
-    {
-    case 0:
-      //TrapPIPA = (Counter >= 037 && Counter <= 041);
-      Overflow = CounterPINC (Ch);
-      break;
-    case 1:
-    case 021:
-      // For the CDUX,Y,Z counters, push the command into a FIFO.
-      if (Counter >= FIRST_CDU && Counter < FIRST_CDU + NUM_CDU_FIFOS)
-	PushCduFifo (State, Counter, IncType);
-      else
-	Overflow = CounterPCDU (Ch);
-      break;
-    case 2:
-      //TrapPIPA = (Counter >= 037 && Counter <= 041);
-      Overflow = CounterMINC (Ch);
-      break;
-    case 3:
-    case 023:
-      // For the CDUX,Y,Z counters, push the command into a FIFO.
-      if (Counter >= FIRST_CDU && Counter < FIRST_CDU + NUM_CDU_FIFOS)
-	PushCduFifo (State, Counter, IncType);
-      else
-	Overflow = CounterMCDU (Ch);
-      break;
-    case 4:
-      Overflow = CounterDINC (State, Counter, Ch);
-      break;
-    case 5:
-      Overflow = CounterSHINC (Ch);
-      break;
-    case 6:
-      Overflow = CounterSHANC (Ch);
-      break;
-    default:
-      break;
-    }
-  if (Overflow)
-    {
-      // On some counters, overflow is supposed to cause
-      // an interrupt.  Take care of setting the interrupt request here.
+int16_t *Ch;
+int Overflow = 0;
+Counter &= 0x7f;
+Ch = &State->Erasable[0][Counter];
+if (CoverageCounts)
+ErasableWriteCounts[0][Counter]++;
+switch (IncType)
+{
+case 0:
+  //TrapPIPA = (Counter >= 037 && Counter <= 041);
+Overflow = CounterPINC (Ch);
+break;
+case 1:
+case 021:
+  // For the CDUX,Y,Z counters, push the command into a FIFO.
+if (Counter >= FIRST_CDU && Counter < FIRST_CDU + NUM_CDU_FIFOS)
+PushCduFifo (State, Counter, IncType);
+else
+Overflow = CounterPCDU (Ch);
+break;
+case 2:
+  //TrapPIPA = (Counter >= 037 && Counter <= 041);
+Overflow = CounterMINC (Ch);
+break;
+case 3:
+case 023:
+  // For the CDUX,Y,Z counters, push the command into a FIFO.
+if (Counter >= FIRST_CDU && Counter < FIRST_CDU + NUM_CDU_FIFOS)
+PushCduFifo (State, Counter, IncType);
+else
+Overflow = CounterMCDU (Ch);
+break;
+case 4:
+Overflow = CounterDINC (State, Counter, Ch);
+break;
+case 5:
+Overflow = CounterSHINC (Ch);
+break;
+case 6:
+Overflow = CounterSHANC (Ch);
+break;
+default:
+break;
+}
+if (Overflow)
+{
+  // On some counters, overflow is supposed to cause
+  // an interrupt.  Take care of setting the interrupt request here.
 
-    }
-  TrapPIPA = 0;
+}
+TrapPIPA = 0;
 }
 
 //----------------------------------------------------------------------------
-// Function handles the coarse-alignment output pulses for one IMU CDU drive axis.  
+// Function handles the coarse-alignment output pulses for one IMU CDU drive axis.
 // It returns non-0 if a non-zero count remains on the axis, 0 otherwise.
 
 static int
 BurstOutput (agc_t *State, int DriveBitMask, int CounterRegister, int Channel)
 {
-  static int CountCDUX = 0, CountCDUY = 0, CountCDUZ = 0; // In target CPU format.
-  int DriveCount = 0, DriveBit, Direction = 0, Delta, DriveCountSaved;
-  if (CounterRegister == RegCDUXCMD)
-    DriveCountSaved = CountCDUX;
-  else if (CounterRegister == RegCDUYCMD)
-    DriveCountSaved = CountCDUY;
-  else if (CounterRegister == RegCDUZCMD)
-    DriveCountSaved = CountCDUZ;
-  else
-    return (0);
-  // Driving this axis?
-  DriveBit = (State->InputChannel[014] & DriveBitMask);
-  // If so, we must retrieve the count from the counter register.
-  if (DriveBit)
-    {
-      DriveCount = State->Erasable[0][CounterRegister];
-      State->Erasable[0][CounterRegister] = 0;
-    }
-  // The count may be negative.  If so, normalize to be positive and set the
-  // direction flag.
-  Direction = (040000 & DriveCount);
-  if (Direction)
-    {
-      DriveCount ^= 077777;
-      DriveCountSaved -= DriveCount;
-    }
-  else
-    DriveCountSaved += DriveCount;
-  if (DriveCountSaved < 0)
-    {
-      DriveCountSaved = -DriveCountSaved;
-      Direction = 040000;
-    }
-  else
-    Direction = 0;
-  // Determine how many pulses to output.  The max is 192 per burst.
-  Delta = DriveCountSaved;
-  if (Delta >= 192 / COARSE_SMOOTH)
-    Delta = 192 / COARSE_SMOOTH;
-  // If the count is non-zero, pulse it.
-  if (Delta > 0)
-    {
-      ChannelOutput (State, Channel, Direction | Delta);
-      DriveCountSaved -= Delta;
-    }
-  if (Direction)
-    DriveCountSaved = -DriveCountSaved;
-  if (CounterRegister == RegCDUXCMD)
-    CountCDUX = DriveCountSaved;
-  else if (CounterRegister == RegCDUYCMD)
-    CountCDUY = DriveCountSaved;
-  else if (CounterRegister == RegCDUZCMD)
-    CountCDUZ = DriveCountSaved;
-  return (DriveCountSaved);
+static int CountCDUX = 0, CountCDUY = 0, CountCDUZ = 0; // In target CPU format.
+int DriveCount = 0, DriveBit, Direction = 0, Delta, DriveCountSaved;
+if (CounterRegister == RegCDUXCMD)
+DriveCountSaved = CountCDUX;
+else if (CounterRegister == RegCDUYCMD)
+DriveCountSaved = CountCDUY;
+else if (CounterRegister == RegCDUZCMD)
+DriveCountSaved = CountCDUZ;
+else
+return (0);
+ // Driving this axis?
+DriveBit = (State->InputChannel[014] & DriveBitMask);
+ // If so, we must retrieve the count from the counter register.
+if (DriveBit)
+{
+DriveCount = State->Erasable[0][CounterRegister];
+State->Erasable[0][CounterRegister] = 0;
+}
+ // The count may be negative.  If so, normalize to be positive and set the
+ // direction flag.
+Direction = (040000 & DriveCount);
+if (Direction)
+{
+DriveCount ^= 077777;
+DriveCountSaved -= DriveCount;
+}
+else
+DriveCountSaved += DriveCount;
+if (DriveCountSaved < 0)
+{
+DriveCountSaved = -DriveCountSaved;
+Direction = 040000;
+}
+else
+Direction = 0;
+ // Determine how many pulses to output.  The max is 192 per burst.
+Delta = DriveCountSaved;
+if (Delta >= 192 / COARSE_SMOOTH)
+Delta = 192 / COARSE_SMOOTH;
+ // If the count is non-zero, pulse it.
+if (Delta > 0)
+{
+ChannelOutput (State, Channel, Direction | Delta);
+DriveCountSaved -= Delta;
+}
+if (Direction)
+DriveCountSaved = -DriveCountSaved;
+if (CounterRegister == RegCDUXCMD)
+CountCDUX = DriveCountSaved;
+else if (CounterRegister == RegCDUYCMD)
+CountCDUY = DriveCountSaved;
+else if (CounterRegister == RegCDUZCMD)
+CountCDUZ = DriveCountSaved;
+return (DriveCountSaved);
 }
 
-static void 
-UpdateDSKY(agc_t *State)
+static void
+UpdateDSKY (agc_t *State)
 {
-  unsigned LastChannel163 = State->DskyChannel163;
+unsigned LastChannel163 = State->DskyChannel163;
 
-  State->DskyChannel163 &= ~(DSKY_KEY_REL | DSKY_VN_FLASH | DSKY_OPER_ERR | DSKY_RESTART | DSKY_STBY | DSKY_AGC_WARN);
+State->DskyChannel163 &= ~(DSKY_KEY_REL | DSKY_VN_FLASH | DSKY_OPER_ERR
+| DSKY_RESTART | DSKY_STBY | DSKY_AGC_WARN);
 
-  if (State->InputChannel[013] & 01000)
-    // The light test is active. Light RESTART and STBY.
-    State->DskyChannel163 |= DSKY_RESTART | DSKY_STBY; // 
+if (State->InputChannel[013] & 01000)
+ // The light test is active. Light RESTART and STBY.
+State->DskyChannel163 |= DSKY_RESTART | DSKY_STBY; //
 
-  // If we're in standby, light the standby light
-  if (State->Standby)
-    State->DskyChannel163 |= DSKY_STBY;
+ // If we're in standby, light the standby light
+if (State->Standby)
+State->DskyChannel163 |= DSKY_STBY;
 
-  // Make the RESTART light mirror State->RestartLight.
-  if (State->RestartLight)
-    State->DskyChannel163 |= DSKY_RESTART;
+ // Make the RESTART light mirror State->RestartLight.
+if (State->RestartLight)
+State->DskyChannel163 |= DSKY_RESTART;
 
-  // Set KEY REL and OPER ERR according to channel 11
-  if (State->InputChannel[011] & DSKY_KEY_REL)
-    State->DskyChannel163 |= DSKY_KEY_REL;
-  if (State->InputChannel[011] & DSKY_OPER_ERR)
-    State->DskyChannel163 |= DSKY_OPER_ERR;
+ // Set KEY REL and OPER ERR according to channel 11
+if (State->InputChannel[011] & DSKY_KEY_REL)
+State->DskyChannel163 |= DSKY_KEY_REL;
+if (State->InputChannel[011] & DSKY_OPER_ERR)
+State->DskyChannel163 |= DSKY_OPER_ERR;
 
-  // Turn on the AGC warning light if the warning filter is above its threshold
-  if (State->WarningFilter > WARNING_FILTER_THRESHOLD)
-    {
-      State->DskyChannel163 |= DSKY_AGC_WARN;
+ // Turn on the AGC warning light if the warning filter is above its threshold
+if (State->WarningFilter > WARNING_FILTER_THRESHOLD)
+{
+State->DskyChannel163 |= DSKY_AGC_WARN;
 
-      // Set the AGC Warning input bit in channel 33
-      State->InputChannel[033] &= 057777;
-    }
+ // Set the AGC Warning input bit in channel 33
+State->InputChannel[033] &= 057777;
+}
 
-  // Update the DSKY flash counter based on the DSKY timer
-  while (State->DskyTimer >= DSKY_OVERFLOW)
-    {
-      State->DskyTimer -= DSKY_OVERFLOW;
-      State->DskyFlash = (State->DskyFlash + 1) % DSKY_FLASH_PERIOD;
-    }
+ // Update the DSKY flash counter based on the DSKY timer
+while (State->DskyTimer >= DSKY_OVERFLOW)
+{
+State->DskyTimer -= DSKY_OVERFLOW;
+State->DskyFlash = (State->DskyFlash + 1) % DSKY_FLASH_PERIOD;
+}
 
-  // Flashing lights on the DSKY have a period of 1.28s, and a 75% duty cycle
-  if (!State->Standby && State->DskyFlash == 0)
-    {
-      // If V/N FLASH is high, then the lights are turned off
-      if (State->InputChannel[011] & DSKY_VN_FLASH)
-        State->DskyChannel163 |= DSKY_VN_FLASH;
+ // Flashing lights on the DSKY have a period of 1.28s, and a 75% duty cycle
+if (!State->Standby && State->DskyFlash == 0)
+{
+ // If V/N FLASH is high, then the lights are turned off
+if (State->InputChannel[011] & DSKY_VN_FLASH)
+State->DskyChannel163 |= DSKY_VN_FLASH;
 
-      // Flash off the KEY REL and OPER ERR lamps
-      State->DskyChannel163 &= ~DSKY_KEY_REL;
-      State->DskyChannel163 &= ~DSKY_OPER_ERR;
-    }
+ // Flash off the KEY REL and OPER ERR lamps
+State->DskyChannel163 &= ~DSKY_KEY_REL;
+State->DskyChannel163 &= ~DSKY_OPER_ERR;
+}
 
-  // Send out updated display information, if something on the DSKY changed
-  if (State->DskyChannel163 != LastChannel163)
-    ChannelOutput(State, 0163, State->DskyChannel163);
+ // Send out updated display information, if something on the DSKY changed
+if (State->DskyChannel163 != LastChannel163)
+ChannelOutput (State, 0163, State->DskyChannel163);
 }
 
 //----------------------------------------------------------------------------
@@ -1719,77 +1721,77 @@ UpdateDSKY(agc_t *State)
 // If A, L, or Z are the divisor, it assumes that the unexpected transformations
 // have already been applied to the "divisor" argument.
 static void
-SimulateDV(agc_t *State, uint16_t divisor)
+SimulateDV (agc_t *State, uint16_t divisor)
 {
-    uint16_t dividend_sign = 0;
-    uint16_t divisor_sign = 0;
-    uint16_t remainder;
-    uint16_t remainder_sign = 0;
-    uint16_t quotient_sign = 0;
-    uint16_t quotient = 0;
-    uint16_t sum = 0;
-    uint16_t a = c(RegA);
-    uint16_t l = c(RegL);
-    int i;
+uint16_t dividend_sign = 0;
+uint16_t divisor_sign = 0;
+uint16_t remainder;
+uint16_t remainder_sign = 0;
+uint16_t quotient_sign = 0;
+uint16_t quotient = 0;
+uint16_t sum = 0;
+uint16_t a = c(RegA);
+uint16_t l = c(RegL);
+int i;
 
-    // Assume A contains the sign of the dividend
-    dividend_sign = a & 0100000;
+ // Assume A contains the sign of the dividend
+dividend_sign = a & 0100000;
 
-    // Negate A if it was positive
-    if (!dividend_sign)
-      a = ~a;
-    // If A is now -0, take the dividend sign from L
-    if (a == 0177777)
-      dividend_sign = l & 0100000;
-    // Negate L if the dividend is negative.
-    if (dividend_sign)
-      l = ~l;
+ // Negate A if it was positive
+if (!dividend_sign)
+a = ~a;
+ // If A is now -0, take the dividend sign from L
+if (a == 0177777)
+dividend_sign = l & 0100000;
+ // Negate L if the dividend is negative.
+if (dividend_sign)
+l = ~l;
 
-    // Add 40000 to L
-    l = AddSP16(l, 040000);
-    // If this did not cause positive overflow, add one to A
-    if (ValueOverflowed(l) != AGC_P1)
-      a = AddSP16(a, 1);
-    // Initialize the remainder with the current value of A
-    remainder = a;
+ // Add 40000 to L
+l = AddSP16 (l, 040000);
+ // If this did not cause positive overflow, add one to A
+if (ValueOverflowed (l) != AGC_P1)
+a = AddSP16 (a, 1);
+ // Initialize the remainder with the current value of A
+remainder = a;
 
-    // Record the sign of the divisor, and then take its absolute value
-    divisor_sign = divisor & 0100000;
-    if (divisor_sign)
-      divisor = ~divisor;
-    // Initialize the quotient via a WYD on L (L's sign is placed in bits
-    // 16 and 1, and L bits 14-1 are placed in bits 15-2).
-    quotient_sign = l & 0100000;
-    quotient = quotient_sign | ((l & 037777) << 1) | (quotient_sign >> 15);
+ // Record the sign of the divisor, and then take its absolute value
+divisor_sign = divisor & 0100000;
+if (divisor_sign)
+divisor = ~divisor;
+ // Initialize the quotient via a WYD on L (L's sign is placed in bits
+ // 16 and 1, and L bits 14-1 are placed in bits 15-2).
+quotient_sign = l & 0100000;
+quotient = quotient_sign | ((l & 037777) << 1) | (quotient_sign >> 15);
 
-    for (i = 0; i < 14; i++)
-    {
-        // Shift up the quotient
-        quotient <<= 1;
-        // Perform a WYD on the remainder
-        remainder_sign = remainder & 0100000;
-        remainder = remainder_sign | ((remainder & 037777) << 1);
-        // The sign is only placed in bit 1 if the quotient's new bit 16 is 1
-        if ((quotient & 0100000) == 0)
-          remainder |= (remainder_sign >> 15);
-        // Add the divisor to the remainder
-        sum = AddSP16(remainder, divisor);
-        if (sum & 0100000)
-          {
-            // If the resulting sum has its bit 16 set, OR a 1 onto the
-            // quotient and take the sum as the new remainder
-            quotient |= 1;
-            remainder = sum;
-          }
-    }
-    // Restore the proper quotient sign
-    a = quotient_sign | (quotient & 077777);
+for (i = 0; i < 14; i++)
+{
+ // Shift up the quotient
+quotient <<= 1;
+ // Perform a WYD on the remainder
+remainder_sign = remainder & 0100000;
+remainder = remainder_sign | ((remainder & 037777) << 1);
+ // The sign is only placed in bit 1 if the quotient's new bit 16 is 1
+if ((quotient & 0100000) == 0)
+remainder |= (remainder_sign >> 15);
+ // Add the divisor to the remainder
+sum = AddSP16 (remainder, divisor);
+if (sum & 0100000)
+{
+  // If the resulting sum has its bit 16 set, OR a 1 onto the
+  // quotient and take the sum as the new remainder
+  quotient |= 1;
+  remainder = sum;
+}
+}
+  // Restore the proper quotient sign
+a = quotient_sign | (quotient & 077777);
 
-    // The final value for A is negated if the dividend sign and the
-    // divisor sign did not match
-    c(RegA) = (dividend_sign != divisor_sign) ? ~a : a;
-    // The final value for L is negated if the dividend was negative
-    c(RegL) = (dividend_sign) ? remainder : ~remainder;
+  // The final value for A is negated if the dividend sign and the
+  // divisor sign did not match
+c(RegA)= (dividend_sign != divisor_sign) ? ~a : a;
+  // The final value for L is negated if the dividend was negative
+c(RegL)= (dividend_sign) ? remainder : ~remainder;
 }
 
 //-----------------------------------------------------------------------------
@@ -1835,7 +1837,7 @@ int
 agc_engine (agc_t * State)
 {
   int i, j;
-  uint16_t ProgramCounter, Instruction, /*OpCode,*/ QuarterCode, sExtraCode;
+  uint16_t ProgramCounter, Instruction, /*OpCode,*/QuarterCode, sExtraCode;
   int16_t *WhereWord;
   uint16_t Address12, Address10, Address9;
   int ValueK, KeepExtraCode = 0;
@@ -1849,7 +1851,6 @@ agc_engine (agc_t * State)
   int ExecutedTC = 0;
   int JustTookBZF = 0;
   int JustTookBZMF = 0;
-
 
   sExtraCode = 0;
 
@@ -1907,7 +1908,7 @@ agc_engine (agc_t * State)
   State->ChannelRoutineCount = ((State->ChannelRoutineCount + 1) & 017777);
 
   // Update the various hardware-driven DSKY lights
-  UpdateDSKY(State);
+  UpdateDSKY (State);
 
   // Get data from input channels.  Return immediately if a unprogrammed 
   // counter-increment was performed.
@@ -1955,7 +1956,6 @@ agc_engine (agc_t * State)
       State->SbyPressed = 0;
       State->SbyStillPressed = 0;
     }
-   
 
   //----------------------------------------------------------------------
   // Here we take care of counter-timers.  There is a basic 1/3200 second
@@ -1976,261 +1976,264 @@ agc_engine (agc_t * State)
       State->ScalerCounter -= SCALER_OVERFLOW;
       State->InputChannel[ChanSCALER1]++;
       if (State->InputChannel[ChanSCALER1] == 040000)
-        {
-          State->InputChannel[ChanSCALER1] = 0;
-          State->InputChannel[ChanSCALER2] = (State->InputChannel[ChanSCALER2] + 1) & 037777;
-        }
+	{
+	  State->InputChannel[ChanSCALER1] = 0;
+	  State->InputChannel[ChanSCALER2] = (State->InputChannel[ChanSCALER2]
+	      + 1) & 037777;
+	}
 
       // Check alarms first, since there's a chance we might go to standby
       if (04000 == (07777 & State->InputChannel[ChanSCALER1]))
-        {
-          // The Night Watchman begins looking once every 1.28s
-          if (!State->Standby)
-            State->NightWatchman = 1;
+	{
+	  // The Night Watchman begins looking once every 1.28s
+	  if (!State->Standby)
+	    State->NightWatchman = 1;
 
-          // The standby circuit finishes checking to see if we're going to standby now
-          // (it has the same period as but is 180 degrees out of phase with the Night Watchman)
-          if (State->SbyPressed && ((State->InputChannel[013] & 002000) || State->Standby))
-            {
-              if (!State->Standby)
-                {
-                  // Standby is enabled, and PRO has been held down for the required amount of time.
-                  State->Standby = 1;
-                  State->SbyStillPressed = 1;
+	  // The standby circuit finishes checking to see if we're going to standby now
+	  // (it has the same period as but is 180 degrees out of phase with the Night Watchman)
+	  if (State->SbyPressed
+	      && ((State->InputChannel[013] & 002000) || State->Standby))
+	    {
+	      if (!State->Standby)
+		{
+		  // Standby is enabled, and PRO has been held down for the required amount of time.
+		  State->Standby = 1;
+		  State->SbyStillPressed = 1;
 
-                  // While this isn't technically an alarm, it causes GOJAM just like all the rest
-                  TriggeredAlarm = 1;
+		  // While this isn't technically an alarm, it causes GOJAM just like all the rest
+		  TriggeredAlarm = 1;
 
-                  // Turn on the STBY light, and switch off the EL segments
-                  State->DskyChannel163 |= DSKY_STBY | DSKY_EL_OFF;
-                  ChannelOutput(State, 0163, State->DskyChannel163);
-                }
-              else if (!State->SbyStillPressed)
-                {
-                  // PRO was pressed for long enough to turn us back on. Let's get going!
-                  State->Standby = 0;
+		  // Turn on the STBY light, and switch off the EL segments
+		  State->DskyChannel163 |= DSKY_STBY | DSKY_EL_OFF;
+		  ChannelOutput (State, 0163, State->DskyChannel163);
+		}
+	      else if (!State->SbyStillPressed)
+		{
+		  // PRO was pressed for long enough to turn us back on. Let's get going!
+		  State->Standby = 0;
 
-                  // Turn off the STBY light
-                  State->DskyChannel163 &= ~(DSKY_STBY | DSKY_EL_OFF);
-                  ChannelOutput(State, 0163, State->DskyChannel163);
-                }
-            }
-        }
+		  // Turn off the STBY light
+		  State->DskyChannel163 &= ~(DSKY_STBY | DSKY_EL_OFF);
+		  ChannelOutput (State, 0163, State->DskyChannel163);
+		}
+	    }
+	}
       else if (00000 == (07777 & State->InputChannel[ChanSCALER1]))
-        {
-          // The standby circuit checks the SBY/PRO button state every 1.28s
-          if (0 == (State->InputChannel[032] & 020000))
-            State->SbyPressed = 1;
+	{
+	  // The standby circuit checks the SBY/PRO button state every 1.28s
+	  if (0 == (State->InputChannel[032] & 020000))
+	    State->SbyPressed = 1;
 
-          // The Night Watchman finishes looking now
-          if (!State->Standby && State->NightWatchman)
-            {
-              // NEWJOB wasn't checked before 0.64s elapsed. Sound the alarm!
-              TriggeredAlarm = 1;
+	  // The Night Watchman finishes looking now
+	  if (!State->Standby && State->NightWatchman)
+	    {
+	      // NEWJOB wasn't checked before 0.64s elapsed. Sound the alarm!
+	      TriggeredAlarm = 1;
 
-              // Set the NIGHT WATCHMAN bit in channel 77. Don't go through CpuWriteIO() because
-              // instructions writing to CH77 clear it. We'll broadcast changes to it in the
-              // generic alarm handler a bit further down.
-              State->InputChannel[077] |= CH77_NIGHT_WATCHMAN;
-              State->NightWatchmanTripped = 1;
-            }
-          else
-            // If it's been 1.28s since a Night Watchman alarm happened, stop asserting its
-            // channel 77 bit
-            State->NightWatchmanTripped = 0;
-        }
+	      // Set the NIGHT WATCHMAN bit in channel 77. Don't go through CpuWriteIO() because
+	      // instructions writing to CH77 clear it. We'll broadcast changes to it in the
+	      // generic alarm handler a bit further down.
+	      State->InputChannel[077] |= CH77_NIGHT_WATCHMAN;
+	      State->NightWatchmanTripped = 1;
+	    }
+	  else
+	    // If it's been 1.28s since a Night Watchman alarm happened, stop asserting its
+	    // channel 77 bit
+	    State->NightWatchmanTripped = 0;
+	}
       else if (00 == (07 & State->InputChannel[ChanSCALER1]))
-        {
-          // Update the warning filter. Once every 160ms, if an input to the filter has been
-          // generated (or if the light test is active), the filter is charged. Otherwise,
-          // it slowly discharges. This is being modeled as a simple linear function right now,
-          // and should be updated when we learn its real implementation details.
-          if ((0400 == (0777 & State->InputChannel[ChanSCALER1])) &&
-              (State->GeneratedWarning || (State->InputChannel[013] & 01000)))
-            {
-              State->GeneratedWarning = 0;
-              State->WarningFilter += WARNING_FILTER_INCREMENT;
-              if (State->WarningFilter > WARNING_FILTER_MAX)
-                State->WarningFilter = WARNING_FILTER_MAX;
-            }
-          else
-            {
-              if (State->WarningFilter >= WARNING_FILTER_DECREMENT)
-                State->WarningFilter -= WARNING_FILTER_DECREMENT;
-              else
-                State->WarningFilter = 0;
-            }
-        }
+	{
+	  // Update the warning filter. Once every 160ms, if an input to the filter has been
+	  // generated (or if the light test is active), the filter is charged. Otherwise,
+	  // it slowly discharges. This is being modeled as a simple linear function right now,
+	  // and should be updated when we learn its real implementation details.
+	  if ((0400 == (0777 & State->InputChannel[ChanSCALER1]))
+	      && (State->GeneratedWarning || (State->InputChannel[013] & 01000)))
+	    {
+	      State->GeneratedWarning = 0;
+	      State->WarningFilter += WARNING_FILTER_INCREMENT;
+	      if (State->WarningFilter > WARNING_FILTER_MAX)
+		State->WarningFilter = WARNING_FILTER_MAX;
+	    }
+	  else
+	    {
+	      if (State->WarningFilter >= WARNING_FILTER_DECREMENT)
+		State->WarningFilter -= WARNING_FILTER_DECREMENT;
+	      else
+		State->WarningFilter = 0;
+	    }
+	}
 
       // All the rest of this is switched off during standby.
       if (!State->Standby)
-        {
-          if (0400 == (0777 & State->InputChannel[ChanSCALER1]))
-            {
-              // The Rupt Lock alarm watches ISR state starting every 160ms
-              State->RuptLock = 1;
-              State->NoRupt = 1;
-            }
-          else if ((State->RuptLock || State->NoRupt) && 0300 == (0777 & State->InputChannel[ChanSCALER1]))
-            {
-              // We've either had no interrupts, or stuck in one, for 140ms. Sound the alarm!
-              TriggeredAlarm = 1;
+	{
+	  if (0400 == (0777 & State->InputChannel[ChanSCALER1]))
+	    {
+	      // The Rupt Lock alarm watches ISR state starting every 160ms
+	      State->RuptLock = 1;
+	      State->NoRupt = 1;
+	    }
+	  else if ((State->RuptLock || State->NoRupt)
+	      && 0300 == (0777 & State->InputChannel[ChanSCALER1]))
+	    {
+	      // We've either had no interrupts, or stuck in one, for 140ms. Sound the alarm!
+	      TriggeredAlarm = 1;
 
-              // Set the RUPT LOCK bit in channel 77.
-              State->InputChannel[077] |= CH77_RUPT_LOCK;
-            }
+	      // Set the RUPT LOCK bit in channel 77.
+	      State->InputChannel[077] |= CH77_RUPT_LOCK;
+	    }
 
-          if (020 == (037 & State->InputChannel[ChanSCALER1]))
-            {
-              // The TC Trap alarm watches executing instructions every 5ms
-              State->TCTrap = 1;
-              State->NoTC = 1;
-            }
-          else if ((State->TCTrap || State->NoTC) && 000 == (037 & State->InputChannel[ChanSCALER1]))
-            {
-              // We've either executed no TC at all, or only TCs, for the past 5ms. Sound the alarm!
-              TriggeredAlarm = 1;
+	  if (020 == (037 & State->InputChannel[ChanSCALER1]))
+	    {
+	      // The TC Trap alarm watches executing instructions every 5ms
+	      State->TCTrap = 1;
+	      State->NoTC = 1;
+	    }
+	  else if ((State->TCTrap || State->NoTC)
+	      && 000 == (037 & State->InputChannel[ChanSCALER1]))
+	    {
+	      // We've either executed no TC at all, or only TCs, for the past 5ms. Sound the alarm!
+	      TriggeredAlarm = 1;
 
-              // Set the TC TRAP bit in channel 77.
-              State->InputChannel[077] |= CH77_TC_TRAP;
-            }
+	      // Set the TC TRAP bit in channel 77.
+	      State->InputChannel[077] |= CH77_TC_TRAP;
+	    }
 
-          // Now that that's taken care of...
-          // Update the 10 ms. timers TIME1 and TIME3.
-          // Recall that the registers are in AGC integer format,
-          // and therefore are actually shifted left one space.
-          // When taking a reset, the real AGC would skip unprogrammed
-          // sequences and go straight to GOJAM. The requests, however,
-          // would be saved and the counts would happen immediately
-          // after the first instruction at 4000, so doing them now
-          // is not too inaccurate.
-          if (020 == (037 & State->InputChannel[ChanSCALER1]))
+	  // Now that that's taken care of...
+	  // Update the 10 ms. timers TIME1 and TIME3.
+	  // Recall that the registers are in AGC integer format,
+	  // and therefore are actually shifted left one space.
+	  // When taking a reset, the real AGC would skip unprogrammed
+	  // sequences and go straight to GOJAM. The requests, however,
+	  // would be saved and the counts would happen immediately
+	  // after the first instruction at 4000, so doing them now
+	  // is not too inaccurate.
+	  if (020 == (037 & State->InputChannel[ChanSCALER1]))
 	    {
 	      State->ExtraDelay++;
 	      if (CounterPINC (&c(RegTIME1)))
-	        {
-	          State->ExtraDelay++;
-	          CounterPINC (&c(RegTIME2));
-	        }
+		{
+		  State->ExtraDelay++;
+		  CounterPINC (&c(RegTIME2));
+		}
 	      State->ExtraDelay++;
 	      if (CounterPINC (&c(RegTIME3)))
-	        State->InterruptRequests[3] = 1;
+		State->InterruptRequests[3] = 1;
 	    }
-          // TIME5 is the same as TIME3, but 5 ms. out of phase.
-          if (000 == (037 & State->InputChannel[ChanSCALER1]))
+	  // TIME5 is the same as TIME3, but 5 ms. out of phase.
+	  if (000 == (037 & State->InputChannel[ChanSCALER1]))
 	    {
 	      State->ExtraDelay++;
 	      if (CounterPINC (&c(RegTIME5)))
-	        State->InterruptRequests[2] = 1;
+		State->InterruptRequests[2] = 1;
 	    }
-          // TIME4 is the same as TIME3, but 7.5ms out of phase
-          if (010 == (037 & State->InputChannel[ChanSCALER1]))
+	  // TIME4 is the same as TIME3, but 7.5ms out of phase
+	  if (010 == (037 & State->InputChannel[ChanSCALER1]))
 	    {
 	      State->ExtraDelay++;
 	      if (CounterPINC (&c(RegTIME4)))
-	        State->InterruptRequests[4] = 1;
+		State->InterruptRequests[4] = 1;
 	    }
-          // TIME6 only increments when it has been enabled via CH13 bit 15.
-          // It increments 0.3125ms after TIME1/TIME3
-          if (040000 & State->InputChannel[013] && (State->InputChannel[ChanSCALER1] & 01) == 01)
-            {
-              State->ExtraDelay++;
-              if (CounterDINC (State, 0, &c(RegTIME6)))
-                {
-	          State->InterruptRequests[1] = 1;
-                  // Triggering a T6RUPT disables T6 by clearing the CH13 bit
-                  CpuWriteIO(State, 013, State->InputChannel[013] & 037777);
-                }
-            }
+	  // TIME6 only increments when it has been enabled via CH13 bit 15.
+	  // It increments 0.3125ms after TIME1/TIME3
+	  if (040000 & State->InputChannel[013]
+	      && (State->InputChannel[ChanSCALER1] & 01) == 01)
+	    {
+	      State->ExtraDelay++;
+	      if (CounterDINC (State, 0, &c(RegTIME6)))
+		{
+		  State->InterruptRequests[1] = 1;
+		  // Triggering a T6RUPT disables T6 by clearing the CH13 bit
+		  CpuWriteIO (State, 013, State->InputChannel[013] & 037777);
+		}
+	    }
 
-          // Check for HANDRUPT conditions (the actually timing is very slightly off
-          // from this, but not enough to matter). The traps are reset upon triggering.
-          if (State->Trap31A && ((State->InputChannel[031] & 000077) != 000077))
-            {
-              State->Trap31A = 0;
-              State->InterruptRequests[10] = 1;
-            }
+	  // Check for HANDRUPT conditions (the actually timing is very slightly off
+	  // from this, but not enough to matter). The traps are reset upon triggering.
+	  if (State->Trap31A && ((State->InputChannel[031] & 000077) != 000077))
+	    {
+	      State->Trap31A = 0;
+	      State->InterruptRequests[10] = 1;
+	    }
 
-          if (State->Trap31B && ((State->InputChannel[031] & 007700) != 007700))
-            {
-              State->Trap31B = 0;
-              State->InterruptRequests[10] = 1;
-            }
+	  if (State->Trap31B && ((State->InputChannel[031] & 007700) != 007700))
+	    {
+	      State->Trap31B = 0;
+	      State->InterruptRequests[10] = 1;
+	    }
 
-          if (State->Trap32 && ((State->InputChannel[032] & 001777) != 001777))
-            {
-              State->Trap32 = 0;
-              State->InterruptRequests[10] = 1;
-            }
-        }
-
+	  if (State->Trap32 && ((State->InputChannel[032] & 001777) != 001777))
+	    {
+	      State->Trap32 = 0;
+	      State->InterruptRequests[10] = 1;
+	    }
+	}
 
       // If we triggered any alarms, simulate a GOJAM
       if (TriggeredAlarm || State->ParityFail)
-        {
-          if (!InhibitAlarms) // ...but only if doing so isn't inhibited
-            {
-              int i;
+	{
+	  if (!InhibitAlarms) // ...but only if doing so isn't inhibited
+	    {
+	      int i;
 
-              // Two single-MCT instruction sequences, GOJAM and TC 4000, are about to happen
-              State->ExtraDelay += 2;
+	      // Two single-MCT instruction sequences, GOJAM and TC 4000, are about to happen
+	      State->ExtraDelay += 2;
 
-              // The net result of those two is Z = 4000. Interrupt state is cleared, and
-              // interrupts are enabled. The TC 4000 has the beneficial side-effect of
-              // storing the current Z in Q, where it can helpfully be recovered.
-              c(RegQ) = c(RegZ);
-              c(RegZ) = 04000;
-              State->InIsr = 0;
-              State->AllowInterrupt = 1;
-              State->ParityFail = 0;
+	      // The net result of those two is Z = 4000. Interrupt state is cleared, and
+	      // interrupts are enabled. The TC 4000 has the beneficial side-effect of
+	      // storing the current Z in Q, where it can helpfully be recovered.
+	      c(RegQ)= c(RegZ);
+	      c(RegZ)= 04000;
+	      State->InIsr = 0;
+	      State->AllowInterrupt = 1;
+	      State->ParityFail = 0;
 
-              // HANDRUPT traps are all disabled.
-              State->Trap31A = 0;
-              State->Trap31B = 0;
-              State->Trap32 = 0;
+	      // HANDRUPT traps are all disabled.
+	      State->Trap31A = 0;
+	      State->Trap31B = 0;
+	      State->Trap32 = 0;
 
-              // All interrupt requests are cleared.
-              for (i = 1; i <= NUM_INTERRUPT_TYPES; i++)
-                State->InterruptRequests[i] = 0;
+	      // All interrupt requests are cleared.
+	      for (i = 1; i <= NUM_INTERRUPT_TYPES; i++)
+		State->InterruptRequests[i] = 0;
 
-              // Clear channels 5, 6, 10, 11, 12, 13, and 14
-              CpuWriteIO(State, 005, 0);
-              CpuWriteIO(State, 006, 0);
-              CpuWriteIO(State, 010, 0);
-              CpuWriteIO(State, 011, 0);
-              CpuWriteIO(State, 012, 0);
-              CpuWriteIO(State, 013, 0);
-              CpuWriteIO(State, 014, 0);
+	      // Clear channels 5, 6, 10, 11, 12, 13, and 14
+	      CpuWriteIO (State, 005, 0);
+	      CpuWriteIO (State, 006, 0);
+	      CpuWriteIO (State, 010, 0);
+	      CpuWriteIO (State, 011, 0);
+	      CpuWriteIO (State, 012, 0);
+	      CpuWriteIO (State, 013, 0);
+	      CpuWriteIO (State, 014, 0);
 
-              // Clear the UPLINK TOO FAST bit (11) in channel 33
-              State->InputChannel[033] |= 002000;
+	      // Clear the UPLINK TOO FAST bit (11) in channel 33
+	      State->InputChannel[033] |= 002000;
 
-              // Clear channels 34 and 35, and don't let doing so generate a downrupt
-              CpuWriteIO(State, 034, 0);
-              CpuWriteIO(State, 035, 0);
-              State->DownruptTimeValid = 0;
+	      // Clear channels 34 and 35, and don't let doing so generate a downrupt
+	      CpuWriteIO (State, 034, 0);
+	      CpuWriteIO (State, 035, 0);
+	      State->DownruptTimeValid = 0;
 
-              // Light the RESTART light on the DSKY, if we're not going into standby
-              if (!State->Standby)
-                {
-                  State->RestartLight = 1;
-                  State->GeneratedWarning = 1;
-                }
+	      // Light the RESTART light on the DSKY, if we're not going into standby
+	      if (!State->Standby)
+		{
+		  State->RestartLight = 1;
+		  State->GeneratedWarning = 1;
+		}
 
-            }
+	    }
 
-          // Push the CH77 updates to the outside world
-          ChannelOutput (State, 077, State->InputChannel[077]);
-        }
-
+	  // Push the CH77 updates to the outside world
+	  ChannelOutput (State, 077, State->InputChannel[077]);
+	}
 
       if (State->ExtraDelay)
-        {
-          // Return, so as to account for the time occupied by updating the
-          // counters and/or GOJAM.
-          State->ExtraDelay--;
-          return (0);
-        }
+	{
+	  // Return, so as to account for the time occupied by updating the
+	  // counters and/or GOJAM.
+	  State->ExtraDelay--;
+	  return (0);
+	}
     }
 
   // If we're in standby mode, this is all we can accomplish --
@@ -2377,7 +2380,7 @@ agc_engine (agc_t * State)
   // indicate the next instruction to be executed. The Z register is 16
   // bits long, but its value is transferred to the 12-bit S regsiter for
   // addressing, so the upper bits are lost.
-  ProgramCounter = c(RegZ) & 07777;
+  ProgramCounter = c(RegZ)& 07777;
   WhereWord = FindMemoryWord (State, ProgramCounter);
 
   // Fetch the instruction itself.
@@ -2390,7 +2393,7 @@ agc_engine (agc_t * State)
       // do if the result has overflow, I can't say.  I arbitrarily 
       // overflow-correct it.
       Instruction = OverflowCorrected (
-         AddSP16 (SignExtend (State->IndexValue), SignExtend (*WhereWord)));
+	  AddSP16 (SignExtend (State->IndexValue), SignExtend (*WhereWord)));
     }
   Instruction &= 077777;
 
@@ -2407,12 +2410,48 @@ agc_engine (agc_t * State)
 
   // Handle interrupts.
   if ((DebuggerInterruptMasks[0] && !State->InIsr && State->AllowInterrupt
-     && !State->ExtraCode && !State->PendFlag && !Overflow 
-     && Instruction != 3 && Instruction != 4 && Instruction != 6)
-     || ExtendedOpcode == 0107) // Always check if the instruction is EDRUPT.
+      && !State->ExtraCode && !State->PendFlag && !Overflow && Instruction != 3
+      && Instruction != 4 && Instruction != 6) || ExtendedOpcode == 0107) // Always check if the instruction is EDRUPT.
     {
       int i;
       int InterruptRequested = 0;
+
+      // Fictitious input channel 0162 can be used to command a bailout.
+      // It's not an interrupt, or anything at all the real AGC had, but
+      // it can only occur under the same conditions interrupts can, so
+      // I process it here.
+      i = State->InputChannel[0162];
+      if (i != 0)
+	{
+	  State->InputChannel[0162] = 0;
+	  State->freezeDSKY = 0;
+	  switch (i)
+	    {
+	    case 01104:
+	    case 01201:
+	    case 01202:
+	    case 01203:
+	    case 01211:
+	      // The value of the input channel is the value of an alarm code,
+	      // which we need to store at address
+	      // 07777, and then we need to cause a jump to 07776.
+	      State->Fixed[3][01777] = i;
+	      // I don't know how, or if, the parity of address 7777 needs to be handled,
+	      // so I'm just going to ignore it for now.
+	      State->NextZ = 07776;
+	      goto AllDone;
+	    case 020000:
+	      // A DSKY-freezing command.  Undone by the next channel 162.
+	      State->freezeDSKY = 1;
+	      // This is probably used only by the DSKY itself, so we probably
+	      // just ignore this variable internally here in the AGC.
+	      break;
+	    default:
+	      // Don't know what this is, ignore it.
+	      break;
+	    }
+	}
+
       // Interrupt vectors are ordered by their priority, with the lowest
       // address corresponding to the highest priority interrupt. Thus,
       // we can simply search through them in order for the next pending
@@ -2420,46 +2459,47 @@ agc_engine (agc_t * State)
       // interrupt -- one each for filling ZRUPT and BRUPT.
       // Search for the next interrupt request.
       for (i = 1; i <= NUM_INTERRUPT_TYPES; i++)
-        {
-          if (State->InterruptRequests[i] && DebuggerInterruptMasks[i])
-            {
-              // Clear the interrupt request.
-              State->InterruptRequests[i] = 0;
-              State->InterruptRequests[0] = i;
+	{
+	  if (State->InterruptRequests[i] && DebuggerInterruptMasks[i])
+	    {
+	      // Clear the interrupt request.
+	      State->InterruptRequests[i] = 0;
+	      State->InterruptRequests[0] = i;
 
-              State->NextZ = 04000 + 4 * i;
+	      State->NextZ = 04000 + 4 * i;
 
-              InterruptRequested = 1;
-              break;
-            }
-        }
+	      InterruptRequested = 1;
+	      break;
+	    }
+	}
 
       // If no pending interrupts and we're dealing with EDRUPT, fall
       // back to address 0 (A) as the interrupt vector
       if (!InterruptRequested && ExtendedOpcode == 0107)
-        {
-          State->NextZ = 0;
-          InterruptRequested = 1;
-        }
+	{
+	  State->NextZ = 0;
+	  InterruptRequested = 1;
+	}
 
       if (InterruptRequested)
-        {
-          BacktraceAdd (State, i);
-          // Set up the return stuff.
-          c (RegZRUPT)= ProgramCounter + 1;
-          c (RegBRUPT)= Instruction;
-          // Clear various metadata. Extracode is cleared (this can only
-          // really happen with EDRUPT), and the index value and substituted
-          // instruction were both applied earlier and their effects were
-          // saved in BRUPT.
-          State->ExtraCode = 0;
-          State->IndexValue = AGC_P0;
-          State->SubstituteInstruction = 0;
-          // Vector to the interrupt.
-          State->InIsr = 1;
-          State->ExtraDelay++;
-          goto AllDone;
-        }
+	{
+	  BacktraceAdd (State, i);
+	  // Set up the return stuff.
+	  c (RegZRUPT)= ProgramCounter + 1;
+	  c (RegBRUPT)= Instruction;
+	  // Clear various metadata. Extracode is cleared (this can only
+	  // really happen with EDRUPT), and the index value and substituted
+	  // instruction were both applied earlier and their effects were
+	  // saved in BRUPT.
+	  State->ExtraCode = 0;
+	  State->IndexValue = AGC_P0;
+	  State->SubstituteInstruction = 0;
+	  // Vector to the interrupt.
+	  State->InIsr = 1;
+	  State->ExtraDelay++;
+	  goto AllDone;
+	}
+
     }
 
   // Add delay for multi-MCT instructions.  Works for all instructions 
@@ -2478,7 +2518,7 @@ agc_engine (agc_t * State)
       if (i)
 	{
 	  State->PendFlag = 1;
-	  State->PendDelay = i-1;
+	  State->PendDelay = i - 1;
 	  return (0);
 	}
     }
@@ -2520,21 +2560,21 @@ agc_engine (agc_t * State)
       // TC instruction (1 MCT).
       ValueK = Address12;// Convert AGC numerical format to native CPU format.
       if (ValueK == 3)		// RELINT instruction.
-        {
+	{
 	  State->AllowInterrupt = 1;
 
-          if (State->TookBZF || State->TookBZMF)
-            // RELINT after a single-cycle instruction causes a TC0 transient
-            ExecutedTC = 1;
-        }
+	  if (State->TookBZF || State->TookBZMF)
+	    // RELINT after a single-cycle instruction causes a TC0 transient
+	    ExecutedTC = 1;
+	}
       else if (ValueK == 4)	// INHINT instruction.
-        {
+	{
 	  State->AllowInterrupt = 0;
 
-          if (State->TookBZF || State->TookBZMF)
-            // INHINT after a single-cycle instruction causes a TC0 transient
-            ExecutedTC = 1;
-        }
+	  if (State->TookBZF || State->TookBZMF)
+	    // INHINT after a single-cycle instruction causes a TC0 transient
+	    ExecutedTC = 1;
+	}
       else if (ValueK == 6)	// EXTEND instruction.
 	{
 	  State->ExtraCode = 1;
@@ -2548,7 +2588,7 @@ agc_engine (agc_t * State)
 	  if (ValueK != RegQ)	// If not a RETURN instruction ...
 	    c (RegQ)= 0177777 & State->NextZ;
 	  State->NextZ = Address12;
-          ExecutedTC = 1;
+	  ExecutedTC = 1;
 	}
 
       break;
@@ -2753,7 +2793,7 @@ agc_engine (agc_t * State)
       case 045:
       case 046:
       case 047:
-      ExecutedTC = 1; // CS causes transients on the TC0 line
+      ExecutedTC = 1;// CS causes transients on the TC0 line
 
       if (IsA (Address12))// COM
 	{
@@ -2814,9 +2854,9 @@ agc_engine (agc_t * State)
       break;
       case 052:			// DXCH
       case 053:
-      ExecutedTC = 1; // DXCH causes transients on the TCF0 line
+      ExecutedTC = 1;// DXCH causes transients on the TCF0 line
 
-      // Remember, in the following comparisons, that the address is pre-incremented.
+		     // Remember, in the following comparisons, that the address is pre-incremented.
       if (IsL (Address10))
 	{
 	  c (RegL) = SignExtend (OverflowCorrected (c (RegL)));
@@ -2858,7 +2898,7 @@ agc_engine (agc_t * State)
       break;
       case 054:			// TS
       case 055:
-      ExecutedTC = 1; // TS causes transients on the TCF0 line
+      ExecutedTC = 1;// TS causes transients on the TCF0 line
       if (IsA (Address10))// OVSK
 	{
 	  if (Overflow)
@@ -2887,7 +2927,7 @@ agc_engine (agc_t * State)
       break;
       case 056:			// XCH
       case 057:
-      ExecutedTC = 1; // XCH causes transients on the TCF0 line
+      ExecutedTC = 1;// XCH causes transients on the TCF0 line
       if (IsA (Address10))
       break;
       if (Address10 < REG16)
@@ -3007,7 +3047,7 @@ agc_engine (agc_t * State)
       // It shouldn't be possible to get here, since EDRUPT is treated
       // as an interrupt above.
       break;
-      case 0110:			// DV
+      case 0110:// DV
       case 0111:
 	{
 	  int16_t AccPair[2], AbsA, AbsL, AbsK, Div16;
@@ -3025,34 +3065,34 @@ agc_engine (agc_t * State)
 	    {
 	      // DV modifies A before reading the divisor, so in this
 	      // case the divisor is -|A|.
-              Div16 = c(RegA);
+	      Div16 = c(RegA);
 	      if ((c(RegA) & 0100000) == 0)
-	        Div16 = 0177777 & ~Div16;
+	      Div16 = 0177777 & ~Div16;
 	    }
-          else if (IsL (Address10))
+	  else if (IsL (Address10))
 	    {
 	      // DV modifies L before reading the divisor. L is first
 	      // negated if the quotient A,L is negative according to
 	      // DV sign rules. Then, 40000 is added to it.
 	      Div16 = c(RegL);
-              if (((AbsA == 0) && (0100000 & c(RegL))) || ((AbsA != 0) && (0100000 & c(RegA))))
-	        Div16 = 0177777 & ~Div16;
-              // Make sure to account for L's built-in overflow correction
-              Div16 = SignExtend(OverflowCorrected(AddSP16((uint16_t)Div16, 040000)));
+	      if (((AbsA == 0) && (0100000 & c(RegL))) || ((AbsA != 0) && (0100000 & c(RegA))))
+	      Div16 = 0177777 & ~Div16;
+	      // Make sure to account for L's built-in overflow correction
+	      Div16 = SignExtend(OverflowCorrected(AddSP16((uint16_t)Div16, 040000)));
 	    }
-          else if (IsZ (Address10))
+	  else if (IsZ (Address10))
 	    {
 	      // DV modifies Z before reading the divisor. If the
 	      // quotient A,L is negative according to DV sign rules,
 	      // Z16 is set.
 	      Div16 = c(RegZ);
-              if (((AbsA == 0) && (0100000 & c(RegL))) || ((AbsA != 0) && (0100000 & c(RegA))))
-	        Div16 |= 0100000;
+	      if (((AbsA == 0) && (0100000 & c(RegL))) || ((AbsA != 0) && (0100000 & c(RegA))))
+	      Div16 |= 0100000;
 	    }
 	  else if (Address10 < REG16)
-	    Div16 = c(Address10);
+	  Div16 = c(Address10);
 	  else
-            Div16 = SignExtend(*FindMemoryWord(State, Address10));
+	  Div16 = SignExtend(*FindMemoryWord(State, Address10));
 
 	  // Fetch the values;
 	  AbsK = AbsSP(OverflowCorrected(Div16));
@@ -3062,22 +3102,22 @@ agc_engine (agc_t * State)
 	      // overflow. In both cases, we fall back on a slower simulation
 	      // of the hardware registers, which will produce "total nonsense"
 	      // (that nonetheless will match what the actual AGC would have gotten).
-              SimulateDV(State, Div16);
+	      SimulateDV(State, Div16);
 	    }
 	  else if (AbsA == 0 && AbsL == 0)
 	    {
 	      // The dividend is 0 but the divisor is not. The standard DV sign
 	      // convention applies to A, and L remains unchanged.
 	      if ((040000 & c (RegL)) == (040000 & OverflowCorrected(Div16)))
-                {
-                  if (AbsK == 0) Operand16 = 037777;	// Max positive value.
-                  else Operand16 = AGC_P0;
-                }
+		{
+		  if (AbsK == 0) Operand16 = 037777;	// Max positive value.
+		  else Operand16 = AGC_P0;
+		}
 	      else
-                {
-                  if (AbsK == 0) Operand16 = (077777 & ~037777);	// Max negative value.
-                  else Operand16 = AGC_M0;
-                }
+		{
+		  if (AbsK == 0) Operand16 = (077777 & ~037777);// Max negative value.
+		  else Operand16 = AGC_M0;
+		}
 
 	      c (RegA) = SignExtend (Operand16);
 	    }
@@ -3135,7 +3175,7 @@ agc_engine (agc_t * State)
 	{
 	  BacktraceAdd (State, 0);
 	  State->NextZ = Address12;
-          JustTookBZF = 1;
+	  JustTookBZF = 1;
 	}
       break;
       case 0120:			// MSU
@@ -3160,7 +3200,7 @@ agc_engine (agc_t * State)
 	  if (diff & 040000)
 	    {
 	      diff |= 0100000; // Sign-extend A15 into A16
-	      diff--; // Subtract one from the result
+	      diff--;// Subtract one from the result
 	    }
 	  if (IsQ (Address10))
 	  c (RegA) = 0177777 & diff;
@@ -3334,7 +3374,7 @@ agc_engine (agc_t * State)
 	{
 	  BacktraceAdd (State, 0);
 	  State->NextZ = Address12;
-          JustTookBZMF = 1;
+	  JustTookBZMF = 1;
 	}
       break;
       case 0170:			// MP
@@ -3404,7 +3444,7 @@ agc_engine (agc_t * State)
       // In all cases except for RESUME, Z will be truncated to
       // 12 bits between instructions
       if (!State->SubstituteInstruction)
-        c (RegZ) = c(RegZ) & 07777;
+      c (RegZ) = c(RegZ) & 07777;
       if (!KeepExtraCode)
       State->ExtraCode = 0;
       // Values written to EB and FB are automatically mirrored to BB,

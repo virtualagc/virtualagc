@@ -106,6 +106,9 @@ ChannelOutput (agc_t * State, int Channel, int Value)
   Client_t *Client;
   unsigned char Packet[4];
   extern int DebugMode;
+  // For fictitious input-channel 0162.
+  if ((Channel == 010 || Channel == 011) && State->freezeDSKY)
+    return;
   // Some output channels have purposes within the CPU, so we have to
   // account for those separately.
   if (Channel == 7)

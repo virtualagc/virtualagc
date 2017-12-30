@@ -381,6 +381,7 @@ typedef struct
   unsigned Trap31A:1;           // Enable flag for Trap 31A
   unsigned Trap31B:1;           // Enable flag for Trap 31B
   unsigned Trap32:1;            // Enable flag for Trap 32
+  unsigned freezeDSKY:1;	// For use with channel 162.
   uint32_t WarningFilter;       // Current voltage of the AGC warning filter
   uint64_t /*unsigned long long */ DownruptTime;	// Time when next DOWNRUPT occurs.
   int Downlink;

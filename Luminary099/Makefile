@@ -12,8 +12,18 @@
 #				time make is run. Point to moved Oct2Bin.
 #		2012-09-16 JL	Updated to match tools dir changes.
 #		2016-10-04 JL	Change to use Makefile.inc.
+#		2017-12-29 RSB	Temporarily (or otherwise), added the
+#				--bailout=BAILOUT1 CLI switch for yaYUL.
 
 BASENAME=Luminary099
+
+# The following variable is used to cause yaYUL to place the address of the
+# BAILOUT1 routine at address 07777, which was a feature the orginal rope did
+# NOT have.  In fact, that address was unused fixed-memory in the original
+# rope.  See the comments in the header of the file Luminary099.binsource
+# for further explanation of why I've put it there.
+EXTRA_YAYUL_ARGS=--bailout=BAILOUT1
+
 include ../Makefile.inc
 
 AP11ROPE.bin: Luminary099.bin AP11ROPE.binsource
