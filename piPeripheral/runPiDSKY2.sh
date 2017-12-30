@@ -243,6 +243,7 @@ do
 	fi
 	echo ""
 	read -p $"Choose an option"": " -t 15 -n 1
+	TEST_LAMPS=""
 	if [[ "$REPLY" == "" || "$REPLY" == "$MISSION_DEFAULT" ]]
 	then
 		REPLY=$MISSION_DEFAULT
@@ -387,6 +388,7 @@ do
 			git -C "$SOURCEDIR" show | grep '^Date:' | sed 's/Date: */'$"Version"': /'
 			echo ""
 			echo $"Maintenance menu":
+			menuItem 0 $"Test digits/lamps" RSET
 			if [[ "$NON_NATIVE" == "" ]]
 			then
 				menuItem 1 $"Reboot" RSET
@@ -405,7 +407,11 @@ do
 			menuItem RSET $"Mission menu" RSET
 			read -p $"Choose a number"": " -t 15 -n 1
 			echo ""
-			if [[ "$REPLY" == "1" && "$NON_NATIVE" == "" ]]
+			if [[ "$REPLY" == "0" ]]
+			then
+				TEST_LAMPS=yes
+				PLAYBACK="--playback=$SOURCEDIR/yaDSKY2/testLights.canned"
+			elif [[ "$REPLY" == "1" && "$NON_NATIVE" == "" ]]
 			then
 				menuItem 1 $"Confirm reboot" ""
 				menuItem 2 $"Don't reboot" ""
@@ -562,7 +568,10 @@ do
 			echo $"Permission denied"
 			sleep 2
 		fi
-		continue
+		if [[ "$TEST_LAMPS" == "" ]]
+		then
+			continue
+		fi
 	else
 		continue
 	fi

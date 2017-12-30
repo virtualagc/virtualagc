@@ -1,0 +1,77 @@
+# Canned script for DSKY that simply turns on all of the digits and lamps
+# one after the other, at half-second intervals.
+
+# Starting state ... all digits, signs, and lamps off.
+0 10 04000
+0 10 10000
+0 10 14000
+0 10 20000
+0 10 24000
+0 10 30000
+0 10 34000
+0 10 40000
+0 10 44000
+0 10 50000
+0 10 54000
+0 10 60000
+0 11 00000
+0 13 00000
+0 163 00000
+5000 10 00000
+# Delay half a second, COMP ACTY on.
+500 11 00002
+# Delay half a second, left-hand PROG turns to 8.
+500 10 55640
+# Delay half a second, right-hand PROG turns to 8.
+500 10 55675
+# And VERB ...
+500 10 51640
+500 10 51675
+# And NOUN ...
+500 10 45640
+500 10 45675
+# And R1.
+500 10 36000 # SIGN +
+500 10 41035 # Left digit 8
+500 10 37640
+500 10 37675
+500 10 31640
+500 10 31675 # Right digit 8
+# And R2.
+500 10 26000
+500 10 27640
+500 10 27675
+500 10 21640
+500 10 21675
+500 10 15640
+# And R3.
+500 10 12000
+500 10 15675
+500 10 13640
+500 10 13675
+500 10 05640
+500 10 05675
+# And UPLINK ACTY
+500 11 00006
+# And TEMP
+500 11 00016
+# And so on with other lamps
+500 10 60010	# NO ATT
+500 10 60050	# GIMBAL LOCK
+500 163 00400	# STBY
+500 10 60450	# PROG
+500 163 00420	# KEY REL
+500 163 00620	# RESTART
+500 163 00720	# OPER ERR
+500 10 60650	# TRACKER
+500 10 60651	# PRIO DISP
+500 10 60671	# ALT
+500 10 60673	# NO DAP
+500 10 60677	# VEL
+# Wait a while, and then 5 RSET's to quit ...
+5000 15 22
+100 15 22
+100 15 22
+100 15 22
+100 15 22
+

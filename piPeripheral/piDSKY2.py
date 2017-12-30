@@ -120,6 +120,8 @@
 #				to insure shutdown of PIGPIO on termination.
 #				Tests of yesterday's SPI-shutdown code have been
 #				working fine, though.
+#		2017-12-30 RSB	Allowed corrupted lines in playback scripts, 
+#				in order to handle comment lines.
 #
 # About the design of this program ... yes, a real Python developer would 
 # objectify it and have lots and lots of individual modules defining the objects.
@@ -277,7 +279,10 @@ if args.playback:
 		playbackFile = open(args.playback, "r")
 		playbackGenerator = (line.strip().split() for line in playbackFile)
 		for line in playbackGenerator:
-			playbackEvents.append( ( float(line[0]), int(line[1], 8), int(line[2], 8)  ) )
+			try:
+				playbackEvents.append( ( float(line[0]), int(line[1], 8), int(line[2], 8)  ) )
+			except:
+				pass
 			#print(str(playbackEvents[len(playbackEvents)-1]))
 	except:
 		print("Problem with playback file: " + args.playback)
