@@ -122,6 +122,15 @@
 #				working fine, though.
 #		2017-12-30 RSB	Allowed corrupted lines in playback scripts, 
 #				in order to handle comment lines.
+#		2017-12-31 RSB	Modified the playback scripts in two ways:  First,
+#				it explicitly checks for '#...' and removes them
+#				as being comments, and doesn't simply rely on 
+#				the line being ill-formed.  Secondly, after 
+#				removal of comments, any line NOT of the form
+#				"float octal octal" is treated as "float command",
+#				where the command is executed in the background
+#				by shelling out.  Thus, arbitrary BASH commands such
+#				as audio playback can be put into the script.
 #
 # About the design of this program ... yes, a real Python developer would 
 # objectify it and have lots and lots of individual modules defining the objects.
@@ -278,11 +287,47 @@ if args.playback:
 	try:
 		playbackFile = open(args.playback, "r")
 		playbackGenerator = (line.strip().split() for line in playbackFile)
+		# Loop on the input-file's lines.
 		for line in playbackGenerator:
+			# If we find a field that begins with the '#' character,
+			# we ignore all of the fields beyond it as constituting
+			# a comment.
+			for i in range(1, len(line)):
+				if line[i][:1] == '#':
+					line = line[:i]
+					break
+			# At minimum, we require there must be at least 2 fields in 
+			# the line, that the first must be a float, and the 
+			# second must not be empty.
+			if len(line) < 2 or len(line[1]) < 1:
+				continue
 			try:
-				playbackEvents.append( ( float(line[0]), int(line[1], 8), int(line[2], 8)  ) )
+				differential = float(line[0])
 			except:
-				pass
+				continue
+			# There are two cases at this
+			# point.  First, the line could be an i/o-channel event, in
+			# which case it has 3 fields consisting of a float (already
+			# verified) and two octals.  In the second, it consists of
+			# a variable number of fields, of which the first is a float
+			# (already verified), the second is non-empty (and consists
+			# of the name of a program to be run), and the remainder (if
+			# any) are the command-line parameters for that program.
+			# When we append this to the event array, we distinguish by adding
+			# an extra field that is either True for the former case or
+			# False for the latter.
+			entry = ()
+			if len(line) == 3:			
+				try:
+					entry = ( True, differential, int(line[1], 8), int(line[2], 8)  )
+				except:
+					pass
+			if len(entry) == 0:
+				command = line[1];
+				for i in range(2, len(line)):
+					command += " " + line[i]
+				entry = ( False, differential, command )
+			playbackEvents.append( entry )
 			#print(str(playbackEvents[len(playbackEvents)-1]))
 	except:
 		print("Problem with playback file: " + args.playback)
@@ -1584,40 +1629,45 @@ def eventLoop():
 			if currentPlaybackIndex < len(playbackEvents):
 				#print(currentPlaybackIndex)
 				timeNow = time.time()
-				desiredTime = lastPlaybackTime + playbackEvents[currentPlaybackIndex][0] / 1000.0
+				desiredTime = lastPlaybackTime + playbackEvents[currentPlaybackIndex][1] / 1000.0
 				if timeNow >= desiredTime:
 					lastPlaybackTime = desiredTime
-					# Channels 015 and 032 are AGC INPUT channels (hence
-					# are outputs from the DSKY rather than inputs to it).
-					# They indicate keypresses.  We won't do anything with
-					# them other than possibly to flash backlights on the
-					# associated keys.
-					channel = playbackEvents[currentPlaybackIndex][1]
-					value = playbackEvents[currentPlaybackIndex][2]
-					if channel == 0o15:
-						#print("Playback keystroke event " + oct(channel) + " " + oct(value))
-						name = keyNames[value & 0o37]
-						if name == "RSET KEY":
-							cannedRsetCount += 1
-							if cannedRsetCount >= 5:
-								echoOn(True)
-								timersStop()
-								root.destroy()
-								shutdownGPIO()
-								os.system("xset r on &")
-								return	
+					print(playbackEvents[currentPlaybackIndex])
+					if playbackEvents[currentPlaybackIndex][0]:
+						# Channels 015 and 032 are AGC INPUT channels (hence
+						# are outputs from the DSKY rather than inputs to it).
+						# They indicate keypresses.  We won't do anything with
+						# them other than possibly to flash backlights on the
+						# associated keys.
+						channel = playbackEvents[currentPlaybackIndex][2]
+						value = playbackEvents[currentPlaybackIndex][3]
+						if channel == 0o15:
+							#print("Playback keystroke event " + oct(channel) + " " + oct(value))
+							name = keyNames[value & 0o37]
+							if name == "RSET KEY":
+								cannedRsetCount += 1
+								if cannedRsetCount >= 5:
+									echoOn(True)
+									timersStop()
+									root.destroy()
+									shutdownGPIO()
+									os.system("xset r on &")
+									return	
+							else:
+								cannedRsetCount == 0
+							updateLampStatusesAndLamps(name, False)
+							t = threading.Timer(0.32, updateLampStatusesAndLamps, (name, True))
+							t.start()
+						elif channel == 0o32:
+							if (value & 0o20000) != 0:
+								updateLampStatusesAndLamps("PRO KEY", True)
+							else:
+								updateLampStatusesAndLamps("PRO KEY", False)
 						else:
-							cannedRsetCount == 0
-						updateLampStatusesAndLamps(name, False)
-						t = threading.Timer(0.32, updateLampStatusesAndLamps, (name, True))
-						t.start()
-					elif channel == 0o32:
-						if (value & 0o20000) != 0:
-							updateLampStatusesAndLamps("PRO KEY", True)
-						else:
-							updateLampStatusesAndLamps("PRO KEY", False)
+							outputFromAGC(channel, value)
 					else:
-						outputFromAGC(channel, value)
+						print("Command = \"" + playbackEvents[currentPlaybackIndex][2] + "\"")
+						os.system(playbackEvents[currentPlaybackIndex][2] + ' &')
 					currentPlaybackIndex += 1
 					didSomething = True
 		else:
