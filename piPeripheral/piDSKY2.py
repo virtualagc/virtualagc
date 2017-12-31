@@ -1632,7 +1632,7 @@ def eventLoop():
 				desiredTime = lastPlaybackTime + playbackEvents[currentPlaybackIndex][1] / 1000.0
 				if timeNow >= desiredTime:
 					lastPlaybackTime = desiredTime
-					print(playbackEvents[currentPlaybackIndex])
+					#print(playbackEvents[currentPlaybackIndex])
 					if playbackEvents[currentPlaybackIndex][0]:
 						# Channels 015 and 032 are AGC INPUT channels (hence
 						# are outputs from the DSKY rather than inputs to it).
@@ -1666,7 +1666,7 @@ def eventLoop():
 						else:
 							outputFromAGC(channel, value)
 					else:
-						print("Command = \"" + playbackEvents[currentPlaybackIndex][2] + "\"")
+						sys.stderr.write("Command = \"" + playbackEvents[currentPlaybackIndex][2] + "\"\n")
 						os.system(playbackEvents[currentPlaybackIndex][2] + ' &')
 					currentPlaybackIndex += 1
 					didSomething = True
