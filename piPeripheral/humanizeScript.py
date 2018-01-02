@@ -41,22 +41,33 @@
 #				messages may still not be mission-specific
 #				enough, but I don't really have good enough
 #				documentation to separate it out by mission.
+#		2018-01-02 RSB	Added a second CLI argument, nominally 
+#				'absolute' though the actual string doesn't
+#				matter.  If present, it allow processing of
+#				NASSP logs rather than DSKY playback scripts.
 
 import sys
 
 # Interpret the command-line argument.
 lm = False
 cm = False
-if len(sys.argv) == 2:
+absolute = False
+if len(sys.argv) >= 2:
 	if sys.argv[1].upper() == "LM":
 		lm = True
 	elif sys.argv[1].upper() == "CM":
 		cm = True
 if not (lm or cm):
 	sys.stderr.write("USAGE:\n")
-	sys.stderr.write("\thumanizeScript.py SPACECRAFT <DSKYSCRIPT >REPORT\n")
-	sys.stderr.write("where SPACECRAFT is either lm or cm.\n")
+	sys.stderr.write("\thumanizeScript.py SPACECRAFT [absolute] <DSKYSCRIPT >REPORT\n")
+	sys.stderr.write("where SPACECRAFT is either lm or cm.  If present, the\n")
+	sys.stderr.write("'absolute' argument (actually, it can be any string) means\n")
+	sys.stderr.write("that DSKYSCRIPT is really a NASSP log rather than a DSKY\n")
+	sys.stderr.write("playbask script, and thus contains absolute time references\n")
+	sys.stderr.write("rather than differential time refereneces.\n")
 	sys.exit(1)
+if len(sys.argv) >= 3:
+	absolute = True
 
 # Use this dictionary to keep track of the last values from the i/o channels
 # encountered in the input log/script, and use that info to eliminate repetitions.  
@@ -199,6 +210,7 @@ if lm:
 		"none"
 	]
 	bitNames6 = [
+		"none",
 		"RCS B3A +P/+Z", 
 		"RCS B4F -P/-Z", 
 		"RCS A1F +P/-Z", 
@@ -801,7 +813,10 @@ for line in inputLines:
 	inputTime = float(line[0])
 	if firstPass:
 		firstPass = False
-	currentTimeSeconds += inputTime / 1000.0
+	if absolute:
+		currentTimeSeconds = inputTime
+	else:
+		currentTimeSeconds += inputTime / 1000.0
 	channel = int(line[1], 8)
 	value = int(line[2], 8)
 	
