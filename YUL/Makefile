@@ -21,11 +21,11 @@ ALL_SOURCE:=$(wildcard *.argus)
 SOURCES:=YULPASS0.argus YULPASS1.argus YULPASS2.argus YULPASS3.argus YULMANUF.argus YULSIMUL.argus
 
 symcheck:
-	echo "Checking for bad symbols..."
+	@echo "Checking for bad symbols..."
 	python $(H800)/tools/check-symbols.py -b $(SOURCES)
 
 listsyms:
-	echo "Listing all symbols..."
+	@echo "Listing all symbols..."
 	python $(H800)/tools/list-symbols.py YULPASS0.argus >YULPASS0.symtab
 	python $(H800)/tools/list-symbols.py YULPASS1.argus >YULPASS1.symtab
 	python $(H800)/tools/list-symbols.py YULPASS2.argus >YULPASS2.symtab
@@ -34,15 +34,15 @@ listsyms:
 	#python $(H800)/tools/list-symbols.py YULSIMUL.argus >YULSIMUL.symtab
 
 instrcheck:
-	echo "Checking instructions..."
+	@echo "Checking instructions..."
 	python $(H800)/tools/check-instructions.py -i $(SOURCES)
 
 instrcount:
-	echo "Counting instructions..."
+	@echo "Counting instructions..."
 	python $(H800)/tools/check-instructions.py -c -s -u $(SOURCES)
 
 parse:
-	echo "Parsing..."
+	@echo "Parsing..."
 	python $(H800)/tools/parse.py YULPASS0.argus
 	#python $(H800)/tools/list-symbols.py YULPASS2.argus >YULPASS1.symtab
 	#python $(H800)/tools/list-symbols.py YULPASS2.argus >YULPASS2.symtab
