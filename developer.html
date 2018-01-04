@@ -23,6 +23,11 @@
 
 
 
+
+
+
+
+
           Changes Back to the Virtual AGC Project</a><br>
       </li>
       <li><a href="#Interfacing_yaAGC_to_yaDSKY_or_Other">Interfacing
@@ -72,6 +77,11 @@
         <li><a href="#Useful_AGC_Datatypes_and_Constants">Useful
             Datatypes and Constants</a></li>
         <li><a href="#AGC_CPU-to-Peripheral_Interconnections">CPU-to-Peripheral
+
+
+
+
+
 
 
 
@@ -138,6 +148,11 @@
 
 
 
+
+
+
+
+
     of introducing new stand-alone programs for simulating other Apollo
     hardware—without changing <span style="font-weight: bold;">yaAGC</span>
     itself.&nbsp; In fact, this has already been done with such
@@ -149,6 +164,11 @@
       bold;">yaDEDA</span> and <span style="font-weight: bold;">yaDEDA2</span>,
     and "yaACA" to refer interchangeably to <span style="font-weight:
       bold;">yaACA</span> and <span style="font-weight: bold;">yaACA2</span>.&nbsp;
+
+
+
+
+
 
 
 
@@ -346,6 +366,11 @@
       style="font-family: monospace;">ChannelRoutine</span> functions as
     described below to eliminate the socket-based interface.<br>
     <h3><a name="yaAGC_vs._yaAGS_Packets" id="yaAGC_vs._yaAGS_Packets"></a>yaAGC
+
+
+
+
+
 
 
 
@@ -1278,6 +1303,11 @@
 
 
 
+
+
+
+
+
       with the DEDA</h3>
     Working with the DEDA is somewhat trickier from a developer's
     standpoint than working with the DSKY.&nbsp; The DSKY is simply a
@@ -1439,6 +1469,11 @@
     counter registers and the list of available "unprogrammed
     sequences", refer to the <a
       href="assembly_language_manual.html#CPU_Architecture_Registers">CPU
+
+
+
+
+
 
 
 
@@ -1696,6 +1731,11 @@
 
 
 
+
+
+
+
+
       Input-Channel Bitmasks</h3>
     The bit <span style="font-family: monospace;">u</span> in the <span
       style="font-family: monospace;">send/recv</span> protocol doesn't
@@ -1766,6 +1806,11 @@
     hardware simulations are clever enough to figure out for themselves
     which bits of the output channels are applicable.<br>
     <h3><a name="Fictitious_IO_Channels" id="Fictitious_IO_Channels"></a>Fictitious
+
+
+
+
+
 
 
 
@@ -2023,10 +2068,46 @@
             and are not confined to the CPU.<br>
           </td>
         </tr>
+        <tr>
+          <td valign="middle" align="center">0163<br>
+          </td>
+          <td valign="middle">Output from CPU to DSKY<br>
+          </td>
+          <td valign="top">This channel provides correct handling of
+            signals which, due to hardware-implementation factors, are
+            not provided to the DSKY precisely according to the values
+            the AGC writes to the associated output channels (011 and
+            013).&nbsp; In other words, it accounts for hardware
+            handling of the signals after leaving the AGC's output
+            registers.&nbsp; For example, channel 10 has KEY REL and
+            OPER ERR bits that tell whether the KEY REL and OPER ERR
+            signals are logically active or not, but don't account for
+            the fact that in addition to the logical state of the
+            signals, they are modulated by a square wave (to induce
+            flashing) before reaching the DSKY. Channel 163 models this
+            flashing.<br>
+            <ul>
+              <li>Bit 1: AGC warning</li>
+              <li>Bit 5: KEY REL lamp<br>
+              </li>
+              <li>Bit 6: VERB/NOUN flash</li>
+              <li>Bit 7: OPER ERR lamp</li>
+              <li>Bit 8: RESTART lamp</li>
+              <li>Bit 9: STBY lamp</li>
+              <li>Bit 10: EL off<br>
+              </li>
+            </ul>
+          </td>
+        </tr>
       </tbody>
     </table>
     <br>
     <h2><a name="IO_Channel_Specifics" id="IO_Channel_Specifics"></a>yaAGC
+
+
+
+
+
 
 
 
@@ -2063,6 +2144,11 @@
       it yet.)<br>
     </div>
     <h3><a name="Table_of_IO_Channels" id="Table_of_IO_Channels"></a>Table
+
+
+
+
+
 
 
 
@@ -2263,6 +2349,9 @@
                 style="font-family: monospace;">BCCCCCDDDDD</span>
               pattern.&nbsp; Instead:<br>
               <ul>
+                <li>Bit 1 lights the "PRIO DISP" indicator.</li>
+                <li>Bit 2 lights the "NO DAP" indicator.<br>
+                </li>
                 <li>Bit 3 lights the&nbsp; "VEL" indicator.<br>
                 </li>
                 <li>Bit 4 lights the "NO ATT" indicator.</li>
@@ -2404,6 +2493,11 @@ href="https://archive.org/stream/acelectroniclmma00acel_0#page/n358/mode/1up">fo
 
 
 
+
+
+
+
+
         here</a>, (look at relays K5, K4, ..., K1 in the
       schematic).&nbsp; All 32 of the possible patterns implied by that
       schematic have been traced out, and are shown in the leftmost
@@ -2466,9 +2560,9 @@ href="https://archive.org/stream/acelectroniclmma00acel_0#page/n358/mode/1up">fo
             <td style="text-align: center; vertical-align: middle;"> 5<br>
             </td>
             <td style="vertical-align: middle; text-align: left;"> DSKY:
-              Lights the "KEY REL" indicator.&nbsp; I believe that this
-              indicator flashes at a 1.5 cycle-per-second rate when
-              illuminated.<br>
+              Lights the "KEY REL" indicator.&nbsp; But see the
+              "fictitious" i/o channel 163 discussed earlier on this
+              page.<br>
             </td>
           </tr>
           <tr>
@@ -2476,23 +2570,17 @@ href="https://archive.org/stream/acelectroniclmma00acel_0#page/n358/mode/1up">fo
             </td>
             <td style="vertical-align: middle; text-align: left;"> DSKY:
               Flashes the VERB/NOUN display areas.&nbsp; This means to
-              flash the digits in the NOUN and VERB areas.&nbsp; From
-              AC's "APOLLO GUIDANCE AND NAVIGATION SYSTEM LUNAR MODULE
-              STUDENT STUDY GUIDE", I believe that the rate of flashing
-              is 1.5 cycles per second.&nbsp; Actually, this can be
-              verified by inspecting the Apollo 11 unscheduled TV
-              transmission.&nbsp; (Thanks to Christian Bucher for
-              pointing this out.&nbsp; Christian also tells me that the
-              low:high duty cycle is about 1:3.)<br>
-            </td>
+              flash the digits in the NOUN and VERB areas. But see the
+              "fictitious" i/o channel 163 discussed earlier on this
+              page. </td>
           </tr>
           <tr>
             <td style="text-align: center; vertical-align: middle;"> 7<br>
             </td>
             <td style="vertical-align: middle; text-align: left;"> DSKY:
-              Lights the "OPR ERR" indicator.&nbsp; I believe that this
-              indicator flashes at a 1.5 cycle-per-second rate when
-              illuminated.</td>
+              Lights the "OPR ERR" indicator.&nbsp; But see the
+              "fictitious" i/o channel 163 discussed earlier on this
+              page.</td>
           </tr>
         </tbody>
       </table>
@@ -2650,17 +2738,17 @@ href="https://archive.org/stream/acelectroniclmma00acel_0#page/n358/mode/1up">fo
             <td style="text-align: center; vertical-align: middle;"> 10<br>
             </td>
             <td style="vertical-align: middle; text-align: left;">
-              DSKY:&nbsp; Tests alarms and DSKY lights.&nbsp; I'm not
-              sure what this means, exactly, so right now I'm just
-              ignoring it ....</td>
+              DSKY:&nbsp; Tests alarms and DSKY lights. But see the
+              "fictitious" i/o channel 163 discussed earlier on this
+              page.</td>
           </tr>
           <tr>
             <td style="text-align: center; vertical-align: middle;"> 11<br>
             </td>
             <td style="vertical-align: middle; text-align: left;">
-              DSKY:&nbsp; Lights the "STANDBY" indicator.&nbsp; (But I
-              don't think it's correct.)<br>
-            </td>
+              DSKY:&nbsp; Lights the "STANDBY" indicator. But see the
+              "fictitious" i/o channel 163 discussed earlier on this
+              page. </td>
           </tr>
         </tbody>
       </table>
@@ -3119,6 +3207,11 @@ href="https://github.com/virtualagc/virtualagc/blob/master/piPeripheral/piPeriph
     <p align="center"><tt>[ (<i>CHANNEL0</i>,<i>VALUE0</i>,<i>MASK0</i>),
 
 
+
+
+
+
+
         (<i>CHANNEL1</i>,<i>VALUE1</i>,<i>MASK1</i>), ...]</tt><br>
     </p>
     <p>where the "channels" are the input-channel numbers, the "values"
@@ -3156,12 +3249,22 @@ href="https://github.com/virtualagc/virtualagc/blob/master/piPeripheral/piDSKY.p
 
 
 
+
+
+
+
+
     <span style="font-weight: bold;">yaDSKY</span> is actually an
     extremely simple program to understand and to modify. Though
     targeted for a UNIX-type operating environment (such as Linux), all
     design tradeoffs have been made in favor of simplicity and
     portability, as opposed to performance or aesthetics.<br>
     <h3><a name="Interface_to_yaAGC" id="Interface_to_yaAGC"></a>Interface
+
+
+
+
+
 
 
 
@@ -3189,6 +3292,11 @@ href="https://github.com/virtualagc/virtualagc/blob/master/piPeripheral/piDSKY.p
     of the same kind can connect. For example, two or more DSKY
     simulations can be run at the same time from one AGC simulation.<br>
     <h3><a name="Software_Architecture" id="Software_Architecture"></a>Software
+
+
+
+
+
 
 
 
@@ -3410,6 +3518,11 @@ href="https://github.com/virtualagc/virtualagc/blob/master/piPeripheral/piDSKY.p
 
 
 
+
+
+
+
+
       Therefore, the operation of 16383+1 will overflow.&nbsp; In terms
       of bits, this operation results in 01 000000 000000.&nbsp; The
       mismatch between the most significant bits is an indication of
@@ -3423,6 +3536,11 @@ href="https://github.com/virtualagc/virtualagc/blob/master/piPeripheral/piDSKY.p
       scope here.</span>
     <h3><a name="AGC_CPU-to-Peripheral_Interconnections"
         id="AGC_CPU-to-Peripheral_Interconnections"></a>CPU-to-Peripheral
+
+
+
+
+
 
 
 
@@ -3453,6 +3571,11 @@ href="https://github.com/virtualagc/virtualagc/blob/master/piPeripheral/piDSKY.p
     you like!&nbsp;&nbsp; Then rebuild <span style="font-weight: bold;">yaAGC</span>
     and <span style="font-weight: bold;">yaDSKY</span> using these new
     functions.&nbsp; <span style="font-style: italic;">Voila</span>!&nbsp;
+
+
+
+
+
 
 
 
@@ -3853,6 +3976,11 @@ href="https://github.com/virtualagc/virtualagc/blob/master/piPeripheral/piDSKY.p
 
 
 
+
+
+
+
+
     It's important to use this function rather than reading the mirror
     array directly, since the function accounts for the fact that the L
     and Q registers appear in both i/o space and erasable-memory
@@ -3926,6 +4054,11 @@ href="https://github.com/virtualagc/virtualagc/blob/master/piPeripheral/piDSKY.p
     only)<br>
     <br>
     Displays (i.e., <span style="font-family: monospace;">printf</span>s)
+
+
+
+
+
 
 
 
@@ -4229,6 +4362,11 @@ href="https://github.com/virtualagc/virtualagc/blob/master/piPeripheral/piDSKY.p
 
 
 
+
+
+
+
+
         // No command-line arguments!</span><br>
       <span style="font-family: monospace;">&nbsp; ReturnValue =
         agc_engine_init (&amp;State, argv[1], NULL);</span><br>
@@ -4457,10 +4595,15 @@ href="https://github.com/virtualagc/virtualagc/blob/master/piPeripheral/piDSKY.p
 
 
 
+
+
+
+
+
           Commons No Rights Reserved License</a></span><br>
       <i><font size="-1">Last modified by <a
             href="mailto:info@sandroid.org">Ronald Burkey</a> on
-          2017-12-17.<br>
+          2018-01-03.<br>
           <br>
           <a href="http://www.ibiblio.org"><img style="border: 0px solid
               ; width: 300px; height: 100px;" alt="Virtual AGC is hosted
