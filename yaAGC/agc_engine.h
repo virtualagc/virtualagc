@@ -260,6 +260,7 @@ extern long random (void);
 #define CH77_NIGHT_WATCHMAN 000020
 
 #define DSKY_AGC_WARN 000001
+#define DSKY_TEMP     000010
 #define DSKY_KEY_REL  000020
 #define DSKY_VN_FLASH 000040
 #define DSKY_OPER_ERR 000100

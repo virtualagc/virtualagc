@@ -131,6 +131,8 @@
 #				where the command is executed in the background
 #				by shelling out.  Thus, arbitrary BASH commands such
 #				as audio playback can be put into the script.
+#		2018-01-06 MAS	Switched the TEMP light to use channel 163 instead
+#				of channel 11.
 #
 # About the design of this program ... yes, a real Python developer would 
 # objectify it and have lots and lots of individual modules defining the objects.
@@ -1229,12 +1231,6 @@ def outputFromAGC(channel, value):
 			updateLampStatuses("UPLINK ACTY", True)
 		else:
 			updateLampStatuses("UPLINK ACTY", False)
-		temp = "TEMP OFF        "
-		if (value & 0x08) != 0:
-			temp = "TEMP ON         "
-			updateLampStatuses("TEMP", True)
-		else:
-			updateLampStatuses("TEMP", False)
 		flashing = "V/N NO FLASH    "
 		if (value & 0x20) != 0:
 			if not vnFlashing:
@@ -1246,7 +1242,7 @@ def outputFromAGC(channel, value):
 		else:
 			if vnFlashing != False:
 				vnFlashingStop()
-		print(compActy + "   " + uplinkActy + "   " + temp + "   " + "   " + flashing)
+		print(compActy + "   " + uplinkActy + "   " + "   " + "   " + flashing)
 		updateLamps()
 	elif channel == 0o13:
 		test = "DSKY TEST       "
@@ -1255,6 +1251,12 @@ def outputFromAGC(channel, value):
 		print(test)
 		updateLamps()
 	elif channel == 0o163:
+		if (value & 0x08) != 0:
+			temp = "TEMP ON         "
+			updateLampStatuses("TEMP", True)
+		else:
+			temp = "TEMP OFF        "
+			updateLampStatuses("TEMP", False)
 		if (value & 0o400) != 0:
 			standby = "DSKY STANDBY ON "
 			updateLampStatuses("DSKY STANDBY", True)
@@ -1279,7 +1281,7 @@ def outputFromAGC(channel, value):
 		else:
 			restart = "RESTART OFF     "
 			updateLampStatuses("RESTART", False)
-		print(standby + "   " + keyRel + "   " + oprErr + "   " + restart)
+		print(temp + "   " + standby + "   " + keyRel + "   " + oprErr + "   " + restart)
 		updateLamps()
 	else:
 		print("Received from yaAGC: " + oct(value) + " -> channel " + oct(channel))
