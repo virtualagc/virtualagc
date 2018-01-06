@@ -369,6 +369,10 @@
  *				state via an ever-present GOJAM during standby,
  *				but the standby enabled bit (CH13 bit 11) is not
  *				required to be set to exit standby, only to enter.
+ *		01/06/18 MAS	Added a new channel 163 bit for the TEMP light,
+ *				which is the logical OR of channel 11 bit 4 and
+ *				channel 30 bit 15. The AGC did this internally
+ *				so the light would still work in standby.
  *
  *
  * The technical documentation for the Apollo Guidance & Navigation (G&N) system,
