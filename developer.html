@@ -28,6 +28,8 @@
 
 
 
+
+
           Changes Back to the Virtual AGC Project</a><br>
       </li>
       <li><a href="#Interfacing_yaAGC_to_yaDSKY_or_Other">Interfacing
@@ -77,6 +79,8 @@
         <li><a href="#Useful_AGC_Datatypes_and_Constants">Useful
             Datatypes and Constants</a></li>
         <li><a href="#AGC_CPU-to-Peripheral_Interconnections">CPU-to-Peripheral
+
+
 
 
 
@@ -153,6 +157,8 @@
 
 
 
+
+
     of introducing new stand-alone programs for simulating other Apollo
     hardware—without changing <span style="font-weight: bold;">yaAGC</span>
     itself.&nbsp; In fact, this has already been done with such
@@ -164,6 +170,8 @@
       bold;">yaDEDA</span> and <span style="font-weight: bold;">yaDEDA2</span>,
     and "yaACA" to refer interchangeably to <span style="font-weight:
       bold;">yaACA</span> and <span style="font-weight: bold;">yaACA2</span>.&nbsp;
+
+
 
 
 
@@ -375,6 +383,8 @@
 
 
 
+
+
       vs. yaAGS Packets</h3>
     The <span style="font-weight: bold;">yaAGC</span> and <span
       style="font-weight: bold;">yaAGS</span> programs each use a system
@@ -442,8 +452,8 @@
     Specifically, the <span style="font-family: monospace;">tttttt</span>
     field is interpreted as follows (all numbers in octal):<br>
     <br>
-    <table summary="" style="text-align: left;" cellspacing="2"
-      cellpadding="2" border="1">
+    <table summary="" style="text-align: left;" border="1"
+      cellspacing="2" cellpadding="2">
       <tbody>
         <tr>
           <td style="font-weight: bold; vertical-align: middle;"> <span
@@ -534,8 +544,8 @@
             The mask bits are active when 1 and inactive when 0.<br>
             <br>
             <table summary="" style="text-align: left; margin-left:
-              auto; margin-right: auto;" cellspacing="2" cellpadding="2"
-              border="1">
+              auto; margin-right: auto;" border="1" cellspacing="2"
+              cellpadding="2">
               <tbody>
                 <tr>
                   <td style="font-weight: bold; vertical-align: middle;">
@@ -668,8 +678,8 @@
             The mask bits are active when 1 and inactive when 0.<br>
             <br>
             <table summary="" style="text-align: left; margin-left:
-              auto; margin-right: auto;" cellspacing="2" cellpadding="2"
-              border="1">
+              auto; margin-right: auto;" border="1" cellspacing="2"
+              cellpadding="2">
               <tbody>
                 <tr>
                   <td style="font-weight: bold; vertical-align: middle;">
@@ -1106,8 +1116,8 @@
             are 0 when active and 1 when inactive.<br>
             <br>
             <table summary="" style="text-align: left; margin-left:
-              auto; margin-right: auto;" cellspacing="2" cellpadding="2"
-              border="1">
+              auto; margin-right: auto;" border="1" cellspacing="2"
+              cellpadding="2">
               <tbody>
                 <tr>
                   <td style="font-weight: bold; vertical-align: middle;">
@@ -1273,7 +1283,7 @@
     be zeroed or can count up or down (by one).<br>
     <br>
     <div style="margin-left: 40px;">
-      <table summary="" cellspacing="2" cellpadding="2" border="1">
+      <table summary="" border="1" cellspacing="2" cellpadding="2">
         <tbody>
           <tr>
             <td>0</td>
@@ -1299,6 +1309,8 @@
     at the least-significant bit of the counter or integrator register,
     regardless of how many bits of precision the register has.<br>
     <h3><a name="Working_with_the_DEDA" id="Working_with_the_DEDA"></a>Working
+
+
 
 
 
@@ -1479,12 +1491,14 @@
 
 
 
+
+
       Architecture section of the assembly-language manual</a>.&nbsp;
     Numerically, unprogrammed sequences are represented as follows:<br>
     <br>
     <div style="text-align: center;">
       <table summary="" style="text-align: left; margin-left: auto;
-        margin-right: auto;" cellspacing="2" cellpadding="2" border="1">
+        margin-right: auto;" border="1" cellspacing="2" cellpadding="2">
         <tbody>
           <tr>
             <td style="font-weight: bold; text-align: center;
@@ -1736,6 +1750,8 @@
 
 
 
+
+
       Input-Channel Bitmasks</h3>
     The bit <span style="font-family: monospace;">u</span> in the <span
       style="font-family: monospace;">send/recv</span> protocol doesn't
@@ -1815,6 +1831,8 @@
 
 
 
+
+
       I/O Channels</h3>
     For the purpose of communicating various types of information
     to/from <span style="font-weight: bold;">yaAGC</span> which do not
@@ -1824,8 +1842,8 @@
     not exist in the true AGC.&nbsp; These fictitious i/o channels are
     listed in the table below.<br>
     <br>
-    <table summary="" style="text-align: left; width: 100%;"
-      cellspacing="2" cellpadding="2" border="1">
+    <table summary="" style="text-align: left; width: 100%;" border="1"
+      cellspacing="2" cellpadding="2">
       <tbody>
         <tr>
           <td style="font-weight: bold; text-align: center;
@@ -2088,6 +2106,8 @@
             flashing.<br>
             <ul>
               <li>Bit 1: AGC warning</li>
+              <li>Bit 4: TEMP lamp<br>
+              </li>
               <li>Bit 5: KEY REL lamp<br>
               </li>
               <li>Bit 6: VERB/NOUN flash</li>
@@ -2103,6 +2123,8 @@
     </table>
     <br>
     <h2><a name="IO_Channel_Specifics" id="IO_Channel_Specifics"></a>yaAGC
+
+
 
 
 
@@ -2153,6 +2175,8 @@
 
 
 
+
+
       of I/O Channels</h3>
     Output Channel 10 (octal)<br>
     <div style="margin-left: 40px;"> Used for driving the DSKY's
@@ -2190,8 +2214,8 @@
       or if both 1+ and 1- flags are set, the '-' sign is displayed.)<br>
       <br>
       <table summary="" style="width: 90%; text-align: left;
-        margin-left: auto; margin-right: auto;" cellspacing="2"
-        cellpadding="2" border="1">
+        margin-left: auto; margin-right: auto;" border="1"
+        cellspacing="2" cellpadding="2">
         <tbody>
           <tr>
             <th style="text-align: center; vertical-align: middle;"> <span
@@ -2368,8 +2392,8 @@
       </table>
       <br>
       <table summary="" style="width: 50%; text-align: left;
-        margin-left: auto; margin-right: auto;" cellspacing="2"
-        cellpadding="2" border="1">
+        margin-left: auto; margin-right: auto;" border="1"
+        cellspacing="2" cellpadding="2">
         <tbody>
           <tr>
             <th style="text-align: center; vertical-align: middle;">
@@ -2498,6 +2522,8 @@ href="https://archive.org/stream/acelectroniclmma00acel_0#page/n358/mode/1up">fo
 
 
 
+
+
         here</a>, (look at relays K5, K4, ..., K1 in the
       schematic).&nbsp; All 32 of the possible patterns implied by that
       schematic have been traced out, and are shown in the leftmost
@@ -2511,7 +2537,7 @@ href="https://archive.org/stream/acelectroniclmma00acel_0#page/n358/mode/1up">fo
       <br>
       <div align="center"><a href="traceDSKY.png"><img title="Click to
             enlarge" alt="" src="traceDSKY-small.png" width="383"
-            height="269" border="2"></a> &nbsp; &nbsp; <img alt=""
+            border="2" height="269"></a> &nbsp; &nbsp; <img alt=""
           src="traceDSKYA.jpg" width="646" height="269"><br>
       </div>
       <br>
@@ -2524,8 +2550,8 @@ href="https://archive.org/stream/acelectroniclmma00acel_0#page/n358/mode/1up">fo
       software are:<br>
       <br>
       <table summary="" style="width: 60%; text-align: left;
-        margin-left: auto; margin-right: auto;" cellspacing="2"
-        cellpadding="2" border="1">
+        margin-left: auto; margin-right: auto;" border="1"
+        cellspacing="2" cellpadding="2">
         <tbody>
           <tr>
             <th style="text-align: center; vertical-align: middle;">
@@ -2553,7 +2579,8 @@ href="https://archive.org/stream/acelectroniclmma00acel_0#page/n358/mode/1up">fo
             <td style="text-align: center; vertical-align: middle;"> 4<br>
             </td>
             <td style="vertical-align: middle; text-align: left;"> DSKY:
-              Lights the "TEMP" indicator.<br>
+              Lights the "TEMP" indicator. But see the "fictitious" i/o
+              channel 163 discussed earlier on this page.<br>
             </td>
           </tr>
           <tr>
@@ -2589,8 +2616,8 @@ href="https://archive.org/stream/acelectroniclmma00acel_0#page/n358/mode/1up">fo
     Output Channel 12 (octal)<br>
     <div style="margin-left: 40px;">
       <table summary="" style="width: 60%; text-align: left;
-        margin-left: auto; margin-right: auto;" cellspacing="2"
-        cellpadding="2" border="1">
+        margin-left: auto; margin-right: auto;" border="1"
+        cellspacing="2" cellpadding="2">
         <tbody>
           <tr>
             <th style="text-align: center; vertical-align: middle;">
@@ -2723,8 +2750,8 @@ href="https://archive.org/stream/acelectroniclmma00acel_0#page/n358/mode/1up">fo
     Output Channel 13 (octal)<br>
     <div style="margin-left: 40px;">
       <table summary="" style="width: 60%; text-align: left;
-        margin-left: auto; margin-right: auto;" cellspacing="2"
-        cellpadding="2" border="1">
+        margin-left: auto; margin-right: auto;" border="1"
+        cellspacing="2" cellpadding="2">
         <tbody>
           <tr>
             <th style="text-align: center; vertical-align: middle;">
@@ -2762,8 +2789,8 @@ href="https://archive.org/stream/acelectroniclmma00acel_0#page/n358/mode/1up">fo
     <div style="margin-left: 40px;"> This channel contains the following
       bits:<br>
       <table summary="" style="width: 60%; text-align: left;
-        margin-left: auto; margin-right: auto;" cellspacing="2"
-        cellpadding="2" border="1">
+        margin-left: auto; margin-right: auto;" border="1"
+        cellspacing="2" cellpadding="2">
         <tbody>
           <tr>
             <td style="vertical-align: top; font-weight: bold;
@@ -3008,8 +3035,8 @@ href="https://archive.org/stream/acelectroniclmma00acel_0#page/n358/mode/1up">fo
       prove that at the moment.<br>
       <br>
       <table summary="" style="width: 50%; text-align: left;
-        margin-left: auto; margin-right: auto;" cellspacing="2"
-        cellpadding="2" border="1">
+        margin-left: auto; margin-right: auto;" border="1"
+        cellspacing="2" cellpadding="2">
         <tbody>
           <tr>
             <th style="text-align: center; vertical-align: middle;"> Key<br>
@@ -3212,6 +3239,8 @@ href="https://github.com/virtualagc/virtualagc/blob/master/piPeripheral/piPeriph
 
 
 
+
+
         (<i>CHANNEL1</i>,<i>VALUE1</i>,<i>MASK1</i>), ...]</tt><br>
     </p>
     <p>where the "channels" are the input-channel numbers, the "values"
@@ -3254,12 +3283,16 @@ href="https://github.com/virtualagc/virtualagc/blob/master/piPeripheral/piDSKY.p
 
 
 
+
+
     <span style="font-weight: bold;">yaDSKY</span> is actually an
     extremely simple program to understand and to modify. Though
     targeted for a UNIX-type operating environment (such as Linux), all
     design tradeoffs have been made in favor of simplicity and
     portability, as opposed to performance or aesthetics.<br>
     <h3><a name="Interface_to_yaAGC" id="Interface_to_yaAGC"></a>Interface
+
+
 
 
 
@@ -3292,6 +3325,8 @@ href="https://github.com/virtualagc/virtualagc/blob/master/piPeripheral/piDSKY.p
     of the same kind can connect. For example, two or more DSKY
     simulations can be run at the same time from one AGC simulation.<br>
     <h3><a name="Software_Architecture" id="Software_Architecture"></a>Software
+
+
 
 
 
@@ -3523,6 +3558,8 @@ href="https://github.com/virtualagc/virtualagc/blob/master/piPeripheral/piDSKY.p
 
 
 
+
+
       Therefore, the operation of 16383+1 will overflow.&nbsp; In terms
       of bits, this operation results in 01 000000 000000.&nbsp; The
       mismatch between the most significant bits is an indication of
@@ -3536,6 +3573,8 @@ href="https://github.com/virtualagc/virtualagc/blob/master/piPeripheral/piDSKY.p
       scope here.</span>
     <h3><a name="AGC_CPU-to-Peripheral_Interconnections"
         id="AGC_CPU-to-Peripheral_Interconnections"></a>CPU-to-Peripheral
+
+
 
 
 
@@ -3571,6 +3610,8 @@ href="https://github.com/virtualagc/virtualagc/blob/master/piPeripheral/piDSKY.p
     you like!&nbsp;&nbsp; Then rebuild <span style="font-weight: bold;">yaAGC</span>
     and <span style="font-weight: bold;">yaDSKY</span> using these new
     functions.&nbsp; <span style="font-style: italic;">Voila</span>!&nbsp;
+
+
 
 
 
@@ -3692,8 +3733,8 @@ href="https://github.com/virtualagc/virtualagc/blob/master/piPeripheral/piDSKY.p
     returned, then the variable <span style="font-family: monospace;">ErrorCodes</span>
     will contain one of the following:<br>
     <div style="margin-left: 40px;">
-      <table summary="" style="text-align: left;" cellspacing="2"
-        cellpadding="2" border="1">
+      <table summary="" style="text-align: left;" border="1"
+        cellspacing="2" cellpadding="2">
         <tbody>
           <tr>
             <td style="vertical-align: top;">0x301<br>
@@ -3981,6 +4022,8 @@ href="https://github.com/virtualagc/virtualagc/blob/master/piPeripheral/piDSKY.p
 
 
 
+
+
     It's important to use this function rather than reading the mirror
     array directly, since the function accounts for the fact that the L
     and Q registers appear in both i/o space and erasable-memory
@@ -4003,8 +4046,8 @@ href="https://github.com/virtualagc/virtualagc/blob/master/piPeripheral/piDSKY.p
       style="font-family: monospace;">Cause</span> parameter is used as
     follows:<br>
     <div style="margin-left: 40px;">
-      <table summary="" style="text-align: left;" cellspacing="2"
-        cellpadding="2" border="1">
+      <table summary="" style="text-align: left;" border="1"
+        cellspacing="2" cellpadding="2">
         <tbody>
           <tr>
             <td style="vertical-align: top;">0<br>
@@ -4054,6 +4097,8 @@ href="https://github.com/virtualagc/virtualagc/blob/master/piPeripheral/piDSKY.p
     only)<br>
     <br>
     Displays (i.e., <span style="font-family: monospace;">printf</span>s)
+
+
 
 
 
@@ -4367,6 +4412,8 @@ href="https://github.com/virtualagc/virtualagc/blob/master/piPeripheral/piDSKY.p
 
 
 
+
+
         // No command-line arguments!</span><br>
       <span style="font-family: monospace;">&nbsp; ReturnValue =
         agc_engine_init (&amp;State, argv[1], NULL);</span><br>
@@ -4590,6 +4637,8 @@ href="https://github.com/virtualagc/virtualagc/blob/master/piPeripheral/piDSKY.p
         inline !important; float: none; background-color: rgb(255, 255,
         255);"> This page is available under the <a
           href="https://creativecommons.org/publicdomain/zero/1.0/">Creative
+
+
 
 
 
