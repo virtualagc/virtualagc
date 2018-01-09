@@ -63,9 +63,9 @@ static int SimInitializeEngine(void)
 	if (!Simulator.Options->debug_dsky)
 	{
 		if (Simulator.Options->resume == NULL)
-	    {
+		{
 			if (Simulator.Options->cfg)
-	    	{
+			{
 				if (CmOrLm)
 				{
 					result = agc_engine_init (&Simulator.State,
@@ -77,17 +77,22 @@ static int SimInitializeEngine(void)
 							Simulator.Options->core, "LM.core", 0);
 				}
 			}
-	    	else
-	    	{
-	    		result = agc_engine_init (&Simulator.State,
-	    				Simulator.Options->core,"core", 0);
-	    	}
-	    }
-	    else
-	    {
-	    	result = agc_engine_init (&Simulator.State,
-	    			Simulator.Options->core, Simulator.Options->resume, 1);
-	    }
+			else if (Simulator.Options->no_resume)
+			{
+				result = agc_engine_init (&Simulator.State,
+						Simulator.Options->core, NULL, 0);
+			}
+			else
+			{
+				result = agc_engine_init (&Simulator.State,
+						Simulator.Options->core, "core", 0);
+			}
+		}
+		else
+		{
+			result = agc_engine_init (&Simulator.State,
+					Simulator.Options->core, Simulator.Options->resume, 1);
+		}
 
 		/* Check AGC Engine Init Result and display proper message */
 		switch (result)
