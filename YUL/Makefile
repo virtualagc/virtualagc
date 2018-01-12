@@ -20,6 +20,8 @@ ALL_SOURCE:=$(wildcard *.argus)
 # sources, i.e. they are purely comment text, but not marked as remarks cards.
 SOURCES:=YULPASS0.argus YULPASS1.argus YULPASS2.argus YULPASS3.argus YULMANUF.argus YULSIMUL.argus
 
+default: instrcheck symcheck
+
 symcheck:
 	@echo "Checking for bad symbols..."
 	python $(H800)/tools/check-symbols.py -b $(SOURCES)
