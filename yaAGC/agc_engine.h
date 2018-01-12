@@ -113,7 +113,11 @@
 				the AGC (CMC/LGC) warning light.
 		05/30/17 RSB	Added initializeSunburst37.
 		07/13/17 MAS	Added flags for the three HANDRUPT traps.
-   
+		01/06/18 MAS	Added a new channel 163 bit for the TEMP light,
+				which is the logical OR of channel 11 bit 4 and
+				channel 30 bit 15. The AGC did this internally
+				so the light would still work in standby.
+ 
   For more insight, I'd highly recommend looking at the documents
   http://hrst.mit.edu/hrs/apollo/public/archive/1689.pdf and
   http://hrst.mit.edu/hrs/apollo/public/archive/1704.pdf.
@@ -260,6 +264,7 @@ extern long random (void);
 #define CH77_NIGHT_WATCHMAN 000020
 
 #define DSKY_AGC_WARN 000001
+#define DSKY_TEMP     000010
 #define DSKY_KEY_REL  000020
 #define DSKY_VN_FLASH 000040
 #define DSKY_OPER_ERR 000100

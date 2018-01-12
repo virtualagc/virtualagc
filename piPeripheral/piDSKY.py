@@ -11,6 +11,8 @@
 #				of piDSKY2.py (in which all hardware-specific stuff
 #				has been removed), because it was easier than 
 #				back-porting bug-fixes.
+#		2018-01-06 MAS	Switched the TEMP light to use channel 163 instead
+#				of channel 11.
 #
 # Note that certain functionality (I think the code for get_char_keyboard_nonblock)
 # might not work under Windows, but everything should
@@ -428,14 +430,8 @@ def outputFromAGC(channel, value):
 				updateLampStatuses("UPLINK ACTY", True)
 			else:
 				updateLampStatuses("UPLINK ACTY", False)
-			temp = "TEMP OFF        "
-			if (value & 0x08) != 0:
-				temp = "TEMP ON         "
-				updateLampStatuses("TEMP", True)
-			else:
-				updateLampStatuses("TEMP", False)
 			flashing = "V/N NO FLASH    "
-			print(compActy + "   " + uplinkActy + "   " + temp + "   " + "   " + flashing)
+			print(compActy + "   " + uplinkActy + "   " + "   " + flashing)
 			updateLamps()
 		elif channel == 0o13:
 			last13 = value
@@ -446,6 +442,12 @@ def outputFromAGC(channel, value):
 			updateLamps()
 		elif channel == 0o163:
 			last163 = value
+			if (value & 0x08) != 0:
+				temp = "TEMP ON         "
+				updateLampStatuses("TEMP", True)
+			else:
+				temp = "TEMP OFF        "
+				updateLampStatuses("TEMP", False)
 			if (value & 0o400) != 0:
 				standby = "DSKY STANDBY ON "
 				updateLampStatuses("DSKY STANDBY", True)
@@ -470,7 +472,7 @@ def outputFromAGC(channel, value):
 			else:
 				restart = "RESTART OFF     "
 				updateLampStatuses("RESTART", False)
-			print(standby + "   " + keyRel + "   " + oprErr + "   " + restart)
+			print(temp + "   " + standby + "   " + keyRel + "   " + oprErr + "   " + restart)
 		else:
 			print("Received from yaAGC: " + oct(value) + " -> channel " + oct(channel))
 	return

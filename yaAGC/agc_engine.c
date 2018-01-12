@@ -369,6 +369,10 @@
  *				state via an ever-present GOJAM during standby,
  *				but the standby enabled bit (CH13 bit 11) is not
  *				required to be set to exit standby, only to enter.
+ *		01/06/18 MAS	Added a new channel 163 bit for the TEMP light,
+ *				which is the logical OR of channel 11 bit 4 and
+ *				channel 30 bit 15. The AGC did this internally
+ *				so the light would still work in standby.
  *
  *
  * The technical documentation for the Apollo Guidance & Navigation (G&N) system,
@@ -1658,7 +1662,7 @@ UpdateDSKY(agc_t *State)
 {
   unsigned LastChannel163 = State->DskyChannel163;
 
-  State->DskyChannel163 &= ~(DSKY_KEY_REL | DSKY_VN_FLASH | DSKY_OPER_ERR | DSKY_RESTART | DSKY_STBY | DSKY_AGC_WARN);
+  State->DskyChannel163 &= ~(DSKY_KEY_REL | DSKY_VN_FLASH | DSKY_OPER_ERR | DSKY_RESTART | DSKY_STBY | DSKY_AGC_WARN | DSKY_TEMP);
 
   if (State->InputChannel[013] & 01000)
     // The light test is active. Light RESTART and STBY.
@@ -1671,6 +1675,10 @@ UpdateDSKY(agc_t *State)
   // Make the RESTART light mirror State->RestartLight.
   if (State->RestartLight)
     State->DskyChannel163 |= DSKY_RESTART;
+
+  // Light TEMP if channel 11 bit 4 is set, or channel 30 bit 15 is set
+  if ((State->InputChannel[011] & 010) || (State->InputChannel[030] & 040000))
+    State->DskyChannel163 |= DSKY_TEMP;
 
   // Set KEY REL and OPER ERR according to channel 11
   if (State->InputChannel[011] & DSKY_KEY_REL)
