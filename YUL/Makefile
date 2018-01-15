@@ -26,8 +26,8 @@ symcheck:
 	@echo "Checking for bad symbols..."
 	python $(H800)/tools/check-symbols.py -b $(SOURCES)
 
-listsyms:
-	@echo "Listing all symbols..."
+symtab:
+	@echo "Generating symbol table..."
 	python $(H800)/tools/list-symbols.py $(SOURCES) >YUL.symtab
 
 instrcheck:
