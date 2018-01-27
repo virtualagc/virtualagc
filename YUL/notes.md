@@ -289,6 +289,11 @@ There are several supported machine architectures. These are referred to as "COM
  - "AGC4" (abbreviated "A4")
    This is the revised, final, as-flown Block II AGC.
 
+ - "1800" 
+   I don't really know what this is for. The modules for the 1800 only seem to
+   contain dummy coding. I presume the "1800" refers to the Honeywell H-1800,
+   but beyond that I am at a loss.
+
 
 Monitor Calls
 -------------
