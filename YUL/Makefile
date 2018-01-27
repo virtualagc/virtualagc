@@ -18,7 +18,7 @@ ALL_SOURCE:=$(wildcard *.argus)
 # Top-level modules, these include everything else.
 # Omit DIGEST.argus and OPGUIDE.argus, since they do not seem to be valid
 # sources, i.e. they are purely comment text, but not marked as remarks cards.
-SOURCES:=YULPASS0.argus YULPASS1.argus YULPASS2.argus YULPASS3.argus YULMANUF.argus YULSIMUL.argus
+SOURCES:=YULPASS0.argus YULPASS1.argus YULPASS2.argus YULPASS3.argus # YULMANUF.argus YULSIMUL.argus
 
 default: instrcheck symcheck
 
