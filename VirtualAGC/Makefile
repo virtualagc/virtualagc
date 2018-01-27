@@ -338,11 +338,11 @@ temp/lVirtualAGC : % : VirtualAGC %/bin %/Resources
 		${CP} $$n${EXT} $@/bin ; \
 	done
 	-${CP} ../yaACA/yaACA${EXT} ../yaACA2/yaACA2${EXT} $@/bin
-	cp ApolloPatch2-transparent.png $@/bin/ApolloPatch2.png
 	for n in $@/bin/* ; do strip $$n ; done
+	cp ApolloPatch2-transparent.png $@/bin/ApolloPatch2.png
 	${CP} ../scripts/SimStop $@/bin
 	chmod +x $@/bin/SimStop
-	-mkdir $@/Resources/source
+	-mkdir -p $@/Resources/source
 	cp ../Makefile.inc $@/Resources/source
 	-mkdir -p $@/Resources/source/yaYUL
 	-mkdir -p $@/Resources/source/Tools
