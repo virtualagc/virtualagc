@@ -22,6 +22,9 @@ SOURCES:=YULPASS0.argus YULPASS1.argus YULPASS2.argus YULPASS3.argus # YULMANUF.
 
 default: instrcheck symcheck
 
+clean:
+	@rm -f *.symtab *.symerr
+
 symcheck:
 	@echo "Checking for bad symbols..."
 	python $(H800)/tools/check-symbols.py $(SOURCES)
