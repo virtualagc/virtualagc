@@ -24,7 +24,7 @@ default: instrcheck symcheck
 
 symcheck:
 	@echo "Checking for bad symbols..."
-	python $(H800)/tools/check-symbols.py -b $(SOURCES)
+	python $(H800)/tools/check-symbols.py $(SOURCES)
 
 symtab:
 	@echo "Generating symbol table..."
