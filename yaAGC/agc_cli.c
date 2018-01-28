@@ -36,6 +36,8 @@
  *              08/04/16 OH     Fixed the GPL statement and old user-id
  *              09/30/16 MAS    Added the --inhibit-alarms option
  *              05/30/17 RSB	Added --initialize-sunburst-37 option.
+ *              01/28/18 MAS	Removed help text stating that only ropes
+ *                          	with 36 banks are expected/supported.
  */
 
 #include <string.h>
@@ -101,14 +103,7 @@ static void CliShowUsage(void)
 "                         for a first-time run of SUNBURST 37 (SHEPATIN 0) having\n"
 "                         otherwise clean memory, in lieu of pad-loads.  Not\n"
 "                         required for subsequent runs.  Note that this option only\n"
-"                         has an effect if there is no existing core-dump file.\n"
-"Note that the exec-ropes file should contain exactly 36 banks\n"
-"(36x1024=36864 words, or 73728 bytes). Other sizes may be accepted,\n"
-"but it is unclear what (if any) utility such core-rope images\n"
-"would have. (In particular, if the core-rope\n"
-"is supposed to be for actual Luminary or Colossus software, then\n"
-"the checksums of the missing memory banks would be incorrect, and\n"
-"so the built-in self-test would fail.)\n\n");
+"                         has an effect if there is no existing core-dump file.\n");
 }
 
 extern FILE *rfopen (const char *Filename, const char *mode);

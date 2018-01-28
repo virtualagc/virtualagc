@@ -94,6 +94,9 @@ typedef unsigned short uint16_t;
 #define MSG_NOSIGNAL 0
 #endif
 
+// Roughly 50ms for simulated keypreses
+#define AUTO_KEYPRESS_DURATION 4192
+
 //-----------------------------------------------------------------------------
 // Function for broadcasting "output channel" data to all connected clients of
 // yaAGC.
@@ -157,6 +160,8 @@ ChannelOutput (agc_t * State, int Channel, int Value)
 static int CurrentChannelValues[256] = { 0 };
 static const unsigned char Signatures[4] = { 0x00, 0x40, 0x80, 0xC0 };
 static const unsigned char SignaturesAgs[4] = { 0x00, 0xC0, 0x80, 0x40 };
+static int Ch15ResetCycles = 0;
+static int Ch16ResetCycles = 0;
 
 int
 ChannelInput (agc_t *State)
@@ -166,6 +171,29 @@ ChannelInput (agc_t *State)
   unsigned char c;
   Client_t *Client;
   int Channel, Value;
+
+  // Check if we need to reset a DSKY keypress
+  if (Ch15ResetCycles > 0)
+    {
+      Ch15ResetCycles--;
+      if (Ch15ResetCycles == 0)
+        {
+          WriteIO(State, 015, 0);
+          State->Keyrupt1Enabled = 1;
+          State->Keyrupt1Pending = 0;
+        }
+    }
+
+  if (Ch16ResetCycles > 0)
+    {
+      Ch16ResetCycles--;
+      if (Ch16ResetCycles == 0)
+        {
+          WriteIO(State, 016, ReadIO(State, 016) & 077740);
+          State->Keyrupt2Enabled = 1;
+          State->Keyrupt2Pending = 0;
+        }
+    }
 
   //We use SocketInterlace to slow down the number
   // of polls of the sockets.
@@ -222,7 +250,7 @@ ChannelInput (agc_t *State)
 		        // In this case we're dealing with a counter increment.
 			// So increment the counter.
 			//printf ("Channel=%02o Int=%o\n", Channel, Value);
-			UnprogrammedIncrement (State, Channel, Value);
+			//UnprogrammedIncrement (State, Channel, Value);
 			Client->Size = 0;
 			return (1);
 		      }
@@ -233,12 +261,38 @@ ChannelInput (agc_t *State)
 			  ReadIO (State,
 				  Channel) & ~Client->ChannelMasks[Channel];
 			WriteIO (State, Channel, Value);
-			// If this is a keystroke from the DSKY, generate an interrupt req.
-			if (Channel == 015)
-			  State->InterruptRequests[5] = 1;
-			// If this is on fictitious input channel 0173, then the data
-			// should be placed in the INLINK counter register, and an
-			// UPRUPT interrupt request should be set.
+                        if (Channel == 015)
+                          {
+                            // 0 writes to channel 15 re-enable KEYRUPT1 and
+                            // cancels pending interrupts
+                            if (Value == 0)
+                              {
+                                State->Keyrupt1Enabled = 1;
+                                State->Keyrupt1Pending = 0;
+                              }
+                            // For backwards compatibility, we can automatically
+                            // zero out pressed keys after some press duration
+                            else if (State->AutoClearKeys)
+                              Ch15ResetCycles = AUTO_KEYPRESS_DURATION;
+                          }
+                        else if (Channel == 016)
+                          {
+                            // KEYRUPT2 logic is the same, for bits 1-5 of CH16
+                            if ((Value & 037) == 0)
+                              {
+                                State->Keyrupt2Enabled = 1;
+                                State->Keyrupt2Pending = 0;
+                              }
+                            else if (State->AutoClearKeys)
+                              Ch16ResetCycles = AUTO_KEYPRESS_DURATION;
+
+                            // MARKRUPT logic is the same, for bits 6-7 of CH16
+                            if ((Value & 0140) == 0)
+                              {
+                                State->MarkruptEnabled = 1;
+                                State->MarkruptPending = 0;
+                              }
+                          }
 			else if (Channel == 0173)
 			  {
 			    State->Erasable[0][RegINLINK] = (Value & 077777);
@@ -478,6 +532,8 @@ UpdateAgcPeripheralConnect (void *AgcState, Client_t *Client)
       FormIoPacket (i, State->InputChannel[i], Packet);
       send (Client->Socket, (const char *) Packet, 4, MSG_NOSIGNAL);
     }
+  FormIoPacket(0163, State->DskyChannel163, Packet);
+  send (Client->Socket, (const char *) Packet, 4, MSG_NOSIGNAL);
 #undef State
 }
 
