@@ -77,6 +77,8 @@
 				same size as data packets.  Otherwise, it makes
 				low-level debugging of the streaming data hard,
 				because the packet alignment changes over time.
+		01/30/18 MAS	Removed old RHC input handling, to be replaced
+				with new logic later.
 */
 
 #include <errno.h>
@@ -115,13 +117,6 @@ ChannelOutput (agc_t * State, int Channel, int Value)
     {
       State->InputChannel[7] = State->OutputChannel7 = (Value & 0160);
       return;
-    }
-  // Stick data into the RHCCTR registers, if bits 8,9 of channel 013 are set.
-  if (Channel == 013 && 0600 == (0600 & Value) && !CmOrLm)
-    {
-      State->Erasable[0][042] = LastRhcPitch;
-      State->Erasable[0][043] = LastRhcYaw;
-      State->Erasable[0][044] = LastRhcRoll;
     }
   // Most output channels are simply transmitted to clients representing
   // hardware simulations.
@@ -297,26 +292,6 @@ ChannelInput (agc_t *State)
 			  {
 			    State->Erasable[0][RegINLINK] = (Value & 077777);
 			    State->InterruptRequests[7] = 1;
-			  }
-			// Fictitious registers for rotational hand controller (RHC).
-			// Note that the RHC angles are not immediately used, but
-			// merely squirreled away for later.  They won't actually
-			// go into the counter registers until the RHC counters are
-			// enabled and the data requested (bits 8,9 of channel 13).
-			else if (Channel == 0166)
-			  {
-			    LastRhcPitch = Value;
-			    ChannelOutput (State, Channel, Value);	// echo
-			  }
-			else if (Channel == 0167)
-			  {
-			    LastRhcYaw = Value;
-			    ChannelOutput (State, Channel, Value);	// echo
-			  }
-			else if (Channel == 0170)
-			  {
-			    LastRhcRoll = Value;
-			    ChannelOutput (State, Channel, Value);	// echo
 			  }
 			//---------------------------------------------------------------
 			// For --debug-dsky mode.

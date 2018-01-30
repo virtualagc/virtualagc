@@ -93,6 +93,7 @@
  * 		07/13/17 MAS	Added initialization of the three HANDRUPT traps.
  * 		01/28/18 MAS	Added initialization for the new counter and scaler
  *                              state variables.
+ * 		01/30/18 MAS	Added initialization for RHC state info.
  */
 
 // For Orbiter.
@@ -334,6 +335,13 @@ agc_engine_init (agc_t * State, const char *RomImage, const char *CoreDump,
 
   State->AutoClearKeys = 1;
 
+  State->RHCPending = 0;
+  for (i = 0; i < 3; i++)
+    {
+      State->RHCVoltagemV[0] = 0;
+      State->RHCCounts[0] = 0;
+    }
+
   if (initializeSunburst37)
     {
       State->Erasable[0][0067] = 077777;
@@ -347,6 +355,7 @@ agc_engine_init (agc_t * State, const char *RomImage, const char *CoreDump,
       cd = fopen (CoreDump, "r");
       if (cd == NULL)
 	{
+          PerformGOJAM(State);
 	  if (AllOrErasable)
 	    RetVal = 6;
 	  else

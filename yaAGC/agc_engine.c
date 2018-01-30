@@ -401,6 +401,9 @@
  *				makes priority simulation easier.
  *				* Made BZF and BZMF take an extra MCT if their
  *				branches are not taken, which we had missed.
+ *		01/30/18 MAS	Added simulation of the RHC X,Y,Z counters.
+ *				Inputs to them are specified in Vp millivolts,
+ *				maxing out at 3.96 volts.
  *
  *
  * The technical documentation for the Apollo Guidance & Navigation (G&N) system,
@@ -1172,7 +1175,6 @@ CounterPINC (agc_t * State, int Counter)
       if (i == AGC_M0) // Account for -0 to +1 transition.
         i++;
     }
-
   State->Erasable[0][RegCOUNTER + Counter] = i;
 }
 
@@ -1461,6 +1463,7 @@ static int
 TimingSignalF05A(agc_t * State)
 {
     int CausedRestart = 0;
+    int i = 0;
 
     // First, perform standby-powered stuff. Has our input voltage
     // remained below the limit since F05B?
@@ -1504,8 +1507,23 @@ TimingSignalF05A(agc_t * State)
     if (State->Trap32 && ((State->InputChannel[032] & 001777) != 001777))
         State->Trap32Pending = 1;
 
+    // Check for RHC input pulses
+    for (i = 0; i < 3; i++)
+    {
+        if (State->RHCCounts[i] > 0)
+        {
+            State->RHCCounts[i]--;
+            if (State->InputChannel[013] & 0200)
+                CounterRequest(State, COUNTER_RHCP + i, COUNTER_CELL_PLUS);
+        }
+        else if (State->RHCCounts[i] < 0)
+        {
+            State->RHCCounts[i]++;
+            if (State->InputChannel[013] & 0200)
+                CounterRequest(State, COUNTER_RHCP + i, COUNTER_CELL_MINUS);
+        }
+    }
     // Lots of things:
-    // BMAG/RHC
     // RNRAD
     // GYROD
     // CDU drives
@@ -1557,14 +1575,37 @@ TimingSignalF05B(agc_t * State)
 }
 
 // Timepulse F06B generates TIME6 count requests, if the timer is enabled
-// via channel 13 bit 15.
+// via channel 13 bit 15. It also serves as a two-stage enable for sampling
+// the RHC input type "A" analog-to-digital circuits. If FS07 is high,
+// channel 13 bit 9 is checked. If it is set, a "pending" flip-flop is set,
+// which cannot be reset by CH13 bit 9 going away. The next F06B, when
+// FS07 is low, an enable strobe (RHCGO) is applied to the input circuits,
+// which stretch a pulse-gating output for a time proportional to the
+// peak voltage on the incoming AC signal from the RHC. The counter
+// requests themselves are generated in F05A.
 static void
 TimingSignalF06B(agc_t * State)
 {
+    int i;
+
     if (040000 & State->InputChannel[013])
       CounterRequest(State, COUNTER_TIME6, COUNTER_CELL_PLUS);
 
     // RHC things
+    if (State->ScalerValue & SCALER_FS07)
+    {
+        if (0400 & State->InputChannel[013])
+          State->RHCPending = 1;
+    }
+    else if (State->RHCPending)
+    {
+        // Calculate the number of pulses for each channel
+        for (i = 0; i < 3; i++)
+          State->RHCCounts[i] = State->RHCVoltagemV[i] / RHC_MV_PER_COUNT;
+
+        State->RHCPending = 0;
+        State->InputChannel[013] &= ~0400;
+    }
 }
 
 // Timpeulse F07A marks the beginning of monitoring for one half of the

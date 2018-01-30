@@ -120,6 +120,12 @@
 		01/28/18 MAS	Refactored the scaler and added a framework for
 				counter cell simulation, which enables cycle-
 				accurate simulation of counter handling.
+		01/30/18 MAS	Added fields and constants for RHC simulation.
+				There was a hardware difference in AGCs between
+				those on LM-1 through LM-3, and LM-4 and later
+				(earlier AGCs produce 32 counts for max RHC
+				deflections, and later ones produce 42). We
+				are simulating the later AGCs, with 42 max.
  
   For more insight, I'd highly recommend looking at the documents
   http://hrst.mit.edu/hrs/apollo/public/archive/1689.pdf and
@@ -292,6 +298,16 @@ extern long random (void);
 // SHINC = MINUS and SHANC = PLUS.
 #define COUNTER_CELL_PLUS  1
 #define COUNTER_CELL_MINUS 2
+
+// Number of millivolts per count for RHC input channels. There were
+// actually two types of AGCs here: LM-3 and earlier used 123-124mV
+// per count, leading to a maximum (at 2.8VRMS/3.96Vp) of 32 counts
+// in each RHC channel. Aurora 12 and Sunburst 37 both expect this
+// scaling. All Luminary versions (LM-4 and later) expect 42 counts
+// maximum, which translates to about 94-95mV per count. We use the
+// latter number since the only programs we have that expected the
+// 32 maximum never flew.
+#define RHC_MV_PER_COUNT  94
 
 // Constants related to "input/output channels".
 #define NUM_CHANNELS 512
@@ -484,6 +500,7 @@ typedef struct
   unsigned Keyrupt2Pending:1;   // Flag indicating a NAV DSKY key is pressed and an interrupt may occur
   unsigned MarkruptEnabled:1;   // Enable for MARKRUPT. Cleared upon MARKRUPT interrupt, and set by CH16 bits 6-7 being zero.
   unsigned MarkruptPending:1;   // Flag indicating a MARK key is pressed and an interrupt may occur
+  unsigned RHCPending:1;
   uint8_t CounterCell[NUM_COUNTERS]; // Counter cells storing requested plus or minus counts
   uint64_t /*unsigned long long */ DownruptTime;	// Time when next DOWNRUPT occurs.
   uint32_t WarningFilter;       // Current voltage of the AGC warning filter
@@ -494,6 +511,8 @@ typedef struct
   int ChannelRoutineCount;      // Counter to keep track of channel interface routine timing
   unsigned DskyChannel163;      // Copy of the fake DSKY channel 163
   int InputVoltagemV;           // Input voltage in millivolts, monitored by the voltage fail alarm
+  int RHCVoltagemV[3];
+  int RHCCounts[3];
   // The following pointer is present for whatever use the Orbiter
   // integration squad wants.  The Virtual AGC code proper doesn't use it
   // in any way.
@@ -591,7 +610,6 @@ ProcessDownlinkList_t *ProcessDownlinkList = NULL;
 int CmOrLm = 0;	// Default is 0 (LM); other choice is 1 (CM)
 char Sbuffer[SHEIGHT][SWIDTH + 1];
 int Sheight = DEFAULT_SHEIGHT, Swidth = DEFAULT_SWIDTH;
-int LastRhcPitch = 0, LastRhcYaw = 0, LastRhcRoll = 0;
 #else //AGC_ENGINE_C
 extern int DebugMode;
 extern int SingleStepCounter;
@@ -614,7 +632,6 @@ extern ProcessDownlinkList_t *ProcessDownlinkList;
 extern int CmOrLm;
 extern char Sbuffer[SHEIGHT][SWIDTH + 1];
 extern int Sheight, Swidth;
-extern int LastRhcPitch, LastRhcYaw, LastRhcRoll;
 #endif //AGC_ENGINE_C
 
 #ifndef DECODE_DIGITAL_DOWNLINK_C
