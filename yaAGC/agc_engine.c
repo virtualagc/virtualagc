@@ -412,6 +412,10 @@
  *				themselves are not. Also added descriptive macros
  *				for interrupt numbers, so I don't have to keep
  *				looking them up.
+ *		02/01/18 MAS	Simulated the GYROCMD output counter. It doesn't
+ *				check for the target gyro at the moment, which
+ *				may be something we'll want to do, depending on
+ *				what is most useful for integrators.
  *
  *
  * The technical documentation for the Apollo Guidance & Navigation (G&N) system,
@@ -1247,18 +1251,50 @@ CounterDINC (agc_t *State, int Counter)
   if (i == AGC_P0 || i == AGC_M0)	// Zero?
     {
       switch (Counter)
-      {
-      case COUNTER_TIME6:
+        {
+        case COUNTER_TIME6:
           State->InterruptRequests[RUPT_T6RUPT] = 1;
           // Triggering a T6RUPT disables T6 by clearing the CH13 bit
           CpuWriteIO(State, 013, State->InputChannel[013] & 037777);
           break;
-      }
+        case COUNTER_GYROCMD:
+          // Gyro drive pulses have completed. Clear the active bit and
+          // channel 14 bit 10.
+          State->GyroDriveActive = 0;
+          State->InputChannel[014] &= ~01000;
+          break;
+        }
     }
   else if (040000 & i)			// Negative?
-    i = AddSP16(SignExtend(i), SignExtend(AGC_P1)) & 077777;
+    {
+      i = AddSP16(SignExtend(i), SignExtend(AGC_P1)) & 077777;
+      switch (Counter)
+        {
+        case COUNTER_GYROCMD:
+          if (!State->GyroDriveActive)
+            {
+              // Set the gyro drive active bit if it wasn't set.
+              State->GyroDriveActive = 1;
+              State->GyroDriveOut = 0;
+            }
+          break;
+        }
+    }
   else					// Positive?
-    i = AddSP16(SignExtend(i), SignExtend(AGC_M1)) & 077777;
+    {
+      i = AddSP16(SignExtend(i), SignExtend(AGC_M1)) & 077777;
+      switch (Counter)
+        {
+        case COUNTER_GYROCMD:
+          if (!State->GyroDriveActive)
+            {
+              // Set the gyro drive active bit if it wasn't set.
+              State->GyroDriveActive = 1;
+              State->GyroDriveOut = 0;
+            }
+          break;
+        }
+    }
 
   State->Erasable[0][RegCOUNTER + Counter] = i;
 }
@@ -1544,8 +1580,24 @@ TimingSignalF05A(agc_t * State)
         CounterRequest(State, COUNTER_RNRAD, PulseType);
         State->RadarData <<= 1;
     }
+
+    // Generate gyro drive pulses
+    if (State->InputChannel[014] & 01000)
+    {
+        // At least one DINC is always generated regardless of the value
+        // in the GYROCMD counter. The result of that DINC will determine
+        // what happens next; if it generates a ZOUT, the drive active bit
+        // and channel 14 bit 10 are cleared. Otherwise, the active bit is
+        // set, which allows these F05A timing signals to generate drive
+        // pulses to the gyros.
+        CounterRequest(State, COUNTER_GYROCMD, COUNTER_CELL_PLUS);
+        if (State->GyroDriveActive)
+          State->GyroDriveOut++;
+    }
+    else
+        State->GyroDriveActive = 0;
+
     // Lots of things:
-    // GYROD
     // CDU drives
     // THRSTD
     // EMSD

@@ -128,6 +128,7 @@
 				are simulating the later AGCs, with 42 max.
 		01/31/18 MAS	Added state fields for radar simulation, as well
 				as defines for interrupt indexes.
+		02/01/18 MAS	Added state fields for gyro drive simulation.
  
   For more insight, I'd highly recommend looking at the documents
   http://hrst.mit.edu/hrs/apollo/public/archive/1689.pdf and
@@ -524,6 +525,7 @@ typedef struct
   unsigned MarkruptPending:1;   // Flag indicating a MARK key is pressed and an interrupt may occur
   unsigned RHCPending:1;
   unsigned RadarSync:1;
+  unsigned GyroDriveActive:1;
   uint8_t CounterCell[NUM_COUNTERS]; // Counter cells storing requested plus or minus counts
   uint64_t /*unsigned long long */ DownruptTime;	// Time when next DOWNRUPT occurs.
   uint32_t WarningFilter;       // Current voltage of the AGC warning filter
@@ -538,6 +540,7 @@ typedef struct
   int RHCCounts[3];
   uint8_t RadarGateCounter;
   uint16_t RadarData;
+  uint16_t GyroDriveOut;
   // The following pointer is present for whatever use the Orbiter
   // integration squad wants.  The Virtual AGC code proper doesn't use it
   // in any way.
