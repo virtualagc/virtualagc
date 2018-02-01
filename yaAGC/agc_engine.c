@@ -404,6 +404,14 @@
  *		01/30/18 MAS	Added simulation of the RHC X,Y,Z counters.
  *				Inputs to them are specified in Vp millivolts,
  *				maxing out at 3.96 volts.
+ *		01/31/18 MAS	Added simulation of complete radar cycles.
+ *				RADARUPTs are now generated internally, after
+ *				the new data has been SHINCed and SHANCed into
+ *				the RNRAD counter. The time taken to send gating
+ *				pulses to the radars is simulated, but the pulses
+ *				themselves are not. Also added descriptive macros
+ *				for interrupt numbers, so I don't have to keep
+ *				looking them up.
  *
  *
  * The technical documentation for the Apollo Guidance & Navigation (G&N) system,
@@ -1151,11 +1159,11 @@ OverflowInterrupt (agc_t * State, int16_t Address10)
   if (IsReg(Address10, RegTIME1))
     CounterRequest(State, COUNTER_TIME2, COUNTER_CELL_PLUS);
   else if (IsReg(Address10, RegTIME5))
-    State->InterruptRequests[2] = 1;
+    State->InterruptRequests[RUPT_T5RUPT] = 1;
   else if (IsReg(Address10, RegTIME3))
-    State->InterruptRequests[3] = 1;
+    State->InterruptRequests[RUPT_T3RUPT] = 1;
   else if (IsReg(Address10, RegTIME4))
-    State->InterruptRequests[4] = 1;
+    State->InterruptRequests[RUPT_T4RUPT] = 1;
 }
 
 // 1's-complement increment
@@ -1241,7 +1249,7 @@ CounterDINC (agc_t *State, int Counter)
       switch (Counter)
       {
       case COUNTER_TIME6:
-          State->InterruptRequests[1] = 1;
+          State->InterruptRequests[RUPT_T6RUPT] = 1;
           // Triggering a T6RUPT disables T6 by clearing the CH13 bit
           CpuWriteIO(State, 013, State->InputChannel[013] & 037777);
           break;
@@ -1464,6 +1472,7 @@ TimingSignalF05A(agc_t * State)
 {
     int CausedRestart = 0;
     int i = 0;
+    int PulseType = 0;
 
     // First, perform standby-powered stuff. Has our input voltage
     // remained below the limit since F05B?
@@ -1523,8 +1532,19 @@ TimingSignalF05A(agc_t * State)
                 CounterRequest(State, COUNTER_RHCP + i, COUNTER_CELL_MINUS);
         }
     }
+
+    // Generate radar count requests if a valid radar is selected
+    if (State->RadarSync)
+    {
+        if (State->RadarData & 040000)
+          PulseType = COUNTER_CELL_ONE;
+        else
+          PulseType = COUNTER_CELL_ZERO;
+
+        CounterRequest(State, COUNTER_RNRAD, PulseType);
+        State->RadarData <<= 1;
+    }
     // Lots of things:
-    // RNRAD
     // GYROD
     // CDU drives
     // THRSTD
@@ -1539,9 +1559,13 @@ TimingSignalF05A(agc_t * State)
 // and if they are, notes it down. If the problem hasn't been resolved
 // by F05A, we'll generate an alarm. It also generates HANDRUPTs if any
 // of the input traps are enabled and triggered.
+// Timing pulses GTSET, GTRST, and GTONE are potentially generated,
+// depending on the state of scaler stages 6-9. These pulses are used
+// by the radar, outlink, and altimeter interfaces.
 static void
 TimingSignalF05B(agc_t * State)
 {
+    unsigned GtsetType;
     // If the input voltage is below the voltage fail circuit threshold,
     // set a bit for F05A to check.
     if (State->InputVoltagemV < VFAIL_THRESHOLD)
@@ -1556,21 +1580,43 @@ TimingSignalF05B(agc_t * State)
     {
         State->Trap31A = 0;
         State->Trap31APending = 0;
-        State->InterruptRequests[10] = 1;
+        State->InterruptRequests[RUPT_HANDRUPT] = 1;
     }
 
     if (State->Trap31BPending)
     {
         State->Trap31B = 0;
         State->Trap31BPending = 0;
-        State->InterruptRequests[10] = 1;
+        State->InterruptRequests[RUPT_HANDRUPT] = 1;
     }
 
     if (State->Trap32Pending)
     {
         State->Trap32 = 0;
         State->Trap32Pending = 0;
-        State->InterruptRequests[10] = 1;
+        State->InterruptRequests[RUPT_HANDRUPT] = 1;
+    }
+
+    // Handled GTSET, GTRST, and GTON-driven logic
+    GtsetType = State->ScalerValue & SCALER_GTSET;
+    if (GtsetType == SCALER_GTSET)
+    {
+        // If the radar gate counter has reached 9, begin generating sync
+        // pulses and getting count requests back.
+        if (State->RadarGateCounter == 9)
+          State->RadarSync = 1;
+    }
+    else if (GtsetType == SCALER_GTRST)
+    {
+        // If a radar sync was active, stop it, generate a RADARUPT, and
+        // reset all of the related state information
+        if (State->RadarSync)
+        {
+            State->InterruptRequests[RUPT_RADARUPT] = 1;
+            State->InputChannel[013] &= ~010;
+            State->RadarGateCounter = 0;
+            State->RadarSync = 0;
+        }
     }
 }
 
@@ -1695,7 +1741,7 @@ TimingSignalF09B(agc_t * State)
     if (State->Keyrupt1Enabled && State->Keyrupt1Pending)
     {
         State->Keyrupt1Enabled = 0;
-        State->InterruptRequests[5] = 1;
+        State->InterruptRequests[RUPT_KEYRUPT1] = 1;
     }
 
     // Generate KEYRUPT2 if bits 1-5 of channel 16 have remained
@@ -1703,7 +1749,7 @@ TimingSignalF09B(agc_t * State)
     if (State->Keyrupt2Enabled && State->Keyrupt2Pending)
     {
         State->Keyrupt2Enabled = 0;
-        State->InterruptRequests[6] = 1;
+        State->InterruptRequests[RUPT_KEYRUPT2] = 1;
     }
 
     // Generate MARKRUPT if bits 6-7 of channel 16 have remained
@@ -1711,7 +1757,7 @@ TimingSignalF09B(agc_t * State)
     if (State->MarkruptEnabled && State->MarkruptPending)
     {
         State->MarkruptEnabled = 0;
-        State->InterruptRequests[6] = 1;
+        State->InterruptRequests[RUPT_KEYRUPT2] = 1;
     }
 }
 
@@ -1726,6 +1772,10 @@ TimingSignalF09B(agc_t * State)
 // set NoTC to 0. This behavior appears to be backed up by the
 // RUPTCHK test in the Aurora and Sunburst ropes; without simulating
 // such transients RUPTCHK triggers a restart.
+// This timepulse is also used to begin radar cycles and advance
+// the radar gating pulse counter. The counter advances if channel
+// 13 bit 4 is a 1. When the counter reaches exactly 9, circuits
+// that shift in the results from the radar are enabled.
 static int
 TimingSignalF10A(agc_t * State)
 {
@@ -1739,6 +1789,24 @@ TimingSignalF10A(agc_t * State)
     {
         CausedRestart = 1;
         State->InputChannel[077] |= CH77_TC_TRAP;
+    }
+
+    // If radar activity is enabled, advance the radar gate counter.
+    // It is a 4-bit counter that counts up to 9, at which point the
+    // logic that eventually generates a RADARUPT is set into motion.
+    // This counter is not initialized on power-on or restart, which
+    // means that in real AGCs its initial count was effectively
+    // random, potentially even greater than 9. In such situations,
+    // the counter would wrap around at 16 and continue to count up
+    // as usual. The AGC will generate gating pulses throughout these
+    // additional counts, meaning that the radar will receive many
+    // more than the agreed-upon 256 pulses, presumably leading to
+    // corrupted data. Mission reports/debriefs indicate that the
+    // first VHF ranging in CSMs was typically bad, and we believe
+    // this to be the cause.
+    if (State->InputChannel[013] & 010)
+    {
+        State->RadarGateCounter = (State->RadarGateCounter + 1) & 017;
     }
 
     return CausedRestart;
@@ -2124,7 +2192,7 @@ int HandleNextCounterCell(agc_t * State)
     // SHINC/SHANC. SHANC takes priority if both are requested.
     case COUNTER_INLINK:
     case COUNTER_RNRAD:
-        if (State->CounterCell[i] & COUNTER_CELL_PLUS)
+        if (State->CounterCell[i] & COUNTER_CELL_ONE)
             CounterSHANC(State, i);
         else
             CounterSHINC(State, i);
@@ -2239,7 +2307,7 @@ agc_engine (agc_t * State)
   // For DOWNRUPT
   if (State->DownruptTimeValid && State->CycleCounter >= State->DownruptTime)
     {
-      State->InterruptRequests[8] = 1;	// Request DOWNRUPT
+      State->InterruptRequests[RUPT_DOWNRUPT] = 1;	// Request DOWNRUPT
       State->DownruptTimeValid = 0;
     }
 

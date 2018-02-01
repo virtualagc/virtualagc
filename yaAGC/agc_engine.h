@@ -126,6 +126,8 @@
 				(earlier AGCs produce 32 counts for max RHC
 				deflections, and later ones produce 42). We
 				are simulating the later AGCs, with 42 max.
+		01/31/18 MAS	Added state fields for radar simulation, as well
+				as defines for interrupt indexes.
  
   For more insight, I'd highly recommend looking at the documents
   http://hrst.mit.edu/hrs/apollo/public/archive/1689.pdf and
@@ -298,6 +300,8 @@ extern long random (void);
 // SHINC = MINUS and SHANC = PLUS.
 #define COUNTER_CELL_PLUS  1
 #define COUNTER_CELL_MINUS 2
+#define COUNTER_CELL_ONE   COUNTER_CELL_PLUS
+#define COUNTER_CELL_ZERO  COUNTER_CELL_MINUS
 
 // Number of millivolts per count for RHC input channels. There were
 // actually two types of AGCs here: LM-3 and earlier used 123-124mV
@@ -333,6 +337,17 @@ extern long random (void);
 #define DSKY_STBY     000400
 #define DSKY_EL_OFF   001000
 
+// Interrupts
+#define RUPT_T6RUPT   1
+#define RUPT_T5RUPT   2
+#define RUPT_T3RUPT   3
+#define RUPT_T4RUPT   4
+#define RUPT_KEYRUPT1 5
+#define RUPT_KEYRUPT2 6
+#define RUPT_UPRUPT   7
+#define RUPT_DOWNRUPT 8
+#define RUPT_RADARUPT 9
+#define RUPT_HANDRUPT 10
 #define NUM_INTERRUPT_TYPES 10
 
 // Max number of 15-bit words in a downlink-telemetry list.
@@ -393,6 +408,13 @@ extern long random (void);
 #define SCALER_MASK_F16 0x00003FFF
 #define SCALER_MASK_F17 0x00007FFF
 #define SCALER_MASK_F18 0x0000FFFF
+
+// Scaler-derived timing logic. GTSET, GTRST, and GTONE are
+// synchronous with F05B, and are generated based on the values
+// of scaler stages 6-9.
+#define SCALER_GTSET (SCALER_FS06 | SCALER_FS07 | SCALER_FS08 | SCALER_FS09)
+#define SCALER_GTRST (SCALER_FS07 | SCALER_FS08 | SCALER_FS09)
+#define SCALER_GTONE 0
 
 // Voltage fail alarm threshold, in millivolts. This number is the
 // lower of two types of modules (the the other alarming at 22.8V).
@@ -501,6 +523,7 @@ typedef struct
   unsigned MarkruptEnabled:1;   // Enable for MARKRUPT. Cleared upon MARKRUPT interrupt, and set by CH16 bits 6-7 being zero.
   unsigned MarkruptPending:1;   // Flag indicating a MARK key is pressed and an interrupt may occur
   unsigned RHCPending:1;
+  unsigned RadarSync:1;
   uint8_t CounterCell[NUM_COUNTERS]; // Counter cells storing requested plus or minus counts
   uint64_t /*unsigned long long */ DownruptTime;	// Time when next DOWNRUPT occurs.
   uint32_t WarningFilter;       // Current voltage of the AGC warning filter
@@ -513,6 +536,8 @@ typedef struct
   int InputVoltagemV;           // Input voltage in millivolts, monitored by the voltage fail alarm
   int RHCVoltagemV[3];
   int RHCCounts[3];
+  uint8_t RadarGateCounter;
+  uint16_t RadarData;
   // The following pointer is present for whatever use the Orbiter
   // integration squad wants.  The Virtual AGC code proper doesn't use it
   // in any way.

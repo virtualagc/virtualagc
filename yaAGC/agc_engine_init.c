@@ -94,6 +94,7 @@
  * 		01/28/18 MAS	Added initialization for the new counter and scaler
  *                              state variables.
  * 		01/30/18 MAS	Added initialization for RHC state info.
+ * 		01/31/18 MAS	Added initialization for radar state info.
  */
 
 // For Orbiter.
@@ -341,6 +342,10 @@ agc_engine_init (agc_t * State, const char *RomImage, const char *CoreDump,
       State->RHCVoltagemV[0] = 0;
       State->RHCCounts[0] = 0;
     }
+
+  State->RadarGateCounter = 0;
+  State->RadarData = 0;
+  State->RadarSync = 0;
 
   if (initializeSunburst37)
     {
