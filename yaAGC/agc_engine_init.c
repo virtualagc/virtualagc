@@ -95,7 +95,8 @@
  *                              state variables.
  * 		01/30/18 MAS	Added initialization for RHC state info.
  * 		01/31/18 MAS	Added initialization for radar state info.
- * 		02/01/18 MAS	Added initialization for gyro drive state info.
+ * 		02/01/18 MAS	Added initialization for gyro drive and CDU drive
+ *                              state info.
  */
 
 // For Orbiter.
@@ -340,8 +341,8 @@ agc_engine_init (agc_t * State, const char *RomImage, const char *CoreDump,
   State->RHCPending = 0;
   for (i = 0; i < 3; i++)
     {
-      State->RHCVoltagemV[0] = 0;
-      State->RHCCounts[0] = 0;
+      State->RHCVoltagemV[i] = 0;
+      State->RHCCounts[i] = 0;
     }
 
   State->RadarGateCounter = 0;
@@ -350,6 +351,9 @@ agc_engine_init (agc_t * State, const char *RomImage, const char *CoreDump,
 
   State->GyroDriveActive = 0;
   State->GyroDriveOut = 0;
+
+  for (i = 0; i < 5; i++)
+    State->CduDriveOut[i] = 0;
 
   if (initializeSunburst37)
     {

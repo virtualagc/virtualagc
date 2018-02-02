@@ -415,7 +415,8 @@
  *		02/01/18 MAS	Simulated the GYROCMD output counter. It doesn't
  *				check for the target gyro at the moment, which
  *				may be something we'll want to do, depending on
- *				what is most useful for integrators.
+ *				what is most useful for integrators. Also added
+ *				simulation of the five CDU drive counters.
  *
  *
  * The technical documentation for the Apollo Guidance & Navigation (G&N) system,
@@ -1250,6 +1251,7 @@ CounterDINC (agc_t *State, int Counter)
   i = State->Erasable[0][RegCOUNTER + Counter];
   if (i == AGC_P0 || i == AGC_M0)	// Zero?
     {
+      // Simulate ZOUT effects
       switch (Counter)
         {
         case COUNTER_TIME6:
@@ -1263,11 +1265,28 @@ CounterDINC (agc_t *State, int Counter)
           State->GyroDriveActive = 0;
           State->InputChannel[014] &= ~01000;
           break;
+        // CDU drive pulses simply clear their channel enable bit
+        case COUNTER_CDUXCMD:
+          State->InputChannel[014] &= ~040000;
+          break;
+        case COUNTER_CDUYCMD:
+          State->InputChannel[014] &= ~020000;
+          break;
+        case COUNTER_CDUZCMD:
+          State->InputChannel[014] &= ~010000;
+          break;
+        case COUNTER_OPTYCMD:
+          State->InputChannel[014] &= ~04000;
+          break;
+        case COUNTER_OPTXCMD:
+          State->InputChannel[014] &= ~02000;
+          break;
         }
     }
   else if (040000 & i)			// Negative?
     {
       i = AddSP16(SignExtend(i), SignExtend(AGC_P1)) & 077777;
+      // Simualte MOUT effects
       switch (Counter)
         {
         case COUNTER_GYROCMD:
@@ -1278,11 +1297,28 @@ CounterDINC (agc_t *State, int Counter)
               State->GyroDriveOut = 0;
             }
           break;
+        // Generate minus output pulses for the CDU drives
+        case COUNTER_CDUXCMD:
+          State->CduDriveOut[0]--;
+          break;
+        case COUNTER_CDUYCMD:
+          State->CduDriveOut[1]--;
+          break;
+        case COUNTER_CDUZCMD:
+          State->CduDriveOut[2]--;
+          break;
+        case COUNTER_OPTYCMD:
+          State->CduDriveOut[3]--;
+          break;
+        case COUNTER_OPTXCMD:
+          State->CduDriveOut[4]--;
+          break;
         }
     }
   else					// Positive?
     {
       i = AddSP16(SignExtend(i), SignExtend(AGC_M1)) & 077777;
+      // Simualte POUT effects
       switch (Counter)
         {
         case COUNTER_GYROCMD:
@@ -1292,6 +1328,22 @@ CounterDINC (agc_t *State, int Counter)
               State->GyroDriveActive = 1;
               State->GyroDriveOut = 0;
             }
+          break;
+        // Generate plus output pulses for the CDU drives
+        case COUNTER_CDUXCMD:
+          State->CduDriveOut[0]++;
+          break;
+        case COUNTER_CDUYCMD:
+          State->CduDriveOut[1]++;
+          break;
+        case COUNTER_CDUZCMD:
+          State->CduDriveOut[2]++;
+          break;
+        case COUNTER_OPTYCMD:
+          State->CduDriveOut[3]++;
+          break;
+        case COUNTER_OPTXCMD:
+          State->CduDriveOut[4]++;
           break;
         }
     }
@@ -1597,8 +1649,21 @@ TimingSignalF05A(agc_t * State)
     else
         State->GyroDriveActive = 0;
 
+    // Generate CDU drive pulses if their respective channel 14 bits are
+    // set. The output pulses themselves are generated during the DINC,
+    // with a ZOUT resetting the channel 14 bit to disable the counter.
+    if (State->InputChannel[014] & 040000)
+      CounterRequest(State, COUNTER_CDUXCMD, COUNTER_CELL_PLUS);
+    if (State->InputChannel[014] & 020000)
+      CounterRequest(State, COUNTER_CDUYCMD, COUNTER_CELL_PLUS);
+    if (State->InputChannel[014] & 010000)
+      CounterRequest(State, COUNTER_CDUZCMD, COUNTER_CELL_PLUS);
+    if (State->InputChannel[014] & 04000)
+      CounterRequest(State, COUNTER_OPTYCMD, COUNTER_CELL_PLUS);
+    if (State->InputChannel[014] & 02000)
+      CounterRequest(State, COUNTER_OPTXCMD, COUNTER_CELL_PLUS);
+
     // Lots of things:
-    // CDU drives
     // THRSTD
     // EMSD
     // OTLINK
