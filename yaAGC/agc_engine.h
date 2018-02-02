@@ -130,6 +130,7 @@
 				as defines for interrupt indexes.
 		02/01/18 MAS	Added state fields for gyro drive and CDU drive
 				simulation.
+		02/02/18 MAS	Added state fields for THRUST and EMSD counters.
  
   For more insight, I'd highly recommend looking at the documents
   http://hrst.mit.edu/hrs/apollo/public/archive/1689.pdf and
@@ -527,6 +528,10 @@ typedef struct
   unsigned RHCPending:1;
   unsigned RadarSync:1;
   unsigned GyroDriveActive:1;
+  unsigned ThrustPlusActive:1;
+  unsigned ThrustMinusActive:1;
+  unsigned EMSPlusActive:1;
+  unsigned EMSMinusActive:1;
   uint8_t CounterCell[NUM_COUNTERS]; // Counter cells storing requested plus or minus counts
   uint64_t /*unsigned long long */ DownruptTime;	// Time when next DOWNRUPT occurs.
   uint32_t WarningFilter;       // Current voltage of the AGC warning filter
@@ -543,6 +548,8 @@ typedef struct
   uint16_t RadarData;
   uint16_t GyroDriveOut;
   int CduDriveOut[5];
+  int ThrustOut;
+  int EMSOut;
   // The following pointer is present for whatever use the Orbiter
   // integration squad wants.  The Virtual AGC code proper doesn't use it
   // in any way.

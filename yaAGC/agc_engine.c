@@ -417,6 +417,7 @@
  *				may be something we'll want to do, depending on
  *				what is most useful for integrators. Also added
  *				simulation of the five CDU drive counters.
+ *		02/02/18 MAS	Added simulation of the THRUST and EMSD counters.
  *
  *
  * The technical documentation for the Apollo Guidance & Navigation (G&N) system,
@@ -661,6 +662,21 @@ CpuWriteIO (agc_t * State, int Address, int Value)
       // line to the DSKY's RSET button, so on depression of RSET the
       // light is turned off without need for software intervention.
       State->RestartLight = 0;
+    }
+  else if (Address == 014)
+    {
+      // Also clear THRUST/EMSD counter state if their enable bits
+      // are cleared.
+      if ((Value & 010) == 0)
+      {
+        State->ThrustPlusActive = 0;
+        State->ThrustMinusActive = 0;
+      }
+      if ((Value & 020) == 0)
+      {
+        State->EMSPlusActive = 0;
+        State->EMSMinusActive = 0;
+      }
     }
 
   WriteIO (State, Address, Value);
@@ -1281,6 +1297,18 @@ CounterDINC (agc_t *State, int Counter)
         case COUNTER_OPTXCMD:
           State->InputChannel[014] &= ~02000;
           break;
+        // THRUST and EMSD switch off their enable bits and clear
+        // their state information bits
+        case COUNTER_THRUST:
+          State->InputChannel[014] &= ~010;
+          State->ThrustPlusActive = 0;
+          State->ThrustMinusActive = 0;
+          break;
+        case COUNTER_EMSD:
+          State->InputChannel[014] &= ~020;
+          State->EMSPlusActive = 0;
+          State->EMSMinusActive = 0;
+          break;
         }
     }
   else if (040000 & i)			// Negative?
@@ -1313,6 +1341,13 @@ CounterDINC (agc_t *State, int Counter)
         case COUNTER_OPTXCMD:
           State->CduDriveOut[4]--;
           break;
+        // Enable generation of minus pulses for THRUST and EMSD
+        case COUNTER_THRUST:
+          State->ThrustMinusActive = 1;
+          break;
+        case COUNTER_EMSD:
+          State->EMSMinusActive = 1;
+          break;
         }
     }
   else					// Positive?
@@ -1344,6 +1379,13 @@ CounterDINC (agc_t *State, int Counter)
           break;
         case COUNTER_OPTXCMD:
           State->CduDriveOut[4]++;
+          break;
+        // Enable generation of plus pulses for THRUST and EMSD
+        case COUNTER_THRUST:
+          State->ThrustPlusActive = 1;
+          break;
+        case COUNTER_EMSD:
+          State->EMSPlusActive = 1;
           break;
         }
     }
@@ -1663,9 +1705,36 @@ TimingSignalF05A(agc_t * State)
     if (State->InputChannel[014] & 02000)
       CounterRequest(State, COUNTER_OPTXCMD, COUNTER_CELL_PLUS);
 
+    // THRUST and EMSD operate identically, with THRUST being enabled by
+    // channel 14 bit 4, and EMSD being enabled by bit 5. For these,
+    // F05A is responsible for both generating DINC requests *and*
+    // sending the resulting output pulses. A POUT or a MOUT on the
+    // first DINC will set a bit that allows plus or minus pulses,
+    // respectively, on subsequent F05As. These bits are never cleared
+    // until the CH14 enable bits are cleared, so if the value in the
+    // counter changes sign for some reason, both plus and minus output
+    // pulses will be generated until the counter is disabled.
+    if (State->InputChannel[014] & 010)
+    {
+        if (State->ThrustPlusActive)
+          State->ThrustOut++;
+        if (State->ThrustMinusActive)
+          State->ThrustOut--;
+
+        CounterRequest(State, COUNTER_THRUST, COUNTER_CELL_PLUS);
+    }
+
+    if (State->InputChannel[014] & 020)
+    {
+        if (State->EMSPlusActive)
+          State->EMSOut++;
+        if (State->EMSMinusActive)
+          State->EMSOut--;
+
+        CounterRequest(State, COUNTER_EMSD, COUNTER_CELL_PLUS);
+    }
+
     // Lots of things:
-    // THRSTD
-    // EMSD
     // OTLINK
     // ALT
 

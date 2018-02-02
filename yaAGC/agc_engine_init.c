@@ -97,6 +97,8 @@
  * 		01/31/18 MAS	Added initialization for radar state info.
  * 		02/01/18 MAS	Added initialization for gyro drive and CDU drive
  *                              state info.
+ * 		02/01/18 MAS	Added initialization for THRUST and EMSD counter
+ *                              state info.
  */
 
 // For Orbiter.
@@ -354,6 +356,14 @@ agc_engine_init (agc_t * State, const char *RomImage, const char *CoreDump,
 
   for (i = 0; i < 5; i++)
     State->CduDriveOut[i] = 0;
+
+  State->ThrustPlusActive = 0;
+  State->ThrustMinusActive = 0;
+  State->ThrustOut = 0;
+
+  State->EMSPlusActive = 0;
+  State->EMSMinusActive = 0;
+  State->EMSOut = 0;
 
   if (initializeSunburst37)
     {
