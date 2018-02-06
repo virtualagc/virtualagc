@@ -418,6 +418,7 @@
  *				what is most useful for integrators. Also added
  *				simulation of the five CDU drive counters.
  *		02/02/18 MAS	Added simulation of the THRUST and EMSD counters.
+ *		02/06/18 MAS	Added simulation of the OUTLINK and ALTM counters.
  *
  *
  * The technical documentation for the Apollo Guidance & Navigation (G&N) system,
@@ -552,13 +553,14 @@ unsigned IoWriteCounts[01000];
 int
 ReadIO (agc_t * State, int Address)
 {
+  int Value;
   if (Address < 0 || Address > 0777)
     return (0);
   if (CoverageCounts)
     IoReadCounts[Address]++;
   if (Address == RegL || Address == RegQ)
     return (State->Erasable[0][Address]);
-  return (State->InputChannel[Address]);
+  return State->InputChannel[Address];
 }
 
 void
@@ -579,6 +581,12 @@ WriteIO (agc_t * State, int Address, int Value)
       // by means of latching relays.  We need to capture this data.
       State->OutputChannel10[(Value >> 11) & 017] = Value;
     }
+  else if (Address == 014)
+  {
+    // Channel 14 bits 1 and 3 cannot be reset if OUTLINK or ALTM counters
+    // are active, respectively.
+    Value |= (State->OutlinkActive) | (State->AltActive << 2);
+  }
   else if ((Address == 015 || Address == 016) && Value == 022)
     {
       // RSET being pressed on either DSKY clears the RESTART light
@@ -1399,7 +1407,34 @@ CounterSHINC (agc_t * State, int Counter)
 {
   int16_t i;
   i = State->Erasable[0][RegCOUNTER + Counter];
-  i = (i << 1) & 037777;
+
+  // OUTLINK and ALTM counters generate output pulses depending
+  // on whether or not a one is being shifted off the top
+  switch (Counter)
+    {
+    case COUNTER_OUTLINK:
+      State->OutlinkOut <<= 1;
+      if (i & 040000)
+        State->OutlinkOut |= 1;
+      break;
+
+    case COUNTER_ALTM:
+      if (State->InputChannel[014] & 02)
+        {
+          State->AltRateOut <<= 1;
+          if (i & 040000)
+            State->AltRateOut |= 1;
+        }
+      else
+        {
+          State->AltOut <<= 1;
+          if (i & 040000)
+            State->AltOut |= 1;
+        }
+      break;
+    }
+
+  i = (i << 1) & 077777;
   State->Erasable[0][RegCOUNTER + Counter] = i;
 }
 
@@ -1409,7 +1444,7 @@ CounterSHANC (agc_t * State, int Counter)
 {
   int16_t i;
   i = State->Erasable[0][RegCOUNTER + Counter];
-  i = ((i << 1) + 1) & 037777;
+  i = ((i << 1) + 1) & 077777;
   State->Erasable[0][RegCOUNTER + Counter] = i;
 }
 
@@ -1734,9 +1769,51 @@ TimingSignalF05A(agc_t * State)
         CounterRequest(State, COUNTER_EMSD, COUNTER_CELL_PLUS);
     }
 
-    // Lots of things:
-    // OTLINK
-    // ALT
+    // OUTLINK and ALTM are also almost identical. OUTLINK is enabled
+    // by channel 14 bit 1. After this bit is set to 1, nothing happens
+    // until the following GTSET, which sets up the output circuitry.
+    // The first F05A after this GTSET, a "1" output pulse is generated
+    // as a sync marker. This F05A will also generate a SHINC request,
+    // as will every subsequent F05A until the outlink counter is
+    // disabled by another GTSET. 
+    //
+    // The first F05A of an outlink will also clear the enable flip-flop,
+    // channel 14 bit 1. However, this bit will still read as 1 to
+    // software, because for reading its state is ORed together with
+    // the "outlink active" flip-flop.
+    //
+    // ALTM behaves almost identically. It is enabled by channel 14 bit
+    // 3. It can target one of two pairs of output pins; altitude if
+    // channel 14 bit 2 is 0, and altitude rate if it is 1. This
+    // selection is "checked" with every output pulse, so misbehaving
+    // software can change which interface is being addressed in the
+    // middle of an output cycle.
+    if (State->OutlinkActive)
+    {
+        if (State->OutlinkStarting)
+        {
+            State->OutlinkStarting = 0;
+            State->OutlinkOut = 1;
+            State->InputChannel[014] &= ~01;
+        }
+        else
+          CounterRequest(State, COUNTER_OUTLINK, COUNTER_CELL_ZERO);
+    }
+
+    if (State->AltActive)
+    {
+        if (State->AltStarting)
+        {
+            State->AltStarting = 0;
+            State->InputChannel[014] &= ~04;
+            if (State->InputChannel[014] & 02)
+              State->AltRateOut = 1;
+            else
+              State->AltOut = 1;
+        }
+        else
+          CounterRequest(State, COUNTER_ALTM, COUNTER_CELL_ZERO);
+    }
 
     return CausedRestart;
 }
@@ -1791,6 +1868,32 @@ TimingSignalF05B(agc_t * State)
         // pulses and getting count requests back.
         if (State->RadarGateCounter == 9)
           State->RadarSync = 1;
+
+        // Outlink and tape meter outputs function identically; GTSET will
+        // begin an outgoing pulse sequence if there is not one already
+        // active, otherwise it will end the ongoing one and clear the
+        // channel enable bit.
+        if (State->OutlinkActive)
+        {
+            State->InputChannel[014] &= ~01;
+            State->OutlinkActive = 0;
+        }
+        else if (State->InputChannel[014] & 01)
+        {
+            State->OutlinkActive = 1;
+            State->OutlinkStarting = 1;
+        }
+
+        if (State->AltActive)
+        {
+            State->InputChannel[014] &= ~04;
+            State->AltActive = 0;
+        }
+        else if (State->InputChannel[014] & 04)
+        {
+            State->AltActive = 1;
+            State->AltStarting = 1;
+        }
     }
     else if (GtsetType == SCALER_GTRST)
     {
