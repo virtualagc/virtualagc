@@ -79,6 +79,9 @@
 				because the packet alignment changes over time.
 		01/30/18 MAS	Removed old RHC input handling, to be replaced
 				with new logic later.
+		02/06/18 MAS	Added a skeleton PulseOutput() function for
+				which will be responsible for interpreting output
+				counter pulses and forwarding decoded info.
 */
 
 #include <errno.h>
@@ -418,6 +421,13 @@ ChannelInput (agc_t *State)
     }
   return (0);
 }
+
+void
+PulseOutput(agc_t * State, int SignalId)
+{
+  // FIXME: Implement me!
+}
+
 
 //----------------------------------------------------------------------
 // A generic function for handling client connects/disconnects.

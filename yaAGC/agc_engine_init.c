@@ -100,7 +100,7 @@
  * 		02/01/18 MAS	Added initialization for THRUST and EMSD counter
  *                              state info.
  * 		02/01/18 MAS	Added initialization for OUTLINK and ALTM counter
- *                              state info.
+ *                              state info, and removed some old placeholders.
  */
 
 // For Orbiter.
@@ -354,27 +354,20 @@ agc_engine_init (agc_t * State, const char *RomImage, const char *CoreDump,
   State->RadarSync = 0;
 
   State->GyroDriveActive = 0;
-  State->GyroDriveOut = 0;
-
-  for (i = 0; i < 5; i++)
-    State->CduDriveOut[i] = 0;
 
   State->ThrustPlusActive = 0;
   State->ThrustMinusActive = 0;
-  State->ThrustOut = 0;
 
   State->EMSPlusActive = 0;
   State->EMSMinusActive = 0;
-  State->EMSOut = 0;
 
   State->OutlinkActive = 0;
   State->OutlinkStarting = 0;
-  State->OutlinkOut = 0;
 
   State->AltActive = 0;
   State->AltStarting = 0;
-  State->AltOut = 0;
-  State->AltRateOut = 0;
+
+  State->UplinkTooFast = 0;
 
   if (initializeSunburst37)
     {

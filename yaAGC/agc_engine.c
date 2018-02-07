@@ -419,6 +419,9 @@
  *				simulation of the five CDU drive counters.
  *		02/02/18 MAS	Added simulation of the THRUST and EMSD counters.
  *		02/06/18 MAS	Added simulation of the OUTLINK and ALTM counters.
+ *		                Also added some initial support code for INLINK,
+ *		                and switched all output counters to using the
+ *		                new PulseOutput() interface.
  *
  *
  * The technical documentation for the Apollo Guidance & Navigation (G&N) system,
@@ -1326,28 +1329,24 @@ CounterDINC (agc_t *State, int Counter)
       switch (Counter)
         {
         case COUNTER_GYROCMD:
-          if (!State->GyroDriveActive)
-            {
-              // Set the gyro drive active bit if it wasn't set.
-              State->GyroDriveActive = 1;
-              State->GyroDriveOut = 0;
-            }
+          // Set the gyro drive active bit
+          State->GyroDriveActive = 1;
           break;
         // Generate minus output pulses for the CDU drives
         case COUNTER_CDUXCMD:
-          State->CduDriveOut[0]--;
+          PulseOutput(State, OUTPUT_CDUXCMD_MINUS);
           break;
         case COUNTER_CDUYCMD:
-          State->CduDriveOut[1]--;
+          PulseOutput(State, OUTPUT_CDUYCMD_MINUS);
           break;
         case COUNTER_CDUZCMD:
-          State->CduDriveOut[2]--;
+          PulseOutput(State, OUTPUT_CDUZCMD_MINUS);
           break;
         case COUNTER_OPTYCMD:
-          State->CduDriveOut[3]--;
+          PulseOutput(State, OUTPUT_OPTYCMD_MINUS);
           break;
         case COUNTER_OPTXCMD:
-          State->CduDriveOut[4]--;
+          PulseOutput(State, OUTPUT_OPTXCMD_MINUS);
           break;
         // Enable generation of minus pulses for THRUST and EMSD
         case COUNTER_THRUST:
@@ -1365,28 +1364,24 @@ CounterDINC (agc_t *State, int Counter)
       switch (Counter)
         {
         case COUNTER_GYROCMD:
-          if (!State->GyroDriveActive)
-            {
-              // Set the gyro drive active bit if it wasn't set.
-              State->GyroDriveActive = 1;
-              State->GyroDriveOut = 0;
-            }
+          // Set the gyro drive active bit
+          State->GyroDriveActive = 1;
           break;
         // Generate plus output pulses for the CDU drives
         case COUNTER_CDUXCMD:
-          State->CduDriveOut[0]++;
+          PulseOutput(State, OUTPUT_CDUXCMD_PLUS);
           break;
         case COUNTER_CDUYCMD:
-          State->CduDriveOut[1]++;
+          PulseOutput(State, OUTPUT_CDUYCMD_PLUS);
           break;
         case COUNTER_CDUZCMD:
-          State->CduDriveOut[2]++;
+          PulseOutput(State, OUTPUT_CDUZCMD_PLUS);
           break;
         case COUNTER_OPTYCMD:
-          State->CduDriveOut[3]++;
+          PulseOutput(State, OUTPUT_OPTYCMD_PLUS);
           break;
         case COUNTER_OPTXCMD:
-          State->CduDriveOut[4]++;
+          PulseOutput(State, OUTPUT_OPTXCMD_PLUS);
           break;
         // Enable generation of plus pulses for THRUST and EMSD
         case COUNTER_THRUST:
@@ -1412,24 +1407,32 @@ CounterSHINC (agc_t * State, int Counter)
   // on whether or not a one is being shifted off the top
   switch (Counter)
     {
-    case COUNTER_OUTLINK:
-      State->OutlinkOut <<= 1;
+    case COUNTER_INLINK:
       if (i & 040000)
-        State->OutlinkOut |= 1;
+        State->InterruptRequests[RUPT_UPRUPT] = 1;
+      break;
+
+    case COUNTER_OUTLINK:
+      if (i & 040000)
+        PulseOutput(State, OUTPUT_OUTLINK_ONE);
+      else
+        PulseOutput(State, OUTPUT_OUTLINK_ZERO);
       break;
 
     case COUNTER_ALTM:
       if (State->InputChannel[014] & 02)
         {
-          State->AltRateOut <<= 1;
           if (i & 040000)
-            State->AltRateOut |= 1;
+            PulseOutput(State, OUTPUT_ALTRATE_ONE);
+          else
+            PulseOutput(State, OUTPUT_ALTRATE_ZERO);
         }
       else
         {
-          State->AltOut <<= 1;
           if (i & 040000)
-            State->AltOut |= 1;
+            PulseOutput(State, OUTPUT_ALT_ONE);
+          else
+            PulseOutput(State, OUTPUT_ALT_ZERO);
         }
       break;
     }
@@ -1444,6 +1447,10 @@ CounterSHANC (agc_t * State, int Counter)
 {
   int16_t i;
   i = State->Erasable[0][RegCOUNTER + Counter];
+
+  if ((Counter == COUNTER_INLINK) && (i & 040000))
+    State->InterruptRequests[RUPT_UPRUPT] = 1;
+
   i = ((i << 1) + 1) & 077777;
   State->Erasable[0][RegCOUNTER + Counter] = i;
 }
@@ -1617,7 +1624,7 @@ TimingSignalF03B(agc_t * State)
 static void
 TimingSignalF04A(agc_t * State)
 {
-    // clear uplink too fast monitoring flip-flop
+    State->UplinkTooFast = 0;
 }
 
 // Timepulse F05A is far and away the busiest timing signal. It is used 
@@ -1721,7 +1728,7 @@ TimingSignalF05A(agc_t * State)
         // pulses to the gyros.
         CounterRequest(State, COUNTER_GYROCMD, COUNTER_CELL_PLUS);
         if (State->GyroDriveActive)
-          State->GyroDriveOut++;
+          PulseOutput(State, OUTPUT_GYROCMD_SET);
     }
     else
         State->GyroDriveActive = 0;
@@ -1752,9 +1759,9 @@ TimingSignalF05A(agc_t * State)
     if (State->InputChannel[014] & 010)
     {
         if (State->ThrustPlusActive)
-          State->ThrustOut++;
+          PulseOutput(State, OUTPUT_THRUST_PLUS);
         if (State->ThrustMinusActive)
-          State->ThrustOut--;
+          PulseOutput(State, OUTPUT_THRUST_MINUS);
 
         CounterRequest(State, COUNTER_THRUST, COUNTER_CELL_PLUS);
     }
@@ -1762,9 +1769,9 @@ TimingSignalF05A(agc_t * State)
     if (State->InputChannel[014] & 020)
     {
         if (State->EMSPlusActive)
-          State->EMSOut++;
+          PulseOutput(State, OUTPUT_EMSD_PLUS);
         if (State->EMSMinusActive)
-          State->EMSOut--;
+          PulseOutput(State, OUTPUT_EMSD_MINUS);
 
         CounterRequest(State, COUNTER_EMSD, COUNTER_CELL_PLUS);
     }
@@ -1793,7 +1800,7 @@ TimingSignalF05A(agc_t * State)
         if (State->OutlinkStarting)
         {
             State->OutlinkStarting = 0;
-            State->OutlinkOut = 1;
+            PulseOutput(State, OUTPUT_OUTLINK_ONE);
             State->InputChannel[014] &= ~01;
         }
         else
@@ -1807,9 +1814,9 @@ TimingSignalF05A(agc_t * State)
             State->AltStarting = 0;
             State->InputChannel[014] &= ~04;
             if (State->InputChannel[014] & 02)
-              State->AltRateOut = 1;
+              PulseOutput(State, OUTPUT_ALTRATE_ONE);
             else
-              State->AltOut = 1;
+              PulseOutput(State, OUTPUT_ALT_ONE);
         }
         else
           CounterRequest(State, COUNTER_ALTM, COUNTER_CELL_ZERO);

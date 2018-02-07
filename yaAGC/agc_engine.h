@@ -131,7 +131,10 @@
 		02/01/18 MAS	Added state fields for gyro drive and CDU drive
 				simulation.
 		02/02/18 MAS	Added state fields for THRUST and EMSD counters.
-		02/02/18 MAS	Added state fields for OUTLINK and ALTM counters.
+		02/02/18 MAS	Added state fields for OUTLINK and ALTM counters,
+				removed the placeholder state fields for holding
+				outputs, and added IDs for the various output
+				counter signals for use with PulseOutput().
  
   For more insight, I'd highly recommend looking at the documents
   http://hrst.mit.edu/hrs/apollo/public/archive/1689.pdf and
@@ -354,6 +357,32 @@ extern long random (void);
 #define RUPT_HANDRUPT 10
 #define NUM_INTERRUPT_TYPES 10
 
+// Pulse output signals (numbered according to AGC main connector
+// pin numbers, which should hopefully make cross-referencing these
+// signals with the LM Systems Handbook easier). The outlink and
+// EMSD pins are guesses, since the interfaces weren't used.
+#define OUTPUT_OUTLINK_ZERO  122
+#define OUTPUT_OUTLINK_ONE   123
+#define OUTPUT_GYROCMD_SET   318
+#define OUTPUT_CDUZCMD_MINUS 328
+#define OUTPUT_CDUZCMD_PLUS  329
+#define OUTPUT_CDUYCMD_MINUS 330
+#define OUTPUT_CDUYCMD_PLUS  332
+#define OUTPUT_CDUXCMD_MINUS 333
+#define OUTPUT_CDUXCMD_PLUS  334
+#define OUTPUT_OPTYCMD_MINUS 335
+#define OUTPUT_OPTYCMD_PLUS  336
+#define OUTPUT_OPTXCMD_MINUS 337
+#define OUTPUT_OPTXCMD_PLUS  338
+#define OUTPUT_EMSD_MINUS    349
+#define OUTPUT_EMSD_PLUS     350
+#define OUTPUT_THRUST_MINUS  353
+#define OUTPUT_THRUST_PLUS   354
+#define OUTPUT_ALTRATE_ZERO  455
+#define OUTPUT_ALTRATE_ONE   456
+#define OUTPUT_ALT_ZERO      457
+#define OUTPUT_ALT_ONE       458
+
 // Max number of 15-bit words in a downlink-telemetry list.
 #define MAX_DOWNLINK_LIST 260
 
@@ -537,6 +566,7 @@ typedef struct
   unsigned OutlinkStarting:1;
   unsigned AltActive:1;
   unsigned AltStarting:1;
+  unsigned UplinkTooFast:1;
   uint8_t CounterCell[NUM_COUNTERS]; // Counter cells storing requested plus or minus counts
   uint64_t /*unsigned long long */ DownruptTime;	// Time when next DOWNRUPT occurs.
   uint32_t WarningFilter;       // Current voltage of the AGC warning filter
@@ -551,13 +581,6 @@ typedef struct
   int RHCCounts[3];
   uint8_t RadarGateCounter;
   uint16_t RadarData;
-  uint16_t GyroDriveOut;
-  int CduDriveOut[5];
-  int ThrustOut;
-  int EMSOut;
-  uint16_t OutlinkOut;
-  uint16_t AltOut;
-  uint16_t AltRateOut;
   // The following pointer is present for whatever use the Orbiter
   // integration squad wants.  The Virtual AGC code proper doesn't use it
   // in any way.
@@ -729,6 +752,7 @@ void ChannelOutput (agc_t * State, int Channel, int Value);
 int ChannelInput (agc_t * State);
 void ChannelRoutine (agc_t *State);
 void ChannelRoutineGeneric (void *State, void (*UpdatePeripherals) (void *, Client_t *));
+void PulseOutput(agc_t * State, int SignalId);
 void ShiftToDeda (agc_t *State, int Data);
 
 #endif // AGC_ENGINE_H
