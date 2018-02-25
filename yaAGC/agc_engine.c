@@ -422,6 +422,11 @@
  *		                Also added some initial support code for INLINK,
  *		                and switched all output counters to using the
  *		                new PulseOutput() interface.
+ *		02/25/18 MAS	Put in simulation of PIPA data strobes as well as
+ *		                most of the the PIPA failure monitoring logic.
+ *		                The "both inputs" case for each PIPA axis is not
+ *		                checked, under the assumption that the simulated
+ *		                PIPA would not be implemented to ever do this.
  *
  *
  * The technical documentation for the Apollo Guidance & Navigation (G&N) system,
@@ -1403,15 +1408,16 @@ CounterSHINC (agc_t * State, int Counter)
   int16_t i;
   i = State->Erasable[0][RegCOUNTER + Counter];
 
-  // OUTLINK and ALTM counters generate output pulses depending
-  // on whether or not a one is being shifted off the top
   switch (Counter)
     {
+  // INLINK generates an UPRUPT if a one is shifted off the top
     case COUNTER_INLINK:
       if (i & 040000)
         State->InterruptRequests[RUPT_UPRUPT] = 1;
       break;
 
+  // OUTLINK and ALTM counters generate output pulses depending
+  // on whether or not a one is being shifted off the top
     case COUNTER_OUTLINK:
       if (i & 040000)
         PulseOutput(State, OUTPUT_OUTLINK_ONE);
@@ -1614,7 +1620,8 @@ SimulateDV(agc_t *State, uint16_t divisor)
 static void
 TimingSignalF03B(agc_t * State)
 {
-    // if FS04 && !FS05, generate PIPA count requests
+    if ((State->ScalerValue & (SCALER_FS05 | SCALER_FS04)) == SCALER_FS04)
+      PulseOutput(State, OUTPUT_PIPA_DATA);
 }
 
 // Timepulse F04A clears the uplink-too-fast bit, which is set by each
@@ -1675,6 +1682,11 @@ TimingSignalF05A(agc_t * State)
     // That's it for standby-powered stuff, so leave if we're in standby
     if (State->Standby)
         return CausedRestart;
+
+    // Set the PIPA pulse missing monitoring bits for each PIPA
+    State->PipaMissX = 1;
+    State->PipaMissY = 1;
+    State->PipaMissZ = 1;
 
     // Check for any of the input traps to be triggered. If they are, and
     // the cause of the triggering doesn't go away before F05B, we'll
@@ -1843,6 +1855,10 @@ TimingSignalF05B(agc_t * State)
 
     if (State->Standby)
         return;
+
+    // Set the PIPA fail bit if any expected PIPA pulses were not received
+    if (State->PipaMissX || State->PipaMissY || State->PipaMissZ)
+      State->InputChannel[033] &= ~010000;
 
     // If any of the input traps are pending, generate a HANDRUPT and
     // disable the tripped trap.
@@ -2260,6 +2276,12 @@ TimingSignalF17B(agc_t * State)
 static void
 TimingSignalF18A(agc_t * State)
 {
+    State->PipaNoXPlus = 1;
+    State->PipaNoXMinus = 1;
+    State->PipaNoYPlus = 1;
+    State->PipaNoYMinus = 1;
+    State->PipaNoZPlus = 1;
+    State->PipaNoZMinus = 1;
 }
 
 // Timepulse F18B marks the end of the monitoring period for loss of
@@ -2267,6 +2289,10 @@ TimingSignalF18A(agc_t * State)
 static void
 TimingSignalF18B(agc_t * State)
 {
+    if (State->PipaNoXPlus || State->PipaNoXMinus ||
+        State->PipaNoYPlus || State->PipaNoYMinus ||
+        State->PipaNoZPlus || State->PipaNoZMinus)
+      State->InputChannel[033] &= ~010000;
 }
 
 //-----------------------------------------------------------------------------
@@ -2487,6 +2513,10 @@ int HandleNextCounterCell(agc_t * State)
 
     // SHINC/SHANC. SHANC takes priority if both are requested.
     case COUNTER_INLINK:
+        // INLINK counts set the uplink-too-fast flip-flop, which prevent
+        // any further counts until after the next F04A. The remaining
+        // logic is identical to RNRAD.
+        State->UplinkTooFast = 1;
     case COUNTER_RNRAD:
         if (State->CounterCell[i] & COUNTER_CELL_ONE)
             CounterSHANC(State, i);

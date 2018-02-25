@@ -135,6 +135,10 @@
 				removed the placeholder state fields for holding
 				outputs, and added IDs for the various output
 				counter signals for use with PulseOutput().
+		02/25/18 MAS	Added state fields for PIPA handling and a bunch
+				of input signal definitions for use with the new
+				PulseInput(), which is intended to complement the
+				PulseOutput() function.
  
   For more insight, I'd highly recommend looking at the documents
   http://hrst.mit.edu/hrs/apollo/public/archive/1689.pdf and
@@ -311,13 +315,13 @@ extern long random (void);
 #define COUNTER_CELL_ZERO  COUNTER_CELL_MINUS
 
 // Number of millivolts per count for RHC input channels. There were
-// actually two types of AGCs here: LM-3 and earlier used 123-124mV
+// actually two types of AGCs here: LM-2 and earlier used 123-124mV
 // per count, leading to a maximum (at 2.8VRMS/3.96Vp) of 32 counts
 // in each RHC channel. Aurora 12 and Sunburst 37 both expect this
-// scaling. All Luminary versions (LM-4 and later) expect 42 counts
-// maximum, which translates to about 94-95mV per count. We use the
-// latter number since the only programs we have that expected the
-// 32 maximum never flew.
+// scaling. All Luminary versions, and the flown version of Sundance
+// (LM-3 and later), expect 42 counts maximum, which translates to
+// about 94-95mV per count. We use the latter number since the only
+// programs that expected the 32 maximum never flew.
 #define RHC_MV_PER_COUNT  94
 
 // Constants related to "input/output channels".
@@ -361,9 +365,8 @@ extern long random (void);
 // pin numbers, which should hopefully make cross-referencing these
 // signals with the LM Systems Handbook easier). The outlink and
 // EMSD pins are guesses, since the interfaces weren't used.
-#define OUTPUT_OUTLINK_ZERO  122
-#define OUTPUT_OUTLINK_ONE   123
 #define OUTPUT_GYROCMD_SET   318
+#define OUTPUT_PIPA_DATA     325
 #define OUTPUT_CDUZCMD_MINUS 328
 #define OUTPUT_CDUZCMD_PLUS  329
 #define OUTPUT_CDUYCMD_MINUS 330
@@ -382,6 +385,39 @@ extern long random (void);
 #define OUTPUT_ALTRATE_ONE   456
 #define OUTPUT_ALT_ZERO      457
 #define OUTPUT_ALT_ONE       458
+#define OUTPUT_OUTLINK_ONE   517
+#define OUTPUT_OUTLINK_ZERO  518
+
+// Pulse input signals (again numbered as AGC main connector
+// pin numbers). Crosslink pins are guesses since the interface
+// wasn't used.
+#define INPUT_CROSSLINK_ONE  122
+#define INPUT_CROSSLINK_ZERO 123
+#define INPUT_LR_ONE         124
+#define INPUT_LR_ZERO        125
+#define INPUT_LR_ONE         126
+#define INPUT_LR_ZERO        127
+#define INPUT_UPLINK_ONE     128
+#define INPUT_UPLINK_ZERO    129
+#define INPUT_DOWNLINK_SYNC  130
+#define INPUT_DOWNLINK_END   132
+#define INPUT_DOWNLINK_START 133
+#define INPUT_PIPAZ_MINUS    134
+#define INPUT_PIPAZ_PLUS     135
+#define INPUT_PIPAY_MINUS    136
+#define INPUT_PIPAY_PLUS     137
+#define INPUT_PIPAX_MINUS    138
+#define INPUT_PIPAX_PLUS     139
+#define INPUT_CDUZ_MINUS     143
+#define INPUT_CDUZ_PLUS      144
+#define INPUT_CDUY_MINUS     145
+#define INPUT_CDUY_PLUS      146
+#define INPUT_CDUX_MINUS     147
+#define INPUT_CDUX_PLUS      148
+#define INPUT_OPTX_MINUS     149
+#define INPUT_OPTX_PLUS      150
+#define INPUT_OPTY_MINUS     151
+#define INPUT_OPTY_PLUS      152
 
 // Max number of 15-bit words in a downlink-telemetry list.
 #define MAX_DOWNLINK_LIST 260
@@ -567,6 +603,15 @@ typedef struct
   unsigned AltActive:1;
   unsigned AltStarting:1;
   unsigned UplinkTooFast:1;
+  unsigned PipaMissX:1;
+  unsigned PipaMissY:1;
+  unsigned PipaMissZ:1;
+  unsigned PipaNoXPlus:1;
+  unsigned PipaNoXMinus:1;
+  unsigned PipaNoYPlus:1;
+  unsigned PipaNoYMinus:1;
+  unsigned PipaNoZPlus:1;
+  unsigned PipaNoZMinus:1;
   uint8_t CounterCell[NUM_COUNTERS]; // Counter cells storing requested plus or minus counts
   uint64_t /*unsigned long long */ DownruptTime;	// Time when next DOWNRUPT occurs.
   uint32_t WarningFilter;       // Current voltage of the AGC warning filter
@@ -581,6 +626,7 @@ typedef struct
   int RHCCounts[3];
   uint8_t RadarGateCounter;
   uint16_t RadarData;
+  uint8_t PipaPrecount[3];
   // The following pointer is present for whatever use the Orbiter
   // integration squad wants.  The Virtual AGC code proper doesn't use it
   // in any way.
@@ -737,6 +783,7 @@ int16_t OverflowCorrected (int Value);
 int SignExtend (int16_t Word);
 int AddSP16 (int Addend1, int Addend2);
 void UnprogrammedIncrement (agc_t *State, int Counter, int IncType);
+void CounterRequest(agc_t * State, unsigned Counter, unsigned Type);
 
 void DecodeDigitalDownlink (int Channel, int Value, int CmOrLm);
 ProcessDownlinkList_t PrintDownlinkList;
@@ -752,6 +799,7 @@ void ChannelOutput (agc_t * State, int Channel, int Value);
 int ChannelInput (agc_t * State);
 void ChannelRoutine (agc_t *State);
 void ChannelRoutineGeneric (void *State, void (*UpdatePeripherals) (void *, Client_t *));
+void PulseInput(agc_t * State, int SignalId);
 void PulseOutput(agc_t * State, int SignalId);
 void ShiftToDeda (agc_t *State, int Data);
 

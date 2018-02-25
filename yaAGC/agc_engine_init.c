@@ -101,6 +101,7 @@
  *                              state info.
  * 		02/01/18 MAS	Added initialization for OUTLINK and ALTM counter
  *                              state info, and removed some old placeholders.
+ * 		02/12/18 MAS	Added initialization for PIPA state info.
  */
 
 // For Orbiter.
@@ -368,6 +369,18 @@ agc_engine_init (agc_t * State, const char *RomImage, const char *CoreDump,
   State->AltStarting = 0;
 
   State->UplinkTooFast = 0;
+
+  State->PipaMissX = 0;
+  State->PipaMissY = 0;
+  State->PipaMissZ = 0;
+  State->PipaNoXPlus = 0;
+  State->PipaNoXMinus = 0;
+  State->PipaNoYPlus = 0;
+  State->PipaNoYMinus = 0;
+  State->PipaNoZPlus = 0;
+  State->PipaNoZMinus = 0;
+  for (i = 0; i < 3; i++)
+    State->PipaPrecount[i] = 0;
 
   if (initializeSunburst37)
     {

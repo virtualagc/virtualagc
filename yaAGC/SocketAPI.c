@@ -82,6 +82,9 @@
 		02/06/18 MAS	Added a skeleton PulseOutput() function for
 				which will be responsible for interpreting output
 				counter pulses and forwarding decoded info.
+		02/25/18 MAS	Added a PulseInput() function which handles most
+				input pulses to the AGC, with a few exceptions
+				which will be implemented shortly.
 */
 
 #include <errno.h>
@@ -99,8 +102,8 @@ typedef unsigned short uint16_t;
 #define MSG_NOSIGNAL 0
 #endif
 
-// Roughly 50ms for simulated keypreses
-#define AUTO_KEYPRESS_DURATION 4192
+// Roughly 25ms for simulated keypreses
+#define AUTO_KEYPRESS_DURATION 2096
 
 //-----------------------------------------------------------------------------
 // Function for broadcasting "output channel" data to all connected clients of
@@ -160,6 +163,8 @@ static const unsigned char Signatures[4] = { 0x00, 0x40, 0x80, 0xC0 };
 static const unsigned char SignaturesAgs[4] = { 0x00, 0xC0, 0x80, 0x40 };
 static int Ch15ResetCycles = 0;
 static int Ch16ResetCycles = 0;
+static int PipaModing[3] = {0, 0, 0};
+static int PipaAccel[3] = {0, 0, 0};
 
 int
 ChannelInput (agc_t *State)
@@ -425,7 +430,206 @@ ChannelInput (agc_t *State)
 void
 PulseOutput(agc_t * State, int SignalId)
 {
-  // FIXME: Implement me!
+  int i;
+  switch(SignalId)
+    {
+    case OUTPUT_PIPA_DATA:
+      // The AGC expects to receive one pulse from each PIPA for each data strobe.
+      // This implementatation models the PIPA Simiulator described in the North
+      // American report "Mission Evaluation 103 (Mission D) Presimulation Report,
+      // Part II: Simulator Description". Under no acceleration, it will supply
+      // a stream of 3 plus and 3 minus counts to the AGC through the pulse input
+      // pins. When the direction of counting is changed, a check is performed on
+      // the accleration storage, and if there are any pending acceleration counts,
+      // these are played back until they read 0, at which point the 3-3 moding
+      // will be continued.
+      for (i = 0; i < 3; i++)
+        {
+          if ((PipaAccel[i] == 0) || ((PipaModing[i] != 0) && PipaModing[i] != 3))
+            {
+              // There's either no acceleration, or we are not at a direction change.
+              // Simply continue with the 3-3 moding.
+              if (PipaModing[i] >= 3)
+                PulseInput(State, INPUT_PIPAX_MINUS-2*i);
+              else
+                PulseInput(State, INPUT_PIPAX_PLUS-2*i);
+
+              PipaModing[i] = (PipaModing[i] + 1) % 6;
+            }
+          else
+            {
+              // This axis is under acceleration. Apply the appropriate pulse to
+              // diminish the stored acceleration.
+              if (PipaAccel[i] > 0)
+                {
+                  PulseInput(State, INPUT_PIPAX_PLUS-2*i);
+                  PipaAccel[i]--;
+                }
+              else
+                {
+                  PulseInput(State, INPUT_PIPAX_MINUS-2*i);
+                  PipaAccel[i]++;
+                }
+            }
+        }
+      break;
+
+    default:
+      fprintf(stderr, "Pulse %u\n", SignalId);
+      break;
+    }
+}
+
+void
+PulseInput(agc_t * State, int SignalId)
+{
+  int CountType;
+  switch(SignalId)
+    {
+    // CDU input pulses generate count requests directly, without
+    // any enabling or throttling.
+    case INPUT_CDUX_PLUS:
+      CounterRequest(State, COUNTER_CDUX, COUNTER_CELL_PLUS);
+      break;
+    case INPUT_CDUX_MINUS:
+      CounterRequest(State, COUNTER_CDUX, COUNTER_CELL_MINUS);
+      break;
+    case INPUT_CDUY_PLUS:
+      CounterRequest(State, COUNTER_CDUY, COUNTER_CELL_PLUS);
+      break;
+    case INPUT_CDUY_MINUS:
+      CounterRequest(State, COUNTER_CDUY, COUNTER_CELL_MINUS);
+      break;
+    case INPUT_CDUZ_PLUS:
+      CounterRequest(State, COUNTER_CDUZ, COUNTER_CELL_PLUS);
+      break;
+    case INPUT_CDUZ_MINUS:
+      CounterRequest(State, COUNTER_CDUZ, COUNTER_CELL_MINUS);
+      break;
+    case INPUT_OPTY_PLUS:
+      CounterRequest(State, COUNTER_OPTY, COUNTER_CELL_PLUS);
+      break;
+    case INPUT_OPTY_MINUS:
+      CounterRequest(State, COUNTER_OPTY, COUNTER_CELL_MINUS);
+      break;
+    case INPUT_OPTX_PLUS:
+      CounterRequest(State, COUNTER_OPTX, COUNTER_CELL_PLUS);
+      break;
+    case INPUT_OPTX_MINUS:
+      CounterRequest(State, COUNTER_OPTX, COUNTER_CELL_MINUS);
+      break;
+    
+    // PIPA input pulses are "pre-counted" per channel. Under no acceleration,
+    // each PIPA will generate a constant stream of 3 plus pulses followed by
+    // three minus pulses. This steady state is called "3:3 moding". The AGC
+    // internally contains pre-counting circuits that filter out this moding.
+    // Each precounter constantly counts from 0 to 3, then back to 0, with
+    // each incoming PIPA pulse. Under acceleration, the PIPAs will generate
+    // extra pulses in the direction of acceleration. Whenever a precounter
+    // attempts to count beyond 3 or below 0, it will instead allow the pulse
+    // through to generate a counter request.
+    case INPUT_PIPAX_PLUS:
+      State->PipaMissX = 0;
+      State->PipaNoXPlus = 0;
+      if (State->PipaPrecount[0] == 3)
+        CounterRequest(State, COUNTER_PIPAX, COUNTER_CELL_PLUS);
+      else
+        State->PipaPrecount[0]++;
+      break;
+    case INPUT_PIPAX_MINUS:
+      State->PipaMissX = 0;
+      State->PipaNoXMinus = 0;
+      if (State->PipaPrecount[0] == 0)
+        CounterRequest(State, COUNTER_PIPAX, COUNTER_CELL_MINUS);
+      else
+        State->PipaPrecount[0]--;
+      break;
+
+    case INPUT_PIPAY_PLUS:
+      State->PipaMissY = 0;
+      State->PipaNoYPlus = 0;
+      if (State->PipaPrecount[1] == 3)
+        CounterRequest(State, COUNTER_PIPAY, COUNTER_CELL_PLUS);
+      else
+        State->PipaPrecount[1]++;
+      break;
+    case INPUT_PIPAY_MINUS:
+      State->PipaMissY = 0;
+      State->PipaNoYMinus = 0;
+      if (State->PipaPrecount[1] == 0)
+        CounterRequest(State, COUNTER_PIPAY, COUNTER_CELL_MINUS);
+      else
+        State->PipaPrecount[1]--;
+      break;
+
+    case INPUT_PIPAZ_PLUS:
+      State->PipaMissZ = 0;
+      State->PipaNoZPlus = 0;
+      if (State->PipaPrecount[2] == 3)
+        CounterRequest(State, COUNTER_PIPAZ, COUNTER_CELL_PLUS);
+      else
+        State->PipaPrecount[2]++;
+      break;
+    case INPUT_PIPAZ_MINUS:
+      State->PipaMissZ = 0;
+      State->PipaNoZMinus = 0;
+      if (State->PipaPrecount[2] == 0)
+        CounterRequest(State, COUNTER_PIPAZ, COUNTER_CELL_MINUS);
+      else
+        State->PipaPrecount[2]--;
+      break;
+
+    // The UPLINK and CROSSLINK input pulses both generate count requests for
+    // the INLINK counter, assuming they are enabled. Only one interface is
+    // allowed to be active at a time. The active interface is selected via
+    // channel 13 bit 5, with a 1 indicating crosslink and a 0 indicating
+    // uplink. Uplink, but not crosslink, can also be totally disabled via
+    // input channel 33 bit 10. If pulses arrive on an enabled channel, they
+    // are allowed to directly generate count requests, unless too little
+    // time has elapsed since the previous pulse. The maximum allowable rate
+    // is 6400pps, with each F04A time pulse resetting the limiting flip-flop.
+    // If a pulse arrives too early, channl 33 bit 11 will be set.
+    case INPUT_UPLINK_ONE:
+    case INPUT_UPLINK_ZERO:
+      if (SignalId == INPUT_UPLINK_ONE)
+        CountType = COUNTER_CELL_ONE;
+      else
+        CountType = COUNTER_CELL_ZERO;
+
+      if ((State->InputChannel[033] & 01000) &&
+          ((State->InputChannel[013] & 020) == 0))
+        {
+          if (State->UplinkTooFast)
+            State->InputChannel[033] &= ~073777;
+          else if ((State->InputChannel[013] & 040) == 0)
+            CounterRequest(State, COUNTER_INLINK, CountType);
+        }
+      break;
+
+    case INPUT_CROSSLINK_ONE:
+    case INPUT_CROSSLINK_ZERO:
+      if (SignalId == INPUT_CROSSLINK_ONE)
+        CountType = COUNTER_CELL_ONE;
+      else
+        CountType = COUNTER_CELL_ZERO;
+
+      if (State->InputChannel[013] & 020)
+        {
+          if (State->UplinkTooFast)
+            State->InputChannel[033] &= ~073777;
+          else if ((State->InputChannel[013] & 040) == 0)
+            CounterRequest(State, COUNTER_INLINK, CountType);
+        }
+      break;
+
+    case INPUT_DOWNLINK_START:
+      break;
+    case INPUT_DOWNLINK_SYNC:
+      break;
+    case INPUT_DOWNLINK_END:
+      State->InterruptRequests[RUPT_DOWNRUPT] = 1;
+      break;
+    }
 }
 
 
@@ -542,5 +746,3 @@ ShiftToDeda (agc_t *State, int Data)
   for (i = 0, Client = Clients; i < MAX_CLIENTS; i++, Client++)
     send (Client->Socket, (const char *) Packet, 4, MSG_NOSIGNAL);
 }
-
-
