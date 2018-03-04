@@ -106,7 +106,11 @@
  *          	2017-10-03 RSB	Changed definition of a "small" display to be anything less
  *          			than 1200 (as opposed to less than 1080), due to this issue:
  *          			https://github.com/virtualagc/virtualagc/issues/1051.
- *          	2018-03-04 RSB	Added the --squish and --maximize command-line options.
+ *          	2018-03-04 RSB	Added the --radio-buttons, --normal, --squish and --maximize
+ *          			command-line options for selecting the size of the UI window,
+ *          			and removed the attempt to deduce an appropriate setting from
+ *          			the number of pixels on the display ... which didn't seem to
+ *          			work well anyway.
  *
  * This file was originally generated using the wxGlade RAD program.
  * However, it is now maintained entirely manually, and cannot be managed
@@ -127,6 +131,8 @@
 #include "../yaAGC/yaAGC.h"
 #include "../yaAGC/agc_engine.h"
 
+int noSquish = 0;
+int dropdownSquish = 1;
 int maximumSquish = 0;
 int maximizeAtStartup = 0;
 
@@ -365,18 +371,19 @@ VirtualAGC::VirtualAGC (wxWindow* parent, int id, const wxString& title,
   wxFont Font = GetFont ();
   StartingPoints = Font.GetPointSize ();
   Points = StartingPoints;
-  int x, y, height, width;
-  wxClientDisplayRect (&x, &y, &width, &height);
+  //int x, y;
+  //int height, width;
+  //wxClientDisplayRect (&x, &y, &width, &height);
   DropDown = false;
   ReallySmall = false;
-  if (height < 1200 || width < 1280)
-    {
-      Points = StartingPoints - 2;
-      ReallySmall = true;
-    }
-  else if (height < 768 || width < 1024)
+  if (maximumSquish)
     {
       Points = StartingPoints - 4;
+      ReallySmall = true;
+    }
+  else if (dropdownSquish)
+    {
+      Points = StartingPoints - 2;
       ReallySmall = true;
     }
   if (ReallySmall)
@@ -1975,7 +1982,21 @@ VirtualAgcApp::OnInit ()
 
       if (Arg.IsSameAs (wxT ("--squish")))
 	{
+	  noSquish = 0;
+	  dropdownSquish = 0;
 	  maximumSquish = 1;
+	}
+      else if (Arg.IsSameAs (wxT ("--dropdown")))
+	{
+	  noSquish = 0;
+	  dropdownSquish = 1;
+	  maximumSquish = 0;
+	}
+      else if (Arg.IsSameAs (wxT ("--radio-buttons")))
+	{
+	  noSquish = 1;
+	  dropdownSquish = 0;
+	  maximumSquish = 0;
 	}
       else if (Arg.IsSameAs (wxT ("--maximize")))
 	{
@@ -1986,11 +2007,25 @@ VirtualAgcApp::OnInit ()
 	  Help: printf ("USAGE:\n");
 	  printf ("\tVirtualAGC [OPTIONS]\n");
 	  printf ("The available options are:\n");
+	  printf ("--radio-buttons\n");
+	  printf ("\tSets main-window size appropriate to the largest\n");
+	  printf ("\tdisplay screens ... varies by target platform, but\n");
+	  printf ("\tprobably okay as long as there are at least 1024\n");
+	  printf ("\tof usable pixel rows on the desktop. The name\n");
+	  printf ("\t(radio buttons) refers to the fact that mission\n");
+	  printf ("\tselection is performed using a bit list of so-called\n");
+	  printf ("\t\"radio buttons\".\n");
+	  printf ("--dropdown\n");
+	  printf ("\tSets the main-window size suitable for a smaller\n");
+	  printf ("\tdisplay-screen size.  This is the default, in regard\n");
+	  printf ("\tto --radio-buttons vs --dropdown vs --squish.\n");
+	  printf ("\tactual sizes vary by target platform, but probably\n");
+	  printf ("\tworks at least as small as 700 usable pixel rows.\n");
 	  printf ("--squish\n");
 	  printf ("\tReduces the user interface to the smallest possible\n");
 	  printf ("\tsize ... removing all decoration, extra spacing,\n");
 	  printf ("\ttitles, and even some options.  This is known to\n");
-	  printf ("\tfit on a 800x480 (Raspberry Pi 7-inch touchscreen)\n");
+	  printf ("\tfit in 480 pixel rows (Raspberry Pi 7-inch touchscreen)\n");
 	  printf ("\tbut the actual size will vary by target platform.\n");
 	  printf ("\tNote that when run in this mode there is no title\n");
 	  printf ("\tbar on the main window, and hence no exit (X) button\n");
