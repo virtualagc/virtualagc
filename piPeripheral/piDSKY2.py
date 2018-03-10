@@ -133,6 +133,7 @@
 #				as audio playback can be put into the script.
 #		2018-01-06 MAS	Switched the TEMP light to use channel 163 instead
 #				of channel 11.
+#		2018-03-10 RSB	Added --gunmetal option.
 #
 # About the design of this program ... yes, a real Python developer would 
 # objectify it and have lots and lots of individual modules defining the objects.
@@ -221,6 +222,7 @@ cli.add_argument("--record", help="Record all incoming i/o-channel data for late
 cli.add_argument("--playback", help="Play back recorded i/o-channel data from selected filename.")
 cli.add_argument("--lamptest", help="Perform a lamp test and then exit.")
 cli.add_argument("--manual", help="Manually control the display.")
+cli.add_argument("--gunmetal", help="Use gunmetal versions of mounting posts and horizontal separator.")
 args = cli.parse_args()
 
 if args.manual:
@@ -366,8 +368,14 @@ imagePlusMinusOff = PhotoImage(file="piDSKY2-images/PlusMinusOff.gif")
 imageProgOn = PhotoImage(file="piDSKY2-images/ProgOn.gif")
 imageVerbOn = PhotoImage(file="piDSKY2-images/VerbOn.gif")
 imageNounOn = PhotoImage(file="piDSKY2-images/NounOn.gif")
-imageSeparatorOn = PhotoImage(file="piDSKY2-images/SeparatorOn.gif")
-imageDot = PhotoImage(file="piDSKY2-images/Dot.gif")
+if args.gunmetal:
+	imageSeparatorOn = PhotoImage(file="piDSKY2-images/SeparatorOn.gif")
+	imageSeparatorOff = PhotoImage(file="piDSKY2-images/SeparatorOn.gif")
+	imageDot = PhotoImage(file="piDSKY2-images/Dot.gif")
+else:
+	imageSeparatorOn = PhotoImage(file="piDSKY2-images/SeparatorOn-gunmetal.gif")
+	imageSeparatorOff = PhotoImage(file="piDSKY2-images/SeparatorOff-gunmetal.gif")
+	imageDot = PhotoImage(file="piDSKY2-images/Dot-gunmetal.gif")
 # Initial placement of all graphical objects on LCD panel.
 widgetStates = {}
 widgetLabels = {}
@@ -407,8 +415,8 @@ displayGraphic(colPN, 0, imageProgOn)
 displayGraphic(0, 113, imageVerbOn)
 displayGraphic(colPN, 113, imageNounOn)
 displayGraphic(0, 212, imageSeparatorOn)
-displayGraphic(0, 302, imageSeparatorOn)
-displayGraphic(0, 392, imageSeparatorOn)
+displayGraphic(0, 302, imageSeparatorOff)
+displayGraphic(0, 392, imageSeparatorOff)
 
 ###################################################################################
 # Stuff related to control of the lamp board via PIGPIO and SPI on the Pi's GPIO.
