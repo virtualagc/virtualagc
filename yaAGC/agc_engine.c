@@ -427,6 +427,9 @@
  *		                The "both inputs" case for each PIPA axis is not
  *		                checked, under the assumption that the simulated
  *		                PIPA would not be implemented to ever do this.
+ *		03/12/18 MAS	Switched the radar interface to generate sync
+ *		                pulse outputs, which trigger shifting in of
+ *		                data via PulseInput.
  *
  *
  * The technical documentation for the Apollo Guidance & Navigation (G&N) system,
@@ -1720,13 +1723,10 @@ TimingSignalF05A(agc_t * State)
     // Generate radar count requests if a valid radar is selected
     if (State->RadarSync)
     {
-        if (State->RadarData & 040000)
-          PulseType = COUNTER_CELL_ONE;
-        else
-          PulseType = COUNTER_CELL_ZERO;
-
-        CounterRequest(State, COUNTER_RNRAD, PulseType);
-        State->RadarData <<= 1;
+        if (State->InputChannel[013] & 04)
+            PulseOutput(State, OUTPUT_LR_SYNC);
+        else if ((State->InputChannel[013] & 03) != 0)
+            PulseOutput(State, OUTPUT_RR_SYNC);
     }
 
     // Generate gyro drive pulses

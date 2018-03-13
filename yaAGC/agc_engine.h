@@ -139,6 +139,8 @@
 				of input signal definitions for use with the new
 				PulseInput(), which is intended to complement the
 				PulseOutput() function.
+		03/12/18 MAS	Corrected some pin mappings and deleted the
+				placeholder RadarData from State.
  
   For more insight, I'd highly recommend looking at the documents
   http://hrst.mit.edu/hrs/apollo/public/archive/1689.pdf and
@@ -377,14 +379,16 @@ extern long random (void);
 #define OUTPUT_OPTYCMD_PLUS  336
 #define OUTPUT_OPTXCMD_MINUS 337
 #define OUTPUT_OPTXCMD_PLUS  338
+#define OUTPUT_LR_SYNC       340
+#define OUTPUT_RR_SYNC       346
 #define OUTPUT_EMSD_MINUS    349
 #define OUTPUT_EMSD_PLUS     350
 #define OUTPUT_THRUST_MINUS  353
 #define OUTPUT_THRUST_PLUS   354
-#define OUTPUT_ALTRATE_ZERO  455
-#define OUTPUT_ALTRATE_ONE   456
-#define OUTPUT_ALT_ZERO      457
-#define OUTPUT_ALT_ONE       458
+#define OUTPUT_ALTRATE_ZERO  355
+#define OUTPUT_ALTRATE_ONE   356
+#define OUTPUT_ALT_ZERO      357
+#define OUTPUT_ALT_ONE       358
 #define OUTPUT_OUTLINK_ONE   517
 #define OUTPUT_OUTLINK_ZERO  518
 
@@ -395,8 +399,8 @@ extern long random (void);
 #define INPUT_CROSSLINK_ZERO 123
 #define INPUT_LR_ONE         124
 #define INPUT_LR_ZERO        125
-#define INPUT_LR_ONE         126
-#define INPUT_LR_ZERO        127
+#define INPUT_RR_ONE         126
+#define INPUT_RR_ZERO        127
 #define INPUT_UPLINK_ONE     128
 #define INPUT_UPLINK_ZERO    129
 #define INPUT_DOWNLINK_SYNC  130
@@ -625,7 +629,6 @@ typedef struct
   int RHCVoltagemV[3];
   int RHCCounts[3];
   uint8_t RadarGateCounter;
-  uint16_t RadarData;
   uint8_t PipaPrecount[3];
   // The following pointer is present for whatever use the Orbiter
   // integration squad wants.  The Virtual AGC code proper doesn't use it

@@ -85,6 +85,9 @@
 		02/25/18 MAS	Added a PulseInput() function which handles most
 				input pulses to the AGC, with a few exceptions
 				which will be implemented shortly.
+		03/12/18 MAS	Added basic implementation of the LR and RR
+				interfaces, sans actually getting data from
+				the socket.
 */
 
 #include <errno.h>
@@ -165,6 +168,8 @@ static int Ch15ResetCycles = 0;
 static int Ch16ResetCycles = 0;
 static int PipaModing[3] = {0, 0, 0};
 static int PipaAccel[3] = {0, 0, 0};
+static unsigned short LRData = 0;
+static unsigned short RRData = 0;
 
 int
 ChannelInput (agc_t *State)
@@ -474,6 +479,22 @@ PulseOutput(agc_t * State, int SignalId)
         }
       break;
 
+    case OUTPUT_LR_SYNC:
+      if (LRData & 040000)
+        PulseInput(State, INPUT_LR_ONE);
+      else
+        PulseInput(State, INPUT_LR_ZERO);
+      LRData <<= 1;
+      break;
+
+    case OUTPUT_RR_SYNC:
+      if (RRData & 040000)
+        PulseInput(State, INPUT_RR_ONE);
+      else
+        PulseInput(State, INPUT_RR_ZERO);
+      RRData <<= 1;
+      break;
+
     default:
       fprintf(stderr, "Pulse %u\n", SignalId);
       break;
@@ -620,6 +641,32 @@ PulseInput(agc_t * State, int SignalId)
           else if ((State->InputChannel[013] & 040) == 0)
             CounterRequest(State, COUNTER_INLINK, CountType);
         }
+      break;
+
+    // Radar input pulses are allowed as long as channel 13 bit 4 is
+    // set. Landing Radar pulses also require chanel 13 bit 3 to be set,
+    // while Rendezvous Radar pulses require at least one of channel 13
+    // bits 1 and 2 to be set.
+    case INPUT_LR_ONE:
+    case INPUT_LR_ZERO:
+      if (SignalId == INPUT_LR_ONE)
+        CountType = COUNTER_CELL_ONE;
+      else
+        CountType = COUNTER_CELL_ZERO;
+
+      if ((State->InputChannel[013] & 014) == 014)
+        CounterRequest(State, COUNTER_RNRAD, CountType);
+      break;
+
+    case INPUT_RR_ONE:
+    case INPUT_RR_ZERO:
+      if (SignalId == INPUT_RR_ONE)
+        CountType = COUNTER_CELL_ONE;
+      else
+        CountType = COUNTER_CELL_ZERO;
+
+      if ((State->InputChannel[013] & 010) && (State->InputChannel[013] & 03))
+        CounterRequest(State, COUNTER_RNRAD, CountType);
       break;
 
     case INPUT_DOWNLINK_START:
