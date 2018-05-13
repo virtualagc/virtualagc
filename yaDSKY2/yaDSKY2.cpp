@@ -1444,6 +1444,14 @@ yaDskyApp::OnInit ()
   MainWindow->Timer = new TimerClass ();
   MainWindow->Timer->Start (PULSE_INTERVAL);
 
+  // With wxWidgets 3.0, the --half-size option inevitably creates a main
+  // window thats too short (vertically), and I haven't been able to figure
+  // out how to coax it into calculating the window size properly.
+  // (Works fine with wxWidgets 2.8 or with the full-size DSKY.)  At any
+  // rate, the following is a lame attempt to prevent that from happening,
+  // though in theory it could force windows that are too big on some
+  // platforms, alas!
+  MainWindow->SetMinSize (wxSize(330, 392));
   MainWindow->Show ();
   return true;
 }
