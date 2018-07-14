@@ -9,6 +9,15 @@
   s.parentNode.insertBefore(gcse, s);
 })();
 
+/* Get the logo URL. */
+var date = new Date();
+var dayOfMonth = date.getDate();
+var logoIndex = dayOfMonth % 3;
+var logo;
+if (logoIndex == 1) logo = "ApolloPatchD.png";
+else if (logoIndex == 2) logo = "ApolloPatchC.png";
+else logo = "ApolloPatchA.png";
+
 /* Template for the page's header.  You just have to substitute
    for @TITLE@ and @SUBTITLE@ and then print the result at the
    top of the <body>. */
@@ -132,7 +141,7 @@ headerTemplate = '<table summary="" nosave="" width="100%" border="1" cellpaddin
   + '<div align="left"> </div>' 
   + '</td>' 
   + '<td nosave="" align="center" height="200" valign="middle" width="200">' 
-  + '<center><img src="ApolloPatch2.png" alt="" align="middle" height="200" hspace="0" vspace="0" width="200" border="0"> </center>' 
+  + '<center><img src="' + logo + '" alt="" align="middle" height="200" hspace="0" vspace="0" width="200" border="0"> </center>' 
   + '</td>' 
   + '</tr>' 
   + '<tr>' 
