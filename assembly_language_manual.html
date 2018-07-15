@@ -43,6 +43,7 @@
     </ul>
     <hr style="width: 100%; height: 2px;">
     <h2><a name="Blocks_for_All_Occasions" id="Blocks_for_All_Occasions"></a>Blocks
+
       for All Occasions</h2>
     <p>The design of the AGC went through several stages, which for the
       sake of this discussion we'll call "blocks".&nbsp; However, the
@@ -84,8 +85,10 @@
     importance, is:<br>
     <ol>
       <li><a href="NARA-SW/E-2052.pdf"><span style="font-style: italic;">E-2052:&nbsp;
+
             AGC4 Basic Training</span> <span style="font-style:
             italic;">Manual</span>, <span style="font-style: italic;">Volume
+
             I</span></a>, by Bernard Savage and Alice Drake, January
         1967.&nbsp;</li>
       <li><a href="hrst/archive/1689.pdf"><span style="font-style:
@@ -100,12 +103,15 @@
             Electrical Schematics and ICDs</a></i>, 1966<br>
       </li>
       <li><a href="NARA-SW/E-1077.pdf" style="font-style: italic;">E-1077:&nbsp;
+
           Preliminary MOD 3C Programmers Manual</a>, by R. Alonso, J. H.
         Laning, Jr., and H. Blair-Smith, November 1961.</li>
       <li><a href="hrst/archive/1706.pdf" style="font-style: italic;">Keyboard
+
           and Display Program and Operation</a>, by Alan I. Greene and
         Robert J. Filene, June 1, 1967.</li>
       <li><a href="hrst/archive/1705.pdf" style="font-style: italic;">Block
+
           II AGC Self-Check and Show-Banksum</a>, by Edwin D. Smally,
         December 1966.</li>
       <li><a href="ScansForConversion/Luminary131/"> Luminary 131 (1C)
@@ -361,6 +367,7 @@
           normal flow of card numbers, the one after such a spacing is
           generally 1 more than that of the card before</small><small>—no
 
+
           missing numbers due to spacing. But having said that, I have
           to explain why the card number following a remark over 72
           columns wide is generally 2 more than the one you can see on
@@ -505,6 +512,7 @@
     <h3>Vectors</h3>
     Another Interpreter convention (rather than a format recognized by
     the CPU)&nbsp; is that the <span style="font-style: italic;">x,y,z</span>&nbsp;
+
     components of a vector can be represented by three consecutive DP
     values.<br>
     <h3>Unsigned-Integer (2's-Complement) Format</h3>
@@ -582,6 +590,7 @@
     counter/timer registers.&nbsp; This is not so.&nbsp; Incrementing or
     decrementing the counter/timer registers is (and was) actually
     implemented by the use of "<a href="#UnprogrammedSequences">unprogrammed
+
       sequences</a>", which are similar to CPU instructions, but which
     cannot be directly used by the programmer.&nbsp; The unprogrammed
     sequences have names like <span style="font-family: monospace;">PINC</span>,
@@ -677,6 +686,7 @@
             In most cases, when data is transferred out of the
             accumulator to a true 15-bit register, it is <span
               style="font-style: italic;">overflow-corrected</span>.&nbsp;
+
 
             Overflow-correction implies:<br>
             <ol>
@@ -1144,6 +1154,7 @@
           <td colspan="1" rowspan="2" style="vertical-align: top;">
             TIME1 is a 15-bit 1's-complement counter which is
             incremented every 10 ms. TIME1 by itself overflows every 2<sup>14</sup>*10
+
             ms., or 163.84 seconds.&nbsp; Upon overflow of TIME1, the
             14-bit counter TIME2 is automatically incremented.&nbsp;
             Thus, the two counters together form a 28-bit value which
@@ -1242,6 +1253,7 @@
             insure that the interrupts occur at a desired rate.&nbsp;
             For example, to make an interrupt occur once per second, at
             every interrupt the counter would be reloaded with 2<sup>14</sup>-100=16284
+
             (decimal).&nbsp; Because 10 ms. is usually much longer than
             the amount of time needed to vector to the interrupt service
             routine, it is unnecessary in such calculations to account
@@ -1260,6 +1272,7 @@
             1's-complement counter which is updated every 1/1600 second
             by means of a <span style="font-family: monospace;">DINC</span>
             <a href="#UnprogrammedSequences">unprogrammed sequence</a>.&nbsp;
+
 
             There is a CPU flag which can mask counting of TIME6 on or
             off.&nbsp;&nbsp; By writing 1 to bit 15 of i/o channel 13
@@ -1375,6 +1388,7 @@
             sequence (<a
               href="assembly_language_manual.html#UnprogrammedSequences">see
 
+
               below</a>) in order to increase the angles by one unit,
             and are processed with the <span style="font-family:
               monospace;">MCDU</span> unprogrammed sequence to decrease
@@ -1481,6 +1495,7 @@
             reliablity, <span style="font-weight: bold;">yaACA</span>
             reports the count to <span style="font-weight: bold;">yaAGC</span>
             via <a href="developer.html#Fictitious_IO_Channels">fictitious
+
               input channels</a>, 0170 (roll) or 0167 (yaw) or 0166
             (pitch).&nbsp; The value in the input channel is a
             1's-complement value in the range -57 to +57, and is placed
@@ -1689,6 +1704,7 @@
     necessarily to thoroughly understand the memory map before code can
     be reasonably written or even understood.&nbsp; Mirko Mattioli
     (thanks Mirko!) has sent us a <a href="MirkoMattioliMemoryMap.pdf">diagram
+
       of the structure of the memory map</a>, and it may prove helpful
     to have his diagram at hand whilst reading the following
     description.<br>
@@ -1816,6 +1832,7 @@
     </ul>
     <hr style="width: 100%; height: 2px;">
     <h2><a name="Interrupt_Processing" id="Interrupt_Processing"></a>Interrupt
+
       Processing</h2>
     The AGC has 11 interrupt types.&nbsp; Interrupts are triggered by
     external events, but usually not directly so.&nbsp; Various external
@@ -1926,6 +1943,7 @@
             vertical-align: middle;">KEYRUPT2</td>
           <td colspan="1" rowspan="1" style="text-align: center;
             vertical-align: middle;"><span style="color: rgb(0, 0, 0);">Keystroke
+
               received from secondary DSKY.</span><br>
           </td>
           <td colspan="1" rowspan="1" style="vertical-align: middle;
@@ -2125,6 +2143,7 @@
       <li>Instructions which operate only i/o channels can use and even
         more truncated 9-bit address space, and are encoded as <span
           style="font-family: monospace;">CCC PPP AAA AAA AAA</span>.&nbsp;
+
         The field <span style="font-family: monospace;">PPP</span> is
         referred to as the "peripheral code" or "PC".</li>
       <li>Finally, a fourth bit was made available beyond the 15 within
@@ -2139,6 +2158,7 @@
         set of "basic instructions", but instead is taken from a
         completely different set of instructions called <span
           style="font-style: italic; font-weight: bold;">extracodes</span>.&nbsp;
+
 
         In effect, "basic instructions" use one word of memory, while
         "extracodes" use two words of memory.</li>
@@ -2167,6 +2187,7 @@
     <br>
     <hr style="width: 100%; height: 2px;">
     <h2><a name="AGC4_Instruction_Set" id="AGC4_Instruction_Set"></a>AGC4
+
       Instruction Set</h2>
     <h3>AD<br>
     </h3>
@@ -2255,6 +2276,7 @@
             (+1)+(-1) is -0.<br>
             <br>
             For the special case "<span style="font-family: monospace;">AD
+
               A</span>", refer instead to the <span style="font-family:
               monospace;">DOUBLE</span> instruction.<br>
           </td>
@@ -2336,6 +2358,7 @@
             accumulator and <span style="font-family: monospace;">K</span>
             are added together, and the result is stored both in the
             accumulator and in <span style="font-family: monospace;">K</span>.&nbsp;
+
             The accumulator is neither overflow-corrected prior to the
             addition nor after it.&nbsp; However, the sum is
             overflow-corrected prior to being saved at <span
@@ -2763,6 +2786,7 @@
               bits when placed in A.<br>
             </span><br>
             For the special case "<span style="font-family: monospace;">CA
+
               A</span>", refer instead to the <span style="font-family:
               monospace;">NOOP</span> instruction.<br>
           </td>
@@ -2878,6 +2902,7 @@
                   monospace;">CCS</span>.&nbsp; If equal to -0,
                 execution continues at the 4<sup>th</sup> instruction
                 after the <span style="font-family: monospace;">CCS</span>.&nbsp;&nbsp;
+
 
                 <span style="color: rgb(0, 0, 0);">(If <span
                     style="font-family: monospace;">K</span> is 16 bits,
@@ -3081,6 +3106,7 @@
               sign-extended to 16 bits when placed in A.<br>
             </span><br>
             For the special case "<span style="font-family: monospace;">CS
+
               A</span>", refer instead to the <span style="font-family:
               monospace;">COM</span> instruction.<br>
           </td>
@@ -3162,6 +3188,7 @@
           </td>
           <td style="vertical-align: top;">A variant on this instruction
             is the case "<span style="font-family: monospace;">DAS A</span>"&nbsp;
+
             Refer to the <span style="font-family: monospace;">DDOUBL</span>
             instruction for an explanation of this case.<br>
             <br>
@@ -3177,6 +3204,7 @@
                 style="font-family: monospace; color: rgb(0, 0, 0);">K+1</span><span
                 style="color: rgb(0, 0, 0);">.&nbsp;</span> (</span><a
               style="color: rgb(0, 153, 0);" href="#Data_Representation">See
+
               above</a><span style="color: rgb(0, 153, 0);">.)<br>
               <br>
               <span style="color: rgb(0, 0, 0);">16-bit values (the A,
@@ -3300,6 +3328,7 @@
                 0, 0);"><br>
                 <br>
                 The instruction "<span style="font-family: monospace;">DCA
+
 
                   L</span>" is an unusual case.&nbsp;&nbsp; Since the
                 less-significant word is processed first and then the
@@ -3486,11 +3515,13 @@
             SR, CYL, or EDOP, then they are re-edited.<br>
             <br>
             For the special case "<span style="font-family: monospace;">DCS
+
               A</span>", refer to the <span style="font-family:
               monospace;">DCOM</span> instruction.<span style="color:
               rgb(0, 153, 0);"><span style="color: rgb(0, 0, 0);"><br>
                 <br>
                 The instruction "<span style="font-family: monospace;">DCS
+
 
                   L</span>" is an unusual case.&nbsp;&nbsp; Since the
                 less-significant word is processed first and then the
@@ -4181,21 +4212,26 @@
                   </td>
                   <td style="vertical-align: top; text-align: center;">+17777
 
+
                     (17777)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">-37777
+
 
                     (40000)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">+20000
 
+
                     (20000)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">+37774
 
+
                     (37774)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">+00001
+
 
                     (00001)<br>
                   </td>
@@ -4212,21 +4248,26 @@
                     +0.0000000037</td>
                   <td style="vertical-align: top; text-align: center;">+17777
 
+
                     (17777)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">-37777
+
 
                     (40000)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">-20000
 
+
                     (57777)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">-37774
 
+
                     (40003)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">+00001
+
 
                     (00001)<br>
                   </td>
@@ -4243,21 +4284,26 @@
                     -0.0000000037</td>
                   <td style="vertical-align: top; text-align: center;">-17777
 
+
                     (60000)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">+37777
+
 
                     (37777)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">+20000
 
+
                     (20000)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">-37774
 
+
                     (40003)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">-00001
+
 
                     (77776)<br>
                   </td>
@@ -4274,21 +4320,26 @@
                     -0.0000000037</td>
                   <td style="vertical-align: top; text-align: center;">-17777
 
+
                     (60000)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">+37777
+
 
                     (37777)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">-20000
 
+
                     (57777)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">+37774
 
+
                     (37774)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">-00001
+
 
                     (77776)<br>
                   </td>
@@ -4308,21 +4359,26 @@
                   </td>
                   <td style="vertical-align: top; text-align: center;">+17777
 
+
                     (17777)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">+37777
+
 
                     (37777)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">+20000
 
+
                     (20000)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">+37777
 
+
                     (37777)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">+17777
+
 
                     (17777)<br>
                   </td>
@@ -4340,21 +4396,26 @@
                   </td>
                   <td style="vertical-align: top; text-align: center;">+37776
 
+
                     (37776)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">+00000
+
 
                     (00000)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">+37776
 
+
                     (37776)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">+37777
 
+
                     (37777)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">+37776
+
 
                     (37776)<br>
                   </td>
@@ -4373,22 +4434,27 @@
                   </td>
                   <td style="vertical-align: top; text-align: center;">+00000
 
+
                     (00000)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">-00000
 
+
                     (77777)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">+00000
+
 
                     (00000)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">-37777
 
+
                     (40000)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">-00000
 
+
                     (77777)<br>
                   </td>
                 </tr>
@@ -4406,21 +4472,26 @@
                   </td>
                   <td style="vertical-align: top; text-align: center;">+00000
 
+
                     (00000)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">-00000
 
+
                     (77777)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">-00000
+
 
                     (77777)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">+37777
 
+
                     (37777)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">-00000
+
 
                     (77777)<br>
                   </td>
@@ -4439,21 +4510,26 @@
                   </td>
                   <td style="vertical-align: top; text-align: center;">-00000
 
+
                     (77777)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">+00000
 
+
                     (00000)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">+00000
+
 
                     (00000)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">+37777
 
+
                     (37777)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">+00000
+
 
                     (00000)<br>
                   </td>
@@ -4472,21 +4548,26 @@
                   </td>
                   <td style="vertical-align: top; text-align: center;">-00000
 
+
                     (77777)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">+00000
+
 
                     (00000)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">-00000
 
+
                     (77777)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">-37777
 
+
                     (40000)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">+00000
+
 
                     (00000)<br>
                   </td>
@@ -4590,6 +4671,7 @@
             when placed in A.<br>
             <br>
             In the case of the "<span style="font-family: monospace;">DXCH
+
               L</span>" instruction (in which the source and destination
             ranges overlap, Q&nbsp; (full 16 bits, including overflow)
             goes into A, A&nbsp; goes into L, and L goes into Q.<br>
@@ -5061,6 +5143,7 @@
                 monospace;">
               <span style="font-family: monospace;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
+
                 TC&nbsp; &nbsp;&nbsp;&nbsp; JMPTAB<br>
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ...<br>
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
@@ -5143,6 +5226,7 @@
             When the basic form of <span style="font-family:
               monospace;">INDEX</span> is used (i.e., without a
             preceding <span style="font-family: monospace;">EXTEND</span>),
+
             the special case of <span style="font-family: monospace;">K</span>
             being address&nbsp; 017 octal is not an <span
               style="font-family: monospace;">INDEX</span> instruction,
@@ -5550,11 +5634,13 @@
               monospace;">MP</span> instruction with A and <span
               style="font-family: monospace;">K</span> each containing
             the octal value 2 (which would really be the SP value 2×2<sup>-14</sup>),
+
             then you would indeed find a result of 4, but it would be in
             L register because it would be part of the DP value 4×2<sup>-28</sup>
             rather than just the integer 4.<br>
             <br>
             For the special case "<span style="font-family: monospace;">MP
+
               A</span>", refer instead to the <span style="font-family:
               monospace;">SQUARE</span> instruction.<br>
           </td>
@@ -6325,6 +6411,7 @@
                 monospace;">
               <span style="font-family: monospace; font-style: italic;">Some
 
+
                 instruction</span><br>
             </div>
             would not index the final instruction as shown, because "<span
@@ -6899,6 +6986,7 @@
             the subroutine-return information (from/to the Q register).<br>
             <br>
             <span style="text-decoration: underline;">Indirect jumps</span>:&nbsp;
+
             The <span style="font-family: monospace;">TC</span>
             instruction may also be used to accomplish an indirect jump
             (i.e., a jump to a computed rather than a hard-coded
@@ -6929,6 +7017,7 @@
             that started the chain of events.&nbsp; Thus, the Q register
             will contain a value of 1.&nbsp; Incidentally, it should
             also be obvious that <span style="font-family: monospace;">TC
+
               A</span> will require 2 MCT of CPU time instead of the 1
             MCT quoted earlier, since it actually results in <span
               style="font-style: italic;">two</span> <span
@@ -6942,6 +7031,7 @@
             instruction for full details.<br>
             <br>
             <span style="text-decoration: underline;">Indirect calls</span>:&nbsp;
+
             For an indirect call, it is necessary to combine an <span
               style="font-family: monospace;">INDEX</span> instruction
             with a <span style="font-family: monospace;">TC</span>
@@ -7132,6 +7222,7 @@
             instruction instead for that.<br>
             <br>
             <span style="text-decoration: underline;">Indirect jumps</span>:&nbsp;
+
             For an indirect jump, it is necessary to combine an <span
               style="font-family: monospace;">INDEX</span> instruction
             with a <span style="font-family: monospace;">TCF</span>
@@ -8039,6 +8130,7 @@
         style="font-family: monospace;">
       <span style="font-family: monospace;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
+
         = 4</span><br style="font-family: monospace;">
       <span style="font-family: monospace;">FIFOHAF = 8</span><br>
     </div>
@@ -8178,32 +8270,42 @@
     <div style="margin-left: 40px;"> <span style="font-family:
         monospace;">MYJUMP&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
+
         2FCADR&nbsp;&nbsp; MYLABEL<br>
         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
-        .<br>
-        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
         .<br>
         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
+
         .<br>
         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+
+        .<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
 
         EXTEND<br>
         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
+
         DCA&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; MYJUMP<br>
         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
 
         DTCF<br>
         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
-        .<br>
-        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
         .<br>
         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+
+        .<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
 
         .<br>
         MYLABEL<br>
@@ -8343,7 +8445,7 @@
       style="font-style: italic;">unused</span> location of fixed-memory
     bank 5.&nbsp; Only fixed-memory banks (and not erasable-memory
     banks) are supported in this way. The bank numbers range from 0 to
-    43 (octal) . (Bank numbers 0--37 octal are in "super-bank 0", while
+    43 (octal) . (Bank numbers 0-37 octal are in "super-bank 0", while
     bank numbers 40-43 octal&nbsp; are in "super-bank 1".)<br>
     <br>
     If <span style="font-family: monospace;">BANK</span> is used
@@ -8556,6 +8658,7 @@
         italic;">m</span></span>" and has no effect on the assembler's
     location counter. The net effect is to set the label of the line (if
     any) to <span style="font-style: italic; font-family: monospace;">m</span>.&nbsp;
+
     The <span style="font-style: italic; font-family: monospace;">n</span>
     operand is discarded, and is present principally for documentation
     purposes.<br>
@@ -8620,16 +8723,20 @@
       <p><tt>000005,000005:
           ???????&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
+
           A&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
 
           EQUALS&nbsp;&nbsp; 0</tt><tt><br>
         </tt> <tt>000006,000006:</tt> <tt><br>
         </tt> <tt>000007,000007:&nbsp;&nbsp;&nbsp;
           4000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
+
           BLOCK&nbsp;&nbsp;&nbsp; 2</tt><tt><br>
         </tt> <tt>000008,000008:&nbsp;&nbsp;&nbsp;
           4000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
 
           SECSIZ&nbsp;&nbsp; 25</tt><tt><br>
         </tt> <tt>000009,000009:&nbsp;&nbsp;&nbsp;
@@ -8637,19 +8744,23 @@
           60000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
           FIRST&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
+
           AD&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; A</tt><tt><br>
         </tt> <tt>000010,000010:&nbsp;&nbsp;&nbsp;
           4001&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
           60000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
 
           AD&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; A</tt><tt><br>
         </tt> <tt>000011,000011:</tt> <tt><br>
         </tt> <tt>000012,000012:&nbsp;&nbsp;&nbsp;
           6000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
+
           BLOCK&nbsp;&nbsp;&nbsp; 3</tt><tt><br>
         </tt> <tt>000013,000013:&nbsp;&nbsp;&nbsp;
           6000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
 
           SECSIZ&nbsp;&nbsp; 64</tt><tt><br>
         </tt> <tt>000014,000014:&nbsp;&nbsp;&nbsp;
@@ -8657,13 +8768,16 @@
           56000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
           SECOND&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
+
           XCH&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; A</tt><tt><br>
         </tt> <tt>000015,000015:&nbsp;&nbsp;&nbsp;
           6001&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
+
           BANK</tt><tt><br>
         </tt> <tt>000016,000016:&nbsp;&nbsp;&nbsp;
           6064&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
 
           SECSIZ&nbsp;&nbsp; 6</tt><tt><br>
         </tt> <tt>000017,000017:&nbsp;&nbsp;&nbsp;
@@ -8671,18 +8785,22 @@
           60000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
           SECONDB&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
+
           AD&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; A</tt><tt><br>
         </tt> <tt>000018,000018:</tt> <tt><br>
         </tt> <tt>000019,000019:&nbsp;&nbsp;&nbsp;
           4000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
+
           SETLOC&nbsp;&nbsp; FIRST</tt><tt><br>
         </tt> <tt>000020,000020:&nbsp;&nbsp;&nbsp;
           4000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
+
           BANK</tt><tt><br>
         </tt> <tt>000021,000021:&nbsp;&nbsp;&nbsp;
           4025&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
 
           SECSIZ&nbsp;&nbsp; 12</tt><tt><br>
         </tt> <tt>000022,000022:&nbsp;&nbsp;&nbsp;
@@ -8690,14 +8808,17 @@
           60000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
           THIRD&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
+
           AD&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; A</tt><tt><br>
         </tt> <tt>000023,000023:</tt> <tt><br>
         </tt> <tt>000024,000024:&nbsp;&nbsp;&nbsp;
           6072&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
+
           BLOCK&nbsp;&nbsp;&nbsp; 3</tt><tt><br>
         </tt> <tt>000025,000025:&nbsp;&nbsp;&nbsp;
           6072&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
 
           SECSIZ&nbsp;&nbsp; 14</tt><tt><br>
         </tt> <tt>000026,000026:&nbsp;&nbsp;&nbsp;
@@ -8705,14 +8826,17 @@
           60000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
           FOURTH&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
+
           AD&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; A</tt><tt><br>
         </tt> <tt>000027,000027:</tt> <tt><br>
         </tt> <tt>000028,000028:&nbsp;&nbsp;&nbsp;
           6106&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
+
           BLOCK&nbsp;&nbsp;&nbsp; 3</tt><tt><br>
         </tt> <tt>000029,000029:&nbsp;&nbsp;&nbsp;
           6106&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
 
           SECSIZ&nbsp;&nbsp; 31</tt><tt><br>
         </tt> <tt>000030,000030:&nbsp;&nbsp;&nbsp;
@@ -8720,14 +8844,17 @@
           60000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
           FIFTH&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
+
           AD&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; A</tt><tt><br>
         </tt> <tt>000031,000031:</tt> <tt><br>
         </tt> <tt>000032,000032:
           02,2037&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
+
           BANK&nbsp;&nbsp;&nbsp;&nbsp; 2</tt><tt><br>
         </tt> <tt>000033,000033:
           02,2037&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
 
           SECSIZ&nbsp;&nbsp; 17</tt><tt><br>
         </tt> <tt>000034,000034:
@@ -8735,19 +8862,23 @@
           60000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
           SIXTH&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
+
           AD&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; A</tt><tt><br>
         </tt> <tt>000035,000035:
           02,2040&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
+
           BANK</tt><tt><br>
         </tt> <tt>000036,000036:
           02,2056&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
 
           SECSIZ&nbsp;&nbsp; 18</tt><tt><br>
         </tt> <tt>000037,000037:
           02,2056&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
           60000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
           SEVENTH&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
 
           AD&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; A</tt><br>
         <br>
@@ -8783,6 +8914,7 @@
     bank in fixed-memory.<br>
     <h3>SUBRO</h3>
     This is simply discarded by <span style="font-weight: bold;">yaYUL</span>.&nbsp;
+
     Its original purpose (in <span style="font-weight: bold;">YUL</span>)
     was seemingly to help maintain a list of subroutines for later
     printout, for documentation purposes.&nbsp; <span
@@ -8796,9 +8928,6 @@
     <hr style="width: 100%; height: 2px;">
     <h2><a name="Interpreter_Instruction_Set"
         id="Interpreter_Instruction_Set"></a>Interpreter Instruction Set</h2>
-    (Sorry, but this section is very incomplete right now.&nbsp; So far
-    I've only recorded the information about binary formats I worked out
-    while writing the yaYUL assembler.)<br>
     <h3>Source Code and Encoding<br>
     </h3>
     Interpreter source code is written in a very odd way, reflecting the
@@ -8888,6 +9017,7 @@
     actually suffices for all cases.<br>
     <br>
     <span style="text-decoration: underline;">Operands in fixed memory.</span>&nbsp;&nbsp;
+
     These encode to 15-bit values, and can be used to represent any
     address in fixed-memory banks 00-37.&nbsp; (Superbanks 40-43 are not
     accesible to the interpreter.)&nbsp; I'll designate this rule by <span
@@ -8896,6 +9026,7 @@
       <li>Fixed-fixed:&nbsp; <span style="font-family: monospace;">f(X)
           = X</span></li>
       <li>Common-fixed:&nbsp; <span style="font-family: monospace;">f(X)
+
           = 02000 * <span style="font-style: italic;">FixedBankNumOfX</span>
           + (X - 02000)</span><br>
       </li>
@@ -8927,10 +9058,15 @@
       style="font-family: monospace;">NNNN</span> fields are listed in
     the opcode table below.<br>
     <br>
-    In the table below, items in brackets are optional.&nbsp; For
-    example, <span style="font-family: monospace;">[Y]</span> might
-    indicate an optional operand (called "<span style="font-family:
-      monospace;">Y</span>").<br>
+    As I mentioned above, the <span style="font-family: monospace;">STCALL</span>,
+    <span style="font-family: monospace;">STODL</span>, <span
+      style="font-family: monospace;">STORE</span>, and <span
+      style="font-family: monospace;">STOVL</span> instructions are
+    special cases in some sense, and the table below summarizes what I
+    was able to learn about them.&nbsp; In the table, items in brackets
+    are optional.&nbsp; For example, <span style="font-family:
+      monospace;">[Y]</span> might indicate an optional operand (called
+    "<span style="font-family: monospace;">Y</span>").<br>
     <h3>STCALL</h3>
     <table summary="" style="text-align: left; width: 100%;"
       cellspacing="2" cellpadding="2" border="0">
@@ -9138,14 +9274,1148 @@
       </tbody>
     </table>
     <br>
-    <h3><br>
+    <h3><a name="MarkSchulman"></a>Mark Schulman's Gloss<br>
     </h3>
-    <br>
+    <p>Actually — confession time! — the truth is that I (Ron Burkey)
+      have spent very little time figuring out what the various
+      interpreter instructions do, so I can't really say much more about
+      them than I've said above.&nbsp; Fortunately, Mark Schulman
+      (thanks, Mark!) has stepped in to fill in the gaps and provide a
+      pretty comprehensive explanation of how it all works.&nbsp; This
+      entire section, which I've turned <font color="#663300">brown</font>
+      to make it stand out, has been written by Mark with only minimal
+      editing (for format) by me.&nbsp; I'm sure there's some overlap
+      with what I said about the interpreter above, but I've made no
+      attempt to edit Mark's content.&nbsp; At any rate, I'll turn it
+      over to Mark here:<br>
+    </p>
+    <p><font color="#663300">Because the AGC used a 3-bit opcode, the
+        number of instructions was limited. The hardware designers used
+        various tricks (such as the EXTEND instruction) to increase the
+        number of opcodes </font><font color="#663300">— there were 40
+      </font><font color="#663300">— but the AGC's instruction set was
+        still limited. Additionally, important operations (such as trig
+        functions and vector manipulation) are not supported by the
+        hardware, which meant that performing navigation calculations
+        required an enormous number of subroutine calls.</font></p>
+    <font color="#663300">
+    </font>
+    <p><font color="#663300">To solve these problems, as well as get
+        around the general unwieldiness of writing large programs for
+        the AGC, the developers implemented an interpreter that
+        simulated a computer that was an easier and more natural fit for
+        navigation calculations. The machine simulated by the
+        Interpreter is quite different from the AGC, with its own set of
+        registers, more powerful instructions, and a different memory
+        model.</font></p>
+    <font color="#663300">
+    </font>
+    <p><font color="#663300">The result is that some software in the AGC
+        is written using the AGC's native instructions, and some of the
+        software is written using the instructions that are understood
+        by the Interpreter. YUL (the assembler) understands both sets of
+        instructions, but it is up to the programmer to use the proper
+        instructions at the proper place in the code, as described
+        below.</font></p>
+    <font color="#663300">
+    </font>
+    <p><font color="#663300">The Interpreter includes these features:</font></p>
+    <font color="#663300">
+    </font>
+    <ul>
+      <li><font color="#663300"><b>Wider variety of instructions.</b>
+          The Interpreter provided a much wider variety of instructions,
+          including instructions for trig functions and vector
+          manipulation. Writing code using the Interpreter's
+          instructions made it easier and more natural to write
+          navigation code, and yielded more compact code.</font></li>
+      <li><font color="#663300"><b>Simpler memory model.</b> The AGC
+          hardware uses a complex and cumbersome banking scheme to
+          access memory. The Interpreter enables the programmer to treat
+          memory more like a flat memory space, without having to deal
+          with banking registers.</font></li>
+      <li><font color="#663300"><b>Easier number handling.</b> The
+          Interpreter deals much more easily with a variety of numerical
+          types without forcing the programmer to do explicit
+          conversions.</font></li>
+      <li><font color="#663300"><b>Vectors.</b> The Interpreter provides
+          instructions for dealing with vectors, a crucial component of
+          navigational software.</font></li>
+      <li><font color="#663300"><b>Memory structures.</b> The
+          Interpreter provides useful memory structures, such as stacks
+          and switches, which the AGC hardware lacks.</font></li>
+    </ul>
+    <font color="#663300">
+    </font>
+    <p><font color="#663300">The software that implements the
+        Interpreter occupies most of fixed bank 00, some of 01, and some
+        fixed-fixed memory.</font></p>
+    <font color="#663300">
+    </font>
+    <h4><font color="#663300">Starting / Exiting the Interpreter</font></h4>
+    <font color="#663300">
+    </font>
+    <p><font color="#663300">A machine-code program starts a block of
+        interpreted code by calling the INTPRET subroutine with this
+        assembler instruction:</font></p>
+    <font color="#663300">
+    </font>
+    <div style="font-family: &quot;Courier New&quot;; margin-left: 1em"><font
+        color="#663300">
+        TC INTPRET
+      </font></div>
+    <font color="#663300">
+    </font>
+    <p><font color="#663300">The Interpreter expects the TC INTPRET
+        instruction to be immediately followed by a block of Interpeter
+        code. The Interpreter reads and executes this code until it
+        encounters an EXIT Interpreter instruction. The Interpreter
+        assumes that the memory word following the EXIT instruction is
+        an AGC machine instruction, and execution continues immediately
+        after the EXIT.
+      </font></p>
+    <p><font color="#663300">The typical structure of a program
+        containing Interpreter code looks like this:</font></p>
+    <font color="#663300">
+    </font>
+    <div style="font-family: &quot;Courier New&quot;; margin-left: 1em"><font
+        color="#663300">
+        ... machine code ...<br>
+        TC INTPRET<br>
+        ... Interpreter code ...<br>
+        EXIT<br>
+        ... machine code ...<br>
+      </font>
+    </div>
+    <font color="#663300">
+    </font>
+    <p><font color="#663300">It is vitally important that a programmer
+        use the appropriate instructions in the appropriate context. If
+        a programmer uses an Interpreter instruction in the middle of
+        AGC code without starting the Interpreter, the AGC will
+        misinterpret the instruction. Similarly, if a programmer uses a
+        native AGC instruction inside a block of Interpreter code, a
+        similar misinterpretation will occur.</font></p>
+    <font color="#663300">
+    </font>
+    <p><font color="#663300">An interpreted program can call a machine
+        code subroutine by executing an RTB instruction (which branches
+        to a machine code location). The RTB instruction stores a return
+        address in the Interpreter. When the machine code subroutine has
+        finished executing, it returns to the interpreted code by
+        executing this instruction:</font></p>
+    <font color="#663300">
+    </font>
+    <div style="font-family: &quot;Courier New&quot;; margin-left: 1em"><font
+        color="#663300">
+        TC DANZIG</font><br>
+    </div>
+    <font color="#663300">
+    </font><br>
+    [Ron's note:&nbsp; I've often wondered, Why DANZIG? According to
+    Wikipedia, the Free City of Danzig was a semi-autonomous city-state
+    that existed between 1920 and 1939 (it is now Gdansk, Poland)
+    created to give Poland access to a well-sized seaport, though the
+    majority-German population deeply resented being separated from
+    Germany, and after the war about 300,000 of them either fled to or
+    were expelled to East or West Germany.&nbsp; But does any of that
+    have to do with TC DANZIG?]<br>
+    <h4><font color="#663300">Interpreter Registers</font></h4>
+    <font color="#663300">
+    </font>
+    <p><font color="#663300">The Interpreter simulates these registers:</font></p>
+    <font color="#663300">
+    </font>
+    <table border="1" align="center">
+      <tbody>
+        <tr>
+          <td><font color="#663300">MPAC</font></td>
+          <td><font color="#663300">Multi-purpose accumulator. The MPAC
+              can contain single-, double-, and triple-precision values,
+              and double-precision vectors. The Interpreter keeps track
+              of the type of value currently stored in the MPAC.</font></td>
+        </tr>
+        <tr>
+          <td><font color="#663300">OVFIND</font></td>
+          <td><font color="#663300">An overflow indicator register.</font></td>
+        </tr>
+        <tr>
+          <td><font color="#663300">ADRLOC</font></td>
+          <td><font color="#663300">A program counter.</font></td>
+        </tr>
+        <tr>
+          <td><font color="#663300">QPRET</font></td>
+          <td><font color="#663300">Return address register.</font></td>
+        </tr>
+        <tr>
+          <td><font color="#663300">X1, X2</font></td>
+          <td><font color="#663300">Two index registers</font></td>
+        </tr>
+        <tr>
+          <td><font color="#663300">S1, S2</font></td>
+          <td><font color="#663300">Two step registers, primarily used
+              as loop counters</font></td>
+        </tr>
+      </tbody>
+    </table>
+    <font color="#663300">
+    </font>
+    <p><font color="#663300">There are five sets of registers, so the
+        Interpreter can support up to five simultaneous programs.</font></p>
+    <font color="#663300">
+    </font>
+    <h4><font color="#663300">Stack</font></h4>
+    <font color="#663300">
+    </font>
+    <p><font color="#663300">The Interpreter simulates a push-down
+        stack, which can contain up to 38 values.</font></p>
+    <font color="#663300">
+    </font>
+    <h4><font color="#663300">Switches</font></h4>
+    <font color="#663300">
+    </font>
+    <p><font color="#663300">The Interpreter supports 120 binary
+        (on/off) switches, number 0 - 119 (decimal).</font></p>
+    <font color="#663300">
+    </font>
+    <h4><font color="#663300">Memory</font></h4>
+    <font color="#663300">
+    </font>
+    <p><font color="#663300">The AGC hardware uses a complex and
+        cumbersome memory model which divides both erasable and fixed
+        memory into a series of banks. Banking registers are required to
+        specify which banks of memory are being accessed. The
+        Interpreter relieves the programmer of dealing with most of this
+        complexity within interpreted code. An interpreted program can
+        access roughly half of erasable memory and half of fixed memory.</font></p>
+    <font color="#663300">
+    </font>
+    <p><font color="#663300">The Interpreter organizes memory into these
+        three areas:</font></p>
+    <font color="#663300">
+    </font>
+    <ul>
+      <li><font color="#663300"><b>Local erasable memory</b> consists of
+          unswitched erasable locations 61 (octal) through 1377 (octal),
+          plus the current switched erasable bank (that is, whichever
+          bank is currently selected by the AGC's EBANK register). This
+          gives an interpreted program access to roughly 1K words, half
+          the total amount of erasable memory. Once an interpreted
+          program has started, there are no instructions to access the
+          AGC's EBANK register, so the code is stuck with whatever
+          erasable bank was selected when the Interpreter was called.</font></li>
+      <li><font color="#663300"><b>Low fixed memory</b> consists of
+          fixed banks 04 (octal) through 17. (12K words (decimal))</font></li>
+      <li><font color="#663300"><b>High fixed memory</b> consists of
+          fixed banks 21 (octal) through 37. (15K words (decimal))</font></li>
+    </ul>
+    <font color="#663300">
+    </font>
+    <p><font color="#663300">These rules apply:</font></p>
+    <font color="#663300">
+    </font>
+    <ul>
+      <li><font color="#663300">Interpreted programs can store variables
+          anywhere in local erasable memory, other than location 0 - 77
+          (octal).</font></li>
+      <li><font color="#663300">Interpreted programs must be stored in
+          either low fixed memory or high fixed memory&nbsp;</font><font
+          color="#663300">
+          <meta http-equiv="content-type" content="text/html;
+            charset=UTF-8">
+          — they cannot be stored in erasable memory or in fixed banks
+          00 - 03, or 20. (Note that the restriction on erasable memory
+          differs from the AGC hardware, in which executable
+          instructions can be run from erasable memory.)</font></li>
+      <li><font color="#663300">Constant data that's stored in fixed
+          memory must reside in the same "half" memory as the program
+          (low fixed memory or high fixed memory). A program stored in
+          low fixed memory cannot access data constants in high fixed
+          memory, and vice versa.</font></li>
+      <li><font color="#663300">The arguments for branch instructions
+          use a full 15-bit address, so programs can branch to anywhere
+          accessible by a 15-bit address (32K addresses).</font></li>
+    </ul>
+    <font color="#663300">
+    </font>
+    <p><font color="#663300">The memory organization presented to a
+        program differs, depending on whether a program is located in
+        low fixed memory or high fixed memory:</font></p>
+    <font color="#663300">
+    </font>
+    <table border="1" align="center">
+      <tbody>
+        <tr>
+          <th><font color="#663300">Address (oct)</font></th>
+          <th><font color="#663300">Size (dec)</font></th>
+          <th><font color="#663300">Program in Low Fixed Memory</font></th>
+          <th><font color="#663300">Program in High Fixed Memory</font></th>
+        </tr>
+        <tr>
+          <td align="center"><font color="#663300">00000 - 01377</font></td>
+          <td align="center"><font color="#663300">768</font></td>
+          <td colspan="2" align="center"><font color="#663300">Unswitched
+              erasable memory (i.e. erasable banks 0 - 2)</font></td>
+        </tr>
+        <tr>
+          <td align="center"><font color="#663300">01400 - 01777</font></td>
+          <td align="center"><font color="#663300">256</font></td>
+          <td colspan="2" align="center"><font color="#663300">Currently-selected
+              erasable bank*</font></td>
+        </tr>
+        <tr>
+          <td align="center"><font color="#663300">02000 - 07777</font></td>
+          <td align="center"><font color="#663300">3K</font></td>
+          <td align="center"><font color="#663300">Not usable</font></td>
+          <td align="center"><font color="#663300">Fixed banks 21 - 23</font></td>
+        </tr>
+        <tr>
+          <td align="center"><font color="#663300">10000 - 37777</font></td>
+          <td align="center"><font color="#663300">13K</font></td>
+          <td align="center"><font color="#663300">Fixed banks 04 - 17</font></td>
+          <td align="center"><font color="#663300">Fixed banks 24 - 37</font></td>
+        </tr>
+      </tbody>
+    </table>
+    <font color="#663300">
+    </font>
+    <p><font color="#663300">*This is the erasable memory bank that is
+        selected by the AGC's EBANK register.</font></p>
+    <font color="#663300">
+    </font>
+    <p><font color="#663300">Since a 15-bit address can't access enough
+        memory locations the include all the fixed banks, the designers
+        who wrote the Interpreter came up with this scheme: When an
+        interpreted program runs, an internal register called INTBIT15
+        is set to 1 if the program is in high fixed memory; 0 otherwise.
+        The Interpreter prepends this bit onto data addresses if the
+        address is 2000 (octal) or above. The net effect is that a
+        15-bit address enables any program in low fixed memory to reach
+        any address in low fixed memory, and any program in high fixed
+        memory to reach any address in high fixed memory.
+      </font></p>
+    <h4><font color="#663300">Indirect Branching</font></h4>
+    <font color="#663300">
+    </font>
+    <p><font color="#663300">The Interpreter doesn't support indexing on
+        branch instructions, but it does support a method of
+        indirection. The Interpreter requires that all executable code
+        reside in fixed memory, and that erasable memory is used only
+        for data. If the argument for a branch instruction works out to
+        an address in erasable memory, then the assumption is that the
+        location in erasable memory contains an address </font><font
+        color="#663300"><font color="#663300">—</font> the value in the
+        erasable memory location is read and the Interpreter branches to
+        that address. This continues any number of times, until the
+        address resolves to an address in fixed memory.</font></p>
+    <font color="#663300">
+    </font>
+    <h4><font color="#663300">Instructions</font></h4>
+    <font color="#663300">
+    </font>
+    <p><font color="#663300">Interpreter instructions pack two 7-bit
+        opcodes into a single word, like so:</font></p>
+    <font color="#663300">
+    </font>
+    <table border="1" align="center">
+      <tbody>
+        <tr>
+          <td align="center"><font color="#663300">1</font></td>
+          <td colspan="7" align="center"><font color="#663300">opcode 1</font></td>
+          <td colspan="7" align="center"><font color="#663300">opcode 2</font></td>
+        </tr>
+        <tr>
+          <td><font color="#663300">15</font></td>
+          <td><font color="#663300">14</font></td>
+          <td><font color="#663300">13</font></td>
+          <td><font color="#663300">12</font></td>
+          <td><font color="#663300">11</font></td>
+          <td><font color="#663300">10</font></td>
+          <td><font color="#663300">9</font></td>
+          <td><font color="#663300">8</font></td>
+          <td><font color="#663300">7</font></td>
+          <td><font color="#663300">6</font></td>
+          <td><font color="#663300">5</font></td>
+          <td><font color="#663300">4</font></td>
+          <td><font color="#663300">3</font></td>
+          <td><font color="#663300">2</font></td>
+          <td><font color="#663300">1</font></td>
+        </tr>
+      </tbody>
+    </table>
+    <font color="#663300">
+    </font>
+    <p><font color="#663300">This word is then followed by whatever
+        arguments are required by the first opcode, and then by whatever
+        arguments are required for the second opcode.</font></p>
+    <font color="#663300">
+    </font>
+    <p><font color="#663300">The 127 possible opcodes are divided into
+        four categories, specified by the two low-order bits in each
+        opcode. Roughly, the lowest bit </font><font color="#663300"><font
+          color="#663300">—</font> bit 1 </font><font color="#663300"><font
+          color="#663300">—</font> specifies whether the opcode requires
+        an argument, and bit 2 determines whether the argument may be
+        indexed. Specifically, the four categories work like this:</font></p>
+    <font color="#663300">
+    </font>
+    <table border="1" align="center">
+      <tbody>
+        <tr>
+          <th><font color="#663300">Bit 2 &amp; 1</font></th>
+          <th><font color="#663300">Description</font></th>
+        </tr>
+        <tr>
+          <td><font color="#663300">00</font></td>
+          <td><font color="#663300">Instruction does not take an
+              argument and are not indexed.</font></td>
+        </tr>
+        <tr>
+          <td><font color="#663300">01</font></td>
+          <td><font color="#663300">Instructions that take an argument
+              and are not indexed. The argument is always an address
+              (never a value), and can be taken either from the word
+              following the instruction, or from the stack. The
+              Interpreter determines where to get its argument by
+              looking at the word following the instruction. It counts
+              on the fact that instruction words always have bit 15 set
+              to 1, and arguments that don't involve indexing (and
+              instructions in this class never involve indexing) always
+              have their bit 15 set to zero. So if the word following
+              the instruction has its 15 bit set to 0, it's the argument
+              for this instruction; if it's set to 1, it's the next
+              instruction and the argument should be pulled off the
+              stack.
+              [What's not clear to me is how to handle the case in which
+              opcode 1 is in class 01, and opcode 2 is in class 11. It
+              seems that there could be a problem if the intention is to
+              get opcode 1's argument from the stack, but opcode 2's
+              argument follows the instruction.]</font></td>
+        </tr>
+        <tr>
+          <td><font color="#663300">10</font></td>
+          <td><font color="#663300">Branch and index instructions. This
+              class is handled as a special case, and the individual
+              bits do not have their usual meaning.</font></td>
+        </tr>
+        <tr>
+          <td><font color="#663300">11</font></td>
+          <td><font color="#663300">Instruction requires an address and
+              may be indexed. Bit 15 of the argument determines which
+              index register is used (0=X1, 1=X2).</font></td>
+        </tr>
+      </tbody>
+    </table>
+    <font color="#663300">
+    </font>
+    <p><font color="#663300">Store instructions break the usual pattern
+        of packing two 7-bit opcodes into a word. They consist of a
+        single opcode with a 10-bit address in erasable memory.</font></p>
+    <font color="#663300">
+    </font>
+    <h4><font color="#663300">Instruction List</font></h4>
+    <font color="#663300">
+    </font>
+    <p><font color="#663300">The following table describes each
+        Interpreter opcode. The "Args" column indicates whether the
+        instruction requires 0, 1, or 2 arguments, and whether the
+        arguments are addresses or constants.</font></p>
+    <font color="#663300">
+    </font>
+    <p><font color="#663300">The documentations didn't provide the
+        numeric opcodes for any of the instructions, so it's hard to
+        tell which of the four classes each opcode falls into.</font></p>
+    <font color="#663300">
+    </font>
+    <table border="1" align="center">
+      <tbody>
+        <tr>
+          <th><font color="#663300">Opcode</font></th>
+          <th><font color="#663300">Args X, Y</font></th>
+          <th><font color="#663300">Description</font></th>
+        </tr>
+        <tr>
+          <td><font color="#663300">ABS</font></td>
+          <td><font color="#663300"><br>
+            </font></td>
+          <td><font color="#663300">Absolute Value. Replaces the scalar
+              value in the MPAC with its absolute value.</font></td>
+        </tr>
+        <tr>
+          <td><font color="#663300">ABVAL</font></td>
+          <td><font color="#663300"><br>
+            </font></td>
+          <td><font color="#663300">Vector Absolute Value. Replaces the
+              vector value in the MPAC with its absolute value as a
+              scalar. [Documentation goes into detail.]</font></td>
+        </tr>
+        <tr>
+          <td><font color="#663300">ACOS</font></td>
+          <td><font color="#663300"><br>
+            </font></td>
+          <td><font color="#663300">Arc-cosine. Multiplies the MPAC by
+              2, takes the arcsine, divides by 2p, and leaves the result
+              in the MPAC.</font></td>
+        </tr>
+        <tr>
+          <td><font color="#663300">ASIN</font></td>
+          <td><font color="#663300"><br>
+            </font></td>
+          <td><font color="#663300">Arc-sine. Multiplies the MPAC by 2,
+              takes the arcsine, multiplies by 2p, and leaves the result
+              in the MPAC.</font></td>
+        </tr>
+        <tr>
+          <td><font color="#663300">AXC</font></td>
+          <td><font color="#663300">C</font></td>
+          <td><font color="#663300">Loads the complement of a constant
+              into one of the index registers. [See Note 1 below]</font></td>
+        </tr>
+        <tr>
+          <td><font color="#663300">AXT</font></td>
+          <td><font color="#663300">C</font></td>
+          <td><font color="#663300">Loads a constant into one of the
+              index registers. [See Note 1 below]</font></td>
+        </tr>
+        <tr>
+          <td><font color="#663300">BDDV</font></td>
+          <td><font color="#663300">A</font></td>
+          <td><font color="#663300">Backwards Double Divide. Divide the
+              double-precision value in X by the MPAC and leave the
+              result in the MPAC.</font></td>
+        </tr>
+        <tr>
+          <td><font color="#663300">BDSU</font></td>
+          <td><font color="#663300">A</font></td>
+          <td><font color="#663300">Backwards Double Subtract. Subtracts
+              the MPAC from the double-precision value at X and leaves
+              the result in the MPAC.</font></td>
+        </tr>
+        <tr>
+          <td><font color="#663300">BHIZ</font></td>
+          <td><font color="#663300">A</font></td>
+          <td><font color="#663300">Branch High Order Zero. Branch to X
+              if the single-precision value in the MPAC is zero.</font></td>
+        </tr>
+        <tr>
+          <td><font color="#663300">BMN</font></td>
+          <td><font color="#663300">A</font></td>
+          <td><font color="#663300">Branch Minus. Branch to X if the
+              triple-precision number in the MPAC is negative.</font></td>
+        </tr>
+        <tr>
+          <td><font color="#663300">BOF</font></td>
+          <td><font color="#663300">A, A</font></td>
+          <td><font color="#663300">Branch to Y if switch X is off.</font></td>
+        </tr>
+        <tr>
+          <td><font color="#663300">BOFCLR</font></td>
+          <td><font color="#663300">A, A</font></td>
+          <td><font color="#663300">Clear switch X and branch to Y if
+              the switch was initially off.</font></td>
+        </tr>
+        <tr>
+          <td><font color="#663300">BOFINV</font></td>
+          <td><font color="#663300">A, A</font></td>
+          <td><font color="#663300">Invert switch X and branch to Y if
+              the switch was originally off.</font></td>
+        </tr>
+        <tr>
+          <td><font color="#663300">BOFSET</font></td>
+          <td><font color="#663300">A, A</font></td>
+          <td><font color="#663300">Set switch X and branch to Y if the
+              switch was initially off.</font></td>
+        </tr>
+        <tr>
+          <td><font color="#663300">BON</font></td>
+          <td><font color="#663300">A, A</font></td>
+          <td><font color="#663300">Branch to Y if switch X is on.</font></td>
+        </tr>
+        <tr>
+          <td><font color="#663300">BONCLR</font></td>
+          <td><font color="#663300">A, A</font></td>
+          <td><font color="#663300">Clear switch X and branch to Y if
+              the switch was initially on.</font></td>
+        </tr>
+        <tr>
+          <td><font color="#663300">BONINV</font></td>
+          <td><font color="#663300">A, A</font></td>
+          <td><font color="#663300">Invert switch X and branch to Y if
+              the switch was originally on.</font></td>
+        </tr>
+        <tr>
+          <td><font color="#663300">BONSET</font></td>
+          <td><font color="#663300">A, A</font></td>
+          <td><font color="#663300">Set switch X and branch to Y if the
+              switch was initially on.</font></td>
+        </tr>
+        <tr>
+          <td><font color="#663300">BOV</font></td>
+          <td><font color="#663300">A</font></td>
+          <td><font color="#663300">Branch on Overflow. If the OVFIND
+              register is not zero, then reset it to zero and branch to
+              X.</font></td>
+        </tr>
+        <tr>
+          <td><font color="#663300">BOVB</font></td>
+          <td><font color="#663300">A</font></td>
+          <td><font color="#663300">Brand on Overflow to Basic. If the
+              OVFIND register is not zero, then reset it to zero and
+              call a regular machine language subroutine (as if an RTB
+              had been executed).</font></td>
+        </tr>
+        <tr>
+          <td><font color="#663300">BPL</font></td>
+          <td><font color="#663300">A</font></td>
+          <td><font color="#663300">Branch Plus. Branch to X if the
+              triple-precision number in the MPAC is greater than or
+              equal to zero.</font></td>
+        </tr>
+        <tr>
+          <td><font color="#663300">BVSU</font></td>
+          <td><font color="#663300">A</font></td>
+          <td><font color="#663300">Backwards Vector Subtract. Subtracts
+              the MPAC from the vector at X and leaves the result in the
+              MPAC.</font></td>
+        </tr>
+        <tr>
+          <td><font color="#663300">BZE</font></td>
+          <td><font color="#663300">A</font></td>
+          <td><font color="#663300">Branch Zero. Branch to X if the
+              triple-precision number in the MPAC is zero.</font></td>
+        </tr>
+        <tr>
+          <td><font color="#663300">CALL</font></td>
+          <td><font color="#663300">A</font></td>
+          <td><font color="#663300">Calls a subroutine. Transfers to
+              location X, and loads the return address into the QPRET
+              register.</font></td>
+        </tr>
+        <tr>
+          <td><font color="#663300">CCALL</font></td>
+          <td><font color="#663300">A, A</font></td>
+          <td><font color="#663300">Computed CALL. Works like CGOTO, but
+              also puts the return address in the QPRET register, like
+              CALL.</font></td>
+        </tr>
+        <tr>
+          <td><font color="#663300">CGOTO</font></td>
+          <td><font color="#663300">A, A</font></td>
+          <td><font color="#663300">Computed GOTO. X must point to
+              erasable memory. The value at X is added to Y (which must
+              be in fixed memory), and control transfers there. Like
+              GOTO, if CGOTO occurs as the first opcode in an
+              instruction word, then the second opcode must be blank.</font></td>
+        </tr>
+        <tr>
+          <td><font color="#663300">CLEAR</font></td>
+          <td><font color="#663300">A</font></td>
+          <td><font color="#663300">Clear switch X.</font></td>
+        </tr>
+        <tr>
+          <td><font color="#663300">CLRGO</font></td>
+          <td><font color="#663300">A, A</font></td>
+          <td><font color="#663300">Clear switch X and branch to
+              location Y. Essentially a CLEAR and GOTO in one
+              instruction.</font></td>
+        </tr>
+        <tr>
+          <td><font color="#663300">COS</font></td>
+          <td><font color="#663300"><br>
+            </font></td>
+          <td><font color="#663300">Cosine. Multiplies 2p by the value
+              of the MPAC, takes the cosine, multiplies that by 0.5, and
+              leaves the result in the MPAC.</font></td>
+        </tr>
+        <tr>
+          <td><font color="#663300">DAD</font></td>
+          <td><font color="#663300">A</font></td>
+          <td><font color="#663300">Double Add. Adds the
+              double-precision value at X to the MPAC.</font></td>
+        </tr>
+        <tr>
+          <td><font color="#663300">DCOMP</font></td>
+          <td><font color="#663300"><br>
+            </font></td>
+          <td><font color="#663300">Complement. Replaces the scalar
+              value in the MPAC with its complement.</font></td>
+        </tr>
+        <tr>
+          <td><font color="#663300">DDV</font></td>
+          <td><font color="#663300">A</font></td>
+          <td><font color="#663300">Double Divide. Divide the MPAC by
+              the double-precision value in X.</font></td>
+        </tr>
+        <tr>
+          <td><font color="#663300">DLOAD</font></td>
+          <td><font color="#663300">A</font></td>
+          <td><font color="#663300">Load a double-precision value into
+              the MPAC</font></td>
+        </tr>
+        <tr>
+          <td><font color="#663300">DMP</font></td>
+          <td><font color="#663300">A</font></td>
+          <td><font color="#663300">Double Multiply. Multiplies the MPAC
+              by the double-precision value at X and leaves the product
+              in the MPAC.</font></td>
+        </tr>
+        <tr>
+          <td><font color="#663300">DMPR</font></td>
+          <td><font color="#663300">A</font></td>
+          <td><font color="#663300">Double Multiply and Round.
+              Multiplies the MPAC by the double-precision value at X and
+              leaves the product in the MPAC, rounded to double
+              precision.</font></td>
+        </tr>
+        <tr>
+          <td><font color="#663300">DOT</font></td>
+          <td><font color="#663300">A</font></td>
+          <td><font color="#663300">Vector Dot Product. [tl;dr]</font></td>
+        </tr>
+        <tr>
+          <td><font color="#663300">DSQ</font></td>
+          <td><font color="#663300"><br>
+            </font></td>
+          <td><font color="#663300">Double Square. Squares the value in
+              the MPAC.</font></td>
+        </tr>
+        <tr>
+          <td><font color="#663300">DSU</font></td>
+          <td><font color="#663300">A</font></td>
+          <td><font color="#663300">Double Subtract. Subtracts the
+              double-precision value at X from the MPAC.</font></td>
+        </tr>
+        <tr>
+          <td><font color="#663300">EXIT</font></td>
+          <td><font color="#663300"><br>
+            </font></td>
+          <td><font color="#663300">Exit the Interpreter and resume
+              executing normal machine code at the next instruction.</font></td>
+        </tr>
+        <tr>
+          <td><font color="#663300">GOTO</font></td>
+          <td><font color="#663300">A</font></td>
+          <td><font color="#663300">Transfer control to a new location.
+              If GOTO occurs in the first opcode of a word, then the 2nd
+              opcode must be blank. Note that a subroutine can return
+              using GOTO if it previously saved the contents of the
+              QPRET register in a memory location.</font></td>
+        </tr>
+        <tr>
+          <td><font color="#663300">INCR</font></td>
+          <td><font color="#663300">C</font></td>
+          <td><font color="#663300">Adds a constant Y to one of the
+              index registers. [See Note 1.]</font></td>
+        </tr>
+        <tr>
+          <td><font color="#663300">INVERT</font></td>
+          <td><font color="#663300">A</font></td>
+          <td><font color="#663300">Invert (flip) switch X.</font></td>
+        </tr>
+        <tr>
+          <td><font color="#663300">INVGO</font></td>
+          <td><font color="#663300">A, A</font></td>
+          <td><font color="#663300">Invert (flip) switch X and branch to
+              location Y.</font></td>
+        </tr>
+        <tr>
+          <td><font color="#663300">LXC</font></td>
+          <td><font color="#663300">A</font></td>
+          <td><font color="#663300">Loads one of the index registers
+              with the complement of the contents of erasable location
+              Y. [See Note 1.]</font></td>
+        </tr>
+        <tr>
+          <td><font color="#663300">LXA</font></td>
+          <td><font color="#663300">A</font></td>
+          <td><font color="#663300">Loads one of the index registers
+              with the contents of erasable location Y. [See Note 1.]</font></td>
+        </tr>
+        <tr>
+          <td><font color="#663300">MXV</font></td>
+          <td><font color="#663300">A</font></td>
+          <td><font color="#663300">Matrix Post-Multiplication by
+              Vector.</font></td>
+        </tr>
+        <tr>
+          <td><font color="#663300">NORM</font></td>
+          <td><font color="#663300">A</font></td>
+          <td><font color="#663300">Normalize. The value of the MPAC is
+              shifted left until the value is greater than or equal to
+              0.5. Memory location X is set to the complement of the
+              number of places the value was shifted left. If the
+              starting value of the MPAC is 0, then -0 is stored in X
+              and the MPAC remains unchanged.</font></td>
+        </tr>
+        <tr>
+          <td><font color="#663300">PDDL</font></td>
+          <td><font color="#663300">A</font></td>
+          <td><font color="#663300">Push Down and Double Load. Push the
+              value of the MPAC register onto the stack, and load the
+              MPAC with double-precision value at X.</font></td>
+        </tr>
+        <tr>
+          <td><font color="#663300">PDVL</font></td>
+          <td><font color="#663300">A</font></td>
+          <td><font color="#663300">Push Down and Vector Load. Push the
+              value of the MPAC register onto the stack, and load the
+              MPAC with the vector at X.</font></td>
+        </tr>
+        <tr>
+          <td><font color="#663300">PUSH</font></td>
+          <td><font color="#663300"><br>
+            </font></td>
+          <td><font color="#663300">Push. Pushes the contents of the
+              MPAC onto the stack.</font></td>
+        </tr>
+        <tr>
+          <td><font color="#663300">ROUND</font></td>
+          <td><font color="#663300"><br>
+            </font></td>
+          <td><font color="#663300">Rounds the triple-precision value in
+              the MPAC to a double-precision value.</font></td>
+        </tr>
+        <tr>
+          <td><font color="#663300">RTB</font></td>
+          <td><font color="#663300">A</font></td>
+          <td><font color="#663300">Return to Basic. Essentially this
+              instruction allows the interpreted program to call a
+              subroutine outside the Interpreter (i.e. written in normal
+              machine code). X is the address of the subroutine. The
+              subroutine returns to the Interpreter by executing a TC Q.
+              Alternatively, the subroutine can exit by executing TC
+              DANZIG. [I assume DANZIG is some predefined entry point
+              into the Interpreter.]</font></td>
+        </tr>
+        <tr>
+          <td><font color="#663300">RVQ</font></td>
+          <td><font color="#663300"><br>
+            </font></td>
+          <td><font color="#663300">Return via QPRET. Returns to the
+              location specified in the QPRET register. This is the
+              normal way to return from a subroutine, although if the
+              QPRET register had previously been saved to a memory
+              location, then GOTO can be used instead.</font></td>
+        </tr>
+        <tr>
+          <td><font color="#663300">SET</font></td>
+          <td><font color="#663300">A</font></td>
+          <td><font color="#663300">Set Switch. Sets a switch to 1.</font></td>
+        </tr>
+        <tr>
+          <td><font color="#663300">SETGO</font></td>
+          <td><font color="#663300">A, A</font></td>
+          <td><font color="#663300">Sets a switch to 1 and then jumps to
+              address Y. (Essentially a SET and GOTO in one
+              instruction.)</font></td>
+        </tr>
+        <tr>
+          <td><font color="#663300">SETPD</font></td>
+          <td><font color="#663300">C</font></td>
+          <td><font color="#663300">Set Push Loc.</font></td>
+        </tr>
+        <tr>
+          <td><font color="#663300">SIGN</font></td>
+          <td><font color="#663300">A</font></td>
+          <td><font color="#663300">Sign Test. If the double-precision
+              value at X is negative, then the value in the MPAC is
+              replaced with the MPAC's complement.</font></td>
+        </tr>
+        <tr>
+          <td><font color="#663300">SIN</font></td>
+          <td><font color="#663300"><br>
+            </font></td>
+          <td><font color="#663300">Sine. Multiplies 2p by the value of
+              the MPAC, takes the sine, multiplies that by 0.5, and
+              leaves the result in the MPAC.</font></td>
+        </tr>
+        <tr>
+          <td><font color="#663300">SL</font></td>
+          <td><font color="#663300">C</font></td>
+          <td><font color="#663300">Shift Left. Shift the MPAC left by
+              the number of places in X. The documentation contains a
+              lengthy discussion of the valid values for X.</font></td>
+        </tr>
+        <tr>
+          <td><font color="#663300">SL1 ... SL4</font></td>
+          <td><font color="#663300"><br>
+            </font></td>
+          <td><font color="#663300">Shift Left. Shifts the contents of
+              the MPAC 1 to 4 places left. (There are four separate
+              opcodes here that differ only in how many places the value
+              is shifted.)</font></td>
+        </tr>
+        <tr>
+          <td><font color="#663300">SL1R ... SL4R</font></td>
+          <td><font color="#663300"><br>
+            </font></td>
+          <td><font color="#663300">Shift Left and Round. Shifts the
+              contents of the MPAC 1 to 4 places left and rounds. [Not
+              sure what it means to round a number that's shifted left.]
+              (There are four separate opcodes here that differ only in
+              how many places the value is shifted.)</font></td>
+        </tr>
+        <tr>
+          <td><font color="#663300">SLOAD</font></td>
+          <td><font color="#663300">A</font></td>
+          <td><font color="#663300">Load a single-precision value into
+              the MPAC, but sets the MPAC's type to double precision.</font></td>
+        </tr>
+        <tr>
+          <td><font color="#663300">SLR</font></td>
+          <td><font color="#663300">C</font></td>
+          <td><font color="#663300">Shift Left and Round. Shift the MPAC
+              left by the number of places in X and rounded. The
+              documentation contains a lengthy discussion of the valid
+              values for X.</font></td>
+        </tr>
+        <tr>
+          <td><font color="#663300">SQRT</font></td>
+          <td><font color="#663300"><br>
+            </font></td>
+          <td><font color="#663300">Square Root. The contents of the
+              MPAC are replaced by the square root of the MPAC.</font></td>
+        </tr>
+        <tr>
+          <td><font color="#663300">SR</font></td>
+          <td><font color="#663300">C</font></td>
+          <td><font color="#663300">Shift Right. Shift the MPAC right by
+              the number of places in X. The documentation contains a
+              lengthy discussion of the valid values for X.</font></td>
+        </tr>
+        <tr>
+          <td><font color="#663300">SR1 ... SR4</font></td>
+          <td><font color="#663300"><br>
+            </font></td>
+          <td><font color="#663300">Shift Right. Shifts the contents of
+              the MPAC 1 to 4 places right. (There are four separate
+              opcodes here that differ only in how many places the value
+              is shifted.)</font></td>
+        </tr>
+        <tr>
+          <td><font color="#663300">SR1R ... SR4R</font></td>
+          <td><font color="#663300"><br>
+            </font></td>
+          <td><font color="#663300">Shift Right and Round. Shifts the
+              contents of the MPAC 1 to 4 places right and rounds.
+              (There are four separate opcodes here that differ only in
+              how many places the value is shifted.)</font></td>
+        </tr>
+        <tr>
+          <td><font color="#663300">SRR</font></td>
+          <td><font color="#663300">C</font></td>
+          <td><font color="#663300">Shift Right and Round. Shift the
+              MPAC right by the number of places in X, and rounded. The
+              documentation contains a lengthy discussion of the valid
+              values for X.</font></td>
+        </tr>
+        <tr>
+          <td><font color="#663300">SSP</font></td>
+          <td><font color="#663300">A</font></td>
+          <td><font color="#663300">Set Single Precision. Stores a
+              constant Y in single-precision location X.</font></td>
+        </tr>
+        <tr>
+          <td><font color="#663300">STCALL</font></td>
+          <td><font color="#663300">A, A</font></td>
+          <td><font color="#663300">Store the MPAC into a memory
+              location X and then call subroutine at location Y.</font></td>
+        </tr>
+        <tr>
+          <td><font color="#663300">STODL</font></td>
+          <td><font color="#663300">A, A</font></td>
+          <td><font color="#663300">Store the MPAC to a memory location,
+              and then reload MPAC with a new double-precision value.</font></td>
+        </tr>
+        <tr>
+          <td><font color="#663300">STORE</font></td>
+          <td><font color="#663300">A</font></td>
+          <td><font color="#663300">Stores the contents of the MPAC into
+              erasable memory, according to the current type.</font></td>
+        </tr>
+        <tr>
+          <td><font color="#663300">STOVL</font></td>
+          <td><font color="#663300">A, A</font></td>
+          <td><font color="#663300">Store the MPAC to a memory location,
+              and then reload MPAC with a new vector value.</font></td>
+        </tr>
+        <tr>
+          <td><font color="#663300">STQ</font></td>
+          <td><font color="#663300">A</font></td>
+          <td><font color="#663300">Store the QPRET register in the word
+              at location X. This instruction is used when one
+              subroutine calls another </font><font color="#663300"><font
+                color="#663300">—</font> it gives the subroutine the
+              ability to save the current return address before it gets
+              replaced.</font></td>
+        </tr>
+        <tr>
+          <td><font color="#663300">SXA</font></td>
+          <td><font color="#663300">A</font></td>
+          <td><font color="#663300">Stores one of the index registers at
+              location Y. [See Note 1.]</font></td>
+        </tr>
+        <tr>
+          <td><font color="#663300">TAD</font></td>
+          <td><font color="#663300">A</font></td>
+          <td><font color="#663300">Triple Add. Adds the
+              trip;e-precision value at X to the MPAC.</font></td>
+        </tr>
+        <tr>
+          <td><font color="#663300">TIX</font></td>
+          <td><font color="#663300">A</font></td>
+          <td><font color="#663300">Count and Branch on Index. If
+              subtracting step register X from index register X would
+              yield a positive (non-zero) number, then the subtraction
+              takes place, leaving the result in the index register, and
+              a branch takes place to Y. This instruction enables the
+              creation of a loop counter. [See Note 1.]</font></td>
+        </tr>
+        <tr>
+          <td><font color="#663300">TLOAD</font></td>
+          <td><font color="#663300">A</font></td>
+          <td><font color="#663300">Load a triple-precision value into
+              the MPAC</font></td>
+        </tr>
+        <tr>
+          <td><font color="#663300">UNIT</font></td>
+          <td><font color="#663300"><br>
+            </font></td>
+          <td><font color="#663300">Causes the vector in the MPAC to be
+              replaced by the quotient of the MPAC vector divided by
+              twice the absolute value of the MPAC vector.</font></td>
+        </tr>
+        <tr>
+          <td><font color="#663300">VAD</font></td>
+          <td><font color="#663300">A</font></td>
+          <td><font color="#663300">Vector Add. Adds the vector at X to
+              the MPAC.</font></td>
+        </tr>
+        <tr>
+          <td><font color="#663300">VCOMP</font></td>
+          <td><font color="#663300"><br>
+            </font></td>
+          <td><font color="#663300">Complement Vector. Replaces the
+              vector value in the MPAC with its complement.</font></td>
+        </tr>
+        <tr>
+          <td><font color="#663300">VDEF</font></td>
+          <td><font color="#663300"><br>
+            </font></td>
+          <td><font color="#663300">Vector Define. Somehow takes the
+              double-precision value in the MPAC and converts it into a
+              vector.</font></td>
+        </tr>
+        <tr>
+          <td><font color="#663300">VDSC</font></td>
+          <td><font color="#663300">A</font></td>
+          <td><font color="#663300">Vector Divide by Scalar.</font></td>
+        </tr>
+        <tr>
+          <td><font color="#663300">VLOAD</font></td>
+          <td><font color="#663300">A</font></td>
+          <td><font color="#663300">Load a vector into the MPAC</font></td>
+        </tr>
+        <tr>
+          <td><font color="#663300">VPROJ</font></td>
+          <td><font color="#663300">A</font></td>
+          <td><font color="#663300">Vector Projection.</font></td>
+        </tr>
+        <tr>
+          <td><font color="#663300">VSL</font></td>
+          <td><font color="#663300">C</font></td>
+          <td><font color="#663300">Vector Shift Left. [tl;dr]</font></td>
+        </tr>
+        <tr>
+          <td><font color="#663300">VSL1 ... VSL8</font></td>
+          <td><font color="#663300"><br>
+            </font></td>
+          <td><font color="#663300">Vector Shift Left by 1 - 8 places.
+              (There are eight separate opcodes here that differ only in
+              how many places the value is shifted.)</font></td>
+        </tr>
+        <tr>
+          <td><font color="#663300">VSQ</font></td>
+          <td><font color="#663300"><br>
+            </font></td>
+          <td><font color="#663300">Vector Square. Squares the vector
+              quantity in the MPAC, replacing it with a double-precision
+              number. [Don't understand what it means to square a
+              vector.]</font></td>
+        </tr>
+        <tr>
+          <td><font color="#663300">VSR</font></td>
+          <td><font color="#663300">C</font></td>
+          <td><font color="#663300">Vector Shift Right. [tl;dr]</font></td>
+        </tr>
+        <tr>
+          <td><font color="#663300">VSR1 ... VSR8</font></td>
+          <td><font color="#663300"><br>
+            </font></td>
+          <td><font color="#663300">Vector Shift Right by 1 - 8 places.
+              (There are eight separate opcodes here that differ only in
+              how many places the value is shifted.)</font></td>
+        </tr>
+        <tr>
+          <td><font color="#663300">VSU</font></td>
+          <td><font color="#663300">A</font></td>
+          <td><font color="#663300">Vector Subtract. Subtracts the
+              vector at X from the MPAC and leaves the result in the
+              MPAC.</font></td>
+        </tr>
+        <tr>
+          <td><font color="#663300">VXM</font></td>
+          <td><font color="#663300">A</font></td>
+          <td><font color="#663300">Matrix Pre-Multiplication by Vector.</font></td>
+        </tr>
+        <tr>
+          <td><font color="#663300">VXSC</font></td>
+          <td><font color="#663300">A</font></td>
+          <td><font color="#663300">Vector Times Scalar. [tl;dr]</font></td>
+        </tr>
+        <tr>
+          <td><font color="#663300">VXV</font></td>
+          <td><font color="#663300">A</font></td>
+          <td><font color="#663300">Vector Cross Product.</font></td>
+        </tr>
+        <tr>
+          <td><font color="#663300">XAD</font></td>
+          <td><font color="#663300">A</font></td>
+          <td><font color="#663300">Adds the contents of Y to one of the
+              index registers. [See Note 1.]</font></td>
+        </tr>
+        <tr>
+          <td><font color="#663300">XCHX</font></td>
+          <td><font color="#663300">A</font></td>
+          <td><font color="#663300">Exchanges one of the index registers
+              with the contents of an erasable memory location. [See
+              Note 1.]</font></td>
+        </tr>
+        <tr>
+          <td><font color="#663300">XSU</font></td>
+          <td><font color="#663300">A</font></td>
+          <td><font color="#663300">Subtracts the contents of Y from one
+              of the index registers. [See Note 1.]</font></td>
+        </tr>
+      </tbody>
+    </table>
+    <font color="#663300">
+      <b>Notes:</b><br>
+      [1] The documentation doesn't specify how the instruction
+      determines which index register or step register (1 or 2) is being
+      referenced. In the assembly language the programmer has to specify
+      a 1 or 2, but does it by placing it immediately after the opcode
+      mnemonic ("CLEAR,2"), rather than treating it as an operand
+      ("CLEAR 2"). It's possible that there are two distinct numeric
+      opcodes for each instruction that references an index register or
+      step register.<br>
+    </font><br>
     <hr style="width: 100%; height: 2px;">
     <h2><a name="io_channels" id="io_channels"></a>I/O Channels</h2>
     The following information is largely taken from Luminary and
     Colossus program listings.&nbsp; However, many additional i/o
     channels are covered <a href="developer.html#Table_of_IO_Channels">on
+
       the developer page</a>.<br>
     <br>
     <table summary="" style="text-align: left; width: 100%;"
@@ -10179,6 +11449,7 @@
     </table>
     <br>
     <div style="text-align: center;"> <span style="font-weight: bold;">Instruction
+
         Map</span><br>
     </div>
     <table summary="" style="width: 100%; height: 451px; text-align:
@@ -10422,8 +11693,10 @@
       monospace;">INHINT</span><span style="font-style: italic;">, etc.,
       are not shown.</span><br>
     <h2><a name="UnprogrammedSequences" id="UnprogrammedSequences"></a>Unprogrammed
+
       Sequences</h2>
     As mentioned earlier in the <a href="#CPU_Architecture_Registers">CPU
+
       Architecture</a> section, the AGC provides instruction-like
     entities called "unprogrammed sequences" which are activated
     automatically to modify counter registers upon receiving the proper
@@ -10679,192 +11952,6 @@
       </tbody>
     </table>
     <br>
-    <hr style="width: 100%; height: 2px;">
-    <h2>Modification History</h2>
-    <table summary="" style="text-align: left; width: 100%;"
-      cellspacing="2" cellpadding="2" border="0">
-      <tbody>
-        <tr>
-          <td style="vertical-align: top;">v0.50<br>
-          </td>
-          <td style="vertical-align: top;">First controlled version of
-            this document.&nbsp; It contains a complete specification of
-            the instruction set (though possibly with errors or
-            uncertainties).<br>
-          </td>
-        </tr>
-        <tr>
-          <td style="vertical-align: top;">v0.51<br>
-          </td>
-          <td style="vertical-align: top;"> Problems discovered while
-            implementing v0.50 in agc_engine.c have been corrected:<br>
-            <ul>
-              <li>Various spelling and grammatical errors.</li>
-              <li>In the Add instruction, the special case "<span
-                  style="font-family: monospace;">CA A</span>" has been
-                replaced by "<span style="font-family: monospace;">AD A</span>".<br>
-              </li>
-              <li>The "<span style="font-family: monospace;">DXCH L</span>"
-                instruction was clarified.</li>
-              <li>In the Divide instruction, the phrase "do not" had
-                been omitted from "The signs of the dividend words
-                stored in A and L do not necessarily agree with each
-                other."</li>
-              <li>In the <span style="font-family: monospace;">BZF</span>
-                and <span style="font-family: monospace;">BZMF</span>
-                instruction, it is assumed that an overflow-corrected
-                version of the accumulator is used for the test.</li>
-              <li>For the <span style="font-family: monospace;">AUG</span>
-                instruction, the wording inadvertently implied that the
-                accumulator would always contain plus or minus overflow
-                after the operation.</li>
-              <li>Over-zealous pasting from <span style="font-family:
-                  monospace;">AUG</span> into <span style="font-family:
-                  monospace;">DIM</span> (regarding counter interrupts)
-                has been corrected.&nbsp;<br>
-              </li>
-              <li>The wording of description of interrupts in <span
-                  style="font-family: monospace;">INCR</span> and <span
-                  style="font-family: monospace;">AUG</span> has been
-                changed to avoid the inference that <span
-                  style="font-style: italic;">only</span> TIME1-TIME6
-                are affected.</li>
-              <li>06/05/04: <span style="font-family: monospace;">EDRUPT</span>
-                and <span style="font-family: monospace;">GOJ</span>
-                now indicate that conditions which would inhibit further
-                interrupts are cleared.</li>
-            </ul>
-            Also:<br>
-            <ul>
-              <li>07/05/04:&nbsp; In <span style="font-family:
-                  monospace;">DXCH</span>, the stipulation that the
-                accumulator is <span style="font-style: italic;">not</span>
-                overflow-corrected has been changed to indicate the the
-                accumulator is overflow-corrected.</li>
-              <li>07/07/04:&nbsp; In <span style="font-family:
-                  monospace;">DV</span>, the sign of the output L
-                register has been adjusted in one case where it had
-                previously been inconsistent.</li>
-              <li>07/08/04:&nbsp; In <span style="font-family:
-                  monospace;">BZF</span> and <span style="font-family:
-                  monospace;">BZMF</span>, the use of overflow has been
-                completely changed.&nbsp; Instead of saying that the
-                overflow-corrected accumulator is used, I now say that
-                positive or negative overflow blocks <span
-                  style="font-family: monospace;">BZF</span> from
-                jumping, while positive overflow (but not negative
-                overflow) blocks <span style="font-family: monospace;">BZMF</span>
-                from jumping.</li>
-              <li>07/09/04:&nbsp; In <span style="font-family:
-                  monospace;">DAS</span> and <span style="font-family:
-                  monospace;">DDOUBL</span>, the signs of the
-                less-significant and more-significant words of the
-                result are no longer normalized to match.&nbsp; Also,
-                DAS no longer states that the accumulator is
-                overflow-corrected prior to the addition.</li>
-              <li>07/09/04:&nbsp; In <span style="font-family:
-                  monospace;">DV</span> with dividend and divisor equal
-                in magnitude, the remainder is (and has been) the
-                divisor.&nbsp; But we no longer say in this case that
-                the sign of the remainder is adjusted to match the
-                dividend.</li>
-              <li>07/10/04:&nbsp; In <span style="font-family:
-                  monospace;">MSU</span>, it is now noted that overflow
-                is cleared, rather than stating that it is set on the
-                basis of the result.<br>
-              </li>
-              <li>07/10/04:&nbsp; In <span style="font-family:
-                  monospace;">DCA</span> and <span style="font-family:
-                  monospace;">DCS</span>, the special cases of "<span
-                  style="font-family: monospace;">DCA L</span>" and "<span
-                  style="font-family: monospace;">DCS L</span>" are
-                covered.</li>
-              <li>0713/04:&nbsp; The <span style="font-family:
-                  monospace;">2FCADR</span> pseudo-op has been
-                added.&nbsp; The Q register is now described as having
-                16 bits rather than 15 bits.&nbsp; Many changes to the
-                descriptions within the instructions of overflow
-                handling have ensued, in (for example) <span
-                  style="font-family: monospace;">CCS</span>, <span
-                  style="font-family: monospace;">ADS</span>, <span
-                  style="font-family: monospace;">AD</span>, <span
-                  style="font-family: monospace;">SU</span>, <span
-                  style="font-family: monospace;">XCH</span>, <span
-                  style="font-family: monospace;">LXCH</span>, <span
-                  style="font-family: monospace;">QXCH</span>, etc.</li>
-              <li>07/17/04:&nbsp; The L register is now 16 bits as
-                well.&nbsp; Again, extensive related descriptive changes
-                have been made, including (of especial note) that the
-                final contents of L are overflow-corrected with the <span
-                  style="font-family: monospace;">DXCH</span>, <span
-                  style="font-family: monospace;">DCA</span>, and <span
-                  style="font-family: monospace;">DCS</span>
-                instructions.</li>
-              <li>07/21/04:&nbsp; Added "special downlink opcodes" like
-                <span style="font-family: monospace;">1DNPTR</span> to
-                the pseudo-op section.</li>
-              <li>07/23/04:&nbsp; Added info but not complete
-                descriptions on interpretive opcodes.</li>
-              <li>08/27/04:&nbsp; Added Peter Adler's suggested history
-                of the <span style="font-family: monospace;">EDRUPT</span>
-                instruction.</li>
-              <li>08/29/04:&nbsp; Some links fixed.</li>
-              <li>2004-09-02:&nbsp; More data on the <span
-                  style="font-family: monospace;">EDRUPT</span>
-                instruction, from Hugh Blair-Smith.</li>
-              <li>2004-09-21:&nbsp; Updated and/or added descriptions of
-                the following pseudo-ops:&nbsp; <span
-                  style="font-family: monospace;">ERASE</span>, <span
-                  style="font-family: monospace;">MEMORY</span>, <span
-                  style="font-family: monospace;">SUBRO</span>, <span
-                  style="font-family: monospace;">2DEC*</span>, <span
-                  style="font-family: monospace;">DEC*</span>, <span
-                  style="font-family: monospace;">COUNT</span>, <span
-                  style="font-family: monospace;">COUNT*</span>, <span
-                  style="font-family: monospace;">BNKSUM</span>.</li>
-              <li>2004-09-25:&nbsp; Yet more data on the <span
-                  style="font-family: monospace;">EDRUPT</span>
-                instruction, from Hugh Blair-Smith.</li>
-              <li>2005-05-23:&nbsp; Now points out that <span
-                  style="font-weight: bold;">yaAGC</span> internally
-                clocks TIME1-TIME6.</li>
-              <li>2005-06-16:&nbsp; Completed the description of the
-                CDUXCMD, CDUYCMD, and CDUZCMD registers.</li>
-              <li>2005-06-25:&nbsp; Changed description of UPRUPT and
-                DOWNRUPT.</li>
-              <li>2005-06-30:&nbsp; The description of the GYROCMD
-                counter register, which was previously blank, has now
-                been filled in.</li>
-              <li>2005-07-09:&nbsp; The description of the RHC counter
-                registers, which was previously empty, has now been
-                filled in.</li>
-              <li>2005-08-20:&nbsp; Updated the description of <span
-                  style="font-family: monospace;">EDRUPT</span>, of the
-                BRUPT register, and of the conditions under which
-                interrupts are inhibited.</li>
-              <li>2005-08-21:&nbsp; Interrupt inhibition for program
-                counter &lt;061 removed.</li>
-              <li>2005-08-29:&nbsp; Updated the description of TIME6.</li>
-              <li>2007-03-05:&nbsp; Gave a little background on the
-                advantages of the interpreter language.</li>
-              <li>2007-04-15:&nbsp; Updated the now-discontinued HRST
-                links.</li>
-              <li>2007-04-25:&nbsp; Fixed some links.<br>
-              </li>
-            </ul>
-          </td>
-        </tr>
-        <tr>
-          <td style="vertical-align: top;">n/a<br>
-          </td>
-          <td style="vertical-align: top;">You know what?&nbsp; I
-            originally thought of this as a controlled document.&nbsp;
-            That's just dumb.&nbsp; I won't be updating this silly
-            little revision table any longer.<br>
-          </td>
-        </tr>
-      </tbody>
-    </table>
     <br>
     <hr style="width: 100%; height: 2px;">
     <center> <br>
@@ -10878,10 +11965,11 @@
         255);"> This page is available under the <a
           href="https://creativecommons.org/publicdomain/zero/1.0/">Creative
 
+
           Commons No Rights Reserved License</a></span><br>
       <i><font size="-1">Last modified by <a
             href="mailto:info@sandroid.org">Ronald Burkey</a> on
-          2017-12-09.<br>
+          2018-07-15.<br>
           <br>
           <a href="http://www.ibiblio.org"><img style="border: 0px solid
               ; width: 300px; height: 100px;" alt="Virtual AGC is hosted
