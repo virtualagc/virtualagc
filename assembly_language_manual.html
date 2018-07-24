@@ -45,6 +45,8 @@
     <hr style="width: 100%; height: 2px;">
     <h2><a name="Blocks_for_All_Occasions" id="Blocks_for_All_Occasions"></a>Blocks
 
+
+
       for All Occasions</h2>
     <p>The design of the AGC went through several stages, which for the
       sake of this discussion we'll call "blocks".&nbsp; However, the
@@ -87,8 +89,12 @@
     <ol>
       <li><a href="NARA-SW/E-2052.pdf"><span style="font-style: italic;">E-2052:&nbsp;
 
+
+
             AGC4 Basic Training</span> <span style="font-style:
             italic;">Manual</span>, <span style="font-style: italic;">Volume
+
+
 
             I</span></a>, by Bernard Savage and Alice Drake, January
         1967.&nbsp;</li>
@@ -105,13 +111,19 @@
       </li>
       <li><a href="NARA-SW/E-1077.pdf" style="font-style: italic;">E-1077:&nbsp;
 
+
+
           Preliminary MOD 3C Programmers Manual</a>, by R. Alonso, J. H.
         Laning, Jr., and H. Blair-Smith, November 1961.</li>
       <li><a href="hrst/archive/1706.pdf" style="font-style: italic;">Keyboard
 
+
+
           and Display Program and Operation</a>, by Alan I. Greene and
         Robert J. Filene, June 1, 1967.</li>
       <li><a href="hrst/archive/1705.pdf" style="font-style: italic;">Block
+
+
 
           II AGC Self-Check and Show-Banksum</a>, by Edwin D. Smally,
         December 1966.</li>
@@ -369,6 +381,8 @@
           generally 1 more than that of the card before</small><small>—no
 
 
+
+
           missing numbers due to spacing. But having said that, I have
           to explain why the card number following a remark over 72
           columns wide is generally 2 more than the one you can see on
@@ -514,6 +528,8 @@
     Another Interpreter convention (rather than a format recognized by
     the CPU)&nbsp; is that the <span style="font-style: italic;">x,y,z</span>&nbsp;
 
+
+
     components of a vector can be represented by three consecutive DP
     values.<br>
     <h3>Unsigned-Integer (2's-Complement) Format</h3>
@@ -591,6 +607,8 @@
     counter/timer registers.&nbsp; This is not so.&nbsp; Incrementing or
     decrementing the counter/timer registers is (and was) actually
     implemented by the use of "<a href="#UnprogrammedSequences">unprogrammed
+
+
 
       sequences</a>", which are similar to CPU instructions, but which
     cannot be directly used by the programmer.&nbsp; The unprogrammed
@@ -687,6 +705,8 @@
             In most cases, when data is transferred out of the
             accumulator to a true 15-bit register, it is <span
               style="font-style: italic;">overflow-corrected</span>.&nbsp;
+
+
 
 
             Overflow-correction implies:<br>
@@ -1156,6 +1176,8 @@
             TIME1 is a 15-bit 1's-complement counter which is
             incremented every 10 ms. TIME1 by itself overflows every 2<sup>14</sup>*10
 
+
+
             ms., or 163.84 seconds.&nbsp; Upon overflow of TIME1, the
             14-bit counter TIME2 is automatically incremented.&nbsp;
             Thus, the two counters together form a 28-bit value which
@@ -1255,6 +1277,8 @@
             For example, to make an interrupt occur once per second, at
             every interrupt the counter would be reloaded with 2<sup>14</sup>-100=16284
 
+
+
             (decimal).&nbsp; Because 10 ms. is usually much longer than
             the amount of time needed to vector to the interrupt service
             routine, it is unnecessary in such calculations to account
@@ -1273,6 +1297,8 @@
             1's-complement counter which is updated every 1/1600 second
             by means of a <span style="font-family: monospace;">DINC</span>
             <a href="#UnprogrammedSequences">unprogrammed sequence</a>.&nbsp;
+
+
 
 
             There is a CPU flag which can mask counting of TIME6 on or
@@ -1390,6 +1416,8 @@
               href="assembly_language_manual.html#UnprogrammedSequences">see
 
 
+
+
               below</a>) in order to increase the angles by one unit,
             and are processed with the <span style="font-family:
               monospace;">MCDU</span> unprogrammed sequence to decrease
@@ -1496,6 +1524,8 @@
             reliablity, <span style="font-weight: bold;">yaACA</span>
             reports the count to <span style="font-weight: bold;">yaAGC</span>
             via <a href="developer.html#Fictitious_IO_Channels">fictitious
+
+
 
               input channels</a>, 0170 (roll) or 0167 (yaw) or 0166
             (pitch).&nbsp; The value in the input channel is a
@@ -1706,6 +1736,8 @@
     be reasonably written or even understood.&nbsp; Mirko Mattioli
     (thanks Mirko!) has sent us a <a href="MirkoMattioliMemoryMap.pdf">diagram
 
+
+
       of the structure of the memory map</a>, and it may prove helpful
     to have his diagram at hand whilst reading the following
     description.<br>
@@ -1834,6 +1866,8 @@
     <hr style="width: 100%; height: 2px;">
     <h2><a name="Interrupt_Processing" id="Interrupt_Processing"></a>Interrupt
 
+
+
       Processing</h2>
     The AGC has 11 interrupt types.&nbsp; Interrupts are triggered by
     external events, but usually not directly so.&nbsp; Various external
@@ -1944,6 +1978,8 @@
             vertical-align: middle;">KEYRUPT2</td>
           <td colspan="1" rowspan="1" style="text-align: center;
             vertical-align: middle;"><span style="color: rgb(0, 0, 0);">Keystroke
+
+
 
               received from secondary DSKY.</span><br>
           </td>
@@ -2145,6 +2181,8 @@
         more truncated 9-bit address space, and are encoded as <span
           style="font-family: monospace;">CCC PPP AAA AAA AAA</span>.&nbsp;
 
+
+
         The field <span style="font-family: monospace;">PPP</span> is
         referred to as the "peripheral code" or "PC".</li>
       <li>Finally, a fourth bit was made available beyond the 15 within
@@ -2159,6 +2197,8 @@
         set of "basic instructions", but instead is taken from a
         completely different set of instructions called <span
           style="font-style: italic; font-weight: bold;">extracodes</span>.&nbsp;
+
+
 
 
         In effect, "basic instructions" use one word of memory, while
@@ -2188,6 +2228,8 @@
     <br>
     <hr style="width: 100%; height: 2px;">
     <h2><a name="AGC4_Instruction_Set" id="AGC4_Instruction_Set"></a>AGC4
+
+
 
       Instruction Set</h2>
     <h3>AD<br>
@@ -2278,6 +2320,8 @@
             <br>
             For the special case "<span style="font-family: monospace;">AD
 
+
+
               A</span>", refer instead to the <span style="font-family:
               monospace;">DOUBLE</span> instruction.<br>
           </td>
@@ -2359,6 +2403,8 @@
             accumulator and <span style="font-family: monospace;">K</span>
             are added together, and the result is stored both in the
             accumulator and in <span style="font-family: monospace;">K</span>.&nbsp;
+
+
 
             The accumulator is neither overflow-corrected prior to the
             addition nor after it.&nbsp; However, the sum is
@@ -2788,6 +2834,8 @@
             </span><br>
             For the special case "<span style="font-family: monospace;">CA
 
+
+
               A</span>", refer instead to the <span style="font-family:
               monospace;">NOOP</span> instruction.<br>
           </td>
@@ -2903,6 +2951,8 @@
                   monospace;">CCS</span>.&nbsp; If equal to -0,
                 execution continues at the 4<sup>th</sup> instruction
                 after the <span style="font-family: monospace;">CCS</span>.&nbsp;&nbsp;
+
+
 
 
                 <span style="color: rgb(0, 0, 0);">(If <span
@@ -3108,6 +3158,8 @@
             </span><br>
             For the special case "<span style="font-family: monospace;">CS
 
+
+
               A</span>", refer instead to the <span style="font-family:
               monospace;">COM</span> instruction.<br>
           </td>
@@ -3190,6 +3242,8 @@
           <td style="vertical-align: top;">A variant on this instruction
             is the case "<span style="font-family: monospace;">DAS A</span>"&nbsp;
 
+
+
             Refer to the <span style="font-family: monospace;">DDOUBL</span>
             instruction for an explanation of this case.<br>
             <br>
@@ -3205,6 +3259,8 @@
                 style="font-family: monospace; color: rgb(0, 0, 0);">K+1</span><span
                 style="color: rgb(0, 0, 0);">.&nbsp;</span> (</span><a
               style="color: rgb(0, 153, 0);" href="#Data_Representation">See
+
+
 
               above</a><span style="color: rgb(0, 153, 0);">.)<br>
               <br>
@@ -3329,6 +3385,8 @@
                 0, 0);"><br>
                 <br>
                 The instruction "<span style="font-family: monospace;">DCA
+
+
 
 
                   L</span>" is an unusual case.&nbsp;&nbsp; Since the
@@ -3517,11 +3575,15 @@
             <br>
             For the special case "<span style="font-family: monospace;">DCS
 
+
+
               A</span>", refer to the <span style="font-family:
               monospace;">DCOM</span> instruction.<span style="color:
               rgb(0, 153, 0);"><span style="color: rgb(0, 0, 0);"><br>
                 <br>
                 The instruction "<span style="font-family: monospace;">DCS
+
+
 
 
                   L</span>" is an unusual case.&nbsp;&nbsp; Since the
@@ -4214,9 +4276,13 @@
                   <td style="vertical-align: top; text-align: center;">+17777
 
 
+
+
                     (17777)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">-37777
+
+
 
 
                     (40000)<br>
@@ -4224,14 +4290,20 @@
                   <td style="vertical-align: top; text-align: center;">+20000
 
 
+
+
                     (20000)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">+37774
 
 
+
+
                     (37774)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">+00001
+
+
 
 
                     (00001)<br>
@@ -4250,9 +4322,13 @@
                   <td style="vertical-align: top; text-align: center;">+17777
 
 
+
+
                     (17777)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">-37777
+
+
 
 
                     (40000)<br>
@@ -4260,14 +4336,20 @@
                   <td style="vertical-align: top; text-align: center;">-20000
 
 
+
+
                     (57777)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">-37774
 
 
+
+
                     (40003)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">+00001
+
+
 
 
                     (00001)<br>
@@ -4286,9 +4368,13 @@
                   <td style="vertical-align: top; text-align: center;">-17777
 
 
+
+
                     (60000)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">+37777
+
+
 
 
                     (37777)<br>
@@ -4296,14 +4382,20 @@
                   <td style="vertical-align: top; text-align: center;">+20000
 
 
+
+
                     (20000)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">-37774
 
 
+
+
                     (40003)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">-00001
+
+
 
 
                     (77776)<br>
@@ -4322,9 +4414,13 @@
                   <td style="vertical-align: top; text-align: center;">-17777
 
 
+
+
                     (60000)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">+37777
+
+
 
 
                     (37777)<br>
@@ -4332,14 +4428,20 @@
                   <td style="vertical-align: top; text-align: center;">-20000
 
 
+
+
                     (57777)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">+37774
 
 
+
+
                     (37774)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">-00001
+
+
 
 
                     (77776)<br>
@@ -4361,9 +4463,13 @@
                   <td style="vertical-align: top; text-align: center;">+17777
 
 
+
+
                     (17777)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">+37777
+
+
 
 
                     (37777)<br>
@@ -4371,14 +4477,20 @@
                   <td style="vertical-align: top; text-align: center;">+20000
 
 
+
+
                     (20000)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">+37777
 
 
+
+
                     (37777)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">+17777
+
+
 
 
                     (17777)<br>
@@ -4398,9 +4510,13 @@
                   <td style="vertical-align: top; text-align: center;">+37776
 
 
+
+
                     (37776)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">+00000
+
+
 
 
                     (00000)<br>
@@ -4408,14 +4524,20 @@
                   <td style="vertical-align: top; text-align: center;">+37776
 
 
+
+
                     (37776)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">+37777
 
 
+
+
                     (37777)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">+37776
+
+
 
 
                     (37776)<br>
@@ -4436,14 +4558,20 @@
                   <td style="vertical-align: top; text-align: center;">+00000
 
 
+
+
                     (00000)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">-00000
 
 
+
+
                     (77777)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">+00000
+
+
 
 
                     (00000)<br>
@@ -4451,11 +4579,15 @@
                   <td style="vertical-align: top; text-align: center;">-37777
 
 
+
+
                     (40000)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">-00000
 
 
+
+
                     (77777)<br>
                   </td>
                 </tr>
@@ -4474,14 +4606,20 @@
                   <td style="vertical-align: top; text-align: center;">+00000
 
 
+
+
                     (00000)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">-00000
 
 
+
+
                     (77777)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">-00000
+
+
 
 
                     (77777)<br>
@@ -4489,9 +4627,13 @@
                   <td style="vertical-align: top; text-align: center;">+37777
 
 
+
+
                     (37777)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">-00000
+
+
 
 
                     (77777)<br>
@@ -4512,14 +4654,20 @@
                   <td style="vertical-align: top; text-align: center;">-00000
 
 
+
+
                     (77777)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">+00000
 
 
+
+
                     (00000)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">+00000
+
+
 
 
                     (00000)<br>
@@ -4527,9 +4675,13 @@
                   <td style="vertical-align: top; text-align: center;">+37777
 
 
+
+
                     (37777)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">+00000
+
+
 
 
                     (00000)<br>
@@ -4550,9 +4702,13 @@
                   <td style="vertical-align: top; text-align: center;">-00000
 
 
+
+
                     (77777)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">+00000
+
+
 
 
                     (00000)<br>
@@ -4560,14 +4716,20 @@
                   <td style="vertical-align: top; text-align: center;">-00000
 
 
+
+
                     (77777)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">-37777
 
 
+
+
                     (40000)<br>
                   </td>
                   <td style="vertical-align: top; text-align: center;">+00000
+
+
 
 
                     (00000)<br>
@@ -4672,6 +4834,8 @@
             when placed in A.<br>
             <br>
             In the case of the "<span style="font-family: monospace;">DXCH
+
+
 
               L</span>" instruction (in which the source and destination
             ranges overlap, Q&nbsp; (full 16 bits, including overflow)
@@ -5145,6 +5309,8 @@
               <span style="font-family: monospace;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
 
+
+
                 TC&nbsp; &nbsp;&nbsp;&nbsp; JMPTAB<br>
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ...<br>
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
@@ -5227,6 +5393,8 @@
             When the basic form of <span style="font-family:
               monospace;">INDEX</span> is used (i.e., without a
             preceding <span style="font-family: monospace;">EXTEND</span>),
+
+
 
             the special case of <span style="font-family: monospace;">K</span>
             being address&nbsp; 017 octal is not an <span
@@ -5636,11 +5804,15 @@
               style="font-family: monospace;">K</span> each containing
             the octal value 2 (which would really be the SP value 2×2<sup>-14</sup>),
 
+
+
             then you would indeed find a result of 4, but it would be in
             L register because it would be part of the DP value 4×2<sup>-28</sup>
             rather than just the integer 4.<br>
             <br>
             For the special case "<span style="font-family: monospace;">MP
+
+
 
               A</span>", refer instead to the <span style="font-family:
               monospace;">SQUARE</span> instruction.<br>
@@ -6413,6 +6585,8 @@
               <span style="font-family: monospace; font-style: italic;">Some
 
 
+
+
                 instruction</span><br>
             </div>
             would not index the final instruction as shown, because "<span
@@ -6988,6 +7162,8 @@
             <br>
             <span style="text-decoration: underline;">Indirect jumps</span>:&nbsp;
 
+
+
             The <span style="font-family: monospace;">TC</span>
             instruction may also be used to accomplish an indirect jump
             (i.e., a jump to a computed rather than a hard-coded
@@ -7019,6 +7195,8 @@
             will contain a value of 1.&nbsp; Incidentally, it should
             also be obvious that <span style="font-family: monospace;">TC
 
+
+
               A</span> will require 2 MCT of CPU time instead of the 1
             MCT quoted earlier, since it actually results in <span
               style="font-style: italic;">two</span> <span
@@ -7032,6 +7210,8 @@
             instruction for full details.<br>
             <br>
             <span style="text-decoration: underline;">Indirect calls</span>:&nbsp;
+
+
 
             For an indirect call, it is necessary to combine an <span
               style="font-family: monospace;">INDEX</span> instruction
@@ -7223,6 +7403,8 @@
             instruction instead for that.<br>
             <br>
             <span style="text-decoration: underline;">Indirect jumps</span>:&nbsp;
+
+
 
             For an indirect jump, it is necessary to combine an <span
               style="font-family: monospace;">INDEX</span> instruction
@@ -8132,6 +8314,8 @@
       <span style="font-family: monospace;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
 
+
+
         = 4</span><br style="font-family: monospace;">
       <span style="font-family: monospace;">FIFOHAF = 8</span><br>
     </div>
@@ -8272,40 +8456,60 @@
         monospace;">MYJUMP&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
 
+
+
         2FCADR&nbsp;&nbsp; MYLABEL<br>
         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
 
-        .<br>
-        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
 
         .<br>
         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
 
+
+
         .<br>
         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+
+
+
+        .<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+
 
 
         EXTEND<br>
         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
 
+
+
         DCA&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; MYJUMP<br>
         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+
 
 
         DTCF<br>
         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
 
-        .<br>
-        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
 
         .<br>
         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+
+
+
+        .<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+
 
 
         .<br>
@@ -8660,6 +8864,8 @@
     location counter. The net effect is to set the label of the line (if
     any) to <span style="font-style: italic; font-family: monospace;">m</span>.&nbsp;
 
+
+
     The <span style="font-style: italic; font-family: monospace;">n</span>
     operand is discarded, and is present principally for documentation
     purposes.<br>
@@ -8725,7 +8931,11 @@
           ???????&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
 
+
+
           A&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+
 
 
           EQUALS&nbsp;&nbsp; 0</tt><tt><br>
@@ -8734,9 +8944,13 @@
           4000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
 
+
+
           BLOCK&nbsp;&nbsp;&nbsp; 2</tt><tt><br>
         </tt> <tt>000008,000008:&nbsp;&nbsp;&nbsp;
           4000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+
 
 
           SECSIZ&nbsp;&nbsp; 25</tt><tt><br>
@@ -8746,10 +8960,14 @@
           FIRST&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
 
+
+
           AD&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; A</tt><tt><br>
         </tt> <tt>000010,000010:&nbsp;&nbsp;&nbsp;
           4001&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
           60000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+
 
 
           AD&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; A</tt><tt><br>
@@ -8758,9 +8976,13 @@
           6000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
 
+
+
           BLOCK&nbsp;&nbsp;&nbsp; 3</tt><tt><br>
         </tt> <tt>000013,000013:&nbsp;&nbsp;&nbsp;
           6000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+
 
 
           SECSIZ&nbsp;&nbsp; 64</tt><tt><br>
@@ -8770,14 +8992,20 @@
           SECOND&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
 
+
+
           XCH&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; A</tt><tt><br>
         </tt> <tt>000015,000015:&nbsp;&nbsp;&nbsp;
           6001&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
 
+
+
           BANK</tt><tt><br>
         </tt> <tt>000016,000016:&nbsp;&nbsp;&nbsp;
           6064&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+
 
 
           SECSIZ&nbsp;&nbsp; 6</tt><tt><br>
@@ -8787,10 +9015,14 @@
           SECONDB&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
 
+
+
           AD&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; A</tt><tt><br>
         </tt> <tt>000018,000018:</tt> <tt><br>
         </tt> <tt>000019,000019:&nbsp;&nbsp;&nbsp;
           4000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+
 
 
           SETLOC&nbsp;&nbsp; FIRST</tt><tt><br>
@@ -8798,9 +9030,13 @@
           4000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
 
+
+
           BANK</tt><tt><br>
         </tt> <tt>000021,000021:&nbsp;&nbsp;&nbsp;
           4025&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+
 
 
           SECSIZ&nbsp;&nbsp; 12</tt><tt><br>
@@ -8810,15 +9046,21 @@
           THIRD&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
 
+
+
           AD&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; A</tt><tt><br>
         </tt> <tt>000023,000023:</tt> <tt><br>
         </tt> <tt>000024,000024:&nbsp;&nbsp;&nbsp;
           6072&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
 
+
+
           BLOCK&nbsp;&nbsp;&nbsp; 3</tt><tt><br>
         </tt> <tt>000025,000025:&nbsp;&nbsp;&nbsp;
           6072&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+
 
 
           SECSIZ&nbsp;&nbsp; 14</tt><tt><br>
@@ -8828,15 +9070,21 @@
           FOURTH&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
 
+
+
           AD&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; A</tt><tt><br>
         </tt> <tt>000027,000027:</tt> <tt><br>
         </tt> <tt>000028,000028:&nbsp;&nbsp;&nbsp;
           6106&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
 
+
+
           BLOCK&nbsp;&nbsp;&nbsp; 3</tt><tt><br>
         </tt> <tt>000029,000029:&nbsp;&nbsp;&nbsp;
           6106&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+
 
 
           SECSIZ&nbsp;&nbsp; 31</tt><tt><br>
@@ -8846,15 +9094,21 @@
           FIFTH&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
 
+
+
           AD&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; A</tt><tt><br>
         </tt> <tt>000031,000031:</tt> <tt><br>
         </tt> <tt>000032,000032:
           02,2037&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
 
+
+
           BANK&nbsp;&nbsp;&nbsp;&nbsp; 2</tt><tt><br>
         </tt> <tt>000033,000033:
           02,2037&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+
 
 
           SECSIZ&nbsp;&nbsp; 17</tt><tt><br>
@@ -8864,9 +9118,13 @@
           SIXTH&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
 
+
+
           AD&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; A</tt><tt><br>
         </tt> <tt>000035,000035:
           02,2040&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+
 
 
           BANK</tt><tt><br>
@@ -8874,11 +9132,15 @@
           02,2056&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
 
+
+
           SECSIZ&nbsp;&nbsp; 18</tt><tt><br>
         </tt> <tt>000037,000037:
           02,2056&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
           60000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
           SEVENTH&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+
 
 
           AD&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; A</tt><br>
@@ -8915,6 +9177,8 @@
     bank in fixed-memory.<br>
     <h3>SUBRO</h3>
     This is simply discarded by <span style="font-weight: bold;">yaYUL</span>.&nbsp;
+
+
 
     Its original purpose (in <span style="font-weight: bold;">YUL</span>)
     was seemingly to help maintain a list of subroutines for later
@@ -9019,6 +9283,8 @@
     <br>
     <span style="text-decoration: underline;">Operands in fixed memory.</span>&nbsp;&nbsp;
 
+
+
     These encode to 15-bit values, and can be used to represent any
     address in fixed-memory banks 00-37.&nbsp; (Superbanks 40-43 are not
     accesible to the interpreter.)&nbsp; I'll designate this rule by <span
@@ -9027,6 +9293,8 @@
       <li>Fixed-fixed:&nbsp; <span style="font-family: monospace;">f(X)
           = X</span></li>
       <li>Common-fixed:&nbsp; <span style="font-family: monospace;">f(X)
+
+
 
           = 02000 * <span style="font-style: italic;">FixedBankNumOfX</span>
           + (X - 02000)</span><br>
@@ -9299,8 +9567,7 @@
         functions and vector manipulation) are not supported by the
         hardware, which meant that performing navigation calculations
         required an enormous number of subroutine calls.</font></p>
-    <font color="#663300">
-    </font>
+    <font color="#663300"> </font>
     <p><font color="#663300">To solve these problems, as well as get
         around the general unwieldiness of writing large programs for
         the AGC, the developers implemented an interpreter that
@@ -9309,8 +9576,7 @@
         Interpreter is quite different from the AGC, with its own set of
         registers, more powerful instructions, and a different memory
         model.</font></p>
-    <font color="#663300">
-    </font>
+    <font color="#663300"> </font>
     <p><font color="#663300">The result is that some software in the AGC
         is written using the AGC's native instructions, and some of the
         software is written using the instructions that are understood
@@ -9318,11 +9584,9 @@
         instructions, but it is up to the programmer to use the proper
         instructions at the proper place in the code, as described
         below.</font></p>
-    <font color="#663300">
-    </font>
+    <font color="#663300"> </font>
     <p><font color="#663300">The Interpreter includes these features:</font></p>
-    <font color="#663300">
-    </font>
+    <font color="#663300"> </font>
     <ul>
       <li><font color="#663300"><b>Wider variety of instructions.</b>
           The Interpreter provided a much wider variety of instructions,
@@ -9346,50 +9610,39 @@
           Interpreter provides useful memory structures, such as stacks
           and switches, which the AGC hardware lacks.</font></li>
     </ul>
-    <font color="#663300">
-    </font>
+    <font color="#663300"> </font>
     <p><font color="#663300">The software that implements the
         Interpreter occupies most of fixed bank 00, some of 01, and some
         fixed-fixed memory.</font></p>
-    <font color="#663300">
-    </font>
-    <h4><font color="#663300">Starting / Exiting the Interpreter</font></h4>
-    <font color="#663300">
-    </font>
+    <font color="#663300"> </font>
+    <h4><font color="#663300"><a name="Danzig"></a>Starting / Exiting
+        the Interpreter</font></h4>
+    <font color="#663300"> </font>
     <p><font color="#663300">A machine-code program starts a block of
         interpreted code by calling the INTPRET subroutine with this
         assembler instruction:</font></p>
-    <font color="#663300">
-    </font>
+    <font color="#663300"> </font>
     <div style="font-family: &quot;Courier New&quot;; margin-left: 1em"><font
-        color="#663300">
-        TC INTPRET
-      </font></div>
-    <font color="#663300">
-    </font>
+        color="#663300"> TC INTPRET </font></div>
+    <font color="#663300"> </font>
     <p><font color="#663300">The Interpreter expects the TC INTPRET
         instruction to be immediately followed by a block of Interpeter
         code. The Interpreter reads and executes this code until it
         encounters an EXIT Interpreter instruction. The Interpreter
         assumes that the memory word following the EXIT instruction is
         an AGC machine instruction, and execution continues immediately
-        after the EXIT.
-      </font></p>
+        after the EXIT. </font></p>
     <p><font color="#663300">The typical structure of a program
         containing Interpreter code looks like this:</font></p>
-    <font color="#663300">
-    </font>
+    <font color="#663300"> </font>
     <div style="font-family: &quot;Courier New&quot;; margin-left: 1em"><font
-        color="#663300">
-        ... machine code ...<br>
+        color="#663300"> ... machine code ...<br>
         TC INTPRET<br>
         ... Interpreter code ...<br>
         EXIT<br>
         ... machine code ...<br>
-      </font>
-    </div>
-    <font color="#663300">
-    </font>
+      </font> </div>
+    <font color="#663300"> </font>
     <p><font color="#663300">It is vitally important that a programmer
         use the appropriate instructions in the appropriate context. If
         a programmer uses an Interpreter instruction in the middle of
@@ -9397,36 +9650,60 @@
         misinterpret the instruction. Similarly, if a programmer uses a
         native AGC instruction inside a block of Interpreter code, a
         similar misinterpretation will occur.</font></p>
-    <font color="#663300">
-    </font>
+    <font color="#663300"> </font>
     <p><font color="#663300">An interpreted program can call a machine
         code subroutine by executing an RTB instruction (which branches
         to a machine code location). The RTB instruction stores a return
         address in the Interpreter. When the machine code subroutine has
         finished executing, it returns to the interpreted code by
         executing this instruction:</font></p>
-    <font color="#663300">
-    </font>
+    <font color="#663300"> </font>
     <div style="font-family: &quot;Courier New&quot;; margin-left: 1em"><font
-        color="#663300">
-        TC DANZIG</font><br>
+        color="#663300"> TC DANZIG</font><br>
     </div>
-    <font color="#663300">
-    </font><br>
-    [Ron's note:&nbsp; I've often wondered, Why DANZIG? According to
-    Wikipedia, the Free City of Danzig was a semi-autonomous city-state
-    that existed between 1920 and 1939 (it is now Gdansk, Poland)
-    created to give Poland access to a well-sized seaport, though the
-    majority-German population deeply resented being separated from
-    Germany, and after the war about 300,000 of them either fled to or
-    were expelled to East or West Germany.&nbsp; But does any of that
-    have to do with TC DANZIG?]<br>
+    <font color="#663300"> </font><br>
+    <b>Ron's note:</b>&nbsp; In general, the DANZIG routine is the
+    dispatcher that determines the next action to take after executing
+    an interpreted instruction.&nbsp; In other words, it decides the
+    next interpreted instruction to execute.&nbsp; Calling DANZIG as
+    shown above is simply a special case in which the preceding code was
+    basic code instead of interpretive code.&nbsp; <i>But why <u>DANZIG</u>?</i>&nbsp;
+
+    I'd often wondered about that, but after a dozen years of wondering
+    about it and inventing my own little stories about it, I finally
+    thought to <i>ask</i> someone about it ... and as luck would have
+    it, the first person I thought to ask was able to give me the
+    answer. Hugh Blair-Smith, responding to my apology about asking him
+    something outside of his bailiwick, said the following:<br>
+    <blockquote><font size="-1">"Outside my bailiwick, you say? Nay sir,
+        I'm fairly sure I personally coined the term in that context.
+        The interpretive language, in both Block I and Block II, was
+        formatted in 'Polish notation,' where one word was occupied by
+        two operation codes and the next few words held as many
+        addresses as those op codes needed. The additional gimmick was
+        that the logic in the interpreter that picked up addresses could
+        tell when it was looking at an op code word instead, in which
+        case it understood that the address it was thinking of wasn't
+        necessary, and it should pop an operand off the stack instead.
+        That's how it implemented Lukasiewicz's parenthesis-free
+        notation, spending a little logic to save words of memory.<br>
+        <br>
+        "So .......... the dispatcher is the 'gateway to Poland' and as
+        any student of World War II history knows, the bogus Polish
+        provocation, and the Wehrmacht's all-too-ready charge across the
+        border, occurred in Danzig. It was many years before I
+        understood that 'Danzig' was a German respelling of the city
+        known to any proper Pole as 'Gdansk.'<br>
+        <br>
+        "But it was 'Danzig' on the maps and globes of my childhood, so
+        established by the Treaty of Versailles to give Poland a
+        corridor to the Baltic Sea, and that's why!"<br>
+      </font></blockquote>
+    So there you have it.<br>
     <h4><font color="#663300">Interpreter Registers</font></h4>
-    <font color="#663300">
-    </font>
+    <font color="#663300"> </font>
     <p><font color="#663300">The Interpreter simulates these registers:</font></p>
-    <font color="#663300">
-    </font>
+    <font color="#663300"> </font>
     <table border="1" align="center">
       <tbody>
         <tr>
@@ -9459,29 +9736,22 @@
         </tr>
       </tbody>
     </table>
-    <font color="#663300">
-    </font>
+    <font color="#663300"> </font>
     <p><font color="#663300">There are five sets of registers, so the
         Interpreter can support up to five simultaneous programs.</font></p>
-    <font color="#663300">
-    </font>
+    <font color="#663300"> </font>
     <h4><font color="#663300">Stack</font></h4>
-    <font color="#663300">
-    </font>
+    <font color="#663300"> </font>
     <p><font color="#663300">The Interpreter simulates a push-down
         stack, which can contain up to 38 values.</font></p>
-    <font color="#663300">
-    </font>
+    <font color="#663300"> </font>
     <h4><font color="#663300">Switches</font></h4>
-    <font color="#663300">
-    </font>
+    <font color="#663300"> </font>
     <p><font color="#663300">The Interpreter supports 120 binary
         (on/off) switches, number 0 - 119 (decimal).</font></p>
-    <font color="#663300">
-    </font>
+    <font color="#663300"> </font>
     <h4><font color="#663300">Memory</font></h4>
-    <font color="#663300">
-    </font>
+    <font color="#663300"> </font>
     <p><font color="#663300">The AGC hardware uses a complex and
         cumbersome memory model which divides both erasable and fixed
         memory into a series of banks. Banking registers are required to
@@ -9489,12 +9759,10 @@
         Interpreter relieves the programmer of dealing with most of this
         complexity within interpreted code. An interpreted program can
         access roughly half of erasable memory and half of fixed memory.</font></p>
-    <font color="#663300">
-    </font>
+    <font color="#663300"> </font>
     <p><font color="#663300">The Interpreter organizes memory into these
         three areas:</font></p>
-    <font color="#663300">
-    </font>
+    <font color="#663300"> </font>
     <ul>
       <li><font color="#663300"><b>Local erasable memory</b> consists of
           unswitched erasable locations 61 (octal) through 1377 (octal),
@@ -9510,11 +9778,9 @@
       <li><font color="#663300"><b>High fixed memory</b> consists of
           fixed banks 21 (octal) through 37. (15K words (decimal))</font></li>
     </ul>
-    <font color="#663300">
-    </font>
+    <font color="#663300"> </font>
     <p><font color="#663300">These rules apply:</font></p>
-    <font color="#663300">
-    </font>
+    <font color="#663300"> </font>
     <ul>
       <li><font color="#663300">Interpreted programs can store variables
           anywhere in local erasable memory, other than location 0 - 77
@@ -9537,13 +9803,11 @@
           use a full 15-bit address, so programs can branch to anywhere
           accessible by a 15-bit address (32K addresses).</font></li>
     </ul>
-    <font color="#663300">
-    </font>
+    <font color="#663300"> </font>
     <p><font color="#663300">The memory organization presented to a
         program differs, depending on whether a program is located in
         low fixed memory or high fixed memory:</font></p>
-    <font color="#663300">
-    </font>
+    <font color="#663300"> </font>
     <table border="1" align="center">
       <tbody>
         <tr>
@@ -9556,12 +9820,16 @@
           <td align="center"><font color="#663300">00000 - 01377</font></td>
           <td align="center"><font color="#663300">768</font></td>
           <td colspan="2" align="center"><font color="#663300">Unswitched
+
+
               erasable memory (i.e. erasable banks 0 - 2)</font></td>
         </tr>
         <tr>
           <td align="center"><font color="#663300">01400 - 01777</font></td>
           <td align="center"><font color="#663300">256</font></td>
           <td colspan="2" align="center"><font color="#663300">Currently-selected
+
+
               erasable bank*</font></td>
         </tr>
         <tr>
@@ -9578,12 +9846,10 @@
         </tr>
       </tbody>
     </table>
-    <font color="#663300">
-    </font>
+    <font color="#663300"> </font>
     <p><font color="#663300">*This is the erasable memory bank that is
         selected by the AGC's EBANK register.</font></p>
-    <font color="#663300">
-    </font>
+    <font color="#663300"> </font>
     <p><font color="#663300">Since a 15-bit address can't access enough
         memory locations the include all the fixed banks, the designers
         who wrote the Interpreter came up with this scheme: When an
@@ -9593,11 +9859,9 @@
         address is 2000 (octal) or above. The net effect is that a
         15-bit address enables any program in low fixed memory to reach
         any address in low fixed memory, and any program in high fixed
-        memory to reach any address in high fixed memory.
-      </font></p>
+        memory to reach any address in high fixed memory. </font></p>
     <h4><font color="#663300">Indirect Branching</font></h4>
-    <font color="#663300">
-    </font>
+    <font color="#663300"> </font>
     <p><font color="#663300">The Interpreter doesn't support indexing on
         branch instructions, but it does support a method of
         indirection. The Interpreter requires that all executable code
@@ -9609,15 +9873,12 @@
         erasable memory location is read and the Interpreter branches to
         that address. This continues any number of times, until the
         address resolves to an address in fixed memory.</font></p>
-    <font color="#663300">
-    </font>
+    <font color="#663300"> </font>
     <h4><font color="#663300">Instructions</font></h4>
-    <font color="#663300">
-    </font>
+    <font color="#663300"> </font>
     <p><font color="#663300">Interpreter instructions pack two 7-bit
         opcodes into a single word, like so:</font></p>
-    <font color="#663300">
-    </font>
+    <font color="#663300"> </font>
     <table border="1" align="center">
       <tbody>
         <tr>
@@ -9644,13 +9905,11 @@
         </tr>
       </tbody>
     </table>
-    <font color="#663300">
-    </font>
+    <font color="#663300"> </font>
     <p><font color="#663300">This word is then followed by whatever
         arguments are required by the first opcode, and then by whatever
         arguments are required for the second opcode.</font></p>
-    <font color="#663300">
-    </font>
+    <font color="#663300"> </font>
     <p><font color="#663300">The 127 possible opcodes are divided into
         four categories, specified by the two low-order bits in each
         opcode. Roughly, the lowest bit </font><font color="#663300"><font
@@ -9658,8 +9917,7 @@
           color="#663300">—</font> specifies whether the opcode requires
         an argument, and bit 2 determines whether the argument may be
         indexed. Specifically, the four categories work like this:</font></p>
-    <font color="#663300">
-    </font>
+    <font color="#663300"> </font>
     <table border="1" align="center">
       <tbody>
         <tr>
@@ -9686,12 +9944,11 @@
               the instruction has its 15 bit set to 0, it's the argument
               for this instruction; if it's set to 1, it's the next
               instruction and the argument should be pulled off the
-              stack.
-              [What's not clear to me is how to handle the case in which
-              opcode 1 is in class 01, and opcode 2 is in class 11. It
-              seems that there could be a problem if the intention is to
-              get opcode 1's argument from the stack, but opcode 2's
-              argument follows the instruction.]</font></td>
+              stack. [What's not clear to me is how to handle the case
+              in which opcode 1 is in class 01, and opcode 2 is in class
+              11. It seems that there could be a problem if the
+              intention is to get opcode 1's argument from the stack,
+              but opcode 2's argument follows the instruction.]</font></td>
         </tr>
         <tr>
           <td><font color="#663300">10</font></td>
@@ -9707,27 +9964,22 @@
         </tr>
       </tbody>
     </table>
-    <font color="#663300">
-    </font>
+    <font color="#663300"> </font>
     <p><font color="#663300">Store instructions break the usual pattern
         of packing two 7-bit opcodes into a word. They consist of a
         single opcode with a 10-bit address in erasable memory.</font></p>
-    <font color="#663300">
-    </font>
+    <font color="#663300"> </font>
     <h4><font color="#663300">Instruction List</font></h4>
-    <font color="#663300">
-    </font>
+    <font color="#663300"> </font>
     <p><font color="#663300">The following table describes each
         Interpreter opcode. The "Args" column indicates whether the
         instruction requires 0, 1, or 2 arguments, and whether the
         arguments are addresses or constants.</font></p>
-    <font color="#663300">
-    </font>
+    <font color="#663300"> </font>
     <p><font color="#663300">The documentations didn't provide the
         numeric opcodes for any of the instructions, so it's hard to
         tell which of the four classes each opcode falls into.</font></p>
-    <font color="#663300">
-    </font>
+    <font color="#663300"> </font>
     <table border="1" align="center">
       <tbody>
         <tr>
@@ -10400,8 +10652,7 @@
         </tr>
       </tbody>
     </table>
-    <font color="#663300">
-      <b>Notes:</b><br>
+    <font color="#663300"> <b>Notes:</b><br>
       [1] The documentation doesn't specify how the instruction
       determines which index register or step register (1 or 2) is being
       referenced. In the assembly language the programmer has to specify
@@ -10416,6 +10667,8 @@
     The following information is largely taken from Luminary and
     Colossus program listings.&nbsp; However, many additional i/o
     channels are covered <a href="developer.html#Table_of_IO_Channels">on
+
+
 
       the developer page</a>.<br>
     <br>
@@ -11451,6 +11704,8 @@
     <br>
     <div style="text-align: center;"> <span style="font-weight: bold;">Instruction
 
+
+
         Map</span><br>
     </div>
     <table summary="" style="width: 100%; height: 451px; text-align:
@@ -11695,8 +11950,12 @@
       are not shown.</span><br>
     <h2><a name="UnprogrammedSequences" id="UnprogrammedSequences"></a>Unprogrammed
 
+
+
       Sequences</h2>
     As mentioned earlier in the <a href="#CPU_Architecture_Registers">CPU
+
+
 
       Architecture</a> section, the AGC provides instruction-like
     entities called "unprogrammed sequences" which are activated
@@ -11967,10 +12226,12 @@
           href="https://creativecommons.org/publicdomain/zero/1.0/">Creative
 
 
+
+
           Commons No Rights Reserved License</a></span><br>
       <i><font size="-1">Last modified by <a
             href="mailto:info@sandroid.org">Ronald Burkey</a> on
-          2018-07-15.<br>
+          2018-07-23.<br>
           <br>
           <a href="http://www.ibiblio.org"><img style="border: 0px solid
               ; width: 300px; height: 100px;" alt="Virtual AGC is hosted

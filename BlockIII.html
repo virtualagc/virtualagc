@@ -1,173 +1,211 @@
 <!DOCTYPE doctype PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
 <html>
-<head>
-  <meta name="generator" content=
-  "HTML Tidy for HTML5 for Linux version 5.3.14">
-  <meta http-equiv="Content-Type" content=
-  "text/html; charset=utf-8">
-  <meta name="GENERATOR" content=
-  "Mozilla/4.7 [en] (X11; I; Linux 2.4.16 ppc) [Netscape]">
-  <meta name="Author" content="Ronald Burkey">
-  <title>Virtual AGC FAQ Page</title>
-  <link rel="icon" type="image/png" href="favicon.png">
-  <meta name="author" content="Ronald S. Burkey">
-  <script type="text/javascript" src="Header.js">
+  <head>
+    <meta name="generator" content="HTML Tidy for HTML5 for Linux
+      version 5.3.14">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="GENERATOR" content="Mozilla/4.7 [en] (X11; I; Linux
+      2.4.16 ppc) [Netscape]">
+    <meta name="Author" content="Ronald Burkey">
+    <title>Virtual AGC FAQ Page</title>
+    <link rel="icon" type="image/png" href="favicon.png">
+    <meta name="author" content="Ronald S. Burkey">
+    <script type="text/javascript" src="Header.js">
   </script>
-</head>
-<body style="background-image: url(gray3.jpg);">
-  <script type="text/javascript">
+  </head>
+  <body style="background-image: url(gray3.jpg);">
+    <script type="text/javascript">
   document.write(headerTemplate.replace("@TITLE@","Block III").replace("@SUBTITLE@","Ruminations on a More-Ideal World"))
   </script><br>
-  <h2><a name="Blocks_for_All_Occasions" id=
-  "Blocks_for_All_Occasions"></a>Blocks for All Occasions</h2>
-  <p>The design of the AGC went through several stages, which for
-  the sake of this discussion we'll call "blocks".&nbsp; However,
-  the different block designs, while similar in many ways, were
-  quite different in others.&nbsp; Rather than try to cover all of
-  them on one page, the different blocks are covered in separate
-  pages:<br></p>
-  <ul>
-    <li><a href=
-    "NARA-SW/E-1077.pdf">"Block
-    0"</a> — Earliest preliminary design of the AGC for which I
-    have any documentation, not used in any missions, and with no
-    known existing code.&nbsp; There's a single document (that I
-    know of) describing it, so the link is simply to that document,
-    rather than to a separate page.</li>
-    <li><a href="Block1.html">"Block 1"</a> — Used for the earlier
-    designs of the Command Module, which were also referred to a
-    Block 1 spacecraft.&nbsp; Used for the unmanned Apollo 4 and
-    Apollo 6 unmanned missions.</li>
-    <li><a href="assembly_language_manual.html">"Block 2"</a> —
-    Used for the later designs of the Command Module, which were
-    also referred to a Block 2 spacecraft.&nbsp; Used for the
-    (unmanned) Apollo 5 mission's Lunar Module, and for all manned
-    missions.</li>
-    <li>"Block 3" — There was no such thing in the Apollo program,
-    but Hugh Blair-Smith has given us some ideas about what it
-    might have looked like if there were.</li>
-  </ul>
-  <p>However, <i>this</i> page confines itself just to the Block 3
-  design.<br></p>
-  <hr style="width: 100%; height: 2px;">
-  <h2><a name="Intro" id="Intro"></a><big><big><big><font size=
-  "-1"><big><big><big>Introduction</big></big></big></font></big></big></big></h2>
-  <p>The first thing to understand about the Block III AGC is that
-  there's no such thing.&nbsp; However, if you have had the
-  patience to read much of what we have to say on this site about
-  the architecture of the Block I AGC (used only in a handful of
-  unmanned missions) and especially the Block II AGC (used in all
-  the manned missions), you will see that certain aspects of the
-  architecture seem to have led to related inefficiencies in the
-  software, and that the system could perhaps have had a
-  more-efficient architecture from the ground up.&nbsp;<br></p>
-  <p>Of course, in blithely stating that, we shouldn't pretend that
-  that fact should have been obvious in advance, nor that there
-  weren't inescapable forces that led to this kind of
-  situation.&nbsp; For one thing, the "feature creep" (over which
-  the developers had no control) on the original development
-  project, combined with the need to maintain a certain backward
-  compatibility in order to keep from having to rewrite the
-  software over and over again, combined too with the inherent
-  multiplicative complexity in increasing instruction and memory
-  word-lengths at the time, would have forced the team to allow
-  only incremental changes to the architecture.<br></p>
-  <p>However, that doesn't stop us from speculating about what a
-  better Block III system <i>might</i> have looked like, if the
-  developers were freed from these kinds of restrictions.&nbsp; But
-  as it happens, we don't need to speculate about it!&nbsp; As he
-  explains in a footnote in his book, <a href=
-  "https://www.amazon.com/Left-Brains-Right-Stuff-Computers/dp/0996434534">
-  Left Brains for the Right Stuff</a>, original AGC developer Hugh
-  Blair-Smith put together some notes for a hypothetical Block III
-  AGC architecture that he hoped would have doubled the processing
-  speed, and (to quote his words)<br></p>
-  <blockquote>
-    <p><small>"I did the thinking and writing just a few years ago,
-    but strictly in terms of the mid-\9260s technology we actually
-    used. Probably the greatest risk of non-fidelity is in power
-    consumption, because I take advantage of the Harvard
-    architecture to cycle both fixed and erasable memories
-    simultaneously whenever practical (which is
-    mostly)."</small><br></p>
-  </blockquote>
-  <p>And,<br></p>
-  <blockquote>
-    <p><small>"I plan to publish this fantasy on-line for the
-    amusement of all the people around the world who enjoy building
-    hardware or software replicas of the AGC".</small><br></p>
-  </blockquote>
-  <p>Actually, only the second quote is from the book.&nbsp; While
-  I don't know that "enjoy" is the word I would necessarily use for
-  this activity, Hugh has in fact sent his notes on the topic to
-  us, and we present them here for your delectation.<br></p>
-  <h2>Hugh's Dream</h2>
-  <p>I quote:<br></p>
-  <blockquote>
-    <p><small>"What I\92d love is for some
-    too-much-time-on-their-hands people to port, say, Luminary 099
-    from Block II to Block III and see how much shorter and faster
-    it is!"</small><br></p>
-  </blockquote>A fascinating idea, obviously.&nbsp; One might wish
-  for not merely a port of one or more of the Block II AGC
-  programs, but perhaps even a Block III assembler and
-  simulator.&nbsp; If you're such a person, give it some
-  thought.&nbsp; Perhaps it would be your road to fame!<br>
-  <h2>Hugh's Notes<br></h2>
-  <p>Hugh's notes comprise two Word documents,<br></p>
-  <ul>
-    <li><a href=
-    "Documents/AGC_Block_III_upd_3.doc">
-    AGC Block III.doc</a> (most recently updated
-    2016-09-15)<a href="Documents/AGC_Block_III_upd_2.doc"><br>
-    </a></li>
-    <li><a href=
-    "Documents/AGC_Block_III_testing.doc">
-    AGC Block III testing.doc</a></li>
-  </ul>
-  <p>and since they haven't exactly been put into a finalized form,
-  he has also taken the trouble to describe the best way of reading
-  them.&nbsp; I quote, though a brief summary might be, "Don't
-  start with the testing document":<br></p>
-  <blockquote>
-    <p><small>"... you\92ll probably find the testing document
-    pretty opaque, since it records the output of a simulator that
-    existed only in my headbone. In reading the doc, I would
-    recommend starting with the general discussions at the
-    beginning, then skipping over the NI (Native Interpreter) code
-    examples in the middle initially, and going to the
-    \93regular\94 interpreter code examples toward the end—the idea
-    being to get your head around how Block III performs the same
-    kind of interpreter as Block II does. Then dive bravely into
-    the NI part to see how it interprets the two-word format in RAM
-    of what would otherwise have been one-word native instructions
-    in ROM. If you were a professor, you could assign a hapless
-    grad student to do that! The main reason I spent so much design
-    effort on the NI was to make sure the native design could
-    handle it without too much ugliness, and I did make several
-    enhancements to the native design as a result.<br>
+    <h2><a name="Blocks_for_All_Occasions" id="Blocks_for_All_Occasions"></a>Blocks
+
+
+      for All Occasions</h2>
+    <p>The design of the AGC went through several stages, which for the
+      sake of this discussion we'll call "blocks".&nbsp; However, the
+      different block designs, while similar in many ways, were quite
+      different in others.&nbsp; Rather than try to cover all of them on
+      one page, the different blocks are covered in separate pages:<br>
+    </p>
+    <ul>
+      <li><a href="NARA-SW/E-1077.pdf">"Block 0"</a> — Earliest
+        preliminary design of the AGC for which I have any
+        documentation, not used in any missions, and with no known
+        existing code.&nbsp; There's a single document (that I know of)
+        describing it, so the link is simply to that document, rather
+        than to a separate page.</li>
+      <li><a href="Block1.html">"Block 1"</a> — Used for the earlier
+        designs of the Command Module, which were also referred to a
+        Block 1 spacecraft.&nbsp; Used for the unmanned Apollo 4 and
+        Apollo 6 unmanned missions.</li>
+      <li><a href="assembly_language_manual.html">"Block 2"</a> — Used
+        for the later designs of the Command Module, which were also
+        referred to a Block 2 spacecraft.&nbsp; Used for the (unmanned)
+        Apollo 5 mission's Lunar Module, and for all manned missions.</li>
+      <li>"Block 3" — There was no such thing in the Apollo program, but
+        Hugh Blair-Smith has given us some ideas about what it might
+        have looked like if there were.</li>
+    </ul>
+    <p>However, <i>this</i> page confines itself just to the Block 3
+      design.<br>
+    </p>
+    <hr style="width: 100%; height: 2px;">
+    <h2><a name="Intro" id="Intro"></a><big><big><big><font size="-1"><big><big><big>Introduction</big></big></big></font></big></big></big></h2>
+    <p>The first thing to understand about the Block III AGC is that
+      there's no such thing.&nbsp; However, if you have had the patience
+      to read much of what we have to say on this site about the
+      architecture of the Block I AGC (used only in a handful of
+      unmanned missions) and especially the Block II AGC (used in all
+      the manned missions), you will see that certain aspects of the
+      architecture seem to have led to related inefficiencies in the
+      software, and that the system could perhaps have had a
+      more-efficient architecture from the ground up.&nbsp;<br>
+    </p>
+    <p>Of course, in blithely stating that, we shouldn't pretend that
+      that fact should have been obvious in advance, nor that there
+      weren't inescapable forces that led to this kind of
+      situation.&nbsp; For one thing, the "feature creep" (over which
+      the developers had no control) on the original development
+      project, combined with the need to maintain a certain backward
+      compatibility in order to keep from having to rewrite the software
+      over and over again, combined too with the inherent multiplicative
+      complexity in increasing instruction and memory word-lengths at
+      the time, would have forced the team to allow only incremental
+      changes to the architecture.<br>
+    </p>
+    <p>However, that doesn't stop us from speculating about what a
+      better Block III system <i>might</i> have looked like, if the
+      developers were freed from these kinds of restrictions.&nbsp; But
+      as it happens, we don't need to speculate about it!&nbsp; As he
+      explains in a footnote in his book, <a
+href="https://www.amazon.com/Left-Brains-Right-Stuff-Computers/dp/0996434534">
+        Left Brains for the Right Stuff</a>, original AGC developer Hugh
+      Blair-Smith put together some notes for a hypothetical Block III
+      AGC architecture that he hoped would have doubled the processing
+      speed, and (to quote his words)<br>
+    </p>
+    <blockquote>
+      <p><small>"I did the thinking and writing just a few years ago,
+          but strictly in terms of the mid-'60s technology we actually
+          used. Probably the greatest risk of non-fidelity is in power
+          consumption, because I take advantage of the Harvard
+          architecture to cycle both fixed and erasable memories
+          simultaneously whenever practical (which is mostly)."</small><br>
+      </p>
+    </blockquote>
+    <p>And,<br>
+    </p>
+    <blockquote>
+      <p><small>"I plan to publish this fantasy on-line for the
+          amusement of all the people around the world who enjoy
+          building hardware or software replicas of the AGC".</small><br>
+      </p>
+    </blockquote>
+    <p>Actually, only the second quote is from the book.&nbsp; While I
+      don't know that "enjoy" is the word I would necessarily use for
+      this activity, Hugh has in fact sent his notes on the topic to us,
+      and we present them here for your delectation.<br>
+    </p>
+    <h2>Hugh's Dream</h2>
+    <p>I quote:<br>
+    </p>
+    <blockquote>
+      <p><small>"What I'd love is for some too-much-time-on-their-hands
+          people to port, say, Luminary 099 from Block II to Block III
+          and see how much shorter and faster it is!"</small><br>
+      </p>
+    </blockquote>
+    A fascinating idea, obviously.&nbsp; One might wish for not merely a
+    port of one or more of the Block II AGC programs, but perhaps even a
+    Block III assembler and simulator.&nbsp; If you're such a person,
+    give it some thought.&nbsp; Perhaps it would be your road to fame!<br>
+    <h2><a name="HughsNotes"></a>Hugh's Notes<br>
+    </h2>
+    <p>Hugh's current thoughts on the improved architecture, upon which
+      he has been working with Bruno Muller, comprise two Word
+      documents:<br>
+    </p>
+    <ul>
+      <li><a href="Documents/AGC%20Block%20III%20Overview.docx">AGC
+          Block III Overview.docx</a></li>
+      <li><a
+          href="Documents/AGC%20Block%20III%20Native-Mode%20Instructions.docx">AGC
+
+
+          Block III Native-Mode Instructions.docx</a></li>
+    </ul>
+    <p>We also have Hugh's <i>original</i> solo thoughts on the
+      subject, which I believe have been completely supplanted by the
+      documents listed above.&nbsp; Nevertheless, those original
+      thoughts are preserved for posterity below, though <strike>struck
+        out</strike> to avoid confusion.<br>
+    </p>
+    <ul>
+      <li><a href="Documents/AGC_Block_III_upd_3.doc"> <strike>AGC
+            Block III.doc</strike></a><strike><a
+            href="Documents/AGC_Block_III_upd_2.doc"><br>
+          </a></strike></li>
+      <strike> </strike>
+      <li><strike><a href="Documents/AGC_Block_III_testing.doc"> AGC
+            Block III testing.doc</a></strike></li>
+      <strike> </strike>
+    </ul>
+    <strike> </strike>
+    <p><strike>and since they haven't exactly been put into a finalized
+        form, he has also taken the trouble to describe the best way of
+        reading them.&nbsp; I quote, though a brief summary might be,
+        "Don't start with the testing document":</strike><strike><br>
+      </strike></p>
+    <strike> </strike>
+    <blockquote><strike> </strike>
+      <p><strike><small>"... you'll probably find the testing document
+            pretty opaque, since it records the output of a simulator
+            that existed only in my headbone. In reading the doc, I
+            would recommend starting with the general discussions at the
+            beginning, then skipping over the NI (Native Interpreter)
+            code examples in the middle initially, and going to
+            the"regular" interpreter code examples toward the end—the
+            idea being to get your head around how Block III performs
+            the same kind of interpreter as Block II does. Then dive
+            bravely into the NI part to see how it interprets the
+            two-word format in RAM of what would otherwise have been
+            one-word native instructions in ROM. If you were a
+            professor, you could assign a hapless grad student to do
+            that! The main reason I spent so much design effort on the
+            NI was to make sure the native design could handle it
+            without too much ugliness, and I did make several
+            enhancements to the native design as a result.<br>
+            <br>
+            "For relatively short pieces of code, like those in the
+            document, it should be possible to have a fairly
+            satisfactory experience just writing source code and
+            eyeballing it for running time in MCT (as well as for what I
+            might call Nortoning)."</small></strike><br>
+      </p>
+    </blockquote>
+    <hr style="width: 100%; height: 2px;">
+    <center> <br>
+      <span style="color: rgb(84, 89, 93); font-family: sans-serif;
+        font-size: 11.05px; font-style: normal; font-variant: normal;
+        font-weight: normal; letter-spacing: normal; line-height:
+        16.575px; orphans: auto; text-align: center; text-indent: 0px;
+        text-transform: none; white-space: normal; widows: 1;
+        word-spacing: 0px; -webkit-text-stroke-width: 0px; display:
+        inline !important; float: none; background-color: rgb(255, 255,
+        255);"> This page is available under the <a
+          href="https://creativecommons.org/publicdomain/zero/1.0/">Creative
+
+
+
+          Commons No Rights Reserved License</a></span><br>
+      <i><font size="-1">Last modified by <a
+            href="mailto:info@sandroid.org">Ronald Burkey</a> on
+          2017-07-23.<br>
+          <br>
+          <a href="http://www.ibiblio.org"><img style="border: 0px solid
+              ; width: 300px; height: 100px;" alt="Virtual AGC is hosted
+              by ibiblio.org" src="hosted.png" width="300" height="100"></a><br>
+        </font></i> </center>
     <br>
-    "For relatively short pieces of code, like those in the
-    document, it should be possible to have a fairly satisfactory
-    experience just writing source code and eyeballing it for
-    running time in MCT (as well as for what I might call
-    Nortoning)."</small><br></p>
-  </blockquote>
-  <hr style="width: 100%; height: 2px;">
-  <center>
-    <br>
-    <span style=
-    "color: rgb(84, 89, 93); font-family: sans-serif; font-size: 11.05px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 16.575px; orphans: auto; text-align: center; text-indent: 0px; text-transform: none; white-space: normal; widows: 1; word-spacing: 0px; -webkit-text-stroke-width: 0px; display: inline !important; float: none; background-color: rgb(255, 255, 255);">
-    This page is available under the <a href=
-    "https://creativecommons.org/publicdomain/zero/1.0/">Creative
-    Commons No Rights Reserved License</a></span><br>
-    <i><font size="-1">Last modified by <a href=
-    "mailto:info@sandroid.org">Ronald Burkey</a> on 2017-01-11.<br>
-    <br>
-    <a href="http://www.ibiblio.org"><img style=
-    "border: 0px solid ; width: 300px; height: 100px;" alt=
-    "Virtual AGC is hosted by ibiblio.org" src="hosted.png" height=
-    "100" width="300"></a><br></font></i>
-  </center><br>
-</body>
+  </body>
 </html>
