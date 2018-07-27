@@ -19,82 +19,141 @@
     <i><br>
     </i>
     <div align="center"><i>(This page is very much a work in progress,
-        so don't expect it to be too accurate, complete, or useful yet.)</i><br>
+        so don't expect it to be too accurate or complete yet.)</i><br>
     </div>
-    <h1>Contents</h1>
+    <h1><a name="Contents"></a>Contents</h1>
     <ul>
       <li><a href="#Introduction">Introduction</a></li>
-      <li><a href="#PartNumbers">Explanation of AGC/DSKY Part Numbers</a><br>
-      </li>
-      <li><a href="#AGC_or_DSKY_Part_Numbers_vs_Serial">AGC/DSKY Part
-          Numbers vs Serial Number</a></li>
       <li><a href="#I_AGC">Drawings for Block I AGC p/n TBD</a></li>
       <li><a href="#I_MAIN_DSKY">Drawings for Block I Main DSKY p/n TBD</a></li>
       <li><a href="#I_NAV_DSKY">Drawings for Block I Navigation DSKY p/n
           TBD</a></li>
-      <li><a href="#2003100-011K">Drawings for Block II AGC p/n
-          2003100-011K, -021K</a><br>
+      <li><a href="#2003100-021">Drawings for Block II AGC p/n
+          2003100-021</a><br>
       </li>
-      <li><a href="#2003200-011A">Drawings for Block II AGC p/n
-          2003200-011A</a></li>
-      <li><a href="#2003993-011">Drawings for Block II AGC p/n
-          2003993-011</a></li>
-      <li><a href="#200303993-021">Drawings for Block II AGC p/n
-          2003993-021, -031</a><br>
-      </li>
-      <li><a href="#2003993-061">Drawings for Block II AGC p/n
-          2003993-061</a><br>
-      </li>
+      <li><a href="#2003200-011">Drawings for Block II AGC p/n
+          2003200-011</a></li>
       <li><a href="#2003993-111">Drawings for Block II AGC p/n
           2003993-111</a><br>
       </li>
-      <li><a href="#2003900-011D">Drawings for Block II DSKY p/n
-          2003900-011D</a><br>
+      <li><a href="#2003994">Drawings for Block II DSKY p/n 2003994-<i>TBD</i></a></li>
+      <li><a href="#PartNumbers">Appendix: Evolution of AGC/DSKY Part
+          Numbers</a><br>
       </li>
-      <li><a href="#2003985-011G">Drawings for Block II DSKY p/n
-          2003985-011G</a></li>
-      <li><a href="#2003985-021G">Drawings for Block II DSKY p/n
-          2003985-021G</a></li>
-      <li><a href="#2003985-031G">Drawings for Block II DSKY p/n
-          2003985-031G</a></li>
-      <li><a href="#2003985-041G">Drawings for Block II DSKY p/n
-          2003985-041G</a></li>
-      <li><a href="#2003985-051G">Drawings for Block II DSKY p/n
-          2003985-051G</a></li>
-      <li><a href="#2003950-011B">Drawings for Block II DSKY p/n
-          2003950-011B</a></li>
-      <li><a href="#2003994">Drawings for Block II DSKY p/n 2003994</a></li>
+      <li><a href="#AGC_or_DSKY_Part_Numbers_vs_Serial">Appendix:
+          AGC/DSKY Part Numbers vs Serial Number</a></li>
     </ul>
     <h1><a name="Introduction"></a>Introduction</h1>
-    <p>Like the AGC's software, the AGC's hardware (electrical and
-      mechanical design) evolved over time.&nbsp; In other words, not
-      all AGC electrical schematics are created equal ... you have to
-      know which specific AGC model number you're interested in, since
-      its schematics may be different than other AGC models.&nbsp; On
-      this page, we attempt to break down the AGC/DSKY hardware design
-      on a unit-by-unit basis, and provide the mechanical drawings and
-      electrical schematics for those specific AGC/DSKY units.<br>
+    <p>On this page of the Virtual AGC website, the goal is to present
+      the complete electrical schematics and mechanical drawings for
+      every major version of the AGC and DSKY units.&nbsp; We don't yet
+      fully succeed in doing so.&nbsp; Additionally, there are drawings
+      related to various intermediate versions of the AGC and DSKY which
+      we point out to you as a resource, but let you digest them for
+      yourself if you're interested, rather than trying to do so for
+      you.<br>
     </p>
-    <p>There are additional (sometimes overlapping) electrical or
-      mechanical drawings available which don't (or haven't yet) been
-      integrated into this particular framework.&nbsp; Such information
-      can be seen in <a href="links.html#AGC_electrical_schematics">the
-        "AGC electrical schematics" section of our document-library page</a>.<br>
+    <p>Versions of the AGC and DSKY? Huh?<br>
     </p>
-    <p>Except where otherwise stated below, all drawings for p/n
-      2003993-<i>x</i> were contributed by Eldon Hall to klabs.org, and
-      all drawings for other AGC/DSKY part numbers come from the
-      so-called AGC Handbook, contributed to Virtual AGC by Don Eyles,
-      the raw scans for which can be seen on our Internet Archive site
-      here:&nbsp; TBD.<br>
+    <p>Well, like the AGC's software, the AGC's hardware (electrical and
+      mechanical design) evolved over time.&nbsp; For example, not all
+      AGC electrical schematics are created equal ... you have to know
+      which specific AGC model number you're interested in, since its
+      electrical schematics and mechanical configuration may be
+      different than other AGC models.&nbsp; There were a <i>lot</i> of
+      different versions of the AGC over time, and not just the major
+      distinction between Block I and Block II AGCs with which you may
+      be familiar.&nbsp; The same comment goes for DSKY units (and other
+      components as well, though we won't concern ourselves with any of
+      them).&nbsp; The good news is that the changes were prior to any
+      actual missions, and mostly didn't affect software, so there was
+      much less variation in electrical design from mission to mission
+      than there was for the software design.<br>
     </p>
-    <p>Additional information for used for cross-referencing the various
-      drawings to specific AGC or DSKY part numbers and/or serial
-      numbers came from a couple of sources:<br>
+    <p>The AGC and DSKY part-numbering scheme looked like this:<br>
     </p>
+    <blockquote><i>PARTNUMBER-DASHNUMBER</i> <i>REVISION</i><br>
+    </blockquote>
+    <p>For example, Block II AGCs had <i>PARTNUMBER</i>s 2003100,
+      2003200, and 2003993, with <i>DASHNUMBER</i>s like -011, -021,
+      -031, and so on.&nbsp; <i>REVISION</i>s were letter codes, such
+      as A, B, C, etc., or else a dash (-) for "no revision".&nbsp; For
+      example,<br>
+    </p>
+    <blockquote>
+      <p>2003200-011A<br>
+      </p>
+    </blockquote>
+    <p>Given a part number for a particular AGC (or DSKY) model, the
+      part number then relates to a set of sub-assemblies (often
+      represented by electrical schematics or mechanical drawings), many
+      of which are circuit modules, which themselves may have varying
+      versions over time, and have part-numbers like<br>
+    </p>
+    <blockquote><i>PARTNUMBER</i> <i>REVISION</i><br>
+    </blockquote>
+    <p>For example, the AGC with p/n 2003200-011A contained, among other
+      things, an "oscillator module" which fit into a backplane socket
+      labeled B7, and which itself had a p/n 2005003E ... and naturally,
+      we have drawing 2005003E if you want to see it.<br>
+    </p>
+    <p>But as I mentioned, to simplify the presentation a little, we
+      concentrate here on just a few selected versions of the AGC and
+      DSKY, namely those listed in the <a href="#Contents">Table of
+        Contents</a>.&nbsp; These tend to be the <i>last</i> AGCs in
+      the chain of development that we think the documentation available
+      to us supports, but you can't assume that they are necessarily the
+      versions that flew.&nbsp; Sadly, we don't presently have enough
+      information to actually tell you which versions of every unit flew
+      on which missions anyway, which is the real motivation for
+      sticking with just the "latest and greatest".&nbsp; Oddly, even
+      though we don't know their part numbers, we <i>do</i> have enough
+      information to know which <i>serial numbers</i> of AGC and DSKY
+      units flew on which missions.&nbsp; That information is given in
+      an <a href="#AGC_or_DSKY_Part_Numbers_vs_Serial">Appendix</a>.&nbsp;
+
+      In general, though, we think that all manned missions flew with <i>some</i>
+      variant of AGC p/n 2003993-<i>xxx</i> and DSKY p/n 2003994-<i>xxx</i>.<br>
+    </p>
+    <p>Except where otherwise stated below, all drawings for AGC p/n
+      2003993-<i>xxx</i> were contributed by Eldon Hall to klabs.org,
+      and all drawings for other AGC/DSKY part numbers come from the
+      so-called AGC Handbook, contributed to Virtual AGC by Don
+      Eyles.&nbsp; The AGC Handbook is very significant, in that it is
+      the source document which provides all of the assembly information
+      as well as which drawings are associated with which AGC/DSKY
+      versions, and which provides those drawings (in numerous
+      revisions) as well.&nbsp; Often, some revision of a drawing which
+      is not part of one of the AGC/DSKY assemblies listed on this page
+      is more legible than the corresponding revision we are listing
+      here, so it's often useful to look at those other revisions of the
+      drawings in additions to the ones we are listing here.&nbsp; <a
+        href="TBD">The full scan of the AGC Handbook can be seen on our
+        Internet Archive site</a>.&nbsp; We <i>haven't</i> followed our
+      typical process of providing a "reduced quality" version of the
+      AGC Handbook on our document-library page, because it doesn't seem
+      like reducing the quality of these drawings is that great an idea,
+      so our Internet Archive page is the only source for this data at
+      present.&nbsp; If you want to download it from there it will be
+      quite large.<br>
+    </p>
+    There are additional (sometimes overlapping) electrical or
+    mechanical drawings available in AC Electronics guidance-system
+    manuals which haven't (or haven't yet) been integrated into this
+    particular framework, but which can be used to fill in some gaps in
+    the official schematics we do have from the sources mentioned
+    above.&nbsp; Such information can be seen in <a
+      href="links.html#AGC_electrical_schematics">the "AGC electrical
+      schematics" section of our document-library page</a>.<br>
+    <br>
+    Additional information for used for cross-referencing the various
+    drawings to specific AGC or DSKY part numbers and/or serial numbers
+    came from a couple of sources:<br>
     <ul>
       <li>Section 3.7 of the <a
 href="documents/NAS9-497_ApolloPrimaryGuidanceNavigationAndControlSystem.pdf">AC
+
+
 
 
 
@@ -117,18 +176,1572 @@ href="documents/NAS9-497_ApolloPrimaryGuidanceNavigationAndControlSystem.pdf">AC
 
 
 
+
+
           3-IE in volume 1</a> can be used to obtain drawing numbers of
         electrical schematics corresponding to the different AGC and
         DSKY assembly part numbers.</li>
     </ul>
-    <h1><a name="PartNumbers"></a>Explanation of AGC/DSKY Part Numbers</h1>
+    <ul>
+    </ul>
+    <h1><a name="I_AGC"></a>Drawings for Block I AGC p/n TBD </h1>
+    <p>TBD<br>
+    </p>
+    <h1><a name="I_MAIN_DSKY"></a>Drawings for Block I Main DSKY p/n TBD</h1>
+    <p>TBD<br>
+    </p>
+    <h1><a name="I_NAV_DSKY"></a>Drawings for Block I Navigation DSKY
+      p/n TBD</h1>
+    <p>TBD<br>
+    </p>
+    <h1><a name="2003100-021"></a>Drawings for Block II AGC p/n
+      2003100-021</h1>
+    <table cellpadding="2" cellspacing="2" align="center" border="1">
+      <tbody>
+        <tr>
+          <th valign="top">Module Description<br>
+          </th>
+          <th valign="top">Drawing Number<br>
+          </th>
+        </tr>
+        <tr>
+          <td valign="top">A1: Scaler Module<br>
+          </td>
+          <td align="center" valign="top">2005059E <a
+              href="AGCHandbook/A1-2005059E-1.jpg">page 1</a>, <a
+              href="AGCHandbook/A1-2005059E-2.jpg">page 2</a><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">A2: Timer<br>
+          </td>
+          <td align="center" valign="top">2005060D <a
+              href="AGCHandbook/A2-2005060D-1.jpg">page 1</a>, <a
+              href="AGCHandbook/A2-2005060D-2.jpg">page 2</a>, <a
+              href="AGCHandbook/A2-2005060D-3.jpg">page 3</a><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">A3: S Q Register and Decoding<br>
+          </td>
+          <td align="center" valign="top">2005051D <a
+              href="AGCHandbook/A3-2005051D-1.jpg">page 1</a>, <a
+              href="AGCHandbook/A3-2005051D-2.jpg">page 2</a><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">A4: Stage Branch Decoding<br>
+          </td>
+          <td align="center" valign="top">2005062C <a
+              href="AGCHandbook/A4-2005062C-1.jpg">page 1</a>, <a
+              href="AGCHandbook/A4-2005062C-2.jpg">page 2</a><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">A5: Cross Point Generator I<br>
+          </td>
+          <td align="center" valign="top">2005061D <a
+              href="AGCHandbook/A5-2005061D-1.jpg">page 1</a>, <a
+              href="AGCHandbook/A5-2005061D-2.jpg">page 2</a><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">A6: Cross Point Generator II<br>
+          </td>
+          <td align="center" valign="top">2005063F <a
+              href="AGCHandbook/A6-2005063F-1.jpg">page 1</a>, <a
+              href="AGCHandbook/A6-2005063F-2.jpg">page 2</a><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">A7: Service Gates<br>
+          </td>
+          <td align="center" valign="top">2005252D <a
+              href="klabs/history/agc_schematics_block2/logic/a07-1.jpg">page
+
+
+
+
+
+              1</a>, <a
+              href="klabs/history/agc_schematics_block2/logic/a07-2.jpg">page
+
+
+
+
+
+              2</a><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">A8: 4 Bit Module<br>
+          </td>
+          <td align="center" valign="top">2005055D <a
+              href="AGCHandbook/A8-2005055D-1.jpg">page 1</a>, <a
+              href="AGCHandbook/A8-2005055D-2.jpg">page 2</a><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">A9: 4 Bit Module<br>
+          </td>
+          <td align="center" valign="top">2005056C <a
+              href="AGCHandbook/A9-2005056C-1.jpg">page 1</a>, <a
+              href="AGCHandbook/A9-2005056C-2.jpg">page 2</a><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">A10: 4 Bit Module<br>
+          </td>
+          <td align="center" valign="top">2005057E <a
+              href="AGCHandbook/A10-2005057E-1.jpg">page 1</a>, <a
+              href="AGCHandbook/A10-2005057E-2.jpg">page 2</a><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">A11: 4 Bit Module<br>
+          </td>
+          <td align="center" valign="top">2005058D <a
+              href="AGCHandbook/A11-2005058D-1.jpg">page 1</a>, <a
+              href="AGCHandbook/A11-2005058D-2.jpg">page 2</a><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">A12: Parity and S Register<br>
+          </td>
+          <td align="center" valign="top">2005053 <a
+              href="AGCHandbook/A12-2005053F-1.jpg">page 1</a>, <a
+              href="AGCHandbook/A12-2005053F-2.jpg">page 2</a><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">A13: Alarms<br>
+          </td>
+          <td align="center" valign="top"><a
+              href="AGCHandbook/A13-2005069E-1.jpg">2005069E</a><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">A14: Memory Timing and Addressing<br>
+          </td>
+          <td align="center" valign="top">2005064F <a
+              href="AGCHandbook/A14-2005064F-1.jpg">page 1</a>, page 2<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">A15: RUPT Service<br>
+          </td>
+          <td align="center" valign="top">2005065D <a
+              href="AGCHandbook/A15-2005065D-1.jpg">page 1</a>, <a
+              href="AGCHandbook/A15-2005065D-2.jpg">page 2</a><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">A16: In/Out I<br>
+          </td>
+          <td align="center" valign="top">2005066D <a
+              href="AGCHandbook/A16-2005066D-1.jpg">page 1</a>, <a
+              href="AGCHandbook/A16-2005066D-2.jpg">page 2</a><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">A17: In/Out II<br>
+          </td>
+          <td align="center" valign="top">2005067B <a
+              href="AGCHandbook/A17-2005067B-1.jpg">page 1</a>, <a
+              href="AGCHandbook/A17-2005067B-2.jpg">page 2</a><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">A18: In/Out III<br>
+          </td>
+          <td align="center" valign="top">2005068C <a
+              href="AGCHandbook/A18-2005068C-1.jpg">page 1</a>, <a
+              href="AGCHandbook/A18-2005068C-2.jpg">page 2</a><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">A19: In/Out IV<br>
+          </td>
+          <td align="center" valign="top">2005070E <a
+              href="AGCHandbook/A19-2005070-1.jpg">page 1</a>, <a
+              href="AGCHandbook/A19-2005070-2.jpg">page 2</a><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">A20: Counter Cell I<br>
+          </td>
+          <td align="center" valign="top">2005054C <a
+              href="AGCHandbook/A20-2005054C-1.jpg">page 1</a>, <a
+              href="AGCHandbook/A20-2005054C-2.jpg">page 2</a><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">A21: Counter Cell II<br>
+          </td>
+          <td align="center" valign="top">2005050J <a
+              href="AGCHandbook/A21-2005050J-1.jpg">page 1</a>, <a
+              href="AGCHandbook/A21-2005050J-2.jpg">page 2</a>, <a
+              href="AGCHandbook/A21-2005050J-3.jpg">page 3</a><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">A22: In/Out V<br>
+          </td>
+          <td align="center" valign="top">2005071B <a
+              href="AGCHandbook/A22-2005071B-1.jpg">page 1</a>, <a
+              href="AGCHandbook/A22-2005071B-2.jpg">page 2</a><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">A23: In/Out VI<br>
+          </td>
+          <td align="center" valign="top">2005072C <a
+              href="AGCHandbook/A23-2005072C-1.jpg">page 1</a>, <a
+              href="AGCHandbook/A23-2005072C-2.jpg">page 2</a><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">A24: In/Out VII<br>
+          </td>
+          <td align="center" valign="top">2005073A <a
+              href="AGCHandbook/A24-2005073A-1.jpg">page 1</a>, <a
+              href="AGCHandbook/A24-2005073A-2.jpg">page 2</a><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">A25 - A26: Interface<br>
+          </td>
+          <td align="center" valign="top"><a
+              href="AGCHandbook/A25-A26-2005021C-1.jpg">2005021C</a> </td>
+        </tr>
+        <tr>
+          <td valign="top">A27 - A29: Interface<br>
+          </td>
+          <td align="center" valign="top">2005020B <a
+              href="AGCHandbook/A27-A29-2005020B-1.jpg">page 1</a>, <a
+              href="AGCHandbook/A27-A29-2005020B-2.jpg">page 2</a><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">A30 - A31: Power Supply<br>
+          </td>
+          <td align="center" valign="top">2005010F <a
+              href="AGCHandbook/A30-A31-2005010B-1.jpg">page 1</a>, <a
+              href="AGCHandbook/A30-A31-2005010B-2.jpg">page 2</a><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">B1 - B6: Rope Memory<br>
+          </td>
+          <td align="center" valign="top">2005012B <a
+              href="AGCHandbook/B1-B6-2005012B-1.jpg">page 1</a>, <a
+              href="AGCHandbook/B1-B6-2005012B-2.jpg">page 2</a><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">B7: Oscillator<br>
+          </td>
+          <td align="center" valign="top">2005003E <a
+              href="AGCHandbook/B7-2005003E-1.jpg">page 1</a>, <a
+              href="AGCHandbook/B7-2005003E-2.jpg">page 2</a>, <a
+              href="AGCHandbook/B7-2005003E-3.jpg">page 3</a> </td>
+        </tr>
+        <tr>
+          <td valign="top">B8: Alarms<br>
+          </td>
+          <td align="center" valign="top">2005028A <a
+              href="AGCHandbook/B8-2005028A-1.jpg">page 1</a>, <a
+              href="AGCHandbook/B8-2005028A-2.jpg">page 2</a>, <a
+              href="AGCHandbook/B8-2005028A-3.jpg">page 3</a><a
+              href="AGCHandbook/SCHEM-B8-2005029--3.jpg"></a><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">B9 - B10: Erasable Drivers<br>
+          </td>
+          <td align="center" valign="top">2005915- <a
+              href="AGCHandbook/B9-B10-2005915--1.jpg">page 1</a>, <a
+              href="AGCHandbook/B9-B10-2005915--2.jpg">page 2</a><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">B11: Current Switch<br>
+          </td>
+          <td align="center" valign="top">2005005D <a
+              href="AGCHandbook/B11-2005005D-1.jpg">page 1</a>, <a
+              href="AGCHandbook/B11-2005005D-2.jpg">page 2</a><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">B12: Erasable Memory<br>
+          </td>
+          <td align="center" valign="top"><a
+              href="AGCHandbook/B12-2005006-1.jpg">2005006-</a><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">B13 - B14: Sense Amplifier<br>
+          </td>
+          <td align="center" valign="top">2005914- <a
+              href="AGCHandbook/B13-B14-2005914--1.jpg">page 1</a>, <a
+              href="AGCHandbook/B13-B14-2005914--2.jpg">page 2</a><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">B15: Strand Select<br>
+          </td>
+          <td align="center" valign="top"><a
+              href="AGCHandbook/B15-2005009A.jpg">2005009A</a><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">B16 - B17: Rope Driver<br>
+          </td>
+          <td align="center" valign="top">2005913- <a
+              href="AGCHandbook/B16-B17-2005913--1.jpg">page 1</a>, <a
+              href="AGCHandbook/B16-B17-2005913--2.jpg">page 2</a><br>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <br>
+    <h1><a name="2003200-011"></a>Drawings for Block II AGC p/n
+      2003200-011</h1>
+    <table cellpadding="2" cellspacing="2" align="center" border="1">
+      <tbody>
+        <tr>
+          <th valign="top">Module Description<br>
+          </th>
+          <th valign="top">Drawing Number<br>
+          </th>
+        </tr>
+        <tr>
+          <td valign="top">A1: Scaler Module<br>
+          </td>
+          <td align="center" valign="top">2005259A <a
+              href="klabs/history/agc_schematics_block2/logic/a01-1.jpg">page
+
+
+
+
+
+              1</a>, <a
+              href="klabs/history/agc_schematics_block2/logic/a01-2.jpg">page
+
+
+
+
+
+              2</a><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">A2: Timer<br>
+          </td>
+          <td align="center" valign="top">2005260A <a
+              href="klabs/history/agc_schematics_block2/logic/a02-1.jpg">page
+
+
+
+
+
+              1</a>, <a
+              href="klabs/history/agc_schematics_block2/logic/a02-2.jpg">page
+
+
+
+
+
+              2</a>, <a
+              href="klabs/history/agc_schematics_block2/logic/a02-3.jpg">page
+
+
+
+
+
+              3</a><a
+              href="klabs/history/agc_schematics_block2/logic/a02-3.jpg"></a>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">A3: S Q Register and Decoding<br>
+          </td>
+          <td align="center" valign="top">2005251A <a
+              href="klabs/history/agc_schematics_block2/logic/a03-1.jpg">page
+
+
+
+
+
+              1</a>, <a
+              href="klabs/history/agc_schematics_block2/logic/a03-2.jpg">page
+
+
+
+
+
+              2</a><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">A4: Stage Branch Decoding<br>
+          </td>
+          <td align="center" valign="top">2005262A <a
+              href="klabs/history/agc_schematics_block2/logic/a04-1.jpg">page
+
+
+
+
+
+              1</a>, <a
+              href="klabs/history/agc_schematics_block2/logic/a04-2.jpg">page
+
+
+
+
+
+              2</a><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">A5: Cross Point Generator I<br>
+          </td>
+          <td align="center" valign="top">2005261A <a
+              href="klabs/history/agc_schematics_block2/logic/a05-1.jpg">page
+
+
+
+
+
+              1</a>, <a
+              href="klabs/history/agc_schematics_block2/logic/a05-2.jpg">page
+
+
+
+
+
+              2</a><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">A6: Cross Point Generator II<br>
+          </td>
+          <td align="center" valign="top">2005263A <a
+              href="klabs/history/agc_schematics_block2/logic/a06-1.jpg">page
+
+
+
+
+
+              1</a>, <a
+              href="klabs/history/agc_schematics_block2/logic/a06-2.jpg">page
+
+
+
+
+
+              2</a><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">A7: Service Gates<br>
+          </td>
+          <td align="center" valign="top">2005252A <a
+              href="klabs/history/agc_schematics_block2/logic/a07-1.jpg">page
+
+
+
+
+
+              1</a>, <a
+              href="klabs/history/agc_schematics_block2/logic/a07-2.jpg">page
+
+
+
+
+
+              2</a><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">A8: 4 Bit Module<br>
+          </td>
+          <td align="center" valign="top">2005255- <a
+              href="klabs/history/agc_schematics_block2/logic/a08-1.jpg">page
+
+
+
+
+
+              1</a>, <a
+              href="klabs/history/agc_schematics_block2/logic/a08-2.jpg">page
+
+
+
+
+
+              2</a><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">A9: 4 Bit Module<br>
+          </td>
+          <td align="center" valign="top">2005256A <a
+              href="klabs/history/agc_schematics_block2/logic/a09-1.jpg">page
+
+
+
+
+
+              1</a>, <a
+              href="klabs/history/agc_schematics_block2/logic/a09-2.jpg">page
+
+
+
+
+
+              2</a><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">A10: 4 Bit Module<br>
+          </td>
+          <td align="center" valign="top">2005257A <a
+              href="klabs/history/agc_schematics_block2/logic/a10-1.jpg">page
+
+
+
+
+
+              1</a>, <a
+              href="klabs/history/agc_schematics_block2/logic/a10-2.jpg">page
+
+
+
+
+
+              2</a><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">A11: 4 Bit Module<br>
+          </td>
+          <td align="center" valign="top">2005258A <a
+              href="klabs/history/agc_schematics_block2/logic/a11-1.jpg">page
+
+
+
+
+
+              1</a>, <a
+              href="klabs/history/agc_schematics_block2/logic/a11-2.jpg">page
+
+
+
+
+
+              2</a><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">A12: Parity and S Register<br>
+          </td>
+          <td align="center" valign="top">2005253A <a
+              href="klabs/history/agc_schematics_block2/logic/a12-1.jpg">page
+
+
+
+
+
+              1</a>, <a
+              href="klabs/history/agc_schematics_block2/logic/a12-2.jpg">page
+
+
+
+
+
+              2</a><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">A13: Alarms<br>
+          </td>
+          <td align="center" valign="top"><a
+              href="klabs/history/agc_schematics_block2/logic/a13-1.jpg">2005269-</a><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">A14: Memory Timing and Addressing<br>
+          </td>
+          <td align="center" valign="top">2005264A&nbsp;<a
+              href="klabs/history/agc_schematics_block2/logic/a14-1.jpg">page
+
+
+
+
+
+              1</a>, <a
+              href="klabs/history/agc_schematics_block2/logic/a14-2.jpg">page
+
+
+
+
+
+              2</a><br>
+            (The drawing linked above is<br>
+            &nbsp;2005264B; will fix when possible.)<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">A15: RUPT Service<br>
+          </td>
+          <td align="center" valign="top">2005265A <a
+              href="klabs/history/agc_schematics_block2/logic/a15-1.jpg">page
+
+
+
+
+
+              1</a>, <a
+              href="klabs/history/agc_schematics_block2/logic/a15-2.jpg">page
+
+
+
+
+
+              2</a><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">A16: In/Out I<br>
+          </td>
+          <td align="center" valign="top">2005266- <a
+              href="klabs/history/agc_schematics_block2/logic/a16-1.jpg">page
+
+
+
+
+
+              1</a>, <a
+              href="klabs/history/agc_schematics_block2/logic/a16-2.jpg">page
+
+
+
+
+
+              2</a><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">A17: In/Out II<br>
+          </td>
+          <td align="center" valign="top">2005267A <a
+              href="klabs/history/agc_schematics_block2/logic/a17-1.jpg">page
+
+
+
+
+
+              1</a>, <a
+              href="klabs/history/agc_schematics_block2/logic/a17-2.jpg">page
+
+
+
+
+
+              2</a><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">A18: In/Out III<br>
+          </td>
+          <td align="center" valign="top">2005268A <a
+              href="klabs/history/agc_schematics_block2/logic/a18-1.jpg">page
+
+
+
+
+
+              1</a>, <a
+              href="klabs/history/agc_schematics_block2/logic/a18-2.jpg">page
+
+
+
+
+
+              2</a><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">A19: In/Out IV<br>
+          </td>
+          <td align="center" valign="top">2005270- <a
+              href="klabs/history/agc_schematics_block2/logic/a19-1.jpg">page
+
+
+
+
+
+              1</a>, <a
+              href="klabs/history/agc_schematics_block2/logic/a19-2.jpg">page
+
+
+
+
+
+              2</a><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">A20: Counter Cell I<br>
+          </td>
+          <td align="center" valign="top">2005254- <a
+              href="klabs/history/agc_schematics_block2/logic/a20-1.jpg">page
+
+
+
+
+
+              1</a>, <a
+              href="klabs/history/agc_schematics_block2/logic/a20-2.jpg">page
+
+
+
+
+
+              2</a><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">A21: Counter Cell II<br>
+          </td>
+          <td align="center" valign="top">2005250- <a
+              href="klabs/history/agc_schematics_block2/logic/a21-1.jpg">page
+
+
+
+
+
+              1</a>, <a
+              href="klabs/history/agc_schematics_block2/logic/a21-2.jpg">page
+
+
+
+
+
+              2</a>, <a
+              href="klabs/history/agc_schematics_block2/logic/a21-3.jpg">page
+
+
+
+
+
+              3</a><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">A22: In/Out V<br>
+          </td>
+          <td align="center" valign="top">2005271- <a
+              href="klabs/history/agc_schematics_block2/logic/a22-1.jpg">page
+
+
+
+
+
+              1</a>, <a
+              href="klabs/history/agc_schematics_block2/logic/a22-2.jpg">page
+
+
+
+
+
+              2</a><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">A23: In/Out VI<br>
+          </td>
+          <td align="center" valign="top">2005272A <a
+              href="klabs/history/agc_schematics_block2/logic/a23-1.jpg">page
+
+
+
+
+
+              1</a>, <a
+              href="klabs/history/agc_schematics_block2/logic/a23-2.jpg">page
+
+
+
+
+
+              2</a><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">A24: In/Out VII<br>
+          </td>
+          <td align="center" valign="top">2005273A <a
+              href="klabs/history/agc_schematics_block2/logic/a24-1.jpg">page
+
+
+
+
+
+              1</a>, <a
+              href="klabs/history/agc_schematics_block2/logic/a24-2.jpg">page
+
+
+
+
+
+              2</a><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">A25 - A26: Interface<br>
+          </td>
+          <td align="center" valign="top"><a
+              href="AGCHandbook/A25-A26-2005021C-1.jpg">2005021C</a><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">A27 - A29: Interface<br>
+          </td>
+          <td align="center" valign="top">2005912B <a
+              href="AGCHandbook/A27-A29-2005912B-1.jpg">page 1</a>, <a
+              href="AGCHandbook/A27-A29-2005912B-2.jpg">page 2</a><br>
+            <a href="AGCHandbook/B1-B6-2005012B-2.jpg"></a><a
+              href="klabs/history/agc_schematics_block2/top_level/a27-a29-2.jpg"></a>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">A30 - A31: Power Supply<br>
+          </td>
+          <td align="center" valign="top">2005916A <a
+              href="AGCHandbook/A30-A31-2005916A-1.jpg">page 1</a>, <a
+              href="AGCHandbook/A30-A31-2005916A-2.jpg">page 2</a><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">B1 - B6: Rope Memory<br>
+          </td>
+          <td align="center" valign="top">2005012B <a
+              href="AGCHandbook/B1-B6-2005012B-1.jpg">page 1</a>, <a
+              href="AGCHandbook/B1-B6-2005012B-2.jpg">page 2</a> </td>
+        </tr>
+        <tr>
+          <td valign="top">B7: Oscillator<br>
+          </td>
+          <td align="center" valign="top">2005003E <a
+              href="AGCHandbook/B7-2005003E-1.jpg">page 1</a>, <a
+              href="AGCHandbook/B7-2005003E-2.jpg">page 2</a>, <a
+              href="AGCHandbook/B7-2005003E-3.jpg">page 3</a><a
+              href="AGCHandbook/B7-2005003E-3.jpg"></a> </td>
+        </tr>
+        <tr>
+          <td valign="top">B8: Alarms<br>
+          </td>
+          <td align="center" valign="top">2005922A <a
+              href="AGCHandbook/B8-2005922--1.jpg">page 1</a>, <a
+              href="AGCHandbook/B8-2005922--2.jpg">page 2</a>, <a
+              href="AGCHandbook/B8-2005028A-3.jpg">page 3</a><br>
+            (The drawing linked above is<br>
+            &nbsp;2005922-; will fix when possible.)<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">B9 - B10: Erasable Drivers<br>
+          </td>
+          <td align="center" valign="top">2005104B <a
+              href="AGCHandbook/B9-B10-2005104B-1.jpg">page 1</a>, <a
+              href="AGCHandbook/B9-B10-2005104B-2.jpg">page 2</a><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">B11: Current Switch<br>
+          </td>
+          <td align="center" valign="top">2005005D <a
+              href="AGCHandbook/B11-2005005D-1.jpg">page 1</a>, <a
+              href="AGCHandbook/B11-2005005D-2.jpg">page 2</a><a
+              href="AGCHandbook/B11-2005005D-2.jpg"></a> </td>
+        </tr>
+        <tr>
+          <td valign="top">B12: Erasable Memory<br>
+          </td>
+          <td align="center" valign="top"><a
+              href="AGCHandbook/B12-2005106--1.jpg">2005106-</a><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">B13: Sense Amplifier<br>
+          </td>
+          <td align="center" valign="top">2005920B <a
+              href="AGCHandbook/B13-2005920B-1.jpg">page 1</a>, <a
+              href="AGCHandbook/B13-2005920B-2.jpg">page 2</a><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">B14: Sense Amplifier<br>
+          </td>
+          <td align="center" valign="top">2005919A <a
+              href="AGCHandbook/B14-2005919A-1.jpg">page 1</a>, <a
+              href="AGCHandbook/B14-2005919A-2.jpg">page 2</a><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">B15: Strand Select<br>
+          </td>
+          <td align="center" valign="top"><a
+              href="AGCHandbook/B15-2005924--1.jpg">2005924-</a><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">B16 - B17: Rope Driver<br>
+          </td>
+          <td align="center" valign="top">2005100D <a
+              href="AGCHandbook/B16-B17-2005100D-1.jpg">page 1</a>, <a
+              href="AGCHandbook/B16-B17-2005100D-2.jpg">page 2</a><br>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <h1><a name="2003993-111"></a>Drawings for Block II AGC p/n
+      2003993-111</h1>
+    <b>Note:</b> For p/n 2003993-<i>xxx</i>, while we have lists of the
+    drawing <i>numbers</i>, we don't presently have the documentation
+    needed to tell which <i>revisions</i> of the drawings are
+    needed.&nbsp; Therefore, the drawings linked in the table below are
+    the revisions Eldon Hall supplied, or else (in lieu of those) the
+    latest revisions we've been able to find.<br>
+    <br>
+    <table cellpadding="2" cellspacing="2" align="center" border="1">
+      <tbody>
+        <tr>
+          <th valign="top">Module Description<br>
+          </th>
+          <th valign="top">Drawing Number<br>
+          </th>
+        </tr>
+        <tr>
+          <td valign="top">A1: Scaler Module<br>
+          </td>
+          <td align="center" valign="top">2005259 <a
+              href="klabs/history/agc_schematics_block2/logic/a01-1.jpg">page
+
+
+
+
+
+              1</a>, <a
+              href="klabs/history/agc_schematics_block2/logic/a01-2.jpg">page
+
+
+
+
+
+              2</a><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">A2: Timer<br>
+          </td>
+          <td align="center" valign="top">2005260 <a
+              href="klabs/history/agc_schematics_block2/logic/a02-1.jpg">page
+
+
+
+
+
+              1</a>, <a
+              href="klabs/history/agc_schematics_block2/logic/a02-2.jpg">page
+
+
+
+
+
+              2</a>, <a
+              href="klabs/history/agc_schematics_block2/logic/a02-3.jpg">page
+
+
+
+
+
+              3</a><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">A3: S Q Register and Decoding<br>
+          </td>
+          <td align="center" valign="top">2005251 <a
+              href="klabs/history/agc_schematics_block2/logic/a03-1.jpg">page
+
+
+
+
+
+              1</a>, <a
+              href="klabs/history/agc_schematics_block2/logic/a03-2.jpg">page
+
+
+
+
+
+              2</a><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">A4: Stage Branch Decoding<br>
+          </td>
+          <td align="center" valign="top">2005262 <a
+              href="klabs/history/agc_schematics_block2/logic/a04-1.jpg">page
+
+
+
+
+
+              1</a>, <a
+              href="klabs/history/agc_schematics_block2/logic/a04-2.jpg">page
+
+
+
+
+
+              2</a><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">A5: Cross Point Generator I<br>
+          </td>
+          <td align="center" valign="top">2005261 <a
+              href="klabs/history/agc_schematics_block2/logic/a05-1.jpg">page
+
+
+
+
+
+              1</a>, <a
+              href="klabs/history/agc_schematics_block2/logic/a05-2.jpg">page
+
+
+
+
+
+              2</a><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">A6: Cross Point Generator II<br>
+          </td>
+          <td align="center" valign="top">2005263 <a
+              href="klabs/history/agc_schematics_block2/logic/a06-1.jpg">page
+
+
+
+
+
+              1</a>, <a
+              href="klabs/history/agc_schematics_block2/logic/a06-2.jpg">page
+
+
+
+
+
+              2</a><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">A7: Service Gates<br>
+          </td>
+          <td align="center" valign="top">2005252 <a
+              href="klabs/history/agc_schematics_block2/logic/a07-1.jpg">page
+
+
+
+
+
+              1</a>, <a
+              href="klabs/history/agc_schematics_block2/logic/a07-2.jpg">page
+
+
+
+
+
+              2</a><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">A8: 4 Bit Module<br>
+          </td>
+          <td align="center" valign="top">2005255 <a
+              href="klabs/history/agc_schematics_block2/logic/a08-1.jpg">page
+
+
+
+
+
+              1</a>, <a
+              href="klabs/history/agc_schematics_block2/logic/a08-2.jpg">page
+
+
+
+
+
+              2</a><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">A9: 4 Bit Module<br>
+          </td>
+          <td align="center" valign="top">2005256 <a
+              href="klabs/history/agc_schematics_block2/logic/a09-1.jpg">page
+
+
+
+
+
+              1</a>, <a
+              href="klabs/history/agc_schematics_block2/logic/a09-2.jpg">page
+
+
+
+
+
+              2</a><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">A10: 4 Bit Module<br>
+          </td>
+          <td align="center" valign="top">2005257 <a
+              href="klabs/history/agc_schematics_block2/logic/a10-1.jpg">page
+
+
+
+
+
+              1</a>, <a
+              href="klabs/history/agc_schematics_block2/logic/a10-2.jpg">page
+
+
+
+
+
+              2</a><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">A11: 4 Bit Module<br>
+          </td>
+          <td align="center" valign="top">2005258 <a
+              href="klabs/history/agc_schematics_block2/logic/a11-1.jpg">page
+
+
+
+
+
+              1</a>, <a
+              href="klabs/history/agc_schematics_block2/logic/a11-2.jpg">page
+
+
+
+
+
+              2</a><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">A12: Parity and S Register<br>
+          </td>
+          <td align="center" valign="top">2005253 <a
+              href="klabs/history/agc_schematics_block2/logic/a12-1.jpg">page
+
+
+
+
+
+              1</a>, <a
+              href="klabs/history/agc_schematics_block2/logic/a12-2.jpg">page
+
+
+
+
+
+              2</a><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">A13: Alarms<br>
+          </td>
+          <td align="center" valign="top"><a
+              href="klabs/history/agc_schematics_block2/logic/a13-1.jpg">2005269</a><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">A14: Memory Timing and Addressing<br>
+          </td>
+          <td align="center" valign="top">2005264 <a
+              href="klabs/history/agc_schematics_block2/logic/a14-1.jpg">page
+
+
+
+
+
+              1</a>, <a
+              href="klabs/history/agc_schematics_block2/logic/a14-2.jpg">page
+
+
+
+
+
+              2</a><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">A15: RUPT Service<br>
+          </td>
+          <td align="center" valign="top">2005265 <a
+              href="klabs/history/agc_schematics_block2/logic/a15-1.jpg">page
+
+
+
+
+
+              1</a>, <a
+              href="klabs/history/agc_schematics_block2/logic/a15-2.jpg">page
+
+
+
+
+
+              2</a><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">A16: In/Out I<br>
+          </td>
+          <td align="center" valign="top">2005266 <a
+              href="klabs/history/agc_schematics_block2/logic/a16-1.jpg">page
+
+
+
+
+
+              1</a>, <a
+              href="klabs/history/agc_schematics_block2/logic/a16-2.jpg">page
+
+
+
+
+
+              2</a><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">A17: In/Out II<br>
+          </td>
+          <td align="center" valign="top">2005267 <a
+              href="klabs/history/agc_schematics_block2/logic/a17-1.jpg">page
+
+
+
+
+
+              1</a>, <a
+              href="klabs/history/agc_schematics_block2/logic/a17-2.jpg">page
+
+
+
+
+
+              2</a><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">A18: In/Out III<br>
+          </td>
+          <td align="center" valign="top">2005268 <a
+              href="klabs/history/agc_schematics_block2/logic/a18-1.jpg">page
+
+
+
+
+
+              1</a>, <a
+              href="klabs/history/agc_schematics_block2/logic/a18-2.jpg">page
+
+
+
+
+
+              2</a><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">A19: In/Out IV<br>
+          </td>
+          <td align="center" valign="top">2005270 <a
+              href="klabs/history/agc_schematics_block2/logic/a19-1.jpg">page
+
+
+
+
+
+              1</a>, <a
+              href="klabs/history/agc_schematics_block2/logic/a19-2.jpg">page
+
+
+
+
+
+              2</a><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">A20: Counter Cell I<br>
+          </td>
+          <td align="center" valign="top">2005254 <a
+              href="klabs/history/agc_schematics_block2/logic/a20-1.jpg">page
+
+
+
+
+
+              1</a>, <a
+              href="klabs/history/agc_schematics_block2/logic/a20-2.jpg">page
+
+
+
+
+
+              2</a><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">A21: Counter Cell II<br>
+          </td>
+          <td align="center" valign="top">2005250 <a
+              href="klabs/history/agc_schematics_block2/logic/a21-1.jpg">page
+
+
+
+
+
+              1</a>, <a
+              href="klabs/history/agc_schematics_block2/logic/a21-2.jpg">page
+
+
+
+
+
+              2</a>, <a
+              href="klabs/history/agc_schematics_block2/logic/a21-3.jpg">page
+
+
+
+
+
+              3</a><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">A22: In/Out V<br>
+          </td>
+          <td align="center" valign="top">2005271 <a
+              href="klabs/history/agc_schematics_block2/logic/a22-1.jpg">page
+
+
+
+
+
+              1</a>, <a
+              href="klabs/history/agc_schematics_block2/logic/a22-2.jpg">page
+
+
+
+
+
+              2</a><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">A23: In/Out VI<br>
+          </td>
+          <td align="center" valign="top">2005272 <a
+              href="klabs/history/agc_schematics_block2/logic/a23-1.jpg">page
+
+
+
+
+
+              1</a>, <a
+              href="klabs/history/agc_schematics_block2/logic/a23-2.jpg">page
+
+
+
+
+
+              2</a><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">A24: In/Out VII<br>
+          </td>
+          <td align="center" valign="top">2005273 <a
+              href="klabs/history/agc_schematics_block2/logic/a24-1.jpg">page
+
+
+
+
+
+              1</a>, <a
+              href="klabs/history/agc_schematics_block2/logic/a24-2.jpg">page
+
+
+
+
+
+              2</a><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">A25 - A26: Interface<br>
+          </td>
+          <td align="center" valign="top"><a
+              href="klabs/history/agc_schematics_block2/top_level/a25-a26-1.jpg">2005928</a><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">A27 - A29: Interface<br>
+          </td>
+          <td align="center" valign="top">2005933 page 1, page 2<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">A30 - A31: Power Supply<br>
+          </td>
+          <td align="center" valign="top"><a
+              href="klabs/history/agc_schematics_block2/top_level/a30-a31-1.jpg">2005971</a><br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">B1 - B6: Rope Memory<br>
+          </td>
+          <td align="center" valign="top">2005012B <a
+              href="AGCHandbook/B1-B6-2005012B-1.jpg">page 1</a>, <a
+              href="AGCHandbook/B1-B6-2005012B-2.jpg">page 2</a> </td>
+        </tr>
+        <tr>
+          <td valign="top">B7: Oscillator<br>
+          </td>
+          <td align="center" valign="top">2005930<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">B8: Alarms<br>
+          </td>
+          <td align="center" valign="top">2005975<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">B9 - B10: Erasable Drivers<br>
+          </td>
+          <td align="center" valign="top">2005934<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">B11: Current Switch<br>
+          </td>
+          <td align="center" valign="top">2005925<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">B12: Erasable Memory<br>
+          </td>
+          <td align="center" valign="top">2005931<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">B13: Sense Amplifier<br>
+          </td>
+          <td align="center" valign="top">2005970<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">B14: Sense Amplifier<br>
+          </td>
+          <td align="center" valign="top">2005969<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">B15: Strand Select<br>
+          </td>
+          <td align="center" valign="top">2005926<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">B16 - B17: Rope Driver<br>
+          </td>
+          <td align="center" valign="top">2005938<br>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <br>
+    <ul>
+    </ul>
+    <h1><a name="2003994"></a>Drawings for Block II DSKY p/n 2003994-<i>TBD</i></h1>
+    <p><b>Note:</b> For p/n 2003994-<i>xxx</i>, while we have lists of
+      the drawing <i>numbers</i>, we don't presently have the
+      documentation needed to tell which <i>revisions</i> of the
+      drawings are needed.&nbsp; Therefore, the drawings linked in the
+      tab below are simply the latest revisions we've been able to find.</p>
+    <table cellpadding="2" cellspacing="2" align="center" border="1">
+      <tbody>
+        <tr>
+          <th valign="top">Module Description<br>
+          </th>
+          <th valign="top">Drawing Number<br>
+          </th>
+        </tr>
+        <tr>
+          <td valign="top">DSKY Interconnection Drawing<br>
+          </td>
+          <td align="center" valign="top">2005954<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">D1 - D6: Indicator Driver<br>
+          </td>
+          <td align="center" valign="top">2006954<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">D7: Power Supply Module<br>
+          </td>
+          <td align="center" valign="top">2005937<br>
+          </td>
+        </tr>
+        <tr>
+          <td valign="top">D8: Keyboard Module<br>
+          </td>
+          <td align="center" valign="top">2005939<br>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <p><br>
+    </p>
+    <h1><a name="PartNumbers"></a>Appendix: Evolution of AGC/DSKY Part
+      Numbers</h1>
     The way different part numbers of AGCs or DSKYs are related to one
     another is that you start with a given assembly with a certain part
     number (such as Block II AGC with p/n 2003100-011), then you apply
     an Engineering Change Proposal, or ECP for short, such as ECP 322
     (described as "computer wiring changes"), with the result that you
     now have a different assembly p/n 2003100-021.&nbsp; <br>
-    <br>
+    <h2>Evolution of Block II AGC Part Numbers</h2>
     The list below shows how all known Block II AGC part numbers are
     interrelated according to the principle just mentioned.&nbsp; Many
     of these changes clearly are not electrical in nature, or else refer
@@ -249,8 +1862,6 @@ href="documents/NAS9-497_ApolloPrimaryGuidanceNavigationAndControlSystem.pdf">AC
                           detection")</li>
                       </ul>
                     </ul>
-                    <ul>
-                    </ul>
                   </ul>
                 </ul>
               </ul>
@@ -259,15 +1870,24 @@ href="documents/NAS9-497_ApolloPrimaryGuidanceNavigationAndControlSystem.pdf">AC
         </ul>
       </ul>
     </ul>
-    <p>Block II DSKY part numbers are TBD.</p>
-    <p>Block I AGC part numbers are TBD.<br>
+    <p>Note that there is also an ECP 483 for p/n 203993 listed in Table
+      8-II of document ND-1021042 (from which the information above
+      came), but I haven't been able so far to find out what it is, nor
+      at what dash number of 2003993 it became effective.&nbsp; In
+      earlier section providing <a href="#2003993-111">drawings for
+        2003993-111</a>, I arbitrarily assumed that ECP 483 had been
+      applied.<br>
     </p>
-    <p>Block I DSKY part numbers are TBD.<br>
+    <h2>Evolution of Block II DSKY Part Numbers</h2>
+    <p>TBD.</p>
+    <h2>Evolution of Block I AGC Part Numbers</h2>
+    <p>TBD.<br>
     </p>
-    <ul>
-    </ul>
-    <h1><a name="AGC_or_DSKY_Part_Numbers_vs_Serial"></a>AGC and DSKY
-      Part Numbers vs Serial Number</h1>
+    <h2> </h2>
+    <h2>Evolution of Block I DSKY Part Numbers</h2>
+    TBD.
+    <h1><a name="AGC_or_DSKY_Part_Numbers_vs_Serial"></a>Appendix: AGC
+      and DSKY Part Numbers vs Serial Number</h1>
     <p>Note that the table that follows isn't guaranteed to be perfect,
       but simply reflect the limits of the presently-available
       documentation.</p>
@@ -1750,2736 +3370,7 @@ href="documents/NAS9-497_ApolloPrimaryGuidanceNavigationAndControlSystem.pdf">AC
         </tr>
       </tbody>
     </table>
-    <ul>
-    </ul>
-    <ul>
-    </ul>
-    <h1><a name="I_AGC"></a>Drawings for Block I AGC p/n TBD</h1>
-    <p>TBD<br>
-    </p>
-    <h1><a name="I_MAIN_DSKY"></a>Drawings for Block I Main DSKY p/n TBD</h1>
-    <p>TBD<br>
-    </p>
-    <h1><a name="I_NAV_DSKY"></a>Drawings for Block I Navigation DSKY
-      p/n TBD</h1>
-    <p>TBD<br>
-    </p>
-    <h1><a name="2003100-011K"></a>Drawings for Block II AGC p/n
-      2003100-011K, -021K<br>
-    </h1>
-    <table cellpadding="2" cellspacing="2" align="center" border="1">
-      <tbody>
-        <tr>
-          <th valign="top">Module Description<br>
-          </th>
-          <th valign="top">Drawing Number<br>
-          </th>
-        </tr>
-        <tr>
-          <td valign="top">A1: Scaler Module<br>
-          </td>
-          <td align="center" valign="top">2005059<a
-              href="klabs/history/agc_schematics_block2/logic/a01-2.jpg"></a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">A2: Timer<br>
-          </td>
-          <td align="center" valign="top">2005060<a
-              href="klabs/history/agc_schematics_block2/logic/a02-3.jpg"></a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">A3: S Q Register and Decoding<br>
-          </td>
-          <td align="center" valign="top">2005051<a
-              href="klabs/history/agc_schematics_block2/logic/a03-2.jpg"></a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">A4: Stage Branch Decoding<br>
-          </td>
-          <td align="center" valign="top">2005062<a
-              href="klabs/history/agc_schematics_block2/logic/a04-2.jpg"></a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">A5: Cross Point Generator I<br>
-          </td>
-          <td align="center" valign="top">2005061<a
-              href="klabs/history/agc_schematics_block2/logic/a05-2.jpg"></a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">A6: Cross Point Generator II<br>
-          </td>
-          <td align="center" valign="top">2005063<a
-              href="klabs/history/agc_schematics_block2/logic/a06-2.jpg"></a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">A7: Service Gates<br>
-          </td>
-          <td align="center" valign="top">2005252 <a
-              href="klabs/history/agc_schematics_block2/logic/a07-1.jpg">page
-
-
-
-              1</a>, <a
-              href="klabs/history/agc_schematics_block2/logic/a07-2.jpg">page
-
-
-
-              2</a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">A8: 4 Bit Module<br>
-          </td>
-          <td align="center" valign="top">2005055<a
-              href="klabs/history/agc_schematics_block2/logic/a08-2.jpg"></a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">A9: 4 Bit Module<br>
-          </td>
-          <td align="center" valign="top">2005056<a
-              href="klabs/history/agc_schematics_block2/logic/a09-2.jpg"></a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">A10: 4 Bit Module<br>
-          </td>
-          <td align="center" valign="top">2005057<a
-              href="klabs/history/agc_schematics_block2/logic/a10-2.jpg"></a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">A11: 4 Bit Module<br>
-          </td>
-          <td align="center" valign="top">2005058<a
-              href="klabs/history/agc_schematics_block2/logic/a11-2.jpg"></a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">A12: Parity and S Register<br>
-          </td>
-          <td align="center" valign="top">2005053<a
-              href="klabs/history/agc_schematics_block2/logic/a12-2.jpg"></a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">A13: Alarms<br>
-          </td>
-          <td align="center" valign="top">2005069<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">A14: Memory Timing and Addressing<br>
-          </td>
-          <td align="center" valign="top">2005074<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">A15: RUPT Service<br>
-          </td>
-          <td align="center" valign="top">2005065<a
-              href="klabs/history/agc_schematics_block2/logic/a15-2.jpg"></a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">A16: In/Out I<br>
-          </td>
-          <td align="center" valign="top">2005066<a
-              href="klabs/history/agc_schematics_block2/logic/a16-2.jpg"></a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">A17: In/Out II<br>
-          </td>
-          <td align="center" valign="top">2005067<a
-              href="klabs/history/agc_schematics_block2/logic/a17-2.jpg"></a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">A18: In/Out III<br>
-          </td>
-          <td align="center" valign="top">2005068<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">A19: In/Out IV<br>
-          </td>
-          <td align="center" valign="top">2005070<a
-              href="klabs/history/agc_schematics_block2/logic/a19-2.jpg"></a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">A20: Counter Cell I<br>
-          </td>
-          <td align="center" valign="top">2005054<a
-              href="klabs/history/agc_schematics_block2/logic/a20-2.jpg"></a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">A21: Counter Cell II<br>
-          </td>
-          <td align="center" valign="top">2005050<a
-              href="klabs/history/agc_schematics_block2/logic/a21-3.jpg"></a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">A22: In/Out V<br>
-          </td>
-          <td align="center" valign="top">2005071<a
-              href="klabs/history/agc_schematics_block2/logic/a22-2.jpg"></a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">A23: In/Out VI<br>
-          </td>
-          <td align="center" valign="top">2005072<a
-              href="klabs/history/agc_schematics_block2/logic/a23-2.jpg"></a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">A24: In/Out VII<br>
-          </td>
-          <td align="center" valign="top">2005073<a
-              href="klabs/history/agc_schematics_block2/logic/a24-2.jpg"></a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">A25 - A26: Interface<br>
-          </td>
-          <td align="center" valign="top"><a
-              href="AGCHandbook/A25-A26-2005021C.jpg">2005021</a> </td>
-        </tr>
-        <tr>
-          <td valign="top">A27 - A29: Interface<br>
-          </td>
-          <td align="center" valign="top">2005020 <a
-              href="AGCHandbook/A27-A29-2005020B-1.jpg">page 1</a>, <a
-              href="AGCHandbook/A27-A29-2005020B-2.jpg">page 2</a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">A30 - A31: Power Supply<br>
-          </td>
-          <td align="center" valign="top">2005010 <a
-              href="AGCHandbook/A30-A31-2005010B-1.jpg">page 1</a>, <a
-              href="AGCHandbook/A30-A31-2005010B-2.jpg">page 2</a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">B1 - B6: Rope Memory<br>
-          </td>
-          <td align="center" valign="top">2005012?<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">B7: Oscillator<br>
-          </td>
-          <td align="center" valign="top">2005003 <a
-              href="AGCHandbook/B7-2005003E-1.jpg">page 1</a>, <a
-              href="AGCHandbook/B7-2005003E-2.jpg">page 2</a>, <a
-              href="AGCHandbook/B7-2005003E-3.jpg">page 3</a> </td>
-        </tr>
-        <tr>
-          <td valign="top">B8: Alarms<br>
-          </td>
-          <td align="center" valign="top">2005028<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">B9 - B10: Erasable Drivers<br>
-          </td>
-          <td align="center" valign="top">2005915<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">B11: Current Switch<br>
-          </td>
-          <td align="center" valign="top">2005005 <a
-              href="AGCHandbook/B11-2005005D-1.jpg">page 1</a>, <a
-              href="AGCHandbook/B11-2005005D-2.jpg">page 2</a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">B12: Erasable Memory<br>
-          </td>
-          <td align="center" valign="top"><a
-              href="AGCHandbook/B12-2005006.jpg">2005006</a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">B13: Sense Amplifier<br>
-          </td>
-          <td align="center" valign="top">2005914<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">B14: Sense Amplifier<br>
-          </td>
-          <td align="center" valign="top">2005914<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">B15: Strand Select<br>
-          </td>
-          <td align="center" valign="top"><a
-              href="AGCHandbook/B15-2005009A.jpg">2005009</a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">B16 - B17: Rope Driver<br>
-          </td>
-          <td align="center" valign="top">2005913<br>
-          </td>
-        </tr>
-      </tbody>
-    </table>
     <br>
-    <h1><a name="2003200-011A"></a>Drawings for Block II AGC p/n
-      2003200-011A</h1>
-    <table cellpadding="2" cellspacing="2" align="center" border="1">
-      <tbody>
-        <tr>
-          <th valign="top">Module Description<br>
-          </th>
-          <th valign="top">Drawing Number<br>
-          </th>
-        </tr>
-        <tr>
-          <td valign="top">A1: Scaler Module<br>
-          </td>
-          <td align="center" valign="top">2005259 <a
-              href="klabs/history/agc_schematics_block2/logic/a01-1.jpg">page
-
-
-
-              1</a>, <a
-              href="klabs/history/agc_schematics_block2/logic/a01-2.jpg">page
-
-
-
-              2</a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">A2: Timer<br>
-          </td>
-          <td align="center" valign="top">2005260 <a
-              href="klabs/history/agc_schematics_block2/logic/a02-1.jpg">page
-
-
-
-              1</a>, <a
-              href="klabs/history/agc_schematics_block2/logic/a02-2.jpg">page
-
-
-
-              2</a>, <a
-              href="klabs/history/agc_schematics_block2/logic/a02-3.jpg">page
-
-
-
-              3</a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">A3: S Q Register and Decoding<br>
-          </td>
-          <td align="center" valign="top">2005251 <a
-              href="klabs/history/agc_schematics_block2/logic/a03-1.jpg">page
-
-
-
-              1</a>, <a
-              href="klabs/history/agc_schematics_block2/logic/a03-2.jpg">page
-
-
-
-              2</a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">A4: Stage Branch Decoding<br>
-          </td>
-          <td align="center" valign="top">2005262 <a
-              href="klabs/history/agc_schematics_block2/logic/a04-1.jpg">page
-
-
-
-              1</a>, <a
-              href="klabs/history/agc_schematics_block2/logic/a04-2.jpg">page
-
-
-
-              2</a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">A5: Cross Point Generator I<br>
-          </td>
-          <td align="center" valign="top">2005261 <a
-              href="klabs/history/agc_schematics_block2/logic/a05-1.jpg">page
-
-
-
-              1</a>, <a
-              href="klabs/history/agc_schematics_block2/logic/a05-2.jpg">page
-
-
-
-              2</a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">A6: Cross Point Generator II<br>
-          </td>
-          <td align="center" valign="top">2005263 <a
-              href="klabs/history/agc_schematics_block2/logic/a06-1.jpg">page
-
-
-
-              1</a>, <a
-              href="klabs/history/agc_schematics_block2/logic/a06-2.jpg">page
-
-
-
-              2</a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">A7: Service Gates<br>
-          </td>
-          <td align="center" valign="top">2005252 <a
-              href="klabs/history/agc_schematics_block2/logic/a07-1.jpg">page
-
-
-
-              1</a>, <a
-              href="klabs/history/agc_schematics_block2/logic/a07-2.jpg">page
-
-
-
-              2</a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">A8: 4 Bit Module<br>
-          </td>
-          <td align="center" valign="top">2005255 <a
-              href="klabs/history/agc_schematics_block2/logic/a08-1.jpg">page
-
-
-
-              1</a>, <a
-              href="klabs/history/agc_schematics_block2/logic/a08-2.jpg">page
-
-
-
-              2</a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">A9: 4 Bit Module<br>
-          </td>
-          <td align="center" valign="top">2005256 <a
-              href="klabs/history/agc_schematics_block2/logic/a09-1.jpg">page
-
-
-
-              1</a>, <a
-              href="klabs/history/agc_schematics_block2/logic/a09-2.jpg">page
-
-
-
-              2</a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">A10: 4 Bit Module<br>
-          </td>
-          <td align="center" valign="top">2005257 <a
-              href="klabs/history/agc_schematics_block2/logic/a10-1.jpg">page
-
-
-
-              1</a>, <a
-              href="klabs/history/agc_schematics_block2/logic/a10-2.jpg">page
-
-
-
-              2</a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">A11: 4 Bit Module<br>
-          </td>
-          <td align="center" valign="top">2005258 <a
-              href="klabs/history/agc_schematics_block2/logic/a11-1.jpg">page
-
-
-
-              1</a>, <a
-              href="klabs/history/agc_schematics_block2/logic/a11-2.jpg">page
-
-
-
-              2</a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">A12: Parity and S Register<br>
-          </td>
-          <td align="center" valign="top">2005253 <a
-              href="klabs/history/agc_schematics_block2/logic/a12-1.jpg">page
-
-
-
-              1</a>, <a
-              href="klabs/history/agc_schematics_block2/logic/a12-2.jpg">page
-
-
-
-              2</a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">A13: Alarms<br>
-          </td>
-          <td align="center" valign="top"><a
-              href="klabs/history/agc_schematics_block2/logic/a13-1.jpg">2005269</a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">A14: Memory Timing and Addressing<br>
-          </td>
-          <td align="center" valign="top">2005264 <a
-              href="klabs/history/agc_schematics_block2/logic/a14-1.jpg">page
-
-
-
-              1</a>, <a
-              href="klabs/history/agc_schematics_block2/logic/a14-2.jpg">page
-
-
-
-              2</a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">A15: RUPT Service<br>
-          </td>
-          <td align="center" valign="top">2005265 <a
-              href="klabs/history/agc_schematics_block2/logic/a15-1.jpg">page
-
-
-
-              1</a>, <a
-              href="klabs/history/agc_schematics_block2/logic/a15-2.jpg">page
-
-
-
-              2</a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">A16: In/Out I<br>
-          </td>
-          <td align="center" valign="top">2005266 <a
-              href="klabs/history/agc_schematics_block2/logic/a16-1.jpg">page
-
-
-
-              1</a>, <a
-              href="klabs/history/agc_schematics_block2/logic/a16-2.jpg">page
-
-
-
-              2</a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">A17: In/Out II<br>
-          </td>
-          <td align="center" valign="top">2005267 <a
-              href="klabs/history/agc_schematics_block2/logic/a17-1.jpg">page
-
-
-
-              1</a>, <a
-              href="klabs/history/agc_schematics_block2/logic/a17-2.jpg">page
-
-
-
-              2</a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">A18: In/Out III<br>
-          </td>
-          <td align="center" valign="top">2005268 <a
-              href="klabs/history/agc_schematics_block2/logic/a18-1.jpg">page
-
-
-
-              1</a>, <a
-              href="klabs/history/agc_schematics_block2/logic/a18-2.jpg">page
-
-
-
-              2</a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">A19: In/Out IV<br>
-          </td>
-          <td align="center" valign="top">2005270 <a
-              href="klabs/history/agc_schematics_block2/logic/a19-1.jpg">page
-
-
-
-              1</a>, <a
-              href="klabs/history/agc_schematics_block2/logic/a19-2.jpg">page
-
-
-
-              2</a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">A20: Counter Cell I<br>
-          </td>
-          <td align="center" valign="top">2005254 <a
-              href="klabs/history/agc_schematics_block2/logic/a20-1.jpg">page
-
-
-
-              1</a>, <a
-              href="klabs/history/agc_schematics_block2/logic/a20-2.jpg">page
-
-
-
-              2</a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">A21: Counter Cell II<br>
-          </td>
-          <td align="center" valign="top">2005250 <a
-              href="klabs/history/agc_schematics_block2/logic/a21-1.jpg">page
-
-
-
-              1</a>, <a
-              href="klabs/history/agc_schematics_block2/logic/a21-2.jpg">page
-
-
-
-              2</a>, <a
-              href="klabs/history/agc_schematics_block2/logic/a21-3.jpg">page
-
-
-
-              3</a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">A22: In/Out V<br>
-          </td>
-          <td align="center" valign="top">2005271 <a
-              href="klabs/history/agc_schematics_block2/logic/a22-1.jpg">page
-
-
-
-              1</a>, <a
-              href="klabs/history/agc_schematics_block2/logic/a22-2.jpg">page
-
-
-
-              2</a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">A23: In/Out VI<br>
-          </td>
-          <td align="center" valign="top">2005272 <a
-              href="klabs/history/agc_schematics_block2/logic/a23-1.jpg">page
-
-
-
-              1</a>, <a
-              href="klabs/history/agc_schematics_block2/logic/a23-2.jpg">page
-
-
-
-              2</a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">A24: In/Out VII<br>
-          </td>
-          <td align="center" valign="top">2005273 <a
-              href="klabs/history/agc_schematics_block2/logic/a24-1.jpg">page
-
-
-
-              1</a>, <a
-              href="klabs/history/agc_schematics_block2/logic/a24-2.jpg">page
-
-
-
-              2</a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">A25 - A26: Interface<br>
-          </td>
-          <td align="center" valign="top"><a
-              href="AGCHandbook/A25-A26-2005021C.jpg">2005021</a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">A27 - A29: Interface<br>
-          </td>
-          <td align="center" valign="top">2005912 <a
-              href="klabs/history/agc_schematics_block2/top_level/a27-a29-1.jpg">page
-
-
-              1</a>, <a
-              href="klabs/history/agc_schematics_block2/top_level/a27-a29-2.jpg">page
-
-
-              2</a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">A30 - A31: Power Supply<br>
-          </td>
-          <td align="center" valign="top">2005916<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">B1 - B6: Rope Memory<br>
-          </td>
-          <td align="center" valign="top">2005012<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">B7: Oscillator<br>
-          </td>
-          <td align="center" valign="top">2005003 <a
-              href="AGCHandbook/B7-2005003E-1.jpg">page 1</a>, <a
-              href="AGCHandbook/B7-2005003E-2.jpg">page 2</a>, <a
-              href="AGCHandbook/B7-2005003E-3.jpg">page 3</a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">B8: Alarms<br>
-          </td>
-          <td align="center" valign="top">2005927<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">B9 - B10: Erasable Drivers<br>
-          </td>
-          <td align="center" valign="top">2005104<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">B11: Current Switch<br>
-          </td>
-          <td align="center" valign="top">2005005 <a
-              href="AGCHandbook/B11-2005005D-1.jpg">page 1</a>, <a
-              href="AGCHandbook/B11-2005005D-2.jpg">page 2</a> </td>
-        </tr>
-        <tr>
-          <td valign="top">B12: Erasable Memory<br>
-          </td>
-          <td align="center" valign="top">2005106<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">B13: Sense Amplifier<br>
-          </td>
-          <td align="center" valign="top">2005920<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">B14: Sense Amplifier<br>
-          </td>
-          <td align="center" valign="top">2005919<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">B15: Strand Select<br>
-          </td>
-          <td align="center" valign="top">2005924<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">B16 - B17: Rope Driver<br>
-          </td>
-          <td align="center" valign="top">2005100<br>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-    <h1><a name="2003993-011"></a>Drawings for Block II AGC p/n
-      2003993-011</h1>
-    <table cellpadding="2" cellspacing="2" align="center" border="1">
-      <tbody>
-        <tr>
-          <th valign="top">Module Description<br>
-          </th>
-          <th valign="top">Drawing Number<br>
-          </th>
-        </tr>
-        <tr>
-          <td valign="top">A1: Scaler Module<br>
-          </td>
-          <td align="center" valign="top">2005259 <a
-              href="klabs/history/agc_schematics_block2/logic/a01-1.jpg">page
-
-
-
-              1</a>, <a
-              href="klabs/history/agc_schematics_block2/logic/a01-2.jpg">page
-
-
-
-              2</a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">A2: Timer<br>
-          </td>
-          <td align="center" valign="top">2005260 <a
-              href="klabs/history/agc_schematics_block2/logic/a02-1.jpg">page
-
-
-
-              1</a>, <a
-              href="klabs/history/agc_schematics_block2/logic/a02-2.jpg">page
-
-
-
-              2</a>, <a
-              href="klabs/history/agc_schematics_block2/logic/a02-3.jpg">page
-
-
-
-              3</a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">A3: S Q Register and Decoding<br>
-          </td>
-          <td align="center" valign="top">2005251 <a
-              href="klabs/history/agc_schematics_block2/logic/a03-1.jpg">page
-
-
-
-              1</a>, <a
-              href="klabs/history/agc_schematics_block2/logic/a03-2.jpg">page
-
-
-
-              2</a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">A4: Stage Branch Decoding<br>
-          </td>
-          <td align="center" valign="top">2005262 <a
-              href="klabs/history/agc_schematics_block2/logic/a04-1.jpg">page
-
-
-
-              1</a>, <a
-              href="klabs/history/agc_schematics_block2/logic/a04-2.jpg">page
-
-
-
-              2</a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">A5: Cross Point Generator I<br>
-          </td>
-          <td align="center" valign="top">2005261 <a
-              href="klabs/history/agc_schematics_block2/logic/a05-1.jpg">page
-
-
-
-              1</a>, <a
-              href="klabs/history/agc_schematics_block2/logic/a05-2.jpg">page
-
-
-
-              2</a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">A6: Cross Point Generator II<br>
-          </td>
-          <td align="center" valign="top">2005263 <a
-              href="klabs/history/agc_schematics_block2/logic/a06-1.jpg">page
-
-
-
-              1</a>, <a
-              href="klabs/history/agc_schematics_block2/logic/a06-2.jpg">page
-
-
-
-              2</a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">A7: Service Gates<br>
-          </td>
-          <td align="center" valign="top">2005252 <a
-              href="klabs/history/agc_schematics_block2/logic/a07-1.jpg">page
-
-
-
-              1</a>, <a
-              href="klabs/history/agc_schematics_block2/logic/a07-2.jpg">page
-
-
-
-              2</a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">A8: 4 Bit Module<br>
-          </td>
-          <td align="center" valign="top">2005255 <a
-              href="klabs/history/agc_schematics_block2/logic/a08-1.jpg">page
-
-
-
-              1</a>, <a
-              href="klabs/history/agc_schematics_block2/logic/a08-2.jpg">page
-
-
-
-              2</a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">A9: 4 Bit Module<br>
-          </td>
-          <td align="center" valign="top">2005256 <a
-              href="klabs/history/agc_schematics_block2/logic/a09-1.jpg">page
-
-
-
-              1</a>, <a
-              href="klabs/history/agc_schematics_block2/logic/a09-2.jpg">page
-
-
-
-              2</a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">A10: 4 Bit Module<br>
-          </td>
-          <td align="center" valign="top">2005257 <a
-              href="klabs/history/agc_schematics_block2/logic/a10-1.jpg">page
-
-
-
-              1</a>, <a
-              href="klabs/history/agc_schematics_block2/logic/a10-2.jpg">page
-
-
-
-              2</a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">A11: 4 Bit Module<br>
-          </td>
-          <td align="center" valign="top">2005258 <a
-              href="klabs/history/agc_schematics_block2/logic/a11-1.jpg">page
-
-
-
-              1</a>, <a
-              href="klabs/history/agc_schematics_block2/logic/a11-2.jpg">page
-
-
-
-              2</a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">A12: Parity and S Register<br>
-          </td>
-          <td align="center" valign="top">2005253 <a
-              href="klabs/history/agc_schematics_block2/logic/a12-1.jpg">page
-
-
-
-              1</a>, <a
-              href="klabs/history/agc_schematics_block2/logic/a12-2.jpg">page
-
-
-
-              2</a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">A13: Alarms<br>
-          </td>
-          <td align="center" valign="top"><a
-              href="klabs/history/agc_schematics_block2/logic/a13-1.jpg">2005269</a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">A14: Memory Timing and Addressing<br>
-          </td>
-          <td align="center" valign="top">2005264 <a
-              href="klabs/history/agc_schematics_block2/logic/a14-1.jpg">page
-
-
-
-              1</a>, <a
-              href="klabs/history/agc_schematics_block2/logic/a14-2.jpg">page
-
-
-
-              2</a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">A15: RUPT Service<br>
-          </td>
-          <td align="center" valign="top">2005265 <a
-              href="klabs/history/agc_schematics_block2/logic/a15-1.jpg">page
-
-
-
-              1</a>, <a
-              href="klabs/history/agc_schematics_block2/logic/a15-2.jpg">page
-
-
-
-              2</a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">A16: In/Out I<br>
-          </td>
-          <td align="center" valign="top">2005266 <a
-              href="klabs/history/agc_schematics_block2/logic/a16-1.jpg">page
-
-
-
-              1</a>, <a
-              href="klabs/history/agc_schematics_block2/logic/a16-2.jpg">page
-
-
-
-              2</a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">A17: In/Out II<br>
-          </td>
-          <td align="center" valign="top">2005267 <a
-              href="klabs/history/agc_schematics_block2/logic/a17-1.jpg">page
-
-
-
-              1</a>, <a
-              href="klabs/history/agc_schematics_block2/logic/a17-2.jpg">page
-
-
-
-              2</a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">A18: In/Out III<br>
-          </td>
-          <td align="center" valign="top">2005268 <a
-              href="klabs/history/agc_schematics_block2/logic/a18-1.jpg">page
-
-
-
-              1</a>, <a
-              href="klabs/history/agc_schematics_block2/logic/a18-2.jpg">page
-
-
-
-              2</a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">A19: In/Out IV<br>
-          </td>
-          <td align="center" valign="top">2005270 <a
-              href="klabs/history/agc_schematics_block2/logic/a19-1.jpg">page
-
-
-
-              1</a>, <a
-              href="klabs/history/agc_schematics_block2/logic/a19-2.jpg">page
-
-
-
-              2</a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">A20: Counter Cell I<br>
-          </td>
-          <td align="center" valign="top">2005254 <a
-              href="klabs/history/agc_schematics_block2/logic/a20-1.jpg">page
-
-
-
-              1</a>, <a
-              href="klabs/history/agc_schematics_block2/logic/a20-2.jpg">page
-
-
-
-              2</a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">A21: Counter Cell II<br>
-          </td>
-          <td align="center" valign="top">2005250 <a
-              href="klabs/history/agc_schematics_block2/logic/a21-1.jpg">page
-
-
-
-              1</a>, <a
-              href="klabs/history/agc_schematics_block2/logic/a21-2.jpg">page
-
-
-
-              2</a>, <a
-              href="klabs/history/agc_schematics_block2/logic/a21-3.jpg">page
-
-
-
-              3</a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">A22: In/Out V<br>
-          </td>
-          <td align="center" valign="top">2005271 <a
-              href="klabs/history/agc_schematics_block2/logic/a22-1.jpg">page
-
-
-
-              1</a>, <a
-              href="klabs/history/agc_schematics_block2/logic/a22-2.jpg">page
-
-
-
-              2</a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">A23: In/Out VI<br>
-          </td>
-          <td align="center" valign="top">2005272 <a
-              href="klabs/history/agc_schematics_block2/logic/a23-1.jpg">page
-
-
-
-              1</a>, <a
-              href="klabs/history/agc_schematics_block2/logic/a23-2.jpg">page
-
-
-
-              2</a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">A24: In/Out VII<br>
-          </td>
-          <td align="center" valign="top">2005273 <a
-              href="klabs/history/agc_schematics_block2/logic/a24-1.jpg">page
-
-
-
-              1</a>, <a
-              href="klabs/history/agc_schematics_block2/logic/a24-2.jpg">page
-
-
-
-              2</a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">A25 - A26: Interface<br>
-          </td>
-          <td align="center" valign="top"><a
-              href="klabs/history/agc_schematics_block2/top_level/a25-a26-1.jpg">2005928</a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">A27 - A29: Interface<br>
-          </td>
-          <td align="center" valign="top">2005933 page 1, page 2<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">A30 - A31: Power Supply<br>
-          </td>
-          <td align="center" valign="top">2005936<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">B1 - B6: Rope Memory<br>
-          </td>
-          <td align="center" valign="top">2005012?<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">B7: Oscillator<br>
-          </td>
-          <td align="center" valign="top">2005930<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">B8: Alarms<br>
-          </td>
-          <td align="center" valign="top">2005927<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">B9 - B10: Erasable Drivers<br>
-          </td>
-          <td align="center" valign="top">2005934<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">B11: Current Switch<br>
-          </td>
-          <td align="center" valign="top">2005925<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">B12: Erasable Memory<br>
-          </td>
-          <td align="center" valign="top">2005931<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">B13: Sense Amplifier<br>
-          </td>
-          <td align="center" valign="top">2005932 or (2005970 with ECP
-            483)<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">B14: Sense Amplifier<br>
-          </td>
-          <td align="center" valign="top">2005969<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">B15: Strand Select<br>
-          </td>
-          <td align="center" valign="top">2005926<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">B16 - B17: Rope Driver<br>
-          </td>
-          <td align="center" valign="top">2005938<br>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-    <h1><a name="200303993-021"></a>Drawings for Block II AGC p/n
-      2003993-021, -031<br>
-    </h1>
-    <br>
-    <table cellpadding="2" cellspacing="2" align="center" border="1">
-      <tbody>
-        <tr>
-          <th valign="top">Module Description<br>
-          </th>
-          <th valign="top">Drawing Number<br>
-          </th>
-        </tr>
-        <tr>
-          <td valign="top">A1: Scaler Module<br>
-          </td>
-          <td align="center" valign="top">2005259 <a
-              href="klabs/history/agc_schematics_block2/logic/a01-1.jpg">page
-
-
-
-              1</a>, <a
-              href="klabs/history/agc_schematics_block2/logic/a01-2.jpg">page
-
-
-
-              2</a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">A2: Timer<br>
-          </td>
-          <td align="center" valign="top">2005260 <a
-              href="klabs/history/agc_schematics_block2/logic/a02-1.jpg">page
-
-
-
-              1</a>, <a
-              href="klabs/history/agc_schematics_block2/logic/a02-2.jpg">page
-
-
-
-              2</a>, <a
-              href="klabs/history/agc_schematics_block2/logic/a02-3.jpg">page
-
-
-
-              3</a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">A3: S Q Register and Decoding<br>
-          </td>
-          <td align="center" valign="top">2005251 <a
-              href="klabs/history/agc_schematics_block2/logic/a03-1.jpg">page
-
-
-
-              1</a>, <a
-              href="klabs/history/agc_schematics_block2/logic/a03-2.jpg">page
-
-
-
-              2</a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">A4: Stage Branch Decoding<br>
-          </td>
-          <td align="center" valign="top">2005262 <a
-              href="klabs/history/agc_schematics_block2/logic/a04-1.jpg">page
-
-
-
-              1</a>, <a
-              href="klabs/history/agc_schematics_block2/logic/a04-2.jpg">page
-
-
-
-              2</a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">A5: Cross Point Generator I<br>
-          </td>
-          <td align="center" valign="top">2005261 <a
-              href="klabs/history/agc_schematics_block2/logic/a05-1.jpg">page
-
-
-
-              1</a>, <a
-              href="klabs/history/agc_schematics_block2/logic/a05-2.jpg">page
-
-
-
-              2</a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">A6: Cross Point Generator II<br>
-          </td>
-          <td align="center" valign="top">2005263 <a
-              href="klabs/history/agc_schematics_block2/logic/a06-1.jpg">page
-
-
-
-              1</a>, <a
-              href="klabs/history/agc_schematics_block2/logic/a06-2.jpg">page
-
-
-
-              2</a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">A7: Service Gates<br>
-          </td>
-          <td align="center" valign="top">2005252 <a
-              href="klabs/history/agc_schematics_block2/logic/a07-1.jpg">page
-
-
-
-              1</a>, <a
-              href="klabs/history/agc_schematics_block2/logic/a07-2.jpg">page
-
-
-
-              2</a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">A8: 4 Bit Module<br>
-          </td>
-          <td align="center" valign="top">2005255 <a
-              href="klabs/history/agc_schematics_block2/logic/a08-1.jpg">page
-
-
-
-              1</a>, <a
-              href="klabs/history/agc_schematics_block2/logic/a08-2.jpg">page
-
-
-
-              2</a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">A9: 4 Bit Module<br>
-          </td>
-          <td align="center" valign="top">2005256 <a
-              href="klabs/history/agc_schematics_block2/logic/a09-1.jpg">page
-
-
-
-              1</a>, <a
-              href="klabs/history/agc_schematics_block2/logic/a09-2.jpg">page
-
-
-
-              2</a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">A10: 4 Bit Module<br>
-          </td>
-          <td align="center" valign="top">2005257 <a
-              href="klabs/history/agc_schematics_block2/logic/a10-1.jpg">page
-
-
-
-              1</a>, <a
-              href="klabs/history/agc_schematics_block2/logic/a10-2.jpg">page
-
-
-
-              2</a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">A11: 4 Bit Module<br>
-          </td>
-          <td align="center" valign="top">2005258 <a
-              href="klabs/history/agc_schematics_block2/logic/a11-1.jpg">page
-
-
-
-              1</a>, <a
-              href="klabs/history/agc_schematics_block2/logic/a11-2.jpg">page
-
-
-
-              2</a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">A12: Parity and S Register<br>
-          </td>
-          <td align="center" valign="top">2005253 <a
-              href="klabs/history/agc_schematics_block2/logic/a12-1.jpg">page
-
-
-
-              1</a>, <a
-              href="klabs/history/agc_schematics_block2/logic/a12-2.jpg">page
-
-
-
-              2</a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">A13: Alarms<br>
-          </td>
-          <td align="center" valign="top"><a
-              href="klabs/history/agc_schematics_block2/logic/a13-1.jpg">2005269</a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">A14: Memory Timing and Addressing<br>
-          </td>
-          <td align="center" valign="top">2005264 <a
-              href="klabs/history/agc_schematics_block2/logic/a14-1.jpg">page
-
-
-
-              1</a>, <a
-              href="klabs/history/agc_schematics_block2/logic/a14-2.jpg">page
-
-
-
-              2</a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">A15: RUPT Service<br>
-          </td>
-          <td align="center" valign="top">2005265 <a
-              href="klabs/history/agc_schematics_block2/logic/a15-1.jpg">page
-
-
-
-              1</a>, <a
-              href="klabs/history/agc_schematics_block2/logic/a15-2.jpg">page
-
-
-
-              2</a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">A16: In/Out I<br>
-          </td>
-          <td align="center" valign="top">2005266 <a
-              href="klabs/history/agc_schematics_block2/logic/a16-1.jpg">page
-
-
-
-              1</a>, <a
-              href="klabs/history/agc_schematics_block2/logic/a16-2.jpg">page
-
-
-
-              2</a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">A17: In/Out II<br>
-          </td>
-          <td align="center" valign="top">2005267 <a
-              href="klabs/history/agc_schematics_block2/logic/a17-1.jpg">page
-
-
-
-              1</a>, <a
-              href="klabs/history/agc_schematics_block2/logic/a17-2.jpg">page
-
-
-
-              2</a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">A18: In/Out III<br>
-          </td>
-          <td align="center" valign="top">2005268 <a
-              href="klabs/history/agc_schematics_block2/logic/a18-1.jpg">page
-
-
-
-              1</a>, <a
-              href="klabs/history/agc_schematics_block2/logic/a18-2.jpg">page
-
-
-
-              2</a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">A19: In/Out IV<br>
-          </td>
-          <td align="center" valign="top">2005270 <a
-              href="klabs/history/agc_schematics_block2/logic/a19-1.jpg">page
-
-
-
-              1</a>, <a
-              href="klabs/history/agc_schematics_block2/logic/a19-2.jpg">page
-
-
-
-              2</a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">A20: Counter Cell I<br>
-          </td>
-          <td align="center" valign="top">2005254 <a
-              href="klabs/history/agc_schematics_block2/logic/a20-1.jpg">page
-
-
-
-              1</a>, <a
-              href="klabs/history/agc_schematics_block2/logic/a20-2.jpg">page
-
-
-
-              2</a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">A21: Counter Cell II<br>
-          </td>
-          <td align="center" valign="top">2005250 <a
-              href="klabs/history/agc_schematics_block2/logic/a21-1.jpg">page
-
-
-
-              1</a>, <a
-              href="klabs/history/agc_schematics_block2/logic/a21-2.jpg">page
-
-
-
-              2</a>, <a
-              href="klabs/history/agc_schematics_block2/logic/a21-3.jpg">page
-
-
-
-              3</a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">A22: In/Out V<br>
-          </td>
-          <td align="center" valign="top">2005271 <a
-              href="klabs/history/agc_schematics_block2/logic/a22-1.jpg">page
-
-
-
-              1</a>, <a
-              href="klabs/history/agc_schematics_block2/logic/a22-2.jpg">page
-
-
-
-              2</a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">A23: In/Out VI<br>
-          </td>
-          <td align="center" valign="top">2005272 <a
-              href="klabs/history/agc_schematics_block2/logic/a23-1.jpg">page
-
-
-
-              1</a>, <a
-              href="klabs/history/agc_schematics_block2/logic/a23-2.jpg">page
-
-
-
-              2</a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">A24: In/Out VII<br>
-          </td>
-          <td align="center" valign="top">2005273 <a
-              href="klabs/history/agc_schematics_block2/logic/a24-1.jpg">page
-
-
-
-              1</a>, <a
-              href="klabs/history/agc_schematics_block2/logic/a24-2.jpg">page
-
-
-
-              2</a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">A25 - A26: Interface<br>
-          </td>
-          <td align="center" valign="top"><a
-              href="klabs/history/agc_schematics_block2/top_level/a25-a26-1.jpg">2005928</a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">A27 - A29: Interface<br>
-          </td>
-          <td align="center" valign="top">2005933 page 1, page 2<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">A30 - A31: Power Supply<br>
-          </td>
-          <td align="center" valign="top"><a
-              href="klabs/history/agc_schematics_block2/top_level/a30-a31-1.jpg">2005971</a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">B1 - B6: Rope Memory<br>
-          </td>
-          <td align="center" valign="top">2005012?<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">B7: Oscillator<br>
-          </td>
-          <td align="center" valign="top">2005930<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">B8: Alarms<br>
-          </td>
-          <td align="center" valign="top">2005927<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">B9 - B10: Erasable Drivers<br>
-          </td>
-          <td align="center" valign="top">2005934<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">B11: Current Switch<br>
-          </td>
-          <td align="center" valign="top">2005925<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">B12: Erasable Memory<br>
-          </td>
-          <td align="center" valign="top">2005931<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">B13: Sense Amplifier<br>
-          </td>
-          <td align="center" valign="top">2005932 or (2005970 with ECP
-            483)<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">B14: Sense Amplifier<br>
-          </td>
-          <td align="center" valign="top">2005969<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">B15: Strand Select<br>
-          </td>
-          <td align="center" valign="top">2005926<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">B16 - B17: Rope Driver<br>
-          </td>
-          <td align="center" valign="top">2005938<br>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-    <br>
-    <h1><a name="2003993-061"></a>Drawings for Block II AGC p/n
-      2003993-061<br>
-    </h1>
-    <table cellpadding="2" cellspacing="2" align="center" border="1">
-      <tbody>
-        <tr>
-          <th valign="top">Module Description<br>
-          </th>
-          <th valign="top">Drawing Number<br>
-          </th>
-        </tr>
-        <tr>
-          <td valign="top">A1: Scaler Module<br>
-          </td>
-          <td align="center" valign="top">2005259 <a
-              href="klabs/history/agc_schematics_block2/logic/a01-1.jpg">page
-
-
-
-              1</a>, <a
-              href="klabs/history/agc_schematics_block2/logic/a01-2.jpg">page
-
-
-
-              2</a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">A2: Timer<br>
-          </td>
-          <td align="center" valign="top">2005260 <a
-              href="klabs/history/agc_schematics_block2/logic/a02-1.jpg">page
-
-
-
-              1</a>, <a
-              href="klabs/history/agc_schematics_block2/logic/a02-2.jpg">page
-
-
-
-              2</a>, <a
-              href="klabs/history/agc_schematics_block2/logic/a02-3.jpg">page
-
-
-
-              3</a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">A3: S Q Register and Decoding<br>
-          </td>
-          <td align="center" valign="top">2005251 <a
-              href="klabs/history/agc_schematics_block2/logic/a03-1.jpg">page
-
-
-
-              1</a>, <a
-              href="klabs/history/agc_schematics_block2/logic/a03-2.jpg">page
-
-
-
-              2</a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">A4: Stage Branch Decoding<br>
-          </td>
-          <td align="center" valign="top">2005262 <a
-              href="klabs/history/agc_schematics_block2/logic/a04-1.jpg">page
-
-
-
-              1</a>, <a
-              href="klabs/history/agc_schematics_block2/logic/a04-2.jpg">page
-
-
-
-              2</a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">A5: Cross Point Generator I<br>
-          </td>
-          <td align="center" valign="top">2005261 <a
-              href="klabs/history/agc_schematics_block2/logic/a05-1.jpg">page
-
-
-
-              1</a>, <a
-              href="klabs/history/agc_schematics_block2/logic/a05-2.jpg">page
-
-
-
-              2</a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">A6: Cross Point Generator II<br>
-          </td>
-          <td align="center" valign="top">2005263 <a
-              href="klabs/history/agc_schematics_block2/logic/a06-1.jpg">page
-
-
-
-              1</a>, <a
-              href="klabs/history/agc_schematics_block2/logic/a06-2.jpg">page
-
-
-
-              2</a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">A7: Service Gates<br>
-          </td>
-          <td align="center" valign="top">2005252 <a
-              href="klabs/history/agc_schematics_block2/logic/a07-1.jpg">page
-
-
-
-              1</a>, <a
-              href="klabs/history/agc_schematics_block2/logic/a07-2.jpg">page
-
-
-
-              2</a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">A8: 4 Bit Module<br>
-          </td>
-          <td align="center" valign="top">2005255 <a
-              href="klabs/history/agc_schematics_block2/logic/a08-1.jpg">page
-
-
-
-              1</a>, <a
-              href="klabs/history/agc_schematics_block2/logic/a08-2.jpg">page
-
-
-
-              2</a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">A9: 4 Bit Module<br>
-          </td>
-          <td align="center" valign="top">2005256 <a
-              href="klabs/history/agc_schematics_block2/logic/a09-1.jpg">page
-
-
-
-              1</a>, <a
-              href="klabs/history/agc_schematics_block2/logic/a09-2.jpg">page
-
-
-
-              2</a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">A10: 4 Bit Module<br>
-          </td>
-          <td align="center" valign="top">2005257 <a
-              href="klabs/history/agc_schematics_block2/logic/a10-1.jpg">page
-
-
-
-              1</a>, <a
-              href="klabs/history/agc_schematics_block2/logic/a10-2.jpg">page
-
-
-
-              2</a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">A11: 4 Bit Module<br>
-          </td>
-          <td align="center" valign="top">2005258 <a
-              href="klabs/history/agc_schematics_block2/logic/a11-1.jpg">page
-
-
-
-              1</a>, <a
-              href="klabs/history/agc_schematics_block2/logic/a11-2.jpg">page
-
-
-
-              2</a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">A12: Parity and S Register<br>
-          </td>
-          <td align="center" valign="top">2005253 <a
-              href="klabs/history/agc_schematics_block2/logic/a12-1.jpg">page
-
-
-
-              1</a>, <a
-              href="klabs/history/agc_schematics_block2/logic/a12-2.jpg">page
-
-
-
-              2</a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">A13: Alarms<br>
-          </td>
-          <td align="center" valign="top"><a
-              href="klabs/history/agc_schematics_block2/logic/a13-1.jpg">2005269</a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">A14: Memory Timing and Addressing<br>
-          </td>
-          <td align="center" valign="top">2005264 <a
-              href="klabs/history/agc_schematics_block2/logic/a14-1.jpg">page
-
-
-
-              1</a>, <a
-              href="klabs/history/agc_schematics_block2/logic/a14-2.jpg">page
-
-
-
-              2</a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">A15: RUPT Service<br>
-          </td>
-          <td align="center" valign="top">2005265 <a
-              href="klabs/history/agc_schematics_block2/logic/a15-1.jpg">page
-
-
-
-              1</a>, <a
-              href="klabs/history/agc_schematics_block2/logic/a15-2.jpg">page
-
-
-
-              2</a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">A16: In/Out I<br>
-          </td>
-          <td align="center" valign="top">2005266 <a
-              href="klabs/history/agc_schematics_block2/logic/a16-1.jpg">page
-
-
-
-              1</a>, <a
-              href="klabs/history/agc_schematics_block2/logic/a16-2.jpg">page
-
-
-
-              2</a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">A17: In/Out II<br>
-          </td>
-          <td align="center" valign="top">2005267 <a
-              href="klabs/history/agc_schematics_block2/logic/a17-1.jpg">page
-
-
-
-              1</a>, <a
-              href="klabs/history/agc_schematics_block2/logic/a17-2.jpg">page
-
-
-
-              2</a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">A18: In/Out III<br>
-          </td>
-          <td align="center" valign="top">2005268 <a
-              href="klabs/history/agc_schematics_block2/logic/a18-1.jpg">page
-
-
-
-              1</a>, <a
-              href="klabs/history/agc_schematics_block2/logic/a18-2.jpg">page
-
-
-
-              2</a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">A19: In/Out IV<br>
-          </td>
-          <td align="center" valign="top">2005270 <a
-              href="klabs/history/agc_schematics_block2/logic/a19-1.jpg">page
-
-
-
-              1</a>, <a
-              href="klabs/history/agc_schematics_block2/logic/a19-2.jpg">page
-
-
-
-              2</a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">A20: Counter Cell I<br>
-          </td>
-          <td align="center" valign="top">2005254 <a
-              href="klabs/history/agc_schematics_block2/logic/a20-1.jpg">page
-
-
-
-              1</a>, <a
-              href="klabs/history/agc_schematics_block2/logic/a20-2.jpg">page
-
-
-
-              2</a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">A21: Counter Cell II<br>
-          </td>
-          <td align="center" valign="top">2005250 <a
-              href="klabs/history/agc_schematics_block2/logic/a21-1.jpg">page
-
-
-
-              1</a>, <a
-              href="klabs/history/agc_schematics_block2/logic/a21-2.jpg">page
-
-
-
-              2</a>, <a
-              href="klabs/history/agc_schematics_block2/logic/a21-3.jpg">page
-
-
-
-              3</a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">A22: In/Out V<br>
-          </td>
-          <td align="center" valign="top">2005271 <a
-              href="klabs/history/agc_schematics_block2/logic/a22-1.jpg">page
-
-
-
-              1</a>, <a
-              href="klabs/history/agc_schematics_block2/logic/a22-2.jpg">page
-
-
-
-              2</a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">A23: In/Out VI<br>
-          </td>
-          <td align="center" valign="top">2005272 <a
-              href="klabs/history/agc_schematics_block2/logic/a23-1.jpg">page
-
-
-
-              1</a>, <a
-              href="klabs/history/agc_schematics_block2/logic/a23-2.jpg">page
-
-
-
-              2</a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">A24: In/Out VII<br>
-          </td>
-          <td align="center" valign="top">2005273 <a
-              href="klabs/history/agc_schematics_block2/logic/a24-1.jpg">page
-
-
-
-              1</a>, <a
-              href="klabs/history/agc_schematics_block2/logic/a24-2.jpg">page
-
-
-
-              2</a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">A25 - A26: Interface<br>
-          </td>
-          <td align="center" valign="top"><a
-              href="klabs/history/agc_schematics_block2/top_level/a25-a26-1.jpg">2005928</a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">A27 - A29: Interface<br>
-          </td>
-          <td align="center" valign="top">2005933 page 1, page 2<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">A30 - A31: Power Supply<br>
-          </td>
-          <td align="center" valign="top"><a
-              href="klabs/history/agc_schematics_block2/top_level/a30-a31-1.jpg">2005971</a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">B1 - B6: Rope Memory<br>
-          </td>
-          <td align="center" valign="top">2005012?<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">B7: Oscillator<br>
-          </td>
-          <td align="center" valign="top">2005930<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">B8: Alarms<br>
-          </td>
-          <td align="center" valign="top">2005975<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">B9 - B10: Erasable Drivers<br>
-          </td>
-          <td align="center" valign="top">2005934<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">B11: Current Switch<br>
-          </td>
-          <td align="center" valign="top">2005925<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">B12: Erasable Memory<br>
-          </td>
-          <td align="center" valign="top">2005931<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">B13: Sense Amplifier<br>
-          </td>
-          <td align="center" valign="top">2005932 or (2005970 with ECP
-            483)<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">B14: Sense Amplifier<br>
-          </td>
-          <td align="center" valign="top">2005969<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">B15: Strand Select<br>
-          </td>
-          <td align="center" valign="top">2005926<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">B16 - B17: Rope Driver<br>
-          </td>
-          <td align="center" valign="top">2005938<br>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-    <h1><a name="2003993-111"></a>Drawings for Block II AGC p/n
-      2003993-111<br>
-    </h1>
-    <table cellpadding="2" cellspacing="2" align="center" border="1">
-      <tbody>
-        <tr>
-          <th valign="top">Module Description<br>
-          </th>
-          <th valign="top">Drawing Number<br>
-          </th>
-        </tr>
-        <tr>
-          <td valign="top">A1: Scaler Module<br>
-          </td>
-          <td align="center" valign="top">2005259 <a
-              href="klabs/history/agc_schematics_block2/logic/a01-1.jpg">page
-
-
-
-              1</a>, <a
-              href="klabs/history/agc_schematics_block2/logic/a01-2.jpg">page
-
-
-
-              2</a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">A2: Timer<br>
-          </td>
-          <td align="center" valign="top">2005260 <a
-              href="klabs/history/agc_schematics_block2/logic/a02-1.jpg">page
-
-
-
-              1</a>, <a
-              href="klabs/history/agc_schematics_block2/logic/a02-2.jpg">page
-
-
-
-              2</a>, <a
-              href="klabs/history/agc_schematics_block2/logic/a02-3.jpg">page
-
-
-
-              3</a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">A3: S Q Register and Decoding<br>
-          </td>
-          <td align="center" valign="top">2005251 <a
-              href="klabs/history/agc_schematics_block2/logic/a03-1.jpg">page
-
-
-
-              1</a>, <a
-              href="klabs/history/agc_schematics_block2/logic/a03-2.jpg">page
-
-
-
-              2</a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">A4: Stage Branch Decoding<br>
-          </td>
-          <td align="center" valign="top">2005262 <a
-              href="klabs/history/agc_schematics_block2/logic/a04-1.jpg">page
-
-
-
-              1</a>, <a
-              href="klabs/history/agc_schematics_block2/logic/a04-2.jpg">page
-
-
-
-              2</a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">A5: Cross Point Generator I<br>
-          </td>
-          <td align="center" valign="top">2005261 <a
-              href="klabs/history/agc_schematics_block2/logic/a05-1.jpg">page
-
-
-
-              1</a>, <a
-              href="klabs/history/agc_schematics_block2/logic/a05-2.jpg">page
-
-
-
-              2</a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">A6: Cross Point Generator II<br>
-          </td>
-          <td align="center" valign="top">2005263 <a
-              href="klabs/history/agc_schematics_block2/logic/a06-1.jpg">page
-
-
-
-              1</a>, <a
-              href="klabs/history/agc_schematics_block2/logic/a06-2.jpg">page
-
-
-
-              2</a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">A7: Service Gates<br>
-          </td>
-          <td align="center" valign="top">2005252 <a
-              href="klabs/history/agc_schematics_block2/logic/a07-1.jpg">page
-
-
-
-              1</a>, <a
-              href="klabs/history/agc_schematics_block2/logic/a07-2.jpg">page
-
-
-
-              2</a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">A8: 4 Bit Module<br>
-          </td>
-          <td align="center" valign="top">2005255 <a
-              href="klabs/history/agc_schematics_block2/logic/a08-1.jpg">page
-
-
-
-              1</a>, <a
-              href="klabs/history/agc_schematics_block2/logic/a08-2.jpg">page
-
-
-
-              2</a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">A9: 4 Bit Module<br>
-          </td>
-          <td align="center" valign="top">2005256 <a
-              href="klabs/history/agc_schematics_block2/logic/a09-1.jpg">page
-
-
-
-              1</a>, <a
-              href="klabs/history/agc_schematics_block2/logic/a09-2.jpg">page
-
-
-
-              2</a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">A10: 4 Bit Module<br>
-          </td>
-          <td align="center" valign="top">2005257 <a
-              href="klabs/history/agc_schematics_block2/logic/a10-1.jpg">page
-
-
-
-              1</a>, <a
-              href="klabs/history/agc_schematics_block2/logic/a10-2.jpg">page
-
-
-
-              2</a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">A11: 4 Bit Module<br>
-          </td>
-          <td align="center" valign="top">2005258 <a
-              href="klabs/history/agc_schematics_block2/logic/a11-1.jpg">page
-
-
-
-              1</a>, <a
-              href="klabs/history/agc_schematics_block2/logic/a11-2.jpg">page
-
-
-
-              2</a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">A12: Parity and S Register<br>
-          </td>
-          <td align="center" valign="top">2005253 <a
-              href="klabs/history/agc_schematics_block2/logic/a12-1.jpg">page
-
-
-
-              1</a>, <a
-              href="klabs/history/agc_schematics_block2/logic/a12-2.jpg">page
-
-
-
-              2</a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">A13: Alarms<br>
-          </td>
-          <td align="center" valign="top"><a
-              href="klabs/history/agc_schematics_block2/logic/a13-1.jpg">2005269</a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">A14: Memory Timing and Addressing<br>
-          </td>
-          <td align="center" valign="top">2005264 <a
-              href="klabs/history/agc_schematics_block2/logic/a14-1.jpg">page
-
-
-
-              1</a>, <a
-              href="klabs/history/agc_schematics_block2/logic/a14-2.jpg">page
-
-
-
-              2</a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">A15: RUPT Service<br>
-          </td>
-          <td align="center" valign="top">2005265 <a
-              href="klabs/history/agc_schematics_block2/logic/a15-1.jpg">page
-
-
-
-              1</a>, <a
-              href="klabs/history/agc_schematics_block2/logic/a15-2.jpg">page
-
-
-
-              2</a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">A16: In/Out I<br>
-          </td>
-          <td align="center" valign="top">2005266 <a
-              href="klabs/history/agc_schematics_block2/logic/a16-1.jpg">page
-
-
-
-              1</a>, <a
-              href="klabs/history/agc_schematics_block2/logic/a16-2.jpg">page
-
-
-
-              2</a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">A17: In/Out II<br>
-          </td>
-          <td align="center" valign="top">2005267 <a
-              href="klabs/history/agc_schematics_block2/logic/a17-1.jpg">page
-
-
-
-              1</a>, <a
-              href="klabs/history/agc_schematics_block2/logic/a17-2.jpg">page
-
-
-
-              2</a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">A18: In/Out III<br>
-          </td>
-          <td align="center" valign="top">2005268 <a
-              href="klabs/history/agc_schematics_block2/logic/a18-1.jpg">page
-
-
-
-              1</a>, <a
-              href="klabs/history/agc_schematics_block2/logic/a18-2.jpg">page
-
-
-
-              2</a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">A19: In/Out IV<br>
-          </td>
-          <td align="center" valign="top">2005270 <a
-              href="klabs/history/agc_schematics_block2/logic/a19-1.jpg">page
-
-
-
-              1</a>, <a
-              href="klabs/history/agc_schematics_block2/logic/a19-2.jpg">page
-
-
-
-              2</a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">A20: Counter Cell I<br>
-          </td>
-          <td align="center" valign="top">2005254 <a
-              href="klabs/history/agc_schematics_block2/logic/a20-1.jpg">page
-
-
-
-              1</a>, <a
-              href="klabs/history/agc_schematics_block2/logic/a20-2.jpg">page
-
-
-
-              2</a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">A21: Counter Cell II<br>
-          </td>
-          <td align="center" valign="top">2005250 <a
-              href="klabs/history/agc_schematics_block2/logic/a21-1.jpg">page
-
-
-
-              1</a>, <a
-              href="klabs/history/agc_schematics_block2/logic/a21-2.jpg">page
-
-
-
-              2</a>, <a
-              href="klabs/history/agc_schematics_block2/logic/a21-3.jpg">page
-
-
-
-              3</a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">A22: In/Out V<br>
-          </td>
-          <td align="center" valign="top">2005271 <a
-              href="klabs/history/agc_schematics_block2/logic/a22-1.jpg">page
-
-
-
-              1</a>, <a
-              href="klabs/history/agc_schematics_block2/logic/a22-2.jpg">page
-
-
-
-              2</a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">A23: In/Out VI<br>
-          </td>
-          <td align="center" valign="top">2005272 <a
-              href="klabs/history/agc_schematics_block2/logic/a23-1.jpg">page
-
-
-
-              1</a>, <a
-              href="klabs/history/agc_schematics_block2/logic/a23-2.jpg">page
-
-
-
-              2</a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">A24: In/Out VII<br>
-          </td>
-          <td align="center" valign="top">2005273 <a
-              href="klabs/history/agc_schematics_block2/logic/a24-1.jpg">page
-
-
-
-              1</a>, <a
-              href="klabs/history/agc_schematics_block2/logic/a24-2.jpg">page
-
-
-
-              2</a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">A25 - A26: Interface<br>
-          </td>
-          <td align="center" valign="top"><a
-              href="klabs/history/agc_schematics_block2/top_level/a25-a26-1.jpg">2005928</a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">A27 - A29: Interface<br>
-          </td>
-          <td align="center" valign="top">2005933 page 1, page 2<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">A30 - A31: Power Supply<br>
-          </td>
-          <td align="center" valign="top"><a
-              href="klabs/history/agc_schematics_block2/top_level/a30-a31-1.jpg">2005971</a><br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">B1 - B6: Rope Memory<br>
-          </td>
-          <td align="center" valign="top">2005012?<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">B7: Oscillator<br>
-          </td>
-          <td align="center" valign="top">2005930<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">B8: Alarms<br>
-          </td>
-          <td align="center" valign="top">2005975<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">B9 - B10: Erasable Drivers<br>
-          </td>
-          <td align="center" valign="top">2005934<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">B11: Current Switch<br>
-          </td>
-          <td align="center" valign="top">2005925<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">B12: Erasable Memory<br>
-          </td>
-          <td align="center" valign="top">2005931<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">B13: Sense Amplifier<br>
-          </td>
-          <td align="center" valign="top">2005932 or (2005970 with ECP
-            483)<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">B14: Sense Amplifier<br>
-          </td>
-          <td align="center" valign="top">2005969<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">B15: Strand Select<br>
-          </td>
-          <td align="center" valign="top">2005926<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">B16 - B17: Rope Driver<br>
-          </td>
-          <td align="center" valign="top">2005938<br>
-          </td>
-        </tr>
-        <tr>
-          <td valign="top">Restart Monitor, Channel 77, Alarm Box<br>
-          </td>
-          <td align="center" valign="top"><a
-              href="klabs/history/agc_schematics_block2/logic/77.jpg">2003305</a><br>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-    <h1><a name="2003900-011D"></a>Drawings for Block II DSKY p/n
-      2003900-011D</h1>
-    <p>TBD<br>
-    </p>
-    <h1><a name="2003985-011G"></a>Drawings for Block II DSKY p/n
-      2003985-011G</h1>
-    <p>TBD<br>
-    </p>
-    <h1><a name="2003985-021G"></a>Drawings for Block II DSKY p/n
-      2003985-021G</h1>
-    <p>TBD</p>
-    <h1><a name="2003985-031G"></a>Drawings for Block II DSKY p/n
-      2003985-031G</h1>
-    <p>TBD<br>
-    </p>
-    <h1><a name="2003985-041G"></a>Drawings for Block II DSKY p/n
-      2003985-041G</h1>
-    <p>TBD</p>
-    <h1><a name="2003985-051G"></a>Drawings for Block II DSKY p/n
-      2003985-051G</h1>
-    <p>TBD</p>
-    <h1><a name="2003950-011B"></a>Drawings for Block II DSKY p/n
-      2003950-011B</h1>
-    <p>TBD<br>
-    </p>
-    <ul>
-    </ul>
-    <h1><a name="2003994"></a>Drawings for Block II DSKY p/n 2003994</h1>
-    <p>TBD</p>
     <br>
     <hr style="width: 100%; height: 2px;">
     <center> <br>
@@ -4625,10 +3516,12 @@ href="documents/NAS9-497_ApolloPrimaryGuidanceNavigationAndControlSystem.pdf">AC
 
 
 
+
+
           Commons No Rights Reserved License</a></span><br>
       <i><font size="-1">Last modified by <a
             href="mailto:info@sandroid.org">Ronald Burkey</a> on
-          2018-07-26.<br>
+          2018-07-27.<br>
           <br>
           <a href="http://www.ibiblio.org"><img style="border: 0px solid
               ; width: 300px; height: 100px;" alt="Virtual AGC is hosted
