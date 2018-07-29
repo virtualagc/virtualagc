@@ -110,32 +110,131 @@
       their part numbers, we <i>do</i> have enough information to know
       which <i>serial numbers</i> of AGC and DSKY units flew on which
       missions.&nbsp; That information is given in an <a
-        href="#AGC_or_DSKY_Part_Numbers_vs_Serial">Appendix</a>.&nbsp;
-      In general, though, we think that all Block II missions flew with
-      <i>some</i> variant of AGC p/n 2003993-<i>xxx</i> and DSKY p/n
-      2003994-<i>xxx</i>.<br>
+        href="#AGC_or_DSKY_Part_Numbers_vs_Serial">Appendix</a>.&nbsp; <br>
+    </p>
+    <p>In general, we think that all Block II missions flew with <i>some</i>
+      variant of AGC p/n 2003993-<i>xxx</i> and DSKY p/n 2003994-<i>xxx</i>,
+      but irritatingly we presently have only partial drawing sets for
+      part numbers 2003993 and 2003994!&nbsp; Whereas we have <i>complete</i>
+      drawing sets for the earlier Block II AGC part numbers (2003100
+      and 2003200) and DSKY part numbers (2003985 and 2003950).&nbsp;
+      This would naturally lead one to ask how great the differences
+      were between all these different AGC part numbers?&nbsp; Well,
+      Mike Stewart has put together a nice, little list of the
+      differences we're aware of; I quote him:<br>
+    </p>
+    <blockquote>
+      <p><font size="-1">Changes from AGC p/n 2003100 to 2003200: <br>
+        </font></p>
+      <ul>
+        <li><font size="-1">Conversion from aluminum trays (the X on the
+            tray B cover, as depicted in most drawings) to magnesium
+            trays (with the grid on the tray B cover).</font></li>
+        <li><font size="-1">Addition of dedicated "expander gates" to
+            replace all of the blue-nose gates in the 2003100 design,
+            whose power pins were left disconnected. There was a diode
+            sneak path in the dual NOR gate integrated circuit that
+            manifested in these blue nose gates, that added significant
+            coupling between the two gates in a chip, and added
+            excessive load to some nets. The custom expander gates had
+            the resistor from the power pin to the outputs removed,
+            which achieved the same effect, but the diode sneak path was
+            still there, and it needed to be reverse-biased to keep it
+            from affecting anything. So a new power rail, called "FAP",
+            was added (shorted to +4VDC in both power supplies), that
+            kept constant power applied to all of these gates, even
+            during standby.</font></li>
+        <li><font size="-1">Addition of wiring to allow the "STBY" key
+            on the DSKY to be used as "PRO". I tested for such wiring in
+            the AGC I was examining, and it wasn't there, so I'm
+            guessing this capability wasn't ported back to any 2003100
+            computers.</font></li>
+        <li><font size="-1">Addition of additional diodes in the fixed
+            and erasable memory drivers, which helped with thermal
+            stability.</font></li>
+        <li><font size="-1">Addition of a resistor/diode feedback path
+            to get rope memory working (these components were hacked
+            across the backplane, in the yellow sleeves in Tray B, for
+            the AGC I was examining).</font></li>
+        <li><font size="-1">Addition of a capacitor in the erasable
+            memory module that allowed the exact timing of the sense
+            amplifier strobe to be adjusted. As far as I can tell, two
+            extra pins were physically added to the erasable memory
+            module for this, since there are no such spare pins in
+            2003100 erasable modules.</font></li>
+        <li><font size="-1">Switching of the potting compound used in
+            the erasable memory module. There was a problem where the
+            original compound allowed two much movement of the cores,
+            which was leading to some of the wires breaking internally.
+            (I may be wrong about the timing of this one; it may have
+            been between 2003200 and 2003993, or maybe even later than
+            that).</font></li>
+        <li><font size="-1">Addition of a dedicated 26.5 Volt supply for
+            the DSKY to the two power supply modules.</font></li>
+        <li><font size="-1">Some changed resistor configurations in the
+            alarms module, again for thermal stability.</font></li>
+        <li><font size="-1">Also somewhere in here, the tuning resistors
+            in the interface modules were changed, to adjust the number
+            of counts at max deflection of the RHC/ACA in the LM from 32
+            to 42. I'm guessing that was probably between 2003100 and
+            2003200, but I'm not completely sure.</font></li>
+      </ul>
+      <p><font size="-1">Changes from AGC p/n 2003200 to 2003993:<br>
+        </font></p>
+      <ul>
+        <li><font size="-1">Removal of the 26.5 Volt supply for the DSKY
+            that had been added in 2003200 (I still don't know what this
+            was supposed to be for).</font></li>
+        <li><font size="-1">Updates to support the Auxiliary Memory Unit
+            being developed at Raytheon, which would give the AGC access
+            to an external core memory stack and tape module. These
+            updates include wiring to some spare NOR gates (and possibly
+            the population of those NOR gates, if they chips were
+            omitted from the boards), and wiring a new Monitor signal,
+            MAMU (Monitor Auxiliary Memory Unit), to the test connector
+            A52.</font></li>
+        <li><font size="-1">Addition of a test connector cover that
+            grounded all of the Monitor inputs (this change was
+            backported all the way back to 2003100 AGCs).</font></li>
+        <li><font size="-1">Rerouting of the SCAFAL wire in the Tray B
+            backplane to eliminate noise coupling into it.</font></li>
+        <li><font size="-1">Switching to a new diode, or something like
+            that?</font></li>
+      </ul>
+    </blockquote>
+    <p>In particular, it sounds like the biggest change from AGC p/n
+      2003200 to 2003993 was the support for the Raytheon Auxiliary
+      Memory Unit.&nbsp; <a href="Luminary.html#Superjob">Over on our
+        LUMINARY page, we actually have a complete AGC program whose
+        purpose is exercising and testing this very Auxiliary Memory
+        Unit</a>.&nbsp; Nevertheless, the Auxiliary Memory Unit was
+      neither installed nor used on actual missions, so I think you'd be
+      justified in believing that the 2003200 AGC is pretty close to
+      being a 2003993 AGC.<br>
     </p>
     <p>Except where otherwise stated below, all drawings for AGC p/n
       2003993-<i>xxx</i> were contributed by Eldon Hall to klabs.org,
       and all drawings for other AGC/DSKY part numbers come from the
       so-called AGC Handbook, contributed to Virtual AGC by Don
-      Eyles.&nbsp; The AGC Handbook is very significant, in that it is
-      the source document which provides all of the assembly information
-      as well as which drawings are associated with which AGC/DSKY
-      versions, and which provides those drawings (in numerous
-      revisions) as well.&nbsp; Often, some revision of a drawing which
-      is not part of one of the AGC/DSKY assemblies listed on this page
-      is more legible than the corresponding revision we are listing
-      here, so it's often useful to look at those other revisions of the
-      drawings in additions to the ones we are listing here.&nbsp; <a
-        href="TBD">The full scan of the AGC Handbook can be seen on our
-        Internet Archive site</a>.&nbsp; We <i>haven't</i> followed our
-      typical process of providing a "reduced quality" version of the
-      AGC Handbook on our document-library page, because it doesn't seem
-      like reducing the quality of these drawings is that great an idea,
-      so our Internet Archive page is the only source for this data at
-      present.&nbsp; If you want to download it from there it will be
-      quite large.<br>
+      Eyles.&nbsp; Note also that some drawings appear in both sources,
+      though scanned from different physical pages, though we only link
+      to Eldon Hall's version in that particular case. The AGC Handbook
+      is very significant, in that it is the source document which
+      provides all of the assembly information as well as which drawings
+      are associated with which AGC/DSKY versions, and which provides
+      those drawings (in numerous revisions) as well.&nbsp; Often, some
+      revision of a drawing which is not part of one of the AGC/DSKY
+      assemblies listed on this page is more legible than the
+      corresponding revision we are listing here, so it's often useful
+      to look at those other revisions of the drawings in additions to
+      the ones we are listing here.&nbsp; <a href="TBD">The full scan
+        of the AGC Handbook can be seen on our Internet Archive site</a>.&nbsp;
+      We <i>haven't</i> followed our typical process of providing a
+      "reduced quality" version of the AGC Handbook on our
+      document-library page, because it doesn't seem like reducing the
+      quality of these drawings is that great an idea, so our Internet
+      Archive page is the only source for this data at present.&nbsp; If
+      you want to download it from there it will be quite large.<br>
     </p>
     There are additional (sometimes overlapping) electrical or
     mechanical drawings available in AC Electronics guidance-system
@@ -152,6 +251,7 @@
     <ul>
       <li>Section 3.7 of the <a
 href="Documents/NAS9-497_ApolloPrimaryGuidanceNavigationAndControlSystem.pdf">AC
+
 
 
 
@@ -199,7 +299,8 @@ href="https://archive.org/stream/acelectroniclmma00acel#page/n197">Table
         href="Documents/apollolunarexcuracel_1.pdf">AC Electronics
         document ND-1021043 of March 10, 1966</a>, supposedly relates to
       AGC p/n 203100-021 (according to its Tables 3-I and 7-I), and its
-      Table 8-II lists all of the associated module drawings.&nbsp;
+      Table 8-II lists all of the associated module drawings.&nbsp; So
+      we've used some data from that document as well.&nbsp;
       Discrepancies between it and the AGC Handbook are noted in the
       comments.<br>
     </p>
@@ -534,7 +635,7 @@ href="https://archive.org/stream/acelectroniclmma00acel#page/n197">Table
               href="AGCHandbook/B8-2005028A-3.jpg">page 3</a><br>
           </td>
           <td valign="middle">AC document ND-1021043 lists 2005008
-            instead.<br>
+            instead, but we think it's probably wrong.<br>
           </td>
         </tr>
         <tr>
@@ -545,7 +646,7 @@ href="https://archive.org/stream/acelectroniclmma00acel#page/n197">Table
               href="AGCHandbook/B9-B10-2005915--2.jpg">page 2</a><br>
           </td>
           <td valign="middle">AC document ND-1021043 lists 2005004
-            instead. </td>
+            instead, but we think it's probably wrong. </td>
         </tr>
         <tr>
           <td valign="middle" nowrap="nowrap">B11: Current Switch<br>
@@ -574,7 +675,7 @@ href="https://archive.org/stream/acelectroniclmma00acel#page/n197">Table
               href="AGCHandbook/B13-B14-2005914--2.jpg">page 2</a><br>
           </td>
           <td valign="middle">AC document ND-1021043 lists 2005002
-            instead. </td>
+            instead, but we think it's probably wrong. </td>
         </tr>
         <tr>
           <td valign="middle" nowrap="nowrap">B15: Strand Select<br>
@@ -593,7 +694,7 @@ href="https://archive.org/stream/acelectroniclmma00acel#page/n197">Table
               href="AGCHandbook/B16-B17-2005913--2.jpg">page 2</a><br>
           </td>
           <td valign="middle">AC document ND-1021043 lists 2005000
-            instead. </td>
+            instead, but we think it's probably wrong.</td>
         </tr>
       </tbody>
     </table>
@@ -624,8 +725,10 @@ href="https://archive.org/stream/acelectroniclmma00acel#page/n197">Table
 
 
 
+
               1</a>, <a
               href="klabs/history/agc_schematics_block2/logic/a01-2.jpg">page
+
 
 
 
@@ -656,6 +759,7 @@ href="https://archive.org/stream/acelectroniclmma00acel#page/n197">Table
 
 
 
+
               1</a>, <a
               href="klabs/history/agc_schematics_block2/logic/a02-2.jpg">page
 
@@ -668,8 +772,10 @@ href="https://archive.org/stream/acelectroniclmma00acel#page/n197">Table
 
 
 
+
               2</a>, <a
               href="klabs/history/agc_schematics_block2/logic/a02-3.jpg">page
+
 
 
 
@@ -700,8 +806,10 @@ href="https://archive.org/stream/acelectroniclmma00acel#page/n197">Table
 
 
 
+
               1</a>, <a
               href="klabs/history/agc_schematics_block2/logic/a03-2.jpg">page
+
 
 
 
@@ -732,8 +840,10 @@ href="https://archive.org/stream/acelectroniclmma00acel#page/n197">Table
 
 
 
+
               1</a>, <a
               href="klabs/history/agc_schematics_block2/logic/a04-2.jpg">page
+
 
 
 
@@ -765,8 +875,10 @@ href="https://archive.org/stream/acelectroniclmma00acel#page/n197">Table
 
 
 
+
               1</a>, <a
               href="klabs/history/agc_schematics_block2/logic/a05-2.jpg">page
+
 
 
 
@@ -798,8 +910,10 @@ href="https://archive.org/stream/acelectroniclmma00acel#page/n197">Table
 
 
 
+
               1</a>, <a
               href="klabs/history/agc_schematics_block2/logic/a06-2.jpg">page
+
 
 
 
@@ -830,8 +944,10 @@ href="https://archive.org/stream/acelectroniclmma00acel#page/n197">Table
 
 
 
+
               1</a>, <a
               href="klabs/history/agc_schematics_block2/logic/a07-2.jpg">page
+
 
 
 
@@ -862,8 +978,10 @@ href="https://archive.org/stream/acelectroniclmma00acel#page/n197">Table
 
 
 
+
               1</a>, <a
               href="klabs/history/agc_schematics_block2/logic/a08-2.jpg">page
+
 
 
 
@@ -894,8 +1012,10 @@ href="https://archive.org/stream/acelectroniclmma00acel#page/n197">Table
 
 
 
+
               1</a>, <a
               href="klabs/history/agc_schematics_block2/logic/a09-2.jpg">page
+
 
 
 
@@ -926,8 +1046,10 @@ href="https://archive.org/stream/acelectroniclmma00acel#page/n197">Table
 
 
 
+
               1</a>, <a
               href="klabs/history/agc_schematics_block2/logic/a10-2.jpg">page
+
 
 
 
@@ -958,8 +1080,10 @@ href="https://archive.org/stream/acelectroniclmma00acel#page/n197">Table
 
 
 
+
               1</a>, <a
               href="klabs/history/agc_schematics_block2/logic/a11-2.jpg">page
+
 
 
 
@@ -990,8 +1114,10 @@ href="https://archive.org/stream/acelectroniclmma00acel#page/n197">Table
 
 
 
+
               1</a>, <a
               href="klabs/history/agc_schematics_block2/logic/a12-2.jpg">page
+
 
 
 
@@ -1032,8 +1158,10 @@ href="https://archive.org/stream/acelectroniclmma00acel#page/n197">Table
 
 
 
+
               1</a>, <a
               href="klabs/history/agc_schematics_block2/logic/a14-2.jpg">page
+
 
 
 
@@ -1066,8 +1194,10 @@ href="https://archive.org/stream/acelectroniclmma00acel#page/n197">Table
 
 
 
+
               1</a>, <a
               href="klabs/history/agc_schematics_block2/logic/a15-2.jpg">page
+
 
 
 
@@ -1098,8 +1228,10 @@ href="https://archive.org/stream/acelectroniclmma00acel#page/n197">Table
 
 
 
+
               1</a>, <a
               href="klabs/history/agc_schematics_block2/logic/a16-2.jpg">page
+
 
 
 
@@ -1130,8 +1262,10 @@ href="https://archive.org/stream/acelectroniclmma00acel#page/n197">Table
 
 
 
+
               1</a>, <a
               href="klabs/history/agc_schematics_block2/logic/a17-2.jpg">page
+
 
 
 
@@ -1162,8 +1296,10 @@ href="https://archive.org/stream/acelectroniclmma00acel#page/n197">Table
 
 
 
+
               1</a>, <a
               href="klabs/history/agc_schematics_block2/logic/a18-2.jpg">page
+
 
 
 
@@ -1194,8 +1330,10 @@ href="https://archive.org/stream/acelectroniclmma00acel#page/n197">Table
 
 
 
+
               1</a>, <a
               href="klabs/history/agc_schematics_block2/logic/a19-2.jpg">page
+
 
 
 
@@ -1226,8 +1364,10 @@ href="https://archive.org/stream/acelectroniclmma00acel#page/n197">Table
 
 
 
+
               1</a>, <a
               href="klabs/history/agc_schematics_block2/logic/a20-2.jpg">page
+
 
 
 
@@ -1258,6 +1398,7 @@ href="https://archive.org/stream/acelectroniclmma00acel#page/n197">Table
 
 
 
+
               1</a>, <a
               href="klabs/history/agc_schematics_block2/logic/a21-2.jpg">page
 
@@ -1270,8 +1411,10 @@ href="https://archive.org/stream/acelectroniclmma00acel#page/n197">Table
 
 
 
+
               2</a>, <a
               href="klabs/history/agc_schematics_block2/logic/a21-3.jpg">page
+
 
 
 
@@ -1302,8 +1445,10 @@ href="https://archive.org/stream/acelectroniclmma00acel#page/n197">Table
 
 
 
+
               1</a>, <a
               href="klabs/history/agc_schematics_block2/logic/a22-2.jpg">page
+
 
 
 
@@ -1334,8 +1479,10 @@ href="https://archive.org/stream/acelectroniclmma00acel#page/n197">Table
 
 
 
+
               1</a>, <a
               href="klabs/history/agc_schematics_block2/logic/a23-2.jpg">page
+
 
 
 
@@ -1366,8 +1513,10 @@ href="https://archive.org/stream/acelectroniclmma00acel#page/n197">Table
 
 
 
+
               1</a>, <a
               href="klabs/history/agc_schematics_block2/logic/a24-2.jpg">page
+
 
 
 
@@ -1552,8 +1701,10 @@ href="https://archive.org/stream/acelectroniclmma00acel#page/n197">Table
 
 
 
+
               1</a>, <a
               href="klabs/history/agc_schematics_block2/logic/a01-2.jpg">page
+
 
 
 
@@ -1584,6 +1735,7 @@ href="https://archive.org/stream/acelectroniclmma00acel#page/n197">Table
 
 
 
+
               1</a>, <a
               href="klabs/history/agc_schematics_block2/logic/a02-2.jpg">page
 
@@ -1596,8 +1748,10 @@ href="https://archive.org/stream/acelectroniclmma00acel#page/n197">Table
 
 
 
+
               2</a>, <a
               href="klabs/history/agc_schematics_block2/logic/a02-3.jpg">page
+
 
 
 
@@ -1629,8 +1783,10 @@ href="https://archive.org/stream/acelectroniclmma00acel#page/n197">Table
 
 
 
+
               1</a>, <a
               href="klabs/history/agc_schematics_block2/logic/a03-2.jpg">page
+
 
 
 
@@ -1661,8 +1817,10 @@ href="https://archive.org/stream/acelectroniclmma00acel#page/n197">Table
 
 
 
+
               1</a>, <a
               href="klabs/history/agc_schematics_block2/logic/a04-2.jpg">page
+
 
 
 
@@ -1694,8 +1852,10 @@ href="https://archive.org/stream/acelectroniclmma00acel#page/n197">Table
 
 
 
+
               1</a>, <a
               href="klabs/history/agc_schematics_block2/logic/a05-2.jpg">page
+
 
 
 
@@ -1727,8 +1887,10 @@ href="https://archive.org/stream/acelectroniclmma00acel#page/n197">Table
 
 
 
+
               1</a>, <a
               href="klabs/history/agc_schematics_block2/logic/a06-2.jpg">page
+
 
 
 
@@ -1759,8 +1921,10 @@ href="https://archive.org/stream/acelectroniclmma00acel#page/n197">Table
 
 
 
+
               1</a>, <a
               href="klabs/history/agc_schematics_block2/logic/a07-2.jpg">page
+
 
 
 
@@ -1791,8 +1955,10 @@ href="https://archive.org/stream/acelectroniclmma00acel#page/n197">Table
 
 
 
+
               1</a>, <a
               href="klabs/history/agc_schematics_block2/logic/a08-2.jpg">page
+
 
 
 
@@ -1823,8 +1989,10 @@ href="https://archive.org/stream/acelectroniclmma00acel#page/n197">Table
 
 
 
+
               1</a>, <a
               href="klabs/history/agc_schematics_block2/logic/a09-2.jpg">page
+
 
 
 
@@ -1855,8 +2023,10 @@ href="https://archive.org/stream/acelectroniclmma00acel#page/n197">Table
 
 
 
+
               1</a>, <a
               href="klabs/history/agc_schematics_block2/logic/a10-2.jpg">page
+
 
 
 
@@ -1887,8 +2057,10 @@ href="https://archive.org/stream/acelectroniclmma00acel#page/n197">Table
 
 
 
+
               1</a>, <a
               href="klabs/history/agc_schematics_block2/logic/a11-2.jpg">page
+
 
 
 
@@ -1919,8 +2091,10 @@ href="https://archive.org/stream/acelectroniclmma00acel#page/n197">Table
 
 
 
+
               1</a>, <a
               href="klabs/history/agc_schematics_block2/logic/a12-2.jpg">page
+
 
 
 
@@ -1961,8 +2135,10 @@ href="https://archive.org/stream/acelectroniclmma00acel#page/n197">Table
 
 
 
+
               1</a>, <a
               href="klabs/history/agc_schematics_block2/logic/a14-2.jpg">page
+
 
 
 
@@ -1993,8 +2169,10 @@ href="https://archive.org/stream/acelectroniclmma00acel#page/n197">Table
 
 
 
+
               1</a>, <a
               href="klabs/history/agc_schematics_block2/logic/a15-2.jpg">page
+
 
 
 
@@ -2025,8 +2203,10 @@ href="https://archive.org/stream/acelectroniclmma00acel#page/n197">Table
 
 
 
+
               1</a>, <a
               href="klabs/history/agc_schematics_block2/logic/a16-2.jpg">page
+
 
 
 
@@ -2057,8 +2237,10 @@ href="https://archive.org/stream/acelectroniclmma00acel#page/n197">Table
 
 
 
+
               1</a>, <a
               href="klabs/history/agc_schematics_block2/logic/a17-2.jpg">page
+
 
 
 
@@ -2089,8 +2271,10 @@ href="https://archive.org/stream/acelectroniclmma00acel#page/n197">Table
 
 
 
+
               1</a>, <a
               href="klabs/history/agc_schematics_block2/logic/a18-2.jpg">page
+
 
 
 
@@ -2121,8 +2305,10 @@ href="https://archive.org/stream/acelectroniclmma00acel#page/n197">Table
 
 
 
+
               1</a>, <a
               href="klabs/history/agc_schematics_block2/logic/a19-2.jpg">page
+
 
 
 
@@ -2153,8 +2339,10 @@ href="https://archive.org/stream/acelectroniclmma00acel#page/n197">Table
 
 
 
+
               1</a>, <a
               href="klabs/history/agc_schematics_block2/logic/a20-2.jpg">page
+
 
 
 
@@ -2185,6 +2373,7 @@ href="https://archive.org/stream/acelectroniclmma00acel#page/n197">Table
 
 
 
+
               1</a>, <a
               href="klabs/history/agc_schematics_block2/logic/a21-2.jpg">page
 
@@ -2197,8 +2386,10 @@ href="https://archive.org/stream/acelectroniclmma00acel#page/n197">Table
 
 
 
+
               2</a>, <a
               href="klabs/history/agc_schematics_block2/logic/a21-3.jpg">page
+
 
 
 
@@ -2229,8 +2420,10 @@ href="https://archive.org/stream/acelectroniclmma00acel#page/n197">Table
 
 
 
+
               1</a>, <a
               href="klabs/history/agc_schematics_block2/logic/a22-2.jpg">page
+
 
 
 
@@ -2261,8 +2454,10 @@ href="https://archive.org/stream/acelectroniclmma00acel#page/n197">Table
 
 
 
+
               1</a>, <a
               href="klabs/history/agc_schematics_block2/logic/a23-2.jpg">page
+
 
 
 
@@ -2293,8 +2488,10 @@ href="https://archive.org/stream/acelectroniclmma00acel#page/n197">Table
 
 
 
+
               1</a>, <a
               href="klabs/history/agc_schematics_block2/logic/a24-2.jpg">page
+
 
 
 
@@ -2437,12 +2634,11 @@ href="klabs/history/agc_schematics_block2/top_level/a30-a31-1.jpg">page
           <td valign="middle" nowrap="nowrap">DSKY Interconnection
             Drawing<br>
           </td>
-          <td valign="middle" nowrap="nowrap" align="center">2005950C<br>
+          <td valign="middle" nowrap="nowrap" align="center">2005951B <a
+              href="AGCHandbook/2005951B-1.jpg">page 1</a>, <a
+              href="AGCHandbook/2005951B-2.jpg">page 2</a><br>
           </td>
-          <td valign="middle">In lieu of drawing 2005950C, this might be
-            useful: drawing 2005901- <a
-              href="AGCHandbook/2005901--1.jpg">page 1</a>, <a
-              href="AGCHandbook/2005901--2.jpg">page 2</a>.<br>
+          <td valign="middle"><br>
           </td>
         </tr>
         <tr>
@@ -2475,12 +2671,11 @@ href="klabs/history/agc_schematics_block2/top_level/a30-a31-1.jpg">page
         <tr>
           <td valign="middle">AGC DSKY Signal Flow Diagram<br>
           </td>
-          <td valign="middle" align="center">2005900B <a
-              href="AGCHandbook/2005900--1.jpg">page 1</a>, <a
-              href="AGCHandbook/2005900--2.jpg">page 2</a><br>
+          <td valign="middle" align="center">2005950C <a
+              href="AGCHandbook/2005950C-1.jpg">page 1</a>, <a
+              href="AGCHandbook/2005950C-2.jpg">page 2</a><br>
           </td>
-          <td valign="middle">The links are actually to 2005900-, which
-            is the only revision of drawing 2005900 we presently have.<br>
+          <td valign="middle"><br>
           </td>
         </tr>
       </tbody>
@@ -2503,12 +2698,12 @@ href="klabs/history/agc_schematics_block2/top_level/a30-a31-1.jpg">page
           <td valign="middle" nowrap="nowrap">DSKY Interconnection
             Drawing<br>
           </td>
-          <td valign="middle" nowrap="nowrap" align="center">2005953B<br>
+          <td valign="middle" nowrap="nowrap" align="center">2005953B <a
+              href="AGCHandbook/2005953B-1.jpg">page 1</a>, <a
+              href="AGCHandbook/2005953B-2.jpg">page 2</a><br>
           </td>
-          <td valign="middle">In lieu of drawing 2005950C, this might be
-            useful: drawing 2005901- <a
-              href="AGCHandbook/2005901--1.jpg">page 1</a>, <a
-              href="AGCHandbook/2005901--2.jpg">page 2</a>. </td>
+          <td valign="middle"><br>
+          </td>
         </tr>
         <tr>
           <td valign="middle" nowrap="nowrap">D1 - D6: Indicator Driver<br>
@@ -2540,22 +2735,16 @@ href="klabs/history/agc_schematics_block2/top_level/a30-a31-1.jpg">page
         <tr>
           <td valign="middle">AGC DSKY Signal Flow Diagram<br>
           </td>
-          <td valign="middle" align="center">2005900B <a
-              href="AGCHandbook/2005900--1.jpg">page 1</a>, <a
-              href="AGCHandbook/2005900--2.jpg">page 2</a><br>
+          <td valign="middle" align="center">2005918- <a
+              href="AGCHandbook/2005918--1.jpg">page 1</a>, <a
+              href="AGCHandbook/2005918--2.jpg">page 2</a><br>
           </td>
-          <td valign="middle">The links are actually to 2005900-, which
-            is the only revision of drawing 2005900 we presently have.<br>
+          <td valign="middle"><br>
           </td>
         </tr>
       </tbody>
     </table>
     <h1><a name="2003994"></a>Drawings for Block II DSKY p/n 2003994-<i>TBD</i></h1>
-    <p><b>Note:</b> For p/n 2003994-<i>xxx</i>, while we have lists of
-      the drawing <i>numbers</i>, we don't presently have the
-      documentation needed to tell which <i>revisions</i> of the
-      drawings are needed.&nbsp; Therefore, the drawings linked in the
-      tab below are simply the latest revisions we've been able to find.</p>
     <table cellspacing="2" cellpadding="2" border="1" align="center">
       <tbody>
         <tr>
@@ -2759,7 +2948,10 @@ href="klabs/history/agc_schematics_block2/top_level/a30-a31-1.jpg">page
       and DSKY Part Numbers vs Serial Number</h1>
     <p>Note that the table that follows isn't guaranteed to be perfect,
       but simply reflect the limits of the presently-available
-      documentation.</p>
+      documentation.&nbsp; It's not really needed for anything, but it's
+      just kind of fun to see what AGC/DSKY part numbers were used in
+      actual practice.<br>
+    </p>
     <table cellspacing="2" cellpadding="2" border="1" align="center">
       <tbody>
         <tr>
@@ -2888,8 +3080,9 @@ href="klabs/history/agc_schematics_block2/top_level/a30-a31-1.jpg">page
           <td valign="middle" align="center">Apollo 6<br>
             CMO-20<br>
             p/n TBD</td>
-          <td valign="middle" align="center"><br>
-          </td>
+          <td valign="middle" align="center">p/n 2003100-021<br>
+            (p/n from drawing 6003001D<br>
+            in AGC Handbook) </td>
           <td valign="middle" align="center"><br>
           </td>
         </tr>
@@ -2902,10 +3095,12 @@ href="klabs/history/agc_schematics_block2/top_level/a30-a31-1.jpg">page
           </td>
           <td valign="middle" align="center">Qual 110 Subsystem<br>
             p/n TBD</td>
-          <td valign="middle" align="center"><br>
-          </td>
-          <td valign="middle" align="center"><br>
-          </td>
+          <td valign="middle" align="center">p/n 2003100-021<br>
+            (p/n from drawing 6003001D<br>
+            in AGC Handbook) </td>
+          <td valign="middle" align="center">p/n 2003985-051<br>
+            (p/n from drawing 6003001D<br>
+            in AGC Handbook) </td>
         </tr>
         <tr>
           <td valign="middle" align="center">9<br>
@@ -2917,8 +3112,9 @@ href="klabs/history/agc_schematics_block2/top_level/a30-a31-1.jpg">page
             p/n TBD</td>
           <td valign="middle" align="center"><br>
           </td>
-          <td valign="middle" align="center"><br>
-          </td>
+          <td valign="middle" align="center">p/n 2003100-021<br>
+            (p/n from drawing 6003001D<br>
+            in AGC Handbook) </td>
           <td valign="middle" align="center"><br>
           </td>
         </tr>
@@ -2982,8 +3178,9 @@ href="klabs/history/agc_schematics_block2/top_level/a30-a31-1.jpg">page
           </td>
           <td valign="middle" align="center"><br>
           </td>
-          <td valign="middle" align="center"><br>
-          </td>
+          <td valign="middle" align="center">p/n 2003985-051<br>
+            (p/n from drawing 6003001D<br>
+            in AGC Handbook) </td>
         </tr>
         <tr>
           <td valign="middle" align="center">14<br>
@@ -3057,8 +3254,9 @@ href="klabs/history/agc_schematics_block2/top_level/a30-a31-1.jpg">page
           </td>
           <td valign="middle" align="center">(Shipped to Raytheon)<br>
             p/n 2003993-<i>TBD</i> </td>
-          <td valign="middle" align="center"><br>
-          </td>
+          <td valign="middle" align="center">p/n 2003985-051<br>
+            (p/n from drawing 6003001D<br>
+            in AGC Handbook) </td>
         </tr>
         <tr>
           <td valign="middle" align="center">19<br>
@@ -4350,10 +4548,11 @@ href="klabs/history/agc_schematics_block2/top_level/a30-a31-1.jpg">page
 
 
 
+
           Commons No Rights Reserved License</a></span><br>
       <i><font size="-1">Last modified by <a
             href="mailto:info@sandroid.org">Ronald Burkey</a> on
-          2018-07-28.<br>
+          2018-07-29.<br>
           <br>
           <a href="http://www.ibiblio.org"><img style="border: 0px solid
               ; width: 300px; height: 100px;" alt="Virtual AGC is hosted
