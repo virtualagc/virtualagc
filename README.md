@@ -1,5 +1,4 @@
-# virtualagc
-Virtual AGC Project Electrical Schematics
+# Virtual AGC Project Electrical Schematics for the AGC and DSKY
 
 This branch of the Virtual AGC repository is based on the speculative notion that all of the electrical schematics of the AGC and DSKY that we've collected scans for will be converted into machine readable schematic files that can be used to actually generate netlists, verify connectivity, create actual readable diagrams (rather than old smudgy ones), and so forth, or can be used as something people can try to fork off their own designs from. Right now this is just a whim, but I intend to produce at least a few simple files for it and need some place to store them.
 
