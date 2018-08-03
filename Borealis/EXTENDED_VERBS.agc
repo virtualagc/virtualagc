@@ -38,7 +38,7 @@ LST2FAN         TC              VBZERO                  # VB40 ZERO (USED WITH N
                 TC              POSTAND                 # VB61 RECOVER FROM STANDBY
                 TC              SETUPMSG                # VB62 SCAM LEM INBITS
                 TCF             AGSINIT                 # VB63 INITIALIZE AGS
-                TCF             ALM/END
+                TC              AGCVER                  # VB64 DETERMINE AGC VERSION
                 TCF             ALM/END
                 TCF             ALM/END
                 TCF             ALM/END
