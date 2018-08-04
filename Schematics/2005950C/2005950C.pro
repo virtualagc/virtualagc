@@ -33,7 +33,7 @@ LibDir=
 [eeschema/libraries]
 [schematic_editor]
 version=1
-PageLayoutDescrFile=/home/rburkey/git/virtualagc-schematics/SchematicTemplates/schematicTemplateJ10D.kicad_wks
+PageLayoutDescrFile=schematicTemplateJ10D.kicad_wks
 PlotDirectoryName=
 SubpartIdSeparator=0
 SubpartFirstId=65
