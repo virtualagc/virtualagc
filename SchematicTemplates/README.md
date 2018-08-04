@@ -7,3 +7,5 @@ Here are all of the sizes for the templates corresponding to existing AGC electr
 - J-size (template J12D) &mdash; 80&times;34 inches, 2032&times;863.6 mm
 - J-size (template J10D) &mdash; 96&times;34 inches, 2438.4&times;863.6 mm
 - J-size (template J8D) &mdash; 100&times;34 inches, 2540&times;863.6 mm
+- J-size (template J5D) &mdash; 51&times;34 inches, 1295.4&times;863.6 mm
+
