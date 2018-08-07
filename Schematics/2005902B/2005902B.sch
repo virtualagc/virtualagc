@@ -1142,4 +1142,73 @@ Wire Notes Line width 24 style solid
 	7380 30210 7878 30213
 Wire Notes Line width 24 style solid
 	7878 30213 7875 28191
+Text Notes 12504 30312 0    140  ~ 28
+REFERENCE
+Text Notes 13308 30582 0    140  ~ 28
+1. ASSEMBLY DWG NO.2003802
+Wire Notes Line style solid
+	43461 984  43461 1764
+Wire Notes Line style solid
+	43461 1764 50500 1764
+Wire Notes Line style solid
+	50500 1374 43461 1374
+Wire Notes Line style solid
+	43972 984  43972 1764
+Wire Notes Line style solid
+	44350 984  44350 1764
+Wire Notes Line style solid
+	47831 984  47831 1764
+Wire Notes Line style solid
+	48331 984  48331 1764
+Wire Notes Line style solid
+	48831 984  48831 1764
+Wire Notes Line style solid
+	49480 984  49480 1764
+Text Notes 44075 1290 0    150  ~ 30
+A
+Text Notes 44419 1298 0    150  ~ 30
+REVISED PER TDRR 19006
+Text Notes 44059 1650 0    150  ~ 30
+B
+Text Notes 44427 1674 0    150  ~ 30
+REVISED PER TDRR 20039
+Wire Notes Line width 15 style solid
+	46060 32941 46880 32941
+Wire Notes Line width 15 style solid
+	46010 33378 46774 33378
+Wire Notes Line style solid
+	46774 33378 46774 33380
+Text Notes 49394 33418 0    0    ~ 0
+1
+Text Notes 49416 33470 0    140  ~ 28
+1
+Text Notes 50080 33470 0    140  ~ 28
+1
+Text Notes 47944 33174 0    250  ~ 50
+2005902
+Text Notes 46592 31766 0    300  ~ 60
+SCHEMATIC
+Text Notes 46480 32126 0    200  ~ 40
+INDICATOR DRIVER
+Text Notes 46968 32390 0    140  ~ 28
+MODULE D1-D6
+Text GLabel 14500 27555 0    140  UnSpc ~ 28
+22
+Text GLabel 12740 25800 0    140  UnSpc ~ 28
+71
+Text GLabel 11150 24920 0    140  UnSpc ~ 28
+16
+Text GLabel 19650 27560 0    140  UnSpc ~ 28
+39
+$Comp
+L Diode:1N4001 CR1
+U 1 1 5B6C8DA4
+P 15530 26280
+F 0 "CR1" V 15530 26359 50  0000 L CNB
+F 1 "2004103-001" H 15530 26405 50  0001 C CNN
+F 2 "" H 15530 26105 50  0001 C CNN
+F 3 "" H 15530 26280 50  0001 C CNN
+	1    15530 26280
+	0    1    1    0   
+$EndComp
 $EndSCHEMATC
