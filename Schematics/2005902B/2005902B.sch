@@ -3800,12 +3800,9 @@ Wire Wire Line
 Connection ~ 17550 12925
 Wire Wire Line
 	17550 12925 17675 12925
-Wire Wire Line
-	18550 10775 18550 10750
 Connection ~ 18550 9050
 Wire Wire Line
 	18550 9050 21700 9050
-Connection ~ 18550 10750
 Wire Wire Line
 	18550 10750 18550 9050
 Wire Wire Line
