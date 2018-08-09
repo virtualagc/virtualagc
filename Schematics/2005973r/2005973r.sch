@@ -564,10 +564,10 @@ Wire Notes Line width 33 style solid
 	4804 21623 4804 22798
 Wire Notes Line width 33 style solid
 	6054 21642 6054 22817
-Text Notes 1544 30412 0    140  ~ 28
-RELAY CKT FOR K21 & K22\nTO SWITCH FROM POSITION\nSHOWN, APPLY PLUS VOLTAGE\nON PIN 1
-Text Notes 6133 31662 0    140  ~ 28
-CKT FOR LATCHING RELAY K1-\nK6,K6-K10,K11-K15,& K16-K20\nTO SWITCH AND LATCH FROM\nPOSITION SHOWN,APPLY PLUS\nVOLTAGE ON PIN 10
+Text Notes 2125 30525 0    140  ~ 28
+CIRCUIT FOR RELAYS\nK21 AND K22.  TO\nSWITCH FROM POSITION\nSHOWN, APPLY PLUS\nVOLTAGE ON PIN 1.
+Text Notes 6575 31775 0    140  ~ 28
+CIRCUIT FOR LATCHING\nRELAYS K1 THRU K20.\nTO SWITCH AND LATCH \nFROM POSITION SHOWN,\nAPPLY PLUS VOLTAGE\nON PIN 10.
 Text Notes 1076 31932 0    140  ~ 28
 NOTES
 Text Notes 2030 32484 0    140  ~ 28
@@ -686,9 +686,9 @@ Text Notes 3928 28436 0    140  ~ 28
 1
 Text Notes 3924 29176 0    140  ~ 28
 5
-Text Notes 3656 28528 0    140  ~ 28
+Text Notes 3375 28275 0    140  ~ 28
 +
-Text Notes 3652 29072 0    140  ~ 28
+Text Notes 3375 29050 0    140  ~ 28
 -
 Wire Notes Line width 24
 	3064 25596 3060 28080
@@ -705,97 +705,11 @@ Wire Notes Line width 24 style solid
 Wire Notes Line width 24 style solid
 	3314 29223 3313 28202
 Wire Notes Line width 24 style solid
-	3790 28326 2809 28325
-Wire Notes Line width 24 style solid
-	2810 28837 3313 28835
+	3790 28326 3313 28326
 Wire Notes Line width 24 style solid
 	3823 29079 3316 29079
 Wire Notes Line width 24 style solid
-	2809 28326 2771 28342
-Wire Notes Line width 24 style solid
-	2771 28342 2737 28363
-Wire Notes Line width 24 style solid
-	2737 28363 2712 28384
-Wire Notes Line width 24 style solid
-	2712 28384 2693 28407
-Wire Notes Line width 24 style solid
-	2693 28407 2680 28429
-Wire Notes Line width 24 style solid
-	2680 28429 2675 28455
-Wire Notes Line width 24 style solid
-	2675 28455 2677 28480
-Wire Notes Line width 24 style solid
-	2677 28480 2684 28505
-Wire Notes Line width 24 style solid
-	2684 28505 2696 28528
-Wire Notes Line width 24 style solid
-	2696 28528 2709 28547
-Wire Notes Line width 24 style solid
-	2709 28547 2728 28566
-Wire Notes Line width 24 style solid
-	2728 28566 2746 28577
-Wire Notes Line width 24 style solid
-	2746 28577 2768 28587
-Wire Notes Line width 24 style solid
-	2768 28587 2805 28597
-Wire Notes Line width 24 style solid
 	2805 28597 2804 28596
-Wire Notes Line width 24 style solid
-	2801 28834 2763 28850
-Wire Notes Line width 24 style solid
-	2763 28850 2729 28871
-Wire Notes Line width 24 style solid
-	2729 28871 2704 28892
-Wire Notes Line width 24 style solid
-	2704 28892 2685 28915
-Wire Notes Line width 24 style solid
-	2685 28915 2672 28937
-Wire Notes Line width 24 style solid
-	2672 28937 2667 28963
-Wire Notes Line width 24 style solid
-	2667 28963 2669 28988
-Wire Notes Line width 24 style solid
-	2669 28988 2676 29013
-Wire Notes Line width 24 style solid
-	2676 29013 2688 29036
-Wire Notes Line width 24 style solid
-	2688 29036 2701 29055
-Wire Notes Line width 24 style solid
-	2701 29055 2720 29074
-Wire Notes Line width 24 style solid
-	2720 29074 2738 29085
-Wire Notes Line width 24 style solid
-	2738 29085 2760 29095
-Wire Notes Line width 24 style solid
-	2760 29095 2797 29105
-Wire Notes Line width 24 style solid
-	3323 28826 3361 28810
-Wire Notes Line width 24 style solid
-	3361 28810 3395 28789
-Wire Notes Line width 24 style solid
-	3395 28789 3420 28768
-Wire Notes Line width 24 style solid
-	3420 28768 3439 28745
-Wire Notes Line width 24 style solid
-	3439 28745 3452 28723
-Wire Notes Line width 24 style solid
-	3452 28723 3457 28697
-Wire Notes Line width 24 style solid
-	3457 28697 3455 28672
-Wire Notes Line width 24 style solid
-	3455 28672 3448 28647
-Wire Notes Line width 24 style solid
-	3448 28647 3436 28624
-Wire Notes Line width 24 style solid
-	3436 28624 3423 28605
-Wire Notes Line width 24 style solid
-	3423 28605 3404 28586
-Wire Notes Line width 24 style solid
-	3404 28586 3386 28575
-Wire Notes Line width 24 style solid
-	3386 28575 3364 28565
-Wire Notes Line width 24 style solid
-	3364 28565 3327 28555
 Text Notes 7315 25737 0    100  ~ 20
 ◯
 Wire Notes Line width 24 style solid
@@ -904,9 +818,9 @@ Text Notes 8500 28424 0    140  ~ 28
 1
 Text Notes 8496 29164 0    140  ~ 28
 5
-Text Notes 8280 28518 0    140  ~ 28
+Text Notes 7900 28275 0    140  ~ 28
 +
-Text Notes 8286 29070 0    140  ~ 28
+Text Notes 7900 29050 0    140  ~ 28
 -
 Wire Notes Line width 24
 	7636 25584 7632 28068
@@ -917,197 +831,21 @@ Wire Notes Line width 24 style solid
 Wire Notes Line width 24 style solid
 	7883 28190 7380 28191
 Wire Notes Line width 24 style solid
-	8362 28314 7381 28313
-Wire Notes Line width 24 style solid
-	7382 28825 7885 28823
+	8362 28314 7876 28314
 Wire Notes Line width 24 style solid
 	8395 29067 7888 29067
-Wire Notes Line width 24 style solid
-	7381 28314 7343 28330
-Wire Notes Line width 24 style solid
-	7343 28330 7309 28351
-Wire Notes Line width 24 style solid
-	7309 28351 7284 28372
-Wire Notes Line width 24 style solid
-	7284 28372 7265 28395
-Wire Notes Line width 24 style solid
-	7265 28395 7252 28417
-Wire Notes Line width 24 style solid
-	7252 28417 7247 28443
-Wire Notes Line width 24 style solid
-	7247 28443 7249 28468
-Wire Notes Line width 24 style solid
-	7249 28468 7256 28493
-Wire Notes Line width 24 style solid
-	7256 28493 7268 28516
-Wire Notes Line width 24 style solid
-	7268 28516 7281 28535
-Wire Notes Line width 24 style solid
-	7281 28535 7300 28554
-Wire Notes Line width 24 style solid
-	7300 28554 7318 28565
-Wire Notes Line width 24 style solid
-	7318 28565 7340 28575
-Wire Notes Line width 24 style solid
-	7340 28575 7377 28585
-Wire Notes Line width 24 style solid
-	7377 28585 7376 28584
-Wire Notes Line width 24 style solid
-	7373 28822 7335 28838
-Wire Notes Line width 24 style solid
-	7335 28838 7301 28859
-Wire Notes Line width 24 style solid
-	7301 28859 7276 28880
-Wire Notes Line width 24 style solid
-	7276 28880 7257 28903
-Wire Notes Line width 24 style solid
-	7257 28903 7244 28925
-Wire Notes Line width 24 style solid
-	7244 28925 7239 28951
-Wire Notes Line width 24 style solid
-	7239 28951 7241 28976
-Wire Notes Line width 24 style solid
-	7241 28976 7248 29001
-Wire Notes Line width 24 style solid
-	7248 29001 7260 29024
-Wire Notes Line width 24 style solid
-	7260 29024 7273 29043
-Wire Notes Line width 24 style solid
-	7273 29043 7292 29062
-Wire Notes Line width 24 style solid
-	7292 29062 7310 29073
-Wire Notes Line width 24 style solid
-	7310 29073 7332 29083
-Wire Notes Line width 24 style solid
-	7332 29083 7369 29093
-Wire Notes Line width 24 style solid
-	7895 28814 7933 28798
-Wire Notes Line width 24 style solid
-	7933 28798 7967 28777
-Wire Notes Line width 24 style solid
-	7967 28777 7992 28756
-Wire Notes Line width 24 style solid
-	7992 28756 8011 28733
-Wire Notes Line width 24 style solid
-	8011 28733 8024 28711
-Wire Notes Line width 24 style solid
-	8024 28711 8029 28685
-Wire Notes Line width 24 style solid
-	8029 28685 8027 28660
-Wire Notes Line width 24 style solid
-	8027 28660 8020 28635
-Wire Notes Line width 24 style solid
-	8020 28635 8008 28612
-Wire Notes Line width 24 style solid
-	8008 28612 7995 28593
-Wire Notes Line width 24 style solid
-	7995 28593 7976 28574
-Wire Notes Line width 24 style solid
-	7976 28574 7958 28563
-Wire Notes Line width 24 style solid
-	7958 28563 7936 28553
-Wire Notes Line width 24 style solid
-	7936 28553 7899 28543
 Text Notes 8502 29424 0    140  ~ 28
 9
 Text Notes 8418 30174 0    140  ~ 28
 10
-Text Notes 8278 29496 0    140  ~ 28
+Text Notes 7900 29275 0    140  ~ 28
 +
-Text Notes 8284 30048 0    140  ~ 28
+Text Notes 7900 30050 0    140  ~ 28
 -
 Wire Notes Line width 24 style solid
-	8360 29292 7379 29291
-Wire Notes Line width 24 style solid
-	7380 29803 7883 29801
+	8360 29292 7878 29292
 Wire Notes Line width 24 style solid
 	8393 30045 7886 30045
-Wire Notes Line width 24 style solid
-	7379 29292 7341 29308
-Wire Notes Line width 24 style solid
-	7341 29308 7307 29329
-Wire Notes Line width 24 style solid
-	7307 29329 7282 29350
-Wire Notes Line width 24 style solid
-	7282 29350 7263 29373
-Wire Notes Line width 24 style solid
-	7263 29373 7250 29395
-Wire Notes Line width 24 style solid
-	7250 29395 7245 29421
-Wire Notes Line width 24 style solid
-	7245 29421 7247 29446
-Wire Notes Line width 24 style solid
-	7247 29446 7254 29471
-Wire Notes Line width 24 style solid
-	7254 29471 7266 29494
-Wire Notes Line width 24 style solid
-	7266 29494 7279 29513
-Wire Notes Line width 24 style solid
-	7279 29513 7298 29532
-Wire Notes Line width 24 style solid
-	7298 29532 7316 29543
-Wire Notes Line width 24 style solid
-	7316 29543 7338 29553
-Wire Notes Line width 24 style solid
-	7338 29553 7375 29563
-Wire Notes Line width 24 style solid
-	7375 29563 7374 29562
-Wire Notes Line width 24 style solid
-	7371 29800 7333 29816
-Wire Notes Line width 24 style solid
-	7333 29816 7299 29837
-Wire Notes Line width 24 style solid
-	7299 29837 7274 29858
-Wire Notes Line width 24 style solid
-	7274 29858 7255 29881
-Wire Notes Line width 24 style solid
-	7255 29881 7242 29903
-Wire Notes Line width 24 style solid
-	7242 29903 7237 29929
-Wire Notes Line width 24 style solid
-	7237 29929 7239 29954
-Wire Notes Line width 24 style solid
-	7239 29954 7246 29979
-Wire Notes Line width 24 style solid
-	7246 29979 7258 30002
-Wire Notes Line width 24 style solid
-	7258 30002 7271 30021
-Wire Notes Line width 24 style solid
-	7271 30021 7290 30040
-Wire Notes Line width 24 style solid
-	7290 30040 7308 30051
-Wire Notes Line width 24 style solid
-	7308 30051 7330 30061
-Wire Notes Line width 24 style solid
-	7330 30061 7367 30071
-Wire Notes Line width 24 style solid
-	7893 29792 7931 29776
-Wire Notes Line width 24 style solid
-	7931 29776 7965 29755
-Wire Notes Line width 24 style solid
-	7965 29755 7990 29734
-Wire Notes Line width 24 style solid
-	7990 29734 8009 29711
-Wire Notes Line width 24 style solid
-	8009 29711 8022 29689
-Wire Notes Line width 24 style solid
-	8022 29689 8027 29663
-Wire Notes Line width 24 style solid
-	8027 29663 8025 29638
-Wire Notes Line width 24 style solid
-	8025 29638 8018 29613
-Wire Notes Line width 24 style solid
-	8018 29613 8006 29590
-Wire Notes Line width 24 style solid
-	8006 29590 7993 29571
-Wire Notes Line width 24 style solid
-	7993 29571 7974 29552
-Wire Notes Line width 24 style solid
-	7974 29552 7956 29541
-Wire Notes Line width 24 style solid
-	7956 29541 7934 29531
-Wire Notes Line width 24 style solid
-	7934 29531 7897 29521
 Wire Notes Line width 24 style solid
 	7383 28191 7380 30210
 Wire Notes Line width 24 style solid
@@ -1117,7 +855,7 @@ Wire Notes Line width 24 style solid
 Text Notes 12504 30312 0    140  ~ 28
 REFERENCE
 Text Notes 13308 30582 0    140  ~ 28
-1. ASSEMBLY DWG NO.2003952
+1. ASSEMBLY DWG NO.TBD.
 Wire Notes Line width 15 style solid
 	46010 33378 46774 33378
 Wire Notes Line style solid
@@ -2132,18 +1870,9 @@ Wire Wire Line
 	13350 20850 16150 20850
 Wire Wire Line
 	16150 20850 16150 20350
-Wire Wire Line
-	16150 20850 19875 20850
-Wire Wire Line
-	19875 20850 19875 19650
-Wire Wire Line
-	19875 19650 20000 19650
 Connection ~ 16150 20850
 Wire Wire Line
-	19875 20850 26450 20850
-Wire Wire Line
 	26450 20850 26450 20350
-Connection ~ 19875 20850
 Wire Wire Line
 	31500 20850 31500 20350
 Connection ~ 26450 20850
@@ -2250,17 +1979,8 @@ Wire Wire Line
 	20400 21325 20400 20350
 Connection ~ 15250 21325
 Wire Wire Line
-	20400 21325 25000 21325
-Wire Wire Line
 	25550 21325 25550 20350
 Connection ~ 20400 21325
-Wire Wire Line
-	25150 19650 25000 19650
-Wire Wire Line
-	25000 19650 25000 21325
-Connection ~ 25000 21325
-Wire Wire Line
-	25000 21325 25550 21325
 Wire Wire Line
 	30600 21325 30600 20350
 Connection ~ 25550 21325
@@ -2785,17 +2505,8 @@ Wire Wire Line
 	20400 25025 20400 24100
 Connection ~ 15250 25025
 Wire Wire Line
-	20400 25025 25000 25025
-Wire Wire Line
 	25550 25025 25550 24100
 Connection ~ 20400 25025
-Wire Wire Line
-	25000 25025 25000 23400
-Wire Wire Line
-	25000 23400 25150 23400
-Connection ~ 25000 25025
-Wire Wire Line
-	25000 25025 25550 25025
 Wire Wire Line
 	25550 25025 30600 25025
 Wire Wire Line
@@ -3495,7 +3206,7 @@ Wire Wire Line
 Text GLabel 16525 12925 0    140  UnSpc ~ 28
 112
 Text Notes 15775 13000 2    130  ~ 26
-W0243
++28VDC
 $Comp
 L 2005973r-rescue:Inductor-AGC_DSKY-2005902B-rescue-2005952--rescue L1
 U 1 1 5F58B8F7
@@ -3629,10 +3340,10 @@ F 3 "" H 40700 5400 130 0001 C CNN
 	0    -1   -1   0   
 $EndComp
 $Comp
-L 2005973r-rescue:Resistor-AGC_DSKY-2005902B-rescue-2005952--rescue R25
+L 2005973r-rescue:Resistor-AGC_DSKY-2005902B-rescue-2005952--rescue R23
 U 1 1 5FC8A2A9
 P 40725 5550
-F 0 "R25" H 40700 5725 130 0000 C CNN
+F 0 "R23" H 40700 5725 130 0000 C CNN
 F 1 "Resistor" H 40725 5725 130 0001 C CNN
 F 2 "" H 40725 5550 130 0001 C CNN
 F 3 "" H 40725 5550 130 0001 C CNN
@@ -3811,7 +3522,7 @@ Wire Wire Line
 	21700 9150 21700 9050
 Connection ~ 21700 9050
 Wire Wire Line
-	21700 9050 24750 9050
+	21700 9050 22725 9050
 Wire Wire Line
 	21700 9950 21700 10025
 Text GLabel 22175 13300 3    130  UnSpc ~ 26
@@ -4629,7 +4340,7 @@ Text Notes 2605 3935 0    130  ~ 26
 Text Notes 2615 6190 0    130  ~ 26
 1006750-56
 Text Notes 2620 6425 0    130  ~ 26
-1006750-56
+1006750-63
 Text Notes 2630 6680 0    130  ~ 26
 1006750-39
 Text Notes 2630 6935 0    130  ~ 26
@@ -4637,7 +4348,7 @@ Text Notes 2630 6935 0    130  ~ 26
 Text Notes 2630 7190 0    130  ~ 26
 1006750-56
 Text Notes 2630 7435 0    130  ~ 26
-1006750-56
+1006750-63
 Text Notes 2635 7685 0    130  ~ 26
 1006750-39
 Text Notes 2630 7930 0    130  ~ 26
@@ -4659,7 +4370,7 @@ Text Notes 5832 3942 0    130  ~ 26
 Text Notes 5842 6182 0    130  ~ 26
 10K
 Text Notes 5847 6437 0    130  ~ 26
-10K
+20K
 Text Notes 5895 6680 0    130  ~ 26
 2K
 Text Notes 5857 6932 0    130  ~ 26
@@ -4667,7 +4378,7 @@ Text Notes 5857 6932 0    130  ~ 26
 Text Notes 5862 7187 0    130  ~ 26
 10K
 Text Notes 5872 7427 0    130  ~ 26
-10K
+20K
 Text Notes 5920 7680 0    130  ~ 26
 2K
 Text Notes 5872 7942 0    130  ~ 26
@@ -4690,8 +4401,6 @@ Wire Wire Line
 	30200 6850 29450 6850
 NoConn ~ 29450 6850
 NoConn ~ 29450 5850
-Wire Notes Line
-	30200 5850 29450 5850
 Text Notes 30600 5950 0    140  ~ 28
 SPARE
 Text Notes 30575 6950 0    140  ~ 28
@@ -4701,7 +4410,7 @@ Wire Notes Line
 Wire Notes Line
 	39000 7400 37700 7400
 $Comp
-L AGC_DSKY:Resistor-shortlead R20
+L 2005973r-rescue:Resistor-shortlead-AGC_DSKY R20
 U 1 1 5D6BBD4F
 P 33250 9350
 F 0 "R20" V 33250 9242 130 0000 R CNN
@@ -4716,7 +4425,7 @@ Connection ~ 33250 9050
 Wire Wire Line
 	33250 9050 34300 9050
 $Comp
-L AGC_DSKY:Resistor-shortlead R25
+L 2005973r-rescue:Resistor-shortlead-AGC_DSKY R25
 U 1 1 5D748F40
 P 28300 9350
 F 0 "R25" V 28300 9458 130 0000 L CNN
@@ -5739,4 +5448,25 @@ EndData
 $EndBitmap
 Text Notes 26975 32275 0    130  ~ 26
 Notes from Virtual AGC Project:\na) This is a RECONSTRUCTION of drawing 2005973, not a surviving drawing from\n   the Apollo Project.  It is based on the following resources from the original Apollo\n   Project:  drawing 2005952- (an earlier version of this drawing) and revision J of\n   Figure 4-226 AC Electronics document ND-1021042 (a redrafted form of original\n   drawing 2005973) — RSB 2018.
+Wire Wire Line
+	22725 9775 22725 9050
+Connection ~ 22725 9050
+Wire Wire Line
+	22725 9050 23775 9050
+Wire Wire Line
+	23775 9775 23775 9050
+Connection ~ 23775 9050
+Wire Wire Line
+	23775 9050 24750 9050
+Wire Wire Line
+	30200 5850 29450 5850
+Wire Wire Line
+	20400 25025 25550 25025
+NoConn ~ 25150 23400
+Wire Wire Line
+	16150 20850 26450 20850
+NoConn ~ 20000 19650
+Wire Wire Line
+	20400 21325 25550 21325
+NoConn ~ 25150 19650
 $EndSCHEMATC
