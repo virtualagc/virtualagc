@@ -181,7 +181,8 @@ var retargetedFolders = [ "/OnnoHommes/",
                           "/ApolloProjectOnline/",
                           "/doc/",
                           "/klabs/",
-                          "/AGCHandbook/"
+                          "/AGCHandbook/",
+                          "/KiCad/"
 ]
 var numRetargets = retargetedFolders.length
 window.onload = function() {
