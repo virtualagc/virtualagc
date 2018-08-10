@@ -2887,31 +2887,16 @@ Wire Wire Line
 	21250 11925 21125 11925
 Wire Wire Line
 	21125 11925 21125 12200
-$Comp
-L 2005973r-rescue:Ground-chassis-AGC_DSKY-2005902B-rescue-2005952--rescue G1
-U 1 1 5E931B6C
-P 29050 4850
-F 0 "G1" V 28950 5275 130 0000 L CNN
-F 1 "Ground-chassis" H 29283 4749 130 0001 L CNN
-F 2 "" H 29050 4850 130 0001 C CNN
-F 3 "" H 29050 4850 130 0001 C CNN
-	1    29050 4850
-	0    1    1    0   
-$EndComp
 Wire Notes Line width 12
 	29450 7425 28350 7425
 Wire Notes Line width 12
 	28350 7425 28350 4225
 Wire Notes Line width 12
 	28350 4225 29450 4225
-Wire Notes Line width 12
-	29450 4225 29450 7425
 Text GLabel 30200 4850 2    140  UnSpc ~ 28
 68
 Text Notes 30575 4950 0    140  ~ 28
 CGD1-6
-Wire Wire Line
-	29300 4850 30200 4850
 $Comp
 L 2005973r-rescue:Diode-AGC_DSKY-2005902B-rescue-2005952--rescue CR51
 U 1 1 5ECC2D68
@@ -3244,7 +3229,7 @@ L 2005973r-rescue:Transistor-PNP-AGC_DSKY-2005902B-rescue-2005952--rescue Q12
 U 1 1 5F80BC46
 P 38400 4475
 F 0 "Q12" H 38025 4175 130 0000 C CNN
-F 1 "" H 38400 5040 130 0001 C CNN
+F 1 "~" H 38400 5040 130 0001 C CNN
 F 2 "" H 38400 4725 130 0001 C CNN
 F 3 "" H 38400 4725 130 0001 C CNN
 	1    38400 4475
@@ -3322,7 +3307,7 @@ L 2005973r-rescue:Transistor-PNP-AGC_DSKY-2005902B-rescue-2005952--rescue Q13
 U 1 1 5FC8A29D
 P 40400 4475
 F 0 "Q13" H 40025 4175 130 0000 C CNN
-F 1 "" H 40400 5040 130 0001 C CNN
+F 1 "~" H 40400 5040 130 0001 C CNN
 F 2 "" H 40400 4725 130 0001 C CNN
 F 3 "" H 40400 4725 130 0001 C CNN
 	1    40400 4475
@@ -4397,10 +4382,6 @@ Text GLabel 30200 5850 2    140  UnSpc ~ 28
 93
 Text GLabel 30200 6850 2    140  UnSpc ~ 28
 96
-Wire Wire Line
-	30200 6850 29450 6850
-NoConn ~ 29450 6850
-NoConn ~ 29450 5850
 Text Notes 30600 5950 0    140  ~ 28
 SPARE
 Text Notes 30575 6950 0    140  ~ 28
@@ -4439,8 +4420,8 @@ Connection ~ 28300 9050
 Wire Wire Line
 	28300 9050 29500 9050
 Connection ~ 28300 9650
-Text Notes 26975 32275 0    130  ~ 26
-Notes from Virtual AGC Project:\na) This is a RECONSTRUCTION of drawing 2005973, not a surviving drawing from\n   the Apollo Project.  It is based on the following resources from the original Apollo\n   Project:  drawing 2005952- (an earlier version of this drawing) and revision J of\n   Figure 4-226 AC Electronics document ND-1021042 (a redrafted form of original\n   drawing 2005973) — RSB 2018.
+Text Notes 26950 32925 0    130  ~ 26
+Notes from Virtual AGC Project:\na) This is a RECONSTRUCTION of drawing 2005973, not a surviving drawing from\n   the Apollo Project.  It is based on the following resources from the original Apollo\n   Project:  drawing 2005952- (an earlier version of this drawing) and revision J of\n   Figure 4-226 AC Electronics document ND-1021042 (a redrafted form of original\n   drawing 2005973) — RSB 2018.\nb) Drawing 2005952- and document ND-1021042 differ in the connectivity of pin 6\n   of relays K8, K12, and K13.  Circuit simulation has shown that ND-1021042 is\n   incorrect, and therefore 2005952- has been used for those pins — RSB 2018. 
 Wire Wire Line
 	22725 9775 22725 9050
 Connection ~ 22725 9050
@@ -4452,16 +4433,11 @@ Connection ~ 23775 9050
 Wire Wire Line
 	23775 9050 24750 9050
 Wire Wire Line
-	30200 5850 29450 5850
+	20400 25025 24975 25025
 Wire Wire Line
-	20400 25025 25550 25025
-NoConn ~ 25150 23400
+	16150 20850 19875 20850
 Wire Wire Line
-	16150 20850 26450 20850
-NoConn ~ 20000 19650
-Wire Wire Line
-	20400 21325 25550 21325
-NoConn ~ 25150 19650
+	20400 21325 24975 21325
 Text Notes 40150 875  0    265  ~ 53
 r
 Text Notes 50875 25875 1    265  ~ 53
@@ -5330,4 +5306,86 @@ C9 BB 29 F5 5D 8B CA 82 36 A4 40 25 C6 15 08 48 31 74 1C 38 17 8C B5 84 B2 9A 34
 C6 5C DC 75 02 E5 96 B4 52 0D 25 6F F3 00 00 00 00 49 45 4E 44 AE 42 60 82 
 EndData
 $EndBitmap
+Wire Wire Line
+	30200 5850 29450 5850
+Wire Wire Line
+	30200 6850 29450 6850
+$Comp
+L AGC_DSKY:Ground-chassis G1
+U 1 1 5BFD91EE
+P 29050 4850
+F 0 "G1" V 28900 5300 130 0000 L CNN
+F 1 "Ground-chassis" H 29050 5350 130 0001 C CNN
+F 2 "" H 29050 4850 130 0001 C CNN
+F 3 "" H 29050 4850 130 0001 C CNN
+	1    29050 4850
+	0    1    1    0   
+$EndComp
+$Comp
+L AGC_DSKY:Node N1
+U 1 1 5C309BC4
+P 29450 4850
+F 0 "N1" H 29450 4950 50  0001 C CNN
+F 1 "Node" H 29450 5025 50  0001 C CNN
+F 2 "" H 29450 4850 50  0001 C CNN
+F 3 "" H 29450 4850 50  0001 C CNN
+	1    29450 4850
+	1    0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:Node N2
+U 1 1 5C309D81
+P 29450 5850
+F 0 "N2" H 29450 5950 50  0001 C CNN
+F 1 "Node" H 29450 6025 50  0001 C CNN
+F 2 "" H 29450 5850 50  0001 C CNN
+F 3 "" H 29450 5850 50  0001 C CNN
+	1    29450 5850
+	1    0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:Node N3
+U 1 1 5C309F3C
+P 29450 6850
+F 0 "N3" H 29450 6950 50  0001 C CNN
+F 1 "Node" H 29450 7025 50  0001 C CNN
+F 2 "" H 29450 6850 50  0001 C CNN
+F 3 "" H 29450 6850 50  0001 C CNN
+	1    29450 6850
+	1    0    0    -1  
+$EndComp
+Wire Notes Line width 12
+	29450 4775 29450 4225
+Wire Notes Line width 12
+	29450 4925 29450 5775
+Wire Notes Line width 12
+	29450 5925 29450 6775
+Wire Notes Line width 12
+	29450 7425 29450 6925
+Wire Wire Line
+	30200 4850 29450 4850
+Wire Wire Line
+	29300 4850 29450 4850
+Connection ~ 29450 4850
+Wire Wire Line
+	25150 23400 24975 23400
+Wire Wire Line
+	24975 23400 24975 25025
+Connection ~ 24975 25025
+Wire Wire Line
+	24975 25025 25550 25025
+Wire Wire Line
+	25150 19650 24975 19650
+Wire Wire Line
+	24975 19650 24975 21325
+Connection ~ 24975 21325
+Wire Wire Line
+	24975 21325 25550 21325
+Wire Wire Line
+	20000 19650 19875 19650
+Wire Wire Line
+	19875 19650 19875 20850
+Connection ~ 19875 20850
+Wire Wire Line
+	19875 20850 26450 20850
 $EndSCHEMATC
