@@ -35,7 +35,7 @@ A
 Text Notes 28475 1475 0    140  ~ 28
 REVISED PER TDRR 19006\nDR           CHK
 Text Notes 24250 3800 0    140  ~ 28
-Notes from the Virtual AGC Project:\na) This CAD drawing was manually transcribed from the original Apollo Program \n   drawing 2005903A, but is not itself from the time of the Apollo Program — RSB\n   2018\nb) The title-block notation at the lower left of the "MIT" sub-block was illegible in\n   the surviving drawing, and has been omitted — RSB 2018\nc) A just outside the right margin of the drawing area reading "2005903A" has\n   been omitted because it conflicts with area label "B".
+Notes from the Virtual AGC Project:\na) This CAD drawing was manually transcribed from the original Apollo Program \n   drawing 2005903A, but is not itself from the time of the Apollo Program — RSB\n   2018\nb) The title-block notation at the lower left of the "MIT" sub-block was illegible in\n   the surviving drawing, and has been omitted — RSB 2018\nc) A label just outside the right margin of the drawing area reading "2005903A" has\n   been omitted because it conflicts with area label "B" — RSB 2018
 $Bitmap
 Pos 23925 2175
 Scale 1.000000
