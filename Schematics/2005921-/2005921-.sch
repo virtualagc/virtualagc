@@ -1,5 +1,5 @@
 EESchema Schematic File Version 4
-LIBS:2005904C-cache
+LIBS:2005921--cache
 EELAYER 26 0
 EELAYER END
 $Descr D 34000 22000
@@ -15,17 +15,7 @@ Comment3 ""
 Comment4 ""
 $EndDescr
 Wire Notes Line style solid
-	33500 1457 27953 1457
-Wire Notes Line style solid
-	27953 2027 33499 2027
-Text Notes 28125 1300 0    150  ~ 30
-A
-Text Notes 28100 1825 0    150  ~ 30
-B
-Text Notes 28475 1425 0    150  ~ 30
-REVISED PER TDRR 19006\nDR          CHK
-Text Notes 28475 1975 0    150  ~ 30
-REVISED PER TDRR 21249\nDR          CHK
+	33500 1175 27953 1175
 Text Notes 29800 19750 0    250  ~ 50
 SCHEMATIC
 Text Notes 29675 20150 0    200  ~ 40
@@ -33,7 +23,7 @@ POWER SUPPLY
 Text Notes 30175 20400 0    150  ~ 30
 MODULE D7
 Text Notes 30875 21150 0    250  ~ 50
-2005904
+2005921
 Text Notes 32400 21425 0    140  ~ 28
 1
 Text Notes 33100 21425 0    140  ~ 28
@@ -167,7 +157,7 @@ $Comp
 L AGC_DSKY:Capacitor C1
 U 1 1 5B70DD0B
 P 7325 12600
-F 0 "C1" H 6850 12600 130 0000 L CNN
+F 0 "C1" H 6875 12725 130 0000 L CNN
 F 1 "Capacitor" H 7350 12050 130 0001 C CNN
 F 2 "" H 7325 13000 130 0001 C CNN
 F 3 "" H 7325 13000 130 0001 C CNN
@@ -890,9 +880,9 @@ NOTES\n     1.   PARTIAL REFERENCE DESIGNATIONS ARE SHOWN, PREFIX\n          THE
 Text Notes 9050 18075 0    130  ~ 26
 REFERENCE\n       1. ASSEMBLY DRAWING NO.2003901
 Text Notes 11000 21150 0    130  ~ 26
-Notes from the Virtual AGC Project:\n1. This CAD file was manually transcribed from the original Apollo Program drawing\n   2005904C, but did not itself come from the Apollo Program. — RSB 2018
+Notes from the Virtual AGC Project:\n1. This CAD file was manually transcribed from the original Apollo Program\n   drawing 2005904C, but did not itself come from the Apollo Program. \n   — RSB 2018\n2. A notation in the right-hand margin reading "2005921" has been omitted\n   because it would conflict with the label for the "B" area that is there.\n   — RSB 2018
 $Bitmap
-Pos 10725 20675
+Pos 10725 19850
 Scale 1.000000
 Data
 89 50 4E 47 0D 0A 1A 0A 00 00 00 0D 49 48 44 52 00 00 00 78 00 00 00 78 08 02 00 00 00 B6 06 A1 
@@ -1892,7 +1882,7 @@ Text Notes 9000 2225 2    130  ~ 26
 Text Notes 9000 2475 2    130  ~ 26
 1006750-32
 Text Notes 9000 2725 2    130  ~ 26
-1006750-72
+1006750-63
 Text Notes 9000 2975 2    130  ~ 26
 1006750-56
 Text Notes 10500 1475 2    130  ~ 26
@@ -1920,7 +1910,7 @@ Text Notes 11750 2225 2    130  ~ 26
 Text Notes 11675 2475 2    130  ~ 26
 1K
 Text Notes 11750 2725 2    130  ~ 26
-47K
+20K
 Text Notes 11750 2975 2    130  ~ 26
 10K
 Text Notes 12800 1475 2    130  ~ 26
@@ -1941,18 +1931,18 @@ Text Notes 13650 2725 2    130  ~ 26
 1/4W
 Text Notes 13650 2975 2    130  ~ 26
 1/4W
-Text Notes 9000 3725 2    130  ~ 26
-1006793-19
+Text Notes 7700 3725 0    130  ~ 26
+1006793
 Text Notes 9125 3975 2    130  ~ 26
 1006755-134
 Text Notes 10550 3725 2    130  ~ 26
 CAPACITOR
 Text Notes 10550 3975 2    130  ~ 26
 CAPACITOR
-Text Notes 11825 3725 2    130  ~ 26
-.0033
-Text Notes 11700 3975 2    130  ~ 26
-22
+Text Notes 12075 3725 2    130  ~ 26
+SEE TABLE
+Text Notes 11800 3975 2    130  ~ 26
+22μF
 Text Notes 12800 3725 2    130  ~ 26
 ±2%
 Text Notes 12850 3975 2    130  ~ 26
@@ -2114,18 +2104,18 @@ Wire Notes Line width 24 style solid
 Wire Notes Line width 24 style solid
 	20275 1950 20300 1775
 Wire Notes Line width 24 style solid
-	16050 4715 16025 4540
+	16050 6465 16025 6290
 Wire Notes Line width 24 style solid
-	16025 4540 16075 4540
+	16025 6290 16075 6290
 Wire Notes Line width 24 style solid
-	16075 4540 16050 4715
+	16075 6290 16050 6465
 Wire Notes Line width 24 style solid
 	16050 1800 16025 1975
 Wire Notes Line width 24 style solid
 	16025 1975 16075 1975
 Wire Notes Line width 24 style solid
 	16075 1975 16050 1800
-Text Notes 16500 1725 0    130  ~ 26
+Text Notes 16525 1725 0    130  ~ 26
 -41
 Text Notes 16525 1975 0    130  ~ 26
 -42
@@ -2218,33 +2208,13 @@ Text Notes 21600 3975 0    130  ~ 26
 Text Notes 21600 4225 0    130  ~ 26
 1500
 Wire Notes Line style solid
-	27953 2597 33499 2597
-Wire Notes Line style solid
-	27953 915  27953 2597
-Wire Notes Line style solid
-	28453 915  28453 2597
-Wire Notes Line style solid
-	31831 916  31831 2597
-Wire Notes Line style solid
-	32472 917  32472 2597
-Text Notes 28100 2400 0    150  ~ 30
-C
-Text Notes 28475 2550 0    150  ~ 30
-REVISED PER TDRR 25147\nDR          CHK
-Wire Notes Line style solid
 	18125 4750 15375 4750
 Wire Notes Line style solid
 	18125 5000 15375 5000
-Text Notes 16500 4975 2    130  ~ 26
+Text Notes 16500 6725 2    130  ~ 26
 1006750
-Wire Notes Line style solid
-	15375 1000 15375 5000
-Wire Notes Line style solid
-	18125 1000 18125 5000
-Wire Notes Line style solid
-	17100 1250 17100 5000
 Wire Notes Line width 24 style solid
-	16050 1840 16050 4675
+	16050 1815 16050 6425
 Text Notes 16525 4725 0    130  ~ 26
 -130
 Text Notes 16525 4975 0    130  ~ 26
@@ -2253,4 +2223,156 @@ Text Notes 17325 4725 0    130  ~ 26
 4100
 Text Notes 17325 4975 0    130  ~ 26
 4500
+Text Notes 28500 1150 0    150  ~ 30
+INITIAL RELEASE PER TDRR
+Wire Notes Line style solid
+	32472 917  32472 1175
+Wire Notes Line style solid
+	31831 917  31831 1175
+Wire Notes Line style solid
+	28453 917  28453 1175
+Wire Notes Line style solid
+	27953 917  27953 1175
+Wire Notes Line style solid
+	18125 5250 15375 5250
+Text Notes 17325 5225 0    130  ~ 26
+1800
+Wire Notes Line style solid
+	18125 5500 15375 5500
+Text Notes 17325 5475 0    130  ~ 26
+1900
+Wire Notes Line style solid
+	18125 5750 15375 5750
+Text Notes 17325 5725 0    130  ~ 26
+2000
+Wire Notes Line style solid
+	18125 6000 15375 6000
+Text Notes 17325 5975 0    130  ~ 26
+2100
+Wire Notes Line style solid
+	18125 6250 15375 6250
+Text Notes 17325 6225 0    130  ~ 26
+2200
+Wire Notes Line style solid
+	18125 6500 15375 6500
+Text Notes 17325 6475 0    130  ~ 26
+2300
+Wire Notes Line style solid
+	18125 6750 15375 6750
+Text Notes 17325 6725 0    130  ~ 26
+2550
+Wire Notes Line style solid
+	15375 1000 15375 6750
+Wire Notes Line style solid
+	17100 1250 17100 6750
+Wire Notes Line style solid
+	18125 1000 18125 6750
+Text Notes 16525 5225 0    130  ~ 26
+-38
+Text Notes 16525 5475 0    130  ~ 26
+-122
+Text Notes 16525 5725 0    130  ~ 26
+-39
+Text Notes 16525 5975 0    130  ~ 26
+-123
+Text Notes 16525 6225 0    130  ~ 26
+-40
+Text Notes 16525 6475 0    130  ~ 26
+-124
+Text Notes 16525 6725 0    130  ~ 26
+-125
+Wire Notes Line style solid
+	23925 1000 23925 3250
+Wire Notes Line style solid
+	23925 1000 26675 1000
+Wire Notes Line style solid
+	26675 1000 26675 3250
+Wire Notes Line style solid
+	23925 1250 26675 1250
+Wire Notes Line style solid
+	23925 1500 26675 1500
+Wire Notes Line style solid
+	23925 1750 26675 1750
+Wire Notes Line style solid
+	23925 2000 26675 2000
+Wire Notes Line style solid
+	23925 2250 26675 2250
+Wire Notes Line style solid
+	23925 2500 26675 2500
+Wire Notes Line style solid
+	23925 2750 26675 2750
+Wire Notes Line style solid
+	23925 3000 26675 3000
+Wire Notes Line style solid
+	23925 3250 26675 3250
+Wire Notes Line style solid
+	25650 1250 25650 3250
+Text Notes 25200 1225 0    130  ~ 26
+C1
+Text Notes 24350 1475 0    130  ~ 26
+PART NO.
+Text Notes 25875 1475 0    130  ~ 26
+VALUE
+Text Notes 25025 1725 2    130  ~ 26
+1006793
+Wire Notes Line width 24 style solid
+	24575 2975 24550 2800
+Wire Notes Line width 24 style solid
+	24550 2800 24600 2800
+Wire Notes Line width 24 style solid
+	24600 2800 24575 2975
+Wire Notes Line width 24 style solid
+	24575 1775 24600 1950
+Wire Notes Line width 24 style solid
+	24600 1950 24550 1950
+Wire Notes Line width 24 style solid
+	24550 1950 24575 1775
+Text Notes 25025 1725 0    130  ~ 26
+-18
+Text Notes 25025 1975 0    130  ~ 26
+-19
+Text Notes 25025 2225 0    130  ~ 26
+-20
+Text Notes 25025 2475 0    130  ~ 26
+-21
+Text Notes 25025 2725 0    130  ~ 26
+-22
+Text Notes 25025 2975 0    130  ~ 26
+-23
+Text Notes 25025 3225 0    130  ~ 26
+-24
+Text Notes 25700 1725 0    130  ~ 26
+3000μμF
+Text Notes 25700 1975 0    130  ~ 26
+3300
+Text Notes 25700 2225 0    130  ~ 26
+3600
+Text Notes 25700 2475 0    130  ~ 26
+3900
+Text Notes 25700 2725 0    130  ~ 26
+4300
+Text Notes 25700 2975 0    130  ~ 26
+4700
+Text Notes 25700 3225 0    130  ~ 26
+5100μμF
+Wire Notes Line width 24 style solid
+	24575 1800 24575 2975
+Text Notes 25025 3225 2    130  ~ 26
+1006793
+Wire Notes Line width 24 style solid
+	26425 1775 26450 1950
+Wire Notes Line width 24 style solid
+	26450 1950 26400 1950
+Wire Notes Line width 24 style solid
+	26400 1950 26425 1775
+Wire Notes Line width 24 style solid
+	26425 1800 26425 2975
+Wire Notes Line width 24 style solid
+	26425 2975 26400 2800
+Wire Notes Line width 24 style solid
+	26400 2800 26450 2800
+Wire Notes Line width 24 style solid
+	26450 2800 26425 2975
+Text Notes 6300 12900 0    130  ~ 26
+(NOMINAL)
 $EndSCHEMATC
