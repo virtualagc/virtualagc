@@ -35,7 +35,7 @@ A
 Text Notes 28475 1475 0    140  ~ 28
 REVISED PER TDRR 19006\nDR           CHK
 Text Notes 24250 3800 0    140  ~ 28
-Notes from the Virtual AGC Project:\na) This CAD drawing was manually transcribed from the original Apollo Program \n   drawing 2005903A, but is not itself from the time of the Apollo Program — RSB\n   2018\nb) The title-block notation at the lower left of the "MIT" sub-block was illegible in\n   the surviving drawing, and has been omitted — RSB 2018\nc) A label just outside the right margin of the drawing area reading "2005903A" has\n   been omitted because it conflicts with area label "B" — RSB 2018
+Notes from the Virtual AGC Project:\na) This CAD drawing was manually transcribed from the original Apollo Program \n   drawing 2005903A, but is not itself from the time of the Apollo Program — RSB\n   2018\nb) The title-block notation at the lower left of the "MIT" sub-block was illegible in\n   the surviving drawing, and has been omitted — RSB 2018\nc) A label in the right-hand border margin reading "2005903A" has been \n   omitted because it conflicts with area label "B" — RSB 2018
 $Bitmap
 Pos 23925 2175
 Scale 1.000000
@@ -1472,22 +1472,6 @@ F 3 "" H 22525 16100 130 0001 C CNN
 	1    22525 16100
 	0    1    1    0   
 $EndComp
-Text GLabel 8700 17950 3    140  UnSpc ~ 28
-12
-Text GLabel 9650 17950 3    140  UnSpc ~ 28
-28
-Text GLabel 10675 17950 3    140  UnSpc ~ 28
-33
-Text GLabel 12125 17950 3    140  UnSpc ~ 28
-29
-Text GLabel 13625 17950 3    140  UnSpc ~ 28
-31
-Text GLabel 16550 17950 3    140  UnSpc ~ 28
-4
-Text GLabel 19550 17950 3    140  UnSpc ~ 28
-7
-Text GLabel 24400 16600 2    140  UnSpc ~ 28
-32
 $Comp
 L AGC_DSKY:Node N1
 U 1 1 5B71780F
@@ -1604,8 +1588,6 @@ Wire Wire Line
 Wire Wire Line
 	9650 16625 9250 16625
 Connection ~ 9650 17775
-Text GLabel 7725 17400 0    140  UnSpc ~ 28
-9
 $Comp
 L AGC_DSKY:Node N8
 U 1 1 5B7223FE
@@ -1626,10 +1608,6 @@ Wire Wire Line
 	8700 17950 8700 17400
 Wire Wire Line
 	8700 17400 8650 17400
-Text GLabel 7725 16625 0    140  UnSpc ~ 28
-25
-Text GLabel 7725 15900 0    140  UnSpc ~ 28
-30
 $Comp
 L AGC_DSKY:Node N9
 U 1 1 5B725A1E
@@ -1883,42 +1861,6 @@ Wire Wire Line
 Connection ~ 22525 15650
 Wire Wire Line
 	22525 15650 22525 14125
-Text GLabel 7725 15150 0    140  UnSpc ~ 28
-27
-Text GLabel 7725 14400 0    140  UnSpc ~ 28
-26
-Text GLabel 7725 13675 0    140  UnSpc ~ 28
-24
-Text GLabel 7725 12925 0    140  UnSpc ~ 28
-22
-Text GLabel 7725 12150 0    140  UnSpc ~ 28
-20
-Text GLabel 7725 11450 0    140  UnSpc ~ 28
-14
-Text GLabel 7725 10675 0    140  UnSpc ~ 28
-18
-Text GLabel 7725 9925 0    140  UnSpc ~ 28
-11
-Text GLabel 7725 9175 0    140  UnSpc ~ 28
-17
-Text GLabel 7725 8450 0    140  UnSpc ~ 28
-19
-Text GLabel 7725 7700 0    140  UnSpc ~ 28
-16
-Text GLabel 7725 6950 0    140  UnSpc ~ 28
-15
-Text GLabel 7725 6200 0    140  UnSpc ~ 28
-13
-Text GLabel 7725 5475 0    140  UnSpc ~ 28
-10
-Text GLabel 7725 4725 0    140  UnSpc ~ 28
-8
-Text GLabel 7725 4000 0    140  UnSpc ~ 28
-3
-Text GLabel 7725 3250 0    140  UnSpc ~ 28
-5
-Text GLabel 7725 2475 0    140  UnSpc ~ 28
-21
 $Comp
 L AGC_DSKY:Node N28
 U 1 1 5B7885FE
@@ -2195,18 +2137,6 @@ Wire Wire Line
 Connection ~ 9950 5475
 Wire Wire Line
 	9950 5475 12900 5475
-Text GLabel 10625 1900 1    140  UnSpc ~ 28
-23
-Text GLabel 12800 1900 1    140  UnSpc ~ 28
-2
-Text GLabel 13375 1900 1    140  UnSpc ~ 28
-6
-Text GLabel 14000 1900 1    140  UnSpc ~ 28
-34
-Text GLabel 14600 1900 1    140  UnSpc ~ 28
-35
-Text GLabel 16575 1900 1    140  UnSpc ~ 28
-1
 $Comp
 L AGC_DSKY:Node N34
 U 1 1 5B7DED36
@@ -2475,27 +2405,27 @@ Wire Notes Line
 	23600 17775 23600 2050
 Wire Notes Line
 	23600 2050 8000 2050
-Text Notes 10275 1450 0    130  ~ 26
+Text Notes 10275 1325 0    130  ~ 26
 R0251\n(+28V)
-Text Notes 13250 1475 0    130  ~ 26
+Text Notes 13250 1325 0    130  ~ 26
 SPARES
-Text Notes 16325 1475 0    130  ~ 26
+Text Notes 16325 1325 0    130  ~ 26
 CGD8
 Text Notes 24300 17100 0    130  ~ 26
 KEY 1
-Text Notes 19250 18500 0    130  ~ 26
+Text Notes 19200 18650 0    130  ~ 26
 KEY 2
-Text Notes 16275 18500 0    130  ~ 26
+Text Notes 16225 18650 0    130  ~ 26
 KEY 3
-Text Notes 13350 18500 0    130  ~ 26
+Text Notes 13300 18650 0    130  ~ 26
 KEY 4
-Text Notes 11900 18500 0    130  ~ 26
+Text Notes 11850 18650 0    130  ~ 26
 RSET
-Text Notes 10400 18500 0    130  ~ 26
+Text Notes 10350 18650 0    130  ~ 26
 KEY 5
-Text Notes 9300 18500 0    130  ~ 26
+Text Notes 9225 18650 0    130  ~ 26
 KEYRST
-Text Notes 8475 18500 0    130  ~ 26
+Text Notes 8400 18650 0    130  ~ 26
 STBY
 Text Notes 1475 18850 0    140  ~ 28
 NOTE:\n    1. INTERPRET DRAWING IN ACCORDANCE\n       WITH STANDARDS PRESCRIBED BY\n       MIL-D-70327
@@ -2595,4 +2525,389 @@ Text Notes 31375 8775 0    130  ~ 26
 2%
 Text Notes 31950 8775 0    130  ~ 26
 1/4 W
+$Comp
+L AGC_DSKY:ConnectorD8 J1
+U 21 1 5B703D49
+P 7500 2475
+F 0 "J1" H 7225 2700 50  0001 C CNN
+F 1 "ConnectorD8" H 7200 2775 50  0001 C CNN
+F 2 "" H 7350 2650 50  0001 C CNN
+F 3 "" H 7350 2650 50  0001 C CNN
+	21   7500 2475
+	1    0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:ConnectorD8 J1
+U 5 1 5B71BE04
+P 7500 3250
+F 0 "J1" H 7225 3475 50  0001 C CNN
+F 1 "ConnectorD8" H 7200 3550 50  0001 C CNN
+F 2 "" H 7350 3425 50  0001 C CNN
+F 3 "" H 7350 3425 50  0001 C CNN
+	5    7500 3250
+	1    0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:ConnectorD8 J1
+U 3 1 5B7220E3
+P 7500 4000
+F 0 "J1" H 7225 4225 50  0001 C CNN
+F 1 "ConnectorD8" H 7200 4300 50  0001 C CNN
+F 2 "" H 7350 4175 50  0001 C CNN
+F 3 "" H 7350 4175 50  0001 C CNN
+	3    7500 4000
+	1    0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:ConnectorD8 J1
+U 8 1 5B728465
+P 7500 4725
+F 0 "J1" H 7225 4950 50  0001 C CNN
+F 1 "ConnectorD8" H 7200 5025 50  0001 C CNN
+F 2 "" H 7350 4900 50  0001 C CNN
+F 3 "" H 7350 4900 50  0001 C CNN
+	8    7500 4725
+	1    0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:ConnectorD8 J1
+U 10 1 5B72F549
+P 7500 5475
+F 0 "J1" H 7225 5700 50  0001 C CNN
+F 1 "ConnectorD8" H 7200 5775 50  0001 C CNN
+F 2 "" H 7350 5650 50  0001 C CNN
+F 3 "" H 7350 5650 50  0001 C CNN
+	10   7500 5475
+	1    0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:ConnectorD8 J1
+U 13 1 5B72FED8
+P 7500 6200
+F 0 "J1" H 7225 6425 50  0001 C CNN
+F 1 "ConnectorD8" H 7200 6500 50  0001 C CNN
+F 2 "" H 7350 6375 50  0001 C CNN
+F 3 "" H 7350 6375 50  0001 C CNN
+	13   7500 6200
+	1    0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:ConnectorD8 J1
+U 15 1 5B72FFD8
+P 7500 6950
+F 0 "J1" H 7225 7175 50  0001 C CNN
+F 1 "ConnectorD8" H 7200 7250 50  0001 C CNN
+F 2 "" H 7350 7125 50  0001 C CNN
+F 3 "" H 7350 7125 50  0001 C CNN
+	15   7500 6950
+	1    0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:ConnectorD8 J1
+U 16 1 5B730B61
+P 7500 7700
+F 0 "J1" H 7225 7925 50  0001 C CNN
+F 1 "ConnectorD8" H 7200 8000 50  0001 C CNN
+F 2 "" H 7350 7875 50  0001 C CNN
+F 3 "" H 7350 7875 50  0001 C CNN
+	16   7500 7700
+	1    0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:ConnectorD8 J1
+U 19 1 5B731690
+P 7500 8450
+F 0 "J1" H 7225 8675 50  0001 C CNN
+F 1 "ConnectorD8" H 7200 8750 50  0001 C CNN
+F 2 "" H 7350 8625 50  0001 C CNN
+F 3 "" H 7350 8625 50  0001 C CNN
+	19   7500 8450
+	1    0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:ConnectorD8 J1
+U 17 1 5B73175C
+P 7500 9175
+F 0 "J1" H 7225 9400 50  0001 C CNN
+F 1 "ConnectorD8" H 7200 9475 50  0001 C CNN
+F 2 "" H 7350 9350 50  0001 C CNN
+F 3 "" H 7350 9350 50  0001 C CNN
+	17   7500 9175
+	1    0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:ConnectorD8 J1
+U 11 1 5B731844
+P 7500 9925
+F 0 "J1" H 7225 10150 50  0001 C CNN
+F 1 "ConnectorD8" H 7200 10225 50  0001 C CNN
+F 2 "" H 7350 10100 50  0001 C CNN
+F 3 "" H 7350 10100 50  0001 C CNN
+	11   7500 9925
+	1    0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:ConnectorD8 J1
+U 18 1 5B73245F
+P 7500 10675
+F 0 "J1" H 7225 10900 50  0001 C CNN
+F 1 "ConnectorD8" H 7200 10975 50  0001 C CNN
+F 2 "" H 7350 10850 50  0001 C CNN
+F 3 "" H 7350 10850 50  0001 C CNN
+	18   7500 10675
+	1    0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:ConnectorD8 J1
+U 14 1 5B732539
+P 7500 11450
+F 0 "J1" H 7225 11675 50  0001 C CNN
+F 1 "ConnectorD8" H 7200 11750 50  0001 C CNN
+F 2 "" H 7350 11625 50  0001 C CNN
+F 3 "" H 7350 11625 50  0001 C CNN
+	14   7500 11450
+	1    0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:ConnectorD8 J1
+U 20 1 5B73348D
+P 7500 12150
+F 0 "J1" H 7225 12375 50  0001 C CNN
+F 1 "ConnectorD8" H 7200 12450 50  0001 C CNN
+F 2 "" H 7350 12325 50  0001 C CNN
+F 3 "" H 7350 12325 50  0001 C CNN
+	20   7500 12150
+	1    0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:ConnectorD8 J1
+U 22 1 5B733559
+P 7500 12925
+F 0 "J1" H 7225 13150 50  0001 C CNN
+F 1 "ConnectorD8" H 7200 13225 50  0001 C CNN
+F 2 "" H 7350 13100 50  0001 C CNN
+F 3 "" H 7350 13100 50  0001 C CNN
+	22   7500 12925
+	1    0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:ConnectorD8 J1
+U 24 1 5B733625
+P 7500 13675
+F 0 "J1" H 7225 13900 50  0001 C CNN
+F 1 "ConnectorD8" H 7200 13975 50  0001 C CNN
+F 2 "" H 7350 13850 50  0001 C CNN
+F 3 "" H 7350 13850 50  0001 C CNN
+	24   7500 13675
+	1    0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:ConnectorD8 J1
+U 26 1 5B7347DB
+P 7500 14400
+F 0 "J1" H 7225 14625 50  0001 C CNN
+F 1 "ConnectorD8" H 7200 14700 50  0001 C CNN
+F 2 "" H 7350 14575 50  0001 C CNN
+F 3 "" H 7350 14575 50  0001 C CNN
+	26   7500 14400
+	1    0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:ConnectorD8 J1
+U 27 1 5B7348A0
+P 7500 15150
+F 0 "J1" H 7225 15375 50  0001 C CNN
+F 1 "ConnectorD8" H 7200 15450 50  0001 C CNN
+F 2 "" H 7350 15325 50  0001 C CNN
+F 3 "" H 7350 15325 50  0001 C CNN
+	27   7500 15150
+	1    0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:ConnectorD8 J1
+U 30 1 5B734973
+P 7500 15900
+F 0 "J1" H 7225 16125 50  0001 C CNN
+F 1 "ConnectorD8" H 7200 16200 50  0001 C CNN
+F 2 "" H 7350 16075 50  0001 C CNN
+F 3 "" H 7350 16075 50  0001 C CNN
+	30   7500 15900
+	1    0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:ConnectorD8 J1
+U 25 1 5B735AC8
+P 7500 16625
+F 0 "J1" H 7225 16850 50  0001 C CNN
+F 1 "ConnectorD8" H 7200 16925 50  0001 C CNN
+F 2 "" H 7350 16800 50  0001 C CNN
+F 3 "" H 7350 16800 50  0001 C CNN
+	25   7500 16625
+	1    0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:ConnectorD8 J1
+U 9 1 5B735BF6
+P 7500 17400
+F 0 "J1" H 7225 17625 50  0001 C CNN
+F 1 "ConnectorD8" H 7200 17700 50  0001 C CNN
+F 2 "" H 7350 17575 50  0001 C CNN
+F 3 "" H 7350 17575 50  0001 C CNN
+	9    7500 17400
+	1    0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:ConnectorD8 J1
+U 12 1 5B736B01
+P 8700 18175
+F 0 "J1" H 8425 18400 50  0001 C CNN
+F 1 "ConnectorD8" H 8400 18475 50  0001 C CNN
+F 2 "" H 8550 18350 50  0001 C CNN
+F 3 "" H 8550 18350 50  0001 C CNN
+	12   8700 18175
+	0    -1   -1   0   
+$EndComp
+$Comp
+L AGC_DSKY:ConnectorD8 J1
+U 28 1 5B736CCB
+P 9650 18175
+F 0 "J1" H 9375 18400 50  0001 C CNN
+F 1 "ConnectorD8" H 9350 18475 50  0001 C CNN
+F 2 "" H 9500 18350 50  0001 C CNN
+F 3 "" H 9500 18350 50  0001 C CNN
+	28   9650 18175
+	0    -1   -1   0   
+$EndComp
+$Comp
+L AGC_DSKY:ConnectorD8 J1
+U 33 1 5B736E48
+P 10675 18175
+F 0 "J1" H 10400 18400 50  0001 C CNN
+F 1 "ConnectorD8" H 10375 18475 50  0001 C CNN
+F 2 "" H 10525 18350 50  0001 C CNN
+F 3 "" H 10525 18350 50  0001 C CNN
+	33   10675 18175
+	0    -1   -1   0   
+$EndComp
+$Comp
+L AGC_DSKY:ConnectorD8 J1
+U 29 1 5B737FCA
+P 12125 18175
+F 0 "J1" H 11850 18400 50  0001 C CNN
+F 1 "ConnectorD8" H 11825 18475 50  0001 C CNN
+F 2 "" H 11975 18350 50  0001 C CNN
+F 3 "" H 11975 18350 50  0001 C CNN
+	29   12125 18175
+	0    -1   -1   0   
+$EndComp
+$Comp
+L AGC_DSKY:ConnectorD8 J1
+U 31 1 5B739172
+P 13625 18175
+F 0 "J1" H 13350 18400 50  0001 C CNN
+F 1 "ConnectorD8" H 13325 18475 50  0001 C CNN
+F 2 "" H 13475 18350 50  0001 C CNN
+F 3 "" H 13475 18350 50  0001 C CNN
+	31   13625 18175
+	0    -1   -1   0   
+$EndComp
+$Comp
+L AGC_DSKY:ConnectorD8 J1
+U 4 1 5B73A7CF
+P 16550 18175
+F 0 "J1" H 16275 18400 50  0001 C CNN
+F 1 "ConnectorD8" H 16250 18475 50  0001 C CNN
+F 2 "" H 16400 18350 50  0001 C CNN
+F 3 "" H 16400 18350 50  0001 C CNN
+	4    16550 18175
+	0    -1   -1   0   
+$EndComp
+$Comp
+L AGC_DSKY:ConnectorD8 J1
+U 7 1 5B73BEFA
+P 19550 18175
+F 0 "J1" H 19275 18400 50  0001 C CNN
+F 1 "ConnectorD8" H 19250 18475 50  0001 C CNN
+F 2 "" H 19400 18350 50  0001 C CNN
+F 3 "" H 19400 18350 50  0001 C CNN
+	7    19550 18175
+	0    -1   -1   0   
+$EndComp
+$Comp
+L AGC_DSKY:ConnectorD8 J1
+U 32 1 5B73E553
+P 24625 16600
+F 0 "J1" H 24350 16825 50  0001 C CNN
+F 1 "ConnectorD8" H 24325 16900 50  0001 C CNN
+F 2 "" H 24475 16775 50  0001 C CNN
+F 3 "" H 24475 16775 50  0001 C CNN
+	32   24625 16600
+	-1   0    0    1   
+$EndComp
+$Comp
+L AGC_DSKY:ConnectorD8 J1
+U 1 1 5B7423EF
+P 16575 1675
+F 0 "J1" H 16300 1900 50  0001 C CNN
+F 1 "ConnectorD8" H 16275 1975 50  0001 C CNN
+F 2 "" H 16425 1850 50  0001 C CNN
+F 3 "" H 16425 1850 50  0001 C CNN
+	1    16575 1675
+	0    1    1    0   
+$EndComp
+$Comp
+L AGC_DSKY:ConnectorD8 J1
+U 35 1 5B743D74
+P 14600 1675
+F 0 "J1" H 14325 1900 50  0001 C CNN
+F 1 "ConnectorD8" H 14300 1975 50  0001 C CNN
+F 2 "" H 14450 1850 50  0001 C CNN
+F 3 "" H 14450 1850 50  0001 C CNN
+	35   14600 1675
+	0    1    1    0   
+$EndComp
+$Comp
+L AGC_DSKY:ConnectorD8 J1
+U 34 1 5B744032
+P 14000 1675
+F 0 "J1" H 13725 1900 50  0001 C CNN
+F 1 "ConnectorD8" H 13700 1975 50  0001 C CNN
+F 2 "" H 13850 1850 50  0001 C CNN
+F 3 "" H 13850 1850 50  0001 C CNN
+	34   14000 1675
+	0    1    1    0   
+$EndComp
+$Comp
+L AGC_DSKY:ConnectorD8 J1
+U 6 1 5B744313
+P 13375 1675
+F 0 "J1" H 13100 1900 50  0001 C CNN
+F 1 "ConnectorD8" H 13075 1975 50  0001 C CNN
+F 2 "" H 13225 1850 50  0001 C CNN
+F 3 "" H 13225 1850 50  0001 C CNN
+	6    13375 1675
+	0    1    1    0   
+$EndComp
+$Comp
+L AGC_DSKY:ConnectorD8 J1
+U 2 1 5B7444DC
+P 12800 1675
+F 0 "J1" H 12525 1900 50  0001 C CNN
+F 1 "ConnectorD8" H 12500 1975 50  0001 C CNN
+F 2 "" H 12650 1850 50  0001 C CNN
+F 3 "" H 12650 1850 50  0001 C CNN
+	2    12800 1675
+	0    1    1    0   
+$EndComp
+$Comp
+L AGC_DSKY:ConnectorD8 J1
+U 23 1 5B747039
+P 10625 1675
+F 0 "J1" H 10350 1900 50  0001 C CNN
+F 1 "ConnectorD8" H 10325 1975 50  0001 C CNN
+F 2 "" H 10475 1850 50  0001 C CNN
+F 3 "" H 10475 1850 50  0001 C CNN
+	23   10625 1675
+	0    1    1    0   
+$EndComp
 $EndSCHEMATC
