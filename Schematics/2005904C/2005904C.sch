@@ -1,5 +1,5 @@
 EESchema Schematic File Version 4
-LIBS:2005904B-cache
+LIBS:2005904C-cache
 EELAYER 26 0
 EELAYER END
 $Descr D 34000 22000
@@ -15,20 +15,12 @@ Comment3 ""
 Comment4 ""
 $EndDescr
 Wire Notes Line style solid
-	27953 915  27953 2027
-Wire Notes Line style solid
 	33500 1457 27953 1457
-Wire Notes Line style solid
-	28453 915  28453 2027
-Wire Notes Line style solid
-	31831 916  31831 2027
-Wire Notes Line style solid
-	32472 917  32472 2027
 Wire Notes Line style solid
 	27953 2027 33499 2027
 Text Notes 28125 1300 0    150  ~ 30
 A
-Text Notes 28125 1825 0    150  ~ 30
+Text Notes 28100 1825 0    150  ~ 30
 B
 Text Notes 28475 1425 0    150  ~ 30
 REVISED PER TDRR 19006\nDR          CHK
@@ -48,8 +40,8 @@ Text Notes 33100 21425 0    140  ~ 28
 1
 Text Notes 28850 21450 0    140  ~ 28
 NONE
-Text Notes 28600 20975 0    140  ~ 28
-_____
+Text Notes 28275 21100 0    250  ~ 50
+80230
 $Comp
 L AGC_DSKY:ConnectorD7 J1
 U 3 1 5B70B39C
@@ -898,7 +890,7 @@ NOTES\n     1.   PARTIAL REFERENCE DESIGNATIONS ARE SHOWN, PREFIX\n          THE
 Text Notes 9050 18075 0    130  ~ 26
 REFERENCE\n       1. ASSEMBLY DRAWING NO.2003901
 Text Notes 11000 21150 0    130  ~ 26
-Notes from the Virtual AGC Project:\n1. This CAD file was manually transcribed from the original Apollo Program drawing\n   2005904B, but did not itself come from the Apollo Program. — RSB 2018
+Notes from the Virtual AGC Project:\n1. This CAD file was manually transcribed from the original Apollo Program drawing\n   2005904C, but did not itself come from the Apollo Program. — RSB 2018
 $Bitmap
 Pos 10725 20675
 Scale 1.000000
@@ -2026,11 +2018,7 @@ Wire Notes Line style solid
 Text Notes 10950 4825 0    130  ~ 26
 SEE NOTE 3
 Wire Notes Line style solid
-	15375 1000 15375 4500
-Wire Notes Line style solid
 	15375 1000 18125 1000
-Wire Notes Line style solid
-	18125 1000 18125 4500
 Wire Notes Line style solid
 	18125 4500 15375 4500
 Wire Notes Line style solid
@@ -2059,8 +2047,6 @@ Wire Notes Line style solid
 	15375 4000 18125 4000
 Wire Notes Line style solid
 	15375 4250 18125 4250
-Wire Notes Line style solid
-	17100 1250 17100 4500
 Wire Notes Line style solid
 	19650 1000 19650 4250
 Wire Notes Line style solid
@@ -2109,8 +2095,6 @@ Text Notes 17300 1475 0    130  ~ 26
 VALUE
 Text Notes 16500 1725 2    130  ~ 26
 1006750
-Text Notes 16500 4475 2    130  ~ 26
-1006750
 Text Notes 20750 1725 2    130  ~ 26
 1006750
 Text Notes 20750 4225 2    130  ~ 26
@@ -2130,19 +2114,17 @@ Wire Notes Line width 24 style solid
 Wire Notes Line width 24 style solid
 	20275 1950 20300 1775
 Wire Notes Line width 24 style solid
-	16050 4200 16025 4025
+	16050 4715 16025 4540
 Wire Notes Line width 24 style solid
-	16025 4025 16075 4025
+	16025 4540 16075 4540
 Wire Notes Line width 24 style solid
-	16075 4025 16050 4200
+	16075 4540 16050 4715
 Wire Notes Line width 24 style solid
 	16050 1800 16025 1975
 Wire Notes Line width 24 style solid
 	16025 1975 16075 1975
 Wire Notes Line width 24 style solid
 	16075 1975 16050 1800
-Wire Notes Line width 24 style solid
-	16050 1800 16050 4200
 Text Notes 16500 1725 0    130  ~ 26
 -41
 Text Notes 16525 1975 0    130  ~ 26
@@ -2235,4 +2217,40 @@ Text Notes 21600 3975 0    130  ~ 26
 1200
 Text Notes 21600 4225 0    130  ~ 26
 1500
+Wire Notes Line style solid
+	27953 2597 33499 2597
+Wire Notes Line style solid
+	27953 915  27953 2597
+Wire Notes Line style solid
+	28453 915  28453 2597
+Wire Notes Line style solid
+	31831 916  31831 2597
+Wire Notes Line style solid
+	32472 917  32472 2597
+Text Notes 28100 2400 0    150  ~ 30
+C
+Text Notes 28475 2550 0    150  ~ 30
+REVISED PER TDRR 25147\nDR          CHK
+Wire Notes Line style solid
+	18125 4750 15375 4750
+Wire Notes Line style solid
+	18125 5000 15375 5000
+Text Notes 16500 4975 2    130  ~ 26
+1006750
+Wire Notes Line style solid
+	15375 1000 15375 5000
+Wire Notes Line style solid
+	18125 1000 18125 5000
+Wire Notes Line style solid
+	17100 1250 17100 5000
+Wire Notes Line width 24 style solid
+	16050 1840 16050 4675
+Text Notes 16525 4725 0    130  ~ 26
+-130
+Text Notes 16525 4975 0    130  ~ 26
+-131
+Text Notes 17325 4725 0    130  ~ 26
+4100
+Text Notes 17325 4975 0    130  ~ 26
+4500
 $EndSCHEMATC
