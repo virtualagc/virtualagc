@@ -33,7 +33,11 @@ Because we retain appearances of the original drawings, as well as the sheet siz
 
 ## KiCad J-Size "Bug" Workarounds
 
-Presently, KiCad has a hard-coded upper limit of 48" for both the width and height of the drawing, and therefore cannot handle any J-size drawings.  Or more accurately, it can work with a J-size drawing perfectly well if you happen to have one, but won't let you _create_ a J-size drawing within the KiCad GUI. This is not a actually a bug, but simply an arbitrary choice, and [I'm told that a fix for this has been committed](https://bugs.launchpad.net/kicad/+bug/1785155), but that doesn't really help you right now.
+Presently, KiCad has a hard-coded upper limit of 48" for both the width and height of the drawing, and therefore cannot handle any J-size drawings.  Or more accurately, it can work with a J-size drawing perfectly well if you happen to have one, but won't let you _create_ a J-size drawing within the KiCad GUI. If you just want to work with existing drawings, you don't have to worry about any of this, and don't need to read the rest of this section or the "Workaround" sub-sections.
+
+But if you must create a J-size drawing, you need to keep reading.
+
+Anyway, this is not a actually a bug, but simply an arbitrary design choice based on somebody's guess that nobody would ever need schematics bigger than this.  [I'm told that a fix for this has been committed to the KiCad source tree](https://bugs.launchpad.net/kicad/+bug/1785155), though that doesn't really help you if you need to work with it right now.
 
 So perhaps &mdash; just for now &mdash; you might want to work instead with a C, D, or E drawing until that fix becomes commonplace.
 
