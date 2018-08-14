@@ -31,6 +31,42 @@ Besides that, all of KiCad's schematic files, parts libraries, board templates, 
 
 Because we retain appearances of the original drawings, as well as the sheet sizes of the original drawings &mdash; and they were plotted on _big_ paper &mdash; we can't really avail ourselves of the standard KiCAD part libraries.  We instead have a _custom_ part library, AGC_DSKY.lib, which you will see in the top-level directory of this branch.  To the extent possible, we'd like to centralize changes to this library, rather than making its maintenance a community effort, so any changes to it should be made with care.  However, because almost no integrated circuits were used in the design of the AGC and DSKY, the library consists almost entirely of things like resistors, capacitors, inductors, diodes, transistors, and so on ... i.e., generic parts, of which there are not a huge number of variations.  So the part library doesn't need the level of maintenance that today's libraries do.
 
+## KiCad J-Size "Bug" Workarounds
+
+Presently, KiCad has a hard-coded upper limit of 48" for both the width and height of the drawing, and therefore cannot handle any J-size drawings.  Or more accurately, it can work with a J-size drawing perfectly well if you happen to have one, but won't let you _create_ a J-size drawing within the KiCad GUI. This is not a actually a bug, but simply an arbitrary choice, and [I'm told that a fix for this has been committed](https://bugs.launchpad.net/kicad/+bug/1785155), but that doesn't really help you right now.
+
+So perhaps &mdash; just for now &mdash; you might want to work instead with a C, D, or E drawing until that fix becomes commonplace.
+
+But if you really, really must work with a J, there are a couple of workarounds.
+
+### Workaround #1
+
+After you have created a KiCad project, open it in the schematic editor, and configure it to have a _custom_ sheet size (as opposed to a standard size like C, D, E).  For the sake of argument, let's say you've chosen 44"&times;40".  Save the schematic.
+
+Now look in the directory where your schematic file is, and open your schematic file (_something_.sch) in a text editor.  You'll see a line reading 
+
+ $Descr User 44000 40000
+
+which is the custom size you specified, but in thousandths of an inch.  Change it howver you like within the text editor and then save it.  For example, to change it to an 80" wide J-size sheet, it would be:
+
+ $Descr User 80000 34000
+
+KiCad will now let you open this file in the schematic editor, and it will be the right side.
+
+The drawback is that if you need to make any other changes to the drawing's metadata, the KiCad GUI will no longer allow you to do so, since you have what it thinks is a funky sheet size.  So to make any other changes to the metadata &mdash; and in particular, if you want to select a different template file, which is the file that determines the drawings title block and border area &mdash; the KiCad GUI won't allow you to do so, and you'll have to resort again to modifying the .sch file directly to make such changes.
+
+### Workaround #2
+
+Or, you can download KiCad's source code and build it yourself.  You will have to change the line
+
+ #define MAX_PAGE_SIZE 48000
+
+in the file include/page_info.h before doing so.  The value 128000 worked well for me.
+
+However, this build process took quite a long time for me, and was not incredibly fun.  The upside is that once it's working, there are basically no drawbacks.  It "just works".
+
+
+
 ## Community Effort
 
 It is my intention to convert every available scan of an AGC or DSKY electrical drawing (and there are over a hundred of them) to CAD.
@@ -39,9 +75,7 @@ If you have the expertise and desire to help out with this, we can certainly acc
 
 ## Basic Procedures for Conversion of a Scanned Schematic
 
-**Important note**: Presently, KiCad has a hard-coded upper limit of 48" for both the width and height of the drawing, and therefore cannot handle any J-size drawings.  Or more accurately, it can work with a J-size drawing perfectly well if you happen to have one, but won't let you _create_ a J-size drawing within the KiCad GUI.  I have been assured that this limit will be increased in future versions.  So perhaps &mdash; just for now &mdash; you might want to work instead with a C, D, or E drawing until that fix becomes commonplace.  If you absolutely must work with a J, there are several satisfactory workarounds which I'll consider writing up instructions for. 
-
-At any rate, I've converted a handful of these drawings into KiCad now, but it's work in progress.  So while I don't know _everything_ about this, I do know _something_ about how to do it, and that's what I'll try to impart to you in this section.
+I've personally converted a handful of these drawings into KiCad now, but it's work in progress.  So while I don't know _everything_ about this, I do know _something_ about how to do it, and that's what I'll try to impart to you in this section.
 
 First, I'll list the basic steps, and then elaborate afterward on any of the steps that have some subtleties involved that can't be explained in just a few words.
 
