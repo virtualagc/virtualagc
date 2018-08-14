@@ -39,7 +39,9 @@ If you have the expertise and desire to help out with this, we can certainly acc
 
 ## Basic Procedures for Conversion of a Scanned Schematic
 
-I've converted a handful of these drawings into KiCad now, but it's work in progress.  So while I don't know _everything_ about this, I do know _something_ about how to do it, and that's what I'll try to impart to you in this section.
+**Important note**: Presently, KiCad has a hard-coded upper limit of 48" for both the width and height of the drawing, and therefore cannot handle any J-size drawings.  Or more accurately, it can work with a J-size drawing perfectly well if you happen to have one, but won't let you _create_ a J-size drawing within the KiCad GUI.  I have been assured that this limit will be increased in future versions.  So perhaps &mdash; just for now &mdash; you might want to work instead with a C, D, or E drawing until that fix becomes commonplace.  If you absolutely must work with a J, there are several satisfactory which I'll consider writing up instructions for. 
+
+At any rate, I've converted a handful of these drawings into KiCad now, but it's work in progress.  So while I don't know _everything_ about this, I do know _something_ about how to do it, and that's what I'll try to impart to you in this section.
 
 First, I'll list the basic steps, and then elaborate afterward on any of the steps that have some subtleties involved that can't be explained in just a few words.
 
