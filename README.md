@@ -51,9 +51,9 @@ which is the custom size you specified, but in thousandths of an inch.  Change i
 
  $Descr User 80000 34000
 
-KiCad will now let you open this file in the schematic editor, and it will be the right side.
+KiCad will now let you open this file in the schematic editor, and it will be the right size.
 
-The drawback is that if you need to make any other changes to the drawing's metadata, the KiCad GUI will no longer allow you to do so, since you have what it thinks is a funky sheet size.  So to make any other changes to the metadata &mdash; and in particular, if you want to select a different template file, which is the file that determines the drawings title block and border area &mdash; the KiCad GUI won't allow you to do so, and you'll have to resort again to modifying the .sch file directly to make such changes.
+The drawback is that if you need to make any other changes to the drawing's metadata, the KiCad GUI will no longer allow you to do so, since you have what it thinks is a funky sheet size.  So to make any other changes to the metadata &mdash; and in particular, if you want to select a different template file, which is the file that determines the drawing's title block and border area &mdash; the KiCad GUI won't allow you to do so, and you'll have to resort again to modifying the .sch file directly to make such changes.
 
 ### Workaround #2
 
@@ -80,7 +80,7 @@ I've personally converted a handful of these drawings into KiCad now, but it's w
 First, I'll list the basic steps, and then elaborate afterward on any of the steps that have some subtleties involved that can't be explained in just a few words.
 
 1. Clone the "schematics" branch of this repository onto your local system.
-2. The existing conversions are in the Schematics/ folder.  Choose from the available scanned drawings one that you'd like to converthat that _isn't_ already in that folder.  **Hint**: _I'd_ suggest that if there are multiple versions of the circuit, such as different revisions of the same drawing or different drawings representing an evolution of the circuit over time, choose the _earliest_ version.  Then after the early version has been converted, you can probably clone it and modify it quite easily to create all of the later versions in succession.  Or at least, that's my experience.  But you can choose to do it however you want.
+2. The existing conversions are in the Schematics/ folder.  Choose from the available scanned drawings one that you'd like to convert that _isn't_ already in that folder.  (And in making your selection, remember the warning above about _possible_ problems you may experience in working with J-size drawings.)  **Hint**: _I'd_ suggest that if there are multiple versions of the circuit, such as different revisions of the same drawing or different drawings representing an evolution of the circuit over time, choose the _earliest_ version.  Then after the early version has been converted, you can probably clone it and modify it quite easily to create all of the later versions in succession.  Or at least, that's my experience.  But you can choose to do it however you want.
 3. Let us know that you intend to convert this drawing or this time-sequence of drawings, so that multiple people won't waste their efforts working on the same thing at the same time.
 4. Create a new subdirectory under Schematics/ for your drawing.  Name it identically to the drawing as 8 digits plus a one-character revision code.
 5. Determine the target sheet-size of the drawing.  The basic size (C, D, E, J) will be marked in the SIZE field of the scanned-drawing's title block.  It's a bit trickier J-size drawings, so I'll describe those issues somewhat below; let's just assume for the moment that you do know the target width, in inches.
