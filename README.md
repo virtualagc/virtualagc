@@ -39,4 +39,4 @@ It is my intention to convert every available scan of an AGC or DSKY electrical 
 
 If you have the expertise and desire to help out with this, we can certainly accommodate you, though there are presently no procedures in place to do so.
 
-[The basic steps of transcribing a scanned AGC/DSKY schematic into KiCad are discuss at the main Virtural AGC website.](http://www.ibiblio.org/apollo/ElectroMechanical.html#Appendix:_KiCad_for_Virtual_AGC)
+[The basic steps of transcribing a scanned AGC/DSKY schematic into KiCad are discussed at the main Virtural AGC website.](http://www.ibiblio.org/apollo/ElectroMechanical.html#Appendix:_KiCad_for_Virtual_AGC)
