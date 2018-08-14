@@ -11,7 +11,7 @@ Once converted to CAD files, they can then be used for otherwise impossible thin
 - Generating netlists to see what's connected to what.
 - Running ERCs (Electrical Rule Checkers) to get a little more assurance of correctness.
 - Comparison of different versions of the schematics to see what has changed.
-- Attractively and _legibly_ displayed.
+- Attractively and _legibly_ displayed, compared to the original scans.
 - More-easily used as the basis for your own AGC-like or DSKY-like designs.
 - Corrected (and _commented_) in those rare instances where the original drawings can be shown to be in error.
 
