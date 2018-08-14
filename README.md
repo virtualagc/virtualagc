@@ -31,7 +31,7 @@ Because we retain appearances of the original drawings, as well as the sheet siz
 
 ## Installation of KiCad
 
-[Refer to the main Virtual AGC website.](http://www.ibiblio.org/apollo/ElectroMechanical.html#Appendix:_KiCad_for_Virtual_AGC)
+[Refer to the main Virtual AGC website.](http://www.ibiblio.org/apollo/ElectroMechanical.html#Appendix:_KiCad_for_Virtual_AGC)  Note that if you don't follow the installation suggestions, there are some schematics you may not be able to view.
 
 ## Community Effort
 
