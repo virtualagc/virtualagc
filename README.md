@@ -2,7 +2,7 @@
 
 ## Introduction
 
-The "schematics" branch of the Virtual AGC repository is devoted to conversion of the electrical schematics of the AGC and DSKY that would otherwise be available (_if_ available, that is) as scans of 50-year-old printouts into electrical CAD files. We convert these designs so that they are as close as possible to the originals, on the same size "paper", with identical title blocks and borders, with electrical components positioned and sized as close to the original as possible, but with electrical correctness in mind.
+The "schematics" branch of the Virtual AGC repository is devoted to conversion of the electrical schematics of the AGC and DSKY that would otherwise be available (_if_ available, that is) only as scans of 50-year-old printouts into electrical CAD files. We convert these designs so that they are as close as possible to the originals, on the same size "paper", with identical title blocks and borders, with electrical components positioned and sized as close to the original as possible, but with electrical correctness in mind.
 
 Once converted to CAD files, they can then be used for otherwise impossible things like:
 
