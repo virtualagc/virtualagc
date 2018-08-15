@@ -21,7 +21,7 @@
 #	BASENAME-ABC-DEF  or  BASNENAME-C_B-_FD  etc.
 
 vcc = "+4VDC" # Name of net used for hidden power input.
-gnd = "0VDC" # Name of net used for hidden ground input.
+gnd = "0VDCA" # Name of net used for hidden ground input.
 basename = "D3NOR-" + vcc + "-" + gnd # Base name of the generated components. 
 
 # Generate library header.
