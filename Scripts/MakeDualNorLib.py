@@ -41,8 +41,9 @@ pinNumbers = {
 # Proceed to generate the library's entries.
 # In the following loop, the inputs of gate A are represented by inA1, inA2, and inA3.
 # The inputs of gate B are represented by inB1, inB2, and inB3.
-ListALevel0 = [ "_", "A", "B", "C" ]
-ListBLevel0 = [ "_", "D", "E", "F" ]
+ListALevel0 = [ "_", "_", "A", "B", "C" ]
+ListBLevel0 = [ "_", "_", "D", "E", "F" ]
+dupes = []
 for inA1 in ListALevel0:
   ListALevel1 = list(ListALevel0)
   ListALevel1.remove(inA1)
@@ -52,6 +53,8 @@ for inA1 in ListALevel0:
     for inA3 in ListALevel2:
       ListALevel3 = list(ListALevel2)
       ListALevel3.remove(inA3)
+      if "_" in ListALevel3:
+        ListALevel3.remove("_")
       for inB1 in ListBLevel0:
         ListBLevel1 = list(ListBLevel0)
         ListBLevel1.remove(inB1)
@@ -61,12 +64,29 @@ for inA1 in ListALevel0:
           for inB3 in ListBLevel2:
             ListBLevel3 = list(ListBLevel2)
             ListBLevel3.remove(inB3)
+            if "_" in ListBLevel3:
+              ListBLevel3.remove("_")
+            ListALevel3A = list(ListALevel3)
+            ListBLevel3A = list(ListBLevel3)
+            
+            # Apply some symmetry to remove some of the possibilities.
+            if inA1 == "_" and inA2 == "_" and inA3 == "_":
+              continue
+            if inB1 == "_" and inB2 == "_" and inB3 == "_":
+              continue
+            if inA1 > inA3:
+              continue
+            if inB1 > inB3:
+              continue
+            
             # All the stuff above is just to get us to the point of having
             # a valid set of 6 inputs, in[AB][1-3] (in regex notation) with
             # appropriate values [_A-F].  Having those in hand, we can now
             # generate the specific entry for the component.
             name = basename + "-" + inA1 + inA2 + inA3 + "-" + inB1 + inB2 + inB3
-            
+            if name in dupes:
+            	continue
+            dupes.append(name)
             
             print("#")
             print("# " + name)
@@ -105,30 +125,36 @@ for inA1 in ListALevel0:
             if inA1 != "_":
               print("X " + inA1 + " " + pinNumbers[inA1] + " -900 275 140 R 140 140 1 1 I")
             else:
-              print("X " + gnd + " " + pinNumbers[ListALevel3[0]] + " -475 275 0 R 140 140 1 1 W N")
+              print("X " + gnd + " " + pinNumbers[ListALevel3A[0]] + " -475 275 0 R 140 140 1 1 W N")
+              del ListALevel3A[0]
             if inA2 != "_":
               print("X " + inA2 + " " + pinNumbers[inA2] + " -900 0 140 R 140 140 1 1 I")
               print("P 2 1 1 0 -760 0 -680 0 N")
             else:
-              print("X " + gnd + " " + pinNumbers[ListALevel3[0]] + " -425 0 0 R 140 140 1 1 W N")
+              print("X " + gnd + " " + pinNumbers[ListALevel3A[0]] + " -425 0 0 R 140 140 1 1 W N")
+              del ListALevel3A[0]
             if inA3 != "_":
               print("X " + inA3 + " " + pinNumbers[inA3] + " -900 -275 140 R 140 140 1 1 I")
             else:
-              print("X " + gnd + " " + pinNumbers[ListALevel3[0]] + " -475 -275 0 R 140 140 1 1 W N")
+              print("X " + gnd + " " + pinNumbers[ListALevel3A[0]] + " -475 -275 0 R 140 140 1 1 W N")
+              del ListALevel3A[0]
             print("X " + gnd + " 5 -175 -400 0 U 140 140 1 1 W N")
             if inB1 != "_":
               print("X " + inB1 + " " + pinNumbers[inB1] + " -900 275 140 R 140 140 2 1 I")
             else:
-              print("X " + gnd + " " + pinNumbers[ListBLevel3[0]] + " -475 275 0 R 140 140 2 1 W N")
+              print("X " + gnd + " " + pinNumbers[ListBLevel3A[0]] + " -475 275 0 R 140 140 2 1 W N")
+              del ListBLevel3A[0]
             if inB2 != "_":
               print("X " + inB2 + " " + pinNumbers[inB2] + " -900 0 140 R 140 140 2 1 I")
               print("P 2 2 1 0 -760 0 -680 0 N")
             else:
-              print("X " + gnd + " " + pinNumbers[ListBLevel3[0]] + " -425 0 0 R 140 140 2 1 W N")
+              print("X " + gnd + " " + pinNumbers[ListBLevel3A[0]] + " -425 0 0 R 140 140 2 1 W N")
+              del ListBLevel3A[0]
             if inB3 != "_":
               print("X " + inB3 + " " + pinNumbers[inB3] + " -900 -275 140 R 140 140 2 1 I")
             else:
-              print("X " + gnd + " " + pinNumbers[ListBLevel3[0]] + " -475 -275 0 R 140 140 2 1 W N")
+              print("X " + gnd + " " + pinNumbers[ListBLevel3A[0]] + " -475 -275 0 R 140 140 2 1 W N")
+              del ListBLevel3A[0]
             print("X K 9 900 0 150 L 140 140 2 1 O")
             print("ENDDRAW")
             print("ENDDEF")
