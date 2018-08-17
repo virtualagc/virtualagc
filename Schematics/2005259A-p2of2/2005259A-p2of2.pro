@@ -1,4 +1,4 @@
-update=Wed 15 Aug 2018 02:16:51 PM CDT
+update=Fri 17 Aug 2018 06:19:56 PM CDT
 version=1
 last_client=kicad
 [general]
@@ -34,10 +34,10 @@ LibDir=
 [schematic_editor]
 version=1
 PageLayoutDescrFile=schematicTemplate.kicad_wks
-PlotDirectoryName=
+PlotDirectoryName=/home/rburkey/Desktop/
 SubpartIdSeparator=0
 SubpartFirstId=65
 NetFmtName=
 SpiceAjustPassiveValues=0
-LabSize=50
+LabSize=140
 ERC_TestSimilarLabels=1
