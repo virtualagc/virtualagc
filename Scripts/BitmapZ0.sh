@@ -8,7 +8,7 @@ then
 	echo "File \"$1\" does not exist."
 	exit 1
 fi
-if [[ 1 != "`grep -c '^\$Bitmap$' 2005259A-p2of2.sch`" ]]
+if [[ 1 != "`grep -c '^\$Bitmap$' \"$1\"`" ]]
 then 
 	echo "No image or more than 1 image in the file ... won't change."
 	exit 1

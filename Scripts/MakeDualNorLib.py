@@ -24,6 +24,8 @@ vcc = "+4VDC" # Name of net used for hidden power input.
 gnd = "0VDCA" # Name of net used for hidden ground input.
 basename = "D3NOR-" + vcc + "-" + gnd # Base name of the generated components. 
 
+lineWidth = 30
+
 # Generate library header.
 print("EESchema-LIBRARY Version 2.4")
 print("#encoding utf-8")
@@ -102,24 +104,24 @@ for inA1 in ListALevel0:
             # print("F4 \"GGGGG\" 0 100 140 H V C CNN \"Gate\"")
             # print("F5 \"LL\" 0 -100 140 H V C CNN \"Loc\"")
             print("DRAW")
-            print("A -1460 0 1040 -226 226 0 1 40 N -500 -400 -500 400")
-            print("A -113 -374 787 795 284 0 1 40 N 30 400 580 0")
-            print("A -113 374 787 -284 -795 0 1 40 N 580 0 30 -400")
-            print("C 665 0 85 0 1 40 N")
-            print("P 2 0 1 40 30 -400 -500 -400 N")
-            print("P 2 0 1 40 30 400 -500 400 N")
+            print("A -1460 0 1040 -226 226 0 1 " + str(lineWidth) + " N -500 -400 -500 400")
+            print("A -113 -374 787 795 284 0 1 " + str(lineWidth) + " N 30 400 580 0")
+            print("A -113 374 787 -284 -795 0 1 " + str(lineWidth) + " N 580 0 30 -400")
+            print("C 665 0 85 0 1 " + str(lineWidth) + " N")
+            print("P 2 0 1 " + str(lineWidth) + " 30 -400 -500 -400 N")
+            print("P 2 0 1 " + str(lineWidth) + " 30 400 -500 400 N")
             if inA1 != "_":
-              print("P 4 1 1 40 -460 275 -750 375 -750 175 -460 275 F")
+              print("P 4 1 1 " + str(lineWidth) + " -460 275 -750 375 -750 175 -460 275 F")
             if inA2 != "_":
-              print("P 4 1 1 40 -420 0 -675 -100 -675 100 -420 0 F")
+              print("P 4 1 1 " + str(lineWidth) + " -420 0 -675 -100 -675 100 -420 0 F")
             if inA3 != "_":
-              print("P 4 1 1 40 -460 -275 -750 -175 -750 -375 -460 -275 F")
+              print("P 4 1 1 " + str(lineWidth) + " -460 -275 -750 -175 -750 -375 -460 -275 F")
             if inB1 != "_":
-              print("P 4 2 1 40 -460 275 -750 375 -750 175 -460 275 F")
+              print("P 4 2 1 " + str(lineWidth) + " -460 275 -750 375 -750 175 -460 275 F")
             if inB2 != "_":
-              print("P 4 2 1 40 -420 0 -675 -100 -675 100 -420 0 F")
+              print("P 4 2 1 " + str(lineWidth) + " -420 0 -675 -100 -675 100 -420 0 F")
             if inB3 != "_":
-              print("P 4 2 1 40 -460 -275 -750 -175 -750 -375 -460 -275 F")
+              print("P 4 2 1 " + str(lineWidth) + " -460 -275 -750 -175 -750 -375 -460 -275 F")
             print("X J 1 900 0 150 L 140 140 1 1 O")
             print("X " + vcc + " 10 -175 400 0 D 140 140 1 1 W N")
             if inA1 != "_":
