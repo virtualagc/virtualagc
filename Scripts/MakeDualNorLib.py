@@ -20,9 +20,35 @@
 #
 #	BASENAME-ABC-DEF  or  BASNENAME-C_B-_FD  etc.
 
+# Usage:
+#	MakeDualNorLib.py [VCC [GND [VARIATION [VARIATION2]]]]
+# The defaults are GND=0VDCA, VCC=+4VDC, VARIATION="", VARIATION2="".
+# The first GND/VCC are the netnames for the power rails for the hidden power and ground pins.
+# If VCC="NC", then the corresponding power pin is left unconnected.
+# VARIATION is either "" (for regular NOR gates) or "expander" for the expander gates.
+# VARIATION2 is either "" (to show pin numbers) or "nopinnums" to not show pin numbers.
+
+import sys
+
 vcc = "+4VDC" # Name of net used for hidden power input.
 gnd = "0VDCA" # Name of net used for hidden ground input.
+variation = ""
+variation2 = ""
+
+if len(sys.argv) > 1:
+	vcc = sys.argv[1]
+if len(sys.argv) > 2:
+	gnd = sys.argv[2]
+if len(sys.argv) > 3:
+	variation = sys.argv[3]
+if len(sys.argv) > 2:
+	variation2 = sys.argv[4]
+
 basename = "D3NOR-" + vcc + "-" + gnd # Base name of the generated components. 
+if variation == "expander":
+	basename += "-expander"
+if variation2 == "nopinnums":
+	basename += "-nopinnums"
 
 lineWidth = 30
 
@@ -93,16 +119,15 @@ for inA1 in ListALevel0:
             print("#")
             print("# " + name)
             print("#")
-            print("DEF " + name + " U 0 0 N Y 2 F N")
-            print("F0 \"U\" 0 475 50 H V C CNN")
+            if variation2 == "nopinnums":
+              print("DEF " + name + " U 0 0 N N 2 F N")
+            else:
+              print("DEF " + name + " U 0 0 N Y 2 F N")
+            print("F0 \"U\" 0 525 140 H I C CNB")
             print("F1 \"" + name +"\" 0 550 50 H I C CNN")
             print("F2 \"\" -495 470 50 H I C CNN")
             print("F3 \"\" -495 470 50 H I C CNN")
-            # The following two fields look like good ideas, except that
-            # they get moved outside the body when the component is placed
-            # regardless of how I position them in the library.
-            # print("F4 \"GGGGG\" 0 100 140 H V C CNN \"Gate\"")
-            # print("F5 \"LL\" 0 -100 140 H V C CNN \"Loc\"")
+            print("F4 \"NNNNN\" 0 0 140 H V C CNB \"Location\"")
             print("DRAW")
             print("A -1460 0 1040 -226 226 0 1 " + str(lineWidth) + " N -500 -400 -500 400")
             print("A -113 -374 787 795 284 0 1 " + str(lineWidth) + " N 30 400 580 0")
@@ -110,6 +135,8 @@ for inA1 in ListALevel0:
             print("C 665 0 85 0 1 " + str(lineWidth) + " N")
             print("P 2 0 1 " + str(lineWidth) + " 30 -400 -500 -400 N")
             print("P 2 0 1 " + str(lineWidth) + " 30 400 -500 400 N")
+            if variation == "expander":
+            	print("P 16 0 1 0 275 305 275 -315 340 -270 400 -220 445 -170 485 -130 520 -85 540 -55 575 0 545 55 480 135 425 195 375 245 310 290 275 305 280 300 F")
             if inA1 != "_":
               print("P 4 1 1 " + str(lineWidth) + " -460 275 -750 375 -750 175 -460 275 F")
             if inA2 != "_":
@@ -122,8 +149,11 @@ for inA1 in ListALevel0:
               print("P 4 2 1 " + str(lineWidth) + " -420 0 -675 -100 -675 100 -420 0 F")
             if inB3 != "_":
               print("P 4 2 1 " + str(lineWidth) + " -460 -275 -750 -175 -750 -375 -460 -275 F")
-            print("X J 1 900 0 150 L 140 140 1 1 O")
-            print("X " + vcc + " 10 -175 400 0 D 140 140 1 1 W N")
+            print("X J 1 900 0 150 L 140 140 1 1 C")
+            if vcc == "NC":
+            	print("X " + vcc + " 10 -175 400 0 D 140 140 1 1 N N")
+            else:
+            	print("X " + vcc + " 10 -175 400 0 D 140 140 1 1 W N")
             if inA1 != "_":
               print("X " + inA1 + " " + pinNumbers[inA1] + " -900 275 140 R 140 140 1 1 I")
             else:
@@ -157,7 +187,7 @@ for inA1 in ListALevel0:
             else:
               print("X " + gnd + " " + pinNumbers[ListBLevel3A[0]] + " -475 -275 0 R 140 140 2 1 W N")
               del ListBLevel3A[0]
-            print("X K 9 900 0 150 L 140 140 2 1 O")
+            print("X K 9 900 0 150 L 140 140 2 1 C")
             print("ENDDRAW")
             print("ENDDEF")
 
