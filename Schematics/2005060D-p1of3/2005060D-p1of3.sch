@@ -2533,7 +2533,7 @@ Connection ~ 14625 17100
 Wire Wire Line
 	14625 17100 15025 17100
 $Bitmap
-Pos 850  30450
+Pos 11600 28300
 Scale 1.000000
 Data
 89 50 4E 47 0D 0A 1A 0A 00 00 00 0D 49 48 44 52 00 00 00 78 00 00 00 78 08 02 00 00 00 B6 06 A1 
@@ -3396,8 +3396,8 @@ C9 BB 29 F5 5D 8B CA 82 36 A4 40 25 C6 15 08 48 31 74 1C 38 17 8C B5 84 B2 9A 34
 C6 5C DC 75 02 E5 96 B4 52 0D 25 6F F3 00 00 00 00 49 45 4E 44 AE 42 60 82 
 EndData
 $EndBitmap
-Text Notes 1125 30450 0    140  ~ 28
+Text Notes 11875 28300 0    140  ~ 28
 Notes from the Virtual AGC Project:
-Text Notes 1150 33350 0    140  ~ 28
-1. This CAD drawing was transcribed from the original Apollo Program drawing\n   2005060D, page 1 of 3, but is not itself from the time of Apollo — RSB 2018\n2. In the original drawing, none of the NOR gates is shown with either a reference\n   desginator, nor pin numbering to show which of the two identical gates from the\n   dual-gate part is being used, nor which of the three interchangeable inputs of\n   the gate are being used.  Therefore, these were arbitrarily chosen during the \n   transcription.  In the case of reference designators, with two exceptions, the\n   reference designator is Unn, where nn is a number given by the formula\n   nn = trunc(((L-37100)+1)/2), where L is the location number written on the gate.\n   For example, gates 37101 and 37102 are both on U1, 37103 and 37104 are on\n   U2, etc.  The exceptions are that 37136 and 37137 are swapped: they are U19 \n   and U18 rather than the otherwise-expected U18 and U19. — RSB 2018
+Text Notes 11925 31675 0    140  ~ 28
+1. This CAD drawing was transcribed from the original Apollo Program drawing\n   2005060D, page 1 of 3, but is not itself from the time of Apollo — RSB 2018\n2. In the original drawing, none of the NOR gates is shown with either a reference\n   desginator, nor pin numbering to show which of the two identical gates from the\n   dual-gate part is being used, nor which of the three interchangeable inputs of\n   the gate are being used.  Therefore, these were arbitrarily chosen during the \n   transcription.  In the case of reference designators, with two exceptions, the\n   reference designator is Unn, where nn is a number given by the formula\n   nn = trunc(((L-37100)+1)/2), where L is the location number written on the gate.\n   For example, gates 37101 and 37102 are both on U1, 37103 and 37104 are on\n   U2, etc.  The exceptions are that 37136 and 37137 are swapped: they are U19 \n   and U18 rather than the otherwise-expected U18 and U19. — RSB 2018\n3. On the original schematics, the "expander gates" are incorrectly shown as OR\n   gates, but have been shown correctly as NOR gates here. — RSB 2018
 $EndSCHEMATC
