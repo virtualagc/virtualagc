@@ -41,7 +41,7 @@ if len(sys.argv) > 2:
 	gnd = sys.argv[2]
 if len(sys.argv) > 3:
 	variation = sys.argv[3]
-if len(sys.argv) > 2:
+if len(sys.argv) > 4:
 	variation2 = sys.argv[4]
 
 basename = "D3NOR-" + vcc + "-" + gnd # Base name of the generated components. 
