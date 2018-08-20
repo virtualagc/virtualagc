@@ -120,9 +120,9 @@ for inA1 in ListALevel0:
             print("# " + name)
             print("#")
             if variation2 == "nopinnums":
-              print("DEF " + name + " U 0 0 N N 2 F N")
+              print("DEF " + name + " U 0 0 N N 2 L N")
             else:
-              print("DEF " + name + " U 0 0 N Y 2 F N")
+              print("DEF " + name + " U 0 0 N Y 2 L N")
             print("F0 \"U\" 0 525 140 H I C CNB")
             print("F1 \"" + name +"\" 0 550 50 H I C CNN")
             print("F2 \"\" -495 470 50 H I C CNN")
