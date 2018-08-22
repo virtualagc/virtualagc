@@ -95,7 +95,7 @@ print("F0 \"" + refdPattern + "\" 0 " + str(yRadius+ 3 * textMargin) + " " + str
 print("F1 \"" + partName + "\" 0 " + str(yRadius + 5 * textMargin) + " " + str(textSize) + " H I C CNN")
 print("F2 \"\" 0 " + str(yRadius) + " " + str(textSize) + " H I C CNN")
 print("F3 \"\" 0 " + str(yRadius) + " " + str(textSize) + " H I C CNN")
-#print("F4 \"PAD\" 0 " + str(yRadius + 1 * textMargin) + " " + str(textSize) + " H V C BNB \"Caption\"")
+print("F4 \"PAD\" 0 " + str(yRadius + 1 * textMargin) + " " + str(textSize) + " H V C BNB \"Caption\"")
 print("DRAW")
 arcPos = xRadius - yRadius
 print("A " + str(-arcPos) + " 0 " + str(yRadius) + " 901 -901 0 0 " + str(lineWidth) + " N " + str(-arcPos) + " " + str(yRadius) + " " + str(-arcPos) + " " + str(-yRadius))
