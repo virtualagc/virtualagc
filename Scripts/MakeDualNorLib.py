@@ -35,14 +35,22 @@ gnd = "0VDCA" # Name of net used for hidden ground input.
 variation = ""
 variation2 = ""
 
-if len(sys.argv) > 1:
-	vcc = sys.argv[1]
-if len(sys.argv) > 2:
-	gnd = sys.argv[2]
-if len(sys.argv) > 3:
-	variation = sys.argv[3]
-if len(sys.argv) > 4:
-	variation2 = sys.argv[4]
+if len(sys.argv) > 1 and "D3NOR-" in sys.argv[1] and ".lib.bak" in sys.argv[1]:
+	s = sys.argv[1].replace('.lib.bak', '')
+	fields = s.split('-');
+	if len(fields) == 4 and fields[3] == "nopinnums":
+		fields[3] = ""
+		fields.append("nopinnums")
+else:
+	fields = sys.argv
+if len(fields) > 1:
+	vcc = fields[1]
+if len(fields) > 2:
+	gnd = fields[2]
+if len(fields) > 3:
+	variation = fields[3]
+if len(fields) > 4:
+	variation2 = fields[4]
 
 basename = "D3NOR-" + vcc + "-" + gnd # Base name of the generated components. 
 if variation == "expander":
@@ -154,9 +162,9 @@ for inA1 in ListALevel0:
               print("P 4 2 1 " + str(lineWidth) + " -460 -275 -750 -175 -750 -375 -460 -275 F")
             print("X J 1 900 0 150 L 140 140 1 1 C")
             if vcc == "NC":
-            	print("X " + vcc + " 10 -175 400 0 D 140 140 1 1 N N")
+            	print("X " + vcc + " 10 -175 350 0 D 140 140 1 1 N N")
             else:
-            	print("X " + vcc + " 10 -175 400 0 D 140 140 1 1 W N")
+            	print("X " + vcc + " 10 -175 350 0 D 140 140 1 1 W N")
             if inA1 != "_":
               print("X " + inA1 + " " + pinNumbers[inA1] + " -900 275 140 R 140 140 1 1 I")
             else:
@@ -173,7 +181,7 @@ for inA1 in ListALevel0:
             else:
               print("X " + gnd + " " + pinNumbers[ListALevel3A[0]] + " -475 -275 0 R 140 140 1 1 W N")
               del ListALevel3A[0]
-            print("X " + gnd + " 5 -175 -400 0 U 140 140 1 1 W N")
+            print("X " + gnd + " 5 -175 -350 0 U 140 140 1 1 W N")
             if inB1 != "_":
               print("X " + inB1 + " " + pinNumbers[inB1] + " -900 275 140 R 140 140 2 1 I")
             else:
