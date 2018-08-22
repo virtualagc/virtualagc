@@ -127,10 +127,10 @@ for inA1 in ListALevel0:
             print("F1 \"" + name +"\" 0 550 50 H I C CNN")
             print("F2 \"\" -495 470 50 H I C CNN")
             print("F3 \"\" -495 470 50 H I C CNN")
-            if variation == "expander":
-            	print("F4 \"NNNNN\" 0 0 130 H V C CNB \"Location\"")
-            else:
-            	print("F4 \"NNNNN\" 0 0 140 H V C CNB \"Location\"")
+            #if variation == "expander":
+            #	print("F4 \"NNNNN\" 0 0 130 H V C CNB \"Location\"")
+            #else:
+            #	print("F4 \"NNNNN\" 0 0 140 H V C CNB \"Location\"")
             print("DRAW")
             print("A -1460 0 1040 -226 226 0 1 " + str(lineWidth) + " N -500 -400 -500 400")
             print("A -113 -374 787 795 284 0 1 " + str(lineWidth) + " N 30 400 580 0")
