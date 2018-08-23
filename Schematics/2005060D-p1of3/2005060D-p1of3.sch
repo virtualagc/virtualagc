@@ -582,7 +582,7 @@ $Comp
 L AGC_DSKY:PWR_FLAG #FLG0101
 U 1 1 5B797106
 P 34325 23300
-F 0 "#FLG0101" H 34325 23825 50 0001 C CNN
+F 0 "#FLG0101" H 34325 23825 50  0001 C CNN
 F 1 "PWR_FLAG" H 34335 23760 50  0001 C CNN
 F 2 "" H 34325 23300 50  0001 C CNN
 F 3 "~" H 34325 23300 50  0001 C CNN
@@ -596,7 +596,7 @@ $Comp
 L AGC_DSKY:PWR_FLAG #FLG0102
 U 1 1 5B79712A
 P 34300 25150
-F 0 "#FLG0102" H 34300 25675 50 0001 C CNN
+F 0 "#FLG0102" H 34300 25675 50  0001 C CNN
 F 1 "PWR_FLAG" H 34310 25610 50  0001 C CNN
 F 2 "" H 34300 25150 50  0001 C CNN
 F 3 "~" H 34300 25150 50  0001 C CNN
@@ -3398,6 +3398,6 @@ EndData
 $EndBitmap
 Text Notes 11875 28300 0    140  ~ 28
 Notes from the Virtual AGC Project:
-Text Notes 11925 31675 0    140  ~ 28
-1. This CAD drawing was transcribed from the original Apollo Program drawing\n   2005060D, page 1 of 3, but is not itself from the time of Apollo — RSB 2018\n2. In the original drawing, none of the NOR gates is shown with either a reference\n   desginator, nor pin numbering to show which of the two identical gates from the\n   dual-gate part is being used, nor which of the three interchangeable inputs of\n   the gate are being used.  Therefore, these were arbitrarily chosen during the \n   transcription.  In the case of reference designators, with two exceptions, the\n   reference designator is Unn, where nn is a number given by the formula\n   nn = trunc(((L-37100)+1)/2), where L is the location number written on the gate.\n   For example, gates 37101 and 37102 are both on U1, 37103 and 37104 are on\n   U2, etc.  The exceptions are that 37136 and 37137 are swapped: they are U19 \n   and U18 rather than the otherwise-expected U18 and U19. — RSB 2018\n3. On the original schematics, the "expander gates" are incorrectly shown as OR\n   gates, but have been shown correctly as NOR gates here. — RSB 2018
+Text Notes 11900 30525 0    140  ~ 28
+1. This CAD drawing was transcribed from the original Apollo Program drawing\n   2005060D, page 1 of 3, but is not itself from the time of Apollo — RSB 2018\n2. The original drawing did not display reference designators or pin numbers on\n   the NOR gates,  so they are not shown here either, but on the basis of the signal\n   wiring diagram (drawing 2005160C), we believe that for purposes such as ERC\n   and netlist generation we have assigned them using the same rules as were\n   originally used. — RSB 2018\n3. On the original schematics, the "expander gates" are incorrectly shown as OR\n   gates, but have been shown correctly as NOR gates here. — RSB 2018
 $EndSCHEMATC
