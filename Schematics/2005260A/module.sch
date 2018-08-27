@@ -1,0 +1,108 @@
+EESchema Schematic File Version 4
+EELAYER 26 0
+EELAYER END
+$Descr E 44000 34000
+encoding utf-8
+Sheet 1 4
+Title ""
+Date ""
+Rev ""
+Comp ""
+Comment1 ""
+Comment2 ""
+Comment3 ""
+Comment4 ""
+$EndDescr
+$Sheet
+S 9500 11875 5600 8925
+U 5B842FBB
+F0 "Sheet 1" 140
+F1 "2005260A-p1of3.sch" 140
+F2 "0VDC" U R 15100 16950 140
+F3 "+4VDC" U R 15100 16050 140
+F4 "FAP" U R 15100 15200 140
+$EndSheet
+$Sheet
+S 19200 11875 5600 8925
+U 5B84300F
+F0 "Sheet 2" 140
+F1 "2005260A-p2of3.sch" 140
+$EndSheet
+$Sheet
+S 28650 11875 5600 8925
+U 5B84301C
+F0 "Sheet 3" 140
+F1 "2005260A-p3of3.sch" 140
+$EndSheet
+Text Notes 40525 33125 0    250  ~ 50
+2005260
+Text Notes 38925 31825 0    250  ~ 50
+LOGIC FLOW DIAGRAM
+Text Notes 39600 32150 0    200  ~ 40
+MODULE NO. A2
+Text Notes 40025 32450 0    200  ~ 40
+TIMER
+Text Notes 38250 33125 0    250  ~ 50
+80230
+Text Notes 38950 33425 0    140  ~ 28
+____
+Wire Notes Line width 6 style solid
+	36461 985  36461 1310
+Wire Notes Line width 6 style solid
+	36839 984  36839 1310
+Wire Notes Line width 6 style solid
+	37350 984  37350 1310
+Wire Notes Line width 6 style solid
+	40831 984  40831 1310
+Wire Notes Line width 6 style solid
+	41331 984  41331 1310
+Wire Notes Line width 6 style solid
+	41831 984  41831 1310
+Wire Notes Line width 6 style solid
+	42480 984  42480 1310
+Wire Notes Line width 6 style solid
+	43500 1310 36465 1310
+Text Notes 36600 1250 0    140  ~ 28
+A
+Text Notes 37450 1250 0    140  ~ 28
+REVISED PER TDRR      30754
+$Comp
+L AGC_DSKY:PWR_FLAG #FLG?
+U 1 1 5C914190
+P 17225 15200
+F 0 "#FLG?" H 17225 15725 50  0001 C CNN
+F 1 "PWR_FLAG" H 17235 15660 50  0001 C CNN
+F 2 "" H 17225 15200 50  0001 C CNN
+F 3 "~" H 17225 15200 50  0001 C CNN
+	1    17225 15200
+	1    0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:PWR_FLAG #FLG?
+U 1 1 5C9141B2
+P 17225 16050
+F 0 "#FLG?" H 17225 16575 50  0001 C CNN
+F 1 "PWR_FLAG" H 17235 16510 50  0001 C CNN
+F 2 "" H 17225 16050 50  0001 C CNN
+F 3 "~" H 17225 16050 50  0001 C CNN
+	1    17225 16050
+	1    0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:PWR_FLAG #FLG?
+U 1 1 5C9141D4
+P 17225 16950
+F 0 "#FLG?" H 17225 17475 50  0001 C CNN
+F 1 "PWR_FLAG" H 17235 17410 50  0001 C CNN
+F 2 "" H 17225 16950 50  0001 C CNN
+F 3 "~" H 17225 16950 50  0001 C CNN
+	1    17225 16950
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	15100 15200 17225 15200
+Wire Wire Line
+	15100 16050 17225 16050
+Wire Wire Line
+	15100 16950 17225 16950
+$EndSCHEMATC
