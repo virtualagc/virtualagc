@@ -9,9 +9,10 @@ import sys
 import time
 
 # Current origin and index around the origin.
-spacing = 0.75 # inches
-originX = 1.25 # inches
-originY = 1.25
+xSpacing = 1.775 # inches
+ySpacing = 0.8
+originX = 0 # inches
+originY = 0
 nextX = 0
 nextY = 0
 def nextXY():
@@ -65,14 +66,14 @@ for line in sys.stdin:
 		nors["X2"][refdPrefix] = fields[2]
 		continue
 	if type == "L" and numFields == 3:
-		originX = float(fields[1])
-		originY = float(fields[2])
+		originX = float(fields[1]) + xSpacing / 2.0
+		originY = float(fields[2]) + ySpacing / 2.0
 		nextX = 0
 		nextY = 0
 		continue
 
-	posX = int(1000 * (originX + spacing * nextX))
-	posY = int(1000 * (originY + spacing * nextY))
+	posX = int(1000 * (originX + xSpacing * nextX))
+	posY = int(1000 * (originY + ySpacing * nextY))
 	
 	if type in nors and numFields == 6:
 		gate = fields[1]
