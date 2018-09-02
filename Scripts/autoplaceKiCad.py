@@ -12,6 +12,7 @@ import re
 wereErrors = False
 
 # Current origin and index around the origin.
+columns = 0
 xSpacing = 1.775 # inches
 ySpacing = 0.8
 originX = 0 # inches
@@ -20,14 +21,20 @@ nextX = 0
 nextY = 0
 def nextXY():
 	global nextX, nextY
-	if nextX == 0:
-		nextX = nextY + 1
-		nextY = 0
-		return
-	if nextY < nextX:
-		nextY += 1
-		return
-	nextX -= 1
+	if columns == 0:
+		if nextX == 0:
+			nextX = nextY + 1
+			nextY = 0
+			return
+		if nextY < nextX:
+			nextY += 1
+			return
+		nextX -= 1
+	else:
+		nextX += 1
+		if nextX >= columns:
+			nextX = 0
+			nextY += 1
 	return
 
 # For entities with no obvious sequencing.
@@ -38,9 +45,7 @@ objects = {}
 
 nors = { 
 	"N": { "library": "D3NOR-+4VDC-0VDCA", "refdPrefix": "U1" },
-	"N2": { "library": "D3NOR-+4SW-0VDCA", "refdPrefix": "U2" }, 
 	"X": { "library": "D3NOR-FAP-0VDCA-expander", "refdPrefix": "U1" }, 
-	"X2": { "library": "D3NOR-NC-0VDCA-expander", "refdPrefix": "U2" }
 }
 aPins = ["A", "B", "C", "_"]
 bPins = ["D", "E", "F", "_"]
@@ -54,6 +59,12 @@ for line in sys.stdin:
 		continue
 	type = fields[0]
 	if numFields < 1 or type == "#":
+		continue
+	if type == "C=" and numFields == 2:
+		columns = int(fields[1])
+		continue
+	if type == "W=" and numFields == 2:
+		columns = int(float(fields[1]) / xSpacing)
 		continue
 	if type == "N=" and numFields == 3:
 		nors["N"]["library"] = fields[1]
@@ -78,10 +89,10 @@ for line in sys.stdin:
 		nextY = 0
 		continue
 
-	posX = int(1000 * (originX + xSpacing * nextX))
-	posY = int(1000 * (originY + ySpacing * nextY))
+	posX = 25 * int(40 * (originX + xSpacing * nextX))
+	posY = 25 * int(40 * (originY + ySpacing * nextY))
 	
-	if type in nors and numFields == 6:
+	if type in nors and numFields == 6 and fields[1].isdigit() and fields[2].isdigit():
 		gate = fields[1]
 		location = fields[2]
 		top = fields[3]
@@ -92,7 +103,17 @@ for line in sys.stdin:
 			wereErrors = True
 			continue
 		id = type + location
-		if not (id in objects):
+		if type == "N":
+			otype = "X"
+		else:
+			otype = "N"
+		oid = otype + location
+		if oid in objects:
+			print >>sys.stderr, "Library Mismatch: " + line
+			print >>sys.stderr, objects[oid]
+			wereErrors = True
+			continue
+		elif not (id in objects):
 			objects[id] = { "type": type, "library": nors[type]["library"], "refd": nors[type]["refdPrefix"]+location, "location": location }
 		elif objects[id]["library"] != nors[type]["library"]:
 			print >>sys.stderr, "A/B Library Mismatch: " + line
@@ -116,7 +137,7 @@ for line in sys.stdin:
 		nextXY()
 		continue
 	
-	if type == "J" and (numFields == 2 or numFields == 3):
+	if type == "J" and (numFields == 2 or numFields == 3) and fields[1].isdigit():
 		pinName = fields[1]
 		pinNum = int(pinName)
 		if numFields >= 3:
@@ -161,7 +182,7 @@ for line in sys.stdin:
 		nextXY()
 		continue
 	
-	if type == "A" and numFields == 2:
+	if type == "A" and numFields == 2 and fields[1].isdigit():
 		id = type + str(index)
 		index += 1
 		count = "(" + fields[1] + ")"
