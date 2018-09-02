@@ -7,6 +7,9 @@
 
 import sys
 import time
+import re
+
+wereErrors = False
 
 # Current origin and index around the origin.
 xSpacing = 1.775 # inches
@@ -44,26 +47,29 @@ bPins = ["D", "E", "F", "_"]
 
 # Read the input file.
 for line in sys.stdin:
-	fields = line.strip().split(" ")
+	line = re.sub(' +', ' ', line.strip())
+	fields = line.split(" ")
 	numFields = len(fields)
+	if line == "":
+		continue
 	type = fields[0]
 	if numFields < 1 or type == "#":
 		continue
 	if type == "N=" and numFields == 3:
-		nors["N"][library] = fields[1]
-		nors["N"][refdPrefix] = fields[2]
+		nors["N"]["library"] = fields[1]
+		nors["N"]["refdPrefix"] = fields[2]
 		continue
 	if type == "N2=" and numFields == 3:
-		nors["N2"][library] = fields[1]
-		nors["N2"][refdPrefix] = fields[2]
+		nors["N2"]["library"] = fields[1]
+		nors["N2"]["refdPrefix"] = fields[2]
 		continue
 	if type == "X=" and numFields == 3:
-		nors["X"][library] = fields[1]
-		nors["X"][refdPrefix] = fields[2]
+		nors["X"]["library"] = fields[1]
+		nors["X"]["refdPrefix"] = fields[2]
 		continue
 	if type == "X2=" and numFields == 3:
-		nors["X2"][library] = fields[1]
-		nors["X2"][refdPrefix] = fields[2]
+		nors["X2"]["library"] = fields[1]
+		nors["X2"]["refdPrefix"] = fields[2]
 		continue
 	if type == "L" and numFields == 3:
 		originX = float(fields[1]) + xSpacing / 2.0
@@ -81,16 +87,31 @@ for line in sys.stdin:
 		top = fields[3]
 		middle = fields[4]
 		bottom = fields[5]
+		if (top == middle and top != "_") or (top == bottom and top != "_") or (middle == bottom and middle != "_"):
+			print >>sys.stderr, "Duplicate pins: " + line
+			wereErrors = True
+			continue
 		id = type + location
 		if not (id in objects):
 			objects[id] = { "type": type, "library": nors[type]["library"], "refd": nors[type]["refdPrefix"]+location, "location": location }
+		elif objects[id]["library"] != nors[type]["library"]:
+			print >>sys.stderr, "A/B Library Mismatch: " + line
+			print >>sys.stderr, objects[id]
+			wereErrors = True
+			continue
 		if top in aPins and middle in aPins and bottom in aPins:
 			whichGate = "a"
 		elif top in bPins and middle in bPins and bottom in bPins:
 			whichGate = "b"
 		else:
-			print >>sys.stderr, "Illegal spec: " + line.strip('\n')
-			sys.exit()
+			print >>sys.stderr, "Illegal NOR spec: " + line
+			wereErrors = True
+			continue
+		if whichGate in objects[id]:
+			print >>sys.stderr, "Part duplicated: " + line
+			print >>sys.stderr, objects[id][whichGate]
+			wereErrors = True
+			continue
 		objects[id][whichGate] = { "gate": gate, "top": top, "middle": middle, "bottom": bottom, "x": posX, "y": posY } 
 		nextXY()
 		continue
@@ -120,8 +141,14 @@ for line in sys.stdin:
 			symbol = "ConnectorA1-400"
 			unit = pinNum % 100
 		else:
-			print >>sys.stderr, "Illegal pin number: " + line.strip('\n')
-			sys.exit()
+			print >>sys.stderr, "Illegal pin number: " + line
+			wereErrors = True
+			continue
+		if id in objects:
+			print >>sys.stderr, "Part duplicated: " + line
+			print >>sys.stderr, objects[id]
+			wereErrors = True
+			continue
 		objects[id] = { "type": type, "refd": refd, "symbol": symbol, "unit": unit, "text": text, "x": posX, "y": posY }
 		nextXY()
 		continue
@@ -141,6 +168,12 @@ for line in sys.stdin:
 		objects[id] = { "type": type, "count": count, "x": posX, "y": posY }
 		nextXY()
 		continue		
+	
+	print >>sys.stderr, "Unrecognized line: " + line
+	wereErrors = True
+
+if wereErrors:
+	sys.exit()
 
 # Write the output file.
 timestamp = "%X" % time.time()
@@ -252,11 +285,13 @@ for id in objects:
 		posX = object["x"]
 		posY = object["y"]
 		number = object["count"]
+		refd = "X?"
+		symbol = "ArrowTwiddle"
 		sys.stdout.write("$Comp\n")
-		sys.stdout.write("L AGC_DSKY:ArrowTwiddle X?\n")
+		sys.stdout.write("L AGC_DSKY:ArrowTwiddle " + refd + "\n")
 		sys.stdout.write("U 1 1 " + timestamp + "\n")
 		sys.stdout.write("P " + str(posX) + " " + str(posY) + "\n")
-		sys.stdout.write("F 0 \"X?\" H " + str(posX) + " " + str(posY + 325) + " 140 0001 C CNN\n")
+		sys.stdout.write("F 0 \"" + refd + "\" H " + str(posX) + " " + str(posY + 325) + " 140 0001 C CNN\n")
 		sys.stdout.write("F 1 \"" + symbol + "\" H " + str(posX) + " " + str(posY+425) + " 140 0001 C CNN\n")
 		sys.stdout.write("F 2 \"\" H " + str(posX) + " " + str(posY+475) + " 140 0001 C CNN\n")
 		sys.stdout.write("F 3 \"\" H " + str(posX) + " " + str(posY+475) + " 140 0001 C CNN\n")
@@ -271,11 +306,13 @@ for id in objects:
 		posX = object["x"]
 		posY = object["y"]
 		caption = object["text"]
+		refd = "X?"
+		symbol = "Node2"
 		sys.stdout.write("$Comp\n")
-		sys.stdout.write("L AGC_DSKY:Node2 X?\n")
+		sys.stdout.write("L AGC_DSKY:Node2 " + refd + "\n")
 		sys.stdout.write("U 1 1 " + timestamp + "\n")
 		sys.stdout.write("P " + str(posX) + " " + str(posY) + "\n")
-		sys.stdout.write("F 0 \"X?\" H " + str(posX) + " " + str(posY + 325) + " 140 0001 C CNN\n")
+		sys.stdout.write("F 0 \"" + refd + "\" H " + str(posX) + " " + str(posY + 325) + " 140 0001 C CNN\n")
 		sys.stdout.write("F 1 \"" + symbol + "\" H " + str(posX) + " " + str(posY+425) + " 140 0001 C CNN\n")
 		sys.stdout.write("F 2 \"\" H " + str(posX) + " " + str(posY+475) + " 140 0001 C CNN\n")
 		sys.stdout.write("F 3 \"\" H " + str(posX) + " " + str(posY+475) + " 140 0001 C CNN\n")
