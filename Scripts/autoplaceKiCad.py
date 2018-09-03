@@ -94,7 +94,15 @@ for line in sys.stdin:
 	
 	if type in nors and numFields == 6 and fields[1].isdigit() and fields[2].isdigit():
 		gate = fields[1]
+		if len(gate) != 5 or not gate.isdigit():
+			print >>sys.stderr, "Incorrectly numbered gate: " + line
+			wereErrors = True
+			continue
 		location = fields[2]
+		if len(location) != 2 or not location.isdigit():
+			print >>sys.stderr, "Incorrectly numbered location: " + line
+			wereErrors = True
+			continue
 		top = fields[3]
 		middle = fields[4]
 		bottom = fields[5]
@@ -139,6 +147,10 @@ for line in sys.stdin:
 	
 	if type == "J" and (numFields == 2 or numFields == 3) and fields[1].isdigit():
 		pinName = fields[1]
+		if len(pinName) != 3 or not pinName.isdigit():
+			print >>sys.stderr, "Incorrectly numbered connector: " + line
+			wereErrors = True
+			continue
 		pinNum = int(pinName)
 		if numFields >= 3:
 			text = fields[2]
