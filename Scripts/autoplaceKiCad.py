@@ -42,6 +42,7 @@ index = 0
 
 # A dictionary for storing the objects in the schematic.
 objects = {}
+gatesFound = {}
 
 nors = { 
 	"N": { "library": "D3NOR-+4VDC-0VDCA", "refdPrefix": "U1" },
@@ -53,6 +54,7 @@ bPins = ["D", "E", "F", "_"]
 # Read the input file.
 for line in sys.stdin:
 	line = re.sub(' +', ' ', line.strip())
+	# print >>sys.stderr, "Processing: " + line
 	fields = line.split(" ")
 	numFields = len(fields)
 	if line == "":
@@ -141,11 +143,21 @@ for line in sys.stdin:
 			print >>sys.stderr, objects[id][whichGate]
 			wereErrors = True
 			continue
+		if gate in gatesFound:
+			print >>sys.stderr, "Gate number duplicated: " + line
+			print >>sys.stderr, gatesFound[gate]
+			wereErrors = True
+			continue
+		gatesFound[gate] = line
 		objects[id][whichGate] = { "gate": gate, "top": top, "middle": middle, "bottom": bottom, "x": posX, "y": posY } 
 		nextXY()
 		continue
 	
-	if type == "J" and (numFields == 2 or numFields == 3) and fields[1].isdigit():
+	if (type == "J" or type == "j") and (numFields == 2 or numFields == 3) and fields[1].isdigit():
+		rotated = False
+		if type == "j":
+			rotated = True
+			type = "J"
 		pinName = fields[1]
 		if len(pinName) != 3 or not pinName.isdigit():
 			print >>sys.stderr, "Incorrectly numbered connector: " + line
@@ -182,7 +194,7 @@ for line in sys.stdin:
 			print >>sys.stderr, objects[id]
 			wereErrors = True
 			continue
-		objects[id] = { "type": type, "refd": refd, "symbol": symbol, "unit": unit, "text": text, "x": posX, "y": posY }
+		objects[id] = { "type": type, "refd": refd, "symbol": symbol, "unit": unit, "text": text, "x": posX, "y": posY, "rotated": rotated }
 		nextXY()
 		continue
 	
@@ -213,6 +225,7 @@ timestamp = "%X" % time.time()
 for id in objects:
 	object = objects[id]
 	type = object["type"]
+	# print >>sys.stderr, "Outputting: " + object
 	
 	if type in nors:
 		library = object["library"]
@@ -299,6 +312,7 @@ for id in objects:
 		refd = object["refd"]
 		unit = object["unit"]
 		caption = object["text"]
+		rotated = object["rotated"]
 		sys.stdout.write("$Comp\n")
 		sys.stdout.write("L AGC_DSKY:" + symbol + " " + refd + "\n")
 		sys.stdout.write("U " + str(unit) + " 1 " + timestamp + "\n")
@@ -307,9 +321,15 @@ for id in objects:
 		sys.stdout.write("F 1 \"" + symbol + "\" H " + str(posX) + " " + str(posY+425) + " 140 0001 C CNN\n")
 		sys.stdout.write("F 2 \"\" H " + str(posX) + " " + str(posY+475) + " 140 0001 C CNN\n")
 		sys.stdout.write("F 3 \"\" H " + str(posX) + " " + str(posY+475) + " 140 0001 C CNN\n")
-		sys.stdout.write("F 4 \"" + caption + "\" H " + str(posX) + " " + str(posY + 250) + " 140 0000 C BNB \"Caption\"\n")
+		if rotated:
+			sys.stdout.write("F 4 \"" + caption + "\" H " + str(posX) + " " + str(posY - 250) + " 140 0000 C BNB \"Caption\"\n")
+		else:
+			sys.stdout.write("F 4 \"" + caption + "\" H " + str(posX) + " " + str(posY + 250) + " 140 0000 C BNB \"Caption\"\n")
 		sys.stdout.write("\t" + str(unit) + " " + str(posX) + " " + str(posY) + "\n")
-		sys.stdout.write("\t1    0    0    -1  \n")
+		if rotated:
+			sys.stdout.write("\t-1    0    0    1  \n")
+		else:
+			sys.stdout.write("\t1    0    0    -1  \n")
 		sys.stdout.write("$EndComp\n")
 		continue
 	
