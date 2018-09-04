@@ -1,0 +1,41 @@
+EESchema Schematic File Version 4
+LIBS:module-cache
+EELAYER 26 0
+EELAYER END
+$Descr E 44000 34000
+encoding utf-8
+Sheet 3 3
+Title ""
+Date ""
+Rev ""
+Comp ""
+Comment1 ""
+Comment2 ""
+Comment3 ""
+Comment4 ""
+$EndDescr
+$Comp
+L AGC_DSKY:ConnectorA1-100 J?
+U 1 1 5B8E81D3
+P 10725 11525
+F 0 "J?" H 10725 11850 140 0001 C CNN
+F 1 "ConnectorA1-100" H 10725 11950 140 0001 C CNN
+F 2 "" H 10725 11700 140 0001 C CNN
+F 3 "" H 10725 11700 140 0001 C CNN
+F 4 "PAD" H 10725 11750 140 0000 C BNB "Caption"
+	1    10725 11525
+	1    0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:ConnectorA1-100 J?
+U 2 1 5B8E8216
+P 10725 12425
+F 0 "J?" H 10725 12750 140 0001 C CNN
+F 1 "ConnectorA1-100" H 10725 12850 140 0001 C CNN
+F 2 "" H 10725 12600 140 0001 C CNN
+F 3 "" H 10725 12600 140 0001 C CNN
+F 4 "PAD" H 10725 12650 140 0000 C BNB "Caption"
+	2    10725 12425
+	-1   0    0    1   
+$EndComp
+$EndSCHEMATC
