@@ -1,13 +1,16 @@
 ### FILE="Main.annotation"
 ## Copyright:	Public domain.
-## Filename:	TAGS_FOR_RELATIVE_SETLOC.agc
-## Purpose:	Header information for Luminary 1C, revision 131.
-##		It is part of the source code for the Lunar Module's (LM)
-##		Apollo Guidance Computer (AGC) for Apollo 13.
-##		This file is intended to be a faithful transcription, except
-##		that the code format has been changed to conform to the
-##		requirements of the yaYUL assembler rather than the 
-##		original YUL assembler.
+## Filename:	TAGS_FOR_RELATIVE_SETLOC_AND_BLANK_BANK_CARDS.agc
+## Purpose:	A section of the reconstructed source code for Luminary 130.
+##		This was the original program released for the Apollo 13 LM,
+##		although several more revisions would follow. It has been
+##		reconstructed from a listing of Luminary 131, from which it
+##		differs on only two lines in P70-P71. The difference is
+##		described in detail in Luminary memo #129, which was used
+##		to perform the reconstruction. This file is intended to be a
+##		faithful reconstruction, except that the code format has been
+##		changed to conform to the requirements of the yaYUL assembler
+##		rather than the original YUL assembler.
 ## Reference:	Pages 28-37
 ## Contact:	Ron Burkey <info@sandroid.org>.
 ## Website:	www.ibiblio.org/apollo/index.html
@@ -17,15 +20,7 @@
 ##				original harcopy, as opposed to the PDF page
 ##				numbers in 1701.pdf.
 ##		2017-02-12 RSB	Proofed comment text using octopus/ProoferComments.
-
-## The contents of this file, and all associated "Luminary131" files, are
-## transcribed from scanned pages at http://www.ibiblio.org/apollo/ScansForConversion/.
-## Notations on these scanned pages read, in part:
-##
-##	NASA Apollo LUMINARY 131 (1C) Program Source Code Listing.
-##	MIT Instrumentation/Draper Laboratory -- 19 December 1969, 1742 pages.
-##	This listing contains the flight program for the Lunar Module 
-##	as created by MIT's Draper Lab for the Apollo 13/14 moon missions.
+##		2018-09-04 MAS	Copied from Luminary 131 for Luminary 130.
 
 ## Page 28
 		COUNT	BANKSUM

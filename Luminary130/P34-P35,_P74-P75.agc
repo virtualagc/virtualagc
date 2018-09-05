@@ -1,13 +1,16 @@
 ### FILE="Main.annotation"
 ## Copyright:	Public domain.
-## Filename:	P34-35_P74-75.agc
-## Purpose:	A section of Luminary 1C, revision 131.
-##		It is part of the source code for the Lunar Module's (LM)
-##		Apollo Guidance Computer (AGC) for Apollo 13.
-##		This file is intended to be a faithful transcription, except
-##		that the code format has been changed to conform to the
-##		requirements of the yaYUL assembler rather than the
-##		original YUL assembler.
+## Filename:	P34-P35,_P74-P75.agc
+## Purpose:	A section of the reconstructed source code for Luminary 130.
+##		This was the original program released for the Apollo 13 LM,
+##		although several more revisions would follow. It has been
+##		reconstructed from a listing of Luminary 131, from which it
+##		differs on only two lines in P70-P71. The difference is
+##		described in detail in Luminary memo #129, which was used
+##		to perform the reconstruction. This file is intended to be a
+##		faithful reconstruction, except that the code format has been
+##		changed to conform to the requirements of the yaYUL assembler
+##		rather than the original YUL assembler.
 ## Reference:	pp. 660-704
 ## Contact:	Ron Burkey <info@sandroid.org>.
 ## Website:	www.ibiblio.org/apollo
@@ -27,6 +30,7 @@
 ##		2017-03-09 RSB	Comment-text fixes noted in proofing Luminary 116. 
 ##		2017-03-16 RSB	Comment-text fixes identified in 5-way
 ##				side-by-side diff of Luminary 69/99/116/131/210.
+##		2018-09-04 MAS	Copied from Luminary 131 for Luminary 130.
 
 ## Page 660
 # TRANSFER PHASE INITIATION (TPI) PROGRAMS (P34 AND P74)

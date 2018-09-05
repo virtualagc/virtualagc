@@ -1,9 +1,16 @@
 ### FILE="Main.annotation"
 # Copyright:	Public domain.
 # Filename:	MAIN.agc
-# Purpose:	The main source file for Luminary 1C, revision 131.
-#		It is part of the source code for the Lunar Module's (LM)
-#		Apollo Guidance Computer (AGC) for Apollo 13.
+# Purpose:	The main source file for the reconstructed Luminary 130.
+#		This was the original program released for the Apollo 13 LM,
+#		although several more revisions would follow. It has been
+#		reconstructed from a listing of Luminary 131, from which it
+#		differs on only two lines in P70-P71. The difference is
+#		described in detail in Luminary memo #129, which was used
+#		to perform the reconstruction. This file is intended to be a
+#		faithful reconstruction, except that the code format has been
+#		changed to conform to the requirements of the yaYUL assembler
+#		rather than the original YUL assembler.
 # Assembler:	yaYUL
 # Contact:	Ron Burkey <info@sandroid.org>.
 # Website:	www.ibiblio.org/apollo/index.html
@@ -24,8 +31,9 @@
 #		2017-02-12 RSB	References to the scanned assembly listing
 #				have been updated now that a more-legible
 #				scan is available than before.
+#		2018-09-04 MAS	Copied from Luminary 131 for Luminary 130.
 #
-# The contents of these "Luminary131" files were originally (2003)
+# The contents of these "Luminary130" files were originally (2003)
 # transcribed from a scanned document obtained from MIT's
 # now-defunct history or recent technology website, but which can be
 # consulted now at
@@ -42,7 +50,10 @@
 #	This listing contains the flight program for the Lunar Module 
 #	as created by MIT's Draper Lab for the Apollo 13/14 moon missions.
 #
-# This file is a little different from the other Luminary131 files I'm providing, 
+# Modifications were then made to P70-P71 to match how it would have been in
+# Luminary 130, according to Luminary memo #129.
+#
+# This file is a little different from the other Luminary130 files I'm providing, 
 # in that it doesn't represent anything that appears directly in the original source.  
 # What I (RSB) have done for organizational purposes is to split the huge monolithic
 # source code into smaller, more manageable chunks--i.e., into individual source 

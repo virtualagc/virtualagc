@@ -1,13 +1,16 @@
 ### FILE="Main.annotation"
 ## Copyright:	Public domain.
-## Filename:	R60_62.agc
-## Purpose:	A section of Luminary 1C, revision 131.
-##		It is part of the source code for the Lunar Module's (LM)
-##		Apollo Guidance Computer (AGC) for Apollo 13.
-##		This file is intended to be a faithful transcription, except
-##		that the code format has been changed to conform to the
-##		requirements of the yaYUL assembler rather than the 
-##		original YUL assembler.
+## Filename:	R60,R62.agc
+## Purpose:	A section of the reconstructed source code for Luminary 130.
+##		This was the original program released for the Apollo 13 LM,
+##		although several more revisions would follow. It has been
+##		reconstructed from a listing of Luminary 131, from which it
+##		differs on only two lines in P70-P71. The difference is
+##		described in detail in Luminary memo #129, which was used
+##		to perform the reconstruction. This file is intended to be a
+##		faithful reconstruction, except that the code format has been
+##		changed to conform to the requirements of the yaYUL assembler
+##		rather than the original YUL assembler.
 ## Reference:	pp. 476-489
 ## Contact:	Ron Burkey <info@sandroid.org>.
 ## Website:	www.ibiblio.org/apollo/index.html
@@ -20,6 +23,7 @@
 ##		2017-02-23 RSB	Proofed comment text using octopus/ProoferComments.
 ##		2017-02-28 RSB	Fixed lingering typos.
 ##		2017-03-09 RSB	Comment text fixes noted in proofing Luminary 116.
+##		2018-09-04 MAS	Copied from Luminary 131 for Luminary 130.
 
 ## Page 476
 # MOD NO: 0				DATE: 1 MAY 1968

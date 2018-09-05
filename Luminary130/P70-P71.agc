@@ -6,7 +6,7 @@
 ##		although several more revisions would follow. It has been
 ##		reconstructed from a listing of Luminary 131, from which it
 ##		differs on only two lines in P70-P71. The difference is
-##		described in detail in Luminary memoy #129, which was used
+##		described in detail in Luminary memo #129, which was used
 ##		to perform the reconstruction. This file is intended to be a
 ##		faithful reconstruction, except that the code format has been
 ##		changed to conform to the requirements of the yaYUL assembler

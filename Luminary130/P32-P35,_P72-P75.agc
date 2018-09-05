@@ -1,13 +1,16 @@
 ### FILE="Main.annotation"
 ## Copyright:	Public domain.
-## Filename:	P32-P35_P72-P75.agc
-## Purpose:	A section of Luminary 1C, revision 131.
-##		It is part of the source code for the Lunar Module's (LM)
-##		Apollo Guidance Computer (AGC) for Apollo 13.
-##		This file is intended to be a faithful transcription, except
-##		that the code format has been changed to conform to the
-##		requirements of the yaYUL assembler rather than the 
-##		original YUL assembler.
+## Filename:	P32-P35,_P72-P75.agc
+## Purpose:	A section of the reconstructed source code for Luminary 130.
+##		This was the original program released for the Apollo 13 LM,
+##		although several more revisions would follow. It has been
+##		reconstructed from a listing of Luminary 131, from which it
+##		differs on only two lines in P70-P71. The difference is
+##		described in detail in Luminary memo #129, which was used
+##		to perform the reconstruction. This file is intended to be a
+##		faithful reconstruction, except that the code format has been
+##		changed to conform to the requirements of the yaYUL assembler
+##		rather than the original YUL assembler.
 ## Reference:	pp. 623-655
 ## Contact:	Ron Burkey <info@sandroid.org>.
 ## Website:	www.ibiblio.org/apollo
@@ -23,6 +26,7 @@
 ##		2017-03-09 RSB	Comment-text fixes noted in proofing Luminary 116.
 ##				Fixed VNP00H to VNPOOH.
 ##		2017-08-25 RSB	Corrected a misprint (00 -> 0D) identified in ZERLINA 56.
+##		2018-09-04 MAS	Copied from Luminary 131 for Luminary 130.
 
 ## Page 623
 # COELLIPTIC SEQUENCE INITIATION (CSI) PROGRAMS (P32 AND P72)
