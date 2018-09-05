@@ -2,8 +2,11 @@
 # The purpose of this python script is to take a text file that has some
 # descriptions of NOR gates, expander gates, connector pads, nodes,
 # and perhaps other objects commonly in AGC "logic flow diagrams", and
-# produces a rough placement of those objects that can be cut-and-pasted
-# into an eeschema .sch file.
+# produces a rough placement of those objects into an otherwise empty
+# .sch file.  That .sch file can then be brought into the real .sch file
+# that's supposed to hold them, using eeschema's Import feature.
+# Usage:
+#	autoplaceKiCad.py <input.autoplace >output.sch
 
 import sys
 import time
@@ -222,6 +225,22 @@ if wereErrors:
 
 # Write the output file.
 timestamp = "%X" % time.time()
+print "EESchema Schematic File Version 4"
+print "LIBS:module-cache"
+print "EELAYER 26 0"
+print "EELAYER END"
+print "$Descr User 100000 34000"
+print "encoding utf-8"
+print "Sheet 1 1"
+print "Title \"\""
+print "Date \"\""
+print "Rev \"\""
+print "Comp \"\""
+print "Comment1 \"\""
+print "Comment2 \"\""
+print "Comment3 \"\""
+print "Comment4 \"\""
+print "$EndDescr"
 for id in objects:
 	object = objects[id]
 	type = object["type"]
@@ -322,9 +341,9 @@ for id in objects:
 		sys.stdout.write("F 2 \"\" H " + str(posX) + " " + str(posY+475) + " 140 0001 C CNN\n")
 		sys.stdout.write("F 3 \"\" H " + str(posX) + " " + str(posY+475) + " 140 0001 C CNN\n")
 		if rotated:
-			sys.stdout.write("F 4 \"" + caption + "\" H " + str(posX) + " " + str(posY - 250) + " 140 0000 C BNB \"Caption\"\n")
+			sys.stdout.write("F 4 \"" + caption + "\" H " + str(posX) + " " + str(posY + 325) + " 140 0000 C CNB \"Caption\"\n")
 		else:
-			sys.stdout.write("F 4 \"" + caption + "\" H " + str(posX) + " " + str(posY + 250) + " 140 0000 C BNB \"Caption\"\n")
+			sys.stdout.write("F 4 \"" + caption + "\" H " + str(posX) + " " + str(posY + 300) + " 140 0000 C CNB \"Caption\"\n")
 		sys.stdout.write("\t" + str(unit) + " " + str(posX) + " " + str(posY) + "\n")
 		if rotated:
 			sys.stdout.write("\t-1    0    0    1  \n")
@@ -374,3 +393,4 @@ for id in objects:
 		sys.stdout.write("\t1    0    0    -1  \n")
 		sys.stdout.write("$EndComp\n")
 		continue
+print "$EndSCHEMATC"
