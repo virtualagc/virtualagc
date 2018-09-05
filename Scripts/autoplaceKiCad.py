@@ -3,8 +3,14 @@
 # descriptions of NOR gates, expander gates, connector pads, nodes,
 # and perhaps other objects commonly in AGC "logic flow diagrams", and
 # produces a rough placement of those objects into an otherwise empty
-# .sch file.  That .sch file can then be brought into the real .sch file
-# that's supposed to hold them, using eeschema's Import feature.
+# .sch file.  
+#
+# IMPORTANT:  The temptation is to use eeschema's "Import" feature to
+# bring the symbols into the schematic where you want them to reside,
+# which is why I actually implemented it this way.  DON'T DO IT!
+# The Import feature will replace all of your reference designators with
+# U? or J?, and that's definitely not what you want to do!
+#
 # Usage:
 #	autoplaceKiCad.py <input.autoplace >output.sch
 
