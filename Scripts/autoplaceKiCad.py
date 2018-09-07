@@ -56,6 +56,7 @@ gatesFound = {}
 nors = { 
 	"N": { "library": "D3NOR-+4VDC-0VDCA", "refdPrefix": "U1" },
 	"X": { "library": "D3NOR-FAP-0VDCA-expander", "refdPrefix": "U1" }, 
+	"N2": { "library": "D3NOR-+4VDC-0VDCA", "refdPrefix": "U1" }
 }
 aPins = ["A", "B", "C", "_"]
 bPins = ["D", "E", "F", "_"]
