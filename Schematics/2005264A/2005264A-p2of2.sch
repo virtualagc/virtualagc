@@ -26,28 +26,6 @@ Text Notes 38450 32425 0    200  ~ 40
 MEMORY TIMING & ADDRESSING
 Text Notes 38875 33400 0    140  ~ 28
 ____
-Wire Notes Line width 6 style solid
-	43500 1300 36461 1300
-Text Notes 36550 1250 0    160  ~ 32
-A      REVISED PER TDRR 30754
-Wire Notes Line width 6 style solid
-	43500 1625 36461 1625
-Wire Notes Line width 6 style solid
-	36461 975  36461 1625
-Wire Notes Line width 6 style solid
-	36839 975  36839 1625
-Wire Notes Line width 6 style solid
-	37350 975  37350 1625
-Wire Notes Line width 6 style solid
-	40831 975  40831 1625
-Wire Notes Line width 6 style solid
-	41331 975  41331 1625
-Wire Notes Line width 6 style solid
-	41831 975  41831 1625
-Wire Notes Line width 6 style solid
-	42480 975  42480 1625
-Text Notes 36525 1575 0    160  ~ 32
-B      REVISED PER TDRR 35326
 Text Notes 42425 33450 0    140  ~ 28
 2     2
 $Comp
@@ -622,7 +600,7 @@ F 0 "J4" H 24725 5150 140 0001 C CNN
 F 1 "ConnectorA1-400" H 24725 5250 140 0001 C CNN
 F 2 "" H 24725 5300 140 0001 C CNN
 F 3 "" H 24725 5300 140 0001 C CNN
-F 4 "0VDCA" H 24550 5150 140 0000 C CNB "Caption"
+F 4 "WT/" H 24675 5175 140 0000 C CNB "Caption"
 	17   24725 4825
 	1    0    0    -1  
 $EndComp
@@ -1869,7 +1847,7 @@ F 0 "J3" H 9975 16025 140 0001 C CNN
 F 1 "ConnectorA1-300" H 9975 16125 140 0001 C CNN
 F 2 "" H 9975 16175 140 0001 C CNN
 F 3 "" H 9975 16175 140 0001 C CNN
-F 4 "XB4/" H 9950 15375 140 0000 C CNB "Caption"
+F 4 "XB4/" H 9925 15375 140 0000 C CNB "Caption"
 	39   9975 15700
 	-1   0    0    1   
 $EndComp
@@ -3202,7 +3180,7 @@ F 4 "XT0E" H 30975 11300 140 0000 C CNB "Caption"
 	-1   0    0    1   
 $EndComp
 Text Notes 1175 33275 0    140  ~ 28
-Notes from the Virtual AGC Project:\n1. This CAD drawing was manually transcribed from the original Apollo Program \n   drawing 2005264B, but does not itself date from the Apollo period. — RSB 2018\n2. The original drawing displayed no reference designators for the components, so\n   this CAD drawing also does not display any.  For the purposes of ERC or netlist\n   generation, NOR gates have reference designators U2nn, where nn is the 2-digit\n   number shown on the NOR-gate symbol.  The oval pads numbered 301-371\n   comprise connector J3, while those numbered 401-471 comprise connector J4.\n   — RSB 2018\n3. All known revisions of this drawing incorrectly display the 2-digit location code of\n   NOR gate 42416 as "K".  On this CAD drawing, we have used location code "54",\n   so that the gate forms U254 (along with NOR gate 42412). — RSB 2018\n4. The originals of sheets 1 and 2 of drawing 2005264B used different \n   area-numbering systems.  Sheet 1 used border numbers 1-6 and border letters A-F,\n   while sheet 2 used numbers 1-8 and letters A-H.  The CAD schematic editor being\n   used does not provide the option of doing this, so the CAD drawing instead uses the\n   area-numbering system from sheet 1 for both sheets.\n5. The only change I have been able to find from drawing 2005264A to 2005264B is\n   that the caption of oval pad 417 has changed from "WT/" to "0VDCA". — RSB 2018 
+Notes from the Virtual AGC Project:\n1. This CAD drawing was adapted from the previously-transcribed original Apollo\n   Program drawing 2005264B and checked vs the original drawing 2005264A (and\n   2005064F).  It does not itself date from the Apollo period.  — RSB 2018\n2. The original drawing displayed no reference designators for the components, so\n   this CAD drawing also does not display any.  For the purposes of ERC or netlist\n   generation, NOR gates have reference designators U2nn, where nn is the 2-digit\n   number shown on the NOR-gate symbol.  The oval pads numbered 301-371\n   comprise connector J3, while those numbered 401-471 comprise connector J4.\n   — RSB 2018\n3. All known revisions of this drawing incorrectly display the 2-digit location code of\n   NOR gate 42416 as "K".  On this CAD drawing, we have used location code "54",\n   so that the gate forms U254 (along with NOR gate 42412). — RSB 2018\n4. The originals of sheets 1 and 2 of drawing 2005264A used different \n   area-numbering systems.  Sheet 1 used border numbers 1-6 and border letters A-F,\n   while sheet 2 used numbers 1-8 and letters A-H.  The CAD schematic editor being\n   used does not provide the option of doing this, so the CAD drawing instead uses the\n   area-numbering system from sheet 1 for both sheets.
 Wire Wire Line
 	8125 4525 8350 4525
 Wire Wire Line
@@ -4807,8 +4785,26 @@ Wire Wire Line
 	11075 17150 11150 17150
 Wire Wire Line
 	16725 16125 17000 16125
+Wire Notes Line width 6 style solid
+	43500 1300 36461 1300
+Text Notes 36550 1250 0    160  ~ 32
+A      REVISED PER TDRR 30754
+Wire Notes Line width 6 style solid
+	36461 975  36461 1300
+Wire Notes Line width 6 style solid
+	36839 975  36839 1300
+Wire Notes Line width 6 style solid
+	37350 975  37350 1300
+Wire Notes Line width 6 style solid
+	40831 975  40831 1300
+Wire Notes Line width 6 style solid
+	41331 975  41331 1300
+Wire Notes Line width 6 style solid
+	41831 975  41831 1300
+Wire Notes Line width 6 style solid
+	42480 975  42480 1300
 $Bitmap
-Pos 925  29000
+Pos 925  29225
 Scale 1.000000
 Data
 89 50 4E 47 0D 0A 1A 0A 00 00 00 0D 49 48 44 52 00 00 00 78 00 00 00 78 08 02 00 00 00 B6 06 A1 
