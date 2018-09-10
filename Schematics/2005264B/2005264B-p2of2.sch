@@ -1,10 +1,9 @@
 EESchema Schematic File Version 4
-LIBS:module-cache
 EELAYER 26 0
 EELAYER END
 $Descr E 44000 34000
 encoding utf-8
-Sheet 3 3
+Sheet 1 1
 Title ""
 Date ""
 Rev ""
@@ -2267,7 +2266,7 @@ F 0 "J3" H 11425 27150 140 0001 C CNN
 F 1 "ConnectorA1-300" H 11425 27250 140 0001 C CNN
 F 2 "" H 11425 27300 140 0001 C CNN
 F 3 "" H 11425 27300 140 0001 C CNN
-F 4 "XB73" H 11450 26475 140 0000 C CNB "Caption"
+F 4 "XB7E" H 11450 26475 140 0000 C CNB "Caption"
 	25   11425 26825
 	-1   0    0    1   
 $EndComp
