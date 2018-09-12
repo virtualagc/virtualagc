@@ -4660,4 +4660,220 @@ C9 BB 29 F5 5D 8B CA 82 36 A4 40 25 C6 15 08 48 31 74 1C 38 17 8C B5 84 B2 9A 34
 C6 5C DC 75 02 E5 96 B4 52 0D 25 6F F3 00 00 00 00 49 45 4E 44 AE 42 60 82 
 EndData
 $EndBitmap
+Text Notes 1075 30250 0    140  ~ 28
+NOTES:
+Text Notes 1525 30850 0    140  ~ 28
+1. INTERPRET DRAWING IN ACCORDANCE WITH STANDARDS\n   PRESCRIBED BY MIL-D-70327\n
+Text Notes 1475 31425 0    140  ~ 28
+2. TOP SIGNAL CORRESPONDS TO A26 MODULE\n   BOTTOM SIGNAL CORRESPONDS TO A25 MODULE\n
+Text Notes 1500 32250 0    140  ~ 28
+3. NUMERALS WITHIN THE CONFINES OF THE CIRCUIT\n   REPRESENTATIONAL BLOCK ARE HOMOLOGOUS WITH\n   COMPONENT PREFIXES, DWG NOS. 2003070,2004136,2004137
+Text Notes 35475 29600 0    140  ~ 28
+REF DWG:\n    INTERFACE MODULE ASSY A25 - 26\n    DWG NO. 2003070
+Wire Notes Line style solid
+	35525 20775 43000 20775
+Wire Notes Line style solid
+	43000 21050 35525 21050
+Wire Notes Line style solid
+	35525 21325 43000 21325
+Wire Notes Line style solid
+	43000 21575 35525 21575
+Wire Notes Line style solid
+	35525 21825 43000 21825
+Wire Notes Line style solid
+	43000 22075 35525 22075
+Wire Notes Line style solid
+	35525 22300 43000 22300
+Wire Notes Line style solid
+	35525 22575 43000 22575
+Wire Notes Line style solid
+	35525 22800 43000 22800
+Wire Notes Line style solid
+	35525 20775 35525 26300
+Wire Notes Line style solid
+	35525 23050 43000 23050
+Wire Notes Line style solid
+	43000 20775 43000 26300
+Wire Notes Line style solid
+	35525 23300 43000 23300
+Wire Notes Line style solid
+	36525 20775 36525 26300
+Wire Notes Line style solid
+	38375 20775 38375 26300
+Wire Notes Line style solid
+	40125 20775 40125 26300
+Wire Notes Line style solid
+	41275 20775 41275 26300
+Wire Notes Line style solid
+	42125 20775 42125 26300
+Wire Notes Line style solid
+	35525 26300 43000 26300
+Wire Notes Line style solid
+	43000 26050 35525 26050
+Wire Notes Line style solid
+	35525 25800 43000 25800
+Wire Notes Line style solid
+	43000 25550 35525 25550
+Wire Notes Line style solid
+	35525 25300 43000 25300
+Wire Notes Line style solid
+	43000 25050 35525 25050
+Wire Notes Line style solid
+	35525 24800 43000 24800
+Wire Notes Line style solid
+	43000 24550 35525 24550
+Wire Notes Line style solid
+	35525 24300 43000 24300
+Wire Notes Line style solid
+	43000 24050 35525 24050
+Wire Notes Line style solid
+	35525 23800 43000 23800
+Wire Notes Line style solid
+	43000 23550 35525 23550
+Text Notes 35575 21025 0    140  ~ 28
+REF DES
+Text Notes 36925 21025 0    140  ~ 28
+PART NO.
+Text Notes 38500 21025 0    140  ~ 28
+DESCRIPTION
+Text Notes 40325 21025 0    140  ~ 28
+VALUE
+Text Notes 41525 21025 0    140  ~ 28
+TOL
+Text Notes 42200 21025 0    140  ~ 28
+RATING
+Text Notes 35650 21300 0    140  ~ 28
+R1
+Text Notes 35650 21550 0    140  ~ 28
+R2
+Text Notes 35650 21800 0    140  ~ 28
+R3
+Text Notes 35650 22050 0    140  ~ 28
+R4
+Text Notes 35650 22300 0    140  ~ 28
+R5
+Text Notes 35650 22550 0    140  ~ 28
+R6
+Text Notes 35650 22800 0    140  ~ 28
+R7
+Text Notes 35650 23300 0    140  ~ 28
+C1
+Text Notes 35650 23550 0    140  ~ 28
+C2
+Text Notes 35650 24050 0    140  ~ 28
+CR1
+Text Notes 35650 24550 0    140  ~ 28
+L1
+Text Notes 35650 25300 0    140  ~ 28
+Q1
+Text Notes 35650 25550 0    140  ~ 28
+Q2
+Text Notes 35675 26300 0    140  ~ 28
+T1
+Text Notes 36650 21300 0    140  ~ 28
+1006750-32
+Text Notes 37600 21550 0    140  ~ 28
+-8
+Text Notes 37600 21800 0    140  ~ 28
+-8
+Text Notes 37600 22050 0    140  ~ 28
+-63
+Text Notes 37600 22300 0    140  ~ 28
+-39
+Text Notes 37600 22550 0    140  ~ 28
+-39
+Text Notes 36675 22800 0    140  ~ 28
+1006750-39
+Text Notes 36675 23300 0    140  ~ 28
+1006755-79
+Text Notes 36675 23550 0    140  ~ 28
+1006755-79
+Text Notes 36650 24025 0    140  ~ 28
+2004103-001
+Text Notes 36725 24550 0    140  ~ 28
+1010406-6
+Text Notes 36625 25300 0    140  ~ 28
+2004004-001
+Text Notes 36625 25550 0    140  ~ 28
+2004004-001
+Text Notes 36575 26300 0    140  ~ 28
+1006319
+Text Notes 38525 21300 0    140  ~ 28
+RESISTOR
+Text Notes 38525 22800 0    140  ~ 28
+RESISTOR
+Text Notes 38500 23275 0    140  ~ 28
+CAPACITOR
+Text Notes 38500 23525 0    140  ~ 28
+CAPACITOR
+Text Notes 38550 24025 0    140  ~ 28
+DIODE
+Text Notes 38450 24550 0    140  ~ 28
+COIL,RF CHOKE
+Text Notes 38525 25300 0    140  ~ 28
+TRANSISTOR
+Text Notes 38525 25550 0    140  ~ 28
+TRANSISTOR
+Text Notes 38525 26275 0    140  ~ 28
+TRANSFORMER
+Text Notes 40300 21300 0    140  ~ 28
+1000
+Text Notes 40300 21550 0    140  ~ 28
+100
+Text Notes 40300 21800 0    140  ~ 28
+100
+Text Notes 40300 22050 0    140  ~ 28
+20K
+Text Notes 40300 22300 0    140  ~ 28
+2000
+Text Notes 40300 22550 0    140  ~ 28
+2000
+Text Notes 40300 22800 0    140  ~ 28
+2000
+Text Notes 40325 23275 0    140  ~ 28
+6.8
+Text Notes 40325 23550 0    140  ~ 28
+6.8
+Text Notes 40275 24550 0    140  ~ 28
+100 UH
+Text Notes 41425 21300 0    140  ~ 28
+±2%
+Text Notes 41425 22800 0    140  ~ 28
+±2%
+Text Notes 41375 23275 0    140  ~ 28
+±10%
+Text Notes 41400 23525 0    140  ~ 28
+±10%
+Text Notes 42250 21300 0    140  ~ 28
+1/4W
+Text Notes 42275 22800 0    140  ~ 28
+1/4W
+Text Notes 42225 23275 0    140  ~ 28
+35VDC
+Text Notes 42225 23525 0    140  ~ 28
+35VDC
+Wire Notes Line width 50 style solid
+	37150 21375 37150 22525
+Wire Notes Line width 50 style solid
+	37150 22525 37100 22375
+Wire Notes Line width 50 style solid
+	37200 22375 37150 22525
+Wire Notes Line width 50 style solid
+	39225 21375 39225 22525
+Wire Notes Line width 50 style solid
+	39225 22525 39175 22375
+Wire Notes Line width 50 style solid
+	39275 22375 39225 22525
+Wire Notes Line width 50 style solid
+	41700 21375 41700 22525
+Wire Notes Line width 50 style solid
+	41700 22525 41650 22375
+Wire Notes Line width 50 style solid
+	41750 22375 41700 22525
+Wire Notes Line width 50 style solid
+	42550 21375 42550 22525
+Wire Notes Line width 50 style solid
+	42550 22525 42500 22375
+Wire Notes Line width 50 style solid
+	42600 22375 42550 22525
 $EndSCHEMATC
