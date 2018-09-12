@@ -1637,6 +1637,18 @@ X 1 1 0 250 0 D 50 50 1 1 P N
 ENDDRAW
 ENDDEF
 #
+# HierBody
+#
+DEF ~HierBody N 0 0 N N 1 F N
+F0 "N" -15 -200 140 H I C CNN
+F1 "HierBody" 5 180 140 H I C CNN
+F2 "" 0 0 140 H I C CNN
+F3 "" 0 0 140 H I C CNN
+DRAW
+P 6 0 1 30 75 0 -5 -70 -75 -70 -75 70 -5 70 75 0 N
+ENDDRAW
+ENDDEF
+#
 # Inductor
 #
 DEF ~Inductor L 0 0 N N 1 F N
@@ -1694,10 +1706,22 @@ X G G 0 75 0 D 50 50 1 1 W N
 ENDDRAW
 ENDDEF
 #
+# NodeGBody
+#
+DEF ~NodeGBody N 0 0 N N 1 F N
+F0 "N" 0 -200 50 H I C CNN
+F1 "NodeGBody" 0 -125 50 H I C CNN
+F2 "" 0 0 50 H I C CNN
+F3 "" 0 0 50 H I C CNN
+DRAW
+C 0 0 75 0 1 30 N
+ENDDRAW
+ENDDEF
+#
 # NorBody
 #
 DEF ~NorBody X 0 0 N N 1 F N
-F0 "X" 0 475 50 H V C CNN
+F0 "X" 0 475 50 H I C CNN
 F1 "NorBody" 0 550 50 H I C CNN
 F2 "" -495 470 50 H I C CNN
 F3 "" -495 470 50 H I C CNN
@@ -1714,7 +1738,7 @@ ENDDEF
 # NorExpanderBody
 #
 DEF ~NorExpanderBody X 0 0 N N 1 F N
-F0 "X" 0 475 50 H V C CNN
+F0 "X" 0 475 50 H I C CNN
 F1 "NorExpanderBody" 0 550 50 H I C CNN
 F2 "" -495 470 50 H I C CNN
 F3 "" -495 470 50 H I C CNN
@@ -1746,9 +1770,9 @@ ENDDEF
 #
 # OvalBody2
 #
-DEF OvalBody2 X 0 0 N N 1 F N
-F0 "X" 50 -300 140 H V C CNN
-F1 "OvalBody2" 0 300 140 H V C CNN
+DEF ~OvalBody2 X 0 0 N N 1 F N
+F0 "X" 50 -300 140 H I C CNN
+F1 "OvalBody2" 0 300 140 H I C CNN
 F2 "" 0 0 140 H I C CNN
 F3 "" 0 0 140 H I C CNN
 DRAW
