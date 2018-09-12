@@ -1,0 +1,265 @@
+EESchema Schematic File Version 4
+LIBS:module-cache
+EELAYER 26 0
+EELAYER END
+$Descr E 44000 34000
+encoding utf-8
+Sheet 3 63
+Title ""
+Date ""
+Rev ""
+Comp ""
+Comment1 ""
+Comment2 ""
+Comment3 ""
+Comment4 ""
+$EndDescr
+Text Notes 38425 31900 0    225  ~ 45
+SCHEMATIC & FLOW DIAGRAM
+Text Notes 40875 33100 0    250  ~ 50
+2005021
+Text Notes 38250 33100 0    250  ~ 50
+80230
+Text Notes 39400 32325 0    180  ~ 36
+INTERFACE A25 - 26
+Text Notes 38900 33425 0    140  ~ 28
+____
+Wire Notes Line width 6 style solid
+	43500 1300 36461 1300
+Wire Notes Line width 6 style solid
+	43500 1600 36461 1600
+Wire Notes Line width 6 style solid
+	43500 1900 36460 1900
+Wire Notes Line width 6 style solid
+	36461 1900 36461 975 
+Wire Notes Line width 6 style solid
+	36839 1900 36839 975 
+Wire Notes Line width 6 style solid
+	37350 1899 37350 974 
+Wire Notes Line width 6 style solid
+	40831 1899 40831 974 
+Wire Notes Line width 6 style solid
+	41331 1899 41331 974 
+Wire Notes Line width 6 style solid
+	41831 1899 41831 974 
+Wire Notes Line width 6 style solid
+	42480 1899 42480 974 
+Text Notes 36575 1250 0    160  ~ 32
+A      REVISED PER TDRR 21853
+Text Notes 36550 1575 0    160  ~ 32
+B      REVISED PER TDRR 25017
+Text Notes 36550 1875 0    160  ~ 32
+C      REVISED PER TDRR ?????
+Text Notes 42400 33450 0    140  ~ 28
+2     6
+Wire Notes Line style solid
+	550  2050 25200 2050
+Wire Notes Line style solid
+	25200 2050 25200 13350
+Wire Notes Line style solid
+	550  8875 25200 8875
+Wire Notes Line style solid
+	17200 2050 17200 8850
+Wire Notes Line
+	17200 8850 17225 8850
+Wire Notes Line
+	17225 8850 17225 8875
+Wire Notes Line style solid
+	20325 8875 20325 13350
+Wire Notes Line style solid
+	12425 8875 12425 13350
+Wire Notes Line style solid
+	550  13350 25200 13350
+Text Notes 8175 2700 0    200  ~ 40
+XT CIRCUIT
+Text HLabel 3475 4700 0    140  Input ~ 28
+A
+$Comp
+L AGC_DSKY:Transistor-NPN Q?
+U 1 1 5CD321C6
+P 5000 4700
+AR Path="/5B99108F/5CD321C6" Ref="Q?"  Part="1" 
+AR Path="/5B9910B1/5CD321C6" Ref="Q301"  Part="1" 
+AR Path="/5B991354/5CD321C6" Ref="Q501"  Part="1" 
+AR Path="/5B9913B2/5CD321C6" Ref="Q601"  Part="1" 
+AR Path="/5B991410/5CD321C6" Ref="Q701"  Part="1" 
+AR Path="/5B99146E/5CD321C6" Ref="Q801"  Part="1" 
+AR Path="/5B9914CC/5CD321C6" Ref="Q901"  Part="1" 
+AR Path="/5B99152A/5CD321C6" Ref="Q1001"  Part="1" 
+AR Path="/5B991588/5CD321C6" Ref="Q1101"  Part="1" 
+AR Path="/5B9915E6/5CD321C6" Ref="Q1201"  Part="1" 
+AR Path="/5B991644/5CD321C6" Ref="Q1301"  Part="1" 
+AR Path="/5B9916A2/5CD321C6" Ref="Q1401"  Part="1" 
+F 0 "Q1401" H 5000 5115 130 0000 C CNN
+F 1 "Transistor-NPN" H 5000 5265 130 0001 C CNN
+F 2 "" H 5000 4950 130 0001 C CNN
+F 3 "" H 5000 4950 130 0001 C CNN
+	1    5000 4700
+	1    0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:Resistor R?
+U 1 1 5CD321CD
+P 6250 5100
+AR Path="/5B99108F/5CD321CD" Ref="R?"  Part="1" 
+AR Path="/5B9910B1/5CD321CD" Ref="R301"  Part="1" 
+AR Path="/5B991354/5CD321CD" Ref="R501"  Part="1" 
+AR Path="/5B9913B2/5CD321CD" Ref="R601"  Part="1" 
+AR Path="/5B991410/5CD321CD" Ref="R701"  Part="1" 
+AR Path="/5B99146E/5CD321CD" Ref="R801"  Part="1" 
+AR Path="/5B9914CC/5CD321CD" Ref="R901"  Part="1" 
+AR Path="/5B99152A/5CD321CD" Ref="R1001"  Part="1" 
+AR Path="/5B991588/5CD321CD" Ref="R1101"  Part="1" 
+AR Path="/5B9915E6/5CD321CD" Ref="R1201"  Part="1" 
+AR Path="/5B991644/5CD321CD" Ref="R1301"  Part="1" 
+AR Path="/5B9916A2/5CD321CD" Ref="R1401"  Part="1" 
+F 0 "R1401" V 6050 5425 130 0000 C CNN
+F 1 "1000" V 6350 5525 130 0000 C CNN
+F 2 "" H 6250 5100 130 0001 C CNN
+F 3 "" H 6250 5100 130 0001 C CNN
+	1    6250 5100
+	0    1    1    0   
+$EndComp
+$Comp
+L AGC_DSKY:Resistor R?
+U 1 1 5CD321D4
+P 7750 5750
+AR Path="/5B99108F/5CD321D4" Ref="R?"  Part="1" 
+AR Path="/5B9910B1/5CD321D4" Ref="R302"  Part="1" 
+AR Path="/5B991354/5CD321D4" Ref="R502"  Part="1" 
+AR Path="/5B9913B2/5CD321D4" Ref="R602"  Part="1" 
+AR Path="/5B991410/5CD321D4" Ref="R702"  Part="1" 
+AR Path="/5B99146E/5CD321D4" Ref="R802"  Part="1" 
+AR Path="/5B9914CC/5CD321D4" Ref="R902"  Part="1" 
+AR Path="/5B99152A/5CD321D4" Ref="R1002"  Part="1" 
+AR Path="/5B991588/5CD321D4" Ref="R1102"  Part="1" 
+AR Path="/5B9915E6/5CD321D4" Ref="R1202"  Part="1" 
+AR Path="/5B991644/5CD321D4" Ref="R1302"  Part="1" 
+AR Path="/5B9916A2/5CD321D4" Ref="R1402"  Part="1" 
+F 0 "R1402" V 7550 6075 130 0000 C CNN
+F 1 "100" V 7800 6100 130 0000 C CNN
+F 2 "" H 7750 5750 130 0001 C CNN
+F 3 "" H 7750 5750 130 0001 C CNN
+	1    7750 5750
+	0    1    1    0   
+$EndComp
+$Comp
+L AGC_DSKY:Resistor R?
+U 1 1 5CD321DB
+P 7750 6700
+AR Path="/5B99108F/5CD321DB" Ref="R?"  Part="1" 
+AR Path="/5B9910B1/5CD321DB" Ref="R303"  Part="1" 
+AR Path="/5B991354/5CD321DB" Ref="R503"  Part="1" 
+AR Path="/5B9913B2/5CD321DB" Ref="R603"  Part="1" 
+AR Path="/5B991410/5CD321DB" Ref="R703"  Part="1" 
+AR Path="/5B99146E/5CD321DB" Ref="R803"  Part="1" 
+AR Path="/5B9914CC/5CD321DB" Ref="R903"  Part="1" 
+AR Path="/5B99152A/5CD321DB" Ref="R1003"  Part="1" 
+AR Path="/5B991588/5CD321DB" Ref="R1103"  Part="1" 
+AR Path="/5B9915E6/5CD321DB" Ref="R1203"  Part="1" 
+AR Path="/5B991644/5CD321DB" Ref="R1303"  Part="1" 
+AR Path="/5B9916A2/5CD321DB" Ref="R1403"  Part="1" 
+F 0 "R1403" V 7500 7050 130 0000 C CNN
+F 1 "100" V 7750 7050 130 0000 C CNN
+F 2 "" H 7750 6700 130 0001 C CNN
+F 3 "" H 7750 6700 130 0001 C CNN
+	1    7750 6700
+	0    1    1    0   
+$EndComp
+Wire Wire Line
+	4700 4700 3475 4700
+Wire Wire Line
+	5150 4450 5150 3950
+Wire Wire Line
+	5150 3950 6250 3950
+Wire Wire Line
+	6250 3950 6250 4700
+Wire Wire Line
+	5050 5800 5175 5800
+Wire Wire Line
+	5175 5800 5175 4950
+Wire Wire Line
+	5175 4950 5150 4950
+$Comp
+L AGC_DSKY:Diode CR?
+U 1 1 5CD321E9
+P 6250 6250
+AR Path="/5B99108F/5CD321E9" Ref="CR?"  Part="1" 
+AR Path="/5B9910B1/5CD321E9" Ref="CR301"  Part="1" 
+AR Path="/5B991354/5CD321E9" Ref="CR501"  Part="1" 
+AR Path="/5B9913B2/5CD321E9" Ref="CR601"  Part="1" 
+AR Path="/5B991410/5CD321E9" Ref="CR701"  Part="1" 
+AR Path="/5B99146E/5CD321E9" Ref="CR801"  Part="1" 
+AR Path="/5B9914CC/5CD321E9" Ref="CR901"  Part="1" 
+AR Path="/5B99152A/5CD321E9" Ref="CR1001"  Part="1" 
+AR Path="/5B991588/5CD321E9" Ref="CR1101"  Part="1" 
+AR Path="/5B9915E6/5CD321E9" Ref="CR1201"  Part="1" 
+AR Path="/5B991644/5CD321E9" Ref="CR1301"  Part="1" 
+AR Path="/5B9916A2/5CD321E9" Ref="CR1401"  Part="1" 
+F 0 "CR1401" V 6300 5850 140 0000 C CNN
+F 1 "Diode" H 6250 6100 50  0001 C CNN
+F 2 "" H 6200 6075 50  0001 C CNN
+F 3 "" H 6200 6250 50  0001 C CNN
+	1    6250 6250
+	0    -1   -1   0   
+$EndComp
+Wire Wire Line
+	6250 5500 6250 6050
+Wire Wire Line
+	6250 6450 6250 7225
+Wire Wire Line
+	6250 7225 7750 7225
+Wire Wire Line
+	9450 7225 9450 7525
+Wire Wire Line
+	9450 7525 9275 7525
+Wire Wire Line
+	7750 7100 7750 7225
+Connection ~ 7750 7225
+Wire Wire Line
+	7750 7225 9450 7225
+Wire Wire Line
+	7750 6300 7750 6150
+$Comp
+L AGC_DSKY:Transformer T?
+U 1 1 5CD321F9
+P 8875 4550
+AR Path="/5B99108F/5CD321F9" Ref="T?"  Part="1" 
+AR Path="/5B9910B1/5CD321F9" Ref="T301"  Part="1" 
+AR Path="/5B991354/5CD321F9" Ref="T501"  Part="1" 
+AR Path="/5B9913B2/5CD321F9" Ref="T601"  Part="1" 
+AR Path="/5B991410/5CD321F9" Ref="T701"  Part="1" 
+AR Path="/5B99146E/5CD321F9" Ref="T801"  Part="1" 
+AR Path="/5B9914CC/5CD321F9" Ref="T901"  Part="1" 
+AR Path="/5B99152A/5CD321F9" Ref="T1001"  Part="1" 
+AR Path="/5B991588/5CD321F9" Ref="T1101"  Part="1" 
+AR Path="/5B9915E6/5CD321F9" Ref="T1201"  Part="1" 
+AR Path="/5B991644/5CD321F9" Ref="T1301"  Part="1" 
+AR Path="/5B9916A2/5CD321F9" Ref="T1401"  Part="1" 
+F 0 "T1401" H 8850 5600 130 0000 C CNN
+F 1 "2:1" H 8875 5325 130 0000 C CNN
+F 2 "" V 8850 3900 130 0001 C CNN
+F 3 "" V 8850 3900 130 0001 C CNN
+	1    8875 4550
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	10600 4150 9500 4150
+Text HLabel 10600 4150 2    140  Output ~ 28
+B
+Text HLabel 10600 4950 2    140  Output ~ 28
+C
+Wire Wire Line
+	9500 4950 10600 4950
+Text HLabel 5050 5800 0    140  Input ~ 28
+G
+Text HLabel 9275 7525 0    140  Input ~ 28
+D
+Wire Wire Line
+	6250 3950 8250 3950
+Connection ~ 6250 3950
+Wire Wire Line
+	7750 5350 7750 5150
+Wire Wire Line
+	7750 5150 8250 5150
+$EndSCHEMATC
