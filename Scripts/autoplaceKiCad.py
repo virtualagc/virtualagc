@@ -163,7 +163,7 @@ for line in sys.stdin:
 		nextXY()
 		continue
 	
-	if (type == "J" or type == "j") and (numFields == 2 or numFields == 3 or numFields == 4) and fields[1].isdigit():
+	if (type == "J" or type == "j") and numFields >= 2 and numFields <= 5 and fields[1].isdigit():
 		rotated = False
 		if type == "j":
 			rotated = True
@@ -174,6 +174,10 @@ for line in sys.stdin:
 			wereErrors = True
 			continue
 		pinNum = int(pinName)
+		if numFields >= 5:
+			text3 = fields[4]
+		else:
+			text3 = ""
 		if numFields >= 4:
 			text2 = fields[3]
 		else:
@@ -208,7 +212,7 @@ for line in sys.stdin:
 			print >>sys.stderr, objects[id]
 			wereErrors = True
 			continue
-		objects[id] = { "type": type, "refd": refd, "symbol": symbol, "unit": unit, "text": text, "text2": text2, "x": posX, "y": posY, "rotated": rotated }
+		objects[id] = { "type": type, "refd": refd, "symbol": symbol, "unit": unit, "text": text, "text2": text2, "text3": text3, "x": posX, "y": posY, "rotated": rotated }
 		nextXY()
 		continue
 	
@@ -343,6 +347,7 @@ for id in objects:
 		unit = object["unit"]
 		caption = object["text"]
 		caption2 = object["text2"]
+		caption3 = object["text3"]
 		rotated = object["rotated"]
 		sys.stdout.write("$Comp\n")
 		sys.stdout.write("L AGC_DSKY:" + symbol + " " + refd + "\n")
@@ -352,20 +357,26 @@ for id in objects:
 		sys.stdout.write("F 1 \"" + symbol + "\" H " + str(posX) + " " + str(posY+425) + " 140 0001 C CNN\n")
 		sys.stdout.write("F 2 \"\" H " + str(posX) + " " + str(posY+475) + " 140 0001 C CNN\n")
 		sys.stdout.write("F 3 \"\" H " + str(posX) + " " + str(posY+475) + " 140 0001 C CNN\n")
-		if caption2 !="":
+		inverted = 0
+		if caption3 != "":
 			if rotated:
-				sys.stdout.write("F 4 \"" + caption + "\" H " + str(posX) + " " + str(posY - 300) + " 140 0000 C CNB \"Caption\"\n")
-				sys.stdout.write("F 5 \"" + caption2 + "\" H " + str(posX) + " " + str(posY + 325) + " 140 0000 C CNB \"Caption2\"\n")
-			else:
-				sys.stdout.write("F 4 \"" + caption + "\" H " + str(posX) + " " + str(posY + 300) + " 140 0000 C CNB \"Caption\"\n")
-				sys.stdout.write("F 5 \"" + caption2 + "\" H " + str(posX) + " " + str(posY - 325) + " 140 0000 C CNB \"Caption2\"\n")
+				rotated = 0
+				inverted = 1
+			sys.stdout.write("F 4 \"" + caption + "\" H " + str(posX-425) + " " + str(posY + 175) + " 140 0000 R BNB \"Caption\"\n")
+			sys.stdout.write("F 5 \"" + caption2 + "\" H " + str(posX-425) + " " + str(posY) + " 140 0000 R CNB \"Caption2\"\n")
+			sys.stdout.write("F 6 \"" + caption3 + "\" H " + str(posX-425) + " " + str(posY - 175) + " 140 0000 R TNB \"Caption3\"\n")
+		elif caption2 != "":
+			if rotated:
+				rotated = 0
+				inverted = 1
+			sys.stdout.write("F 4 \"" + caption + "\" H " + str(posX) + " " + str(posY + 225) + " 140 0000 C BNB \"Caption\"\n")
+			sys.stdout.write("F 5 \"" + caption2 + "\" H " + str(posX) + " " + str(posY - 225) + " 140 0000 C TNB \"Caption2\"\n")
 		else:
-			if rotated:
-				sys.stdout.write("F 4 \"" + caption + "\" H " + str(posX) + " " + str(posY + 325) + " 140 0000 C CNB \"Caption\"\n")
-			else:
-				sys.stdout.write("F 4 \"" + caption + "\" H " + str(posX) + " " + str(posY + 300) + " 140 0000 C CNB \"Caption\"\n")
+			sys.stdout.write("F 4 \"" + caption + "\" H " + str(posX) + " " + str(posY + 225) + " 140 0000 C BNB \"Caption\"\n")
 		sys.stdout.write("\t" + str(unit) + " " + str(posX) + " " + str(posY) + "\n")
-		if rotated:
+		if inverted:
+			sys.stdout.write("\t-1    0    0   -1  \n")
+		elif rotated:
 			sys.stdout.write("\t-1    0    0    1  \n")
 		else:
 			sys.stdout.write("\t1    0    0    -1  \n")
