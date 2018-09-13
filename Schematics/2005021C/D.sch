@@ -4,7 +4,7 @@ EELAYER 26 0
 EELAYER END
 $Descr E 44000 34000
 encoding utf-8
-Sheet 29 63
+Sheet 28 63
 Title ""
 Date ""
 Rev ""
@@ -87,7 +87,7 @@ AR Path="/5B991E43/5CD537B3" Ref="R2701"  Part="1"
 AR Path="/5B991E9D/5CD537B3" Ref="R2801"  Part="1" 
 AR Path="/5B991EF7/5CD537B3" Ref="R2901"  Part="1" 
 AR Path="/5CD537B3" Ref="R4"  Part="1" 
-F 0 "R2901" H 20200 4325 130 0001 C CNN
+F 0 "R2801" H 20200 4325 130 0001 C CNN
 F 1 "20K" H 20200 4100 130 0000 C CNN
 F 2 "" H 20225 3875 130 0001 C CNN
 F 3 "" H 20225 3875 130 0001 C CNN
@@ -110,7 +110,7 @@ AR Path="/5B991E43/5CD53849" Ref="R2702"  Part="1"
 AR Path="/5B991E9D/5CD53849" Ref="R2802"  Part="1" 
 AR Path="/5B991EF7/5CD53849" Ref="R2902"  Part="1" 
 AR Path="/5CD53849" Ref="R5"  Part="1" 
-F 0 "R2902" V 22250 5000 130 0001 C CNN
+F 0 "R2802" V 22250 5000 130 0001 C CNN
 F 1 "2000" V 22550 5050 130 0000 C CNN
 F 2 "" H 22425 4675 130 0001 C CNN
 F 3 "" H 22425 4675 130 0001 C CNN
@@ -133,7 +133,7 @@ AR Path="/5B991E43/5CD53908" Ref="C2701"  Part="1"
 AR Path="/5B991E9D/5CD53908" Ref="C2801"  Part="1" 
 AR Path="/5B991EF7/5CD53908" Ref="C2901"  Part="1" 
 AR Path="/5CD53908" Ref="C1"  Part="1" 
-F 0 "C2901" H 21575 4850 130 0001 C CNN
+F 0 "C2801" H 21575 4850 130 0001 C CNN
 F 1 "6.8" H 21575 4575 130 0000 C CNN
 F 2 "" H 21175 5075 130 0001 C CNN
 F 3 "" H 21175 5075 130 0001 C CNN
@@ -195,7 +195,7 @@ AR Path="/5B991DE9/5CF392C3" Ref="N2601"  Part="1"
 AR Path="/5B991E43/5CF392C3" Ref="N2701"  Part="1" 
 AR Path="/5B991E9D/5CF392C3" Ref="N2801"  Part="1" 
 AR Path="/5B991EF7/5CF392C3" Ref="N2901"  Part="1" 
-F 0 "N2901" H 20285 7125 140 0001 C CNN
+F 0 "N2801" H 20285 7125 140 0001 C CNN
 F 1 "HierBody" H 20305 7505 140 0001 C CNN
 F 2 "" H 20300 7325 140 0001 C CNN
 F 3 "" H 20300 7325 140 0001 C CNN
@@ -217,7 +217,7 @@ AR Path="/5B991DE9/5CF392EE" Ref="N2602"  Part="1"
 AR Path="/5B991E43/5CF392EE" Ref="N2702"  Part="1" 
 AR Path="/5B991E9D/5CF392EE" Ref="N2802"  Part="1" 
 AR Path="/5B991EF7/5CF392EE" Ref="N2902"  Part="1" 
-F 0 "N2902" H 20285 7550 140 0001 C CNN
+F 0 "N2802" H 20285 7550 140 0001 C CNN
 F 1 "HierBody" H 20305 7930 140 0001 C CNN
 F 2 "" H 20300 7750 140 0001 C CNN
 F 3 "" H 20300 7750 140 0001 C CNN
@@ -239,7 +239,7 @@ AR Path="/5B991DE9/5CF39319" Ref="N2603"  Part="1"
 AR Path="/5B991E43/5CF39319" Ref="N2703"  Part="1" 
 AR Path="/5B991E9D/5CF39319" Ref="N2803"  Part="1" 
 AR Path="/5B991EF7/5CF39319" Ref="N2903"  Part="1" 
-F 0 "N2903" H 21285 7125 140 0001 C CNN
+F 0 "N2803" H 21285 7125 140 0001 C CNN
 F 1 "HierBody" H 21305 7505 140 0001 C CNN
 F 2 "" H 21300 7325 140 0001 C CNN
 F 3 "" H 21300 7325 140 0001 C CNN
@@ -251,4 +251,210 @@ Text Notes 21350 8200 2    140  ~ 0
 File: D.sch
 Text Notes 21250 6650 2    140  ~ 0
 Sheet: D
+Wire Notes Line style solid
+	35529 20770 43004 20770
+Wire Notes Line style solid
+	43004 21045 35529 21045
+Wire Notes Line style solid
+	35529 21320 43004 21320
+Wire Notes Line style solid
+	43004 21570 35529 21570
+Wire Notes Line style solid
+	35529 21820 43004 21820
+Wire Notes Line style solid
+	43004 22070 35529 22070
+Wire Notes Line style solid
+	35529 22295 43004 22295
+Wire Notes Line style solid
+	35529 22570 43004 22570
+Wire Notes Line style solid
+	35529 22795 43004 22795
+Wire Notes Line style solid
+	35529 20770 35529 26295
+Wire Notes Line style solid
+	35529 23045 43004 23045
+Wire Notes Line style solid
+	43004 20770 43004 26295
+Wire Notes Line style solid
+	35529 23295 43004 23295
+Wire Notes Line style solid
+	36529 20770 36529 26295
+Wire Notes Line style solid
+	38379 20770 38379 26295
+Wire Notes Line style solid
+	40129 20770 40129 26295
+Wire Notes Line style solid
+	41279 20770 41279 26295
+Wire Notes Line style solid
+	42129 20770 42129 26295
+Wire Notes Line style solid
+	35529 26295 43004 26295
+Wire Notes Line style solid
+	43004 26045 35529 26045
+Wire Notes Line style solid
+	35529 25795 43004 25795
+Wire Notes Line style solid
+	43004 25545 35529 25545
+Wire Notes Line style solid
+	35529 25295 43004 25295
+Wire Notes Line style solid
+	43004 25045 35529 25045
+Wire Notes Line style solid
+	35529 24795 43004 24795
+Wire Notes Line style solid
+	43004 24545 35529 24545
+Wire Notes Line style solid
+	35529 24295 43004 24295
+Wire Notes Line style solid
+	43004 24045 35529 24045
+Wire Notes Line style solid
+	35529 23795 43004 23795
+Wire Notes Line style solid
+	43004 23545 35529 23545
+Text Notes 35579 21020 0    140  ~ 28
+REF DES
+Text Notes 36929 21020 0    140  ~ 28
+PART NO.
+Text Notes 38504 21020 0    140  ~ 28
+DESCRIPTION
+Text Notes 40329 21020 0    140  ~ 28
+VALUE
+Text Notes 41529 21020 0    140  ~ 28
+TOL
+Text Notes 42204 21020 0    140  ~ 28
+RATING
+Text Notes 35654 21295 0    140  ~ 28
+R1
+Text Notes 35654 21545 0    140  ~ 28
+R2
+Text Notes 35654 21795 0    140  ~ 28
+R3
+Text Notes 35654 22045 0    140  ~ 28
+R4
+Text Notes 35654 22295 0    140  ~ 28
+R5
+Text Notes 35654 22545 0    140  ~ 28
+R6
+Text Notes 35654 22795 0    140  ~ 28
+R7
+Text Notes 35654 23295 0    140  ~ 28
+C1
+Text Notes 35654 23545 0    140  ~ 28
+C2
+Text Notes 35654 24045 0    140  ~ 28
+CR1
+Text Notes 35654 24545 0    140  ~ 28
+L1
+Text Notes 35654 25295 0    140  ~ 28
+Q1
+Text Notes 35654 25545 0    140  ~ 28
+Q2
+Text Notes 35679 26295 0    140  ~ 28
+T1
+Text Notes 36654 21295 0    140  ~ 28
+1006750-32
+Text Notes 37604 21545 0    140  ~ 28
+-8
+Text Notes 37604 21795 0    140  ~ 28
+-8
+Text Notes 37604 22045 0    140  ~ 28
+-63
+Text Notes 37604 22295 0    140  ~ 28
+-39
+Text Notes 37604 22545 0    140  ~ 28
+-39
+Text Notes 36679 22795 0    140  ~ 28
+1006750-39
+Text Notes 36679 23295 0    140  ~ 28
+1006755-79
+Text Notes 36679 23545 0    140  ~ 28
+1006755-79
+Text Notes 36654 24020 0    140  ~ 28
+2004103-001
+Text Notes 36729 24545 0    140  ~ 28
+1010406-6
+Text Notes 36629 25295 0    140  ~ 28
+2004004-001
+Text Notes 36629 25545 0    140  ~ 28
+2004004-001
+Text Notes 36579 26295 0    140  ~ 28
+1006319
+Text Notes 38529 21295 0    140  ~ 28
+RESISTOR
+Text Notes 38529 22795 0    140  ~ 28
+RESISTOR
+Text Notes 38504 23270 0    140  ~ 28
+CAPACITOR
+Text Notes 38504 23520 0    140  ~ 28
+CAPACITOR
+Text Notes 38554 24020 0    140  ~ 28
+DIODE
+Text Notes 38454 24545 0    140  ~ 28
+COIL,RF CHOKE
+Text Notes 38529 25295 0    140  ~ 28
+TRANSISTOR
+Text Notes 38529 25545 0    140  ~ 28
+TRANSISTOR
+Text Notes 38529 26270 0    140  ~ 28
+TRANSFORMER
+Text Notes 40304 21295 0    140  ~ 28
+1000
+Text Notes 40304 21545 0    140  ~ 28
+100
+Text Notes 40304 21795 0    140  ~ 28
+100
+Text Notes 40304 22045 0    140  ~ 28
+20K
+Text Notes 40304 22295 0    140  ~ 28
+2000
+Text Notes 40304 22545 0    140  ~ 28
+2000
+Text Notes 40304 22795 0    140  ~ 28
+2000
+Text Notes 40329 23270 0    140  ~ 28
+6.8
+Text Notes 40329 23545 0    140  ~ 28
+6.8
+Text Notes 40279 24545 0    140  ~ 28
+100 UH
+Text Notes 41429 21295 0    140  ~ 28
+±2%
+Text Notes 41429 22795 0    140  ~ 28
+±2%
+Text Notes 41379 23270 0    140  ~ 28
+±10%
+Text Notes 41404 23520 0    140  ~ 28
+±10%
+Text Notes 42254 21295 0    140  ~ 28
+1/4W
+Text Notes 42279 22795 0    140  ~ 28
+1/4W
+Text Notes 42229 23270 0    140  ~ 28
+35VDC
+Text Notes 42229 23520 0    140  ~ 28
+35VDC
+Wire Notes Line width 50 style solid
+	37154 21370 37154 22520
+Wire Notes Line width 50 style solid
+	37154 22520 37104 22370
+Wire Notes Line width 50 style solid
+	37204 22370 37154 22520
+Wire Notes Line width 50 style solid
+	39229 21370 39229 22520
+Wire Notes Line width 50 style solid
+	39229 22520 39179 22370
+Wire Notes Line width 50 style solid
+	39279 22370 39229 22520
+Wire Notes Line width 50 style solid
+	41704 21370 41704 22520
+Wire Notes Line width 50 style solid
+	41704 22520 41654 22370
+Wire Notes Line width 50 style solid
+	41754 22370 41704 22520
+Wire Notes Line width 50 style solid
+	42554 21370 42554 22520
+Wire Notes Line width 50 style solid
+	42554 22520 42504 22370
+Wire Notes Line width 50 style solid
+	42604 22370 42554 22520
 $EndSCHEMATC

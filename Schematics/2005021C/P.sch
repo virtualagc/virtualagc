@@ -180,4 +180,210 @@ Text Notes 10850 11725 2    140  ~ 0
 File: P.sch
 Text Notes 10750 10425 2    140  ~ 0
 Sheet: P
+Wire Notes Line style solid
+	35526 20780 43001 20780
+Wire Notes Line style solid
+	43001 21055 35526 21055
+Wire Notes Line style solid
+	35526 21330 43001 21330
+Wire Notes Line style solid
+	43001 21580 35526 21580
+Wire Notes Line style solid
+	35526 21830 43001 21830
+Wire Notes Line style solid
+	43001 22080 35526 22080
+Wire Notes Line style solid
+	35526 22305 43001 22305
+Wire Notes Line style solid
+	35526 22580 43001 22580
+Wire Notes Line style solid
+	35526 22805 43001 22805
+Wire Notes Line style solid
+	35526 20780 35526 26305
+Wire Notes Line style solid
+	35526 23055 43001 23055
+Wire Notes Line style solid
+	43001 20780 43001 26305
+Wire Notes Line style solid
+	35526 23305 43001 23305
+Wire Notes Line style solid
+	36526 20780 36526 26305
+Wire Notes Line style solid
+	38376 20780 38376 26305
+Wire Notes Line style solid
+	40126 20780 40126 26305
+Wire Notes Line style solid
+	41276 20780 41276 26305
+Wire Notes Line style solid
+	42126 20780 42126 26305
+Wire Notes Line style solid
+	35526 26305 43001 26305
+Wire Notes Line style solid
+	43001 26055 35526 26055
+Wire Notes Line style solid
+	35526 25805 43001 25805
+Wire Notes Line style solid
+	43001 25555 35526 25555
+Wire Notes Line style solid
+	35526 25305 43001 25305
+Wire Notes Line style solid
+	43001 25055 35526 25055
+Wire Notes Line style solid
+	35526 24805 43001 24805
+Wire Notes Line style solid
+	43001 24555 35526 24555
+Wire Notes Line style solid
+	35526 24305 43001 24305
+Wire Notes Line style solid
+	43001 24055 35526 24055
+Wire Notes Line style solid
+	35526 23805 43001 23805
+Wire Notes Line style solid
+	43001 23555 35526 23555
+Text Notes 35576 21030 0    140  ~ 28
+REF DES
+Text Notes 36926 21030 0    140  ~ 28
+PART NO.
+Text Notes 38501 21030 0    140  ~ 28
+DESCRIPTION
+Text Notes 40326 21030 0    140  ~ 28
+VALUE
+Text Notes 41526 21030 0    140  ~ 28
+TOL
+Text Notes 42201 21030 0    140  ~ 28
+RATING
+Text Notes 35651 21305 0    140  ~ 28
+R1
+Text Notes 35651 21555 0    140  ~ 28
+R2
+Text Notes 35651 21805 0    140  ~ 28
+R3
+Text Notes 35651 22055 0    140  ~ 28
+R4
+Text Notes 35651 22305 0    140  ~ 28
+R5
+Text Notes 35651 22555 0    140  ~ 28
+R6
+Text Notes 35651 22805 0    140  ~ 28
+R7
+Text Notes 35651 23305 0    140  ~ 28
+C1
+Text Notes 35651 23555 0    140  ~ 28
+C2
+Text Notes 35651 24055 0    140  ~ 28
+CR1
+Text Notes 35651 24555 0    140  ~ 28
+L1
+Text Notes 35651 25305 0    140  ~ 28
+Q1
+Text Notes 35651 25555 0    140  ~ 28
+Q2
+Text Notes 35676 26305 0    140  ~ 28
+T1
+Text Notes 36651 21305 0    140  ~ 28
+1006750-32
+Text Notes 37601 21555 0    140  ~ 28
+-8
+Text Notes 37601 21805 0    140  ~ 28
+-8
+Text Notes 37601 22055 0    140  ~ 28
+-63
+Text Notes 37601 22305 0    140  ~ 28
+-39
+Text Notes 37601 22555 0    140  ~ 28
+-39
+Text Notes 36676 22805 0    140  ~ 28
+1006750-39
+Text Notes 36676 23305 0    140  ~ 28
+1006755-79
+Text Notes 36676 23555 0    140  ~ 28
+1006755-79
+Text Notes 36651 24030 0    140  ~ 28
+2004103-001
+Text Notes 36726 24555 0    140  ~ 28
+1010406-6
+Text Notes 36626 25305 0    140  ~ 28
+2004004-001
+Text Notes 36626 25555 0    140  ~ 28
+2004004-001
+Text Notes 36576 26305 0    140  ~ 28
+1006319
+Text Notes 38526 21305 0    140  ~ 28
+RESISTOR
+Text Notes 38526 22805 0    140  ~ 28
+RESISTOR
+Text Notes 38501 23280 0    140  ~ 28
+CAPACITOR
+Text Notes 38501 23530 0    140  ~ 28
+CAPACITOR
+Text Notes 38551 24030 0    140  ~ 28
+DIODE
+Text Notes 38451 24555 0    140  ~ 28
+COIL,RF CHOKE
+Text Notes 38526 25305 0    140  ~ 28
+TRANSISTOR
+Text Notes 38526 25555 0    140  ~ 28
+TRANSISTOR
+Text Notes 38526 26280 0    140  ~ 28
+TRANSFORMER
+Text Notes 40301 21305 0    140  ~ 28
+1000
+Text Notes 40301 21555 0    140  ~ 28
+100
+Text Notes 40301 21805 0    140  ~ 28
+100
+Text Notes 40301 22055 0    140  ~ 28
+20K
+Text Notes 40301 22305 0    140  ~ 28
+2000
+Text Notes 40301 22555 0    140  ~ 28
+2000
+Text Notes 40301 22805 0    140  ~ 28
+2000
+Text Notes 40326 23280 0    140  ~ 28
+6.8
+Text Notes 40326 23555 0    140  ~ 28
+6.8
+Text Notes 40276 24555 0    140  ~ 28
+100 UH
+Text Notes 41426 21305 0    140  ~ 28
+±2%
+Text Notes 41426 22805 0    140  ~ 28
+±2%
+Text Notes 41376 23280 0    140  ~ 28
+±10%
+Text Notes 41401 23530 0    140  ~ 28
+±10%
+Text Notes 42251 21305 0    140  ~ 28
+1/4W
+Text Notes 42276 22805 0    140  ~ 28
+1/4W
+Text Notes 42226 23280 0    140  ~ 28
+35VDC
+Text Notes 42226 23530 0    140  ~ 28
+35VDC
+Wire Notes Line width 50 style solid
+	37151 21380 37151 22530
+Wire Notes Line width 50 style solid
+	37151 22530 37101 22380
+Wire Notes Line width 50 style solid
+	37201 22380 37151 22530
+Wire Notes Line width 50 style solid
+	39226 21380 39226 22530
+Wire Notes Line width 50 style solid
+	39226 22530 39176 22380
+Wire Notes Line width 50 style solid
+	39276 22380 39226 22530
+Wire Notes Line width 50 style solid
+	41701 21380 41701 22530
+Wire Notes Line width 50 style solid
+	41701 22530 41651 22380
+Wire Notes Line width 50 style solid
+	41751 22380 41701 22530
+Wire Notes Line width 50 style solid
+	42551 21380 42551 22530
+Wire Notes Line width 50 style solid
+	42551 22530 42501 22380
+Wire Notes Line width 50 style solid
+	42601 22380 42551 22530
 $EndSCHEMATC
