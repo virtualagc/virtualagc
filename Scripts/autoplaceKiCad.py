@@ -118,6 +118,12 @@ for line in sys.stdin:
 		top = fields[3]
 		middle = fields[4]
 		bottom = fields[5]
+		if top == ";":
+			top = "_"
+		if middle == ";":
+			middle = "_"
+		if bottom == ";":
+			bottom = "_"
 		if (top == middle and top != "_") or (top == bottom and top != "_") or (middle == bottom and middle != "_"):
 			print >>sys.stderr, "Duplicate pins: " + line
 			wereErrors = True
