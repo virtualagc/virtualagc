@@ -1,0 +1,267 @@
+EESchema Schematic File Version 4
+LIBS:module-cache
+EELAYER 26 0
+EELAYER END
+$Descr E 44000 34000
+encoding utf-8
+Sheet 3 3
+Title ""
+Date ""
+Rev ""
+Comp ""
+Comment1 ""
+Comment2 ""
+Comment3 ""
+Comment4 ""
+$EndDescr
+Wire Notes Line width 6 style solid
+	36839 983  36839 1300
+Wire Notes Line width 6 style solid
+	36461 1300 43500 1300
+Wire Notes Line width 6 style solid
+	36461 983  36461 1300
+Wire Notes Line width 6 style solid
+	37350 982  37350 1299
+Wire Notes Line width 6 style solid
+	40831 983  40831 1300
+Wire Notes Line width 6 style solid
+	41331 983  41331 1300
+Wire Notes Line width 6 style solid
+	41831 983  41831 1300
+Wire Notes Line width 6 style solid
+	42480 983  42480 1300
+Text Notes 36550 1250 0    160  ~ 32
+A      REVISED PER TDRR 30754
+Text Notes 42400 33450 0    140  ~ 28
+2     2
+$Comp
+L AGC_DSKY:ConnectorA1-400 J4
+U 12 1 6049B2DF
+P 32450 27475
+F 0 "J4" H 32450 27800 140 0001 C CNN
+F 1 "ConnectorA1-400" H 32450 27900 140 0001 C CNN
+F 2 "" H 32450 27950 140 0001 C CNN
+F 3 "" H 32450 27950 140 0001 C CNN
+F 4 "" H 32450 27775 140 0000 C CNB "Caption"
+	12   32450 27475
+	1    0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:ConnectorA1-300 J3
+U 60 1 6049B2D3
+P 28600 28475
+F 0 "J3" H 28600 28800 140 0001 C CNN
+F 1 "ConnectorA1-300" H 28600 28900 140 0001 C CNN
+F 2 "" H 28600 28950 140 0001 C CNN
+F 3 "" H 28600 28950 140 0001 C CNN
+F 4 "" H 28600 28775 140 0000 C CNB "Caption"
+	60   28600 28475
+	1    0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:ConnectorA1-400 J4
+U 60 1 6049B270
+P 32450 28475
+F 0 "J4" H 32450 28800 140 0001 C CNN
+F 1 "ConnectorA1-400" H 32450 28900 140 0001 C CNN
+F 2 "" H 32450 28950 140 0001 C CNN
+F 3 "" H 32450 28950 140 0001 C CNN
+F 4 "" H 32450 28775 140 0000 C CNB "Caption"
+	60   32450 28475
+	1    0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:ConnectorA1-300 J3
+U 48 1 6049B2A0
+P 28575 29800
+F 0 "J3" H 28575 30125 140 0001 C CNN
+F 1 "ConnectorA1-300" H 28575 30225 140 0001 C CNN
+F 2 "" H 28575 30275 140 0001 C CNN
+F 3 "" H 28575 30275 140 0001 C CNN
+F 4 "+4SW" H 27750 30050 140 0000 C CNB "Caption"
+	48   28575 29800
+	1    0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:ConnectorA1-400 J4
+U 36 1 6049B28D
+P 32425 27975
+F 0 "J4" H 32425 28300 140 0001 C CNN
+F 1 "ConnectorA1-400" H 32425 28400 140 0001 C CNN
+F 2 "" H 32425 28450 140 0001 C CNN
+F 3 "" H 32425 28450 140 0001 C CNN
+F 4 "" H 32425 28275 140 0000 C CNB "Caption"
+	36   32425 27975
+	1    0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:ConnectorA1-300 J3
+U 36 1 6049B347
+P 28575 27975
+F 0 "J3" H 28575 28300 140 0001 C CNN
+F 1 "ConnectorA1-300" H 28575 28400 140 0001 C CNN
+F 2 "" H 28575 28450 140 0001 C CNN
+F 3 "" H 28575 28450 140 0001 C CNN
+F 4 "0VDCA" H 27900 28000 140 0000 C CNB "Caption"
+	36   28575 27975
+	1    0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:ConnectorA1-400 J4
+U 48 1 6049B341
+P 32450 29800
+F 0 "J4" H 32450 30125 140 0001 C CNN
+F 1 "ConnectorA1-400" H 32450 30225 140 0001 C CNN
+F 2 "" H 32450 30275 140 0001 C CNN
+F 3 "" H 32450 30275 140 0001 C CNN
+F 4 "" H 32450 30100 140 0000 C CNB "Caption"
+	48   32450 29800
+	1    0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:ConnectorA1-300 J3
+U 24 1 6049B359
+P 28575 29300
+F 0 "J3" H 28575 29625 140 0001 C CNN
+F 1 "ConnectorA1-300" H 28575 29725 140 0001 C CNN
+F 2 "" H 28575 29775 140 0001 C CNN
+F 3 "" H 28575 29775 140 0001 C CNN
+F 4 "" H 28575 29600 140 0000 C CNB "Caption"
+	24   28575 29300
+	1    0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:ConnectorA1-400 J4
+U 24 1 6049B355
+P 32450 29300
+F 0 "J4" H 32450 29625 140 0001 C CNN
+F 1 "ConnectorA1-400" H 32450 29725 140 0001 C CNN
+F 2 "" H 32450 29775 140 0001 C CNN
+F 3 "" H 32450 29775 140 0001 C CNN
+F 4 "" H 32450 29600 140 0000 C CNB "Caption"
+	24   32450 29300
+	1    0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:ConnectorA1-300 J3
+U 12 1 6049B34B
+P 28575 27475
+F 0 "J3" H 28575 27800 140 0001 C CNN
+F 1 "ConnectorA1-300" H 28575 27900 140 0001 C CNN
+F 2 "" H 28575 27950 140 0001 C CNN
+F 3 "" H 28575 27950 140 0001 C CNN
+F 4 "" H 28575 27775 140 0000 C CNB "Caption"
+	12   28575 27475
+	1    0    0    -1  
+$EndComp
+Text HLabel 28975 26975 0    140  UnSpc ~ 28
+0VDCA
+Text HLabel 28925 28900 0    140  UnSpc ~ 28
++4SW
+Wire Wire Line
+	28850 29800 29150 29800
+Wire Wire Line
+	29150 29800 29150 29550
+Wire Wire Line
+	29150 28775 33000 28775
+Wire Wire Line
+	33000 28775 33000 29300
+Wire Wire Line
+	33000 29800 32725 29800
+Wire Wire Line
+	32725 29300 33000 29300
+Connection ~ 33000 29300
+Wire Wire Line
+	33000 29300 33000 29800
+Wire Wire Line
+	28850 29300 29150 29300
+Connection ~ 29150 29300
+Wire Wire Line
+	29150 29300 29150 28900
+Wire Wire Line
+	28925 28900 29150 28900
+Connection ~ 29150 28900
+Wire Wire Line
+	29150 28900 29150 28775
+Wire Wire Line
+	28875 28475 29150 28475
+Wire Wire Line
+	29150 28475 29150 27975
+Wire Wire Line
+	29150 26975 28975 26975
+Wire Wire Line
+	29150 26975 33000 26975
+Wire Wire Line
+	33000 26975 33000 27475
+Wire Wire Line
+	33000 28475 32725 28475
+Connection ~ 29150 26975
+Wire Wire Line
+	32700 27975 33000 27975
+Connection ~ 33000 27975
+Wire Wire Line
+	33000 27975 33000 28475
+Wire Wire Line
+	32725 27475 33000 27475
+Connection ~ 33000 27475
+Wire Wire Line
+	33000 27475 33000 27975
+Wire Wire Line
+	28850 27475 29150 27475
+Connection ~ 29150 27475
+Wire Wire Line
+	29150 27475 29150 26975
+Wire Wire Line
+	28850 27975 29150 27975
+Connection ~ 29150 27975
+Wire Wire Line
+	29150 27975 29150 27700
+$Comp
+L AGC_DSKY:ArrowTwiddle X2
+U 1 1 5BCD2A5F
+P 29150 27700
+F 0 "X2" H 29150 28225 50  0001 C CNN
+F 1 "ArrowTwiddle" H 29160 28160 50  0001 C CNN
+F 2 "" H 29150 27700 50  0001 C CNN
+F 3 "~" H 29150 27700 50  0001 C CNN
+F 4 "" V 29150 28070 100 0001 L CNB "Number"
+	1    29150 27700
+	0    1    1    0   
+$EndComp
+Connection ~ 29150 27700
+Wire Wire Line
+	29150 27700 29150 27475
+$Comp
+L AGC_DSKY:ArrowTwiddle X3
+U 1 1 5BCD2A98
+P 29150 29550
+F 0 "X3" H 29150 30075 50  0001 C CNN
+F 1 "ArrowTwiddle" H 29160 30010 50  0001 C CNN
+F 2 "" H 29150 29550 50  0001 C CNN
+F 3 "~" H 29150 29550 50  0001 C CNN
+F 4 "" V 29150 29920 100 0001 L CNB "Number"
+	1    29150 29550
+	0    1    1    0   
+$EndComp
+Connection ~ 29150 29550
+Wire Wire Line
+	29150 29550 29150 29300
+Text Notes 29700 28200 0    140  ~ 28
+TO PIN G &\nUNUSED INPUTS OF \n35300 AND 35400\nSERIES GATES
+Text Notes 29750 30375 0    140  ~ 28
+TO PIN V OF\n35300 AND 35400\nSERIES GATES \nEXCEPT THOSE \nGATES TIED TO \nFAP PIN (430)
+Text Notes 1325 33325 0    140  ~ 28
+Notes from the Virtual AGC Project:\n1. This CAD drawing was manually transcribed from the original Apollo Program\n   drawing 2005267A, but is not itself original to the Apollo Program. — RSB 2018\n2. The original drawing did not show reference designators for the components, so\n   this CAD drawing does not show them either.  For purposes of netlist generation\n   and ERC, the NOR gates have reference designators U2nn, where nn is the 2-digit\n   number shown on the NOR-gate symbol.  The oval pads numbered 301-371 \n   comprise connector J3, while those numbered 401-471 comprise connector J4.\n   — RSB 2018
+Text Notes 38925 31800 0    250  ~ 50
+LOGIC FLOW DIAGRAM
+Text Notes 40875 33100 0    250  ~ 50
+2005267
+Text Notes 38250 33100 0    250  ~ 50
+80230
+Text Notes 39700 32125 0    200  ~ 40
+MODULE NO. A17
+Text Notes 40475 32450 0    200  ~ 40
+INOUT II
+Text Notes 38875 33450 0    140  ~ 28
+NONE
+$EndSCHEMATC
