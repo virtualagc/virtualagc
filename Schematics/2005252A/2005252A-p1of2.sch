@@ -427,7 +427,7 @@ F 0 "J1" H 34875 11275 140 0001 C CNN
 F 1 "ConnectorA1-100" H 34875 11375 140 0001 C CNN
 F 2 "" H 34875 11425 140 0001 C CNN
 F 3 "" H 34875 11425 140 0001 C CNN
-F 4 "" H 34875 11200 140 0000 C BNB "Caption"
+F 4 "0VDCA" H 34875 11200 140 0001 C BNB "Caption"
 	60   34875 10950
 	1    0    0    -1  
 $EndComp
@@ -890,7 +890,7 @@ F 0 "J1" H 34900 10250 140 0001 C CNN
 F 1 "ConnectorA1-100" H 34900 10350 140 0001 C CNN
 F 2 "" H 34900 10400 140 0001 C CNN
 F 3 "" H 34900 10400 140 0001 C CNN
-F 4 "" H 34900 10175 140 0000 C BNB "Caption"
+F 4 "0VDCA" H 34900 10175 140 0001 C BNB "Caption"
 	12   34900 9925
 	1    0    0    -1  
 $EndComp
@@ -1036,7 +1036,7 @@ F 0 "J2" H 38775 10250 140 0001 C CNN
 F 1 "ConnectorA1-200" H 38775 10350 140 0001 C CNN
 F 2 "" H 38775 10400 140 0001 C CNN
 F 3 "" H 38775 10400 140 0001 C CNN
-F 4 "" H 38775 10175 140 0000 C BNB "Caption"
+F 4 "0VDCA" H 38775 10175 140 0001 C BNB "Caption"
 	12   38775 9925
 	1    0    0    -1  
 $EndComp
@@ -1426,7 +1426,7 @@ F 0 "J1" H 20825 8175 140 0001 C CNN
 F 1 "ConnectorA1-100" H 20825 8275 140 0001 C CNN
 F 2 "" H 20825 8325 140 0001 C CNN
 F 3 "" H 20825 8325 140 0001 C CNN
-F 4 "MWGG" H 20850 7425 140 0000 C BNB "Caption"
+F 4 "MWBG" H 20850 7425 140 0000 C BNB "Caption"
 	4    20825 7850
 	-1   0    0    1   
 $EndComp
@@ -1487,7 +1487,7 @@ F 0 "J2" H 38775 12125 140 0001 C CNN
 F 1 "ConnectorA1-200" H 38775 12225 140 0001 C CNN
 F 2 "" H 38775 12275 140 0001 C CNN
 F 3 "" H 38775 12275 140 0001 C CNN
-F 4 "" H 38775 12050 140 0000 C BNB "Caption"
+F 4 "+4SW" H 38775 12050 140 0001 C BNB "Caption"
 	24   38775 11800
 	1    0    0    -1  
 $EndComp
@@ -2009,7 +2009,7 @@ F 0 "J2" H 38775 10775 140 0001 C CNN
 F 1 "ConnectorA1-200" H 38775 10875 140 0001 C CNN
 F 2 "" H 38775 10925 140 0001 C CNN
 F 3 "" H 38775 10925 140 0001 C CNN
-F 4 "" H 38775 10700 140 0000 C BNB "Caption"
+F 4 "0VDCA" H 38775 10700 140 0001 C BNB "Caption"
 	36   38775 10450
 	1    0    0    -1  
 $EndComp
@@ -2143,7 +2143,7 @@ F 0 "J1" H 34900 12125 140 0001 C CNN
 F 1 "ConnectorA1-100" H 34900 12225 140 0001 C CNN
 F 2 "" H 34900 12275 140 0001 C CNN
 F 3 "" H 34900 12275 140 0001 C CNN
-F 4 "" H 34900 12050 140 0000 C BNB "Caption"
+F 4 "+4SW" H 34900 12050 140 0001 C BNB "Caption"
 	24   34900 11800
 	1    0    0    -1  
 $EndComp
@@ -2287,7 +2287,7 @@ F 0 "J2" H 38775 12625 140 0001 C CNN
 F 1 "ConnectorA1-200" H 38775 12725 140 0001 C CNN
 F 2 "" H 38775 12775 140 0001 C CNN
 F 3 "" H 38775 12775 140 0001 C CNN
-F 4 "" H 38775 12550 140 0000 C BNB "Caption"
+F 4 "+4SW" H 38775 12550 140 0001 C BNB "Caption"
 	48   38775 12300
 	1    0    0    -1  
 $EndComp
@@ -2407,7 +2407,7 @@ F 0 "J1" H 1675 6225 140 0001 C CNN
 F 1 "ConnectorA1-100" H 1675 6325 140 0001 C CNN
 F 2 "" H 1675 6375 140 0001 C CNN
 F 3 "" H 1675 6375 140 0001 C CNN
-F 4 "WY/" H 1075 5825 140 0000 C BNB "Caption"
+F 4 "WT/" H 1075 5825 140 0000 C BNB "Caption"
 	50   1675 5900
 	1    0    0    -1  
 $EndComp
@@ -2943,7 +2943,7 @@ F 0 "J2" H 38775 11275 140 0001 C CNN
 F 1 "ConnectorA1-200" H 38775 11375 140 0001 C CNN
 F 2 "" H 38775 11425 140 0001 C CNN
 F 3 "" H 38775 11425 140 0001 C CNN
-F 4 "" H 38775 11200 140 0000 C BNB "Caption"
+F 4 "0VDCA" H 38775 11200 140 0001 C BNB "Caption"
 	60   38775 10950
 	1    0    0    -1  
 $EndComp
@@ -5766,8 +5766,8 @@ C9 BB 29 F5 5D 8B CA 82 36 A4 40 25 C6 15 08 48 31 74 1C 38 17 8C B5 84 B2 9A 34
 C6 5C DC 75 02 E5 96 B4 52 0D 25 6F F3 00 00 00 00 49 45 4E 44 AE 42 60 82 
 EndData
 $EndBitmap
-Text Notes 33875 3500 0    140  ~ 28
-Notes from the Virtual AGC Project:\n1. This CAD drawing was manually transcribed from the original Apollo Program\n   drawing 2005252A, but does not itself date from the Apollo period. — RSB 2018\n2. The original drawing did not display reference designators, so this CAD drawing\n   also does not display any.  For the purpose of netlist generation and ERC, the NOR\n   gates have reference designators U1nn, where nn is the 2-digit number written on\n   the NOR-gate symbol.  The oval pads numbered 101-171 comprise connector J1,\n   and those numbered 201-271 comprise connector J2. — RSB 2018 
+Text Notes 33775 4475 0    140  ~ 28
+Notes from the Virtual AGC Project:\n1. This CAD drawing was manually transcribed from the original Apollo Program\n   drawing 2005252A, but does not itself date from the Apollo period. — RSB 2018\n2. The original drawing did not display reference designators, so this CAD drawing\n   also does not display any.  For the purpose of netlist generation and ERC, the NOR\n   gates have reference designators U1nn, where nn is the 2-digit number written on\n   the NOR-gate symbol.  The oval pads numbered 101-171 comprise connector J1,\n   and those numbered 201-271 comprise connector J2. — RSB 2018 \n3. Connector J1 pad 150 seems to be clearly labeled WY/ in Eldon Hall's copy of \n   drawing 2005252A, whereas it seems to be clearly labeled WT/ in the AGC\n   Handbook copy of drawing 2005252A.  The latter is chosen in this CAD transcription.\n   — RSB 2018
 Text Notes 36568 1309 0    150  ~ 30
 A       REVISED PER TDRR 30754
 Wire Notes Line width 6 style solid
