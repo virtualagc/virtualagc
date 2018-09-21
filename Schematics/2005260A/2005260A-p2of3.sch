@@ -17,13 +17,13 @@ $EndDescr
 $Comp
 L AGC_DSKY:ConnectorA1-200 J2
 U 13 1 5B7AE29B
-P 14975 26550
-F 0 "J2" H 14975 26875 140 0001 C CNN
-F 1 "ConnectorA1-200" H 14975 26975 140 0001 C CNN
-F 2 "" H 14975 26725 140 0001 C CNN
-F 3 "" H 14975 26725 140 0001 C CNN
-F 4 "SPARE" H 14300 26550 140 0001 C CNB "Caption"
-	13   14975 26550
+P 15025 26575
+F 0 "J2" H 15025 26900 140 0001 C CNN
+F 1 "ConnectorA1-200" H 15025 27000 140 0001 C CNN
+F 2 "" H 15025 26750 140 0001 C CNN
+F 3 "" H 15025 26750 140 0001 C CNN
+F 4 "" H 14350 26575 140 0001 C CNB "Caption"
+	13   15025 26575
 	1    0    0    -1  
 $EndComp
 $Comp
@@ -34,7 +34,7 @@ F 0 "J2" H 15000 26400 140 0001 C CNN
 F 1 "ConnectorA1-200" H 15000 26500 140 0001 C CNN
 F 2 "" H 15000 26250 140 0001 C CNN
 F 3 "" H 15000 26250 140 0001 C CNN
-F 4 "SPARE" H 14600 26100 140 0001 R CNB "Caption"
+F 4 "" H 14600 26100 140 0001 R CNB "Caption"
 	9    15000 26075
 	1    0    0    -1  
 $EndComp
@@ -46,7 +46,7 @@ F 0 "J2" H 15000 25900 140 0001 C CNN
 F 1 "ConnectorA1-200" H 15000 26000 140 0001 C CNN
 F 2 "" H 15000 25750 140 0001 C CNN
 F 3 "" H 15000 25750 140 0001 C CNN
-F 4 "SPARE" H 14685 25575 140 0001 R CNB "Caption"
+F 4 "" H 14685 25575 140 0001 R CNB "Caption"
 	8    15000 25575
 	1    0    0    -1  
 $EndComp
@@ -1794,7 +1794,7 @@ F 0 "J2" H 16550 20075 140 0001 C CNN
 F 1 "ConnectorA1-200" H 16550 20175 140 0001 C CNN
 F 2 "" H 16550 19925 140 0001 C CNN
 F 3 "" H 16550 19925 140 0001 C CNN
-F 4 "MSTRT" H 16475 20100 140 0000 C CNB "Caption"
+F 4 "MSTRTP" H 16475 20100 140 0000 C CNB "Caption"
 	38   16550 19750
 	1    0    0    -1  
 $EndComp
@@ -2368,10 +2368,8 @@ Connection ~ 15500 11925
 Wire Wire Line
 	15500 11925 15950 11925
 Connection ~ 31825 19150
-Text Notes 1325 30900 0    140  ~ 28
-Notes from the Virtual AGC Project:
-Text Notes 1375 32850 0    140  ~ 28
-1. This CAD drawing was adapted from the earlier transcription to CAD of the\n   original Apollo Program drawing 2005060D, and then corrected vs the original\n   drawing 2005260A.  — RSB 2018\n2. The original drawing did not display reference designators or pin numbers on\n   the NOR gates,  so they are not shown here either, but the reference designators\n   for purposes such as ERC and netlist generation are all U2nn, where nn is the \n   2-digit number written on the NOR gate.  Similarly, all of the numbered oval pads\n   represent the corresponding pin number of connector J2. — RSB 2018
+Text Notes 1225 33400 0    140  ~ 28
+Notes from the Virtual AGC Project:\n1. This CAD drawing was adapted from the earlier transcription to CAD of the\n   original Apollo Program drawing 2005060D, and then corrected vs the original\n   drawing 2005260A.  — RSB 2018\n2. The original drawing did not display reference designators or pin numbers on\n   the NOR gates,  so they are not shown here either, but the reference designators\n   for purposes such as ERC and netlist generation are all U2nn, where nn is the \n   2-digit number written on the NOR gate.  Similarly, all of the numbered oval pads\n   represent the corresponding pin number of connector J2. — RSB 2018\n3. Regarding J2 pin 238, Eldon Hall's copy of drawing 2005260A clearly lists its \n   caption as "MSYRTP", while the AGC Handbook's copy of drawing 2005260A clearly\n   lists its caption as "MSTRTP".  In this CAD transcription we have chosen the latter.\n   — RSB 2018
 Text HLabel 36050 28175 0    140  UnSpc ~ 28
 +4VDC
 Text Notes 40525 33125 0    250  ~ 50
@@ -2417,7 +2415,7 @@ SPARE PINS
 Text HLabel 36025 27425 0    140  UnSpc ~ 28
 FAP
 $Bitmap
-Pos 1050 30950
+Pos 1000 30550
 Scale 1.000000
 Data
 89 50 4E 47 0D 0A 1A 0A 00 00 00 0D 49 48 44 52 00 00 00 78 00 00 00 78 08 02 00 00 00 B6 06 A1 
@@ -3280,7 +3278,7 @@ C9 BB 29 F5 5D 8B CA 82 36 A4 40 25 C6 15 08 48 31 74 1C 38 17 8C B5 84 B2 9A 34
 C6 5C DC 75 02 E5 96 B4 52 0D 25 6F F3 00 00 00 00 49 45 4E 44 AE 42 60 82 
 EndData
 $EndBitmap
-NoConn ~ 15250 26550
+NoConn ~ 15300 26575
 NoConn ~ 15275 26075
 NoConn ~ 15275 25575
 $EndSCHEMATC
