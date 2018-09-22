@@ -11,7 +11,7 @@
 # I call this dumped file pins.txt.  Then from pins.txt, you do this for the 
 # module you're interested in (A1, A2, ..., B1, B2, ...), but let's say A8
 # for concreteness:
-#	awk '{if ($1 == "A8" && $3 != "SPARE") print $2 " " $4 ; else {}}' <pins.txt >pinsDB.txt
+#	awk '{if ($1 == "A8" && $3 != "SPARE" && !($3 == "NC" && $4 == "0VDCA")) print $2 " " $4 ; else {}}' <pins.txt >pinsDB.txt
 # You can then diff or kompare or whatever to see the differences between
 # pinsLocal.txt and pinsDB.txt.
 
