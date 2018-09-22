@@ -1530,7 +1530,7 @@ F 0 "J2" H 26800 6550 140 0001 C CNN
 F 1 "ConnectorA1-200" H 26800 6650 140 0001 C CNN
 F 2 "" H 26800 6700 140 0001 C CNN
 F 3 "" H 26800 6700 140 0001 C CNN
-F 4 "C102/" H 26750 5850 140 0000 C BNB "Caption"
+F 4 "CI02/" H 26750 5850 140 0000 C BNB "Caption"
 	29   26800 6225
 	1    0    0    -1  
 $EndComp
@@ -5855,8 +5855,8 @@ C9 BB 29 F5 5D 8B CA 82 36 A4 40 25 C6 15 08 48 31 74 1C 38 17 8C B5 84 B2 9A 34
 C6 5C DC 75 02 E5 96 B4 52 0D 25 6F F3 00 00 00 00 49 45 4E 44 AE 42 60 82 
 EndData
 $EndBitmap
-Text Notes 15475 32325 0    140  ~ 28
-Notes from the Virtual AGC Project:\n1. This CAD drawing was transcribed from the original Apollo Project drawing\n   2005255-, but does not itself date from the Apollo Project. — RSB 2018\n2. The original drawing did not indicate reference designators, so this CAD drawing\n   does not do so either.  For purposes of netlist generation or ERC, the NOR gates\n   have reference designators U1nn, where nn is the 2-digit number shown on the\n   NOR-gate symbol.  The oval pads numbered 101-171 comprise connector J1, while\n   those numbered 201-271 comprise connector J2. — RSB 2018
+Text Notes 15500 33300 0    140  ~ 28
+Notes from the Virtual AGC Project:\n1. This CAD drawing was transcribed from the original Apollo Project drawing\n   2005255-, but does not itself date from the Apollo Project. — RSB 2018\n2. The original drawing did not indicate reference designators, so this CAD drawing\n   does not do so either.  For purposes of netlist generation or ERC, the NOR gates\n   have reference designators U1nn, where nn is the 2-digit number shown on the\n   NOR-gate symbol.  The oval pads numbered 101-171 comprise connector J1, while\n   those numbered 201-271 comprise connector J2. — RSB 2018\n3. On the original drawing, the caption for connector pad 229 could reasonably be\n   interpreted either as "C102/" (with the numeral 1) or "CI02/" (with the capital\n   letter O).  It forms part of a carry-in circuit, and has been labeled "CI02/" (with\n   the letter I) in this transcription. — RSB 2018
 Text Notes 8175 21025 0    140  ~ 28
 Z_
 Text Notes 8200 17325 0    140  ~ 28

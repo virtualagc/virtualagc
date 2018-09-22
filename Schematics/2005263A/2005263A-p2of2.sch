@@ -748,7 +748,7 @@ F 0 "J3" H 17850 8275 140 0001 C CNN
 F 1 "ConnectorA1-300" H 17850 8375 140 0001 C CNN
 F 2 "" H 17850 8425 140 0001 C CNN
 F 3 "" H 17850 8425 140 0001 C CNN
-F 4 "TO61" H 17850 8150 140 0000 C BNB "Caption"
+F 4 "T06/" H 17850 8150 140 0000 C BNB "Caption"
 	68   17850 7950
 	1    0    0    -1  
 $EndComp
@@ -5423,6 +5423,6 @@ C9 BB 29 F5 5D 8B CA 82 36 A4 40 25 C6 15 08 48 31 74 1C 38 17 8C B5 84 B2 9A 34
 C6 5C DC 75 02 E5 96 B4 52 0D 25 6F F3 00 00 00 00 49 45 4E 44 AE 42 60 82 
 EndData
 $EndBitmap
-Text Notes 35875 4225 0    140  ~ 28
-Notes from the Virtual AGC Project:\n1. This CAD drawing was manually transcribed from the original \n   Apollo Program drawing 2005263A, but does not itself date \n   from the Apollo period. — RSB 2018\n2. The original drawing did not show reference designators for any \n   of the parts, and hence this transcription does not show them \n   either.  For purposes of ERC and netlist generation, the reference \n   designators of the NOR gates are U2nn, where nn is the 2-digit \n   number written on the NOR-gate symbols.  The oval pads \n   numbered 301-371 comprise connector J3, and those numbered \n   401-471 comprise connector J4. — RSB 2018
+Text Notes 35900 5900 0    140  ~ 28
+Notes from the Virtual AGC Project:\n1. This CAD drawing was manually transcribed from the original \n   Apollo Program drawing 2005263A, but does not itself date \n   from the Apollo period. — RSB 2018\n2. The original drawing did not show reference designators for any \n   of the parts, and hence this transcription does not show them \n   either.  For purposes of ERC and netlist generation, the reference \n   designators of the NOR gates are U2nn, where nn is the 2-digit \n   number written on the NOR-gate symbols.  The oval pads \n   numbered 301-371 comprise connector J3, and those numbered \n   401-471 comprise connector J4. — RSB 2018\n3. In the original drawing, connector J3 pad 368 is labeled TO61\n   (or perhaps T061, TO6I, or T06I).  There is no such signal\n   elsewhere in the AGC.  Continuity testing on a physical AGC\n   (s/n 14) reveals that the signal connects externally to the \n   net named "T06/".  We therefore regard this as a mistake\n   in the original drawing, and have labeled pad 368 as "T06/".\n   — RSB 2018
 $EndSCHEMATC

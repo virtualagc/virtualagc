@@ -1335,7 +1335,7 @@ F 0 "J2" H 32450 15200 140 0001 C CNN
 F 1 "ConnectorA1-200" H 32450 15300 140 0001 C CNN
 F 2 "" H 32450 15350 140 0001 C CNN
 F 3 "" H 32450 15350 140 0001 C CNN
-F 4 "ST0P/" H 32450 15125 140 0000 C BNB "Caption"
+F 4 "STOP/" H 32450 15125 140 0000 C BNB "Caption"
 	27   32450 14875
 	1    0    0    -1  
 $EndComp
@@ -4781,7 +4781,7 @@ A
 Text Notes 37425 1300 0    160  ~ 32
 REVISED PER TDRR 30754
 $Bitmap
-Pos 9280 30469
+Pos 9250 30250
 Scale 1.000000
 Data
 89 50 4E 47 0D 0A 1A 0A 00 00 00 0D 49 48 44 52 00 00 00 78 00 00 00 78 08 02 00 00 00 B6 06 A1 
@@ -5644,8 +5644,8 @@ C9 BB 29 F5 5D 8B CA 82 36 A4 40 25 C6 15 08 48 31 74 1C 38 17 8C B5 84 B2 9A 34
 C6 5C DC 75 02 E5 96 B4 52 0D 25 6F F3 00 00 00 00 49 45 4E 44 AE 42 60 82 
 EndData
 $EndBitmap
-Text Notes 9528 32145 0    140  ~ 28
-Notes from the Virtual AGC Project:\n1. This CAD drawing was manually transcribed from the original Apollo Program\n   drawing 2005263A, but does not itself date from the Apollo period. — RSB 2018\n2. The original drawing did not show reference designators, so none are shown on\n   this CAD drawing either.  For the purposes of ERC and netlist generation, the \n   reference designators of NOR gates are U1nn, where nn is the 2-digit number \n   drawn on the NOR-gate symbols.  The oval pads numbered 101-171 comprise\n   connector J1, and those numbered 201-271 comprise connector J2. — RSB 2018
+Text Notes 9500 33350 0    140  ~ 28
+Notes from the Virtual AGC Project:\n1. This CAD drawing was manually transcribed from the original Apollo Program\n   drawing 2005263A, but does not itself date from the Apollo period. — RSB 2018\n2. The original drawing did not show reference designators, so none are shown on\n   this CAD drawing either.  For the purposes of ERC and netlist generation, the \n   reference designators of NOR gates are U1nn, where nn is the 2-digit number \n   drawn on the NOR-gate symbols.  The oval pads numbered 101-171 comprise\n   connector J1, and those numbered 201-271 comprise connector J2. — RSB 2018\n3. On the original drawing, connector J2 pad 227 is clearly captioned "ST0P/" (with\n   a zero).  However, externally, the signal connects to module A2's connector J2 \n   pin 255, which is named "STOP/" (with a capital letter O).  In software, the effect\n   of this signal is to stop execution after time-pulse T12.  We thus regard this as a\n   mistake in the original drawing, and have captioned pad 227 as "STOP/" (with\n   a capital O). — RSB 2018\n
 Connection ~ 17150 22300
 Wire Wire Line
 	17150 22300 17425 22300

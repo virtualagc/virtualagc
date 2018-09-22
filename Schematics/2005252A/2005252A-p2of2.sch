@@ -96,7 +96,7 @@ F 0 "J4" H 20675 27550 140 0001 C CNN
 F 1 "ConnectorA1-400" H 20675 27650 140 0001 C CNN
 F 2 "" H 20675 27700 140 0001 C CNN
 F 3 "" H 20675 27700 140 0001 C CNN
-F 4 "C1NORM" H 19825 27125 140 0000 C BNB "Caption"
+F 4 "CINORM" H 19825 27125 140 0000 C BNB "Caption"
 	7    20675 27225
 	-1   0    0    1   
 $EndComp
@@ -558,7 +558,7 @@ F 0 "J3" H 13875 12875 140 0001 C CNN
 F 1 "ConnectorA1-300" H 13875 12975 140 0001 C CNN
 F 2 "" H 13875 13025 140 0001 C CNN
 F 3 "" H 13875 13025 140 0001 C CNN
-F 4 "EAD10" H 13200 12475 140 0000 C BNB "Caption"
+F 4 "EAD10/" H 13200 12475 140 0000 C BNB "Caption"
 	66   13875 12550
 	1    0    0    -1  
 $EndComp
@@ -1772,7 +1772,7 @@ F 0 "J3" H 16750 22525 140 0001 C CNN
 F 1 "ConnectorA1-300" H 16750 22625 140 0001 C CNN
 F 2 "" H 16750 22675 140 0001 C CNN
 F 3 "" H 16750 22675 140 0001 C CNN
-F 4 "C1NORM" H 16050 22150 140 0000 C BNB "Caption"
+F 4 "CINORM" H 16050 22150 140 0000 C BNB "Caption"
 	5    16750 22200
 	1    0    0    -1  
 $EndComp
@@ -4810,7 +4810,7 @@ Wire Wire Line
 Wire Wire Line
 	31575 8725 31675 8725
 $Bitmap
-Pos 975  30300
+Pos 950  28600
 Scale 1.000000
 Data
 89 50 4E 47 0D 0A 1A 0A 00 00 00 0D 49 48 44 52 00 00 00 78 00 00 00 78 08 02 00 00 00 B6 06 A1 
@@ -5673,8 +5673,8 @@ C9 BB 29 F5 5D 8B CA 82 36 A4 40 25 C6 15 08 48 31 74 1C 38 17 8C B5 84 B2 9A 34
 C6 5C DC 75 02 E5 96 B4 52 0D 25 6F F3 00 00 00 00 49 45 4E 44 AE 42 60 82 
 EndData
 $EndBitmap
-Text Notes 1250 32175 0    140  ~ 28
-Notes from the Virtual AGC Project:\n1. This CAD drawing was manually transcribed from the original Apollo Program \n   drawing 2005252A, but does not itself date from the Apollo period. — RSB 2018\n2. The original drawing did not display reference designators for any component,\n   so this CAD drawing does not display them either.  For purposes of netlist\n   generation and ERC, the NOR gates have reference designators U2nn, where nn\n   is the 2-digit number shown on the NOR-gate symbol.  The oval pads numbered\n   301-371 comprise connector J3, while those numbered 401-471 comprise\n   connector J4.
+Text Notes 1250 33350 0    140  ~ 28
+Notes from the Virtual AGC Project:\n1. This CAD drawing was manually transcribed from the original Apollo Program \n   drawing 2005252A, but does not itself date from the Apollo period. — RSB 2018\n2. The original drawing did not display reference designators for any component,\n   so this CAD drawing does not display them either.  For purposes of netlist\n   generation and ERC, the NOR gates have reference designators U2nn, where nn\n   is the 2-digit number shown on the NOR-gate symbol.  The oval pads numbered\n   301-371 comprise connector J3, while those numbered 401-471 comprise\n   connector J4. — RSB 2018\n3. On the original drawing, connector pads 305 and 407 are both captioned \n   "C1NORM" (using the numeral 1).  Externally, the signal connects to module\n   A2's connector pad 357, which is captioned "CINORM" (with a capital letter I).\n   The signal itself is related to carry-in.  This is regarded as a mistake in the \n   original A7 drawing, which is not always consistent the visual appearance of the\n   numeral 1 or the letter I anyway.  Both pads 305 and 407 have therefore been\n   captioned "CINORM" (with a capital I) in this transcription. — RSB 2018\n4. On the original drawing, connector pad 366 is labeled "EAD10".  This must be\n   a mistake, since internally the signal participates (with EAD09, EAD09/, EAD10/,\n   and EAD11) as inputs into a 3-bit to 8-bit decoder circuit.  I.e., pad 366 must be\n   EAD10/ rather than EAD10, and has accordingly been captioned "EAD10/" in \n   this transcription.  — RSB 2018
 Text Notes 36568 1309 0    150  ~ 30
 A       REVISED PER TDRR 30754
 Wire Notes Line width 6 style solid
