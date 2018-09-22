@@ -426,7 +426,7 @@ F 0 "J1" H 36350 26950 140 0001 C CNN
 F 1 "ConnectorA1-100" H 36350 27050 140 0001 C CNN
 F 2 "" H 36350 27100 140 0001 C CNN
 F 3 "" H 36350 27100 140 0001 C CNN
-F 4 "" H 36350 26925 140 0000 C CNB "Caption"
+F 4 "0VDCA" H 36350 26925 140 0001 C CNB "Caption"
 	60   36350 26625
 	1    0    0    -1  
 $EndComp
@@ -850,7 +850,7 @@ F 0 "J1" H 36375 25725 140 0001 C CNN
 F 1 "ConnectorA1-100" H 36375 25825 140 0001 C CNN
 F 2 "" H 36375 25875 140 0001 C CNN
 F 3 "" H 36375 25875 140 0001 C CNN
-F 4 "" H 36375 25700 140 0000 C CNB "Caption"
+F 4 "0VDCA" H 36375 25700 140 0001 C CNB "Caption"
 	12   36375 25400
 	1    0    0    -1  
 $EndComp
@@ -946,7 +946,7 @@ F 0 "J2" H 40375 26350 140 0001 C CNN
 F 1 "ConnectorA1-200" H 40375 26450 140 0001 C CNN
 F 2 "" H 40375 26500 140 0001 C CNN
 F 3 "" H 40375 26500 140 0001 C CNN
-F 4 "" H 40375 26325 140 0000 C CNB "Caption"
+F 4 "0VDCA" H 40375 26325 140 0001 C CNB "Caption"
 	36   40375 26025
 	1    0    0    -1  
 $EndComp
@@ -1072,7 +1072,7 @@ F 0 "J2" H 40375 25700 140 0001 C CNN
 F 1 "ConnectorA1-200" H 40375 25800 140 0001 C CNN
 F 2 "" H 40375 25850 140 0001 C CNN
 F 3 "" H 40375 25850 140 0001 C CNN
-F 4 "" H 40375 25675 140 0000 C CNB "Caption"
+F 4 "0VDCA" H 40375 25675 140 0001 C CNB "Caption"
 	12   40375 25375
 	1    0    0    -1  
 $EndComp
@@ -1445,7 +1445,7 @@ F 0 "J2" H 40350 27950 140 0001 C CNN
 F 1 "ConnectorA1-200" H 40350 28050 140 0001 C CNN
 F 2 "" H 40350 28100 140 0001 C CNN
 F 3 "" H 40350 28100 140 0001 C CNN
-F 4 "" H 40350 27925 140 0000 C CNB "Caption"
+F 4 "+4SW" H 40350 27925 140 0001 C CNB "Caption"
 	24   40350 27625
 	1    0    0    -1  
 $EndComp
@@ -2119,7 +2119,7 @@ F 0 "J1" H 4650 17675 140 0001 C CNN
 F 1 "ConnectorA1-100" H 4650 17775 140 0001 C CNN
 F 2 "" H 4650 17825 140 0001 C CNN
 F 3 "" H 4650 17825 140 0001 C CNN
-F 4 "PSH4/" H 3950 17375 140 0000 C CNB "Caption"
+F 4 "PHS4/" H 3950 17375 140 0000 C CNB "Caption"
 	28   4650 17350
 	1    0    0    -1  
 $EndComp
@@ -2179,7 +2179,7 @@ F 0 "J1" H 36350 27950 140 0001 C CNN
 F 1 "ConnectorA1-100" H 36350 28050 140 0001 C CNN
 F 2 "" H 36350 28100 140 0001 C CNN
 F 3 "" H 36350 28100 140 0001 C CNN
-F 4 "" H 36350 27925 140 0000 C CNB "Caption"
+F 4 "+4SW" H 36350 27925 140 0001 C CNB "Caption"
 	24   36350 27625
 	1    0    0    -1  
 $EndComp
@@ -2323,7 +2323,7 @@ F 0 "J2" H 40350 28575 140 0001 C CNN
 F 1 "ConnectorA1-200" H 40350 28675 140 0001 C CNN
 F 2 "" H 40350 28725 140 0001 C CNN
 F 3 "" H 40350 28725 140 0001 C CNN
-F 4 "" H 40350 28550 140 0000 C CNB "Caption"
+F 4 "+4SW" H 40350 28550 140 0001 C CNB "Caption"
 	48   40350 28250
 	1    0    0    -1  
 $EndComp
@@ -3016,7 +3016,7 @@ F 0 "J2" H 40350 26950 140 0001 C CNN
 F 1 "ConnectorA1-200" H 40350 27050 140 0001 C CNN
 F 2 "" H 40350 27100 140 0001 C CNN
 F 3 "" H 40350 27100 140 0001 C CNN
-F 4 "" H 40350 26925 140 0000 C CNB "Caption"
+F 4 "0VDCA" H 40350 26925 140 0001 C CNB "Caption"
 	60   40350 26625
 	1    0    0    -1  
 $EndComp
@@ -3239,7 +3239,7 @@ F 5 "53" H 14450 12125 140 0000 C CNB "Location2"
 	1    0    0    -1  
 $EndComp
 Text Notes 8225 33425 0    140  ~ 28
-Notes from the Virtual AGC Project:\n1. This CAD file was adapted from the CAD file for drawing 2005264B, and then\n   checked vs the original drawing 2005264A (and against the original drawing\n   2005064F).  It does not itself date from the Apollo period. — RSB 2018\n2. The original drawing did not display reference designators, so they are not shown\n   on this CAD drawing either.  For purposes of ERC and netlist generation, the NOR\n   gates have been assigned reference designators U1nn, where nn is the 2-digit\n   number displayed on the NOR-gate symbol.  The oval pads numbered 101-171\n   comprise connector J1, while those numbered 201-271 comprise connector\n   J2. — RSB 2018\n4. On the original drawing (and on all available revisions of 2005264),  expander\n   NOR gate 42250 is mismarked as being at location 06, which is impossible since\n   the non-expander NOR gates 42247 and 42249 are already at location 06.  On \n   this CAD drawing, gate 42250's location has been marked as 05, which is consistent\n   with the fact that expander NOR-gate 42251 is also at that location. — RSB 2018
+Notes from the Virtual AGC Project:\n1. This CAD file was adapted from the CAD file for drawing 2005264B, and then\n   checked vs the original drawing 2005264A (and against the original drawing\n   2005064F).  It does not itself date from the Apollo period. — RSB 2018\n2. The original drawing did not display reference designators, so they are not shown\n   on this CAD drawing either.  For purposes of ERC and netlist generation, the NOR\n   gates have been assigned reference designators U1nn, where nn is the 2-digit\n   number displayed on the NOR-gate symbol.  The oval pads numbered 101-171\n   comprise connector J1, while those numbered 201-271 comprise connector\n   J2. — RSB 2018\n3. On the original drawing (and on all available revisions of 2005264),  expander\n   NOR gate 42250 is mismarked as being at location 06, which is impossible since\n   the non-expander NOR gates 42247 and 42249 are already at location 06.  On \n   this CAD drawing, gate 42250's location has been marked as 05, which is consistent\n   with the fact that expander NOR-gate 42251 is also at that location. — RSB 2018\n4. On the original drawing, the caption for connector pad 128 is mistakenly given\n   as "PSH4/".  It has been corrected to "PHS4/" here. — RSB 2018
 $Comp
 L D3NOR-+4SW-0VDCA:D3NOR-+4SW-0VDCA-BC_-DEF U142
 U 2 1 5B97689B
@@ -5127,12 +5127,12 @@ $EndComp
 $Comp
 L AGC_DSKY:ArrowTwiddleBody X206
 U 1 1 62BAB7A6
-P 8725 29175
-F 0 "X206" H 8800 29925 140 0001 C CNN
-F 1 "ArrowTwiddleBody" H 8800 29925 140 0001 C CNN
-F 2 "" H 8800 29925 140 0001 C CNN
-F 3 "" H 8800 29925 140 0001 C CNN
-	1    8725 29175
+P 8200 28450
+F 0 "X206" H 8275 29200 140 0001 C CNN
+F 1 "ArrowTwiddleBody" H 8275 29200 140 0001 C CNN
+F 2 "" H 8275 29200 140 0001 C CNN
+F 3 "" H 8275 29200 140 0001 C CNN
+	1    8200 28450
 	1    0    0    -1  
 $EndComp
 Text Notes 2125 28925 0    140  ~ 28
@@ -5157,7 +5157,7 @@ Text Notes 3375 32475 0    140  ~ 28
 UPPER NUMBER DENOTES GATE SHOWN.\nLOWER NUMBER DENOTES PHYSICAL\nLOCATION OF GATE ON CIRCUIT BOARD,\nMULTILAYER SCD NO.1006395
 Text Notes 3375 33175 0    140  ~ 28
 SYMBOL FOR EXPANDER DUAL NOR GATE\nSCD NO.1006394
-Text Notes 8200 29775 0    140  ~ 28
+Text Notes 7675 29050 0    140  ~ 28
 8.      NUMBER IN PARENTHESES DENOTES\n  NUMBER OF REF CIRCLES TO WHICH THIS\n  SIGNAL IS TIED
 Wire Wire Line
 	7825 26350 7825 26675
@@ -5223,7 +5223,7 @@ Wire Notes Line width 6 style solid
 Wire Notes Line width 6 style solid
 	42480 975  42480 1300
 $Bitmap
-Pos 8000 30075
+Pos 7975 29600
 Scale 1.000000
 Data
 89 50 4E 47 0D 0A 1A 0A 00 00 00 0D 49 48 44 52 00 00 00 78 00 00 00 78 08 02 00 00 00 B6 06 A1 
