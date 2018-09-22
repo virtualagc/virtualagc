@@ -404,7 +404,7 @@ F 0 "J1" H 36500 26925 140 0001 C CNN
 F 1 "ConnectorA1-100" H 36500 27025 140 0001 C CNN
 F 2 "" H 36500 27075 140 0001 C CNN
 F 3 "" H 36500 27075 140 0001 C CNN
-F 4 "" H 36500 26900 140 0000 C CNB "Caption"
+F 4 "0VDCA" H 36500 26900 140 0001 C CNB "Caption"
 	60   36500 26600
 	1    0    0    -1  
 $EndComp
@@ -560,7 +560,7 @@ F 0 "J2" H 35750 3225 140 0001 C CNN
 F 1 "ConnectorA1-200" H 35750 3325 140 0001 C CNN
 F 2 "" H 35750 3375 140 0001 C CNN
 F 3 "" H 35750 3375 140 0001 C CNN
-F 4 "MYFAIL/" H 35625 2600 140 0000 C CNB "Caption"
+F 4 "MVFAIL/" H 35625 2600 140 0000 C CNB "Caption"
 	7    35750 2900
 	-1   0    0    1   
 $EndComp
@@ -622,7 +622,7 @@ F 0 "J1" H 36500 25925 140 0001 C CNN
 F 1 "ConnectorA1-100" H 36500 26025 140 0001 C CNN
 F 2 "" H 36500 26075 140 0001 C CNN
 F 3 "" H 36500 26075 140 0001 C CNN
-F 4 "" H 36500 25900 140 0000 C CNB "Caption"
+F 4 "0VDCA" H 36500 25900 140 0001 C CNB "Caption"
 	12   36500 25600
 	1    0    0    -1  
 $EndComp
@@ -756,7 +756,7 @@ F 0 "J2" H 22425 11925 140 0001 C CNN
 F 1 "ConnectorA1-200" H 22425 12025 140 0001 C CNN
 F 2 "" H 22425 12075 140 0001 C CNN
 F 3 "" H 22425 12075 140 0001 C CNN
-F 4 "P01" H 22425 11900 140 0000 C CNB "Caption"
+F 4 "P02" H 22425 11900 140 0000 C CNB "Caption"
 	19   22425 11600
 	1    0    0    -1  
 $EndComp
@@ -792,7 +792,7 @@ F 0 "J2" H 40375 25900 140 0001 C CNN
 F 1 "ConnectorA1-200" H 40375 26000 140 0001 C CNN
 F 2 "" H 40375 26050 140 0001 C CNN
 F 3 "" H 40375 26050 140 0001 C CNN
-F 4 "" H 40375 25875 140 0000 C CNB "Caption"
+F 4 "0VDCA" H 40375 25875 140 0001 C CNB "Caption"
 	12   40375 25575
 	1    0    0    -1  
 $EndComp
@@ -1167,7 +1167,7 @@ F 0 "J1" H 14900 6150 140 0001 C CNN
 F 1 "ConnectorA1-100" H 14900 6250 140 0001 C CNN
 F 2 "" H 14900 6300 140 0001 C CNN
 F 3 "" H 14900 6300 140 0001 C CNN
-F 4 "NHAL3A" H 14175 5825 140 0000 C CNB "Caption"
+F 4 "NHALGA" H 14175 5825 140 0000 C CNB "Caption"
 	8    14900 5825
 	-1   0    0    1   
 $EndComp
@@ -1227,7 +1227,7 @@ F 0 "J2" H 40375 27750 140 0001 C CNN
 F 1 "ConnectorA1-200" H 40375 27850 140 0001 C CNN
 F 2 "" H 40375 27900 140 0001 C CNN
 F 3 "" H 40375 27900 140 0001 C CNN
-F 4 "" H 40375 27725 140 0000 C CNB "Caption"
+F 4 "+4VDC" H 40375 27725 140 0001 C CNB "Caption"
 	22   40375 27425
 	1    0    0    -1  
 $EndComp
@@ -1725,7 +1725,7 @@ F 0 "J2" H 40375 26400 140 0001 C CNN
 F 1 "ConnectorA1-200" H 40375 26500 140 0001 C CNN
 F 2 "" H 40375 26550 140 0001 C CNN
 F 3 "" H 40375 26550 140 0001 C CNN
-F 4 "" H 40375 26375 140 0000 C CNB "Caption"
+F 4 "0VDCA" H 40375 26375 140 0001 C CNB "Caption"
 	36   40375 26075
 	1    0    0    -1  
 $EndComp
@@ -1963,7 +1963,7 @@ F 0 "J1" H 8375 12425 140 0001 C CNN
 F 1 "ConnectorA1-100" H 8375 12525 140 0001 C CNN
 F 2 "" H 8375 12575 140 0001 C CNN
 F 3 "" H 8375 12575 140 0001 C CNN
-F 4 "F10A" H 7800 12100 140 0000 C CNB "Caption"
+F 4 "F10A/" H 7675 12100 140 0000 C CNB "Caption"
 	27   8375 12100
 	-1   0    0    1   
 $EndComp
@@ -2791,7 +2791,7 @@ F 0 "J1" H 36500 27775 140 0001 C CNN
 F 1 "ConnectorA1-100" H 36500 27875 140 0001 C CNN
 F 2 "" H 36500 27925 140 0001 C CNN
 F 3 "" H 36500 27925 140 0001 C CNN
-F 4 "" H 36500 27750 140 0000 C CNB "Caption"
+F 4 "+4SW" H 36500 27750 140 0001 C CNB "Caption"
 	24   36500 27450
 	1    0    0    -1  
 $EndComp
@@ -2959,7 +2959,7 @@ F 0 "J2" H 40375 26925 140 0001 C CNN
 F 1 "ConnectorA1-200" H 40375 27025 140 0001 C CNN
 F 2 "" H 40375 27075 140 0001 C CNN
 F 3 "" H 40375 27075 140 0001 C CNN
-F 4 "" H 40375 26900 140 0000 C CNB "Caption"
+F 4 "0VDCA" H 40375 26900 140 0001 C CNB "Caption"
 	60   40375 26600
 	1    0    0    -1  
 $EndComp
@@ -4585,7 +4585,7 @@ Text Notes 2125 31250 0    140  ~ 28
 Text Notes 3850 31350 0    140  ~ 28
 SYMBOL FOR EXPANDER DUAL NOR GATE\nSCD NO.1006394
 $Bitmap
-Pos 9475 31500
+Pos 8675 29975
 Scale 1.000000
 Data
 89 50 4E 47 0D 0A 1A 0A 00 00 00 0D 49 48 44 52 00 00 00 78 00 00 00 78 08 02 00 00 00 B6 06 A1 
@@ -5448,8 +5448,8 @@ C9 BB 29 F5 5D 8B CA 82 36 A4 40 25 C6 15 08 48 31 74 1C 38 17 8C B5 84 B2 9A 34
 C6 5C DC 75 02 E5 96 B4 52 0D 25 6F F3 00 00 00 00 49 45 4E 44 AE 42 60 82 
 EndData
 $EndBitmap
-Text Notes 9750 33150 0    140  ~ 28
-Notes from the Virtual AGC Project:\n1. This drawing was manually transcribed from the original Apollo Program\n   drawing 2005269-, but does not itself date from the Apollo period. — RSB 2018\n2. The original drawing did not display reference designators for the components.\n   For purposes of ERC and netlist generation, the reference designators of the\n   NOR gates are U1nn, where nn is the 2-digit number displayed on the NOR-gate\n   symbol.  The oval pads numbered 101-171 comprise connector J1, while those\n   numbered 201-271 comprise connector J2. — RSB 2018
+Text Notes 8975 33325 0    140  ~ 28
+Notes from the Virtual AGC Project:\n1. This drawing was manually transcribed from the original Apollo Program\n   drawing 2005269-, but does not itself date from the Apollo period. — RSB 2018\n2. The original drawing did not display reference designators for the components.\n   For purposes of ERC and netlist generation, the reference designators of the\n   NOR gates are U1nn, where nn is the 2-digit number displayed on the NOR-gate\n   symbol.  The oval pads numbered 101-171 comprise connector J1, while those\n   numbered 201-271 comprise connector J2. — RSB 2018\n3. On the original drawing, on predecessor drawing (2005069), and in associated   \n   documentation (ND-1021042), connector pad 127 is labeled "F10A".  Continuity\n   tests on a physical AGC (s/n 14) show that the signal is connected externally to net\n   F10A/ instead.  In simulation of the ciruitry with the signal connected to net F10A\n   as marked, the AGC sticks in an endless reboot loop.  Therefore, the F10A \n   labeling is regarded as a mistake in the original drawing(s).  In this transcription, \n   pad 127 is labeled "F10A/". — RSB 2018\n
 Text Notes 2575 27075 0    140  ~ 28
 XXX
 $EndSCHEMATC

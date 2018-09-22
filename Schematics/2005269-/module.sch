@@ -17,7 +17,7 @@ $EndDescr
 $Sheet
 S 20175 11625 5450 8975
 U 5B8E7731
-F0 "Sheet 1" 140
+F0 "1" 140
 F1 "2005269--p1of1.sch" 140
 $EndSheet
 Text Notes 38775 31800 0    250  ~ 50
