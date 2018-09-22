@@ -1,10 +1,10 @@
 EESchema Schematic File Version 4
-LIBS:module-cache
+LIBS:board1-cache
 EELAYER 26 0
 EELAYER END
 $Descr E 44000 34000
 encoding utf-8
-Sheet 2 3
+Sheet 2 2
 Title ""
 Date ""
 Rev ""

@@ -1,4 +1,4 @@
-update=Mon 03 Sep 2018 06:51:09 PM CDT
+update=Sat 22 Sep 2018 02:51:50 PM CDT
 version=1
 last_client=kicad
 [general]
@@ -34,7 +34,7 @@ LibDir=
 [schematic_editor]
 version=1
 PageLayoutDescrFile=schematicTemplate.kicad_wks
-PlotDirectoryName=/home/rburkey/Desktop/
+PlotDirectoryName=../temp
 SubpartIdSeparator=0
 SubpartFirstId=65
 NetFmtName=

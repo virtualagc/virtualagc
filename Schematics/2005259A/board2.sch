@@ -1,4 +1,5 @@
 EESchema Schematic File Version 4
+LIBS:board2-cache
 EELAYER 26 0
 EELAYER END
 $Descr E 44000 34000
@@ -16,7 +17,7 @@ $EndDescr
 $Sheet
 S 17350 11000 9375 11600
 U 5B7AB7F4
-F0 "Sheet 2" 250
+F0 "2" 250
 F1 "2005259A-p2of2.sch" 250
 F2 "0VDCA" U L 17350 16425 140
 F3 "+4VDC" U L 17350 15025 140
