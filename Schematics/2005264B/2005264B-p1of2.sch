@@ -3260,8 +3260,8 @@ F 5 "53" H 14450 12125 140 0000 C CNB "Location2"
 	2    14450 12325
 	1    0    0    -1  
 $EndComp
-Text Notes 8225 33325 0    140  ~ 28
-Notes from the Virtual AGC Project:\n1. This CAD file was manually transcribed from the original Apollo Program drawing \n   2005264B, but does not itself date from the Apollo period. — RSB 2018\n2. The original drawing did not display reference designators, so they are not shown\n   on this CAD drawing either.  For purposes of ERC and netlist generation, the NOR\n   gates have been assigned reference designators U1nn, where nn is the 2-digit\n   number displayed on the NOR-gate symbol.  The oval pads numbered 101-171\n   comprise connector J1, while those numbered 201-271 comprise connector\n   J2. — RSB 2018\n3. On the original drawing (and on all available revisions of 2005264),  expander\n   NOR gate 42250 is mismarked as being at location 06, which is impossible since\n   the non-expander NOR gates 42247 and 42249 are already at location 06.  On \n   this CAD drawing, gate 42250's location has been marked as 05, which is consistent\n   with the fact that expander NOR-gate 42251 is also at that location. — RSB 2018\n4. On the original drawing, the caption for connector pad 128 is mistakenly given\n   as "PSH4/".  It has been corrected to "PHS4/" here. — RSB 2018
+Text Notes 4975 2450 0    140  ~ 28
+Notes from the Virtual AGC Project:\n1. This CAD file was manually transcribed from the original Apollo Program drawing \n   2005264B, but does not itself date from the Apollo period. — RSB 2018\n2. The original drawing did not display reference designators, so they are not shown\n   on this CAD drawing either.  Though not visible, the NOR gates have been assigned\n   reference designators U1nn, where nn is the 2-digit number displayed on the \n   NOR-gate symbol.  The oval pads numbered 101-171 comprise connector J1, while\n   those numbered 201-271 comprise connector J2. — RSB 2018\n
 Text Notes 39250 8325 0    140  ~ 28
 Notes from the Virtual AGC Project:\n5. On the original 2005264B, a sticker \n   reading "MAMU" obscures the \n   caption of oval pad 253.  But on\n   drawing 2005264A, that caption \n   reads "0VDCA".  0VDCA has been\n   used here.  — RSB 2018\n
 $Comp
@@ -5184,7 +5184,7 @@ SYMBOL FOR EXPANDER DUAL NOR GATE\nSCD NO.1006394
 Text Notes 7675 29025 0    140  ~ 28
 8.      NUMBER IN PARENTHESES DENOTES\n  NUMBER OF REF CIRCLES TO WHICH THIS\n  SIGNAL IS TIED
 $Bitmap
-Pos 7975 29750
+Pos 4725 775 
 Scale 1.000000
 Data
 89 50 4E 47 0D 0A 1A 0A 00 00 00 0D 49 48 44 52 00 00 00 78 00 00 00 78 08 02 00 00 00 B6 06 A1 
@@ -6956,4 +6956,6 @@ C9 BB 29 F5 5D 8B CA 82 36 A4 40 25 C6 15 08 48 31 74 1C 38 17 8C B5 84 B2 9A 34
 C6 5C DC 75 02 E5 96 B4 52 0D 25 6F F3 00 00 00 00 49 45 4E 44 AE 42 60 82 
 EndData
 $EndBitmap
+Text Notes 14600 2450 0    140  ~ 28
+3. On the original drawing (and other revisions of it),  expander NOR gate 42250 is\n   mismarked as being at location 06, which is already occupied by 42247 and 42249.\n   On this CAD drawing, 42250 has instead been placed at 05, consistent with\n   expander NOR-gate 42251 also at that location. — RSB 2018\n4. On the original drawing, the caption for connector pad 128 is given as "PSH4/".  \n   Document ND-1021042 lists it instead as "PHS4/".  The signal itself drives\n   SBF high at phase 4 of time-pulse 6.  Other instances of PHS4/ (and PHS3/ and\n   PHS2/) appear throughout the drawing.  We have used "PHS4/". — RSB 2018
 $EndSCHEMATC

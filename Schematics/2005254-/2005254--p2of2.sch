@@ -514,7 +514,7 @@ F 0 "J4" H 40950 16425 140 0001 C CNN
 F 1 "ConnectorA1-400" H 40950 16525 140 0001 C CNN
 F 2 "" H 40950 16575 140 0001 C CNN
 F 3 "" H 40950 16575 140 0001 C CNN
-F 4 "" H 40950 16325 140 0000 C BNB "Caption"
+F 4 "0VDCA" H 40950 16325 140 0001 C BNB "Caption"
 	12   40950 16100
 	1    0    0    -1  
 $EndComp
@@ -562,7 +562,7 @@ F 0 "J4" H 1400 22225 140 0001 C CNN
 F 1 "ConnectorA1-400" H 1400 22325 140 0001 C CNN
 F 2 "" H 1400 22375 140 0001 C CNN
 F 3 "" H 1400 22375 140 0001 C CNN
-F 4 "CXB3" H 1400 22125 140 0000 C BNB "Caption"
+F 4 "CXB3/" H 1400 22125 140 0000 C BNB "Caption"
 	16   1400 21900
 	1    0    0    -1  
 $EndComp
@@ -658,7 +658,7 @@ F 0 "J3" H 38100 17400 140 0001 C CNN
 F 1 "ConnectorA1-300" H 38100 17500 140 0001 C CNN
 F 2 "" H 38100 17550 140 0001 C CNN
 F 3 "" H 38100 17550 140 0001 C CNN
-F 4 "" H 38100 17300 140 0000 C BNB "Caption"
+F 4 "0VDCA" H 38100 17300 140 0001 C BNB "Caption"
 	60   38100 17075
 	1    0    0    -1  
 $EndComp
@@ -682,7 +682,7 @@ F 0 "J3" H 20850 18750 140 0001 C CNN
 F 1 "ConnectorA1-300" H 20850 18850 140 0001 C CNN
 F 2 "" H 20850 18900 140 0001 C CNN
 F 3 "" H 20850 18900 140 0001 C CNN
-F 4 "CDUX0" H 20850 18650 140 0000 C BNB "Caption"
+F 4 "CDUXD" H 20850 18650 140 0000 C BNB "Caption"
 	68   20850 18425
 	1    0    0    -1  
 $EndComp
@@ -1014,7 +1014,7 @@ F 0 "J3" H 36050 4625 140 0001 C CNN
 F 1 "ConnectorA1-300" H 36050 4725 140 0001 C CNN
 F 2 "" H 36050 4775 140 0001 C CNN
 F 3 "" H 36050 4775 140 0001 C CNN
-F 4 "C35A" H 36025 3900 140 0000 C BNB "Caption"
+F 4 "C36A" H 36025 3900 140 0000 C BNB "Caption"
 	54   36050 4300
 	-1   0    0    1   
 $EndComp
@@ -1086,7 +1086,7 @@ F 0 "J4" H 40950 17400 140 0001 C CNN
 F 1 "ConnectorA1-400" H 40950 17500 140 0001 C CNN
 F 2 "" H 40950 17550 140 0001 C CNN
 F 3 "" H 40950 17550 140 0001 C CNN
-F 4 "" H 40950 17300 140 0000 C BNB "Caption"
+F 4 "0VDCA" H 40950 17300 140 0001 C BNB "Caption"
 	60   40950 17075
 	1    0    0    -1  
 $EndComp
@@ -1904,7 +1904,7 @@ F 0 "J4" H 40850 19400 140 0001 C CNN
 F 1 "ConnectorA1-400" H 40850 19500 140 0001 C CNN
 F 2 "" H 40850 19550 140 0001 C CNN
 F 3 "" H 40850 19550 140 0001 C CNN
-F 4 "" H 40850 19300 140 0000 C BNB "Caption"
+F 4 "+4SW" H 40850 19300 140 0001 C BNB "Caption"
 	48   40850 19075
 	1    0    0    -1  
 $EndComp
@@ -2314,7 +2314,7 @@ F 0 "J3" H 38050 18700 140 0001 C CNN
 F 1 "ConnectorA1-300" H 38050 18800 140 0001 C CNN
 F 2 "" H 38050 18850 140 0001 C CNN
 F 3 "" H 38050 18850 140 0001 C CNN
-F 4 "" H 38050 18600 140 0000 C BNB "Caption"
+F 4 "+4SW" H 38050 18600 140 0001 C BNB "Caption"
 	24   38050 18375
 	1    0    0    -1  
 $EndComp
@@ -2338,7 +2338,7 @@ F 0 "J4" H 40850 18725 140 0001 C CNN
 F 1 "ConnectorA1-400" H 40850 18825 140 0001 C CNN
 F 2 "" H 40850 18875 140 0001 C CNN
 F 3 "" H 40850 18875 140 0001 C CNN
-F 4 "" H 40850 18625 140 0000 C BNB "Caption"
+F 4 "+4SW" H 40850 18625 140 0001 C BNB "Caption"
 	24   40850 18400
 	1    0    0    -1  
 $EndComp
@@ -2458,7 +2458,7 @@ F 0 "J3" H 38100 16400 140 0001 C CNN
 F 1 "ConnectorA1-300" H 38100 16500 140 0001 C CNN
 F 2 "" H 38100 16550 140 0001 C CNN
 F 3 "" H 38100 16550 140 0001 C CNN
-F 4 "" H 38100 16300 140 0000 C BNB "Caption"
+F 4 "0VDCA" H 38100 16300 140 0001 C BNB "Caption"
 	12   38100 16075
 	1    0    0    -1  
 $EndComp
@@ -2912,7 +2912,7 @@ F 0 "J4" H 40950 16900 140 0001 C CNN
 F 1 "ConnectorA1-400" H 40950 17000 140 0001 C CNN
 F 2 "" H 40950 17050 140 0001 C CNN
 F 3 "" H 40950 17050 140 0001 C CNN
-F 4 "" H 40950 16800 140 0000 C BNB "Caption"
+F 4 "0VDCA" H 40950 16800 140 0001 C BNB "Caption"
 	36   40950 16575
 	1    0    0    -1  
 $EndComp
@@ -3870,10 +3870,7 @@ Connection ~ 41325 18400
 Wire Wire Line
 	41325 18400 41325 19075
 Wire Wire Line
-	38325 18400 38325 18375
-Wire Wire Line
 	38325 18375 38525 18375
-Connection ~ 38325 18375
 Connection ~ 38525 18375
 Wire Wire Line
 	38525 18375 38525 17850
@@ -4943,10 +4940,10 @@ Wire Wire Line
 	25175 28350 25175 28700
 Wire Wire Line
 	25175 28700 24950 28700
-Text Notes 1225 33375 0    140  ~ 28
-Notes from the Virtual AGC Project:\n1. This CAD drawing was transcribed from the original Apollo Program \n   drawing 2005254-, but does not itself date from the Apollo period. \n   — RSB 2018\n2. The original drawing did not show reference designators for the \n   components. For the purposes of ERC and netlist generation, the NOR\n   gates have been assigned reference designators U2nn, where nn is \n   the 2-digit number shown on the NOR-gate symbol.  The oval pads \n   numbered 301-371 comprise connector J3, while those numbered \n   401-471 comprise connector J4. — RSB 2018
+Text Notes 36875 5125 0    140  ~ 28
+Notes from the Virtual AGC Project:\n1. This CAD drawing was transcribed from the original \n   Apollo Program drawing 2005254-, but does not itself \n   date from the Apollo period. — RSB 2018\n2. The original drawing did not show reference designators \n   for the components. Though not visible, here the NOR \n   gates have been assigned reference designators U2nn, \n   where nn is the 2-digit number shown on the NOR-gate \n   symbol.  The oval pads numbered 301-371 comprise \n   connector J3, while those numbered 401-471 comprise\n   connector J4. — RSB 2018\n3. On the original drawing, connector pad 416 is labeled\n   "CXB3".  In this transcription, it has been corrected to \n   "CXB3/".  No net CXB3 exists on the AGC backplane for\n   which this signal to connect.  Moreover, both the \n   predecessor drawing (2005054) and documentation \n   ND-1021042 indicate CXB3/. — RSB 2018
 $Bitmap
-Pos 975  31250
+Pos 36625 1325
 Scale 1.000000
 Data
 89 50 4E 47 0D 0A 1A 0A 00 00 00 0D 49 48 44 52 00 00 00 78 00 00 00 78 08 02 00 00 00 B6 06 A1 

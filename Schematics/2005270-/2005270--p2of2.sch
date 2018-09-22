@@ -510,7 +510,7 @@ F 0 "J4" H 39350 26175 140 0001 C CNN
 F 1 "ConnectorA1-400" H 39350 26275 140 0001 C CNN
 F 2 "" H 39350 26325 140 0001 C CNN
 F 3 "" H 39350 26325 140 0001 C CNN
-F 4 "" H 39350 26075 140 0000 C BNB "Caption"
+F 4 "0VDCA" H 39350 26075 140 0001 C BNB "Caption"
 	12   39350 25850
 	1    0    0    -1  
 $EndComp
@@ -606,7 +606,7 @@ F 0 "J3" H 16250 26025 140 0001 C CNN
 F 1 "ConnectorA1-300" H 16250 26125 140 0001 C CNN
 F 2 "" H 16250 26175 140 0001 C CNN
 F 3 "" H 16250 26175 140 0001 C CNN
-F 4 "RCHGO" H 15550 25600 140 0000 C BNB "Caption"
+F 4 "RHCGO" H 15550 25600 140 0000 C BNB "Caption"
 	64   16250 25700
 	-1   0    0    1   
 $EndComp
@@ -654,7 +654,7 @@ F 0 "J3" H 35475 27175 140 0001 C CNN
 F 1 "ConnectorA1-300" H 35475 27275 140 0001 C CNN
 F 2 "" H 35475 27325 140 0001 C CNN
 F 3 "" H 35475 27325 140 0001 C CNN
-F 4 "" H 35475 27075 140 0000 C BNB "Caption"
+F 4 "0VDCA" H 35475 27075 140 0001 C BNB "Caption"
 	60   35475 26850
 	1    0    0    -1  
 $EndComp
@@ -1081,7 +1081,7 @@ F 0 "J4" H 39350 27175 140 0001 C CNN
 F 1 "ConnectorA1-400" H 39350 27275 140 0001 C CNN
 F 2 "" H 39350 27325 140 0001 C CNN
 F 3 "" H 39350 27325 140 0001 C CNN
-F 4 "" H 39350 27075 140 0000 C BNB "Caption"
+F 4 "0VDCA" H 39350 27075 140 0001 C BNB "Caption"
 	60   39350 26850
 	1    0    0    -1  
 $EndComp
@@ -1755,7 +1755,7 @@ F 0 "J4" H 39350 26675 140 0001 C CNN
 F 1 "ConnectorA1-400" H 39350 26775 140 0001 C CNN
 F 2 "" H 39350 26825 140 0001 C CNN
 F 3 "" H 39350 26825 140 0001 C CNN
-F 4 "" H 39350 26575 140 0000 C BNB "Caption"
+F 4 "0VDCA" H 39350 26575 140 0001 C BNB "Caption"
 	36   39350 26350
 	1    0    0    -1  
 $EndComp
@@ -1851,7 +1851,7 @@ F 0 "J3" H 35000 24350 140 0001 C CNN
 F 1 "ConnectorA1-300" H 35000 24450 140 0001 C CNN
 F 2 "" H 35000 24500 140 0001 C CNN
 F 3 "" H 35000 24500 140 0001 C CNN
-F 4 "T60N/" H 34300 23950 140 0000 C BNB "Caption"
+F 4 "T6ON/" H 34300 23950 140 0000 C BNB "Caption"
 	8    35000 24025
 	1    0    0    -1  
 $EndComp
@@ -2285,7 +2285,7 @@ F 0 "J3" H 35475 28000 140 0001 C CNN
 F 1 "ConnectorA1-300" H 35475 28100 140 0001 C CNN
 F 2 "" H 35475 28150 140 0001 C CNN
 F 3 "" H 35475 28150 140 0001 C CNN
-F 4 "" H 35475 27900 140 0000 C BNB "Caption"
+F 4 "+4SW" H 35475 27900 140 0001 C BNB "Caption"
 	24   35475 27675
 	1    0    0    -1  
 $EndComp
@@ -2309,7 +2309,7 @@ F 0 "J4" H 39350 28000 140 0001 C CNN
 F 1 "ConnectorA1-400" H 39350 28100 140 0001 C CNN
 F 2 "" H 39350 28150 140 0001 C CNN
 F 3 "" H 39350 28150 140 0001 C CNN
-F 4 "" H 39350 27900 140 0000 C BNB "Caption"
+F 4 "+4SW" H 39350 27900 140 0001 C BNB "Caption"
 	24   39350 27675
 	1    0    0    -1  
 $EndComp
@@ -2441,7 +2441,7 @@ F 0 "J3" H 35475 26175 140 0001 C CNN
 F 1 "ConnectorA1-300" H 35475 26275 140 0001 C CNN
 F 2 "" H 35475 26325 140 0001 C CNN
 F 3 "" H 35475 26325 140 0001 C CNN
-F 4 "" H 35475 26075 140 0000 C BNB "Caption"
+F 4 "0VDCA" H 35475 26075 140 0001 C BNB "Caption"
 	12   35475 25850
 	1    0    0    -1  
 $EndComp
@@ -3204,7 +3204,7 @@ F 4 "UPRUPT" H 20950 29700 140 0000 C BNB "Caption"
 	-1   0    0    1   
 $EndComp
 Text Notes 1200 33325 0    140  ~ 28
-Notes from the Virtual AGC Project:\n1. This CAD drawing was transcribed from the original Apollo Program drawing\n   2005270-, but does not itself date from the Apollo period. — RSB 2018\n2. The original drawing does not show reference designators for the components,\n   so this CAD drawing does not show any either.  For purposes of ERC and netlist\n   generation, the NOR gates have reference designators U2nn, where nn is the \n   2-digit number shown on the NOR-gate symbol.  The oval pads numbered 301-371\n   comprise connector J3, while those numbered 401-471 comprise connector J4.\n   — RSB 2018\n3. On the original drawing, NOR-gate 46435 is not marked with a 2-digit location\n   code.  In the CAD drawing, it has been marked with location code 01, and therefore\n   comprises (together with NOR-gate 46436) reference designator U201. — RSB 2018
+Notes from the Virtual AGC Project:\n1. This CAD drawing was transcribed from the original Apollo Program drawing\n   2005270-, but does not itself date from the Apollo period. — RSB 2018\n2. The original drawing does not show reference designators for the components,\n   so this CAD drawing does not show any either.  For purposes of ERC and netlist\n   generation, the NOR gates have reference designators U2nn, where nn is the \n   2-digit number shown on the NOR-gate symbol.  The oval pads numbered 301-371\n   comprise connector J3, while those numbered 401-471 comprise connector J4.\n   — RSB 2018\n3. On the original drawing, NOR-gate 46435 is not marked with a 2-digit location\n   code.  In the CAD drawing, it has been marked with location code 01, and therefore\n   comprises (together with NOR-gate 46436) reference designator U201. — RSB 2018\n4. On the original drawing, the caption for connector pad 308 is given as "T60N/"\n   (with the digit 0).  The signal is externally connected to module A23 pad 456, which\n   is labeled as "T6ON/" (with a capital letter O).  The signal itself switches on timer\n   TIME6.  The original is thus a misprint, and "T6ON/" (with a capital letter O) is\n   used in this transcription. — RSB 2018
 Text HLabel 32925 28000 0    140  UnSpc ~ 28
 FAP
 Text HLabel 35850 27300 0    140  UnSpc ~ 28
@@ -4739,7 +4739,7 @@ Wire Wire Line
 Wire Wire Line
 	14425 10025 13625 10025
 $Bitmap
-Pos 875  30725
+Pos 950  29500
 Scale 1.000000
 Data
 89 50 4E 47 0D 0A 1A 0A 00 00 00 0D 49 48 44 52 00 00 00 78 00 00 00 78 08 02 00 00 00 B6 06 A1 
