@@ -728,9 +728,9 @@ F 0 "J1" H 26950 14800 140 0001 C CNN
 F 1 "ConnectorA1-100" H 26950 14900 140 0001 C CNN
 F 2 "" H 26950 14950 140 0001 C CNN
 F 3 "" H 26950 14950 140 0001 C CNN
-F 4 "OPCDFL" H 26525 14650 140 0000 R BNB "Caption"
+F 4 "OPMSW2" H 26525 14650 140 0000 R BNB "Caption"
 F 5 "SMSEPR" H 26525 14475 140 0000 R CNB "Caption2"
-F 6 "OPCDEL" H 26525 14300 140 0000 R TNB "Caption3"
+F 6 "OPCDFL" H 26525 14300 140 0000 R TNB "Caption3"
 	9    26950 14475
 	-1   0    0    -1  
 $EndComp
@@ -3658,7 +3658,7 @@ Wire Wire Line
 Wire Wire Line
 	12475 16100 13325 16100
 $Bitmap
-Pos 33175 25625
+Pos 33125 23725
 Scale 1.000000
 Data
 89 50 4E 47 0D 0A 1A 0A 00 00 00 0D 49 48 44 52 00 00 00 78 00 00 00 78 08 02 00 00 00 B6 06 A1 
@@ -4522,5 +4522,5 @@ C6 5C DC 75 02 E5 96 B4 52 0D 25 6F F3 00 00 00 00 49 45 4E 44 AE 42 60 82
 EndData
 $EndBitmap
 Text Notes 33425 29700 0    140  ~ 28
-Notes from the Virtual AGC Project:\n1. This CAD drawing was manually transcribed from the original Apollo Program \n   drawing 2005912B, but does not itself date from the Apollo period. — RSB 2018\n2. The original drawing 2005912B consisted of two sheets.  Due to the hierarchical\n   nature of circuit blocks A, D, P, R, XT, and Y, the second of the original sheets has\n   become this top-level sheet, while the first of the original sheets has been split into\n   6 separate sheets, one for each of the circuit blocks mentioned.  This procedure,\n   and the characteristics of the CAD system used, have also caused various other\n   visual discrepancies between the original drawing and this CAD drawing. \n   — RSB 2018\n3. The CAD sheets for the circuit blocks always show the same reference designators\n   as on the original drawing, whereas for ERC or netlist generations each instance of\n   a circuit block has its own, separate reference designators which we do not display.\n   If a component in a circuit block is edited in the CAD editor, the latter is given by the\n   "Reference" field of the component, while the former is given by the "baseRefd"\n   field.  — RSB 2018\n4. The oval pads numbered 101-171 comprise connector J1, while those numbered\n   201-271 comprise connector J2.  — RSB 2018
+Notes from the Virtual AGC Project:\n1. This CAD drawing was manually transcribed from the original Apollo Program \n   drawing 2005912B, but does not itself date from the Apollo period. — RSB 2018\n2. The original drawing 2005912B consisted of two sheets.  Due to the hierarchical\n   nature of circuit blocks A, D, P, R, XT, and Y, the second of the original sheets has\n   become this top-level sheet, while the first of the original sheets has been split into\n   6 separate sheets, one for each of the circuit blocks mentioned.  This procedure,\n   and the characteristics of the CAD system used, have also caused various other\n   visual discrepancies between the original drawing and this CAD drawing. \n   — RSB 2018\n3. The CAD sheets for the circuit blocks always show the same reference designators\n   as on the original drawing, whereas for ERC or netlist generations each instance of\n   a circuit block has its own, separate reference designators which we do not display.\n   If a component in a circuit block is edited in the CAD editor, the latter is given by the\n   "Reference" field of the component, while the former is given by the "baseRefd"\n   field.  — RSB 2018\n4. The oval pads numbered 101-171 comprise connector J1, while those numbered\n   201-271 comprise connector J2.  — RSB 2018\n5. On the original drawing, connector pad 109 is captioned OPCDEL for module A27 and\n   OPCDFL for module A29.  In this transcription we instead use OPCDFL for module A27\n   and OPMSW2 for module A29.  The full rationale for this is too lengthy to fit into this \n   space, so suffice it to say that document ND-1021042 agrees with our labeling.  As \n   for how this mistake appeared on the schematic in the first place, it may have been\n   an attempt to fix an error in the labeling of module A27 in the preceding revision of \n   the drawing (2005912A) that was accidentally applied to module A29's labeling\n   instead.  — RSB 2018
 $EndSCHEMATC
