@@ -16,10 +16,120 @@
     <script type="text/javascript">
   document.write(headerTemplate.replace("@TITLE@","Electro-Mechanical Page").replace("@SUBTITLE@","AGC Electrical Schematics and Mechanical Drawings"))
   </script> <i> </i>
+    <h1>Introduction</h1>
+    <p>Most of the remainder of this website, other than this page, is
+      devoted to the <i>software</i> for the Apollo Guidance Computer
+      (the AGC).&nbsp; In various pages of the site we talk a lot about
+      the software that ran on the AGC, about the software that
+      originally prepared the AGC's flight software software for actual
+      use, about the documentation for the AGC's software, about our
+      modern open-source replacements for that preparation software,
+      about our open-source software for simulating the behavior of the
+      AGC and its display/keyboard peripheral (the DSKY), about the
+      integration of our AGC simulation software into modern
+      spaceflight-simulation software, about the people who originally
+      coded the software, and so on.&nbsp; In other words, Software,
+      software, software, and then more software, for dessert!<br>
+    </p>
+    <p>Admittedly, there are a few places on the site where we change
+      course a bit to discuss the AGC and DSKY hardware, mainly to
+      discuss <a href="Pultorak.html">various people's personal
+        projects to make modern hardware recreations of the AGC and/or
+        DSKY</a>.&nbsp; All of those efforts derive, in some sense from
+      John Pultorak's original attempt to provide a simulation of the
+      Block I AGC.&nbsp; But when we provide this material, we don't
+      really go into detail, and simply let people speak in their own
+      words about whatever they're willing to share, and then direct you
+      to their own websites (if any) or caches of photographs or movies
+      of their equipment in action.&nbsp; That approach has some
+      drawbacks, though, since people may not choose to share their
+      design files, may (and usually do) work in some kind of electrical
+      or mechanical design environment that's congenial to them but
+      which the rest of us don't have the financial resources or
+      inclination to duplicate, and of course, <i>never</i> give you
+      actual access to their hardware creations; if you want access, you
+      have to build one yourself!<br>
+    </p>
+    <p>On this page, though, we change course quite a lot, and provide a
+      <i>lot</i> of resources related to the AGC/DSKY hardware.&nbsp;
+      Too much, perhaps!&nbsp; As with our software efforts, of course,
+      this is an ongoing effort that will probably never be 100%
+      complete.&nbsp; But here, briefly, is what we trying to provide
+      for you on this "electro-mechanical" page.<br>
+    </p>
+    <ul>
+      <li>Complete set of electrical schematics for AGC and DSKY, in the
+        form of scanned images of the original Apollo Program drawings.</li>
+      <li>Electrically and visually accurate transcriptions of those
+        electrical schematics into a modern open-source electrical CAD
+        program.</li>
+      <li>Translation of AGC electrical design into Verilog
+        hardware-description language.<br>
+      </li>
+      <li>Simulation of the AGC hardware, via modern open-source
+        Verilog-simulation software.</li>
+    </ul>
+    <p>Once all of this material is in place, so what?&nbsp; Well,
+      there's a lot of interesting stuff you can do with it if you're so
+      inclined:<br>
+    </p>
+    <ul>
+      <li>Having <i>all</i> versions of the electrical schematics, if
+        we ever do have them, allows you to see how the AGC hardware
+        design changed over time.&nbsp; And by all versions, I mean both
+        Block I and Block II.<br>
+      </li>
+      <li>The transcriptions into CAD:</li>
+      <ul>
+        <li>Gives you highly legible forms of the schematics to look at
+          (as opposed to nasty, smudgy scans of 50-year-old photocopies,
+          which is generally the other alternative), color-coded,
+          searchable, and with modern notes added to alert you of errors
+          in the schematics.</li>
+        <li>Gives you an easy way to modify the design to a more
+          modern-friendly form if you happen to want to build your own
+          hardware recreation of the AGC or DSKY.</li>
+        <li>You could even lay out your own circuit boards, if you were
+          so inclined.<br>
+        </li>
+      </ul>
+      <li>With a Verilog translation of the design, you could, perhaps
+        create an AGC within an FPGA or set of FPGAs.<br>
+      </li>
+      <li>Simulation of the AGC hardware is a particularly fun
+        proposition, since once you can simulate the AGC hardware, you
+        can actually run the AGC software on the simulation in a very
+        accurate manner (albeit <i>very</i> slowly!), and can look at
+        of the AGC's internal (and external) signals to gain a high
+        degree of insight into how the AGC actually operated.&nbsp; It
+        will impress your friends no end, no doubt!</li>
+    </ul>
+    <p>Because this is a work in progress, though, you may not see <i>all</i>
+      of this material available just yet.&nbsp; Just have a bit of
+      patience.<br>
+    </p>
+    <ul>
+    </ul>
+    <p>What about the mechanical design?&nbsp; After all, I've barely
+      mentioned it after first bringing it up.&nbsp; It's just that our
+      mechanical effort hasn't advanced very far yet, due to the effort
+      poured so far into the electrical effort.&nbsp; The roadmap for
+      the mechanical effort will be this, when the time comes:&nbsp;
+      provide scans of all original mechanical drawings,
+      visually-accurate transcription into some open 2D CAD format
+      (probably DXF), and mechanically-accurate reworking into some open
+      3D-model format (if/when an appropriate format exists).<br>
+    </p>
     <h1><a name="Contents"></a>Contents</h1>
     <ul>
-      <li><a href="#Introduction">Introduction</a></li>
+      <li><a href="#Sources_of_Information">Sources of Information</a><br>
+      </li>
+      <li><a href="#Versioning">Versioning the AGC and DSKY<br>
+        </a></li>
       <li><a href="#CAD_Files_and_Images">CAD Files and Images</a></li>
+      <li><a href="#Basic_Procedures_for_Transcription_of_a">Basic
+          Partitioning of the AGC Electronics</a><br>
+      </li>
       <li><a href="#Drawings_for_Block_I_AGC">Drawings for Block I AGC</a><br>
       </li>
       <ul>
@@ -71,40 +181,388 @@
           Drawings</a></li>
       <li><a href="#Electronics_Component_Part_Numbers">Appendix:
           Electronics Component Part Numbers</a></li>
-      <li><a href="#Appendix:_KiCad_for_Virtual_AGC">Appendix: Using
-          KiCad to Transcribe Drawings for Virtual AGC</a></li>
       <li><a href="#Appendix:_Signal_Wiring_Diagrams">Appendix: Signal
-          Wiring Diagrams for AGC 2003100 and the NOR-Gate Problem</a><br>
+          Wiring Diagrams for AGC 2003100 and the NOR-Gate Problem</a></li>
+    </ul>
+    <h1><a name="Sources_of_Information"></a>Sources of Information</h1>
+    <p>The full sets of AGC/DSKY electro-mechanical drawings available
+      to us at the present time are these:</p>
+    <ul>
+      <li><a href="klabs/history/agc_schematics_block2/">Folder of JPG
+          scans of drawings preserved by Eldon Hall</a>, and then
+        donated to the now-essentially-defunct klabs.org.&nbsp; Contains
+        most of the available drawings for AGC p/n 2003993. <br>
+      </li>
+      <li>The "AGC Handbook", contributed by Don Eyles.&nbsp; Mostly
+        contains drawings for AGC/DSKY part numbers <i>other</i> than
+        AGC p/n 2003993.&nbsp; Contains many other drawings than just
+        the electrical schematics, including top-level indices,
+        mechanical drawings, wiring diagrams, assembly drawings, and
+        even software lists.&nbsp; The AGC Handbook scans are available
+        in two forms:</li>
+      <ul>
+        <li><a href="Documents/agc_handbook_jp2.pdf">Reduced-size
+            (170MB), reduced-quality PDF hosted locally here at the
+            Virtual AGC website</a>.&nbsp; Thanks to Hartmuth
+          Gutsche,&nbsp;<a href="Documents/AGCHandbookDrawingIndex.xlsx">there's
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            also a neat index</a> that shows all of the drawings vs
+          their page numbers within the the handbook.</li>
+        <li><a href="https://archive.org/details/agc_handbook_jp2">Full-quality
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            scans, hosted on our Virtual AGC project page at the
+            Internet Archive</a>.&nbsp; The drawings can be individually
+          viewed in full-quality form online there, or else you can
+          download the entire set of drawings (4.2GB) in JPEG2000
+          format.&nbsp; See the <a
+            href="ElectroMechanical.html#Appendix:_Index_and_Links_to_all_AGC_">Appendix</a>
+          for an index of all of the full-quality drawings and
+          individual links to them, based on Hartmuth's index of the
+          low-quality PDF mentioned above.<br>
+        </li>
+      </ul>
+    </ul>
+    Often, some revision of a drawing which is not part of one of the
+    AGC/DSKY assemblies listed on this page, but nevertheless appears in
+    the AGC Handbook, is more legible than the corresponding revision we
+    are listing here.&nbsp; So it's often useful to look at those other
+    revisions of the drawings in additions to the ones we are listing
+    here on this page.&nbsp; In the handful of cases in which the same
+    drawing appears in both Eldon's and Don's set, the one in Eldon's
+    set will typically (but not always) be the more legible one.<br>
+    <br>
+    Besides these primary sources, there are additional (sometimes
+    overlapping) essentially complete electrical schematics available
+    in:<br>
+    <ul>
+      <li>For Block II and LM:&nbsp; <a
+          href="Documents/acelectroniclmma00acel_0.pdf">AC Electronics
+          manual ND-1021042 volume 2</a>.&nbsp; Or, the full resolution
+        scan (<a
+          href="https://archive.org/stream/acelectroniclmma00acel_0">volume
+
+
+
+
+
+
+
+
+
+
+          2</a>). <br>
+      </li>
+      <li>For Block I: <a href="Documents/apollocommandmodacel.pdf">AC
+          Electronics manual ND-1021041 volume 1</a> and <a
+          href="Documents/apollocommandmodacel_0.pdf">volume 2</a>.&nbsp;
+
+
+
+
+
+
+
+
+
+
+        Or, the full-resolution scans (<a
+          href="https://archive.org/details/apollocommandmodacel">volume
+          1</a> and <a
+          href="https://archive.org/details/apollocommandmodacel_0">volume
+
+
+
+
+
+
+
+
+
+
+          2</a>).<br>
       </li>
     </ul>
-    <h1><a name="Introduction"></a>Introduction</h1>
-    <p>This page of the Virtual AGC website is very technical, and not
-      likely to be of interest unless you are very familiar with
-      electronics design.&nbsp; The goal of this page is to present the
-      complete electrical schematics and mechanical drawings for every
-      major version of the AGC and DSKY units.&nbsp; We don't yet fully
-      succeed in doing so.&nbsp; Additionally, there are drawings
-      related to various intermediate versions of the AGC and DSKY which
-      we point out to you as a resource, but let you digest them for
-      yourself if you're interested, rather than trying to do so for
-      you.<br>
-    </p>
-    <p>"Versions" of the AGC and DSKY? Huh?<br>
-    </p>
+    In saying "essentially complete", what I mean is that the schematics
+    in these volumes aren't precisely in the form of the original
+    drawings, but rather have been redrafted by AC Electronics to fit
+    into the format of their volumes.&nbsp; Thus, they are subject to
+    mistakes (and potentially, corrections) by AC Electronics, and
+    cannot necessarily be straightforwardly matched to specific drawing
+    numbers or revisions.&nbsp; On the other hand, the authors of those
+    manuals had access to much more legible versions of the electrical
+    schematics than we do, and our scans of the manuals are terrific, so
+    the manuals can often be used to resolve some text that's too smudgy
+    to read otherwise. These AC Electronics manuals also contain
+    extensive textual descriptions of the theory of operation of the
+    electronics (among other things).<br>
+    <br>
+    Surprisingly, while we have schematics in one form or another for
+    all AGC/DSKY modules, though not necessarily in all of the different
+    forms or versions we like, and we have wiring diagrams for the DSKY
+    backplane into which its modules are inserted, we do <i>not</i>
+    have wiring diagrams for the AGC backplane.&nbsp; (See <a
+      href="#Basic_Partitioning_of_the_AGC">this section</a> for a
+    discussion of how the AGC circuitry is partitioned up.)&nbsp;
+    Nevertheless, we do have enough information about it to be useful,
+    compiled by two techniques:&nbsp; Firstly, the the electrical
+    schematics for the individual circuit modules list "net names" for
+    all of the connector pins going from the module to the backplane, so
+    we do know how the modules were interconnected on the backplane;
+    secondly, physical AGCs can have their backplanes mapped by means of
+    continuity checking with an ohmmeter.&nbsp; Mike Stewart has put
+    together <a
+      href="https://github.com/virtualagc/agc_hardware/blob/block2/delphi.db">a
+      helpful sqlite database</a> and <a
+      href="http://apolloguidance.computer/pins">an interactive, online
+      form of it</a>, based on mapping out the backplane for AGC s/n 14.<br>
+    <br>
+    Other such alternate or partial AGC/DSKY schematics <i>may</i> be
+    available in <a href="links.html#AGC_electrical_schematics">the
+      "AGC electrical schematics" section of our document-library page</a>.<br>
+    <br>
+    Besides the AGC Handbook, additional information used for
+    cross-referencing the various drawings to specific AGC or DSKY part
+    numbers and/or serial numbers came from a couple of sources:<br>
+    <ul>
+      <li>Section 3.7 of the <a
+href="Documents/NAS9-497_ApolloPrimaryGuidanceNavigationAndControlSystem.pdf">AC
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+          Electronics Final Report on Contract NAS9-497</a> and tables
+        7-IV and 7-VI of the <a
+          href="Documents/R-700-Volume-3-2nd-copy.pdf">Instrumentation
+          Labs Final Report on Contracts NAS9-153 and NAS9-4065</a> can
+        be used to relate many AGC and DSKY serial numbers to the
+        specific missions (or in some cases, other purposes) for which
+        they were used.&nbsp; In some cases, there is a discrepancy
+        between these two documents (e.g., which DSKYs were assigned to
+        LM-10), in which case the latter document was chosen to be
+        authoritative.<br>
+      </li>
+      <li>For Block I, <a
+href="https://archive.org/stream/apollocommandmodacel_0#page/18/mode/1up">Table
+
+
+
+
+
+
+
+
+
+
+
+
+          8-III in AC Electronics manual ND-1021041</a> can be used to
+        obtain drawing numbers for what we believe are AGC 1003700 and
+        DSKYs 1003706 and 1003707.<br>
+      </li>
+      <li>For Block II and LM, tables <a
+href="https://archive.org/stream/acelectroniclmma00acel_0#page/n481/mode/1up">8-II</a>
+        and <a
+          href="https://archive.org/stream/acelectroniclmma00acel#page/n197">3-IE</a>
+        in AC Electronics manual 1021042 can be used to obtain drawing
+        numbers of electrical schematics corresponding to several AGC
+        and DSKY assembly part numbers.</li>
+    </ul>
+    <ul>
+    </ul>
+    <h1><a name="Versioning"></a>Versioning the AGC and DSKY<br>
+    </h1>
+    "Versions" of the AGC and DSKY? Huh?&nbsp; This is not a concept
+    mentioned elsewhere on the site, other than the fact that there were
+    earlier "Block I" and later "Block II" versions of everything.<br>
     <p>Well, like the AGC's software, the AGC's hardware (electrical and
       mechanical design) evolved over time.&nbsp; For example, not all
       AGC electrical schematics are created equal ... you have to know
       which specific AGC model number you're interested in, since its
       electrical schematics and mechanical configuration may be
       different than other AGC models.&nbsp; There were a <i>lot</i> of
-      different versions of the AGC over time, and not just the major
-      distinction between Block I and Block II AGCs with which you may
-      be familiar.&nbsp; The same comment goes for DSKY units (and other
-      components as well, though we won't concern ourselves with any of
-      them).&nbsp; The good news is that the changes were prior to any
-      actual missions, and mostly didn't affect software, so there was
-      much less variation in electrical design from mission to mission
-      than there was for the software design.<br>
+      different versions of the AGC over time.&nbsp; The same comment
+      goes for DSKY units (and other components as well, though we won't
+      concern ourselves with any of them).&nbsp; The good news is that
+      the changes were prior to any actual missions, and mostly didn't
+      affect software, so there was much less variation in electrical
+      design from mission to mission than there was for the software
+      design.<br>
     </p>
     <p>The AGC and DSKY part-numbering scheme looked like this:<br>
     </p>
@@ -135,11 +593,17 @@
     </p>
     <p>Sadly, in most cases, though with some happy rare exceptions, we
       don't presently have enough information to actually tell you which
-      versions of every AGC or DSKY flew on which missions anyway.&nbsp;
-      Oddly, even though we don't know their part numbers, we <i>do</i>
-      have enough information to know which <i>serial numbers</i> of
-      AGC and DSKY units flew on which missions.&nbsp; That information
-      is given in an <a href="#AGC_or_DSKY_Part_Numbers_vs_Serial">Appendix</a>.&nbsp;
+      versions of every AGC or DSKY flew on which missions.&nbsp; Oddly,
+      even though we don't know their part numbers, we <i>do</i> have
+      enough information to know which <i>serial numbers</i> of AGC and
+      DSKY units flew on which missions.&nbsp; That information is given
+      in an <a href="#AGC_or_DSKY_Part_Numbers_vs_Serial">Appendix</a>.&nbsp;
+
+
+
+
+
+
 
 
 
@@ -295,356 +759,44 @@
       justified in believing that the 2003200 AGC is pretty close to
       being a 2003993 AGC.<br>
     </p>
-    <p>More drawings are available than just those presented
-      specifically on this page.&nbsp; The full sets of drawings
-      available to us at the present time are these:</p>
-    <ul>
-      <li><a href="klabs/history/agc_schematics_block2/">Folder of JPG
-          scans of drawings preserved by Eldon Hall</a>, and then
-        donated to the now-essentially-defunct klabs.org.&nbsp; Contains
-        most of the available drawings for AGC p/n 2003993. <br>
-      </li>
-      <li>The "AGC Handbook", contributed by Don Eyles.&nbsp; Contains
-        most of the drawings for AGC/DSKY part numbers <i>other</i>
-        than AGC p/n 2003993.&nbsp; Contains many other drawings than
-        just the electrical schematics, including top-level indices,
-        mechanical drawings, wiring diagrams, assembly drawings, and
-        even software lists.&nbsp; The AGC Handbook scans are available
-        in two forms:</li>
-      <ul>
-        <li><a href="Documents/agc_handbook_jp2.pdf">Reduced-size
-            (170MB), reduced-quality PDF hosted locally here at the
-            Virtual AGC website</a>.&nbsp; Thanks to Hartmuth
-          Gutsche,&nbsp;<a href="Documents/AGCHandbookDrawingIndex.xlsx">there's
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-            also a neat index</a> that shows all of the drawings vs
-          their page numbers within the the handbook.</li>
-        <li><a href="https://archive.org/details/agc_handbook_jp2">Full-quality
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-            scans, hosted on our Virtual AGC project page at the
-            Internet Archive</a>.&nbsp; The drawings can be individually
-          viewed in full-quality form online there, or else you can
-          download the entire set of drawings (4.2GB) in JPEG2000
-          format.&nbsp; See the <a
-            href="#Appendix:_Index_and_Links_to_all_AGC_">Appendix</a>
-          for an index of all of the full-quality drawings and
-          individual links to them, based on Hartmuth's index of the
-          low-quality PDF mentioned above.<br>
-        </li>
-      </ul>
-    </ul>
-    Often, some revision of a drawing which is not part of one of the
-    AGC/DSKY assemblies listed on this page, but nevertheless appears in
-    the AGC Handbook, is more legible than the corresponding revision we
-    are listing here.&nbsp; So it's often useful to look at those other
-    revisions of the drawings in additions to the ones we are listing
-    here on this page.&nbsp; In the handful of cases in which the same
-    drawing appears in both Eldon's and Don's set, the one in Eldon's
-    set will typically be the more legible.<br>
-    <br>
-    Besides these primary sources, there are additional (sometimes
-    overlapping) essentially complete electrical schematics available
-    in:<br>
-    <ul>
-      <li>For Block II and LM:&nbsp; <a
-          href="Documents/acelectroniclmma00acel_0.pdf">AC Electronics
-          manual ND-1021042 volume 2</a>.&nbsp; Or, the full resolution
-        scan (<a
-          href="https://archive.org/stream/acelectroniclmma00acel_0">volume
-
-
-
-
-          2</a>). <br>
-      </li>
-      <li>For Block I: <a href="Documents/apollocommandmodacel.pdf">AC
-          Electronics manual ND-1021041 volume 1</a> and <a
-          href="Documents/apollocommandmodacel_0.pdf">volume 2</a>.&nbsp;
-
-
-
-
-        Or, the full-resolution scans (<a
-          href="https://archive.org/details/apollocommandmodacel">volume
-          1</a> and <a
-          href="https://archive.org/details/apollocommandmodacel_0">volume
-
-
-
-
-          2</a>).<br>
-      </li>
-    </ul>
-    In saying "essentially complete", what I mean is that the schematics
-    in these volumes aren't precisely in the form of the original
-    drawings, but rather have been redrafted by AC Electronics to fit
-    into the format of their volumes.&nbsp; Thus, they are subject to
-    mistakes (and potentially, corrections) by AC Electronics, and
-    cannot necessarily be straightforwardly matched to specific drawing
-    numbers or revisions.&nbsp; These AC Electronics manuals also
-    contain extensive textual descriptions of the theory of operation of
-    the electronics (among other things)<br>
-    <br>
-    Other such alternate or partial AGC/DSKY schematics may be available
-    in <a href="links.html#AGC_electrical_schematics">the "AGC
-      electrical schematics" section of our document-library page</a>.<br>
-    <br>
-    Besides the AGC Handbook, additional information for used for
-    cross-referencing the various drawings to specific AGC or DSKY part
-    numbers and/or serial numbers came from a couple of sources:<br>
-    <ul>
-      <li>Section 3.7 of the <a
-href="Documents/NAS9-497_ApolloPrimaryGuidanceNavigationAndControlSystem.pdf">AC
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-          Electronics Final Report on Contract NAS9-497</a> and tables
-        7-IV and 7-VI of the <a
-          href="Documents/R-700-Volume-3-2nd-copy.pdf">Instrumentation
-          Labs Final Report on Contracts NAS9-153 and NAS9-4065</a> can
-        be used to relate many AGC and DSKY serial numbers to the
-        specific missions (or in some cases, other purposes) for which
-        they were used.&nbsp; In some cases, there is a discrepancy
-        between these two documents (e.g., which DSKYs were assigned to
-        LM-10), in which case the latter document was chosen to be
-        authoritative.<br>
-      </li>
-      <li>For Block I, <a
-href="https://archive.org/stream/apollocommandmodacel_0#page/18/mode/1up">Table
-
-
-
-
-
-
-          8-III in AC Electronics manual ND-1021041</a> can be used to
-        obtain drawing numbers for what we believe are AGC 1003700 and
-        DSKYs 1003706 and 1003707.<br>
-      </li>
-      <li>For Block II and LM, tables <a
-href="https://archive.org/stream/acelectroniclmma00acel_0#page/n481/mode/1up">8-II</a>
-        and <a
-          href="https://archive.org/stream/acelectroniclmma00acel#page/n197">3-IE</a>
-        in AC Electronics manual 1021042 can be used to obtain drawing
-        numbers of electrical schematics corresponding to several AGC
-        and DSKY assembly part numbers.</li>
-    </ul>
+    <p>In other words, with few exceptions, most Block II AGC software
+      that we have should run on any of the Block II AGC/DSKY models to
+      which we're likely to be able to get.&nbsp; Similarly, though Mike
+      doesn't address it above, the same is true of the Block I AGC
+      software we have and the Block I AGC electrical schematics we
+      have.<br>
+    </p>
     <h1><a name="CAD_Files_and_Images"></a>CAD Files and Images</h1>
     <p>In addition to providing scans of original electrical and
-      mechanical drawings from the Apollo program, <i>some</i> of those
-      drawings have been manually transcribed into CAD files, and thus
-      can be used for a variety of purposes, such as:<br>
-    </p>
-    <ul>
-      <li>Create custom AGC or DSKY designs based on the original Apollo
-        Program electrical designs.</li>
-      <li>Design and fabricate actual circuit boards faithful to the
-        original schematics.&nbsp; (Actually, this isn't <i>completely</i>
-        possible, since the dual triple-input NOR gate IC's used in the
-        AGC and the relays used in the DSKY are no longer
-        available.&nbsp; Working that out is a problem for the
-        reader.&nbsp; <img src="smiley.png" alt="" width="16"
-          height="16">)<br>
-      </li>
-      <li>Simply make prettier drawings that are more legible than the
-        now rather-degraded original drawings.&nbsp; <br>
-      </li>
-      <li>Once we have <i>complete</i> sets of electrical CAD files for
-        any given AGC version, you will be able simulate the hardware
-        itself, using <a href="http://iverilog.icarus.com/">Icarus
-          Verilog</a>.&nbsp; That will let you do things, for example,
-        such as running the AGC electrical hardware on a
-        clock-cycle-by-clock-cycle basis, whilst running AGC software
-        like LUMINARY or COLOSSUS on it!&nbsp; So if you were ever eager
-        to see the so-called command sequences in action, you'd be able
-        to. But we're not close to that, at this point, since only a
-        handful of drawings have so far been transcribed.<br>
-      </li>
-    </ul>
-    <p>That's not to everyone's taste or background, of course, so if
-      none of that sounds interesting you can skip right past this
-      sections and live perfectly happily with the original scanned
-      documents instead.&nbsp; Assuming, that is, that you're capable of
-      living "perfectly happily" in the first place.<br>
-    </p>
-    <p>At any rate, if fortune smiles upon us, perhaps one day <i>all</i>
-      of the available original drawings will be available as CAD
-      files.&nbsp; Where those CAD drawings (and printouts of the CAD
-      drawings) exist, they are noted in the remainder of this page as
-      "CAD Files" (for the CAD design files) or "CAD Images" (for PNGs
-      equivalent to the original Apollo drawings, but printed out from
-      the CAD system instead).<br>
+      mechanical drawings from the Apollo program, there is an ongoing
+      effort to transcribe these drawings into CAD files.<br>
     </p>
     <p>Such CAD transcriptions are made as faithfully visually to the
-      original as is feasible, as long as there is no compromise of
-      electrical or mechanical correctness.&nbsp; But realize that
-      transcription is a human effort, so transcribed CAD files may
-      contain errors; conversely, they may from time to time correct
-      errors present in the original drawings — naturally, though, with
+      original as is feasible, given the capabilities of the CAD program
+      involved, as long as there is no compromise of electrical or
+      mechanical correctness.&nbsp; But realize that transcription is a
+      human effort, so transcribed CAD files may at first contain
+      errors; conversely, they may from time to time correct errors
+      present in the original drawings — naturally, though, with
       suitable notes indicating that the change had been made, and
       why.&nbsp; It has also been possible occasionally to reconstruct
-      some currently-missing drawings from the original Apollo Project.
-      <br>
+      some currently-missing drawings from the original Apollo Program.<br>
     </p>
+    <p>Help in proof-reading CAD vs the original drawings is welcomed,
+      and you can contact me directly at the address at the bottom of
+      this page if you're interested.&nbsp; This does not require using
+      CAD or having expert electrical knowledge.&nbsp; It just involves
+      comparing two images like the ones below and seeing how they
+      differ from each other (click to enlarge):<br>
+    </p>
+    <p align="center"><a
+href="file:///home/rburkey/git/virtualagc-web/klabs/history/agc_schematics_block2/logic/a13-1.jpg"></a><a
+        href="klabs/history/agc_schematics_block2/logic/a13-1.jpg"><img
+          src="small-SCAN-2005269-.jpg" alt="Click to enlarge"
+          width="405" height="320" border="2"></a>&nbsp; <a
+        href="KiCad/2005269--p1of1.png"><img
+          src="small-CAD-2005269--.png" alt="Click to enlarge"
+          width="414" height="320" border="2"></a></p>
     <p>No mechanical drawings have yet been transcribed to CAD, so I
       presently have no thoughts to pass along to you about it, or even
       know what CAD system will be used.&nbsp; (I can assure you,
@@ -705,91 +857,222 @@ href="https://archive.org/stream/acelectroniclmma00acel_0#page/n481/mode/1up">8-
 
 
 
+
+
+
+
+
+
         "schematics" branch of our GitHub repository</a>. <br>
     </p>
     <p>There's plenty of online material to help you get started with
       KiCad, if you're inclined to do anything more with the CAD files
-      as such.&nbsp; Still, there are a few points it's worth knowing:<br>
+      as such.&nbsp; But in brief, there are a few points you'll want to
+      know about if you want to specifically work with our electrical
+      schematics in KiCad:<br>
     </p>
     <ul>
-      <li>KiCad is really intended for designing new circuitry, and not
-        for preserving historical schematics in a reasonably
-        visually-faithful form.&nbsp; Hence, we've been generating a
-        pretty steady stream of bug reports back upstream to
-        KiCad.&nbsp; So for now at least, in order to take advantage of
-        whatever fixes the KiCad developers have made in response to
-        these bug reports, it's best to use the <i>nightly build</i> of
-        KiCad (presently v6) rather than a stable version of it
-        (presently v4 or v5).&nbsp; For example, the paper sizes of the
-        original drawings vary from 22"×17" for the <i>tiniest</i>
-        drawings, up to 100"×34" for the largest I've seen so far, and
-        some tweaks to KiCad were necessary get into the upper end of
-        that size range.</li>
-      <li>What you find in the GitHub repository for any given
-        transcribed circuit is the following:</li>
+      <li>It's best to use the <i>nightly build</i> of KiCad (presently
+        v6) rather than a stable version of it (presently v4 or v5), to
+        stay as up-to-date as possible with respect to the bug reports
+        we file.</li>
+      <li>What you find in our GitHub repository for any given
+        transcribed drawing is the following:</li>
       <ul>
-        <li>A KiCad project file called module.pro.&nbsp; Most of
-          electrical drawings pertain to AGC "modules" with designations
-          like A1, A2, ..., or B1, B2, ..., or else to DSKY modules D1,
-          D2, ....&nbsp; Thus what the module.pro file provides you with
-          is the complete circuit for the module.&nbsp; After you open
-          module.pro in KiCad, it will just look like a set of
-          rectangular blocks, one for each of the printed pages of the
-          schematic.&nbsp; Just double-click on one of the blocks to see
-          the schematic for that page.</li>
-        <li>Sometimes, there will also be KiCad project files called
-          board1.pro, board2.pro, ....&nbsp;&nbsp; These appear when the
-          original module consisted of several different circuit
-          boards.&nbsp; The board<i>n</i>.pro projects are used just
-          like the module.pro project, except that you only see the
-          parts of the design appropriate to the specific circuit board.</li>
-        <li>The CAD transcriptions of the individual schematic pages
-          have names like 2005902B.sch (in which the drawing just has
-          one page) or 2005060D-p1of3.sch, 2005060D-p2of3.sch, and&nbsp;
-          2005060D-p3of3.sch (in which the drawing consists of three
-          pages).&nbsp; You could open these directly in the KiCad
-          schematic editor (eeschema) and bypass the KiCad project
-          files, though it's hard to see much reason to do so.<br>
+        <li>A folder called Schematics/<i>DRAWINGNUMBER</i>/ containing
+          the files for the drawing.&nbsp; For example, the CAD files
+          for drawing 2005912B are in Schematics/2005912B/.<br>
         </li>
       </ul>
-      <li>All of the symbol libraries for the KiCad schematic editor
-        (known as eeschema) used in our CAD drawings are <i>custom</i>
-        libraries, and no standard KiCad libraries are used.&nbsp; If
-        you find that symbols are missing in the schematics you load,
-        you'll have to maneuver through KiCad's menu system to
-        individually enable all of the libraries needed.&nbsp; These are
-        the *.lib files in the GitHub repository.&nbsp; There are a lot
-        of them, primarily because of visual and power-supply variations
-        the schematics need for the dual NOR-gate part; the main
-        library, exclusive of the NOR gates, is AGC_DSKY.lib.</li>
+      <ul>
+        <li>A KiCad project file called module.pro, which you will need
+          to open.&nbsp; <br>
+        </li>
+        <li>Once the project is open, you can run the schematic editor
+          (eeschema) from KiCad's menu.&nbsp; The schematic page that
+          opens up will <i>usually</i> look like 2 (or 1 or 3)
+          rectangular blocks.&nbsp; Each of the rectangular blocks
+          represents one of the original sheets of the drawing.&nbsp;
+          Just double-click on one of the blocks to see the schematic
+          for that page. <br>
+        </li>
+        <li>We use a grid size of 25 mils within the schematics.&nbsp;
+          You should set the grid size to 25 mils and stay with it.</li>
+        <li>Similarly, in the preferences, set the default line width to
+          20 mils.<br>
+        </li>
+        <li>Many of the drawings consist largely of open-collector
+          3-input NOR gates and oval-shaped pads, neither marked on the
+          schematics with reference designators, so you may need to rely
+          on notes within the schematic to know what's what.<br>
+        </li>
+      </ul>
+      <li>All of the symbol libraries for eeschema used in our CAD
+        drawings are <i>custom</i> libraries, and no standard KiCad
+        libraries are used.&nbsp; If you find that symbols are missing
+        in the schematics you load, you'll have to maneuver through
+        KiCad's menu system to individually enable all of the libraries
+        needed.&nbsp; These are the *.lib files in the GitHub
+        repository.&nbsp; There are a lot of them, primarily because of
+        visual and power-supply variations the schematics need for the
+        dual NOR-gate part; the main library, exclusive of the NOR
+        gates, is AGC_DSKY.lib.</li>
       <li>You may also get warnings when loading a schematic about the
         library versions having changed and asking if you want to
         "recover" any symbols.&nbsp; The answer is that you do <i>not</i>
         want to recover any of them, which at the present time means you
         will need to uncheck the boxes next to every symbol it offers to
         recover for you.</li>
-      <li>The CAD files, and anything you print or plot from them, will
-        look best if the default line-width settings (found in
-        eeschema's Preferences menu) are changed from the default to 20
-        mils.<br>
+      <li>Printing out one of the designs directly from CAD is presently
+        fairly tricky because of a handful of bugs in KiCad in which the
+        size of our drawings has simply overwhelmed the poor
+        thing.&nbsp;&nbsp; Here's what I've found works best for me in
+        Linux.&nbsp; On other operating systems, you might want to look
+        at the source code of the printKiCad.sh script and either
+        perform what it does manually, or else create a corresponding
+        script in your own native operating system (and send it to me so
+        that I can make it generally available!).&nbsp; Or for that
+        matter, you can just use KiCad to print for you and see for
+        yourself whether or not it's adequate for your purposes, which
+        it may be!<br>
+      </li>
+      <ol>
+        <li>Use the KiCad schematic editor's <i>plot</i> option (not <i>print</i>).&nbsp;
+
+
+
+
+          One of the settings in the menu this calls up is the default
+          line width, which should be 20 mils.&nbsp; Select Postscript
+          as the output format.</li>
+        <li>Make sure <a
+            href="https://www.imagemagick.org/script/index.php">ImageMagick</a>
+          is installed.<br>
+        </li>
+        <li>Run the provided BASH script Scripts/printKiCad.sh.&nbsp;
+          For example, "printKiCad.sh file1.ps file2.ps ...", which
+          would result in the output files file1.png, file2.png,
+          ....&nbsp; What the printKiCad.sh script does for you that
+          might otherwise be problematic is that it treats the sheet's
+          physical size and desired dpi properly, as well as altering
+          the style of dashed lines to a more-legible styling.<br>
+        </li>
+        <li>Use whatever method you like for printing out the PNG
+          files.&nbsp; I find that loading them into the Firefox or
+          Chrome browser works well.<br>
+        </li>
+      </ol>
+    </ul>
+    <ul>
+    </ul>
+    <h1><a name="Basic_Partitioning_of_the_AGC"></a>Basic Partitioning
+      of the AGC Electronics<br>
+    </h1>
+    <p><i>(This section is under construction, is incomplete, and is
+        very likely full of really dumb errors.)</i><br>
+    </p>
+    <p>The Block II or LM AGC contains two trays of electronics, the
+      A-tray and the B-tray.<br>
+      <br>
+    </p>
+    <div align="center"><img
+        src="file:///home/rburkey/git/virtualagc-web/SF9-PopulatedTrayA.jpg"
+        alt="" width="1398" height="869"></div>
+    <p> </p>
+    <p>The trays contain connectors allowing A to be connected to B, or
+      vice-versa, and to the outside world.&nbsp; Each tray also
+      contains a "backplane" into which electronics modules can be
+      plugged.&nbsp; The A-tray modules have designations like A1, A2,
+      ..., A31, while the B-tray modules have designations like B1, B2,
+      ..., B17.<br>
+    </p>
+    <div align="center"><img src="SF9-PartiallyExposedTrayB.jpg" alt=""
+        width="1137" height="570"></div>
+    <p>Each of these modules has an associated drawing.&nbsp; For
+      example, in the 2003200-011 AGC, module A1 (the "scaler" module)
+      has electrical drawing 2005259A.&nbsp; In other words, each module
+      is considered to comprise a single circuit, with a unique (though
+      possibly multi-sheet) drawing.<br>
+    </p>
+    <p>Modules A1 - A24 consist entirely of "logic": i.e., their
+      electrical drawings consist entirely of NOR-gates and the
+      connectors for plugging the modules into the
+      backplane.&nbsp;&nbsp;&nbsp; For this reason, I suppose, the
+      drawings aren't called "schematics", but are given the special
+      name "LOGIC FLOW DIAGRAMS".&nbsp; But they're schematics
+      anyway.&nbsp; Modules A25 - A31 and B1 - B17 are entirely analog
+      in nature and are specifically called "SCHEMATICS".<br>
+    </p>
+    <p>As far as the construction of the circuitry is concerned, three
+      basic techniques were intermixed:<br>
+    </p>
+    <ul>
+      <li>Logic-flow module (A1 - A24) construction changed over time:</li>
+      <ul>
+        <li>Early 2003100 AGCs: The components of a module were
+          partitioned into 4 "quadrants", and the components of each
+          quadrant were mounted on a multilayer nickel ribbon.&nbsp; The
+          4 ribbons themselves were also interconnected at various
+          strategic spots.&nbsp; This design proved not to work properly
+          because of excessive interconnection delays due to the
+          properties of the ribbon, though as far as I know, the design
+          was basically sound in other respects and should still work if
+          a better interconnection technique is used.<br>
+        </li>
+        <li>2003993, 2003200, and later 2003100 AGCs: Each module
+          contains two multilayer circuit boards, though I've chosen to
+          show you only one of them in the image below.&nbsp; We'd see
+          the other one if we flipped the module over.<br>
+        </li>
+      </ul>
+    </ul>
+    <blockquote><img src="SF9-A1-side.jpg" alt="" width="1338"
+        height="270"><br>
+    </blockquote>
+    <ul>
+      <ul>
+      </ul>
+      <li>Analog modules (A25 - A29, B1 - B17):&nbsp; These used
+        so-called "welded cordwood" construction.&nbsp; What that means
+        is that you have a metal block with holes in it, like Swiss
+        cheese; the components (such as resistors, capacitors,
+        transistors, etc.) are inserted into the holes in the block,
+        with their leads protruding from either side.&nbsp; Wires are
+        then welded (not soldered) to the leads to interconnect the
+        components.&nbsp; In the image below, note the nifty insert
+        providing reference designators for the components.<br>
       </li>
     </ul>
-    <p>My original thoughts on transcription of the electrical CAD
-      drawings is that while it was initially an individual effort, it
-      might eventually become a community effort, much like our
-      transcription process for AGC <i>software</i> did.&nbsp; As time
-      has passed, though, it has become clear to me that electrical
-      transcription is a task for experts.&nbsp; Still, I could
-      definitely use some help, if you feel you are qualified and
-      determined enough to do so.&nbsp; Some of the issues involved are
-      covered in <a href="#Appendix:_KiCad_for_Virtual_AGC">the
-        Appendix</a>, and you could look it over to get a sense of the
-      difficulties before stepping forward to volunteer.<br>
+    <div align="center"><img src="SF9-B8-flip-zoom.jpg" alt=""
+        width="1410" height="567"><br>
+    </div>
+    <ul>
+      <li>The backplane was wirewrapped.</li>
+    </ul>
+    <div align="center"><img src="SF9-PartialBackplane.jpg" alt=""
+        width="1383" height="814"><br>
+    </div>
+    <ul>
+    </ul>
+    <p>Of course, these details don't matter much in modern terms unless
+      you're <i>very</i> enthusiastic about building an AGC recreation
+      and want to do it absolutely 100% authentically.&nbsp; If you
+      were, you would be defeated in the end by the fact that the
+      electronic components originally used, such as the dual
+      triple-input NOR gates, are no longer available in precisely the
+      form they were originally used.&nbsp; And while I haven't priced
+      ferrite memory lately, I expect that it's probably not terribly
+      cost-effective.&nbsp; <img src="smiley.png" alt="" width="16"
+        height="16">&nbsp; Though, surprisingly, you can get junked
+      ferrite-memory systems from eBay; not from the AGC, naturally, but
+      perhaps close enough that they could be made to work if mined for
+      parts.<br>
     </p>
-    <p>Help in proof-reading CAD images vs the original drawings is much
-      less of an expert job, and anyone with sufficient toleration for
-      that kind of activity could do it.<br>
+    <p>The pictures in this section, taken by Mike Stewart, are of
+      Jimmie Loocke's model 2003100-071 AGC, s/n 14. <br>
     </p>
+    <ul>
+    </ul>
     <h1><a name="Drawings_for_Block_I_AGC"></a>Drawings for Block I AGC<br>
     </h1>
     <p> </p>
@@ -798,7 +1081,7 @@ href="https://archive.org/stream/acelectroniclmma00acel_0#page/n481/mode/1up">8-
     <ul>
     </ul>
     <h2><a name="1003700"></a>Drawings for Block I AGC p/n 1003700</h2>
-    <p>This seems to be the final form of the Block I AGC design.<br>
+    <p>1003700 seems to be the final form of the Block I AGC design.<br>
     </p>
     <p>We do not have the original electrical-schematic drawings for any
       Block I AGC at the present time, but we do have <a
@@ -1252,7 +1535,7 @@ href="https://archive.org/stream/acelectroniclmma00acel_0#page/n481/mode/1up">8-
     </table>
     <br>
     <h2><a name="1003563"></a>Drawings for Block I Main DSKY p/n 1003563</h2>
-    <p>This seems to have been the final design for the Block I main
+    <p>1003563 seems to have been the final design for the Block I main
       DSKY.<br>
     </p>
     <div align="center"><a href="1003563-031-1.jpg"><img alt=""
@@ -1347,8 +1630,8 @@ href="https://archive.org/stream/acelectroniclmma00acel_0#page/n481/mode/1up">8-
     </h1>
     <h2><a name="1003706"></a>Drawings for Block I Navigation DSKY p/n
       1003706</h2>
-    <p>This seems to have been the final form of the Block I navigation
-      DSKY design.<br>
+    <p>1003706 seems to have been the final form of the Block I
+      navigation DSKY design.<br>
     </p>
     <p>We do not have the original electrical-schematic drawings for any
       Block I nav DSKY at the present time, but we do have <a
@@ -1467,14 +1750,19 @@ href="https://archive.org/stream/acelectroniclmma00acel_0#page/n481/mode/1up">8-
       did have some interaction with each other.&nbsp; Later designs
       removed the concept of quadrants altogether.<br>
     </p>
-    <p>In addition to the reference sources mentioned earlier, <a
-        href="Documents/apollolunarexcuracel_1.pdf">AC Electronics
-        document ND-1021043 of March 10, 1966</a>, supposedly relates to
-      AGC p/n 203100-021 (according to its Tables 3-I and 7-I), and its
-      Table 8-II lists all of the associated module drawings.&nbsp; So
-      we've used some data from that document as well.&nbsp;
-      Discrepancies between it and the AGC Handbook are noted in the
-      comments.<br>
+    <p>Besides <a href="#Sources_of_Information">the reference sources</a>
+      mentioned earlier, <a href="Documents/apollolunarexcuracel_1.pdf">AC
+
+
+
+
+
+        Electronics document ND-1021043 of March 10, 1966</a>,
+      supposedly relates to AGC p/n 203100-021 (according to its Tables
+      3-I and 7-I), and its Table 8-II lists all of the associated
+      module drawings.&nbsp; But I don't believe there are any
+      differences between the circuitry it presents and that presented
+      by ND-1021042.<br>
     </p>
     <p>In what follows, note that the schematic drawing is all that is
       needed for understanding the electronics as such.&nbsp; Sometimes,
@@ -2014,8 +2302,20 @@ href="https://github.com/virtualagc/virtualagc/tree/schematics/Schematics/200506
 
 
 
+
+
+
+
+
+
               1</a>, <a
               href="klabs/history/agc_schematics_block2/logic/a23-2.jpg">2</a>),
+
+
+
+
+
+
 
 
 
@@ -2292,6 +2592,12 @@ href="https://github.com/virtualagc/virtualagc/tree/schematics/Schematics/200502
 
 
 
+
+
+
+
+
+
               1</a>, <a
               href="klabs/history/agc_schematics_block2/logic/5011-2.jpg">2</a><br>
           </td>
@@ -2329,6 +2635,12 @@ href="https://github.com/virtualagc/virtualagc/tree/schematics/Schematics/200502
           </td>
           <td valign="middle" nowrap="nowrap" align="center">2005259A <a
               href="klabs/history/agc_schematics_block2/logic/a01-1.jpg">page
+
+
+
+
+
+
 
 
 
@@ -2499,6 +2811,12 @@ href="https://github.com/virtualagc/virtualagc/tree/schematics/Schematics/200526
 
 
 
+
+
+
+
+
+
               1</a>, <a
               href="klabs/history/agc_schematics_block2/logic/a03-2.jpg">2</a><br>
           </td>
@@ -2517,6 +2835,12 @@ href="https://github.com/virtualagc/virtualagc/tree/schematics/Schematics/200525
           </td>
           <td valign="middle" nowrap="nowrap" align="center">2005262A <a
               href="klabs/history/agc_schematics_block2/logic/a04-1.jpg">page
+
+
+
+
+
+
 
 
 
@@ -2666,6 +2990,12 @@ href="https://github.com/virtualagc/virtualagc/tree/schematics/Schematics/200526
 
 
 
+
+
+
+
+
+
               1</a>, <a
               href="klabs/history/agc_schematics_block2/logic/a05-2.jpg">2</a><br>
           </td>
@@ -2685,6 +3015,12 @@ href="https://github.com/virtualagc/virtualagc/tree/schematics/Schematics/200526
           </td>
           <td valign="middle" nowrap="nowrap" align="center">2005263A <a
               href="klabs/history/agc_schematics_block2/logic/a06-1.jpg">page
+
+
+
+
+
+
 
 
 
@@ -2833,6 +3169,12 @@ href="https://github.com/virtualagc/virtualagc/tree/schematics/Schematics/200526
 
 
 
+
+
+
+
+
+
               1</a>, <a
               href="klabs/history/agc_schematics_block2/logic/a07-2.jpg">2</a><br>
           </td>
@@ -2851,6 +3193,12 @@ href="https://github.com/virtualagc/virtualagc/tree/schematics/Schematics/200525
           </td>
           <td valign="middle" nowrap="nowrap" align="center">2005255- <a
               href="klabs/history/agc_schematics_block2/logic/a08-1.jpg">page
+
+
+
+
+
+
 
 
 
@@ -2999,6 +3347,12 @@ href="https://github.com/virtualagc/virtualagc/tree/schematics/Schematics/200525
 
 
 
+
+
+
+
+
+
               1</a>, <a
               href="klabs/history/agc_schematics_block2/logic/a09-2.jpg">2</a><br>
           </td>
@@ -3017,6 +3371,12 @@ href="https://github.com/virtualagc/virtualagc/tree/schematics/Schematics/200525
           </td>
           <td valign="middle" nowrap="nowrap" align="center">2005257A <a
               href="klabs/history/agc_schematics_block2/logic/a10-1.jpg">page
+
+
+
+
+
+
 
 
 
@@ -3165,6 +3525,12 @@ href="https://github.com/virtualagc/virtualagc/tree/schematics/Schematics/200525
 
 
 
+
+
+
+
+
+
               1</a>, <a
               href="klabs/history/agc_schematics_block2/logic/a11-2.jpg">2</a>)<br>
           </td>
@@ -3183,6 +3549,12 @@ href="https://github.com/virtualagc/virtualagc/tree/schematics/Schematics/200525
           </td>
           <td valign="middle" nowrap="nowrap" align="center">2005253A <a
               href="klabs/history/agc_schematics_block2/logic/a12-1.jpg">page
+
+
+
+
+
+
 
 
 
@@ -3364,6 +3736,12 @@ href="https://github.com/virtualagc/virtualagc/tree/schematics/Schematics/200526
 
 
 
+
+
+
+
+
+
               1</a>, <a
               href="klabs/history/agc_schematics_block2/logic/a15-2.jpg">2</a><br>
           </td>
@@ -3382,6 +3760,12 @@ href="https://github.com/virtualagc/virtualagc/tree/schematics/Schematics/200526
           </td>
           <td valign="middle" nowrap="nowrap" align="center">2005266- <a
               href="klabs/history/agc_schematics_block2/logic/a16-1.jpg">page
+
+
+
+
+
+
 
 
 
@@ -3530,6 +3914,12 @@ href="https://github.com/virtualagc/virtualagc/tree/schematics/Schematics/200526
 
 
 
+
+
+
+
+
+
               1</a>, <a
               href="klabs/history/agc_schematics_block2/logic/a17-2.jpg">2</a><br>
           </td>
@@ -3548,6 +3938,12 @@ href="https://github.com/virtualagc/virtualagc/tree/schematics/Schematics/200526
           </td>
           <td valign="middle" nowrap="nowrap" align="center">2005268A <a
               href="klabs/history/agc_schematics_block2/logic/a18-1.jpg">page
+
+
+
+
+
+
 
 
 
@@ -3696,12 +4092,21 @@ href="https://github.com/virtualagc/virtualagc/tree/schematics/Schematics/200526
 
 
 
+
+
+
+
+
+
               1</a>, <a
               href="klabs/history/agc_schematics_block2/logic/a19-2.jpg">2</a><br>
           </td>
-          <td valign="middle" nowrap="nowrap" align="center"><br>
+          <td valign="middle" nowrap="nowrap" align="center"><a
+href="https://github.com/virtualagc/virtualagc/tree/schematics/Schematics/2005270-">module</a><br>
           </td>
-          <td valign="middle" nowrap="nowrap" align="center"><br>
+          <td valign="middle" nowrap="nowrap" align="center"><a
+              href="KiCad/2005270--p1of2.png">page 1</a>, <a
+              href="KiCad/2005270--p2of2.png">2</a><br>
           </td>
           <td valign="middle"><br>
           </td>
@@ -3776,12 +4181,21 @@ href="https://github.com/virtualagc/virtualagc/tree/schematics/Schematics/200526
 
 
 
+
+
+
+
+
+
               1</a>, <a
               href="klabs/history/agc_schematics_block2/logic/a20-2.jpg">2</a><br>
           </td>
-          <td valign="middle" nowrap="nowrap" align="center"><br>
+          <td valign="middle" nowrap="nowrap" align="center"><a
+href="https://github.com/virtualagc/virtualagc/tree/schematics/Schematics/2005254-">module</a><br>
           </td>
-          <td valign="middle" nowrap="nowrap" align="center"><br>
+          <td valign="middle" nowrap="nowrap" align="center"><a
+              href="KiCad/2005254--p1of2.png">page 1</a>, <a
+              href="KiCad/2005254--p2of2.png">2</a><br>
           </td>
           <td valign="middle"><br>
           </td>
@@ -3856,14 +4270,24 @@ href="https://github.com/virtualagc/virtualagc/tree/schematics/Schematics/200526
 
 
 
+
+
+
+
+
+
               1</a>, <a
               href="klabs/history/agc_schematics_block2/logic/a21-2.jpg">2</a>,
             <a
               href="klabs/history/agc_schematics_block2/logic/a21-3.jpg">3</a><br>
           </td>
-          <td valign="middle" nowrap="nowrap" align="center"><br>
+          <td valign="middle" nowrap="nowrap" align="center"><a
+href="https://github.com/virtualagc/virtualagc/tree/schematics/Schematics/2005250-">module</a><br>
           </td>
-          <td valign="middle" nowrap="nowrap" align="center"><br>
+          <td valign="middle" nowrap="nowrap" align="center"><a
+              href="KiCad/2005250--p1of3.png">page 1</a>, <a
+              href="KiCad/2005250--p2of3.png">2</a>, <a
+              href="KiCad/2005250--p3of3.png">3</a><br>
           </td>
           <td valign="middle"><br>
           </td>
@@ -3938,12 +4362,21 @@ href="https://github.com/virtualagc/virtualagc/tree/schematics/Schematics/200526
 
 
 
+
+
+
+
+
+
               1</a>, <a
               href="klabs/history/agc_schematics_block2/logic/a22-2.jpg">2</a><br>
           </td>
-          <td valign="middle" nowrap="nowrap" align="center"><br>
+          <td valign="middle" nowrap="nowrap" align="center"><a
+href="https://github.com/virtualagc/virtualagc/tree/schematics/Schematics/2005271-">module</a><br>
           </td>
-          <td valign="middle" nowrap="nowrap" align="center"><br>
+          <td valign="middle" nowrap="nowrap" align="center"><a
+              href="KiCad/2005271--p1of2.png">page 1</a>, <a
+              href="KiCad/2005271--p2of2.png">2</a><br>
           </td>
           <td valign="middle"><br>
           </td>
@@ -4018,12 +4451,21 @@ href="https://github.com/virtualagc/virtualagc/tree/schematics/Schematics/200526
 
 
 
+
+
+
+
+
+
               1</a>, <a
               href="klabs/history/agc_schematics_block2/logic/a23-2.jpg">2</a><br>
           </td>
-          <td valign="middle" nowrap="nowrap" align="center"><br>
+          <td valign="middle" nowrap="nowrap" align="center"><a
+href="https://github.com/virtualagc/virtualagc/tree/schematics/Schematics/2005272A">module</a><br>
           </td>
-          <td valign="middle" nowrap="nowrap" align="center"><br>
+          <td valign="middle" nowrap="nowrap" align="center"><a
+              href="KiCad/2005272A-p1of2.png">page 1</a>, <a
+              href="KiCad/2005272A-p2of2.png">2</a><br>
           </td>
           <td valign="middle"><br>
           </td>
@@ -4098,12 +4540,21 @@ href="https://github.com/virtualagc/virtualagc/tree/schematics/Schematics/200526
 
 
 
+
+
+
+
+
+
               1</a>, <a
               href="klabs/history/agc_schematics_block2/logic/a24-2.jpg">2</a><br>
           </td>
-          <td valign="middle" nowrap="nowrap" align="center"><br>
+          <td valign="middle" nowrap="nowrap" align="center"><a
+href="https://github.com/virtualagc/virtualagc/tree/schematics/Schematics/2005273A">module</a><br>
           </td>
-          <td valign="middle" nowrap="nowrap" align="center"><br>
+          <td valign="middle" nowrap="nowrap" align="center"><a
+              href="KiCad/2005273A-p1of2.png">page 1</a>, <a
+              href="KiCad/2005273A-p2of2.png">2</a><br>
           </td>
           <td valign="middle"><br>
           </td>
@@ -4344,6 +4795,12 @@ href="https://github.com/virtualagc/virtualagc/tree/schematics/Schematics/200591
 
 
 
+
+
+
+
+
+
               1</a>, <a
               href="klabs/history/agc_schematics_block2/logic/5011-2.jpg">2</a></td>
           <td valign="middle" nowrap="nowrap" align="center"><br>
@@ -4460,6 +4917,12 @@ href="https://github.com/virtualagc/virtualagc/tree/schematics/Schematics/200591
 
 
 
+
+
+
+
+
+
               1</a>, <a
               href="klabs/history/agc_schematics_block2/logic/a01-2.jpg">2</a><br>
           </td>
@@ -4480,6 +4943,12 @@ href="https://github.com/virtualagc/virtualagc/tree/schematics/Schematics/200525
           </td>
           <td valign="middle" nowrap="nowrap" align="center">2005260 <a
               href="klabs/history/agc_schematics_block2/logic/a02-1.jpg">page
+
+
+
+
+
+
 
 
 
@@ -4634,6 +5103,12 @@ href="https://github.com/virtualagc/virtualagc/tree/schematics/Schematics/200526
 
 
 
+
+
+
+
+
+
               1</a>, <a
               href="klabs/history/agc_schematics_block2/logic/a03-2.jpg">2</a><br>
           </td>
@@ -4654,6 +5129,12 @@ href="https://github.com/virtualagc/virtualagc/tree/schematics/Schematics/200525
           </td>
           <td valign="middle" nowrap="nowrap" align="center">2005262 <a
               href="klabs/history/agc_schematics_block2/logic/a04-1.jpg">page
+
+
+
+
+
+
 
 
 
@@ -4805,6 +5286,12 @@ href="https://github.com/virtualagc/virtualagc/tree/schematics/Schematics/200526
 
 
 
+
+
+
+
+
+
               1</a>, <a
               href="klabs/history/agc_schematics_block2/logic/a05-2.jpg">2</a><br>
           </td>
@@ -4826,6 +5313,12 @@ href="https://github.com/virtualagc/virtualagc/tree/schematics/Schematics/200526
           </td>
           <td valign="middle" nowrap="nowrap" align="center">2005263 <a
               href="klabs/history/agc_schematics_block2/logic/a06-1.jpg">page
+
+
+
+
+
+
 
 
 
@@ -4976,6 +5469,12 @@ href="https://github.com/virtualagc/virtualagc/tree/schematics/Schematics/200526
 
 
 
+
+
+
+
+
+
               1</a>, <a
               href="klabs/history/agc_schematics_block2/logic/a07-2.jpg">2</a><br>
           </td>
@@ -4996,6 +5495,12 @@ href="https://github.com/virtualagc/virtualagc/tree/schematics/Schematics/200525
           </td>
           <td valign="middle" nowrap="nowrap" align="center">2005255 <a
               href="klabs/history/agc_schematics_block2/logic/a08-1.jpg">page
+
+
+
+
+
+
 
 
 
@@ -5146,6 +5651,12 @@ href="https://github.com/virtualagc/virtualagc/tree/schematics/Schematics/200525
 
 
 
+
+
+
+
+
+
               1</a>, <a
               href="klabs/history/agc_schematics_block2/logic/a09-2.jpg">2</a><br>
           </td>
@@ -5153,6 +5664,12 @@ href="https://github.com/virtualagc/virtualagc/tree/schematics/Schematics/200525
           </td>
           <td valign="middle" nowrap="nowrap" align="center"><a
 href="https://github.com/virtualagc/virtualagc/tree/schematics/Schematics/2005256A">module
+
+
+
+
+
+
 
 
 
@@ -5180,6 +5697,12 @@ href="https://github.com/virtualagc/virtualagc/tree/schematics/Schematics/200525
           </td>
           <td valign="middle" nowrap="nowrap" align="center">2005257 <a
               href="klabs/history/agc_schematics_block2/logic/a10-1.jpg">page
+
+
+
+
+
+
 
 
 
@@ -5330,6 +5853,12 @@ href="https://github.com/virtualagc/virtualagc/tree/schematics/Schematics/200525
 
 
 
+
+
+
+
+
+
               1</a>, <a
               href="klabs/history/agc_schematics_block2/logic/a11-2.jpg">2</a><br>
           </td>
@@ -5350,6 +5879,12 @@ href="https://github.com/virtualagc/virtualagc/tree/schematics/Schematics/200525
           </td>
           <td valign="middle" nowrap="nowrap" align="center">2005253 <a
               href="klabs/history/agc_schematics_block2/logic/a12-1.jpg">page
+
+
+
+
+
+
 
 
 
@@ -5518,6 +6053,12 @@ href="https://github.com/virtualagc/virtualagc/tree/schematics/Schematics/200526
 
 
 
+
+
+
+
+
+
               1</a>, <a
               href="klabs/history/agc_schematics_block2/logic/a14-2.jpg">2</a><br>
           </td>
@@ -5540,6 +6081,12 @@ href="https://github.com/virtualagc/virtualagc/tree/schematics/Schematics/200526
           </td>
           <td valign="middle" nowrap="nowrap" align="center">2005265 <a
               href="klabs/history/agc_schematics_block2/logic/a15-1.jpg">page
+
+
+
+
+
+
 
 
 
@@ -5690,6 +6237,12 @@ href="https://github.com/virtualagc/virtualagc/tree/schematics/Schematics/200526
 
 
 
+
+
+
+
+
+
               1</a>, <a
               href="klabs/history/agc_schematics_block2/logic/a16-2.jpg">2</a><br>
           </td>
@@ -5775,6 +6328,12 @@ href="https://github.com/virtualagc/virtualagc/tree/schematics/Schematics/200526
 
 
 
+
+
+
+
+
+
               1</a>, <a
               href="klabs/history/agc_schematics_block2/logic/a17-2.jpg">2</a><br>
           </td>
@@ -5794,6 +6353,12 @@ href="https://github.com/virtualagc/virtualagc/tree/schematics/Schematics/200526
           </td>
           <td valign="middle" nowrap="nowrap" align="center">2005268 <a
               href="klabs/history/agc_schematics_block2/logic/a18-1.jpg">page
+
+
+
+
+
+
 
 
 
@@ -5944,14 +6509,23 @@ href="https://github.com/virtualagc/virtualagc/tree/schematics/Schematics/200526
 
 
 
+
+
+
+
+
+
               1</a>, <a
               href="klabs/history/agc_schematics_block2/logic/a19-2.jpg">2</a><br>
           </td>
           <td valign="middle" align="center">-<br>
           </td>
-          <td valign="middle" nowrap="nowrap" align="center"><br>
+          <td valign="middle" nowrap="nowrap" align="center"><a
+href="https://github.com/virtualagc/virtualagc/tree/schematics/Schematics/2005270-">module</a><br>
           </td>
-          <td valign="middle" nowrap="nowrap" align="center"><br>
+          <td valign="middle" nowrap="nowrap" align="center"><a
+              href="KiCad/2005270--p1of2.png">page 1</a>, <a
+              href="KiCad/2005270--p2of2.png">2</a><br>
           </td>
           <td valign="middle"><br>
           </td>
@@ -6026,14 +6600,23 @@ href="https://github.com/virtualagc/virtualagc/tree/schematics/Schematics/200526
 
 
 
+
+
+
+
+
+
               1</a>, <a
               href="klabs/history/agc_schematics_block2/logic/a20-2.jpg">2</a><br>
           </td>
           <td valign="middle" align="center">-<br>
           </td>
-          <td valign="middle" nowrap="nowrap" align="center"><br>
+          <td valign="middle" nowrap="nowrap" align="center"><a
+href="https://github.com/virtualagc/virtualagc/tree/schematics/Schematics/2005254-">module</a><br>
           </td>
-          <td valign="middle" nowrap="nowrap" align="center"><br>
+          <td valign="middle" nowrap="nowrap" align="center"><a
+              href="KiCad/2005254--p1of2.png">page 1</a>, <a
+              href="KiCad/2005254--p2of2.png">2</a><br>
           </td>
           <td valign="middle"><br>
           </td>
@@ -6108,6 +6691,12 @@ href="https://github.com/virtualagc/virtualagc/tree/schematics/Schematics/200526
 
 
 
+
+
+
+
+
+
               1</a>, <a
               href="klabs/history/agc_schematics_block2/logic/a21-2.jpg">2</a>,
             <a
@@ -6115,9 +6704,13 @@ href="https://github.com/virtualagc/virtualagc/tree/schematics/Schematics/200526
           </td>
           <td valign="middle" align="center">-<br>
           </td>
-          <td valign="middle" nowrap="nowrap" align="center"><br>
+          <td valign="middle" nowrap="nowrap" align="center"><a
+href="https://github.com/virtualagc/virtualagc/tree/schematics/Schematics/2005250-">module</a><br>
           </td>
-          <td valign="middle" nowrap="nowrap" align="center"><br>
+          <td valign="middle" nowrap="nowrap" align="center"><a
+              href="KiCad/2005250--p1of3.png">page 1</a>, <a
+              href="KiCad/2005250--p2of3.png">2</a>, <a
+              href="KiCad/2005250--p3of3.png">3</a><br>
           </td>
           <td valign="middle"><br>
           </td>
@@ -6192,14 +6785,29 @@ href="https://github.com/virtualagc/virtualagc/tree/schematics/Schematics/200526
 
 
 
+
+
+
+
+
+
               1</a>, <a
               href="klabs/history/agc_schematics_block2/logic/a22-2.jpg">2</a><br>
           </td>
           <td valign="middle" align="center">-<br>
           </td>
-          <td valign="middle" nowrap="nowrap" align="center"><br>
+          <td valign="middle" nowrap="nowrap" align="center"><a
+href="https://github.com/virtualagc/virtualagc/tree/schematics/Schematics/2005271-">module
+
+
+
+
+
+            </a><br>
           </td>
-          <td valign="middle" nowrap="nowrap" align="center"><br>
+          <td valign="middle" nowrap="nowrap" align="center"><a
+              href="KiCad/2005271--p1of2.png">page 1</a>, <a
+              href="KiCad/2005271--p2of2.png">2</a><br>
           </td>
           <td valign="middle"><br>
           </td>
@@ -6274,14 +6882,23 @@ href="https://github.com/virtualagc/virtualagc/tree/schematics/Schematics/200526
 
 
 
+
+
+
+
+
+
               1</a>, <a
               href="klabs/history/agc_schematics_block2/logic/a23-2.jpg">2</a><br>
           </td>
           <td valign="middle" align="center">A<br>
           </td>
-          <td valign="middle" nowrap="nowrap" align="center"><br>
+          <td valign="middle" nowrap="nowrap" align="center"><a
+href="https://github.com/virtualagc/virtualagc/tree/schematics/Schematics/2005272A">module</a><br>
           </td>
-          <td valign="middle" nowrap="nowrap" align="center"><br>
+          <td valign="middle" nowrap="nowrap" align="center"><a
+              href="KiCad/2005272A-p1of2.png">page 1</a>, <a
+              href="KiCad/2005272A-p2of2.png">2</a><br>
           </td>
           <td valign="middle"><br>
           </td>
@@ -6356,14 +6973,23 @@ href="https://github.com/virtualagc/virtualagc/tree/schematics/Schematics/200526
 
 
 
+
+
+
+
+
+
               1</a>, <a
               href="klabs/history/agc_schematics_block2/logic/a24-2.jpg">2</a><br>
           </td>
           <td valign="middle" align="center">A<br>
           </td>
-          <td valign="middle" nowrap="nowrap" align="center"><br>
+          <td valign="middle" nowrap="nowrap" align="center"><a
+href="https://github.com/virtualagc/virtualagc/tree/schematics/Schematics/2005273a">module</a><br>
           </td>
-          <td valign="middle" nowrap="nowrap" align="center"><br>
+          <td valign="middle" nowrap="nowrap" align="center"><a
+              href="KiCad/2005273A-p1of2.png">page 1</a>, <a
+              href="KiCad/2005273A-p2of2.png">2</a><br>
           </td>
           <td valign="middle"><br>
           </td>
@@ -6601,6 +7227,12 @@ href="klabs/history/agc_schematics_block2/top_level/a30-a31-1.jpg">page
 
 
 
+
+
+
+
+
+
               1</a>, <a
               href="klabs/history/agc_schematics_block2/logic/5011-2.jpg">2</a></td>
           <td valign="middle" align="center">-<br>
@@ -6685,6 +7317,12 @@ href="https://github.com/virtualagc/virtualagc/tree/schematics/Schematics/200595
 
 
 
+
+
+
+
+
+
               1</a><br>
           </td>
           <td valign="middle"><br>
@@ -6724,6 +7362,12 @@ href="https://github.com/virtualagc/virtualagc/tree/schematics/Schematics/200590
 
 
 
+
+
+
+
+
+
               1</a><br>
           </td>
           <td valign="middle"><br>
@@ -6739,6 +7383,12 @@ href="https://github.com/virtualagc/virtualagc/tree/schematics/Schematics/200590
 href="https://github.com/virtualagc/virtualagc/tree/schematics/Schematics/2005903A">module</a><br>
           </td>
           <td valign="top" align="center"><a href="KiCad/2005903A.png">page
+
+
+
+
+
+
 
 
 
@@ -6847,6 +7497,12 @@ href="https://github.com/virtualagc/virtualagc/tree/schematics/Schematics/200595
 
 
 
+
+
+
+
+
+
               1<br>
             </a></td>
           <td valign="middle"><br>
@@ -6886,6 +7542,12 @@ href="https://github.com/virtualagc/virtualagc/tree/schematics/Schematics/200592
 
 
 
+
+
+
+
+
+
               1</a><br>
           </td>
           <td valign="middle"><br>
@@ -6900,6 +7562,12 @@ href="https://github.com/virtualagc/virtualagc/tree/schematics/Schematics/200592
           <td valign="top" align="center"><a
 href="https://github.com/virtualagc/virtualagc/tree/schematics/Schematics/2005903A">module</a></td>
           <td valign="top" align="center"><a href="KiCad/2005903A.png">page
+
+
+
+
+
+
 
 
 
@@ -7051,6 +7719,12 @@ href="https://github.com/virtualagc/virtualagc/tree/schematics/Schematics/200593
           <td valign="middle">Instead, see drawing <a
               href="AGCHandbook/2005903A.jpg">2005903A</a> (<a
 href="https://github.com/virtualagc/virtualagc/tree/schematics/Schematics/2005903A">CAD
+
+
+
+
+
+
 
 
 
@@ -8742,7 +9416,7 @@ href="https://github.com/virtualagc/virtualagc/tree/schematics/Schematics/200590
       drawings separately provided by Eldon Hall, and to some of the
       pages in AC Electronics manuals (ND-1021041 or ND-1021042) that
       provide a redrawn versions of the same circuits.&nbsp; (Adding the
-      links for the AC manuals is an ongoing effort), and so is only
+      links for the AC manuals is an ongoing effort, and so is only
       partially completed at present.)&nbsp; In the latter case, the AC
       manual itself does not tie the circuits it presents specifically
       to the original drawing numbers or revisions, but in the table
@@ -10887,6 +11561,12 @@ href="https://archive.org/stream/acelectroniclmma00acel#page/n282/mode/1up">ND-1
 
 
 
+
+
+
+
+
+
               rev AJ: 4-118</a></td>
           <td valign="top">2005930<br>
           </td>
@@ -11653,6 +12333,12 @@ href="https://archive.org/stream/acelectroniclmma00acel_0#page/n288/mode/1up">ND
 
 
 
+
+
+
+
+
+
               rev AJ: 4-210</a>, <a
 href="https://archive.org/stream/acelectroniclmma00acel_0#page/n288/mode/1up">4-211</a>,
             <a
@@ -11871,6 +12557,12 @@ href="https://github.com/virtualagc/virtualagc/tree/schematics/Schematics/200502
           </td>
           <td valign="top"><a
 href="https://archive.org/stream/acelectroniclmma00acel_0#page/n228/mode/1up">ND-1021042
+
+
+
+
+
+
 
 
 
@@ -12458,6 +13150,12 @@ href="https://archive.org/stream/acelectroniclmma00acel_0#page/n274/mode/1up">ND
 
 
 
+
+
+
+
+
+
               rev AJ: 4-205<br>
             </a></td>
           <td valign="top">2005931<br>
@@ -12519,6 +13217,12 @@ href="https://github.com/virtualagc/virtualagc/tree/schematics/Schematics/200590
 
 
 
+
+
+
+
+
+
               1</a><br>
           </td>
           <td style="text-align:left; " valign="middle">&nbsp;</td>
@@ -12548,6 +13252,12 @@ href="https://github.com/virtualagc/virtualagc/tree/schematics/Schematics/200590
 href="https://github.com/virtualagc/virtualagc/tree/schematics/Schematics/2005903A">module</a>
           </td>
           <td valign="middle" align="left"><a href="KiCad/2005903A.png">page
+
+
+
+
+
+
 
 
 
@@ -12632,6 +13342,12 @@ href="https://github.com/virtualagc/virtualagc/tree/schematics/Schematics/200590
 
 
 
+
+
+
+
+
+
               1</a> </td>
           <td style="text-align:left; " valign="middle">&nbsp;</td>
         </tr>
@@ -12673,6 +13389,12 @@ href="https://github.com/virtualagc/virtualagc/tree/schematics/Schematics/200590
 
 
 
+
+
+
+
+
+
               1</a><br>
           </td>
           <td style="text-align:left; " valign="middle">&nbsp;</td>
@@ -12684,6 +13406,12 @@ href="https://github.com/virtualagc/virtualagc/tree/schematics/Schematics/200590
           </td>
           <td valign="top"><a
 href="https://archive.org/stream/acelectroniclmma00acel_0#page/n345/mode/1up">ND-1021042
+
+
+
+
+
+
 
 
 
@@ -12936,6 +13664,12 @@ href="https://archive.org/stream/acelectroniclmma00acel_0#page/n232/mode/1up">ND
 
 
 
+
+
+
+
+
+
               rev AJ: 4-192</a><br>
           </td>
           <td colspan="1" rowspan="1" valign="middle">2005933<br>
@@ -13123,6 +13857,12 @@ href="https://archive.org/stream/acelectroniclmma00acel_0#page/n268/mode/1up">ND
 
 
 
+
+
+
+
+
+
               rev AJ: 4-202<br>
             </a></td>
           <td colspan="1" rowspan="1" valign="middle">2005934<br>
@@ -13148,6 +13888,12 @@ href="https://archive.org/stream/acelectroniclmma00acel_0#page/n268/mode/1up">ND
           </td>
           <td valign="middle"><a
 href="https://archive.org/stream/acelectroniclmma00acel_0#page/n268/mode/1up">ND-1021042
+
+
+
+
+
+
 
 
 
@@ -13278,6 +14024,12 @@ href="https://archive.org/stream/acelectroniclmma00acel_0#page/n310/mode/1up">ND
 
 
 
+
+
+
+
+
+
               rev AJ: 4-219A</a>, <a
 href="https://archive.org/stream/acelectroniclmma00acel_0#page/n318/mode/1up">4-220A</a><br>
           </td>
@@ -13302,6 +14054,12 @@ href="https://archive.org/stream/acelectroniclmma00acel_0#page/n318/mode/1up">4-
           </td>
           <td valign="top"><a
 href="https://archive.org/stream/acelectroniclmma00acel_0#page/n308/mode/1up">ND-1021042
+
+
+
+
+
+
 
 
 
@@ -13354,6 +14112,12 @@ href="https://archive.org/stream/acelectroniclmma00acel_0#page/n316/mode/1up">4-
           </td>
           <td valign="top"><a
 href="https://archive.org/stream/acelectroniclmma00acel_0#page/n312/mode/1up">ND-1021042
+
+
+
+
+
+
 
 
 
@@ -13625,6 +14389,12 @@ href="https://archive.org/stream/acelectroniclmma00acel_0#page/n272/mode/1up">ND
 
 
 
+
+
+
+
+
+
               rev AJ: 4-204</a>, <a
 href="https://archive.org/stream/acelectroniclmma00acel_0#page/n274/mode/1up">4-205</a>
           </td>
@@ -13687,6 +14457,12 @@ href="https://github.com/virtualagc/virtualagc/tree/schematics/Schematics/200592
 
 
 
+
+
+
+
+
+
               1</a><br>
           </td>
           <td style="text-align:left; " valign="middle">&nbsp;</td>
@@ -13698,6 +14474,12 @@ href="https://github.com/virtualagc/virtualagc/tree/schematics/Schematics/200592
           </td>
           <td valign="top"><a
 href="https://archive.org/stream/acelectroniclmma00acel_0#page/n364/mode/1up">ND-1021042
+
+
+
+
+
+
 
 
 
@@ -13804,6 +14586,12 @@ href="https://archive.org/stream/apollolunarexcuracel#page/n264/mode/1up">ND-102
 
 
 
+
+
+
+
+
+
               rev -: 4-170<br>
             </a></td>
           <td valign="top">2005922<br>
@@ -13827,6 +14615,12 @@ href="https://archive.org/stream/apollolunarexcuracel#page/n264/mode/1up">ND-102
           </td>
           <td valign="top"><a
 href="https://archive.org/stream/acelectroniclmma00acel_0#page/n322/mode/1up">ND-1021042
+
+
+
+
+
+
 
 
 
@@ -13887,6 +14681,12 @@ href="https://archive.org/stream/acelectroniclmma00acel_0#page/n286/mode/1up">ND
 
 
 
+
+
+
+
+
+
               rev AJ: 4-210</a>, <a
 href="https://archive.org/stream/acelectroniclmma00acel_0#page/n298/mode/1up">4-215<br>
             </a></td>
@@ -13912,6 +14712,12 @@ href="https://archive.org/stream/acelectroniclmma00acel_0#page/n298/mode/1up">4-
           </td>
           <td valign="top"><a
 href="https://archive.org/stream/acelectroniclmma00acel_0#page/n290/mode/1up">ND-1021042
+
+
+
+
+
+
 
 
 
@@ -14001,6 +14807,12 @@ href="https://archive.org/stream/acelectroniclmma00acel_0#page/n348/mode/1up">ND
 
 
 
+
+
+
+
+
+
               rev AJ: 4-225</a>, <a
 href="https://archive.org/stream/acelectroniclmma00acel_0#page/n350/mode/1up">4-226</a>,
             <a
@@ -14033,6 +14845,12 @@ href="https://archive.org/stream/acelectroniclmma00acel_0#page/n362/mode/1up">4-
           </td>
           <td valign="middle"><a
 href="https://archive.org/stream/acelectroniclmma00acel_0#page/n298/mode/1up">ND-1021042
+
+
+
+
+
+
 
 
 
@@ -16379,9 +17197,10 @@ href="https://github.com/virtualagc/virtualagc/tree/schematics/Schematics/200506
           </td>
           <td valign="middle">-<br>
           </td>
-          <td valign="middle"><br>
+          <td valign="middle"><a
+href="https://github.com/virtualagc/virtualagc/tree/schematics/Schematics/2005250-">module</a><br>
           </td>
-          <td valign="middle"><br>
+          <td valign="middle">page 1<br>
           </td>
           <td valign="middle"><br>
           </td>
@@ -16400,7 +17219,7 @@ href="https://github.com/virtualagc/virtualagc/tree/schematics/Schematics/200506
           </td>
           <td valign="middle"><br>
           </td>
-          <td valign="middle"><br>
+          <td valign="middle">page 2<br>
           </td>
           <td valign="middle"><br>
           </td>
@@ -16419,7 +17238,7 @@ href="https://github.com/virtualagc/virtualagc/tree/schematics/Schematics/200506
           </td>
           <td valign="middle"><br>
           </td>
-          <td valign="middle"><br>
+          <td valign="middle">page 3<br>
           </td>
           <td valign="middle"><br>
           </td>
@@ -16431,6 +17250,12 @@ href="https://github.com/virtualagc/virtualagc/tree/schematics/Schematics/200506
           </td>
           <td valign="top"><a
 href="https://archive.org/stream/acelectroniclmma00acel#page/n356/mode/1up">ND-1021042
+
+
+
+
+
+
 
 
 
@@ -16593,6 +17418,12 @@ href="https://github.com/virtualagc/virtualagc/tree/schematics/Schematics/200525
           </td>
           <td valign="top"><a
 href="https://archive.org/stream/acelectroniclmma00acel#page/n306/mode/1up">ND-1021042
+
+
+
+
+
+
 
 
 
@@ -16767,6 +17598,12 @@ href="https://github.com/virtualagc/virtualagc/tree/schematics/Schematics/200525
           </td>
           <td valign="top"><a
 href="https://archive.org/stream/acelectroniclmma00acel#page/n376/mode/1up">ND-1021042
+
+
+
+
+
+
 
 
 
@@ -16960,6 +17797,12 @@ href="https://archive.org/stream/acelectroniclmma00acel#page/n306/mode/1up">ND-1
 
 
 
+
+
+
+
+
+
               rev AJ: 4-122</a>, <a
 href="https://archive.org/stream/acelectroniclmma00acel#page/n446/mode/1up">4-136</a>,
             <a
@@ -16974,6 +17817,12 @@ href="https://archive.org/stream/acelectroniclmma00acel_0#page/n94/mode/1up">4-1
 href="https://archive.org/stream/acelectroniclmma00acel_0#page/n100/mode/1up">4-155</a>,
             <a
 href="https://archive.org/stream/acelectroniclmma00acel_0#page/n108/mode/1up">4-157
+
+
+
+
+
+
 
 
 
@@ -17068,9 +17917,10 @@ href="https://archive.org/stream/acelectroniclmma00acel_0#page/n108/mode/1up">4-
           </td>
           <td valign="middle">-<br>
           </td>
-          <td valign="middle"><br>
+          <td valign="middle"><a
+href="https://github.com/virtualagc/virtualagc/tree/schematics/Schematics/2005254-">module</a><br>
           </td>
-          <td valign="middle"><br>
+          <td valign="middle">page 1<br>
           </td>
           <td valign="middle"><br>
           </td>
@@ -17089,7 +17939,7 @@ href="https://archive.org/stream/acelectroniclmma00acel_0#page/n108/mode/1up">4-
           </td>
           <td valign="middle"><br>
           </td>
-          <td valign="middle"><br>
+          <td valign="middle">page 2<br>
           </td>
           <td valign="middle"><br>
           </td>
@@ -17101,6 +17951,12 @@ href="https://archive.org/stream/acelectroniclmma00acel_0#page/n108/mode/1up">4-
           </td>
           <td valign="top"><a
 href="https://archive.org/stream/acelectroniclmma00acel_0#page/n128/mode/1up">ND-1021042
+
+
+
+
+
+
 
 
 
@@ -17219,10 +18075,22 @@ href="https://archive.org/stream/acelectroniclmma00acel_0#page/n44/mode/1up">ND-
 
 
 
+
+
+
+
+
+
               rev AJ: 4-142</a>, <a
 href="https://archive.org/stream/acelectroniclmma00acel_0#page/n82/mode/1up">4-153A</a>,
             <a
 href="https://archive.org/stream/acelectroniclmma00acel_0#page/n282/mode/1up">4-208
+
+
+
+
+
+
 
 
 
@@ -17343,10 +18211,22 @@ href="https://archive.org/stream/acelectroniclmma00acel_0#page/n48/mode/1up">ND-
 
 
 
+
+
+
+
+
+
               rev AJ: 4-142</a>, <a
 href="https://archive.org/stream/acelectroniclmma00acel_0#page/n82/mode/1up">4-153A</a>,
             <a
 href="https://archive.org/stream/acelectroniclmma00acel_0#page/n182/mode/1up">4-175
+
+
+
+
+
+
 
 
 
@@ -17542,10 +18422,22 @@ href="https://archive.org/stream/acelectroniclmma00acel_0#page/n52/mode/1up">ND-
 
 
 
+
+
+
+
+
+
               rev AJ: 4-142</a>, <a
 href="https://archive.org/stream/acelectroniclmma00acel_0#page/n82/mode/1up">4-153A</a>,
             <a
 href="https://archive.org/stream/acelectroniclmma00acel_0#page/n182/mode/1up">4-175
+
+
+
+
+
+
 
 
 
@@ -17708,8 +18600,20 @@ href="https://archive.org/stream/acelectroniclmma00acel_0#page/n44/mode/1up">ND-
 
 
 
+
+
+
+
+
+
               rev AJ: 4-142</a>, <a
 href="https://archive.org/stream/acelectroniclmma00acel_0#page/n182/mode/1up">4-175
+
+
+
+
+
+
 
 
 
@@ -17871,6 +18775,12 @@ href="https://github.com/virtualagc/virtualagc/tree/schematics/Schematics/200525
           </td>
           <td valign="top"><a
 href="https://archive.org/stream/acelectroniclmma00acel#page/n292/mode/1up">ND-1021042
+
+
+
+
+
+
 
 
 
@@ -18070,12 +18980,24 @@ href="https://archive.org/stream/acelectroniclmma00acel#page/n286/mode/1up">ND-1
 
 
 
+
+
+
+
+
+
               rev AJ: 4-119</a>, <a
 href="https://archive.org/stream/acelectroniclmma00acel#page/n292/mode/1up">4-120</a>,
             <a
 href="https://archive.org/stream/acelectroniclmma00acel#page/n306/mode/1up">4-122</a>,
             <a
 href="https://archive.org/stream/acelectroniclmma00acel_0#page/n114/mode/1up">4-159
+
+
+
+
+
+
 
 
 
@@ -18238,6 +19160,12 @@ href="https://archive.org/stream/acelectroniclmma00acel#page/n352/mode/1up">ND-1
 
 
 
+
+
+
+
+
+
               rev AJ: 4-132</a>, <a
 href="https://archive.org/stream/acelectroniclmma00acel#page/n364/mode/1up">4-134</a>,
             <a
@@ -18246,6 +19174,12 @@ href="https://archive.org/stream/acelectroniclmma00acel#page/n434/mode/1up">4-13
 href="https://archive.org/stream/acelectroniclmma00acel_0#page/n67/mode/1up">4-147</a>,
             <a
 href="https://archive.org/stream/acelectroniclmma00acel_0#page/n106/mode/1up">4-156
+
+
+
+
+
+
 
 
 
@@ -18434,6 +19368,12 @@ href="https://archive.org/stream/acelectroniclmma00acel#page/n330/mode/1up">ND-1
 
 
 
+
+
+
+
+
+
               rev AJ: 4-130</a>, <a
 href="https://archive.org/stream/acelectroniclmma00acel#page/n342/mode/1up">4-131</a>,
             <a
@@ -18448,6 +19388,12 @@ href="https://archive.org/stream/acelectroniclmma00acel#page/n442/mode/1up">4-13
 href="https://archive.org/stream/acelectroniclmma00acel_0#page/n78/mode/1up">4-152</a>,
             <a
 href="https://archive.org/stream/acelectroniclmma00acel_0#page/n80/mode/1up">4-153
+
+
+
+
+
+
 
 
 
@@ -18639,6 +19585,12 @@ href="https://archive.org/stream/acelectroniclmma00acel#page/n364/mode/1up">ND-1
 
 
 
+
+
+
+
+
+
               rev AJ: 4-134</a>, <a
 href="https://archive.org/stream/acelectroniclmma00acel#page/n434/mode/1up">4-135</a>,
             <a
@@ -18647,6 +19599,12 @@ href="https://archive.org/stream/acelectroniclmma00acel_0#page/n80/mode/1up">4-1
 href="https://archive.org/stream/acelectroniclmma00acel_0#page/n264/mode/1up">4-200</a>,
             <a
 href="https://archive.org/stream/acelectroniclmma00acel_0#page/n280/mode/1up">4-207
+
+
+
+
+
+
 
 
 
@@ -18834,6 +19792,12 @@ href="https://archive.org/stream/acelectroniclmma00acel_0#page/n42/mode/1up">ND-
 
 
 
+
+
+
+
+
+
               rev AJ: 4-141</a>, <a
 href="https://archive.org/stream/acelectroniclmma00acel_0#page/n44/mode/1up">4-142</a>,
             <a
@@ -18850,6 +19814,12 @@ href="https://archive.org/stream/acelectroniclmma00acel_0#page/n280/mode/1up">4-
 href="https://archive.org/stream/acelectroniclmma00acel_0#page/n282/mode/1up">4-208</a>,
             <a
 href="https://archive.org/stream/acelectroniclmma00acel_0#page/n306/mode/1up">4-218
+
+
+
+
+
+
 
 
 
@@ -19021,6 +19991,12 @@ href="https://archive.org/stream/acelectroniclmma00acel#page/n358/mode/1up">ND-1
 
 
 
+
+
+
+
+
+
               rev AJ: 4-133</a>, <a
 href="https://archive.org/stream/acelectroniclmma00acel_0#page/n42/mode/1up">4-141</a>,
             <a
@@ -19033,6 +20009,12 @@ href="https://archive.org/stream/acelectroniclmma00acel_0#page/n102/mode/1up">4-
 href="https://archive.org/stream/acelectroniclmma00acel_0#page/n122/mode/1up">4-163</a>,
             <a
 href="https://archive.org/stream/acelectroniclmma00acel_0#page/n284/mode/1up">4-209
+
+
+
+
+
+
 
 
 
@@ -19164,12 +20146,24 @@ href="https://archive.org/stream/acelectroniclmma00acel_0#page/n160/mode/1up">ND
 
 
 
+
+
+
+
+
+
               rev AJ: 4-172</a>, <a
 href="https://archive.org/stream/acelectroniclmma00acel_0#page/n186/mode/1up">4-176</a>,
             <a
 href="https://archive.org/stream/acelectroniclmma00acel_0#page/n190/mode/1up">4-178</a>,
             <a
 href="https://archive.org/stream/acelectroniclmma00acel_0#page/n192/mode/1up">4-179
+
+
+
+
+
+
 
 
 
@@ -19333,6 +20327,12 @@ href="https://archive.org/stream/acelectroniclmma00acel_0#page/n98/mode/1up">ND-
 
 
 
+
+
+
+
+
+
               rev AJ: 4-155</a>, <a
 href="https://archive.org/stream/acelectroniclmma00acel_0#page/n160/mode/1up">4-172</a>,
             <a
@@ -19343,6 +20343,12 @@ href="https://archive.org/stream/acelectroniclmma00acel_0#page/n188/mode/1up">4-
 href="https://archive.org/stream/acelectroniclmma00acel_0#page/n190/mode/1up">4-178</a>,
             <a
 href="https://archive.org/stream/acelectroniclmma00acel_0#page/n210/mode/1up">4-185
+
+
+
+
+
+
 
 
 
@@ -19512,6 +20518,12 @@ href="https://archive.org/stream/acelectroniclmma00acel#page/n294/mode/1up">ND-1
 
 
 
+
+
+
+
+
+
               rev AJ: 4-120</a>, <a
 href="https://archive.org/stream/acelectroniclmma00acel#page/n310/mode/1up">4-124</a>,
             <a
@@ -19609,6 +20621,12 @@ href="https://archive.org/stream/acelectroniclmma00acel#page/n294/mode/1up">ND-1
 
 
 
+
+
+
+
+
+
               rev AJ: 4-120</a>, <a
 href="https://archive.org/stream/acelectroniclmma00acel#page/n310/mode/1up">4-124</a>,
             <a
@@ -19693,9 +20711,10 @@ href="https://archive.org/stream/acelectroniclmma00acel_0#page/n322/mode/1up">4-
           </td>
           <td valign="middle">-<br>
           </td>
-          <td valign="middle"><br>
+          <td valign="middle"><a
+href="https://github.com/virtualagc/virtualagc/tree/schematics/Schematics/2005270-">module</a><br>
           </td>
-          <td valign="middle"><br>
+          <td valign="middle"><a href="KiCad/2005270--p1of2.png">page 1</a><br>
           </td>
           <td valign="middle"><br>
           </td>
@@ -19714,7 +20733,7 @@ href="https://archive.org/stream/acelectroniclmma00acel_0#page/n322/mode/1up">4-
           </td>
           <td valign="middle"><br>
           </td>
-          <td valign="middle"><br>
+          <td valign="middle"><a href="KiCad/2005270--p2of2.png">page 2</a><br>
           </td>
           <td valign="middle"><br>
           </td>
@@ -19726,6 +20745,12 @@ href="https://archive.org/stream/acelectroniclmma00acel_0#page/n322/mode/1up">4-
           </td>
           <td valign="top"><a
 href="https://archive.org/stream/acelectroniclmma00acel#page/n294/mode/1up">ND-1021042
+
+
+
+
+
+
 
 
 
@@ -19745,6 +20770,12 @@ href="https://archive.org/stream/acelectroniclmma00acel_0#page/n208/mode/1up">4-
 href="https://archive.org/stream/acelectroniclmma00acel_0#page/n214/mode/1up">4-187</a>,
             <a
 href="https://archive.org/stream/acelectroniclmma00acel_0#page/n218/mode/1up">4-189
+
+
+
+
+
+
 
 
 
@@ -19833,9 +20864,10 @@ href="https://archive.org/stream/acelectroniclmma00acel_0#page/n218/mode/1up">4-
           </td>
           <td valign="middle">-<br>
           </td>
-          <td valign="middle"><br>
+          <td valign="middle"><a
+href="https://github.com/virtualagc/virtualagc/tree/schematics/Schematics/2005271-">module</a><br>
           </td>
-          <td valign="middle"><br>
+          <td valign="middle"><a href="KiCad/2005271--p1of2.png">page 1</a><br>
           </td>
           <td valign="middle"><br>
           </td>
@@ -19854,7 +20886,7 @@ href="https://archive.org/stream/acelectroniclmma00acel_0#page/n218/mode/1up">4-
           </td>
           <td valign="middle"><br>
           </td>
-          <td valign="middle"><br>
+          <td valign="middle"><a href="KiCad/2005271--p2of2.png">page 2</a><br>
           </td>
           <td valign="middle"><br>
           </td>
@@ -19871,12 +20903,24 @@ href="https://archive.org/stream/acelectroniclmma00acel_0#page/n114/mode/1up">ND
 
 
 
+
+
+
+
+
+
               rev AJ: 4-159</a>, <a
 href="https://archive.org/stream/acelectroniclmma00acel_0#page/n198/mode/1up">4-180</a>,
             <a
 href="https://archive.org/stream/acelectroniclmma00acel_0#page/n214/mode/1up">4-187</a>,
             <a
 href="https://archive.org/stream/acelectroniclmma00acel_0#page/n222/mode/1up">4-190
+
+
+
+
+
+
 
 
 
@@ -20004,9 +21048,10 @@ href="https://archive.org/stream/acelectroniclmma00acel_0#page/n222/mode/1up">4-
           <td valign="top">1<br>
           </td>
           <td valign="top">A</td>
-          <td valign="top"><br>
+          <td valign="top"><a
+href="https://github.com/virtualagc/virtualagc/tree/schematics/Schematics/2005272A">module</a><br>
           </td>
-          <td valign="top"><br>
+          <td valign="top"><a href="KiCad/2005272A-p1of2.png">page 1</a><br>
           </td>
           <td valign="top"><br>
           </td>
@@ -20024,7 +21069,7 @@ href="https://archive.org/stream/acelectroniclmma00acel_0#page/n222/mode/1up">4-
           <td valign="top">A</td>
           <td valign="top"><br>
           </td>
-          <td valign="top"><br>
+          <td valign="top"><a href="KiCad/2005272A-p2of2.png">page 2</a><br>
           </td>
           <td valign="top"><br>
           </td>
@@ -20036,6 +21081,12 @@ href="https://archive.org/stream/acelectroniclmma00acel_0#page/n222/mode/1up">4-
           </td>
           <td valign="top"><a
 href="https://archive.org/stream/acelectroniclmma00acel#page/n294/mode/1up">ND-1021042
+
+
+
+
+
+
 
 
 
@@ -20055,6 +21106,12 @@ href="https://archive.org/stream/acelectroniclmma00acel_0#page/n212/mode/1up">4-
 href="https://archive.org/stream/acelectroniclmma00acel_0#page/n218/mode/1up">4-189</a>,
             <a
 href="https://archive.org/stream/acelectroniclmma00acel_0#page/n224/mode/1up">4-190
+
+
+
+
+
+
 
 
 
@@ -20149,9 +21206,10 @@ href="https://archive.org/stream/acelectroniclmma00acel_0#page/n224/mode/1up">4-
           </td>
           <td valign="top">A<br>
           </td>
-          <td valign="top"><br>
+          <td valign="top"><a
+href="https://github.com/virtualagc/virtualagc/tree/schematics/Schematics/2005273A">module</a><br>
           </td>
-          <td valign="top"><br>
+          <td valign="top"><a href="KiCad/2005273A-p1of2.png">page 1</a><br>
           </td>
           <td valign="top"><br>
           </td>
@@ -20170,7 +21228,7 @@ href="https://archive.org/stream/acelectroniclmma00acel_0#page/n224/mode/1up">4-
           </td>
           <td valign="top"><br>
           </td>
-          <td valign="top"><br>
+          <td valign="top"><a href="KiCad/2005273A-p2of2.png">page 2</a><br>
           </td>
           <td valign="top"><br>
           </td>
@@ -20229,6 +21287,12 @@ href="https://archive.org/stream/acelectroniclmma00acel#page/n294/mode/1up">ND-1
 
 
 
+
+
+
+
+
+
               rev AJ: 4-120</a>, <a
 href="https://archive.org/stream/acelectroniclmma00acel#page/n306/mode/1up">4-122</a>,
             <a
@@ -20251,6 +21315,12 @@ href="https://archive.org/stream/acelectroniclmma00acel_0#page/n182/mode/1up">4-
 href="https://archive.org/stream/acelectroniclmma00acel_0#page/n190/mode/1up">4-178</a>,
             <a
 href="https://archive.org/stream/acelectroniclmma00acel_0#page/n222/mode/1up">4-190
+
+
+
+
+
+
 
 
 
@@ -24573,466 +25643,15 @@ href="https://github.com/virtualagc/virtualagc/blob/schematics/MITcomponents.csv
 
 
 
+
+
+
+
+
+
       our GitHub repository</a>.&nbsp; If you have corrections or
     additions to this table, I believe you can edit the table directly
     in GitHub, though your changes won't go live unless we approve them.<br>
-    <br>
-    <h1><a name="Appendix:_KiCad_for_Virtual_AGC"></a>Appendix: Using
-      KiCad to Transcribe Drawings for Virtual AGC</h1>
-    <h2>Installation<br>
-    </h2>
-    <a href="http://www.kicad.org">KiCad</a> is general-purpose
-    electronics design software, and its usage for AGC/DSKY schematics
-    tends to push it a bit beyond its envelope in a variety of
-    ways.&nbsp; Therefore, some care needs to be taken in terms of the
-    way you install KiCad on your system, and the process of
-    transcribing an AGC/DSKY schematic into KiCad (if that's something
-    you choose to do).<br>
-    <br>
-    The principal reason KiCad is pushed beyond its envelope is that we
-    are attempting not only to preserve the <i>electrical</i> qualities
-    of the AGC/DSKY schematics, but also the <i>visual</i> qualities as
-    well.&nbsp; In this we can succeed fairly well, but not perfectly,
-    and sometimes require some actual modifications to KiCad in order to
-    do so.&nbsp; In fact, <a
-      href="https://bugs.launchpad.net/%7Erburkey">you can see the
-      various problem reports I've submitted to KiCad about these
-      issues, and the progress on them, on KiCad's bug tracker</a>.<br>
-    <br>
-    My general suggestion would be that when you install KiCad, do it
-    directly from the KiCad website, and not from any "stores" or
-    "repositories" available on your particular operating system.&nbsp;
-    In particular, at least for the near future, install the KiCad's <i>Nightly
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-      Build</i> rather than its stable version, in order to take
-    advantage of whatever fixes have been made so far to the problem
-    reports mentioned above.<br>
-    <h2>Sheet Sizes and Their Consequences<br>
-    </h2>
-    Almost all AGC and DSKY drawings were plotted on rather huge paper
-    sizes by today's standards, namely:<br>
-    <ul>
-      <li>C (22"×17")</li>
-      <li>D (34"×22")</li>
-      <li>E (44"×34")</li>
-      <li>J (<i>X</i>"×34", where <i>X</i> is 55 to 176)</li>
-    </ul>
-    We retain those sheet sizes in our conversions to KiCad.&nbsp; So
-    unless you have a roll-paper plotter with a paper width of at least
-    34", any printouts you make on small paper such as U.S. Letter or
-    U.S. Tabloid are going to be severely reduced.&nbsp; But at the same
-    time, a custom part library is used rather than the standard KiCad
-    part libraries, so everything tends to be quite large to start
-    with.&nbsp; <br>
-    <br>
-    Nevertheless, if you feel the need to make physical hardcopies of
-    the drawings on a printer, how satisfactory those printouts will be
-    will vary according to your expectations and circumstances.<br>
-    <h2>Basic Procedures for Transcription of a Scanned Schematic</h2>
-    <i>(This section is presently just some personal reflections that I
-      haven't polished or even updated in a while, so don't take it too
-      seriously.)</i><br>
-    <br>
-    I've personally converted a handful of these drawings into KiCad
-    now, but it's work in progress.&nbsp; So while I don't know <i>everything</i>
-    about this, I do know <i>something</i> about how to do it, and
-    that's what I'll try to impart to you in this section.<br>
-    <br>
-    First, I'll list the basic steps, and then elaborate afterward on
-    any of the steps that have some subtleties involved that can't be
-    explained in just a few words.<br>
-    <br>
-    Here are the preliminaries for setting up your KiCad project and the
-    other materials you're going to need during the actual
-    transcription.<br>
-    <ol>
-      <li>Clone the "schematics" branch of this repository onto your
-        local system.</li>
-      <li>The existing conversions are in the Schematics/ folder.&nbsp;
-        Choose from the available scanned drawings one that you'd like
-        to convert that <i>isn't</i> already in that folder.&nbsp; <b>Hint:</b>
-        Converting an existing schematic to a different revision of that
-        same drawing, or to a different drawing number that is closely
-        related to the existing drawing, is much, much easier than
-        transcribing a drawing from scratch.<br>
-      </li>
-      <li>Let us know that you intend to convert this drawing or this
-        time-sequence of drawings, so that multiple people won't waste
-        their efforts working on the same thing at the same time.</li>
-      <li>Under the Schematics/ directory, you'll find a directory
-        called Schematics/EmptyProject/.&nbsp; Simply duplicate this
-        directory (i.e., make another copy of it within Schematics/) and
-        rename it identically to the drawing you've chosen to work with,
-        as 8 digits plus a one-character revision code.&nbsp; (Below,
-        I'll refer to this directory of yours as Schematics/<i>DRAWING</i>/.)&nbsp;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        You'll also find a lot of files in Schematics/<i>DRAWING</i>/
-        with names like "EmptyProject*.*"; rename all those files by
-        replacing EmptyProject -&gt; <i>DRAWING</i>. </li>
-      <li>Determine the target sheet-size of the drawing you're working
-        with.&nbsp; The basic size (C, D, E, J) will be marked in the
-        SIZE field of the scanned-drawing's title block.&nbsp; It's a
-        bit trickier J-size drawings, <a href="#Sizes_of_Drawings">so
-          I'll describe those issues somewhat below</a>; let's just
-        assume for the moment that you do know the target width, in
-        inches.</li>
-      <li>Choose a <i>template</i> file that is the closest match for
-        the drawings you want to convert.&nbsp; Copy that file into your
-        Schematics/<i>DRAWING</i>/ directory, renaming it to
-        "schematicTemplate.kicad_wks" in the process of doing so.&nbsp;
-        If you have to create a new template file from scratch, <a
-          href="#CreatingMaintaining_Templates_for">that's a rather
-          complex topic that will be discussed later</a>, the usual
-        procedure is to either choose one of the template files already
-        in the SchematicTemplates/ directory, or else to choose one of
-        the schematicTemplate.kicad_wks files that already exists
-        somewhere in the Schematic/ directory's sub-directories.&nbsp;
-        Unfortunately, many of these will require at least some minor
-        modification, which will require a few of the same steps as
-        creating a template from scratch.&nbsp; The factors that go into
-        selecting an appropriate template file are:</li>
-      <ul>
-        <li>Physical size of the sheet.</li>
-        <li>The alphanumeric markings along the borders of the
-          drawing.&nbsp; For example, if the numbers along the bottom
-          vary from 1 to 8, and the letters along the side vary from A
-          to D, I call that an "8D" drawing.&nbsp; A 80"-wide J drawing
-          that was 8D would have a template that was "J8D-80x34".</li>
-        <li>The structure of the title block and revision control
-          areas.&nbsp; Mostly these are the same, but sometimes there
-          are significant variations. <br>
-        </li>
-      </ul>
-      <li>Process the scanned image of the drawing with an image-editing
-        tool like GIMP or Photoshop.&nbsp; Personally, I only use GIMP,
-        even though a lot of people consider it funky, because it's free
-        and available on all platforms, so I'm going to pretend that's
-        what's being used, even though any decent image-editing too will
-        probably work just as well.&nbsp; The object of the processing
-        is to get the image cropped, squared up, and correctly
-        sized.&nbsp; Again, <a href="#Pre-Processing_Scanned_Drawings">this
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-          is a slightly complex subject so I'll continue discussing it
-          later</a>.&nbsp;&nbsp; Below, I'll call this version of the
-        scan the "rescaled drawing".</li>
-      <li>Load the rescaled drawing into GIMP or some other tool that
-        lets you measure distances and determine coordinates (relative
-        to the upper-left corner) of features on the drawing, using
-        units of either inches or millimeters, whichever you
-        prefer.&nbsp; During the transcription process you'll be
-        constantly measuring and determining coordinates, so you'll
-        probably have this window open all the time as you continue with
-        the steps below.</li>
-      <li>Run KiCad and open a project<br>
-      </li>
-      <li>In KiCad's <i>Page Layout Editor</i>, make whatever changes
-        are necessary to make the title block and revision control areas
-        of Schematics/<i>DRAWING</i>/schematicTemplate.kicad_wks look
-        like it's supposed to, relative to the rescaled drawing, picking
-        whatever coordinates or measurements you need to off of the
-        rescaled drawing.&nbsp; Again, that's really a sub-topic of
-        tricky concept of creating templates for schematics, so it's
-        discussed later.&nbsp; At end of the process, save the template
-        and close the page layout editor.<br>
-      </li>
-      <li>Now open KiCad's <i>Schematic Editor</i>. The empty project
-        you started your project from had arbitrarily been set to D
-        size.&nbsp; Change the sheet size to the size you've already
-        determined above:&nbsp; C, D, E, or (for J) "custom". &nbsp;
-        Finally, under Preferences/ManageSymbolLibraries, select
-        AGC_DSKY.lib as the library you'd like to use.<br>
-      </li>
-    </ol>
-    The actual transcription process itself is relatively easy compared
-    to the above, since all you do is:<br>
-    <ol>
-      <li>Look at the resized scan and identify some feature you haven't
-        transcribed yet.</li>
-      <li>Figure out where it is located on the resized scan, in inches
-        or millimeters from the upper left of the sheet.</li>
-      <li>Place the corresponding object into the KiCad schematic.</li>
-      <li>Go back to step #1.</li>
-    </ol>
-    <p>Now, to use that information, you will first need to go through
-      the learning curve of understanding how to actually use KiCad,
-      which is not something I'm equipped to help you with.&nbsp; Still,
-      there are a few additional things worth knowing:<br>
-    </p>
-    <ul>
-      <li>Most of the textual notes on the page (other than fields in
-        the title block) use <b>boldface</b> size 130 mils.</li>
-      <li>The numbered oval pads you normally see all over the drawings
-        are individual pins of the connector taking signals into and out
-        of the circuit module.&nbsp; Within the symbol library
-        (AGC_DSKY.lib), these connectors have been defined in such a way
-        that "part A" of the symbol is pad 1, "part B" symbol is pad 2,
-        and so on.&nbsp; Other than specifying parts A, B, ..., Z, AA,
-        AB, etc., you additionally need to specify the oval pad
-        differently, depending on the direction from which the wire
-        enters the oval:</li>
-      <ul>
-        <li>Wire enters from the right:&nbsp; The part is "normal",
-          rotated at 0 degrees.</li>
-        <li>Wire enters from the top:&nbsp; The part is "DeMorgan",
-          rotated at 0 degrees.</li>
-        <li>Wire enters from the left:&nbsp; The part is "normal",
-          rotated at 180 degrees.</li>
-        <li>Wire enters from the bottom:&nbsp; The part is "DeMorgan",
-          rotated at 180 degrees.</li>
-      </ul>
-      <li>... and probably more little factoids later ...</li>
-    </ul>
-    <p><i>After</i> you've transcribed a drawing and saved it, here are
-      a few more things to do:<br>
-    </p>
-    <ul>
-      <li>Visually double-check the CAD vs the original scanned drawing,
-        to make sure nothing was missed.</li>
-      <li>Let KiCad do an ERC (Electrical Rules Check) for you.&nbsp;
-        This can find things for you such as wires that don't quite
-        connect, symbols that haven't been assigned a reference
-        designator, and so on.&nbsp; In fact, we want you to do that,
-        since we are somewhat less interested in having transcriptions
-        with errors in them than we are in having ones without. &nbsp;<img
-          alt="" src="smiley.png" width="16" height="16">&nbsp; <br>
-      </li>
-      <li>Optionally, if you're transcribing the circuit because of a
-        project of your own, you may want to let KiCad create a netlist,
-        which is simply a textual list of the way all the different pins
-        are interconnected — but then, if you're doing an electronics
-        project like that of your own, you probably know all of that.</li>
-      <li>Also optionally, you may want to make an image (like a PNG or
-        JPG or PDF) of the design.&nbsp; This is usually more helpful
-        than a hardcopy, since as I mentioned earlier, printouts of the
-        schematics will usually be scaled down smaller than people are
-        comfortable with.&nbsp; Because of current bugs in KiCad,
-        though, <a href="#Making_Images_PNG_JPG_PDF_of_the_CAD">making
-          an image can be a bit tricky, so I'll devote a section to it
-          below</a>.&nbsp; However, we'll make a PNG from your
-        transcribed CAD files anyway, for display on the Virtual AGC
-        website, so you don't really need to bother with doing so.<br>
-      </li>
-    </ul>
-    <p>And of course, you'll want to push the completed design back to
-      the GitHub repository.<br>
-    </p>
-    <h3><a name="Sizes_of_Drawings"></a>Determining Sizes of Drawings</h3>
-    TBD<br>
-    <h3><a name="CreatingMaintaining_Templates_for"></a>Creating/Maintaining
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-      Templates for Schematics</h3>
-    TBD<br>
-    <h3><a name="Pre-Processing_Scanned_Drawings"></a>Pre-Processing
-      Scanned Drawings</h3>
-    TBD<br>
-    <h3><a name="Making_Images_PNG_JPG_PDF_of_the_CAD"></a>Making Images
-      (PNG, JPG, PDF) of the CAD Drawing</h3>
-    Usually, I think, when choosing somewhat-comparable image-file
-    formats, people generally will end up choosing JPG over PNG, because
-    JPG files are typically much smaller than the corresponding PNG
-    files.&nbsp; That's natural, since JPG is a lossy format and PNG is
-    a lossless one.&nbsp; In the case of images of these CAD designs,
-    though, it is the PNG files which are much smaller than the
-    JPGs!&nbsp; So you should really forget about making a JPG, and
-    think about making a PNG instead.<br>
-    <br>
-    Here's what I have found are the most-satisfactory steps for
-    producing a PNG or PDF file:<br>
-    <ol>
-      <li>Have the KiCad schematic editor <i>plot</i> (not <i>print</i>)
-        to a Postscript file.&nbsp; You may notice that KiCad can plot
-        directly to PDF, and you may be tempted, therefore, to do that
-        instead.&nbsp; The reason not to is that KiCad <i>currently</i>
-        has a bug in which dashed lines are printed at such a fine pitch
-        that they look as if they were solid.&nbsp; If you want a PDF
-        and your design has no dashed lines, or you just don't care,
-        feel free to plot directly to PDF and stop right here.&nbsp; In
-        cause you're wondering why not to <i>print</i> to Postscript
-        (or PDF), it has to do with other current bugs in KiCad related
-        to paper sizing.</li>
-      <li>Convert the Postscript file just created to PNG:</li>
-      <ul>
-        <li>On Linux, or (I suppose) Mac OS X, if you have installed
-          ImageMagick: You can use the Scripts/printKiCad.sh shell
-          script command "printKiCad.sh file1.ps file2.ps ...",
-          resulting in file1.png, file2.png, and so on.</li>
-        <li>Alternatively, on any operating system, if you have
-          installed GIMP:<br>
-        </li>
-        <ul>
-          <li>You must process the Postscript file to increase the pitch
-            of all dashed lines.&nbsp; The Postscript file itself is
-            just text, and the idea is to replace everything that looks
-            like "[<i>NUMBER</i> <i>NUMBER</i>] 0 setdash" with
-            something like "[1000 1000] 0 setdash".&nbsp; <i>I</i> do
-            that using a program called 'sed', with a command reading
-            "sed --in-place 's/\[[0-9]* [0-9]*\] 0 setdash/[1000 1000] 0
-            setdash/' <i>FILENAME</i>.ps".&nbsp; I'm sure 'sed' is on
-            Mac OS X too, though the "--in-place" switch is undoubtedly
-            named something different.&nbsp; You can also install 'sed'
-            on Windows, though it probably doesn't come with it. <br>
-          </li>
-          <li>What I do then is to open up the Postscript file with
-            GIMP, telling it to use a 150 dpi resolution and "strong"
-            anti-aliasing.&nbsp; Within GIMP, I then rotate 90°
-            clockwise, and export to <i>DRAWING</i>.png. <br>
-          </li>
-        </ul>
-        <li>Or if you don't like those alternatives, roll your own
-          solution that accomplishes the following:</li>
-        <ul>
-          <li>In the Postscript file, replace everything that looks like
-            "[<i>NUMBER</i> <i>NUMBER</i>] 0 setdash" with something
-            like "[1000 1000] 0 setdash". </li>
-          <li>In <i>some</i> kind of graphics software, import the
-            Postscript file at 150 dpi with as much anti-aliasing as you
-            can muster, then rotate it 90° clockwise, and finally,
-            export it to PNG.<br>
-          </li>
-        </ul>
-      </ul>
-    </ol>
     <h1><a name="Appendix:_Signal_Wiring_Diagrams"></a> Appendix: Signal
       Wiring Diagrams for AGC 2003100 and the NOR-Gate Problem<br>
     </h1>
@@ -25445,10 +26064,16 @@ href="https://github.com/virtualagc/virtualagc/blob/schematics/MITcomponents.csv
 
 
 
+
+
+
+
+
+
           Commons No Rights Reserved License</a></span><br>
       <i><font size="-1">Last modified by <a
             href="mailto:info@sandroid.org">Ronald Burkey</a> on
-          2018-09-16.<br>
+          2018-09-23.<br>
           <br>
           <a href="http://www.ibiblio.org"><img style="border: 0px solid
               ; width: 300px; height: 100px;" alt="Virtual AGC is hosted
