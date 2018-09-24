@@ -137,7 +137,7 @@ Other connector types differ in some ways, in that they may have a different num
 
 ### Other Conventional Details
 
-Textual labels placed near wires are very seldom the KiCad construct treated as a net name, because the original drawings did not seem to use such labels electrical.  They are generally just descriptive text.
+Textual labels placed near wires are very seldom the KiCad construct treated as a net name, because the original drawings did not seem to use such labels electrically.  They are generally just descriptive text.
 
 An exception is the rare case in which extra NOR gates or NOR gates with additional inputs (tied to ground) need to be added to the CAD design which were not in the original drawings.  In that case it's often desirable to add a net label for the appropriate ground bus (such as 0VDCA) to the affected input pins.
 
