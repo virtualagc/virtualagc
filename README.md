@@ -62,10 +62,24 @@ The script Scripts/printKiCad.sh carries out the two middle steps (edit the dash
 
 The original designers used various conventions and I've used various conventions in dealing with their conventions, and you may need to be aware of all of them for a full grasp of how to work with the drawings.
 
+### Organization of Drawings into Sheets
+
+TBD
+
+### Organization of Drawings into Reusable Blocks
+
+TBD
+
+### NOR Gates
+
+TBD
+
+### Connectors
+
 TBD
 
 ## Community Effort
 
-It is my intention to convert every available scan of an AGC or DSKY electrical drawing (and there are over a hundred of them) to CAD. I've gotten this down to a science, so and to maintain aesthetic and electrical consistency it's perhaps best that I continue that as an individual effort.  If I die or something, feel free to jump in and finish it up!
+It is my intention to convert every available scan of an AGC or DSKY electrical drawing (and there are over a hundred of them) to CAD. I've gotten this down to a science, so to maintain aesthetic and electrical consistency it's perhaps best that I continue that as an individual effort.  If I die or something, feel free to jump in and finish it up!
 
 Where help _would_ be appreciated is in proof-reading the transcribed CAD files vs the scans of the original drawings.  If you would care to assist, please contact me.
