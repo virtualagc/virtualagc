@@ -40,10 +40,26 @@ You will see these in the top-level directory of this branch.  To the extent pos
 - KiCad global library setup: Use the main-menu function Preferences/ManageSymbolLibraries.  Select the Global Libraries tab in the window that appears.  Use the folder icon to add all of the .lib files contained in the folder to which you've cloned this repository.
 - Eeschema global preferences: In KiCad, open any existing project, or create a new one, and view it in the schematic editor.  Use the main-menu function Preferences/Preferences. In the window that opens up, select Eeschma and change measurement units to inches, default text size to 140.  Select Display Options and change grid size to 25 mils, line thickness to 20 mils.
 
+## Printing
+
+Printing out one of the CAD files, either to a physical printer or to an image format such as PNG or PDF, is currently somewhat trickier than it needs to be.  The basic problem is that these drawings have a much larger sheet size than KiCad has been accustomed to handle in the past, and KiCad is only slowly making the changes we need to handle this difference.  Recall, we are trying to preserve legacy drawings rather than designing new ones, so we need KiCad to accomodate us rather than adapting ourself to KiCad's limitations.  Fortunately, it has worked out pretty well so fare ... but not 100% perfectly.
+
+Two issues presently complicate printing:
+
+1. For dashed lines, KiCad choses its own pitch for the dashes rather than allowing us to choose it, and since KiCad's chosen pitch is only appropriate for much smaller sheet sizes, we end up with dashed lines that basically look solid.
+2. For sheet sizes above a certain point, KiCad's print feature simply embeds incorrect metadata into its output files regarding the sheet size ... in fact, it makes them only a tenth the size they ought to be.
+
+The best way I've found to get around this is to use the following basic procedure for printing:
+
+- Use KiCad's "plot" feature rather than its "print" feature.  Plot to an output file in Postscript format.  Make sure the default line size used is 20 mils.
+- Edit the Postscript file (which is just a text file) to change the styling of all dashed lines to an acceptable pitch.  What this actually involves is finding all strings of the form "[_NUMBERS_ _NUMBERS_] 0 setdash" and changing them to "[1000 1000] 0 setdash".
+- Convert the Postscript to PNG using some program like GIMP, ImageMagick, or Photoshop.  The important factors, assuming you have control over them are: white background (as opposed to transparent), density units should be pixels per inch, the density should be 150 (pixels per inch), the images should be rotated to landscape.
+- You can then, of course, print the PNG, convert it to PDF, or whatever pleases you.  My experience is that even the largest of the AGC drawings can be printed to 11"&times;17" and remain readable, though just barely.
+
+The script Scripts/printKiCad.sh carries out the two middle steps (edit the dashed-line styling and convert Postscript to PNG), though it's only for Linux.  If someone wants to create comparable scripts for Mac OS X or for Windows, feel free to send it to me.  The script uses 'sed' and ImageMagick, both of which are available for both Mac OS X and Windows.
+
 ## Community Effort
 
-It is my intention to convert every available scan of an AGC or DSKY electrical drawing (and there are over a hundred of them) to CAD.
+It is my intention to convert every available scan of an AGC or DSKY electrical drawing (and there are over a hundred of them) to CAD. I've gotten this down to a science, so I don't really envisage much need for any assistance on that.
 
-If you have the expertise and desire to help out with this, we can certainly accommodate you, though there are presently no procedures in place to do so.
-
-[The basic steps of transcribing a scanned AGC/DSKY schematic into KiCad are discussed at the main Virtual AGC website.](http://www.ibiblio.org/apollo/ElectroMechanical.html#Appendix:_KiCad_for_Virtual_AGC)
+Where help would be appreciated is in proof-reading the transcribed CAD files vs the scans of the original drawings.  If you would care to assist, please contact me.
