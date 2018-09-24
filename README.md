@@ -29,8 +29,8 @@ Besides that, all of KiCad's schematic files, parts libraries, board templates, 
 
 Because we retain appearances of the original drawings, as well as the sheet sizes of the original drawings &mdash; they were plotted on very big paper &mdash; we can't really avail ourselves of the standard KiCAD part libraries.  We instead have our own custom part libraries:
 
-- AGC_DSKY.lib &mdash; contains the handful of generic parts needed: resistor, capacitor, diode, ..., in general, everything other than NOR gates.
-- D3NOR-_VIN_-_GND_[-expander].lib &mdash; a variety of libaries that handle the wild profusion of NOR-gate symbols needed for the schematics.
+- AGC_DSKY.lib &mdash; contains the handful of generic parts needed: resistor, capacitor, diode, ..., in general, everything other than NOR gates.  The only tricky components are the connectors; there is a script, Script/MakeConnector.py, that can be used to create variations of the basic connector type, which can then be imported into AGC_DSKY.lib
+- D3NOR-_VIN_-_GND_[-expander][-nopinnums].lib &mdash; a variety of libaries that handle the wild profusion of NOR-gate symbols needed for the schematics.  These libraries differ in the net they use for powering the NORs (namely _VIN_), the net they use for grounding the NORs' unused inputs and power supply (namely _GND_), and in whether the library contains "normal" NOR gates vs "expander" NOR gates.  Also, on most of the drawings the pin numbering is shown, but on early drawings they are not.  _VIN_ seems to always be either +4VDC, +4SW, +4SW2, FAP, or NC ("no connect"), while _GND_ is one of 0VDCA, 0VDC, or 0VDC2, so you can see that there are 5&times;3&times;2&times;2=60 overall possibilities; fortunately, _only_ about 16 of them are actually used.  :-)  There is a script, Script/MakeDualNorLib.py, that produces these libaries, given the basic parameters (_VIN_ etc.) just mentioned.
 
 You will see these in the top-level directory of this branch.  To the extent possible, we'd like to manage changes to these libraries ourselves, rather than making their maintenance a community effort.
 
@@ -40,7 +40,7 @@ You will see these in the top-level directory of this branch.  To the extent pos
 - KiCad global library setup: Use the main-menu function Preferences/ManageSymbolLibraries.  Select the Global Libraries tab in the window that appears.  Use the folder icon to add all of the .lib files contained in the folder to which you've cloned this repository.
 - Eeschema global preferences: In KiCad, open any existing project, or create a new one, and view it in the schematic editor.  Use the main-menu function Preferences/Preferences. In the window that opens up, select Eeschma and change measurement units to inches, default text size to 140.  Select Display Options and change grid size to 25 mils, line thickness to 20 mils.
 
-## Printing
+## Printing from KiCad
 
 Printing out one of the CAD files, either to a physical printer or to an image format such as PNG or PDF, is currently somewhat trickier than it needs to be.  The basic problem is that these drawings have a much larger sheet size than KiCad has been accustomed to handle in the past, and KiCad is only slowly making the changes we need to handle this difference.  Recall, we are trying to preserve legacy drawings rather than designing new ones, so we need KiCad to accomodate us rather than adapting ourself to KiCad's limitations.  Fortunately, it has worked out pretty well so fare ... but not 100% perfectly.
 
@@ -58,8 +58,14 @@ The best way I've found to get around this is to use the following basic procedu
 
 The script Scripts/printKiCad.sh carries out the two middle steps (edit the dashed-line styling and convert Postscript to PNG), though it's only for Linux.  If someone wants to create comparable scripts for Mac OS X or for Windows, feel free to send it to me.  The script uses 'sed' and ImageMagick, both of which are available for both Mac OS X and Windows.
 
+## Conventions Used in the Drawings
+
+The original designers used various conventions and I've used various conventions in dealing with their conventions, and you may need to be aware of all of them for a full grasp of how to work with the drawings.
+
+TBD
+
 ## Community Effort
 
-It is my intention to convert every available scan of an AGC or DSKY electrical drawing (and there are over a hundred of them) to CAD. I've gotten this down to a science, so I don't really envisage much need for any assistance on that.
+It is my intention to convert every available scan of an AGC or DSKY electrical drawing (and there are over a hundred of them) to CAD. I've gotten this down to a science, so and to maintain aesthetic and electrical consistency it's perhaps best that I continue that as an individual effort.  If I die or something, feel free to jump in and finish it up!
 
-Where help would be appreciated is in proof-reading the transcribed CAD files vs the scans of the original drawings.  If you would care to assist, please contact me.
+Where help _would_ be appreciated is in proof-reading the transcribed CAD files vs the scans of the original drawings.  If you would care to assist, please contact me.
