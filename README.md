@@ -97,18 +97,44 @@ The components used were all dual 3-input NOR gates, so that each physical integ
 - On early drawings, labeling on the NOR-gate pins is completely omitted.  In other words, you'd just see 3 (or 2 or 1) pins on the schematic drawing, but no A, B, C, D, E, or F label next to them.  It's a mistake to assume (as I did at first) that that means it simply doesn't matter and that we're free to associate these pins however we like.  Rather, there's a _separate_ drawing that you have to look at to determine which pins were used and what order they appear in.  That extra drawing is called the "signal wiring diagram", and [its interpretion is discussed in some detail here](http://www.ibiblio.org/apollo/ElectroMechanical.html#Appendix:_Signal_Wiring_Diagrams).
 - NOR gates are not marked on the schematics with reference designators.  Instead, they are marked on the schematics with a unique 5-digit "gate number"; those can't be used a reference designators, because they vary by NOR gate, and not by dual-NOR chip.  There is also a 2-digit "location number", 01-60, which _is_ the same for both gates in a dual-gate chip, and which pertains to the position of the chip on the physical circuit board.  We encode these 5-digit and 2-digit numbers in the schematic symbol using fields called "Location" and "Location2", respectively.  (Yes, it would have been better as "Gate" and "Location"; too bad!)  Unfortunately, the 2-digit location number can't be used directly as a reference designator, because the same range of numbers (01-60) is generally used on the 2nd page of a 2-sheet drawing as on the 1st page, and we need reference designators to be unique across all sheets of a given drawing.  We handle this by using reference designators U1_nn_ (_nn_=01-60) on the 1st page and U2_nn_ on the 2nd.
 - On early drawings, the 2-digit location number just mentioned is omitted entirely from the drawing.  However, the 2-digit number nevertheless exists and is significant, and must be maintained. Given the 5-digit gate number, the 2-digit location number is deduced from the separate signal wiring diagram, [as described here](http://www.ibiblio.org/apollo/ElectroMechanical.html#Appendix:_Signal_Wiring_Diagrams).
+- As mentioned earlier, all possible variations of pin usage of NOR gates appear in the symbol libraries.  This is not quite true, since there are a handful of instances in the original drawing in which a NOR gate with _no_ inputs appears.  I did not anticipate that kind of situation, and did not create library parts for it.  It's necessary instead to use a NOR gate that has some inputs, and to explicitly tie those inputs to ground.
 
 ### Power Buses
 
-TBD
+In KiCad, in order for a symbol to have hidden power/ground pins, as the NOR gates do, it's necessary to have a net of the same name as has been assigned to the hidden power or ground pins _and_ to add a "power flag" symbol to that net.  In general, what that means is to add a library symbol which happens to be called "PWR_FLAG" to the net.  In the original AGC drawings, there is often a symbol shaped like an arrow attached to the connector pins where power and ground enter the module, so the PWR_FLAG component created for custom symbol library AGC_DSKY.lib has been made somewhat similar in appearance to such an arrow.  In spite of that initial motivation for the shape of the PWR_FLAG symbol, PWR_FLAG components are typically _not_ used on in the CAD sheets where power and ground enter the module, for reasons that will become clear in a moment.  Instead, a different symbol, an ArrowTwiddle, is used.  An ArrowTwiddle looks like a PWR_FLAG, albeit somewhat squatter, but does nothing electrically and simply supplies the appropriate visual appearance.
+
+No ground symbol as such appears in any of the original drawings, except for a chassis-ground symbol that tends to appear once per drawing.  This chassis-ground is treated just like another component in AGC_DSKY.lib, and is not treated as one of KiCad's separate class of "power ports".  No KiCad "power port" appears in any of the CAD designs.
+
+Finally, in a multi-sheet CAD design, the power and ground buses for the NOR-gate's hidden pins are typically the only signals that interact between sheets.  The PWR_FLAG arrow symbols mentioned earlier are not placed on the individual drawing sheets (where the similar-looking ArrowTwiddle symbols are placed instead) because if two or more PWR_FLAGS are used on a bus with the same name, KiCad's design-rule check (ERC) flags it as an error.  Instead, the power/ground signals are taken out of the sheets, onto the top-level schematic, and a single PWR_FLAG symbol is put onto each of the buses at that top level.
 
 ### Connectors
 
-TBD
+Connectors typically appear in the original drawings not as unified objects, but rather as collections of single-pin numbered oval pads.  There are a number of different connectors that fall into this category.  For the AGC modules A1-29, for example, every one of the modules has an identical connector with the following physical characteristics:
+
+- 276 pins altogether
+- Consists of 4 rows of 69 pins each
+- The 69 pins are numbered 1-20 (pin 21 is omitted), 22-50 (pin 51 is missing), 52-71.
+
+In the original drawings these connectors were treated like so:
+
+- 266 oval-shaped, numbered pads.
+- Pad numbers used:  101-171, 201-271, 301-371, and 401-471, but with 121, 221, 321, 421, 151, 251, 351, and 451 omitted.
+
+In the CAD designs, these are treated a trifle differently:
+
+- Four sets of 69 oval-shaped pads.
+- The four sets have reference designators J1, J2, J3, and J4.
+- These have the library symbol types ConnectorA1-100, ConnectorA1-200, ConnectorA1-300, and ConnectorA1-400, respectively.
+- These have pin numbers (and visual marking) 101-171 (with 121 and 151 omitted), 201-271 (with 221 and 251 omitted), 301-371 (with 321 and 351 omitted), and 401-471 (with 421 and 451 omitted), respectively.
+- These are "multipart" symbols, which in KiCad's terminology means that each of them consists of 71 "parts", A, B, ..., Z, AA, ..., AZ, BA, ..., BS.  The missing positions (21 and 51, corresponding to "parts" U and AY) exist in the library, but simply have no electrical pins associated with them.
+- These are "DeMorgan" symbols in KiCad terminology, meaning that they have two alternate appearances (the "normal" one and the "DeMorgan" one).  In the normal appearance, the electrical pin is at either the left or right narrow end of the oval, depending on the rotation or reflection of the symbol.  In the DeMorgan appearance, the electrical pin is at either the top or bottom long end of the oval shape.
+- In the original drawings, there are handful of places where an oval pad is used with pins on _both_ sides of the connectors.  This is not possible in KiCad, as far as I know, so in that case we simply draw enough extra wiring to compensate for the loss of one of the pins.
 
 ### Other Conventional Details
 
-TBD
+Textual labels placed near wires are very seldom the KiCad construct treated as a net name, because the original drawings did not seem to use such labels electrical.  They are generally just descriptive text.
+
+An exception is the rare case in which extra NOR gates or NOR gates with additional inputs (tied to ground) need to be added to the CAD design which were not in the original drawings.  In that case it's often desirable to add a net label for the appropriate ground bus (such as 0VDCA) to the affected input pins.
 
 ## Community Effort
 
