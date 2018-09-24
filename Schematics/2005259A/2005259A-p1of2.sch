@@ -1,10 +1,10 @@
 EESchema Schematic File Version 4
-LIBS:board1-cache
+LIBS:module-cache
 EELAYER 26 0
 EELAYER END
 $Descr E 44000 34000
 encoding utf-8
-Sheet 2 2
+Sheet 2 3
 Title ""
 Date ""
 Rev ""
@@ -2959,8 +2959,6 @@ Wire Wire Line
 	34175 9775 34175 9500
 Connection ~ 34175 9775
 Connection ~ 34175 9500
-Text Notes 40200 13125 0    140  ~ 28
-F09B
 $Comp
 L AGC_DSKY:ConnectorA1-200 J2
 U 15 1 5D2BDE35
@@ -5030,8 +5028,6 @@ Connection ~ 4600 20775
 Wire Wire Line
 	4600 20775 4600 20500
 Wire Wire Line
-	6975 21850 6975 21875
-Wire Wire Line
 	6975 22575 6825 22575
 Wire Wire Line
 	5000 21925 5000 22300
@@ -5058,7 +5054,6 @@ Wire Wire Line
 	5000 21925 6975 21425
 Wire Wire Line
 	6975 21875 5000 21300
-Connection ~ 6975 21875
 Wire Wire Line
 	6975 21875 6975 22575
 Wire Wire Line
