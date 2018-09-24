@@ -62,13 +62,29 @@ The script Scripts/printKiCad.sh carries out the two middle steps (edit the dash
 
 The original designers used various conventions and I've used various conventions in dealing with their conventions, and you may need to be aware of all of them for a full grasp of how to work with the drawings.
 
+### Project Naming
+
+Each of the CAD designs corresponding to one of the original drawings has a sub-directory in the Schematics/ folder, named identically to the original drawing. For example, for original drawing 2005259A (module A1), we have the folder Schematics/2005259A/.
+
+Within that project folder, the KiCad project file is always named module.pro. Logic modules like 2005259A were implemented as pairs of circuit boards, and sometimes it is useful to have KiCad projects for the individual boards rather than for the module as a whole.  In such cases, you may find additional KiCad project files with names like board1.pro or board2.pro in the project folder as well, though at this point that has not been done for most modules.
+
 ### Organization of Drawings into Sheets
 
-TBD
+Many of the CAD designs, particularly for the "logic flow diagrams" for AGC modules A1-A24, are organized almost exactly like the original physical drawings were.  Basically, the original drawings for those modules were organized into completely electrically-independent sheets (usually 2, but occasionally 1 or 3).
+
+In KiCad, the way to organize such a design is to create a top-level schematic that contains just 2 (or 1 or 3) blocks representing the individual sheets, plus a few wires interconnecting those blocks.  For the logic modules, A1-A24, only ground and power nets are common between the individual sheets, and hence only a few signals with names like 0VDCA or +4VDC interconnect the sheets on the top-level schematic.
 
 ### Organization of Drawings into Reusable Blocks
 
-TBD
+For modules of a more analog nature, or used for interfacing, such as AGC modules A25-A31 and B1-B17, another commonly-experienced situation is that in which the top-level drawing uses a lot of small circuit blocks that are iterated repeatedly throughout the top-level schematic. 
+
+The overall design thus consists of a complex-looking top-level schematic, on which a number of the "components" are really circuit blocks that are themselves represented by separate schematics.  In general, each of those circuit blocks is implemented as a separate CAD sheet that acts as a template, and for each appearance of the block in the top-level schematic, the system uses the same template schematic for the circuit block but assigns different reference designators and netnames to each instance.  These CAD sheets for the circuit-block templates won't correspond exactly to a sheet of the original drawing, but will usually be just part of such an original sheet.
+
+For example, in this case, an original drawing that consisted of two sheets, one of which defined the top-level design, and one of which might have defined the templates for (say) 5 circuit blocks called A, B, C, D, and E, will in the CAD design become 6 sheets, one for the top-level design and one for each of the A, B, C, D, and E circuit blocks.  Nevertheless, we still try to maintain as much of the visual appearances of each of these as possible, as compared to the original drawing, so that the correctness and significance of the CAD transcription is as clear as possible.
+
+Preservation of hierarchical reference designators is important when working with the physical AGC circuit modules, because they have reference designators marked on them. What should the reference designators in the circuit blocks be like?  Note first that when a circuit-block appears in the top-level schematic, it is assigned a "sheet name".  For a circuit block with template C.sch, for example, those sheet names would be 1C, 2C, 3C, and so forth on the top-level schematic.  Similarly, circuit block B.sch would have sheet names 1B, 2B, etc.  These designations were drawn on the original top-level sheets, and we continue to use them as-is.  Now suppose that the components in template C.sch are R1, R2, ..., C1, C2, ....  For a particular _instance_ of C.sch appearing in the top-level schematic (say, instance sheet 3C), these reference designators become 3R1, 3R2, ..., 3C1, 3C2, ....  (You may wonder how that could work, since for example, if instance 2B of block B and 2C of block C both had an R1, then the reference designators for both would become 2R2.  The original designers took care so that there was no overlap in the reference designators in the templates for blocks A, B, C, D, and E.  Therefore, the hypothetical situation just mentioned doesn't occur.)
+
+KiCad's schematic editor deals with this configuration well, except for the fact that the naming convention for the reference designators just mentioned is not one that its Tools/AnnotateSchematics function can apply automatically for itself.  Therefore, we will eventually have to create a script (but don't have one yet!) that can apply this reference-designator naming for us.  Until that happens, we just have to let KiCad's Tools/AnnotateSchematics function apply some reference-designator reassignment for us and live with it.
 
 ### NOR Gates
 
