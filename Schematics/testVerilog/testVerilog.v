@@ -2,16 +2,16 @@
 module A1 ( 
   rst,
   FS01_,
+  F02A,
   F02B,
   FS02,
-  F02A,
   FS02A
 );
 input wire rst;
 input wire FS01_;
+output wire F02A;
 output wire F02B;
 output wire FS02;
-output wire F02A;
 output wire FS02A;
 
 assign FS02A = ~(rst|U126Pad7);
