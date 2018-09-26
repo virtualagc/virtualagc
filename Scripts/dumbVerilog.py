@@ -135,11 +135,15 @@ for line in lines:
 		# This is a pin in the component.  The fields are
 		# "(", pin number, net name, ").
 		fields = line.strip().split()
+		pinNumber = int(fields[1])
+		if len(pinsDB[pinNumber]) < 2:
+			continue
+		pinName = pinsDB[pinNumber][1].replace("/", "_")
 		if fields[2][:3] in ["0VD", "+4V", "+4S", "FAP"]:
 			discards[fields[2]] = pinName
 			continue
-		pinNumber = int(fields[1])
-		pinName = pinsDB[pinNumber][1].replace("/", "_")
+		#if (fields[2] in inputs) or (fields[2] in outputs) or (fields[2] in discards):
+		#	continue
 		if pinName[:3] in ["0VD", "+4V", "+4S", "FAP"]:
 			discards[fields[2]] = pinName
 			continue
@@ -157,28 +161,60 @@ for line in lines:
 # Can now write out the beginning of the Verilog module.
 print "// Verilog module auto-generated for AGC module " + moduleName + " by dumbVerilog.py"
 print "module " + moduleName + " ( "
-count = len(inputs) + len(outputs)
 print "  rst,"
+newInputs = []
+newOutputs = []
 for key in inputs:
-	if count > 1:
-		ending = ","
-	else:
-		ending = ""
-	count -= 1
-	print "  " + inputs[key] + ending
+	if inputs[key] not in newInputs:
+		newInputs.append(inputs[key])
 for key in outputs:
+	if outputs[key] not in newOutputs:
+		newOutputs.append(outputs[key])
+inouts = []
+for key in newInputs:
+	if key in newOutputs:
+		inouts.append(key)
+count = len(newInputs) + len(newOutputs) - len(inouts)
+inouts.sort()
+newInputs.sort()
+newOutputs.sort()
+for name in inouts:
 	if count > 1:
 		ending = ","
 	else:
 		ending = ""
 	count -= 1
-	print "  " + outputs[key] + ending
+	print "  " + name + ending
+for name in newInputs:
+	if name in inouts:
+		continue
+	if count > 1:
+		ending = ","
+	else:
+		ending = ""
+	count -= 1
+	print "  " + name + ending
+for name in newOutputs:
+	if name in inouts:
+		continue
+	if count > 1:
+		ending = ","
+	else:
+		ending = ""
+	count -= 1
+	print "  " + name + ending
 print ");"
 print "input wire rst;"
-for key in inputs:
-	print "input wire " + inputs[key] + ";"
-for key in outputs:
-	print "output wire " + outputs[key] + ";"
+for name in inouts:
+	print "inout wire " + name + ";"
+for name in newInputs:
+	if name in inouts:
+		continue
+	print "input wire " + name + ";"
+for name in newOutputs:
+	if name in inouts:
+		continue
+	print "output wire " + name + ";"
 print ""
 
 # Now do another pass on the netlist to determine how the internal logic of the
