@@ -1,0 +1,109 @@
+#! /usr/local/bin/vvp
+:ivl_version "11.0 (devel)" "(3f24557)";
+:ivl_delay_selection "TYPICAL";
+:vpi_time_precision + 0;
+:vpi_module "system";
+:vpi_module "vhdl_sys";
+:vpi_module "vhdl_textio";
+:vpi_module "v2005_math";
+:vpi_module "va_math";
+S_0x1522a70 .scope module, "testVerilog" "testVerilog" 2 3;
+ .timescale 0 0;
+v0x154a860_0 .net "F02A", 0 0, L_0x154bbc0;  1 drivers
+v0x154a920_0 .net "F02B", 0 0, L_0x154c1b0;  1 drivers
+v0x154a9f0_0 .var "FS01_", 0 0;
+v0x154aaf0_0 .net "FS02", 0 0, L_0x154b0b0;  1 drivers
+v0x154abc0_0 .net "FS02A", 0 0, L_0x154ae20;  1 drivers
+v0x154ac60_0 .var "rst", 0 0;
+S_0x1521ef0 .scope module, "A1A" "A1" 2 21, 3 2 0, S_0x1522a70;
+ .timescale 0 0;
+    .port_info 0 /INPUT 1 "rst";
+    .port_info 1 /INPUT 1 "FS01_";
+    .port_info 2 /OUTPUT 1 "F02B";
+    .port_info 3 /OUTPUT 1 "FS02";
+    .port_info 4 /OUTPUT 1 "F02A";
+    .port_info 5 /OUTPUT 1 "FS02A";
+L_0x154ad30 .functor OR 1, v0x154ac60_0, L_0x154b780, C4<0>, C4<0>;
+L_0x154ae20 .functor NOT 1, L_0x154ad30, C4<0>, C4<0>, C4<0>;
+L_0x154af30 .functor OR 1, v0x154ac60_0, L_0x154b780, C4<0>, C4<0>;
+L_0x154aff0 .functor OR 1, L_0x154af30, L_0x154b4e0, C4<0>, C4<0>;
+L_0x154b0b0 .functor NOT 1, L_0x154aff0, C4<0>, C4<0>, C4<0>;
+L_0x154b1c0 .functor OR 1, v0x154ac60_0, L_0x154c1b0, C4<0>, C4<0>;
+L_0x154b2c0 .functor OR 1, L_0x154b1c0, v0x154a9f0_0, C4<0>, C4<0>;
+L_0x154b3d0 .functor OR 1, L_0x154b2c0, L_0x154bb00, C4<0>, C4<0>;
+L_0x154b4e0 .functor NOT 1, L_0x154b3d0, C4<0>, C4<0>, C4<0>;
+L_0x154b5f0 .functor OR 1, v0x154ac60_0, L_0x154bb00, C4<0>, C4<0>;
+L_0x154b710 .functor OR 1, L_0x154b5f0, L_0x154b0b0, C4<0>, C4<0>;
+L_0x154b780 .functor NOT 1, L_0x154b710, C4<0>, C4<0>, C4<0>;
+L_0x154b8b0 .functor OR 1, v0x154ac60_0, L_0x154b4e0, C4<0>, C4<0>;
+L_0x154b920 .functor OR 1, L_0x154b8b0, v0x154a9f0_0, C4<0>, C4<0>;
+L_0x154b840 .functor OR 1, L_0x154b920, L_0x154bbc0, C4<0>, C4<0>;
+L_0x154bb00 .functor NOT 1, L_0x154b840, C4<0>, C4<0>, C4<0>;
+L_0x154bc50 .functor OR 1, v0x154ac60_0, L_0x154b780, C4<0>, C4<0>;
+L_0x154bd50 .functor OR 1, L_0x154bc50, L_0x154bb00, C4<0>, C4<0>;
+L_0x154bbc0 .functor NOT 1, L_0x154bd50, C4<0>, C4<0>, C4<0>;
+L_0x154bef0 .functor OR 1, v0x154ac60_0, L_0x154b4e0, C4<0>, C4<0>;
+L_0x154be50 .functor OR 1, L_0x154bef0, L_0x154b0b0, C4<0>, C4<0>;
+L_0x154c1b0 .functor NOT 1, L_0x154be50, C4<0>, C4<0>, C4<0>;
+v0x1521370_0 .net "F02A", 0 0, L_0x154bbc0;  alias, 1 drivers
+v0x15492c0_0 .net "F02B", 0 0, L_0x154c1b0;  alias, 1 drivers
+v0x1549380_0 .net "FS01_", 0 0, v0x154a9f0_0;  1 drivers
+v0x1549450_0 .net "FS02", 0 0, L_0x154b0b0;  alias, 1 drivers
+v0x1549510_0 .net "FS02A", 0 0, L_0x154ae20;  alias, 1 drivers
+v0x1549620_0 .net "U126Pad7", 0 0, L_0x154b780;  1 drivers
+v0x15496e0_0 .net "U127Pad2", 0 0, L_0x154bb00;  1 drivers
+v0x15497a0_0 .net "U127Pad8", 0 0, L_0x154b4e0;  1 drivers
+v0x1549860_0 .net *"_s0", 0 0, L_0x154ad30;  1 drivers
+v0x15499d0_0 .net *"_s10", 0 0, L_0x154b1c0;  1 drivers
+v0x1549ab0_0 .net *"_s12", 0 0, L_0x154b2c0;  1 drivers
+v0x1549b90_0 .net *"_s14", 0 0, L_0x154b3d0;  1 drivers
+v0x1549c70_0 .net *"_s18", 0 0, L_0x154b5f0;  1 drivers
+v0x1549d50_0 .net *"_s20", 0 0, L_0x154b710;  1 drivers
+v0x1549e30_0 .net *"_s24", 0 0, L_0x154b8b0;  1 drivers
+v0x1549f10_0 .net *"_s26", 0 0, L_0x154b920;  1 drivers
+v0x1549ff0_0 .net *"_s28", 0 0, L_0x154b840;  1 drivers
+v0x154a1a0_0 .net *"_s32", 0 0, L_0x154bc50;  1 drivers
+v0x154a240_0 .net *"_s34", 0 0, L_0x154bd50;  1 drivers
+v0x154a320_0 .net *"_s38", 0 0, L_0x154bef0;  1 drivers
+v0x154a400_0 .net *"_s4", 0 0, L_0x154af30;  1 drivers
+v0x154a4e0_0 .net *"_s40", 0 0, L_0x154be50;  1 drivers
+v0x154a5c0_0 .net *"_s6", 0 0, L_0x154aff0;  1 drivers
+v0x154a6a0_0 .net "rst", 0 0, v0x154ac60_0;  1 drivers
+    .scope S_0x1522a70;
+T_0 ;
+    %pushi/vec4 1, 0, 1;
+    %store/vec4 v0x154ac60_0, 0, 1;
+    %pushi/vec4 0, 0, 1;
+    %store/vec4 v0x154a9f0_0, 0, 1;
+    %end;
+    .thread T_0;
+    .scope S_0x1522a70;
+T_1 ;
+    %vpi_call 2 7 "$dumpfile", "testVerilog.vcd" {0 0 0};
+    %vpi_call 2 8 "$dumpvars", 32'sb00000000000000000000000000000000, S_0x1522a70 {0 0 0};
+    %delay 0, 0;
+    %pushi/vec4 0, 0, 1;
+    %store/vec4 v0x154ac60_0, 0, 1;
+    %delay 70, 0;
+    %vpi_call 2 11 "$finish" {0 0 0};
+    %end;
+    .thread T_1;
+    .scope S_0x1522a70;
+T_2 ;
+    %delay 1, 0;
+    %load/vec4 v0x154a9f0_0;
+    %nor/r;
+    %store/vec4 v0x154a9f0_0, 0, 1;
+    %jmp T_2;
+    .thread T_2;
+    .scope S_0x1522a70;
+T_3 ;
+    %vpi_call 2 24 "$monitor", "At time %t, rst=%d, FS01_=%d, F02B=%d, FS02=%d, FS02A=%d, FS02A=%d", $time, v0x154ac60_0, v0x154a9f0_0, v0x154a920_0, v0x154aaf0_0, v0x154a860_0, v0x154abc0_0 {0 0 0};
+    %end;
+    .thread T_3;
+# The file index is used to find the file name in the following table.
+:file_names 4;
+    "N/A";
+    "<interactive>";
+    "testVerilog_tb.v";
+    "testVerilog.v";
