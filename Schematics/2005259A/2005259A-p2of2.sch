@@ -1639,11 +1639,7 @@ Wire Wire Line
 	9950 11025 11900 10500
 Wire Wire Line
 	11900 11000 9950 10425
-Wire Wire Line
-	11900 11700 11900 11675
 Connection ~ 11900 11675
-Wire Wire Line
-	11900 11725 11900 14250
 Wire Wire Line
 	11900 14250 9725 14250
 Wire Wire Line
@@ -6522,4 +6518,6 @@ F 5 "41" H 20700 17825 140 0000 C CNB "Location2"
 	2    20775 17600
 	1    0    0    1   
 $EndComp
+Wire Wire Line
+	11900 11675 11900 14250
 $EndSCHEMATC
