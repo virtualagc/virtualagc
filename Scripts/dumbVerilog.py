@@ -46,6 +46,7 @@ import sys
 
 error = False
 delay = ""
+inits = {}
 if len(sys.argv) >= 3:
 	
 	moduleName = sys.argv[1]
@@ -54,8 +55,27 @@ if len(sys.argv) >= 3:
 		pathToPinsTxt = sys.argv[3]
 	else:
 		pathToPinsTxt = "pins.txt"
-	if len(sys.argv) > 4:
+	if len(sys.argv) > 4 and sys.argv[4] != "":
 		delay = " #" + sys.argv[4]
+	if len(sys.argv) > 5:
+		initsFile = sys.argv[5]
+		try:
+			# The format of the inits file is ASCII lines, each with 3 
+			# space-delimited fields:
+			#	NOR_REFD J_LEVEL K_LEVEL
+			# J_LEVEL and K_LEVEL are each either 0 or 1.  We're insensitive
+			# to leading, trailing, and multiple spaces. Any NOR not in the
+			# file defaults to levels of 0 0.
+			f = open(initsFile, "r")
+			lines = f.readlines()
+			f.close()
+			for line in lines:
+				fields = line.strip().split()
+				inits[fields[0]] = { "j": fields[1], "k": fields[2] }
+		except:
+			print >> sys.stderr, "Could not read inits file " + initsFile
+			error = True
+				
 	# Test validity of the moduleName
 	if len(moduleName) < 1 or moduleName[0] != "A" or not moduleName[1:].isdigit():
 		print >> sys.stderr, "Module name is not A1 - A24."
@@ -103,12 +123,15 @@ else:
 
 if error:
 	print >> sys.stderr, "USAGE:"
-	print >> sys.stderr, "\tdumbVerilog.py MODULE INPUT.net [/PATH/TO/pins.txt [DELAY]] >OUTPUT.v"
+	print >> sys.stderr, "\tdumbVerilog.py MODULE INPUT.net [/PATH/TO/pins.txt [DELAY [INPUT.init]] >OUTPUT.v"
 	print >> sys.stderr, "MODULE is the name of the AGC module, A1 through A24."
 	print >> sys.stderr, "INPUT.net is a netlist output by KiCad in OrcadPCB2 format."
 	print >> sys.stderr, "If the optional path to pins.txt is omitted, it is assumed"
 	print >> sys.stderr, "that pins.txt is in the current directory.  If the optional"
 	print >> sys.stderr, "gate DELAY is omitted, then it is omitted from the Verilog."
+	print >> sys.stderr, "The optional (but not really, in practice!) INPUT.init file"
+	print >> sys.stderr, "provides initial conditions for any NOR gates that need it;"
+	print >> sys.stderr, "i.e., for feedback within flip-flop circuits."
 	sys.exit(1)
 
 # Let's do a first pass on pinsDB, looking just at the connector components (which are assumed
@@ -228,10 +251,14 @@ for line in lines:
 			# If we are in a dual-NOR, we need to finish it out by outputting all
 			# of the equations for the individual NOR gates.
 			inNOR = False
+			if refd in inits:
+				thisGatesInits = inits[refd]
+			else:
+				thisGatesInits = { "j": "0", "k": "0" }
 			if norPins[1] != "":
-				nors.append([refd + "A", norPins[1], norPins[2], norPins[3], norPins[4]])
+				nors.append([refd + "A", norPins[1], int(thisGatesInits["j"]), norPins[2], norPins[3], norPins[4]])
 			if norPins[9] != "":
-				nors.append([refd + "B", norPins[9], norPins[6], norPins[7], norPins[8]])
+				nors.append([refd + "B", norPins[9], int(thisGatesInits["k"]), norPins[6], norPins[7], norPins[8]])
 		continue
 	if line[:3] == " ( ":
 		# This is the start of a component.
@@ -275,11 +302,13 @@ if len(nors) > 0:
 		netName = nors[i][1]
 		if netName not in nets:
 			gateName = nors[i][0] 
-			inputList = nors[i][2:]
+			initLevel = nors[i][2]
+			inputList = nors[i][3:]
 		else:
 			gateName = nets[netName][0] + "_" + nors[i][0]
-			inputList = nets[netName][2:] + nors[i][2:]
-		finalArray = [gateName, netName]
+			initLevel = nors[i][2] or nets[netName][2]
+			inputList = nets[netName][3:] + nors[i][3:]
+		finalArray = [gateName, initLevel, netName]
 		for input in inputList:
 			if input != "0" and input not in finalArray[2:]:
 				finalArray.append(input)
@@ -288,11 +317,11 @@ if len(nors) > 0:
 	for netName in nets:
 		gate = nets[netName]
 		#outLine = "nor" + delay + " " + gate[0] + "(" + netName + ",rst";
-		#for input in gate[2:]:
+		#for input in gate[3:]:
 		#	outLine += "," + input;
 		#outLine += ")" + ";"
-		outLine = "assign" + delay + " " + netName + " = ~(rst";
-		for input in gate[2:]:
+		outLine = "assign" + delay + " " + netName + " = rst ? " + str(gate[1]) + " : ~(0";
+		for input in gate[3:]:
 			outLine += "|" + input;
 		outLine += ")" + ";"
 		print outLine
