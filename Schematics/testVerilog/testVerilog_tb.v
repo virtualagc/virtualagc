@@ -8,7 +8,7 @@ module testVerilog;
     $dumpfile("testVerilog.vcd");
     $dumpvars(0, testVerilog);
     
-    # 0 rst = 0;
+    # 2 rst = 0;
     # 500 $finish;
   end
   
