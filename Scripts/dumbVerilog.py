@@ -51,6 +51,7 @@
 # and we can simply hard-code the properties of that component into the script.
 
 import sys
+import re
 
 error = False
 delay = ""
@@ -82,6 +83,8 @@ if len(sys.argv) >= 3:
 			for line in lines:
 				thisInit = { "j": { "output":0, "delay":0.0 }, "k": { "output":0, "delay":0.0 } }
 				fields = line.strip().split()
+				if len(fields) <= 1 or fields[0] == "#":
+					continue
 				if len(fields) > 1:
 					thisInit["j"]["output"] = int(fields[1])
 				if len(fields) > 2:
@@ -153,15 +156,16 @@ if error:
 	print >> sys.stderr, "i.e., for feedback within flip-flop circuits."
 	sys.exit(1)
 
-# Let's do a first pass on pinsDB, looking just at the connector components (which are assumed
-# to be J* and to have pin numbers corresponding to the 276-pin connector) to get dictionaries 
-# of the input and output nets, both in terms of the names assigned in the netlist and the names
-# assigned in the pins DB.
+# Let's do a first pass on pinsDB, looking just at the connector components (or Node2 objects) to 
+# get dictionaries of the input and output nets, both in terms of the names assigned in the netlist 
+# and the names assigned in the pins DB.
 discards = {}
 inputs = {}
 outputs = {}
 inouts = {}
 inConnector = False
+isNode = False
+nodePattern = re.compile('^N\d+Pad\d+$')
 for line in lines:
 	if line[:2] == " )":
 		inConnector = False
@@ -169,8 +173,10 @@ for line in lines:
 	if line[:3] == " ( ":
 		# This is the start of a component.
 		fields = line.strip().split()
-		if fields[3][:1] == "J":
+		refd = fields[3]
+		if refd[:1] in ["J", "N"]:
 			inConnector = True
+			isNode = (refd[:1] == "N")
 		continue
 	if not inConnector:
 		continue
@@ -179,6 +185,10 @@ for line in lines:
 		# "(", pin number, net name, ").
 		fields = line.strip().split()
 		pinNumber = int(fields[1])
+		if isNode:
+			netName = fields[2][5:].replace("-", "").replace(")", "")
+			inouts[netName] = netName
+			continue
 		if len(pinsDB[pinNumber]) < 2:
 			continue
 		pinName = pinsDB[pinNumber][1].replace("/", "_")
@@ -248,6 +258,8 @@ for name in newInputs:
 	count -= 1
 	print "  " + name + ending
 for name in newInouts:
+	if nodePattern.match(name):
+		continue
 	if count > 1:
 		ending = ","
 	else:
@@ -255,6 +267,15 @@ for name in newInouts:
 	count -= 1
 	print "  " + name + ending
 for name in newOutputs:
+	if count > 1:
+		ending = ","
+	else:
+		ending = ""
+	count -= 1
+	print "  " + name + ending
+for name in newInouts:
+	if not nodePattern.match(name):
+		continue
 	if count > 1:
 		ending = ","
 	else:
