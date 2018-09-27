@@ -16,11 +16,11 @@
 #			LOGIC FLOW module (A1-A24).  This is not just any arbitrary version
 #			of the KiCad transcriptions, but rather one of the initial ones I 
 #			intended to be visually accurate representations of the original
-#			scans.  The translater understands only a couple of kinds of 
+#			scans.  The translator understands only a couple of kinds of 
 #			components.
 #	/PATH/pins.txt	This is a "CSV" dump of the PINS table of Mike's pin DB from
 #			https://github.com/virtualagc/agc_hardware/blob/block2/delphi.db.
-#			The dump should use a space as the field delimiiter and not quote
+#			The dump should use a space as the field delimiter and not quote
 #			the fields, and no header line is needed.  This file is used only
 #			to create names for the inputs and outputs, and to determine which
 #			of the signals actually are inputs vs outputs.
