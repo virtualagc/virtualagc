@@ -160,6 +160,7 @@ if error:
 discards = {}
 inputs = {}
 outputs = {}
+inouts = {}
 inConnector = False
 for line in lines:
 	if line[:2] == " )":
@@ -189,12 +190,16 @@ for line in lines:
 		if pinName[:3] in ["0VD", "+4V", "+4S", "FAP"]:
 			discards[fields[2]] = pinName
 			continue
+		if pinsDB[pinNumber][0] in ["INOUT", "FIX", "FOX"]:
+			# An inout net, or an unknown type.
+			inouts[fields[2]] = pinName
+			continue
 		if pinsDB[pinNumber][0] in ["IN"]:
 			# An input net.
 			inputs[fields[2]] = pinName
 			continue
 		if pinsDB[pinNumber][0] in ["OUT", "NC"]:
-			# An input net.
+			# An output net.
 			outputs[fields[2]] = pinName
 			continue
 		print >> sys.stderr, "Netlist entry \"" + line.strip() + "\" is neither an input nor an output."
@@ -204,32 +209,45 @@ for line in lines:
 print "// Verilog module auto-generated for AGC module " + moduleName + " by dumbVerilog.py"
 print "module " + moduleName + " ( "
 print "  rst,"
+
+# The dictionaries inputs, outputs, and inouts may have items in common, and may have
+# duplicates.  We want to remove duplicate, add items that are in both inputs and inouts,
+# and then finally to make the three sets mutually exclusive.  We do this in newInputs,
+# newOutputs, and newInouts rather than in the original dictionaries.
 newInputs = []
 newOutputs = []
+newInouts = []
+for key in inouts:
+	if inouts[key] not in newInouts:
+		newInouts.append(inouts[key])
 for key in inputs:
 	if inputs[key] not in newInputs:
 		newInputs.append(inputs[key])
 for key in outputs:
 	if outputs[key] not in newOutputs:
 		newOutputs.append(outputs[key])
-inouts = []
 for key in newInputs:
 	if key in newOutputs:
-		inouts.append(key)
-count = len(newInputs) + len(newOutputs) - len(inouts)
-inouts.sort()
+		if key not in newInouts:
+			newInouts.append(key)
+for key in newInouts:
+	if key in newOutputs:
+		newOutputs.remove(key)
+	if key in newInputs:
+		newInputs.remove(key)
+
+count = len(newInouts) + len(newInputs) + len(newOutputs)
+newInouts.sort()
 newInputs.sort()
 newOutputs.sort()
-for name in inouts:
+for name in newInputs:
 	if count > 1:
 		ending = ","
 	else:
 		ending = ""
 	count -= 1
 	print "  " + name + ending
-for name in newInputs:
-	if name in inouts:
-		continue
+for name in newInouts:
 	if count > 1:
 		ending = ","
 	else:
@@ -237,8 +255,6 @@ for name in newInputs:
 	count -= 1
 	print "  " + name + ending
 for name in newOutputs:
-	if name in inouts:
-		continue
 	if count > 1:
 		ending = ","
 	else:
@@ -247,15 +263,11 @@ for name in newOutputs:
 	print "  " + name + ending
 print ");"
 print "input wire rst;"
-for name in inouts:
-	print "inout wire " + name + ";"
 for name in newInputs:
-	if name in inouts:
-		continue
 	print "input wire " + name + ";"
+for name in newInouts:
+	print "inout wire " + name + ";"
 for name in newOutputs:
-	if name in inouts:
-		continue
 	print "output wire " + name + ";"
 print ""
 
@@ -326,10 +338,15 @@ if len(nors) > 0:
 			inputList = nors[i][3:]
 		else:
 			gateName = nets[netName][0] + "_" + nors[i][0]
-			initLevel = nors[i][2] or nets[netName][2]["output"]
-			gateDelay = max(nors[i][2]["delay"], nets[netName][2]["delay"])
+			try:
+				initLevel = nors[i][2]["output"] or nets[netName][2]["output"]
+				gateDelay = max(nors[i][2]["delay"], nets[netName][2]["delay"])
+			except:
+				print >> sys.stderr, nors[i][2]
+				print >> sys.stderr, nets[netName][2]
+				sys.exit(1)
 			inputList = nets[netName][3:] + nors[i][3:]
-		finalArray = [gateName, { "output":initLevel, "delay":gateDelay }, netName]
+		finalArray = [gateName, netName, { "output":initLevel, "delay":gateDelay }]
 		for input in inputList:
 			if input != "0" and input not in finalArray[2:]:
 				finalArray.append(input)
@@ -341,10 +358,10 @@ if len(nors) > 0:
 		#for input in gate[3:]:
 		#	outLine += "," + input;
 		#outLine += ")" + ";"
-		thisInit = str(gate[1]["output"])
+		thisInit = str(gate[2]["output"])
 		thisDelay = delay
-		if gate[1]["delay"] != 0:
-			thisDelay = " #" + str(gate[1]["delay"])
+		if gate[2]["delay"] != 0:
+			thisDelay = " #" + str(gate[2]["delay"])
 		outLine = "assign" + thisDelay + " " + netName + " = rst ? " + thisInit + " : ~(0";
 		for input in gate[3:]:
 			outLine += "|" + input;
