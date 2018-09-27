@@ -2394,10 +2394,8 @@ Wire Wire Line
 Connection ~ 14625 17100
 Wire Wire Line
 	14625 17100 15025 17100
-Text Notes 13175 31250 0    140  ~ 28
-Notes from the Virtual AGC Project:
-Text Notes 13175 33200 0    140  ~ 28
-1. This CAD drawing was adapted from a previously transcribed drawing, 2005060D,\n   and was then modified to correspond to the original Apollo Program drawing\n   2005260A.  — RSB 2018\n2. The original drawing did not display reference designators for the NOR gates. \n   In this CAD drawing, they are still not shown, but for the purposes of ERC or netlist\n   generation are U1nn, where nn is the 2-digit number written on the NOR gate.\n   Similarly, connector J1 comprises the oval pads numbered 101-171, and connector\n   J2 comprises the oval pads numbered 201-271. — RSB 2018\n
+Text Notes 13150 33350 0    140  ~ 28
+Notes from the Virtual AGC Project:\n1. This CAD drawing was adapted from a previously transcribed drawing, 2005060D,\n   and was then modified to correspond to the original Apollo Program drawing\n   2005260A.  — RSB 2018\n2. The original drawing did not display reference designators for the NOR gates. \n   In this CAD drawing, they are still not shown, but for the purposes of ERC or netlist\n   generation are U1nn, where nn is the 2-digit number written on the NOR gate.\n   Similarly, connector J1 comprises the oval pads numbered 101-171, and connector\n   J2 comprises the oval pads numbered 201-271. — RSB 2018\n3. Rather than using the symbol shown in the original NOTE 8 to indicate that there is a\n   direct connection between different points in the drawing, global label symbology\n   is used in this CAD transcription.  — RSB 2018
 Text HLabel 34100 22625 0    140  UnSpc ~ 28
 0VDCA
 Wire Wire Line
@@ -2661,7 +2659,7 @@ NoConn ~ 27575 27525
 NoConn ~ 27600 28025
 NoConn ~ 27575 28525
 $Bitmap
-Pos 12900 31300
+Pos 12875 30725
 Scale 1.000000
 Data
 89 50 4E 47 0D 0A 1A 0A 00 00 00 0D 49 48 44 52 00 00 00 78 00 00 00 78 08 02 00 00 00 B6 06 A1 
