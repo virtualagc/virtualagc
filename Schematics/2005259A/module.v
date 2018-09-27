@@ -1,6 +1,10 @@
 // Verilog module auto-generated for AGC module A1 by dumbVerilog.py
 module A1 ( 
   rst,
+  CGA1,
+  FS01_,
+  RCHAT_,
+  RCHBT_,
   F03B,
   F07A,
   F09A,
@@ -12,10 +16,6 @@ module A1 (
   FS07,
   FS07_,
   FS08,
-  CGA1,
-  FS01_,
-  RCHAT_,
-  RCHBT_,
   CHAT01,
   CHAT02,
   CHAT03,
@@ -143,6 +143,10 @@ module A1 (
   FS33
 );
 input wire rst;
+input wire CGA1;
+input wire FS01_;
+input wire RCHAT_;
+input wire RCHBT_;
 inout wire F03B;
 inout wire F07A;
 inout wire F09A;
@@ -154,10 +158,6 @@ inout wire FS06;
 inout wire FS07;
 inout wire FS07_;
 inout wire FS08;
-input wire CGA1;
-input wire FS01_;
-input wire RCHAT_;
-input wire RCHBT_;
 output wire CHAT01;
 output wire CHAT02;
 output wire CHAT03;
