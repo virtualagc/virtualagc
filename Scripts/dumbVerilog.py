@@ -336,6 +336,8 @@ for line in lines:
 			netName = "0"
 		elif netName[:3] in ["+4V", "+4S", "FAP"]:
 			netName = "1"
+		elif netName in inouts:
+			netName = inouts[netName]
 		elif netName in inputs:
 			netName = inputs[netName]
 		elif netName in outputs:
