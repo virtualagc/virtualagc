@@ -6,26 +6,34 @@
 # producing successively more-efficient Verilog implementations, though if it
 # works well enough, then possibly ... it works well enough.  :-)  We'll see.
 #
-# Right now, though, the Verilog it creates is just garbage, since I don't know
-# Verilog as of yet.  So far I'm really just looking at the various other factors
-# that are involved, and the fact that it outputs something that looks vaguely
-# like Verilog is just a coincidence.
+# Right now, though, the Verilog don't trust the Verilog it generates too much,
+# unless it has been verified in some way.
 
 # The inputs required are these:
 #
-#	pins.txt	This is a "CSV" dump of the PINS table of Mike's pin DB from
-#			https://github.com/virtualagc/agc_hardware/blob/block2/delphi.db.
-#			The dump should use a space as the field delimiiter and not quote
-#			the fields, and no header line is needed.  This file is used only
-#			to create names for the inputs and outputs, and to determine which
-#			of the signals actually are inputs vs outputs.  None if that is 
-#			actually necessary to produce functional Verilog, but as long as
-#			it's available we may as well use it.
+#	MODULE		The name of the AGC logic module: A1, A2, etc.
 #	FILENAME.net	A netlist as output by KiCad in "OrcadPCB2" format of a single AGC
 #			LOGIC FLOW module (A1-A24).  This is not just any arbitrary version
 #			of the KiCad transcriptions, but rather one of the initial ones I 
 #			intended to be visually accurate representations of the original
-#			scans.
+#			scans.  The translater understands only a couple of kinds of 
+#			components.
+#	/PATH/pins.txt	This is a "CSV" dump of the PINS table of Mike's pin DB from
+#			https://github.com/virtualagc/agc_hardware/blob/block2/delphi.db.
+#			The dump should use a space as the field delimiiter and not quote
+#			the fields, and no header line is needed.  This file is used only
+#			to create names for the inputs and outputs, and to determine which
+#			of the signals actually are inputs vs outputs.
+#	DELAY		A global delay (in units of simulation cycles), applied to all NOR
+#			gates.  By default there is no delay.
+#	FILENAME.init	A file containing initial values for NOR-gate outputs, where 
+#			needed ... which is only for logic with feedback, such as flip-flops.
+#			The initializations don't have to be a "good" condition (since the
+#			original hardware just settled into whatever state it happened to 
+#			like), but rather any stable state.  Otherwise, in iverilog, the
+#			circuit will simply oscillate uncontrollably.  The file can also
+#			contain delays to be applied to specific NOR gate outputs, overriding
+#			the global DELAY setting for those particular gates.
 #
 # The Verilog is output to stdout.
 #
@@ -62,16 +70,27 @@ if len(sys.argv) >= 3:
 		try:
 			# The format of the inits file is ASCII lines, each with 3 
 			# space-delimited fields:
-			#	NOR_REFD J_LEVEL K_LEVEL
-			# J_LEVEL and K_LEVEL are each either 0 or 1.  We're insensitive
+			#	NOR_REFD [ J_LEVEL [ K_LEVEL [ J_DELAY [ K_DELAY ]]]]
+			# J_LEVEL and K_LEVEL are each either 0 or 1 and are the logic
+			# of the associated output during reset.  J_DELAY and K_DELAY,
+			# if non-zero, are the associated gate delay.  We're insensitive
 			# to leading, trailing, and multiple spaces. Any NOR not in the
-			# file defaults to levels of 0 0.
+			# file defaults to levels of 0 0 0 0.
 			f = open(initsFile, "r")
 			lines = f.readlines()
 			f.close()
 			for line in lines:
+				thisInit = { "j": { "output":0, "delay":0.0 }, "k": { "output":0, "delay":0.0 } }
 				fields = line.strip().split()
-				inits[fields[0]] = { "j": fields[1], "k": fields[2] }
+				if len(fields) > 1:
+					thisInit["j"]["output"] = int(fields[1])
+				if len(fields) > 2:
+					thisInit["k"]["output"] = int(fields[2])
+				if len(fields) > 3:
+					thisInit["j"]["delay"] = float(fields[3])
+				if len(fields) > 4:
+					thisInit["k"]["delay"] = float(fields[4])
+				inits[fields[0]] = thisInit
 		except:
 			print >> sys.stderr, "Could not read inits file " + initsFile
 			error = True
@@ -254,11 +273,11 @@ for line in lines:
 			if refd in inits:
 				thisGatesInits = inits[refd]
 			else:
-				thisGatesInits = { "j": "0", "k": "0" }
+				thisGatesInits = { "j": { "output":0, "delay":0 }, "k": { "output":0, "delay":0} }
 			if norPins[1] != "":
-				nors.append([refd + "A", norPins[1], int(thisGatesInits["j"]), norPins[2], norPins[3], norPins[4]])
+				nors.append([refd + "A", norPins[1], thisGatesInits["j"], norPins[2], norPins[3], norPins[4]])
 			if norPins[9] != "":
-				nors.append([refd + "B", norPins[9], int(thisGatesInits["k"]), norPins[6], norPins[7], norPins[8]])
+				nors.append([refd + "B", norPins[9], thisGatesInits["k"], norPins[6], norPins[7], norPins[8]])
 		continue
 	if line[:3] == " ( ":
 		# This is the start of a component.
@@ -302,13 +321,15 @@ if len(nors) > 0:
 		netName = nors[i][1]
 		if netName not in nets:
 			gateName = nors[i][0] 
-			initLevel = nors[i][2]
+			initLevel = nors[i][2]["output"]
+			gateDelay = nors[i][2]["delay"]
 			inputList = nors[i][3:]
 		else:
 			gateName = nets[netName][0] + "_" + nors[i][0]
-			initLevel = nors[i][2] or nets[netName][2]
+			initLevel = nors[i][2] or nets[netName][2]["output"]
+			gateDelay = max(nors[i][2]["delay"], nets[netName][2]["delay"])
 			inputList = nets[netName][3:] + nors[i][3:]
-		finalArray = [gateName, initLevel, netName]
+		finalArray = [gateName, { "output":initLevel, "delay":gateDelay }, netName]
 		for input in inputList:
 			if input != "0" and input not in finalArray[2:]:
 				finalArray.append(input)
@@ -320,7 +341,11 @@ if len(nors) > 0:
 		#for input in gate[3:]:
 		#	outLine += "," + input;
 		#outLine += ")" + ";"
-		outLine = "assign" + delay + " " + netName + " = rst ? " + str(gate[1]) + " : ~(0";
+		thisInit = str(gate[1]["output"])
+		thisDelay = delay
+		if gate[1]["delay"] != 0:
+			thisDelay = " #" + str(gate[1]["delay"])
+		outLine = "assign" + thisDelay + " " + netName + " = rst ? " + thisInit + " : ~(0";
 		for input in gate[3:]:
 			outLine += "|" + input;
 		outLine += ")" + ";"
