@@ -2,13 +2,19 @@
 # I, the author, Ron Burkey, declare this to be in the Public Domain.
 
 # Filename: 	Schematics/Makefile
-# Purpose:	Makefile for building Verilog simulation of AGC from
-#		the KiCad schematics.
+# Purpose:	Makefile for building a Verilog simulation of the AGC from
+#		the KiCad schematics. It doesn't attempt to actually run
+#		the simulated hardware, but simply builds it.
+# Mod history:	2018-07-29 RSB	Wrote first version of this makefile, 
+#				covering just testVerilog, 2005259A, 
+#				and 2005260A targets.
 #
-# Mod history:	2018-07-29 RSB	First time I remembered to add the GPL and
-#				other boilerplate at the top of the file.
+# This 'make' needs to be performed from the Schematics/ directory.
+# Icarus Verilog must be installed, and iverilog must be in the PATH.
+# Python 2 is also required (rather than Python 3).
 #
-# We expect the following corresponding directory/file arrangement:
+# Underneath the Schematics/ directory, Makefile expects the following 
+# hierarchy and file-naming convention:
 #
 #	TARGET/
 #		TARGET/module.net		Input to the build process
@@ -16,6 +22,21 @@
 #		TARGET/module_tb.v		Input to the build process
 #		TARGET/module.v			Output from the build process
 #		TARGET/module.vvp		Output from the build process
+#
+# The build process basically does this:
+#
+#	module.net + module.init   ->    module.v
+#	module_tb.v + module.v     ->    module.vvp  
+#
+# Note that the declarations of the Verilog module and its parameters must be
+# consistent between module_tb.v (which is supplied as an input) and module.v
+# (which is an output of the build process), but makes no attempt to enforce 
+# that.  (Though it's possible that iverilog may detect a mismatch and complain.)
+# Instead, insuring consistency is the programmer's responsibility.  Since 
+# dumbVerilog.py operates in a consistent and predictable way, it should 
+# hopefully be effortless to maintain consistency once it's first established.
+# However, some actions (like adding an extra input or output for debugging 
+# purposes) will temporarily break consistency.
 
 TARGETS := testVerilog 2005259A 2005260A
 # These are the AGC modules and the global gate delays associated with the various
@@ -31,7 +52,7 @@ delay_2005260A = 0.01
 .PHONY: all
 all: $(TARGETS:%=%/module.vvp)
 
-# Below are the rules which should work for all TARGET in $(TARGETS)
+# Below are the rules which should work for every TARGET in $(TARGETS)
 %/module.vvp: %/module_tb.v %/module.v
 	iverilog -o $@ $^
 
@@ -41,4 +62,4 @@ all: $(TARGETS:%=%/module.vvp)
 # SECONDARY instead, it will keep module.v and not delete it.
 .SECONDARY: $(TARGETS:%=%/module.v)
 %/module.v: %/module.net %/module.init ../Scripts/pins.txt
-	dumbVerilog.py $(module_$*) $*/module.net ../Scripts/pins.txt "$(delay_$*)" $*/module.init >$@
+	../Scripts/dumbVerilog.py $(module_$*) $*/module.net ../Scripts/pins.txt "$(delay_$*)" $*/module.init >$@
