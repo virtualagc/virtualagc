@@ -1,18 +1,12 @@
 // Verilog module auto-generated for AGC module A1 by dumbVerilog.py
+
 module A1 ( 
-  rst,
-  FS01_,
-  F02A,
-  F02B,
-  FS02,
-  FS02A
+  rst, FS01_, F02A, F02B, FS02, FS02A
 );
-input wire rst;
-input wire FS01_;
-output wire F02A;
-output wire F02B;
-output wire FS02;
-output wire FS02A;
+
+input wire rst, FS01_;
+
+output wire F02A, F02B, FS02, FS02A;
 
 assign FS02A = rst ? 0 : ~(0|U126Pad7);
 assign FS02 = rst ? 0 : ~(0|U126Pad7|U127Pad8);
