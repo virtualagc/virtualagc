@@ -1,236 +1,32 @@
 // Verilog module auto-generated for AGC module A2 by dumbVerilog.py
+
 module A2 ( 
-  rst,
-  ALGA,
-  CGA2,
-  CLOCK,
-  GOJ1,
-  MP3A,
-  MSTP,
-  MSTRTP,
-  SBY,
-  STRT1,
-  STRT2,
-  WL15,
-  WL15_,
-  WL16,
-  WL16_,
-  CINORM,
-  EVNSET,
-  EVNSET_,
-  GOJAM,
-  GOJAM_,
-  MGOJAM,
-  MONWT,
-  MSTPIT_,
-  MT01,
-  MT02,
-  MT03,
-  MT04,
-  MT05,
-  MT06,
-  MT07,
-  MT08,
-  MT09,
-  MT10,
-  MT11,
-  MT12,
-  ODDSET_,
-  OVFSTB_,
-  P01_,
-  P02,
-  P02_,
-  P03,
-  P03_,
-  P04,
-  P05,
-  P05_,
-  PHS4,
-  PHS4_,
-  Q2A,
-  RINGA_,
-  RINGB_,
-  RT,
-  STOP,
-  STOPA,
-  T02,
-  T02DC_,
-  T03,
-  T03DC_,
-  T06,
-  T06DC_,
-  T08,
-  T08DC_,
-  T10,
-  T10DC_,
-  T12DC_,
-  WT,
-  WT_,
-  CLK,
-  CT,
-  CT_,
-  EDSET,
-  F01A,
-  F01B,
-  F01C,
-  F01D,
-  FS01,
-  FS01_,
-  GOSET_,
-  OVF,
-  OVF_,
-  P01,
-  P04_,
-  PHS2,
-  PHS2_,
-  RT_,
-  SB0,
-  SB1,
-  SB2,
-  SB4,
-  STOP_,
-  T01,
-  T01DC_,
-  T01_,
-  T02_,
-  T03_,
-  T04,
-  T04_,
-  T05,
-  T05_,
-  T06_,
-  T07,
-  T07DC_,
-  T07_,
-  T08_,
-  T09,
-  T09DC_,
-  T09_,
-  T10_,
-  T11,
-  T11_,
-  T12,
-  T12SET,
-  T12_,
-  TT_,
-  UNF,
-  UNF_
+  rst, ALGA, CGA2, CLOCK, GOJ1, MP3A, MSTP, MSTRTP, SBY, STRT1, STRT2, WL15,
+  WL15_, WL16, WL16_, CINORM, EVNSET, EVNSET_, GOJAM, GOJAM_, MGOJAM, MONWT,
+  MSTPIT_, MT01, MT02, MT03, MT04, MT05, MT06, MT07, MT08, MT09, MT10, MT11,
+  MT12, ODDSET_, OVFSTB_, P01_, P02, P02_, P03, P03_, P04, P05, P05_, PHS4,
+  PHS4_, Q2A, RINGA_, RINGB_, RT, STOP, STOPA, T02, T02DC_, T03, T03DC_,
+  T06, T06DC_, T08, T08DC_, T10, T10DC_, T12DC_, WT, WT_, CLK, CT, CT_, EDSET,
+  F01A, F01B, F01C, F01D, FS01, FS01_, GOSET_, OVF, OVF_, P01, P04_, PHS2,
+  PHS2_, RT_, SB0, SB1, SB2, SB4, STOP_, T01, T01DC_, T01_, T02_, T03_, T04,
+  T04_, T05, T05_, T06_, T07, T07DC_, T07_, T08_, T09, T09DC_, T09_, T10_,
+  T11, T11_, T12, T12SET, T12_, TT_, UNF, UNF_
 );
-input wire rst;
-input wire ALGA;
-input wire CGA2;
-input wire CLOCK;
-input wire GOJ1;
-input wire MP3A;
-input wire MSTP;
-input wire MSTRTP;
-input wire SBY;
-input wire STRT1;
-input wire STRT2;
-input wire WL15;
-input wire WL15_;
-input wire WL16;
-input wire WL16_;
-inout wire CINORM;
-inout wire EVNSET;
-inout wire EVNSET_;
-inout wire GOJAM;
-inout wire GOJAM_;
-inout wire MGOJAM;
-inout wire MONWT;
-inout wire MSTPIT_;
-inout wire MT01;
-inout wire MT02;
-inout wire MT03;
-inout wire MT04;
-inout wire MT05;
-inout wire MT06;
-inout wire MT07;
-inout wire MT08;
-inout wire MT09;
-inout wire MT10;
-inout wire MT11;
-inout wire MT12;
-inout wire ODDSET_;
-inout wire OVFSTB_;
-inout wire P01_;
-inout wire P02;
-inout wire P02_;
-inout wire P03;
-inout wire P03_;
-inout wire P04;
-inout wire P05;
-inout wire P05_;
-inout wire PHS4;
-inout wire PHS4_;
-inout wire Q2A;
-inout wire RINGA_;
-inout wire RINGB_;
-inout wire RT;
-inout wire STOP;
-inout wire STOPA;
-inout wire T02;
-inout wire T02DC_;
-inout wire T03;
-inout wire T03DC_;
-inout wire T06;
-inout wire T06DC_;
-inout wire T08;
-inout wire T08DC_;
-inout wire T10;
-inout wire T10DC_;
-inout wire T12DC_;
-inout wire WT;
-inout wire WT_;
-output wire CLK;
-output wire CT;
-output wire CT_;
-output wire EDSET;
-output wire F01A;
-output wire F01B;
-output wire F01C;
-output wire F01D;
-output wire FS01;
-output wire FS01_;
-output wire GOSET_;
-output wire OVF;
-output wire OVF_;
-output wire P01;
-output wire P04_;
-output wire PHS2;
-output wire PHS2_;
-output wire RT_;
-output wire SB0;
-output wire SB1;
-output wire SB2;
-output wire SB4;
-output wire STOP_;
-output wire T01;
-output wire T01DC_;
-output wire T01_;
-output wire T02_;
-output wire T03_;
-output wire T04;
-output wire T04_;
-output wire T05;
-output wire T05_;
-output wire T06_;
-output wire T07;
-output wire T07DC_;
-output wire T07_;
-output wire T08_;
-output wire T09;
-output wire T09DC_;
-output wire T09_;
-output wire T10_;
-output wire T11;
-output wire T11_;
-output wire T12;
-output wire T12SET;
-output wire T12_;
-output wire TT_;
-output wire UNF;
-output wire UNF_;
+
+input wire rst, ALGA, CGA2, CLOCK, GOJ1, MP3A, MSTP, MSTRTP, SBY, STRT1,
+  STRT2, WL15, WL15_, WL16, WL16_;
+
+inout wire CINORM, EVNSET, EVNSET_, GOJAM, GOJAM_, MGOJAM, MONWT, MSTPIT_,
+  MT01, MT02, MT03, MT04, MT05, MT06, MT07, MT08, MT09, MT10, MT11, MT12,
+  ODDSET_, OVFSTB_, P01_, P02, P02_, P03, P03_, P04, P05, P05_, PHS4, PHS4_,
+  Q2A, RINGA_, RINGB_, RT, STOP, STOPA, T02, T02DC_, T03, T03DC_, T06, T06DC_,
+  T08, T08DC_, T10, T10DC_, T12DC_, WT, WT_;
+
+output wire CLK, CT, CT_, EDSET, F01A, F01B, F01C, F01D, FS01, FS01_, GOSET_,
+  OVF, OVF_, P01, P04_, PHS2, PHS2_, RT_, SB0, SB1, SB2, SB4, STOP_, T01,
+  T01DC_, T01_, T02_, T03_, T04, T04_, T05, T05_, T06_, T07, T07DC_, T07_,
+  T08_, T09, T09DC_, T09_, T10_, T11, T11_, T12, T12SET, T12_, TT_, UNF,
+  UNF_;
 
 assign #0.01 PHS4 = rst ? 0 : ~(0|U131Pad3|U137Pad9);
 assign #0.01 U229Pad8 = rst ? 1 : ~(0|P04|P05|RINGA_);

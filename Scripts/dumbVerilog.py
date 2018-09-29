@@ -1,4 +1,27 @@
 #!/usr/bin/python
+# Copyright 2018 Ronald S. Burkey <info@sandroid.org>
+# 
+# This file is part of yaAGC.
+# 
+# yaAGC is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+# 
+# yaAGC is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with yaAGC; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+# 
+# Filename: 	dumbVerilog.py
+# Purpose:	Converts KiCad AGC "logic flow diagrams" to Verilog
+# Mod history:	2018-07-29 RSB	First time I remembered to add the GPL and
+#				other boilerplate at the top of the file.
+#
 # This script converts one of my KiCad transcriptions of AGC LOGIC FLOW DIAGRAMs
 # into Verilog in the dumbest, most-straightforward way.  In other words, I don't
 # claim it's good or efficient Verilog, but merely that it is functional and 
@@ -51,7 +74,6 @@
 # and we can simply hard-code the properties of that component into the script.
 
 import sys
-#import re
 
 error = False
 delay = ""
@@ -164,8 +186,6 @@ inputs = {}
 outputs = {}
 inouts = {}
 inConnector = False
-#isNode = False
-#nodePattern = re.compile('^N\d+Pad\d+$')
 for line in lines:
 	if line[:2] == " )":
 		inConnector = False
@@ -185,18 +205,12 @@ for line in lines:
 		# "(", pin number, net name, ").
 		fields = line.strip().split()
 		pinNumber = int(fields[1])
-		#if isNode:
-		#	netName = fields[2][5:].replace("-", "").replace(")", "")
-		#	inouts[netName] = netName
-		#	continue
 		if len(pinsDB[pinNumber]) < 2:
 			continue
 		pinName = pinsDB[pinNumber][1].replace("/", "_")
 		if fields[2][:3] in ["0VD", "+4V", "+4S", "FAP"]:
 			discards[fields[2]] = pinName
 			continue
-		#if (fields[2] in inputs) or (fields[2] in outputs) or (fields[2] in discards):
-		#	continue
 		if pinName[:3] in ["0VD", "+4V", "+4S", "FAP"]:
 			discards[fields[2]] = pinName
 			continue
@@ -217,8 +231,8 @@ for line in lines:
 
 # Can now write out the beginning of the Verilog module.
 print "// Verilog module auto-generated for AGC module " + moduleName + " by dumbVerilog.py"
+print ""
 print "module " + moduleName + " ( "
-print "  rst,"
 
 # The dictionaries inputs, outputs, and inouts may have items in common, and may have
 # duplicates.  We want to remove duplicate, add items that are in both inputs and inouts,
@@ -250,46 +264,87 @@ count = len(newInouts) + len(newInputs) + len(newOutputs)
 newInouts.sort()
 newInputs.sort()
 newOutputs.sort()
-for name in newInputs:
-	if count > 1:
-		ending = ","
-	else:
-		ending = ""
+desiredLineLength = 70
+line = "  rst"
+for name in newInputs + newInouts + newOutputs:
 	count -= 1
-	print "  " + name + ending
-for name in newInouts:
-	#if nodePattern.match(name):
-	#	continue
-	if count > 1:
-		ending = ","
+	if line == "":
+		line = "  " + name
 	else:
-		ending = ""
-	count -= 1
-	print "  " + name + ending
-for name in newOutputs:
-	if count > 1:
-		ending = ","
-	else:
-		ending = ""
-	count -= 1
-	print "  " + name + ending
-#for name in newInouts:
-#	if not nodePattern.match(name):
-#		continue
-#	if count > 1:
-#		ending = ","
-#	else:
-#		ending = ""
-#	count -= 1
-#	print "  " + name + ending
+		line += ", " + name
+	if len(line) > desiredLineLength:
+		if count > 0:
+			line += ","
+		print line
+		line = ""
+if len(line) > 0:
+	print line
 print ");"
-print "input wire rst;"
-for name in newInputs:
-	print "input wire " + name + ";"
-for name in newInouts:
-	print "inout wire " + name + ";"
-for name in newOutputs:
-	print "output wire " + name + ";"
+
+count = len(newInputs)
+if count > 0:
+	print ""
+	line = "input wire rst"
+	for name in newInputs:
+		count -= 1
+		if line == "":
+			line = "  " + name
+		else:
+			line += ", " + name
+		if len(line) > desiredLineLength:
+			if count > 0:
+				line += ","
+			else:
+				line += ";"
+			print line
+			line = ""
+	if len(line) > 0:
+		print line + ";"
+
+count = len(newInouts)
+if count > 0:
+	print ""
+	line = "inout wire"
+	for name in newInouts:
+		count -= 1
+		if line == "inout wire":
+			line += " " + name
+		elif line == "":
+			line = "  " + name
+		else:
+			line += ", " + name
+		if len(line) > desiredLineLength:
+			if count > 0:
+				line += ","
+			else:
+				line += ";"
+			print line
+			line = ""
+	if len(line) > 0:
+		print line + ";"
+
+count = len(newOutputs)
+if count > 0:
+	print ""
+	line = "output wire"
+	for name in newOutputs:
+		count -= 1
+		if line == "output wire":
+			line += " " + name
+		elif line == "":
+			line = "  " + name
+		else:
+			line += ", " + name
+		if len(line) > desiredLineLength:
+			if count > 0:
+				line += ","
+			else:
+				line += ";"
+			print line
+			line = ""
+	if len(line) > 0:
+		print line + ";"
+
 print ""
 
 # Now do another pass on the netlist to determine how the internal logic of the

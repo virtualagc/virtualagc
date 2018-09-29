@@ -1,288 +1,38 @@
 // Verilog module auto-generated for AGC module A1 by dumbVerilog.py
+
 module A1 ( 
-  rst,
-  CGA1,
-  FS01_,
-  RCHAT_,
-  RCHBT_,
-  F03B,
-  F07A,
-  F09A,
-  F17A,
-  F18A,
-  F18A_,
-  F25A,
-  FS06,
-  FS07,
-  FS07_,
-  FS08,
-  CHAT01,
-  CHAT02,
-  CHAT03,
-  CHAT04,
-  CHAT05,
-  CHAT06,
-  CHAT07,
-  CHAT08,
-  CHAT09,
-  CHAT10,
-  CHAT11,
-  CHAT12,
-  CHAT13,
-  CHAT14,
-  CHBT01,
-  CHBT02,
-  CHBT03,
-  CHBT04,
-  CHBT05,
-  CHBT06,
-  CHBT07,
-  CHBT08,
-  CHBT09,
-  CHBT10,
-  CHBT11,
-  CHBT12,
-  CHBT13,
-  CHBT14,
-  F02A,
-  F02B,
-  F03A,
-  F03B_,
-  F04A,
-  F04B,
-  F05A,
-  F05B,
-  F06A,
-  F06B,
-  F07A_,
-  F07B,
-  F08A,
-  F08B,
-  F09B,
-  F10A,
-  F10B,
-  F11A,
-  F11B,
-  F12A,
-  F12B,
-  F13A,
-  F13B,
-  F14A,
-  F14B,
-  F15A,
-  F15B,
-  F16A,
-  F16B,
-  F17B,
-  F18AX,
-  F18B,
-  F19A,
-  F19B,
-  F20A,
-  F20B,
-  F21A,
-  F21B,
-  F22A,
-  F22B,
-  F23A,
-  F23B,
-  F24A,
-  F24B,
-  F25B,
-  F26A,
-  F26B,
-  F27A,
-  F27B,
-  F28A,
-  F28B,
-  F29A,
-  F29B,
-  F30A,
-  F30B,
-  F31A,
-  F31B,
-  F32A,
-  F32B,
-  F33A,
-  F33B,
-  FS02,
-  FS02A,
-  FS03,
-  FS03A,
-  FS04,
-  FS04A,
-  FS05,
-  FS05A,
-  FS06_,
-  FS07A,
-  FS08_,
-  FS09,
-  FS10,
-  FS11,
-  FS12,
-  FS13,
-  FS14,
-  FS15,
-  FS16,
-  FS17,
-  FS18,
-  FS19,
-  FS20,
-  FS21,
-  FS22,
-  FS23,
-  FS24,
-  FS25,
-  FS26,
-  FS27,
-  FS28,
-  FS29,
-  FS30,
-  FS31,
-  FS32,
-  FS33
+  rst, CGA1, FS01_, RCHAT_, RCHBT_, F03B, F07A, F09A, F17A, F18A, F18A_,
+  F25A, FS06, FS07, FS07_, FS08, CHAT01, CHAT02, CHAT03, CHAT04, CHAT05,
+  CHAT06, CHAT07, CHAT08, CHAT09, CHAT10, CHAT11, CHAT12, CHAT13, CHAT14,
+  CHBT01, CHBT02, CHBT03, CHBT04, CHBT05, CHBT06, CHBT07, CHBT08, CHBT09,
+  CHBT10, CHBT11, CHBT12, CHBT13, CHBT14, F02A, F02B, F03A, F03B_, F04A,
+  F04B, F05A, F05B, F06A, F06B, F07A_, F07B, F08A, F08B, F09B, F10A, F10B,
+  F11A, F11B, F12A, F12B, F13A, F13B, F14A, F14B, F15A, F15B, F16A, F16B,
+  F17B, F18AX, F18B, F19A, F19B, F20A, F20B, F21A, F21B, F22A, F22B, F23A,
+  F23B, F24A, F24B, F25B, F26A, F26B, F27A, F27B, F28A, F28B, F29A, F29B,
+  F30A, F30B, F31A, F31B, F32A, F32B, F33A, F33B, FS02, FS02A, FS03, FS03A,
+  FS04, FS04A, FS05, FS05A, FS06_, FS07A, FS08_, FS09, FS10, FS11, FS12,
+  FS13, FS14, FS15, FS16, FS17, FS18, FS19, FS20, FS21, FS22, FS23, FS24,
+  FS25, FS26, FS27, FS28, FS29, FS30, FS31, FS32, FS33
 );
-input wire rst;
-input wire CGA1;
-input wire FS01_;
-input wire RCHAT_;
-input wire RCHBT_;
-inout wire F03B;
-inout wire F07A;
-inout wire F09A;
-inout wire F17A;
-inout wire F18A;
-inout wire F18A_;
-inout wire F25A;
-inout wire FS06;
-inout wire FS07;
-inout wire FS07_;
-inout wire FS08;
-output wire CHAT01;
-output wire CHAT02;
-output wire CHAT03;
-output wire CHAT04;
-output wire CHAT05;
-output wire CHAT06;
-output wire CHAT07;
-output wire CHAT08;
-output wire CHAT09;
-output wire CHAT10;
-output wire CHAT11;
-output wire CHAT12;
-output wire CHAT13;
-output wire CHAT14;
-output wire CHBT01;
-output wire CHBT02;
-output wire CHBT03;
-output wire CHBT04;
-output wire CHBT05;
-output wire CHBT06;
-output wire CHBT07;
-output wire CHBT08;
-output wire CHBT09;
-output wire CHBT10;
-output wire CHBT11;
-output wire CHBT12;
-output wire CHBT13;
-output wire CHBT14;
-output wire F02A;
-output wire F02B;
-output wire F03A;
-output wire F03B_;
-output wire F04A;
-output wire F04B;
-output wire F05A;
-output wire F05B;
-output wire F06A;
-output wire F06B;
-output wire F07A_;
-output wire F07B;
-output wire F08A;
-output wire F08B;
-output wire F09B;
-output wire F10A;
-output wire F10B;
-output wire F11A;
-output wire F11B;
-output wire F12A;
-output wire F12B;
-output wire F13A;
-output wire F13B;
-output wire F14A;
-output wire F14B;
-output wire F15A;
-output wire F15B;
-output wire F16A;
-output wire F16B;
-output wire F17B;
-output wire F18AX;
-output wire F18B;
-output wire F19A;
-output wire F19B;
-output wire F20A;
-output wire F20B;
-output wire F21A;
-output wire F21B;
-output wire F22A;
-output wire F22B;
-output wire F23A;
-output wire F23B;
-output wire F24A;
-output wire F24B;
-output wire F25B;
-output wire F26A;
-output wire F26B;
-output wire F27A;
-output wire F27B;
-output wire F28A;
-output wire F28B;
-output wire F29A;
-output wire F29B;
-output wire F30A;
-output wire F30B;
-output wire F31A;
-output wire F31B;
-output wire F32A;
-output wire F32B;
-output wire F33A;
-output wire F33B;
-output wire FS02;
-output wire FS02A;
-output wire FS03;
-output wire FS03A;
-output wire FS04;
-output wire FS04A;
-output wire FS05;
-output wire FS05A;
-output wire FS06_;
-output wire FS07A;
-output wire FS08_;
-output wire FS09;
-output wire FS10;
-output wire FS11;
-output wire FS12;
-output wire FS13;
-output wire FS14;
-output wire FS15;
-output wire FS16;
-output wire FS17;
-output wire FS18;
-output wire FS19;
-output wire FS20;
-output wire FS21;
-output wire FS22;
-output wire FS23;
-output wire FS24;
-output wire FS25;
-output wire FS26;
-output wire FS27;
-output wire FS28;
-output wire FS29;
-output wire FS30;
-output wire FS31;
-output wire FS32;
-output wire FS33;
+
+input wire rst, CGA1, FS01_, RCHAT_, RCHBT_;
+
+inout wire F03B, F07A, F09A, F17A, F18A, F18A_, F25A, FS06, FS07, FS07_,
+  FS08;
+
+output wire CHAT01, CHAT02, CHAT03, CHAT04, CHAT05, CHAT06, CHAT07, CHAT08,
+  CHAT09, CHAT10, CHAT11, CHAT12, CHAT13, CHAT14, CHBT01, CHBT02, CHBT03,
+  CHBT04, CHBT05, CHBT06, CHBT07, CHBT08, CHBT09, CHBT10, CHBT11, CHBT12,
+  CHBT13, CHBT14, F02A, F02B, F03A, F03B_, F04A, F04B, F05A, F05B, F06A,
+  F06B, F07A_, F07B, F08A, F08B, F09B, F10A, F10B, F11A, F11B, F12A, F12B,
+  F13A, F13B, F14A, F14B, F15A, F15B, F16A, F16B, F17B, F18AX, F18B, F19A,
+  F19B, F20A, F20B, F21A, F21B, F22A, F22B, F23A, F23B, F24A, F24B, F25B,
+  F26A, F26B, F27A, F27B, F28A, F28B, F29A, F29B, F30A, F30B, F31A, F31B,
+  F32A, F32B, F33A, F33B, FS02, FS02A, FS03, FS03A, FS04, FS04A, FS05, FS05A,
+  FS06_, FS07A, FS08_, FS09, FS10, FS11, FS12, FS13, FS14, FS15, FS16, FS17,
+  FS18, FS19, FS20, FS21, FS22, FS23, FS24, FS25, FS26, FS27, FS28, FS29,
+  FS30, FS31, FS32, FS33;
 
 assign U232Pad8 = rst ? 1 : ~(0|FS26|U231Pad2);
 assign FS02A = rst ? 0 : ~(0|U126Pad7);
