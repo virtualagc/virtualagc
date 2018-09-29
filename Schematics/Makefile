@@ -38,7 +38,7 @@
 # However, some actions (like adding an extra input or output for debugging 
 # purposes) will temporarily break consistency.
 
-TARGETS := testVerilog 2005259A 2005260A
+TARGETS := testVerilog 2005259A 2005260A 2005250-
 # These are the AGC modules and the global gate delays associated with the various
 # TARGETS.  Each of the TARGETS must have a module_TARGET variable assigned for
 # it, which will be one of A1 through A24.  Similarly, a TARGET *could* have a
@@ -48,6 +48,7 @@ module_testVerilog = A1
 module_2005259A = A1
 module_2005260A = A2
 delay_2005260A = 0.01
+module_2005250- = A21
 
 .PHONY: all
 all: $(TARGETS:%=%/module.vvp)
@@ -62,4 +63,5 @@ all: $(TARGETS:%=%/module.vvp)
 # SECONDARY instead, it will keep module.v and not delete it.
 .SECONDARY: $(TARGETS:%=%/module.v)
 %/module.v: %/module.net %/module.init ../Scripts/pins.txt
-	../Scripts/dumbVerilog.py $(module_$*) $*/module.net ../Scripts/pins.txt "$(delay_$*)" $*/module.init >$@
+	../Scripts/dumbVerilog.py $(module_$*) $*/module.net ../Scripts/pins.txt "$(delay_$*)" $*/module.init >$*/temp.v
+	mv $*/temp.v $@
