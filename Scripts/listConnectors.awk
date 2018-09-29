@@ -1,4 +1,6 @@
 #!/usr/bin/awk
+# I, the author, Ron Burkey, declare this to be in the Public Domain.
+
 # For generating a list of captioned connector pads from an AGC .sch file, for 
 # diff'ing against a similar file derived from Mike Stewart's pin database.
 # To generate the file from the .sch file, you do this in the folder 

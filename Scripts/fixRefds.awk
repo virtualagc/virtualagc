@@ -1,4 +1,7 @@
 #!/usr/bin/awk
+# I, the author, Ron Burkey, declare this to be in the Public Domain.
+# It's just a one-off that was immediately discarded after use anyway.
+
 # For fixing up a .sch file in which all U and J reference designators
 # have been replaced by U? or J?.  Intended for "logic flow diagrams"
 # populated by autoplaceKiCad.py.

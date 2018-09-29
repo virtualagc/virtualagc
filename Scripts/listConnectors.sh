@@ -1,4 +1,6 @@
 #!/bin/bash
+# I, the author, Ron Burkey, declare this to be in the Public Domain.
+
 # A convenience script (probably only for me personally) that is basically
 # a wrapper for listConnectors.awk.  The usage is 
 #	listConnectors drawingfolder module [ comparisonProgram [ nameOfCaptionField ] ]

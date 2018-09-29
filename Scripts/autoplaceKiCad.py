@@ -1,4 +1,31 @@
 #! /usr/bin/python
+# Copyright 2018 Ronald S. Burkey <info@sandroid.org>
+# 
+# This file is part of yaAGC.
+# 
+# yaAGC is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+# 
+# yaAGC is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with yaAGC; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+# 
+# Filename: 	autoplaceKiCad.py
+# Purpose:	Turns a textual description of AGC NOR-gates and connectors
+#		into a KiCad .sch file with those symbols coarsely placed
+#		into the correct regions of the drawing.  This is part of
+#		my workflow for transcribing scanned logic-flow diagrams
+#		into KiCad.
+# Mod history:	2018-07-29 RSB	First time I remembered to add the GPL and
+#				other boilerplate at the top of the file.
+#
 # The purpose of this python script is to take a text file that has some
 # descriptions of NOR gates, expander gates, connector pads, nodes,
 # and perhaps other objects commonly in AGC "logic flow diagrams", and

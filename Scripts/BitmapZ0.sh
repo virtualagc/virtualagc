@@ -1,4 +1,31 @@
 #!/bin/bash
+# Copyright 2018 Ronald S. Burkey <info@sandroid.org>
+# 
+# This file is part of yaAGC.
+# 
+# yaAGC is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+# 
+# yaAGC is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with yaAGC; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+# 
+# Filename: 	BitmapZ0.sh
+# Purpose:	For KiCad .sch files containing a single place image,
+#		moves that image to the top of the file.  This used to
+#		be part of my workflow for transcribing scanned drawings
+#		into KiCad.  Though it still works, it has essentially 
+#		been completely obsoleted by addBackgroundPNG.py.
+# Mod history:	2018-07-29 RSB	First time I remembered to add the GPL and
+#				other boilerplate at the top of the file.
+#
 # In a KiCad schematics file containing a single image (plus other non-image
 # stuff) moves the image to the very beginning, so that it is "behind" the
 # other objects in display order.

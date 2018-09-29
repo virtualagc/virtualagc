@@ -1,4 +1,6 @@
 #!/bin/bash
+# I, the author, Ron Burkey, declare this to be in the Public Domain.
+
 # A convenience script (probably only for me personally) that is basically
 # a wrapper for listConnectors.sh. You run it from the Schematics directory,
 # and it performs a diff of all modules against the pin database.

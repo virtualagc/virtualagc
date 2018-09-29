@@ -1,4 +1,6 @@
 #!/usr/bin/python
+# I, the author, Ron Burkey, declare this to be in the Public Domain.
+
 # This script generates a file describing a connector symbol for KiCad that is:
 #	Multipart, with each part being a single pin.
 #	Oval shaped with the long dimension along the x-axis, as in AGC/DSKY schematics.

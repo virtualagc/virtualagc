@@ -1,4 +1,6 @@
 #!/usr/bin/awk
+# I, the author, Ron Burkey, declare this to be in the Public Domain.
+
 # All of the KiCad schematics I've created for the AGC/DSKY schematics
 # are on a 25-mil grid.  Unfortunately, I've run into a case where 
 # I have a schematic in which everything is off-grid.  It was a bug

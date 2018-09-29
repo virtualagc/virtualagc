@@ -1,4 +1,6 @@
 #!/usr/bin/python
+# I, the author, Ron Burkey, declare this to be in the Public Domain.
+
 # Try to pull an initial NOR state from a VCD file.  The usage is:
 #	cat module.net module.vcd | pullFromVcd.py [TICKNUMBER]
 

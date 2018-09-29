@@ -1,4 +1,6 @@
 #!/usr/bin/python
+# I, the author, Ron Burkey, declare this to be in the Public Domain.
+
 # This script makes a KiCad library containing all of the multitude of NOR gates
 # potentially used in AGC/DSKY schematics.  I say "potentially", because not every
 # combination is actually used, but without making some kind of laborious accounting

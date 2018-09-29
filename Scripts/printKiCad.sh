@@ -1,4 +1,6 @@
 #!/bin/bash
+# I, the author, Ron Burkey, declare this to be in the Public Domain.
+
 # Performs the steps necessary to transform a KiCad AGC/DSKY drawing
 # (or set of drawings) plotted to Postscript into a PNG.  Syntax is
 #
