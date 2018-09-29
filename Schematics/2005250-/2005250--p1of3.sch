@@ -2292,7 +2292,7 @@ Wire Wire Line
 	7050 30300 13350 30300
 Connection ~ 7050 27400
 Wire Wire Line
-	7050 27400 2425 27400
+	7050 27400 2950 27400
 Wire Wire Line
 	13350 30025 10500 30025
 Wire Wire Line
@@ -2630,8 +2630,8 @@ Text Notes 22250 8125 0    140  ~ 28
 TO PIN V OF GATES
 Text Notes 22600 16850 0    149  ~ 30
 32257\n32240\n32235\n32229\n32201\n32057\n32069\n32055\n32067\n32042\n32036\n32053\n32026\n32054\n32041\n32043\n32031\n32034\n32006\n32023\n32032\n32024\n32012\n32013\n32011\n32004\n32002\n32003\n32001\n32005\n32025\n32253\n32230\n32258
-Text Notes 33900 3400 0    140  ~ 28
-Notes from the VirtualAGC Project:\n1. This CAD drawing was transcribed from the original Apollo Program drawing\n   2005250-, but does not itself date from the Apollo period. — RSB 2018\n2. The original drawing did not indicate reference designators for the components,\n   so this transcription of it does not indicate them either.  For purposes of ERC or \n   netlist generation, the NOR gates have been assigned reference designators\n   U1nn, where nn is the 2-digit number shown on the NOR-gate symbol.  The oval \n   pads numbered 101-171 comprise connector J1, while those numbered 201-271\n   comprise connector J2. — RSB 2018
+Text Notes 33875 4850 0    140  ~ 28
+Notes from the VirtualAGC Project:\n1. This CAD drawing was transcribed from the original Apollo Program drawing\n   2005250-, but does not itself date from the Apollo period. — RSB 2018\n2. The original drawing did not indicate reference designators for the components,\n   so this transcription of it does not indicate them either.  For purposes of ERC or \n   netlist generation, the NOR gates have been assigned reference designators\n   U1nn, where nn is the 2-digit number shown on the NOR-gate symbol.  The oval \n   pads numbered 101-171 comprise connector J1, while those numbered 201-271\n   comprise connector J2. — RSB 2018\n3. The original drawing has no arrow symbol next to connector pad 135, but one\n   has been added here.  This has to be a misprint on the original drawing, because\n   without the arrow, point C60A connected to pin F of gate 32056 has no driving\n   signal.  The specific claim that gate 32056 pin F is connected to pad 135 has also\n   been verified on the signal wiring diagram (2005150C) of the predecessor drawing\n   (2005050J) for AGC module A21. — RSB 2018
 $Bitmap
 Pos 33575 1550
 Scale 1.000000
@@ -3531,4 +3531,23 @@ Wire Wire Line
 	13350 30975 13350 31250
 Text Label 13350 31250 1    140  ~ 28
 0VDCA
+Text Label 29350 8650 0    140  ~ 28
+C60A
+Text Label 3150 27400 0    140  ~ 28
+C60A
+$Comp
+L AGC_DSKY:ArrowTwiddle X209
+U 1 1 5BF0B85A
+P 2950 27400
+F 0 "X209" H 2950 27925 50  0001 C CNN
+F 1 "ArrowTwiddle" H 2960 27860 50  0001 C CNN
+F 2 "" H 2950 27400 50  0001 C CNN
+F 3 "~" H 2950 27400 50  0001 C CNN
+F 4 "(1)" H 2825 27875 100 0000 L CNB "Number"
+	1    2950 27400
+	1    0    0    -1  
+$EndComp
+Connection ~ 2950 27400
+Wire Wire Line
+	2950 27400 2425 27400
 $EndSCHEMATC

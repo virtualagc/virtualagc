@@ -1636,7 +1636,7 @@ Wire Wire Line
 Wire Wire Line
 	13575 11250 13825 11250
 Wire Wire Line
-	11000 8300 10550 8300
+	11000 8300 10875 8300
 Connection ~ 11000 8300
 Wire Wire Line
 	11750 8575 11500 8575
@@ -1834,8 +1834,6 @@ Wire Wire Line
 Wire Wire Line
 	16325 18450 16075 18450
 Connection ~ 5375 3475
-Wire Wire Line
-	5375 3475 4550 3475
 Wire Wire Line
 	16575 18450 16325 18450
 Connection ~ 16325 18450
@@ -2242,9 +2240,9 @@ Connection ~ 13800 21925
 Wire Wire Line
 	13800 21925 13550 21925
 Wire Wire Line
-	32900 8125 32875 8450
+	32900 8125 32900 8450
 Wire Wire Line
-	32875 8450 30800 9050
+	32900 8450 30800 9050
 Wire Wire Line
 	30800 9050 30800 9400
 Wire Wire Line
@@ -2293,9 +2291,9 @@ Wire Wire Line
 Wire Wire Line
 	18725 9450 18300 9450
 Text Notes 1600 33225 0    140  ~ 28
-Notes from the VirtualAGC Project:\n1. This CAD drawing was transcribed from the original Apollo Program drawing\n   2005250-, but does not itself date from the Apollo period. — RSB 2018\n2. The original drawing did not indicate reference designators for the components,\n   so this transcription of it does not indicate them either.  For purposes of ERC or \n   netlist generation, the NOR gates have been assigned reference designators\n   U1nn, where nn is the 2-digit number shown on the NOR-gate symbol.  The oval \n   pads numbered 101-171 comprise connector J1, while those numbered 201-271\n   comprise connector J2. — RSB 2018
+Notes from the VirtualAGC Project:\n1. This CAD drawing was transcribed from the original Apollo Program drawing\n   2005250-, but does not itself date from the Apollo period. — RSB 2018\n2. The original drawing did not indicate reference designators for the components,\n   so this transcription of it does not indicate them either.  For purposes of ERC or \n   netlist generation, the NOR gates have been assigned reference designators\n   U1nn, where nn is the 2-digit number shown on the NOR-gate symbol.  The oval \n   pads numbered 101-171 comprise connector J1, while those numbered 201-271\n   comprise connector J2. — RSB 2018\n3. The original drawing has no arrow symbol next to connector pad 208, but one\n   has been added here.  This has to be a misprint on the original drawing, because\n   without the arrow, point GOJAM connected to pin C of gate 32245 has no driving\n   signal.  The specific claim that gate 32245 pin C is connected to pad 208 has also\n   been verified on the signal wiring diagram (2005150C) of the predecessor drawing\n   (2005050J) for AGC module A21. — RSB 2018\n4. For the same reason, an arrow symbol has been added to connector pad 202,\n   for connection to gate 32243 pin F, and verified against the predecessor drawing's\n   signal wiring diagram. — RSB 2018
 $Bitmap
-Pos 1275 31375
+Pos 1350 29175
 Scale 1.000000
 Data
 89 50 4E 47 0D 0A 1A 0A 00 00 00 0D 49 48 44 52 00 00 00 78 00 00 00 78 08 02 00 00 00 B6 06 A1 
@@ -3158,4 +3156,44 @@ C9 BB 29 F5 5D 8B CA 82 36 A4 40 25 C6 15 08 48 31 74 1C 38 17 8C B5 84 B2 9A 34
 C6 5C DC 75 02 E5 96 B4 52 0D 25 6F F3 00 00 00 00 49 45 4E 44 AE 42 60 82 
 EndData
 $EndBitmap
+Text Label 30775 10175 2    140  ~ 28
+GOJAM
+Text Label 11000 8300 0    140  ~ 28
+GOJAM
+$Comp
+L AGC_DSKY:ArrowTwiddle X303
+U 1 1 5BF57FA2
+P 10875 8300
+F 0 "X303" H 10875 8825 50  0001 C CNN
+F 1 "ArrowTwiddle" H 10885 8760 50  0001 C CNN
+F 2 "" H 10875 8300 50  0001 C CNN
+F 3 "~" H 10875 8300 50  0001 C CNN
+F 4 "(1)" H 10750 8750 100 0000 L CNB "Number"
+	1    10875 8300
+	1    0    0    -1  
+$EndComp
+Connection ~ 10875 8300
+Wire Wire Line
+	10875 8300 10550 8300
+Text Label 4825 3475 0    140  ~ 28
+T12_
+$Comp
+L AGC_DSKY:ArrowTwiddle X304
+U 1 1 5BFBE5E0
+P 4750 3475
+F 0 "X304" H 4750 4000 50  0001 C CNN
+F 1 "ArrowTwiddle" H 4760 3935 50  0001 C CNN
+F 2 "" H 4750 3475 50  0001 C CNN
+F 3 "~" H 4750 3475 50  0001 C CNN
+F 4 "(1)" H 4625 3925 100 0000 L CNB "Number"
+	1    4750 3475
+	1    0    0    -1  
+$EndComp
+Text Label 28175 9675 2    140  ~ 28
+T12_
+Connection ~ 4750 3475
+Wire Wire Line
+	4750 3475 4550 3475
+Wire Wire Line
+	4750 3475 5375 3475
 $EndSCHEMATC
