@@ -21,6 +21,10 @@
 # Purpose:	Converts KiCad AGC "logic flow diagrams" to Verilog
 # Mod history:	2018-07-29 RSB	First time I remembered to add the GPL and
 #				other boilerplate at the top of the file.
+#				Various new things, though, like: better formatting
+#				of module parameters and wire lines in the output
+#				Verilog; treatment of netnames that begin with a
+#				digit (not allowed in Verilog).
 #
 # This script converts one of my KiCad transcriptions of AGC LOGIC FLOW DIAGRAMs
 # into Verilog in the dumbest, most-straightforward way.  In other words, I don't
@@ -146,6 +150,10 @@ if len(sys.argv) >= 3:
 				fields[1] = int(fields[1])
 				while len(pinsDB) < fields[1]:
 					pinsDB.append(["MISSING"])
+				if len(fields) > 3:
+					if fields[3][:1].isdigit() and fields[3][:3] != "0VD":
+						fields[3] = "d" + fields[3]
+					fields[3] = fields[3].replace("+", "p")
 				pinsDB.append(fields[2:])
 		f.close()
 	except:
