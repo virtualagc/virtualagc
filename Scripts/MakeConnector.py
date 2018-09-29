@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python2
 # I, the author, Ron Burkey, declare this to be in the Public Domain.
 
 # This script generates a file describing a connector symbol for KiCad that is:

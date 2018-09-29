@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python2
 # Copyright 2018 Ronald S. Burkey <info@sandroid.org>
 # 
 # This file is part of yaAGC.

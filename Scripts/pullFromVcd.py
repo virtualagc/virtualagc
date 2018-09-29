@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python2
 # I, the author, Ron Burkey, declare this to be in the Public Domain.
 
 # Try to pull an initial NOR state from a VCD file.  The usage is:
