@@ -38,7 +38,7 @@
 # However, some actions (like adding an extra input or output for debugging 
 # purposes) will temporarily break consistency.
 
-TARGETS := testVerilog 2005259A 2005260A 2005250-
+TARGETS := testVerilog 2005259A 2005260A 2005251A 2005250-
 # These are the AGC modules and the global gate delays associated with the various
 # TARGETS.  Each of the TARGETS must have a module_TARGET variable assigned for
 # it, which will be one of A1 through A24.  Similarly, a TARGET *could* have a
