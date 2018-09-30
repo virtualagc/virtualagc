@@ -8,6 +8,11 @@
 # Mod history:	2018-07-29 RSB	Wrote first version of this makefile, 
 #				covering just testVerilog, 2005259A, 
 #				and 2005260A targets.
+#		2018-07-30 RSB	Just went ahead and added all of the rest
+#				of the AGC modules for 2003200 as TARGETS.
+#				The build will probably fail as soon as it
+#				hits one of the targets I haven't debugged
+#				yet, but so what?
 #
 # This 'make' needs to be performed from the Schematics/ directory.
 # Icarus Verilog must be installed, and iverilog must be in the PATH.
@@ -38,8 +43,11 @@
 # However, some actions (like adding an extra input or output for debugging 
 # purposes) will temporarily break consistency.
 
-TARGETS = testVerilog 2005259A 2005260A 2005251A 2005262A 2005261A
-TARGETS += 2005250-
+# Here are the targets and their config parameters for AGC 2003200.
+TARGETS = testVerilog 2005259A 2005260A 2005251A 2005262A 2005261A 2005263A
+TARGETS += 2005252A 2005255- 2005256A 2005257A 2005258A 2005253A 2005269-
+TARGETS += 2005264A 2005265A 2005266- 2005267A 2005268A 2005270- 2005254-
+TARGETS += 2005250- 2005271- 2005272A 2005273A
 # These are the AGC modules and the global gate delays associated with the various
 # TARGETS.  Each of the TARGETS must have a module_TARGET variable assigned for
 # it, which will be one of A1 through A24.  Similarly, a TARGET *could* have a
@@ -74,6 +82,15 @@ module_2005273A = A24
 
 .PHONY: all
 all: $(TARGETS:%=%/module.vvp)
+
+# Make some stubs for a couple of required files.  This helpful for a
+# first compilation, but the files need to be filled and the 'make'
+# redone if an actual, usable simulation is to be performed.
+%/module.init:
+	touch $@
+
+%/module_tb.v:
+	touch $@
 
 # Below are the rules which should work for every TARGET in $(TARGETS)
 %/module.vvp: %/module_tb.v %/module.v
