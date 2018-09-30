@@ -1,4 +1,4 @@
-// Test bench for 2005260A/module.v
+// Test bench for 2005251A/module.v
 `timescale 100ns / 1ns
 
 module testbench;
