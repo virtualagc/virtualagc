@@ -1,0 +1,449 @@
+<!DOCTYPE doctype PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+  <head>
+    <meta name="generator" content="HTML Tidy for HTML5 for Linux
+      version 5.3.14">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="GENERATOR" content="Mozilla/4.7 [en] (X11; I; Linux
+      2.4.16 ppc) [Netscape]">
+    <meta name="Author" content="Ronald Burkey">
+    <title>Virtual AGC Electrical/Mechanical Page</title>
+    <link rel="icon" type="image/png" href="favicon.png">
+    <script type="text/javascript" src="Header.js">
+  </script>
+  </head>
+  <body style="background-image: url(gray3.jpg);">
+    <script type="text/javascript">
+  document.write(headerTemplate.replace("@TITLE@","Hardware Simulation Page").replace("@SUBTITLE@","Digital Simulation of the AGC Electronics"))</script>
+    <div align="center"><font size="+2"><i>(This page is under
+          construction and does not yet have any useful content.)</i></font><br>
+    </div>
+    <h1><a name="Contents"></a>Contents</h1>
+    <ul>
+      <li><a href="#Introduction">Introduction</a><br>
+      </li>
+      <li><a href="#References">References</a></li>
+      <li><a href="#An_Example:_testVerilog">An Example: testVerilog</a></li>
+      <li><a href="#Files">Files</a></li>
+      <li><a href="#Step_4:_The_Test_BenchTBD">Step 4: The Test Bench
+          and Initial State<br>
+        </a></li>
+      <li><a href="#Step_5:_Compilation_of_the_Verilog">Step 5:
+          Compilation of the Verilog</a></li>
+      <li><a href="#Step_6:_Running_the_Simulation">Step 6: Running the
+          Simulation</a></li>
+      <li><a href="#Step_7:_Viewing_the_Results">Step 7: Viewing the
+          Results</a></li>
+      <li><a href="#Appendix:_Translation_from_KiCad_into">Appendix:
+          Translation from KiCad into Verilog</a><br>
+      </li>
+    </ul>
+    <h1><a name="Introduction"></a>Introduction</h1>
+    <p>Digital simulation of the AGC electrical design can provide
+      very-detailed insight into how that electrical design
+      functions.&nbsp; Aside from satisfying simple personal interest,
+      this is very valuable if you wish to create a simulation of the
+      AGC, in the manner of Virtual AGC Project's <a
+        href="http://www.ibiblio.org/apollo/yaAGC.html">Block II AGC
+        software simulator</a> or <a
+        href="Block1.html#Virtual_AGCs_CPU_Simulator_yaAGCb1">Block I
+        AGC software simulator</a>, or John Pultorak's <a
+href="http://www.ibiblio.org/apollo/Pultorak.html#John_Pultoraks_Block_I_AGC">Block
+
+
+
+        I AGC hardware simulator</a>, and want to have some way of
+      verifying that your creation works properly.&nbsp;&nbsp;&nbsp; <br>
+    </p>
+    <p>Realize, though, that the purpose of these simulations can only
+      be very accurate examination or verification of behavior.&nbsp; At
+      the present time, these simulations are very much slower than real
+      time, so you cannot expect to use them as replacements for the
+      software simulations of the AGC CPU mentioned in the preceding
+      paragraph.&nbsp; One day, as computer speeds continue to advance,
+      perhaps!&nbsp; But not now.<br>
+    </p>
+    <p>The basic simulation process, from end to end, can be summarized
+      as follows:<br>
+    </p>
+    <ol>
+      <li>The contemporary electrical schematics of the AGC/DSKY from
+        the Apollo era are transcribed into modern schematic-capture CAD
+        software.</li>
+      <li>The CAD drawings are used to create netlists (files that list
+        every electrical connection between components)</li>
+      <li>The netlists are translated into Verilog (a high-level
+        hardware description language) program.&nbsp; If the circuit has
+        memory ("flip-flops"), then the memory's initial status also
+        needs to be specified at this point.</li>
+      <li>A "test bench" (a description, in Verilog, of the external
+        inputs into the simulated&nbsp; hardware vs time) is written.<br>
+      </li>
+      <li>The Verilog for the AGC and test bench are compiled, using
+        Icarus Verilog.</li>
+      <li>The compiled Verilog is then simulated by running it in Icarus
+        Verilog.</li>
+      <li>(Optional) the output data logged by the preceding step is
+        viewed as waveforms, similar to an oscilloscope, using GTKWave.</li>
+    </ol>
+    <p>Steps #1, #2, and #3, and creation of a simple test bench for
+      step #4, have already been accomplished for you by the Virtual AGC
+      Project.&nbsp; It only remains for you to modify the test bench,
+      recompile, run the simulation, and look at the results.&nbsp;
+      Developing the test bench is the only tricky part.<br>
+    </p>
+    <p>Multiple types of simulation are possible, including:<br>
+    </p>
+    <ul>
+      <li>Full AGC + DSKY</li>
+      <li>Full AGC</li>
+      <li>Individual AGC "module" (A1 - A24)</li>
+      <li>Individual circuit board within an AGC module<br>
+      </li>
+    </ul>
+    <p>Indeed, if you are capable of writing your own Verilog
+      descriptions of peripheral hardware in the LM or CM, you can
+      probably even simulate AGC+DSKY+<i>Other</i>.<br>
+    </p>
+    <p>One slight point of confusion is that in the AGC design, the
+      various plug-in circuits are called "modules", while Verilog also
+      uses the term "modules" for its constructs that are similar to
+      "functions" or "subroutines" in other programming languages.&nbsp;
+      Now as it happens, we will normally want to deal with the
+      simulation in such a way that each AGC module <i>actually is</i>
+      modeled as a single Verilog module.&nbsp; That's more-or-less a
+      coincidence, though, and if you attempt to work with any
+      simulations that differ from those we've pre-prepared for you, you
+      may have to watch out for the dual meaning of this term.<br>
+    </p>
+    <ul>
+    </ul>
+    <h1><a name="References"></a>References</h1>
+    <p><a href="ElectroMechanical.html">The Virtual AGC Project's
+        Electro-Mechanical page</a>.<br>
+    </p>
+    <p>Apollo-era AGC/DSKY electrical-schematic diagrams:<br>
+    </p>
+    <ul>
+      <li>Block I AGC/DSKY schematic diagrams redrawn in AC Electronics
+        Manual ND-1021041, with theory of operation: <a
+          href="https://archive.org/details/apollocommandmodacel">Volume
+          1</a> and <a
+          href="https://archive.org/details/apollocommandmodacel_0">Volume
+
+
+
+          2</a>.<br>
+      </li>
+      <li><a href="klabs/history/agc_schematics_block2/">Scans of the
+          original electrical-schematic drawings for Block II AGC p/n
+          2003993.</a> <br>
+      </li>
+      <li><a href="https://archive.org/details/agc_handbook_jp2">Scans
+          of the original electrical-schematic drawings for Block II AGC
+          p/n 2003100 &amp; 2003200, and associated DSKYs.</a>&nbsp; <br>
+      </li>
+      <li>Block II AGC/DSKY schematic diagrams redrawn in AC Electronics
+        Manual ND-1021042, with theory of operation: <a
+          href="Documents/acelectroniclmma00acel_0.pdf">Volume 2</a>.<br>
+      </li>
+      <li><a
+          href="ElectroMechanical.html#Appendix:_Index_and_Links_to_all_AGC_">Drawing-by-drawing
+
+
+
+          index into the items above.</a></li>
+    </ul>
+    AGC/DSKY electrical schematics transcribed into KiCad
+    electrical-design software, plus Verilog translations:<br>
+    <ul>
+      <li><a
+href="https://github.com/virtualagc/virtualagc/tree/schematics/Schematics">GitHub
+
+
+
+          repository</a></li>
+    </ul>
+    <p>Open-source software:<br>
+    </p>
+    <ul>
+      <li><a href="http://kicad-pcb.org/">KiCad (Electrical
+          schematic-capture CAD)</a></li>
+      <li><a
+href="https://github.com/virtualagc/virtualagc/blob/schematics/Scripts/dumbVerilog.py">KiCad-to-Verilog
+
+
+
+          translator script</a></li>
+      <li><a href="http://iverilog.icarus.com/">Icarus Verilog (Verilog
+          compiler and simulator)</a></li>
+      <li><a href="http://gtkwave.sourceforge.net/">GTKWave (viewer for
+          waveforms output by Icarus Verilog)</a></li>
+    </ul>
+    <h1><a name="An_Example:_testVerilog"></a>An Example: testVerilog</h1>
+    <p>The Virtual AGC software repository already contains some
+      fully-worked out examples of digital simulations. The simplest is
+      something called "testVerilog", which is actually a small circuit
+      block from the AGC's circuit module A1.&nbsp; Let's consider the
+      testVerilog simulation, within the context of steps #1 through #7
+      outlined in the <a href="#Introduction">Introduction</a> above.<br>
+    </p>
+    <p>Step #1:&nbsp; Start with the original Apollo Program
+      schematic-diagram drawing for module A1, which is drawing
+      2005259A, two sheets (click to enlarge):<br>
+    </p>
+    <div align="center"><a
+        href="klabs/history/agc_schematics_block2/logic/a01-1.jpg"><img
+          src="a01-1-small.jpg" alt="" width="300" height="241"
+          border="2"></a>&nbsp; <a
+        href="klabs/history/agc_schematics_block2/logic/a01-2.jpg"><img
+          src="a01-2-small.jpg" alt="" width="300" height="239"
+          border="2"></a><br>
+    </div>
+    <p>Don't be confused by the fact that the inputs of NOR gates in the
+      circuit are decorated with little triangles that make the gate
+      look like a rocket ship.&nbsp; They're just regular NOR gates in
+      spite of that.&nbsp; The numbered oval pads are the inputs from or
+      outputs to the AGC backplane.<br>
+    </p>
+    <p>After conversion to CAD, KiCad files for this circuit module are
+      <a
+href="https://github.com/virtualagc/virtualagc/tree/schematics/Schematics/2005259A">here</a>,
+      but for exposition purposes I've printed them out as simple images
+      as well: <br>
+    </p>
+    <div align="center"><a href="KiCad/2005259A-p1of2.png"><img
+          src="2005259A-p1of2-small.png" alt="" width="300" height="232"
+          border="2">&nbsp; </a><a href="KiCad/2005259A-p2of2.png"><img
+          src="2005259A-p2of2-small.png" alt="" width="300" height="232"
+          border="2"></a><br>
+    </div>
+    <p>Now, AGC module A1 is the "scaler" circuit.&nbsp; If you want to
+      read about it in some detail, you can look at <a
+href="https://archive.org/stream/acelectroniclmma00acel#page/n290/mode/1up">section
+
+
+
+        4-5.3.4 of document ND-1021042</a>, which covers the theory of
+      operation of this module.&nbsp; The module's purpose is to take
+      clock signal called FS01/ (a 102.4 KHz square wave), which you can
+      see coming into the module from the AGC's backplane near the upper
+      left on the first sheet of the schematic, and to run it through a
+      sequence of circuit blocks that successively cut the frequency of
+      that signal in half, as follows, and outputting those slower
+      clocks back to the AGC's backplane:<br>
+    </p>
+    <ul>
+      <li>Output signal FS02 is 51.2 KHz</li>
+      <li> Output signal FS03 is 25.6 KHz</li>
+      <li>...</li>
+      <li>Output signal FS33 is 0.000023842 Hz</li>
+    </ul>
+    <p>To simplify things, the testVerilog example cuts this all down so
+      that just the first divide-by-two circuit block, which produces
+      FS02 from FS01/, is kept.&nbsp; <a
+href="https://github.com/virtualagc/virtualagc/tree/schematics/Schematics/testVerilog">The
+
+
+
+        CAD files for testVerilog are here</a>, but here is a simple
+      image of the circuit:<br>
+    </p>
+    <div align="center"><img src="testVerilogCircuit.png" alt=""
+        width="643" height="549"><br>
+    </div>
+    <p>Step 2: Creation of a netlist from the CAD files.&nbsp; This is
+      just a feature of the KiCad program itself.&nbsp; While it isn't
+      terribly instructive, the netlist file for this circuit is
+      relatively short and relatively readable without any explanation,
+      so here it is in full:<br>
+    </p>
+    <blockquote>
+      <p>
+        <meta http-equiv="content-type" content="text/html;
+          charset=UTF-8">
+      </p>
+      <pre style="color: rgb(0, 0, 0); font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: normal; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; word-wrap: break-word; white-space: pre-wrap;"><font face="Courier">( { EESchema Netlist Version 1.1 created  Wed 26 Sep 2018 08:21:48 AM CDT }
+ ( /5D281B38 $noname  J2 ConnectorA1-200
+  (  202 Net-(J2-Pad202) )
+  (  204 Net-(J2-Pad204) )
+  (  205 Net-(J2-Pad205) )
+  (  206 Net-(J2-Pad206) )
+  (  208 Net-(J2-Pad208) )
+  (  209 Net-(J2-Pad209) )
+  (  212 0VDCA )
+  (  222 +4VDC )
+  (  236 0VDCA )
+  (  250 +4VDC )
+  (  260 0VDCA )
+ )
+ ( /5D281B3E $noname  U126 D3NOR-+4VDC-0VDCA-A_B-E_F
+  (    6 0VDCA )
+  (    7 Net-(U126-Pad7) )
+  (    8 Net-(J2-Pad206) )
+  (    9 Net-(J2-Pad208) )
+ )
+ ( /5D281B45 $noname  U128 D3NOR-+4VDC-0VDCA-ABC-E_F
+  (    1 Net-(U127-Pad2) )
+  (    2 Net-(U127-Pad8) )
+  (    3 Net-(J2-Pad205) )
+  (    4 Net-(J2-Pad209) )
+  (    5 0VDCA )
+  (    6 0VDCA )
+  (    7 Net-(U126-Pad7) )
+  (    8 Net-(U127-Pad2) )
+  (    9 Net-(J2-Pad209) )
+  (   10 +4VDC )
+ )
+ ( /5D281B77 $noname  U127 D3NOR-+4VDC-0VDCA-B_C-E_F
+  (    1 Net-(U126-Pad7) )
+  (    2 Net-(U127-Pad2) )
+  (    3 Net-(J2-Pad204) )
+  (    4 0VDCA )
+  (    5 0VDCA )
+  (    6 0VDCA )
+  (    7 Net-(U126-Pad7) )
+  (    8 Net-(U127-Pad8) )
+  (    9 Net-(J2-Pad204) )
+  (   10 +4VDC )
+ )
+ ( /5D281B9B $noname  U129 D3NOR-+4VDC-0VDCA-ABC-E_F
+  (    1 Net-(U127-Pad8) )
+  (    2 Net-(J2-Pad202) )
+  (    3 Net-(J2-Pad205) )
+  (    4 Net-(U127-Pad2) )
+  (    5 0VDCA )
+  (    6 0VDCA )
+  (    7 Net-(U127-Pad8) )
+  (    8 Net-(J2-Pad204) )
+  (    9 Net-(J2-Pad202) )
+  (   10 +4VDC )
+ )
+)
+*</font><br></pre></blockquote>Step #3: Conversion to Verilog.&nbsp; (You may have noticed that <a href="#Introduction">the Introduction</a> mentions that at this point we need to specify the initial state of the flip-flops.&nbsp; If you are an electronics novice it may not be obvious, but to any experienced electronics designer it will have been obvious that the feedback between the pairs of NOR gates in the circuit does indeed create a flip-flop, or at least introduces some kind of memory.&nbsp; For our purposes at the moment, we'll just skip over that point, and note that the repository provides a file called <a href="https://github.com/virtualagc/virtualagc/blob/schematics/Schematics/testVerilog/module.init">module.init</a> that specifies the initial conditions of the implicit flip-flop.&nbsp; Besides that, another input file called pins.txt is needed, which again, we'll just accept for the moment without further explanation.)<br><br>The conversion from the netlist to Verilog is automated by a Python 2 script called dumbVerilog.py in the software repository, and the Verilog you get from that looks like the following.&nbsp; Even if you don't know Verilog, I think you can get a good sense of what's what.&nbsp; The rst signal is not present in the schematic, and is simply always added by the translation script; it's what allows the initial conditions of memory to be set up, but is normally inactive after the beginning of the simulation.&nbsp; Verilog doesn't allow signal names like "FS01/", because the character "/" isn't legal for signal names, so the translater has automatically changed "FS01/" to "FS01_".<br><blockquote><meta http-equiv="content-type" content="text/html; charset=UTF-8"><pre style="color: rgb(0, 0, 0); font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: normal; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; word-wrap: break-word; white-space: pre-wrap;"><font face="Courier">// Verilog module auto-generated for AGC module A1 by dumbVerilog.py
+
+module A1 ( 
+  rst, FS01_, F02A, F02B, FS02, FS02A
+);
+
+input wire rst, FS01_;
+
+output wire F02A, F02B, FS02, FS02A;
+
+assign FS02A = rst ? 0 : ~(0|U126Pad7);
+assign FS02 = rst ? 0 : ~(0|U126Pad7|U127Pad8);
+assign U127Pad8 = rst ? 1 : ~(0|F02B|FS01_|U127Pad2);
+assign U126Pad7 = rst ? 1 : ~(0|U127Pad2|FS02);
+assign U127Pad2 = rst ? 0 : ~(0|U127Pad8|FS01_|F02A);
+assign F02A = rst ? 0 : ~(0|U126Pad7|U127Pad2);
+assign F02B = rst ? 0 : ~(0|U127Pad8|FS02);
+
+endmodule</font></pre></blockquote>Step #4: Creation of a test bench.&nbsp; This is the point in a real simulation task where you would have to decide what it is you want from the simulation, and write a test bench file in Verilog to provide the appropriate inputs at the proper time to do the testing you have in mind.&nbsp; For the purpose of this example, though, we've simply provided a test-bench file, which looks like this:<br><blockquote><meta http-equiv="content-type" content="text/html; charset=UTF-8"><pre style="color: rgb(0, 0, 0); font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: normal; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; word-wrap: break-word; white-space: pre-wrap;"><font face="Courier">// Test bench for testVerilog.v
+`timescale 1us / 1ns
+
+module testVerilog;
+
+reg rst = 1;
+initial begin
+  $dumpfile("testVerilog.vcd");
+  $dumpvars(0, testVerilog);
+  
+  # 2 rst = 0;
+  # 500 $finish;
+end
+  
+reg FS01_ = 0;
+always #4.883 FS01_ = !FS01_;
+  
+wire F02A, F02B, FS02, FS02A;
+A1 A1A ( 
+  rst, FS01_, F02A, F02B, FS02, FS02A
+);
+  
+initial
+  $timeformat(-6, 0, " us", 10);
+initial
+  $monitor("At time %t, rst=%d, FS01_=%d, F02B=%d, FS02=%d, FS02A=%d, FS02A=%d", $time, rst, FS01_, F02B, FS02, F02A, FS02A);
+
+endmodule</font></pre></blockquote>Let's take a look at this file and see what it says.&nbsp; First, the "timescale" directive explains how to understand the timings (the things marked with "#") that appear within the test-bench file.&nbsp; It says that the time scale will be 1 us, so that the numbers for the "#" timings are in microseconds.&nbsp; <br><br>The "reg rst =1" means that the rst signal is going to be an input signal into the circuit we're testing, but here within the test bench it's going to be a "register" that remembers it's own settings, as opposed to a "wire" (which cannot remember anything).&nbsp; Thus, we set rst to 1 and it will stay that way until we say otherwise.&nbsp; Thus, a few lines later we see "# 2 rst = 0", which means that 2 us after startup, the test bench is going to reset the rst signal to 0, and leave it there.&nbsp; The "# 500 $finish" that you also see there says that the simulation itself will actually end after 500 us.&nbsp; The "$dumpfile" and "$dumpvars" statements say that an output logfile called testVerilog.vcd is going to be opened, and that the values of all of the input and output variables are going to be dumped into it on a cycle-by-cycle basis, for later analysis.<br><br>The "reg FS01_ = 0" means that FS01_ (FS01/) is also an input to the circuit being tested, and that it starts out at 0.&nbsp; But "always #4.883 FS01_ = !FS01_" means that FS01_ is going to be toggled every 4.883 us during the simulation.&nbsp; Recall that FS01/ is a 102.4 KHz square wave in the AGC, and therefore it toggles from low-to-high or high-to-low at a rate of 204.8 KHz, or (surprise!) every 4.8828125 us.<br><br>The statements "wire F02A, ..." and "A1 A1A ( ... )" simply mean that a circuit module of type A1 (which is what the Verilog shown in step #3 above implements) is being tested, and has outputs named F02A etc.<br><br>Finally, the "initial" statements at the very end describe the status messages which the simulation is going to print out whilst running.&nbsp; These messages are just informative, and have nothing to do with the data being dumped out on the testVerilog.vcd.&nbsp; You don't even need to print out any status messages if you don't want to.<br><br>Steps #5 and #6:&nbsp; Compiling and running the simulation.&nbsp; There's really nothing to show you in terms of compiling; it's dead simple.&nbsp; When you run the simulation, you see something like this:<br><blockquote><font size="-1" face="Courier">VCD info: dumpfile testVerilog.vcd opened for output.<br>At time&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0 us, rst=1, FS01_=0, F02B=0, FS02=0, FS02A=0, FS02A=0<br>At time&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 2 us, rst=0, FS01_=0, F02B=0, FS02=0, FS02A=0, FS02A=0<br>At time&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 5 us, rst=0, FS01_=1, F02B=1, FS02=0, FS02A=0, FS02A=0<br>At time&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 10 us, rst=0, FS01_=0, F02B=0, FS02=1, FS02A=0, FS02A=1<br>At time&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 15 us, rst=0, FS01_=1, F02B=0, FS02=1, FS02A=1, FS02A=1<br>At time&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 20 us, rst=0, FS01_=0, F02B=0, FS02=0, FS02A=0, FS02A=0<br>At time&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 24 us, rst=0, FS01_=1, F02B=1, FS02=0, FS02A=0, FS02A=0<br>At time&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 29 us, rst=0, FS01_=0, F02B=0, FS02=1, FS02A=0, FS02A=1<br>At time&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 34 us, rst=0, FS01_=1, F02B=0, FS02=1, FS02A=1, FS02A=1<br>At time&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 39 us, rst=0, FS01_=0, F02B=0, FS02=0, FS02A=0, FS02A=0<br>At time&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 44 us, rst=0, FS01_=1, F02B=1, FS02=0, FS02A=0, FS02A=0<br>At time&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 49 us, rst=0, FS01_=0, F02B=0, FS02=1, FS02A=0, FS02A=1<br>At time&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 54 us, rst=0, FS01_=1, F02B=0, FS02=1, FS02A=1, FS02A=1<br>At time&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 59 us, rst=0, FS01_=0, F02B=0, FS02=0, FS02A=0, FS02A=0<br>At time&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 63 us, rst=0, FS01_=1, F02B=1, FS02=0, FS02A=0, FS02A=0<br>At time&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 68 us, rst=0, FS01_=0, F02B=0, FS02=1, FS02A=0, FS02A=1<br>At time&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 73 us, rst=0, FS01_=1, F02B=0, FS02=1, FS02A=1, FS02A=1<br>At time&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 78 us, rst=0, FS01_=0, F02B=0, FS02=0, FS02A=0, FS02A=0<br>At time&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 83 us, rst=0, FS01_=1, F02B=1, FS02=0, FS02A=0, FS02A=0<br>At time&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 88 us, rst=0, FS01_=0, F02B=0, FS02=1, FS02A=0, FS02A=1<br>At time&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 93 us, rst=0, FS01_=1, F02B=0, FS02=1, FS02A=1, FS02A=1<br>At time&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 98 us, rst=0, FS01_=0, F02B=0, FS02=0, FS02A=0, FS02A=0<br>...<br>At time&nbsp;&nbsp;&nbsp;&nbsp; 498 us, rst=0, FS01_=0, F02B=0, FS02=1, FS02A=0, FS02A=1<br></font></blockquote>Thus as promised, FS01/ toggles about very 5 microseconds, while FS02 toggles about every 10 microseconds.<br><blockquote><meta http-equiv="content-type" content="text/html; charset=UTF-8"></blockquote>Step #7: Visualization.&nbsp; When the dump-file created by running the simulation, namely testVerilog.vcd, is pulled into the GTKWave visualization program, you see something like the following.&nbsp; The picture doesn't seem to require any explanation, though it's fun to compare it to <a href="https://archive.org/stream/acelectroniclmma00acel#page/n296/mode/1up">the corresponding picture on p. 4-222A of document ND-1021042</a>.<br><br><div align="center"><img src="testVerilogWave.png" alt="" width="1030" height="499"><br></div>
+
+<h1><a name="Files"></a>Files</h1><p>TBD<br></p><h1><a name="Step_4:_The_Test_BenchTBD"></a>Step 4: The Test BenchTBD</h1><p>TBD<br></p><h1><a name="Step_5:_Compilation_of_the_Verilog"></a>Step 5: Compilation of the Verilog</h1>TBD<br><h1><a name="Step_6:_Running_the_Simulation"></a>Step 6: Running the Simulation</h1>TBD<br><h1><a name="Step_7:_Viewing_the_Results"></a>Step 7: Viewing the Results</h1><p>TBD<br></p><ul>
+    </ul><h1><a name="Appendix:_Translation_from_KiCad_into"></a>Appendix: Translation from KiCad into Verilog</h1>TBD<br><br><hr style="width: 100%; height: 2px;">
+    <center> <br>
+      <span style="color: rgb(84, 89, 93); font-family: sans-serif;
+        font-size: 11.05px; font-style: normal; font-variant: normal;
+        font-weight: normal; letter-spacing: normal; line-height:
+        16.575px; orphans: auto; text-align: center; text-indent: 0px;
+        text-transform: none; white-space: normal; widows: 1;
+        word-spacing: 0px; -webkit-text-stroke-width: 0px; display:
+        inline !important; float: none; background-color: rgb(255, 255,
+        255);"> This page is available under the <a href="https://creativecommons.org/publicdomain/zero/1.0/">Creative
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+          Commons No Rights Reserved License</a></span><br>
+      <i><font size="-1">Last modified by <a href="mailto:info@sandroid.org">Ronald Burkey</a> on
+          2018-09-30.<br>
+          <br>
+          <a href="http://www.ibiblio.org"><img style="border: 0px solid
+              ; width: 300px; height: 100px;" alt="Virtual AGC is hosted
+              by ibiblio.org" src="hosted.png" width="300" height="100" border="0"></a><br>
+        </font></i> </center>
+    <br>
+    <br>
+  
+
+</body></html>
