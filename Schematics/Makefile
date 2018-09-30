@@ -38,7 +38,8 @@
 # However, some actions (like adding an extra input or output for debugging 
 # purposes) will temporarily break consistency.
 
-TARGETS := testVerilog 2005259A 2005260A 2005251A 2005262A 2005250-
+TARGETS = testVerilog 2005259A 2005260A 2005251A 2005262A 2005261A
+TARGETS += 2005250-
 # These are the AGC modules and the global gate delays associated with the various
 # TARGETS.  Each of the TARGETS must have a module_TARGET variable assigned for
 # it, which will be one of A1 through A24.  Similarly, a TARGET *could* have a
@@ -50,8 +51,26 @@ module_2005260A = A2
 delay_2005260A = 0.01
 module_2005251A = A3
 module_2005262A = A4
-
+module_2005261A = A5
+module_2005263A = A6
+module_2005252A = A7
+module_2005255- = A8
+module_2005256A = A9
+module_2005257A = A10
+module_2005258A = A11
+module_2005253A = A12
+module_2005269- = A13
+module_2005264A = A14
+module_2005265A = A15
+module_2005266- = A16
+module_2005267A = A17
+module_2005268A = A18
+module_2005270- = A19
+module_2005254- = A20
 module_2005250- = A21
+module_2005271- = A22
+module_2005272A = A23
+module_2005273A = A24
 
 .PHONY: all
 all: $(TARGETS:%=%/module.vvp)
