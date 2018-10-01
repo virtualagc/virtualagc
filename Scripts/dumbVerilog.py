@@ -26,6 +26,8 @@
 #				Verilog; treatment of netnames that begin with a
 #				digit (not allowed in Verilog).
 #		2018-08-01 RSB	Added signal-name translations of "-" to "m". 
+#				Now allow for case where output of NOR is directly
+#				tied to ground.
 #
 # This script converts one of my KiCad transcriptions of AGC LOGIC FLOW DIAGRAMs
 # into Verilog in the dumbest, most-straightforward way.  In other words, I don't
@@ -440,6 +442,8 @@ if len(nors) > 0:
 		nets[netName] = finalArray
 	# Write out Verilog code for each of the consolidated gates.
 	for netName in nets:
+		if netName == "0":
+			continue
 		gate = nets[netName]
 		#outLine = "nor" + delay + " " + gate[0] + "(" + netName + ",rst";
 		#for input in gate[3:]:
