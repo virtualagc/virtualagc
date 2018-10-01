@@ -86,6 +86,7 @@ all: $(TARGETS:%=%/module.vvp)
 # Make some stubs for a couple of required files.  This helpful for a
 # first compilation, but the files need to be filled and the 'make'
 # redone if an actual, usable simulation is to be performed.
+.SECONDARY: $(TARGETS:%=%/module.init)
 %/module.init:
 	touch $@
 
