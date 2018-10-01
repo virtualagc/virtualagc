@@ -16,7 +16,8 @@
     <script type="text/javascript">
   document.write(headerTemplate.replace("@TITLE@","Hardware Simulation Page").replace("@SUBTITLE@","Digital Simulation of the AGC Electronics"))</script>
     <div align="center"><font size="+2"><i>(This page is under
-          construction and does not yet have any useful content.)</i></font><br>
+          construction and does not necessarily have useful content
+          yet.)</i></font><br>
     </div>
     <h1><a name="Contents"></a>Contents</h1>
     <ul>
@@ -25,9 +26,14 @@
       <li><a href="#References">References</a></li>
       <li><a href="#An_Example:_testVerilog">An Example: testVerilog</a></li>
       <li><a href="#Files">Files</a></li>
-      <li><a href="#Step_4:_The_Test_BenchTBD">Step 4: The Test Bench
-          and Initial State<br>
+      <li><a href="#Step_4:_The_Test_BenchTBD">Step 4: The Test Bench,
+          and Initial States and Gate Delays<br>
         </a></li>
+      <ul>
+        <li><a href="#module.init">module.init</a></li>
+        <li><a href="#Testbench_files">Testbench files</a><br>
+        </li>
+      </ul>
       <li><a href="#Step_5:_Compilation_of_the_Verilog">Step 5:
           Compilation of the Verilog</a></li>
       <li><a href="#Step_6:_Running_the_Simulation">Step 6: Running the
@@ -49,6 +55,8 @@
         href="Block1.html#Virtual_AGCs_CPU_Simulator_yaAGCb1">Block I
         AGC software simulator</a>, or John Pultorak's <a
 href="http://www.ibiblio.org/apollo/Pultorak.html#John_Pultoraks_Block_I_AGC">Block
+
+
 
 
 
@@ -133,6 +141,8 @@ href="http://www.ibiblio.org/apollo/Pultorak.html#John_Pultoraks_Block_I_AGC">Bl
 
 
 
+
+
           2</a>.<br>
       </li>
       <li><a href="klabs/history/agc_schematics_block2/">Scans of the
@@ -152,6 +162,8 @@ href="http://www.ibiblio.org/apollo/Pultorak.html#John_Pultoraks_Block_I_AGC">Bl
 
 
 
+
+
           index into the items above.</a></li>
     </ul>
     AGC/DSKY electrical schematics transcribed into KiCad
@@ -159,6 +171,8 @@ href="http://www.ibiblio.org/apollo/Pultorak.html#John_Pultoraks_Block_I_AGC">Bl
     <ul>
       <li><a
 href="https://github.com/virtualagc/virtualagc/tree/schematics/Schematics">GitHub
+
+
 
 
 
@@ -171,6 +185,8 @@ href="https://github.com/virtualagc/virtualagc/tree/schematics/Schematics">GitHu
           schematic-capture CAD)</a></li>
       <li><a
 href="https://github.com/virtualagc/virtualagc/blob/schematics/Scripts/dumbVerilog.py">KiCad-to-Verilog
+
+
 
 
 
@@ -194,11 +210,11 @@ href="https://github.com/virtualagc/virtualagc/blob/schematics/Scripts/dumbVeril
     </p>
     <div align="center"><a
         href="klabs/history/agc_schematics_block2/logic/a01-1.jpg"><img
-          src="a01-1-small.jpg" alt="" width="300" height="241"
-          border="2"></a>&nbsp; <a
+          src="a01-1-small.jpg" alt="" border="2" height="241"
+          width="300"></a>&nbsp; <a
         href="klabs/history/agc_schematics_block2/logic/a01-2.jpg"><img
-          src="a01-2-small.jpg" alt="" width="300" height="239"
-          border="2"></a><br>
+          src="a01-2-small.jpg" alt="" border="2" height="239"
+          width="300"></a><br>
     </div>
     <p>Don't be confused by the fact that the inputs of NOR gates in the
       circuit are decorated with little triangles that make the gate
@@ -213,14 +229,16 @@ href="https://github.com/virtualagc/virtualagc/tree/schematics/Schematics/200525
       as well: <br>
     </p>
     <div align="center"><a href="KiCad/2005259A-p1of2.png"><img
-          src="2005259A-p1of2-small.png" alt="" width="300" height="232"
-          border="2">&nbsp; </a><a href="KiCad/2005259A-p2of2.png"><img
-          src="2005259A-p2of2-small.png" alt="" width="300" height="232"
-          border="2"></a><br>
+          src="2005259A-p1of2-small.png" alt="" border="2" height="232"
+          width="300">&nbsp; </a><a href="KiCad/2005259A-p2of2.png"><img
+          src="2005259A-p2of2-small.png" alt="" border="2" height="232"
+          width="300"></a><br>
     </div>
     <p>Now, AGC module A1 is the "scaler" circuit.&nbsp; If you want to
       read about it in some detail, you can look at <a
 href="https://archive.org/stream/acelectroniclmma00acel#page/n290/mode/1up">section
+
+
 
 
 
@@ -246,11 +264,13 @@ href="https://github.com/virtualagc/virtualagc/tree/schematics/Schematics/testVe
 
 
 
+
+
         CAD files for testVerilog are here</a>, but here is a simple
       image of the circuit:<br>
     </p>
     <div align="center"><img src="testVerilogCircuit.png" alt=""
-        width="643" height="549"><br>
+        height="549" width="643"><br>
     </div>
     <p>Step 2: Creation of a netlist from the CAD files.&nbsp; This is
       just a feature of the KiCad program itself.&nbsp; While it isn't
@@ -365,9 +385,16 @@ initial
 initial
   $monitor("At time %t, rst=%d, FS01_=%d, F02B=%d, FS02=%d, FS02A=%d, FS02A=%d", $time, rst, FS01_, F02B, FS02, F02A, FS02A);
 
-endmodule</font></pre></blockquote>Let's take a look at this file and see what it says.&nbsp; First, the "timescale" directive explains how to understand the timings (the things marked with "#") that appear within the test-bench file.&nbsp; It says that the time scale will be 1 us, so that the numbers for the "#" timings are in microseconds.&nbsp; <br><br>The "reg rst =1" means that the rst signal is going to be an input signal into the circuit we're testing, but here within the test bench it's going to be a "register" that remembers it's own settings, as opposed to a "wire" (which cannot remember anything).&nbsp; Thus, we set rst to 1 and it will stay that way until we say otherwise.&nbsp; Thus, a few lines later we see "# 2 rst = 0", which means that 2 us after startup, the test bench is going to reset the rst signal to 0, and leave it there.&nbsp; The "# 500 $finish" that you also see there says that the simulation itself will actually end after 500 us.&nbsp; The "$dumpfile" and "$dumpvars" statements say that an output logfile called testVerilog.vcd is going to be opened, and that the values of all of the input and output variables are going to be dumped into it on a cycle-by-cycle basis, for later analysis.<br><br>The "reg FS01_ = 0" means that FS01_ (FS01/) is also an input to the circuit being tested, and that it starts out at 0.&nbsp; But "always #4.883 FS01_ = !FS01_" means that FS01_ is going to be toggled every 4.883 us during the simulation.&nbsp; Recall that FS01/ is a 102.4 KHz square wave in the AGC, and therefore it toggles from low-to-high or high-to-low at a rate of 204.8 KHz, or (surprise!) every 4.8828125 us.<br><br>The statements "wire F02A, ..." and "A1 A1A ( ... )" simply mean that a circuit module of type A1 (which is what the Verilog shown in step #3 above implements) is being tested, and has outputs named F02A etc.<br><br>Finally, the "initial" statements at the very end describe the status messages which the simulation is going to print out whilst running.&nbsp; These messages are just informative, and have nothing to do with the data being dumped out on the testVerilog.vcd.&nbsp; You don't even need to print out any status messages if you don't want to.<br><br>Steps #5 and #6:&nbsp; Compiling and running the simulation.&nbsp; There's really nothing to show you in terms of compiling; it's dead simple.&nbsp; When you run the simulation, you see something like this:<br><blockquote><font size="-1" face="Courier">VCD info: dumpfile testVerilog.vcd opened for output.<br>At time&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0 us, rst=1, FS01_=0, F02B=0, FS02=0, FS02A=0, FS02A=0<br>At time&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 2 us, rst=0, FS01_=0, F02B=0, FS02=0, FS02A=0, FS02A=0<br>At time&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 5 us, rst=0, FS01_=1, F02B=1, FS02=0, FS02A=0, FS02A=0<br>At time&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 10 us, rst=0, FS01_=0, F02B=0, FS02=1, FS02A=0, FS02A=1<br>At time&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 15 us, rst=0, FS01_=1, F02B=0, FS02=1, FS02A=1, FS02A=1<br>At time&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 20 us, rst=0, FS01_=0, F02B=0, FS02=0, FS02A=0, FS02A=0<br>At time&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 24 us, rst=0, FS01_=1, F02B=1, FS02=0, FS02A=0, FS02A=0<br>At time&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 29 us, rst=0, FS01_=0, F02B=0, FS02=1, FS02A=0, FS02A=1<br>At time&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 34 us, rst=0, FS01_=1, F02B=0, FS02=1, FS02A=1, FS02A=1<br>At time&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 39 us, rst=0, FS01_=0, F02B=0, FS02=0, FS02A=0, FS02A=0<br>At time&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 44 us, rst=0, FS01_=1, F02B=1, FS02=0, FS02A=0, FS02A=0<br>At time&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 49 us, rst=0, FS01_=0, F02B=0, FS02=1, FS02A=0, FS02A=1<br>At time&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 54 us, rst=0, FS01_=1, F02B=0, FS02=1, FS02A=1, FS02A=1<br>At time&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 59 us, rst=0, FS01_=0, F02B=0, FS02=0, FS02A=0, FS02A=0<br>At time&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 63 us, rst=0, FS01_=1, F02B=1, FS02=0, FS02A=0, FS02A=0<br>At time&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 68 us, rst=0, FS01_=0, F02B=0, FS02=1, FS02A=0, FS02A=1<br>At time&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 73 us, rst=0, FS01_=1, F02B=0, FS02=1, FS02A=1, FS02A=1<br>At time&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 78 us, rst=0, FS01_=0, F02B=0, FS02=0, FS02A=0, FS02A=0<br>At time&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 83 us, rst=0, FS01_=1, F02B=1, FS02=0, FS02A=0, FS02A=0<br>At time&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 88 us, rst=0, FS01_=0, F02B=0, FS02=1, FS02A=0, FS02A=1<br>At time&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 93 us, rst=0, FS01_=1, F02B=0, FS02=1, FS02A=1, FS02A=1<br>At time&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 98 us, rst=0, FS01_=0, F02B=0, FS02=0, FS02A=0, FS02A=0<br>...<br>At time&nbsp;&nbsp;&nbsp;&nbsp; 498 us, rst=0, FS01_=0, F02B=0, FS02=1, FS02A=0, FS02A=1<br></font></blockquote>Thus as promised, FS01/ toggles about very 5 microseconds, while FS02 toggles about every 10 microseconds.<br><blockquote><meta http-equiv="content-type" content="text/html; charset=UTF-8"></blockquote>Step #7: Visualization.&nbsp; When the dump-file created by running the simulation, namely testVerilog.vcd, is pulled into the GTKWave visualization program, you see something like the following.&nbsp; The picture doesn't seem to require any explanation, though it's fun to compare it to <a href="https://archive.org/stream/acelectroniclmma00acel#page/n296/mode/1up">the corresponding picture on p. 4-222A of document ND-1021042</a>.<br><br><div align="center"><img src="testVerilogWave.png" alt="" width="1030" height="499"><br></div>
+endmodule</font></pre></blockquote>Let's take a look at this file and see what it says.&nbsp; First, the "timescale" directive explains how to understand the timings (the things marked with "#") that appear within the test-bench file.&nbsp; It says that the time scale will be 1 us, so that the numbers for the "#" timings are in microseconds.&nbsp; <br><br>The "reg rst =1" means that the rst signal is going to be an input signal into the circuit we're testing, but here within the test bench it's going to be a "register" that remembers it's own settings, as opposed to a "wire" (which cannot remember anything).&nbsp; Thus, we set rst to 1 and it will stay that way until we say otherwise.&nbsp; Thus, a few lines later we see "# 2 rst = 0", which means that 2 us after startup, the test bench is going to reset the rst signal to 0, and leave it there.&nbsp; The "# 500 $finish" that you also see there says that the simulation itself will actually end after 500 us.&nbsp; The "$dumpfile" and "$dumpvars" statements say that an output logfile called testVerilog.vcd is going to be opened, and that the values of all of the input and output variables are going to be dumped into it on a cycle-by-cycle basis, for later analysis.<br><br>The "reg FS01_ = 0" means that FS01_ (FS01/) is also an input to the circuit being tested, and that it starts out at 0.&nbsp; But "always #4.883 FS01_ = !FS01_" means that FS01_ is going to be toggled every 4.883 us during the simulation.&nbsp; Recall that FS01/ is a 102.4 KHz square wave in the AGC, and therefore it toggles from low-to-high or high-to-low at a rate of 204.8 KHz, or (surprise!) every 4.8828125 us.<br><br>The statements "wire F02A, ..." and "A1 A1A ( ... )" simply mean that a circuit module of type A1 (which is what the Verilog shown in step #3 above implements) is being tested, and has outputs named F02A etc.<br><br>Finally, the "initial" statements at the very end describe the status messages which the simulation is going to print out whilst running.&nbsp; These messages are just informative, and have nothing to do with the data being dumped out on the testVerilog.vcd.&nbsp; You don't even need to print out any status messages if you don't want to.<br><br>Steps #5 and #6:&nbsp; Compiling and running the simulation.&nbsp; There's really nothing to show you in terms of compiling; it's dead simple.&nbsp; When you run the simulation, you see something like this:<br><blockquote><font face="Courier" size="-1">VCD info: dumpfile testVerilog.vcd opened for output.<br>At time&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 0 us, rst=1, FS01_=0, F02B=0, FS02=0, FS02A=0, FS02A=0<br>At time&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 2 us, rst=0, FS01_=0, F02B=0, FS02=0, FS02A=0, FS02A=0<br>At time&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 5 us, rst=0, FS01_=1, F02B=1, FS02=0, FS02A=0, FS02A=0<br>At time&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 10 us, rst=0, FS01_=0, F02B=0, FS02=1, FS02A=0, FS02A=1<br>At time&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 15 us, rst=0, FS01_=1, F02B=0, FS02=1, FS02A=1, FS02A=1<br>At time&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 20 us, rst=0, FS01_=0, F02B=0, FS02=0, FS02A=0, FS02A=0<br>At time&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 24 us, rst=0, FS01_=1, F02B=1, FS02=0, FS02A=0, FS02A=0<br>At time&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 29 us, rst=0, FS01_=0, F02B=0, FS02=1, FS02A=0, FS02A=1<br>At time&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 34 us, rst=0, FS01_=1, F02B=0, FS02=1, FS02A=1, FS02A=1<br>At time&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 39 us, rst=0, FS01_=0, F02B=0, FS02=0, FS02A=0, FS02A=0<br>At time&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 44 us, rst=0, FS01_=1, F02B=1, FS02=0, FS02A=0, FS02A=0<br>At time&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 49 us, rst=0, FS01_=0, F02B=0, FS02=1, FS02A=0, FS02A=1<br>At time&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 54 us, rst=0, FS01_=1, F02B=0, FS02=1, FS02A=1, FS02A=1<br>At time&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 59 us, rst=0, FS01_=0, F02B=0, FS02=0, FS02A=0, FS02A=0<br>At time&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 63 us, rst=0, FS01_=1, F02B=1, FS02=0, FS02A=0, FS02A=0<br>At time&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 68 us, rst=0, FS01_=0, F02B=0, FS02=1, FS02A=0, FS02A=1<br>At time&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 73 us, rst=0, FS01_=1, F02B=0, FS02=1, FS02A=1, FS02A=1<br>At time&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 78 us, rst=0, FS01_=0, F02B=0, FS02=0, FS02A=0, FS02A=0<br>At time&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 83 us, rst=0, FS01_=1, F02B=1, FS02=0, FS02A=0, FS02A=0<br>At time&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 88 us, rst=0, FS01_=0, F02B=0, FS02=1, FS02A=0, FS02A=1<br>At time&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 93 us, rst=0, FS01_=1, F02B=0, FS02=1, FS02A=1, FS02A=1<br>At time&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 98 us, rst=0, FS01_=0, F02B=0, FS02=0, FS02A=0, FS02A=0<br>...<br>At time&nbsp;&nbsp;&nbsp;&nbsp; 498 us, rst=0, FS01_=0, F02B=0, FS02=1, FS02A=0, FS02A=1<br></font></blockquote>Thus as promised, FS01/ toggles about very 5 microseconds, while FS02 toggles about every 10 microseconds.<br><blockquote><meta http-equiv="content-type" content="text/html; charset=UTF-8"></blockquote>Step #7: Visualization.&nbsp; When the dump-file created by running the simulation, namely testVerilog.vcd, is pulled into the GTKWave visualization program, you see something like the following.&nbsp; The picture doesn't seem to require any explanation, though it's fun to compare it to <a href="https://archive.org/stream/acelectroniclmma00acel#page/n296/mode/1up">the corresponding picture on p. 4-222A of document ND-1021042</a>.<br><br><div align="center"><img src="testVerilog.Wave.png" alt="" height="499" width="1030"><br></div>
 
-<h1><a name="Files"></a>Files</h1><p>TBD<br></p><h1><a name="Step_4:_The_Test_BenchTBD"></a>Step 4: The Test BenchTBD</h1><p>TBD<br></p><h1><a name="Step_5:_Compilation_of_the_Verilog"></a>Step 5: Compilation of the Verilog</h1>TBD<br><h1><a name="Step_6:_Running_the_Simulation"></a>Step 6: Running the Simulation</h1>TBD<br><h1><a name="Step_7:_Viewing_the_Results"></a>Step 7: Viewing the Results</h1><p>TBD<br></p><ul>
+<h1><a name="Files"></a>Files</h1><p>For our discussion (and in <a href="https://github.com/virtualagc/virtualagc/tree/schematics/Schematics">our repository for electrical schematics and Verilog descriptions of them</a>), we expect a certain directory hierarchy and file-naming convention within that hierarchy.&nbsp; It looks like this:<br></p><blockquote>Top level directory of the repository/<br><blockquote>Scripts/<br><blockquote><font color="#33cc00">dumbVerilog.py<br>dumbTestbench.py</font><br></blockquote>Schematics/<br><blockquote><i>DRAWING1</i>/<br><blockquote><font color="#33cc00">... <i>schematics</i> ...<br>module.net<br><font color="#990000">module.init<br></font></font><font color="#990000">module_tb.v</font><br><font color="#33cc00">module.v<br>module.vvp</font><br></blockquote><i>DRAWING2</i>/<br>
+<blockquote><font color="#33cc00"><i>... schematics ...</i><br>module.net<br>
+<font color="#990000">module.init<br>
+</font></font><font color="#990000">module_tb.v<br>
+</font><font color="#33cc00">module.v<br>
+module.vvp</font><br>
+</blockquote>
+.<br>.<br>.<br><font color="#33cc00">Makefile<br></font><font color="#990000">2003200.v<br></font><font color="#33cc00">2003200.vvp<br></font><font color="#990000">2003993.v<br></font><font color="#33cc00">2003993.vvp<br></font>.<br>.<br>.<br></blockquote></blockquote></blockquote><font color="#33cc00">The items in green above</font> are the ones that are either provided for you in our repository or are created more-or-less automatically for you by the process that will be described later on.&nbsp; <font color="#990000">The items in reddish-brown above</font> may be partially created for you to give you a head start, but nevertheless require some active involvement on your part to get them just right.&nbsp; But in brief, the electrical design for any given part number of the AGC (such as 2003200 or 2003993) consists of a set of drawings of the individual circuit modules, plus the "backplane", i.e. the set of electrical interconnections between the modules.&nbsp; For AGC p/n 2003200, for example, those items are implemented by the Verilog files:<br><ul><li>2003200.v (the backplane)</li><li>2005259A/module.v (module A1)</li><li>2005260A/module.v (module A2)</li><li>...</li><li>2005273A/module.v (module A24).</li></ul>File 2003200.v is also the "test bench" for the AGC simulation as a whole, described further in the next section, as are the initialization files <i>DRAWINGn</i>/module.init.&nbsp; The file 2003200.vvp is the compiled form of the Verilog, and is what's use to actually run simulations.<br><h1><a name="Step_4:_The_Test_BenchTBD"></a>Step 4: The Test Bench, and Initial States and Gate Delays<br></h1><h2><a name="module.init"></a>module.init</h2><p><img src="testVerilogCircuit.png" alt="" align="left" height="372" width="438">The AGC's logic module circuits, modules A1-A24 mostly consist of so-called "combinational" logic, in which a unique set of inputs determines a unique set of outputs at any specific moment of time.&nbsp; However, some of the NOR gates, such as those in the figure to the left (which is from <a href="#An_Example:_testVerilog">the testVerilog example</a> given earlier), contain feedback in which the inputs to a NOR gate may depend indirectly on its output.&nbsp; The net result is for those portions of the circuit to have a kind of "memory", in which the current output depends not just on the inputs at this precise moment in time, but also on the inputs at earlier times as well.<br></p><p>When confronted with a situation like this, the Verilog simulator software may not be able to initially figure out what the outputs of the circuit are, because those depend on times before the simulation started, about which the simulator software has no information. In <i>real</i> life, such as in the real physical AGC units, those circuits will settle very quickly into <i>some</i> stable state.&nbsp; But in simulation that may not be the case, and the circuit may oscillate endlessly.&nbsp; So we have to have some way to initially get the system into some stable state in which all of the feedback signals have some nice, consistent values. <br></p><p><img alt="" src="file:///oldRoot/home/rburkey/git/virtualagc-web/dualNOR.png" align="right" height="216" width="224">The way that is done is with module.init files.&nbsp; Each schematic drawing needs to have one of these.&nbsp; A module.init file can provide settings for any or all of the NOR gates, driving their outputs to a desired state when a signal ("rst") is initially applied to the circuit.<br></p><p>Before describing the format of the module.init files, though, we need to agree on some basic facts about the NOR gates used in the AGC circuits.&nbsp; The NOR gates are packaged into 10-pin integrated circuits, each of which contains two independent NOR gates, as in the figure to the right.&nbsp; One of the NOR-gates outputs to the chip's pin 1 (called "J") on the schematics, while the other NOR-gate outputs to pin 9 (or "K").<br></p><p>The other thing to notice is that, as in the figure to the left, the dual NOR-gates are identified in the Verilog design by reference designators like U1<i>nn</i>, U2<i>nn</i>, or U3<i>nn</i>, where <i>nn</i> is a 2-digit number written on the NOR-gate's schematic symbol.&nbsp; In the figure at left, for example, we have both NOR gates from U127, both NOR gates from U128, both NOR gates from U129, and one of the two NOR gates from U126.&nbsp; How did I know that we had U127 rather than U227?&nbsp; Well, usually U1<i>nn</i> is on the first sheet of the schematic and U2<i>nn</i> is on the second sheet.&nbsp; However, to know for sure, you really need to read the textual notes provided within the schematic.<br></p><p>With those understandings in mind, here's a portion of a module.init file for your consideration.&nbsp; (It does <i>not</i> belong to the example figure above.)<br></p><blockquote><p><font face="Courier 10 Pitch"># For module A2<br>U151 1 0 0.01<br>U152 0 0 0.01<br>U153 0 0 0.01<br>U155 1 0 0.01<br>U156 0 0 0.01<br>U157 1 0 0.01<br><br>U308 0 0<br>U309 0 0<br>U228 1 0<br>...</font><br></p></blockquote><p>You can decorate the module.init file with comments (preceded by "#") or blank lines, if it helps you document what's being done.&nbsp; More importantly, the file can be edited in a text-editor and consists of lines of the form<br></p><blockquote><p>U<i>nnn</i> [ <i>JVALUE</i> [ <i>KVALUE</i> [ <i>JDELAY</i> [ <i>KDELAY</i> ]]]<br></p></blockquote><p>by which I mean that the lines consist of the chip's reference designator, follow by 0 to 4 numerical values. <i>JVALUE</i> and <i>KVALUE</i> are simply the values of the NOR gates' outputs at reset, and always have the settings 0 or 1.&nbsp; 0 is the default, meaning that the output of the NOR is LOW.<br></p><p>How does one determine what values <i>JVALUE</i> and <i>KVALUE</i> should be given?&nbsp; I'm afraid I have no good answer for you.&nbsp; What you are looking for is an output value that's <i>logically consistent</i> with the input values.&nbsp; Since the original AGCs didn't simply oscillate out of control, we know it's possible to select some consistent set of values. But how?&nbsp; For now, I fear the answer may be trial and error.&nbsp; Fortunately, it is usually the case that the same basic circuit appears over and over again within any of the AGC schematics, so once you figure out a way to initialize one of those circuits, you can probably do the same thing to initialize the others.<br></p><p>What are <i>JDELAY</i> and <i>KDELAY</i>?&nbsp; Well, they have to do with a completely different topic.&nbsp; The Verilog description of the design allows you to assign any gate delay you like to any of the NOR gates.&nbsp; Mostly it isn't critical, and the default we use is a delay of 0.&nbsp; But in some cases it <i>is</i> critical that it be non-zero, or even that it is confined within a narrow range of acceptable values.&nbsp; The units of time are defined by the "timescale" operative that appears near the top of many of the Verilog files.&nbsp; Usually this is 100 ns per simulator timer tick.&nbsp; Therefore, for example, a <i>JDELAY</i> or <i>KDELAY</i> of 0.1 would be 10 ns.<br></p><h2><a name="Testbench_files"></a>Testbench files<br></h2><h1><a name="Step_5:_Compilation_of_the_Verilog"></a>Step 5: Compilation of the Verilog</h1>TBD<br><h1><a name="Step_6:_Running_the_Simulation"></a>Step 6: Running the Simulation</h1>TBD<br><h1><a name="Step_7:_Viewing_the_Results"></a>Step 7: Viewing the Results</h1><p>TBD<br></p><ul>
     </ul><h1><a name="Appendix:_Translation_from_KiCad_into"></a>Appendix: Translation from KiCad into Verilog</h1>TBD<br><br><hr style="width: 100%; height: 2px;">
     <center> <br>
       <span style="color: rgb(84, 89, 93); font-family: sans-serif;
@@ -440,7 +467,7 @@ endmodule</font></pre></blockquote>Let's take a look at this file and see what i
           <br>
           <a href="http://www.ibiblio.org"><img style="border: 0px solid
               ; width: 300px; height: 100px;" alt="Virtual AGC is hosted
-              by ibiblio.org" src="hosted.png" width="300" height="100" border="0"></a><br>
+              by ibiblio.org" src="hosted.png" border="0" height="100" width="300"></a><br>
         </font></i> </center>
     <br>
     <br>
