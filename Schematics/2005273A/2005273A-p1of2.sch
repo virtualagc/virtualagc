@@ -73,13 +73,13 @@ $EndComp
 $Comp
 L AGC_DSKY:Node2 X209
 U 1 1 6AFC9065
-P 38400 12900
-F 0 "X209" H 38400 13225 140 0001 C CNN
-F 1 "Node2" H 38400 13325 140 0001 C CNN
-F 2 "" H 38400 13375 140 0001 C CNN
-F 3 "" H 38400 13375 140 0001 C CNN
-F 4 "SB1/" H 38025 12900 140 0000 R CNB "Caption"
-	1    38400 12900
+P 37950 12900
+F 0 "X209" H 37950 13225 140 0001 C CNN
+F 1 "Node2" H 37950 13325 140 0001 C CNN
+F 2 "" H 37950 13375 140 0001 C CNN
+F 3 "" H 37950 13375 140 0001 C CNN
+F 4 "SB1/" H 37575 12900 140 0000 R CNB "Caption"
+	1    37950 12900
 	1    0    0    -1  
 $EndComp
 $Comp
@@ -2551,13 +2551,13 @@ $EndComp
 $Comp
 L AGC_DSKY:ConnectorA1-100 J1
 U 53 1 6AFC902E
-P 6850 7825
-F 0 "J1" H 6850 8150 140 0001 C CNN
-F 1 "ConnectorA1-100" H 6850 8250 140 0001 C CNN
-F 2 "" H 6850 8300 140 0001 C CNN
-F 3 "" H 6850 8300 140 0001 C CNN
-F 4 "SB1/" H 6250 7775 140 0000 C BNB "Caption"
-	53   6850 7825
+P 6400 7825
+F 0 "J1" H 6400 8150 140 0001 C CNN
+F 1 "ConnectorA1-100" H 6400 8250 140 0001 C CNN
+F 2 "" H 6400 8300 140 0001 C CNN
+F 3 "" H 6400 8300 140 0001 C CNN
+F 4 "SB1/" H 5800 7775 140 0000 C BNB "Caption"
+	53   6400 7825
 	1    0    0    -1  
 $EndComp
 $Comp
@@ -3875,7 +3875,7 @@ Wire Wire Line
 	38925 13925 39300 13925
 Connection ~ 38925 12900
 Wire Wire Line
-	38925 12900 38475 12900
+	38925 12900 38025 12900
 Wire Wire Line
 	24775 1375 24900 1375
 Wire Wire Line
@@ -4088,7 +4088,7 @@ Wire Wire Line
 	7725 7825 7500 7825
 Connection ~ 7500 7825
 Wire Wire Line
-	7500 7825 7125 7825
+	7500 7825 6675 7825
 Wire Wire Line
 	5050 9025 5125 9025
 Wire Wire Line
@@ -5433,4 +5433,8 @@ Text Notes 9275 33275 0    140  ~ 28
 Notes from the Virtual AGC Project:\n1. This CAD drawing was transcribed from the original Apollo Program drawing\n   2005273A, but does not itself date from the Apollo period. — RSB 2018\n2. The original drawing did not show reference designators for the components,\n   so they are also not visible on this transcribed CAD drawing.  Though not visible,\n   the NOR-gates have been assigned reference designators U1nn, where nn is the\n   2-digit number shown on the NOR-gate symbol.  The oval pads numbered 101-171\n   collectively form connector J1, while those numbered 201-271 form connector J2.\n   — RSB 2018
 Text Notes 19600 29475 0    140  ~ 28
 SPARE PINS
+Text Label 38150 12900 0    140  ~ 28
+SB1_
+Text Label 6750 7825 0    140  ~ 28
+SB1_
 $EndSCHEMATC
