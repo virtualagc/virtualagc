@@ -175,13 +175,13 @@ $EndComp
 $Comp
 L AGC_DSKY:Node2 X9
 U 1 1 5DD51A64
-P 2050 12675
-F 0 "X9" H 2050 13000 140 0001 C CNN
-F 1 "Node2" H 2050 13100 140 0001 C CNN
-F 2 "" H 2050 13150 140 0001 C CNN
-F 3 "" H 2050 13150 140 0001 C CNN
-F 4 "BR1B2B/" H 1950 12675 140 0000 R CNB "Caption"
-	1    2050 12675
+P 1725 12675
+F 0 "X9" H 1725 13000 140 0001 C CNN
+F 1 "Node2" H 1725 13100 140 0001 C CNN
+F 2 "" H 1725 13150 140 0001 C CNN
+F 3 "" H 1725 13150 140 0001 C CNN
+F 4 "BR1B2B/" H 1625 12675 140 0000 R CNB "Caption"
+	1    1725 12675
 	1    0    0    -1  
 $EndComp
 $Comp
@@ -949,13 +949,13 @@ $EndComp
 $Comp
 L AGC_DSKY:ConnectorA1-400 J4
 U 9 1 5B8C02FB
-P 23725 8875
-F 0 "J4" H 23725 9200 140 0001 C CNN
-F 1 "ConnectorA1-400" H 23725 9300 140 0001 C CNN
-F 2 "" H 23725 9350 140 0001 C CNN
-F 3 "" H 23725 9350 140 0001 C CNN
-F 4 "BR12B/" H 22975 8800 140 0000 C BNB "Caption"
-	9    23725 8875
+P 23375 8875
+F 0 "J4" H 23375 9200 140 0001 C CNN
+F 1 "ConnectorA1-400" H 23375 9300 140 0001 C CNN
+F 2 "" H 23375 9350 140 0001 C CNN
+F 3 "" H 23375 9350 140 0001 C CNN
+F 4 "BR12B/" H 22625 8800 140 0000 C BNB "Caption"
+	9    23375 8875
 	1    0    0    -1  
 $EndComp
 $Comp
@@ -2404,13 +2404,13 @@ $EndComp
 $Comp
 L AGC_DSKY:ConnectorA1-400 J4
 U 20 1 5DD51A1C
-P 23700 5250
-F 0 "J4" H 23700 5575 140 0001 C CNN
-F 1 "ConnectorA1-400" H 23700 5675 140 0001 C CNN
-F 2 "" H 23700 5725 140 0001 C CNN
-F 3 "" H 23700 5725 140 0001 C CNN
-F 4 "BR1B2B/" H 22875 5150 140 0000 C BNB "Caption"
-	20   23700 5250
+P 23225 5250
+F 0 "J4" H 23225 5575 140 0001 C CNN
+F 1 "ConnectorA1-400" H 23225 5675 140 0001 C CNN
+F 2 "" H 23225 5725 140 0001 C CNN
+F 3 "" H 23225 5725 140 0001 C CNN
+F 4 "BR1B2B/" H 22400 5150 140 0000 C BNB "Caption"
+	20   23225 5250
 	1    0    0    -1  
 $EndComp
 $Comp
@@ -2623,25 +2623,25 @@ $EndComp
 $Comp
 L AGC_DSKY:ArrowTwiddle X21
 U 1 1 5DD51A2E
-P 24400 5250
-F 0 "X21" H 24400 5575 140 0001 C CNN
-F 1 "ArrowTwiddle" H 24400 5675 140 0001 C CNN
-F 2 "" H 24400 5725 140 0001 C CNN
-F 3 "" H 24400 5725 140 0001 C CNN
-F 4 "(1)" H 24400 5650 140 0000 C BNB "Number"
-	1    24400 5250
+P 23650 5250
+F 0 "X21" H 23650 5575 140 0001 C CNN
+F 1 "ArrowTwiddle" H 23650 5675 140 0001 C CNN
+F 2 "" H 23650 5725 140 0001 C CNN
+F 3 "" H 23650 5725 140 0001 C CNN
+F 4 "(1)" H 23650 5650 140 0000 C BNB "Number"
+	1    23650 5250
 	-1   0    0    1   
 $EndComp
 $Comp
 L AGC_DSKY:ArrowTwiddle X22
 U 1 1 5DD51A2F
-P 24400 8875
-F 0 "X22" H 24400 9200 140 0001 C CNN
-F 1 "ArrowTwiddle" H 24400 9300 140 0001 C CNN
-F 2 "" H 24400 9350 140 0001 C CNN
-F 3 "" H 24400 9350 140 0001 C CNN
-F 4 "(1)" H 24400 9275 140 0000 C BNB "Number"
-	1    24400 8875
+P 23800 8875
+F 0 "X22" H 23800 9200 140 0001 C CNN
+F 1 "ArrowTwiddle" H 23800 9300 140 0001 C CNN
+F 2 "" H 23800 9350 140 0001 C CNN
+F 3 "" H 23800 9350 140 0001 C CNN
+F 4 "(1)" H 23800 9275 140 0000 C BNB "Number"
+	1    23800 8875
 	-1   0    0    1   
 $EndComp
 $Comp
@@ -3690,10 +3690,7 @@ Wire Wire Line
 Wire Wire Line
 	25600 4700 24775 4700
 Wire Wire Line
-	25600 5250 24400 5250
-Connection ~ 24400 5250
-Wire Wire Line
-	24400 5250 23975 5250
+	23650 5250 23500 5250
 Wire Wire Line
 	27400 4975 27600 4975
 Wire Wire Line
@@ -3705,10 +3702,7 @@ Wire Wire Line
 Wire Wire Line
 	25625 7475 24000 7475
 Wire Wire Line
-	25625 8875 24400 8875
-Connection ~ 24400 8875
-Wire Wire Line
-	24400 8875 24000 8875
+	23800 8875 23650 8875
 Wire Wire Line
 	27425 8600 27650 8600
 Wire Wire Line
@@ -4109,7 +4103,7 @@ Connection ~ 3750 14675
 Wire Wire Line
 	3750 14675 3750 13550
 Wire Wire Line
-	2125 12675 4250 12675
+	1800 12675 4250 12675
 Wire Wire Line
 	4250 12675 4250 13000
 Wire Wire Line
@@ -4523,8 +4517,6 @@ Text Notes 12000 7050 0    140  ~ 28
 MONEX
 Text Notes 12000 11350 0    140  ~ 28
 CI
-Text Notes 8800 29050 0    140  ~ 28
-8PP4
 Text Notes 18575 4075 0    140  ~ 28
 SPARE PINS
 Text Notes 26750 30075 0    140  ~ 28
@@ -4537,8 +4529,6 @@ Text Notes 30200 21750 0    140  ~ 28
 TO PIN V OF GATES
 Text Notes 31050 19625 0    140  ~ 28
 10XP15
-Text Notes 31475 15675 0    140  ~ 28
-8XP4
 Text Notes 30900 24825 0    150  ~ 30
 40308\n40306\n40315\n40328\n40339\n40342\n40344\n40347\n40343\n40356\n40433\n40348
 Text Notes 31925 24325 0    150  ~ 30
@@ -5425,4 +5415,54 @@ EndData
 $EndBitmap
 Text Notes 35900 5900 0    140  ~ 28
 Notes from the Virtual AGC Project:\n1. This CAD drawing was manually transcribed from the original \n   Apollo Program drawing 2005263A, but does not itself date \n   from the Apollo period. — RSB 2018\n2. The original drawing did not show reference designators for any \n   of the parts, and hence this transcription does not show them \n   either.  For purposes of ERC and netlist generation, the reference \n   designators of the NOR gates are U2nn, where nn is the 2-digit \n   number written on the NOR-gate symbols.  The oval pads \n   numbered 301-371 comprise connector J3, and those numbered \n   401-471 comprise connector J4. — RSB 2018\n3. In the original drawing, connector J3 pad 368 is labeled TO61\n   (or perhaps T061, TO6I, or T06I).  There is no such signal\n   elsewhere in the AGC.  Continuity testing on a physical AGC\n   (s/n 14) reveals that the signal connects externally to the \n   net named "T06/".  We therefore regard this as a mistake\n   in the original drawing, and have labeled pad 368 as "T06/".\n   — RSB 2018
+Text Label 30800 15700 0    140  ~ 28
+8XP4
+Text Label 13300 28000 0    140  ~ 28
+8XP4
+Text Label 13250 29075 0    140  ~ 28
+8XP10
+Text Label 35650 12175 0    140  ~ 28
+8XP10
+Text Label 38750 8025 0    140  ~ 28
+WA_
+Text Label 18675 16850 0    140  ~ 28
+WA_
+Text Label 35825 9325 0    140  ~ 28
+7XP7
+Text Label 13875 17550 0    140  ~ 28
+7XP7
+Text Label 28750 11425 0    140  ~ 28
+8PP4
+Text Label 8675 28275 0    140  ~ 28
+8PP4
+Text Label 23700 12300 0    140  ~ 28
+IC11
+Text Label 15050 32000 0    140  ~ 28
+IC11
+Text Label 23950 8875 0    140  ~ 28
+BR12B_
+Connection ~ 23800 8875
+Wire Wire Line
+	23800 8875 25625 8875
+Text Label 2250 3900 0    140  ~ 28
+BR12B_
+Text Label 23725 5250 0    140  ~ 28
+BR1B2B_
+Connection ~ 23650 5250
+Wire Wire Line
+	23650 5250 25600 5250
+Text Label 1900 12675 0    140  ~ 28
+BR1B2B_
+Text Label 2325 26925 0    140  ~ 28
+IC9
+Text Label 24700 13850 0    140  ~ 28
+IC9
+Text Label 35725 15800 0    140  ~ 28
+6XP10
+Text Label 13250 3350 0    140  ~ 28
+6XP10
+Text Label 15525 27475 0    140  ~ 28
+10XP9
+Text Label 33225 2625 0    140  ~ 28
+10XP9
 $EndSCHEMATC
