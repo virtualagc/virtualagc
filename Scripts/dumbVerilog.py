@@ -27,7 +27,9 @@
 #				digit (not allowed in Verilog).
 #		2018-08-01 RSB	Added signal-name translations of "-" to "m". 
 #				Now allow for case where output of NOR is directly
-#				tied to ground.
+#				tied to ground.  Found that some netnames assigned
+#				only by net labels had a weird form I wasn't 
+#				accounting for.
 #
 # This script converts one of my KiCad transcriptions of AGC LOGIC FLOW DIAGRAMs
 # into Verilog in the dumbest, most-straightforward way.  In other words, I don't
@@ -408,6 +410,8 @@ for line in lines:
 			netName = inputs[netName]
 		elif netName in outputs:
 			netName = outputs[netName]
+		elif netName[:3] == "/1/":
+			netName = netName[3:]
 		else:
 			netName = netName[5:].replace("-", "").replace(")", "")
 		norPins[pinNumber] = netName
