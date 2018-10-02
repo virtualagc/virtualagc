@@ -1,0 +1,53 @@
+// Verilog testbench created by dumbTestbench.py
+`timescale 100ns / 1ns
+
+module agc;
+
+reg rst = 1;
+initial
+  begin
+    $dumpfile("agc.lxt2");
+    $dumpvars(0, agc);
+    # 1 rst = 0;
+    # 1000 $finish;
+  end
+
+reg CLOCK = 0;
+always #4.8828125 CLOCK = !CLOCK;
+
+reg ALTEST = 0, ALTM = 0, BMAGZM = 0, CCH33 = 0, CDUXD = 0, CDUYD = 0,
+  CDUZD = 0, CGA13 = 0, CON2 = 0, CTROR = 0, CT_ = 0, DLKRPT = 0, DRPRST = 0,
+  EMSD = 0, ERRST = 0, F05A_ = 0, F05B_ = 0, F07A = 0, F07B_ = 0, F08B = 0,
+  F10A_ = 0, F10B = 0, F14B = 0, F14H = 0, FLTOUT = 0, FS01 = 0, FS10 = 0,
+  G01A = 0, G01A_ = 0, G16A_ = 0, GOJAM = 0, GYROD = 0, IIP = 0, IIP_ = 0,
+  INKL = 0, INLNKM = 0, INLNKP = 0, MSTRT = 0, NHALGA = 0, NHVFAL = 0,
+  NOTEST = 0, OTLNKM = 0, P02 = 0, P02_ = 0, P03 = 0, P03_ = 0, PALE = 0,
+  PIPAFL = 0, RNRADM = 0, RNRADP = 0, SB0_ = 0, SB2_ = 0, SBY = 0, SCAFAL = 0,
+  SHAFTD = 0, STNDBY_ = 0, STRT2 = 0, SUMA16_ = 0, SUMB16_ = 0, T03_ = 0,
+  T04_ = 0, T09_ = 0, T10 = 0, T10_ = 0, TC0 = 0, TCF0 = 0, TEMPIN_ = 0,
+  THRSTD = 0, TMPOUT = 0, TRUND = 0, VFAIL = 0, WATCHP = 0, XT0 = 0, XT1 = 0,
+  d2FSFAL = 0;
+
+wire AGCWAR, ALGA, CGCWAR, CKTAL_, CON3, CTPLS_, DLKPLS, DOFILT, F08B_,
+  FILTIN, G16SW_, MCTRAL_, MOSCAL_, MPIPAL_, MRPTAL_, MSCAFL_, MSTRTP,
+  MTCAL_, MVFAIL_, MWARNF_, OSCALM, RESTRT, SBYEXT, SCADBL, STRT1, SYNC14_,
+  SYNC4_, TMPCAU, WARN, XT0_, XT1_;
+
+A13 iA13 (
+  rst, ALTEST, ALTM, BMAGZM, CCH33, CDUXD, CDUYD, CDUZD, CGA13, CON2, CTROR,
+  CT_, DLKRPT, DRPRST, EMSD, ERRST, F05A_, F05B_, F07A, F07B_, F08B, F10A_,
+  F10B, F14B, F14H, FLTOUT, FS01, FS10, G01A, G01A_, G16A_, GOJAM, GYROD,
+  IIP, IIP_, INKL, INLNKM, INLNKP, MSTRT, NHALGA, NHVFAL, NOTEST, OTLNKM,
+  P02, P02_, P03, P03_, PALE, PIPAFL, RNRADM, RNRADP, SB0_, SB2_, SBY, SCAFAL,
+  SHAFTD, STNDBY_, STRT2, SUMA16_, SUMB16_, T03_, T04_, T09_, T10, T10_,
+  TC0, TCF0, TEMPIN_, THRSTD, TMPOUT, TRUND, VFAIL, WATCHP, XT0, XT1, d2FSFAL,
+  CON3, CTPLS_, DOFILT, FILTIN, MCTRAL_, MOSCAL_, MPIPAL_, MRPTAL_, MSCAFL_,
+  MTCAL_, MVFAIL_, MWARNF_, SCADBL, WARN, XT0_, XT1_, AGCWAR, ALGA, CGCWAR,
+  CKTAL_, DLKPLS, F08B_, G16SW_, MSTRTP, OSCALM, RESTRT, SBYEXT, STRT1, SYNC14_,
+  SYNC4_, TMPCAU
+);
+
+initial $timeformat(-9, 0, " ns", 10);
+initial $monitor("%t: %d", $time, CLOCK);
+
+endmodule
