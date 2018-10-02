@@ -95,7 +95,7 @@ if len(sys.argv) >= 3:
 		pathToPinsTxt = sys.argv[3]
 	else:
 		pathToPinsTxt = "pins.txt"
-	if len(sys.argv) > 4 and sys.argv[4] != "":
+	if len(sys.argv) > 4 and sys.argv[4] != "" and sys.argv[4] != "0":
 		delay = " #" + sys.argv[4]
 	if len(sys.argv) > 5:
 		initsFile = sys.argv[5]
@@ -191,7 +191,7 @@ if error:
 	print >> sys.stderr, "i.e., for feedback within flip-flop circuits."
 	sys.exit(1)
 
-# Let's do a first pass on pinsDB, looking just at the connector components to 
+# Let's do a first pass on the netlist, looking just at the connector components to 
 # get dictionaries of the input and output nets, both in terms of the names assigned in the netlist 
 # and the names assigned in the pins DB.
 discards = {}
@@ -220,24 +220,24 @@ for line in lines:
 		pinNumber = int(fields[1])
 		if len(pinsDB[pinNumber]) < 2:
 			continue
-		pinName = pinsDB[pinNumber][1].replace("/", "_")
+		netName = pinsDB[pinNumber][1].replace("/", "_")
 		if fields[2][:3] in ["0VD", "+4V", "+4S", "FAP"]:
-			discards[fields[2]] = pinName
+			discards[fields[2]] = netName
 			continue
-		if pinName[:3] in ["0VD", "+4V", "+4S", "FAP"]:
-			discards[fields[2]] = pinName
+		if netName[:3] in ["0VD", "+4V", "+4S", "FAP"]:
+			discards[fields[2]] = netName
 			continue
 		if pinsDB[pinNumber][0] in ["INOUT", "FIX", "FOX"]:
 			# An inout net, or an unknown type.
-			inouts[fields[2]] = pinName
+			inouts[fields[2]] = netName
 			continue
 		if pinsDB[pinNumber][0] in ["IN"]:
 			# An input net.
-			inputs[fields[2]] = pinName
+			inputs[fields[2]] = netName
 			continue
 		if pinsDB[pinNumber][0] in ["OUT", "NC"]:
 			# An output net.
-			outputs[fields[2]] = pinName
+			outputs[fields[2]] = netName
 			continue
 		print >> sys.stderr, "Netlist entry \"" + line.strip() + "\" is neither an input nor an output."
 		sys.exit(1)
@@ -412,6 +412,8 @@ for line in lines:
 			netName = outputs[netName]
 		elif netName[:3] == "/1/":
 			netName = netName[3:]
+			if netName[:1].isdigit():
+				netName = "d" + netName
 		else:
 			netName = netName[5:].replace("-", "").replace(")", "")
 		norPins[pinNumber] = netName
