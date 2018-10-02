@@ -5,10 +5,11 @@
 # Purpose:	Makefile for building a Verilog simulation of the AGC from
 #		the KiCad schematics. It doesn't attempt to actually run
 #		the simulated hardware, but simply builds it.
-# Host system:	The programs 'touch', 'mv', and 'cat' are used.  This works
-#		in *NIX type systems (Linux, probably Mac OS X), but I
-#		doubt that it works in a stock version of Windows.  I'm
-#		sure you can install these programs for Windows.
+# Host system:	This expects expects to be running under 'bash', and expects
+#		'touch', 'mv', 'rm', and 'cat' to be available.  So it works
+#		in Linux systems and possibly Mac OS X, but not in Windows.
+#		If you want to fix it up to work other than in Linux, look 
+#		for 'if', 'touch', 'mv', 'rm', and 'cat' uses.
 # Mod history:	2018-07-29 RSB	Wrote first version of this makefile, 
 #				covering just testVerilog, 2005259A, 
 #				and 2005260A targets.
@@ -167,14 +168,18 @@ TARGETS_VVP_AGC := $(TARGETS_VVP_2003200) $(TARGETS_VVP_2003100) $(TARGETS_VVP_2
 TARGETS_V_AGC := $(TARGETS_V_2003200) $(TARGETS_V_2003100) $(TARGETS_V_2003993) $(TARGETS_V_1003700)
 
 # Here are the specific example and AGC targets we're actually trying to build. 
-TARGETS = testVerilog/module.vvp 2003200.vvp # 2003100.vvp 2003993.vvp 1003700.vvp
+TARGETS = testVerilog/module.vvp
+TARGETS += 2003200.vvp $(TARGETS_VVP_2003200)
+#TARGETS += 2003100.vvp $(TARGETS_VVP_2003100)
+#TARGETS += 2003993.vvp $(TARGETS_VVP_2003993)
+#TARGETS += 1003700.vvp $(TARGETS_VVP_1003700)
 
 .PHONY: all
 all: $(TARGETS)
 
 .PHONY: clean
 clean:
-	-rm $(TARGETS) testVerilog/module.v $(TARGETS_VVP_AGC) $(TARGETS_V_AGC)
+	-rm $(TARGETS) testVerilog/module.v $(TARGETS_V_AGC) 2>/dev/null
 
 2003200.vvp: 2003200.v $(TARGETS_V_2003200)
 	iverilog -o $@ $^
@@ -195,37 +200,17 @@ clean:
 # usable.  But it's a significant amount of work to manually create the testbench
 # initially, too, so we would still like to automate that work when we can.
 
-ifeq ("$(wildcard 2003200.v)", "")
 2003200.v: $(TARGETS_V_2003200)
-	cat $^ | ../Scripts/dumbTestbench.py >$@
-else
-2003200.v:
-	touch $@
-endif
+	@if test ! -f $@ ; then cat $^ | ../Scripts/dumbTestbench.py >$@ ; fi
 
-ifeq ("$(wildcard 2003100.v)", "")
 2003100.v: $(TARGETS_V_2003100)
-	cat $^ | ../Scripts/dumbTestbench.py >$@
-else
-2003100.v:
-	touch $@
-endif
+	@if test ! -f $@ ; then cat $^ | ../Scripts/dumbTestbench.py >$@ ; fi
 
-ifeq ("$(wildcard 2003993.v)", "")
 2003993.v: $(TARGETS_V_2003993)
-	cat $^ | ../Scripts/dumbTestbench.py >$@
-else
-2003993.v:
-	touch $@
-endif
+	@if test ! -f $@ ; then cat $^ | ../Scripts/dumbTestbench.py >$@ ; fi
 
-ifeq ("$(wildcard 1003700.v)", "")
 1003700.v: $(TARGETS_V_1003700)
-	cat $^ | ../Scripts/dumbTestbench.py >$@
-else
-1003700.v:
-	touch $@
-endif
+	@if test ! -f $@ ; then cat $^ | ../Scripts/dumbTestbench.py >$@ ; fi
 
 # Make some stubs for a couple of required files.  This helpful for a
 # first compilation, but the files need to be filled and the 'make'
@@ -234,8 +219,9 @@ endif
 %/module.init:
 	touch $@
 
-%/module_tb.v:
-	touch $@
+.SECONDARY: testVerilog/module_tb.v $(DRAWINGS_AGC:%=%/module_tb.v)
+%/module_tb.v: %/module.v
+	@if test ! -f $@ ; then cat $^ | ../Scripts/dumbTestbench.py >$@ ; fi
 
 # Below are the rules which should work for every TARGET in $(TARGETS)
 %/module.vvp: %/module_tb.v %/module.v
