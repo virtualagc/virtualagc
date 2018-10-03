@@ -85,11 +85,13 @@ print ""
 print "module agc;"
 print ""
 print "reg rst = 1;"
+print "reg STRT2 = 1;"
 print "initial"
 print "  begin"
 print "    $dumpfile(\"agc.lxt2\");"
 print "    $dumpvars(0, agc);"
 print "    # 1 rst = 0;"
+print "    # 10 STRT2 = 0;"
 print "    # 1000 $finish;"
 print "  end"
 print ""
@@ -101,6 +103,8 @@ if len(regs) > 0:
 	line = "reg"
 	for i in range(0, len(regs)):
 		reg = regs[i]
+		if reg in ["rst", "STRT2", "CLOCK"]:
+			continue
 		if len(line) == 0:
 			line = " "
 		line += " " + reg + " = 0"
