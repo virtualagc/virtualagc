@@ -8,12 +8,19 @@ input wire rst, FS01_;
 
 output wire F02A, F02B, FS02, FS02A;
 
-assign FS02A = rst ? 0 : ~(0|U126Pad7);
-assign FS02 = rst ? 0 : ~(0|U126Pad7|U127Pad8);
-assign U127Pad8 = rst ? 1 : ~(0|F02B|FS01_|U127Pad2);
-assign U126Pad7 = rst ? 1 : ~(0|U127Pad2|FS02);
-assign U127Pad2 = rst ? 0 : ~(0|U127Pad8|FS01_|F02A);
-assign F02A = rst ? 0 : ~(0|U126Pad7|U127Pad2);
-assign F02B = rst ? 0 : ~(0|U127Pad8|FS02);
+// Gate A1-U127A
+assign A1U126Pad7 = rst ? 1 : ~(0|A1U127Pad2|FS02);
+// Gate A1-U128A
+assign A1U127Pad2 = rst ? 0 : ~(0|A1U127Pad8|FS01_|F02A);
+// Gate A1-U126B
+assign FS02A = rst ? 0 : ~(0|A1U126Pad7);
+// Gate A1-U129A
+assign A1U127Pad8 = rst ? 1 : ~(0|F02B|FS01_|A1U127Pad2);
+// Gate A1-U127B
+assign FS02 = rst ? 0 : ~(0|A1U126Pad7|A1U127Pad8);
+// Gate A1-U128B
+assign F02A = rst ? 0 : ~(0|A1U126Pad7|A1U127Pad2);
+// Gate A1-U129B
+assign F02B = rst ? 0 : ~(0|A1U127Pad8|FS02);
 
 endmodule

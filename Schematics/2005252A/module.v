@@ -37,164 +37,323 @@ output wire A2XG_, CAG, CBG, CEBG, CFBG, CGG, CI01_, CLG1G, CLG2G, CQG, CZG,
   WYHIG_, WYLOG_, WZG_, YT0, YT0_, YT1, YT1_, YT2, YT2_, YT3, YT3_, YT4,
   YT4_, YT5, YT5_, YT6, YT6_, YT7, YT7_;
 
-assign #0.2  RAG_ = rst ? 0 : ~(0|U244Pad2|U244Pad3);
-assign #0.2  U244Pad2 = rst ? 0 : ~(0|RSCG_|XB0_);
-assign #0.2  U244Pad3 = rst ? 0 : ~(0|RT_|RA_);
-assign #0.2  RFBG_ = rst ? 0 : ~(0|RBBK|U207Pad3|U205Pad3);
+// Gate A7-U244A A7-U256A A7-U257A A7-U255A
+assign #0.2  RAG_ = rst ? 1 : ~(0|A7U244Pad2|A7U244Pad3);
+// Gate A7-U153B
+assign #0.2  A7U152Pad7 = rst ? 0 : ~(0|WT_|WYD_);
+// Gate A7-U259A
+assign #0.2  A7U259Pad1 = rst ? 0 : ~(0|XB3_|RSCG_);
+// Gate A7-U207A
+assign #0.2  RFBG_ = rst ? 1 : ~(0|RBBK|A7U207Pad3|A7U205Pad3);
+// Gate A7-U118A
 assign #0.2  MWSG = rst ? 0 : ~(0|WSG_);
-assign #0.2  U111Pad9 = rst ? 0 : ~(0|WL_|WT_);
-assign #0.2  P04A = rst ? 0 : ~(0|P04_);
-assign #0.2  RLG_ = rst ? 0 : ~(0|RLG2|RLG1|RLG3);
-assign #0.2  YT7_ = rst ? 0 : ~(0|YT7);
-assign #0.2  A2XG_ = rst ? 0 : ~(0|U207Pad8);
-assign #0.2  U204Pad7 = rst ? 0 : ~(0|CT_|WG_);
-assign #0.2  U108Pad1 = rst ? 0 : ~(0|WALSG|U102Pad4|U101Pad1);
-assign #0.2  WEDOPG_ = rst ? 0 : ~(0|U158Pad1);
+// Gate A7-U122B A7-U119B
+assign #0.2  A7U119Pad9 = rst ? 1 : ~(0|WALSG|A7U111Pad9|A7U112Pad7|A7U112Pad8);
+// Gate A7-U243B
+assign #0.2  A7U239Pad8 = rst ? 0 : ~(0|RUS_|RT_);
+// Gate A7-U127B
+assign #0.2  P04A = rst ? 1 : ~(0|P04_);
+// Gate A7-U119A
+assign #0.2  A7U119Pad1 = rst ? 0 : ~(0|WQ_|WT_);
+// Gate A7-U128B A7-U258B A7-U259B A7-U257B
+assign #0.2  RLG_ = rst ? 1 : ~(0|RLG2|RLG1|RLG3);
+// Gate A7-U220A
+assign #0.2  YT7_ = rst ? 1 : ~(0|YT7);
+// Gate A7-U209A
+assign #0.2  A7U209Pad1 = rst ? 0 : ~(0|XT0_|RCHG_|XB2_);
+// Gate A7-U209B A7-U208B A7-U207B
+assign #0.2  A2XG_ = rst ? 1 : ~(0|A7U207Pad8);
+// Gate A7-U206B
+assign #0.2  A7U204Pad6 = rst ? 0 : ~(0|L2GD_|CT_);
+// Gate A7-U108A
+assign #0.2  A7U108Pad1 = rst ? 1 : ~(0|WALSG|A7U102Pad4|A7U101Pad1);
+// Gate A7-U205B
+assign #0.2  A7U204Pad7 = rst ? 0 : ~(0|CT_|WG_);
+// Gate A7-U253B
+assign #0.2  A7U250Pad7 = rst ? 0 : ~(0|RT_|RZ_);
+// Gate A7-U160A A7-U159A
+assign #0.2  WEDOPG_ = rst ? 1 : ~(0|A7U158Pad1);
+// Gate A7-U219A
 assign #0.2  YT7E = rst ? 0 : ~(0|YT7_);
+// Gate A7-U226A
 assign #0.2  YT5E = rst ? 0 : ~(0|YT5_);
-assign #0.2  CQG = rst ? 0 : ~(0|CT_|WQG_);
-assign #0.2  RLG2 = rst ? 0 : ~(0|RT_|RL_);
-assign #0.2  RLG1 = rst ? 0 : ~(0|XB1_|RSCG_);
-assign #0.2  CIFF = rst ? 0 : ~(0|J4Pad432|CUG);
-assign #0.2  RZG_ = rst ? 0 : ~(0|U250Pad7|U249Pad9);
-assign #0.2  WALSG_ = rst ? 0 : ~(0|WALSG);
-assign #0.2  CI01_ = rst ? 0 : ~(0|CINORM|CIFF);
-assign #0.2  MWZG = rst ? 0 : ~(0|WZG_);
-assign #0.2  YT4_ = rst ? 0 : ~(0|YT4);
-assign #0.2  RUSG_ = rst ? 0 : ~(0|U239Pad8);
-assign #0.2  U117Pad9 = rst ? 0 : ~(0|U111Pad9|U112Pad7|U112Pad8);
-assign #0.2  MRULOG = rst ? 0 : ~(0|U240Pad7);
-assign #0.2  L2GDG_ = rst ? 0 : ~(0|U211Pad8);
-assign #0.2  WYLOG_ = rst ? 0 : ~(0|U139Pad9);
-assign #0.2  U102Pad4 = rst ? 0 : ~(0|WSCG_|XB0_);
-assign #0.2  U102Pad9 = rst ? 0 : ~(0|XB5_|WSCG_);
-assign #0.2  WYDLOG_ = rst ? 0 : ~(0|U157Pad9);
-assign #0.2  CLG2G = rst ? 0 : ~(0|U119Pad9|CT_);
-assign #0.2  WYDG_ = rst ? 0 : ~(0|U152Pad7);
-assign #0.2  YT6E = rst ? 0 : ~(0|YT6_);
-assign #0.2  U120Pad4 = rst ? 0 : ~(0|XB2_|WSCG_);
-assign #0.2  U120Pad2 = rst ? 0 : ~(0|XT0_|WCHG_|XB2_);
-assign #0.2  RGG1 = rst ? 0 : ~(0|RG_|RT_);
-assign #0.2  WBBEG_ = rst ? 0 : ~(0|U231Pad8);
-assign #0.2  WG2G_ = rst ? 0 : ~(0|U146Pad1|WGNORM);
-assign #0.2  U120Pad9 = rst ? 0 : ~(0|U111Pad9|U112Pad7|U112Pad8|G2LSG);
-assign #0.2  WGNORM = rst ? 0 : ~(0|WGA_|WT_|GINH);
-assign #0.2  U112Pad7 = rst ? 0 : ~(0|WCHG_|XB1_|XT0_);
-assign #0.2  RCG_ = rst ? 0 : ~(0|U215Pad2);
-assign #0.2  MWG = rst ? 0 : ~(0|WGA_);
-assign #0.2  U112Pad1 = rst ? 0 : ~(0|WT_|WS_);
-assign #0.2  YT6_ = rst ? 0 : ~(0|YT6);
-assign #0.2  U112Pad8 = rst ? 0 : ~(0|XB1_|WSCG_);
-assign #0.2  U232Pad3 = rst ? 0 : ~(0|RB_|RT_);
-assign #0.2  U131Pad1 = rst ? 0 : ~(0|WB_|WT_);
-assign #0.2  YT6 = rst ? 0 : ~(0|EAD10_|EAD09|EAD11_);
-assign #0.2  YT7 = rst ? 0 : ~(0|EAD11_|EAD10_|EAD09_);
-assign #0.2  YT4 = rst ? 0 : ~(0|EAD11_|EAD10|EAD09);
-assign #0.2  YT5 = rst ? 0 : ~(0|EAD10|EAD11_|EAD09_);
-assign #0.2  YT2 = rst ? 0 : ~(0|EAD11|EAD09|EAD10_);
-assign #0.2  YT3 = rst ? 0 : ~(0|EAD10_|EAD11|EAD09_);
-assign #0.2  YT0 = rst ? 0 : ~(0|EAD11|EAD10|EAD09);
-assign #0.2  YT1 = rst ? 0 : ~(0|EAD09_|EAD10|EAD11);
-assign #0.2  U119Pad1 = rst ? 0 : ~(0|WQ_|WT_);
-assign #0.2  U119Pad9 = rst ? 0 : ~(0|WALSG|U111Pad9|U112Pad7|U112Pad8);
-assign #0.2  MWBBEG = rst ? 0 : ~(0|WBBEG_);
-assign #0.2  MWBG = rst ? 0 : ~(0|WBG_);
-assign #0.2  U239Pad8 = rst ? 0 : ~(0|RUS_|RT_);
-assign #0.2  U215Pad2 = rst ? 0 : ~(0|RT_|RC_);
-assign #0.2  U153Pad1 = rst ? 0 : ~(0|CYL_|WT_|WGA_);
-assign #0.2  U231Pad7 = rst ? 0 : ~(0|XB4_|WSCG_);
-assign #0.2  U231Pad8 = rst ? 0 : ~(0|XB6_|WSCG_);
-assign #0.2  U231Pad9 = rst ? 0 : ~(0|U2BBK|U231Pad7|U231Pad8);
-assign #0.2  CSG = rst ? 0 : ~(0|CT_|WSG_);
-assign #0.2  U250Pad7 = rst ? 0 : ~(0|RT_|RZ_);
-assign #0.2  U210Pad1 = rst ? 0 : ~(0|RSCG_|XB2_);
-assign #0.2  REBG_ = rst ? 0 : ~(0|U259Pad1);
+// Gate A7-U233B
+assign #0.2  A7U233Pad9 = rst ? 0 : ~(0|A7U232Pad9|RT_);
+// Gate A7-U239B
+assign #0.2  RUSG_ = rst ? 1 : ~(0|A7U239Pad8);
+// Gate A7-U254A
 assign #0.2  MRAG = rst ? 0 : ~(0|RAG_);
-assign #0.2  YT4E = rst ? 0 : ~(0|YT4_);
-assign #0.2  U157Pad9 = rst ? 0 : ~(0|WYD_|WT_|SHIFT|U158Pad7|NEAC);
-assign #0.2  U146Pad1 = rst ? 0 : ~(0|WGA_|WT_|SR_);
-assign #0.2  CBG = rst ? 0 : ~(0|CT_|WBG_);
-assign #0.2  RGG_ = rst ? 0 : ~(0|RGG1);
-assign #0.2  WG4G_ = rst ? 0 : ~(0|U146Pad1|U148Pad4);
-assign #0.2  U138Pad9 = rst ? 0 : ~(0|U135Pad9|U137Pad9);
-assign #0.2  U209Pad1 = rst ? 0 : ~(0|XT0_|RCHG_|XB2_);
-assign #0.2  U207Pad8 = rst ? 0 : ~(0|TT_|A2X_);
-assign #0.2  WAG_ = rst ? 0 : ~(0|U101Pad1|U102Pad4);
-assign #0.2  U148Pad4 = rst ? 0 : ~(0|CYR_|WT_|WGA_);
-assign #0.2  CZG = rst ? 0 : ~(0|CT_|WZG_);
-assign #0.2  PIPSAM = rst ? 0 : ~(0|SB2_|PIPPLS_|P04A);
-assign #0.2  WG5G_ = rst ? 0 : ~(0|U148Pad4);
-assign #0.2  U233Pad9 = rst ? 0 : ~(0|U232Pad9|RT_);
-assign #0.2  U106Pad1 = rst ? 0 : ~(0|U101Pad1|U102Pad4);
-assign #0.2  YT0E = rst ? 0 : ~(0|YT0_);
-assign #0.2  U233Pad2 = rst ? 0 : ~(0|U234Pad2|U231Pad8|U2BBK);
-assign #0.2  WLG_ = rst ? 0 : ~(0|U111Pad9|U112Pad7|U112Pad8);
-assign #0.2  WG3G_ = rst ? 0 : ~(0|U153Pad1);
-assign #0.2  RBBEG_ = rst ? 0 : ~(0|RBBK|U205Pad3);
-assign #0.2  WEBG_ = rst ? 0 : ~(0|U234Pad2);
-assign #0.2  YT0_ = rst ? 0 : ~(0|YT0);
-assign #0.2  U201Pad8 = rst ? 0 : ~(0|U204Pad6|U204Pad7|CGMC);
-assign #0.2  WYHIG_ = rst ? 0 : ~(0|U142Pad9);
-assign #0.2  U204Pad6 = rst ? 0 : ~(0|L2GD_|CT_);
-assign #0.2  RBHG_ = rst ? 0 : ~(0|U232Pad3);
-assign #0.2  CGG = rst ? 0 : ~(0|U201Pad8);
-assign #0.2  U241Pad8 = rst ? 0 : ~(0|RU_|RT_);
-assign #0.2  CEBG = rst ? 0 : ~(0|U233Pad2|CT_);
-assign #0.2  U101Pad9 = rst ? 0 : ~(0|WT_|WZ_);
-assign #0.2  MWEBG = rst ? 0 : ~(0|WEBG_);
-assign #0.2  WALSG = rst ? 0 : ~(0|ZAP_|WT_);
-assign #0.2  WG1G_ = rst ? 0 : ~(0|WGNORM);
-assign #0.2  RBLG_ = rst ? 0 : ~(0|U233Pad9|U232Pad3);
-assign #0.2  MWFBG = rst ? 0 : ~(0|WFBG_);
-assign #0.2  U259Pad1 = rst ? 0 : ~(0|XB3_|RSCG_);
-assign #0.2  YT1E = rst ? 0 : ~(0|YT1_);
-assign #0.2  U139Pad9 = rst ? 0 : ~(0|U138Pad9|WT_);
-assign #0.2  U207Pad3 = rst ? 0 : ~(0|XB4_|RSCG_);
-assign #0.2  MRGG = rst ? 0 : ~(0|RGG_);
-assign #0.2  CUG = rst ? 0 : ~(0|U144Pad7|CT_);
-assign #0.2  RBBK = rst ? 0 : ~(0|T10_|STFET1_);
-assign #0.2  U144Pad7 = rst ? 0 : ~(0|U139Pad9|U152Pad7);
-assign #0.2  U135Pad9 = rst ? 0 : ~(0|WY12_);
-assign #0.2  J4Pad432 = rst ? 0 : ~(0|CI|CIFF);
-assign #0.2  YT1_ = rst ? 0 : ~(0|YT1);
-assign #0.2  U101Pad1 = rst ? 0 : ~(0|WA_|WT_);
-assign #0.2  U211Pad2 = rst ? 0 : ~(0|RQ_|RT_);
-assign #0.2  WQG_ = rst ? 0 : ~(0|U120Pad2|U119Pad1|U120Pad4);
-assign #0.2  RULOG_ = rst ? 0 : ~(0|U241Pad8|U239Pad8);
-assign #0.2  WBG_ = rst ? 0 : ~(0|U131Pad1);
-assign #0.2  U211Pad8 = rst ? 0 : ~(0|L2GD_|TT_);
-assign #0.2  G2LSG_ = rst ? 0 : ~(0|G2LSG);
-assign #0.2  MWQG = rst ? 0 : ~(0|WQG_);
-assign #0.2  MWLG = rst ? 0 : ~(0|U117Pad9);
-assign #0.2  YT2E = rst ? 0 : ~(0|YT2_);
-assign #0.2  RQG_ = rst ? 0 : ~(0|U211Pad2|U210Pad1|U209Pad1);
-assign #0.2  RUG_ = rst ? 0 : ~(0|U241Pad8);
-assign #0.2  U240Pad7 = rst ? 0 : ~(0|U241Pad8|U239Pad8);
-assign #0.2  WSG_ = rst ? 0 : ~(0|U112Pad1);
-assign #0.2  YT2_ = rst ? 0 : ~(0|YT2);
-assign #0.2  U234Pad2 = rst ? 0 : ~(0|WSCG_|XB3_);
-assign #0.2  MWYG = rst ? 0 : ~(0|U144Pad7);
-assign #0.2  CAG = rst ? 0 : ~(0|CT_|U108Pad1);
-assign #0.2  YT5_ = rst ? 0 : ~(0|YT5);
-assign #0.2  WFBG_ = rst ? 0 : ~(0|U231Pad7|U231Pad8);
-assign #0.2  G2LSG = rst ? 0 : ~(0|ZAP_|TT_);
-assign #0.2  U152Pad7 = rst ? 0 : ~(0|WT_|WYD_);
-assign #0.2  MWAG = rst ? 0 : ~(0|U106Pad1);
-assign #0.2  U249Pad9 = rst ? 0 : ~(0|XB5_|RSCG_);
-assign #0.2  U137Pad9 = rst ? 0 : ~(0|WY_);
-assign #0.2  CLG1G = rst ? 0 : ~(0|U120Pad9|CT_);
-assign #0.2  CINORM = rst ? 0 : ~(0|NEAC|EAC_);
+// Gate A7-U117B
+assign #0.2  A7U117Pad9 = rst ? 1 : ~(0|A7U111Pad9|A7U112Pad7|A7U112Pad8);
+// Gate A7-U260B
+assign #0.2  RLG2 = rst ? 0 : ~(0|RT_|RL_);
+// Gate A7-U234A
+assign #0.2  A7U233Pad2 = rst ? 1 : ~(0|A7U234Pad2|A7U231Pad8|U2BBK);
+// Gate A7-U202A
+assign #0.2  CIFF = rst ? 1 : ~(0|A7J4Pad432|CUG);
+// Gate A7-U252B A7-U250B A7-U251B
+assign #0.2  RZG_ = rst ? 1 : ~(0|A7U250Pad7|A7U249Pad9);
+// Gate A7-U238B
+assign #0.2  A7U232Pad3 = rst ? 0 : ~(0|RB_|RT_);
+// Gate A7-U231A
+assign #0.2  CI01_ = rst ? 0 : ~(0|CINORM|CIFF);
+// Gate A7-U111B
+assign #0.2  A7U111Pad9 = rst ? 0 : ~(0|WL_|WT_);
+// Gate A7-U232B
+assign #0.2  A7U232Pad9 = rst ? 1 : ~(0|RL10BB);
+// Gate A7-U107B
+assign #0.2  MWZG = rst ? 0 : ~(0|WZG_);
+// Gate A7-U229A
+assign #0.2  YT4_ = rst ? 1 : ~(0|YT4);
+// Gate A7-U116B
+assign #0.2  A7U112Pad8 = rst ? 0 : ~(0|XB1_|WSCG_);
+// Gate A7-U240B
+assign #0.2  MRULOG = rst ? 0 : ~(0|A7U240Pad7);
+// Gate A7-U212B A7-U213B A7-U211B
+assign #0.2  L2GDG_ = rst ? 1 : ~(0|A7U211Pad8);
+// Gate A7-U145B A7-U152B
+assign #0.2  A7U144Pad7 = rst ? 1 : ~(0|A7U139Pad9|A7U152Pad7);
+// Gate A7-U141B A7-U140B A7-U145A
+assign #0.2  WYLOG_ = rst ? 1 : ~(0|A7U139Pad9);
+// Gate A7-U255B
 assign #0.2  RLG3 = rst ? 0 : ~(0|RCHG_|XT0_|XB1_);
+// Gate A7-U121B
+assign #0.2  MWBG = rst ? 0 : ~(0|WBG_);
+// Gate A7-U228A
+assign #0.2  YT4E = rst ? 0 : ~(0|YT4_);
+// Gate A7-U123B
+assign #0.2  CLG2G = rst ? 0 : ~(0|A7U119Pad9|CT_);
+// Gate A7-U156B A7-U154B A7-U155B
+assign #0.2  WYDG_ = rst ? 1 : ~(0|A7U152Pad7);
+// Gate A7-U222A
+assign #0.2  YT6E = rst ? 0 : ~(0|YT6_);
+// Gate A7-U204B
+assign #0.2  A7U201Pad8 = rst ? 1 : ~(0|A7U204Pad6|A7U204Pad7|CGMC);
+// Gate A7-U252A
+assign #0.2  RGG1 = rst ? 0 : ~(0|RG_|RT_);
+// Gate A7-U147A
+assign #0.2  WG2G_ = rst ? 1 : ~(0|A7U146Pad1|WGNORM);
+// Gate A7-U140A
+assign #0.2  WGNORM = rst ? 0 : ~(0|WGA_|WT_|GINH);
+// Gate A7-U138B
+assign #0.2  A7U138Pad9 = rst ? 1 : ~(0|A7U135Pad9|A7U137Pad9);
+// Gate A7-U216A A7-U217A A7-U215A
+assign #0.2  RCG_ = rst ? 1 : ~(0|A7U215Pad2);
+// Gate A7-U144A
+assign #0.2  MWG = rst ? 0 : ~(0|WGA_);
+// Gate A7-U118B
+assign #0.2  MWLG = rst ? 0 : ~(0|A7U117Pad9);
+// Gate A7-U223A
+assign #0.2  YT6_ = rst ? 1 : ~(0|YT6);
+// Gate A7-U258A
+assign #0.2  A7U244Pad2 = rst ? 0 : ~(0|RSCG_|XB0_);
+// Gate A7-U253A
+assign #0.2  A7U244Pad3 = rst ? 0 : ~(0|RT_|RA_);
+// Gate A7-U224A
+assign #0.2  YT6 = rst ? 0 : ~(0|EAD10_|EAD09|EAD11_);
+// Gate A7-U221A
+assign #0.2  YT7 = rst ? 0 : ~(0|EAD11_|EAD10_|EAD09_);
+// Gate A7-U230A
+assign #0.2  YT4 = rst ? 0 : ~(0|EAD11_|EAD10|EAD09);
+// Gate A7-U227A
+assign #0.2  YT5 = rst ? 0 : ~(0|EAD10|EAD11_|EAD09_);
+// Gate A7-U227B
+assign #0.2  YT2 = rst ? 1 : ~(0|EAD11|EAD09|EAD10_);
+// Gate A7-U230B
+assign #0.2  YT3 = rst ? 0 : ~(0|EAD10_|EAD11|EAD09_);
+// Gate A7-U221B
+assign #0.2  YT0 = rst ? 0 : ~(0|EAD11|EAD10|EAD09);
+// Gate A7-U224B
+assign #0.2  YT1 = rst ? 0 : ~(0|EAD09_|EAD10|EAD11);
+// Gate A7-U237B
+assign #0.2  MWBBEG = rst ? 0 : ~(0|WBBEG_);
+// Gate A7-U210A
+assign #0.2  A7U210Pad1 = rst ? 0 : ~(0|RSCG_|XB2_);
+// Gate A7-U129B A7-U116A A7-U117A
+assign #0.2  CSG = rst ? 0 : ~(0|CT_|WSG_);
+// Gate A7-U218A
+assign #0.2  A7U215Pad2 = rst ? 0 : ~(0|RT_|RC_);
+// Gate A7-U210B
+assign #0.2  A7U207Pad8 = rst ? 0 : ~(0|TT_|A2X_);
+// Gate A7-U120B A7-U157A
+assign #0.2  A7U120Pad9 = rst ? 1 : ~(0|A7U111Pad9|A7U112Pad7|A7U112Pad8|G2LSG);
+// Gate A7-U260A
+assign #0.2  REBG_ = rst ? 1 : ~(0|A7U259Pad1);
+// Gate A7-U128A
+assign #0.2  A7U120Pad2 = rst ? 0 : ~(0|XT0_|WCHG_|XB2_);
+// Gate A7-U208A
+assign #0.2  A7U207Pad3 = rst ? 0 : ~(0|XB4_|RSCG_);
+// Gate A7-U159B
+assign #0.2  WYDLOG_ = rst ? 1 : ~(0|A7U157Pad9);
+// Gate A7-U126A
+assign #0.2  A7U120Pad4 = rst ? 0 : ~(0|XB2_|WSCG_);
+// Gate A7-U160B
+assign #0.2  A7U158Pad7 = rst ? 0 : ~(0|PIFL_|L15_);
+// Gate A7-U138A A7-U139A A7-U137A
+assign #0.2  CBG = rst ? 0 : ~(0|CT_|WBG_);
+// Gate A7-U127A A7-U249A A7-U250A A7-U251A
+assign #0.2  RGG_ = rst ? 1 : ~(0|RGG1);
+// Gate A7-U149A A7-U148A A7-U150A
+assign #0.2  WG4G_ = rst ? 1 : ~(0|A7U146Pad1|A7U148Pad4);
+// Gate A7-U153A
+assign #0.2  A7U153Pad1 = rst ? 0 : ~(0|CYL_|WT_|WGA_);
+// Gate A7-U249B
+assign #0.2  A7U249Pad9 = rst ? 0 : ~(0|XB5_|RSCG_);
+// Gate A7-U243A
+assign #0.2  A7U231Pad7 = rst ? 0 : ~(0|XB4_|WSCG_);
+// Gate A7-U146A
+assign #0.2  A7U146Pad1 = rst ? 0 : ~(0|WGA_|WT_|SR_);
+// Gate A7-U256B
+assign #0.2  RLG1 = rst ? 0 : ~(0|XB1_|RSCG_);
+// Gate A7-U104A A7-U103A A7-U102A
+assign #0.2  WAG_ = rst ? 1 : ~(0|A7U101Pad1|A7U102Pad4);
+// Gate A7-U109B A7-U108B A7-U110B
+assign #0.2  CZG = rst ? 0 : ~(0|CT_|WZG_);
+// Gate A7-U136B
+assign #0.2  PIPSAM = rst ? 0 : ~(0|SB2_|PIPPLS_|P04A);
+// Gate A7-U231B
+assign #0.2  A7U231Pad9 = rst ? 1 : ~(0|U2BBK|A7U231Pad7|A7U231Pad8);
+// Gate A7-U152A
+assign #0.2  WG5G_ = rst ? 1 : ~(0|A7U148Pad4);
+// Gate A7-U219B
+assign #0.2  YT0E = rst ? 0 : ~(0|YT0_);
+// Gate A7-U112B A7-U113B A7-U114B
+assign #0.2  WLG_ = rst ? 1 : ~(0|A7U111Pad9|A7U112Pad7|A7U112Pad8);
+// Gate A7-U157B A7-U158B
+assign #0.2  A7U157Pad9 = rst ? 0 : ~(0|WYD_|WT_|SHIFT|A7U158Pad7|NEAC);
+// Gate A7-U156A A7-U154A A7-U155A
+assign #0.2  WG3G_ = rst ? 1 : ~(0|A7U153Pad1);
+// Gate A7-U205A
+assign #0.2  RBBEG_ = rst ? 1 : ~(0|RBBK|A7U205Pad3);
+// Gate A7-U112A
+assign #0.2  A7U112Pad1 = rst ? 0 : ~(0|WT_|WS_);
+// Gate A7-U247B
+assign #0.2  A7U241Pad8 = rst ? 0 : ~(0|RU_|RT_);
+// Gate A7-U220B
+assign #0.2  YT0_ = rst ? 1 : ~(0|YT0);
+// Gate A7-U115B
+assign #0.2  A7U112Pad7 = rst ? 0 : ~(0|WCHG_|XB1_|XT0_);
+// Gate A7-U238A
+assign #0.2  A7U234Pad2 = rst ? 0 : ~(0|WSCG_|XB3_);
+// Gate A7-U143B
+assign #0.2  WYHIG_ = rst ? 1 : ~(0|A7U142Pad9);
+// Gate A7-U232A A7-U236B
+assign #0.2  RBHG_ = rst ? 1 : ~(0|A7U232Pad3);
+// Gate A7-U201B A7-U203B A7-U202B
+assign #0.2  CGG = rst ? 0 : ~(0|A7U201Pad8);
+// Gate A7-U233A
+assign #0.2  CEBG = rst ? 0 : ~(0|A7U233Pad2|CT_);
+// Gate A7-U101B
+assign #0.2  A7U101Pad9 = rst ? 0 : ~(0|WT_|WZ_);
+// Gate A7-U131B
+assign #0.2  WALSG = rst ? 0 : ~(0|ZAP_|WT_);
+// Gate A7-U141A A7-U143A A7-U142A
+assign #0.2  WG1G_ = rst ? 1 : ~(0|WGNORM);
+// Gate A7-U101A
+assign #0.2  A7U101Pad1 = rst ? 0 : ~(0|WA_|WT_);
+// Gate A7-U237A
+assign #0.2  MWEBG = rst ? 0 : ~(0|WEBG_);
+// Gate A7-U240A
+assign #0.2  MWFBG = rst ? 0 : ~(0|WFBG_);
+// Gate A7-U222B
+assign #0.2  YT1E = rst ? 0 : ~(0|YT1_);
+// Gate A7-U137B
+assign #0.2  A7U137Pad9 = rst ? 0 : ~(0|WY_);
+// Gate A7-U245A A7-U246A
+assign #0.2  WBBEG_ = rst ? 1 : ~(0|A7U231Pad8);
+// Gate A7-U248A
+assign #0.2  MRGG = rst ? 0 : ~(0|RGG_);
+// Gate A7-U149B A7-U148B A7-U147B A7-U146B A7-U150B A7-U151B
+assign #0.2  CUG = rst ? 0 : ~(0|A7U144Pad7|CT_);
+// Gate A7-U201A
+assign #0.2  RBBK = rst ? 0 : ~(0|T10_|STFET1_);
+// Gate A7-U223B
+assign #0.2  YT1_ = rst ? 1 : ~(0|YT1);
+// Gate A7-U248B
+assign #0.2  A7J3Pad338 = rst ? 1 : ~(0);
+// Gate A7-U132B A7-U133B A7-U136A A7-U34B
+assign #0.2  WALSG_ = rst ? 1 : ~(0|WALSG);
+// Gate A7-U135B
+assign #0.2  A7U135Pad9 = rst ? 0 : ~(0|WY12_);
+// Gate A7-U241B
+assign #0.2  RUG_ = rst ? 1 : ~(0|A7U241Pad8);
+// Gate A7-U123A A7-U120A A7-U125A A7-U124A
+assign #0.2  WQG_ = rst ? 1 : ~(0|A7U120Pad2|A7U119Pad1|A7U120Pad4);
+// Gate A7-U158A
+assign #0.2  A7U158Pad1 = rst ? 0 : ~(0|WGA_|EDOP_|WT_);
+// Gate A7-U245B A7-U244B A7-U246B
+assign #0.2  RULOG_ = rst ? 1 : ~(0|A7U241Pad8|A7U239Pad8);
+// Gate A7-U132A A7-U133A A7-U134A A7-U135A
+assign #0.2  WBG_ = rst ? 1 : ~(0|A7U131Pad1);
+// Gate A7-U216B A7-U217B A7-U215B
+assign #0.2  G2LSG_ = rst ? 1 : ~(0|G2LSG);
+// Gate A7-U234B A7-U235B
+assign #0.2  RBLG_ = rst ? 1 : ~(0|A7U233Pad9|A7U232Pad3);
+// Gate A7-U121A
+assign #0.2  MWQG = rst ? 0 : ~(0|WQG_);
+// Gate A7-U226B
+assign #0.2  YT2E = rst ? 1 : ~(0|YT2_);
+// Gate A7-U212A A7-U213A A7-U211A
+assign #0.2  RQG_ = rst ? 1 : ~(0|A7U211Pad2|A7U210Pad1|A7U209Pad1);
+// Gate A7-U144B
+assign #0.2  MWYG = rst ? 0 : ~(0|A7U144Pad7);
+// Gate A7-U106A
+assign #0.2  A7U106Pad1 = rst ? 1 : ~(0|A7U101Pad1|A7U102Pad4);
+// Gate A7-U113A A7-U114A A7-U115A
+assign #0.2  WSG_ = rst ? 1 : ~(0|A7U112Pad1);
+// Gate A7-U225B
+assign #0.2  YT2_ = rst ? 0 : ~(0|YT2);
+// Gate A7-U131A
+assign #0.2  A7U131Pad1 = rst ? 0 : ~(0|WB_|WT_);
+// Gate A7-U109A A7-U110A A7-U111A
+assign #0.2  CAG = rst ? 0 : ~(0|CT_|A7U108Pad1);
+// Gate A7-U214B
+assign #0.2  A7U211Pad8 = rst ? 0 : ~(0|L2GD_|TT_);
+// Gate A7-U105A
+assign #0.2  A7U102Pad4 = rst ? 0 : ~(0|WSCG_|XB0_);
+// Gate A7-U241A A7-U242A
+assign #0.2  WFBG_ = rst ? 1 : ~(0|A7U231Pad7|A7U231Pad8);
+// Gate A7-U214A
+assign #0.2  A7U211Pad2 = rst ? 0 : ~(0|RQ_|RT_);
+// Gate A7-U151A
+assign #0.2  A7U148Pad4 = rst ? 0 : ~(0|CYR_|WT_|WGA_);
+// Gate A7-U102B
+assign #0.2  A7U102Pad9 = rst ? 0 : ~(0|XB5_|WSCG_);
+// Gate A7-U107A
+assign #0.2  MWAG = rst ? 0 : ~(0|A7U106Pad1);
+// Gate A7-U126B A7-U125B A7-U124B
+assign #0.2  CLG1G = rst ? 0 : ~(0|A7U120Pad9|CT_);
+// Gate A7-U204A
+assign #0.2  CINORM = rst ? 0 : ~(0|NEAC|EAC_);
+// Gate A7-U235A A7-U236A
+assign #0.2  WEBG_ = rst ? 1 : ~(0|A7U234Pad2);
+// Gate A7-U129A A7-U130A A7-U130B
+assign #0.2  CQG = rst ? 0 : ~(0|CT_|WQG_);
+// Gate A7-U228B
 assign #0.2  YT3E = rst ? 0 : ~(0|YT3_);
-assign #0.2  CFBG = rst ? 0 : ~(0|U231Pad9|CT_);
-assign #0.2  YT3_ = rst ? 0 : ~(0|YT3);
-assign #0.2  WZG_ = rst ? 0 : ~(0|U102Pad9|U101Pad9);
-assign #0.2  J3Pad338 = rst ? 0 : ~(0);
-assign #0.2  U158Pad1 = rst ? 0 : ~(0|WGA_|EDOP_|WT_);
-assign #0.2  U205Pad3 = rst ? 0 : ~(0|XB6_|RSCG_);
-assign #0.2  U158Pad7 = rst ? 0 : ~(0|PIFL_|L15_);
+// Gate A7-U239A
+assign #0.2  CFBG = rst ? 0 : ~(0|A7U231Pad9|CT_);
+// Gate A7-U229B
+assign #0.2  YT3_ = rst ? 1 : ~(0|YT3);
+// Gate A7-U225A
+assign #0.2  YT5_ = rst ? 1 : ~(0|YT5);
+// Gate A7-U105B A7-U104B A7-U106B A7-U103B
+assign #0.2  WZG_ = rst ? 1 : ~(0|A7U102Pad9|A7U101Pad9);
+// Gate A7-U206A
+assign #0.2  A7U205Pad3 = rst ? 0 : ~(0|XB6_|RSCG_);
+// Gate A7-U203A
+assign #0.2  A7J4Pad432 = rst ? 0 : ~(0|CI|CIFF);
+// Gate A7-U142B
+assign #0.2  A7U142Pad9 = rst ? 0 : ~(0|WY_|WT_);
+// Gate A7-U247A
+assign #0.2  A7U231Pad8 = rst ? 0 : ~(0|XB6_|WSCG_);
+// Gate A7-U139B
+assign #0.2  A7U139Pad9 = rst ? 0 : ~(0|A7U138Pad9|WT_);
+// Gate A7-U254B
 assign #0.2  MRLG = rst ? 0 : ~(0|RLG_);
-assign #0.2  U142Pad9 = rst ? 0 : ~(0|WY_|WT_);
-assign #0.2  U232Pad9 = rst ? 0 : ~(0|RL10BB);
+// Gate A7-U218B
+assign #0.2  G2LSG = rst ? 0 : ~(0|ZAP_|TT_);
+// Gate A7-U242B
+assign #0.2  A7U240Pad7 = rst ? 1 : ~(0|A7U241Pad8|A7U239Pad8);
 
 endmodule
