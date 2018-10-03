@@ -84,6 +84,10 @@ for line in lines:
 	for innet in innets:
 		if innet not in netValues:
 			netValues[innet] = False
+if "STRT2" in netValues:
+	netValues["STRT2"] = True
+else:
+	print >> sys.stderr, "Warning: Could not find signal STRT2."
 
 # Now iterate the logic until nothing changes.  Once you've reached that 
 # point, the ordering of the evaluations no longer matters at all, and you
@@ -128,8 +132,6 @@ for norNet in nors:
 		continue
 	for nor in nors[norNet]["gates"]:
 		ones.append(nor)
-#ones.sort()
-#print ones
 
 # Create the MODULE.init files.
 for moduleNumber in range(1, 25):
@@ -151,3 +153,6 @@ for moduleNumber in range(1, 25):
 			if j == 1 or k == 1:
 				f.write(localRefd + " " + str(j) + " " + str(k) + "\n")
 	f.close()
+
+#ones.sort()
+#print ones
