@@ -72,7 +72,7 @@ assign #0.2  A6U124Pad2 = rst ? 1 : ~(0|T03|T01);
 // Gate A6-U124A
 assign #0.2  A6U124Pad1 = rst ? 0 : ~(0|A6U124Pad2|MP3_);
 // Gate A6-U144A A6-U144B
-assign #0.2  A6U144Pad1 = rst ? 0 : ~(0|RSTK_);
+assign #0.2  A6U144Pad1 = rst ? 1 : ~(0|RSTK_);
 // Gate A6-U116A
 assign #0.2  A6U116Pad1 = rst ? 0 : ~(0|A6U105Pad2|A6U114Pad9);
 // Gate A6-U137A
@@ -82,7 +82,7 @@ assign #0.2  A6U124Pad9 = rst ? 1 : ~(0|A6U123Pad1|DIVSTG);
 // Gate A6-U151B
 assign #0.2  A6U151Pad2 = rst ? 1 : ~(0|MONEX|PTWOX);
 // Gate A6-U149B
-assign #0.2  A6U148Pad3 = rst ? 1 : ~(0|A6U149Pad1|P01);
+assign #0.2  A6U148Pad3 = rst ? 0 : ~(0|A6U149Pad1|P01);
 // Gate A6-U134B
 assign #0.2  A6U133Pad8 = rst ? 0 : ~(0|A6U134Pad8);
 // Gate A6-U157A
@@ -110,7 +110,7 @@ assign #0.2  A6U111Pad1 = rst ? 1 : ~(0|L02A_);
 // Gate A6-U228B A6-U229A
 assign #0.2  A6U228Pad9 = rst ? 1 : ~(0|IC11|A6U228Pad7|ADS0|CCS0|A6U227Pad1);
 // Gate A6-U112B
-assign #0.2  A6U111Pad7 = rst ? 1 : ~(0|L15A_);
+assign #0.2  A6U111Pad7 = rst ? 0 : ~(0|L15A_);
 // Gate A6-U209B
 assign #0.2  A6U207Pad2 = rst ? 0 : ~(0|DIM0_|BR1B2B_);
 // Gate A6-U208A
@@ -130,7 +130,7 @@ assign #0.2  R1C_ = rst ? 1 : ~(0|A6U219Pad1);
 // Gate A6-U211B
 assign #0.2  MOUT = rst ? 0 : ~(0|CDUSTB_|DINC_|BR12B_);
 // Gate A6-U132A
-assign #0.2  IL03_ = rst ? 0 : ~(0|S03_);
+assign #0.2  IL03_ = rst ? 1 : ~(0|S03_);
 // Gate A6-U123A
 assign #0.2  A6U123Pad1 = rst ? 0 : ~(0|A6U121Pad9|T12USE_|DV376_);
 // Gate A6-U251A
@@ -192,7 +192,7 @@ assign #0.2  A6U236Pad9 = rst ? 1 : ~(0|DV4B1B|A6U235Pad1|DCS0|IC7|SU0);
 // Gate A6-U139A
 assign #0.2  IL01_ = rst ? 0 : ~(0|S01_);
 // Gate A6-U155A A6-U223A
-assign #0.2  WG_ = rst ? 1 : ~(0|d6XP8|A6U223Pad3|WOVR);
+assign #0.2  WG_ = rst ? 0 : ~(0|d6XP8|A6U223Pad3|WOVR);
 // Gate A6-U117A
 assign #0.2  RCH_ = rst ? 1 : ~(0|d4XP11|d5XP21|d3XP7);
 // Gate A6-U107A
@@ -206,7 +206,7 @@ assign #0.2  A6U142Pad1 = rst ? 1 : ~(0|A6U141Pad8|CGMC);
 // Gate A6-U213B
 assign #0.2  A6U213Pad9 = rst ? 0 : ~(0|A6U213Pad1|T07_);
 // Gate A6-U149A
-assign #0.2  A6U149Pad1 = rst ? 0 : ~(0|STOP_|A6U148Pad3);
+assign #0.2  A6U149Pad1 = rst ? 1 : ~(0|STOP_|A6U148Pad3);
 // Gate A6-U143B
 assign #0.2  A6U142Pad8 = rst ? 1 : ~(0|d1XP10|STBF|STBE);
 // Gate A6-U238B
@@ -248,7 +248,7 @@ assign #0.2  A6U104Pad3 = rst ? 0 : ~(0|A6U114Pad1|A6U111Pad9|A6U105Pad2);
 // Gate A6-U154B
 assign #0.2  PIFL_ = rst ? 1 : ~(0|DVXP1|A6U154Pad1);
 // Gate A6-U145A
-assign #0.2  RSTKY_ = rst ? 1 : ~(0|A6U144Pad1);
+assign #0.2  RSTKY_ = rst ? 0 : ~(0|A6U144Pad1);
 // Gate A6-U118B
 assign #0.2  A6U118Pad9 = rst ? 1 : ~(0|T11|T05|T08);
 // Gate A6-U106A
@@ -272,7 +272,7 @@ assign #0.2  d2PP1 = rst ? 1 : ~(0|IC15|DV0|DV1376);
 // Gate A6-U157B
 assign #0.2  WQ_ = rst ? 1 : ~(0|d3XP6|d5XP15);
 // Gate A6-U136B
-assign #0.2  IL06_ = rst ? 1 : ~(0|S06_);
+assign #0.2  IL06_ = rst ? 0 : ~(0|S06_);
 // Gate A6-U128B
 assign #0.2  ZAP_ = rst ? 1 : ~(0|A6U124Pad1|A6U128Pad1);
 // Gate A6-U210B
@@ -288,7 +288,7 @@ assign #0.2  CGMC = rst ? 0 : ~(0|A6U142Pad8|A6U135Pad1);
 // Gate A6-U129A A6-U126B A6-U223B A6-U204A
 assign #0.2  RU_ = rst ? 1 : ~(0|ZAP|A6U125Pad1|d6XP5|d5XP12|A6U219Pad9|A6U223Pad7|A6U215Pad8|RDBANK);
 // Gate A6-U145B
-assign #0.2  RSTKX_ = rst ? 1 : ~(0|A6U144Pad1);
+assign #0.2  RSTKX_ = rst ? 0 : ~(0|A6U144Pad1);
 // Gate A6-U122A
 assign #0.2  A6U118Pad2 = rst ? 1 : ~(0|A6U122Pad2|A6U117Pad9);
 // Gate A6-U160A A6-U159A A6-U159B
@@ -308,7 +308,7 @@ assign #0.2  A6U202Pad2 = rst ? 0 : ~(0|DIM0_|BR12B_);
 // Gate A6-U251B
 assign #0.2  A6U251Pad3 = rst ? 1 : ~(0|MP0T10|NEAC);
 // Gate A6-U140A
-assign #0.2  IL04_ = rst ? 0 : ~(0|S04_);
+assign #0.2  IL04_ = rst ? 1 : ~(0|S04_);
 // Gate A6-U239A
 assign #0.2  CI_ = rst ? 1 : ~(0|A6U209Pad1|ZIPCI);
 // Gate A6-U257A
@@ -328,13 +328,13 @@ assign #0.2  IL01 = rst ? 1 : ~(0|S01);
 // Gate A6-U132B
 assign #0.2  IL07 = rst ? 0 : ~(0|S07);
 // Gate A6-U137B
-assign #0.2  IL06 = rst ? 0 : ~(0|S06);
+assign #0.2  IL06 = rst ? 1 : ~(0|S06);
 // Gate A6-U139B
 assign #0.2  IL05 = rst ? 0 : ~(0|S05);
 // Gate A6-U131A
-assign #0.2  IL04 = rst ? 1 : ~(0|S04);
+assign #0.2  IL04 = rst ? 0 : ~(0|S04);
 // Gate A6-U113A
-assign #0.2  A6U113Pad1 = rst ? 1 : ~(0|L02A_|L01_|L15A_);
+assign #0.2  A6U113Pad1 = rst ? 0 : ~(0|L02A_|L01_|L15A_);
 // Gate A6-U247B
 assign #0.2  ST1 = rst ? 0 : ~(0|A6U246Pad1);
 // Gate A6-U248A
@@ -350,7 +350,7 @@ assign #0.2  A6U219Pad9 = rst ? 0 : ~(0|T07_|A6U219Pad8);
 // Gate A6-U227B A6-U203B A6-U256B
 assign #0.2  A6P10 = rst ? 0 : ~(0|RUPT0|T08_|DAS0|A6U202Pad1|T06_|DV1376|MP1);
 // Gate A6-U121B
-assign #0.2  A6U121Pad9 = rst ? 0 : ~(0|T09|T12|T06);
+assign #0.2  A6U121Pad9 = rst ? 1 : ~(0|T09|T12|T06);
 // Gate A6-U236A A6-U234B
 assign #0.2  A6U234Pad2 = rst ? 1 : ~(0|A6U236Pad2|AD0|DCA0|IC6);
 // Gate A6-U222A
@@ -364,11 +364,11 @@ assign #0.2  A6P4 = rst ? 0 : ~(0|d8PP4|T08_);
 // Gate A6-U216A
 assign #0.2  A6P7 = rst ? 0 : ~(0|T07_|A6U214Pad9);
 // Gate A6-U110A
-assign #0.2  A6U110Pad1 = rst ? 1 : ~(0|L01_);
+assign #0.2  A6U110Pad1 = rst ? 0 : ~(0|L01_);
 // Gate A6-U241A A6-U215B
 assign #0.2  WA_ = rst ? 1 : ~(0|A6U223Pad7|A6U238Pad1|d2XP5|A6P7|A6U213Pad9|A6U215Pad8);
 // Gate A6-U112A
-assign #0.2  A6U109Pad3 = rst ? 0 : ~(0|A6U111Pad7|L02A_|A6U110Pad1);
+assign #0.2  A6U109Pad3 = rst ? 1 : ~(0|A6U111Pad7|L02A_|A6U110Pad1);
 // Gate A6-U201A
 assign #0.2  A6U201Pad1 = rst ? 0 : ~(0|AUG0_|BR1);
 // Gate A6-U220B
@@ -376,15 +376,15 @@ assign #0.2  A6U220Pad9 = rst ? 0 : ~(0|A6U218Pad9|T07_);
 // Gate A6-U113B
 assign #0.2  A6U109Pad4 = rst ? 0 : ~(0|A6U111Pad1|L15A_|L01_);
 // Gate A6-U109B
-assign #0.2  A6U109Pad9 = rst ? 1 : ~(0|A6U109Pad4|A6U109Pad3);
+assign #0.2  A6U109Pad9 = rst ? 0 : ~(0|A6U109Pad4|A6U109Pad3);
 // Gate A6-U136A
-assign #0.2  IL03 = rst ? 1 : ~(0|S03);
+assign #0.2  IL03 = rst ? 0 : ~(0|S03);
 // Gate A6-U234A
 assign #0.2  A6XP9 = rst ? 0 : ~(0|A6U234Pad2|T10_);
 // Gate A6-U217B
 assign #0.2  A6U217Pad9 = rst ? 0 : ~(0|MON_|T04_|FETCH1);
 // Gate A6-U114B
-assign #0.2  A6U114Pad9 = rst ? 0 : ~(0|A6U114Pad1);
+assign #0.2  A6U114Pad9 = rst ? 1 : ~(0|A6U114Pad1);
 // Gate A6-U150A
 assign #0.2  BXVX = rst ? 0 : ~(0|A6U150Pad2);
 // Gate A6-U118A
@@ -392,7 +392,7 @@ assign #0.2  A6J1Pad104 = rst ? 0 : ~(0|A6U118Pad2);
 // Gate A6-U119A A6-U158A
 assign #0.2  TSGU_ = rst ? 1 : ~(0|d5XP28|A6J1Pad104);
 // Gate A6-U114A
-assign #0.2  A6U114Pad1 = rst ? 1 : ~(0|L02A_|A6U109Pad4|A6U109Pad3);
+assign #0.2  A6U114Pad1 = rst ? 0 : ~(0|L02A_|A6U109Pad4|A6U109Pad3);
 // Gate A6-U247A
 assign #0.2  RB1_ = rst ? 1 : ~(0|A6U218Pad1);
 

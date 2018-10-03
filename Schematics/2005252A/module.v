@@ -90,13 +90,13 @@ assign #0.2  RLG2 = rst ? 0 : ~(0|RT_|RL_);
 // Gate A7-U234A
 assign #0.2  A7U233Pad2 = rst ? 1 : ~(0|A7U234Pad2|A7U231Pad8|U2BBK);
 // Gate A7-U202A
-assign #0.2  CIFF = rst ? 1 : ~(0|A7J4Pad432|CUG);
+assign #0.2  CIFF = rst ? 0 : ~(0|A7J4Pad432|CUG);
 // Gate A7-U252B A7-U250B A7-U251B
 assign #0.2  RZG_ = rst ? 1 : ~(0|A7U250Pad7|A7U249Pad9);
 // Gate A7-U238B
 assign #0.2  A7U232Pad3 = rst ? 0 : ~(0|RB_|RT_);
 // Gate A7-U231A
-assign #0.2  CI01_ = rst ? 0 : ~(0|CINORM|CIFF);
+assign #0.2  CI01_ = rst ? 1 : ~(0|CINORM|CIFF);
 // Gate A7-U111B
 assign #0.2  A7U111Pad9 = rst ? 0 : ~(0|WL_|WT_);
 // Gate A7-U232B
@@ -342,7 +342,7 @@ assign #0.2  WZG_ = rst ? 1 : ~(0|A7U102Pad9|A7U101Pad9);
 // Gate A7-U206A
 assign #0.2  A7U205Pad3 = rst ? 0 : ~(0|XB6_|RSCG_);
 // Gate A7-U203A
-assign #0.2  A7J4Pad432 = rst ? 0 : ~(0|CI|CIFF);
+assign #0.2  A7J4Pad432 = rst ? 1 : ~(0|CI|CIFF);
 // Gate A7-U142B
 assign #0.2  A7U142Pad9 = rst ? 0 : ~(0|WY_|WT_);
 // Gate A7-U247A

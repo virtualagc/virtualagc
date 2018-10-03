@@ -62,7 +62,7 @@ assign #0.2  A5U131Pad2 = rst ? 1 : ~(0|TC0|TCF0|IC4);
 // Gate A5-U131A
 assign #0.2  A5U131Pad1 = rst ? 0 : ~(0|A5U131Pad2|T01_);
 // Gate A5-U210A
-assign #0.2  Z15_ = rst ? 1 : ~(0|A5U210Pad2);
+assign #0.2  Z15_ = rst ? 0 : ~(0|A5U210Pad2);
 // Gate A5-U108B
 assign #0.2  RAD = rst ? 0 : ~(0|TSUDO_|T08_);
 // Gate A5-U239B
@@ -84,7 +84,7 @@ assign #0.2  A5U140Pad1 = rst ? 0 : ~(0|IC2_|T04_);
 // Gate A5-U133B
 assign #0.2  A5U133Pad9 = rst ? 1 : ~(0|STD2|IC2);
 // Gate A5-U120B A5-U141A A5-U238A
-assign #0.2  RA_ = rst ? 0 : ~(0|A5U118Pad9|A5U120Pad3|A5U140Pad1|A5U139Pad9|A5P2|A5U236Pad1);
+assign #0.2  RA_ = rst ? 1 : ~(0|A5U118Pad9|A5U120Pad3|A5U140Pad1|A5U139Pad9|A5P2|A5U236Pad1);
 // Gate A5-U258A A5-U257A
 assign #0.2  NDR100_ = rst ? 1 : ~(0|A5U258Pad2|A5U257Pad2);
 // Gate A5-U259A
@@ -130,7 +130,7 @@ assign #0.2  A5U124Pad7 = rst ? 0 : ~(0|C37P|C40P|C41P|C44P|C43P|C42P|C26A|C25A|
 // Gate A5-U124B
 assign #0.2  A5U124Pad9 = rst ? 0 : ~(0|A5U124Pad7|INCSET_);
 // Gate A5-U254A
-assign #0.2  Z16_ = rst ? 1 : ~(0|A5U223Pad9);
+assign #0.2  Z16_ = rst ? 0 : ~(0|A5U223Pad9);
 // Gate A5-U215B
 assign #0.2  A5U215Pad9 = rst ? 0 : ~(0|T09_|DAS1_);
 // Gate A5-U233A
@@ -168,7 +168,7 @@ assign #0.2  A5U210Pad2 = rst ? 0 : ~(0|T09_|A5U215Pad3);
 // Gate A5-U137A
 assign #0.2  NISQ_ = rst ? 1 : ~(0|d2XP7|A5U136Pad1|A58XP15);
 // Gate A5-U152A A5-U208B
-assign #0.2  TSGN_ = rst ? 0 : ~(0|A5U139Pad9|d7XP9|A5U143Pad3|A5P9|RSTSTG);
+assign #0.2  TSGN_ = rst ? 1 : ~(0|A5U139Pad9|d7XP9|A5U143Pad3|A5P9|RSTSTG);
 // Gate A5-U214A
 assign #0.2  A5U210Pad8 = rst ? 0 : ~(0|T09_|DV4_);
 // Gate A5-U213B
@@ -208,7 +208,7 @@ assign #0.2  d10XP8 = rst ? 0 : ~(0|BR1B2_|T10_|DAS0_);
 // Gate A5-U147B
 assign #0.2  A5U147Pad2 = rst ? 1 : ~(0|PRINC|PARTC|CCS0);
 // Gate A5-U149A A5-U220B
-assign #0.2  TMZ_ = rst ? 0 : ~(0|A5U139Pad9|A5U143Pad3|A5U215Pad9);
+assign #0.2  TMZ_ = rst ? 1 : ~(0|A5U139Pad9|A5U143Pad3|A5U215Pad9);
 // Gate A5-U201A
 assign #0.2  A5U201Pad1 = rst ? 0 : ~(0|T12_|T12USE_|DV1_);
 // Gate A5-U147A

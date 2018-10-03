@@ -30,7 +30,7 @@ assign #0.2  DKDATA = rst ? 0 : ~(0|DKDAT_|RDOUT_|BSYNC_);
 // Gate A22-U147A
 assign #0.2  DKDATB = rst ? 0 : ~(0|BSYNC_|RDOUT_|DKDAT_);
 // Gate A22-U130A
-assign #0.2  DKCTR5 = rst ? 1 : ~(0|DKCTR5_|A22U128Pad2);
+assign #0.2  DKCTR5 = rst ? 0 : ~(0|DKCTR5_|A22U128Pad2);
 // Gate A22-U112B
 assign #0.2  DKCTR2 = rst ? 1 : ~(0|A22U110Pad2);
 // Gate A22-U124B
@@ -38,7 +38,7 @@ assign #0.2  DKCTR3 = rst ? 0 : ~(0|A22U122Pad2);
 // Gate A22-U139A
 assign #0.2  LOW6_ = rst ? 1 : ~(0|A22U139Pad2);
 // Gate A22-U108B
-assign #0.2  DKCTR1 = rst ? 1 : ~(0|A22U106Pad2);
+assign #0.2  DKCTR1 = rst ? 0 : ~(0|A22U106Pad2);
 // Gate A22-U127A
 assign #0.2  DKCTR4 = rst ? 1 : ~(0|DKCTR4_|A22U125Pad2);
 // Gate A22-U237A
@@ -86,9 +86,9 @@ assign #0.2  A22U148Pad2 = rst ? 0 : ~(0|XB4_|XT1_);
 // Gate A22-U231B
 assign #0.2  A22U231Pad2 = rst ? 0 : ~(0|WCH35_|CHWL02_);
 // Gate A22-U105A
-assign #0.2  A22U105Pad1 = rst ? 1 : ~(0|A22U105Pad2|A22U105Pad3|A22U104Pad1);
+assign #0.2  A22U105Pad1 = rst ? 0 : ~(0|A22U105Pad2|A22U105Pad3|A22U104Pad1);
 // Gate A22-U105B
-assign #0.2  A22U105Pad2 = rst ? 0 : ~(0|A22U105Pad1|A22U104Pad1|d1CNT);
+assign #0.2  A22U105Pad2 = rst ? 1 : ~(0|A22U105Pad1|A22U104Pad1|d1CNT);
 // Gate A22-U106A
 assign #0.2  A22U105Pad3 = rst ? 0 : ~(0|A22U106Pad2|A22U105Pad1);
 // Gate A22-U209B
@@ -136,7 +136,7 @@ assign #0.2  A22U241Pad3 = rst ? 0 : ~(0|LOW7_|HIGH2_|A22U244Pad3);
 // Gate A22-U242B
 assign #0.2  A22U241Pad2 = rst ? 0 : ~(0|HIGH3_|LOW0_|A22U242Pad2);
 // Gate A22-U103B
-assign #0.2  RDOUT_ = rst ? 1 : ~(0|A22U102Pad9|DLKCLR);
+assign #0.2  RDOUT_ = rst ? 0 : ~(0|A22U102Pad9|DLKCLR);
 // Gate A22-U247B
 assign #0.2  A22U241Pad4 = rst ? 0 : ~(0|LOW6_|HIGH2_|A22U246Pad1);
 // Gate A22-U229A
@@ -164,7 +164,7 @@ assign #0.2  DATA_ = rst ? 0 : ~(0|A22U132Pad6|A22U132Pad7|WRD2B2|WRD1BP|WRD2B3|
 // Gate A22-U250B
 assign #0.2  A22U250Pad2 = rst ? 0 : ~(0|CHWL11_|WCH35_);
 // Gate A22-U142B
-assign #0.2  A22U142Pad2 = rst ? 1 : ~(0|DKCTR1_|DKCTR2_|DKCTR3);
+assign #0.2  A22U142Pad2 = rst ? 0 : ~(0|DKCTR1_|DKCTR2_|DKCTR3);
 // Gate A22-U129B
 assign #0.2  d16CNT = rst ? 0 : ~(0|A22U128Pad2|DKCTR5);
 // Gate A22-U251B
@@ -178,7 +178,7 @@ assign #0.2  A22U221Pad1 = rst ? 1 : ~(0|A22U221Pad2|A22U221Pad3);
 // Gate A22-U222A
 assign #0.2  A22U221Pad3 = rst ? 0 : ~(0|CCH34|A22U221Pad1);
 // Gate A22-U108A
-assign #0.2  DKCTR1_ = rst ? 0 : ~(0|A22U106Pad8);
+assign #0.2  DKCTR1_ = rst ? 1 : ~(0|A22U106Pad8);
 // Gate A22-U149A A22-U150A A22-U150B
 assign #0.2  CCH14 = rst ? 1 : ~(0|A22U149Pad2);
 // Gate A22-U218A
@@ -248,13 +248,13 @@ assign #0.2  A22U207Pad8 = rst ? 0 : ~(0|HIGH0_|LOW7_|A22U212Pad2);
 // Gate A22-U243B
 assign #0.2  A22U243Pad2 = rst ? 0 : ~(0|CHWL07_|WCH35_);
 // Gate A22-U102B
-assign #0.2  A22U102Pad9 = rst ? 0 : ~(0|END|RDOUT_);
+assign #0.2  A22U102Pad9 = rst ? 1 : ~(0|END|RDOUT_);
 // Gate A22-U135B
 assign #0.2  A22U135Pad9 = rst ? 0 : ~(0|A22U134Pad8|CCH34);
 // Gate A22-U123B
 assign #0.2  A22U122Pad2 = rst ? 1 : ~(0|A22U121Pad1|DLKCLR|A22U122Pad8);
 // Gate A22-U143A
-assign #0.2  LOW2_ = rst ? 1 : ~(0|A22U143Pad2);
+assign #0.2  LOW2_ = rst ? 0 : ~(0|A22U143Pad2);
 // Gate A22-U135A
 assign #0.2  A22U135Pad1 = rst ? 0 : ~(0|A22U134Pad3|CCH34);
 // Gate A22-U123A
@@ -268,7 +268,7 @@ assign #0.2  RCH13_ = rst ? 1 : ~(0|A22U154Pad2);
 // Gate A22-U255B
 assign #0.2  A22U254Pad8 = rst ? 0 : ~(0|LOW2_|HIGH2_|A22U255Pad3);
 // Gate A22-U130B
-assign #0.2  DKCTR5_ = rst ? 0 : ~(0|DLKCLR|A22U128Pad1|DKCTR5);
+assign #0.2  DKCTR5_ = rst ? 1 : ~(0|DLKCLR|A22U128Pad1|DKCTR5);
 // Gate A22-U257B
 assign #0.2  A22U254Pad7 = rst ? 0 : ~(0|LOW1_|HIGH2_|A22U257Pad3);
 // Gate A22-U208B
@@ -372,7 +372,7 @@ assign #0.2  A22U213Pad2 = rst ? 0 : ~(0|WCH34_|CHWL08_);
 // Gate A22-U145A
 assign #0.2  LOW0_ = rst ? 1 : ~(0|A22U145Pad2);
 // Gate A22-U143B
-assign #0.2  A22U143Pad2 = rst ? 0 : ~(0|DKCTR2_|DKCTR1|DKCTR3);
+assign #0.2  A22U143Pad2 = rst ? 1 : ~(0|DKCTR2_|DKCTR1|DKCTR3);
 // Gate A22-U144A
 assign #0.2  LOW1_ = rst ? 1 : ~(0|A22U144Pad2);
 // Gate A22-U227A
@@ -406,7 +406,7 @@ assign #0.2  A22U121Pad8 = rst ? 0 : ~(0|A22U121Pad2|A22U122Pad8);
 // Gate A22-U244A
 assign #0.2  A22U244Pad1 = rst ? 0 : ~(0|CCH35|A22U244Pad3);
 // Gate A22-U142A
-assign #0.2  LOW3_ = rst ? 0 : ~(0|A22U142Pad2);
+assign #0.2  LOW3_ = rst ? 1 : ~(0|A22U142Pad2);
 // Gate A22-U228B
 assign #0.2  WRD1B1 = rst ? 0 : ~(0|HIGH1_|LOW6_|A22U227Pad1);
 // Gate A22-U121B
@@ -422,19 +422,19 @@ assign #0.2  A22U218Pad2 = rst ? 0 : ~(0|WCH34_|CHWL11_);
 // Gate A22-U118A
 assign #0.2  A22U118Pad1 = rst ? 1 : ~(0|DLKCLR|WDORDR);
 // Gate A22-U107B
-assign #0.2  A22U106Pad2 = rst ? 0 : ~(0|A22U105Pad1|DLKCLR|A22U106Pad8);
+assign #0.2  A22U106Pad2 = rst ? 1 : ~(0|A22U105Pad1|DLKCLR|A22U106Pad8);
 // Gate A22-U258B
 assign #0.2  A22U258Pad2 = rst ? 0 : ~(0|CHWL14_|WCH35_);
 // Gate A22-U225A
 assign #0.2  A22U225Pad1 = rst ? 1 : ~(0|A22U225Pad2|A22U225Pad3);
 // Gate A22-U128B
-assign #0.2  A22U128Pad2 = rst ? 0 : ~(0|A22U128Pad1|A22U125Pad3|d16CNT);
+assign #0.2  A22U128Pad2 = rst ? 1 : ~(0|A22U128Pad1|A22U125Pad3|d16CNT);
 // Gate A22-U128A
-assign #0.2  A22U128Pad1 = rst ? 1 : ~(0|A22U128Pad2|d32CNT|A22U125Pad3);
+assign #0.2  A22U128Pad1 = rst ? 0 : ~(0|A22U128Pad2|d32CNT|A22U125Pad3);
 // Gate A22-U225B
 assign #0.2  A22U225Pad2 = rst ? 0 : ~(0|WCH34_|CHWL02_);
 // Gate A22-U107A
-assign #0.2  A22U106Pad8 = rst ? 1 : ~(0|A22U106Pad2|A22U105Pad2);
+assign #0.2  A22U106Pad8 = rst ? 0 : ~(0|A22U106Pad2|A22U105Pad2);
 // Gate A22-U228A
 assign #0.2  A22U227Pad3 = rst ? 0 : ~(0|CCH34|A22U227Pad1);
 // Gate A22-U227B

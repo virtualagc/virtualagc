@@ -82,7 +82,7 @@ assign #0.2  QC3_ = rst ? 0 : ~(0|A3U102Pad2);
 // Gate A3-U136A
 assign #0.2  A3U132Pad2 = rst ? 1 : ~(0|A3U136Pad2|SQR16);
 // Gate A3-U132B
-assign #0.2  SCAS10 = rst ? 0 : ~(0|FS10|CON2);
+assign #0.2  SCAS10 = rst ? 1 : ~(0|FS10|CON2);
 // Gate A3-U216A
 assign #0.2  A3J3Pad334 = rst ? 1 : ~(0);
 // Gate A3-U241A

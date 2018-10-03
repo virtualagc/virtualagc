@@ -225,7 +225,7 @@ assign #0.2  ALTM = rst ? 0 : ~(0|F5ASB0_|A19U116Pad1);
 // Gate A19-U242A
 assign #0.2  A19U241Pad2 = rst ? 1 : ~(0|BMGYP|A19U242Pad3);
 // Gate A19-U132B
-assign #0.2  A19U132Pad2 = rst ? 0 : ~(0|A19U131Pad1|A19U132Pad8);
+assign #0.2  A19U132Pad2 = rst ? 1 : ~(0|A19U131Pad1|A19U132Pad8);
 // Gate A19-U155A
 assign #0.2  A19U155Pad1 = rst ? 0 : ~(0|A19U155Pad2|A19U154Pad2|CCH14);
 // Gate A19-U149B
@@ -233,7 +233,7 @@ assign #0.2  A19U148Pad2 = rst ? 0 : ~(0|A19U149Pad3|POUT_);
 // Gate A19-U159A
 assign #0.2  A19U155Pad2 = rst ? 0 : ~(0|A19U129Pad9|ZOUT_);
 // Gate A19-U133B
-assign #0.2  A19U132Pad8 = rst ? 1 : ~(0|A19U132Pad2|F04A);
+assign #0.2  A19U132Pad8 = rst ? 0 : ~(0|A19U132Pad2|F04A);
 // Gate A19-U214B
 assign #0.2  GYZP = rst ? 0 : ~(0|A19U213Pad1|A19U209Pad2);
 // Gate A19-U244A
@@ -259,7 +259,7 @@ assign #0.2  A19U259Pad8 = rst ? 0 : ~(0|WCH13_|CHWL09_);
 // Gate A19-U213A
 assign #0.2  A19U213Pad1 = rst ? 1 : ~(0|A19U212Pad1);
 // Gate A19-U132A
-assign #0.2  A19U131Pad3 = rst ? 1 : ~(0|A19U132Pad2|A19U131Pad1);
+assign #0.2  A19U131Pad3 = rst ? 0 : ~(0|A19U132Pad2|A19U131Pad1);
 // Gate A19-U131A
 assign #0.2  A19U131Pad1 = rst ? 0 : ~(0|C45R_|A19U131Pad3);
 // Gate A19-U245B
@@ -305,9 +305,9 @@ assign #0.2  CH1402 = rst ? 0 : ~(0|A19U108Pad1|RCH14_);
 // Gate A19-U110A
 assign #0.2  CH1403 = rst ? 0 : ~(0|RCH14_|A19U110Pad3);
 // Gate A19-U118A
-assign #0.2  A19U118Pad1 = rst ? 0 : ~(0|A19U118Pad2|A19U109Pad6);
+assign #0.2  A19U118Pad1 = rst ? 1 : ~(0|A19U118Pad2|A19U109Pad6);
 // Gate A19-U118B
-assign #0.2  A19U118Pad2 = rst ? 1 : ~(0|GTONE|A19U118Pad1);
+assign #0.2  A19U118Pad2 = rst ? 0 : ~(0|GTONE|A19U118Pad1);
 // Gate A19-U210A
 assign #0.2  CH1408 = rst ? 0 : ~(0|RCH14_|A19U210Pad3);
 // Gate A19-U208A
@@ -327,7 +327,7 @@ assign #0.2  A19U123Pad1 = rst ? 1 : ~(0|A19U123Pad2|A19U122Pad1);
 // Gate A19-U248A
 assign #0.2  A19U247Pad2 = rst ? 0 : ~(0|F5ASB2_|A19U248Pad3|GATEZ_);
 // Gate A19-U120A
-assign #0.2  ALTSNC = rst ? 1 : ~(0|A19U119Pad1);
+assign #0.2  ALTSNC = rst ? 0 : ~(0|A19U119Pad1);
 // Gate A19-U113A
 assign #0.2  ALRT0 = rst ? 0 : ~(0|A19U104Pad1|A19U108Pad1);
 // Gate A19-U113B
@@ -341,7 +341,7 @@ assign #0.2  BMAGYM = rst ? 0 : ~(0|A19U241Pad7|A19U231Pad3);
 // Gate A19-U254A
 assign #0.2  A19U253Pad2 = rst ? 0 : ~(0|A19U253Pad7|F07B);
 // Gate A19-U119A
-assign #0.2  A19U119Pad1 = rst ? 0 : ~(0|A19U115Pad2|A19U109Pad6|A19U118Pad2);
+assign #0.2  A19U119Pad1 = rst ? 1 : ~(0|A19U115Pad2|A19U109Pad6|A19U118Pad2);
 // Gate A19-U107B
 assign #0.2  A19U107Pad9 = rst ? 0 : ~(0|CHWL02_|WCH14_);
 // Gate A19-U229A
@@ -349,7 +349,7 @@ assign #0.2  A19U229Pad1 = rst ? 0 : ~(0|WCH11_|CHWL12_);
 // Gate A19-U115A
 assign #0.2  A19U114Pad7 = rst ? 1 : ~(0|A19U115Pad2|A19U114Pad1);
 // Gate A19-U102A
-assign #0.2  SH3MS_ = rst ? 0 : ~(0|A19U102Pad2|A19U101Pad1);
+assign #0.2  SH3MS_ = rst ? 1 : ~(0|A19U102Pad2|A19U101Pad1);
 // Gate A19-U119B
 assign #0.2  A19U119Pad9 = rst ? 0 : ~(0|WCH14_|CHWL01_);
 // Gate A19-U106B
@@ -399,7 +399,7 @@ assign #0.2  A19U212Pad7 = rst ? 0 : ~(0|A19U212Pad2|CCH14);
 // Gate A19-U157B
 assign #0.2  THRSTm = rst ? 0 : ~(0|A19U157Pad2|F5ASB0_);
 // Gate A19-U102B
-assign #0.2  A19U102Pad2 = rst ? 1 : ~(0|SH3MS_|CSG);
+assign #0.2  A19U102Pad2 = rst ? 0 : ~(0|SH3MS_|CSG);
 // Gate A19-U139B
 assign #0.2  A19U136Pad8 = rst ? 1 : ~(0|A19U138Pad3|A19U137Pad3);
 // Gate A19-U247A
@@ -461,7 +461,7 @@ assign #0.2  A19U146Pad2 = rst ? 1 : ~(0|A19U147Pad2|A19U147Pad3);
 // Gate A19-U204A
 assign #0.2  GYRSET = rst ? 0 : ~(0|F5ASB2_|A19U203Pad2);
 // Gate A19-U235B
-assign #0.2  A19U232Pad8 = rst ? 0 : ~(0|A19U232Pad2|A19U235Pad8);
+assign #0.2  A19U232Pad8 = rst ? 1 : ~(0|A19U232Pad2|A19U235Pad8);
 // Gate A19-U120B
 assign #0.2  A19U120Pad9 = rst ? 0 : ~(0|CCH14|A19U120Pad7|A19U120Pad8);
 // Gate A19-U121A
@@ -501,7 +501,7 @@ assign #0.2  A19U220Pad9 = rst ? 0 : ~(0|CHWL06_|WCH14_);
 // Gate A19-U133A
 assign #0.2  CH3310 = rst ? 0 : ~(0|RCH33_|BLKUPL);
 // Gate A19-U235A
-assign #0.2  A19U232Pad2 = rst ? 1 : ~(0|A19U232Pad8|A19U235Pad3);
+assign #0.2  A19U232Pad2 = rst ? 0 : ~(0|A19U232Pad8|A19U235Pad3);
 // Gate A19-U254B
 assign #0.2  A19U253Pad7 = rst ? 1 : ~(0|A19U253Pad2|A19U254Pad8);
 // Gate A19-U211B

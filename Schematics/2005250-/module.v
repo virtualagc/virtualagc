@@ -50,7 +50,7 @@ assign #0.2  A21U143Pad8 = rst ? 1 : ~(0|C57A|C55A|C53A|C47A|C51A|C33A|C35A|C37A
 // Gate A21-U242A
 assign #0.2  C57A = rst ? 0 : ~(0|CG23|A21U241Pad1|A21U234Pad2);
 // Gate A21-U250A
-assign #0.2  A21U249Pad2 = rst ? 0 : ~(0|C60R|A21U249Pad1);
+assign #0.2  A21U249Pad2 = rst ? 1 : ~(0|C60R|A21U249Pad1);
 // Gate A21-U116B
 assign #0.2  INOTRD = rst ? 1 : ~(0|A21U112Pad8|A21U116Pad1);
 // Gate A21-U214B
@@ -58,7 +58,7 @@ assign #0.2  C47R = rst ? 0 : ~(0|A21U202Pad2|CXB7_|CA4_);
 // Gate A21-U137A A21-U138A A21-U139B
 assign #0.2  A21U137Pad1 = rst ? 1 : ~(0|C45M|C46M|C57A|C60A);
 // Gate A21-U229A
-assign #0.2  A21U228Pad2 = rst ? 0 : ~(0|A21U219Pad4|C44R);
+assign #0.2  A21U228Pad2 = rst ? 1 : ~(0|A21U219Pad4|C44R);
 // Gate A21-U203A
 assign #0.2  A21U203Pad1 = rst ? 1 : ~(0|C45R|A21U201Pad2);
 // Gate A21-U211B
@@ -92,7 +92,7 @@ assign #0.2  BKTF_ = rst ? 0 : ~(0|T10_);
 // Gate A21-U113B
 assign #0.2  A21U110Pad6 = rst ? 0 : ~(0|A21U113Pad7|T11_);
 // Gate A21-U223A
-assign #0.2  A21U222Pad3 = rst ? 1 : ~(0|C44R|A21U221Pad4);
+assign #0.2  A21U222Pad3 = rst ? 0 : ~(0|C44R|A21U221Pad4);
 // Gate A21-U237A
 assign #0.2  C56R = rst ? 0 : ~(0|CXB6_|CA5_|A21U237Pad4);
 // Gate A21-U114A
@@ -108,9 +108,9 @@ assign #0.2  SHANC_ = rst ? 1 : ~(0|SHANC|A21U134Pad1);
 // Gate A21-U154A A21-U148A A21-U150A A21-U157A A21-U159A A21-U153A
 assign #0.2  A21U141Pad2 = rst ? 0 : ~(0|C36A|C37A|C44A|C57A|C55A|C54A|C56A|C27A|C34A|C35A|C25A|C24A|C26A|C45A|C47A|C46A);
 // Gate A21-U235B
-assign #0.2  A21U235Pad9 = rst ? 0 : ~(0|A21U234Pad9|A21U235Pad8);
+assign #0.2  A21U235Pad9 = rst ? 1 : ~(0|A21U234Pad9|A21U235Pad8);
 // Gate A21-U237B
-assign #0.2  A21U235Pad8 = rst ? 1 : ~(0|A21U235Pad9|C42R);
+assign #0.2  A21U235Pad8 = rst ? 0 : ~(0|A21U235Pad9|C42R);
 // Gate A21-U208B
 assign #0.2  A21J3Pad314 = rst ? 0 : ~(0|A21U208Pad6|CG16|A21U208Pad8);
 // Gate A21-U134B
@@ -118,7 +118,7 @@ assign #0.2  DINCNC_ = rst ? 1 : ~(0|DINC|A21U133Pad1);
 // Gate A21-U125A
 assign #0.2  STORE1 = rst ? 0 : ~(0|A21U125Pad2|ST1_);
 // Gate A21-U224A
-assign #0.2  A21U207Pad2 = rst ? 1 : ~(0|A21U224Pad2|C44R);
+assign #0.2  A21U207Pad2 = rst ? 0 : ~(0|A21U224Pad2|C44R);
 // Gate A21-U201B
 assign #0.2  RQ_ = rst ? 1 : ~(0|RQ);
 // Gate A21-U207A
@@ -134,9 +134,9 @@ assign #0.2  MREQIN = rst ? 1 : ~(0|A21U114Pad2);
 // Gate A21-U234B
 assign #0.2  A21U234Pad9 = rst ? 0 : ~(0|A21U233Pad9|A21U233Pad2);
 // Gate A21-U234A
-assign #0.2  A21U234Pad1 = rst ? 1 : ~(0|A21U234Pad2|A21U233Pad1);
+assign #0.2  A21U234Pad1 = rst ? 0 : ~(0|A21U234Pad2|A21U233Pad1);
 // Gate A21-U236A
-assign #0.2  A21U234Pad2 = rst ? 0 : ~(0|C56R|A21U234Pad1);
+assign #0.2  A21U234Pad2 = rst ? 1 : ~(0|C56R|A21U234Pad1);
 // Gate A21-U238A
 assign #0.2  A21U238Pad1 = rst ? 1 : ~(0|A21U238Pad2|C57R);
 // Gate A21-U239A
@@ -164,19 +164,19 @@ assign #0.2  A21U231Pad9 = rst ? 0 : ~(0|A21U231Pad7|BMAGXP);
 // Gate A21-U206A
 assign #0.2  A21J3Pad303 = rst ? 1 : ~(0);
 // Gate A21-U206B
-assign #0.2  CA4_ = rst ? 0 : ~(0|OCTAD4);
+assign #0.2  CA4_ = rst ? 1 : ~(0|OCTAD4);
 // Gate A21-U129A A21-U128A
 assign #0.2  A21U128Pad1 = rst ? 0 : ~(0|PHS4_|T12_|NISQL_|GNHNC|PSEUDO);
 // Gate A21-U102A
 assign #0.2  RSSB = rst ? 0 : ~(0|PHS3_|T07_|A21U102Pad4);
 // Gate A21-U230A
-assign #0.2  A21U219Pad4 = rst ? 1 : ~(0|BMAGZP|A21U228Pad2);
+assign #0.2  A21U219Pad4 = rst ? 0 : ~(0|BMAGZP|A21U228Pad2);
 // Gate A21-U244B
 assign #0.2  C57R = rst ? 0 : ~(0|CXB7_|A21U237Pad4|CA5_);
 // Gate A21-U204A
 assign #0.2  A21U201Pad2 = rst ? 0 : ~(0|INLNKM|A21U203Pad1);
 // Gate A21-U203B A21-U202B
-assign #0.2  CXB6_ = rst ? 1 : ~(0|XB6);
+assign #0.2  CXB6_ = rst ? 0 : ~(0|XB6);
 // Gate A21-U241A
 assign #0.2  A21U241Pad1 = rst ? 0 : ~(0|A21U241Pad2|A21U240Pad1);
 // Gate A21-U243A
@@ -196,7 +196,7 @@ assign #0.2  INCSET_ = rst ? 1 : ~(0|A21U105Pad8);
 // Gate A21-U224B
 assign #0.2  C46R = rst ? 0 : ~(0|CA4_|CXB6_|A21U202Pad2);
 // Gate A21-U246A
-assign #0.2  A21U245Pad2 = rst ? 1 : ~(0|A21U245Pad1|ALTM);
+assign #0.2  A21U245Pad2 = rst ? 0 : ~(0|A21U245Pad1|ALTM);
 // Gate A21-U220B
 assign #0.2  C46P = rst ? 0 : ~(0|CA4_|CXB6_|A21U220Pad8);
 // Gate A21-U213A
@@ -222,7 +222,7 @@ assign #0.2  A21U120Pad1 = rst ? 0 : ~(0|ST1_|MON_|A21U112Pad9);
 // Gate A21-U114B A21-U115B
 assign #0.2  A21U114Pad2 = rst ? 0 : ~(0|A21U114Pad7|A21U114Pad8|INOTLD|INOTRD);
 // Gate A21-U257B
-assign #0.2  A21U257Pad9 = rst ? 0 : ~(0|A21U248Pad8|BMAGYM);
+assign #0.2  A21U257Pad9 = rst ? 1 : ~(0|A21U248Pad8|BMAGYM);
 // Gate A21-U259B
 assign #0.2  C43M = rst ? 0 : ~(0|A21U257Pad9|CA4_|CXB3_);
 // Gate A21-U252B
@@ -236,7 +236,7 @@ assign #0.2  d50SUM = rst ? 0 : ~(0|A21U145Pad8);
 // Gate A21-U118A
 assign #0.2  A21U118Pad1 = rst ? 0 : ~(0|INOTLD|A21U118Pad3);
 // Gate A21-U227B
-assign #0.2  A21U226Pad7 = rst ? 0 : ~(0|A21U208Pad8|A21U225Pad9);
+assign #0.2  A21U226Pad7 = rst ? 1 : ~(0|A21U208Pad8|A21U225Pad9);
 // Gate A21-U119A
 assign #0.2  A21U118Pad3 = rst ? 0 : ~(0|A21U109Pad3|A21U119Pad3|A21U110Pad8);
 // Gate A21-U241B
@@ -254,7 +254,7 @@ assign #0.2  A21U108Pad2 = rst ? 0 : ~(0|CTROR_|A21U108Pad7|MNHNC|A21U109Pad3);
 // Gate A21-U106B
 assign #0.2  A21U105Pad8 = rst ? 0 : ~(0|A21U102Pad4|T02_);
 // Gate A21-U216B
-assign #0.2  A21U215Pad7 = rst ? 1 : ~(0|A21U213Pad7|C47R);
+assign #0.2  A21U215Pad7 = rst ? 0 : ~(0|A21U213Pad7|C47R);
 // Gate A21-U122B
 assign #0.2  A21U114Pad7 = rst ? 0 : ~(0|A21U120Pad1|A21U121Pad3|GOJAM);
 // Gate A21-U255A A21-U253A
@@ -262,7 +262,7 @@ assign #0.2  CTROR_ = rst ? 0 : ~(0|A21U241Pad2|A21U249Pad2|CG23|A21U234Pad2);
 // Gate A21-U142A
 assign #0.2  A21U113Pad7 = rst ? 0 : ~(0|FETCH1|STORE1|CHINC);
 // Gate A21-U222A
-assign #0.2  A21U221Pad4 = rst ? 0 : ~(0|BMAGZM|A21U222Pad3);
+assign #0.2  A21U221Pad4 = rst ? 1 : ~(0|BMAGZM|A21U222Pad3);
 // Gate A21-U230B
 assign #0.2  A21U221Pad8 = rst ? 1 : ~(0|C46R|A21U220Pad8);
 // Gate A21-U119B
@@ -270,7 +270,7 @@ assign #0.2  A21U119Pad3 = rst ? 1 : ~(0|MLDCH);
 // Gate A21-U132B
 assign #0.2  CHINC_ = rst ? 0 : ~(0|INOTRD|INOTLD);
 // Gate A21-U226A
-assign #0.2  A21U224Pad2 = rst ? 0 : ~(0|A21U226Pad2|A21U207Pad2);
+assign #0.2  A21U224Pad2 = rst ? 1 : ~(0|A21U226Pad2|A21U207Pad2);
 // Gate A21-U225A
 assign #0.2  C44A = rst ? 0 : ~(0|CG15|A21U224Pad2);
 // Gate A21-U142B
@@ -290,7 +290,7 @@ assign #0.2  C45R = rst ? 0 : ~(0|A21U202Pad2|CA4_|CXB5_);
 // Gate A21-U251A A21-U252A
 assign #0.2  C60A = rst ? 0 : ~(0|CG23|A21U234Pad2|A21U241Pad2|A21U249Pad1);
 // Gate A21-U249A
-assign #0.2  A21U249Pad1 = rst ? 1 : ~(0|A21U249Pad2|A21U247Pad1);
+assign #0.2  A21U249Pad1 = rst ? 0 : ~(0|A21U249Pad2|A21U247Pad1);
 // Gate A21-U107B
 assign #0.2  A21U107Pad3 = rst ? 0 : ~(0|A21U107Pad6|PHS3_|T12_);
 // Gate A21-U117B
@@ -324,7 +324,7 @@ assign #0.2  A21J3Pad343 = rst ? 1 : ~(0);
 // Gate A21-U134A
 assign #0.2  A21U134Pad1 = rst ? 0 : ~(0|INCSET_|A21U133Pad9);
 // Gate A21-U103B
-assign #0.2  INKBT1 = rst ? 0 : ~(0|STD2);
+assign #0.2  INKBT1 = rst ? 1 : ~(0|STD2);
 // Gate A21-U124A
 assign #0.2  A21U123Pad3 = rst ? 1 : ~(0|MREAD);
 // Gate A21-U123A
@@ -332,7 +332,7 @@ assign #0.2  A21U123Pad1 = rst ? 0 : ~(0|A21U109Pad3|A21U123Pad3|A21U110Pad8);
 // Gate A21-U240A
 assign #0.2  A21U240Pad1 = rst ? 0 : ~(0|A21U233Pad2|A21U238Pad2);
 // Gate A21-U215A
-assign #0.2  A21U214Pad3 = rst ? 0 : ~(0|A21U212Pad3|C45R);
+assign #0.2  A21U214Pad3 = rst ? 1 : ~(0|A21U212Pad3|C45R);
 // Gate A21-U233A
 assign #0.2  A21U233Pad1 = rst ? 0 : ~(0|A21U233Pad2|A21U231Pad3);
 // Gate A21-U238B
@@ -346,13 +346,13 @@ assign #0.2  A21U247Pad7 = rst ? 0 : ~(0|A21U245Pad7|A21U248Pad8);
 // Gate A21-U127A
 assign #0.2  A21U127Pad1 = rst ? 1 : ~(0|MLOAD);
 // Gate A21-U245A
-assign #0.2  A21U245Pad1 = rst ? 0 : ~(0|A21U245Pad2|C60R);
+assign #0.2  A21U245Pad1 = rst ? 1 : ~(0|A21U245Pad2|C60R);
 // Gate A21-U213B
 assign #0.2  A21U212Pad8 = rst ? 0 : ~(0|A21U213Pad7|A21U213Pad3);
 // Gate A21-U247B
 assign #0.2  A21U247Pad9 = rst ? 0 : ~(0|A21U247Pad7|A21U233Pad2);
 // Gate A21-U228B
-assign #0.2  A21U208Pad8 = rst ? 1 : ~(0|A21U226Pad7|C46R);
+assign #0.2  A21U208Pad8 = rst ? 0 : ~(0|A21U226Pad7|C46R);
 // Gate A21-U240B
 assign #0.2  C42M = rst ? 0 : ~(0|A21U238Pad7|CA4_|CXB2_);
 // Gate A21-U149A A21-U152A A21-U151A
@@ -366,7 +366,7 @@ assign #0.2  A21U233Pad9 = rst ? 0 : ~(0|A21U233Pad7|A21U231Pad7);
 // Gate A21-U211A
 assign #0.2  A21U208Pad3 = rst ? 0 : ~(0|A21U211Pad2|A21U207Pad4);
 // Gate A21-U215B
-assign #0.2  A21U213Pad7 = rst ? 0 : ~(0|A21U215Pad7|GYROD);
+assign #0.2  A21U213Pad7 = rst ? 1 : ~(0|A21U215Pad7|GYROD);
 // Gate A21-U217B
 assign #0.2  A21U213Pad3 = rst ? 1 : ~(0|BKTF_);
 // Gate A21-U214A
@@ -412,12 +412,12 @@ assign #0.2  A21U218Pad8 = rst ? 0 : ~(0|A21U221Pad7|RNRADM);
 // Gate A21-U243B
 assign #0.2  A21U233Pad2 = rst ? 1 : ~(0|BKTF_);
 // Gate A21-U258B
-assign #0.2  A21U248Pad8 = rst ? 1 : ~(0|A21U257Pad9|C43R);
+assign #0.2  A21U248Pad8 = rst ? 0 : ~(0|A21U257Pad9|C43R);
 // Gate A21-U113A
 assign #0.2  A21U112Pad8 = rst ? 0 : ~(0|T12_|CT|PHS2_);
 // Gate A21-U212A
 assign #0.2  C45P = rst ? 0 : ~(0|CXB5_|A21U212Pad3|CA4_);
 // Gate A21-U216A
-assign #0.2  A21U212Pad3 = rst ? 1 : ~(0|INLNKP|A21U214Pad3);
+assign #0.2  A21U212Pad3 = rst ? 0 : ~(0|INLNKP|A21U214Pad3);
 
 endmodule

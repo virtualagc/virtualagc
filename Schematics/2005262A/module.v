@@ -79,7 +79,7 @@ assign #0.2  A4U122Pad2 = rst ? 1 : ~(0|TL15);
 // Gate A4-U156B
 assign #0.2  A4U156Pad9 = rst ? 0 : ~(0|STG2|STG1|A4U147Pad1);
 // Gate A4-U124A
-assign #0.2  A4U115Pad7 = rst ? 0 : ~(0|SUMB16_|SUMA16_);
+assign #0.2  A4U115Pad7 = rst ? 1 : ~(0|SUMB16_|SUMA16_);
 // Gate A4-U249B
 assign #0.2  d2PP1 = rst ? 0 : ~(0|INOUT|MP1|MP3A);
 // Gate A4-U117B
@@ -89,7 +89,7 @@ assign #0.2  A4U156Pad2 = rst ? 0 : ~(0|STG1|STG3);
 // Gate A4-U211A
 assign #0.2  ROR0 = rst ? 0 : ~(0|A4U201Pad1|QC2_|SQR10);
 // Gate A4-U109A A4-U118A A4-U119A
-assign #0.2  BR1_ = rst ? 0 : ~(0|A4U109Pad2);
+assign #0.2  BR1_ = rst ? 1 : ~(0|A4U109Pad2);
 // Gate A4-U116B A4-U115B
 assign #0.2  A4U115Pad9 = rst ? 0 : ~(0|PHS4|PHS3_|A4U115Pad7|TSGU_);
 // Gate A4-U154A A4-U148A
@@ -97,11 +97,11 @@ assign #0.2  STD2 = rst ? 0 : ~(0|STG3|A4U139Pad2|STG1|INKL);
 // Gate A4-U101B
 assign #0.2  MBR2 = rst ? 0 : ~(0|A4U101Pad7);
 // Gate A4-U113B
-assign #0.2  MBR1 = rst ? 1 : ~(0|A4U113Pad7);
+assign #0.2  MBR1 = rst ? 0 : ~(0|A4U113Pad7);
 // Gate A4-U240B
-assign #0.2  BRDIF_ = rst ? 0 : ~(0|BR12B|BR1B2);
+assign #0.2  BRDIF_ = rst ? 1 : ~(0|BR12B|BR1B2);
 // Gate A4-U155B
-assign #0.2  ST3_ = rst ? 0 : ~(0|A4U155Pad1);
+assign #0.2  ST3_ = rst ? 1 : ~(0|A4U155Pad1);
 // Gate A4-U228A
 assign #0.2  A4U228Pad1 = rst ? 0 : ~(0|T09_|RXOR0_);
 // Gate A4-U246B
@@ -109,9 +109,9 @@ assign #0.2  KRPT = rst ? 0 : ~(0|T09_|RUPT1_);
 // Gate A4-U238B
 assign #0.2  BR1B2_ = rst ? 1 : ~(0|BR1B2);
 // Gate A4-U121B A4-U120B
-assign #0.2  A4U113Pad7 = rst ? 0 : ~(0|SGUM|A4U121Pad8|A4U109Pad2|A4U117Pad9|A4U120Pad8);
+assign #0.2  A4U113Pad7 = rst ? 1 : ~(0|SGUM|A4U121Pad8|A4U109Pad2|A4U117Pad9|A4U120Pad8);
 // Gate A4-U242B
-assign #0.2  BR1B2B = rst ? 0 : ~(0|BR2|BR1);
+assign #0.2  BR1B2B = rst ? 1 : ~(0|BR2|BR1);
 // Gate A4-U132B
 assign #0.2  DIVSTG = rst ? 0 : ~(0|T12USE_|T03_);
 // Gate A4-U225A
@@ -129,7 +129,7 @@ assign #0.2  A4U234Pad9 = rst ? 0 : ~(0|TS0_|BR1B2_|T05_);
 // Gate A4-U125B A4-U126B A4-U127B
 assign #0.2  DV1_ = rst ? 1 : ~(0|DV1);
 // Gate A4-U243B
-assign #0.2  BR1B2B_ = rst ? 1 : ~(0|BR1B2B);
+assign #0.2  BR1B2B_ = rst ? 0 : ~(0|BR1B2B);
 // Gate A4-U234A
 assign #0.2  A4U234Pad1 = rst ? 0 : ~(0|INOUT_|T03_);
 // Gate A4-U218A
@@ -137,7 +137,7 @@ assign #0.2  RUPT0_ = rst ? 1 : ~(0|RUPT0);
 // Gate A4-U247B
 assign #0.2  A4U247Pad9 = rst ? 0 : ~(0|MP3_|T04_);
 // Gate A4-U242A
-assign #0.2  BR12B = rst ? 1 : ~(0|BR1_|BR2);
+assign #0.2  BR12B = rst ? 0 : ~(0|BR1_|BR2);
 // Gate A4-U244B
 assign #0.2  A4U244Pad9 = rst ? 0 : ~(0|DV1_|T04_|BR2_);
 // Gate A4-U212B
@@ -151,7 +151,7 @@ assign #0.2  WAND0 = rst ? 0 : ~(0|SQR10_|A4U201Pad1|QC1_);
 // Gate A4-U116A A4-U124B
 assign #0.2  SGUM = rst ? 0 : ~(0|PHS3_|PHS4|SUMA16_|SUMB16_|TSGU_);
 // Gate A4-U137A
-assign #0.2  A4U135Pad2 = rst ? 0 : ~(0|STG1|A4U136Pad1);
+assign #0.2  A4U135Pad2 = rst ? 1 : ~(0|STG1|A4U136Pad1);
 // Gate A4-U222B A4-U220A
 assign #0.2  RUPT1 = rst ? 0 : ~(0|SQR10_|EXST1_|QC3_|SQ0_);
 // Gate A4-U111B
@@ -167,7 +167,7 @@ assign #0.2  A4U101Pad1 = rst ? 0 : ~(0|XB7_|TRSM_|XT1_|NDR100_);
 // Gate A4-U203A
 assign #0.2  INOUT = rst ? 0 : ~(0|RUPT0|SQ0_|EXST0_);
 // Gate A4-U252A
-assign #0.2  RSC_ = rst ? 1 : ~(0|A4U237Pad1|A4U247Pad9|A4U250Pad1);
+assign #0.2  RSC_ = rst ? 0 : ~(0|A4U237Pad1|A4U247Pad9|A4U250Pad1);
 // Gate A4-U226B
 assign #0.2  A4U222Pad2 = rst ? 0 : ~(0|A4U224Pad1|T09_);
 // Gate A4-U227B
@@ -175,15 +175,15 @@ assign #0.2  A4U227Pad9 = rst ? 0 : ~(0|T09_|STORE1_);
 // Gate A4-U211B
 assign #0.2  WOR0_ = rst ? 1 : ~(0|WOR0);
 // Gate A4-U257A A4-U257B
-assign #0.2  TSGN_ = rst ? 1 : ~(0|A4U231Pad1|A4U244Pad9|A4U237Pad1|MP0T10|d1XP10);
+assign #0.2  TSGN_ = rst ? 0 : ~(0|A4U231Pad1|A4U244Pad9|A4U237Pad1|MP0T10|d1XP10);
 // Gate A4-U214A
 assign #0.2  RXOR0_ = rst ? 1 : ~(0|RXOR0);
 // Gate A4-U135A
-assign #0.2  MST1 = rst ? 1 : ~(0|A4U135Pad2);
+assign #0.2  MST1 = rst ? 0 : ~(0|A4U135Pad2);
 // Gate A4-U139A
 assign #0.2  MST2 = rst ? 1 : ~(0|A4U139Pad2);
 // Gate A4-U148B
-assign #0.2  MST3 = rst ? 0 : ~(0|A4U147Pad1);
+assign #0.2  MST3 = rst ? 1 : ~(0|A4U147Pad1);
 // Gate A4-U213B
 assign #0.2  A4U213Pad9 = rst ? 1 : ~(0|RAND0|WAND0);
 // Gate A4-U130A
@@ -229,7 +229,7 @@ assign #0.2  A4U146Pad9 = rst ? 0 : ~(0|A4U104Pad9|A4U133Pad9);
 // Gate A4-U238A
 assign #0.2  BR12B_ = rst ? 0 : ~(0|BR12B);
 // Gate A4-U121A A4-U120A
-assign #0.2  A4U109Pad2 = rst ? 1 : ~(0|A4U113Pad7|A4U121Pad3|A4U117Pad1|A4U108Pad7|A4U115Pad9);
+assign #0.2  A4U109Pad2 = rst ? 0 : ~(0|A4U113Pad7|A4U121Pad3|A4U117Pad1|A4U108Pad7|A4U115Pad9);
 // Gate A4-U106B A4-U105B
 assign #0.2  BR2_ = rst ? 1 : ~(0|A4U105Pad8);
 // Gate A4-U231B
@@ -241,7 +241,7 @@ assign #0.2  DV1376_ = rst ? 1 : ~(0|DV1376);
 // Gate A4-U221A
 assign #0.2  RUPT1_ = rst ? 1 : ~(0|RUPT1);
 // Gate A4-U254B
-assign #0.2  TMZ_ = rst ? 1 : ~(0|d2XP5|d1XP10);
+assign #0.2  TMZ_ = rst ? 0 : ~(0|d2XP5|d1XP10);
 // Gate A4-U223B
 assign #0.2  A4U223Pad9 = rst ? 0 : ~(0|WRITE0_|T02_);
 // Gate A4-U152B
@@ -255,7 +255,7 @@ assign #0.2  A4U105Pad8 = rst ? 0 : ~(0|A4U101Pad7|A4U107Pad7|A4U108Pad7|A4U108P
 // Gate A4-U106A
 assign #0.2  BR2 = rst ? 0 : ~(0|A4U101Pad7);
 // Gate A4-U118B A4-U119B A4-U160B
-assign #0.2  BR1 = rst ? 1 : ~(0|A4U113Pad7);
+assign #0.2  BR1 = rst ? 0 : ~(0|A4U113Pad7);
 // Gate A4-U232B
 assign #0.2  d4XP5 = rst ? 0 : ~(0|T04_|TS0_);
 // Gate A4-U123A
@@ -289,7 +289,7 @@ assign #0.2  TRSM_ = rst ? 1 : ~(0|TRSM);
 // Gate A4-U255B
 assign #0.2  A4U255Pad9 = rst ? 0 : ~(0|T04_|BRDIF_|TS0_);
 // Gate A4-U147A
-assign #0.2  A4U147Pad1 = rst ? 1 : ~(0|STG3|A4U146Pad1);
+assign #0.2  A4U147Pad1 = rst ? 0 : ~(0|STG3|A4U146Pad1);
 // Gate A4-U128A A4-U128B
 assign #0.2  DIV_ = rst ? 1 : ~(0|A4U128Pad2);
 // Gate A4-U102A
@@ -297,7 +297,7 @@ assign #0.2  DVST_ = rst ? 1 : ~(0|DVST);
 // Gate A4-U237A
 assign #0.2  A4U237Pad1 = rst ? 0 : ~(0|DV1_|T07_);
 // Gate A4-U229B A4-U259A
-assign #0.2  RA_ = rst ? 1 : ~(0|d2XP3|A4U217Pad7|A4U220Pad9|d1XP10|A4U245Pad1|d8XP5);
+assign #0.2  RA_ = rst ? 0 : ~(0|d2XP3|A4U217Pad7|A4U220Pad9|d1XP10|A4U245Pad1|d8XP5);
 // Gate A4-U227A
 assign #0.2  d9XP1 = rst ? 0 : ~(0|T09_|RUPT0_);
 // Gate A4-U132A
@@ -317,11 +317,11 @@ assign #0.2  B15X = rst ? 0 : ~(0|DV1_|T05_);
 // Gate A4-U156A
 assign #0.2  ST376 = rst ? 1 : ~(0|A4U156Pad2|A4U139Pad2);
 // Gate A4-U138A
-assign #0.2  STG1 = rst ? 1 : ~(0|A4U137Pad9|A4U135Pad2);
+assign #0.2  STG1 = rst ? 0 : ~(0|A4U137Pad9|A4U135Pad2);
 // Gate A4-U142A
 assign #0.2  STG2 = rst ? 1 : ~(0|A4U139Pad2|A4U141Pad1);
 // Gate A4-U159B A4-U147B
-assign #0.2  STG3 = rst ? 0 : ~(0|A4U146Pad9|A4U147Pad1);
+assign #0.2  STG3 = rst ? 1 : ~(0|A4U146Pad9|A4U147Pad1);
 // Gate A4-U129A
 assign #0.2  DV4 = rst ? 0 : ~(0|DIV_|ST4_);
 // Gate A4-U117A
@@ -331,7 +331,7 @@ assign #0.2  A4U120Pad8 = rst ? 0 : ~(0|A4U122Pad2|L15_);
 // Gate A4-U127A
 assign #0.2  DV0 = rst ? 0 : ~(0|DIV_|ST0_);
 // Gate A4-U259B
-assign #0.2  L16_ = rst ? 1 : ~(0|A4U235Pad3);
+assign #0.2  L16_ = rst ? 0 : ~(0|A4U235Pad3);
 // Gate A4-U157A
 assign #0.2  ST4_ = rst ? 1 : ~(0|A4U156Pad9);
 // Gate A4-U230B A4-U258B
@@ -399,7 +399,7 @@ assign #0.2  R15 = rst ? 0 : ~(0|T01_|A4U251Pad1);
 // Gate A4-U150A A4-U152A A4-U151A
 assign #0.2  ST1_ = rst ? 1 : ~(0|ST1D);
 // Gate A4-U155A
-assign #0.2  A4U155Pad1 = rst ? 1 : ~(0|A4U135Pad2|STG3|A4U139Pad2);
+assign #0.2  A4U155Pad1 = rst ? 0 : ~(0|A4U135Pad2|STG3|A4U139Pad2);
 // Gate A4-U158A
 assign #0.2  A4U158Pad1 = rst ? 0 : ~(0|A4U156Pad9|ST376);
 // Gate A4-U201A A4-U202A
