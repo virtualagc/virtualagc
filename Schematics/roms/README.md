@@ -1,2 +1,3 @@
 This directory contains the "ropes" for various AGC software, as converted to Verilog.  These were taken as-is from https://github.com/virtualagc/agc_simulation/tree/master/roms, in order to have all of the material needed for building the simulation at the same place.  The original site contains hex versions of these ropes, as well as scripts for creating the Verilog, and those things have not been brought over.  
+
 The only file potentially out of date with respect to the original site is Validation.v, and it may therefore be necessary to pull in updated versions of that file at a later time.
