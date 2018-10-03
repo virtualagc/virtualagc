@@ -10,6 +10,8 @@
 #		in Linux systems and possibly Mac OS X, but not in Windows.
 #		If you want to fix it up to work other than in Linux, look 
 #		for 'if', 'touch', 'mv', 'rm', and 'cat' uses.
+# Warning:	This Makefile requires GNU 'make' v4.x or higher.  It does 
+#		not work with v3.x.
 # Mod history:	2018-07-29 RSB	Wrote first version of this makefile, 
 #				covering just testVerilog, 2005259A, 
 #				and 2005260A targets.
@@ -153,7 +155,9 @@ TARGETS_VVP_2003993 := $(DRAWINGS_2003993:%=%/module.vvp)
 TARGETS_V_2003993 := $(DRAWINGS_2003993:%=%/module.v)
 # Create module_DRAWING and delay_DRAWING variables for each drawing.
 MODULES_PROCESSED = none
+$(info here $(MODULES_PROCESSED))
 $(foreach drawing,$(DRAWINGS_2003993),$(eval $(call moduleTemplate,$(drawing))))
+$(info here $(MODULES_PROCESSED))
 
 ##################################################################################
 
