@@ -36,6 +36,7 @@
 #				worked out details such as gaps in the 
 #				module numbering and the lack of a pinDB yet.
 #				Also added a default but non-zero gate delay.
+#				Added target for AGC.init.
 #
 # This 'make' needs to be performed from the Schematics/ directory.
 # Icarus Verilog must be installed, and iverilog must be in the PATH.
@@ -215,7 +216,6 @@ clean:
 # Make some stubs for a couple of required files.  This helpful for a
 # first compilation, but the files need to be filled and the 'make'
 # redone if an actual, usable simulation is to be performed.
-.SECONDARY: testVerilog/module.init $(DRAWINGS_AGC:%=%/module.init)
 %/module.init:
 	touch $@
 
@@ -235,3 +235,25 @@ clean:
 %/module.v: %/module.net %/module.init ../Scripts/pins.txt
 	../Scripts/dumbVerilog.py $(module_$*) $*/module.net ../Scripts/pins.txt "$(delay_$*)" $*/module.init >$*/temp.v
 	mv $*/temp.v $@
+
+# The following target can be used as 2003200.init, 2003993.init, etc.
+# It does not create any of those files.  Instead, it creates init files
+# for all of 2003200's (or whatever's) modules.  However, it doesn't 
+# overwrite any module.init files that already exist.  Moreover, if any
+# module.init files are change in the process, you'll need to rebuild all
+# of the Verilog afterward, and this target doesn't do that for you.
+%.init: %.vvp
+	cat $(TARGETS_V_$*) | ../Scripts/dumbInitialization.py
+	@n=1; \
+	for d in $(DRAWINGS_$*) ; \
+	do \
+		if test -f $$d/module.init ; \
+		then \
+			echo Deleting A$$n.init ; \
+			rm A$$n.init ; \
+		else \
+			echo Moving A$$n.init to $$d/module.init ; \
+			mv A$$n.init $$d/module.init ; \
+		fi ; \
+		n=$$((n+1)) ; \
+	done
