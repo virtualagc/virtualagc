@@ -376,9 +376,9 @@ for line in lines:
 			else:
 				thisGatesInits = { "j": { "output":0, "delay":0 }, "k": { "output":0, "delay":0} }
 			if norPins[1] != "":
-				nors.append([refd + "A", norPins[1], thisGatesInits["j"], norPins[2], norPins[3], norPins[4]])
+				nors.append([moduleName + "-" + refd + "A", norPins[1], thisGatesInits["j"], norPins[2], norPins[3], norPins[4]])
 			if norPins[9] != "":
-				nors.append([refd + "B", norPins[9], thisGatesInits["k"], norPins[6], norPins[7], norPins[8]])
+				nors.append([moduleName + "-" + refd + "B", norPins[9], thisGatesInits["k"], norPins[6], norPins[7], norPins[8]])
 		continue
 	if line[:3] == " ( ":
 		# This is the start of a component.
