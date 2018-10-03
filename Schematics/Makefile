@@ -247,13 +247,7 @@ clean:
 	@n=1; \
 	for d in $(DRAWINGS_$*) ; \
 	do \
-		if test -f $$d/module.init ; \
-		then \
-			echo Deleting A$$n.init ; \
-			rm A$$n.init ; \
-		else \
-			echo Moving A$$n.init to $$d/module.init ; \
-			mv A$$n.init $$d/module.init ; \
-		fi ; \
+		echo Moving A$$n.init to $$d/module.init ; \
+		mv A$$n.init $$d/module.init ; \
 		n=$$((n+1)) ; \
 	done
