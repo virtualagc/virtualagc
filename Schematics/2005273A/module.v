@@ -97,7 +97,7 @@ assign #0.2  GTONE = rst ? 0 : ~(0|F05B_|FS06|FS07A|FS09|FS08);
 // Gate A24-U149A
 assign #0.2  PIPINT = rst ? 0 : ~(0|A24U149Pad2|PIPPLS_);
 // Gate A24-U237A
-assign #0.2  A24U237Pad1 = rst ? 1 : ~(0|CDUSTB_|T08);
+assign #0.2  A24U237Pad1 = rst ? 0 : ~(0|CDUSTB_|T08);
 // Gate A24-U227A
 assign #0.2  NOZP = rst ? 0 : ~(0|PIPGZp|A24U226Pad1);
 // Gate A24-U129A A24-U129B
@@ -287,7 +287,7 @@ assign #0.2  SB1_ = rst ? 0 : ~(0|SB1);
 // Gate A24-U149B
 assign #0.2  A24U149Pad2 = rst ? 1 : ~(0|SB4);
 // Gate A24-U237B
-assign #0.2  CDUSTB_ = rst ? 0 : ~(0|T06|A24U237Pad1);
+assign #0.2  CDUSTB_ = rst ? 1 : ~(0|T06|A24U237Pad1);
 // Gate A24-U115A
 assign #0.2  A24U115Pad1 = rst ? 0 : ~(0|DKCTR5_|DKCTR4_);
 // Gate A24-U126A A24-U126B

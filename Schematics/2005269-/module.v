@@ -94,7 +94,7 @@ assign #0.2  A13U125Pad1 = rst ? 0 : ~(0|A13U122Pad9|A13U123Pad1);
 // Gate A13-U125B
 assign #0.2  A13U125Pad9 = rst ? 0 : ~(0|A13U124Pad1|A13U122Pad9);
 // Gate A13-U142A
-assign #0.2  MOSCAL_ = rst ? 1 : ~(0|STRT2);
+assign #0.2  MOSCAL_ = rst ? 0 : ~(0|STRT2);
 // Gate A13-U117A
 assign #0.2  G16SW_ = rst ? 1 : ~(0|A13U115Pad1|A13U115Pad9);
 // Gate A13-U141B

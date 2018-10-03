@@ -4,11 +4,13 @@
 module agc;
 
 reg rst = 1;
+reg STRT2 = 1;
 initial
   begin
     $dumpfile("agc.lxt2");
     $dumpvars(0, agc);
     # 1 rst = 0;
+    # 10 STRT2 = 0;
     # 1000 $finish;
   end
 
@@ -41,10 +43,9 @@ reg BLKUPL_ = 0, BMGXM = 0, BMGXP = 0, BMGYM = 0, BMGYP = 0, BMGZM = 0,
   SA07 = 0, SA08 = 0, SA09 = 0, SA10 = 0, SA11 = 0, SA12 = 0, SA13 = 0,
   SA14 = 0, SA16 = 0, SAP = 0, SBYBUT = 0, SCAFAL = 0, SHAFTM = 0, SHAFTP = 0,
   SIGNX = 0, SIGNY = 0, SIGNZ = 0, SMSEPR = 0, SPSRDY = 0, STRPRS = 0,
-  STRT2 = 0, TEMPIN = 0, TRANmX = 0, TRANmY = 0, TRANmZ = 0, TRANpX = 0,
-  TRANpY = 0, TRANpZ = 0, TRNM = 0, TRNP = 0, TRST10 = 0, TRST9 = 0, ULLTHR = 0,
-  UPL0 = 0, UPL1 = 0, VFAIL = 0, XLNK0 = 0, XLNK1 = 0, ZEROP = 0, d2FSFAL = 0,
-  p4SW = 0;
+  TEMPIN = 0, TRANmX = 0, TRANmY = 0, TRANmZ = 0, TRANpX = 0, TRANpY = 0,
+  TRANpZ = 0, TRNM = 0, TRNP = 0, TRST10 = 0, TRST9 = 0, ULLTHR = 0, UPL0 = 0,
+  UPL1 = 0, VFAIL = 0, XLNK0 = 0, XLNK1 = 0, ZEROP = 0, d2FSFAL = 0, p4SW = 0;
 
 wire A01_, A02_, A03_, A04_, A05_, A06_, A07_, A08_, A09_, A10_, A11_,
   A12_, A13_, A14_, A15_, A16_, A2XG_, A2X_, AD0, ADS0, ADVCTR, AGCWAR,
