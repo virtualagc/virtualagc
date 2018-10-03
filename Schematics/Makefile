@@ -127,8 +127,6 @@ TARGETS_V_2003100 := $(DRAWINGS_2003100:%=%/module.v)
 # Create module_DRAWING and delay_DRAWING variables for each drawing.
 MODULES_PROCESSED = none
 $(foreach drawing,$(DRAWINGS_2003100),$(eval $(call moduleTemplate,$(drawing))))
-# Override default delay_DRAWING variables, if a specific drawing needs it. 
-delay_2005059E = 0
 
 ##################################################################################
 # Here's what goes into an AGC p/n 2003200.  They need to be the drawing numbers
@@ -142,8 +140,6 @@ TARGETS_V_2003200 := $(DRAWINGS_2003200:%=%/module.v)
 # Create module_DRAWING and delay_DRAWING variables for each drawing.
 MODULES_PROCESSED = none
 $(foreach drawing,$(DRAWINGS_2003200),$(eval $(call moduleTemplate,$(drawing))))
-# Override default delay_DRAWING variables, if a specific drawing needs it. 
-delay_2005259A = 0
 
 ##################################################################################
 # Here's what goes into an AGC p/n 2003993.  They need to be the drawing numbers
@@ -157,10 +153,14 @@ TARGETS_V_2003993 := $(DRAWINGS_2003993:%=%/module.v)
 # Create module_DRAWING and delay_DRAWING variables for each drawing.
 MODULES_PROCESSED = none
 $(foreach drawing,$(DRAWINGS_2003993),$(eval $(call moduleTemplate,$(drawing))))
-# Override default delay_DRAWING variables, if a specific drawing needs it. 
-delay_2005259A = 0
 
 ##################################################################################
+
+# Override default delay_DRAWING variables, if a specific drawing needs it or can
+# benefit from it. 
+delay_2005059E = 0
+delay_2005259A = 0
+delay_2005260A = 0.2
 
 # Some combined variables for the complete set of AGC targets.
 DRAWINGS_AGC := $(DRAWINGS_2003200) $(DRAWINGS_2003100) $(DRAWINGS_2003993) $(DRAWINGS_1003700)
