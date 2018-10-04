@@ -10,12 +10,12 @@ initial
     $dumpfile("agc.lxt2");
     $dumpvars(0, agc);
     # 1 rst = 0;
-    # 10 STRT2 = 0;
+    # 100 STRT2 = 0;
     # 1000 $finish;
   end
 
 reg CLOCK = 0;
-always #4.8828125 CLOCK = !CLOCK;
+always #2.44140625 CLOCK = !CLOCK;
 
 reg BLKUPL_ = 0, BMGXM = 0, BMGXP = 0, BMGYM = 0, BMGYP = 0, BMGZM = 0,
   BMGZP = 0, CAURST = 0, CDUFAL = 0, CDUXM = 0, CDUXP = 0, CDUYM = 0, CDUYP = 0,

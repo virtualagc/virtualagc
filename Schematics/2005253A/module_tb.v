@@ -4,16 +4,18 @@
 module agc;
 
 reg rst = 1;
+reg STRT2 = 1;
 initial
   begin
     $dumpfile("agc.lxt2");
     $dumpvars(0, agc);
     # 1 rst = 0;
+    # 50 STRT2 = 0;
     # 1000 $finish;
   end
 
 reg CLOCK = 0;
-always #4.8828125 CLOCK = !CLOCK;
+always #2.44140625 CLOCK = !CLOCK;
 
 reg CAD4 = 0, CAD5 = 0, CAD6 = 0, CGA12 = 0, CGG = 0, CSG = 0, EB10 = 0,
   EB11_ = 0, EB9 = 0, G01 = 0, G02 = 0, G03 = 0, G04 = 0, G05 = 0, G06 = 0,

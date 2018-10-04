@@ -14,7 +14,7 @@ initial
   end
 
 reg FS01_ = 1;
-always #4.883 FS01_ = !FS01_;
+always #4.8828125 FS01_ = !FS01_;
 
 reg RCHAT_ = 0;
 reg RCHBT_ = 0;

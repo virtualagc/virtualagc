@@ -4,16 +4,18 @@
 module agc;
 
 reg rst = 1;
+reg STRT2 = 1;
 initial
   begin
     $dumpfile("agc.lxt2");
     $dumpvars(0, agc);
     # 1 rst = 0;
+    # 50 STRT2 = 0;
     # 1000 $finish;
   end
 
 reg CLOCK = 0;
-always #4.8828125 CLOCK = !CLOCK;
+always #2.44140625 CLOCK = !CLOCK;
 
 reg A2XG_ = 0, CAG = 0, CBG = 0, CGA9 = 0, CGG = 0, CH05 = 0, CH06 = 0,
   CH07 = 0, CH08 = 0, CI05_ = 0, CLG1G = 0, CLXC = 0, CO06 = 0, CQG = 0,
@@ -21,10 +23,10 @@ reg A2XG_ = 0, CAG = 0, CBG = 0, CGA9 = 0, CGG = 0, CH05 = 0, CH06 = 0,
   L04_ = 0, L2GDG_ = 0, MDT05 = 0, MDT06 = 0, MDT07 = 0, MDT08 = 0, MONEX = 0,
   PIPAXm_ = 0, PIPAXp_ = 0, PIPAYp_ = 0, PIPSAM = 0, R1C = 0, RAG_ = 0,
   RBLG_ = 0, RCG_ = 0, RGG_ = 0, RL16_ = 0, RLG_ = 0, RQG_ = 0, RULOG_ = 0,
-  RZG_ = 0, SA05 = 0, SA06 = 0, SA07 = 0, SA08 = 0, STRT2 = 0, WAG_ = 0,
-  WALSG_ = 0, WBG_ = 0, WG1G_ = 0, WG3G_ = 0, WG4G_ = 0, WL04_ = 0, WL09_ = 0,
-  WL10_ = 0, WLG_ = 0, WQG_ = 0, WYDG_ = 0, WYLOG_ = 0, WZG_ = 0, XUY09_ = 0,
-  XUY10_ = 0, p4SW = 0;
+  RZG_ = 0, SA05 = 0, SA06 = 0, SA07 = 0, SA08 = 0, WAG_ = 0, WALSG_ = 0,
+  WBG_ = 0, WG1G_ = 0, WG3G_ = 0, WG4G_ = 0, WL04_ = 0, WL09_ = 0, WL10_ = 0,
+  WLG_ = 0, WQG_ = 0, WYDG_ = 0, WYLOG_ = 0, WZG_ = 0, XUY09_ = 0, XUY10_ = 0,
+  p4SW = 0;
 
 wire A05_, A06_, A07_, A08_, CI06_, CI07_, CI08_, CI09_, CLROPE, CO08,
   CO10, G05, G05_, G06, G06_, G07, G07_, G08, G08_, GEM05, GEM06, GEM07,

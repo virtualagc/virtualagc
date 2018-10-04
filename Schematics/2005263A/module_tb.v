@@ -4,16 +4,18 @@
 module agc;
 
 reg rst = 1;
+reg STRT2 = 1;
 initial
   begin
     $dumpfile("agc.lxt2");
     $dumpvars(0, agc);
     # 1 rst = 0;
+    # 50 STRT2 = 0;
     # 1000 $finish;
   end
 
 reg CLOCK = 0;
-always #4.8828125 CLOCK = !CLOCK;
+always #2.44140625 CLOCK = !CLOCK;
 
 reg AD0 = 0, ADS0 = 0, AUG0_ = 0, B15X = 0, BR1 = 0, BR12B_ = 0, BR1B2B = 0,
   BR1B2B_ = 0, BR1B2_ = 0, BR1_ = 0, BR2_ = 0, CCS0 = 0, CCS0_ = 0, CDUSTB_ = 0,
@@ -28,14 +30,14 @@ reg AD0 = 0, ADS0 = 0, AUG0_ = 0, B15X = 0, BR1 = 0, BR12B_ = 0, BR1B2B = 0,
   RRPA = 0, RSTK_ = 0, RUPT0 = 0, RUPT1 = 0, S01 = 0, S01_ = 0, S02 = 0,
   S02_ = 0, S03 = 0, S03_ = 0, S04 = 0, S04_ = 0, S05 = 0, S05_ = 0, S06 = 0,
   S06_ = 0, S07 = 0, S07_ = 0, SHIFT = 0, STBE = 0, STBF = 0, STFET1_ = 0,
-  STOP_ = 0, STRT2 = 0, SU0 = 0, T01 = 0, T01_ = 0, T02 = 0, T02_ = 0,
-  T03 = 0, T03_ = 0, T04 = 0, T04_ = 0, T05 = 0, T06 = 0, T06_ = 0, T07 = 0,
-  T07_ = 0, T08 = 0, T08_ = 0, T09 = 0, T10 = 0, T10_ = 0, T11 = 0, T11_ = 0,
-  T12 = 0, T12USE_ = 0, TL15 = 0, WAND0 = 0, d10XP1 = 0, d10XP8 = 0, d11XP2 = 0,
-  d1XP10 = 0, d2XP3 = 0, d2XP5 = 0, d2XP7 = 0, d2XP8 = 0, d3XP2 = 0, d3XP6 = 0,
-  d3XP7 = 0, d4XP11 = 0, d5XP12 = 0, d5XP15 = 0, d5XP21 = 0, d5XP28 = 0,
-  d5XP4 = 0, d6XP5 = 0, d6XP8 = 0, d7XP19 = 0, d7XP4 = 0, d7XP9 = 0, d8PP4 = 0,
-  d8XP6 = 0, d9XP1 = 0, d9XP5 = 0;
+  STOP_ = 0, SU0 = 0, T01 = 0, T01_ = 0, T02 = 0, T02_ = 0, T03 = 0, T03_ = 0,
+  T04 = 0, T04_ = 0, T05 = 0, T06 = 0, T06_ = 0, T07 = 0, T07_ = 0, T08 = 0,
+  T08_ = 0, T09 = 0, T10 = 0, T10_ = 0, T11 = 0, T11_ = 0, T12 = 0, T12USE_ = 0,
+  TL15 = 0, WAND0 = 0, d10XP1 = 0, d10XP8 = 0, d11XP2 = 0, d1XP10 = 0,
+  d2XP3 = 0, d2XP5 = 0, d2XP7 = 0, d2XP8 = 0, d3XP2 = 0, d3XP6 = 0, d3XP7 = 0,
+  d4XP11 = 0, d5XP12 = 0, d5XP15 = 0, d5XP21 = 0, d5XP28 = 0, d5XP4 = 0,
+  d6XP5 = 0, d6XP8 = 0, d7XP19 = 0, d7XP4 = 0, d7XP9 = 0, d8PP4 = 0, d8XP6 = 0,
+  d9XP1 = 0, d9XP5 = 0;
 
 wire A2X_, BXVX, CGMC, CI_, CLXC, DVXP1, EXT, IL01, IL01_, IL02, IL02_,
   IL03, IL03_, IL04, IL04_, IL05, IL05_, IL06, IL06_, IL07, IL07_, L2GD_,

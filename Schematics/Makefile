@@ -161,11 +161,8 @@ $(info here $(MODULES_PROCESSED))
 
 ##################################################################################
 
-# Override default delay_DRAWING variables, if a specific drawing needs it or can
+# Override default delay_DRAWING variables here, if a specific drawing needs it or can
 # benefit from it. 
-delay_2005059E = 0
-delay_2005259A = 0
-delay_2005260A = 0.2
 
 # Some combined variables for the complete set of AGC targets.
 DRAWINGS_AGC := $(DRAWINGS_2003200) $(DRAWINGS_2003100) $(DRAWINGS_2003993) $(DRAWINGS_1003700)

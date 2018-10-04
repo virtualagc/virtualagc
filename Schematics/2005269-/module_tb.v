@@ -4,16 +4,18 @@
 module agc;
 
 reg rst = 1;
+reg STRT2 = 1;
 initial
   begin
     $dumpfile("agc.lxt2");
     $dumpvars(0, agc);
     # 1 rst = 0;
+    # 50 STRT2 = 0;
     # 1000 $finish;
   end
 
 reg CLOCK = 0;
-always #4.8828125 CLOCK = !CLOCK;
+always #2.44140625 CLOCK = !CLOCK;
 
 reg ALTEST = 0, ALTM = 0, BMAGZM = 0, CCH33 = 0, CDUXD = 0, CDUYD = 0,
   CDUZD = 0, CGA13 = 0, CON2 = 0, CTROR = 0, CT_ = 0, DLKRPT = 0, DRPRST = 0,
@@ -23,10 +25,9 @@ reg ALTEST = 0, ALTM = 0, BMAGZM = 0, CCH33 = 0, CDUXD = 0, CDUYD = 0,
   INKL = 0, INLNKM = 0, INLNKP = 0, MSTRT = 0, NHALGA = 0, NHVFAL = 0,
   NOTEST = 0, OTLNKM = 0, P02 = 0, P02_ = 0, P03 = 0, P03_ = 0, PALE = 0,
   PIPAFL = 0, RNRADM = 0, RNRADP = 0, SB0_ = 0, SB2_ = 0, SBY = 0, SCAFAL = 0,
-  SHAFTD = 0, STNDBY_ = 0, STRT2 = 0, SUMA16_ = 0, SUMB16_ = 0, T03_ = 0,
-  T04_ = 0, T09_ = 0, T10 = 0, T10_ = 0, TC0 = 0, TCF0 = 0, TEMPIN_ = 0,
-  THRSTD = 0, TMPOUT = 0, TRUND = 0, VFAIL = 0, WATCHP = 0, XT0 = 0, XT1 = 0,
-  d2FSFAL = 0;
+  SHAFTD = 0, STNDBY_ = 0, SUMA16_ = 0, SUMB16_ = 0, T03_ = 0, T04_ = 0,
+  T09_ = 0, T10 = 0, T10_ = 0, TC0 = 0, TCF0 = 0, TEMPIN_ = 0, THRSTD = 0,
+  TMPOUT = 0, TRUND = 0, VFAIL = 0, WATCHP = 0, XT0 = 0, XT1 = 0, d2FSFAL = 0;
 
 wire AGCWAR, ALGA, CGCWAR, CKTAL_, CON3, CTPLS_, DLKPLS, DOFILT, F08B_,
   FILTIN, G16SW_, MCTRAL_, MOSCAL_, MPIPAL_, MRPTAL_, MSCAFL_, MSTRTP,
