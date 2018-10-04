@@ -21,6 +21,7 @@
 # Purpose:	In a dumb manner, creates a Verilog testbench file for 
 #		Verilog files made by dumbVerilog.py.
 # Mod history:	2018-08-01 RSB	Created.
+#		2018-08-04 RSB	Replaced wires by wands.
 
 # Usage is:
 #	cat VERILOG_FILES | dumbTestbench.py >TESTBENCH.v

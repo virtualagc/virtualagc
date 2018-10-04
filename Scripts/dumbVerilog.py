@@ -30,6 +30,13 @@
 #				tied to ground.  Found that some netnames assigned
 #				only by net labels had a weird form I wasn't 
 #				accounting for.
+#		2018-08-04 RSB	Replace my "assign" statments by 
+#				"pullup; assign (highz1,strong0)" statements.  I 
+#				thought they worked to solve my problem (which was
+#				wire-anding the outputs of gates from different 
+#				modules), but it didn't.  I then replaced all my
+#				"wire" specifications by "wand" specifications and,
+#				once again, I think that works.
 #
 # This script converts one of my KiCad transcriptions of AGC LOGIC FLOW DIAGRAMs
 # into Verilog in the dumbest, most-straightforward way.  In other words, I don't

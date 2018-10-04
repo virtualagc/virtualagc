@@ -25,6 +25,7 @@
 #		change.  This is then a globally consistent initialization.
 #		It works, and converges pretty fast.
 # Mod history:	2018-08-03 RSB	Created.
+#		2018-08-04 RSB	Handled nets driven from different modules.
 
 # Usage is:
 #	cat VERILOG_FILES | dumbInitialization.py
