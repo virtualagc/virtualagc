@@ -462,8 +462,9 @@ if len(nors) > 0:
 		thisDelay = delay
 		if gate[2]["delay"] != 0:
 			thisDelay = " #" + str(gate[2]["delay"])
-		print "// Gate " + gate[0].replace("_", " ")			
-		outLine = "assign" + thisDelay + " " + netName + " = rst ? " + thisInit + " : ~(0";
+		print "// Gate " + gate[0].replace("_", " ")	
+		print "pullup(" + netName + ");"		
+		outLine = "assign (highz1,strong0)" + thisDelay + " " + netName + " = rst ? " + thisInit + " : ~(0";
 		for input in gate[3:]:
 			outLine += "|" + input;
 		outLine += ")" + ";"

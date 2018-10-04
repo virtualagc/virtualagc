@@ -65,20 +65,24 @@ for line in lines:
 	if len(fields) >= 3 and fields[0] == "//" and fields[1] == "Gate":
 		gates = fields[2:]
 		continue
-	# "assign" statements have one of two forms: 
-	#	assign #DELAY OUTNET = rst ? INIT : ~(0|INNET1|INNET2|...);
-	# or else
-	#	assign OUTNET = rst ? INIT : ~(0|INNET1|INNET2|...);
+	# "assign" statements have several possible forms: 
+	#	assign [STRENGTH] [#DELAY] OUTNET = rst ? INIT : ~(0|INNET1|INNET2|...);
 	if len(fields) == 8 and fields[0] == "assign" and fields[2] == "=":
 		outnet = fields[1]
 		innets = fields[7].strip("~();").split("|")[1:]
 	elif len(fields) == 9 and fields[0] == "assign" and fields[3] == "=":
 		outnet = fields[2]
 		innets = fields[8].strip("~();").split("|")[1:]
+	elif len(fields) == 10 and fields[0] == "assign" and fields[4] == "=":
+		outnet = fields[3]
+		innets = fields[9].strip("~();").split("|")[1:]
 	else:
 		continue
 	# Save the data in structures.
-	nors[outnet] = { "gates":gates, "innets":innets }
+	if outnet not in nors:
+		nors[outnet] = { "gates":gates, "innets":innets }
+	else:
+		nors[outnet] = { "gates":(nors[outnet]["gates"]+gates), "innets":(nors[outnet]["innets"]+innets) }
 	if outnet not in netValues:
 		netValues[outnet] = False
 	for innet in innets:
@@ -124,11 +128,16 @@ while unchanged < 2:
 			numchanged += 1
 		netValues[norNet] = value	
 
+for netName in ["RINGA_", "RINGB_", "P02", "P02_", "A2U225Pad2", "A2U225Pad8", "P03", "P03_"]:
+	print netName + " = " + str(netValues[netName]) + ", " + str(nors[netName])
+#print nors
+
 ones = []
 #zeroes = []
 for norNet in nors:
 	if not netValues[norNet]:
-		#zeroes.append(nor)
+		#for nor in nors[norNet]["gates"]:
+		#	zeroes.append(nor)
 		continue
 	for nor in nors[norNet]["gates"]:
 		ones.append(nor)
