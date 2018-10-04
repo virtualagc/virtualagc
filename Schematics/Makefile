@@ -155,9 +155,7 @@ TARGETS_VVP_2003993 := $(DRAWINGS_2003993:%=%/module.vvp)
 TARGETS_V_2003993 := $(DRAWINGS_2003993:%=%/module.v)
 # Create module_DRAWING and delay_DRAWING variables for each drawing.
 MODULES_PROCESSED = none
-$(info here $(MODULES_PROCESSED))
 $(foreach drawing,$(DRAWINGS_2003993),$(eval $(call moduleTemplate,$(drawing))))
-$(info here $(MODULES_PROCESSED))
 
 ##################################################################################
 
