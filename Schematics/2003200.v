@@ -9,8 +9,8 @@ initial
   begin
     $dumpfile("agc.lxt2");
     $dumpvars(0, agc);
-    # 2 rst = 0;
-    # 100 STRT2 = 0;
+    # 1 rst = 0;
+    # 50 STRT2 = 0;
     # 1000 $finish;
   end
 
