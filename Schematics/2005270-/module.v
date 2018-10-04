@@ -45,472 +45,706 @@ output wire ALRT0, ALRT1, ALT0, ALT1, ALTM, ALTSNC, BMAGXM, BMAGXP, BMAGYM,
   W1110;
 
 // Gate A19-U155B
-assign #0.2  A19U154Pad2 = rst ? 1 : ~(0|A19U155Pad1|A19U155Pad8);
+pullup(A19U154Pad2);
+assign (highz1,strong0) #0.2  A19U154Pad2 = rst ? 1 : ~(0|A19U155Pad1|A19U155Pad8);
 // Gate A19-U154B
-assign #0.2  THRSTD = rst ? 0 : ~(0|F5ASB2_|A19U154Pad2);
+pullup(THRSTD);
+assign (highz1,strong0) #0.2  THRSTD = rst ? 0 : ~(0|F5ASB2_|A19U154Pad2);
 // Gate A19-U116A
-assign #0.2  A19U116Pad1 = rst ? 1 : ~(0|A19U109Pad6|A19U111Pad8);
+pullup(A19U116Pad1);
+assign (highz1,strong0) #0.2  A19U116Pad1 = rst ? 1 : ~(0|A19U109Pad6|A19U111Pad8);
 // Gate A19-U151A
-assign #0.2  A19U151Pad1 = rst ? 0 : ~(0|ZOUT_|A19U149Pad3);
+pullup(A19U151Pad1);
+assign (highz1,strong0) #0.2  A19U151Pad1 = rst ? 0 : ~(0|ZOUT_|A19U149Pad3);
 // Gate A19-U142A
-assign #0.2  CH1306 = rst ? 0 : ~(0|A19U142Pad2|RCH13_);
+pullup(CH1306);
+assign (highz1,strong0) #0.2  CH1306 = rst ? 0 : ~(0|A19U142Pad2|RCH13_);
 // Gate A19-U110B
-assign #0.2  A19U110Pad3 = rst ? 1 : ~(0|A19U109Pad2|A19U109Pad6);
+pullup(A19U110Pad3);
+assign (highz1,strong0) #0.2  A19U110Pad3 = rst ? 1 : ~(0|A19U109Pad2|A19U109Pad6);
 // Gate A19-U216B
-assign #0.2  A19U216Pad9 = rst ? 1 : ~(0|A19U216Pad1);
+pullup(A19U216Pad9);
+assign (highz1,strong0) #0.2  A19U216Pad9 = rst ? 1 : ~(0|A19U216Pad1);
 // Gate A19-U205A
-assign #0.2  GYRRST = rst ? 0 : ~(0|F5ASB2_|A19U203Pad1);
+pullup(GYRRST);
+assign (highz1,strong0) #0.2  GYRRST = rst ? 0 : ~(0|F5ASB2_|A19U203Pad1);
 // Gate A19-U218B
-assign #0.2  A19U218Pad9 = rst ? 0 : ~(0|CHWL07_|WCH14_);
+pullup(A19U218Pad9);
+assign (highz1,strong0) #0.2  A19U218Pad9 = rst ? 0 : ~(0|CHWL07_|WCH14_);
 // Gate A19-U214A
-assign #0.2  GYYP = rst ? 0 : ~(0|A19U209Pad2|A19U213Pad9);
+pullup(GYYP);
+assign (highz1,strong0) #0.2  GYYP = rst ? 0 : ~(0|A19U209Pad2|A19U213Pad9);
 // Gate A19-U212B
-assign #0.2  A19U212Pad9 = rst ? 0 : ~(0|A19U210Pad3|A19U212Pad7|SB1_);
+pullup(A19U212Pad9);
+assign (highz1,strong0) #0.2  A19U212Pad9 = rst ? 0 : ~(0|A19U210Pad3|A19U212Pad7|SB1_);
 // Gate A19-U134A
-assign #0.2  CCH33 = rst ? 0 : ~(0|XT3_|XB3_|CCHG_);
+pullup(CCH33);
+assign (highz1,strong0) #0.2  CCH33 = rst ? 0 : ~(0|XT3_|XB3_|CCHG_);
 // Gate A19-U243A
-assign #0.2  A19U242Pad3 = rst ? 0 : ~(0|A19U243Pad2|GATEY_|F5ASB2_);
+pullup(A19U242Pad3);
+assign (highz1,strong0) #0.2  A19U242Pad3 = rst ? 0 : ~(0|A19U243Pad2|GATEY_|F5ASB2_);
 // Gate A19-U233A
-assign #0.2  A19U231Pad2 = rst ? 1 : ~(0|BMGXP|A19U232Pad1);
+pullup(A19U231Pad2);
+assign (highz1,strong0) #0.2  A19U231Pad2 = rst ? 1 : ~(0|BMGXP|A19U232Pad1);
 // Gate A19-U256A
-assign #0.2  A19U231Pad3 = rst ? 1 : ~(0|A19U256Pad2);
+pullup(A19U231Pad3);
+assign (highz1,strong0) #0.2  A19U231Pad3 = rst ? 1 : ~(0|A19U256Pad2);
 // Gate A19-U233B
-assign #0.2  A19U231Pad7 = rst ? 1 : ~(0|A19U232Pad9|BMGXM);
+pullup(A19U231Pad7);
+assign (highz1,strong0) #0.2  A19U231Pad7 = rst ? 1 : ~(0|A19U232Pad9|BMGXM);
 // Gate A19-U111B
-assign #0.2  A19U111Pad9 = rst ? 1 : ~(0|A19U103Pad9|A19U111Pad8);
+pullup(A19U111Pad9);
+assign (highz1,strong0) #0.2  A19U111Pad9 = rst ? 1 : ~(0|A19U103Pad9|A19U111Pad8);
 // Gate A19-U114B
-assign #0.2  A19U111Pad8 = rst ? 0 : ~(0|A19U114Pad7|F5ASB2_);
+pullup(A19U111Pad8);
+assign (highz1,strong0) #0.2  A19U111Pad8 = rst ? 0 : ~(0|A19U114Pad7|F5ASB2_);
 // Gate A19-U135A
-assign #0.2  A19U135Pad1 = rst ? 1 : ~(0|A19U134Pad8|A19U135Pad3);
+pullup(A19U135Pad1);
+assign (highz1,strong0) #0.2  A19U135Pad1 = rst ? 1 : ~(0|A19U134Pad8|A19U135Pad3);
 // Gate A19-U230A
-assign #0.2  CH1112 = rst ? 0 : ~(0|RCH11_|FF1112_);
+pullup(CH1112);
+assign (highz1,strong0) #0.2  CH1112 = rst ? 0 : ~(0|RCH11_|FF1112_);
 // Gate A19-U224A
-assign #0.2  CH1109 = rst ? 0 : ~(0|RCH11_|FF1109_);
+pullup(CH1109);
+assign (highz1,strong0) #0.2  CH1109 = rst ? 0 : ~(0|RCH11_|FF1109_);
 // Gate A19-U225A
-assign #0.2  CH1110 = rst ? 0 : ~(0|RCH11_|FF1110_);
+pullup(CH1110);
+assign (highz1,strong0) #0.2  CH1110 = rst ? 0 : ~(0|RCH11_|FF1110_);
 // Gate A19-U156A
-assign #0.2  A19U155Pad8 = rst ? 0 : ~(0|CHWL04_|WCH14_);
+pullup(A19U155Pad8);
+assign (highz1,strong0) #0.2  A19U155Pad8 = rst ? 0 : ~(0|CHWL04_|WCH14_);
 // Gate A19-U228A
-assign #0.2  CH1111 = rst ? 0 : ~(0|RCH11_|FF1111_);
+pullup(CH1111);
+assign (highz1,strong0) #0.2  CH1111 = rst ? 0 : ~(0|RCH11_|FF1111_);
 // Gate A19-U243B
-assign #0.2  A19U242Pad7 = rst ? 0 : ~(0|F5ASB2_|GATEY_|A19U243Pad8);
+pullup(A19U242Pad7);
+assign (highz1,strong0) #0.2  A19U242Pad7 = rst ? 0 : ~(0|F5ASB2_|GATEY_|A19U243Pad8);
 // Gate A19-U144B
-assign #0.2  A19U140Pad3 = rst ? 1 : ~(0|A19U144Pad7|A19U141Pad4);
+pullup(A19U140Pad3);
+assign (highz1,strong0) #0.2  A19U140Pad3 = rst ? 1 : ~(0|A19U144Pad7|A19U141Pad4);
 // Gate A19-U236B
-assign #0.2  F10A_ = rst ? 1 : ~(0|F10A);
+pullup(F10A_);
+assign (highz1,strong0) #0.2  F10A_ = rst ? 1 : ~(0|F10A);
 // Gate A19-U129B
-assign #0.2  A19U129Pad9 = rst ? 1 : ~(0|A19U129Pad1);
+pullup(A19U129Pad9);
+assign (highz1,strong0) #0.2  A19U129Pad9 = rst ? 1 : ~(0|A19U129Pad1);
 // Gate A19-U207A
-assign #0.2  GYROD = rst ? 0 : ~(0|A19U203Pad3|F5ASB2_);
+pullup(GYROD);
+assign (highz1,strong0) #0.2  GYROD = rst ? 0 : ~(0|A19U203Pad3|F5ASB2_);
 // Gate A19-U234B
-assign #0.2  F06B_ = rst ? 1 : ~(0|F06B);
+pullup(F06B_);
+assign (highz1,strong0) #0.2  F06B_ = rst ? 1 : ~(0|F06B);
 // Gate A19-U231B
-assign #0.2  BMAGXM = rst ? 0 : ~(0|A19U231Pad7|A19U231Pad3);
+pullup(BMAGXM);
+assign (highz1,strong0) #0.2  BMAGXM = rst ? 0 : ~(0|A19U231Pad7|A19U231Pad3);
 // Gate A19-U129A
-assign #0.2  A19U129Pad1 = rst ? 0 : ~(0|CA5_|XB5_);
+pullup(A19U129Pad1);
+assign (highz1,strong0) #0.2  A19U129Pad1 = rst ? 0 : ~(0|CA5_|XB5_);
 // Gate A19-U201B
-assign #0.2  A19U201Pad2 = rst ? 0 : ~(0|XB7_|CA4_);
+pullup(A19U201Pad2);
+assign (highz1,strong0) #0.2  A19U201Pad2 = rst ? 0 : ~(0|XB7_|CA4_);
 // Gate A19-U231A
-assign #0.2  BMAGXP = rst ? 0 : ~(0|A19U231Pad2|A19U231Pad3);
+pullup(BMAGXP);
+assign (highz1,strong0) #0.2  BMAGXP = rst ? 0 : ~(0|A19U231Pad2|A19U231Pad3);
 // Gate A19-U105B
-assign #0.2  A19U105Pad9 = rst ? 0 : ~(0|CA5_|CXB7_);
+pullup(A19U105Pad9);
+assign (highz1,strong0) #0.2  A19U105Pad9 = rst ? 0 : ~(0|CA5_|CXB7_);
 // Gate A19-U138B A19-U117B
-assign #0.2  T2P = rst ? 0 : ~(0|OVF_|WOVR_|XB5_|CA2_);
+pullup(T2P);
+assign (highz1,strong0) #0.2  T2P = rst ? 0 : ~(0|OVF_|WOVR_|XB5_|CA2_);
 // Gate A19-U222B
-assign #0.2  XLNK0_ = rst ? 1 : ~(0|XLNK0);
+pullup(XLNK0_);
+assign (highz1,strong0) #0.2  XLNK0_ = rst ? 1 : ~(0|XLNK0);
 // Gate A19-U124A
-assign #0.2  OTLNKM = rst ? 0 : ~(0|A19U124Pad2|F5ASB0_);
+pullup(OTLNKM);
+assign (highz1,strong0) #0.2  OTLNKM = rst ? 0 : ~(0|A19U124Pad2|F5ASB0_);
 // Gate A19-U217B
-assign #0.2  GYXP = rst ? 0 : ~(0|A19U216Pad9|A19U209Pad2);
+pullup(GYXP);
+assign (highz1,strong0) #0.2  GYXP = rst ? 0 : ~(0|A19U216Pad9|A19U209Pad2);
 // Gate A19-U140A
-assign #0.2  A19U137Pad2 = rst ? 0 : ~(0|XLNK0_|A19U140Pad3);
+pullup(A19U137Pad2);
+assign (highz1,strong0) #0.2  A19U137Pad2 = rst ? 0 : ~(0|XLNK0_|A19U140Pad3);
 // Gate A19-U150A
-assign #0.2  A19U149Pad3 = rst ? 1 : ~(0|A19U150Pad2);
+pullup(A19U149Pad3);
+assign (highz1,strong0) #0.2  A19U149Pad3 = rst ? 1 : ~(0|A19U150Pad2);
 // Gate A19-U124B
-assign #0.2  A19U124Pad9 = rst ? 0 : ~(0|A19U123Pad1|F5ASB2_);
+pullup(A19U124Pad9);
+assign (highz1,strong0) #0.2  A19U124Pad9 = rst ? 0 : ~(0|A19U123Pad1|F5ASB2_);
 // Gate A19-U258A
-assign #0.2  A19U256Pad2 = rst ? 0 : ~(0|CCH13|A19U257Pad2);
+pullup(A19U256Pad2);
+assign (highz1,strong0) #0.2  A19U256Pad2 = rst ? 0 : ~(0|CCH13|A19U257Pad2);
 // Gate A19-U251B
-assign #0.2  A19U235Pad8 = rst ? 0 : ~(0|SB0_|A19U236Pad4|F07C_);
+pullup(A19U235Pad8);
+assign (highz1,strong0) #0.2  A19U235Pad8 = rst ? 0 : ~(0|SB0_|A19U236Pad4|F07C_);
 // Gate A19-U250A
-assign #0.2  A19U248Pad3 = rst ? 1 : ~(0|A19U248Pad8|A19U250Pad3);
+pullup(A19U248Pad3);
+assign (highz1,strong0) #0.2  A19U248Pad3 = rst ? 1 : ~(0|A19U248Pad8|A19U250Pad3);
 // Gate A19-U107A
-assign #0.2  A19U107Pad1 = rst ? 0 : ~(0|WCH14_|CHWL03_);
+pullup(A19U107Pad1);
+assign (highz1,strong0) #0.2  A19U107Pad1 = rst ? 0 : ~(0|WCH14_|CHWL03_);
 // Gate A19-U125A
-assign #0.2  A19U124Pad2 = rst ? 1 : ~(0|A19U120Pad7|A19U124Pad9);
+pullup(A19U124Pad2);
+assign (highz1,strong0) #0.2  A19U124Pad2 = rst ? 1 : ~(0|A19U120Pad7|A19U124Pad9);
 // Gate A19-U217A
-assign #0.2  GYXM = rst ? 0 : ~(0|A19U208Pad2|A19U216Pad9);
+pullup(GYXM);
+assign (highz1,strong0) #0.2  GYXM = rst ? 0 : ~(0|A19U208Pad2|A19U216Pad9);
 // Gate A19-U236A
-assign #0.2  A19U235Pad3 = rst ? 0 : ~(0|SIGNX|F7CSB1_|A19U236Pad4);
+pullup(A19U235Pad3);
+assign (highz1,strong0) #0.2  A19U235Pad3 = rst ? 0 : ~(0|SIGNX|F7CSB1_|A19U236Pad4);
 // Gate A19-U249B
-assign #0.2  BLKUPL = rst ? 1 : ~(0|BLKUPL_);
+pullup(BLKUPL);
+assign (highz1,strong0) #0.2  BLKUPL = rst ? 1 : ~(0|BLKUPL_);
 // Gate A19-U255B
-assign #0.2  UPL0_ = rst ? 1 : ~(0|UPL0);
+pullup(UPL0_);
+assign (highz1,strong0) #0.2  UPL0_ = rst ? 1 : ~(0|UPL0);
 // Gate A19-U150B
-assign #0.2  A19U150Pad2 = rst ? 0 : ~(0|CA5_|XB6_);
+pullup(A19U150Pad2);
+assign (highz1,strong0) #0.2  A19U150Pad2 = rst ? 0 : ~(0|CA5_|XB6_);
 // Gate A19-U114A
-assign #0.2  A19U114Pad1 = rst ? 0 : ~(0|GTSET_|A19U109Pad1);
+pullup(A19U114Pad1);
+assign (highz1,strong0) #0.2  A19U114Pad1 = rst ? 0 : ~(0|GTSET_|A19U109Pad1);
 // Gate A19-U245A
-assign #0.2  A19U244Pad2 = rst ? 0 : ~(0|SIGNY|A19U236Pad4|F7CSB1_);
+pullup(A19U244Pad2);
+assign (highz1,strong0) #0.2  A19U244Pad2 = rst ? 0 : ~(0|SIGNY|A19U236Pad4|F7CSB1_);
 // Gate A19-U255A
-assign #0.2  UPRUPT = rst ? 0 : ~(0|C45R_|BR1_);
+pullup(UPRUPT);
+assign (highz1,strong0) #0.2  UPRUPT = rst ? 0 : ~(0|C45R_|BR1_);
 // Gate A19-U146B
-assign #0.2  EMSp = rst ? 0 : ~(0|F5ASB0_|A19U146Pad8);
+pullup(EMSp);
+assign (highz1,strong0) #0.2  EMSp = rst ? 0 : ~(0|F5ASB0_|A19U146Pad8);
 // Gate A19-U253B
-assign #0.2  RHCGO = rst ? 0 : ~(0|F07C_|A19U253Pad7|SB2_);
+pullup(RHCGO);
+assign (highz1,strong0) #0.2  RHCGO = rst ? 0 : ~(0|F07C_|A19U253Pad7|SB2_);
 // Gate A19-U253A
-assign #0.2  A19U236Pad4 = rst ? 1 : ~(0|A19U253Pad2);
+pullup(A19U236Pad4);
+assign (highz1,strong0) #0.2  A19U236Pad4 = rst ? 1 : ~(0|A19U253Pad2);
 // Gate A19-U227A
-assign #0.2  A19U227Pad1 = rst ? 0 : ~(0|WCH11_|CHWL11_);
+pullup(A19U227Pad1);
+assign (highz1,strong0) #0.2  A19U227Pad1 = rst ? 0 : ~(0|WCH11_|CHWL11_);
 // Gate A19-U224B
-assign #0.2  FF1109_ = rst ? 1 : ~(0|A19U222Pad1|FF1109);
+pullup(FF1109_);
+assign (highz1,strong0) #0.2  FF1109_ = rst ? 1 : ~(0|A19U222Pad1|FF1109);
 // Gate A19-U146A
-assign #0.2  EMSm = rst ? 0 : ~(0|A19U146Pad2|F5ASB0_);
+pullup(EMSm);
+assign (highz1,strong0) #0.2  EMSm = rst ? 0 : ~(0|A19U146Pad2|F5ASB0_);
 // Gate A19-U259B
-assign #0.2  A19U256Pad8 = rst ? 1 : ~(0|A19U258Pad9|A19U259Pad8);
+pullup(A19U256Pad8);
+assign (highz1,strong0) #0.2  A19U256Pad8 = rst ? 1 : ~(0|A19U258Pad9|A19U259Pad8);
 // Gate A19-U257A
-assign #0.2  CH1308 = rst ? 0 : ~(0|A19U257Pad2|RCH13_);
+pullup(CH1308);
+assign (highz1,strong0) #0.2  CH1308 = rst ? 0 : ~(0|A19U257Pad2|RCH13_);
 // Gate A19-U112B
-assign #0.2  ALT1 = rst ? 0 : ~(0|A19U111Pad9|A19U108Pad2);
+pullup(ALT1);
+assign (highz1,strong0) #0.2  ALT1 = rst ? 0 : ~(0|A19U111Pad9|A19U108Pad2);
 // Gate A19-U112A
-assign #0.2  ALT0 = rst ? 0 : ~(0|A19U104Pad1|A19U108Pad2);
+pullup(ALT0);
+assign (highz1,strong0) #0.2  ALT0 = rst ? 0 : ~(0|A19U104Pad1|A19U108Pad2);
 // Gate A19-U145B
-assign #0.2  A19U144Pad7 = rst ? 0 : ~(0|WCH13_|CHWL05_);
+pullup(A19U144Pad7);
+assign (highz1,strong0) #0.2  A19U144Pad7 = rst ? 0 : ~(0|WCH13_|CHWL05_);
 // Gate A19-U157A
-assign #0.2  A19U157Pad1 = rst ? 0 : ~(0|A19U157Pad2|A19U154Pad2);
+pullup(A19U157Pad1);
+assign (highz1,strong0) #0.2  A19U157Pad1 = rst ? 0 : ~(0|A19U157Pad2|A19U154Pad2);
 // Gate A19-U246B
-assign #0.2  BMAGZM = rst ? 0 : ~(0|A19U246Pad7|A19U231Pad3);
+pullup(BMAGZM);
+assign (highz1,strong0) #0.2  BMAGZM = rst ? 0 : ~(0|A19U246Pad7|A19U231Pad3);
 // Gate A19-U144A
-assign #0.2  A19U141Pad4 = rst ? 0 : ~(0|CCH13|A19U140Pad3);
+pullup(A19U141Pad4);
+assign (highz1,strong0) #0.2  A19U141Pad4 = rst ? 0 : ~(0|CCH13|A19U140Pad3);
 // Gate A19-U221A
-assign #0.2  A19U220Pad3 = rst ? 1 : ~(0|A19U221Pad2|A19U220Pad9);
+pullup(A19U220Pad3);
+assign (highz1,strong0) #0.2  A19U220Pad3 = rst ? 1 : ~(0|A19U221Pad2|A19U220Pad9);
 // Gate A19-U143A
-assign #0.2  A19U142Pad2 = rst ? 1 : ~(0|A19U143Pad2|A19U136Pad7);
+pullup(A19U142Pad2);
+assign (highz1,strong0) #0.2  A19U142Pad2 = rst ? 1 : ~(0|A19U143Pad2|A19U136Pad7);
 // Gate A19-U202A
-assign #0.2  A19U202Pad1 = rst ? 0 : ~(0|MOUT_|A19U201Pad1);
+pullup(A19U202Pad1);
+assign (highz1,strong0) #0.2  A19U202Pad1 = rst ? 0 : ~(0|MOUT_|A19U201Pad1);
 // Gate A19-U222A
-assign #0.2  A19U222Pad1 = rst ? 0 : ~(0|CHWL09_|WCH11_);
+pullup(A19U222Pad1);
+assign (highz1,strong0) #0.2  A19U222Pad1 = rst ? 0 : ~(0|CHWL09_|WCH11_);
 // Gate A19-U153A
-assign #0.2  A19U153Pad1 = rst ? 0 : ~(0|CCH14|A19U147Pad8|A19U151Pad1);
+pullup(A19U153Pad1);
+assign (highz1,strong0) #0.2  A19U153Pad1 = rst ? 0 : ~(0|CCH14|A19U147Pad8|A19U151Pad1);
 // Gate A19-U128A A19-U252B
-assign #0.2  F5ASB2 = rst ? 0 : ~(0|F05A_|SB2_);
+pullup(F5ASB2);
+assign (highz1,strong0) #0.2  F5ASB2 = rst ? 0 : ~(0|F05A_|SB2_);
 // Gate A19-U127A
-assign #0.2  F5ASB0 = rst ? 0 : ~(0|F05A_|SB0_);
+pullup(F5ASB0);
+assign (highz1,strong0) #0.2  F5ASB0 = rst ? 0 : ~(0|F05A_|SB0_);
 // Gate A19-U258B
-assign #0.2  A19U258Pad9 = rst ? 0 : ~(0|RHCGO|A19U256Pad8|CCH13);
+pullup(A19U258Pad9);
+assign (highz1,strong0) #0.2  A19U258Pad9 = rst ? 0 : ~(0|RHCGO|A19U256Pad8|CCH13);
 // Gate A19-U151B
-assign #0.2  EMSD = rst ? 0 : ~(0|A19U147Pad8|F5ASB2_);
+pullup(EMSD);
+assign (highz1,strong0) #0.2  EMSD = rst ? 0 : ~(0|A19U147Pad8|F5ASB2_);
 // Gate A19-U206B
-assign #0.2  A19U206Pad2 = rst ? 0 : ~(0|A19U204Pad9|A19U203Pad3|CCH14);
+pullup(A19U206Pad2);
+assign (highz1,strong0) #0.2  A19U206Pad2 = rst ? 0 : ~(0|A19U204Pad9|A19U203Pad3|CCH14);
 // Gate A19-U122A
-assign #0.2  A19U122Pad1 = rst ? 0 : ~(0|A19U120Pad8|GTSET_);
+pullup(A19U122Pad1);
+assign (highz1,strong0) #0.2  A19U122Pad1 = rst ? 0 : ~(0|A19U120Pad8|GTSET_);
 // Gate A19-U252A
-assign #0.2  UPL1_ = rst ? 1 : ~(0|UPL1);
+pullup(UPL1_);
+assign (highz1,strong0) #0.2  UPL1_ = rst ? 1 : ~(0|UPL1);
 // Gate A19-U256B
-assign #0.2  A19U254Pad8 = rst ? 0 : ~(0|F07D_|A19U256Pad8);
+pullup(A19U254Pad8);
+assign (highz1,strong0) #0.2  A19U254Pad8 = rst ? 0 : ~(0|F07D_|A19U256Pad8);
 // Gate A19-U229B
-assign #0.2  FF1112_ = rst ? 1 : ~(0|A19U229Pad1|FF1112);
+pullup(FF1112_);
+assign (highz1,strong0) #0.2  FF1112_ = rst ? 1 : ~(0|A19U229Pad1|FF1112);
 // Gate A19-U248B
-assign #0.2  A19U247Pad8 = rst ? 0 : ~(0|GATEZ_|F5ASB2_|A19U248Pad8);
+pullup(A19U247Pad8);
+assign (highz1,strong0) #0.2  A19U247Pad8 = rst ? 0 : ~(0|GATEZ_|F5ASB2_|A19U248Pad8);
 // Gate A19-U251A
-assign #0.2  A19U250Pad3 = rst ? 0 : ~(0|SIGNZ|A19U236Pad4|F7CSB1_);
+pullup(A19U250Pad3);
+assign (highz1,strong0) #0.2  A19U250Pad3 = rst ? 0 : ~(0|SIGNZ|A19U236Pad4|F7CSB1_);
 // Gate A19-U259A
-assign #0.2  A19U257Pad2 = rst ? 1 : ~(0|A19U259Pad2|A19U256Pad2);
+pullup(A19U257Pad2);
+assign (highz1,strong0) #0.2  A19U257Pad2 = rst ? 1 : ~(0|A19U259Pad2|A19U256Pad2);
 // Gate A19-U209B
-assign #0.2  A19U209Pad2 = rst ? 0 : ~(0|A19U208Pad2|CCH14);
+pullup(A19U209Pad2);
+assign (highz1,strong0) #0.2  A19U209Pad2 = rst ? 0 : ~(0|A19U208Pad2|CCH14);
 // Gate A19-U137B
-assign #0.2  INLNKM = rst ? 0 : ~(0|A19U136Pad7|A19U132Pad8|A19U137Pad8);
+pullup(INLNKM);
+assign (highz1,strong0) #0.2  INLNKM = rst ? 0 : ~(0|A19U136Pad7|A19U132Pad8|A19U137Pad8);
 // Gate A19-U117A
-assign #0.2  ALTM = rst ? 0 : ~(0|F5ASB0_|A19U116Pad1);
+pullup(ALTM);
+assign (highz1,strong0) #0.2  ALTM = rst ? 0 : ~(0|F5ASB0_|A19U116Pad1);
 // Gate A19-U242A
-assign #0.2  A19U241Pad2 = rst ? 1 : ~(0|BMGYP|A19U242Pad3);
+pullup(A19U241Pad2);
+assign (highz1,strong0) #0.2  A19U241Pad2 = rst ? 1 : ~(0|BMGYP|A19U242Pad3);
 // Gate A19-U132B
-assign #0.2  A19U132Pad2 = rst ? 1 : ~(0|A19U131Pad1|A19U132Pad8);
+pullup(A19U132Pad2);
+assign (highz1,strong0) #0.2  A19U132Pad2 = rst ? 1 : ~(0|A19U131Pad1|A19U132Pad8);
 // Gate A19-U155A
-assign #0.2  A19U155Pad1 = rst ? 0 : ~(0|A19U155Pad2|A19U154Pad2|CCH14);
+pullup(A19U155Pad1);
+assign (highz1,strong0) #0.2  A19U155Pad1 = rst ? 0 : ~(0|A19U155Pad2|A19U154Pad2|CCH14);
 // Gate A19-U149B
-assign #0.2  A19U148Pad2 = rst ? 0 : ~(0|A19U149Pad3|POUT_);
+pullup(A19U148Pad2);
+assign (highz1,strong0) #0.2  A19U148Pad2 = rst ? 0 : ~(0|A19U149Pad3|POUT_);
 // Gate A19-U159A
-assign #0.2  A19U155Pad2 = rst ? 0 : ~(0|A19U129Pad9|ZOUT_);
+pullup(A19U155Pad2);
+assign (highz1,strong0) #0.2  A19U155Pad2 = rst ? 0 : ~(0|A19U129Pad9|ZOUT_);
 // Gate A19-U133B
-assign #0.2  A19U132Pad8 = rst ? 0 : ~(0|A19U132Pad2|F04A);
+pullup(A19U132Pad8);
+assign (highz1,strong0) #0.2  A19U132Pad8 = rst ? 0 : ~(0|A19U132Pad2|F04A);
 // Gate A19-U214B
-assign #0.2  GYZP = rst ? 0 : ~(0|A19U213Pad1|A19U209Pad2);
+pullup(GYZP);
+assign (highz1,strong0) #0.2  GYZP = rst ? 0 : ~(0|A19U213Pad1|A19U209Pad2);
 // Gate A19-U244A
-assign #0.2  A19U243Pad2 = rst ? 1 : ~(0|A19U244Pad2|A19U243Pad8);
+pullup(A19U243Pad2);
+assign (highz1,strong0) #0.2  A19U243Pad2 = rst ? 1 : ~(0|A19U244Pad2|A19U243Pad8);
 // Gate A19-U215B
-assign #0.2  GYZM = rst ? 0 : ~(0|A19U213Pad1|A19U208Pad2);
+pullup(GYZM);
+assign (highz1,strong0) #0.2  GYZM = rst ? 0 : ~(0|A19U213Pad1|A19U208Pad2);
 // Gate A19-U239A
-assign #0.2  T1P = rst ? 0 : ~(0|CNTRSB_|F10B_);
+pullup(T1P);
+assign (highz1,strong0) #0.2  T1P = rst ? 0 : ~(0|CNTRSB_|F10B_);
 // Gate A19-U203B
-assign #0.2  A19U203Pad2 = rst ? 1 : ~(0|A19U202Pad9|A19U202Pad1|A19U203Pad1);
+pullup(A19U203Pad2);
+assign (highz1,strong0) #0.2  A19U203Pad2 = rst ? 1 : ~(0|A19U202Pad9|A19U202Pad1|A19U203Pad1);
 // Gate A19-U203A
-assign #0.2  A19U203Pad1 = rst ? 0 : ~(0|A19U203Pad2|A19U203Pad3);
+pullup(A19U203Pad1);
+assign (highz1,strong0) #0.2  A19U203Pad1 = rst ? 0 : ~(0|A19U203Pad2|A19U203Pad3);
 // Gate A19-U152A
-assign #0.2  A19U152Pad1 = rst ? 0 : ~(0|WCH14_|CHWL05_);
+pullup(A19U152Pad1);
+assign (highz1,strong0) #0.2  A19U152Pad1 = rst ? 0 : ~(0|WCH14_|CHWL05_);
 // Gate A19-U135B
-assign #0.2  A19U134Pad8 = rst ? 0 : ~(0|CCH33|A19U135Pad1|GOJAM);
+pullup(A19U134Pad8);
+assign (highz1,strong0) #0.2  A19U134Pad8 = rst ? 0 : ~(0|CCH33|A19U135Pad1|GOJAM);
 // Gate A19-U244B
-assign #0.2  A19U243Pad8 = rst ? 0 : ~(0|A19U243Pad2|A19U235Pad8);
+pullup(A19U243Pad8);
+assign (highz1,strong0) #0.2  A19U243Pad8 = rst ? 0 : ~(0|A19U243Pad2|A19U235Pad8);
 // Gate A19-U136B
-assign #0.2  INLNKP = rst ? 0 : ~(0|A19U132Pad8|A19U136Pad7|A19U136Pad8);
+pullup(INLNKP);
+assign (highz1,strong0) #0.2  INLNKP = rst ? 0 : ~(0|A19U132Pad8|A19U136Pad7|A19U136Pad8);
 // Gate A19-U260B
-assign #0.2  A19U259Pad8 = rst ? 0 : ~(0|WCH13_|CHWL09_);
+pullup(A19U259Pad8);
+assign (highz1,strong0) #0.2  A19U259Pad8 = rst ? 0 : ~(0|WCH13_|CHWL09_);
 // Gate A19-U213A
-assign #0.2  A19U213Pad1 = rst ? 1 : ~(0|A19U212Pad1);
+pullup(A19U213Pad1);
+assign (highz1,strong0) #0.2  A19U213Pad1 = rst ? 1 : ~(0|A19U212Pad1);
 // Gate A19-U132A
-assign #0.2  A19U131Pad3 = rst ? 0 : ~(0|A19U132Pad2|A19U131Pad1);
+pullup(A19U131Pad3);
+assign (highz1,strong0) #0.2  A19U131Pad3 = rst ? 0 : ~(0|A19U132Pad2|A19U131Pad1);
 // Gate A19-U131A
-assign #0.2  A19U131Pad1 = rst ? 0 : ~(0|C45R_|A19U131Pad3);
+pullup(A19U131Pad1);
+assign (highz1,strong0) #0.2  A19U131Pad1 = rst ? 0 : ~(0|C45R_|A19U131Pad3);
 // Gate A19-U245B
-assign #0.2  F09B_ = rst ? 1 : ~(0|F09B);
+pullup(F09B_);
+assign (highz1,strong0) #0.2  F09B_ = rst ? 1 : ~(0|F09B);
 // Gate A19-U213B
-assign #0.2  A19U213Pad9 = rst ? 1 : ~(0|A19U212Pad9);
+pullup(A19U213Pad9);
+assign (highz1,strong0) #0.2  A19U213Pad9 = rst ? 1 : ~(0|A19U212Pad9);
 // Gate A19-U238B
-assign #0.2  T4P = rst ? 0 : ~(0|CNTRSB_|FS10|F09B_);
+pullup(T4P);
+assign (highz1,strong0) #0.2  T4P = rst ? 0 : ~(0|CNTRSB_|FS10|F09B_);
 // Gate A19-U216A
-assign #0.2  A19U216Pad1 = rst ? 0 : ~(0|A19U212Pad2|SB1_|A19U211Pad2);
+pullup(A19U216Pad1);
+assign (highz1,strong0) #0.2  A19U216Pad1 = rst ? 0 : ~(0|A19U212Pad2|SB1_|A19U211Pad2);
 // Gate A19-U104B
-assign #0.2  A19U101Pad8 = rst ? 0 : ~(0|CA6_|CXB0_);
+pullup(A19U101Pad8);
+assign (highz1,strong0) #0.2  A19U101Pad8 = rst ? 0 : ~(0|CA6_|CXB0_);
 // Gate A19-U101B
-assign #0.2  A19U101Pad9 = rst ? 1 : ~(0|A19U101Pad8);
+pullup(A19U101Pad9);
+assign (highz1,strong0) #0.2  A19U101Pad9 = rst ? 1 : ~(0|A19U101Pad8);
 // Gate A19-U106A
-assign #0.2  OTLNK0 = rst ? 0 : ~(0|A19U105Pad3|BR1|SH3MS_);
+pullup(OTLNK0);
+assign (highz1,strong0) #0.2  OTLNK0 = rst ? 0 : ~(0|A19U105Pad3|BR1|SH3MS_);
 // Gate A19-U126A
-assign #0.2  OTLNK1 = rst ? 0 : ~(0|A19U126Pad2);
+pullup(OTLNK1);
+assign (highz1,strong0) #0.2  OTLNK1 = rst ? 0 : ~(0|A19U126Pad2);
 // Gate A19-U101A
-assign #0.2  A19U101Pad1 = rst ? 0 : ~(0|T06_|SHINC_);
+pullup(A19U101Pad1);
+assign (highz1,strong0) #0.2  A19U101Pad1 = rst ? 0 : ~(0|T06_|SHINC_);
 // Gate A19-U205B
-assign #0.2  A19U205Pad9 = rst ? 0 : ~(0|WCH14_|CHWL10_);
+pullup(A19U205Pad9);
+assign (highz1,strong0) #0.2  A19U205Pad9 = rst ? 0 : ~(0|WCH14_|CHWL10_);
 // Gate A19-U136A
-assign #0.2  A19U135Pad3 = rst ? 0 : ~(0|A19U136Pad2|A19U132Pad2);
+pullup(A19U135Pad3);
+assign (highz1,strong0) #0.2  A19U135Pad3 = rst ? 0 : ~(0|A19U136Pad2|A19U132Pad2);
 // Gate A19-U246A
-assign #0.2  BMAGZP = rst ? 0 : ~(0|A19U246Pad2|A19U231Pad3);
+pullup(BMAGZP);
+assign (highz1,strong0) #0.2  BMAGZP = rst ? 0 : ~(0|A19U246Pad2|A19U231Pad3);
 // Gate A19-U260A
-assign #0.2  A19U259Pad2 = rst ? 0 : ~(0|WCH13_|CHWL08_);
+pullup(A19U259Pad2);
+assign (highz1,strong0) #0.2  A19U259Pad2 = rst ? 0 : ~(0|WCH13_|CHWL08_);
 // Gate A19-U127B
-assign #0.2  F5ASB0_ = rst ? 0 : ~(0|F5ASB0);
+pullup(F5ASB0_);
+assign (highz1,strong0) #0.2  F5ASB0_ = rst ? 1 : ~(0|F5ASB0);
 // Gate A19-U154A
-assign #0.2  CH1404 = rst ? 0 : ~(0|A19U154Pad2|RCH14_);
+pullup(CH1404);
+assign (highz1,strong0) #0.2  CH1404 = rst ? 0 : ~(0|A19U154Pad2|RCH14_);
 // Gate A19-U152B
-assign #0.2  CH1405 = rst ? 0 : ~(0|A19U147Pad8|RCH14_);
+pullup(CH1405);
+assign (highz1,strong0) #0.2  CH1405 = rst ? 0 : ~(0|A19U147Pad8|RCH14_);
 // Gate A19-U220A
-assign #0.2  CH1406 = rst ? 0 : ~(0|RCH14_|A19U220Pad3);
+pullup(CH1406);
+assign (highz1,strong0) #0.2  CH1406 = rst ? 0 : ~(0|RCH14_|A19U220Pad3);
 // Gate A19-U218A
-assign #0.2  CH1407 = rst ? 0 : ~(0|RCH14_|A19U212Pad2);
+pullup(CH1407);
+assign (highz1,strong0) #0.2  CH1407 = rst ? 0 : ~(0|RCH14_|A19U212Pad2);
 // Gate A19-U122B
-assign #0.2  CH1401 = rst ? 0 : ~(0|A19U121Pad9|RCH14_);
+pullup(CH1401);
+assign (highz1,strong0) #0.2  CH1401 = rst ? 0 : ~(0|A19U121Pad9|RCH14_);
 // Gate A19-U111A
-assign #0.2  CH1402 = rst ? 0 : ~(0|A19U108Pad1|RCH14_);
+pullup(CH1402);
+assign (highz1,strong0) #0.2  CH1402 = rst ? 0 : ~(0|A19U108Pad1|RCH14_);
 // Gate A19-U110A
-assign #0.2  CH1403 = rst ? 0 : ~(0|RCH14_|A19U110Pad3);
+pullup(CH1403);
+assign (highz1,strong0) #0.2  CH1403 = rst ? 0 : ~(0|RCH14_|A19U110Pad3);
 // Gate A19-U118A
-assign #0.2  A19U118Pad1 = rst ? 1 : ~(0|A19U118Pad2|A19U109Pad6);
+pullup(A19U118Pad1);
+assign (highz1,strong0) #0.2  A19U118Pad1 = rst ? 1 : ~(0|A19U118Pad2|A19U109Pad6);
 // Gate A19-U118B
-assign #0.2  A19U118Pad2 = rst ? 0 : ~(0|GTONE|A19U118Pad1);
+pullup(A19U118Pad2);
+assign (highz1,strong0) #0.2  A19U118Pad2 = rst ? 0 : ~(0|GTONE|A19U118Pad1);
 // Gate A19-U210A
-assign #0.2  CH1408 = rst ? 0 : ~(0|RCH14_|A19U210Pad3);
+pullup(CH1408);
+assign (highz1,strong0) #0.2  CH1408 = rst ? 0 : ~(0|RCH14_|A19U210Pad3);
 // Gate A19-U208A
-assign #0.2  CH1409 = rst ? 0 : ~(0|A19U208Pad2|RCH14_);
+pullup(CH1409);
+assign (highz1,strong0) #0.2  CH1409 = rst ? 0 : ~(0|A19U208Pad2|RCH14_);
 // Gate A19-U209A
-assign #0.2  A19U208Pad2 = rst ? 1 : ~(0|A19U209Pad2|A19U208Pad9);
+pullup(A19U208Pad2);
+assign (highz1,strong0) #0.2  A19U208Pad2 = rst ? 1 : ~(0|A19U209Pad2|A19U208Pad9);
 // Gate A19-U208B
-assign #0.2  A19U208Pad9 = rst ? 0 : ~(0|CHWL09_|WCH14_);
+pullup(A19U208Pad9);
+assign (highz1,strong0) #0.2  A19U208Pad9 = rst ? 0 : ~(0|CHWL09_|WCH14_);
 // Gate A19-U131B
-assign #0.2  C45R_ = rst ? 1 : ~(0|C45R);
+pullup(C45R_);
+assign (highz1,strong0) #0.2  C45R_ = rst ? 1 : ~(0|C45R);
 // Gate A19-U156B
-assign #0.2  THRSTp = rst ? 0 : ~(0|A19U156Pad7|F5ASB0_);
+pullup(THRSTp);
+assign (highz1,strong0) #0.2  THRSTp = rst ? 0 : ~(0|A19U156Pad7|F5ASB0_);
 // Gate A19-U123B
-assign #0.2  A19U123Pad2 = rst ? 0 : ~(0|GOJAM|GTONE|A19U123Pad1);
+pullup(A19U123Pad2);
+assign (highz1,strong0) #0.2  A19U123Pad2 = rst ? 0 : ~(0|GOJAM|GTONE|A19U123Pad1);
 // Gate A19-U123A
-assign #0.2  A19U123Pad1 = rst ? 1 : ~(0|A19U123Pad2|A19U122Pad1);
+pullup(A19U123Pad1);
+assign (highz1,strong0) #0.2  A19U123Pad1 = rst ? 1 : ~(0|A19U123Pad2|A19U122Pad1);
 // Gate A19-U248A
-assign #0.2  A19U247Pad2 = rst ? 0 : ~(0|F5ASB2_|A19U248Pad3|GATEZ_);
+pullup(A19U247Pad2);
+assign (highz1,strong0) #0.2  A19U247Pad2 = rst ? 0 : ~(0|F5ASB2_|A19U248Pad3|GATEZ_);
 // Gate A19-U120A
-assign #0.2  ALTSNC = rst ? 0 : ~(0|A19U119Pad1);
+pullup(ALTSNC);
+assign (highz1,strong0) #0.2  ALTSNC = rst ? 0 : ~(0|A19U119Pad1);
 // Gate A19-U113A
-assign #0.2  ALRT0 = rst ? 0 : ~(0|A19U104Pad1|A19U108Pad1);
+pullup(ALRT0);
+assign (highz1,strong0) #0.2  ALRT0 = rst ? 0 : ~(0|A19U104Pad1|A19U108Pad1);
 // Gate A19-U113B
-assign #0.2  ALRT1 = rst ? 0 : ~(0|A19U111Pad9|A19U108Pad1);
+pullup(ALRT1);
+assign (highz1,strong0) #0.2  ALRT1 = rst ? 0 : ~(0|A19U111Pad9|A19U108Pad1);
 // Gate A19-U242B
-assign #0.2  A19U241Pad7 = rst ? 1 : ~(0|A19U242Pad7|BMGYM);
+pullup(A19U241Pad7);
+assign (highz1,strong0) #0.2  A19U241Pad7 = rst ? 1 : ~(0|A19U242Pad7|BMGYM);
 // Gate A19-U204B
-assign #0.2  A19U204Pad9 = rst ? 0 : ~(0|A19U201Pad1|ZOUT_);
+pullup(A19U204Pad9);
+assign (highz1,strong0) #0.2  A19U204Pad9 = rst ? 0 : ~(0|A19U201Pad1|ZOUT_);
 // Gate A19-U241B
-assign #0.2  BMAGYM = rst ? 0 : ~(0|A19U241Pad7|A19U231Pad3);
+pullup(BMAGYM);
+assign (highz1,strong0) #0.2  BMAGYM = rst ? 0 : ~(0|A19U241Pad7|A19U231Pad3);
 // Gate A19-U254A
-assign #0.2  A19U253Pad2 = rst ? 0 : ~(0|A19U253Pad7|F07B);
+pullup(A19U253Pad2);
+assign (highz1,strong0) #0.2  A19U253Pad2 = rst ? 0 : ~(0|A19U253Pad7|F07B);
 // Gate A19-U119A
-assign #0.2  A19U119Pad1 = rst ? 1 : ~(0|A19U115Pad2|A19U109Pad6|A19U118Pad2);
+pullup(A19U119Pad1);
+assign (highz1,strong0) #0.2  A19U119Pad1 = rst ? 1 : ~(0|A19U115Pad2|A19U109Pad6|A19U118Pad2);
 // Gate A19-U107B
-assign #0.2  A19U107Pad9 = rst ? 0 : ~(0|CHWL02_|WCH14_);
+pullup(A19U107Pad9);
+assign (highz1,strong0) #0.2  A19U107Pad9 = rst ? 0 : ~(0|CHWL02_|WCH14_);
 // Gate A19-U229A
-assign #0.2  A19U229Pad1 = rst ? 0 : ~(0|WCH11_|CHWL12_);
+pullup(A19U229Pad1);
+assign (highz1,strong0) #0.2  A19U229Pad1 = rst ? 0 : ~(0|WCH11_|CHWL12_);
 // Gate A19-U115A
-assign #0.2  A19U114Pad7 = rst ? 1 : ~(0|A19U115Pad2|A19U114Pad1);
+pullup(A19U114Pad7);
+assign (highz1,strong0) #0.2  A19U114Pad7 = rst ? 1 : ~(0|A19U115Pad2|A19U114Pad1);
 // Gate A19-U102A
-assign #0.2  SH3MS_ = rst ? 1 : ~(0|A19U102Pad2|A19U101Pad1);
+pullup(SH3MS_);
+assign (highz1,strong0) #0.2  SH3MS_ = rst ? 1 : ~(0|A19U102Pad2|A19U101Pad1);
 // Gate A19-U119B
-assign #0.2  A19U119Pad9 = rst ? 0 : ~(0|WCH14_|CHWL01_);
+pullup(A19U119Pad9);
+assign (highz1,strong0) #0.2  A19U119Pad9 = rst ? 0 : ~(0|WCH14_|CHWL01_);
 // Gate A19-U106B
-assign #0.2  A19U105Pad3 = rst ? 1 : ~(0|A19U105Pad9);
+pullup(A19U105Pad3);
+assign (highz1,strong0) #0.2  A19U105Pad3 = rst ? 1 : ~(0|A19U105Pad9);
 // Gate A19-U105A
-assign #0.2  A19U105Pad1 = rst ? 0 : ~(0|SH3MS_|A19U105Pad3|BR1_);
+pullup(A19U105Pad1);
+assign (highz1,strong0) #0.2  A19U105Pad1 = rst ? 0 : ~(0|SH3MS_|A19U105Pad3|BR1_);
 // Gate A19-U241A
-assign #0.2  BMAGYP = rst ? 0 : ~(0|A19U241Pad2|A19U231Pad3);
+pullup(BMAGYP);
+assign (highz1,strong0) #0.2  BMAGYP = rst ? 0 : ~(0|A19U241Pad2|A19U231Pad3);
 // Gate A19-U130B
-assign #0.2  F5BSB2_ = rst ? 1 : ~(0|F5BSB2);
+pullup(F5BSB2_);
+assign (highz1,strong0) #0.2  F5BSB2_ = rst ? 1 : ~(0|F5BSB2);
 // Gate A19-U250B
-assign #0.2  A19U248Pad8 = rst ? 0 : ~(0|A19U235Pad8|A19U248Pad3);
+pullup(A19U248Pad8);
+assign (highz1,strong0) #0.2  A19U248Pad8 = rst ? 0 : ~(0|A19U235Pad8|A19U248Pad3);
 // Gate A19-U148B
-assign #0.2  A19U148Pad3 = rst ? 0 : ~(0|A19U146Pad8|A19U147Pad8);
+pullup(A19U148Pad3);
+assign (highz1,strong0) #0.2  A19U148Pad3 = rst ? 0 : ~(0|A19U146Pad8|A19U147Pad8);
 // Gate A19-U207B
-assign #0.2  CH1410 = rst ? 0 : ~(0|A19U203Pad3|RCH14_);
+pullup(CH1410);
+assign (highz1,strong0) #0.2  CH1410 = rst ? 0 : ~(0|A19U203Pad3|RCH14_);
 // Gate A19-U226A
-assign #0.2  W1110 = rst ? 0 : ~(0|WCH11_|CHWL10_);
+pullup(W1110);
+assign (highz1,strong0) #0.2  W1110 = rst ? 0 : ~(0|WCH11_|CHWL10_);
 // Gate A19-U108B
-assign #0.2  A19U108Pad2 = rst ? 0 : ~(0|A19U108Pad1|CCH14);
+pullup(A19U108Pad2);
+assign (highz1,strong0) #0.2  A19U108Pad2 = rst ? 0 : ~(0|A19U108Pad1|CCH14);
 // Gate A19-U108A
-assign #0.2  A19U108Pad1 = rst ? 1 : ~(0|A19U108Pad2|A19U107Pad9);
+pullup(A19U108Pad1);
+assign (highz1,strong0) #0.2  A19U108Pad1 = rst ? 1 : ~(0|A19U108Pad2|A19U107Pad9);
 // Gate A19-U221B
-assign #0.2  A19U221Pad2 = rst ? 0 : ~(0|A19U220Pad3|CCH14);
+pullup(A19U221Pad2);
+assign (highz1,strong0) #0.2  A19U221Pad2 = rst ? 0 : ~(0|A19U220Pad3|CCH14);
 // Gate A19-U202B
-assign #0.2  A19U202Pad9 = rst ? 0 : ~(0|POUT_|A19U201Pad1);
+pullup(A19U202Pad9);
+assign (highz1,strong0) #0.2  A19U202Pad9 = rst ? 0 : ~(0|POUT_|A19U201Pad1);
 // Gate A19-U238A
-assign #0.2  T3P = rst ? 0 : ~(0|F10B_|CNTRSB_);
+pullup(T3P);
+assign (highz1,strong0) #0.2  T3P = rst ? 0 : ~(0|F10B_|CNTRSB_);
 // Gate A19-U239B
-assign #0.2  F10B_ = rst ? 1 : ~(0|F10B);
+pullup(F10B_);
+assign (highz1,strong0) #0.2  F10B_ = rst ? 1 : ~(0|F10B);
 // Gate A19-U223A
-assign #0.2  GYENAB = rst ? 0 : ~(0|A19U220Pad3|SB1_);
+pullup(GYENAB);
+assign (highz1,strong0) #0.2  GYENAB = rst ? 0 : ~(0|A19U220Pad3|SB1_);
 // Gate A19-U247B
-assign #0.2  A19U246Pad7 = rst ? 1 : ~(0|BMGZM|A19U247Pad8);
+pullup(A19U246Pad7);
+assign (highz1,strong0) #0.2  A19U246Pad7 = rst ? 1 : ~(0|BMGZM|A19U247Pad8);
 // Gate A19-U143B
-assign #0.2  A19U136Pad7 = rst ? 0 : ~(0|A19U142Pad2|CCH13);
+pullup(A19U136Pad7);
+assign (highz1,strong0) #0.2  A19U136Pad7 = rst ? 0 : ~(0|A19U142Pad2|CCH13);
 // Gate A19-U234A
-assign #0.2  T6P = rst ? 0 : ~(0|F06B_|T6ON_|CNTRSB_);
+pullup(T6P);
+assign (highz1,strong0) #0.2  T6P = rst ? 0 : ~(0|F06B_|T6ON_|CNTRSB_);
 // Gate A19-U230B
-assign #0.2  FF1112 = rst ? 0 : ~(0|CCH11|FF1112_);
+pullup(FF1112);
+assign (highz1,strong0) #0.2  FF1112 = rst ? 0 : ~(0|CCH11|FF1112_);
 // Gate A19-U138A A19-U137A
-assign #0.2  A19U136Pad2 = rst ? 1 : ~(0|A19U138Pad2|A19U138Pad3|A19U137Pad2|A19U137Pad3);
+pullup(A19U136Pad2);
+assign (highz1,strong0) #0.2  A19U136Pad2 = rst ? 1 : ~(0|A19U138Pad2|A19U138Pad3|A19U137Pad2|A19U137Pad3);
 // Gate A19-U130A
-assign #0.2  F5BSB2 = rst ? 0 : ~(0|F05B_|SB2_);
+pullup(F5BSB2);
+assign (highz1,strong0) #0.2  F5BSB2 = rst ? 0 : ~(0|F05B_|SB2_);
 // Gate A19-U219B
-assign #0.2  A19U212Pad7 = rst ? 0 : ~(0|A19U212Pad2|CCH14);
+pullup(A19U212Pad7);
+assign (highz1,strong0) #0.2  A19U212Pad7 = rst ? 0 : ~(0|A19U212Pad2|CCH14);
 // Gate A19-U157B
-assign #0.2  THRSTm = rst ? 0 : ~(0|A19U157Pad2|F5ASB0_);
+pullup(THRSTm);
+assign (highz1,strong0) #0.2  THRSTm = rst ? 0 : ~(0|A19U157Pad2|F5ASB0_);
 // Gate A19-U102B
-assign #0.2  A19U102Pad2 = rst ? 0 : ~(0|SH3MS_|CSG);
+pullup(A19U102Pad2);
+assign (highz1,strong0) #0.2  A19U102Pad2 = rst ? 0 : ~(0|SH3MS_|CSG);
 // Gate A19-U139B
-assign #0.2  A19U136Pad8 = rst ? 1 : ~(0|A19U138Pad3|A19U137Pad3);
+pullup(A19U136Pad8);
+assign (highz1,strong0) #0.2  A19U136Pad8 = rst ? 1 : ~(0|A19U138Pad3|A19U137Pad3);
 // Gate A19-U247A
-assign #0.2  A19U246Pad2 = rst ? 1 : ~(0|A19U247Pad2|BMGZP);
+pullup(A19U246Pad2);
+assign (highz1,strong0) #0.2  A19U246Pad2 = rst ? 1 : ~(0|A19U247Pad2|BMGZP);
 // Gate A19-U249A
-assign #0.2  XLNK1_ = rst ? 1 : ~(0|XLNK1);
+pullup(XLNK1_);
+assign (highz1,strong0) #0.2  XLNK1_ = rst ? 1 : ~(0|XLNK1);
 // Gate A19-U211A
-assign #0.2  A19U210Pad3 = rst ? 1 : ~(0|A19U211Pad2|A19U210Pad9);
+pullup(A19U210Pad3);
+assign (highz1,strong0) #0.2  A19U210Pad3 = rst ? 1 : ~(0|A19U211Pad2|A19U210Pad9);
 // Gate A19-U232B
-assign #0.2  A19U232Pad9 = rst ? 0 : ~(0|F5ASB2_|GATEX_|A19U232Pad8);
+pullup(A19U232Pad9);
+assign (highz1,strong0) #0.2  A19U232Pad9 = rst ? 0 : ~(0|F5ASB2_|GATEX_|A19U232Pad8);
 // Gate A19-U226B
-assign #0.2  FF1110_ = rst ? 1 : ~(0|W1110|FF1110);
+pullup(FF1110_);
+assign (highz1,strong0) #0.2  FF1110_ = rst ? 1 : ~(0|W1110|FF1110);
 // Gate A19-U128B
-assign #0.2  F5ASB2_ = rst ? 0 : ~(0|F5ASB2);
+pullup(F5ASB2_);
+assign (highz1,strong0) #0.2  F5ASB2_ = rst ? 1 : ~(0|F5ASB2);
 // Gate A19-U223B
-assign #0.2  FF1109 = rst ? 0 : ~(0|CCH11|FF1109_);
+pullup(FF1109);
+assign (highz1,strong0) #0.2  FF1109 = rst ? 0 : ~(0|CCH11|FF1109_);
 // Gate A19-U232A
-assign #0.2  A19U232Pad1 = rst ? 0 : ~(0|A19U232Pad2|GATEX_|F5ASB2_);
+pullup(A19U232Pad1);
+assign (highz1,strong0) #0.2  A19U232Pad1 = rst ? 0 : ~(0|A19U232Pad2|GATEX_|F5ASB2_);
 // Gate A19-U215A
-assign #0.2  GYYM = rst ? 0 : ~(0|A19U213Pad9|A19U208Pad2);
+pullup(GYYM);
+assign (highz1,strong0) #0.2  GYYM = rst ? 0 : ~(0|A19U213Pad9|A19U208Pad2);
 // Gate A19-U121B
-assign #0.2  A19U121Pad9 = rst ? 1 : ~(0|A19U120Pad7|A19U120Pad9);
+pullup(A19U121Pad9);
+assign (highz1,strong0) #0.2  A19U121Pad9 = rst ? 1 : ~(0|A19U120Pad7|A19U120Pad9);
 // Gate A19-U142B
-assign #0.2  CH1305 = rst ? 0 : ~(0|A19U140Pad3|RCH13_);
+pullup(CH1305);
+assign (highz1,strong0) #0.2  CH1305 = rst ? 0 : ~(0|A19U140Pad3|RCH13_);
 // Gate A19-U116B
-assign #0.2  A19U109Pad6 = rst ? 0 : ~(0|GOJAM|GTSET|A19U116Pad1);
+pullup(A19U109Pad6);
+assign (highz1,strong0) #0.2  A19U109Pad6 = rst ? 0 : ~(0|GOJAM|GTSET|A19U116Pad1);
 // Gate A19-U139A
-assign #0.2  A19U137Pad8 = rst ? 1 : ~(0|A19U138Pad2|A19U137Pad2);
+pullup(A19U137Pad8);
+assign (highz1,strong0) #0.2  A19U137Pad8 = rst ? 1 : ~(0|A19U138Pad2|A19U137Pad2);
 // Gate A19-U109B
-assign #0.2  A19U109Pad2 = rst ? 0 : ~(0|A19U109Pad6|A19U109Pad1|CCH14);
+pullup(A19U109Pad2);
+assign (highz1,strong0) #0.2  A19U109Pad2 = rst ? 0 : ~(0|A19U109Pad6|A19U109Pad1|CCH14);
 // Gate A19-U103B
-assign #0.2  A19U103Pad9 = rst ? 0 : ~(0|BR1_|A19U101Pad9|SH3MS_);
+pullup(A19U103Pad9);
+assign (highz1,strong0) #0.2  A19U103Pad9 = rst ? 0 : ~(0|BR1_|A19U101Pad9|SH3MS_);
 // Gate A19-U109A
-assign #0.2  A19U109Pad1 = rst ? 1 : ~(0|A19U109Pad2|A19U107Pad1);
+pullup(A19U109Pad1);
+assign (highz1,strong0) #0.2  A19U109Pad1 = rst ? 1 : ~(0|A19U109Pad2|A19U107Pad1);
 // Gate A19-U206A
-assign #0.2  A19U203Pad3 = rst ? 1 : ~(0|A19U206Pad2|A19U205Pad9);
+pullup(A19U203Pad3);
+assign (highz1,strong0) #0.2  A19U203Pad3 = rst ? 1 : ~(0|A19U206Pad2|A19U205Pad9);
 // Gate A19-U140B
-assign #0.2  A19U137Pad3 = rst ? 0 : ~(0|XLNK1_|A19U140Pad3);
+pullup(A19U137Pad3);
+assign (highz1,strong0) #0.2  A19U137Pad3 = rst ? 0 : ~(0|XLNK1_|A19U140Pad3);
 // Gate A19-U115B
-assign #0.2  A19U115Pad2 = rst ? 0 : ~(0|GTONE|GOJAM|A19U114Pad7);
+pullup(A19U115Pad2);
+assign (highz1,strong0) #0.2  A19U115Pad2 = rst ? 0 : ~(0|GTONE|GOJAM|A19U114Pad7);
 // Gate A19-U103A
-assign #0.2  A19U103Pad1 = rst ? 0 : ~(0|BR1|SH3MS_|A19U101Pad9);
+pullup(A19U103Pad1);
+assign (highz1,strong0) #0.2  A19U103Pad1 = rst ? 0 : ~(0|BR1|SH3MS_|A19U101Pad9);
 // Gate A19-U158B
-assign #0.2  A19U158Pad9 = rst ? 0 : ~(0|A19U154Pad2|A19U156Pad7);
+pullup(A19U158Pad9);
+assign (highz1,strong0) #0.2  A19U158Pad9 = rst ? 0 : ~(0|A19U154Pad2|A19U156Pad7);
 // Gate A19-U145A
-assign #0.2  A19U143Pad2 = rst ? 0 : ~(0|WCH13_|CHWL06_);
+pullup(A19U143Pad2);
+assign (highz1,strong0) #0.2  A19U143Pad2 = rst ? 0 : ~(0|WCH13_|CHWL06_);
 // Gate A19-U148A
-assign #0.2  A19U146Pad8 = rst ? 1 : ~(0|A19U148Pad2|A19U148Pad3);
+pullup(A19U146Pad8);
+assign (highz1,strong0) #0.2  A19U146Pad8 = rst ? 1 : ~(0|A19U148Pad2|A19U148Pad3);
 // Gate A19-U158A
-assign #0.2  A19U157Pad2 = rst ? 1 : ~(0|A19U158Pad2|A19U157Pad1);
+pullup(A19U157Pad2);
+assign (highz1,strong0) #0.2  A19U157Pad2 = rst ? 1 : ~(0|A19U158Pad2|A19U157Pad1);
 // Gate A19-U237A
-assign #0.2  T5P = rst ? 0 : ~(0|CNTRSB_|F10A_);
+pullup(T5P);
+assign (highz1,strong0) #0.2  T5P = rst ? 0 : ~(0|CNTRSB_|F10A_);
 // Gate A19-U201A
-assign #0.2  A19U201Pad1 = rst ? 1 : ~(0|A19U201Pad2);
+pullup(A19U201Pad1);
+assign (highz1,strong0) #0.2  A19U201Pad1 = rst ? 1 : ~(0|A19U201Pad2);
 // Gate A19-U257B
-assign #0.2  CH1309 = rst ? 0 : ~(0|RCH13_|A19U256Pad8);
+pullup(CH1309);
+assign (highz1,strong0) #0.2  CH1309 = rst ? 0 : ~(0|RCH13_|A19U256Pad8);
 // Gate A19-U147A
-assign #0.2  A19U146Pad2 = rst ? 1 : ~(0|A19U147Pad2|A19U147Pad3);
+pullup(A19U146Pad2);
+assign (highz1,strong0) #0.2  A19U146Pad2 = rst ? 1 : ~(0|A19U147Pad2|A19U147Pad3);
 // Gate A19-U204A
-assign #0.2  GYRSET = rst ? 0 : ~(0|F5ASB2_|A19U203Pad2);
+pullup(GYRSET);
+assign (highz1,strong0) #0.2  GYRSET = rst ? 0 : ~(0|F5ASB2_|A19U203Pad2);
 // Gate A19-U235B
-assign #0.2  A19U232Pad8 = rst ? 1 : ~(0|A19U232Pad2|A19U235Pad8);
+pullup(A19U232Pad8);
+assign (highz1,strong0) #0.2  A19U232Pad8 = rst ? 1 : ~(0|A19U232Pad2|A19U235Pad8);
 // Gate A19-U120B
-assign #0.2  A19U120Pad9 = rst ? 0 : ~(0|CCH14|A19U120Pad7|A19U120Pad8);
+pullup(A19U120Pad9);
+assign (highz1,strong0) #0.2  A19U120Pad9 = rst ? 0 : ~(0|CCH14|A19U120Pad7|A19U120Pad8);
 // Gate A19-U121A
-assign #0.2  A19U120Pad8 = rst ? 1 : ~(0|A19U119Pad9|A19U120Pad9);
+pullup(A19U120Pad8);
+assign (highz1,strong0) #0.2  A19U120Pad8 = rst ? 1 : ~(0|A19U119Pad9|A19U120Pad9);
 // Gate A19-U149A
-assign #0.2  A19U147Pad2 = rst ? 0 : ~(0|MOUT_|A19U149Pad3);
+pullup(A19U147Pad2);
+assign (highz1,strong0) #0.2  A19U147Pad2 = rst ? 0 : ~(0|MOUT_|A19U149Pad3);
 // Gate A19-U147B
-assign #0.2  A19U147Pad3 = rst ? 0 : ~(0|A19U146Pad2|A19U147Pad8);
+pullup(A19U147Pad3);
+assign (highz1,strong0) #0.2  A19U147Pad3 = rst ? 0 : ~(0|A19U146Pad2|A19U147Pad8);
 // Gate A19-U125B
-assign #0.2  A19U120Pad7 = rst ? 0 : ~(0|A19U124Pad2|GOJAM|GTSET);
+pullup(A19U120Pad7);
+assign (highz1,strong0) #0.2  A19U120Pad7 = rst ? 0 : ~(0|A19U124Pad2|GOJAM|GTSET);
 // Gate A19-U153B
-assign #0.2  A19U147Pad8 = rst ? 1 : ~(0|A19U152Pad1|A19U153Pad1);
+pullup(A19U147Pad8);
+assign (highz1,strong0) #0.2  A19U147Pad8 = rst ? 1 : ~(0|A19U152Pad1|A19U153Pad1);
 // Gate A19-U160B
-assign #0.2  A19U159Pad8 = rst ? 0 : ~(0|A19U129Pad9|POUT_);
+pullup(A19U159Pad8);
+assign (highz1,strong0) #0.2  A19U159Pad8 = rst ? 0 : ~(0|A19U129Pad9|POUT_);
 // Gate A19-U227B
-assign #0.2  FF1111_ = rst ? 1 : ~(0|A19U227Pad1|FF1111);
+pullup(FF1111_);
+assign (highz1,strong0) #0.2  FF1111_ = rst ? 1 : ~(0|A19U227Pad1|FF1111);
 // Gate A19-U159B
-assign #0.2  A19U156Pad7 = rst ? 1 : ~(0|A19U158Pad9|A19U159Pad8);
+pullup(A19U156Pad7);
+assign (highz1,strong0) #0.2  A19U156Pad7 = rst ? 1 : ~(0|A19U158Pad9|A19U159Pad8);
 // Gate A19-U212A
-assign #0.2  A19U212Pad1 = rst ? 0 : ~(0|A19U212Pad2|SB1_|A19U210Pad3);
+pullup(A19U212Pad1);
+assign (highz1,strong0) #0.2  A19U212Pad1 = rst ? 0 : ~(0|A19U212Pad2|SB1_|A19U210Pad3);
 // Gate A19-U104A
-assign #0.2  A19U104Pad1 = rst ? 1 : ~(0|A19U103Pad1);
+pullup(A19U104Pad1);
+assign (highz1,strong0) #0.2  A19U104Pad1 = rst ? 1 : ~(0|A19U103Pad1);
 // Gate A19-U219A
-assign #0.2  A19U212Pad2 = rst ? 1 : ~(0|A19U212Pad7|A19U218Pad9);
+pullup(A19U212Pad2);
+assign (highz1,strong0) #0.2  A19U212Pad2 = rst ? 1 : ~(0|A19U212Pad7|A19U218Pad9);
 // Gate A19-U141A
-assign #0.2  A19U138Pad2 = rst ? 0 : ~(0|UPL0_|BLKUPL|A19U141Pad4);
+pullup(A19U138Pad2);
+assign (highz1,strong0) #0.2  A19U138Pad2 = rst ? 0 : ~(0|UPL0_|BLKUPL|A19U141Pad4);
 // Gate A19-U141B
-assign #0.2  A19U138Pad3 = rst ? 0 : ~(0|UPL1_|A19U141Pad4|BLKUPL);
+pullup(A19U138Pad3);
+assign (highz1,strong0) #0.2  A19U138Pad3 = rst ? 0 : ~(0|UPL1_|A19U141Pad4|BLKUPL);
 // Gate A19-U228B
-assign #0.2  FF1111 = rst ? 0 : ~(0|CCH11|FF1111_);
+pullup(FF1111);
+assign (highz1,strong0) #0.2  FF1111 = rst ? 0 : ~(0|CCH11|FF1111_);
 // Gate A19-U225B
-assign #0.2  FF1110 = rst ? 0 : ~(0|CCH11|FF1110_);
+pullup(FF1110);
+assign (highz1,strong0) #0.2  FF1110 = rst ? 0 : ~(0|CCH11|FF1110_);
 // Gate A19-U126B
-assign #0.2  A19U126Pad2 = rst ? 1 : ~(0|A19U105Pad1|A19U124Pad9);
+pullup(A19U126Pad2);
+assign (highz1,strong0) #0.2  A19U126Pad2 = rst ? 1 : ~(0|A19U105Pad1|A19U124Pad9);
 // Gate A19-U220B
-assign #0.2  A19U220Pad9 = rst ? 0 : ~(0|CHWL06_|WCH14_);
+pullup(A19U220Pad9);
+assign (highz1,strong0) #0.2  A19U220Pad9 = rst ? 0 : ~(0|CHWL06_|WCH14_);
 // Gate A19-U133A
-assign #0.2  CH3310 = rst ? 0 : ~(0|RCH33_|BLKUPL);
+pullup(CH3310);
+assign (highz1,strong0) #0.2  CH3310 = rst ? 0 : ~(0|RCH33_|BLKUPL);
 // Gate A19-U235A
-assign #0.2  A19U232Pad2 = rst ? 0 : ~(0|A19U232Pad8|A19U235Pad3);
+pullup(A19U232Pad2);
+assign (highz1,strong0) #0.2  A19U232Pad2 = rst ? 0 : ~(0|A19U232Pad8|A19U235Pad3);
 // Gate A19-U254B
-assign #0.2  A19U253Pad7 = rst ? 1 : ~(0|A19U253Pad2|A19U254Pad8);
+pullup(A19U253Pad7);
+assign (highz1,strong0) #0.2  A19U253Pad7 = rst ? 1 : ~(0|A19U253Pad2|A19U254Pad8);
 // Gate A19-U211B
-assign #0.2  A19U211Pad2 = rst ? 0 : ~(0|A19U210Pad3|CCH14);
+pullup(A19U211Pad2);
+assign (highz1,strong0) #0.2  A19U211Pad2 = rst ? 0 : ~(0|A19U210Pad3|CCH14);
 // Gate A19-U210B
-assign #0.2  A19U210Pad9 = rst ? 0 : ~(0|CHWL08_|WCH14_);
+pullup(A19U210Pad9);
+assign (highz1,strong0) #0.2  A19U210Pad9 = rst ? 0 : ~(0|CHWL08_|WCH14_);
 // Gate A19-U160A
-assign #0.2  A19U158Pad2 = rst ? 0 : ~(0|MOUT_|A19U129Pad9);
+pullup(A19U158Pad2);
+assign (highz1,strong0) #0.2  A19U158Pad2 = rst ? 0 : ~(0|MOUT_|A19U129Pad9);
 // Gate A19-U134B
-assign #0.2  CH3311 = rst ? 0 : ~(0|RCH33_|A19U134Pad8);
+pullup(CH3311);
+assign (highz1,strong0) #0.2  CH3311 = rst ? 0 : ~(0|RCH33_|A19U134Pad8);
 
 endmodule

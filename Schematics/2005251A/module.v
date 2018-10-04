@@ -40,398 +40,595 @@ output wire AD0, ADS0, AUG0, AUG0_, BMF0, BMF0_, BZF0, BZF0_, CCS0, CCS0_,
   STRTFC, SU0, TC0, TC0_, TCF0, TCSAJ3_, TS0_, WSQG_;
 
 // Gate A3-U153B
-assign #0.2  SQ1_ = rst ? 1 : ~(0|A3U151Pad9);
+pullup(SQ1_);
+assign (highz1,strong0) #0.2  SQ1_ = rst ? 1 : ~(0|A3U151Pad9);
 // Gate A3-U242A
-assign #0.2  NDX0_ = rst ? 1 : ~(0|NDX0);
+pullup(NDX0_);
+assign (highz1,strong0) #0.2  NDX0_ = rst ? 1 : ~(0|NDX0);
 // Gate A3-U159A
-assign #0.2  NISQL_ = rst ? 1 : ~(0|A3U159Pad2);
+pullup(NISQL_);
+assign (highz1,strong0) #0.2  NISQL_ = rst ? 1 : ~(0|A3U159Pad2);
 // Gate A3-U220B
-assign #0.2  A3U219Pad7 = rst ? 0 : ~(0|ST0_|SQEXT_);
+pullup(A3U219Pad7);
+assign (highz1,strong0) #0.2  A3U219Pad7 = rst ? 0 : ~(0|ST0_|SQEXT_);
 // Gate A3-U154B
-assign #0.2  SQ5 = rst ? 0 : ~(0|A3U133Pad9|A3U144Pad7|A3U143Pad7);
+pullup(SQ5);
+assign (highz1,strong0) #0.2  SQ5 = rst ? 0 : ~(0|A3U133Pad9|A3U144Pad7|A3U143Pad7);
 // Gate A3-U252B
-assign #0.2  IC12_ = rst ? 1 : ~(0|MSU0|CCS0);
+pullup(IC12_);
+assign (highz1,strong0) #0.2  IC12_ = rst ? 1 : ~(0|MSU0|CCS0);
 // Gate A3-U117A
-assign #0.2  A3U115Pad2 = rst ? 0 : ~(0|A3U101Pad1|SQR12);
+pullup(A3U115Pad2);
+assign (highz1,strong0) #0.2  A3U115Pad2 = rst ? 0 : ~(0|A3U101Pad1|SQR12);
 // Gate A3-U218B
-assign #0.2  A3U215Pad8 = rst ? 1 : ~(0|A3U217Pad8|NEXST0);
+pullup(A3U215Pad8);
+assign (highz1,strong0) #0.2  A3U215Pad8 = rst ? 1 : ~(0|A3U217Pad8|NEXST0);
 // Gate A3-U104B
-assign #0.2  RPTFRC = rst ? 1 : ~(0|A3U103Pad8);
+pullup(RPTFRC);
+assign (highz1,strong0) #0.2  RPTFRC = rst ? 0 : ~(0|A3U103Pad8);
 // Gate A3-U154A
-assign #0.2  A3U152Pad2 = rst ? 0 : ~(0|A3U154Pad2|WT_);
+pullup(A3U152Pad2);
+assign (highz1,strong0) #0.2  A3U152Pad2 = rst ? 0 : ~(0|A3U154Pad2|WT_);
 // Gate A3-U151A A3-U150A
-assign #0.2  CSQG = rst ? 0 : ~(0|T12_|A3U150Pad4|CT_);
+pullup(CSQG);
+assign (highz1,strong0) #0.2  CSQG = rst ? 0 : ~(0|T12_|A3U150Pad4|CT_);
 // Gate A3-U137A
-assign #0.2  A3U136Pad2 = rst ? 0 : ~(0|WL16_|WSQG_);
+pullup(A3U136Pad2);
+assign (highz1,strong0) #0.2  A3U136Pad2 = rst ? 0 : ~(0|WL16_|WSQG_);
 // Gate A3-U104A
-assign #0.2  A3U102Pad2 = rst ? 1 : ~(0|A3U104Pad2|A3U101Pad1);
+pullup(A3U102Pad2);
+assign (highz1,strong0) #0.2  A3U102Pad2 = rst ? 0 : ~(0|A3U104Pad2|A3U101Pad1);
 // Gate A3-U101B
-assign #0.2  A3J2Pad267 = rst ? 1 : ~(0);
+pullup(A3J2Pad267);
+assign (highz1,strong0) #0.2  A3J2Pad267 = rst ? 1 : ~(0);
 // Gate A3-U112B
-assign #0.2  IIP_ = rst ? 1 : ~(0|KRPT|IIP);
+pullup(IIP_);
+assign (highz1,strong0) #0.2  IIP_ = rst ? 1 : ~(0|KRPT|IIP);
 // Gate A3-U103B
-assign #0.2  A3U101Pad2 = rst ? 1 : ~(0|A3U103Pad8);
+pullup(A3U101Pad2);
+assign (highz1,strong0) #0.2  A3U101Pad2 = rst ? 0 : ~(0|A3U103Pad8);
 // Gate A3-U129A
-assign #0.2  A3U101Pad3 = rst ? 0 : ~(0|WSQG_|WL11_);
+pullup(A3U101Pad3);
+assign (highz1,strong0) #0.2  A3U101Pad3 = rst ? 0 : ~(0|WSQG_|WL11_);
 // Gate A3-U202B
-assign #0.2  IC5_ = rst ? 1 : ~(0|IC5);
+pullup(IC5_);
+assign (highz1,strong0) #0.2  IC5_ = rst ? 1 : ~(0|IC5);
 // Gate A3-U212B
-assign #0.2  LXCH0 = rst ? 0 : ~(0|SQ2_|NEXST0_|QC1_);
+pullup(LXCH0);
+assign (highz1,strong0) #0.2  LXCH0 = rst ? 0 : ~(0|SQ2_|NEXST0_|QC1_);
 // Gate A3-U103A A3-U102A
-assign #0.2  QC3_ = rst ? 0 : ~(0|A3U102Pad2);
+pullup(QC3_);
+assign (highz1,strong0) #0.2  QC3_ = rst ? 1 : ~(0|A3U102Pad2);
 // Gate A3-U136A
-assign #0.2  A3U132Pad2 = rst ? 1 : ~(0|A3U136Pad2|SQR16);
+pullup(A3U132Pad2);
+assign (highz1,strong0) #0.2  A3U132Pad2 = rst ? 1 : ~(0|A3U136Pad2|SQR16);
 // Gate A3-U132B
-assign #0.2  SCAS10 = rst ? 1 : ~(0|FS10|CON2);
+pullup(SCAS10);
+assign (highz1,strong0) #0.2  SCAS10 = rst ? 1 : ~(0|FS10|CON2);
 // Gate A3-U216A
-assign #0.2  A3J3Pad334 = rst ? 1 : ~(0);
+pullup(A3J3Pad334);
+assign (highz1,strong0) #0.2  A3J3Pad334 = rst ? 1 : ~(0);
 // Gate A3-U241A
-assign #0.2  NDXX1 = rst ? 0 : ~(0|SQEXT_|SQ5_|ST1_);
+pullup(NDXX1);
+assign (highz1,strong0) #0.2  NDXX1 = rst ? 0 : ~(0|SQEXT_|SQ5_|ST1_);
 // Gate A3-U230B
-assign #0.2  A3U227Pad7 = rst ? 0 : ~(0|SQ5_|QC0_);
+pullup(A3U227Pad7);
+assign (highz1,strong0) #0.2  A3U227Pad7 = rst ? 0 : ~(0|SQ5_|QC0_);
 // Gate A3-U243A
-assign #0.2  NDX0 = rst ? 0 : ~(0|NEXST0_|SQ5_|QC0_);
+pullup(NDX0);
+assign (highz1,strong0) #0.2  NDX0 = rst ? 0 : ~(0|NEXST0_|SQ5_|QC0_);
 // Gate A3-U150B A3-U149B
-assign #0.2  SQ0_ = rst ? 1 : ~(0|A3U146Pad9);
+pullup(SQ0_);
+assign (highz1,strong0) #0.2  SQ0_ = rst ? 1 : ~(0|A3U146Pad9);
 // Gate A3-U149A
-assign #0.2  CON1 = rst ? 1 : ~(0|DBLTST);
+pullup(CON1);
+assign (highz1,strong0) #0.2  CON1 = rst ? 1 : ~(0|DBLTST);
 // Gate A3-U254A
-assign #0.2  BZF0_ = rst ? 1 : ~(0|BZF0);
+pullup(BZF0_);
+assign (highz1,strong0) #0.2  BZF0_ = rst ? 1 : ~(0|BZF0);
 // Gate A3-U229B
-assign #0.2  A3U227Pad8 = rst ? 0 : ~(0|SQ5_|SQEXT_);
+pullup(A3U227Pad8);
+assign (highz1,strong0) #0.2  A3U227Pad8 = rst ? 0 : ~(0|SQ5_|SQEXT_);
 // Gate A3-U102B
-assign #0.2  T07 = rst ? 0 : ~(0|T07DC_|ODDSET_);
+pullup(T07);
+assign (highz1,strong0) #0.2  T07 = rst ? 0 : ~(0|T07DC_|ODDSET_);
 // Gate A3-U224A
-assign #0.2  IC3 = rst ? 0 : ~(0|IC3_);
+pullup(IC3);
+assign (highz1,strong0) #0.2  IC3 = rst ? 0 : ~(0|IC3_);
 // Gate A3-U221A A3-U209A
-assign #0.2  IC13_ = rst ? 1 : ~(0|IC11|IC6|IC7|DCS0|IC1|DCA0);
+pullup(IC13_);
+assign (highz1,strong0) #0.2  IC13_ = rst ? 1 : ~(0|IC11|IC6|IC7|DCS0|IC1|DCA0);
 // Gate A3-U123A
-assign #0.2  SQR10_ = rst ? 0 : ~(0|A3U123Pad2);
+pullup(SQR10_);
+assign (highz1,strong0) #0.2  SQR10_ = rst ? 0 : ~(0|A3U123Pad2);
 // Gate A3-U126A
-assign #0.2  SQR10 = rst ? 1 : ~(0|A3U124Pad2);
+pullup(SQR10);
+assign (highz1,strong0) #0.2  SQR10 = rst ? 1 : ~(0|A3U124Pad2);
 // Gate A3-U109A
-assign #0.2  SQR11 = rst ? 1 : ~(0|CSQG|A3U101Pad1);
+pullup(SQR11);
+assign (highz1,strong0) #0.2  SQR11 = rst ? 0 : ~(0|CSQG|A3U101Pad1);
 // Gate A3-U114A
-assign #0.2  SQR12 = rst ? 1 : ~(0|A3U104Pad2|CSQG);
+pullup(SQR12);
+assign (highz1,strong0) #0.2  SQR12 = rst ? 1 : ~(0|A3U104Pad2|CSQG);
 // Gate A3-U146A
-assign #0.2  SQR13 = rst ? 0 : ~(0|CSQG|A3U101Pad2|A3U144Pad7);
+pullup(SQR13);
+assign (highz1,strong0) #0.2  SQR13 = rst ? 0 : ~(0|CSQG|A3U101Pad2|A3U144Pad7);
 // Gate A3-U140A
-assign #0.2  SQR14 = rst ? 0 : ~(0|A3U134Pad7|A3U101Pad2|CSQG);
+pullup(SQR14);
+assign (highz1,strong0) #0.2  SQR14 = rst ? 0 : ~(0|A3U134Pad7|A3U101Pad2|CSQG);
 // Gate A3-U135B
-assign #0.2  SQR16 = rst ? 0 : ~(0|A3U101Pad2|A3U132Pad2|CSQG);
+pullup(SQR16);
+assign (highz1,strong0) #0.2  SQR16 = rst ? 0 : ~(0|A3U101Pad2|A3U132Pad2|CSQG);
 // Gate A3-U111A A3-U111B A3-U109B
-assign #0.2  RPTSET = rst ? 0 : ~(0|T12_|NISQL_|FUTEXT|OVNHRP|INHINT|IIP|PHS2_|MNHRPT|RUPTOR_);
+pullup(RPTSET);
+assign (highz1,strong0) #0.2  RPTSET = rst ? 0 : ~(0|T12_|NISQL_|FUTEXT|OVNHRP|INHINT|IIP|PHS2_|MNHRPT|RUPTOR_);
 // Gate A3-U128A
-assign #0.2  A3U125Pad3 = rst ? 0 : ~(0|WSQG_|WL10_);
+pullup(A3U125Pad3);
+assign (highz1,strong0) #0.2  A3U125Pad3 = rst ? 0 : ~(0|WSQG_|WL10_);
 // Gate A3-U159B
-assign #0.2  CON2 = rst ? 0 : ~(0|FS09|CON1);
+pullup(CON2);
+assign (highz1,strong0) #0.2  CON2 = rst ? 0 : ~(0|FS09|CON1);
 // Gate A3-U256B
-assign #0.2  A3U256Pad9 = rst ? 0 : ~(0|BMF0_|BR1B2B);
+pullup(A3U256Pad9);
+assign (highz1,strong0) #0.2  A3U256Pad9 = rst ? 0 : ~(0|BMF0_|BR1B2B);
 // Gate A3-U236B
-assign #0.2  RSM3 = rst ? 0 : ~(0|SQEXT|ST3_|SQ5QC0_);
+pullup(RSM3);
+assign (highz1,strong0) #0.2  RSM3 = rst ? 0 : ~(0|SQEXT|ST3_|SQ5QC0_);
 // Gate A3-U219A A3-U220A
-assign #0.2  TS0_ = rst ? 1 : ~(0|TS0);
+pullup(TS0_);
+assign (highz1,strong0) #0.2  TS0_ = rst ? 1 : ~(0|TS0);
 // Gate A3-U147B
-assign #0.2  A3U134Pad6 = rst ? 0 : ~(0|A3U144Pad7);
+pullup(A3U134Pad6);
+assign (highz1,strong0) #0.2  A3U134Pad6 = rst ? 0 : ~(0|A3U144Pad7);
 // Gate A3-U142A A3-U141A
-assign #0.2  A3U134Pad7 = rst ? 1 : ~(0|SQR14|A3U138Pad1);
+pullup(A3U134Pad7);
+assign (highz1,strong0) #0.2  A3U134Pad7 = rst ? 1 : ~(0|SQR14|A3U138Pad1);
 // Gate A3-U134A
-assign #0.2  A3J1Pad163 = rst ? 1 : ~(0);
+pullup(A3J1Pad163);
+assign (highz1,strong0) #0.2  A3J1Pad163 = rst ? 1 : ~(0);
 // Gate A3-U244A
-assign #0.2  DAS1 = rst ? 0 : ~(0|DAS1_);
+pullup(DAS1);
+assign (highz1,strong0) #0.2  DAS1 = rst ? 0 : ~(0|DAS1_);
 // Gate A3-U133A
-assign #0.2  A3U133Pad1 = rst ? 0 : ~(0|A3U132Pad2|INKL);
+pullup(A3U133Pad1);
+assign (highz1,strong0) #0.2  A3U133Pad1 = rst ? 0 : ~(0|A3U132Pad2|INKL);
 // Gate A3-U239B
-assign #0.2  GOJ1 = rst ? 0 : ~(0|SQEXT|SQ0_|ST1_);
+pullup(GOJ1);
+assign (highz1,strong0) #0.2  GOJ1 = rst ? 0 : ~(0|SQEXT|SQ0_|ST1_);
 // Gate A3-U105A
-assign #0.2  QC2_ = rst ? 1 : ~(0|A3U105Pad2);
+pullup(QC2_);
+assign (highz1,strong0) #0.2  QC2_ = rst ? 0 : ~(0|A3U105Pad2);
 // Gate A3-U133B
-assign #0.2  A3U133Pad9 = rst ? 1 : ~(0|A3U133Pad1);
+pullup(A3U133Pad9);
+assign (highz1,strong0) #0.2  A3U133Pad9 = rst ? 1 : ~(0|A3U133Pad1);
 // Gate A3-U107B
-assign #0.2  SQR12_ = rst ? 0 : ~(0|SQR12);
+pullup(SQR12_);
+assign (highz1,strong0) #0.2  SQR12_ = rst ? 0 : ~(0|SQR12);
 // Gate A3-U113A
-assign #0.2  MINHL = rst ? 0 : ~(0|A3U113Pad2);
+pullup(MINHL);
+assign (highz1,strong0) #0.2  MINHL = rst ? 0 : ~(0|A3U113Pad2);
 // Gate A3-U121B
-assign #0.2  A3U116Pad8 = rst ? 0 : ~(0|RPTFRC|A3U117Pad8|A3U121Pad8);
+pullup(A3U116Pad8);
+assign (highz1,strong0) #0.2  A3U116Pad8 = rst ? 1 : ~(0|RPTFRC|A3U117Pad8|A3U121Pad8);
 // Gate A3-U212A
-assign #0.2  IC10_ = rst ? 1 : ~(0|DXCH0|DAS0|IC4);
+pullup(IC10_);
+assign (highz1,strong0) #0.2  IC10_ = rst ? 1 : ~(0|DXCH0|DAS0|IC4);
 // Gate A3-U118B A3-U117B
-assign #0.2  SQEXT_ = rst ? 1 : ~(0|A3U117Pad8);
+pullup(SQEXT_);
+assign (highz1,strong0) #0.2  SQEXT_ = rst ? 1 : ~(0|A3U117Pad8);
 // Gate A3-U131A
-assign #0.2  A3U131Pad1 = rst ? 0 : ~(0|INKL|SQR16);
+pullup(A3U131Pad1);
+assign (highz1,strong0) #0.2  A3U131Pad1 = rst ? 0 : ~(0|INKL|SQR16);
 // Gate A3-U204B
-assign #0.2  A3U203Pad7 = rst ? 1 : ~(0|A3U204Pad7|A3U204Pad8);
+pullup(A3U203Pad7);
+assign (highz1,strong0) #0.2  A3U203Pad7 = rst ? 1 : ~(0|A3U204Pad7|A3U204Pad8);
 // Gate A3-U130B
-assign #0.2  A3U129Pad8 = rst ? 0 : ~(0|GOJAM|MTCSAI);
+pullup(A3U129Pad8);
+assign (highz1,strong0) #0.2  A3U129Pad8 = rst ? 0 : ~(0|GOJAM|MTCSAI);
 // Gate A3-U240A
-assign #0.2  MP1 = rst ? 0 : ~(0|ST1_|SQEXT_|SQ7_);
+pullup(MP1);
+assign (highz1,strong0) #0.2  MP1 = rst ? 0 : ~(0|ST1_|SQEXT_|SQ7_);
 // Gate A3-U210A
-assign #0.2  IC4_ = rst ? 1 : ~(0|DCA0|DCS0);
+pullup(IC4_);
+assign (highz1,strong0) #0.2  IC4_ = rst ? 1 : ~(0|DCA0|DCS0);
 // Gate A3-U131B
-assign #0.2  A3U131Pad9 = rst ? 1 : ~(0|A3U131Pad1);
+pullup(A3U131Pad9);
+assign (highz1,strong0) #0.2  A3U131Pad9 = rst ? 1 : ~(0|A3U131Pad1);
 // Gate A3-U113B
-assign #0.2  MIIP = rst ? 0 : ~(0|IIP_);
+pullup(MIIP);
+assign (highz1,strong0) #0.2  MIIP = rst ? 0 : ~(0|IIP_);
 // Gate A3-U225A
-assign #0.2  TCF0 = rst ? 0 : ~(0|QC0|SQ1_|NEXST0_);
+pullup(TCF0);
+assign (highz1,strong0) #0.2  TCF0 = rst ? 0 : ~(0|QC0|SQ1_|NEXST0_);
 // Gate A3-U234A A3-U234B
-assign #0.2  MP0_ = rst ? 1 : ~(0|MP0);
+pullup(MP0_);
+assign (highz1,strong0) #0.2  MP0_ = rst ? 1 : ~(0|MP0);
 // Gate A3-U119B
-assign #0.2  A3U119Pad9 = rst ? 1 : ~(0|FUTEXT|A3U119Pad8);
+pullup(A3U119Pad9);
+assign (highz1,strong0) #0.2  A3U119Pad9 = rst ? 1 : ~(0|FUTEXT|A3U119Pad8);
 // Gate A3-U128B
-assign #0.2  A3U119Pad8 = rst ? 0 : ~(0|STRTFC|A3U128Pad8);
+pullup(A3U119Pad8);
+assign (highz1,strong0) #0.2  A3U119Pad8 = rst ? 0 : ~(0|STRTFC|A3U128Pad8);
 // Gate A3-U156B
-assign #0.2  SQ3_ = rst ? 1 : ~(0|A3U155Pad9);
+pullup(SQ3_);
+assign (highz1,strong0) #0.2  SQ3_ = rst ? 1 : ~(0|A3U155Pad9);
 // Gate A3-U140B A3-U138B A3-U137B
-assign #0.2  SQ2_ = rst ? 1 : ~(0|A3U136Pad9);
+pullup(SQ2_);
+assign (highz1,strong0) #0.2  SQ2_ = rst ? 1 : ~(0|A3U136Pad9);
 // Gate A3-U124A
-assign #0.2  A3U123Pad2 = rst ? 1 : ~(0|A3U124Pad2|CSQG);
+pullup(A3U123Pad2);
+assign (highz1,strong0) #0.2  A3U123Pad2 = rst ? 1 : ~(0|A3U124Pad2|CSQG);
 // Gate A3-U248A
-assign #0.2  DIM0_ = rst ? 1 : ~(0|DIM0);
+pullup(DIM0_);
+assign (highz1,strong0) #0.2  DIM0_ = rst ? 1 : ~(0|DIM0);
 // Gate A3-U126B
-assign #0.2  A3U122Pad7 = rst ? 1 : ~(0|FUTEXT|EXT|EXTPLS);
+pullup(A3U122Pad7);
+assign (highz1,strong0) #0.2  A3U122Pad7 = rst ? 1 : ~(0|FUTEXT|EXT|EXTPLS);
 // Gate A3-U228A
-assign #0.2  TC0 = rst ? 0 : ~(0|SQ0_|NEXST0_);
+pullup(TC0);
+assign (highz1,strong0) #0.2  TC0 = rst ? 0 : ~(0|SQ0_|NEXST0_);
 // Gate A3-U124B A3-U116B
-assign #0.2  SQEXT = rst ? 1 : ~(0|A3U116Pad8);
+pullup(SQEXT);
+assign (highz1,strong0) #0.2  SQEXT = rst ? 0 : ~(0|A3U116Pad8);
 // Gate A3-U241B
-assign #0.2  MP1_ = rst ? 1 : ~(0|MP1);
+pullup(MP1_);
+assign (highz1,strong0) #0.2  MP1_ = rst ? 1 : ~(0|MP1);
 // Gate A3-U110A
-assign #0.2  A3U103Pad8 = rst ? 0 : ~(0|RPTSET|A3U105Pad9);
+pullup(A3U103Pad8);
+assign (highz1,strong0) #0.2  A3U103Pad8 = rst ? 1 : ~(0|RPTSET|A3U105Pad9);
 // Gate A3-U240B
-assign #0.2  GOJ1_ = rst ? 1 : ~(0|GOJ1);
+pullup(GOJ1_);
+assign (highz1,strong0) #0.2  GOJ1_ = rst ? 1 : ~(0|GOJ1);
 // Gate A3-U251A
-assign #0.2  MSU0 = rst ? 0 : ~(0|SQ2_|QC0_|EXST0_);
+pullup(MSU0);
+assign (highz1,strong0) #0.2  MSU0 = rst ? 0 : ~(0|SQ2_|QC0_|EXST0_);
 // Gate A3-U214B A3-U213B
-assign #0.2  DAS0 = rst ? 0 : ~(0|QC0_|SQ2_|NEXST0_);
+pullup(DAS0);
+assign (highz1,strong0) #0.2  DAS0 = rst ? 0 : ~(0|QC0_|SQ2_|NEXST0_);
 // Gate A3-U101A
-assign #0.2  A3U101Pad1 = rst ? 0 : ~(0|A3U101Pad2|A3U101Pad3|SQR11);
+pullup(A3U101Pad1);
+assign (highz1,strong0) #0.2  A3U101Pad1 = rst ? 1 : ~(0|A3U101Pad2|A3U101Pad3|SQR11);
 // Gate A3-U218A
-assign #0.2  TS0 = rst ? 0 : ~(0|SQ5_|QC2_|NEXST0_);
+pullup(TS0);
+assign (highz1,strong0) #0.2  TS0 = rst ? 0 : ~(0|SQ5_|QC2_|NEXST0_);
 // Gate A3-U136B
-assign #0.2  A3U136Pad9 = rst ? 0 : ~(0|A3U134Pad6|A3U131Pad9|A3U134Pad7);
+pullup(A3U136Pad9);
+assign (highz1,strong0) #0.2  A3U136Pad9 = rst ? 0 : ~(0|A3U134Pad6|A3U131Pad9|A3U134Pad7);
 // Gate A3-U255B
-assign #0.2  BMF0 = rst ? 0 : ~(0|QC0|SQ6_|EXST0_);
+pullup(BMF0);
+assign (highz1,strong0) #0.2  BMF0 = rst ? 0 : ~(0|QC0|SQ6_|EXST0_);
 // Gate A3-U207B A3-U209B
-assign #0.2  IC9_ = rst ? 1 : ~(0|IC5|TS0|LXCH0|QXCH0);
+pullup(IC9_);
+assign (highz1,strong0) #0.2  IC9_ = rst ? 1 : ~(0|IC5|TS0|LXCH0|QXCH0);
 // Gate A3-U222A A3-U259A A3-U233A A3-U260A
-assign #0.2  A3 = rst ? 1 : ~(0);
+pullup(A3);
+assign (highz1,strong0) #0.2  A3 = rst ? 1 : ~(0);
 // Gate A3-U125B
-assign #0.2  FUTEXT = rst ? 0 : ~(0|STRTFC|INKBT1|A3U122Pad7);
+pullup(FUTEXT);
+assign (highz1,strong0) #0.2  FUTEXT = rst ? 0 : ~(0|STRTFC|INKBT1|A3U122Pad7);
 // Gate A3-U257B
-assign #0.2  IC16_ = rst ? 1 : ~(0|A3U256Pad1|A3U256Pad9);
+pullup(IC16_);
+assign (highz1,strong0) #0.2  IC16_ = rst ? 1 : ~(0|A3U256Pad1|A3U256Pad9);
 // Gate A3-U23B
-assign #0.2  A3U128Pad8 = rst ? 0 : ~(0|NISQL_|T12_);
+pullup(A3U128Pad8);
+assign (highz1,strong0) #0.2  A3U128Pad8 = rst ? 0 : ~(0|NISQL_|T12_);
 // Gate A3-U35A A3-U236A
-assign #0.2  MP3_ = rst ? 1 : ~(0|MP3);
+pullup(MP3_);
+assign (highz1,strong0) #0.2  MP3_ = rst ? 1 : ~(0|MP3);
 // Gate A3-U256A
-assign #0.2  A3U256Pad1 = rst ? 0 : ~(0|BR2_|BZF0_);
+pullup(A3U256Pad1);
+assign (highz1,strong0) #0.2  A3U256Pad1 = rst ? 0 : ~(0|BR2_|BZF0_);
 // Gate A3-U211B
-assign #0.2  QXCH0 = rst ? 0 : ~(0|QC1_|SQ2_|EXST0_);
+pullup(QXCH0);
+assign (highz1,strong0) #0.2  QXCH0 = rst ? 0 : ~(0|QC1_|SQ2_|EXST0_);
 // Gate A3-U221B
-assign #0.2  A3U217Pad8 = rst ? 0 : ~(0|ST1_|SQEXT_);
+pullup(A3U217Pad8);
+assign (highz1,strong0) #0.2  A3U217Pad8 = rst ? 0 : ~(0|ST1_|SQEXT_);
 // Gate A3-U217A
-assign #0.2  DCA0 = rst ? 0 : ~(0|SQ3_|EXST0_);
+pullup(DCA0);
+assign (highz1,strong0) #0.2  DCA0 = rst ? 0 : ~(0|SQ3_|EXST0_);
 // Gate A3-U156A
-assign #0.2  A3U154Pad2 = rst ? 1 : ~(0|A3U156Pad2);
+pullup(A3U154Pad2);
+assign (highz1,strong0) #0.2  A3U154Pad2 = rst ? 1 : ~(0|A3U156Pad2);
 // Gate A3-U238B
-assign #0.2  RSM3_ = rst ? 1 : ~(0|RSM3);
+pullup(RSM3_);
+assign (highz1,strong0) #0.2  RSM3_ = rst ? 1 : ~(0|RSM3);
 // Gate A3-U243B
-assign #0.2  AD0 = rst ? 0 : ~(0|NEXST0_|SQ6_);
+pullup(AD0);
+assign (highz1,strong0) #0.2  AD0 = rst ? 0 : ~(0|NEXST0_|SQ6_);
 // Gate A3-U249B
-assign #0.2  AUG0_ = rst ? 1 : ~(0|AUG0);
+pullup(AUG0_);
+assign (highz1,strong0) #0.2  AUG0_ = rst ? 1 : ~(0|AUG0);
 // Gate A3-U242B
-assign #0.2  NDXX1_ = rst ? 1 : ~(0|NDXX1);
+pullup(NDXX1_);
+assign (highz1,strong0) #0.2  NDXX1_ = rst ? 1 : ~(0|NDXX1);
 // Gate A3-U214A A3-U213A
-assign #0.2  DXCH0 = rst ? 0 : ~(0|NEXST0_|QC1_|SQ5_);
+pullup(DXCH0);
+assign (highz1,strong0) #0.2  DXCH0 = rst ? 0 : ~(0|NEXST0_|QC1_|SQ5_);
 // Gate A3-U115B
-assign #0.2  A3U113Pad2 = rst ? 1 : ~(0|INHPLS|INHINT);
+pullup(A3U113Pad2);
+assign (highz1,strong0) #0.2  A3U113Pad2 = rst ? 1 : ~(0|INHPLS|INHINT);
 // Gate A3-U132A
-assign #0.2  MSQ16 = rst ? 0 : ~(0|A3U132Pad2);
+pullup(MSQ16);
+assign (highz1,strong0) #0.2  MSQ16 = rst ? 0 : ~(0|A3U132Pad2);
 // Gate A3-U249A
-assign #0.2  DIM0 = rst ? 0 : ~(0|SQ2_|EXST0_|QC3_);
+pullup(DIM0);
+assign (highz1,strong0) #0.2  DIM0 = rst ? 0 : ~(0|SQ2_|EXST0_|QC3_);
 // Gate A3-U144A
-assign #0.2  MSQ14 = rst ? 0 : ~(0|A3U134Pad7);
+pullup(MSQ14);
+assign (highz1,strong0) #0.2  MSQ14 = rst ? 0 : ~(0|A3U134Pad7);
 // Gate A3-U144B
-assign #0.2  MSQ13 = rst ? 0 : ~(0|A3U144Pad7);
+pullup(MSQ13);
+assign (highz1,strong0) #0.2  MSQ13 = rst ? 0 : ~(0|A3U144Pad7);
 // Gate A3-U108B
-assign #0.2  MSQ12 = rst ? 1 : ~(0|A3U104Pad2);
+pullup(MSQ12);
+assign (highz1,strong0) #0.2  MSQ12 = rst ? 1 : ~(0|A3U104Pad2);
 // Gate A3-U108A
-assign #0.2  MSQ11 = rst ? 1 : ~(0|A3U101Pad1);
+pullup(MSQ11);
+assign (highz1,strong0) #0.2  MSQ11 = rst ? 0 : ~(0|A3U101Pad1);
 // Gate A3-U127A
-assign #0.2  MSQ10 = rst ? 1 : ~(0|A3U124Pad2);
+pullup(MSQ10);
+assign (highz1,strong0) #0.2  MSQ10 = rst ? 1 : ~(0|A3U124Pad2);
 // Gate A3-U238A
-assign #0.2  TCSAJ3 = rst ? 0 : ~(0|SQ0_|SQEXT|ST3_);
+pullup(TCSAJ3);
+assign (highz1,strong0) #0.2  TCSAJ3 = rst ? 0 : ~(0|SQ0_|SQEXT|ST3_);
 // Gate A3-U250B
-assign #0.2  AUG0 = rst ? 0 : ~(0|EXST0_|QC2_|SQ2_);
+pullup(AUG0);
+assign (highz1,strong0) #0.2  AUG0 = rst ? 0 : ~(0|EXST0_|QC2_|SQ2_);
 // Gate A3-U230A A3-U229A
-assign #0.2  SQ5_ = rst ? 1 : ~(0|SQ5);
+pullup(SQ5_);
+assign (highz1,strong0) #0.2  SQ5_ = rst ? 1 : ~(0|SQ5);
 // Gate A3-U158A
-assign #0.2  A3U156Pad2 = rst ? 0 : ~(0|A3U158Pad2|A3U101Pad2|T12_);
+pullup(A3U156Pad2);
+assign (highz1,strong0) #0.2  A3U156Pad2 = rst ? 0 : ~(0|A3U158Pad2|A3U101Pad2|T12_);
 // Gate A3-U232A
-assign #0.2  MASK0_ = rst ? 1 : ~(0|MASK0);
+pullup(MASK0_);
+assign (highz1,strong0) #0.2  MASK0_ = rst ? 1 : ~(0|MASK0);
 // Gate A3-U235B
-assign #0.2  MP3 = rst ? 0 : ~(0|SQ7_|ST3_|SQEXT_);
+pullup(MP3);
+assign (highz1,strong0) #0.2  MP3 = rst ? 0 : ~(0|SQ7_|ST3_|SQEXT_);
 // Gate A3-U105B
-assign #0.2  A3U105Pad9 = rst ? 0 : ~(0|T02|A3U103Pad8|STRTFC);
+pullup(A3U105Pad9);
+assign (highz1,strong0) #0.2  A3U105Pad9 = rst ? 0 : ~(0|T02|A3U103Pad8|STRTFC);
 // Gate A3-U203A
-assign #0.2  NEXST0 = rst ? 0 : ~(0|ST0_|SQEXT);
+pullup(NEXST0);
+assign (highz1,strong0) #0.2  NEXST0 = rst ? 0 : ~(0|ST0_|SQEXT);
 // Gate A3-U130A
-assign #0.2  A3U112Pad3 = rst ? 0 : ~(0|WSQG_|WL12_);
+pullup(A3U112Pad3);
+assign (highz1,strong0) #0.2  A3U112Pad3 = rst ? 0 : ~(0|WSQG_|WL12_);
 // Gate A3-U208B
-assign #0.2  IC8_ = rst ? 1 : ~(0|DXCH0|LXCH0);
+pullup(IC8_);
+assign (highz1,strong0) #0.2  IC8_ = rst ? 1 : ~(0|DXCH0|LXCH0);
 // Gate A3-U114B
-assign #0.2  INHINT = rst ? 0 : ~(0|RELPLS|A3U113Pad2|GOJAM);
+pullup(INHINT);
+assign (highz1,strong0) #0.2  INHINT = rst ? 0 : ~(0|RELPLS|A3U113Pad2|GOJAM);
 // Gate A3-U231A
-assign #0.2  MASK0 = rst ? 0 : ~(0|NEXST0_|SQ7_);
+pullup(MASK0);
+assign (highz1,strong0) #0.2  MASK0 = rst ? 0 : ~(0|NEXST0_|SQ7_);
 // Gate A3-U107A
-assign #0.2  A3U105Pad2 = rst ? 0 : ~(0|SQR11|A3U104Pad2);
+pullup(A3U105Pad2);
+assign (highz1,strong0) #0.2  A3U105Pad2 = rst ? 1 : ~(0|SQR11|A3U104Pad2);
 // Gate A3-U129B
-assign #0.2  STRTFC = rst ? 1 : ~(0|A3U129Pad8);
+pullup(STRTFC);
+assign (highz1,strong0) #0.2  STRTFC = rst ? 1 : ~(0|A3U129Pad8);
 // Gate A3-U120B
-assign #0.2  A3U117Pad8 = rst ? 0 : ~(0|A3U116Pad8|A3U119Pad9);
+pullup(A3U117Pad8);
+assign (highz1,strong0) #0.2  A3U117Pad8 = rst ? 0 : ~(0|A3U116Pad8|A3U119Pad9);
 // Gate A3-U253A
-assign #0.2  CCS0 = rst ? 0 : ~(0|SQ1_|NEXST0_|QC0_);
+pullup(CCS0);
+assign (highz1,strong0) #0.2  CCS0 = rst ? 0 : ~(0|SQ1_|NEXST0_|QC0_);
 // Gate A3-U138A
-assign #0.2  A3U138Pad1 = rst ? 0 : ~(0|WL14_|WSQG_);
+pullup(A3U138Pad1);
+assign (highz1,strong0) #0.2  A3U138Pad1 = rst ? 0 : ~(0|WL14_|WSQG_);
 // Gate A3-U112A
-assign #0.2  A3U104Pad2 = rst ? 0 : ~(0|SQR12|A3U112Pad3|A3U101Pad2);
+pullup(A3U104Pad2);
+assign (highz1,strong0) #0.2  A3U104Pad2 = rst ? 0 : ~(0|SQR12|A3U112Pad3|A3U101Pad2);
 // Gate A3-U258A
-assign #0.2  IC17 = rst ? 0 : ~(0|IC16|IC15_);
+pullup(IC17);
+assign (highz1,strong0) #0.2  IC17 = rst ? 0 : ~(0|IC16|IC15_);
 // Gate A3-U160B
-assign #0.2  A3U159Pad2 = rst ? 0 : ~(0|STRTFC|INKBT1|A3U158Pad2);
+pullup(A3U159Pad2);
+assign (highz1,strong0) #0.2  A3U159Pad2 = rst ? 0 : ~(0|STRTFC|INKBT1|A3U158Pad2);
 // Gate A3-U259B
-assign #0.2  IC15 = rst ? 0 : ~(0|IC15_);
+pullup(IC15);
+assign (highz1,strong0) #0.2  IC15 = rst ? 0 : ~(0|IC15_);
 // Gate A3-U232B
-assign #0.2  IC14 = rst ? 0 : ~(0|A3U231Pad9);
+pullup(IC14);
+assign (highz1,strong0) #0.2  IC14 = rst ? 0 : ~(0|A3U231Pad9);
 // Gate A3-U207A
-assign #0.2  IC13 = rst ? 0 : ~(0|IC13_);
+pullup(IC13);
+assign (highz1,strong0) #0.2  IC13 = rst ? 0 : ~(0|IC13_);
 // Gate A3-U252A
-assign #0.2  IC12 = rst ? 0 : ~(0|IC12_);
+pullup(IC12);
+assign (highz1,strong0) #0.2  IC12 = rst ? 0 : ~(0|IC12_);
 // Gate A3-U223A
-assign #0.2  IC11 = rst ? 0 : ~(0|ST0_|A3U223Pad3|SQ6_);
+pullup(IC11);
+assign (highz1,strong0) #0.2  IC11 = rst ? 0 : ~(0|ST0_|A3U223Pad3|SQ6_);
 // Gate A3-U211A
-assign #0.2  IC10 = rst ? 0 : ~(0|IC10_);
+pullup(IC10);
+assign (highz1,strong0) #0.2  IC10 = rst ? 0 : ~(0|IC10_);
 // Gate A3-U152A A3-U153A
-assign #0.2  WSQG_ = rst ? 1 : ~(0|A3U152Pad2);
+pullup(WSQG_);
+assign (highz1,strong0) #0.2  WSQG_ = rst ? 1 : ~(0|A3U152Pad2);
 // Gate A3-U41B
-assign #0.2  A3U143Pad7 = rst ? 0 : ~(0|A3U134Pad7);
+pullup(A3U143Pad7);
+assign (highz1,strong0) #0.2  A3U143Pad7 = rst ? 0 : ~(0|A3U134Pad7);
 // Gate A3-U231B
-assign #0.2  A3U231Pad9 = rst ? 1 : ~(0|MASK0|RXOR0|MP0);
+pullup(A3U231Pad9);
+assign (highz1,strong0) #0.2  A3U231Pad9 = rst ? 1 : ~(0|MASK0|RXOR0|MP0);
 // Gate A3-U248B
-assign #0.2  ADS0 = rst ? 0 : ~(0|QC3_|SQ2_|NEXST0_);
+pullup(ADS0);
+assign (highz1,strong0) #0.2  ADS0 = rst ? 0 : ~(0|QC3_|SQ2_|NEXST0_);
 // Gate A3-U143A
-assign #0.2  A3U143Pad1 = rst ? 0 : ~(0|WL13_|WSQG_);
+pullup(A3U143Pad1);
+assign (highz1,strong0) #0.2  A3U143Pad1 = rst ? 0 : ~(0|WL13_|WSQG_);
 // Gate A3-U127B
-assign #0.2  MSQEXT = rst ? 1 : ~(0|A3U116Pad8);
+pullup(MSQEXT);
+assign (highz1,strong0) #0.2  MSQEXT = rst ? 0 : ~(0|A3U116Pad8);
 // Gate A3-U215A
-assign #0.2  DCS0 = rst ? 0 : ~(0|SQ4_|EXST0_);
+pullup(DCS0);
+assign (highz1,strong0) #0.2  DCS0 = rst ? 0 : ~(0|SQ4_|EXST0_);
 // Gate A3-U143B
-assign #0.2  A3U143Pad9 = rst ? 0 : ~(0|A3U133Pad9|A3U143Pad7|A3U134Pad6);
+pullup(A3U143Pad9);
+assign (highz1,strong0) #0.2  A3U143Pad9 = rst ? 0 : ~(0|A3U133Pad9|A3U143Pad7|A3U134Pad6);
 // Gate A3-U244B
-assign #0.2  SU0 = rst ? 0 : ~(0|SQ6_|EXST0_|QC0_);
+pullup(SU0);
+assign (highz1,strong0) #0.2  SU0 = rst ? 0 : ~(0|SQ6_|EXST0_|QC0_);
 // Gate A3-U155A
-assign #0.2  RBSQ = rst ? 0 : ~(0|A3U154Pad2|RT_);
+pullup(RBSQ);
+assign (highz1,strong0) #0.2  RBSQ = rst ? 0 : ~(0|A3U154Pad2|RT_);
 // Gate A3-U152B
-assign #0.2  A3J1Pad122 = rst ? 1 : ~(0);
+pullup(A3J1Pad122);
+assign (highz1,strong0) #0.2  A3J1Pad122 = rst ? 1 : ~(0);
 // Gate A3-U122B
-assign #0.2  A3U121Pad8 = rst ? 0 : ~(0|A3U122Pad7|A3U119Pad8);
+pullup(A3U121Pad8);
+assign (highz1,strong0) #0.2  A3U121Pad8 = rst ? 0 : ~(0|A3U122Pad7|A3U119Pad8);
 // Gate A3-U145B
-assign #0.2  SQ4_ = rst ? 1 : ~(0|A3U143Pad9);
+pullup(SQ4_);
+assign (highz1,strong0) #0.2  SQ4_ = rst ? 1 : ~(0|A3U143Pad9);
 // Gate A3-U217B
-assign #0.2  EXST1_ = rst ? 1 : ~(0|A3U217Pad8);
+pullup(EXST1_);
+assign (highz1,strong0) #0.2  EXST1_ = rst ? 1 : ~(0|A3U217Pad8);
 // Gate A3-U254B
-assign #0.2  BZF0 = rst ? 0 : ~(0|EXST0_|QC0|SQ1_);
+pullup(BZF0);
+assign (highz1,strong0) #0.2  BZF0 = rst ? 0 : ~(0|EXST0_|QC0|SQ1_);
 // Gate A3-U233B
-assign #0.2  MP0 = rst ? 0 : ~(0|SQ7_|SQEXT_|ST0_);
+pullup(MP0);
+assign (highz1,strong0) #0.2  MP0 = rst ? 0 : ~(0|SQ7_|SQEXT_|ST0_);
 // Gate A3-U157B
-assign #0.2  A3U157Pad9 = rst ? 0 : ~(0|A3U134Pad7|A3U133Pad9|A3U144Pad7);
+pullup(A3U157Pad9);
+assign (highz1,strong0) #0.2  A3U157Pad9 = rst ? 0 : ~(0|A3U134Pad7|A3U133Pad9|A3U144Pad7);
 // Gate A3-U219B A3-U260B
-assign #0.2  EXST0_ = rst ? 1 : ~(0|A3U219Pad7);
+pullup(EXST0_);
+assign (highz1,strong0) #0.2  EXST0_ = rst ? 1 : ~(0|A3U219Pad7);
 // Gate A3-U255A
-assign #0.2  BMF0_ = rst ? 1 : ~(0|BMF0);
+pullup(BMF0_);
+assign (highz1,strong0) #0.2  BMF0_ = rst ? 1 : ~(0|BMF0);
 // Gate A3-U205B
-assign #0.2  A3U204Pad8 = rst ? 0 : ~(0|ST0_|QC3_);
+pullup(A3U204Pad8);
+assign (highz1,strong0) #0.2  A3U204Pad8 = rst ? 0 : ~(0|ST0_|QC3_);
 // Gate A3-U210B
-assign #0.2  QXCH0_ = rst ? 1 : ~(0|QXCH0);
+pullup(QXCH0_);
+assign (highz1,strong0) #0.2  QXCH0_ = rst ? 1 : ~(0|QXCH0);
 // Gate A3-U205A A3-U204A A3-U202A
-assign #0.2  NEXST0_ = rst ? 1 : ~(0|NEXST0);
+pullup(NEXST0_);
+assign (highz1,strong0) #0.2  NEXST0_ = rst ? 1 : ~(0|NEXST0);
 // Gate A3-U206A
-assign #0.2  A3U204Pad7 = rst ? 0 : ~(0|QC1_|ST1_);
+pullup(A3U204Pad7);
+assign (highz1,strong0) #0.2  A3U204Pad7 = rst ? 0 : ~(0|QC1_|ST1_);
 // Gate A3-U151B
-assign #0.2  A3U151Pad9 = rst ? 0 : ~(0|A3U131Pad9|A3U143Pad7|A3U144Pad7);
+pullup(A3U151Pad9);
+assign (highz1,strong0) #0.2  A3U151Pad9 = rst ? 0 : ~(0|A3U131Pad9|A3U143Pad7|A3U144Pad7);
 // Gate A3-U246B
-assign #0.2  MTCSA_ = rst ? 1 : ~(0|TCSAJ3);
+pullup(MTCSA_);
+assign (highz1,strong0) #0.2  MTCSA_ = rst ? 1 : ~(0|TCSAJ3);
 // Gate A3-U142B
-assign #0.2  INKBT1 = rst ? 0 : ~(0|INKL|T01_);
+pullup(INKBT1);
+assign (highz1,strong0) #0.2  INKBT1 = rst ? 0 : ~(0|INKL|T01_);
 // Gate A3-U253B A3-U247A
-assign #0.2  CCS0_ = rst ? 1 : ~(0|CCS0);
+pullup(CCS0_);
+assign (highz1,strong0) #0.2  CCS0_ = rst ? 1 : ~(0|CCS0);
 // Gate A3-U125A
-assign #0.2  A3U124Pad2 = rst ? 0 : ~(0|A3U123Pad2|A3U125Pad3|A3U101Pad2);
+pullup(A3U124Pad2);
+assign (highz1,strong0) #0.2  A3U124Pad2 = rst ? 0 : ~(0|A3U123Pad2|A3U125Pad3|A3U101Pad2);
 // Gate A3-U110B
-assign #0.2  IIP = rst ? 0 : ~(0|d5XP4|GOJAM|IIP_);
+pullup(IIP);
+assign (highz1,strong0) #0.2  IIP = rst ? 0 : ~(0|d5XP4|GOJAM|IIP_);
 // Gate A3-U226A
-assign #0.2  IC3_ = rst ? 1 : ~(0|TC0|STD2|TCF0);
+pullup(IC3_);
+assign (highz1,strong0) #0.2  IC3_ = rst ? 1 : ~(0|TC0|STD2|TCF0);
 // Gate A3-U250A
-assign #0.2  INCR0 = rst ? 0 : ~(0|SQ2_|NEXST0_|QC2_);
+pullup(INCR0);
+assign (highz1,strong0) #0.2  INCR0 = rst ? 0 : ~(0|SQ2_|NEXST0_|QC2_);
 // Gate A3-U155B
-assign #0.2  A3U155Pad9 = rst ? 0 : ~(0|A3U131Pad9|A3U134Pad7|A3U144Pad7);
+pullup(A3U155Pad9);
+assign (highz1,strong0) #0.2  A3U155Pad9 = rst ? 0 : ~(0|A3U131Pad9|A3U134Pad7|A3U144Pad7);
 // Gate A3-U245A A3-U245B
-assign #0.2  DAS1_ = rst ? 1 : ~(0|A3U245Pad2|ADS0);
+pullup(DAS1_);
+assign (highz1,strong0) #0.2  DAS1_ = rst ? 1 : ~(0|A3U245Pad2|ADS0);
 // Gate A3-U225B
-assign #0.2  A3U223Pad3 = rst ? 0 : ~(0|QC0|SQEXT_);
+pullup(A3U223Pad3);
+assign (highz1,strong0) #0.2  A3U223Pad3 = rst ? 0 : ~(0|QC0|SQEXT_);
 // Gate A3-U247B A3-U246A
-assign #0.2  A3U245Pad2 = rst ? 0 : ~(0|SQ2_|QC0_|ST1_|SQEXT);
+pullup(A3U245Pad2);
+assign (highz1,strong0) #0.2  A3U245Pad2 = rst ? 0 : ~(0|SQ2_|QC0_|ST1_|SQEXT);
 // Gate A3-U206B
-assign #0.2  IC9 = rst ? 0 : ~(0|IC9_);
+pullup(IC9);
+assign (highz1,strong0) #0.2  IC9 = rst ? 0 : ~(0|IC9_);
 // Gate A3-U158B
-assign #0.2  SQ7_ = rst ? 1 : ~(0|A3U157Pad9);
+pullup(SQ7_);
+assign (highz1,strong0) #0.2  SQ7_ = rst ? 1 : ~(0|A3U157Pad9);
 // Gate A3-U116A A3-U115A
-assign #0.2  QC1_ = rst ? 1 : ~(0|A3U115Pad2);
+pullup(QC1_);
+assign (highz1,strong0) #0.2  QC1_ = rst ? 1 : ~(0|A3U115Pad2);
 // Gate A3-U224B A3-U223B
-assign #0.2  IC2 = rst ? 0 : ~(0|ST1_|A3U223Pad8);
+pullup(IC2);
+assign (highz1,strong0) #0.2  IC2 = rst ? 0 : ~(0|ST1_|A3U223Pad8);
 // Gate A3-U226B
-assign #0.2  IC1 = rst ? 0 : ~(0|ST0_|A3U223Pad8);
+pullup(IC1);
+assign (highz1,strong0) #0.2  IC1 = rst ? 0 : ~(0|ST0_|A3U223Pad8);
 // Gate A3-U227B
-assign #0.2  A3U223Pad8 = rst ? 1 : ~(0|A3U227Pad7|A3U227Pad8);
+pullup(A3U223Pad8);
+assign (highz1,strong0) #0.2  A3U223Pad8 = rst ? 1 : ~(0|A3U227Pad7|A3U227Pad8);
 // Gate A3-U215B
-assign #0.2  IC7 = rst ? 0 : ~(0|SQ4_|A3U215Pad8);
+pullup(IC7);
+assign (highz1,strong0) #0.2  IC7 = rst ? 0 : ~(0|SQ4_|A3U215Pad8);
 // Gate A3-U216B
-assign #0.2  IC6 = rst ? 0 : ~(0|SQ3_|A3U215Pad8);
+pullup(IC6);
+assign (highz1,strong0) #0.2  IC6 = rst ? 0 : ~(0|SQ3_|A3U215Pad8);
 // Gate A3-U203B
-assign #0.2  IC5 = rst ? 0 : ~(0|SQEXT|A3U203Pad7|SQ5_);
+pullup(IC5);
+assign (highz1,strong0) #0.2  IC5 = rst ? 0 : ~(0|SQEXT|A3U203Pad7|SQ5_);
 // Gate A3-U208A
-assign #0.2  IC4 = rst ? 0 : ~(0|IC4_);
+pullup(IC4);
+assign (highz1,strong0) #0.2  IC4 = rst ? 0 : ~(0|IC4_);
 // Gate A3-U257A
-assign #0.2  IC15_ = rst ? 1 : ~(0|BMF0|BZF0);
+pullup(IC15_);
+assign (highz1,strong0) #0.2  IC15_ = rst ? 1 : ~(0|BMF0|BZF0);
 // Gate A3-U134B
-assign #0.2  A3U134Pad9 = rst ? 0 : ~(0|A3U134Pad6|A3U134Pad7|A3U133Pad9);
+pullup(A3U134Pad9);
+assign (highz1,strong0) #0.2  A3U134Pad9 = rst ? 0 : ~(0|A3U134Pad6|A3U134Pad7|A3U133Pad9);
 // Gate A3-U239A
-assign #0.2  TCSAJ3_ = rst ? 1 : ~(0|TCSAJ3);
+pullup(TCSAJ3_);
+assign (highz1,strong0) #0.2  TCSAJ3_ = rst ? 1 : ~(0|TCSAJ3);
 // Gate A3-U157A
-assign #0.2  A3U150Pad4 = rst ? 0 : ~(0|A3U156Pad2|STRTFC);
+pullup(A3U150Pad4);
+assign (highz1,strong0) #0.2  A3U150Pad4 = rst ? 0 : ~(0|A3U156Pad2|STRTFC);
 // Gate A3-U160A
-assign #0.2  A3U158Pad2 = rst ? 1 : ~(0|A3U159Pad2|NISQ);
+pullup(A3U158Pad2);
+assign (highz1,strong0) #0.2  A3U158Pad2 = rst ? 1 : ~(0|A3U159Pad2|NISQ);
 // Gate A3-U146B
-assign #0.2  A3U146Pad9 = rst ? 0 : ~(0|A3U131Pad9|A3U143Pad7|A3U134Pad6);
+pullup(A3U146Pad9);
+assign (highz1,strong0) #0.2  A3U146Pad9 = rst ? 0 : ~(0|A3U131Pad9|A3U143Pad7|A3U134Pad6);
 // Gate A3-U251B
-assign #0.2  MSU0_ = rst ? 1 : ~(0|MSU0);
+pullup(MSU0_);
+assign (highz1,strong0) #0.2  MSU0_ = rst ? 1 : ~(0|MSU0);
 // Gate A3-U237A A3-U237B
-assign #0.2  DAS0_ = rst ? 1 : ~(0|DAS0);
+pullup(DAS0_);
+assign (highz1,strong0) #0.2  DAS0_ = rst ? 1 : ~(0|DAS0);
 // Gate A3-U228B
-assign #0.2  SQ5QC0_ = rst ? 1 : ~(0|A3U227Pad7);
+pullup(SQ5QC0_);
+assign (highz1,strong0) #0.2  SQ5QC0_ = rst ? 1 : ~(0|A3U227Pad7);
 // Gate A3-U122A A3-U121A
-assign #0.2  QC0 = rst ? 0 : ~(0|SQR11|SQR12);
+pullup(QC0);
+assign (highz1,strong0) #0.2  QC0 = rst ? 0 : ~(0|SQR11|SQR12);
 // Gate A3-U258B
-assign #0.2  IC16 = rst ? 0 : ~(0|IC16_);
+pullup(IC16);
+assign (highz1,strong0) #0.2  IC16 = rst ? 0 : ~(0|IC16_);
 // Gate A3-U135A
-assign #0.2  SQ6_ = rst ? 1 : ~(0|A3U134Pad9);
+pullup(SQ6_);
+assign (highz1,strong0) #0.2  SQ6_ = rst ? 1 : ~(0|A3U134Pad9);
 // Gate A3-U222B
-assign #0.2  IC2_ = rst ? 1 : ~(0|IC2);
+pullup(IC2_);
+assign (highz1,strong0) #0.2  IC2_ = rst ? 1 : ~(0|IC2);
 // Gate A3-U147A A3-U145A
-assign #0.2  A3U144Pad7 = rst ? 1 : ~(0|A3U143Pad1|SQR13);
+pullup(A3U144Pad7);
+assign (highz1,strong0) #0.2  A3U144Pad7 = rst ? 1 : ~(0|A3U143Pad1|SQR13);
 // Gate A3-U120A A3-U119A A3-U118A
-assign #0.2  QC0_ = rst ? 1 : ~(0|QC0);
+pullup(QC0_);
+assign (highz1,strong0) #0.2  QC0_ = rst ? 1 : ~(0|QC0);
 // Gate A3-U227A
-assign #0.2  TC0_ = rst ? 1 : ~(0|TC0);
+pullup(TC0_);
+assign (highz1,strong0) #0.2  TC0_ = rst ? 1 : ~(0|TC0);
 
 endmodule
