@@ -41,7 +41,7 @@ for line in lines:
 		declaration = ""
 		continue
 	signals = []
-	if len(fields) > 2 and fields[1] == "wire":
+	if len(fields) > 2 and fields[1] in ["wire", "wand"]:
 		declaration = fields[0]
 		signals = fields[2:]
 	elif declaration != False:
@@ -119,7 +119,7 @@ if len(regs) > 0:
 		print line
 	print ""
 if len(wires) > 0:
-	line = "wire"
+	line = "wand"
 	for i in range(0, len(wires)):
 		wire = wires[i]
 		if len(line) == 0:

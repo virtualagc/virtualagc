@@ -297,7 +297,7 @@ print ");"
 count = len(newInputs)
 if count > 0:
 	print ""
-	line = "input wire rst"
+	line = "input wand rst"
 	for name in newInputs:
 		count -= 1
 		if line == "":
@@ -317,10 +317,10 @@ if count > 0:
 count = len(newInouts)
 if count > 0:
 	print ""
-	line = "inout wire"
+	line = "inout wand"
 	for name in newInouts:
 		count -= 1
-		if line == "inout wire":
+		if line == "inout wand":
 			line += " " + name
 		elif line == "":
 			line = "  " + name
@@ -339,10 +339,10 @@ if count > 0:
 count = len(newOutputs)
 if count > 0:
 	print ""
-	line = "output wire"
+	line = "output wand"
 	for name in newOutputs:
 		count -= 1
-		if line == "output wire":
+		if line == "output wand":
 			line += " " + name
 		elif line == "":
 			line = "  " + name
@@ -463,8 +463,9 @@ if len(nors) > 0:
 		if gate[2]["delay"] != 0:
 			thisDelay = " #" + str(gate[2]["delay"])
 		print "// Gate " + gate[0].replace("_", " ")	
-		print "pullup(" + netName + ");"		
-		outLine = "assign (highz1,strong0)" + thisDelay + " " + netName + " = rst ? " + thisInit + " : ~(0";
+		#print "pullup(" + netName + ");"		
+		#outLine = "assign (highz1,strong0)" + thisDelay + " " + netName + " = rst ? " + thisInit + " : ~(0";
+		outLine = "assign" + thisDelay + " " + netName + " = rst ? " + thisInit + " : ~(0";
 		for input in gate[3:]:
 			outLine += "|" + input;
 		outLine += ")" + ";"

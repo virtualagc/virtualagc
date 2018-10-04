@@ -128,7 +128,7 @@ while unchanged < 2:
 			numchanged += 1
 		netValues[norNet] = value	
 
-for netName in ["RINGA_", "RINGB_", "P02", "P02_", "A2U225Pad2", "A2U225Pad8", "P03", "P03_"]:
+for netName in []:
 	print netName + " = " + str(netValues[netName]) + ", " + str(nors[netName])
 #print nors
 
