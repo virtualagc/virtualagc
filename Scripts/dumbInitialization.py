@@ -111,6 +111,9 @@ while unchanged < 2:
 	print "Iteration " + str(count) + " " + str(numchanged)
 	unchanged += 1
 	numchanged = 0
+	# Certain flip-flops we want to make sure are not initialized to 1.
+	for netName in ["STNDBY", "STOPA"]:
+		netValues[netName] = False
 	
 	# Choose a random evaluation order.
 	randomNors = []
