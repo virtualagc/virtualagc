@@ -30,13 +30,14 @@
 #				tied to ground.  Found that some netnames assigned
 #				only by net labels had a weird form I wasn't 
 #				accounting for.
-#		2018-08-04 RSB	Replace my "assign" statments by 
+#		2018-08-04 RSB	Replace my "assign" statements by 
 #				"pullup; assign (highz1,strong0)" statements.  I 
 #				thought they worked to solve my problem (which was
 #				wire-anding the outputs of gates from different 
 #				modules), but it didn't.  I then replaced all my
 #				"wire" specifications by "wand" specifications and,
 #				once again, I think that works.
+#		2018-08-05 RSB	Added optional SCHEMATIC.sch input.
 #
 # This script converts one of my KiCad transcriptions of AGC LOGIC FLOW DIAGRAMs
 # into Verilog in the dumbest, most-straightforward way.  In other words, I don't
@@ -90,8 +91,58 @@
 # and we can simply hard-code the properties of that component into the script.
 
 import sys
+import os
 
 error = False
+gateLocations = {}
+
+def readSchematicFile(filename):
+	global gateLocations
+	f = open(filename, "r")
+	newLines = f.readlines();
+	f.close();
+	print >> sys.stderr, "Read file " + filename + ", " + str(len(newLines)) + " lines"
+	inSheet = False
+	inComp = False
+	pathName = os.path.dirname(filename)
+	for rawLine in newLines:
+		line = rawLine.strip()
+		if line == "$Sheet":
+			inSheet = True
+			continue
+		if line == "$EndSheet":
+			inSheet = False
+			continue
+		if line == "$Comp":
+			inComp = True
+			refd = ""
+			unit = 0
+			continue
+		if line == "$EndComp":
+			inComp = False
+			continue
+		if inSheet:
+			fields = line.split()
+			if len(fields) >= 2 and fields[0] == "F1":
+				newFilename = pathName + "/" + fields[1].strip("\"")
+				readSchematicFile(newFilename)
+			continue
+		if inComp:
+			fields = line.split()
+			if len(fields) >= 3 and fields[0] == "L":
+				refd = fields[2]
+				continue
+			if len(fields) >= 2 and fields[0] == "U":
+				if fields[1] == "1":
+					unit = "A"
+				else:
+					unit = "B"
+				continue
+			if len(fields) >= 11 and fields[0] == "F" and fields[10] == "\"Location\"":
+				gate = fields[2].strip("\"")
+				gateLocations[refd + unit] = gate
+				continue
+
 delay = ""
 inits = {}
 if len(sys.argv) >= 3:
@@ -172,6 +223,17 @@ if len(sys.argv) >= 3:
 		print >> sys.stderr, "Could not read pin DB " + pathToPinsTxt
 		error = True
 	
+	# Load the gate numbers of the NOR gates from the .sch file, if one has been specified.
+	if len(sys.argv) > 6:
+		schFile = sys.argv[6]
+		try:
+			# Read the entire schematic, including its child sheets, into the
+			# schLines array.
+			readSchematicFile(schFile)
+		except:
+			print >> sys.stderr, "Could not read schematic file " + schFile
+			error = True
+	
 	# Let's read the netlist into memory.
 	try:
 		f = open(netlistFilename, "r")
@@ -187,7 +249,7 @@ else:
 
 if error:
 	print >> sys.stderr, "USAGE:"
-	print >> sys.stderr, "\tdumbVerilog.py MODULE INPUT.net [/PATH/TO/pins.txt [DELAY [INPUT.init]] >OUTPUT.v"
+	print >> sys.stderr, "\tdumbVerilog.py MODULE INPUT.net [/PATH/TO/pins.txt [DELAY [INPUT.init [SCHEMATIC.sch]]]] >OUTPUT.v"
 	print >> sys.stderr, "MODULE is the name of the AGC module, A1 through A24."
 	print >> sys.stderr, "INPUT.net is a netlist output by KiCad in OrcadPCB2 format."
 	print >> sys.stderr, "If the optional path to pins.txt is omitted, it is assumed"
@@ -195,7 +257,10 @@ if error:
 	print >> sys.stderr, "gate DELAY is omitted, then it is omitted from the Verilog."
 	print >> sys.stderr, "The optional (but not really, in practice!) INPUT.init file"
 	print >> sys.stderr, "provides initial conditions for any NOR gates that need it;"
-	print >> sys.stderr, "i.e., for feedback within flip-flop circuits."
+	print >> sys.stderr, "i.e., for feedback within flip-flop circuits.  The optional"
+	print >> sys.stderr, "SCHEMATIC.sch file is used to find the gate numbers associated"
+	print >> sys.stderr, "with the NOR gates, and to rename otherwise inconveniently-"
+	print >> sys.stderr, "named nets according to the gates driving them."
 	sys.exit(1)
 
 # Let's do a first pass on the netlist, looking just at the connector components to 
@@ -372,6 +437,7 @@ print ""
 # have everything we need to know about the connectors.
 inNOR = False
 nors = []
+netToGate = {}
 for line in lines:
 	if line[:2] == " )":
 		if inNOR:
@@ -426,9 +492,14 @@ for line in lines:
 				netName = moduleName + rawNetName
 		else:
 			netName = moduleName + netName[5:].replace("-", "").replace(")", "")
+			if pinNumber == 1:
+				netToGate[netName] = "g" + gateLocations[refd + "A"]
+			elif pinNumber == 9:
+				netToGate[netName] = "g" + gateLocations[refd + "B"]
 		norPins[pinNumber] = netName
 
 nets = {}
+translateToGates = True
 if len(nors) > 0:
 	# First, consolidate all of the gates whose outputs are connected together,
 	# and eliminate all inputs that are 0.  There's always one rst input to the
@@ -457,7 +528,8 @@ if len(nors) > 0:
 				finalArray.append(input)
 		nets[netName] = finalArray
 	# Write out Verilog code for each of the consolidated gates.
-	for netName in nets:
+	for rawNetName in nets:
+		netName = rawNetName
 		if netName == "0":
 			continue
 		gate = nets[netName]
@@ -470,13 +542,18 @@ if len(nors) > 0:
 		if gate[2]["delay"] != 0:
 			thisDelay = " #" + str(gate[2]["delay"])
 		print "// Gate " + gate[0].replace("_", " ")	
+		if translateToGates and netName in netToGate:
+			netName = netToGate[netName]
 		#print "pullup(" + netName + ");"		
 		#outLine = "assign (highz1,strong0)" + thisDelay + " " + netName + " = rst ? " + thisInit + " : ~(0";
 		outLine = "assign" + thisDelay + " " + netName + " = rst ? " + thisInit + " : ~(0";
-		for input in gate[3:]:
+		for rawInput in gate[3:]:
+			input = rawInput
+			if translateToGates and input in netToGate:
+				input = netToGate[input]
 			outLine += "|" + input;
 		outLine += ")" + ";"
 		print outLine
 print ""
 print "endmodule"
-	
+

@@ -232,7 +232,7 @@ clean:
 # SECONDARY instead, it will keep module.v and not delete it.
 .SECONDARY: testVerilog/module.v $(DRAWINGS_AGC:%=%/module.v)
 %/module.v: %/module.net %/module.init ../Scripts/pins.txt
-	../Scripts/dumbVerilog.py $(module_$*) $*/module.net ../Scripts/pins.txt "$(delay_$*)" $*/module.init >$*/temp.v
+	../Scripts/dumbVerilog.py $(module_$*) $*/module.net ../Scripts/pins.txt "$(delay_$*)" $*/module.init $*/module.sch >$*/temp.v
 	mv $*/temp.v $@
 
 # The following target can be used as 2003200.init, 2003993.init, etc.
