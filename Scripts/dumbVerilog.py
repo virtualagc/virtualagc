@@ -37,7 +37,10 @@
 #				modules), but it didn't.  I then replaced all my
 #				"wire" specifications by "wand" specifications and,
 #				once again, I think that works.
-#		2018-08-05 RSB	Added optional SCHEMATIC.sch input.
+#		2018-08-05 RSB	Added optional SCHEMATIC.sch input.  Also, began 
+#				adding a way to use the command-line to specify
+#				translating with pullups instead of wands, but that
+#				doesn't yet work.
 #
 # This script converts one of my KiCad transcriptions of AGC LOGIC FLOW DIAGRAMs
 # into Verilog in the dumbest, most-straightforward way.  In other words, I don't
@@ -234,6 +237,10 @@ if len(sys.argv) >= 3:
 			print >> sys.stderr, "Could not read schematic file " + schFile
 			error = True
 	
+	wireType = "wand"
+	if len(sys.argv) > 7:
+		wireType = "wire"
+	
 	# Let's read the netlist into memory.
 	try:
 		f = open(netlistFilename, "r")
@@ -249,7 +256,7 @@ else:
 
 if error:
 	print >> sys.stderr, "USAGE:"
-	print >> sys.stderr, "\tdumbVerilog.py MODULE INPUT.net [/PATH/TO/pins.txt [DELAY [INPUT.init [SCHEMATIC.sch]]]] >OUTPUT.v"
+	print >> sys.stderr, "\tdumbVerilog.py MODULE INPUT.net [/PATH/TO/pins.txt [DELAY [INPUT.init [SCHEMATIC.sch [pullup]]]]] >OUTPUT.v"
 	print >> sys.stderr, "MODULE is the name of the AGC module, A1 through A24."
 	print >> sys.stderr, "INPUT.net is a netlist output by KiCad in OrcadPCB2 format."
 	print >> sys.stderr, "If the optional path to pins.txt is omitted, it is assumed"
@@ -260,7 +267,10 @@ if error:
 	print >> sys.stderr, "i.e., for feedback within flip-flop circuits.  The optional"
 	print >> sys.stderr, "SCHEMATIC.sch file is used to find the gate numbers associated"
 	print >> sys.stderr, "with the NOR gates, and to rename otherwise inconveniently-"
-	print >> sys.stderr, "named nets according to the gates driving them."
+	print >> sys.stderr, "named nets according to the gates driving them.  The pullup"
+	print >> sys.stderr, "argument, if present, causes the Verilog pullup construct to"
+	print >> sys.stderr, "be used for NOR gates, rather than the default Verilog wand"
+	print >> sys.stderr, "construct; but it doesn't work yet, so don't use it!"
 	sys.exit(1)
 
 # Let's do a first pass on the netlist, looking just at the connector components to 
@@ -369,7 +379,7 @@ print ");"
 count = len(newInputs)
 if count > 0:
 	print ""
-	line = "input wand rst"
+	line = "input " + wireType + " rst"
 	for name in newInputs:
 		count -= 1
 		if line == "":
@@ -389,7 +399,7 @@ if count > 0:
 count = len(newInouts)
 if count > 0:
 	print ""
-	line = "inout wand"
+	line = "inout " + wireType
 	for name in newInouts:
 		count -= 1
 		if line == "inout wand":
@@ -411,7 +421,7 @@ if count > 0:
 count = len(newOutputs)
 if count > 0:
 	print ""
-	line = "output wand"
+	line = "output " + wireType
 	for name in newOutputs:
 		count -= 1
 		if line == "output wand":
@@ -544,9 +554,11 @@ if len(nors) > 0:
 		print "// Gate " + gate[0].replace("_", " ")	
 		if translateToGates and netName in netToGate:
 			netName = netToGate[netName]
-		#print "pullup(" + netName + ");"		
-		#outLine = "assign (highz1,strong0)" + thisDelay + " " + netName + " = rst ? " + thisInit + " : ~(0";
-		outLine = "assign" + thisDelay + " " + netName + " = rst ? " + thisInit + " : ~(0";
+		if wireType == "wire":
+			print "pullup(" + netName + ");"		
+			outLine = "assign" + thisDelay + " " + netName + " = rst ? " + thisInit + " : ~(0";
+		else:
+			outLine = "assign" + thisDelay + " " + netName + " = rst ? " + thisInit + " : ~(0";
 		for rawInput in gate[3:]:
 			input = rawInput
 			if translateToGates and input in netToGate:

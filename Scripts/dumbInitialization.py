@@ -111,9 +111,14 @@ while unchanged < 2:
 	print "Iteration " + str(count) + " " + str(numchanged)
 	unchanged += 1
 	numchanged = 0
-	# Certain flip-flops we want to make sure are not initialized to 1.
+	# Certain flip-flops we want to make sure are initialized specifically to 0 or 1.  
+	# I'm led to believe that this doesn't actually matter, but it's helpful
+	# to me whilst debugging without any software running on the simulated AGC.
+	# Realize that these wishes may not always be possible to achieve.
 	for netName in ["STNDBY", "STOPA"]:
 		netValues[netName] = False
+	for netName in []:
+		netValues[netName] = True
 	
 	# Choose a random evaluation order.
 	randomNors = []

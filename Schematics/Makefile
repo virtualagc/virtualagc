@@ -82,6 +82,12 @@
 # The testbench AGC_PN.v is really just intended to be a starting point, since while it 
 # has regs, wires, and modules for all of the DRAWINGs used in it, those aren't
 # necessarily correctly set up, nor do they necessarily behave correctly.  
+#
+# Finally, by default, the Verilog "wand" construct is used for NOR-gates, to support
+# wire-ANDing them.  The Verilog "pullup" construct is alternately available, and
+# to use it instead, the make command would be changed to
+#
+#	PULLUP=pullup make ...
 
 DEFAULT_GATE_DELAY = 0.2 # In 100ns units.
 
@@ -232,7 +238,7 @@ clean:
 # SECONDARY instead, it will keep module.v and not delete it.
 .SECONDARY: testVerilog/module.v $(DRAWINGS_AGC:%=%/module.v)
 %/module.v: %/module.net %/module.init ../Scripts/pins.txt
-	../Scripts/dumbVerilog.py $(module_$*) $*/module.net ../Scripts/pins.txt "$(delay_$*)" $*/module.init $*/module.sch >$*/temp.v
+	../Scripts/dumbVerilog.py $(module_$*) $*/module.net ../Scripts/pins.txt "$(delay_$*)" $*/module.init $*/module.sch $(PULLUP) >$*/temp.v
 	mv $*/temp.v $@
 
 # The following target can be used as 2003200.init, 2003993.init, etc.

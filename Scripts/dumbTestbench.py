@@ -28,6 +28,8 @@
 
 import sys
 
+wireType = "wire"
+
 # Read all of the concatenated input Verlog files.
 lines = sys.stdin.readlines()
 
@@ -120,7 +122,7 @@ if len(regs) > 0:
 		print line
 	print ""
 if len(wires) > 0:
-	line = "wand"
+	line = wireType
 	for i in range(0, len(wires)):
 		wire = wires[i]
 		if len(line) == 0:
