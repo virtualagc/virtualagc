@@ -26,6 +26,10 @@
 #		It works, and converges pretty fast.
 # Mod history:	2018-08-03 RSB	Created.
 #		2018-08-04 RSB	Handled nets driven from different modules.
+#		2018-08-05 RSB	Now additionally outputs a file called
+#				dumbInitialization.log, which lists the 
+#				initialization values assigned to each 
+#				applicable net, nicely alphabetized.
 
 # Usage is:
 #	cat VERILOG_FILES | dumbInitialization.py
@@ -172,5 +176,22 @@ for moduleNumber in range(1, 25):
 				f.write(localRefd + " " + str(j) + " " + str(k) + "\n")
 	f.close()
 
+# Print out a nice report about this.
 #ones.sort()
 #print ones
+netNames = []
+for netName in netValues:
+	netNames.append(netName)
+netNames.sort()
+f = open("dumbInitialization.log", "w")
+for netName in netNames:
+	if netName in netValues:
+		if netValues[netName]:
+			value = "1"
+		else:
+			value = "0"
+	f.write(netName + " = " + value + "\n")
+f.close()
+
+	
+
