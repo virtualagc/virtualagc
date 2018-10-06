@@ -40,7 +40,9 @@
 #		2018-08-05 RSB	Added optional SCHEMATIC.sch input.  Also, began 
 #				adding a way to use the command-line to specify
 #				translating with pullups instead of wands, but that
-#				doesn't yet work.
+#				doesn't yet work.  Wasn't treating net labels in 
+#				sheets 2 or 3 properly --- i.e., they only worked
+#				right in sheet 1.
 #
 # This script converts one of my KiCad transcriptions of AGC LOGIC FLOW DIAGRAMs
 # into Verilog in the dumbest, most-straightforward way.  In other words, I don't
@@ -493,7 +495,7 @@ for line in lines:
 			netName = inputs[netName]
 		elif netName in outputs:
 			netName = outputs[netName]
-		elif netName[:3] == "/1/":
+		elif netName[:3] in ["/1/", "/2/", "/3/", "/4/", "/5/", "/6/", "/7/", "/8/", "/9/"]:
 			rawNetName = netName[3:]
 			netName = rawNetName
 			if netName[:1].isdigit():
