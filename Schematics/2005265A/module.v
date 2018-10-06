@@ -46,11 +46,11 @@ assign #0.2  g35302 = rst ? 0 : ~(0|WOVR_|OVF_);
 // Gate A15-U121A A15-U124A
 assign #0.2  EB9_ = rst ? 0 : ~(0|g35158|g35143|g35144|EB9);
 // Gate A15-U205A
-assign #0.2  g35411 = rst ? 0 : ~(0|F11_);
+assign #0.2  g35411 = rst ? 1 : ~(0|F11_);
 // Gate A15-U135A
 assign #0.2  F16_ = rst ? 1 : ~(0|F16);
 // Gate A15-U108A
-assign #0.2  FB13_ = rst ? 0 : ~(0|g35153|FB13|g35113);
+assign #0.2  FB13_ = rst ? 1 : ~(0|g35153|FB13|g35113);
 // Gate A15-U147B
 assign #0.2  RPTA12 = rst ? 0 : ~(0|g35229|RRPA1_);
 // Gate A15-U131B
@@ -88,7 +88,7 @@ assign #0.2  g35316 = rst ? 0 : ~(0|CA2_|XB6_|g35303);
 // Gate A15-U123A
 assign #0.2  g35139 = rst ? 0 : ~(0|REBG_|EB10_);
 // Gate A15-U126A A15-U116B
-assign #0.2  EB11_ = rst ? 0 : ~(0|g35156|g35128|g35129|EB11);
+assign #0.2  EB11_ = rst ? 1 : ~(0|g35156|g35128|g35129|EB11);
 // Gate A15-U244A
 assign #0.2  KY2RST = rst ? 0 : ~(0|XB0_|KRPTA_|XT3_);
 // Gate A15-U222B
@@ -128,11 +128,11 @@ assign #0.2  g35246 = rst ? 1 : ~(0|C35M|C36M|C32M|C33M|C34M);
 // Gate A15-U119A
 assign #0.2  EB10 = rst ? 1 : ~(0|CEBG|EB10_);
 // Gate A15-U116A
-assign #0.2  EB11 = rst ? 1 : ~(0|CEBG|EB11_);
+assign #0.2  EB11 = rst ? 0 : ~(0|CEBG|EB11_);
 // Gate A15-U249B
 assign #0.2  g35326 = rst ? 0 : ~(0|g35325|GOJAM|g35323);
 // Gate A15-U105B A15-U106B
-assign #0.2  FB14_ = rst ? 1 : ~(0|FB14|g35152|g35107);
+assign #0.2  FB14_ = rst ? 0 : ~(0|FB14|g35152|g35107);
 // Gate A15-U234A A15-U235B
 assign #0.2  g35351 = rst ? 1 : ~(0|g35309|g35319|g35330|g35342|PRPOR3);
 // Gate A15-U227A
@@ -158,7 +158,7 @@ assign #0.2  g35202 = rst ? 1 : ~(0|S12_);
 // Gate A15-U224B
 assign #0.2  g35442 = rst ? 0 : ~(0|F16|F15_);
 // Gate A15-U205B
-assign #0.2  g35414 = rst ? 0 : ~(0|S10_);
+assign #0.2  g35414 = rst ? 1 : ~(0|S10_);
 // Gate A15-U158A
 assign #0.2  g35243 = rst ? 0 : ~(0|INCSET_|g35241);
 // Gate A15-U121B
@@ -212,13 +212,13 @@ assign #0.2  g35129 = rst ? 0 : ~(0|WBBEG_|WL03_);
 // Gate A15-U203A A15-U203B
 assign #0.2  STR311 = rst ? 0 : ~(0|g35401|g35414|g35405);
 // Gate A15-U109A
-assign #0.2  FB12_ = rst ? 0 : ~(0|FB12|g35154|g35118);
+assign #0.2  FB12_ = rst ? 1 : ~(0|FB12|g35154|g35118);
 // Gate A15-U145A A15-U146B
 assign #0.2  g35229 = rst ? 1 : ~(0|PRPOR1|DNRPTA|g35223|g35225);
 // Gate A15-U227B
 assign #0.2  g35435 = rst ? 0 : ~(0|g35434|g35440);
 // Gate A15-U139B
-assign #0.2  F11_ = rst ? 1 : ~(0|g35203|g35204);
+assign #0.2  F11_ = rst ? 0 : ~(0|g35203|g35204);
 // Gate A15-U148A
 assign #0.2  g35234 = rst ? 0 : ~(0|RUPTOR_|g35229);
 // Gate A15-U137A
@@ -228,7 +228,7 @@ assign #0.2  F13 = rst ? 0 : ~(0|FB13_|g35202);
 // Gate A15-U255B
 assign #0.2  g35310 = rst ? 0 : ~(0|XT1_|XB0_|KRPTA_);
 // Gate A15-U140A
-assign #0.2  F11 = rst ? 0 : ~(0|F11_);
+assign #0.2  F11 = rst ? 1 : ~(0|F11_);
 // Gate A15-U135B A15-U134A
 assign #0.2  F16 = rst ? 0 : ~(0|FB14_|FB16_|E7_|g35202);
 // Gate A15-U112B
@@ -258,7 +258,7 @@ assign #0.2  g35437 = rst ? 1 : ~(0|F14);
 // Gate A15-U242B
 assign #0.2  g35340 = rst ? 1 : ~(0|UPRUPT|g35341);
 // Gate A15-U139A
-assign #0.2  g35204 = rst ? 0 : ~(0|S11_|S12_);
+assign #0.2  g35204 = rst ? 1 : ~(0|S11_|S12_);
 // Gate A15-U211A
 assign #0.2  STR14 = rst ? 0 : ~(0|g35420);
 // Gate A15-U136A
@@ -278,13 +278,13 @@ assign #0.2  RL12_ = rst ? 1 : ~(0|g35121|RSTRT|RPTA12);
 // Gate A15-U254B
 assign #0.2  g35314 = rst ? 0 : ~(0|g35312|g35309);
 // Gate A15-U204A
-assign #0.2  g35405 = rst ? 1 : ~(0|F11);
+assign #0.2  g35405 = rst ? 0 : ~(0|F11);
 // Gate A15-U226A
 assign #0.2  g35452 = rst ? 0 : ~(0|g35431|g35437|g35443);
 // Gate A15-U215B
 assign #0.2  g35433 = rst ? 1 : ~(0|g35424|g35438|g35452);
 // Gate A15-U204B
-assign #0.2  g35408 = rst ? 1 : ~(0|S10);
+assign #0.2  g35408 = rst ? 0 : ~(0|S10);
 // Gate A15-U247A
 assign #0.2  KY1RST = rst ? 0 : ~(0|KRPTA_|XT2_|XB4_);
 // Gate A15-U107A
@@ -348,15 +348,15 @@ assign #0.2  T6RPT = rst ? 0 : ~(0|CA3_|ZOUT_|XB1_);
 // Gate A15-U245A
 assign #0.2  g35331 = rst ? 1 : ~(0|g35321|g35326|g35329);
 // Gate A15-U103B
-assign #0.2  FB16 = rst ? 0 : ~(0|CFBG|FB16_);
+assign #0.2  FB16 = rst ? 1 : ~(0|CFBG|FB16_);
 // Gate A15-U143B
 assign #0.2  g35224 = rst ? 1 : ~(0|g35225|HNDRPT);
 // Gate A15-U104B
-assign #0.2  FB14 = rst ? 0 : ~(0|CFBG|FB14_);
+assign #0.2  FB14 = rst ? 1 : ~(0|CFBG|FB14_);
 // Gate A15-U108B
-assign #0.2  FB13 = rst ? 1 : ~(0|CFBG|FB13_);
+assign #0.2  FB13 = rst ? 0 : ~(0|CFBG|FB13_);
 // Gate A15-U115A
-assign #0.2  FB12 = rst ? 1 : ~(0|CFBG|FB12_);
+assign #0.2  FB12 = rst ? 0 : ~(0|CFBG|FB12_);
 // Gate A15-U117A
 assign #0.2  FB11 = rst ? 1 : ~(0|FB11_|CFBG);
 // Gate A15-U143A
@@ -410,7 +410,7 @@ assign #0.2  g35248 = rst ? 0 : ~(0|INCSET_|g35246);
 // Gate A15-U211B
 assign #0.2  ROPER = rst ? 0 : ~(0|g35426);
 // Gate A15-U103A A15-U102A
-assign #0.2  FB16_ = rst ? 1 : ~(0|g35151|FB16|g35101);
+assign #0.2  FB16_ = rst ? 0 : ~(0|g35151|FB16|g35101);
 // Gate A15-U128A
 assign #0.2  g35154 = rst ? 0 : ~(0|SUMB12_|SUMA12_|U2BBKG_);
 // Gate A15-U122A

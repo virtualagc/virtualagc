@@ -114,7 +114,7 @@ assign #0.2  SQR11 = rst ? 1 : ~(0|CSQG|g30134);
 // Gate A3-U114A
 assign #0.2  SQR12 = rst ? 1 : ~(0|g30132|CSQG);
 // Gate A3-U146A
-assign #0.2  SQR13 = rst ? 1 : ~(0|CSQG|g30128|g30020);
+assign #0.2  SQR13 = rst ? 0 : ~(0|CSQG|g30128|g30020);
 // Gate A3-U140A
 assign #0.2  SQR14 = rst ? 1 : ~(0|g30018|g30128|CSQG);
 // Gate A3-U135B
@@ -132,7 +132,7 @@ assign #0.2  RSM3 = rst ? 0 : ~(0|SQEXT|ST3_|SQ5QC0_);
 // Gate A3-U219A A3-U220A
 assign #0.2  TS0_ = rst ? 1 : ~(0|TS0);
 // Gate A3-U147B
-assign #0.2  g30036 = rst ? 1 : ~(0|g30020);
+assign #0.2  g30036 = rst ? 0 : ~(0|g30020);
 // Gate A3-U142A A3-U141A
 assign #0.2  g30018 = rst ? 0 : ~(0|SQR14|g30014);
 // Gate A3-U134A
@@ -252,7 +252,7 @@ assign #0.2  DIM0 = rst ? 0 : ~(0|SQ2_|EXST0_|QC3_);
 // Gate A3-U144A
 assign #0.2  MSQ14 = rst ? 1 : ~(0|g30018);
 // Gate A3-U144B
-assign #0.2  MSQ13 = rst ? 1 : ~(0|g30020);
+assign #0.2  MSQ13 = rst ? 0 : ~(0|g30020);
 // Gate A3-U108B
 assign #0.2  MSQ12 = rst ? 1 : ~(0|g30132);
 // Gate A3-U108A
@@ -344,7 +344,7 @@ assign #0.2  BZF0 = rst ? 0 : ~(0|EXST0_|QC0|SQ1_);
 // Gate A3-U233B
 assign #0.2  MP0 = rst ? 0 : ~(0|SQ7_|SQEXT_|ST0_);
 // Gate A3-U157B
-assign #0.2  g30044 = rst ? 1 : ~(0|g30018|g30031|g30020);
+assign #0.2  g30044 = rst ? 0 : ~(0|g30018|g30031|g30020);
 // Gate A3-U219B A3-U260B
 assign #0.2  EXST0_ = rst ? 1 : ~(0|g30347);
 // Gate A3-U255A
@@ -384,7 +384,7 @@ assign #0.2  g30418 = rst ? 0 : ~(0|SQ2_|QC0_|ST1_|SQEXT);
 // Gate A3-U206B
 assign #0.2  IC9 = rst ? 0 : ~(0|IC9_);
 // Gate A3-U158B
-assign #0.2  SQ7_ = rst ? 0 : ~(0|g30044);
+assign #0.2  SQ7_ = rst ? 1 : ~(0|g30044);
 // Gate A3-U116A A3-U115A
 assign #0.2  QC1_ = rst ? 1 : ~(0|g30142);
 // Gate A3-U224B A3-U223B
@@ -404,7 +404,7 @@ assign #0.2  IC4 = rst ? 0 : ~(0|IC4_);
 // Gate A3-U257A
 assign #0.2  IC15_ = rst ? 1 : ~(0|BMF0|BZF0);
 // Gate A3-U134B
-assign #0.2  g30043 = rst ? 0 : ~(0|g30036|g30018|g30031);
+assign #0.2  g30043 = rst ? 1 : ~(0|g30036|g30018|g30031);
 // Gate A3-U239A
 assign #0.2  TCSAJ3_ = rst ? 1 : ~(0|TCSAJ3);
 // Gate A3-U157A
@@ -424,11 +424,11 @@ assign #0.2  QC0 = rst ? 0 : ~(0|SQR11|SQR12);
 // Gate A3-U258B
 assign #0.2  IC16 = rst ? 0 : ~(0|IC16_);
 // Gate A3-U135A
-assign #0.2  SQ6_ = rst ? 1 : ~(0|g30043);
+assign #0.2  SQ6_ = rst ? 0 : ~(0|g30043);
 // Gate A3-U222B
 assign #0.2  IC2_ = rst ? 1 : ~(0|IC2);
 // Gate A3-U147A A3-U145A
-assign #0.2  g30020 = rst ? 0 : ~(0|g30015|SQR13);
+assign #0.2  g30020 = rst ? 1 : ~(0|g30015|SQR13);
 // Gate A3-U120A A3-U119A A3-U118A
 assign #0.2  QC0_ = rst ? 1 : ~(0|QC0);
 // Gate A3-U227A

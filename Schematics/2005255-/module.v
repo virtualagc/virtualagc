@@ -35,13 +35,13 @@ output wand A01_, A02_, A03_, A04_, CI05_, CLEARA, CLEARB, CLEARC, CLEARD,
   Z04_;
 
 // Gate A8-U139B A8-U113A A8-U140B
-assign #0.2  G01_ = rst ? 0 : ~(0|g51145|g51146|G01|G01ED|g51144|g51143|SA01);
+assign #0.2  G01_ = rst ? 1 : ~(0|g51145|g51146|G01|G01ED|g51144|g51143|SA01);
 // Gate A8-U223A
 assign #0.2  g51430 = rst ? 0 : ~(0|g51431|g51429);
 // Gate A8-U218B A8-U236A A8-U257A A8-U247A
 assign #0.2  RL04_ = rst ? 1 : ~(0|R15|R1C|MDT04|g51322|CH04|g51317|g51332|g51337|g51328|g51341|g51342|g51351);
 // Gate A8-U147A
-assign #0.2  g15540 = rst ? 1 : ~(0|CBG|g51139);
+assign #0.2  g15540 = rst ? 0 : ~(0|CBG|g51139);
 // Gate A8-U152B
 assign #0.2  g51106 = rst ? 0 : ~(0|WYDLOG_|WL16_);
 // Gate A8-U148B
@@ -79,21 +79,21 @@ assign #0.2  WL02 = rst ? 0 : ~(0|RL02_);
 // Gate A8-U260A
 assign #0.2  g51334 = rst ? 0 : ~(0|WZG_|WL04_);
 // Gate A8-U240A
-assign #0.2  g51327 = rst ? 1 : ~(0|CLG1G|L04_);
+assign #0.2  g51327 = rst ? 0 : ~(0|CLG1G|L04_);
 // Gate A8-U225B
 assign #0.2  g51446 = rst ? 0 : ~(0|WL03_|WG1G_);
 // Gate A8-U238A
 assign #0.2  g51325 = rst ? 0 : ~(0|G2LSG_|G07_);
 // Gate A8-U212B
-assign #0.2  SUMA03_ = rst ? 1 : ~(0|g51409|XUY03_|CI03_);
+assign #0.2  SUMA03_ = rst ? 0 : ~(0|g51409|XUY03_|CI03_);
 // Gate A8-U109B A8-U156A A8-U110B
-assign #0.2  G02_ = rst ? 0 : ~(0|g51246|g51245|G02|G02ED|g51244|g51243|SA02);
+assign #0.2  G02_ = rst ? 1 : ~(0|g51246|g51245|G02|G02ED|g51244|g51243|SA02);
 // Gate A8-U145A
 assign #0.2  g51142 = rst ? 0 : ~(0|g15540|RCG_);
 // Gate A8-U115B
 assign #0.2  SUMB02_ = rst ? 0 : ~(0|g51213|g51211);
 // Gate A8-U241B
-assign #0.2  g51309 = rst ? 1 : ~(0|g51307|g51303);
+assign #0.2  g51309 = rst ? 0 : ~(0|g51307|g51303);
 // Gate A8-U144B
 assign #0.2  g51117 = rst ? 0 : ~(0|RULOG_|SUMA01_|SUMB01_);
 // Gate A8-U255A
@@ -137,7 +137,7 @@ assign #0.2  g51219 = rst ? 0 : ~(0|WALSG_|WL04_);
 // Gate A8-U130A
 assign #0.2  g51218 = rst ? 0 : ~(0|WAG_|WL02_);
 // Gate A8-U213B
-assign #0.2  g51413 = rst ? 1 : ~(0|XUY03_|g51409);
+assign #0.2  g51413 = rst ? 0 : ~(0|XUY03_|g51409);
 // Gate A8-U126B
 assign #0.2  g51222 = rst ? 0 : ~(0|RAG_|A02_);
 // Gate A8-U118A
@@ -167,11 +167,11 @@ assign #0.2  g51437 = rst ? 0 : ~(0|Z03_|RZG_);
 // Gate A8-U227A A8-U248B A8-U217A A8-U205A
 assign #0.2  RL03_ = rst ? 1 : ~(0|g51432|g51437|g51428|R15|R1C|MDT03|g51441|g51451|g51442|g51422|CH03|g51417);
 // Gate A8-U203B
-assign #0.2  g51404 = rst ? 0 : ~(0|g51403|CLXC|CUG);
+assign #0.2  g51404 = rst ? 1 : ~(0|g51403|CLXC|CUG);
 // Gate A8-U139A
 assign #0.2  g51151 = rst ? 0 : ~(0|RGG_|G01_);
 // Gate A8-U127A
-assign #0.2  g51221 = rst ? 1 : ~(0|CAG|A02_);
+assign #0.2  g51221 = rst ? 0 : ~(0|CAG|A02_);
 // Gate A8-U112A
 assign #0.2  S08A = rst ? 0 : ~(0|S08_);
 // Gate A8-U117A
@@ -185,7 +185,7 @@ assign #0.2  g51227 = rst ? 1 : ~(0|L02_|CLG1G);
 // Gate A8-U214B
 assign #0.2  g51411 = rst ? 1 : ~(0|CI03_);
 // Gate A8-U210A
-assign #0.2  g51427 = rst ? 1 : ~(0|CLG1G|L03_);
+assign #0.2  g51427 = rst ? 0 : ~(0|CLG1G|L03_);
 // Gate A8-U245B
 assign #0.2  CI05_ = rst ? 0 : ~(0|g51309|SUMA04_|CO04);
 // Gate A8-U121B
@@ -197,9 +197,9 @@ assign #0.2  g51305 = rst ? 0 : ~(0|WL04_|WYLOG_);
 // Gate A8-U254B
 assign #0.2  g51345 = rst ? 0 : ~(0|L2GDG_|L03_);
 // Gate A8-U102A
-assign #0.2  Z02_ = rst ? 0 : ~(0|g51236|g51234);
+assign #0.2  Z02_ = rst ? 1 : ~(0|g51236|g51234);
 // Gate A8-U138A
-assign #0.2  g51130 = rst ? 1 : ~(0|g51129|g51131);
+assign #0.2  g51130 = rst ? 0 : ~(0|g51129|g51131);
 // Gate A8-U131B A8-U132B A8-U133B
 assign #0.2  WL01_ = rst ? 1 : ~(0|WL01);
 // Gate A8-U118B
@@ -219,9 +219,9 @@ assign #0.2  g51424 = rst ? 0 : ~(0|WLG_|WL03_);
 // Gate A8-U244B
 assign #0.2  g51311 = rst ? 1 : ~(0|CI04_);
 // Gate A8-U128A
-assign #0.2  A02_ = rst ? 0 : ~(0|g51219|g51218|g51221);
+assign #0.2  A02_ = rst ? 1 : ~(0|g51219|g51218|g51221);
 // Gate A8-U148A
-assign #0.2  g51139 = rst ? 0 : ~(0|g51138|g15540);
+assign #0.2  g51139 = rst ? 1 : ~(0|g51138|g15540);
 // Gate A8-U207B
 assign #0.2  g51405 = rst ? 0 : ~(0|WL03_|WYLOG_);
 // Gate A8-U150B
@@ -241,13 +241,13 @@ assign #0.2  CLEARD = rst ? 0 : ~(0|S08A|SETCD_);
 // Gate A8-U133A
 assign #0.2  g51136 = rst ? 0 : ~(0|Z01_|CZG);
 // Gate A8-U209A
-assign #0.2  L03_ = rst ? 0 : ~(0|g51424|g51425|g51427);
+assign #0.2  L03_ = rst ? 1 : ~(0|g51424|g51425|g51427);
 // Gate A8-U149B
 assign #0.2  SUMA01_ = rst ? 0 : ~(0|g51109|XUY01_|CI01_);
 // Gate A8-U230A
 assign #0.2  g51434 = rst ? 0 : ~(0|WZG_|WL03_);
 // Gate A8-U218A
-assign #0.2  G06_ = rst ? 0 : ~(0|G06ED);
+assign #0.2  G06_ = rst ? 1 : ~(0|G06ED);
 // Gate A8-U229A
 assign #0.2  Z03_ = rst ? 0 : ~(0|g51434|g51436);
 // Gate A8-U109A
@@ -269,7 +269,7 @@ assign #0.2  g51102 = rst ? 0 : ~(0|A01_|A2XG_);
 // Gate A8-U131A
 assign #0.2  g51134 = rst ? 0 : ~(0|WL01_|WZG_);
 // Gate A8-U248A
-assign #0.2  G05_ = rst ? 0 : ~(0|G05ED);
+assign #0.2  G05_ = rst ? 1 : ~(0|G05ED);
 // Gate A8-U145B
 assign #0.2  SUMB01_ = rst ? 0 : ~(0|g51113|g51111);
 // Gate A8-U256A
@@ -283,11 +283,11 @@ assign #0.2  WL04 = rst ? 0 : ~(0|RL04_);
 // Gate A8-U217B
 assign #0.2  g51417 = rst ? 0 : ~(0|RULOG_|SUMB03_|SUMA03_);
 // Gate A8-U242B
-assign #0.2  SUMA04_ = rst ? 0 : ~(0|g51309|XUY04_|CI04_);
+assign #0.2  SUMA04_ = rst ? 1 : ~(0|g51309|XUY04_|CI04_);
 // Gate A8-U206A
 assign #0.2  g51422 = rst ? 0 : ~(0|RAG_|A03_);
 // Gate A8-U103A
-assign #0.2  g51236 = rst ? 1 : ~(0|Z02_|CZG);
+assign #0.2  g51236 = rst ? 0 : ~(0|Z02_|CZG);
 // Gate A8-U224B
 assign #0.2  g51445 = rst ? 0 : ~(0|L2GDG_|L02_);
 // Gate A8-U132A
@@ -309,7 +309,7 @@ assign #0.2  g51234 = rst ? 0 : ~(0|WL02_|WZG_);
 // Gate A8-U229B A8-U228B A8-U230B
 assign #0.2  WL03_ = rst ? 1 : ~(0|WL03);
 // Gate A8-U243B
-assign #0.2  g51313 = rst ? 0 : ~(0|XUY04_|g51309);
+assign #0.2  g51313 = rst ? 1 : ~(0|XUY04_|g51309);
 // Gate A8-U123B
 assign #0.2  g51207 = rst ? 0 : ~(0|g51206|g51208|g51205);
 // Gate A8-U158A
@@ -325,7 +325,7 @@ assign #0.2  g51203 = rst ? 0 : ~(0|g51202|g51204|TWOX);
 // Gate A8-U157B
 assign #0.2  XUY01_ = rst ? 0 : ~(0|g51108|g51104);
 // Gate A8-U251B A8-U205B A8-U252B
-assign #0.2  G04_ = rst ? 0 : ~(0|g51344|SA04|g51343|G04ED|g51345|G04|g51346);
+assign #0.2  G04_ = rst ? 1 : ~(0|g51344|SA04|g51343|G04ED|g51345|G04|g51346);
 // Gate A8-U254A
 assign #0.2  g51331 = rst ? 0 : ~(0|g51330|CQG);
 // Gate A8-U137B
@@ -333,11 +333,11 @@ assign #0.2  g51145 = rst ? 0 : ~(0|MCRO_|L2GDG_);
 // Gate A8-U249A
 assign #0.2  CLEARB = rst ? 0 : ~(0|S08A|SETAB_);
 // Gate A8-U137A
-assign #0.2  g51131 = rst ? 0 : ~(0|CQG|g51130);
+assign #0.2  g51131 = rst ? 1 : ~(0|CQG|g51130);
 // Gate A8-U119B
 assign #0.2  SUMA02_ = rst ? 0 : ~(0|g51209|CI02_|XUY02_);
 // Gate A8-U201B
-assign #0.2  g51403 = rst ? 1 : ~(0|g51402|MONEX|g51404);
+assign #0.2  g51403 = rst ? 0 : ~(0|g51402|MONEX|g51404);
 // Gate A8-U150A
 assign #0.2  g51128 = rst ? 0 : ~(0|L01_|RLG_);
 // Gate A8-U260B A8-U258B A8-U259B
@@ -347,9 +347,9 @@ assign #0.2  g51418 = rst ? 0 : ~(0|WL03_|WAG_);
 // Gate A8-U202B
 assign #0.2  g51402 = rst ? 0 : ~(0|A2XG_|A03_);
 // Gate A8-U143A A8-U222B A8-U221B
-assign #0.2  G03_ = rst ? 0 : ~(0|G03ED|g51445|G03|g51446|g51444|SA03|g51443);
+assign #0.2  G03_ = rst ? 1 : ~(0|G03ED|g51445|G03|g51446|g51444|SA03|g51443);
 // Gate A8-U253B
-assign #0.2  G04 = rst ? 1 : ~(0|CGG|G04_);
+assign #0.2  G04 = rst ? 0 : ~(0|CGG|G04_);
 // Gate A8-U154B
 assign #0.2  g51105 = rst ? 0 : ~(0|WYLOG_|WL01_);
 // Gate A8-U107B
@@ -363,23 +363,23 @@ assign #0.2  MWL03 = rst ? 0 : ~(0|RL03_);
 // Gate A8-U104B
 assign #0.2  MWL02 = rst ? 0 : ~(0|RL02_);
 // Gate A8-U107A
-assign #0.2  g51231 = rst ? 1 : ~(0|CQG|g51230);
+assign #0.2  g51231 = rst ? 0 : ~(0|CQG|g51230);
 // Gate A8-U138B
-assign #0.2  G01 = rst ? 1 : ~(0|G01_|CGG);
+assign #0.2  G01 = rst ? 0 : ~(0|G01_|CGG);
 // Gate A8-U108B
-assign #0.2  G02 = rst ? 1 : ~(0|G02_|CGG);
+assign #0.2  G02 = rst ? 0 : ~(0|G02_|CGG);
 // Gate A8-U223B
-assign #0.2  G03 = rst ? 1 : ~(0|CGG|G03_);
+assign #0.2  G03 = rst ? 0 : ~(0|CGG|G03_);
 // Gate A8-U141B
 assign #0.2  g51144 = rst ? 0 : ~(0|WG4G_|WL02_);
 // Gate A8-U140A
-assign #0.2  GEM01 = rst ? 1 : ~(0|G01_);
+assign #0.2  GEM01 = rst ? 0 : ~(0|G01_);
 // Gate A8-U126A
 assign #0.2  S08A_ = rst ? 1 : ~(0|S08);
 // Gate A8-U221A
-assign #0.2  GEM03 = rst ? 1 : ~(0|G03_);
+assign #0.2  GEM03 = rst ? 0 : ~(0|G03_);
 // Gate A8-U239A
-assign #0.2  L04_ = rst ? 0 : ~(0|g51327|g51325|g51324);
+assign #0.2  L04_ = rst ? 1 : ~(0|g51327|g51325|g51324);
 // Gate A8-U233B
 assign #0.2  g51304 = rst ? 1 : ~(0|g51303|CLXC|CUG);
 // Gate A8-U243A
@@ -395,7 +395,7 @@ assign #0.2  XUY04_ = rst ? 0 : ~(0|g51304|g51308);
 // Gate A8-U258A
 assign #0.2  g51336 = rst ? 0 : ~(0|CZG|Z04_);
 // Gate A8-U238B
-assign #0.2  g51307 = rst ? 0 : ~(0|g51306|g51305|g51308);
+assign #0.2  g51307 = rst ? 1 : ~(0|g51306|g51305|g51308);
 // Gate A8-U111A
 assign #0.2  g51229 = rst ? 0 : ~(0|WL02_|WQG_);
 // Gate A8-U237A
@@ -413,15 +413,15 @@ assign #0.2  g51321 = rst ? 1 : ~(0|A04_|CAG);
 // Gate A8-U149A
 assign #0.2  g51138 = rst ? 0 : ~(0|WBG_|WL01_);
 // Gate A8-U110A
-assign #0.2  GEM02 = rst ? 1 : ~(0|G02_);
+assign #0.2  GEM02 = rst ? 0 : ~(0|G02_);
 // Gate A8-U209B
 assign #0.2  g51406 = rst ? 0 : ~(0|WL02_|WYDG_);
 // Gate A8-U240B
-assign #0.2  g51308 = rst ? 1 : ~(0|CUG|g51307);
+assign #0.2  g51308 = rst ? 0 : ~(0|CUG|g51307);
 // Gate A8-U245A
 assign #0.2  g51341 = rst ? 0 : ~(0|g51339|RBLG_);
 // Gate A8-U251A
-assign #0.2  GEM04 = rst ? 1 : ~(0|G04_);
+assign #0.2  GEM04 = rst ? 0 : ~(0|G04_);
 // Gate A8-U112B
 assign #0.2  g51243 = rst ? 0 : ~(0|WL01_|WG3G_);
 // Gate A8-U156B A8-U113B A8-U134A A8-U144A
@@ -433,7 +433,7 @@ assign #0.2  g51132 = rst ? 0 : ~(0|g51130|RQG_);
 // Gate A8-U135A
 assign #0.2  g51137 = rst ? 0 : ~(0|RZG_|Z01_);
 // Gate A8-U211B
-assign #0.2  g51409 = rst ? 0 : ~(0|g51407|g51403);
+assign #0.2  g51409 = rst ? 1 : ~(0|g51407|g51403);
 // Gate A8-U146A
 assign #0.2  g51141 = rst ? 0 : ~(0|RBLG_|g51139);
 // Gate A8-U231B
@@ -445,7 +445,7 @@ assign #0.2  g51302 = rst ? 0 : ~(0|A2XG_|A04_);
 // Gate A8-U231A
 assign #0.2  g51318 = rst ? 0 : ~(0|WL04_|WAG_);
 // Gate A8-U108A
-assign #0.2  g51230 = rst ? 0 : ~(0|g51229|g51231);
+assign #0.2  g51230 = rst ? 1 : ~(0|g51229|g51231);
 // Gate A8-U120A
 assign #0.2  g51228 = rst ? 0 : ~(0|L02_|RLG_);
 // Gate A8-U246A

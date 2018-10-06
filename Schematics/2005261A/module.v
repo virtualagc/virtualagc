@@ -43,6 +43,8 @@ output wand DV4B1B, DVST, GNHNC, NDR100_, NISQ_, OCTAD2, OCTAD3, OCTAD4,
 
 // Gate A5-U115B
 assign #0.2  ST2_ = rst ? 1 : ~(0|g39227|g39221);
+// Gate A5-U241A
+assign #0.2  g39320 = rst ? 0 : ~(0|g39318|T04_);
 // Gate A5-U121B
 assign #0.2  g39237 = rst ? 0 : ~(0|BR12B_|DAS0_);
 // Gate A5-U227B
@@ -62,7 +64,7 @@ assign #0.2  g39108 = rst ? 1 : ~(0|TC0|TCF0|IC4);
 // Gate A5-U131A
 assign #0.2  g39109 = rst ? 0 : ~(0|g39108|T01_);
 // Gate A5-U210A
-assign #0.2  Z15_ = rst ? 0 : ~(0|g39432);
+assign #0.2  Z15_ = rst ? 1 : ~(0|g39432);
 // Gate A5-U108B
 assign #0.2  RAD = rst ? 0 : ~(0|TSUDO_|T08_);
 // Gate A5-U239B
@@ -74,7 +76,7 @@ assign #0.2  g39243 = rst ? 0 : ~(0|g39245|T11_);
 // Gate A5-U144B
 assign #0.2  g39127 = rst ? 0 : ~(0|T04_|DAS0_);
 // Gate A5-U212A A5-U212B
-assign #0.2  WL_ = rst ? 1 : ~(0|g39436|g39449|g39452|g39337);
+assign #0.2  WL_ = rst ? 1 : ~(0|g39436|g39449|g39452|A55XP13);
 // Gate A5-U133A
 assign #0.2  g39102 = rst ? 0 : ~(0|T01_|g39101);
 // Gate A5-U134B
@@ -84,7 +86,7 @@ assign #0.2  g39124 = rst ? 0 : ~(0|IC2_|T04_);
 // Gate A5-U133B
 assign #0.2  g39105 = rst ? 1 : ~(0|STD2|IC2);
 // Gate A5-U120B A5-U141A A5-U238A
-assign #0.2  RA_ = rst ? 1 : ~(0|g39233|g39225|g39124|g29121|g39421|g39312);
+assign #0.2  RA_ = rst ? 1 : ~(0|g39233|g39225|g39124|g29121|A56XP2|g39312);
 // Gate A5-U258A A5-U257A
 assign #0.2  NDR100_ = rst ? 1 : ~(0|g39348|g39349);
 // Gate A5-U259A
@@ -113,8 +115,6 @@ assign #0.2  g39233 = rst ? 0 : ~(0|g39232|T10_);
 assign #0.2  g39116 = rst ? 0 : ~(0|T10_|MP3_);
 // Gate A5-U227A
 assign #0.2  g39404 = rst ? 1 : ~(0|RAND0|WAND0|g39401);
-// Gate A5-U213A
-assign #0.2  g39425 = rst ? 0 : ~(0|T07_|STFET1_);
 // Gate A5-U228A
 assign #0.2  DV1B1B = rst ? 0 : ~(0|DV1_|BR1);
 // Gate A5-U203A
@@ -131,6 +131,8 @@ assign #0.2  g39251 = rst ? 0 : ~(0|C37P|C40P|C41P|C44P|C43P|C42P|C26A|C25A|C24A
 assign #0.2  g39254 = rst ? 0 : ~(0|g39251|INCSET_);
 // Gate A5-U254A
 assign #0.2  Z16_ = rst ? 0 : ~(0|g39411);
+// Gate A5-U246B
+assign #0.2  A55XP9 = rst ? 0 : ~(0|SHIFT_|T05_);
 // Gate A5-U215B
 assign #0.2  g39439 = rst ? 0 : ~(0|T09_|DAS1_);
 // Gate A5-U233A
@@ -139,8 +141,6 @@ assign #0.2  g39307 = rst ? 0 : ~(0|CHINC_|T01_);
 assign #0.2  SCAD_ = rst ? 1 : ~(0|SCAD);
 // Gate A5-U253A
 assign #0.2  TRSM = rst ? 0 : ~(0|NDX0_|T05_);
-// Gate A5-U246B
-assign #0.2  g39332 = rst ? 0 : ~(0|SHIFT_|T05_);
 // Gate A5-U107A
 assign #0.2  g39209 = rst ? 1 : ~(0|IC16);
 // Gate A5-U204B
@@ -149,8 +149,10 @@ assign #0.2  g39447 = rst ? 0 : ~(0|BR2|ADS0|DAS1_);
 assign #0.2  RL10BB = rst ? 0 : ~(0|T01_|g39301);
 // Gate A5-U231B A5-U237A A5-U232B
 assign #0.2  g39301 = rst ? 1 : ~(0|DXCH0|IC9|PRINC|INOUT|DAS1|DAS0|IC12);
+// Gate A5-U244A
+assign #0.2  A55XP13 = rst ? 0 : ~(0|T05_|IC8_);
 // Gate A5-U149B A5-U245A A5-U245B A5-U211B
-assign #0.2  RG_ = rst ? 1 : ~(0|g39149|g39140|g39134|d5XP15|g39344|g39337|g39324|g39327|g39332|g39428|g39425|g39451);
+assign #0.2  RG_ = rst ? 1 : ~(0|g39149|g39140|g39134|d5XP15|g39344|A55XP13|g39324|g39327|A55XP9|g39428|g39425|g39451);
 // Gate A5-U158A
 assign #0.2  g39149 = rst ? 0 : ~(0|IC2_|T07_);
 // Gate A5-U234B
@@ -168,15 +170,17 @@ assign #0.2  g39432 = rst ? 0 : ~(0|T09_|g39403);
 // Gate A5-U137A
 assign #0.2  NISQ_ = rst ? 1 : ~(0|d2XP7|g39112|A58XP15);
 // Gate A5-U152A A5-U208B
-assign #0.2  TSGN_ = rst ? 1 : ~(0|g29121|d7XP9|g39134|g39332|RSTSTG);
+assign #0.2  TSGN_ = rst ? 1 : ~(0|g29121|d7XP9|g39134|A55XP9|RSTSTG);
 // Gate A5-U214A
 assign #0.2  g39436 = rst ? 0 : ~(0|T09_|DV4_);
-// Gate A5-U213B
-assign #0.2  U2BBK = rst ? 0 : ~(0|T08_|MONWBK|STFET1_);
 // Gate A5-U201B
 assign #0.2  g39461 = rst ? 1 : ~(0);
 // Gate A5-U225A
 assign #0.2  g39403 = rst ? 1 : ~(0|g39401);
+// Gate A5-U217B
+assign #0.2  A56XP2 = rst ? 0 : ~(0|INOUT_|RXOR0|T06_);
+// Gate A5-U219A
+assign #0.2  A56XP7 = rst ? 0 : ~(0|T06_|DV4_);
 // Gate A5-U136B
 assign #0.2  DVST = rst ? 0 : ~(0|STD2|T02_|DIV_);
 // Gate A5-U103B
@@ -216,23 +220,23 @@ assign #0.2  g39134 = rst ? 0 : ~(0|g39133|T05_);
 // Gate A5-U112B
 assign #0.2  A58XP3 = rst ? 0 : ~(0|g39211|T08_);
 // Gate A5-U128A A5-U155B A5-U249B
-assign #0.2  WY_ = rst ? 1 : ~(0|g39227|g39225|g39233|g39140|g39143|g39149|g39442|g39330|d2XP8);
-// Gate A5-U203B
-assign #0.2  g39450 = rst ? 0 : ~(0|DV1_|T11_);
-// Gate A5-U205B
-assign #0.2  g39442 = rst ? 0 : ~(0|T10_|IC11_);
+assign #0.2  WY_ = rst ? 1 : ~(0|g39227|g39225|g39233|g39140|g39143|g39149|A510XP10|g39330|d2XP8);
 // Gate A5-U256A
 assign #0.2  OCTAD2 = rst ? 0 : ~(0|XT2_|NDR100_);
 // Gate A5-U159A A5-U247A
 assign #0.2  WY12_ = rst ? 1 : ~(0|g39102|d4XP5|g39152|g39341|g39343);
 // Gate A5-U224A
 assign #0.2  g39412 = rst ? 0 : ~(0|g39410|T05_);
+// Gate A5-U225B
+assign #0.2  A55XP19 = rst ? 0 : ~(0|g39405|T05_);
 // Gate A5-U111B
 assign #0.2  g39203 = rst ? 0 : ~(0|FETCH0|T08_|INKL_);
 // Gate A5-U101B
 assign #0.2  g39248 = rst ? 0 : ~(0|GOJAM|GNHNC);
 // Gate A5-U153B
 assign #0.2  g39140 = rst ? 0 : ~(0|T06_|DAS0_);
+// Gate A5-U203B
+assign #0.2  A511XP6 = rst ? 0 : ~(0|DV1_|T11_);
 // Gate A5-U251A
 assign #0.2  g39343 = rst ? 0 : ~(0|g39342|T05_);
 // Gate A5-U251B
@@ -254,7 +258,7 @@ assign #0.2  g39445 = rst ? 1 : ~(0|IC2|IC14|DV1);
 // Gate A5-U146A
 assign #0.2  g39129 = rst ? 0 : ~(0|MASK0_|T04_);
 // Gate A5-U216B
-assign #0.2  TOV_ = rst ? 1 : ~(0|g39420|d6XP8);
+assign #0.2  TOV_ = rst ? 1 : ~(0|A56XP7|d6XP8);
 // Gate A5-U117B
 assign #0.2  g39235 = rst ? 1 : ~(0|g39239|g39237);
 // Gate A5-U206A
@@ -269,8 +273,8 @@ assign #0.2  g39214 = rst ? 0 : ~(0|g39213|T08_);
 assign #0.2  g39232 = rst ? 1 : ~(0|g39239|DAS0);
 // Gate A5-U145A A5-U115A A5-U222A
 assign #0.2  WA_ = rst ? 1 : ~(0|g39129|g39127|g39223|d5XP11|g39243|g39412|g39432);
-// Gate A5-U241A
-assign #0.2  g39320 = rst ? 0 : ~(0|g39318|T04_);
+// Gate A5-U205B
+assign #0.2  A510XP10 = rst ? 0 : ~(0|T10_|IC11_);
 // Gate A5-U244B
 assign #0.2  g39324 = rst ? 0 : ~(0|IC12_|T05_);
 // Gate A5-U113B
@@ -279,22 +283,20 @@ assign #0.2  g39230 = rst ? 1 : ~(0|IC1|RUPT0|IC10);
 assign #0.2  g39406 = rst ? 0 : ~(0|g39404|T05_);
 // Gate A5-U118A
 assign #0.2  d9XP5 = rst ? 0 : ~(0|T09_|DAS0_);
-// Gate A5-U217B
-assign #0.2  g39421 = rst ? 0 : ~(0|INOUT_|RXOR0|T06_);
 // Gate A5-U156B
 assign #0.2  d7XP4 = rst ? 0 : ~(0|CCS0_|BR2_|T07_);
-// Gate A5-U219A
-assign #0.2  g39420 = rst ? 0 : ~(0|T06_|DV4_);
+// Gate A5-U213A
+assign #0.2  g39425 = rst ? 0 : ~(0|T07_|STFET1_);
 // Gate A5-U146B
 assign #0.2  d5XP12 = rst ? 0 : ~(0|T05_|DAS0_);
 // Gate A5-U208A
-assign #0.2  WYD_ = rst ? 1 : ~(0|g39332|g39450);
+assign #0.2  WYD_ = rst ? 1 : ~(0|A55XP9|A511XP6);
 // Gate A5-U246A
 assign #0.2  d5XP15 = rst ? 0 : ~(0|T05_|QXCH0_);
 // Gate A5-U243A
 assign #0.2  g39330 = rst ? 0 : ~(0|g39329|T05_);
 // Gate A5-U145B A5-U238B
-assign #0.2  RL_ = rst ? 1 : ~(0|g39127|g39116|A58XP12|g39450|g39319|g39313);
+assign #0.2  RL_ = rst ? 1 : ~(0|g39127|g39116|A58XP12|A511XP6|g39319|g39313);
 // Gate A5-U109A A5-U211A A5-U216A
 assign #0.2  RU_ = rst ? 1 : ~(0|d9XP5|g39201|g39214|g39452|g39436|g39441|g39416|d6XP8|d5XP11);
 // Gate A5-U207B
@@ -312,7 +314,7 @@ assign #0.2  g39120 = rst ? 0 : ~(0|IC2_|T03_);
 // Gate A5-U226B
 assign #0.2  g39409 = rst ? 0 : ~(0|TS0_|BRDIF_);
 // Gate A5-U109B A5-U240A A5-U240B A5-U210B
-assign #0.2  WB_ = rst ? 1 : ~(0|g39217|RAD|g39320|g39324|g39421|g39312|g39313|RQ|g39428|g39441|g39436);
+assign #0.2  WB_ = rst ? 1 : ~(0|g39217|RAD|g39320|g39324|A56XP2|g39312|g39313|RQ|g39428|g39441|g39436);
 // Gate A5-U217A
 assign #0.2  d6XP8 = rst ? 0 : ~(0|T06_|DAS1_);
 // Gate A5-U143A
@@ -348,7 +350,7 @@ assign #0.2  WS_ = rst ? 1 : ~(0|RL10BB|RSCT|g39307);
 // Gate A5-U101A
 assign #0.2  GNHNC = rst ? 0 : ~(0|g39248|T01);
 // Gate A5-U154B A5-U248B
-assign #0.2  A2X_ = rst ? 1 : ~(0|g39149|g39143|g39140|g39327|g39442);
+assign #0.2  A2X_ = rst ? 1 : ~(0|g39149|g39143|g39140|g39327|A510XP10);
 // Gate A5-U136A
 assign #0.2  g39112 = rst ? 0 : ~(0|g39111|T02_);
 // Gate A5-U138B
@@ -356,13 +358,11 @@ assign #0.2  g39111 = rst ? 1 : ~(0|IC2|IC3|RSM3);
 // Gate A5-U242B
 assign #0.2  d2XP8 = rst ? 0 : ~(0|FETCH0_|T02_);
 // Gate A5-U132A A5-U150B A5-U110A A5-U250B
-assign #0.2  RB_ = rst ? 1 : ~(0|g39120|g39109|g39145|g39138|g39223|g39203|g39407|g39341);
+assign #0.2  RB_ = rst ? 1 : ~(0|g39120|g39109|g39145|g39138|g39223|g39203|A55XP19|g39341);
 // Gate A5-U241B
 assign #0.2  g39319 = rst ? 0 : ~(0|DV1_|T04_);
-// Gate A5-U244A
-assign #0.2  g39337 = rst ? 0 : ~(0|T05_|IC8_);
-// Gate A5-U225B
-assign #0.2  g39407 = rst ? 0 : ~(0|g39405|T05_);
+// Gate A5-U213B
+assign #0.2  U2BBK = rst ? 0 : ~(0|T08_|MONWBK|STFET1_);
 // Gate A5-U239A
 assign #0.2  g39313 = rst ? 0 : ~(0|IC8_|T03_);
 // Gate A5-U139B
@@ -372,7 +372,7 @@ assign #0.2  g39125 = rst ? 0 : ~(0|IC15_|T02_);
 // Gate A5-U220A
 assign #0.2  g39416 = rst ? 0 : ~(0|T06_|g39415);
 // Gate A5-U159B A5-U141B A5-U250A
-assign #0.2  RZ_ = rst ? 1 : ~(0|g39152|d4XP5|A58XP3|g39131|g39106|d3XP6|g39343|g39420);
+assign #0.2  RZ_ = rst ? 1 : ~(0|g39152|d4XP5|A58XP3|g39131|g39106|d3XP6|g39343|A56XP7);
 // Gate A5-U112A
 assign #0.2  g39211 = rst ? 1 : ~(0|IC1|MP0);
 // Gate A5-U157A

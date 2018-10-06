@@ -60,17 +60,17 @@ assign #0.2  g32056 = rst ? 1 : ~(0|C45M|C46M|C57A|C60A);
 // Gate A21-U229A
 assign #0.2  g32603 = rst ? 1 : ~(0|g32602|C44R);
 // Gate A21-U203A
-assign #0.2  g32625 = rst ? 1 : ~(0|C45R|g32624);
+assign #0.2  g32625 = rst ? 0 : ~(0|C45R|g32624);
 // Gate A21-U211B
 assign #0.2  g32648 = rst ? 1 : ~(0);
 // Gate A21-U258A A21-U259A
-assign #0.2  CXB5_ = rst ? 1 : ~(0|XB5);
+assign #0.2  CXB5_ = rst ? 0 : ~(0|XB5);
 // Gate A21-U256A A21-U257A
 assign #0.2  CA5_ = rst ? 1 : ~(0|OCTAD5);
 // Gate A21-U156A A21-U158A A21-U155A
 assign #0.2  d32004K = rst ? 1 : ~(0|C37A|C36A|C32A|C31A|C30A|C35A|C34A|C33A);
 // Gate A21-U129B
-assign #0.2  SCAS17 = rst ? 1 : ~(0|FS17|DOSCAL);
+assign #0.2  SCAS17 = rst ? 0 : ~(0|FS17|DOSCAL);
 // Gate A21-U120B
 assign #0.2  FETCH0_ = rst ? 1 : ~(0|FETCH0);
 // Gate A21-U122A
@@ -80,7 +80,7 @@ assign #0.2  CG26 = rst ? 1 : ~(0|g32650);
 // Gate A21-U220A
 assign #0.2  C44R = rst ? 0 : ~(0|CXB4_|CA4_|g32611);
 // Gate A21-U212B
-assign #0.2  g32646 = rst ? 1 : ~(0|g32647|g32645);
+assign #0.2  g32646 = rst ? 0 : ~(0|g32647|g32645);
 // Gate A21-U228A
 assign #0.2  g32604 = rst ? 0 : ~(0|g32603|g32610);
 // Gate A21-U235A
@@ -104,7 +104,7 @@ assign #0.2  g32237 = rst ? 0 : ~(0|PHS2_|g32235);
 // Gate A21-U254A
 assign #0.2  CTROR = rst ? 1 : ~(0|CTROR_);
 // Gate A21-U135A
-assign #0.2  SHANC_ = rst ? 1 : ~(0|SHANC|g32062);
+assign #0.2  SHANC_ = rst ? 0 : ~(0|SHANC|g32062);
 // Gate A21-U154A A21-U148A A21-U150A A21-U157A A21-U159A A21-U153A
 assign #0.2  g32033 = rst ? 0 : ~(0|C36A|C37A|C44A|C57A|C55A|C54A|C56A|C27A|C34A|C35A|C25A|C24A|C26A|C45A|C47A|C46A);
 // Gate A21-U235B
@@ -124,7 +124,7 @@ assign #0.2  RQ_ = rst ? 1 : ~(0|RQ);
 // Gate A21-U207A
 assign #0.2  g32622 = rst ? 0 : ~(0|g32607|CG15|g32620);
 // Gate A21-U136A
-assign #0.2  SHANC = rst ? 0 : ~(0|SHANC_|T12A);
+assign #0.2  SHANC = rst ? 1 : ~(0|SHANC_|T12A);
 // Gate A21-U125B
 assign #0.2  STFET1_ = rst ? 1 : ~(0|STORE1|FETCH1);
 // Gate A21-U245B
@@ -134,9 +134,9 @@ assign #0.2  MREQIN = rst ? 0 : ~(0|g32229);
 // Gate A21-U234B
 assign #0.2  g32505 = rst ? 0 : ~(0|g32504|g32501);
 // Gate A21-U234A
-assign #0.2  g32532 = rst ? 0 : ~(0|g32533|g32531);
+assign #0.2  g32532 = rst ? 1 : ~(0|g32533|g32531);
 // Gate A21-U236A
-assign #0.2  g32533 = rst ? 1 : ~(0|C56R|g32532);
+assign #0.2  g32533 = rst ? 0 : ~(0|C56R|g32532);
 // Gate A21-U238A
 assign #0.2  g32537 = rst ? 1 : ~(0|g32536|C57R);
 // Gate A21-U239A
@@ -146,21 +146,21 @@ assign #0.2  C45A = rst ? 0 : ~(0|g32607|CG15|g32619);
 // Gate A21-U136B
 assign #0.2  DINC = rst ? 0 : ~(0|T12A|DINCNC_);
 // Gate A21-U239B
-assign #0.2  g32509 = rst ? 1 : ~(0|g32510|BMAGXM);
+assign #0.2  g32509 = rst ? 0 : ~(0|g32510|BMAGXM);
 // Gate A21-U254B
 assign #0.2  g32522 = rst ? 0 : ~(0|g32520|CG13|g32507);
 // Gate A21-U201A
 assign #0.2  C45M = rst ? 0 : ~(0|g32624|CA4_|CXB5_);
 // Gate A21-U231A
-assign #0.2  g32530 = rst ? 1 : ~(0|C56R|g32529);
+assign #0.2  g32530 = rst ? 0 : ~(0|C56R|g32529);
 // Gate A21-U232A
-assign #0.2  g32529 = rst ? 0 : ~(0|g32530|EMSD);
+assign #0.2  g32529 = rst ? 1 : ~(0|g32530|EMSD);
 // Gate A21-U208A
-assign #0.2  g32620 = rst ? 1 : ~(0|C45R|g32619);
+assign #0.2  g32620 = rst ? 0 : ~(0|C45R|g32619);
 // Gate A21-U232B
-assign #0.2  g32503 = rst ? 1 : ~(0|g32502|C42R);
+assign #0.2  g32503 = rst ? 0 : ~(0|g32502|C42R);
 // Gate A21-U231B
-assign #0.2  g32502 = rst ? 0 : ~(0|g32503|BMAGXP);
+assign #0.2  g32502 = rst ? 1 : ~(0|g32503|BMAGXP);
 // Gate A21-U206A
 assign #0.2  g32659 = rst ? 1 : ~(0);
 // Gate A21-U206B
@@ -174,7 +174,7 @@ assign #0.2  g32602 = rst ? 0 : ~(0|BMAGZP|g32603);
 // Gate A21-U244B
 assign #0.2  C57R = rst ? 0 : ~(0|CXB7_|g32511|CA5_);
 // Gate A21-U204A
-assign #0.2  g32624 = rst ? 0 : ~(0|INLNKM|g32625);
+assign #0.2  g32624 = rst ? 1 : ~(0|INLNKM|g32625);
 // Gate A21-U203B A21-U202B
 assign #0.2  CXB6_ = rst ? 1 : ~(0|XB6);
 // Gate A21-U241A
@@ -222,7 +222,7 @@ assign #0.2  g32218 = rst ? 0 : ~(0|ST1_|MON_|g32234);
 // Gate A21-U114B A21-U115B
 assign #0.2  g32229 = rst ? 1 : ~(0|g32214|g32207|INOTLD|INOTRD);
 // Gate A21-U257B
-assign #0.2  g32524 = rst ? 1 : ~(0|g32525|BMAGYM);
+assign #0.2  g32524 = rst ? 0 : ~(0|g32525|BMAGYM);
 // Gate A21-U259B
 assign #0.2  C43M = rst ? 0 : ~(0|g32524|CA4_|CXB3_);
 // Gate A21-U252B
@@ -336,13 +336,13 @@ assign #0.2  g32616 = rst ? 0 : ~(0|g32615|C45R);
 // Gate A21-U233A
 assign #0.2  g32531 = rst ? 0 : ~(0|g32501|g32529);
 // Gate A21-U238B
-assign #0.2  g32510 = rst ? 0 : ~(0|g32509|C42R);
+assign #0.2  g32510 = rst ? 1 : ~(0|g32509|C42R);
 // Gate A21-U217A
 assign #0.2  g32611 = rst ? 1 : ~(0|RSSB);
 // Gate A21-U146A
 assign #0.2  d30SUM = rst ? 0 : ~(0|d32004K);
 // Gate A21-U248B
-assign #0.2  g32517 = rst ? 1 : ~(0|g32516|g32525);
+assign #0.2  g32517 = rst ? 0 : ~(0|g32516|g32525);
 // Gate A21-U127A
 assign #0.2  g32204 = rst ? 1 : ~(0|MLOAD);
 // Gate A21-U245A
@@ -360,17 +360,17 @@ assign #0.2  g32044 = rst ? 1 : ~(0|C57A|C56A|C52A|C50A|C51A|C53A|C55A|C54A);
 // Gate A21-U236B
 assign #0.2  C42A = rst ? 0 : ~(0|g32506|CG13);
 // Gate A21-U210B
-assign #0.2  g32647 = rst ? 0 : ~(0|g32646|C47R);
+assign #0.2  g32647 = rst ? 1 : ~(0|g32646|C47R);
 // Gate A21-U233B
 assign #0.2  g32504 = rst ? 0 : ~(0|g32510|g32503);
 // Gate A21-U211A
-assign #0.2  g32619 = rst ? 0 : ~(0|g32618|g32620);
+assign #0.2  g32619 = rst ? 1 : ~(0|g32618|g32620);
 // Gate A21-U215B
 assign #0.2  g32643 = rst ? 0 : ~(0|g32644|GYROD);
 // Gate A21-U217B
 assign #0.2  g32601 = rst ? 1 : ~(0|BKTF_);
 // Gate A21-U214A
-assign #0.2  g32617 = rst ? 0 : ~(0|g32625|g32616);
+assign #0.2  g32617 = rst ? 1 : ~(0|g32625|g32616);
 // Gate A21-U160A A21-U160B A21-U145A
 assign #0.2  g32015 = rst ? 0 : ~(0|C26A|C25A|C24A|C27A|d30SUM|C60A);
 // Gate A21-U110B
@@ -412,7 +412,7 @@ assign #0.2  g32636 = rst ? 0 : ~(0|g32637|RNRADM);
 // Gate A21-U243B
 assign #0.2  g32501 = rst ? 1 : ~(0|BKTF_);
 // Gate A21-U258B
-assign #0.2  g32525 = rst ? 0 : ~(0|g32524|C43R);
+assign #0.2  g32525 = rst ? 1 : ~(0|g32524|C43R);
 // Gate A21-U113A
 assign #0.2  g32233 = rst ? 0 : ~(0|T12_|CT|PHS2_);
 // Gate A21-U212A

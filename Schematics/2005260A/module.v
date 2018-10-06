@@ -229,7 +229,7 @@ assign #0.2  PHS4_ = rst ? 1 : ~(0|PHS4);
 // Gate A2-U354A A2-U354B
 assign #0.2  T02_ = rst ? 1 : ~(0|T02);
 // Gate A2-U326B
-assign #0.2  CINORM = rst ? 0 : ~(0|MP3A);
+assign #0.2  CINORM = rst ? 1 : ~(0|MP3A);
 // Gate A2-U307A
 assign #0.2  T10DC_ = rst ? 1 : ~(0|g37341|g37343);
 // Gate A2-U217A

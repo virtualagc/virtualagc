@@ -53,9 +53,9 @@ assign #0.2  g45142 = rst ? 1 : ~(0|g45146|g45147);
 // Gate A18-U131B
 assign #0.2  g45137 = rst ? 0 : ~(0|WCH13_|CHWL11_);
 // Gate A18-U150A
-assign #0.2  g45116 = rst ? 1 : ~(0|g45113);
+assign #0.2  g45116 = rst ? 0 : ~(0|g45113);
 // Gate A18-U244A
-assign #0.2  g45422 = rst ? 0 : ~(0|g45423|g45421|g45412);
+assign #0.2  g45422 = rst ? 1 : ~(0|g45423|g45421|g45412);
 // Gate A18-U205B
 assign #0.2  g45349 = rst ? 1 : ~(0|RRIN0);
 // Gate A18-U132A
@@ -65,25 +65,25 @@ assign #0.2  g45336 = rst ? 1 : ~(0|g45335);
 // Gate A18-U136A
 assign #0.2  g45146 = rst ? 0 : ~(0|g45142|g45141);
 // Gate A18-U245A
-assign #0.2  g45424 = rst ? 0 : ~(0|g45425|g45421);
+assign #0.2  g45424 = rst ? 1 : ~(0|g45425|g45421);
 // Gate A18-U211B
 assign #0.2  g45339 = rst ? 0 : ~(0|g45337|F5ASB2_);
 // Gate A18-U219B
 assign #0.2  g45324 = rst ? 1 : ~(0|g45322);
 // Gate A18-U236A
-assign #0.2  g45410 = rst ? 1 : ~(0|g45407|g45411);
+assign #0.2  g45410 = rst ? 0 : ~(0|g45407|g45411);
 // Gate A18-U243B
 assign #0.2  CHOR13_ = rst ? 1 : ~(0|CH3313|CHBT13|CHAT13);
 // Gate A18-U243A A18-U242A
-assign #0.2  g45421 = rst ? 1 : ~(0|RADRPT|g45419|g45412|g45422);
+assign #0.2  g45421 = rst ? 0 : ~(0|RADRPT|g45419|g45412|g45422);
 // Gate A18-U121A
-assign #0.2  g45217 = rst ? 1 : ~(0|NKEY5|g45218);
+assign #0.2  g45217 = rst ? 0 : ~(0|NKEY5|g45218);
 // Gate A18-U223B
 assign #0.2  g45316 = rst ? 0 : ~(0|CHWL01_|WCH13_);
 // Gate A18-U149B
-assign #0.2  g45113 = rst ? 0 : ~(0|g45114|MKEY4);
+assign #0.2  g45113 = rst ? 1 : ~(0|g45114|MKEY4);
 // Gate A18-U149A
-assign #0.2  g45114 = rst ? 1 : ~(0|g45123|g45113);
+assign #0.2  g45114 = rst ? 0 : ~(0|g45123|g45113);
 // Gate A18-U240B
 assign #0.2  g45416 = rst ? 0 : ~(0|g45418|g45415);
 // Gate A18-U241B
@@ -103,7 +103,7 @@ assign #0.2  g45246 = rst ? 0 : ~(0|g45245|g45221);
 // Gate A18-U118B
 assign #0.2  g45221 = rst ? 1 : ~(0|NAVRST);
 // Gate A18-U122A
-assign #0.2  g45218 = rst ? 0 : ~(0|g45223|g45217);
+assign #0.2  g45218 = rst ? 1 : ~(0|g45223|g45217);
 // Gate A18-U230A
 assign #0.2  g45302 = rst ? 1 : ~(0|g45301|g45303);
 // Gate A18-U256B
@@ -113,9 +113,9 @@ assign #0.2  g45245 = rst ? 1 : ~(0|g45238);
 // Gate A18-U218A
 assign #0.2  g45326 = rst ? 1 : ~(0|CNTOF9);
 // Gate A18-U260B
-assign #0.2  g45454 = rst ? 0 : ~(0|g45453|g45455);
+assign #0.2  g45454 = rst ? 1 : ~(0|g45453|g45455);
 // Gate A18-U258A
-assign #0.2  g45455 = rst ? 1 : ~(0|CCH33|g45454);
+assign #0.2  g45455 = rst ? 0 : ~(0|CCH33|g45454);
 // Gate A18-U124B
 assign #0.2  g45212 = rst ? 0 : ~(0|g45209);
 // Gate A18-U224B
@@ -189,7 +189,7 @@ assign #0.2  RRRARA = rst ? 0 : ~(0|g45324|g45313|g45318);
 // Gate A18-U227A
 assign #0.2  g45308 = rst ? 0 : ~(0|CCH13|g45307);
 // Gate A18-U246A
-assign #0.2  g45425 = rst ? 1 : ~(0|g45422|g45424);
+assign #0.2  g45425 = rst ? 0 : ~(0|g45422|g45424);
 // Gate A18-U201A
 assign #0.2  g45357 = rst ? 1 : ~(0|g45356|g45350);
 // Gate A18-U152B
@@ -241,7 +241,7 @@ assign #0.2  CH11 = rst ? 0 : ~(0|RCHG_|CHOR11_);
 // Gate A18-U105B
 assign #0.2  MKRPT = rst ? 0 : ~(0|g45251|TPOR_|F09B_);
 // Gate A18-U120A
-assign #0.2  g45220 = rst ? 0 : ~(0|g45217);
+assign #0.2  g45220 = rst ? 1 : ~(0|g45217);
 // Gate A18-U213A
 assign #0.2  g45335 = rst ? 0 : ~(0|g45310|g45334);
 // Gate A18-U117B
@@ -323,7 +323,7 @@ assign #0.2  g45314 = rst ? 0 : ~(0|CCH13|g45313);
 // Gate A18-U119A A18-U126A
 assign #0.2  g45243 = rst ? 0 : ~(0|F09A_|g45247|g45238|g45223);
 // Gate A18-U130B
-assign #0.2  g45201 = rst ? 1 : ~(0|g45202|NKEY1);
+assign #0.2  g45201 = rst ? 0 : ~(0|g45202|NKEY1);
 // Gate A18-U249A
 assign #0.2  g45430 = rst ? 0 : ~(0|g45429|g45432);
 // Gate A18-U141B
@@ -343,7 +343,7 @@ assign #0.2  HERB = rst ? 0 : ~(0|TPOR_);
 // Gate A18-U204A
 assign #0.2  g45356 = rst ? 0 : ~(0|g45311|g45305|g45355);
 // Gate A18-U237B
-assign #0.2  g45411 = rst ? 0 : ~(0|g45410|g45408);
+assign #0.2  g45411 = rst ? 1 : ~(0|g45410|g45408);
 // Gate A18-U124A
 assign #0.2  g45214 = rst ? 0 : ~(0|g45223|g45213);
 // Gate A18-U156B
@@ -353,7 +353,7 @@ assign #0.2  g45133 = rst ? 1 : ~(0|g45126);
 // Gate A18-U118A
 assign #0.2  g45223 = rst ? 0 : ~(0|g45221);
 // Gate A18-U129A
-assign #0.2  g45204 = rst ? 0 : ~(0|g45201);
+assign #0.2  g45204 = rst ? 1 : ~(0|g45201);
 // Gate A18-U143A
 assign #0.2  g45102 = rst ? 0 : ~(0|g45101|g45123);
 // Gate A18-U156A
@@ -403,13 +403,13 @@ assign #0.2  g45109 = rst ? 1 : ~(0|g45110|MKEY3);
 // Gate A18-U232B
 assign #0.2  g45402 = rst ? 1 : ~(0|g45403|F10AS0);
 // Gate A18-U233A A18-U234B
-assign #0.2  g45407 = rst ? 0 : ~(0|g45405|RADRPT|g45401|g45408);
+assign #0.2  g45407 = rst ? 1 : ~(0|g45405|RADRPT|g45401|g45408);
 // Gate A18-U153B A18-U154A
 assign #0.2  g45127 = rst ? 0 : ~(0|g45123|F09A_|g45126|g45135);
 // Gate A18-U257A
 assign #0.2  g45452 = rst ? 0 : ~(0|F10A|g45451);
 // Gate A18-U130A
-assign #0.2  g45202 = rst ? 0 : ~(0|g45201|g45223);
+assign #0.2  g45202 = rst ? 1 : ~(0|g45201|g45223);
 // Gate A18-U153A A18-U155A
 assign #0.2  g45126 = rst ? 0 : ~(0|g45104|g45108|g45112|g45116|g45120);
 // Gate A18-U101B
@@ -463,15 +463,15 @@ assign #0.2  g45122 = rst ? 0 : ~(0|XB5_|XT1_);
 // Gate A18-U112A
 assign #0.2  g45226 = rst ? 0 : ~(0|g45225|g45234);
 // Gate A18-U236B
-assign #0.2  g45408 = rst ? 1 : ~(0|g45409|g45407|g45401);
+assign #0.2  g45408 = rst ? 0 : ~(0|g45409|g45407|g45401);
 // Gate A18-U258B
 assign #0.2  CH3312 = rst ? 0 : ~(0|g45455|RCH33_);
 // Gate A18-U157A
-assign #0.2  g45130 = rst ? 0 : ~(0|F09D|g45126|g45129);
+assign #0.2  g45130 = rst ? 1 : ~(0|F09D|g45126|g45129);
 // Gate A18-U137A
 assign #0.2  g45149 = rst ? 0 : ~(0|g45142|g45138|STOP);
 // Gate A18-U157B
-assign #0.2  g45129 = rst ? 1 : ~(0|g45130|g45127);
+assign #0.2  g45129 = rst ? 0 : ~(0|g45130|g45127);
 // Gate A18-U223A
 assign #0.2  CH1302 = rst ? 0 : ~(0|RCH13_|g45313);
 // Gate A18-U219A
@@ -481,8 +481,8 @@ assign #0.2  g45344 = rst ? 1 : ~(0|g45339);
 // Gate A18-U208A
 assign #0.2  g45348 = rst ? 0 : ~(0|g45336|g45305|g45347);
 // Gate A18-U160B
-assign #0.2  g45136 = rst ? 0 : ~(0|KYRPT1|g45135);
+assign #0.2  g45136 = rst ? 1 : ~(0|KYRPT1|g45135);
 // Gate A18-U160A
-assign #0.2  g45135 = rst ? 1 : ~(0|g45136|g45134);
+assign #0.2  g45135 = rst ? 0 : ~(0|g45136|g45134);
 
 endmodule

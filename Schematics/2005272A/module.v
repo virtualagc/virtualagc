@@ -81,9 +81,9 @@ assign #0.2  g48136 = rst ? 0 : ~(0|g48134|g48128);
 // Gate A23-U253A
 assign #0.2  g48446 = rst ? 0 : ~(0|WCH13_|CHWL16_);
 // Gate A23-U130A
-assign #0.2  NOYM = rst ? 0 : ~(0|g48253|PIPGYm);
+assign #0.2  NOYM = rst ? 1 : ~(0|g48253|PIPGYm);
 // Gate A23-U160A
-assign #0.2  g48147 = rst ? 0 : ~(0|g48148|g48145);
+assign #0.2  g48147 = rst ? 1 : ~(0|g48148|g48145);
 // Gate A23-U256B
 assign #0.2  g48451 = rst ? 1 : ~(0|g48452|g48450);
 // Gate A23-U230A
@@ -107,13 +107,13 @@ assign #0.2  g48350 = rst ? 0 : ~(0|ZOUT_|g48347);
 // Gate A23-U204B
 assign #0.2  g48347 = rst ? 1 : ~(0|g48346);
 // Gate A23-U123B
-assign #0.2  g48235 = rst ? 1 : ~(0|g48233|g48234);
+assign #0.2  g48235 = rst ? 0 : ~(0|g48233|g48234);
 // Gate A23-U155B
 assign #0.2  g48138 = rst ? 1 : ~(0|g48136|g48137);
 // Gate A23-U160B
-assign #0.2  g48148 = rst ? 1 : ~(0|g48146|g48147);
+assign #0.2  g48148 = rst ? 0 : ~(0|g48146|g48147);
 // Gate A23-U123A
-assign #0.2  g48234 = rst ? 0 : ~(0|g48235|g48232);
+assign #0.2  g48234 = rst ? 1 : ~(0|g48235|g48232);
 // Gate A23-U212B
 assign #0.2  g48357 = rst ? 1 : ~(0|OCTAD5);
 // Gate A23-U150B
@@ -129,7 +129,7 @@ assign #0.2  WCH34_ = rst ? 1 : ~(0|g48219);
 // Gate A23-U214A
 assign #0.2  TRUND = rst ? 0 : ~(0|F5ASB2_|g48332);
 // Gate A23-U136A
-assign #0.2  g48104 = rst ? 0 : ~(0|MISSY|MISSZ|MISSX);
+assign #0.2  g48104 = rst ? 1 : ~(0|MISSY|MISSZ|MISSX);
 // Gate A23-U125A
 assign #0.2  CHOR06_ = rst ? 1 : ~(0|CHAT06|CHBT06|CH1606);
 // Gate A23-U237A
@@ -153,7 +153,7 @@ assign #0.2  g48240 = rst ? 0 : ~(0|g48249|g48239|g48230);
 // Gate A23-U244A
 assign #0.2  OT1113 = rst ? 0 : ~(0|g48424);
 // Gate A23-U234A
-assign #0.2  g48406 = rst ? 1 : ~(0|E6|g48405);
+assign #0.2  g48406 = rst ? 0 : ~(0|E6|g48405);
 // Gate A23-U252B
 assign #0.2  CH1216 = rst ? 0 : ~(0|g48442|RCH12_);
 // Gate A23-U108B
@@ -187,7 +187,7 @@ assign #0.2  CHOR05_ = rst ? 1 : ~(0|CHBT05|CHAT05|CH1505|CH1605);
 // Gate A23-U135B
 assign #0.2  DATA_ = rst ? 1 : ~(0|g48116|g48115);
 // Gate A23-U121B
-assign #0.2  g48239 = rst ? 1 : ~(0|g48238|g48237);
+assign #0.2  g48239 = rst ? 0 : ~(0|g48238|g48237);
 // Gate A23-U236A
 assign #0.2  g48411 = rst ? 1 : ~(0|CCH07|E7_);
 // Gate A23-U218B
@@ -201,7 +201,7 @@ assign #0.2  g48154 = rst ? 1 : ~(0|MISSX|F5ASB2);
 // Gate A23-U232A
 assign #0.2  E5 = rst ? 1 : ~(0|CCH07|g48402);
 // Gate A23-U233B
-assign #0.2  E6 = rst ? 0 : ~(0|g48406|CCH07);
+assign #0.2  E6 = rst ? 1 : ~(0|g48406|CCH07);
 // Gate A23-U229A
 assign #0.2  CH1416 = rst ? 0 : ~(0|RCH14_|g48302);
 // Gate A23-U105A
@@ -217,7 +217,7 @@ assign #0.2  g48425 = rst ? 0 : ~(0|CCH11|g48424);
 // Gate A23-U126B
 assign #0.2  g48231 = rst ? 1 : ~(0|PIPGYm);
 // Gate A23-U121A
-assign #0.2  g48238 = rst ? 0 : ~(0|g48236|g48239);
+assign #0.2  g48238 = rst ? 1 : ~(0|g48236|g48239);
 // Gate A23-U138B A23-U139B
 assign #0.2  g48102 = rst ? 0 : ~(0|NOXM|NOXP|NOYP|NOZM|NOZP|NOYM);
 // Gate A23-U146B
@@ -389,9 +389,9 @@ assign #0.2  g48132 = rst ? 0 : ~(0|g48129|g48137|g48148);
 // Gate A23-U237B
 assign #0.2  g48414 = rst ? 0 : ~(0|XB7_|XT0_|WCHG_);
 // Gate A23-U152A
-assign #0.2  g48134 = rst ? 1 : ~(0|g48133|g48132);
+assign #0.2  g48134 = rst ? 0 : ~(0|g48133|g48132);
 // Gate A23-U151B
-assign #0.2  g48133 = rst ? 0 : ~(0|g48131|g48134);
+assign #0.2  g48133 = rst ? 1 : ~(0|g48131|g48134);
 // Gate A23-U117A
 assign #0.2  CHOR01_ = rst ? 1 : ~(0|CHBT01|CHAT01|CH1601);
 // Gate A23-U208A
@@ -429,7 +429,7 @@ assign #0.2  g48141 = rst ? 0 : ~(0|g48147|g48130|g48138);
 // Gate A23-U226B
 assign #0.2  CDUXDM = rst ? 0 : ~(0|g48307|MOUT_);
 // Gate A23-U130B
-assign #0.2  g48253 = rst ? 1 : ~(0|F18AX|NOYM);
+assign #0.2  g48253 = rst ? 0 : ~(0|F18AX|NOYM);
 // Gate A23-U159B
 assign #0.2  g48146 = rst ? 0 : ~(0|g48144|g48128);
 // Gate A23-U203A
