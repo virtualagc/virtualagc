@@ -1,0 +1,67 @@
+EESchema Schematic File Version 4
+LIBS:module-cache
+EELAYER 26 0
+EELAYER END
+$Descr E 44000 34000
+encoding utf-8
+Sheet 1 3
+Title ""
+Date ""
+Rev ""
+Comp ""
+Comment1 ""
+Comment2 ""
+Comment3 ""
+Comment4 ""
+$EndDescr
+$Sheet
+S 15250 11550 5450 8975
+U 5B8E7731
+F0 "1" 140
+F1 "fixed_erasable_memory-1.sch" 140
+F2 "0VDCA" U R 20700 17550 140
+F3 "+4SW" U R 20700 16425 140
+$EndSheet
+Wire Wire Line
+	20700 16425 22900 16425
+Wire Wire Line
+	20700 17550 22900 17550
+$Comp
+L AGC_DSKY:PWR_FLAG #FLG0103
+U 1 1 61A08F95
+P 22900 17550
+F 0 "#FLG0103" H 22900 18075 50  0001 C CNN
+F 1 "PWR_FLAG" H 22910 18010 50  0001 C CNN
+F 2 "" H 22900 17550 50  0001 C CNN
+F 3 "~" H 22900 17550 50  0001 C CNN
+	1    22900 17550
+	1    0    0    -1  
+$EndComp
+Connection ~ 22900 17550
+Wire Wire Line
+	22900 17550 25125 17550
+$Comp
+L AGC_DSKY:PWR_FLAG #FLG0102
+U 1 1 61A08FB9
+P 22900 16425
+F 0 "#FLG0102" H 22900 16950 50  0001 C CNN
+F 1 "PWR_FLAG" H 22910 16885 50  0001 C CNN
+F 2 "" H 22900 16425 50  0001 C CNN
+F 3 "~" H 22900 16425 50  0001 C CNN
+	1    22900 16425
+	1    0    0    -1  
+$EndComp
+Connection ~ 22900 16425
+Wire Wire Line
+	22900 16425 25125 16425
+Text Notes 38575 32300 0    250  ~ 50
+Fixed/Erasable Memory\nInterface for Simulation
+$Sheet
+S 25125 11550 5450 8975
+U 5B8E7796
+F0 "2" 140
+F1 "fixed_erasable_memory-2.sch" 140
+F2 "0VDCA" U L 25125 17550 140
+F3 "+4SW" U L 25125 16425 140
+$EndSheet
+$EndSCHEMATC
