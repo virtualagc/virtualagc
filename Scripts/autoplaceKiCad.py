@@ -25,6 +25,8 @@
 #		into KiCad.
 # Mod history:	2018-07-29 RSB	First time I remembered to add the GPL and
 #				other boilerplate at the top of the file.
+#		2018-08-06 RSB	Added the auto-increment feature for N and
+#				J.
 #
 # The purpose of this python script is to take a text file that has some
 # descriptions of NOR gates, expander gates, connector pads, nodes,
@@ -88,6 +90,10 @@ nors = {
 aPins = ["A", "B", "C", "_"]
 bPins = ["D", "E", "F", "_"]
 
+gateNumber = 0
+locationNumber = 1
+padNumber = 1
+
 # Read the input file.
 for line in sys.stdin:
 	line = re.sub(' +', ' ', line.strip())
@@ -98,6 +104,12 @@ for line in sys.stdin:
 		continue
 	type = fields[0]
 	if numFields < 1 or type == "#":
+		continue
+	if type == "G=" and numFields == 2:
+		gateNumber = int(fields[1])
+		continue
+	if type == "J=" and numFields == 2:
+		padNumber = int(fields[1])
 		continue
 	if type == "C=" and numFields == 2:
 		columns = int(fields[1])
@@ -130,6 +142,46 @@ for line in sys.stdin:
 
 	posX = 25 * int(40 * (originX + xSpacing * nextX))
 	posY = 25 * int(40 * (originY + ySpacing * nextY))
+	
+	if type == "N" and numFields == 3 and fields[1] == "." and fields[2] in ["1", "2", "3"]:
+		numInputs = int(fields[2])
+		fields[1] = str(gateNumber)
+		even = ((gateNumber & 1) == 0) 
+		if locationNumber < 10:
+			fields[2] = "0" + str(locationNumber)
+		else:
+			fields[2] = str(locationNumber)
+		if numInputs == 1:
+			if even:
+				fields.append("_")
+				fields.append("E")
+				fields.append("_")
+			else:
+				fields.append("_")
+				fields.append("B")
+				fields.append("_")
+		elif numInputs == 2:
+			if even:
+				fields.append("D")
+				fields.append("_")
+				fields.append("F")
+			else:
+				fields.append("A")
+				fields.append("_")
+				fields.append("C")
+		else:
+			if even:
+				fields.append("D")
+				fields.append("E")
+				fields.append("F")
+			else:
+				fields.append("A")
+				fields.append("B")
+				fields.append("C")
+		if even:
+			locationNumber += 1
+		gateNumber += 1
+		numFields = 6
 	
 	if type in nors and numFields == 6 and fields[1].isdigit() and fields[2].isdigit():
 		gate = fields[1]
@@ -196,7 +248,15 @@ for line in sys.stdin:
 		nextXY()
 		continue
 	
-	if (type == "J" or type == "j") and numFields >= 2 and numFields <= 5 and fields[1].isdigit():
+	if (type == "J" or type == "j") and numFields >= 2 and numFields <= 5 and (fields[1].isdigit() or fields[1] == "."):
+		if fields[1] == ".":
+			fields[1] = str(padNumber)
+			padNumber += 1
+			remainder = padNumber % 100
+			if remainder in [21, 51]:
+				padNumber += 1
+			if remainder == 72:
+				padNumber += 29
 		rotated = False
 		if type == "j":
 			rotated = True
