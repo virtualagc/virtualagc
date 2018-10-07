@@ -404,7 +404,7 @@ if count > 0:
 	line = "inout " + wireType
 	for name in newInouts:
 		count -= 1
-		if line == "inout wand":
+		if line == ("inout " + wireType):
 			line += " " + name
 		elif line == "":
 			line = "  " + name
@@ -426,7 +426,7 @@ if count > 0:
 	line = "output " + wireType
 	for name in newOutputs:
 		count -= 1
-		if line == "output wand":
+		if line == ("output " + wireType):
 			line += " " + name
 		elif line == "":
 			line = "  " + name
@@ -550,6 +550,8 @@ if len(nors) > 0:
 		#	outLine += "," + input;
 		#outLine += ")" + ";"
 		thisInit = str(gate[2]["output"])
+		if wireType == "wire" and thisInit == "1":
+			thisInit = "1'bz"
 		thisDelay = delay
 		if gate[2]["delay"] != 0:
 			thisDelay = " #" + str(gate[2]["delay"])
@@ -558,7 +560,7 @@ if len(nors) > 0:
 			netName = netToGate[netName]
 		if wireType == "wire":
 			print "pullup(" + netName + ");"		
-			outLine = "assign" + thisDelay + " " + netName + " = rst ? " + thisInit + " : ~(0";
+			outLine = "assign" + thisDelay + " " + netName + " = rst ? " + thisInit + " : ((~(0";
 		else:
 			outLine = "assign" + thisDelay + " " + netName + " = rst ? " + thisInit + " : ~(0";
 		for rawInput in gate[3:]:
@@ -566,6 +568,8 @@ if len(nors) > 0:
 			if translateToGates and input in netToGate:
 				input = netToGate[input]
 			outLine += "|" + input;
+		if wireType == "wire":
+			outLine += ")) ? 1'bz : 1'b0"
 		outLine += ")" + ";"
 		print outLine
 print ""
