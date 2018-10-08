@@ -43,6 +43,16 @@
 #				doesn't yet work.  Wasn't treating net labels in 
 #				sheets 2 or 3 properly --- i.e., they only worked
 #				right in sheet 1.
+#		2018-08-08 RSB	Think that the optional pullup/wire construct may
+#				be working now.  I think my problem was using
+#				bitwise negation something I hadn't specified to
+#				be 1 bit wide, when I should have used logical 
+#				negation.  Maybe.  For what it's worth, I did 
+#				a full-AGC simulation (in its current state, of
+#				of course, which isn't fully functional) for 20 ms.,
+#				and compared all backplane signals for wand vs
+#				wire/pullup/1bz, and they were all absolutely identical
+#				in level and timing.
 #
 # This script converts one of my KiCad transcriptions of AGC LOGIC FLOW DIAGRAMs
 # into Verilog in the dumbest, most-straightforward way.  In other words, I don't
@@ -560,16 +570,16 @@ if len(nors) > 0:
 			netName = netToGate[netName]
 		if wireType == "wire":
 			print "pullup(" + netName + ");"		
-			outLine = "assign" + thisDelay + " " + netName + " = rst ? " + thisInit + " : ((~(0";
+			outLine = "assign" + thisDelay + " " + netName + " = rst ? " + thisInit + " : ((0";
 		else:
-			outLine = "assign" + thisDelay + " " + netName + " = rst ? " + thisInit + " : ~(0";
+			outLine = "assign" + thisDelay + " " + netName + " = rst ? " + thisInit + " : !(0";
 		for rawInput in gate[3:]:
 			input = rawInput
 			if translateToGates and input in netToGate:
 				input = netToGate[input]
 			outLine += "|" + input;
 		if wireType == "wire":
-			outLine += ")) ? 1'bz : 1'b0"
+			outLine += ") ? 1'b0 : 1'bz"
 		outLine += ")" + ";"
 		print outLine
 print ""
