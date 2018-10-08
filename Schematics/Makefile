@@ -155,7 +155,7 @@ DRAWINGS_2003200 += 2005250- 2005271- 2005272A 2005273A
 MODULES_PROCESSED = none
 $(foreach drawing,$(DRAWINGS_2003200),$(eval $(call moduleTemplate,$(drawing))))
 # Add more drawings separately that don't fit into the nice module-number sequence used above.
-DRAWINGS_2003200 += fixed_erasable_memory
+#DRAWINGS_2003200 += fixed_erasable_memory
 TARGETS_VVP_2003200 := $(DRAWINGS_2003200:%=%/module.vvp)
 TARGETS_V_2003200 := $(DRAWINGS_2003200:%=%/module.v)
 
