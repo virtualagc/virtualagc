@@ -107,9 +107,11 @@ define moduleTemplate =
 endef
 
 ##################################################################################
-# Definitions needed for the testVerilog target.
+# Definitions needed for the testVerilog and fixed_erasable_memory targets.
 module_testVerilog = A1
 delay_testVerilog = 0
+module_fixed_erasable_memory = A62
+delay_fixed_erasable_memory = $(DEFAULT_GATE_DELAY)
 
 ##################################################################################
 # Here's what goes into an AGC p/n 1003700.  They need to be the drawing numbers
@@ -134,11 +136,13 @@ DRAWINGS_2003100 = 2005059E 2005060D 2005051D 2005062C 2005061D 2005063F
 DRAWINGS_2003100 += 2005052D 2005055D 2005056C 2005057E 2005058D 2005053F 2005069E
 DRAWINGS_2003100 += 2005064F 2005065D 2005066D 2005067B 2005068C 2005070E 2005054C
 DRAWINGS_2003100 += 2005050J 2005071B 2005072C 2005073A
-TARGETS_VVP_2003100 := $(DRAWINGS_2003100:%=%/module.vvp)
-TARGETS_V_2003100 := $(DRAWINGS_2003100:%=%/module.v)
 # Create module_DRAWING and delay_DRAWING variables for each drawing.
 MODULES_PROCESSED = none
 $(foreach drawing,$(DRAWINGS_2003100),$(eval $(call moduleTemplate,$(drawing))))
+# Add more drawings separately that don't fit into the nice module-number sequence used above.
+DRAWINGS_2003100 += fixed_erasable_memory
+TARGETS_VVP_2003100 := $(DRAWINGS_2003100:%=%/module.vvp)
+TARGETS_V_2003100 := $(DRAWINGS_2003100:%=%/module.v)
 
 ##################################################################################
 # Here's what goes into an AGC p/n 2003200.  They need to be the drawing numbers
@@ -147,11 +151,13 @@ DRAWINGS_2003200 = 2005259A 2005260A 2005251A 2005262A 2005261A 2005263A
 DRAWINGS_2003200 += 2005252A 2005255- 2005256A 2005257A 2005258A 2005253A 2005269-
 DRAWINGS_2003200 += 2005264A 2005265A 2005266- 2005267A 2005268A 2005270- 2005254-
 DRAWINGS_2003200 += 2005250- 2005271- 2005272A 2005273A
-TARGETS_VVP_2003200 := $(DRAWINGS_2003200:%=%/module.vvp)
-TARGETS_V_2003200 := $(DRAWINGS_2003200:%=%/module.v)
 # Create module_DRAWING and delay_DRAWING variables for each drawing.
 MODULES_PROCESSED = none
 $(foreach drawing,$(DRAWINGS_2003200),$(eval $(call moduleTemplate,$(drawing))))
+# Add more drawings separately that don't fit into the nice module-number sequence used above.
+DRAWINGS_2003200 += fixed_erasable_memory
+TARGETS_VVP_2003200 := $(DRAWINGS_2003200:%=%/module.vvp)
+TARGETS_V_2003200 := $(DRAWINGS_2003200:%=%/module.v)
 
 ##################################################################################
 # Here's what goes into an AGC p/n 2003993.  They need to be the drawing numbers
@@ -160,11 +166,13 @@ DRAWINGS_2003993 = 2005259A 2005260A 2005251A 2005262A 2005261A 2005263A
 DRAWINGS_2003993 += 2005252A 2005255- 2005256A 2005257A 2005258A 2005253A 2005269-
 DRAWINGS_2003993 += 2005264B 2005265A 2005266- 2005267A 2005268A 2005270- 2005254-
 DRAWINGS_2003993 += 2005250- 2005271- 2005272A 2005273A
-TARGETS_VVP_2003993 := $(DRAWINGS_2003993:%=%/module.vvp)
-TARGETS_V_2003993 := $(DRAWINGS_2003993:%=%/module.v)
 # Create module_DRAWING and delay_DRAWING variables for each drawing.
 MODULES_PROCESSED = none
 $(foreach drawing,$(DRAWINGS_2003993),$(eval $(call moduleTemplate,$(drawing))))
+# Add more drawings separately that don't fit into the nice module-number sequence used above.
+DRAWINGS_2003993 += fixed_erasable_memory
+TARGETS_VVP_2003993 := $(DRAWINGS_2003993:%=%/module.vvp)
+TARGETS_V_2003993 := $(DRAWINGS_2003993:%=%/module.v)
 
 ##################################################################################
 

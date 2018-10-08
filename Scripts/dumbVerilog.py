@@ -19,31 +19,31 @@
 # 
 # Filename: 	dumbVerilog.py
 # Purpose:	Converts KiCad AGC "logic flow diagrams" to Verilog
-# Mod history:	2018-07-29 RSB	First time I remembered to add the GPL and
+# Mod history:	2018-09-29 RSB	First time I remembered to add the GPL and
 #				other boilerplate at the top of the file.
 #				Various new things, though, like: better formatting
 #				of module parameters and wire lines in the output
 #				Verilog; treatment of netnames that begin with a
 #				digit (not allowed in Verilog).
-#		2018-08-01 RSB	Added signal-name translations of "-" to "m". 
+#		2018-10-01 RSB	Added signal-name translations of "-" to "m". 
 #				Now allow for case where output of NOR is directly
 #				tied to ground.  Found that some netnames assigned
 #				only by net labels had a weird form I wasn't 
 #				accounting for.
-#		2018-08-04 RSB	Replace my "assign" statements by 
+#		2018-10-04 RSB	Replace my "assign" statements by 
 #				"pullup; assign (highz1,strong0)" statements.  I 
 #				thought they worked to solve my problem (which was
 #				wire-anding the outputs of gates from different 
 #				modules), but it didn't.  I then replaced all my
 #				"wire" specifications by "wand" specifications and,
 #				once again, I think that works.
-#		2018-08-05 RSB	Added optional SCHEMATIC.sch input.  Also, began 
+#		2018-10-05 RSB	Added optional SCHEMATIC.sch input.  Also, began 
 #				adding a way to use the command-line to specify
 #				translating with pullups instead of wands, but that
 #				doesn't yet work.  Wasn't treating net labels in 
 #				sheets 2 or 3 properly --- i.e., they only worked
 #				right in sheet 1.
-#		2018-08-08 RSB	Think that the optional pullup/wire construct may
+#		2018-10-08 RSB	Think that the optional pullup/wire construct may
 #				be working now.  I think my problem was using
 #				bitwise negation something I hadn't specified to
 #				be 1 bit wide, when I should have used logical 
@@ -51,8 +51,9 @@
 #				a full-AGC simulation (in its current state, of
 #				of course, which isn't fully functional) for 20 ms.,
 #				and compared all backplane signals for wand vs
-#				wire/pullup/1bz, and they were all absolutely identical
-#				in level and timing.
+#				wire/pullup/1bz, and they were all absolutely 
+#				identical in level and timing.  Added some handling
+#				for the "ROM", "RAM", and "BUFFER" symbols.
 #
 # This script converts one of my KiCad transcriptions of AGC LOGIC FLOW DIAGRAMs
 # into Verilog in the dumbest, most-straightforward way.  In other words, I don't
@@ -204,12 +205,12 @@ if len(sys.argv) >= 3:
 				
 	# Test validity of the moduleName
 	if len(moduleName) < 1 or moduleName[0] != "A" or not moduleName[1:].isdigit():
-		print >> sys.stderr, "Module name is not A1 - A24."
+		print >> sys.stderr, "Module name invalid."
 		error = True 
 	else:
 		moduleNumber = int(moduleName[1:])
-		if moduleNumber < 1 or moduleNumber > 24:
-			print >> sys.stderr, "Module name is not A1 - A24."
+		if moduleNumber < 1 or moduleNumber > 64:
+			print >> sys.stderr, "Module name is not A1 - A64."
 			error = True
 	
 	# Load pins.txt into pinsDB[].  Each entry in pinsDB[] is itself a list
@@ -292,20 +293,20 @@ discards = {}
 inputs = {}
 outputs = {}
 inouts = {}
-inConnector = False
+inWhat = ""
 for line in lines:
 	if line[:2] == " )":
-		inConnector = False
+		inWhat = ""
 		continue
 	if line[:3] == " ( ":
 		# This is the start of a component.
 		fields = line.strip().split()
 		refd = fields[3]
 		if refd[:1] in ["J"]:  # ["J", "N"]:
-			inConnector = True
+			inWhat = "CONNECTOR"
 			#isNode = (refd[:1] == "N")
 		continue
-	if not inConnector:
+	if inWhat != "CONNECTOR":
 		continue
 	if line[:4] == "  ( ":
 		# This is a pin in the component.  The fields are
@@ -457,15 +458,42 @@ print ""
 # Now do another pass on the netlist to determine how the internal logic of the
 # module works.  We only need to look at the NOR gate components, because we already
 # have everything we need to know about the connectors.
-inNOR = False
+inWhat = ""
+pinNamesNOR = [ "",
+	"J", "A", "B", "C", "GND", "D", "E", "F", "K", "VCC"
+]
 nors = []
 netToGate = {}
+pinNamesROM = [ "",
+	"A15",  "A14",  "A13",  "A12",  "A11",  "A10",  "A9",   "A8",
+	"",     "",     "WE_",  "",     "",     "",     "",     "",
+	"",     "A7",   "A6",   "A5",   "A4",   "A3",   "A2",   "A1", 
+	"A0",   "CE_",  "GND",  "OE_",  "DQ0",  "DQ8",  "DQ1",  "DQ9",
+	"DQ2",  "DQ10", "DQ3",  "DQ11", "VCC",  "DQ4",  "DQ12", "DQ5",
+	"DQ13", "DQ6",  "DQ14", "DQ7",  "DQ15", "GND",  "",     "A16"
+]
+roms = []
+pinNamesRAM = [ "",
+	"A0",   "A1",   "A2",   "A3",   "A4",   "E_",   "DQL0", "DQL1",
+	"DQL2", "DQL3", "VCC",  "GND",  "DQL4", "DQL5", "DQL6", "DQL7",
+	"W_",   "A5",   "A6",   "A7",   "A8",   "A9",   "A10",  "A11",
+	"A12",  "GND",  "VCC",  "",     "DQU8", "DQU9", "DQU10","DQU11",
+	"VCC",  "GND",  "DQU12","DQU13","DQU14","DQU15","LB_",  "UB_",
+	"G_",   "A13",  "A14",  "A15"
+]
+rams = []
+pinNamesBUFFER = [ "",
+	"OEa_", "I0a",  "O3b",  "I1a",  "O2b",  "I2a",  "O1b",  "I3a",
+	"O0b",  "GND",  "I0b",  "O3a",  "I1b",  "O2a",  "I2b",  "O1a",
+	"I3b",  "O0a",  "OEb_", "VCC" 
+]
+buffers = []
+pinNetsB = [""] * 100
 for line in lines:
 	if line[:2] == " )":
-		if inNOR:
+		if inWhat == "NOR":
 			# If we are in a dual-NOR, we need to finish it out by outputting all
 			# of the equations for the individual NOR gates.
-			inNOR = False
 			if refd in inits:
 				thisGatesInits = inits[refd]
 			else:
@@ -474,23 +502,49 @@ for line in lines:
 				nors.append([moduleName + "-" + refd + "A", norPins[1], thisGatesInits["j"], norPins[2], norPins[3], norPins[4]])
 			if norPins[9] != "":
 				nors.append([moduleName + "-" + refd + "B", norPins[9], thisGatesInits["k"], norPins[6], norPins[7], norPins[8]])
+		elif inWhat == "BUFFER":
+			buffers.append( { "refd":(moduleName + "-" + refd), "pins":pinNetsB[:21] } )
+		elif inWhat == "RAM":
+			rams.append( { "refd":(moduleName + "-" + refd), "pins":pinNetsB[:45] } )
+		elif inWhat == "ROM":
+			roms.append( { "refd":(moduleName + "-" + refd), "pins":pinNetsB[:49] } )
+		inWhat = ""
 		continue
 	if line[:3] == " ( ":
 		# This is the start of a component.
 		fields = line.strip().split()
-		if fields[3][:1] == "U":
-			inNOR = True
-			norPins = [ "", "", "", "", "", "", "", "", "", "", "" ]
-			refd = fields[3]
+		refd = fields[3]
+		if fields[4][:6] == "D3NOR-":
+			inWhat = "NOR"
+			norPins = [ "" ] * 11
+			pinNames = pinNamesNOR
+			continue
+		pinNetsB = [ "" ] * 101
+		if fields[4] == "ROM":
+			inWhat = fields[4]
+			pinNames = pinNamesROM
+			continue
 		continue
-	if not inNOR:
+		if fields[4] == "RAM":
+			inWhat = fields[4]
+			pinNames = pinNamesRAM
+			continue
 		continue
+		if fields[4] == "BUFFER":
+			inWhat = fields[4]
+			pinNames = pinNamesBUFFER
+			continue
+		continue
+	if inWhat == "":
+		continue
+	isPin = False
 	if line[:4] == "  ( ":
-		# This is a pin in the NOR.  The fields are
+		# This is a pin in a component  The fields are
 		# "(", pin number, net name, ").
+		isPin = True
 		fields = line.strip().split()
 		pinNumber = int(fields[1])
-		if pinNumber == 5 or pinNumber == 10:
+		if pinNames[pinNumber] in ["GND", "VCC"]:
 			# Ignore the chip's power and ground pins.
 			continue
 		netName = fields[2]		
@@ -514,11 +568,17 @@ for line in lines:
 				netName = moduleName + rawNetName
 		else:
 			netName = moduleName + netName[5:].replace("-", "").replace(")", "")
-			if pinNumber == 1:
-				netToGate[netName] = "g" + gateLocations[refd + "A"]
-			elif pinNumber == 9:
-				netToGate[netName] = "g" + gateLocations[refd + "B"]
+			if inWhat == "NOR":
+				if pinNumber == 1:
+					netToGate[netName] = "g" + gateLocations[refd + "A"]
+				elif pinNumber == 9:
+					netToGate[netName] = "g" + gateLocations[refd + "B"]
+	if not isPin:
+		continue
+	if inWhat == "NOR":
 		norPins[pinNumber] = netName
+		continue
+	pinNetsB[pinNumber] = netName
 
 nets = {}
 translateToGates = True
