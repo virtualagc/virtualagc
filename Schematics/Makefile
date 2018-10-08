@@ -12,20 +12,20 @@
 #		for 'if', 'touch', 'mv', 'rm', and 'cat' uses.
 # Warning:	This Makefile requires GNU 'make' v4.x or higher.  It does 
 #		not work with v3.x.
-# Mod history:	2018-07-29 RSB	Wrote first version of this makefile, 
+# Mod history:	2018-09-29 RSB	Wrote first version of this makefile, 
 #				covering just testVerilog, 2005259A, 
 #				and 2005260A targets.
-#		2018-07-30 RSB	Just went ahead and added all of the rest
+#		2018-09-30 RSB	Just went ahead and added all of the rest
 #				of the AGC modules for 2003200 as TARGETS.
 #				The build will probably fail as soon as it
 #				hits one of the targets I haven't debugged
 #				yet, but so what?
-#		2018-08-01 RSB	The main target has now become 2003200,
+#		2018-10-01 RSB	The main target has now become 2003200,
 #				which is the AGC p/n 2003200 backplane 
 #				(testbench) plus modules A1-A24. It still
 #				translates and builds all of the individual
 #				modules, of course, on an as-needed basis.
-#		2018-08-02 RSB	Simplified the structure of the makefile
+#		2018-10-02 RSB	Simplified the structure of the makefile
 #				somewhat --- i.e., made it much harder to
 #				maintain --- to make it cleaner to added
 #				new AGC target p/n's.  I did in fact add
@@ -39,6 +39,9 @@
 #				module numbering and the lack of a pinDB yet.
 #				Also added a default but non-zero gate delay.
 #				Added target for AGC.init.
+#		2018-10-08 RSB	Now account for separate "tb.v" files, so 
+#				avoid hard-coding unnecessary stuff into 
+#				the module_tb.v files or AGCNUMBER.v files.
 #
 # This 'make' needs to be performed from the Schematics/ directory.
 # Icarus Verilog must be installed, and iverilog must be in the PATH.
@@ -185,19 +188,19 @@ all: $(TARGETS)
 
 .PHONY: clean
 clean:
-	-rm $(TARGETS) testVerilog/module.v $(TARGETS_V_AGC) 2>/dev/null
+	-rm $(TARGETS) 2003200.v 2003100.v 2003993.v 1003700.v testVerilog/module.v $(TARGETS_V_AGC) 2>/dev/null
 
-2003200.vvp: 2003200.v $(TARGETS_V_2003200)
-	iverilog -o $@ $^
+2003200.vvp: 2003200.v $(TARGETS_V_2003200) tb-2003200.v
+	iverilog -o $@ 2003200.v $(TARGETS_V_2003200)
 
-2003100.vvp: 2003100.v $(TARGETS_V_2003100)
-	iverilog -o $@ $^
+2003100.vvp: 2003100.v $(TARGETS_V_2003100) tb-2003100.v
+	iverilog -o $@ 2003100.v $(TARGETS_V_2003100)
 
-2003993.vvp: 2003993.v $(TARGETS_V_2003993)
-	iverilog -o $@ $^
+2003993.vvp: 2003993.v $(TARGETS_V_2003993) tb-2003993.v
+	iverilog -o $@ 2003993.v $(TARGETS_V_2003993)
 
-1003700.vvp: 1003700.v $(TARGETS_V_1003700)
-	iverilog -o $@ $^
+1003700.vvp: 1003700.v $(TARGETS_V_1003700) tb-1003700.v
+	iverilog -o $@ 1003700.v $(TARGETS_V_1003700)
 
 # Note that we only create an AGC's testbench file (such as 2003200) if it doesn't
 # already exist.  That's because the one we create from the Verilog of the 
@@ -206,17 +209,17 @@ clean:
 # usable.  But it's a significant amount of work to manually create the testbench
 # initially, too, so we would still like to automate that work when we can.
 
-2003200.v: $(TARGETS_V_2003200)
-	@if test ! -f $@ ; then cat $^ | ../Scripts/dumbTestbench.py >$@ ; fi
+2003200.v: $(TARGETS_V_2003200) tb-2003200.v
+	@if test ! -f $@ ; then cat $(TARGETS_V_2003200) | ../Scripts/dumbTestbench.py tb-2003200.v >$@ ; fi
 
-2003100.v: $(TARGETS_V_2003100)
-	@if test ! -f $@ ; then cat $^ | ../Scripts/dumbTestbench.py >$@ ; fi
+2003100.v: $(TARGETS_V_2003100) tb-2003100.v
+	@if test ! -f $@ ; then cat $(TARGETS_V_2003100) | ../Scripts/dumbTestbench.py tb-2003100.v >$@ ; fi
 
-2003993.v: $(TARGETS_V_2003993)
-	@if test ! -f $@ ; then cat $^ | ../Scripts/dumbTestbench.py >$@ ; fi
+2003993.v: $(TARGETS_V_2003993) tb-2003993.v
+	@if test ! -f $@ ; then cat $(TARGETS_V_2003993) | ../Scripts/dumbTestbench.py tb-2003993.v >$@ ; fi
 
-1003700.v: $(TARGETS_V_1003700)
-	@if test ! -f $@ ; then cat $^ | ../Scripts/dumbTestbench.py >$@ ; fi
+1003700.v: $(TARGETS_V_1003700) tb-1003700.v
+	@if test ! -f $@ ; then cat $(TARGETS_V_1003700) | ../Scripts/dumbTestbench.py tb-1003700.v >$@ ; fi
 
 # Make some stubs for a couple of required files.  This helpful for a
 # first compilation, but the files need to be filled and the 'make'
@@ -225,12 +228,12 @@ clean:
 	touch $@
 
 .SECONDARY: testVerilog/module_tb.v $(DRAWINGS_AGC:%=%/module_tb.v)
-%/module_tb.v: %/module.v
-	@if test ! -f $@ ; then cat $^ | ../Scripts/dumbTestbench.py >$@ ; fi
+%/module_tb.v: %/module.v %/tb.v
+	@if test ! -f $@ ; then cat $^ | ../Scripts/dumbTestbench.py $*/tb.v >$@ ; fi
 
 # Below are the rules which should work for every TARGET in $(TARGETS)
-%/module.vvp: %/module_tb.v %/module.v
-	iverilog -o $@ $^
+%/module.vvp: %/module_tb.v %/module.v %/tb.v
+	iverilog -o $@ $*/module_tb.v $*/module.v
 
 # The purpose of the SECONDARY directive below is that when it's omitted,
 # 'make' will believe that module.v is a so-called "intermediate file", and

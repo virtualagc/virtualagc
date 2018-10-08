@@ -3,19 +3,7 @@
 
 module agc;
 
-reg rst = 1;
-reg STRT2 = 1;
-initial
-  begin
-    $dumpfile("agc.lxt2");
-    $dumpvars(0, agc);
-    # 1 rst = 0;
-    # 50 STRT2 = 0;
-    # 200000 $finish;
-  end
-
-reg CLOCK = 0;
-always #2.44140625 CLOCK = !CLOCK;
+`include "tb-2003200.v"
 
 reg BLKUPL_ = 0, BMGXM = 0, BMGXP = 0, BMGYM = 0, BMGYP = 0, BMGZM = 0,
   BMGZP = 0, CAURST = 0, CDUFAL = 0, CDUXM = 0, CDUXP = 0, CDUYM = 0, CDUYP = 0,
@@ -35,8 +23,8 @@ reg BLKUPL_ = 0, BMGXM = 0, BMGXP = 0, BMGYM = 0, BMGYP = 0, BMGZM = 0,
   MLDCH = 0, MLOAD = 0, MNHNC = 0, MNHRPT = 0, MNHSBF = 0, MNIMmP = 0,
   MNIMmR = 0, MNIMmY = 0, MNIMpP = 0, MNIMpR = 0, MNIMpY = 0, MONPAR = 0,
   MONWBK = 0, MRDCH = 0, MREAD = 0, MRKREJ = 0, MRKRST = 0, MSTP = 0, MSTRT = 0,
-  MTCSAI = 0, MYCLMP = 0, NAVRST = 0, NHALGA = 1, NHVFAL = 0, NKEY1 = 0,
-  NKEY2 = 0, NKEY3 = 0, NKEY4 = 0, NKEY5 = 0, OPCDFL = 0, OPMSW2 = 0, OPMSW3 = 0,
+  MTCSAI = 0, MYCLMP = 0, NAVRST = 0, NHVFAL = 0, NKEY1 = 0, NKEY2 = 0,
+  NKEY3 = 0, NKEY4 = 0, NKEY5 = 0, OPCDFL = 0, OPMSW2 = 0, OPMSW3 = 0,
   PCHGOF = 0, PIPAXm = 0, PIPAXp = 0, PIPAYm = 0, PIPAYp = 0, PIPAZm = 0,
   PIPAZp = 0, ROLGOF = 0, RRIN0 = 0, RRIN1 = 0, RRPONA = 0, RRRLSC = 0,
   S4BSAB = 0, SA01 = 0, SA02 = 0, SA03 = 0, SA04 = 0, SA05 = 0, SA06 = 0,
@@ -648,8 +636,5 @@ A24 iA24 (
   U2BBKG_, US2SG, WATCH, WATCHP, WATCH_, WCHG_, d12KPPS, d25KPPS, d3200A,
   d3200B, d3200C, d3200D, d800RST, d800SET
 );
-
-initial $timeformat(-9, 0, " ns", 10);
-initial $monitor("%t: %d", $time, CLOCK);
 
 endmodule

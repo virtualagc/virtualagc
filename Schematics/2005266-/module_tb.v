@@ -3,19 +3,7 @@
 
 module agc;
 
-reg rst = 1;
-reg STRT2 = 1;
-initial
-  begin
-    $dumpfile("agc.lxt2");
-    $dumpvars(0, agc);
-    # 1 rst = 0;
-    # 50 STRT2 = 0;
-    # 1000 $finish;
-  end
-
-reg CLOCK = 0;
-always #2.44140625 CLOCK = !CLOCK;
+`include "2005266-/tb.v"
 
 reg CCH11 = 0, CCHG_ = 0, CGA16 = 0, CH0705 = 0, CH0706 = 0, CH0707 = 0,
   CH1501 = 0, CH1502 = 0, CH1503 = 0, CH1504 = 0, CH3201 = 0, CH3202 = 0,
@@ -48,8 +36,5 @@ A16 iA16 (
   RCpZmR, RCpZpR, S4BOFF, S4BSEQ, S4BTAK, STARON, TMPOUT, TVCNAB, UPLACT,
   VNFLSH, WCH05_, WCH06_, ZEROPT, ZIMCDU, ZOPCDU
 );
-
-initial $timeformat(-9, 0, " ns", 10);
-initial $monitor("%t: %d", $time, CLOCK);
 
 endmodule

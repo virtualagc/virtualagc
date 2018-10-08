@@ -3,19 +3,7 @@
 
 module agc;
 
-reg rst = 1;
-reg STRT2 = 1;
-initial
-  begin
-    $dumpfile("agc.lxt2");
-    $dumpvars(0, agc);
-    # 1 rst = 0;
-    # 50 STRT2 = 0;
-    # 1000 $finish;
-  end
-
-reg CLOCK = 0;
-always #2.44140625 CLOCK = !CLOCK;
+`include "2005267A/tb.v"
 
 reg AGCWAR = 0, CCHG_ = 0, CDUFAL = 0, CGA17 = 0, CH1113 = 0, CH1213 = 0,
   CH1214 = 0, CH1301 = 0, CH1302 = 0, CH1303 = 0, CH1304 = 0, CH1305 = 0,
@@ -68,8 +56,5 @@ A17 iA17 (
   RLYB06, RLYB07, RLYB08, RLYB09, RLYB10, RLYB11, RYWD12, RYWD13, RYWD14,
   RYWD16, TRP31A, TRP31B, TRP32, WCH10_, WCH11_
 );
-
-initial $timeformat(-9, 0, " ns", 10);
-initial $monitor("%t: %d", $time, CLOCK);
 
 endmodule

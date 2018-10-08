@@ -3,19 +3,7 @@
 
 module agc;
 
-reg rst = 1;
-reg STRT2 = 1;
-initial
-  begin
-    $dumpfile("agc.lxt2");
-    $dumpvars(0, agc);
-    # 1 rst = 0;
-    # 50 STRT2 = 0;
-    # 1000 $finish;
-  end
-
-reg CLOCK = 0;
-always #2.44140625 CLOCK = !CLOCK;
+`include "2005271-/tb.v"
 
 reg CCH34 = 0, CCH35 = 0, CCHG_ = 0, CGA22 = 0, CHWL01_ = 0, CHWL02_ = 0,
   CHWL03_ = 0, CHWL04_ = 0, CHWL05_ = 0, CHWL06_ = 0, CHWL07_ = 0, CHWL08_ = 0,
@@ -41,8 +29,5 @@ A22 iA22 (
   CH1307, DKCTR1, DKCTR1_, DKCTR2_, DKCTR4, DKCTR4_, DKCTR5, DKCTR5_, DKDATA,
   DKDATB, F14H, RCH14_, WCH14_, d16CNT, d1CNT, d32CNT
 );
-
-initial $timeformat(-9, 0, " ns", 10);
-initial $monitor("%t: %d", $time, CLOCK);
 
 endmodule

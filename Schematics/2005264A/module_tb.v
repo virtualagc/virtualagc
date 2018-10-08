@@ -3,19 +3,7 @@
 
 module agc;
 
-reg rst = 1;
-reg STRT2 = 1;
-initial
-  begin
-    $dumpfile("agc.lxt2");
-    $dumpvars(0, agc);
-    # 1 rst = 0;
-    # 50 STRT2 = 0;
-    # 1000 $finish;
-  end
-
-reg CLOCK = 0;
-always #2.44140625 CLOCK = !CLOCK;
+`include "2005264A/tb.v"
 
 reg BR12B = 0, CGA14 = 0, CHINC = 0, CLEARA = 0, CLEARB = 0, CLEARC = 0,
   CLEARD = 0, DV3764 = 0, GOJ1 = 0, GOJAM = 0, INOUT = 0, MAMU = 0, MNHSBF = 0,
@@ -57,8 +45,5 @@ A14 iA14 (
   XT4_, XT5, XT5_, XT6, XT6_, XT7, XT7_, YB0, YB0_, YB1, YB1_, YB2, YB2_,
   YB3, YB3_
 );
-
-initial $timeformat(-9, 0, " ns", 10);
-initial $monitor("%t: %d", $time, CLOCK);
 
 endmodule

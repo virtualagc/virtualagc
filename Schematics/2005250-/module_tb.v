@@ -3,19 +3,7 @@
 
 module agc;
 
-reg rst = 1;
-reg STRT2 = 1;
-initial
-  begin
-    $dumpfile("agc.lxt2");
-    $dumpvars(0, agc);
-    # 1 rst = 0;
-    # 50 STRT2 = 0;
-    # 1000 $finish;
-  end
-
-reg CLOCK = 0;
-always #2.44140625 CLOCK = !CLOCK;
+`include "2005250-/tb.v"
 
 reg ALTM = 0, BMAGXM = 0, BMAGXP = 0, BMAGYM = 0, BMAGYP = 0, BMAGZM = 0,
   BMAGZP = 0, C24A = 0, C25A = 0, C26A = 0, C27A = 0, C30A = 0, C31A = 0,
@@ -54,8 +42,5 @@ A21 iA21 (
   FETCH0_, FETCH1, INKL, INKL_, MON_, MONpCH, RQ_, SHANC, SHANC_, SHINC,
   SHINC_, STFET1_, STORE1, STORE1_, d30SUM, d50SUM
 );
-
-initial $timeformat(-9, 0, " ns", 10);
-initial $monitor("%t: %d", $time, CLOCK);
 
 endmodule

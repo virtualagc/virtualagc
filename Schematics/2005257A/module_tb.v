@@ -3,19 +3,7 @@
 
 module agc;
 
-reg rst = 1;
-reg STRT2 = 1;
-initial
-  begin
-    $dumpfile("agc.lxt2");
-    $dumpvars(0, agc);
-    # 1 rst = 0;
-    # 50 STRT2 = 0;
-    # 1000 $finish;
-  end
-
-reg CLOCK = 0;
-always #2.44140625 CLOCK = !CLOCK;
+`include "2005257A/tb.v"
 
 reg A2XG_ = 0, BK16 = 0, CAG = 0, CBG = 0, CGA10 = 0, CGG = 0, CH09 = 0,
   CH10 = 0, CH11 = 0, CH12 = 0, CI09_ = 0, CLG1G = 0, CLXC = 0, CO10 = 0,
@@ -51,8 +39,5 @@ A10 iA10 (
   SUMB11_, SUMB12_, WL09, WL10, WL11, WL12, XUY09_, XUY10_, Z09_, Z10_, Z11_,
   Z12_
 );
-
-initial $timeformat(-9, 0, " ns", 10);
-initial $monitor("%t: %d", $time, CLOCK);
 
 endmodule

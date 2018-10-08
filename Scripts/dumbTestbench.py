@@ -20,13 +20,31 @@
 # Filename: 	dumbTestbench.py
 # Purpose:	In a dumb manner, creates a Verilog testbench file for 
 #		Verilog files made by dumbVerilog.py.
-# Mod history:	2018-08-01 RSB	Created.
-#		2018-08-04 RSB	Replaced wires by wands.
+# Mod history:	2018-10-01 RSB	Created.
+#		2018-10-04 RSB	Replaced wires by wands.  (Actually, works 
+#				with either.)
+#		2018-10-08 RSB	Replaced some hard-codeds stuff in the testbenches
+#				with include-files.
 
 # Usage is:
 #	cat VERILOG_FILES | dumbTestbench.py >TESTBENCH.v
 
 import sys
+
+tbInclude = "tb.v"
+if len(sys.argv) > 1:
+	tbInclude = sys.argv[1]
+# Read the tb.v file, so as to build up a list of the regs it defines, so that
+# they can be removed from the list of the regs that we're going to autogenerate 
+# later.
+f = open(tbInclude, "r")
+lines = f.readlines()
+f.close()
+tbIncludeRegs = []
+for line in lines:
+	fields = line.strip().split()
+	if len(fields) >= 3 and fields[0] == "reg" and fields[2] == "=":
+		tbIncludeRegs.append(fields[1])
 
 wireType = "wire"
 
@@ -73,11 +91,13 @@ for signal in inputs+inouts:
 	if signal not in outputs:
 		if signal not in inouts:
 			if signal not in regs:
-				regs.append(signal)
+				if signal not in tbIncludeRegs:
+					regs.append(signal)
 for signal in inputs+inouts+outputs:
 	if signal not in regs:
-		if signal not in wires:
-			wires.append(signal)
+		if signal not in tbIncludeRegs:
+			if signal not in wires:
+				wires.append(signal)
 regs.sort()
 wires.sort()
 
@@ -87,27 +107,13 @@ print "`timescale 100ns / 1ns"
 print ""
 print "module agc;"
 print ""
-print "reg rst = 1;"
-print "reg STRT2 = 1;"
-print "initial"
-print "  begin"
-print "    $dumpfile(\"agc.lxt2\");"
-print "    $dumpvars(0, agc);"
-print "    # 1 rst = 0;"
-print "    # 50 STRT2 = 0;"
-print "    # 1000 $finish;"
-print "  end"
-print ""
-print "reg CLOCK = 0;"
-print "always #2.44140625 CLOCK = !CLOCK;"
+print "`include \"" + tbInclude + "\""
 print ""
 desiredLineLength = 70
 if len(regs) > 0:
 	line = "reg"
 	for i in range(0, len(regs)):
 		reg = regs[i]
-		if reg in ["rst", "STRT2", "CLOCK"]:
-			continue
 		if len(line) == 0:
 			line = " "
 		line += " " + reg + " = 0"
@@ -152,8 +158,5 @@ for line in lines:
 		continue
 	if inModule:
 		print line.rstrip()
-print "initial $timeformat(-9, 0, \" ns\", 10);"
-print "initial $monitor(\"%t: %d\", $time, CLOCK);"
-print ""
 print "endmodule"
 
