@@ -53,6 +53,23 @@ module RAM (
     wire [15:0] sensed_word;
     wire [15:0] write_word;
 
+    pullup(DQL0);
+    pullup(DQL1);
+    pullup(DQL2);
+    pullup(DQL3);
+    pullup(DQL4);
+    pullup(DQL5);
+    pullup(DQL6);
+    pullup(DQL7);
+    pullup(DQU8);
+    pullup(DQU9);
+    pullup(DQU10);
+    pullup(DQU11);
+    pullup(DQU12);
+    pullup(DQU13);
+    pullup(DQU14);
+    pullup(DQU15);
+    
     assign DQL0 = sensed_word[0];
     assign DQL1 = sensed_word[1];
     assign DQL2 = sensed_word[2];
