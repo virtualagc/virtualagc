@@ -15,7 +15,7 @@ Comment3 ""
 Comment4 ""
 $EndDescr
 Text Notes 1375 33125 0    140  ~ 28
-Notes from the Virtual AGC Project:\n1. Though having an MIT/MSC title block, this\n   drawing was not transcribed from an Apollo\n   Project drawing.  It is a memory interface to\n   original Apollo Project AGC design, intended \n   to assist in Verilog simulation or synthesis of \n   logically-compatible designs. — RSB 2018\n2. To conform to the conventions of original\n   Apollo Program drawings, reference \n   designators are not shown on components.\n   For the purposes of ERC and netlist generation, \n   NOR gates have reference designators U1nn, \n   where nn is the 2-digit number shown on the\n   NOR gate.  The oval pads numbered 101-171\n   comprise connector J1, while those numbered\n   201-271 comprise connector J2. — RSB 2018\n3. This design is based on similarly-named\n   drawings and Verilog memory interfaces by\n   Mike Stewart. — RSB 2018
+Notes from the Virtual AGC Project:\n1. Though having an MIT/MSC title block, this\n   drawing was not transcribed from an Apollo\n   Project drawing.  It is a memory interface to\n   original Apollo Project AGC design, intended \n   to assist in Verilog simulation or synthesis of \n   logically-compatible designs. — RSB 2018\n2. To conform to the conventions of original\n   Apollo Program drawings, reference \n   designators are not shown on NOR gates.\n   For the purposes of ERC and netlist generation, \n   NOR gates have reference designators U1nn, \n   where nn is the 2-digit number shown on the\n   NOR gate. — RSB 2018\n3. This design is based on similarly-named\n   drawings and Verilog memory interfaces by\n   Mike Stewart. — RSB 2018
 $Comp
 L D3NOR-+4SW-0VDCA:D3NOR-+4SW-0VDCA-_B_-_E_ U129
 U 1 1 5C87C915
@@ -1779,7 +1779,7 @@ Wire Wire Line
 Text Label 23275 8725 0    140  ~ 28
 NOROPE
 $Bitmap
-Pos 1075 28875
+Pos 1100 29350
 Scale 1.000000
 Data
 89 50 4E 47 0D 0A 1A 0A 00 00 00 0D 49 48 44 52 00 00 00 78 00 00 00 78 08 02 00 00 00 B6 06 A1 
@@ -2643,12 +2643,10 @@ C6 5C DC 75 02 E5 96 B4 52 0D 25 6F F3 00 00 00 00 49 45 4E 44 AE 42 60 82
 EndData
 $EndBitmap
 $Comp
-L AGC_DSKY:ROM B1
+L AGC_DSKY:ROM U1
 U 1 1 5BDECA96
 P 32400 2825
-AR Path="/5BDECA96" Ref="B1"  Part="1" 
-AR Path="/5B8E7731/5BDECA96" Ref="B1"  Part="1" 
-F 0 "B1" H 32400 2825 140 0001 C CNN
+F 0 "U1" H 32225 2750 140 0000 C CNB
 F 1 "ROM" H 32400 2825 140 0001 C CNN
 F 2 "" H 32400 2825 140 0001 C CNN
 F 3 "" H 32400 2825 140 0001 C CNN

@@ -19,9 +19,9 @@ Fixed/Erasable Memory\nInterface for Simulation
 Text Notes 42375 33450 0    140  ~ 28
 2      2
 Text Notes 1675 33250 0    140  ~ 28
-Notes from the Virtual AGC Project:\n1. Though having an MIT/MSC title block, this\n   drawing was not transcribed from an Apollo\n   Project drawing.  It is a memory interface to\n   original Apollo Project AGC design, intended \n   to assist in Verilog simulation or synthesis of \n   logically-compatible designs. — RSB 2018\n2. To conform to the conventions of original\n   Apollo Program drawings, reference \n   designators are not shown on components.\n   For the purposes of ERC and netlist generation, \n   NOR gates have reference designators U2nn, \n   where nn is the 2-digit number shown on the\n   NOR gate.  The oval pads numbered 301-371\n   comprise connector J3, while those numbered\n   401-471 comprise connector J4. — RSB 2018\n3. This design is based on similarly-named\n   drawings and Verilog memory interfaces by\n   Mike Stewart. — RSB 2018
+Notes from the Virtual AGC Project:\n1. Though having an MIT/MSC title block, this\n   drawing was not transcribed from an Apollo\n   Project drawing.  It is a memory interface to\n   original Apollo Project AGC design, intended \n   to assist in Verilog simulation or synthesis of \n   logically-compatible designs. — RSB 2018\n2. To conform to the conventions of original\n   Apollo Program drawings, reference \n   designators are not shown on NOR gates.\n   For the purposes of ERC and netlist generation, \n   NOR gates have reference designators U2nn, \n   where nn is the 2-digit number shown on the\n   NOR gate.  — RSB 2018\n3. This design is based on similarly-named\n   drawings and Verilog memory interfaces by\n   Mike Stewart. — RSB 2018
 $Bitmap
-Pos 1325 28975
+Pos 1375 29450
 Scale 1.000000
 Data
 89 50 4E 47 0D 0A 1A 0A 00 00 00 0D 49 48 44 52 00 00 00 78 00 00 00 78 08 02 00 00 00 B6 06 A1 
@@ -1851,8 +1851,8 @@ L AGC_DSKY:RAM B2
 U 1 1 5CDE0DD4
 P 37150 9750
 AR Path="/5CDE0DD4" Ref="B2"  Part="1" 
-AR Path="/5B8E7796/5CDE0DD4" Ref="B2"  Part="1" 
-F 0 "B2" H 36800 9750 140 0001 C CNN
+AR Path="/5B8E7796/5CDE0DD4" Ref="U2"  Part="1" 
+F 0 "U2" H 36950 9675 140 0000 C CNB
 F 1 "RAM" H 36800 9750 140 0001 C CNN
 F 2 "" H 36800 9750 140 0001 C CNN
 F 3 "" H 36800 9750 140 0001 C CNN
@@ -1860,10 +1860,10 @@ F 3 "" H 36800 9750 140 0001 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L AGC_DSKY:BUFFER B3
+L AGC_DSKY:BUFFER U3
 U 1 1 5CDE0FA6
 P 32575 7450
-F 0 "B3" H 32275 7450 140 0001 C CNN
+F 0 "U3" H 32375 7400 140 0000 C CNB
 F 1 "BUFFER" H 32275 7450 140 0001 C CNN
 F 2 "" H 32275 7450 140 0001 C CNN
 F 3 "" H 32275 7450 140 0001 C CNN
@@ -2703,10 +2703,10 @@ Connection ~ 37750 9650
 Wire Wire Line
 	37750 9650 37550 9650
 $Comp
-L AGC_DSKY:BUFFER B4
+L AGC_DSKY:BUFFER U4
 U 1 1 5E7484C5
 P 32575 2700
-F 0 "B4" H 32275 2700 140 0001 C CNN
+F 0 "U4" H 32400 2625 140 0000 C CNB
 F 1 "BUFFER" H 32275 2700 140 0001 C CNN
 F 2 "" H 32275 2700 140 0001 C CNN
 F 3 "" H 32275 2700 140 0001 C CNN
@@ -2895,8 +2895,6 @@ Entry Wire Line
 	39300 10150 39400 10050
 Text HLabel 39700 10150 2    140  BiDi ~ 28
 SA01
-Wire Bus Line
-	39400 13050 39400 6475
 Text Label 34650 9250 2    120  ~ 24
 SA16
 Wire Wire Line
@@ -3258,4 +3256,6 @@ Wire Bus Line
 	35850 10250 35850 20025
 Wire Bus Line
 	9925 3475 9925 20625
+Wire Bus Line
+	39400 6475 39400 13050
 $EndSCHEMATC
