@@ -88,7 +88,7 @@ assign #0.2  g39105 = rst ? 1 : !(0|STD2|IC2);
 // Gate A5-U120B A5-U141A A5-U238A
 assign #0.2  RA_ = rst ? 1 : !(0|g39233|g39225|g39124|g29121|A56XP2|g39312);
 // Gate A5-U258A A5-U257A
-assign #0.2  NDR100_ = rst ? 1 : !(0|g39348|g39349);
+assign #0.2  NDR100_ = rst ? 0 : !(0|g39348|g39349);
 // Gate A5-U259A
 assign #0.2  g39348 = rst ? 0 : !(0|YB0_|YT0_);
 // Gate A5-U110B A5-U218A
@@ -130,7 +130,7 @@ assign #0.2  g39251 = rst ? 0 : !(0|C37P|C40P|C41P|C44P|C43P|C42P|C26A|C25A|C24A
 // Gate A5-U124B
 assign #0.2  g39254 = rst ? 0 : !(0|g39251|INCSET_);
 // Gate A5-U254A
-assign #0.2  Z16_ = rst ? 0 : !(0|g39411);
+assign #0.2  Z16_ = rst ? 1 : !(0|g39411);
 // Gate A5-U246B
 assign #0.2  A55XP9 = rst ? 0 : !(0|SHIFT_|T05_);
 // Gate A5-U215B
@@ -198,7 +198,7 @@ assign #0.2  A58XP12 = rst ? 0 : !(0|DAS0_|T08_);
 // Gate A5-U107B
 assign #0.2  A58XP15 = rst ? 0 : !(0|g39209|T08_);
 // Gate A5-U260A
-assign #0.2  g39349 = rst ? 0 : !(0|S11|S12);
+assign #0.2  g39349 = rst ? 1 : !(0|S11|S12);
 // Gate A5-U140B
 assign #0.2  d3XP6 = rst ? 0 : !(0|T03_|TC0_);
 // Gate A5-U113A
@@ -300,7 +300,7 @@ assign #0.2  RL_ = rst ? 1 : !(0|g39127|g39116|A58XP12|A511XP6|g39319|g39313);
 // Gate A5-U109A A5-U211A A5-U216A
 assign #0.2  RU_ = rst ? 1 : !(0|d9XP5|g39201|g39214|g39452|g39436|g39441|g39416|d6XP8|d5XP11);
 // Gate A5-U207B
-assign #0.2  g39427 = rst ? 1 : !(0|DV1|IC14|IC13);
+assign #0.2  g39427 = rst ? 0 : !(0|DV1|IC14|IC13);
 // Gate A5-U242A
 assign #0.2  g39318 = rst ? 1 : !(0|INOUT|IC2|DV1);
 // Gate A5-U204A
@@ -387,5 +387,6 @@ assign #0.2  PTWOX = rst ? 0 : !(0|BR1_|T07_|CCS0_);
 assign #0.2  PINC = rst ? 0 : !(0|T12|PINC_);
 // Gate A5-U144A
 assign #0.2  g39131 = rst ? 0 : !(0|IC2_|T05_);
+// End of NOR gates
 
 endmodule

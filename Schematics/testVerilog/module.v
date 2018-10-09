@@ -22,5 +22,6 @@ assign FS02 = rst ? 0 : !(0|g38204|g38205);
 assign F02A = rst ? 0 : !(0|g38204|g38203);
 // Gate A1-U129B
 assign F02B = rst ? 0 : !(0|g38205|FS02);
+// End of NOR gates
 
 endmodule

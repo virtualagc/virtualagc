@@ -54,7 +54,7 @@ assign #0.2  IC12_ = rst ? 1 : !(0|MSU0|CCS0);
 // Gate A3-U117A
 assign #0.2  g30142 = rst ? 0 : !(0|g30134|SQR12);
 // Gate A3-U218B
-assign #0.2  g30315 = rst ? 1 : !(0|g30314|NEXST0);
+assign #0.2  g30315 = rst ? 0 : !(0|g30314|NEXST0);
 // Gate A3-U104B
 assign #0.2  RPTFRC = rst ? 0 : !(0|g30121);
 // Gate A3-U154A
@@ -104,7 +104,7 @@ assign #0.2  T07 = rst ? 0 : !(0|T07DC_|ODDSET_);
 // Gate A3-U224A
 assign #0.2  IC3 = rst ? 0 : !(0|IC3_);
 // Gate A3-U221A A3-U209A
-assign #0.2  IC13_ = rst ? 1 : !(0|IC11|IC6|IC7|DCS0|IC1|DCA0);
+assign #0.2  IC13_ = rst ? 0 : !(0|IC11|IC6|IC7|DCS0|IC1|DCA0);
 // Gate A3-U123A
 assign #0.2  SQR10_ = rst ? 0 : !(0|g30137);
 // Gate A3-U126A
@@ -160,7 +160,7 @@ assign #0.2  SQEXT_ = rst ? 1 : !(0|g30120);
 // Gate A3-U131A
 assign #0.2  g30024 = rst ? 0 : !(0|INKL|SQR16);
 // Gate A3-U204B
-assign #0.2  g30337 = rst ? 1 : !(0|g30335|g30336);
+assign #0.2  g30337 = rst ? 0 : !(0|g30335|g30336);
 // Gate A3-U130B
 assign #0.2  g30101 = rst ? 0 : !(0|GOJAM|MTCSAI);
 // Gate A3-U240A
@@ -236,7 +236,7 @@ assign #0.2  g30006 = rst ? 1 : !(0|g30003);
 // Gate A3-U238B
 assign #0.2  RSM3_ = rst ? 1 : !(0|RSM3);
 // Gate A3-U243B
-assign #0.2  AD0 = rst ? 0 : !(0|NEXST0_|SQ6_);
+assign #0.2  AD0 = rst ? 1 : !(0|NEXST0_|SQ6_);
 // Gate A3-U249B
 assign #0.2  AUG0_ = rst ? 1 : !(0|AUG0);
 // Gate A3-U242B
@@ -274,7 +274,7 @@ assign #0.2  MP3 = rst ? 0 : !(0|SQ7_|ST3_|SQEXT_);
 // Gate A3-U105B
 assign #0.2  g30122 = rst ? 0 : !(0|T02|g30121|STRTFC);
 // Gate A3-U203A
-assign #0.2  NEXST0 = rst ? 0 : !(0|ST0_|SQEXT);
+assign #0.2  NEXST0 = rst ? 1 : !(0|ST0_|SQEXT);
 // Gate A3-U130A
 assign #0.2  g30129 = rst ? 0 : !(0|WSQG_|WL12_);
 // Gate A3-U208B
@@ -304,11 +304,11 @@ assign #0.2  IC15 = rst ? 0 : !(0|IC15_);
 // Gate A3-U232B
 assign #0.2  IC14 = rst ? 0 : !(0|g30455);
 // Gate A3-U207A
-assign #0.2  IC13 = rst ? 0 : !(0|IC13_);
+assign #0.2  IC13 = rst ? 1 : !(0|IC13_);
 // Gate A3-U252A
 assign #0.2  IC12 = rst ? 0 : !(0|IC12_);
 // Gate A3-U223A
-assign #0.2  IC11 = rst ? 0 : !(0|ST0_|g30360|SQ6_);
+assign #0.2  IC11 = rst ? 1 : !(0|ST0_|g30360|SQ6_);
 // Gate A3-U211A
 assign #0.2  IC10 = rst ? 0 : !(0|IC10_);
 // Gate A3-U152A A3-U153A
@@ -350,11 +350,11 @@ assign #0.2  EXST0_ = rst ? 1 : !(0|g30347);
 // Gate A3-U255A
 assign #0.2  BMF0_ = rst ? 1 : !(0|BMF0);
 // Gate A3-U205B
-assign #0.2  g30336 = rst ? 0 : !(0|ST0_|QC3_);
+assign #0.2  g30336 = rst ? 1 : !(0|ST0_|QC3_);
 // Gate A3-U210B
 assign #0.2  QXCH0_ = rst ? 1 : !(0|QXCH0);
 // Gate A3-U205A A3-U204A A3-U202A
-assign #0.2  NEXST0_ = rst ? 1 : !(0|NEXST0);
+assign #0.2  NEXST0_ = rst ? 0 : !(0|NEXST0);
 // Gate A3-U206A
 assign #0.2  g30335 = rst ? 0 : !(0|QC1_|ST1_);
 // Gate A3-U151B
@@ -433,5 +433,6 @@ assign #0.2  g30020 = rst ? 1 : !(0|g30015|SQR13);
 assign #0.2  QC0_ = rst ? 1 : !(0|QC0);
 // Gate A3-U227A
 assign #0.2  TC0_ = rst ? 1 : !(0|TC0);
+// End of NOR gates
 
 endmodule

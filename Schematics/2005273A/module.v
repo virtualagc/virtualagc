@@ -65,7 +65,7 @@ assign #0.2  g49322 = rst ? 0 : !(0|g49301|g49316|g49327);
 // Gate A24-U204A
 assign #0.2  GTSET = rst ? 0 : !(0|FS06_|F05B_|g49342);
 // Gate A24-U205A
-assign #0.2  g49341 = rst ? 0 : !(0|FS08_|FS07_|FS09_);
+assign #0.2  g49341 = rst ? 1 : !(0|FS08_|FS07_|FS09_);
 // Gate A24-U250A
 assign #0.2  MRCH = rst ? 0 : !(0|RCH_);
 // Gate A24-U130A A24-U130B
@@ -75,7 +75,7 @@ assign #0.2  g49104 = rst ? 0 : !(0|A16_|g49102);
 // Gate A24-U139A
 assign #0.2  LRRST = rst ? 0 : !(0|F05B_|SB1_);
 // Gate A24-U102A
-assign #0.2  g49103 = rst ? 1 : !(0|g49101|A15_);
+assign #0.2  g49103 = rst ? 0 : !(0|g49101|A15_);
 // Gate A24-U139B
 assign #0.2  RRRST = rst ? 0 : !(0|F05B_|SB1_);
 // Gate A24-U123A A24-U123B
@@ -87,11 +87,11 @@ assign #0.2  MWCH = rst ? 0 : !(0|WCH_);
 // Gate A24-U247B
 assign #0.2  F05D = rst ? 0 : !(0|FS05_|F04B_);
 // Gate A24-U104B
-assign #0.2  g49108 = rst ? 0 : !(0|g49106|OVNHRP);
+assign #0.2  g49108 = rst ? 1 : !(0|g49106|OVNHRP);
 // Gate A24-U228A
 assign #0.2  g49304 = rst ? 0 : !(0|NOZM|F18AX);
 // Gate A24-U110A A24-U110B
-assign #0.2  HIGH0_ = rst ? 1 : !(0|g49120);
+assign #0.2  HIGH0_ = rst ? 0 : !(0|g49120);
 // Gate A24-U202B A24-U201A
 assign #0.2  GTONE = rst ? 0 : !(0|F05B_|FS06|FS07A|FS09|FS08);
 // Gate A24-U149A
@@ -133,7 +133,7 @@ assign #0.2  PIPZP = rst ? 0 : !(0|g49301|g49327|g49317);
 // Gate A24-U112A
 assign #0.2  g49123 = rst ? 0 : !(0|DKCTR4_|DKCTR5);
 // Gate A24-U253A
-assign #0.2  CNTRSB_ = rst ? 1 : !(0|SB2);
+assign #0.2  CNTRSB_ = rst ? 0 : !(0|SB2);
 // Gate A24-U154A
 assign #0.2  ELSNCN = rst ? 1 : !(0|g49248);
 // Gate A24-U154B
@@ -177,7 +177,7 @@ assign #0.2  F07D_ = rst ? 1 : !(0|g49355);
 // Gate A24-U213B
 assign #0.2  F09A_ = rst ? 1 : !(0|F09A);
 // Gate A24-U236A
-assign #0.2  IC11_ = rst ? 1 : !(0|IC11);
+assign #0.2  IC11_ = rst ? 0 : !(0|IC11);
 // Gate A24-U134A
 assign #0.2  d25KPPS = rst ? 0 : !(0|FS02|SB0_|g49221);
 // Gate A24-U224A
@@ -187,7 +187,7 @@ assign #0.2  T02_ = rst ? 1 : !(0|T02);
 // Gate A24-U215B
 assign #0.2  CA3_ = rst ? 1 : !(0|OCTAD3);
 // Gate A24-U245A A24-U245B A24-U246A A24-U246B
-assign #0.2  PHS3_ = rst ? 1 : !(0|CT);
+assign #0.2  PHS3_ = rst ? 0 : !(0|CT);
 // Gate A24-U242A A24-U242B
 assign #0.2  CHWL14_ = rst ? 1 : !(0|WL14);
 // Gate A24-U152B
@@ -197,7 +197,7 @@ assign #0.2  CHWL03_ = rst ? 1 : !(0|WL03);
 // Gate A24-U103A
 assign #0.2  g49106 = rst ? 0 : !(0|g49105|NISQ_);
 // Gate A24-U103B
-assign #0.2  g49105 = rst ? 0 : !(0|g49103|g49104);
+assign #0.2  g49105 = rst ? 1 : !(0|g49103|g49104);
 // Gate A24-U214B
 assign #0.2  g49318 = rst ? 1 : !(0|F5ASB2);
 // Gate A24-U211A
@@ -255,7 +255,7 @@ assign #0.2  g49301 = rst ? 1 : !(0|PIPGZp);
 // Gate A24-U143A A24-U144A A24-U144B
 assign #0.2  F05B_ = rst ? 1 : !(0|F05B);
 // Gate A24-U216A
-assign #0.2  g49316 = rst ? 1 : !(0|g49317|g49314);
+assign #0.2  g49316 = rst ? 0 : !(0|g49317|g49314);
 // Gate A24-U108A
 assign #0.2  g49115 = rst ? 0 : !(0|SB1_|g49113);
 // Gate A24-U234A A24-U234B A24-U235A A24-U235B A24-U236B
@@ -265,7 +265,7 @@ assign #0.2  d12KPPS = rst ? 0 : !(0|FS03|g49216|SB0_);
 // Gate A24-U111A
 assign #0.2  g49119 = rst ? 1 : !(0);
 // Gate A24-U202A
-assign #0.2  FS09_ = rst ? 1 : !(0|FS09);
+assign #0.2  FS09_ = rst ? 0 : !(0|FS09);
 // Gate A24-U121A A24-U120A A24-U119A
 assign #0.2  WCHG_ = rst ? 1 : !(0|g49136);
 // Gate A24-U152A
@@ -277,7 +277,7 @@ assign #0.2  F07C_ = rst ? 1 : !(0|g49356);
 // Gate A24-U260A A24-U260B A24-U249A A24-U249B A24-U254B A24-U256A A24-U256B A24-U252A A24-U252B
 assign #0.2  CTPLS_ = rst ? 1 : !(0|BMAGXM|BMAGXP|PIPZM|BMAGYP|BMAGYM|BMAGZP|T4P|T6P|T5P|T1P|T2P|T3P|TRNP|TRNM|SHAFTP|PIPZP|PIPYM|PIPYP|SHAFTM|PIPXP|PIPXM|CDUZM|CDUZP|CDUYM|CDUXP|CDUXM|CDUYP);
 // Gate A24-U146A
-assign #0.2  g49222 = rst ? 0 : !(0|F01A);
+assign #0.2  g49222 = rst ? 1 : !(0|F01A);
 // Gate A24-U147A
 assign #0.2  d800RST = rst ? 0 : !(0|SB1_|F07B_);
 // Gate A24-U156A A24-U156B A24-U157B
@@ -289,7 +289,7 @@ assign #0.2  g49207 = rst ? 1 : !(0|SB4);
 // Gate A24-U237B
 assign #0.2  CDUSTB_ = rst ? 0 : !(0|T06|g49412);
 // Gate A24-U115A
-assign #0.2  g49129 = rst ? 1 : !(0|DKCTR5_|DKCTR4_);
+assign #0.2  g49129 = rst ? 0 : !(0|DKCTR5_|DKCTR4_);
 // Gate A24-U126A A24-U126B
 assign #0.2  CHWL05_ = rst ? 1 : !(0|WL05);
 // Gate A24-U155B
@@ -309,7 +309,7 @@ assign #0.2  GTRST = rst ? 0 : !(0|FS06|g49342|F05B_);
 // Gate A24-U233A
 assign #0.2  FLASH_ = rst ? 1 : !(0|FLASH);
 // Gate A24-U116A A24-U117A
-assign #0.2  HIGH3_ = rst ? 0 : !(0|g49129);
+assign #0.2  HIGH3_ = rst ? 1 : !(0|g49129);
 // Gate A24-U201B
 assign #0.2  OUTCOM = rst ? 0 : !(0|FF1109_);
 // Gate A24-U101A
@@ -321,27 +321,27 @@ assign #0.2  g49355 = rst ? 0 : !(0|FS07_|F06B_);
 // Gate A24-U203A
 assign #0.2  CI = rst ? 0 : !(0|CI_);
 // Gate A24-U101B
-assign #0.2  g49101 = rst ? 0 : !(0|A16_);
+assign #0.2  g49101 = rst ? 1 : !(0|A16_);
 // Gate A24-U253B
 assign #0.2  US2SG = rst ? 0 : !(0|SUMB15_|SUMA15_|RUSG_);
 // Gate A24-U150A A24-U150B
-assign #0.2  SB2_ = rst ? 1 : !(0|SB2);
+assign #0.2  SB2_ = rst ? 0 : !(0|SB2);
 // Gate A24-U121B A24-U120B
 assign #0.2  CCHG_ = rst ? 1 : !(0|g49140);
 // Gate A24-U128A A24-U128B
 assign #0.2  CHWL07_ = rst ? 1 : !(0|WL07);
 // Gate A24-U137A
-assign #0.2  g49216 = rst ? 0 : !(0|F02B);
+assign #0.2  g49216 = rst ? 1 : !(0|F02B);
 // Gate A24-U108B
 assign #0.2  WATCH_ = rst ? 1 : !(0|WATCHP|WATCH);
 // Gate A24-U231A A24-U231B A24-U232B
 assign #0.2  F5ASB2_ = rst ? 1 : !(0|F5ASB2);
 // Gate A24-U105B
-assign #0.2  OVNHRP = rst ? 1 : !(0|g49107|g49108|MP3);
+assign #0.2  OVNHRP = rst ? 0 : !(0|g49107|g49108|MP3);
 // Gate A24-U206A
 assign #0.2  g49351 = rst ? 0 : !(0|F08B_);
 // Gate A24-U205B
-assign #0.2  g49342 = rst ? 1 : !(0|g49341);
+assign #0.2  g49342 = rst ? 0 : !(0|g49341);
 // Gate A24-U107A
 assign #0.2  WATCHP = rst ? 0 : !(0|g49113|SB2_|g49112);
 // Gate A24-U232A
@@ -349,7 +349,7 @@ assign #0.2  ONE = rst ? 1 : !(0);
 // Gate A24-U136B
 assign #0.2  NISQ = rst ? 0 : !(0|NISQ_);
 // Gate A24-U216B
-assign #0.2  g49317 = rst ? 0 : !(0|g49315|g49316);
+assign #0.2  g49317 = rst ? 1 : !(0|g49315|g49316);
 // Gate A24-U241A A24-U241B
 assign #0.2  CHWL13_ = rst ? 1 : !(0|WL13);
 // Gate A24-U118A
@@ -359,7 +359,7 @@ assign #0.2  CHWL06_ = rst ? 1 : !(0|WL06);
 // Gate A24-U135B
 assign #0.2  MNISQ = rst ? 0 : !(0|NISQ_);
 // Gate A24-U206B
-assign #0.2  F09D = rst ? 0 : !(0|g49351|FS09_);
+assign #0.2  F09D = rst ? 1 : !(0|g49351|FS09_);
 // Gate A24-U219A
 assign #0.2  g49310 = rst ? 0 : !(0|g49302|g49328|g49317);
 // Gate A24-U226A
@@ -371,10 +371,11 @@ assign #0.2  CHWL16_ = rst ? 1 : !(0|WL16);
 // Gate A24-U109B
 assign #0.2  WATCH = rst ? 0 : !(0|WATCH_|g49115);
 // Gate A24-U109A
-assign #0.2  g49120 = rst ? 0 : !(0|DKCTR5|DKCTR4);
+assign #0.2  g49120 = rst ? 1 : !(0|DKCTR5|DKCTR4);
 // Gate A24-U119B
 assign #0.2  g49140 = rst ? 0 : !(0|CT_|WCH_);
 // Gate A24-U134B
 assign #0.2  g49221 = rst ? 1 : !(0|F01B);
+// End of NOR gates
 
 endmodule

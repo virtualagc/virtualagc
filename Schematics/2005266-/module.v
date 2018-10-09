@@ -467,5 +467,6 @@ assign #0.2  RCH12_ = rst ? 1 : !(0|g43355);
 assign #0.2  g43204 = rst ? 0 : !(0|RCH06_|g43202);
 // Gate A16-U155B
 assign #0.2  g43151 = rst ? 0 : !(0|XB5_|XT0_|WCHG_);
+// End of NOR gates
 
 endmodule

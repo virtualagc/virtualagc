@@ -30,17 +30,17 @@ assign #0.2  DKDATA = rst ? 0 : !(0|DKDAT_|RDOUT_|BSYNC_);
 // Gate A22-U147A
 assign #0.2  DKDATB = rst ? 0 : !(0|BSYNC_|RDOUT_|DKDAT_);
 // Gate A22-U130A
-assign #0.2  DKCTR5 = rst ? 1 : !(0|DKCTR5_|g47140);
+assign #0.2  DKCTR5 = rst ? 0 : !(0|DKCTR5_|g47140);
 // Gate A22-U112B
-assign #0.2  DKCTR2 = rst ? 0 : !(0|g47122);
+assign #0.2  DKCTR2 = rst ? 1 : !(0|g47122);
 // Gate A22-U124B
-assign #0.2  DKCTR3 = rst ? 1 : !(0|g47130);
+assign #0.2  DKCTR3 = rst ? 0 : !(0|g47130);
 // Gate A22-U139A
 assign #0.2  LOW6_ = rst ? 1 : !(0|g47240);
 // Gate A22-U108B
 assign #0.2  DKCTR1 = rst ? 0 : !(0|g47114);
 // Gate A22-U127A
-assign #0.2  DKCTR4 = rst ? 1 : !(0|DKCTR4_|g47134);
+assign #0.2  DKCTR4 = rst ? 0 : !(0|DKCTR4_|g47134);
 // Gate A22-U237A
 assign #0.2  g47457 = rst ? 1 : !(0|g47456|g47458);
 // Gate A22-U126B
@@ -50,11 +50,11 @@ assign #0.2  g47458 = rst ? 0 : !(0|CCH35|g47457);
 // Gate A22-U136A
 assign #0.2  g47248 = rst ? 1 : !(0|g47245|g47249);
 // Gate A22-U125B
-assign #0.2  g47134 = rst ? 0 : !(0|g47135|g47128|g47133);
+assign #0.2  g47134 = rst ? 1 : !(0|g47135|g47128|g47133);
 // Gate A22-U126A
 assign #0.2  g47136 = rst ? 0 : !(0|DKCTR4_|g47135);
 // Gate A22-U125A
-assign #0.2  g47135 = rst ? 1 : !(0|g47134|g47136|g47128);
+assign #0.2  g47135 = rst ? 0 : !(0|g47134|g47136|g47128);
 // Gate A22-U136B
 assign #0.2  g47246 = rst ? 1 : !(0|g47247|g47244);
 // Gate A22-U219A
@@ -66,7 +66,7 @@ assign #0.2  g47341 = rst ? 0 : !(0|CCH34|g47340);
 // Gate A22-U246A
 assign #0.2  g47440 = rst ? 1 : !(0|g47439|g47441);
 // Gate A22-U118B
-assign #0.2  WDORDR = rst ? 0 : !(0|g47147|g47153);
+assign #0.2  WDORDR = rst ? 1 : !(0|g47147|g47153);
 // Gate A22-U210B
 assign #0.2  g47342 = rst ? 0 : !(0|HIGH1_|LOW0_|g47340);
 // Gate A22-U259B
@@ -158,7 +158,7 @@ assign #0.2  g47339 = rst ? 0 : !(0|WCH34_|CHWL07_);
 // Gate A22-U240A
 assign #0.2  g47454 = rst ? 0 : !(0|CCH35|g47453);
 // Gate A22-U124A
-assign #0.2  DKCTR3_ = rst ? 0 : !(0|g47129);
+assign #0.2  DKCTR3_ = rst ? 1 : !(0|g47129);
 // Gate A22-U132B A22-U133B A22-U220A A22-U220B A22-U241A A22-U241B A22-U254A A22-U254B A22-U207A A22-U207B
 assign #0.2  DATA_ = rst ? 1 : !(0|g47251|g47250|WRD2B2|WRD1BP|WRD2B3|WRD1B1|g47312|g47316|g47320|g47325|g47329|g47333|g47451|g47446|g47442|g47455|g47459|g47412|g47429|g47438|g47433|g47416|g47420|g47425|g47351|g47355|g47359|g47342|g47347|g47338);
 // Gate A22-U250B
@@ -170,7 +170,7 @@ assign #0.2  d16CNT = rst ? 0 : !(0|g47140|DKCTR5);
 // Gate A22-U251B
 assign #0.2  g47433 = rst ? 0 : !(0|LOW4_|HIGH2_|g47431);
 // Gate A22-U141B
-assign #0.2  g47236 = rst ? 1 : !(0|DKCTR3_|DKCTR2|DKCTR1);
+assign #0.2  g47236 = rst ? 0 : !(0|DKCTR3_|DKCTR2|DKCTR1);
 // Gate A22-U209A
 assign #0.2  g47345 = rst ? 1 : !(0|g47344|g47346);
 // Gate A22-U221A
@@ -198,7 +198,7 @@ assign #0.2  g47333 = rst ? 0 : !(0|HIGH0_|LOW6_|g47331);
 // Gate A22-U204B
 assign #0.2  g47355 = rst ? 0 : !(0|HIGH1_|LOW3_|g47353);
 // Gate A22-U141A
-assign #0.2  LOW4_ = rst ? 0 : !(0|g47236);
+assign #0.2  LOW4_ = rst ? 1 : !(0|g47236);
 // Gate A22-U216B
 assign #0.2  g47326 = rst ? 0 : !(0|WCH34_|CHWL10_);
 // Gate A22-U216A
@@ -222,7 +222,7 @@ assign #0.2  g47422 = rst ? 0 : !(0|CHWL13_|WCH35_);
 // Gate A22-U226B
 assign #0.2  g47312 = rst ? 0 : !(0|HIGH1_|LOW5_|g47310);
 // Gate A22-U112A
-assign #0.2  DKCTR2_ = rst ? 1 : !(0|g47121);
+assign #0.2  DKCTR2_ = rst ? 0 : !(0|g47121);
 // Gate A22-U214A
 assign #0.2  g47331 = rst ? 1 : !(0|g47330|g47332);
 // Gate A22-U215A
@@ -252,13 +252,13 @@ assign #0.2  g47104 = rst ? 0 : !(0|END|RDOUT_);
 // Gate A22-U135B
 assign #0.2  g47247 = rst ? 0 : !(0|g47246|CCH34);
 // Gate A22-U123B
-assign #0.2  g47130 = rst ? 0 : !(0|g47127|DLKCLR|g47129);
+assign #0.2  g47130 = rst ? 1 : !(0|g47127|DLKCLR|g47129);
 // Gate A22-U143A
-assign #0.2  LOW2_ = rst ? 1 : !(0|g47232);
+assign #0.2  LOW2_ = rst ? 0 : !(0|g47232);
 // Gate A22-U135A
 assign #0.2  g47249 = rst ? 0 : !(0|g47248|CCH34);
 // Gate A22-U123A
-assign #0.2  g47129 = rst ? 1 : !(0|g47130|g47126);
+assign #0.2  g47129 = rst ? 0 : !(0|g47130|g47126);
 // Gate A22-U153B
 assign #0.2  g47218 = rst ? 0 : !(0|XB4_|CCHG_|XT1_);
 // Gate A22-U139B
@@ -268,7 +268,7 @@ assign #0.2  RCH13_ = rst ? 1 : !(0|g47210);
 // Gate A22-U255B
 assign #0.2  g47425 = rst ? 0 : !(0|LOW2_|HIGH2_|g47423);
 // Gate A22-U130B
-assign #0.2  DKCTR5_ = rst ? 0 : !(0|DLKCLR|g47141|DKCTR5);
+assign #0.2  DKCTR5_ = rst ? 1 : !(0|DLKCLR|g47141|DKCTR5);
 // Gate A22-U257B
 assign #0.2  g47420 = rst ? 0 : !(0|LOW1_|HIGH2_|g47418);
 // Gate A22-U208B
@@ -300,9 +300,9 @@ assign #0.2  g47117 = rst ? 0 : !(0|g47118|g47121);
 // Gate A22-U240B
 assign #0.2  g47455 = rst ? 0 : !(0|LOW1_|HIGH3_|g47453);
 // Gate A22-U109A
-assign #0.2  g47119 = rst ? 0 : !(0|g47118|g47120|g47112);
+assign #0.2  g47119 = rst ? 1 : !(0|g47118|g47120|g47112);
 // Gate A22-U109B
-assign #0.2  g47118 = rst ? 1 : !(0|g47119|g47112|g47117);
+assign #0.2  g47118 = rst ? 0 : !(0|g47119|g47112|g47117);
 // Gate A22-U110A
 assign #0.2  g47120 = rst ? 0 : !(0|g47122|g47119);
 // Gate A22-U152A A22-U152B A22-U151A
@@ -318,7 +318,7 @@ assign #0.2  g47439 = rst ? 0 : !(0|CHWL09_|WCH35_);
 // Gate A22-U214B
 assign #0.2  g47330 = rst ? 0 : !(0|CHWL09_|WCH34_);
 // Gate A22-U127B
-assign #0.2  DKCTR4_ = rst ? 0 : !(0|g47135|DLKCLR|DKCTR4);
+assign #0.2  DKCTR4_ = rst ? 1 : !(0|g47135|DLKCLR|DKCTR4);
 // Gate A22-U119B
 assign #0.2  g47156 = rst ? 1 : !(0|g47155|g47157);
 // Gate A22-U119A
@@ -352,7 +352,7 @@ assign #0.2  g47411 = rst ? 0 : !(0|CCH35|g47410);
 // Gate A22-U235A
 assign #0.2  g47410 = rst ? 1 : !(0|g47409|g47411);
 // Gate A22-U111B
-assign #0.2  g47122 = rst ? 1 : !(0|g47119|DLKCLR|g47121);
+assign #0.2  g47122 = rst ? 0 : !(0|g47119|DLKCLR|g47121);
 // Gate A22-U260B
 assign #0.2  g47413 = rst ? 0 : !(0|CHWL16_|WCH35_);
 // Gate A22-U248B
@@ -362,7 +362,7 @@ assign #0.2  g47437 = rst ? 0 : !(0|CCH35|g47436);
 // Gate A22-U211A
 assign #0.2  g47340 = rst ? 1 : !(0|g47339|g47341);
 // Gate A22-U111A
-assign #0.2  g47121 = rst ? 0 : !(0|g47122|g47118);
+assign #0.2  g47121 = rst ? 1 : !(0|g47122|g47118);
 // Gate A22-U140A
 assign #0.2  LOW5_ = rst ? 1 : !(0|g47238);
 // Gate A22-U144B
@@ -372,7 +372,7 @@ assign #0.2  g47335 = rst ? 0 : !(0|WCH34_|CHWL08_);
 // Gate A22-U145A
 assign #0.2  LOW0_ = rst ? 1 : !(0|g47228);
 // Gate A22-U143B
-assign #0.2  g47232 = rst ? 0 : !(0|DKCTR2_|DKCTR1|DKCTR3);
+assign #0.2  g47232 = rst ? 1 : !(0|DKCTR2_|DKCTR1|DKCTR3);
 // Gate A22-U144A
 assign #0.2  LOW1_ = rst ? 1 : !(0|g47230);
 // Gate A22-U227A
@@ -392,7 +392,7 @@ assign #0.2  CH1307 = rst ? 0 : !(0|g47156|RCH13_);
 // Gate A22-U249B
 assign #0.2  g47438 = rst ? 0 : !(0|LOW5_|HIGH2_|g47436);
 // Gate A22-U147B
-assign #0.2  FS13_ = rst ? 0 : !(0|FS13);
+assign #0.2  FS13_ = rst ? 1 : !(0|FS13);
 // Gate A22-U259A
 assign #0.2  g47415 = rst ? 0 : !(0|CCH35|g47614);
 // Gate A22-U260A
@@ -410,17 +410,17 @@ assign #0.2  LOW3_ = rst ? 1 : !(0|g47234);
 // Gate A22-U228B
 assign #0.2  WRD1B1 = rst ? 0 : !(0|HIGH1_|LOW6_|g47306);
 // Gate A22-U121B
-assign #0.2  g47126 = rst ? 0 : !(0|g47127|g47120|g47125);
+assign #0.2  g47126 = rst ? 1 : !(0|g47127|g47120|g47125);
 // Gate A22-U122A
 assign #0.2  g47128 = rst ? 0 : !(0|g47130|g47127);
 // Gate A22-U121A
-assign #0.2  g47127 = rst ? 1 : !(0|g47126|g47128|g47120);
+assign #0.2  g47127 = rst ? 0 : !(0|g47126|g47128|g47120);
 // Gate A22-U221B
 assign #0.2  g47317 = rst ? 0 : !(0|WCH34_|CHWL12_);
 // Gate A22-U218B
 assign #0.2  g47322 = rst ? 0 : !(0|WCH34_|CHWL11_);
 // Gate A22-U118A
-assign #0.2  g47153 = rst ? 1 : !(0|DLKCLR|WDORDR);
+assign #0.2  g47153 = rst ? 0 : !(0|DLKCLR|WDORDR);
 // Gate A22-U107B
 assign #0.2  g47114 = rst ? 1 : !(0|g47111|DLKCLR|g47113);
 // Gate A22-U258B
@@ -428,9 +428,9 @@ assign #0.2  g47417 = rst ? 0 : !(0|CHWL14_|WCH35_);
 // Gate A22-U225A
 assign #0.2  g47310 = rst ? 1 : !(0|g47309|g47311);
 // Gate A22-U128B
-assign #0.2  g47140 = rst ? 0 : !(0|g47141|g47136|d16CNT);
+assign #0.2  g47140 = rst ? 1 : !(0|g47141|g47136|d16CNT);
 // Gate A22-U128A
-assign #0.2  g47141 = rst ? 1 : !(0|g47140|d32CNT|g47136);
+assign #0.2  g47141 = rst ? 0 : !(0|g47140|d32CNT|g47136);
 // Gate A22-U225B
 assign #0.2  g47309 = rst ? 0 : !(0|WCH34_|CHWL02_);
 // Gate A22-U107A
@@ -457,5 +457,6 @@ assign #0.2  g47349 = rst ? 1 : !(0|g47348|g47350);
 assign #0.2  g47429 = rst ? 0 : !(0|LOW3_|HIGH2_|g47427);
 // Gate A22-U137B
 assign #0.2  g47244 = rst ? 0 : !(0|CHWL16_|WCH34_);
+// End of NOR gates
 
 endmodule

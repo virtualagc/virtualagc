@@ -444,5 +444,6 @@ assign #0.2  g44410 = rst ? 0 : !(0|g44408|RCH10_);
 assign #0.2  CH3313 = rst ? 0 : !(0|RCH33_|PIPAFL);
 // Gate A17-U216A
 assign #0.2  g44328 = rst ? 0 : !(0|g44326|RCH10_);
+// End of NOR gates
 
 endmodule

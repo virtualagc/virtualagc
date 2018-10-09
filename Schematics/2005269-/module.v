@@ -100,11 +100,11 @@ assign #0.2  G16SW_ = rst ? 1 : !(0|g41129|g41130);
 // Gate A13-U141B
 assign #0.2  OSCALM = rst ? 1 : !(0|g41232|CCH33);
 // Gate A13-U139B
-assign #0.2  SBYEXT = rst ? 1 : !(0|g41234);
+assign #0.2  SBYEXT = rst ? 0 : !(0|g41234);
 // Gate A13-U153B
 assign #0.2  g41215 = rst ? 0 : !(0|g41214|F08B);
 // Gate A13-U107B
-assign #0.2  g41149 = rst ? 1 : !(0|g41148|g41150);
+assign #0.2  g41149 = rst ? 0 : !(0|g41148|g41150);
 // Gate A13-U120B
 assign #0.2  g41126 = rst ? 0 : !(0|F10A_|g41124);
 // Gate A13-U106A
@@ -128,15 +128,15 @@ assign #0.2  MWARNF_ = rst ? 1 : !(0|FLTOUT);
 // Gate A13-U141A
 assign #0.2  g41232 = rst ? 0 : !(0|STRT2|OSCALM);
 // Gate A13-U106B
-assign #0.2  g41150 = rst ? 0 : !(0|F07A|g41149);
+assign #0.2  g41150 = rst ? 1 : !(0|F07A|g41149);
 // Gate A13-U114A A13-U114B
-assign #0.2  XT0_ = rst ? 1 : !(0|XT0);
+assign #0.2  XT0_ = rst ? 0 : !(0|XT0);
 // Gate A13-U107A
 assign #0.2  g41141 = rst ? 1 : !(0|g41140|g41142);
 // Gate A13-U103B A13-U113A A13-U113B A13-U108A A13-U108B
 assign #0.2  CTPLS_ = rst ? 1 : !(0|CDUXD|CDUYD|CDUZD|SHAFTD|TRUND|THRSTD|ALTM|OTLNKM|EMSD|RNRADM|GYROD|RNRADP|INLNKM|BMAGZM|INLNKP);
 // Gate A13-U111B
-assign #0.2  g41138 = rst ? 0 : !(0|g41139|g41137);
+assign #0.2  g41138 = rst ? 1 : !(0|g41139|g41137);
 // Gate A13-U127B
 assign #0.2  MPIPAL_ = rst ? 0 : !(0|PIPAFL);
 // Gate A13-U105B
@@ -162,7 +162,7 @@ assign #0.2  g41111 = rst ? 1 : !(0|F14H);
 // Gate A13-U146B
 assign #0.2  g41224 = rst ? 1 : !(0|SCAFAL|FLTOUT);
 // Gate A13-U139A
-assign #0.2  g41235 = rst ? 1 : !(0|g41234|T10);
+assign #0.2  g41235 = rst ? 0 : !(0|g41234|T10);
 // Gate A13-U124A
 assign #0.2  g41110 = rst ? 1 : !(0|g41109|F14B);
 // Gate A13-U157B
@@ -172,13 +172,13 @@ assign #0.2  g41148 = rst ? 0 : !(0|T03_|INKL|CTROR);
 // Gate A13-U109A
 assign #0.2  g41140 = rst ? 0 : !(0|T09_|g41138|NOTEST);
 // Gate A13-U138B
-assign #0.2  g41238 = rst ? 0 : !(0|ERRST|g41237|SBYEXT);
+assign #0.2  g41238 = rst ? 1 : !(0|ERRST|g41237|SBYEXT);
 // Gate A13-U137A
-assign #0.2  g41239 = rst ? 1 : !(0|g41238|ALTEST);
+assign #0.2  g41239 = rst ? 0 : !(0|g41238|ALTEST);
 // Gate A13-U152A
 assign #0.2  STRT1 = rst ? 0 : !(0|g41245|g41247);
 // Gate A13-U111A
-assign #0.2  g41139 = rst ? 1 : !(0|g41138|INKL);
+assign #0.2  g41139 = rst ? 0 : !(0|g41138|INKL);
 // Gate A13-U147A
 assign #0.2  MSCAFL_ = rst ? 1 : !(0|SCAFAL);
 // Gate A13-U151B
@@ -200,18 +200,19 @@ assign #0.2  MCTRAL_ = rst ? 1 : !(0|g41143|g41151);
 // Gate A13-U119B
 assign #0.2  g41124 = rst ? 0 : !(0|F10B|g41123);
 // Gate A13-U140A
-assign #0.2  g41234 = rst ? 0 : !(0|g41235|SBY);
+assign #0.2  g41234 = rst ? 1 : !(0|g41235|SBY);
 // Gate A13-U119A
 assign #0.2  g41122 = rst ? 1 : !(0|g41121|F10B);
 // Gate A13-U118A
 assign #0.2  g41121 = rst ? 0 : !(0|g41122|TCF0|TC0);
 // Gate A13-U137B
-assign #0.2  RESTRT = rst ? 0 : !(0|g41239);
+assign #0.2  RESTRT = rst ? 1 : !(0|g41239);
 // Gate A13-U129B
 assign #0.2  g41101 = rst ? 1 : !(0|MSTRT);
 // Gate A13-U128A
 assign #0.2  g41102 = rst ? 0 : !(0|F05B_|g41101);
 // Gate A13-U118B
 assign #0.2  g41123 = rst ? 1 : !(0|g41120|g41124);
+// End of NOR gates
 
 endmodule

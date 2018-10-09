@@ -44,15 +44,15 @@ assign #0.2  g42126 = rst ? 0 : !(0|T08|GOJAM|g42127);
 // Gate A14-U222A
 assign #0.2  XB2E = rst ? 0 : !(0|XB2_);
 // Gate A14-U243B
-assign #0.2  g42441 = rst ? 0 : !(0|XB6|XB5);
+assign #0.2  g42441 = rst ? 1 : !(0|XB6|XB5);
 // Gate A14-U146B
 assign #0.2  g42129 = rst ? 0 : !(0|S08|g42127|S09);
 // Gate A14-U235A A14-U236A
 assign #0.2  RSCG_ = rst ? 1 : !(0|g42448);
 // Gate A14-U103B A14-U109A A14-U102B
-assign #0.2  ERAS = rst ? 0 : !(0|S12|S11|TCSAJ3|MAMU|MP1|INOUT|GOJ1|CHINC);
+assign #0.2  ERAS = rst ? 1 : !(0|S12|S11|TCSAJ3|MAMU|MP1|INOUT|GOJ1|CHINC);
 // Gate A14-U217A A14-U215A A14-U218B
-assign #0.2  XB5_ = rst ? 0 : !(0|XB5);
+assign #0.2  XB5_ = rst ? 1 : !(0|XB5);
 // Gate A14-U223B A14-U224A A14-U224B
 assign #0.2  XB2_ = rst ? 1 : !(0|XB2);
 // Gate A14-U255B
@@ -64,13 +64,13 @@ assign #0.2  ILP_ = rst ? 1 : !(0|g42443);
 // Gate A14-U138A
 assign #0.2  g42144 = rst ? 0 : !(0|ROP_|T02_);
 // Gate A14-U104A A14-U104B
-assign #0.2  ERAS_ = rst ? 1 : !(0|ERAS);
+assign #0.2  ERAS_ = rst ? 0 : !(0|ERAS);
 // Gate A14-U121B
 assign #0.2  g42218 = rst ? 0 : !(0|g42215|TIMR|RSTK_);
 // Gate A14-U117A
 assign #0.2  g42227 = rst ? 0 : !(0|T03_|ERAS_);
 // Gate A14-U258A
-assign #0.2  XT0E = rst ? 0 : !(0|XT0_);
+assign #0.2  XT0E = rst ? 1 : !(0|XT0_);
 // Gate A14-U123A
 assign #0.2  g42215 = rst ? 0 : !(0|PHS4_|T02_);
 // Gate A14-U127A
@@ -112,7 +112,7 @@ assign #0.2  XB7 = rst ? 0 : !(0|S03_|S02_|S01_);
 // Gate A14-U215B
 assign #0.2  XB6 = rst ? 0 : !(0|S02_|S03_|S01);
 // Gate A14-U228B
-assign #0.2  XB1 = rst ? 0 : !(0|S01_|S02|S03);
+assign #0.2  XB1 = rst ? 1 : !(0|S01_|S02|S03);
 // Gate A14-U230B
 assign #0.2  XB0 = rst ? 0 : !(0|S03|S02|S01);
 // Gate A14-U223A
@@ -120,17 +120,17 @@ assign #0.2  XB3 = rst ? 0 : !(0|S03|S01_|S02_);
 // Gate A14-U116B
 assign #0.2  g42228 = rst ? 1 : !(0|g42229|g42227);
 // Gate A14-U246B
-assign #0.2  XT7E = rst ? 1 : !(0|XT7_);
+assign #0.2  XT7E = rst ? 0 : !(0|XT7_);
 // Gate A14-U245A
-assign #0.2  XT7_ = rst ? 0 : !(0|XT7);
+assign #0.2  XT7_ = rst ? 1 : !(0|XT7);
 // Gate A14-U113A
 assign #0.2  g42235 = rst ? 0 : !(0|GOJAM|g42234|REDRST);
 // Gate A14-U205A
-assign #0.2  RILP1 = rst ? 0 : !(0|YB0|YB3);
+assign #0.2  RILP1 = rst ? 1 : !(0|YB0|YB3);
 // Gate A14-U115A
 assign #0.2  g42233 = rst ? 0 : !(0|PHS3_|ERAS_|T03_);
 // Gate A14-U137A
-assign #0.2  g42147 = rst ? 1 : !(0|ROP_);
+assign #0.2  g42147 = rst ? 0 : !(0|ROP_);
 // Gate A14-U227B
 assign #0.2  XB0E = rst ? 0 : !(0|XB0_);
 // Gate A14-U229A A14-U229B A14-U228A A14-U230A
@@ -140,7 +140,7 @@ assign #0.2  g42234 = rst ? 1 : !(0|g42235|g42233);
 // Gate A14-U112A
 assign #0.2  g42238 = rst ? 1 : !(0|g42239|g42240);
 // Gate A14-U242A
-assign #0.2  g43437 = rst ? 1 : !(0|RILP1|g42442|g42435);
+assign #0.2  g43437 = rst ? 0 : !(0|RILP1|g42442|g42435);
 // Gate A14-U244A
 assign #0.2  g42436 = rst ? 0 : !(0|g42441|RILP1|g42433);
 // Gate A14-U225A
@@ -150,7 +150,7 @@ assign #0.2  g42136 = rst ? 1 : !(0|g42135|CLEARC);
 // Gate A14-U237A
 assign #0.2  g42445 = rst ? 1 : !(0|g42443);
 // Gate A14-U205B
-assign #0.2  YB2_ = rst ? 1 : !(0|YB2);
+assign #0.2  YB2_ = rst ? 0 : !(0|YB2);
 // Gate A14-U142B
 assign #0.2  g42137 = rst ? 0 : !(0|g42127|S09_|S08_);
 // Gate A14-U222B
@@ -160,7 +160,7 @@ assign #0.2  g42138 = rst ? 1 : !(0|g42137|CLEARD);
 // Gate A14-U256A A14-U255A
 assign #0.2  XT2_ = rst ? 1 : !(0|XT2);
 // Gate A14-U160A A14-U160B
-assign #0.2  ROP_ = rst ? 0 : !(0|S12|S11);
+assign #0.2  ROP_ = rst ? 1 : !(0|S12|S11);
 // Gate A14-U155B
 assign #0.2  g42111 = rst ? 0 : !(0|g42112|g42110|TIMR);
 // Gate A14-U254A
@@ -168,9 +168,9 @@ assign #0.2  XT2E = rst ? 0 : !(0|XT2_);
 // Gate A14-U254B
 assign #0.2  XT3E = rst ? 0 : !(0|XT3_);
 // Gate A14-U203B
-assign #0.2  YB2E = rst ? 0 : !(0|YB2_);
+assign #0.2  YB2E = rst ? 1 : !(0|YB2_);
 // Gate A14-U247B
-assign #0.2  XT7 = rst ? 1 : !(0|S04_|S06_|S05_);
+assign #0.2  XT7 = rst ? 0 : !(0|S04_|S06_|S05_);
 // Gate A14-U245B
 assign #0.2  WL16_ = rst ? 1 : !(0|WL16);
 // Gate A14-U110A
@@ -202,19 +202,19 @@ assign #0.2  SETEK = rst ? 0 : !(0|MYCLMP|g42228);
 // Gate A14-U204A
 assign #0.2  YB3_ = rst ? 1 : !(0|YB3);
 // Gate A14-U209A
-assign #0.2  YB0 = rst ? 1 : !(0|S07|S08);
+assign #0.2  YB0 = rst ? 0 : !(0|S07|S08);
 // Gate A14-U206A
 assign #0.2  YB1 = rst ? 0 : !(0|S07_|S08);
 // Gate A14-U206B
-assign #0.2  YB2 = rst ? 0 : !(0|S07|S08_);
+assign #0.2  YB2 = rst ? 1 : !(0|S07|S08_);
 // Gate A14-U243A A14-U244B
-assign #0.2  g42433 = rst ? 1 : !(0|XT6|XT5|XT0|XT3);
+assign #0.2  g42433 = rst ? 0 : !(0|XT6|XT5|XT0|XT3);
 // Gate A14-U146A
 assign #0.2  g42128 = rst ? 0 : !(0|PHS3_|T05_|ROP_);
 // Gate A14-U232B
 assign #0.2  BR12B_ = rst ? 1 : !(0|BR12B);
 // Gate A14-U226A A14-U226B A14-U225B
-assign #0.2  XB1_ = rst ? 1 : !(0|XB1);
+assign #0.2  XB1_ = rst ? 0 : !(0|XB1);
 // Gate A14-U203A
 assign #0.2  YB3E = rst ? 0 : !(0|YB3_);
 // Gate A14-U111A
@@ -250,7 +250,7 @@ assign #0.2  XT2 = rst ? 0 : !(0|S05_|S06|S04);
 // Gate A14-U259A
 assign #0.2  XT1 = rst ? 0 : !(0|S05|S06|S04_);
 // Gate A14-U202B
-assign #0.2  RILP1_ = rst ? 1 : !(0|RILP1);
+assign #0.2  RILP1_ = rst ? 0 : !(0|RILP1);
 // Gate A14-U133A
 assign #0.2  WHOMPA = rst ? 0 : !(0|WHOMP_);
 // Gate A14-U123B
@@ -260,13 +260,13 @@ assign #0.2  g42103 = rst ? 0 : !(0|PHS3_|T08_);
 // Gate A14-U121A
 assign #0.2  RSTK_ = rst ? 1 : !(0|g42216|g42218);
 // Gate A14-U218A
-assign #0.2  XB5 = rst ? 1 : !(0|S02|S01_|S03_);
+assign #0.2  XB5 = rst ? 0 : !(0|S02|S01_|S03_);
 // Gate A14-U212B
 assign #0.2  XB7E = rst ? 0 : !(0|XB7_);
 // Gate A14-U252B A14-U251A
 assign #0.2  XT4_ = rst ? 1 : !(0|XT4);
 // Gate A14-U231A
-assign #0.2  CXB1_ = rst ? 1 : !(0|XB1);
+assign #0.2  CXB1_ = rst ? 0 : !(0|XB1);
 // Gate A14-U231B
 assign #0.2  NOTEST = rst ? 1 : !(0|NOTEST_);
 // Gate A14-U122A
@@ -280,7 +280,7 @@ assign #0.2  g42154 = rst ? 0 : !(0|ROP_|T10_);
 // Gate A14-U133B
 assign #0.2  g42156 = rst ? 0 : !(0|g42155|GOJAM|T03);
 // Gate A14-U260A A14-U259B
-assign #0.2  XT0_ = rst ? 1 : !(0|XT0);
+assign #0.2  XT0_ = rst ? 0 : !(0|XT0);
 // Gate A14-U125A
 assign #0.2  g42211 = rst ? 0 : !(0|T10|g42212);
 // Gate A14-U125B
@@ -316,7 +316,7 @@ assign #0.2  XT3_ = rst ? 1 : !(0|g42413);
 // Gate A14-U108B
 assign #0.2  g42243 = rst ? 1 : !(0|g42242|T06);
 // Gate A14-U240A
-assign #0.2  g42435 = rst ? 0 : !(0|g42433);
+assign #0.2  g42435 = rst ? 1 : !(0|g42433);
 // Gate A14-U241A
 assign #0.2  g42440 = rst ? 1 : !(0|XB3|XB0);
 // Gate A14-U150B
@@ -336,7 +336,7 @@ assign #0.2  g42242 = rst ? 0 : !(0|g42243|g42244);
 // Gate A14-U208A
 assign #0.2  YB1E = rst ? 0 : !(0|YB1_);
 // Gate A14-U216B
-assign #0.2  XB5E = rst ? 1 : !(0|XB5_);
+assign #0.2  XB5E = rst ? 0 : !(0|XB5_);
 // Gate A14-U204B
 assign #0.2  YB3 = rst ? 0 : !(0|S08_|S07_);
 // Gate A14-U110B
@@ -376,9 +376,9 @@ assign #0.2  SETAB_ = rst ? 1 : !(0|g42114);
 // Gate A14-U234A
 assign #0.2  g42448 = rst ? 0 : !(0|RSC_|SCAD_|RT_);
 // Gate A14-U208B
-assign #0.2  YB0E = rst ? 1 : !(0|YB0_);
+assign #0.2  YB0E = rst ? 0 : !(0|YB0_);
 // Gate A14-U260B
-assign #0.2  XT0 = rst ? 0 : !(0|S04|S06|S05);
+assign #0.2  XT0 = rst ? 1 : !(0|S04|S06|S05);
 // Gate A14-U154B
 assign #0.2  g42113 = rst ? 0 : !(0|ROP_|PHS4_|T10_);
 // Gate A14-U118A
@@ -386,13 +386,13 @@ assign #0.2  FNERAS_ = rst ? 1 : !(0|g42224|g42226);
 // Gate A14-U107A A14-U105A
 assign #0.2  TPGE = rst ? 0 : !(0|SCAD|GOJAM|ERAS_|PHS3_|T05_);
 // Gate A14-U227A
-assign #0.2  XB1E = rst ? 0 : !(0|XB1_);
+assign #0.2  XB1E = rst ? 1 : !(0|XB1_);
 // Gate A14-U139B A14-U140A A14-U140B
 assign #0.2  TPGF = rst ? 0 : !(0|T08_|DV3764|ROP_|TCSAJ3|GOJAM|GOJ1|PHS2_|MP1);
 // Gate A14-U158B
 assign #0.2  g42105 = rst ? 0 : !(0|g42104|T09|GOJAM);
 // Gate A14-U209B
-assign #0.2  YB0_ = rst ? 0 : !(0|YB0);
+assign #0.2  YB0_ = rst ? 1 : !(0|YB0);
 // Gate A14-U159A
 assign #0.2  g42104 = rst ? 1 : !(0|g42103|g42105);
 // Gate A14-U249B
@@ -416,8 +416,9 @@ assign #0.2  g42210 = rst ? 0 : !(0|g42204|g42209|TIMR);
 // Gate A14-U250B
 assign #0.2  XT5_ = rst ? 1 : !(0|XT5);
 // Gate A14-U242B
-assign #0.2  g42438 = rst ? 0 : !(0|g42442|g42433|RILP1_);
+assign #0.2  g42438 = rst ? 1 : !(0|g42442|g42433|RILP1_);
 // Gate A14-U216A
 assign #0.2  XB4E = rst ? 0 : !(0|XB4_);
+// End of NOR gates
 
 endmodule
