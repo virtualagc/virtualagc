@@ -112,6 +112,69 @@ import os
 error = False
 gateLocations = {}
 
+# Hard-coded info about components from our custom symbol libraries.  It would probably be
+# niftier to read the symbol libraries to deduce this info.  Entry 0 in these arrays is
+# unused, since there is no pin 0 in the parts.  In the pinTypesXXX arrays, the following
+# codes are used:
+#	"N"	No connect, not applicable, not used, ...
+#	"I"	Input
+#	"O"	Output
+#	"B"	Bidirectional
+#	"T"	Tristate output
+#	"P"	Power or ground
+pinNamesNOR = [ "",
+	"J", "A", "B", "C", "GND", "D", "E", "F", "K", "VCC"
+]
+pinTypesNOR = [ "",
+	"O", "I", "I", "I", "P",   "I", "I", "I", "O", "P"
+]
+pinNamesROM = [ "",
+	"A15",  "A14",  "A13",  "A12",  "A11",  "A10",  "A9",   "A8",
+	"",     "",     "WE_",  "",     "",     "",     "",     "",
+	"",     "A7",   "A6",   "A5",   "A4",   "A3",   "A2",   "A1", 
+	"A0",   "CE_",  "GND",  "OE_",  "DQ0",  "DQ8",  "DQ1",  "DQ9",
+	"DQ2",  "DQ10", "DQ3",  "DQ11", "VCC",  "DQ4",  "DQ12", "DQ5",
+	"DQ13", "DQ6",  "DQ14", "DQ7",  "DQ15", "GND",  "",     "A16"
+]
+pinTypesROM = [ "",
+	"I",    "I",    "I",    "I",    "I",    "I",    "I",    "I",    
+	"N",    "N",    "I",    "N",    "N",    "N",    "N",    "N",
+	"N",    "I",    "I",    "I",    "I",    "I",    "I",    "I",    
+	"I",    "I",    "P",    "I",    "B",    "B",    "B",    "B",
+	"B",    "B",    "B",    "B",    "B",    "B",    "B",    "B",    
+	"B",    "B",    "B",    "B",    "B",    "P",    "N",    "I"
+]
+pinNamesRAM = [ "",
+	"A0",   "A1",   "A2",   "A3",   "A4",   "E_",   "DQL0", "DQL1",
+	"DQL2", "DQL3", "VCC",  "GND",  "DQL4", "DQL5", "DQL6", "DQL7",
+	"W_",   "A5",   "A6",   "A7",   "A8",   "A9",   "A10",  "A11",
+	"A12",  "GND",  "VCC",  "",     "DQU8", "DQU9", "DQU10","DQU11",
+	"VCC",  "GND",  "DQU12","DQU13","DQU14","DQU15","LB_",  "UB_",
+	"G_",   "A13",  "A14",  "A15"
+]
+pinTypesRAM = [ "",
+	"I",    "I",    "I",    "I",    "I",    "I",    "B",    "B",    
+	"B",    "B",    "P",    "P",    "B",    "B",    "B",    "B",    
+	"I",    "I",    "I",    "I",    "I",    "I",    "I",    "I",    
+	"I",    "P",    "P",    "N",    "B",    "B",    "B",    "B",    
+	"P",    "P",    "B",    "B",    "B",    "B",    "I",    "I",    
+	"I",    "I",    "I",    "I"
+]
+pinNamesBUFFER = [ "",
+	"OEa_", "I0a",  "O3b",  "I1a",  "O2b",  "I2a",  "O1b",  "I3a",
+	"O0b",  "GND",  "I0b",  "O3a",  "I1b",  "O2a",  "I2b",  "O1a",
+	"I3b",  "O0a",  "OEb_", "VCC" 
+]
+pinTypesBUFFER = [ "",
+	"I",    "I",    "T",    "I",    "T",    "I",    "T",    "I",    
+	"T",    "P",    "I",    "T",    "I",    "T",    "I",    "T",    
+	"I",    "T",    "I",    "P"
+]
+schPadsJ1 = [ "?" ] * 72
+schPadsJ2 = [ "?" ] * 72
+schPadsJ3 = [ "?" ] * 72
+schPadsJ4 = [ "?" ] * 72
+
 def readSchematicFile(filename):
 	global gateLocations
 	f = open(filename, "r")
@@ -120,6 +183,8 @@ def readSchematicFile(filename):
 	print >> sys.stderr, "Read file " + filename + ", " + str(len(newLines)) + " lines"
 	inSheet = False
 	inComp = False
+	inNOR = False
+	inConnector = False
 	pathName = os.path.dirname(filename)
 	for rawLine in newLines:
 		line = rawLine.strip()
@@ -136,6 +201,8 @@ def readSchematicFile(filename):
 			continue
 		if line == "$EndComp":
 			inComp = False
+			inNOR = False
+			inConnector = False
 			continue
 		if inSheet:
 			fields = line.split()
@@ -147,17 +214,41 @@ def readSchematicFile(filename):
 			fields = line.split()
 			if len(fields) >= 3 and fields[0] == "L":
 				refd = fields[2]
+				if fields[1][:5] == "D3NOR":
+					inNOR = True
+				if fields[1][:18] == "AGC_DSKY:Connector":
+					inConnector = True
+				if refd == "J1":
+					schPads = schPadsJ1
+				elif refd == "J2":
+					schPads = schPadsJ2
+				elif refd == "J3":
+					schPads = schPadsJ3
+				elif refd == "J4":
+					schPads = schPadsJ4
+				else:
+					schPads = ""
 				continue
 			if len(fields) >= 2 and fields[0] == "U":
-				if fields[1] == "1":
-					unit = "A"
-				else:
-					unit = "B"
+				unitNumber = int(fields[1])
+				if inNOR:
+					if unitNumber == 1:
+						unit = "A"
+					else:
+						unit = "B"
 				continue
-			if len(fields) >= 11 and fields[0] == "F" and fields[10] == "\"Location\"":
+			if inNOR and len(fields) >= 11 and fields[0] == "F" and fields[10] == "\"Location\"":
 				gate = fields[2].strip("\"")
 				gateLocations[refd + unit] = gate
 				continue
+			if inConnector and len(fields) >= 11 and fields[0] == "F" and fields[10] == "\"Caption\"":
+				caption = fields[2].strip("\"")
+				if caption[:3] in ["0VD", "+4V", "+4S", "FAP"]:
+					continue
+				if caption[:1].isdigit():
+					caption = "d" + caption
+				caption = caption.replace("+", "p").replace("-", "m")
+				schPads[unitNumber] = caption
 
 delay = ""
 inits = {}
@@ -204,40 +295,42 @@ if len(sys.argv) >= 3:
 			error = True
 				
 	# Test validity of the moduleName
+	usePinsDB = True
 	if len(moduleName) < 1 or moduleName[0] != "A" or not moduleName[1:].isdigit():
-		print >> sys.stderr, "Module name invalid."
-		error = True 
+		#print >> sys.stderr, "Module name invalid."
+		usePinsDB = False 
 	else:
 		moduleNumber = int(moduleName[1:])
-		if moduleNumber < 1 or moduleNumber > 64:
-			print >> sys.stderr, "Module name is not A1 - A64."
-			error = True
+		if moduleNumber < 1 or moduleNumber > 24:
+			#print >> sys.stderr, "Module name is not A1 - A64."
+			usePinsDB = False
 	
-	# Load pins.txt into pinsDB[].  Each entry in pinsDB[] is itself a list
-	# with either 1 or 2 entries, namely: type of signal and net name, even
-	# though the original pins database has lines with either 3 or 4 fields.
-	# All pins database entries for different AGC modules are silently discarded.
-	# The list has been padded so that the index to the entry is always equal
-	# to the pad number.  For example, pad 425 is pinsDB[425].
-	try:
-		f = open(pathToPinsTxt, "r")
-		pinsDB = []
-		lines = f.readlines()
-		for line in lines:
-			fields = line.rstrip().split(" ")
-			if len(fields) >= 3 and fields[0] == moduleName:
-				fields[1] = int(fields[1])
-				while len(pinsDB) < fields[1]:
-					pinsDB.append(["MISSING"])
-				if len(fields) > 3:
-					if fields[3][:1].isdigit() and fields[3][:3] != "0VD":
-						fields[3] = "d" + fields[3]
-					fields[3] = fields[3].replace("+", "p").replace("-", "m")
-				pinsDB.append(fields[2:])
-		f.close()
-	except:
-		print >> sys.stderr, "Could not read pin DB " + pathToPinsTxt
-		error = True
+	if usePinsDB:
+		# Load pins.txt into pinsDB[].  Each entry in pinsDB[] is itself a list
+		# with either 1 or 2 entries, namely: type of signal and net name, even
+		# though the original pins database has lines with either 3 or 4 fields.
+		# All pins database entries for different AGC modules are silently discarded.
+		# The list has been padded so that the index to the entry is always equal
+		# to the pad number.  For example, pad 425 is pinsDB[425].
+		try:
+			f = open(pathToPinsTxt, "r")
+			pinsDB = []
+			lines = f.readlines()
+			for line in lines:
+				fields = line.rstrip().split(" ")
+				if len(fields) >= 3 and fields[0] == moduleName:
+					fields[1] = int(fields[1])
+					while len(pinsDB) < fields[1]:
+						pinsDB.append(["MISSING"])
+					if len(fields) > 3:
+						if fields[3][:1].isdigit() and fields[3][:3] != "0VD":
+							fields[3] = "d" + fields[3]
+						fields[3] = fields[3].replace("+", "p").replace("-", "m")
+					pinsDB.append(fields[2:])
+			f.close()
+		except:
+			print >> sys.stderr, "Could not read pin DB " + pathToPinsTxt
+			error = True
 	
 	# Load the gate numbers of the NOR gates from the .sch file, if one has been specified.
 	if len(sys.argv) > 6:
@@ -246,6 +339,21 @@ if len(sys.argv) >= 3:
 			# Read the entire schematic, including its child sheets, into the
 			# schLines array.
 			readSchematicFile(schFile)
+			if not usePinsDB:
+				# Since we're not using (or can't use) the pins DB, but we do
+				# have the schematic (and later, the netlist), we try to 
+				# regenerate the data that would be in the pins DB from those
+				# items instead.
+				pinsDB = [ None ] * 500
+				for i in range(1, 72):
+					if schPadsJ1[i] != "?":
+						pinsDB[100 + i] = [ "?", schPadsJ1[i] ]
+					if schPadsJ2[i] != "?":
+						pinsDB[200 + i] = [ "?", schPadsJ2[i] ]
+					if schPadsJ1[i] != "?":
+						pinsDB[300 + i] = [ "?", schPadsJ3[i] ]
+					if schPadsJ1[i] != "?":
+						pinsDB[400 + i] = [ "?", schPadsJ4[i] ]
 		except:
 			print >> sys.stderr, "Could not read schematic file " + schFile
 			error = True
@@ -271,6 +379,9 @@ if error:
 	print >> sys.stderr, "USAGE:"
 	print >> sys.stderr, "\tdumbVerilog.py MODULE INPUT.net [/PATH/TO/pins.txt [DELAY [INPUT.init [SCHEMATIC.sch [pullup]]]]] >OUTPUT.v"
 	print >> sys.stderr, "MODULE is the name of the AGC module, A1 through A24."
+	print >> sys.stderr, "For \"modules\" that weren't part of the original AGC, but"
+	print >> sys.stderr, "are instead introduced for simulation purposes, any unique"
+	print >> sys.stderr, "alphanumeric (or '_', not leading with a digit) can be used."
 	print >> sys.stderr, "INPUT.net is a netlist output by KiCad in OrcadPCB2 format."
 	print >> sys.stderr, "If the optional path to pins.txt is omitted, it is assumed"
 	print >> sys.stderr, "that pins.txt is in the current directory.  If the optional"
@@ -286,14 +397,104 @@ if error:
 	print >> sys.stderr, "construct; but it doesn't work yet, so don't use it!"
 	sys.exit(1)
 
-# Let's do a first pass on the netlist, looking just at the connector components to 
+# If we're not using the pins DB, then we need to try and regenerate the data that would 
+# have been in it from the schematic data (which we've already used) and the netlist
+# (which we haven't).  Basically, we have already gotten the backplane netnames on the
+# connector pads, but we don't know yet if they're inputs, outputs, or inouts.
+inWhat = ""
+rawConnectorNets = {}
+
+if not usePinsDB:
+	
+	# Let's do a pass on the netlist just to determine the raw
+	# netnames (i.e., not normalized in any way) on the connector pins.
+	for line in lines:
+		if line[:2] == " )":
+			inWhat = ""
+			continue
+		if line[:3] == " ( ":
+			# This is the start of a component.
+			fields = line.strip().split()
+			refd = fields[3]
+			if refd[:1] in ["J"]:
+				inWhat = "CONNECTOR"
+			continue
+		if inWhat != "CONNECTOR":
+			continue
+		if line[:4] == "  ( ":
+			# This is a pin in the component.  The fields are
+			# "(", pin number, net name, ").
+			fields = line.strip().split()
+			pinNumber = int(fields[1])
+			rawNetName = fields[2]
+			if rawNetName in rawConnectorNets:
+				rawConnectorNets[rawNetName].append(pinNumber)
+			else:
+				rawConnectorNets[rawNetName] = [ pinNumber ]
+	
+	#print >> sys.stderr, rawConnectorNets
+	#print >> sys.stderr, pinsDB
+	
+	# Now let's do another pass in which we can see how those raw netnames relate
+	# to component pins, for which we have hardcoded data telling us if they're 
+	# inputs or outputs.
+	for line in lines:
+		if line[:2] == " )":
+			inWhat = ""
+			continue
+		if line[:3] == " ( ":
+			# This is the start of a component.
+			fields = line.strip().split()
+			if fields[4][:5] == "D3NOR":
+				inWhat = "NOR"
+				pinTypes = pinTypesNOR
+			elif fields[4] == "RAM":
+				inWhat = fields[4]
+				pinTypes = pinTypesRAM
+			elif fields[4] == "ROM":
+				inWhat = fields[4]
+				pinTypes = pinTypesROM
+			elif fields[4] == "BUFFER":
+				inWhat = fields[4]
+				pinTypes = pinTypesBUFFER
+			continue
+		if inWhat not in [ "NOR", "RAM", "ROM", "BUFFER"]:
+			continue
+		if line[:4] == "  ( ":
+			# This is a pin in the component.  The fields are
+			# "(", pin number, net name, ").
+			fields = line.strip().split()
+			pinNumber = int(fields[1])
+			rawNetName = fields[2]
+			if rawNetName not in rawConnectorNets:
+				continue
+			type = pinTypes[pinNumber]
+			if type == "I":
+				type = "IN"
+			elif type == "O" or type == "T":
+				type = "OUT"
+			else:
+				type = "INOUT"
+			connectorPinNumbers = rawConnectorNets[rawNetName]
+			for n in connectorPinNumbers:
+				if pinsDB[n] == None:
+					pinsDB[n] = [ "?", "?" ]
+				oldType = pinsDB[n][0]
+				if oldType == "?":
+					newType = type
+				elif type != oldType:
+					newType = "INOUT"
+				pinsDB[n][0] = newType
+		
+	#print >> sys.stderr, pinsDB
+
+# Now let's do a pass on the netlist, looking just at the connector components to 
 # get dictionaries of the input and output nets, both in terms of the names assigned in the netlist 
 # and the names assigned in the pins DB.
 discards = {}
 inputs = {}
 outputs = {}
 inouts = {}
-inWhat = ""
 for line in lines:
 	if line[:2] == " )":
 		inWhat = ""
@@ -313,6 +514,11 @@ for line in lines:
 		# "(", pin number, net name, ").
 		fields = line.strip().split()
 		pinNumber = int(fields[1])
+		rawNetName = fields[2]
+		if rawNetName in rawConnectorNets:
+			rawConnectorNets[rawNetName].append(pinNumber)
+		else:
+			rawConnectorNets[rawNetName] = [ pinNumber ]
 		if len(pinsDB[pinNumber]) < 2:
 			continue
 		netName = pinsDB[pinNumber][1].replace("/", "_")
@@ -459,34 +665,10 @@ print ""
 # module works.  We only need to look at the NOR gate components, because we already
 # have everything we need to know about the connectors.
 inWhat = ""
-pinNamesNOR = [ "",
-	"J", "A", "B", "C", "GND", "D", "E", "F", "K", "VCC"
-]
 nors = []
 netToGate = {}
-pinNamesROM = [ "",
-	"A15",  "A14",  "A13",  "A12",  "A11",  "A10",  "A9",   "A8",
-	"",     "",     "WE_",  "",     "",     "",     "",     "",
-	"",     "A7",   "A6",   "A5",   "A4",   "A3",   "A2",   "A1", 
-	"A0",   "CE_",  "GND",  "OE_",  "DQ0",  "DQ8",  "DQ1",  "DQ9",
-	"DQ2",  "DQ10", "DQ3",  "DQ11", "VCC",  "DQ4",  "DQ12", "DQ5",
-	"DQ13", "DQ6",  "DQ14", "DQ7",  "DQ15", "GND",  "",     "A16"
-]
 roms = []
-pinNamesRAM = [ "",
-	"A0",   "A1",   "A2",   "A3",   "A4",   "E_",   "DQL0", "DQL1",
-	"DQL2", "DQL3", "VCC",  "GND",  "DQL4", "DQL5", "DQL6", "DQL7",
-	"W_",   "A5",   "A6",   "A7",   "A8",   "A9",   "A10",  "A11",
-	"A12",  "GND",  "VCC",  "",     "DQU8", "DQU9", "DQU10","DQU11",
-	"VCC",  "GND",  "DQU12","DQU13","DQU14","DQU15","LB_",  "UB_",
-	"G_",   "A13",  "A14",  "A15"
-]
 rams = []
-pinNamesBUFFER = [ "",
-	"OEa_", "I0a",  "O3b",  "I1a",  "O2b",  "I2a",  "O1b",  "I3a",
-	"O0b",  "GND",  "I0b",  "O3a",  "I1b",  "O2a",  "I2b",  "O1a",
-	"I3b",  "O0a",  "OEb_", "VCC" 
-]
 buffers = []
 pinNetsB = [""] * 100
 for line in lines:
@@ -524,12 +706,10 @@ for line in lines:
 			inWhat = fields[4]
 			pinNames = pinNamesROM
 			continue
-		continue
 		if fields[4] == "RAM":
 			inWhat = fields[4]
 			pinNames = pinNamesRAM
 			continue
-		continue
 		if fields[4] == "BUFFER":
 			inWhat = fields[4]
 			pinNames = pinNamesBUFFER
@@ -549,10 +729,10 @@ for line in lines:
 			continue
 		netName = fields[2]		
 		# Normalize the net name on the pin.
-		if netName[:3] == "0VD" or netName in discards:
-			netName = "0"
-		elif netName[:3] in ["+4V", "+4S", "FAP"]:
+		if netName[:3] in ["+4S", "+4V", "FAP"]:
 			netName = "1"
+		elif netName[:3] == "0VD" or netName in discards:
+			netName = "0"
 		elif netName in inouts:
 			netName = inouts[netName]
 		elif netName in inputs:
@@ -642,6 +822,70 @@ if len(nors) > 0:
 			outLine += ") ? 1'b0 : 1'bz"
 		outLine += ")" + ";"
 		print outLine
+print "// End of NOR gates"
+
+# And similarly, write out any Verilog for BUFFERs, RAMs, and ROMs:
+for device in buffers:
+	refd = device["refd"]
+	pins = device["pins"]
+	for n in range(0, len(pins)):
+		if translateToGates and pins[n] in netToGate:
+			pins[n] = netToGate[pins[n]]
+		if pins[n] == "0":
+			pins[n] = "1'b0"
+		elif pins[n] == "1":
+			pins[n] = "1'b1"
+	print "BUFFER " + refd.replace("-","_") + "("
+	print "  " + pins[1] + ", " + pins[19] + ", " + pins[2] + ", " + pins[4] + ", "	
+	print "  " + pins[6] + ", " + pins[8] + ", " + pins[11] + ", " + pins[13] + ", "	
+	print "  " + pins[15] + ", " + pins[17] + ", " + pins[18] + ", " + pins[16] + ", "	
+	print "  " + pins[14] + ", " + pins[12] + ", " + pins[9] + ", " + pins[7] + ", "	
+	print "  " + pins[5] + ", " + pins[3]
+	print ");"	
+for device in rams:
+	refd = device["refd"]
+	pins = device["pins"]
+	for n in range(0, len(pins)):
+		if translateToGates and pins[n] in netToGate:
+			pins[n] = netToGate[pins[n]]
+		if pins[n] == "0":
+			pins[n] = "1'b0"
+		elif pins[n] == "1":
+			pins[n] = "1'b1"
+	print "RAM " + refd.replace("-","_") + "("
+	print "  " + pins[6] + ", " + pins[17] + ", " + pins[41] + ", " + pins[40] + ", "	
+	print "  " + pins[39] + ", " + pins[1] + ", " + pins[2] + ", " + pins[3] + ", "	
+	print "  " + pins[4] + ", " + pins[5] + ", " + pins[18] + ", " + pins[19] + ", "
+	print "  " + pins[20] + ", " + pins[21] + ", " + pins[22] + ", " + pins[23] + ", "
+	print "  " + pins[24] + ", " + pins[25] + ", " + pins[42] + ", " + pins[43] + ", "	
+	print "  " + pins[44] + ", " + pins[7] + ", " + pins[8] + ", " + pins[9] + ", "
+	print "  " + pins[10] + ", " + pins[13] + ", " + pins[14] + ", " + pins[15] + ", "
+	print "  " + pins[16] + ", " + pins[29] + ", " + pins[30] + ", " + pins[31] + ", "
+	print "  " + pins[32] + ", " + pins[35] + ", " + pins[36] + ", " + pins[37] + ", "
+	print "  " + pins[38]
+	print ");"	
+for device in roms:
+	refd = device["refd"]
+	pins = device["pins"]
+	for n in range(0, len(pins)):
+		if translateToGates and pins[n] in netToGate:
+			pins[n] = netToGate[pins[n]]
+		if pins[n] == "0":
+			pins[n] = "1'b0"
+		elif pins[n] == "1":
+			pins[n] = "1'b1"
+	print "ROM " + refd.replace("-","_") + "("
+	print "  " + pins[26] + ", " + pins[28] + ", " + pins[11] + ", " + pins[25] + ", "	
+	print "  " + pins[24] + ", " + pins[23] + ", " + pins[22] + ", " + pins[21] + ", "	
+	print "  " + pins[20] + ", " + pins[19] + ", " + pins[18] + ", " + pins[8] + ", "
+	print "  " + pins[7] + ", " + pins[6] + ", " + pins[5] + ", " + pins[4] + ", "
+	print "  " + pins[3] + ", " + pins[2] + ", " + pins[1] + ", " + pins[48] + ", "	
+	print "  " + pins[29] + ", " + pins[31] + ", " + pins[33] + ", " + pins[35] + ", "
+	print "  " + pins[38] + ", " + pins[40] + ", " + pins[42] + ", " + pins[44] + ", "
+	print "  " + pins[30] + ", " + pins[32] + ", " + pins[34] + ", " + pins[36] + ", "
+	print "  " + pins[39] + ", " + pins[41] + ", " + pins[43] + ", " + pins[45]
+	print ");"	
+
 print ""
 print "endmodule"
 

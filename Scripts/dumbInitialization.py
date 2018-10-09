@@ -156,7 +156,7 @@ for norNet in nors:
 		ones.append(nor)
 
 # Create the MODULE.init files.
-for moduleNumber in range(1, 25):
+for moduleNumber in range(1, 25) + [99]:
 	f = open("A" + str(moduleNumber) + ".init", "w")
 	f.write("# Auto-generated for module A" + str(moduleNumber) + " by dumbInitialization.py.\n")
 	for sheet in range(1, 5):
