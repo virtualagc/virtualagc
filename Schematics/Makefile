@@ -94,6 +94,10 @@
 
 DEFAULT_GATE_DELAY = 0.2 # In 100ns units.
 
+ifndef ROM
+	ROM := Validation
+endif
+
 # An auxiliary function, which takes a drawing number for a given AGC p/n,
 # and creates variables (module_DRAWING) that tells which AGC module the drawing
 # corresponds to (A1 through A24).  You must the variable MODULES_PROCESSED=none 
@@ -110,7 +114,7 @@ endef
 # Definitions needed for the testVerilog and fixed_erasable_memory targets.
 module_testVerilog = A1
 delay_testVerilog = 0
-module_fixed_erasable_memory = A62
+module_fixed_erasable_memory = A99
 delay_fixed_erasable_memory = $(DEFAULT_GATE_DELAY)
 
 ##################################################################################
@@ -155,7 +159,7 @@ DRAWINGS_2003200 += 2005250- 2005271- 2005272A 2005273A
 MODULES_PROCESSED = none
 $(foreach drawing,$(DRAWINGS_2003200),$(eval $(call moduleTemplate,$(drawing))))
 # Add more drawings separately that don't fit into the nice module-number sequence used above.
-#DRAWINGS_2003200 += fixed_erasable_memory
+DRAWINGS_2003200 += fixed_erasable_memory
 TARGETS_VVP_2003200 := $(DRAWINGS_2003200:%=%/module.vvp)
 TARGETS_V_2003200 := $(DRAWINGS_2003200:%=%/module.v)
 
@@ -184,6 +188,10 @@ DRAWINGS_AGC := $(DRAWINGS_2003200) $(DRAWINGS_2003100) $(DRAWINGS_2003993) $(DR
 TARGETS_VVP_AGC := $(TARGETS_VVP_2003200) $(TARGETS_VVP_2003100) $(TARGETS_VVP_2003993) $(TARGETS_VVP_1003700)
 TARGETS_V_AGC := $(TARGETS_V_2003200) $(TARGETS_V_2003100) $(TARGETS_V_2003993) $(TARGETS_V_1003700)
 
+# Do not combined these Verilog files with any of the TARGETS_V_etc, because they
+# are not auto-generated and definitely should never be erased.
+EXTRA_V := fixed_erasable_memory/BUFFER.v fixed_erasable_memory/RAM.v fixed_erasable_memory/ROM.v 
+
 # Here are the specific example and AGC targets we're actually trying to build. 
 TARGETS = testVerilog/module.vvp
 TARGETS += 2003200.vvp $(TARGETS_VVP_2003200)
@@ -198,16 +206,16 @@ all: $(TARGETS)
 clean:
 	-rm $(TARGETS) 2003200.v 2003100.v 2003993.v 1003700.v testVerilog/module.v $(TARGETS_V_AGC) 2>/dev/null
 
-2003200.vvp: 2003200.v $(TARGETS_V_2003200) tb-2003200.v
-	iverilog -o $@ 2003200.v $(TARGETS_V_2003200)
+2003200.vvp: 2003200.v $(TARGETS_V_2003200) tb-2003200.v $(EXTRA_V) roms/rom.v
+	iverilog -o $@ 2003200.v $(TARGETS_V_2003200) $(EXTRA_V)
 
-2003100.vvp: 2003100.v $(TARGETS_V_2003100) tb-2003100.v
-	iverilog -o $@ 2003100.v $(TARGETS_V_2003100)
+2003100.vvp: 2003100.v $(TARGETS_V_2003100) tb-2003100.v $(EXTRA_V) roms/rom.v
+	iverilog -o $@ 2003100.v $(TARGETS_V_2003100) $(EXTRA_V)
 
-2003993.vvp: 2003993.v $(TARGETS_V_2003993) tb-2003993.v
-	iverilog -o $@ 2003993.v $(TARGETS_V_2003993)
+2003993.vvp: 2003993.v $(TARGETS_V_2003993) tb-2003993.v $(EXTRA_V) roms/rom.v
+	iverilog -o $@ 2003993.v $(TARGETS_V_2003993) $(EXTRA_V)
 
-1003700.vvp: 1003700.v $(TARGETS_V_1003700) tb-1003700.v
+1003700.vvp: 1003700.v $(TARGETS_V_1003700) tb-1003700.v roms/rom.v
 	iverilog -o $@ 1003700.v $(TARGETS_V_1003700)
 
 # Note that we only create an AGC's testbench file (such as 2003200) if it doesn't
@@ -240,6 +248,14 @@ clean:
 	@if test ! -f $@ ; then cat $^ | ../Scripts/dumbTestbench.py $*/tb.v >$@ ; fi
 
 # Below are the rules which should work for every TARGET in $(TARGETS)
+
+roms/rom.v: roms/$(ROM).v
+	cp $< $@
+
+FIXED_ERASABLE_V := fixed_erasable_memory/module_tb.v fixed_erasable_memory/module.v fixed_erasable_memory/tb.v $(EXTRA_V)
+fixed_erasable_memory/module.vvp: $(FIXED_ERASABLE_V) roms/rom.v
+	iverilog -o $@ $(FIXED_ERASABLE_V)
+
 %/module.vvp: %/module_tb.v %/module.v %/tb.v
 	iverilog -o $@ $*/module_tb.v $*/module.v
 
@@ -263,7 +279,9 @@ clean:
 	@n=1; \
 	for d in $(DRAWINGS_$*) ; \
 	do \
-		echo Moving A$$n.init to $$d/module.init ; \
-		mv A$$n.init $$d/module.init ; \
+		m=A$$n ; \
+		if test "$$d" = "fixed_erasable_memory" ; then m=A99 ; fi ; \
+		echo Moving $$m.init to $$d/module.init ; \
+		mv $$m.init $$d/module.init ; \
 		n=$$((n+1)) ; \
 	done
