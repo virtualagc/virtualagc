@@ -158,13 +158,13 @@ while True:
         if sig_name == 'T01' and state == 1 and signals['INKL'] == 0 and signals['STG1'] == 0 and signals['STG3'] == 0 and inkl_inst is None:
             if signals['STG2'] == 0  or (signals['STG2'] == 1 and staged_inst in ['RELINT', 'INHINT', 'EXTEND']):
                 instruction_starting = True
-        elif sig_name == 'WSQG_n' and state == 1:
+        elif sig_name == 'WSQG_' and state == 1:
             print('#%u' % time)
         elif sig_name == 'GOJAM' and state == 0:
             staged_inst = 'GOJAM'
             instruction_starting = True
         elif sig_name == 'T07' and state == 0:
-            if signals['TSUDO_n'] == 0 or signals['IC2'] == 1:
+            if signals['TSUDO_'] == 0 or signals['IC2'] == 1:
                 # G should be ready by now, we don't expect G to change during this time
                 G = 0
                 for i in range(1,16):
