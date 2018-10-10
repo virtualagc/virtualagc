@@ -42,6 +42,8 @@
 #		2018-10-08 RSB	Now account for separate "tb.v" files, so 
 #				avoid hard-coding unnecessary stuff into 
 #				the module_tb.v files or AGCNUMBER.v files.
+#		2018-10-10 RSB	Changed the default Verilog construct used
+#				for NOR gates from 'wand' to 'wire'
 #
 # This 'make' needs to be performed from the Schematics/ directory.
 # Icarus Verilog must be installed, and iverilog must be in the PATH.
@@ -86,11 +88,11 @@
 # has regs, wires, and modules for all of the DRAWINGs used in it, those aren't
 # necessarily correctly set up, nor do they necessarily behave correctly.  
 #
-# Finally, by default, the Verilog "wand" construct is used for NOR-gates, to support
-# wire-ANDing them.  The Verilog "pullup" construct is alternately available, and
-# to use it instead, the make command would be changed to
+# Finally, by default, the Verilog "wire" construct is used for NOR-gates, to support
+# wire-ANDing them via Z outputs and pullups.  The Verilog "wand" construct is 
+# alternately available, and to use it instead, the make command would be changed to
 #
-#	PULLUP=pullup make ...
+#	WIRETYPE=wand make ...
 
 DEFAULT_GATE_DELAY = 0.2 # In 100ns units.
 
@@ -265,7 +267,7 @@ fixed_erasable_memory/module.vvp: $(FIXED_ERASABLE_V) roms/rom.v
 # SECONDARY instead, it will keep module.v and not delete it.
 .SECONDARY: testVerilog/module.v $(DRAWINGS_AGC:%=%/module.v)
 %/module.v: %/module.net %/module.init ../Scripts/pins.txt
-	../Scripts/dumbVerilog.py $(module_$*) $*/module.net ../Scripts/pins.txt "$(delay_$*)" $*/module.init $*/module.sch $(PULLUP) >$*/temp.v
+	../Scripts/dumbVerilog.py $(module_$*) $*/module.net ../Scripts/pins.txt "$(delay_$*)" $*/module.init $*/module.sch $(WIRETYPE) >$*/temp.v
 	mv $*/temp.v $@
 
 # The following target can be used as 2003200.init, 2003993.init, etc.

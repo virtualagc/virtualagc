@@ -48,22 +48,22 @@ module ROM(
     output wire DQ15;
 
     reg [15:0] data;
-    pullup(DQ0);
-    pullup(DQ1);
-    pullup(DQ2);
-    pullup(DQ3);
-    pullup(DQ4);
-    pullup(DQ5);
-    pullup(DQ6);
-    pullup(DQ7);
-    pullup(DQ8);
-    pullup(DQ9);
-    pullup(DQ10);
-    pullup(DQ11);
-    pullup(DQ12);
-    pullup(DQ13);
-    pullup(DQ14);
-    pullup(DQ15);
+    pulldown(DQ0);
+    pulldown(DQ1);
+    pulldown(DQ2);
+    pulldown(DQ3);
+    pulldown(DQ4);
+    pulldown(DQ5);
+    pulldown(DQ6);
+    pulldown(DQ7);
+    pulldown(DQ8);
+    pulldown(DQ9);
+    pulldown(DQ10);
+    pulldown(DQ11);
+    pulldown(DQ12);
+    pulldown(DQ13);
+    pulldown(DQ14);
+    pulldown(DQ15);
     
     assign DQ0 = data[0];
     assign DQ1 = data[1];

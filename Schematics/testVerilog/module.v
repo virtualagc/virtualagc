@@ -4,24 +4,31 @@ module A1 (
   rst, FS01_, F02A, F02B, FS02, FS02A
 );
 
-input wand rst, FS01_;
+input wire rst, FS01_;
 
-output wand F02A, F02B, FS02, FS02A;
+output wire F02A, F02B, FS02, FS02A;
 
 // Gate A1-U127A
-assign g38204 = rst ? 1 : !(0|g38203|FS02);
+pullup(g38204);
+assign g38204 = rst ? 1'bz : ((0|g38203|FS02) ? 1'b0 : 1'bz);
 // Gate A1-U128A
-assign g38203 = rst ? 0 : !(0|g38205|FS01_|F02A);
+pullup(g38203);
+assign g38203 = rst ? 0 : ((0|g38205|FS01_|F02A) ? 1'b0 : 1'bz);
 // Gate A1-U126B
-assign FS02A = rst ? 0 : !(0|g38204);
+pullup(FS02A);
+assign FS02A = rst ? 0 : ((0|g38204) ? 1'b0 : 1'bz);
 // Gate A1-U129A
-assign g38205 = rst ? 1 : !(0|F02B|FS01_|g38203);
+pullup(g38205);
+assign g38205 = rst ? 1'bz : ((0|F02B|FS01_|g38203) ? 1'b0 : 1'bz);
 // Gate A1-U127B
-assign FS02 = rst ? 0 : !(0|g38204|g38205);
+pullup(FS02);
+assign FS02 = rst ? 0 : ((0|g38204|g38205) ? 1'b0 : 1'bz);
 // Gate A1-U128B
-assign F02A = rst ? 0 : !(0|g38204|g38203);
+pullup(F02A);
+assign F02A = rst ? 0 : ((0|g38204|g38203) ? 1'b0 : 1'bz);
 // Gate A1-U129B
-assign F02B = rst ? 0 : !(0|g38205|FS02);
+pullup(F02B);
+assign F02B = rst ? 0 : ((0|g38205|FS02) ? 1'b0 : 1'bz);
 // End of NOR gates
 
 endmodule

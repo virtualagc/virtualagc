@@ -54,6 +54,9 @@
 #				wire/pullup/1bz, and they were all absolutely 
 #				identical in level and timing.  Added some handling
 #				for the "ROM", "RAM", and "BUFFER" symbols.
+#		2018-10-10 RSB	Changed the default build type to "wire", since 
+#				the simulation isn't currently working correctly
+#				with "pullup".
 #
 # This script converts one of my KiCad transcriptions of AGC LOGIC FLOW DIAGRAMs
 # into Verilog in the dumbest, most-straightforward way.  In other words, I don't
@@ -358,9 +361,9 @@ if len(sys.argv) >= 3:
 			print >> sys.stderr, "Could not read schematic file " + schFile
 			error = True
 	
-	wireType = "wand"
-	if len(sys.argv) > 7:
-		wireType = "wire"
+	wireType = "wire"
+	if len(sys.argv) > 7 and sys.argv[7] != "":
+		wireType = sys.argv[7]
 	
 	# Let's read the netlist into memory.
 	try:
@@ -377,7 +380,7 @@ else:
 
 if error:
 	print >> sys.stderr, "USAGE:"
-	print >> sys.stderr, "\tdumbVerilog.py MODULE INPUT.net [/PATH/TO/pins.txt [DELAY [INPUT.init [SCHEMATIC.sch [pullup]]]]] >OUTPUT.v"
+	print >> sys.stderr, "\tdumbVerilog.py MODULE INPUT.net [/PATH/TO/pins.txt [DELAY [INPUT.init [SCHEMATIC.sch [WIRETYPE]]]]] >OUTPUT.v"
 	print >> sys.stderr, "MODULE is the name of the AGC module, A1 through A24."
 	print >> sys.stderr, "For \"modules\" that weren't part of the original AGC, but"
 	print >> sys.stderr, "are instead introduced for simulation purposes, any unique"
@@ -391,10 +394,11 @@ if error:
 	print >> sys.stderr, "i.e., for feedback within flip-flop circuits.  The optional"
 	print >> sys.stderr, "SCHEMATIC.sch file is used to find the gate numbers associated"
 	print >> sys.stderr, "with the NOR gates, and to rename otherwise inconveniently-"
-	print >> sys.stderr, "named nets according to the gates driving them.  The pullup"
-	print >> sys.stderr, "argument, if present, causes the Verilog pullup construct to"
-	print >> sys.stderr, "be used for NOR gates, rather than the default Verilog wand"
-	print >> sys.stderr, "construct; but it doesn't work yet, so don't use it!"
+	print >> sys.stderr, "named nets according to the gates driving them.  The WIRETYPE"
+	print >> sys.stderr, "argument, if present, chooses between the Verilog constructs"
+	print >> sys.stderr, "used for wire-AND'ing.  The default is 'wire' (uses pullups +"
+	print >> sys.stderr, "1'bz + wires), while the other choice is 'wand' (uses wands)."
+	print >> sys.stderr, "the default is 'wire'."
 	sys.exit(1)
 
 # If we're not using the pins DB, then we need to try and regenerate the data that would 
@@ -595,11 +599,25 @@ if len(line) > 0:
 	print line
 print ");"
 
-count = len(newInputs)
+# Force the following signals to be wires (as opposed to wands), regardless of which 
+# wire-type has been chosen.
+forceWires = [ "SA01", "SA02", "SA03", "SA04", "SA05", "SA06", "SA07", "SA08", "SA09",
+	"SA10", "SA11", "SA12", "SA13", "SA14", "SA15", "SA16" ]
+# If there are any inputs in the forceWires[] list, we want to
+# make sure they're defined as wires and not wands.
+forces = []
+newNewInputs = []
+for item in newInputs:
+	if item in forceWires:
+		forces.append(item)
+	else:
+		newNewInputs.append(item)
+
+count = len(newNewInputs)
 if count > 0:
 	print ""
 	line = "input " + wireType + " rst"
-	for name in newInputs:
+	for name in newNewInputs:
 		count -= 1
 		if line == "":
 			line = "  " + name
@@ -615,11 +633,41 @@ if count > 0:
 	if len(line) > 0:
 		print line + ";"
 
-count = len(newInouts)
+count = len(forces)
+if count > 0:
+	print ""
+	line = "input wire"
+	for name in forces:
+		if count == len(forces):
+			line += " " + name
+		elif line == "":
+			line = "  " + name
+		else:
+			line += ", " + name
+		count -= 1
+		if len(line) > desiredLineLength:
+			if count > 0:
+				line += ","
+			else:
+				line += ";"
+			print line
+			line = ""
+	if len(line) > 0:
+		print line + ";"
+
+forces = []
+newNewInouts = []
+for item in newInouts:
+	if item in forceWires:
+		forces.append(item)
+	else:
+		newNewInouts.append(item)
+
+count = len(newNewInouts)
 if count > 0:
 	print ""
 	line = "inout " + wireType
-	for name in newInouts:
+	for name in newNewInouts:
 		count -= 1
 		if line == ("inout " + wireType):
 			line += " " + name
@@ -627,6 +675,28 @@ if count > 0:
 			line = "  " + name
 		else:
 			line += ", " + name
+		if len(line) > desiredLineLength:
+			if count > 0:
+				line += ","
+			else:
+				line += ";"
+			print line
+			line = ""
+	if len(line) > 0:
+		print line + ";"
+
+count = len(forces)
+if count > 0:
+	print ""
+	line = "inout wire"
+	for name in forces:
+		if count == len(forces):
+			line += " " + name
+		elif line == "":
+			line = "  " + name
+		else:
+			line += ", " + name
+		count -= 1
 		if len(line) > desiredLineLength:
 			if count > 0:
 				line += ","
