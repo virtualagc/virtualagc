@@ -1,6 +1,6 @@
 EESchema Schematic File Version 4
 LIBS:module-cache
-EELAYER 26 0
+EELAYER 28 0
 EELAYER END
 $Descr E 44000 34000
 encoding utf-8
@@ -1606,9 +1606,9 @@ F 4 "WL15/" H 11025 3100 140 0000 C CNB "Caption"
 	14   10975 2800
 	1    0    0    -1  
 $EndComp
-Text GLabel 17300 3675 2    140  Input ~ 28
+Text GLabel 17300 3675 2    140  Output ~ 28
 B2
-Text GLabel 17275 5650 2    140  Input ~ 28
+Text GLabel 17275 5650 2    140  Output ~ 28
 B1
 $Comp
 L AGC_DSKY:ConnectorA1-300 J3
@@ -2006,7 +2006,7 @@ F 4 "T12" H 6775 9675 140 0000 C CNB "Caption"
 	67   6725 9375
 	1    0    0    -1  
 $EndComp
-Text GLabel 7050 8800 0    140  Input ~ 28
+Text GLabel 7450 8975 2    140  Output ~ 28
 B19
 $Comp
 L AGC_DSKY:ConnectorA1-300 J3
@@ -2044,11 +2044,11 @@ F 4 "T01" H 12875 9725 140 0000 C CNB "Caption"
 	61   12850 9400
 	1    0    0    -1  
 $EndComp
-Text GLabel 13125 8825 0    140  Input ~ 28
+Text GLabel 13575 9000 2    140  Output ~ 28
 B18
-Text GLabel 18725 8825 0    140  Input ~ 28
+Text GLabel 19075 8975 2    140  Output ~ 28
 B16
-Text GLabel 24525 8825 0    140  Input ~ 28
+Text GLabel 25000 8950 2    140  Output ~ 28
 B14
 $Comp
 L AGC_DSKY:ConnectorA1-300 J3
@@ -2110,9 +2110,9 @@ F 4 "T04" H 30300 9650 140 0000 C CNB "Caption"
 	42   30275 9350
 	1    0    0    -1  
 $EndComp
-Text GLabel 30550 8800 0    140  Input ~ 28
+Text GLabel 31000 9000 2    140  Output ~ 28
 B13
-Text GLabel 38300 9100 2    140  Input ~ 28
+Text GLabel 38300 9100 2    140  Output ~ 28
 B11
 $Comp
 L AGC_DSKY:ConnectorA1-300 J3
@@ -2150,11 +2150,11 @@ F 4 "GOJAM" H 2925 12325 140 0000 C CNB "Caption"
 	59   3625 12325
 	1    0    0    -1  
 $EndComp
-Text GLabel 7750 18450 0    140  Input ~ 28
+Text GLabel 8200 18450 2    140  Output ~ 28
 B9
-Text GLabel 7125 22450 0    140  Output ~ 28
+Text GLabel 7125 22450 0    140  Input ~ 28
 B16
-Text GLabel 1325 22650 0    140  Output ~ 28
+Text GLabel 1325 22650 0    140  Input ~ 28
 B18
 $Comp
 L AGC_DSKY:ConnectorA1-300 J3
@@ -2280,9 +2280,9 @@ F 4 "" H 3435 30250 140 0001 R CNB "Caption"
 	8    3750 30250
 	-1   0    0    1   
 $EndComp
-Text GLabel 7075 27625 0    140  Output ~ 28
+Text GLabel 7075 27625 0    140  Input ~ 28
 B7
-Text GLabel 1350 28450 0    140  Output ~ 28
+Text GLabel 1350 28450 0    140  Input ~ 28
 B8
 Text Notes 6625 27450 0    140  ~ 28
 T08
@@ -2600,7 +2600,7 @@ F 4 "T08/" H 11400 28275 140 0000 R CNB "Caption"
 	18   11225 28600
 	-1   0    0    1   
 $EndComp
-Text GLabel 15125 32275 0    140  Output ~ 28
+Text GLabel 15125 32275 0    140  Input ~ 28
 B3
 Text Notes 14675 32100 0    140  ~ 28
 T11
@@ -2644,11 +2644,11 @@ F 4 "T02/" H 11225 22325 140 0000 R CNB "Caption"
 	55   11100 22650
 	-1   0    0    1   
 $EndComp
-Text GLabel 13125 27625 0    140  Output ~ 28
+Text GLabel 13125 27625 0    140  Input ~ 28
 B5
-Text GLabel 12825 23650 0    140  Output ~ 28
+Text GLabel 12825 23650 0    140  Input ~ 28
 B14
-Text GLabel 13500 18450 0    140  Input ~ 28
+Text GLabel 13950 18450 2    140  Output ~ 28
 B8
 $Comp
 L AGC_DSKY:ConnectorA1-400 J4
@@ -2758,15 +2758,15 @@ F 4 "MT03" H 19225 20725 140 0000 R CNB "Caption"
 	54   19025 21025
 	-1   0    0    1   
 $EndComp
-Text GLabel 25100 18375 0    140  Input ~ 28
+Text GLabel 25500 18375 2    140  Output ~ 28
 B5
-Text GLabel 19325 18425 0    140  Input ~ 28
+Text GLabel 19650 18425 2    140  Output ~ 28
 B7
-Text GLabel 31375 19525 0    140  Input ~ 28
+Text GLabel 31825 19525 2    140  Output ~ 28
 B4
-Text GLabel 19025 23625 0    140  Output ~ 28
+Text GLabel 19025 23625 0    140  Input ~ 28
 B13
-Text GLabel 31975 24625 0    140  Output ~ 28
+Text GLabel 31975 24625 0    140  Input ~ 28
 B9
 Text Notes 31550 24450 0    140  ~ 28
 T06
@@ -2922,17 +2922,17 @@ Text Notes 18525 27450 0    140  ~ 28
 T10
 Text Notes 20750 29875 0    140  ~ 28
 T12
-Text GLabel 19000 27625 0    140  Output ~ 28
+Text GLabel 19000 27625 0    140  Input ~ 28
 B4
-Text GLabel 25975 27625 0    140  Output ~ 28
+Text GLabel 25975 27625 0    140  Input ~ 28
 B11
-Text GLabel 21275 30075 0    140  Output ~ 28
+Text GLabel 21275 30075 0    140  Input ~ 28
 B19
-Text GLabel 39500 23000 0    140  Output ~ 28
+Text GLabel 39500 23000 0    140  Input ~ 28
 B1
-Text GLabel 39500 22000 0    140  Output ~ 28
+Text GLabel 39500 22000 0    140  Input ~ 28
 B2
-Text GLabel 37525 19550 0    140  Output ~ 28
+Text GLabel 38125 19225 2    140  Output ~ 28
 B3
 $Comp
 L AGC_DSKY:ConnectorA1-400 J4
@@ -3286,8 +3286,6 @@ Text Notes 41075 26975 0    140  ~ 28
 TO PIN 5 &\nUNUSED INPUTS OF\n37400 SERIES\nGATES
 Text Notes 41125 28925 0    140  ~ 28
 TO PIN 10 OF\n37400 SERIES \nGATES EXCEPT \nFAN-INS. SEE\nNOTE 3
-Text Label 36625 27350 0    140  ~ 28
-0VDC
 Text Label 36350 28175 0    140  ~ 28
 +4SW
 Text Label 40450 27350 0    140  ~ 28
@@ -3977,9 +3975,9 @@ Wire Wire Line
 Wire Wire Line
 	41625 23000 42325 23000
 Wire Wire Line
-	37525 19550 37825 19550
+	38125 19225 37825 19225
 Wire Wire Line
-	37825 19550 37825 18975
+	37825 19225 37825 18975
 Wire Wire Line
 	37825 18250 37725 18250
 Wire Wire Line
@@ -4070,8 +4068,6 @@ Wire Wire Line
 Wire Wire Line
 	13600 17100 13800 17100
 Wire Wire Line
-	13800 18450 13500 18450
-Wire Wire Line
 	13500 17875 13800 17875
 Wire Wire Line
 	13800 17100 13800 17875
@@ -4101,7 +4097,7 @@ Wire Wire Line
 Wire Wire Line
 	7975 17100 7975 17900
 Wire Wire Line
-	7975 18450 7750 18450
+	7975 18450 8200 18450
 Wire Wire Line
 	7725 17900 7975 17900
 Connection ~ 7975 17900
@@ -4145,8 +4141,6 @@ Wire Wire Line
 Connection ~ 17475 19075
 Wire Wire Line
 	17475 19075 17625 19075
-Wire Wire Line
-	19325 18425 19500 18425
 Wire Wire Line
 	19500 17075 19400 17075
 Wire Wire Line
@@ -4192,7 +4186,7 @@ Connection ~ 23225 19075
 Wire Wire Line
 	23225 19075 23425 19075
 Wire Wire Line
-	25100 18375 25300 18375
+	25500 18375 25300 18375
 Wire Wire Line
 	25300 18375 25300 17775
 Wire Wire Line
@@ -4282,7 +4276,7 @@ Wire Wire Line
 Wire Wire Line
 	31600 20475 31600 20100
 Wire Wire Line
-	31600 19525 31375 19525
+	31600 19525 31825 19525
 Wire Wire Line
 	31375 20100 31600 20100
 Connection ~ 31600 20100
@@ -4518,12 +4512,12 @@ Wire Wire Line
 Wire Wire Line
 	7250 10125 7250 9375
 Wire Wire Line
-	7250 8800 7050 8800
+	7250 8975 7450 8975
 Wire Wire Line
 	7000 9375 7250 9375
 Connection ~ 7250 9375
 Wire Wire Line
-	7250 9375 7250 8800
+	7250 9375 7250 8975
 Wire Wire Line
 	7825 11900 8400 11900
 Connection ~ 7825 11900
@@ -4603,9 +4597,9 @@ Wire Wire Line
 Wire Wire Line
 	14000 8400 14225 8400
 Wire Wire Line
-	13125 8825 13400 8825
+	13575 9000 13400 9000
 Wire Wire Line
-	13400 8825 13400 9400
+	13400 9000 13400 9400
 Wire Wire Line
 	13400 10125 13125 10125
 Connection ~ 13400 9400
@@ -4698,23 +4692,23 @@ Wire Wire Line
 Wire Wire Line
 	30825 10100 30825 9350
 Wire Wire Line
-	30825 8800 30550 8800
+	30825 9000 31000 9000
 Wire Wire Line
 	30550 9350 30825 9350
 Connection ~ 30825 9350
 Wire Wire Line
-	30825 9350 30825 8800
+	30825 9350 30825 9000
 Wire Wire Line
 	24625 10100 24825 10100
 Wire Wire Line
 	24825 10100 24825 9375
 Wire Wire Line
-	24825 8825 24525 8825
+	24825 8950 25000 8950
 Wire Wire Line
 	24525 9375 24825 9375
 Connection ~ 24825 9375
 Wire Wire Line
-	24825 9375 24825 8825
+	24825 9375 24825 8950
 Wire Wire Line
 	31700 9500 31700 9825
 Wire Wire Line
@@ -5164,12 +5158,12 @@ Wire Wire Line
 Wire Wire Line
 	18950 10125 18950 9400
 Wire Wire Line
-	18950 8825 18725 8825
+	18950 8975 19075 8975
 Wire Wire Line
 	18725 9400 18950 9400
 Connection ~ 18950 9400
 Wire Wire Line
-	18950 9400 18950 8825
+	18950 9400 18950 8975
 Connection ~ 28200 8125
 Wire Wire Line
 	28200 8125 28850 8125
@@ -6115,4 +6109,8 @@ Wire Wire Line
 Wire Wire Line
 	36625 25900 36625 26350
 Connection ~ 36625 26350
+Wire Wire Line
+	19500 18425 19650 18425
+Wire Wire Line
+	13800 18450 13950 18450
 $EndSCHEMATC

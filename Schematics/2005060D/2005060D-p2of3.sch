@@ -1,10 +1,10 @@
 EESchema Schematic File Version 4
-LIBS:board1-cache
-EELAYER 26 0
+LIBS:module-cache
+EELAYER 28 0
 EELAYER END
 $Descr E 44000 34000
 encoding utf-8
-Sheet 3 3
+Sheet 3 4
 Title ""
 Date ""
 Rev ""
@@ -3374,8 +3374,6 @@ Connection ~ 30700 28725
 Connection ~ 30700 29000
 Wire Wire Line
 	30700 29000 30700 28725
-Text Label 30500 28725 2    140  ~ 0
-0VDC
 Text HLabel 36000 26250 0    140  UnSpc ~ 28
 0VDC
 Text HLabel 36050 28175 0    140  UnSpc ~ 28
@@ -3394,4 +3392,6 @@ Wire Wire Line
 Wire Wire Line
 	36225 28175 36225 28575
 Connection ~ 36225 28575
+Text HLabel 30500 28725 0    140  UnSpc ~ 28
+0VDC
 $EndSCHEMATC

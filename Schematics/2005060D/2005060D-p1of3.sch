@@ -1,10 +1,10 @@
 EESchema Schematic File Version 4
-LIBS:board1-cache
-EELAYER 26 0
+LIBS:module-cache
+EELAYER 28 0
 EELAYER END
 $Descr E 44000 34000
 encoding utf-8
-Sheet 2 3
+Sheet 2 4
 Title ""
 Date ""
 Rev ""
@@ -1325,13 +1325,13 @@ F 3 "" H 2400 28900 140 0001 C CNN
 	1    2400 28900
 	1    0    0    -1  
 $EndComp
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	2100 29200 2100 29450
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	2100 29450 2725 29450
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	2725 29450 2725 29200
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	2725 29200 2100 29200
 Text Notes 2175 29000 0    140  ~ 28
 XXX
@@ -1790,14 +1790,9 @@ Wire Wire Line
 Wire Wire Line
 	7150 25500 7825 25500
 Wire Wire Line
-	5375 25500 5350 25500
-Wire Wire Line
 	5250 25500 5250 27250
 Wire Wire Line
 	5250 27250 5550 27250
-Connection ~ 5350 25500
-Wire Wire Line
-	5350 25500 5250 25500
 Wire Wire Line
 	5250 25500 4775 25500
 Wire Wire Line
@@ -1806,7 +1801,6 @@ Wire Wire Line
 	4775 15675 7375 15675
 Wire Wire Line
 	7375 15675 7375 14300
-Connection ~ 5250 25500
 Wire Wire Line
 	7175 14300 7375 14300
 Connection ~ 7375 14300
@@ -3382,4 +3376,7 @@ Wire Wire Line
 Wire Wire Line
 	34300 24525 34300 24900
 Connection ~ 34300 24900
+Connection ~ 5250 25500
+Wire Wire Line
+	5250 25500 5350 25500
 $EndSCHEMATC

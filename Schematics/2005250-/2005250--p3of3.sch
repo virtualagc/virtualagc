@@ -1,6 +1,6 @@
 EESchema Schematic File Version 4
 LIBS:module-cache
-EELAYER 26 0
+EELAYER 28 0
 EELAYER END
 $Descr E 44000 34000
 encoding utf-8
@@ -4323,12 +4323,6 @@ Wire Wire Line
 Wire Wire Line
 	7625 7100 11550 7100
 Wire Wire Line
-	11550 7100 11550 8475
-Wire Wire Line
-	11550 8475 11925 8475
-Wire Wire Line
-	11925 8475 11925 8450
-Wire Wire Line
 	6050 7425 6300 7425
 Wire Wire Line
 	6300 7425 6300 7050
@@ -5072,11 +5066,9 @@ Wire Wire Line
 Wire Wire Line
 	25250 7075 25075 7075
 Wire Wire Line
-	25075 7075 25075 7450
+	25075 7075 25075 7425
 Wire Wire Line
-	25075 7450 24800 7450
-Wire Wire Line
-	24800 7450 24800 7425
+	25075 7425 24800 7425
 Wire Wire Line
 	25250 4575 25250 7075
 Wire Wire Line
@@ -5694,15 +5686,8 @@ Wire Wire Line
 Wire Wire Line
 	33200 11925 33375 11925
 Wire Wire Line
-	33200 11925 33200 4000
-Wire Wire Line
 	33200 3300 35700 3300
 Connection ~ 33200 11925
-Wire Wire Line
-	33325 4025 33200 4000
-Connection ~ 33200 4000
-Wire Wire Line
-	33200 4000 33200 3300
 Wire Wire Line
 	29775 4300 30625 4300
 Wire Wire Line
@@ -5839,4 +5824,15 @@ Wire Wire Line
 	24875 21650 25025 21650
 Wire Wire Line
 	13575 1300 13825 1300
+Wire Wire Line
+	11925 8450 11550 8450
+Wire Wire Line
+	11550 7100 11550 8450
+Wire Wire Line
+	33200 3300 33200 4025
+Wire Wire Line
+	33325 4025 33200 4025
+Connection ~ 33200 4025
+Wire Wire Line
+	33200 4025 33200 11925
 $EndSCHEMATC
