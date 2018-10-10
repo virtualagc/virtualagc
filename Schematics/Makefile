@@ -43,7 +43,13 @@
 #				avoid hard-coding unnecessary stuff into 
 #				the module_tb.v files or AGCNUMBER.v files.
 #		2018-10-10 RSB	Changed the default Verilog construct used
-#				for NOR gates from 'wand' to 'wire'
+#				for NOR gates from 'wand' to 'wire'.  I did
+#				that because the 'wand' construct was making
+#				a simulation that didn't work as well as the
+#				'wire'.  However, I've since fixed that in
+#				dumbVerilog.py, so I've added a 'test' target
+#				here to verify that the two produce the same
+#				simulation results.
 #
 # This 'make' needs to be performed from the Schematics/ directory.
 # Icarus Verilog must be installed, and iverilog must be in the PATH.
@@ -287,3 +293,30 @@ fixed_erasable_memory/module.vvp: $(FIXED_ERASABLE_V) roms/rom.v
 		mv $$m.init $$d/module.init ; \
 		n=$$((n+1)) ; \
 	done
+
+# Performs a test of building with the "wand" construct vs the "wire" construct.
+# Unfortunately, the .lxt2 files produced by this (test-wire.lxt2 and test-wand.lxt2)
+# will differ, so you can't automatically compare them.  You have several choices,
+# I guess.  If you install Impulse in Eclipse, it can compare two .lxt2 files; but
+# you need to get a (free) license and in my experience, the comparison feature is
+# rather useless for this purpose.  You code just visually compare the waveforms by
+# running two instances of gtkwave side by side (which this target does for you).
+# Or ... and this is my recommendation ... you can export the data from gtkwave as
+# a TIM file.  If I knew how to automate that, I would.  The two TIM files will be
+# identical and can be diff'd. A nice side effect is that the TIM files contain a
+# friendly list of the instructions and involuntary instructions executed.
+.PHONY: test
+test: 
+	-rm test-wand.lxt2 test-wire.lxt2 test-wand.tim test-wire.tim
+	make test-wand.lxt2
+	make test-wire.lxt2
+	gtkwave test-wand.lxt2 agc-decoder.gtkw & \
+	gtkwave test-wire.lxt2 agc-decoder.gtkw &
+
+test-%.lxt2: 
+	WIRETYPE=$* make clean all
+	cp fixed_erasable_memory/module.v test-$*.v
+	vvp 2003200.vvp -lxt2
+	mv agc.lxt2 $@
+
+	
