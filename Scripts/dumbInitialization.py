@@ -24,12 +24,21 @@
 #		order that changes with each iteration) until the values no longer
 #		change.  This is then a globally consistent initialization.
 #		It works, and converges pretty fast.
-# Mod history:	2018-08-03 RSB	Created.
-#		2018-08-04 RSB	Handled nets driven from different modules.
-#		2018-08-05 RSB	Now additionally outputs a file called
+# Mod history:	2018-10-03 RSB	Created.
+#		2018-10-04 RSB	Handled nets driven from different modules.
+#		2018-10-05 RSB	Now additionally outputs a file called
 #				dumbInitialization.log, which lists the 
 #				initialization values assigned to each 
 #				applicable net, nicely alphabetized.
+#		2018-10-11 RSB	Should work with both WIRETYPEs now (instead
+#				of just with "wand").  For some reason, 
+#				including STOPA in the list of nets that 
+#				initialize to 0 causes the process not to
+#				converge, so I've had to remove it.  Added
+#				a number of other explicit initializations,
+#				though, to help get a pretty simulation rather
+#				than just a correct one.  Specifically, 
+#				gets rid of a bunch of involuntaries at startup.
 
 # Usage is:
 #	cat VERILOG_FILES | dumbInitialization.py
@@ -41,6 +50,63 @@
 
 import sys
 import random
+
+# Certain flip-flops we want to make sure are initialized specifically to 0 or 1.  
+# I'm told (and my experience is) that the only one that actually matters is STNDBY.  
+# However, explicitly initializing other flip-flops can be helpful helpful in terms
+# of getting a nice setup that produces a simulation without various extraneous stuff
+# at startup (like PINCs) that I usually want to ignore, or that I'd like to use in
+# making comparisons with other simulations (like Mike's) that initialize differently.  
+# Realize that these wishes may not always be possible to achieve, in which case
+# this process will never converge, or that the settings might be immediately
+# undone at startup by some other flip-flops that are initialized wrong.  So
+# some care needs to be taken in these selections.
+want0 = [
+	# STNDBY is controlled from a B-module that we're not simulating.
+	"STNDBY"
+]
+want1 = [
+	# This zeroes the 32-bit counter in scaler module A1.
+	"g38104", "g38114", "g38124", "g38134", "g38144", "g38154", "g38164", "g38174",
+	"g38204", "g38214", "g38224", "g38234", "g38244", "g38254", "g38264", "g38274",
+	"g38304", "g38314", "g38324", "g38334", "g38344", "g38354", "g38364", "g38374",
+	"g38404", "g38414", "g38424", "g38434", "g38444", "g38454", "g38464", "g38474",
+	"g38105", "g38115", "g38125", "g38135", "g38145", "g38155", "g38165", "g38175",
+	"g38205", "g38215", "g38225", "g38235", "g38245", "g38255", "g38265", "g38275",
+	"g38305", "g38315", "g38325", "g38335", "g38345", "g38355", "g38365", "g38375",
+	"g38405", "g38415", "g38425", "g38435", "g38445", "g38455", "g38465", "g38475",
+	# This zeroes the flip-flops in counter modules A20-A21 can otherwise trigger
+	# a bunch of involuntaries (PINC etc.) on registers 024-060 at startup.
+	"g31132", "g31129", # 24
+	"g31139", "g31136", # 25
+	"g31146", "g31143", # 26
+	"g31232", "g31229", # 27
+	"g31239", "g31236", # 30
+	"g31246", "g31243", # 31
+	"g31106", "g31102", "g31109", # 32
+	"g31119", "g31115", "g31124", # 33
+	"g32108", "g31202", "g31209", # 34
+	"g31219", "g31215", "g31224", # 35
+	"g31306", "g31302", "g31309", # 36
+	"g31319", "g31315", "g31324", # 37
+	"g31406", "g31402", "g31409", # 40
+	"g31419", "g31415", "g31424", # 41
+	"g32506", "g32502", "g32509", # 42
+	"g32519", "g32515", "g32524", # 43
+	"g32608", "g32602", "g32609", # 44
+	"g32619", "g32615", "g32624", # 45
+	"g32632", "g32629", "g32636", # 46
+	"g32646", "g32643", # 47
+	"g31332", "g31329", # 50
+	"g31341", "g31336", # 51
+	"g31346", "g31343", # 52
+	"g31432", "g31429", # 53
+	"g31439", "g31436", # 54
+	"g31446", "g31443", # 55
+	"g32532", "g32529", # 56
+	"g32539", "g32536", # 57
+	"g32546", "g32543"  # 60
+]
 
 random.seed(12345)
 
@@ -70,19 +136,34 @@ for line in lines:
 	if len(fields) >= 3 and fields[0] == "//" and fields[1] == "Gate":
 		gates = fields[2:]
 		continue
-	# "assign" statements have several possible forms: 
-	#	assign [STRENGTH] [#DELAY] OUTNET = rst ? INIT : ~(0|INNET1|INNET2|...);
-	if len(fields) == 8 and fields[0] == "assign" and fields[2] == "=":
-		outnet = fields[1]
-		innets = fields[7].strip("~();").split("|")[1:]
-	elif len(fields) == 9 and fields[0] == "assign" and fields[3] == "=":
-		outnet = fields[2]
-		innets = fields[8].strip("~();").split("|")[1:]
-	elif len(fields) == 10 and fields[0] == "assign" and fields[4] == "=":
-		outnet = fields[3]
-		innets = fields[9].strip("~();").split("|")[1:]
-	else:
+	# "assign" statements have several possible forms, but there's always one or 
+	# the other of the following: 
+	#	assign ... OUTNET = ... !(0|INNET1|INNET2|...)...
+	#	assign ... OUTNET = ... ((0|INNET1|INNET2|...)...
+	if len(fields) < 1:
 		continue
+	if fields[0] != "assign":
+		continue
+	j = 0
+	for i in range(2, len(fields)):
+		if fields[i] == "=":
+			j = i
+			outnet = fields[j - 1]
+			break
+	if j == 0:
+		continue
+	innets = []
+	for i in range(j + 1, len(fields)):
+		if fields[i][:4] in ["((0|", "!(0|"]:
+			k = fields[i].find(")")
+			if k < 5:
+				continue
+			stripped = fields[i][4:k]
+			innets = stripped.split("|")
+	if len(innets) < 1:
+		continue
+	#print outnet
+	#print innets
 	# Save the data in structures.
 	if outnet not in nors:
 		nors[outnet] = { "gates":gates, "innets":innets }
@@ -107,21 +188,23 @@ else:
 unchanged = 0
 count = 0
 numchanged = 0
+changed = []
 while unchanged < 2:
 	count += 1
 	if count > 1000:
 		print "Did not converge."
 		sys.exit(1)
-	print "Iteration " + str(count) + " " + str(numchanged)
+	if numchanged <= 100:
+		print "Iteration " + str(count) + " " + str(numchanged) + " " + str(changed)
+	else:
+		print "Iteration " + str(count) + " " + str(numchanged) + " [...]"
 	unchanged += 1
 	numchanged = 0
+	changed = []
 	# Certain flip-flops we want to make sure are initialized specifically to 0 or 1.  
-	# I'm led to believe that this doesn't actually matter, but it's helpful
-	# to me whilst debugging without any software running on the simulated AGC.
-	# Realize that these wishes may not always be possible to achieve.
-	for netName in ["STNDBY", "STOPA"]:
+	for netName in want0:
 		netValues[netName] = False
-	for netName in []:
+	for netName in want1:
 		netValues[netName] = True
 	
 	# Choose a random evaluation order.
@@ -139,6 +222,7 @@ while unchanged < 2:
 		if value != netValues[norNet]:
 			unchanged = 0
 			numchanged += 1
+			changed.append(norNet)
 		netValues[norNet] = value	
 
 for netName in []:
