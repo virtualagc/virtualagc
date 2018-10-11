@@ -59,7 +59,7 @@ pullup(g36425);
 assign #0.2  g36425 = rst ? 0 : ((0|BR1|MP0_|T04_) ? 1'b0 : 1'bz);
 // Gate A4-U136B
 pullup(g36118);
-assign #0.2  g36118 = rst ? 0 : ((0|g36112|T01) ? 1'b0 : 1'bz);
+assign #0.2  g36118 = rst ? 1'bz : ((0|g36112|T01) ? 1'b0 : 1'bz);
 // Gate A4-U144A
 pullup(g36124);
 assign #0.2  g36124 = rst ? 0 : ((0|STG3|DVST_) ? 1'b0 : 1'bz);
@@ -74,7 +74,7 @@ pullup(READ0);
 assign #0.2  READ0 = rst ? 0 : ((0|SQR10|g36307|QC0_) ? 1'b0 : 1'bz);
 // Gate A4-U142B A4-U143B
 pullup(g36133);
-assign #0.2  g36133 = rst ? 1'bz : ((0|g36131|STG2) ? 1'b0 : 1'bz);
+assign #0.2  g36133 = rst ? 0 : ((0|g36131|STG2) ? 1'b0 : 1'bz);
 // Gate A4-U256A
 pullup(RB1_);
 assign #0.2  RB1_ = rst ? 1'bz : ((0|g36436|g36451) ? 1'b0 : 1'bz);
@@ -98,7 +98,7 @@ pullup(g36144);
 assign #0.2  g36144 = rst ? 0 : ((0|STG2|STG1|g36148) ? 1'b0 : 1'bz);
 // Gate A4-U124A
 pullup(g36213);
-assign #0.2  g36213 = rst ? 0 : ((0|SUMB16_|SUMA16_) ? 1'b0 : 1'bz);
+assign #0.2  g36213 = rst ? 1'bz : ((0|SUMB16_|SUMA16_) ? 1'b0 : 1'bz);
 // Gate A4-U249B
 pullup(d2PP1);
 assign #0.2  d2PP1 = rst ? 1'bz : ((0|INOUT|MP1|MP3A) ? 1'b0 : 1'bz);
@@ -107,7 +107,7 @@ pullup(g36221);
 assign #0.2  g36221 = rst ? 0 : ((0|WL16_|PHS4_|TSGN_) ? 1'b0 : 1'bz);
 // Gate A4-U157B
 pullup(g36152);
-assign #0.2  g36152 = rst ? 1'bz : ((0|STG1|STG3) ? 1'b0 : 1'bz);
+assign #0.2  g36152 = rst ? 0 : ((0|STG1|STG3) ? 1'b0 : 1'bz);
 // Gate A4-U211A
 pullup(ROR0);
 assign #0.2  ROR0 = rst ? 0 : ((0|g36307|QC2_|SQR10) ? 1'b0 : 1'bz);
@@ -152,7 +152,7 @@ pullup(DIVSTG);
 assign #0.2  DIVSTG = rst ? 0 : ((0|T12USE_|T03_) ? 1'b0 : 1'bz);
 // Gate A4-U225A
 pullup(g36326);
-assign #0.2  g36326 = rst ? 1'bz : ((0|SQEXT|QC3_) ? 1'b0 : 1'bz);
+assign #0.2  g36326 = rst ? 0 : ((0|SQEXT|QC3_) ? 1'b0 : 1'bz);
 // Gate A4-U235A
 pullup(R1C_);
 assign #0.2  R1C_ = rst ? 1'bz : ((0|g36438|g36451) ? 1'b0 : 1'bz);
@@ -194,7 +194,7 @@ pullup(RAND0);
 assign #0.2  RAND0 = rst ? 0 : ((0|SQR10|QC1_|g36307) ? 1'b0 : 1'bz);
 // Gate A4-U158B
 pullup(ST376_);
-assign #0.2  ST376_ = rst ? 1'bz : ((0|ST376) ? 1'b0 : 1'bz);
+assign #0.2  ST376_ = rst ? 0 : ((0|ST376) ? 1'b0 : 1'bz);
 // Gate A4-U245B
 pullup(g36444);
 assign #0.2  g36444 = rst ? 0 : ((0|BRDIF_|MP0_|T09_) ? 1'b0 : 1'bz);
@@ -251,10 +251,10 @@ pullup(MST1);
 assign #0.2  MST1 = rst ? 0 : ((0|g36115) ? 1'b0 : 1'bz);
 // Gate A4-U139A
 pullup(MST2);
-assign #0.2  MST2 = rst ? 0 : ((0|g36133) ? 1'b0 : 1'bz);
+assign #0.2  MST2 = rst ? 1'bz : ((0|g36133) ? 1'b0 : 1'bz);
 // Gate A4-U148B
 pullup(MST3);
-assign #0.2  MST3 = rst ? 0 : ((0|g36148) ? 1'b0 : 1'bz);
+assign #0.2  MST3 = rst ? 1'bz : ((0|g36148) ? 1'b0 : 1'bz);
 // Gate A4-U213B
 pullup(g36337);
 assign #0.2  g36337 = rst ? 1'bz : ((0|RAND0|WAND0) ? 1'b0 : 1'bz);
@@ -272,7 +272,7 @@ pullup(WRITE0);
 assign #0.2  WRITE0 = rst ? 0 : ((0|QC0_|SQR10_|g36307) ? 1'b0 : 1'bz);
 // Gate A4-U150B A4-U151B
 pullup(ST0_);
-assign #0.2  ST0_ = rst ? 0 : ((0|g36105) ? 1'b0 : 1'bz);
+assign #0.2  ST0_ = rst ? 1'bz : ((0|g36105) ? 1'b0 : 1'bz);
 // Gate A4-U245A
 pullup(g36446);
 assign #0.2  g36446 = rst ? 0 : ((0|T09_|MP3_) ? 1'b0 : 1'bz);
@@ -296,7 +296,7 @@ pullup(WG_);
 assign #0.2  WG_ = rst ? 1'bz : ((0|d9XP1|g36340|g36354|g36351|g36343|g36360|g36407|g36435) ? 1'b0 : 1'bz);
 // Gate A4-U207B
 pullup(d8PP4);
-assign #0.2  d8PP4 = rst ? 0 : ((0|DV4|INOUT|PRINC) ? 1'b0 : 1'bz);
+assign #0.2  d8PP4 = rst ? 1'bz : ((0|DV4|INOUT|PRINC) ? 1'b0 : 1'bz);
 // Gate A4-U149A
 pullup(ST1D);
 assign #0.2  ST1D = rst ? 0 : ((0|g36115|STG2|STG3) ? 1'b0 : 1'bz);
@@ -332,7 +332,7 @@ pullup(d5XP4);
 assign #0.2  d5XP4 = rst ? 0 : ((0|RSM3_|T05_) ? 1'b0 : 1'bz);
 // Gate A4-U104A A4-U160A A4-U105A
 pullup(g);
-assign #0.2  g = rst ? 1'bz : ((0) ? 1'b0 : 1'bz);
+assign #0.2  g = rst ? 0 : ((0) ? 1'b0 : 1'bz);
 // Gate A4-U154B
 pullup(DV1376_);
 assign #0.2  DV1376_ = rst ? 1'bz : ((0|DV1376) ? 1'b0 : 1'bz);
@@ -413,7 +413,7 @@ pullup(g36424);
 assign #0.2  g36424 = rst ? 0 : ((0|T04_|BRDIF_|TS0_) ? 1'b0 : 1'bz);
 // Gate A4-U147A
 pullup(g36148);
-assign #0.2  g36148 = rst ? 1'bz : ((0|STG3|g36147) ? 1'b0 : 1'bz);
+assign #0.2  g36148 = rst ? 0 : ((0|STG3|g36147) ? 1'b0 : 1'bz);
 // Gate A4-U128A A4-U128B
 pullup(DIV_);
 assign #0.2  DIV_ = rst ? 1'bz : ((0|g36201) ? 1'b0 : 1'bz);
@@ -452,16 +452,16 @@ pullup(B15X);
 assign #0.2  B15X = rst ? 0 : ((0|DV1_|T05_) ? 1'b0 : 1'bz);
 // Gate A4-U156A
 pullup(ST376);
-assign #0.2  ST376 = rst ? 0 : ((0|g36152|g36133) ? 1'b0 : 1'bz);
+assign #0.2  ST376 = rst ? 1'bz : ((0|g36152|g36133) ? 1'b0 : 1'bz);
 // Gate A4-U138A
 pullup(STG1);
 assign #0.2  STG1 = rst ? 0 : ((0|g36119|g36115) ? 1'b0 : 1'bz);
 // Gate A4-U142A
 pullup(STG2);
-assign #0.2  STG2 = rst ? 0 : ((0|g36133|g36136) ? 1'b0 : 1'bz);
+assign #0.2  STG2 = rst ? 1'bz : ((0|g36133|g36136) ? 1'b0 : 1'bz);
 // Gate A4-U159B A4-U147B
 pullup(STG3);
-assign #0.2  STG3 = rst ? 0 : ((0|g36150|g36148) ? 1'b0 : 1'bz);
+assign #0.2  STG3 = rst ? 1'bz : ((0|g36150|g36148) ? 1'b0 : 1'bz);
 // Gate A4-U129A
 pullup(DV4);
 assign #0.2  DV4 = rst ? 0 : ((0|DIV_|ST4_) ? 1'b0 : 1'bz);
@@ -476,7 +476,7 @@ pullup(DV0);
 assign #0.2  DV0 = rst ? 0 : ((0|DIV_|ST0_) ? 1'b0 : 1'bz);
 // Gate A4-U259B
 pullup(L16_);
-assign #0.2  L16_ = rst ? 1'bz : ((0|g36451) ? 1'b0 : 1'bz);
+assign #0.2  L16_ = rst ? 0 : ((0|g36451) ? 1'b0 : 1'bz);
 // Gate A4-U157A
 pullup(ST4_);
 assign #0.2  ST4_ = rst ? 1'bz : ((0|g36144) ? 1'b0 : 1'bz);
@@ -500,7 +500,7 @@ pullup(TL15);
 assign #0.2  TL15 = rst ? 0 : ((0|MP3_|T06_) ? 1'b0 : 1'bz);
 // Gate A4-U224A
 pullup(g36342);
-assign #0.2  g36342 = rst ? 0 : ((0|IC13|IC12|RUPT1) ? 1'b0 : 1'bz);
+assign #0.2  g36342 = rst ? 1'bz : ((0|IC13|IC12|RUPT1) ? 1'b0 : 1'bz);
 // Gate A4-U250A
 pullup(g36407);
 assign #0.2  g36407 = rst ? 0 : ((0|T02_|g36406) ? 1'b0 : 1'bz);
@@ -545,10 +545,10 @@ pullup(g36110);
 assign #0.2  g36110 = rst ? 0 : ((0|PHS3_|g36109|T12_) ? 1'b0 : 1'bz);
 // Gate A4-U153A
 pullup(ST1376_);
-assign #0.2  ST1376_ = rst ? 1'bz : ((0|ST376|ST1D) ? 1'b0 : 1'bz);
+assign #0.2  ST1376_ = rst ? 0 : ((0|ST376|ST1D) ? 1'b0 : 1'bz);
 // Gate A4-U149B
 pullup(g36105);
-assign #0.2  g36105 = rst ? 1'bz : ((0|STG3|STG1|STG2) ? 1'b0 : 1'bz);
+assign #0.2  g36105 = rst ? 0 : ((0|STG3|STG1|STG2) ? 1'b0 : 1'bz);
 // Gate A4-U133B A4-U134A
 pullup(g36111);
 assign #0.2  g36111 = rst ? 1'bz : ((0|g36103|g36110) ? 1'b0 : 1'bz);
@@ -581,7 +581,7 @@ pullup(g36140);
 assign #0.2  g36140 = rst ? 0 : ((0|g36115|STG3|g36133) ? 1'b0 : 1'bz);
 // Gate A4-U158A
 pullup(g36156);
-assign #0.2  g36156 = rst ? 1'bz : ((0|g36144|ST376) ? 1'b0 : 1'bz);
+assign #0.2  g36156 = rst ? 0 : ((0|g36144|ST376) ? 1'b0 : 1'bz);
 // Gate A4-U201A A4-U202A
 pullup(g36307);
 assign #0.2  g36307 = rst ? 1'bz : ((0|g36303) ? 1'b0 : 1'bz);

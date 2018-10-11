@@ -533,7 +533,7 @@ pullup(g44435);
 assign #0.2  g44435 = rst ? 0 : ((0|XT1_|XB0_|CCHG_) ? 1'b0 : 1'bz);
 // Gate A17-U260A
 pullup(g44463);
-assign #0.2  g44463 = rst ? 1'bz : ((0) ? 1'b0 : 1'bz);
+assign #0.2  g44463 = rst ? 0 : ((0) ? 1'b0 : 1'bz);
 // Gate A17-U149A A17-U203A
 pullup(CHOR09_);
 assign #0.2  CHOR09_ = rst ? 1'bz : ((0|g44218|g44125|g44126|CH1309|CH1409|g44352) ? 1'b0 : 1'bz);
@@ -605,7 +605,7 @@ pullup(g44232);
 assign #0.2  g44232 = rst ? 0 : ((0|TRANmZ|RCH31_) ? 1'b0 : 1'bz);
 // Gate A17-U260B
 pullup(g44464);
-assign #0.2  g44464 = rst ? 1'bz : ((0) ? 1'b0 : 1'bz);
+assign #0.2  g44464 = rst ? 0 : ((0) ? 1'b0 : 1'bz);
 // Gate A17-U134B
 pullup(g44149);
 assign #0.2  g44149 = rst ? 0 : ((0|XB1_|XT3_) ? 1'b0 : 1'bz);

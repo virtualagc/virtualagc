@@ -37,7 +37,7 @@ pullup(g41237);
 assign #0.2  g41237 = rst ? 0 : ((0|g41238|GOJAM) ? 1'b0 : 1'bz);
 // Gate A13-U115B
 pullup(g41130);
-assign #0.2  g41130 = rst ? 0 : ((0|SUMA16_|G01A_|SUMB16_) ? 1'b0 : 1'bz);
+assign #0.2  g41130 = rst ? 1'bz : ((0|SUMA16_|G01A_|SUMB16_) ? 1'b0 : 1'bz);
 // Gate A13-U101A
 pullup(DOFILT);
 assign #0.2  DOFILT = rst ? 1'bz : ((0|g41146) ? 1'b0 : 1'bz);
@@ -73,7 +73,7 @@ pullup(g41206);
 assign #0.2  g41206 = rst ? 0 : ((0|STNDBY_|F05A_|g41203) ? 1'b0 : 1'bz);
 // Gate A13-U133A
 pullup(g41244);
-assign #0.2  g41244 = rst ? 1'bz : ((0) ? 1'b0 : 1'bz);
+assign #0.2  g41244 = rst ? 0 : ((0) ? 1'b0 : 1'bz);
 // Gate A13-U101B
 pullup(g41146);
 assign #0.2  g41146 = rst ? 0 : ((0|g41143|GOJAM|g41151) ? 1'b0 : 1'bz);
@@ -130,13 +130,13 @@ pullup(MOSCAL_);
 assign #0.2  MOSCAL_ = rst ? 0 : ((0|STRT2) ? 1'b0 : 1'bz);
 // Gate A13-U117A
 pullup(G16SW_);
-assign #0.2  G16SW_ = rst ? 1'bz : ((0|g41129|g41130) ? 1'b0 : 1'bz);
+assign #0.2  G16SW_ = rst ? 0 : ((0|g41129|g41130) ? 1'b0 : 1'bz);
 // Gate A13-U141B
 pullup(OSCALM);
 assign #0.2  OSCALM = rst ? 1'bz : ((0|g41232|CCH33) ? 1'b0 : 1'bz);
 // Gate A13-U139B
 pullup(SBYEXT);
-assign #0.2  SBYEXT = rst ? 0 : ((0|g41234) ? 1'b0 : 1'bz);
+assign #0.2  SBYEXT = rst ? 1'bz : ((0|g41234) ? 1'b0 : 1'bz);
 // Gate A13-U153B
 pullup(g41215);
 assign #0.2  g41215 = rst ? 0 : ((0|g41214|F08B) ? 1'b0 : 1'bz);
@@ -181,7 +181,7 @@ pullup(g41150);
 assign #0.2  g41150 = rst ? 1'bz : ((0|F07A|g41149) ? 1'b0 : 1'bz);
 // Gate A13-U114A A13-U114B
 pullup(XT0_);
-assign #0.2  XT0_ = rst ? 0 : ((0|XT0) ? 1'b0 : 1'bz);
+assign #0.2  XT0_ = rst ? 1'bz : ((0|XT0) ? 1'b0 : 1'bz);
 // Gate A13-U107A
 pullup(g41141);
 assign #0.2  g41141 = rst ? 1'bz : ((0|g41140|g41142) ? 1'b0 : 1'bz);
@@ -229,7 +229,7 @@ pullup(g41224);
 assign #0.2  g41224 = rst ? 1'bz : ((0|SCAFAL|FLTOUT) ? 1'b0 : 1'bz);
 // Gate A13-U139A
 pullup(g41235);
-assign #0.2  g41235 = rst ? 0 : ((0|g41234|T10) ? 1'b0 : 1'bz);
+assign #0.2  g41235 = rst ? 1'bz : ((0|g41234|T10) ? 1'b0 : 1'bz);
 // Gate A13-U124A
 pullup(g41110);
 assign #0.2  g41110 = rst ? 1'bz : ((0|g41109|F14B) ? 1'b0 : 1'bz);
@@ -244,10 +244,10 @@ pullup(g41140);
 assign #0.2  g41140 = rst ? 0 : ((0|T09_|g41138|NOTEST) ? 1'b0 : 1'bz);
 // Gate A13-U138B
 pullup(g41238);
-assign #0.2  g41238 = rst ? 1'bz : ((0|ERRST|g41237|SBYEXT) ? 1'b0 : 1'bz);
+assign #0.2  g41238 = rst ? 0 : ((0|ERRST|g41237|SBYEXT) ? 1'b0 : 1'bz);
 // Gate A13-U137A
 pullup(g41239);
-assign #0.2  g41239 = rst ? 0 : ((0|g41238|ALTEST) ? 1'b0 : 1'bz);
+assign #0.2  g41239 = rst ? 1'bz : ((0|g41238|ALTEST) ? 1'b0 : 1'bz);
 // Gate A13-U152A
 pullup(STRT1);
 assign #0.2  STRT1 = rst ? 0 : ((0|g41245|g41247) ? 1'b0 : 1'bz);
@@ -283,10 +283,10 @@ pullup(MCTRAL_);
 assign #0.2  MCTRAL_ = rst ? 1'bz : ((0|g41143|g41151) ? 1'b0 : 1'bz);
 // Gate A13-U119B
 pullup(g41124);
-assign #0.2  g41124 = rst ? 0 : ((0|F10B|g41123) ? 1'b0 : 1'bz);
+assign #0.2  g41124 = rst ? 1'bz : ((0|F10B|g41123) ? 1'b0 : 1'bz);
 // Gate A13-U140A
 pullup(g41234);
-assign #0.2  g41234 = rst ? 1'bz : ((0|g41235|SBY) ? 1'b0 : 1'bz);
+assign #0.2  g41234 = rst ? 0 : ((0|g41235|SBY) ? 1'b0 : 1'bz);
 // Gate A13-U119A
 pullup(g41122);
 assign #0.2  g41122 = rst ? 1'bz : ((0|g41121|F10B) ? 1'b0 : 1'bz);
@@ -295,7 +295,7 @@ pullup(g41121);
 assign #0.2  g41121 = rst ? 0 : ((0|g41122|TCF0|TC0) ? 1'b0 : 1'bz);
 // Gate A13-U137B
 pullup(RESTRT);
-assign #0.2  RESTRT = rst ? 1'bz : ((0|g41239) ? 1'b0 : 1'bz);
+assign #0.2  RESTRT = rst ? 0 : ((0|g41239) ? 1'b0 : 1'bz);
 // Gate A13-U129B
 pullup(g41101);
 assign #0.2  g41101 = rst ? 1'bz : ((0|MSTRT) ? 1'b0 : 1'bz);
@@ -304,7 +304,7 @@ pullup(g41102);
 assign #0.2  g41102 = rst ? 0 : ((0|F05B_|g41101) ? 1'b0 : 1'bz);
 // Gate A13-U118B
 pullup(g41123);
-assign #0.2  g41123 = rst ? 1'bz : ((0|g41120|g41124) ? 1'b0 : 1'bz);
+assign #0.2  g41123 = rst ? 0 : ((0|g41120|g41124) ? 1'b0 : 1'bz);
 // End of NOR gates
 
 endmodule

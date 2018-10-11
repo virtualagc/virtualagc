@@ -48,7 +48,7 @@ pullup(g99132);
 assign #0.2  g99132 = rst ? 1'bz : ((0|CLROPE|g99133) ? 1'b0 : 1'bz);
 // Gate A99-U205A A99-U205B
 pullup(A99ES03_);
-assign #0.2  A99ES03_ = rst ? 1'bz : ((0|XB5E|XB4E|XB6E|XB7E) ? 1'b0 : 1'bz);
+assign #0.2  A99ES03_ = rst ? 0 : ((0|XB5E|XB4E|XB6E|XB7E) ? 1'b0 : 1'bz);
 // Gate A99-U131B
 pullup(g99162);
 assign #0.2  g99162 = rst ? 1'bz : ((0|g99131|RESETB) ? 1'b0 : 1'bz);
@@ -126,7 +126,7 @@ pullup(g99124);
 assign #0.2  g99124 = rst ? 0 : ((0|HIMOD|STR58) ? 1'b0 : 1'bz);
 // Gate A99-U113B
 pullup(g99126);
-assign #0.2  g99126 = rst ? 1'bz : ((0|LOMOD|g99125) ? 1'b0 : 1'bz);
+assign #0.2  g99126 = rst ? 0 : ((0|LOMOD|g99125) ? 1'b0 : 1'bz);
 // Gate A99-U224A
 pullup(g99247);
 assign #0.2  g99247 = rst ? 1'bz : ((0|A99RADDR10|g99246) ? 1'b0 : 1'bz);
@@ -141,7 +141,7 @@ pullup(g99166);
 assign #0.2  g99166 = rst ? 0 : ((0|g99164) ? 1'b0 : 1'bz);
 // Gate A99-U103A
 pullup(g99105);
-assign #0.2  g99105 = rst ? 1'bz : ((0|STR14|LOMOD|ROPES) ? 1'b0 : 1'bz);
+assign #0.2  g99105 = rst ? 0 : ((0|STR14|LOMOD|ROPES) ? 1'b0 : 1'bz);
 // Gate A99-U102A
 pullup(g99103);
 assign #0.2  g99103 = rst ? 1'bz : ((0|ROPES) ? 1'b0 : 1'bz);
@@ -159,7 +159,7 @@ pullup(g99219);
 assign #0.2  g99219 = rst ? 0 : ((0|g99203|A99ES04_) ? 1'b0 : 1'bz);
 // Gate A99-U212A A99-U212B
 pullup(A99ES10_);
-assign #0.2  A99ES10_ = rst ? 1'bz : ((0|YT3E|YT2E|YT6E|YT7E) ? 1'b0 : 1'bz);
+assign #0.2  A99ES10_ = rst ? 0 : ((0|YT3E|YT2E|YT6E|YT7E) ? 1'b0 : 1'bz);
 // Gate A99-U133A
 pullup(g99165);
 assign #0.2  g99165 = rst ? 1'bz : ((0|g99166) ? 1'b0 : 1'bz);
@@ -249,7 +249,7 @@ pullup(g99203);
 assign #0.2  g99203 = rst ? 1'bz : ((0|SETEK) ? 1'b0 : 1'bz);
 // Gate A99-U208A A99-U208B
 pullup(A99ES06_);
-assign #0.2  A99ES06_ = rst ? 1'bz : ((0|XT5E|XT4E|XT6E|XT7E) ? 1'b0 : 1'bz);
+assign #0.2  A99ES06_ = rst ? 0 : ((0|XT5E|XT4E|XT6E|XT7E) ? 1'b0 : 1'bz);
 // Gate A99-U228B
 pullup(A99RADDR11);
 assign #0.2  A99RADDR11 = rst ? 0 : ((0|g99254|A99RESETK) ? 1'b0 : 1'bz);
@@ -267,19 +267,19 @@ pullup(A99FADDR8);
 assign #0.2  A99FADDR8 = rst ? 1'bz : ((0|A99QUARTERA|A99QUARTERC) ? 1'b0 : 1'bz);
 // Gate A99-U139A
 pullup(A99FADDR7);
-assign #0.2  A99FADDR7 = rst ? 0 : ((0|IL07) ? 1'b0 : 1'bz);
+assign #0.2  A99FADDR7 = rst ? 1'bz : ((0|IL07) ? 1'b0 : 1'bz);
 // Gate A99-U139B
 pullup(A99FADDR6);
-assign #0.2  A99FADDR6 = rst ? 0 : ((0|IL06) ? 1'b0 : 1'bz);
+assign #0.2  A99FADDR6 = rst ? 1'bz : ((0|IL06) ? 1'b0 : 1'bz);
 // Gate A99-U140A
 pullup(A99FADDR5);
-assign #0.2  A99FADDR5 = rst ? 0 : ((0|IL05) ? 1'b0 : 1'bz);
+assign #0.2  A99FADDR5 = rst ? 1'bz : ((0|IL05) ? 1'b0 : 1'bz);
 // Gate A99-U140B
 pullup(A99FADDR4);
-assign #0.2  A99FADDR4 = rst ? 0 : ((0|IL04) ? 1'b0 : 1'bz);
+assign #0.2  A99FADDR4 = rst ? 1'bz : ((0|IL04) ? 1'b0 : 1'bz);
 // Gate A99-U141A
 pullup(A99FADDR3);
-assign #0.2  A99FADDR3 = rst ? 0 : ((0|IL03) ? 1'b0 : 1'bz);
+assign #0.2  A99FADDR3 = rst ? 1'bz : ((0|IL03) ? 1'b0 : 1'bz);
 // Gate A99-U129B
 pullup(g99158);
 assign #0.2  g99158 = rst ? 1'bz : ((0|g99157) ? 1'b0 : 1'bz);
@@ -288,7 +288,7 @@ pullup(A99FADDR1);
 assign #0.2  A99FADDR1 = rst ? 1'bz : ((0|IL01) ? 1'b0 : 1'bz);
 // Gate A99-U104A
 pullup(g99107);
-assign #0.2  g99107 = rst ? 0 : ((0|STR912|HIMOD|ROPET) ? 1'b0 : 1'bz);
+assign #0.2  g99107 = rst ? 1'bz : ((0|STR912|HIMOD|ROPET) ? 1'b0 : 1'bz);
 // Gate A99-U126B
 pullup(g99152);
 assign #0.2  g99152 = rst ? 1'bz : ((0|g99150|A99QUARTERC) ? 1'b0 : 1'bz);
@@ -297,10 +297,10 @@ pullup(g99110);
 assign #0.2  g99110 = rst ? 0 : ((0|g99103|g99115) ? 1'b0 : 1'bz);
 // Gate A99-U106A
 pullup(g99111);
-assign #0.2  g99111 = rst ? 1'bz : ((0|STR14|LOMOD|ROPER) ? 1'b0 : 1'bz);
+assign #0.2  g99111 = rst ? 0 : ((0|STR14|LOMOD|ROPER) ? 1'b0 : 1'bz);
 // Gate A99-U213B A99-U214A
 pullup(A99ES11_);
-assign #0.2  A99ES11_ = rst ? 1'bz : ((0|YT6E|YT7E|YT5E|YT4E) ? 1'b0 : 1'bz);
+assign #0.2  A99ES11_ = rst ? 0 : ((0|YT6E|YT7E|YT5E|YT4E) ? 1'b0 : 1'bz);
 // Gate A99-U101A
 pullup(A99FADDR16);
 assign #0.2  A99FADDR16 = rst ? 0 : ((0|STR14|LOMOD|g99106) ? 1'b0 : 1'bz);
@@ -309,7 +309,7 @@ pullup(A99FADDR15);
 assign #0.2  A99FADDR15 = rst ? 0 : ((0|ROPER|g99105|g99107) ? 1'b0 : 1'bz);
 // Gate A99-U105A A99-U104B
 pullup(A99FADDR14);
-assign #0.2  A99FADDR14 = rst ? 0 : ((0|g99114|g99113|g99110|g99111) ? 1'b0 : 1'bz);
+assign #0.2  A99FADDR14 = rst ? 1'bz : ((0|g99114|g99113|g99110|g99111) ? 1'b0 : 1'bz);
 // Gate A99-U109A A99-U109B
 pullup(A99FADDR13);
 assign #0.2  A99FADDR13 = rst ? 0 : ((0|g99119|g99116|g99120|g99121) ? 1'b0 : 1'bz);
@@ -345,13 +345,13 @@ pullup(g99208);
 assign #0.2  g99208 = rst ? 0 : ((0|A99ES02_|g99203) ? 1'b0 : 1'bz);
 // Gate A99-U209B
 pullup(A99ES07_);
-assign #0.2  A99ES07_ = rst ? 1'bz : ((0|YB1E|YB3E) ? 1'b0 : 1'bz);
+assign #0.2  A99ES07_ = rst ? 0 : ((0|YB1E|YB3E) ? 1'b0 : 1'bz);
 // Gate A99-U235A
 pullup(g99269);
 assign #0.2  g99269 = rst ? 0 : ((0|g99268) ? 1'b0 : 1'bz);
 // Gate A99-U108B
 pullup(g99116);
-assign #0.2  g99116 = rst ? 0 : ((0|ROPES|HIMOD|STR912) ? 1'b0 : 1'bz);
+assign #0.2  g99116 = rst ? 1'bz : ((0|ROPES|HIMOD|STR912) ? 1'b0 : 1'bz);
 // Gate A99-U123B
 pullup(g99146);
 assign #0.2  g99146 = rst ? 1'bz : ((0|RESETA) ? 1'b0 : 1'bz);
@@ -372,7 +372,7 @@ pullup(g99240);
 assign #0.2  g99240 = rst ? 1'bz : ((0|g99217|A99RADDR3) ? 1'b0 : 1'bz);
 // Gate A99-U112A
 pullup(A99FADDR12);
-assign #0.2  A99FADDR12 = rst ? 0 : ((0|g99126|g99124) ? 1'b0 : 1'bz);
+assign #0.2  A99FADDR12 = rst ? 1'bz : ((0|g99126|g99124) ? 1'b0 : 1'bz);
 // Gate A99-U226B
 pullup(g99252);
 assign #0.2  g99252 = rst ? 1'bz : ((0|g99225|A99RADDR5) ? 1'b0 : 1'bz);
@@ -414,7 +414,7 @@ pullup(g99168);
 assign #0.2  g99168 = rst ? 1'bz : ((0|g99134|RESETC) ? 1'b0 : 1'bz);
 // Gate A99-U206A A99-U206B
 pullup(A99ES04_);
-assign #0.2  A99ES04_ = rst ? 1'bz : ((0|XT3E|XT1E|XT5E|XT7E) ? 1'b0 : 1'bz);
+assign #0.2  A99ES04_ = rst ? 0 : ((0|XT3E|XT1E|XT5E|XT7E) ? 1'b0 : 1'bz);
 // Gate A99-U136A
 pullup(g99171);
 assign #0.2  g99171 = rst ? 1'bz : ((0|g99172) ? 1'b0 : 1'bz);
@@ -444,10 +444,10 @@ pullup(g99120);
 assign #0.2  g99120 = rst ? 0 : ((0|g99103|HIMOD|g99115) ? 1'b0 : 1'bz);
 // Gate A99-U110A
 pullup(g99119);
-assign #0.2  g99119 = rst ? 1'bz : ((0|STR14|LOMOD|ROPES) ? 1'b0 : 1'bz);
+assign #0.2  g99119 = rst ? 0 : ((0|STR14|LOMOD|ROPES) ? 1'b0 : 1'bz);
 // Gate A99-U207A A99-U207B
 pullup(A99ES05_);
-assign #0.2  A99ES05_ = rst ? 1'bz : ((0|XT3E|XT2E|XT6E|XT7E) ? 1'b0 : 1'bz);
+assign #0.2  A99ES05_ = rst ? 0 : ((0|XT3E|XT2E|XT6E|XT7E) ? 1'b0 : 1'bz);
 // Gate A99-U136B
 pullup(g99172);
 assign #0.2  g99172 = rst ? 0 : ((0|g99170) ? 1'b0 : 1'bz);

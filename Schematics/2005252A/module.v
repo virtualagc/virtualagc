@@ -60,7 +60,7 @@ pullup(g33345);
 assign #0.2  g33345 = rst ? 0 : ((0|RUS_|RT_) ? 1'b0 : 1'bz);
 // Gate A7-U127B
 pullup(P04A);
-assign #0.2  P04A = rst ? 0 : ((0|P04_) ? 1'b0 : 1'bz);
+assign #0.2  P04A = rst ? 1'bz : ((0|P04_) ? 1'b0 : 1'bz);
 // Gate A7-U119A
 pullup(g33244);
 assign #0.2  g33244 = rst ? 0 : ((0|WQ_|WT_) ? 1'b0 : 1'bz);
@@ -69,7 +69,7 @@ pullup(RLG_);
 assign #0.2  RLG_ = rst ? 1'bz : ((0|RLG2|RLG1|RLG3) ? 1'b0 : 1'bz);
 // Gate A7-U220A
 pullup(YT7_);
-assign #0.2  YT7_ = rst ? 1'bz : ((0|YT7) ? 1'b0 : 1'bz);
+assign #0.2  YT7_ = rst ? 0 : ((0|YT7) ? 1'b0 : 1'bz);
 // Gate A7-U209A
 pullup(g33409);
 assign #0.2  g33409 = rst ? 0 : ((0|XT0_|RCHG_|XB2_) ? 1'b0 : 1'bz);
@@ -93,7 +93,7 @@ pullup(WEDOPG_);
 assign #0.2  WEDOPG_ = rst ? 1'bz : ((0|g33155) ? 1'b0 : 1'bz);
 // Gate A7-U219A
 pullup(YT7E);
-assign #0.2  YT7E = rst ? 0 : ((0|YT7_) ? 1'b0 : 1'bz);
+assign #0.2  YT7E = rst ? 1'bz : ((0|YT7_) ? 1'b0 : 1'bz);
 // Gate A7-U226A
 pullup(YT5E);
 assign #0.2  YT5E = rst ? 0 : ((0|YT5_) ? 1'b0 : 1'bz);
@@ -117,7 +117,7 @@ pullup(g33305);
 assign #0.2  g33305 = rst ? 1'bz : ((0|g33301|g33312|U2BBK) ? 1'b0 : 1'bz);
 // Gate A7-U202A
 pullup(CIFF);
-assign #0.2  CIFF = rst ? 0 : ((0|g33458|CUG) ? 1'b0 : 1'bz);
+assign #0.2  CIFF = rst ? 1'bz : ((0|g33458|CUG) ? 1'b0 : 1'bz);
 // Gate A7-U252B A7-U250B A7-U251B
 pullup(RZG_);
 assign #0.2  RZG_ = rst ? 1'bz : ((0|g33336|g33337) ? 1'b0 : 1'bz);
@@ -126,7 +126,7 @@ pullup(g33350);
 assign #0.2  g33350 = rst ? 0 : ((0|RB_|RT_) ? 1'b0 : 1'bz);
 // Gate A7-U231A
 pullup(CI01_);
-assign #0.2  CI01_ = rst ? 1'bz : ((0|CINORM|CIFF) ? 1'b0 : 1'bz);
+assign #0.2  CI01_ = rst ? 0 : ((0|CINORM|CIFF) ? 1'b0 : 1'bz);
 // Gate A7-U111B
 pullup(g33211);
 assign #0.2  g33211 = rst ? 0 : ((0|WL_|WT_) ? 1'b0 : 1'bz);
@@ -210,7 +210,7 @@ pullup(YT6);
 assign #0.2  YT6 = rst ? 0 : ((0|EAD10_|EAD09|EAD11_) ? 1'b0 : 1'bz);
 // Gate A7-U221A
 pullup(YT7);
-assign #0.2  YT7 = rst ? 0 : ((0|EAD11_|EAD10_|EAD09_) ? 1'b0 : 1'bz);
+assign #0.2  YT7 = rst ? 1'bz : ((0|EAD11_|EAD10_|EAD09_) ? 1'b0 : 1'bz);
 // Gate A7-U230A
 pullup(YT4);
 assign #0.2  YT4 = rst ? 0 : ((0|EAD11_|EAD10|EAD09) ? 1'b0 : 1'bz);
@@ -228,7 +228,7 @@ pullup(YT0);
 assign #0.2  YT0 = rst ? 0 : ((0|EAD11|EAD10|EAD09) ? 1'b0 : 1'bz);
 // Gate A7-U224B
 pullup(YT1);
-assign #0.2  YT1 = rst ? 1'bz : ((0|EAD09_|EAD10|EAD11) ? 1'b0 : 1'bz);
+assign #0.2  YT1 = rst ? 0 : ((0|EAD09_|EAD10|EAD11) ? 1'b0 : 1'bz);
 // Gate A7-U237B
 pullup(MWBBEG);
 assign #0.2  MWBBEG = rst ? 0 : ((0|WBBEG_) ? 1'b0 : 1'bz);
@@ -264,7 +264,7 @@ pullup(g33245);
 assign #0.2  g33245 = rst ? 0 : ((0|XB2_|WSCG_) ? 1'b0 : 1'bz);
 // Gate A7-U160B
 pullup(g33125);
-assign #0.2  g33125 = rst ? 0 : ((0|PIFL_|L15_) ? 1'b0 : 1'bz);
+assign #0.2  g33125 = rst ? 1'bz : ((0|PIFL_|L15_) ? 1'b0 : 1'bz);
 // Gate A7-U138A A7-U139A A7-U137A
 pullup(CBG);
 assign #0.2  CBG = rst ? 0 : ((0|CT_|WBG_) ? 1'b0 : 1'bz);
@@ -366,7 +366,7 @@ pullup(MWFBG);
 assign #0.2  MWFBG = rst ? 0 : ((0|WFBG_) ? 1'b0 : 1'bz);
 // Gate A7-U222B
 pullup(YT1E);
-assign #0.2  YT1E = rst ? 1'bz : ((0|YT1_) ? 1'b0 : 1'bz);
+assign #0.2  YT1E = rst ? 0 : ((0|YT1_) ? 1'b0 : 1'bz);
 // Gate A7-U137B
 pullup(g33106);
 assign #0.2  g33106 = rst ? 0 : ((0|WY_) ? 1'b0 : 1'bz);
@@ -384,10 +384,10 @@ pullup(RBBK);
 assign #0.2  RBBK = rst ? 0 : ((0|T10_|STFET1_) ? 1'b0 : 1'bz);
 // Gate A7-U223B
 pullup(YT1_);
-assign #0.2  YT1_ = rst ? 0 : ((0|YT1) ? 1'b0 : 1'bz);
+assign #0.2  YT1_ = rst ? 1'bz : ((0|YT1) ? 1'b0 : 1'bz);
 // Gate A7-U248B
 pullup(g33358);
-assign #0.2  g33358 = rst ? 1'bz : ((0) ? 1'b0 : 1'bz);
+assign #0.2  g33358 = rst ? 0 : ((0) ? 1'b0 : 1'bz);
 // Gate A7-U132B A7-U133B A7-U136A A7-U34B
 pullup(WALSG_);
 assign #0.2  WALSG_ = rst ? 1'bz : ((0|WALSG) ? 1'b0 : 1'bz);
@@ -468,7 +468,7 @@ pullup(CLG1G);
 assign #0.2  CLG1G = rst ? 0 : ((0|g33223|CT_) ? 1'b0 : 1'bz);
 // Gate A7-U204A
 pullup(CINORM);
-assign #0.2  CINORM = rst ? 0 : ((0|NEAC|EAC_) ? 1'b0 : 1'bz);
+assign #0.2  CINORM = rst ? 1'bz : ((0|NEAC|EAC_) ? 1'b0 : 1'bz);
 // Gate A7-U235A A7-U236A
 pullup(WEBG_);
 assign #0.2  WEBG_ = rst ? 1'bz : ((0|g33301) ? 1'b0 : 1'bz);
@@ -495,7 +495,7 @@ pullup(g33413);
 assign #0.2  g33413 = rst ? 0 : ((0|XB6_|RSCG_) ? 1'b0 : 1'bz);
 // Gate A7-U203A
 pullup(g33458);
-assign #0.2  g33458 = rst ? 1'bz : ((0|CI|CIFF) ? 1'b0 : 1'bz);
+assign #0.2  g33458 = rst ? 0 : ((0|CI|CIFF) ? 1'b0 : 1'bz);
 // Gate A7-U142B
 pullup(g33111);
 assign #0.2  g33111 = rst ? 0 : ((0|WY_|WT_) ? 1'b0 : 1'bz);

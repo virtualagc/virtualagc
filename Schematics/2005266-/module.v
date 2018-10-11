@@ -108,7 +108,7 @@ pullup(g43213);
 assign #0.2  g43213 = rst ? 0 : ((0|XB6_|XT0_) ? 1'b0 : 1'bz);
 // Gate A16-U258B
 pullup(g43360);
-assign #0.2  g43360 = rst ? 1'bz : ((0) ? 1'b0 : 1'bz);
+assign #0.2  g43360 = rst ? 0 : ((0) ? 1'b0 : 1'bz);
 // Gate A16-U141A
 pullup(g43122);
 assign #0.2  g43122 = rst ? 0 : ((0|RCH05_|g43120) ? 1'b0 : 1'bz);
@@ -435,7 +435,7 @@ pullup(VNFLSH);
 assign #0.2  VNFLSH = rst ? 0 : ((0|FLASH_|g43434) ? 1'b0 : 1'bz);
 // Gate A16-U101B
 pullup(g43260);
-assign #0.2  g43260 = rst ? 1'bz : ((0) ? 1'b0 : 1'bz);
+assign #0.2  g43260 = rst ? 0 : ((0) ? 1'b0 : 1'bz);
 // Gate A16-U133B
 pullup(RCpXpP);
 assign #0.2  RCpXpP = rst ? 0 : ((0|g43102) ? 1'b0 : 1'bz);
@@ -645,7 +645,7 @@ pullup(g43410);
 assign #0.2  g43410 = rst ? 0 : ((0|g43409|CCH11) ? 1'b0 : 1'bz);
 // Gate A16-U260B
 pullup(g43359);
-assign #0.2  g43359 = rst ? 1'bz : ((0) ? 1'b0 : 1'bz);
+assign #0.2  g43359 = rst ? 0 : ((0) ? 1'b0 : 1'bz);
 // Gate A16-U121A
 pullup(g43221);
 assign #0.2  g43221 = rst ? 0 : ((0|CCH06|g43220) ? 1'b0 : 1'bz);
