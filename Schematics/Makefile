@@ -107,7 +107,7 @@
 DEFAULT_GATE_DELAY = 0.2 # In 100ns units.
 
 ifndef ROM
-	ROM := Validation
+	ROM := Aurora12
 endif
 
 # An auxiliary function, which takes a drawing number for a given AGC p/n,
