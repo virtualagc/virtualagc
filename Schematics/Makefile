@@ -50,6 +50,10 @@
 #				dumbVerilog.py, so I've added a 'test' target
 #				here to verify that the two produce the same
 #				simulation results.
+#		2018-10-11 RSB	For the 2003200.init target (which creates 
+#				the initialization conditions for the flip-flops)
+#				I found that it was rebuilding 2003200.vvp
+#				which wasn't wanted.
 #
 # This 'make' needs to be performed from the Schematics/ directory.
 # Icarus Verilog must be installed, and iverilog must be in the PATH.
@@ -282,7 +286,7 @@ fixed_erasable_memory/module.vvp: $(FIXED_ERASABLE_V) roms/rom.v
 # overwrite any module.init files that already exist.  Moreover, if any
 # module.init files are change in the process, you'll need to rebuild all
 # of the Verilog afterward, and this target doesn't do that for you.
-%.init: %.vvp
+%.init:
 	cat $(TARGETS_V_$*) | ../Scripts/dumbInitialization.py
 	@n=1; \
 	for d in $(DRAWINGS_$*) ; \
