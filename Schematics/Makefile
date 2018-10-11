@@ -299,9 +299,9 @@ fixed_erasable_memory/module.vvp: $(FIXED_ERASABLE_V) roms/rom.v
 	done
 
 # Performs a test of building with the "wand" construct vs the "wire" construct.
-# Unfortunately, the .lxt2 files produced by this (test-wire.lxt2 and test-wand.lxt2)
+# Unfortunately, the .lxt files produced by this (test-wire.lxt and test-wand.lxt)
 # will differ, so you can't automatically compare them.  You have several choices,
-# I guess.  If you install Impulse in Eclipse, it can compare two .lxt2 files; but
+# I guess.  If you install Impulse in Eclipse, it can compare two .lxt files; but
 # you need to get a (free) license and in my experience, the comparison feature is
 # rather useless for this purpose.  You code just visually compare the waveforms by
 # running two instances of gtkwave side by side (which this target does for you).
@@ -311,16 +311,16 @@ fixed_erasable_memory/module.vvp: $(FIXED_ERASABLE_V) roms/rom.v
 # friendly list of the instructions and involuntary instructions executed.
 .PHONY: test
 test: 
-	-rm test-wand.lxt2 test-wire.lxt2 test-wand.tim test-wire.tim
-	make test-wand.lxt2
-	make test-wire.lxt2
-	gtkwave test-wand.lxt2 agc-decoder.gtkw & \
-	gtkwave test-wire.lxt2 agc-decoder.gtkw &
+	-rm test-wand.lxt test-wire.lxt test-wand.tim test-wire.tim
+	make test-wand.lxt
+	make test-wire.lxt
+	gtkwave test-wand.lxt agc-decoder.gtkw & \
+	gtkwave test-wire.lxt agc-decoder.gtkw &
 
-test-%.lxt2: 
+test-%.lxt: 
 	WIRETYPE=$* make clean all
 	cp fixed_erasable_memory/module.v test-$*.v
-	vvp 2003200.vvp -lxt2
-	mv agc.lxt2 $@
+	vvp 2003200.vvp -lxt
+	mv agc.lxt $@
 
 	

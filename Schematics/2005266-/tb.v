@@ -5,7 +5,7 @@ reg rst = 1;
 reg STRT2 = 1;
 initial
   begin
-    $dumpfile("module.lxt2");
+    $dumpfile("module.lxt");
     $dumpvars(0, agc);
     # 1 rst = 0;
     # 50 STRT2 = 0;

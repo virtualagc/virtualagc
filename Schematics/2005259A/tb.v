@@ -1,7 +1,7 @@
 reg rst = 1;
 initial
   begin
-    $dumpfile("module.lxt2");
+    $dumpfile("module.lxt");
     $dumpvars(0, agc);
 
     # 1 rst = 0;
