@@ -29,6 +29,5 @@ include ../Makefile.inc
 SIM_SOURCE := Validation-hardware-simulation.agc
 $(SIM_SOURCE).bin: $(SOURCE)
 	cp Validation.agc $(SIM_SOURCE)
-	../yaYUL/yaYUL --simulation --unpound-page $(EXTRA_YAYUL_ARGS) $(SIM_SOURCE) >$(SIM_SOURCE).lst
-	../yaYUL/yaYUL --simulation --html $(EXTRA_YAYUL_ARGS) $(SIM_SOURCE) >/dev/null
+	../yaYUL/yaYUL --simulation --hardware --html $(EXTRA_YAYUL_ARGS) $(SIM_SOURCE) >/dev/null
 	rm $(SIM_SOURCE)
