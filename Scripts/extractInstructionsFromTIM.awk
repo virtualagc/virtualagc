@@ -22,7 +22,8 @@ BEGIN {
   else if (inInst && $1 == "Edge:" && $3 != "") {
     if ($3 == "RUPT")
     	inRupt = 1
-    if (!((noRupts && inRupt) || (ruptsOnly && !inRupt)))
+    PINC = ($3 == "PINC" || $3 == "MINC" || $3 == "DINC" || $3 == "PCDU" || $3 == "MCDU" || $3 == "SHINC" || $3 == "SHANC" || $3 == "GOJAM")
+    if (!((noRupts && (inRupt || PINC )) || (ruptsOnly && !inRupt && !PINC)))
     	print $3, $4 
     if ($3 == "RESUME")
     	inRupt = 0
