@@ -54,6 +54,8 @@
 #				the initialization conditions for the flip-flops)
 #				I found that it was rebuilding 2003200.vvp
 #				which wasn't wanted.
+#		2018-10-12 RSB	Changed the default ROM from Aurora12 to 
+#				Validation-hardware-simulation.
 #
 # This 'make' needs to be performed from the Schematics/ directory.
 # Icarus Verilog must be installed, and iverilog must be in the PATH.
@@ -107,7 +109,7 @@
 DEFAULT_GATE_DELAY = 0.2 # In 100ns units.
 
 ifndef ROM
-	ROM := Aurora12
+	ROM := Validation-hardware-simulation
 endif
 
 # An auxiliary function, which takes a drawing number for a given AGC p/n,
