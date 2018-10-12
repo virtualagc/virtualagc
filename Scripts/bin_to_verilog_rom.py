@@ -1,3 +1,5 @@
+#!/usr/bin/python3
+
 import argparse
 import array
 import os
@@ -24,7 +26,7 @@ if __name__ == "__main__":
 
         # Add in parity in bit position 15
         for i in range(len(words)):
-            words[i] = (words[i] & 0o100000) | (((bin(words[i]).count('1') + 1) % 2) << 14) | ((words[i] & 77776) >> 1)
+            words[i] = (words[i] & 0o100000) | (((bin(words[i]).count('1') + 1) % 2) << 14) | ((words[i] & 0o77776) >> 1)
 
     with open(args.output_file, 'w') as of:
         for i,word in enumerate(words):
