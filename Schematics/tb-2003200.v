@@ -15,7 +15,7 @@ initial
     //	agc.STG3, agc.STG2, agc.STG1, agc.WSQG_, agc.GOJAM, agc.RPTFRC, agc.PCDU, agc.MCDU, 
     //	agc.SHINC, agc.SHANC);
     // Or, use just the list of variables needed by the instruction decoder, plus a few
-    // more useful things like SAxx and the A, L, and Z registers.
+    // useful things: A, L, Z, S, EB, FB registers.
     $dumpvars(1, agc.MINC, agc.DINC, agc.PINC, agc.INKL, agc.T07, agc.T01, agc.TSUDO_, 
     	agc.G16, agc.G15, agc.G14, agc.G13, agc.G12, agc.G11, agc.G10, agc.G09, agc.G08, 
     	agc.G07, agc.G06, agc.G05, agc.G04, agc.G03, agc.G02, agc.G01, agc.FUTEXT, agc.IC2, 
