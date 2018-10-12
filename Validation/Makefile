@@ -17,8 +17,18 @@
 #				to the new build procedure for VirtualAGC.
 #		2009-07-04 RSB	Added --html switch.
 #		2016-10-04 JL	Changed to use Makefile.inc.
+#		2018-10-12 RSB	Added the Validation-hardware-simulation target.
 
 BASENAME=Validation
 NO_BINSOURCE=yes
 include ../Makefile.inc
 
+# Assemble a verson for use in hardware simulator.  The --simulation switch in 
+# yaYUL tells it how to deal with source lines containing the strings -SIMULATION
+# or +SIMULATION in the program comments.
+SIM_SOURCE := Validation-hardware-simulation.agc
+$(SIM_SOURCE).bin: $(SOURCE)
+	cp Validation.agc $(SIM_SOURCE)
+	../yaYUL/yaYUL --simulation --unpound-page $(EXTRA_YAYUL_ARGS) $(SIM_SOURCE) >$(SIM_SOURCE).lst
+	../yaYUL/yaYUL --simulation --html $(EXTRA_YAYUL_ARGS) $(SIM_SOURCE) >/dev/null
+	rm $(SIM_SOURCE)

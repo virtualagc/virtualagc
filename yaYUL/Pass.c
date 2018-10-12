@@ -1,5 +1,5 @@
 /*
- * Copyright 2003-2005,2009,2016-2017 Ronald S. Burkey <info@sandroid.org>
+ * Copyright 2003-2005,2009,2016-2018 Ronald S. Burkey <info@sandroid.org>
  *
  * This file is part of yaAGC.
  *
@@ -120,6 +120,7 @@
  *             			conjunction with RawNumInterpretiveOperands (which wasn't changed).
  *             			The result is that --block1 assembly was working essentially by
  *             			accident, and similarly was failing by accident in Mac OS X.
+ *            	2018-10-12 RSB	Added --simulation stuff.
  *
  * I don't really try to duplicate the formatting used by the original
  * assembly-language code, since that format was appropriate for
@@ -1628,6 +1629,15 @@ Pass(int WriteOutput, const char *InputFilename, FILE *OutputFile, int *Fatals,
           CurrentLineInFile++;
         }
       debugLine = CurrentLineAll;
+
+      // For --simulation.
+      if (s[0] != '#')
+	if ((Simulation && strstr(s, "-SIMULATION")) || (!Simulation && strstr(s, "+SIMULATION")))
+	  {
+	    memmove(&s[1], s, sizeof(s) - 1);
+	    s[sizeof(s) - 1] = 0;
+	    s[0] = '#';
+	  }
 
       // Analyze the input line.
 

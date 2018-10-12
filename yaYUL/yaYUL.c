@@ -1,5 +1,5 @@
 /*
- * Copyright 2003-2005,2009-2010,2016,2017 Ronald S. Burkey <info@sandroid.org>
+ * Copyright 2003-2005,2009-2010,2016-2018 Ronald S. Burkey <info@sandroid.org>
  *
  * This file is part of yaAGC.
  *
@@ -105,6 +105,7 @@
  *              2017-09-20 RSB	Gave --hardware type parity priority over --parity (since
  *                            	builds with "--hardware --parity" was giving hardware-
  *                            	incompatible binaries).
+ *             	2018-10-12 RSB  Added stuff associated with --simulation.
  */
 
 #include "yaYUL.h"
@@ -141,6 +142,7 @@ static int Parity = 0;
 static int Hardware = 0;
 int posChecksums = 0;
 int asYUL = 0, trace = 0;
+int Simulation = 0;
 
 static Address_t RegEB = REG(03);
 static Address_t RegFB = REG(04);
@@ -275,6 +277,8 @@ main(int argc, char *argv[])
           toYulOnly = 1;
           toYulOnlySequenceNumber = j;
         }
+      else if (!strcmp(argv[i], "--simulation"))
+	Simulation = 1;
       else if (*argv[i] == '-' || *argv[i] == '/')
         {
           printf("Unknown switch \"%s\".\n", argv[i]);
@@ -319,7 +323,7 @@ main(int argc, char *argv[])
 
   printf("Apollo Guidance Computer (AGC) assembler, version " NVER
   ", built " __DATE__ ", target %s\n", assemblyTarget);
-  printf("(c)2003-2005,2009-2010,2016,2017 Ronald S. Burkey\n");
+  printf("(c)2003-2005,2009-2010,2016-2018 Ronald S. Burkey\n");
   printf(
       "Refer to http://www.ibiblio.org/apollo/index.html for more information.\n");
 
@@ -651,6 +655,7 @@ main(int argc, char *argv[])
       printf("                 an equivalent .yul file on stdout.  S (a decimal number\n");
       printf("                 is the initial card-sequence number.  L (a string) is the\n");
       printf("                 name of the log section to use as a P-card.\n");
+      printf("--simulation     Reacts to the string -SIMULATION and +SIMULATION in comments.\n");
     }
   if ((RetVal || Fatals) && !Force)
     remove(OutputFilename);

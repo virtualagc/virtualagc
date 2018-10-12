@@ -1,5 +1,5 @@
 /*
- *  Copyright 2003-2005,2009-2010,2016-2017 Ronald S. Burkey <info@sandroid.org>
+ *  Copyright 2003-2005,2009-2010,2016-2018 Ronald S. Burkey <info@sandroid.org>
  *
  *  This file is part of yaAGC.
  *
@@ -70,6 +70,7 @@
  *                               YUL superbank behavior. Also lightly refactored
  *                               superbank data storage.
  *             	  2017-08-31 RSB Added stuff associated with --debug.
+ *             	  2018-10-12 RSB Added stuff associated with --simulation.
  */
 
 #ifndef INCLUDED_YAYUL_H
@@ -571,6 +572,7 @@ extern int blk2;
 extern char *assemblyTarget;
 extern int Html;
 extern FILE *HtmlOut;
+extern int Simulation;
 
 extern int ObjectCode[044][02000];
 extern unsigned char Parities[044][02000];
