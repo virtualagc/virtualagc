@@ -168,10 +168,10 @@ endif
 # Mods for the 2003200.v and similar compilation by iverilog.
 EXTRA_IV_ARGS = -DSPOOF_SC
 ifdef DUMPFILE
-	EXTRA_IV_ARGS += -PDUMPFILE="$(DUMPFILE)"
+	EXTRA_IV_ARGS += -Pagc.DUMPFILE='"$(DUMPFILE)"'
 endif
 ifdef RUNLENGTH
-	EXTRA_IV_ARGS += -PRUNLENGTH=$(RUNLENGTH)
+	EXTRA_IV_ARGS += -Pagc.RUNLENGTH=$(RUNLENGTH)
 endif
 DUMPED =
 ifdef DUMP_ALL
