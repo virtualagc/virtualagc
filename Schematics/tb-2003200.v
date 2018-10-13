@@ -35,6 +35,7 @@ initial
     # 600000000 $finish; // 60 seconds ... should be enough time for Validation to run.
     //# 100000000 $finish; // 10 seconds
     //# 10000000 $finish; // 1 second
+    //# 2500000 $finish; // 0.25 second
     //# 100000 $finish; // 10 ms.
     //# 10000 $finish; // 1 ms.
   end
