@@ -3,6 +3,7 @@
 
 module agc;
 
+parameter GATE_DELAY = 0.2;
 `include "2005260A/tb.v"
 
 reg ALGA = 0, CGA2 = 0, GOJ1 = 0, MP3A = 0, MSTP = 0, MSTRTP = 0, SBY = 0,
@@ -30,5 +31,6 @@ A2 iA2 (
   T04_, T05, T05_, T06_, T07, T07DC_, T07_, T08_, T09, T09DC_, T09_, T10_,
   T11, T11_, T12, T12SET, T12_, TT_, UNF, UNF_
 );
+defparam iA2.GATE_DELAY = GATE_DELAY;
 
 endmodule

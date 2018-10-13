@@ -3,6 +3,7 @@
 
 module agc;
 
+parameter GATE_DELAY = 0;
 `include "2005259A/tb.v"
 
 reg CGA1 = 0, RCHAT_ = 0, RCHBT_ = 0;
@@ -36,5 +37,6 @@ A1 iA1 (
   FS13, FS14, FS15, FS16, FS17, FS18, FS19, FS20, FS21, FS22, FS23, FS24,
   FS25, FS26, FS27, FS28, FS29, FS30, FS31, FS32, FS33
 );
+defparam iA1.GATE_DELAY = GATE_DELAY;
 
 endmodule

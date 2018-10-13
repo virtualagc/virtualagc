@@ -100,21 +100,88 @@
 # has regs, wires, and modules for all of the DRAWINGs used in it, those aren't
 # necessarily correctly set up, nor do they necessarily behave correctly.  
 #
-# Finally, by default, the Verilog "wire" construct is used for NOR-gates, to support
-# wire-ANDing them via Z outputs and pullups.  The Verilog "wand" construct is 
-# alternately available, and to use it instead, the make command would be changed to
+# Finally, there are various environment variables that can be defined to alter
+# the default setup: 
 #
-#	WIRETYPE=wand make ...
+#	[VAR1=VAL1] [VAR2=VAL2] ... make ...
+#
+# These variables are:
+#
+#	WIRETYPE=wand		The affect which Verilog constructs are used to accomplish
+#	WIRETYPE=wire		wire-AND'ing of signals.  By default, "wire" is used, which
+#				means that signals are defined to actively pull to ground
+#				when 0, but are tri-stated when 1, and have a pullup.
+#				The other choice, "wand", is a dedicated Verilog construct
+#				that serves the same purpose.  The intention is that identical
+#				simulation results will be achieved by the two.
+#	GATE_DELAY=TIME		Overrides at Verilog-compile time the DEFAULT_GATE_DELAY
+#				(see below) embedded in the Verilog files.
+#	DEFAULT_GATE_DELAY=TIME	Affects how dumbVerilog.py assigns the default gate delay it
+#				embeds when it generates Verilog from the KiCad netlists.  
+#				The default is 0.2 (in units of 0.1 us), i.e. 20 ns.
+#	ROM=PROGRAM		The name of the AGC software installed in the simulation.
+#				Defaults to "Validation-hardware-simulation".
+#	RUNLENGTH=TIME		Controls the length of the simulation.  The units are 0.1 us,
+#				and the default is 2500000 (0.25 seconds).
+#	DUMP_ALL=1		These affect which set of signals is stored in the 
+#	DUMP_BACKPLANE=1	file (.lxt2, .lxt, or .vcd) dumped to the filesystem
+#	DUMP_DECODER=1		during the simulation run.  Respectively, they mean
+#	DUMP_HELPFUL=1		literally all the signals, just the signals appearing
+#				on the backplane, just the signals needed by the 
+#				gtkwave instruction decoder, or the signals for the 
+#				instruction decoder plus a few other signals (A, L, Z, ...).
+#				The default is DUMP_HELPFUL.
+#
+# Note that WIRETYPE and DEFAULT_GATE_DELAY affect the generated Verilog for the circuit
+# modules, and hence different values (at present) affect files that are stored in the 
+# git repository.  The others affect only the Verilog compilation process, and therefore
+# do not modify files saved in git.
 
-DEFAULT_GATE_DELAY = 0.2 # In 100ns units.
+ifndef DEFAULT_GATE_DELAY
+	# In 100ns units.
+	DEFAULT_GATE_DELAY = 0.2
+endif
 
 ifndef ROM
 	ROM := Validation-hardware-simulation
 endif
 
+ifndef GATE_DELAY
+	GATE_DELAY = $(DEFAULT_GATE_DELAY)
+endif
+
+# Mods for the 2003200.v and similar compilation by iverilog.
+EXTRA_IV_ARGS = 
+ifdef RUNLENGTH
+	EXTRA_IV_ARGS += -PRUNLENGTH=$(RUNLENGTH)
+endif
+DUMPED =
+ifdef DUMP_ALL
+	EXTRA_IV_ARGS += -DDUMP_ALL
+	DUMPED = 1
+endif
+ifdef DUMP_BACKPLANE
+	EXTRA_IV_ARGS += -DDUMP_BACKPLANE
+	DUMPED = 1
+endif
+ifdef DUMP_DECODER
+	EXTRA_IV_ARGS += -DDUMP_DECODER
+	DUMPED = 1
+endif
+ifdef DUMP_HELPFUL
+	EXTRA_IV_ARGS += -DDUMP_HELPFUL
+	DUMPED = 1
+endif
+ifndef DUMPED
+	EXTRA_IV_ARGS += -DDUMP_HELPFUL
+endif
+ifneq ($(DEFAULT_GATE_DELAY),$(GATE_DELAY))
+	EXTRA_IV_ARGS += -Pagc.GATE_DELAY=$(GATE_DELAY)
+endif
+
 # An auxiliary function, which takes a drawing number for a given AGC p/n,
 # and creates variables (module_DRAWING) that tells which AGC module the drawing
-# corresponds to (A1 through A24).  You must the variable MODULES_PROCESSED=none 
+# corresponds to (A1 through A24).  You must the set MODULES_PROCESSED=none 
 # before using on the first module of a given AGC p/n.  Also creates a default
 # delay_DRAWING variable, that can be overridden afterward if desired.
 MODULES_PROCESSED = none
@@ -221,16 +288,16 @@ clean:
 	-rm $(TARGETS) 2003200.v 2003100.v 2003993.v 1003700.v testVerilog/module.v $(TARGETS_V_AGC) 2>/dev/null
 
 2003200.vvp: 2003200.v $(TARGETS_V_2003200) tb-2003200.v $(EXTRA_V) roms/rom.v
-	iverilog -o $@ 2003200.v $(TARGETS_V_2003200) $(EXTRA_V)
+	iverilog $(EXTRA_IV_ARGS) -o $@ 2003200.v $(TARGETS_V_2003200) $(EXTRA_V)
 
 2003100.vvp: 2003100.v $(TARGETS_V_2003100) tb-2003100.v $(EXTRA_V) roms/rom.v
-	iverilog -o $@ 2003100.v $(TARGETS_V_2003100) $(EXTRA_V)
+	iverilog $(EXTRA_IV_ARGS) -o $@ 2003100.v $(TARGETS_V_2003100) $(EXTRA_V)
 
 2003993.vvp: 2003993.v $(TARGETS_V_2003993) tb-2003993.v $(EXTRA_V) roms/rom.v
-	iverilog -o $@ 2003993.v $(TARGETS_V_2003993) $(EXTRA_V)
+	iverilog $(EXTRA_IV_ARGS) -o $@ 2003993.v $(TARGETS_V_2003993) $(EXTRA_V)
 
 1003700.vvp: 1003700.v $(TARGETS_V_1003700) tb-1003700.v roms/rom.v
-	iverilog -o $@ 1003700.v $(TARGETS_V_1003700)
+	iverilog $(EXTRA_IV_ARGS) -o $@ 1003700.v $(TARGETS_V_1003700)
 
 # Note that we only create an AGC's testbench file (such as 2003200) if it doesn't
 # already exist.  That's because the one we create from the Verilog of the 
@@ -240,16 +307,16 @@ clean:
 # initially, too, so we would still like to automate that work when we can.
 
 2003200.v: $(TARGETS_V_2003200) tb-2003200.v
-	@if test ! -f $@ ; then cat $(TARGETS_V_2003200) | ../Scripts/dumbTestbench.py tb-2003200.v >$@ ; fi
+	@if test ! -f $@ ; then cat $(TARGETS_V_2003200) | ../Scripts/dumbTestbench.py tb-2003200.v $(DEFAULT_GATE_DELAY) >$@ ; fi
 
 2003100.v: $(TARGETS_V_2003100) tb-2003100.v
-	@if test ! -f $@ ; then cat $(TARGETS_V_2003100) | ../Scripts/dumbTestbench.py tb-2003100.v >$@ ; fi
+	@if test ! -f $@ ; then cat $(TARGETS_V_2003100) | ../Scripts/dumbTestbench.py tb-2003100.v $(DEFAULT_GATE_DELAY) >$@ ; fi
 
 2003993.v: $(TARGETS_V_2003993) tb-2003993.v
-	@if test ! -f $@ ; then cat $(TARGETS_V_2003993) | ../Scripts/dumbTestbench.py tb-2003993.v >$@ ; fi
+	@if test ! -f $@ ; then cat $(TARGETS_V_2003993) | ../Scripts/dumbTestbench.py tb-2003993.v $(DEFAULT_GATE_DELAY) >$@ ; fi
 
 1003700.v: $(TARGETS_V_1003700) tb-1003700.v
-	@if test ! -f $@ ; then cat $(TARGETS_V_1003700) | ../Scripts/dumbTestbench.py tb-1003700.v >$@ ; fi
+	@if test ! -f $@ ; then cat $(TARGETS_V_1003700) | ../Scripts/dumbTestbench.py tb-1003700.v $(DEFAULT_GATE_DELAY) >$@ ; fi
 
 # Make some stubs for a couple of required files.  This helpful for a
 # first compilation, but the files need to be filled and the 'make'
@@ -259,7 +326,7 @@ clean:
 
 .SECONDARY: testVerilog/module_tb.v $(DRAWINGS_AGC:%=%/module_tb.v)
 %/module_tb.v: %/module.v %/tb.v
-	@if test ! -f $@ ; then cat $^ | ../Scripts/dumbTestbench.py $*/tb.v >$@ ; fi
+	@if test ! -f $@ ; then cat $^ | ../Scripts/dumbTestbench.py $*/tb.v $(DEFAULT_GATE_DELAY) >$@ ; fi
 
 # Below are the rules which should work for every TARGET in $(TARGETS)
 
@@ -276,7 +343,10 @@ fixed_erasable_memory/module.vvp: $(FIXED_ERASABLE_V) roms/rom.v
 # The purpose of the SECONDARY directive below is that when it's omitted,
 # 'make' will believe that module.v is a so-called "intermediate file", and
 # will delete it at the end of the build.  By specifying that module.v is
-# SECONDARY instead, it will keep module.v and not delete it.
+# SECONDARY instead, it will keep module.v and not delete it.  The gate
+# delay is fixed.  That's because if we want the gate delay changed, we'll
+# do it at Verilog-compile time, rather than changing the Verilog source
+# files.  However, the value 0.2 seems to work well.
 .SECONDARY: testVerilog/module.v $(DRAWINGS_AGC:%=%/module.v)
 %/module.v: %/module.net %/module.init ../Scripts/pins.txt
 	../Scripts/dumbVerilog.py $(module_$*) $*/module.net ../Scripts/pins.txt "$(delay_$*)" $*/module.init $*/module.sch $(WIRETYPE) >$*/temp.v

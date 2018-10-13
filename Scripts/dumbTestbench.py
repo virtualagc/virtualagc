@@ -25,6 +25,7 @@
 #				with either.)
 #		2018-10-08 RSB	Replaced some hard-codeds stuff in the testbenches
 #				with include-files.
+#		2018-10-13 RSB	Added DEFAULT_GATE_DELAY.
 
 # Usage is:
 #	cat VERILOG_FILES | dumbTestbench.py >TESTBENCH.v
@@ -34,6 +35,9 @@ import sys
 tbInclude = "tb.v"
 if len(sys.argv) > 1:
 	tbInclude = sys.argv[1]
+DEFAULT_GATE_DELAY = "0.2"
+if len(sys.argv) > 2:
+	DEFAULT_GATE_DELAY = sys.argv[2]
 # Read the tb.v file, so as to build up a list of the regs it defines, so that
 # they can be removed from the list of the regs that we're going to autogenerate 
 # later.
@@ -107,6 +111,8 @@ print "`timescale 100ns / 1ns"
 print ""
 print "module agc;"
 print ""
+print "parameter GATE_DELAY = " + DEFAULT_GATE_DELAY + ";"
+#print "initial $display(\"Gate Delay is %f ns.\", GATE_DELAY*100);"
 print "`include \"" + tbInclude + "\""
 print ""
 desiredLineLength = 70
@@ -150,11 +156,13 @@ for line in lines:
 	if inModule and len(fields) == 1 and fields[0] == ");":
 		inModule = False
 		print ");"
+		print "defparam " + moduleName + ".GATE_DELAY = GATE_DELAY;"
 		print ""
 		continue
 	if len(fields) == 3 and fields[0] == "module" and not inModule:
 		inModule = True
-		print fields[1] + " i" + fields[1] + " ("
+		moduleName = "i" + fields[1]
+		print fields[1] + " " + moduleName + " ("
 		continue
 	if inModule:
 		print line.rstrip()

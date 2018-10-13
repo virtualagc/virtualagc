@@ -253,7 +253,8 @@ def readSchematicFile(filename):
 				caption = caption.replace("+", "p").replace("-", "m")
 				schPads[unitNumber] = caption
 
-delay = ""
+rawDelay = "0.2"
+delay = " #GATE_DELAY"
 inits = {}
 if len(sys.argv) >= 3:
 	
@@ -264,7 +265,7 @@ if len(sys.argv) >= 3:
 	else:
 		pathToPinsTxt = "pins.txt"
 	if len(sys.argv) > 4 and sys.argv[4] != "" and sys.argv[4] != "0":
-		delay = " #" + sys.argv[4]
+		rawDelay = sys.argv[4]
 	if len(sys.argv) > 5:
 		initsFile = sys.argv[5]
 		try:
@@ -734,6 +735,9 @@ if count > 0:
 		print line + ";"
 
 print ""
+print "parameter GATE_DELAY = " + rawDelay + "; // This default may be overridden at compile time."
+print "initial $display(\"Gate delay (" + moduleName + ") will be %f ns.\", GATE_DELAY*100);"
+print ""
 
 # Now do another pass on the netlist to determine how the internal logic of the
 # module works.  We only need to look at the NOR gate components, because we already
@@ -823,9 +827,9 @@ for line in lines:
 		else:
 			netName = moduleName + netName[5:].replace("-", "").replace(")", "")
 			if inWhat == "NOR":
-				if pinNumber == 1:
+				if pinNumber == 1 and gateLocations[refd + "A"] != "":
 					netToGate[netName] = "g" + gateLocations[refd + "A"]
-				elif pinNumber == 9:
+				elif pinNumber == 9 and gateLocations[refd + "B"] != "":
 					netToGate[netName] = "g" + gateLocations[refd + "B"]
 	if not isPin:
 		continue
