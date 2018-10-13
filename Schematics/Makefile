@@ -56,6 +56,11 @@
 #				which wasn't wanted.
 #		2018-10-12 RSB	Changed the default ROM from Aurora12 to 
 #				Validation-hardware-simulation.
+#		2018-10-13 RSB	Now pass various parameters to the testbench
+#				so that they can change at build-time rather
+#				than needing to be hardcoded into the testbench
+#				Verilog:  simulation run-length, signals to 
+#				be dumped, and so on.
 #
 # This 'make' needs to be performed from the Schematics/ directory.
 # Icarus Verilog must be installed, and iverilog must be in the PATH.
@@ -122,7 +127,10 @@
 #	ROM=PROGRAM		The name of the AGC software installed in the simulation.
 #				Defaults to "Validation-hardware-simulation".
 #	RUNLENGTH=TIME		Controls the length of the simulation.  The units are 0.1 us,
-#				and the default is 2500000 (0.25 seconds).
+#				and the default for full-AGC targets (2003200, 2003100, etc.)
+#				is 2500000 (0.25 seconds).  The defaults for other testbench
+#				targets (module A1, A2, etc.) may differ, but all will be
+#				affected by this setting.
 #	DUMP_ALL=1		These affect which set of signals is stored in the 
 #	DUMP_BACKPLANE=1	file (.lxt2, .lxt, or .vcd) dumped to the filesystem
 #	DUMP_DECODER=1		during the simulation run.  Respectively, they mean
@@ -130,7 +138,14 @@
 #				on the backplane, just the signals needed by the 
 #				gtkwave instruction decoder, or the signals for the 
 #				instruction decoder plus a few other signals (A, L, Z, ...).
-#				The default is DUMP_HELPFUL.
+#				The default is DUMP_HELPFUL.  This is only guaranteed to
+#				affect full-AGC targets; whether it affects other testbenches
+#				depend on how those are defined internally.
+#	DUMPFILE=FILENAME	Name of the dumpfile to create, defaulting to "agc.lxt2"
+#				for full-AGC targets (2003200, 2003100, ...).  Other 
+#				targets, like those for module A1, A2, and so on, may 
+#				have different defaults, but all will be affected equally
+#				by this setting.
 #
 # Note that WIRETYPE and DEFAULT_GATE_DELAY affect the generated Verilog for the circuit
 # modules, and hence different values (at present) affect files that are stored in the 
@@ -151,7 +166,10 @@ ifndef GATE_DELAY
 endif
 
 # Mods for the 2003200.v and similar compilation by iverilog.
-EXTRA_IV_ARGS = 
+EXTRA_IV_ARGS =
+ifdef DUMPFILE
+	EXTRA_IV_ARGS += -PDUMPFILE="$(DUMPFILE)"
+endif
 ifdef RUNLENGTH
 	EXTRA_IV_ARGS += -PRUNLENGTH=$(RUNLENGTH)
 endif

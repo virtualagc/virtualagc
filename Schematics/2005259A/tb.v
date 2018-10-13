@@ -1,11 +1,14 @@
+parameter DUMPFILE = "moduleA1.lxt2";
+parameter RUNLENGTH = 1000000;
+
 reg rst = 1;
 initial
   begin
-    $dumpfile("module.lxt2");
+    $dumpfile(DUMPFILE);
     $dumpvars(0, agc);
 
     # 1 rst = 0;
-    # 1000000 $finish;
+    # RUNLENGTH $finish;
   end
 
 reg FS01_ = 1;

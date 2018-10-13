@@ -1,12 +1,14 @@
 // For use by dumbTestbench.py in autogenerating an AGC testbench.
 
+parameter DUMPFILE = "agc.lxt2";
+
 // In units of 0.1 us.
 parameter RUNLENGTH = 2500000; // 0.25 seconds
 
 reg rst = 1;
 initial
   begin
-    $dumpfile("agc.lxt2");
+    $dumpfile(DUMPFILE);
 `ifdef DUMP_ALL    
     // Dump all of the signals, including those local to individual modules.
     $dumpvars(0,agc);
