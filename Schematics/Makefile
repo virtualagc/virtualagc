@@ -166,7 +166,7 @@ ifndef GATE_DELAY
 endif
 
 # Mods for the 2003200.v and similar compilation by iverilog.
-EXTRA_IV_ARGS =
+EXTRA_IV_ARGS = -DSPOOF_SC
 ifdef DUMPFILE
 	EXTRA_IV_ARGS += -PDUMPFILE="$(DUMPFILE)"
 endif

@@ -62,9 +62,65 @@ initial
 reg CLOCK = 0;
 always #2.44140625 CLOCK = !CLOCK;
 
-// Turn off parity checking.
+// If not commented, turn off parity checking.
 //reg NHALGA = 1;
 
 initial $timeformat(-3, 0, " ms", 10);
 always #10000 $display("%t", $time);
 
+///////////////////////////////////////////////////////////////////////////////////////////
+// The following stuff was pasted as-is from Mike's testbench.  It pertains to signals from
+// the spacecraft that are being fed into the AGC, and isn't necessary for basic operation
+// of the computer as a computer.  The Validation AGC program passes without it.  However,
+// I'm putting it in as a possible aid to comparing the results of this sim to Mike's sim.
+// If/when more of the spacecraft is simulated, it probably won't be usable.
+
+`ifdef SPOOF_SC
+
+    // PIPA spoofing -- simulate 3-3 moding on PIPA inputs, synced with PIPDAT
+    // and counting on PIPASW
+    reg [2:0] moding_counter = 3'b0;
+    always @(posedge PIPASW) begin
+        moding_counter = moding_counter + 3'b1;
+        if (moding_counter == 3'd6) begin
+            moding_counter = 3'b0;
+        end
+    end
+
+    assign PIPAXm = PIPDAT && (moding_counter >= 3'd3);
+    assign PIPAYm = PIPDAT && (moding_counter >= 3'd3);
+    assign PIPAZm = PIPDAT && (moding_counter >= 3'd3);
+    assign PIPAXp = PIPDAT && (moding_counter < 3'd3);
+    assign PIPAYp = PIPDAT && (moding_counter < 3'd3);
+    assign PIPAZp = PIPDAT && (moding_counter < 3'd3);
+
+    // PCM simulation
+    reg [4:0] pcm_counter = 5'd19;
+    reg dlk_clk = 1'b0;
+    reg [9:0] dlk_counter = 10'd1023;
+    always @(posedge CLK) begin
+        if (pcm_counter == 5'd20) begin
+            pcm_counter <= 5'b0;
+        end else begin
+            pcm_counter <= pcm_counter + 5'b1;
+            if (pcm_counter == 5'd0) begin
+                dlk_clk <= 1'b1;
+                dlk_counter <= dlk_counter + 10'b1;
+            end else if (pcm_counter == 5'd4) begin
+                dlk_clk <= 1'b0;
+            end
+        end
+    end
+
+    assign DKSTRT = dlk_clk && (dlk_counter == 10'd0);
+    assign DKBSNC = dlk_clk && (dlk_counter > 10'd0) && (dlk_counter < 10'd41);
+    assign DKEND = dlk_clk && (dlk_counter == 10'd41);
+
+`else
+
+reg DKBSNC = 0, DKEND = 0, DKST = 0, PIPAXm = 0, PIPAXp = 0, 
+	PIPAYm = 0, PIPAYp = 0, PIPAZm = 0, PIPAZp = 0;
+
+`endif
+
+///////////////////////////////////////////////////////////////////////////////////////////

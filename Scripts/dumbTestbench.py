@@ -23,14 +23,24 @@
 # Mod history:	2018-10-01 RSB	Created.
 #		2018-10-04 RSB	Replaced wires by wands.  (Actually, works 
 #				with either.)
-#		2018-10-08 RSB	Replaced some hard-codeds stuff in the testbenches
+#		2018-10-08 RSB	Replaced some hard-coded stuff in the testbenches
 #				with include-files.
-#		2018-10-13 RSB	Added DEFAULT_GATE_DELAY.
+#		2018-10-13 RSB	Added DEFAULT_GATE_DELAY.  Added a bunch
+#				of reg initializations to match what Mike
+#				uses, for the purpose of making it easier
+#				to compare his sim to mine.
 
 # Usage is:
 #	cat VERILOG_FILES | dumbTestbench.py >TESTBENCH.v
 
 import sys
+
+# Register initializations taken from Mike's testbench.  These are the 
+# signals we want to initialize to 1 rather than to the default 0.
+regInits = [ "BLKUPL_", "GATEX_", "GATEY_", "GATEZ_" ]
+# Registers we don't want to initialize, because they're initialized
+# by specific code in the testbench.
+regUninits = ["DKBSNC", "DKEND", "DKSTRT", "PIPAXm", "PIPAXp", "PIPAYm", "PIPAYp", "PIPAZm", "PIPAZp"]
 
 tbInclude = "tb.v"
 if len(sys.argv) > 1:
@@ -116,14 +126,22 @@ print "parameter GATE_DELAY = " + DEFAULT_GATE_DELAY + ";"
 print "`include \"" + tbInclude + "\""
 print ""
 desiredLineLength = 70
-if len(regs) > 0:
+newRegs = []
+for reg in regs:
+	if reg not in regUninits:
+		newRegs.append(reg)
+if len(newRegs) > 0:
 	line = "reg"
-	for i in range(0, len(regs)):
-		reg = regs[i]
+	for i in range(0, len(newRegs)):
+		reg = newRegs[i]
 		if len(line) == 0:
 			line = " "
-		line += " " + reg + " = 0"
-		if i < len(regs) - 1:
+		if reg in regInits:
+			initVal = "1"
+		else:
+			initVal = "0"
+		line += " " + reg + " = " + initVal
+		if i < len(newRegs) - 1:
 			line += ","
 		else:
 			line += ";"
