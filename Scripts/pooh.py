@@ -81,13 +81,16 @@ normalizedMikeNets = {
 	"A15.__A15_1__EB11":"EB11"
 }
 
-def readVCD(openFile):
+wantTransitions = False
+wantNets = False
+
+def readVCD(nameOfVcd, openFile):
 	
 	netsByID = {}
 	netsByPrimaryNetname = {}
 	time = 0
 	
-	print >> sys.stderr, "Reading netnames"
+	print >> sys.stderr, "Reading netnames for " + nameOfVcd
 	
 	# Read the input, line by line.  We'll only need a single pass on the input.
 	inDumpvars = False
@@ -126,7 +129,9 @@ def readVCD(openFile):
 					print >> sys.stderr, "Duplication of primary netname: " + netname
 					sys.exit(1)
 				netsByPrimaryNetname[netname] = { "id":id, "width":width, "mask":mask }
-			print >> sys.stderr, "Reading transitions"
+			if not wantTransitions:
+				break
+			print >> sys.stderr, "Reading transitions for " + nameOfVcd
 		elif len(fields) == 3 and fields[0] == "$timescale" and fields[2] == "$end":
 			if fields[1] == "1ps":
 				picosecondScale = True
@@ -138,6 +143,7 @@ def readVCD(openFile):
 			netname = fields[4]
 			mask = fields[5]
 			# Normalize the netnames a tad.
+			rawNetname = netname
 			if netname[:4] == "agc.":
 				netname = netname[4:]
 			elif netname[:9] == "main.AGC.":
@@ -153,8 +159,10 @@ def readVCD(openFile):
 					print >> sys.stderr, "Field width/mask discrepancy: " + line
 					sys.exit(1)
 				netsByID[id]["netnames"].append(netname)
+				netsByID[id]["rawNetnames"].append(rawNetname)
 			else:
-				netsByID[id] = { "netnames":[netname], "width":width, "mask":mask, "transitions":[], "values":[], "desired":False }
+				netsByID[id] = { "netnames":[netname], "rawNetnames":[rawNetName], "width":width, 
+					"mask":mask, "transitions":[], "values":[], "desired":False }
 				if netname in desiredNetnames:
 					netsByID[id]["desired"] = True
 	
@@ -163,7 +171,7 @@ def readVCD(openFile):
 def printNets(nameOfVCD, vcd):
 	print "$vcd " + nameOfVCD
 	for netname in desiredNetnames:
-		id = vcd["byNetname"][netname]
+		id = vcd["byNetname"][netname]["id"]
 		transitions = vcd["byID"][id]["transitions"]
 		values = vcd["byID"][id]["values"]
 		print "$net " + netname
@@ -172,25 +180,38 @@ def printNets(nameOfVCD, vcd):
 		for i in range(0,len(transitions)):
 			print str(transitions[i]) + " " + str(values[i])
 
+def analyzeNetHierarchy(nameOfVCD, vcd):
+	return
+
 # Parse the command line:
 compare = ""
 desiredNetnames = []
 error = False
+count = 0
 for argv in sys.argv[1:]:
 	if argv[:10] == "--compare=":
 		compare = argv[10:]
+	elif argv == "--transitions":
+		wantTransitions = True
+		count += 1
+	elif argv == "--nets":
+		wantNets = True
+		count += 1
 	elif argv[:1] == "-":
 		print >> sys.stderr, "Unknown command-line argument: " + argv
 		error = True
 	else:
 		desiredNetnames.append(argv)
+if count != 1:
+	print >> sys.stderr, "Must select exactly one of the following: --transitions --nets"
+	error = True
 if error:
 	sys.exit(1)
 error = False
 
 if compare == "":
 	# Single-file operation.
-	vcd = readVCD(sys.stdin)
+	vcd = readVCD("vcd", sys.stdin)
 	for netname in desiredNetnames:
 		if netname in vcd["byNetname"]:
 			print "Net \"" + netname + "\" found in the input"
@@ -199,33 +220,37 @@ if compare == "":
 			error = True
 	if error:
 		sys.exit(1)
-	printNets("vcd", vcd)
+	if wantTransitions:
+		printNets("vcd", vcd)
+	if wantNets:
+		analyzeNetHierarchy("vcd", vcd)
 else:
 	# Dual-file comparison operation.
-	vcd1 = readVCD(sys.stdin)
+	vcd1 = readVCD("vcd1", sys.stdin)
 	try:
 		f = open(compare, "r")
 	except:
 		print >> sys.stderr, "Cannot open the comparison input \"" + compare + "\""
 		sys.exit(1)
-	vcd2 = readVCD(f)
+	vcd2 = readVCD("vcd2", f)
 	f.close()
 	for netname in desiredNetnames:
 		if netname in vcd1["byNetname"] and netname in vcd2["byNetname"]:
-			print "Net \"" + netname + "\" found in both inputs"
+			print >> sys.stderr, "Net \"" + netname + "\" found in both inputs"
 		elif netname in vcd1["byNetname"]:
-			print "Net \"" + netname + "\" found only in first input"
+			print >> sys.stderr, "Net \"" + netname + "\" found only in first input"
 			error = True
 		elif netname in vcd2["byNetname"]:
-			print "Net \"" + netname + "\" found only in second input"
+			print >> sys.stderr, "Net \"" + netname + "\" found only in second input"
 			error = True
 		else:
-			print "Net \"" + netname + "\" found in neither input"
+			print >> sys.stderr, "Net \"" + netname + "\" found in neither input"
 			error = True
 	if error:
 		sys.exit(1)
-	printNets("vcd1", vcd1)
-	printNets("vcd2", vcd2)
-
-	
-			
+	if wantTransitions:
+		printNets("vcd1", vcd1)
+		printNets("vcd2", vcd2)
+	if wantNets:
+		analyzeNetHierarchy("vcd1", vcd1)
+		analyzeNetHierarchy("vcd2", vcd2)
