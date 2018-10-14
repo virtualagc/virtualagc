@@ -43,7 +43,9 @@ initial
     	agc.A08_, agc.A07_, agc.A06_, agc.A05_, agc.A04_, agc.A03_, agc.A02_, agc.A01_,
     	agc.FB16, agc.FB14, agc.FB13, agc.FB12, agc.FB11, agc.EB9, agc.EB10, agc.EB11,
     	agc.L16_, agc.L15_, agc.L14_, agc.L13_, agc.L12_, agc.L11_, agc.L10_, agc.L09_, agc.L08_, 
-    	agc.L07_, agc.L06_, agc.L05_, agc.L04_, agc.L03_, agc.L02_, agc.L01_
+    	agc.L07_, agc.L06_, agc.L05_, agc.L04_, agc.L03_, agc.L02_, agc.L01_,
+    	agc.SA16, agc.SAP, agc.SA14, agc.SA13, agc.SA12, agc.SA11, agc.SA10, agc.SA09, agc.SA08, 
+    	agc.SA07, agc.SA06, agc.SA05, agc.SA04, agc.SA03, agc.SA02, agc.SA01
     );
     $display("Dumping helpful signals.");
 `endif
