@@ -303,7 +303,7 @@ all: $(TARGETS)
 
 .PHONY: clean
 clean:
-	-rm $(TARGETS) 2003200.v 2003100.v 2003993.v 1003700.v testVerilog/module.v $(TARGETS_V_AGC) 2>/dev/null
+	-rm $(TARGETS) roms/rom.v 2003200.v 2003100.v 2003993.v 1003700.v testVerilog/module.v $(TARGETS_V_AGC) 2>/dev/null
 
 2003200.vvp: 2003200.v $(TARGETS_V_2003200) tb-2003200.v $(EXTRA_V) roms/rom.v
 	iverilog $(EXTRA_IV_ARGS) -o $@ 2003200.v $(TARGETS_V_2003200) $(EXTRA_V)
