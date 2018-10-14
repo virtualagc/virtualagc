@@ -33,7 +33,7 @@ pullup(A99NOROPE);
 assign #GATE_DELAY A99NOROPE = rst ? 1'bz : ((0|ROPER|ROPES|ROPET) ? 1'b0 : 1'bz);
 // Gate A99-U216A
 pullup(g99231);
-assign #GATE_DELAY g99231 = rst ? 1'bz : ((0|A99RADDR7|g99230) ? 1'b0 : 1'bz);
+assign #GATE_DELAY g99231 = rst ? 0 : ((0|A99RADDR7|g99230) ? 1'b0 : 1'bz);
 // Gate A99-U214B
 pullup(g99228);
 assign #GATE_DELAY g99228 = rst ? 0 : ((0|A99ES06_|g99203) ? 1'b0 : 1'bz);
@@ -51,7 +51,7 @@ pullup(g99132);
 assign #GATE_DELAY g99132 = rst ? 1'bz : ((0|CLROPE|g99133) ? 1'b0 : 1'bz);
 // Gate A99-U205A A99-U205B
 pullup(A99ES03_);
-assign #GATE_DELAY A99ES03_ = rst ? 0 : ((0|XB5E|XB4E|XB6E|XB7E) ? 1'b0 : 1'bz);
+assign #GATE_DELAY A99ES03_ = rst ? 1'bz : ((0|XB5E|XB4E|XB6E|XB7E) ? 1'b0 : 1'bz);
 // Gate A99-U131B
 pullup(g99162);
 assign #GATE_DELAY g99162 = rst ? 1'bz : ((0|g99131|RESETB) ? 1'b0 : 1'bz);
@@ -63,34 +63,34 @@ pullup(g99260);
 assign #GATE_DELAY g99260 = rst ? 0 : ((0|g99259) ? 1'b0 : 1'bz);
 // Gate A99-U222B
 pullup(A99RADDR9);
-assign #GATE_DELAY A99RADDR9 = rst ? 0 : ((0|g99242|A99RESETK) ? 1'b0 : 1'bz);
+assign #GATE_DELAY A99RADDR9 = rst ? 1'bz : ((0|g99242|A99RESETK) ? 1'b0 : 1'bz);
 // Gate A99-U220A
 pullup(A99RADDR8);
-assign #GATE_DELAY A99RADDR8 = rst ? 0 : ((0|A99RESETK|g99237) ? 1'b0 : 1'bz);
+assign #GATE_DELAY A99RADDR8 = rst ? 1'bz : ((0|A99RESETK|g99237) ? 1'b0 : 1'bz);
 // Gate A99-U222A
 pullup(A99RADDR3);
-assign #GATE_DELAY A99RADDR3 = rst ? 0 : ((0|A99RESETK|g99240) ? 1'b0 : 1'bz);
+assign #GATE_DELAY A99RADDR3 = rst ? 1'bz : ((0|A99RESETK|g99240) ? 1'b0 : 1'bz);
 // Gate A99-U201A A99-U201B
 pullup(A99ES01_);
-assign #GATE_DELAY A99ES01_ = rst ? 0 : ((0|XB3E|XB1E|XB5E|XB7E) ? 1'b0 : 1'bz);
+assign #GATE_DELAY A99ES01_ = rst ? 1'bz : ((0|XB3E|XB1E|XB5E|XB7E) ? 1'b0 : 1'bz);
 // Gate A99-U221B
 pullup(g99242);
-assign #GATE_DELAY g99242 = rst ? 1'bz : ((0|g99241|A99RADDR9) ? 1'b0 : 1'bz);
+assign #GATE_DELAY g99242 = rst ? 0 : ((0|g99241|A99RADDR9) ? 1'b0 : 1'bz);
 // Gate A99-U217A
 pullup(A99RADDR7);
-assign #GATE_DELAY A99RADDR7 = rst ? 0 : ((0|A99RESETK|g99231) ? 1'b0 : 1'bz);
+assign #GATE_DELAY A99RADDR7 = rst ? 1'bz : ((0|A99RESETK|g99231) ? 1'b0 : 1'bz);
 // Gate A99-U229B
 pullup(A99RADDR6);
-assign #GATE_DELAY A99RADDR6 = rst ? 0 : ((0|g99257|A99RESETK) ? 1'b0 : 1'bz);
+assign #GATE_DELAY A99RADDR6 = rst ? 1'bz : ((0|g99257|A99RESETK) ? 1'b0 : 1'bz);
 // Gate A99-U228A
 pullup(A99RADDR5);
-assign #GATE_DELAY A99RADDR5 = rst ? 0 : ((0|A99RESETK|g99252) ? 1'b0 : 1'bz);
+assign #GATE_DELAY A99RADDR5 = rst ? 1'bz : ((0|A99RESETK|g99252) ? 1'b0 : 1'bz);
 // Gate A99-U225A
 pullup(A99RADDR4);
-assign #GATE_DELAY A99RADDR4 = rst ? 0 : ((0|A99RESETK|g99245) ? 1'b0 : 1'bz);
+assign #GATE_DELAY A99RADDR4 = rst ? 1'bz : ((0|A99RESETK|g99245) ? 1'b0 : 1'bz);
 // Gate A99-U211A A99-U211B
 pullup(A99ES09_);
-assign #GATE_DELAY A99ES09_ = rst ? 0 : ((0|YT3E|YT1E|YT5E|YT7E) ? 1'b0 : 1'bz);
+assign #GATE_DELAY A99ES09_ = rst ? 1'bz : ((0|YT3E|YT1E|YT5E|YT7E) ? 1'b0 : 1'bz);
 // Gate A99-U132B
 pullup(g99164);
 assign #GATE_DELAY g99164 = rst ? 1'bz : ((0|g99163) ? 1'b0 : 1'bz);
@@ -117,7 +117,7 @@ pullup(g99113);
 assign #GATE_DELAY g99113 = rst ? 0 : ((0|g99112|LOMOD|ROPET) ? 1'b0 : 1'bz);
 // Gate A99-U223A
 pullup(g99245);
-assign #GATE_DELAY g99245 = rst ? 1'bz : ((0|A99RADDR4|g99219) ? 1'b0 : 1'bz);
+assign #GATE_DELAY g99245 = rst ? 0 : ((0|A99RADDR4|g99219) ? 1'b0 : 1'bz);
 // Gate A99-U135A
 pullup(g99169);
 assign #GATE_DELAY g99169 = rst ? 0 : ((0|g99168) ? 1'b0 : 1'bz);
@@ -126,13 +126,13 @@ pullup(A99ES02_);
 assign #GATE_DELAY A99ES02_ = rst ? 1'bz : ((0|XB3E|XB2E|XB6E|XB7E) ? 1'b0 : 1'bz);
 // Gate A99-U112B
 pullup(g99124);
-assign #GATE_DELAY g99124 = rst ? 0 : ((0|HIMOD|STR58) ? 1'b0 : 1'bz);
+assign #GATE_DELAY g99124 = rst ? 1'bz : ((0|HIMOD|STR58) ? 1'b0 : 1'bz);
 // Gate A99-U113B
 pullup(g99126);
 assign #GATE_DELAY g99126 = rst ? 0 : ((0|LOMOD|g99125) ? 1'b0 : 1'bz);
 // Gate A99-U224A
 pullup(g99247);
-assign #GATE_DELAY g99247 = rst ? 1'bz : ((0|A99RADDR10|g99246) ? 1'b0 : 1'bz);
+assign #GATE_DELAY g99247 = rst ? 0 : ((0|A99RADDR10|g99246) ? 1'b0 : 1'bz);
 // Gate A99-U108A
 pullup(g99115);
 assign #GATE_DELAY g99115 = rst ? 1'bz : ((0|STR912) ? 1'b0 : 1'bz);
@@ -162,7 +162,7 @@ pullup(g99219);
 assign #GATE_DELAY g99219 = rst ? 0 : ((0|g99203|A99ES04_) ? 1'b0 : 1'bz);
 // Gate A99-U212A A99-U212B
 pullup(A99ES10_);
-assign #GATE_DELAY A99ES10_ = rst ? 0 : ((0|YT3E|YT2E|YT6E|YT7E) ? 1'b0 : 1'bz);
+assign #GATE_DELAY A99ES10_ = rst ? 1'bz : ((0|YT3E|YT2E|YT6E|YT7E) ? 1'b0 : 1'bz);
 // Gate A99-U133A
 pullup(g99165);
 assign #GATE_DELAY g99165 = rst ? 1'bz : ((0|g99166) ? 1'b0 : 1'bz);
@@ -174,7 +174,7 @@ pullup(g99137);
 assign #GATE_DELAY g99137 = rst ? 1'bz : ((0|SBF) ? 1'b0 : 1'bz);
 // Gate A99-U229A
 pullup(g99257);
-assign #GATE_DELAY g99257 = rst ? 1'bz : ((0|A99RADDR6|g99228) ? 1'b0 : 1'bz);
+assign #GATE_DELAY g99257 = rst ? 0 : ((0|A99RADDR6|g99228) ? 1'b0 : 1'bz);
 // Gate A99-U141B
 pullup(A99FADDR2);
 assign #GATE_DELAY A99FADDR2 = rst ? 0 : ((0|IL02) ? 1'b0 : 1'bz);
@@ -198,7 +198,7 @@ pullup(g99241);
 assign #GATE_DELAY g99241 = rst ? 0 : ((0|g99203|A99ES09_) ? 1'b0 : 1'bz);
 // Gate A99-U215A
 pullup(g99229);
-assign #GATE_DELAY g99229 = rst ? 1'bz : ((0|A99RADDR1|g99204) ? 1'b0 : 1'bz);
+assign #GATE_DELAY g99229 = rst ? 0 : ((0|A99RADDR1|g99204) ? 1'b0 : 1'bz);
 // Gate A99-U121B
 pullup(g99142);
 assign #GATE_DELAY g99142 = rst ? 1'bz : ((0|SETAB) ? 1'b0 : 1'bz);
@@ -216,7 +216,7 @@ pullup(g99234);
 assign #GATE_DELAY g99234 = rst ? 1'bz : ((0|ZID) ? 1'b0 : 1'bz);
 // Gate A99-U113A
 pullup(g99125);
-assign #GATE_DELAY g99125 = rst ? 0 : ((0|STR58) ? 1'b0 : 1'bz);
+assign #GATE_DELAY g99125 = rst ? 1'bz : ((0|STR58) ? 1'b0 : 1'bz);
 // Gate A99-U213A
 pullup(g99225);
 assign #GATE_DELAY g99225 = rst ? 0 : ((0|g99203|A99ES05_) ? 1'b0 : 1'bz);
@@ -225,13 +225,13 @@ pullup(g99259);
 assign #GATE_DELAY g99259 = rst ? 1'bz : ((0|REY|REX) ? 1'b0 : 1'bz);
 // Gate A99-U219B
 pullup(A99RADDR2);
-assign #GATE_DELAY A99RADDR2 = rst ? 0 : ((0|g99235|A99RESETK) ? 1'b0 : 1'bz);
+assign #GATE_DELAY A99RADDR2 = rst ? 1'bz : ((0|g99235|A99RESETK) ? 1'b0 : 1'bz);
 // Gate A99-U233A
 pullup(g99265);
 assign #GATE_DELAY g99265 = rst ? 1'bz : ((0|A99EDESTROY|g99264) ? 1'b0 : 1'bz);
 // Gate A99-U216B
 pullup(A99RADDR1);
-assign #GATE_DELAY A99RADDR1 = rst ? 0 : ((0|g99229|A99RESETK) ? 1'b0 : 1'bz);
+assign #GATE_DELAY A99RADDR1 = rst ? 1'bz : ((0|g99229|A99RESETK) ? 1'b0 : 1'bz);
 // Gate A99-U210B
 pullup(A99ES08_);
 assign #GATE_DELAY A99ES08_ = rst ? 0 : ((0|YB2E|YB3E) ? 1'b0 : 1'bz);
@@ -252,13 +252,13 @@ pullup(g99203);
 assign #GATE_DELAY g99203 = rst ? 1'bz : ((0|SETEK) ? 1'b0 : 1'bz);
 // Gate A99-U208A A99-U208B
 pullup(A99ES06_);
-assign #GATE_DELAY A99ES06_ = rst ? 0 : ((0|XT5E|XT4E|XT6E|XT7E) ? 1'b0 : 1'bz);
+assign #GATE_DELAY A99ES06_ = rst ? 1'bz : ((0|XT5E|XT4E|XT6E|XT7E) ? 1'b0 : 1'bz);
 // Gate A99-U228B
 pullup(A99RADDR11);
-assign #GATE_DELAY A99RADDR11 = rst ? 0 : ((0|g99254|A99RESETK) ? 1'b0 : 1'bz);
+assign #GATE_DELAY A99RADDR11 = rst ? 1'bz : ((0|g99254|A99RESETK) ? 1'b0 : 1'bz);
 // Gate A99-U225B
 pullup(A99RADDR10);
-assign #GATE_DELAY A99RADDR10 = rst ? 0 : ((0|g99247|A99RESETK) ? 1'b0 : 1'bz);
+assign #GATE_DELAY A99RADDR10 = rst ? 1'bz : ((0|g99247|A99RESETK) ? 1'b0 : 1'bz);
 // Gate A99-U129A
 pullup(g99157);
 assign #GATE_DELAY g99157 = rst ? 0 : ((0|g99156) ? 1'b0 : 1'bz);
@@ -270,25 +270,25 @@ pullup(A99FADDR8);
 assign #GATE_DELAY A99FADDR8 = rst ? 1'bz : ((0|A99QUARTERA|A99QUARTERC) ? 1'b0 : 1'bz);
 // Gate A99-U139A
 pullup(A99FADDR7);
-assign #GATE_DELAY A99FADDR7 = rst ? 1'bz : ((0|IL07) ? 1'b0 : 1'bz);
+assign #GATE_DELAY A99FADDR7 = rst ? 0 : ((0|IL07) ? 1'b0 : 1'bz);
 // Gate A99-U139B
 pullup(A99FADDR6);
-assign #GATE_DELAY A99FADDR6 = rst ? 1'bz : ((0|IL06) ? 1'b0 : 1'bz);
+assign #GATE_DELAY A99FADDR6 = rst ? 0 : ((0|IL06) ? 1'b0 : 1'bz);
 // Gate A99-U140A
 pullup(A99FADDR5);
-assign #GATE_DELAY A99FADDR5 = rst ? 1'bz : ((0|IL05) ? 1'b0 : 1'bz);
+assign #GATE_DELAY A99FADDR5 = rst ? 0 : ((0|IL05) ? 1'b0 : 1'bz);
 // Gate A99-U140B
 pullup(A99FADDR4);
-assign #GATE_DELAY A99FADDR4 = rst ? 1'bz : ((0|IL04) ? 1'b0 : 1'bz);
+assign #GATE_DELAY A99FADDR4 = rst ? 0 : ((0|IL04) ? 1'b0 : 1'bz);
 // Gate A99-U141A
 pullup(A99FADDR3);
-assign #GATE_DELAY A99FADDR3 = rst ? 1'bz : ((0|IL03) ? 1'b0 : 1'bz);
+assign #GATE_DELAY A99FADDR3 = rst ? 0 : ((0|IL03) ? 1'b0 : 1'bz);
 // Gate A99-U129B
 pullup(g99158);
 assign #GATE_DELAY g99158 = rst ? 1'bz : ((0|g99157) ? 1'b0 : 1'bz);
 // Gate A99-U142A
 pullup(A99FADDR1);
-assign #GATE_DELAY A99FADDR1 = rst ? 1'bz : ((0|IL01) ? 1'b0 : 1'bz);
+assign #GATE_DELAY A99FADDR1 = rst ? 0 : ((0|IL01) ? 1'b0 : 1'bz);
 // Gate A99-U104A
 pullup(g99107);
 assign #GATE_DELAY g99107 = rst ? 1'bz : ((0|STR912|HIMOD|ROPET) ? 1'b0 : 1'bz);
@@ -303,7 +303,7 @@ pullup(g99111);
 assign #GATE_DELAY g99111 = rst ? 0 : ((0|STR14|LOMOD|ROPER) ? 1'b0 : 1'bz);
 // Gate A99-U213B A99-U214A
 pullup(A99ES11_);
-assign #GATE_DELAY A99ES11_ = rst ? 0 : ((0|YT6E|YT7E|YT5E|YT4E) ? 1'b0 : 1'bz);
+assign #GATE_DELAY A99ES11_ = rst ? 1'bz : ((0|YT6E|YT7E|YT5E|YT4E) ? 1'b0 : 1'bz);
 // Gate A99-U101A
 pullup(A99FADDR16);
 assign #GATE_DELAY A99FADDR16 = rst ? 0 : ((0|STR14|LOMOD|g99106) ? 1'b0 : 1'bz);
@@ -348,7 +348,7 @@ pullup(g99208);
 assign #GATE_DELAY g99208 = rst ? 0 : ((0|A99ES02_|g99203) ? 1'b0 : 1'bz);
 // Gate A99-U209B
 pullup(A99ES07_);
-assign #GATE_DELAY A99ES07_ = rst ? 0 : ((0|YB1E|YB3E) ? 1'b0 : 1'bz);
+assign #GATE_DELAY A99ES07_ = rst ? 1'bz : ((0|YB1E|YB3E) ? 1'b0 : 1'bz);
 // Gate A99-U235A
 pullup(g99269);
 assign #GATE_DELAY g99269 = rst ? 0 : ((0|g99268) ? 1'b0 : 1'bz);
@@ -369,16 +369,16 @@ pullup(g99145);
 assign #GATE_DELAY g99145 = rst ? 0 : ((0|g99146|g99142) ? 1'b0 : 1'bz);
 // Gate A99-U106B
 pullup(g99112);
-assign #GATE_DELAY g99112 = rst ? 1'bz : ((0|STR14) ? 1'b0 : 1'bz);
+assign #GATE_DELAY g99112 = rst ? 0 : ((0|STR14) ? 1'b0 : 1'bz);
 // Gate A99-U220B
 pullup(g99240);
-assign #GATE_DELAY g99240 = rst ? 1'bz : ((0|g99217|A99RADDR3) ? 1'b0 : 1'bz);
+assign #GATE_DELAY g99240 = rst ? 0 : ((0|g99217|A99RADDR3) ? 1'b0 : 1'bz);
 // Gate A99-U112A
 pullup(A99FADDR12);
-assign #GATE_DELAY A99FADDR12 = rst ? 1'bz : ((0|g99126|g99124) ? 1'b0 : 1'bz);
+assign #GATE_DELAY A99FADDR12 = rst ? 0 : ((0|g99126|g99124) ? 1'b0 : 1'bz);
 // Gate A99-U226B
 pullup(g99252);
-assign #GATE_DELAY g99252 = rst ? 1'bz : ((0|g99225|A99RADDR5) ? 1'b0 : 1'bz);
+assign #GATE_DELAY g99252 = rst ? 0 : ((0|g99225|A99RADDR5) ? 1'b0 : 1'bz);
 // Gate A99-U103B
 pullup(g99106);
 assign #GATE_DELAY g99106 = rst ? 1'bz : ((0|ROPET) ? 1'b0 : 1'bz);
@@ -396,7 +396,7 @@ pullup(g99102);
 assign #GATE_DELAY g99102 = rst ? 1'bz : ((0|ROPER) ? 1'b0 : 1'bz);
 // Gate A99-U227B
 pullup(g99254);
-assign #GATE_DELAY g99254 = rst ? 1'bz : ((0|g99253|A99RADDR11) ? 1'b0 : 1'bz);
+assign #GATE_DELAY g99254 = rst ? 0 : ((0|g99253|A99RADDR11) ? 1'b0 : 1'bz);
 // Gate A99-U227A
 pullup(g99253);
 assign #GATE_DELAY g99253 = rst ? 0 : ((0|g99203|A99ES11_) ? 1'b0 : 1'bz);
@@ -405,7 +405,7 @@ pullup(g99271);
 assign #GATE_DELAY g99271 = rst ? 1'bz : ((0|g99272) ? 1'b0 : 1'bz);
 // Gate A99-U218A
 pullup(g99235);
-assign #GATE_DELAY g99235 = rst ? 1'bz : ((0|A99RADDR2|g99208) ? 1'b0 : 1'bz);
+assign #GATE_DELAY g99235 = rst ? 0 : ((0|A99RADDR2|g99208) ? 1'b0 : 1'bz);
 // Gate A99-U231A
 pullup(A99EDESTROY);
 assign #GATE_DELAY A99EDESTROY = rst ? 0 : ((0|g99271|g99260) ? 1'b0 : 1'bz);
@@ -417,7 +417,7 @@ pullup(g99168);
 assign #GATE_DELAY g99168 = rst ? 1'bz : ((0|g99134|RESETC) ? 1'b0 : 1'bz);
 // Gate A99-U206A A99-U206B
 pullup(A99ES04_);
-assign #GATE_DELAY A99ES04_ = rst ? 0 : ((0|XT3E|XT1E|XT5E|XT7E) ? 1'b0 : 1'bz);
+assign #GATE_DELAY A99ES04_ = rst ? 1'bz : ((0|XT3E|XT1E|XT5E|XT7E) ? 1'b0 : 1'bz);
 // Gate A99-U136A
 pullup(g99171);
 assign #GATE_DELAY g99171 = rst ? 1'bz : ((0|g99172) ? 1'b0 : 1'bz);
@@ -450,7 +450,7 @@ pullup(g99119);
 assign #GATE_DELAY g99119 = rst ? 0 : ((0|STR14|LOMOD|ROPES) ? 1'b0 : 1'bz);
 // Gate A99-U207A A99-U207B
 pullup(A99ES05_);
-assign #GATE_DELAY A99ES05_ = rst ? 0 : ((0|XT3E|XT2E|XT6E|XT7E) ? 1'b0 : 1'bz);
+assign #GATE_DELAY A99ES05_ = rst ? 1'bz : ((0|XT3E|XT2E|XT6E|XT7E) ? 1'b0 : 1'bz);
 // Gate A99-U136B
 pullup(g99172);
 assign #GATE_DELAY g99172 = rst ? 0 : ((0|g99170) ? 1'b0 : 1'bz);
@@ -459,7 +459,7 @@ pullup(g99273);
 assign #GATE_DELAY g99273 = rst ? 1'bz : ((0|g99274) ? 1'b0 : 1'bz);
 // Gate A99-U219A
 pullup(g99237);
-assign #GATE_DELAY g99237 = rst ? 1'bz : ((0|A99RADDR8|g99236) ? 1'b0 : 1'bz);
+assign #GATE_DELAY g99237 = rst ? 0 : ((0|A99RADDR8|g99236) ? 1'b0 : 1'bz);
 // Gate A99-U236B
 pullup(g99272);
 assign #GATE_DELAY g99272 = rst ? 0 : ((0|g99273) ? 1'b0 : 1'bz);

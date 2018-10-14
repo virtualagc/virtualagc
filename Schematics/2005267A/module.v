@@ -188,7 +188,7 @@ pullup(g44343);
 assign #GATE_DELAY g44343 = rst ? 0 : ((0|WCH10_|CHWL08_) ? 1'b0 : 1'bz);
 // Gate A17-U259B
 pullup(XB0);
-assign #GATE_DELAY XB0 = rst ? 0 : ((0|S01|S02) ? 1'b0 : 1'bz);
+assign #GATE_DELAY XB0 = rst ? 1'bz : ((0|S01|S02) ? 1'b0 : 1'bz);
 // Gate A17-U254A A17-U255A A17-U253B
 pullup(WCH11_);
 assign #GATE_DELAY WCH11_ = rst ? 1'bz : ((0|g44444) ? 1'b0 : 1'bz);

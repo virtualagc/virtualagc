@@ -100,7 +100,7 @@ pullup(g41103);
 assign #GATE_DELAY g41103 = rst ? 1'bz : ((0|g41104|g41102) ? 1'b0 : 1'bz);
 // Gate A13-U154B
 pullup(g41214);
-assign #GATE_DELAY g41214 = rst ? 1'bz : ((0|g41215|g41213) ? 1'b0 : 1'bz);
+assign #GATE_DELAY g41214 = rst ? 0 : ((0|g41215|g41213) ? 1'b0 : 1'bz);
 // Gate A13-U144B
 pullup(g41229);
 assign #GATE_DELAY g41229 = rst ? 0 : ((0|TMPOUT|TEMPIN_) ? 1'b0 : 1'bz);
@@ -142,7 +142,7 @@ pullup(SBYEXT);
 assign #GATE_DELAY SBYEXT = rst ? 1'bz : ((0|g41234) ? 1'b0 : 1'bz);
 // Gate A13-U153B
 pullup(g41215);
-assign #GATE_DELAY g41215 = rst ? 0 : ((0|g41214|F08B) ? 1'b0 : 1'bz);
+assign #GATE_DELAY g41215 = rst ? 1'bz : ((0|g41214|F08B) ? 1'b0 : 1'bz);
 // Gate A13-U107B
 pullup(g41149);
 assign #GATE_DELAY g41149 = rst ? 0 : ((0|g41148|g41150) ? 1'b0 : 1'bz);
@@ -184,7 +184,7 @@ pullup(g41150);
 assign #GATE_DELAY g41150 = rst ? 1'bz : ((0|F07A|g41149) ? 1'b0 : 1'bz);
 // Gate A13-U114A A13-U114B
 pullup(XT0_);
-assign #GATE_DELAY XT0_ = rst ? 1'bz : ((0|XT0) ? 1'b0 : 1'bz);
+assign #GATE_DELAY XT0_ = rst ? 0 : ((0|XT0) ? 1'b0 : 1'bz);
 // Gate A13-U107A
 pullup(g41141);
 assign #GATE_DELAY g41141 = rst ? 1'bz : ((0|g41140|g41142) ? 1'b0 : 1'bz);
@@ -262,16 +262,16 @@ pullup(MSCAFL_);
 assign #GATE_DELAY MSCAFL_ = rst ? 1'bz : ((0|SCAFAL) ? 1'b0 : 1'bz);
 // Gate A13-U151B
 pullup(FILTIN);
-assign #GATE_DELAY FILTIN = rst ? 0 : ((0|g41214) ? 1'b0 : 1'bz);
+assign #GATE_DELAY FILTIN = rst ? 1'bz : ((0|g41214) ? 1'b0 : 1'bz);
 // Gate A13-U145A
 pullup(WARN);
 assign #GATE_DELAY WARN = rst ? 0 : ((0|g41224) ? 1'b0 : 1'bz);
 // Gate A13-U123A
 pullup(g41108);
-assign #GATE_DELAY g41108 = rst ? 0 : ((0|F14B|g41107) ? 1'b0 : 1'bz);
+assign #GATE_DELAY g41108 = rst ? 1'bz : ((0|F14B|g41107) ? 1'b0 : 1'bz);
 // Gate A13-U123B
 pullup(g41107);
-assign #GATE_DELAY g41107 = rst ? 1'bz : ((0|IIP|g41108) ? 1'b0 : 1'bz);
+assign #GATE_DELAY g41107 = rst ? 0 : ((0|IIP|g41108) ? 1'b0 : 1'bz);
 // Gate A13-U150B
 pullup(SYNC4_);
 assign #GATE_DELAY SYNC4_ = rst ? 1'bz : ((0|g41218) ? 1'b0 : 1'bz);

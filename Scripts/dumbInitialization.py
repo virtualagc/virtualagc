@@ -105,7 +105,9 @@ want1 = [
 	"g31446", "g31443", # 55
 	"g32532", "g32529", # 56
 	"g32539", "g32536", # 57
-	"g32546", "g32543"  # 60
+	"g32546", "g32543", # 60
+	# Various flip-flops affecting the behavior of CHORxx.
+	"g48402", "g48406", "E7_", "g45117", "g45105"
 ]
 
 random.seed(12345)
