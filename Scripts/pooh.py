@@ -57,38 +57,45 @@ import sys
 # be dealt with formulaically into my signal names, even after they've already
 # been normalized.
 normalizedMikeNets = { 
-	"A08.__A08_1___A1_":"A01_", "A08.__A08_1___A2_":"A02_",
-	"A08.__A08_2___A1_":"A03_", "A08.__A08_2___A2_":"A04_",
-	"A09.__A09_1___A1_":"A05_", "A09.__A09_1___A2_":"A06_",
-	"A09.__A09_2___A1_":"A07_", "A09.__A09_2___A2_":"A08_",
-	"A10.__A10_1___A1_":"A09_", "A10.__A10_1___A2_":"A10_",
-	"A10.__A10_2___A1_":"A11_", "A10.__A10_2___A2_":"A12_",
-	"A11.__A11_1___A1_":"A13_", "A11.__A11_1___A2_":"A14_",
-	"A08.__L03_":"L03_", 
-	"A09.__L05_":"L05_", "A09.__L06_":"L06_", "A09.__L07_":"L07_", 
-	"A10.__L09_":"L09_", "A10.__L10_":"L10_", "A10.__L11_":"L11_",  
-	"A11.__L13_":"L13_", "A11.__L14_":"L14_",
-	"A08.__A08_1___Z1_":"Z01_", "A08.__A08_1___Z2_":"Z02_",
-	"A08.__A08_2___Z1_":"Z03_", "A08.__A08_2___Z2_":"Z04_",
-	"A09.__A09_1___Z1_":"Z05_", "A09.__A09_1___Z2_":"Z06_",
-	"A09.__A09_2___Z1_":"Z07_", "A09.__A09_2___Z2_":"Z08_",
-	"A10.__A10_1___Z1_":"Z09_", "A10.__A10_1___Z2_":"Z10_",
-	"A10.__A10_2___Z1_":"Z11_", "A10.__A10_2___Z2_":"Z12_",
-	"A11.__A11_1___Z1_":"Z13_", "A11.__A11_1___Z2_":"Z14_",
-	"A15.__A15_1__FB16":"FB16", "A15.__A15_1__FB14":"FB14", 
-	"A15.__A15_1__FB13":"FB13", "A15.__A15_1__FB12":"FB12", 
-	"A15.__A15_1__FB11":"FB11", 
-	"A15.__A15_1__EB11":"EB11"
+	"iA8.__A08_1___A1_":"A01_", "iA8.__A08_1___A2_":"A02_",
+	"iA8.__A08_2___A1_":"A03_", "iA8.__A08_2___A2_":"A04_",
+	"iA9.__A09_1___A1_":"A05_", "iA9.__A09_1___A2_":"A06_",
+	"iA9.__A09_2___A1_":"A07_", "iA9.__A09_2___A2_":"A08_",
+	"iA10.__A10_1___A1_":"A09_", "iA10.__A10_1___A2_":"A10_",
+	"iA10.__A10_2___A1_":"A11_", "iA10.__A10_2___A2_":"A12_",
+	"iA11.__A11_1___A1_":"A13_", "iA11.__A11_1___A2_":"A14_",
+	"iA8.__L03_":"L03_", 
+	"iA9.__L05_":"L05_", "iA9.__L06_":"L06_", "iA9.__L07_":"L07_", 
+	"iA10.__L09_":"L09_", "A10.__L10_":"L10_", "iA10.__L11_":"L11_",  
+	"iA11.__L13_":"L13_", "iA11.__L14_":"L14_",
+	"iA8.__A08_1___Z1_":"Z01_", "iA8.__A08_1___Z2_":"Z02_",
+	"iA8.__A08_2___Z1_":"Z03_", "iA8.__A08_2___Z2_":"Z04_",
+	"iA9.__A09_1___Z1_":"Z05_", "iA9.__A09_1___Z2_":"Z06_",
+	"iA9.__A09_2___Z1_":"Z07_", "iA9.__A09_2___Z2_":"Z08_",
+	"iA10.__A10_1___Z1_":"Z09_", "iA10.__A10_1___Z2_":"Z10_",
+	"iA10.__A10_2___Z1_":"Z11_", "iA10.__A10_2___Z2_":"Z12_",
+	"iA11.__A11_1___Z1_":"Z13_", "iA11.__A11_1___Z2_":"Z14_",
+	"iA15.__A15_1__FB16":"FB16", "iA15.__A15_1__FB14":"FB14", 
+	"iA15.__A15_1__FB13":"FB13", "iA15.__A15_1__FB12":"FB12", 
+	"iA15.__A15_1__FB11":"FB11", 
+	"iA15.__A15_1__EB11":"EB11",
+	"iA3.IC2":"IC2",
+	"iA4.__A04_1__STG1":"STG1", "iA4.__A04_1__STG2":"STG2", "iA4.__A04_1__STG3":"STG3", 
+	"iA3.__A03_1__WSQG_":"WSQG_",
+	"iA3.__A03_1__RPTFRC":"RPTFRC",
+	"iA21.__A21_1__SHINC":"SHINC", "iA21.__A21_1__SHANC":"SHANC"
 }
 
 wantTransitions = False
 wantNets = False
+wantConvert = False
 
 def readVCD(nameOfVcd, openFile):
 	
 	netsByID = {}
 	netsByPrimaryNetname = {}
 	time = 0
+	namesFound = {}
 	
 	print >> sys.stderr, "Reading netnames for " + nameOfVcd
 	
@@ -97,12 +104,15 @@ def readVCD(nameOfVcd, openFile):
 	for line in openFile:
 		line = line.strip()
 		fields = line.split()
+		skip = False
 		if inDumpvars:
 			if len(fields) == 1:
 				if fields[0][:1] == "#":
 					time = int(fields[0][1:])
 					if picosecondScale:
 						time /= 1000
+						if wantConvert:
+							line = "#" + str(time)
 					#print >> sys.stderr, time
 				else:
 					value = fields[0][:1]
@@ -129,7 +139,7 @@ def readVCD(nameOfVcd, openFile):
 					print >> sys.stderr, "Duplication of primary netname: " + netname
 					sys.exit(1)
 				netsByPrimaryNetname[netname] = { "id":id, "width":width, "mask":mask }
-			if not wantTransitions:
+			if not wantTransitions and not wantConvert:
 				break
 			print >> sys.stderr, "Reading transitions for " + nameOfVcd
 		elif len(fields) == 3 and fields[0] == "$timescale" and fields[2] == "$end":
@@ -137,19 +147,34 @@ def readVCD(nameOfVcd, openFile):
 				picosecondScale = True
 			elif fields[1] == "1ns":
 				picosecondScale = False
+			if wantConvert:
+				line = "$timescale 1ns $end"
 		elif len(fields) == 7 and fields[0] == "$var" and fields[1] == "wire" and fields[6] == "$end":
 			width = int(fields[2])
 			id = fields[3]
 			netname = fields[4]
 			mask = fields[5]
-			# Normalize the netnames a tad.
+			# Normalize the netnames a tad.  More accurately, by "normalize" I mean
+			# turn Mike's names into my names.
 			rawNetname = netname
 			if netname[:4] == "agc.":
 				netname = netname[4:]
+			elif netname[:13] == "main.AGC.B01.":
+				netname = "iA99." + netname[13:]
+			elif netname[:13] in [
+				"main.AGC.A01.", "main.AGC.A02.", "main.AGC.A03.", "main.AGC.A04.", 
+				"main.AGC.A05.", "main.AGC.A06.", "main.AGC.A07.", "main.AGC.A08.", 
+				"main.AGC.A09.", "main.AGC.A10.", "main.AGC.A11.", "main.AGC.A12.", 
+				"main.AGC.A13.", "main.AGC.A14.", "main.AGC.A15.", "main.AGC.A16.", 
+				"main.AGC.A17.", "main.AGC.A18.", "main.AGC.A19.", "main.AGC.A20.", 
+				"main.AGC.A21.", "main.AGC.A22.", "main.AGC.A23.", "main.AGC.A24."]:
+				netname = "iA" + str(int(netname[10:12])) + "." + netname[13:]
 			elif netname[:9] == "main.AGC.":
 				netname = netname[9:]
 			elif netname[:5] == "main.":
 				netname = netname[5:]
+			if netname[:1] == "n" and netname[1:2].isdigit():
+				netname = "d" + netname[1:]
 			if netname[-2:] == "_n":
 				netname = netname[:-1]
 			if netname in normalizedMikeNets:
@@ -161,10 +186,24 @@ def readVCD(nameOfVcd, openFile):
 				netsByID[id]["netnames"].append(netname)
 				netsByID[id]["rawNetnames"].append(rawNetname)
 			else:
-				netsByID[id] = { "netnames":[netname], "rawNetnames":[rawNetName], "width":width, 
+				netsByID[id] = { "netnames":[netname], "rawNetnames":[rawNetname], "width":width, 
 					"mask":mask, "transitions":[], "values":[], "desired":False }
 				if netname in desiredNetnames:
 					netsByID[id]["desired"] = True
+			
+			if netname in namesFound:
+				if namesFound[netname]["id"] == id:
+					skip = True
+				else:
+					print >> sys.stderr, "Implementation error, dupe net \"" + \
+						netname + "\", raw nets \"" + rawNetname + "\" and \"" + \
+						namesFound[netname]["rawName"] + "\""
+			else:
+				namesFound[netname] = { "id":id, "rawName":rawNetname }
+			if wantConvert:
+				line = "$var wire " + str(width) + " " + id + " agc." + netname + " " + mask + " $end"
+		if wantConvert and not skip:
+			print line
 	
 	return { "byID":netsByID, "byNetname":netsByPrimaryNetname }
 
@@ -197,13 +236,16 @@ for argv in sys.argv[1:]:
 	elif argv == "--nets":
 		wantNets = True
 		count += 1
+	elif argv == "--convert":
+		wantConvert = True
+		count += 1
 	elif argv[:1] == "-":
 		print >> sys.stderr, "Unknown command-line argument: " + argv
 		error = True
 	else:
 		desiredNetnames.append(argv)
 if count != 1:
-	print >> sys.stderr, "Must select exactly one of the following: --transitions --nets"
+	print >> sys.stderr, "Must select exactly one of the following: --transitions --nets --convert"
 	error = True
 if error:
 	sys.exit(1)
@@ -214,12 +256,14 @@ if compare == "":
 	vcd = readVCD("vcd", sys.stdin)
 	for netname in desiredNetnames:
 		if netname in vcd["byNetname"]:
-			print "Net \"" + netname + "\" found in the input"
+			print >> sys.stderr, "Net \"" + netname + "\" found in the input"
 		else:
-			print "Net \"" + netname + "\" not found in the input"
+			print >> sys.stderr, "Net \"" + netname + "\" not found in the input"
 			error = True
 	if error:
 		sys.exit(1)
+	if wantConvert:
+		sys.exit(0)
 	if wantTransitions:
 		printNets("vcd", vcd)
 	if wantNets:
