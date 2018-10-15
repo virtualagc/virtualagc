@@ -31,25 +31,26 @@
 #
 # The idea here is that the simulations are performed with the Icarus
 # Verilog program 'vvp' in such a way as to dump simulation data into an
-# LXT2 file.  Other dump formats might work, but I don't care ... LXT2
-# is the scenario I support.  This program is used either to work with
-# a single dumpfile,
+# FST file.  Other dump formats might work, but I don't care ... FST
+# is the scenario I support.  (Note, lxt2vcd has bugs that cause LXT2 not
+# to work for this with a current stock version of iverilog.)  This program
+# is used either to work with a single dumpfile,
 #
-#	lxt2vcd --flatearth DUMPED.lxt2 | pooh.py [OPTIONS] >OUTPUTFILE
+#	fst2vcd DUMPED.fst | pooh.py [OPTIONS] >OUTPUTFILE
 #
 # or else to compare two dumpfiles,
 #
-#	lxt2vcd --flatearth DUMPED2.lxt2 >DUMPED2.vcd
-#	lxt2vcd --flatearth DUMPED1.lxt2 | pooh.py --compare=DUMPED2.vcd [OPTIONS] >OUTPUTFILE
+#	fst2vcd DUMPED2.fst >DUMPED2.vcd
+#	fst2vcd DUMPED1.fst | pooh.py --compare=DUMPED2.vcd [OPTIONS] >OUTPUTFILE
 #	rm DUMPED2.vcd
 #
-# 'lxt2vcd' is a utility program from Icarus Verilog.  You may think
+# 'fst2vcd' is a utility program from gtkwave.  You may think
 # that having 'vvp' just dump to VCD format would be more straightforward,
-# but that won't work since the --flatearth option is required; moreover,
-# the dumped files would generally be enormously bigger.  Sadly, with the
-# comparison functionality, I don't know any good way to get around having
-# the temporary VCD file. I guess (in Linux at least) you could use a named
-# pipe, although I hesitate to suggest such tricksy stuff.
+# and it would, but the dumped files would generally be enormously bigger.  
+# Sadly, with the comparison functionality, I don't know any good way to 
+# get around having the temporary VCD file. I guess (in Linux at least) 
+# you could use a named pipe, although I hesitate to suggest such tricksy 
+# stuff.
 
 import sys
 
@@ -91,6 +92,9 @@ wantNets = False
 wantConvert = False
 
 def readVCD(nameOfVcd, openFile):
+	scope = []
+	scopeString = ""
+	inTimescale = False
 	
 	netsByID = {}
 	netsByPrimaryNetname = {}
@@ -142,6 +146,19 @@ def readVCD(nameOfVcd, openFile):
 			if not wantTransitions and not wantConvert:
 				break
 			print >> sys.stderr, "Reading transitions for " + nameOfVcd
+		elif len(fields) == 4 and fields[0] == "$scope" and fields[1] == "module" and fields[3] == "$end":
+			scope.append(fields[2])
+			scopeString += fields[2] + "."
+			skip = True
+		elif len(fields) == 2 and fields[0] == "$upscope" and fields[1] == "$end":
+			del scope[-1]
+			if len(scope) < 1:
+				scopeString = ""
+			else:
+				scopeString = ""
+				for field in scope:
+					scopeString += field + "."
+			skip = True
 		elif len(fields) == 3 and fields[0] == "$timescale" and fields[2] == "$end":
 			if fields[1] == "1ps":
 				picosecondScale = True
@@ -149,11 +166,26 @@ def readVCD(nameOfVcd, openFile):
 				picosecondScale = False
 			if wantConvert:
 				line = "$timescale 1ns $end"
-		elif len(fields) == 7 and fields[0] == "$var" and fields[1] == "wire" and fields[6] == "$end":
+		elif len(fields) == 1 and fields[0] == "$timescale":
+			inTimescale = True
+		elif len(fields) == 1 and inTimescale:
+			if fields[0] == "$end":
+				inTimescale = False
+			else:
+				if fields[0] == "1ps":
+					picosecondScale = True
+				elif fields[0] == "1ns":
+					picosecondScale = False
+				if wantConvert:
+					line = "        1ns"
+		elif len(fields) in [6, 7] and fields[0] == "$var" and fields[1] in ["wire", "reg"]:
 			width = int(fields[2])
 			id = fields[3]
-			netname = fields[4]
-			mask = fields[5]
+			netname = scopeString + fields[4]
+			if len(fields) == 6:
+				mask = "[0]"
+			else:
+				mask = fields[5]
 			# Normalize the netnames a tad.  More accurately, by "normalize" I mean
 			# turn Mike's names into my names.
 			rawNetname = netname
