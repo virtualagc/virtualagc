@@ -55,51 +55,39 @@
 import sys
 
 # Here's a dictionary used to translate various of Mike's signal names that can't
-# be dealt with formulaically into my signal names, even after they've already
-# been normalized.
+# be dealt with formulaically into my signal names.
 normalizedMikeNets = { 
-	"iA8.__A08_1___A1_":"A01_", "iA8.__A08_1___A2_":"A02_",
-	"iA8.__A08_2___A1_":"A03_", "iA8.__A08_2___A2_":"A04_",
-	"iA9.__A09_1___A1_":"A05_", "iA9.__A09_1___A2_":"A06_",
-	"iA9.__A09_2___A1_":"A07_", "iA9.__A09_2___A2_":"A08_",
-	"iA10.__A10_1___A1_":"A09_", "iA10.__A10_1___A2_":"A10_",
-	"iA10.__A10_2___A1_":"A11_", "iA10.__A10_2___A2_":"A12_",
-	"iA11.__A11_1___A1_":"A13_", "iA11.__A11_1___A2_":"A14_",
-	"iA8.__L03_":"L03_", 
-	"iA9.__L05_":"L05_", "iA9.__L06_":"L06_", "iA9.__L07_":"L07_", 
-	"iA10.__L09_":"L09_", "A10.__L10_":"L10_", "iA10.__L11_":"L11_",  
-	"iA11.__L13_":"L13_", "iA11.__L14_":"L14_",
-	"iA8.__A08_1___Z1_":"Z01_", "iA8.__A08_1___Z2_":"Z02_",
-	"iA8.__A08_2___Z1_":"Z03_", "iA8.__A08_2___Z2_":"Z04_",
-	"iA9.__A09_1___Z1_":"Z05_", "iA9.__A09_1___Z2_":"Z06_",
-	"iA9.__A09_2___Z1_":"Z07_", "iA9.__A09_2___Z2_":"Z08_",
-	"iA10.__A10_1___Z1_":"Z09_", "iA10.__A10_1___Z2_":"Z10_",
-	"iA10.__A10_2___Z1_":"Z11_", "iA10.__A10_2___Z2_":"Z12_",
-	"iA11.__A11_1___Z1_":"Z13_", "iA11.__A11_1___Z2_":"Z14_",
-	"iA15.__A15_1__FB16":"FB16", "iA15.__A15_1__FB14":"FB14", 
-	"iA15.__A15_1__FB13":"FB13", "iA15.__A15_1__FB12":"FB12", 
-	"iA15.__A15_1__FB11":"FB11", 
-	"iA15.__A15_1__EB11":"EB11",
-	"iA3.IC2":"IC2",
-	"iA4.__A04_1__STG1":"STG1", "iA4.__A04_1__STG2":"STG2", "iA4.__A04_1__STG3":"STG3", 
-	"iA3.__A03_1__WSQG_":"WSQG_",
-	"iA3.__A03_1__RPTFRC":"RPTFRC",
-	"iA21.__A21_1__SHINC":"SHINC", "iA21.__A21_1__SHANC":"SHANC"
+	"__A08_1___A1_n":"A01_", "__A08_1___A2_n":"A02_",
+	"__A08_2___A1_n":"A03_", "__A08_2___A2_n":"A04_",
+	"__A09_1___A1_n":"A05_", "__A09_1___A2_n":"A06_",
+	"__A09_2___A1_n":"A07_", "__A09_2___A2_n":"A08_",
+	"__A10_1___A1_n":"A09_", "__A10_1___A2_n":"A10_",
+	"__A10_2___A1_n":"A11_", "__A10_2___A2_n":"A12_",
+	"__A11_1___A1_n":"A13_", "__A11_1___A2_n":"A14_",
+	"__A08_1___Z1_n":"Z01_", "__A08_1___Z2_n":"Z02_",
+	"__A08_2___Z1_n":"Z03_", "__A08_2___Z2_n":"Z04_",
+	"__A09_1___Z1_n":"Z05_", "__A09_1___Z2_n":"Z06_",
+	"__A09_2___Z1_n":"Z07_", "__A09_2___Z2_n":"Z08_",
+	"__A10_1___Z1_n":"Z09_", "__A10_1___Z2_n":"Z10_",
+	"__A10_2___Z1_n":"Z11_", "__A10_2___Z2_n":"Z12_",
+	"__A11_1___Z1_n":"Z13_", "__A11_1___Z2_n":"Z14_"
 }
 
 wantTransitions = False
 wantNets = False
 wantConvert = False
+wantSymbols = False
 
 def readVCD(nameOfVcd, openFile):
 	scope = []
 	scopeString = ""
+	xScope = []
+	xScopeString = ""
 	inTimescale = False
+	scopeCount = 0
 	
 	netsByID = {}
-	netsByPrimaryNetname = {}
 	time = 0
-	namesFound = {}
 	
 	print >> sys.stderr, "Reading netnames for " + nameOfVcd
 	
@@ -135,30 +123,46 @@ def readVCD(nameOfVcd, openFile):
 				sys.exit(1)
 		elif len(fields) == 1 and fields[0] == "$dumpvars":
 			inDumpvars = True
-			for id in netsByID:
-				netname = netsByID[id]["netnames"][0]
-				width = netsByID[id]["width"]
-				mask = netsByID[id]["mask"]
-				if netname in netsByPrimaryNetname:
-					print >> sys.stderr, "Duplication of primary netname: " + netname
-					sys.exit(1)
-				netsByPrimaryNetname[netname] = { "id":id, "width":width, "mask":mask }
 			if not wantTransitions and not wantConvert:
 				break
 			print >> sys.stderr, "Reading transitions for " + nameOfVcd
 		elif len(fields) == 4 and fields[0] == "$scope" and fields[1] == "module" and fields[3] == "$end":
-			scope.append(fields[2])
-			scopeString += fields[2] + "."
-			skip = True
+			rawModule = fields[2]
+			scope.append(rawModule)
+			scopeString += rawModule + "."
+			scopeCount += 1
+			module = rawModule
+			if module == "main":
+				module = "agc"
+			elif module == "AGC":
+				module = "agc"
+				skip = True
+				scopeCount -= 1
+			elif module == "B01":
+				module = "iA99"
+			elif module[:1] == "A" and module[1:].isdigit():
+				module = "iA" + str(int(module[1:]))
+			if not skip:
+				xScope.append(module)
+				xScopeString += module + "."
+			line = "$scope module " + module + " $end"
 		elif len(fields) == 2 and fields[0] == "$upscope" and fields[1] == "$end":
 			del scope[-1]
+			scopeCount -= 1
+			if scopeCount < 0:
+				skip = True
+			else:
+				del xScope[-1]
 			if len(scope) < 1:
 				scopeString = ""
+				xScopeString = ""
 			else:
 				scopeString = ""
+				xScopeString = ""
 				for field in scope:
 					scopeString += field + "."
-			skip = True
+				for field in xScope:
+					xScopeString += field + "."
 		elif len(fields) == 3 and fields[0] == "$timescale" and fields[2] == "$end":
 			if fields[1] == "1ps":
 				picosecondScale = True
@@ -181,63 +185,50 @@ def readVCD(nameOfVcd, openFile):
 		elif len(fields) in [6, 7] and fields[0] == "$var" and fields[1] in ["wire", "reg"]:
 			width = int(fields[2])
 			id = fields[3]
-			netname = scopeString + fields[4]
+			netname = fields[4]
 			if len(fields) == 6:
 				mask = "[0]"
 			else:
 				mask = fields[5]
 			# Normalize the netnames a tad.  More accurately, by "normalize" I mean
 			# turn Mike's names into my names.
-			rawNetname = netname
-			if netname[:4] == "agc.":
-				netname = netname[4:]
-			elif netname[:13] == "main.AGC.B01.":
-				netname = "iA99." + netname[13:]
-			elif netname[:13] in [
-				"main.AGC.A01.", "main.AGC.A02.", "main.AGC.A03.", "main.AGC.A04.", 
-				"main.AGC.A05.", "main.AGC.A06.", "main.AGC.A07.", "main.AGC.A08.", 
-				"main.AGC.A09.", "main.AGC.A10.", "main.AGC.A11.", "main.AGC.A12.", 
-				"main.AGC.A13.", "main.AGC.A14.", "main.AGC.A15.", "main.AGC.A16.", 
-				"main.AGC.A17.", "main.AGC.A18.", "main.AGC.A19.", "main.AGC.A20.", 
-				"main.AGC.A21.", "main.AGC.A22.", "main.AGC.A23.", "main.AGC.A24."]:
-				netname = "iA" + str(int(netname[10:12])) + "." + netname[13:]
-			elif netname[:9] == "main.AGC.":
-				netname = netname[9:]
-			elif netname[:5] == "main.":
-				netname = netname[5:]
-			if netname[:1] == "n" and netname[1:2].isdigit():
+			rawNetname = scopeString + netname
+			if netname[:2] == "__" and netname[2:5] != rawModule:
+				netname = netname[2:]
+			elif netname in normalizedMikeNets:
+				netname = normalizedMikeNets[netname]
+			elif netname[:2] == "__" and netname[2:5] == rawModule and netname[5:9] in ["_1__", "_2__", "_3__"]:
+				 if netname[9] != "_" and not (netname[9] in ["X", "Y"] and netname[10].isdigit()) \
+				 	and not (rawModule == "A20" and netname[9] == "C" and netname[10].isdigit()):
+				 	netname = netname[9:]
+			if netname[0].isdigit():
+				netname = "d" + netname
+			if netname[0] == "n" and netname[1].isdigit():
 				netname = "d" + netname[1:]
 			if netname[-2:] == "_n":
 				netname = netname[:-1]
-			if netname in normalizedMikeNets:
-				netname = normalizedMikeNets[netname]
+			xRawNetname = xScopeString + netname
 			if id in netsByID:
 				if netsByID[id]["width"] != width or netsByID[id]["mask"] != mask:
 					print >> sys.stderr, "Field width/mask discrepancy: " + line
 					sys.exit(1)
+				if netname in netsByID[id]["netnames"]:
+					skip = True
 				netsByID[id]["netnames"].append(netname)
 				netsByID[id]["rawNetnames"].append(rawNetname)
+				netsByID[id]["xRawNetnames"].append(xRawNetname)
 			else:
 				netsByID[id] = { "netnames":[netname], "rawNetnames":[rawNetname], "width":width, 
-					"mask":mask, "transitions":[], "values":[], "desired":False }
+					"mask":mask, "transitions":[], "values":[], "desired":False,
+					"xRawNetnames":[xRawNetname] }
 				if netname in desiredNetnames:
 					netsByID[id]["desired"] = True
-			
-			if netname in namesFound:
-				if namesFound[netname]["id"] == id:
-					skip = True
-				else:
-					print >> sys.stderr, "Implementation error, dupe net \"" + \
-						netname + "\", raw nets \"" + rawNetname + "\" and \"" + \
-						namesFound[netname]["rawName"] + "\""
-			else:
-				namesFound[netname] = { "id":id, "rawName":rawNetname }
 			if wantConvert:
-				line = "$var wire " + str(width) + " " + id + " agc." + netname + " " + mask + " $end"
+				line = "$var wire " + str(width) + " " + id + " " + netname + " " + mask + " $end"
 		if wantConvert and not skip:
 			print line
 	
-	return { "byID":netsByID, "byNetname":netsByPrimaryNetname }
+	return { "byID":netsByID }
 
 def printNets(nameOfVCD, vcd):
 	print "$vcd " + nameOfVCD
@@ -271,13 +262,16 @@ for argv in sys.argv[1:]:
 	elif argv == "--convert":
 		wantConvert = True
 		count += 1
+	elif argv == "--symbols":
+		wantSymbols = True
+		count += 1
 	elif argv[:1] == "-":
 		print >> sys.stderr, "Unknown command-line argument: " + argv
 		error = True
 	else:
 		desiredNetnames.append(argv)
 if count != 1:
-	print >> sys.stderr, "Must select exactly one of the following: --transitions --nets --convert"
+	print >> sys.stderr, "Must select exactly one of the following: --transitions --nets --convert --symbols"
 	error = True
 if error:
 	sys.exit(1)
@@ -300,6 +294,11 @@ if compare == "":
 		printNets("vcd", vcd)
 	if wantNets:
 		analyzeNetHierarchy("vcd", vcd)
+	if wantSymbols:
+		symbols = []
+		for id in vcd["byID"]:
+			for i in range(0, len(vcd["byID"][id]["rawNetnames"])):
+				print vcd["byID"][id]["rawNetnames"][i] + " -> " + vcd["byID"][id]["xRawNetnames"][i]
 else:
 	# Dual-file comparison operation.
 	vcd1 = readVCD("vcd1", sys.stdin)
