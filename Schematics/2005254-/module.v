@@ -208,7 +208,7 @@ pullup(g32331);
 assign #GATE_DELAY g32331 = rst ? 0 : ((0|g31301|g31329) ? 1'b0 : 1'bz);
 // Gate A20-U219B
 pullup(C51A);
-assign #GATE_DELAY C51A = rst ? 0 : ((0|g31339|CG26|g31333) ? 1'b0 : 1'bz);
+assign #GATE_DELAY C51A = rst ? 1'bz : ((0|g31339|CG26|g31333) ? 1'b0 : 1'bz);
 // Gate A20-U125A
 pullup(C34A);
 assign #GATE_DELAY C34A = rst ? 0 : ((0|CG11|g31206) ? 1'b0 : 1'bz);

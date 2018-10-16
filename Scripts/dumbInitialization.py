@@ -63,7 +63,9 @@ import random
 # some care needs to be taken in these selections.
 want0 = [
 	# STNDBY is controlled from a B-module that we're not simulating.
-	"STNDBY"
+	"STNDBY",
+	# Misc
+	"g32607"
 ]
 want1 = [
 	# This zeroes the 32-bit counter in scaler module A1.
