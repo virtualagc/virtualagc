@@ -16,6 +16,7 @@ BEGIN {
 
 {
 	gsub(/A0/,"A",module)
+	gsub(/B0/,"B",module)
 	if ($1 == module && NF == 5 && $4 != "") {
 		gsub(/\//, "_")
 		print " -e 's@Net[-](J[1234][-]Pad" $2 ")$@" $4 "@' \\"

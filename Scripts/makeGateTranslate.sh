@@ -34,17 +34,17 @@ then
 fi
 if [[ ! -f $MIKENETLIST ]]
 then
-	echo "The input file \"$MIKENETLIST\" does not exist
+	echo "The input file \"$MIKENETLIST\" does not exist"
 	exit 1
 fi
 if [[ ! -f $MYNETLIST ]]
 then
-	echo "The input file \"$MYNETLIST\" does not exist
+	echo "The input file \"$MYNETLIST\" does not exist"
 	exit 1
 fi
 
 awk -v module=$MODULE -f $SCRIPTDIR/extractMikeGates.awk $MIKENETLIST | \
-sed -e 's@/$@_@' -e 's@/A[0-9][0-9]_[0-9]/@@' | \
+sed -e 's@/$@_@' -e 's@/[AB][0-9][0-9]_[0-9]/@@' | \
 sort --key=2 >$MIKEPINS
 
 awk -v module=$MODULE -f $SCRIPTDIR/pinDB2Lookup.awk <$PINSDB >$MYSCRIPT
@@ -55,5 +55,9 @@ sed -e 's@/$@_@' -e 's@[^ ]*/@@' | \
 sort --key=2 | $MYSCRIPT | sort --key=2 >$MYPINS
 
 join -1 2 -2 2 -a 1 $MIKEPINS $MYPINS >$OUTFILE
-gedit $OUTFILE &
+if [[ "$4" != "" ]]
+then
+  gedit $OUTFILE &
+fi
+
 
