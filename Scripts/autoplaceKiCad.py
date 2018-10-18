@@ -27,6 +27,7 @@
 #				other boilerplate at the top of the file.
 #		2018-08-06 RSB	Added the auto-increment feature for N and
 #				J.
+#		2018-10-18 RSB	Added connector A52.
 #
 # The purpose of this python script is to take a text file that has some
 # descriptions of NOR gates, expander gates, connector pads, nodes,
@@ -93,6 +94,8 @@ bPins = ["D", "E", "F", "_"]
 gateNumber = 0
 locationNumber = 1
 padNumber = 1
+module = "X"
+moduleA52 = False
 
 # Read the input file.
 for line in sys.stdin:
@@ -104,6 +107,11 @@ for line in sys.stdin:
 		continue
 	type = fields[0]
 	if numFields < 1 or type == "#":
+		continue
+	if type == "module=" and numFields == 2:
+		module = fields[1]
+		if module == "A52":
+			moduleA52 = True
 		continue
 	if type == "G=" and numFields == 2:
 		gateNumber = int(fields[1])
@@ -280,7 +288,13 @@ for line in sys.stdin:
 		else:
 			text = ""
 		id = type + pinName
-		if pinNum >= 101 and pinNum <= 171:
+		if moduleA52:
+			refd = "J1"
+			symbol = "ConnectorA52"
+			quotient = (pinNum // 100) - 1
+			remainder = pinNum % 100
+			unit = 16 * quotient + remainder 
+		elif pinNum >= 101 and pinNum <= 171:
 			refd = "J1"
 			symbol = "ConnectorA1-100"
 			unit = pinNum % 100
