@@ -64,6 +64,9 @@ import random
 want0 = [
 	# STNDBY is controlled from a B-module that we're not simulating.
 	"STNDBY",
+	# Restart monitor
+	"g98023", "g98027", "g98029", "g80031", "g98033", 
+	"g98035", "g98037", "g98039", "g98041",
 	# Misc
 	"g32607"
 ]

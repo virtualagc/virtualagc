@@ -61,6 +61,7 @@
 #				than needing to be hardcoded into the testbench
 #				Verilog:  simulation run-length, signals to 
 #				be dumped, and so on.
+#		2018-10-18 RSB	Added A52.
 #
 # This 'make' needs to be performed from the Schematics/ directory.
 # Icarus Verilog must be installed, and iverilog must be in the PATH.
@@ -244,6 +245,7 @@ MODULES_PROCESSED = none
 $(foreach drawing,$(DRAWINGS_2003100),$(eval $(call moduleTemplate,$(drawing))))
 # Add more drawings separately that don't fit into the nice module-number sequence used above.
 DRAWINGS_2003100 += fixed_erasable_memory
+#DRAWINGS_2003200 += 2003305B
 TARGETS_VVP_2003100 := $(DRAWINGS_2003100:%=%/module.vvp)
 TARGETS_V_2003100 := $(DRAWINGS_2003100:%=%/module.v)
 
@@ -259,6 +261,7 @@ MODULES_PROCESSED = none
 $(foreach drawing,$(DRAWINGS_2003200),$(eval $(call moduleTemplate,$(drawing))))
 # Add more drawings separately that don't fit into the nice module-number sequence used above.
 DRAWINGS_2003200 += fixed_erasable_memory
+#DRAWINGS_2003200 += 2003305B
 TARGETS_VVP_2003200 := $(DRAWINGS_2003200:%=%/module.vvp)
 TARGETS_V_2003200 := $(DRAWINGS_2003200:%=%/module.v)
 
@@ -274,10 +277,13 @@ MODULES_PROCESSED = none
 $(foreach drawing,$(DRAWINGS_2003993),$(eval $(call moduleTemplate,$(drawing))))
 # Add more drawings separately that don't fit into the nice module-number sequence used above.
 DRAWINGS_2003993 += fixed_erasable_memory
+#DRAWINGS_2003993 += 2003305B
 TARGETS_VVP_2003993 := $(DRAWINGS_2003993:%=%/module.vvp)
 TARGETS_V_2003993 := $(DRAWINGS_2003993:%=%/module.v)
 
 ##################################################################################
+
+module_2003305B := A52
 
 # Override default delay_DRAWING variables here, if a specific drawing needs it or can
 # benefit from it. 

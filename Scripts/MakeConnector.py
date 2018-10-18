@@ -58,8 +58,8 @@ elif partName == "ConnectorD8":
 	startingPinNumber = 1
 	endingPinNumber = 35
 	omitPins = [ ]
-elif partName == "ConnectorA51":
-	connectorA51 = True
+elif partName == "ConnectorA52":
+	connectorA52 = True
 	startingPinNumber = 1
 	endingPinNumber = 9 * 16
 	omitPins = [ ]
@@ -94,8 +94,8 @@ nextPinAfterLast = endingPinNumber + 1
 totalPins = nextPinAfterLast - startingPinNumber # - len(omitPins)
 
 def createPinName(pinNumber):
-	global connectorA51
-	if connectorA51:
+	global connectorA52
+	if connectorA52:
 		quotient = ((pinNumber - 1) // 16) + 1
 		remainder = ((pinNumber - 1) % 16) + 1
 		pinName = str(100 * quotient + remainder)
@@ -130,13 +130,13 @@ partno = 1
 for pin in range(startingPinNumber, nextPinAfterLast):
 	pinName = createPinName(pin)
 	if not (pin in omitPins):
-		print("X " + pinName + " " + str(pin) + " " + str(xRadius) + " 0 0 L " + str(textSize) + " " + str(textSize) + " " + str(partno) + " 1 P")
+		print("X " + pinName + " " + pinName + " " + str(xRadius) + " 0 0 L " + str(textSize) + " " + str(textSize) + " " + str(partno) + " 1 P")
 	partno += 1
 partno = 1
 for pin in range(startingPinNumber, nextPinAfterLast):
 	pinName = createPinName(pin)
 	if not (pin in omitPins):
-		print("X " + pinName + " " + str(pin) + " 0 " + str(yRadius) + " 0 D " + str(textSize) + " " + str(textSize) + " " + str(partno) + " 2 P")
+		print("X " + pinName + " " + pinName + " 0 " + str(yRadius) + " 0 D " + str(textSize) + " " + str(textSize) + " " + str(partno) + " 2 P")
 	partno += 1
 print("ENDDRAW")
 print("ENDDEF")

@@ -57,6 +57,7 @@
 #		2018-10-10 RSB	Changed the default build type to "wire", since 
 #				the simulation isn't currently working correctly
 #				with "pullup".
+#		2018-10-18 RSB	Added A52.
 #
 # This script converts one of my KiCad transcriptions of AGC LOGIC FLOW DIAGRAMs
 # into Verilog in the dumbest, most-straightforward way.  In other words, I don't
@@ -72,7 +73,7 @@
 #
 #	MODULE		The name of the AGC logic module: A1, A2, etc.
 #	FILENAME.net	A netlist as output by KiCad in "OrcadPCB2" format of a single AGC
-#			LOGIC FLOW module (A1-A24).  This is not just any arbitrary version
+#			LOGIC FLOW module (A1-A24,A52).  This is not just any arbitrary version
 #			of the KiCad transcriptions, but rather one of the initial ones I 
 #			intended to be visually accurate representations of the original
 #			scans.  The translator understands only a couple of kinds of 
@@ -173,10 +174,10 @@ pinTypesBUFFER = [ "",
 	"T",    "P",    "I",    "T",    "I",    "T",    "I",    "T",    
 	"I",    "T",    "I",    "P"
 ]
-schPadsJ1 = [ "?" ] * 72
-schPadsJ2 = [ "?" ] * 72
-schPadsJ3 = [ "?" ] * 72
-schPadsJ4 = [ "?" ] * 72
+schPadsJ1 = [ "?" ] * 144
+schPadsJ2 = [ "?" ] * 144
+schPadsJ3 = [ "?" ] * 144
+schPadsJ4 = [ "?" ] * 144
 
 def readSchematicFile(filename):
 	global gateLocations
@@ -305,8 +306,8 @@ if len(sys.argv) >= 3:
 		usePinsDB = False 
 	else:
 		moduleNumber = int(moduleName[1:])
-		if moduleNumber < 1 or moduleNumber > 24:
-			#print >> sys.stderr, "Module name is not A1 - A64."
+		if ( moduleNumber < 1 or moduleNumber > 24 ) and moduleNumber != 52:
+			#print >> sys.stderr, "Module name is not A1 - A24 or A52."
 			usePinsDB = False
 	
 	if usePinsDB:
@@ -382,7 +383,7 @@ else:
 if error:
 	print >> sys.stderr, "USAGE:"
 	print >> sys.stderr, "\tdumbVerilog.py MODULE INPUT.net [/PATH/TO/pins.txt [DELAY [INPUT.init [SCHEMATIC.sch [WIRETYPE]]]]] >OUTPUT.v"
-	print >> sys.stderr, "MODULE is the name of the AGC module, A1 through A24."
+	print >> sys.stderr, "MODULE is the name of the AGC module, A1 - A24 or A52."
 	print >> sys.stderr, "For \"modules\" that weren't part of the original AGC, but"
 	print >> sys.stderr, "are instead introduced for simulation purposes, any unique"
 	print >> sys.stderr, "alphanumeric (or '_', not leading with a digit) can be used."
@@ -758,10 +759,16 @@ for line in lines:
 				thisGatesInits = inits[refd]
 			else:
 				thisGatesInits = { "j": { "output":0, "delay":0 }, "k": { "output":0, "delay":0} }
-			if norPins[1] != "":
-				nors.append([moduleName + "-" + refd + "A", norPins[1], thisGatesInits["j"], norPins[2], norPins[3], norPins[4]])
-			if norPins[9] != "":
-				nors.append([moduleName + "-" + refd + "B", norPins[9], thisGatesInits["k"], norPins[6], norPins[7], norPins[8]])
+			if numerical:
+				if norPins[1] != "":
+					nors.append([moduleName + "-" + refd + "B", norPins[1], thisGatesInits["j"], norPins[2], norPins[3], norPins[4]])
+				if norPins[9] != "":
+					nors.append([moduleName + "-" + refd + "A", norPins[9], thisGatesInits["k"], norPins[6], norPins[7], norPins[8]])
+			else:
+				if norPins[1] != "":
+					nors.append([moduleName + "-" + refd + "A", norPins[1], thisGatesInits["j"], norPins[2], norPins[3], norPins[4]])
+				if norPins[9] != "":
+					nors.append([moduleName + "-" + refd + "B", norPins[9], thisGatesInits["k"], norPins[6], norPins[7], norPins[8]])
 		elif inWhat == "BUFFER":
 			buffers.append( { "refd":(moduleName + "-" + refd), "pins":pinNetsB[:21] } )
 		elif inWhat == "RAM":
@@ -778,6 +785,11 @@ for line in lines:
 			inWhat = "NOR"
 			norPins = [ "" ] * 11
 			pinNames = pinNamesNOR
+			numerical = False
+			compFields = fields[4].split("-")
+			if ("numerical" in compFields):
+				#print >> sys.stderr, "numerical"
+				numerical = True
 			continue
 		pinNetsB = [ "" ] * 101
 		if fields[4] == "ROM":
@@ -827,10 +839,16 @@ for line in lines:
 		else:
 			netName = moduleName + netName[5:].replace("-", "").replace(")", "")
 			if inWhat == "NOR":
-				if pinNumber == 1 and gateLocations[refd + "A"] != "":
-					netToGate[netName] = "g" + gateLocations[refd + "A"]
-				elif pinNumber == 9 and gateLocations[refd + "B"] != "":
-					netToGate[netName] = "g" + gateLocations[refd + "B"]
+				if numerical:
+					if pinNumber == 9 and gateLocations[refd + "A"] != "":
+						netToGate[netName] = "g" + gateLocations[refd + "A"]
+					elif pinNumber == 1 and gateLocations[refd + "B"] != "":
+						netToGate[netName] = "g" + gateLocations[refd + "B"]
+				else:
+					if pinNumber == 1 and gateLocations[refd + "A"] != "":
+						netToGate[netName] = "g" + gateLocations[refd + "A"]
+					elif pinNumber == 9 and gateLocations[refd + "B"] != "":
+						netToGate[netName] = "g" + gateLocations[refd + "B"]
 	if not isPin:
 		continue
 	if inWhat == "NOR":

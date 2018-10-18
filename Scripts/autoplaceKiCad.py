@@ -112,6 +112,8 @@ for line in sys.stdin:
 		module = fields[1]
 		if module == "A52":
 			moduleA52 = True
+			aPins = ["6", "7", "8", "_"]
+			bPins = ["4", "3", "2", "_"]
 		continue
 	if type == "G=" and numFields == 2:
 		gateNumber = int(fields[1])
@@ -151,7 +153,7 @@ for line in sys.stdin:
 	posX = 25 * int(40 * (originX + xSpacing * nextX))
 	posY = 25 * int(40 * (originY + ySpacing * nextY))
 	
-	if type == "N" and numFields == 3 and fields[1] == "." and fields[2] in ["1", "2", "3"]:
+	if type == "N" and numFields == 3 and fields[1] == "." and fields[2] in ["1", "2", "3"] and not moduleA52:
 		numInputs = int(fields[2])
 		fields[1] = str(gateNumber)
 		even = ((gateNumber & 1) == 0) 
@@ -191,7 +193,7 @@ for line in sys.stdin:
 		gateNumber += 1
 		numFields = 6
 	
-	if type in nors and numFields == 6 and fields[1].isdigit() and fields[2].isdigit():
+	if type in nors and numFields == 6 and fields[1].isdigit() and fields[2].isdigit() and not moduleA52:
 		gate = fields[1]
 		if len(gate) != 5 or not gate.isdigit():
 			print >>sys.stderr, "Incorrectly numbered gate: " + line
@@ -253,6 +255,72 @@ for line in sys.stdin:
 			continue
 		gatesFound[gate] = line
 		objects[id][whichGate] = { "gate": gate, "top": top, "middle": middle, "bottom": bottom, "x": posX, "y": posY } 
+		nextXY()
+		continue
+	
+	if type in nors and numFields == 5 and fields[1][:-1].isdigit() and fields[1][-1:] in ["A", "B"] and moduleA52:
+		marking = fields[1]
+		markingNumber = fields[1][:-1]
+		markingLetter = fields[1][-1:]
+		gate = gateNumber + int(markingNumber) * 2
+		if markingLetter != "A":
+			gate += 1
+		gate = str(gate)
+		if len(markingNumber) < 2:
+			location = "0" + markingNumber
+		else:
+			location = markingNumber
+		top = fields[2]
+		middle = fields[3]
+		bottom = fields[4]
+		if top == ";":
+			top = "_"
+		if middle == ";":
+			middle = "_"
+		if bottom == ";":
+			bottom = "_"
+		if (top == middle and top != "_") or (top == bottom and top != "_") or (middle == bottom and middle != "_"):
+			print >>sys.stderr, "Duplicate pins: " + line
+			wereErrors = True
+			continue
+		id = type + location
+		if type == "N":
+			otype = "X"
+		else:
+			otype = "N"
+		oid = otype + location
+		if oid in objects:
+			print >>sys.stderr, "Library Mismatch: " + line
+			print >>sys.stderr, objects[oid]
+			wereErrors = True
+			continue
+		elif not (id in objects):
+			objects[id] = { "type": type, "library": nors[type]["library"], "refd": nors[type]["refdPrefix"]+location, "location": location }
+		elif objects[id]["library"] != nors[type]["library"]:
+			print >>sys.stderr, "A/B Library Mismatch: " + line
+			print >>sys.stderr, objects[id]
+			wereErrors = True
+			continue
+		if top in aPins and middle in aPins and bottom in aPins:
+			whichGate = "a"
+		elif top in bPins and middle in bPins and bottom in bPins:
+			whichGate = "b"
+		else:
+			print >>sys.stderr, "Illegal NOR spec: " + line
+			wereErrors = True
+			continue
+		if whichGate in objects[id]:
+			print >>sys.stderr, "Part duplicated: " + line
+			print >>sys.stderr, objects[id][whichGate]
+			wereErrors = True
+			continue
+		if gate in gatesFound:
+			print >>sys.stderr, "Gate number duplicated: " + line
+			print >>sys.stderr, gatesFound[gate]
+			wereErrors = True
+			continue
+		gatesFound[gate] = line
+		objects[id][whichGate] = { "gate": gate, "top": top, "middle": middle, "bottom": bottom, "x": posX, "y": posY, "marking":marking } 
 		nextXY()
 		continue
 	
@@ -374,8 +442,12 @@ for id in objects:
 		location = object["location"]
 		aMirror = False
 		bMirror = False
-		aFootprint = "ABC"
-		bFootprint = "DEF"
+		if moduleA52:
+			aFootprint = "678"
+			bFootprint = "234"
+		else:
+			aFootprint = "ABC"
+			bFootprint = "DEF"
 		fontSize = 140
 		xOffset = 0
 		if type in ["X", "X2"]:
@@ -412,8 +484,13 @@ for id in objects:
 			sys.stdout.write("F 1 \"" + symbol + "\" H " + str(posX) + " " + str(posY+425) + " 140 0001 C CNN\n")
 			sys.stdout.write("F 2 \"\" H " + str(posX) + " " + str(posY+475) + " 140 0001 C CNN\n")
 			sys.stdout.write("F 3 \"\" H " + str(posX) + " " + str(posY+475) + " 140 0001 C CNN\n")
-			sys.stdout.write("F 4 \"" + aObject["gate"] + "\" H " + str(posX + xOffset) + " " + str(posY) + " " + str(fontSize) + " 0000 C CNB \"Location\"\n")
-			sys.stdout.write("F 5 \"" + location + "\" H " + str(posX + xOffset) + " " + str(posY + locationOffset) + " " + str(fontSize) + " 0000 C CNB \"Location2\"\n")
+			if moduleA52:
+				sys.stdout.write("F 4 \"" + aObject["gate"] + "\" H " + str(posX + xOffset) + " " + str(posY) + " " + str(fontSize) + " 0001 C CNB \"Location\"\n")
+				sys.stdout.write("F 5 \"" + location + "\" H " + str(posX + xOffset) + " " + str(posY + locationOffset) + " " + str(fontSize) + " 0001 C CNB \"Location2\"\n")
+				sys.stdout.write("F 6 \"" + aObject["marking"] + "\" H " + str(posX + xOffset) + " " + str(posY) + " " + str(fontSize) + " 0000 C CNB \"Location3\"\n")
+			else:
+				sys.stdout.write("F 4 \"" + aObject["gate"] + "\" H " + str(posX + xOffset) + " " + str(posY) + " " + str(fontSize) + " 0000 C CNB \"Location\"\n")
+				sys.stdout.write("F 5 \"" + location + "\" H " + str(posX + xOffset) + " " + str(posY + locationOffset) + " " + str(fontSize) + " 0000 C CNB \"Location2\"\n")
 			sys.stdout.write("\t" + str(unit) + " " + str(posX) + " " + str(posY) + "\n")
 			if aMirror:
 				sys.stdout.write("\t1    0    0    1  \n")
@@ -436,8 +513,13 @@ for id in objects:
 			sys.stdout.write("F 1 \"" + symbol + "\" H " + str(posX) + " " + str(posY+425) + " 140 0001 C CNN\n")
 			sys.stdout.write("F 2 \"\" H " + str(posX) + " " + str(posY+475) + " 140 0001 C CNN\n")
 			sys.stdout.write("F 3 \"\" H " + str(posX) + " " + str(posY+475) + " 140 0001 C CNN\n")
-			sys.stdout.write("F 4 \"" + bObject["gate"] + "\" H " + str(posX + xOffset) + " " + str(posY) + " " + str(fontSize) + " 0000 C CNB \"Location\"\n")
-			sys.stdout.write("F 5 \"" + location + "\" H " + str(posX + xOffset) + " " + str(posY + locationOffset) + " " + str(fontSize) + " 0000 C CNB \"Location2\"\n")
+			if moduleA52:
+				sys.stdout.write("F 4 \"" + bObject["gate"] + "\" H " + str(posX + xOffset) + " " + str(posY) + " " + str(fontSize) + " 0001 C CNB \"Location\"\n")
+				sys.stdout.write("F 5 \"" + location + "\" H " + str(posX + xOffset) + " " + str(posY + locationOffset) + " " + str(fontSize) + " 0001 C CNB \"Location2\"\n")
+				sys.stdout.write("F 6 \"" + bObject["marking"] + "\" H " + str(posX + xOffset) + " " + str(posY) + " " + str(fontSize) + " 0000 C CNB \"Location3\"\n")
+			else:
+				sys.stdout.write("F 4 \"" + bObject["gate"] + "\" H " + str(posX + xOffset) + " " + str(posY) + " " + str(fontSize) + " 0000 C CNB \"Location\"\n")
+				sys.stdout.write("F 5 \"" + location + "\" H " + str(posX + xOffset) + " " + str(posY + locationOffset) + " " + str(fontSize) + " 0000 C CNB \"Location2\"\n")
 			sys.stdout.write("\t" + str(unit) + " " + str(posX) + " " + str(posY) + "\n")
 			if bMirror:
 				sys.stdout.write("\t1    0    0    1  \n")

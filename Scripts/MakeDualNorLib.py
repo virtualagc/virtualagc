@@ -28,7 +28,12 @@
 # The first GND/VCC are the netnames for the power rails for the hidden power and ground pins.
 # If VCC="NC", then the corresponding power pin is left unconnected.
 # VARIATION is either "" (for regular NOR gates) or "expander" for the expander gates.
-# VARIATION2 is either "" (to show pin numbers) or "nopinnums" to not show pin numbers.
+# VARIATION2 is either "" (to show pin numbers A-F,J,K), "numerical" (to show 1-4,6-9),
+#	or "nopinnums" to not show pin numbers.  With "numerical, additionally, the
+#	"Location" and "Location2" fields are still present but invisible, whilst a
+#	new "Location3" field is visible instead; moreover, the "A" and "B" parts are
+#	reversed for some reason.  As far as I know right now, the "numerical" option
+#	is only used for drawing 2003305.
 
 import sys
 
@@ -40,9 +45,9 @@ variation2 = ""
 if len(sys.argv) > 1 and "D3NOR-" in sys.argv[1] and ".lib.bak" in sys.argv[1]:
 	s = sys.argv[1].replace('.lib.bak', '')
 	fields = s.split('-');
-	if len(fields) == 4 and fields[3] == "nopinnums":
+	if len(fields) == 4 and fields[3] in ["nopinnums", "numerical"]:
+		fields.append(fields[3])
 		fields[3] = ""
-		fields.append("nopinnums")
 else:
 	fields = sys.argv
 if len(fields) > 1:
@@ -55,10 +60,14 @@ if len(fields) > 4:
 	variation2 = fields[4]
 
 basename = "D3NOR-" + vcc + "-" + gnd # Base name of the generated components. 
+numerical = False
 if variation == "expander":
 	basename += "-expander"
 if variation2 == "nopinnums":
 	basename += "-nopinnums"
+if variation2 == "numerical":
+	basename += "-numerical"
+	numerical = True
 
 lineWidth = 30
 
@@ -67,20 +76,34 @@ print("EESchema-LIBRARY Version 2.4")
 print("#encoding utf-8")
 
 # Relationship of input pin numbers to pin names:
-pinNumbers = {
-  "A" : "4",
-  "B" : "3",
-  "C" : "2",
-  "D" : "6",
-  "E" : "7",
-  "F" : "8"
-}
+if numerical:
+  pinNumbers = {
+    "4" : "4",
+    "3" : "3",
+    "2" : "2",
+    "6" : "6",
+    "7" : "7",
+    "8" : "8"
+  }
+else:
+  pinNumbers = {
+    "A" : "4",
+    "B" : "3",
+    "C" : "2",
+    "D" : "6",
+    "E" : "7",
+    "F" : "8"
+  }
 
 # Proceed to generate the library's entries.
 # In the following loop, the inputs of gate A are represented by inA1, inA2, and inA3.
 # The inputs of gate B are represented by inB1, inB2, and inB3.
-ListALevel0 = [ "_", "_", "A", "B", "C" ]
-ListBLevel0 = [ "_", "_", "D", "E", "F" ]
+if numerical:
+	ListBLevel0 = [ "_", "_", "4", "3", "2" ]
+	ListALevel0 = [ "_", "_", "6", "7", "8" ]
+else:
+	ListALevel0 = [ "_", "_", "A", "B", "C" ]
+	ListBLevel0 = [ "_", "_", "D", "E", "F" ]
 dupes = []
 for inA1 in ListALevel0:
   ListALevel1 = list(ListALevel0)
@@ -138,11 +161,21 @@ for inA1 in ListALevel0:
             print("F2 \"\" -495 470 50 H I C CNN")
             print("F3 \"\" -495 470 50 H I C CNN")
             if variation == "expander":
-            	print("F4 \"NNNNN\" -75 0 120 H V C CNB \"Location\"")
-            	print("F5 \"NN\" -125 -200 120 H V C CNB \"Location2\"")
+            	if numerical:
+	            	print("F4 \"NNNNN\" -75 0 120 H I C CNB \"Location\"")
+	            	print("F5 \"NN\" -125 -200 120 H I C CNB \"Location2\"")
+	            	print("F6 \"NX\" -75 0 140 H V C CNB \"Location3\"")
+            	else:
+	            	print("F4 \"NNNNN\" -75 0 120 H V C CNB \"Location\"")
+	            	print("F5 \"NN\" -125 -200 120 H V C CNB \"Location2\"")
             else:
-            	print("F4 \"NNNNN\" 0 0 140 H V C CNB \"Location\"")
-            	print("F5 \"NN\" -75 -200 140 H V C CNB \"Location2\"")
+            	if numerical:
+	            	print("F4 \"NNNNN\" 0 0 140 H I C CNB \"Location\"")
+	            	print("F5 \"NN\" -75 -200 140 H I C CNB \"Location2\"")
+	            	print("F6 \"NX\" -75 0 140 H V C CNB \"Location3\"")
+            	else:
+	            	print("F4 \"NNNNN\" 0 0 140 H V C CNB \"Location\"")
+	            	print("F5 \"NN\" -75 -200 140 H V C CNB \"Location2\"")
             print("DRAW")
             print("A -1460 0 1040 -226 226 0 1 " + str(lineWidth) + " N -500 -400 -500 400")
             print("A -113 -374 787 795 284 0 1 " + str(lineWidth) + " N 30 400 580 0")
@@ -164,7 +197,10 @@ for inA1 in ListALevel0:
               print("P 4 2 1 " + str(lineWidth) + " -420 0 -675 -100 -675 100 -420 0 F")
             if inB3 != "_":
               print("P 4 2 1 " + str(lineWidth) + " -460 -275 -750 -175 -750 -375 -460 -275 F")
-            print("X J 1 900 0 150 L 140 140 1 1 C")
+            if numerical:
+            	print("X 9 1 900 0 150 L 140 140 1 1 C")
+            else:
+            	print("X J 1 900 0 150 L 140 140 1 1 C")
             if vcc == "NC":
             	print("X " + vcc + " 10 -175 350 0 D 140 140 1 1 N N")
             else:
@@ -202,7 +238,10 @@ for inA1 in ListALevel0:
             else:
               print("X " + gnd + " " + pinNumbers[ListBLevel3A[0]] + " -475 -275 0 R 140 140 2 1 W N")
               del ListBLevel3A[0]
-            print("X K 9 900 0 150 L 140 140 2 1 C")
+            if numerical:
+            	print("X 1 9 900 0 150 L 140 140 2 1 C")
+            else:
+            	print("X K 9 900 0 150 L 140 140 2 1 C")
             print("ENDDRAW")
             print("ENDDEF")
 
