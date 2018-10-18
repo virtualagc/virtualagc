@@ -14,6 +14,8 @@ import sys
 
 # Tweak the stuff below.
 
+connectorA52 = False
+
 if len(sys.argv) > 1:
 	partName = sys.argv[1]
 else:
@@ -56,6 +58,11 @@ elif partName == "ConnectorD8":
 	startingPinNumber = 1
 	endingPinNumber = 35
 	omitPins = [ ]
+elif partName == "ConnectorA51":
+	connectorA51 = True
+	startingPinNumber = 1
+	endingPinNumber = 9 * 16
+	omitPins = [ ]
 else:
 	startingPinNumber = 1
 	omitPins = [ ]
@@ -86,6 +93,16 @@ textMargin = 50
 nextPinAfterLast = endingPinNumber + 1
 totalPins = nextPinAfterLast - startingPinNumber # - len(omitPins)
 
+def createPinName(pinNumber):
+	global connectorA51
+	if connectorA51:
+		quotient = ((pinNumber - 1) // 16) + 1
+		remainder = ((pinNumber - 1) % 16) + 1
+		pinName = str(100 * quotient + remainder)
+	else:
+		pinName = str(pinNumber)
+	return pinName
+
 # This part does the actual work.
 print("EESchema-LIBRARY Version 2.4")
 print("#encoding utf-8")
@@ -104,19 +121,22 @@ print("A " + str(-arcPos) + " 0 " + str(yRadius) + " 901 -901 0 0 " + str(lineWi
 print("A " + str(arcPos) + " 0 " + str(yRadius) + " -899 899 0 0 " + str(lineWidth) + " N " + str(arcPos) + " " + str(-yRadius) + " " + str(arcPos) + " " + str(yRadius))
 partno = 1
 for pin in range(startingPinNumber, nextPinAfterLast):
-	print("T 0 0 0 " + str(textSize) + " 0 " + str(partno) + " 0 " + str(pin) + " Normal 1 C C")
+	pinName = createPinName(pin)
+	print("T 0 0 0 " + str(textSize) + " 0 " + str(partno) + " 0 " + pinName + " Normal 1 C C")
 	partno += 1
 print("P 2 0 0 " + str(lineWidth) + " " + str(-arcPos) + " " + str(-yRadius) + " " + str(arcPos) + " " + str(-yRadius) + " N")
 print("P 2 0 0 " + str(lineWidth) + " " + str(-arcPos) + " " + str(yRadius) + " " + str(arcPos) + " " + str(yRadius) + " N")
 partno = 1
 for pin in range(startingPinNumber, nextPinAfterLast):
+	pinName = createPinName(pin)
 	if not (pin in omitPins):
-		print("X " + str(pin) + " " + str(pin) + " " + str(xRadius) + " 0 0 L " + str(textSize) + " " + str(textSize) + " " + str(partno) + " 1 P")
+		print("X " + pinName + " " + str(pin) + " " + str(xRadius) + " 0 0 L " + str(textSize) + " " + str(textSize) + " " + str(partno) + " 1 P")
 	partno += 1
 partno = 1
 for pin in range(startingPinNumber, nextPinAfterLast):
+	pinName = createPinName(pin)
 	if not (pin in omitPins):
-		print("X " + str(pin) + " " + str(pin) + " 0 " + str(yRadius) + " 0 D " + str(textSize) + " " + str(textSize) + " " + str(partno) + " 2 P")
+		print("X " + pinName + " " + str(pin) + " 0 " + str(yRadius) + " 0 D " + str(textSize) + " " + str(textSize) + " " + str(partno) + " 2 P")
 	partno += 1
 print("ENDDRAW")
 print("ENDDEF")
