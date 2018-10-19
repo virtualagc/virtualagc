@@ -864,6 +864,7 @@ for line in lines:
 
 nets = {}
 translateToGates = True
+assigned = []
 if len(nors) > 0:
 	# First, consolidate all of the gates whose outputs are connected together,
 	# and eliminate all inputs that are 0.  There's always one rst input to the
@@ -916,6 +917,7 @@ if len(nors) > 0:
 			outLine = "assign" + thisDelay + " " + netName + " = rst ? " + thisInit + " : ((0";
 		else:
 			outLine = "assign" + thisDelay + " " + netName + " = rst ? " + thisInit + " : !(0";
+		assigned.append(netName)
 		for rawInput in gate[3:]:
 			input = rawInput
 			if translateToGates and input in netToGate:
@@ -989,6 +991,13 @@ for device in roms:
 	print "  " + pins[39] + ", " + pins[41] + ", " + pins[43] + ", " + pins[45]
 	print ");"	
 
+print ""
+# If there are output signals which aren't really being driven by anything, we need to 
+# fix them up.
+for n in newOutputs:
+	if n not in assigned:
+		#print "pulldown(" + n + ");"
+		print "assign " + n + " = 1'b0;"
 print ""
 print "endmodule"
 
