@@ -39,6 +39,8 @@
 #				though, to help get a pretty simulation rather
 #				than just a correct one.  Specifically, 
 #				gets rid of a bunch of involuntaries at startup.
+#		2018-10-19 RSB	Had forgotten to take care of signals set 
+#				with "reg SIGNAL=1" within the test bench.
 
 # Usage is:
 #	cat VERILOG_FILES | dumbInitialization.py
@@ -50,6 +52,7 @@
 
 import sys
 import random
+import re
 
 # Certain flip-flops we want to make sure are initialized specifically to 0 or 1.  
 # I'm told (and my experience is) that the only one that actually matters is STNDBY.  
@@ -64,6 +67,8 @@ import random
 want0 = [
 	# STNDBY is controlled from a B-module that we're not simulating.
 	"STNDBY",
+	# CHORxx
+	"PIPAFL", "AGCWAR",
 	# Misc
 	"g32607"
 ]
@@ -74,7 +79,8 @@ want1 = [
 	"g38304", "g38314", "g38324", "g38334", "g38344", "g38354", "g38364", "g38374",
 	"g38404", "g38414", "g38424", "g38434", "g38444", "g38454", "g38464", "g38474",
 	"g38105", "g38115", "g38125", "g38135", "g38145", "g38155", "g38165", "g38175",
-	"g38205", "g38215", "g38225", "g38235", "g38245", "g38255", "g38265", "g38275",
+	#"g38205", 
+	"g38215", "g38225", "g38235", "g38245", "g38255", "g38265", "g38275",
 	"g38305", "g38315", "g38325", "g38335", "g38345", "g38355", "g38365", "g38375",
 	"g38405", "g38415", "g38425", "g38435", "g38445", "g38455", "g38465", "g38475",
 	# This zeroes the flip-flops in counter modules A20-A21 can otherwise trigger
@@ -112,7 +118,7 @@ want1 = [
 	"g98023", "g98027", "g98029", "g80031", "g98033", 
 	"g98035", "g98037", "g98039", "g98041",	"g98013",
 	# Various flip-flops affecting the behavior of CHORxx.
-	"g48402", "g48406", "E7_", "g45117", "g45105"
+	"g48402", "g48406", "E7_", "g45117", "g45105", "g45225"
 ]
 
 random.seed(12345)
@@ -133,8 +139,36 @@ lines = sys.stdin.readlines()
 nors = {}
 netValues = {}
 module = ""
+inReg = False
 for line in lines:
 	fields = line.strip().split()
+	if len(fields) < 1:
+		if inReg:
+			inReg = False
+		continue
+	# Take care of regs.
+	if fields[0] == "reg":
+		inReg = True
+		regFields = re.split(r'[,;]', line.strip()[4:])
+	elif inReg:
+		regFields = re.split(r'[,;]', line.strip())
+	if inReg:
+		for field in regFields:
+			fieldsInTheReg = field.replace(" ", "").split("=")
+			if len(fieldsInTheReg) == 2:
+				if fieldsInTheReg[1] == "1":
+					if fieldsInTheReg[0] not in want1:
+						want1.append(fieldsInTheReg[0])
+					if fieldsInTheReg[0] in want0:
+						want0.remove(fieldsInTheReg[0])
+				elif fieldsInTheReg[1] == "0":
+					if fieldsInTheReg[0] not in want0:
+						want0.append(fieldsInTheReg[0])
+					if fieldsInTheReg[0] in want1:
+						want1.remove(fieldsInTheReg[0])
+		if ";" in line:
+			inReg = False
+		continue
 	# "module" line.
 	if len(fields) == 3 and fields[0] == "module":
 		module = fields[1]
