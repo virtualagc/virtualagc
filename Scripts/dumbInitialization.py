@@ -64,9 +64,6 @@ import random
 want0 = [
 	# STNDBY is controlled from a B-module that we're not simulating.
 	"STNDBY",
-	# Restart monitor
-	"g98023", "g98027", "g98029", "g80031", "g98033", 
-	"g98035", "g98037", "g98039", "g98041",
 	# Misc
 	"g32607"
 ]
@@ -111,6 +108,9 @@ want1 = [
 	"g32532", "g32529", # 56
 	"g32539", "g32536", # 57
 	"g32546", "g32543", # 60
+	# Restart monitor
+	"g98023", "g98027", "g98029", "g80031", "g98033", 
+	"g98035", "g98037", "g98039", "g98041",	"g98013",
 	# Various flip-flops affecting the behavior of CHORxx.
 	"g48402", "g48406", "E7_", "g45117", "g45105"
 ]
@@ -247,7 +247,7 @@ for norNet in nors:
 		ones.append(nor)
 
 # Create the MODULE.init files.
-for moduleNumber in range(1, 25) + [99]:
+for moduleNumber in range(1, 25) + [99, 52]:
 	f = open("A" + str(moduleNumber) + ".init", "w")
 	f.write("# Auto-generated for module A" + str(moduleNumber) + " by dumbInitialization.py.\n")
 	for sheet in range(1, 5):

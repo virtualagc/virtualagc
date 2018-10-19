@@ -211,9 +211,13 @@ define moduleTemplate =
 endef
 
 ##################################################################################
-# Definitions needed for the testVerilog and fixed_erasable_memory targets.
+# Definitions needed for targets that don't fit into the neat pattern dealt
+# with by moduleTemplate above.  That's basically everything not in the module
+# range A1-A24.
 module_testVerilog = A1
 delay_testVerilog = 0
+module_2003305B = A52
+delay_2003305B = $(DEFAULT_GATE_DELAY)
 module_fixed_erasable_memory = A99
 delay_fixed_erasable_memory = $(DEFAULT_GATE_DELAY)
 
@@ -282,8 +286,6 @@ TARGETS_VVP_2003993 := $(DRAWINGS_2003993:%=%/module.vvp)
 TARGETS_V_2003993 := $(DRAWINGS_2003993:%=%/module.v)
 
 ##################################################################################
-
-module_2003305B := A52
 
 # Override default delay_DRAWING variables here, if a specific drawing needs it or can
 # benefit from it. 
@@ -389,6 +391,7 @@ fixed_erasable_memory/module.vvp: $(FIXED_ERASABLE_V) roms/rom.v
 	do \
 		m=A$$n ; \
 		if test "$$d" = "fixed_erasable_memory" ; then m=A99 ; fi ; \
+		if test "$$d" = "2003305B" ; then m=A52 ; fi ; \
 		echo Moving $$m.init to $$d/module.init ; \
 		mv $$m.init $$d/module.init ; \
 		n=$$((n+1)) ; \

@@ -45,9 +45,13 @@ variation2 = ""
 if len(sys.argv) > 1 and "D3NOR-" in sys.argv[1] and ".lib.bak" in sys.argv[1]:
 	s = sys.argv[1].replace('.lib.bak', '')
 	fields = s.split('-');
+	#print >> sys.stderr, len(fields)
+	#print >> sys.stderr, fields
 	if len(fields) == 4 and fields[3] in ["nopinnums", "numerical"]:
 		fields.append(fields[3])
 		fields[3] = ""
+	#print >> sys.stderr, len(fields)
+	#print >> sys.stderr, fields
 else:
 	fields = sys.argv
 if len(fields) > 1:
@@ -68,6 +72,7 @@ if variation2 == "nopinnums":
 if variation2 == "numerical":
 	basename += "-numerical"
 	numerical = True
+#print >> sys.stderr, "numerical = " + str(numerical)
 
 lineWidth = 30
 
@@ -198,7 +203,7 @@ for inA1 in ListALevel0:
             if inB3 != "_":
               print("P 4 2 1 " + str(lineWidth) + " -460 -275 -750 -175 -750 -375 -460 -275 F")
             if numerical:
-            	print("X 9 1 900 0 150 L 140 140 1 1 C")
+            	print("X 9 9 900 0 150 L 140 140 1 1 C")
             else:
             	print("X J 1 900 0 150 L 140 140 1 1 C")
             if vcc == "NC":
@@ -239,7 +244,7 @@ for inA1 in ListALevel0:
               print("X " + gnd + " " + pinNumbers[ListBLevel3A[0]] + " -475 -275 0 R 140 140 2 1 W N")
               del ListBLevel3A[0]
             if numerical:
-            	print("X 1 9 900 0 150 L 140 140 2 1 C")
+            	print("X 1 1 900 0 150 L 140 140 2 1 C")
             else:
             	print("X K 9 900 0 150 L 140 140 2 1 C")
             print("ENDDRAW")
