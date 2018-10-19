@@ -685,4 +685,5 @@ pullup(g31436);
 assign #GATE_DELAY g31436 = rst ? 1'bz : ((0|SHAFTD|g31437) ? 1'b0 : 1'bz);
 // End of NOR gates
 
+
 endmodule

@@ -265,7 +265,7 @@ MODULES_PROCESSED = none
 $(foreach drawing,$(DRAWINGS_2003200),$(eval $(call moduleTemplate,$(drawing))))
 # Add more drawings separately that don't fit into the nice module-number sequence used above.
 DRAWINGS_2003200 += fixed_erasable_memory
-#DRAWINGS_2003200 += 2003305B
+DRAWINGS_2003200 += 2003305B
 TARGETS_VVP_2003200 := $(DRAWINGS_2003200:%=%/module.vvp)
 TARGETS_V_2003200 := $(DRAWINGS_2003200:%=%/module.v)
 
@@ -385,7 +385,7 @@ fixed_erasable_memory/module.vvp: $(FIXED_ERASABLE_V) roms/rom.v
 # module.init files are change in the process, you'll need to rebuild all
 # of the Verilog afterward, and this target doesn't do that for you.
 %.init:
-	cat $(TARGETS_V_$*) | ../Scripts/dumbInitialization.py
+	cat $*.v tb-$*.v $(TARGETS_V_$*) | ../Scripts/dumbInitialization.py
 	@n=1; \
 	for d in $(DRAWINGS_$*) ; \
 	do \

@@ -387,7 +387,7 @@ pullup(F02A);
 assign #GATE_DELAY F02A = rst ? 0 : ((0|g38204|g38203) ? 1'b0 : 1'bz);
 // Gate A1-U129B
 pullup(F02B);
-assign #GATE_DELAY F02B = rst ? 0 : ((0|g38205|FS02) ? 1'b0 : 1'bz);
+assign #GATE_DELAY F02B = rst ? 1'bz : ((0|g38205|FS02) ? 1'b0 : 1'bz);
 // Gate A1-U146A
 pullup(g38145);
 assign #GATE_DELAY g38145 = rst ? 1'bz : ((0|F13A|g38143|F14B) ? 1'b0 : 1'bz);
@@ -417,7 +417,7 @@ pullup(F18A_);
 assign #GATE_DELAY F18A_ = rst ? 1'bz : ((0|F18A) ? 1'b0 : 1'bz);
 // Gate A1-U129A
 pullup(g38205);
-assign #GATE_DELAY g38205 = rst ? 1'bz : ((0|g38203|FS01_|F02B) ? 1'b0 : 1'bz);
+assign #GATE_DELAY g38205 = rst ? 0 : ((0|g38203|FS01_|F02B) ? 1'b0 : 1'bz);
 // Gate A1-U213B
 pullup(CHBT04);
 assign #GATE_DELAY CHBT04 = rst ? 0 : ((0|g38354|RCHBT_) ? 1'b0 : 1'bz);
@@ -734,5 +734,6 @@ assign #GATE_DELAY F12B = rst ? 0 : ((0|g38125|FS12) ? 1'b0 : 1'bz);
 pullup(F30B);
 assign #GATE_DELAY F30B = rst ? 0 : ((0|g38445|FS30) ? 1'b0 : 1'bz);
 // End of NOR gates
+
 
 endmodule

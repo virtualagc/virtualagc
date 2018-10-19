@@ -67,7 +67,7 @@ pullup(g98059);
 assign #GATE_DELAY g98059 = rst ? 0 : ((0|g98015|g98041) ? 1'b0 : 1'bz);
 // Gate A52-U106A
 pullup(g98012);
-assign #GATE_DELAY g98012 = rst ? 0 : ((0|MT12|g98013) ? 1'b0 : 1'bz);
+assign #GATE_DELAY g98012 = rst ? 1'bz : ((0|MT12|g98013) ? 1'b0 : 1'bz);
 // Gate A52-U120B
 pullup(g98041);
 assign #GATE_DELAY g98041 = rst ? 0 : ((0|g98040|g98059) ? 1'b0 : 1'bz);
@@ -112,7 +112,7 @@ pullup(g98014);
 assign #GATE_DELAY g98014 = rst ? 0 : ((0|MWCH) ? 1'b0 : 1'bz);
 // Gate A52-U106B
 pullup(g98013);
-assign #GATE_DELAY g98013 = rst ? 1'bz : ((0|g98012|g98020) ? 1'b0 : 1'bz);
+assign #GATE_DELAY g98013 = rst ? 0 : ((0|g98012|g98020) ? 1'b0 : 1'bz);
 // Gate A52-U109A A52-U109B
 pullup(g98018);
 assign #GATE_DELAY g98018 = rst ? 1'bz : ((0|g98017) ? 1'b0 : 1'bz);
@@ -186,5 +186,30 @@ assign #GATE_DELAY g98023 = rst ? 0 : ((0|g98022|g98043) ? 1'b0 : 1'bz);
 pullup(g98040);
 assign #GATE_DELAY g98040 = rst ? 1'bz : ((0|MSCDBL_) ? 1'b0 : 1'bz);
 // End of NOR gates
+
+assign DBLTST = 1'b0;
+assign DOSCAL = 1'b0;
+assign MAMU = 1'b0;
+assign MDT10 = 1'b0;
+assign MDT11 = 1'b0;
+assign MDT12 = 1'b0;
+assign MDT13 = 1'b0;
+assign MDT14 = 1'b0;
+assign MDT15 = 1'b0;
+assign MDT16 = 1'b0;
+assign MLDCH = 1'b0;
+assign MLOAD = 1'b0;
+assign MNHNC = 1'b0;
+assign MNHRPT = 1'b0;
+assign MNHSBF = 1'b0;
+assign MONPAR = 1'b0;
+assign MONWBK = 1'b0;
+assign MRDCH = 1'b0;
+assign MREAD = 1'b0;
+assign MSBSTP = 1'b0;
+assign MSTP = 1'b0;
+assign MSTRT = 1'b0;
+assign MTCSAI = 1'b0;
+assign NHALGA = 1'b0;
 
 endmodule

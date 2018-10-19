@@ -34,4 +34,5 @@ pullup(F02B);
 assign #GATE_DELAY F02B = rst ? 0 : ((0|g38205|FS02) ? 1'b0 : 1'bz);
 // End of NOR gates
 
+
 endmodule
