@@ -61,7 +61,9 @@ default: $(TARGETS) $(EXTRA_TARGETS)
 
 ifdef NO_BINSOURCE
 $(BASENAME).bin: $(TOPLEVEL).agc.bin
+ifneq ($(BASENAME),TRIVIUM)
 	mv -f $< $@
+endif
 else
 $(BASENAME).bin: $(BASENAME).binsource
 	../Tools/oct2bin $(OCT2BIN_ARGS) <$(BASENAME).binsource
@@ -73,21 +75,34 @@ $(BASENAME).txt: $(BASENAME).bin
 
 # Assemble the actual source files.
 $(TOPLEVEL).agc.bin $(TOPLEVEL).agc.lst: $(SOURCE)
+ifeq ($(BASENAME),TRIVIUM)
+	@echo TRIVIUM contains intentional errors and will not be assembled.
+else
 	../yaYUL/yaYUL --unpound-page $(EXTRA_YAYUL_ARGS) $(TOPLEVEL).agc >$(TOPLEVEL).agc.lst
+endif
 
 # Generate HTML.
 $(TOPLEVEL).agc.html: $(SOURCE)
+ifeq ($(BASENAME),TRIVIUM)
+	@echo The following assembly should contain 3 intentional errors.
+	-../yaYUL/yaYUL --html $(EXTRA_YAYUL_ARGS) $(TOPLEVEL).agc >/dev/null
+else
 	../yaYUL/yaYUL --html $(EXTRA_YAYUL_ARGS) $(TOPLEVEL).agc >/dev/null
+endif
 
 # Compare rope images, and rename output files.
 $(BASENAME).lst: $(TOPLEVEL).agc.bin $(TOPLEVEL).agc.lst $(BASENAME).bin
 ifndef NO_BINSOURCE
 	diff -s $(TOPLEVEL).agc.bin $(BASENAME).bin
 endif
+ifneq ($(BASENAME),TRIVIUM)
 	mv $(TOPLEVEL).agc.lst $(BASENAME).lst
+endif
 
 $(BASENAME).symtab: $(BASENAME).lst
+ifneq ($(BASENAME),TRIVIUM)
 	mv $(TOPLEVEL).agc.symtab $(BASENAME).symtab
+endif
 
 corediff.txt: $(BASENAME).bin $(TOPLEVEL).agc.bin $(TOPLEVEL).agc.lst
 ifdef NO_BINSOURCE

@@ -418,7 +418,7 @@ MISSIONS += Luminary099 Artemis072 Colossus237
 MISSIONS += Aurora12 Sunburst120 Luminary210 Retread44 Luminary069
 MISSIONS += SuperJob LUM99R2 Luminary116 Borealis Sunburst37 LMY99R0
 # ifndef MACOSX
-MISSIONS += Solarium055
+MISSIONS += Solarium055 TRIVIUM TRIVIUM-repaired
 # endif
 export MISSIONS
 
