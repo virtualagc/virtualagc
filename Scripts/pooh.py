@@ -28,6 +28,12 @@
 #		https://github.com/virtualagc/agc_simulation
 #		https://github.com/virtualagc/agc_hardware
 # Mod history:	2018-10-14 RSB	Began.
+#		2018-10-21 RSB	Added --snapshot/--gap options, for trying
+#				to get the configuration once it has
+#				settled down a bit.  I'd recommend using
+#				--snapshot=5100 --gap=100 for that, though
+#				the truth is it never really settles down
+#				very much.
 #
 # The idea here is that the simulations are performed with the Icarus
 # Verilog program 'vvp' in such a way as to dump simulation data into an
@@ -77,6 +83,9 @@ wantTransitions = False
 wantNets = False
 wantConvert = False
 wantSymbols = False
+wantSnapshot = False
+snapTimeNanoseconds = -1
+snapGapNanoseconds = -1
 
 def readVCD(nameOfVcd, openFile):
 	scope = []
@@ -85,6 +94,7 @@ def readVCD(nameOfVcd, openFile):
 	xScopeString = ""
 	inTimescale = False
 	scopeCount = 0
+	lastTime = 0
 	
 	netsByID = {}
 	time = 0
@@ -102,10 +112,16 @@ def readVCD(nameOfVcd, openFile):
 				if fields[0][:1] == "#":
 					time = int(fields[0][1:])
 					if picosecondScale:
-						time /= 1000
-						if wantConvert:
+						time = (time + 500) / 1000
+						if wantConvert or wantSnapshot:
 							line = "#" + str(time)
 					#print >> sys.stderr, time
+					if wantSnapshot:
+						gap = time - lastTime
+						lastTime = time
+						if time >= snapTimeNanoseconds:
+						   if gap >= snapGapNanoseconds:
+							return { "byID":netsByID, "snapped":time, "gap":gap }
 				else:
 					value = fields[0][:1]
 					id = fields[0][1:]
@@ -123,7 +139,7 @@ def readVCD(nameOfVcd, openFile):
 				sys.exit(1)
 		elif len(fields) == 1 and fields[0] == "$dumpvars":
 			inDumpvars = True
-			if not wantTransitions and not wantConvert:
+			if not wantTransitions and not wantConvert and not wantSnapshot:
 				break
 			print >> sys.stderr, "Reading transitions for " + nameOfVcd
 		elif len(fields) == 4 and fields[0] == "$scope" and fields[1] == "module" and fields[3] == "$end":
@@ -168,7 +184,7 @@ def readVCD(nameOfVcd, openFile):
 				picosecondScale = True
 			elif fields[1] == "1ns":
 				picosecondScale = False
-			if wantConvert:
+			if wantConvert or wantSnapshot:
 				line = "$timescale 1ns $end"
 		elif len(fields) == 1 and fields[0] == "$timescale":
 			inTimescale = True
@@ -221,7 +237,7 @@ def readVCD(nameOfVcd, openFile):
 				netsByID[id] = { "netnames":[netname], "rawNetnames":[rawNetname], "width":width, 
 					"mask":mask, "transitions":[], "values":[], "desired":False,
 					"xRawNetnames":[xRawNetname] }
-				if netname in desiredNetnames:
+				if wantSnapshot or netname in desiredNetnames:
 					netsByID[id]["desired"] = True
 			if wantConvert:
 				line = "$var wire " + str(width) + " " + id + " " + netname + " " + mask + " $end"
@@ -253,6 +269,12 @@ count = 0
 for argv in sys.argv[1:]:
 	if argv[:10] == "--compare=":
 		compare = argv[10:]
+	elif argv[:11] == "--snapshot=" and argv[11:].isdigit():
+		wantSnapshot = True
+		snapTimeNanoseconds = int(argv[11:])
+		count += 1
+	elif argv[:6] == "--gap=" and argv[6:].isdigit():
+		snapGapNanoseconds = int(argv[6:])
 	elif argv == "--transitions":
 		wantTransitions = True
 		count += 1
@@ -271,7 +293,7 @@ for argv in sys.argv[1:]:
 	else:
 		desiredNetnames.append(argv)
 if count != 1:
-	print >> sys.stderr, "Must select exactly one of the following: --transitions --nets --convert --symbols"
+	print >> sys.stderr, "Must select exactly one of the following: --transitions --nets --convert --symbols --snapshot=ns"
 	error = True
 if error:
 	sys.exit(1)
@@ -299,6 +321,15 @@ if compare == "":
 		for id in vcd["byID"]:
 			for i in range(0, len(vcd["byID"][id]["rawNetnames"])):
 				print vcd["byID"][id]["rawNetnames"][i] + " -> " + vcd["byID"][id]["xRawNetnames"][i]
+	if wantSnapshot:
+		print "time : " + str(vcd["snapped"]) + " (" + str(snapTimeNanoseconds) + ") ns"
+		print "gap : " + str(vcd["gap"]) + " (" + str(snapGapNanoseconds) + ") ns"
+		for id in vcd["byID"]:
+			entry = vcd["byID"][id]
+			if len(entry["values"]) == 0:
+				print "x = " + entry["netnames"][0]
+			else:
+				print entry["values"][-1] + " = " + entry["netnames"][0]
 else:
 	# Dual-file comparison operation.
 	vcd1 = readVCD("vcd1", sys.stdin)
