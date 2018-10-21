@@ -1,6 +1,6 @@
 EESchema Schematic File Version 4
 LIBS:module-cache
-EELAYER 26 0
+EELAYER 28 0
 EELAYER END
 $Descr E 44000 34000
 encoding utf-8
@@ -1719,11 +1719,9 @@ Wire Wire Line
 Wire Wire Line
 	4375 23825 4450 23825
 Wire Wire Line
-	4450 24375 4450 24400
+	4450 24375 4375 24375
 Wire Wire Line
-	4450 24400 4375 24400
-Wire Wire Line
-	4375 24400 4375 24850
+	4375 24375 4375 24850
 Wire Wire Line
 	4375 24850 9700 24850
 Wire Wire Line
