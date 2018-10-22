@@ -115,10 +115,7 @@ pullup(RA_);
 assign #GATE_DELAY RA_ = rst ? 1'bz : ((0|g39233|g39225|g29121|g39124|g39312|A56XP2) ? 1'b0 : 1'bz);
 // Gate A5-U258A A5-U257A
 pullup(NDR100_);
-assign #GATE_DELAY NDR100_ = rst ? 1'bz : ((0|g39348|g39349) ? 1'b0 : 1'bz);
-// Gate A5-U259A
-pullup(g39348);
-assign #GATE_DELAY g39348 = rst ? 0 : ((0|YT0_|YB0_) ? 1'b0 : 1'bz);
+assign #GATE_DELAY NDR100_ = rst ? 1'bz : ((0|g39348) ? 1'b0 : 1'bz);
 // Gate A5-U110B A5-U218A
 pullup(WZ_);
 assign #GATE_DELAY WZ_ = rst ? 1'bz : ((0|g39201|g39120|g39221|g39416) ? 1'b0 : 1'bz);
@@ -278,9 +275,9 @@ assign #GATE_DELAY A58XP12 = rst ? 0 : ((0|T08_|DAS0_) ? 1'b0 : 1'bz);
 // Gate A5-U107B
 pullup(A58XP15);
 assign #GATE_DELAY A58XP15 = rst ? 0 : ((0|g39209|T08_) ? 1'b0 : 1'bz);
-// Gate A5-U260A
-pullup(g39349);
-assign #GATE_DELAY g39349 = rst ? 0 : ((0|S12|S11) ? 1'b0 : 1'bz);
+// Gate A5-U260A A5-U259A
+pullup(g39348);
+assign #GATE_DELAY g39348 = rst ? 0 : ((0|S12|S11|YT0_|YB0_) ? 1'b0 : 1'bz);
 // Gate A5-U140B
 pullup(d3XP6);
 assign #GATE_DELAY d3XP6 = rst ? 0 : ((0|T03_|TC0_) ? 1'b0 : 1'bz);
@@ -358,7 +355,7 @@ pullup(MONEX_);
 assign #GATE_DELAY MONEX_ = rst ? 1'bz : ((0|g39103|d10XP6|A510XP7) ? 1'b0 : 1'bz);
 // Gate A5-U223A A5-U222B
 pullup(g39410);
-assign #GATE_DELAY g39410 = rst ? 1'bz : ((0|IC5|READ0|IC2|DV4|g39409) ? 1'b0 : 1'bz);
+assign #GATE_DELAY g39410 = rst ? 1'bz : ((0|IC5|READ0|IC2|DV4|g39408) ? 1'b0 : 1'bz);
 // Gate A5-U104B
 pullup(RSTRT);
 assign #GATE_DELAY RSTRT = rst ? 0 : ((0|GOJ1_|T08_) ? 1'b0 : 1'bz);
@@ -450,8 +447,8 @@ assign #GATE_DELAY RC_ = rst ? 1'bz : ((0|g39225|g39241|g39143|g39129|g39432|g39
 pullup(g39120);
 assign #GATE_DELAY g39120 = rst ? 0 : ((0|T03_|IC2_) ? 1'b0 : 1'bz);
 // Gate A5-U226B
-pullup(g39409);
-assign #GATE_DELAY g39409 = rst ? 0 : ((0|TS0_|BRDIF_) ? 1'b0 : 1'bz);
+pullup(g39408);
+assign #GATE_DELAY g39408 = rst ? 0 : ((0|TS0_|BRDIF_) ? 1'b0 : 1'bz);
 // Gate A5-U109B A5-U240A A5-U240B A5-U210B
 pullup(WB_);
 assign #GATE_DELAY WB_ = rst ? 1'bz : ((0|g39217|RAD|A56XP2|g39324|g39320|g39312|g39313|RQ|g39428|g39441|g39436) ? 1'b0 : 1'bz);
