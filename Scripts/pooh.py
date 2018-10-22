@@ -59,25 +59,7 @@
 # stuff.
 
 import sys
-
-# Here's a dictionary used to translate various of Mike's signal names that can't
-# be dealt with formulaically into my signal names.
-normalizedMikeNets = { 
-	"__A08_1___A1_n":"A01_", "__A08_1___A2_n":"A02_",
-	"__A08_2___A1_n":"A03_", "__A08_2___A2_n":"A04_",
-	"__A09_1___A1_n":"A05_", "__A09_1___A2_n":"A06_",
-	"__A09_2___A1_n":"A07_", "__A09_2___A2_n":"A08_",
-	"__A10_1___A1_n":"A09_", "__A10_1___A2_n":"A10_",
-	"__A10_2___A1_n":"A11_", "__A10_2___A2_n":"A12_",
-	"__A11_1___A1_n":"A13_", "__A11_1___A2_n":"A14_",
-	"__A08_1___Z1_n":"Z01_", "__A08_1___Z2_n":"Z02_",
-	"__A08_2___Z1_n":"Z03_", "__A08_2___Z2_n":"Z04_",
-	"__A09_1___Z1_n":"Z05_", "__A09_1___Z2_n":"Z06_",
-	"__A09_2___Z1_n":"Z07_", "__A09_2___Z2_n":"Z08_",
-	"__A10_1___Z1_n":"Z09_", "__A10_1___Z2_n":"Z10_",
-	"__A10_2___Z1_n":"Z11_", "__A10_2___Z2_n":"Z12_",
-	"__A11_1___Z1_n":"Z13_", "__A11_1___Z2_n":"Z14_"
-}
+from normalizedMikeNets import normalizedMikeNets
 
 wantTransitions = False
 wantNets = False
@@ -121,6 +103,8 @@ def readVCD(nameOfVcd, openFile):
 						lastTime = time
 						if time >= snapTimeNanoseconds:
 						   if gap >= snapGapNanoseconds:
+						   	#for n in netsByID:
+						   	#	print netsByID[n]
 							return { "byID":netsByID, "snapped":time, "gap":gap }
 				else:
 					value = fields[0][:1]
@@ -209,14 +193,29 @@ def readVCD(nameOfVcd, openFile):
 			# Normalize the netnames a tad.  More accurately, by "normalize" I mean
 			# turn Mike's names into my names.
 			rawNetname = scopeString + netname
-			if netname[:2] == "__" and netname[2:5] != rawModule:
-				netname = netname[2:]
-			elif netname in normalizedMikeNets:
-				netname = normalizedMikeNets[netname]
-			elif netname[:2] == "__" and netname[2:5] == rawModule and netname[5:9] in ["_1__", "_2__", "_3__"]:
-				 if netname[9] != "_" and not (netname[9] in ["X", "Y"] and netname[10].isdigit()) \
-				 	and not (rawModule == "A20" and netname[9] == "C" and netname[10].isdigit()):
-				 	netname = netname[9:]
+			if False:
+				if netname[:2] == "__" and netname[2:5] != rawModule:
+					netname = netname[2:]
+				elif netname in normalizedMikeNets:
+					netname = normalizedMikeNets[netname]
+				elif netname[:2] == "__" and netname[2:5] == rawModule and netname[5:9] in ["_1__", "_2__", "_3__"]:
+					 if netname[9] != "_" and not (netname[9] in ["X", "Y"] and netname[10].isdigit()) \
+					 	and not (rawModule == "A20" and netname[9] == "C" and netname[10].isdigit()):
+					 	netname = netname[9:]
+			else:
+				m = ""
+				e = ""
+				if netname[:3] == "__A" and netname[5:9] in ["_1__", "_2__", "_3__"]:
+					m = netname[3:5]
+					e = netname[9:]
+				if netname in normalizedMikeNets:
+					netname = normalizedMikeNets[netname]
+				elif m != "" and e[0] in [
+								"0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "A", "B", "C", "D", 
+								"E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", 
+								"S", "T", "U", "V", "W", "X", "Y", "Z"
+							 ]:
+					netname = e
 			if netname[0].isdigit():
 				netname = "d" + netname
 			if netname[0] == "n" and netname[1].isdigit():
@@ -326,10 +325,22 @@ if compare == "":
 		print "gap : " + str(vcd["gap"]) + " (" + str(snapGapNanoseconds) + ") ns"
 		for id in vcd["byID"]:
 			entry = vcd["byID"][id]
+			chips = ""
+			for rawName in entry["rawNetnames"]:
+				rawFields = rawName.split(".")
+				if len(rawFields) >= 3:
+					refd = rawFields[-3]
+					unit = rawFields[-2]
+					if rawFields[-1] == "y" and unit in ["A", "B", "C", "D", "E", "F"] and len(refd) in [5, 6] and refd[0] == "U" and refd[1:].isdigit():
+						chips += " " + refd + unit
+				#if len(rawFields) >= 1:
+				#	gate = rawFields[-1]
+				#	if len(gate) == 6 and gate[0] == "g" and gate[1:].isdigit():
+				#		chips += " " + gate
 			if len(entry["values"]) == 0:
-				print "x = " + entry["netnames"][0]
+				print "x = " + entry["netnames"][0] + chips
 			else:
-				print entry["values"][-1] + " = " + entry["netnames"][0]
+				print entry["values"][-1] + " = " + entry["netnames"][0] + chips
 else:
 	# Dual-file comparison operation.
 	vcd1 = readVCD("vcd1", sys.stdin)

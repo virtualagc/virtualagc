@@ -4,6 +4,13 @@
 # Try to pull an initial NOR state from a VCD file.  The usage is:
 #	cat module.net module.vcd | pullFromVcd.py [TICKNUMBER]
 
+####################################################################
+# This is weird ... I don't recall writing this, and don't know if
+# or how well it works.  Even if it works, I'd suggest using 
+# "pooh.py --snapshot=N --gap=M", which definitely works, and in a
+# more full-featured way.
+####################################################################
+
 import sys
 
 inModule = False
