@@ -410,7 +410,7 @@ if error:
 # (which we haven't).  Basically, we have already gotten the backplane netnames on the
 # connector pads, but we don't know yet if they're inputs, outputs, or inouts.
 #
-# This presently won't work with A52.
+# This presently won't work with A52 (though it doesn't actually need to..
 inWhat = ""
 rawConnectorNets = {}
 
