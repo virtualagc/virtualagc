@@ -14,8 +14,12 @@
 import sys
 import re
 
-# Can hard-code a few hints here to help out the processing if it stalls
-hints = {}
+heuristicPattern1 = re.compile("_[AB][0-2][0-9]_[1-3]_")
+
+# Can hard-code a few hints here to help out the processing if it stalls, or if the
+# heuristic isn't quite right.  The hints are applied when the netlist is read in,
+# before any other changes to the netname have been made.
+hints = { "/A12_1/G02/":"ua12_1_G02_", "/A12_1_G03/":"ua12_1_G03_" }
 
 # Just read the netlist from a file into a structure of the form:
 #
@@ -70,7 +74,13 @@ def inputAndParseNetlistFile(filename):
 		elif inComponent and len(fields) == 4 and fields[0] == "(" and fields[3] == ")":
 			# Pin of a component
 			pinNumber = int(fields[1])
-			net = fields[2].replace("+","p")
+			net = fields[2]
+			#if "G02" in net or "G03" in net:
+			#	print >> sys.stderr, "A " + net
+			if net in hints:
+				net = hints[net]
+				#print >> sys.stderr, "B " + net
+			net = net.replace("+","p")
 			if net[:4] != "Net-":
 				net = net.replace("-","m").replace("/","_")
 			if net[0].isdigit():
@@ -105,6 +115,8 @@ def inputAndParseVerilogFile(filename):
 				if fields[i] == "=":
 					j = i
 					out = fields[j - 1]
+					if out[:1] == "_":
+						out = "u" + out[1:]
 					break
 			if j == 0:
 				continue
@@ -116,6 +128,10 @@ def inputAndParseVerilogFile(filename):
 						continue
 					stripped = fields[i][4:k]
 					ins = stripped.split("|")
+					for i in range(0, len(ins)):
+						input = ins[i]
+						if input[:1] == "_":
+							ins[i] = "u" + input[1:]
 			if len(ins) < 1:
 				continue
 			if len(gates) < 1:
@@ -367,7 +383,6 @@ count1 = 1
 count1O = 1
 count1I = 1
 count1R = 0
-heuristicPattern1 = re.compile("_[AB][0-2][0-9]_[1-3]_")
 for h in range(0, heuristicLevel + 1):
 	print "Heuristic level " + str(h)
 	
@@ -453,10 +468,7 @@ for h in range(0, heuristicLevel + 1):
 		count1O = 0
 		count1I = 0
 		count1R = 0
-		if passNumber == 1:
-			deducedNets = hints
-		else:
-			deducedNets = {}
+		deducedNets = {}
 		
 		# What this stuff does is to try to do matching where the output signal name matched,
 		# and either all or all but one of the input signals match.
