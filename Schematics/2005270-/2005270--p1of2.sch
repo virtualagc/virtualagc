@@ -1,6 +1,6 @@
 EESchema Schematic File Version 4
 LIBS:module-cache
-EELAYER 26 0
+EELAYER 28 0
 EELAYER END
 $Descr E 44000 34000
 encoding utf-8
@@ -6212,7 +6212,7 @@ CCH14
 Text Label 2750 14750 0    140  ~ 28
 GOJAM
 Text Label 2750 15275 0    140  ~ 28
-GOTONE
+GTONE
 Wire Wire Line
 	13700 12800 14025 12800
 Text Label 13700 13025 2    140  ~ 28
@@ -6235,7 +6235,7 @@ Connection ~ 19750 18725
 Wire Wire Line
 	19750 18725 20675 18725
 Text Label 19950 18725 0    140  ~ 28
-POUT
+POUT_
 Wire Wire Line
 	19650 20325 19525 20325
 Wire Wire Line
