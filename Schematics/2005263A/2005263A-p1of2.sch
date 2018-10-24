@@ -1,6 +1,6 @@
 EESchema Schematic File Version 4
 LIBS:module-cache
-EELAYER 26 0
+EELAYER 29 0
 EELAYER END
 $Descr E 44000 34000
 encoding utf-8
@@ -4237,7 +4237,7 @@ Wire Wire Line
 	37750 7000 37750 7375
 Connection ~ 37750 7375
 Wire Wire Line
-	37750 7375 41875 7375
+	37750 7375 38100 7375
 Wire Wire Line
 	35450 7375 35450 8475
 Wire Wire Line
@@ -4251,7 +4251,7 @@ Connection ~ 35450 8475
 Wire Wire Line
 	35450 8475 35450 9550
 Wire Wire Line
-	38100 7400 38100 8475
+	38100 7375 38100 8475
 Wire Wire Line
 	38100 9550 37725 9550
 Wire Wire Line
@@ -5687,4 +5687,7 @@ Wire Wire Line
 	28625 5050 28625 6125
 Text Notes 37700 22725 0    140  ~ 28
 SPARE PIN
+Connection ~ 38100 7375
+Wire Wire Line
+	38100 7375 41875 7375
 $EndSCHEMATC

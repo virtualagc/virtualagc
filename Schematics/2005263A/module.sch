@@ -1,6 +1,6 @@
 EESchema Schematic File Version 4
 LIBS:module-cache
-EELAYER 26 0
+EELAYER 29 0
 EELAYER END
 $Descr D 34000 22000
 encoding utf-8
