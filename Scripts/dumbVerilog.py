@@ -829,7 +829,9 @@ for line in lines:
 		if pinNames[pinNumber] in ["GND", "VCC"]:
 			# Ignore the chip's power and ground pins.
 			continue
-		netName = fields[2]		
+		netName = fields[2]
+		if netName == "?":
+			continue		
 		# Normalize the net name on the pin.
 		if netName[:3] in ["+4S", "+4V", "FAP"]:
 			netName = "1"
@@ -842,13 +844,18 @@ for line in lines:
 		elif netName in outputs:
 			netName = outputs[netName]
 		elif netName[:3] in ["/1/", "/2/", "/3/", "/4/", "/5/", "/6/", "/7/", "/8/", "/9/"]:
-			rawNetName = netName[3:]
-			netName = rawNetName
-			if netName[:1].isdigit():
-				netName = "d" + netName
-			if netName not in newInouts+newOutputs+newInputs:
-				netName = moduleName + rawNetName
-		else:
+			if False:
+				# This is completely misguided, and potentially can interconnect
+				# local net labels in different sheets together
+				rawNetName = netName[3:]
+				netName = rawNetName
+				if netName[:1].isdigit():
+					netName = "d" + netName
+				if netName not in newInouts+newOutputs+newInputs:
+					netName = moduleName + rawNetName
+			else:
+				netName = "_" + moduleName + "_" + netName[1] + "_" + netName[3:]
+		elif netName[:5] == "Net-(":
 			netName = moduleName + netName[5:].replace("-", "").replace(")", "")
 			if inWhat == "NOR":
 				if pinNumber == outPinA and gateLocations[refd + "A"] != "":

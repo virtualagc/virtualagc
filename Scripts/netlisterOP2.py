@@ -13,14 +13,11 @@
 
 import sys
 
-def deHierizer(netname):
-	if False:
-		# No!  These nets should not be connected.
-		if len(netname) > 7 and netname[:2] in ["/A", "/B"] and netname[2:4].isdigit() and netname[4] == "_" and netname[5].isdigit() and netname[6] == "/":
-			return netname[7:]
-		if len(netname) > 3 and netname[0] == "/" and netname[1].isdigit() and netname[2] == "/":
-			return netname[3:]
-	return netname
+# Can hard-code a few hints here to help out the processing if it stalls
+hints = {
+	"Net-(U15033-Pad6)":"g35341",  
+	"_A18_1_F17A_":"F17A_"
+}
 
 # Just read the netlist from a file into a structure of the form:
 #
@@ -75,7 +72,7 @@ def inputAndParseNetlistFile(filename):
 		elif inComponent and len(fields) == 4 and fields[0] == "(" and fields[3] == ")":
 			# Pin of a component
 			pinNumber = int(fields[1])
-			net = deHierizer(fields[2]).replace("+","p")
+			net = fields[2].replace("+","p")
 			if net[:4] != "Net-":
 				net = net.replace("-","m").replace("/","_")
 			if net[0].isdigit():
@@ -96,10 +93,13 @@ def inputAndParseVerilogFile(filename):
 	lines = f.readlines()
 	f.close()
 	
+	module = ""
 	components = {}
 	for line in lines:
 		fields = line.strip().split()
-		if len(fields) >= 2 and fields[0] == "//" and fields[1] == "Gate":
+		if len(fields) == 3 and fields[0] == "module" and fields[2] == "(":
+			module = fields[1]
+		elif len(fields) >= 2 and fields[0] == "//" and fields[1] == "Gate":
 			gates = fields[2:]
 		elif len(fields) >= 1 and fields[0] == "assign":
 			j = 0
@@ -273,12 +273,6 @@ def normalizeComponents(components):
 				if normalizedComponents[refd]["ins"][i] in synonym:
 					normalizedComponents[refd]["ins"][i] = backplaneSignal
 	
-	#for refd in normalizedComponents:
-	#	component = normalizedComponents[refd]
-	#	component["out"] = deHierizer(component["out"])
-	#	for i in range(0, len(component["ins"])):
-	#		component["ins"][i] = deHierizer(component["ins"][i])
-	
 	# Now want to combine gates if they have the same output nets.
 	byOuts = {}
 	for refd in normalizedComponents:
@@ -302,7 +296,7 @@ def normalizeComponents(components):
 	return { "normalized":superNormalizedComponents, "synonyms":newSynonyms }
 
 if len(sys.argv) != 3:
-	print >> sys.stderr, "Try:  netlisterOP2.py MIKE_NETLIST RON_VERILOG >OUTPUT"
+	print >> sys.stderr, "Try:  netlisterOP2.py MIKE_NETLIST RON_VERILOG"
 	sys.exit(1)
 
 # Input the data and normalize it however we can.
@@ -348,7 +342,10 @@ while count1 + count1O + count1I + count1R != 0:
 	count1O = 0
 	count1I = 0
 	count1R = 0
-	deducedNets = {}
+	if passNumber == 1:
+		deducedNets = hints
+	else:
+		deducedNets = {}
 	
 	# What this stuff does is to try to do matching where the output signal name matched,
 	# and either all or all but one of the input signals match.
@@ -414,9 +411,16 @@ while count1 + count1O + count1I + count1R != 0:
 		ins = component["ins"]
 		ins.sort()
 		ronByIns[str(ins)] = { "refd":component["refd"], "out":out }
+	#testkey = "['WCHG_', 'XB7_', 'XT0_']"
+	#print mikeByIns[testkey]
+	#print ronByIns[testkey]
 	for inputs in mikeByIns:
+		#if inputs == testkey:
+		#	print "here A"
 		if inputs not in ronByIns or mikeByIns[inputs]["matched"]:
 			continue
+		#if inputs == testkey:
+		#	print "here B"
 		mikeRefd = mikeByIns[inputs]["refd"]
 		mikeOut = mikeByIns[inputs]["out"]
 		ronRefd = ronByIns[inputs]["refd"]
@@ -427,11 +431,22 @@ while count1 + count1O + count1I + count1R != 0:
 			else:
 				mikeByOuts[mikeOut]["deducedRefd"] = ronRefd
 			count1R += 1
+			#if inputs == testkey:
+			#	print "here C"
 		if mikeOut != ronOut:
+			#if inputs == testkey:
+			#	print "here D"
+			#	print mikeOut
+			#	print ronOut
+			#	print mikeByOuts[mikeOut]
 			deducedNets[mikeOut] = ronOut
 			mikeByOuts[ronOut] = mikeByOuts[mikeOut]
 			mikeByOuts.pop(mikeOut, None)
+			#if inputs == testkey:
+			#	print ronOut
+			#	print mikeByOuts[ronOut]
 			count1O += 1
+		mikeByIns[inputs]["matched"] = True
 		mikeByOuts[ronOut]["matched"] = True
 	
 	for m in deducedNets:
@@ -473,6 +488,9 @@ f.close()
 f = open("netlisterOP2.nets", "w")
 for net in bigDeducedNets:
 	f.write(net + " => " + bigDeducedNets[net] + "\n")
+for net in mikeByOuts:
+	if not mikeByOuts[net]["matched"]:
+		f.write(net + " =>\n")
 f.close()
 
 

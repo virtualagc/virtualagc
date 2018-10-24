@@ -66,16 +66,19 @@ import re
 # some care needs to be taken in these selections.
 want0 = [
 	# STNDBY is controlled from a B-module that we're not simulating.
-	"STNDBY",
+	"STNDBY", "STRT1",
 	# CHORxx
 	"PIPAFL", "AGCWAR",
 	# Misc
 	"g32607"
 ]
 want1 = [
+	#"GOSET_", 
+	"STOPA",
 	# This zeroes the 32-bit counter in scaler module A1.
 	"g38104", "g38114", "g38124", "g38134", "g38144", "g38154", "g38164", "g38174",
-	"g38204", "g38214", "g38224", "g38234", "g38244", "g38254", "g38264", "g38274",
+	#"g38204", 
+	"g38214", "g38224", "g38234", "g38244", "g38254", "g38264", "g38274",
 	"g38304", "g38314", "g38324", "g38334", "g38344", "g38354", "g38364", "g38374",
 	"g38404", "g38414", "g38424", "g38434", "g38444", "g38454", "g38464", "g38474",
 	"g38105", "g38115", "g38125", "g38135", "g38145", "g38155", "g38165", "g38175",
@@ -121,7 +124,8 @@ want1 = [
 	"g31424", "g49328", "g49324", "g49317", "g49313",
 	"g31246", "g31239", "g31232", "g31229", "g31236", "g31243",
 	# Restart monitor
-	"g98023", "g98027", "g98029", "g80031", "g98033", 
+	"g98023", "g98027", "g98029", "g80031", 
+	#"g98033", 
 	"g98035", "g98037", "g98039", "g98041",	"g98013",
 	# Various flip-flops affecting the behavior of CHORxx.
 	"g48402", "g48406", "E7_", "g45117", "g45105", "g45225"
