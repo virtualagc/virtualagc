@@ -157,7 +157,7 @@ pullup(g39201);
 assign #GATE_DELAY g39201 = rst ? 0 : ((0|T08_|CCS0_) ? 1'b0 : 1'bz);
 // Gate A5-U106A
 pullup(P03);
-assign #GATE_DELAY P03 = rst ? 1'bz : ((0|EDSET) ? 1'b0 : 1'bz);
+assign #GATE_DELAY P03 = rst ? 0 : ((0|EDSET) ? 1'b0 : 1'bz);
 // Gate A5-U123B
 pullup(d11XP2);
 assign #GATE_DELAY d11XP2 = rst ? 0 : ((0|T11_|MSU0_) ? 1'b0 : 1'bz);
@@ -289,7 +289,7 @@ pullup(g39134);
 assign #GATE_DELAY g39134 = rst ? 0 : ((0|T05_|g39133) ? 1'b0 : 1'bz);
 // Gate A5-U210A
 pullup(Z15_);
-assign #GATE_DELAY Z15_ = rst ? 1'bz : ((0|g39432) ? 1'b0 : 1'bz);
+assign #GATE_DELAY Z15_ = rst ? 0 : ((0|g39432) ? 1'b0 : 1'bz);
 // Gate A5-U203B
 pullup(_A5_2_11XP6);
 assign #GATE_DELAY _A5_2_11XP6 = rst ? 0 : ((0|DV1_|T11_) ? 1'b0 : 1'bz);

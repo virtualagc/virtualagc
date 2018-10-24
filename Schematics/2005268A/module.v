@@ -197,7 +197,7 @@ pullup(g45305);
 assign #GATE_DELAY g45305 = rst ? 1'bz : ((0|g45303) ? 1'b0 : 1'bz);
 // Gate A18-U148A
 pullup(g45112);
-assign #GATE_DELAY g45112 = rst ? 1'bz : ((0|g45109) ? 1'b0 : 1'bz);
+assign #GATE_DELAY g45112 = rst ? 0 : ((0|g45109) ? 1'b0 : 1'bz);
 // Gate A18-U216B
 pullup(RRRANG);
 assign #GATE_DELAY RRRANG = rst ? 0 : ((0|g45314|g45324|g45317) ? 1'b0 : 1'bz);
@@ -251,7 +251,7 @@ pullup(RRSYNC);
 assign #GATE_DELAY RRSYNC = rst ? 0 : ((0|g45344|g45336) ? 1'b0 : 1'bz);
 // Gate A18-U256A
 pullup(g45450);
-assign #GATE_DELAY g45450 = rst ? 0 : ((0|DLKRPT|g45451) ? 1'b0 : 1'bz);
+assign #GATE_DELAY g45450 = rst ? 1'bz : ((0|DLKRPT|g45451) ? 1'b0 : 1'bz);
 // Gate A18-U145B
 pullup(g45105);
 assign #GATE_DELAY g45105 = rst ? 1'bz : ((0|g45106|MKEY2) ? 1'b0 : 1'bz);
@@ -578,13 +578,13 @@ pullup(g45453);
 assign #GATE_DELAY g45453 = rst ? 0 : ((0|g45451|g45447|DLKRPT) ? 1'b0 : 1'bz);
 // Gate A18-U147A
 pullup(g45110);
-assign #GATE_DELAY g45110 = rst ? 1'bz : ((0|g45109|g45123) ? 1'b0 : 1'bz);
+assign #GATE_DELAY g45110 = rst ? 0 : ((0|g45109|g45123) ? 1'b0 : 1'bz);
 // Gate A18-U227B
 pullup(g45307);
 assign #GATE_DELAY g45307 = rst ? 1'bz : ((0|g45308|g45306) ? 1'b0 : 1'bz);
 // Gate A18-U147B
 pullup(g45109);
-assign #GATE_DELAY g45109 = rst ? 0 : ((0|g45110|MKEY3) ? 1'b0 : 1'bz);
+assign #GATE_DELAY g45109 = rst ? 1'bz : ((0|g45110|MKEY3) ? 1'b0 : 1'bz);
 // Gate A18-U232B
 pullup(g45402);
 assign #GATE_DELAY g45402 = rst ? 1'bz : ((0|g45403|F10AS0) ? 1'b0 : 1'bz);
@@ -596,7 +596,7 @@ pullup(g45127);
 assign #GATE_DELAY g45127 = rst ? 0 : ((0|g45123|g45135|g45126|F09A_) ? 1'b0 : 1'bz);
 // Gate A18-U257A
 pullup(g45452);
-assign #GATE_DELAY g45452 = rst ? 0 : ((0|g45451|F10A) ? 1'b0 : 1'bz);
+assign #GATE_DELAY g45452 = rst ? 1'bz : ((0|g45451|F10A) ? 1'b0 : 1'bz);
 // Gate A18-U130A
 pullup(g45202);
 assign #GATE_DELAY g45202 = rst ? 1'bz : ((0|g45223|g45201) ? 1'b0 : 1'bz);
@@ -617,7 +617,7 @@ pullup(g45232);
 assign #GATE_DELAY g45232 = rst ? 0 : ((0|g45229) ? 1'b0 : 1'bz);
 // Gate A18-U257B
 pullup(g45451);
-assign #GATE_DELAY g45451 = rst ? 1'bz : ((0|g45452|DLKRPT) ? 1'b0 : 1'bz);
+assign #GATE_DELAY g45451 = rst ? 0 : ((0|g45452|DLKRPT) ? 1'b0 : 1'bz);
 // Gate A18-U229B
 pullup(CH1304);
 assign #GATE_DELAY CH1304 = rst ? 0 : ((0|RCH13_|g45302) ? 1'b0 : 1'bz);
@@ -707,10 +707,10 @@ pullup(g45348);
 assign #GATE_DELAY g45348 = rst ? 0 : ((0|g45347|g45305|g45336) ? 1'b0 : 1'bz);
 // Gate A18-U160B
 pullup(g45136);
-assign #GATE_DELAY g45136 = rst ? 0 : ((0|KYRPT1|g45135) ? 1'b0 : 1'bz);
+assign #GATE_DELAY g45136 = rst ? 1'bz : ((0|KYRPT1|g45135) ? 1'b0 : 1'bz);
 // Gate A18-U160A
 pullup(g45135);
-assign #GATE_DELAY g45135 = rst ? 1'bz : ((0|g45134|g45136) ? 1'b0 : 1'bz);
+assign #GATE_DELAY g45135 = rst ? 0 : ((0|g45134|g45136) ? 1'b0 : 1'bz);
 // End of NOR gates
 
 

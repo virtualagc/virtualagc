@@ -163,7 +163,7 @@ pullup(g98029);
 assign #GATE_DELAY g98029 = rst ? 0 : ((0|g98028|g98047) ? 1'b0 : 1'bz);
 // Gate A52-U116B
 pullup(g98033);
-assign #GATE_DELAY g98033 = rst ? 1'bz : ((0|g98032|g98051) ? 1'b0 : 1'bz);
+assign #GATE_DELAY g98033 = rst ? 0 : ((0|g98032|g98051) ? 1'b0 : 1'bz);
 // Gate A52-U116A
 pullup(g98032);
 assign #GATE_DELAY g98032 = rst ? 0 : ((0|MWATCH_) ? 1'b0 : 1'bz);

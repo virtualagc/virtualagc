@@ -136,7 +136,7 @@ pullup(G16SW_);
 assign #GATE_DELAY G16SW_ = rst ? 1'bz : ((0|g41130|g41129) ? 1'b0 : 1'bz);
 // Gate A13-U141B
 pullup(OSCALM);
-assign #GATE_DELAY OSCALM = rst ? 0 : ((0|g41232|CCH33) ? 1'b0 : 1'bz);
+assign #GATE_DELAY OSCALM = rst ? 1'bz : ((0|g41232|CCH33) ? 1'b0 : 1'bz);
 // Gate A13-U139B
 pullup(SBYEXT);
 assign #GATE_DELAY SBYEXT = rst ? 1'bz : ((0|g41234) ? 1'b0 : 1'bz);
@@ -145,7 +145,7 @@ pullup(g41215);
 assign #GATE_DELAY g41215 = rst ? 1'bz : ((0|g41214|F08B) ? 1'b0 : 1'bz);
 // Gate A13-U107B
 pullup(g41149);
-assign #GATE_DELAY g41149 = rst ? 1'bz : ((0|g41148|g41150) ? 1'b0 : 1'bz);
+assign #GATE_DELAY g41149 = rst ? 0 : ((0|g41148|g41150) ? 1'b0 : 1'bz);
 // Gate A13-U120B
 pullup(g41126);
 assign #GATE_DELAY g41126 = rst ? 0 : ((0|F10A_|g41124) ? 1'b0 : 1'bz);
@@ -178,13 +178,13 @@ pullup(MWARNF_);
 assign #GATE_DELAY MWARNF_ = rst ? 1'bz : ((0|FLTOUT) ? 1'b0 : 1'bz);
 // Gate A13-U141A
 pullup(g41232);
-assign #GATE_DELAY g41232 = rst ? 1'bz : ((0|OSCALM|STRT2) ? 1'b0 : 1'bz);
+assign #GATE_DELAY g41232 = rst ? 0 : ((0|OSCALM|STRT2) ? 1'b0 : 1'bz);
 // Gate A13-U106B
 pullup(g41150);
-assign #GATE_DELAY g41150 = rst ? 0 : ((0|F07A|g41149) ? 1'b0 : 1'bz);
+assign #GATE_DELAY g41150 = rst ? 1'bz : ((0|F07A|g41149) ? 1'b0 : 1'bz);
 // Gate A13-U114A A13-U114B
 pullup(XT0_);
-assign #GATE_DELAY XT0_ = rst ? 1'bz : ((0|XT0) ? 1'b0 : 1'bz);
+assign #GATE_DELAY XT0_ = rst ? 0 : ((0|XT0) ? 1'b0 : 1'bz);
 // Gate A13-U107A
 pullup(g41141);
 assign #GATE_DELAY g41141 = rst ? 1'bz : ((0|g41142|g41140) ? 1'b0 : 1'bz);
@@ -268,10 +268,10 @@ pullup(WARN);
 assign #GATE_DELAY WARN = rst ? 0 : ((0|g41224) ? 1'b0 : 1'bz);
 // Gate A13-U123A
 pullup(g41108);
-assign #GATE_DELAY g41108 = rst ? 1'bz : ((0|g41107|F14B) ? 1'b0 : 1'bz);
+assign #GATE_DELAY g41108 = rst ? 0 : ((0|g41107|F14B) ? 1'b0 : 1'bz);
 // Gate A13-U123B
 pullup(g41107);
-assign #GATE_DELAY g41107 = rst ? 0 : ((0|IIP|g41108) ? 1'b0 : 1'bz);
+assign #GATE_DELAY g41107 = rst ? 1'bz : ((0|IIP|g41108) ? 1'b0 : 1'bz);
 // Gate A13-U150B
 pullup(SYNC4_);
 assign #GATE_DELAY SYNC4_ = rst ? 1'bz : ((0|g41218) ? 1'b0 : 1'bz);
