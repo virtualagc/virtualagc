@@ -12,12 +12,10 @@
 #	as can be done automatically.
 
 import sys
+import re
 
 # Can hard-code a few hints here to help out the processing if it stalls
-hints = {
-	"Net-(U15033-Pad6)":"g35341",  
-	"_A18_1_F17A_":"F17A_"
-}
+hints = {}
 
 # Just read the netlist from a file into a structure of the form:
 #
@@ -164,6 +162,8 @@ def normalizeComponents(components):
 
 	synonyms = []
 	def addSynonym(name1, name2):
+		if name1 == "" or name2 == "":
+			return
 		index1 = -1
 		index2 = -1
 		for i in range(0, len(synonyms)):
@@ -227,6 +227,9 @@ def normalizeComponents(components):
 			addSynonym(pins[8], pins[9])
 			addSynonym(pins[10], pins[11])
 			addSynonym(pins[12], pins[13])
+			#if refd == "U7007":
+			#	print synonyms
+			#	print pins
 		elif type == "D3NOR":
 			while len(pins) <= 10:
 				pins.append("")
@@ -243,6 +246,11 @@ def normalizeComponents(components):
 		else:
 			print >> sys.stderr, "Unsupported part type " + type
 			sys.exit(1)
+	
+	# The stuff above allows input pins of "GND", which we don't want.
+	for r in normalizedComponents:
+		while "GND" in normalizedComponents[r]["ins"]:
+			normalizedComponents[r]["ins"].remove("GND")
 	
 	# If there is unambiguously a backplane signal name among the synonyms, replace all of its
 	# synonyms with it, and eliminate the synonym from the synonym table.
@@ -295,28 +303,19 @@ def normalizeComponents(components):
 	
 	return { "normalized":superNormalizedComponents, "synonyms":newSynonyms }
 
-if len(sys.argv) != 3:
-	print >> sys.stderr, "Try:  netlisterOP2.py MIKE_NETLIST RON_VERILOG"
+if len(sys.argv) < 3:
+	print >> sys.stderr, "Try:  netlisterOP2.py MIKE_NETLIST RON_VERILOG [LEVEL]"
 	sys.exit(1)
+heuristicLevel = 0
+if len(sys.argv) >= 4:
+	heuristicLevel = int(sys.argv[3])
 
 # Input the data and normalize it however we can.
 mikeComponents = inputAndParseNetlistFile(sys.argv[1])
 mikeNormalized = normalizeComponents(mikeComponents)
 ronNormalized = inputAndParseVerilogFile(sys.argv[2])
 
-# Output what we just input, as files, for debugging purposes.
-f = open("netlisterOP2.mike", "w")
-for refd in mikeNormalized["normalized"]:
-	component = mikeNormalized["normalized"][refd]
-	f.write(refd + ": out=" + component["out"] + " ins=" + str(component["ins"]) + "\n")
-f.close()
-f = open("netlisterOP2.ron", "w")
-for refd in ronNormalized["normalized"]:
-	component = ronNormalized["normalized"][refd]
-	f.write(refd + ": out=" + component["out"] + " ins=" + str(component["ins"]) + "\n")
-f.close()
-
-# Make some helpful, supplementary data structures to facilitate comparisons.
+# Make some helpful data structures to facilitate comparisons.
 mikeByOuts = {}
 ronByOuts = {}
 for refd in mikeNormalized["normalized"]:
@@ -328,6 +327,38 @@ for refd in ronNormalized["normalized"]:
 	component = ronNormalized["normalized"][refd]
 	ronByOuts[component["out"]] = { "refd":refd, "ins":component["ins"], "matched":False }
 
+# Actually, it turns out that the xxxByOuts structures we just created are used for 
+# almost everything, and the xxxComponents and xxxNormalized structures we created 
+# first are used for nothing ever again.  Go figure!  Let's just get rid of them,
+# to avoid confusion.
+synonyms = mikeNormalized["synonyms"]
+del mikeComponents
+del mikeNormalized
+del ronNormalized
+
+# Let's apply the synonyms.  We'll just always use the first one in each equivalence class.
+# First, all output nets.
+for synonym in synonyms:
+	master = synonym[0]
+	for syn in synonym[1:]:
+		if syn in mikeByOuts:
+			if master in mikeByOuts:
+				for input in mikeByOuts[syn]["ins"]:
+					if input not in mikeByOuts[master]["ins"]:
+						mikeByOuts[master]["ins"].append(input)
+			else:
+				mikeByOuts[master] = mikeByOuts[syn]
+			mikeByOuts.pop(syn, None)
+# Now all the input nets.
+synonymsSecondary = {}
+for synonym in synonyms:
+	for syn in synonym[1:]:
+		synonymsSecondary[syn] = synonym[0]
+for output in mikeByOuts:
+	for i in range(0, len(mikeByOuts[output]["ins"])):
+		if mikeByOuts[output]["ins"][i] in synonymsSecondary:
+			mikeByOuts[output]["ins"][i] = synonymsSecondary[mikeByOuts[output]["ins"][i]]
+
 # Everything else below is just matching stuff between the Mike netlists and Ron netlists.  
 
 bigDeducedNets = {}
@@ -336,147 +367,379 @@ count1 = 1
 count1O = 1
 count1I = 1
 count1R = 0
-while count1 + count1O + count1I + count1R != 0:
-	passNumber += 1
-	count1 = 0
-	count1O = 0
-	count1I = 0
-	count1R = 0
-	if passNumber == 1:
-		deducedNets = hints
-	else:
-		deducedNets = {}
+heuristicPattern1 = re.compile("_[AB][0-2][0-9]_[1-3]_")
+for h in range(0, heuristicLevel + 1):
+	print "Heuristic level " + str(h)
 	
-	# What this stuff does is to try to do matching where the output signal name matched,
-	# and either all or all but one of the input signals match.
-	for out in mikeByOuts:
-		mikeComp = mikeByOuts[out]
-		if mikeComp["matched"]:
-			continue
-		if out in ronByOuts and len(mikeComp["ins"]) == len(ronByOuts[out]["ins"]):
-			ronComp = ronByOuts[out]
-			unmatchedCount = 0
-			mikeUnmatched = ""
-			for i in mikeComp["ins"]:
-				if i not in ronComp["ins"]:
-					mikeUnmatched = i
-					unmatchedCount += 1
-			if unmatchedCount == 1:
-				for i in ronComp["ins"]:
-					if i not in mikeComp["ins"]:
-						#print mikeUnmatched + " => " + i
-						deducedNets[mikeUnmatched] = i
-						break
-			if unmatchedCount <= 1:
-				count1 += 1
-				#print mikeComp["refd"] + " => " + ronComp["refd"]
-				mikeComp["matched"] = True
-				if "deducedRefd" in mikeComp:
-					mikeComp["deducedRefd"] += "/" + ronComp["refd"]
+	# At "heuristic level" 0, we make only logically-inescapable inferences.  At level
+	# 1, we first make some guesses related to the fact that Mike sometimes moved NOR
+	# gates from one module to another, to avoid creating backplane signals that would 
+	# otherwise have been needed to interconnect the modules.  Often, but not always,
+	# these signals retained their names locally within a module, and therefore (in the
+	# netlist) are systematically similar but not identical to the signals in my design
+	# (which are all still passed on the backplane.
+	if h == 1:
+		# First, identify all possible candidate signals in Mike's design for 
+		# possible truncation.  That basically means that signals like
+		# "_Ann_n_SOMETHING" or "_Bnn_n_SOMETHING" are candidates to become
+		# just "SOMETHING".  However, we can't determine that immediately, since
+		# we'll only know if there might be some potential conflict if there are
+		# multiple such cases but with differing _Ann_n_ or _Bnn_n_ prefixes.
+		# So we store up a list of candidates, but only make the final decision
+		# on them after all the candidates are known. 
+		mikeSignalList = []
+		for out in mikeByOuts:
+			if out not in mikeSignalList:
+				mikeSignalList.append(out)
+			for input in mikeByOuts[out]["ins"]:
+				if input not in mikeSignalList:
+					mikeSignalList.append(input)
+		ronSignalList = []
+		for out in ronByOuts:
+			if out not in ronSignalList:
+				ronSignalList.append(out)
+			for input in ronByOuts[out]["ins"]:
+				if input not in ronSignalList:
+					ronSignalList.append(input)
+		candidates = {}
+		for signal in mikeSignalList:
+			matchedPrefix = False
+			if signal[:16] == "_RestartMonitor_":
+				truncatedSignalName = signal[16:]
+				matchedPrefix = True
+			elif heuristicPattern1.match(signal[:7]) != None:
+				truncatedSignalName = signal[7:]
+				matchedPrefix = True
+			if matchedPrefix and truncatedSignalName in ronSignalList:
+				if truncatedSignalName in candidates:
+					if signal not in candidates[truncatedSignalName]:
+						candidates[truncatedSignalName].append(signal)
 				else:
-					mikeComp["deducedRefd"] = ronComp["refd"]
-				ronComp["matched"] = True
-	for m in deducedNets:
-		r = deducedNets[m]
-		if m in mikeByOuts:
-			count1O += 1
-			mikeByOuts[r] = mikeByOuts[m]
-			mikeByOuts.pop(m, None)
-	for out in mikeByOuts:
-		ins = mikeByOuts[out]["ins"]
-		for i in range(0, len(ins)):
-			if ins[i] in deducedNets:
-				count1I += 1
-				ins[i] = deducedNets[ins[i]]
-	for d in deducedNets:
-		if d not in bigDeducedNets:
-			bigDeducedNets[d] = deducedNets[d]
-		else:
-			if deducedNets[d] not in bigDeducedNets[d]:
-				bigDeducedNets[d] += "/" + deducedNets[d]
-	
-	# What the stuff above can't do is directly deal with the case of all the inputs matching,
-	# but the output not matching, from which the output can be inferred.  (Some of these are
-	# taken care of indirectly, if the output netname happens to be an input netname which is
-	# inferred separately.  However, that doesn't always happen.)
-	mikeByIns = {}
-	ronByIns = {}
-	for out in mikeByOuts:
-		component = mikeByOuts[out]
-		ins = component["ins"]
-		ins.sort()
-		mikeByIns[str(ins)] = { "refd":component["refd"], "out":out, "matched":component["matched"] }
-	for out in ronByOuts:
-		component = ronByOuts[out]
-		ins = component["ins"]
-		ins.sort()
-		ronByIns[str(ins)] = { "refd":component["refd"], "out":out }
-	#testkey = "['WCHG_', 'XB7_', 'XT0_']"
-	#print mikeByIns[testkey]
-	#print ronByIns[testkey]
-	for inputs in mikeByIns:
-		#if inputs == testkey:
-		#	print "here A"
-		if inputs not in ronByIns or mikeByIns[inputs]["matched"]:
-			continue
-		#if inputs == testkey:
-		#	print "here B"
-		mikeRefd = mikeByIns[inputs]["refd"]
-		mikeOut = mikeByIns[inputs]["out"]
-		ronRefd = ronByIns[inputs]["refd"]
-		ronOut = ronByIns[inputs]["out"]
-		if mikeRefd != ronRefd:
-			if "deducedRefd" in mikeByOuts[mikeOut]:
-				mikeByOuts[mikeOut]["deducedRefd"] += "/" + ronRefd
+					candidates[truncatedSignalName] = [ signal ]
+		# Next, determine if there are potential conflicts among the candidates, and 
+		# retain just the ones for which there aren't any conflicts.
+		deducedNets = {}
+		for signal in candidates:
+			if len(candidates[signal]) == 1:
+				deducedNets[candidates[signal][0]] = signal
+		# Finally, act on the list of retained candidates, by actually translating
+		# signal names based on it.
+		count1 = 0
+		count1O = 0
+		count1I = 0
+		for m in deducedNets:
+			r = deducedNets[m]
+			if m in mikeByOuts:
+				count1O += 1
+				mikeByOuts[r] = mikeByOuts[m]
+				mikeByOuts.pop(m, None)
+		for out in mikeByOuts:
+			ins = mikeByOuts[out]["ins"]
+			for i in range(0, len(ins)):
+				if ins[i] in deducedNets:
+					count1I += 1
+					ins[i] = deducedNets[ins[i]]
+		for d in deducedNets:
+			if d not in bigDeducedNets:
+				bigDeducedNets[d] = deducedNets[d]
 			else:
-				mikeByOuts[mikeOut]["deducedRefd"] = ronRefd
-			count1R += 1
-			#if inputs == testkey:
-			#	print "here C"
-		if mikeOut != ronOut:
-			#if inputs == testkey:
-			#	print "here D"
-			#	print mikeOut
-			#	print ronOut
-			#	print mikeByOuts[mikeOut]
-			deducedNets[mikeOut] = ronOut
-			mikeByOuts[ronOut] = mikeByOuts[mikeOut]
-			mikeByOuts.pop(mikeOut, None)
-			#if inputs == testkey:
-			#	print ronOut
-			#	print mikeByOuts[ronOut]
-			count1O += 1
-		mikeByIns[inputs]["matched"] = True
-		mikeByOuts[ronOut]["matched"] = True
+				if deducedNets[d] not in bigDeducedNets[d]:
+					bigDeducedNets[d] += "/" + deducedNets[d]
+		print "In heuristic 1, " + str(count1O) + " outputs and " + str(count1I) + " inputs were translated"
 	
-	for m in deducedNets:
-		r = deducedNets[m]
-		if m in mikeByOuts:
-			count1O += 1
-			mikeByOuts[r] = mikeByOuts[m]
-			mikeByOuts.pop(m, None)
-	for out in mikeByOuts:
-		ins = mikeByOuts[out]["ins"]
-		for i in range(0, len(ins)):
-			if ins[i] in deducedNets:
-				count1I += 1
-				ins[i] = deducedNets[ins[i]]
-	for d in deducedNets:
-		if d not in bigDeducedNets:
-			bigDeducedNets[d] = deducedNets[d]
+	while count1 + count1O + count1I + count1R != 0:
+		passNumber += 1
+		count1 = 0
+		count1O = 0
+		count1I = 0
+		count1R = 0
+		if passNumber == 1:
+			deducedNets = hints
 		else:
-			if deducedNets[d] not in bigDeducedNets[d]:
-				bigDeducedNets[d] += "/" + deducedNets[d]
-	
-	print str(count1) + " refds, " + str(len(deducedNets)) + " netnames, " + str(count1O) + " outputs, and " + str(count1I) + " inputs replaced on pass " + str(passNumber)
+			deducedNets = {}
+		
+		# What this stuff does is to try to do matching where the output signal name matched,
+		# and either all or all but one of the input signals match.
+		for out in mikeByOuts:
+			mikeComp = mikeByOuts[out]
+			if mikeComp["matched"]:
+				continue
+			if out in ronByOuts and len(mikeComp["ins"]) == len(ronByOuts[out]["ins"]):
+				ronComp = ronByOuts[out]
+				unmatchedCount = 0
+				mikeUnmatched = ""
+				for i in mikeComp["ins"]:
+					if i not in ronComp["ins"]:
+						mikeUnmatched = i
+						unmatchedCount += 1
+				if unmatchedCount == 1:
+					for i in ronComp["ins"]:
+						if i not in mikeComp["ins"]:
+							#print mikeUnmatched + " => " + i
+							deducedNets[mikeUnmatched] = i
+							break
+				if unmatchedCount <= 1:
+					count1 += 1
+					#print mikeComp["refd"] + " => " + ronComp["refd"]
+					mikeComp["matched"] = True
+					if "deducedRefd" in mikeComp:
+						mikeComp["deducedRefd"] += "/" + ronComp["refd"]
+					else:
+						mikeComp["deducedRefd"] = ronComp["refd"]
+					ronComp["matched"] = True
+		if "RCH13_" in deducedNets:
+			print "A RCH13_ => " + deducedNets["RCH13_"]
+		if "CCH13" in deducedNets:
+			print "A CCH13 => " + deducedNets["CCH13"]
+		for m in deducedNets:
+			r = deducedNets[m]
+			if m in mikeByOuts:
+				count1O += 1
+				mikeByOuts[r] = mikeByOuts[m]
+				mikeByOuts.pop(m, None)
+		for out in mikeByOuts:
+			ins = mikeByOuts[out]["ins"]
+			for i in range(0, len(ins)):
+				if ins[i] in deducedNets:
+					count1I += 1
+					ins[i] = deducedNets[ins[i]]
+		for d in deducedNets:
+			if d not in bigDeducedNets:
+				bigDeducedNets[d] = deducedNets[d]
+			else:
+				if deducedNets[d] not in bigDeducedNets[d]:
+					bigDeducedNets[d] += "/" + deducedNets[d]
+		
+		# What the stuff above can't do is directly deal with the case of all the inputs matching,
+		# but the output not matching, from which the output can be inferred.  (Some of these are
+		# taken care of indirectly, if the output netname happens to be an input netname which is
+		# inferred separately.  However, that doesn't always happen.)  Note that sometimes there 
+		# may be two separate gates with identical sets of inputs.  I'm just going to ignore those.
+		mikeByIns = {}
+		mikeIgnore = []
+		ronByIns = {}
+		ronIgnore = []
+		bypass = False
+		for out in mikeByOuts:
+			component = mikeByOuts[out]
+			ins = component["ins"]
+			ins.sort()
+			inkey = str(ins)
+			if inkey in mikeIgnore:
+				continue
+			if inkey in mikeByIns:
+				mikeIgnore.append(inkey)
+				mikeByIns.pop(inkey, None)
+			else:
+				mikeByIns[str(ins)] = { "refd":component["refd"], "out":out, "matched":component["matched"] }
+		for out in ronByOuts:
+			component = ronByOuts[out]
+			ins = component["ins"]
+			ins.sort()
+			inkey = str(ins)
+			if inkey in ronIgnore:
+				continue
+			if inkey in ronByIns:
+				ronIgnore.append(inkey)
+				ronByIns.pop(inkey, None)
+			else:
+				ronByIns[str(ins)] = { "refd":component["refd"], "out":out, "matched":component["matched"] }
+		#testkey = "['F5ASB2']"
+		#print mikeByIns[testkey]
+		#print ronByIns[testkey]
+		for inputs in mikeByIns:
+			#if inputs == testkey:
+			#	print "here A"
+			if inputs not in ronByIns or mikeByIns[inputs]["matched"]:
+				continue
+			#if inputs == testkey:
+			#	print "here B"
+			mikeRefd = mikeByIns[inputs]["refd"]
+			mikeOut = mikeByIns[inputs]["out"]
+			ronRefd = ronByIns[inputs]["refd"]
+			ronOut = ronByIns[inputs]["out"]
+			if mikeRefd != ronRefd:
+				if "deducedRefd" in mikeByOuts[mikeOut]:
+					mikeByOuts[mikeOut]["deducedRefd"] += "/" + ronRefd
+				else:
+					mikeByOuts[mikeOut]["deducedRefd"] = ronRefd
+				count1R += 1
+				#if inputs == testkey:
+				#	print "here C"
+			if mikeOut != ronOut:
+				#if inputs == testkey:
+				#	print "here D"
+				#	print mikeOut
+				#	print ronOut
+				#	print mikeByOuts[mikeOut]
+				deducedNets[mikeOut] = ronOut
+				mikeByOuts[ronOut] = mikeByOuts[mikeOut]
+				mikeByOuts.pop(mikeOut, None)
+				#if inputs == testkey:
+				#	print ronOut
+				#	print mikeByOuts[ronOut]
+				count1O += 1
+			mikeByIns[inputs]["matched"] = True
+			mikeByOuts[ronOut]["matched"] = True
+		
+		if "RCH13_" in deducedNets:
+			print "B RCH13_ => " + deducedNets["RCH13_"]
+		if "CCH13" in deducedNets:
+			print "B CCH13 => " + deducedNets["CCH13"]
+		for m in deducedNets:
+			r = deducedNets[m]
+			if m in mikeByOuts:
+				count1O += 1
+				mikeByOuts[r] = mikeByOuts[m]
+				mikeByOuts.pop(m, None)
+		for out in mikeByOuts:
+			ins = mikeByOuts[out]["ins"]
+			for i in range(0, len(ins)):
+				if ins[i] in deducedNets:
+					count1I += 1
+					ins[i] = deducedNets[ins[i]]
+		for d in deducedNets:
+			if d not in bigDeducedNets:
+				bigDeducedNets[d] = deducedNets[d]
+			else:
+				if deducedNets[d] not in bigDeducedNets[d]:
+					bigDeducedNets[d] += "/" + deducedNets[d]
+		
+		# Consider the following situation  
+		#	out = UNMATCHED_NET1
+		#	ins = [ UNMATCHED_NET2, MATCHED_NET1, MATCHED_NET2, ... ]
+		# None of the stuff so far allows us to deduce the unmatched nets in this scenario.
+		# But consider the following:  Suppose we know also that MATCHED_NETn feeds into
+		# *only* one input, anywhere globally.  In that case, we can deduce that the 
+		# stuff above is that single place MATCHED_NETn feeds into, and thus can match
+		# the two unmatched nets in it.
+		#
+		# As it happens, we can loosen up the requirements a little bit.  Suppose that
+		# MATCHED_NETn feeds not into just 1 other gate as an input, but into (say) N
+		# other gates.  But suppose that N-1 of those other gates have already had
+		# all of their inputs and outputs fully matched up, leaving just one of the 
+		# gates being feed into that hasn't.  As long as we can eliminate those other
+		# N-1 gates, we know that the last one must be the one we want to match to!
+		mikeByIns = {}
+		for output in mikeByOuts:
+			for input in mikeByOuts[output]["ins"]:
+				if input not in mikeByIns:
+					mikeByIns[input] = [ output ]
+				elif output not in mikeByIns[input]:
+					mikeByIns[input].append(output)
+		ronByIns = {}
+		for output in ronByOuts:
+			for input in ronByOuts[output]["ins"]:
+				if input not in ronByIns:
+					ronByIns[input] = [ output ]
+				elif output not in ronByIns[input]:
+					ronByIns[input].append(output)
+		deducedNets = {}
+		for input in mikeByIns:
+			if input not in ronByIns:
+				continue
+			mikeFeeds = mikeByIns[input]
+			ronFeeds = ronByIns[input]
+			numFeeds = len(mikeFeeds)
+			if len(ronFeeds) != numFeeds:
+				continue
+			mikeOutput = ""
+			ronOutput = ""
+			numUnmatched = 0
+			for uo in mikeFeeds:
+				if uo in ronFeeds:
+					continue
+				mikeOutput = uo
+				numUnmatched += 1
+			if numUnmatched != 1:
+				continue
+			for uo in ronFeeds:
+				if uo not in mikeFeeds:
+					ronOutput = uo
+					break
+			mikeInputs = mikeByOuts[mikeOutput]["ins"]
+			ronInputs = ronByOuts[ronOutput]["ins"]
+			if len(mikeInputs) != len(ronInputs):
+				# This shouldn't be possible, logically, but still ...
+				continue
+			# Let's double-check that there's only one unmatched input.
+			mikeInput = ""
+			ronInput = ""
+			numUnmatched = 0
+			for ui in mikeInputs:
+				if ui not in ronInputs:
+					mikeInput = ui
+					numUnmatched += 1
+			if numUnmatched != 1:
+				continue
+			for ui in ronInputs:
+				if ui not in mikeInputs:
+					ronInput = ui
+					break
+			# All right, everything seems swell.
+			deducedNets[mikeOutput] = ronOutput
+			deducedNets[mikeInput] = ronInput
+		if "RCH13_" in deducedNets:
+			print "C RCH13_ => " + deducedNets["RCH13_"]
+		if "CCH13" in deducedNets:
+			print "C CCH13 => " + deducedNets["CCH13"]
+		for m in deducedNets:
+			r = deducedNets[m]
+			if m in mikeByOuts:
+				count1O += 1
+				mikeByOuts[r] = mikeByOuts[m]
+				mikeByOuts.pop(m, None)
+		for out in mikeByOuts:
+			ins = mikeByOuts[out]["ins"]
+			for i in range(0, len(ins)):
+				if ins[i] in deducedNets:
+					count1I += 1
+					ins[i] = deducedNets[ins[i]]
+		for d in deducedNets:
+			if d not in bigDeducedNets:
+				bigDeducedNets[d] = deducedNets[d]
+			else:
+				if deducedNets[d] not in bigDeducedNets[d]:
+					bigDeducedNets[d] += "/" + deducedNets[d]
+		
+		print str(count1) + " refds, " + str(len(deducedNets)) + " netnames, " + str(count1O) + " outputs, and " + str(count1I) + " inputs replaced on pass " + str(passNumber)
 	
 # Output debugging stuff.
-f = open("netlisterOP2.mike1", "w")
+for out in ronByOuts:
+	if out == "":
+		continue
+	component = ronByOuts[out]
+	component["ins"].sort()
 for out in mikeByOuts:
 	if out == "":
 		continue
 	component = mikeByOuts[out]
-	f.write(component["refd"] + ": out=" + out + " ins=" + str(component["ins"]) + "\n")
+	component["ins"].sort()
+f = open("netlisterOP2.ron", "w")
+for out in ronByOuts:
+	if out == "":
+		continue
+	component = ronByOuts[out]
+	if out not in mikeByOuts:
+		status = "+"
+	elif str(component["ins"]) == str(mikeByOuts[out]["ins"]):
+		status = "="
+	else:
+		status = "!"
+	f.write(status + " " + component["refd"] + ": out=" + out + " ins=" + str(component["ins"]) + "\n")
+f.close()
+f = open("netlisterOP2.mike", "w")
+for out in mikeByOuts:
+	if out == "":
+		continue
+	component = mikeByOuts[out]
+	if out not in ronByOuts:
+		status = "+"
+	elif str(component["ins"]) == str(ronByOuts[out]["ins"]):
+		status = "="
+	else:
+		status = "!"
+	f.write(status + " " + component["refd"] + ": out=" + out + " ins=" + str(component["ins"]) + "\n")
 f.close()
 f = open("netlisterOP2.refd", "w")
 for out in mikeByOuts:
@@ -488,9 +751,6 @@ f.close()
 f = open("netlisterOP2.nets", "w")
 for net in bigDeducedNets:
 	f.write(net + " => " + bigDeducedNets[net] + "\n")
-for net in mikeByOuts:
-	if not mikeByOuts[net]["matched"]:
-		f.write(net + " =>\n")
 f.close()
 
 
