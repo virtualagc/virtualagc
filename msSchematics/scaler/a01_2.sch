@@ -1,0 +1,862 @@
+EESchema Schematic File Version 4
+LIBS:scaler-cache
+EELAYER 28 0
+EELAYER END
+$Descr A2 23386 16535
+encoding utf-8
+Sheet 19 35
+Title ""
+Date ""
+Rev ""
+Comp ""
+Comment1 ""
+Comment2 ""
+Comment3 ""
+Comment4 ""
+$EndDescr
+$Sheet
+S 2100 2100 1000 550 
+U 56535F1F
+F0 "scaler_s18" 60
+F1 "clock_divider.sch" 60
+F2 "F" I L 2100 2200 60 
+F3 "FS" O R 3100 2200 60 
+F4 "FS/" O R 3100 2300 60 
+F5 "A" O R 3100 2450 60 
+F6 "B" O R 3100 2550 60 
+$EndSheet
+Wire Wire Line
+	3100 2450 3850 2450
+Wire Wire Line
+	3100 2200 3250 2200
+Wire Wire Line
+	3100 2300 3650 2300
+Wire Wire Line
+	3100 2550 3250 2550
+Text HLabel 3250 2550 2    60   Output ~ 0
+F18B
+Text HLabel 3250 2200 2    60   Output ~ 0
+FS18
+Wire Wire Line
+	3750 2450 3750 2200
+Wire Wire Line
+	3750 2200 4250 2200
+Wire Wire Line
+	3650 2300 3650 1800
+Wire Wire Line
+	3650 1800 3750 1800
+Text HLabel 3850 2450 2    60   Output ~ 0
+F18A
+Connection ~ 3750 2450
+$Sheet
+S 4250 2100 1000 550 
+U 56535F42
+F0 "scaler_s19" 60
+F1 "clock_divider.sch" 60
+F2 "F" I L 4250 2200 60 
+F3 "FS" O R 5250 2200 60 
+F4 "FS/" O R 5250 2300 60 
+F5 "A" O R 5250 2450 60 
+F6 "B" O R 5250 2550 60 
+$EndSheet
+Wire Wire Line
+	5250 2450 6000 2450
+Wire Wire Line
+	5250 2200 5400 2200
+Wire Wire Line
+	5250 2300 5800 2300
+Wire Wire Line
+	5250 2550 5400 2550
+Text HLabel 5400 2550 2    60   Output ~ 0
+F19B
+Text HLabel 5400 2200 2    60   Output ~ 0
+FS19
+Wire Wire Line
+	5900 2450 5900 2200
+Wire Wire Line
+	5900 2200 6400 2200
+Wire Wire Line
+	5800 2300 5800 1800
+Wire Wire Line
+	5800 1800 5900 1800
+Text HLabel 6000 2450 2    60   Output ~ 0
+F19A
+Connection ~ 5900 2450
+$Sheet
+S 6400 2100 1000 550 
+U 56535F65
+F0 "scaler_s20" 60
+F1 "clock_divider.sch" 60
+F2 "F" I L 6400 2200 60 
+F3 "FS" O R 7400 2200 60 
+F4 "FS/" O R 7400 2300 60 
+F5 "A" O R 7400 2450 60 
+F6 "B" O R 7400 2550 60 
+$EndSheet
+Wire Wire Line
+	7400 2450 8150 2450
+Wire Wire Line
+	7400 2200 7550 2200
+Wire Wire Line
+	7400 2300 7950 2300
+Wire Wire Line
+	7400 2550 7550 2550
+Text HLabel 7550 2550 2    60   Output ~ 0
+F20B
+Text HLabel 7550 2200 2    60   Output ~ 0
+FS20
+Wire Wire Line
+	8050 2450 8050 2200
+Wire Wire Line
+	8050 2200 8550 2200
+Wire Wire Line
+	7950 2300 7950 1800
+Wire Wire Line
+	7950 1800 8050 1800
+Text HLabel 8150 2450 2    60   Output ~ 0
+F20A
+Connection ~ 8050 2450
+$Sheet
+S 8550 2100 1000 550 
+U 56535F88
+F0 "scaler_s21" 60
+F1 "clock_divider.sch" 60
+F2 "F" I L 8550 2200 60 
+F3 "FS" O R 9550 2200 60 
+F4 "FS/" O R 9550 2300 60 
+F5 "A" O R 9550 2450 60 
+F6 "B" O R 9550 2550 60 
+$EndSheet
+Wire Wire Line
+	9550 2450 10300 2450
+Wire Wire Line
+	9550 2200 9700 2200
+Wire Wire Line
+	9550 2300 10100 2300
+Wire Wire Line
+	9550 2550 9700 2550
+Text HLabel 9700 2550 2    60   Output ~ 0
+F21B
+Text HLabel 9700 2200 2    60   Output ~ 0
+FS21
+Wire Wire Line
+	10200 2450 10200 2200
+Wire Wire Line
+	10200 2200 10700 2200
+Wire Wire Line
+	10100 2300 10100 1800
+Wire Wire Line
+	10100 1800 10200 1800
+Text HLabel 10300 2450 2    60   Output ~ 0
+F21A
+Connection ~ 10200 2450
+$Sheet
+S 10700 2100 1000 550 
+U 56535FAB
+F0 "scaler_s22" 60
+F1 "clock_divider.sch" 60
+F2 "F" I L 10700 2200 60 
+F3 "FS" O R 11700 2200 60 
+F4 "FS/" O R 11700 2300 60 
+F5 "A" O R 11700 2450 60 
+F6 "B" O R 11700 2550 60 
+$EndSheet
+Wire Wire Line
+	11700 2450 12450 2450
+Wire Wire Line
+	11700 2200 11850 2200
+Wire Wire Line
+	11700 2300 12250 2300
+Wire Wire Line
+	11700 2550 11850 2550
+Text HLabel 11850 2550 2    60   Output ~ 0
+F22B
+Text HLabel 11850 2200 2    60   Output ~ 0
+FS22
+Wire Wire Line
+	12350 2450 12350 2200
+Wire Wire Line
+	12350 2200 12850 2200
+Wire Wire Line
+	12250 2300 12250 1800
+Wire Wire Line
+	12250 1800 12350 1800
+Text HLabel 12450 2450 2    60   Output ~ 0
+F22A
+Connection ~ 12350 2450
+$Sheet
+S 12850 2100 1000 550 
+U 56535FCE
+F0 "scaler_s23" 60
+F1 "clock_divider.sch" 60
+F2 "F" I L 12850 2200 60 
+F3 "FS" O R 13850 2200 60 
+F4 "FS/" O R 13850 2300 60 
+F5 "A" O R 13850 2450 60 
+F6 "B" O R 13850 2550 60 
+$EndSheet
+Wire Wire Line
+	13850 2450 14600 2450
+Wire Wire Line
+	13850 2200 14000 2200
+Wire Wire Line
+	13850 2300 14400 2300
+Wire Wire Line
+	13850 2550 14000 2550
+Text HLabel 14000 2550 2    60   Output ~ 0
+F23B
+Text HLabel 14000 2200 2    60   Output ~ 0
+FS23
+Wire Wire Line
+	14500 2450 14500 2200
+Wire Wire Line
+	14500 2200 15000 2200
+Wire Wire Line
+	14400 2300 14400 1800
+Wire Wire Line
+	14400 1800 14500 1800
+Text HLabel 14600 2450 2    60   Output ~ 0
+F23A
+Connection ~ 14500 2450
+$Sheet
+S 15000 2100 1000 550 
+U 56535FF1
+F0 "scaler_s24" 60
+F1 "clock_divider.sch" 60
+F2 "F" I L 15000 2200 60 
+F3 "FS" O R 16000 2200 60 
+F4 "FS/" O R 16000 2300 60 
+F5 "A" O R 16000 2450 60 
+F6 "B" O R 16000 2550 60 
+$EndSheet
+Wire Wire Line
+	16000 2450 16750 2450
+Wire Wire Line
+	16000 2200 16150 2200
+Wire Wire Line
+	16000 2300 16550 2300
+Wire Wire Line
+	16000 2550 16150 2550
+Text HLabel 16150 2550 2    60   Output ~ 0
+F24B
+Text HLabel 16150 2200 2    60   Output ~ 0
+FS24
+Wire Wire Line
+	16650 2450 16650 2200
+Wire Wire Line
+	16650 2200 17150 2200
+Wire Wire Line
+	16550 2300 16550 1800
+Wire Wire Line
+	16550 1800 16650 1800
+Text HLabel 16750 2450 2    60   Output ~ 0
+F24A
+Connection ~ 16650 2450
+$Sheet
+S 17150 2100 1000 550 
+U 56536014
+F0 "scaler_s25" 60
+F1 "clock_divider.sch" 60
+F2 "F" I L 17150 2200 60 
+F3 "FS" O R 18150 2200 60 
+F4 "FS/" O R 18150 2300 60 
+F5 "A" O R 18150 2450 60 
+F6 "B" O R 18150 2550 60 
+$EndSheet
+Wire Wire Line
+	18150 2450 18900 2450
+Wire Wire Line
+	18150 2200 18300 2200
+Wire Wire Line
+	18150 2300 18700 2300
+Wire Wire Line
+	18150 2550 18300 2550
+Text HLabel 18300 2550 2    60   Output ~ 0
+F25B
+Text HLabel 18300 2200 2    60   Output ~ 0
+FS25
+Wire Wire Line
+	18700 2300 18700 1800
+Wire Wire Line
+	18700 1800 18800 1800
+Text HLabel 18900 2450 2    60   Output ~ 0
+F25A
+Connection ~ 18800 2450
+$Sheet
+S 2100 4200 1000 550 
+U 56536035
+F0 "scaler_s26" 60
+F1 "clock_divider.sch" 60
+F2 "F" I L 2100 4300 60 
+F3 "FS" O R 3100 4300 60 
+F4 "FS/" O R 3100 4400 60 
+F5 "A" O R 3100 4550 60 
+F6 "B" O R 3100 4650 60 
+$EndSheet
+Wire Wire Line
+	3100 4550 3850 4550
+Wire Wire Line
+	3100 4300 3250 4300
+Wire Wire Line
+	3100 4400 3650 4400
+Wire Wire Line
+	3100 4650 3250 4650
+Text HLabel 3250 4650 2    60   Output ~ 0
+F26B
+Text HLabel 3250 4300 2    60   Output ~ 0
+FS26
+Wire Wire Line
+	3750 4550 3750 4300
+Wire Wire Line
+	3750 4300 4250 4300
+Wire Wire Line
+	3650 4400 3650 3900
+Wire Wire Line
+	3650 3900 3750 3900
+Text HLabel 3850 4550 2    60   Output ~ 0
+F26A
+Connection ~ 3750 4550
+$Sheet
+S 4250 4200 1000 550 
+U 56536058
+F0 "scaler_s27" 60
+F1 "clock_divider.sch" 60
+F2 "F" I L 4250 4300 60 
+F3 "FS" O R 5250 4300 60 
+F4 "FS/" O R 5250 4400 60 
+F5 "A" O R 5250 4550 60 
+F6 "B" O R 5250 4650 60 
+$EndSheet
+Wire Wire Line
+	5250 4550 6000 4550
+Wire Wire Line
+	5250 4300 5400 4300
+Wire Wire Line
+	5250 4400 5800 4400
+Wire Wire Line
+	5250 4650 5400 4650
+Text HLabel 5400 4650 2    60   Output ~ 0
+F27B
+Text HLabel 5400 4300 2    60   Output ~ 0
+FS27
+Wire Wire Line
+	5900 4550 5900 4300
+Wire Wire Line
+	5900 4300 6400 4300
+Wire Wire Line
+	5800 4400 5800 3900
+Wire Wire Line
+	5800 3900 5900 3900
+Text HLabel 6000 4550 2    60   Output ~ 0
+F27A
+Connection ~ 5900 4550
+$Sheet
+S 6400 4200 1000 550 
+U 5653607B
+F0 "scaler_s28" 60
+F1 "clock_divider.sch" 60
+F2 "F" I L 6400 4300 60 
+F3 "FS" O R 7400 4300 60 
+F4 "FS/" O R 7400 4400 60 
+F5 "A" O R 7400 4550 60 
+F6 "B" O R 7400 4650 60 
+$EndSheet
+Wire Wire Line
+	7400 4550 8150 4550
+Wire Wire Line
+	7400 4300 7550 4300
+Wire Wire Line
+	7400 4400 7950 4400
+Wire Wire Line
+	7400 4650 7550 4650
+Text HLabel 7550 4650 2    60   Output ~ 0
+F28B
+Text HLabel 7550 4300 2    60   Output ~ 0
+FS28
+Wire Wire Line
+	8050 4550 8050 4300
+Wire Wire Line
+	8050 4300 8550 4300
+Wire Wire Line
+	7950 4400 7950 3900
+Wire Wire Line
+	7950 3900 8050 3900
+Text HLabel 8150 4550 2    60   Output ~ 0
+F28A
+Connection ~ 8050 4550
+$Sheet
+S 8550 4200 1000 550 
+U 5653609E
+F0 "scaler_s29" 60
+F1 "clock_divider.sch" 60
+F2 "F" I L 8550 4300 60 
+F3 "FS" O R 9550 4300 60 
+F4 "FS/" O R 9550 4400 60 
+F5 "A" O R 9550 4550 60 
+F6 "B" O R 9550 4650 60 
+$EndSheet
+Wire Wire Line
+	9550 4550 10300 4550
+Wire Wire Line
+	9550 4300 9700 4300
+Wire Wire Line
+	9550 4400 10100 4400
+Wire Wire Line
+	9550 4650 9700 4650
+Text HLabel 9700 4650 2    60   Output ~ 0
+F29B
+Text HLabel 9700 4300 2    60   Output ~ 0
+FS29
+Wire Wire Line
+	10200 4550 10200 4300
+Wire Wire Line
+	10200 4300 10700 4300
+Wire Wire Line
+	10100 4400 10100 3900
+Wire Wire Line
+	10100 3900 10200 3900
+Text HLabel 10300 4550 2    60   Output ~ 0
+F29A
+Connection ~ 10200 4550
+$Sheet
+S 10700 4200 1000 550 
+U 565360C1
+F0 "scaler_s30" 60
+F1 "clock_divider.sch" 60
+F2 "F" I L 10700 4300 60 
+F3 "FS" O R 11700 4300 60 
+F4 "FS/" O R 11700 4400 60 
+F5 "A" O R 11700 4550 60 
+F6 "B" O R 11700 4650 60 
+$EndSheet
+Wire Wire Line
+	11700 4550 12450 4550
+Wire Wire Line
+	11700 4300 11850 4300
+Wire Wire Line
+	11700 4400 12250 4400
+Wire Wire Line
+	11700 4650 11850 4650
+Text HLabel 11850 4650 2    60   Output ~ 0
+F30B
+Text HLabel 11850 4300 2    60   Output ~ 0
+FS30
+Wire Wire Line
+	12350 4550 12350 4300
+Wire Wire Line
+	12350 4300 12850 4300
+Wire Wire Line
+	12250 4400 12250 3900
+Wire Wire Line
+	12250 3900 12350 3900
+Text HLabel 12450 4550 2    60   Output ~ 0
+F30A
+Connection ~ 12350 4550
+$Sheet
+S 12850 4200 1000 550 
+U 565360E4
+F0 "scaler_s31" 60
+F1 "clock_divider.sch" 60
+F2 "F" I L 12850 4300 60 
+F3 "FS" O R 13850 4300 60 
+F4 "FS/" O R 13850 4400 60 
+F5 "A" O R 13850 4550 60 
+F6 "B" O R 13850 4650 60 
+$EndSheet
+Wire Wire Line
+	13850 4550 14600 4550
+Wire Wire Line
+	13850 4300 14000 4300
+Wire Wire Line
+	13850 4400 14400 4400
+Wire Wire Line
+	13850 4650 14000 4650
+Text HLabel 14000 4650 2    60   Output ~ 0
+F31B
+Text HLabel 14000 4300 2    60   Output ~ 0
+FS31
+Wire Wire Line
+	14500 4550 14500 4300
+Wire Wire Line
+	14500 4300 15000 4300
+Wire Wire Line
+	14400 4400 14400 3900
+Wire Wire Line
+	14400 3900 14500 3900
+Text HLabel 14600 4550 2    60   Output ~ 0
+F31A
+Connection ~ 14500 4550
+$Sheet
+S 15000 4200 1000 550 
+U 56536107
+F0 "scaler_s32" 60
+F1 "clock_divider.sch" 60
+F2 "F" I L 15000 4300 60 
+F3 "FS" O R 16000 4300 60 
+F4 "FS/" O R 16000 4400 60 
+F5 "A" O R 16000 4550 60 
+F6 "B" O R 16000 4650 60 
+$EndSheet
+Wire Wire Line
+	16000 4550 16750 4550
+Wire Wire Line
+	16000 4300 16150 4300
+Wire Wire Line
+	16000 4400 16550 4400
+Wire Wire Line
+	16000 4650 16150 4650
+Text HLabel 16150 4650 2    60   Output ~ 0
+F32B
+Text HLabel 16150 4300 2    60   Output ~ 0
+FS32
+Wire Wire Line
+	16650 4550 16650 4300
+Wire Wire Line
+	16650 4300 17150 4300
+Wire Wire Line
+	16550 4400 16550 3900
+Wire Wire Line
+	16550 3900 16650 3900
+Text HLabel 16750 4550 2    60   Output ~ 0
+F32A
+Connection ~ 16650 4550
+$Sheet
+S 17150 4200 1000 550 
+U 5653612A
+F0 "scaler_s33" 60
+F1 "clock_divider.sch" 60
+F2 "F" I L 17150 4300 60 
+F3 "FS" O R 18150 4300 60 
+F4 "FS/" O R 18150 4400 60 
+F5 "A" O R 18150 4550 60 
+F6 "B" O R 18150 4650 60 
+$EndSheet
+Wire Wire Line
+	18150 4550 18900 4550
+Wire Wire Line
+	18150 4300 18300 4300
+Wire Wire Line
+	18150 4400 18700 4400
+Wire Wire Line
+	18150 4650 18300 4650
+Text HLabel 18300 4650 2    60   Output ~ 0
+F33B
+Text HLabel 18300 4300 2    60   Output ~ 0
+FS33
+Wire Wire Line
+	18700 4400 18700 3900
+Wire Wire Line
+	18700 3900 18800 3900
+Text HLabel 18900 4550 2    60   Output ~ 0
+F33A
+$Comp
+L agc_kicad_components:74HC02 U1160
+U 1 1 56536164
+P 12950 1700
+F 0 "U1160" H 12950 1750 60  0000 C CNN
+F 1 "74HC02" H 13000 1650 60  0001 C CNN
+F 2 "" H 12950 1700 60  0000 C CNN
+F 3 "" H 12950 1700 60  0000 C CNN
+	1    12950 1700
+	1    0    0    -1  
+$EndComp
+$Comp
+L agc_kicad_components:74HC02 U1160
+U 2 1 5653616B
+P 15100 1700
+F 0 "U1160" H 15100 1750 60  0000 C CNN
+F 1 "74HC02" H 15150 1650 60  0001 C CNN
+F 2 "" H 15100 1700 60  0000 C CNN
+F 3 "" H 15100 1700 60  0000 C CNN
+	2    15100 1700
+	1    0    0    -1  
+$EndComp
+$Comp
+L agc_kicad_components:74HC02 U1160
+U 3 1 56536172
+P 17250 1700
+F 0 "U1160" H 17250 1750 60  0000 C CNN
+F 1 "74HC02" H 17300 1650 60  0001 C CNN
+F 2 "" H 17250 1700 60  0000 C CNN
+F 3 "" H 17250 1700 60  0000 C CNN
+	3    17250 1700
+	1    0    0    -1  
+$EndComp
+$Comp
+L agc_kicad_components:74HC02 U1160
+U 4 1 56536179
+P 19400 1700
+F 0 "U1160" H 19400 1750 60  0000 C CNN
+F 1 "74HC02" H 19450 1650 60  0001 C CNN
+F 2 "" H 19400 1700 60  0000 C CNN
+F 3 "" H 19400 1700 60  0000 C CNN
+	4    19400 1700
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	18800 2450 18800 3000
+Wire Wire Line
+	18800 3000 1950 3000
+Wire Wire Line
+	1950 3000 1950 4300
+Wire Wire Line
+	1950 4300 2100 4300
+$Comp
+L agc_kicad_components:74HC02 U1161
+U 1 1 56536184
+P 4350 3800
+F 0 "U1161" H 4350 3850 60  0000 C CNN
+F 1 "74HC02" H 4400 3750 60  0001 C CNN
+F 2 "" H 4350 3800 60  0000 C CNN
+F 3 "" H 4350 3800 60  0000 C CNN
+	1    4350 3800
+	1    0    0    -1  
+$EndComp
+$Comp
+L agc_kicad_components:74HC02 U1161
+U 2 1 5653618B
+P 6500 3800
+F 0 "U1161" H 6500 3850 60  0000 C CNN
+F 1 "74HC02" H 6550 3750 60  0001 C CNN
+F 2 "" H 6500 3800 60  0000 C CNN
+F 3 "" H 6500 3800 60  0000 C CNN
+	2    6500 3800
+	1    0    0    -1  
+$EndComp
+$Comp
+L agc_kicad_components:74HC02 U1161
+U 3 1 56536192
+P 8650 3800
+F 0 "U1161" H 8650 3850 60  0000 C CNN
+F 1 "74HC02" H 8700 3750 60  0001 C CNN
+F 2 "" H 8650 3800 60  0000 C CNN
+F 3 "" H 8650 3800 60  0000 C CNN
+	3    8650 3800
+	1    0    0    -1  
+$EndComp
+$Comp
+L agc_kicad_components:74HC02 U1161
+U 4 1 56536199
+P 10800 3800
+F 0 "U1161" H 10800 3850 60  0000 C CNN
+F 1 "74HC02" H 10850 3750 60  0001 C CNN
+F 2 "" H 10800 3800 60  0000 C CNN
+F 3 "" H 10800 3800 60  0000 C CNN
+	4    10800 3800
+	1    0    0    -1  
+$EndComp
+$Comp
+L agc_kicad_components:74HC02 U1162
+U 1 1 565361A0
+P 12950 3800
+F 0 "U1162" H 12950 3850 60  0000 C CNN
+F 1 "74HC02" H 13000 3750 60  0001 C CNN
+F 2 "" H 12950 3800 60  0000 C CNN
+F 3 "" H 12950 3800 60  0000 C CNN
+	1    12950 3800
+	1    0    0    -1  
+$EndComp
+$Comp
+L agc_kicad_components:74HC02 U1162
+U 2 1 565361A7
+P 15100 3800
+F 0 "U1162" H 15100 3850 60  0000 C CNN
+F 1 "74HC02" H 15150 3750 60  0001 C CNN
+F 2 "" H 15100 3800 60  0000 C CNN
+F 3 "" H 15100 3800 60  0000 C CNN
+	2    15100 3800
+	1    0    0    -1  
+$EndComp
+$Comp
+L agc_kicad_components:74HC02 U1162
+U 3 1 565361AE
+P 17250 3800
+F 0 "U1162" H 17250 3850 60  0000 C CNN
+F 1 "74HC02" H 17300 3750 60  0001 C CNN
+F 2 "" H 17250 3800 60  0000 C CNN
+F 3 "" H 17250 3800 60  0000 C CNN
+	3    17250 3800
+	1    0    0    -1  
+$EndComp
+$Comp
+L agc_kicad_components:74HC02 U1162
+U 4 1 565361B5
+P 19400 3800
+F 0 "U1162" H 19400 3850 60  0000 C CNN
+F 1 "74HC02" H 19450 3750 60  0001 C CNN
+F 2 "" H 19400 3800 60  0000 C CNN
+F 3 "" H 19400 3800 60  0000 C CNN
+	4    19400 3800
+	1    0    0    -1  
+$EndComp
+Text HLabel 5050 1700 2    60   Output ~ 0
+CHAT13
+Wire Wire Line
+	4950 1700 5050 1700
+Wire Wire Line
+	7100 1700 7250 1700
+Text HLabel 7250 1700 2    60   Output ~ 0
+CHAT14
+Wire Wire Line
+	9250 1700 9400 1700
+Text HLabel 9400 1700 2    60   Output ~ 0
+CHBT01
+Wire Wire Line
+	11400 1700 11550 1700
+Text HLabel 11550 1700 2    60   Output ~ 0
+CHBT02
+Wire Wire Line
+	13550 1700 13650 1700
+Text HLabel 13650 1700 2    60   Output ~ 0
+CHBT03
+Text HLabel 15800 1700 2    60   Output ~ 0
+CHBT04
+Wire Wire Line
+	15700 1700 15800 1700
+Text HLabel 17950 1700 2    60   Output ~ 0
+CHBT05
+Wire Wire Line
+	17850 1700 17950 1700
+Wire Wire Line
+	20100 1700 20000 1700
+Text HLabel 20100 1700 2    60   Output ~ 0
+CHBT06
+Text HLabel 5050 3800 2    60   Output ~ 0
+CHBT07
+Wire Wire Line
+	4950 3800 5050 3800
+Wire Wire Line
+	7200 3800 7100 3800
+Text HLabel 7200 3800 2    60   Output ~ 0
+CHBT08
+Text HLabel 9350 3800 2    60   Output ~ 0
+CHBT09
+Wire Wire Line
+	9250 3800 9350 3800
+Text HLabel 11500 3800 2    60   Output ~ 0
+CHBT10
+Text HLabel 13650 3800 2    60   Output ~ 0
+CHBT11
+Text HLabel 15800 3800 2    60   Output ~ 0
+CHBT12
+Text HLabel 17950 3800 2    60   Output ~ 0
+CHBT13
+Text HLabel 20100 3800 2    60   Output ~ 0
+CHBT14
+Wire Wire Line
+	20000 3800 20100 3800
+Wire Wire Line
+	17850 3800 17950 3800
+Wire Wire Line
+	15700 3800 15800 3800
+Wire Wire Line
+	13550 3800 13650 3800
+Wire Wire Line
+	11400 3800 11500 3800
+Text HLabel 1350 2200 0    60   Input ~ 0
+F17A
+Wire Wire Line
+	1350 2200 2100 2200
+Text HLabel 1350 1400 0    60   Input ~ 0
+RCHBT/
+Wire Wire Line
+	1350 1400 18800 1400
+Wire Wire Line
+	1850 1400 1850 3500
+Wire Wire Line
+	1850 3500 18800 3500
+Wire Wire Line
+	12350 1400 12350 1600
+Connection ~ 1850 1400
+Wire Wire Line
+	14500 1400 14500 1600
+Connection ~ 12350 1400
+Wire Wire Line
+	16650 1400 16650 1600
+Connection ~ 14500 1400
+Wire Wire Line
+	18800 1400 18800 1600
+Connection ~ 16650 1400
+Wire Wire Line
+	3750 3500 3750 3700
+Wire Wire Line
+	5900 3500 5900 3700
+Connection ~ 3750 3500
+Wire Wire Line
+	8050 3500 8050 3700
+Connection ~ 5900 3500
+Wire Wire Line
+	10200 3500 10200 3700
+Connection ~ 8050 3500
+Wire Wire Line
+	12350 3500 12350 3700
+Connection ~ 10200 3500
+Wire Wire Line
+	14500 3500 14500 3700
+Connection ~ 12350 3500
+Wire Wire Line
+	16650 3500 16650 3700
+Wire Wire Line
+	18800 3500 18800 3700
+Connection ~ 16650 3500
+$Comp
+L agc_kicad_components:74HC02 U1159
+U 1 1 5665597C
+P 4350 1700
+F 0 "U1159" H 4350 1750 60  0000 C CNN
+F 1 "74HC02" H 4400 1650 60  0001 C CNN
+F 2 "" H 4350 1700 60  0000 C CNN
+F 3 "" H 4350 1700 60  0000 C CNN
+	1    4350 1700
+	1    0    0    -1  
+$EndComp
+$Comp
+L agc_kicad_components:74HC02 U1159
+U 2 1 5666FE7D
+P 6500 1700
+F 0 "U1159" H 6500 1750 60  0000 C CNN
+F 1 "74HC02" H 6550 1650 60  0001 C CNN
+F 2 "" H 6500 1700 60  0000 C CNN
+F 3 "" H 6500 1700 60  0000 C CNN
+	2    6500 1700
+	1    0    0    -1  
+$EndComp
+$Comp
+L agc_kicad_components:74HC02 U1159
+U 3 1 5667E60A
+P 8650 1700
+F 0 "U1159" H 8650 1750 60  0000 C CNN
+F 1 "74HC02" H 8700 1650 60  0001 C CNN
+F 2 "" H 8650 1700 60  0000 C CNN
+F 3 "" H 8650 1700 60  0000 C CNN
+	3    8650 1700
+	1    0    0    -1  
+$EndComp
+$Comp
+L agc_kicad_components:74HC02 U1159
+U 4 1 56683D6C
+P 10800 1700
+F 0 "U1159" H 10800 1750 60  0000 C CNN
+F 1 "74HC02" H 10850 1650 60  0001 C CNN
+F 2 "" H 10800 1700 60  0000 C CNN
+F 3 "" H 10800 1700 60  0000 C CNN
+	4    10800 1700
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	10200 1600 10200 1400
+Connection ~ 10200 1400
+Wire Wire Line
+	8050 1600 8050 1400
+Connection ~ 8050 1400
+Text HLabel 3550 1200 0    60   Input ~ 0
+RCHAT/
+Wire Wire Line
+	3550 1200 5900 1200
+Wire Wire Line
+	3750 1200 3750 1600
+Wire Wire Line
+	5900 1200 5900 1600
+Connection ~ 3750 1200
+Connection ~ 14500 3500
+$EndSCHEMATC
