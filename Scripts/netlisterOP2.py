@@ -1,4 +1,7 @@
 #!/usr/bin/python2
+# I, the author, Ron Burkey, declare this program to be in the public domain.
+# Use it however you like.
+#
 # Here's what I want this script to do:
 #   1. 	Read and parse a netlist from Mike Stewart's schematics, in OrcadPCB2 format.  
 #	I limit myself to the kinds of stuff I see in Mike's and my AGC schematics, 
@@ -18,8 +21,53 @@ heuristicPattern1 = re.compile("_[AB][0-2][0-9]_[1-3]_")
 
 # Can hard-code a few hints here to help out the processing if it stalls, or if the
 # heuristic isn't quite right.  The hints are applied when the netlist is read in,
-# before any other changes to the netname have been made.
-hints = { "/A12_1/G02/":"ua12_1_G02_", "/A12_1_G03/":"ua12_1_G03_" }
+# before any other changes to the netnames have been made.
+hints = { 
+	# I decided to "fix" the following two items in the schematics instead.
+	#"/A12_1/G02/":"ua12_1_G02_", 
+	#"/A12_1_G03/":"ua12_1_G03_",
+	# The following are net labels Mike and I used.
+	"/A15_2/2510H":"uA15_2_2510H",
+	"/A15_2/147H":"uA15_2_147H",
+	"/A15_2/147L":"uA15_2_147L",
+	"/A15_2/036H":"uA15_2_036H",
+	"/A15_2/036L":"uA15_2_036L",
+	"/A15_2/NE00":"uA15_2_NE00",
+	"/A15_2/NE01":"uA15_2_NE01",
+	"/A15_2/NE02":"uA15_2_NE02",
+	"/A15_2/NE03":"uA15_2_NE03",
+	"/A15_2/NE04":"uA15_2_NE04",
+	"/A15_2/NE05":"uA15_2_NE05",
+	"/A15_2/NE06":"uA15_2_NE06",
+	"/A15_2/NE07":"uA15_2_NE07",
+	"/A15_2/NE10":"uA15_2_NE10",
+	"/A15_2/NE12/":"uA15_2_NE12_",
+	"/A15_2/NE345/":"uA15_2_NE345_",
+	"/A15_2/NE6710/":"uA15_2_NE6710_",
+	# The following are just a few leftover nets that can't be automatched
+	# without exponentially more effort.  The hints are potentially vulnerable
+	# to redoing the netlist, since there're no guarantee that KiCad's
+	# netlister will assign the same name to the net next time.  However,
+	# if the net is renamed later by the netlister, it won't create a 
+	# naming *conflict*, and new hints can be added without removing the
+	# old ones (unless an actual change to the connectivity is made).
+	"Net-(U11048-Pad13)":"g54444",
+	"Net-(U14055-Pad11)":"g42445",
+	"Net-(U18028-Pad13)":"g45407",
+	"Net-(U18036-Pad13)":"g45410",
+	"Net-(U18038-Pad13)":"g45417",
+	"Net-(U18040-Pad12)":"g45425",
+	"Net-(U18040-Pad13)":"g45424",
+	"Net-(U18042-Pad12)":"g45432",
+	"Net-(U18042-Pad13)":"g45431",
+	"Net-(U22015-Pad5)":"g47141",
+	"Net-(U23008-Pad13)":"g48147",
+	"Net-(U23014-Pad13)":"g48239",
+	"Net-(U23024-Pad2)":"g49327",
+	"Net-(U24106-Pad5)":"g49214",
+	"Net-(U24036-Pad2)":"g49248",
+	"ZZZZZZZZZZZZZZZZ":"ZZZZZZZ"
+}
 
 # Just read the netlist from a file into a structure of the form:
 #
