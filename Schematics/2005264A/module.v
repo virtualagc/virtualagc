@@ -2,10 +2,10 @@
 
 module A14 ( 
   rst, BR12B, CGA14, CHINC, CLEARA, CLEARB, CLEARC, CLEARD, DV3764, GOJ1,
-  GOJAM, INOUT, MAMU, MNHSBF, MP1, MYCLMP, NISQL_, PHS2_, PHS3_, PHS4_, PSEUDO,
-  R1C_, RB1_, RSC_, RT_, S01, S01_, S02, S02_, S03, S03_, S04, S04_, S05,
-  S05_, S06, S06_, S07, S07_, S08, S08_, S09, S09_, S11, S12, SBY, SCAD,
-  SCAD_, T01, T01_, T02_, T03, T03_, T04_, T05, T05_, T06, T06_, T07, T07_,
+  GOJAM, INOUT, MAMU, MNHSBF, MP1, NISQL_, PHS2_, PHS3_, PHS4_, PSEUDO, R1C_,
+  RB1_, RSC_, RT_, S01, S01_, S02, S02_, S03, S03_, S04, S04_, S05, S05_,
+  S06, S06_, S07, S07_, S08, S08_, S09, S09_, S11, S12, SBY, SCAD, SCAD_,
+  STRT2, T01, T01_, T02_, T03, T03_, T04_, T05, T05_, T06, T06_, T07, T07_,
   T08, T08_, T09, T10, T10_, T11, T12A, T12_, TCSAJ3, TIMR, WHOMP_, WL11,
   WL16, WSC_, BR12B_, CLROPE, ERAS, IHENV, ILP, ILP_, NOTEST_, RESETA, RESETB,
   RESETC, RESETD, REX, REY, RILP1, RILP1_, SBE, SBF, SBYREL_, SETAB, SETCD,
@@ -20,12 +20,12 @@ module A14 (
 );
 
 input wire rst, BR12B, CGA14, CHINC, CLEARA, CLEARB, CLEARC, CLEARD, DV3764,
-  GOJ1, GOJAM, INOUT, MAMU, MNHSBF, MP1, MYCLMP, NISQL_, PHS2_, PHS3_, PHS4_,
-  PSEUDO, R1C_, RB1_, RSC_, RT_, S01, S01_, S02, S02_, S03, S03_, S04, S04_,
-  S05, S05_, S06, S06_, S07, S07_, S08, S08_, S09, S09_, S11, S12, SBY, SCAD,
-  SCAD_, T01, T01_, T02_, T03, T03_, T04_, T05, T05_, T06, T06_, T07, T07_,
-  T08, T08_, T09, T10, T10_, T11, T12A, T12_, TCSAJ3, TIMR, WHOMP_, WL11,
-  WL16, WSC_;
+  GOJ1, GOJAM, INOUT, MAMU, MNHSBF, MP1, NISQL_, PHS2_, PHS3_, PHS4_, PSEUDO,
+  R1C_, RB1_, RSC_, RT_, S01, S01_, S02, S02_, S03, S03_, S04, S04_, S05,
+  S05_, S06, S06_, S07, S07_, S08, S08_, S09, S09_, S11, S12, SBY, SCAD,
+  SCAD_, STRT2, T01, T01_, T02_, T03, T03_, T04_, T05, T05_, T06, T06_, T07,
+  T07_, T08, T08_, T09, T10, T10_, T11, T12A, T12_, TCSAJ3, TIMR, WHOMP_,
+  WL11, WL16, WSC_;
 
 inout wire BR12B_, CLROPE, ERAS, IHENV, ILP, ILP_, NOTEST_, RESETA, RESETB,
   RESETC, RESETD, REX, REY, RILP1, RILP1_, SBE, SBF, SBYREL_, SETAB, SETCD,
@@ -63,9 +63,6 @@ assign #GATE_DELAY XB5_ = rst ? 1'bz : ((0|XB5) ? 1'b0 : 1'bz);
 // Gate A14-U223B A14-U224A A14-U224B
 pullup(XB2_);
 assign #GATE_DELAY XB2_ = rst ? 1'bz : ((0|XB2) ? 1'b0 : 1'bz);
-// Gate A14-U255B
-pullup(g42413);
-assign #GATE_DELAY g42413 = rst ? 0 : ((0|S04_|S05_|S06) ? 1'b0 : 1'bz);
 // Gate A14-U116A
 pullup(g42229);
 assign #GATE_DELAY g42229 = rst ? 0 : ((0|g42232|g42228|GOJAM) ? 1'b0 : 1'bz);
@@ -116,7 +113,7 @@ pullup(g42201);
 assign #GATE_DELAY g42201 = rst ? 1'bz : ((0|PHS3_|T12_) ? 1'b0 : 1'bz);
 // Gate A14-U119A A14-U119B
 pullup(ZID);
-assign #GATE_DELAY ZID = rst ? 1'bz : ((0|MYCLMP|g42221) ? 1'b0 : 1'bz);
+assign #GATE_DELAY ZID = rst ? 1'bz : ((0|STRT2|g42221) ? 1'b0 : 1'bz);
 // Gate A14-U130A
 pullup(g42202);
 assign #GATE_DELAY g42202 = rst ? 0 : ((0|g42201|g42203) ? 1'b0 : 1'bz);
@@ -278,7 +275,7 @@ pullup(g42442);
 assign #GATE_DELAY g42442 = rst ? 1'bz : ((0|g42440) ? 1'b0 : 1'bz);
 // Gate A14-U114A A14-U114B
 pullup(SETEK);
-assign #GATE_DELAY SETEK = rst ? 0 : ((0|MYCLMP|g42228) ? 1'b0 : 1'bz);
+assign #GATE_DELAY SETEK = rst ? 0 : ((0|STRT2|g42228) ? 1'b0 : 1'bz);
 // Gate A14-U204A
 pullup(YB3_);
 assign #GATE_DELAY YB3_ = rst ? 1'bz : ((0|YB3) ? 1'b0 : 1'bz);
@@ -348,6 +345,9 @@ assign #GATE_DELAY XT5 = rst ? 0 : ((0|S05|S06_|S04_) ? 1'b0 : 1'bz);
 // Gate A14-U252A
 pullup(XT4);
 assign #GATE_DELAY XT4 = rst ? 0 : ((0|S06_|S04|S05) ? 1'b0 : 1'bz);
+// Gate A14-U255B
+pullup(XT3);
+assign #GATE_DELAY XT3 = rst ? 0 : ((0|S04_|S05_|S06) ? 1'b0 : 1'bz);
 // Gate A14-U256B
 pullup(XT2);
 assign #GATE_DELAY XT2 = rst ? 0 : ((0|S05_|S06|S04) ? 1'b0 : 1'bz);
@@ -449,7 +449,7 @@ pullup(g42224);
 assign #GATE_DELAY g42224 = rst ? 0 : ((0|T05_|ERAS_) ? 1'b0 : 1'bz);
 // Gate A14-U253A A14-U253B A14-U250A
 pullup(XT3_);
-assign #GATE_DELAY XT3_ = rst ? 1'bz : ((0|g42413) ? 1'b0 : 1'bz);
+assign #GATE_DELAY XT3_ = rst ? 1'bz : ((0|XT3) ? 1'b0 : 1'bz);
 // Gate A14-U108B
 pullup(g42243);
 assign #GATE_DELAY g42243 = rst ? 0 : ((0|g42242|T06) ? 1'b0 : 1'bz);
@@ -611,6 +611,5 @@ pullup(XB4E);
 assign #GATE_DELAY XB4E = rst ? 0 : ((0|XB4_) ? 1'b0 : 1'bz);
 // End of NOR gates
 
-assign XT3 = 1'b0;
 
 endmodule
