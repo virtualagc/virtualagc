@@ -1,6 +1,6 @@
 EESchema Schematic File Version 4
 LIBS:module-cache
-EELAYER 28 0
+EELAYER 29 0
 EELAYER END
 $Descr E 44000 34000
 encoding utf-8
@@ -5793,12 +5793,9 @@ Wire Wire Line
 Wire Wire Line
 	5300 22025 5000 22025
 Wire Wire Line
-	5325 20475 5300 20475
-Wire Wire Line
 	5000 20475 5000 21000
 Wire Wire Line
 	5000 21000 5325 21000
-Connection ~ 5300 20475
 Wire Wire Line
 	5300 20475 5000 20475
 Wire Wire Line
