@@ -1,6 +1,6 @@
 EESchema Schematic File Version 4
 LIBS:module-cache
-EELAYER 26 0
+EELAYER 29 0
 EELAYER END
 $Descr E 44000 34000
 encoding utf-8
@@ -5032,52 +5032,6 @@ Wire Wire Line
 	41000 7625 41175 7625
 Wire Wire Line
 	28900 3300 29000 3300
-Text Notes 27500 15500 0    140  ~ 28
-F15B16
-Text Notes 31500 17725 0    140  ~ 28
-NE10
-Text Notes 31225 16925 0    140  ~ 28
-NE07
-Text Notes 34475 16575 0    140  ~ 28
-NE6710/
-Text Notes 37725 16575 0    140  ~ 28
-2510H
-Text Notes 37350 15150 0    140  ~ 28
-147L
-Text Notes 37350 13675 0    140  ~ 28
-036H
-Text Notes 37100 11325 0    140  ~ 28
-2510L
-Text Notes 37625 10500 0    140  ~ 28
-147H
-Text Notes 37200 9525 0    140  ~ 28
-036L
-Text Notes 34400 8775 0    140  ~ 28
-NE036/
-Text Notes 34150 9725 0    140  ~ 28
-NE012/
-Text Notes 34050 10900 0    140  ~ 28
-NE147/
-Text Notes 33850 13825 0    140  ~ 28
-NE345/
-Text Notes 33750 15325 0    140  ~ 28
-NE2510/
-Text Notes 30900 15800 0    140  ~ 28
-NE06
-Text Notes 30925 14625 0    140  ~ 28
-NE05
-Text Notes 30900 13550 0    140  ~ 28
-NE04
-Text Notes 30900 12400 0    140  ~ 28
-NE03
-Text Notes 31150 11125 0    140  ~ 28
-NE02
-Text Notes 31075 10000 0    140  ~ 28
-NE01
-Text Notes 31500 8550 0    140  ~ 28
-NE00
-Text Notes 27700 8875 0    140  ~ 28
-FISA16
 Text Notes 8475 1925 0    200  ~ 40
 RUPT SERVICE-1
 Text Notes 1325 33325 0    140  ~ 28
@@ -5946,4 +5900,50 @@ C9 BB 29 F5 5D 8B CA 82 36 A4 40 25 C6 15 08 48 31 74 1C 38 17 8C B5 84 B2 9A 34
 C6 5C DC 75 02 E5 96 B4 52 0D 25 6F F3 00 00 00 00 49 45 4E 44 AE 42 60 82 
 EndData
 $EndBitmap
+Text Label 37775 8900 1    140  ~ 28
+036L
+Text Label 38275 9650 1    140  ~ 28
+147H
+Text Label 38900 11600 1    140  ~ 28
+2510L
+Text Label 37800 13175 1    140  ~ 28
+036H
+Text Label 38550 14350 1    140  ~ 28
+147L
+Text Label 38800 15975 1    140  ~ 28
+2510H
+Text Label 34575 17675 1    140  ~ 28
+NE6710_
+Text Label 34775 16025 1    140  ~ 28
+NE2510_
+Text Label 34550 13175 1    140  ~ 28
+NE345_
+Text Label 35025 10825 1    140  ~ 28
+NE147_
+Text Label 40025 9775 1    140  ~ 28
+NE012_
+Text Label 32525 17675 1    140  ~ 28
+NE10
+Text Label 31525 16350 1    140  ~ 28
+NE07
+Text Label 31775 15225 1    140  ~ 28
+NE06
+Text Label 32275 14175 1    140  ~ 28
+NE05
+Text Label 28525 16125 1    140  ~ 28
+F15B16
+Text Label 32275 12900 1    140  ~ 28
+NE04
+Text Label 32025 12900 1    140  ~ 28
+NE03
+Text Label 32525 12900 1    140  ~ 28
+NE02
+Text Label 32275 10750 1    140  ~ 28
+NE01
+Text Label 32500 9750 1    140  ~ 28
+NE00
+Text Label 35250 9775 1    140  ~ 28
+NE036_
+Text Label 28500 9225 1    140  ~ 28
+FISA16
 $EndSCHEMATC
