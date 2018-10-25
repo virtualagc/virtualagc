@@ -4268,7 +4268,7 @@ Connection ~ 26300 18700
 Wire Wire Line
 	26300 18700 26500 18700
 Wire Wire Line
-	26300 17825 26300 17650
+	26300 17850 26300 17650
 Wire Wire Line
 	26300 17650 25725 17650
 Wire Wire Line
@@ -5673,4 +5673,5 @@ Wire Wire Line
 Connection ~ 36100 12250
 Wire Wire Line
 	36100 12250 37475 12250
+Connection ~ 26300 17850
 $EndSCHEMATC
