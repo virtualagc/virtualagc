@@ -1,5 +1,6 @@
 EESchema Schematic File Version 4
-EELAYER 28 0
+LIBS:stage_branch-cache
+EELAYER 29 0
 EELAYER END
 $Descr A2 23386 16535
 encoding utf-8
@@ -366,7 +367,7 @@ MST1
 Wire Wire Line
 	9150 3000 9100 3000
 $Comp
-L device:R R4001
+L stage_branch-rescue:R-device R4001
 U 1 1 56322C1D
 P 6550 2900
 F 0 "R4001" V 6630 2900 50  0000 C CNN
@@ -529,7 +530,7 @@ Wire Wire Line
 	5600 6150 7050 6150
 Connection ~ 6550 5000
 $Comp
-L device:R R4002
+L stage_branch-rescue:R-device R4002
 U 1 1 56324C39
 P 6550 4800
 F 0 "R4002" V 6630 4800 50  0000 C CNN
@@ -1561,7 +1562,7 @@ Wire Wire Line
 	2050 10650 4500 10650
 Connection ~ 2050 9900
 $Comp
-L device:R R4003
+L stage_branch-rescue:R-device R4003
 U 1 1 563E1D99
 P 6650 10400
 F 0 "R4003" V 6730 10400 50  0000 C CNN
@@ -1974,7 +1975,7 @@ Connection ~ 8900 12150
 Wire Wire Line
 	8900 13300 9100 13300
 $Comp
-L device:R R3005
+L stage_branch-rescue:R-device R3005
 U 1 1 56427F4C
 P 9100 13050
 F 0 "R3005" V 9180 13050 50  0000 C CNN
@@ -1988,7 +1989,7 @@ Wire Wire Line
 	9100 13200 9100 13300
 Connection ~ 9100 13300
 $Comp
-L device:R R3004
+L stage_branch-rescue:R-device R3004
 U 1 1 56428217
 P 9050 11950
 F 0 "R3004" V 9130 11950 50  0000 C CNN
@@ -2243,7 +2244,7 @@ Connection ~ 15750 12000
 Connection ~ 15750 12450
 Connection ~ 15750 12900
 $Comp
-L device:R R4006
+L stage_branch-rescue:R-device R4006
 U 1 1 5644513F
 P 15750 11350
 F 0 "R4006" V 15830 11350 50  0000 C CNN
@@ -2412,7 +2413,7 @@ Wire Wire Line
 	18900 11600 18900 11700
 Connection ~ 18900 11700
 $Comp
-L device:R R4007
+L stage_branch-rescue:R-device R4007
 U 1 1 564668A9
 P 18900 11450
 F 0 "R4007" V 18980 11450 50  0000 C CNN

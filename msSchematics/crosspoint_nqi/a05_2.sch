@@ -1,5 +1,6 @@
 EESchema Schematic File Version 4
-EELAYER 28 0
+LIBS:crosspoint_nqi-cache
+EELAYER 29 0
 EELAYER END
 $Descr A2 23386 16535
 encoding utf-8
@@ -80,7 +81,7 @@ F 3 "" H 3050 1550 60  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L device:R R5002
+L crosspoint_nqi-rescue:R-device R5002
 U 1 1 5688CD44
 P 3500 900
 F 0 "R5002" V 3580 900 50  0000 C CNN
@@ -323,7 +324,7 @@ F 3 "" H 3050 4050 60  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L device:R R5003
+L crosspoint_nqi-rescue:R-device R5003
 U 1 1 56896A88
 P 3500 3400
 F 0 "R5003" V 3580 3400 50  0000 C CNN
@@ -434,7 +435,7 @@ F 3 "" H 8300 5050 60  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L device:R R5004
+L crosspoint_nqi-rescue:R-device R5004
 U 1 1 568A00EF
 P 8750 4850
 F 0 "R5004" V 8830 4850 50  0000 C CNN
@@ -507,7 +508,7 @@ F 3 "" H 8300 5750 60  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L device:R R5005
+L crosspoint_nqi-rescue:R-device R5005
 U 1 1 568A6D4E
 P 8750 5550
 F 0 "R5005" V 8830 5550 50  0000 C CNN
@@ -703,7 +704,7 @@ F 3 "" H 8300 8200 60  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L device:R R5006
+L crosspoint_nqi-rescue:R-device R5006
 U 1 1 568CC1C5
 P 8750 8000
 F 0 "R5006" V 8830 8000 50  0000 C CNN
@@ -947,7 +948,7 @@ F 3 "" H 8300 9950 60  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L device:R R5007
+L crosspoint_nqi-rescue:R-device R5007
 U 1 1 568E9688
 P 8750 9750
 F 0 "R5007" V 8830 9750 50  0000 C CNN
@@ -1072,7 +1073,7 @@ F 3 "" H 3500 13000 60  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L device:R R5008
+L crosspoint_nqi-rescue:R-device R5008
 U 1 1 568F2549
 P 3950 12350
 F 0 "R5008" V 4030 12350 50  0000 C CNN
@@ -1407,7 +1408,7 @@ F 3 "" H 13400 2550 60  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L device:R R5009
+L crosspoint_nqi-rescue:R-device R5009
 U 1 1 56931733
 P 13850 2350
 F 0 "R5009" V 13930 2350 50  0000 C CNN
@@ -1581,7 +1582,7 @@ F 3 "" H 13400 3750 60  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L device:R R5011
+L crosspoint_nqi-rescue:R-device R5011
 U 1 1 56951842
 P 19200 9100
 F 0 "R5011" V 19280 9100 50  0000 C CNN
@@ -2824,7 +2825,7 @@ Wire Wire Line
 	19200 9250 19200 9300
 Connection ~ 19200 9300
 $Comp
-L device:R R5010
+L crosspoint_nqi-rescue:R-device R5010
 U 1 1 569C69CB
 P 13850 3550
 F 0 "R5010" V 13930 3550 50  0000 C CNN

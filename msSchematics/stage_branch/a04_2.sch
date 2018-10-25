@@ -1,5 +1,6 @@
 EESchema Schematic File Version 4
-EELAYER 28 0
+LIBS:stage_branch-cache
+EELAYER 29 0
 EELAYER END
 $Descr A1 33110 23386
 encoding utf-8
@@ -637,9 +638,11 @@ F 3 "" H 4000 11000 60  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L device:R R4008
+L stage_branch-rescue:R-device R4008
 U 1 1 5639E3B2
 P 4450 10300
+AR Path="/5639E3B2" Ref="R4008"  Part="1" 
+AR Path="/5635DFF0/5639E3B2" Ref="R4008"  Part="1" 
 F 0 "R4008" V 4530 10300 50  0000 C CNN
 F 1 "5k" V 4450 10300 50  0000 C CNN
 F 2 "" V 4380 10300 30  0000 C CNN
@@ -1048,9 +1051,11 @@ F 3 "" H 15700 3100 60  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L device:R R4011
+L stage_branch-rescue:R-device R4011
 U 1 1 5641F278
 P 16150 2450
+AR Path="/5641F278" Ref="R4011"  Part="1" 
+AR Path="/5635DFF0/5641F278" Ref="R4011"  Part="1" 
 F 0 "R4011" V 16230 2450 50  0000 C CNN
 F 1 "5k" V 16150 2450 50  0000 C CNN
 F 2 "" V 16080 2450 30  0000 C CNN
@@ -2101,9 +2106,11 @@ F 3 "" H 10100 5100 60  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L device:R R4021
+L stage_branch-rescue:R-device R4021
 U 1 1 568313DA
 P 10550 4900
+AR Path="/568313DA" Ref="R4021"  Part="1" 
+AR Path="/5635DFF0/568313DA" Ref="R4021"  Part="1" 
 F 0 "R4021" V 10630 4900 50  0000 C CNN
 F 1 "5k" V 10550 4900 50  0000 C CNN
 F 2 "" V 10480 4900 30  0000 C CNN

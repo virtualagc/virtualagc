@@ -1,5 +1,6 @@
 EESchema Schematic File Version 4
-EELAYER 28 0
+LIBS:crosspoint_nqi-cache
+EELAYER 29 0
 EELAYER END
 $Descr A2 23386 16535
 encoding utf-8
@@ -2704,9 +2705,11 @@ Connection ~ 9100 9700
 Wire Wire Line
 	9100 9700 9100 9650
 $Comp
-L device:R R5012
+L crosspoint_nqi-rescue:R-device R5012
 U 1 1 56C97E7E
 P 9100 9500
+AR Path="/56C97E7E" Ref="R5012"  Part="1" 
+AR Path="/565609E7/56C97E7E" Ref="R5012"  Part="1" 
 F 0 "R5012" V 9180 9500 50  0000 C CNN
 F 1 "5k" V 9100 9500 50  0000 C CNN
 F 2 "" V 9030 9500 30  0000 C CNN

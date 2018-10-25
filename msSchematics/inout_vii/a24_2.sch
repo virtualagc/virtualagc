@@ -1,5 +1,6 @@
 EESchema Schematic File Version 4
-EELAYER 28 0
+LIBS:inout_vii-cache
+EELAYER 29 0
 EELAYER END
 $Descr A2 23386 16535
 encoding utf-8
@@ -1319,7 +1320,7 @@ Wire Wire Line
 	14100 5550 14100 6050
 Connection ~ 14100 5600
 $Comp
-L device:R R24001
+L inout_vii-rescue:R-device R24001
 U 1 1 571BDECB
 P 14100 5400
 F 0 "R24001" V 14180 5400 50  0000 C CNN

@@ -1,5 +1,6 @@
 EESchema Schematic File Version 4
-EELAYER 28 0
+LIBS:inout_iii-cache
+EELAYER 29 0
 EELAYER END
 $Descr A2 23386 16535
 encoding utf-8
@@ -681,7 +682,7 @@ F 3 "" H 21150 11850 60  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L device:R R18003
+L inout_iii-rescue:R-device R18003
 U 1 1 5710AF17
 P 21600 11200
 F 0 "R18003" V 21680 11200 50  0000 C CNN

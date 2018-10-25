@@ -1,5 +1,6 @@
 EESchema Schematic File Version 4
-EELAYER 28 0
+LIBS:crosspoint_ii-cache
+EELAYER 29 0
 EELAYER END
 $Descr A2 23386 16535
 encoding utf-8
@@ -119,7 +120,7 @@ F 3 "" H 5700 1950 60  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L device:R R6014
+L crosspoint_ii-rescue:R-device R6014
 U 1 1 567DC5F5
 P 6150 1300
 F 0 "R6014" V 6230 1300 50  0000 C CNN
@@ -201,7 +202,7 @@ F 3 "" H 5700 3250 60  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L device:R R6015
+L crosspoint_ii-rescue:R-device R6015
 U 1 1 567DD312
 P 6150 2500
 F 0 "R6015" V 6230 2500 50  0000 C CNN
@@ -301,7 +302,7 @@ F 3 "" H 9950 2600 60  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L device:R R6016
+L crosspoint_ii-rescue:R-device R6016
 U 1 1 567DEDA9
 P 10400 2400
 F 0 "R6016" V 10480 2400 50  0000 C CNN
@@ -591,7 +592,7 @@ F 3 "" H 11000 8200 60  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L device:R R6017
+L crosspoint_ii-rescue:R-device R6017
 U 1 1 567E9E54
 P 11450 8000
 F 0 "R6017" V 11530 8000 50  0000 C CNN
@@ -649,7 +650,7 @@ F 3 "" H 11000 8900 60  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L device:R R6018
+L crosspoint_ii-rescue:R-device R6018
 U 1 1 567EFBDD
 P 11450 8700
 F 0 "R6018" V 11530 8700 50  0000 C CNN
@@ -973,7 +974,7 @@ F 3 "" H 4050 11750 60  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L device:R R6019
+L crosspoint_ii-rescue:R-device R6019
 U 1 1 568389AA
 P 4500 11550
 F 0 "R6019" V 4580 11550 50  0000 C CNN
@@ -1104,7 +1105,7 @@ F 3 "" H 8150 13450 60  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L device:R R6020
+L crosspoint_ii-rescue:R-device R6020
 U 1 1 56848F7B
 P 8600 13250
 F 0 "R6020" V 8680 13250 50  0000 C CNN
@@ -1161,7 +1162,7 @@ F 3 "" H 10900 13600 60  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L device:R R6021
+L crosspoint_ii-rescue:R-device R6021
 U 1 1 568544BB
 P 11350 13400
 F 0 "R6021" V 11430 13400 50  0000 C CNN
@@ -1236,7 +1237,7 @@ F 3 "" H 5450 14500 60  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L device:R R6022
+L crosspoint_ii-rescue:R-device R6022
 U 1 1 5685C6CD
 P 5900 14300
 F 0 "R6022" V 5980 14300 50  0000 C CNN
@@ -1370,7 +1371,7 @@ F 3 "" H 10300 4400 60  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L device:R R6023
+L crosspoint_ii-rescue:R-device R6023
 U 1 1 5689CD15
 P 10750 4200
 F 0 "R6023" V 10830 4200 50  0000 C CNN
@@ -1508,7 +1509,7 @@ F 3 "" H 20800 2100 60  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L device:R R6024
+L crosspoint_ii-rescue:R-device R6024
 U 1 1 568B974D
 P 21250 1900
 F 0 "R6024" V 21330 1900 50  0000 C CNN
@@ -1596,7 +1597,7 @@ F 3 "" H 15850 2600 60  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L device:R R6025
+L crosspoint_ii-rescue:R-device R6025
 U 1 1 568BFFA0
 P 16300 2400
 F 0 "R6025" V 16380 2400 50  0000 C CNN
@@ -1695,7 +1696,7 @@ F 3 "" H 20500 3400 60  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L device:R R6026
+L crosspoint_ii-rescue:R-device R6026
 U 1 1 568C9415
 P 20950 3200
 F 0 "R6026" V 21030 3200 50  0000 C CNN
@@ -2389,7 +2390,7 @@ F 3 "" H 20500 4750 60  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L device:R R6027
+L crosspoint_ii-rescue:R-device R6027
 U 1 1 568DAA35
 P 20950 4550
 F 0 "R6027" V 21030 4550 50  0000 C CNN

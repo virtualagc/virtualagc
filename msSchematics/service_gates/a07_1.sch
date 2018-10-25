@@ -378,7 +378,7 @@ Wire Wire Line
 	7550 3850 7550 3900
 Connection ~ 7550 3900
 $Comp
-L device:R R7001
+L service_gates-rescue:R-device R7001
 U 1 1 567B75E9
 P 7550 3700
 F 0 "R7001" V 7630 3700 50  0000 C CNN

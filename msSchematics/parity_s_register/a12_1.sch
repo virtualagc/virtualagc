@@ -754,7 +754,7 @@ F 3 "" H 10200 4600 60  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L device:R R12001
+L parity_s_register-rescue:R-device R12001
 U 1 1 56B2175D
 P 10650 3950
 F 0 "R12001" V 10730 3950 50  0000 C CNN
@@ -910,7 +910,7 @@ F 3 "" H 15800 5600 60  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L device:R R12002
+L parity_s_register-rescue:R-device R12002
 U 1 1 56B158D1
 P 16250 4950
 F 0 "R12002" V 16330 4950 50  0000 C CNN
@@ -981,7 +981,7 @@ F 3 "" H 15800 6800 60  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L device:R R12003
+L parity_s_register-rescue:R-device R12003
 U 1 1 56B21848
 P 16250 6150
 F 0 "R12003" V 16330 6150 50  0000 C CNN
@@ -2299,7 +2299,7 @@ Wire Wire Line
 	20950 11550 20950 11600
 Connection ~ 20950 11600
 $Comp
-L device:R R12004
+L parity_s_register-rescue:R-device R12004
 U 1 1 56B98837
 P 20950 11400
 F 0 "R12004" V 21030 11400 50  0000 C CNN

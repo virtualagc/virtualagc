@@ -1,5 +1,6 @@
 EESchema Schematic File Version 4
-EELAYER 28 0
+LIBS:sq_register-cache
+EELAYER 29 0
 EELAYER END
 $Descr A2 23386 16535
 encoding utf-8
@@ -2477,7 +2478,7 @@ Wire Wire Line
 	7150 2450 7750 2450
 Connection ~ 5900 2700
 $Comp
-L device:R R3002
+L sq_register-rescue:R-device R3002
 U 1 1 56B1DF19
 P 9950 5950
 F 0 "R3002" V 10030 5950 50  0000 C CNN

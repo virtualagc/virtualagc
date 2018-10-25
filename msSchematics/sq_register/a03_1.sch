@@ -1,5 +1,6 @@
 EESchema Schematic File Version 4
-EELAYER 28 0
+LIBS:sq_register-cache
+EELAYER 29 0
 EELAYER END
 $Descr A2 23386 16535
 encoding utf-8
@@ -553,9 +554,11 @@ RUPTOR/
 Text HLabel 5750 9000 0    60   Input ~ 0
 MNHRPT
 $Comp
-L device:R R3001
+L sq_register-rescue:R-device R3001
 U 1 1 562DA4E4
 P 8100 8000
+AR Path="/562DA4E4" Ref="R3001"  Part="1" 
+AR Path="/562C5B6F/562DA4E4" Ref="R3001"  Part="1" 
 F 0 "R3001" V 8180 8000 50  0000 C CNN
 F 1 "5k" V 8100 8000 50  0000 C CNN
 F 2 "" V 8030 8000 30  0000 C CNN

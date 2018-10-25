@@ -1355,7 +1355,7 @@ Text HLabel 20400 4600 2    60   Output ~ 0
 T12SET
 Connection ~ 20200 4600
 $Comp
-L timer-rescue:R-device R2002
+L timer-rescue:R-device-timer-rescue R2002
 U 1 1 5654B114
 P 18300 4250
 AR Path="/5654B114" Ref="R2002"  Part="1" 

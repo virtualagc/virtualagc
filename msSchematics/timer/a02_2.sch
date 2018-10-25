@@ -611,7 +611,7 @@ Wire Wire Line
 Connection ~ 9650 5350
 Connection ~ 9650 4850
 $Comp
-L timer-rescue:R-device R2001
+L timer-rescue:R-device-timer-rescue R2001
 U 1 1 5624793C
 P 9650 4600
 AR Path="/5624793C" Ref="R2001"  Part="1" 

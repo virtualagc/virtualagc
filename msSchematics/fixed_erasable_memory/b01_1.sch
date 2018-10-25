@@ -1,6 +1,6 @@
 EESchema Schematic File Version 4
 LIBS:fixed_erasable_memory-cache
-EELAYER 28 0
+EELAYER 29 0
 EELAYER END
 $Descr A2 23386 16535
 encoding utf-8
@@ -30,7 +30,7 @@ F 5 "EPCS_CSN,EPCS_DCLK,EPCS_ASDI" H 14700 2600 60  0001 C CNN "FPGA#outputs"
 	1    0    0    -1  
 $EndComp
 $Comp
-L fixed_erasable_memory-rescue:R-device R31001
+L fixed_erasable_memory-rescue:R-device-fixed_erasable_memory-rescue R31001
 U 1 1 56CD3CB9
 P 15350 3150
 AR Path="/56CD3CB9" Ref="R31001"  Part="1" 
@@ -43,7 +43,7 @@ F 3 "" H 15350 3150 30  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L fixed_erasable_memory-rescue:R-device R31002
+L fixed_erasable_memory-rescue:R-device-fixed_erasable_memory-rescue R31002
 U 1 1 56CD3DF8
 P 15500 3150
 AR Path="/56CD3DF8" Ref="R31002"  Part="1" 
@@ -56,7 +56,7 @@ F 3 "" H 15500 3150 30  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L fixed_erasable_memory-rescue:R-device R31003
+L fixed_erasable_memory-rescue:R-device-fixed_erasable_memory-rescue R31003
 U 1 1 56CD3EBD
 P 15650 3150
 AR Path="/56CD3EBD" Ref="R31003"  Part="1" 
@@ -69,7 +69,7 @@ F 3 "" H 15650 3150 30  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L fixed_erasable_memory-rescue:R-device R31004
+L fixed_erasable_memory-rescue:R-device-fixed_erasable_memory-rescue R31004
 U 1 1 56CD3EDF
 P 15800 3150
 AR Path="/56CD3EDF" Ref="R31004"  Part="1" 
@@ -82,7 +82,7 @@ F 3 "" H 15800 3150 30  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L fixed_erasable_memory-rescue:R-device R31005
+L fixed_erasable_memory-rescue:R-device-fixed_erasable_memory-rescue R31005
 U 1 1 56CD3F0B
 P 15950 3150
 AR Path="/56CD3F0B" Ref="R31005"  Part="1" 
@@ -95,7 +95,7 @@ F 3 "" H 15950 3150 30  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L fixed_erasable_memory-rescue:R-device R31006
+L fixed_erasable_memory-rescue:R-device-fixed_erasable_memory-rescue R31006
 U 1 1 56CD3F21
 P 16100 3150
 AR Path="/56CD3F21" Ref="R31006"  Part="1" 
@@ -108,7 +108,7 @@ F 3 "" H 16100 3150 30  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L fixed_erasable_memory-rescue:R-device R31008
+L fixed_erasable_memory-rescue:R-device-fixed_erasable_memory-rescue R31008
 U 1 1 56CD3F40
 P 16400 3150
 AR Path="/56CD3F40" Ref="R31008"  Part="1" 
@@ -121,7 +121,7 @@ F 3 "" H 16400 3150 30  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L fixed_erasable_memory-rescue:R-device R31009
+L fixed_erasable_memory-rescue:R-device-fixed_erasable_memory-rescue R31009
 U 1 1 56CD3F64
 P 16550 3150
 AR Path="/56CD3F64" Ref="R31009"  Part="1" 
@@ -134,7 +134,7 @@ F 3 "" H 16550 3150 30  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L fixed_erasable_memory-rescue:R-device R31010
+L fixed_erasable_memory-rescue:R-device-fixed_erasable_memory-rescue R31010
 U 1 1 56CD4173
 P 16700 3150
 AR Path="/56CD4173" Ref="R31010"  Part="1" 
@@ -147,7 +147,7 @@ F 3 "" H 16700 3150 30  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L fixed_erasable_memory-rescue:R-device R31011
+L fixed_erasable_memory-rescue:R-device-fixed_erasable_memory-rescue R31011
 U 1 1 56CD4179
 P 16850 3150
 AR Path="/56CD4179" Ref="R31011"  Part="1" 
@@ -160,7 +160,7 @@ F 3 "" H 16850 3150 30  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L fixed_erasable_memory-rescue:R-device R31012
+L fixed_erasable_memory-rescue:R-device-fixed_erasable_memory-rescue R31012
 U 1 1 56CD417F
 P 17000 3150
 AR Path="/56CD417F" Ref="R31012"  Part="1" 
@@ -173,7 +173,7 @@ F 3 "" H 17000 3150 30  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L fixed_erasable_memory-rescue:R-device R31013
+L fixed_erasable_memory-rescue:R-device-fixed_erasable_memory-rescue R31013
 U 1 1 56CD4185
 P 17150 3150
 AR Path="/56CD4185" Ref="R31013"  Part="1" 
@@ -186,7 +186,7 @@ F 3 "" H 17150 3150 30  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L fixed_erasable_memory-rescue:R-device R31014
+L fixed_erasable_memory-rescue:R-device-fixed_erasable_memory-rescue R31014
 U 1 1 56CD418B
 P 17300 3150
 AR Path="/56CD418B" Ref="R31014"  Part="1" 
@@ -199,7 +199,7 @@ F 3 "" H 17300 3150 30  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L fixed_erasable_memory-rescue:R-device R31007
+L fixed_erasable_memory-rescue:R-device-fixed_erasable_memory-rescue R31007
 U 1 1 56CD4191
 P 16250 3150
 AR Path="/56CD4191" Ref="R31007"  Part="1" 
@@ -212,7 +212,7 @@ F 3 "" H 16250 3150 30  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L fixed_erasable_memory-rescue:R-device R31015
+L fixed_erasable_memory-rescue:R-device-fixed_erasable_memory-rescue R31015
 U 1 1 56CD4197
 P 17450 3150
 AR Path="/56CD4197" Ref="R31015"  Part="1" 
@@ -225,7 +225,7 @@ F 3 "" H 17450 3150 30  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L fixed_erasable_memory-rescue:R-device R31016
+L fixed_erasable_memory-rescue:R-device-fixed_erasable_memory-rescue R31016
 U 1 1 56CD419D
 P 17600 3150
 AR Path="/56CD419D" Ref="R31016"  Part="1" 

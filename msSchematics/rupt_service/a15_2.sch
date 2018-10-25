@@ -545,9 +545,11 @@ F 3 "" H 14700 2950 60  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L device:R R15001
+L rupt_service-rescue:R-device R15001
 U 1 1 56E85E4E
 P 15150 2300
+AR Path="/56E85E4E" Ref="R15001"  Part="1" 
+AR Path="/56E5D485/56E85E4E" Ref="R15001"  Part="1" 
 F 0 "R15001" V 15230 2300 50  0000 C CNN
 F 1 "5k" V 15150 2300 50  0000 C CNN
 F 2 "" V 15080 2300 30  0000 C CNN
@@ -621,9 +623,11 @@ F 3 "" H 14650 4150 60  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L device:R R15002
+L rupt_service-rescue:R-device R15002
 U 1 1 56E8A97B
 P 15100 3500
+AR Path="/56E8A97B" Ref="R15002"  Part="1" 
+AR Path="/56E5D485/56E8A97B" Ref="R15002"  Part="1" 
 F 0 "R15002" V 15180 3500 50  0000 C CNN
 F 1 "5k" V 15100 3500 50  0000 C CNN
 F 2 "" V 15030 3500 30  0000 C CNN

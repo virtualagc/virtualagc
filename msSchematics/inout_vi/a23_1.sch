@@ -1,5 +1,6 @@
 EESchema Schematic File Version 4
-EELAYER 28 0
+LIBS:inout_vi-cache
+EELAYER 29 0
 EELAYER END
 $Descr A2 23386 16535
 encoding utf-8
@@ -68,9 +69,11 @@ F 3 "" H 3200 2400 60  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L device:R R23001
+L inout_vi-rescue:R-device R23001
 U 1 1 57404187
 P 3650 1750
+AR Path="/57404187" Ref="R23001"  Part="1" 
+AR Path="/574035B5/57404187" Ref="R23001"  Part="1" 
 F 0 "R23001" V 3730 1750 50  0000 C CNN
 F 1 "5k" V 3650 1750 50  0000 C CNN
 F 2 "" V 3580 1750 30  0000 C CNN
@@ -211,9 +214,11 @@ F 3 "" H 7250 2000 60  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L device:R R23002
+L inout_vi-rescue:R-device R23002
 U 1 1 574186D1
 P 7700 1350
+AR Path="/574186D1" Ref="R23002"  Part="1" 
+AR Path="/574035B5/574186D1" Ref="R23002"  Part="1" 
 F 0 "R23002" V 7780 1350 50  0000 C CNN
 F 1 "5k" V 7700 1350 50  0000 C CNN
 F 2 "" V 7630 1350 30  0000 C CNN

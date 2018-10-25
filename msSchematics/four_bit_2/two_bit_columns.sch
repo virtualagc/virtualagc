@@ -1,5 +1,6 @@
 EESchema Schematic File Version 4
-EELAYER 28 0
+LIBS:four_bit_2-cache
+EELAYER 29 0
 EELAYER END
 $Descr A2 23386 16535
 encoding utf-8
@@ -510,7 +511,7 @@ $EndComp
 Wire Wire Line
 	8200 1100 8200 1050
 $Comp
-L device:R R8011
+L four_bit_2-rescue:R-device R8011
 U 1 1 56853F32
 P 8200 900
 AR Path="/5689EF80/56853F32" Ref="R8011"  Part="1" 
@@ -521,6 +522,7 @@ AR Path="/568CB566/56853F32" Ref="R10001"  Part="1"
 AR Path="/568CB571/56853F32" Ref="R10011"  Part="1" 
 AR Path="/568CD527/56853F32" Ref="R11001"  Part="1" 
 AR Path="/568CD532/56853F32" Ref="R11011"  Part="1" 
+AR Path="/56853F32" Ref="R9011"  Part="1" 
 F 0 "R9011" V 8280 900 50  0000 C CNN
 F 1 "5k" V 8200 900 50  0000 C CNN
 F 2 "" V 8130 900 30  0000 C CNN
@@ -733,7 +735,7 @@ F 3 "" H 8350 3700 60  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L device:R R8012
+L four_bit_2-rescue:R-device R8012
 U 1 1 56859114
 P 8800 3500
 AR Path="/5689EF80/56859114" Ref="R8012"  Part="1" 
@@ -744,6 +746,7 @@ AR Path="/568CB566/56859114" Ref="R10002"  Part="1"
 AR Path="/568CB571/56859114" Ref="R10012"  Part="1" 
 AR Path="/568CD527/56859114" Ref="R11002"  Part="1" 
 AR Path="/568CD532/56859114" Ref="R11012"  Part="1" 
+AR Path="/56859114" Ref="R9012"  Part="1" 
 F 0 "R9012" V 8880 3500 50  0000 C CNN
 F 1 "5k" V 8800 3500 50  0000 C CNN
 F 2 "" V 8730 3500 30  0000 C CNN
@@ -1042,7 +1045,7 @@ Wire Wire Line
 Wire Wire Line
 	4750 5550 3850 5550
 $Comp
-L device:R R8013
+L four_bit_2-rescue:R-device R8013
 U 1 1 56862FDE
 P 4750 5100
 AR Path="/5689EF80/56862FDE" Ref="R8013"  Part="1" 
@@ -1053,6 +1056,7 @@ AR Path="/568CB566/56862FDE" Ref="R10003"  Part="1"
 AR Path="/568CB571/56862FDE" Ref="R10013"  Part="1" 
 AR Path="/568CD527/56862FDE" Ref="R11003"  Part="1" 
 AR Path="/568CD532/56862FDE" Ref="R11013"  Part="1" 
+AR Path="/56862FDE" Ref="R9013"  Part="1" 
 F 0 "R9013" V 4830 5100 50  0000 C CNN
 F 1 "5k" V 4750 5100 50  0000 C CNN
 F 2 "" V 4680 5100 30  0000 C CNN
@@ -1317,7 +1321,7 @@ Wire Wire Line
 Wire Wire Line
 	6650 5300 6650 6500
 $Comp
-L device:R R8015
+L four_bit_2-rescue:R-device R8015
 U 1 1 56875BCB
 P 4750 8000
 AR Path="/5689EF80/56875BCB" Ref="R8015"  Part="1" 
@@ -1328,6 +1332,7 @@ AR Path="/568CB566/56875BCB" Ref="R10005"  Part="1"
 AR Path="/568CB571/56875BCB" Ref="R10015"  Part="1" 
 AR Path="/568CD527/56875BCB" Ref="R11005"  Part="1" 
 AR Path="/568CD532/56875BCB" Ref="R11015"  Part="1" 
+AR Path="/56875BCB" Ref="R9015"  Part="1" 
 F 0 "R9015" V 4830 8000 50  0000 C CNN
 F 1 "5k" V 4750 8000 50  0000 C CNN
 F 2 "" V 4680 8000 30  0000 C CNN
@@ -1736,7 +1741,7 @@ Wire Wire Line
 	4500 13000 5400 13000
 Connection ~ 5400 12750
 $Comp
-L device:R R8016
+L four_bit_2-rescue:R-device R8016
 U 1 1 568920B9
 P 5400 12100
 AR Path="/5689EF80/568920B9" Ref="R8016"  Part="1" 
@@ -1747,6 +1752,7 @@ AR Path="/568CB566/568920B9" Ref="R10006"  Part="1"
 AR Path="/568CB571/568920B9" Ref="R10016"  Part="1" 
 AR Path="/568CD527/568920B9" Ref="R11006"  Part="1" 
 AR Path="/568CD532/568920B9" Ref="R11016"  Part="1" 
+AR Path="/568920B9" Ref="R9016"  Part="1" 
 F 0 "R9016" V 5480 12100 50  0000 C CNN
 F 1 "5k" V 5400 12100 50  0000 C CNN
 F 2 "" V 5330 12100 30  0000 C CNN
@@ -2669,7 +2675,7 @@ F 3 "" H 19100 3700 60  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L device:R R8017
+L four_bit_2-rescue:R-device R8017
 U 1 1 568B9EF2
 P 19550 3500
 AR Path="/5689EF80/568B9EF2" Ref="R8017"  Part="1" 
@@ -2680,6 +2686,7 @@ AR Path="/568CB566/568B9EF2" Ref="R10007"  Part="1"
 AR Path="/568CB571/568B9EF2" Ref="R10017"  Part="1" 
 AR Path="/568CD527/568B9EF2" Ref="R11007"  Part="1" 
 AR Path="/568CD532/568B9EF2" Ref="R11017"  Part="1" 
+AR Path="/568B9EF2" Ref="R9017"  Part="1" 
 F 0 "R9017" V 19630 3500 50  0000 C CNN
 F 1 "5k" V 19550 3500 50  0000 C CNN
 F 2 "" V 19480 3500 30  0000 C CNN
@@ -2736,7 +2743,7 @@ Connection ~ 11300 8200
 Text HLabel 17350 8750 0    60   Input ~ 0
 _WL_EXTRA2_2
 $Comp
-L device:R R8019
+L four_bit_2-rescue:R-device R8019
 U 1 1 568B9FE7
 P 15500 8000
 AR Path="/5689EF80/568B9FE7" Ref="R8019"  Part="1" 
@@ -2747,6 +2754,7 @@ AR Path="/568CB566/568B9FE7" Ref="R10009"  Part="1"
 AR Path="/568CB571/568B9FE7" Ref="R10019"  Part="1" 
 AR Path="/568CD527/568B9FE7" Ref="R11009"  Part="1" 
 AR Path="/568CD532/568B9FE7" Ref="R11019"  Part="1" 
+AR Path="/568B9FE7" Ref="R9019"  Part="1" 
 F 0 "R9019" V 15580 8000 50  0000 C CNN
 F 1 "5k" V 15500 8000 50  0000 C CNN
 F 2 "" V 15430 8000 30  0000 C CNN
@@ -3009,7 +3017,7 @@ F 3 "" H 18050 6650 60  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L device:R R8018
+L four_bit_2-rescue:R-device R8018
 U 1 1 568B9F7B
 P 15500 5100
 AR Path="/5689EF80/568B9F7B" Ref="R8018"  Part="1" 
@@ -3020,6 +3028,7 @@ AR Path="/568CB566/568B9F7B" Ref="R10008"  Part="1"
 AR Path="/568CB571/568B9F7B" Ref="R10018"  Part="1" 
 AR Path="/568CD527/568B9F7B" Ref="R11008"  Part="1" 
 AR Path="/568CD532/568B9F7B" Ref="R11018"  Part="1" 
+AR Path="/568B9F7B" Ref="R9018"  Part="1" 
 F 0 "R9018" V 15580 5100 50  0000 C CNN
 F 1 "5k" V 15500 5100 50  0000 C CNN
 F 2 "" V 15430 5100 30  0000 C CNN
@@ -3700,7 +3709,7 @@ Wire Wire Line
 	15250 13000 16150 13000
 Connection ~ 16150 12750
 $Comp
-L device:R R8020
+L four_bit_2-rescue:R-device R8020
 U 1 1 568BA085
 P 16150 12100
 AR Path="/5689EF80/568BA085" Ref="R8020"  Part="1" 
@@ -3711,6 +3720,7 @@ AR Path="/568CB566/568BA085" Ref="R10010"  Part="1"
 AR Path="/568CB571/568BA085" Ref="R10020"  Part="1" 
 AR Path="/568CD527/568BA085" Ref="R11010"  Part="1" 
 AR Path="/568CD532/568BA085" Ref="R11020"  Part="1" 
+AR Path="/568BA085" Ref="R9020"  Part="1" 
 F 0 "R9020" V 16230 12100 50  0000 C CNN
 F 1 "5k" V 16150 12100 50  0000 C CNN
 F 2 "" V 16080 12100 30  0000 C CNN

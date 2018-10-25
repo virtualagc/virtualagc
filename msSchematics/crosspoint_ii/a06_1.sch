@@ -1,5 +1,6 @@
 EESchema Schematic File Version 4
-EELAYER 28 0
+LIBS:crosspoint_ii-cache
+EELAYER 29 0
 EELAYER END
 $Descr A2 23386 16535
 encoding utf-8
@@ -159,9 +160,11 @@ F 3 "" H 6600 3650 60  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L device:R R6001
+L crosspoint_ii-rescue:R-device R6001
 U 1 1 5687E294
 P 7050 2950
+AR Path="/5687E294" Ref="R6001"  Part="1" 
+AR Path="/5687DCD2/5687E294" Ref="R6001"  Part="1" 
 F 0 "R6001" V 7130 2950 50  0000 C CNN
 F 1 "5k" V 7050 2950 50  0000 C CNN
 F 2 "" V 6980 2950 30  0000 C CNN
@@ -333,9 +336,11 @@ F 3 "" H 14650 1150 60  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L device:R R6002
+L crosspoint_ii-rescue:R-device R6002
 U 1 1 56881A25
 P 15100 950
+AR Path="/56881A25" Ref="R6002"  Part="1" 
+AR Path="/5687DCD2/56881A25" Ref="R6002"  Part="1" 
 F 0 "R6002" V 15180 950 50  0000 C CNN
 F 1 "5k" V 15100 950 50  0000 C CNN
 F 2 "" V 15030 950 30  0000 C CNN
@@ -388,9 +393,11 @@ F 3 "" H 14650 2550 60  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L device:R R6003
+L crosspoint_ii-rescue:R-device R6003
 U 1 1 56883541
 P 15100 2350
+AR Path="/56883541" Ref="R6003"  Part="1" 
+AR Path="/5687DCD2/56883541" Ref="R6003"  Part="1" 
 F 0 "R6003" V 15180 2350 50  0000 C CNN
 F 1 "5k" V 15100 2350 50  0000 C CNN
 F 2 "" V 15030 2350 30  0000 C CNN
@@ -430,9 +437,11 @@ F 3 "" H 14650 3250 60  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L device:R R6004
+L crosspoint_ii-rescue:R-device R6004
 U 1 1 5688432D
 P 15100 3100
+AR Path="/5688432D" Ref="R6004"  Part="1" 
+AR Path="/5687DCD2/5688432D" Ref="R6004"  Part="1" 
 F 0 "R6004" V 15180 3100 50  0000 C CNN
 F 1 "5k" V 15100 3100 50  0000 C CNN
 F 2 "" V 15030 3100 30  0000 C CNN
@@ -792,9 +801,11 @@ F 3 "" H 6600 8950 60  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L device:R R6005
+L crosspoint_ii-rescue:R-device R6005
 U 1 1 568AA053
 P 7050 8300
+AR Path="/568AA053" Ref="R6005"  Part="1" 
+AR Path="/5687DCD2/568AA053" Ref="R6005"  Part="1" 
 F 0 "R6005" V 7130 8300 50  0000 C CNN
 F 1 "5k" V 7050 8300 50  0000 C CNN
 F 2 "" V 6980 8300 30  0000 C CNN
@@ -918,9 +929,11 @@ F 3 "" H 14650 7300 60  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L device:R R6006
+L crosspoint_ii-rescue:R-device R6006
 U 1 1 568B96BB
 P 15100 7100
+AR Path="/568B96BB" Ref="R6006"  Part="1" 
+AR Path="/5687DCD2/568B96BB" Ref="R6006"  Part="1" 
 F 0 "R6006" V 15180 7100 50  0000 C CNN
 F 1 "5k" V 15100 7100 50  0000 C CNN
 F 2 "" V 15030 7100 30  0000 C CNN
@@ -963,9 +976,11 @@ F 3 "" H 14650 8050 60  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L device:R R6007
+L crosspoint_ii-rescue:R-device R6007
 U 1 1 568BD3A9
 P 15100 7850
+AR Path="/568BD3A9" Ref="R6007"  Part="1" 
+AR Path="/5687DCD2/568BD3A9" Ref="R6007"  Part="1" 
 F 0 "R6007" V 15180 7850 50  0000 C CNN
 F 1 "5k" V 15100 7850 50  0000 C CNN
 F 2 "" V 15030 7850 30  0000 C CNN
@@ -1007,9 +1022,11 @@ F 3 "" H 14650 8750 60  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L device:R R6008
+L crosspoint_ii-rescue:R-device R6008
 U 1 1 568BF161
 P 15100 8550
+AR Path="/568BF161" Ref="R6008"  Part="1" 
+AR Path="/5687DCD2/568BF161" Ref="R6008"  Part="1" 
 F 0 "R6008" V 15180 8550 50  0000 C CNN
 F 1 "5k" V 15100 8550 50  0000 C CNN
 F 2 "" V 15030 8550 30  0000 C CNN
@@ -1048,9 +1065,11 @@ F 3 "" H 14650 9450 60  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L device:R R6009
+L crosspoint_ii-rescue:R-device R6009
 U 1 1 568BFF24
 P 15100 9250
+AR Path="/568BFF24" Ref="R6009"  Part="1" 
+AR Path="/5687DCD2/568BFF24" Ref="R6009"  Part="1" 
 F 0 "R6009" V 15180 9250 50  0000 C CNN
 F 1 "5k" V 15100 9250 50  0000 C CNN
 F 2 "" V 15030 9250 30  0000 C CNN
@@ -1096,9 +1115,11 @@ F 3 "" H 14650 10150 60  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L device:R R6010
+L crosspoint_ii-rescue:R-device R6010
 U 1 1 568D20A2
 P 15100 9950
+AR Path="/568D20A2" Ref="R6010"  Part="1" 
+AR Path="/5687DCD2/568D20A2" Ref="R6010"  Part="1" 
 F 0 "R6010" V 15180 9950 50  0000 C CNN
 F 1 "5k" V 15100 9950 50  0000 C CNN
 F 2 "" V 15030 9950 30  0000 C CNN
@@ -1619,9 +1640,11 @@ F 3 "" H 14650 11250 60  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L device:R R6011
+L crosspoint_ii-rescue:R-device R6011
 U 1 1 568E6888
 P 15100 11050
+AR Path="/568E6888" Ref="R6011"  Part="1" 
+AR Path="/5687DCD2/568E6888" Ref="R6011"  Part="1" 
 F 0 "R6011" V 15180 11050 50  0000 C CNN
 F 1 "5k" V 15100 11050 50  0000 C CNN
 F 2 "" V 15030 11050 30  0000 C CNN
@@ -1678,9 +1701,11 @@ F 3 "" H 14650 11950 60  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L device:R R6012
+L crosspoint_ii-rescue:R-device R6012
 U 1 1 568E71DB
 P 15100 11750
+AR Path="/568E71DB" Ref="R6012"  Part="1" 
+AR Path="/5687DCD2/568E71DB" Ref="R6012"  Part="1" 
 F 0 "R6012" V 15180 11750 50  0000 C CNN
 F 1 "5k" V 15100 11750 50  0000 C CNN
 F 2 "" V 15030 11750 30  0000 C CNN
@@ -1731,9 +1756,11 @@ F 3 "" H 14650 12650 60  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L device:R R6013
+L crosspoint_ii-rescue:R-device R6013
 U 1 1 568E86F8
 P 15100 12450
+AR Path="/568E86F8" Ref="R6013"  Part="1" 
+AR Path="/5687DCD2/568E86F8" Ref="R6013"  Part="1" 
 F 0 "R6013" V 15180 12450 50  0000 C CNN
 F 1 "5k" V 15100 12450 50  0000 C CNN
 F 2 "" V 15030 12450 30  0000 C CNN
@@ -2244,9 +2271,11 @@ F 3 "" H 15950 5500 60  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L device:R R6028
+L crosspoint_ii-rescue:R-device R6028
 U 1 1 56A249BC
 P 16400 5300
+AR Path="/56A249BC" Ref="R6028"  Part="1" 
+AR Path="/5687DCD2/56A249BC" Ref="R6028"  Part="1" 
 F 0 "R6028" V 16480 5300 50  0000 C CNN
 F 1 "5k" V 16400 5300 50  0000 C CNN
 F 2 "" V 16330 5300 30  0000 C CNN
