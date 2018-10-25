@@ -1,6 +1,6 @@
 EESchema Schematic File Version 4
 LIBS:module-cache
-EELAYER 28 0
+EELAYER 29 0
 EELAYER END
 $Descr E 44000 34000
 encoding utf-8
@@ -6261,5 +6261,7 @@ RCH14_
 Text Label 6725 26675 0    140  ~ 28
 F5ASB0_
 Text Label 12875 27550 0    140  ~ 28
+F5ASB2_
+Text Label 9250 13050 2    140  ~ 28
 F5ASB2_
 $EndSCHEMATC
