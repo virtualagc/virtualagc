@@ -1,5 +1,6 @@
 EESchema Schematic File Version 4
-EELAYER 26 0
+LIBS:module-cache
+EELAYER 29 0
 EELAYER END
 $Descr User 51000 34000
 encoding utf-8
@@ -32,7 +33,7 @@ Text Notes 47075 33100 2    250  ~ 50
 $Sheet
 S 23450 12450 5600 7975
 U 5C0028D2
-F0 "Sheet 1" 140
-F1 "2005952-.sch" 140
+F0 "1" 140
+F1 "2005952--p1of1.sch" 140
 $EndSheet
 $EndSCHEMATC

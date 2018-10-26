@@ -1,5 +1,6 @@
 EESchema Schematic File Version 4
-EELAYER 26 0
+LIBS:module-cache
+EELAYER 29 0
 EELAYER END
 $Descr D 34000 22000
 encoding utf-8
@@ -40,7 +41,7 @@ Wire Notes Line style solid
 $Sheet
 S 14050 5525 5175 7000
 U 5BF67ABD
-F0 "Sheet 1" 140
-F1 "2005921-.sch" 140
+F0 "1" 140
+F1 "2005921--p1of1.sch" 140
 $EndSheet
 $EndSCHEMATC

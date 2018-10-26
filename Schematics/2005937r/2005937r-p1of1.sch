@@ -1,10 +1,10 @@
 EESchema Schematic File Version 4
-LIBS:2005921--cache
-EELAYER 26 0
+LIBS:module-cache
+EELAYER 29 0
 EELAYER END
 $Descr D 34000 22000
 encoding utf-8
-Sheet 1 1
+Sheet 1 2
 Title ""
 Date ""
 Rev ""
@@ -14,8 +14,6 @@ Comment2 ""
 Comment3 ""
 Comment4 ""
 $EndDescr
-Wire Notes Line style solid
-	33500 1175 27953 1175
 Text Notes 29800 19750 0    250  ~ 50
 SCHEMATIC
 Text Notes 29675 20150 0    200  ~ 40
@@ -23,15 +21,15 @@ POWER SUPPLY
 Text Notes 30175 20400 0    150  ~ 30
 MODULE D7
 Text Notes 30875 21150 0    250  ~ 50
-2005921
+2005937
 Text Notes 32400 21425 0    140  ~ 28
 1
 Text Notes 33100 21425 0    140  ~ 28
 1
 Text Notes 28850 21450 0    140  ~ 28
 NONE
-Text Notes 28275 21100 0    250  ~ 50
-80230
+Text Notes 28575 21100 0    250  ~ 50
+TBD
 $Comp
 L AGC_DSKY:ConnectorD7 J1
 U 3 1 5B70B39C
@@ -879,10 +877,10 @@ Text Notes 1025 19400 0    130  ~ 26
 NOTES\n     1.   PARTIAL REFERENCE DESIGNATIONS ARE SHOWN, PREFIX\n          THEM WITH UNIT NUMBER OR ASSEMBLY DESIGNATION OR BOTH\n     2.   INTERPRET DRAWING IN ACCORDANCE WITH STANDARDS\n          PRESCRIBED BY MILL-D-70327\n     3.   Q2 AND Q3 ARE MATCHED PAIRS\n     4.   RESISTORS ARE IN OHMS UNLESS OTHERWISE SPECIFIED\n     5.   CAPACITORS ARE IN UFD UNLESS OTHERWISE SPECIFIED
 Text Notes 9050 18075 0    130  ~ 26
 REFERENCE\n       1. ASSEMBLY DRAWING NO.2003901
-Text Notes 11000 21150 0    130  ~ 26
-Notes from the Virtual AGC Project:\n1. This CAD file was manually transcribed from the original Apollo Program\n   drawing 2005921-, but did not itself come from the Apollo Program. \n   — RSB 2018\n2. A notation in the right-hand margin reading "2005921" has been omitted\n   because it would conflict with the label for the "B" area that is there.\n   — RSB 2018
+Text Notes 11100 21250 0    130  ~ 26
+Notes from the Virtual AGC Project:\n1. No surviving copy of drawing 2005937- was known as of the time this CAD file\n   was created.  It is a recreation of what drawing 2005937- was probably like,\n   using  an earlier version of the circuit (2005921-) as a model, and supplementing\n   it with the circuitry from Figure 4-232 (pp. 4-673/40674) of AC Electronics\n   document ND-1021042, which is a redrafted form of drawing 2005937.  All known\n   versions of this circuit differ only in resistor and capacitor values. — RSB 2018\n2. Document ND-1021042 explains that the values of resistors R1 & R2, and\n   capacitor C1, were chosen after electrical testing.  The tables at the top of \n   this drawing list the possible substitutions for R1, R2, and C1.  However, this is\n   the list from drawing 2005921-, and it may not be complete. — RSB 2018
 $Bitmap
-Pos 10725 19850
+Pos 10825 19050
 Scale 1.000000
 Data
 89 50 4E 47 0D 0A 1A 0A 00 00 00 0D 49 48 44 52 00 00 00 78 00 00 00 78 08 02 00 00 00 B6 06 A1 
@@ -2223,16 +2221,6 @@ Text Notes 17325 4725 0    130  ~ 26
 4100
 Text Notes 17325 4975 0    130  ~ 26
 4500
-Text Notes 28500 1150 0    150  ~ 30
-INITIAL RELEASE PER TDRR
-Wire Notes Line style solid
-	32472 917  32472 1175
-Wire Notes Line style solid
-	31831 917  31831 1175
-Wire Notes Line style solid
-	28453 917  28453 1175
-Wire Notes Line style solid
-	27953 917  27953 1175
 Wire Notes Line style solid
 	18125 5250 15375 5250
 Text Notes 17325 5225 0    130  ~ 26

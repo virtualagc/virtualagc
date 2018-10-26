@@ -1,5 +1,6 @@
 EESchema Schematic File Version 4
-EELAYER 26 0
+LIBS:module-cache
+EELAYER 29 0
 EELAYER END
 $Descr D 34000 22000
 encoding utf-8
@@ -32,7 +33,7 @@ REVISED PER TDRR 19006\nDR           CHK
 $Sheet
 S 13775 7150 5750 7050
 U 5BF0431D
-F0 "Sheet 1" 140
-F1 "2005903A.sch" 140
+F0 "1" 140
+F1 "2005903A-p1of1.sch" 140
 $EndSheet
 $EndSCHEMATC
