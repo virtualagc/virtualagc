@@ -1,8 +1,9 @@
 // Verilog testbench created by dumbTestbench.py
-`timescale 100ns / 1ns
+`timescale 1ns / 1ps
 
 module agc;
 
+parameter GATE_DELAY = 20;
 `include "2005265A/tb.v"
 
 reg C32M = 0, C32P = 0, C33M = 0, C33P = 0, C34M = 0, C34P = 0, C35M = 0,
@@ -49,5 +50,6 @@ A15 iA15 (
   MCDU, MCDU_, MINC, MINC_, PCDU, PCDU_, RPTAD4, RPTAD5, RPTAD6, RUPTOR_,
   T6RPT, WOVR_
 );
+defparam iA15.GATE_DELAY = GATE_DELAY;
 
 endmodule

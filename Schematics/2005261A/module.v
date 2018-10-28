@@ -41,8 +41,8 @@ output wire DV4B1B, DVST, GNHNC, NDR100_, NISQ_, OCTAD2, OCTAD3, OCTAD4,
   SCAD, SCAD_, TPZG_, TRSM, TSUDO_, U2BBK, d10XP1, d10XP8, d11XP2, d2XP7,
   d2XP8, d3XP6, d5XP12, d5XP15, d5XP21, d6XP8, d7XP4, d7XP9, d9XP5;
 
-parameter GATE_DELAY = 0.2; // This default may be overridden at compile time.
-initial $display("Gate delay (A5) will be %f ns.", GATE_DELAY*100);
+parameter GATE_DELAY = 20; // This default may be overridden at compile time.
+initial $display("Gate delay (A5) will be %f ns.", GATE_DELAY);
 
 // Gate A5-U115B
 pullup(ST2_);
@@ -157,7 +157,7 @@ pullup(g39201);
 assign #GATE_DELAY g39201 = rst ? 0 : ((0|T08_|CCS0_) ? 1'b0 : 1'bz);
 // Gate A5-U106A
 pullup(P03);
-assign #GATE_DELAY P03 = rst ? 0 : ((0|EDSET) ? 1'b0 : 1'bz);
+assign #GATE_DELAY P03 = rst ? 1'bz : ((0|EDSET) ? 1'b0 : 1'bz);
 // Gate A5-U123B
 pullup(d11XP2);
 assign #GATE_DELAY d11XP2 = rst ? 0 : ((0|T11_|MSU0_) ? 1'b0 : 1'bz);
@@ -169,7 +169,7 @@ pullup(g39254);
 assign #GATE_DELAY g39254 = rst ? 0 : ((0|g39251|INCSET_) ? 1'b0 : 1'bz);
 // Gate A5-U254A
 pullup(Z16_);
-assign #GATE_DELAY Z16_ = rst ? 0 : ((0|g39411) ? 1'b0 : 1'bz);
+assign #GATE_DELAY Z16_ = rst ? 1'bz : ((0|g39411) ? 1'b0 : 1'bz);
 // Gate A5-U215B
 pullup(g39439);
 assign #GATE_DELAY g39439 = rst ? 0 : ((0|T09_|DAS1_) ? 1'b0 : 1'bz);
@@ -214,7 +214,7 @@ pullup(g39342);
 assign #GATE_DELAY g39342 = rst ? 1'bz : ((0|MP3) ? 1'b0 : 1'bz);
 // Gate A5-U127B
 pullup(PINC_);
-assign #GATE_DELAY PINC_ = rst ? 1'bz : ((0|g39254|PINC) ? 1'b0 : 1'bz);
+assign #GATE_DELAY PINC_ = rst ? 0 : ((0|g39254|PINC) ? 1'b0 : 1'bz);
 // Gate A5-U215A
 pullup(g39432);
 assign #GATE_DELAY g39432 = rst ? 0 : ((0|g39403|T09_) ? 1'b0 : 1'bz);
@@ -289,7 +289,7 @@ pullup(g39134);
 assign #GATE_DELAY g39134 = rst ? 0 : ((0|T05_|g39133) ? 1'b0 : 1'bz);
 // Gate A5-U210A
 pullup(Z15_);
-assign #GATE_DELAY Z15_ = rst ? 0 : ((0|g39432) ? 1'b0 : 1'bz);
+assign #GATE_DELAY Z15_ = rst ? 1'bz : ((0|g39432) ? 1'b0 : 1'bz);
 // Gate A5-U203B
 pullup(_A5_2_11XP6);
 assign #GATE_DELAY _A5_2_11XP6 = rst ? 0 : ((0|DV1_|T11_) ? 1'b0 : 1'bz);
@@ -553,7 +553,7 @@ pullup(PTWOX);
 assign #GATE_DELAY PTWOX = rst ? 0 : ((0|BR1_|T07_|CCS0_) ? 1'b0 : 1'bz);
 // Gate A5-U125B
 pullup(PINC);
-assign #GATE_DELAY PINC = rst ? 0 : ((0|T12|PINC_) ? 1'b0 : 1'bz);
+assign #GATE_DELAY PINC = rst ? 1'bz : ((0|T12|PINC_) ? 1'b0 : 1'bz);
 // Gate A5-U246B
 pullup(_A5_2_5XP9);
 assign #GATE_DELAY _A5_2_5XP9 = rst ? 0 : ((0|SHIFT_|T05_) ? 1'b0 : 1'bz);

@@ -1,4 +1,4 @@
-`timescale 100ns/1ns
+`timescale 1ns/1ps
 `default_nettype none
 
 module ROM(
@@ -6,7 +6,7 @@ module ROM(
 	DQ0, DQ1, DQ2, DQ3, DQ4, DQ5, DQ6, DQ7, DQ8, DQ9, DQ10, DQ11, DQ12, DQ13, DQ14, DQ15
 );
 
-    localparam delay = 0.4;
+    localparam delay = 40;
 
     input wire CE_;
     input wire OE_;

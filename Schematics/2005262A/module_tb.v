@@ -1,8 +1,9 @@
 // Verilog testbench created by dumbTestbench.py
-`timescale 100ns / 1ns
+`timescale 1ns / 1ps
 
 module agc;
 
+parameter GATE_DELAY = 20;
 `include "2005262A/tb.v"
 
 reg CGA4 = 0, DVST = 0, EXST0_ = 0, EXST1_ = 0, GEQZRO_ = 0, GOJAM = 0,
@@ -48,5 +49,6 @@ A4 iA4 (
   WRITE0, WRITE0_, d1XP10, d2XP3, d2XP5, d3XP2, d3XP7, d4XP11, d4XP5, d5XP11,
   d5XP28, d5XP4, d6XP5, d7XP19, d8PP4, d8XP5, d8XP6, d9XP1
 );
+defparam iA4.GATE_DELAY = GATE_DELAY;
 
 endmodule

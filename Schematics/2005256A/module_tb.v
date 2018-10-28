@@ -1,8 +1,9 @@
 // Verilog testbench created by dumbTestbench.py
-`timescale 100ns / 1ns
+`timescale 1ns / 1ps
 
 module agc;
 
+parameter GATE_DELAY = 20;
 `include "2005256A/tb.v"
 
 reg A2XG_ = 0, CAG = 0, CBG = 0, CGA9 = 0, CGG = 0, CH05 = 0, CH06 = 0,
@@ -38,5 +39,6 @@ A9 iA9 (
   PIPGYp, RL07_, RL08_, SUMA05_, SUMA06_, SUMA08_, SUMB05_, SUMB06_, SUMB07_,
   SUMB08_, WL05, WL06, WL07, WL08, XUY05_, XUY06_, Z05_, Z06_, Z07_, Z08_
 );
+defparam iA9.GATE_DELAY = GATE_DELAY;
 
 endmodule

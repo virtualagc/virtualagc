@@ -1,9 +1,9 @@
-`timescale 100ns/1ns
+`timescale 1ns/1ps
 `default_nettype none
 
 module BUFFER(OEa_, OEb_, I0a, I1a, I2a, I3a, I0b, I1b, I2b, I3b, O0a, O1a, O2a, O3a, O0b, O1b, O2b, O3b);
 
-    localparam delay = 0.2;
+    localparam delay = 20;
     input wire OEa_, I0a, I1a, I2a, I3a;
     input wire OEb_, I0b, I1b, I2b, I3b;
     output wire O0a, O1a, O2a, O3a;

@@ -20,8 +20,8 @@ output wire DBLTST, DOSCAL, MAMU, MDT01, MDT02, MDT03, MDT04, MDT05, MDT06,
   MLOAD, MNHNC, MNHRPT, MNHSBF, MONPAR, MONWBK, MRDCH, MREAD, MSBSTP, MSTP,
   MSTRT, MTCSAI, NHALGA;
 
-parameter GATE_DELAY = 0.2; // This default may be overridden at compile time.
-initial $display("Gate delay (A52) will be %f ns.", GATE_DELAY*100);
+parameter GATE_DELAY = 20; // This default may be overridden at compile time.
+initial $display("Gate delay (A52) will be %f ns.", GATE_DELAY);
 
 // Gate A52-U115B
 pullup(g98031);
@@ -85,7 +85,7 @@ pullup(MDT03);
 assign #GATE_DELAY MDT03 = rst ? 0 : ((0|g98018|g98029) ? 1'b0 : 1'bz);
 // Gate A52-U124A
 pullup(MDT04);
-assign #GATE_DELAY MDT04 = rst ? 1'bz : ((0|g98018|g98031) ? 1'b0 : 1'bz);
+assign #GATE_DELAY MDT04 = rst ? 0 : ((0|g98018|g98031) ? 1'b0 : 1'bz);
 // Gate A52-U125A
 pullup(MDT05);
 assign #GATE_DELAY MDT05 = rst ? 1'bz : ((0|g98018|g98033) ? 1'b0 : 1'bz);
@@ -136,7 +136,7 @@ pullup(g98007);
 assign #GATE_DELAY g98007 = rst ? 1'bz : ((0|MWL05) ? 1'b0 : 1'bz);
 // Gate A52-U115A
 pullup(g98030);
-assign #GATE_DELAY g98030 = rst ? 0 : ((0|MRPTAL_) ? 1'b0 : 1'bz);
+assign #GATE_DELAY g98030 = rst ? 1'bz : ((0|MRPTAL_) ? 1'b0 : 1'bz);
 // Gate A52-U108B
 pullup(g98017);
 assign #GATE_DELAY g98017 = rst ? 1'bz : ((0|g98016|g98013) ? 1'b0 : 1'bz);
@@ -163,7 +163,7 @@ pullup(g98029);
 assign #GATE_DELAY g98029 = rst ? 0 : ((0|g98028|g98047) ? 1'b0 : 1'bz);
 // Gate A52-U116B
 pullup(g98033);
-assign #GATE_DELAY g98033 = rst ? 0 : ((0|g98032|g98051) ? 1'b0 : 1'bz);
+assign #GATE_DELAY g98033 = rst ? 1'bz : ((0|g98032|g98051) ? 1'b0 : 1'bz);
 // Gate A52-U116A
 pullup(g98032);
 assign #GATE_DELAY g98032 = rst ? 0 : ((0|MWATCH_) ? 1'b0 : 1'bz);

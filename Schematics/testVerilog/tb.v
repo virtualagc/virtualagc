@@ -3,14 +3,14 @@
 reg rst = 1;
 initial begin
   $dumpfile("testVerilog.vcd");
-  $dumpvars(0, testVerilog);
+  $dumpvars(0, agc);
   
-  # 2 rst = 0;
-  # 500 $finish;
+  # 2000 rst = 0;
+  # 500000 $finish;
 end
 
 reg FS01_ = 0;
-always #4.8828125 FS01_ = !FS01_;
+always #4882.8125 FS01_ = !FS01_;
   
 initial
   $timeformat(-6, 0, " us", 10);

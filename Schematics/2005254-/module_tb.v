@@ -1,8 +1,9 @@
 // Verilog testbench created by dumbTestbench.py
-`timescale 100ns / 1ns
+`timescale 1ns / 1ps
 
 module agc;
 
+parameter GATE_DELAY = 20;
 `include "2005254-/tb.v"
 
 reg BKTF_ = 0, CA5_ = 0, CDUXD = 0, CDUXM = 0, CDUXP = 0, CDUYD = 0, CDUYM = 0,
@@ -34,5 +35,6 @@ A20 iA20 (
   C50R, C51A, C51R, C52A, C52R, C53A, C53R, C54A, C54R, C55A, C55R, CA6_,
   CG13, CG23
 );
+defparam iA20.GATE_DELAY = GATE_DELAY;
 
 endmodule

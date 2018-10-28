@@ -1,8 +1,9 @@
 // Verilog testbench created by dumbTestbench.py
-`timescale 100ns / 1ns
+`timescale 1ns / 1ps
 
 module agc;
 
+parameter GATE_DELAY = 20;
 `include "2005268A/tb.v"
 
 reg ALTEST = 0, CAURST = 0, CCH13 = 0, CCH33 = 0, CGA18 = 0, CH1111 = 0,
@@ -10,14 +11,14 @@ reg ALTEST = 0, CAURST = 0, CCH13 = 0, CCH33 = 0, CGA18 = 0, CH1111 = 0,
   CH3311 = 0, CH3313 = 0, CH3314 = 0, CH3316 = 0, CHAT11 = 0, CHAT12 = 0,
   CHAT13 = 0, CHAT14 = 0, CHBT11 = 0, CHBT12 = 0, CHBT13 = 0, CHBT14 = 0,
   CHOR11_ = 0, CHOR12_ = 0, CHOR13_ = 0, CHOR16_ = 0, CHWL01_ = 0, CHWL02_ = 0,
-  CHWL03_ = 0, CHWL04_ = 0, CHWL11_ = 0, DKEND = 0, F09A_ = 0, F09B = 0,
-  F09B_ = 0, F09D = 0, F10A = 0, F10A_ = 0, F17A = 0, F17B = 0, F5ASB2_ = 0,
-  F5BSB2_ = 0, GOJAM = 0, GTRST_ = 0, GTSET_ = 0, LRIN0 = 0, LRIN1 = 0,
-  MAINRS = 0, MARK = 0, MKEY1 = 0, MKEY2 = 0, MKEY3 = 0, MKEY4 = 0, MKEY5 = 0,
-  MRKREJ = 0, MRKRST = 0, NAVRST = 0, NKEY1 = 0, NKEY2 = 0, NKEY3 = 0,
-  NKEY4 = 0, NKEY5 = 0, RCH13_ = 0, RCH33_ = 0, RCHG_ = 0, RRIN0 = 0, RRIN1 = 0,
-  SB0_ = 0, SB2_ = 0, SBYBUT = 0, STOP = 0, T05 = 0, T11 = 0, TEMPIN = 0,
-  W1110 = 0, WCH13_ = 0, XB5_ = 0, XB6_ = 0, XT1_ = 0;
+  CHWL03_ = 0, CHWL04_ = 0, CHWL11_ = 0, F09A_ = 0, F09B = 0, F09B_ = 0,
+  F09D = 0, F10A = 0, F10A_ = 0, F17A = 0, F17B = 0, F5ASB2_ = 0, F5BSB2_ = 0,
+  GOJAM = 0, GTRST_ = 0, GTSET_ = 0, LRIN0 = 0, LRIN1 = 0, MAINRS = 0,
+  MARK = 0, MKEY1 = 0, MKEY2 = 0, MKEY3 = 0, MKEY4 = 0, MKEY5 = 0, MRKREJ = 0,
+  MRKRST = 0, NAVRST = 0, NKEY1 = 0, NKEY2 = 0, NKEY3 = 0, NKEY4 = 0, NKEY5 = 0,
+  RCH13_ = 0, RCH33_ = 0, RCHG_ = 0, RRIN0 = 0, RRIN1 = 0, SB0_ = 0, SB2_ = 0,
+  SBYBUT = 0, STOP = 0, T05 = 0, T11 = 0, TEMPIN = 0, W1110 = 0, WCH13_ = 0,
+  XB5_ = 0, XB6_ = 0, XT1_ = 0;
 
 wire CH11, CH12, CH13, CH1301, CH1302, CH1303, CH1304, CH1311, CH14, CH1501,
   CH1502, CH1503, CH1504, CH1505, CH16, CH1601, CH1602, CH1603, CH1604,
@@ -42,5 +43,6 @@ A18 iA18 (
   LRSYNC, LRXVEL, LRYVEL, LRZVEL, MKRPT, RADRPT, RCH15_, RCH16_, RNRADM,
   RNRADP, RRRANG, RRRARA, RRSYNC, SBY, SBYLIT, STNDBY, STNDBY_, TEMPIN_
 );
+defparam iA18.GATE_DELAY = GATE_DELAY;
 
 endmodule

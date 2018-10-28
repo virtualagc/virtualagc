@@ -1,8 +1,9 @@
 // Verilog testbench created by dumbTestbench.py
-`timescale 100ns / 1ns
+`timescale 1ns / 1ps
 
 module agc;
 
+parameter GATE_DELAY = 20;
 `include "2005261A/tb.v"
 
 reg ADS0 = 0, BR1 = 0, BR12B_ = 0, BR1B2_ = 0, BR1_ = 0, BR2 = 0, BR2_ = 0,
@@ -51,5 +52,6 @@ A5 iA5 (
   TRSM, TSUDO_, U2BBK, d10XP1, d10XP8, d11XP2, d2XP7, d2XP8, d3XP6, d5XP12,
   d5XP15, d5XP21, d6XP8, d7XP4, d7XP9, d9XP5
 );
+defparam iA5.GATE_DELAY = GATE_DELAY;
 
 endmodule

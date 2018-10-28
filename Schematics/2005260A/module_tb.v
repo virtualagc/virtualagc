@@ -1,9 +1,9 @@
 // Verilog testbench created by dumbTestbench.py
-`timescale 100ns / 1ns
+`timescale 1ns / 1ps
 
 module agc;
 
-parameter GATE_DELAY = 0.2;
+parameter GATE_DELAY = 20;
 `include "2005260A/tb.v"
 
 reg ALGA = 0, CGA2 = 0, GOJ1 = 0, MP3A = 0, MSTP = 0, MSTRTP = 0, SBY = 0,

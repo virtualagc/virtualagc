@@ -1,11 +1,11 @@
-`timescale 100ns/1ns
+`timescale 1ns/1ps
 `default_nettype none
 
 module RAM (
 	E_, W_, G_, UB_, LB_, A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, 
 	DQL0, DQL1, DQL2, DQL3, DQL4, DQL5, DQL6, DQL7, DQU8, DQU9, DQU10, DQU11, DQU12, DQU13, DQU14, DQU15
 );
-    localparam delay = 0.3;
+    localparam delay = 30;
 
     input wire E_;
     input wire G_;

@@ -29,8 +29,8 @@ inout wire CON3, CTPLS_, DOFILT, FILTIN, MCTRAL_, MOSCAL_, MPIPAL_, MRPTAL_,
 output wire AGCWAR, ALGA, CGCWAR, CKTAL_, DLKPLS, F08B_, G16SW_, MSTRTP,
   OSCALM, RESTRT, SBYEXT, STRT1, SYNC14_, SYNC4_, TMPCAU;
 
-parameter GATE_DELAY = 0.2; // This default may be overridden at compile time.
-initial $display("Gate delay (A13) will be %f ns.", GATE_DELAY*100);
+parameter GATE_DELAY = 20; // This default may be overridden at compile time.
+initial $display("Gate delay (A13) will be %f ns.", GATE_DELAY);
 
 // Gate A13-U102B
 pullup(DLKPLS);
@@ -40,7 +40,7 @@ pullup(g41237);
 assign #GATE_DELAY g41237 = rst ? 0 : ((0|GOJAM|g41238) ? 1'b0 : 1'bz);
 // Gate A13-U115B
 pullup(g41130);
-assign #GATE_DELAY g41130 = rst ? 0 : ((0|SUMA16_|G01A_|SUMB16_) ? 1'b0 : 1'bz);
+assign #GATE_DELAY g41130 = rst ? 1'bz : ((0|SUMA16_|G01A_|SUMB16_) ? 1'b0 : 1'bz);
 // Gate A13-U101A
 pullup(DOFILT);
 assign #GATE_DELAY DOFILT = rst ? 1'bz : ((0|g41146) ? 1'b0 : 1'bz);
@@ -100,7 +100,7 @@ pullup(g41103);
 assign #GATE_DELAY g41103 = rst ? 1'bz : ((0|g41102|g41104) ? 1'b0 : 1'bz);
 // Gate A13-U154B
 pullup(g41214);
-assign #GATE_DELAY g41214 = rst ? 0 : ((0|g41215|g41213) ? 1'b0 : 1'bz);
+assign #GATE_DELAY g41214 = rst ? 1'bz : ((0|g41215|g41213) ? 1'b0 : 1'bz);
 // Gate A13-U144B
 pullup(g41229);
 assign #GATE_DELAY g41229 = rst ? 0 : ((0|TMPOUT|TEMPIN_) ? 1'b0 : 1'bz);
@@ -133,16 +133,16 @@ pullup(MOSCAL_);
 assign #GATE_DELAY MOSCAL_ = rst ? 1'bz : ((0|STRT2) ? 1'b0 : 1'bz);
 // Gate A13-U117A
 pullup(G16SW_);
-assign #GATE_DELAY G16SW_ = rst ? 1'bz : ((0|g41130|g41129) ? 1'b0 : 1'bz);
+assign #GATE_DELAY G16SW_ = rst ? 0 : ((0|g41130|g41129) ? 1'b0 : 1'bz);
 // Gate A13-U141B
 pullup(OSCALM);
 assign #GATE_DELAY OSCALM = rst ? 1'bz : ((0|g41232|CCH33) ? 1'b0 : 1'bz);
 // Gate A13-U139B
 pullup(SBYEXT);
-assign #GATE_DELAY SBYEXT = rst ? 1'bz : ((0|g41234) ? 1'b0 : 1'bz);
+assign #GATE_DELAY SBYEXT = rst ? 0 : ((0|g41234) ? 1'b0 : 1'bz);
 // Gate A13-U153B
 pullup(g41215);
-assign #GATE_DELAY g41215 = rst ? 1'bz : ((0|g41214|F08B) ? 1'b0 : 1'bz);
+assign #GATE_DELAY g41215 = rst ? 0 : ((0|g41214|F08B) ? 1'b0 : 1'bz);
 // Gate A13-U107B
 pullup(g41149);
 assign #GATE_DELAY g41149 = rst ? 0 : ((0|g41148|g41150) ? 1'b0 : 1'bz);
@@ -151,7 +151,7 @@ pullup(g41126);
 assign #GATE_DELAY g41126 = rst ? 0 : ((0|F10A_|g41124) ? 1'b0 : 1'bz);
 // Gate A13-U106A
 pullup(g41142);
-assign #GATE_DELAY g41142 = rst ? 0 : ((0|g41141|INKL) ? 1'b0 : 1'bz);
+assign #GATE_DELAY g41142 = rst ? 1'bz : ((0|g41141|INKL) ? 1'b0 : 1'bz);
 // Gate A13-U158A
 pullup(g41205);
 assign #GATE_DELAY g41205 = rst ? 0 : ((0|F05A_|g41203|NHVFAL) ? 1'b0 : 1'bz);
@@ -184,16 +184,16 @@ pullup(g41150);
 assign #GATE_DELAY g41150 = rst ? 1'bz : ((0|F07A|g41149) ? 1'b0 : 1'bz);
 // Gate A13-U114A A13-U114B
 pullup(XT0_);
-assign #GATE_DELAY XT0_ = rst ? 0 : ((0|XT0) ? 1'b0 : 1'bz);
+assign #GATE_DELAY XT0_ = rst ? 1'bz : ((0|XT0) ? 1'b0 : 1'bz);
 // Gate A13-U107A
 pullup(g41141);
-assign #GATE_DELAY g41141 = rst ? 1'bz : ((0|g41142|g41140) ? 1'b0 : 1'bz);
+assign #GATE_DELAY g41141 = rst ? 0 : ((0|g41142|g41140) ? 1'b0 : 1'bz);
 // Gate A13-U103B A13-U113A A13-U113B A13-U108A A13-U108B
 pullup(CTPLS_);
 assign #GATE_DELAY CTPLS_ = rst ? 1'bz : ((0|CDUXD|CDUYD|CDUZD|THRSTD|TRUND|SHAFTD|ALTM|OTLNKM|EMSD|RNRADP|GYROD|RNRADM|INLNKM|BMAGZM|INLNKP) ? 1'b0 : 1'bz);
 // Gate A13-U111B
 pullup(g41138);
-assign #GATE_DELAY g41138 = rst ? 1'bz : ((0|g41139|g41137) ? 1'b0 : 1'bz);
+assign #GATE_DELAY g41138 = rst ? 0 : ((0|g41139|g41137) ? 1'b0 : 1'bz);
 // Gate A13-U127B
 pullup(MPIPAL_);
 assign #GATE_DELAY MPIPAL_ = rst ? 1'bz : ((0|PIPAFL) ? 1'b0 : 1'bz);
@@ -232,7 +232,7 @@ pullup(g41224);
 assign #GATE_DELAY g41224 = rst ? 1'bz : ((0|SCAFAL|FLTOUT) ? 1'b0 : 1'bz);
 // Gate A13-U139A
 pullup(g41235);
-assign #GATE_DELAY g41235 = rst ? 1'bz : ((0|T10|g41234) ? 1'b0 : 1'bz);
+assign #GATE_DELAY g41235 = rst ? 0 : ((0|T10|g41234) ? 1'b0 : 1'bz);
 // Gate A13-U124A
 pullup(g41110);
 assign #GATE_DELAY g41110 = rst ? 1'bz : ((0|F14B|g41109) ? 1'b0 : 1'bz);
@@ -247,31 +247,31 @@ pullup(g41140);
 assign #GATE_DELAY g41140 = rst ? 0 : ((0|NOTEST|g41138|T09_) ? 1'b0 : 1'bz);
 // Gate A13-U138B
 pullup(g41238);
-assign #GATE_DELAY g41238 = rst ? 0 : ((0|ERRST|g41237|SBYEXT) ? 1'b0 : 1'bz);
+assign #GATE_DELAY g41238 = rst ? 1'bz : ((0|ERRST|g41237|SBYEXT) ? 1'b0 : 1'bz);
 // Gate A13-U137A
 pullup(g41239);
-assign #GATE_DELAY g41239 = rst ? 1'bz : ((0|ALTEST|g41238) ? 1'b0 : 1'bz);
+assign #GATE_DELAY g41239 = rst ? 0 : ((0|ALTEST|g41238) ? 1'b0 : 1'bz);
 // Gate A13-U152A
 pullup(STRT1);
 assign #GATE_DELAY STRT1 = rst ? 0 : ((0|g41247|g41245) ? 1'b0 : 1'bz);
 // Gate A13-U111A
 pullup(g41139);
-assign #GATE_DELAY g41139 = rst ? 0 : ((0|INKL|g41138) ? 1'b0 : 1'bz);
+assign #GATE_DELAY g41139 = rst ? 1'bz : ((0|INKL|g41138) ? 1'b0 : 1'bz);
 // Gate A13-U147A
 pullup(MSCAFL_);
 assign #GATE_DELAY MSCAFL_ = rst ? 1'bz : ((0|SCAFAL) ? 1'b0 : 1'bz);
 // Gate A13-U151B
 pullup(FILTIN);
-assign #GATE_DELAY FILTIN = rst ? 1'bz : ((0|g41214) ? 1'b0 : 1'bz);
+assign #GATE_DELAY FILTIN = rst ? 0 : ((0|g41214) ? 1'b0 : 1'bz);
 // Gate A13-U145A
 pullup(WARN);
 assign #GATE_DELAY WARN = rst ? 0 : ((0|g41224) ? 1'b0 : 1'bz);
 // Gate A13-U123A
 pullup(g41108);
-assign #GATE_DELAY g41108 = rst ? 0 : ((0|g41107|F14B) ? 1'b0 : 1'bz);
+assign #GATE_DELAY g41108 = rst ? 1'bz : ((0|g41107|F14B) ? 1'b0 : 1'bz);
 // Gate A13-U123B
 pullup(g41107);
-assign #GATE_DELAY g41107 = rst ? 1'bz : ((0|IIP|g41108) ? 1'b0 : 1'bz);
+assign #GATE_DELAY g41107 = rst ? 0 : ((0|IIP|g41108) ? 1'b0 : 1'bz);
 // Gate A13-U150B
 pullup(SYNC4_);
 assign #GATE_DELAY SYNC4_ = rst ? 1'bz : ((0|g41218) ? 1'b0 : 1'bz);
@@ -286,10 +286,10 @@ pullup(MCTRAL_);
 assign #GATE_DELAY MCTRAL_ = rst ? 1'bz : ((0|g41143|g41151) ? 1'b0 : 1'bz);
 // Gate A13-U119B
 pullup(g41124);
-assign #GATE_DELAY g41124 = rst ? 0 : ((0|F10B|g41123) ? 1'b0 : 1'bz);
+assign #GATE_DELAY g41124 = rst ? 1'bz : ((0|F10B|g41123) ? 1'b0 : 1'bz);
 // Gate A13-U140A
 pullup(g41234);
-assign #GATE_DELAY g41234 = rst ? 0 : ((0|SBY|g41235) ? 1'b0 : 1'bz);
+assign #GATE_DELAY g41234 = rst ? 1'bz : ((0|SBY|g41235) ? 1'b0 : 1'bz);
 // Gate A13-U119A
 pullup(g41122);
 assign #GATE_DELAY g41122 = rst ? 1'bz : ((0|F10B|g41121) ? 1'b0 : 1'bz);
@@ -298,7 +298,7 @@ pullup(g41121);
 assign #GATE_DELAY g41121 = rst ? 0 : ((0|TC0|TCF0|g41122) ? 1'b0 : 1'bz);
 // Gate A13-U137B
 pullup(RESTRT);
-assign #GATE_DELAY RESTRT = rst ? 0 : ((0|g41239) ? 1'b0 : 1'bz);
+assign #GATE_DELAY RESTRT = rst ? 1'bz : ((0|g41239) ? 1'b0 : 1'bz);
 // Gate A13-U129B
 pullup(g41101);
 assign #GATE_DELAY g41101 = rst ? 1'bz : ((0|MSTRT) ? 1'b0 : 1'bz);
@@ -307,7 +307,7 @@ pullup(g41102);
 assign #GATE_DELAY g41102 = rst ? 0 : ((0|g41101|F05B_) ? 1'b0 : 1'bz);
 // Gate A13-U118B
 pullup(g41123);
-assign #GATE_DELAY g41123 = rst ? 1'bz : ((0|g41120|g41124) ? 1'b0 : 1'bz);
+assign #GATE_DELAY g41123 = rst ? 0 : ((0|g41120|g41124) ? 1'b0 : 1'bz);
 // End of NOR gates
 
 

@@ -1,8 +1,9 @@
 // Verilog testbench created by dumbTestbench.py
-`timescale 100ns / 1ns
+`timescale 1ns / 1ps
 
 module agc;
 
+parameter GATE_DELAY = 20;
 `include "2005252A/tb.v"
 
 reg A2X_ = 0, CGA7 = 0, CGMC = 0, CI = 0, CT_ = 0, CYL_ = 0, CYR_ = 0,
@@ -42,5 +43,6 @@ A7 iA7 (
   YT0, YT0_, YT1, YT1_, YT2, YT2_, YT3, YT3_, YT4, YT4_, YT5, YT5_, YT6,
   YT6_, YT7, YT7_
 );
+defparam iA7.GATE_DELAY = GATE_DELAY;
 
 endmodule

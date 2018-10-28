@@ -1,16 +1,17 @@
 // Verilog testbench created by dumbTestbench.py
-`timescale 100ns / 1ns
+`timescale 1ns / 1ps
 
 module agc;
 
+parameter GATE_DELAY = 20;
 `include "2005271-/tb.v"
 
 reg CCH34 = 0, CCH35 = 0, CCHG_ = 0, CGA22 = 0, CHWL01_ = 0, CHWL02_ = 0,
   CHWL03_ = 0, CHWL04_ = 0, CHWL05_ = 0, CHWL06_ = 0, CHWL07_ = 0, CHWL08_ = 0,
   CHWL09_ = 0, CHWL10_ = 0, CHWL11_ = 0, CHWL12_ = 0, CHWL13_ = 0, CHWL14_ = 0,
-  CHWL16_ = 0, DKBSNC = 0, DKSTRT = 0, END = 0, F12B = 0, FS13 = 0, FS14 = 0,
-  GOJAM = 0, HIGH0_ = 0, HIGH1_ = 0, HIGH2_ = 0, HIGH3_ = 0, PC15_ = 0,
-  WCH34_ = 0, WCH35_ = 0, WCHG_ = 0, XB3_ = 0, XB4_ = 0, XT1_ = 0;
+  CHWL16_ = 0, END = 0, F12B = 0, FS13 = 0, FS14 = 0, GOJAM = 0, HIGH0_ = 0,
+  HIGH1_ = 0, HIGH2_ = 0, HIGH3_ = 0, PC15_ = 0, WCH34_ = 0, WCH35_ = 0,
+  WCHG_ = 0, XB3_ = 0, XB4_ = 0, XT1_ = 0;
 
 wire ADVCTR, BSYNC_, CCH13, CCH14, CH1307, DATA_, DKCTR1, DKCTR1_, DKCTR2,
   DKCTR2_, DKCTR3, DKCTR3_, DKCTR4, DKCTR4_, DKCTR5, DKCTR5_, DKDATA, DKDATB,
@@ -29,5 +30,6 @@ A22 iA22 (
   CH1307, DKCTR1, DKCTR1_, DKCTR2_, DKCTR4, DKCTR4_, DKCTR5, DKCTR5_, DKDATA,
   DKDATB, F14H, RCH14_, WCH14_, d16CNT, d1CNT, d32CNT
 );
+defparam iA22.GATE_DELAY = GATE_DELAY;
 
 endmodule

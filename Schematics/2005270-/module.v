@@ -44,8 +44,8 @@ output wire ALRT0, ALRT1, ALT0, ALT1, ALTM, ALTSNC, BMAGXM, BMAGXP, BMAGYM,
   RHCGO, SH3MS_, T1P, T2P, T3P, T4P, T5P, T6P, THRSTD, THRSTm, THRSTp, UPRUPT,
   W1110;
 
-parameter GATE_DELAY = 0.2; // This default may be overridden at compile time.
-initial $display("Gate delay (A19) will be %f ns.", GATE_DELAY*100);
+parameter GATE_DELAY = 20; // This default may be overridden at compile time.
+initial $display("Gate delay (A19) will be %f ns.", GATE_DELAY);
 
 // Gate A19-U155B
 pullup(g46231);
@@ -439,10 +439,10 @@ pullup(CH1403);
 assign #GATE_DELAY CH1403 = rst ? 0 : ((0|g46121|RCH14_) ? 1'b0 : 1'bz);
 // Gate A19-U118A
 pullup(g46130);
-assign #GATE_DELAY g46130 = rst ? 1'bz : ((0|g46128|g46131) ? 1'b0 : 1'bz);
+assign #GATE_DELAY g46130 = rst ? 0 : ((0|g46128|g46131) ? 1'b0 : 1'bz);
 // Gate A19-U118B
 pullup(g46131);
-assign #GATE_DELAY g46131 = rst ? 0 : ((0|GTONE|g46130) ? 1'b0 : 1'bz);
+assign #GATE_DELAY g46131 = rst ? 1'bz : ((0|GTONE|g46130) ? 1'b0 : 1'bz);
 // Gate A19-U210A
 pullup(CH1408);
 assign #GATE_DELAY CH1408 = rst ? 0 : ((0|g46411|RCH14_) ? 1'b0 : 1'bz);
@@ -472,7 +472,7 @@ pullup(g46354);
 assign #GATE_DELAY g46354 = rst ? 0 : ((0|GATEZ_|g46352|F5ASB2_) ? 1'b0 : 1'bz);
 // Gate A19-U120A
 pullup(ALTSNC);
-assign #GATE_DELAY ALTSNC = rst ? 0 : ((0|g46133) ? 1'b0 : 1'bz);
+assign #GATE_DELAY ALTSNC = rst ? 1'bz : ((0|g46133) ? 1'b0 : 1'bz);
 // Gate A19-U113A
 pullup(ALRT0);
 assign #GATE_DELAY ALRT0 = rst ? 0 : ((0|g46114|g46108) ? 1'b0 : 1'bz);
@@ -493,7 +493,7 @@ pullup(g46329);
 assign #GATE_DELAY g46329 = rst ? 1'bz : ((0|F07B|g46328) ? 1'b0 : 1'bz);
 // Gate A19-U119A
 pullup(g46133);
-assign #GATE_DELAY g46133 = rst ? 1'bz : ((0|g46131|g46128|g46125) ? 1'b0 : 1'bz);
+assign #GATE_DELAY g46133 = rst ? 0 : ((0|g46131|g46128|g46125) ? 1'b0 : 1'bz);
 // Gate A19-U107B
 pullup(g46113);
 assign #GATE_DELAY g46113 = rst ? 0 : ((0|CHWL02_|WCH14_) ? 1'b0 : 1'bz);

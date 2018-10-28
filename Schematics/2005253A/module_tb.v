@@ -1,8 +1,9 @@
 // Verilog testbench created by dumbTestbench.py
-`timescale 100ns / 1ns
+`timescale 1ns / 1ps
 
 module agc;
 
+parameter GATE_DELAY = 20;
 `include "2005253A/tb.v"
 
 reg CAD4 = 0, CAD5 = 0, CAD6 = 0, CGA12 = 0, CGG = 0, CSG = 0, EB10 = 0,
@@ -43,5 +44,6 @@ A12 iA12 (
   S05_, S06, S06_, S07, S07_, S08, S08_, S09, S10, S11, S11_, S12, S12_,
   SHIFT, SHIFT_, SR_, WGA_
 );
+defparam iA12.GATE_DELAY = GATE_DELAY;
 
 endmodule

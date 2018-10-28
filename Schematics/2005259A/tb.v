@@ -7,12 +7,12 @@ initial
     $dumpfile(DUMPFILE);
     $dumpvars(0, agc);
 
-    # 1 rst = 0;
+    # 1000 rst = 0;
     # RUNLENGTH $finish;
   end
 
 reg FS01_ = 1;
-always #4.8828125 FS01_ = !FS01_;
+always #488.28125 FS01_ = !FS01_;
 
 initial
   $timeformat(-6, 0, " us", 10);

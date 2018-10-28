@@ -48,8 +48,8 @@ output wire CCH10, CCH11, CH3201, CH3202, CH3203, CH3204, CH3205, CH3206,
   RLYB06, RLYB07, RLYB08, RLYB09, RLYB10, RLYB11, RYWD12, RYWD13, RYWD14,
   RYWD16, TRP31A, TRP31B, TRP32, WCH10_, WCH11_;
 
-parameter GATE_DELAY = 0.2; // This default may be overridden at compile time.
-initial $display("Gate delay (A17) will be %f ns.", GATE_DELAY*100);
+parameter GATE_DELAY = 20; // This default may be overridden at compile time.
+initial $display("Gate delay (A17) will be %f ns.", GATE_DELAY);
 
 // Gate A17-U121B
 pullup(g44219);
@@ -188,7 +188,7 @@ pullup(g44343);
 assign #GATE_DELAY g44343 = rst ? 0 : ((0|WCH10_|CHWL08_) ? 1'b0 : 1'bz);
 // Gate A17-U259B
 pullup(XB0);
-assign #GATE_DELAY XB0 = rst ? 1'bz : ((0|S01|S02) ? 1'b0 : 1'bz);
+assign #GATE_DELAY XB0 = rst ? 0 : ((0|S01|S02) ? 1'b0 : 1'bz);
 // Gate A17-U254A A17-U255A A17-U253B
 pullup(WCH11_);
 assign #GATE_DELAY WCH11_ = rst ? 1'bz : ((0|g44444) ? 1'b0 : 1'bz);

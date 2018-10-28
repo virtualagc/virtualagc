@@ -46,8 +46,8 @@ output wire ALTEST, CCH07, CCH34, CCH35, CDUXD, CDUXDM, CDUXDP, CDUYD, CDUYDM,
   SHAFTD, SHFTDM, SHFTDP, T6ON_, T7PHS4_, TRNDM, TRNDP, TRUND, WCH07_, WCH34_,
   WCH35_;
 
-parameter GATE_DELAY = 0.2; // This default may be overridden at compile time.
-initial $display("Gate delay (A23) will be %f ns.", GATE_DELAY*100);
+parameter GATE_DELAY = 20; // This default may be overridden at compile time.
+initial $display("Gate delay (A23) will be %f ns.", GATE_DELAY);
 
 // Gate A23-U131A
 pullup(g48110);
@@ -117,7 +117,7 @@ pullup(CH0706);
 assign #GATE_DELAY CH0706 = rst ? 0 : ((0|g48406|RCH07_) ? 1'b0 : 1'bz);
 // Gate A23-U129A
 pullup(NOYP);
-assign #GATE_DELAY NOYP = rst ? 1'bz : ((0|PIPGYp|g48255) ? 1'b0 : 1'bz);
+assign #GATE_DELAY NOYP = rst ? 0 : ((0|PIPGYp|g48255) ? 1'b0 : 1'bz);
 // Gate A23-U242A
 pullup(CH1113);
 assign #GATE_DELAY CH1113 = rst ? 0 : ((0|g48424|RCH11_) ? 1'b0 : 1'bz);
@@ -141,7 +141,7 @@ pullup(g48347);
 assign #GATE_DELAY g48347 = rst ? 1'bz : ((0|g48346) ? 1'b0 : 1'bz);
 // Gate A23-U123B
 pullup(g48235);
-assign #GATE_DELAY g48235 = rst ? 0 : ((0|g48233|g48234) ? 1'b0 : 1'bz);
+assign #GATE_DELAY g48235 = rst ? 1'bz : ((0|g48233|g48234) ? 1'b0 : 1'bz);
 // Gate A23-U155B
 pullup(g48138);
 assign #GATE_DELAY g48138 = rst ? 1'bz : ((0|g48136|g48137) ? 1'b0 : 1'bz);
@@ -150,7 +150,7 @@ pullup(g48148);
 assign #GATE_DELAY g48148 = rst ? 1'bz : ((0|g48146|g48147) ? 1'b0 : 1'bz);
 // Gate A23-U123A
 pullup(g48234);
-assign #GATE_DELAY g48234 = rst ? 1'bz : ((0|g48232|g48235) ? 1'b0 : 1'bz);
+assign #GATE_DELAY g48234 = rst ? 0 : ((0|g48232|g48235) ? 1'b0 : 1'bz);
 // Gate A23-U212B
 pullup(g48357);
 assign #GATE_DELAY g48357 = rst ? 1'bz : ((0|OCTAD5) ? 1'b0 : 1'bz);
@@ -261,7 +261,7 @@ pullup(DATA_);
 assign #GATE_DELAY DATA_ = rst ? 1'bz : ((0|g48116|g48115) ? 1'b0 : 1'bz);
 // Gate A23-U121B
 pullup(g48239);
-assign #GATE_DELAY g48239 = rst ? 1'bz : ((0|g48238|g48237) ? 1'b0 : 1'bz);
+assign #GATE_DELAY g48239 = rst ? 0 : ((0|g48238|g48237) ? 1'b0 : 1'bz);
 // Gate A23-U236A
 pullup(g48411);
 assign #GATE_DELAY g48411 = rst ? 0 : ((0|E7_|CCH07) ? 1'b0 : 1'bz);
@@ -306,7 +306,7 @@ pullup(g48231);
 assign #GATE_DELAY g48231 = rst ? 1'bz : ((0|PIPGYm) ? 1'b0 : 1'bz);
 // Gate A23-U121A
 pullup(g48238);
-assign #GATE_DELAY g48238 = rst ? 0 : ((0|g48239|g48236) ? 1'b0 : 1'bz);
+assign #GATE_DELAY g48238 = rst ? 1'bz : ((0|g48239|g48236) ? 1'b0 : 1'bz);
 // Gate A23-U138B A23-U139B
 pullup(g48102);
 assign #GATE_DELAY g48102 = rst ? 0 : ((0|NOXM|NOXP|NOYP|NOZM|NOZP|NOYM) ? 1'b0 : 1'bz);
@@ -363,7 +363,7 @@ pullup(g48316);
 assign #GATE_DELAY g48316 = rst ? 0 : ((0|g48357|XB1_) ? 1'b0 : 1'bz);
 // Gate A23-U147A
 pullup(NOXM);
-assign #GATE_DELAY NOXM = rst ? 1'bz : ((0|PIPGXm|g48150) ? 1'b0 : 1'bz);
+assign #GATE_DELAY NOXM = rst ? 0 : ((0|PIPGXm|g48150) ? 1'b0 : 1'bz);
 // Gate A23-U148A
 pullup(NOXP);
 assign #GATE_DELAY NOXP = rst ? 1'bz : ((0|PIPGXp|g48152) ? 1'b0 : 1'bz);
@@ -381,13 +381,13 @@ pullup(g48338);
 assign #GATE_DELAY g48338 = rst ? 1'bz : ((0|g48337) ? 1'b0 : 1'bz);
 // Gate A23-U147B
 pullup(g48150);
-assign #GATE_DELAY g48150 = rst ? 0 : ((0|NOXM|F18AX) ? 1'b0 : 1'bz);
+assign #GATE_DELAY g48150 = rst ? 1'bz : ((0|NOXM|F18AX) ? 1'b0 : 1'bz);
 // Gate A23-U201A
 pullup(g48360);
 assign #GATE_DELAY g48360 = rst ? 0 : ((0) ? 1'b0 : 1'bz);
 // Gate A23-U129B
 pullup(g48255);
-assign #GATE_DELAY g48255 = rst ? 0 : ((0|NOYP|F18AX) ? 1'b0 : 1'bz);
+assign #GATE_DELAY g48255 = rst ? 1'bz : ((0|NOYP|F18AX) ? 1'b0 : 1'bz);
 // Gate A23-U254B
 pullup(T6ON_);
 assign #GATE_DELAY T6ON_ = rst ? 1'bz : ((0|g48448|g48446) ? 1'b0 : 1'bz);
@@ -486,7 +486,7 @@ pullup(g48307);
 assign #GATE_DELAY g48307 = rst ? 1'bz : ((0|g48306) ? 1'b0 : 1'bz);
 // Gate A23-U204A A23-U206A
 pullup(POUT_);
-assign #GATE_DELAY POUT_ = rst ? 1'bz : ((0|POUT) ? 1'b0 : 1'bz);
+assign #GATE_DELAY POUT_ = rst ? 0 : ((0|POUT) ? 1'b0 : 1'bz);
 // Gate A23-U122A
 pullup(g48236);
 assign #GATE_DELAY g48236 = rst ? 0 : ((0|g48229|g48234) ? 1'b0 : 1'bz);

@@ -1,18 +1,19 @@
 // Verilog testbench created by dumbTestbench.py
-`timescale 100ns / 1ns
+`timescale 1ns / 1ps
 
 module agc;
 
+parameter GATE_DELAY = 20;
 `include "2005270-/tb.v"
 
-reg BLKUPL_ = 0, BMGXM = 0, BMGXP = 0, BMGYM = 0, BMGYP = 0, BMGZM = 0,
+reg BLKUPL_ = 1, BMGXM = 0, BMGXP = 0, BMGYM = 0, BMGYP = 0, BMGZM = 0,
   BMGZP = 0, BR1 = 0, BR1_ = 0, C45R = 0, CA2_ = 0, CA4_ = 0, CA5_ = 0,
   CA6_ = 0, CCH11 = 0, CCH13 = 0, CCH14 = 0, CCHG_ = 0, CGA19 = 0, CHWL01_ = 0,
   CHWL02_ = 0, CHWL03_ = 0, CHWL04_ = 0, CHWL05_ = 0, CHWL06_ = 0, CHWL07_ = 0,
   CHWL08_ = 0, CHWL09_ = 0, CHWL10_ = 0, CHWL11_ = 0, CHWL12_ = 0, CNTRSB_ = 0,
   CSG = 0, CXB0_ = 0, CXB7_ = 0, F04A = 0, F05A_ = 0, F05B_ = 0, F06B = 0,
   F07B = 0, F07C_ = 0, F07D_ = 0, F09B = 0, F10A = 0, F10B = 0, F7CSB1_ = 0,
-  FS10 = 0, GATEX_ = 0, GATEY_ = 0, GATEZ_ = 0, GOJAM = 0, GTONE = 0, GTSET = 0,
+  FS10 = 0, GATEX_ = 1, GATEY_ = 1, GATEZ_ = 1, GOJAM = 0, GTONE = 0, GTSET = 0,
   GTSET_ = 0, MOUT_ = 0, OVF_ = 0, POUT_ = 0, RCH11_ = 0, RCH13_ = 0, RCH14_ = 0,
   RCH33_ = 0, SB0_ = 0, SB1_ = 0, SB2_ = 0, SHINC_ = 0, SIGNX = 0, SIGNY = 0,
   SIGNZ = 0, T06_ = 0, T6ON_ = 0, UPL0 = 0, UPL1 = 0, WCH11_ = 0, WCH13_ = 0,
@@ -49,5 +50,6 @@ A19 iA19 (
   RHCGO, SH3MS_, T1P, T2P, T3P, T4P, T5P, T6P, THRSTD, THRSTm, THRSTp, UPRUPT,
   W1110
 );
+defparam iA19.GATE_DELAY = GATE_DELAY;
 
 endmodule

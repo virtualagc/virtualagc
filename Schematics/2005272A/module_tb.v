@@ -1,8 +1,9 @@
 // Verilog testbench created by dumbTestbench.py
-`timescale 100ns / 1ns
+`timescale 1ns / 1ps
 
 module agc;
 
+parameter GATE_DELAY = 20;
 `include "2005272A/tb.v"
 
 reg BOTHZ = 0, CCH11 = 0, CCH12 = 0, CCH13 = 0, CCH14 = 0, CCH33 = 0, CCHG_ = 0,
@@ -54,5 +55,6 @@ A23 iA23 (
   OT1116, PIPAFL, PIPXM, PIPXP, PIPYM, PIPYP, RCH07_, SHAFTD, SHFTDM, SHFTDP,
   T6ON_, T7PHS4_, TRNDM, TRNDP, TRUND, WCH07_, WCH34_, WCH35_
 );
+defparam iA23.GATE_DELAY = GATE_DELAY;
 
 endmodule

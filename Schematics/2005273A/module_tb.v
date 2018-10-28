@@ -1,8 +1,9 @@
 // Verilog testbench created by dumbTestbench.py
-`timescale 100ns / 1ns
+`timescale 1ns / 1ps
 
 module agc;
 
+parameter GATE_DELAY = 20;
 `include "2005273A/tb.v"
 
 reg A15_ = 0, A16_ = 0, BMAGXM = 0, BMAGXP = 0, BMAGYM = 0, BMAGYP = 0,
@@ -58,5 +59,6 @@ A24 iA24 (
   U2BBKG_, US2SG, WATCH, WATCHP, WATCH_, WCHG_, d12KPPS, d25KPPS, d3200A,
   d3200B, d3200C, d3200D, d800RST, d800SET
 );
+defparam iA24.GATE_DELAY = GATE_DELAY;
 
 endmodule

@@ -31,8 +31,8 @@ output wire CCH05, CCH06, CH1208, CH1209, CH1210, CH1211, CH1212, CH1213,
   RCpYpR, RCpZmR, RCpZpR, S4BOFF, S4BSEQ, S4BTAK, STARON, TMPOUT, TVCNAB,
   UPLACT, VNFLSH, WCH05_, WCH06_, ZEROPT, ZIMCDU, ZOPCDU;
 
-parameter GATE_DELAY = 0.2; // This default may be overridden at compile time.
-initial $display("Gate delay (A16) will be %f ns.", GATE_DELAY*100);
+parameter GATE_DELAY = 20; // This default may be overridden at compile time.
+initial $display("Gate delay (A16) will be %f ns.", GATE_DELAY);
 
 // Gate A16-U247A
 pullup(g43434);

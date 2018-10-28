@@ -1,8 +1,9 @@
 // Verilog testbench created by dumbTestbench.py
-`timescale 100ns / 1ns
+`timescale 1ns / 1ps
 
 module agc;
 
+parameter GATE_DELAY = 20;
 `include "2005250-/tb.v"
 
 reg ALTM = 0, BMAGXM = 0, BMAGXP = 0, BMAGYM = 0, BMAGYP = 0, BMAGZM = 0,
@@ -42,5 +43,6 @@ A21 iA21 (
   FETCH0_, FETCH1, INKL, INKL_, MON_, MONpCH, RQ_, SHANC, SHANC_, SHINC,
   SHINC_, STFET1_, STORE1, STORE1_, d30SUM, d50SUM
 );
+defparam iA21.GATE_DELAY = GATE_DELAY;
 
 endmodule

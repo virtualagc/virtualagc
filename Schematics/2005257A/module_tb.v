@@ -1,20 +1,21 @@
 // Verilog testbench created by dumbTestbench.py
-`timescale 100ns / 1ns
+`timescale 1ns / 1ps
 
 module agc;
 
+parameter GATE_DELAY = 20;
 `include "2005257A/tb.v"
 
 reg A2XG_ = 0, BK16 = 0, CAG = 0, CBG = 0, CGA10 = 0, CGG = 0, CH09 = 0,
   CH10 = 0, CH11 = 0, CH12 = 0, CI09_ = 0, CLG1G = 0, CLXC = 0, CO10 = 0,
   CQG = 0, CUG = 0, CZG = 0, G13_ = 0, G14_ = 0, G15_ = 0, G2LSG_ = 0,
   L08_ = 0, L2GDG_ = 0, MDT09 = 0, MDT10 = 0, MDT11 = 0, MDT12 = 0, MONEX = 0,
-  PIPAXm = 0, PIPAXp = 0, PIPAYm_ = 0, PIPAYp = 0, PIPAZm_ = 0, PIPAZp_ = 0,
-  PIPSAM_ = 0, R1C = 0, RAG_ = 0, RBHG_ = 0, RBLG_ = 0, RCG_ = 0, RGG_ = 0,
-  RLG_ = 0, RQG_ = 0, RULOG_ = 0, RZG_ = 0, SA09 = 0, SA10 = 0, SA11 = 0,
-  SA12 = 0, WAG_ = 0, WALSG_ = 0, WBG_ = 0, WG1G_ = 0, WG3G_ = 0, WG4G_ = 0,
-  WHOMPA = 0, WL08_ = 0, WL13_ = 0, WL14_ = 0, WLG_ = 0, WQG_ = 0, WYDG_ = 0,
-  WYLOG_ = 0, WZG_ = 0, XUY13_ = 0, XUY14_ = 0;
+  PIPAYm_ = 0, PIPAZm_ = 0, PIPAZp_ = 0, PIPSAM_ = 0, R1C = 0, RAG_ = 0,
+  RBHG_ = 0, RBLG_ = 0, RCG_ = 0, RGG_ = 0, RLG_ = 0, RQG_ = 0, RULOG_ = 0,
+  RZG_ = 0, SA09 = 0, SA10 = 0, SA11 = 0, SA12 = 0, WAG_ = 0, WALSG_ = 0,
+  WBG_ = 0, WG1G_ = 0, WG3G_ = 0, WG4G_ = 0, WHOMPA = 0, WL08_ = 0, WL13_ = 0,
+  WL14_ = 0, WLG_ = 0, WQG_ = 0, WYDG_ = 0, WYLOG_ = 0, WZG_ = 0, XUY13_ = 0,
+  XUY14_ = 0;
 
 wire A09_, A10_, A11_, A12_, CI10_, CI11_, CI12_, CI13_, CO04, CO12, CO14,
   G09, G09_, G10, G10_, G11, G11_, G12, G12_, GEM09, GEM10, GEM11, GEM12,
@@ -39,5 +40,6 @@ A10 iA10 (
   SUMB11_, SUMB12_, WL09, WL10, WL11, WL12, XUY09_, XUY10_, Z09_, Z10_, Z11_,
   Z12_
 );
+defparam iA10.GATE_DELAY = GATE_DELAY;
 
 endmodule

@@ -7,13 +7,13 @@ initial
   begin
     $dumpfile("module.lxt");
     $dumpvars(0, agc);
-    # 1 rst = 0;
-    # 50 STRT2 = 0;
-    # 1000 $finish;
+    # 100 rst = 0;
+    # 5000 STRT2 = 0;
+    # 100000 $finish;
   end
 
 reg CLOCK = 0;
-always #2.44140625 CLOCK = !CLOCK;
+always #244.140625 CLOCK = !CLOCK;
 
 initial $timeformat(-9, 0, " ns", 10);
 initial $monitor("%t: %d", $time, CLOCK);

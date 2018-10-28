@@ -1,8 +1,9 @@
 // Verilog testbench created by dumbTestbench.py
-`timescale 100ns / 1ns
+`timescale 1ns / 1ps
 
 module agc;
 
+parameter GATE_DELAY = 20;
 `include "2005266-/tb.v"
 
 reg CCH11 = 0, CCHG_ = 0, CGA16 = 0, CH0705 = 0, CH0706 = 0, CH0707 = 0,
@@ -36,5 +37,6 @@ A16 iA16 (
   RCpZmR, RCpZpR, S4BOFF, S4BSEQ, S4BTAK, STARON, TMPOUT, TVCNAB, UPLACT,
   VNFLSH, WCH05_, WCH06_, ZEROPT, ZIMCDU, ZOPCDU
 );
+defparam iA16.GATE_DELAY = GATE_DELAY;
 
 endmodule
