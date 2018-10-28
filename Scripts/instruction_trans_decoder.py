@@ -108,6 +108,12 @@ def decode_instruction(opcode, ext):
 
     return '???'
 
+def getS():
+    S = 0
+    for i in range(1,13):
+        S = S | signals['S%02u' % i] << (i-1)
+    return S
+
 dump_lines = []
 while True:
     time = 0
@@ -173,19 +179,19 @@ while True:
         elif sig_name == 'RPTFRC' and state == 1:
             staged_inst = 'RUPT'
         elif sig_name == 'PINC' and state == 1:
-            print('#%u PINC' % time)
+            print('#%u PINC %04o' % (time,getS()))
         elif sig_name == 'MINC' and state == 1:
-            print('#%u MINC' % time)
+            print('#%u MINC %04o' % (time,getS()))
         elif sig_name == 'DINC' and state == 1:
-            print('#%u DINC' % time)
+            print('#%u DINC %04o' % (time,getS()))
         elif sig_name == 'PCDU' and state == 1:
-            print('#%u PCDU' % time)
+            print('#%u PCDU %04o' % (time,getS()))
         elif sig_name == 'MCDU' and state == 1:
-            print('#%u MCDU' % time)
+            print('#%u MCDU %04o' % (time,getS()))
         elif sig_name == 'SHINC' and state == 1:
-            print('#%u SHINC' % time)
+            print('#%u SHINC %04o' % (time,getS()))
         elif sig_name == 'SHANC' and state == 1:
-            print('#%u SHANC' % time)
+            print('#%u SHANC %04o' % (time,getS()))
         elif sig_name == 'INKL' and state == 0 and inkl_inst is not None:
             staged_inst = inkl_inst
             inkl_inst = None
