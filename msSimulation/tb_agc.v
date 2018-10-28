@@ -368,7 +368,7 @@ parameter RUNLENGTH = 250000000; // 0.25 seconds
     	main.AGC.S08, main.AGC.S07, main.AGC.S06, main.AGC.S05, main.AGC.S04, main.AGC.S03, main.AGC.S02, main.AGC.S01);
     $display("Dumping instruction-decoder signals.");
 `endif
-    $display("Run length will be %f ms.", RUNLENGTH/1000000);
+    $display("Run length will be %f ms.", RUNLENGTH/1000000.0);
         #5000 SIM_RST = 0;
 	//#1000000000 $finish; // 1 seconds
         //#250000000 $finish; // 0.25 seconds
