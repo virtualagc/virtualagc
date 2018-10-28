@@ -68,6 +68,83 @@ wantSymbols = False
 wantSnapshot = False
 snapTimeNanoseconds = -1
 snapGapNanoseconds = -1
+netlistFilename = ""
+
+# Swiped this function from netlisterOP2.py.
+# Just read the netlist from a file into a structure of the form:
+#
+#	{
+#		refd1: {
+#			type: "74HC..." etc,
+#			pins: ["", "netnamePin1", "netnamePin2", ...]
+#		},
+#		refd2: ...
+#	}
+hints = {}
+def inputAndParseNetlistFile(filename):
+	
+	#schCount = 0
+	
+	components = {}
+	try:
+		f = open (filename, "r")
+		lines = f.readlines()
+		f.close()
+	except:
+		print >> sys.stderr, "Could not read netlist file " + filename
+		sys.exit(1)
+	
+	inComponent = False
+	for line in lines:
+		fields = line.strip().split()
+		if len(fields) < 1:
+			continue
+		#if len(fields) >= 2 and fields[0] == "(" and fields[1] == "{":
+		#	schCount += 1
+		if not inComponent and len(fields) == 5 and fields[0] == "(":
+			# Start of a component
+			timestamp = fields[1]
+			name = fields[2]
+			refd = fields[3]
+			type = fields[4]
+			# Note that for convenience, we always have a pin 0, which has an empty
+			# netname and simply isn't used for anything.  There may also be gaps
+			# in the pin-numbering, and those gaps have empty netnames as well.
+			pins = [ "" ]
+			if refd[:1] != "U" or type in "74HC244" or type[:2] not in ["D3", "74"]:
+				continue
+			if type[:2] == "D3":
+				type = "D3NOR"
+			#urefd = str(schCount) + refd
+			urefd = refd
+			inComponent = True
+		elif inComponent and len(fields) == 1 and fields[0] == ")":
+			# End of a component
+			inComponent = False
+			components[urefd] = { "type":type, "pins":pins }
+		elif inComponent and len(fields) == 4 and fields[0] == "(" and fields[3] == ")":
+			# Pin of a component
+			pinNumber = int(fields[1])
+			net = fields[2]
+			#if "G02" in net or "G03" in net:
+			#	print >> sys.stderr, "A " + net
+			if net in hints:
+				net = hints[net]
+				#print >> sys.stderr, "B " + net
+			net = net.replace("+","p")
+			if net[:4] != "Net-":
+				net = net.replace("-","m").replace("/","_")
+			if net[0].isdigit():
+				net = "d" + net
+			#if net[-1] == "/":
+			#	net = net[:-1] + "_"
+			#if net[:5] == "Net-(":
+			#	net = net[:5] + str(schCount) + net[5:]
+			while len(pins) < pinNumber:
+				pins.append("")
+			pins.append(net)
+			
+	return components
 
 def readVCD(nameOfVcd, openFile):
 	scope = []
@@ -283,8 +360,9 @@ for argv in sys.argv[1:]:
 	elif argv == "--convert":
 		wantConvert = True
 		count += 1
-	elif argv == "--symbols":
+	elif argv[:10] == "--symbols=":
 		wantSymbols = True
+		netlistFilename = argv[10:]
 		count += 1
 	elif argv[:1] == "-":
 		print >> sys.stderr, "Unknown command-line argument: " + argv
@@ -297,6 +375,26 @@ if count != 1:
 if error:
 	sys.exit(1)
 error = False
+
+# The purpose of this functionis to convert a hierarchical netname
+# from Mike's implementation, as found in a VCD file, into the 
+# corresponding name that would have appeared in a netlist from
+# Mike's schematic.
+def vcd2net(rawNetname):
+	if rawNetname[:5] != "main.":
+		return rawNetname
+	rawNetname = rawNetname[5:]
+	if rawNetname[:4] == "AGC.":
+		rawNetname = rawNetname[4:]
+	if len(rawNetname) < 5 or not isAnn(rawNetname):
+		return rawNetname
+	return rawNetname[4:]
+def isAnn(string):
+	if len(string) < 3:
+		return False
+	if string[0] not in ["A", "B"]:
+		return False
+	return string[1:3].isdigit()
 
 if compare == "":
 	# Single-file operation.
@@ -317,9 +415,14 @@ if compare == "":
 		analyzeNetHierarchy("vcd", vcd)
 	if wantSymbols:
 		symbols = []
+		netlist = inputAndParseNetlistFile(netlistFilename)
+		#print netlist
 		for id in vcd["byID"]:
-			for i in range(0, len(vcd["byID"][id]["rawNetnames"])):
-				print vcd["byID"][id]["rawNetnames"][i] + " -> " + vcd["byID"][id]["xRawNetnames"][i]
+			rawNetnames = vcd["byID"][id]["rawNetnames"]
+			names = vcd2net(rawNetnames[0])
+			for i in range(1, len(rawNetnames)):
+				names += " " + vcd2net(rawNetnames[i])
+			print id + " : " + names
 	if wantSnapshot:
 		print "time : " + str(vcd["snapped"]) + " (" + str(snapTimeNanoseconds) + ") ns"
 		print "gap : " + str(vcd["gap"]) + " (" + str(snapGapNanoseconds) + ") ns"
