@@ -58,6 +58,7 @@
 #				the simulation isn't currently working correctly
 #				with "pullup".
 #		2018-10-18 RSB	Added A52.
+#		2018-10-27 RSB	Changed simulation time units from 100ns/1ns to 1ns/1ps.
 #
 # This script converts one of my KiCad transcriptions of AGC LOGIC FLOW DIAGRAMs
 # into Verilog in the dumbest, most-straightforward way.  In other words, I don't
@@ -256,7 +257,7 @@ def readSchematicFile(filename):
 	#print schPadsJ1
 	#print gateLocations
 
-rawDelay = "0.2"
+rawDelay = "20"
 delay = " #GATE_DELAY"
 inits = {}
 if len(sys.argv) >= 3:
@@ -740,7 +741,7 @@ if count > 0:
 
 print ""
 print "parameter GATE_DELAY = " + rawDelay + "; // This default may be overridden at compile time."
-print "initial $display(\"Gate delay (" + moduleName + ") will be %f ns.\", GATE_DELAY*100);"
+print "initial $display(\"Gate delay (" + moduleName + ") will be %f ns.\", GATE_DELAY);"
 print ""
 
 # Now do another pass on the netlist to determine how the internal logic of the

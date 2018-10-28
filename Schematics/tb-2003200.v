@@ -2,8 +2,8 @@
 
 parameter DUMPFILE = "agc.lxt2";
 
-// In units of 0.1 us.
-parameter RUNLENGTH = 2500000; // 0.25 seconds
+// In units of ns.
+parameter RUNLENGTH = 250000000; // 0.25 seconds
 
 reg rst = 1;
 initial
@@ -25,7 +25,8 @@ initial
     	agc.G16, agc.G15, agc.G14, agc.G13, agc.G12, agc.G11, agc.G10, agc.G09, agc.G08, 
     	agc.G07, agc.G06, agc.G05, agc.G04, agc.G03, agc.G02, agc.G01, agc.FUTEXT, agc.IC2, 
     	agc.STG3, agc.STG2, agc.STG1, agc.WSQG_, agc.GOJAM, agc.RPTFRC, agc.PCDU, agc.MCDU, 
-    	agc.SHINC, agc.SHANC);
+    	agc.SHINC, agc.SHANC, agc.S12, agc.S11, agc.S10, agc.S09, 
+    	agc.S08, agc.S07, agc.S06, agc.S05, agc.S04, agc.S03, agc.S02, agc.S01);
     $display("Dumping instruction-decoder signals.");
 `endif
 `ifdef DUMP_HELPFUL
@@ -49,26 +50,26 @@ initial
     );
     $display("Dumping helpful signals.");
 `endif
-    $display("Run length will be %f ms.", RUNLENGTH/10000);
-    # 50 rst = 0;
-    //# 10000000000 $finish; // 100 seconds
-    //# 600000000 $finish; // 60 seconds ... should be enough time for Validation to run.
-    //# 100000000 $finish; // 10 seconds
-    //# 10000000 $finish; // 1 second
-    //# 2500000 $finish; // 0.25 second
-    //# 100000 $finish; // 10 ms.
-    //# 10000 $finish; // 1 ms.
+    $display("Run length will be %f ms.", RUNLENGTH/1000000.0);
+    # 5000 rst = 0;
+    //# 1000000000000 $finish; // 100 seconds
+    //# 60000000000 $finish; // 60 seconds ... should be enough time for Validation to run.
+    //# 10000000000 $finish; // 10 seconds
+    //# 1000000000 $finish; // 1 second
+    //# 250000000 $finish; // 0.25 second
+    //# 10000000 $finish; // 10 ms.
+    //# 1000000 $finish; // 1 ms.
     # RUNLENGTH $finish;
   end
 
 reg CLOCK = 0;
-always #2.44140625 CLOCK = !CLOCK;
+always #244.140625 CLOCK = !CLOCK;
 
 // If not commented, turn off parity checking.
 //reg NHALGA = 1;
 
 initial $timeformat(-3, 0, " ms", 10);
-always #10000 $display("%t", $time);
+always #1000000 $display("%t", $time);
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 // The following stuff was pasted as-is from Mike's testbench.  It pertains to signals from

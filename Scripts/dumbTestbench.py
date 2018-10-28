@@ -29,6 +29,7 @@
 #				of reg initializations to match what Mike
 #				uses, for the purpose of making it easier
 #				to compare his sim to mine.
+#		2018-10-27 RSB	Changed simulation time units from 100ns/1ns to 1ns/1ps.
 
 # Usage is:
 #	cat VERILOG_FILES | dumbTestbench.py >TESTBENCH.v
@@ -45,7 +46,7 @@ regUninits = ["DKBSNC", "DKEND", "DKSTRT", "PIPAXm", "PIPAXp", "PIPAYm", "PIPAYp
 tbInclude = "tb.v"
 if len(sys.argv) > 1:
 	tbInclude = sys.argv[1]
-DEFAULT_GATE_DELAY = "0.2"
+DEFAULT_GATE_DELAY = "20"
 if len(sys.argv) > 2:
 	DEFAULT_GATE_DELAY = sys.argv[2]
 # Read the tb.v file, so as to build up a list of the regs it defines, so that
@@ -117,12 +118,12 @@ wires.sort()
 
 # Write the output.
 print "// Verilog testbench created by dumbTestbench.py"
-print "`timescale 100ns / 1ns"
+print "`timescale 1ns / 1ps"
 print ""
 print "module agc;"
 print ""
 print "parameter GATE_DELAY = " + DEFAULT_GATE_DELAY + ";"
-#print "initial $display(\"Gate Delay is %f ns.\", GATE_DELAY*100);"
+#print "initial $display(\"Gate Delay is %f ns.\", GATE_DELAY);"
 print "`include \"" + tbInclude + "\""
 print ""
 desiredLineLength = 70

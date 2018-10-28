@@ -62,6 +62,9 @@
 #				Verilog:  simulation run-length, signals to 
 #				be dumped, and so on.
 #		2018-10-18 RSB	Added A52.
+#		2018-10-27 RSB	Changed time units from 100ns/1ns to 1ns/1ps.
+#				Also, I notice that 'clean' doesn't delete the
+#				generated module_tb.v files, so that's been fixed.
 #
 # This 'make' needs to be performed from the Schematics/ directory.
 # Icarus Verilog must be installed, and iverilog must be in the PATH.
@@ -124,12 +127,12 @@
 #				(see below) embedded in the Verilog files.
 #	DEFAULT_GATE_DELAY=TIME	Affects how dumbVerilog.py assigns the default gate delay it
 #				embeds when it generates Verilog from the KiCad netlists.  
-#				The default is 0.2 (in units of 0.1 us), i.e. 20 ns.
+#				The default is 20 (in units of ns), i.e. 20 ns.
 #	ROM=PROGRAM		The name of the AGC software installed in the simulation.
 #				Defaults to "Validation-hardware-simulation".
-#	RUNLENGTH=TIME		Controls the length of the simulation.  The units are 0.1 us,
+#	RUNLENGTH=TIME		Controls the length of the simulation.  The units are ns,
 #				and the default for full-AGC targets (2003200, 2003100, etc.)
-#				is 2500000 (0.25 seconds).  The defaults for other testbench
+#				is 250000000 (250 ms).  The defaults for other testbench
 #				targets (module A1, A2, etc.) may differ, but all will be
 #				affected by this setting.
 #	DUMP_ALL=1		These affect which set of signals is stored in the 
@@ -154,8 +157,8 @@
 # do not modify files saved in git.
 
 ifndef DEFAULT_GATE_DELAY
-	# In 100ns units.
-	DEFAULT_GATE_DELAY = 0.2
+	# In 1ns units.
+	DEFAULT_GATE_DELAY = 20
 endif
 
 ifndef ROM
@@ -232,6 +235,7 @@ DRAWINGS_1003700 += 1006552B 1006559r 1006548B 1006548B 1006546A 1006547H 100654
 DRAWINGS_1003700 += 1006541B 1006557E 1006550r 1006551B
 TARGETS_VVP_1003700 := $(DRAWINGS_1003700:%=%/module.vvp)
 TARGETS_V_1003700 := $(DRAWINGS_1003700:%=%/module.v)
+TARGETS_TB_V_1003700 := $(DRAWINGS_1003700:%=%/module_tb.v)
 # Create module_DRAWING and delay_DRAWING variables for each drawing.
 MODULES_PROCESSED = none
 $(foreach drawing,$(DRAWINGS_1003700),$(eval $(call moduleTemplate,$(drawing))))
@@ -252,6 +256,7 @@ DRAWINGS_2003100 += fixed_erasable_memory
 #DRAWINGS_2003200 += 2003305B
 TARGETS_VVP_2003100 := $(DRAWINGS_2003100:%=%/module.vvp)
 TARGETS_V_2003100 := $(DRAWINGS_2003100:%=%/module.v)
+TARGETS_TB_V_2003100 := $(DRAWINGS_2003100:%=%/module_tb.v)
 
 ##################################################################################
 # Here's what goes into an AGC p/n 2003200.  They need to be the drawing numbers
@@ -268,6 +273,7 @@ DRAWINGS_2003200 += fixed_erasable_memory
 DRAWINGS_2003200 += 2003305B
 TARGETS_VVP_2003200 := $(DRAWINGS_2003200:%=%/module.vvp)
 TARGETS_V_2003200 := $(DRAWINGS_2003200:%=%/module.v)
+TARGETS_TB_V_2003200 := $(DRAWINGS_2003200:%=%/module_tb.v)
 
 ##################################################################################
 # Here's what goes into an AGC p/n 2003993.  They need to be the drawing numbers
@@ -284,6 +290,7 @@ DRAWINGS_2003993 += fixed_erasable_memory
 #DRAWINGS_2003993 += 2003305B
 TARGETS_VVP_2003993 := $(DRAWINGS_2003993:%=%/module.vvp)
 TARGETS_V_2003993 := $(DRAWINGS_2003993:%=%/module.v)
+TARGETS_TB_V_2003993 := $(DRAWINGS_2003993:%=%/module_tb.v)
 
 ##################################################################################
 
@@ -294,6 +301,7 @@ TARGETS_V_2003993 := $(DRAWINGS_2003993:%=%/module.v)
 DRAWINGS_AGC := $(DRAWINGS_2003200) $(DRAWINGS_2003100) $(DRAWINGS_2003993) $(DRAWINGS_1003700)
 TARGETS_VVP_AGC := $(TARGETS_VVP_2003200) $(TARGETS_VVP_2003100) $(TARGETS_VVP_2003993) $(TARGETS_VVP_1003700)
 TARGETS_V_AGC := $(TARGETS_V_2003200) $(TARGETS_V_2003100) $(TARGETS_V_2003993) $(TARGETS_V_1003700)
+TARGETS_TB_V_AGC := $(TARGETS_TB_V_2003200) $(TARGETS_TB_V_2003100) $(TARGETS_V_TB_2003993) $(TARGETS_TB_V_1003700)
 
 # Do not combined these Verilog files with any of the TARGETS_V_etc, because they
 # are not auto-generated and definitely should never be erased.
@@ -311,7 +319,9 @@ all: $(TARGETS)
 
 .PHONY: clean
 clean:
-	-rm $(TARGETS) roms/rom.v 2003200.v 2003100.v 2003993.v 1003700.v testVerilog/module.v $(TARGETS_V_AGC) 2>/dev/null
+	-rm $(TARGETS) roms/rom.v 2003200.v 2003100.v 2003993.v 1003700.v \
+		testVerilog/module.v testVerilog/module_tb.v \
+		$(TARGETS_V_AGC) $(TARGETS_TB_V_AGC) 2>/dev/null
 
 2003200.vvp: 2003200.v $(TARGETS_V_2003200) tb-2003200.v $(EXTRA_V) roms/rom.v
 	iverilog $(EXTRA_IV_ARGS) -o $@ 2003200.v $(TARGETS_V_2003200) $(EXTRA_V)
