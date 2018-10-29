@@ -134,7 +134,10 @@ while True:
             if line.startswith('$var wire'):
                 toks = line.split()
                 sig_num = int(toks[3])
-                sig_name = re.match('^(?:__.*?__)?(.+?)\[', toks[4]).groups()[0]
+                if toks[4][-3:] == "[0]":
+                	sig_name = re.match('^(?:__.*?__)?(.+?)\[', toks[4]).groups()[0]
+                else:
+                	sig_name = re.match('^(?:__.*?__)?(.+?)$', toks[4]).groups()[0]
                 signal_names[sig_num] = sig_name
                 signals[sig_name] = 0
             elif line.startswith('$dumpvars'):
@@ -164,13 +167,17 @@ while True:
         if sig_name == 'T01' and state == 1 and signals['INKL'] == 0 and signals['STG1'] == 0 and signals['STG3'] == 0 and inkl_inst is None:
             if signals['STG2'] == 0  or (signals['STG2'] == 1 and staged_inst in ['RELINT', 'INHINT', 'EXTEND']):
                 instruction_starting = True
-        elif sig_name == 'WSQG_' and state == 1:
+        elif sig_name in ['WSQG_', 'WSQG_n'] and state == 1:
             print('#%u' % time)
         elif sig_name == 'GOJAM' and state == 0:
             staged_inst = 'GOJAM'
             instruction_starting = True
         elif sig_name == 'T07' and state == 0:
-            if signals['TSUDO_'] == 0 or signals['IC2'] == 1:
+            if "TSUDO_n" in signals:
+                TSUDO_ = "TSUDO_n"
+            else:
+                TSUDO_ = "TSUDO_"
+            if signals[TSUDO_] == 0 or signals['IC2'] == 1:
                 # G should be ready by now, we don't expect G to change during this time
                 G = 0
                 for i in range(1,16):
