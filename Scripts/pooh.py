@@ -69,6 +69,7 @@ wantSnapshot = False
 snapTimeNanoseconds = -1
 snapGapNanoseconds = -1
 netlistFilename = ""
+netsFilename = ""
 
 # Swiped this function from netlisterOP2.py.
 # Just read the netlist from a file into a structure of the form:
@@ -157,6 +158,18 @@ def readVCD(nameOfVcd, openFile):
 	
 	netsByID = {}
 	time = 0
+	
+	netlistTranslations = {}
+	if netsFilename != "":
+		f = open(netsFilename, "r")
+		lines = f.readlines()
+		f.close()
+		for line in lines:
+			fields = line.strip().split()
+			if len(fields) != 3 or fields[1] != "=>":
+				continue
+			netlistTranslations[fields[0]] = fields[2]
+	#print netlistTranslations
 	
 	print >> sys.stderr, "Reading netnames for " + nameOfVcd
 	
@@ -279,7 +292,7 @@ def readVCD(nameOfVcd, openFile):
 					 if netname[9] != "_" and not (netname[9] in ["X", "Y"] and netname[10].isdigit()) \
 					 	and not (rawModule == "A20" and netname[9] == "C" and netname[10].isdigit()):
 					 	netname = netname[9:]
-			else:
+			elif False:
 				m = ""
 				e = ""
 				if netname[:3] == "__A" and netname[5:9] in ["_1__", "_2__", "_3__"]:
@@ -299,6 +312,16 @@ def readVCD(nameOfVcd, openFile):
 				netname = "d" + netname[1:]
 			if netname[-2:] == "_n":
 				netname = netname[:-1]
+			if netname[:4] == "net_":
+				nfields = netname.split("_")
+				if len(nfields) == 3 and nfields[2][:3] == "Pad":
+					key = "Net-(" + nfields[1] + "-" + nfields[2] + ")"
+					if key in netlistTranslations:
+						netname = netlistTranslations[key]
+			elif netname[:2] == "__":
+				k = netname.replace("__", "_")
+				if key in netlistTranslations:
+					netname = netlistTranslations[key]
 			xRawNetname = xScopeString + netname
 			if id in netsByID:
 				if netsByID[id]["width"] != width or netsByID[id]["mask"] != mask:
@@ -351,6 +374,8 @@ for argv in sys.argv[1:]:
 		count += 1
 	elif argv[:6] == "--gap=" and argv[6:].isdigit():
 		snapGapNanoseconds = int(argv[6:])
+	elif argv[:7] == "--nets=":
+		netsFilename = argv[7:]
 	elif argv == "--transitions":
 		wantTransitions = True
 		count += 1
@@ -371,6 +396,9 @@ for argv in sys.argv[1:]:
 		desiredNetnames.append(argv)
 if count != 1:
 	print >> sys.stderr, "Must select exactly one of the following: --transitions --nets --convert --symbols --snapshot=ns"
+	error = True
+if wantSnapshot and netsFilename == "":
+	print >> sys.stderr, "For a --snapshot, must also specify a --nets=FILENAME for the netlisterOP2.nets file."
 	error = True
 if error:
 	sys.exit(1)
@@ -395,6 +423,14 @@ def isAnn(string):
 	if string[0] not in ["A", "B"]:
 		return False
 	return string[1:3].isdigit()
+
+def isGoodName(string):
+	for c in string:
+		if c in ["p", "m", "_"]:
+			continue
+		if not c.isupper() and not c.isdigit():
+			return False
+	return True
 
 if compare == "":
 	# Single-file operation.
@@ -424,8 +460,9 @@ if compare == "":
 				names += " " + vcd2net(rawNetnames[i])
 			print id + " : " + names
 	if wantSnapshot:
-		print "time : " + str(vcd["snapped"]) + " (" + str(snapTimeNanoseconds) + ") ns"
-		print "gap : " + str(vcd["gap"]) + " (" + str(snapGapNanoseconds) + ") ns"
+		print "# time : " + str(vcd["snapped"]) + " (" + str(snapTimeNanoseconds) + ") ns"
+		print "# gap : " + str(vcd["gap"]) + " (" + str(snapGapNanoseconds) + ") ns"
+		print "want1 = ["
 		for id in vcd["byID"]:
 			entry = vcd["byID"][id]
 			chips = ""
@@ -440,10 +477,24 @@ if compare == "":
 				#	gate = rawFields[-1]
 				#	if len(gate) == 6 and gate[0] == "g" and gate[1:].isdigit():
 				#		chips += " " + gate
-			if len(entry["values"]) == 0:
-				print "x = " + entry["netnames"][0] + chips
-			else:
-				print entry["values"][-1] + " = " + entry["netnames"][0] + chips
+			if "rst" not in entry["netnames"]:
+				if len(entry["values"]) == 0:
+					print "# x = " + entry["netnames"][0] + chips
+				else:
+					value = entry["values"][-1]
+					name = entry["netnames"][0]
+					print "# " + value + " = " + name + chips
+					goodName = False
+					if name[:1] == "g" and name[1:].isdigit() and len(name) == 6:
+						goodName = True
+					elif name[:1] == "d" and name[1].isdigit() and isGoodName(name[2:]):
+						goodName = True
+					elif isGoodName(name):
+						goodName = True
+					if value == "1" and goodName:
+						print "\"" + name + "\","
+		print "\"ZZZZZZZZZZ\""
+		print "]"
 else:
 	# Dual-file comparison operation.
 	vcd1 = readVCD("vcd1", sys.stdin)
