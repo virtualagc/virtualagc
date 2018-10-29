@@ -1,5 +1,6 @@
 EESchema Schematic File Version 4
-EELAYER 28 0
+LIBS:counter_cell_ii-cache
+EELAYER 29 0
 EELAYER END
 $Descr A2 23386 16535
 encoding utf-8
@@ -2856,5 +2857,8 @@ Wire Wire Line
 Wire Wire Line
 	15500 7650 15700 7650
 Wire Wire Line
-	13100 8700 13900 8700
+	13100 8700 13500 8700
+Connection ~ 13500 8700
+Wire Wire Line
+	13500 8700 13900 8700
 $EndSCHEMATC
