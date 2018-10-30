@@ -763,7 +763,7 @@ for h in range(0, heuristicLevel + 1):
 					bigDeducedNets[d] += "/" + deducedNets[d]
 		
 		print str(count1) + " refds, " + str(len(deducedNets)) + " netnames, " + str(count1O) + " outputs, and " + str(count1I) + " inputs replaced on pass " + str(passNumber)
-	
+
 # Output debugging stuff.
 for out in ronByOuts:
 	if out == "":
@@ -787,6 +787,41 @@ for out in ronByOuts:
 	else:
 		status = "!"
 	f.write(status + " " + component["refd"] + ": out=" + out + " ins=" + str(component["ins"]) + "\n")
+f.close()
+feedbacks = []
+f = open("netlisterOP2.ff", "w")
+for out in ronByOuts:
+	if out == "":
+		continue
+	ins = ronByOuts[out]["ins"]
+	for input in ins:
+		if input in ronByOuts:
+			if out in ronByOuts[input]["ins"]:
+				outFound = -1
+				inputFound = -1
+				for i in range(0, len(feedbacks)):
+					if out in feedbacks[i]:
+						outFound = i
+						if input not in feedbacks[i]:
+							feedbacks[i].append(input)
+					elif input in feedbacks[i]:
+						inputFound = i
+						if out not in feedbacks[i]:
+							feedbacks[i].append(out)
+				if outFound == -1 and inputFound == -1:
+					feedbacks.append([out, input])
+				elif outFound != -1 and inputFound != -1 and outFound != inputFound:
+					for id in feedbacks[inputFound]:
+						if id not in feedbacks[outFound]:
+							feedbacks[outFound].append(id)
+					del feedbacks[inputFound]
+for entry in feedbacks:
+	entry.sort()
+feedbacks.sort()
+for entry in feedbacks:
+	for id in entry:
+		f.write(id + " ")
+	f.write("\n")
 f.close()
 f = open("netlisterOP2.mike", "w")
 for out in mikeByOuts:
