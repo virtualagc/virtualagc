@@ -1,0 +1,1750 @@
+EESchema Schematic File Version 4
+EELAYER 29 0
+EELAYER END
+$Descr D 34000 22000
+encoding utf-8
+Sheet 2 4
+Title ""
+Date ""
+Rev ""
+Comp ""
+Comment1 ""
+Comment2 ""
+Comment3 ""
+Comment4 ""
+$EndDescr
+$Comp
+L AGC_DSKY:Crystal Y1
+U 1 1 5BDB9921
+P 8875 5100
+F 0 "Y1" H 8850 5350 130 0000 C CNN
+F 1 "Crystal" H 8900 5350 130 0001 C CNN
+F 2 "" H 8875 5100 50  0001 C CNN
+F 3 "" H 8875 5100 50  0001 C CNN
+	1    8875 5100
+	1    0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:Inductor-variable L1
+U 1 1 5BDB9E83
+P 9625 5100
+F 0 "L1" H 9575 5425 130 0000 C CNN
+F 1 "Inductor-variable" H 9625 5000 130 0001 C CNN
+F 2 "" H 9575 5300 130 0001 C CNN
+F 3 "" H 9575 5300 130 0001 C CNN
+	1    9625 5100
+	1    0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:Capacitor C2
+U 1 1 5BDBACB3
+P 8375 5500
+F 0 "C2" H 8050 5400 130 0000 C CNN
+F 1 "SEE NOTE 3" H 7650 5575 130 0000 C CNN
+F 2 "" H 8375 5900 130 0001 C CNN
+F 3 "" H 8375 5900 130 0001 C CNN
+	1    8375 5500
+	-1   0    0    1   
+$EndComp
+$Comp
+L AGC_DSKY:Capacitor C1
+U 1 1 5BDBB8C7
+P 8025 6075
+F 0 "C1" V 8250 6075 130 0000 C CNN
+F 1 "Capacitor" H 8575 5875 130 0001 C CNN
+F 2 "" H 8025 6475 130 0001 C CNN
+F 3 "" H 8025 6475 130 0001 C CNN
+	1    8025 6075
+	0    -1   -1   0   
+$EndComp
+$Comp
+L AGC_DSKY:Capacitor C3
+U 1 1 5BDBC3FF
+P 8375 6700
+F 0 "C3" H 8700 6650 130 0000 C CNN
+F 1 "Capacitor" H 8925 6500 130 0001 C CNN
+F 2 "" H 8375 7100 130 0001 C CNN
+F 3 "" H 8375 7100 130 0001 C CNN
+	1    8375 6700
+	1    0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:Capacitor C5
+U 1 1 5BDBCD35
+P 11575 5100
+F 0 "C5" V 11800 5125 130 0000 C CNN
+F 1 "Capacitor" H 12125 4900 130 0001 C CNN
+F 2 "" H 11575 5500 130 0001 C CNN
+F 3 "" H 11575 5500 130 0001 C CNN
+	1    11575 5100
+	0    -1   -1   0   
+$EndComp
+$Comp
+L AGC_DSKY:Capacitor C6
+U 1 1 5BDBE68A
+P 11925 5925
+F 0 "C6" H 12225 5925 130 0000 C CNN
+F 1 "Capacitor" H 12475 5725 130 0001 C CNN
+F 2 "" H 11925 6325 130 0001 C CNN
+F 3 "" H 11925 6325 130 0001 C CNN
+	1    11925 5925
+	1    0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:Capacitor C7
+U 1 1 5BDBF2DE
+P 14425 8250
+F 0 "C7" V 14150 8250 130 0000 C CNN
+F 1 "Capacitor" H 14975 8050 130 0001 C CNN
+F 2 "" H 14425 8650 130 0001 C CNN
+F 3 "" H 14425 8650 130 0001 C CNN
+	1    14425 8250
+	0    -1   -1   0   
+$EndComp
+$Comp
+L AGC_DSKY:Capacitor C8
+U 1 1 5BDBFD90
+P 15675 4475
+F 0 "C8" V 15900 4475 130 0000 C CNN
+F 1 "Capacitor" H 16225 4275 130 0001 C CNN
+F 2 "" H 15675 4875 130 0001 C CNN
+F 3 "" H 15675 4875 130 0001 C CNN
+	1    15675 4475
+	0    -1   -1   0   
+$EndComp
+$Comp
+L AGC_DSKY:Capacitor C9
+U 1 1 5BDC0922
+P 14450 6775
+F 0 "C9" H 14750 6800 130 0000 C CNN
+F 1 "Capacitor" H 15000 6575 130 0001 C CNN
+F 2 "" H 14450 7175 130 0001 C CNN
+F 3 "" H 14450 7175 130 0001 C CNN
+	1    14450 6775
+	1    0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:Capacitor C10
+U 1 1 5BDC0F5B
+P 3025 8575
+F 0 "C10" H 3250 8775 130 0000 C CNN
+F 1 "Capacitor" H 3575 8375 130 0001 C CNN
+F 2 "" H 3025 8975 130 0001 C CNN
+F 3 "" H 3025 8975 130 0001 C CNN
+	1    3025 8575
+	1    0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:Capacitor-Polarized C4
+U 1 1 5BDC18A6
+P 11100 7775
+F 0 "C4" H 11375 7775 130 0000 C CNN
+F 1 "Capacitor-Polarized" H 12200 7575 130 0001 C CNN
+F 2 "" H 11100 8175 130 0001 C CNN
+F 3 "" H 11100 8175 130 0001 C CNN
+	1    11100 7775
+	1    0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:Thermistor RT1
+U 1 1 5BDC201A
+P 3575 5150
+F 0 "RT1" V 3200 5500 130 0000 C CNN
+F 1 "Thermistor" H 3600 5575 130 0001 C CNN
+F 2 "" H 3575 5150 130 0001 C CNN
+F 3 "" H 3575 5150 130 0001 C CNN
+	1    3575 5150
+	0    1    1    0   
+$EndComp
+$Comp
+L AGC_DSKY:Thermistor RT2
+U 1 1 5BDC56F7
+P 5175 5625
+F 0 "RT2" V 4950 6125 130 0000 C CNN
+F 1 "Thermistor" H 5200 6050 130 0001 C CNN
+F 2 "" H 5175 5625 130 0001 C CNN
+F 3 "" H 5175 5625 130 0001 C CNN
+	1    5175 5625
+	0    1    1    0   
+$EndComp
+$Comp
+L AGC_DSKY:Thermistor RT3
+U 1 1 5BDC5EC2
+P 5175 6550
+F 0 "RT3" V 4875 7000 130 0000 C CNN
+F 1 "Thermistor" H 5200 6975 130 0001 C CNN
+F 2 "" H 5175 6550 130 0001 C CNN
+F 3 "" H 5175 6550 130 0001 C CNN
+	1    5175 6550
+	0    1    1    0   
+$EndComp
+$Comp
+L AGC_DSKY:Resistor R2
+U 1 1 5BDC668C
+P 3575 3675
+F 0 "R2" V 3400 3925 130 0000 C CNN
+F 1 "SEE NOTE 3" H 3575 3850 130 0001 C CNN
+F 2 "" H 3575 3675 130 0001 C CNN
+F 3 "" H 3575 3675 130 0001 C CNN
+	1    3575 3675
+	0    1    1    0   
+$EndComp
+Text Notes 3675 4025 0    130  ~ 0
+SEE\nNOTE 3
+$Comp
+L AGC_DSKY:Resistor R3
+U 1 1 5BDC6DDB
+P 4550 4025
+F 0 "R3" V 4350 4325 130 0000 C CNN
+F 1 "SEE NOTE 3" V 4550 4750 130 0000 C CNN
+F 2 "" H 4550 4025 130 0001 C CNN
+F 3 "" H 4550 4025 130 0001 C CNN
+	1    4550 4025
+	0    1    1    0   
+$EndComp
+$Comp
+L AGC_DSKY:Resistor R7
+U 1 1 5BDC7628
+P 6500 3900
+F 0 "R7" V 6250 4125 130 0000 C CNN
+F 1 "SEE NOTE 3" H 6500 4075 130 0001 C CNN
+F 2 "" H 6500 3900 130 0001 C CNN
+F 3 "" H 6500 3900 130 0001 C CNN
+	1    6500 3900
+	0    1    1    0   
+$EndComp
+Text Notes 6600 4200 0    130  ~ 0
+SEE\nNOTE 3
+$Comp
+L AGC_DSKY:Resistor R11
+U 1 1 5BDC7E38
+P 7575 3875
+F 0 "R11" V 7525 4150 130 0000 C CNN
+F 1 "Resistor" H 7575 4050 130 0001 C CNN
+F 2 "" H 7575 3875 130 0001 C CNN
+F 3 "" H 7575 3875 130 0001 C CNN
+	1    7575 3875
+	0    1    1    0   
+$EndComp
+$Comp
+L AGC_DSKY:Resistor R14
+U 1 1 5BDC8807
+P 10100 4025
+F 0 "R14" V 10100 4325 130 0000 C CNN
+F 1 "Resistor" H 10100 4200 130 0001 C CNN
+F 2 "" H 10100 4025 130 0001 C CNN
+F 3 "" H 10100 4025 130 0001 C CNN
+	1    10100 4025
+	0    1    1    0   
+$EndComp
+$Comp
+L AGC_DSKY:Resistor R16
+U 1 1 5BDC91B6
+P 11100 3425
+F 0 "R16" V 11050 3725 130 0000 C CNN
+F 1 "Resistor" H 11100 3600 130 0001 C CNN
+F 2 "" H 11100 3425 130 0001 C CNN
+F 3 "" H 11100 3425 130 0001 C CNN
+	1    11100 3425
+	0    1    1    0   
+$EndComp
+$Comp
+L AGC_DSKY:Resistor R19
+U 1 1 5BDC9831
+P 12750 3950
+F 0 "R19" V 12675 4250 130 0000 C CNN
+F 1 "Resistor" H 12750 4125 130 0001 C CNN
+F 2 "" H 12750 3950 130 0001 C CNN
+F 3 "" H 12750 3950 130 0001 C CNN
+	1    12750 3950
+	0    1    1    0   
+$EndComp
+$Comp
+L AGC_DSKY:Resistor R21
+U 1 1 5BDC9FFA
+P 13675 3525
+F 0 "R21" V 13650 3825 130 0000 C CNN
+F 1 "Resistor" H 13675 3700 130 0001 C CNN
+F 2 "" H 13675 3525 130 0001 C CNN
+F 3 "" H 13675 3525 130 0001 C CNN
+	1    13675 3525
+	0    1    1    0   
+$EndComp
+$Comp
+L AGC_DSKY:Resistor R24
+U 1 1 5BDCA7DD
+P 16625 4475
+F 0 "R24" H 16600 4675 130 0000 C CNN
+F 1 "Resistor" H 16625 4650 130 0001 C CNN
+F 2 "" H 16625 4475 130 0001 C CNN
+F 3 "" H 16625 4475 130 0001 C CNN
+	1    16625 4475
+	1    0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:Resistor R23
+U 1 1 5BDCAECB
+P 13700 6750
+F 0 "R23" V 13675 7050 130 0000 C CNN
+F 1 "Resistor" H 13700 6925 130 0001 C CNN
+F 2 "" H 13700 6750 130 0001 C CNN
+F 3 "" H 13700 6750 130 0001 C CNN
+	1    13700 6750
+	0    1    1    0   
+$EndComp
+$Comp
+L AGC_DSKY:Resistor R22
+U 1 1 5BDCB6B3
+P 13700 5800
+F 0 "R22" V 13700 6075 130 0000 C CNN
+F 1 "Resistor" H 13700 5975 130 0001 C CNN
+F 2 "" H 13700 5800 130 0001 C CNN
+F 3 "" H 13700 5800 130 0001 C CNN
+	1    13700 5800
+	0    1    1    0   
+$EndComp
+$Comp
+L AGC_DSKY:Resistor R20
+U 1 1 5BDCBD84
+P 12750 5925
+F 0 "R20" V 12750 6200 130 0000 C CNN
+F 1 "Resistor" H 12750 6100 130 0001 C CNN
+F 2 "" H 12750 5925 130 0001 C CNN
+F 3 "" H 12750 5925 130 0001 C CNN
+	1    12750 5925
+	0    1    1    0   
+$EndComp
+$Comp
+L AGC_DSKY:Resistor R18
+U 1 1 5BDCC3B1
+P 11925 7750
+F 0 "R18" V 11875 8050 130 0000 C CNN
+F 1 "Resistor" H 11925 7925 130 0001 C CNN
+F 2 "" H 11925 7750 130 0001 C CNN
+F 3 "" H 11925 7750 130 0001 C CNN
+	1    11925 7750
+	0    1    1    0   
+$EndComp
+$Comp
+L AGC_DSKY:Resistor R17
+U 1 1 5BDCCA75
+P 11100 6800
+F 0 "R17" V 11125 7125 130 0000 C CNN
+F 1 "Resistor" H 11100 6975 130 0001 C CNN
+F 2 "" H 11100 6800 130 0001 C CNN
+F 3 "" H 11100 6800 130 0001 C CNN
+	1    11100 6800
+	0    1    1    0   
+$EndComp
+$Comp
+L AGC_DSKY:Resistor R1
+U 1 1 5BDCD1F7
+P 3625 8575
+F 0 "R1" V 3575 8825 130 0000 C CNN
+F 1 "Resistor" H 3625 8750 130 0001 C CNN
+F 2 "" H 3625 8575 130 0001 C CNN
+F 3 "" H 3625 8575 130 0001 C CNN
+	1    3625 8575
+	0    1    1    0   
+$EndComp
+$Comp
+L AGC_DSKY:Resistor R6
+U 1 1 5BDCDB54
+P 5400 8000
+F 0 "R6" H 5375 8350 130 0000 C CNN
+F 1 "SEE NOTE 3" H 5475 8175 130 0000 C CNN
+F 2 "" H 5400 8000 130 0001 C CNN
+F 3 "" H 5400 8000 130 0001 C CNN
+	1    5400 8000
+	1    0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:Resistor R4
+U 1 1 5BDCE300
+P 4550 7425
+F 0 "R4" V 4325 7650 130 0000 C CNN
+F 1 "SEE NOTE 3" V 4525 8100 130 0000 C CNN
+F 2 "" H 4550 7425 130 0001 C CNN
+F 3 "" H 4550 7425 130 0001 C CNN
+	1    4550 7425
+	0    1    1    0   
+$EndComp
+$Comp
+L AGC_DSKY:Resistor R10
+U 1 1 5BDCED55
+P 6500 8600
+F 0 "R10" V 6325 8925 130 0000 C CNN
+F 1 "SEE NOTE 3" H 6500 8775 130 0001 C CNN
+F 2 "" H 6500 8600 130 0001 C CNN
+F 3 "" H 6500 8600 130 0001 C CNN
+	1    6500 8600
+	0    1    1    0   
+$EndComp
+Text Notes 6600 8950 0    130  ~ 0
+SEE\nNOTE 3
+Text Notes 6575 6925 0    130  ~ 0
+SEE\nNOTE 3
+Text Notes 6600 5900 0    130  ~ 0
+SEE\nNOTE 3
+Text Notes 10200 7075 0    130  ~ 0
+SEE\nNOTE 3
+$Comp
+L AGC_DSKY:Resistor R12
+U 1 1 5BDCF68E
+P 7575 7825
+F 0 "R12" V 7600 8125 130 0000 C CNN
+F 1 "Resistor" H 7575 8000 130 0001 C CNN
+F 2 "" H 7575 7825 130 0001 C CNN
+F 3 "" H 7575 7825 130 0001 C CNN
+	1    7575 7825
+	0    1    1    0   
+$EndComp
+$Comp
+L AGC_DSKY:Resistor R9
+U 1 1 5BDCFE52
+P 6500 6575
+F 0 "R9" V 6300 6800 130 0000 C CNN
+F 1 "Resistor" H 6500 6750 130 0001 C CNN
+F 2 "" H 6500 6575 130 0001 C CNN
+F 3 "" H 6500 6575 130 0001 C CNN
+	1    6500 6575
+	0    1    1    0   
+$EndComp
+$Comp
+L AGC_DSKY:Resistor R8
+U 1 1 5BDD037C
+P 6500 5600
+F 0 "R8" V 6275 5850 130 0000 C CNN
+F 1 "Resistor" H 6500 5775 130 0001 C CNN
+F 2 "" H 6500 5600 130 0001 C CNN
+F 3 "" H 6500 5600 130 0001 C CNN
+	1    6500 5600
+	0    1    1    0   
+$EndComp
+$Comp
+L AGC_DSKY:Diode CR2
+U 1 1 5BDD0C60
+P 7575 5650
+F 0 "CR2" V 7350 5925 140 0000 C CNN
+F 1 "Diode" H 7575 5500 50  0001 C CNN
+F 2 "" H 7525 5475 50  0001 C CNN
+F 3 "" H 7525 5650 50  0001 C CNN
+	1    7575 5650
+	0    1    1    0   
+$EndComp
+$Comp
+L AGC_DSKY:Resistor R15
+U 1 1 5BDD1354
+P 10100 6675
+F 0 "R15" V 10000 6975 130 0000 C CNN
+F 1 "Resistor" H 10100 6850 130 0001 C CNN
+F 2 "" H 10100 6675 130 0001 C CNN
+F 3 "" H 10100 6675 130 0001 C CNN
+	1    10100 6675
+	0    1    1    0   
+$EndComp
+$Comp
+L AGC_DSKY:Diode CR3
+U 1 1 5BDD1B0B
+P 12250 8250
+F 0 "CR3" H 12275 8500 140 0000 C CNN
+F 1 "Diode" H 12250 8100 50  0001 C CNN
+F 2 "" H 12200 8075 50  0001 C CNN
+F 3 "" H 12200 8250 50  0001 C CNN
+	1    12250 8250
+	-1   0    0    1   
+$EndComp
+$Comp
+L AGC_DSKY:Diode CR4
+U 1 1 5BDD2272
+P 12750 7825
+F 0 "CR4" V 12700 8200 140 0000 C CNN
+F 1 "Diode" H 12750 7675 50  0001 C CNN
+F 2 "" H 12700 7650 50  0001 C CNN
+F 3 "" H 12700 7825 50  0001 C CNN
+	1    12750 7825
+	0    1    1    0   
+$EndComp
+$Comp
+L AGC_DSKY:Diode CR5
+U 1 1 5BDD2C26
+P 17475 3650
+F 0 "CR5" H 17425 3875 140 0000 C CNN
+F 1 "Diode" H 17475 3500 50  0001 C CNN
+F 2 "" H 17425 3475 50  0001 C CNN
+F 3 "" H 17425 3650 50  0001 C CNN
+	1    17475 3650
+	1    0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:Inductor L2
+U 1 1 5BDD3452
+P 11125 4525
+F 0 "L2" V 11025 4800 130 0000 C CNN
+F 1 "Inductor" H 11125 4425 130 0001 C CNN
+F 2 "" H 11075 4725 130 0001 C CNN
+F 3 "" H 11075 4725 130 0001 C CNN
+	1    11125 4525
+	0    1    1    0   
+$EndComp
+$Comp
+L AGC_DSKY:Diode-Zener CR1
+U 1 1 5BDD4006
+P 5675 12725
+F 0 "CR1" V 5800 12200 140 0000 C CNN
+F 1 "Diode-Zener" H 5675 12375 50  0001 C CNN
+F 2 "" H 5625 12550 50  0001 C CNN
+F 3 "" H 5625 12725 50  0001 C CNN
+	1    5675 12725
+	0    -1   -1   0   
+$EndComp
+$Comp
+L AGC_DSKY:Resistor R5
+U 1 1 5BDD5925
+P 4350 13400
+F 0 "R5" H 4350 13625 130 0000 C CNN
+F 1 "Resistor" H 4350 13575 130 0001 C CNN
+F 2 "" H 4350 13400 130 0001 C CNN
+F 3 "" H 4350 13400 130 0001 C CNN
+	1    4350 13400
+	1    0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:Resistor R13
+U 1 1 5BDD5D7F
+P 8300 13400
+F 0 "R13" H 8275 13625 130 0000 C CNN
+F 1 "Resistor" H 8300 13575 130 0001 C CNN
+F 2 "" H 8300 13400 130 0001 C CNN
+F 3 "" H 8300 13400 130 0001 C CNN
+	1    8300 13400
+	1    0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:Capacitor-Polarized C11
+U 1 1 5BDD6234
+P 7675 12800
+F 0 "C11" H 8000 12700 130 0000 C CNN
+F 1 "Capacitor-Polarized" H 8775 12600 130 0001 C CNN
+F 2 "" H 7675 13200 130 0001 C CNN
+F 3 "" H 7675 13200 130 0001 C CNN
+	1    7675 12800
+	1    0    0    1   
+$EndComp
+$Comp
+L AGC_DSKY:Ground-chassis G1
+U 1 1 5BDD722C
+P 4925 13850
+F 0 "G1" H 4775 13950 130 0001 C CNN
+F 1 "Ground-chassis" H 4925 14350 130 0001 C CNN
+F 2 "" H 4925 13850 130 0001 C CNN
+F 3 "" H 4925 13850 130 0001 C CNN
+	1    4925 13850
+	1    0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:Transistor-NPN Q1
+U 1 1 5BDD7FA3
+P 10950 6075
+F 0 "Q1" H 11425 6050 130 0000 C CNN
+F 1 "Transistor-NPN" H 10950 6640 130 0001 C CNN
+F 2 "" H 10950 6325 130 0001 C CNN
+F 3 "" H 10950 6325 130 0001 C CNN
+	1    10950 6075
+	1    0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:Transistor-NPN Q2
+U 1 1 5BDD87F5
+P 13475 5100
+F 0 "Q2" H 13975 5100 130 0000 C CNN
+F 1 "Transistor-NPN" H 13475 5665 130 0001 C CNN
+F 2 "" H 13475 5350 130 0001 C CNN
+F 3 "" H 13475 5350 130 0001 C CNN
+	1    13475 5100
+	1    0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:Node2 N?
+U 1 1 5BDD928A
+P 3375 6850
+F 0 "N?" H 3375 6950 50  0001 C CNN
+F 1 "Node2" H 3375 7025 50  0001 C CNN
+F 2 "" H 3375 6850 50  0001 C CNN
+F 3 "" H 3375 6850 50  0001 C CNN
+F 4 "B+" H 3300 7000 140 0000 R CNB "Caption"
+	1    3375 6850
+	1    0    0    -1  
+$EndComp
+Text Label 3550 6850 0    130  ~ 0
+B+
+Text Label 6650 13775 1    130  ~ 0
+B+
+$Comp
+L AGC_DSKY:Node2 N?
+U 1 1 5BDD96D4
+P 6650 13850
+F 0 "N?" H 6650 13950 50  0001 C CNN
+F 1 "Node2" H 6650 14025 50  0001 C CNN
+F 2 "" H 6650 13850 50  0001 C CNN
+F 3 "" H 6650 13850 50  0001 C CNN
+F 4 "B+" V 6575 13775 140 0000 R CNB "Caption"
+	1    6650 13850
+	0    -1   -1   0   
+$EndComp
+$Comp
+L AGC_DSKY:Node2 N?
+U 1 1 5BDD9F9D
+P 14675 2700
+F 0 "N?" H 14675 2800 50  0001 C CNN
+F 1 "Node2" H 14675 2875 50  0001 C CNN
+F 2 "" H 14675 2700 50  0001 C CNN
+F 3 "" H 14675 2700 50  0001 C CNN
+F 4 "B+" H 14600 2700 140 0000 R CNB "Caption"
+	1    14675 2700
+	-1   0    0    1   
+$EndComp
+Text Label 14600 2700 2    130  ~ 0
+B+
+$Comp
+L AGC_DSKY:Transistor-NPN Q3
+U 1 1 5BDDA386
+P 17700 4475
+F 0 "Q3" H 18200 4500 130 0000 C CNN
+F 1 "Transistor-NPN" H 17700 5040 130 0001 C CNN
+F 2 "" H 17700 4725 130 0001 C CNN
+F 3 "" H 17700 4725 130 0001 C CNN
+	1    17700 4475
+	1    0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:Transistor-NPN Q4
+U 1 1 5BDDAB21
+P 19650 3950
+F 0 "Q4" H 20150 3950 130 0000 C CNN
+F 1 "Transistor-NPN" H 19650 4515 130 0001 C CNN
+F 2 "" H 19650 4200 130 0001 C CNN
+F 3 "" H 19650 4200 130 0001 C CNN
+	1    19650 3950
+	1    0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:Resistor R25
+U 1 1 5BDDB20E
+P 17850 2900
+F 0 "R25" V 17725 3200 130 0000 C CNN
+F 1 "Resistor" H 17850 3075 130 0001 C CNN
+F 2 "" H 17850 2900 130 0001 C CNN
+F 3 "" H 17850 2900 130 0001 C CNN
+	1    17850 2900
+	0    1    1    0   
+$EndComp
+$Comp
+L AGC_DSKY:Resistor R27
+U 1 1 5BDDB9CA
+P 19800 2900
+F 0 "R27" V 19650 3225 130 0000 C CNN
+F 1 "Resistor" H 19800 3075 130 0001 C CNN
+F 2 "" H 19800 2900 130 0001 C CNN
+F 3 "" H 19800 2900 130 0001 C CNN
+	1    19800 2900
+	0    1    1    0   
+$EndComp
+$Comp
+L AGC_DSKY:Resistor R26
+U 1 1 5BDDC364
+P 18600 3950
+F 0 "R26" H 18625 4200 130 0000 C CNN
+F 1 "Resistor" H 18600 4125 130 0001 C CNN
+F 2 "" H 18600 3950 130 0001 C CNN
+F 3 "" H 18600 3950 130 0001 C CNN
+	1    18600 3950
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	7575 3475 7575 2800
+Wire Wire Line
+	7575 2800 6500 2800
+Wire Wire Line
+	3575 2800 3575 3275
+Wire Wire Line
+	4550 3625 4550 2800
+Connection ~ 4550 2800
+Wire Wire Line
+	4550 2800 3575 2800
+Wire Wire Line
+	6500 3500 6500 2800
+Connection ~ 6500 2800
+Wire Wire Line
+	6500 2800 4550 2800
+Wire Wire Line
+	3575 4075 3575 4750
+Wire Wire Line
+	4550 4425 4550 6100
+Wire Wire Line
+	4550 6100 3575 6100
+Wire Wire Line
+	3575 6100 3575 5550
+Wire Wire Line
+	5175 5225 5175 5100
+Wire Wire Line
+	5175 5100 6500 5100
+Wire Wire Line
+	6500 5100 6500 4300
+Wire Wire Line
+	6500 5100 6500 5200
+Connection ~ 6500 5100
+Wire Wire Line
+	5175 6150 5175 6100
+Wire Wire Line
+	5175 6100 6500 6100
+Wire Wire Line
+	6500 6100 6500 6000
+Connection ~ 5175 6100
+Wire Wire Line
+	5175 6100 5175 6025
+Wire Wire Line
+	6500 6100 6500 6175
+Connection ~ 6500 6100
+Wire Wire Line
+	7575 4275 7575 5100
+Wire Wire Line
+	7750 6075 7575 6075
+Wire Wire Line
+	7575 5850 7575 6075
+Connection ~ 7575 6075
+Wire Wire Line
+	7575 6075 7575 7425
+Wire Wire Line
+	8575 5100 8375 5100
+Connection ~ 7575 5100
+Wire Wire Line
+	7575 5100 7575 5450
+Wire Wire Line
+	8375 5250 8375 5100
+Connection ~ 8375 5100
+Wire Wire Line
+	8375 5100 7575 5100
+Wire Wire Line
+	8375 5775 8375 6075
+Wire Wire Line
+	8275 6075 8375 6075
+Connection ~ 8375 6075
+Wire Wire Line
+	8375 6075 8375 6425
+Wire Wire Line
+	8375 6075 10100 6075
+Wire Wire Line
+	10100 6275 10100 6075
+Connection ~ 10100 6075
+Wire Wire Line
+	10100 6075 10650 6075
+Wire Wire Line
+	10100 6075 10100 4425
+Wire Wire Line
+	10025 5100 11125 5100
+Wire Wire Line
+	11125 4925 11125 5100
+Connection ~ 11125 5100
+Wire Wire Line
+	11125 5100 11300 5100
+Wire Wire Line
+	11125 5100 11125 5825
+Wire Wire Line
+	11125 5825 11100 5825
+Wire Wire Line
+	11100 6325 11100 6425
+Wire Wire Line
+	11825 5100 11925 5100
+Wire Wire Line
+	12750 4350 12750 5100
+Connection ~ 12750 5100
+Wire Wire Line
+	12750 5100 13175 5100
+Wire Wire Line
+	12750 5100 12750 5525
+Wire Wire Line
+	11925 5650 11925 5100
+Connection ~ 11925 5100
+Wire Wire Line
+	11925 5100 12750 5100
+Wire Wire Line
+	12750 7225 11925 7225
+Wire Wire Line
+	7325 7225 7325 6100
+Wire Wire Line
+	7325 6100 6500 6100
+Wire Wire Line
+	8375 6950 8375 7225
+Connection ~ 8375 7225
+Wire Wire Line
+	8375 7225 7325 7225
+Wire Wire Line
+	10100 7075 10100 8250
+Wire Wire Line
+	10100 8250 11100 8250
+Wire Wire Line
+	11925 8150 11925 8250
+Connection ~ 11925 8250
+Wire Wire Line
+	11925 8250 12050 8250
+Wire Wire Line
+	11100 8025 11100 8250
+Connection ~ 11100 8250
+Wire Wire Line
+	11100 8250 11925 8250
+Wire Wire Line
+	12450 8250 12750 8250
+Wire Wire Line
+	12750 8250 12750 8025
+Wire Wire Line
+	12750 8250 14150 8250
+Connection ~ 12750 8250
+Wire Wire Line
+	11925 6175 11925 7225
+Connection ~ 11925 7225
+Wire Wire Line
+	11925 7225 11100 7225
+Wire Wire Line
+	11925 7250 11925 7350
+Wire Wire Line
+	11100 7500 11100 7225
+Connection ~ 11100 7225
+Wire Wire Line
+	11100 7225 8375 7225
+Wire Wire Line
+	12750 6325 12750 7225
+Connection ~ 12750 7225
+Wire Wire Line
+	12750 7225 12750 7625
+Wire Wire Line
+	12750 7225 13700 7225
+Wire Wire Line
+	13700 7225 13700 7150
+Wire Wire Line
+	13700 6350 13700 6300
+Wire Wire Line
+	13700 7225 14450 7225
+Wire Wire Line
+	14450 7225 14450 7025
+Connection ~ 13700 7225
+Wire Wire Line
+	14450 6500 14450 6300
+Wire Wire Line
+	14450 6300 13700 6300
+Connection ~ 13700 6300
+Wire Wire Line
+	13700 6300 13700 6200
+Wire Wire Line
+	14600 2700 13675 2700
+Wire Wire Line
+	10100 2700 10100 3625
+Wire Wire Line
+	11100 3025 11100 2700
+Connection ~ 11100 2700
+Wire Wire Line
+	11100 2700 10100 2700
+Wire Wire Line
+	12750 3550 12750 2700
+Connection ~ 12750 2700
+Wire Wire Line
+	12750 2700 11100 2700
+Wire Wire Line
+	13675 3125 13675 2700
+Connection ~ 13675 2700
+Wire Wire Line
+	13675 2700 12750 2700
+Wire Wire Line
+	16225 4475 15925 4475
+Wire Wire Line
+	15400 4475 15100 4475
+Wire Wire Line
+	13675 4475 13675 3925
+Wire Wire Line
+	13625 5350 13700 5400
+Wire Wire Line
+	13625 4850 13675 4825
+Wire Wire Line
+	13675 4825 13675 4475
+Connection ~ 13675 4475
+Wire Wire Line
+	15100 4475 15100 8250
+Wire Wire Line
+	15100 8250 14675 8250
+Connection ~ 15100 4475
+Wire Wire Line
+	15100 4475 13675 4475
+Wire Wire Line
+	17025 4475 17150 4475
+Wire Wire Line
+	17275 3650 17150 3650
+Wire Wire Line
+	17150 3650 17150 4475
+Connection ~ 17150 4475
+Wire Wire Line
+	17150 4475 17400 4475
+Wire Wire Line
+	17850 3300 17850 3650
+Wire Wire Line
+	17675 3650 17850 3650
+Connection ~ 17850 3650
+Wire Wire Line
+	17850 3650 17850 3950
+Wire Wire Line
+	18200 3950 17850 3950
+Connection ~ 17850 3950
+Wire Wire Line
+	17850 3950 17850 4225
+Wire Wire Line
+	19000 3950 19350 3950
+Wire Wire Line
+	17850 4725 17850 5275
+Wire Wire Line
+	17850 5275 19800 5275
+Wire Wire Line
+	19800 5275 19800 4200
+Wire Wire Line
+	19800 3300 19800 3700
+Wire Wire Line
+	17850 2500 17850 2375
+Wire Wire Line
+	17850 2375 19800 2375
+Wire Wire Line
+	19800 2375 19800 2500
+Wire Wire Line
+	19800 5275 19800 7225
+Wire Wire Line
+	19800 7225 14450 7225
+Connection ~ 19800 5275
+Connection ~ 14450 7225
+Wire Wire Line
+	4550 6100 4550 6850
+Connection ~ 4550 6100
+Wire Wire Line
+	3450 6850 4550 6850
+Connection ~ 4550 6850
+Wire Wire Line
+	4550 6850 4550 7025
+Wire Wire Line
+	7575 8250 7575 9225
+Wire Wire Line
+	6500 9225 6500 9000
+Wire Wire Line
+	6500 8200 6500 8000
+Wire Wire Line
+	5800 8000 6500 8000
+Connection ~ 6500 8000
+Wire Wire Line
+	6500 8000 6500 7000
+Wire Wire Line
+	5175 6950 5175 7000
+Wire Wire Line
+	5175 7000 6500 7000
+Connection ~ 6500 7000
+Wire Wire Line
+	6500 7000 6500 6975
+Wire Wire Line
+	4550 7825 4550 8000
+Wire Wire Line
+	4550 8000 5000 8000
+Wire Wire Line
+	4550 8000 4550 9225
+Wire Wire Line
+	4550 9225 6500 9225
+Connection ~ 4550 8000
+Connection ~ 6500 9225
+Wire Wire Line
+	6500 9225 7575 9225
+Wire Wire Line
+	3625 7925 3625 8175
+Wire Wire Line
+	3625 8975 3625 9225
+Wire Wire Line
+	3625 9225 3025 9225
+Wire Wire Line
+	3025 9225 3025 8825
+Wire Wire Line
+	8375 7225 8375 12250
+Wire Wire Line
+	8375 12250 7675 12250
+Wire Wire Line
+	5675 12250 5675 12525
+Wire Wire Line
+	7675 12550 7675 12250
+Connection ~ 7675 12250
+Wire Wire Line
+	7675 12250 5675 12250
+Wire Wire Line
+	7900 13400 7675 13400
+Wire Wire Line
+	7675 13400 7675 13075
+Wire Wire Line
+	7675 13400 6650 13400
+Wire Wire Line
+	6650 13400 6650 13775
+Connection ~ 7675 13400
+Wire Wire Line
+	6650 13400 5675 13400
+Wire Wire Line
+	5675 13400 5675 12925
+Connection ~ 6650 13400
+Wire Wire Line
+	5675 13400 4750 13400
+Connection ~ 5675 13400
+Wire Wire Line
+	3625 7925 3025 7925
+Wire Wire Line
+	3025 7925 3025 8300
+Wire Notes Line
+	2450 2075 2450 14225
+Wire Notes Line
+	2450 14225 9400 14225
+Wire Notes Line
+	9400 14225 9400 8825
+Wire Notes Line
+	9400 8825 22725 8825
+Wire Notes Line
+	22725 8825 22725 2000
+Wire Notes Line
+	22725 2000 2450 2050
+Text Notes 1575 15800 0    140  ~ 28
+NOTES:
+Text Notes 1875 18200 0    140  ~ 28
+1. INTERPRET DRAWING IN ACCORDANCE WITH\n   STANDARDS PRESCRIBED BY MIL-D-70327\n2. RESISTOR VALUES ARE EXPRESSED IN OHMS UNLESS\n   OTHERWISE SPECIFIED\n3. THE VALUE OF THE FOLLOWING COMPONENTS TO BE\n   DETERMINED AT UNIT TEST : C2,R2,R3,R4,R6,R7,R8,R9,R10 AND R15\n   SEE TABLES ON SHEETS 2 AND 3 PART NO.1006750 ±2% OR\n   1010733 ±1%\n5. WHEN VALUE OF R6 R8 R9 OR R10 IS\n   NO COMPONENTS WILL BE USED
+Wire Notes Line style solid
+	11050 10250 18175 10250
+Wire Notes Line style solid
+	11050 10500 18175 10500
+Wire Notes Line style solid
+	11050 10750 18175 10750
+Wire Notes Line style solid
+	11050 11000 18175 11000
+Wire Notes Line style solid
+	11050 11250 18175 11250
+Wire Notes Line style solid
+	11050 11500 18175 11500
+Wire Notes Line style solid
+	11050 11750 18175 11750
+Wire Notes Line style solid
+	11050 12000 18175 12000
+Wire Notes Line style solid
+	11050 12250 18175 12250
+Wire Notes Line style solid
+	11050 12500 18175 12500
+Wire Notes Line style solid
+	11050 12750 18175 12750
+Wire Notes Line style solid
+	11050 13000 18175 13000
+Wire Notes Line style solid
+	11050 13250 18175 13250
+Wire Notes Line style solid
+	11050 13500 18175 13500
+Wire Notes Line style solid
+	11050 13750 18175 13750
+Wire Notes Line style solid
+	11050 14000 18175 14000
+Wire Notes Line style solid
+	11050 14250 18175 14250
+Wire Notes Line style solid
+	11050 14500 18175 14500
+Wire Notes Line style solid
+	11050 14750 18175 14750
+Wire Notes Line style solid
+	11050 15000 18175 15000
+Wire Notes Line style solid
+	11050 15250 18175 15250
+Wire Notes Line style solid
+	11050 15500 18175 15500
+Wire Notes Line style solid
+	11050 15750 18175 15750
+Wire Notes Line style solid
+	11050 16000 18175 16000
+Wire Notes Line style solid
+	11050 16250 18175 16250
+Wire Notes Line style solid
+	11050 16500 18175 16500
+Wire Notes Line style solid
+	11050 16750 18175 16750
+Wire Notes Line style solid
+	11050 17000 18175 17000
+Wire Notes Line style solid
+	11050 17250 18175 17250
+Wire Notes Line style solid
+	11050 17500 18175 17500
+Wire Notes Line style solid
+	11050 17750 18175 17750
+Wire Notes Line style solid
+	11050 18000 18175 18000
+Wire Notes Line style solid
+	11050 18250 18175 18250
+Wire Notes Line style solid
+	11050 18500 18175 18500
+Wire Notes Line style solid
+	11050 9775 18175 9775
+Wire Notes Line style solid
+	18175 9775 18175 18500
+Wire Notes Line style solid
+	16975 9775 16975 18500
+Wire Notes Line style solid
+	16025 18500 16025 9775
+Wire Notes Line style solid
+	14975 9775 14975 18500
+Wire Notes Line style solid
+	13525 18500 13525 9775
+Wire Notes Line style solid
+	12000 9775 12000 18500
+Wire Notes Line style solid
+	11050 18500 11050 9775
+Wire Notes Line style solid
+	18550 10250 25550 10250
+Wire Notes Line style solid
+	18550 10500 25550 10500
+Wire Notes Line style solid
+	18550 11250 25550 11250
+Wire Notes Line style solid
+	18550 11500 25550 11500
+Wire Notes Line style solid
+	18550 12750 25550 12750
+Wire Notes Line style solid
+	18550 13000 25550 13000
+Wire Notes Line style solid
+	18550 13250 25550 13250
+Wire Notes Line style solid
+	18550 13500 25550 13500
+Wire Notes Line style solid
+	18550 13750 25550 13750
+Wire Notes Line style solid
+	18550 14000 25550 14000
+Wire Notes Line style solid
+	18550 14250 25550 14250
+Wire Notes Line style solid
+	18550 14500 25550 14500
+Wire Notes Line style solid
+	18550 14750 25550 14750
+Wire Notes Line style solid
+	18550 15000 25550 15000
+Wire Notes Line style solid
+	18550 15250 25550 15250
+Wire Notes Line style solid
+	18550 15500 25550 15500
+Wire Notes Line style solid
+	18550 15750 25550 15750
+Wire Notes Line style solid
+	18550 16000 25550 16000
+Wire Notes Line style solid
+	18550 16250 25550 16250
+Wire Notes Line style solid
+	18550 16500 25550 16500
+Wire Notes Line style solid
+	18550 16750 25550 16750
+Wire Notes Line style solid
+	18550 17000 25550 17000
+Wire Notes Line style solid
+	18550 17250 25550 17250
+Wire Notes Line style solid
+	18550 17250 18550 9775
+Wire Notes Line style solid
+	18550 9775 25550 9775
+Wire Notes Line style solid
+	25550 9775 25550 17250
+Wire Notes Line style solid
+	19550 17250 19550 9775
+Wire Notes Line style solid
+	21050 9775 21050 17250
+Wire Notes Line style solid
+	22525 17250 22525 9775
+Wire Notes Line style solid
+	23525 9775 23525 17250
+Wire Notes Line style solid
+	24525 17250 24525 9775
+Wire Notes Line style solid
+	18550 11750 19550 11750
+Wire Notes Line style solid
+	19550 12000 18550 12000
+Wire Notes Line style solid
+	19550 12250 18550 12250
+Wire Notes Line style solid
+	19550 12500 18550 12500
+Wire Notes Line style solid
+	21050 12500 23525 12500
+Wire Notes Line style solid
+	23525 12250 21050 12250
+Wire Notes Line style solid
+	21050 12000 23525 12000
+Wire Notes Line style solid
+	23525 11750 21050 11750
+Text Notes 18925 10475 0    130  ~ 26
+R1
+Text Notes 18925 10725 0    130  ~ 26
+R2
+Text Notes 18925 10975 0    130  ~ 26
+R3
+Text Notes 18925 11225 0    130  ~ 26
+R4
+Text Notes 18925 11475 0    130  ~ 26
+R5
+Text Notes 18925 11725 0    130  ~ 26
+R6
+Text Notes 18925 11975 0    130  ~ 26
+R7
+Text Notes 18925 12225 0    130  ~ 26
+R8
+Text Notes 18925 12475 0    130  ~ 26
+R9
+Text Notes 18925 12725 0    130  ~ 26
+R10
+Text Notes 18925 12975 0    130  ~ 26
+R11
+Text Notes 18925 13225 0    130  ~ 26
+R12
+Text Notes 18925 13475 0    130  ~ 26
+R13
+Text Notes 18925 13725 0    130  ~ 26
+R14
+Text Notes 18925 13975 0    130  ~ 26
+R15
+Text Notes 18925 14225 0    130  ~ 26
+R16
+Text Notes 18925 14475 0    130  ~ 26
+R17
+Text Notes 18925 14725 0    130  ~ 26
+R18
+Text Notes 18925 14975 0    130  ~ 26
+R19
+Text Notes 18925 15225 0    130  ~ 26
+R20
+Text Notes 18925 15475 0    130  ~ 26
+R21
+Text Notes 18925 15725 0    130  ~ 26
+R22
+Text Notes 18925 15975 0    130  ~ 26
+R23
+Text Notes 18925 16225 0    130  ~ 26
+R24
+Text Notes 18925 16475 0    130  ~ 26
+R25
+Text Notes 18925 16725 0    130  ~ 26
+R26
+Text Notes 18925 16975 0    130  ~ 26
+R27
+Text Notes 11375 10475 0    130  ~ 26
+C1
+Text Notes 11375 10725 0    130  ~ 26
+C2
+Text Notes 11375 10975 0    130  ~ 26
+C3
+Text Notes 11375 11225 0    130  ~ 26
+C4
+Text Notes 11375 11475 0    130  ~ 26
+C5
+Text Notes 11375 11725 0    130  ~ 26
+C6
+Text Notes 11375 11975 0    130  ~ 26
+C7
+Text Notes 11375 12225 0    130  ~ 26
+C8
+Text Notes 11375 12475 0    130  ~ 26
+C9
+Text Notes 11375 12725 0    130  ~ 26
+C10
+Text Notes 11375 12975 0    130  ~ 26
+C11
+Text Notes 11375 13725 0    130  ~ 26
+CR1
+Text Notes 11375 13975 0    130  ~ 26
+CR2
+Text Notes 11375 14225 0    130  ~ 26
+CR3
+Text Notes 11375 14475 0    130  ~ 26
+CR4
+Text Notes 11375 14725 0    130  ~ 26
+CR5
+Text Notes 11425 15475 0    130  ~ 26
+L1
+Text Notes 11425 15725 0    130  ~ 26
+L2
+Text Notes 11425 15975 0    130  ~ 26
+Y1
+Text Notes 11375 16475 0    130  ~ 26
+RT1
+Text Notes 11375 16725 0    130  ~ 26
+RT2
+Text Notes 11375 16975 0    130  ~ 26
+RT3
+Text Notes 11375 17475 0    130  ~ 26
+Q1
+Text Notes 11375 17725 0    130  ~ 26
+Q2
+Text Notes 11375 17975 0    130  ~ 26
+Q3
+Text Notes 11375 18225 0    130  ~ 26
+Q4
+Wire Notes Line style solid
+	27965 920  27965 2650
+Wire Notes Line style solid
+	33500 2175 27965 2175
+Wire Notes Line style solid
+	28464 921  28464 2649
+Wire Notes Line style solid
+	31799 919  31799 2648
+Wire Notes Line style solid
+	32465 920  32465 2649
+Wire Notes Line style solid
+	27965 2650 33500 2650
+Wire Notes Line style solid
+	33510 1716 27975 1716
+Wire Notes Line style solid
+	33506 1438 27971 1438
+Wire Notes Line style solid
+	33502 1169 27967 1169
+Text Notes 28125 1150 0    140  ~ 28
+A   REVISED PER TDRR 18681
+Text Notes 28100 1425 0    140  ~ 28
+B   REVISED PER TDRR 19761
+Text Notes 28100 1700 0    140  ~ 28
+C   REVISED PER TDRR 23218
+Text Notes 28100 2050 0    140  ~ 28
+D
+Text Notes 28125 2500 0    140  ~ 28
+E
+Text Notes 28550 2150 0    130  ~ 26
+REVISED PER TDRR 23956\nDR              CHK
+Text Notes 28525 2625 0    130  ~ 26
+REVISED PER TDRR 23956\nDR              CHK
+Text Notes 11075 10150 0    130  ~ 26
+REF DES
+Text Notes 12250 10150 0    130  ~ 26
+PART NO.
+Text Notes 13600 10150 0    130  ~ 26
+DESCRIPTION
+Text Notes 15175 10150 0    130  ~ 26
+VALUE
+Text Notes 16275 10150 0    130  ~ 26
+TOL
+Text Notes 17200 10150 0    130  ~ 26
+RATING
+Text Notes 18625 10125 0    130  ~ 26
+REF DES
+Text Notes 19800 10125 0    130  ~ 26
+PART NO.
+Text Notes 21125 10125 0    130  ~ 26
+DESCRIPTION
+Text Notes 22725 10125 0    130  ~ 26
+VALUE
+Text Notes 23825 10125 0    130  ~ 26
+TOL
+Text Notes 24675 10125 0    130  ~ 26
+RATING
+Text Notes 13725 12975 0    130  ~ 26
+CAPACITOR
+Text Notes 12075 10475 0    130  ~ 26
+1006793-89
+Text Notes 12075 10725 0    130  ~ 26
+1006793
+Text Notes 12075 10975 0    130  ~ 26
+1006793-87
+Text Notes 12075 11500 0    130  ~ 26
+1006793-87
+Text Notes 12075 11975 0    130  ~ 26
+1006793-87
+Text Notes 12075 12225 0    130  ~ 26
+1006793-87
+Text Notes 12075 11725 0    130  ~ 26
+1006793-83
+Text Notes 12075 11225 0    130  ~ 26
+1006793-69
+Text Notes 12075 12475 0    130  ~ 26
+1006793-32
+Text Notes 12075 12725 0    130  ~ 26
+1006793-32
+Text Notes 12075 12975 0    130  ~ 26
+1006793-79
+Text Notes 13675 10475 0    130  ~ 26
+CAPACITOR
+Text Notes 15025 10475 0    130  ~ 26
+1200UUF
+Text Notes 15025 10750 0    130  ~ 26
+NOMINAL
+Text Notes 15025 10975 0    130  ~ 26
+1000UUF
+Text Notes 15025 11475 0    130  ~ 26
+1000UUF
+Text Notes 15025 11975 0    130  ~ 26
+1000UUF
+Text Notes 15025 12225 0    130  ~ 26
+1000UUF
+Text Notes 15025 11225 0    130  ~ 26
+1.0 UF
+Text Notes 15075 11725 0    130  ~ 26
+680UUF
+Text Notes 15100 12475 0    130  ~ 26
+.020UF
+Text Notes 15100 12725 0    130  ~ 26
+.020UF
+Text Notes 15150 12975 0    130  ~ 26
+6.8UF
+Text Notes 17200 10475 0    130  ~ 26
+300V
+Text Notes 17200 10975 0    130  ~ 26
+300V
+Text Notes 17200 11475 0    130  ~ 26
+300V
+Text Notes 17200 11725 0    130  ~ 26
+300V
+Text Notes 17200 11975 0    130  ~ 26
+300V
+Text Notes 17200 12225 0    130  ~ 26
+300V
+Text Notes 17325 11225 0    130  ~ 26
+35V
+Text Notes 17325 12975 0    130  ~ 26
+35V
+Text Notes 17325 12725 0    130  ~ 26
+50V
+Text Notes 17325 12475 0    130  ~ 26
+50V
+Text Notes 16200 10475 0    130  ~ 26
+±2%
+Text Notes 16225 10975 0    130  ~ 26
+±2%
+Text Notes 16225 11475 0    130  ~ 26
+±2%
+Text Notes 16225 11725 0    130  ~ 26
+±2%
+Text Notes 16225 11975 0    130  ~ 26
+±2%
+Text Notes 16225 12225 0    130  ~ 26
+±2%
+Text Notes 16225 11225 0    130  ~ 26
+±10%
+Text Notes 16225 12475 0    130  ~ 26
+±10%
+Text Notes 16225 12725 0    130  ~ 26
+±10%
+Text Notes 12525 9150 0    130  ~ 26
+±10%
+Wire Notes Line style solid
+	14200 10575 14200 12700
+Text Notes 12050 13725 0    130  ~ 26
+2004112-001
+Text Notes 12050 13975 0    130  ~ 26
+1006700-1
+Text Notes 12050 14225 0    130  ~ 26
+2004103-001
+Text Notes 12050 14475 0    130  ~ 26
+2004103-001
+Text Notes 12050 14725 0    130  ~ 26
+2004103-001
+Text Notes 13600 13725 0    130  ~ 26
+ZENER
+Text Notes 13600 13975 0    130  ~ 26
+DIODE
+Text Notes 13600 14225 0    130  ~ 26
+DIODE
+Text Notes 13600 14475 0    130  ~ 26
+DIODE
+Text Notes 13600 14725 0    130  ~ 26
+DIODE
+Text Notes 15225 13725 0    130  ~ 26
+9V
+Text Notes 15100 14000 0    130  ~ 26
+47UUF
+Text Notes 17400 13975 0    130  ~ 26
+4V
+Text Notes 16975 14225 0    130  ~ 26
+500MW MAX
+Text Notes 16975 14475 0    130  ~ 26
+500MW MAX
+Text Notes 16975 14725 0    130  ~ 26
+500MW MAX
+Text Notes 16225 12975 0    130  ~ 26
+±10%
+Text Notes 16225 13975 0    130  ~ 26
+±20%
+Text Notes 16225 15725 0    130  ~ 26
+±10%
+Text Notes 12075 15475 0    130  ~ 26
+1006324
+Text Notes 12075 15725 0    130  ~ 26
+1010406-12
+Text Notes 12075 15975 0    130  ~ 26
+1006847
+Text Notes 13750 15475 0    130  ~ 26
+COIL
+Text Notes 13750 15725 0    130  ~ 26
+COIL
+Text Notes 13775 15975 0    130  ~ 26
+XTAL
+Text Notes 15075 15475 0    130  ~ 26
+9-13Uh
+Text Notes 15075 15725 0    130  ~ 26
+22Uh
+Wire Notes Line width 50 style solid
+	14200 12700 14150 12450
+Wire Notes Line width 50 style solid
+	14150 12450 14250 12450
+Wire Notes Line width 50 style solid
+	14250 12450 14200 12700
+Text Notes 16225 16475 0    130  ~ 26
+±1%
+Text Notes 16225 16725 0    130  ~ 26
+±1%
+Text Notes 13600 16475 0    130  ~ 26
+THERMISTOR
+Text Notes 13600 16725 0    130  ~ 26
+THERMISTOR
+Text Notes 13600 16975 0    130  ~ 26
+THERMISTOR
+Text Notes 13600 17475 0    130  ~ 26
+TRANSISTOR
+Text Notes 13600 17725 0    130  ~ 26
+TRANSISTOR
+Text Notes 13600 17975 0    130  ~ 26
+TRANSISTOR
+Text Notes 13600 18225 0    130  ~ 26
+TRANSISTOR
+Text Notes 12050 16475 0    130  ~ 26
+1006715-1
+Text Notes 12050 16725 0    130  ~ 26
+1006712-3
+Text Notes 12050 16975 0    130  ~ 26
+1006291
+Text Notes 15200 16475 0    130  ~ 26
+100K
+Text Notes 15325 16725 0    130  ~ 26
+5K
+Text Notes 12050 17475 0    130  ~ 26
+2004004-005
+Text Notes 12050 17725 0    130  ~ 26
+2004004-005
+Text Notes 12050 17975 0    130  ~ 26
+2004004-005
+Text Notes 12050 18225 0    130  ~ 26
+2004004-005
+Text Notes 23750 10725 0    130  ~ 26
+±2%
+Text Notes 23750 11475 0    130  ~ 26
+±2%
+Text Notes 23750 11975 0    130  ~ 26
+±2%
+Text Notes 23750 10475 0    130  ~ 26
+±1%
+Text Notes 23750 11225 0    130  ~ 26
+±.1%
+Text Notes 23775 12500 0    130  ~ 26
+±.1%
+Text Notes 23925 12225 0    130  ~ 26
+OR
+Text Notes 24925 12225 0    130  ~ 26
+OR
+Text Notes 24950 10950 0    130  ~ 26
+OR
+Text Notes 23950 10950 0    130  ~ 26
+OR
+Text Notes 20125 12250 0    130  ~ 26
+OR
+Text Notes 20125 10975 0    130  ~ 26
+OR
+Wire Notes Line style solid
+	18550 10750 19550 10750
+Wire Notes Line style solid
+	18550 11000 19550 11000
+Wire Notes Line style solid
+	21050 10750 23525 10750
+Wire Notes Line style solid
+	21050 11000 23525 11000
+Text Notes 24750 10475 0    130  ~ 26
+1/4W
+Text Notes 24750 10725 0    130  ~ 26
+1/4W
+Text Notes 24750 11475 0    130  ~ 26
+1/4W
+Text Notes 24750 11950 0    130  ~ 26
+1/4W
+Text Notes 24750 12975 0    130  ~ 26
+1/4W
+Text Notes 23775 12975 0    130  ~ 26
+±2%
+Text Notes 24825 11200 0    130  ~ 26
+.1 W
+Text Notes 24825 12500 0    130  ~ 26
+.1 W
+Text Notes 21275 10475 0    130  ~ 26
+RESISTOR
+Text Notes 21275 16975 0    130  ~ 26
+RESISTOR
+Text Notes 23800 16975 0    130  ~ 26
+±2%
+Text Notes 24750 16975 0    130  ~ 26
+1/4W
+Text Notes 22800 10475 0    130  ~ 26
+4K
+Text Notes 22750 11475 0    130  ~ 26
+510
+Text Notes 22750 12975 0    130  ~ 26
+150K
+Text Notes 22750 13225 0    130  ~ 26
+150K
+Text Notes 22775 13475 0    130  ~ 26
+2.0K
+Text Notes 22750 13725 0    130  ~ 26
+100K
+Text Notes 22575 10725 0    130  ~ 26
+NOMINAL
+Text Notes 22575 10975 0    130  ~ 26
+NOMINAL
+Text Notes 22575 11225 0    130  ~ 26
+NOMINAL
+Text Notes 22575 11725 0    130  ~ 26
+NOMINAL
+Text Notes 22575 11975 0    130  ~ 26
+NOMINAL
+Text Notes 22575 12225 0    130  ~ 26
+NOMINAL
+Text Notes 22575 12475 0    130  ~ 26
+NOMINAL
+Text Notes 22575 12725 0    130  ~ 26
+NOMINAL
+Text Notes 22575 13975 0    130  ~ 26
+NOMINAL
+Text Notes 19625 10475 0    130  ~ 26
+1006714
+Text Notes 19850 10725 0    130  ~ 26
+1006750
+Text Notes 19850 11225 0    130  ~ 26
+1010733
+Text Notes 19650 11475 0    130  ~ 26
+1006750-25
+Text Notes 19850 12000 0    130  ~ 26
+1006750
+Text Notes 19850 12500 0    130  ~ 26
+1010733
+Text Notes 19650 13000 0    130  ~ 26
+1006750-84
+Text Notes 20525 13225 0    130  ~ 26
+-84
+Text Notes 20525 13475 0    130  ~ 26
+-39
+Text Notes 20525 13725 0    130  ~ 26
+-80
+Text Notes 20525 14225 0    130  ~ 26
+-39
+Text Notes 20525 14475 0    130  ~ 26
+-8
+Text Notes 20525 14725 0    130  ~ 26
+-56
+Text Notes 20525 14975 0    130  ~ 26
+-62
+Text Notes 20525 15225 0    130  ~ 26
+-55
+Text Notes 20525 15475 0    130  ~ 26
+-36
+Text Notes 20525 15725 0    130  ~ 26
+-1
+Text Notes 20525 15975 0    130  ~ 26
+-34
+Text Notes 20525 16225 0    130  ~ 26
+-39
+Text Notes 20525 16475 0    130  ~ 26
+-39
+Text Notes 20525 16725 0    130  ~ 26
+-27
+Text Notes 19650 16975 0    130  ~ 26
+1006750-43
+Text Notes 22775 14225 0    130  ~ 26
+2.0K
+Text Notes 22775 16225 0    130  ~ 26
+2.0K
+Text Notes 22775 16475 0    130  ~ 26
+2.0K
+Text Notes 22775 14475 0    130  ~ 26
+100
+Text Notes 22775 14725 0    130  ~ 26
+10K
+Text Notes 22775 14975 0    130  ~ 26
+18K
+Text Notes 22750 15225 0    130  ~ 26
+9.1K
+Text Notes 22750 15475 0    130  ~ 26
+1.5K
+Text Notes 22850 15725 0    130  ~ 26
+51
+Text Notes 22750 15975 0    130  ~ 26
+1.2K
+Text Notes 22800 16725 0    130  ~ 26
+620
+Text Notes 22775 16975 0    130  ~ 26
+3.0K
+Wire Notes Line style solid
+	20075 13075 20075 16700
+Wire Notes Line style solid
+	24075 13050 24075 16675
+Wire Notes Line style solid
+	24900 13050 24900 16650
+Wire Notes Line style solid
+	21750 16700 21750 10575
+Wire Notes Line width 50 style solid
+	20075 16700 20025 16450
+Wire Notes Line width 50 style solid
+	20025 16450 20125 16450
+Wire Notes Line width 50 style solid
+	20125 16450 20075 16700
+Wire Notes Line width 50 style solid
+	21750 16700 21700 16450
+Wire Notes Line width 50 style solid
+	21700 16450 21800 16450
+Wire Notes Line width 50 style solid
+	21800 16450 21750 16700
+Wire Notes Line width 50 style solid
+	24075 16700 24025 16450
+Wire Notes Line width 50 style solid
+	24025 16450 24125 16450
+Wire Notes Line width 50 style solid
+	24125 16450 24075 16700
+Wire Notes Line width 50 style solid
+	24900 16700 24850 16450
+Wire Notes Line width 50 style solid
+	24850 16450 24950 16450
+Wire Notes Line width 50 style solid
+	24950 16450 24900 16700
+Wire Notes Line width 50 style solid
+	14200 10550 14250 10800
+Wire Notes Line width 50 style solid
+	14250 10800 14150 10800
+Wire Notes Line width 50 style solid
+	14150 10800 14200 10550
+Wire Notes Line width 50 style solid
+	21750 10550 21800 10800
+Wire Notes Line width 50 style solid
+	21800 10800 21700 10800
+Wire Notes Line width 50 style solid
+	21700 10800 21750 10550
+Wire Notes Line width 50 style solid
+	24075 13050 24125 13300
+Wire Notes Line width 50 style solid
+	24125 13300 24025 13300
+Wire Notes Line width 50 style solid
+	24025 13300 24075 13050
+Wire Notes Line width 50 style solid
+	24900 13050 24950 13300
+Wire Notes Line width 50 style solid
+	24950 13300 24850 13300
+Wire Notes Line width 50 style solid
+	24850 13300 24900 13050
+Text Notes 29750 19775 0    250  ~ 50
+SCHEMATIC
+Text Notes 29325 20150 0    200  ~ 40
+CLOCK OSCILLATOR
+Text Notes 30125 20375 0    140  ~ 28
+MODULE NO. B7
+Text Notes 31000 21125 0    225  ~ 45
+2005003
+Text Notes 28325 21100 0    225  ~ 45
+80230
+Text Notes 32400 21450 0    140  ~ 28
+1     3
+Wire Wire Line
+	9225 5100 9175 5100
+Text Notes 6225 18050 0    400  ~ 0
+∞
+$EndSCHEMATC
