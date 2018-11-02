@@ -1337,7 +1337,7 @@ Text Notes 12075 10725 0    130  ~ 26
 1006793
 Text Notes 12075 10975 0    130  ~ 26
 1006793-87
-Text Notes 12075 11500 0    130  ~ 26
+Text Notes 12075 11475 0    130  ~ 26
 1006793-87
 Text Notes 12075 11975 0    130  ~ 26
 1006793-87
@@ -1742,10 +1742,10 @@ Wire Wire Line
 Text Notes 6225 18050 0    400  ~ 0
 ∞
 $Comp
-L AGC_DSKY:ConnectorB7-600 J201
+L AGC_DSKY:ConnectorB7-600 J6
 U 28 1 5BDC2FA6
 P 1475 2800
-F 0 "J201" H 1475 3125 140 0001 C CNN
+F 0 "J6" H 1475 3125 140 0001 C CNN
 F 1 "ConnectorB7-600" H 1475 3225 140 0001 C CNN
 F 2 "" H 1475 2975 140 0001 C CNN
 F 3 "" H 1475 2975 140 0001 C CNN
@@ -1757,10 +1757,10 @@ Wire Wire Line
 	3575 2800 1750 2800
 Connection ~ 3575 2800
 $Comp
-L AGC_DSKY:ConnectorB7-600 J201
+L AGC_DSKY:ConnectorB7-600 J6
 U 29 1 5BDCC662
 P 1550 10250
-F 0 "J201" H 1550 10575 140 0001 C CNN
+F 0 "J6" H 1550 10575 140 0001 C CNN
 F 1 "ConnectorB7-600" H 1550 10675 140 0001 C CNN
 F 2 "" H 1550 10425 140 0001 C CNN
 F 3 "" H 1550 10425 140 0001 C CNN
@@ -1775,10 +1775,10 @@ Wire Wire Line
 Text Notes 2700 9975 0    140  ~ 28
 INTERNAL\nTEMPERATURE\nSENSOR
 $Comp
-L AGC_DSKY:ConnectorB7-600 J201
+L AGC_DSKY:ConnectorB7-600 J6
 U 4 1 5BDD66D6
 P 1500 9225
-F 0 "J201" H 1500 9550 140 0001 C CNN
+F 0 "J6" H 1500 9550 140 0001 C CNN
 F 1 "ConnectorB7-600" H 1500 9650 140 0001 C CNN
 F 2 "" H 1500 9400 140 0001 C CNN
 F 3 "" H 1500 9400 140 0001 C CNN
@@ -1787,10 +1787,10 @@ F 4 "MTHI" H 1500 8850 140 0000 C CNB "Caption"
 	1    0    0    -1  
 $EndComp
 $Comp
-L AGC_DSKY:ConnectorB7-300 J202
+L AGC_DSKY:ConnectorB7-300 J3
 U 2 1 5BDD7399
 P 1500 7925
-F 0 "J202" H 1500 8250 140 0001 C CNN
+F 0 "J3" H 1500 8250 140 0001 C CNN
 F 1 "ConnectorB7-300" H 1500 8350 140 0001 C CNN
 F 2 "" H 1500 8100 140 0001 C CNN
 F 3 "" H 1500 8100 140 0001 C CNN
@@ -1802,10 +1802,10 @@ Wire Wire Line
 	3025 7925 1775 7925
 Connection ~ 3025 7925
 $Comp
-L AGC_DSKY:ConnectorB7-500 J203
+L AGC_DSKY:ConnectorB7-500 J5
 U 2 1 5BDEAC7C
 P 1525 13400
-F 0 "J203" H 1525 13725 140 0001 C CNN
+F 0 "J5" H 1525 13725 140 0001 C CNN
 F 1 "ConnectorB7-500" H 1525 13825 140 0001 C CNN
 F 2 "" H 1525 13575 140 0001 C CNN
 F 3 "" H 1525 13575 140 0001 C CNN
@@ -1816,10 +1816,10 @@ $EndComp
 Wire Wire Line
 	3950 13400 1800 13400
 $Comp
-L AGC_DSKY:ConnectorB7-100 J204
+L AGC_DSKY:ConnectorB7-100 J1
 U 37 2 5BDFE6EE
 P 5450 15300
-F 0 "J204" H 5450 15625 140 0001 C CNN
+F 0 "J1" H 5450 15625 140 0001 C CNN
 F 1 "ConnectorB7-100" H 5450 15725 140 0001 C CNN
 F 2 "" H 5450 15475 140 0001 C CNN
 F 3 "" H 5450 15475 140 0001 C CNN
@@ -1832,10 +1832,10 @@ Wire Wire Line
 Wire Wire Line
 	5450 13600 5450 15125
 $Comp
-L AGC_DSKY:ConnectorB7-500 J203
+L AGC_DSKY:ConnectorB7-500 J5
 U 3 1 5BE0A321
 P 10100 13400
-F 0 "J203" H 10100 13725 140 0001 C CNN
+F 0 "J5" H 10100 13725 140 0001 C CNN
 F 1 "ConnectorB7-500" H 10100 13825 140 0001 C CNN
 F 2 "" H 10100 13575 140 0001 C CNN
 F 3 "" H 10100 13575 140 0001 C CNN
@@ -1854,10 +1854,10 @@ SEE NOTE 3
 Text Notes 4875 7925 0    130  ~ 0
 SEE NOTE 3
 $Comp
-L AGC_DSKY:ConnectorB7-500 J203
+L AGC_DSKY:ConnectorB7-500 J5
 U 4 1 5BE14E67
 P 24250 2375
-F 0 "J203" H 24250 2700 140 0001 C CNN
+F 0 "J5" H 24250 2700 140 0001 C CNN
 F 1 "ConnectorB7-500" H 24250 2800 140 0001 C CNN
 F 2 "" H 24250 2550 140 0001 C CNN
 F 3 "" H 24250 2550 140 0001 C CNN
@@ -1869,10 +1869,10 @@ Wire Wire Line
 	19800 2375 23975 2375
 Connection ~ 19800 2375
 $Comp
-L AGC_DSKY:ConnectorB7-300 J202
+L AGC_DSKY:ConnectorB7-300 J3
 U 4 1 5BE291F7
 P 24250 3400
-F 0 "J202" H 24250 3725 140 0001 C CNN
+F 0 "J3" H 24250 3725 140 0001 C CNN
 F 1 "ConnectorB7-300" H 24250 3825 140 0001 C CNN
 F 2 "" H 24250 3575 140 0001 C CNN
 F 3 "" H 24250 3575 140 0001 C CNN
@@ -1886,10 +1886,10 @@ Connection ~ 19800 3400
 Wire Wire Line
 	19800 3400 19800 3700
 $Comp
-L AGC_DSKY:ConnectorB7-600 J201
+L AGC_DSKY:ConnectorB7-600 J6
 U 2 1 5BE336F1
 P 24275 7225
-F 0 "J201" H 24275 7550 140 0001 C CNN
+F 0 "J6" H 24275 7550 140 0001 C CNN
 F 1 "ConnectorB7-600" H 24275 7650 140 0001 C CNN
 F 2 "" H 24275 7400 140 0001 C CNN
 F 3 "" H 24275 7400 140 0001 C CNN
@@ -1927,7 +1927,7 @@ Connection ~ 3025 9225
 Wire Wire Line
 	11100 7200 11100 7225
 Text Notes 1900 21150 0    140  ~ 28
-Notes from the Virtual AGC Project:\n1. This CAD drawing was manually transcribed from the original Apollo Program\n   document, but is not itself original to the Apollo Program. — RSB 2018\n2. The original drawing did not supply reference designators for the connector to\n   the AGC backplane.  On this drawing, the numbered oval pads collectively comprise\n   connector J1. — RSB 2018
+Notes from the Virtual AGC Project:\n1. This CAD drawing was manually transcribed from the original Apollo Program\n   document, but is not itself original to the Apollo Program. — RSB 2018\n2. The original drawing did not supply reference designators for the connector to\n   the AGC backplane.  On this drawing, 4 connectors (J1, J3, J5, J6) have been used;\n   the oval pad numbered "xyy" would be pin yy of connector Jx. — RSB 2018
 $Bitmap
 Pos 1600 19975
 Scale 1.000000
