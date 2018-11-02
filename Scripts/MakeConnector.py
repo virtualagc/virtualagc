@@ -26,7 +26,32 @@ else:
 	print >> sys.stderr, "into the script, such as \"ConnectorD7\"."
 	sys.exit(1)
 
-if partName == "ConnectorA1-100":
+if partName == "ConnectorB7-100":
+	startingPinNumber = 133
+	endingPinNumber = 169
+	omitPins = [ ] 
+elif partName == "ConnectorB7-200":
+	startingPinNumber = 201
+	endingPinNumber = 204
+	omitPins = [ 201 ] 
+elif partName == "ConnectorB7-300":
+	startingPinNumber = 301
+	endingPinNumber = 304
+	omitPins = [ 301 ] 
+elif partName == "ConnectorB7-500":
+	startingPinNumber = 501
+	endingPinNumber = 504
+	omitPins = [ 501 ] 
+elif partName == "ConnectorB7-600":
+	startingPinNumber = 601
+	endingPinNumber = 629
+	omitPins = [ 601, 605, 606, 607, 608, 609, 610, 611, 612, 613, 614, 615, 
+		     616, 617, 618, 619, 620, 621, 622, 623, 624, 625, 626, 627 ] 
+elif partName == "ConnectorB7-700":
+	startingPinNumber = 733
+	endingPinNumber = 769
+	omitPins = [ ]
+elif partName == "ConnectorA1-100":
 	startingPinNumber = 101
 	endingPinNumber = 171
 	omitPins = [ 121, 151 ]
