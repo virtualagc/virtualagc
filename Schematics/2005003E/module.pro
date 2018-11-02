@@ -1,4 +1,4 @@
-update=Thu 01 Nov 2018 05:32:57 PM CDT
+update=Fri 02 Nov 2018 09:01:39 AM CDT
 version=1
 last_client=kicad
 [general]
@@ -34,10 +34,10 @@ LibDir=
 [schematic_editor]
 version=1
 PageLayoutDescrFile=schematicTemplate.kicad_wks
-PlotDirectoryName=
+PlotDirectoryName=../temp
 SubpartIdSeparator=0
 SubpartFirstId=65
 NetFmtName=
 SpiceAjustPassiveValues=0
-LabSize=140
+LabSize=130
 ERC_TestSimilarLabels=1
