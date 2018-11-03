@@ -51,6 +51,14 @@ elif partName == "ConnectorB7-700":
 	startingPinNumber = 733
 	endingPinNumber = 769
 	omitPins = [ ]
+elif partName == "ConnectorB8-100":
+	startingPinNumber = 101
+	endingPinNumber = 169
+	omitPins = [ ]
+elif partName == "ConnectorB8-200":
+	startingPinNumber = 201
+	endingPinNumber = 269
+	omitPins = [ ]
 elif partName == "ConnectorA1-100":
 	startingPinNumber = 101
 	endingPinNumber = 171
