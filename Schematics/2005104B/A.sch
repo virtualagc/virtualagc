@@ -1,0 +1,1699 @@
+EESchema Schematic File Version 4
+LIBS:module-cache
+EELAYER 29 0
+EELAYER END
+$Descr E 44000 34000
+encoding utf-8
+Sheet 6 11
+Title ""
+Date ""
+Rev ""
+Comp ""
+Comment1 ""
+Comment2 ""
+Comment3 ""
+Comment4 ""
+$EndDescr
+Text Notes 39650 31700 0    250  ~ 50
+SCHEMATIC,
+Text Notes 40875 33100 0    250  ~ 50
+2005104
+Text Notes 38250 33100 0    250  ~ 50
+80230
+Text Notes 38500 32050 0    200  ~ 40
+ERASABLE DRIVER MODULE
+Text Notes 38750 32375 0    200  ~ 40
+MODULE NO. B9 AND B10
+Text Notes 38875 33400 0    140  ~ 28
+____
+Text Notes 42425 33450 0    140  ~ 28
+1     2
+Text Notes 33500 32300 0    140  ~ 28
+____________
+Text Notes 33500 32875 0    140  ~ 28
+____________
+Text Notes 33500 33350 0    140  ~ 28
+____________
+Wire Notes Line style solid
+	34000 33400 34100 33225
+Wire Notes Line style solid
+	34250 32925 34350 32775
+Wire Notes Line style solid
+	34225 32375 34325 32225
+Text Notes 35100 31750 0    140  ~ 28
+___
+Text Notes 34125 31750 0    140  ~ 28
+___
+Text Notes 33125 31750 0    140  ~ 28
+___
+Wire Notes Line style solid
+	33275 31775 33350 31675
+Wire Notes Line style solid
+	34250 31775 34325 31675
+Wire Notes Line style solid
+	35250 31775 35325 31675
+Wire Notes Line style solid
+	38950 33425 39050 33325
+Text Notes 40325 33400 0    140  ~ 28
+_____
+Wire Notes Line style solid
+	40550 33425 40650 33325
+Wire Notes Line style solid
+	37965 920  37965 2050
+Wire Notes Line style solid
+	37975 2050 43500 2050
+Wire Notes Line style solid
+	37975 1475 43500 1475
+Wire Notes Line style solid
+	42465 920  42465 2050
+Wire Notes Line style solid
+	41800 920  41800 2050
+Wire Notes Line style solid
+	38465 920  38465 2050
+Text Notes 38125 1300 0    140  ~ 28
+A
+Text Notes 38125 1850 0    140  ~ 28
+B
+Text Notes 38550 1425 0    140  ~ 28
+REVISED PER TDRR 29079\nDR     CHK      APPD
+Text Notes 38550 2000 0    140  ~ 28
+REVISED PER TDRR 29821\nDR     CHK      APPD
+Wire Notes Line style solid
+	14025 18075 34950 18075
+Wire Notes Line style solid
+	17025 18550 34950 18550
+Wire Notes Line style solid
+	14025 18975 34950 18975
+Wire Notes Line style solid
+	34950 19225 14025 19225
+Wire Notes Line style solid
+	34950 19475 14025 19475
+Wire Notes Line style solid
+	34950 19725 14025 19725
+Wire Notes Line style solid
+	34950 22975 14025 22975
+Wire Notes Line style solid
+	14025 23225 32950 23225
+Wire Notes Line style solid
+	14025 23475 32950 23475
+Wire Notes Line style solid
+	14025 29975 32950 29975
+Wire Notes Line style solid
+	14025 18075 14025 29975
+Wire Notes Line style solid
+	15525 18075 15525 29975
+Wire Notes Line style solid
+	17025 18075 17025 29975
+Wire Notes Line style solid
+	18025 18550 18025 29975
+Wire Notes Line style solid
+	19025 18075 19025 29975
+Wire Notes Line style solid
+	20025 18550 20025 29975
+Wire Notes Line style solid
+	21025 18075 21025 29975
+Wire Notes Line style solid
+	22025 18550 22025 29975
+Wire Notes Line style solid
+	23025 18075 23025 29975
+Wire Notes Line style solid
+	24025 29975 24025 18550
+Wire Notes Line style solid
+	25000 18075 25000 29975
+Wire Notes Line style solid
+	26000 29975 26000 18550
+Wire Notes Line style solid
+	26975 18075 26975 29975
+Wire Notes Line style solid
+	27975 18550 27975 29975
+Wire Notes Line style solid
+	28975 18075 28975 29975
+Wire Notes Line style solid
+	30000 29975 30000 18550
+Wire Notes Line style solid
+	30975 18075 30975 29975
+Wire Notes Line style solid
+	31975 29975 31975 18550
+Wire Notes Line style solid
+	32950 18075 32950 29975
+Wire Notes Line style solid
+	33950 18550 33950 22975
+Wire Notes Line style solid
+	34950 22975 34950 18075
+Text Notes 14700 19200 0    130  ~ 26
+1
+Text Notes 14700 19450 0    130  ~ 26
+2
+Text Notes 14700 19700 0    130  ~ 26
+3
+Text Notes 14700 19950 0    130  ~ 26
+4
+Text Notes 14700 20200 0    130  ~ 26
+5
+Text Notes 14700 20450 0    130  ~ 26
+6
+Text Notes 14700 20700 0    130  ~ 26
+7
+Text Notes 14700 20950 0    130  ~ 26
+8
+Text Notes 14700 21200 0    130  ~ 26
+1
+Text Notes 14700 21450 0    130  ~ 26
+2
+Text Notes 14700 21700 0    130  ~ 26
+3
+Text Notes 14700 21950 0    130  ~ 26
+4
+Text Notes 14700 22200 0    130  ~ 26
+5
+Text Notes 14700 22450 0    130  ~ 26
+6
+Text Notes 14700 22700 0    130  ~ 26
+7
+Text Notes 14700 22950 0    130  ~ 26
+8
+Text Notes 14725 23200 0    130  ~ 26
+1
+Text Notes 14725 23450 0    130  ~ 26
+2
+Text Notes 14725 23700 0    130  ~ 26
+3
+Text Notes 14725 23950 0    130  ~ 26
+4
+Text Notes 14725 24200 0    130  ~ 26
+5
+Text Notes 14725 24450 0    130  ~ 26
+6
+Text Notes 14725 24700 0    130  ~ 26
+7
+Text Notes 14725 24950 0    130  ~ 26
+8
+Text Notes 14725 25200 0    130  ~ 26
+9
+Text Notes 14725 25450 0    130  ~ 26
+10
+Text Notes 14725 25700 0    130  ~ 26
+11
+Text Notes 14725 25950 0    130  ~ 26
+12
+Text Notes 14725 26200 0    130  ~ 26
+13
+Text Notes 14725 26450 0    130  ~ 26
+14
+Text Notes 14725 26700 0    130  ~ 26
+1
+Text Notes 14725 26950 0    130  ~ 26
+2
+Text Notes 14725 27200 0    130  ~ 26
+3
+Text Notes 14725 27450 0    130  ~ 26
+4
+Text Notes 14725 27700 0    130  ~ 26
+5
+Text Notes 14725 27950 0    130  ~ 26
+6
+Text Notes 14725 28200 0    130  ~ 26
+7
+Text Notes 14725 28450 0    130  ~ 26
+8
+Text Notes 14725 28700 0    130  ~ 26
+9
+Text Notes 14725 28950 0    130  ~ 26
+10
+Text Notes 14725 29200 0    130  ~ 26
+11
+Text Notes 14725 29450 0    130  ~ 26
+12
+Text Notes 14725 29700 0    130  ~ 26
+13
+Text Notes 14725 29950 0    130  ~ 26
+14
+Text Notes 17175 21450 0    130  ~ 26
+DBF01
+Text Notes 700  2275 0    140  ~ 28
+CKT NO.    40001 THRU 40008\n            40009 THRU 40016
+Wire Notes Line
+	600  8850 39375 8850
+Wire Notes Line
+	39375 8850 39375 14075
+Wire Notes Line
+	39375 14075 21400 14075
+Wire Notes Line
+	28725 17125 28725 14075
+Wire Notes Line
+	600  17125 28725 17125
+Wire Notes Line
+	21400 575  21400 17125
+Wire Notes Line
+	37725 8850 37725 625 
+Wire Notes Line
+	28725 625  28725 8850
+Wire Notes Line
+	33350 8850 33350 14075
+Wire Notes Line
+	27400 14075 27400 8850
+Wire Notes Line
+	12525 17125 12525 8850
+Wire Notes Line
+	12050 8850 12050 600 
+Wire Notes Line
+	7100 8850 7100 17125
+Wire Notes Line
+	12525 13500 550  13500
+$Comp
+L AGC_DSKY:Resistor R301
+U 1 1 5E45A16C
+P 4350 4550
+AR Path="/5B8E7731/5FA95F9F/5E45A16C" Ref="R301"  Part="1" 
+AR Path="/5B8E7731/5FBE56E6/5E45A16C" Ref="R401"  Part="1" 
+AR Path="/5B8E7731/5FBEDF51/5E45A16C" Ref="R601"  Part="1" 
+AR Path="/5B8E7731/5FBEDF37/5E45A16C" Ref="R501"  Part="1" 
+AR Path="/5B8E7731/5FBF834E/5E45A16C" Ref="R701"  Part="1" 
+AR Path="/5B8E7731/5FBF8368/5E45A16C" Ref="R801"  Part="1" 
+AR Path="/5B8E7731/5FBF8382/5E45A16C" Ref="R901"  Part="1" 
+AR Path="/5B8E7731/5FBF839C/5E45A16C" Ref="R1001"  Part="1" 
+F 0 "R1001" V 4236 4435 130 0000 R CNN
+F 1 "5100" V 4463 4435 130 0000 R CNN
+F 2 "" H 4350 4550 130 0001 C CNN
+F 3 "" H 4350 4550 130 0001 C CNN
+	1    4350 4550
+	0    -1   1    0   
+$EndComp
+$Comp
+L AGC_DSKY:Resistor R302
+U 1 1 5E45A859
+P 5350 5200
+AR Path="/5B8E7731/5FA95F9F/5E45A859" Ref="R302"  Part="1" 
+AR Path="/5B8E7731/5FBE56E6/5E45A859" Ref="R402"  Part="1" 
+AR Path="/5B8E7731/5FBEDF51/5E45A859" Ref="R602"  Part="1" 
+AR Path="/5B8E7731/5FBEDF37/5E45A859" Ref="R502"  Part="1" 
+AR Path="/5B8E7731/5FBF834E/5E45A859" Ref="R702"  Part="1" 
+AR Path="/5B8E7731/5FBF8368/5E45A859" Ref="R802"  Part="1" 
+AR Path="/5B8E7731/5FBF8382/5E45A859" Ref="R902"  Part="1" 
+AR Path="/5B8E7731/5FBF839C/5E45A859" Ref="R1002"  Part="1" 
+F 0 "R1002" H 5350 5450 130 0000 C CNN
+F 1 "200" H 5375 4975 130 0000 C CNN
+F 2 "" H 5350 5200 130 0001 C CNN
+F 3 "" H 5350 5200 130 0001 C CNN
+	1    5350 5200
+	-1   0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:Transistor-NPN Q301
+U 1 1 5E45B34C
+P 6675 5200
+AR Path="/5B8E7731/5FA95F9F/5E45B34C" Ref="Q301"  Part="1" 
+AR Path="/5B8E7731/5FBE56E6/5E45B34C" Ref="Q401"  Part="1" 
+AR Path="/5B8E7731/5FBEDF51/5E45B34C" Ref="Q601"  Part="1" 
+AR Path="/5B8E7731/5FBEDF37/5E45B34C" Ref="Q501"  Part="1" 
+AR Path="/5B8E7731/5FBF834E/5E45B34C" Ref="Q701"  Part="1" 
+AR Path="/5B8E7731/5FBF8368/5E45B34C" Ref="Q801"  Part="1" 
+AR Path="/5B8E7731/5FBF8382/5E45B34C" Ref="Q901"  Part="1" 
+AR Path="/5B8E7731/5FBF839C/5E45B34C" Ref="Q1001"  Part="1" 
+F 0 "Q1001" H 7125 5675 130 0000 C CNN
+F 1 "Transistor-NPN" H 6675 5765 130 0001 C CNN
+F 2 "" H 6675 5450 130 0001 C CNN
+F 3 "" H 6675 5450 130 0001 C CNN
+	1    6675 5200
+	1    0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:Resistor R304
+U 1 1 5E45BCBE
+P 8100 6775
+AR Path="/5B8E7731/5FA95F9F/5E45BCBE" Ref="R304"  Part="1" 
+AR Path="/5B8E7731/5FBE56E6/5E45BCBE" Ref="R404"  Part="1" 
+AR Path="/5B8E7731/5FBEDF51/5E45BCBE" Ref="R604"  Part="1" 
+AR Path="/5B8E7731/5FBEDF37/5E45BCBE" Ref="R504"  Part="1" 
+AR Path="/5B8E7731/5FBF834E/5E45BCBE" Ref="R704"  Part="1" 
+AR Path="/5B8E7731/5FBF8368/5E45BCBE" Ref="R804"  Part="1" 
+AR Path="/5B8E7731/5FBF8382/5E45BCBE" Ref="R904"  Part="1" 
+AR Path="/5B8E7731/5FBF839C/5E45BCBE" Ref="R1004"  Part="1" 
+F 0 "R1004" V 7986 6660 130 0000 R CNN
+F 1 "5100" V 8213 6660 130 0000 R CNN
+F 2 "" H 8100 6775 130 0001 C CNN
+F 3 "" H 8100 6775 130 0001 C CNN
+	1    8100 6775
+	0    -1   1    0   
+$EndComp
+$Comp
+L AGC_DSKY:Resistor R303
+U 1 1 5E45C3DA
+P 8100 3475
+AR Path="/5B8E7731/5FA95F9F/5E45C3DA" Ref="R303"  Part="1" 
+AR Path="/5B8E7731/5FBE56E6/5E45C3DA" Ref="R403"  Part="1" 
+AR Path="/5B8E7731/5FBEDF51/5E45C3DA" Ref="R603"  Part="1" 
+AR Path="/5B8E7731/5FBEDF37/5E45C3DA" Ref="R503"  Part="1" 
+AR Path="/5B8E7731/5FBF834E/5E45C3DA" Ref="R703"  Part="1" 
+AR Path="/5B8E7731/5FBF8368/5E45C3DA" Ref="R803"  Part="1" 
+AR Path="/5B8E7731/5FBF8382/5E45C3DA" Ref="R903"  Part="1" 
+AR Path="/5B8E7731/5FBF839C/5E45C3DA" Ref="R1003"  Part="1" 
+F 0 "R1003" V 7986 3360 130 0000 R CNN
+F 1 "1000" V 8213 3360 130 0000 R CNN
+F 2 "" H 8100 3475 130 0001 C CNN
+F 3 "" H 8100 3475 130 0001 C CNN
+	1    8100 3475
+	0    -1   1    0   
+$EndComp
+$Comp
+L AGC_DSKY:Resistor R306
+U 1 1 5E45C83D
+P 10775 7050
+AR Path="/5B8E7731/5FA95F9F/5E45C83D" Ref="R306"  Part="1" 
+AR Path="/5B8E7731/5FBE56E6/5E45C83D" Ref="R406"  Part="1" 
+AR Path="/5B8E7731/5FBEDF51/5E45C83D" Ref="R606"  Part="1" 
+AR Path="/5B8E7731/5FBEDF37/5E45C83D" Ref="R506"  Part="1" 
+AR Path="/5B8E7731/5FBF834E/5E45C83D" Ref="R706"  Part="1" 
+AR Path="/5B8E7731/5FBF8368/5E45C83D" Ref="R806"  Part="1" 
+AR Path="/5B8E7731/5FBF8382/5E45C83D" Ref="R906"  Part="1" 
+AR Path="/5B8E7731/5FBF839C/5E45C83D" Ref="R1006"  Part="1" 
+F 0 "R1006" V 10661 6935 130 0000 R CNN
+F 1 "NOTE 3" V 10888 6935 130 0000 R CNN
+F 2 "" H 10775 7050 130 0001 C CNN
+F 3 "" H 10775 7050 130 0001 C CNN
+	1    10775 7050
+	0    -1   1    0   
+$EndComp
+$Comp
+L AGC_DSKY:Resistor R307
+U 1 1 5E45D0A2
+P 11400 4850
+AR Path="/5B8E7731/5FA95F9F/5E45D0A2" Ref="R307"  Part="1" 
+AR Path="/5B8E7731/5FBE56E6/5E45D0A2" Ref="R407"  Part="1" 
+AR Path="/5B8E7731/5FBEDF51/5E45D0A2" Ref="R607"  Part="1" 
+AR Path="/5B8E7731/5FBEDF37/5E45D0A2" Ref="R507"  Part="1" 
+AR Path="/5B8E7731/5FBF834E/5E45D0A2" Ref="R707"  Part="1" 
+AR Path="/5B8E7731/5FBF8368/5E45D0A2" Ref="R807"  Part="1" 
+AR Path="/5B8E7731/5FBF8382/5E45D0A2" Ref="R907"  Part="1" 
+AR Path="/5B8E7731/5FBF839C/5E45D0A2" Ref="R1007"  Part="1" 
+F 0 "R1007" V 11286 4735 130 0000 R CNN
+F 1 "150" V 11513 4735 130 0000 R CNN
+F 2 "" H 11400 4850 130 0001 C CNN
+F 3 "" H 11400 4850 130 0001 C CNN
+	1    11400 4850
+	0    -1   1    0   
+$EndComp
+$Comp
+L AGC_DSKY:Transistor-NPN Q302
+U 1 1 5E45DBAB
+P 9375 4175
+AR Path="/5B8E7731/5FA95F9F/5E45DBAB" Ref="Q302"  Part="1" 
+AR Path="/5B8E7731/5FBE56E6/5E45DBAB" Ref="Q402"  Part="1" 
+AR Path="/5B8E7731/5FBEDF51/5E45DBAB" Ref="Q602"  Part="1" 
+AR Path="/5B8E7731/5FBEDF37/5E45DBAB" Ref="Q502"  Part="1" 
+AR Path="/5B8E7731/5FBF834E/5E45DBAB" Ref="Q702"  Part="1" 
+AR Path="/5B8E7731/5FBF8368/5E45DBAB" Ref="Q802"  Part="1" 
+AR Path="/5B8E7731/5FBF8382/5E45DBAB" Ref="Q902"  Part="1" 
+AR Path="/5B8E7731/5FBF839C/5E45DBAB" Ref="Q1002"  Part="1" 
+F 0 "Q1002" H 9950 4550 130 0000 C CNN
+F 1 "Transistor-NPN" H 9375 4740 130 0001 C CNN
+F 2 "" H 9375 4425 130 0001 C CNN
+F 3 "" H 9375 4425 130 0001 C CNN
+	1    9375 4175
+	1    0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:Resistor R305
+U 1 1 5E45E2CC
+P 9525 5125
+AR Path="/5B8E7731/5FA95F9F/5E45E2CC" Ref="R305"  Part="1" 
+AR Path="/5B8E7731/5FBE56E6/5E45E2CC" Ref="R405"  Part="1" 
+AR Path="/5B8E7731/5FBEDF51/5E45E2CC" Ref="R605"  Part="1" 
+AR Path="/5B8E7731/5FBEDF37/5E45E2CC" Ref="R505"  Part="1" 
+AR Path="/5B8E7731/5FBF834E/5E45E2CC" Ref="R705"  Part="1" 
+AR Path="/5B8E7731/5FBF8368/5E45E2CC" Ref="R805"  Part="1" 
+AR Path="/5B8E7731/5FBF8382/5E45E2CC" Ref="R905"  Part="1" 
+AR Path="/5B8E7731/5FBF839C/5E45E2CC" Ref="R1005"  Part="1" 
+F 0 "R1005" V 9411 5010 130 0000 R CNN
+F 1 "39" V 9638 5010 130 0000 R CNN
+F 2 "" H 9525 5125 130 0001 C CNN
+F 3 "" H 9525 5125 130 0001 C CNN
+	1    9525 5125
+	0    -1   1    0   
+$EndComp
+$Comp
+L AGC_DSKY:Transistor-NPN Q303
+U 1 1 5E45E872
+P 10625 6175
+AR Path="/5B8E7731/5FA95F9F/5E45E872" Ref="Q303"  Part="1" 
+AR Path="/5B8E7731/5FBE56E6/5E45E872" Ref="Q403"  Part="1" 
+AR Path="/5B8E7731/5FBEDF51/5E45E872" Ref="Q603"  Part="1" 
+AR Path="/5B8E7731/5FBEDF37/5E45E872" Ref="Q503"  Part="1" 
+AR Path="/5B8E7731/5FBF834E/5E45E872" Ref="Q703"  Part="1" 
+AR Path="/5B8E7731/5FBF8368/5E45E872" Ref="Q803"  Part="1" 
+AR Path="/5B8E7731/5FBF8382/5E45E872" Ref="Q903"  Part="1" 
+AR Path="/5B8E7731/5FBF839C/5E45E872" Ref="Q1003"  Part="1" 
+F 0 "Q1003" H 11200 6375 130 0000 C CNN
+F 1 "Transistor-NPN" H 10625 6740 130 0001 C CNN
+F 2 "" H 10625 6425 130 0001 C CNN
+F 3 "" H 10625 6425 130 0001 C CNN
+	1    10625 6175
+	1    0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:Diode CR302
+U 1 1 5E45F314
+P 8100 5175
+AR Path="/5B8E7731/5FA95F9F/5E45F314" Ref="CR302"  Part="1" 
+AR Path="/5B8E7731/5FBE56E6/5E45F314" Ref="CR402"  Part="1" 
+AR Path="/5B8E7731/5FBEDF51/5E45F314" Ref="CR602"  Part="1" 
+AR Path="/5B8E7731/5FBEDF37/5E45F314" Ref="CR502"  Part="1" 
+AR Path="/5B8E7731/5FBF834E/5E45F314" Ref="CR702"  Part="1" 
+AR Path="/5B8E7731/5FBF8368/5E45F314" Ref="CR802"  Part="1" 
+AR Path="/5B8E7731/5FBF8382/5E45F314" Ref="CR902"  Part="1" 
+AR Path="/5B8E7731/5FBF839C/5E45F314" Ref="CR1002"  Part="1" 
+F 0 "CR1002" V 8100 5046 140 0000 R CNN
+F 1 "Diode" H 8100 5025 50  0001 C CNN
+F 2 "" H 8050 5000 50  0001 C CNN
+F 3 "" H 8050 5175 50  0001 C CNN
+	1    8100 5175
+	0    -1   -1   0   
+$EndComp
+$Comp
+L AGC_DSKY:Diode CR301
+U 1 1 5E45FAE0
+P 8100 4775
+AR Path="/5B8E7731/5FA95F9F/5E45FAE0" Ref="CR301"  Part="1" 
+AR Path="/5B8E7731/5FBE56E6/5E45FAE0" Ref="CR401"  Part="1" 
+AR Path="/5B8E7731/5FBEDF51/5E45FAE0" Ref="CR601"  Part="1" 
+AR Path="/5B8E7731/5FBEDF37/5E45FAE0" Ref="CR501"  Part="1" 
+AR Path="/5B8E7731/5FBF834E/5E45FAE0" Ref="CR701"  Part="1" 
+AR Path="/5B8E7731/5FBF8368/5E45FAE0" Ref="CR801"  Part="1" 
+AR Path="/5B8E7731/5FBF8382/5E45FAE0" Ref="CR901"  Part="1" 
+AR Path="/5B8E7731/5FBF839C/5E45FAE0" Ref="CR1001"  Part="1" 
+F 0 "CR1001" V 8100 4646 140 0000 R CNN
+F 1 "Diode" H 8100 4625 50  0001 C CNN
+F 2 "" H 8050 4600 50  0001 C CNN
+F 3 "" H 8050 4775 50  0001 C CNN
+	1    8100 4775
+	0    -1   -1   0   
+$EndComp
+$Comp
+L AGC_DSKY:Diode CR303
+U 1 1 5E4607C2
+P 8100 5575
+AR Path="/5B8E7731/5FA95F9F/5E4607C2" Ref="CR303"  Part="1" 
+AR Path="/5B8E7731/5FBE56E6/5E4607C2" Ref="CR403"  Part="1" 
+AR Path="/5B8E7731/5FBEDF51/5E4607C2" Ref="CR603"  Part="1" 
+AR Path="/5B8E7731/5FBEDF37/5E4607C2" Ref="CR503"  Part="1" 
+AR Path="/5B8E7731/5FBF834E/5E4607C2" Ref="CR703"  Part="1" 
+AR Path="/5B8E7731/5FBF8368/5E4607C2" Ref="CR803"  Part="1" 
+AR Path="/5B8E7731/5FBF8382/5E4607C2" Ref="CR903"  Part="1" 
+AR Path="/5B8E7731/5FBF839C/5E4607C2" Ref="CR1003"  Part="1" 
+F 0 "CR1003" V 8100 5446 140 0000 R CNN
+F 1 "Diode" H 8100 5425 50  0001 C CNN
+F 2 "" H 8050 5400 50  0001 C CNN
+F 3 "" H 8050 5575 50  0001 C CNN
+	1    8100 5575
+	0    -1   -1   0   
+$EndComp
+$Comp
+L AGC_DSKY:Diode CR305
+U 1 1 5E460ED0
+P 9525 6900
+AR Path="/5B8E7731/5FA95F9F/5E460ED0" Ref="CR305"  Part="1" 
+AR Path="/5B8E7731/5FBE56E6/5E460ED0" Ref="CR405"  Part="1" 
+AR Path="/5B8E7731/5FBEDF51/5E460ED0" Ref="CR605"  Part="1" 
+AR Path="/5B8E7731/5FBEDF37/5E460ED0" Ref="CR505"  Part="1" 
+AR Path="/5B8E7731/5FBF834E/5E460ED0" Ref="CR705"  Part="1" 
+AR Path="/5B8E7731/5FBF8368/5E460ED0" Ref="CR805"  Part="1" 
+AR Path="/5B8E7731/5FBF8382/5E460ED0" Ref="CR905"  Part="1" 
+AR Path="/5B8E7731/5FBF839C/5E460ED0" Ref="CR1005"  Part="1" 
+F 0 "CR1005" V 9525 6771 140 0000 R CNN
+F 1 "Diode" H 9525 6750 50  0001 C CNN
+F 2 "" H 9475 6725 50  0001 C CNN
+F 3 "" H 9475 6900 50  0001 C CNN
+	1    9525 6900
+	0    -1   -1   0   
+$EndComp
+$Comp
+L AGC_DSKY:Diode CR304
+U 1 1 5E4618D4
+P 9525 6500
+AR Path="/5B8E7731/5FA95F9F/5E4618D4" Ref="CR304"  Part="1" 
+AR Path="/5B8E7731/5FBE56E6/5E4618D4" Ref="CR404"  Part="1" 
+AR Path="/5B8E7731/5FBEDF51/5E4618D4" Ref="CR604"  Part="1" 
+AR Path="/5B8E7731/5FBEDF37/5E4618D4" Ref="CR504"  Part="1" 
+AR Path="/5B8E7731/5FBF834E/5E4618D4" Ref="CR704"  Part="1" 
+AR Path="/5B8E7731/5FBF8368/5E4618D4" Ref="CR804"  Part="1" 
+AR Path="/5B8E7731/5FBF8382/5E4618D4" Ref="CR904"  Part="1" 
+AR Path="/5B8E7731/5FBF839C/5E4618D4" Ref="CR1004"  Part="1" 
+F 0 "CR1004" V 9525 6371 140 0000 R CNN
+F 1 "Diode" H 9525 6350 50  0001 C CNN
+F 2 "" H 9475 6325 50  0001 C CNN
+F 3 "" H 9475 6500 50  0001 C CNN
+	1    9525 6500
+	0    -1   -1   0   
+$EndComp
+$Comp
+L AGC_DSKY:Diode CR306
+U 1 1 5E461DE6
+P 9525 7300
+AR Path="/5B8E7731/5FA95F9F/5E461DE6" Ref="CR306"  Part="1" 
+AR Path="/5B8E7731/5FBE56E6/5E461DE6" Ref="CR406"  Part="1" 
+AR Path="/5B8E7731/5FBEDF51/5E461DE6" Ref="CR606"  Part="1" 
+AR Path="/5B8E7731/5FBEDF37/5E461DE6" Ref="CR506"  Part="1" 
+AR Path="/5B8E7731/5FBF834E/5E461DE6" Ref="CR706"  Part="1" 
+AR Path="/5B8E7731/5FBF8368/5E461DE6" Ref="CR806"  Part="1" 
+AR Path="/5B8E7731/5FBF8382/5E461DE6" Ref="CR906"  Part="1" 
+AR Path="/5B8E7731/5FBF839C/5E461DE6" Ref="CR1006"  Part="1" 
+F 0 "CR1006" V 9525 7171 140 0000 R CNN
+F 1 "Diode" H 9525 7150 50  0001 C CNN
+F 2 "" H 9475 7125 50  0001 C CNN
+F 3 "" H 9475 7300 50  0001 C CNN
+	1    9525 7300
+	0    -1   -1   0   
+$EndComp
+$Comp
+L AGC_DSKY:Diode CR307
+U 1 1 5E462C08
+P 9525 7700
+AR Path="/5B8E7731/5FA95F9F/5E462C08" Ref="CR307"  Part="1" 
+AR Path="/5B8E7731/5FBE56E6/5E462C08" Ref="CR407"  Part="1" 
+AR Path="/5B8E7731/5FBEDF51/5E462C08" Ref="CR607"  Part="1" 
+AR Path="/5B8E7731/5FBEDF37/5E462C08" Ref="CR507"  Part="1" 
+AR Path="/5B8E7731/5FBF834E/5E462C08" Ref="CR707"  Part="1" 
+AR Path="/5B8E7731/5FBF8368/5E462C08" Ref="CR807"  Part="1" 
+AR Path="/5B8E7731/5FBF8382/5E462C08" Ref="CR907"  Part="1" 
+AR Path="/5B8E7731/5FBF839C/5E462C08" Ref="CR1007"  Part="1" 
+F 0 "CR1007" V 9525 7571 140 0000 R CNN
+F 1 "Diode" H 9525 7550 50  0001 C CNN
+F 2 "" H 9475 7525 50  0001 C CNN
+F 3 "" H 9475 7700 50  0001 C CNN
+	1    9525 7700
+	0    -1   -1   0   
+$EndComp
+$Comp
+L AGC_DSKY:Inductor L301
+U 1 1 5E463285
+P 10125 7925
+AR Path="/5B8E7731/5FA95F9F/5E463285" Ref="L301"  Part="1" 
+AR Path="/5B8E7731/5FBE56E6/5E463285" Ref="L401"  Part="1" 
+AR Path="/5B8E7731/5FBEDF51/5E463285" Ref="L601"  Part="1" 
+AR Path="/5B8E7731/5FBEDF37/5E463285" Ref="L501"  Part="1" 
+AR Path="/5B8E7731/5FBF834E/5E463285" Ref="L701"  Part="1" 
+AR Path="/5B8E7731/5FBF8368/5E463285" Ref="L801"  Part="1" 
+AR Path="/5B8E7731/5FBF8382/5E463285" Ref="L901"  Part="1" 
+AR Path="/5B8E7731/5FBF839C/5E463285" Ref="L1001"  Part="1" 
+F 0 "L1001" H 10100 7800 130 0000 C CNN
+F 1 "2.2UH" H 10175 7575 130 0000 C CNN
+F 2 "" H 10075 8125 130 0001 C CNN
+F 3 "" H 10075 8125 130 0001 C CNN
+	1    10125 7925
+	1    0    0    -1  
+$EndComp
+$Comp
+L AGC_DSKY:Ground-chassis G301
+U 1 1 5E463C4C
+P 4425 6600
+AR Path="/5B8E7731/5FA95F9F/5E463C4C" Ref="G301"  Part="1" 
+AR Path="/5B8E7731/5FBE56E6/5E463C4C" Ref="G401"  Part="1" 
+AR Path="/5B8E7731/5FBEDF51/5E463C4C" Ref="G601"  Part="1" 
+AR Path="/5B8E7731/5FBEDF37/5E463C4C" Ref="G501"  Part="1" 
+AR Path="/5B8E7731/5FBF834E/5E463C4C" Ref="G701"  Part="1" 
+AR Path="/5B8E7731/5FBF8368/5E463C4C" Ref="G801"  Part="1" 
+AR Path="/5B8E7731/5FBF8382/5E463C4C" Ref="G901"  Part="1" 
+AR Path="/5B8E7731/5FBF839C/5E463C4C" Ref="G1001"  Part="1" 
+F 0 "G1001" H 4665 6608 130 0001 L CNN
+F 1 "Ground-chassis" H 4425 7100 130 0001 C CNN
+F 2 "" H 4425 6600 130 0001 C CNN
+F 3 "" H 4425 6600 130 0001 C CNN
+	1    4425 6600
+	1    0    0    -1  
+$EndComp
+Text HLabel 6575 6300 0    140  UnSpc ~ 28
+D
+Text HLabel 3050 5200 0    140  UnSpc ~ 28
+C
+Text HLabel 10825 5050 2    140  UnSpc ~ 28
+A
+Wire Wire Line
+	3050 5200 4350 5200
+Wire Wire Line
+	5750 5200 6375 5200
+Wire Wire Line
+	4350 4950 4350 5200
+Connection ~ 4350 5200
+Wire Wire Line
+	4350 5200 4950 5200
+Wire Wire Line
+	6825 5450 6825 6300
+Wire Wire Line
+	6825 6300 6575 6300
+Wire Wire Line
+	6825 4950 6825 4175
+Wire Wire Line
+	6825 4175 8100 4175
+Wire Wire Line
+	8100 4575 8100 4175
+Connection ~ 8100 4175
+Wire Wire Line
+	8100 4175 9075 4175
+Wire Wire Line
+	8100 3875 8100 4175
+Wire Wire Line
+	9525 3925 9525 2950
+Wire Wire Line
+	9525 2950 8100 2950
+Wire Wire Line
+	8100 2950 8100 3075
+Wire Wire Line
+	9525 4425 9525 4725
+Wire Wire Line
+	9525 5525 9525 6175
+Wire Wire Line
+	10325 6175 9525 6175
+Connection ~ 9525 6175
+Wire Wire Line
+	9525 6175 9525 6300
+Wire Wire Line
+	9550 6175 9525 6175
+Wire Wire Line
+	8100 6175 8100 6375
+Wire Wire Line
+	9525 6175 8100 6175
+Wire Wire Line
+	8100 6175 8100 5775
+Connection ~ 8100 6175
+Wire Wire Line
+	10775 6425 10775 6650
+Wire Wire Line
+	10775 7450 10775 7925
+Wire Wire Line
+	10775 7925 10525 7925
+Wire Wire Line
+	9725 7925 9525 7925
+Wire Wire Line
+	9525 7925 9525 7900
+Wire Wire Line
+	9525 7925 8550 7925
+Connection ~ 9525 7925
+Wire Wire Line
+	10775 5925 10775 5525
+Wire Wire Line
+	10775 5525 11400 5525
+Wire Wire Line
+	11400 5525 11400 5250
+Wire Wire Line
+	10775 5525 10775 5050
+Wire Wire Line
+	10775 5050 10825 5050
+Connection ~ 10775 5525
+Wire Wire Line
+	4350 4150 4350 4050
+Wire Wire Line
+	4425 6350 4425 6200
+Wire Wire Line
+	4425 6200 3550 6200
+Wire Wire Line
+	8100 7175 8100 7425
+Wire Wire Line
+	8100 7425 7075 7425
+Wire Wire Line
+	8100 2950 8100 2675
+Connection ~ 8100 2950
+Text Notes 13250 20575 0    1300 ~ 0
+{
+Text Notes 13250 22575 0    1300 ~ 0
+{
+Text Notes 12750 25725 0    2250 ~ 0
+{
+Text Notes 12750 29200 0    2250 ~ 0
+{
+Text Notes 12725 28300 0    140  ~ 28
+B10
+Text Notes 12850 24825 0    140  ~ 28
+B9
+Text Notes 13025 22100 0    140  ~ 28
+B10
+Text Notes 13175 20100 0    140  ~ 28
+B9
+Text Notes 15925 19200 0    130  ~ 26
+40001
+Text Notes 15925 19450 0    130  ~ 26
+40002
+Text Notes 15925 19700 0    130  ~ 26
+40003
+Text Notes 15925 19950 0    130  ~ 26
+40004
+Text Notes 15925 20200 0    130  ~ 26
+40005
+Text Notes 15925 20450 0    130  ~ 26
+40006
+Text Notes 15925 20700 0    130  ~ 26
+40007
+Text Notes 15925 20950 0    130  ~ 26
+40008
+Text Notes 15925 21200 0    130  ~ 26
+40009
+Text Notes 15925 21450 0    130  ~ 26
+40010
+Text Notes 15925 21700 0    130  ~ 26
+40011
+Text Notes 15925 21950 0    130  ~ 26
+40012
+Text Notes 15925 22200 0    130  ~ 26
+40013
+Text Notes 15925 22450 0    130  ~ 26
+40014
+Text Notes 15925 22700 0    130  ~ 26
+40015
+Text Notes 15925 22950 0    130  ~ 26
+40016
+Text Notes 15925 23200 0    130  ~ 26
+40271
+Text Notes 15925 23450 0    130  ~ 26
+40273
+Text Notes 15925 23700 0    130  ~ 26
+40263
+Text Notes 15925 23950 0    130  ~ 26
+40269
+Text Notes 15925 24200 0    130  ~ 26
+40268
+Text Notes 15925 24450 0    130  ~ 26
+40270
+Text Notes 15925 24700 0    130  ~ 26
+40253
+Text Notes 15925 24950 0    130  ~ 26
+40257
+Text Notes 15925 25200 0    130  ~ 26
+40256
+Text Notes 15925 25450 0    130  ~ 26
+40258
+Text Notes 15925 25700 0    130  ~ 26
+40261
+Text Notes 15900 25950 0    130  ~ 26
+40262
+Text Notes 15900 26200 0    130  ~ 26
+40276
+Text Notes 15900 26450 0    130  ~ 26
+40278
+Text Notes 15900 26700 0    130  ~ 26
+40277
+Text Notes 15900 26950 0    130  ~ 26
+40275
+Text Notes 15900 27200 0    130  ~ 26
+40259
+Text Notes 15900 27450 0    130  ~ 26
+40260
+Text Notes 15900 27700 0    130  ~ 26
+40254
+Text Notes 15900 27950 0    130  ~ 26
+40252
+Text Notes 15900 28200 0    130  ~ 26
+40255
+Text Notes 15900 28450 0    130  ~ 26
+40251
+Text Notes 15900 28700 0    130  ~ 26
+40266
+Text Notes 15900 28950 0    130  ~ 26
+40264
+Text Notes 15900 29200 0    130  ~ 26
+40267
+Text Notes 15900 29450 0    130  ~ 26
+40265
+Text Notes 15900 29700 0    130  ~ 26
+40274
+Text Notes 15900 29950 0    130  ~ 26
+40272
+Wire Notes Line style solid
+	14025 19975 20300 19975
+Wire Notes Line style solid
+	14025 20225 20300 20225
+Wire Notes Line style solid
+	14025 20475 20300 20475
+Wire Notes Line style solid
+	14025 20725 20300 20725
+Wire Notes Line style solid
+	14025 20975 20300 20975
+Wire Notes Line style solid
+	14025 21475 20300 21475
+Wire Notes Line style solid
+	14025 21725 20300 21725
+Wire Notes Line style solid
+	14025 21975 20300 21975
+Wire Notes Line style solid
+	14025 22225 20300 22225
+Wire Notes Line style solid
+	14025 22475 20300 22475
+Wire Notes Line style solid
+	20600 19975 34275 19975
+Wire Notes Line style solid
+	20600 20225 34275 20225
+Wire Notes Line style solid
+	20600 20475 34275 20475
+Wire Notes Line style solid
+	20600 20725 34275 20725
+Wire Notes Line style solid
+	20600 20975 34275 20975
+Wire Notes Line style solid
+	20600 21475 34275 21475
+Wire Notes Line style solid
+	20600 21725 34275 21725
+Wire Notes Line style solid
+	20600 21975 34275 21975
+Wire Notes Line style solid
+	20600 22225 34275 22225
+Wire Notes Line style solid
+	20600 22475 34275 22475
+Wire Notes Line style solid
+	34575 19975 34950 19975
+Wire Notes Line style solid
+	34600 20225 34950 20225
+Wire Notes Line style solid
+	34600 20475 34950 20475
+Wire Notes Line style solid
+	34600 20725 34950 20725
+Wire Notes Line style solid
+	34600 20975 34950 20975
+Wire Notes Line style solid
+	34600 21475 34950 21475
+Wire Notes Line style solid
+	34600 21725 34950 21725
+Wire Notes Line style solid
+	34600 21975 34950 21975
+Wire Notes Line style solid
+	34600 22225 34950 22225
+Wire Notes Line style solid
+	34600 22475 34950 22475
+Wire Notes Line style solid
+	14025 21225 34950 21225
+Text Notes 34525 22550 1    140  ~ 28
+INTERNALLY  CONNECTED
+Text Notes 20550 22575 1    140  ~ 28
+INTERNALLY  CONNECTED
+Wire Notes Line style solid
+	14025 22725 34950 22725
+Wire Notes Line style solid
+	14025 23725 32300 23725
+Wire Notes Line style solid
+	32300 23975 14025 23975
+Wire Notes Line style solid
+	32300 24225 14025 24225
+Wire Notes Line style solid
+	32300 24475 14025 24475
+Wire Notes Line style solid
+	32300 24725 14025 24725
+Wire Notes Line style solid
+	32300 24975 14025 24975
+Wire Notes Line style solid
+	32300 25225 14025 25225
+Wire Notes Line style solid
+	32300 25475 14025 25475
+Wire Notes Line style solid
+	32300 25725 14025 25725
+Wire Notes Line style solid
+	32300 25975 14025 25975
+Wire Notes Line style solid
+	32300 27225 14025 27225
+Wire Notes Line style solid
+	32300 27475 14025 27475
+Wire Notes Line style solid
+	32300 27725 14025 27725
+Wire Notes Line style solid
+	32300 27975 14025 27975
+Wire Notes Line style solid
+	32300 28225 14025 28225
+Wire Notes Line style solid
+	32300 28475 14025 28475
+Wire Notes Line style solid
+	32300 28725 14025 28725
+Wire Notes Line style solid
+	32300 28975 14025 28975
+Wire Notes Line style solid
+	32300 29225 14025 29225
+Wire Notes Line style solid
+	32300 29475 14025 29475
+Wire Notes Line style solid
+	32300 29725 14025 29725
+Wire Notes Line style solid
+	32575 23725 32950 23725
+Wire Notes Line style solid
+	32575 23975 32950 23975
+Wire Notes Line style solid
+	32575 24225 32950 24225
+Wire Notes Line style solid
+	32575 24475 32950 24475
+Wire Notes Line style solid
+	32575 24725 32950 24725
+Wire Notes Line style solid
+	32575 24975 32950 24975
+Wire Notes Line style solid
+	32575 25225 32950 25225
+Wire Notes Line style solid
+	32575 25475 32950 25475
+Wire Notes Line style solid
+	32575 25725 32950 25725
+Wire Notes Line style solid
+	32575 25975 32950 25975
+Wire Notes Line style solid
+	32575 27225 32950 27225
+Wire Notes Line style solid
+	32575 27475 32950 27475
+Wire Notes Line style solid
+	32575 27725 32950 27725
+Wire Notes Line style solid
+	32575 27975 32950 27975
+Wire Notes Line style solid
+	32575 28225 32950 28225
+Wire Notes Line style solid
+	32575 28475 32950 28475
+Wire Notes Line style solid
+	32575 28725 32950 28725
+Wire Notes Line style solid
+	32575 28975 32950 28975
+Wire Notes Line style solid
+	32575 29225 32950 29225
+Wire Notes Line style solid
+	32575 29475 32950 29475
+Wire Notes Line style solid
+	32575 29725 32950 29725
+Text Notes 32550 26100 1    140  ~ 28
+INTERNALLY CONNECTED
+Wire Notes Line style solid
+	14025 26225 32950 26225
+Wire Notes Line style solid
+	14025 26475 32950 26475
+Wire Notes Line style solid
+	14025 26725 32950 26725
+Wire Notes Line style solid
+	14025 26975 32950 26975
+Text Notes 32550 29750 1    140  ~ 28
+INTERNALLY CONNECTED
+Text Notes 17175 21200 0    130  ~ 26
+DBF15
+Text Notes 17175 20950 0    130  ~ 26
+DBF06
+Text Notes 17175 20700 0    130  ~ 26
+DBF07
+Text Notes 17175 20450 0    130  ~ 26
+DBF10
+Text Notes 17175 20200 0    130  ~ 26
+DBF11
+Text Notes 17175 19950 0    130  ~ 26
+DBF12
+Text Notes 17175 19700 0    130  ~ 26
+DBF13
+Text Notes 17175 19450 0    130  ~ 26
+DBF14
+Text Notes 17175 19200 0    130  ~ 26
+DBF16
+Text Notes 17175 21700 0    130  ~ 26
+DBF02
+Text Notes 17175 21950 0    130  ~ 26
+DBF03
+Text Notes 17175 22200 0    130  ~ 26
+DBF04
+Text Notes 17175 22450 0    130  ~ 26
+DBF05
+Text Notes 17175 22700 0    130  ~ 26
+DBF08
+Text Notes 17175 22950 0    130  ~ 26
+DBF09
+Text Notes 14100 18900 0    140  ~ 28
+COMPONENT\n  PREFIX\n  (ASSY)
+Text Notes 15725 18825 0    180  ~ 36
+CIRCUIT\n  NO.
+Text Notes 17150 18900 0    130  ~ 26
+SIGNAL
+Text Notes 18125 18900 0    130  ~ 26
+PIN NO.
+Text Notes 19175 18900 0    130  ~ 26
+SIGNAL
+Text Notes 20150 18900 0    130  ~ 26
+PIN NO.
+Text Notes 21175 18900 0    130  ~ 26
+SIGNAL
+Text Notes 22100 18900 0    130  ~ 26
+PIN NO.
+Text Notes 24125 18900 0    130  ~ 26
+PIN NO.
+Text Notes 23175 18900 0    130  ~ 26
+SIGNAL
+Text Notes 25150 18900 0    130  ~ 26
+SIGNAL
+Text Notes 27125 18900 0    130  ~ 26
+SIGNAL
+Text Notes 26100 18900 0    130  ~ 26
+PIN NO.
+Text Notes 28100 18900 0    130  ~ 26
+PIN NO.
+Text Notes 30100 18900 0    130  ~ 26
+PIN NO.
+Text Notes 29125 18900 0    130  ~ 26
+SIGNAL
+Text Notes 31125 18900 0    130  ~ 26
+SIGNAL
+Text Notes 33100 18900 0    130  ~ 26
+SIGNAL
+Text Notes 32075 18900 0    130  ~ 26
+PIN NO.
+Text Notes 34050 18900 0    130  ~ 26
+PIN NO.
+Text Notes 17950 18425 0    180  ~ 36
+A             B             C              D             E             F             G              H             J
+Text Notes 18300 19200 0    130  ~ 26
+104
+Text Notes 18300 19450 0    130  ~ 26
+109
+Text Notes 18300 19700 0    130  ~ 26
+116
+Text Notes 18300 19950 0    130  ~ 26
+121
+Text Notes 18300 20200 0    130  ~ 26
+126
+Text Notes 18300 20450 0    130  ~ 26
+130
+Text Notes 18300 20700 0    130  ~ 26
+137
+Text Notes 18300 20950 0    130  ~ 26
+142
+Text Notes 18300 21200 0    130  ~ 26
+104
+Text Notes 18300 21450 0    130  ~ 26
+109
+Text Notes 18300 21700 0    130  ~ 26
+116
+Text Notes 18300 21950 0    130  ~ 26
+121
+Text Notes 18300 22200 0    130  ~ 26
+126
+Text Notes 18300 22450 0    130  ~ 26
+130
+Text Notes 18300 22700 0    130  ~ 26
+137
+Text Notes 18300 22950 0    130  ~ 26
+142
+Text Notes 19125 19200 0    130  ~ 26
+40035A
+Text Notes 19125 19950 0    130  ~ 26
+40035A
+Text Notes 19125 20200 0    130  ~ 26
+40033A
+Text Notes 19125 20950 0    130  ~ 26
+40033A
+Text Notes 19125 21200 0    130  ~ 26
+40036A
+Text Notes 19125 21950 0    130  ~ 26
+40036A
+Text Notes 19125 22200 0    130  ~ 26
+40034A
+Text Notes 19125 22950 0    130  ~ 26
+40034A
+Wire Notes Line style solid
+	19550 19300 19550 19675
+Wire Notes Line style solid
+	19550 20275 19550 20675
+Wire Notes Line style solid
+	19525 21275 19525 21675
+Wire Notes Line style solid
+	19525 22275 19525 22675
+Text Notes 21150 19200 0    130  ~ 26
+GEM
+Text Notes 21150 19450 0    130  ~ 26
+GEM
+Text Notes 21150 19700 0    130  ~ 26
+GEM
+Text Notes 21150 19950 0    130  ~ 26
+GEM
+Text Notes 21150 20200 0    130  ~ 26
+GEM
+Text Notes 21150 20450 0    130  ~ 26
+GEM
+Text Notes 21150 20700 0    130  ~ 26
+GEM
+Text Notes 21150 20950 0    130  ~ 26
+GEM
+Text Notes 21150 21200 0    130  ~ 26
+GEM
+Text Notes 21150 21450 0    130  ~ 26
+GEM
+Text Notes 21150 21700 0    130  ~ 26
+GEM
+Text Notes 21150 21950 0    130  ~ 26
+GEM
+Text Notes 21150 22200 0    130  ~ 26
+GEM
+Text Notes 21150 22450 0    130  ~ 26
+GEM
+Text Notes 21150 22700 0    130  ~ 26
+GEM
+Text Notes 21150 22950 0    130  ~ 26
+GEM
+Text Notes 21575 19200 0    130  ~ 26
+16
+Text Notes 21575 19450 0    130  ~ 26
+14
+Text Notes 21575 19700 0    130  ~ 26
+13
+Text Notes 21575 19950 0    130  ~ 26
+12
+Text Notes 21575 20200 0    130  ~ 26
+11
+Text Notes 21575 20450 0    130  ~ 26
+10
+Text Notes 21575 20700 0    130  ~ 26
+07
+Text Notes 21575 20950 0    130  ~ 26
+06
+Text Notes 21575 21200 0    130  ~ 26
+15
+Text Notes 21575 21450 0    130  ~ 26
+01
+Text Notes 21575 21700 0    130  ~ 26
+02
+Text Notes 21575 21950 0    130  ~ 26
+03
+Text Notes 21575 22200 0    130  ~ 26
+04
+Text Notes 21575 22450 0    130  ~ 26
+05
+Text Notes 21575 22700 0    130  ~ 26
+08
+Text Notes 21575 22950 0    130  ~ 26
+09
+Text Notes 22300 19200 0    130  ~ 26
+201
+Text Notes 22300 19450 0    130  ~ 26
+205
+Text Notes 22300 19700 0    130  ~ 26
+212
+Text Notes 22300 19950 0    130  ~ 26
+217
+Text Notes 22300 20200 0    130  ~ 26
+221
+Text Notes 22300 20450 0    130  ~ 26
+226
+Text Notes 22300 20700 0    130  ~ 26
+233
+Text Notes 22300 20950 0    130  ~ 26
+238
+Text Notes 22300 21200 0    130  ~ 26
+201
+Text Notes 22300 21450 0    130  ~ 26
+205
+Text Notes 22300 21700 0    130  ~ 26
+212
+Text Notes 22300 21950 0    130  ~ 26
+217
+Text Notes 22300 22200 0    130  ~ 26
+221
+Text Notes 22300 22450 0    130  ~ 26
+226
+Text Notes 22300 22700 0    130  ~ 26
+233
+Text Notes 22300 22950 0    130  ~ 26
+238
+Text Notes 23125 19200 0    130  ~ 26
+40029A
+Text Notes 23125 20950 0    130  ~ 26
+40029A
+Text Notes 23125 21200 0    130  ~ 26
+40030A
+Text Notes 23125 22950 0    130  ~ 26
+40030A
+Wire Notes Line style solid
+	23525 19275 23525 20675
+Wire Notes Line style solid
+	23525 21300 23525 22675
+Text Notes 24300 19200 0    130  ~ 26
+204
+Text Notes 24300 19450 0    130  ~ 26
+204
+Text Notes 24300 19700 0    130  ~ 26
+216
+Text Notes 24300 19950 0    130  ~ 26
+216
+Text Notes 24300 20200 0    130  ~ 26
+225
+Text Notes 24300 20450 0    130  ~ 26
+225
+Text Notes 24300 20700 0    130  ~ 26
+237
+Text Notes 24300 20950 0    130  ~ 26
+237
+Text Notes 24300 21200 0    130  ~ 26
+204
+Text Notes 24300 21450 0    130  ~ 26
+204
+Text Notes 24300 21700 0    130  ~ 26
+216
+Text Notes 24300 21950 0    130  ~ 26
+216
+Text Notes 24300 22200 0    130  ~ 26
+225
+Text Notes 24300 22450 0    130  ~ 26
+225
+Text Notes 24300 22700 0    130  ~ 26
+237
+Text Notes 24300 22950 0    130  ~ 26
+237
+Text Notes 33050 19200 0    130  ~ 26
+40035B
+Text Notes 33050 19950 0    130  ~ 26
+40035B
+Text Notes 33050 20200 0    130  ~ 26
+40033B
+Text Notes 33050 20950 0    130  ~ 26
+40033B
+Text Notes 33050 21200 0    130  ~ 26
+40036B
+Text Notes 33050 21950 0    130  ~ 26
+40036B
+Text Notes 33050 22200 0    130  ~ 26
+40034B
+Text Notes 33050 22950 0    130  ~ 26
+40034B
+Wire Notes Line style solid
+	33450 19275 33450 19675
+Wire Notes Line style solid
+	33450 20275 33450 20675
+Wire Notes Line style solid
+	33450 21300 33450 21675
+Wire Notes Line style solid
+	33450 22275 33450 22675
+Text Notes 25100 23200 0    130  ~ 26
+40271A
+Text Notes 25100 23450 0    130  ~ 26
+40273A
+Text Notes 25100 23700 0    130  ~ 26
+40263A
+Text Notes 25100 23950 0    130  ~ 26
+40269A
+Text Notes 25100 24200 0    130  ~ 26
+40268A
+Text Notes 25100 24450 0    130  ~ 26
+40270A
+Text Notes 25125 24700 0    130  ~ 26
+40253A
+Text Notes 25125 24950 0    130  ~ 26
+40257A
+Text Notes 25125 25200 0    130  ~ 26
+40256A
+Text Notes 25125 25450 0    130  ~ 26
+40258A
+Text Notes 25125 25700 0    130  ~ 26
+40261A
+Text Notes 25125 25950 0    130  ~ 26
+40262A
+Text Notes 25125 26200 0    130  ~ 26
+40276A
+Text Notes 25125 26450 0    130  ~ 26
+40278A
+Text Notes 25125 26700 0    130  ~ 26
+40277A
+Text Notes 25125 26950 0    130  ~ 26
+40275A
+Text Notes 25125 27200 0    130  ~ 26
+40259A
+Text Notes 25125 27450 0    130  ~ 26
+40260A
+Text Notes 25125 27700 0    130  ~ 26
+40254A
+Text Notes 25125 27950 0    130  ~ 26
+40252A
+Text Notes 25125 28200 0    130  ~ 26
+40255A
+Text Notes 25125 28450 0    130  ~ 26
+40251A
+Text Notes 25125 28700 0    130  ~ 26
+40266A
+Text Notes 25125 28950 0    130  ~ 26
+40264A
+Text Notes 25125 29200 0    130  ~ 26
+40267A
+Text Notes 25125 29450 0    130  ~ 26
+40265A
+Text Notes 25125 29700 0    130  ~ 26
+40274A
+Text Notes 25125 29950 0    130  ~ 26
+40272A
+Text Notes 26275 23200 0    130  ~ 26
+103
+Text Notes 26275 23450 0    130  ~ 26
+108
+Text Notes 26275 23700 0    130  ~ 26
+115
+Text Notes 26275 23950 0    130  ~ 26
+120
+Text Notes 26275 24200 0    130  ~ 26
+124
+Text Notes 26275 24450 0    130  ~ 26
+129
+Text Notes 26275 24700 0    130  ~ 26
+136
+Text Notes 26275 24950 0    130  ~ 26
+141
+Text Notes 26275 25200 0    130  ~ 26
+146
+Text Notes 26275 25450 0    130  ~ 26
+150
+Text Notes 26275 25700 0    130  ~ 26
+156
+Text Notes 26275 25950 0    130  ~ 26
+160
+Text Notes 26275 26200 0    130  ~ 26
+164
+Text Notes 26275 26450 0    130  ~ 26
+167
+Text Notes 26275 26700 0    130  ~ 26
+103
+Text Notes 26275 26950 0    130  ~ 26
+108
+Text Notes 26275 27200 0    130  ~ 26
+115
+Text Notes 26275 27450 0    130  ~ 26
+120
+Text Notes 26275 27700 0    130  ~ 26
+124
+Text Notes 26275 27950 0    130  ~ 26
+129
+Text Notes 26275 28200 0    130  ~ 26
+136
+Text Notes 26275 28450 0    130  ~ 26
+141
+Text Notes 26275 28700 0    130  ~ 26
+146
+Text Notes 26275 28950 0    130  ~ 26
+150
+Text Notes 26275 29200 0    130  ~ 26
+156
+Text Notes 26275 29450 0    130  ~ 26
+160
+Text Notes 26275 29700 0    130  ~ 26
+164
+Text Notes 26275 29950 0    130  ~ 26
+167
+Text Notes 27175 23200 0    130  ~ 26
+YT0E
+Text Notes 27175 23450 0    130  ~ 26
+YT2E
+Text Notes 27150 23700 0    130  ~ 26
+YB0E
+Text Notes 27150 23950 0    130  ~ 26
+YT6E
+Text Notes 27150 24200 0    130  ~ 26
+YT5E
+Text Notes 27150 24450 0    130  ~ 26
+YT7E
+Text Notes 27125 24700 0    130  ~ 26
+XB2E
+Text Notes 27125 24950 0    130  ~ 26
+XB6E
+Text Notes 27125 25200 0    130  ~ 26
+XB5E
+Text Notes 27125 25450 0    130  ~ 26
+XB7E
+Text Notes 27150 25700 0    130  ~ 26
+XT4E
+Text Notes 27150 25950 0    130  ~ 26
+XT5E
+Text Notes 27150 26200 0    130  ~ 26
+XT2E
+Text Notes 27150 26450 0    130  ~ 26
+XT0E
+Text Notes 27150 26700 0    130  ~ 26
+XT3E
+Text Notes 27150 26950 0    130  ~ 26
+XT1E
+Text Notes 27150 27200 0    130  ~ 26
+XT7E
+Text Notes 27150 27450 0    130  ~ 26
+XT6E
+Text Notes 27125 27700 0    130  ~ 26
+XB3E
+Text Notes 27125 27950 0    130  ~ 26
+XB1E
+Text Notes 27125 28200 0    130  ~ 26
+XB4E
+Text Notes 27125 28450 0    130  ~ 26
+XB0E
+Text Notes 27125 28700 0    130  ~ 26
+YB3E
+Text Notes 27125 28950 0    130  ~ 26
+YB1E
+Text Notes 27150 29200 0    130  ~ 26
+YT4E
+Text Notes 27125 29450 0    130  ~ 26
+YB2E
+Text Notes 27150 29700 0    130  ~ 26
+YT3E
+Text Notes 27150 29950 0    130  ~ 26
+YT1E
+Text Notes 28275 23200 0    130  ~ 26
+202
+Text Notes 28275 23450 0    130  ~ 26
+206
+Text Notes 28275 23700 0    130  ~ 26
+213
+Text Notes 28275 23950 0    130  ~ 26
+218
+Text Notes 28275 24200 0    130  ~ 26
+222
+Text Notes 28275 24450 0    130  ~ 26
+227
+Text Notes 28275 24700 0    130  ~ 26
+234
+Text Notes 28275 24950 0    130  ~ 26
+239
+Text Notes 28275 25200 0    130  ~ 26
+244
+Text Notes 28275 25450 0    130  ~ 26
+249
+Text Notes 28275 25700 0    130  ~ 26
+255
+Text Notes 28275 25950 0    130  ~ 26
+258
+Text Notes 28275 26200 0    130  ~ 26
+262
+Text Notes 28275 26450 0    130  ~ 26
+265
+Text Notes 28275 26700 0    130  ~ 26
+202
+Text Notes 28275 26950 0    130  ~ 26
+206
+Text Notes 28275 27200 0    130  ~ 26
+213
+Text Notes 28275 27450 0    130  ~ 26
+218
+Text Notes 28275 27700 0    130  ~ 26
+222
+Text Notes 28250 27950 0    130  ~ 26
+227
+Text Notes 28250 28200 0    130  ~ 26
+234
+Text Notes 28250 28450 0    130  ~ 26
+239
+Text Notes 28250 28700 0    130  ~ 26
+244
+Text Notes 28250 28950 0    130  ~ 26
+249
+Text Notes 28250 29200 0    130  ~ 26
+255
+Text Notes 28250 29450 0    130  ~ 26
+258
+Text Notes 28250 29700 0    130  ~ 26
+262
+Text Notes 28250 29950 0    130  ~ 26
+265
+Text Notes 29050 23200 0    130  ~ 26
+40031B
+Text Notes 29050 26450 0    130  ~ 26
+40031B
+Text Notes 29050 26700 0    130  ~ 26
+40032B
+Text Notes 29050 29950 0    130  ~ 26
+40032B
+Wire Notes Line style solid
+	29475 23275 29475 26125
+Wire Notes Line style solid
+	29475 26775 29475 29675
+Text Notes 30275 23200 0    130  ~ 26
+208
+Text Notes 30275 24700 0    130  ~ 26
+208
+Text Notes 30275 24950 0    130  ~ 26
+251
+Text Notes 30250 26450 0    130  ~ 26
+251
+Text Notes 30250 28450 0    130  ~ 26
+251
+Text Notes 30250 29950 0    130  ~ 26
+251
+Text Notes 30250 26700 0    130  ~ 26
+208
+Text Notes 30250 28200 0    130  ~ 26
+208
+Wire Notes Line style solid
+	30475 23275 30475 24425
+Wire Notes Line style solid
+	30475 25025 30475 26175
+Wire Notes Line style solid
+	30475 26775 30475 27925
+Wire Notes Line style solid
+	30475 28525 30475 29675
+Wire Notes Line style solid
+	31475 23275 31475 24425
+Wire Notes Line style solid
+	31475 25025 31475 26175
+Wire Notes Line style solid
+	31475 26775 31475 27925
+Wire Notes Line style solid
+	31475 28525 31475 29650
+Text Notes 31100 23200 0    130  ~ 26
+40305A
+Text Notes 31100 24700 0    130  ~ 26
+40305A
+Text Notes 31100 24950 0    130  ~ 26
+40305B
+Text Notes 31100 26450 0    130  ~ 26
+40305B
+Text Notes 31100 26700 0    130  ~ 26
+40280A
+Text Notes 31100 28200 0    130  ~ 26
+40280A
+Text Notes 31100 28450 0    130  ~ 26
+40280B
+Text Notes 31100 29950 0    130  ~ 26
+40280B
+Wire Notes Line width 60 style solid
+	30475 24413 30425 24288
+Wire Notes Line width 60 style solid
+	30425 24288 30525 24288
+Wire Notes Line width 60 style solid
+	30525 24288 30475 24413
+Wire Notes Line width 60 style solid
+	31475 24413 31425 24288
+Wire Notes Line width 60 style solid
+	31425 24288 31525 24288
+Wire Notes Line width 60 style solid
+	31525 24288 31475 24413
+Wire Notes Line width 60 style solid
+	33450 22663 33400 22538
+Wire Notes Line width 60 style solid
+	33400 22538 33500 22538
+Wire Notes Line width 60 style solid
+	33500 22538 33450 22663
+Wire Notes Line width 60 style solid
+	33450 21663 33400 21538
+Wire Notes Line width 60 style solid
+	33400 21538 33500 21538
+Wire Notes Line width 60 style solid
+	33500 21538 33450 21663
+Wire Notes Line width 60 style solid
+	33450 20663 33400 20538
+Wire Notes Line width 60 style solid
+	33400 20538 33500 20538
+Wire Notes Line width 60 style solid
+	33500 20538 33450 20663
+Wire Notes Line width 60 style solid
+	33450 19663 33400 19538
+Wire Notes Line width 60 style solid
+	33400 19538 33500 19538
+Wire Notes Line width 60 style solid
+	33500 19538 33450 19663
+Wire Notes Line width 60 style solid
+	31475 26163 31425 26038
+Wire Notes Line width 60 style solid
+	31425 26038 31525 26038
+Wire Notes Line width 60 style solid
+	31525 26038 31475 26163
+Wire Notes Line width 60 style solid
+	30475 26163 30425 26038
+Wire Notes Line width 60 style solid
+	30425 26038 30525 26038
+Wire Notes Line width 60 style solid
+	30525 26038 30475 26163
+Wire Notes Line width 60 style solid
+	29475 26163 29425 26038
+Wire Notes Line width 60 style solid
+	29425 26038 29525 26038
+Wire Notes Line width 60 style solid
+	29525 26038 29475 26163
+Wire Notes Line width 60 style solid
+	31475 29663 31425 29538
+Wire Notes Line width 60 style solid
+	31425 29538 31525 29538
+Wire Notes Line width 60 style solid
+	31525 29538 31475 29663
+Wire Notes Line width 60 style solid
+	31475 27913 31425 27788
+Wire Notes Line width 60 style solid
+	31425 27788 31525 27788
+Wire Notes Line width 60 style solid
+	31525 27788 31475 27913
+Wire Notes Line width 60 style solid
+	30475 27913 30425 27788
+Wire Notes Line width 60 style solid
+	30425 27788 30525 27788
+Wire Notes Line width 60 style solid
+	30525 27788 30475 27913
+Wire Notes Line width 60 style solid
+	30475 29663 30425 29538
+Wire Notes Line width 60 style solid
+	30425 29538 30525 29538
+Wire Notes Line width 60 style solid
+	30525 29538 30475 29663
+Wire Notes Line width 60 style solid
+	29475 29663 29425 29538
+Wire Notes Line width 60 style solid
+	29425 29538 29525 29538
+Wire Notes Line width 60 style solid
+	29525 29538 29475 29663
+Wire Notes Line width 60 style solid
+	23525 22663 23475 22538
+Wire Notes Line width 60 style solid
+	23475 22538 23575 22538
+Wire Notes Line width 60 style solid
+	23575 22538 23525 22663
+Wire Notes Line width 60 style solid
+	23525 20663 23475 20538
+Wire Notes Line width 60 style solid
+	23475 20538 23575 20538
+Wire Notes Line width 60 style solid
+	23575 20538 23525 20663
+Wire Notes Line width 60 style solid
+	19525 22663 19475 22538
+Wire Notes Line width 60 style solid
+	19475 22538 19575 22538
+Wire Notes Line width 60 style solid
+	19575 22538 19525 22663
+Wire Notes Line width 60 style solid
+	19525 21663 19475 21538
+Wire Notes Line width 60 style solid
+	19475 21538 19575 21538
+Wire Notes Line width 60 style solid
+	19575 21538 19525 21663
+Wire Notes Line width 60 style solid
+	19550 20663 19500 20538
+Wire Notes Line width 60 style solid
+	19500 20538 19600 20538
+Wire Notes Line width 60 style solid
+	19600 20538 19550 20663
+Wire Notes Line width 60 style solid
+	19550 19663 19500 19538
+Wire Notes Line width 60 style solid
+	19500 19538 19600 19538
+Wire Notes Line width 60 style solid
+	19600 19538 19550 19663
+Text HLabel 8550 7925 0    140  UnSpc ~ 28
+B
+Text HLabel 11200 4100 0    140  UnSpc ~ 28
+J
+Wire Wire Line
+	11200 4100 11400 4100
+Wire Wire Line
+	11400 4100 11400 4450
+Text HLabel 7700 2675 0    140  UnSpc ~ 28
+PIN101
+Wire Wire Line
+	7700 2675 8100 2675
+Text HLabel 7075 7425 0    140  UnSpc ~ 28
+PIN111_135_159
+Text HLabel 3550 6200 0    140  UnSpc ~ 28
+PIN169
+Text HLabel 4050 4050 0    140  UnSpc ~ 28
+PIN153_236
+Wire Wire Line
+	4050 4050 4350 4050
+$EndSCHEMATC
