@@ -1,10 +1,10 @@
 EESchema Schematic File Version 4
 LIBS:module-cache
-EELAYER 26 0
+EELAYER 29 0
 EELAYER END
 $Descr E 44000 34000
 encoding utf-8
-Sheet 4 54
+Sheet 20 54
 Title ""
 Date ""
 Rev ""
@@ -962,13 +962,13 @@ Text Notes 28025 30350 0    140  ~ 28
 243K
 Text Notes 28025 30600 0    140  ~ 28
 274K
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	20925 24050 22150 24050
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	22150 24050 22150 22850
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	22150 22850 20925 22850
-Wire Notes Line width 30 style solid
+Wire Notes Line style solid
 	20925 22850 20925 24050
 $Comp
 L AGC_DSKY:HierBody N401
@@ -983,7 +983,7 @@ AR Path="/5B9F06F3/5CC2E83C" Ref="N2401"  Part="1"
 AR Path="/5B9F0BD8/5CC2E83C" Ref="N2501"  Part="1" 
 AR Path="/5B9F10BD/5CC2E83C" Ref="N2601"  Part="1" 
 AR Path="/5B9F15A2/5CC2E83C" Ref="N2701"  Part="1" 
-F 0 "N401" H 21010 23250 140 0001 C CNN
+F 0 "N2001" H 21010 23250 140 0001 C CNN
 F 1 "T" H 21200 23475 140 0000 C CNB
 F 2 "" H 21025 23450 140 0001 C CNN
 F 3 "" H 21025 23450 140 0001 C CNN
@@ -1003,7 +1003,7 @@ AR Path="/5B9F06F3/5CC2E848" Ref="N2402"  Part="1"
 AR Path="/5B9F0BD8/5CC2E848" Ref="N2502"  Part="1" 
 AR Path="/5B9F10BD/5CC2E848" Ref="N2602"  Part="1" 
 AR Path="/5B9F15A2/5CC2E848" Ref="N2702"  Part="1" 
-F 0 "N402" H 22060 23225 140 0001 C CNN
+F 0 "N2002" H 22060 23225 140 0001 C CNN
 F 1 "U" H 21900 23425 140 0000 C CNB
 F 2 "" H 22075 23425 140 0001 C CNN
 F 3 "" H 22075 23425 140 0001 C CNN
@@ -1027,7 +1027,7 @@ AR Path="/5B9F06F3/5CC389B5" Ref="R2401"  Part="1"
 AR Path="/5B9F0BD8/5CC389B5" Ref="R2501"  Part="1" 
 AR Path="/5B9F10BD/5CC389B5" Ref="R2601"  Part="1" 
 AR Path="/5B9F15A2/5CC389B5" Ref="R2701"  Part="1" 
-F 0 "R401" H 16775 22800 130 0001 C CNN
+F 0 "R2001" H 17200 23425 50  0000 C CNN
 F 1 "2000" H 16800 23225 130 0000 C CNN
 F 2 "" H 16800 22975 130 0001 C CNN
 F 3 "" H 16800 22975 130 0001 C CNN
