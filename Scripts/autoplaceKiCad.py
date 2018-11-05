@@ -362,6 +362,16 @@ for line in sys.stdin:
 			quotient = (pinNum // 100) - 1
 			remainder = pinNum % 100
 			unit = 16 * quotient + remainder 
+		elif module[0] == "B" and pinNum >= 101 and pinNum <= 169:
+			# Note that these B-module cases do not cover the case of B7, which isn't
+			# supported.
+			refd = "J1"
+			symbol = "ConnectorB8-100"
+			unit = pinNum % 100
+		elif module[0] == "B" and pinNum >= 201 and pinNum <= 269:
+			refd = "J2"
+			symbol = "ConnectorB8-200"
+			unit = pinNum % 100
 		elif pinNum >= 101 and pinNum <= 171:
 			refd = "J1"
 			symbol = "ConnectorA1-100"
