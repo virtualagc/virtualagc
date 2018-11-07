@@ -325,8 +325,6 @@ F 4 "VYE2" H 27300 16225 140 0000 C BNB "Caption"
 	65   27975 16275
 	1    0    0    -1  
 $EndComp
-Text GLabel 28225 15775 0    140  UnSpc ~ 28
-VYE2
 $Comp
 L AGC_DSKY:ConnectorB8-100 J1
 U 28 1 5C64718F
@@ -339,8 +337,6 @@ F 4 "BPLSWY" H 32925 17775 140 0000 C BNB "Caption"
 	28   33725 17850
 	-1   0    0    1   
 $EndComp
-Text GLabel 33425 18375 2    140  UnSpc ~ 28
-BPLSWY
 Text GLabel 32925 23900 2    140  UnSpc ~ 28
 0VDC
 $Comp

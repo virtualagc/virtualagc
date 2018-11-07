@@ -1,10 +1,10 @@
 EESchema Schematic File Version 4
-LIBS:original-cache
+LIBS:module-cache
 EELAYER 29 0
 EELAYER END
 $Descr E 44000 34000
 encoding utf-8
-Sheet 3 3
+Sheet 2 10
 Title ""
 Date ""
 Rev ""
@@ -1196,526 +1196,6 @@ Text Notes 27950 25250 0    130  ~ 26
 2004003-001
 Text Notes 27950 25000 0    130  ~ 26
 2004003-001
-Wire Notes Line style solid
-	1850 16500 23750 16500
-Wire Notes Line style solid
-	23750 16950 1850 16950
-Wire Notes Line style solid
-	1850 17625 23750 17625
-Wire Notes Line style solid
-	1850 18125 23750 18125
-Wire Notes Line style solid
-	1850 18625 23750 18625
-Wire Notes Line style solid
-	1850 19125 23750 19125
-Wire Notes Line style solid
-	1850 19600 23750 19600
-Wire Notes Line style solid
-	1850 20100 23750 20100
-Wire Notes Line style solid
-	1850 20575 23750 20575
-Wire Notes Line style solid
-	1850 21100 23750 21100
-Text Notes 400  20750 0    2600 ~ 0
-{
-Text Notes 875  19825 1    140  ~ 28
-B13
-Wire Notes Line style solid
-	1825 16500 1825 21550
-Wire Notes Line style solid
-	2825 16500 2825 21550
-Wire Notes Line style solid
-	3850 21550 3850 16950
-Wire Notes Line style solid
-	4825 16500 4825 21550
-Wire Notes Line style solid
-	4900 21550 4900 16500
-Wire Notes Line style solid
-	5925 16950 5925 21550
-Wire Notes Line style solid
-	6875 21550 6875 16500
-Wire Notes Line style solid
-	6975 16500 6975 21550
-Wire Notes Line style solid
-	8000 16975 8000 21550
-Wire Notes Line style solid
-	8975 21550 8975 16500
-Wire Notes Line style solid
-	9075 16500 9075 21550
-Wire Notes Line style solid
-	10075 16950 10075 21550
-Wire Notes Line style solid
-	11075 16500 11075 21550
-Wire Notes Line style solid
-	11175 16500 11175 21550
-Wire Notes Line style solid
-	12175 16950 12175 21550
-Wire Notes Line style solid
-	13175 16500 13175 21550
-Wire Notes Line style solid
-	13275 16500 13275 21550
-Wire Notes Line style solid
-	14275 16950 14275 21550
-Wire Notes Line style solid
-	15250 16500 15250 21550
-Wire Notes Line style solid
-	15350 16500 15350 21550
-Wire Notes Line style solid
-	16350 16975 16350 21550
-Wire Notes Line style solid
-	17325 16500 17325 21550
-Wire Notes Line style solid
-	17425 16500 17425 21550
-Wire Notes Line style solid
-	18425 16975 18425 21550
-Wire Notes Line style solid
-	19425 16500 19425 21550
-Wire Notes Line style solid
-	19525 16500 19525 21550
-Wire Notes Line style solid
-	20525 16975 20525 21550
-Wire Notes Line style solid
-	21500 16500 21500 21550
-Wire Notes Line style solid
-	21600 16500 21600 21550
-Wire Notes Line style solid
-	22600 16950 22600 21550
-Wire Notes Line style solid
-	23750 16500 23750 21550
-Wire Notes Line style solid
-	1825 21550 23750 21550
-Wire Notes Line style solid
-	23650 16500 23650 21550
-Text Notes 2250 17950 0    140  ~ 28
-7
-Text Notes 2250 18475 0    140  ~ 28
-6
-Text Notes 2250 18975 0    140  ~ 28
-5
-Text Notes 2250 19475 0    140  ~ 28
-4
-Text Notes 2250 19975 0    140  ~ 28
-3
-Text Notes 2250 20475 0    140  ~ 28
-2
-Text Notes 2250 20975 0    140  ~ 28
-1
-Text Notes 2250 21475 0    140  ~ 28
-8
-Text Notes 2975 17950 0    140  ~ 28
-SAF 01
-Text Notes 2975 18475 0    140  ~ 28
-SAF 03
-Text Notes 2975 18975 0    140  ~ 28
-SAF 05
-Text Notes 2975 19475 0    140  ~ 28
-SAF 07
-Text Notes 2975 19975 0    140  ~ 28
-SAF 09
-Text Notes 2975 20475 0    140  ~ 28
-SAF 11
-Text Notes 2975 20975 0    140  ~ 28
-SAF 13
-Text Notes 2975 21475 0    140  ~ 28
-SAF 15
-Text Notes 5100 17950 0    140  ~ 28
-0VDC
-Text Notes 5100 18450 0    140  ~ 28
-0VDC
-Text Notes 5100 18950 0    140  ~ 28
-0VDC
-Text Notes 5100 19450 0    140  ~ 28
-0VDC
-Text Notes 5100 19950 0    140  ~ 28
-0VDC
-Text Notes 5100 20450 0    140  ~ 28
-0VDC
-Text Notes 5100 20950 0    140  ~ 28
-0VDC
-Text Notes 5100 21450 0    140  ~ 28
-0VDC
-Text Notes 7100 17950 0    140  ~ 28
-SBF 01
-Text Notes 7100 18450 0    140  ~ 28
-SBF 03
-Text Notes 7100 18950 0    140  ~ 28
-SBF 05
-Text Notes 7100 19450 0    140  ~ 28
-SBF 07
-Text Notes 7100 19950 0    140  ~ 28
-SBF 09
-Text Notes 7100 20450 0    140  ~ 28
-SBF 11
-Text Notes 7100 20950 0    140  ~ 28
-SBF 13
-Text Notes 7100 21450 0    140  ~ 28
-SBF 15
-Text Notes 9175 17950 0    140  ~ 28
-SAF 02
-Text Notes 9175 18450 0    140  ~ 28
-SAF 04
-Text Notes 9175 18950 0    140  ~ 28
-SAF 06
-Text Notes 9175 19450 0    140  ~ 28
-SAF 08
-Text Notes 9175 19950 0    140  ~ 28
-SAF 10
-Text Notes 9175 20450 0    140  ~ 28
-SAF 12
-Text Notes 9175 20950 0    140  ~ 28
-SAF 14
-Text Notes 9175 21450 0    140  ~ 28
-SAF 16
-Text Notes 11400 17950 0    140  ~ 28
-0VDC
-Text Notes 11400 18450 0    140  ~ 28
-0VDC
-Text Notes 11400 18950 0    140  ~ 28
-0VDC
-Text Notes 11400 19450 0    140  ~ 28
-0VDC
-Text Notes 11400 19950 0    140  ~ 28
-0VDC
-Text Notes 11400 20450 0    140  ~ 28
-0VDC
-Text Notes 11400 20950 0    140  ~ 28
-0VDC
-Text Notes 11400 21450 0    140  ~ 28
-0VDC
-Text Notes 13350 17950 0    140  ~ 28
-SBF 02
-Text Notes 13350 18450 0    140  ~ 28
-SBF 04
-Text Notes 13350 18950 0    140  ~ 28
-SBF 06
-Text Notes 13350 19450 0    140  ~ 28
-SBF 08
-Text Notes 13350 19950 0    140  ~ 28
-SBF 10
-Text Notes 13350 20450 0    140  ~ 28
-SBF 12
-Text Notes 13350 20950 0    140  ~ 28
-SBF 14
-Text Notes 13350 21450 0    140  ~ 28
-SBF 16
-Text Notes 16175 17950 0    140  ~ 28
-A
-Text Notes 16175 18450 0    140  ~ 28
-A
-Text Notes 16175 18950 0    140  ~ 28
-A
-Text Notes 16175 19450 0    140  ~ 28
-A
-Text Notes 16175 19950 0    140  ~ 28
-A
-Text Notes 16175 20450 0    140  ~ 28
-A
-Text Notes 16175 20950 0    140  ~ 28
-A
-Text Notes 16175 21450 0    140  ~ 28
-A
-Text Notes 17550 17950 0    140  ~ 28
-VYE
-Text Notes 17550 18450 0    140  ~ 28
-VYE
-Text Notes 17550 18950 0    140  ~ 28
-VYE
-Text Notes 17550 19450 0    140  ~ 28
-VYE
-Text Notes 17550 19950 0    140  ~ 28
-VYE
-Text Notes 17550 20450 0    140  ~ 28
-VYE
-Text Notes 17550 20950 0    140  ~ 28
-VYE
-Text Notes 17550 21450 0    140  ~ 28
-VYE
-Text Notes 17925 17950 0    140  ~ 28
-2
-Text Notes 17925 18450 0    140  ~ 28
-2
-Text Notes 17925 18950 0    140  ~ 28
-2
-Text Notes 17925 19450 0    140  ~ 28
-1
-Text Notes 17925 19950 0    140  ~ 28
-1
-Text Notes 17925 20450 0    140  ~ 28
-1
-Text Notes 17925 20950 0    140  ~ 28
-1
-Text Notes 17925 21450 0    140  ~ 28
-2
-Text Notes 19650 17950 0    140  ~ 28
-SA02
-Text Notes 19650 18450 0    140  ~ 28
-SA04
-Text Notes 19650 18950 0    140  ~ 28
-SA06
-Text Notes 19650 19450 0    140  ~ 28
-SA08
-Text Notes 19650 19950 0    140  ~ 28
-SA10
-Text Notes 19650 20450 0    140  ~ 28
-SA12
-Text Notes 19650 20950 0    140  ~ 28
-SA14
-Text Notes 19650 21450 0    140  ~ 28
-SA16
-Text Notes 21650 17950 0    140  ~ 28
-40601
-Text Notes 21650 18450 0    140  ~ 28
-40602
-Text Notes 21650 18950 0    140  ~ 28
-40603
-Text Notes 21650 19450 0    140  ~ 28
-40604
-Text Notes 21650 19950 0    140  ~ 28
-40605
-Text Notes 21650 20450 0    140  ~ 28
-40606
-Text Notes 21650 20950 0    140  ~ 28
-40607
-Text Notes 21650 21450 0    140  ~ 28
-40608
-Text Notes 22325 17950 0    140  ~ 28
-A
-Text Notes 22325 18450 0    140  ~ 28
-A
-Text Notes 22325 18950 0    140  ~ 28
-A
-Text Notes 22325 19450 0    140  ~ 28
-A
-Text Notes 22325 19950 0    140  ~ 28
-A
-Text Notes 22325 20450 0    140  ~ 28
-A
-Text Notes 22325 20950 0    140  ~ 28
-A
-Text Notes 22325 21450 0    140  ~ 28
-A
-Text Notes 1950 17625 0    130  ~ 26
- COMP\nPREFIX\n  NO.
-Text Notes 2950 17425 0    140  ~ 28
-SIGNAL
-Text Notes 3925 17425 0    140  ~ 28
-PIN NO.
-Text Notes 5975 17425 0    140  ~ 28
-PIN NO.
-Text Notes 5050 17425 0    140  ~ 28
-SIGNAL
-Text Notes 7100 17425 0    140  ~ 28
-SIGNAL
-Text Notes 9200 17425 0    140  ~ 28
-SIGNAL
-Text Notes 11325 17425 0    140  ~ 28
-SIGNAL
-Text Notes 8075 17425 0    140  ~ 28
-PIN NO.
-Text Notes 10175 17425 0    140  ~ 28
-PIN NO.
-Text Notes 12250 17425 0    140  ~ 28
-PIN NO.
-Text Notes 18525 17425 0    140  ~ 28
-PIN NO.
-Text Notes 16450 17425 0    140  ~ 28
-PIN NO.
-Text Notes 14350 17425 0    140  ~ 28
-PIN NO.
-Text Notes 13425 17425 0    140  ~ 28
-SIGNAL
-Text Notes 15475 17425 0    140  ~ 28
-SIGNAL
-Text Notes 17550 17425 0    140  ~ 28
-SIGNAL
-Text Notes 19650 17425 0    140  ~ 28
-SIGNAL
-Text Notes 22725 17425 0    140  ~ 28
-PIN NO.
-Text Notes 20650 17425 0    140  ~ 28
-PIN NO.
-Text Notes 21725 17425 0    140  ~ 28
-SIGNAL
-Text Notes 4125 17950 0    140  ~ 28
-255
-Text Notes 4125 18475 0    140  ~ 28
-248
-Text Notes 4125 18975 0    140  ~ 28
-241
-Text Notes 4125 19475 0    140  ~ 28
-225
-Text Notes 4125 19975 0    140  ~ 28
-218
-Text Notes 4125 20475 0    140  ~ 28
-210
-Text Notes 4125 20975 0    140  ~ 28
-204
-Text Notes 4125 21475 0    140  ~ 28
-262
-Text Notes 6250 17950 0    140  ~ 28
-154
-Text Notes 6250 18450 0    140  ~ 28
-147
-Text Notes 6250 18975 0    140  ~ 28
-140
-Text Notes 6250 19450 0    140  ~ 28
-125
-Text Notes 6250 19950 0    140  ~ 28
-118
-Text Notes 6250 20450 0    140  ~ 28
-110
-Text Notes 6250 20950 0    140  ~ 28
-104
-Text Notes 6250 21450 0    140  ~ 28
-162
-Text Notes 8300 17950 0    140  ~ 28
-253
-Text Notes 8300 18450 0    140  ~ 28
-246
-Text Notes 8300 18950 0    140  ~ 28
-239
-Text Notes 8300 19450 0    140  ~ 28
-223
-Text Notes 8300 19950 0    140  ~ 28
-216
-Text Notes 8300 20450 0    140  ~ 28
-209
-Text Notes 8300 20950 0    140  ~ 28
-203
-Text Notes 8300 21450 0    140  ~ 28
-261
-Text Notes 10375 17950 0    140  ~ 28
-152
-Text Notes 10375 18450 0    140  ~ 28
-145
-Text Notes 10375 18950 0    140  ~ 28
-138
-Text Notes 10375 19450 0    140  ~ 28
-123
-Text Notes 10375 19950 0    140  ~ 28
-116
-Text Notes 10375 20450 0    140  ~ 28
-109
-Text Notes 10375 20950 0    140  ~ 28
-102
-Text Notes 10375 21450 0    140  ~ 28
-158
-Text Notes 12475 17950 0    140  ~ 28
-251
-Text Notes 12475 18450 0    140  ~ 28
-244
-Text Notes 12475 18950 0    140  ~ 28
-237
-Text Notes 12475 19450 0    140  ~ 28
-221
-Text Notes 12475 19950 0    140  ~ 28
-214
-Text Notes 12475 20450 0    140  ~ 28
-207
-Text Notes 12475 20950 0    140  ~ 28
-201
-Text Notes 12475 21450 0    140  ~ 28
-258
-Text Notes 14550 17950 0    140  ~ 28
-151
-Text Notes 14550 18450 0    140  ~ 28
-143
-Text Notes 14550 18950 0    140  ~ 28
-136
-Text Notes 14550 19450 0    140  ~ 28
-121
-Text Notes 14550 19950 0    140  ~ 28
-114
-Text Notes 14550 20450 0    140  ~ 28
-107
-Text Notes 14550 20950 0    140  ~ 28
-101
-Text Notes 14550 21450 0    140  ~ 28
-157
-Text Notes 16650 17950 0    140  ~ 28
-252
-Text Notes 16650 18450 0    140  ~ 28
-245
-Text Notes 16650 18950 0    140  ~ 28
-238
-Text Notes 16650 19450 0    140  ~ 28
-222
-Text Notes 16650 19950 0    140  ~ 28
-215
-Text Notes 16650 20450 0    140  ~ 28
-208
-Text Notes 16650 20950 0    140  ~ 28
-202
-Text Notes 16650 21450 0    140  ~ 28
-260
-Text Notes 18700 17950 0    140  ~ 28
-265
-Text Notes 18700 18450 0    140  ~ 28
-265
-Text Notes 18700 18950 0    140  ~ 28
-265
-Text Notes 18700 21450 0    140  ~ 28
-265
-Text Notes 18700 19450 0    140  ~ 28
-233
-Text Notes 18700 19950 0    140  ~ 28
-233
-Text Notes 18700 20450 0    140  ~ 28
-233
-Text Notes 18700 20950 0    140  ~ 28
-233
-Text Notes 20825 17950 0    140  ~ 28
-156
-Text Notes 20825 18450 0    140  ~ 28
-150
-Text Notes 20825 18950 0    140  ~ 28
-142
-Text Notes 20825 19450 0    140  ~ 28
-127
-Text Notes 20825 19950 0    140  ~ 28
-120
-Text Notes 20825 20450 0    140  ~ 28
-113
-Text Notes 20800 20950 0    140  ~ 28
-105
-Text Notes 20800 21450 0    140  ~ 28
-164
-Text Notes 22900 17950 0    140  ~ 28
-256
-Text Notes 22900 18450 0    140  ~ 28
-249
-Text Notes 22900 18950 0    140  ~ 28
-242
-Text Notes 22900 19450 0    140  ~ 28
-226
-Text Notes 22900 19950 0    140  ~ 28
-219
-Text Notes 22900 20450 0    140  ~ 28
-212
-Text Notes 22900 20950 0    140  ~ 28
-205
-Text Notes 22900 21450 0    140  ~ 28
-263
-Text Notes 3725 16875 0    180  ~ 36
-A
-Text Notes 5750 16875 0    180  ~ 36
-B
-Text Notes 7875 16875 0    180  ~ 36
-C
-Text Notes 9975 16875 0    180  ~ 36
-D
-Text Notes 12050 16875 0    180  ~ 36
-E
-Text Notes 14175 16875 0    180  ~ 36
-F
-Text Notes 16200 16875 0    180  ~ 36
-G
-Text Notes 18325 16875 0    180  ~ 36
-H
-Text Notes 20450 16875 0    180  ~ 36
-I
-Text Notes 22525 16875 0    180  ~ 36
-J
 Wire Notes Line width 60 style solid
 	4125 12050 4075 11950
 Wire Notes Line width 60 style solid
@@ -1797,99 +1277,71 @@ Wire Notes Line width 60 style solid
 Wire Notes Line width 60 style solid
 	28500 20200 28450 20100
 Wire Notes Line style solid
-	37958 910  37958 2290
-Wire Notes Line style solid
-	37968 2290 43493 2290
-Wire Notes Line style solid
-	37968 1715 43493 1715
-Wire Notes Line style solid
-	42458 910  42458 2290
-Wire Notes Line style solid
-	41793 910  41793 2290
-Wire Notes Line style solid
-	38458 910  38458 2290
-Text Notes 38118 1540 0    140  ~ 28
+	37964 1435 43489 1435
+Text Notes 38114 1260 0    140  ~ 28
 A
-Text Notes 38118 2090 0    140  ~ 28
-B
-Text Notes 38543 1665 0    140  ~ 28
-REVISED PER TDRR 29077\nDR     CHK      APPD
-Text Notes 38543 2240 0    140  ~ 28
-REVISED PER TDRR 29821\nDR     CHK      APPD
+Text Notes 38539 1385 0    140  ~ 28
+REVISED PER TDRR 30751\nDR     CHK      APPD
 Wire Notes Line style solid
-	43493 1165 37968 1165
-Text Notes 38093 1115 0    140  ~ 28
--
-Text Notes 38543 1140 0    140  ~ 28
-RELEASED PER TDRR
-Text Notes 39659 31724 0    250  ~ 50
+	37961 1433 37962 1433
+Wire Notes Line style solid
+	37961 916  37961 1434
+Wire Notes Line style solid
+	38461 916  38461 1434
+Wire Notes Line style solid
+	41795 917  41795 1435
+Wire Notes Line style solid
+	42461 916  42461 1434
+Text Notes 39669 31724 0    250  ~ 50
 SCHEMATIC
-Text Notes 40884 33124 0    250  ~ 50
-2005920
-Text Notes 38259 33124 0    250  ~ 50
+Text Notes 40894 33124 0    250  ~ 50
+2005919
+Text Notes 38269 33124 0    250  ~ 50
 80230
-Text Notes 38659 32074 0    200  ~ 40
+Text Notes 38669 32074 0    200  ~ 40
 SENSE AMPLIFIER MODULE,
-Text Notes 38909 32399 0    200  ~ 40
-ERASABLE MEMORY B13
-Text Notes 33509 32324 0    140  ~ 28
+Text Notes 38919 32399 0    200  ~ 40
+ERASABLE MEMORY B14
+Text Notes 33519 32324 0    140  ~ 28
 ____________
-Text Notes 33509 32899 0    140  ~ 28
+Text Notes 33519 32899 0    140  ~ 28
 ____________
-Text Notes 33509 33374 0    140  ~ 28
+Text Notes 33519 33374 0    140  ~ 28
 ____________
 Wire Notes Line style solid
-	34009 33424 34134 33249
-Text Notes 35109 31774 0    140  ~ 28
+	34019 33424 34144 33249
+Text Notes 35119 31774 0    140  ~ 28
 ___
-Text Notes 34134 31774 0    140  ~ 28
+Text Notes 34144 31774 0    140  ~ 28
 ___
-Text Notes 33134 31774 0    140  ~ 28
+Text Notes 33144 31774 0    140  ~ 28
 ___
 Wire Notes Line style solid
-	33284 31799 33359 31699
+	33294 31799 33369 31699
 Wire Notes Line style solid
-	34309 31799 34384 31699
+	34319 31799 34394 31699
 Wire Notes Line style solid
-	35284 31799 35359 31699
-Text Notes 40334 33424 0    140  ~ 28
+	35294 31799 35369 31699
+Text Notes 40344 33424 0    140  ~ 28
 _____
 Wire Notes Line style solid
-	40559 33449 40659 33349
-Text Notes 38809 33474 0    140  ~ 28
+	40569 33449 40669 33349
+Text Notes 38819 33474 0    140  ~ 28
 NONE
 Wire Notes Line style solid
-	34109 33424 34234 33249
+	34119 33424 34244 33249
 Wire Notes Line style solid
-	34109 32949 34234 32774
+	34119 32949 34244 32774
 Wire Notes Line style solid
-	34009 32949 34134 32774
+	34019 32949 34144 32774
 Wire Notes Line style solid
-	34109 32374 34234 32199
+	34119 32374 34244 32199
 Wire Notes Line style solid
-	34009 32374 34134 32199
+	34019 32374 34144 32199
 Wire Notes Line style solid
-	33234 31799 33309 31699
+	33244 31799 33319 31699
 Wire Notes Line style solid
-	34259 31799 34334 31699
+	34269 31799 34344 31699
 Wire Notes Line style solid
-	35234 31799 35309 31699
-Text Notes 42390 33450 0    140  ~ 28
-2     2
-Text Notes 15475 17950 0    140  ~ 28
-40611
-Text Notes 15475 18450 0    140  ~ 28
-40612
-Text Notes 15475 18950 0    140  ~ 28
-40613
-Text Notes 15475 19450 0    140  ~ 28
-40614
-Text Notes 15475 19950 0    140  ~ 28
-40615
-Text Notes 15475 20450 0    140  ~ 28
-40616
-Text Notes 15475 20950 0    140  ~ 28
-40617
-Text Notes 15475 21450 0    140  ~ 28
-40618
+	35244 31799 35319 31699
 $EndSCHEMATC

@@ -1216,10 +1216,10 @@ Wire Notes Line style solid
 	1850 20575 23750 20575
 Wire Notes Line style solid
 	1850 21100 23750 21100
-Text Notes 400  20750 0    2600 ~ 0
+Text Notes 375  20750 0    2600 ~ 0
 {
-Text Notes 875  19825 1    140  ~ 28
-B13
+Text Notes 850  19825 1    140  ~ 28
+B14
 Wire Notes Line style solid
 	1825 16500 1825 21550
 Wire Notes Line style solid
@@ -1302,134 +1302,134 @@ Text Notes 2250 20975 0    140  ~ 28
 1
 Text Notes 2250 21475 0    140  ~ 28
 8
-Text Notes 2975 17950 0    140  ~ 28
-SAF 01
-Text Notes 2975 18475 0    140  ~ 28
-SAF 03
-Text Notes 2975 18975 0    140  ~ 28
-SAF 05
-Text Notes 2975 19475 0    140  ~ 28
-SAF 07
-Text Notes 2975 19975 0    140  ~ 28
-SAF 09
-Text Notes 2975 20475 0    140  ~ 28
-SAF 11
-Text Notes 2975 20975 0    140  ~ 28
-SAF 13
-Text Notes 2975 21475 0    140  ~ 28
-SAF 15
-Text Notes 5100 17950 0    140  ~ 28
-0VDC
-Text Notes 5100 18450 0    140  ~ 28
-0VDC
-Text Notes 5100 18950 0    140  ~ 28
-0VDC
-Text Notes 5100 19450 0    140  ~ 28
-0VDC
-Text Notes 5100 19950 0    140  ~ 28
-0VDC
-Text Notes 5100 20450 0    140  ~ 28
-0VDC
-Text Notes 5100 20950 0    140  ~ 28
-0VDC
-Text Notes 5100 21450 0    140  ~ 28
-0VDC
-Text Notes 7100 17950 0    140  ~ 28
-SBF 01
-Text Notes 7100 18450 0    140  ~ 28
-SBF 03
-Text Notes 7100 18950 0    140  ~ 28
-SBF 05
-Text Notes 7100 19450 0    140  ~ 28
-SBF 07
-Text Notes 7100 19950 0    140  ~ 28
-SBF 09
-Text Notes 7100 20450 0    140  ~ 28
-SBF 11
-Text Notes 7100 20950 0    140  ~ 28
-SBF 13
-Text Notes 7100 21450 0    140  ~ 28
-SBF 15
 Text Notes 9175 17950 0    140  ~ 28
-SAF 02
-Text Notes 9175 18450 0    140  ~ 28
-SAF 04
-Text Notes 9175 18950 0    140  ~ 28
-SAF 06
-Text Notes 9175 19450 0    140  ~ 28
-SAF 08
-Text Notes 9175 19950 0    140  ~ 28
-SAF 10
-Text Notes 9175 20450 0    140  ~ 28
-SAF 12
-Text Notes 9175 20950 0    140  ~ 28
-SAF 14
-Text Notes 9175 21450 0    140  ~ 28
-SAF 16
-Text Notes 11400 17950 0    140  ~ 28
-0VDC
-Text Notes 11400 18450 0    140  ~ 28
-0VDC
-Text Notes 11400 18950 0    140  ~ 28
-0VDC
-Text Notes 11400 19450 0    140  ~ 28
-0VDC
-Text Notes 11400 19950 0    140  ~ 28
-0VDC
-Text Notes 11400 20450 0    140  ~ 28
-0VDC
-Text Notes 11400 20950 0    140  ~ 28
-0VDC
-Text Notes 11400 21450 0    140  ~ 28
-0VDC
+GAR 01
+Text Notes 9175 18475 0    140  ~ 28
+GAR 03
+Text Notes 9175 18975 0    140  ~ 28
+GAR 05
+Text Notes 9175 19475 0    140  ~ 28
+GAR 07
+Text Notes 9175 19975 0    140  ~ 28
+GAR 09
+Text Notes 9175 20475 0    140  ~ 28
+GAR 11
+Text Notes 9175 20975 0    140  ~ 28
+GAR 13
+Text Notes 9175 21475 0    140  ~ 28
+GAR 15
+Text Notes 5000 17950 0    140  ~ 28
+BPLSWX
+Text Notes 5000 18450 0    140  ~ 28
+BPLSWX
+Text Notes 5000 18950 0    140  ~ 28
+BPLSWX
+Text Notes 5000 19450 0    140  ~ 28
+BPLSWX
+Text Notes 5000 19950 0    140  ~ 28
+BPLSWX
+Text Notes 5000 20450 0    140  ~ 28
+BPLSWX
+Text Notes 5000 20950 0    140  ~ 28
+BPLSWX
+Text Notes 5000 21450 0    140  ~ 28
+BPLSWX
 Text Notes 13350 17950 0    140  ~ 28
-SBF 02
+GBR 01
 Text Notes 13350 18450 0    140  ~ 28
-SBF 04
+GBR 03
 Text Notes 13350 18950 0    140  ~ 28
-SBF 06
+GBR 05
 Text Notes 13350 19450 0    140  ~ 28
-SBF 08
+GBR 07
 Text Notes 13350 19950 0    140  ~ 28
-SBF 10
+GBR 09
 Text Notes 13350 20450 0    140  ~ 28
-SBF 12
+GBR 11
 Text Notes 13350 20950 0    140  ~ 28
-SBF 14
+GBR 13
 Text Notes 13350 21450 0    140  ~ 28
-SBF 16
-Text Notes 16175 17950 0    140  ~ 28
+GBR 15
+Text Notes 2925 17975 0    140  ~ 28
+GAR 02
+Text Notes 2925 18475 0    140  ~ 28
+GAR 04
+Text Notes 2925 18975 0    140  ~ 28
+GAR 06
+Text Notes 2925 19475 0    140  ~ 28
+GAR 08
+Text Notes 2925 19975 0    140  ~ 28
+GAR 10
+Text Notes 2925 20475 0    140  ~ 28
+GAR 12
+Text Notes 2925 20975 0    140  ~ 28
+GAR 14
+Text Notes 2925 21475 0    140  ~ 28
+GAR 16
+Text Notes 11250 17950 0    140  ~ 28
+BPLSWX
+Text Notes 11250 18450 0    140  ~ 28
+BPLSWX
+Text Notes 11250 18950 0    140  ~ 28
+BPLSWX
+Text Notes 11250 19450 0    140  ~ 28
+BPLSWX
+Text Notes 11250 19950 0    140  ~ 28
+BPLSWX
+Text Notes 11250 20450 0    140  ~ 28
+BPLSWX
+Text Notes 11250 20950 0    140  ~ 28
+BPLSWX
+Text Notes 11250 21450 0    140  ~ 28
+BPLSWX
+Text Notes 7050 17950 0    140  ~ 28
+GBR 02
+Text Notes 7050 18450 0    140  ~ 28
+GBR 04
+Text Notes 7050 18950 0    140  ~ 28
+GBR 06
+Text Notes 7050 19450 0    140  ~ 28
+GBR 08
+Text Notes 7050 19950 0    140  ~ 28
+GBR 10
+Text Notes 7050 20450 0    140  ~ 28
+GBR 12
+Text Notes 7050 20950 0    140  ~ 28
+GBR 14
+Text Notes 7050 21450 0    140  ~ 28
+GBR 16
+Text Notes 16100 17950 0    140  ~ 28
 A
-Text Notes 16175 18450 0    140  ~ 28
+Text Notes 16100 18450 0    140  ~ 28
 A
-Text Notes 16175 18950 0    140  ~ 28
+Text Notes 16100 18950 0    140  ~ 28
 A
-Text Notes 16175 19450 0    140  ~ 28
+Text Notes 16100 19450 0    140  ~ 28
 A
-Text Notes 16175 19950 0    140  ~ 28
+Text Notes 16100 19950 0    140  ~ 28
 A
-Text Notes 16175 20450 0    140  ~ 28
+Text Notes 16100 20450 0    140  ~ 28
 A
-Text Notes 16175 20950 0    140  ~ 28
+Text Notes 16100 20950 0    140  ~ 28
 A
-Text Notes 16175 21450 0    140  ~ 28
+Text Notes 16100 21450 0    140  ~ 28
 A
 Text Notes 17550 17950 0    140  ~ 28
-VYE
+VYF
 Text Notes 17550 18450 0    140  ~ 28
-VYE
+VYF
 Text Notes 17550 18950 0    140  ~ 28
-VYE
+VYF
 Text Notes 17550 19450 0    140  ~ 28
-VYE
+VYF
 Text Notes 17550 19950 0    140  ~ 28
-VYE
+VYF
 Text Notes 17550 20450 0    140  ~ 28
-VYE
+VYF
 Text Notes 17550 20950 0    140  ~ 28
-VYE
+VYF
 Text Notes 17550 21450 0    140  ~ 28
-VYE
+VYF
 Text Notes 17925 17950 0    140  ~ 28
 2
 Text Notes 17925 18450 0    140  ~ 28
@@ -1446,38 +1446,6 @@ Text Notes 17925 20950 0    140  ~ 28
 1
 Text Notes 17925 21450 0    140  ~ 28
 2
-Text Notes 19650 17950 0    140  ~ 28
-SA02
-Text Notes 19650 18450 0    140  ~ 28
-SA04
-Text Notes 19650 18950 0    140  ~ 28
-SA06
-Text Notes 19650 19450 0    140  ~ 28
-SA08
-Text Notes 19650 19950 0    140  ~ 28
-SA10
-Text Notes 19650 20450 0    140  ~ 28
-SA12
-Text Notes 19650 20950 0    140  ~ 28
-SA14
-Text Notes 19650 21450 0    140  ~ 28
-SA16
-Text Notes 21650 17950 0    140  ~ 28
-40601
-Text Notes 21650 18450 0    140  ~ 28
-40602
-Text Notes 21650 18950 0    140  ~ 28
-40603
-Text Notes 21650 19450 0    140  ~ 28
-40604
-Text Notes 21650 19950 0    140  ~ 28
-40605
-Text Notes 21650 20450 0    140  ~ 28
-40606
-Text Notes 21650 20950 0    140  ~ 28
-40607
-Text Notes 21650 21450 0    140  ~ 28
-40608
 Text Notes 22325 17950 0    140  ~ 28
 A
 Text Notes 22325 18450 0    140  ~ 28
@@ -1796,42 +1764,16 @@ Wire Notes Line width 60 style solid
 	28400 20200 28500 20200
 Wire Notes Line width 60 style solid
 	28500 20200 28450 20100
-Wire Notes Line style solid
-	37958 910  37958 2290
-Wire Notes Line style solid
-	37968 2290 43493 2290
-Wire Notes Line style solid
-	37968 1715 43493 1715
-Wire Notes Line style solid
-	42458 910  42458 2290
-Wire Notes Line style solid
-	41793 910  41793 2290
-Wire Notes Line style solid
-	38458 910  38458 2290
-Text Notes 38118 1540 0    140  ~ 28
-A
-Text Notes 38118 2090 0    140  ~ 28
-B
-Text Notes 38543 1665 0    140  ~ 28
-REVISED PER TDRR 29077\nDR     CHK      APPD
-Text Notes 38543 2240 0    140  ~ 28
-REVISED PER TDRR 29821\nDR     CHK      APPD
-Wire Notes Line style solid
-	43493 1165 37968 1165
-Text Notes 38093 1115 0    140  ~ 28
--
-Text Notes 38543 1140 0    140  ~ 28
-RELEASED PER TDRR
 Text Notes 39659 31724 0    250  ~ 50
 SCHEMATIC
 Text Notes 40884 33124 0    250  ~ 50
-2005920
+2005919
 Text Notes 38259 33124 0    250  ~ 50
 80230
 Text Notes 38659 32074 0    200  ~ 40
 SENSE AMPLIFIER MODULE,
 Text Notes 38909 32399 0    200  ~ 40
-ERASABLE MEMORY B13
+ERASABLE MEMORY B14
 Text Notes 33509 32324 0    140  ~ 28
 ____________
 Text Notes 33509 32899 0    140  ~ 28
@@ -1876,20 +1818,82 @@ Wire Notes Line style solid
 	35234 31799 35309 31699
 Text Notes 42390 33450 0    140  ~ 28
 2     2
-Text Notes 15475 17950 0    140  ~ 28
+Wire Notes Line style solid
+	37964 1435 43489 1435
+Wire Notes Line style solid
+	42461 916  42461 1435
+Text Notes 38114 1260 0    140  ~ 28
+A
+Text Notes 38539 1385 0    140  ~ 28
+REVISED PER TDRR 30751\nDR     CHK      APPD
+Wire Notes Line style solid
+	41795 916  41795 1435
+Wire Notes Line style solid
+	38462 916  38462 1435
+Wire Notes Line style solid
+	37961 916  37961 1435
+Text Notes 15425 17950 0    140  ~ 28
+40601
+Text Notes 15425 18450 0    140  ~ 28
+40602
+Text Notes 15425 18950 0    140  ~ 28
+40603
+Text Notes 15425 19450 0    140  ~ 28
+40604
+Text Notes 15425 19950 0    140  ~ 28
+40605
+Text Notes 15425 20450 0    140  ~ 28
+40606
+Text Notes 15425 20950 0    140  ~ 28
+40607
+Text Notes 15425 21450 0    140  ~ 28
+40608
+Text Notes 21650 17950 0    140  ~ 28
 40611
-Text Notes 15475 18450 0    140  ~ 28
+Text Notes 21650 18450 0    140  ~ 28
 40612
-Text Notes 15475 18950 0    140  ~ 28
+Text Notes 21650 18950 0    140  ~ 28
 40613
-Text Notes 15475 19450 0    140  ~ 28
+Text Notes 21650 19450 0    140  ~ 28
 40614
-Text Notes 15475 19950 0    140  ~ 28
+Text Notes 21650 19950 0    140  ~ 28
 40615
-Text Notes 15475 20450 0    140  ~ 28
+Text Notes 21650 20450 0    140  ~ 28
 40616
-Text Notes 15475 20950 0    140  ~ 28
+Text Notes 21650 20950 0    140  ~ 28
 40617
-Text Notes 15475 21450 0    140  ~ 28
+Text Notes 21650 21450 0    140  ~ 28
 40618
+Text Notes 19650 17950 0    140  ~ 28
+SA
+Text Notes 19650 18450 0    140  ~ 28
+SA
+Text Notes 19650 18950 0    140  ~ 28
+SA
+Text Notes 19650 19450 0    140  ~ 28
+SA
+Text Notes 19650 19950 0    140  ~ 28
+SA
+Text Notes 19650 20450 0    140  ~ 28
+SA
+Text Notes 19650 20950 0    140  ~ 28
+SA
+Text Notes 19650 21450 0    140  ~ 28
+SA
+Text Notes 20075 17950 0    140  ~ 28
+01
+Text Notes 20075 18450 0    140  ~ 28
+03
+Text Notes 20075 18950 0    140  ~ 28
+05
+Text Notes 20075 19450 0    140  ~ 28
+07
+Text Notes 20075 19950 0    140  ~ 28
+09
+Text Notes 20075 20450 0    140  ~ 28
+11
+Text Notes 20075 20950 0    140  ~ 28
+13
+Text Notes 20075 21450 0    140  ~ 28
+P
 $EndSCHEMATC
