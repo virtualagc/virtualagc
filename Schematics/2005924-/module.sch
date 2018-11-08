@@ -63,9 +63,9 @@ REF DWG:
 Text Notes 29200 29950 0    140  ~ 28
 STRAND SELECT ASSY\nDWG NO. 2003027
 Text Notes 1675 33300 0    130  ~ 26
-Notes from the Virtual AGC Project:\n1. This CAD drawing was manually transcribed from the original Apollo Program \n   drawing 2005924-, but does not itself date from the Apollo period. — RSB 2018\n2. Since the original drawing provided some connectivity information in tabular form,\n   rather than in the form of wires or similar constructs useful in CAD, it was not possible \n   to transcribe a single CAD drawing that simultaneously captured both the visual\n   appearance of the original and its electrical properties.  This CAD drawing attempts\n   to accurately represent the intended electrical properties of the circuit.  A separate\n   CAD drawing has been created to capture the visual appearance of the original\n   drawing. — RSB 2018\n3. The oval pads numbered 101-169 comprise connector J1, and those numbered \n   201-269 comprise connector J2.  — RSB 2018
+Notes from the Virtual AGC Project:\n1. This CAD drawing was manually transcribed from the original Apollo Program \n   drawing 2005924-, but does not itself date from the Apollo period. — RSB 2018\n2. Since the original drawing provided some connectivity information in tabular form,\n   rather than in the form of wires or similar constructs useful in CAD, it was not possible \n   to transcribe a single CAD drawing that simultaneously captured both the visual\n   appearance of the original and its electrical properties.  This CAD drawing attempts\n   to accurately represent the intended electrical properties of the circuit.  A separate\n   CAD drawing has been created to capture the visual appearance of the original\n   drawing. — RSB 2018\n3. The oval pads numbered 101-169 comprise connector J1, and those numbered \n   201-269 comprise connector J2.  — RSB 2018\n4. In the revision area, the TDRR number was not entirely legible on the original drawing\n   and may not be correct.  — RSB 2018
 $Bitmap
-Pos 1350 30875
+Pos 1400 30425
 Scale 1.000000
 Data
 89 50 4E 47 0D 0A 1A 0A 00 00 00 0D 49 48 44 52 00 00 00 78 00 00 00 78 08 02 00 00 00 B6 06 A1 
@@ -1091,7 +1091,7 @@ Wire Notes Line
 	24475 8350 550  8350
 $Comp
 L AGC_DSKY:ConnectorB8-100 J1
-U 65 1 5BE4333D
+U 65 1 5C2D6479
 P 10975 4025
 F 0 "J1" H 10975 4350 140 0001 C CNN
 F 1 "ConnectorB8-100" H 10975 4450 140 0001 C CNN
@@ -1103,7 +1103,7 @@ F 4 "STR58" H 10300 3950 140 0000 C BNB "Caption"
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorB8-100 J1
-U 15 1 5BE4333D
+U 15 1 5C2D647A
 P 9675 12775
 F 0 "J1" H 9675 13100 140 0001 C CNN
 F 1 "ConnectorB8-100" H 9675 13200 140 0001 C CNN
@@ -1115,7 +1115,7 @@ F 4 "MODT1" H 8900 12700 140 0000 C BNB "Caption"
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorB8-100 J1
-U 38 1 5BE4333D
+U 38 1 5C2D647B
 P 39825 5450
 F 0 "J1" H 39825 5775 140 0001 C CNN
 F 1 "ConnectorB8-100" H 39825 5875 140 0001 C CNN
@@ -1127,7 +1127,7 @@ F 4 "ROPER" H 39100 5375 140 0000 C BNB "Caption"
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorB8-100 J1
-U 17 1 5BE4333D
+U 17 1 5C2D647C
 P 17300 12775
 F 0 "J1" H 17300 13100 140 0001 C CNN
 F 1 "ConnectorB8-100" H 17300 13200 140 0001 C CNN
@@ -1139,7 +1139,7 @@ F 4 "MODT2" H 16525 12700 140 0000 C BNB "Caption"
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorB8-100 J1
-U 34 1 5BE4333D
+U 34 1 5C2D647D
 P 17300 11975
 F 0 "J1" H 17300 12300 140 0001 C CNN
 F 1 "ConnectorB8-100" H 17300 12400 140 0001 C CNN
@@ -1151,7 +1151,7 @@ F 4 "MODR2" H 16525 11900 140 0000 C BNB "Caption"
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorB8-100 J1
-U 48 1 5BE4333D
+U 48 1 5C2D647E
 P 25875 11525
 F 0 "J1" H 25875 11850 140 0001 C CNN
 F 1 "ConnectorB8-100" H 25875 11950 140 0001 C CNN
@@ -1163,7 +1163,7 @@ F 4 "STR412" H 25100 11450 140 0000 C BNB "Caption"
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorB8-100 J1
-U 31 1 5BE4333D
+U 31 1 5C2D647F
 P 9675 11975
 F 0 "J1" H 9675 12300 140 0001 C CNN
 F 1 "ConnectorB8-100" H 9675 12400 140 0001 C CNN
@@ -1175,7 +1175,7 @@ F 4 "MODR1" H 8875 11900 140 0000 C BNB "Caption"
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorB8-100 J1
-U 54 1 5BE4333D
+U 54 1 5C2D6480
 P 6575 5200
 F 0 "J1" H 6575 5525 140 0001 C CNN
 F 1 "ConnectorB8-100" H 6575 5625 140 0001 C CNN
@@ -1187,7 +1187,7 @@ F 4 "STR03" H 5850 5125 140 0000 C BNB "Caption"
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorB8-200 J2
-U 39 1 5BE4333D
+U 39 1 5C2D6481
 P 32450 5200
 F 0 "J2" H 32450 5525 140 0001 C CNN
 F 1 "ConnectorB8-200" H 32450 5625 140 0001 C CNN
@@ -1211,7 +1211,7 @@ F 4 "SE210" H 40325 8100 140 0000 C BNB "Caption"
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorB8-100 J1
-U 56 1 5BE4333D
+U 56 1 5C2D6476
 P 20900 4800
 F 0 "J1" H 20900 5125 140 0001 C CNN
 F 1 "ConnectorB8-100" H 20900 5225 140 0001 C CNN
@@ -1223,7 +1223,7 @@ F 4 "STR10" H 20200 4725 140 0000 C BNB "Caption"
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorB8-100 J1
-U 57 1 5BE4333D
+U 57 1 5C2D646B
 P 25875 7275
 F 0 "J1" H 25875 7600 140 0001 C CNN
 F 1 "ConnectorB8-100" H 25875 7700 140 0001 C CNN
@@ -1235,7 +1235,7 @@ F 4 "STR210" H 25075 7200 140 0000 C BNB "Caption"
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorB8-100 J1
-U 50 1 5BE4333D
+U 50 1 5C2D6460
 P 6575 5600
 F 0 "J1" H 6575 5925 140 0001 C CNN
 F 1 "ConnectorB8-100" H 6575 6025 140 0001 C CNN
@@ -1247,7 +1247,7 @@ F 4 "STR04" H 5850 5525 140 0000 C BNB "Caption"
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorB8-100 J1
-U 51 1 5BE4333D
+U 51 1 5C2D6461
 P 41025 8825
 F 0 "J1" H 41025 9150 140 0001 C CNN
 F 1 "ConnectorB8-100" H 41025 9250 140 0001 C CNN
@@ -1259,7 +1259,7 @@ F 4 "SE311" H 40325 8750 140 0000 C BNB "Caption"
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorB8-100 J1
-U 52 1 5BE4333D
+U 52 1 5C2D6462
 P 20900 5200
 F 0 "J1" H 20900 5525 140 0001 C CNN
 F 1 "ConnectorB8-100" H 20900 5625 140 0001 C CNN
@@ -1271,7 +1271,7 @@ F 4 "STR11" H 20200 5125 140 0000 C BNB "Caption"
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorB8-100 J1
-U 53 1 5BE4333D
+U 53 1 5C2D6463
 P 25875 9425
 F 0 "J1" H 25875 9750 140 0001 C CNN
 F 1 "ConnectorB8-100" H 25875 9850 140 0001 C CNN
@@ -1283,7 +1283,7 @@ F 4 "STR311" H 25125 9350 140 0000 C BNB "Caption"
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorB8-200 J2
-U 54 1 5BE4333D
+U 54 1 5C2D6464
 P 13675 5175
 F 0 "J2" H 13675 5500 140 0001 C CNN
 F 1 "ConnectorB8-200" H 13675 5600 140 0001 C CNN
@@ -1295,7 +1295,7 @@ F 4 "STR07" H 12950 5100 140 0000 C BNB "Caption"
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorB8-200 J2
-U 58 1 5BE4333D
+U 58 1 5C2D6465
 P 13675 4775
 F 0 "J2" H 13675 5100 140 0001 C CNN
 F 1 "ConnectorB8-200" H 13675 5200 140 0001 C CNN
@@ -1307,7 +1307,7 @@ F 4 "STR06" H 12950 4700 140 0000 C BNB "Caption"
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorB8-100 J1
-U 29 1 5BE4333D
+U 29 1 5C2D6466
 P 39825 6150
 F 0 "J1" H 39825 6475 140 0001 C CNN
 F 1 "ConnectorB8-100" H 39825 6575 140 0001 C CNN
@@ -1319,7 +1319,7 @@ F 4 "ROPES" H 39125 6075 140 0000 C BNB "Caption"
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorB8-100 J1
-U 64 1 5BE4333D
+U 64 1 5C2D6467
 P 6575 4400
 F 0 "J1" H 6575 4725 140 0001 C CNN
 F 1 "ConnectorB8-100" H 6575 4825 140 0001 C CNN
@@ -1331,7 +1331,7 @@ F 4 "STR01" H 5850 4325 140 0000 C BNB "Caption"
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorB8-100 J1
-U 61 1 5BE4333D
+U 61 1 5C2D6468
 P 41025 7475
 F 0 "J1" H 41025 7800 140 0001 C CNN
 F 1 "ConnectorB8-100" H 41025 7900 140 0001 C CNN
@@ -1343,7 +1343,7 @@ F 4 "SE19" H 40375 7400 140 0000 C BNB "Caption"
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorB8-100 J1
-U 60 1 5BE4333D
+U 60 1 5C2D6469
 P 6575 4800
 F 0 "J1" H 6575 5125 140 0001 C CNN
 F 1 "ConnectorB8-100" H 6575 5225 140 0001 C CNN
@@ -1355,7 +1355,7 @@ F 4 "STR02" H 5850 4725 140 0000 C BNB "Caption"
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorB8-100 J1
-U 63 1 5BE4333D
+U 63 1 5C2D646A
 P 25875 5200
 F 0 "J1" H 25875 5525 140 0001 C CNN
 F 1 "ConnectorB8-100" H 25875 5625 140 0001 C CNN
@@ -1367,7 +1367,7 @@ F 4 "STR19" H 25150 5125 140 0000 C BNB "Caption"
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorB8-100 J1
-U 62 1 5BE4333D
+U 62 1 5C2D645F
 P 20900 4400
 F 0 "J1" H 20900 4725 140 0001 C CNN
 F 1 "ConnectorB8-100" H 20900 4825 140 0001 C CNN
@@ -1379,7 +1379,7 @@ F 4 "STR09" H 20200 4325 140 0000 C BNB "Caption"
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorB8-100 J1
-U 20 1 5BE4333D
+U 20 1 5C2D646C
 P 39825 6825
 F 0 "J1" H 39825 7150 140 0001 C CNN
 F 1 "ConnectorB8-100" H 39825 7250 140 0001 C CNN
@@ -1391,7 +1391,7 @@ F 4 "ROPET" H 39125 6750 140 0000 C BNB "Caption"
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorB8-100 J1
-U 23 1 5BE4333D
+U 23 1 5C2D646D
 P 9675 12375
 F 0 "J1" H 9675 12700 140 0001 C CNN
 F 1 "ConnectorB8-100" H 9675 12800 140 0001 C CNN
@@ -1403,7 +1403,7 @@ F 4 "MODS1" H 8875 12300 140 0000 C BNB "Caption"
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorB8-100 J1
-U 25 1 5BE4333D
+U 25 1 5C2D646E
 P 17300 12375
 F 0 "J1" H 17300 12700 140 0001 C CNN
 F 1 "ConnectorB8-100" H 17300 12800 140 0001 C CNN
@@ -1415,7 +1415,7 @@ F 4 "MODS2" H 16525 12300 140 0000 C BNB "Caption"
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorB8-200 J2
-U 21 1 5BE4333D
+U 21 1 5C2D646F
 P 32450 9450
 F 0 "J2" H 32450 9775 140 0001 C CNN
 F 1 "ConnectorB8-200" H 32450 9875 140 0001 C CNN
@@ -1427,7 +1427,7 @@ F 4 "RPT" H 31875 9375 140 0000 C BNB "Caption"
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorB8-100 J1
-U 46 1 5BE4333D
+U 46 1 5C2D6470
 P 41025 9500
 F 0 "J1" H 41025 9825 140 0001 C CNN
 F 1 "ConnectorB8-100" H 41025 9925 140 0001 C CNN
@@ -1439,7 +1439,7 @@ F 4 "SE412" H 40350 9425 140 0000 C BNB "Caption"
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorB8-200 J2
-U 29 1 5BE4333D
+U 29 1 5C2D6471
 P 32450 7250
 F 0 "J2" H 32450 7575 140 0001 C CNN
 F 1 "ConnectorB8-200" H 32450 7675 140 0001 C CNN
@@ -1451,7 +1451,7 @@ F 4 "RPS" H 31825 7175 140 0000 C BNB "Caption"
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorB8-200 J2
-U 45 1 5BE4333D
+U 45 1 5C2D6472
 P 7000 11625
 F 0 "J2" H 7000 11950 140 0001 C CNN
 F 1 "ConnectorB8-200" H 7000 12050 140 0001 C CNN
@@ -1463,7 +1463,7 @@ F 4 "LOMOD" H 6250 11550 140 0000 C BNB "Caption"
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorB8-200 J2
-U 66 1 5BE4333D
+U 66 1 5C2D6473
 P 18050 4050
 F 0 "J2" H 18050 4375 140 0001 C CNN
 F 1 "ConnectorB8-200" H 18050 4475 140 0001 C CNN
@@ -1475,7 +1475,7 @@ F 4 "STR912" H 17275 3975 140 0000 C BNB "Caption"
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorB8-200 J2
-U 64 1 5BE4333D
+U 64 1 5C2D6474
 P 13675 4375
 F 0 "J2" H 13675 4700 140 0001 C CNN
 F 1 "ConnectorB8-200" H 13675 4800 140 0001 C CNN
@@ -1487,7 +1487,7 @@ F 4 "STR05" H 12950 4300 140 0000 C BNB "Caption"
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorB8-200 J2
-U 42 1 5BE4333D
+U 42 1 5C2D6475
 P 14425 11625
 F 0 "J2" H 14425 11950 140 0001 C CNN
 F 1 "ConnectorB8-200" H 14425 12050 140 0001 C CNN
@@ -1499,7 +1499,7 @@ F 4 "HIMOD" H 13625 11550 140 0000 C BNB "Caption"
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorB8-200 J2
-U 69 1 5BE4333D
+U 69 1 5C2D6478
 P 3975 4050
 F 0 "J2" H 3975 4375 140 0001 C CNN
 F 1 "ConnectorB8-200" H 3975 4475 140 0001 C CNN
@@ -1511,7 +1511,7 @@ F 4 "STR14" H 3300 3975 140 0000 C BNB "Caption"
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorB8-200 J2
-U 49 1 5BE4333D
+U 49 1 5C2D6477
 P 13675 5575
 F 0 "J2" H 13675 5900 140 0001 C CNN
 F 1 "ConnectorB8-200" H 13675 6000 140 0001 C CNN
@@ -1522,10 +1522,10 @@ F 4 "STR08" H 12950 5500 140 0000 C BNB "Caption"
 	-1   0    0    1   
 $EndComp
 $Comp
-L AGC_DSKY:ConnectorB8-100 J?
+L AGC_DSKY:ConnectorB8-100 J1
 U 47 1 5BEBA79A
 P 20900 5600
-F 0 "J?" H 20900 5925 140 0001 C CNN
+F 0 "J1" H 20900 5925 140 0001 C CNN
 F 1 "ConnectorB8-100" H 20900 6025 140 0001 C CNN
 F 2 "" H 20900 6075 140 0001 C CNN
 F 3 "" H 20900 6075 140 0001 C CNN
@@ -1809,9 +1809,9 @@ Wire Wire Line
 Wire Wire Line
 	11750 4400 11250 4400
 Wire Wire Line
-	11725 4025 11250 4025
+	11750 4025 11250 4025
 Wire Wire Line
-	11725 3625 11250 3625
+	11750 3625 11250 3625
 Wire Wire Line
 	11250 5900 11750 5900
 Wire Wire Line
