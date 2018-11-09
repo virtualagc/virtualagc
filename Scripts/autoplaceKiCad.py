@@ -28,6 +28,7 @@
 #		2018-08-06 RSB	Added the auto-increment feature for N and
 #				J.
 #		2018-10-18 RSB	Added connector A52.
+#		2018-11-09 RSB	Added K and k.
 #
 # The purpose of this python script is to take a text file that has some
 # descriptions of NOR gates, expander gates, connector pads, nodes,
@@ -324,7 +325,7 @@ for line in sys.stdin:
 		nextXY()
 		continue
 	
-	if (type == "J" or type == "j") and numFields >= 2 and numFields <= 5 and (fields[1].isdigit() or fields[1] == "."):
+	if type in ['J', 'j', 'K', 'k'] and numFields >= 2 and numFields <= 5 and (fields[1].isdigit() or fields[1] == "."):
 		if fields[1] == ".":
 			fields[1] = str(padNumber)
 			padNumber += 1
@@ -334,9 +335,15 @@ for line in sys.stdin:
 			if remainder == 72:
 				padNumber += 29
 		rotated = False
+		up = False
+		down = False
 		if type == "j":
 			rotated = True
-			type = "J"
+		elif type == "K":
+			down = True
+		elif type == "k":
+			up = True
+		type = "J"
 		pinName = fields[1]
 		if len(pinName) != 3 or not pinName.isdigit():
 			print >>sys.stderr, "Incorrectly numbered connector: " + line
@@ -397,15 +404,18 @@ for line in sys.stdin:
 			print >>sys.stderr, objects[id]
 			wereErrors = True
 			continue
-		objects[id] = { "type": type, "refd": refd, "symbol": symbol, "unit": unit, "text": text, "text2": text2, "text3": text3, "x": posX, "y": posY, "rotated": rotated }
+		objects[id] = { "type": type, "refd": refd, "symbol": symbol, "unit": unit, "text": text, "text2": text2, "text3": text3, "x": posX, "y": posY, "rotated": rotated, "down": down, "up": up }
 		nextXY()
 		continue
 	
-	if type == "O" and numFields == 2:
+	if type == "O" and numFields in [2, 3]:
 		id = type + str(index)
 		index += 1
 		text = fields[1]
-		objects[id] = { "type": type, "text": text, "x": posX, "y": posY }
+		text2 = ""
+		if numFields > 2:
+			text2 = fields[2]
+		objects[id] = { "type": type, "text": text, "text2": text2, "x": posX, "y": posY }
 		nextXY()
 		continue
 	
@@ -539,6 +549,14 @@ for id in objects:
 		continue
 	
 	if type == "J":
+		up = object["up"]
+		down = object["down"]
+		if up or down:
+			demorgan = "2"
+			
+		else:
+			demorgan = "1"
+		inverted = False
 		posX = object["x"]
 		posY = object["y"]
 		symbol = object["symbol"]
@@ -550,30 +568,52 @@ for id in objects:
 		rotated = object["rotated"]
 		sys.stdout.write("$Comp\n")
 		sys.stdout.write("L AGC_DSKY:" + symbol + " " + refd + "\n")
-		sys.stdout.write("U " + str(unit) + " 1 " + timestamp + "\n")
+		sys.stdout.write("U " + str(unit) + " " + demorgan + " " + timestamp + "\n")
 		sys.stdout.write("P " + str(posX) + " " + str(posY) + "\n")
 		sys.stdout.write("F 0 \"" + refd + "\" H " + str(posX) + " " + str(posY + 325) + " 140 0001 C CNN\n")
 		sys.stdout.write("F 1 \"" + symbol + "\" H " + str(posX) + " " + str(posY+425) + " 140 0001 C CNN\n")
 		sys.stdout.write("F 2 \"\" H " + str(posX) + " " + str(posY+475) + " 140 0001 C CNN\n")
 		sys.stdout.write("F 3 \"\" H " + str(posX) + " " + str(posY+475) + " 140 0001 C CNN\n")
-		inverted = 0
 		if caption3 != "":
 			if rotated:
 				rotated = 0
-				inverted = 1
-			sys.stdout.write("F 4 \"" + caption + "\" H " + str(posX-425) + " " + str(posY + 175) + " 140 0000 R BNB \"Caption\"\n")
-			sys.stdout.write("F 5 \"" + caption2 + "\" H " + str(posX-425) + " " + str(posY) + " 140 0000 R CNB \"Caption2\"\n")
-			sys.stdout.write("F 6 \"" + caption3 + "\" H " + str(posX-425) + " " + str(posY - 175) + " 140 0000 R TNB \"Caption3\"\n")
+				inverted = True
+			if down:
+				sys.stdout.write("F 4 \"" + caption + "\" H " + str(posX) + " " + str(posY - 675) + " 140 0000 C TNB \"Caption\"\n")
+				sys.stdout.write("F 5 \"" + caption2 + "\" H " + str(posX) + " " + str(posY - 450) + " 140 0000 C TNB \"Caption2\"\n")
+				sys.stdout.write("F 6 \"" + caption3 + "\" H " + str(posX) + " " + str(posY - 225) + " 140 0000 C TNB \"Caption3\"\n")
+			elif up:
+				sys.stdout.write("F 4 \"" + caption + "\" H " + str(posX) + " " + str(posY - 225) + " 140 0000 C TNB \"Caption\"\n")
+				sys.stdout.write("F 5 \"" + caption2 + "\" H " + str(posX) + " " + str(posY - 450) + " 140 0000 C TNB \"Caption2\"\n")
+				sys.stdout.write("F 6 \"" + caption3 + "\" H " + str(posX) + " " + str(posY - 675) + " 140 0000 C TNB \"Caption3\"\n")
+			else:
+				sys.stdout.write("F 4 \"" + caption + "\" H " + str(posX-425) + " " + str(posY + 175) + " 140 0000 R BNB \"Caption\"\n")
+				sys.stdout.write("F 5 \"" + caption2 + "\" H " + str(posX-425) + " " + str(posY) + " 140 0000 R CNB \"Caption2\"\n")
+				sys.stdout.write("F 6 \"" + caption3 + "\" H " + str(posX-425) + " " + str(posY - 175) + " 140 0000 R TNB \"Caption3\"\n")
 		elif caption2 != "":
 			if rotated:
 				rotated = 0
-				inverted = 1
-			sys.stdout.write("F 4 \"" + caption + "\" H " + str(posX) + " " + str(posY + 225) + " 140 0000 C BNB \"Caption\"\n")
-			sys.stdout.write("F 5 \"" + caption2 + "\" H " + str(posX) + " " + str(posY - 225) + " 140 0000 C TNB \"Caption2\"\n")
+				inverted = True
+			if down:
+				sys.stdout.write("F 4 \"" + caption + "\" H " + str(posX) + " " + str(posY - 450) + " 140 0000 C TNB \"Caption\"\n")
+				sys.stdout.write("F 5 \"" + caption2 + "\" H " + str(posX) + " " + str(posY - 225) + " 140 0000 C TNB \"Caption2\"\n")
+			elif up:
+				sys.stdout.write("F 4 \"" + caption + "\" H " + str(posX) + " " + str(posY - 225) + " 140 0000 C TNB \"Caption\"\n")
+				sys.stdout.write("F 5 \"" + caption2 + "\" H " + str(posX) + " " + str(posY - 450) + " 140 0000 C TNB \"Caption2\"\n")
+			else:
+				sys.stdout.write("F 4 \"" + caption + "\" H " + str(posX) + " " + str(posY + 225) + " 140 0000 C BNB \"Caption\"\n")
+				sys.stdout.write("F 5 \"" + caption2 + "\" H " + str(posX) + " " + str(posY - 225) + " 140 0000 C TNB \"Caption2\"\n")
 		else:
-			sys.stdout.write("F 4 \"" + caption + "\" H " + str(posX) + " " + str(posY + 225) + " 140 0000 C BNB \"Caption\"\n")
+			if up or down:
+				sys.stdout.write("F 4 \"" + caption + "\" H " + str(posX) + " " + str(posY - 225) + " 140 0000 C TNB \"Caption\"\n")
+			else:
+				sys.stdout.write("F 4 \"" + caption + "\" H " + str(posX) + " " + str(posY + 225) + " 140 0000 C BNB \"Caption\"\n")
 		sys.stdout.write("\t" + str(unit) + " " + str(posX) + " " + str(posY) + "\n")
-		if inverted:
+		if up:
+			sys.stdout.write("\t1    0    0    -1  \n")
+		elif down:
+			sys.stdout.write("\t1    0    0     1  \n")
+		elif inverted:
 			sys.stdout.write("\t-1    0    0   -1  \n")
 		elif rotated:
 			sys.stdout.write("\t-1    0    0    1  \n")
@@ -608,6 +648,7 @@ for id in objects:
 		posX = object["x"]
 		posY = object["y"]
 		caption = object["text"]
+		caption2 = object["text2"]
 		refd = "X?"
 		symbol = "Node2"
 		sys.stdout.write("$Comp\n")
@@ -615,10 +656,14 @@ for id in objects:
 		sys.stdout.write("U 1 1 " + timestamp + "\n")
 		sys.stdout.write("P " + str(posX) + " " + str(posY) + "\n")
 		sys.stdout.write("F 0 \"" + refd + "\" H " + str(posX) + " " + str(posY + 325) + " 140 0001 C CNN\n")
-		sys.stdout.write("F 1 \"" + symbol + "\" H " + str(posX) + " " + str(posY+425) + " 140 0001 C CNN\n")
+		sys.stdout.write("F 1 \"" + symbol + "\" H " + str(posX) + " " + str(posY + 425) + " 140 0001 C CNN\n")
 		sys.stdout.write("F 2 \"\" H " + str(posX) + " " + str(posY+475) + " 140 0001 C CNN\n")
 		sys.stdout.write("F 3 \"\" H " + str(posX) + " " + str(posY+475) + " 140 0001 C CNN\n")
-		sys.stdout.write("F 4 \"" + caption + "\" H " + str(posX-100) + " " + str(posY) + " 140 0000 R CNB \"Caption\"\n")
+		if caption2 == "":
+			sys.stdout.write("F 4 \"" + caption + "\" H " + str(posX-100) + " " + str(posY) + " 140 0000 R CNB \"Caption\"\n")
+		else:
+			sys.stdout.write("F 4 \"" + caption + "\" H " + str(posX-100) + " " + str(posY + 125) + " 140 0000 R CNB \"Caption\"\n")
+			sys.stdout.write("F 5 \"" + caption2 + "\" H " + str(posX-100) + " " + str(posY - 125) + " 140 0000 R CNB \"Caption2\"\n")
 		sys.stdout.write("\t" + str(unit) + " " + str(posX) + " " + str(posY) + "\n")
 		sys.stdout.write("\t1    0    0    -1  \n")
 		sys.stdout.write("$EndComp\n")
