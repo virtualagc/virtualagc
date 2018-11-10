@@ -95,7 +95,7 @@ NOTES:
 Text Notes 1675 31850 0    130  ~ 26
 1. INTERPRET DRAWING IN ACCORDANCE WITH STANDARDS PRESCRIBED BY MIL-D-70327\n2. UNLESS OTHERWISE SPECIFIED, RESISTOR VALUES ARE IN OHMS\n3. THE VALUE OF THE FOLLOWING COMPONENTS TO BE DETERMINED AT ELECTRICAL\n   TEST  R29, R36, R37, R50, AND R51  TO BE SELECTED FROM APPROPRIATE CHART\n4. TOP SIGNAL NAME AND CIRCUIT NUMBER APPLY TO POSITION B16,\n   BOTTOM SIGNAL NAME AND CIRCUIT NUMBER APPLY TO POSITION B17\n   SEE CHARTS
 Text Notes 20175 33100 0    130  ~ 26
-Notes from the Virtual AGC Project:\n1. This CAD drawing was transcribed from the original Apollo Program drawing 2005100D,\n   but does not itself date from the Apollo era.  — RSB 2018\n2. This CAD drawing is intended to capture the visual appearance of the original drawing,\n   but does not provide a valid electrical design for it.  A separate drawing has been created\n   to instead capture the intended electrical characteristics of the circuit. — RSB 2018
+Notes from the Virtual AGC Project:\n1. This CAD drawing was transcribed from the original Apollo Program drawing 2005100D,\n   but does not itself date from the Apollo era.  — RSB 2018\n2. This CAD drawing is intended to capture the electrical properties of the original drawing,\n   but is not a visually accurate representation of it.  A separate drawing has been created\n   to instead capture the visual appearance of the original drawing. — RSB 2018
 $Bitmap
 Pos 19900 32000
 Scale 1.000000
@@ -3447,7 +3447,7 @@ Connection ~ 3275 6750
 Wire Wire Line
 	3275 6750 3275 7050
 Wire Wire Line
-	5325 6475 5325 5925
+	5325 6500 5325 5925
 Wire Wire Line
 	5325 5925 5650 5925
 Wire Wire Line
@@ -3706,8 +3706,6 @@ Wire Wire Line
 Wire Wire Line
 	17650 10125 17650 9475
 Wire Wire Line
-	17650 9475 18300 9475
-Wire Wire Line
 	17650 10625 17650 11100
 Wire Wire Line
 	17650 11100 17050 11100
@@ -3775,8 +3773,6 @@ Wire Wire Line
 Wire Wire Line
 	23275 11100 23275 11275
 Connection ~ 20150 11100
-Wire Wire Line
-	23275 11700 23275 11900
 Wire Wire Line
 	22800 11900 23275 11900
 Connection ~ 23275 11900
@@ -4015,7 +4011,7 @@ Wire Wire Line
 	38375 15425 38375 15650
 Connection ~ 38375 15425
 Wire Wire Line
-	38375 15425 39800 15425
+	38375 15425 39425 15425
 Wire Wire Line
 	38375 16175 38375 16350
 Wire Wire Line
@@ -4030,7 +4026,7 @@ Connection ~ 31650 14525
 Wire Wire Line
 	31650 15325 31650 15450
 Wire Wire Line
-	31650 15450 33000 15450
+	31650 15450 32675 15450
 Wire Wire Line
 	31650 15600 31650 15450
 Connection ~ 31650 15450
@@ -4258,8 +4254,6 @@ Wire Wire Line
 Wire Wire Line
 	42675 26925 42800 26925
 Wire Wire Line
-	42000 26325 42000 26725
-Wire Wire Line
 	42000 26725 42675 26725
 Connection ~ 42675 26725
 Wire Wire Line
@@ -4394,14 +4388,14 @@ BPLMX3_Y3
 $Comp
 L AGC_DSKY:ConnectorB8-200 J2
 U 31 1 5F28E215
-P 33181 18381
-F 0 "J2" H 33181 18706 140 0001 C CNN
-F 1 "ConnectorB8-200" H 33181 18806 140 0001 C CNN
-F 2 "" H 33181 18856 140 0001 C CNN
-F 3 "" H 33181 18856 140 0001 C CNN
-F 4 "BPLMX3" H 32306 18481 140 0000 C BNB "Caption"
-F 5 "BPLMY3" H 32306 18381 140 0000 C TNB "Caption2"
-	31   33181 18381
+P 33175 18375
+F 0 "J2" H 33175 18700 140 0001 C CNN
+F 1 "ConnectorB8-200" H 33175 18800 140 0001 C CNN
+F 2 "" H 33175 18850 140 0001 C CNN
+F 3 "" H 33175 18850 140 0001 C CNN
+F 4 "BPLMX3" H 32300 18475 140 0000 C BNB "Caption"
+F 5 "BPLMY3" H 32300 18375 140 0000 C TNB "Caption2"
+	31   33175 18375
 	-1   0    0    -1  
 $EndComp
 Wire Wire Line
@@ -4433,7 +4427,7 @@ BPLMX2_Y2
 Text GLabel 30775 5875 2    140  Input ~ 28
 BPLMX2_Y2
 Text GLabel 26325 17500 2    140  Output ~ 28
-40331A_32A
+40331A_2A
 Wire Wire Line
 	26325 17500 26125 17500
 Wire Wire Line
@@ -4467,19 +4461,6 @@ Text GLabel 35375 25025 0    140  Input ~ 28
 40365A_6A
 Wire Notes Line style solid
 	27900 25875 22100 25875
-$Comp
-L AGC_DSKY:ConnectorB8-100 J1
-U 2 1 5F6E575D
-P 2200 25150
-F 0 "J1" H 2200 25475 140 0001 C CNN
-F 1 "ConnectorB8-100" H 2200 25575 140 0001 C CNN
-F 2 "" H 2200 25325 140 0001 C CNN
-F 3 "" H 2200 25325 140 0001 C CNN
-F 4 "BPLSSW" H 1475 25200 140 0000 C BNB "Caption"
-F 5 "BPLSSW" H 1475 25075 140 0000 C CNB "Caption2"
-	2    2200 25150
-	1    0    0    -1  
-$EndComp
 Wire Wire Line
 	2475 25150 3350 25150
 $Comp
@@ -4760,21 +4741,6 @@ $EndComp
 Wire Wire Line
 	4425 15275 4975 15275
 $Comp
-L AGC_DSKY:ConnectorB8-200 J2
-U 67 1 5C00FBCB
-P 7550 15275
-F 0 "J2" H 7550 15600 140 0001 C CNN
-F 1 "ConnectorB8-200" H 7550 15700 140 0001 C CNN
-F 2 "" H 7550 15450 140 0001 C CNN
-F 3 "" H 7550 15450 140 0001 C CNN
-F 4 "+4MX1" H 6875 15300 140 0000 C BNB "Caption"
-F 5 "+4MY1" H 6875 15175 140 0000 C CNB "Caption2"
-	67   7550 15275
-	-1   0    0    -1  
-$EndComp
-Wire Wire Line
-	6725 15275 6975 15275
-$Comp
 L AGC_DSKY:ConnectorB8-100 J1
 U 62 1 5C046742
 P 7550 16900
@@ -4829,7 +4795,7 @@ $EndComp
 Wire Wire Line
 	4425 17850 4975 17850
 Wire Wire Line
-	6725 17850 6975 17850
+	6725 17850 7275 17850
 $Comp
 L AGC_DSKY:ConnectorB8-100 J1
 U 68 1 5C1A6570
@@ -4885,21 +4851,6 @@ $EndComp
 Wire Wire Line
 	4425 20425 4975 20425
 $Comp
-L AGC_DSKY:ConnectorB8-200 J2
-U 56 1 5C1E2778
-P 7550 20425
-F 0 "J2" H 7550 20750 140 0001 C CNN
-F 1 "ConnectorB8-200" H 7550 20850 140 0001 C CNN
-F 2 "" H 7550 20600 140 0001 C CNN
-F 3 "" H 7550 20600 140 0001 C CNN
-F 4 "+4MX2" H 6875 20450 140 0000 C BNB "Caption"
-F 5 "+4MY2" H 6875 20325 140 0000 C CNB "Caption2"
-	56   7550 20425
-	-1   0    0    -1  
-$EndComp
-Wire Wire Line
-	6725 20425 6975 20425
-$Comp
 L AGC_DSKY:ConnectorB8-100 J1
 U 57 1 5C1E2785
 P 7550 19475
@@ -4952,7 +4903,7 @@ $EndComp
 Wire Wire Line
 	4425 22975 4975 22975
 Wire Wire Line
-	6725 22975 6975 22975
+	6725 22975 7275 22975
 $Comp
 L AGC_DSKY:ConnectorB8-100 J1
 U 52 1 5C21D83B
@@ -4968,11 +4919,6 @@ F 5 "X04CN" H 6875 21950 140 0000 C CNB "Caption2"
 $EndComp
 Wire Wire Line
 	6725 22025 7275 22025
-Wire Wire Line
-	6975 15275 6975 17850
-Connection ~ 6975 15275
-Wire Wire Line
-	6975 15275 7275 15275
 $Sheet
 S 11775 14075 1750 1950
 U 5C3EA18C
@@ -4999,8 +4945,6 @@ Wire Wire Line
 	11225 15750 11775 15750
 Wire Wire Line
 	11225 15275 11775 15275
-Wire Wire Line
-	13525 15275 13775 15275
 Wire Wire Line
 	13525 14325 14075 14325
 $Sheet
@@ -5030,7 +4974,7 @@ Wire Wire Line
 Wire Wire Line
 	11225 17850 11775 17850
 Wire Wire Line
-	13525 17850 13775 17850
+	13525 17850 14050 17850
 Wire Wire Line
 	13525 16900 14075 16900
 $Sheet
@@ -5059,8 +5003,6 @@ Wire Wire Line
 	11225 20900 11775 20900
 Wire Wire Line
 	11225 20425 11775 20425
-Wire Wire Line
-	13525 20425 13775 20425
 $Sheet
 S 11775 21775 1750 1950
 U 5C3EA21F
@@ -5088,14 +5030,9 @@ Wire Wire Line
 Wire Wire Line
 	11225 22975 11775 22975
 Wire Wire Line
-	13525 22975 13775 22975
+	13525 22975 14050 22975
 Wire Wire Line
 	13525 22025 14075 22025
-Wire Wire Line
-	13775 15275 13775 17850
-Connection ~ 13775 15275
-Wire Wire Line
-	13775 15275 14075 15275
 $Comp
 L AGC_DSKY:ConnectorB8-100 J1
 U 67 1 5C449B5E
@@ -5148,46 +5085,10 @@ F 5 "ILP/" H 10275 22900 140 0000 C CNB "Caption2"
 	51   10950 22975
 	1    0    0    -1  
 $EndComp
-$Comp
-L AGC_DSKY:ConnectorB8-200 J2
-U 67 1 5C45A190
-P 14350 15275
-F 0 "J2" H 14350 15600 140 0001 C CNN
-F 1 "ConnectorB8-200" H 14350 15700 140 0001 C CNN
-F 2 "" H 14350 15450 140 0001 C CNN
-F 3 "" H 14350 15450 140 0001 C CNN
-F 4 "+4MX1" H 13675 15300 140 0000 C BNB "Caption"
-F 5 "+4MY1" H 13675 15175 140 0000 C CNB "Caption2"
-	67   14350 15275
-	-1   0    0    -1  
-$EndComp
 Wire Wire Line
 	6725 19475 7275 19475
 Wire Wire Line
-	6975 22975 6975 20425
-Connection ~ 6975 20425
-Wire Wire Line
-	6975 20425 7275 20425
-Wire Wire Line
 	13525 19475 14075 19475
-Wire Wire Line
-	13775 22975 13775 20425
-Connection ~ 13775 20425
-Wire Wire Line
-	13775 20425 14075 20425
-$Comp
-L AGC_DSKY:ConnectorB8-200 J2
-U 56 1 5C522145
-P 14350 20425
-F 0 "J2" H 14350 20750 140 0001 C CNN
-F 1 "ConnectorB8-200" H 14350 20850 140 0001 C CNN
-F 2 "" H 14350 20600 140 0001 C CNN
-F 3 "" H 14350 20600 140 0001 C CNN
-F 4 "+4MX2" H 13675 20450 140 0000 C BNB "Caption"
-F 5 "+4MY2" H 13675 20325 140 0000 C CNB "Caption2"
-	56   14350 20425
-	-1   0    0    -1  
-$EndComp
 $Comp
 L AGC_DSKY:ConnectorB8-200 J2
 U 68 1 5C5264C6
@@ -5240,4 +5141,63 @@ F 5 "XPCN" H 13675 21925 140 0000 C CNB "Caption2"
 	50   14350 22025
 	-1   0    0    -1  
 $EndComp
+Text GLabel 39800 15875 2    140  Output ~ 28
++4MX2_Y2
+Text GLabel 33000 15875 2    140  Output ~ 28
++4MX1_Y1
+Wire Wire Line
+	39800 15875 39425 15875
+Wire Wire Line
+	39425 15875 39425 15425
+Connection ~ 39425 15425
+Wire Wire Line
+	39425 15425 39800 15425
+Wire Wire Line
+	33000 15900 32675 15900
+Wire Wire Line
+	32675 15900 32675 15450
+Connection ~ 32675 15450
+Wire Wire Line
+	32675 15450 33000 15450
+Wire Wire Line
+	6725 15275 7275 15275
+Text GLabel 7275 15275 2    140  Input ~ 28
++4MX1_Y1
+Text GLabel 7275 17850 2    140  Input ~ 28
++4MX1_Y1
+Wire Wire Line
+	13525 15275 14075 15275
+Text GLabel 14075 15275 2    140  Input ~ 28
++4MX1_Y1
+Text GLabel 14050 17850 2    140  Input ~ 28
++4MX1_Y1
+Wire Wire Line
+	6725 20425 7275 20425
+Wire Wire Line
+	13525 20425 14075 20425
+Text GLabel 7275 20425 2    140  Input ~ 28
++4MX2_Y2
+Text GLabel 7275 22975 2    140  Input ~ 28
++4MX2_Y2
+Text GLabel 14075 20425 2    140  Input ~ 28
++4MX2_Y2
+Text GLabel 14050 22975 2    140  Input ~ 28
++4MX2_Y2
+Text GLabel 2475 25150 0    140  Input ~ 28
+BPLSSW
+Text GLabel 39025 8125 2    140  Output ~ 28
+BPLSSW
+Wire Wire Line
+	39025 8125 38775 8125
+Wire Wire Line
+	38775 8125 38775 8600
+Connection ~ 38775 8600
+Wire Wire Line
+	23275 11675 23275 11900
+Wire Wire Line
+	30300 14525 30000 14525
+Wire Wire Line
+	17650 9475 18325 9475
+Wire Wire Line
+	42000 26300 42000 26725
 $EndSCHEMATC

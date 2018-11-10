@@ -84,16 +84,8 @@ Wire Notes Line style solid
 	34268 31799 34343 31699
 Wire Notes Line style solid
 	35243 31799 35318 31699
-Text Notes 42399 33450 0    140  ~ 28
-2     2
 Text Notes 35099 31775 0    140  ~ 28
 ___
-Wire Notes Line width 60 style solid
-	43100 31688 43050 31563
-Wire Notes Line width 60 style solid
-	43050 31563 43150 31563
-Wire Notes Line width 60 style solid
-	43150 31563 43100 31688
 Wire Notes Line style solid
 	11400 1200 14425 1200
 Wire Notes Line style solid
