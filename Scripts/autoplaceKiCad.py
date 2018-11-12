@@ -369,7 +369,7 @@ for line in sys.stdin:
 			quotient = (pinNum // 100) - 1
 			remainder = pinNum % 100
 			unit = 16 * quotient + remainder 
-		elif module[0] == "B" and pinNum >= 101 and pinNum <= 169:
+		elif module[0] == "B":
 			# Note that these B-module cases do not cover the case of B7, which isn't
 			# supported.
 			refd = "J1"
