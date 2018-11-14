@@ -603,7 +603,7 @@ for id in objects:
 			else:
 				sys.stdout.write("F 4 \"" + caption + "\" H " + str(posX) + " " + str(posY + 225) + " 140 0000 C BNB \"Caption\"\n")
 				sys.stdout.write("F 5 \"" + caption2 + "\" H " + str(posX) + " " + str(posY - 225) + " 140 0000 C TNB \"Caption2\"\n")
-		else:
+		elif caption != ".":
 			if up or down:
 				sys.stdout.write("F 4 \"" + caption + "\" H " + str(posX) + " " + str(posY - 225) + " 140 0000 C TNB \"Caption\"\n")
 			else:
