@@ -29,8 +29,8 @@
 # If VCC="NC", then the corresponding power pin is left unconnected.
 # VARIATION is either "" (for regular NOR gates) or "expander" for the expander gates.
 # VARIATION2 is either "" (to show pin numbers A-F,J,K), "numerical" (to show 1-4,6-9),
-#	or "nopinnums" to not show pin numbers.  With "numerical, additionally, the
-#	"Location" and "Location2" fields are still present but invisible, whilst a
+#	"nopinnums" to not show pin numbers, or "nd1021041".  With "numerical", additionally, 
+#	the "Location" and "Location2" fields are still present but invisible, whilst a
 #	new "Location3" field is visible instead; moreover, the "A" and "B" parts are
 #	reversed for some reason.  As far as I know right now, the "numerical" option
 #	is only used for drawing 2003305.
@@ -47,7 +47,7 @@ if len(sys.argv) > 1 and "D3NOR-" in sys.argv[1] and ".lib.bak" in sys.argv[1]:
 	fields = s.split('-');
 	#print >> sys.stderr, len(fields)
 	#print >> sys.stderr, fields
-	if len(fields) == 4 and fields[3] in ["nopinnums", "numerical"]:
+	if len(fields) == 4 and fields[3] in ["nopinnums", "numerical", "nd1021041"]:
 		fields.append(fields[3])
 		fields[3] = ""
 	#print >> sys.stderr, len(fields)
@@ -65,10 +65,18 @@ if len(fields) > 4:
 
 basename = "D3NOR-" + vcc + "-" + gnd # Base name of the generated components. 
 numerical = False
+nd1021041 = False
+powerPin = "10"
+expander = False
 if variation == "expander":
 	basename += "-expander"
+	expander = True
 if variation2 == "nopinnums":
 	basename += "-nopinnums"
+if variation2 == "nd1021041":
+	powerPin = "6"
+	basename += "-nd1021041"
+	nd1021041 = True
 if variation2 == "numerical":
 	basename += "-numerical"
 	numerical = True
@@ -103,7 +111,10 @@ else:
 # Proceed to generate the library's entries.
 # In the following loop, the inputs of gate A are represented by inA1, inA2, and inA3.
 # The inputs of gate B are represented by inB1, inB2, and inB3.
-if numerical:
+if nd1021041:
+	ListALevel0 = [ "_", "_", "A", "B", "C" ]
+	ListBLevel0 = [ "_", "_", "_" ]
+elif numerical:
 	ListBLevel0 = [ "_", "_", "4", "3", "2" ]
 	ListALevel0 = [ "_", "_", "6", "7", "8" ]
 else:
@@ -136,10 +147,10 @@ for inA1 in ListALevel0:
             ListBLevel3A = list(ListBLevel3)
             
             # Apply some symmetry to remove some of the possibilities.
-            if inA1 == "_" and inA2 == "_" and inA3 == "_":
-              continue
-            if inB1 == "_" and inB2 == "_" and inB3 == "_":
-              continue
+            #if inA1 == "_" and inA2 == "_" and inA3 == "_":
+            #  continue
+            #if inB1 == "_" and inB2 == "_" and inB3 == "_":
+            #  continue
             if inA1 > inA3:
               continue
             if inB1 > inB3:
@@ -157,7 +168,9 @@ for inA1 in ListALevel0:
             print("#")
             print("# " + name)
             print("#")
-            if variation2 == "nopinnums":
+            if variation2 == "nd1021041":
+              print("DEF " + name + " U 0 0 N N 1 L N")
+            elif variation2 == "nopinnums":
               print("DEF " + name + " U 0 0 N N 2 L N")
             else:
               print("DEF " + name + " U 0 0 N Y 2 L N")
@@ -165,14 +178,15 @@ for inA1 in ListALevel0:
             print("F1 \"" + name +"\" 0 550 50 H I C CNN")
             print("F2 \"\" -495 470 50 H I C CNN")
             print("F3 \"\" -495 470 50 H I C CNN")
-            if variation == "expander":
+            if expander:
             	if numerical:
 	            	print("F4 \"NNNNN\" -75 0 120 H I C CNB \"Location\"")
 	            	print("F5 \"NN\" -125 -200 120 H I C CNB \"Location2\"")
 	            	print("F6 \"NX\" -75 0 140 H V C CNB \"Location3\"")
             	else:
 	            	print("F4 \"NNNNN\" -75 0 120 H V C CNB \"Location\"")
-	            	print("F5 \"NN\" -125 -200 120 H V C CNB \"Location2\"")
+	            	if not nd1021041:
+	            		print("F5 \"NN\" -125 -200 120 H V C CNB \"Location2\"")
             else:
             	if numerical:
 	            	print("F4 \"NNNNN\" 0 0 140 H I C CNB \"Location\"")
@@ -180,73 +194,89 @@ for inA1 in ListALevel0:
 	            	print("F6 \"NX\" -75 0 140 H V C CNB \"Location3\"")
             	else:
 	            	print("F4 \"NNNNN\" 0 0 140 H V C CNB \"Location\"")
-	            	print("F5 \"NN\" -75 -200 140 H V C CNB \"Location2\"")
+	            	if not nd1021041:
+				print("F5 \"NN\" -75 -200 140 H V C CNB \"Location2\"")
             print("DRAW")
             print("A -1460 0 1040 -226 226 0 1 " + str(lineWidth) + " N -500 -400 -500 400")
             print("A -113 -374 787 795 284 0 1 " + str(lineWidth) + " N 30 400 580 0")
             print("A -113 374 787 -284 -795 0 1 " + str(lineWidth) + " N 580 0 30 -400")
-            print("C 665 0 85 0 1 " + str(lineWidth) + " N")
+            if not nd1021041 or not expander:
+            	print("C 665 0 85 0 1 " + str(lineWidth) + " N")
             print("P 2 0 1 " + str(lineWidth) + " 30 -400 -500 -400 N")
             print("P 2 0 1 " + str(lineWidth) + " 30 400 -500 400 N")
-            if variation == "expander":
+            if expander:
             	print("P 16 0 1 0 275 305 275 -315 340 -270 400 -220 445 -170 485 -130 520 -85 540 -55 575 0 545 55 480 135 425 195 375 245 310 290 275 305 280 300 F")
-            if inA1 != "_":
-              print("P 4 1 1 " + str(lineWidth) + " -460 275 -750 375 -750 175 -460 275 F")
-            if inA2 != "_":
-              print("P 4 1 1 " + str(lineWidth) + " -420 0 -675 -100 -675 100 -420 0 F")
-            if inA3 != "_":
-              print("P 4 1 1 " + str(lineWidth) + " -460 -275 -750 -175 -750 -375 -460 -275 F")
-            if inB1 != "_":
-              print("P 4 2 1 " + str(lineWidth) + " -460 275 -750 375 -750 175 -460 275 F")
-            if inB2 != "_":
-              print("P 4 2 1 " + str(lineWidth) + " -420 0 -675 -100 -675 100 -420 0 F")
-            if inB3 != "_":
-              print("P 4 2 1 " + str(lineWidth) + " -460 -275 -750 -175 -750 -375 -460 -275 F")
+            if not nd1021041:
+	            if inA1 != "_":
+	              print("P 4 1 1 " + str(lineWidth) + " -460 275 -750 375 -750 175 -460 275 F")
+	            if inA2 != "_":
+	              print("P 4 1 1 " + str(lineWidth) + " -420 0 -675 -100 -675 100 -420 0 F")
+	            if inA3 != "_":
+	              print("P 4 1 1 " + str(lineWidth) + " -460 -275 -750 -175 -750 -375 -460 -275 F")
+	            if inB1 != "_":
+	              print("P 4 2 1 " + str(lineWidth) + " -460 275 -750 375 -750 175 -460 275 F")
+	            if inB2 != "_":
+	              print("P 4 2 1 " + str(lineWidth) + " -420 0 -675 -100 -675 100 -420 0 F")
+	            if inB3 != "_":
+	              print("P 4 2 1 " + str(lineWidth) + " -460 -275 -750 -175 -750 -375 -460 -275 F")
             if numerical:
             	print("X 9 9 900 0 150 L 140 140 1 1 C")
+            elif nd1021041 and expander:
+            	print("X J 1 800 0 210 L 140 140 1 1 C")
             else:
             	print("X J 1 900 0 150 L 140 140 1 1 C")
             if vcc == "NC":
-            	print("X " + vcc + " 10 -175 350 0 D 140 140 1 1 N N")
+            	print("X " + vcc + " " + powerPin + " -175 350 0 D 140 140 1 1 N N")
             else:
-            	print("X " + vcc + " 10 -175 350 0 D 140 140 1 1 W N")
+            	print("X " + vcc + " " + powerPin + " -175 350 0 D 140 140 1 1 W N")
             if inA1 != "_":
-              print("X " + inA1 + " " + pinNumbers[inA1] + " -900 275 140 R 140 140 1 1 I")
+              if nd1021041:
+	        print("X " + inA1 + " " + pinNumbers[inA1] + " -625 350 140 R 140 140 1 1 I")
+              else:
+	        print("X " + inA1 + " " + pinNumbers[inA1] + " -900 275 140 R 140 140 1 1 I")
             else:
               print("X " + gnd + " " + pinNumbers[ListALevel3A[0]] + " -475 275 0 R 140 140 1 1 W N")
               del ListALevel3A[0]
             if inA2 != "_":
-              print("X " + inA2 + " " + pinNumbers[inA2] + " -900 0 140 R 140 140 1 1 I")
-              print("P 2 1 1 0 -760 0 -680 0 N")
+              if nd1021041:
+                print("X " + inA2 + " " + pinNumbers[inA2] + " -600 0 140 R 140 140 1 1 I")
+                print("P 2 1 1 0 -460 0 -430 0 N")
+              else:
+                print("X " + inA2 + " " + pinNumbers[inA2] + " -900 0 140 R 140 140 1 1 I")
+                print("P 2 1 1 0 -760 0 -680 0 N")
             else:
               print("X " + gnd + " " + pinNumbers[ListALevel3A[0]] + " -425 0 0 R 140 140 1 1 W N")
               del ListALevel3A[0]
             if inA3 != "_":
-              print("X " + inA3 + " " + pinNumbers[inA3] + " -900 -275 140 R 140 140 1 1 I")
+              if nd1021041:
+                print("X " + inA3 + " " + pinNumbers[inA3] + " -625 -350 140 R 140 140 1 1 I")
+              else:
+                print("X " + inA3 + " " + pinNumbers[inA3] + " -900 -275 140 R 140 140 1 1 I")
             else:
               print("X " + gnd + " " + pinNumbers[ListALevel3A[0]] + " -475 -275 0 R 140 140 1 1 W N")
               del ListALevel3A[0]
             print("X " + gnd + " 5 -175 -350 0 U 140 140 1 1 W N")
-            if inB1 != "_":
-              print("X " + inB1 + " " + pinNumbers[inB1] + " -900 275 140 R 140 140 2 1 I")
-            else:
-              print("X " + gnd + " " + pinNumbers[ListBLevel3A[0]] + " -475 275 0 R 140 140 2 1 W N")
-              del ListBLevel3A[0]
-            if inB2 != "_":
-              print("X " + inB2 + " " + pinNumbers[inB2] + " -900 0 140 R 140 140 2 1 I")
-              print("P 2 2 1 0 -760 0 -680 0 N")
-            else:
-              print("X " + gnd + " " + pinNumbers[ListBLevel3A[0]] + " -425 0 0 R 140 140 2 1 W N")
-              del ListBLevel3A[0]
-            if inB3 != "_":
-              print("X " + inB3 + " " + pinNumbers[inB3] + " -900 -275 140 R 140 140 2 1 I")
-            else:
-              print("X " + gnd + " " + pinNumbers[ListBLevel3A[0]] + " -475 -275 0 R 140 140 2 1 W N")
-              del ListBLevel3A[0]
-            if numerical:
-            	print("X 1 1 900 0 150 L 140 140 2 1 C")
-            else:
-            	print("X K 9 900 0 150 L 140 140 2 1 C")
+            if not nd1021041:
+	            if inB1 != "_":
+	              print("X " + inB1 + " " + pinNumbers[inB1] + " -900 275 140 R 140 140 2 1 I")
+	            else:
+	              print("X " + gnd + " " + pinNumbers[ListBLevel3A[0]] + " -475 275 0 R 140 140 2 1 W N")
+	              del ListBLevel3A[0]
+	            if inB2 != "_":
+	              print("X " + inB2 + " " + pinNumbers[inB2] + " -900 0 140 R 140 140 2 1 I")
+	              print("P 2 2 1 0 -760 0 -680 0 N")
+	            else:
+	              print("X " + gnd + " " + pinNumbers[ListBLevel3A[0]] + " -425 0 0 R 140 140 2 1 W N")
+	              del ListBLevel3A[0]
+	            if inB3 != "_":
+	              print("X " + inB3 + " " + pinNumbers[inB3] + " -900 -275 140 R 140 140 2 1 I")
+	            else:
+	              print("X " + gnd + " " + pinNumbers[ListBLevel3A[0]] + " -475 -275 0 R 140 140 2 1 W N")
+	              del ListBLevel3A[0]
+	            if numerical:
+	            	print("X 1 1 900 0 150 L 140 140 2 1 C")
+	            else:
+	            	print("X K 9 900 0 150 L 140 140 2 1 C")
             print("ENDDRAW")
             print("ENDDEF")
 

@@ -29,6 +29,7 @@
 #				J.
 #		2018-10-18 RSB	Added connector A52.
 #		2018-11-09 RSB	Added K and k.
+#		2018-11-16 RSB	Added block1
 #
 # The purpose of this python script is to take a text file that has some
 # descriptions of NOR gates, expander gates, connector pads, nodes,
@@ -97,6 +98,7 @@ locationNumber = 1
 padNumber = 1
 module = "X"
 moduleA52 = False
+block1 = False
 
 # Read the input file.
 for line in sys.stdin:
@@ -108,6 +110,9 @@ for line in sys.stdin:
 		continue
 	type = fields[0]
 	if numFields < 1 or type == "#":
+		continue
+	if type == "block1":
+		block1 = True
 		continue
 	if type == "module=" and numFields == 2:
 		module = fields[1]
@@ -154,7 +159,39 @@ for line in sys.stdin:
 	posX = 25 * int(40 * (originX + xSpacing * nextX))
 	posY = 25 * int(40 * (originY + ySpacing * nextY))
 	
-	if type == "N" and numFields == 3 and fields[1] == "." and fields[2] in ["1", "2", "3"] and not moduleA52:
+	if block1 and type in nors and numFields == 5:
+		gate = fields[1]
+		top = fields[2]
+		middle = fields[3]
+		bottom = fields[4]
+		if top not in aPins or middle not in aPins or bottom not in aPins:
+			print >>sys.stderr, "Incorrect pin numbers: " + line
+			wereErrors = True
+			continue
+		if top == ";":
+			top = "_"
+		if middle == ";":
+			middle = "_"
+		if bottom == ";":
+			bottom = "_"
+		if (top == middle and top != "_") or (top == bottom and top != "_") or (middle == bottom and middle != "_"):
+			print >>sys.stderr, "Duplicate pins: " + line
+			wereErrors = True
+			continue
+		if len(gate) != 5 or not gate.isdigit():
+			print >>sys.stderr, "Incorrectly numbered gate: " + line
+			wereErrors = True
+			continue
+		id = "g" + gate
+		whichGate = "a"
+		gatesFound[gate] = line
+		objects[id] = { "type": type, "library": nors[type]["library"], "refd": nors[type]["refdPrefix"]+"?", "location":"XX" }
+		objects[id][whichGate] = { "gate": gate, "top": top, "middle": middle, "bottom": bottom, "x": posX, "y": posY } 
+		nextXY()
+		continue
+		
+	
+	if type in nors and numFields == 3 and fields[1] == "." and fields[2] in ["1", "2", "3"] and not moduleA52:
 		numInputs = int(fields[2])
 		fields[1] = str(gateNumber)
 		even = ((gateNumber & 1) == 0) 
@@ -345,7 +382,7 @@ for line in sys.stdin:
 			up = True
 		type = "J"
 		pinName = fields[1]
-		if len(pinName) != 3 or not pinName.isdigit():
+		if (len(pinName) != 3 and not block1) or not pinName.isdigit():
 			print >>sys.stderr, "Incorrectly numbered connector: " + line
 			wereErrors = True
 			continue
@@ -363,7 +400,11 @@ for line in sys.stdin:
 		else:
 			text = ""
 		id = type + pinName
-		if moduleA52:
+		if block1:
+			refd = "J1"
+			symbol = "ConnectorGeneric"
+			unit = pinNum
+		elif moduleA52:
 			refd = "J1"
 			symbol = "ConnectorA52"
 			quotient = (pinNum // 100) - 1
@@ -450,7 +491,11 @@ if wereErrors:
 	sys.exit()
 
 # Write the output file.
-timestamp = "%X" % time.time()
+timestampValue = time.time()
+def timestamp():
+	global timestampValue
+	timestampValue += 1
+	return "%X" % timestampValue
 print "EESchema Schematic File Version 4"
 print "LIBS:module-cache"
 print "EELAYER 26 0"
@@ -478,7 +523,10 @@ for id in objects:
 		location = object["location"]
 		aMirror = False
 		bMirror = False
-		if moduleA52:
+		if block1:
+			aFootprint = "ABC"
+			bFootprint = "___"
+		elif moduleA52:
 			aFootprint = "678"
 			bFootprint = "234"
 		else:
@@ -503,6 +551,7 @@ for id in objects:
 			else:
 				bFootprint = bObject["bottom"] + bObject["middle"] + bObject["top"]
 				bMirror = True
+		local_library = library
 		symbol = library + '-' + aFootprint + '-' + bFootprint
 		if "a" in object:
 			unit = 1
@@ -513,14 +562,16 @@ for id in objects:
 			else:
 				locationOffset = -200
 			sys.stdout.write("$Comp\n")
-			sys.stdout.write("L " + library + ":" + symbol + " " + refd + "\n")
-			sys.stdout.write("U 1 1 " + timestamp + "\n")
+			sys.stdout.write("L " + local_library + ":" + symbol + " " + refd + "\n")
+			sys.stdout.write("U 1 1 " + timestamp() + "\n")
 			sys.stdout.write("P " + str(posX) + " " + str(posY) + "\n")
 			sys.stdout.write("F 0 \"" + refd + "\" H " + str(posX) + " " + str(posY + 325) + " 140 0001 C CNB\n")
 			sys.stdout.write("F 1 \"" + symbol + "\" H " + str(posX) + " " + str(posY+425) + " 140 0001 C CNN\n")
 			sys.stdout.write("F 2 \"\" H " + str(posX) + " " + str(posY+475) + " 140 0001 C CNN\n")
 			sys.stdout.write("F 3 \"\" H " + str(posX) + " " + str(posY+475) + " 140 0001 C CNN\n")
-			if moduleA52:
+			if block1:
+				sys.stdout.write("F 4 \"" + aObject["gate"] + "\" H " + str(posX + xOffset) + " " + str(posY) + " " + str(fontSize) + " 0000 C CNB \"Location\"\n")
+			elif moduleA52:
 				sys.stdout.write("F 4 \"" + aObject["gate"] + "\" H " + str(posX + xOffset) + " " + str(posY) + " " + str(fontSize) + " 0001 C CNB \"Location\"\n")
 				sys.stdout.write("F 5 \"" + location + "\" H " + str(posX + xOffset) + " " + str(posY + locationOffset) + " " + str(fontSize) + " 0001 C CNB \"Location2\"\n")
 				sys.stdout.write("F 6 \"" + aObject["marking"] + "\" H " + str(posX + xOffset) + " " + str(posY) + " " + str(fontSize) + " 0000 C CNB \"Location3\"\n")
@@ -543,7 +594,7 @@ for id in objects:
 				locationOffset = -200
 			sys.stdout.write("$Comp\n")
 			sys.stdout.write("L " + library + ":" + symbol + " " + refd + "\n")
-			sys.stdout.write("U 2 1 " + timestamp + "\n")
+			sys.stdout.write("U 2 1 " + timestamp() + "\n")
 			sys.stdout.write("P " + str(posX) + " " + str(posY) + "\n")
 			sys.stdout.write("F 0 \"" + refd + "\" H " + str(posX) + " " + str(posY + 325) + " 140 0001 C CNB\n")
 			sys.stdout.write("F 1 \"" + symbol + "\" H " + str(posX) + " " + str(posY+425) + " 140 0001 C CNN\n")
@@ -584,7 +635,7 @@ for id in objects:
 		rotated = object["rotated"]
 		sys.stdout.write("$Comp\n")
 		sys.stdout.write("L AGC_DSKY:" + symbol + " " + refd + "\n")
-		sys.stdout.write("U " + str(unit) + " " + demorgan + " " + timestamp + "\n")
+		sys.stdout.write("U " + str(unit) + " " + demorgan + " " + timestamp() + "\n")
 		sys.stdout.write("P " + str(posX) + " " + str(posY) + "\n")
 		sys.stdout.write("F 0 \"" + refd + "\" H " + str(posX) + " " + str(posY + 325) + " 140 0001 C CNN\n")
 		sys.stdout.write("F 1 \"" + symbol + "\" H " + str(posX) + " " + str(posY+425) + " 140 0001 C CNN\n")
@@ -647,7 +698,7 @@ for id in objects:
 		symbol = "ArrowTwiddle"
 		sys.stdout.write("$Comp\n")
 		sys.stdout.write("L AGC_DSKY:ArrowTwiddle " + refd + "\n")
-		sys.stdout.write("U 1 1 " + timestamp + "\n")
+		sys.stdout.write("U 1 1 " + timestamp() + "\n")
 		sys.stdout.write("P " + str(posX) + " " + str(posY) + "\n")
 		sys.stdout.write("F 0 \"" + refd + "\" H " + str(posX) + " " + str(posY + 325) + " 140 0001 C CNN\n")
 		sys.stdout.write("F 1 \"" + symbol + "\" H " + str(posX) + " " + str(posY+425) + " 140 0001 C CNN\n")
@@ -669,7 +720,7 @@ for id in objects:
 		symbol = "Node2"
 		sys.stdout.write("$Comp\n")
 		sys.stdout.write("L AGC_DSKY:Node2 " + refd + "\n")
-		sys.stdout.write("U 1 1 " + timestamp + "\n")
+		sys.stdout.write("U 1 1 " + timestamp() + "\n")
 		sys.stdout.write("P " + str(posX) + " " + str(posY) + "\n")
 		sys.stdout.write("F 0 \"" + refd + "\" H " + str(posX) + " " + str(posY + 325) + " 140 0001 C CNN\n")
 		sys.stdout.write("F 1 \"" + symbol + "\" H " + str(posX) + " " + str(posY + 425) + " 140 0001 C CNN\n")
