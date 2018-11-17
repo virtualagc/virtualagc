@@ -256,14 +256,14 @@ F 4 "52050" H 20550 21800 140 0000 C CNB "Location"
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorGeneric J1
-U 89 2 5BEF69D1
+U 8 2 5BEF69D1
 P 46350 7975
 F 0 "J1" H 46350 8300 140 0001 C CNN
 F 1 "ConnectorGeneric" H 46350 8400 140 0001 C CNN
 F 2 "" H 46350 8450 140 0001 C CNN
 F 3 "" H 46350 8450 140 0001 C CNN
 F 4 "F04A/" H 46325 7600 140 0000 C BNB "Caption"
-	89   46350 7975
+	8    46350 7975
 	-1   0    0    1   
 $EndComp
 $Comp
@@ -2564,8 +2564,8 @@ Text HLabel 2550 29075 0    140  Input ~ 28
 +3VDC
 Text HLabel 2550 29425 0    140  Input ~ 28
 0VDC
-Text Notes 54750 2350 0    140  ~ 28
-Notes from the Virtual AGC Project:\n4. In document ND-1021041, net F04A_ is shown as being output to connector pad\n   8 ("F04A/").  However, pad 8 is used elsewhere for a different net in module A33\n   (namely WEY/ in ND-1021041 Figure 4-153).  In this drawing, net F04A_ is\n   arbitrarily output instead to the otherwise unused pad 89. — RSB 2018
+Text Notes 54700 2125 0    140  ~ 28
+Notes from the Virtual AGC Project:\n4. Figures 4-59 and 4-153 of ND-1021041 conflict in their usage of connector pad\n   8 in module A33.  However, module A34 in those figures makes it clear that the\n   figure 4-59 is correct, and that the pad carries net F04A/ in A33.  — RSB 2018
 $Bitmap
 Pos 54450 1400
 Scale 1.000000
@@ -3433,17 +3433,7 @@ $EndBitmap
 Wire Wire Line
 	60850 23425 61025 23425
 Wire Wire Line
-	14850 8575 33975 8575
-Wire Wire Line
 	61025 23425 61025 24600
-Wire Wire Line
-	14850 7175 14850 7825
-Connection ~ 14850 8575
-Wire Wire Line
-	14850 8575 14850 8650
-Connection ~ 14850 7825
-Wire Wire Line
-	14850 7825 14850 8575
 Connection ~ 61025 23425
 Wire Wire Line
 	61025 23425 61750 23425
@@ -3459,4 +3449,6 @@ Wire Wire Line
 Connection ~ 43400 23500
 Wire Wire Line
 	43400 23500 44000 23500
+Wire Wire Line
+	14850 7825 14850 8650
 $EndSCHEMATC

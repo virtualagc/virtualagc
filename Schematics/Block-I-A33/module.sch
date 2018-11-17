@@ -29,9 +29,9 @@ F0 "4-153" 140
 F1 "Fig-4-153.sch" 140
 F2 "+3VDC" I L 19150 10700 140
 F3 "0VDC" I L 19150 11175 140
-F4 "GTOF" U R 23175 13175 140
-F5 "T01_" I L 19150 12625 140
-F6 "ST11" I L 19150 13175 140
+F4 "PIN85" I L 19150 13175 140
+F5 "PIN35" U R 23175 13700 140
+F6 "PIN9" U R 23175 12625 140
 $EndSheet
 $Sheet
 S 25900 10025 4025 6325
@@ -40,9 +40,8 @@ F0 "4-165" 140
 F1 "Fig-4-165.sch" 140
 F2 "+3VDC" I L 25900 10700 140
 F3 "0VDC" I L 25900 11175 140
-F4 "GTOF" U R 29925 13150 140
-F5 "T01_" I L 25900 12625 140
-F6 "ST11" I L 25900 13175 140
+F4 "PIN85" I L 25900 13175 140
+F5 "PIN35" U R 29925 13675 140
 $EndSheet
 $Sheet
 S 4325 4975 4025 6325
@@ -122,63 +121,14 @@ Wire Wire Line
 	9250 8000 11100 8000
 $Comp
 L AGC_DSKY:ConnectorGeneric J1
-U 12 1 5D747CF8
-P 24350 13175
-F 0 "J1" H 24350 13500 140 0001 C CNN
-F 1 "ConnectorGeneric" H 24350 13600 140 0001 C CNN
-F 2 "" H 24350 13650 140 0001 C CNN
-F 3 "" H 24350 13650 140 0001 C CNN
-F 4 "GTOF" H 24350 12800 140 0000 C BNB "Caption"
-	12   24350 13175
-	-1   0    0    1   
-$EndComp
-Wire Wire Line
-	24075 13175 23825 13175
-Wire Wire Line
-	29925 13150 30625 13150
-Wire Wire Line
-	30625 13150 30625 17075
-Wire Wire Line
-	30625 17075 23825 17075
-Wire Wire Line
-	23825 17075 23825 13175
-Connection ~ 23825 13175
-Wire Wire Line
-	23825 13175 23175 13175
-$Comp
-L AGC_DSKY:ConnectorGeneric J1
-U 18 1 5D7E994D
-P 17725 12625
-F 0 "J1" H 17725 12950 140 0001 C CNN
-F 1 "ConnectorGeneric" H 17725 13050 140 0001 C CNN
-F 2 "" H 17725 13100 140 0001 C CNN
-F 3 "" H 17725 13100 140 0001 C CNN
-F 4 "T01/" H 17150 12550 140 0000 C BNB "Caption"
-	18   17725 12625
-	1    0    0    -1  
-$EndComp
-Wire Wire Line
-	19150 12625 18500 12625
-Wire Wire Line
-	18500 12625 18500 17500
-Wire Wire Line
-	18500 17500 25325 17500
-Wire Wire Line
-	25325 17500 25325 12625
-Wire Wire Line
-	25325 12625 25900 12625
-Connection ~ 18500 12625
-Wire Wire Line
-	18500 12625 18000 12625
-$Comp
-L AGC_DSKY:ConnectorGeneric J1
 U 85 1 5D86ED84
 P 17725 13175
 F 0 "J1" H 17725 13500 140 0001 C CNN
 F 1 "ConnectorGeneric" H 17725 13600 140 0001 C CNN
 F 2 "" H 17725 13650 140 0001 C CNN
 F 3 "" H 17725 13650 140 0001 C CNN
-F 4 "ST11" H 17150 13125 140 0000 C BNB "Caption"
+F 4 "ST11" H 17150 13200 140 0000 C BNB "Caption"
+F 5 "P34_85" H 17025 13075 140 0000 C CNB "Caption2"
 	85   17725 13175
 	1    0    0    -1  
 $EndComp
@@ -195,8 +145,8 @@ Wire Wire Line
 Connection ~ 18300 13175
 Wire Wire Line
 	18300 13175 18000 13175
-Text Notes 23750 4175 0    140  ~ 28
-Notes from the Virtual AGC Project:\n1. None of the official Block I AGC electrical-schematic drawings were available at\n   the time this CAD drawing was made.  Rather, it is a transcription of the schematic\n   drawings in the figures of AC Electronics document ND-1021041, which are also\n   believed to comprise a complete but unofficial set of schematics. — RSB 2018\n2. The figures in ND-1021041 do not indicate reference designators for components.\n   In this drawing, the numbered oval pads comprise connector J1.  All other \n   electrical components presently have reference designators assigned by the\n   KiCad CAD software. — RSB 2018\n3. The oval connector pads are associated with captions giving the name of the\n   AGC backplane signal they correspond to, while NOR gates are associated with\n   5-digit gate numbers.  In each case, two such signal names or gate numbers are\n   shown on the drawing.  The top ones are for module A33, while the bottom ones\n   are for module A34. — RSB 2018
+Text Notes 23775 5600 0    140  ~ 28
+Notes from the Virtual AGC Project:\n1. None of the official Block I AGC electrical-schematic drawings were available at\n   the time this CAD drawing was made.  Rather, it is a transcription of the schematic\n   drawings in the figures of AC Electronics document ND-1021041, which are also\n   believed to comprise a complete but unofficial set of schematics. — RSB 2018\n2. The figures in ND-1021041 do not indicate reference designators for components.\n   In this drawing, the numbered oval pads comprise connector J1.  All other \n   electrical components presently have reference designators assigned by the\n   KiCad CAD software. — RSB 2018\n3. The oval connector pads are associated with captions giving the name of the\n   AGC backplane signal they correspond to, while NOR gates are associated with\n   5-digit gate numbers.  In each case, two such signal names or gate numbers are\n   shown on the drawing.  The top ones are for module A33, while the bottom ones\n   are for module A34. — RSB 2018\n8. ND-1021041 is not entirely consistent in depicting the corresponding components\n   from modules A33 and A34 within the same Figures.  In this drawing, these are\n   represented by a single symbol, and necessarily are on the same sheet.\n   However, the sheets of this drawing correspond to the figures in ND-1021041.\n   It therefore occasionally happens that a component which would be expected to be\n   on a particular sheet will actually appear on a different sheet. — RSB 2018
 $Bitmap
 Pos 23500 1050
 Scale 1.000000
@@ -1061,4 +1011,40 @@ C9 BB 29 F5 5D 8B CA 82 36 A4 40 25 C6 15 08 48 31 74 1C 38 17 8C B5 84 B2 9A 34
 C6 5C DC 75 02 E5 96 B4 52 0D 25 6F F3 00 00 00 00 49 45 4E 44 AE 42 60 82 
 EndData
 $EndBitmap
+$Comp
+L AGC_DSKY:ConnectorGeneric J?
+U 35 1 5DF438CC
+P 24350 13700
+AR Path="/5BEFD31A/5DF438CC" Ref="J?"  Part="35" 
+AR Path="/5DF438CC" Ref="J1"  Part="35" 
+F 0 "J1" H 24350 14025 140 0001 C CNN
+F 1 "ConnectorGeneric" H 24350 14125 140 0001 C CNN
+F 2 "" H 24350 14175 140 0001 C CNN
+F 3 "" H 24350 14175 140 0001 C CNN
+F 4 "P33_35" H 24325 13925 140 0000 C BNB "Caption"
+F 5 "Q2RP" H 24325 14225 140 0000 C CNB "Caption2"
+	35   24350 13700
+	-1   0    0    1   
+$EndComp
+$Comp
+L AGC_DSKY:ConnectorGeneric J?
+U 9 1 5DF438D4
+P 24325 12650
+AR Path="/5BEFD31A/5DF438D4" Ref="J?"  Part="9" 
+AR Path="/5DF438D4" Ref="J1"  Part="9" 
+F 0 "J1" H 24325 12975 140 0001 C CNN
+F 1 "ConnectorGeneric" H 24325 13075 140 0001 C CNN
+F 2 "" H 24325 13125 140 0001 C CNN
+F 3 "" H 24325 13125 140 0001 C CNN
+F 4 "P33_9" H 24325 12075 140 0000 C BNB "Caption"
+F 5 "Q2RP" H 24325 12375 140 0000 C CNB "Caption2"
+	9    24325 12650
+	-1   0    0    1   
+$EndComp
+Wire Wire Line
+	23175 13700 24075 13700
+Wire Wire Line
+	23175 12625 24050 12625
+Wire Wire Line
+	24050 12625 24050 12650
 $EndSCHEMATC
