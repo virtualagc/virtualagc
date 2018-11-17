@@ -164,16 +164,16 @@ for line in sys.stdin:
 		top = fields[2]
 		middle = fields[3]
 		bottom = fields[4]
-		if top not in aPins or middle not in aPins or bottom not in aPins:
-			print >>sys.stderr, "Incorrect pin numbers: " + line
-			wereErrors = True
-			continue
 		if top == ";":
 			top = "_"
 		if middle == ";":
 			middle = "_"
 		if bottom == ";":
 			bottom = "_"
+		if top not in aPins or middle not in aPins or bottom not in aPins:
+			print >>sys.stderr, "Incorrect pin numbers: " + line
+			wereErrors = True
+			continue
 		if (top == middle and top != "_") or (top == bottom and top != "_") or (middle == bottom and middle != "_"):
 			print >>sys.stderr, "Duplicate pins: " + line
 			wereErrors = True
