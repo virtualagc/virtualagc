@@ -232,14 +232,15 @@ F 4 "52313" H 18775 10550 140 0000 C CNB "Location"
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorGeneric J1
-U 52 1 5BEF2ACE
-P 20450 10875
-F 0 "J1" H 20450 11200 140 0001 C CNN
-F 1 "ConnectorGeneric" H 20450 11300 140 0001 C CNN
-F 2 "" H 20450 11350 140 0001 C CNN
-F 3 "" H 20450 11350 140 0001 C CNN
-F 4 "g52313" H 20425 11125 140 0000 C BNB "Caption"
-	52   20450 10875
+U 35 1 5BEF2ACE
+P 20450 10800
+F 0 "J1" H 20450 11125 140 0001 C CNN
+F 1 "ConnectorGeneric" H 20450 11225 140 0001 C CNN
+F 2 "" H 20450 11275 140 0001 C CNN
+F 3 "" H 20450 11275 140 0001 C CNN
+F 4 "g52313" H 20425 11025 140 0000 C BNB "Caption"
+F 5 "Q2RP" H 20425 11300 140 0000 C CNB "Caption2"
+	35   20450 10800
 	-1   0    0    1   
 $EndComp
 $Comp
@@ -310,7 +311,8 @@ F 0 "J1" H 17800 12025 140 0001 C CNN
 F 1 "ConnectorGeneric" H 17800 12125 140 0001 C CNN
 F 2 "" H 17800 12175 140 0001 C CNN
 F 3 "" H 17800 12175 140 0001 C CNN
-F 4 "Q2" H 17800 11300 140 0000 C BNB "Caption"
+F 4 "Q2" H 17250 11725 140 0000 C BNB "Caption"
+F 5 "T04/" H 17175 11600 140 0000 C CNB "Caption2"
 	13   17800 11700
 	1    0    0    -1  
 $EndComp
@@ -454,7 +456,8 @@ F 0 "J1" H 28725 11475 140 0001 C CNN
 F 1 "ConnectorGeneric" H 28725 11575 140 0001 C CNN
 F 2 "" H 28725 11625 140 0001 C CNN
 F 3 "" H 28725 11625 140 0001 C CNN
-F 4 "RSTKY/" H 27625 11050 140 0000 C BNB "Caption"
+F 4 "RSTKY/" H 27900 10925 140 0000 C BNB "Caption"
+F 5 "RSTRP/" H 27900 11225 140 0000 C CNB "Caption2"
 	5    28725 11150
 	-1   0    0    1   
 $EndComp
@@ -495,14 +498,15 @@ F 4 "52321" H 26475 10000 130 0000 C CNB "Location"
 	1    0    0    1   
 $EndComp
 $Comp
-L D3NOR-+3VDC-0VDC-nd1021041:D3NOR-+3VDC-0VDC-nd1021041-_B_-___ U311
+L D3NOR-NC-0VDC-expander-nd1021041:D3NOR-NC-0VDC-expander-nd1021041-_B_-___ U311
 U 1 1 5BEF2AE6
 P 18775 11700
 F 0 "U311" H 18775 12025 140 0001 C CNB
-F 1 "D3NOR-+3VDC-0VDC-nd1021041-_B_-___" H 18775 12125 140 0001 C CNN
+F 1 "D3NOR-NC-0VDC-expander-nd1021041-_B_-___" H 18775 12125 140 0001 C CNN
 F 2 "" H 18775 12175 140 0001 C CNN
 F 3 "" H 18775 12175 140 0001 C CNN
-F 4 "52323" H 18775 11700 140 0000 C CNB "Location"
+F 4 "52323" H 18700 11625 130 0000 C CNB "Location"
+F 5 "53323" H 18700 11825 130 0000 C CNB "Location2"
 	1    18775 11700
 	1    0    0    1   
 $EndComp
@@ -514,7 +518,8 @@ F 0 "U322" H 26550 11475 140 0001 C CNB
 F 1 "D3NOR-NC-0VDC-expander-nd1021041-_B_-___" H 26550 11575 140 0001 C CNN
 F 2 "" H 26550 11625 140 0001 C CNN
 F 3 "" H 26550 11625 140 0001 C CNN
-F 4 "52322" H 26475 11150 130 0000 C CNB "Location"
+F 4 "52322" H 26475 11075 130 0000 C CNB "Location"
+F 5 "53322" H 26475 11275 130 0000 C CNB "Location2"
 	1    26550 11150
 	1    0    0    1   
 $EndComp
@@ -539,6 +544,7 @@ F 1 "ConnectorGeneric" H 20475 12125 140 0001 C CNN
 F 2 "" H 20475 12175 140 0001 C CNN
 F 3 "" H 20475 12175 140 0001 C CNN
 F 4 "g52313" H 20425 11950 140 0000 C BNB "Caption"
+F 5 "Q2RP" H 20450 12225 140 0000 C CNB "Caption2"
 	9    20475 11700
 	-1   0    0    1   
 $EndComp
@@ -580,14 +586,15 @@ F 4 "52301" H 18800 6425 140 0000 C CNB "Location"
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorGeneric J1
-U 7 2 5BEF2AED
-P 25500 10750
-F 0 "J1" H 25500 11075 140 0001 C CNN
-F 1 "ConnectorGeneric" H 25500 11175 140 0001 C CNN
-F 2 "" H 25500 11225 140 0001 C CNN
-F 3 "" H 25500 11225 140 0001 C CNN
-F 4 "g52315" H 25500 10525 140 0000 C TNB "Caption"
-	7    25500 10750
+U 7 1 5BEF2AED
+P 25225 11150
+F 0 "J1" H 25225 11475 140 0001 C CNN
+F 1 "ConnectorGeneric" H 25225 11575 140 0001 C CNN
+F 2 "" H 25225 11625 140 0001 C CNN
+F 3 "" H 25225 11625 140 0001 C CNN
+F 4 "g52315" H 24450 11150 140 0000 C TNB "Caption"
+F 5 "RSTRP" H 24500 11275 140 0000 C CNB "Caption2"
+	7    25225 11150
 	1    0    0    1   
 $EndComp
 $Comp
@@ -767,9 +774,9 @@ Wire Wire Line
 Wire Wire Line
 	18150 10900 18075 10900
 Wire Wire Line
-	20025 10550 20025 10875
+	20025 10550 20025 10800
 Wire Wire Line
-	20025 11700 19675 11700
+	20025 11700 19575 11700
 Connection ~ 20025 10550
 Wire Wire Line
 	20025 10550 21925 10550
@@ -777,10 +784,10 @@ Wire Wire Line
 	20200 11700 20025 11700
 Connection ~ 20025 11700
 Wire Wire Line
-	20175 10875 20025 10875
-Connection ~ 20025 10875
+	20175 10800 20025 10800
+Connection ~ 20025 10800
 Wire Wire Line
-	20025 10875 20025 11700
+	20025 10800 20025 11700
 Wire Wire Line
 	15900 15600 21275 15600
 Wire Wire Line
@@ -824,11 +831,6 @@ Wire Wire Line
 Wire Wire Line
 	24825 10000 24825 10550
 Wire Wire Line
-	24825 11150 25500 11150
-Wire Wire Line
-	25500 10925 25500 11150
-Connection ~ 25500 11150
-Wire Wire Line
 	25500 11150 25950 11150
 Wire Wire Line
 	25500 9700 25500 10000
@@ -837,9 +839,6 @@ Wire Wire Line
 	25500 10000 24825 10000
 Wire Wire Line
 	23425 10550 23475 10550
-Connection ~ 24825 10550
-Wire Wire Line
-	24825 10550 24825 11150
 Wire Wire Line
 	24150 10325 24150 10550
 Connection ~ 24150 10550
@@ -930,8 +929,8 @@ Text HLabel 17925 14700 0    140  Input ~ 28
 T01_
 Text HLabel 4100 11075 0    140  Input ~ 28
 ST11
-Text Notes 23625 2450 0    140  ~ 28
-Notes from the Virtual AGC Project:\n4. In drawing ND-1021041, the joint output of gates 52313 and 52323 is fed to \n   connector pads 53 and 9.  However, pad 53 is already used (ND-1021041 Figure\n   4-165) for net SBF.  It is not clear whether these two uses of pad 53 are the same\n   net or not.  However, in this drawing, pad 53 has arbitrarily been replaced by \n   the otherwise-unused pad 52.  — RSB 2018.
+Text Notes 23575 2475 0    140  ~ 28
+Notes from the Virtual AGC Project:\n5. In drawing ND-1021041, Figure 4-153 for module A33 mismarks connector pad\n   35 as pad 53 (which is used elsewhere for net SBF instead).  The correct pad \n   number has been taken from Figure 4-165 for module A34.  Similarly, the \n   associate NOR gate 52323 has been mismarked as a normal NOR, whereas\n   it has been corrected to be an expander gate. — RSB 2018.
 $Bitmap
 Pos 23300 1275
 Scale 1.000000

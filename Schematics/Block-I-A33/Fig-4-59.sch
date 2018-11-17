@@ -2565,7 +2565,7 @@ Text HLabel 2550 29075 0    140  Input ~ 28
 Text HLabel 2550 29425 0    140  Input ~ 28
 0VDC
 Text Notes 54750 2350 0    140  ~ 28
-Notes from the Virtual AGC Project:\n3. In document ND-1021041, net F04A_ is shown as being output to connector pad\n   8 ("F04A/").  However, pad 8 is used elsewhere for a different net in module A33\n   (namely WEY/ in ND-1021041 Figure 4-153).  In this drawing, net F04A_ is\n   arbitrarily output instead to the otherwise unused pad 89. — RSB 2018
+Notes from the Virtual AGC Project:\n4. In document ND-1021041, net F04A_ is shown as being output to connector pad\n   8 ("F04A/").  However, pad 8 is used elsewhere for a different net in module A33\n   (namely WEY/ in ND-1021041 Figure 4-153).  In this drawing, net F04A_ is\n   arbitrarily output instead to the otherwise unused pad 89. — RSB 2018
 $Bitmap
 Pos 54450 1400
 Scale 1.000000
