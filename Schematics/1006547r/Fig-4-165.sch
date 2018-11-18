@@ -5,9 +5,9 @@ EELAYER END
 $Descr D 34000 22000
 encoding utf-8
 Sheet 4 5
-Title "Block I AGC Module A33"
-Date ""
-Rev ""
+Title "BLOCK I SCALER MODULES A33-A34, DRAWING 1006547"
+Date "2018-11-17"
+Rev "Draft"
 Comp ""
 Comment1 ""
 Comment2 ""
