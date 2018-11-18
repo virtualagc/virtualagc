@@ -5,7 +5,7 @@ EELAYER END
 $Descr D 34000 22000
 encoding utf-8
 Sheet 3 5
-Title "BLOCK I SCALER MODULES A33-A34, DRAWING 1006547"
+Title "BLOCK I LOGIC FLOW G, MODULES A33-A34, DRAWING 1006547"
 Date "2018-11-17"
 Rev "Draft"
 Comp ""
@@ -906,9 +906,9 @@ Wire Wire Line
 	21850 14225 21850 14350
 Wire Wire Line
 	21850 14350 21900 14350
-Text HLabel 4225 5100 0    140  Input ~ 28
+Text HLabel 3675 17150 0    140  Input ~ 28
 +3VDC
-Text HLabel 4225 5475 0    140  Input ~ 28
+Text HLabel 3675 17525 0    140  Input ~ 28
 0VDC
 Text HLabel 4100 11075 0    140  Input ~ 28
 PIN85
