@@ -29,7 +29,14 @@
 #				J.
 #		2018-10-18 RSB	Added connector A52.
 #		2018-11-09 RSB	Added K and k.
-#		2018-11-16 RSB	Added block1
+#		2018-11-16 RSB	Added block1.
+#		2018-11-19 RSB	Added bit.  This is for the special case of
+#				Block I modules A1-A16, which use the same
+#				physical module in 16 different positions,
+#				necessitating a very different technique 
+#				for the connector captions and NOR-gate 
+#				location fields than all of the other modules
+#				do (or have).
 #
 # The purpose of this python script is to take a text file that has some
 # descriptions of NOR gates, expander gates, connector pads, nodes,
@@ -99,6 +106,9 @@ padNumber = 1
 module = "X"
 moduleA52 = False
 block1 = False
+bit = False
+norLength = 5
+norSuffix = ""
 
 # Read the input file.
 for line in sys.stdin:
@@ -113,6 +123,11 @@ for line in sys.stdin:
 		continue
 	if type == "block1":
 		block1 = True
+		continue
+	if type == "bit":
+		bit = True
+		norLength = 3
+		norSuffix = "xx"
 		continue
 	if type == "module=" and numFields == 2:
 		module = fields[1]
@@ -178,7 +193,7 @@ for line in sys.stdin:
 			print >>sys.stderr, "Duplicate pins: " + line
 			wereErrors = True
 			continue
-		if len(gate) != 5 or not gate.isdigit():
+		if len(gate) != norLength or not gate.isdigit():
 			print >>sys.stderr, "Incorrectly numbered gate: " + line
 			wereErrors = True
 			continue
@@ -362,7 +377,7 @@ for line in sys.stdin:
 		nextXY()
 		continue
 	
-	if type in ['J', 'j', 'K', 'k'] and numFields >= 2 and numFields <= 5 and (fields[1].isdigit() or fields[1] == "."):
+	if type in ['J', 'j', 'K', 'k'] and numFields >= 2 and (numFields <= 5 or (bit and numFields == 18)) and (fields[1].isdigit() or fields[1] == "."):
 		if fields[1] == ".":
 			fields[1] = str(padNumber)
 			padNumber += 1
@@ -387,18 +402,19 @@ for line in sys.stdin:
 			wereErrors = True
 			continue
 		pinNum = int(pinName)
-		if numFields >= 5:
-			text3 = fields[4]
-		else:
-			text3 = ""
-		if numFields >= 4:
-			text2 = fields[3]
-		else:
-			text2 = ""
-		if numFields >= 3:
-			text = fields[2]
-		else:
-			text = ""
+		texts = fields[2:]
+		#if numFields >= 5:
+		#	text3 = fields[4]
+		#else:
+		#	text3 = ""
+		#if numFields >= 4:
+		#	text2 = fields[3]
+		#else:
+		#	text2 = ""
+		#if numFields >= 3:
+		#	text = fields[2]
+		#else:
+		#	text = ""
 		id = type + pinName
 		if block1:
 			refd = "J1"
@@ -461,7 +477,7 @@ for line in sys.stdin:
 			print >>sys.stderr, objects[id]
 			wereErrors = True
 			continue
-		objects[id] = { "type": type, "refd": refd, "symbol": symbol, "unit": unit, "text": text, "text2": text2, "text3": text3, "x": posX, "y": posY, "rotated": rotated, "down": down, "up": up }
+		objects[id] = { "type": type, "refd": refd, "symbol": symbol, "unit": unit, "texts": texts, "x": posX, "y": posY, "rotated": rotated, "down": down, "up": up }
 		nextXY()
 		continue
 	
@@ -570,7 +586,7 @@ for id in objects:
 			sys.stdout.write("F 2 \"\" H " + str(posX) + " " + str(posY+475) + " 140 0001 C CNN\n")
 			sys.stdout.write("F 3 \"\" H " + str(posX) + " " + str(posY+475) + " 140 0001 C CNN\n")
 			if block1:
-				sys.stdout.write("F 4 \"" + aObject["gate"] + "\" H " + str(posX + xOffset) + " " + str(posY) + " " + str(fontSize) + " 0000 C CNB \"Location\"\n")
+				sys.stdout.write("F 4 \"" + aObject["gate"] + norSuffix + "\" H " + str(posX + xOffset) + " " + str(posY) + " " + str(fontSize) + " 0000 C CNB \"Location\"\n")
 			elif moduleA52:
 				sys.stdout.write("F 4 \"" + aObject["gate"] + "\" H " + str(posX + xOffset) + " " + str(posY) + " " + str(fontSize) + " 0001 C CNB \"Location\"\n")
 				sys.stdout.write("F 5 \"" + location + "\" H " + str(posX + xOffset) + " " + str(posY + locationOffset) + " " + str(fontSize) + " 0001 C CNB \"Location2\"\n")
@@ -629,9 +645,12 @@ for id in objects:
 		symbol = object["symbol"]
 		refd = object["refd"]
 		unit = object["unit"]
-		caption = object["text"]
-		caption2 = object["text2"]
-		caption3 = object["text3"]
+		texts = object["texts"]
+		if not bit:
+			texts += ["", "", ""]
+			caption = texts[0]
+			caption2 = texts[1]
+			caption3 = texts[2]
 		rotated = object["rotated"]
 		sys.stdout.write("$Comp\n")
 		sys.stdout.write("L AGC_DSKY:" + symbol + " " + refd + "\n")
@@ -641,7 +660,11 @@ for id in objects:
 		sys.stdout.write("F 1 \"" + symbol + "\" H " + str(posX) + " " + str(posY+425) + " 140 0001 C CNN\n")
 		sys.stdout.write("F 2 \"\" H " + str(posX) + " " + str(posY+475) + " 140 0001 C CNN\n")
 		sys.stdout.write("F 3 \"\" H " + str(posX) + " " + str(posY+475) + " 140 0001 C CNN\n")
-		if caption3 != "":
+		if bit:
+			sys.stdout.write("F 4 \"" + texts[0] + "\" H " + str(posX) + " " + str(posY) + " 140 0001 C BNB \"Caption\"\n")
+			for i in range(1,16):
+				sys.stdout.write("F " + str(4 + i) + " \"" + texts[i] + "\" H " + str(posX) + " " + str(posY) + " 140 0001 C BNB \"Caption" + str(i + 1) + "\"\n")
+		elif caption3 != "":
 			if rotated:
 				rotated = 0
 				inverted = True
