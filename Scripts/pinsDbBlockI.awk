@@ -24,6 +24,10 @@ BEGIN {
       maxIndex = i - 2
       modules[maxIndex] = $i
       sub(/"/,"",modules[maxIndex])
+      if (length(modules[maxIndex]) == 2) {
+      	sub(/A/,"A0",modules[maxIndex])
+      	sub(/B/,"B0",modules[maxIndex])
+      }
       if (i == 3) {
         captionKeys[maxIndex] = "\"Caption\""
       } else {
