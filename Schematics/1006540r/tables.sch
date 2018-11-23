@@ -6,7 +6,7 @@ $Descr User 50000 34000
 encoding utf-8
 Sheet 2 2
 Title "BLOCK I LOGIC FLOW BIT, MODULES A1-A16, DRAWING 1006540"
-Date "2018-11-21"
+Date "2018-11-23"
 Rev "Draft"
 Comp ""
 Comment1 "Modules A1 A2 A3 A4 A5 A6 A7 A8 A9 A10 A11 A12 A13 A14 A15 A16"
