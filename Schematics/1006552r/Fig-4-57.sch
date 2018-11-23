@@ -6,7 +6,7 @@ $Descr E 44000 34000
 encoding utf-8
 Sheet 7 7
 Title "BLOCK I LOGIC FLOW N, MODULE A28, DRAWING 1006552"
-Date "2018-11-18"
+Date "2018-11-23"
 Rev "Draft"
 Comp ""
 Comment1 "Modules A28"
@@ -350,7 +350,7 @@ F 0 "J1" H 5450 11500 140 0001 C CNN
 F 1 "ConnectorGeneric" H 5450 11600 140 0001 C CNN
 F 2 "" H 5450 11650 140 0001 C CNN
 F 3 "" H 5450 11650 140 0001 C CNN
-F 4 "P28_90" H 4700 11100 140 0000 C BNB "Caption"
+F 4 "A28_89_90" H 4550 11100 140 0000 C BNB "Caption"
 	90   5450 11175
 	1    0    0    -1  
 $EndComp
@@ -386,7 +386,7 @@ F 0 "J1" H 5450 11000 140 0001 C CNN
 F 1 "ConnectorGeneric" H 5450 11100 140 0001 C CNN
 F 2 "" H 5450 11150 140 0001 C CNN
 F 3 "" H 5450 11150 140 0001 C CNN
-F 4 "P28_98" H 4700 10600 140 0000 C BNB "Caption"
+F 4 "A28_97_98" H 4550 10600 140 0000 C BNB "Caption"
 	98   5450 10675
 	1    0    0    -1  
 $EndComp
@@ -970,8 +970,8 @@ Connection ~ 15125 18600
 Connection ~ 15125 16075
 Wire Wire Line
 	15125 16075 5000 16075
-Text Notes 3925 11200 0    600  ~ 0
+Text Notes 3675 11200 0    600  ~ 0
 {
-Text Notes 4000 11250 2    140  ~ 28
+Text Notes 3750 11250 2    140  ~ 28
 FROM\nCLOCK\nDIVIDER
 $EndSCHEMATC

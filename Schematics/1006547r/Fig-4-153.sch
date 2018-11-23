@@ -6,7 +6,7 @@ $Descr D 34000 22000
 encoding utf-8
 Sheet 3 5
 Title "BLOCK I LOGIC FLOW G, MODULES A33-A34, DRAWING 1006547"
-Date "2018-11-17"
+Date "2018-11-23"
 Rev "Draft"
 Comp ""
 Comment1 "Modules A33 A34"
@@ -35,8 +35,8 @@ F 0 "J1" H 6675 15175 140 0001 C CNN
 F 1 "ConnectorGeneric" H 6675 15275 140 0001 C CNN
 F 2 "" H 6675 15325 140 0001 C CNN
 F 3 "" H 6675 15325 140 0001 C CNN
-F 4 "STRT2" H 5925 14875 140 0000 C BNB "Caption"
-F 5 "P34_84" H 5925 14725 140 0000 C CNB "Caption2"
+F 4 "STRT2" H 6650 15300 140 0000 C BNB "Caption"
+F 5 "A34_84_93" H 6650 15175 140 0000 C CNB "Caption2"
 	84   6675 14850
 	1    0    0    -1  
 $EndComp
@@ -48,8 +48,8 @@ F 0 "J1" H 9550 15525 140 0001 C CNN
 F 1 "ConnectorGeneric" H 9550 15625 140 0001 C CNN
 F 2 "" H 9550 15675 140 0001 C CNN
 F 3 "" H 9550 15675 140 0001 C CNN
-F 4 "P33_86" H 8800 15025 140 0000 C BNB "Caption"
-F 5 "P34_86" H 8800 15325 140 0000 C CNB "Caption2"
+F 4 "A33_86_A34_65" H 9550 15450 140 0000 C BNB "Caption"
+F 5 "A34_86_94" H 9500 15750 140 0000 C CNB "Caption2"
 	86   9550 15200
 	-1   0    0    1   
 $EndComp
@@ -95,14 +95,14 @@ $EndComp
 $Comp
 L AGC_DSKY:ConnectorGeneric J1
 U 65 1 5BEF2AC1
-P 7375 10725
-F 0 "J1" H 7375 11050 140 0001 C CNN
-F 1 "ConnectorGeneric" H 7375 11150 140 0001 C CNN
-F 2 "" H 7375 11200 140 0001 C CNN
-F 3 "" H 7375 11200 140 0001 C CNN
-F 4 "P33_65" H 7400 10300 140 0000 C TNB "Caption"
-F 5 "P34_65" H 7400 10425 140 0000 C CNB "Caption2"
-	65   7375 10725
+P 7375 10175
+F 0 "J1" H 7375 10500 140 0001 C CNN
+F 1 "ConnectorGeneric" H 7375 10600 140 0001 C CNN
+F 2 "" H 7375 10650 140 0001 C CNN
+F 3 "" H 7375 10650 140 0001 C CNN
+F 4 "A33_65_77_A34_53" H 7400 9750 140 0000 C TNB "Caption"
+F 5 "A33_86_A34_65" H 7400 9875 140 0000 C CNB "Caption2"
+	65   7375 10175
 	1    0    0    1   
 $EndComp
 $Comp
@@ -113,8 +113,8 @@ F 0 "J1" H 25375 10325 140 0001 C CNN
 F 1 "ConnectorGeneric" H 25375 10425 140 0001 C CNN
 F 2 "" H 25375 10475 140 0001 C CNN
 F 3 "" H 25375 10475 140 0001 C CNN
-F 4 "P33_3" H 25400 9575 140 0000 C TNB "Caption"
-F 5 "P34_3" H 25400 9700 140 0000 C CNB "Caption2"
+F 4 "A33_3_7_70" H 25400 9575 140 0000 C TNB "Caption"
+F 5 "A34_3_66" H 25400 9700 140 0000 C CNB "Caption2"
 	3    25375 10000
 	1    0    0    1   
 $EndComp
@@ -360,8 +360,8 @@ F 0 "J1" H 6700 15875 140 0001 C CNN
 F 1 "ConnectorGeneric" H 6700 15975 140 0001 C CNN
 F 2 "" H 6700 16025 140 0001 C CNN
 F 3 "" H 6700 16025 140 0001 C CNN
-F 4 "P33_78" H 5875 15575 140 0000 C BNB "Caption"
-F 5 "P34_78" H 5875 15450 140 0000 C CNB "Caption2"
+F 4 "A33_78_A34_77" H 6675 15150 140 0000 C BNB "Caption"
+F 5 "A34_78_79_90" H 6700 15025 140 0000 C CNB "Caption2"
 	78   6700 15550
 	1    0    0    -1  
 $EndComp
@@ -374,7 +374,7 @@ F 1 "ConnectorGeneric" H 3800 10800 140 0001 C CNN
 F 2 "" H 3800 10850 140 0001 C CNN
 F 3 "" H 3800 10850 140 0001 C CNN
 F 4 "MC/" H 3825 10825 140 0000 C BNB "Caption"
-F 5 "P34_79" H 3825 10700 140 0000 C CNB "Caption2"
+F 5 "A34_78_79_90" H 3825 10700 140 0000 C CNB "Caption2"
 	79   3800 10375
 	1    0    0    -1  
 $EndComp
@@ -399,7 +399,7 @@ F 0 "J1" H 24500 10325 140 0001 C CNN
 F 1 "ConnectorGeneric" H 24500 10425 140 0001 C CNN
 F 2 "" H 24500 10475 140 0001 C CNN
 F 3 "" H 24500 10475 140 0001 C CNN
-F 4 "P33_70" H 24500 9775 140 0000 C TNB "Caption"
+F 4 "A33_3_7_70" H 24500 9775 140 0000 C TNB "Caption"
 F 5 "(NC)" H 24500 9450 140 0000 C CNB "Caption2"
 	70   24500 10000
 	-1   0    0    -1  
@@ -452,7 +452,7 @@ F 1 "ConnectorGeneric" H 10800 7950 140 0001 C CNN
 F 2 "" H 10800 8000 140 0001 C CNN
 F 3 "" H 10800 8000 140 0001 C CNN
 F 4 "Q2X/" H 10800 7750 140 0000 C BNB "Caption"
-F 5 "P34_76" H 10800 8050 140 0000 C CNB "Caption2"
+F 5 "A34_76_85" H 10800 8050 140 0000 C CNB "Caption2"
 	76   10800 7525
 	-1   0    0    1   
 $EndComp
@@ -464,8 +464,8 @@ F 0 "J1" H 6300 11050 140 0001 C CNN
 F 1 "ConnectorGeneric" H 6300 11150 140 0001 C CNN
 F 2 "" H 6300 11200 140 0001 C CNN
 F 3 "" H 6300 11200 140 0001 C CNN
-F 4 "P33_77" H 6300 10500 140 0000 C TNB "Caption"
-F 5 "P34_77" H 6300 10200 140 0000 C CNB "Caption2"
+F 4 "A33_65_77_A34_53" H 6300 10500 140 0000 C TNB "Caption"
+F 5 "A33_78_A34_77" H 6300 10200 140 0000 C CNB "Caption2"
 	77   6300 10725
 	-1   0    0    -1  
 $EndComp
@@ -607,8 +607,8 @@ F 0 "J1" H 25225 11475 140 0001 C CNN
 F 1 "ConnectorGeneric" H 25225 11575 140 0001 C CNN
 F 2 "" H 25225 11625 140 0001 C CNN
 F 3 "" H 25225 11625 140 0001 C CNN
-F 4 "P33_7" H 24450 11150 140 0000 C TNB "Caption"
-F 5 "RSTRP" H 24500 11275 140 0000 C CNB "Caption2"
+F 4 "A33_3_7_70" H 25225 11550 140 0000 C TNB "Caption"
+F 5 "RSTRP" H 25250 11675 140 0000 C CNB "Caption2"
 	7    25225 11150
 	1    0    0    1   
 $EndComp
@@ -727,22 +727,17 @@ Wire Wire Line
 Wire Wire Line
 	8575 11325 8150 11325
 Wire Wire Line
-	8150 11325 8150 10725
-Wire Wire Line
 	8150 10175 8600 10175
 Wire Wire Line
 	5750 10725 6025 10725
-Connection ~ 8150 10725
 Wire Wire Line
-	8150 10725 8150 10175
-Wire Wire Line
-	7650 10725 8150 10725
+	7650 10175 8150 10175
 Wire Wire Line
 	4250 10725 3500 10725
 Wire Wire Line
 	4225 10375 4075 10375
 Wire Wire Line
-	4225 11075 4100 11075
+	4225 11075 3925 11075
 Wire Wire Line
 	19700 6425 21950 6425
 Wire Wire Line
@@ -751,8 +746,6 @@ Wire Wire Line
 	19675 7900 21950 7900
 Wire Wire Line
 	19675 9050 21950 9050
-Wire Wire Line
-	19675 10550 20025 10550
 Wire Wire Line
 	19650 13200 21925 13200
 Wire Wire Line
@@ -787,13 +780,6 @@ Wire Wire Line
 	18150 10200 18075 10200
 Wire Wire Line
 	18150 10900 18075 10900
-Wire Wire Line
-	20025 10550 20025 10800
-Connection ~ 20025 10550
-Wire Wire Line
-	20025 10550 21925 10550
-Wire Wire Line
-	20175 10800 20025 10800
 Wire Wire Line
 	15900 15600 21275 15600
 Wire Wire Line
@@ -910,10 +896,10 @@ Text HLabel 3675 17150 0    140  Input ~ 28
 +3VDC
 Text HLabel 3675 17525 0    140  Input ~ 28
 0VDC
-Text HLabel 4100 11075 0    140  Input ~ 28
+Text HLabel 3525 11075 0    140  Input ~ 28
 PIN85
 Text Notes 23525 2975 0    140  ~ 28
-Notes from the Virtual AGC Project:\n5. In drawing ND-1021041, Figure 4-153 for module A33 mismarks connector pad\n   35 as pad 53 (which is used elsewhere for net SBF instead).  The correct pad \n   number has been taken from Figure 4-165 for module A34.  Similarly, the \n   associate NOR gate 52323 has been mismarked as a normal NOR, whereas\n   it has been corrected to be an expander gate. — RSB 2018\n7. Similarly, gate 52310 (A33) is shown as driving connector pad 8 (WEY/).\n   Since pad 8 is used elsewhere in A33 for a different net, and since gate 53310 (A34)\n   is shown as driving the pad 4, which is otherwise unused in A33, it is clear that\n   gate 52310 is really driving pad 4, and that's what this drawing shows.  — RSB 2018
+Notes from the Virtual AGC Project:\n5. In drawing ND-1021041, connector pad 53 is used inconsistently between Figures\n   4-153 and 4-165.  In this drawing, Figure 4-165 has been arbitrarily taken as correct,\n   and pad 53 in Figure 4-153 has been changed to the otherwise-unused pad 52. \n   Similarly, the associated NOR gate 52323 had been mismarked as a normal NOR,\n   whereas it has been corrected to be an expander gate. — RSB 2018\n7. Similarly, gate 52310 (A33) is shown as driving connector pad 8 (WEY/).\n   Since pad 8 is used elsewhere in A33 for a different net, and since gate 53310 (A34)\n   is shown as driving the pad 4, which is otherwise unused in A33, it is clear that\n   gate 52310 is really driving pad 4, and that's what this drawing shows.  — RSB 2018
 $Bitmap
 Pos 23275 825 
 Scale 1.000000
@@ -1778,12 +1764,6 @@ C9 BB 29 F5 5D 8B CA 82 36 A4 40 25 C6 15 08 48 31 74 1C 38 17 8C B5 84 B2 9A 34
 C6 5C DC 75 02 E5 96 B4 52 0D 25 6F F3 00 00 00 00 49 45 4E 44 AE 42 60 82 
 EndData
 $EndBitmap
-Text HLabel 20175 10800 2    140  UnSpc ~ 28
-PIN35
-Wire Wire Line
-	19575 11700 20200 11700
-Text HLabel 20200 11700 2    140  UnSpc ~ 28
-PIN9
 $Comp
 L AGC_DSKY:ConnectorGeneric J1
 U 68 1 5DFDD57C
@@ -1844,8 +1824,8 @@ F 0 "J1" H 24475 9375 140 0001 C CNN
 F 1 "ConnectorGeneric" H 24475 9475 140 0001 C CNN
 F 2 "" H 24475 9525 140 0001 C CNN
 F 3 "" H 24475 9525 140 0001 C CNN
-F 4 "(NC)" H 24475 8825 140 0000 C TNB "Caption"
-F 5 "P34_66" H 24475 8500 140 0000 C CNB "Caption2"
+F 4 "(NC)" H 24525 9700 140 0000 C TNB "Caption"
+F 5 "A34_3_66" H 24525 9375 140 0000 C CNB "Caption2"
 	66   24475 9050
 	-1   0    0    -1  
 $EndComp
@@ -1889,4 +1869,68 @@ Wire Wire Line
 Connection ~ 16075 14350
 Wire Wire Line
 	16075 14350 18125 14350
+Connection ~ 8150 10175
+Wire Wire Line
+	8150 10175 8150 11325
+$Comp
+L AGC_DSKY:ConnectorGeneric J1
+U 52 2 5C06260A
+P 20275 10175
+AR Path="/5BEFD31A/5C06260A" Ref="J1"  Part="52" 
+AR Path="/5C06260A" Ref="J?"  Part="35" 
+F 0 "J1" H 20275 10500 140 0001 C CNN
+F 1 "ConnectorGeneric" H 20275 10600 140 0001 C CNN
+F 2 "" H 20275 10650 140 0001 C CNN
+F 3 "" H 20275 10650 140 0001 C CNN
+F 4 "A33_9_52" H 20275 9525 140 0000 C BNB "Caption"
+F 5 "(NC)" H 20275 9850 140 0000 C CNB "Caption2"
+	52   20275 10175
+	-1   0    0    1   
+$EndComp
+$Comp
+L AGC_DSKY:ConnectorGeneric J1
+U 9 1 5C070EDD
+P 20300 11700
+AR Path="/5BEFD31A/5C070EDD" Ref="J1"  Part="9" 
+AR Path="/5C070EDD" Ref="J?"  Part="9" 
+F 0 "J1" H 20300 12025 140 0001 C CNN
+F 1 "ConnectorGeneric" H 20300 12125 140 0001 C CNN
+F 2 "" H 20300 12175 140 0001 C CNN
+F 3 "" H 20300 12175 140 0001 C CNN
+F 4 "A33_9_52" H 20300 11125 140 0000 C BNB "Caption"
+F 5 "Q2RP" H 20300 11425 140 0000 C CNB "Caption2"
+	9    20300 11700
+	-1   0    0    1   
+$EndComp
+$Comp
+L AGC_DSKY:ConnectorGeneric J?
+U 85 1 5C0B0A53
+P 3225 11450
+AR Path="/5C0B0A53" Ref="J?"  Part="85" 
+AR Path="/5BEFD31A/5C0B0A53" Ref="J1"  Part="85" 
+F 0 "J1" H 3225 11775 140 0001 C CNN
+F 1 "ConnectorGeneric" H 3225 11875 140 0001 C CNN
+F 2 "" H 3225 11925 140 0001 C CNN
+F 3 "" H 3225 11925 140 0001 C CNN
+F 4 "ST11" H 3250 11050 140 0000 C BNB "Caption"
+F 5 "A34_76_85" H 3225 10925 140 0000 C CNB "Caption2"
+	85   3225 11450
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	3500 11450 3925 11450
+Wire Wire Line
+	3925 11450 3925 11075
+Connection ~ 3925 11075
+Wire Wire Line
+	3925 11075 3525 11075
+Wire Wire Line
+	19675 10550 20275 10550
+Wire Wire Line
+	20275 10350 20275 10550
+Connection ~ 20275 10550
+Wire Wire Line
+	20275 10550 21925 10550
+Wire Wire Line
+	19575 11700 20025 11700
 $EndSCHEMATC

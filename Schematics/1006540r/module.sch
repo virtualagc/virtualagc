@@ -14,8 +14,8 @@ Comment2 ""
 Comment3 ""
 Comment4 ""
 $EndDescr
-Text Notes 68450 10700 0    140  ~ 28
-Notes from the Virtual AGC Project:\n1. None of the official Block I AGC electrical-schematic drawings were available at\n   the time this CAD drawing was made.  Rather, it is a transcription of the schematic\n   drawings in the figures of AC Electronics document ND-1021041, which are also\n   believed to comprise a complete but unofficial set of schematics. — RSB 2018\n2. The figures in ND-1021041 do not indicate reference designators for components.\n   In this drawing, the numbered oval pads comprise connector J1.  All other \n   electrical components presently have reference designators assigned by the\n   KiCad CAD software. — RSB 2018\n3. This physical drawing has 16 separate physical instances (modules A1 through\n   A16) in the Block I AGC, each with different associated backplane signals.  Each oval\n   connector pad is associated with 16 backplane signal names.  In CAD, they can be\n   viewed or edited as the connector-pads' fields "Caption", "Caption2", "Caption3", ...,\n   "Caption16". As visual notations on the drawing, a notation like NAMExx means that\n   the signal name is NAME01 for module A1, NAME02 for module A2, and so on. \n   If a single notation is shown for an oval pad, it means that the same signal is applied\n   on that pin for all modules.  Signal names that cannot be concisely described are \n   listed instead in the table on the second sheet of this drawing.  — RSB 2018\n4. Each NOR gate is associated with 16 different 5-digit gate numbers, one for each of\n   the modules A1-A16.  These 5-digit numbers are of the form NNNxx, where xx\n   is the module number and NNN represents a unique location within the drawing.\n   For example, the NOR gate shown as 226xx represents gate 22601 in module A1,\n   gate 22602 in module A2, and so on. — RSB 2018\n5. Resolution of backplane-signal inconsistencies in ND-1021041.  Pad which have been\n   renumbered to avoid inconsistencies show their original pad number paranthetically\n   in this drawing.\n   a) Figure 4-108, drawing and table differ in output of gate 283xx; the former indicates\n      it feeds pad 66, the latter indicates pad 68.  The table is in error, since Figure 4-105\n      shows pad 68 as carrying different backplane signals. — RSB 2018\n   b) Figure 4-60 and 4-117 both use pad 55, but in conflicting ways. There is not enough\n      information to resolve this discrepancy.  Figure 4-60 has been arbitrarily selected\n      as being correct.  Pad 55 in Figure 4-117 has been arbitrarily replaced by the\n      otherwise-unused pad 51. — RSB 2018\n   c) Figures 4-65 and 4-122 conflict in the output of gate 182xx.  The former\n      indicates that it feeds pad 74, while the latter indicates it feeds pin 140.  However, pin\n      74 is used elsewhere (Figure 4-121), so the usage of 4-122 is accepted.  — RSB 2018\n   d) Every pad used in Figure  4-110 (pads 31-38) conflicts with usage in some other\n      figure.  Consequently, all of the pads in Figure 4-110 have been arbitrarily replaced\n      by otherwise-unused pads:  specifically, 31→101, 32→103, 33→104, 34→108,\n      35→109, 36→113, 37→116, and 38→117. — RSB 2018
+Text Notes 68425 12875 0    140  ~ 28
+Notes from the Virtual AGC Project:\n1. None of the official Block I AGC electrical-schematic drawings were available at\n   the time this CAD drawing was made.  Rather, it is a transcription of the schematic\n   drawings in the figures of AC Electronics document ND-1021041, which are also\n   believed to comprise a complete but unofficial set of schematics. — RSB 2018\n2. The figures in ND-1021041 do not indicate reference designators for components.\n   In this drawing, the numbered oval pads comprise connector J1.  All other \n   electrical components presently have reference designators assigned by the\n   KiCad CAD software. — RSB 2018\n3. This physical drawing has 16 separate physical instances (modules A1 through\n   A16) in the Block I AGC, each with different associated backplane signals.  Each oval\n   connector pad is associated with 16 backplane signal names.  In CAD, they can be\n   viewed or edited as the connector-pads' fields "Caption", "Caption2", "Caption3", ...,\n   "Caption16". As visual notations on the drawing, a notation like NAMExx means that\n   the signal name is NAME01 for module A1, NAME02 for module A2, and so on. \n   If a single notation is shown for an oval pad, it means that the same signal is applied\n   on that pin for all modules.  Signal names that cannot be concisely described are \n   listed instead in the table on the second sheet of this drawing.  — RSB 2018\n4. Each NOR gate is associated with 16 different 5-digit gate numbers, one for each of\n   the modules A1-A16.  These 5-digit numbers are of the form NNNxx, where xx\n   is the module number and NNN represents a unique location within the drawing.\n   For example, the NOR gate shown as 226xx represents gate 22601 in module A1,\n   gate 22602 in module A2, and so on. — RSB 2018\n5. Backplane signals which ND-1021041 does not supply a name for have been given \n   unique names constructed from module and pad numbers in this drawing.  For example,\n   signal name "A15_105_A16_105_106" refers to the net connecting module A15 pad 105\n   with module A16 pads 105 and 106. — RSB 2018\n6. Resolution of backplane-signal inconsistencies in ND-1021041.  Pad which have been\n   renumbered to avoid inconsistencies show their original pad number paranthetically\n   in this drawing.\n   a) Figure 4-108, drawing and table differ in output of gate 283xx; the former indicates\n      it feeds pad 66, the latter indicates pad 68.  The table is in error, since Figure 4-105\n      shows pad 68 as carrying different backplane signals. — RSB 2018\n   b) Figure 4-60 and 4-117 both use pad 55, but in conflicting ways. There is not enough\n      information to resolve this discrepancy.  Figure 4-60 has been arbitrarily selected\n      as being correct.  Pad 55 in Figure 4-117 has been arbitrarily replaced by the\n      otherwise-unused pad 51. — RSB 2018\n   c) Figures 4-65 and 4-122 conflict in the output of gate 182xx.  The former\n      indicates that it feeds pad 74, while the latter indicates it feeds pin 140.  However, pin\n      74 is used elsewhere (Figure 4-121), so the usage of 4-122 is accepted.  — RSB 2018\n   d) Every pad used in Figure  4-110 (pads 31-38) conflicts with usage in some other\n      figure.  Consequently, all of the pads in Figure 4-110 have been arbitrarily replaced\n      by otherwise-unused pads:  specifically, 31→101, 32→103, 33→104, 34→108,\n      35→109, 36→113, 37→116, and 38→117. — RSB 2018\n   e) Superficially, module A38 appears to use its connector pad 14 for 3 mutually\n      inconsistent nets in Figures 4-119, 4-120, and 4-121.  It is possible that this usage is\n      correct.  However, provisionally, in this drawing, module A38's pad 14 has been \n      replaced by the otherwise-unused pad 13 in Figure 4-120, and by pad 16 in \n      Figure 4-121. — RSB 2018
 $Bitmap
 Pos 68075 1475
 Scale 1.000000
@@ -883,495 +883,495 @@ $EndBitmap
 $Comp
 L AGC_DSKY:ConnectorGeneric J1
 U 129 1 5BF2DBDF
-P 75475 24425
-F 0 "J1" H 75475 24750 140 0001 C CNN
-F 1 "ConnectorGeneric" H 75475 24850 140 0001 C CNN
-F 2 "" H 75475 24900 140 0001 C CNN
-F 3 "" H 75475 24900 140 0001 C CNN
-F 4 "+3A" H 75475 24425 140 0001 C BNB "Caption"
-F 5 "+3A" H 75475 24425 140 0001 C BNB "Caption2"
-F 6 "+3A" H 75475 24425 140 0001 C BNB "Caption3"
-F 7 "+3A" H 75475 24425 140 0001 C BNB "Caption4"
-F 8 "+3A" H 75475 24425 140 0001 C BNB "Caption5"
-F 9 "+3A" H 75475 24425 140 0001 C BNB "Caption6"
-F 10 "+3A" H 75475 24425 140 0001 C BNB "Caption7"
-F 11 "+3A" H 75475 24425 140 0001 C BNB "Caption8"
-F 12 "+3A" H 75475 24425 140 0001 C BNB "Caption9"
-F 13 "+3A" H 75475 24425 140 0001 C BNB "Caption10"
-F 14 "+3A" H 75475 24425 140 0001 C BNB "Caption11"
-F 15 "+3A" H 75475 24425 140 0001 C BNB "Caption12"
-F 16 "+3A" H 75475 24425 140 0001 C BNB "Caption13"
-F 17 "+3A" H 75475 24425 140 0001 C BNB "Caption14"
-F 18 "+3A" H 75475 24425 140 0001 C BNB "Caption15"
-F 19 "+3A" H 75475 24425 140 0001 C BNB "Caption16"
-	129  75475 24425
+P 74700 25325
+F 0 "J1" H 74700 25650 140 0001 C CNN
+F 1 "ConnectorGeneric" H 74700 25750 140 0001 C CNN
+F 2 "" H 74700 25800 140 0001 C CNN
+F 3 "" H 74700 25800 140 0001 C CNN
+F 4 "+3A" H 74700 25325 140 0001 C BNB "Caption"
+F 5 "+3A" H 74700 25325 140 0001 C BNB "Caption2"
+F 6 "+3A" H 74700 25325 140 0001 C BNB "Caption3"
+F 7 "+3A" H 74700 25325 140 0001 C BNB "Caption4"
+F 8 "+3A" H 74700 25325 140 0001 C BNB "Caption5"
+F 9 "+3A" H 74700 25325 140 0001 C BNB "Caption6"
+F 10 "+3A" H 74700 25325 140 0001 C BNB "Caption7"
+F 11 "+3A" H 74700 25325 140 0001 C BNB "Caption8"
+F 12 "+3A" H 74700 25325 140 0001 C BNB "Caption9"
+F 13 "+3A" H 74700 25325 140 0001 C BNB "Caption10"
+F 14 "+3A" H 74700 25325 140 0001 C BNB "Caption11"
+F 15 "+3A" H 74700 25325 140 0001 C BNB "Caption12"
+F 16 "+3A" H 74700 25325 140 0001 C BNB "Caption13"
+F 17 "+3A" H 74700 25325 140 0001 C BNB "Caption14"
+F 18 "+3A" H 74700 25325 140 0001 C BNB "Caption15"
+F 19 "+3A" H 74700 25325 140 0001 C BNB "Caption16"
+	129  74700 25325
 	1    0    0    -1  
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorGeneric J1
 U 96 1 5BF2DBE0
-P 75450 27600
-F 0 "J1" H 75450 27925 140 0001 C CNN
-F 1 "ConnectorGeneric" H 75450 28025 140 0001 C CNN
-F 2 "" H 75450 28075 140 0001 C CNN
-F 3 "" H 75450 28075 140 0001 C CNN
-F 4 "+3B" H 75450 27600 140 0001 C BNB "Caption"
-F 5 "+3B" H 75450 27600 140 0001 C BNB "Caption2"
-F 6 "+3B" H 75450 27600 140 0001 C BNB "Caption3"
-F 7 "+3B" H 75450 27600 140 0001 C BNB "Caption4"
-F 8 "+3B" H 75450 27600 140 0001 C BNB "Caption5"
-F 9 "+3B" H 75450 27600 140 0001 C BNB "Caption6"
-F 10 "+3B" H 75450 27600 140 0001 C BNB "Caption7"
-F 11 "+3B" H 75450 27600 140 0001 C BNB "Caption8"
-F 12 "+3B" H 75450 27600 140 0001 C BNB "Caption9"
-F 13 "+3B" H 75450 27600 140 0001 C BNB "Caption10"
-F 14 "+3B" H 75450 27600 140 0001 C BNB "Caption11"
-F 15 "+3B" H 75450 27600 140 0001 C BNB "Caption12"
-F 16 "+3B" H 75450 27600 140 0001 C BNB "Caption13"
-F 17 "+3B" H 75450 27600 140 0001 C BNB "Caption14"
-F 18 "+3B" H 75450 27600 140 0001 C BNB "Caption15"
-F 19 "+3B" H 75450 27600 140 0001 C BNB "Caption16"
-	96   75450 27600
+P 74675 28500
+F 0 "J1" H 74675 28825 140 0001 C CNN
+F 1 "ConnectorGeneric" H 74675 28925 140 0001 C CNN
+F 2 "" H 74675 28975 140 0001 C CNN
+F 3 "" H 74675 28975 140 0001 C CNN
+F 4 "+3B" H 74675 28500 140 0001 C BNB "Caption"
+F 5 "+3B" H 74675 28500 140 0001 C BNB "Caption2"
+F 6 "+3B" H 74675 28500 140 0001 C BNB "Caption3"
+F 7 "+3B" H 74675 28500 140 0001 C BNB "Caption4"
+F 8 "+3B" H 74675 28500 140 0001 C BNB "Caption5"
+F 9 "+3B" H 74675 28500 140 0001 C BNB "Caption6"
+F 10 "+3B" H 74675 28500 140 0001 C BNB "Caption7"
+F 11 "+3B" H 74675 28500 140 0001 C BNB "Caption8"
+F 12 "+3B" H 74675 28500 140 0001 C BNB "Caption9"
+F 13 "+3B" H 74675 28500 140 0001 C BNB "Caption10"
+F 14 "+3B" H 74675 28500 140 0001 C BNB "Caption11"
+F 15 "+3B" H 74675 28500 140 0001 C BNB "Caption12"
+F 16 "+3B" H 74675 28500 140 0001 C BNB "Caption13"
+F 17 "+3B" H 74675 28500 140 0001 C BNB "Caption14"
+F 18 "+3B" H 74675 28500 140 0001 C BNB "Caption15"
+F 19 "+3B" H 74675 28500 140 0001 C BNB "Caption16"
+	96   74675 28500
 	1    0    0    -1  
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorGeneric J1
 U 95 1 5BF2DBE1
-P 75475 23350
-F 0 "J1" H 75475 23675 140 0001 C CNN
-F 1 "ConnectorGeneric" H 75475 23775 140 0001 C CNN
-F 2 "" H 75475 23825 140 0001 C CNN
-F 3 "" H 75475 23825 140 0001 C CNN
-F 4 "+3B" H 75475 23350 140 0001 C BNB "Caption"
-F 5 "+3B" H 75475 23350 140 0001 C BNB "Caption2"
-F 6 "+3B" H 75475 23350 140 0001 C BNB "Caption3"
-F 7 "+3B" H 75475 23350 140 0001 C BNB "Caption4"
-F 8 "+3B" H 75475 23350 140 0001 C BNB "Caption5"
-F 9 "+3B" H 75475 23350 140 0001 C BNB "Caption6"
-F 10 "+3B" H 75475 23350 140 0001 C BNB "Caption7"
-F 11 "+3B" H 75475 23350 140 0001 C BNB "Caption8"
-F 12 "+3B" H 75475 23350 140 0001 C BNB "Caption9"
-F 13 "+3B" H 75475 23350 140 0001 C BNB "Caption10"
-F 14 "+3B" H 75475 23350 140 0001 C BNB "Caption11"
-F 15 "+3B" H 75475 23350 140 0001 C BNB "Caption12"
-F 16 "+3B" H 75475 23350 140 0001 C BNB "Caption13"
-F 17 "+3B" H 75475 23350 140 0001 C BNB "Caption14"
-F 18 "+3B" H 75475 23350 140 0001 C BNB "Caption15"
-F 19 "+3B" H 75475 23350 140 0001 C BNB "Caption16"
-	95   75475 23350
+P 74700 24250
+F 0 "J1" H 74700 24575 140 0001 C CNN
+F 1 "ConnectorGeneric" H 74700 24675 140 0001 C CNN
+F 2 "" H 74700 24725 140 0001 C CNN
+F 3 "" H 74700 24725 140 0001 C CNN
+F 4 "+3B" H 74700 24250 140 0001 C BNB "Caption"
+F 5 "+3B" H 74700 24250 140 0001 C BNB "Caption2"
+F 6 "+3B" H 74700 24250 140 0001 C BNB "Caption3"
+F 7 "+3B" H 74700 24250 140 0001 C BNB "Caption4"
+F 8 "+3B" H 74700 24250 140 0001 C BNB "Caption5"
+F 9 "+3B" H 74700 24250 140 0001 C BNB "Caption6"
+F 10 "+3B" H 74700 24250 140 0001 C BNB "Caption7"
+F 11 "+3B" H 74700 24250 140 0001 C BNB "Caption8"
+F 12 "+3B" H 74700 24250 140 0001 C BNB "Caption9"
+F 13 "+3B" H 74700 24250 140 0001 C BNB "Caption10"
+F 14 "+3B" H 74700 24250 140 0001 C BNB "Caption11"
+F 15 "+3B" H 74700 24250 140 0001 C BNB "Caption12"
+F 16 "+3B" H 74700 24250 140 0001 C BNB "Caption13"
+F 17 "+3B" H 74700 24250 140 0001 C BNB "Caption14"
+F 18 "+3B" H 74700 24250 140 0001 C BNB "Caption15"
+F 19 "+3B" H 74700 24250 140 0001 C BNB "Caption16"
+	95   74700 24250
 	1    0    0    -1  
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorGeneric J1
 U 48 1 5BF2DBE2
-P 75450 27075
-F 0 "J1" H 75450 27400 140 0001 C CNN
-F 1 "ConnectorGeneric" H 75450 27500 140 0001 C CNN
-F 2 "" H 75450 27550 140 0001 C CNN
-F 3 "" H 75450 27550 140 0001 C CNN
-F 4 "+3B" H 75450 27075 140 0001 C BNB "Caption"
-F 5 "+3B" H 75450 27075 140 0001 C BNB "Caption2"
-F 6 "+3B" H 75450 27075 140 0001 C BNB "Caption3"
-F 7 "+3B" H 75450 27075 140 0001 C BNB "Caption4"
-F 8 "+3B" H 75450 27075 140 0001 C BNB "Caption5"
-F 9 "+3B" H 75450 27075 140 0001 C BNB "Caption6"
-F 10 "+3B" H 75450 27075 140 0001 C BNB "Caption7"
-F 11 "+3B" H 75450 27075 140 0001 C BNB "Caption8"
-F 12 "+3B" H 75450 27075 140 0001 C BNB "Caption9"
-F 13 "+3B" H 75450 27075 140 0001 C BNB "Caption10"
-F 14 "+3B" H 75450 27075 140 0001 C BNB "Caption11"
-F 15 "+3B" H 75450 27075 140 0001 C BNB "Caption12"
-F 16 "+3B" H 75450 27075 140 0001 C BNB "Caption13"
-F 17 "+3B" H 75450 27075 140 0001 C BNB "Caption14"
-F 18 "+3B" H 75450 27075 140 0001 C BNB "Caption15"
-F 19 "+3B" H 75450 27075 140 0001 C BNB "Caption16"
-	48   75450 27075
+P 74675 27975
+F 0 "J1" H 74675 28300 140 0001 C CNN
+F 1 "ConnectorGeneric" H 74675 28400 140 0001 C CNN
+F 2 "" H 74675 28450 140 0001 C CNN
+F 3 "" H 74675 28450 140 0001 C CNN
+F 4 "+3B" H 74675 27975 140 0001 C BNB "Caption"
+F 5 "+3B" H 74675 27975 140 0001 C BNB "Caption2"
+F 6 "+3B" H 74675 27975 140 0001 C BNB "Caption3"
+F 7 "+3B" H 74675 27975 140 0001 C BNB "Caption4"
+F 8 "+3B" H 74675 27975 140 0001 C BNB "Caption5"
+F 9 "+3B" H 74675 27975 140 0001 C BNB "Caption6"
+F 10 "+3B" H 74675 27975 140 0001 C BNB "Caption7"
+F 11 "+3B" H 74675 27975 140 0001 C BNB "Caption8"
+F 12 "+3B" H 74675 27975 140 0001 C BNB "Caption9"
+F 13 "+3B" H 74675 27975 140 0001 C BNB "Caption10"
+F 14 "+3B" H 74675 27975 140 0001 C BNB "Caption11"
+F 15 "+3B" H 74675 27975 140 0001 C BNB "Caption12"
+F 16 "+3B" H 74675 27975 140 0001 C BNB "Caption13"
+F 17 "+3B" H 74675 27975 140 0001 C BNB "Caption14"
+F 18 "+3B" H 74675 27975 140 0001 C BNB "Caption15"
+F 19 "+3B" H 74675 27975 140 0001 C BNB "Caption16"
+	48   74675 27975
 	1    0    0    -1  
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorGeneric J1
 U 71 1 5BF2DBE3
-P 75450 26000
-F 0 "J1" H 75450 26325 140 0001 C CNN
-F 1 "ConnectorGeneric" H 75450 26425 140 0001 C CNN
-F 2 "" H 75450 26475 140 0001 C CNN
-F 3 "" H 75450 26475 140 0001 C CNN
-F 4 "0VDC" H 75450 26000 140 0001 C BNB "Caption"
-F 5 "0VDC" H 75450 26000 140 0001 C BNB "Caption2"
-F 6 "0VDC" H 75450 26000 140 0001 C BNB "Caption3"
-F 7 "0VDC" H 75450 26000 140 0001 C BNB "Caption4"
-F 8 "0VDC" H 75450 26000 140 0001 C BNB "Caption5"
-F 9 "0VDC" H 75450 26000 140 0001 C BNB "Caption6"
-F 10 "0VDC" H 75450 26000 140 0001 C BNB "Caption7"
-F 11 "0VDC" H 75450 26000 140 0001 C BNB "Caption8"
-F 12 "0VDC" H 75450 26000 140 0001 C BNB "Caption9"
-F 13 "0VDC" H 75450 26000 140 0001 C BNB "Caption10"
-F 14 "0VDC" H 75450 26000 140 0001 C BNB "Caption11"
-F 15 "0VDC" H 75450 26000 140 0001 C BNB "Caption12"
-F 16 "0VDC" H 75450 26000 140 0001 C BNB "Caption13"
-F 17 "0VDC" H 75450 26000 140 0001 C BNB "Caption14"
-F 18 "0VDC" H 75450 26000 140 0001 C BNB "Caption15"
-F 19 "0VDC" H 75450 26000 140 0001 C BNB "Caption16"
-	71   75450 26000
+P 74675 26900
+F 0 "J1" H 74675 27225 140 0001 C CNN
+F 1 "ConnectorGeneric" H 74675 27325 140 0001 C CNN
+F 2 "" H 74675 27375 140 0001 C CNN
+F 3 "" H 74675 27375 140 0001 C CNN
+F 4 "0VDC" H 74675 26900 140 0001 C BNB "Caption"
+F 5 "0VDC" H 74675 26900 140 0001 C BNB "Caption2"
+F 6 "0VDC" H 74675 26900 140 0001 C BNB "Caption3"
+F 7 "0VDC" H 74675 26900 140 0001 C BNB "Caption4"
+F 8 "0VDC" H 74675 26900 140 0001 C BNB "Caption5"
+F 9 "0VDC" H 74675 26900 140 0001 C BNB "Caption6"
+F 10 "0VDC" H 74675 26900 140 0001 C BNB "Caption7"
+F 11 "0VDC" H 74675 26900 140 0001 C BNB "Caption8"
+F 12 "0VDC" H 74675 26900 140 0001 C BNB "Caption9"
+F 13 "0VDC" H 74675 26900 140 0001 C BNB "Caption10"
+F 14 "0VDC" H 74675 26900 140 0001 C BNB "Caption11"
+F 15 "0VDC" H 74675 26900 140 0001 C BNB "Caption12"
+F 16 "0VDC" H 74675 26900 140 0001 C BNB "Caption13"
+F 17 "0VDC" H 74675 26900 140 0001 C BNB "Caption14"
+F 18 "0VDC" H 74675 26900 140 0001 C BNB "Caption15"
+F 19 "0VDC" H 74675 26900 140 0001 C BNB "Caption16"
+	71   74675 26900
 	1    0    0    -1  
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorGeneric J1
 U 47 1 5BF2DBE4
-P 75475 22825
-F 0 "J1" H 75475 23150 140 0001 C CNN
-F 1 "ConnectorGeneric" H 75475 23250 140 0001 C CNN
-F 2 "" H 75475 23300 140 0001 C CNN
-F 3 "" H 75475 23300 140 0001 C CNN
-F 4 "+3B" H 75475 22825 140 0001 C BNB "Caption"
-F 5 "+3B" H 75475 22825 140 0001 C BNB "Caption2"
-F 6 "+3B" H 75475 22825 140 0001 C BNB "Caption3"
-F 7 "+3B" H 75475 22825 140 0001 C BNB "Caption4"
-F 8 "+3B" H 75475 22825 140 0001 C BNB "Caption5"
-F 9 "+3B" H 75475 22825 140 0001 C BNB "Caption6"
-F 10 "+3B" H 75475 22825 140 0001 C BNB "Caption7"
-F 11 "+3B" H 75475 22825 140 0001 C BNB "Caption8"
-F 12 "+3B" H 75475 22825 140 0001 C BNB "Caption9"
-F 13 "+3B" H 75475 22825 140 0001 C BNB "Caption10"
-F 14 "+3B" H 75475 22825 140 0001 C BNB "Caption11"
-F 15 "+3B" H 75475 22825 140 0001 C BNB "Caption12"
-F 16 "+3B" H 75475 22825 140 0001 C BNB "Caption13"
-F 17 "+3B" H 75475 22825 140 0001 C BNB "Caption14"
-F 18 "+3B" H 75475 22825 140 0001 C BNB "Caption15"
-F 19 "+3B" H 75475 22825 140 0001 C BNB "Caption16"
-	47   75475 22825
+P 74700 23725
+F 0 "J1" H 74700 24050 140 0001 C CNN
+F 1 "ConnectorGeneric" H 74700 24150 140 0001 C CNN
+F 2 "" H 74700 24200 140 0001 C CNN
+F 3 "" H 74700 24200 140 0001 C CNN
+F 4 "+3B" H 74700 23725 140 0001 C BNB "Caption"
+F 5 "+3B" H 74700 23725 140 0001 C BNB "Caption2"
+F 6 "+3B" H 74700 23725 140 0001 C BNB "Caption3"
+F 7 "+3B" H 74700 23725 140 0001 C BNB "Caption4"
+F 8 "+3B" H 74700 23725 140 0001 C BNB "Caption5"
+F 9 "+3B" H 74700 23725 140 0001 C BNB "Caption6"
+F 10 "+3B" H 74700 23725 140 0001 C BNB "Caption7"
+F 11 "+3B" H 74700 23725 140 0001 C BNB "Caption8"
+F 12 "+3B" H 74700 23725 140 0001 C BNB "Caption9"
+F 13 "+3B" H 74700 23725 140 0001 C BNB "Caption10"
+F 14 "+3B" H 74700 23725 140 0001 C BNB "Caption11"
+F 15 "+3B" H 74700 23725 140 0001 C BNB "Caption12"
+F 16 "+3B" H 74700 23725 140 0001 C BNB "Caption13"
+F 17 "+3B" H 74700 23725 140 0001 C BNB "Caption14"
+F 18 "+3B" H 74700 23725 140 0001 C BNB "Caption15"
+F 19 "+3B" H 74700 23725 140 0001 C BNB "Caption16"
+	47   74700 23725
 	1    0    0    -1  
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorGeneric J1
 U 120 1 5BF2DBE5
-P 75450 29175
-F 0 "J1" H 75450 29500 140 0001 C CNN
-F 1 "ConnectorGeneric" H 75450 29600 140 0001 C CNN
-F 2 "" H 75450 29650 140 0001 C CNN
-F 3 "" H 75450 29650 140 0001 C CNN
-F 4 "0VDC" H 75450 29175 140 0001 C BNB "Caption"
-F 5 "0VDC" H 75450 29175 140 0001 C BNB "Caption2"
-F 6 "0VDC" H 75450 29175 140 0001 C BNB "Caption3"
-F 7 "0VDC" H 75450 29175 140 0001 C BNB "Caption4"
-F 8 "0VDC" H 75450 29175 140 0001 C BNB "Caption5"
-F 9 "0VDC" H 75450 29175 140 0001 C BNB "Caption6"
-F 10 "0VDC" H 75450 29175 140 0001 C BNB "Caption7"
-F 11 "0VDC" H 75450 29175 140 0001 C BNB "Caption8"
-F 12 "0VDC" H 75450 29175 140 0001 C BNB "Caption9"
-F 13 "0VDC" H 75450 29175 140 0001 C BNB "Caption10"
-F 14 "0VDC" H 75450 29175 140 0001 C BNB "Caption11"
-F 15 "0VDC" H 75450 29175 140 0001 C BNB "Caption12"
-F 16 "0VDC" H 75450 29175 140 0001 C BNB "Caption13"
-F 17 "0VDC" H 75450 29175 140 0001 C BNB "Caption14"
-F 18 "0VDC" H 75450 29175 140 0001 C BNB "Caption15"
-F 19 "0VDC" H 75450 29175 140 0001 C BNB "Caption16"
-	120  75450 29175
+P 74675 30075
+F 0 "J1" H 74675 30400 140 0001 C CNN
+F 1 "ConnectorGeneric" H 74675 30500 140 0001 C CNN
+F 2 "" H 74675 30550 140 0001 C CNN
+F 3 "" H 74675 30550 140 0001 C CNN
+F 4 "0VDC" H 74675 30075 140 0001 C BNB "Caption"
+F 5 "0VDC" H 74675 30075 140 0001 C BNB "Caption2"
+F 6 "0VDC" H 74675 30075 140 0001 C BNB "Caption3"
+F 7 "0VDC" H 74675 30075 140 0001 C BNB "Caption4"
+F 8 "0VDC" H 74675 30075 140 0001 C BNB "Caption5"
+F 9 "0VDC" H 74675 30075 140 0001 C BNB "Caption6"
+F 10 "0VDC" H 74675 30075 140 0001 C BNB "Caption7"
+F 11 "0VDC" H 74675 30075 140 0001 C BNB "Caption8"
+F 12 "0VDC" H 74675 30075 140 0001 C BNB "Caption9"
+F 13 "0VDC" H 74675 30075 140 0001 C BNB "Caption10"
+F 14 "0VDC" H 74675 30075 140 0001 C BNB "Caption11"
+F 15 "0VDC" H 74675 30075 140 0001 C BNB "Caption12"
+F 16 "0VDC" H 74675 30075 140 0001 C BNB "Caption13"
+F 17 "0VDC" H 74675 30075 140 0001 C BNB "Caption14"
+F 18 "0VDC" H 74675 30075 140 0001 C BNB "Caption15"
+F 19 "0VDC" H 74675 30075 140 0001 C BNB "Caption16"
+	120  74675 30075
 	1    0    0    -1  
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorGeneric J1
 U 24 1 5BF2DBE6
-P 75450 28125
-F 0 "J1" H 75450 28450 140 0001 C CNN
-F 1 "ConnectorGeneric" H 75450 28550 140 0001 C CNN
-F 2 "" H 75450 28600 140 0001 C CNN
-F 3 "" H 75450 28600 140 0001 C CNN
-F 4 "0VDC" H 75450 28125 140 0001 C BNB "Caption"
-F 5 "0VDC" H 75450 28125 140 0001 C BNB "Caption2"
-F 6 "0VDC" H 75450 28125 140 0001 C BNB "Caption3"
-F 7 "0VDC" H 75450 28125 140 0001 C BNB "Caption4"
-F 8 "0VDC" H 75450 28125 140 0001 C BNB "Caption5"
-F 9 "0VDC" H 75450 28125 140 0001 C BNB "Caption6"
-F 10 "0VDC" H 75450 28125 140 0001 C BNB "Caption7"
-F 11 "0VDC" H 75450 28125 140 0001 C BNB "Caption8"
-F 12 "0VDC" H 75450 28125 140 0001 C BNB "Caption9"
-F 13 "0VDC" H 75450 28125 140 0001 C BNB "Caption10"
-F 14 "0VDC" H 75450 28125 140 0001 C BNB "Caption11"
-F 15 "0VDC" H 75450 28125 140 0001 C BNB "Caption12"
-F 16 "0VDC" H 75450 28125 140 0001 C BNB "Caption13"
-F 17 "0VDC" H 75450 28125 140 0001 C BNB "Caption14"
-F 18 "0VDC" H 75450 28125 140 0001 C BNB "Caption15"
-F 19 "0VDC" H 75450 28125 140 0001 C BNB "Caption16"
-	24   75450 28125
+P 74675 29025
+F 0 "J1" H 74675 29350 140 0001 C CNN
+F 1 "ConnectorGeneric" H 74675 29450 140 0001 C CNN
+F 2 "" H 74675 29500 140 0001 C CNN
+F 3 "" H 74675 29500 140 0001 C CNN
+F 4 "0VDC" H 74675 29025 140 0001 C BNB "Caption"
+F 5 "0VDC" H 74675 29025 140 0001 C BNB "Caption2"
+F 6 "0VDC" H 74675 29025 140 0001 C BNB "Caption3"
+F 7 "0VDC" H 74675 29025 140 0001 C BNB "Caption4"
+F 8 "0VDC" H 74675 29025 140 0001 C BNB "Caption5"
+F 9 "0VDC" H 74675 29025 140 0001 C BNB "Caption6"
+F 10 "0VDC" H 74675 29025 140 0001 C BNB "Caption7"
+F 11 "0VDC" H 74675 29025 140 0001 C BNB "Caption8"
+F 12 "0VDC" H 74675 29025 140 0001 C BNB "Caption9"
+F 13 "0VDC" H 74675 29025 140 0001 C BNB "Caption10"
+F 14 "0VDC" H 74675 29025 140 0001 C BNB "Caption11"
+F 15 "0VDC" H 74675 29025 140 0001 C BNB "Caption12"
+F 16 "0VDC" H 74675 29025 140 0001 C BNB "Caption13"
+F 17 "0VDC" H 74675 29025 140 0001 C BNB "Caption14"
+F 18 "0VDC" H 74675 29025 140 0001 C BNB "Caption15"
+F 19 "0VDC" H 74675 29025 140 0001 C BNB "Caption16"
+	24   74675 29025
 	1    0    0    -1  
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorGeneric J1
 U 23 1 5BF2DBE7
-P 75450 25475
-F 0 "J1" H 75450 25800 140 0001 C CNN
-F 1 "ConnectorGeneric" H 75450 25900 140 0001 C CNN
-F 2 "" H 75450 25950 140 0001 C CNN
-F 3 "" H 75450 25950 140 0001 C CNN
-F 4 "0VDC" H 75450 25475 140 0001 C BNB "Caption"
-F 5 "0VDC" H 75450 25475 140 0001 C BNB "Caption2"
-F 6 "0VDC" H 75450 25475 140 0001 C BNB "Caption3"
-F 7 "0VDC" H 75450 25475 140 0001 C BNB "Caption4"
-F 8 "0VDC" H 75450 25475 140 0001 C BNB "Caption5"
-F 9 "0VDC" H 75450 25475 140 0001 C BNB "Caption6"
-F 10 "0VDC" H 75450 25475 140 0001 C BNB "Caption7"
-F 11 "0VDC" H 75450 25475 140 0001 C BNB "Caption8"
-F 12 "0VDC" H 75450 25475 140 0001 C BNB "Caption9"
-F 13 "0VDC" H 75450 25475 140 0001 C BNB "Caption10"
-F 14 "0VDC" H 75450 25475 140 0001 C BNB "Caption11"
-F 15 "0VDC" H 75450 25475 140 0001 C BNB "Caption12"
-F 16 "0VDC" H 75450 25475 140 0001 C BNB "Caption13"
-F 17 "0VDC" H 75450 25475 140 0001 C BNB "Caption14"
-F 18 "0VDC" H 75450 25475 140 0001 C BNB "Caption15"
-F 19 "0VDC" H 75450 25475 140 0001 C BNB "Caption16"
-	23   75450 25475
+P 74675 26375
+F 0 "J1" H 74675 26700 140 0001 C CNN
+F 1 "ConnectorGeneric" H 74675 26800 140 0001 C CNN
+F 2 "" H 74675 26850 140 0001 C CNN
+F 3 "" H 74675 26850 140 0001 C CNN
+F 4 "0VDC" H 74675 26375 140 0001 C BNB "Caption"
+F 5 "0VDC" H 74675 26375 140 0001 C BNB "Caption2"
+F 6 "0VDC" H 74675 26375 140 0001 C BNB "Caption3"
+F 7 "0VDC" H 74675 26375 140 0001 C BNB "Caption4"
+F 8 "0VDC" H 74675 26375 140 0001 C BNB "Caption5"
+F 9 "0VDC" H 74675 26375 140 0001 C BNB "Caption6"
+F 10 "0VDC" H 74675 26375 140 0001 C BNB "Caption7"
+F 11 "0VDC" H 74675 26375 140 0001 C BNB "Caption8"
+F 12 "0VDC" H 74675 26375 140 0001 C BNB "Caption9"
+F 13 "0VDC" H 74675 26375 140 0001 C BNB "Caption10"
+F 14 "0VDC" H 74675 26375 140 0001 C BNB "Caption11"
+F 15 "0VDC" H 74675 26375 140 0001 C BNB "Caption12"
+F 16 "0VDC" H 74675 26375 140 0001 C BNB "Caption13"
+F 17 "0VDC" H 74675 26375 140 0001 C BNB "Caption14"
+F 18 "0VDC" H 74675 26375 140 0001 C BNB "Caption15"
+F 19 "0VDC" H 74675 26375 140 0001 C BNB "Caption16"
+	23   74675 26375
 	1    0    0    -1  
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorGeneric J1
 U 119 1 5BF2DBE8
-P 75450 26550
-F 0 "J1" H 75450 26875 140 0001 C CNN
-F 1 "ConnectorGeneric" H 75450 26975 140 0001 C CNN
-F 2 "" H 75450 27025 140 0001 C CNN
-F 3 "" H 75450 27025 140 0001 C CNN
-F 4 "0VDC" H 75450 26550 140 0001 C BNB "Caption"
-F 5 "0VDC" H 75450 26550 140 0001 C BNB "Caption2"
-F 6 "0VDC" H 75450 26550 140 0001 C BNB "Caption3"
-F 7 "0VDC" H 75450 26550 140 0001 C BNB "Caption4"
-F 8 "0VDC" H 75450 26550 140 0001 C BNB "Caption5"
-F 9 "0VDC" H 75450 26550 140 0001 C BNB "Caption6"
-F 10 "0VDC" H 75450 26550 140 0001 C BNB "Caption7"
-F 11 "0VDC" H 75450 26550 140 0001 C BNB "Caption8"
-F 12 "0VDC" H 75450 26550 140 0001 C BNB "Caption9"
-F 13 "0VDC" H 75450 26550 140 0001 C BNB "Caption10"
-F 14 "0VDC" H 75450 26550 140 0001 C BNB "Caption11"
-F 15 "0VDC" H 75450 26550 140 0001 C BNB "Caption12"
-F 16 "0VDC" H 75450 26550 140 0001 C BNB "Caption13"
-F 17 "0VDC" H 75450 26550 140 0001 C BNB "Caption14"
-F 18 "0VDC" H 75450 26550 140 0001 C BNB "Caption15"
-F 19 "0VDC" H 75450 26550 140 0001 C BNB "Caption16"
-	119  75450 26550
+P 74675 27450
+F 0 "J1" H 74675 27775 140 0001 C CNN
+F 1 "ConnectorGeneric" H 74675 27875 140 0001 C CNN
+F 2 "" H 74675 27925 140 0001 C CNN
+F 3 "" H 74675 27925 140 0001 C CNN
+F 4 "0VDC" H 74675 27450 140 0001 C BNB "Caption"
+F 5 "0VDC" H 74675 27450 140 0001 C BNB "Caption2"
+F 6 "0VDC" H 74675 27450 140 0001 C BNB "Caption3"
+F 7 "0VDC" H 74675 27450 140 0001 C BNB "Caption4"
+F 8 "0VDC" H 74675 27450 140 0001 C BNB "Caption5"
+F 9 "0VDC" H 74675 27450 140 0001 C BNB "Caption6"
+F 10 "0VDC" H 74675 27450 140 0001 C BNB "Caption7"
+F 11 "0VDC" H 74675 27450 140 0001 C BNB "Caption8"
+F 12 "0VDC" H 74675 27450 140 0001 C BNB "Caption9"
+F 13 "0VDC" H 74675 27450 140 0001 C BNB "Caption10"
+F 14 "0VDC" H 74675 27450 140 0001 C BNB "Caption11"
+F 15 "0VDC" H 74675 27450 140 0001 C BNB "Caption12"
+F 16 "0VDC" H 74675 27450 140 0001 C BNB "Caption13"
+F 17 "0VDC" H 74675 27450 140 0001 C BNB "Caption14"
+F 18 "0VDC" H 74675 27450 140 0001 C BNB "Caption15"
+F 19 "0VDC" H 74675 27450 140 0001 C BNB "Caption16"
+	119  74675 27450
 	1    0    0    -1  
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorGeneric J1
 U 72 1 5BF2DBE9
-P 75450 28650
-F 0 "J1" H 75450 28975 140 0001 C CNN
-F 1 "ConnectorGeneric" H 75450 29075 140 0001 C CNN
-F 2 "" H 75450 29125 140 0001 C CNN
-F 3 "" H 75450 29125 140 0001 C CNN
-F 4 "0VDC" H 75450 28650 140 0001 C BNB "Caption"
-F 5 "0VDC" H 75450 28650 140 0001 C BNB "Caption2"
-F 6 "0VDC" H 75450 28650 140 0001 C BNB "Caption3"
-F 7 "0VDC" H 75450 28650 140 0001 C BNB "Caption4"
-F 8 "0VDC" H 75450 28650 140 0001 C BNB "Caption5"
-F 9 "0VDC" H 75450 28650 140 0001 C BNB "Caption6"
-F 10 "0VDC" H 75450 28650 140 0001 C BNB "Caption7"
-F 11 "0VDC" H 75450 28650 140 0001 C BNB "Caption8"
-F 12 "0VDC" H 75450 28650 140 0001 C BNB "Caption9"
-F 13 "0VDC" H 75450 28650 140 0001 C BNB "Caption10"
-F 14 "0VDC" H 75450 28650 140 0001 C BNB "Caption11"
-F 15 "0VDC" H 75450 28650 140 0001 C BNB "Caption12"
-F 16 "0VDC" H 75450 28650 140 0001 C BNB "Caption13"
-F 17 "0VDC" H 75450 28650 140 0001 C BNB "Caption14"
-F 18 "0VDC" H 75450 28650 140 0001 C BNB "Caption15"
-F 19 "0VDC" H 75450 28650 140 0001 C BNB "Caption16"
-	72   75450 28650
+P 74675 29550
+F 0 "J1" H 74675 29875 140 0001 C CNN
+F 1 "ConnectorGeneric" H 74675 29975 140 0001 C CNN
+F 2 "" H 74675 30025 140 0001 C CNN
+F 3 "" H 74675 30025 140 0001 C CNN
+F 4 "0VDC" H 74675 29550 140 0001 C BNB "Caption"
+F 5 "0VDC" H 74675 29550 140 0001 C BNB "Caption2"
+F 6 "0VDC" H 74675 29550 140 0001 C BNB "Caption3"
+F 7 "0VDC" H 74675 29550 140 0001 C BNB "Caption4"
+F 8 "0VDC" H 74675 29550 140 0001 C BNB "Caption5"
+F 9 "0VDC" H 74675 29550 140 0001 C BNB "Caption6"
+F 10 "0VDC" H 74675 29550 140 0001 C BNB "Caption7"
+F 11 "0VDC" H 74675 29550 140 0001 C BNB "Caption8"
+F 12 "0VDC" H 74675 29550 140 0001 C BNB "Caption9"
+F 13 "0VDC" H 74675 29550 140 0001 C BNB "Caption10"
+F 14 "0VDC" H 74675 29550 140 0001 C BNB "Caption11"
+F 15 "0VDC" H 74675 29550 140 0001 C BNB "Caption12"
+F 16 "0VDC" H 74675 29550 140 0001 C BNB "Caption13"
+F 17 "0VDC" H 74675 29550 140 0001 C BNB "Caption14"
+F 18 "0VDC" H 74675 29550 140 0001 C BNB "Caption15"
+F 19 "0VDC" H 74675 29550 140 0001 C BNB "Caption16"
+	72   74675 29550
 	1    0    0    -1  
 $EndComp
 $Comp
 L AGC_DSKY:Capacitor C103
 U 1 1 5C0FAB6B
-P 76650 23325
-F 0 "C103" H 76825 23525 130 0001 C CNN
-F 1 "Capacitor" H 77200 23125 130 0001 C CNN
-F 2 "" H 76650 23725 130 0001 C CNN
-F 3 "" H 76650 23725 130 0001 C CNN
-	1    76650 23325
+P 75875 24225
+F 0 "C103" H 76050 24425 130 0001 C CNN
+F 1 "Capacitor" H 76425 24025 130 0001 C CNN
+F 2 "" H 75875 24625 130 0001 C CNN
+F 3 "" H 75875 24625 130 0001 C CNN
+	1    75875 24225
 	1    0    0    -1  
 $EndComp
 $Comp
 L AGC_DSKY:Capacitor C101
 U 1 1 5C0FB1FF
-P 76625 24900
-F 0 "C101" H 76800 25100 130 0001 C CNN
-F 1 "Capacitor" H 77175 24700 130 0001 C CNN
-F 2 "" H 76625 25300 130 0001 C CNN
-F 3 "" H 76625 25300 130 0001 C CNN
-	1    76625 24900
+P 75850 25800
+F 0 "C101" H 76025 26000 130 0001 C CNN
+F 1 "Capacitor" H 76400 25600 130 0001 C CNN
+F 2 "" H 75850 26200 130 0001 C CNN
+F 3 "" H 75850 26200 130 0001 C CNN
+	1    75850 25800
 	1    0    0    -1  
 $EndComp
 $Comp
 L AGC_DSKY:Capacitor C102
 U 1 1 5C0FB6FE
-P 76625 27550
-F 0 "C102" H 76800 27750 130 0001 C CNN
-F 1 "Capacitor" H 77175 27350 130 0001 C CNN
-F 2 "" H 76625 27950 130 0001 C CNN
-F 3 "" H 76625 27950 130 0001 C CNN
-	1    76625 27550
+P 75850 28450
+F 0 "C102" H 76025 28650 130 0001 C CNN
+F 1 "Capacitor" H 76400 28250 130 0001 C CNN
+F 2 "" H 75850 28850 130 0001 C CNN
+F 3 "" H 75850 28850 130 0001 C CNN
+	1    75850 28450
 	1    0    0    -1  
 $EndComp
 $Comp
 L AGC_DSKY:Capacitor C104
 U 1 1 5C0FBCC5
-P 78175 27550
-F 0 "C104" H 78350 27750 130 0001 C CNN
-F 1 "Capacitor" H 78725 27350 130 0001 C CNN
-F 2 "" H 78175 27950 130 0001 C CNN
-F 3 "" H 78175 27950 130 0001 C CNN
-	1    78175 27550
+P 77400 28450
+F 0 "C104" H 77575 28650 130 0001 C CNN
+F 1 "Capacitor" H 77950 28250 130 0001 C CNN
+F 2 "" H 77400 28850 130 0001 C CNN
+F 3 "" H 77400 28850 130 0001 C CNN
+	1    77400 28450
 	1    0    0    -1  
 $EndComp
 Wire Wire Line
-	75725 29175 76625 29175
+	74950 30075 75850 30075
 Wire Wire Line
-	76625 29175 76625 28650
+	75850 30075 75850 29550
 Wire Wire Line
-	75725 28650 76625 28650
-Connection ~ 76625 28650
+	74950 29550 75850 29550
+Connection ~ 75850 29550
 Wire Wire Line
-	76625 28650 76625 28125
+	75850 29550 75850 29025
 Wire Wire Line
-	75725 28125 76625 28125
-Connection ~ 76625 28125
+	74950 29025 75850 29025
+Connection ~ 75850 29025
 Wire Wire Line
-	76625 28125 76625 27800
+	75850 29025 75850 28700
 Wire Wire Line
-	78175 27800 78175 28125
+	77400 28700 77400 29025
 Wire Wire Line
-	78175 28125 76625 28125
+	77400 29025 75850 29025
 Wire Wire Line
-	75725 27075 76000 27075
+	74950 27975 75225 27975
 Wire Wire Line
-	76625 27275 76625 27075
-Connection ~ 76625 27075
+	75850 28175 75850 27975
+Connection ~ 75850 27975
 Wire Wire Line
-	76625 27075 78175 27075
+	75850 27975 77400 27975
 Wire Wire Line
-	78175 27275 78175 27075
-Connection ~ 78175 27075
+	77400 28175 77400 27975
+Connection ~ 77400 27975
 Wire Wire Line
-	75725 27600 76000 27600
+	74950 28500 75225 28500
 Wire Wire Line
-	76000 27600 76000 27075
-Connection ~ 76000 27075
+	75225 28500 75225 27975
+Connection ~ 75225 27975
 Wire Wire Line
-	76000 27075 76625 27075
+	75225 27975 75850 27975
 Wire Wire Line
-	75725 25475 76000 25475
+	74950 26375 75225 26375
 Wire Wire Line
-	76625 25475 76625 25150
+	75850 26375 75850 26050
 Wire Wire Line
-	75725 26550 76000 26550
+	74950 27450 75225 27450
 Wire Wire Line
-	76000 26550 76000 26000
-Connection ~ 76000 25475
+	75225 27450 75225 26900
+Connection ~ 75225 26375
 Wire Wire Line
-	76000 25475 76625 25475
+	75225 26375 75850 26375
 Wire Wire Line
-	76000 25475 76000 23875
+	75225 26375 75225 24775
 Wire Wire Line
-	76000 23875 76650 23875
+	75225 24775 75875 24775
 Wire Wire Line
-	76650 23875 76650 23575
+	75875 24775 75875 24475
 Wire Wire Line
-	75725 26000 76000 26000
-Connection ~ 76000 26000
+	74950 26900 75225 26900
+Connection ~ 75225 26900
 Wire Wire Line
-	76000 26000 76000 25475
+	75225 26900 75225 26375
 Wire Wire Line
-	75750 24425 76625 24425
+	74975 25325 75850 25325
 Wire Wire Line
-	76625 24425 76625 24625
+	75850 25325 75850 25525
 Wire Wire Line
-	76625 24425 77750 24425
-Connection ~ 76625 24425
+	75850 25325 76975 25325
+Connection ~ 75850 25325
 Wire Wire Line
-	75750 22825 76000 22825
+	74975 23725 75225 23725
 Wire Wire Line
-	76650 23050 76650 22825
-Connection ~ 76650 22825
-Text Label 76800 22825 0    140  ~ 28
+	75875 23950 75875 23725
+Connection ~ 75875 23725
+Text Label 76025 23725 0    140  ~ 28
 +3VDC
-Text Label 76725 24425 0    140  ~ 28
+Text Label 75950 25325 0    140  ~ 28
 +3VDCB
 $Comp
 L AGC_DSKY:PWR_FLAG #FLG0101
 U 1 1 5C101113
-P 77750 24425
-F 0 "#FLG0101" H 77750 24950 50  0001 C CNN
-F 1 "PWR_FLAG" H 77760 24885 50  0001 C CNN
-F 2 "" H 77750 24425 50  0001 C CNN
-F 3 "~" H 77750 24425 50  0001 C CNN
-	1    77750 24425
+P 76975 25325
+F 0 "#FLG0101" H 76975 25850 50  0001 C CNN
+F 1 "PWR_FLAG" H 76985 25785 50  0001 C CNN
+F 2 "" H 76975 25325 50  0001 C CNN
+F 3 "~" H 76975 25325 50  0001 C CNN
+	1    76975 25325
 	1    0    0    -1  
 $EndComp
 Wire Wire Line
-	78175 27075 78175 22825
+	77400 27975 77400 23725
 Wire Wire Line
-	76650 22825 78175 22825
+	75875 23725 77400 23725
 $Comp
 L AGC_DSKY:PWR_FLAG #FLG0103
 U 1 1 5C102702
-P 78175 22825
-F 0 "#FLG0103" H 78175 23350 50  0001 C CNN
-F 1 "PWR_FLAG" H 78185 23285 50  0001 C CNN
-F 2 "" H 78175 22825 50  0001 C CNN
-F 3 "~" H 78175 22825 50  0001 C CNN
-	1    78175 22825
+P 77400 23725
+F 0 "#FLG0103" H 77400 24250 50  0001 C CNN
+F 1 "PWR_FLAG" H 77410 24185 50  0001 C CNN
+F 2 "" H 77400 23725 50  0001 C CNN
+F 3 "~" H 77400 23725 50  0001 C CNN
+	1    77400 23725
 	1    0    0    -1  
 $EndComp
-Connection ~ 78175 22825
+Connection ~ 77400 23725
 Wire Wire Line
-	76625 25475 78600 25475
+	75850 26375 77825 26375
 Wire Wire Line
-	78600 25475 78600 29175
+	77825 26375 77825 30075
 Wire Wire Line
-	78600 29175 77750 29175
-Connection ~ 76625 25475
-Connection ~ 76625 29175
-Text Label 76925 29175 0    140  ~ 28
+	77825 30075 76975 30075
+Connection ~ 75850 26375
+Connection ~ 75850 30075
+Text Label 76150 30075 0    140  ~ 28
 0VDC
 $Comp
 L AGC_DSKY:PWR_FLAG #FLG0102
 U 1 1 5C104986
-P 77750 29175
-F 0 "#FLG0102" H 77750 29700 50  0001 C CNN
-F 1 "PWR_FLAG" H 77760 29635 50  0001 C CNN
-F 2 "" H 77750 29175 50  0001 C CNN
-F 3 "~" H 77750 29175 50  0001 C CNN
-	1    77750 29175
+P 76975 30075
+F 0 "#FLG0102" H 76975 30600 50  0001 C CNN
+F 1 "PWR_FLAG" H 76985 30535 50  0001 C CNN
+F 2 "" H 76975 30075 50  0001 C CNN
+F 3 "~" H 76975 30075 50  0001 C CNN
+	1    76975 30075
 	1    0    0    -1  
 $EndComp
-Connection ~ 77750 29175
+Connection ~ 76975 30075
 Wire Wire Line
-	77750 29175 76625 29175
-Text Notes 75275 23400 2    600  ~ 0
+	76975 30075 75850 30075
+Text Notes 74500 24300 2    600  ~ 0
 {
-Text Notes 75275 27650 2    600  ~ 0
+Text Notes 74500 28550 2    600  ~ 0
 {
-Text Notes 75400 26475 2    1000 ~ 0
+Text Notes 74625 27375 2    1000 ~ 0
 {
-Text Notes 75400 29125 2    1000 ~ 0
+Text Notes 74625 30025 2    1000 ~ 0
 {
-Text Notes 74900 23200 2    140  ~ 28
+Text Notes 74125 24100 2    140  ~ 28
 +3B
-Text Notes 75150 24525 2    140  ~ 28
+Text Notes 74375 25425 2    140  ~ 28
 +3A
-Text Notes 74825 26100 2    140  ~ 28
+Text Notes 74050 27000 2    140  ~ 28
 0VDC
-Text Notes 74900 27425 2    140  ~ 28
+Text Notes 74125 28325 2    140  ~ 28
 +3B
-Text Notes 74825 28750 2    140  ~ 28
+Text Notes 74050 29650 2    140  ~ 28
 0VDC
-Text Notes 78075 24950 2    140  ~ 28
+Text Notes 77300 25850 2    140  ~ 28
 +3VDC TO\nSCALER B
 Wire Wire Line
-	75750 23350 76000 23350
+	74975 24250 75225 24250
 Wire Wire Line
-	76000 23350 76000 22825
-Connection ~ 76000 22825
+	75225 24250 75225 23725
+Connection ~ 75225 23725
 Wire Wire Line
-	76000 22825 76650 22825
+	75225 23725 75875 23725
 $Comp
 L AGC_DSKY:ConnectorGeneric J1
 U 115 1 5BF2E480
@@ -1763,7 +1763,7 @@ Wire Wire Line
 	36850 9550 36400 9550
 Wire Wire Line
 	38775 9900 38375 9900
-Text Notes 77475 22275 2    140  ~ 28
+Text Notes 76700 23175 2    140  ~ 28
 Figure 4-181
 Text Notes 30275 8100 2    140  ~ 28
 Figure 4-60
@@ -1901,14 +1901,14 @@ F 0 "J1" H 27450 3300 140 0001 C CNN
 F 1 "ConnectorGeneric" H 27450 3400 140 0001 C CNN
 F 2 "" H 27450 3450 140 0001 C CNN
 F 3 "" H 27450 3450 140 0001 C CNN
-F 4 "P1_10" H 27450 2975 140 0001 C BNB "Caption"
-F 5 "P2_10" H 27450 2975 140 0001 C BNB "Caption2"
-F 6 "P3_10" H 27450 2975 140 0001 C BNB "Caption3"
-F 7 "P4_10" H 27450 2975 140 0001 C BNB "Caption4"
-F 8 "P5_10" H 27450 2975 140 0001 C BNB "Caption5"
-F 9 "P6_10" H 27450 2975 140 0001 C BNB "Caption6"
-F 10 "P7_10" H 27450 2975 140 0001 C BNB "Caption7"
-F 11 "P8_10" H 27450 2975 140 0001 C BNB "Caption8"
+F 4 "A1_4_10" H 27450 2975 140 0001 C BNB "Caption"
+F 5 "A2_4_10" H 27450 2975 140 0001 C BNB "Caption2"
+F 6 "A3_4_10" H 27450 2975 140 0001 C BNB "Caption3"
+F 7 "A4_4_10" H 27450 2975 140 0001 C BNB "Caption4"
+F 8 "A5_4_10" H 27450 2975 140 0001 C BNB "Caption5"
+F 9 "A6_4_10" H 27450 2975 140 0001 C BNB "Caption6"
+F 10 "A7_4_10" H 27450 2975 140 0001 C BNB "Caption7"
+F 11 "A8_4_10" H 27450 2975 140 0001 C BNB "Caption8"
 F 12 "RBQ" H 27450 2975 140 0001 C BNB "Caption9"
 F 13 "WYS" H 27450 2975 140 0001 C BNB "Caption10"
 F 14 "RGS" H 27450 2975 140 0001 C BNB "Caption11"
@@ -2242,10 +2242,10 @@ F 11 "234/" H 25325 5550 140 0001 C BNB "Caption8"
 F 12 "234/" H 25325 5550 140 0001 C BNB "Caption9"
 F 13 "234/" H 25325 5550 140 0001 C BNB "Caption10"
 F 14 "234/" H 25325 5550 140 0001 C BNB "Caption11"
-F 15 "P12_22" H 25325 5550 140 0001 C BNB "Caption12"
-F 16 "P13_22" H 25325 5550 140 0001 C BNB "Caption13"
-F 17 "P14_22" H 25325 5550 140 0001 C BNB "Caption14"
-F 18 "P15_22" H 25325 5550 140 0001 C BNB "Caption15"
+F 15 "A12_4_22" H 25325 5550 140 0001 C BNB "Caption12"
+F 16 "A13_4_22" H 25325 5550 140 0001 C BNB "Caption13"
+F 17 "A14_4_22" H 25325 5550 140 0001 C BNB "Caption14"
+F 18 "A15_22_A37_4" H 25325 5550 140 0001 C BNB "Caption15"
 F 19 "GOJAM" H 25325 5550 140 0001 C BNB "Caption16"
 	22   25325 5550
 	1    0    0    -1  
@@ -2269,11 +2269,11 @@ F 11 "RLP/" H 25350 4850 140 0001 C BNB "Caption8"
 F 12 "RB/" H 25350 4850 140 0001 C BNB "Caption9"
 F 13 "WY/" H 25350 4850 140 0001 C BNB "Caption10"
 F 14 "RG/" H 25350 4850 140 0001 C BNB "Caption11"
-F 15 "P12_20" H 25350 4850 140 0001 C BNB "Caption12"
-F 16 "P13_20" H 25350 4850 140 0001 C BNB "Caption13"
-F 17 "P14_20" H 25350 4850 140 0001 C BNB "Caption14"
-F 18 "P15_20" H 25350 4850 140 0001 C BNB "Caption15"
-F 19 "P16_20" H 25350 4850 140 0001 C BNB "Caption16"
+F 15 "A9_4_A12_20" H 25350 4850 140 0001 C BNB "Caption12"
+F 16 "A10_4_A13_20" H 25350 4850 140 0001 C BNB "Caption13"
+F 17 "A11_4_A14_20" H 25350 4850 140 0001 C BNB "Caption14"
+F 18 "A15_4_20" H 25350 4850 140 0001 C BNB "Caption15"
+F 19 "A16_4_20" H 25350 4850 140 0001 C BNB "Caption16"
 	20   25350 4850
 	1    0    0    -1  
 $EndComp
@@ -2285,22 +2285,22 @@ F 0 "J1" H 25975 3300 140 0001 C CNN
 F 1 "ConnectorGeneric" H 25975 3400 140 0001 C CNN
 F 2 "" H 25975 3450 140 0001 C CNN
 F 3 "" H 25975 3450 140 0001 C CNN
-F 4 "P1_4" H 25975 2975 140 0001 C BNB "Caption"
-F 5 "P2_4" H 25975 2975 140 0001 C BNB "Caption2"
-F 6 "P3_4" H 25975 2975 140 0001 C BNB "Caption3"
-F 7 "P4_4" H 25975 2975 140 0001 C BNB "Caption4"
-F 8 "P5_4" H 25975 2975 140 0001 C BNB "Caption5"
-F 9 "P6_4" H 25975 2975 140 0001 C BNB "Caption6"
-F 10 "P7_4" H 25975 2975 140 0001 C BNB "Caption7"
-F 11 "P8_4" H 25975 2975 140 0001 C BNB "Caption8"
-F 12 "P9_4" H 25975 2975 140 0001 C BNB "Caption9"
-F 13 "P10_4" H 25975 2975 140 0001 C BNB "Caption10"
-F 14 "P11_4" H 25975 2975 140 0001 C BNB "Caption11"
-F 15 "P12_4" H 25975 2975 140 0001 C BNB "Caption12"
-F 16 "P13_4" H 25975 2975 140 0001 C BNB "Caption13"
-F 17 "P14_4" H 25975 2975 140 0001 C BNB "Caption14"
-F 18 "P15_4" H 25975 2975 140 0001 C BNB "Caption15"
-F 19 "P16_4" H 25975 2975 140 0001 C BNB "Caption16"
+F 4 "A1_4_10" H 25975 2975 140 0001 C BNB "Caption"
+F 5 "A2_4_10" H 25975 2975 140 0001 C BNB "Caption2"
+F 6 "A3_4_10" H 25975 2975 140 0001 C BNB "Caption3"
+F 7 "A4_4_10" H 25975 2975 140 0001 C BNB "Caption4"
+F 8 "A5_4_10" H 25975 2975 140 0001 C BNB "Caption5"
+F 9 "A6_4_10" H 25975 2975 140 0001 C BNB "Caption6"
+F 10 "A7_4_10" H 25975 2975 140 0001 C BNB "Caption7"
+F 11 "A8_4_10" H 25975 2975 140 0001 C BNB "Caption8"
+F 12 "A9_4_A12_20" H 25975 2975 140 0001 C BNB "Caption9"
+F 13 "A10_4_A13_20" H 25975 2975 140 0001 C BNB "Caption10"
+F 14 "A11_4_A14_20" H 25975 2975 140 0001 C BNB "Caption11"
+F 15 "A12_4_22" H 25975 2975 140 0001 C BNB "Caption12"
+F 16 "A13_4_22" H 25975 2975 140 0001 C BNB "Caption13"
+F 17 "A14_4_22" H 25975 2975 140 0001 C BNB "Caption14"
+F 18 "A15_4_20" H 25975 2975 140 0001 C BNB "Caption15"
+F 19 "A16_4_20" H 25975 2975 140 0001 C BNB "Caption16"
 	4    25975 2975
 	1    0    0    1   
 $EndComp
@@ -4508,736 +4508,736 @@ SCALERBBIT
 $Comp
 L AGC_DSKY:ConnectorGeneric J1
 U 49 1 5BF41FD2
-P 44075 16050
-F 0 "J1" H 44075 16375 140 0001 C CNN
-F 1 "ConnectorGeneric" H 44075 16475 140 0001 C CNN
-F 2 "" H 44075 16525 140 0001 C CNN
-F 3 "" H 44075 16525 140 0001 C CNN
-F 4 "RB1" H 44075 16050 140 0001 C BNB "Caption"
-F 5 "R1C" H 44075 16050 140 0001 C BNB "Caption2"
-F 6 "R1C" H 44075 16050 140 0001 C BNB "Caption3"
-F 7 "R1C" H 44075 16050 140 0001 C BNB "Caption4"
-F 8 "R1C" H 44075 16050 140 0001 C BNB "Caption5"
-F 9 "R1C" H 44075 16050 140 0001 C BNB "Caption6"
-F 10 "R1C" H 44075 16050 140 0001 C BNB "Caption7"
-F 11 "R1C" H 44075 16050 140 0001 C BNB "Caption8"
-F 12 "R1C" H 44075 16050 140 0001 C BNB "Caption9"
-F 13 "R1C" H 44075 16050 140 0001 C BNB "Caption10"
-F 14 "R1C" H 44075 16050 140 0001 C BNB "Caption11"
-F 15 "R1C" H 44075 16050 140 0001 C BNB "Caption12"
-F 16 "R1C" H 44075 16050 140 0001 C BNB "Caption13"
-F 17 "R1C" H 44075 16050 140 0001 C BNB "Caption14"
-F 18 "R1C" H 44075 16050 140 0001 C BNB "Caption15"
-F 19 "R1C" H 44075 16050 140 0001 C BNB "Caption16"
-	49   44075 16050
+P 41975 16975
+F 0 "J1" H 41975 17300 140 0001 C CNN
+F 1 "ConnectorGeneric" H 41975 17400 140 0001 C CNN
+F 2 "" H 41975 17450 140 0001 C CNN
+F 3 "" H 41975 17450 140 0001 C CNN
+F 4 "RB1" H 41975 16975 140 0001 C BNB "Caption"
+F 5 "R1C" H 41975 16975 140 0001 C BNB "Caption2"
+F 6 "R1C" H 41975 16975 140 0001 C BNB "Caption3"
+F 7 "R1C" H 41975 16975 140 0001 C BNB "Caption4"
+F 8 "R1C" H 41975 16975 140 0001 C BNB "Caption5"
+F 9 "R1C" H 41975 16975 140 0001 C BNB "Caption6"
+F 10 "R1C" H 41975 16975 140 0001 C BNB "Caption7"
+F 11 "R1C" H 41975 16975 140 0001 C BNB "Caption8"
+F 12 "R1C" H 41975 16975 140 0001 C BNB "Caption9"
+F 13 "R1C" H 41975 16975 140 0001 C BNB "Caption10"
+F 14 "R1C" H 41975 16975 140 0001 C BNB "Caption11"
+F 15 "R1C" H 41975 16975 140 0001 C BNB "Caption12"
+F 16 "R1C" H 41975 16975 140 0001 C BNB "Caption13"
+F 17 "R1C" H 41975 16975 140 0001 C BNB "Caption14"
+F 18 "R1C" H 41975 16975 140 0001 C BNB "Caption15"
+F 19 "R1C" H 41975 16975 140 0001 C BNB "Caption16"
+	49   41975 16975
 	1    0    0    -1  
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorGeneric J1
 U 87 1 5BF41FD3
-P 44100 20925
-F 0 "J1" H 44100 21250 140 0001 C CNN
-F 1 "ConnectorGeneric" H 44100 21350 140 0001 C CNN
-F 2 "" H 44100 21400 140 0001 C CNN
-F 3 "" H 44100 21400 140 0001 C CNN
-F 4 "0VDC" H 44100 20925 140 0001 C BNB "Caption"
-F 5 "0VDC" H 44100 20925 140 0001 C BNB "Caption2"
-F 6 "0VDC" H 44100 20925 140 0001 C BNB "Caption3"
-F 7 "RSTRT" H 44100 20925 140 0001 C BNB "Caption4"
-F 8 "RSTRT" H 44100 20925 140 0001 C BNB "Caption5"
-F 9 "0VDC" H 44100 20925 140 0001 C BNB "Caption6"
-F 10 "0VDC" H 44100 20925 140 0001 C BNB "Caption7"
-F 11 "0VDC" H 44100 20925 140 0001 C BNB "Caption8"
-F 12 "0VDC" H 44100 20925 140 0001 C BNB "Caption9"
-F 13 "0VDC" H 44100 20925 140 0001 C BNB "Caption10"
-F 14 "RSTRT" H 44100 20925 140 0001 C BNB "Caption11"
-F 15 "0VDC" H 44100 20925 140 0001 C BNB "Caption12"
-F 16 "0VDC" H 44100 20925 140 0001 C BNB "Caption13"
-F 17 "0VDC" H 44100 20925 140 0001 C BNB "Caption14"
-F 18 "0VDC" H 44100 20925 140 0001 C BNB "Caption15"
-F 19 "0VDC" H 44100 20925 140 0001 C BNB "Caption16"
-	87   44100 20925
+P 42000 21850
+F 0 "J1" H 42000 22175 140 0001 C CNN
+F 1 "ConnectorGeneric" H 42000 22275 140 0001 C CNN
+F 2 "" H 42000 22325 140 0001 C CNN
+F 3 "" H 42000 22325 140 0001 C CNN
+F 4 "0VDC" H 42000 21850 140 0001 C BNB "Caption"
+F 5 "0VDC" H 42000 21850 140 0001 C BNB "Caption2"
+F 6 "0VDC" H 42000 21850 140 0001 C BNB "Caption3"
+F 7 "RSTRT" H 42000 21850 140 0001 C BNB "Caption4"
+F 8 "RSTRT" H 42000 21850 140 0001 C BNB "Caption5"
+F 9 "0VDC" H 42000 21850 140 0001 C BNB "Caption6"
+F 10 "0VDC" H 42000 21850 140 0001 C BNB "Caption7"
+F 11 "0VDC" H 42000 21850 140 0001 C BNB "Caption8"
+F 12 "0VDC" H 42000 21850 140 0001 C BNB "Caption9"
+F 13 "0VDC" H 42000 21850 140 0001 C BNB "Caption10"
+F 14 "RSTRT" H 42000 21850 140 0001 C BNB "Caption11"
+F 15 "0VDC" H 42000 21850 140 0001 C BNB "Caption12"
+F 16 "0VDC" H 42000 21850 140 0001 C BNB "Caption13"
+F 17 "0VDC" H 42000 21850 140 0001 C BNB "Caption14"
+F 18 "0VDC" H 42000 21850 140 0001 C BNB "Caption15"
+F 19 "0VDC" H 42000 21850 140 0001 C BNB "Caption16"
+	87   42000 21850
 	1    0    0    -1  
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorGeneric J1
 U 67 1 5BF41FD4
-P 54350 14125
-F 0 "J1" H 54350 14450 140 0001 C CNN
-F 1 "ConnectorGeneric" H 54350 14550 140 0001 C CNN
-F 2 "" H 54350 14600 140 0001 C CNN
-F 3 "" H 54350 14600 140 0001 C CNN
-F 4 "WL01" H 54350 14125 140 0001 C BNB "Caption"
-F 5 "WL02" H 54350 14125 140 0001 C BNB "Caption2"
-F 6 "WL03" H 54350 14125 140 0001 C BNB "Caption3"
-F 7 "WL04" H 54350 14125 140 0001 C BNB "Caption4"
-F 8 "WL05" H 54350 14125 140 0001 C BNB "Caption5"
-F 9 "WL06" H 54350 14125 140 0001 C BNB "Caption6"
-F 10 "WL07" H 54350 14125 140 0001 C BNB "Caption7"
-F 11 "WL08" H 54350 14125 140 0001 C BNB "Caption8"
-F 12 "WL09" H 54350 14125 140 0001 C BNB "Caption9"
-F 13 "WL10" H 54350 14125 140 0001 C BNB "Caption10"
-F 14 "WL11" H 54350 14125 140 0001 C BNB "Caption11"
-F 15 "WL12" H 54350 14125 140 0001 C BNB "Caption12"
-F 16 "WL13" H 54350 14125 140 0001 C BNB "Caption13"
-F 17 "WL14" H 54350 14125 140 0001 C BNB "Caption14"
-F 18 "WL15" H 54350 14125 140 0001 C BNB "Caption15"
-F 19 "WL16" H 54350 14125 140 0001 C BNB "Caption16"
-	67   54350 14125
+P 52250 15050
+F 0 "J1" H 52250 15375 140 0001 C CNN
+F 1 "ConnectorGeneric" H 52250 15475 140 0001 C CNN
+F 2 "" H 52250 15525 140 0001 C CNN
+F 3 "" H 52250 15525 140 0001 C CNN
+F 4 "WL01" H 52250 15050 140 0001 C BNB "Caption"
+F 5 "WL02" H 52250 15050 140 0001 C BNB "Caption2"
+F 6 "WL03" H 52250 15050 140 0001 C BNB "Caption3"
+F 7 "WL04" H 52250 15050 140 0001 C BNB "Caption4"
+F 8 "WL05" H 52250 15050 140 0001 C BNB "Caption5"
+F 9 "WL06" H 52250 15050 140 0001 C BNB "Caption6"
+F 10 "WL07" H 52250 15050 140 0001 C BNB "Caption7"
+F 11 "WL08" H 52250 15050 140 0001 C BNB "Caption8"
+F 12 "WL09" H 52250 15050 140 0001 C BNB "Caption9"
+F 13 "WL10" H 52250 15050 140 0001 C BNB "Caption10"
+F 14 "WL11" H 52250 15050 140 0001 C BNB "Caption11"
+F 15 "WL12" H 52250 15050 140 0001 C BNB "Caption12"
+F 16 "WL13" H 52250 15050 140 0001 C BNB "Caption13"
+F 17 "WL14" H 52250 15050 140 0001 C BNB "Caption14"
+F 18 "WL15" H 52250 15050 140 0001 C BNB "Caption15"
+F 19 "WL16" H 52250 15050 140 0001 C BNB "Caption16"
+	67   52250 15050
 	-1   0    0    1   
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorGeneric J1
 U 133 1 5BF41FD5
-P 54375 19025
-F 0 "J1" H 54375 19350 140 0001 C CNN
-F 1 "ConnectorGeneric" H 54375 19450 140 0001 C CNN
-F 2 "" H 54375 19500 140 0001 C CNN
-F 3 "" H 54375 19500 140 0001 C CNN
-F 4 "WL01/" H 54375 19025 140 0001 C BNB "Caption"
-F 5 "WL02/" H 54375 19025 140 0001 C BNB "Caption2"
-F 6 "WL03/" H 54375 19025 140 0001 C BNB "Caption3"
-F 7 "WL04/" H 54375 19025 140 0001 C BNB "Caption4"
-F 8 "WL05/" H 54375 19025 140 0001 C BNB "Caption5"
-F 9 "WL06/" H 54375 19025 140 0001 C BNB "Caption6"
-F 10 "WL07/" H 54375 19025 140 0001 C BNB "Caption7"
-F 11 "WL08/" H 54375 19025 140 0001 C BNB "Caption8"
-F 12 "WL09/" H 54375 19025 140 0001 C BNB "Caption9"
-F 13 "WL10/" H 54375 19025 140 0001 C BNB "Caption10"
-F 14 "WL11/" H 54375 19025 140 0001 C BNB "Caption11"
-F 15 "WL12/" H 54375 19025 140 0001 C BNB "Caption12"
-F 16 "WL13/" H 54375 19025 140 0001 C BNB "Caption13"
-F 17 "WL14/" H 54375 19025 140 0001 C BNB "Caption14"
-F 18 "WL15/" H 54375 19025 140 0001 C BNB "Caption15"
-F 19 "WL16/" H 54375 19025 140 0001 C BNB "Caption16"
-	133  54375 19025
+P 52275 19950
+F 0 "J1" H 52275 20275 140 0001 C CNN
+F 1 "ConnectorGeneric" H 52275 20375 140 0001 C CNN
+F 2 "" H 52275 20425 140 0001 C CNN
+F 3 "" H 52275 20425 140 0001 C CNN
+F 4 "WL01/" H 52275 19950 140 0001 C BNB "Caption"
+F 5 "WL02/" H 52275 19950 140 0001 C BNB "Caption2"
+F 6 "WL03/" H 52275 19950 140 0001 C BNB "Caption3"
+F 7 "WL04/" H 52275 19950 140 0001 C BNB "Caption4"
+F 8 "WL05/" H 52275 19950 140 0001 C BNB "Caption5"
+F 9 "WL06/" H 52275 19950 140 0001 C BNB "Caption6"
+F 10 "WL07/" H 52275 19950 140 0001 C BNB "Caption7"
+F 11 "WL08/" H 52275 19950 140 0001 C BNB "Caption8"
+F 12 "WL09/" H 52275 19950 140 0001 C BNB "Caption9"
+F 13 "WL10/" H 52275 19950 140 0001 C BNB "Caption10"
+F 14 "WL11/" H 52275 19950 140 0001 C BNB "Caption11"
+F 15 "WL12/" H 52275 19950 140 0001 C BNB "Caption12"
+F 16 "WL13/" H 52275 19950 140 0001 C BNB "Caption13"
+F 17 "WL14/" H 52275 19950 140 0001 C BNB "Caption14"
+F 18 "WL15/" H 52275 19950 140 0001 C BNB "Caption15"
+F 19 "WL16/" H 52275 19950 140 0001 C BNB "Caption16"
+	133  52275 19950
 	-1   0    0    1   
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorGeneric J1
 U 43 1 5BF41FD6
-P 54375 15375
-F 0 "J1" H 54375 15700 140 0001 C CNN
-F 1 "ConnectorGeneric" H 54375 15800 140 0001 C CNN
-F 2 "" H 54375 15850 140 0001 C CNN
-F 3 "" H 54375 15850 140 0001 C CNN
-F 4 "WL01/" H 54375 15375 140 0001 C BNB "Caption"
-F 5 "WL02/" H 54375 15375 140 0001 C BNB "Caption2"
-F 6 "WL03/" H 54375 15375 140 0001 C BNB "Caption3"
-F 7 "WL04/" H 54375 15375 140 0001 C BNB "Caption4"
-F 8 "WL05/" H 54375 15375 140 0001 C BNB "Caption5"
-F 9 "WL06/" H 54375 15375 140 0001 C BNB "Caption6"
-F 10 "WL07/" H 54375 15375 140 0001 C BNB "Caption7"
-F 11 "WL08/" H 54375 15375 140 0001 C BNB "Caption8"
-F 12 "WL09/" H 54375 15375 140 0001 C BNB "Caption9"
-F 13 "WL10/" H 54375 15375 140 0001 C BNB "Caption10"
-F 14 "WL11/" H 54375 15375 140 0001 C BNB "Caption11"
-F 15 "WL12/" H 54375 15375 140 0001 C BNB "Caption12"
-F 16 "WL13/" H 54375 15375 140 0001 C BNB "Caption13"
-F 17 "WL14/" H 54375 15375 140 0001 C BNB "Caption14"
-F 18 "WL15/" H 54375 15375 140 0001 C BNB "Caption15"
-F 19 "WL16/" H 54375 15375 140 0001 C BNB "Caption16"
-	43   54375 15375
+P 52275 16300
+F 0 "J1" H 52275 16625 140 0001 C CNN
+F 1 "ConnectorGeneric" H 52275 16725 140 0001 C CNN
+F 2 "" H 52275 16775 140 0001 C CNN
+F 3 "" H 52275 16775 140 0001 C CNN
+F 4 "WL01/" H 52275 16300 140 0001 C BNB "Caption"
+F 5 "WL02/" H 52275 16300 140 0001 C BNB "Caption2"
+F 6 "WL03/" H 52275 16300 140 0001 C BNB "Caption3"
+F 7 "WL04/" H 52275 16300 140 0001 C BNB "Caption4"
+F 8 "WL05/" H 52275 16300 140 0001 C BNB "Caption5"
+F 9 "WL06/" H 52275 16300 140 0001 C BNB "Caption6"
+F 10 "WL07/" H 52275 16300 140 0001 C BNB "Caption7"
+F 11 "WL08/" H 52275 16300 140 0001 C BNB "Caption8"
+F 12 "WL09/" H 52275 16300 140 0001 C BNB "Caption9"
+F 13 "WL10/" H 52275 16300 140 0001 C BNB "Caption10"
+F 14 "WL11/" H 52275 16300 140 0001 C BNB "Caption11"
+F 15 "WL12/" H 52275 16300 140 0001 C BNB "Caption12"
+F 16 "WL13/" H 52275 16300 140 0001 C BNB "Caption13"
+F 17 "WL14/" H 52275 16300 140 0001 C BNB "Caption14"
+F 18 "WL15/" H 52275 16300 140 0001 C BNB "Caption15"
+F 19 "WL16/" H 52275 16300 140 0001 C BNB "Caption16"
+	43   52275 16300
 	-1   0    0    1   
 $EndComp
 $Comp
 L D3NOR-+3VDC-0VDC-nd1021041:D3NOR-+3VDC-0VDC-nd1021041-_B_-___ U192
 U 1 1 5BF41FD7
-P 51925 16600
-F 0 "U192" H 51925 16925 140 0001 C CNB
-F 1 "D3NOR-+3VDC-0VDC-nd1021041-_B_-___" H 51925 17025 140 0001 C CNN
-F 2 "" H 51925 17075 140 0001 C CNN
-F 3 "" H 51925 17075 140 0001 C CNN
-F 4 "158xx" H 51925 16600 140 0000 C CNB "Location"
-	1    51925 16600
+P 49825 17525
+F 0 "U192" H 49825 17850 140 0001 C CNB
+F 1 "D3NOR-+3VDC-0VDC-nd1021041-_B_-___" H 49825 17950 140 0001 C CNN
+F 2 "" H 49825 18000 140 0001 C CNN
+F 3 "" H 49825 18000 140 0001 C CNN
+F 4 "158xx" H 49825 17525 140 0000 C CNB "Location"
+	1    49825 17525
 	1    0    0    1   
 $EndComp
 $Comp
 L D3NOR-+3VDC-0VDC-nd1021041:D3NOR-+3VDC-0VDC-nd1021041-_B_-___ U191
 U 1 1 5BF41FD8
-P 51900 15375
-F 0 "U191" H 51900 15700 140 0001 C CNB
-F 1 "D3NOR-+3VDC-0VDC-nd1021041-_B_-___" H 51900 15800 140 0001 C CNN
-F 2 "" H 51900 15850 140 0001 C CNN
-F 3 "" H 51900 15850 140 0001 C CNN
-F 4 "157xx" H 51900 15375 140 0000 C CNB "Location"
-	1    51900 15375
+P 49800 16300
+F 0 "U191" H 49800 16625 140 0001 C CNB
+F 1 "D3NOR-+3VDC-0VDC-nd1021041-_B_-___" H 49800 16725 140 0001 C CNN
+F 2 "" H 49800 16775 140 0001 C CNN
+F 3 "" H 49800 16775 140 0001 C CNN
+F 4 "157xx" H 49800 16300 140 0000 C CNB "Location"
+	1    49800 16300
 	1    0    0    1   
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorGeneric J1
 U 85 1 5BF41FD9
-P 44150 22125
-F 0 "J1" H 44150 22450 140 0001 C CNN
-F 1 "ConnectorGeneric" H 44150 22550 140 0001 C CNN
-F 2 "" H 44150 22600 140 0001 C CNN
-F 3 "" H 44150 22600 140 0001 C CNN
-F 4 "0VDC" H 44150 22125 140 0001 C BNB "Caption"
-F 5 "0VDC" H 44150 22125 140 0001 C BNB "Caption2"
-F 6 "0VDC" H 44150 22125 140 0001 C BNB "Caption3"
-F 7 "0VDC" H 44150 22125 140 0001 C BNB "Caption4"
-F 8 "0VDC" H 44150 22125 140 0001 C BNB "Caption5"
-F 9 "0VDC" H 44150 22125 140 0001 C BNB "Caption6"
-F 10 "0VDC" H 44150 22125 140 0001 C BNB "Caption7"
-F 11 "0VDC" H 44150 22125 140 0001 C BNB "Caption8"
-F 12 "0VDC" H 44150 22125 140 0001 C BNB "Caption9"
-F 13 "0VDC" H 44150 22125 140 0001 C BNB "Caption10"
-F 14 "0VDC" H 44150 22125 140 0001 C BNB "Caption11"
-F 15 "0VDC" H 44150 22125 140 0001 C BNB "Caption12"
-F 16 "0VDC" H 44150 22125 140 0001 C BNB "Caption13"
-F 17 "0VDC" H 44150 22125 140 0001 C BNB "Caption14"
-F 18 "0VDC" H 44150 22125 140 0001 C BNB "Caption15"
-F 19 "0VDC" H 44150 22125 140 0001 C BNB "Caption16"
-	85   44150 22125
+P 42050 23050
+F 0 "J1" H 42050 23375 140 0001 C CNN
+F 1 "ConnectorGeneric" H 42050 23475 140 0001 C CNN
+F 2 "" H 42050 23525 140 0001 C CNN
+F 3 "" H 42050 23525 140 0001 C CNN
+F 4 "0VDC" H 42050 23050 140 0001 C BNB "Caption"
+F 5 "0VDC" H 42050 23050 140 0001 C BNB "Caption2"
+F 6 "0VDC" H 42050 23050 140 0001 C BNB "Caption3"
+F 7 "0VDC" H 42050 23050 140 0001 C BNB "Caption4"
+F 8 "0VDC" H 42050 23050 140 0001 C BNB "Caption5"
+F 9 "0VDC" H 42050 23050 140 0001 C BNB "Caption6"
+F 10 "0VDC" H 42050 23050 140 0001 C BNB "Caption7"
+F 11 "0VDC" H 42050 23050 140 0001 C BNB "Caption8"
+F 12 "0VDC" H 42050 23050 140 0001 C BNB "Caption9"
+F 13 "0VDC" H 42050 23050 140 0001 C BNB "Caption10"
+F 14 "0VDC" H 42050 23050 140 0001 C BNB "Caption11"
+F 15 "0VDC" H 42050 23050 140 0001 C BNB "Caption12"
+F 16 "0VDC" H 42050 23050 140 0001 C BNB "Caption13"
+F 17 "0VDC" H 42050 23050 140 0001 C BNB "Caption14"
+F 18 "0VDC" H 42050 23050 140 0001 C BNB "Caption15"
+F 19 "0VDC" H 42050 23050 140 0001 C BNB "Caption16"
+	85   42050 23050
 	1    0    0    -1  
 $EndComp
 $Comp
 L D3NOR-+3VDC-0VDC-nd1021041:D3NOR-+3VDC-0VDC-nd1021041-_B_-___ U193
 U 1 1 5BF41FDA
-P 51925 17800
-F 0 "U193" H 51925 18125 140 0001 C CNB
-F 1 "D3NOR-+3VDC-0VDC-nd1021041-_B_-___" H 51925 18225 140 0001 C CNN
-F 2 "" H 51925 18275 140 0001 C CNN
-F 3 "" H 51925 18275 140 0001 C CNN
-F 4 "155xx" H 51925 17800 140 0000 C CNB "Location"
-	1    51925 17800
+P 49825 18725
+F 0 "U193" H 49825 19050 140 0001 C CNB
+F 1 "D3NOR-+3VDC-0VDC-nd1021041-_B_-___" H 49825 19150 140 0001 C CNN
+F 2 "" H 49825 19200 140 0001 C CNN
+F 3 "" H 49825 19200 140 0001 C CNN
+F 4 "155xx" H 49825 18725 140 0000 C CNB "Location"
+	1    49825 18725
 	1    0    0    1   
 $EndComp
 $Comp
 L D3NOR-NC-0VDC-expander-nd1021041:D3NOR-NC-0VDC-expander-nd1021041-_B_-___ U188
 U 1 1 5BF41FDB
-P 48975 20925
-F 0 "U188" H 48975 21250 140 0001 C CNB
-F 1 "D3NOR-NC-0VDC-expander-nd1021041-_B_-___" H 48975 21350 140 0001 C CNN
-F 2 "" H 48975 21400 140 0001 C CNN
-F 3 "" H 48975 21400 140 0001 C CNN
-F 4 "152xx" H 48900 20925 130 0000 C CNB "Location"
-	1    48975 20925
+P 46875 21850
+F 0 "U188" H 46875 22175 140 0001 C CNB
+F 1 "D3NOR-NC-0VDC-expander-nd1021041-_B_-___" H 46875 22275 140 0001 C CNN
+F 2 "" H 46875 22325 140 0001 C CNN
+F 3 "" H 46875 22325 140 0001 C CNN
+F 4 "152xx" H 46800 21850 130 0000 C CNB "Location"
+	1    46875 21850
 	1    0    0    1   
 $EndComp
 $Comp
 L D3NOR-+3VDC-0VDC-nd1021041:D3NOR-+3VDC-0VDC-nd1021041-_B_-___ U186
 U 1 1 5BF41FDC
-P 48950 16050
-F 0 "U186" H 48950 16375 140 0001 C CNB
-F 1 "D3NOR-+3VDC-0VDC-nd1021041-_B_-___" H 48950 16475 140 0001 C CNN
-F 2 "" H 48950 16525 140 0001 C CNN
-F 3 "" H 48950 16525 140 0001 C CNN
-F 4 "151xx" H 48950 16050 140 0000 C CNB "Location"
-	1    48950 16050
+P 46850 16975
+F 0 "U186" H 46850 17300 140 0001 C CNB
+F 1 "D3NOR-+3VDC-0VDC-nd1021041-_B_-___" H 46850 17400 140 0001 C CNN
+F 2 "" H 46850 17450 140 0001 C CNN
+F 3 "" H 46850 17450 140 0001 C CNN
+F 4 "151xx" H 46850 16975 140 0000 C CNB "Location"
+	1    46850 16975
 	1    0    0    1   
 $EndComp
 $Comp
 L D3NOR-+3VDC-0VDC-nd1021041:D3NOR-+3VDC-0VDC-nd1021041-_B_-___ U187
 U 1 1 5BF41FDD
-P 48975 18475
-F 0 "U187" H 48975 18800 140 0001 C CNB
-F 1 "D3NOR-+3VDC-0VDC-nd1021041-_B_-___" H 48975 18900 140 0001 C CNN
-F 2 "" H 48975 18950 140 0001 C CNN
-F 3 "" H 48975 18950 140 0001 C CNN
-F 4 "150xx" H 48975 18475 140 0000 C CNB "Location"
-	1    48975 18475
+P 46875 19400
+F 0 "U187" H 46875 19725 140 0001 C CNB
+F 1 "D3NOR-+3VDC-0VDC-nd1021041-_B_-___" H 46875 19825 140 0001 C CNN
+F 2 "" H 46875 19875 140 0001 C CNN
+F 3 "" H 46875 19875 140 0001 C CNN
+F 4 "150xx" H 46875 19400 140 0000 C CNB "Location"
+	1    46875 19400
 	1    0    0    1   
 $EndComp
 $Comp
 L D3NOR-+3VDC-0VDC-nd1021041:D3NOR-+3VDC-0VDC-nd1021041-_B_-___ U194
 U 1 1 5BF41FDE
-P 51925 19025
-F 0 "U194" H 51925 19350 140 0001 C CNB
-F 1 "D3NOR-+3VDC-0VDC-nd1021041-_B_-___" H 51925 19450 140 0001 C CNN
-F 2 "" H 51925 19500 140 0001 C CNN
-F 3 "" H 51925 19500 140 0001 C CNN
-F 4 "156xx" H 51925 19025 140 0000 C CNB "Location"
-	1    51925 19025
+P 49825 19950
+F 0 "U194" H 49825 20275 140 0001 C CNB
+F 1 "D3NOR-+3VDC-0VDC-nd1021041-_B_-___" H 49825 20375 140 0001 C CNN
+F 2 "" H 49825 20425 140 0001 C CNN
+F 3 "" H 49825 20425 140 0001 C CNN
+F 4 "156xx" H 49825 19950 140 0000 C CNB "Location"
+	1    49825 19950
 	1    0    0    1   
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorGeneric J1
 U 19 1 5BF41FDF
-P 54400 20225
-F 0 "J1" H 54400 20550 140 0001 C CNN
-F 1 "ConnectorGeneric" H 54400 20650 140 0001 C CNN
-F 2 "" H 54400 20700 140 0001 C CNN
-F 3 "" H 54400 20700 140 0001 C CNN
-F 4 "WL01" H 54400 20225 140 0001 C BNB "Caption"
-F 5 "WL02" H 54400 20225 140 0001 C BNB "Caption2"
-F 6 "WL03" H 54400 20225 140 0001 C BNB "Caption3"
-F 7 "WL04" H 54400 20225 140 0001 C BNB "Caption4"
-F 8 "WL05" H 54400 20225 140 0001 C BNB "Caption5"
-F 9 "WL06" H 54400 20225 140 0001 C BNB "Caption6"
-F 10 "WL07" H 54400 20225 140 0001 C BNB "Caption7"
-F 11 "WL08" H 54400 20225 140 0001 C BNB "Caption8"
-F 12 "WL09" H 54400 20225 140 0001 C BNB "Caption9"
-F 13 "WL10" H 54400 20225 140 0001 C BNB "Caption10"
-F 14 "WL11" H 54400 20225 140 0001 C BNB "Caption11"
-F 15 "WL12" H 54400 20225 140 0001 C BNB "Caption12"
-F 16 "WL13" H 54400 20225 140 0001 C BNB "Caption13"
-F 17 "WL14" H 54400 20225 140 0001 C BNB "Caption14"
-F 18 "WL15" H 54400 20225 140 0001 C BNB "Caption15"
-F 19 "WL16" H 54400 20225 140 0001 C BNB "Caption16"
-	19   54400 20225
+P 52300 21150
+F 0 "J1" H 52300 21475 140 0001 C CNN
+F 1 "ConnectorGeneric" H 52300 21575 140 0001 C CNN
+F 2 "" H 52300 21625 140 0001 C CNN
+F 3 "" H 52300 21625 140 0001 C CNN
+F 4 "WL01" H 52300 21150 140 0001 C BNB "Caption"
+F 5 "WL02" H 52300 21150 140 0001 C BNB "Caption2"
+F 6 "WL03" H 52300 21150 140 0001 C BNB "Caption3"
+F 7 "WL04" H 52300 21150 140 0001 C BNB "Caption4"
+F 8 "WL05" H 52300 21150 140 0001 C BNB "Caption5"
+F 9 "WL06" H 52300 21150 140 0001 C BNB "Caption6"
+F 10 "WL07" H 52300 21150 140 0001 C BNB "Caption7"
+F 11 "WL08" H 52300 21150 140 0001 C BNB "Caption8"
+F 12 "WL09" H 52300 21150 140 0001 C BNB "Caption9"
+F 13 "WL10" H 52300 21150 140 0001 C BNB "Caption10"
+F 14 "WL11" H 52300 21150 140 0001 C BNB "Caption11"
+F 15 "WL12" H 52300 21150 140 0001 C BNB "Caption12"
+F 16 "WL13" H 52300 21150 140 0001 C BNB "Caption13"
+F 17 "WL14" H 52300 21150 140 0001 C BNB "Caption14"
+F 18 "WL15" H 52300 21150 140 0001 C BNB "Caption15"
+F 19 "WL16" H 52300 21150 140 0001 C BNB "Caption16"
+	19   52300 21150
 	-1   0    0    1   
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorGeneric J1
 U 17 1 5BF41FE0
-P 44075 13975
-F 0 "J1" H 44075 14300 140 0001 C CNN
-F 1 "ConnectorGeneric" H 44075 14400 140 0001 C CNN
-F 2 "" H 44075 14450 140 0001 C CNN
-F 3 "" H 44075 14450 140 0001 C CNN
-F 4 "URL01" H 44075 13975 140 0001 C BNB "Caption"
-F 5 "URL02" H 44075 13975 140 0001 C BNB "Caption2"
-F 6 "URL03" H 44075 13975 140 0001 C BNB "Caption3"
-F 7 "URL04" H 44075 13975 140 0001 C BNB "Caption4"
-F 8 "URL05" H 44075 13975 140 0001 C BNB "Caption5"
-F 9 "URL06" H 44075 13975 140 0001 C BNB "Caption6"
-F 10 "URL07" H 44075 13975 140 0001 C BNB "Caption7"
-F 11 "URL08" H 44075 13975 140 0001 C BNB "Caption8"
-F 12 "URL09" H 44075 13975 140 0001 C BNB "Caption9"
-F 13 "URL10" H 44075 13975 140 0001 C BNB "Caption10"
-F 14 "URL11" H 44075 13975 140 0001 C BNB "Caption11"
-F 15 "URL12" H 44075 13975 140 0001 C BNB "Caption12"
-F 16 "URL13" H 44075 13975 140 0001 C BNB "Caption13"
-F 17 "URL14" H 44075 13975 140 0001 C BNB "Caption14"
-F 18 "URL15" H 44075 13975 140 0001 C BNB "Caption15"
-F 19 "UWL16" H 44075 13975 140 0001 C BNB "Caption16"
-	17   44075 13975
+P 41975 14900
+F 0 "J1" H 41975 15225 140 0001 C CNN
+F 1 "ConnectorGeneric" H 41975 15325 140 0001 C CNN
+F 2 "" H 41975 15375 140 0001 C CNN
+F 3 "" H 41975 15375 140 0001 C CNN
+F 4 "URL01" H 41975 14900 140 0001 C BNB "Caption"
+F 5 "URL02" H 41975 14900 140 0001 C BNB "Caption2"
+F 6 "URL03" H 41975 14900 140 0001 C BNB "Caption3"
+F 7 "URL04" H 41975 14900 140 0001 C BNB "Caption4"
+F 8 "URL05" H 41975 14900 140 0001 C BNB "Caption5"
+F 9 "URL06" H 41975 14900 140 0001 C BNB "Caption6"
+F 10 "URL07" H 41975 14900 140 0001 C BNB "Caption7"
+F 11 "URL08" H 41975 14900 140 0001 C BNB "Caption8"
+F 12 "URL09" H 41975 14900 140 0001 C BNB "Caption9"
+F 13 "URL10" H 41975 14900 140 0001 C BNB "Caption10"
+F 14 "URL11" H 41975 14900 140 0001 C BNB "Caption11"
+F 15 "URL12" H 41975 14900 140 0001 C BNB "Caption12"
+F 16 "URL13" H 41975 14900 140 0001 C BNB "Caption13"
+F 17 "URL14" H 41975 14900 140 0001 C BNB "Caption14"
+F 18 "URL15" H 41975 14900 140 0001 C BNB "Caption15"
+F 19 "UWL16" H 41975 14900 140 0001 C BNB "Caption16"
+	17   41975 14900
 	1    0    0    -1  
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorGeneric J1
 U 15 1 5BF41FE1
-P 44075 17275
-F 0 "J1" H 44075 17600 140 0001 C CNN
-F 1 "ConnectorGeneric" H 44075 17700 140 0001 C CNN
-F 2 "" H 44075 17750 140 0001 C CNN
-F 3 "" H 44075 17750 140 0001 C CNN
-F 4 "0VDC" H 44075 17275 140 0001 C BNB "Caption"
-F 5 "R22" H 44075 17275 140 0001 C BNB "Caption2"
-F 6 "0VDC" H 44075 17275 140 0001 C BNB "Caption3"
-F 7 "0VDC" H 44075 17275 140 0001 C BNB "Caption4"
-F 8 "R22" H 44075 17275 140 0001 C BNB "Caption5"
-F 9 "0VDC" H 44075 17275 140 0001 C BNB "Caption6"
-F 10 "0VDC" H 44075 17275 140 0001 C BNB "Caption7"
-F 11 "0VDC" H 44075 17275 140 0001 C BNB "Caption8"
-F 12 "0VDC" H 44075 17275 140 0001 C BNB "Caption9"
-F 13 "0VDC" H 44075 17275 140 0001 C BNB "Caption10"
-F 14 "0VDC" H 44075 17275 140 0001 C BNB "Caption11"
-F 15 "0VDC" H 44075 17275 140 0001 C BNB "Caption12"
-F 16 "0VDC" H 44075 17275 140 0001 C BNB "Caption13"
-F 17 "0VDC" H 44075 17275 140 0001 C BNB "Caption14"
-F 18 "0VDC" H 44075 17275 140 0001 C BNB "Caption15"
-F 19 "0VDC" H 44075 17275 140 0001 C BNB "Caption16"
-	15   44075 17275
+P 41975 18200
+F 0 "J1" H 41975 18525 140 0001 C CNN
+F 1 "ConnectorGeneric" H 41975 18625 140 0001 C CNN
+F 2 "" H 41975 18675 140 0001 C CNN
+F 3 "" H 41975 18675 140 0001 C CNN
+F 4 "0VDC" H 41975 18200 140 0001 C BNB "Caption"
+F 5 "R22" H 41975 18200 140 0001 C BNB "Caption2"
+F 6 "0VDC" H 41975 18200 140 0001 C BNB "Caption3"
+F 7 "0VDC" H 41975 18200 140 0001 C BNB "Caption4"
+F 8 "R22" H 41975 18200 140 0001 C BNB "Caption5"
+F 9 "0VDC" H 41975 18200 140 0001 C BNB "Caption6"
+F 10 "0VDC" H 41975 18200 140 0001 C BNB "Caption7"
+F 11 "0VDC" H 41975 18200 140 0001 C BNB "Caption8"
+F 12 "0VDC" H 41975 18200 140 0001 C BNB "Caption9"
+F 13 "0VDC" H 41975 18200 140 0001 C BNB "Caption10"
+F 14 "0VDC" H 41975 18200 140 0001 C BNB "Caption11"
+F 15 "0VDC" H 41975 18200 140 0001 C BNB "Caption12"
+F 16 "0VDC" H 41975 18200 140 0001 C BNB "Caption13"
+F 17 "0VDC" H 41975 18200 140 0001 C BNB "Caption14"
+F 18 "0VDC" H 41975 18200 140 0001 C BNB "Caption15"
+F 19 "0VDC" H 41975 18200 140 0001 C BNB "Caption16"
+	15   41975 18200
 	1    0    0    -1  
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorGeneric J1
 U 13 1 5BF41FE2
-P 44075 14500
-F 0 "J1" H 44075 14825 140 0001 C CNN
-F 1 "ConnectorGeneric" H 44075 14925 140 0001 C CNN
-F 2 "" H 44075 14975 140 0001 C CNN
-F 3 "" H 44075 14975 140 0001 C CNN
-F 4 "CAD01" H 44075 14500 140 0001 C BNB "Caption"
-F 5 "CAD02" H 44075 14500 140 0001 C BNB "Caption2"
-F 6 "CAD03" H 44075 14500 140 0001 C BNB "Caption3"
-F 7 "CAD04" H 44075 14500 140 0001 C BNB "Caption4"
-F 8 "CAD05" H 44075 14500 140 0001 C BNB "Caption5"
-F 9 "CAD06" H 44075 14500 140 0001 C BNB "Caption6"
-F 10 "0VDC" H 44075 14500 140 0001 C BNB "Caption7"
-F 11 "0VDC" H 44075 14500 140 0001 C BNB "Caption8"
-F 12 "0VDC" H 44075 14500 140 0001 C BNB "Caption9"
-F 13 "0VDC" H 44075 14500 140 0001 C BNB "Caption10"
-F 14 "RWL11" H 44075 14500 140 0001 C BNB "Caption11"
-F 15 "RWL12" H 44075 14500 140 0001 C BNB "Caption12"
-F 16 "RWL13" H 44075 14500 140 0001 C BNB "Caption13"
-F 17 "RWL14" H 44075 14500 140 0001 C BNB "Caption14"
-F 18 "0VDC" H 44075 14500 140 0001 C BNB "Caption15"
-F 19 "RSB" H 44075 14500 140 0001 C BNB "Caption16"
-	13   44075 14500
+P 41975 15425
+F 0 "J1" H 41975 15750 140 0001 C CNN
+F 1 "ConnectorGeneric" H 41975 15850 140 0001 C CNN
+F 2 "" H 41975 15900 140 0001 C CNN
+F 3 "" H 41975 15900 140 0001 C CNN
+F 4 "CAD01" H 41975 15425 140 0001 C BNB "Caption"
+F 5 "CAD02" H 41975 15425 140 0001 C BNB "Caption2"
+F 6 "CAD03" H 41975 15425 140 0001 C BNB "Caption3"
+F 7 "CAD04" H 41975 15425 140 0001 C BNB "Caption4"
+F 8 "CAD05" H 41975 15425 140 0001 C BNB "Caption5"
+F 9 "CAD06" H 41975 15425 140 0001 C BNB "Caption6"
+F 10 "0VDC" H 41975 15425 140 0001 C BNB "Caption7"
+F 11 "0VDC" H 41975 15425 140 0001 C BNB "Caption8"
+F 12 "0VDC" H 41975 15425 140 0001 C BNB "Caption9"
+F 13 "0VDC" H 41975 15425 140 0001 C BNB "Caption10"
+F 14 "RWL11" H 41975 15425 140 0001 C BNB "Caption11"
+F 15 "RWL12" H 41975 15425 140 0001 C BNB "Caption12"
+F 16 "RWL13" H 41975 15425 140 0001 C BNB "Caption13"
+F 17 "RWL14" H 41975 15425 140 0001 C BNB "Caption14"
+F 18 "0VDC" H 41975 15425 140 0001 C BNB "Caption15"
+F 19 "RSB" H 41975 15425 140 0001 C BNB "Caption16"
+	13   41975 15425
 	1    0    0    -1  
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorGeneric J1
 U 79 1 5BF41FE3
-P 44075 18475
-F 0 "J1" H 44075 18800 140 0001 C CNN
-F 1 "ConnectorGeneric" H 44075 18900 140 0001 C CNN
-F 2 "" H 44075 18950 140 0001 C CNN
-F 3 "" H 44075 18950 140 0001 C CNN
-F 4 "0VDC" H 44075 18475 140 0001 C BNB "Caption"
-F 5 "0VDC" H 44075 18475 140 0001 C BNB "Caption2"
-F 6 "R24" H 44075 18475 140 0001 C BNB "Caption3"
-F 7 "0VDC" H 44075 18475 140 0001 C BNB "Caption4"
-F 8 "R24" H 44075 18475 140 0001 C BNB "Caption5"
-F 9 "0VDC" H 44075 18475 140 0001 C BNB "Caption6"
-F 10 "0VDC" H 44075 18475 140 0001 C BNB "Caption7"
-F 11 "0VDC" H 44075 18475 140 0001 C BNB "Caption8"
-F 12 "0VDC" H 44075 18475 140 0001 C BNB "Caption9"
-F 13 "0VDC" H 44075 18475 140 0001 C BNB "Caption10"
-F 14 "0VDC" H 44075 18475 140 0001 C BNB "Caption11"
-F 15 "0VDC" H 44075 18475 140 0001 C BNB "Caption12"
-F 16 "0VDC" H 44075 18475 140 0001 C BNB "Caption13"
-F 17 "0VDC" H 44075 18475 140 0001 C BNB "Caption14"
-F 18 "0VDC" H 44075 18475 140 0001 C BNB "Caption15"
-F 19 "0VDC" H 44075 18475 140 0001 C BNB "Caption16"
-	79   44075 18475
+P 41975 19400
+F 0 "J1" H 41975 19725 140 0001 C CNN
+F 1 "ConnectorGeneric" H 41975 19825 140 0001 C CNN
+F 2 "" H 41975 19875 140 0001 C CNN
+F 3 "" H 41975 19875 140 0001 C CNN
+F 4 "0VDC" H 41975 19400 140 0001 C BNB "Caption"
+F 5 "0VDC" H 41975 19400 140 0001 C BNB "Caption2"
+F 6 "R24" H 41975 19400 140 0001 C BNB "Caption3"
+F 7 "0VDC" H 41975 19400 140 0001 C BNB "Caption4"
+F 8 "R24" H 41975 19400 140 0001 C BNB "Caption5"
+F 9 "0VDC" H 41975 19400 140 0001 C BNB "Caption6"
+F 10 "0VDC" H 41975 19400 140 0001 C BNB "Caption7"
+F 11 "0VDC" H 41975 19400 140 0001 C BNB "Caption8"
+F 12 "0VDC" H 41975 19400 140 0001 C BNB "Caption9"
+F 13 "0VDC" H 41975 19400 140 0001 C BNB "Caption10"
+F 14 "0VDC" H 41975 19400 140 0001 C BNB "Caption11"
+F 15 "0VDC" H 41975 19400 140 0001 C BNB "Caption12"
+F 16 "0VDC" H 41975 19400 140 0001 C BNB "Caption13"
+F 17 "0VDC" H 41975 19400 140 0001 C BNB "Caption14"
+F 18 "0VDC" H 41975 19400 140 0001 C BNB "Caption15"
+F 19 "0VDC" H 41975 19400 140 0001 C BNB "Caption16"
+	79   41975 19400
 	1    0    0    -1  
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorGeneric J1
 U 91 1 5BF41FE4
-P 54400 20925
-F 0 "J1" H 54400 21250 140 0001 C CNN
-F 1 "ConnectorGeneric" H 54400 21350 140 0001 C CNN
-F 2 "" H 54400 21400 140 0001 C CNN
-F 3 "" H 54400 21400 140 0001 C CNN
-F 4 "MWL01" H 54400 20925 140 0001 C BNB "Caption"
-F 5 "MWL02" H 54400 20925 140 0001 C BNB "Caption2"
-F 6 "MWL03" H 54400 20925 140 0001 C BNB "Caption3"
-F 7 "MWL04" H 54400 20925 140 0001 C BNB "Caption4"
-F 8 "MWL05" H 54400 20925 140 0001 C BNB "Caption5"
-F 9 "MWL06" H 54400 20925 140 0001 C BNB "Caption6"
-F 10 "MWL07" H 54400 20925 140 0001 C BNB "Caption7"
-F 11 "MWL08" H 54400 20925 140 0001 C BNB "Caption8"
-F 12 "MWL09" H 54400 20925 140 0001 C BNB "Caption9"
-F 13 "MWL10" H 54400 20925 140 0001 C BNB "Caption10"
-F 14 "MWL11" H 54400 20925 140 0001 C BNB "Caption11"
-F 15 "MWL12" H 54400 20925 140 0001 C BNB "Caption12"
-F 16 "MWL13" H 54400 20925 140 0001 C BNB "Caption13"
-F 17 "MWL14" H 54400 20925 140 0001 C BNB "Caption14"
-F 18 "MWL15" H 54400 20925 140 0001 C BNB "Caption15"
-F 19 "MWL16" H 54400 20925 140 0001 C BNB "Caption16"
-	91   54400 20925
+P 52300 21850
+F 0 "J1" H 52300 22175 140 0001 C CNN
+F 1 "ConnectorGeneric" H 52300 22275 140 0001 C CNN
+F 2 "" H 52300 22325 140 0001 C CNN
+F 3 "" H 52300 22325 140 0001 C CNN
+F 4 "MWL01" H 52300 21850 140 0001 C BNB "Caption"
+F 5 "MWL02" H 52300 21850 140 0001 C BNB "Caption2"
+F 6 "MWL03" H 52300 21850 140 0001 C BNB "Caption3"
+F 7 "MWL04" H 52300 21850 140 0001 C BNB "Caption4"
+F 8 "MWL05" H 52300 21850 140 0001 C BNB "Caption5"
+F 9 "MWL06" H 52300 21850 140 0001 C BNB "Caption6"
+F 10 "MWL07" H 52300 21850 140 0001 C BNB "Caption7"
+F 11 "MWL08" H 52300 21850 140 0001 C BNB "Caption8"
+F 12 "MWL09" H 52300 21850 140 0001 C BNB "Caption9"
+F 13 "MWL10" H 52300 21850 140 0001 C BNB "Caption10"
+F 14 "MWL11" H 52300 21850 140 0001 C BNB "Caption11"
+F 15 "MWL12" H 52300 21850 140 0001 C BNB "Caption12"
+F 16 "MWL13" H 52300 21850 140 0001 C BNB "Caption13"
+F 17 "MWL14" H 52300 21850 140 0001 C BNB "Caption14"
+F 18 "MWL15" H 52300 21850 140 0001 C BNB "Caption15"
+F 19 "MWL16" H 52300 21850 140 0001 C BNB "Caption16"
+	91   52300 21850
 	-1   0    0    1   
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorGeneric J1
 U 73 1 5BF41FE5
-P 44100 19700
-F 0 "J1" H 44100 20025 140 0001 C CNN
-F 1 "ConnectorGeneric" H 44100 20125 140 0001 C CNN
-F 2 "" H 44100 20175 140 0001 C CNN
-F 3 "" H 44100 20175 140 0001 C CNN
-F 4 "MDT01" H 44100 19700 140 0001 C BNB "Caption"
-F 5 "MDT02" H 44100 19700 140 0001 C BNB "Caption2"
-F 6 "MDT03" H 44100 19700 140 0001 C BNB "Caption3"
-F 7 "MDT04" H 44100 19700 140 0001 C BNB "Caption4"
-F 8 "MDT05" H 44100 19700 140 0001 C BNB "Caption5"
-F 9 "MDT06" H 44100 19700 140 0001 C BNB "Caption6"
-F 10 "MDT07" H 44100 19700 140 0001 C BNB "Caption7"
-F 11 "MDT08" H 44100 19700 140 0001 C BNB "Caption8"
-F 12 "MDT09" H 44100 19700 140 0001 C BNB "Caption9"
-F 13 "MDT10" H 44100 19700 140 0001 C BNB "Caption10"
-F 14 "MDT11" H 44100 19700 140 0001 C BNB "Caption11"
-F 15 "MDT12" H 44100 19700 140 0001 C BNB "Caption12"
-F 16 "MDT13" H 44100 19700 140 0001 C BNB "Caption13"
-F 17 "MDT14" H 44100 19700 140 0001 C BNB "Caption14"
-F 18 "MDT15" H 44100 19700 140 0001 C BNB "Caption15"
-F 19 "MDT16" H 44100 19700 140 0001 C BNB "Caption16"
-	73   44100 19700
+P 42000 20625
+F 0 "J1" H 42000 20950 140 0001 C CNN
+F 1 "ConnectorGeneric" H 42000 21050 140 0001 C CNN
+F 2 "" H 42000 21100 140 0001 C CNN
+F 3 "" H 42000 21100 140 0001 C CNN
+F 4 "MDT01" H 42000 20625 140 0001 C BNB "Caption"
+F 5 "MDT02" H 42000 20625 140 0001 C BNB "Caption2"
+F 6 "MDT03" H 42000 20625 140 0001 C BNB "Caption3"
+F 7 "MDT04" H 42000 20625 140 0001 C BNB "Caption4"
+F 8 "MDT05" H 42000 20625 140 0001 C BNB "Caption5"
+F 9 "MDT06" H 42000 20625 140 0001 C BNB "Caption6"
+F 10 "MDT07" H 42000 20625 140 0001 C BNB "Caption7"
+F 11 "MDT08" H 42000 20625 140 0001 C BNB "Caption8"
+F 12 "MDT09" H 42000 20625 140 0001 C BNB "Caption9"
+F 13 "MDT10" H 42000 20625 140 0001 C BNB "Caption10"
+F 14 "MDT11" H 42000 20625 140 0001 C BNB "Caption11"
+F 15 "MDT12" H 42000 20625 140 0001 C BNB "Caption12"
+F 16 "MDT13" H 42000 20625 140 0001 C BNB "Caption13"
+F 17 "MDT14" H 42000 20625 140 0001 C BNB "Caption14"
+F 18 "MDT15" H 42000 20625 140 0001 C BNB "Caption15"
+F 19 "MDT16" H 42000 20625 140 0001 C BNB "Caption16"
+	73   42000 20625
 	1    0    0    -1  
 $EndComp
 $Comp
 L D3NOR-NC-0VDC-expander-nd1021041:D3NOR-NC-0VDC-expander-nd1021041-ABC-___ U179
 U 1 1 5BF41FE6
-P 46325 22125
-F 0 "U179" H 46325 22450 140 0001 C CNB
-F 1 "D3NOR-NC-0VDC-expander-nd1021041-ABC-___" H 46325 22550 140 0001 C CNN
-F 2 "" H 46325 22600 140 0001 C CNN
-F 3 "" H 46325 22600 140 0001 C CNN
-F 4 "148xx" H 46250 22125 130 0000 C CNB "Location"
-	1    46325 22125
+P 44225 23050
+F 0 "U179" H 44225 23375 140 0001 C CNB
+F 1 "D3NOR-NC-0VDC-expander-nd1021041-ABC-___" H 44225 23475 140 0001 C CNN
+F 2 "" H 44225 23525 140 0001 C CNN
+F 3 "" H 44225 23525 140 0001 C CNN
+F 4 "148xx" H 44150 23050 130 0000 C CNB "Location"
+	1    44225 23050
 	1    0    0    -1  
 $EndComp
 $Comp
 L D3NOR-+3VDC-0VDC-nd1021041:D3NOR-+3VDC-0VDC-nd1021041-ABC-___ U175
 U 1 1 5BF41FE7
-P 46275 17275
-F 0 "U175" H 46275 17600 140 0001 C CNB
-F 1 "D3NOR-+3VDC-0VDC-nd1021041-ABC-___" H 46275 17700 140 0001 C CNN
-F 2 "" H 46275 17750 140 0001 C CNN
-F 3 "" H 46275 17750 140 0001 C CNN
-F 4 "144xx" H 46200 17275 130 0000 C CNB "Location"
-	1    46275 17275
+P 44175 18200
+F 0 "U175" H 44175 18525 140 0001 C CNB
+F 1 "D3NOR-+3VDC-0VDC-nd1021041-ABC-___" H 44175 18625 140 0001 C CNN
+F 2 "" H 44175 18675 140 0001 C CNN
+F 3 "" H 44175 18675 140 0001 C CNN
+F 4 "144xx" H 44100 18200 130 0000 C CNB "Location"
+	1    44175 18200
 	1    0    0    -1  
 $EndComp
 $Comp
 L D3NOR-NC-0VDC-expander-nd1021041:D3NOR-NC-0VDC-expander-nd1021041-ABC-___ U176
 U 1 1 5BF41FE8
-P 46275 18475
-F 0 "U176" H 46275 18800 140 0001 C CNB
-F 1 "D3NOR-NC-0VDC-expander-nd1021041-ABC-___" H 46275 18900 140 0001 C CNN
-F 2 "" H 46275 18950 140 0001 C CNN
-F 3 "" H 46275 18950 140 0001 C CNN
-F 4 "145xx" H 46200 18475 130 0000 C CNB "Location"
-	1    46275 18475
+P 44175 19400
+F 0 "U176" H 44175 19725 140 0001 C CNB
+F 1 "D3NOR-NC-0VDC-expander-nd1021041-ABC-___" H 44175 19825 140 0001 C CNN
+F 2 "" H 44175 19875 140 0001 C CNN
+F 3 "" H 44175 19875 140 0001 C CNN
+F 4 "145xx" H 44100 19400 130 0000 C CNB "Location"
+	1    44175 19400
 	1    0    0    -1  
 $EndComp
 $Comp
 L D3NOR-NC-0VDC-expander-nd1021041:D3NOR-NC-0VDC-expander-nd1021041-ABC-___ U177
 U 1 1 5BF41FE9
-P 46300 19700
-F 0 "U177" H 46300 20025 140 0001 C CNB
-F 1 "D3NOR-NC-0VDC-expander-nd1021041-ABC-___" H 46300 20125 140 0001 C CNN
-F 2 "" H 46300 20175 140 0001 C CNN
-F 3 "" H 46300 20175 140 0001 C CNN
-F 4 "146xx" H 46225 19700 130 0000 C CNB "Location"
-	1    46300 19700
+P 44200 20625
+F 0 "U177" H 44200 20950 140 0001 C CNB
+F 1 "D3NOR-NC-0VDC-expander-nd1021041-ABC-___" H 44200 21050 140 0001 C CNN
+F 2 "" H 44200 21100 140 0001 C CNN
+F 3 "" H 44200 21100 140 0001 C CNN
+F 4 "146xx" H 44125 20625 130 0000 C CNB "Location"
+	1    44200 20625
 	1    0    0    -1  
 $EndComp
 $Comp
 L D3NOR-NC-0VDC-expander-nd1021041:D3NOR-NC-0VDC-expander-nd1021041-ABC-___ U178
 U 1 1 5BF41FEA
-P 46300 20925
-F 0 "U178" H 46300 21250 140 0001 C CNB
-F 1 "D3NOR-NC-0VDC-expander-nd1021041-ABC-___" H 46300 21350 140 0001 C CNN
-F 2 "" H 46300 21400 140 0001 C CNN
-F 3 "" H 46300 21400 140 0001 C CNN
-F 4 "147xx" H 46225 20925 130 0000 C CNB "Location"
-	1    46300 20925
+P 44200 21850
+F 0 "U178" H 44200 22175 140 0001 C CNB
+F 1 "D3NOR-NC-0VDC-expander-nd1021041-ABC-___" H 44200 22275 140 0001 C CNN
+F 2 "" H 44200 22325 140 0001 C CNN
+F 3 "" H 44200 22325 140 0001 C CNN
+F 4 "147xx" H 44125 21850 130 0000 C CNB "Location"
+	1    44200 21850
 	1    0    0    -1  
 $EndComp
 $Comp
 L D3NOR-NC-0VDC-expander-nd1021041:D3NOR-NC-0VDC-expander-nd1021041-ABC-___ U172
 U 1 1 5BF41FEB
-P 46250 13625
-F 0 "U172" H 46250 13950 140 0001 C CNB
-F 1 "D3NOR-NC-0VDC-expander-nd1021041-ABC-___" H 46250 14050 140 0001 C CNN
-F 2 "" H 46250 14100 140 0001 C CNN
-F 3 "" H 46250 14100 140 0001 C CNN
-F 4 "141xx" H 46175 13625 130 0000 C CNB "Location"
-	1    46250 13625
+P 44150 14550
+F 0 "U172" H 44150 14875 140 0001 C CNB
+F 1 "D3NOR-NC-0VDC-expander-nd1021041-ABC-___" H 44150 14975 140 0001 C CNN
+F 2 "" H 44150 15025 140 0001 C CNN
+F 3 "" H 44150 15025 140 0001 C CNN
+F 4 "141xx" H 44075 14550 130 0000 C CNB "Location"
+	1    44150 14550
 	1    0    0    -1  
 $EndComp
 $Comp
 L D3NOR-NC-0VDC-expander-nd1021041:D3NOR-NC-0VDC-expander-nd1021041-ABC-___ U173
 U 1 1 5BF41FEC
-P 46250 14850
-F 0 "U173" H 46250 15175 140 0001 C CNB
-F 1 "D3NOR-NC-0VDC-expander-nd1021041-ABC-___" H 46250 15275 140 0001 C CNN
-F 2 "" H 46250 15325 140 0001 C CNN
-F 3 "" H 46250 15325 140 0001 C CNN
-F 4 "142xx" H 46175 14850 130 0000 C CNB "Location"
-	1    46250 14850
+P 44150 15775
+F 0 "U173" H 44150 16100 140 0001 C CNB
+F 1 "D3NOR-NC-0VDC-expander-nd1021041-ABC-___" H 44150 16200 140 0001 C CNN
+F 2 "" H 44150 16250 140 0001 C CNN
+F 3 "" H 44150 16250 140 0001 C CNN
+F 4 "142xx" H 44075 15775 130 0000 C CNB "Location"
+	1    44150 15775
 	1    0    0    -1  
 $EndComp
 $Comp
 L D3NOR-NC-0VDC-expander-nd1021041:D3NOR-NC-0VDC-expander-nd1021041-ABC-___ U174
 U 1 1 5BF41FED
-P 46250 16050
-F 0 "U174" H 46250 16375 140 0001 C CNB
-F 1 "D3NOR-NC-0VDC-expander-nd1021041-ABC-___" H 46250 16475 140 0001 C CNN
-F 2 "" H 46250 16525 140 0001 C CNN
-F 3 "" H 46250 16525 140 0001 C CNN
-F 4 "143xx" H 46175 16050 130 0000 C CNB "Location"
-	1    46250 16050
+P 44150 16975
+F 0 "U174" H 44150 17300 140 0001 C CNB
+F 1 "D3NOR-NC-0VDC-expander-nd1021041-ABC-___" H 44150 17400 140 0001 C CNN
+F 2 "" H 44150 17450 140 0001 C CNN
+F 3 "" H 44150 17450 140 0001 C CNN
+F 4 "143xx" H 44075 16975 130 0000 C CNB "Location"
+	1    44150 16975
 	1    0    0    -1  
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorGeneric J1
 U 9 1 5BF41FEE
-P 44050 13275
-F 0 "J1" H 44050 13600 140 0001 C CNN
-F 1 "ConnectorGeneric" H 44050 13700 140 0001 C CNN
-F 2 "" H 44050 13750 140 0001 C CNN
-F 3 "" H 44050 13750 140 0001 C CNN
-F 4 "GRL01" H 44050 13275 140 0001 C BNB "Caption"
-F 5 "GRL02" H 44050 13275 140 0001 C BNB "Caption2"
-F 6 "GRL03" H 44050 13275 140 0001 C BNB "Caption3"
-F 7 "GRL04" H 44050 13275 140 0001 C BNB "Caption4"
-F 8 "GRL05" H 44050 13275 140 0001 C BNB "Caption5"
-F 9 "GRL06" H 44050 13275 140 0001 C BNB "Caption6"
-F 10 "GRL07" H 44050 13275 140 0001 C BNB "Caption7"
-F 11 "GRL08" H 44050 13275 140 0001 C BNB "Caption8"
-F 12 "GRL09" H 44050 13275 140 0001 C BNB "Caption9"
-F 13 "GRL10" H 44050 13275 140 0001 C BNB "Caption10"
-F 14 "GRL11" H 44050 13275 140 0001 C BNB "Caption11"
-F 15 "GRL12" H 44050 13275 140 0001 C BNB "Caption12"
-F 16 "GRL13" H 44050 13275 140 0001 C BNB "Caption13"
-F 17 "GRL14" H 44050 13275 140 0001 C BNB "Caption14"
-F 18 "GRL15" H 44050 13275 140 0001 C BNB "Caption15"
-F 19 "GRL16" H 44050 13275 140 0001 C BNB "Caption16"
-	9    44050 13275
+P 41950 14200
+F 0 "J1" H 41950 14525 140 0001 C CNN
+F 1 "ConnectorGeneric" H 41950 14625 140 0001 C CNN
+F 2 "" H 41950 14675 140 0001 C CNN
+F 3 "" H 41950 14675 140 0001 C CNN
+F 4 "GRL01" H 41950 14200 140 0001 C BNB "Caption"
+F 5 "GRL02" H 41950 14200 140 0001 C BNB "Caption2"
+F 6 "GRL03" H 41950 14200 140 0001 C BNB "Caption3"
+F 7 "GRL04" H 41950 14200 140 0001 C BNB "Caption4"
+F 8 "GRL05" H 41950 14200 140 0001 C BNB "Caption5"
+F 9 "GRL06" H 41950 14200 140 0001 C BNB "Caption6"
+F 10 "GRL07" H 41950 14200 140 0001 C BNB "Caption7"
+F 11 "GRL08" H 41950 14200 140 0001 C BNB "Caption8"
+F 12 "GRL09" H 41950 14200 140 0001 C BNB "Caption9"
+F 13 "GRL10" H 41950 14200 140 0001 C BNB "Caption10"
+F 14 "GRL11" H 41950 14200 140 0001 C BNB "Caption11"
+F 15 "GRL12" H 41950 14200 140 0001 C BNB "Caption12"
+F 16 "GRL13" H 41950 14200 140 0001 C BNB "Caption13"
+F 17 "GRL14" H 41950 14200 140 0001 C BNB "Caption14"
+F 18 "GRL15" H 41950 14200 140 0001 C BNB "Caption15"
+F 19 "GRL16" H 41950 14200 140 0001 C BNB "Caption16"
+	9    41950 14200
 	1    0    0    -1  
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorGeneric J1
 U 21 1 5BF41FEF
-P 44075 15200
-F 0 "J1" H 44075 15525 140 0001 C CNN
-F 1 "ConnectorGeneric" H 44075 15625 140 0001 C CNN
-F 2 "" H 44075 15675 140 0001 C CNN
-F 3 "" H 44075 15675 140 0001 C CNN
-F 4 "0VDC" H 44075 15200 140 0001 C BNB "Caption"
-F 5 "RB2" H 44075 15200 140 0001 C BNB "Caption2"
-F 6 "RAD03" H 44075 15200 140 0001 C BNB "Caption3"
-F 7 "RAD04" H 44075 15200 140 0001 C BNB "Caption4"
-F 8 "RAD05" H 44075 15200 140 0001 C BNB "Caption5"
-F 9 "0VDC" H 44075 15200 140 0001 C BNB "Caption6"
-F 10 "0VDC" H 44075 15200 140 0001 C BNB "Caption7"
-F 11 "0VDC" H 44075 15200 140 0001 C BNB "Caption8"
-F 12 "0VDC" H 44075 15200 140 0001 C BNB "Caption9"
-F 13 "0VDC" H 44075 15200 140 0001 C BNB "Caption10"
-F 14 "RAD11" H 44075 15200 140 0001 C BNB "Caption11"
-F 15 "0VDC" H 44075 15200 140 0001 C BNB "Caption12"
-F 16 "0VDC" H 44075 15200 140 0001 C BNB "Caption13"
-F 17 "RB14" H 44075 15200 140 0001 C BNB "Caption14"
-F 18 "0VDC" H 44075 15200 140 0001 C BNB "Caption15"
-F 19 "RWL16" H 44075 15200 140 0001 C BNB "Caption16"
-	21   44075 15200
+P 41975 16125
+F 0 "J1" H 41975 16450 140 0001 C CNN
+F 1 "ConnectorGeneric" H 41975 16550 140 0001 C CNN
+F 2 "" H 41975 16600 140 0001 C CNN
+F 3 "" H 41975 16600 140 0001 C CNN
+F 4 "0VDC" H 41975 16125 140 0001 C BNB "Caption"
+F 5 "RB2" H 41975 16125 140 0001 C BNB "Caption2"
+F 6 "RAD03" H 41975 16125 140 0001 C BNB "Caption3"
+F 7 "RAD04" H 41975 16125 140 0001 C BNB "Caption4"
+F 8 "RAD05" H 41975 16125 140 0001 C BNB "Caption5"
+F 9 "0VDC" H 41975 16125 140 0001 C BNB "Caption6"
+F 10 "0VDC" H 41975 16125 140 0001 C BNB "Caption7"
+F 11 "0VDC" H 41975 16125 140 0001 C BNB "Caption8"
+F 12 "0VDC" H 41975 16125 140 0001 C BNB "Caption9"
+F 13 "0VDC" H 41975 16125 140 0001 C BNB "Caption10"
+F 14 "RAD11" H 41975 16125 140 0001 C BNB "Caption11"
+F 15 "0VDC" H 41975 16125 140 0001 C BNB "Caption12"
+F 16 "0VDC" H 41975 16125 140 0001 C BNB "Caption13"
+F 17 "RB14" H 41975 16125 140 0001 C BNB "Caption14"
+F 18 "0VDC" H 41975 16125 140 0001 C BNB "Caption15"
+F 19 "RWL16" H 41975 16125 140 0001 C BNB "Caption16"
+	21   41975 16125
 	1    0    0    -1  
 $EndComp
-Text Notes 49300 12725 2    140  ~ 28
+Text Notes 47200 13650 2    140  ~ 28
 Figures 4-113, 111
-Text GLabel 45125 13625 0    140  Input ~ 28
+Text GLabel 43025 14550 0    140  Input ~ 28
 ABIT
-Text GLabel 45125 14850 0    140  Input ~ 28
+Text GLabel 43025 15775 0    140  Input ~ 28
 BBIT
-Text GLabel 45200 16925 0    140  Input ~ 28
+Text GLabel 43100 17850 0    140  Input ~ 28
 BBIT_
-Text GLabel 45150 18125 0    140  Input ~ 28
+Text GLabel 43050 19050 0    140  Input ~ 28
 QBIT
-Text GLabel 45225 20050 0    140  Input ~ 28
+Text GLabel 43125 20975 0    140  Input ~ 28
 SCALERBBIT
-Text GLabel 45225 20575 0    140  Input ~ 28
+Text GLabel 43125 21500 0    140  Input ~ 28
 ZBIT
-Text GLabel 45250 21275 0    140  Input ~ 28
+Text GLabel 43150 22200 0    140  Input ~ 28
 LPBIT
 Wire Wire Line
-	47050 16050 47350 16050
+	44950 16975 45250 16975
 Wire Wire Line
-	47050 13625 47350 13625
+	44950 14550 45250 14550
 Wire Wire Line
-	47350 13625 47350 14850
-Connection ~ 47350 16050
+	45250 14550 45250 15775
+Connection ~ 45250 16975
 Wire Wire Line
-	47350 16050 48350 16050
+	45250 16975 46250 16975
 Wire Wire Line
-	47350 22125 47125 22125
+	45250 23050 45025 23050
 Wire Wire Line
-	47100 20925 47350 20925
+	45000 21850 45250 21850
 Wire Wire Line
-	47350 16050 47350 17275
-Connection ~ 47350 20925
+	45250 16975 45250 18200
+Connection ~ 45250 21850
 Wire Wire Line
-	47350 20925 47350 22125
+	45250 21850 45250 23050
 Wire Wire Line
-	47350 20925 48375 20925
+	45250 21850 46275 21850
 Wire Wire Line
-	45725 22125 44425 22125
+	43625 23050 42325 23050
 Wire Wire Line
-	45700 20925 44375 20925
+	43600 21850 42275 21850
 Wire Wire Line
-	45675 21275 45250 21275
+	43575 22200 43150 22200
 Wire Wire Line
-	45225 20575 45675 20575
+	43125 21500 43575 21500
 Wire Wire Line
-	47075 18475 47350 18475
-Connection ~ 47350 18475
+	44975 19400 45250 19400
+Connection ~ 45250 19400
 Wire Wire Line
-	47350 18475 47350 19700
+	45250 19400 45250 20625
 Wire Wire Line
-	47350 18475 48375 18475
+	45250 19400 46275 19400
 Wire Wire Line
-	47100 19700 47350 19700
-Connection ~ 47350 19700
+	45000 20625 45250 20625
+Connection ~ 45250 20625
 Wire Wire Line
-	47350 19700 47350 20925
+	45250 20625 45250 21850
 Wire Wire Line
-	47175 17275 47350 17275
-Connection ~ 47350 17275
+	45075 18200 45250 18200
+Connection ~ 45250 18200
 Wire Wire Line
-	47350 17275 47350 18475
+	45250 18200 45250 19400
 Wire Wire Line
-	45700 19700 44375 19700
+	43600 20625 42275 20625
 Wire Wire Line
-	45675 20050 45225 20050
+	43575 20975 43125 20975
 Wire Wire Line
-	45675 18475 44350 18475
+	43575 19400 42250 19400
 Wire Wire Line
-	45650 18125 45150 18125
+	43550 19050 43050 19050
 Wire Wire Line
-	45675 17275 44350 17275
+	43575 18200 42250 18200
 Wire Wire Line
-	45650 16925 45200 16925
+	43550 17850 43100 17850
 Wire Wire Line
-	45650 16050 44350 16050
+	43550 16975 42250 16975
 Wire Wire Line
-	47050 14850 47350 14850
-Connection ~ 47350 14850
+	44950 15775 45250 15775
+Connection ~ 45250 15775
 Wire Wire Line
-	47350 14850 47350 16050
+	45250 15775 45250 16975
 Wire Wire Line
-	45650 14850 45125 14850
+	43550 15775 43025 15775
 Wire Wire Line
-	45625 15200 44350 15200
+	43525 16125 42250 16125
 Wire Wire Line
-	45625 14500 44350 14500
+	43525 15425 42250 15425
 Wire Wire Line
-	45650 13625 45125 13625
+	43550 14550 43025 14550
 Wire Wire Line
-	45625 13275 44325 13275
+	43525 14200 42225 14200
 Wire Wire Line
-	45625 13975 44350 13975
+	43525 14900 42250 14900
 Wire Wire Line
-	49775 20925 54125 20925
+	47675 21850 52025 21850
 Wire Wire Line
-	49875 18475 50075 18475
+	47775 19400 47975 19400
 Wire Wire Line
-	50750 18475 50750 17800
+	48650 19400 48650 18725
 Wire Wire Line
-	50750 17800 51325 17800
+	48650 18725 49225 18725
 Wire Wire Line
-	50750 18475 50750 19025
+	48650 19400 48650 19950
 Wire Wire Line
-	50750 19025 51325 19025
-Connection ~ 50750 18475
+	48650 19950 49225 19950
+Connection ~ 48650 19400
 Wire Wire Line
-	52825 19025 53025 19025
+	50725 19950 50925 19950
 Wire Wire Line
-	50075 18475 50075 20225
+	47975 19400 47975 21150
 Wire Wire Line
-	50075 20225 54125 20225
-Connection ~ 50075 18475
+	47975 21150 52025 21150
+Connection ~ 47975 19400
 Wire Wire Line
-	50075 18475 50750 18475
+	47975 19400 48650 19400
 Wire Wire Line
-	52825 17800 53025 17800
+	50725 18725 50925 18725
 Wire Wire Line
-	53025 17800 53025 19025
-Connection ~ 53025 19025
+	50925 18725 50925 19950
+Connection ~ 50925 19950
 Wire Wire Line
-	53025 19025 54100 19025
+	50925 19950 52000 19950
 Wire Wire Line
-	49850 16050 50025 16050
+	47750 16975 47925 16975
 Wire Wire Line
-	50725 16050 50725 16600
+	48625 16975 48625 17525
 Wire Wire Line
-	50725 16600 51325 16600
+	48625 17525 49225 17525
 Wire Wire Line
-	50725 16050 50725 15375
+	48625 16975 48625 16300
 Wire Wire Line
-	50725 15375 51300 15375
-Connection ~ 50725 16050
+	48625 16300 49200 16300
+Connection ~ 48625 16975
 Wire Wire Line
-	52800 15375 53000 15375
+	50700 16300 50900 16300
 Wire Wire Line
-	52825 16600 53000 16600
+	50725 17525 50900 17525
 Wire Wire Line
-	53000 16600 53000 15375
-Connection ~ 53000 15375
+	50900 17525 50900 16300
+Connection ~ 50900 16300
 Wire Wire Line
-	53000 15375 54100 15375
+	50900 16300 52000 16300
 Wire Wire Line
-	50025 16050 50025 14125
+	47925 16975 47925 15050
 Wire Wire Line
-	50025 14125 54075 14125
-Connection ~ 50025 16050
+	47925 15050 51975 15050
+Connection ~ 47925 16975
 Wire Wire Line
-	50025 16050 50725 16050
+	47925 16975 48625 16975
 $Comp
 L D3NOR-+3VDC-0VDC-nd1021041:D3NOR-+3VDC-0VDC-nd1021041-_B_-___ U159
 U 1 1 5BF4386C
@@ -5345,10 +5345,10 @@ F 12 "XT0/" H 29175 24525 140 0001 C BNB "Caption9"
 F 13 "XT0/" H 29175 24525 140 0001 C BNB "Caption10"
 F 14 "XT0/" H 29175 24525 140 0001 C BNB "Caption11"
 F 15 "XT0/" H 29175 24525 140 0001 C BNB "Caption12"
-F 16 "P13_30" H 29175 24525 140 0001 C BNB "Caption13"
-F 17 "P14_30" H 29175 24525 140 0001 C BNB "Caption14"
-F 18 "P15_30" H 29175 24525 140 0001 C BNB "Caption15"
-F 19 "P16_30" H 29175 24525 140 0001 C BNB "Caption16"
+F 16 "A13_30_A38_6" H 29175 24525 140 0001 C BNB "Caption13"
+F 17 "A14_30_A38_14" H 29175 24525 140 0001 C BNB "Caption14"
+F 18 "A15_30_A38_13" H 29175 24525 140 0001 C BNB "Caption15"
+F 19 "A16_30_A38_16" H 29175 24525 140 0001 C BNB "Caption16"
 	30   29175 24525
 	1    0    0    -1  
 $EndComp
@@ -5470,485 +5470,485 @@ Wire Wire Line
 $Comp
 L D3NOR-+3VDC-0VDC-nd1021041:D3NOR-+3VDC-0VDC-nd1021041-A_C-___ U206
 U 1 1 5BF43BDD
-P 60575 15550
-F 0 "U206" H 60575 15875 140 0001 C CNB
-F 1 "D3NOR-+3VDC-0VDC-nd1021041-A_C-___" H 60575 15975 140 0001 C CNN
-F 2 "" H 60575 16025 140 0001 C CNN
-F 3 "" H 60575 16025 140 0001 C CNN
-F 4 "124xx" H 60575 15550 140 0000 C CNB "Location"
-	1    60575 15550
+P 58475 16475
+F 0 "U206" H 58475 16800 140 0001 C CNB
+F 1 "D3NOR-+3VDC-0VDC-nd1021041-A_C-___" H 58475 16900 140 0001 C CNN
+F 2 "" H 58475 16950 140 0001 C CNN
+F 3 "" H 58475 16950 140 0001 C CNN
+F 4 "124xx" H 58475 16475 140 0000 C CNB "Location"
+	1    58475 16475
 	1    0    0    -1  
 $EndComp
 $Comp
 L D3NOR-+3VDC-0VDC-nd1021041:D3NOR-+3VDC-0VDC-nd1021041-AB_-___ U213
 U 1 1 5BF43BDE
-P 65000 13800
-F 0 "U213" H 65000 14125 140 0001 C CNB
-F 1 "D3NOR-+3VDC-0VDC-nd1021041-AB_-___" H 65000 14225 140 0001 C CNN
-F 2 "" H 65000 14275 140 0001 C CNN
-F 3 "" H 65000 14275 140 0001 C CNN
-F 4 "125xx" H 65000 13800 140 0000 C CNB "Location"
-	1    65000 13800
+P 62600 14725
+F 0 "U213" H 62600 15050 140 0001 C CNB
+F 1 "D3NOR-+3VDC-0VDC-nd1021041-AB_-___" H 62600 15150 140 0001 C CNN
+F 2 "" H 62600 15200 140 0001 C CNN
+F 3 "" H 62600 15200 140 0001 C CNN
+F 4 "125xx" H 62600 14725 140 0000 C CNB "Location"
+	1    62600 14725
 	1    0    0    -1  
 $EndComp
 $Comp
 L D3NOR-+3VDC-0VDC-nd1021041:D3NOR-+3VDC-0VDC-nd1021041-A_C-___ U205
 U 1 1 5BF43BDF
-P 60550 13800
-F 0 "U205" H 60550 14125 140 0001 C CNB
-F 1 "D3NOR-+3VDC-0VDC-nd1021041-A_C-___" H 60550 14225 140 0001 C CNN
-F 2 "" H 60550 14275 140 0001 C CNN
-F 3 "" H 60550 14275 140 0001 C CNN
-F 4 "123xx" H 60550 13800 140 0000 C CNB "Location"
-	1    60550 13800
+P 58450 14725
+F 0 "U205" H 58450 15050 140 0001 C CNB
+F 1 "D3NOR-+3VDC-0VDC-nd1021041-A_C-___" H 58450 15150 140 0001 C CNN
+F 2 "" H 58450 15200 140 0001 C CNN
+F 3 "" H 58450 15200 140 0001 C CNN
+F 4 "123xx" H 58450 14725 140 0000 C CNB "Location"
+	1    58450 14725
 	1    0    0    -1  
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorGeneric J1
 U 53 1 5BF43BE0
-P 63625 13450
-F 0 "J1" H 63625 13775 140 0001 C CNN
-F 1 "ConnectorGeneric" H 63625 13875 140 0001 C CNN
-F 2 "" H 63625 13925 140 0001 C CNN
-F 3 "" H 63625 13925 140 0001 C CNN
-F 4 "RV0G/" H 63625 13450 140 0001 C BNB "Caption"
-F 5 "RV0G/" H 63625 13450 140 0001 C BNB "Caption2"
-F 6 "RV0G/" H 63625 13450 140 0001 C BNB "Caption3"
-F 7 "RV0G/" H 63625 13450 140 0001 C BNB "Caption4"
-F 8 "RV0G/" H 63625 13450 140 0001 C BNB "Caption5"
-F 9 "RV0G/" H 63625 13450 140 0001 C BNB "Caption6"
-F 10 "RV0G/" H 63625 13450 140 0001 C BNB "Caption7"
-F 11 "RV0G/" H 63625 13450 140 0001 C BNB "Caption8"
-F 12 "RV0G/" H 63625 13450 140 0001 C BNB "Caption9"
-F 13 "RV0G/" H 63625 13450 140 0001 C BNB "Caption10"
-F 14 "RV0G/" H 63625 13450 140 0001 C BNB "Caption11"
-F 15 "RV0G/" H 63625 13450 140 0001 C BNB "Caption12"
-F 16 "RV0G/" H 63625 13450 140 0001 C BNB "Caption13"
-F 17 "RV0G/" H 63625 13450 140 0001 C BNB "Caption14"
-F 18 "RV0G/" H 63625 13450 140 0001 C BNB "Caption15"
-F 19 "RV0G/" H 63625 13450 140 0001 C BNB "Caption16"
-	53   63625 13450
+P 61225 14375
+F 0 "J1" H 61225 14700 140 0001 C CNN
+F 1 "ConnectorGeneric" H 61225 14800 140 0001 C CNN
+F 2 "" H 61225 14850 140 0001 C CNN
+F 3 "" H 61225 14850 140 0001 C CNN
+F 4 "RV0G/" H 61225 14375 140 0001 C BNB "Caption"
+F 5 "RV0G/" H 61225 14375 140 0001 C BNB "Caption2"
+F 6 "RV0G/" H 61225 14375 140 0001 C BNB "Caption3"
+F 7 "RV0G/" H 61225 14375 140 0001 C BNB "Caption4"
+F 8 "RV0G/" H 61225 14375 140 0001 C BNB "Caption5"
+F 9 "RV0G/" H 61225 14375 140 0001 C BNB "Caption6"
+F 10 "RV0G/" H 61225 14375 140 0001 C BNB "Caption7"
+F 11 "RV0G/" H 61225 14375 140 0001 C BNB "Caption8"
+F 12 "RV0G/" H 61225 14375 140 0001 C BNB "Caption9"
+F 13 "RV0G/" H 61225 14375 140 0001 C BNB "Caption10"
+F 14 "RV0G/" H 61225 14375 140 0001 C BNB "Caption11"
+F 15 "RV0G/" H 61225 14375 140 0001 C BNB "Caption12"
+F 16 "RV0G/" H 61225 14375 140 0001 C BNB "Caption13"
+F 17 "RV0G/" H 61225 14375 140 0001 C BNB "Caption14"
+F 18 "RV0G/" H 61225 14375 140 0001 C BNB "Caption15"
+F 19 "RV0G/" H 61225 14375 140 0001 C BNB "Caption16"
+	53   61225 14375
 	1    0    0    -1  
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorGeneric J1
 U 51 1 5BF43BE1
-P 59175 13450
-F 0 "J1" H 59175 13775 140 0001 C CNN
-F 1 "ConnectorGeneric" H 59175 13875 140 0001 C CNN
-F 2 "" H 59175 13925 140 0001 C CNN
-F 3 "" H 59175 13925 140 0001 C CNN
-F 4 "KEY1" H 59175 13450 140 0001 C BNB "Caption"
-F 5 "KEY2" H 59175 13450 140 0001 C BNB "Caption2"
-F 6 "KEY3" H 59175 13450 140 0001 C BNB "Caption3"
-F 7 "KEY4" H 59175 13450 140 0001 C BNB "Caption4"
-F 8 "KEY5" H 59175 13450 140 0001 C BNB "Caption5"
-F 9 "BLKUPL" H 59175 13450 140 0001 C BNB "Caption6"
-F 10 "NHSYNC" H 59175 13450 140 0001 C BNB "Caption7"
-F 11 "0VDC" H 59175 13450 140 0001 C BNB "Caption8"
-F 12 "0VDC" H 59175 13450 140 0001 C BNB "Caption9"
-F 13 "0VDC" H 59175 13450 140 0001 C BNB "Caption10"
-F 14 "G_N_ATT_CONTROL" H 59175 13450 140 0001 C BNB "Caption11"
-F 15 "G_N_DV_MODE" H 59175 13450 140 0001 C BNB "Caption12"
-F 16 "G_N_ENTRY_MODE" H 59175 13450 140 0001 C BNB "Caption13"
-F 17 "0VDC" H 59175 13450 140 0001 C BNB "Caption14"
-F 18 "MARK" H 59175 13450 140 0001 C BNB "Caption15"
-F 19 "MARK" H 59175 13450 140 0001 C BNB "Caption16"
-	51   59175 13450
+P 57075 14375
+F 0 "J1" H 57075 14700 140 0001 C CNN
+F 1 "ConnectorGeneric" H 57075 14800 140 0001 C CNN
+F 2 "" H 57075 14850 140 0001 C CNN
+F 3 "" H 57075 14850 140 0001 C CNN
+F 4 "KEY1" H 57075 14375 140 0001 C BNB "Caption"
+F 5 "KEY2" H 57075 14375 140 0001 C BNB "Caption2"
+F 6 "KEY3" H 57075 14375 140 0001 C BNB "Caption3"
+F 7 "KEY4" H 57075 14375 140 0001 C BNB "Caption4"
+F 8 "KEY5" H 57075 14375 140 0001 C BNB "Caption5"
+F 9 "BLKUPL" H 57075 14375 140 0001 C BNB "Caption6"
+F 10 "NHSYNC" H 57075 14375 140 0001 C BNB "Caption7"
+F 11 "0VDC" H 57075 14375 140 0001 C BNB "Caption8"
+F 12 "0VDC" H 57075 14375 140 0001 C BNB "Caption9"
+F 13 "0VDC" H 57075 14375 140 0001 C BNB "Caption10"
+F 14 "G_N_ATT_CONTROL" H 57075 14375 140 0001 C BNB "Caption11"
+F 15 "G_N_DV_MODE" H 57075 14375 140 0001 C BNB "Caption12"
+F 16 "G_N_ENTRY_MODE" H 57075 14375 140 0001 C BNB "Caption13"
+F 17 "0VDC" H 57075 14375 140 0001 C BNB "Caption14"
+F 18 "MARK" H 57075 14375 140 0001 C BNB "Caption15"
+F 19 "MARK" H 57075 14375 140 0001 C BNB "Caption16"
+	51   57075 14375
 	1    0    0    -1  
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorGeneric J1
 U 57 1 5BF43BE2
-P 59225 15900
-F 0 "J1" H 59225 16225 140 0001 C CNN
-F 1 "ConnectorGeneric" H 59225 16325 140 0001 C CNN
-F 2 "" H 59225 16375 140 0001 C CNN
-F 3 "" H 59225 16375 140 0001 C CNN
-F 4 "CVOG" H 59225 15900 140 0001 C BNB "Caption"
-F 5 "CVOG" H 59225 15900 140 0001 C BNB "Caption2"
-F 6 "CVOG" H 59225 15900 140 0001 C BNB "Caption3"
-F 7 "CVOG" H 59225 15900 140 0001 C BNB "Caption4"
-F 8 "CVOG" H 59225 15900 140 0001 C BNB "Caption5"
-F 9 "CVOG" H 59225 15900 140 0001 C BNB "Caption6"
-F 10 "CVOG" H 59225 15900 140 0001 C BNB "Caption7"
-F 11 "CVOG" H 59225 15900 140 0001 C BNB "Caption8"
-F 12 "CVOG" H 59225 15900 140 0001 C BNB "Caption9"
-F 13 "CVOG" H 59225 15900 140 0001 C BNB "Caption10"
-F 14 "CVOG" H 59225 15900 140 0001 C BNB "Caption11"
-F 15 "CVOG" H 59225 15900 140 0001 C BNB "Caption12"
-F 16 "CVOG" H 59225 15900 140 0001 C BNB "Caption13"
-F 17 "CVOG" H 59225 15900 140 0001 C BNB "Caption14"
-F 18 "CVOG" H 59225 15900 140 0001 C BNB "Caption15"
-F 19 "CVOG" H 59225 15900 140 0001 C BNB "Caption16"
-	57   59225 15900
+P 57125 16825
+F 0 "J1" H 57125 17150 140 0001 C CNN
+F 1 "ConnectorGeneric" H 57125 17250 140 0001 C CNN
+F 2 "" H 57125 17300 140 0001 C CNN
+F 3 "" H 57125 17300 140 0001 C CNN
+F 4 "CVOG" H 57125 16825 140 0001 C BNB "Caption"
+F 5 "CVOG" H 57125 16825 140 0001 C BNB "Caption2"
+F 6 "CVOG" H 57125 16825 140 0001 C BNB "Caption3"
+F 7 "CVOG" H 57125 16825 140 0001 C BNB "Caption4"
+F 8 "CVOG" H 57125 16825 140 0001 C BNB "Caption5"
+F 9 "CVOG" H 57125 16825 140 0001 C BNB "Caption6"
+F 10 "CVOG" H 57125 16825 140 0001 C BNB "Caption7"
+F 11 "CVOG" H 57125 16825 140 0001 C BNB "Caption8"
+F 12 "CVOG" H 57125 16825 140 0001 C BNB "Caption9"
+F 13 "CVOG" H 57125 16825 140 0001 C BNB "Caption10"
+F 14 "CVOG" H 57125 16825 140 0001 C BNB "Caption11"
+F 15 "CVOG" H 57125 16825 140 0001 C BNB "Caption12"
+F 16 "CVOG" H 57125 16825 140 0001 C BNB "Caption13"
+F 17 "CVOG" H 57125 16825 140 0001 C BNB "Caption14"
+F 18 "CVOG" H 57125 16825 140 0001 C BNB "Caption15"
+F 19 "CVOG" H 57125 16825 140 0001 C BNB "Caption16"
+	57   57125 16825
 	1    0    0    -1  
 $EndComp
-Text GLabel 68625 13800 2    140  Output ~ 28
+Text GLabel 64900 14725 2    140  Output ~ 28
 IN0BIT
-Text Notes 65075 12750 2    140  ~ 28
+Text Notes 62975 13675 2    140  ~ 28
 Figure 4-117
 Wire Wire Line
-	61450 13800 61625 13800
+	59350 14725 59525 14725
 Wire Wire Line
-	64375 13450 63900 13450
+	61975 14375 61500 14375
 Wire Wire Line
-	59925 13450 59450 13450
+	57825 14375 57350 14375
 Wire Wire Line
-	59950 15900 59500 15900
+	57850 16825 57400 16825
 Wire Wire Line
-	61625 13800 61625 14350
+	59525 14725 59525 15275
 Wire Wire Line
-	61625 14350 59800 15025
+	59525 15275 57700 15950
 Wire Wire Line
-	59800 15025 59800 15200
+	57700 15950 57700 16125
 Wire Wire Line
-	59800 15200 59950 15200
-Connection ~ 61625 13800
+	57700 16125 57850 16125
+Connection ~ 59525 14725
 Wire Wire Line
-	61625 13800 64400 13800
+	59525 14725 62000 14725
 Wire Wire Line
-	61475 15550 61625 15550
+	59375 16475 59525 16475
 Wire Wire Line
-	61625 15550 61625 15000
+	59525 16475 59525 15925
 Wire Wire Line
-	61625 15000 59800 14375
+	59525 15925 57700 15300
 Wire Wire Line
-	59800 14375 59800 14150
+	57700 15300 57700 15075
 Wire Wire Line
-	59800 14150 59925 14150
+	57700 15075 57825 15075
 Wire Wire Line
-	65900 13800 68625 13800
-Text GLabel 45225 15700 0    140  Input ~ 28
+	63500 14725 64900 14725
+Text GLabel 43125 16625 0    140  Input ~ 28
 IN2BIT
-Text GLabel 45225 16400 0    140  Input ~ 28
+Text GLabel 43125 17325 0    140  Input ~ 28
 IN0BIT
-Text GLabel 45200 17625 0    140  Input ~ 28
+Text GLabel 43100 18550 0    140  Input ~ 28
 OUT0BIT
-Text GLabel 45150 18825 0    140  Input ~ 28
+Text GLabel 43050 19750 0    140  Input ~ 28
 IN3BIT
-Text GLabel 45175 19350 0    140  Input ~ 28
+Text GLabel 43075 20275 0    140  Input ~ 28
 OUT2BIT
-Text GLabel 45225 21775 0    140  Input ~ 28
+Text GLabel 43125 22700 0    140  Input ~ 28
 OUT1BIT
-Text GLabel 45175 22475 0    140  Input ~ 28
+Text GLabel 43075 23400 0    140  Input ~ 28
 INOUT3
 Wire Wire Line
-	45625 15700 45225 15700
+	43525 16625 43125 16625
 Wire Wire Line
-	45625 16400 45225 16400
+	43525 17325 43125 17325
 Wire Wire Line
-	45650 17625 45200 17625
+	43550 18550 43100 18550
 Wire Wire Line
-	45650 18825 45150 18825
+	43550 19750 43050 19750
 Wire Wire Line
-	45675 19350 45175 19350
+	43575 20275 43075 20275
 Wire Wire Line
-	45225 21775 45700 21775
+	43125 22700 43600 22700
 $Comp
 L D3NOR-+3VDC-0VDC-nd1021041:D3NOR-+3VDC-0VDC-nd1021041-A_C-___ U209
 U 1 1 5FE177F9
-P 60625 19250
-F 0 "U209" H 60625 19575 140 0001 C CNB
-F 1 "D3NOR-+3VDC-0VDC-nd1021041-A_C-___" H 60625 19675 140 0001 C CNN
-F 2 "" H 60625 19725 140 0001 C CNN
-F 3 "" H 60625 19725 140 0001 C CNN
-F 4 "127xx" H 60625 19250 140 0000 C CNB "Location"
-	1    60625 19250
+P 58525 20175
+F 0 "U209" H 58525 20500 140 0001 C CNB
+F 1 "D3NOR-+3VDC-0VDC-nd1021041-A_C-___" H 58525 20600 140 0001 C CNN
+F 2 "" H 58525 20650 140 0001 C CNN
+F 3 "" H 58525 20650 140 0001 C CNN
+F 4 "127xx" H 58525 20175 140 0000 C CNB "Location"
+	1    58525 20175
 	1    0    0    -1  
 $EndComp
 $Comp
 L D3NOR-+3VDC-0VDC-nd1021041:D3NOR-+3VDC-0VDC-nd1021041-AB_-___ U214
 U 1 1 5FE17804
-P 65050 17500
-F 0 "U214" H 65050 17825 140 0001 C CNB
-F 1 "D3NOR-+3VDC-0VDC-nd1021041-AB_-___" H 65050 17925 140 0001 C CNN
-F 2 "" H 65050 17975 140 0001 C CNN
-F 3 "" H 65050 17975 140 0001 C CNN
-F 4 "128xx" H 65050 17500 140 0000 C CNB "Location"
-	1    65050 17500
+P 62650 18425
+F 0 "U214" H 62650 18750 140 0001 C CNB
+F 1 "D3NOR-+3VDC-0VDC-nd1021041-AB_-___" H 62650 18850 140 0001 C CNN
+F 2 "" H 62650 18900 140 0001 C CNN
+F 3 "" H 62650 18900 140 0001 C CNN
+F 4 "128xx" H 62650 18425 140 0000 C CNB "Location"
+	1    62650 18425
 	1    0    0    -1  
 $EndComp
 $Comp
 L D3NOR-+3VDC-0VDC-nd1021041:D3NOR-+3VDC-0VDC-nd1021041-A_C-___ U207
 U 1 1 5FE1780F
-P 60600 17500
-F 0 "U207" H 60600 17825 140 0001 C CNB
-F 1 "D3NOR-+3VDC-0VDC-nd1021041-A_C-___" H 60600 17925 140 0001 C CNN
-F 2 "" H 60600 17975 140 0001 C CNN
-F 3 "" H 60600 17975 140 0001 C CNN
-F 4 "126xx" H 60600 17500 140 0000 C CNB "Location"
-	1    60600 17500
+P 58500 18425
+F 0 "U207" H 58500 18750 140 0001 C CNB
+F 1 "D3NOR-+3VDC-0VDC-nd1021041-A_C-___" H 58500 18850 140 0001 C CNN
+F 2 "" H 58500 18900 140 0001 C CNN
+F 3 "" H 58500 18900 140 0001 C CNN
+F 4 "126xx" H 58500 18425 140 0000 C CNB "Location"
+	1    58500 18425
 	1    0    0    -1  
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorGeneric J1
 U 45 1 5FE17829
-P 63675 17150
-F 0 "J1" H 63675 17475 140 0001 C CNN
-F 1 "ConnectorGeneric" H 63675 17575 140 0001 C CNN
-F 2 "" H 63675 17625 140 0001 C CNN
-F 3 "" H 63675 17625 140 0001 C CNN
-F 4 "RV2G/" H 63675 17150 140 0001 C BNB "Caption"
-F 5 "RV2G/" H 63675 17150 140 0001 C BNB "Caption2"
-F 6 "RV2G/" H 63675 17150 140 0001 C BNB "Caption3"
-F 7 "RV2G/" H 63675 17150 140 0001 C BNB "Caption4"
-F 8 "RV2G/" H 63675 17150 140 0001 C BNB "Caption5"
-F 9 "RV2G/" H 63675 17150 140 0001 C BNB "Caption6"
-F 10 "RV2G/" H 63675 17150 140 0001 C BNB "Caption7"
-F 11 "RV2G/" H 63675 17150 140 0001 C BNB "Caption8"
-F 12 "RV2G/" H 63675 17150 140 0001 C BNB "Caption9"
-F 13 "RV2G/" H 63675 17150 140 0001 C BNB "Caption10"
-F 14 "RV2G/" H 63675 17150 140 0001 C BNB "Caption11"
-F 15 "RV2G/" H 63675 17150 140 0001 C BNB "Caption12"
-F 16 "RV2G/" H 63675 17150 140 0001 C BNB "Caption13"
-F 17 "RV2G/" H 63675 17150 140 0001 C BNB "Caption14"
-F 18 "RV2G/" H 63675 17150 140 0001 C BNB "Caption15"
-F 19 "RV2G/" H 63675 17150 140 0001 C BNB "Caption16"
-	45   63675 17150
+P 61275 18075
+F 0 "J1" H 61275 18400 140 0001 C CNN
+F 1 "ConnectorGeneric" H 61275 18500 140 0001 C CNN
+F 2 "" H 61275 18550 140 0001 C CNN
+F 3 "" H 61275 18550 140 0001 C CNN
+F 4 "RV2G/" H 61275 18075 140 0001 C BNB "Caption"
+F 5 "RV2G/" H 61275 18075 140 0001 C BNB "Caption2"
+F 6 "RV2G/" H 61275 18075 140 0001 C BNB "Caption3"
+F 7 "RV2G/" H 61275 18075 140 0001 C BNB "Caption4"
+F 8 "RV2G/" H 61275 18075 140 0001 C BNB "Caption5"
+F 9 "RV2G/" H 61275 18075 140 0001 C BNB "Caption6"
+F 10 "RV2G/" H 61275 18075 140 0001 C BNB "Caption7"
+F 11 "RV2G/" H 61275 18075 140 0001 C BNB "Caption8"
+F 12 "RV2G/" H 61275 18075 140 0001 C BNB "Caption9"
+F 13 "RV2G/" H 61275 18075 140 0001 C BNB "Caption10"
+F 14 "RV2G/" H 61275 18075 140 0001 C BNB "Caption11"
+F 15 "RV2G/" H 61275 18075 140 0001 C BNB "Caption12"
+F 16 "RV2G/" H 61275 18075 140 0001 C BNB "Caption13"
+F 17 "RV2G/" H 61275 18075 140 0001 C BNB "Caption14"
+F 18 "RV2G/" H 61275 18075 140 0001 C BNB "Caption15"
+F 19 "RV2G/" H 61275 18075 140 0001 C BNB "Caption16"
+	45   61275 18075
 	1    0    0    -1  
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorGeneric J1
 U 37 1 5FE17843
-P 59225 17150
-F 0 "J1" H 59225 17475 140 0001 C CNN
-F 1 "ConnectorGeneric" H 59225 17575 140 0001 C CNN
-F 2 "" H 59225 17625 140 0001 C CNN
-F 3 "" H 59225 17625 140 0001 C CNN
-F 4 "FS07/" H 59225 17150 140 0001 C BNB "Caption"
-F 5 "FS08/" H 59225 17150 140 0001 C BNB "Caption2"
-F 6 "FS09/" H 59225 17150 140 0001 C BNB "Caption3"
-F 7 "FS10/" H 59225 17150 140 0001 C BNB "Caption4"
-F 8 "LIFTOFF" H 59225 17150 140 0001 C BNB "Caption5"
-F 9 "GUID_REL" H 59225 17150 140 0001 C BNB "Caption6"
-F 10 "ULLAGE" H 59225 17150 140 0001 C BNB "Caption7"
-F 11 "SIVB_SEP" H 59225 17150 140 0001 C BNB "Caption8"
-F 12 "SM_CM_SEP" H 59225 17150 140 0001 C BNB "Caption9"
-F 13 "CDU_FAIL" H 59225 17150 140 0001 C BNB "Caption10"
-F 14 "PIPA_FAIL" H 59225 17150 140 0001 C BNB "Caption11"
-F 15 "IMU_FAIL" H 59225 17150 140 0001 C BNB "Caption12"
-F 16 "SCS_DELTAV" H 59225 17150 140 0001 C BNB "Caption13"
-F 17 "G_N_MONITOR" H 59225 17150 140 0001 C BNB "Caption14"
-F 18 "PARITY_ALARM" H 59225 17150 140 0001 C BNB "Caption15"
-F 19 "PARITY_ALARM" H 59225 17150 140 0001 C BNB "Caption16"
-	37   59225 17150
+P 57125 18075
+F 0 "J1" H 57125 18400 140 0001 C CNN
+F 1 "ConnectorGeneric" H 57125 18500 140 0001 C CNN
+F 2 "" H 57125 18550 140 0001 C CNN
+F 3 "" H 57125 18550 140 0001 C CNN
+F 4 "FS07/" H 57125 18075 140 0001 C BNB "Caption"
+F 5 "FS08/" H 57125 18075 140 0001 C BNB "Caption2"
+F 6 "FS09/" H 57125 18075 140 0001 C BNB "Caption3"
+F 7 "FS10/" H 57125 18075 140 0001 C BNB "Caption4"
+F 8 "LIFTOFF" H 57125 18075 140 0001 C BNB "Caption5"
+F 9 "GUID_REL" H 57125 18075 140 0001 C BNB "Caption6"
+F 10 "ULLAGE" H 57125 18075 140 0001 C BNB "Caption7"
+F 11 "SIVB_SEP" H 57125 18075 140 0001 C BNB "Caption8"
+F 12 "SM_CM_SEP" H 57125 18075 140 0001 C BNB "Caption9"
+F 13 "CDU_FAIL" H 57125 18075 140 0001 C BNB "Caption10"
+F 14 "PIPA_FAIL" H 57125 18075 140 0001 C BNB "Caption11"
+F 15 "IMU_FAIL" H 57125 18075 140 0001 C BNB "Caption12"
+F 16 "SCS_DELTAV" H 57125 18075 140 0001 C BNB "Caption13"
+F 17 "G_N_MONITOR" H 57125 18075 140 0001 C BNB "Caption14"
+F 18 "PARITY_ALARM" H 57125 18075 140 0001 C BNB "Caption15"
+F 19 "PARITY_ALARM" H 57125 18075 140 0001 C BNB "Caption16"
+	37   57125 18075
 	1    0    0    -1  
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorGeneric J1
 U 39 1 5FE1785D
-P 59275 19600
-F 0 "J1" H 59275 19925 140 0001 C CNN
-F 1 "ConnectorGeneric" H 59275 20025 140 0001 C CNN
-F 2 "" H 59275 20075 140 0001 C CNN
-F 3 "" H 59275 20075 140 0001 C CNN
-F 4 "CV2G" H 59275 19600 140 0001 C BNB "Caption"
-F 5 "CV2G" H 59275 19600 140 0001 C BNB "Caption2"
-F 6 "CV2G" H 59275 19600 140 0001 C BNB "Caption3"
-F 7 "CV2G" H 59275 19600 140 0001 C BNB "Caption4"
-F 8 "CV2G" H 59275 19600 140 0001 C BNB "Caption5"
-F 9 "CV2G" H 59275 19600 140 0001 C BNB "Caption6"
-F 10 "CV2G" H 59275 19600 140 0001 C BNB "Caption7"
-F 11 "CV2G" H 59275 19600 140 0001 C BNB "Caption8"
-F 12 "CV2G" H 59275 19600 140 0001 C BNB "Caption9"
-F 13 "CV2G" H 59275 19600 140 0001 C BNB "Caption10"
-F 14 "CV2G" H 59275 19600 140 0001 C BNB "Caption11"
-F 15 "CV2G" H 59275 19600 140 0001 C BNB "Caption12"
-F 16 "CV2G" H 59275 19600 140 0001 C BNB "Caption13"
-F 17 "CV2G" H 59275 19600 140 0001 C BNB "Caption14"
-F 18 "CV2G" H 59275 19600 140 0001 C BNB "Caption15"
-F 19 "CV2G" H 59275 19600 140 0001 C BNB "Caption16"
-	39   59275 19600
+P 57175 20525
+F 0 "J1" H 57175 20850 140 0001 C CNN
+F 1 "ConnectorGeneric" H 57175 20950 140 0001 C CNN
+F 2 "" H 57175 21000 140 0001 C CNN
+F 3 "" H 57175 21000 140 0001 C CNN
+F 4 "CV2G" H 57175 20525 140 0001 C BNB "Caption"
+F 5 "CV2G" H 57175 20525 140 0001 C BNB "Caption2"
+F 6 "CV2G" H 57175 20525 140 0001 C BNB "Caption3"
+F 7 "CV2G" H 57175 20525 140 0001 C BNB "Caption4"
+F 8 "CV2G" H 57175 20525 140 0001 C BNB "Caption5"
+F 9 "CV2G" H 57175 20525 140 0001 C BNB "Caption6"
+F 10 "CV2G" H 57175 20525 140 0001 C BNB "Caption7"
+F 11 "CV2G" H 57175 20525 140 0001 C BNB "Caption8"
+F 12 "CV2G" H 57175 20525 140 0001 C BNB "Caption9"
+F 13 "CV2G" H 57175 20525 140 0001 C BNB "Caption10"
+F 14 "CV2G" H 57175 20525 140 0001 C BNB "Caption11"
+F 15 "CV2G" H 57175 20525 140 0001 C BNB "Caption12"
+F 16 "CV2G" H 57175 20525 140 0001 C BNB "Caption13"
+F 17 "CV2G" H 57175 20525 140 0001 C BNB "Caption14"
+F 18 "CV2G" H 57175 20525 140 0001 C BNB "Caption15"
+F 19 "CV2G" H 57175 20525 140 0001 C BNB "Caption16"
+	39   57175 20525
 	1    0    0    -1  
 $EndComp
-Text GLabel 68675 17500 2    140  Output ~ 28
+Text GLabel 64950 18425 2    140  Output ~ 28
 IN2BIT
-Text Notes 65125 16450 2    140  ~ 28
+Text Notes 62725 17375 2    140  ~ 28
 Figure 4-118
 Wire Wire Line
-	61500 17500 61675 17500
+	59400 18425 59575 18425
 Wire Wire Line
-	64425 17150 63950 17150
+	62025 18075 61550 18075
 Wire Wire Line
-	59975 17150 59500 17150
+	57875 18075 57400 18075
 Wire Wire Line
-	60000 19600 59550 19600
+	57900 20525 57450 20525
 Wire Wire Line
-	61675 17500 61675 18050
+	59575 18425 59575 18975
 Wire Wire Line
-	61675 18050 59850 18725
+	59575 18975 57750 19650
 Wire Wire Line
-	59850 18725 59850 18900
+	57750 19650 57750 19825
 Wire Wire Line
-	59850 18900 60000 18900
-Connection ~ 61675 17500
+	57750 19825 57900 19825
+Connection ~ 59575 18425
 Wire Wire Line
-	61675 17500 64450 17500
+	59575 18425 62050 18425
 Wire Wire Line
-	61525 19250 61675 19250
+	59425 20175 59575 20175
 Wire Wire Line
-	61675 19250 61675 18700
+	59575 20175 59575 19625
 Wire Wire Line
-	61675 18700 59850 18075
+	59575 19625 57750 19000
 Wire Wire Line
-	59850 18075 59850 17850
+	57750 19000 57750 18775
 Wire Wire Line
-	59850 17850 59975 17850
+	57750 18775 57875 18775
 Wire Wire Line
-	65950 17500 68675 17500
+	63550 18425 64950 18425
 $Comp
 L D3NOR-+3VDC-0VDC-nd1021041:D3NOR-+3VDC-0VDC-nd1021041-A_C-___ U210
 U 1 1 5FE97F5D
-P 60625 22900
-F 0 "U210" H 60625 23225 140 0001 C CNB
-F 1 "D3NOR-+3VDC-0VDC-nd1021041-A_C-___" H 60625 23325 140 0001 C CNN
-F 2 "" H 60625 23375 140 0001 C CNN
-F 3 "" H 60625 23375 140 0001 C CNN
-F 4 "133xx" H 60625 22900 140 0000 C CNB "Location"
-	1    60625 22900
+P 58525 23825
+F 0 "U210" H 58525 24150 140 0001 C CNB
+F 1 "D3NOR-+3VDC-0VDC-nd1021041-A_C-___" H 58525 24250 140 0001 C CNN
+F 2 "" H 58525 24300 140 0001 C CNN
+F 3 "" H 58525 24300 140 0001 C CNN
+F 4 "133xx" H 58525 23825 140 0000 C CNB "Location"
+	1    58525 23825
 	1    0    0    -1  
 $EndComp
 $Comp
 L D3NOR-+3VDC-0VDC-nd1021041:D3NOR-+3VDC-0VDC-nd1021041-AB_-___ U215
 U 1 1 5FE97F68
-P 65050 21150
-F 0 "U215" H 65050 21475 140 0001 C CNB
-F 1 "D3NOR-+3VDC-0VDC-nd1021041-AB_-___" H 65050 21575 140 0001 C CNN
-F 2 "" H 65050 21625 140 0001 C CNN
-F 3 "" H 65050 21625 140 0001 C CNN
-F 4 "134xx" H 65050 21150 140 0000 C CNB "Location"
-	1    65050 21150
+P 62650 22075
+F 0 "U215" H 62650 22400 140 0001 C CNB
+F 1 "D3NOR-+3VDC-0VDC-nd1021041-AB_-___" H 62650 22500 140 0001 C CNN
+F 2 "" H 62650 22550 140 0001 C CNN
+F 3 "" H 62650 22550 140 0001 C CNN
+F 4 "134xx" H 62650 22075 140 0000 C CNB "Location"
+	1    62650 22075
 	1    0    0    -1  
 $EndComp
 $Comp
 L D3NOR-+3VDC-0VDC-nd1021041:D3NOR-+3VDC-0VDC-nd1021041-A_C-___ U208
 U 1 1 5FE97F73
-P 60600 21150
-F 0 "U208" H 60600 21475 140 0001 C CNB
-F 1 "D3NOR-+3VDC-0VDC-nd1021041-A_C-___" H 60600 21575 140 0001 C CNN
-F 2 "" H 60600 21625 140 0001 C CNN
-F 3 "" H 60600 21625 140 0001 C CNN
-F 4 "132xx" H 60600 21150 140 0000 C CNB "Location"
-	1    60600 21150
+P 58500 22075
+F 0 "U208" H 58500 22400 140 0001 C CNB
+F 1 "D3NOR-+3VDC-0VDC-nd1021041-A_C-___" H 58500 22500 140 0001 C CNN
+F 2 "" H 58500 22550 140 0001 C CNN
+F 3 "" H 58500 22550 140 0001 C CNN
+F 4 "132xx" H 58500 22075 140 0000 C CNB "Location"
+	1    58500 22075
 	1    0    0    -1  
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorGeneric J1
 U 59 1 5FE97F8D
-P 63675 20800
-F 0 "J1" H 63675 21125 140 0001 C CNN
-F 1 "ConnectorGeneric" H 63675 21225 140 0001 C CNN
-F 2 "" H 63675 21275 140 0001 C CNN
-F 3 "" H 63675 21275 140 0001 C CNN
-F 4 "RV3G/" H 63675 20800 140 0001 C BNB "Caption"
-F 5 "RV3G/" H 63675 20800 140 0001 C BNB "Caption2"
-F 6 "RV3G/" H 63675 20800 140 0001 C BNB "Caption3"
-F 7 "RV3G/" H 63675 20800 140 0001 C BNB "Caption4"
-F 8 "RV3G/" H 63675 20800 140 0001 C BNB "Caption5"
-F 9 "RV3G/" H 63675 20800 140 0001 C BNB "Caption6"
-F 10 "RV3G/" H 63675 20800 140 0001 C BNB "Caption7"
-F 11 "RV3G/" H 63675 20800 140 0001 C BNB "Caption8"
-F 12 "RV3G/" H 63675 20800 140 0001 C BNB "Caption9"
-F 13 "RV3G/" H 63675 20800 140 0001 C BNB "Caption10"
-F 14 "RV3G/" H 63675 20800 140 0001 C BNB "Caption11"
-F 15 "RV3G/" H 63675 20800 140 0001 C BNB "Caption12"
-F 16 "RV3G/" H 63675 20800 140 0001 C BNB "Caption13"
-F 17 "RV3G/" H 63675 20800 140 0001 C BNB "Caption14"
-F 18 "RV3G/" H 63675 20800 140 0001 C BNB "Caption15"
-F 19 "RV3G/" H 63675 20800 140 0001 C BNB "Caption16"
-	59   63675 20800
+P 61275 21725
+F 0 "J1" H 61275 22050 140 0001 C CNN
+F 1 "ConnectorGeneric" H 61275 22150 140 0001 C CNN
+F 2 "" H 61275 22200 140 0001 C CNN
+F 3 "" H 61275 22200 140 0001 C CNN
+F 4 "RV3G/" H 61275 21725 140 0001 C BNB "Caption"
+F 5 "RV3G/" H 61275 21725 140 0001 C BNB "Caption2"
+F 6 "RV3G/" H 61275 21725 140 0001 C BNB "Caption3"
+F 7 "RV3G/" H 61275 21725 140 0001 C BNB "Caption4"
+F 8 "RV3G/" H 61275 21725 140 0001 C BNB "Caption5"
+F 9 "RV3G/" H 61275 21725 140 0001 C BNB "Caption6"
+F 10 "RV3G/" H 61275 21725 140 0001 C BNB "Caption7"
+F 11 "RV3G/" H 61275 21725 140 0001 C BNB "Caption8"
+F 12 "RV3G/" H 61275 21725 140 0001 C BNB "Caption9"
+F 13 "RV3G/" H 61275 21725 140 0001 C BNB "Caption10"
+F 14 "RV3G/" H 61275 21725 140 0001 C BNB "Caption11"
+F 15 "RV3G/" H 61275 21725 140 0001 C BNB "Caption12"
+F 16 "RV3G/" H 61275 21725 140 0001 C BNB "Caption13"
+F 17 "RV3G/" H 61275 21725 140 0001 C BNB "Caption14"
+F 18 "RV3G/" H 61275 21725 140 0001 C BNB "Caption15"
+F 19 "RV3G/" H 61275 21725 140 0001 C BNB "Caption16"
+	59   61275 21725
 	1    0    0    -1  
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorGeneric J1
 U 63 1 5FE97FA7
-P 59225 20800
-F 0 "J1" H 59225 21125 140 0001 C CNN
-F 1 "ConnectorGeneric" H 59225 21225 140 0001 C CNN
-F 2 "" H 59225 21275 140 0001 C CNN
-F 3 "" H 59225 21275 140 0001 C CNN
-F 4 "K1" H 59225 20800 140 0001 C BNB "Caption"
-F 5 "K2" H 59225 20800 140 0001 C BNB "Caption2"
-F 6 "K3" H 59225 20800 140 0001 C BNB "Caption3"
-F 7 "K4" H 59225 20800 140 0001 C BNB "Caption4"
-F 8 "K12" H 59225 20800 140 0001 C BNB "Caption5"
-F 9 "TRNSW" H 59225 20800 140 0001 C BNB "Caption6"
-F 10 "K5" H 59225 20800 140 0001 C BNB "Caption7"
-F 11 "0VDC" H 59225 20800 140 0001 C BNB "Caption8"
-F 12 "0VDC" H 59225 20800 140 0001 C BNB "Caption9"
-F 13 "OPTMS3" H 59225 20800 140 0001 C BNB "Caption10"
-F 14 "STAR_PRESENT" H 59225 20800 140 0001 C BNB "Caption11"
-F 15 "ZEROPT" H 59225 20800 140 0001 C BNB "Caption12"
-F 16 "SEXT_ON" H 59225 20800 140 0001 C BNB "Caption13"
-F 17 "OPTMS2" H 59225 20800 140 0001 C BNB "Caption14"
-F 18 "C1-C33" H 59225 20800 140 0001 C BNB "Caption15"
-F 19 "C1-C33" H 59225 20800 140 0001 C BNB "Caption16"
-	63   59225 20800
+P 57125 21725
+F 0 "J1" H 57125 22050 140 0001 C CNN
+F 1 "ConnectorGeneric" H 57125 22150 140 0001 C CNN
+F 2 "" H 57125 22200 140 0001 C CNN
+F 3 "" H 57125 22200 140 0001 C CNN
+F 4 "K1" H 57125 21725 140 0001 C BNB "Caption"
+F 5 "K2" H 57125 21725 140 0001 C BNB "Caption2"
+F 6 "K3" H 57125 21725 140 0001 C BNB "Caption3"
+F 7 "K4" H 57125 21725 140 0001 C BNB "Caption4"
+F 8 "K12" H 57125 21725 140 0001 C BNB "Caption5"
+F 9 "TRNSW" H 57125 21725 140 0001 C BNB "Caption6"
+F 10 "K5" H 57125 21725 140 0001 C BNB "Caption7"
+F 11 "0VDC" H 57125 21725 140 0001 C BNB "Caption8"
+F 12 "0VDC" H 57125 21725 140 0001 C BNB "Caption9"
+F 13 "OPTMS3" H 57125 21725 140 0001 C BNB "Caption10"
+F 14 "STAR_PRESENT" H 57125 21725 140 0001 C BNB "Caption11"
+F 15 "ZEROPT" H 57125 21725 140 0001 C BNB "Caption12"
+F 16 "SEXT_ON" H 57125 21725 140 0001 C BNB "Caption13"
+F 17 "OPTMS2" H 57125 21725 140 0001 C BNB "Caption14"
+F 18 "C1-C33" H 57125 21725 140 0001 C BNB "Caption15"
+F 19 "C1-C33" H 57125 21725 140 0001 C BNB "Caption16"
+	63   57125 21725
 	1    0    0    -1  
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorGeneric J1
 U 61 1 5FE97FC1
-P 59275 23250
-F 0 "J1" H 59275 23575 140 0001 C CNN
-F 1 "ConnectorGeneric" H 59275 23675 140 0001 C CNN
-F 2 "" H 59275 23725 140 0001 C CNN
-F 3 "" H 59275 23725 140 0001 C CNN
-F 4 "CV3G" H 59275 23250 140 0001 C BNB "Caption"
-F 5 "CV3G" H 59275 23250 140 0001 C BNB "Caption2"
-F 6 "CV3G" H 59275 23250 140 0001 C BNB "Caption3"
-F 7 "CV3G" H 59275 23250 140 0001 C BNB "Caption4"
-F 8 "CV3G" H 59275 23250 140 0001 C BNB "Caption5"
-F 9 "CV3G" H 59275 23250 140 0001 C BNB "Caption6"
-F 10 "CV3G" H 59275 23250 140 0001 C BNB "Caption7"
-F 11 "CV3G" H 59275 23250 140 0001 C BNB "Caption8"
-F 12 "CV3G" H 59275 23250 140 0001 C BNB "Caption9"
-F 13 "CV3G" H 59275 23250 140 0001 C BNB "Caption10"
-F 14 "CV3G" H 59275 23250 140 0001 C BNB "Caption11"
-F 15 "CV3G" H 59275 23250 140 0001 C BNB "Caption12"
-F 16 "CV3G" H 59275 23250 140 0001 C BNB "Caption13"
-F 17 "CV3G" H 59275 23250 140 0001 C BNB "Caption14"
-F 18 "CV3G" H 59275 23250 140 0001 C BNB "Caption15"
-F 19 "CV3G" H 59275 23250 140 0001 C BNB "Caption16"
-	61   59275 23250
+P 57175 24175
+F 0 "J1" H 57175 24500 140 0001 C CNN
+F 1 "ConnectorGeneric" H 57175 24600 140 0001 C CNN
+F 2 "" H 57175 24650 140 0001 C CNN
+F 3 "" H 57175 24650 140 0001 C CNN
+F 4 "CV3G" H 57175 24175 140 0001 C BNB "Caption"
+F 5 "CV3G" H 57175 24175 140 0001 C BNB "Caption2"
+F 6 "CV3G" H 57175 24175 140 0001 C BNB "Caption3"
+F 7 "CV3G" H 57175 24175 140 0001 C BNB "Caption4"
+F 8 "CV3G" H 57175 24175 140 0001 C BNB "Caption5"
+F 9 "CV3G" H 57175 24175 140 0001 C BNB "Caption6"
+F 10 "CV3G" H 57175 24175 140 0001 C BNB "Caption7"
+F 11 "CV3G" H 57175 24175 140 0001 C BNB "Caption8"
+F 12 "CV3G" H 57175 24175 140 0001 C BNB "Caption9"
+F 13 "CV3G" H 57175 24175 140 0001 C BNB "Caption10"
+F 14 "CV3G" H 57175 24175 140 0001 C BNB "Caption11"
+F 15 "CV3G" H 57175 24175 140 0001 C BNB "Caption12"
+F 16 "CV3G" H 57175 24175 140 0001 C BNB "Caption13"
+F 17 "CV3G" H 57175 24175 140 0001 C BNB "Caption14"
+F 18 "CV3G" H 57175 24175 140 0001 C BNB "Caption15"
+F 19 "CV3G" H 57175 24175 140 0001 C BNB "Caption16"
+	61   57175 24175
 	1    0    0    -1  
 $EndComp
-Text GLabel 68675 21150 2    140  Output ~ 28
+Text GLabel 64950 22075 2    140  Output ~ 28
 IN3BIT
-Text Notes 65125 20100 2    140  ~ 28
+Text Notes 62725 21025 2    140  ~ 28
 Figure 4-119
 Wire Wire Line
-	61500 21150 61675 21150
+	59400 22075 59575 22075
 Wire Wire Line
-	64425 20800 63950 20800
+	62025 21725 61550 21725
 Wire Wire Line
-	59975 20800 59500 20800
+	57875 21725 57400 21725
 Wire Wire Line
-	60000 23250 59550 23250
+	57900 24175 57450 24175
 Wire Wire Line
-	61675 21150 61675 21700
+	59575 22075 59575 22625
 Wire Wire Line
-	61675 21700 59850 22375
+	59575 22625 57750 23300
 Wire Wire Line
-	59850 22375 59850 22550
+	57750 23300 57750 23475
 Wire Wire Line
-	59850 22550 60000 22550
-Connection ~ 61675 21150
+	57750 23475 57900 23475
+Connection ~ 59575 22075
 Wire Wire Line
-	61675 21150 64450 21150
+	59575 22075 62050 22075
 Wire Wire Line
-	61525 22900 61675 22900
+	59425 23825 59575 23825
 Wire Wire Line
-	61675 22900 61675 22350
+	59575 23825 59575 23275
 Wire Wire Line
-	61675 22350 59850 21725
+	59575 23275 57750 22650
 Wire Wire Line
-	59850 21725 59850 21500
+	57750 22650 57750 22425
 Wire Wire Line
-	59850 21500 59975 21500
+	57750 22425 57875 22425
 Wire Wire Line
-	65950 21150 68675 21150
+	63550 22075 64950 22075
 $Comp
 L D3NOR-+3VDC-0VDC-nd1021041:D3NOR-+3VDC-0VDC-nd1021041-CB_-___ U131
 U 1 1 5FF3B1FB
@@ -6198,22 +6198,22 @@ F 0 "J1" H 11625 29850 140 0001 C CNN
 F 1 "ConnectorGeneric" H 11625 29950 140 0001 C CNN
 F 2 "" H 11625 30000 140 0001 C CNN
 F 3 "" H 11625 30000 140 0001 C CNN
-F 4 "P1_42" H 11625 29525 140 0001 C BNB "Caption"
-F 5 "P2_42" H 11625 29525 140 0001 C BNB "Caption2"
-F 6 "P3_42" H 11625 29525 140 0001 C BNB "Caption3"
-F 7 "P4_42" H 11625 29525 140 0001 C BNB "Caption4"
-F 8 "P5_42" H 11625 29525 140 0001 C BNB "Caption5"
-F 9 "P6_42" H 11625 29525 140 0001 C BNB "Caption6"
-F 10 "P7_42" H 11625 29525 140 0001 C BNB "Caption7"
-F 11 "P8_42" H 11625 29525 140 0001 C BNB "Caption8"
-F 12 "P9_42" H 11625 29525 140 0001 C BNB "Caption9"
-F 13 "P10_42" H 11625 29525 140 0001 C BNB "Caption10"
-F 14 "P11_42" H 11625 29525 140 0001 C BNB "Caption11"
-F 15 "P12_42" H 11625 29525 140 0001 C BNB "Caption12"
-F 16 "P13_42" H 11625 29525 140 0001 C BNB "Caption13"
-F 17 "P14_42" H 11625 29525 140 0001 C BNB "Caption14"
+F 4 "A1_41_42" H 11625 29525 140 0001 C BNB "Caption"
+F 5 "A2_41_42" H 11625 29525 140 0001 C BNB "Caption2"
+F 6 "A3_41_42" H 11625 29525 140 0001 C BNB "Caption3"
+F 7 "A4_41_42" H 11625 29525 140 0001 C BNB "Caption4"
+F 8 "A5_41_42" H 11625 29525 140 0001 C BNB "Caption5"
+F 9 "A6_41_42" H 11625 29525 140 0001 C BNB "Caption6"
+F 10 "A7_41_42" H 11625 29525 140 0001 C BNB "Caption7"
+F 11 "A8_41_42" H 11625 29525 140 0001 C BNB "Caption8"
+F 12 "A9_41_42" H 11625 29525 140 0001 C BNB "Caption9"
+F 13 "A10_41_42" H 11625 29525 140 0001 C BNB "Caption10"
+F 14 "A11_41_42" H 11625 29525 140 0001 C BNB "Caption11"
+F 15 "A12_41_42" H 11625 29525 140 0001 C BNB "Caption12"
+F 16 "A13_41_42" H 11625 29525 140 0001 C BNB "Caption13"
+F 17 "A14_41_42" H 11625 29525 140 0001 C BNB "Caption14"
 F 18 "(NC)" H 11625 29525 140 0001 C BNB "Caption15"
-F 19 "P16_42" H 11625 29525 140 0001 C BNB "Caption16"
+F 19 "A15_41_A16_41_42" H 11625 29525 140 0001 C BNB "Caption16"
 	42   11625 29525
 	1    0    0    1   
 $EndComp
@@ -6227,22 +6227,22 @@ F 0 "J1" H 12425 29850 140 0001 C CNN
 F 1 "ConnectorGeneric" H 12425 29950 140 0001 C CNN
 F 2 "" H 12425 30000 140 0001 C CNN
 F 3 "" H 12425 30000 140 0001 C CNN
-F 4 "P1_41" H 12425 29525 140 0001 C BNB "Caption"
-F 5 "P2_41" H 12425 29525 140 0001 C BNB "Caption2"
-F 6 "P3_41" H 12425 29525 140 0001 C BNB "Caption3"
-F 7 "P4_41" H 12425 29525 140 0001 C BNB "Caption4"
-F 8 "P5_41" H 12425 29525 140 0001 C BNB "Caption5"
-F 9 "P6_41" H 12425 29525 140 0001 C BNB "Caption6"
-F 10 "P7_41" H 12425 29525 140 0001 C BNB "Caption7"
-F 11 "P8_41" H 12425 29525 140 0001 C BNB "Caption8"
-F 12 "P9_41" H 12425 29525 140 0001 C BNB "Caption9"
-F 13 "P10_41" H 12425 29525 140 0001 C BNB "Caption10"
-F 14 "P11_41" H 12425 29525 140 0001 C BNB "Caption11"
-F 15 "P12_41" H 12425 29525 140 0001 C BNB "Caption12"
-F 16 "P13_41" H 12425 29525 140 0001 C BNB "Caption13"
-F 17 "P14_41" H 12425 29525 140 0001 C BNB "Caption14"
-F 18 "P15_41" H 12425 29525 140 0001 C BNB "Caption15"
-F 19 "P16_41" H 12425 29525 140 0001 C BNB "Caption16"
+F 4 "A1_41_42" H 12425 29525 140 0001 C BNB "Caption"
+F 5 "A2_41_42" H 12425 29525 140 0001 C BNB "Caption2"
+F 6 "A3_41_42" H 12425 29525 140 0001 C BNB "Caption3"
+F 7 "A4_41_42" H 12425 29525 140 0001 C BNB "Caption4"
+F 8 "A5_41_42" H 12425 29525 140 0001 C BNB "Caption5"
+F 9 "A6_41_42" H 12425 29525 140 0001 C BNB "Caption6"
+F 10 "A7_41_42" H 12425 29525 140 0001 C BNB "Caption7"
+F 11 "A8_41_42" H 12425 29525 140 0001 C BNB "Caption8"
+F 12 "A9_41_42" H 12425 29525 140 0001 C BNB "Caption9"
+F 13 "A10_41_42" H 12425 29525 140 0001 C BNB "Caption10"
+F 14 "A11_41_42" H 12425 29525 140 0001 C BNB "Caption11"
+F 15 "A12_41_42" H 12425 29525 140 0001 C BNB "Caption12"
+F 16 "A13_41_42" H 12425 29525 140 0001 C BNB "Caption13"
+F 17 "A14_41_42" H 12425 29525 140 0001 C BNB "Caption14"
+F 18 "A15_41_A16_41_42" H 12425 29525 140 0001 C BNB "Caption15"
+F 19 "A15_41_A16_41_42" H 12425 29525 140 0001 C BNB "Caption16"
 	41   12425 29525
 	1    0    0    1   
 $EndComp
@@ -6661,22 +6661,22 @@ F 0 "J1" H 50600 29825 140 0001 C CNN
 F 1 "ConnectorGeneric" H 50600 29925 140 0001 C CNN
 F 2 "" H 50600 29975 140 0001 C CNN
 F 3 "" H 50600 29975 140 0001 C CNN
-F 4 "P1_140" H 50600 29500 140 0001 C BNB "Caption"
-F 5 "P2_140" H 50600 29500 140 0001 C BNB "Caption2"
-F 6 "P3_140" H 50600 29500 140 0001 C BNB "Caption3"
-F 7 "P4_140" H 50600 29500 140 0001 C BNB "Caption4"
-F 8 "P5_140" H 50600 29500 140 0001 C BNB "Caption5"
-F 9 "P6_140" H 50600 29500 140 0001 C BNB "Caption6"
-F 10 "P7_140" H 50600 29500 140 0001 C BNB "Caption7"
-F 11 "P8_140" H 50600 29500 140 0001 C BNB "Caption8"
-F 12 "P9_140" H 50600 29500 140 0001 C BNB "Caption9"
-F 13 "P10_140" H 50600 29500 140 0001 C BNB "Caption10"
-F 14 "P11_140" H 50600 29500 140 0001 C BNB "Caption11"
-F 15 "P12_140" H 50600 29500 140 0001 C BNB "Caption12"
-F 16 "P13_140" H 50600 29500 140 0001 C BNB "Caption13"
-F 17 "P14_140" H 50600 29500 140 0001 C BNB "Caption14"
-F 18 "(NC)" H 50600 29500 140 0001 C BNB "Caption15"
-F 19 "P16_140" H 50600 29500 140 0001 C BNB "Caption16"
+F 4 "A1_139_140" H 50600 29500 140 0001 C BNB "Caption"
+F 5 "A2_139_140" H 50600 29500 140 0001 C BNB "Caption2"
+F 6 "A3_139_140" H 50600 29500 140 0001 C BNB "Caption3"
+F 7 "A4_139_140" H 50600 29500 140 0001 C BNB "Caption4"
+F 8 "A5_139_140" H 50600 29500 140 0001 C BNB "Caption5"
+F 9 "A6_139_140" H 50600 29500 140 0001 C BNB "Caption6"
+F 10 "A7_139_140" H 50600 29500 140 0001 C BNB "Caption7"
+F 11 "A8_139_140" H 50600 29500 140 0001 C BNB "Caption8"
+F 12 "A9_139_140" H 50600 29500 140 0001 C BNB "Caption9"
+F 13 "A10_139_140" H 50600 29500 140 0001 C BNB "Caption10"
+F 14 "A11_139_140" H 50600 29500 140 0001 C BNB "Caption11"
+F 15 "A12_139_140" H 50600 29500 140 0001 C BNB "Caption12"
+F 16 "A13_139_140" H 50600 29500 140 0001 C BNB "Caption13"
+F 17 "A14_139_140" H 50600 29500 140 0001 C BNB "Caption14"
+F 18 "A15_140_A25_93" H 50600 29500 140 0001 C BNB "Caption15"
+F 19 "A15_139_A16_139_140" H 50600 29500 140 0001 C BNB "Caption16"
 	140  50600 29500
 	1    0    0    1   
 $EndComp
@@ -6696,22 +6696,22 @@ F 0 "J1" H 51400 29825 140 0001 C CNN
 F 1 "ConnectorGeneric" H 51400 29925 140 0001 C CNN
 F 2 "" H 51400 29975 140 0001 C CNN
 F 3 "" H 51400 29975 140 0001 C CNN
-F 4 "P1_139" H 51400 29500 140 0001 C BNB "Caption"
-F 5 "P2_139" H 51400 29500 140 0001 C BNB "Caption2"
-F 6 "P3_139" H 51400 29500 140 0001 C BNB "Caption3"
-F 7 "P4_139" H 51400 29500 140 0001 C BNB "Caption4"
-F 8 "P5_139" H 51400 29500 140 0001 C BNB "Caption5"
-F 9 "P6_139" H 51400 29500 140 0001 C BNB "Caption6"
-F 10 "P7_139" H 51400 29500 140 0001 C BNB "Caption7"
-F 11 "P8_139" H 51400 29500 140 0001 C BNB "Caption8"
-F 12 "P9_139" H 51400 29500 140 0001 C BNB "Caption9"
-F 13 "P10_139" H 51400 29500 140 0001 C BNB "Caption10"
-F 14 "P11_139" H 51400 29500 140 0001 C BNB "Caption11"
-F 15 "P12_139" H 51400 29500 140 0001 C BNB "Caption12"
+F 4 "A1_139_140" H 51400 29500 140 0001 C BNB "Caption"
+F 5 "A2_139_140" H 51400 29500 140 0001 C BNB "Caption2"
+F 6 "A3_139_140" H 51400 29500 140 0001 C BNB "Caption3"
+F 7 "A4_139_140" H 51400 29500 140 0001 C BNB "Caption4"
+F 8 "A5_139_140" H 51400 29500 140 0001 C BNB "Caption5"
+F 9 "A6_139_140" H 51400 29500 140 0001 C BNB "Caption6"
+F 10 "A7_139_140" H 51400 29500 140 0001 C BNB "Caption7"
+F 11 "A8_139_140" H 51400 29500 140 0001 C BNB "Caption8"
+F 12 "A9_139_140" H 51400 29500 140 0001 C BNB "Caption9"
+F 13 "A10_139_140" H 51400 29500 140 0001 C BNB "Caption10"
+F 14 "A11_139_140" H 51400 29500 140 0001 C BNB "Caption11"
+F 15 "A12_139_140" H 51400 29500 140 0001 C BNB "Caption12"
 F 16 "P13_139" H 51400 29500 140 0001 C BNB "Caption13"
-F 17 "P14_139" H 51400 29500 140 0001 C BNB "Caption14"
-F 18 "P15_139" H 51400 29500 140 0001 C BNB "Caption15"
-F 19 "P16_139" H 51400 29500 140 0001 C BNB "Caption16"
+F 17 "A14_139_140" H 51400 29500 140 0001 C BNB "Caption14"
+F 18 "A15_139_A16_139_140" H 51400 29500 140 0001 C BNB "Caption15"
+F 19 "A15_139_A16_139_140" H 51400 29500 140 0001 C BNB "Caption16"
 	139  51400 29500
 	1    0    0    1   
 $EndComp
@@ -6725,22 +6725,22 @@ F 0 "J1" H 46900 29475 140 0001 C CNN
 F 1 "ConnectorGeneric" H 46900 29575 140 0001 C CNN
 F 2 "" H 46900 29625 140 0001 C CNN
 F 3 "" H 46900 29625 140 0001 C CNN
-F 4 "P1_134" H 46900 29150 140 0001 C BNB "Caption"
-F 5 "P2_134" H 46900 29150 140 0001 C BNB "Caption2"
-F 6 "P3_134" H 46900 29150 140 0001 C BNB "Caption3"
-F 7 "P4_134" H 46900 29150 140 0001 C BNB "Caption4"
-F 8 "P5_134" H 46900 29150 140 0001 C BNB "Caption5"
-F 9 "P6_134" H 46900 29150 140 0001 C BNB "Caption6"
-F 10 "P7_134" H 46900 29150 140 0001 C BNB "Caption7"
-F 11 "P8_134" H 46900 29150 140 0001 C BNB "Caption8"
-F 12 "P9_134" H 46900 29150 140 0001 C BNB "Caption9"
-F 13 "P10_134" H 46900 29150 140 0001 C BNB "Caption10"
-F 14 "P11_134" H 46900 29150 140 0001 C BNB "Caption11"
-F 15 "P12_134" H 46900 29150 140 0001 C BNB "Caption12"
-F 16 "P13_134" H 46900 29150 140 0001 C BNB "Caption13"
-F 17 "P14_134" H 46900 29150 140 0001 C BNB "Caption14"
+F 4 "A1_128_134" H 46900 29150 140 0001 C BNB "Caption"
+F 5 "A2_128_134" H 46900 29150 140 0001 C BNB "Caption2"
+F 6 "A3_128_134" H 46900 29150 140 0001 C BNB "Caption3"
+F 7 "A4_128_134" H 46900 29150 140 0001 C BNB "Caption4"
+F 8 "A5_128_134" H 46900 29150 140 0001 C BNB "Caption5"
+F 9 "A6_128_134" H 46900 29150 140 0001 C BNB "Caption6"
+F 10 "A7_128_134" H 46900 29150 140 0001 C BNB "Caption7"
+F 11 "A8_128_134" H 46900 29150 140 0001 C BNB "Caption8"
+F 12 "A9_128_134" H 46900 29150 140 0001 C BNB "Caption9"
+F 13 "A10_128_134" H 46900 29150 140 0001 C BNB "Caption10"
+F 14 "A11_128_134" H 46900 29150 140 0001 C BNB "Caption11"
+F 15 "A12_128_134" H 46900 29150 140 0001 C BNB "Caption12"
+F 16 "A13_128_134" H 46900 29150 140 0001 C BNB "Caption13"
+F 17 "A14_128_134" H 46900 29150 140 0001 C BNB "Caption14"
 F 18 "(NC)" H 46900 29150 140 0001 C BNB "Caption15"
-F 19 "P16_134" H 46900 29150 140 0001 C BNB "Caption16"
+F 19 "A16_128_134" H 46900 29150 140 0001 C BNB "Caption16"
 	134  46900 29150
 	1    0    0    1   
 $EndComp
@@ -6756,22 +6756,22 @@ F 0 "J1" H 47700 29475 140 0001 C CNN
 F 1 "ConnectorGeneric" H 47700 29575 140 0001 C CNN
 F 2 "" H 47700 29625 140 0001 C CNN
 F 3 "" H 47700 29625 140 0001 C CNN
-F 4 "P1_128" H 47700 29150 140 0001 C BNB "Caption"
-F 5 "P2_128" H 47700 29150 140 0001 C BNB "Caption2"
-F 6 "P3_128" H 47700 29150 140 0001 C BNB "Caption3"
-F 7 "P4_128" H 47700 29150 140 0001 C BNB "Caption4"
-F 8 "P5_128" H 47700 29150 140 0001 C BNB "Caption5"
-F 9 "P6_128" H 47700 29150 140 0001 C BNB "Caption6"
-F 10 "P7_128" H 47700 29150 140 0001 C BNB "Caption7"
-F 11 "P8_128" H 47700 29150 140 0001 C BNB "Caption8"
-F 12 "P9_128" H 47700 29150 140 0001 C BNB "Caption9"
-F 13 "P10_128" H 47700 29150 140 0001 C BNB "Caption10"
-F 14 "P11_128" H 47700 29150 140 0001 C BNB "Caption11"
-F 15 "P12_128" H 47700 29150 140 0001 C BNB "Caption12"
-F 16 "P13_128" H 47700 29150 140 0001 C BNB "Caption13"
-F 17 "P14_128" H 47700 29150 140 0001 C BNB "Caption14"
+F 4 "A1_128_134" H 47700 29150 140 0001 C BNB "Caption"
+F 5 "A2_128_134" H 47700 29150 140 0001 C BNB "Caption2"
+F 6 "A3_128_134" H 47700 29150 140 0001 C BNB "Caption3"
+F 7 "A4_128_134" H 47700 29150 140 0001 C BNB "Caption4"
+F 8 "A5_128_134" H 47700 29150 140 0001 C BNB "Caption5"
+F 9 "A6_128_134" H 47700 29150 140 0001 C BNB "Caption6"
+F 10 "A7_128_134" H 47700 29150 140 0001 C BNB "Caption7"
+F 11 "A8_128_134" H 47700 29150 140 0001 C BNB "Caption8"
+F 12 "A9_128_134" H 47700 29150 140 0001 C BNB "Caption9"
+F 13 "A10_128_134" H 47700 29150 140 0001 C BNB "Caption10"
+F 14 "A11_128_134" H 47700 29150 140 0001 C BNB "Caption11"
+F 15 "A12_128_134" H 47700 29150 140 0001 C BNB "Caption12"
+F 16 "A13_128_134" H 47700 29150 140 0001 C BNB "Caption13"
+F 17 "A14_128_134" H 47700 29150 140 0001 C BNB "Caption14"
 F 18 "T10" H 47700 29150 140 0001 C BNB "Caption15"
-F 19 "P16_128" H 47700 29150 140 0001 C BNB "Caption16"
+F 19 "A16_128_134" H 47700 29150 140 0001 C BNB "Caption16"
 	128  47700 29150
 	1    0    0    1   
 $EndComp
@@ -7257,22 +7257,22 @@ F 0 "J1" H 37300 29850 140 0001 C CNN
 F 1 "ConnectorGeneric" H 37300 29950 140 0001 C CNN
 F 2 "" H 37300 30000 140 0001 C CNN
 F 3 "" H 37300 30000 140 0001 C CNN
-F 4 "P1_106" H 37300 29525 140 0001 C BNB "Caption"
-F 5 "P2_106" H 37300 29525 140 0001 C BNB "Caption2"
-F 6 "P3_106" H 37300 29525 140 0001 C BNB "Caption3"
-F 7 "P4_106" H 37300 29525 140 0001 C BNB "Caption4"
-F 8 "P5_106" H 37300 29525 140 0001 C BNB "Caption5"
-F 9 "P6_106" H 37300 29525 140 0001 C BNB "Caption6"
-F 10 "P7_106" H 37300 29525 140 0001 C BNB "Caption7"
-F 11 "P8_106" H 37300 29525 140 0001 C BNB "Caption8"
-F 12 "P9_106" H 37300 29525 140 0001 C BNB "Caption9"
-F 13 "P10_106" H 37300 29525 140 0001 C BNB "Caption10"
-F 14 "P11_106" H 37300 29525 140 0001 C BNB "Caption11"
-F 15 "P12_106" H 37300 29525 140 0001 C BNB "Caption12"
-F 16 "P13_106" H 37300 29525 140 0001 C BNB "Caption13"
-F 17 "P14_106" H 37300 29525 140 0001 C BNB "Caption14"
+F 4 "A1_105_106" H 37300 29525 140 0001 C BNB "Caption"
+F 5 "A2_105_106" H 37300 29525 140 0001 C BNB "Caption2"
+F 6 "A3_105_106" H 37300 29525 140 0001 C BNB "Caption3"
+F 7 "A4_105_106" H 37300 29525 140 0001 C BNB "Caption4"
+F 8 "A5_105_106" H 37300 29525 140 0001 C BNB "Caption5"
+F 9 "A6_105_106" H 37300 29525 140 0001 C BNB "Caption6"
+F 10 "A7_105_106" H 37300 29525 140 0001 C BNB "Caption7"
+F 11 "A8_105_106" H 37300 29525 140 0001 C BNB "Caption8"
+F 12 "A9_105_106" H 37300 29525 140 0001 C BNB "Caption9"
+F 13 "A10_105_106" H 37300 29525 140 0001 C BNB "Caption10"
+F 14 "A11_105_106" H 37300 29525 140 0001 C BNB "Caption11"
+F 15 "A12_105_106" H 37300 29525 140 0001 C BNB "Caption12"
+F 16 "A13_105_106" H 37300 29525 140 0001 C BNB "Caption13"
+F 17 "A14_105_106" H 37300 29525 140 0001 C BNB "Caption14"
 F 18 "(NC)" H 37300 29525 140 0001 C BNB "Caption15"
-F 19 "P16_106" H 37300 29525 140 0001 C BNB "Caption16"
+F 19 "A15_105_P16_105_106" H 37300 29525 140 0001 C BNB "Caption16"
 	106  37300 29525
 	1    0    0    1   
 $EndComp
@@ -7296,22 +7296,22 @@ F 0 "J1" H 38100 29850 140 0001 C CNN
 F 1 "ConnectorGeneric" H 38100 29950 140 0001 C CNN
 F 2 "" H 38100 30000 140 0001 C CNN
 F 3 "" H 38100 30000 140 0001 C CNN
-F 4 "P1_105" H 38100 29525 140 0001 C BNB "Caption"
-F 5 "P2_105" H 38100 29525 140 0001 C BNB "Caption2"
-F 6 "P3_105" H 38100 29525 140 0001 C BNB "Caption3"
-F 7 "P4_105" H 38100 29525 140 0001 C BNB "Caption4"
-F 8 "P5_105" H 38100 29525 140 0001 C BNB "Caption5"
-F 9 "P6_105" H 38100 29525 140 0001 C BNB "Caption6"
-F 10 "P7_105" H 38100 29525 140 0001 C BNB "Caption7"
-F 11 "P8_105" H 38100 29525 140 0001 C BNB "Caption8"
-F 12 "P9_105" H 38100 29525 140 0001 C BNB "Caption9"
-F 13 "P10_105" H 38100 29525 140 0001 C BNB "Caption10"
-F 14 "P11_105" H 38100 29525 140 0001 C BNB "Caption11"
-F 15 "P12_105" H 38100 29525 140 0001 C BNB "Caption12"
-F 16 "P13_105" H 38100 29525 140 0001 C BNB "Caption13"
-F 17 "P14_105" H 38100 29525 140 0001 C BNB "Caption14"
-F 18 "P15_105" H 38100 29525 140 0001 C BNB "Caption15"
-F 19 "P16_105" H 38100 29525 140 0001 C BNB "Caption16"
+F 4 "A1_105_106" H 38100 29525 140 0001 C BNB "Caption"
+F 5 "A2_105_106" H 38100 29525 140 0001 C BNB "Caption2"
+F 6 "A3_105_106" H 38100 29525 140 0001 C BNB "Caption3"
+F 7 "A4_105_106" H 38100 29525 140 0001 C BNB "Caption4"
+F 8 "A5_105_106" H 38100 29525 140 0001 C BNB "Caption5"
+F 9 "A6_105_106" H 38100 29525 140 0001 C BNB "Caption6"
+F 10 "A7_105_106" H 38100 29525 140 0001 C BNB "Caption7"
+F 11 "A8_105_106" H 38100 29525 140 0001 C BNB "Caption8"
+F 12 "A9_105_106" H 38100 29525 140 0001 C BNB "Caption9"
+F 13 "A10_105_106" H 38100 29525 140 0001 C BNB "Caption10"
+F 14 "A11_105_106" H 38100 29525 140 0001 C BNB "Caption11"
+F 15 "A12_105_106" H 38100 29525 140 0001 C BNB "Caption12"
+F 16 "A13_105_106" H 38100 29525 140 0001 C BNB "Caption13"
+F 17 "A14_105_106" H 38100 29525 140 0001 C BNB "Caption14"
+F 18 "A15_105_P16_105_106" H 38100 29525 140 0001 C BNB "Caption15"
+F 19 "A15_105_P16_105_106" H 38100 29525 140 0001 C BNB "Caption16"
 	105  38100 29525
 	1    0    0    1   
 $EndComp
@@ -7397,7 +7397,7 @@ Text Notes 57700 7525 0    140  ~ 28
 (37)
 Text Notes 61950 7500 0    140  ~ 28
 (38)
-Text Notes 58925 13875 0    140  ~ 28
+Text Notes 56825 14800 0    140  ~ 28
 (55)
 Text Notes 49950 29325 0    140  ~ 28
 (74)
@@ -7407,7 +7407,7 @@ Wire Wire Line
 Wire Wire Line
 	29450 23825 29825 23825
 Wire Wire Line
-	45175 22475 45700 22475
+	43075 23400 43600 23400
 Text Notes 2225 2125 0    140  ~ 28
 WALPG/
 Text Notes 2425 3900 0    140  ~ 28
@@ -7652,56 +7652,56 @@ Text Notes 58075 8325 0    140  ~ 28
  RUG/\n(but A16\nRUAC/)
 Text Notes 61875 6900 0    140  ~ 28
 URLxx
-Text Notes 43075 13350 0    140  ~ 28
+Text Notes 40975 14275 0    140  ~ 28
 GRLxx
-Text Notes 43775 14200 2    140  ~ 28
+Text Notes 41675 15125 2    140  ~ 28
  URLxx\n(but A16\n UWL16)
-Text Notes 42575 14575 0    140  ~ 28
+Text Notes 40475 15500 0    140  ~ 28
 (See Table)
-Text Notes 42550 15300 0    140  ~ 28
+Text Notes 40450 16225 0    140  ~ 28
 (See Table)
-Text Notes 43800 16400 2    140  ~ 28
+Text Notes 41700 17325 2    140  ~ 28
   R1C\n(but A1\n  RB1)
-Text Notes 43775 17625 2    140  ~ 28
+Text Notes 41675 18550 2    140  ~ 28
     0VDC\n(but A2,A5\n    R22)
-Text Notes 43800 18825 2    140  ~ 28
+Text Notes 41700 19750 2    140  ~ 28
     0VDC\n(but A3,A5\n    R24)
-Text Notes 43125 19800 0    140  ~ 28
+Text Notes 41025 20725 0    140  ~ 28
 MDTxx
-Text Notes 43800 21275 2    140  ~ 28
+Text Notes 41700 22200 2    140  ~ 28
     0VDC\n(but A4,A5,A11\n    RSTRT)
-Text Notes 43300 22225 0    140  ~ 28
+Text Notes 41200 23150 0    140  ~ 28
 0VDC
-Text Notes 54675 14225 0    140  ~ 28
+Text Notes 52575 15150 0    140  ~ 28
 WLxx
-Text Notes 54725 20325 0    140  ~ 28
+Text Notes 52625 21250 0    140  ~ 28
 WLxx
-Text Notes 54700 15475 0    140  ~ 28
+Text Notes 52600 16400 0    140  ~ 28
 WLxx/
-Text Notes 54700 19125 0    140  ~ 28
+Text Notes 52600 20050 0    140  ~ 28
 WLxx/
-Text Notes 54700 21025 0    140  ~ 28
+Text Notes 52600 21950 0    140  ~ 28
 MWLxx
-Text Notes 58875 13550 2    140  ~ 28
+Text Notes 56775 14475 2    140  ~ 28
 (See Table)
-Text Notes 58900 16000 2    140  ~ 28
+Text Notes 56800 16925 2    140  ~ 28
 CV0G
-Text Notes 63300 13550 2    140  ~ 28
+Text Notes 60900 14475 2    140  ~ 28
 RV0G/
-Text Notes 63375 17250 2    140  ~ 28
+Text Notes 60975 18175 2    140  ~ 28
 RV2G/
-Text Notes 58950 19700 2    140  ~ 28
+Text Notes 56850 20625 2    140  ~ 28
 CV2G
-Text Notes 58925 17225 2    140  ~ 28
+Text Notes 56825 18150 2    140  ~ 28
 (See Table)
-Text Notes 63375 20900 2    140  ~ 28
+Text Notes 60975 21825 2    140  ~ 28
 RV3G/
-Text Notes 58925 23350 2    140  ~ 28
+Text Notes 56825 24275 2    140  ~ 28
 CV3G
-Text Notes 58925 20900 2    140  ~ 28
+Text Notes 56825 21825 2    140  ~ 28
 (See Table)
 $Sheet
-S 73400 13675 3975 5900
+S 73675 14800 3975 5900
 U 5C5614DD
 F0 "Tables" 140
 F1 "tables.sch" 140
