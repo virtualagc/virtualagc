@@ -1,0 +1,61 @@
+EESchema Schematic File Version 4
+LIBS:module-cache
+EELAYER 29 0
+EELAYER END
+$Descr USLetter 11000 8500
+encoding utf-8
+Sheet 8 12
+Title "BLOCK I LOGIC FLOW B, MODULE A18, DRAWING 1006542"
+Date "2018-11-24"
+Rev "Draft"
+Comp ""
+Comment1 "Modules A18"
+Comment2 ""
+Comment3 ""
+Comment4 ""
+$EndDescr
+Text HLabel 1550 7300 0    140  Input ~ 28
++3VDC
+Text HLabel 1550 7650 0    140  Input ~ 28
+0VDC
+$Comp
+L D3NOR-NC-0VDC-expander-nd1021041:D3NOR-NC-0VDC-expander-nd1021041-_B_-___ U801
+U 1 1 5BF95FBE
+P 5325 4175
+F 0 "U801" H 5325 4500 140 0001 C CNB
+F 1 "D3NOR-NC-0VDC-expander-nd1021041-_B_-___" H 5325 4600 140 0001 C CNN
+F 2 "" H 5325 4650 140 0001 C CNN
+F 3 "" H 5325 4650 140 0001 C CNN
+F 4 "32783" H 5250 4175 130 0000 C CNB "Location"
+	1    5325 4175
+	1    0    0    1   
+$EndComp
+$Comp
+L AGC_DSKY:ConnectorGeneric J1
+U 91 1 5BF95FBF
+P 7625 4175
+F 0 "J1" H 7625 4500 140 0001 C CNN
+F 1 "ConnectorGeneric" H 7625 4600 140 0001 C CNN
+F 2 "" H 7625 4650 140 0001 C CNN
+F 3 "" H 7625 4650 140 0001 C CNN
+F 4 "MWQG" H 6925 4100 140 0000 C BNB "Caption"
+	91   7625 4175
+	-1   0    0    1   
+$EndComp
+$Comp
+L AGC_DSKY:ConnectorGeneric J1
+U 99 1 5BF95FC0
+P 3450 4175
+F 0 "J1" H 3450 4500 140 0001 C CNN
+F 1 "ConnectorGeneric" H 3450 4600 140 0001 C CNN
+F 2 "" H 3450 4650 140 0001 C CNN
+F 3 "" H 3450 4650 140 0001 C CNN
+F 4 "WQG/" H 2800 4100 140 0000 C BNB "Caption"
+	99   3450 4175
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	6125 4175 7350 4175
+Wire Wire Line
+	4725 4175 3725 4175
+$EndSCHEMATC
