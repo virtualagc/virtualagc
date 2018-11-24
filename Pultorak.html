@@ -263,6 +263,7 @@ href="../../../../media/STORAGE/home/rburkey/Desktop/sandroid.org/public_html/ap
 
 
 
+
       Designer</span> product is supposed to be able to import existing
     <span style="font-weight: bold;">Circuitmaker</span>
     schematics.&nbsp; I have no idea whether this is true or not, though
@@ -299,6 +300,7 @@ href="../../../../media/STORAGE/home/rburkey/Desktop/sandroid.org/public_html/ap
 
 
 
+
     They may run fine too under normal <a href="http://www.winehq.com">Wine</a>,
     but I haven't tried it.<br>
     <br>
@@ -320,6 +322,7 @@ href="../../../../media/STORAGE/home/rburkey/Desktop/sandroid.org/public_html/ap
       based on the Pultorak Simulator and assembler, which you can find
       at <a title="https://github.com/donnaware/AGC"
         href="https://github.com/donnaware/AGC">https://github.com/donnaware/AGC</a>.&nbsp;
+
 
 
 
@@ -403,11 +406,15 @@ href="https://github.com/rburkey2005/virtualagc/tree/master/Contributed/WireList
       Although (see preceding section) I don't have fancy graphics from
       Mike Stewart's project to show you, Steven Hauer has been busy
       working on implementing Mike's work, and has sent graphics
-      galore.&nbsp; Here's what Steven has to say about it:<br>
-      <blockquote><font size="-1">Here is a physical implementation
-          currently in progress of Mike Stewart's Block II AGC
-          design.&nbsp; I started the process of creating this AGC about
-          a year ago by researching available AGC design information and
+      galore.&nbsp; Because I am lazy, I'll let Steven describe it for
+      you himself without any of my normal, pesky reinterpretations or
+      editing.<br>
+      <blockquote>
+        <h3><font size="-1">OVERVIEW</font></h3>
+        <font size="-1">Here is a physical implementation currently in
+          progress of Mike Stewart's Block II AGC design.&nbsp; I
+          started the process of creating this AGC about 20 months ago
+          by researching available AGC design information and
           implementation examples.&nbsp; I wanted to create a Block II
           version of the AGC capable of running the full software.&nbsp;
           The idea of creating an AGC that mimics the original Block II
@@ -415,35 +422,67 @@ href="https://github.com/rburkey2005/virtualagc/tree/master/Contributed/WireList
           exclusively on NOR gates, inverters, and open collector
           drivers was exactly what I was looking for.<br>
           <br>
-          My intent is to implement Mike's design of A01 - A24 plus his
-          version of the fixed/erasable memory board B01 exactly as
-          defined in his KiCad schematics available online.&nbsp; The
-          only exception is a change in memory devices used on B01 to
-          options available for 5V logic and through-hole design.&nbsp;
-          I also intend to bring out the full set of I/O signals and the
-          monitor connector signals.&nbsp; I will use the monitor
-          connector signals for basic integration testing via a monitor
-          breakout board of my own design that will interface to a logic
+          I have implemented Mike's design of A01 - A24 plus his version
+          of the fixed/erasable memory board B01 exactly as defined in
+          his KiCad schematics available online.&nbsp; The only
+          exception is a change in memory devices used on B01 to options
+          available for 5V logic and through-hole design.&nbsp; <br>
+          <br>
+          I intend this AGC to demonstrate full functionality so I have
+          brought out the full set of I/O signals and the monitor
+          connector signals.&nbsp; I use the monitor connector signals
+          for basic integration testing via a monitor breakout board of
+          my own design that also provides interfaces to a logic
           analyzer.<br>
           <br>
-          I will not be using transformer coupled I/O and instead
-          applying more traditional digital drivers and input
-          conditioning.&nbsp; I ultimately want to create hardware
-          simulations of all peripheral devices, uplink/downlink, and a
-          working hardware implementation of the monitor console (also
-          called the core rope simulator) to demonstrate historically
-          accurate monitor functionality.<br>
+          Instead of the transformer coupled I/O of the original AGC, I
+          applied open collector digital drivers for all outputs added
+          directly to the I/O boards.&nbsp; For the inputs I used a
+          simple emitter follower for the high speed inputs and the
+          original 'D' circuits for handling the switch inputs.&nbsp;
+          The simplification of the signal conditioning allowed me to
+          use only 2 interface circuit boards.<br>
           <br>
-          I have not started the DSKY fabrication yet but have much of
-          the design done.&nbsp; I will start fabricating the DSKY in
-          the next few months.<br>
+          My intention is to eventually create a full complement of
+          hardware based simulations of all peripheral devices,
+          uplink/downlink, and a working hardware implementation of the
+          monitor console (also called the core rope simulator) to
+          demonstrate historically accurate monitor functionality.<br>
+        </font>
+        <h3><font size="-1">DSKY</font></h3>
+        <font size="-1">The DSKY design is my own.&nbsp; Instead of
+          multiplexing the display drivers like in John Pultorak's DSKY,
+          I have decided to drive the led segments primarily from open
+          collector driver ICs and each 7-segment display will have its
+          own latching BCD decoder/driver instead of latching
+          relays.&nbsp; The translation of the AGC digit values to BCD
+          will be accomplished with some old 32x8 bit fused link bipolar
+          PROMS.&nbsp; Decoding of the AGC OUT1 channel (channel 10 oct)
+          will use a combination of a 4 to 16 decoder and a series of
+          nor-gate based flip flops and gating logic similar to the AGC
+          implementation.<br>
           <br>
-          Each AGC module is fabricated on a 4 layer PCB using 14-pin
-          DIP packages.&nbsp; I initially thought I would wire-wrap each
-          module but after completing A01 and A02 I quickly determined
-          that wire-wrapping the modules was not a viable option so I
-          went with PCBs.&nbsp; I used KiCad for all PCB layout to
-          ensure they matched Mike's schematics.<br>
+          The DSKY push buttons are as close to the orginals as I could
+          find comercially available.&nbsp; They will be wired identical
+          to the original DSKY and make use of the same diode array for
+          encoding.<br>
+          <br>
+          There will be 4 PCBs in the DSKY:<br>
+          - Display board<br>
+          - Display driver board<br>
+          - Decode and latch board<br>
+          - I/O board with signal conditioning and the push button diode
+          array<br>
+          <br>
+          I currently have the first two boards completed.<br>
+        </font>
+        <h3><font size="-1">AGC CONSTRUCTION</font></h3>
+        <font size="-1">Each AGC module is fabricated on a 4 layer PCB
+          using 14-pin DIP packages.&nbsp; I initially thought I would
+          wire-wrap each module but after completing A01 and A02 I
+          quickly determined that wire-wrapping the modules was not a
+          viable option so I went with PCBs.&nbsp; I used KiCad for all
+          PCB layout to ensure they matched Mike's schematics.<br>
           <br>
           The chassis is made of aluminum plate and angle stock.&nbsp;
           The plates for the module connectors and the card guides were
@@ -452,26 +491,48 @@ href="https://github.com/rburkey2005/virtualagc/tree/master/Contributed/WireList
           The backplane is wire-wrapped by hand.&nbsp; I generated a
           backplane netlist within KiCad and printed out a hard
           copy.&nbsp; Careful use of highlighter markers and triple
-          counting each pin has so far yielded an error free backplane.<br>
-          <br>
-          Pictures show current progress of A01 - A15 plus B01
-          completed.&nbsp; I've included some logic analyzer screen
-          shots showing the first time I got GOJAM working and also a
-          couple screen shots showing the 4 instructions of the startup
-          entry vector executing from the validate code.&nbsp; The
-          screen shots showing instruction names are driven from signals
-          via the monitor connector breakout board.<br>
-          <br>
-          Current chip count is well over 800 14-pin DIP packages and
-          over 1500 feet of wire wrap wire in the backplane, with an
-          estimated 1000 feet to go.&nbsp; I still have boards A16 - A24
-          to fabricate and complete their wiring on the backplane plus
-          an additional 2 I/O boards.<br>
+          counting each pin has so far yielded an error free
+          backplane.&nbsp; The backplane took about 10 months of part
+          time effort (several hundred hours) to complete and I ended up
+          using about 2200 feet of wire.<br>
+        </font>
+        <h3><font size="-1">CURRENT FUNCTIONALITY</font></h3>
+        <font size="-1">Pictures show completed AGC with modules A01 -
+          A24 plus two input conditioning boards.&nbsp; I've included
+          some logic analyzer screen shots showing the first time I got
+          GOJAM working and also a couple screen shots showing the 4
+          instructions of the startup entry vector executing from the
+          validate code.&nbsp; The screen shots showing instruction
+          names are driven from signals via the monitor connector
+          breakout board.<br>
           <br>
           Current computer runs validation program successfully through
-          test 27 and fails on test 30 (ValidateIO.agc) which makes
-          sense since the I/O is not fully implemented at the moment.<br>
-        </font></blockquote>
+          to completion.&nbsp; I don't have a DSKY yet so I confirmed
+          successful completion by watching '77' be written to CH10
+          (oct) for the DSKY signaling the sucessful completion of the
+          program.<br>
+          <br>
+          I have also loaded Luminary 210 and the program runs without
+          any alarms other than 'NO ATT' which makes sense since there
+          is no IMU (yet).&nbsp; I can watch PINBALL (the DSKY control
+          routine) clear the DSKY via my logic analyzer and observe some
+          of the interrupt driven idle behavior of Luminary at this
+          point.<br>
+        </font>
+        <h3><font size="-1">FUTURE PLANS</font></h3>
+        <font size="-1">After the DSKY is complete, I plan on creating
+          an interface to allow my physical AGC / DSKY to connect to the
+          Orbiter spaceflight simulator, with the NASSP 8.0
+          Apollo-mission add-on.&nbsp; Instead of interfacing this
+          package to yaAGC, I will instead connect it to an adaptor that
+          will take the data stream created for the 'ya' packages and
+          translate the packet data to/from the correct hardware signals
+          to interface with my AGC.<br>
+          <br>
+        </font>
+        <div align="right">— Steven Hauer, 11/2018<br>
+        </div>
+      </blockquote>
       Of course, I know that what you really want to see are the
       pictures, so here they are.&nbsp; Click any of them to see an
       enlarged view:<br>
@@ -479,7 +540,7 @@ href="https://github.com/rburkey2005/virtualagc/tree/master/Contributed/WireList
       <table cellspacing="2" cellpadding="2" border="0" align="center">
         <tbody>
           <tr>
-            <td valign="bottom" align="center"><a
+            <td valign="middle" align="center"><a
                 href="StevenHauer/A01%20-%20A07%20+%20A13.jpg"><b><img
                     src="StevenHauer/small-A01%20-%20A07%20+%20A13.jpg"
                     alt="" width="274" height="327" border="2"></b></a><b><br>
@@ -487,7 +548,7 @@ href="https://github.com/rburkey2005/virtualagc/tree/master/Contributed/WireList
               <div align="center"><b>A01 - A07 + A13</b><b><br>
                 </b></div>
             </td>
-            <td valign="bottom" align="center"><b><a
+            <td valign="middle" align="center"><b><a
                   href="StevenHauer/A01%20-%20A15%20+%20B01.jpg"><img
                     src="StevenHauer/small-A01%20-%20A15%20+%20B01.jpg"
                     alt="" width="288" height="230" border="2"></a></b><b><br>
@@ -495,7 +556,7 @@ href="https://github.com/rburkey2005/virtualagc/tree/master/Contributed/WireList
               <div align="center"><b>A01 - A15 + B01</b><b><br>
                 </b></div>
             </td>
-            <td valign="bottom" align="center"><b><a
+            <td valign="middle" align="center"><b><a
                   href="StevenHauer/A05.jpg"><img
                     src="StevenHauer/small-A05.jpg" alt="" width="301"
                     height="280" border="2"></a></b><b><br>
@@ -503,19 +564,19 @@ href="https://github.com/rburkey2005/virtualagc/tree/master/Contributed/WireList
               </b></td>
           </tr>
           <tr>
-            <td valign="bottom" align="center"><b><a
+            <td valign="middle" align="center"><b><a
                   href="StevenHauer/backplane%201.jpg"><img
                     src="StevenHauer/small-backplane%201.jpg" alt=""
                     width="290" height="271" border="2"></a></b><b><br>
               </b><b>Backplane 1</b><b><br>
               </b></td>
-            <td valign="bottom" align="center"><b><a
+            <td valign="middle" align="center"><b><a
                   href="StevenHauer/backplane%202.jpg"><img
                     src="StevenHauer/small-backplane%202.jpg" alt=""
                     width="302" height="301" border="2"></a><br>
                 Backplane 2<br>
               </b></td>
-            <td valign="bottom" align="center"><b><a
+            <td valign="middle" align="center"><b><a
                   href="StevenHauer/backplane%203.jpg"><img
                     src="StevenHauer/small-backplane%203.jpg" alt=""
                     width="277" height="248" border="2"></a><br>
@@ -523,19 +584,19 @@ href="https://github.com/rburkey2005/virtualagc/tree/master/Contributed/WireList
               </b></td>
           </tr>
           <tr>
-            <td valign="bottom" align="center"><b><a
+            <td valign="middle" align="center"><b><a
                   href="StevenHauer/chassis%201.jpg"><img
                     src="StevenHauer/small-chassis%201.jpg" alt=""
                     width="394" height="302" border="2"></a><br>
                 Chassis 1<br>
               </b></td>
-            <td valign="bottom" align="center"><b><a
+            <td valign="middle" align="center"><b><a
                   href="StevenHauer/chassis%202.jpg"><img
                     src="StevenHauer/small-chassis%202.jpg" alt=""
                     width="403" height="302" border="2"></a><br>
                 Chassis 2<br>
               </b></td>
-            <td valign="bottom" align="center"><b><a
+            <td valign="middle" align="center"><b><a
                   href="StevenHauer/monitor%20board%201.jpg"><img
                     src="StevenHauer/small-monitor%20board%201.jpg"
                     alt="" width="403" height="302" border="2"></a><br>
@@ -543,19 +604,19 @@ href="https://github.com/rburkey2005/virtualagc/tree/master/Contributed/WireList
               </b></td>
           </tr>
           <tr>
-            <td valign="bottom" align="center"><b><a
+            <td valign="middle" align="center"><b><a
                   href="StevenHauer/monitor%20board%202.jpg"><img
                     src="StevenHauer/small-monitor%20board%202.jpg"
                     alt="" width="403" height="302" border="2"></a><br>
                 Monitor Board 2<br>
               </b></td>
-            <td valign="bottom" align="center"><b><a
+            <td valign="middle" align="center"><b><a
                   href="StevenHauer/running%20with%20monitor%20board.jpg"><img
 src="StevenHauer/small-running%20with%20monitor%20board.jpg" alt=""
                     width="302" height="403" border="2"></a><br>
                 Running with Monitor Board<br>
               </b></td>
-            <td valign="bottom" align="center"><b><a
+            <td valign="middle" align="center"><b><a
                   href="StevenHauer/GOJAM%20control%20signals.jpg"><img
 src="StevenHauer/small-GOJAM%20control%20signals.jpg" alt="" width="302"
                     height="403" border="2"></a><br>
@@ -563,19 +624,47 @@ src="StevenHauer/small-GOJAM%20control%20signals.jpg" alt="" width="302"
               </b></td>
           </tr>
           <tr>
-            <td valign="bottom" align="center"><b><a
+            <td valign="middle" align="center"><b><a
                   href="StevenHauer/start%20vector%201.jpg"><img
                     src="StevenHauer/small-start%20vector%201.jpg"
                     alt="" width="302" height="245" border="2"></a><br>
                 Start Vector 1<br>
               </b></td>
-            <td valign="bottom" align="center"><b><a
+            <td valign="middle" align="center"><b><a
                   href="StevenHauer/start%20vector%202.jpg"><img
                     src="StevenHauer/small-start%20vector%202.jpg"
                     alt="" width="302" height="287" border="2"></a><br>
                 Start Vector 2<br>
               </b></td>
-            <td valign="bottom" align="center"><b><br>
+            <td valign="middle" align="center"><b><a
+                  href="StevenHauer/DSKY%20Button%20Wiring.jpg"><img
+                    src="StevenHauer/small%20DSKY%20Button%20Wiring.jpg"
+                    alt="Click to enlarge" width="302" height="403"
+                    border="2"></a><br>
+                DSKY Button Wiring<br>
+              </b></td>
+          </tr>
+          <tr>
+            <td valign="middle" align="center"><b><a
+                  href="StevenHauer/DSKY%20Display%201.jpg"><img
+                    src="StevenHauer/small%20DSKY%20Display%201.jpg"
+                    alt="Click to enlarge" width="372" height="403"
+                    border="2"></a><br>
+              </b><b>DSKY Display 1</b><b><br>
+              </b></td>
+            <td valign="middle" align="center"><b><a
+                  href="StevenHauer/DSKY%20Display%202.jpg"><img
+                    src="StevenHauer/small%20DSKY%20Display%202.jpg"
+                    alt="Click to enlarge" width="302" height="403"
+                    border="2"></a><br>
+                DSKY Display 2<br>
+              </b></td>
+            <td valign="middle" align="center"><b><a
+                  href="StevenHauer/DSKY%20Display%20Test.jpg"><img
+                    src="StevenHauer/small%20DSKY%20Display%20Test.jpg"
+                    alt="Click to enlarge" width="371" height="403"
+                    border="2"></a><br>
+                DSKY Display Test<br>
               </b></td>
           </tr>
         </tbody>
@@ -631,7 +720,8 @@ src="StevenHauer/small-GOJAM%20control%20signals.jpg" alt="" width="302"
       <br>
       <div align="center"><iframe
           src="https://www.youtube.com/embed/sDMNhPDV5yc"
-          allowfullscreen="" width="854" height="480" frameborder="0">&amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;lt;br&amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;gt;
+          allowfullscreen="" width="854" height="480" frameborder="0">&amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;lt;br&amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;gt;
+
 
 
 
@@ -767,6 +857,7 @@ src="StevenHauer/small-GOJAM%20control%20signals.jpg" alt="" width="302"
 
 
 
+
           20090927 snapshot now!</big></a><br>
     </div>
     <span style="font-family: arial;"><br>
@@ -775,6 +866,7 @@ src="StevenHauer/small-GOJAM%20control%20signals.jpg" alt="" width="302"
     <br>
     Dimitris uses <span style="font-weight: bold;">Eagle</span> CAD for
     this project (<a href="http://www.cadsoft.de">www.cadsoft.de</a>).&nbsp;
+
 
 
 
@@ -832,6 +924,7 @@ src="StevenHauer/small-GOJAM%20control%20signals.jpg" alt="" width="302"
               drawing<br>
               from which measurements can<br>
               be taken.&nbsp; A <a href="DimitrisVitoris/DSKY.cdr">CorelDraw
+
 
 
 
@@ -983,6 +1076,7 @@ src="StevenHauer/small-GOJAM%20control%20signals.jpg" alt="" width="302"
 
 
 
+
       own web-page</a>.&nbsp; Phil tells me that he will eventually
     provide all of the CAD files for his design (in <span
       style="font-weight: bold;">Altium Designer</span> format), but for
@@ -1029,6 +1123,7 @@ src="StevenHauer/small-GOJAM%20control%20signals.jpg" alt="" width="302"
 
 
 
+
           1</a> and <a
           href="http://www.youtube.com/watch?v=YgbQCP_EOvA">video 2</a>.</li>
     </ul>
@@ -1041,6 +1136,7 @@ src="StevenHauer/small-GOJAM%20control%20signals.jpg" alt="" width="302"
       found here</a>.&nbsp; It was apparently, at least partially,
     intended to work with <a
       href="http://www.therpf.com/f11/apollo-lem-5-dsky-agc-188757/">Tony
+
 
 
 
@@ -1189,7 +1285,7 @@ src="StevenHauer/small-GOJAM%20control%20signals.jpg" alt="" width="302"
         <p align="center"><br>
           <iframe
 src="https://www.youtube.com/embed/ecZQtStWviY?feature=player_detailpage"
-            allowfullscreen="" width="640" height="360" frameborder="0">&amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;lt;br&amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;gt;</iframe></p>
+            allowfullscreen="" width="640" height="360" frameborder="0">&amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;lt;br&amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;amp;gt;</iframe></p>
       </div>
     </div>
     <hr style="width: 100%; height: 2px;">
@@ -1228,6 +1324,7 @@ src="https://www.youtube.com/embed/ecZQtStWviY?feature=player_detailpage"
     exchange of netlists and back-annotation info, and the notion that
     the two must be integrated into one program is a fantasy promoted by
     CAD manufacturers and swallowed <span style="font-style: italic;">en
+
 
 
 
@@ -1295,10 +1392,11 @@ src="https://www.youtube.com/embed/ecZQtStWviY?feature=player_detailpage"
 
 
 
+
           Commons No Rights Reserved License</a></span><br>
       <i><font size="-1">Last modified by <a
             href="mailto:info@sandroid.org">Ronald Burkey</a> on
-          2018-07-15.<br>
+          2018-11-24.<br>
           <br>
           <a href="http://www.ibiblio.org"><img style="border: 0px solid
               ; width: 300px; height: 100px;" alt="Virtual AGC is hosted
