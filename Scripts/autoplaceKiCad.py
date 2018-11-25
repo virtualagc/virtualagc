@@ -503,6 +503,17 @@ for line in sys.stdin:
 	print >>sys.stderr, "Unrecognized line: " + line
 	wereErrors = True
 
+if block1:
+	gatesUsed = []
+	for id in objects:
+		if "a" in objects[id]:
+			gate = objects[id]["a"]["gate"]
+			if gate in gatesUsed:
+				print >>sys.stderr, "Gate " + gate + " duplicated"
+				wereErrors = True
+			else:
+				gatesUsed.append(gate)
+
 if wereErrors:
 	sys.exit()
 
