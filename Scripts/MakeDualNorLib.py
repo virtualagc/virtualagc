@@ -51,7 +51,7 @@ if len(sys.argv) > 1 and "D3NOR-" in sys.argv[1] and ".lib.bak" in sys.argv[1]:
 	fields = s.split('-');
 	#print >> sys.stderr, len(fields)
 	#print >> sys.stderr, fields
-	if len(fields) == 4 and fields[3] in ["nopinnums", "numerical", "nd1021041"]:
+	if len(fields) == 4 and fields[3] in ["nopinnums", "numerical", "nd1021041", "block1"]:
 		fields.append(fields[3])
 		fields[3] = ""
 	#print >> sys.stderr, len(fields)
@@ -70,6 +70,7 @@ if len(fields) > 4:
 basename = "D3NOR-" + vcc + "-" + gnd # Base name of the generated components. 
 numerical = False
 nd1021041 = False
+block1 = False
 powerPin = "10"
 groundPin = "5"
 outputA = "J 1"
@@ -79,12 +80,15 @@ if variation == "expander":
 	expander = True
 if variation2 == "nopinnums":
 	basename += "-nopinnums"
-if variation2 == "nd1021041":
+if variation2 in ["nd1021041", "block1"]:
 	powerPin = "8"
 	groundPin = "4"
 	outputA = "7 7"
-	basename += "-nd1021041"
-	nd1021041 = True
+	basename += "-" + variation2
+	if variation2 == "nd1021041":
+		nd1021041 = True
+	elif variation2 == "block1":
+		block1 = True
 if variation2 == "numerical":
 	outputA = "9 9"
 	basename += "-numerical"
@@ -98,7 +102,7 @@ print("EESchema-LIBRARY Version 2.4")
 print("#encoding utf-8")
 
 # Relationship of input pin numbers to pin names:
-if nd1021041:
+if nd1021041 or block1:
   pinNumbers = {
     "1" : "1",
     "3" : "3",
@@ -126,7 +130,7 @@ else:
 # Proceed to generate the library's entries.
 # In the following loop, the inputs of gate A are represented by inA1, inA2, and inA3.
 # The inputs of gate B are represented by inB1, inB2, and inB3.
-if nd1021041:
+if nd1021041 or block1:
 	ListALevel0 = [ "_", "_", "1", "3", "5" ]
 	ListBLevel0 = [ "_", "_", "_" ]
 elif numerical:
@@ -183,7 +187,7 @@ for inA1 in ListALevel0:
             print("#")
             print("# " + name)
             print("#")
-            if variation2 == "nd1021041":
+            if nd1021041 or block1:
               print("DEF " + name + " U 0 0 N N 1 L N")
             elif variation2 == "nopinnums":
               print("DEF " + name + " U 0 0 N N 2 L N")
@@ -198,15 +202,23 @@ for inA1 in ListALevel0:
 	            	print("F4 \"NNNNN\" -75 0 120 H I C CNB \"Location\"")
 	            	print("F5 \"NN\" -125 -200 120 H I C CNB \"Location2\"")
 	            	print("F6 \"NX\" -75 0 140 H V C CNB \"Location3\"")
+            	elif block1:
+            		print("F4 \"NNNNN\" -400 -125 120 H V L CNB \"Location\"")
+            		print("F5 \"NN\" -125 0 120 H I C CNB \"Location2\"")
+            		print("F6 \"NXM\" -400 125 120 H V L CNB \"Location0\"")
             	else:
-	            	print("F4 \"NNNNN\" -75 0 120 H V C CNB \"Location\"")
-	            	if not nd1021041:
-	            		print("F5 \"NN\" -125 -200 120 H V C CNB \"Location2\"")
+            		print("F4 \"NNNNN\" -75 0 120 H V C CNB \"Location\"")
+            		if not nd1021041:
+            			print("F5 \"NN\" -125 -200 120 H V C CNB \"Location2\"")
             else:
             	if numerical:
 	            	print("F4 \"NNNNN\" 0 0 140 H I C CNB \"Location\"")
 	            	print("F5 \"NN\" -75 -200 140 H I C CNB \"Location2\"")
 	            	print("F6 \"NX\" -75 0 140 H V C CNB \"Location3\"")
+            	elif block1:
+	            	print("F4 \"NNNNN\" -400 -125 140 H V L CNB \"Location\"")
+	            	print("F5 \"NN\" -75 0 140 H I C CNB \"Location2\"")
+	            	print("F6 \"NXN\" -400 125 140 H V L CNB \"Location0\"")
             	else:
 	            	print("F4 \"NNNNN\" 0 0 140 H V C CNB \"Location\"")
 	            	if not nd1021041:
@@ -274,7 +286,7 @@ for inA1 in ListALevel0:
             if nd1021041:
 	            print("X NC 2 -350 -350 0 U 140 140 1 1 N N")
 	            print("X NC 6 0 -350 0 U 140 140 1 1 N N")
-            if not nd1021041:
+            if not nd1021041 and not block1:
 	            if inB1 != "_":
 	              print("X " + inB1 + " " + pinNumbers[inB1] + " -900 275 140 R 140 140 2 1 I")
 	            else:
