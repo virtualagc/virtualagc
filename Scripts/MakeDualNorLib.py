@@ -28,12 +28,16 @@
 # The first GND/VCC are the netnames for the power rails for the hidden power and ground pins.
 # If VCC="NC", then the corresponding power pin is left unconnected.
 # VARIATION is either "" (for regular NOR gates) or "expander" for the expander gates.
-# VARIATION2 is either "" (to show pin numbers A-F,J,K), "numerical" (to show 1-4,6-9),
-#	"nopinnums" to not show pin numbers, or "nd1021041".  With "numerical", additionally, 
-#	the "Location" and "Location2" fields are still present but invisible, whilst a
-#	new "Location3" field is visible instead; moreover, the "A" and "B" parts are
-#	reversed for some reason.  As far as I know right now, the "numerical" option
-#	is only used for drawing 2003305.
+# VARIATION2 is one of the following:
+#	"" 		The normal case for Block II (to show pin numbers A-F,J,K)
+#	"numerical" 	An unusual Block II case (to show pin numbers 1-4,6-9)
+#	"nopinnums" 	An unusual Block II case (to not show pin numbers)
+#	"nd1021041"	For recovery of Block I schematics from ND-1021041
+#	"block1"	The normal case for Block I
+# With "numerical", additionally, the "Location" and "Location2" fields are still 
+# present but invisible, whilst a new "Location3" field is visible instead; moreover, the 
+# "A" and "B" parts are reversed for some reason.  As far as I know right now, the "numerical"
+# option is only used for drawing 2003305.
 
 import sys
 
@@ -67,6 +71,8 @@ basename = "D3NOR-" + vcc + "-" + gnd # Base name of the generated components.
 numerical = False
 nd1021041 = False
 powerPin = "10"
+groundPin = "5"
+outputA = "J 1"
 expander = False
 if variation == "expander":
 	basename += "-expander"
@@ -74,10 +80,13 @@ if variation == "expander":
 if variation2 == "nopinnums":
 	basename += "-nopinnums"
 if variation2 == "nd1021041":
-	powerPin = "6"
+	powerPin = "8"
+	groundPin = "4"
+	outputA = "7 7"
 	basename += "-nd1021041"
 	nd1021041 = True
 if variation2 == "numerical":
+	outputA = "9 9"
 	basename += "-numerical"
 	numerical = True
 #print >> sys.stderr, "numerical = " + str(numerical)
@@ -89,7 +98,13 @@ print("EESchema-LIBRARY Version 2.4")
 print("#encoding utf-8")
 
 # Relationship of input pin numbers to pin names:
-if numerical:
+if nd1021041:
+  pinNumbers = {
+    "1" : "1",
+    "3" : "3",
+    "5" : "5"
+  }
+elif numerical:
   pinNumbers = {
     "4" : "4",
     "3" : "3",
@@ -112,7 +127,7 @@ else:
 # In the following loop, the inputs of gate A are represented by inA1, inA2, and inA3.
 # The inputs of gate B are represented by inB1, inB2, and inB3.
 if nd1021041:
-	ListALevel0 = [ "_", "_", "A", "B", "C" ]
+	ListALevel0 = [ "_", "_", "1", "3", "5" ]
 	ListBLevel0 = [ "_", "_", "_" ]
 elif numerical:
 	ListBLevel0 = [ "_", "_", "4", "3", "2" ]
@@ -220,11 +235,11 @@ for inA1 in ListALevel0:
 	            if inB3 != "_":
 	              print("P 4 2 1 " + str(lineWidth) + " -460 -275 -750 -175 -750 -375 -460 -275 F")
             if numerical:
-            	print("X 9 9 900 0 150 L 140 140 1 1 C")
+            	print("X " + outputA + " 900 0 150 L 140 140 1 1 C")
             elif nd1021041 and expander:
-            	print("X J 1 800 0 210 L 140 140 1 1 C")
+            	print("X " + outputA + " 800 0 210 L 140 140 1 1 C")
             else:
-            	print("X J 1 900 0 150 L 140 140 1 1 C")
+            	print("X " + outputA + " 900 0 150 L 140 140 1 1 C")
             if vcc == "NC":
             	print("X " + vcc + " " + powerPin + " -175 350 0 D 140 140 1 1 N N")
             else:
@@ -255,7 +270,10 @@ for inA1 in ListALevel0:
             else:
               print("X " + gnd + " " + pinNumbers[ListALevel3A[0]] + " -475 -275 0 R 140 140 1 1 W N")
               del ListALevel3A[0]
-            print("X " + gnd + " 5 -175 -350 0 U 140 140 1 1 W N")
+            print("X " + gnd + " " + groundPin + " -175 -350 0 U 140 140 1 1 W N")
+            if nd1021041:
+	            print("X NC 2 -350 -350 0 U 140 140 1 1 N N")
+	            print("X NC 6 0 -350 0 U 140 140 1 1 N N")
             if not nd1021041:
 	            if inB1 != "_":
 	              print("X " + inB1 + " " + pinNumbers[inB1] + " -900 275 140 R 140 140 2 1 I")
