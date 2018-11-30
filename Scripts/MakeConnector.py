@@ -15,6 +15,7 @@ import sys
 # Tweak the stuff below.
 
 connectorA52 = False
+split = False
 
 if len(sys.argv) > 1:
 	partName = sys.argv[1]
@@ -29,6 +30,11 @@ else:
 if partName == "ConnectorGeneric":
 	startingPinNumber = 1
 	endingPinNumber = 200
+	omitPins = []
+elif partName == "ConnectorBlockI":
+	startingPinNumber = 1
+	endingPinNumber = 142
+	split = True
 	omitPins = []
 elif partName == "ConnectorB7-100":
 	startingPinNumber = 133
@@ -176,6 +182,8 @@ print("F1 \"" + partName + "\" 0 " + str(yRadius + 5 * textMargin) + " " + str(t
 print("F2 \"\" 0 " + str(yRadius) + " " + str(textSize) + " H I C CNN")
 print("F3 \"\" 0 " + str(yRadius) + " " + str(textSize) + " H I C CNN")
 print("F4 \"PAD\" 0 " + str(yRadius + 1 * textMargin) + " " + str(textSize) + " H V C BNB \"Caption\"")
+if split:
+	print("F5 \"NNN\" 0 30 100 H V C BNB \"Pin0\"")
 print("DRAW")
 arcPos = xRadius - yRadius
 print("A " + str(-arcPos) + " 0 " + str(yRadius) + " 901 -901 0 0 " + str(lineWidth) + " N " + str(-arcPos) + " " + str(yRadius) + " " + str(-arcPos) + " " + str(-yRadius))
@@ -183,8 +191,13 @@ print("A " + str(arcPos) + " 0 " + str(yRadius) + " -899 899 0 0 " + str(lineWid
 partno = 1
 for pin in range(startingPinNumber, nextPinAfterLast):
 	pinName = createPinName(pin)
-	print("T 0 0 0 " + str(textSize) + " 0 " + str(partno) + " 0 " + pinName + " Normal 1 C C")
+	if split:
+		print("T 0 0 -90 100 0 " + str(partno) + " 0 " + pinName + " Normal 1 C C")
+	else:
+		print("T 0 0 0 " + str(textSize) + " 0 " + str(partno) + " 0 " + pinName + " Normal 1 C C")
 	partno += 1
+if split:
+	print("P 2 0 0 " + str(lineWidth) + " -275 0 275 0 N")
 print("P 2 0 0 " + str(lineWidth) + " " + str(-arcPos) + " " + str(-yRadius) + " " + str(arcPos) + " " + str(-yRadius) + " N")
 print("P 2 0 0 " + str(lineWidth) + " " + str(-arcPos) + " " + str(yRadius) + " " + str(arcPos) + " " + str(yRadius) + " N")
 partno = 1
