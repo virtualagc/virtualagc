@@ -9,7 +9,11 @@
 # "sorted", I mean sorted in the same manner archive.org would upon receiving
 # that file.  Plus, we need the basic link for that batch of files at archive.org.
 # The very first file in the sorted list is linked as "Page 1", the second as
-# "Page 2", and so on.  
+# "Page 2", and so on. 
+
+# The archive.org stuff is for recurring usage, but as a one-off, of the base URL
+# is "SCDs/", then it can also be used on the local folder of SCDs that Mike 
+# gave me. 
 
 # To accomplish the sorting properly, I'd suggest naming the files like
 #	DR[-S][-frameF].png.jp2
@@ -21,6 +25,11 @@
 # sorted list.  Regardless, this script expects this specific naming scheme.
 # I also allow fields "-crummy", "-lighter", or "-darker" to be present.
 
+# The archive.org stuff is for recurring usage, but as a one-off, if the base URL
+# is "SCDs/", then it can also be used on the local folder of SCDs that Mike 
+# gave me. In that case, the comments about the filenaming convention and other
+# details change.
+
 import sys
 
 if len(sys.argv) < 4:
@@ -30,6 +39,9 @@ if len(sys.argv) < 4:
 inputTsvFilename = sys.argv[1]
 inputImagesFilename = sys.argv[2]
 baseUrl = sys.argv[3]
+SCDs = False
+if baseUrl == "SCDs/":
+	SCDs = True
 
 # First, read the input TSV file.
 inputTsv = {}
@@ -46,8 +58,8 @@ try:
 					title = fields[2]
 				else:
 					title = ""
-				if len(fields) >= 4:
-					notes = fields[3]
+				if len(fields) >= 5:
+					notes = fields[4]
 				else:
 					notes = ""
 				inputTsv[drawing] = { "revisions":revisions, "title":title, "notes":notes }
@@ -68,6 +80,19 @@ try:
 		if line:
 			line = line.strip()
 			filename = line
+			if SCDs:
+				if line[:4] != "scd_" or line[-4:] != ".pdf":
+					print >> sys.stderr, "Filename improper: " + line
+					sys.exit(1)
+				line = line[4:-4]
+				if line[-2].isalpha():
+					drawing = line[:-2]
+					rev = line[-2:].upper()
+				else:
+					drawing = line[:-1]
+					rev = line[-1:].upper()
+				pages.append({ "filename":filename, "drawing":drawing, "rev":rev, "sheet":"1", "frame":"1" })
+				continue
 			if line[-8:] != ".png.jp2":
 				print >> sys.stderr, "Filename improper: " + line
 				sys.exit(1)
@@ -120,32 +145,50 @@ except:
 	sys.exit(1)
 #print pages
 
-# Ready to ouput the table.
-print '''
-    <table cellspacing="2" cellpadding="2" border="1" align="center">
-      <tbody>
-        <tr>
-          <th valign="middle" align="center">Page<br></th>
-          <th valign="middle" align="center">Drawing<br></th>
-          <th valign="middle">Title<br></th>
-          <th valign="middle" align="center">Rev<br></th>
-          <th valign="middle" align="center">Sheet<br></th>
-          <th valign="middle" align="center">Frame<br></th>
-          <th valign="middle">Comment<br></th>
-        </tr>
-'''
+# Ready to output the table.
+if SCDs:
+	print '''
+	    <table cellspacing="2" cellpadding="2" border="1" align="center">
+	      <tbody>
+	        <tr>
+	          <th valign="middle" align="center">Link<br></th>
+	          <th valign="middle" align="center">Drawing<br></th>
+	          <th valign="middle" align="center">Rev<br></th>
+	          <th valign="middle">Title<br></th>
+	          <th valign="middle">Comment<br></th>
+	        </tr>
+	'''
+else:
+	print '''
+	    <table cellspacing="2" cellpadding="2" border="1" align="center">
+	      <tbody>
+	        <tr>
+	          <th valign="middle" align="center">Page<br></th>
+	          <th valign="middle" align="center">Drawing<br></th>
+	          <th valign="middle" align="center">Rev<br></th>
+	          <th valign="middle" align="center">Sheet<br></th>
+	          <th valign="middle" align="center">Frame<br></th>
+	          <th valign="middle">Title<br></th>
+	          <th valign="middle">Comment<br></th>
+	        </tr>
+	'''
 for i in range(0, len(pages)):
+	filename = pages[i]["filename"]
 	drawing = pages[i]["drawing"]
 	title = inputTsv[drawing]["title"]
 	rev = pages[i]["rev"]
 	sheet = pages[i]["sheet"]
 	frame = pages[i]["frame"]
 	notes = inputTsv[drawing]["notes"]
-	print '<tr><td valign="middle" align="center"><a href="' + baseUrl + '#page/n' + str(i) + '/mode/1up">' + str(i+1) + '<br></a></td>'
+	if SCDs:
+		print '<tr><td valign="middle" align="center"><a href="' + baseUrl + filename + '">drawing<br></a></td>'
+	else:
+		print '<tr><td valign="middle" align="center"><a href="' + baseUrl + '#page/n' + str(i) + '/mode/1up">' + str(i+1) + '<br></a></td>'
         print '<td valign="middle" align="center">' + drawing + '<br></td>'
-        print '<td valign="middle">' + title + '</td>'
         print '<td valign="middle" align="center">' + rev + '<br></td>'
-        print '<td valign="middle" align="center">' + sheet + '<br></td>'
-        print '<td valign="middle" align="center">' + frame + '<br></td>'
+        if not SCDs:
+	        print '<td valign="middle" align="center">' + sheet + '<br></td>'
+	        print '<td valign="middle" align="center">' + frame + '<br></td>'
+        print '<td valign="middle">' + title + '</td>'
         print '<td valign="middle">' + notes + '</td></tr>'
 print '</tbody></table>'
