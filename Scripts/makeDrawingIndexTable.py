@@ -128,7 +128,7 @@ try:
 					frame = fields[1][5:]
 				else:
 					sheet = fields[1]
-			if not drawing.isdigit():
+			if not drawing.isdigit() and not (drawing[:3] == "JDC" and drawing[3:].isdigit()):
 				print >> sys.stderr, "Drawing number improper: " + line
 				sys.exit(1)
 			if rev != "-" and not rev.isalpha():
