@@ -11,10 +11,6 @@
 # The very first file in the sorted list is linked as "Page 1", the second as
 # "Page 2", and so on. 
 
-# The archive.org stuff is for recurring usage, but as a one-off, of the base URL
-# is "SCDs/", then it can also be used on the local folder of SCDs that Mike 
-# gave me. 
-
 # To accomplish the sorting properly, I'd suggest naming the files like
 #	DR[-S][-frameF].png.jp2
 # where D is the (usually 7-digit) drawing number, R is the revision, S is the
