@@ -1,1277 +1,1279 @@
 <!DOCTYPE doctype PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
 <html>
-<head>
-  <meta name="generator" content=
-  "HTML Tidy for HTML5 for Linux version 5.3.14">
-  <meta http-equiv="Content-Type" content=
-  "text/html; charset=utf-8">
-  <meta name="GENERATOR" content=
-  "Mozilla/4.7 [en] (X11; I; Linux 2.4.16 ppc) [Netscape]">
-  <meta name="Author" content="Ronald Burkey">
-  <title>Virtual AGC yaAGC Page</title>
-  <link rel="icon" type="image/png" href="favicon.png">
-  <meta name="author" content="Ronald S. Burkey">
-  <script type="text/javascript" src="Header.js">
+  <head>
+    <meta name="generator" content="HTML Tidy for HTML5 for Linux
+      version 5.3.14">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="GENERATOR" content="Mozilla/4.7 [en] (X11; I; Linux
+      2.4.16 ppc) [Netscape]">
+    <meta name="Author" content="Ronald Burkey">
+    <title>Virtual AGC yaAGC Page</title>
+    <link rel="icon" type="image/png" href="favicon.png">
+    <meta name="author" content="Ronald S. Burkey">
+    <script type="text/javascript" src="Header.js">
   </script>
-</head>
-<body style="background-image: url(gray3.jpg);">
-  <script type="text/javascript">
+  </head>
+  <body style="background-image: url(gray3.jpg);">
+    <script type="text/javascript">
   document.write(headerTemplate.replace("@TITLE@","yaAGC").replace("@SUBTITLE@","The AGC Simulation Software"))
   </script>
-  <h1><small>What is yaAGC?<br></small></h1><span style=
-  "font-weight: bold;">yaAGC</span> is a computer program which
-  emulates the behavior of the "Block 2" Apollo Guidance Computer
-  (AGC).&nbsp; (There was also an earlier <a href=
-  "Block1.html">"Block 1" AGC</a> that never flew in any manned
-  missions.) &nbsp; It is a virtual computer (existing within, for
-  example, a desktop PC) which is capable of running software
-  written for the original AGCs used in the Apollo project.&nbsp;
-  <span style="font-weight: bold;">yaAGC</span> emulates only the
-  computer itself, and not the peripheral devices used by the
-  AGC.&nbsp; For example, the display/keyboard (DSKY) used by the
-  AGC is a peripheral device and is emulated by a completely
-  different computer program called <span style=
-  "font-weight: bold;">yaDSKY</span>.&nbsp; Just as the true AGC
-  and DSKY communicated between themselves by mean of wiring, the
-  virtual yaAGC and yaDSKY communicate between themselves using
-  communication channels (sockets) that act like virtual
-  wires.&nbsp;<br>
-  <br>
-  Similarly, as a "computer", <span style=
-  "font-weight: bold;">yaAGC</span> by itself provided little or no
-  functionality.&nbsp; To be useful, it needs to be "loaded" with
-  appropriate flight software—in other words, with the Command
-  Module (CM) or Lunar Module (LM) flight-software written for the
-  original Apollo missions.&nbsp;&nbsp; The CM and LM software are
-  called <span style="font-weight: bold;">Colossus</span> and
-  <span style="font-weight: bold;">Luminary</span>,
-  respectively.<br>
-  <br>
-  <h2>What, Exactly, is Being Simulated?</h2>
-  <div style="text-align: center;">
-    <img src="ArchitectureGN.gif" alt=
-    "Guidance&amp;Navigation block architecture" style=
-    "width: 517px; height: 542px;" height="542" width="517"><br>
-  </div><br>
-  <ul>
-    <li>The <span style="font-weight: bold;">yaAGC</span> and
-    <span style="font-weight: bold;">yaDSKY</span> programs
-    simulate the center two blocks in the figure above.&nbsp; The
-    actual Block II AGC measured 24"×12.5"×6", weighed 70.1 pounds,
-    and 2.5A of current at 28V DC.&nbsp; The DSKY measured 8"×8"×7"
-    and weighed 17.5 pounds.<br></li>
-    <li>The CPU had a&nbsp; memory cycling time (MCT) of 11.7
-    microseconds. The modern reader, reading this, probably
-    imagines that by "CPU" we are referring to a single integrated
-    circuit (or "chip").&nbsp; In fact, integrated circuits were
-    too new and too risky (as well as too expensive) at that time
-    to be used.&nbsp; At some point, a few integrated circuits were
-    added to act as "flip-flops" for some of the CPU registers; but
-    the CPU itself was not, by any stretch of the imagination, an
-    integrated circuit.&nbsp; The instruction timing varies from 1
-    MCT up to 6 MCT, but most instructions execute in 2 MCT. The
-    11.7&nbsp; microsecond cycle is subdivided at the hardware
-    level into 12 shorter time-periods derived from a 1024 KHz
-    clock. However, for the purpose of the <span style=
-    "font-weight: bold;">yaAGC</span> simulation, only the basic
-    11.7 microsecond cycle-time is of interest.The instruction set
-    of the AGC is apparently implemented as a kind of microcode,
-    and the microcode instructions are executed in the 12
-    subdivisions of the clock cycle. Since the microcode and the
-    hidden register set it uses are not accessible to programmers,
-    I've not bothered to carry the simulation down to the microcode
-    level. However, examining the microcode is useful in
-    understanding the detailed workings of some of the
-    assembly-language operations.</li>
-    <li>Memory and registers are 16 bits, consisting of 15 bits of
-    data, plus one bit of odd parity (used for detection of memory
-    errors). The parity bit is not simulated by <span style=
-    "font-weight: bold;">yaAGC</span>.<br></li>
-    <li>Fixed memory—i.e., memory which cannot be modified at
-    runtime, for program code, constants, and so forth. There are
-    38912 15-bit words of ROM at addresses 4000-117777 (octal).
-    This ROM was implemented not in integrated circuits, but in
-    "core" memory—consisting of many small ferromagnetic doughnuts
-    threaded into a braid of extremely fine wires. This made the
-    cost of program changes very high, since changes could only be
-    incorporated by having Raytheon Corp. rebuild the core-memory
-    assembly.&nbsp; Each of the cores could encode as many as 64
-    bits of memory, since 64 wires could be threaded through each
-    core, so that even though over 600,000 bits needed to be coded,
-    less than 10,000 cores were used.&nbsp; A small portion of the
-    core rope is seen below.</li>
-    <li>Erasable memory—i.e., memory which can be modified at
-    runtime. There are 2048&nbsp; 15-bit words of erasable memory
-    at addresses 0-3777 (octal). Locations 0-17 (octal)&nbsp;
-    correspond to what might be thought of as CPU registers, while
-    20-57 (octal)&nbsp; are "counters", and 60-3777 (octal)&nbsp;
-    are general-purpose RAM.&nbsp; The erasable memory was
-    implemented by means of ferromagnetic cores, but not the same
-    as the core-rope seen at the right.<br></li>
-    <li>Memory banks. It is important to note that while erasable
-    and fixed memory formed a space of continous memory, logically
-    addressed from 0-117777 (octal), that 16 addressing bits are
-    needed but that no register in the AGC (including the
-    program-counter) is 16-bits wide. To get around this problem,
-    extra addressing bits are taken from special bank-selection
-    registers and combined with the program counter or with
-    addresses embedded within program instructions to provide full
-    16-bit addresses.</li>
-    <li>I/O channels. There were potentially 512 i/o ports with
-    "channel numbers" from 0-777 (octal). Some few of the i/o
-    channels correspond to erasable-memory locations.&nbsp; The
-    others were used to address peripheral devices (such as the
-    DSKY) for telemetry uplink/downlink, and so on.</li>
-  </ul>
-  <table summary="" style=
-  "text-align: left; margin-left: auto; margin-right: auto;"
-  border="0" cellpadding="2" cellspacing="2">
-    <tbody>
-      <tr>
-        <td style="vertical-align: top; text-align: center;">
-          <a href="yaAGC-core-big.jpg"><img src="yaAGC-core.jpg"
-          title="Photograph of core-rope. Click to enlarge." alt=
-          "Photograph of core-rope" style=
-          "border: 2px solid ; width: 200px; height: 160px;"
-          height="160" hspace="10" vspace="5" width="200"></a><br>
-          <div style="text-align: left;">
-            <span style="font-style: italic;">A small section of
-            the ferrite cores in the "core rope" non-volatile
-            memory of the AGC.&nbsp; (The photo was taken from the
-            web; it was credited to Raytheon Corp.)</span><br>
-          </div>
-        </td>
-        <td style="vertical-align: top; text-align: center;">
-          <a href="AgcModuleCompartment.jpg"><img style=
-          "border: 2px solid ; width: 246px; height: 155px;" alt=
-          "Click to enlarge." src=
-          "thumbnail-AgcModuleCompartment.jpg" height="155" width=
-          "246"></a><br>
-          <div style="text-align: left;">
-            <span style="font-style: italic;">Logic modules,
-            plugged into a backplane.&nbsp; Though you cannot tell
-            it from this photo, if the modules were disassembled,
-            you would see that they are of "welded cordwood"
-            construction.&nbsp; What that means is that the modules
-            are full of cylindrical holes, like swiss cheese; the
-            electrical components, such a resistors, slide into
-            these holes, and their leads protrude from either side
-            of the module.&nbsp; Wires are
-            welded</span>—<span style="font-style: italic;">not
-            soldered</span>—<span style="font-style: italic;">onto
-            the leads to interconnect the components.&nbsp; (Photo
-            by Stephan Hotto, taken at the Computer Historic Museum
-            in Palo Alto, California.)</span>
-          </div>
-        </td>
-        <td style="vertical-align: top; text-align: center;">
-          <a href="AgcWirewrappedBackplane.jpg"><img style=
-          "border: 2px solid ; width: 268px; height: 143px;" alt=
-          "Click to enlarge" src=
-          "thumb-AgcWirewrappedBackplane.jpg" height="143" width=
-          "268"></a><br>
-          <div style="text-align: left;">
-            <span style="font-style: italic;">The backplane the
-            logic and memory modules&nbsp; which the logic and
-            memory modules plug into.&nbsp; Notice that it is
-            wire-wrapped.&nbsp; Even the production models were
-            wire-wrapped, and not just the engineering
-            models.&nbsp; (Photo by Stephan Hotto, taken at the
-            Computer Historic Museum in Palo Alto,
-            California.)</span>
-          </div>
-        </td>
-      </tr>
-    </tbody>
-  </table>
-  <h2>Invoking yaAGC</h2><br>
-  <table summary="" style=
-  "text-align: left; width: 60%; margin-left: auto; margin-right: auto;"
-  border="1" cellpadding="2" cellspacing="2">
-    <tbody>
-      <tr>
-        <td style="text-align: center; vertical-align: top;">
-          <big><span style="font-weight: bold;">Important
-          Note!</span></big><br>
-          <div style="text-align: left;">
-            The description that follows describes the "classic"
-            command-line switches of the <span style=
-            "font-weight: bold;">yaAGC</span> program for versions
-            prior to 20090427.&nbsp; I retain this description
-            as-is for the benefit of those using one of those
-            versions of <span style=
-            "font-weight: bold;">yaAGC</span>.&nbsp; However, for
-            versions 20090427 and later, the command-line switches
-            with respect to to modes for debugging AGC programs
-            have changed, and I'm not presently in a position to
-            authoritatively describe those changes (which may be in
-            a state of flux).&nbsp; A more up-to-date description
-            may be available at <a href=
-            "http://code.google.com/p/virtualagc/">Onno Hommes
-            website</a>.&nbsp; (In brief, however, to activate the
-            command-line debugging mode which previously would have
-            been gotten by invoking "yaAGC --debug --core=...", one
-            would use "yaAGC --exec=...".)<br>
-          </div>
-        </td>
-      </tr>
-    </tbody>
-  </table><br>
-  <span style="font-weight: bold;">yaAGC</span> is a command-line
-  program that requires no user interaction once started.&nbsp; The
-  syntax is<br>
-  <br>
-  <div style="text-align: center;">
-    <span style="font-family: monospace;">yaAGC [OPTIONS]
-    --core=</span><span style=
-    "font-style: italic; font-family: monospace;">BinaryExecutable</span><br>
-  </div><br>
-  The <span style="font-style: italic;">BinaryExecutable</span>
-  will be the name of a file containing an AGC core-rope binary
-  image, either <a href="download.html">downloaded</a> or else
-  assembled from <a href="Luminary.html">Luminary</a> or <a href=
-  "Colossus.html">Colossus</a> source code using <a href=
-  "yaYUL.html">yaYUL</a>.&nbsp; If a complete pathname for
-  <span style="font-style: italic;">BinaryExecutable</span> is not
-  specified, then <span style="font-weight: bold;">yaAGC</span>
-  will look first in the current directory, and then (for software
-  versions 05/06/2004 or later) in the installation directory
-  (which is /usr/local/bin by default, but which may be changed
-  when <span style="font-weight: bold;">yaAGC</span> is
-  built).&nbsp; The other currently-defined options are:<br>
-  <br>
-  --help<br>
-  <div style="margin-left: 40px;">
-    Displays a list of options (such as this one) and then
-    quits.<br>
+    <h1><small>What is yaAGC?<br>
+      </small></h1>
+    <span style="font-weight: bold;">yaAGC</span> is a computer program
+    which emulates the behavior of the "Block 2" Apollo Guidance
+    Computer (AGC).&nbsp; (There was also an earlier <a
+      href="Block1.html">"Block 1" AGC</a> that never flew in any manned
+    missions.) &nbsp; It is a virtual computer (existing within, for
+    example, a desktop PC) which is capable of running software written
+    for the original AGCs used in the Apollo project.&nbsp; <span
+      style="font-weight: bold;">yaAGC</span> emulates only the computer
+    itself, and not the peripheral devices used by the AGC.&nbsp; For
+    example, the display/keyboard (DSKY) used by the AGC is a peripheral
+    device and is emulated by a completely different computer program
+    called <span style="font-weight: bold;">yaDSKY</span>.&nbsp; Just
+    as the true AGC and DSKY communicated between themselves by mean of
+    wiring, the virtual yaAGC and yaDSKY communicate between themselves
+    using communication channels (sockets) that act like virtual
+    wires.&nbsp;<br>
     <br>
-  </div>--port=<span style="font-style: italic;">Portnum</span><br>
-  <div style="margin-left: 40px;">
-    The <span style="font-weight: bold;">yaAGC</span> program and
-    programs simulating peripheral devices (such as <span style=
-    "font-weight: bold;">yaDSKY)</span> have a server/client
-    relationship.&nbsp; <span style=
-    "font-weight: bold;">yaAGC</span> listens on a set of ports (by
-    default, 19697 through 19706) for client
-    connection-requests.&nbsp; The base (lowest) port number can be
-    changed using the "--port" command-line switch.&nbsp; (The
-    number of ports scanned remains 10, however.&nbsp; To change
-    the number of scanned ports requires changing <span style=
-    "font-weight: bold;">yaAGC</span>'s source code and recompiling
-    the program.)&nbsp; One might wish to change the base port if,
-    for example, simultaneously running an instance of <span style=
-    "font-weight: bold;">yaAGC</span> for the CM and another
-    instance of <span style="font-weight: bold;">yaAGC</span> for
-    the LM.&nbsp; The port ranges of the two instances of
-    <span style="font-weight: bold;">yaAGC</span> shouldn't
-    overlap, so one instance could be run (for example) with the
-    command-line switch "--port=19707".<br>
+    Similarly, as a "computer", <span style="font-weight: bold;">yaAGC</span>
+    by itself provided little or no functionality.&nbsp; To be useful,
+    it needs to be "loaded" with appropriate flight software—in other
+    words, with the Command Module (CM) or Lunar Module (LM)
+    flight-software written for the original Apollo
+    missions.&nbsp;&nbsp; The CM and LM software are called <span
+      style="font-weight: bold;">Colossus</span> and <span
+      style="font-weight: bold;">Luminary</span>, respectively.<br>
     <br>
-  </div>--debug-dsky<br>
-  <div style="margin-left: 40px;">
-    This setting is useful for debugging a DSKY simulation (such as
-    <span style="font-weight: bold;">yaDSKY</span>).&nbsp; This
-    switch causes the "--core" setting to be ignored (in fact, the
-    "--core" switch can be omitted).&nbsp; Instead of running an
-    AGC executable, <span style="font-weight: bold;">yaAGC</span>
-    simply echoes command sequences back to the DSKY upon receiving
-    keystrokes from the DSKY.&nbsp; These command sequences are
-    defined in the configuration file (see "--cfg" below), and can
-    actually relate to any peripheral devices (not just the
-    DSKY).<br>
+    <h2>What, Exactly, is Being Simulated?</h2>
+    <div style="text-align: center;"> <img src="ArchitectureGN.gif"
+        alt="Guidance&amp;Navigation block architecture" style="width:
+        517px; height: 542px;" width="517" height="542"><br>
+    </div>
     <br>
-  </div>--debug-deda<br>
-  <div style="margin-left: 40px;">
-    This setting is useful for debugging a DEDA simulation (such as
-    <span style="font-weight: bold;">yaDEDA</span>).&nbsp; Unlike
-    --debug-dsky, <span style="font-weight: bold;">yaAGC</span>
-    runs the AGC simulation as normal.&nbsp; But in addition, it
-    interprets communications from <span style=
-    "font-weight: bold;">yaDEDA</span>.&nbsp; (In normal operation,
-    of course, it completely ignores data originating from
-    <span style="font-weight: bold;">yaDEDA</span>, or indeed any
-    other messages in <span style="font-weight: bold;">yaAGS</span>
-    format.)&nbsp; For each communication received from
-    <span style="font-weight: bold;">yaDEDA</span> (for key
-    sequences such as CLR-<span style=
-    "font-style: italic;">OctalDigit-OctalDigit-OctalDigit</span>-READOUT)
-    it prints out a message indicating what was received.&nbsp; For
-    the specific key sequence just mentioned, it goes further and
-    acts similarly to the AEA software, in that it interprets the 3
-    octal digits as an address in erasable memory, and outputs the
-    value found at that address (in octal) every 1/2 second to
-    <span style="font-weight: bold;">yaDEDA</span>.&nbsp; The
-    addresses most meaningfully observed in this fashion are timer
-    registers like 25 (octal) which increment at 10 ms. intervals,
-    and therefore increments by about 50 (62 octal) every 1/2
-    second.<br>
-  </div><br>
-  --deda-quiet<br>
-  <div style="margin-left: 40px;">
-    This setting is used in conjunction with --debug-deda to
-    eliminate the outputs from <span style=
-    "font-weight: bold;">yaAGC</span> to <span style=
-    "font-weight: bold;">yaDEDA</span> which --debug-deda normally
-    creates.&nbsp; In other words, lets <span style=
-    "font-weight: bold;">yaAGC</span> parse the messages being
-    received from <span style="font-weight: bold;">yaDEDA</span>,
-    but never to send any itself.<br>
-  </div><br>
-  --cfg=<span style="font-style: italic;">Filename</span><br>
-  <div style="margin-left: 40px;">
-    This presently has no effect unless used with
-    "--debug-dsky".&nbsp; It causes a configuration file to be
-    loaded which defines the command sequences used in --debug-dsky
-    mode.&nbsp; The same directory assumptions are used in
-    searching for the file as are used with the --core switch (see
-    above).&nbsp; Full instructions can be found within the
-    provided sample files&nbsp; (presently LM.ini, CM.ini, LM1.ini,
-    and CM0.ini).&nbsp; The configuration files are really provided
-    for use with the <span style="font-weight: bold;">yaDSKY</span>
-    program, and the same file should be selected for <span style=
-    "font-weight: bold;">yaAGC</span> as is selected for
-    <span style="font-weight: bold;">yaDSKY</span> (if --debug-dsky
-    is going to be used).&nbsp;&nbsp; Only the "DEBUG" lines within
-    the configuration files are relevant to <span style=
-    "font-weight: bold;">yaAGC</span>.&nbsp; If no configuration
-    file is selected, or if no DEBUG lines appear within the
-    configuration file, then --debug-dsky will be
-    non-functional.<br>
-  </div><br>
-  --debug<br>
-  <div style="margin-left: 40px;">
-    Causes the AGC program to halt prior to executing its first
-    instruction, and activates a debugging mode (very primitive) in
-    which you can do things like examine AGC registers, single-step
-    through the AGC program, etc.&nbsp; This mode is described
-    further <a href="#Debugging">below</a>.&nbsp;&nbsp; In Linux
-    (though not necessarily in *BSD, MacOS X, or Win32), you can
-    put <span style="font-weight: bold;">yaAGC</span> into debug
-    mode without the --debug switch, simply by hitting the
-    carriage-return key any time after starting the program; the
-    AGC program will simply be halted wherever it is, and you can
-    begin debugging at that point.<br>
-    <br>
-  </div>--symtab=<span style=
-  "font-style: italic;">Filename</span><br>
-  <div style="margin-left: 40px;">
-    For versions 20050728 and later, <span style=
-    "font-weight: bold;">yaYUL</span> outputs symbol-table
-    information that <span style="font-weight: bold;">yaAGC</span>
-    can use in "--debug" mode to aid symbolic debugging.&nbsp; In
-    other words, if you load a symbol table into <span style=
-    "font-weight: bold;">yaAGC</span>, then in debug-mode you can
-    sometimes use program labels and variable names rather than
-    having to know the absolute numerical addresses for
-    everything.&nbsp; The --symtab switch is used to specify the
-    name of the symbol-table file.&nbsp; The same search path is
-    used as for --core and --cfg.&nbsp; Since the symbol tables for
-    Luminary131 and Colossus249 (namely, Luminary131.symtab and
-    Colossus249.symtab) are "installed" along with the executables,
-    you can simply say "--symtab=Luminary131.symtab" or
-    "--symtab=Colossus249.symtab".&nbsp; However, if you want to
-    assemble your own AGC source code, the symbol table output by
-    <span style="font-weight: bold;">yaYUL</span> will be named the
-    same as your source file, but with ".symtab" suffixed to
-    it.&nbsp; For example, if you assemble "MyFile.s", then the
-    symbol table will be "MyFile.s.symtab".&nbsp; In this case,
-    you'll want to use the complete pathname for the symbol-table
-    as the filename for --symtab.&nbsp; This feature, and all of
-    the debugging commands associated with it are courtesy of
-    Jordan Slott.&nbsp; (Thanks, Jordan.)<br>
-  </div><br>
-  <a name="Resume" id="Resume"></a>--resume=<span style=
-  "font-style: italic;">Filename</span><br>
-  <div style="margin-left: 40px;">
-    Normally when the emulator runs an AGC program it sets all i/o
-    channels, erasable memory, and hidden CPU state variables to
-    what it considers reasonable power-up defaults.&nbsp; (But see
-    "--dump-time", below.)&nbsp; The --resume option instead allows
-    these items to be loaded from a previously-created file.&nbsp;
-    (The file itself is created from --debug mode using the
-    COREDUMP command as explained below.)&nbsp; In effect, this
-    allows execution to continue from the exact point in the AGC
-    program at which the COREDUMP was made, rather than forcing the
-    AGC program to its reset condition.&nbsp; The file must be
-    either in the current directory, or else a full pathname must
-    be given for it.<br>
-    <br>
-  </div>--dump-time=<span style="font-style: italic;">N</span><br>
-  <div style="margin-left: 40px;">
-    For versions 20050705 and later, <span style=
-    "font-weight: bold;">yaAGC</span> attempts to save the contents
-    of erasable memory, and to restore them automatically at
-    startup (but not i/o channels and hidden CPU state
-    variables).&nbsp; This means that things like pad loads are
-    preserved even when the AGC is "powered down", just as they
-    would have been in the true AGC's ferrite-core memory.&nbsp; In
-    an effort to keep this from increasing system overhead too
-    much, the saving is actually done only every <span style=
-    "font-style: italic;">N</span> seconds (10, by default).&nbsp;
-    The data is saved either in a file called LM.core or CM.core,
-    and is compatible with the "core dumps" described above for the
-    "--resume" switch.&nbsp; You can start with a clean system by
-    erasing LM.core or CM.core.&nbsp; Or, you can use
-    "--resume=LM.core" or "--resume=CM.core" if you'd like to
-    restore more than just the erasable memory.&nbsp; Because
-    separate files are used for the LM and CM, you can run both
-    simulations at once without any conflict.&nbsp; However, if you
-    want to run more than one LM simulation (or more than one CM
-    simulation), you'd better start them from different
-    directories, to make sure that the .core files are stored in
-    different directories.<br>
-  </div>
-  <div style="margin-left: 40px;">
-    <br>
-  </div>--interlace=<span style="font-style: italic;">N</span><br>
-  <div style="margin-left: 40px;">
-    On some PC's the act of checking the socket connections (i.e.,
-    the mechanism used by <span style=
-    "font-weight: bold;">yaAGC</span> to communicate with
-    <span style="font-weight: bold;">yaDSKY</span> and/or other
-    peripheral devices) can make the simulation very
-    sluggish.&nbsp; Therefore <span style=
-    "font-weight: bold;">yaAGC</span> only performs this check
-    every <span style="font-style: italic;">N</span>-th CPU
-    instruction, where by default <span style=
-    "font-style: italic;">N</span>=50.&nbsp; Changing the value of
-    <span style="font-style: italic;">N</span> does not affect the
-    reliability of the communication (i.e., no data is lost).&nbsp;
-    Making <span style="font-style: italic;">N</span> smaller
-    theoretically improves the responsiveness of the system, except
-    on slow PC's where the overhead from checking the sockets may
-    exceed the computing time taken by the simulation.&nbsp; For
-    example, a value of <span style=
-    "font-style: italic;">N</span>=1 works fine on my ~2.5 GHz P4
-    Linux and Windows XP systems, but results in about a 10-to-1
-    slowdown of the simulation on my 450 MHz P2 Windows 98
-    system.&nbsp; On the latter system, a value of <span style=
-    "font-style: italic;">N</span>=10 seems to work
-    perfectly.&nbsp; Conversely, increasing <span style=
-    "font-style: italic;">N</span> reduces the overhead, but
-    results in a larger time-jitter in signalling, and (in theory)
-    for large enough values a steadily-increasing backlog of data
-    waiting to be delivered.&nbsp; As far as time-jitter is
-    concerned, it's important to realize that <span style=
-    "font-weight: bold;">yaAGC</span> does not actually execute a
-    machine cycle every 11.7 microseconds, but merely keeps up
-    appearances of doing so in a way not detectable by the
-    user.&nbsp; Therefore, there is a pretty large time-jitter
-    anyway, and the amount of jitter is dependent on both the speed
-    of the PC and on the operating system used by the PC.&nbsp; The
-    value <span style="font-style: italic;">N</span>=50 has been
-    chosen in the belief that it will work well for most PC's, and
-    does work well on all of the example systems mentioned
-    above.&nbsp; (On my 150 MHz P1, on the other hand, the
-    simulation runs about 50% slow no matter what the setting of
-    --interlace.)&nbsp; Nevertheless, the --interlace switch may be
-    of value when fine-tuning of the timing is required.<br>
-  </div><br>
-  --cdu-log<br>
-  <div style="margin-left: 40px;">
-    Used only for debugging.&nbsp; Causes a file called
-    yaAGC.cdulog to be created, containing data related to the
-    bandwidth-limiting of CDU inputs PCDU and MCDU.<br>
-  </div>
-  <h2>Verification of yaAGC Correctness<br></h2>The validity of the
-  emulation provided by&nbsp; <span style=
-  "font-weight: bold;">yaAGC</span> is questionable, of
-  course,&nbsp; particularly since I have no working AGC against
-  which it can be compared.&nbsp; If we cannot assure that
-  <span style="font-weight: bold;">yaAGC</span> actually behaves
-  identically to the actual AGC, then there's really not much point
-  in having it.&nbsp; Sadly, the complete answer to this question
-  remains open.&nbsp; I can, however, point out the following
-  relevant facts:<br>
-  <ol>
-    <li>AGC behavior at the assembly-language level is described in
-    two separate documents, mostly covering the same material, by
-    <a href=
-    "hrst/archive/1689.pdf">Blair-Smith</a>
-    and by <a href=
-    "NARA-SW/E-2052.pdf">Savage &amp;
-    Drake</a>.&nbsp; While I would be lying to claim that either of
-    these presents a complete and satisfactory explanation,
-    comparing and reconciling the two is a very useful exercise
-    whilst attempting to verify <span style=
-    "font-weight: bold;">yaAGC</span> behavior.</li>
-    <li>The Blair-Smith documentation goes one step farther, in
-    that it breaks down all or most AGC instructions into more
-    primitive functionality called "pulse sequences", operating
-    upon hidden registers of the CPU.&nbsp; In cases of difficulty,
-    therefore, one can explore the detailed action of the pulse
-    sequences to obtain yet another description of any
-    instruction's behavior.</li>
-    <li>The built-in self-test of the <span style=
-    "font-weight: bold;">Luminary</span> or <span style=
-    "font-weight: bold;">Colossus</span> software provides a
-    reasonably-detailed check of CPU operations.&nbsp;<br></li>
-    <li>A validation test-suite in AGC assembly language has been
-    written from one of the original Apollo documents, "Block II
-    AGC Self-Check and Show-Banksum" by Edwin Smally.&nbsp; This
-    test suite gives the CPU a pretty rigorous (if not 100%
-    complete) going-over.<br></li>
-  </ol>To understand points #3 and #4 better, note that the
-  original AGC CPU was a homegrown device created from a large
-  number of electronic components, rather than being a single
-  "integrated circuit" as it likely would be today.&nbsp; For this
-  reason, it would have made sense for the original designers to
-  provide extensive diagnostics for the CPU itself.&nbsp; In other
-  words, if the CPU was broken it would have to be repaired rather
-  than simply being discarded and replaced, and to be repaired the
-  fault would have to be localized.&nbsp; As it happens, the
-  designers <span style="font-style: italic;">did</span> provide
-  extensive runtime diagnostics <span style=
-  "font-style: italic;">in software</span> for checking a multitude
-  of CPU features.&nbsp; These diagnostics were part of the unit's
-  built-in self-test, and included checks like:<br>
-  <ul>
-    <li>Do branch instructions work?</li>
-    <li>Do multiply and divide work?</li>
-    <li>Do interrupts work?</li>
-    <li>etc.</li>
-  </ul>Unfortunately, many of these checks had to be removed
-  eventually from <span style="font-weight: bold;">Luminary</span>
-  and <span style="font-weight: bold;">Colossus</span> in order to
-  save memory; but the flowcharts for the checks which have been
-  removed still exist, and the tests they performed can be
-  reconstructed.&nbsp; Because of this oddity (by today's
-  standards) the <span style=
-  "font-weight: bold;">Luminary</span>/<span style=
-  "font-weight: bold;">Colossus</span> software&nbsp; and the
-  validation suite verify the operation of many of the (from our
-  standpoint trickier) CPU instructions!&nbsp; While, as I said,
-  this is not a 100% guarantee of completely correct operation, we
-  can only regard it as helpful in the context of the present
-  project.<br>
-  <h2><a name="Debugging" id="Debugging"></a>Debugging Mode</h2>
-  <table summary="" style=
-  "text-align: left; width: 60%; margin-left: auto; margin-right: auto;"
-  border="1" cellpadding="2" cellspacing="2">
-    <tbody>
-      <tr>
-        <td style="text-align: center; vertical-align: top;">
-          <big><span style="font-weight: bold;">Important
-          Note!</span></big><br>
-          <div style="text-align: left;">
-            The description that follows covers the "classic"
-            debugging mode for versions prior to 20090427.&nbsp; I
-            retain this description as-is for the benefit of those
-            using one of those versions of <span style=
-            "font-weight: bold;">yaAGC</span>.&nbsp; However, for
-            versions 20090427 and later, command-line debugging has
-            changed to a style more closely related to that of the
-            widely used <span style="font-weight: bold;">gdb</span>
-            program, and the "classic" mode described below is not
-            longer available.&nbsp; Since these changes have been
-            driven by Onno Hommes, we have agreed that Onno will
-            maintain documentation for the new debugging mode at
-            <a href="http://code.google.com/p/virtualagc/">his
-            website</a>.<br>
-          </div>
-        </td>
-      </tr>
-    </tbody>
-  </table><br>
-  When the "--debug" command-line switch is used, a mode is entered
-  in which AGC programs can be debugged.&nbsp; This mode is very
-  primitive compared (for example) to the facilities provided by a
-  debugging program like <span style=
-  "font-weight: bold;">gdb</span>, but has been pretty useful for
-  my purposes, and may conceivably be useful for yours.&nbsp; You
-  are unlikely to find this mode (or my description of the mode!)
-  of any use unless you are very familiar with AGC <a href=
-  "assembly_language_manual.html">assembly language</a>, and are
-  writing/debugging AGC code.&nbsp; In this mode, rather than
-  simply running the software contained within the core-rope binary
-  image, <span style="font-weight: bold;">yaAGC</span> halts prior
-  to executing the first instruction of the program and allows you
-  to interactively determine its further actions.&nbsp; You are
-  presented with a status message and a prompt from which you can
-  enter commands.<br>
-  <br>
-  The debugging mode's status display may look something like
-  this:<br>
-  <div style="margin-left: 40px;">
-    <br>
-    <span style=
-    "font-family: monospace;">A=00010&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-    L=00000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-    Q=00000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-    EB=01400&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-    FB=12000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-    Z=02675&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-    BB=12103</span><br style="font-family: monospace;">
-    <span style=
-    "font-family: monospace;">ARUPT=00000&nbsp;&nbsp;&nbsp;&nbsp;
-    LRUPT=00000&nbsp;&nbsp;&nbsp;&nbsp;
-    QRUPT=00000&nbsp;&nbsp;&nbsp;&nbsp;
-    ZRUPT=00000&nbsp;&nbsp;&nbsp;&nbsp;
-    BBRUPT=00000&nbsp;&nbsp;&nbsp;
-    BRUPT=00000&nbsp;&nbsp;&nbsp;&nbsp;
-    CHAN07=00000</span><br style="font-family: monospace;">
-    <span style=
-    "font-family: monospace;">CYR=00000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-    SR=00000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-    CYL=00000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-    EDOP=00000</span><br style="font-family: monospace;">
-    <span style=
-    "font-family: monospace;">Index=00000&nbsp;&nbsp;&nbsp;&nbsp;
-    Extend=1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-    Interrupts=0&nbsp;&nbsp;&nbsp;
-    Overflow=0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-    Cycles=29</span><br style="font-family: monospace;">
-    <span style=
-    "font-family: monospace;">05,02675&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-    12701&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-    BZF&nbsp;&nbsp;&nbsp;&nbsp; 2701</span><br>
-  </div><br>
-  In the first three of these status lines, we see the current
-  values (in octal) of various important CPU registers, and in
-  input channel 7.&nbsp; In fact <span style=
-  "font-style: italic;">all</span> numerical values displayed by
-  the debugger are in octal, because octal notation is used almost
-  exclusively throughout&nbsp; existing AGC code, and because
-  almost all of the numerical values reported by the <span style=
-  "font-weight: bold;">YUL</span> assembler were in octal.<br>
-  <br>
-  The next line shows information that may be from hidden CPU
-  registers or may be known only to the debugger:<br>
-  <ul>
-    <li><span style="font-family: monospace;">Index</span> is a
-    value that will be added to the next instruction (except for
-    <span style="font-family: monospace;">EXTEND</span>) prior to
-    executing that instruction.&nbsp; It is set to a non-zero value
-    when the assembly-language instruction <span style=
-    "font-family: monospace;">INDEX</span> is executed, and then
-    cleared after it has been used.<br></li>
-    <li><span style="font-family: monospace;">Extend</span> is
-    non-zero when the next instruction will be interpreted as
-    "extracode".&nbsp; It is set when the assembly-language
-    instruction <span style="font-family: monospace;">EXTEND</span>
-    is executed, and then cleared after it has been used.</li>
-    <li><span style="font-family: monospace;">Interrupts</span> is
-    non-zero when interrupts are enabled.&nbsp; It is affected by
-    the <span style="font-family: monospace;">INHINT</span> and
-    <span style="font-family: monospace;">RELINT</span>
-    assembly-language instructions.</li>
-    <li><span style="font-family: monospace;">Overflow</span> is
-    set when an arithmetical overflow occurs in relevant
-    assembly-language instructions like <span style=
-    "font-family: monospace;">DAS</span>.</li>
-    <li><span style="font-family: monospace;">Cycles</span> is a
-    count of the number of machine cycles used so far in executing
-    instructions.</li>
-  </ul>The final status line is, of course, a disassembly of the
-  next instruction scheduled to be executed.&nbsp; It shows the
-  current address (<span style=
-  "font-family: monospace;">05,02675</span>), the octal value of
-  the instruction (<span style=
-  "font-family: monospace;">12701</span>), and a disassembly of
-  that octal value into assembly-language (<span style=
-  "font-family: monospace;">BZF 2701</span>).&nbsp; The debugging
-  mode does not currently understand any labels defined within the
-  AGC program itself; therefore, understanding code like
-  "<span style="font-family: monospace;">BZF 2701</span>" as
-  something like "<span style="font-family: monospace;">BZF
-  ADDONE</span>" (involving labels) is aided by having a symbol
-  table or assembly listing at hand.<br>
-  <br>
-  The debugger understands addresses in one of three formats:<br>
-  <ol>
-    <li>Addresses within "unswitched-erasable" memory or
-    "fixed-fixed" memory are represented by a single octal number,
-    such as 1234.&nbsp; Unswitched-erasable addresses are in the
-    range 0000-1377, while fixed-fixed addresses are in the range
-    4000-7777.</li>
-    <li>Addresses within "common-fixed" memory are represented by a
-    pair of octal numbers separated by a comma, such as
-    03,2345.&nbsp; The first number is the bank number, in the
-    range 00-43.&nbsp; The second number is the address within the
-    memory bank, and is in the range 2000-3777.</li>
-    <li>Addresses within "switched-erasable" memory are similar,
-    but are prefixed by 'E', such as E7,1456.&nbsp; The first
-    number is again a bank, but is in the range 0-7.&nbsp; The
-    second number is again the address within the memory bank, but
-    is in the range 1400-1777.</li>
-  </ol>Additionally, in some cases you may need to identify i/o
-  channels rather than memory locations:<br>
-  <ol start="4">
-    <li>Addresses within "i/o channel" space are single octal
-    numbers prefixed by 'C', as in C7.&nbsp; The number is in the
-    range 000-777.</li>
-  </ol>These same notations are used within the status display's
-  instruction-disassembly, except that the distinction between
-  memory locations and i/o channels is always obvious in that
-  context, and so i/o channel numbers are not prefixed by 'C' in
-  disassemblies.<br>
-  <br>
-  The user-commands which are currently recognized by the debugger
-  are:<br>
-  <ul>
-    <li>#<span style="font-style: italic;">Anything</span> — (i.e.,
-    any string beginning with the character '#' in the first
-    column) a comment, which is discarded without a warning
-    message.&nbsp; This is principally useful for writing scripts
-    for the FROMFILE command.<br></li>
-    <li>BACKTRACES — displays the most recent (100) backtrace
-    points (i.e., points at which the program branched).</li>
-    <li>BACKTRACE <span style="font-style: italic;">N</span> —
-    restores the state of the system (CPU, erasable memory, i/o
-    channels) to backtrace point #<span style=
-    "font-style: italic;">N</span> (from the list displayed by the
-    BACKTRACES command).</li>
-    <li>BREAK <span style="font-style: italic;">*A</span> —
-    (<span style="font-weight: bold;">Changed</span> in versions
-    2005-07-31 and later!&nbsp; Previously, did not have the
-    asterisk.)&nbsp; Defines a new breakpoint at address
-    <span style="font-style: italic;">A</span> (using one of the
-    memory-location formats described above).&nbsp; The program
-    will halt upon encountering an instruction at the address of
-    the breakpoint.&nbsp; <span style=
-    "font-weight: bold;">Note</span>:&nbsp; The AGC's
-    unswitched-erasable memory coincides with switched-erasable
-    banks 0, 1, and 2, while fixed-fixed memory coincides with
-    common-fixed banks 2 and 3.&nbsp; The breakpoints are specific
-    to not only the address but also to the specific <span style=
-    "font-style: italic;">type</span> of memory.&nbsp; This means
-    that if you define a breakpoint at (say) address 4010 in
-    fixed-fixed memory, the program will break upon hitting address
-    4010 but <span style="font-style: italic;">not</span> upon
-    hitting address 02,2010 in common-fixed memory which coincides
-    with address 4010.&nbsp; However, you can set two separate
-    breakpoints if you want to catch both of these
-    conditions.&nbsp;<br></li>
-    <li>BREAK <span style="font-style: italic;">L</span> --
-    (Versions 2005-07-31 and after.)&nbsp; If you have loaded a
-    symbol table via "--symtab" or SYMBOL-FILE, then you can set a
-    breakpoint with <span style="font-style: italic;">L</span>
-    being either a line number within the current source file, or
-    else a program label.<br></li>
-    <li>BREAKPOINTS — displays all currently-defined breakpoints,
-    watchpoints, and patterns.&nbsp; For versions 2005-07-28 and
-    after, if you have loaded a symbol table via "--symtab" or
-    SYMBOL-FILE, the printout will include symbolic names for
-    program labels and variables in addition to absolute numerical
-    addresses.<br></li>
-    <li>CONT — begin running the program.&nbsp; The program will
-    simply run until encountering a breakpoint.&nbsp; Alternately,
-    in Linux, you can halt the program after it's running by
-    hitting the carriage-return key on the keyboard.&nbsp; (I don't
-    know if this works in *BSD or MacOS X, so you'll just have to
-    try it and see.&nbsp; Presently, under Win32 there is
-    <span style="font-style: italic;">no</span> interactive way to
-    break execution once it gets started, so you really need to be
-    sure that the program is actually going to hit a breakpoint
-    eventually when using the CONT command.)<br></li>
-    <li>COREDUMP <span style="font-style: italic;">F</span> —
-    creates a "core-dump" file of the AGC program on disk, using
-    filename <span style="font-style: italic;">F</span>.&nbsp;
-    (Note that in pre-07/01/04 versions, <span style=
-    "font-style: italic;">F</span> will be in all-caps, regardless
-    of whether upper or lower case was used when inputting
-    it.)&nbsp; The "core-dump" file contains a snapshot of erasable
-    memory, i/o channels,and hidden CPU state-variables.&nbsp;
-    Loading the core-dump file later using <span style=
-    "font-weight: bold;">yaAGC</span>'s "--resume" command-line
-    switch allows execution to continue from the point at which the
-    core-dump file was made, rather than forcing the program to a
-    reset state.&nbsp; (An exception to this is if you have used
-    EDIT to modify values in fixed memory.&nbsp; These changes
-    won't be stored in the core-dump file, and therefore will be
-    lost.)</li>
-    <li>DELETE — without an address, DELETE simply deletes all
-    existing breakpoints and watchpoints.</li>
-    <li>DELETE <span style="font-style: italic;">A</span> — deletes
-    the breakpoint or watchpoint (if any) currently defined at
-    address <span style="font-style: italic;">A</span>.&nbsp;
-    <span style="font-weight: bold;">Note</span>:&nbsp; The same
-    comments about the usage of coinciding memory locations apply
-    as for the BREAK command (see above).&nbsp; For example, if you
-    have set breakpoints both at 4010 and at the coinciding address
-    02,2010, then "DELETE 4010" will delete only one of these
-    breakpoints, leaving the other one in effect.&nbsp; To delete
-    both of the breakpoints, you would have to use two DELETE
-    commands, "DELETE 4010" and "DELETE 02,2010".&nbsp; For
-    versions 2005-07-28 and after, if you have loaded a symbol
-    table via "--symtab" or SYMBOL-FILE, you can also use the
-    symbolic program labels rather than addresses.</li>
-    <li>DELETE <span style="font-style: italic;">V M</span> —
-    deletes the pattern (if any) corresponding to value
-    <span style="font-style: italic;">V</span> and mask
-    <span style="font-style: italic;">M</span>.&nbsp; (See also the
-    PATTERN command.)<br></li>
-    <li>DUMP — without arguments (i.e, no <span style=
-    "font-style: italic;">N</span> and no <span style=
-    "font-style: italic;">A</span>), a dump is performed using the
-    last <span style="font-style: italic;">N</span> and
-    <span style="font-style: italic;">A</span> previously
-    used.</li>
-    <li>DUMP [<span style="font-style: italic;">N</span>]
-    <span style="font-style: italic;">A</span> — displays the
-    current contents of <span style="font-style: italic;">N</span>
-    successive memory locations or i/o channels, starting at
-    address <span style="font-style: italic;">A</span>.&nbsp; The
-    formats allowed in <span style="font-style: italic;">A</span>
-    are described above.&nbsp; <span style=
-    "font-style: italic;">N</span> is shown in brackets to indicate
-    that it is optional.&nbsp; If <span style=
-    "font-style: italic;">N</span> is omitted, it defaults to
-    1.&nbsp; The dump cannot&nbsp; go past the end of the memory
-    bank, and will be truncated to fit the bank if you attempt to
-    do so.&nbsp; Example:&nbsp; "DUMP 5 03,2005" displays the
-    contents of memory locations 03,2005, 03,2006, 03,2007,
-    03,2010, and 03,2011.&nbsp; As special cases, note that all CPU
-    registers are memory mapped, so "DUMP 0" will display the
-    contents of the 'A' register, "DUMP 1" will display the
-    contents of the 'L' register, and so forth.<br></li>
-    <li>EDIT <span style="font-style: italic;">A</span>
-    <span style="font-style: italic;">V</span> — sets the current
-    value of memory location or i/o channel <span style=
-    "font-style: italic;">A</span> to the octal value <span style=
-    "font-style: italic;">V</span>.&nbsp; The allowed formats for
-    <span style="font-style: italic;">A</span> are as described
-    earlier.</li>
-    <li>FROMFILE <span style="font-style: italic;">Filename</span>
-    — (06/30/04 and later) begins accepting input from a file
-    rather than the keyboard.&nbsp; When the file is exhausted,
-    keyboard input is accepted again.&nbsp; (Hitting the return key
-    does have an effect, however, in that it interrupts program
-    execution.)&nbsp; The FROMFILE commands can be nested (i.e., a
-    file referenced by FROMFILE can itself contain FROMFILE
-    commands) up to 10 levels deep.&nbsp; In the directory
-    yaAGC/DebugModeScripts, I've provided a bunch of keystroke
-    files which can be used with FROMFILE to set up patterns that
-    trap upon executing given types of instructions.&nbsp; For
-    example, "FROMFILE TC.PAT" sets up a trap that is triggered by
-    subsequently executing the <span style=
-    "font-family: monospace;">TC</span> instruction.&nbsp; The
-    files are cunningly contrived so they trap only "normal" uses
-    of the instruction, and not the special "implied address"
-    versions of instructions.&nbsp; Thus, TC.PAT does not trap
-    <span style="font-family: monospace;">RETURN</span> (which
-    compiles as "<span style="font-family: monospace;">TC
-    Q</span>"), <span style="font-family: monospace;">RELINT</span>
-    (which compiles as "<span style="font-family: monospace;">TC
-    EB</span>"), etc.&nbsp; To trap these instructions, one would
-    use RETURN.PAT, RELINT.PAT, etc.&nbsp; For each <span style=
-    "font-style: italic;">instruction</span>.PAT file, there is
-    also a file called <span style=
-    "font-style: italic;">instruction</span>.PAT.DEL, which can be
-    used to delete the patterns associated with the
-    instruction.<br></li>
-    <li>GETOCT <span style="font-style: italic;">Expression</span>
-    — converts hexadecimal or decimal (including floating point)
-    numbers to the AGC CPU's native octal format, or converts from
-    the AGC CPU's native octal format to a decimal number.&nbsp;
-    This is available only for versions 05/09/2004 or later.&nbsp;
-    The HELP command gives more detail about the supported
-    <span style="font-style: italic;">Expression</span>
-    formats.</li>
-    <li>HELP — shows a list of the available debugger
-    commands.</li>
-    <li>INTERRUPTS — displays the current interrupt-request flags,
-    and the masks the debugger is applying to them (see
-    below).&nbsp; There are 10 flags, and their meanings are listed
-    on the <a href="developer.html">developer</a> page.</li>
-    <li>INTOFF <span style="font-style: italic;">N</span> — clears
-    the CPU's interrupt-request flag #N.</li>
-    <li>INTON <span style="font-style: italic;">N</span> — sets the
-    CPU's interrupt-request flag #<span style=
-    "font-style: italic;">N</span>.</li>
-    <li>LOG <span style="font-style: italic;">N</span> — creates a
-    file called yaAGC.log, and logs the next <span style=
-    "font-style: italic;">N</span> (decimal) instructions executed
-    to the file.&nbsp; The log is a simple ASCII file, in which
-    there is a line for each instruction.&nbsp; Each line contains
-    two octal numbers, of which the first is the BB register
-    logically-ORed with i/o channel 7, and the second is the Z
-    register.&nbsp; The purpose of this log is primarily for
-    regression testing.&nbsp; Logs can be created for two versions
-    of <span style="font-weight: bold;">yaAGC</span> and then
-    compared with standard text-comparison utilities like
-    <span style="font-weight: bold;">diff</span> to determine where
-    the point execution path differs.&nbsp; With that information,
-    hopefully, the debugger can determine the exact reasons for the
-    differences.<br></li>
-    <li>MASKOFF <span style="font-style: italic;">N</span> — the
-    debugger stops blocking interrupt type <span style=
-    "font-style: italic;">N</span>.</li>
-    <li>MASKON <span style="font-style: italic;">N</span> — the
-    debugger (independently of the CPU) will block interrupt type
-    <span style="font-style: italic;">N</span> from
-    occurring.&nbsp; If <span style=
-    "font-style: italic;">N</span>=0, then <span style=
-    "font-style: italic;">all</span> interrupts are blocked.</li>
-    <li>PATTERN <span style="font-style: italic;">V M</span> —
-    (06/30/04 and later) sets a "pattern" with value <span style=
-    "font-style: italic;">V</span> and mask <span style=
-    "font-style: italic;">M</span>.&nbsp; A pattern is similar to a
-    breakpoint, except that it uses the instruction code rather
-    than the program counter.&nbsp; In other words, execution is
-    halted upon finding that the instruction code is equal to the
-    value <span style="font-style: italic;">V</span>.&nbsp; The
-    instruction code is logically bitwise-ANDed with the mask
-    <span style="font-style: italic;">M</span> prior to the
-    comparison, so that only selected fields in the instruction
-    code are really used.&nbsp; Even though any given location in
-    memory can only contain 15 bits, the value and mask are really
-    32 bits, and the additional 17 bits represent additional
-    conditions that can be checked.&nbsp; The presently-defined
-    extra bits are:</li>
-  </ul>
-  <div style="margin-left: 40px;">
-    <table summary="" style=
-    "text-align: left; margin-left: auto; margin-right: auto;"
-    border="1" cellpadding="2" cellspacing="2">
+    <ul>
+      <li>The <span style="font-weight: bold;">yaAGC</span> and <span
+          style="font-weight: bold;">yaDSKY</span> programs simulate the
+        center two blocks in the figure above.&nbsp; The actual Block II
+        AGC measured 24"×12.5"×6", weighed 70.1 pounds, and 2.5A of
+        current at 28V DC.&nbsp; The DSKY measured 8"×8"×7" and weighed
+        17.5 pounds.<br>
+      </li>
+      <li>The CPU had a&nbsp; memory cycling time (MCT) of 11.7
+        microseconds. The modern reader, reading this, probably imagines
+        that by "CPU" we are referring to a single integrated circuit
+        (or "chip").&nbsp; In fact, integrated circuits were too new and
+        too risky (as well as too expensive) at that time to be
+        used.&nbsp; At some point, a few integrated circuits were added
+        to act as "flip-flops" for some of the CPU registers; but the
+        CPU itself was not, by any stretch of the imagination, an
+        integrated circuit.&nbsp; The instruction timing varies from 1
+        MCT up to 6 MCT, but most instructions execute in 2 MCT. The
+        11.7&nbsp; microsecond cycle is subdivided at the hardware level
+        into 12 shorter time-periods derived from a 1024 KHz clock.
+        However, for the purpose of the <span style="font-weight:
+          bold;">yaAGC</span> simulation, only the basic 11.7
+        microsecond cycle-time is of interest.The instruction set of the
+        AGC is apparently implemented as a kind of microcode, and the
+        microcode instructions are executed in the 12 subdivisions of
+        the clock cycle. Since the microcode and the hidden register set
+        it uses are not accessible to programmers, I've not bothered to
+        carry the simulation down to the microcode level. However,
+        examining the microcode is useful in understanding the detailed
+        workings of some of the assembly-language operations.</li>
+      <li>Memory and registers are 16 bits, consisting of 15 bits of
+        data, plus one bit of odd parity (used for detection of memory
+        errors). The parity bit is not simulated by <span
+          style="font-weight: bold;">yaAGC</span>.<br>
+      </li>
+      <li>Fixed memory—i.e., memory which cannot be modified at runtime,
+        for program code, constants, and so forth. There are 38912
+        15-bit words of ROM at addresses 4000-117777 (octal). This ROM
+        was implemented not in integrated circuits, but in "core"
+        memory—consisting of many small ferromagnetic doughnuts threaded
+        into a braid of extremely fine wires. This made the cost of
+        program changes very high, since changes could only be
+        incorporated by having Raytheon Corp. rebuild the core-memory
+        assembly.&nbsp; Each of the cores could encode as many as 64
+        bits of memory, since 64 wires could be threaded through each
+        core, so that even though over 600,000 bits needed to be coded,
+        less than 10,000 cores were used.&nbsp; A small portion of the
+        core rope is seen below.</li>
+      <li>Erasable memory—i.e., memory which can be modified at runtime.
+        There are 2048&nbsp; 15-bit words of erasable memory at
+        addresses 0-3777 (octal). Locations 0-17 (octal)&nbsp;
+        correspond to what might be thought of as CPU registers, while
+        20-57 (octal)&nbsp; are "counters", and 60-3777 (octal)&nbsp;
+        are general-purpose RAM.&nbsp; The erasable memory was
+        implemented by means of ferromagnetic cores, but not the same as
+        the core-rope seen at the right.<br>
+      </li>
+      <li>Memory banks. It is important to note that while erasable and
+        fixed memory formed a space of continous memory, logically
+        addressed from 0-117777 (octal), that 16 addressing bits are
+        needed but that no register in the AGC (including the
+        program-counter) is 16-bits wide. To get around this problem,
+        extra addressing bits are taken from special bank-selection
+        registers and combined with the program counter or with
+        addresses embedded within program instructions to provide full
+        16-bit addresses.</li>
+      <li>I/O channels. There were potentially 512 i/o ports with
+        "channel numbers" from 0-777 (octal). Some few of the i/o
+        channels correspond to erasable-memory locations.&nbsp; The
+        others were used to address peripheral devices (such as the
+        DSKY) for telemetry uplink/downlink, and so on.</li>
+    </ul>
+    <table summary="" style="text-align: left; margin-left: auto;
+      margin-right: auto;" cellspacing="2" cellpadding="2" border="0">
       <tbody>
         <tr>
-          <td style=
-          "text-align: center; vertical-align: middle; font-weight: bold;">
-          Bit Number<br></td>
-          <td style=
-          "font-weight: bold; text-align: center; vertical-align: middle;">
-          Octal Mask<br></td>
-          <td style=
-          "vertical-align: middle; text-align: left; font-weight: bold;">
-          Description<br></td>
-        </tr>
-        <tr>
-          <td style="text-align: center; vertical-align: middle;">
-          16<br></td>
-          <td style=
-          "text-align: center; vertical-align: middle; font-family: monospace;">
-          00100000<br></td>
-          <td style="vertical-align: middle; text-align: left;">The
-          Extracode bit.&nbsp;<br></td>
-        </tr>
-        <tr>
-          <td style="text-align: center; vertical-align: middle;">
-          17<br></td>
-          <td style=
-          "text-align: center; vertical-align: middle; font-family: monospace;">
-          00200000<br></td>
-          <td style="vertical-align: middle; text-align: left;">1
-          if the <span style="font-family: monospace;">INDEX</span>
-          is non-zero.<br></td>
-        </tr>
-        <tr>
-          <td style="text-align: center; vertical-align: middle;">
-          18<br></td>
-          <td style=
-          "text-align: center; vertical-align: middle; font-family: monospace;">
-          00400000<br></td>
-          <td style="vertical-align: middle; text-align: left;">1
-          if the Accumulator contains + overflow.<br></td>
-        </tr>
-        <tr>
-          <td style="text-align: center; vertical-align: middle;">
-          19<br></td>
-          <td style=
-          "text-align: center; vertical-align: middle; font-family: monospace;">
-          01000000<br></td>
-          <td style="vertical-align: middle; text-align: left;">1
-          if the Accumulator contains - overflow.<br></td>
-        </tr>
-        <tr>
-          <td style="text-align: center; vertical-align: middle;">
-          20<br></td>
-          <td style=
-          "text-align: center; vertical-align: middle; font-family: monospace;">
-          02000000<br></td>
-          <td style="vertical-align: middle; text-align: left;">1
-          if the Accumulator is -.<br></td>
-        </tr>
-        <tr>
-          <td style="text-align: center; vertical-align: middle;">
-          21<br></td>
-          <td style=
-          "text-align: center; vertical-align: middle; font-family: monospace;">
-          04000000<br></td>
-          <td style="vertical-align: middle; text-align: left;">1
-          if the sign of the Accumulator does not match the sign of
-          L.<br></td>
-        </tr>
-        <tr>
-          <td style="text-align: center; vertical-align: middle;">
-          22<br></td>
-          <td style=
-          "text-align: center; vertical-align: middle; font-family: monospace;">
-          10000000<br></td>
-          <td style="vertical-align: middle; text-align: left;">1
-          if within an interrupt-service routine.<br></td>
-        </tr>
-        <tr>
-          <td style="text-align: center; vertical-align: middle;">
-          23-31<br></td>
-          <td style="text-align: center; vertical-align: middle;">
-          n/a<br></td>
-          <td style="vertical-align: top;">Presently 0.<br></td>
-        </tr>
-      </tbody>
-    </table><br>
-  </div>
-  <div style="margin-left: 40px;">
-    Note that the INDEX (if any) is added to the instruction code
-    prior to the comparison.&nbsp; The net effect of this, with
-    proper selection of <span style="font-style: italic;">V</span>
-    and <span style="font-style: italic;">M</span>, is to allow
-    halting upon execution of a given <span style=
-    "font-style: italic;">instruction type</span>, and to be able
-    <span style="font-style: italic;">optionally</span> to select
-    only INDEXed or non-INDEXed instances. &nbsp; Both <span style=
-    "font-style: italic;">V</span> and <span style=
-    "font-style: italic;">M</span> are in octal.&nbsp; For example,
-    with "PATTERN 170000 170000", the program will halt upon
-    encountering the <span style=
-    "font-family: monospace;">MP</span> instruction.<br>
-  </div>
-  <ul>
-    <li>QUIT or EXIT — exits <span style=
-    "font-weight: bold;">yaAGC</span>.</li>
-    <li>STEP [<span style="font-style: italic;">N</span>] or NEXT
-    [<span style="font-style: italic;">N</span>] — executes the
-    next <span style="font-style: italic;">N</span>
-    assembly-language instructions.&nbsp; If <span style=
-    "font-style: italic;">N</span> is omitted, then it defaults to
-    1.&nbsp; Note that this command can be abbreviated as 'S' or as
-    'N'.<br></li>
-    <li>WATCH <span style="font-style: italic;">A</span> —
-    (06/08/2004 and after) defines a new watchpoint at
-    erasable-memory address <span style=
-    "font-style: italic;">A</span> (using one of the
-    memory-location formats described above).&nbsp; The program
-    will halt <span style="font-style: italic;">after</span>
-    executing an instruction that changes the value stored at the
-    address of the watchpoint.&nbsp; <span style=
-    "font-weight: bold;">Note</span>:&nbsp; The AGC's
-    unswitched-erasable memory coincides with switched-erasable
-    banks 0, 1, and 2.&nbsp; The watchpoints are specific to not
-    only the address but also to the specific <span style=
-    "font-style: italic;">type</span> of memory.&nbsp; This means
-    that if you define a watchpoint at (say) address 010 in
-    unswitched erasable memory, the program will halt upon hitting
-    address 010 but <span style="font-style: italic;">not</span>
-    upon noting a change in the value stored at address E0,010 in
-    switched erasable memory (which coincides with address
-    010).&nbsp; However, you can set two separate watchpoints if
-    you want to catch both of these conditions.&nbsp; For versions
-    2005-10-17 and after, if you have loaded a symbol table via
-    "--symtab" or SYMBOL-FILE, you can also use the symbolic
-    program labels rather than addresses.</li>
-    <li>WATCH <span style="font-style: italic;">A V</span> —
-    (2005-08-23 and later) is similar to "WATCH <span style=
-    "font-style: italic;">A</span>", except that it breaks upon
-    finding a <span style="font-style: italic;">specific</span>
-    octal value <span style="font-style: italic;">V</span>.</li>
-    <li>VIEW <span style="font-style: italic;">A</span> —
-    (2005-10-17 and later) is similar to "WATCH <span style=
-    "font-style: italic;">A</span>", except that it displays the
-    value stored in the variable or numerical address in real time
-    rather than interrupting program execution when the value
-    changes.&nbsp; It is only meaningful to use this command on
-    erasable memory, since values stored in fixed memory do not
-    change.<br></li>
-    <li>SYMBOL-FILE <span style=
-    "font-style: italic;">Filename</span> — (2005-07-28 and
-    after.)&nbsp; To use the symbol table generated by <span style=
-    "font-weight: bold;">yaYUL</span>, there are two equivalent
-    methods.&nbsp; One is to specify the symbol table (such as
-    Luminary131.symtab or Colossus249.symtab) via the "--symtab"
-    command-line switch.&nbsp; The other is to specify it via the
-    SYMBOL-FILE command.<br></li>
-    <li>PRINT <span style="font-style: italic;">Variable</span> —
-    (2005-07-28 and after.) If a symbol table has been loaded (via
-    "--symtab" or the SYMBOL-FILE command), prints the octal value
-    stored in <span style=
-    "font-style: italic;">Variable</span>.&nbsp; This is similar to
-    the DUMP command, except that the variable is referenced by its
-    symbolic name rather than by its absolute address.&nbsp; For
-    example, in <span style=
-    "font-weight: bold;">Luminary131</span>, the variable NOTBIT12
-    is at address 40,3736.&nbsp; The command "PRINT NOTBIT12" gives
-    the same result as "DUMP 40,3736".</li>
-    <li>WHATIS <span style="font-style: italic;">Symbol</span> —
-    (2005-07-28 and after.) If a symbol table has been loaded (via
-    "--symtab" or the SYMBOL-FILE command), displays info about the
-    <span style="font-style: italic;">Symbol</span>.&nbsp; The info
-    includes items such as the symbol's numerical address (if a
-    variable or program label), its value (if a constant), its
-    class (label, variable, constant, etc.), and the source-code
-    file and line-number at which it is defined.</li>
-    <li>SYM-DUMP <span style=
-    "font-style: italic;">RegularExpression</span> — (2005-07-28
-    and after.) If a symbol table has been loaded (via "--symtab"
-    or the SYMBOL-FILE command), displays info about all of the
-    symbols whose names match the <span style=
-    "font-style: italic;">RegularExpression</span>.&nbsp; The
-    printout is truncated after 25 symbols, in which case you might
-    want to tighten up the search by making <span style=
-    "font-style: italic;">RegularExpression</span> more
-    specific.&nbsp; The regular expressions are "extended" POSIX
-    regular expressions, and are not case-sensitive.&nbsp; (If you
-    don't know anything about regular expressions and want to learn
-    more, the <a href=
-    "http://en.wikipedia.org/wiki/Regular_expression">wikipedia</a>
-    is a reasonable place to start.)&nbsp; Here are some examples
-    that might help:</li>
-  </ul>
-  <div style="margin-left: 40px;">
-    <table summary="" style=
-    "text-align: left; margin-left: auto; margin-right: auto;"
-    border="1" cellpadding="2" cellspacing="2">
-      <tbody>
-        <tr>
-          <td style="vertical-align: middle;">SYM-DUMP NOT<br></td>
-          <td style="vertical-align: middle;">Any symbol whose name
-          contains "NOT".<br></td>
-        </tr>
-        <tr>
-          <td style="vertical-align: middle;">SYM-DUMP
-          ^NOT<br></td>
-          <td style="vertical-align: middle;">Any symbol whose name
-          begins with "NOT".<br></td>
-        </tr>
-        <tr>
-          <td style="vertical-align: middle;">SYM-DUMP
-          NOT$<br></td>
-          <td style="vertical-align: middle;">Any symbol whose name
-          ends with "NOT".<br></td>
-        </tr>
-        <tr>
-          <td style="vertical-align: top;">SYM-DUMP ^NOT$<br></td>
-          <td style="vertical-align: top;">The symbol
-          "NOT".<br></td>
-        </tr>
-        <tr>
-          <td style="vertical-align: middle;">SYM-DUMP
-          (^NOT)|(NOT$)<br></td>
-          <td style="vertical-align: middle;">Any symbol whose name
-          begins or ends with "NOT".<br></td>
-        </tr>
-        <tr>
-          <td style="vertical-align: middle;">SYM-DUMP ^[ABC]<br>
-          <span style="font-style: italic;">or</span><br>
-          SYM-DUMP ^((A)|(B)|(C))<br></td>
-          <td style="vertical-align: middle;">Any symbol whose name
-          begins with 'A', 'B', or 'C'.<br></td>
-        </tr>
-        <tr>
-          <td style="vertical-align: middle;">SYM-DUMP
-          ^NO+<br></td>
-          <td style="vertical-align: middle;">Any symbol whose name
-          begins with 'N' followed by 1 or more occurrences of
-          'O'.<br></td>
-        </tr>
-        <tr>
-          <td style="vertical-align: middle;">SYM-DUMP
-          ^NO*<br></td>
-          <td style="vertical-align: middle;">Any symbol whose name
-          begins with 'N' followed by 0 or more occurrences of
-          'O'.<br></td>
-        </tr>
-        <tr>
-          <td style="vertical-align: middle;">SYM-DUMP 1.2<br></td>
-          <td style="vertical-align: middle;">Any symbol whose name
-          contains a '1' followed by a '2', with any other
-          character in between.<br></td>
-        </tr>
-        <tr>
-          <td style="vertical-align: middle;">SYM-DUMP
-          1\.2<br></td>
-          <td style="vertical-align: middle;">Any symbol whose name
-          contains a '1' followed by a '2', with '.' (specifically)
-          in between.<br></td>
+          <td style="vertical-align: top; text-align: center;"> <a
+              href="yaAGC-core-big.jpg"><img src="yaAGC-core.jpg"
+                title="Photograph of core-rope. Click to enlarge."
+                alt="Photograph of core-rope" style="border: 2px solid ;
+                width: 200px; height: 160px;" width="200" vspace="5"
+                hspace="10" height="160"></a><br>
+            <div style="text-align: left;"> <span style="font-style:
+                italic;">A small section of the ferrite cores in the
+                "core rope" non-volatile memory of the AGC.&nbsp; (The
+                photo was taken from the web; it was credited to
+                Raytheon Corp.)</span><br>
+            </div>
+          </td>
+          <td style="vertical-align: top; text-align: center;"> <a
+              href="AgcModuleCompartment.jpg"><img style="border: 2px
+                solid ; width: 246px; height: 155px;" alt="Click to
+                enlarge." src="thumbnail-AgcModuleCompartment.jpg"
+                width="246" height="155"></a><br>
+            <div style="text-align: left;"> <span style="font-style:
+                italic;">Logic modules, plugged into a backplane.&nbsp;
+                Though you cannot tell it from this photo, if the
+                modules were disassembled, you would see that they are
+                of "welded cordwood" construction.&nbsp; What that means
+                is that the modules are full of cylindrical holes, like
+                swiss cheese; the electrical components, such a
+                resistors, slide into these holes, and their leads
+                protrude from either side of the module.&nbsp; Wires are
+                welded</span>—<span style="font-style: italic;">not
+                soldered</span>—<span style="font-style: italic;">onto
+                the leads to interconnect the components.&nbsp; (Photo
+                by Stephan Hotto, taken at the Computer History Museum
+                in Mountain View, California.)</span> </div>
+          </td>
+          <td style="vertical-align: top; text-align: center;"> <a
+              href="AgcWirewrappedBackplane.jpg"><img style="border: 2px
+                solid ; width: 268px; height: 143px;" alt="Click to
+                enlarge" src="thumb-AgcWirewrappedBackplane.jpg"
+                width="268" height="143"></a><br>
+            <div style="text-align: left;"> <span style="font-style:
+                italic;">The backplane the logic and memory
+                modules&nbsp; which the logic and memory modules plug
+                into.&nbsp; Notice that it is wire-wrapped.&nbsp; Even
+                the production models were wire-wrapped, and not just
+                the engineering models.&nbsp; </span><span
+                style="font-style: italic;">(Photo by Stephan Hotto,
+                taken at the Computer History Museum in Mountain View,
+                California.)</span> </div>
+          </td>
         </tr>
       </tbody>
     </table>
-  </div>
-  <ul>
-    <li><a name="LIST" id="LIST"></a>LIST — (2005-07-30 and
-    after.)&nbsp; Provides a symbolic disassembly of the code, if a
-    symbol table has been loaded (via "--symtab" or the SYMBOL-FILE
-    command), and if the source-code files are present.&nbsp; The
-    source files must be in the same directory as they were when
-    <span style="font-weight: bold;">yaYUL</span> created the
-    symbol table; if copied to a different directory, <span style=
-    "font-weight: bold;">yaAGC</span> will not be able to find
-    them.&nbsp; There are several variations of this command:</li>
-  </ul>
-  <div style="margin-left: 40px;">
-    <table summary="" style=
-    "text-align: left; margin-left: auto; margin-right: auto;"
-    border="1" cellpadding="2" cellspacing="2">
+    <h2>Invoking yaAGC</h2>
+    <br>
+    <table summary="" style="text-align: left; width: 60%; margin-left:
+      auto; margin-right: auto;" cellspacing="2" cellpadding="2"
+      border="1">
       <tbody>
         <tr>
-          <td style="vertical-align: top;">LIST<br></td>
-          <td style="vertical-align: top;">Print the source lines
-          following the current program counter.<br></td>
-        </tr>
-        <tr>
-          <td style="vertical-align: top;">LIST -<br></td>
-          <td style="vertical-align: top;">Print the source lines
-          preceding the current program counter.<br></td>
-        </tr>
-        <tr>
-          <td style="vertical-align: top;">LIST <span style=
-          "font-style: italic;">label</span><br></td>
-          <td style="vertical-align: top;">Print the source lines
-          at (and surrounding) the specified program
-          label.<br></td>
-        </tr>
-        <tr>
-          <td style="vertical-align: top;">LIST <span style=
-          "font-style: italic;">lineno</span><br></td>
-          <td style="vertical-align: top;">Print the source lines
-          at (and surrounding) the specified line number in the
-          source file containing the current program
-          counter.<br></td>
-        </tr>
-        <tr>
-          <td style="vertical-align: top;">LIST <span style=
-          "font-style: italic;">fromline,toline</span><br></td>
-          <td style="vertical-align: top;">Print the source lines
-          from the specified starting line number to the specified
-          ending line number in the source file containing the
-          corrent program counter.<br></td>
-        </tr>
-        <tr>
-          <td style="vertical-align: top;">LIST <span style=
-          "font-style: italic;">filename</span>:<span style=
-          "font-style: italic;">lineno</span><br></td>
-          <td style="vertical-align: top;">Print the source lines
-          at (and surrounding) the specified line number in the
-          specified source file.&nbsp; Note that you only need the
-          actual filename of the source file, and you can omit the
-          name of the directory containing the source
-          file.<br></td>
+          <td style="text-align: center; vertical-align: top;"> <big><span
+                style="font-weight: bold;">Important Note!</span></big><br>
+            <div style="text-align: left;"> The description that follows
+              describes the "classic" command-line switches of the <span
+                style="font-weight: bold;">yaAGC</span> program for
+              versions prior to 20090427.&nbsp; I retain this
+              description as-is for the benefit of those using one of
+              those versions of <span style="font-weight: bold;">yaAGC</span>.&nbsp;
+              However, for versions 20090427 and later, the command-line
+              switches with respect to to modes for debugging AGC
+              programs have changed, and I'm not presently in a position
+              to authoritatively describe those changes (which may be in
+              a state of flux).&nbsp; A more up-to-date description may
+              be available at <a
+                href="http://code.google.com/p/virtualagc/">Onno Hommes
+                website</a>.&nbsp; (In brief, however, to activate the
+              command-line debugging mode which previously would have
+              been gotten by invoking "yaAGC --debug --core=...", one
+              would use "yaAGC --exec=...".)<br>
+            </div>
+          </td>
         </tr>
       </tbody>
-    </table><br>
-  </div>
-  <ul>
-    <li>FILES <span style=
-    "font-style: italic;">RegularExpression</span> — (2005-07-31
-    and later.)&nbsp; Lists the names of the AGC source-code
-    files.&nbsp; A regular expression is used to determine which
-    filenames are listed, just as described above in the SYM-DUMP
-    command.<br></li>
-  </ul><br>
-  <hr style="width: 100%; height: 2px;">
-  <center>
+    </table>
     <br>
-    <span style=
-    "color: rgb(84, 89, 93); font-family: sans-serif; font-size: 11.05px; font-style: normal; font-variant: normal; font-weight: normal; letter-spacing: normal; line-height: 16.575px; orphans: auto; text-align: center; text-indent: 0px; text-transform: none; white-space: normal; widows: 1; word-spacing: 0px; -webkit-text-stroke-width: 0px; display: inline !important; float: none; background-color: rgb(255, 255, 255);">
-    This page is available under the <a href=
-    "https://creativecommons.org/publicdomain/zero/1.0/">Creative
-    Commons No Rights Reserved License</a></span><br>
-    <i><font size="-1">Last modified by <a href=
-    "mailto:info@sandroid.org">Ronald Burkey</a> on 2017-01-11.<br>
+    <span style="font-weight: bold;">yaAGC</span> is a command-line
+    program that requires no user interaction once started.&nbsp; The
+    syntax is<br>
     <br>
-    <a href="http://www.ibiblio.org"><img style=
-    "border: 0px solid ; width: 300px; height: 100px;" alt=
-    "Virtual AGC is hosted by ibiblio.org" src="hosted.png" height=
-    "100" width="300"></a><br></font></i>
-  </center><br>
-</body>
+    <div style="text-align: center;"> <span style="font-family:
+        monospace;">yaAGC [OPTIONS] --core=</span><span
+        style="font-style: italic; font-family: monospace;">BinaryExecutable</span><br>
+    </div>
+    <br>
+    The <span style="font-style: italic;">BinaryExecutable</span> will
+    be the name of a file containing an AGC core-rope binary image,
+    either <a href="download.html">downloaded</a> or else assembled
+    from <a href="Luminary.html">Luminary</a> or <a
+      href="Colossus.html">Colossus</a> source code using <a
+      href="yaYUL.html">yaYUL</a>.&nbsp; If a complete pathname for <span
+      style="font-style: italic;">BinaryExecutable</span> is not
+    specified, then <span style="font-weight: bold;">yaAGC</span> will
+    look first in the current directory, and then (for software versions
+    05/06/2004 or later) in the installation directory (which is
+    /usr/local/bin by default, but which may be changed when <span
+      style="font-weight: bold;">yaAGC</span> is built).&nbsp; The other
+    currently-defined options are:<br>
+    <br>
+    --help<br>
+    <div style="margin-left: 40px;"> Displays a list of options (such as
+      this one) and then quits.<br>
+      <br>
+    </div>
+    --port=<span style="font-style: italic;">Portnum</span><br>
+    <div style="margin-left: 40px;"> The <span style="font-weight:
+        bold;">yaAGC</span> program and programs simulating peripheral
+      devices (such as <span style="font-weight: bold;">yaDSKY)</span>
+      have a server/client relationship.&nbsp; <span
+        style="font-weight: bold;">yaAGC</span> listens on a set of
+      ports (by default, 19697 through 19706) for client
+      connection-requests.&nbsp; The base (lowest) port number can be
+      changed using the "--port" command-line switch.&nbsp; (The number
+      of ports scanned remains 10, however.&nbsp; To change the number
+      of scanned ports requires changing <span style="font-weight:
+        bold;">yaAGC</span>'s source code and recompiling the
+      program.)&nbsp; One might wish to change the base port if, for
+      example, simultaneously running an instance of <span
+        style="font-weight: bold;">yaAGC</span> for the CM and another
+      instance of <span style="font-weight: bold;">yaAGC</span> for the
+      LM.&nbsp; The port ranges of the two instances of <span
+        style="font-weight: bold;">yaAGC</span> shouldn't overlap, so
+      one instance could be run (for example) with the command-line
+      switch "--port=19707".<br>
+      <br>
+    </div>
+    --debug-dsky<br>
+    <div style="margin-left: 40px;"> This setting is useful for
+      debugging a DSKY simulation (such as <span style="font-weight:
+        bold;">yaDSKY</span>).&nbsp; This switch causes the "--core"
+      setting to be ignored (in fact, the "--core" switch can be
+      omitted).&nbsp; Instead of running an AGC executable, <span
+        style="font-weight: bold;">yaAGC</span> simply echoes command
+      sequences back to the DSKY upon receiving keystrokes from the
+      DSKY.&nbsp; These command sequences are defined in the
+      configuration file (see "--cfg" below), and can actually relate to
+      any peripheral devices (not just the DSKY).<br>
+      <br>
+    </div>
+    --debug-deda<br>
+    <div style="margin-left: 40px;"> This setting is useful for
+      debugging a DEDA simulation (such as <span style="font-weight:
+        bold;">yaDEDA</span>).&nbsp; Unlike --debug-dsky, <span
+        style="font-weight: bold;">yaAGC</span> runs the AGC simulation
+      as normal.&nbsp; But in addition, it interprets communications
+      from <span style="font-weight: bold;">yaDEDA</span>.&nbsp; (In
+      normal operation, of course, it completely ignores data
+      originating from <span style="font-weight: bold;">yaDEDA</span>,
+      or indeed any other messages in <span style="font-weight: bold;">yaAGS</span>
+      format.)&nbsp; For each communication received from <span
+        style="font-weight: bold;">yaDEDA</span> (for key sequences such
+      as CLR-<span style="font-style: italic;">OctalDigit-OctalDigit-OctalDigit</span>-READOUT)
+
+      it prints out a message indicating what was received.&nbsp; For
+      the specific key sequence just mentioned, it goes further and acts
+      similarly to the AEA software, in that it interprets the 3 octal
+      digits as an address in erasable memory, and outputs the value
+      found at that address (in octal) every 1/2 second to <span
+        style="font-weight: bold;">yaDEDA</span>.&nbsp; The addresses
+      most meaningfully observed in this fashion are timer registers
+      like 25 (octal) which increment at 10 ms. intervals, and therefore
+      increments by about 50 (62 octal) every 1/2 second.<br>
+    </div>
+    <br>
+    --deda-quiet<br>
+    <div style="margin-left: 40px;"> This setting is used in conjunction
+      with --debug-deda to eliminate the outputs from <span
+        style="font-weight: bold;">yaAGC</span> to <span
+        style="font-weight: bold;">yaDEDA</span> which --debug-deda
+      normally creates.&nbsp; In other words, lets <span
+        style="font-weight: bold;">yaAGC</span> parse the messages being
+      received from <span style="font-weight: bold;">yaDEDA</span>, but
+      never to send any itself.<br>
+    </div>
+    <br>
+    --cfg=<span style="font-style: italic;">Filename</span><br>
+    <div style="margin-left: 40px;"> This presently has no effect unless
+      used with "--debug-dsky".&nbsp; It causes a configuration file to
+      be loaded which defines the command sequences used in --debug-dsky
+      mode.&nbsp; The same directory assumptions are used in searching
+      for the file as are used with the --core switch (see above).&nbsp;
+      Full instructions can be found within the provided sample
+      files&nbsp; (presently LM.ini, CM.ini, LM1.ini, and
+      CM0.ini).&nbsp; The configuration files are really provided for
+      use with the <span style="font-weight: bold;">yaDSKY</span>
+      program, and the same file should be selected for <span
+        style="font-weight: bold;">yaAGC</span> as is selected for <span
+        style="font-weight: bold;">yaDSKY</span> (if --debug-dsky is
+      going to be used).&nbsp;&nbsp; Only the "DEBUG" lines within the
+      configuration files are relevant to <span style="font-weight:
+        bold;">yaAGC</span>.&nbsp; If no configuration file is selected,
+      or if no DEBUG lines appear within the configuration file, then
+      --debug-dsky will be non-functional.<br>
+    </div>
+    <br>
+    --debug<br>
+    <div style="margin-left: 40px;"> Causes the AGC program to halt
+      prior to executing its first instruction, and activates a
+      debugging mode (very primitive) in which you can do things like
+      examine AGC registers, single-step through the AGC program,
+      etc.&nbsp; This mode is described further <a href="#Debugging">below</a>.&nbsp;&nbsp;
+      In Linux (though not necessarily in *BSD, MacOS X, or Win32), you
+      can put <span style="font-weight: bold;">yaAGC</span> into debug
+      mode without the --debug switch, simply by hitting the
+      carriage-return key any time after starting the program; the AGC
+      program will simply be halted wherever it is, and you can begin
+      debugging at that point.<br>
+      <br>
+    </div>
+    --symtab=<span style="font-style: italic;">Filename</span><br>
+    <div style="margin-left: 40px;"> For versions 20050728 and later, <span
+        style="font-weight: bold;">yaYUL</span> outputs symbol-table
+      information that <span style="font-weight: bold;">yaAGC</span>
+      can use in "--debug" mode to aid symbolic debugging.&nbsp; In
+      other words, if you load a symbol table into <span
+        style="font-weight: bold;">yaAGC</span>, then in debug-mode you
+      can sometimes use program labels and variable names rather than
+      having to know the absolute numerical addresses for
+      everything.&nbsp; The --symtab switch is used to specify the name
+      of the symbol-table file.&nbsp; The same search path is used as
+      for --core and --cfg.&nbsp; Since the symbol tables for
+      Luminary131 and Colossus249 (namely, Luminary131.symtab and
+      Colossus249.symtab) are "installed" along with the executables,
+      you can simply say "--symtab=Luminary131.symtab" or
+      "--symtab=Colossus249.symtab".&nbsp; However, if you want to
+      assemble your own AGC source code, the symbol table output by <span
+        style="font-weight: bold;">yaYUL</span> will be named the same
+      as your source file, but with ".symtab" suffixed to it.&nbsp; For
+      example, if you assemble "MyFile.s", then the symbol table will be
+      "MyFile.s.symtab".&nbsp; In this case, you'll want to use the
+      complete pathname for the symbol-table as the filename for
+      --symtab.&nbsp; This feature, and all of the debugging commands
+      associated with it are courtesy of Jordan Slott.&nbsp; (Thanks,
+      Jordan.)<br>
+    </div>
+    <br>
+    <a name="Resume" id="Resume"></a>--resume=<span style="font-style:
+      italic;">Filename</span><br>
+    <div style="margin-left: 40px;"> Normally when the emulator runs an
+      AGC program it sets all i/o channels, erasable memory, and hidden
+      CPU state variables to what it considers reasonable power-up
+      defaults.&nbsp; (But see "--dump-time", below.)&nbsp; The --resume
+      option instead allows these items to be loaded from a
+      previously-created file.&nbsp; (The file itself is created from
+      --debug mode using the COREDUMP command as explained below.)&nbsp;
+      In effect, this allows execution to continue from the exact point
+      in the AGC program at which the COREDUMP was made, rather than
+      forcing the AGC program to its reset condition.&nbsp; The file
+      must be either in the current directory, or else a full pathname
+      must be given for it.<br>
+      <br>
+    </div>
+    --dump-time=<span style="font-style: italic;">N</span><br>
+    <div style="margin-left: 40px;"> For versions 20050705 and later, <span
+        style="font-weight: bold;">yaAGC</span> attempts to save the
+      contents of erasable memory, and to restore them automatically at
+      startup (but not i/o channels and hidden CPU state
+      variables).&nbsp; This means that things like pad loads are
+      preserved even when the AGC is "powered down", just as they would
+      have been in the true AGC's ferrite-core memory.&nbsp; In an
+      effort to keep this from increasing system overhead too much, the
+      saving is actually done only every <span style="font-style:
+        italic;">N</span> seconds (10, by default).&nbsp; The data is
+      saved either in a file called LM.core or CM.core, and is
+      compatible with the "core dumps" described above for the
+      "--resume" switch.&nbsp; You can start with a clean system by
+      erasing LM.core or CM.core.&nbsp; Or, you can use
+      "--resume=LM.core" or "--resume=CM.core" if you'd like to restore
+      more than just the erasable memory.&nbsp; Because separate files
+      are used for the LM and CM, you can run both simulations at once
+      without any conflict.&nbsp; However, if you want to run more than
+      one LM simulation (or more than one CM simulation), you'd better
+      start them from different directories, to make sure that the .core
+      files are stored in different directories.<br>
+    </div>
+    <div style="margin-left: 40px;"> <br>
+    </div>
+    --interlace=<span style="font-style: italic;">N</span><br>
+    <div style="margin-left: 40px;"> On some PC's the act of checking
+      the socket connections (i.e., the mechanism used by <span
+        style="font-weight: bold;">yaAGC</span> to communicate with <span
+        style="font-weight: bold;">yaDSKY</span> and/or other peripheral
+      devices) can make the simulation very sluggish.&nbsp; Therefore <span
+        style="font-weight: bold;">yaAGC</span> only performs this check
+      every <span style="font-style: italic;">N</span>-th CPU
+      instruction, where by default <span style="font-style: italic;">N</span>=50.&nbsp;
+      Changing the value of <span style="font-style: italic;">N</span>
+      does not affect the reliability of the communication (i.e., no
+      data is lost).&nbsp; Making <span style="font-style: italic;">N</span>
+      smaller theoretically improves the responsiveness of the system,
+      except on slow PC's where the overhead from checking the sockets
+      may exceed the computing time taken by the simulation.&nbsp; For
+      example, a value of <span style="font-style: italic;">N</span>=1
+      works fine on my ~2.5 GHz P4 Linux and Windows XP systems, but
+      results in about a 10-to-1 slowdown of the simulation on my 450
+      MHz P2 Windows 98 system.&nbsp; On the latter system, a value of <span
+        style="font-style: italic;">N</span>=10 seems to work
+      perfectly.&nbsp; Conversely, increasing <span style="font-style:
+        italic;">N</span> reduces the overhead, but results in a larger
+      time-jitter in signalling, and (in theory) for large enough values
+      a steadily-increasing backlog of data waiting to be
+      delivered.&nbsp; As far as time-jitter is concerned, it's
+      important to realize that <span style="font-weight: bold;">yaAGC</span>
+      does not actually execute a machine cycle every 11.7 microseconds,
+      but merely keeps up appearances of doing so in a way not
+      detectable by the user.&nbsp; Therefore, there is a pretty large
+      time-jitter anyway, and the amount of jitter is dependent on both
+      the speed of the PC and on the operating system used by the
+      PC.&nbsp; The value <span style="font-style: italic;">N</span>=50
+      has been chosen in the belief that it will work well for most
+      PC's, and does work well on all of the example systems mentioned
+      above.&nbsp; (On my 150 MHz P1, on the other hand, the simulation
+      runs about 50% slow no matter what the setting of
+      --interlace.)&nbsp; Nevertheless, the --interlace switch may be of
+      value when fine-tuning of the timing is required.<br>
+    </div>
+    <br>
+    --cdu-log<br>
+    <div style="margin-left: 40px;"> Used only for debugging.&nbsp;
+      Causes a file called yaAGC.cdulog to be created, containing data
+      related to the bandwidth-limiting of CDU inputs PCDU and MCDU.<br>
+    </div>
+    <h2>Verification of yaAGC Correctness<br>
+    </h2>
+    The validity of the emulation provided by&nbsp; <span
+      style="font-weight: bold;">yaAGC</span> is questionable, of
+    course,&nbsp; particularly since I have no working AGC against which
+    it can be compared.&nbsp; If we cannot assure that <span
+      style="font-weight: bold;">yaAGC</span> actually behaves
+    identically to the actual AGC, then there's really not much point in
+    having it.&nbsp; Sadly, the complete answer to this question remains
+    open.&nbsp; I can, however, point out the following relevant facts:<br>
+    <ol>
+      <li>AGC behavior at the assembly-language level is described in
+        two separate documents, mostly covering the same material, by <a
+          href="hrst/archive/1689.pdf">Blair-Smith</a> and by <a
+          href="NARA-SW/E-2052.pdf">Savage &amp; Drake</a>.&nbsp; While
+        I would be lying to claim that either of these presents a
+        complete and satisfactory explanation, comparing and reconciling
+        the two is a very useful exercise whilst attempting to verify <span
+          style="font-weight: bold;">yaAGC</span> behavior.</li>
+      <li>The Blair-Smith documentation goes one step farther, in that
+        it breaks down all or most AGC instructions into more primitive
+        functionality called "pulse sequences", operating upon hidden
+        registers of the CPU.&nbsp; In cases of difficulty, therefore,
+        one can explore the detailed action of the pulse sequences to
+        obtain yet another description of any instruction's behavior.</li>
+      <li>The built-in self-test of the <span style="font-weight:
+          bold;">Luminary</span> or <span style="font-weight: bold;">Colossus</span>
+        software provides a reasonably-detailed check of CPU
+        operations.&nbsp;<br>
+      </li>
+      <li>A validation test-suite in AGC assembly language has been
+        written from one of the original Apollo documents, "Block II AGC
+        Self-Check and Show-Banksum" by Edwin Smally.&nbsp; This test
+        suite gives the CPU a pretty rigorous (if not 100% complete)
+        going-over.<br>
+      </li>
+    </ol>
+    To understand points #3 and #4 better, note that the original AGC
+    CPU was a homegrown device created from a large number of electronic
+    components, rather than being a single "integrated circuit" as it
+    likely would be today.&nbsp; For this reason, it would have made
+    sense for the original designers to provide extensive diagnostics
+    for the CPU itself.&nbsp; In other words, if the CPU was broken it
+    would have to be repaired rather than simply being discarded and
+    replaced, and to be repaired the fault would have to be
+    localized.&nbsp; As it happens, the designers <span
+      style="font-style: italic;">did</span> provide extensive runtime
+    diagnostics <span style="font-style: italic;">in software</span>
+    for checking a multitude of CPU features.&nbsp; These diagnostics
+    were part of the unit's built-in self-test, and included checks
+    like:<br>
+    <ul>
+      <li>Do branch instructions work?</li>
+      <li>Do multiply and divide work?</li>
+      <li>Do interrupts work?</li>
+      <li>etc.</li>
+    </ul>
+    Unfortunately, many of these checks had to be removed eventually
+    from <span style="font-weight: bold;">Luminary</span> and <span
+      style="font-weight: bold;">Colossus</span> in order to save
+    memory; but the flowcharts for the checks which have been removed
+    still exist, and the tests they performed can be
+    reconstructed.&nbsp; Because of this oddity (by today's standards)
+    the <span style="font-weight: bold;">Luminary</span>/<span
+      style="font-weight: bold;">Colossus</span> software&nbsp; and the
+    validation suite verify the operation of many of the (from our
+    standpoint trickier) CPU instructions!&nbsp; While, as I said, this
+    is not a 100% guarantee of completely correct operation, we can only
+    regard it as helpful in the context of the present project.<br>
+    <h2><a name="Debugging" id="Debugging"></a>Debugging Mode</h2>
+    <table summary="" style="text-align: left; width: 60%; margin-left:
+      auto; margin-right: auto;" cellspacing="2" cellpadding="2"
+      border="1">
+      <tbody>
+        <tr>
+          <td style="text-align: center; vertical-align: top;"> <big><span
+                style="font-weight: bold;">Important Note!</span></big><br>
+            <div style="text-align: left;"> The description that follows
+              covers the "classic" debugging mode for versions prior to
+              20090427.&nbsp; I retain this description as-is for the
+              benefit of those using one of those versions of <span
+                style="font-weight: bold;">yaAGC</span>.&nbsp; However,
+              for versions 20090427 and later, command-line debugging
+              has changed to a style more closely related to that of the
+              widely used <span style="font-weight: bold;">gdb</span>
+              program, and the "classic" mode described below is not
+              longer available.&nbsp; Since these changes have been
+              driven by Onno Hommes, we have agreed that Onno will
+              maintain documentation for the new debugging mode at <a
+                href="http://code.google.com/p/virtualagc/">his website</a>.<br>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <br>
+    When the "--debug" command-line switch is used, a mode is entered in
+    which AGC programs can be debugged.&nbsp; This mode is very
+    primitive compared (for example) to the facilities provided by a
+    debugging program like <span style="font-weight: bold;">gdb</span>,
+    but has been pretty useful for my purposes, and may conceivably be
+    useful for yours.&nbsp; You are unlikely to find this mode (or my
+    description of the mode!) of any use unless you are very familiar
+    with AGC <a href="assembly_language_manual.html">assembly language</a>,
+    and are writing/debugging AGC code.&nbsp; In this mode, rather than
+    simply running the software contained within the core-rope binary
+    image, <span style="font-weight: bold;">yaAGC</span> halts prior to
+    executing the first instruction of the program and allows you to
+    interactively determine its further actions.&nbsp; You are presented
+    with a status message and a prompt from which you can enter
+    commands.<br>
+    <br>
+    The debugging mode's status display may look something like this:<br>
+    <div style="margin-left: 40px;"> <br>
+      <span style="font-family: monospace;">A=00010&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+        L=00000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        Q=00000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        EB=01400&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        FB=12000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        Z=02675&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; BB=12103</span><br
+        style="font-family: monospace;">
+      <span style="font-family: monospace;">ARUPT=00000&nbsp;&nbsp;&nbsp;&nbsp;
+
+        LRUPT=00000&nbsp;&nbsp;&nbsp;&nbsp;
+        QRUPT=00000&nbsp;&nbsp;&nbsp;&nbsp;
+        ZRUPT=00000&nbsp;&nbsp;&nbsp;&nbsp;
+        BBRUPT=00000&nbsp;&nbsp;&nbsp;
+        BRUPT=00000&nbsp;&nbsp;&nbsp;&nbsp; CHAN07=00000</span><br
+        style="font-family: monospace;">
+      <span style="font-family: monospace;">CYR=00000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+        SR=00000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        CYL=00000&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; EDOP=00000</span><br
+        style="font-family: monospace;">
+      <span style="font-family: monospace;">Index=00000&nbsp;&nbsp;&nbsp;&nbsp;
+
+        Extend=1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        Interrupts=0&nbsp;&nbsp;&nbsp;
+        Overflow=0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Cycles=29</span><br
+        style="font-family: monospace;">
+      <span style="font-family: monospace;">05,02675&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+        12701&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+        BZF&nbsp;&nbsp;&nbsp;&nbsp; 2701</span><br>
+    </div>
+    <br>
+    In the first three of these status lines, we see the current values
+    (in octal) of various important CPU registers, and in input channel
+    7.&nbsp; In fact <span style="font-style: italic;">all</span>
+    numerical values displayed by the debugger are in octal, because
+    octal notation is used almost exclusively throughout&nbsp; existing
+    AGC code, and because almost all of the numerical values reported by
+    the <span style="font-weight: bold;">YUL</span> assembler were in
+    octal.<br>
+    <br>
+    The next line shows information that may be from hidden CPU
+    registers or may be known only to the debugger:<br>
+    <ul>
+      <li><span style="font-family: monospace;">Index</span> is a value
+        that will be added to the next instruction (except for <span
+          style="font-family: monospace;">EXTEND</span>) prior to
+        executing that instruction.&nbsp; It is set to a non-zero value
+        when the assembly-language instruction <span
+          style="font-family: monospace;">INDEX</span> is executed, and
+        then cleared after it has been used.<br>
+      </li>
+      <li><span style="font-family: monospace;">Extend</span> is
+        non-zero when the next instruction will be interpreted as
+        "extracode".&nbsp; It is set when the assembly-language
+        instruction <span style="font-family: monospace;">EXTEND</span>
+        is executed, and then cleared after it has been used.</li>
+      <li><span style="font-family: monospace;">Interrupts</span> is
+        non-zero when interrupts are enabled.&nbsp; It is affected by
+        the <span style="font-family: monospace;">INHINT</span> and <span
+          style="font-family: monospace;">RELINT</span>
+        assembly-language instructions.</li>
+      <li><span style="font-family: monospace;">Overflow</span> is set
+        when an arithmetical overflow occurs in relevant
+        assembly-language instructions like <span style="font-family:
+          monospace;">DAS</span>.</li>
+      <li><span style="font-family: monospace;">Cycles</span> is a count
+        of the number of machine cycles used so far in executing
+        instructions.</li>
+    </ul>
+    The final status line is, of course, a disassembly of the next
+    instruction scheduled to be executed.&nbsp; It shows the current
+    address (<span style="font-family: monospace;">05,02675</span>), the
+    octal value of the instruction (<span style="font-family:
+      monospace;">12701</span>), and a disassembly of that octal value
+    into assembly-language (<span style="font-family: monospace;">BZF
+      2701</span>).&nbsp; The debugging mode does not currently
+    understand any labels defined within the AGC program itself;
+    therefore, understanding code like "<span style="font-family:
+      monospace;">BZF 2701</span>" as something like "<span
+      style="font-family: monospace;">BZF ADDONE</span>" (involving
+    labels) is aided by having a symbol table or assembly listing at
+    hand.<br>
+    <br>
+    The debugger understands addresses in one of three formats:<br>
+    <ol>
+      <li>Addresses within "unswitched-erasable" memory or "fixed-fixed"
+        memory are represented by a single octal number, such as
+        1234.&nbsp; Unswitched-erasable addresses are in the range
+        0000-1377, while fixed-fixed addresses are in the range
+        4000-7777.</li>
+      <li>Addresses within "common-fixed" memory are represented by a
+        pair of octal numbers separated by a comma, such as
+        03,2345.&nbsp; The first number is the bank number, in the range
+        00-43.&nbsp; The second number is the address within the memory
+        bank, and is in the range 2000-3777.</li>
+      <li>Addresses within "switched-erasable" memory are similar, but
+        are prefixed by 'E', such as E7,1456.&nbsp; The first number is
+        again a bank, but is in the range 0-7.&nbsp; The second number
+        is again the address within the memory bank, but is in the range
+        1400-1777.</li>
+    </ol>
+    Additionally, in some cases you may need to identify i/o channels
+    rather than memory locations:<br>
+    <ol start="4">
+      <li>Addresses within "i/o channel" space are single octal numbers
+        prefixed by 'C', as in C7.&nbsp; The number is in the range
+        000-777.</li>
+    </ol>
+    These same notations are used within the status display's
+    instruction-disassembly, except that the distinction between memory
+    locations and i/o channels is always obvious in that context, and so
+    i/o channel numbers are not prefixed by 'C' in disassemblies.<br>
+    <br>
+    The user-commands which are currently recognized by the debugger
+    are:<br>
+    <ul>
+      <li>#<span style="font-style: italic;">Anything</span> — (i.e.,
+        any string beginning with the character '#' in the first column)
+        a comment, which is discarded without a warning message.&nbsp;
+        This is principally useful for writing scripts for the FROMFILE
+        command.<br>
+      </li>
+      <li>BACKTRACES — displays the most recent (100) backtrace points
+        (i.e., points at which the program branched).</li>
+      <li>BACKTRACE <span style="font-style: italic;">N</span> —
+        restores the state of the system (CPU, erasable memory, i/o
+        channels) to backtrace point #<span style="font-style: italic;">N</span>
+        (from the list displayed by the BACKTRACES command).</li>
+      <li>BREAK <span style="font-style: italic;">*A</span> — (<span
+          style="font-weight: bold;">Changed</span> in versions
+        2005-07-31 and later!&nbsp; Previously, did not have the
+        asterisk.)&nbsp; Defines a new breakpoint at address <span
+          style="font-style: italic;">A</span> (using one of the
+        memory-location formats described above).&nbsp; The program will
+        halt upon encountering an instruction at the address of the
+        breakpoint.&nbsp; <span style="font-weight: bold;">Note</span>:&nbsp;
+        The AGC's unswitched-erasable memory coincides with
+        switched-erasable banks 0, 1, and 2, while fixed-fixed memory
+        coincides with common-fixed banks 2 and 3.&nbsp; The breakpoints
+        are specific to not only the address but also to the specific <span
+          style="font-style: italic;">type</span> of memory.&nbsp; This
+        means that if you define a breakpoint at (say) address 4010 in
+        fixed-fixed memory, the program will break upon hitting address
+        4010 but <span style="font-style: italic;">not</span> upon
+        hitting address 02,2010 in common-fixed memory which coincides
+        with address 4010.&nbsp; However, you can set two separate
+        breakpoints if you want to catch both of these conditions.&nbsp;<br>
+      </li>
+      <li>BREAK <span style="font-style: italic;">L</span> -- (Versions
+        2005-07-31 and after.)&nbsp; If you have loaded a symbol table
+        via "--symtab" or SYMBOL-FILE, then you can set a breakpoint
+        with <span style="font-style: italic;">L</span> being either a
+        line number within the current source file, or else a program
+        label.<br>
+      </li>
+      <li>BREAKPOINTS — displays all currently-defined breakpoints,
+        watchpoints, and patterns.&nbsp; For versions 2005-07-28 and
+        after, if you have loaded a symbol table via "--symtab" or
+        SYMBOL-FILE, the printout will include symbolic names for
+        program labels and variables in addition to absolute numerical
+        addresses.<br>
+      </li>
+      <li>CONT — begin running the program.&nbsp; The program will
+        simply run until encountering a breakpoint.&nbsp; Alternately,
+        in Linux, you can halt the program after it's running by hitting
+        the carriage-return key on the keyboard.&nbsp; (I don't know if
+        this works in *BSD or MacOS X, so you'll just have to try it and
+        see.&nbsp; Presently, under Win32 there is <span
+          style="font-style: italic;">no</span> interactive way to break
+        execution once it gets started, so you really need to be sure
+        that the program is actually going to hit a breakpoint
+        eventually when using the CONT command.)<br>
+      </li>
+      <li>COREDUMP <span style="font-style: italic;">F</span> — creates
+        a "core-dump" file of the AGC program on disk, using filename <span
+          style="font-style: italic;">F</span>.&nbsp; (Note that in
+        pre-07/01/04 versions, <span style="font-style: italic;">F</span>
+        will be in all-caps, regardless of whether upper or lower case
+        was used when inputting it.)&nbsp; The "core-dump" file contains
+        a snapshot of erasable memory, i/o channels,and hidden CPU
+        state-variables.&nbsp; Loading the core-dump file later using <span
+          style="font-weight: bold;">yaAGC</span>'s "--resume"
+        command-line switch allows execution to continue from the point
+        at which the core-dump file was made, rather than forcing the
+        program to a reset state.&nbsp; (An exception to this is if you
+        have used EDIT to modify values in fixed memory.&nbsp; These
+        changes won't be stored in the core-dump file, and therefore
+        will be lost.)</li>
+      <li>DELETE — without an address, DELETE simply deletes all
+        existing breakpoints and watchpoints.</li>
+      <li>DELETE <span style="font-style: italic;">A</span> — deletes
+        the breakpoint or watchpoint (if any) currently defined at
+        address <span style="font-style: italic;">A</span>.&nbsp; <span
+          style="font-weight: bold;">Note</span>:&nbsp; The same
+        comments about the usage of coinciding memory locations apply as
+        for the BREAK command (see above).&nbsp; For example, if you
+        have set breakpoints both at 4010 and at the coinciding address
+        02,2010, then "DELETE 4010" will delete only one of these
+        breakpoints, leaving the other one in effect.&nbsp; To delete
+        both of the breakpoints, you would have to use two DELETE
+        commands, "DELETE 4010" and "DELETE 02,2010".&nbsp; For versions
+        2005-07-28 and after, if you have loaded a symbol table via
+        "--symtab" or SYMBOL-FILE, you can also use the symbolic program
+        labels rather than addresses.</li>
+      <li>DELETE <span style="font-style: italic;">V M</span> — deletes
+        the pattern (if any) corresponding to value <span
+          style="font-style: italic;">V</span> and mask <span
+          style="font-style: italic;">M</span>.&nbsp; (See also the
+        PATTERN command.)<br>
+      </li>
+      <li>DUMP — without arguments (i.e, no <span style="font-style:
+          italic;">N</span> and no <span style="font-style: italic;">A</span>),
+        a dump is performed using the last <span style="font-style:
+          italic;">N</span> and <span style="font-style: italic;">A</span>
+        previously used.</li>
+      <li>DUMP [<span style="font-style: italic;">N</span>] <span
+          style="font-style: italic;">A</span> — displays the current
+        contents of <span style="font-style: italic;">N</span>
+        successive memory locations or i/o channels, starting at address
+        <span style="font-style: italic;">A</span>.&nbsp; The formats
+        allowed in <span style="font-style: italic;">A</span> are
+        described above.&nbsp; <span style="font-style: italic;">N</span>
+        is shown in brackets to indicate that it is optional.&nbsp; If <span
+          style="font-style: italic;">N</span> is omitted, it defaults
+        to 1.&nbsp; The dump cannot&nbsp; go past the end of the memory
+        bank, and will be truncated to fit the bank if you attempt to do
+        so.&nbsp; Example:&nbsp; "DUMP 5 03,2005" displays the contents
+        of memory locations 03,2005, 03,2006, 03,2007, 03,2010, and
+        03,2011.&nbsp; As special cases, note that all CPU registers are
+        memory mapped, so "DUMP 0" will display the contents of the 'A'
+        register, "DUMP 1" will display the contents of the 'L'
+        register, and so forth.<br>
+      </li>
+      <li>EDIT <span style="font-style: italic;">A</span> <span
+          style="font-style: italic;">V</span> — sets the current value
+        of memory location or i/o channel <span style="font-style:
+          italic;">A</span> to the octal value <span style="font-style:
+          italic;">V</span>.&nbsp; The allowed formats for <span
+          style="font-style: italic;">A</span> are as described earlier.</li>
+      <li>FROMFILE <span style="font-style: italic;">Filename</span> —
+        (06/30/04 and later) begins accepting input from a file rather
+        than the keyboard.&nbsp; When the file is exhausted, keyboard
+        input is accepted again.&nbsp; (Hitting the return key does have
+        an effect, however, in that it interrupts program
+        execution.)&nbsp; The FROMFILE commands can be nested (i.e., a
+        file referenced by FROMFILE can itself contain FROMFILE
+        commands) up to 10 levels deep.&nbsp; In the directory
+        yaAGC/DebugModeScripts, I've provided a bunch of keystroke files
+        which can be used with FROMFILE to set up patterns that trap
+        upon executing given types of instructions.&nbsp; For example,
+        "FROMFILE TC.PAT" sets up a trap that is triggered by
+        subsequently executing the <span style="font-family:
+          monospace;">TC</span> instruction.&nbsp; The files are
+        cunningly contrived so they trap only "normal" uses of the
+        instruction, and not the special "implied address" versions of
+        instructions.&nbsp; Thus, TC.PAT does not trap <span
+          style="font-family: monospace;">RETURN</span> (which compiles
+        as "<span style="font-family: monospace;">TC Q</span>"), <span
+          style="font-family: monospace;">RELINT</span> (which compiles
+        as "<span style="font-family: monospace;">TC EB</span>"),
+        etc.&nbsp; To trap these instructions, one would use RETURN.PAT,
+        RELINT.PAT, etc.&nbsp; For each <span style="font-style:
+          italic;">instruction</span>.PAT file, there is also a file
+        called <span style="font-style: italic;">instruction</span>.PAT.DEL,
+        which can be used to delete the patterns associated with the
+        instruction.<br>
+      </li>
+      <li>GETOCT <span style="font-style: italic;">Expression</span> —
+        converts hexadecimal or decimal (including floating point)
+        numbers to the AGC CPU's native octal format, or converts from
+        the AGC CPU's native octal format to a decimal number.&nbsp;
+        This is available only for versions 05/09/2004 or later.&nbsp;
+        The HELP command gives more detail about the supported <span
+          style="font-style: italic;">Expression</span> formats.</li>
+      <li>HELP — shows a list of the available debugger commands.</li>
+      <li>INTERRUPTS — displays the current interrupt-request flags, and
+        the masks the debugger is applying to them (see below).&nbsp;
+        There are 10 flags, and their meanings are listed on the <a
+          href="developer.html">developer</a> page.</li>
+      <li>INTOFF <span style="font-style: italic;">N</span> — clears
+        the CPU's interrupt-request flag #N.</li>
+      <li>INTON <span style="font-style: italic;">N</span> — sets the
+        CPU's interrupt-request flag #<span style="font-style: italic;">N</span>.</li>
+      <li>LOG <span style="font-style: italic;">N</span> — creates a
+        file called yaAGC.log, and logs the next <span
+          style="font-style: italic;">N</span> (decimal) instructions
+        executed to the file.&nbsp; The log is a simple ASCII file, in
+        which there is a line for each instruction.&nbsp; Each line
+        contains two octal numbers, of which the first is the BB
+        register logically-ORed with i/o channel 7, and the second is
+        the Z register.&nbsp; The purpose of this log is primarily for
+        regression testing.&nbsp; Logs can be created for two versions
+        of <span style="font-weight: bold;">yaAGC</span> and then
+        compared with standard text-comparison utilities like <span
+          style="font-weight: bold;">diff</span> to determine where the
+        point execution path differs.&nbsp; With that information,
+        hopefully, the debugger can determine the exact reasons for the
+        differences.<br>
+      </li>
+      <li>MASKOFF <span style="font-style: italic;">N</span> — the
+        debugger stops blocking interrupt type <span style="font-style:
+          italic;">N</span>.</li>
+      <li>MASKON <span style="font-style: italic;">N</span> — the
+        debugger (independently of the CPU) will block interrupt type <span
+          style="font-style: italic;">N</span> from occurring.&nbsp; If
+        <span style="font-style: italic;">N</span>=0, then <span
+          style="font-style: italic;">all</span> interrupts are blocked.</li>
+      <li>PATTERN <span style="font-style: italic;">V M</span> —
+        (06/30/04 and later) sets a "pattern" with value <span
+          style="font-style: italic;">V</span> and mask <span
+          style="font-style: italic;">M</span>.&nbsp; A pattern is
+        similar to a breakpoint, except that it uses the instruction
+        code rather than the program counter.&nbsp; In other words,
+        execution is halted upon finding that the instruction code is
+        equal to the value <span style="font-style: italic;">V</span>.&nbsp;
+        The instruction code is logically bitwise-ANDed with the mask <span
+          style="font-style: italic;">M</span> prior to the comparison,
+        so that only selected fields in the instruction code are really
+        used.&nbsp; Even though any given location in memory can only
+        contain 15 bits, the value and mask are really 32 bits, and the
+        additional 17 bits represent additional conditions that can be
+        checked.&nbsp; The presently-defined extra bits are:</li>
+    </ul>
+    <div style="margin-left: 40px;">
+      <table summary="" style="text-align: left; margin-left: auto;
+        margin-right: auto;" cellspacing="2" cellpadding="2" border="1">
+        <tbody>
+          <tr>
+            <td style="text-align: center; vertical-align: middle;
+              font-weight: bold;"> Bit Number<br>
+            </td>
+            <td style="font-weight: bold; text-align: center;
+              vertical-align: middle;"> Octal Mask<br>
+            </td>
+            <td style="vertical-align: middle; text-align: left;
+              font-weight: bold;"> Description<br>
+            </td>
+          </tr>
+          <tr>
+            <td style="text-align: center; vertical-align: middle;"> 16<br>
+            </td>
+            <td style="text-align: center; vertical-align: middle;
+              font-family: monospace;"> 00100000<br>
+            </td>
+            <td style="vertical-align: middle; text-align: left;">The
+              Extracode bit.&nbsp;<br>
+            </td>
+          </tr>
+          <tr>
+            <td style="text-align: center; vertical-align: middle;"> 17<br>
+            </td>
+            <td style="text-align: center; vertical-align: middle;
+              font-family: monospace;"> 00200000<br>
+            </td>
+            <td style="vertical-align: middle; text-align: left;">1 if
+              the <span style="font-family: monospace;">INDEX</span> is
+              non-zero.<br>
+            </td>
+          </tr>
+          <tr>
+            <td style="text-align: center; vertical-align: middle;"> 18<br>
+            </td>
+            <td style="text-align: center; vertical-align: middle;
+              font-family: monospace;"> 00400000<br>
+            </td>
+            <td style="vertical-align: middle; text-align: left;">1 if
+              the Accumulator contains + overflow.<br>
+            </td>
+          </tr>
+          <tr>
+            <td style="text-align: center; vertical-align: middle;"> 19<br>
+            </td>
+            <td style="text-align: center; vertical-align: middle;
+              font-family: monospace;"> 01000000<br>
+            </td>
+            <td style="vertical-align: middle; text-align: left;">1 if
+              the Accumulator contains - overflow.<br>
+            </td>
+          </tr>
+          <tr>
+            <td style="text-align: center; vertical-align: middle;"> 20<br>
+            </td>
+            <td style="text-align: center; vertical-align: middle;
+              font-family: monospace;"> 02000000<br>
+            </td>
+            <td style="vertical-align: middle; text-align: left;">1 if
+              the Accumulator is -.<br>
+            </td>
+          </tr>
+          <tr>
+            <td style="text-align: center; vertical-align: middle;"> 21<br>
+            </td>
+            <td style="text-align: center; vertical-align: middle;
+              font-family: monospace;"> 04000000<br>
+            </td>
+            <td style="vertical-align: middle; text-align: left;">1 if
+              the sign of the Accumulator does not match the sign of L.<br>
+            </td>
+          </tr>
+          <tr>
+            <td style="text-align: center; vertical-align: middle;"> 22<br>
+            </td>
+            <td style="text-align: center; vertical-align: middle;
+              font-family: monospace;"> 10000000<br>
+            </td>
+            <td style="vertical-align: middle; text-align: left;">1 if
+              within an interrupt-service routine.<br>
+            </td>
+          </tr>
+          <tr>
+            <td style="text-align: center; vertical-align: middle;">
+              23-31<br>
+            </td>
+            <td style="text-align: center; vertical-align: middle;"> n/a<br>
+            </td>
+            <td style="vertical-align: top;">Presently 0.<br>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <br>
+    </div>
+    <div style="margin-left: 40px;"> Note that the INDEX (if any) is
+      added to the instruction code prior to the comparison.&nbsp; The
+      net effect of this, with proper selection of <span
+        style="font-style: italic;">V</span> and <span
+        style="font-style: italic;">M</span>, is to allow halting upon
+      execution of a given <span style="font-style: italic;">instruction
+        type</span>, and to be able <span style="font-style: italic;">optionally</span>
+      to select only INDEXed or non-INDEXed instances. &nbsp; Both <span
+        style="font-style: italic;">V</span> and <span
+        style="font-style: italic;">M</span> are in octal.&nbsp; For
+      example, with "PATTERN 170000 170000", the program will halt upon
+      encountering the <span style="font-family: monospace;">MP</span>
+      instruction.<br>
+    </div>
+    <ul>
+      <li>QUIT or EXIT — exits <span style="font-weight: bold;">yaAGC</span>.</li>
+      <li>STEP [<span style="font-style: italic;">N</span>] or NEXT [<span
+          style="font-style: italic;">N</span>] — executes the next <span
+          style="font-style: italic;">N</span> assembly-language
+        instructions.&nbsp; If <span style="font-style: italic;">N</span>
+        is omitted, then it defaults to 1.&nbsp; Note that this command
+        can be abbreviated as 'S' or as 'N'.<br>
+      </li>
+      <li>WATCH <span style="font-style: italic;">A</span> —
+        (06/08/2004 and after) defines a new watchpoint at
+        erasable-memory address <span style="font-style: italic;">A</span>
+        (using one of the memory-location formats described
+        above).&nbsp; The program will halt <span style="font-style:
+          italic;">after</span> executing an instruction that changes
+        the value stored at the address of the watchpoint.&nbsp; <span
+          style="font-weight: bold;">Note</span>:&nbsp; The AGC's
+        unswitched-erasable memory coincides with switched-erasable
+        banks 0, 1, and 2.&nbsp; The watchpoints are specific to not
+        only the address but also to the specific <span
+          style="font-style: italic;">type</span> of memory.&nbsp; This
+        means that if you define a watchpoint at (say) address 010 in
+        unswitched erasable memory, the program will halt upon hitting
+        address 010 but <span style="font-style: italic;">not</span>
+        upon noting a change in the value stored at address E0,010 in
+        switched erasable memory (which coincides with address
+        010).&nbsp; However, you can set two separate watchpoints if you
+        want to catch both of these conditions.&nbsp; For versions
+        2005-10-17 and after, if you have loaded a symbol table via
+        "--symtab" or SYMBOL-FILE, you can also use the symbolic program
+        labels rather than addresses.</li>
+      <li>WATCH <span style="font-style: italic;">A V</span> —
+        (2005-08-23 and later) is similar to "WATCH <span
+          style="font-style: italic;">A</span>", except that it breaks
+        upon finding a <span style="font-style: italic;">specific</span>
+        octal value <span style="font-style: italic;">V</span>.</li>
+      <li>VIEW <span style="font-style: italic;">A</span> — (2005-10-17
+        and later) is similar to "WATCH <span style="font-style:
+          italic;">A</span>", except that it displays the value stored
+        in the variable or numerical address in real time rather than
+        interrupting program execution when the value changes.&nbsp; It
+        is only meaningful to use this command on erasable memory, since
+        values stored in fixed memory do not change.<br>
+      </li>
+      <li>SYMBOL-FILE <span style="font-style: italic;">Filename</span>
+        — (2005-07-28 and after.)&nbsp; To use the symbol table
+        generated by <span style="font-weight: bold;">yaYUL</span>,
+        there are two equivalent methods.&nbsp; One is to specify the
+        symbol table (such as Luminary131.symtab or Colossus249.symtab)
+        via the "--symtab" command-line switch.&nbsp; The other is to
+        specify it via the SYMBOL-FILE command.<br>
+      </li>
+      <li>PRINT <span style="font-style: italic;">Variable</span> —
+        (2005-07-28 and after.) If a symbol table has been loaded (via
+        "--symtab" or the SYMBOL-FILE command), prints the octal value
+        stored in <span style="font-style: italic;">Variable</span>.&nbsp;
+        This is similar to the DUMP command, except that the variable is
+        referenced by its symbolic name rather than by its absolute
+        address.&nbsp; For example, in <span style="font-weight: bold;">Luminary131</span>,
+        the variable NOTBIT12 is at address 40,3736.&nbsp; The command
+        "PRINT NOTBIT12" gives the same result as "DUMP 40,3736".</li>
+      <li>WHATIS <span style="font-style: italic;">Symbol</span> —
+        (2005-07-28 and after.) If a symbol table has been loaded (via
+        "--symtab" or the SYMBOL-FILE command), displays info about the
+        <span style="font-style: italic;">Symbol</span>.&nbsp; The info
+        includes items such as the symbol's numerical address (if a
+        variable or program label), its value (if a constant), its class
+        (label, variable, constant, etc.), and the source-code file and
+        line-number at which it is defined.</li>
+      <li>SYM-DUMP <span style="font-style: italic;">RegularExpression</span>
+        — (2005-07-28 and after.) If a symbol table has been loaded (via
+        "--symtab" or the SYMBOL-FILE command), displays info about all
+        of the symbols whose names match the <span style="font-style:
+          italic;">RegularExpression</span>.&nbsp; The printout is
+        truncated after 25 symbols, in which case you might want to
+        tighten up the search by making <span style="font-style:
+          italic;">RegularExpression</span> more specific.&nbsp; The
+        regular expressions are "extended" POSIX regular expressions,
+        and are not case-sensitive.&nbsp; (If you don't know anything
+        about regular expressions and want to learn more, the <a
+          href="http://en.wikipedia.org/wiki/Regular_expression">wikipedia</a>
+        is a reasonable place to start.)&nbsp; Here are some examples
+        that might help:</li>
+    </ul>
+    <div style="margin-left: 40px;">
+      <table summary="" style="text-align: left; margin-left: auto;
+        margin-right: auto;" cellspacing="2" cellpadding="2" border="1">
+        <tbody>
+          <tr>
+            <td style="vertical-align: middle;">SYM-DUMP NOT<br>
+            </td>
+            <td style="vertical-align: middle;">Any symbol whose name
+              contains "NOT".<br>
+            </td>
+          </tr>
+          <tr>
+            <td style="vertical-align: middle;">SYM-DUMP ^NOT<br>
+            </td>
+            <td style="vertical-align: middle;">Any symbol whose name
+              begins with "NOT".<br>
+            </td>
+          </tr>
+          <tr>
+            <td style="vertical-align: middle;">SYM-DUMP NOT$<br>
+            </td>
+            <td style="vertical-align: middle;">Any symbol whose name
+              ends with "NOT".<br>
+            </td>
+          </tr>
+          <tr>
+            <td style="vertical-align: top;">SYM-DUMP ^NOT$<br>
+            </td>
+            <td style="vertical-align: top;">The symbol "NOT".<br>
+            </td>
+          </tr>
+          <tr>
+            <td style="vertical-align: middle;">SYM-DUMP (^NOT)|(NOT$)<br>
+            </td>
+            <td style="vertical-align: middle;">Any symbol whose name
+              begins or ends with "NOT".<br>
+            </td>
+          </tr>
+          <tr>
+            <td style="vertical-align: middle;">SYM-DUMP ^[ABC]<br>
+              <span style="font-style: italic;">or</span><br>
+              SYM-DUMP ^((A)|(B)|(C))<br>
+            </td>
+            <td style="vertical-align: middle;">Any symbol whose name
+              begins with 'A', 'B', or 'C'.<br>
+            </td>
+          </tr>
+          <tr>
+            <td style="vertical-align: middle;">SYM-DUMP ^NO+<br>
+            </td>
+            <td style="vertical-align: middle;">Any symbol whose name
+              begins with 'N' followed by 1 or more occurrences of 'O'.<br>
+            </td>
+          </tr>
+          <tr>
+            <td style="vertical-align: middle;">SYM-DUMP ^NO*<br>
+            </td>
+            <td style="vertical-align: middle;">Any symbol whose name
+              begins with 'N' followed by 0 or more occurrences of 'O'.<br>
+            </td>
+          </tr>
+          <tr>
+            <td style="vertical-align: middle;">SYM-DUMP 1.2<br>
+            </td>
+            <td style="vertical-align: middle;">Any symbol whose name
+              contains a '1' followed by a '2', with any other character
+              in between.<br>
+            </td>
+          </tr>
+          <tr>
+            <td style="vertical-align: middle;">SYM-DUMP 1\.2<br>
+            </td>
+            <td style="vertical-align: middle;">Any symbol whose name
+              contains a '1' followed by a '2', with '.' (specifically)
+              in between.<br>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <ul>
+      <li><a name="LIST" id="LIST"></a>LIST — (2005-07-30 and
+        after.)&nbsp; Provides a symbolic disassembly of the code, if a
+        symbol table has been loaded (via "--symtab" or the SYMBOL-FILE
+        command), and if the source-code files are present.&nbsp; The
+        source files must be in the same directory as they were when <span
+          style="font-weight: bold;">yaYUL</span> created the symbol
+        table; if copied to a different directory, <span
+          style="font-weight: bold;">yaAGC</span> will not be able to
+        find them.&nbsp; There are several variations of this command:</li>
+    </ul>
+    <div style="margin-left: 40px;">
+      <table summary="" style="text-align: left; margin-left: auto;
+        margin-right: auto;" cellspacing="2" cellpadding="2" border="1">
+        <tbody>
+          <tr>
+            <td style="vertical-align: top;">LIST<br>
+            </td>
+            <td style="vertical-align: top;">Print the source lines
+              following the current program counter.<br>
+            </td>
+          </tr>
+          <tr>
+            <td style="vertical-align: top;">LIST -<br>
+            </td>
+            <td style="vertical-align: top;">Print the source lines
+              preceding the current program counter.<br>
+            </td>
+          </tr>
+          <tr>
+            <td style="vertical-align: top;">LIST <span
+                style="font-style: italic;">label</span><br>
+            </td>
+            <td style="vertical-align: top;">Print the source lines at
+              (and surrounding) the specified program label.<br>
+            </td>
+          </tr>
+          <tr>
+            <td style="vertical-align: top;">LIST <span
+                style="font-style: italic;">lineno</span><br>
+            </td>
+            <td style="vertical-align: top;">Print the source lines at
+              (and surrounding) the specified line number in the source
+              file containing the current program counter.<br>
+            </td>
+          </tr>
+          <tr>
+            <td style="vertical-align: top;">LIST <span
+                style="font-style: italic;">fromline,toline</span><br>
+            </td>
+            <td style="vertical-align: top;">Print the source lines from
+              the specified starting line number to the specified ending
+              line number in the source file containing the corrent
+              program counter.<br>
+            </td>
+          </tr>
+          <tr>
+            <td style="vertical-align: top;">LIST <span
+                style="font-style: italic;">filename</span>:<span
+                style="font-style: italic;">lineno</span><br>
+            </td>
+            <td style="vertical-align: top;">Print the source lines at
+              (and surrounding) the specified line number in the
+              specified source file.&nbsp; Note that you only need the
+              actual filename of the source file, and you can omit the
+              name of the directory containing the source file.<br>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <br>
+    </div>
+    <ul>
+      <li>FILES <span style="font-style: italic;">RegularExpression</span>
+        — (2005-07-31 and later.)&nbsp; Lists the names of the AGC
+        source-code files.&nbsp; A regular expression is used to
+        determine which filenames are listed, just as described above in
+        the SYM-DUMP command.<br>
+      </li>
+    </ul>
+    <br>
+    <hr style="width: 100%; height: 2px;">
+    <center> <br>
+      <span style="color: rgb(84, 89, 93); font-family: sans-serif;
+        font-size: 11.05px; font-style: normal; font-variant: normal;
+        font-weight: normal; letter-spacing: normal; line-height:
+        16.575px; orphans: auto; text-align: center; text-indent: 0px;
+        text-transform: none; white-space: normal; widows: 1;
+        word-spacing: 0px; -webkit-text-stroke-width: 0px; display:
+        inline !important; float: none; background-color: rgb(255, 255,
+        255);"> This page is available under the <a
+          href="https://creativecommons.org/publicdomain/zero/1.0/">Creative
+
+          Commons No Rights Reserved License</a></span><br>
+      <i><font size="-1">Last modified by <a
+            href="mailto:info@sandroid.org">Ronald Burkey</a> on 2018-12-22.<br>
+          <br>
+          <a href="http://www.ibiblio.org"><img style="border: 0px solid
+              ; width: 300px; height: 100px;" alt="Virtual AGC is hosted
+              by ibiblio.org" src="hosted.png" width="300" height="100"></a><br>
+        </font></i> </center>
+    <br>
+  </body>
 </html>
