@@ -1,5 +1,5 @@
 #! /usr/bin/python2
-# Copyright 2018 Ronald S. Burkey <info@sandroid.org>
+# Copyright 2018-2019 Ronald S. Burkey <info@sandroid.org>
 # 
 # This file is part of yaAGC.
 # 
@@ -37,6 +37,15 @@
 #				for the connector captions and NOR-gate 
 #				location fields than all of the other modules
 #				do (or have).
+#		2019-01-02 RSB	Changed "block1" added earlier to "nd1021041",
+#				since it really applied only to schematics
+#				being "recovered" from document ND-1021041.
+#				Since true Block I schematic drawings are now
+#				available, I'm beginning to repurpose "block1" 
+#				to cover those kinds of drawings instead.  I 
+#				doubt there will be any more recovered 
+#				ND-1021041 drawings in the future, but I'll 
+#				keep nd1021041 around for that, just in case.
 #
 # The purpose of this python script is to take a text file that has some
 # descriptions of NOR gates, expander gates, connector pads, nodes,
@@ -105,6 +114,7 @@ locationNumber = 1
 padNumber = 1
 module = "X"
 moduleA52 = False
+nd1021041 = False
 block1 = False
 bit = False
 norLength = 5
@@ -121,8 +131,12 @@ for line in sys.stdin:
 	type = fields[0]
 	if numFields < 1 or type == "#":
 		continue
+	if type == "nd1021041":
+		nd1021041 = True
+		continue
 	if type == "block1":
 		block1 = True
+		aPins = ["1", "3", "5", "_"]
 		continue
 	if type == "bit":
 		bit = True
@@ -174,7 +188,7 @@ for line in sys.stdin:
 	posX = 25 * int(40 * (originX + xSpacing * nextX))
 	posY = 25 * int(40 * (originY + ySpacing * nextY))
 	
-	if block1 and type in nors and numFields == 5:
+	if nd1021041 and type in nors and numFields == 5:
 		gate = fields[1]
 		top = fields[2]
 		middle = fields[3]
@@ -205,6 +219,38 @@ for line in sys.stdin:
 		nextXY()
 		continue
 		
+	if block1 and type in nors and numFields == 7:
+		gate = fields[1]
+		agc4 = fields[2]
+		agc5 = fields[3]
+		top = fields[4]
+		middle = fields[5]
+		bottom = fields[6]
+		if top == ";":
+			top = "_"
+		if middle == ";":
+			middle = "_"
+		if bottom == ";":
+			bottom = "_"
+		if top not in aPins or middle not in aPins or bottom not in aPins:
+			print >>sys.stderr, "Incorrect pin numbers: " + line
+			wereErrors = True
+			continue
+		if (top == middle and top != "_") or (top == bottom and top != "_") or (middle == bottom and middle != "_"):
+			print >>sys.stderr, "Duplicate pins: " + line
+			wereErrors = True
+			continue
+		if len(gate) != 2 or not gate.isdigit() or len(agc5) != 3 or not agc5.isdigit():
+			print >>sys.stderr, "Incorrectly numbered gate: " + line
+			wereErrors = True
+			continue
+		id = "g" + gate
+		whichGate = "a"
+		gatesFound[gate] = line
+		objects[id] = { "type": type, "library": nors[type]["library"], "refd": nors[type]["refdPrefix"]+"?", "location":"XX" }
+		objects[id][whichGate] = { "gate": gate, "top": top, "middle": middle, "bottom": bottom, "x": posX, "y": posY, "agc4":agc4, "agc5":agc5 } 
+		nextXY()
+		continue
 	
 	if type in nors and numFields == 3 and fields[1] == "." and fields[2] in ["1", "2", "3"] and not moduleA52:
 		numInputs = int(fields[2])
@@ -397,7 +443,7 @@ for line in sys.stdin:
 			up = True
 		type = "J"
 		pinName = fields[1]
-		if (len(pinName) != 3 and not block1) or not pinName.isdigit():
+		if (len(pinName) != 3 and not nd1021041) or not pinName.isdigit():
 			print >>sys.stderr, "Incorrectly numbered connector: " + line
 			wereErrors = True
 			continue
@@ -416,7 +462,7 @@ for line in sys.stdin:
 		#else:
 		#	text = ""
 		id = type + pinName
-		if block1:
+		if nd1021041:
 			refd = "J1"
 			symbol = "ConnectorGeneric"
 			unit = pinNum
@@ -503,7 +549,7 @@ for line in sys.stdin:
 	print >>sys.stderr, "Unrecognized line: " + line
 	wereErrors = True
 
-if block1:
+if nd1021041:
 	gatesUsed = []
 	for id in objects:
 		if "a" in objects[id]:
@@ -550,7 +596,7 @@ for id in objects:
 		location = object["location"]
 		aMirror = False
 		bMirror = False
-		if block1:
+		if nd1021041:
 			aFootprint = "ABC"
 			bFootprint = "___"
 		elif moduleA52:
@@ -596,7 +642,7 @@ for id in objects:
 			sys.stdout.write("F 1 \"" + symbol + "\" H " + str(posX) + " " + str(posY+425) + " 140 0001 C CNN\n")
 			sys.stdout.write("F 2 \"\" H " + str(posX) + " " + str(posY+475) + " 140 0001 C CNN\n")
 			sys.stdout.write("F 3 \"\" H " + str(posX) + " " + str(posY+475) + " 140 0001 C CNN\n")
-			if block1:
+			if nd1021041:
 				sys.stdout.write("F 4 \"" + aObject["gate"] + norSuffix + "\" H " + str(posX + xOffset) + " " + str(posY) + " " + str(fontSize) + " 0000 C CNB \"Location\"\n")
 			elif moduleA52:
 				sys.stdout.write("F 4 \"" + aObject["gate"] + "\" H " + str(posX + xOffset) + " " + str(posY) + " " + str(fontSize) + " 0001 C CNB \"Location\"\n")
