@@ -240,14 +240,14 @@ for line in sys.stdin:
 			print >>sys.stderr, "Duplicate pins: " + line
 			wereErrors = True
 			continue
-		if len(gate) != 2 or not gate.isdigit() or len(agc5) != 3 or not agc5.isdigit():
+		if len(gate) != 3 or not gate.isdigit() or len(agc5) not in [3, 5] or not agc5.isdigit():
 			print >>sys.stderr, "Incorrectly numbered gate: " + line
 			wereErrors = True
 			continue
 		id = "g" + gate
 		whichGate = "a"
 		gatesFound[gate] = line
-		objects[id] = { "type": type, "library": nors[type]["library"], "refd": nors[type]["refdPrefix"]+"?", "location":"XX" }
+		objects[id] = { "type": type, "library": nors[type]["library"], "refd": nors[type]["refdPrefix"]+gate, "location":"XX" }
 		objects[id][whichGate] = { "gate": gate, "top": top, "middle": middle, "bottom": bottom, "x": posX, "y": posY, "agc4":agc4, "agc5":agc5 } 
 		nextXY()
 		continue
@@ -423,7 +423,7 @@ for line in sys.stdin:
 		nextXY()
 		continue
 	
-	if type in ['J', 'j', 'K', 'k'] and numFields >= 2 and (numFields <= 5 or (bit and numFields == 18)) and (fields[1].isdigit() or fields[1] == "."):
+	if type in ['J', 'j', 'K', 'k'] and numFields >= 2 and (numFields <= 5 or (bit and numFields == 18)) and (fields[1].isdigit() or fields[1] == "." or block1):
 		if fields[1] == ".":
 			fields[1] = str(padNumber)
 			padNumber += 1
@@ -435,6 +435,8 @@ for line in sys.stdin:
 		rotated = False
 		up = False
 		down = False
+		if type == "K" and block1:
+			type = "j"
 		if type == "j":
 			rotated = True
 		elif type == "K":
@@ -442,13 +444,25 @@ for line in sys.stdin:
 		elif type == "k":
 			up = True
 		type = "J"
-		pinName = fields[1]
-		if (len(pinName) != 3 and not nd1021041) or not pinName.isdigit():
+		if block1:
+			pinName = fields[2]
+			while len(pinName) < 3:
+				pinName = "0" + pinName
+			upperPinName = fields[1]
+			while upperPinName != "-" and len(upperPinName) < 3:
+				upperPinName = "0" + upperPinName
+		else:
+			pinName = fields[1]
+			upperPinName = "000"
+		if (len(pinName) != 3 and not nd1021041) or not pinName.isdigit() or (upperPinName != "-" and not upperPinName.isdigit()):
 			print >>sys.stderr, "Incorrectly numbered connector: " + line
 			wereErrors = True
 			continue
 		pinNum = int(pinName)
-		texts = fields[2:]
+		if block1:
+			texts = fields[3:]
+		else:
+			texts = fields[2:]
 		#if numFields >= 5:
 		#	text3 = fields[4]
 		#else:
@@ -462,7 +476,11 @@ for line in sys.stdin:
 		#else:
 		#	text = ""
 		id = type + pinName
-		if nd1021041:
+		if block1:
+			refd = "J1"
+			symbol = "ConnectorBlockI"
+			unit = pinNum
+		elif nd1021041:
 			refd = "J1"
 			symbol = "ConnectorGeneric"
 			unit = pinNum
@@ -523,7 +541,7 @@ for line in sys.stdin:
 			print >>sys.stderr, objects[id]
 			wereErrors = True
 			continue
-		objects[id] = { "type": type, "refd": refd, "symbol": symbol, "unit": unit, "texts": texts, "x": posX, "y": posY, "rotated": rotated, "down": down, "up": up }
+		objects[id] = { "type": type, "refd": refd, "symbol": symbol, "unit": unit, "texts": texts, "x": posX, "y": posY, "rotated": rotated, "down": down, "up": up, "upperPinName":upperPinName }
 		nextXY()
 		continue
 	
@@ -549,7 +567,7 @@ for line in sys.stdin:
 	print >>sys.stderr, "Unrecognized line: " + line
 	wereErrors = True
 
-if nd1021041:
+if nd1021041 or block1:
 	gatesUsed = []
 	for id in objects:
 		if "a" in objects[id]:
@@ -596,7 +614,10 @@ for id in objects:
 		location = object["location"]
 		aMirror = False
 		bMirror = False
-		if nd1021041:
+		if block1:
+			aFootprint = "135"
+			bFootprint = "___"
+		elif nd1021041:
 			aFootprint = "ABC"
 			bFootprint = "___"
 		elif moduleA52:
@@ -634,6 +655,8 @@ for id in objects:
 				locationOffset = 200
 			else:
 				locationOffset = -200
+			if block1:
+				locationOffset = locationOffset // 2
 			sys.stdout.write("$Comp\n")
 			sys.stdout.write("L " + local_library + ":" + symbol + " " + refd + "\n")
 			sys.stdout.write("U 1 1 " + timestamp() + "\n")
@@ -642,7 +665,14 @@ for id in objects:
 			sys.stdout.write("F 1 \"" + symbol + "\" H " + str(posX) + " " + str(posY+425) + " 140 0001 C CNN\n")
 			sys.stdout.write("F 2 \"\" H " + str(posX) + " " + str(posY+475) + " 140 0001 C CNN\n")
 			sys.stdout.write("F 3 \"\" H " + str(posX) + " " + str(posY+475) + " 140 0001 C CNN\n")
-			if nd1021041:
+			if block1:
+				agc4 = aObject["agc4"]
+				agc5 = aObject["agc5"]
+				if len(agc5) == 3:
+					agc5 = "--" + agc5
+				sys.stdout.write("F 4 \"" + agc4 + "\" H " + str(posX + xOffset) + " " + str(posY - locationOffset) + " " + str(fontSize) + " 0000 C CNB \"agc4\"\n")
+				sys.stdout.write("F 5 \"" + agc5 + "\" H " + str(posX) + " " + str(posY + locationOffset) + " " + str(fontSize) + " 0000 C CNB \"agc5\"\n")
+			elif nd1021041:
 				sys.stdout.write("F 4 \"" + aObject["gate"] + norSuffix + "\" H " + str(posX + xOffset) + " " + str(posY) + " " + str(fontSize) + " 0000 C CNB \"Location\"\n")
 			elif moduleA52:
 				sys.stdout.write("F 4 \"" + aObject["gate"] + "\" H " + str(posX + xOffset) + " " + str(posY) + " " + str(fontSize) + " 0001 C CNB \"Location\"\n")
@@ -717,8 +747,12 @@ for id in objects:
 		sys.stdout.write("F 1 \"" + symbol + "\" H " + str(posX) + " " + str(posY+425) + " 140 0001 C CNN\n")
 		sys.stdout.write("F 2 \"\" H " + str(posX) + " " + str(posY+475) + " 140 0001 C CNN\n")
 		sys.stdout.write("F 3 \"\" H " + str(posX) + " " + str(posY+475) + " 140 0001 C CNN\n")
+		nextFieldPos = 4
+		if block1:
+			sys.stdout.write("F 4 \"" + object["upperPinName"] + "\" H " + str(posX) + " " + str(posY + 150) + " 100 0000 C TNB \"agc4\"\n")
+			nextFieldPos = 5
 		if bit:
-			sys.stdout.write("F 4 \"" + texts[0] + "\" H " + str(posX) + " " + str(posY) + " 140 0001 C BNB \"Caption\"\n")
+			sys.stdout.write("F " + str(nextFieldPos+0) + " \"" + texts[0] + "\" H " + str(posX) + " " + str(posY) + " 140 0001 C BNB \"Caption\"\n")
 			for i in range(1,16):
 				sys.stdout.write("F " + str(4 + i) + " \"" + texts[i] + "\" H " + str(posX) + " " + str(posY) + " 140 0001 C BNB \"Caption" + str(i + 1) + "\"\n")
 		elif caption3 != "":
@@ -726,35 +760,35 @@ for id in objects:
 				rotated = 0
 				inverted = True
 			if down:
-				sys.stdout.write("F 4 \"" + caption + "\" H " + str(posX) + " " + str(posY - 675) + " 140 0000 C TNB \"Caption\"\n")
-				sys.stdout.write("F 5 \"" + caption2 + "\" H " + str(posX) + " " + str(posY - 450) + " 140 0000 C TNB \"Caption2\"\n")
-				sys.stdout.write("F 6 \"" + caption3 + "\" H " + str(posX) + " " + str(posY - 225) + " 140 0000 C TNB \"Caption3\"\n")
+				sys.stdout.write("F " + str(nextFieldPos+0) + " \"" + caption + "\" H " + str(posX) + " " + str(posY - 675) + " 140 0000 C TNB \"Caption\"\n")
+				sys.stdout.write("F " + str(nextFieldPos+1) + " \"" + caption2 + "\" H " + str(posX) + " " + str(posY - 450) + " 140 0000 C TNB \"Caption2\"\n")
+				sys.stdout.write("F " + str(nextFieldPos+2) + " \"" + caption3 + "\" H " + str(posX) + " " + str(posY - 225) + " 140 0000 C TNB \"Caption3\"\n")
 			elif up:
-				sys.stdout.write("F 4 \"" + caption + "\" H " + str(posX) + " " + str(posY - 225) + " 140 0000 C TNB \"Caption\"\n")
-				sys.stdout.write("F 5 \"" + caption2 + "\" H " + str(posX) + " " + str(posY - 450) + " 140 0000 C TNB \"Caption2\"\n")
-				sys.stdout.write("F 6 \"" + caption3 + "\" H " + str(posX) + " " + str(posY - 675) + " 140 0000 C TNB \"Caption3\"\n")
+				sys.stdout.write("F " + str(nextFieldPos+0) + " \"" + caption + "\" H " + str(posX) + " " + str(posY - 225) + " 140 0000 C TNB \"Caption\"\n")
+				sys.stdout.write("F " + str(nextFieldPos+1) + " \"" + caption2 + "\" H " + str(posX) + " " + str(posY - 450) + " 140 0000 C TNB \"Caption2\"\n")
+				sys.stdout.write("F " + str(nextFieldPos+2) + " \"" + caption3 + "\" H " + str(posX) + " " + str(posY - 675) + " 140 0000 C TNB \"Caption3\"\n")
 			else:
-				sys.stdout.write("F 4 \"" + caption + "\" H " + str(posX-425) + " " + str(posY + 175) + " 140 0000 R BNB \"Caption\"\n")
-				sys.stdout.write("F 5 \"" + caption2 + "\" H " + str(posX-425) + " " + str(posY) + " 140 0000 R CNB \"Caption2\"\n")
-				sys.stdout.write("F 6 \"" + caption3 + "\" H " + str(posX-425) + " " + str(posY - 175) + " 140 0000 R TNB \"Caption3\"\n")
+				sys.stdout.write("F " + str(nextFieldPos+0) + " \"" + caption + "\" H " + str(posX-425) + " " + str(posY + 175) + " 140 0000 R BNB \"Caption\"\n")
+				sys.stdout.write("F " + str(nextFieldPos+1) + " \"" + caption2 + "\" H " + str(posX-425) + " " + str(posY) + " 140 0000 R CNB \"Caption2\"\n")
+				sys.stdout.write("F " + str(nextFieldPos+2) + " \"" + caption3 + "\" H " + str(posX-425) + " " + str(posY - 175) + " 140 0000 R TNB \"Caption3\"\n")
 		elif caption2 != "":
 			if rotated:
 				rotated = 0
 				inverted = True
 			if down:
-				sys.stdout.write("F 4 \"" + caption + "\" H " + str(posX) + " " + str(posY - 450) + " 140 0000 C TNB \"Caption\"\n")
-				sys.stdout.write("F 5 \"" + caption2 + "\" H " + str(posX) + " " + str(posY - 225) + " 140 0000 C TNB \"Caption2\"\n")
+				sys.stdout.write("F " + str(nextFieldPos+0) + " \"" + caption + "\" H " + str(posX) + " " + str(posY - 450) + " 140 0000 C TNB \"Caption\"\n")
+				sys.stdout.write("F " + str(nextFieldPos+1) + " \"" + caption2 + "\" H " + str(posX) + " " + str(posY - 225) + " 140 0000 C TNB \"Caption2\"\n")
 			elif up:
-				sys.stdout.write("F 4 \"" + caption + "\" H " + str(posX) + " " + str(posY - 225) + " 140 0000 C TNB \"Caption\"\n")
-				sys.stdout.write("F 5 \"" + caption2 + "\" H " + str(posX) + " " + str(posY - 450) + " 140 0000 C TNB \"Caption2\"\n")
+				sys.stdout.write("F " + str(nextFieldPos+0) + " \"" + caption + "\" H " + str(posX) + " " + str(posY - 225) + " 140 0000 C TNB \"Caption\"\n")
+				sys.stdout.write("F " + str(nextFieldPos+1) + " \"" + caption2 + "\" H " + str(posX) + " " + str(posY - 450) + " 140 0000 C TNB \"Caption2\"\n")
 			else:
-				sys.stdout.write("F 4 \"" + caption + "\" H " + str(posX) + " " + str(posY + 225) + " 140 0000 C BNB \"Caption\"\n")
-				sys.stdout.write("F 5 \"" + caption2 + "\" H " + str(posX) + " " + str(posY - 225) + " 140 0000 C TNB \"Caption2\"\n")
+				sys.stdout.write("F " + str(nextFieldPos+0) + " \"" + caption + "\" H " + str(posX) + " " + str(posY + 225) + " 140 0000 C BNB \"Caption\"\n")
+				sys.stdout.write("F " + str(nextFieldPos+1) + " \"" + caption2 + "\" H " + str(posX) + " " + str(posY - 225) + " 140 0000 C TNB \"Caption2\"\n")
 		elif caption != ".":
 			if up or down:
-				sys.stdout.write("F 4 \"" + caption + "\" H " + str(posX) + " " + str(posY - 225) + " 140 0000 C TNB \"Caption\"\n")
+				sys.stdout.write("F " + str(nextFieldPos+0) + " \"" + caption + "\" H " + str(posX) + " " + str(posY - 225) + " 140 0000 C TNB \"Caption\"\n")
 			else:
-				sys.stdout.write("F 4 \"" + caption + "\" H " + str(posX) + " " + str(posY + 225) + " 140 0000 C BNB \"Caption\"\n")
+				sys.stdout.write("F " + str(nextFieldPos+0) + " \"" + caption + "\" H " + str(posX) + " " + str(posY + 225) + " 140 0000 C BNB \"Caption\"\n")
 		sys.stdout.write("\t" + str(unit) + " " + str(posX) + " " + str(posY) + "\n")
 		if up:
 			sys.stdout.write("\t1    0    0    -1  \n")
