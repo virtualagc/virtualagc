@@ -227,7 +227,7 @@ for inA1 in ListALevel0:
             print("A -1460 0 1040 -226 226 0 1 " + str(lineWidth) + " N -500 -400 -500 400")
             print("A -113 -374 787 795 284 0 1 " + str(lineWidth) + " N 30 400 580 0")
             print("A -113 374 787 -284 -795 0 1 " + str(lineWidth) + " N 580 0 30 -400")
-            if not nd1021041 or not expander:
+            if not (nd1021041 or block1) or not expander:
             	print("C 665 0 85 0 1 " + str(lineWidth) + " N")
             print("P 2 0 1 " + str(lineWidth) + " 30 -400 -500 -400 N")
             print("P 2 0 1 " + str(lineWidth) + " 30 400 -500 400 N")
@@ -248,7 +248,7 @@ for inA1 in ListALevel0:
 	              print("P 4 2 1 " + str(lineWidth) + " -460 -275 -750 -175 -750 -375 -460 -275 F")
             if numerical:
             	print("X " + outputA + " 900 0 150 L 140 140 1 1 C")
-            elif nd1021041 and expander:
+            elif (nd1021041 or block1) and expander:
             	print("X " + outputA + " 800 0 210 L 140 140 1 1 C")
             else:
             	print("X " + outputA + " 900 0 150 L 140 140 1 1 C")

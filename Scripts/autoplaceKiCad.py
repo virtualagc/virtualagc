@@ -629,8 +629,12 @@ for id in objects:
 		fontSize = 140
 		xOffset = 0
 		if type in ["X", "X2"]:
-		  fontSize = 130
-		  xOffset = -75
+			if block1:
+				fontSize = 115
+				xOffset = -80
+			else:
+				fontSize = 130
+				xOffset = -75
 		if "a" in object:
 			aObject = object["a"]
 			if aObject["top"] < aObject["bottom"]:
@@ -671,7 +675,7 @@ for id in objects:
 				if len(agc5) == 3:
 					agc5 = "--" + agc5
 				sys.stdout.write("F 4 \"" + agc4 + "\" H " + str(posX + xOffset) + " " + str(posY - locationOffset) + " " + str(fontSize) + " 0000 C CNB \"agc4\"\n")
-				sys.stdout.write("F 5 \"" + agc5 + "\" H " + str(posX) + " " + str(posY + locationOffset) + " " + str(fontSize) + " 0000 C CNB \"agc5\"\n")
+				sys.stdout.write("F 5 \"" + agc5 + "\" H " + str(posX + xOffset) + " " + str(posY + locationOffset) + " " + str(fontSize) + " 0000 C CNB \"agc5\"\n")
 			elif nd1021041:
 				sys.stdout.write("F 4 \"" + aObject["gate"] + norSuffix + "\" H " + str(posX + xOffset) + " " + str(posY) + " " + str(fontSize) + " 0000 C CNB \"Location\"\n")
 			elif moduleA52:
