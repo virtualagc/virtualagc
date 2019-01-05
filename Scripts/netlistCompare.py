@@ -104,7 +104,8 @@ for refd in trueSchematic:
 	for key in trueSchematic[refd]:
 		if key[:8] == '"Caption' and key not in recoveredSchematic[refd]:
 			print "Key " + key + " is missing from recovered schematic " + refd
-NCs = ["(NC)", "N.C."]
+NC = ["(NC)", "N.C.", "0VDC"]
+V3 = ["+3VDC", "+3A"]
 for refd in trueSchematic:
 	if refd[:1] != "J":
 		continue
@@ -112,10 +113,17 @@ for refd in trueSchematic:
 		if key[:8] != '"Caption':
 			continue
 		try:
-			if trueSchematic[refd][key] in NCs and recoveredSchematic[refd][key] in NCs:
+			trueValue = trueSchematic[refd][key]
+			recoveredValue = recoveredSchematic[refd][key]
+			if trueValue in NC and recoveredValue in NC:
 				continue
-			if trueSchematic[refd][key] != recoveredSchematic[refd][key]:
-				print "In " + refd + ", " + key + " differs: " + trueSchematic[refd][key] + " != " + recoveredSchematic[refd][key]
+			if trueValue in V3 and recoveredValue in V3:
+				continue
+			if trueValue != recoveredValue:
+				fields = recoveredValue.split("_")
+				if len(fields) > 1 and fields[0][:1] == "A" and fields[0][1:].isdigit():
+					continue
+				print "In " + refd + ", " + key + " differs: " + trueValue + " != " + recoveredValue
 		except:
 			continue
 
