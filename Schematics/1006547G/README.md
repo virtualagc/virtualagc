@@ -51,10 +51,6 @@ This is associated with the issue above, because the input signal from pin 61 pa
 
 Again, I have no explanation at this time.
 
-# Connector Pin 54 Discrepancy
-
-As mentioned before, 1006547- differs significantly from revisions A through G, so we will ignore it. However, 1006547A through 1006547G list the module A34 signal as B2, whereas ND-1021041 lists it as B2/.  (All list the module A33 signal as B2/.)  It is unclear whether this is a simple typo in ND-1021041, or whether it is a contrast/brightness problem in our scans of the original schematics, since there are other contrast/brightness problems in that general area on the scans.  Perhaps the discrepancy can be resolved at some point by comparison against the Block II design.
-
 # More Discrepancies
 
 TBD.  The comparison process is not yet complete.
