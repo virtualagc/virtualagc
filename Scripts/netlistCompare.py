@@ -53,9 +53,21 @@ def readSchematic(filename):
 				elif len(fields) == 3 and fields[0] == "L":
 					refd = fields[2]
 					symbol = fields[1]
+				elif len(fields) == 4 and fields[0] == "U":
+					if refd[:1] == "J":
+						unit = int(fields[1])
+						if unit <= 26:
+							refd += chr(64 + unit)
+						else:
+							high = (unit - 27) // 26
+							low = (unit - 1) % 26
+							refd += chr(65 + high)
+							refd += chr(65 + low)
 					schematic[refd] = { "symbol": symbol }
 				elif len(fields) == 11 and fields[0] == "F" and fields[10] in ['"Location"','"agc5"']:
 					schematic[refd]["gate"] = fields[2].strip('"')
+				elif len(fields) == 11 and fields[0] == "F" and fields[10][:8] == '"Caption':
+					schematic[refd][fields[10]] = fields[2].strip('"')
 			else:
 				if len(fields) == 1 and fields[0] == "$Comp":
 					inComponent = True
@@ -73,6 +85,40 @@ recoveredSchematic = readSchematic(sys.argv[4])
 #print trueSchematic
 #print recoveredSchematic
 
+# At this point, we should be able to compare all backplane signals.
+for refd in recoveredSchematic:
+	if refd[:1] != "J":
+		continue
+	if refd not in trueSchematic:
+		print "Connector " + refd + " in recovered schematic is missing from the true schematic."
+		continue
+	for key in recoveredSchematic[refd]:
+		if key[:8] == '"Caption' and key not in trueSchematic[refd]:
+			print "Key " + key + " is missing from true schematic " + refd
+for refd in trueSchematic:
+	if refd[:1] != "J":
+		continue
+	if refd not in recoveredSchematic:
+		print "Connector " + refd + " in true schematic is missing from the recovered schematic."
+		continue
+	for key in trueSchematic[refd]:
+		if key[:8] == '"Caption' and key not in recoveredSchematic[refd]:
+			print "Key " + key + " is missing from recovered schematic " + refd
+NCs = ["(NC)", "N.C."]
+for refd in trueSchematic:
+	if refd[:1] != "J":
+		continue
+	for key in trueSchematic[refd]:
+		if key[:8] != '"Caption':
+			continue
+		try:
+			if trueSchematic[refd][key] in NCs and recoveredSchematic[refd][key] in NCs:
+				continue
+			if trueSchematic[refd][key] != recoveredSchematic[refd][key]:
+				print "In " + refd + ", " + key + " differs: " + trueSchematic[refd][key] + " != " + recoveredSchematic[refd][key]
+		except:
+			continue
+
 # As far as logic-flow diagrams are concerned -- and I think that's all we're dealing with here! --
 # we should know enough to match all of the NOR gates between the two netlists, since we know from
 # reading the schematics what gate numbers are mapped with what reference designators, and
@@ -82,3 +128,32 @@ recoveredSchematic = readSchematic(sys.argv[4])
 #	DRAWING		ORIGINAL	RECOVERED
 #	-------		--------	---------
 #	1006547		--NNN		52NNN
+
+# Make a way, in the real schematic, to look up the refd by the gate number.  This will be the
+# dictionary recovered2true, which will have key/value pairs like
+#	"recoveredREFD" : "trueREFD"
+
+def normalizeGate(gate):
+	if gate[-2:] == "xx":	# For modules A1-A16.
+		return gate[:-2]
+	else:			# For all other modules.
+		return gate[2:]
+
+reverseTrueSchematic = {}
+for refd in trueSchematic:
+	if refd[:1] != "U":
+		continue
+	component = trueSchematic[refd]
+	component["refd"] = refd
+	gate = component["gate"]
+	reverseTrueSchematic[normalizeGate(gate)] = component
+recovered2true = {}
+#print reverseTrueSchematic
+for refd in recoveredSchematic:
+	if refd[:1] != "U":
+		continue
+	gate = normalizeGate(recoveredSchematic[refd]["gate"])
+	recovered2true[refd] = reverseTrueSchematic[gate]["refd"]
+print recovered2true
+ 
+
