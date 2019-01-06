@@ -898,10 +898,10 @@ Text HLabel 3675 17525 0    140  Input ~ 28
 0VDC
 Text HLabel 3525 11075 0    140  Input ~ 28
 PIN85
-Text Notes 23525 2975 0    140  ~ 28
-Notes from the Virtual AGC Project:\n5. In drawing ND-1021041, connector pad 53 is used inconsistently between Figures\n   4-153 and 4-165.  In this drawing, Figure 4-165 has been arbitrarily taken as correct,\n   and pad 53 in Figure 4-153 has been changed to the otherwise-unused pad 52. \n   Similarly, the associated NOR gate 52323 had been mismarked as a normal NOR,\n   whereas it has been corrected to be an expander gate. — RSB 2018\n7. Similarly, gate 52310 (A33) is shown as driving connector pad 8 (WEY/).\n   Since pad 8 is used elsewhere in A33 for a different net, and since gate 53310 (A34)\n   is shown as driving the pad 4, which is otherwise unused in A33, it is clear that\n   gate 52310 is really driving pad 4, and that's what this drawing shows.  — RSB 2018
+Text Notes 23350 3250 0    140  ~ 28
+Notes from the Virtual AGC Project:\n5. In drawing ND-1021041, connector pad 53 is used inconsistently between Figures\n   4-153 and 4-165.  In this drawing, Figure 4-165 has been arbitrarily taken as correct,\n   and pad 53 in Figure 4-153 has been changed to pad 62.   The explanation seems to \n   be that it was pad 53 for the rackmount model but pad 62 for the flight model.\n   Similarly, the associated NOR gate 52323 had been mismarked as a normal NOR,\n   whereas it has been corrected to be an expander gate. — RSB 2018\n7. Similarly, gate 52310 (A33) is shown as driving connector pad 8 (WEY/).\n   Since pad 8 is used elsewhere in A33 for a different net, and since gate 53310 (A34)\n   is shown as driving the pad 4, which is otherwise unused in A33, it is clear that\n   gate 52310 is really driving pad 4, and that's what this drawing shows.  — RSB 2018
 $Bitmap
-Pos 23275 825 
+Pos 23050 850 
 Scale 1.000000
 Data
 89 50 4E 47 0D 0A 1A 0A 00 00 00 0D 49 48 44 52 00 00 00 78 00 00 00 78 08 02 00 00 00 B6 06 A1 
@@ -1874,9 +1874,9 @@ Wire Wire Line
 	8150 10175 8150 11325
 $Comp
 L AGC_DSKY:ConnectorGeneric J1
-U 52 2 5C06260A
+U 62 2 5C06260A
 P 20275 10175
-AR Path="/5BEFD31A/5C06260A" Ref="J1"  Part="52" 
+AR Path="/5BEFD31A/5C06260A" Ref="J1"  Part="62" 
 AR Path="/5C06260A" Ref="J?"  Part="35" 
 F 0 "J1" H 20275 10500 140 0001 C CNN
 F 1 "ConnectorGeneric" H 20275 10600 140 0001 C CNN
@@ -1884,7 +1884,7 @@ F 2 "" H 20275 10650 140 0001 C CNN
 F 3 "" H 20275 10650 140 0001 C CNN
 F 4 "A33_9_52" H 20275 9525 140 0000 C BNB "Caption"
 F 5 "(NC)" H 20275 9850 140 0000 C CNB "Caption2"
-	52   20275 10175
+	62   20275 10175
 	-1   0    0    1   
 $EndComp
 $Comp

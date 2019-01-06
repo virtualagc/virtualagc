@@ -162,6 +162,103 @@ for refd in recoveredSchematic:
 		continue
 	gate = normalizeGate(recoveredSchematic[refd]["gate"])
 	recovered2true[refd] = reverseTrueSchematic[gate]["refd"]
-print recovered2true
+#print recovered2true
  
+# Now actually create a new recovered schematic, in which the REFDs match the true schematic.  We don't have to 
+# rename the nets whose names contain the REFDs, because we're going to (eventually) rely only on those names
+# being unique, and not on the formats of the names themselves.
+renamedRecoveredDrawingNet = {}
+for refd in recoveredDrawingNet:
+	translatedRefd = refd
+	if refd in recovered2true:
+		translatedRefd = recovered2true[refd]
+	component = recoveredDrawingNet[refd]
+	component["originalRefd"] = refd
+	renamedRecoveredDrawingNet[translatedRefd] = component
+
+# So at this point, the dictionaries trueDrawingNet and renamedRecoveredDrawingNet have the same
+# REFDs as keys.  Their values are components, which differ because the netnames, while unique,
+# usually differ, because the input pins of the NORs are rearranged, and because the 
+# components can have fields (used for tracking what's going on) that the corresponding 
+# components don't have.  Almost every net has one or more of the following on it:  a connector
+# pin, a NOR-gate output pin, or a pin of part with non-interchangeable pins (polarized capacitor,
+# diode, transistor).  Therefore, if we look at what nets are on such pins in the true schematic,
+# vs what nets are on such pins in the recovered schematic, we can make an almost-complete 
+# table for translating the recovered net names to the true net names.  (In fact, for logic
+# flow diagrams, I think it actually will be a complete list.)  We save the translated net names
+# in the recovered netlist's trueNets arrays.
+net2net = {}
+for refd in renamedRecoveredDrawingNet:
+	if refd not in trueDrawingNet:
+		continue
+	if refd[:1] == "J":
+		for pin in renamedRecoveredDrawingNet[refd]["pins"]:
+			if pin not in trueDrawingNet[refd]["pins"]:
+				continue
+			netFrom = renamedRecoveredDrawingNet[refd]["pins"][pin]
+			netTo = trueDrawingNet[refd]["pins"][pin]
+			if netFrom in net2net:
+				if net2net[netFrom] != netTo:
+					print "Net " + netFrom + " has multiple translations (" + netTo + ", " + net2net[netFrom] + ")"
+			else:
+				net2net[netFrom] = netTo
+	elif renamedRecoveredDrawingNet[refd]["symbol"][:5] == "D3NOR":
+		netFrom = renamedRecoveredDrawingNet[refd]["pins"]["7"]
+		netTo = trueDrawingNet[refd]["pins"]["7"]
+		if netFrom in net2net:
+			if net2net[netFrom] != netTo:
+				print "Net " + netFrom + " has multiple translations (" + netTo + ", " + net2net[netFrom] + ")"
+		else:
+			net2net[netFrom] = netTo
+#print net2net
+#print len(net2net)
+#print len(trueDrawingNet)
+#print len(recoveredDrawingNet)
+
+# Now translate all of the net names in renamedRecoverdDrawingNet.
+for refd in renamedRecoveredDrawingNet:
+	component = renamedRecoveredDrawingNet[refd]
+	for pin in component["pins"]:
+		net = component["pins"][pin]
+		if net in net2net:
+			component["pins"][pin] = net2net[net]
+
+# Check which components and component pins were not present in one or the other.
+for refd in trueDrawingNet:
+	if refd not in renamedRecoveredDrawingNet:
+		print "Component " + refd + " is in the official drawing, but not in ND-1021041"
+for refd in renamedRecoveredDrawingNet:
+	if refd not in trueDrawingNet:
+		print "Component " + refd + " is in ND-1021041, but not in the official drawing"
+for refd in trueDrawingNet:
+	if refd in renamedRecoveredDrawingNet:
+		trueComponent = trueDrawingNet[refd]
+		recoveredComponent = renamedRecoveredDrawingNet[refd]
+		for pin in trueComponent["pins"]:
+			if pin not in trueComponent["pins"]:
+				print "Pin " + pin + " for " + refd + " in ND-1021041 but not the official drawing"
+		for pin in trueComponent["pins"]:
+			if pin not in trueComponent["pins"]:
+				print "Pin " + pin + " for " + refd + " in the official drawing but not in ND-1021041"
+
+# Now compare the net names.  There are two cases for each component: pins which
+# are interchangeable, and pins which are not.
+for refd in renamedRecoveredDrawingNet:
+	if refd not in trueDrawingNet:
+		continue
+	trueComponent = trueDrawingNet[refd]
+	recoveredComponent = renamedRecoveredDrawingNet[refd]
+	if trueComponent["symbol"][:5] == "D3NOR":
+		if recoveredComponent["pins"]["7"] != trueComponent["pins"]["7"]:
+			print "Net on pin 7 for " + refd + " does not match (" + trueComponent["pins"]["7"] + ", " + recoveredComponent["pins"]["7"] + ")"
+		trueUnordered = set([trueComponent["pins"]["1"], trueComponent["pins"]["3"], trueComponent["pins"]["5"]])
+		recoveredUnordered = set([recoveredComponent["pins"]["1"], recoveredComponent["pins"]["3"], recoveredComponent["pins"]["5"]])
+		if len(trueUnordered - recoveredUnordered) != 0:
+			print "Mismatch on pins 1,3,5 for " + refd
+	else:
+		for pin in recoveredComponent["pins"]:
+			if pin in trueComponent["pins"]:
+				if trueComponent["pins"][pin] != recoveredComponent["pins"][pin]:
+					print "Net on pin " + pin + " of " + refd + " does not match (" + trueComponent["pins"][pin] + ", " + recoveredComponent["pins"][pin] + ")"
+
 
