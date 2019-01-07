@@ -158,19 +158,19 @@ Wire Notes Line width 20 style solid
 	1975 32065 2525 32065
 Wire Notes Line style solid
 	3100 32200 2650 32200
-Wire Notes Line width 60 style solid
+Wire Notes Line style solid
 	2650 32200 2825 32150
-Wire Notes Line width 60 style solid
+Wire Notes Line style solid
 	2825 32150 2825 32250
-Wire Notes Line width 60 style solid
+Wire Notes Line style solid
 	2825 32250 2650 32200
 Wire Notes Line style solid
 	3100 31950 2650 31950
-Wire Notes Line width 60 style solid
+Wire Notes Line style solid
 	2650 31950 2825 31900
-Wire Notes Line width 60 style solid
+Wire Notes Line style solid
 	2825 31900 2825 32000
-Wire Notes Line width 60 style solid
+Wire Notes Line style solid
 	2825 32000 2650 31950
 Text Notes 2125 32950 0    140  ~ 28
  1G3\n--027
@@ -242,11 +242,11 @@ Text Notes 42425 14625 0    140  ~ 28
 ____
 Wire Notes Line style solid
 	41400 15100 41400 15950
-Wire Notes Line width 60 style solid
+Wire Notes Line style solid
 	41400 15950 41350 15775
-Wire Notes Line width 60 style solid
+Wire Notes Line style solid
 	41350 15775 41450 15775
-Wire Notes Line width 60 style solid
+Wire Notes Line style solid
 	41450 15775 41400 15950
 Text Notes 39525 13950 0    180  ~ 36
 REFERENCE
@@ -4643,7 +4643,7 @@ F 0 "J1" H 38775 28425 140 0001 C CNN
 F 1 "ConnectorBlockI" H 38775 28525 140 0001 C CNN
 F 2 "" H 38775 28575 140 0001 C CNN
 F 3 "" H 38775 28575 140 0001 C CNN
-F 4 "048" H 38775 28250 100 0000 C TNB "agc4"
+F 4 "049" H 38775 28250 100 0000 C TNB "agc4"
 F 5 "0VDC" H 37700 28000 140 0000 C BNB "Caption"
 F 6 "0VDC" H 38775 27875 140 0001 C TNB "Caption2"
 	72   38775 28100
