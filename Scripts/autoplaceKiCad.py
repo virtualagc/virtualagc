@@ -775,7 +775,7 @@ for id in objects:
 				sys.stdout.write("F " + str(nextFieldPos+0) + " \"" + caption + "\" H " + str(posX-425) + " " + str(posY + 175) + " 140 0000 R BNB \"Caption\"\n")
 				sys.stdout.write("F " + str(nextFieldPos+1) + " \"" + caption2 + "\" H " + str(posX-425) + " " + str(posY) + " 140 0000 R CNB \"Caption2\"\n")
 				sys.stdout.write("F " + str(nextFieldPos+2) + " \"" + caption3 + "\" H " + str(posX-425) + " " + str(posY - 175) + " 140 0000 R TNB \"Caption3\"\n")
-		elif caption2 != "":
+		elif caption2 != "" or block1:
 			if rotated:
 				rotated = 0
 				inverted = True
