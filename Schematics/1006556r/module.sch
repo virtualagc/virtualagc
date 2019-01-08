@@ -1696,10 +1696,10 @@ g60015
 Wire Wire Line
 	27950 10150 28450 10150
 $Comp
-L AGC_DSKY:ConnectorGeneric J?
+L AGC_DSKY:ConnectorGeneric J1
 U 136 1 5D6A4EE4
 P 8375 32075
-AR Path="/5F3224AF/5D6A4EE4" Ref="J?"  Part="136" 
+AR Path="/5F3224AF/5D6A4EE4" Ref="J1"  Part="136" 
 AR Path="/5D6A4EE4" Ref="J1"  Part="136" 
 F 0 "J1" H 8375 32400 140 0001 C CNN
 F 1 "ConnectorGeneric" H 8375 32500 140 0001 C CNN
@@ -1742,10 +1742,10 @@ T04_
 Wire Wire Line
 	1600 22650 2125 22650
 $Comp
-L AGC_DSKY:ConnectorGeneric J?
+L AGC_DSKY:ConnectorGeneric J1
 U 53 1 5D859091
 P 1700 32500
-AR Path="/5F3224AF/5D859091" Ref="J?"  Part="53" 
+AR Path="/5F3224AF/5D859091" Ref="J1"  Part="53" 
 AR Path="/5D859091" Ref="J1"  Part="53" 
 F 0 "J1" H 1700 32825 140 0001 C CNN
 F 1 "ConnectorGeneric" H 1700 32925 140 0001 C CNN
@@ -1760,10 +1760,10 @@ T01_
 Wire Wire Line
 	2775 32500 1975 32500
 $Comp
-L AGC_DSKY:ConnectorGeneric J?
+L AGC_DSKY:ConnectorGeneric J1
 U 139 1 5D909415
 P 8375 33075
-AR Path="/5F3216C6/5D909415" Ref="J?"  Part="139" 
+AR Path="/5F3216C6/5D909415" Ref="J1"  Part="139" 
 AR Path="/5D909415" Ref="J1"  Part="139" 
 F 0 "J1" H 8375 33400 140 0001 C CNN
 F 1 "ConnectorGeneric" H 8375 33500 140 0001 C CNN
@@ -1778,10 +1778,10 @@ T04_B
 Wire Wire Line
 	9450 33075 8650 33075
 $Comp
-L AGC_DSKY:ConnectorGeneric J?
+L AGC_DSKY:ConnectorGeneric J1
 U 20 1 5D96ABAC
 P 1725 29650
-AR Path="/60065313/5D96ABAC" Ref="J?"  Part="20" 
+AR Path="/60065313/5D96ABAC" Ref="J1"  Part="20" 
 AR Path="/5D96ABAC" Ref="J1"  Part="20" 
 F 0 "J1" H 1725 29975 140 0001 C CNN
 F 1 "ConnectorGeneric" H 1725 30075 140 0001 C CNN
@@ -1796,10 +1796,10 @@ Text GLabel 2800 29650 2    140  Output ~ 28
 Wire Wire Line
 	2800 29650 2000 29650
 $Comp
-L AGC_DSKY:ConnectorGeneric J?
+L AGC_DSKY:ConnectorGeneric J1
 U 41 1 5D9F8C89
 P 1700 32025
-AR Path="/5F32147E/5D9F8C89" Ref="J?"  Part="41" 
+AR Path="/5F32147E/5D9F8C89" Ref="J1"  Part="41" 
 AR Path="/5D9F8C89" Ref="J1"  Part="41" 
 F 0 "J1" H 1700 32350 140 0001 C CNN
 F 1 "ConnectorGeneric" H 1700 32450 140 0001 C CNN
@@ -1810,10 +1810,10 @@ F 4 "T02/" H 1125 31950 140 0000 C BNB "Caption"
 	1    0    0    -1  
 $EndComp
 $Comp
-L AGC_DSKY:ConnectorGeneric J?
+L AGC_DSKY:ConnectorGeneric J1
 U 33 1 5D9F8C90
 P 1700 31550
-AR Path="/5F32147E/5D9F8C90" Ref="J?"  Part="33" 
+AR Path="/5F32147E/5D9F8C90" Ref="J1"  Part="33" 
 AR Path="/5D9F8C90" Ref="J1"  Part="33" 
 F 0 "J1" H 1700 31875 140 0001 C CNN
 F 1 "ConnectorGeneric" H 1700 31975 140 0001 C CNN
@@ -1824,10 +1824,10 @@ F 4 "DV1/" H 1125 31500 140 0000 C BNB "Caption"
 	1    0    0    -1  
 $EndComp
 $Comp
-L AGC_DSKY:ConnectorGeneric J?
+L AGC_DSKY:ConnectorGeneric J1
 U 109 1 5D9F8C97
 P 8350 30125
-AR Path="/5F32147E/5D9F8C97" Ref="J?"  Part="109" 
+AR Path="/5F32147E/5D9F8C97" Ref="J1"  Part="109" 
 AR Path="/5D9F8C97" Ref="J1"  Part="109" 
 F 0 "J1" H 8350 30450 140 0001 C CNN
 F 1 "ConnectorGeneric" H 8350 30550 140 0001 C CNN
@@ -1850,10 +1850,10 @@ T03_
 Wire Wire Line
 	9425 30125 8625 30125
 $Comp
-L AGC_DSKY:ConnectorGeneric J?
+L AGC_DSKY:ConnectorGeneric J1
 U 123 1 5DB48681
 P 8350 31575
-AR Path="/5F3224AF/5DB48681" Ref="J?"  Part="123" 
+AR Path="/5F3224AF/5DB48681" Ref="J1"  Part="123" 
 AR Path="/5DB48681" Ref="J1"  Part="123" 
 F 0 "J1" H 8350 31900 140 0001 C CNN
 F 1 "ConnectorGeneric" H 8350 32000 140 0001 C CNN
@@ -1868,10 +1868,10 @@ MP1_
 Wire Wire Line
 	9425 31575 8625 31575
 $Comp
-L AGC_DSKY:ConnectorGeneric J?
+L AGC_DSKY:ConnectorGeneric J1
 U 137 1 5DC370A7
 P 8375 32575
-AR Path="/5F3224AF/5DC370A7" Ref="J?"  Part="137" 
+AR Path="/5F3224AF/5DC370A7" Ref="J1"  Part="137" 
 AR Path="/5DC370A7" Ref="J1"  Part="137" 
 F 0 "J1" H 8375 32900 140 0001 C CNN
 F 1 "ConnectorGeneric" H 8375 33000 140 0001 C CNN
@@ -1886,10 +1886,10 @@ T05_
 Wire Wire Line
 	9450 32575 8650 32575
 $Comp
-L AGC_DSKY:ConnectorGeneric J?
+L AGC_DSKY:ConnectorGeneric J1
 U 67 1 5DCC56D3
 P 5050 30125
-AR Path="/5F3216C6/5DCC56D3" Ref="J?"  Part="67" 
+AR Path="/5F3216C6/5DCC56D3" Ref="J1"  Part="67" 
 AR Path="/5DCC56D3" Ref="J1"  Part="67" 
 F 0 "J1" H 5050 30450 140 0001 C CNN
 F 1 "ConnectorGeneric" H 5050 30550 140 0001 C CNN
@@ -1904,10 +1904,10 @@ STD2
 Wire Wire Line
 	6125 30125 5325 30125
 $Comp
-L AGC_DSKY:ConnectorGeneric J?
+L AGC_DSKY:ConnectorGeneric J1
 U 60 1 5DDC6855
 P 5050 29175
-AR Path="/5F3224CF/5DDC6855" Ref="J?"  Part="60" 
+AR Path="/5F3224CF/5DDC6855" Ref="J1"  Part="60" 
 AR Path="/5DDC6855" Ref="J1"  Part="60" 
 F 0 "J1" H 5050 29500 140 0001 C CNN
 F 1 "ConnectorGeneric" H 5050 29600 140 0001 C CNN
@@ -1918,10 +1918,10 @@ F 4 "BR1/" H 4450 29100 140 0000 C BNB "Caption"
 	1    0    0    -1  
 $EndComp
 $Comp
-L AGC_DSKY:ConnectorGeneric J?
+L AGC_DSKY:ConnectorGeneric J1
 U 118 1 5DDC685C
 P 8350 31075
-AR Path="/5F3224CF/5DDC685C" Ref="J?"  Part="118" 
+AR Path="/5F3224CF/5DDC685C" Ref="J1"  Part="118" 
 AR Path="/5DDC685C" Ref="J1"  Part="118" 
 F 0 "J1" H 8350 31400 140 0001 C CNN
 F 1 "ConnectorGeneric" H 8350 31500 140 0001 C CNN
@@ -1940,10 +1940,10 @@ DV0_
 Wire Wire Line
 	9425 31075 8625 31075
 $Comp
-L AGC_DSKY:ConnectorGeneric J?
+L AGC_DSKY:ConnectorGeneric J1
 U 65 1 5DEF7C44
 P 5050 29650
-AR Path="/5F3216C6/5DEF7C44" Ref="J?"  Part="65" 
+AR Path="/5F3216C6/5DEF7C44" Ref="J1"  Part="65" 
 AR Path="/5DEF7C44" Ref="J1"  Part="65" 
 F 0 "J1" H 5050 29975 140 0001 C CNN
 F 1 "ConnectorGeneric" H 5050 30075 140 0001 C CNN
@@ -1958,10 +1958,10 @@ G06
 Wire Wire Line
 	6125 29650 5325 29650
 $Comp
-L AGC_DSKY:ConnectorGeneric J?
+L AGC_DSKY:ConnectorGeneric J1
 U 116 1 5DFDCFA2
 P 8350 30600
-AR Path="/5F3224AF/5DFDCFA2" Ref="J?"  Part="116" 
+AR Path="/5F3224AF/5DFDCFA2" Ref="J1"  Part="116" 
 AR Path="/5DFDCFA2" Ref="J1"  Part="116" 
 F 0 "J1" H 8350 30925 140 0001 C CNN
 F 1 "ConnectorGeneric" H 8350 31025 140 0001 C CNN
@@ -1976,10 +1976,10 @@ T05_B
 Wire Wire Line
 	9425 30600 8625 30600
 $Comp
-L AGC_DSKY:ConnectorGeneric J?
+L AGC_DSKY:ConnectorGeneric J1
 U 102 1 5E10A9AC
 P 8350 29650
-AR Path="/5F3224CF/5E10A9AC" Ref="J?"  Part="102" 
+AR Path="/5F3224CF/5E10A9AC" Ref="J1"  Part="102" 
 AR Path="/5E10A9AC" Ref="J1"  Part="102" 
 F 0 "J1" H 8350 29975 140 0001 C CNN
 F 1 "ConnectorGeneric" H 8350 30075 140 0001 C CNN
@@ -1994,10 +1994,10 @@ MP0_
 Wire Wire Line
 	9425 29650 8625 29650
 $Comp
-L AGC_DSKY:ConnectorGeneric J?
+L AGC_DSKY:ConnectorGeneric J1
 U 30 1 5E18D466
 P 1700 31075
-AR Path="/6006532B/5E18D466" Ref="J?"  Part="30" 
+AR Path="/6006532B/5E18D466" Ref="J1"  Part="30" 
 AR Path="/5E18D466" Ref="J1"  Part="30" 
 F 0 "J1" H 1700 31400 140 0001 C CNN
 F 1 "ConnectorGeneric" H 1700 31500 140 0001 C CNN
@@ -2012,10 +2012,10 @@ T01_B
 Wire Wire Line
 	2775 31075 1975 31075
 $Comp
-L AGC_DSKY:ConnectorGeneric J?
+L AGC_DSKY:ConnectorGeneric J1
 U 16 1 5E21A5D6
 P 1725 29175
-AR Path="/5F3224C7/5E21A5D6" Ref="J?"  Part="16" 
+AR Path="/5F3224C7/5E21A5D6" Ref="J1"  Part="16" 
 AR Path="/5E21A5D6" Ref="J1"  Part="16" 
 F 0 "J1" H 1725 29500 140 0001 C CNN
 F 1 "ConnectorGeneric" H 1725 29600 140 0001 C CNN
@@ -2030,10 +2030,10 @@ T02_B
 Wire Wire Line
 	2800 29175 2000 29175
 $Comp
-L AGC_DSKY:ConnectorGeneric J?
+L AGC_DSKY:ConnectorGeneric J1
 U 21 1 5E25C798
 P 1725 30125
-AR Path="/5BEFD1AD/5E25C798" Ref="J?"  Part="21" 
+AR Path="/5BEFD1AD/5E25C798" Ref="J1"  Part="21" 
 AR Path="/5E25C798" Ref="J1"  Part="21" 
 F 0 "J1" H 1725 30450 140 0001 C CNN
 F 1 "ConnectorGeneric" H 1725 30550 140 0001 C CNN
@@ -2048,10 +2048,10 @@ MP0
 Wire Wire Line
 	2800 30125 2000 30125
 $Comp
-L AGC_DSKY:ConnectorGeneric J?
+L AGC_DSKY:ConnectorGeneric J1
 U 99 1 5E2FE018
 P 8325 29175
-AR Path="/5F3216C6/5E2FE018" Ref="J?"  Part="99" 
+AR Path="/5F3216C6/5E2FE018" Ref="J1"  Part="99" 
 AR Path="/5E2FE018" Ref="J1"  Part="99" 
 F 0 "J1" H 8325 29500 140 0001 C CNN
 F 1 "ConnectorGeneric" H 8325 29600 140 0001 C CNN
@@ -2066,10 +2066,10 @@ TC
 Wire Wire Line
 	9400 29175 8600 29175
 $Comp
-L AGC_DSKY:ConnectorGeneric J?
+L AGC_DSKY:ConnectorGeneric J1
 U 97 1 5E34DC18
 P 5050 32975
-AR Path="/5F3224AF/5E34DC18" Ref="J?"  Part="97" 
+AR Path="/5F3224AF/5E34DC18" Ref="J1"  Part="97" 
 AR Path="/5E34DC18" Ref="J1"  Part="97" 
 F 0 "J1" H 5050 33300 140 0001 C CNN
 F 1 "ConnectorGeneric" H 5050 33400 140 0001 C CNN
@@ -2084,10 +2084,10 @@ NDX0
 Wire Wire Line
 	6125 32975 5325 32975
 $Comp
-L AGC_DSKY:ConnectorGeneric J?
+L AGC_DSKY:ConnectorGeneric J1
 U 89 1 5E394E3B
 P 5050 32500
-AR Path="/5F3216C6/5E394E3B" Ref="J?"  Part="89" 
+AR Path="/5F3216C6/5E394E3B" Ref="J1"  Part="89" 
 AR Path="/5E394E3B" Ref="J1"  Part="89" 
 F 0 "J1" H 5050 32825 140 0001 C CNN
 F 1 "ConnectorGeneric" H 5050 32925 140 0001 C CNN
@@ -2102,10 +2102,10 @@ BR1
 Wire Wire Line
 	6125 32500 5325 32500
 $Comp
-L AGC_DSKY:ConnectorGeneric J?
+L AGC_DSKY:ConnectorGeneric J1
 U 82 1 5E3FBD79
 P 5050 31075
-AR Path="/60066CCB/5E3FBD79" Ref="J?"  Part="82" 
+AR Path="/60066CCB/5E3FBD79" Ref="J1"  Part="82" 
 AR Path="/5E3FBD79" Ref="J1"  Part="82" 
 F 0 "J1" H 5050 31400 140 0001 C CNN
 F 1 "ConnectorGeneric" H 5050 31500 140 0001 C CNN
@@ -2116,10 +2116,10 @@ F 4 "T03/" H 4425 31000 140 0000 C BNB "Caption"
 	1    0    0    -1  
 $EndComp
 $Comp
-L AGC_DSKY:ConnectorGeneric J?
+L AGC_DSKY:ConnectorGeneric J1
 U 84 1 5E3FBD80
 P 5050 32025
-AR Path="/60066CCB/5E3FBD80" Ref="J?"  Part="84" 
+AR Path="/60066CCB/5E3FBD80" Ref="J1"  Part="84" 
 AR Path="/5E3FBD80" Ref="J1"  Part="84" 
 F 0 "J1" H 5050 32350 140 0001 C CNN
 F 1 "ConnectorGeneric" H 5050 32450 140 0001 C CNN
@@ -2138,10 +2138,10 @@ T03_B
 Wire Wire Line
 	6125 31075 5325 31075
 $Comp
-L AGC_DSKY:ConnectorGeneric J?
+L AGC_DSKY:ConnectorGeneric J1
 U 83 1 5E5597F7
 P 5050 31550
-AR Path="/5F3224AF/5E5597F7" Ref="J?"  Part="83" 
+AR Path="/5F3224AF/5E5597F7" Ref="J1"  Part="83" 
 AR Path="/5E5597F7" Ref="J1"  Part="83" 
 F 0 "J1" H 5050 31875 140 0001 C CNN
 F 1 "ConnectorGeneric" H 5050 31975 140 0001 C CNN
@@ -2156,10 +2156,10 @@ TS0_
 Wire Wire Line
 	6125 31550 5325 31550
 $Comp
-L AGC_DSKY:ConnectorGeneric J?
+L AGC_DSKY:ConnectorGeneric J1
 U 74 1 5E664F88
 P 5050 30600
-AR Path="/5F3224AF/5E664F88" Ref="J?"  Part="83" 
+AR Path="/5F3224AF/5E664F88" Ref="J1"  Part="83" 
 AR Path="/5E664F88" Ref="J1"  Part="74" 
 F 0 "J1" H 5050 30925 140 0001 C CNN
 F 1 "ConnectorGeneric" H 5050 31025 140 0001 C CNN
@@ -2174,10 +2174,10 @@ BR1
 Wire Wire Line
 	6125 30600 5325 30600
 $Comp
-L AGC_DSKY:ConnectorGeneric J?
+L AGC_DSKY:ConnectorGeneric J1
 U 50 1 5E6E9589
 P 1700 32975
-AR Path="/5F32147E/5E6E9589" Ref="J?"  Part="50" 
+AR Path="/5F32147E/5E6E9589" Ref="J1"  Part="50" 
 AR Path="/5E6E9589" Ref="J1"  Part="50" 
 F 0 "J1" H 1700 33300 140 0001 C CNN
 F 1 "ConnectorGeneric" H 1700 33400 140 0001 C CNN
@@ -2192,10 +2192,10 @@ DV1_B
 Wire Wire Line
 	2775 32975 1975 32975
 $Comp
-L AGC_DSKY:ConnectorGeneric J?
+L AGC_DSKY:ConnectorGeneric J1
 U 27 1 5E7537E9
 P 1725 30600
-AR Path="/5F321873/5E7537E9" Ref="J?"  Part="27" 
+AR Path="/5F321873/5E7537E9" Ref="J1"  Part="27" 
 AR Path="/5E7537E9" Ref="J1"  Part="27" 
 F 0 "J1" H 1725 30925 140 0001 C CNN
 F 1 "ConnectorGeneric" H 1725 31025 140 0001 C CNN

@@ -66,7 +66,7 @@ def readSchematic(filename):
 					schematic[refd] = { "symbol": symbol }
 				elif len(fields) == 11 and fields[0] == "F" and fields[10] in ['"Location"','"agc5"']:
 					schematic[refd]["gate"] = fields[2].strip('"')
-				elif len(fields) == 11 and fields[0] == "F" and fields[10][:8] == '"Caption':
+				elif len(fields) == 11 and fields[0] == "F" and fields[10][:8] == '"Caption' and fields[2] != '""':
 					schematic[refd][fields[10]] = fields[2].strip('"')
 			else:
 				if len(fields) == 1 and fields[0] == "$Comp":
@@ -105,7 +105,7 @@ for refd in trueSchematic:
 		if key[:8] == '"Caption' and key not in recoveredSchematic[refd]:
 			print "Key " + key + " is missing from recovered schematic " + refd
 NC = ["(NC)", "N.C.", "0VDC"]
-V3 = ["+3VDC", "+3A"]
+V3 = ["+3VDC", "+3A", "+3B"]
 for refd in trueSchematic:
 	if refd[:1] != "J":
 		continue
@@ -161,7 +161,8 @@ for refd in recoveredSchematic:
 	if refd[:1] != "U":
 		continue
 	gate = normalizeGate(recoveredSchematic[refd]["gate"])
-	recovered2true[refd] = reverseTrueSchematic[gate]["refd"]
+	if gate in recoveredSchematic:
+		recovered2true[refd] = reverseTrueSchematic[gate]["refd"]
 #print recovered2true
  
 # Now actually create a new recovered schematic, in which the REFDs match the true schematic.  We don't have to 
@@ -225,12 +226,18 @@ for refd in renamedRecoveredDrawingNet:
 
 # Check which components and component pins were not present in one or the other.
 for refd in trueDrawingNet:
+	if refd[:1] == "X":
+		continue
 	if refd not in renamedRecoveredDrawingNet:
 		print "Component " + refd + " is in the official drawing, but not in ND-1021041"
 for refd in renamedRecoveredDrawingNet:
+	if refd[:1] == "X":
+		continue
 	if refd not in trueDrawingNet:
 		print "Component " + refd + " is in ND-1021041, but not in the official drawing"
 for refd in trueDrawingNet:
+	if refd[:1] == "X":
+		continue
 	if refd in renamedRecoveredDrawingNet:
 		trueComponent = trueDrawingNet[refd]
 		recoveredComponent = renamedRecoveredDrawingNet[refd]
