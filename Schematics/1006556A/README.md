@@ -37,4 +37,8 @@ There's not enough available evidence to distinguish between the following 3 pos
 * It may be a transcription in 1006556r.  (I.e., the gates may appear in ND1021041 but haven't yet been found.)
 * There may be revisions C (or higher) of the schematic 1006556 and wiring diagram 1006136 in which the gates have been removed.  (This assumes that the conclusion in the preceding section is correct, namely that signal-wiring diagram rev B corresponds to schematic rev B, and thus that the gates would therefore still appear in schematic rev B since they appear in rev B of the signal-wiring diagram.)
 
+# Signal DV1/
 
+Signal DV1/ is provided by the backplane on two connector pins, 33 and 50, which are not internally connected within the module.  ND-1021041 and the recovered schematic indicate that these are connected to the NOR-gate inputs differently than the signal-wiring diagrams (1006136-, 1006136A, and 1006136B) do.  Specifically, in Figure 4-71, ND-1021041 indicates that pin 33 feeds gate 60075, whereas the signal-wiring diagram indicates that it is pin 50 instead.  Of course, this doesn't matter electrically, as long as the connection on the backplane is intact.
+
+I suspect that this is an error in ND-1021041, due to the difficulty of interpreting signal-wiring diagrams, but it is possible that the connection was different in revisions C or higher of the signal-wiring diagram.
