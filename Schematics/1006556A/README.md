@@ -21,11 +21,20 @@ Differences which can be detected using this method, once the factors above are 
 
 The differences that are detected are then either transcription errors (which are fixed within the CAD files themselves), legitimate differences in conventions (such as "(NC)" vs "N.C." for no-connects), or else are actual differences that require, or at least invite, resolution.  The findings relating to the actual differences are noted below.
 
-# Expander Gate 60080
+# Signal ROPB
 
-In the recovered schematic (1006556r), a gate (60080 from ND-1021041 Figure 4-68) appears which does not appear in any of the available revisions of the official schematic drawing (1006556- and 1006556A).  Moreover, while this gate does not appear in earlier signal-wiring diagram revisions (1006136- and 1006136A), it _does_ appear in signal-wiring diagram 1006136B.
+In the recovered schematic (1006556r), gate 60080 from ND-1021041 Figure 4-68 and its driving connector pin 75 (ROPB) appear which do not appear in any of the available revisions of the official schematic drawing (1006556- and 1006556A).  Moreover, while these items do not appear in earlier signal-wiring diagram revisions (1006136- and 1006136A), the _do_ appear in signal-wiring diagram 1006136B.
 
-Conclusion:  The latest revision of the schematic which we have, namely 1006556A, is not the latest actual revision.  Probably there is a revision 106556B that contains gate 60080.
+Conclusion:  The latest revision of the schematic which we have, namely 1006556A, is not the latest actual revision.  Probably there is a revision 106556B that contains gate 60080 and connector pin 75.
 
+# Signals RRPA and MRRPA/
+
+Gates 60041 and 60042, driving connector pins 18 (RRPA) and 34 (MRRPA/) respectively, are present in the available official schematic drawings (1006556- or 1006556A) but _not_ in ND-1021041 and the recovered drawing 1006556r.  Both gates are present in all available revisions of the signal-wiring diagram (1006136-, 1006136A, 1006136B).
+
+There's not enough available evidence to distinguish between the following 3 possible explanations:
+
+* It may be an error of omission in ND-1021041.
+* It may be a transcription in 1006556r.  (I.e., the gates may appear in ND1021041 but haven't yet been found.)
+* There may be revisions C (or higher) of the schematic 1006556 and wiring diagram 1006136 in which the gates have been removed.  (This assumes that the conclusion in the preceding section is correct, namely that signal-wiring diagram rev B corresponds to schematic rev B, and thus that the gates would therefore still appear in schematic rev B since they appear in rev B of the signal-wiring diagram.)
 
 
