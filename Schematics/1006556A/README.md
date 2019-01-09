@@ -23,7 +23,7 @@ The differences that are detected are then either transcription errors (which ar
 
 # Signal ROPB
 
-In the recovered schematic (1006556r), gate 60080 from ND-1021041 Figure 4-68 and its driving connector pin 75 (ROPB) appear that do not appear in any of the available revisions of the official schematic drawing (1006556- and 1006556A).  Moreover, while these items do not appear in earlier signal-wiring diagram revisions (1006136- and 1006136A), they _do_ appear in signal-wiring diagram 1006136B.
+In the recovered schematic (1006556r), gate 60080 from ND-1021041 Figure 4-68 and its driving connector pin 75 (ROPB) appear, but they not appear in any of the available revisions of the official schematic drawing (1006556- and 1006556A).  Moreover, while these items do not appear in earlier signal-wiring diagram revisions (1006136- and 1006136A), they _do_ appear in signal-wiring diagram 1006136B.
 
 Conclusion:  The latest revision of the schematic which we have, namely 1006556A, is not the latest actual revision.  Probably there is a revision 106556B that contains gate 60080 and connector pin 75.
 
