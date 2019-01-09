@@ -4,7 +4,7 @@ EELAYER 29 0
 EELAYER END
 $Descr C 22000 17000
 encoding utf-8
-Sheet 11 24
+Sheet 24 24
 Title "BLOCK I LOGIC FLOW S, MODULE A21, DRAWING 1006556"
 Date "2018-11-25"
 Rev "Draft"
@@ -435,9 +435,9 @@ Wire Wire Line
 Text HLabel 13625 6925 0    140  Input ~ 28
 MP0_
 Text HLabel 13550 4950 0    140  Input ~ 28
-BR1
+BR1A
 Text HLabel 13650 10100 0    140  Input ~ 28
-BR1
+BR1B
 Text HLabel 3475 6150 0    140  Input ~ 28
 T02_
 $EndSCHEMATC

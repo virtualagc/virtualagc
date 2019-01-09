@@ -199,7 +199,7 @@ F 4 "60418" H 7725 2975 130 0000 C CNB "Location"
 	1    0    0    -1  
 $EndComp
 Text Notes 10300 3800 0    140  ~ 28
-Notes from the Virtual AGC Project:\n4. Figure 4-73 is internally inconsistent in its use of \n   connector pad 45, using it both for the signals WB/ \n   and NDX0.  One of the other pads used for NDX0 \n   is pad 97 (Figure 4-68), so that usage has been \n   temporarily adoped here as well. — RSB 2018\n8. Figures 4-73 and 4-77 conflict in their assignments\n   of connector pad 15.  Here, pin 15 (RB/) is\n   arbitrarily being changed to pin 18. — RSB 2018\n9. Figures 4-73 and 4-68 conflict in their assigments \n   of connector pad 63. Here, pin 63 (DV0) is being\n   changed to pin 29 to conform to signal wiring \n   diagram 1006136.  — RSB 2019
+Notes from the Virtual AGC Project:\n4. Figure 4-73 is internally inconsistent in its use of \n   connector pad 45, using it both for the signals WB/ \n   and NDX0.  One of the other pads used for NDX0 \n   is pad 97 (Figure 4-68), so that usage has been \n   temporarily adoped here as well. — RSB 2018\n8. Figures 4-73 and 4-77 conflict in their assignments\n   of connector pad 15.  Here, the usage in signal \n   wiring diagram 1006136B is kept. — RSB 2019\n9. Figures 4-73 and 4-68 conflict in their assigments \n   of connector pad 63. Here, pin 63 (DV0) is being\n   changed to pin 29 to conform to signal wiring \n   diagram 1006136.  — RSB 2019
 $Bitmap
 Pos 10075 900 
 Scale 1.000000

@@ -861,7 +861,7 @@ NDX0
 Text HLabel 22175 7700 0    140  Input ~ 28
 TS0_
 Text HLabel 8975 10050 0    140  Input ~ 28
-BR1
+BR1B
 $Bitmap
 Pos 900  900 
 Scale 1.000000

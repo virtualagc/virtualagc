@@ -460,8 +460,6 @@ Wire Wire Line
 Wire Wire Line
 	9500 9925 9500 8900
 Wire Wire Line
-	9500 8900 11750 8900
-Wire Wire Line
 	8525 8700 8925 8700
 Wire Wire Line
 	8925 8700 8925 8200
@@ -478,7 +476,7 @@ Wire Wire Line
 Wire Wire Line
 	9500 6400 9500 7475
 Wire Wire Line
-	9500 7475 12250 7475
+	9500 7475 11200 7475
 Wire Wire Line
 	8550 5150 8900 5150
 Wire Wire Line
@@ -576,13 +574,6 @@ Wire Wire Line
 Connection ~ 11650 5925
 Wire Wire Line
 	11650 5925 11650 6150
-Wire Wire Line
-	11750 8900 11750 11250
-Wire Wire Line
-	11750 11250 16700 11250
-Connection ~ 11750 8900
-Wire Wire Line
-	11750 8900 12225 8900
 Wire Wire Line
 	3925 7875 4100 7875
 Wire Wire Line
@@ -1550,7 +1541,16 @@ G06
 Text HLabel 1925 1650 0    140  Input ~ 28
 TC
 Text HLabel 1975 7525 0    140  Input ~ 28
-BR1
+BR1A
 Text HLabel 6600 7525 0    140  Input ~ 28
 TS0_
+Wire Wire Line
+	9500 8900 12225 8900
+Wire Wire Line
+	11200 7475 11200 11250
+Wire Wire Line
+	11200 11250 16700 11250
+Connection ~ 11200 7475
+Wire Wire Line
+	11200 7475 12250 7475
 $EndSCHEMATC
