@@ -34,7 +34,7 @@ Gates 60041 and 60042, driving connector pins 18 (RRPA) and 34 (MRRPA/) respecti
 There's not enough available evidence to distinguish between the following 3 possible explanations:
 
 * It may be an error of omission in ND-1021041.
-* It may be a transcription in 1006556r.  (I.e., the gates may appear in ND1021041 but haven't yet been found.)
+* It may be a transcription error in 1006556r.  (I.e., the gates may appear in ND1021041 but haven't yet been found.)
 * There may be revisions C (or higher) of the schematic 1006556 and wiring diagram 1006136 in which the gates have been removed.  (This assumes that the conclusion in the preceding section is correct, namely that signal-wiring diagram rev B corresponds to schematic rev B, and thus that the gates would therefore still appear in schematic rev B since they appear in rev B of the signal-wiring diagram.)
 
 # Signal DV1/
