@@ -39,6 +39,6 @@ There's not enough available evidence to distinguish between the following 3 pos
 
 # Signal DV1/
 
-Signal DV1/ is provided by the backplane on two connector pins, 33 and 50, which are not internally connected within the module.  ND-1021041 Figure 4071 (and of course 1006556r) that these are connected to NOR-gate 60075 differently than the signal-wiring diagrams (1006136-, 1006136A, and 1006136B) do.  Of course, this doesn't matter electrically, as long as the connection on the backplane is intact.
+Signal DV1/ is provided by the backplane on two connector pins, 33 and 50, which are not internally connected within the module.  ND-1021041 Figure 4-71 (and of course 1006556r) indicate that these are connected to NOR-gate 60075 differently than the signal-wiring diagrams (1006136-, 1006136A, and 1006136B) do.  Of course, this doesn't matter electrically, as long as the connection on the backplane is intact.
 
 I suspect that this is an error in ND-1021041, due to the difficulty of interpreting signal-wiring diagrams, but it is possible that the connection to gate 60075 was different in revisions C or higher of the signal-wiring diagram.
