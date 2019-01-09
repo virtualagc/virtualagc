@@ -2478,10 +2478,10 @@ DV0
 Wire Wire Line
 	38225 10475 38725 10475
 $Comp
-L AGC_DSKY:ConnectorGeneric J?
+L AGC_DSKY:ConnectorGeneric J1
 U 29 1 5C446881
 P 11650 33100
-AR Path="/5F32147E/5C446881" Ref="J?"  Part="29" 
+AR Path="/5F32147E/5C446881" Ref="J1"  Part="29" 
 AR Path="/5C446881" Ref="J1"  Part="29" 
 F 0 "J1" H 11650 33425 140 0001 C CNN
 F 1 "ConnectorGeneric" H 11650 33525 140 0001 C CNN
