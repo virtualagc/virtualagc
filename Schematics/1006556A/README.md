@@ -23,7 +23,7 @@ The differences that are detected are then either transcription errors (which ar
 
 # Expander Gate 60080
 
-In the recovered schematic (1006556r), a gate (60080 from ND-1021041 Figure 4-68) appears which does not appear in any of the available revisions of the official drawing (1006556- and 1006556A).  Moreover, while this gate does not appear in earlier signal wiring diagram revisions (1006136- and 1006136A), it _does_ appear in 1006136B.
+In the recovered schematic (1006556r), a gate (60080 from ND-1021041 Figure 4-68) appears which does not appear in any of the available revisions of the official schematic drawing (1006556- and 1006556A).  Moreover, while this gate does not appear in earlier signal wiring diagram revisions (1006136- and 1006136A), it _does_ appear in 1006136B.
 
 My conclusion is that the latest revisions of the schematic which we have, namely 1006556A, is not the latest actual revision.  Probably there is a revision 106556B that contains gate 60080.
 
