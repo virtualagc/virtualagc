@@ -32,18 +32,6 @@ F 4 "WB/" H 4050 2875 140 0000 C BNB "Caption"
 $EndComp
 $Comp
 L AGC_DSKY:ConnectorGeneric J1
-U 68 1 5BFAA19A
-P 2475 7225
-F 0 "J1" H 2475 7550 140 0001 C CNN
-F 1 "ConnectorGeneric" H 2475 7650 140 0001 C CNN
-F 2 "" H 2475 7700 140 0001 C CNN
-F 3 "" H 2475 7700 140 0001 C CNN
-F 4 "DV0" H 1950 7150 140 0000 C BNB "Caption"
-	68   2475 7225
-	1    0    0    -1  
-$EndComp
-$Comp
-L AGC_DSKY:ConnectorGeneric J1
 U 80 1 5BFAA19C
 P 9025 2975
 F 0 "J1" H 9025 3300 140 0001 C CNN
@@ -210,8 +198,8 @@ F 4 "60418" H 7725 2975 130 0000 C CNB "Location"
 	1    7800 2975
 	1    0    0    -1  
 $EndComp
-Text Notes 10325 3550 0    140  ~ 28
-Notes from the Virtual AGC Project:\n4. Figure 4-73 is internally inconsistent in its use of \n   connector pad 45, using it both for the signals WB/ \n   and NDX0.  One of the other pads used for NDX0 \n   is pad 97 (Figure 4-68), so that usage has been \n   temporarily adoped here as well. — RSB 2018\n8. Figures 4-73 and 4-77 conflict in their assignments\n   of connector pad 15.  Here, pin 15 (RB/) is\n   arbitrarily being changed to pin 18. — RSB 2018\n9. Figures 4-73 and 4-68 conflict in their assigments \n   of connector pad 63. Here, pin 63 (DV0) is being\n   arbitrarily changed to pin 68.  — RSB 2018
+Text Notes 10300 3800 0    140  ~ 28
+Notes from the Virtual AGC Project:\n4. Figure 4-73 is internally inconsistent in its use of \n   connector pad 45, using it both for the signals WB/ \n   and NDX0.  One of the other pads used for NDX0 \n   is pad 97 (Figure 4-68), so that usage has been \n   temporarily adoped here as well. — RSB 2018\n8. Figures 4-73 and 4-77 conflict in their assignments\n   of connector pad 15.  Here, pin 15 (RB/) is\n   arbitrarily being changed to pin 18. — RSB 2018\n9. Figures 4-73 and 4-68 conflict in their assigments \n   of connector pad 63. Here, pin 63 (DV0) is being\n   changed to pin 29 to conform to signal wiring \n   diagram 1006136.  — RSB 2019
 $Bitmap
 Pos 10075 900 
 Scale 1.000000
@@ -1178,4 +1166,6 @@ Text HLabel 2775 7950 0    140  Input ~ 28
 MP0
 Text HLabel 2750 6875 0    140  Input ~ 28
 NDX0
+Text HLabel 2750 7225 0    140  Input ~ 28
+DV0
 $EndSCHEMATC

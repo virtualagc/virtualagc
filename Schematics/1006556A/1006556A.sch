@@ -608,7 +608,7 @@ F 0 "X204" H 3350 6175 140 0001 C CNN
 F 1 "Node2" H 3350 6275 140 0001 C CNN
 F 2 "" H 3350 6325 140 0001 C CNN
 F 3 "" H 3350 6325 140 0001 C CNN
-F 4 "TC0" H 3250 5850 140 0000 R CNB "Caption"
+F 4 "TC" H 3250 5850 140 0000 R CNB "Caption"
 	1    3350 5850
 	1    0    0    -1  
 $EndComp
@@ -1042,7 +1042,7 @@ Wire Wire Line
 Wire Wire Line
 	4000 6700 3675 6700
 Text Label 3450 5850 0    140  ~ 28
-TC0
+TC
 Wire Wire Line
 	3675 6700 3675 7675
 Wire Wire Line
@@ -7631,4 +7631,6 @@ Text Label 15625 26150 0    140  ~ 28
 DV0_
 Text Label 15825 9050 0    140  ~ 28
 BR1_
+Text Label 14200 1525 0    140  ~ 28
+TC
 $EndSCHEMATC

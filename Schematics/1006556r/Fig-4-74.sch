@@ -198,18 +198,6 @@ F 4 "DV1" H 5250 5700 140 0000 C BNB "Caption"
 	25   5750 5775
 	1    0    0    -1  
 $EndComp
-$Comp
-L AGC_DSKY:ConnectorGeneric J1
-U 29 1 5BFAAD9E
-P 1950 3325
-F 0 "J1" H 1950 3650 140 0001 C CNN
-F 1 "ConnectorGeneric" H 1950 3750 140 0001 C CNN
-F 2 "" H 1950 3800 140 0001 C CNN
-F 3 "" H 1950 3800 140 0001 C CNN
-F 4 "DV0" H 1400 3275 140 0000 C BNB "Caption"
-	29   1950 3325
-	1    0    0    -1  
-$EndComp
 Wire Wire Line
 	7050 8800 7125 8800
 Wire Wire Line
@@ -358,4 +346,6 @@ Text HLabel 5125 9150 0    140  Input ~ 28
 DV1_B
 Text HLabel 5925 5425 0    140  Input ~ 28
 MP1
+Text HLabel 2225 3325 0    140  Input ~ 28
+DV0
 $EndSCHEMATC

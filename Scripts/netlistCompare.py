@@ -161,7 +161,7 @@ for refd in recoveredSchematic:
 	if refd[:1] != "U":
 		continue
 	gate = normalizeGate(recoveredSchematic[refd]["gate"])
-	if gate in recoveredSchematic:
+	if gate in reverseTrueSchematic:
 		recovered2true[refd] = reverseTrueSchematic[gate]["refd"]
 #print recovered2true
  
