@@ -25,6 +25,25 @@ Differences which can be detected using this method, once the factors above are 
 
 The differences that are detected are then either transcription errors (which are fixed within the CAD files themselves), legitimate differences in conventions (such as "(NC)" vs "N.C." for no-connects), or else are actual differences that require, or at least invite, resolution.  The findings relating to the actual differences are noted below.
 
-# TBD
+# Connector Pin 2
 
-TBD
+Connector pin 2, the input to inverter 51303 is assigned the backplane signal name F02B/ in schematic drawing 1006552A (and 1006552-).  However, in ND-1021041 Figure 4-62 it is assigned the name GO/.
+
+I don't have any information at present to resolve this discrepancy.
+
+# Wiring of Inputs to Gate 51312.
+
+In ND-1021041 Figure 4-62, the inputs to gate 51312 are given as:
+
+* Connector pin 16
+* Connector pin 20
+* Output of gate 51311
+
+In schematic 1006552A (and 1006552-) and wiring diagram 1006132-, they are instead given as:
+
+* Connector pin 50
+* Connector pin 20
+* Output of gate 51311
+
+Because of the way the wires from connector pins 16 and 50 are drawn in the schematic, it would be a natural error to accidentally swap them, and so I believe this is an error in ND-1021041.
+
