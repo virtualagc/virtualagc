@@ -611,6 +611,9 @@ for id in objects:
 	if type in nors:
 		library = object["library"]
 		refd = object["refd"]
+		embeddableRefd = refd
+		while len(embeddableRefd) > 2 and embeddableRefd[:2] == "U0":
+			embeddableRefd = "U" + embeddableRefd[2:]
 		location = object["location"]
 		aMirror = False
 		bMirror = False
@@ -662,10 +665,10 @@ for id in objects:
 			if block1:
 				locationOffset = locationOffset // 2
 			sys.stdout.write("$Comp\n")
-			sys.stdout.write("L " + local_library + ":" + symbol + " " + refd + "\n")
+			sys.stdout.write("L " + local_library + ":" + symbol + " " + embeddableRefd + "\n")
 			sys.stdout.write("U 1 1 " + timestamp() + "\n")
 			sys.stdout.write("P " + str(posX) + " " + str(posY) + "\n")
-			sys.stdout.write("F 0 \"" + refd + "\" H " + str(posX) + " " + str(posY + 325) + " 140 0001 C CNB\n")
+			sys.stdout.write("F 0 \"" + embeddableRefd + "\" H " + str(posX) + " " + str(posY + 325) + " 140 0001 C CNB\n")
 			sys.stdout.write("F 1 \"" + symbol + "\" H " + str(posX) + " " + str(posY+425) + " 140 0001 C CNN\n")
 			sys.stdout.write("F 2 \"\" H " + str(posX) + " " + str(posY+475) + " 140 0001 C CNN\n")
 			sys.stdout.write("F 3 \"\" H " + str(posX) + " " + str(posY+475) + " 140 0001 C CNN\n")
@@ -700,10 +703,10 @@ for id in objects:
 			else:
 				locationOffset = -200
 			sys.stdout.write("$Comp\n")
-			sys.stdout.write("L " + library + ":" + symbol + " " + refd + "\n")
+			sys.stdout.write("L " + library + ":" + symbol + " " + embeddableRefd + "\n")
 			sys.stdout.write("U 2 1 " + timestamp() + "\n")
 			sys.stdout.write("P " + str(posX) + " " + str(posY) + "\n")
-			sys.stdout.write("F 0 \"" + refd + "\" H " + str(posX) + " " + str(posY + 325) + " 140 0001 C CNB\n")
+			sys.stdout.write("F 0 \"" + embeddableRefd + "\" H " + str(posX) + " " + str(posY + 325) + " 140 0001 C CNB\n")
 			sys.stdout.write("F 1 \"" + symbol + "\" H " + str(posX) + " " + str(posY+425) + " 140 0001 C CNN\n")
 			sys.stdout.write("F 2 \"\" H " + str(posX) + " " + str(posY+475) + " 140 0001 C CNN\n")
 			sys.stdout.write("F 3 \"\" H " + str(posX) + " " + str(posY+475) + " 140 0001 C CNN\n")

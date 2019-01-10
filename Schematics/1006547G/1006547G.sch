@@ -221,11 +221,11 @@ CAPACITOR
 Text Notes 38500 15025 0    140  ~ 28
 C1
 Text Notes 38500 15350 0    140  ~ 28
-C1
+C2
 Text Notes 38500 15675 0    140  ~ 28
-C1
+C3
 Text Notes 38500 16000 0    140  ~ 28
-C1
+C4
 Text Notes 39250 14700 0    140  ~ 28
 1006771
 Text Notes 39225 15025 0    140  ~ 28

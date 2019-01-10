@@ -112,11 +112,11 @@ CAPACITOR
 Text Notes 37225 16925 0    140  ~ 28
 C1
 Text Notes 37225 17250 0    140  ~ 28
-C1
+C2
 Text Notes 37225 17575 0    140  ~ 28
-C1
+C3
 Text Notes 37225 17900 0    140  ~ 28
-C1
+C4
 Text Notes 37975 16600 0    140  ~ 28
 1006771
 Text Notes 37950 16925 0    140  ~ 28
