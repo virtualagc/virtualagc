@@ -27,7 +27,7 @@ The differences that are detected are then either transcription errors (which ar
 
 # Connector Pin 2
 
-Connector pin 2, the input to inverter 51303 is assigned the backplane signal name F02B/ in schematic drawing 1006552A (and 1006552-).  However, in ND-1021041 Figure 4-62 it is assigned the name GO/.
+Connector pin 2, the input to inverter 51303, is assigned the backplane signal name F02B/ in schematic drawing 1006552A (and 1006552-).  However, in ND-1021041 Figure 4-62 it is assigned the name GO/.
 
 I don't have any information at present to resolve this discrepancy.
 
