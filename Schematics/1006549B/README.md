@@ -25,7 +25,8 @@ Differences which can be detected using this method, once the factors above are 
 
 The differences that are detected are then either transcription errors (which are fixed within the CAD files themselves), legitimate differences in conventions (such as "(NC)" vs "N.C." for no-connects), or else are actual differences that require, or at least invite, resolution.  The findings relating to the actual differences are noted below.
 
-# TBD
+# Discrepancies
 
-TBD
+After fixing all detected errors in 1006549B and 1006549r, there were no remaining discrepancies between them detectable by netlistCompare.py.
+
 
